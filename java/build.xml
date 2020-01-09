@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- ==========================================================================
+
+	The MIT License (MIT)
+
+	Copyright (c) 2010-2011,2020 Roger L. Whitcomb.
+
+	Permission is hereby granted, free of charge, to any person obtaining a copy
+	of this software and associated documentation files (the "Software"), to deal
+	in the Software without restriction, including without limitation the rights
+	to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+	copies of the Software, and to permit persons to whom the Software is
+	furnished to do so, subject to the following conditions:
+
+	The above copyright notice and this permission notice shall be included in all
+	copies or substantial portions of the Software.
+
+	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+	IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+	FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+	AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+	LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+	OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+	SOFTWARE.
+
+	"Ant" build file to build the custom tasks.
+
+     ========================================================================== -->
+
+<project name="java-utilities" default="all" basedir="."
+    xmlns:if="ant:if"
+    xmlns:unless="ant:unless"
+>
+	<property environment="env"/>
+
+	<target name="compile" description="Compiles the java source">
+		<javac srcdir="." includeAntRuntime="true">
+			<include name="info/rlwhitcomb/ant/*.java"/>
+			<include name="info/rlwhitcomb/preproc/*.java"/>
+		</javac>
+	</target>
+
+	<target name="jar" description="jar up the compiled class files">
+		<jar basedir="." destfile="anttasks.jar">
+			<include name="info/rlwhitcomb/ant/*.class" />
+			<include name="info/rlwhitcomb/preproc/*.class" />
+		</jar>
+	</target>
+
+	<target name="all" depends="compile,jar" description="Builds and jars everything"/>
+
+	<target name="install" depends="all" description="Installs the tasks into Ant runtime location">
+		<copy file="anttasks.jar" todir="${env.ANT_HOME}/lib"/>
+	</target>
+
+	<target name="clean" description="cleans all generated files">
+		<delete>
+			<fileset dir="." includes="anttasks.jar" />
+			<fileset dir="info/rlwhitcomb/ant" includes="*.class" />
+			<fileset dir="info/rlwhitcomb/preproc" includes="*.class" />
+		</delete>
+	</target>
+</project>
+
+
