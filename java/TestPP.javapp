@@ -1,0 +1,153 @@
+/*
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2010-2011,2020 Roger L. Whitcomb.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ * Java PreProcessor test case.
+ *
+ */
+
+// Set up the test variables
+# define ABC	"ABC"
+ # define DEF
+#	define	GHI	ghi
+	#	define	JKL	123
+	#	define	JKL1	(JKL+1)
+	#	define	JKL2	(JKL*2)
+# define T	true
+# define F	false
+
+class TestPP {
+	private static int $(GHI) = $(JKL);
+ # if	T
+	private static String TRUE_WORKS = "$(T) works!";
+ # else
+ 	#error T doesn't work!
+ #endif
+	# if !F
+	private static String FALSE_ALSO_WORKS = "!$(F) also works correctly.";
+	# else
+	#error !F doesn't work
+	# endif
+// Some tests of boolean algebra
+#if !F && T
+	// !$(F) && $(T) works
+#else
+	// Bad!  !$(F) && $(T) doesn't work
+#endif
+#if !(F || T)
+	// Bad!  This means that ($(F) || $(T)) is false
+#else
+	// Good!  !($(F) || $(T)) works
+#endif
+#if F
+	// Oops!  $(F) is not true
+#elif F
+	// Oops!  $(F) is not true a second time either
+#elif T
+	// Finally!  $(T) is true
+#else
+	// Bad!  #else of #elif $(T) shouldn't be caught!
+#endif
+#define	TEST	(T && !F)
+#if TEST
+	// Compound test of $(TEST) worked!
+ #else
+	// Compound test FAILED!
+#endif
+// Tests of #ifdef and #if defined() (also #ifndef and #if !defined())
+#ifdef DEF
+	private static String DEF = "DEF is defined as '$(DEF)' (should be '')";
+#else
+	#error DEF should be defined!
+#endif
+#if defined(DEF)
+	private static String DEF2 = "DEF tested correctly by #defined";
+#else
+	#error defined(DEF) didn't work right.
+#endif
+#ifndef XYZ
+	private static String XYZ_UNDEF = "This is correct -- XYZ is not defined.";
+#else
+	#error XYZ defined test failed!
+#endif
+
+// Test ING_REL being undefined
+#if !defined(ING_REL)
+	private static String ING_REL_UNDEFINED = "Correct, we should have undefined ING_REL on the command line.";
+#else
+	#error ING_REL should be undefined and is not!
+#endif
+
+// Test 'pqr' being defined without a value: '$(pqr)'
+// Test 'xyzzy' being undefined: '$(xyzzy)'
+
+# ifistr "abc" == ABC
+	// This is correct -- "abc" should equal (case-insensitive) $(ABC)
+# elseif ABC == "abc"
+	// Not correct!  $(ABC) does not equal "abc"
+# else
+	// Should not see this!
+#endif
+
+# ifistr ABC != "abc"
+	// This is not right -- "abc" should equal (case-insensitive) $(ABC)
+# elseif ABC == "abc"
+	// Also not correct!  $(ABC) does not equal "abc"
+# else
+	// Correct!  Correctly tested different scenario with #ifistr
+#endif
+
+// Numeric expression tests
+#if JKL + 2 == 125
+	private static int JKL_PLUS = $(JKL) + 2;	// simple arithmetic test works
+#else
+	#error Numeric addition test failed!
+#endif
+
+// More extensive numeric expression tests
+#if ((JKL + 123) / JKL) % JKL + 2 == (255 % 128 % 4 +1)
+	// Correct result using JKL=$(JKL)
+#else
+	#error Error evaluating '((JKL + 123) / JKL) % JKL + 2 == (255 % 128 % 4 +1)'
+#endif
+#if (255 % 128 % 4 +1) == ((JKL + 123) / JKL) % JKL + 2
+	// Correct result using JKL=$(JKL) and switching the order of operations
+#else
+	#error Error evaluating '(255 % 128 % 4 +1) == ((JKL + 123) / JKL) % JKL + 2'
+#endif
+
+#ifnum JKL+1 == JKL1
+	// Arithmetic test of JKL+1==JKL1 ($(JKL)+1==$(JKL1)) correct.
+#else
+	// Arithmetic test of JKL+1==JKL1 ($(JKL)+1==$(JKL1)) FAILED!
+#endif
+
+#ifnum JKL*2 == JKL2
+	// Arithmetic test of JKL*2==JKL2 ($(JKL)*2==$(JKL2)) correct.
+#else
+	// Arithmetic test of JKL*2==JKL2 ($(JKL)*2==$(JKL2)) FAILED!
+#endif
+
+	public static void main(String[] args) {
+		System.out.println("$(GHI) = " + $(GHI));
+	}
+}

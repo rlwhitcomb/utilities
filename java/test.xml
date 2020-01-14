@@ -1,0 +1,16 @@
+<project name="Test Ant tasks" default="all" basedir="."
+	xmlns:if="ant:if"
+	xmlns:unless="ant:unless">
+
+	<typedef file="numeric-conditions.properties" classpath="anttasks.jar"/>
+	<taskdef name="preproc" classname="info.rlwhitcomb.preproc.JavaPreProc" classpath="anttasks.jar"/>
+	<taskdef name="findfile" classname="info.rlwhitcomb.ant.FindTask" classpath="anttasks.jar"/>
+
+	<property environment="env"/>
+
+	<target name="all" description="Runs all extant tests.">
+		<preproc dir="." processAsDirectory="true" recurseDirectories="true" nologo="true" verbose="plus"/>
+	</target>
+
+</project>
+
