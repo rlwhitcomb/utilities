@@ -229,7 +229,7 @@ import org.apache.tools.ant.Task;
  * <li>file name(s)
  * </ul>
  * <p> This process can also be invoked as an Ant task by using the following in your "build.xml":
- * <p> <tt>&lt;taskdef name="preproc" classname="com.ingres.preproc.JavaPreProc" classpath="anttasks.jar"/&gt;</tt>.
+ * <p> <tt>&lt;taskdef name="preproc" classname="info.rlwhitcomb.preproc.JavaPreProc" classpath="anttasks.jar"/&gt;</tt>.
  * <p> The directives supported in this context are:
  * <ul><li><tt>directiveChar="<i>ch</i>"</tt> (same as <tt>-C<i>ch</i></tt> parameter)
  * <li><tt>define="<i>var</i>=<i>value</i>"</tt> or
@@ -2412,7 +2412,7 @@ public class JavaPreProc extends Task
 	 */
 	private static void SignOnBanner(boolean display) {
 	    if (display)
-		System.out.format("Java Pre-Processor -- version %1$s%nCopyright (c) %2$s Actian Corporation.%n", VERSION, COPYRIGHT_YEAR);
+		System.out.format("Java Pre-Processor -- version %1$s%nCopyright (c) %2$s Roger L. Whitcomb.%n", VERSION, COPYRIGHT_YEAR);
 	}
 
 
@@ -2420,7 +2420,7 @@ public class JavaPreProc extends Task
 	 * Display rudimentary help screen.
 	 */
 	private static void Usage() {
-	    System.out.format("%nFor usage instructions, see the generated Javadoc%nin the package \"com.ingres.preproc\".%n%n");
+	    System.out.format("%nFor usage instructions, see the generated Javadoc%nin the package \"info.rlwhitcomb.preproc\".%n%n");
 	}
 
 
