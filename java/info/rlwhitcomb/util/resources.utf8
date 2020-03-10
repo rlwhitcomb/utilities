@@ -1,0 +1,153 @@
+#
+# The MIT License (MIT)
+#
+# Copyright (c) 2014-2018,2020 Roger L. Whitcomb.
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+#
+#	Internationalizable strings for the info.rlwhitcomb.util code.
+#
+# History:
+#	06-Nov-2014 (rlwhitcomb)
+#	    Created from the .java text strings.
+#	06-Jan-2015 (rlwhitcomb)
+#	    Added messages from LineProcessor et. al.
+#	07-Jan-2015 (rlwhitcomb)
+#	    Corrected a typo from the last change.
+#	07-Apr-2015 (rlwhitcomb)
+#	    Add error messages and other strings from a new method in CharUtil.
+#	18-Mar-2016 (rlwhitcomb)
+#	    A new error message from FileUtilities.
+#	21-Apr-2016 (rlwhitcomb)
+#	    One new error from ClassUtil.
+#	06-Jul-2017 (rlwhitcomb)
+#	    Improve errors from "getBooleanValue" in CharUtil.
+#	20-Sep-2017 (rlwhitcomb)
+#	    New error from CharUtil.convertHexLiteral method.
+#	04-Dec-2017 (rlwhitcomb)
+#	    New error from SysConsole class.
+#	12-Feb-2018 (rlwhitcomb)
+#	    New error from NumericUtil related to binary file I/O.
+#	13-Feb-2018 (rlwhitcomb) SIR 132829
+#	    Oops!  Forgot one more message for binary data types.
+#	14-Feb-2018 (rlwhitcomb) SIR 132829
+#	    More errors for raw binary support.
+#	07-May-2018 (rlwhitcomb) SIR 132829
+#	    One more error from NumericUtil for string length overflows.
+#	06-Jan-2020 (rlwhitcomb) SIR 135654
+#	    Add in a copyright string (accessible from Environment).
+#	13-Feb-2020 (rlwhitcomb)
+#	    Moved a "badLocale" message from elsewhere.
+#	13-Feb-2020 (rlwhitcomb)
+#	    Revise the default copyright years.
+#	10-Mar-2020 (rlwhitcomb)
+#	    Prepare for GitHub.
+#
+
+#
+# From BidiMap.java
+#
+bidi.keyNotNull		= Key must not be null.
+bidi.valueNotNull	= Value must not be null.
+bidi.entryCannotChange	= Map entry cannot be changed.
+bidi.illegalCapacity	= Illegal initial capacity: %1$d
+bidi.illegalLoadFactor	= Illegal load factor: %1$s
+bidi.keyNotUnique	= Key '%1$s' is not unique.
+bidi.valueNotUnique	= Value '%1$s' is not unique.
+bidi.removeNotSupported	= Remove is not supported.
+bidi.iteratorNotInit	= Map iterator not initialized.
+
+#
+# From CharUtil.java
+#
+char.illegalUnicodeEscape	= Illegal Unicode escape sequence: '%1$s'
+char.unknownBooleanString	= Unknown boolean value: '%1$s'
+char.unknownBooleanType		= Cannot convert object of type %1$s to a boolean value.
+char.badLocale			= Locale name '%1$s' is not supported
+# Note: these are lists of valid values separated by a comma and optional spaces
+# The English versions should remain untranslated, but additional choices in other languages
+# can be ADDED to the list.
+char.validTrueStrings		= T, Yes, Y, On
+char.validFalseStrings		= F, No, N, Off
+char.illegalHexLiteral		= Illegal hex literal: "%1$s"
+
+#
+# From Environment.java
+#
+env.unknownDataModel	= Java system has an unexpected data model value: %1$d
+env.copyright		= Copyright (c) 2008-2020 Roger L. Whitcomb.
+
+#
+# From Intl.java!
+#
+intl.keyNotNull		= Text resource key must not be null.
+intl.providerNotFound	= Unable to find resource provider for '%1$s' package.
+
+#
+# From NumericUtil.java
+#
+numeric.outsideKMGRange	= Value out of range of kilo-, mega- or gigabytes.
+numeric.badKMGFormat	= Improper input format: must be 'nnK' or 'nnM' or 'nnG'.
+numeric.outOfRange	= Value is out of range.
+numeric.badDataType	= Data type %1$s is not recognized in binary files.
+numeric.badDataTypeCode	= Data type code %1$d is not recognized.
+numeric.unknownByteOrder= '%1$s' is not a valid byte order (should be LSB or MSB).
+numeric.unknownStringLength= '%1$s' is not a valid string length designation.
+numeric.stringLengthTooBig= String length of %1$d exceds limit of %2$d.
+
+#
+# From SecurityUtil.java
+#
+security.hexNotEven	= Hex string must have an even number of characters.
+security.hexInvalidChar	= Hex string contains invalid character: %1$c%2$c
+
+#
+# From LineProcessor.java
+#
+line.genericError	= Error reading input file '%1$s': %2$s
+
+#
+# From FileProcessor.java
+#
+file.nullEmptyInput	= Input file is null or empty.
+file.nullInputFile	= Input file is null.
+file.nullProcessor	= File Processor is null.
+file.notExistNotFile	= File '%1$s' does not exist or cannot be read or is not a regular file.
+
+#
+# From DirectoryProcessor.java
+#
+dir.nullEmptyInput	= Directory name is null or empty.
+dir.nullInputDir	= Input directory is null.
+dir.notExistNotDir	= Directory '%1$s' does not exist or cannot be read or is not a directory.
+
+#
+# From FileUtilities.java
+#
+fileutil.fileTooBig	= The file's size of %1$d is too big to read.
+
+#
+# From ClassUtil.java
+#
+class.optionFieldSet	= Option field '%1$s' is set but not supported.
+
+#
+# From SysConsole.java
+#
+console.noConsole	= There is no System.console to use!

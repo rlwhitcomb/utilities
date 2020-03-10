@@ -1,0 +1,607 @@
+/**
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2011-2017,2019-2020 Roger L. Whitcomb.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ *	Class exposing various attributes of the Environment we're
+ *	currently running in.
+ *
+ *  History:
+ *	10-Aug-2011 (rlwhitcomb)
+ *	    Created.
+ *	15-Aug-2011 (rlwhitcomb)
+ *	    Add architecture value.
+ *	03-Oct-2011 (rlwhitcomb)
+ *	    Allow current directory to be changed as user
+ *	    navigates around with a file browser.
+ *	07-Oct-2011 (rlwhitcomb)
+ *	    Add "isLinux" method; add methods to abstract
+ *	    out the high-res timer (workaround for Linux).
+ *	06-Nov-2012 (rlwhitcomb)
+ *	    Add a method to get the process ID (using
+ *	    java management methods).
+ *	04-Apr-2013 (rlwhitcomb)
+ *	    Expose the host/computer name.
+ *	04-Apr-2013 (rlwhitcomb)
+ *	    If the host name is not set in the environment,
+ *	    call the network layer to get it.
+ *	05-Sep-2013 (rlwhitcomb)
+ *	    Add method to determine the environment variable
+ *	    name used to locate native libraries.
+ *	12-Nov-2013 (rlwhitcomb)
+ *	    Add accessor for platform, which is os.name.
+ *	15-Apr-2014 (rlwhitcomb)
+ *	    Add get/set methods for "running as a GUI application"
+ *	    so we can make choices for input methods, etc.
+ *	16-Sep-2014 (rlwhitcomb)
+ *	    New method to check if the user is the same as current
+ *	    (desktop) user.  This is for convenience because user
+ *	    names under Windows are case-insensitive, but not so on
+ *	    Linux or OSX.
+ *	06-Nov-2014 (rlwhitcomb)
+ *	    Moved error message to resource bundle.
+ *	27-Aug-2015 (rlwhitcomb)
+ *	    Save the startup properties for access by anyone.
+ *	11-Sep-2015 (rlwhitcomb)
+ *	    For the web version, return user home dir for current dir
+ *	    since the "current" directory will be some weird place in
+ *	    the web server area.
+ *	07-Jan-2016 (rlwhitcomb)
+ *	    Fix Javadoc warnings found by Java 8.
+ *	04-May-2016 (rlwhitcomb)
+ *	    Add a flag to say this is a Java Web Start application.
+ *	10-Feb-2017 (rlwhitcomb)
+ *	    Add a setting for the product name (to use with SQL session
+ *	    descriptions).
+ *	31-Oct-2017 (rlwhitcomb)
+ *	    Add new "userDocumentDirectory" and use that for default in
+ *	    "currentDirectory()" esp. for OSX where the "current" is in
+ *	    a completely weird and unusable location (inside the .app).
+ *	20-May-2019 (rlwhitcomb)
+ *	    Make this pre-processable and add in the version information.
+ *	06-Jan-2020 (rlwhitcomb)
+ *	    Add a copyright notice string and accessor method.
+ *	10-Mar-2020 (rlwhitcomb)
+ *	    Prepare for GitHub.
+ *	    Set the default product name from the preprocessor also.
+ */
+package info.rlwhitcomb.util;
+
+import java.io.File;
+import java.util.Locale;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.lang.management.ManagementFactory;
+
+
+/**
+ * Package of essentially static information about the
+ * environment we're running in.  This information is
+ * largely derived from properties accessible via
+ * {@link System#getProperty}, but are implemented here
+ * in a (hopefully) more convenient form that hides the
+ * actual details (just in case they change).
+ */
+public final class Environment
+{
+	private static final String USER_NAME = System.getProperty("user.name");
+	private static final String USER_DIR = System.getProperty("user.dir");
+	private static final String USER_HOME = System.getProperty("user.home");
+	private static final String OS_NAME = System.getProperty("os.name");
+	private static final String OS_NAME_LOWER = OS_NAME.toLowerCase(Locale.ENGLISH);
+	private static final String OS_VERSION = System.getProperty("os.version");
+	private static final String JAVA_RUNTIME_VERSION = System.getProperty("java.runtime.version");
+	private static final String LINE_SEPARATOR = System.getProperty("line.separator");
+	private static final int DATA_MODEL = Integer.parseInt(System.getProperty("sun.arch.data.model"));
+
+	public static final int DATA_MODEL_32 = 32;
+	public static final int DATA_MODEL_64 = 64;
+
+	private static File currentDirectory = null;
+
+	private static Map<String, String> startupProperties = null;
+
+	private static boolean runningAsDesktop = false;
+	private static boolean runningAsWebStart = false;
+	private static boolean runningAsGUI = false;
+
+	private static boolean osIsWindows = OS_NAME_LOWER.startsWith("windows");
+	private static boolean osIsLinux = OS_NAME_LOWER.startsWith("linux");
+	private static boolean osIsOSX = OS_NAME_LOWER.startsWith("mac os x");
+
+	private static TimeUnit timeUnit = osIsLinux ? TimeUnit.MILLISECONDS : TimeUnit.NANOSECONDS;
+
+	private static String copyrightNotice = null;
+
+	/**
+	 * Default product name -- set from the "build.properties" file externally
+	 * by the preprocessor, but can be set by the enclosing application as well.
+	 * @see #setProductName
+	 */
+	private static String productName = "$(PRODUCT_NAME)";
+
+	/**
+	 * Current version of this application -- set from the "build.properties" file externally
+	 * by the preprocessor.
+	 */
+	private static final String APP_VERSION = "$(APP_VERSION)";
+	/**
+	 * Current build number -- set from the "build.number" file externally.
+	 */
+	private static final String APP_BUILD = "$(APP_BUILD)";
+	/**
+	 * Build date.
+	 */
+	private static final String BUILD_DATE = "$(__DATE__)";
+	/**
+	 * Build time.
+	 */
+	private static final String BUILD_TIME = "$(__TIME__)";
+	/**
+	 * Whether this is a DEBUG build or not.
+	 */
+	private static final boolean IS_DEBUG_BUILD = $(IS_DEBUG_BUILD);
+
+
+	/**
+	 * Get the current user we're running as.
+	 *
+	 * @return	The value of 'user.name' system property.
+	 * @see	#USER_NAME
+	 */
+	public static String currentUser() {
+	    return USER_NAME;
+	}
+
+
+	/**
+	 * Check if the given user is the same as the current user
+	 * <p> This subsumes the platform check and the decision as to
+	 * whether the names are case-sensitive or not.
+	 *
+	 * @param	user	User name to check if it matches the {@link #currentUser}.
+	 * @return	<tt>true</tt> if the given name matches the current user value
+	 *		taking into consideration the case-sensitivity of the platform
+	 */
+	public static boolean isCurrentUser(String user) {
+	    if (osIsWindows)
+		return USER_NAME.equalsIgnoreCase(user);
+	    return USER_NAME.equals(user);
+	}
+
+
+	/**
+	 * Get the static user's current directory.
+	 *
+	 * @return	The value of the 'user.dir' system property.
+	 * @see	#USER_DIR
+	 */
+	public static File userDirectory() {
+	    return new File(USER_DIR);
+	}
+
+
+	/**
+	 * Get the current directory.
+	 *
+	 * @return	The value of the {@link #currentDirectory} value if
+	 *		it has been set by user interaction, or the {@link #userDocumentDirectory}
+	 *		value by default for the desktop or {@link #userHomeDir}
+	 *		for the web version.
+	 */
+	public static File currentDirectory() {
+	    if (currentDirectory != null)
+		return currentDirectory;
+	    return runningAsDesktop ? userDocumentDirectory() : userHomeDir();
+	}
+
+
+	/**
+	 * Set a new value for the current directory used by the application.
+	 *
+	 * @param	dir	New current directory (probably gotten from a
+	 *			file browse dialog).
+	 */
+	public static void setCurrentDirectory(File dir) {
+	    currentDirectory = dir;
+	}
+
+
+	/**
+	 * Get the user's home directory.
+	 *
+	 * @return	The value of the 'user.home' system property as a {@link File}.
+	 * @see	#USER_HOME
+	 */
+	public static File userHomeDir() {
+	    return new File(USER_HOME);
+	}
+
+
+	/**
+	 * Get the user's "document" directory.
+	 *
+	 * @return	The value of the 'user.home' system property with the
+	 *		"Documents" (or equivalent) subdirectory.
+	 * @see #USER_HOME
+	 */
+	public static File userDocumentDirectory() {
+	    File docDir = new File(USER_HOME, "Documents");
+	    if (docDir.exists() && docDir.isDirectory())
+		return docDir;
+	    return userHomeDir();
+	}
+
+
+	/**
+	 * @return The platform designation (the "os.name" property).
+	 */
+	public static String platform() {
+	    return OS_NAME;
+	}
+
+
+	/**
+	 * @return Are we running on a version of the Windows (tm)
+	 * operating system?
+	 *
+	 * @see	#OS_NAME_LOWER
+	 * @see #osIsWindows
+	 */
+	public static boolean isWindows() {
+	    return osIsWindows;
+	}
+
+
+	/**
+	 * @return Are we running on a version of the Mac OSX
+	 * operating system?
+	 *
+	 * @see	#OS_NAME_LOWER
+	 * @see #osIsOSX
+	 */
+	public static boolean isOSX() {
+	    return osIsOSX;
+	}
+
+
+	/**
+	 * @return Are we running on a version of the Linux
+	 * operating system?
+	 *
+	 * @see	#OS_NAME_LOWER
+	 * @see #osIsLinux
+	 */
+	public static boolean isLinux() {
+	    return osIsLinux;
+	}
+
+
+	/**
+	 * @return The operating system version string.
+	 *
+	 * @see	#OS_VERSION
+	 */
+	public static String osVersion() {
+	    return OS_VERSION;
+	}
+
+
+	/**
+	 * @return Are we running as a desktop application?
+	 *
+	 * @see	#runningAsDesktop
+	 * @see	#setDesktopApp
+	 */
+	public static boolean isDesktopApp() {
+	    return runningAsDesktop;
+	}
+
+
+	/**
+	 * Set the flag (from the main program) to say whether we're running
+	 * as a desktop application (as opposed to inside a web browser).
+	 *
+	 * @param	desktop	{@code false} when called from an applet.
+	 */
+	public static void setDesktopApp(boolean desktop) {
+	    runningAsDesktop = desktop;
+	}
+
+
+	/**
+	 * @return Are we running as a Java Web Start application?
+	 *
+	 * @see	#runningAsWebStart
+	 * @see	#setWebStartApp
+	 */
+	public static boolean isWebStartApp() {
+	    return runningAsWebStart;
+	}
+
+
+	/**
+	 * Set the flag (from the main program) to say whether we're running
+	 * as a Java Web Start application (that is, a desktop app, but launched
+	 * from a JNLP file, and authenticated with and getting preferences from 
+	 * the launching web server).
+	 *
+	 * @param	webstart	Only set as {@code true} when the {@code DirectorMain.main()}
+	 *				is invoked with the build flag saying this is a Java Web Start
+	 *				build is set {@code true}, otherwise just leave the default.
+	 */
+	public static void setWebStartApp(boolean webstart) {
+	    runningAsWebStart = webstart;
+	}
+
+
+	/**
+	 * @return Are we running as a GUI application
+	 * (as opposed to running as a console app)?
+	 *
+	 * @see #runningAsGUI
+	 * @see #setGUIApp
+	 */
+	public static boolean isGUIApp() {
+	    return runningAsGUI;
+	}
+
+
+	/**
+	 * Set the flag (from the main GUI program) to say whether we're running
+	 * as a GUI application (as opposed to just as a console app).
+	 *
+	 * @param	gui	{@code true} only from an application that displays a GUI interface.
+	 */
+	public static void setGUIApp(boolean gui) {
+	    runningAsGUI = gui;
+	}
+
+
+	/**
+	 * @return The version of Java we're running under.
+	 *
+	 * @see	#JAVA_RUNTIME_VERSION
+	 */
+	public static String javaVersion() {
+	    return JAVA_RUNTIME_VERSION;
+	}
+
+
+	/**
+	 * @return The host name (computer name) we're running on.
+	 */
+	public static String hostName() {
+	    String hostName = null;
+	    if (osIsWindows)
+		hostName = System.getenv("COMPUTERNAME");
+	    else
+		hostName = System.getenv("HOSTNAME");
+
+	    if (hostName == null || hostName.isEmpty())
+		hostName = NetworkUtil.getLocalHostName();
+
+	    return hostName;
+	}
+
+
+	/**
+	 * @return The system-dependent line separator string.
+	 *
+	 * @see	#LINE_SEPARATOR
+	 */
+	public static String lineSeparator() {
+	    return LINE_SEPARATOR;
+	}
+
+
+	/**
+	 * Return the architecture model value.
+	 *
+	 * @return	Either {@link #DATA_MODEL_32} or {@link #DATA_MODEL_64}.
+	 * @see	#DATA_MODEL
+	 * @throws	IllegalStateException if we can't figure out the data model
+	 *		(which would be from a non-standard JVM).
+	 */
+	public static int dataModel() {
+	    if (DATA_MODEL == DATA_MODEL_32 ||
+	        DATA_MODEL == DATA_MODEL_64)
+		return DATA_MODEL;
+	    throw new IllegalStateException(Intl.formatString("util#env.unknownDataModel", DATA_MODEL));
+	}
+
+
+	/**
+	 * @return The name of the environment variable used to determine where native libraries
+	 * are to be found.  Differs per operating system.
+	 */
+	public static String getNativePathVar() {
+	    if (osIsLinux)
+		return "LD_LIBRARY_PATH";
+	    else if (osIsOSX)
+		return "DYLD_LIBRARY_PATH";
+	    return "PATH";
+	}
+
+
+	/**
+	 * @return The current high-resolution timer value.
+	 * <p> Because of problems with {@link System#nanoTime} on Linux
+	 * we will use the millisecond timer (which is pretty accurate
+	 * anyway on this platform) instead.
+	 *
+	 * @see	#highResTimerResolution
+	 */
+	public static long highResTimer() {
+	    if (osIsLinux)
+		return System.currentTimeMillis();
+	    else
+		return System.nanoTime();
+	}
+
+
+	/**
+	 * @return The resolution (in ticks per second) of the {@link #highResTimer} value.
+	 */
+	public static long highResTimerResolution() {
+	    return timeUnit.convert(1L, TimeUnit.SECONDS);
+	}
+
+
+	/**
+	 * @return The system's high-res {@link TimeUnit} value.
+	 *
+	 * @see	#timeUnit
+	 */
+	public static TimeUnit highResTimeUnit() {
+	    return timeUnit;
+	}
+
+
+	/**
+	 * @return The scaling factor needed for the high-res timer value to scale to
+	 * a 0.0 to 1.0 range.
+	 * <p> For instance, for nanoseconds, the value would be 9.
+	 */
+	public static int highResTimeScaleFactor() {
+	    long value = highResTimerResolution();
+	    int scale = 0;
+	    while (value > 1L) {
+		value /= 10L;
+		scale++;
+	    }
+	    return scale;
+	}
+
+
+	/**
+	 * Returns the process ID of the current process.
+	 * @return	0 if the process ID cannot be determined using the
+	 *		management bean (it does work on all the platforms
+	 *		I have available currently).
+	 * @see <a href="http://stackoverflow.com/questions/35842/how-can-a-java-program-get-its-own-process-id">http://stackoverflow.com/questions/35842/how-can-a-java-program-get-its-own-process-id</a>
+	 */
+	public static long getProcessID() {
+	    final String jvmName = ManagementFactory.getRuntimeMXBean().getName();
+	    // The format is (always?) pid@host
+	    final int index = jvmName.indexOf('@');
+
+	    if (index > 0) {
+		try {
+		    return Long.parseLong(jvmName.substring(0, index));
+		} catch (NumberFormatException e) {
+		    // ignore
+		}
+	    }
+	    return 0L;
+	}
+
+
+	/**
+	 * Save the startup properties for use by anyone.
+	 *
+	 * @param	properties	The startup properties map for the whole application.
+	 */
+	public static void setStartupProperties(Map<String, String> properties) {
+	    startupProperties = properties;
+	}
+
+
+	/**
+	 * @return The saved startup properties.
+	 */
+	public static Map<String, String> getStartupProperties() {
+	    return startupProperties;
+	}
+
+
+	/**
+	 * @return The product name string, mostly used for identifying SQL sessions made through
+	 * the management server, so default to a neutral product.
+	 */
+	public static String getProductName() {
+	    return productName;
+	}
+
+
+	/**
+	 * Set the product name field.
+	 *
+	 * @param	name	The new value for the product name (overrides the "neutral" default).
+	 */
+	public static void setProductName(String name) {
+	    productName = name;
+	}
+
+
+	/**
+	 * @return The application version (set externally from the "version.properties" file).
+	 */
+	public static String getAppVersion() {
+	    return APP_VERSION;
+	}
+
+
+	/**
+	 * @return The application build number (set externally from the "version.properties" file).
+	 */
+	public static String getAppBuild() {
+	    return APP_BUILD;
+	}
+
+
+	/**
+	 * @return The date the application was built (set externally by the preprocessor).
+	 */
+	public static String getBuildDate() {
+	    return BUILD_DATE;
+	}
+
+
+	/**
+	 * @return The time the application was built (set externally by the preprocessor).
+	 */
+	public static String getBuildTime() {
+	    return BUILD_TIME;
+	}
+
+
+	/**
+	 * @return Whether or not this is a DEBUG build (set externally from the environment and preprocessor).
+	 */
+	public static boolean isDebugBuild() {
+	    return IS_DEBUG_BUILD;
+	}
+
+
+	/**
+	 * @return The current copyright notice string (from the resources).
+	 */
+	public static String getCopyrightNotice() {
+	    if (copyrightNotice == null) {
+		copyrightNotice = Intl.getString("util#env.copyright");
+	    }
+	    return copyrightNotice;
+	}
+
+
+}
+

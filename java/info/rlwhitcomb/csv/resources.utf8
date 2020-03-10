@@ -1,0 +1,113 @@
+#
+# The MIT License (MIT)
+#
+# Copyright (c) 2014-2016,2020 Roger L. Whitcomb.
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+#
+#	Internationalizable strings for the info.rlwhitcomb.csv stuff.
+#
+# History:
+#	04-Mar-2014 (rlwhitcomb)
+#	    Moved into here from the .java files.
+#	13-Mar-2014 (rlwhitcomb)
+#	    Add field number to the CSVTest output.  Add some more
+#	    error messages during parsing.
+#	07-Jan-2015 (rlwhitcomb)
+#	    Removed an unused error message.
+#	28-Jun-2016 (rlwhitcomb)
+#	    New error messages from the CSVTest program; remove one unused one;
+#	    some rewording of other errors.
+#	27-Feb-2020 (rlwhitcomb)
+#	    One more error from CSVTest (and the new Separator option).
+#	10-Mar-2020 (rlwhitcomb)
+#	    Prepare for GitHub.
+#
+
+#
+# From CSVFormat.java
+#
+format.quoteNotNull		= Quote character must not be null.
+format.quoteNotEscape		= Quote character must not be the same as escape character.
+format.fieldSepNotNull		= Field separator must not be null.
+format.recordSepTwoChars	= Record separator must be two characters or less.
+format.recordSepTwoDifferent	= Two record separator characters must be different.
+format.recordSepStandard	= Record separator can only be one character except for CR and LF combinations.
+format.escapeNotQuote		= Escape character must not be the same as quote character.
+
+#
+# From CSVParser.java
+#
+parser.readerNotNull		= Reader cannot be null.
+parser.unterminatedToken	= Unterminated token at end of input (offset %1$d).
+parser.readingException		= Exception while reading input at offset %1$d
+parser.unexpectedEOF		= Unexpected end of file while parsing input at offset %1$d.
+
+#
+# From CSVReader.java and CSVRecord.java
+#
+removeNotSupported		= "Remove" is not supported.
+
+#
+# From CSVRecord.java
+#
+record.indexOutOfRange		= Index %1$d is not in the range 0..%2$d
+
+#
+# From CSVWriter.java
+#
+writer.writerNotNull		= Writer must not be null.
+writer.noWriteAfterClose	= Trying to write a record after output has been closed.
+writer.writingException		= Exception while writing output
+
+#
+# From CSVTest.java
+#
+tester.helpNumberLines		= 15
+tester.help1			= Usage: [-8][-qx][-dx][-rx][-ex][-w][-B][-T][-R][-L][-I][-W] file name(s)
+tester.help2			= Where the options are:
+tester.help3			= \t-8  = use the UTF-8 character set to read and write files (default to system charset)
+tester.help4			= \t-qx = set the quote character to 'x' (default is '\"')
+tester.help5			= \t-dx = set the column delimiter to 'x' (default is ',')
+tester.help6			= \t-rx = set the record separator to 'x' (default is CR,LF)
+tester.help7			= \t-ex = set the escape charater to 'x' (default is '\\')
+tester.help8			= \t-w  = preserve whitespace in unquoted fields (default is not)
+tester.help9			= \t-B  = set the column delimiter to a blank
+tester.help10			= \t-T  = set the column delimiter to a tab character
+tester.help11			= \t-R  = set the record separator to CR
+tester.help12			= \t-L  = set the record separator to LF
+tester.help13			= \t-I  = ignore empty lines (default is not)
+tester.help14			= \t-W  = enable writeback mode, where the contents are written back out
+tester.help15			= \t      and then read back in and compared to the original parsed values.
+
+tester.unknownOption		= Unknown option '-%1$s'
+tester.unknownQuote		= Unknown quote option '%1$s'
+tester.unknownDelim		= Unknown delimiter option '%1$s'
+tester.unknownSeparator		= Unknown separator option '%1$s'
+tester.noInputFiles		= No input files specified.
+tester.recordNum		= Record %1$d:
+tester.record			= "%1$5d. '%2$s'"
+tester.separator		= "============================="
+tester.outputNoInput		= Record #%1$d: output record but no input record
+tester.lengthMismatch		= Record #%1$d: length mismatch: input len=%2$d, output len=%3$d
+tester.mismatchFieldCount	= Record #%1$d: number of fields (%2$d) does not match number in first row (%3$d)
+tester.fieldMismatch		= Record #%1$d, field #%2$d: mismatch: input='%3$s', output='%4$s'
+tester.inputNoOutput		= Record #%1$d: input record has no output record
+tester.inputEqualsOutput	= Output file exactly equals original input file '%1$s'.
+tester.inputNotEqualOutput	= Output file '%1$s' does not match original input file '%2$s':%n  %3$d record errors, %4$d length errors, %5$d compare errors

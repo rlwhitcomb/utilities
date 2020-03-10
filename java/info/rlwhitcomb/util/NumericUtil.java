@@ -1,0 +1,1101 @@
+/*
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2011,2013-2014,2016-2018,2020 Roger L. Whitcomb.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ *	Various static methods for numeric conversions and manipulations.
+ *
+ *  History:
+ *	23-Feb-2011 (rlwhitcomb)
+ *	    Created.
+ *	11-Mar-2013 (rlwhitcomb)
+ *	    Create static methods to determine the appropriate size
+ *	    range for a (possibly) large value, and then to format it
+ *	    into that range.
+ *	21-Aug-2013 (rlwhitcomb)
+ *	    Really support Terabytes and Petabytes in the value match pattern
+ *	    but still only support KMG value range in that method.
+ *	04-Oct-2013 (rlwhitcomb)
+ *	    Add method to convert a long to human-readable words.
+ *	06-Nov-2014 (rlwhitcomb)
+ *	    Move error message strings to resource bundle.  Not quite ready to do
+ *	    the same for the number names.
+ *	20-Nov-2014 (rlwhitcomb)
+ *	    Make a new method to format big numbers using short suffixes (space-constrained).
+ *	05-Jan-2016 (rlwhitcomb)
+ *	    After writing tests for "convertToWords" it was discovered that it fails for
+ *	    Long.MAX_VALUE, so redo the logic to fix that.
+ *	07-Jan-2016 (rlwhitcomb)
+ *	    Finally getting to fixing the Java 8 Javadoc warnings.
+ *	12-Apr-2016 (rlwhitcomb)
+ *	    Methods to convert to/from BCD format and BigDecimal.
+ *	22-Aug-2017 (rlwhitcomb)
+ *	    Method to round up to a power of two.
+ *	12-Feb-2018 (rlwhitcomb)
+ *	    More methods to deal with binary files.
+ *	14-Feb-2018 (rlwhitcomb)
+ *	    Implement RAW binary file read support.
+ *	07-May-2018 (rlwhitcomb)
+ *	    Fix BCD support a little bit, implement raw writing.
+ *	10-Aug-2018 (rlwhitcomb)
+ *	    Add method to do exponentiation on BigDecimal values.
+ *	29-Jan-2020 (rlwhitcomb)
+ *	    Add BigInteger ("bigint") support.
+ *	10-Mar-2020 (rlwhitcomb)
+ *	    Prepare for GitHub.
+ */
+package info.rlwhitcomb.util;
+
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.EOFException;
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.nio.charset.Charset;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.regex.*;
+
+
+/**
+ * Collection of static methods to deal with numeric conversions.
+ * <p> NOTE: this class will (somewhat confusingly) deal with conversions
+ * to binary units instead of SI units to go along with historical usage
+ * in the computer industry.  This differs from the units used by disk-drive
+ * manufacturers (for instance) which specify sizes in SI (decimal) units.
+ */
+public class NumericUtil
+{
+	/**
+	 * Enum representing the binary data types.
+	 */
+	public static enum DataType
+	{
+	    NUL   (0),
+	    BYTE  (1),
+	    SHORT (2),
+	    INT   (3),
+	    LONG  (4),
+	    DEC   (5),
+	    FLOAT (6),
+	    DOUBLE(7),
+	    DATE  (8),
+	    CHAR  (9),
+	    STRING(10),
+	    BIGINT(11);
+
+	    private int idCode;
+
+	    private DataType(int code) {
+		this.idCode = code;
+	    }
+
+	    public int getCode() {
+		return this.idCode;
+	    }
+
+	    public static DataType fromCode(int code) {
+		// This relies on the code being the same as the ordinal
+		DataType[] values = values();
+		if (code < 0 || code >= values.length) {
+		    throw new IllegalArgumentException(Intl.formatString("util#numeric.badDataTypeCode", code));
+		}
+		return values[code];
+	    }
+	}
+
+
+	/**
+	 * Byte order for raw binary numeric values.
+	 */
+	public static enum ByteOrder
+	{
+		LSB,
+		MSB;
+
+		public static ByteOrder fromString(String value) {
+		    for (ByteOrder order : values()) {
+			if (order.toString().equals(value.toUpperCase())) {
+			    return order;
+			}
+		    }
+		    throw new IllegalArgumentException(Intl.formatString("util#numeric.unknownByteOrder", value));
+		}
+	}
+
+
+	/**
+	 * Determines how strings are to be read/written to raw binary files.
+	 */
+	public static enum StringLength
+	{
+		/** Byte width specified at read/write time, padded with 0x00 bytes. */
+		FIXED,
+		/** String delimited by 0x00 byte at the end. */
+		EOS,
+		/** String length prefix (one byte, max 255 bytes). */
+		PREFIX1,
+		/** String length prefix (two bytes, max 32767 bytes). */
+		PREFIX2,
+		/** String length prefix (four bytes, max 4,294,967,295 bytes). */
+		PREFIX4;
+
+		public static StringLength fromString(String value) {
+		    for (StringLength length : values()) {
+			if (length.toString().equals(value.toUpperCase())) {
+			    return length;
+			}
+		    }
+		    throw new IllegalArgumentException(Intl.formatString("util#numeric.unknownStringLength", value));
+		}
+	}
+
+
+	public static final BigInteger MIN_BYTE = BigInteger.valueOf(Byte.MIN_VALUE);
+	public static final BigInteger MAX_BYTE = BigInteger.valueOf(Byte.MAX_VALUE);
+	public static final BigInteger MIN_SHORT = BigInteger.valueOf(Short.MIN_VALUE);
+	public static final BigInteger MAX_SHORT = BigInteger.valueOf(Short.MAX_VALUE);
+	public static final BigInteger MIN_INT = BigInteger.valueOf(Integer.MIN_VALUE);
+	public static final BigInteger MAX_INT = BigInteger.valueOf(Integer.MAX_VALUE);
+	public static final BigInteger MIN_LONG = BigInteger.valueOf(Long.MIN_VALUE);
+	public static final BigInteger MAX_LONG = BigInteger.valueOf(Long.MAX_VALUE);
+
+	private static final Pattern valueMatch = Pattern.compile("^([0-9]+)([kKmMgGtTpP])$");
+
+	private static final long MULT_KB = 1024L;
+	private static final long MULT_MB = MULT_KB * MULT_KB;
+	private static final long MULT_GB = MULT_MB * MULT_KB;
+	private static final long MULT_TB = MULT_GB * MULT_KB;
+	private static final long MULT_PB = MULT_TB * MULT_KB;
+
+	private static final String[] smallWords = {
+		"zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine",
+		"ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen",
+		"eighteen", "nineteen"
+	};
+	private static final String[] tensWords = {
+		"twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"
+	};
+	private static final long[] rangeValues = {
+		 99L,  999L,  999999L,  999999999L,  999999999999L,  999999999999999L,  999999999999999999L, Long.MAX_VALUE
+	};
+	private static final String[] rangeWords = {
+		"hundred", "thousand", "million", "billion", "trillion", "quadrillion", "quintillion"
+	};
+	private static final String minus = "minus";
+
+	/**
+	 * Enum to represent the range of a numeric number of bytes.
+	 */
+	public static enum Range
+	{
+		BYTES		(1L, "", "bytes", "Bytes"),
+		KILOBYTES	(MULT_KB, "K", "Kbytes", "Kilobytes"),
+		MEGABYTES	(MULT_MB, "M", "Mbytes", "Megabytes"),
+		GIGABYTES	(MULT_GB, "G", "Gbytes", "Gigabytes"),
+		TERABYTES	(MULT_TB, "T", "Tbytes", "Terabytes"),
+		PETABYTES	(MULT_PB, "P", "Pbytes", "Petabytes");
+
+		private long multiplier;
+		private String prefix;
+		private String shortName;
+		private String longName;
+
+		private Range(long multiplier, String prefix, String shortName, String longName) {
+		    this.multiplier = multiplier;
+		    this.prefix = prefix;
+		    this.shortName = shortName;
+		    this.longName = longName;
+		}
+
+		/** @return This "binary" multiplier where 1K == 1024 (2^10) and 1M == 1024 * 1024 (2^20),
+		 * as opposed to the SI definition of the "kilo" and "mega" prefixes which are in terms
+		 * of powers of 10 (i.e., 10^3, 10^6, etc.).
+		 */
+		public long getMultiplier() {
+		    return this.multiplier;
+		}
+
+		public String getPrefix() {
+		    return this.prefix;
+		}
+
+		public String getShortName() {
+		    return this.shortName;
+		}
+
+		public String getLongName() {
+		    return this.longName;
+		}
+
+		/**
+		 * @return A {@link Range} value that corresponds to the given prefix (as in, "K", "M", etc).
+		 * @param prefix The prefix to look up.
+		 */
+		public static Range getRangeByPrefix(String prefix) {
+		    for (Range r : values()) {
+			if (r.prefix.equalsIgnoreCase(prefix))
+			    return r;
+		    }
+		    return null;
+		}
+
+		/** @return A {@link Range} value that best represents the given value.
+		 * This will result in a formatted value in the range of 0.80 .. 799.99.
+		 * @param value The candidate value.
+		 */
+		public static Range getRangeOfValue(long value) {
+		    long absValue = Math.abs(value);
+		    if (absValue <= 1L)
+			return BYTES;
+		    for (Range r : values()) {
+			if (absValue / r.multiplier < 800)
+			    return r;
+		    }
+		    return BYTES;
+		}
+
+	}
+
+
+	/**
+	 * Helper function to convert a "nnK" or "nnM" or "nnG" to a straight number.
+	 *
+	 * @param	input	The input value in one of the above formats.
+	 * @return		The output as a strictly numeric value, where "nn" is
+	 *			multiplied by 1024 for "K", 1024 * 1024 for "M" and
+	 *			1024 * 1024 * 1024 for "G".
+	 * @throws		NumberFormatException for bad input formats
+	 */
+	public static long convertKMGValue(String input) {
+	    Matcher m = valueMatch.matcher(input);
+	    if (m.matches()) {
+		long value = Long.parseLong(m.group(1));
+		Range range = Range.getRangeByPrefix(m.group(2));
+		if (range != null) {
+		    value *= range.getMultiplier();
+		}
+		// Restrict range to less than a terabyte
+		if (value >= -MULT_TB && value < MULT_TB)
+		    return value;
+		throw new NumberFormatException(Intl.getString("util#numeric.outsideKMGRange"));
+	    }
+	    else
+		throw new NumberFormatException(Intl.getString("util#numeric.badKMGFormat"));
+	}
+
+
+	/**
+	 * Format a value using the {@link Range} enum to put into a readable range.
+	 *
+	 * @param	value	The input value to format.
+	 * @return		The value formatted to an appropriate range.
+	 */
+	public static String formatToRange(long value) {
+	    Range r = Range.getRangeOfValue(value);
+	    if (r == Range.BYTES)
+		return String.format("%1$d %2$s", value, r.getShortName());
+	    else {
+		double scaledValue = (double)value / (double)r.getMultiplier();
+		String name = r.getShortName();
+		if (scaledValue < 10.0d)
+		    return String.format("%1$3.2f %2$s", scaledValue, name);
+		else if (scaledValue < 100.0d)
+		    return String.format("%1$3.1f %2$s", scaledValue, name);
+		else
+		    return String.format("%1$3.0f %2$s", scaledValue, name);
+	    }
+	}
+
+
+	/**
+	 * Format a value using the {@link Range} enum to put into a readable range,
+	 * but use just the prefix (to save space).
+	 *
+	 * @param	value	The input value to format.
+	 * @return		The value formatted (short form) to an appropriate range.
+	 */
+	public static String formatToRangeShort(long value) {
+	    Range r = Range.getRangeOfValue(value);
+	    if (r == Range.BYTES)
+		return String.format("%1$d B", value);
+	    else {
+		double scaledValue = (double)value / (double)r.getMultiplier();
+		String prefix = r.getPrefix();
+		if (scaledValue < 10.0d)
+		    return String.format("%1$3.2f %2$sB", scaledValue, prefix);
+		else if (scaledValue < 100.0d)
+		    return String.format("%1$3.1f %2$sB", scaledValue, prefix);
+		else
+		    return String.format("%1$3.0f %2$sB", scaledValue, prefix);
+	    }
+	}
+
+
+	/**
+	 * The "long" range name will be something like "Kilobytes", or "Megabytes".
+	 *
+	 * @param	value	The input value to test for range.
+	 * @return		The long name of the appropriate range for this value.
+	 */
+	public static String getLongRangeName(long value) {
+	    return Range.getRangeOfValue(value).getLongName();
+	}
+
+
+	/**
+	 * Convert a long number to words.
+	 * <p>Examples:
+	 * <ul><li>10 -&gt; ten
+	 * <li>27 -&gt; twenty-seven
+	 * <li>493 -&gt; four hundred ninety-three
+	 * </ul>
+	 *
+	 * @param	value	The value to convert.
+	 * @return		The value written out as its English name.
+	 */
+	public static String convertToWords(long value) {
+	    StringBuilder buf = new StringBuilder();
+	    convertToWords(value, buf);
+	    return buf.toString();
+	}
+
+	public static void convertToWords(long value, StringBuilder buf) {
+	    if (value < 0L) {
+		if (value == Long.MIN_VALUE) {
+		    throw new IllegalArgumentException(Intl.getString("util#numeric.outOfRange"));
+		}
+		buf.append(minus).append(' ');
+		value = -value;
+	    }
+	    if (value < 20L) {
+		buf.append(smallWords[(int)value]);
+	    }
+	    else if (value < 100L) {
+		int decade = (int)(value / 10L);
+		int residual = (int)(value % 10L);
+		buf.append(tensWords[decade - 2]);
+		if (residual != 0) {
+		    buf.append('-');
+		    buf.append(smallWords[residual]);
+		}
+	    }
+	    else {
+		for (int i = 1; i < rangeValues.length; i++) {
+		    if (value <= rangeValues[i]) {
+			long scale = rangeValues[i - 1] + 1L;
+			long prefix = value / scale;
+			long residual = value % scale;
+			convertToWords(prefix, buf);
+			buf.append(' ').append(rangeWords[i - 1]);
+			if (residual != 0L) {
+			    buf.append(' ');
+			    convertToWords(residual, buf);
+			}
+			break;
+		    }
+		}
+	    }
+	}
+
+
+	/**
+	 * Convert a BCD-format byte string into a {@link BigDecimal} value.
+	 *
+	 * @param bcdBytes	The BCD-encoded byte string.
+	 * @return		The {@link BigDecimal} equivalent.
+	 * @throws IllegalArgumentException if the input bytes are not valid BCD.
+	 */
+	public static BigDecimal convertBCDToDecimal(byte[] bcdBytes) {
+	    String decimalString = convertBCDToString(bcdBytes);
+	    return new BigDecimal(decimalString);
+	}
+
+
+	/**
+	 * Convert a BCD-format byte string into a {@link BigInteger} value.
+	 *
+	 * @param bcdBytes	The BCD-encoded byte string.
+	 * @return		The {@link BigInteger} equivalent.
+	 * @throws IllegalArgumentException if the input bytes are not valid BCD.
+	 */
+	public static BigInteger convertBCDToInteger(byte[] bcdBytes) {
+	    String integerString = convertBCDToString(bcdBytes);
+	    return new BigInteger(integerString);
+	}
+
+
+	/**
+	 * Convert a BCD-format byte string into a string value, which can then
+	 * be converted to a {@link BigDecimal} or {@link BigInteger}.
+	 *
+	 * @param bcdBytes	The BCD-encoded byte string.
+	 * @return		The string equivalent.
+	 * @throws IllegalArgumentException if the input bytes are not valid BCD.
+	 */
+	public static String convertBCDToString(byte[] bcdBytes) {
+	    StringBuilder buf = new StringBuilder(bcdBytes.length * 2 + 2);
+	    int scale = bcdBytes[0];
+	    int pos = 0;
+	    char sign = '+';
+	    // Put in the decimal and leading zeroes
+	    if (scale < 0) {
+		buf.append('.');
+		for (int j = 0; j < -scale; j++) {
+		    buf.append('0');
+		}
+	    }
+	    for (int i = 1; i < bcdBytes.length; i++) {
+		int highNibble = (bcdBytes[i] & 0xF0) >>> 4;
+		int lowNibble  = (bcdBytes[i] & 0x0F);
+		if (pos == scale) {
+		    buf.append('.');
+		}
+		if (highNibble > 9) {
+		    if (highNibble == 0x0D) {
+			sign = '-';
+		    }
+		    break;
+		}
+		else {
+		    buf.append((char)(highNibble + '0'));
+		    pos++;
+		}
+		if (pos == scale) {
+		    buf.append('.');
+		}
+		if (lowNibble > 9) {
+		    if (lowNibble == 0x0D) {
+			sign = '-';
+		    }
+		    break;
+		}
+		else {
+		    buf.append((char)(lowNibble + '0'));
+		    pos++;
+		}
+	    }
+	    buf.insert(0, sign);
+
+	    // Delete trailing decimal point so this works for BigInteger too
+	    int last = buf.length() - 1;
+	    if (buf.charAt(last) == '.')
+		buf.deleteCharAt(last);
+
+	    return buf.toString();
+	}
+
+
+	/**
+	 * Convert from {@link BigDecimal} to BCD format (byte array).
+	 *
+	 * @param decimal	A {@link BigDecimal} value to convert.
+	 * @return 		The BCD-encoded bytes of this value.
+	 */
+	public static byte[] convertToBCD(BigDecimal decimal) {
+	    return convertToBCD(decimal.toPlainString());
+	}
+
+
+	/**
+	 * Convert from {@link BigInteger} to BCD format (byte array).
+	 *
+	 * @param integer	A {@link BigInteger} value to convert.
+	 * @return 		The BCD-encoded bytes of this value.
+	 */
+	public static byte[] convertToBCD(BigInteger integer) {
+	    return convertToBCD(integer.toString());
+	}
+
+
+	/**
+	 * Convert from numeric string to BCD format (byte array).
+	 *
+	 * @param plainText	A plain text numeric string to convert.
+	 * @return 		The BCD-encoded bytes of this value.
+	 */
+	public static byte[] convertToBCD(String plainText) {
+	    int plainLength = plainText.length();
+
+	    // The format is going to be:
+	    // optional sign
+	    // some number (non-zero) of integer digits
+	    // optional decimal point, and then
+	    // optional fractional digits
+	    int i = 0;
+	    int sign = 0x0C;	// positive
+	    if (plainText.charAt(i) == '-') {
+		sign = 0x0D;
+		i++;
+	    }
+	    else if (plainText.charAt(i) == '+') {
+		i++;
+	    }
+	    // First pass, compute scale and count # digits
+	    int scale = 0;
+	    int digits = 0;
+	    boolean pointSeen = false;
+	    for (int j = i; j < plainLength; j++) {
+		// Skip leading zeros
+		if (!pointSeen && scale == 0 && plainText.charAt(j) == '0') {
+		    i++;
+		}
+		// Note: the "BigDecimal.toPlainString()" method produces a
+		// canonical form, not affected by Locale, so we are safe to
+		// use '.' here.
+		else if (plainText.charAt(j) == '.') {
+		    pointSeen = true;
+		}
+		else if (plainText.charAt(j) == '0') {
+		    if (pointSeen && digits == 0) {
+			scale--;
+		    }
+		    else {
+			digits++;
+			if (!pointSeen)
+			    scale++;
+		    }
+		}
+		else {
+		    digits++;
+		    if (!pointSeen)
+			scale++;
+		}
+	    }
+	    int byteLength = (digits + 2) / 2 + 1 /* for scale */;
+	    byte[] bytes = new byte[byteLength];
+	    int pos = 0;
+	    pointSeen = false;
+	    bytes[0] = (byte)scale;
+	    for (int j = i; j < plainLength; j++) {
+		if (plainText.charAt(j) == '.') {
+		    pointSeen = true;
+		    continue;
+		}
+		else if (plainText.charAt(j) == '0') {
+		    if (pointSeen && pos == 0) {
+			continue;
+		    }
+		}
+		int ch = plainText.charAt(j);
+		int nibble = ch - '0';
+		if ((pos & 1) == 0) {
+		    // even nibble = high nibble of the byte
+		    bytes[(pos / 2) + 1] = (byte)(nibble << 4);
+		}
+		else {
+		    // odd nibble = low nibble (combine with existing high)
+		    bytes[(pos / 2) + 1] |= nibble;
+		}
+		pos++;
+	    }
+	    // Add the sign in as the last nibble
+	    if ((pos & 1) == 0) {
+		bytes[(pos / 2) + 1] = (byte)(sign << 4);
+	    }
+	    else {
+		bytes[(pos / 2) + 1] |= sign;
+	    }
+
+	    return bytes;
+	}
+
+	private static byte[] readBCDBytes(DataInputStream dis)
+		throws IOException
+	{
+	    ByteArrayOutputStream baos = new ByteArrayOutputStream(256);
+	    // First byte is scale, so don't do the sign nibble check on it
+	    byte b = dis.readByte();
+	    baos.write(b);
+	    int hi, lo;
+	    do {
+		b = dis.readByte();
+		baos.write(b);
+		hi = ((int)b) & 0xC0;
+		lo = ((int)b) & 0x0C;
+	    } while (hi != 0xC0 && lo != 0x0C);
+	    return baos.toByteArray();
+	}
+
+	private static char readChar(DataInputStream dis, ByteOrder byteOrder)
+		throws IOException
+	{
+	    if (byteOrder == ByteOrder.LSB) {
+		return (char)readShort(dis, byteOrder);
+	    }
+	    return dis.readChar();
+	}
+
+	private static void writeChar(DataOutputStream dos, char ch, ByteOrder byteOrder)
+		throws IOException
+	{
+	    if (byteOrder == ByteOrder.LSB) {
+		writeShort(dos, (short)ch, byteOrder);
+	    }
+	    else {
+		dos.writeChar(ch);
+	    }
+	}
+
+	private static short readShort(DataInputStream dis, ByteOrder byteOrder)
+		throws IOException
+	{
+	    // This is "network" byte order, or MSB first
+	    short value = dis.readShort();
+	    if (byteOrder == ByteOrder.LSB) {
+		return (short)Integer.rotateRight(Integer.reverseBytes((int)value), 16);
+	    }
+	    return value;
+	}
+
+	private static void writeShort(DataOutputStream dos, short value, ByteOrder byteOrder)
+		throws IOException
+	{
+	    if (byteOrder == ByteOrder.LSB) {
+		dos.writeShort((short)Integer.rotateRight(Integer.reverseBytes((int)value), 16));
+	    }
+	    else {
+		dos.writeShort(value);
+	    }
+	}
+
+	private static int readInt(DataInputStream dis, ByteOrder byteOrder)
+		throws IOException
+	{
+	    int value = dis.readInt();
+	    if (byteOrder == ByteOrder.LSB) {
+		return Integer.reverseBytes(value);
+	    }
+	    return value;
+	}
+
+	private static void writeInt(DataOutputStream dos, int value, ByteOrder byteOrder)
+		throws IOException
+	{
+	    if (byteOrder == ByteOrder.LSB) {
+		dos.writeInt(Integer.reverseBytes(value));
+	    }
+	    else {
+		dos.writeInt(value);
+	    }
+	}
+
+	private static long readLong(DataInputStream dis, ByteOrder byteOrder)
+		throws IOException
+	{
+	    long value = dis.readLong();
+	    if (byteOrder == ByteOrder.LSB) {
+		return Long.reverseBytes(value);
+	    }
+	    return value;
+	}
+
+	private static void writeLong(DataOutputStream dos, long value, ByteOrder byteOrder)
+		throws IOException
+	{
+	    if (byteOrder == ByteOrder.LSB) {
+		dos.writeLong(Long.reverseBytes(value));
+	    }
+	    else {
+		dos.writeLong(value);
+	    }
+	}
+
+	private static float readFloat(DataInputStream dis, ByteOrder byteOrder)
+		throws IOException
+	{
+	    return Float.intBitsToFloat(readInt(dis, byteOrder));
+	}
+
+	private static void writeFloat(DataOutputStream dos, float value, ByteOrder byteOrder)
+		throws IOException
+	{
+	    writeInt(dos, Float.floatToRawIntBits(value), byteOrder);
+	}
+
+	private static double readDouble(DataInputStream dis, ByteOrder byteOrder)
+		throws IOException
+	{
+	    return Double.longBitsToDouble(readLong(dis, byteOrder));
+	}
+
+	private static void writeDouble(DataOutputStream dos, double value, ByteOrder byteOrder)
+		throws IOException
+	{
+	    writeLong(dos, Double.doubleToRawLongBits(value), byteOrder);
+	}
+
+	private static String readString(DataInputStream dis, Charset charset, int byteLength)
+		throws IOException
+	{
+	    byte[] bytes = new byte[byteLength];
+	    dis.readFully(bytes);
+	    return new String(bytes, charset);
+	}
+
+	private static void writeString(DataOutputStream dos, String value, Charset charset, ByteOrder byteOrder, StringLength stringLength, int length)
+		throws IOException
+	{
+	    byte[] bytes = value.getBytes(charset);
+	    int byteLen = bytes.length;
+	    switch (stringLength) {
+		case PREFIX1:
+		    // Need a range of 0..255 here
+		    if (byteLen > 255)
+			throw new IndexOutOfBoundsException(Intl.formatString("util#numeric.stringLengthTooBig", byteLen, 255));
+		    dos.write(byteLen);
+		    dos.write(bytes);
+		    break;
+		case PREFIX2:
+		    // Need a range of 0..65535 here
+		    if (byteLen > 65535)
+			throw new IndexOutOfBoundsException(Intl.formatString("util#numeric.stringLengthTooBig", byteLen, 65535));
+		    writeShort(dos, (short)byteLen, byteOrder);
+		    dos.write(bytes);
+		    break;
+		case PREFIX4:
+		    writeInt(dos, byteLen, byteOrder);
+		    dos.write(bytes);
+		    break;
+		case FIXED:
+		    if (byteLen >= length) {
+			// Note: silent truncation of the value!
+			dos.write(bytes, 0, length);
+		    }
+		    else {
+			dos.write(Arrays.copyOf(bytes, length));
+		    }
+		    break;
+		case EOS:
+		    dos.write(bytes);
+		    dos.write('\0');
+		    break;
+	    }
+	}
+
+
+	public static Object readRawBinaryValue(DataInputStream dis, Charset charset,
+		DataType dataType, ByteOrder byteOrder, StringLength stringLength, int length)
+		throws IOException
+	{
+	     Object value = null;
+	     int byteLen = length;
+	     switch (dataType) {
+		case NUL:
+		    // Leave the value as null
+		    break;
+		case BYTE:
+		    value = Byte.valueOf(dis.readByte());
+		    break;
+		case SHORT:
+		    value = Short.valueOf(readShort(dis, byteOrder));
+		    break;
+		case INT:
+		    value = Integer.valueOf(readInt(dis, byteOrder));
+		    break;
+		case LONG:
+		    value = Long.valueOf(readLong(dis, byteOrder));
+		    break;
+		case BIGINT:
+		    value = convertBCDToInteger(readBCDBytes(dis));
+		    break;
+		case DEC:
+		    // Note: the last nibble of the value has the sign, so read until then.
+		    value = convertBCDToDecimal(readBCDBytes(dis));
+		    break;
+		case FLOAT:
+		    value = Float.valueOf(readFloat(dis, byteOrder));
+		    break;
+		case DOUBLE:
+		    value = Double.valueOf(readDouble(dis, byteOrder));
+		    break;
+		case DATE:
+		    long millis = readLong(dis, byteOrder);
+		    value = new Date(millis);
+		    break;
+		case CHAR:
+		    value = Character.valueOf(readChar(dis, byteOrder));
+		    break;
+		case STRING:
+		    switch (stringLength) {
+			case PREFIX1:
+			    // Need a range of 0..255 here
+			    byteLen = dis.readUnsignedByte();
+			    value = readString(dis, charset, byteLen);
+			    break;
+			case PREFIX2:
+			    // Need a range of 0..65535 here
+			    byteLen = ((int)readShort(dis, byteOrder)) & 0xFFFF;
+			    value = readString(dis, charset, byteLen);
+			    break;
+			case PREFIX4:
+			    byteLen = readInt(dis, byteOrder);
+			    // Fall through
+			case FIXED:
+			    value = readString(dis, charset, byteLen);
+			    break;
+			case EOS:
+			    ByteArrayOutputStream baos = new ByteArrayOutputStream(256);
+			    byte b = dis.readByte();
+			    while (b != 0x00) {
+				baos.write(b);
+				b = dis.readByte();
+			    }
+			    value = new String(baos.toByteArray(), charset);
+			    break;
+		    }
+		    break;
+	     }
+	     return value;
+	}
+
+
+	/**
+	 * Read an arbitrary data type from the given {@link DataInputStream}
+	 * as it was written by {@link #writeBinaryValue}.  Esp. the BCD data
+	 * is an uncommon format.
+	 * <p> Each piece of data is preceded by a one-byte data type code
+	 * given by the {@link DataType} enum/code.  This does two things:
+	 * <ul><li>Provides a fool-proof way to interpret the following bytes,</li>
+	 * <li>And gives a way to encode a {@code null} value in the streami.</li>
+	 * </ul>
+	 *
+	 * @param dis The data stream to read from.
+	 * @param charset The character set to use to interpret string data.
+	 * @return The object read or {@code null} if the value byte was
+	 * {@link DataType#NUL}.
+	 * @throws IOException especially for end of file
+	 * @throws EOFException at the end of the file
+	 */
+	public static Object readBinaryValue(DataInputStream dis, Charset charset)
+		throws IOException
+	{
+	     byte code = dis.readByte();
+	     DataType dataType = DataType.fromCode((int)code);
+	     return readRawBinaryValue(dis, charset, dataType, ByteOrder.MSB, StringLength.PREFIX4, -1);
+	}
+
+	/**
+	 * Write an abitrary piece of data in raw binary form to the given stream.
+	 *
+	 * @param value Any wrapped primitive data type, or a {@link String}.
+	 * @param dos The data stream to write to.
+	 * @param charset The character set to use to convert strings to bytes.
+	 * @param byteOrder Whether the bytes are in MSB..LSB or LSB..MSB order.
+	 * @param stringLength The discipline to use for writing the string length.
+	 * @param length For a fixed string length, the length to use, otherwise ignored.
+	 *
+	 * @throws IOException if there is a problem doing the write.
+	 * @throws IllegalArgumentException if the data type isn't recognized.
+	 */
+	public static void writeRawBinaryValue(Object value, DataOutputStream dos, Charset charset,
+		ByteOrder byteOrder, StringLength stringLength, int length)
+			throws IOException
+	{
+	    // TODO: if the value is null, write nothing.... is this the right thing to do?
+	    if (value == null)
+		return;
+	    Class<?> clazz = value.getClass();
+	    if (clazz == Byte.class) {
+		dos.writeByte(((Byte)value).intValue());
+	    }
+	    else if (clazz == Character.class) {
+		writeChar(dos, ((Character)value).charValue(), byteOrder);
+	    }
+	    else if (clazz == Short.class) {
+		writeShort(dos, ((Short)value).shortValue(), byteOrder);
+	    }
+	    else if (clazz == Integer.class) {
+		writeInt(dos, ((Integer)value).intValue(), byteOrder);
+	    }
+	    else if (clazz == Long.class) {
+		writeLong(dos, ((Long)value).longValue(), byteOrder);
+	    }
+	    else if (clazz == Float.class) {
+		writeFloat(dos, ((Float)value).floatValue(), byteOrder);
+	    }
+	    else if (clazz == Double.class) {
+		writeDouble(dos, ((Double)value).doubleValue(), byteOrder);
+	    }
+	    else if (clazz == BigDecimal.class) {
+		dos.write(convertToBCD((BigDecimal)value));
+	    }
+	    else if (clazz == BigInteger.class) {
+		dos.write(convertToBCD((BigInteger)value));
+	    }
+	    else if (clazz == String.class) {
+		writeString(dos, (String)value, charset, byteOrder, stringLength, length);
+	    }
+	    else {
+		throw new IllegalArgumentException(Intl.formatString("util#numeric.badDataType", clazz.getName()));
+	    }
+	}
+
+	/**
+	 * Write an arbitrary data type to the given {@link DataOutputStream}.
+	 * <p> The convention for these files is to write a byte type for each
+	 * field, defined by the {@link DataType} enum
+	 *
+	 * @param value Any wrapped primitive data type, or a {@link String}.
+	 * @param dos The data stream to write to.
+	 * @param charset The character set to use to convert strings to bytes.
+	 * @throws IOException if there is a problem doing the write.
+	 * @throws IllegalArgumentException if the data type isn't recognized.
+	 */
+	public static void writeBinaryValue(Object value, DataOutputStream dos, Charset charset)
+		throws IOException
+	{
+	    if (value == null) {
+		dos.writeByte(DataType.NUL.getCode());
+	    }
+	    else {
+		Class<?> clazz = value.getClass();
+		if (clazz == String.class) {
+		    dos.writeByte(DataType.STRING.getCode());
+		}
+		else if (clazz == BigDecimal.class) {
+		    dos.writeByte(DataType.DEC.getCode());
+		}
+		else if (clazz == BigInteger.class) {
+		    dos.writeByte(DataType.BIGINT.getCode());
+		}
+		else if (clazz == Long.class) {
+		    dos.writeByte(DataType.LONG.getCode());
+		}
+		else if (clazz == Integer.class) {
+		    dos.writeByte(DataType.INT.getCode());
+		}
+		else if (clazz == Short.class) {
+		    dos.writeByte(DataType.SHORT.getCode());
+		}
+		else if (clazz == Byte.class) {
+		    dos.writeByte(DataType.BYTE.getCode());
+		}
+		else if (clazz == Double.class) {
+		    dos.writeByte(DataType.DOUBLE.getCode());
+		}
+		else if (clazz == Float.class) {
+		    dos.writeByte(DataType.FLOAT.getCode());
+		}
+		else if (clazz == Date.class) {
+		    dos.writeByte(DataType.DATE.getCode());
+		}
+		else if (clazz == Character.class) {
+		    dos.writeByte(DataType.CHAR.getCode());
+		}
+		else {
+		    throw new IllegalArgumentException(Intl.formatString("util#numeric.badDataType", clazz.getName()));
+		}
+	    }
+	    writeRawBinaryValue(value, dos, charset, ByteOrder.MSB, StringLength.PREFIX4, -1);
+	}
+
+
+	/**
+	 * Round up a value to the next highest power of two.
+	 *
+	 * @param n Any non-negative number.
+	 * @return The next highest power of two greater or equal to
+	 * the input.
+	 */
+	public static int roundUpPowerTwo(int n) {
+	    int p = 1;
+
+	    // Check for exact power of two
+//	    if (n != 0 && (n & (n - 1)) == 0)
+//		return n;
+
+	    while (p < n)
+		p <<= 1;
+	
+	    return p;
+	}
+
+
+	/**
+	 * @return The result of the base to the exp power, done in <code>BigDecimal</code>
+	 * precision.
+	 * @param base The number to raise to the given power.
+	 * @param exp The power to raise the number to.
+	 * @throws IllegalArgumentException if the exponent is infinite or not-a-number.
+	 */
+	public static BigDecimal pow(BigDecimal base, double exp) {
+	    if (Double.isNaN(exp) || Double.isInfinite(exp))
+		throw new IllegalArgumentException(Intl.getString("util#numeric.outOfRange"));
+	    if (exp == 0.0d)
+		return BigDecimal.ONE;
+	    boolean reciprocal = false;
+	    if (exp < 0) {
+		reciprocal = true;
+		exp = -exp;
+	    }
+
+	    int intExp = (int)Math.floor(exp);
+	    double fracExp = exp - (double)intExp;
+
+	    BigDecimal result = BigDecimal.ONE;
+	    BigDecimal mult = base;
+	    while (intExp != 0) {
+		if (intExp % 2 == 1)
+		    result = result.multiply(mult);
+		intExp >>= 1;
+		mult = mult.multiply(mult);
+	    }
+
+	    // 2.14**2.14 = 2.14**2 * 2.14**.14
+	    BigDecimal fracResult = new BigDecimal(Math.pow(base.doubleValue(), fracExp));
+	    result = result.multiply(fracResult);
+
+	    if (reciprocal) {
+		result = BigDecimal.ONE.divide(result);
+	    }
+
+	    return result;
+	}
+
+
+	/**
+	 * @return The result of the base to the exp power, done in <code>BigInteger</code>,
+	 * or <code>BigDecimal</code> precision depending on the value of the exponent.
+	 * @param base The number to raise to the given power.
+	 * @param exp The power to raise the number to.
+	 * @throws IllegalArgumentException if the exponent is infinite, or not-a-number.
+	 */
+	public static Number pow(BigInteger base, double exp) {
+	    if (Double.isNaN(exp) || Double.isInfinite(exp))
+		throw new IllegalArgumentException(Intl.getString("util#numeric.outOfRange"));
+	    if (exp == 0.0d)
+		return BigInteger.ONE;
+
+	    // Test for negative or fractional powers and convert to BigDecimal for those cases
+	    double wholeExp = Math.floor(exp);
+	    if (exp < 0.0d || wholeExp != exp) {
+		return pow(new BigDecimal(base), exp);
+	    }
+
+	    int intExp = (int)wholeExp;
+	    return base.pow(intExp);
+	}
+
+
+}

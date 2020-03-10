@@ -1,0 +1,470 @@
+/**
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2010-2011,2013-2017,2019-2020 Roger L. Whitcomb.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ *   File Utilities
+ *
+ * History:
+ *    25-Jun-2010 (rlwhitcomb)
+ *	Initial implementation.  Taken from examples on web.
+ *    06-Sep-2013 (rlwhitcomb)
+ *	Add method to check readability of a directory using new
+ *	Java 7 features.  Make "main" method call this new method
+ *	so we can invoke the function from the command line.
+ *    12-Sep-2013 (rlwhitcomb)
+ *	Add method to generate a random file name with the given
+ *	prefix and suffix (extension).
+ *    25-Jan-2014 (rlwhitcomb)
+ *	Add a logging statement so we can tell when and with what
+ *	path the pathIsReadable is check is being called.
+ *	Add comments to "copyFile".
+ *    28-Jan-2014 (rlwhitcomb)
+ *	Try different things for "pathIsReadable" because the code
+ *	in the Files class doesn't seem to be quite right everywhere.
+ *    04-Mar-2014 (rlwhitcomb)
+ *	Don't try to open a FileInputStream on a directory to check
+ *	read access... Extra logging.
+ *    12-Mar-2015 (rlwhitcomb)
+ *	Add a method for creating temporary files and allow delete
+ *	on exit.
+ *    17-Mar-2015 (rlwhitcomb)
+ *	Add a method to count lines in a file.
+ *    31-Aug-2015 (rlwhitcomb)
+ *	Cleanup Javadoc (found by Java 8).
+ *    07-Jan-2016 (rlwhitcomb)
+ *	More Javadoc work.
+ *    20-Feb-2016 (rlwhitcomb)
+ *	Add a method to do gzip compression on a file and one to rename
+ *	a file.
+ *    30-Mar-2016 (rlwhitcomb)
+ *	New method to read file into a string.
+ *    12-Jul-2016 (rlwhitcomb)
+ *	Add a method to compare two files (byte-by-byte).
+ *	Fix a couple of funky Javadoc constructs.
+ *    27-Mar-2017 (rlwhitcomb)
+ *	Add "uncompressFile" method.
+ *    07-Jun-2017 (rlwhitcomb)
+ *	Allow null charset for 'readFileAsString' to specify system default.
+ *    15-Mar-2019 (rlwhitcomb)
+ *	Don't use FileInputStream/FileOutputStream due to GC problems b/c of the finalize
+ *	method in these classes. Remove wildcard imports.
+ *    23-May-2019 (rlwhitcomb)
+ *	Migrate the "canWrite" function into here.
+ *    10-Mar-2020 (rlwhitcomb)
+ *	Prepare for GitHub.
+ */
+package info.rlwhitcomb.util;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
+import java.nio.charset.CodingErrorAction;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.nio.file.attribute.PosixFilePermission;
+import java.security.SecureRandom;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.Set;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
+import net.iharder.b64.Base64;
+
+
+/**
+ * Utility class for dealing with files.
+ */
+public class FileUtilities
+{
+    /** Source of randomness for {@link #getRandomName}. */
+    static SecureRandom random = new SecureRandom();
+
+    /** Buffer size for the file compression method. */
+    private static final int BUFFER_SIZE = 65_536;
+
+    /** Maximum size (2MB) of a file to read into a single string. */
+    private static final long FILE_STRING_SIZE_LIMIT = 2_097_152L;
+
+    /**
+     * Compressed file (GZIP) extension, made available for callers
+     * of the {@link #compressFile} method.
+     */
+    public static final String COMPRESS_EXT = ".gz";
+
+
+    /**
+     * Copies one file to another.
+     *
+     * @param in The original file.
+     * @param out The new output file.
+     * @throws IOException if there is an error during the copy.
+     * @throws FileNotFoundException if the original file could
+     * not be found.
+     */
+    public static void copyFile(File in, File out)
+		throws IOException, FileNotFoundException
+    {
+	Files.copy(in.toPath(), out.toPath(),
+		StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.COPY_ATTRIBUTES);
+    }
+
+    /**
+     * Compare two file byte-by-byte.
+     * <p> NOTE: this is only meant to compare two "small-ish" files
+     * because it reads the entire contents into memory.
+     * @see Files#readAllBytes
+     * @param file1	The first file to compare.
+     * @param file2	The second file to compare.
+     * @return	{@code true} if the two files compare byte-for-byte,
+     *		or {@code false} if not.
+     * @throws IOException if something went wrong.
+     */
+    public static boolean compareFiles(File file1, File file2)
+	throws IOException
+    {
+	Path path1 = file1.toPath();
+	Path path2 = file2.toPath();
+	byte[] bytes1 = Files.readAllBytes(path1);
+	byte[] bytes2 = Files.readAllBytes(path2);
+	return Arrays.equals(bytes1, bytes2);
+    }
+
+    /**
+     * Generate a random file name using the given prefix and suffix
+     * (extension).
+     *
+     * @param	prefix	The beginning of the new random name.
+     * @param	suffix	And the ending of it (usually an extension,
+     *			if there is a leading ".").
+     * @return The new random file name.
+     */
+    public static String getRandomName(String prefix, String suffix) {
+	byte bytes[] = new byte[20];
+	random.nextBytes(bytes);
+	return String.format("%1$s%2$s%3$s",
+		prefix,
+		Base64.encodeBytes(bytes, Base64.URL_SAFE),
+		suffix);
+    }
+
+    /**
+     * Create a temporary file with the given name prefix and extension.
+     *
+     * @param	prefix		Prefix for the file name (must be &gt; 3 characters)
+     * @param	suffix		Should start with "." (i.e., a file extension), so one will
+     *				be added if not present (but can be <tt>null</tt>).
+     * @param	deleteOnExit	<tt>true</tt> to always delete this file
+     *				when the JVM terminates (i.e., assumes the
+     *				user will not need to examine the file later).
+     * @return	The file object.
+     * @throws	IOException if there was disk operation error.
+     */
+    public static File createTempFile(String prefix, String suffix, boolean deleteOnExit)
+		throws IOException
+    {
+	File tempFile = File.createTempFile(prefix, suffix == null || suffix.startsWith(".") ? suffix : "." + suffix);
+	if (deleteOnExit)
+	    tempFile.deleteOnExit();
+	return tempFile;
+    }
+
+    /**
+     * Create a temporary file with the given name prefix and default extension (".tmp").
+     * @param	prefix		Prefix for the file name (must be &gt; 3 characters)
+     * @param	deleteOnExit	<tt>true</tt> to always delete this file
+     *				when the JVM terminates (i.e., assumes the
+     *				user will not need to examine the file later).
+     * @return	The file object.
+     * @throws	IOException if there was disk operation error.
+     * @see	#createTempFile(String, String, boolean)
+     */
+    public static File createTempFile(String prefix, boolean deleteOnExit)
+		throws IOException
+    {
+	return createTempFile(prefix, null, deleteOnExit);
+    }
+
+    /**
+     * Create a temporary file with the given name prefix and default extension (".tmp")
+     * and that caller is responsible for cleaning up (i.e., it will not be
+     * automatically deleted on exit).
+     * @param	prefix		Prefix for the file name (must be &gt; 3 characters)
+     * @return	The file object.
+     * @throws	IOException if there was disk operation error.
+     * @see	#createTempFile(String, String, boolean)
+     */
+    public static File createTempFile(String prefix)
+		throws IOException
+    {
+	return createTempFile(prefix, null, false);
+    }
+
+    /**
+     * Check if the given file or directory is readable by the
+     * current user (process owner).
+     *
+     * @param	path	The path to check.
+     * @return		Whether the given path is readable by
+     *			simply trying to read from it.
+     */
+    public static boolean pathIsReadable(String path) {
+	File f = new File(path);
+	Logging.Debug("FileUtilities.pathIsReadable(String path='%1$s', Path='%2$s')", path, f.getPath());
+	if (!f.exists() || !f.canRead()) {
+	    Logging.Debug("\tpath does not exist or is not readable by current user");
+	    return false;
+	}
+	// Cannot use an InputStream to read from a directory, so the above checks are fine
+	// in that case
+	if (f.isDirectory()) {
+	    Logging.Debug("\tpath is a directory, return true");
+	    return true;
+	}
+	Logging.Debug("\tpath exists and is readable and not a directory, so try opening a stream...");
+	try (InputStream fis = Files.newInputStream(f.toPath())) {
+	    Logging.Debug("\tpath exists and is readable by current user");
+	    return true;
+	}
+	catch (Exception ex) {
+	    Logging.Debug("Exception %1$s trying to open file '%2$s' for reading.", ExceptionUtil.toString(ex, true), path);
+	}
+	Logging.Debug("\tsome unexpected exception was thrown trying to read the file, return false");
+	return false;
+    }
+
+    /**
+     * @return The count of the number of lines in the file.
+     *
+     * @param	f	The file to inspect.
+     * @throws	IOException if the file couldn't be read.
+     */
+    public static int countLines(File f)
+	    throws IOException
+    {
+	try (BufferedReader r = new BufferedReader(new FileReader(f))) {
+	    String line;
+	    int lines = 0;
+	    while ((line = r.readLine()) != null) {
+		lines++;
+	    }
+	    return lines;
+	}
+    }
+
+    /**
+     * Compress the given file to <tt>"<i>name</i>.gz"</tt> and remove the original.
+     * <p> This mimics the operation of the {@code "gzip"} command line tool, which
+     * only leaves the <tt>"<i>name</i>.gz"</tt> file (and also {@code "gunzip"} which
+     * leaves the original file only).
+     *
+     * @param	inputFile	The input file (in the proper directory).
+     * @throws	IOException if something happened during the compression.
+     */
+    public static void compressFile(File inputFile)
+	    throws IOException
+    {
+	String outputName = inputFile.getPath() + COMPRESS_EXT;
+	try (InputStream fis = Files.newInputStream(inputFile.toPath());
+	     GZIPOutputStream gos = new GZIPOutputStream(Files.newOutputStream(Paths.get(outputName)), BUFFER_SIZE, true))
+	{
+	    byte[] buffer = new byte[BUFFER_SIZE];
+	    int len;
+	    while ((len = fis.read(buffer)) > 0) {
+		gos.write(buffer, 0, len);
+	    }
+	    gos.flush();
+	}
+	// Now remove the original file (if possible)
+	inputFile.delete();
+    }
+
+    /**
+     * Uncompress the given file from <tt>"<i>name</i>.gz"</tt> to just <tt>"<i>name</i>"</tt>
+     * and remove the original compressed file.
+     * <p> This mimics the operation of the {@code "gunzip"} command line tool, which
+     * only leaves the <tt>"<i>name</i>"</tt> file (and also {@code "gzip"} which
+     * leaves the compressed file only).
+     *
+     * @param	inputFile	The input file (in the proper directory).
+     * @throws	IOException if something happened during the decompression.
+     * @throws	IllegalArgumentException (with no message) if the input
+     *		file name doesn't end with {@link #COMPRESS_EXT}.
+     */
+    public static void uncompressFile(File inputFile)
+	    throws IOException
+    {
+	String inputName = inputFile.getPath();
+	String outputName;
+	if (inputName.endsWith(COMPRESS_EXT))
+	    outputName = inputName.substring(0, inputName.length() - COMPRESS_EXT.length());
+	else
+	    throw new IllegalArgumentException();
+	try (GZIPInputStream gis = new GZIPInputStream(Files.newInputStream(inputFile.toPath()), BUFFER_SIZE);
+	     OutputStream fos = Files.newOutputStream(Paths.get(outputName)))
+	{
+	    byte[] buffer = new byte[BUFFER_SIZE];
+	    int len;
+	    while ((len = gis.read(buffer)) > 0) {
+		fos.write(buffer, 0, len);
+	    }
+	    fos.flush();
+	}
+	// Now remove the original file (if possible)
+	inputFile.delete();
+    }
+
+    /**
+     * Rename the given file to the new name.
+     *
+     * @param	currentFile	Current file (full path).
+     * @param	newName		New file name (relative to source directory).
+     * @throws	IOException if the rename doesn't succeed.
+     */
+    public static void renameFile(File currentFile, String newName)
+	    throws IOException
+    {
+	Path source = currentFile.toPath();
+	Files.move(source, source.resolveSibling(newName), StandardCopyOption.ATOMIC_MOVE);
+    }
+
+    /**
+     * Test to see if the file given by the name is actually writable.
+     * <p> The problem this solves is that no matter the permissions on the actual
+     * file on Linux, the "root" user can "write" to it, which is not what we want.
+     * We actually need to test the file permissions.  So, do that on Linux, yet
+     * the regular test is sufficient for Windows (plus on Java 10 the POSIX
+     * object isn't available there).
+     *
+     * @param	file	The local file to test.
+     * @return		Whether or not the file permissions include write for this file.
+     */
+    public static boolean canWrite(File file) {
+	Path path = file.toPath();
+	if (Environment.isWindows()) {
+	    return Files.isWritable(path);
+	}
+	else {
+	    try {
+		Map<String, Object> attrs = Files.readAttributes(path, "posix:permissions");
+		@SuppressWarnings("unchecked")
+		Set<PosixFilePermission> permissions = (Set<PosixFilePermission>)attrs.get("permissions");
+		return permissions.contains(PosixFilePermission.OTHERS_WRITE)
+		    || permissions.contains(PosixFilePermission.GROUP_WRITE)
+		    || permissions.contains(PosixFilePermission.OWNER_WRITE);
+	    }
+	    catch (IOException ioe) {
+		return false;
+	    }
+	}
+    }
+
+    /**
+     * Read the given local file and produce a single string from the contents.
+     *
+     * @param	file	The local file to read.
+     * @param	cs	The character set to use to decode the file contents. Can be
+     *			<tt>null</tt> in which case the system default is used.
+     * @param	tabWidth	In order to convert tab characters to spaces, specify
+     *				a non-zero width.
+     * @return		The complete contents of the file as a {@link String},
+     *			with line endings translated to Unix conventions (i.e., only
+     *			{@code \n}).
+     * @throws	IllegalArgumentException if the file size is over 2MB (arbitrary).
+     * @throws	IOException if there is a problem reading the file.
+     */
+    public static String readFileAsString(File file, Charset cs, int tabWidth)
+	throws IOException
+    {
+	long size = file.length();
+	if (size > FILE_STRING_SIZE_LIMIT) {
+	    throw new IllegalArgumentException(Intl.formatString("util#fileutil.fileTooBig", size));
+	}
+	StringBuilder buf = new StringBuilder((int)size);
+
+	CharsetDecoder decoder = cs == null ? Charset.defaultCharset().newDecoder() : cs.newDecoder();
+	decoder.onUnmappableCharacter(CodingErrorAction.REPORT);
+	decoder.onMalformedInput(CodingErrorAction.REPORT);
+
+	InputStream fis = Files.newInputStream(file.toPath());
+	InputStreamReader isr = new InputStreamReader(fis, decoder);
+
+	try (BufferedReader reader = new BufferedReader(isr))
+	{
+	    String line;
+	    while ((line = reader.readLine()) != null) {
+		if (tabWidth > 0) {
+		    int ix = 0, tabPos = 0, iy;
+		    while ((iy = line.indexOf('\t', ix)) >= 0) {
+			tabPos += (iy - ix);
+			buf.append(line.substring(ix, iy));
+			int spaces = tabWidth - (tabPos % tabWidth);
+			for (int i = 0; i < spaces; i++) {
+			    buf.append(' ');
+			}
+			tabPos += spaces;
+			ix = iy + 1;
+		    }
+		    if (ix < line.length()) {
+			buf.append(line.substring(ix));
+		    }
+		}
+		else {
+		    buf.append(line);
+		}
+		buf.append('\n');
+	    }
+	}
+
+	return buf.toString();
+    }
+
+    /**
+     * Command line invocation of the {@link #pathIsReadable} method.
+     * <p> Returns process exit code of 0 if path is readable and
+     * print "true" on stdout.  Returns exit code 100 if path is not
+     * readable by the current process owner and prints "false".
+     * Also if there is more or less than one path on the command line.
+     *
+     * @param	args	The command line arguments, which should be the
+     *			single path to test.
+     */
+    public static void main(String args[]) {
+	if (args.length == 1) {
+	    if (pathIsReadable(args[0])) {
+		System.out.println("true");
+		return;
+	    }
+	}
+	System.out.println("false");
+	System.exit(100);
+    }
+
+}

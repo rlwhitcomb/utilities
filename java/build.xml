@@ -4,7 +4,7 @@
 
 	The MIT License (MIT)
 
-	Copyright (c) 2010-2011,2020 Roger L. Whitcomb.
+	Copyright (c) 2020 Roger L. Whitcomb.
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -24,7 +24,7 @@
 	OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 	SOFTWARE.
 
-	"Ant" build file to build the custom tasks.
+	"Ant" build file for the utility code.
 
      ========================================================================== -->
 
@@ -33,33 +33,104 @@
     xmlns:unless="ant:unless"
 >
 	<property environment="env"/>
+	<property file="build.properties"/>
+	<buildnumber/>
+        <condition property="new.java.version" value="true" else="false" >
+                <javaversion atleast="9"/>
+        </condition>
 
-	<target name="compile" description="Compiles the java source">
-		<javac srcdir="." includeAntRuntime="true">
-			<include name="info/rlwhitcomb/ant/*.java"/>
-			<include name="info/rlwhitcomb/preproc/*.java"/>
+
+        <taskdef name="preproc" classname="info.rlwhitcomb.preproc.JavaPreProc" classpath="${ant.tasks.jar}"/>
+
+        <macrodef name="generate-text-resources">
+                <attribute name="dir"/>
+
+                <sequential>
+                        <apply executable="native2ascii" dir="@{dir}" dest="@{dir}" failonerror="true" unless:true="${new.java.version}">
+                                <arg value="-encoding" />
+                                <arg value="utf8" />
+                                <srcfile/>
+                                <targetfile/>
+                                <fileset dir="@{dir}" includes="resources*.utf8"/>
+                                <globmapper from="*.utf8" to="*.properties"/>
+                        </apply>
+                        <copy todir="@{dir}" if:true="${new.java.version}">
+                                <fileset dir="@{dir}" includes="resources*.utf8"/>
+                                <globmapper from="*.utf8" to="*.properties"/>
+                        </copy>
+                </sequential>
+        </macrodef>
+
+	<target name="preproc" description="Preprocesses necessary files">
+                <preproc file="info/rlwhitcomb/util/Environment.javapp" outputExt=".java" nologo="true" verbose="true" format="UTF-8"
+                        define="PRODUCT_NAME=${product.name},APP_VERSION=${build.version},APP_BUILD=${build.number},IS_DEBUG_BUILD=false" />
+                <parallel>
+                        <generate-text-resources dir="info/rlwhitcomb/util" />
+                        <generate-text-resources dir="info/rlwhitcomb/csv" />
+                </parallel>
+	</target>
+
+	<target name="compile" depends="preproc" description="Compiles the java source">
+		<javac includeAntRuntime="false" createMissingPackageInfoClass="false">
+			<src path="net/iharder/b64"/>
+			<src path="info/rlwhitcomb/jarfile"/>
+			<src path="info/rlwhitcomb/annotations"/>
+			<src path="info/rlwhitcomb/util"/>
+			<src path="info/rlwhitcomb/csv"/>
+			<exclude name="**/package-info.java"/>
+			<classpath>
+				<pathelement path="."/>
+				<fileset dir="external-jars" includes="*.jar"/>
+			</classpath>
 		</javac>
 	</target>
 
-	<target name="jar" description="jar up the compiled class files">
-		<jar basedir="." destfile="anttasks.jar">
-			<include name="info/rlwhitcomb/ant/*.class" />
-			<include name="info/rlwhitcomb/preproc/*.class" />
+	<target name="jar" depends="compile" description="jar up the compiled class files">
+		<jar basedir="." destfile="${dest.jar}">
+			<include name="net/iharder/b64/*.class"/>
+			<include name="info/rlwhitcomb/jarfile/*.class"/>
+			<include name="info/rlwhitcomb/annotations/*.class"/>
+			<include name="info/rlwhitcomb/util/*.class"/>
+			<include name="info/rlwhitcomb/csv/*.class"/>
+			<include name="info/rlwhitcomb/**/*.properties"/>
 		</jar>
+	</target>
+
+	<target name="doc" depends="compile" description="Builds Javadoc">
+		<javadoc destdir="doc" access="private">
+			<arg value="-html4" if:true="${new.java.version}"/>
+			<arg value="--frames" if:true="${new.java.version}"/>
+			<link href="https://docs.oracle.com/javase/8/docs/api/"/>
+			<packageset dir=".">
+				<include name="net/iharder/b64"/>
+				<include name="info/rlwhitcomb/**"/>
+			</packageset>
+		</javadoc>
 	</target>
 
 	<target name="all" depends="compile,jar" description="Builds and jars everything"/>
 
-	<target name="install" depends="all" description="Installs the tasks into Ant runtime location">
-		<copy file="anttasks.jar" todir="${env.ANT_HOME}/lib"/>
-	</target>
-
 	<target name="clean" description="cleans all generated files">
 		<delete>
-			<fileset dir="." includes="anttasks.jar" />
-			<fileset dir="info/rlwhitcomb/ant" includes="*.class" />
-			<fileset dir="info/rlwhitcomb/preproc" includes="*.class" />
+			<fileset dir="." includes="${dest.jar}"/>
+			<fileset dir="net/iharder/b64" includes="*.class"/>
+			<fileset dir="info/rlwhitcomb/jarfile" includes="*.class"/>
+			<fileset dir="info/rlwhitcomb/annotations" includes="*.class"/>
+			<fileset dir="info/rlwhitcomb/util" includes="*.class"/>
+			<fileset dir="info/rlwhitcomb/csv" includes="*.class"/>
+                        <!-- Clean out the preprocessed files -->
+                        <fileset dir="." includes="**/*">
+                                <present targetdir=".">
+                                        <mapper type="glob" from="*.java" to="*.javapp"/>
+                                </present>
+                        </fileset>
+                        <fileset dir="." includes="**/*">
+                                <present targetdir=".">
+                                        <mapper type="glob" from="*.properties" to="*.utf8"/>
+                                </present>
+                        </fileset>
 		</delete>
+		<delete dir="doc"/>
 	</target>
 </project>
 
