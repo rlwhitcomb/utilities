@@ -7,9 +7,29 @@
 	<taskdef name="findfile" classname="info.rlwhitcomb.ant.FindTask" classpath="anttasks.jar"/>
 
 	<property environment="env"/>
+	<property file="build.properties"/>
+	<property name="csv.test.class" value="info.rlwhitcomb.csv.CSVTest"/>
 
 	<target name="all" description="Runs all extant tests.">
+		<delete file="TestPP.java"/>
 		<preproc dir="." processAsDirectory="true" recurseDirectories="true" nologo="true" verbose="plus"/>
+		<java classpath="${dest.jar}" classname="${csv.test.class}">
+			<arg value="-Qall"/>
+			<arg value="-Dspace"/>
+			<arg value="-8"/>
+			<arg value="test/data/test_all_quotes.dsv"/>
+		</java>
+		<java classpath="${dest.jar}" classname="${csv.test.class}">
+			<arg value="test/data/test_quote.dsv"/>
+			<arg value="-Qangle"/>
+			<arg value="-Dspace"/>
+		</java>
+		<java classpath="${dest.jar}" classname="${csv.test.class}">
+			<arg value="test/data/nonstandard_delims.csv"/>
+			<arg value="-d@"/>
+			<arg value="-r%"/>
+			<arg value="-I"/>
+		</java>
 	</target>
 
 </project>

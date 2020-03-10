@@ -1,0 +1,10 @@
+<abc> <def> <ghi>
+[jkl] [mno] [pqr]
+{stu} {vwx} {yz_}
+“ABC” “DEF” “GHI”
+‘jkl’ ‘mno’ ‘pqr’
+(stu) (vwx) (yz_)
+'abc' 'def' 'g\'i'
+"jkl" "mno" "p\"r"
+«stu» «vwx» «yz_»
+‹a c› ‹d f› ‹g i›
