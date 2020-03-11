@@ -72,12 +72,15 @@
 
 	<target name="compile" depends="preproc" description="Compiles the java source">
 		<javac includeAntRuntime="false" createMissingPackageInfoClass="false">
+			<src path="."/>
 			<src path="net/iharder/b64"/>
 			<src path="info/rlwhitcomb/jarfile"/>
 			<src path="info/rlwhitcomb/annotations"/>
 			<src path="info/rlwhitcomb/util"/>
 			<src path="info/rlwhitcomb/csv"/>
 			<exclude name="**/package-info.java"/>
+			<exclude name="**/preproc/*"/>
+			<exclude name="**/ant/*"/>
 			<classpath>
 				<pathelement path="."/>
 				<fileset dir="external-jars" includes="*.jar"/>
@@ -105,6 +108,9 @@
 				<include name="net/iharder/b64"/>
 				<include name="info/rlwhitcomb/**"/>
 			</packageset>
+                       <fileset dir=".">
+                                <include name="*.java" />
+                        </fileset>
 		</javadoc>
 	</target>
 
@@ -113,6 +119,7 @@
 	<target name="clean" description="cleans all generated files">
 		<delete>
 			<fileset dir="." includes="${dest.jar}"/>
+			<fileset dir="." includes="*.class"/>
 			<fileset dir="net/iharder/b64" includes="*.class"/>
 			<fileset dir="info/rlwhitcomb/jarfile" includes="*.class"/>
 			<fileset dir="info/rlwhitcomb/annotations" includes="*.class"/>
