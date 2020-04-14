@@ -31,6 +31,8 @@
  *	    Fix code for non-Windows platforms.
  *	09-Apr-2020 (rlwhitcomb)
  *	    Prepare for github.
+ *	14-Apr-2020 (rlwhitcomb)
+ *	    For multiple input targets, print the "target -> result"
  */
 package info.rlwhitcomb.util;
 
@@ -203,7 +205,9 @@ public class Which
 	    return DATE_FORMAT.format(fileTime);
 	}
 
-	private static void showFileInfo(File f, boolean showMore) {
+	private static void showFileInfo(String name, File f, boolean showTarget, boolean showMore) {
+	    if (showTarget)
+		System.out.print(name + " -> ");
 	    System.out.println(f.getPath());
 	    if (showMore) {
 		System.out.format("\t%1$s  %2$s%n", Num.fmt1(f.length(), 10), getFileTimeString(f));
@@ -217,6 +221,7 @@ public class Which
 	public static void main(String[] args) {
 	    boolean findAll = false;
 	    boolean showInfo = false;
+	    List<String> names = new ArrayList<>(args.length);
 
 	    // Evaluate all the options first
 	    for (String arg : args) {
@@ -232,21 +237,24 @@ public class Which
 			System.exit(1);
 		    }
 		}
+		else {
+		    names.add(arg);
+		}
 	    }
 
+	    boolean showTargetNameFirst = names.size() > 1;
+
 	    // Then evaluate the names one at a time
-	    for (String arg : args) {
-		if (Options.isOption(arg) == null) {
-		    if (findAll) {
-			for (File f : findAllExecutables(arg)) {
-			    showFileInfo(f, showInfo);
-			}
+	    for (String name : names) {
+		if (findAll) {
+		    for (File f : findAllExecutables(name)) {
+			showFileInfo(name, f, showTargetNameFirst, showInfo);
 		    }
-		    else {
-			File f = findExecutable(arg);
-			if (f != null) {
-			    showFileInfo(f, showInfo);
-			}
+		}
+		else {
+		    File f = findExecutable(name);
+		    if (f != null) {
+			showFileInfo(name, f, showTargetNameFirst, showInfo);
 		    }
 		}
 	    }

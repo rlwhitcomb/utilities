@@ -1,0 +1,6 @@
+#!/bin/bash
+if [ ! -e info/rlwhitcomb/tree/Tree.class ]; then
+    ant compile
+fi
+java info.rlwhitcomb.tree.Tree $@
+

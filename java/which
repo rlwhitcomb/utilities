@@ -1,0 +1,6 @@
+#!/bin/bash
+if [ ! -e info/rlwhitcomb/util/Which.class ]; then
+    ant compile
+fi
+java info.rlwhitcomb.util.Which $@
+

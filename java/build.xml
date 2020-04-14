@@ -65,8 +65,8 @@
                 <preproc file="info/rlwhitcomb/util/Environment.javapp" outputExt=".java" nologo="true" verbose="true" format="UTF-8"
                         define="PRODUCT_NAME=${product.name},APP_VERSION=${build.version},APP_BUILD=${build.number},IS_DEBUG_BUILD=false" />
                 <parallel>
-                        <generate-text-resources dir="info/rlwhitcomb/util" />
                         <generate-text-resources dir="info/rlwhitcomb/csv" />
+                        <generate-text-resources dir="info/rlwhitcomb/util" />
                 </parallel>
 	</target>
 
@@ -75,10 +75,11 @@
 			<compilerarg line="${compiler.args}"/>
 			<src path="."/>
 			<src path="net/iharder/b64"/>
-			<src path="info/rlwhitcomb/jarfile"/>
 			<src path="info/rlwhitcomb/annotations"/>
-			<src path="info/rlwhitcomb/util"/>
 			<src path="info/rlwhitcomb/csv"/>
+			<src path="info/rlwhitcomb/jarfile"/>
+			<src path="info/rlwhitcomb/tree"/>
+			<src path="info/rlwhitcomb/util"/>
 			<exclude name="**/package-info.java"/>
 			<exclude name="**/preproc/*"/>
 			<exclude name="**/ant/*"/>
@@ -92,10 +93,11 @@
 	<target name="jar" depends="compile" description="jar up the compiled class files">
 		<jar basedir="." destfile="${dest.jar}">
 			<include name="net/iharder/b64/*.class"/>
-			<include name="info/rlwhitcomb/jarfile/*.class"/>
 			<include name="info/rlwhitcomb/annotations/*.class"/>
-			<include name="info/rlwhitcomb/util/*.class"/>
 			<include name="info/rlwhitcomb/csv/*.class"/>
+			<include name="info/rlwhitcomb/jarfile/*.class"/>
+			<include name="info/rlwhitcomb/tree/*.class"/>
+			<include name="info/rlwhitcomb/util/*.class"/>
 			<include name="info/rlwhitcomb/**/*.properties"/>
 		</jar>
 	</target>
@@ -122,10 +124,11 @@
 			<fileset dir="." includes="${dest.jar}"/>
 			<fileset dir="." includes="*.class"/>
 			<fileset dir="net/iharder/b64" includes="*.class"/>
-			<fileset dir="info/rlwhitcomb/jarfile" includes="*.class"/>
 			<fileset dir="info/rlwhitcomb/annotations" includes="*.class"/>
-			<fileset dir="info/rlwhitcomb/util" includes="*.class"/>
 			<fileset dir="info/rlwhitcomb/csv" includes="*.class"/>
+			<fileset dir="info/rlwhitcomb/jarfile" includes="*.class"/>
+			<fileset dir="info/rlwhitcomb/tree" includes="*.class"/>
+			<fileset dir="info/rlwhitcomb/util" includes="*.class"/>
                         <!-- Clean out the preprocessed files -->
                         <fileset dir="." includes="**/*">
                                 <present targetdir=".">

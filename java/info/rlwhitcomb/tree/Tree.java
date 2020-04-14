@@ -29,6 +29,10 @@
  *	    First coding in Java.
  *	14-Apr-2020 (rlwhitcomb)
  *	    Add new filter options; fix compile warning.
+ *	14-Apr-2020 (rlwhitcomb)
+ *	    New warning message if input file/directory does not exist.
+ *	    Tweak some code.  Add "-help" output.  Add some Javadoc.
+ *	    Display full path name for top-level files.
  */
 package info.rlwhitcomb.tree;
 
@@ -69,14 +73,18 @@ public class Tree
 	    return sb.toString();
 	}
 
-	private static String singleBranch(int width) {
-	    return line(LLS, HS, SPC, width);
+	private static String branchPrefix(int width, boolean multi) {
+	    return line(multi ? LVTS : LLS, HS, SPC, width);
 	}
 
-	private static String multiBranch(int width) {
-	    return line(LVTS, HS, SPC, width);
+	private static String parentPrefix(int width, boolean continuation) {
+	    return CharUtil.padToWidth((continuation ? VS : SPC), width, SPC, Justification.LEFT);
 	}
 
+
+	/**
+	 * Enumeration for sort ordering (either by name, or other criteria).
+	 */
 	private static enum SortOrder
 	{
 		ASCENDING,
@@ -130,17 +138,15 @@ public class Tree
 
 		@Override
 		public int compare(File f1, File f2) {
+		    int RESULT = asc ? +1 : -1;
 		    boolean dir1 = f1.isDirectory();
 		    boolean dir2 = f2.isDirectory();
 		    int ret = 0;
 		    if (!dir1 && dir2)
-			ret = +1;
+			ret = RESULT;
 		    else if (dir1 && !dir2)
-			ret = -1;
-		    if (asc)
-			return ret;
-		    else
-			return -ret;
+			ret = -RESULT;
+		    return ret;
 		}
 	}
 
@@ -206,10 +212,11 @@ public class Tree
 	 * @param ancestors	The prefix to display according from grandparents up.
 	 * @param parent	The new prefix for our immediate parent (applied to children)
 	 * @param branch	The branch to display for this entry (according to my parent).
+	 * @param fullPath	Whether to display the full path for root files.
 	 */
-	private static void list(File file, String ancestors, String parent, String branch) {
-	    String baseName = file.getName();
-	    System.out.format("%s%s%s%n", ancestors, branch, baseName);
+	private static void list(File file, String ancestors, String parent, String branch, boolean fullPath) {
+	    String name = fullPath ? file.getPath() : file.getName();
+	    System.out.format("%s%s%s%n", ancestors, branch, name);
 
 	    if (file.isDirectory()) {
 		File[] files = file.listFiles(filter);
@@ -219,14 +226,53 @@ public class Tree
 
 		for (int i = 0; i < files.length; i++) {
 		    boolean last = i == files.length - 1;
-		    String newBranch = last ? singleBranch(INDENT) : multiBranch(INDENT);
-		    String newParent = CharUtil.padToWidth((last ? SPC : VS), INDENT, SPC, Justification.LEFT);
 		    File f = files[i];
-		    list(f, ancestors + parent, newParent, newBranch);
+		    list(f, ancestors + parent, parentPrefix(INDENT, !last), branchPrefix(INDENT, !last), false);
 		}
 	    }
 	}
 
+
+	private static final String[] help = {
+		"Usage: tree [options] file_or_directory_name(s)",
+		"",
+		" Where \"options\" can be:",
+		"\t-ascending  to sort by file name, alphabetically ascending",
+		"\t  (or -alpha, -asc, or -a)",
+		"\t-descending  sorts by name, descending order",
+		"\t  (or -Alpha, -desc, or -A)",
+		"\t-dir  sorts directories first, followed by files",
+		"\t  (or -directory, or -d)",
+		"\t-Dir  sorts files first, then directories",
+		"\t  (or -Directory, or -D)",
+		" Default is not to sort the output at all.",
+		"",
+		"\t-file  prints file names also (default is directories only)",
+		"\t  (or -files, -all, or -f)",
+		"\t-omit  (default) omits file names",
+		"\t  (or -o)",
+		"",
+		"\t-help  prints this message",
+		"",
+		" Note: options can be specified by \"-opt\" or \"--opt\"",
+		"  (or on Windows by \"/opt\").",
+		""
+	};
+
+	private static void usage(String... messages) {
+	    for (String message : messages) {
+		System.out.println(message);
+	    }
+	    for (String helpLine : help) {
+		System.out.println(helpLine);
+	    }
+	}
+
+
+	/**
+	 * Main program.
+	 * @param args The command line arguments.
+	 */
 	public static void main(String[] args) {
 	    boolean sortByFileName = false;
 	    boolean sortByDirectory = false;
@@ -259,12 +305,21 @@ public class Tree
 		else if (Options.matchesOption(arg, false, "omit", "o")) {
 		    omitFiles = true;
 		}
+		else if (Options.matchesOption(arg, true, "help", "usage", "u", "h", "?")) {
+		    usage();
+		    return;
+		}
 		else if (Options.isOption(arg) != null) {
 		    System.err.println("WARNING: Ignoring unknown option: \"" + arg + "\"");
 		}
 		else {
 		    argList.add(arg);
 		}
+	    }
+
+	    if (argList.isEmpty()) {
+		usage("ERROR: No input files or directories specified.", "");
+		return;
 	    }
 
 	    // Construct a comparator based on the desired sorting options
@@ -284,7 +339,13 @@ public class Tree
 	    filter = new FilterOutFiles(omitFiles);
 
 	    for (String arg : argList) {
-		list(new File(arg), "", "", "");
+		File f = new File(arg);
+		if (f.exists()) {
+		    list(f, "", "", "", true);
+		}
+		else {
+		    usage("WARNING: Ignoring non-existent file \"" + f.getPath() + "\"");
+		}
 	    }
 	}
 
