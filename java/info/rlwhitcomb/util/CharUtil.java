@@ -250,6 +250,8 @@
  *	    Make the new "getLocale" more friendly by allowing null input to produce the default.
  *	10-Mar-2020 (rlwhitcomb)
  *	    Prepare for GitHub.
+ *	14-Apr-2020 (rlwhitcomb)
+ *	    Another flavor of "padToWidth" that takes single char input and char padding.
  */
 
 package info.rlwhitcomb.util;
@@ -1052,6 +1054,20 @@ public class CharUtil
 	    if (input.length() >= Math.abs(width))
 		return input;
 	    return padToWidth(new StringBuilder(), input, width, pad, just).toString();
+	}
+
+
+	/**
+	 * Pad a given char to a certain width with padding char at the end.
+	 *
+	 * @param	input	Input character.
+	 * @param	width	The width to pad the input to.
+	 * @param	pad	The padding character.
+	 * @param	just	The justification for the padding.
+	 * @return		The padded string.
+	 */
+	public static String padToWidth(char input, int width, char pad, Justification just) {
+	    return padToWidth(Character.toString(input), width, pad, just);
 	}
 
 
