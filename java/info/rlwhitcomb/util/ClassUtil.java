@@ -65,6 +65,8 @@
  *	    Add method to compare objects with null checking.
  *	10-Mar-2020 (rlwhitcomb)
  *	    Prepare for GitHub.
+ *	14-Apr-2020 (rlwhitcomb)
+ *	    Rework code to avoid deprecated "Class.newInstance" method.
  */
 
 package info.rlwhitcomb.util;
@@ -176,7 +178,8 @@ public class ClassUtil
 	{
 	    Object obj = null;
 	    try {
-		obj = clazz.newInstance();
+		Constructor<?> constructor = clazz.getConstructor();
+		obj = constructor.newInstance();
 		if (obj != null) {
 		    Field[] fields = clazz.getDeclaredFields();
 		    Method[] methods = clazz.getDeclaredMethods();
@@ -321,6 +324,7 @@ public class ClassUtil
 		    }
 		}
 	    }
+	    catch (NoSuchMethodException nsme) { }
 	    catch (InstantiationException ie) { }
 	    catch (IllegalAccessException iae) { }
 	    return obj;
