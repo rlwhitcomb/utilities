@@ -27,10 +27,13 @@
  * History:
  *	09-Apr-2020 (rlwhitcomb)
  *	    First coding in Java.
+ *	14-Apr-2020 (rlwhitcomb)
+ *	    Add new filter options; fix compile warning.
  */
 package info.rlwhitcomb.tree;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -175,6 +178,29 @@ public class Tree
 
 
 	/**
+	 * File filter that either accepts only directories, or also regular files.
+	 */
+	private static class FilterOutFiles implements FileFilter
+	{
+		private final boolean directoriesOnly;
+
+		public FilterOutFiles(boolean filter) {
+		    this.directoriesOnly = filter;
+		}
+
+		@Override
+		public boolean accept(File path) {
+		    if (directoriesOnly)
+			return path.isDirectory();
+		    return true;
+		}
+	}
+
+	/** The filter to omit regular files or not. */
+	private static FileFilter filter = null;
+
+
+	/**
 	 * Recursively print one entry and descend into child directories.
 	 * @param file		The file/directory to display name (and directory contents).
 	 * @param ancestors	The prefix to display according from grandparents up.
@@ -186,7 +212,7 @@ public class Tree
 	    System.out.format("%s%s%s%n", ancestors, branch, baseName);
 
 	    if (file.isDirectory()) {
-		File[] files = file.listFiles();
+		File[] files = file.listFiles(filter);
 		if (sorter != null) {
 		    Arrays.sort(files, sorter);
 		}
@@ -204,17 +230,18 @@ public class Tree
 	public static void main(String[] args) {
 	    boolean sortByFileName = false;
 	    boolean sortByDirectory = false;
+	    boolean omitFiles = true;
 	    SortOrder nameOrder = SortOrder.ASCENDING;
 	    SortOrder directoryOrder = SortOrder.ASCENDING;
-	    List<String> argList = new ArrayList(args.length);
+	    List<String> argList = new ArrayList<>(args.length);
 
 	    // Scan the input arguments for options vs. file/directory specs
 	    for (String arg : args) {
-		if (Options.matchesOption(arg, false, "alpha", "ascending", "a")) {
+		if (Options.matchesOption(arg, false, "alpha", "ascending", "asc", "a")) {
 		    sortByFileName = true;
 		    nameOrder = SortOrder.ASCENDING;
 		}
-		else if (Options.matchesOption(arg, false, "Alpha", "descending", "A")) {
+		else if (Options.matchesOption(arg, false, "Alpha", "descending", "desc", "A")) {
 		    sortByFileName = true;
 		    nameOrder = SortOrder.DESCENDING;
 		}
@@ -225,6 +252,15 @@ public class Tree
 		else if (Options.matchesOption(arg, false, "Directory", "Dir", "D")) {
 		    sortByDirectory = true;
 		    directoryOrder = SortOrder.DESCENDING;
+		}
+		else if (Options.matchesOption(arg, false, "files", "file", "all", "f")) {
+		    omitFiles = false;
+		}
+		else if (Options.matchesOption(arg, false, "omit", "o")) {
+		    omitFiles = true;
+		}
+		else if (Options.isOption(arg) != null) {
+		    System.err.println("WARNING: Ignoring unknown option: \"" + arg + "\"");
 		}
 		else {
 		    argList.add(arg);
@@ -243,6 +279,9 @@ public class Tree
 	    else if (sortByDirectory) {
 		sorter = new DirectoryComparator(directoryOrder);
 	    }
+
+	    // Construct the filter for files + directories, or only directories
+	    filter = new FilterOutFiles(omitFiles);
 
 	    for (String arg : argList) {
 		list(new File(arg), "", "", "");
