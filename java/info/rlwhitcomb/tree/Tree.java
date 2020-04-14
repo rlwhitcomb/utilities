@@ -35,6 +35,8 @@
  *	    Display full path name for top-level files.
  *	14-Apr-2020 (rlwhitcomb)
  *	    Don't print full usage for warnings.
+ *	14-Apr-2020 (rlwhitcomb)
+ *	    Tweak the help output.
  */
 package info.rlwhitcomb.tree;
 
@@ -258,6 +260,9 @@ public class Tree
 		"",
 		" Note: options can be specified by \"-opt\" or \"--opt\"",
 		"  (or on Windows by \"/opt\").",
+		"",
+		" Also note: all options are parsed before any files are processed,",
+		"  so later options will override earlier ones for the entire output.",
 		""
 	};
 
