@@ -33,6 +33,8 @@
  *	    New warning message if input file/directory does not exist.
  *	    Tweak some code.  Add "-help" output.  Add some Javadoc.
  *	    Display full path name for top-level files.
+ *	14-Apr-2020 (rlwhitcomb)
+ *	    Don't print full usage for warnings.
  */
 package info.rlwhitcomb.tree;
 
@@ -344,7 +346,7 @@ public class Tree
 		    list(f, "", "", "", true);
 		}
 		else {
-		    usage("WARNING: Ignoring non-existent file \"" + f.getPath() + "\"");
+		    System.err.println("WARNING: Ignoring non-existent file \"" + f.getPath() + "\"");
 		}
 	    }
 	}
