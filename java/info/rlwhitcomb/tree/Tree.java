@@ -37,6 +37,8 @@
  *	    Don't print full usage for warnings.
  *	14-Apr-2020 (rlwhitcomb)
  *	    Tweak the help output.
+ *	14-Apr-2020 (rlwhitcomb)
+ *	    New options for case-sensitive and -insensitive sorting.
  */
 package info.rlwhitcomb.tree;
 
@@ -96,27 +98,41 @@ public class Tree
 	}
 
 	/**
+	 * Enumeration for case-sensitivity for alphabetic sorting.
+	 */
+	private static enum CaseSensitivity
+	{
+		MIXED_CASE,
+		CASE_INSENSITIVE
+	}
+
+	/**
 	 * Comparator for alphabetic sorting by file name.
 	 */
 	private static class FileNameComparator implements Comparator<File>
 	{
 		private final boolean asc;
+		private final boolean caseSensitive;
 
 		/**
 		 * Construct according to the desired direction of the sort.
 		 *
 		 * @param order	The sort order to use.
+		 * @param casing The mode to use for case differences.
 		 */
-		public FileNameComparator(SortOrder order) {
-		    this.asc = order == SortOrder.ASCENDING;;
+		public FileNameComparator(SortOrder order, CaseSensitivity casing) {
+		    this.asc = order == SortOrder.ASCENDING;
+		    this.caseSensitive = casing == CaseSensitivity.MIXED_CASE;
 		}
 
 		@Override
 		public int compare(File f1, File f2) {
+		    String name1 = caseSensitive ? f1.getPath() : f1.getPath().toLowerCase();
+		    String name2 = caseSensitive ? f2.getPath() : f2.getPath().toLowerCase();
 		    if (asc)
-			return f1.getPath().compareTo(f2.getPath());
+			return name1.compareTo(name2);
 		    else
-			return -(f1.getPath().compareTo(f2.getPath()));
+			return name2.compareTo(name1);
 		}
 	}
 
@@ -249,6 +265,12 @@ public class Tree
 		"\t  (or -directory, or -d)",
 		"\t-Dir  sorts files first, then directories",
 		"\t  (or -Directory, or -D)",
+		"\t-mixed  sorts file names alphabetically, in mixed case",
+		"\t  (meaning \"M\" is different than \"m\")",
+		"\t  (or -mixedcase, -sensitive, -mix, -m, -s)",
+		"\t-case  sort file names alphabetically, without regard to case",
+		"\t  (meaning \"M\" sorts the same as \"m\")",
+		"\t  (or -caseinsensitive, -insensitive, -case, -c, or -i)",
 		" Default is not to sort the output at all.",
 		"",
 		"\t-file  prints file names also (default is directories only)",
@@ -286,6 +308,7 @@ public class Tree
 	    boolean omitFiles = true;
 	    SortOrder nameOrder = SortOrder.ASCENDING;
 	    SortOrder directoryOrder = SortOrder.ASCENDING;
+	    CaseSensitivity casing = CaseSensitivity.MIXED_CASE;
 	    List<String> argList = new ArrayList<>(args.length);
 
 	    // Scan the input arguments for options vs. file/directory specs
@@ -306,11 +329,19 @@ public class Tree
 		    sortByDirectory = true;
 		    directoryOrder = SortOrder.DESCENDING;
 		}
-		else if (Options.matchesOption(arg, false, "files", "file", "all", "f")) {
+		else if (Options.matchesOption(arg, true, "files", "file", "all", "f")) {
 		    omitFiles = false;
 		}
-		else if (Options.matchesOption(arg, false, "omit", "o")) {
+		else if (Options.matchesOption(arg, true, "omit", "o")) {
 		    omitFiles = true;
+		}
+		else if (Options.matchesOption(arg, true, "mixedcase", "sensitive", "mixed", "mix", "m", "s")) {
+		    casing = CaseSensitivity.MIXED_CASE;
+		    sortByFileName = true;
+		}
+		else if (Options.matchesOption(arg, true, "caseinsensitive", "insensitive", "case", "c", "i")) {
+		    casing = CaseSensitivity.CASE_INSENSITIVE;
+		    sortByFileName = true;
 		}
 		else if (Options.matchesOption(arg, true, "help", "usage", "u", "h", "?")) {
 		    usage();
@@ -332,11 +363,11 @@ public class Tree
 	    // Construct a comparator based on the desired sorting options
 	    if (sortByFileName && sortByDirectory) {
 		Comparator<File> c1 = new DirectoryComparator(directoryOrder);
-		Comparator<File> c2 = new FileNameComparator(nameOrder);
+		Comparator<File> c2 = new FileNameComparator(nameOrder, casing);
 		sorter = new DualComparator(c1, c2);
 	    }
 	    else if (sortByFileName) {
-		sorter = new FileNameComparator(nameOrder);
+		sorter = new FileNameComparator(nameOrder, casing);
 	    }
 	    else if (sortByDirectory) {
 		sorter = new DirectoryComparator(directoryOrder);
