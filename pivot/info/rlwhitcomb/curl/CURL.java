@@ -117,7 +117,9 @@ public class CURL
 		@Override
 		public boolean process(final String line) {
 		    ApplicationContext.queueCallback(() -> {
-			outputTextArea.setText(outputTextArea.getText() + line + "\n");
+			int length = outputTextArea.getCharacterCount();
+			outputTextArea.insertText(line, length);
+			outputTextArea.insertText("\n", length + line.length());
 		    });
 		    return true;
 		}
