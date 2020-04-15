@@ -1,0 +1,10 @@
+export ANT_HOME=~/Projects/apache-ant-1.10.5
+export PATH=$ANT_HOME/bin:$PATH
+export PIVOT_HOME=~/Projects/pivot/trunk
+CLASSPATH=.:~/Projects/utilities/java
+for i in $PIVOT_HOME/lib/*.jar
+do
+    CLASSPATH=$CLASSPATH:$i
+done
+export CLASSPATH
+

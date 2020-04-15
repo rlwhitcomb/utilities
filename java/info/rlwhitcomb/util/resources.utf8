@@ -58,6 +58,8 @@
 #	    Revise the default copyright years.
 #	10-Mar-2020 (rlwhitcomb)
 #	    Prepare for GitHub.
+#	15-Apr-2020 (rlwhitcomb)
+#	    New error message from ClassUtil.
 #
 
 #
@@ -146,6 +148,7 @@ fileutil.fileTooBig	= The file's size of %1$d is too big to read.
 # From ClassUtil.java
 #
 class.optionFieldSet	= Option field '%1$s' is set but not supported.
+class.nullObject	= Null input not allowed.
 
 #
 # From SysConsole.java

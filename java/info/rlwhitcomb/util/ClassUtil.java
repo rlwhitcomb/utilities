@@ -67,6 +67,8 @@
  *	    Prepare for GitHub.
  *	14-Apr-2020 (rlwhitcomb)
  *	    Rework code to avoid deprecated "Class.newInstance" method.
+ *	15-Apr-2020 (rlwhitcomb)
+ *	    New method to turn a class into a resource path.
  */
 
 package info.rlwhitcomb.util;
@@ -475,6 +477,22 @@ public class ClassUtil
 		return true;
 	    }
 	    return false;
+	}
+
+
+	/**
+	 * Get the package name of the given object's class and turn it into
+	 * a resource path (for the TCCL).
+	 *
+	 * @param obj	The object whose class is to be used as a reference for resources.
+	 * @return	The package name with "." changed to "/", and with leading and
+	 *		trailing "/" (suitable for adding specific resource names).
+	 */
+	public static String getResourcePath(Object obj) {
+	    if (obj == null)
+		throw new IllegalArgumentException(Intl.getString("util#class.nullObject"));
+	    String path = obj.getClass().getPackage().getName().replace('.', '/');
+	    return String.format("/%1$s/", path);
 	}
 
 

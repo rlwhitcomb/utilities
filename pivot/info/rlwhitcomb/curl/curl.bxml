@@ -1,0 +1,106 @@
+<!-- ==========================================================================
+
+ The MIT License (MIT)
+
+  Copyright (c) 2016-2018,2020 Roger L. Whitcomb.
+
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+
+ The above copyright notice and this permission notice shall be included in all
+ copies or substantial portions of the Software.
+
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ SOFTWARE.
+
+ ========================================================================== -->
+<Window bxml:id="mainWindow"
+    title="CURL"
+    maximized="true"
+    xmlns:bxml="http://pivot.apache.org/bxml"
+    xmlns:content="org.apache.pivot.wtk.content"
+    xmlns="org.apache.pivot.wtk">
+
+    <TablePane>
+	<columns>
+	    <TablePane.Column width="1*"/>
+	</columns>
+	<rows>
+	    <TablePane.Row height="-1">
+		<BoxPane orientation="horizontal" styles="{padding:4, spacing:20, verticalAlignment:'center'}">
+		    <BoxPane styles="{verticalAlignment:'center'}">
+			<Label text="Content-type:"/>
+			<ListButton bxml:id="contentTypeList"
+				listData="['application/html', 'application/json', 'application/sql', 'application/xml', 'text/csv', 'text/html', 'text/xml', 'plain']"
+				selectedIndex="1" />
+		    </BoxPane>
+		    <BoxPane styles="{verticalAlignment:'center'}">
+			<Label text="Request:"/>
+			<ListButton bxml:id="requestType"
+				    listData="['GET', 'HEAD', 'POST', 'PUT', 'DELETE', 'TRACE']"
+				    selectedIndex="0" />
+		    </BoxPane>
+		    <BoxPane styles="{verticalAlignment:'center'}">
+			<Label text="Header:"/>
+			<TextInput bxml:id="headerInput" prompt="[Header]" textSize="40"/>
+		    </BoxPane>
+		    <Checkbox bxml:id="silentCheck" buttonData="Silent?" selected="true"/>
+		</BoxPane>
+	    </TablePane.Row>
+	    <TablePane.Row height="-1">
+		<BoxPane orientation="horizontal" styles="{padding:4, verticalAlignment:'center'}">
+		    <Label text="URL:"/>
+		    <TextInput bxml:id="urlInput" prompt="[URL]" textSize="80"/>
+		</BoxPane>
+	    </TablePane.Row>
+	    <TablePane.Row height="1*">
+		<Border title="Data" styles="{padding:4}">
+		    <StackPane>
+			<ScrollPane horizontalScrollBarPolicy="fill" verticalScrollBarPolicy="fill_to_capacity" >
+			    <TextArea bxml:id="inputTextArea"/>
+			</ScrollPane>
+			<GridPane bxml:id="activityGrid" columnCount="3" visible="false">
+			    <GridPane.Row>
+				<GridPane.Filler />
+				<GridPane.Filler />
+				<GridPane.Filler />
+			    </GridPane.Row>
+			    <GridPane.Row>
+				<GridPane.Filler />
+				<ActivityIndicator bxml:id="indicator" active="false" preferredHeight="100"/>
+				<GridPane.Filler />
+			    </GridPane.Row>
+			    <GridPane.Row>
+				<GridPane.Filler />
+				<GridPane.Filler />
+				<GridPane.Filler />
+			    </GridPane.Row>
+			</GridPane>
+		    </StackPane>
+		</Border>
+	    </TablePane.Row>
+	    <TablePane.Row height="-1">
+		<BoxPane orientation="horizontal" styles="{padding:4, spacing:20, verticalAlignment:'center', horizontalAlignment:'center'}">
+		    <PushButton bxml:id="goButton" buttonData="GO!" styles="{font:{size:16, bold:true}}" preferredWidth="60"/>
+		</BoxPane>
+	    </TablePane.Row>
+	    <TablePane.Row height="1*">
+		<Border title="Result" styles="{padding:4}">
+		    <ScrollPane horizontalScrollBarPolicy="fill" verticalScrollBarPolicy="fill_to_capacity" >
+			<TextArea bxml:id="outputTextArea"/>
+		    </ScrollPane>
+		</Border>
+	    </TablePane.Row>
+	</rows>
+    </TablePane>
+
+</Window>
