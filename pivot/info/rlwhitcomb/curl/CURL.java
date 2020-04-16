@@ -39,6 +39,9 @@
  *	    "Go" button. Add an entry field for extra "--header" information.
  *	14-Apr-2020 (rlwhitcomb)
  *	    Tweaks for GitHub.
+ *	15-Apr-2020 (rlwhitcomb)
+ *	    Speedup output display. Refactor code a bit.
+ *	    Add some more keyboard shortcuts.
  */
 package info.rlwhitcomb.curl;
 
@@ -63,6 +66,16 @@ import info.rlwhitcomb.util.Which;
 /**
  * A GUI front-end for the <tt>"curl"</tt> command-line utility.
  * <p>Useful for doing basic testing on web services.
+ * <p> Ctrl-&lt;key&gt; will nagivate to the appropriate form field:
+ * <ul><li>Ctrl-C (or Ctrl-T) to "Content Type"</li>
+ * <li>Ctrl-R to "Request"</li>
+ * <li>Ctrl-H to "Header"</li>
+ * <li>Ctrl-S to "Silent"</li>
+ * <li>Ctrl-L (or Ctrl-U) to "URL"</li>
+ * <li>Ctrl-I to "Data" (Input)</li>
+ * <li>Ctrl-O to "Result" (Output)</li>
+ * <li>Ctrl-G to "Go!" button</li>
+ * </ul>
  */
 public class CURL
 	implements Application
@@ -84,11 +97,11 @@ public class CURL
 	@BXML private ActivityIndicator indicator;
 
 
-	private class KeyPressListener implements ComponentKeyListener
+	private class KeyPressButtonListener implements ComponentKeyListener
 	{
 		private PushButton buttonToPress;
 
-		public KeyPressListener(PushButton button) {
+		public KeyPressButtonListener(PushButton button) {
 		    buttonToPress = button;
 		}
 
@@ -97,6 +110,49 @@ public class CURL
 		    if (keyCode == Keyboard.KeyCode.ENTER) {
 			buttonToPress.press();
 			return true;
+		    }
+		    return false;
+		}
+	}
+
+	private class KeyPressListener implements ComponentKeyListener
+	{
+		@Override
+		public boolean keyPressed(Component component, int keyCode, Keyboard.KeyLocation keyLocation) {
+		    if (Keyboard.isPressed(Keyboard.Modifier.CTRL)) {
+			Component focusComponent = null;
+			switch (keyCode) {
+			    case Keyboard.KeyCode.L:
+			    case Keyboard.KeyCode.U:
+				focusComponent = urlInput;
+				break;
+			    case Keyboard.KeyCode.H:
+				focusComponent = headerInput;
+				break;
+			    case Keyboard.KeyCode.C:
+			    case Keyboard.KeyCode.T:
+				focusComponent = contentTypeList;
+				break;
+			    case Keyboard.KeyCode.R:
+				focusComponent = requestType;
+				break;
+			    case Keyboard.KeyCode.S:
+				focusComponent = silentCheck;
+				break;
+			    case Keyboard.KeyCode.G:
+				focusComponent = goButton;
+				break;
+			    case Keyboard.KeyCode.I:
+				focusComponent = inputTextArea;
+				break;
+			    case Keyboard.KeyCode.O:
+				focusComponent = outputTextArea;
+				break;
+			}
+			if (focusComponent != null) {
+			    focusComponent.requestFocus();
+			    return true;
+			}
 		    }
 		    return false;
 		}
@@ -171,27 +227,25 @@ public class CURL
 	}
 
 
+	private void setActive(boolean active) {
+	    indicator.setActive(active);
+	    activityGrid.setVisible(active);
+	}
+
 	private void handleCURLQuery() {
 	    outputTextArea.setText("");
-
-	    activityGrid.setVisible(true);
-	    indicator.setActive(true);
+	    setActive(true);
 
 	    CURLTask task = new CURLTask();
 	    TaskListener<Void> taskListener = new TaskListener<Void>() {
-		private void cleanup() {
-		    indicator.setActive(false);
-		    activityGrid.setVisible(false);
-		}
-
 		@Override
 		public void taskExecuted(Task<Void> task) {
-		    cleanup();
+		    setActive(false);
 		}
 
 		@Override
 		public void executeFailed(Task<Void> task) {
-		    cleanup();
+		    setActive(false);
 		}
 	    };
 	    task.execute(new TaskAdapter<Void>(taskListener));
@@ -207,7 +261,8 @@ public class CURL
 		serializer.bind(this);
 
 		goButton.getButtonPressListeners().add((button) -> handleCURLQuery());
-		urlInput.getComponentKeyListeners().add(new KeyPressListener(goButton));
+		urlInput.getComponentKeyListeners().add(new KeyPressButtonListener(goButton));
+		mainWindow.getComponentKeyListeners().add(0, new KeyPressListener());
 
 		mainWindow.open(display);
 
