@@ -39,6 +39,8 @@
  *	    Tweak the help output.
  *	14-Apr-2020 (rlwhitcomb)
  *	    New options for case-sensitive and -insensitive sorting.
+ *	26-May-2020 (rlwhitcomb)
+ *	    Add coloring to the output.
  */
 package info.rlwhitcomb.tree;
 
@@ -50,6 +52,7 @@ import java.util.Comparator;
 import java.util.List;
 import info.rlwhitcomb.util.CharUtil;
 import static info.rlwhitcomb.util.CharUtil.Justification;
+import static info.rlwhitcomb.util.ConsoleColor.*;
 import info.rlwhitcomb.util.Options;
 
 /**
@@ -236,7 +239,7 @@ public class Tree
 	 */
 	private static void list(File file, String ancestors, String parent, String branch, boolean fullPath) {
 	    String name = fullPath ? file.getPath() : file.getName();
-	    System.out.format("%s%s%s%n", ancestors, branch, name);
+	    System.out.format("%s%s%s%s%s%s%n", CYAN, ancestors, branch, BLACK_BOLD, name, RESET);
 
 	    if (file.isDirectory()) {
 		File[] files = file.listFiles(filter);
