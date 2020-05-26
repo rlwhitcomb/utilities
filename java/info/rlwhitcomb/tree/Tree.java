@@ -52,6 +52,7 @@ import java.util.Comparator;
 import java.util.List;
 import info.rlwhitcomb.util.CharUtil;
 import static info.rlwhitcomb.util.CharUtil.Justification;
+import info.rlwhitcomb.util.ConsoleColor;
 import static info.rlwhitcomb.util.ConsoleColor.*;
 import info.rlwhitcomb.util.Options;
 
@@ -239,9 +240,11 @@ public class Tree
 	 */
 	private static void list(File file, String ancestors, String parent, String branch, boolean fullPath) {
 	    String name = fullPath ? file.getPath() : file.getName();
-	    System.out.format("%s%s%s%s%s%s%n", CYAN, ancestors, branch, BLACK_BOLD, name, RESET);
+	    boolean isDirectory = file.isDirectory();
+	    ConsoleColor nameEmphasis = isDirectory ? BLACK_BOLD : BLACK_BRIGHT;
+	    System.out.format("%s%s%s%s%s%s%n", GREEN, ancestors, branch, nameEmphasis, name, RESET);
 
-	    if (file.isDirectory()) {
+	    if (isDirectory) {
 		File[] files = file.listFiles(filter);
 		if (sorter != null) {
 		    Arrays.sort(files, sorter);
