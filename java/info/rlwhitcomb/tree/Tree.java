@@ -41,6 +41,8 @@
  *	    New options for case-sensitive and -insensitive sorting.
  *	26-May-2020 (rlwhitcomb)
  *	    Add coloring to the output.
+ *	    Add option to show hidden files and hide by default;
+ *	    and tweak coloring for file attributes.
  */
 package info.rlwhitcomb.tree;
 
@@ -213,13 +215,19 @@ public class Tree
 	private static class FilterOutFiles implements FileFilter
 	{
 		private final boolean directoriesOnly;
+		private final boolean showHidden;
 
-		public FilterOutFiles(boolean filter) {
+		public FilterOutFiles(boolean filter, boolean hidden) {
 		    this.directoriesOnly = filter;
+		    this.showHidden = hidden;
 		}
 
 		@Override
 		public boolean accept(File path) {
+		    if (path.isHidden()) {
+			if (!showHidden)
+			    return false;
+		    }
 		    if (directoriesOnly)
 			return path.isDirectory();
 		    return true;
@@ -241,7 +249,17 @@ public class Tree
 	private static void list(File file, String ancestors, String parent, String branch, boolean fullPath) {
 	    String name = fullPath ? file.getPath() : file.getName();
 	    boolean isDirectory = file.isDirectory();
-	    ConsoleColor nameEmphasis = isDirectory ? BLACK_BOLD : BLACK_BRIGHT;
+	    ConsoleColor nameEmphasis = BLACK_BOLD;
+	    if (!isDirectory) {
+		if (file.isHidden())
+		    nameEmphasis = RED;
+		else if (file.canExecute())
+		    nameEmphasis = MAGENTA_BOLD;
+		else if (file.canWrite())
+		    nameEmphasis = BLACK_BRIGHT;
+		else
+		    nameEmphasis = BLUE;
+	    }
 	    System.out.format("%s%s%s%s%s%s%n", GREEN, ancestors, branch, nameEmphasis, name, RESET);
 
 	    if (isDirectory) {
@@ -284,7 +302,11 @@ public class Tree
 		"\t-omit  (default) omits file names",
 		"\t  (or -o)",
 		"",
+		"\t-hidden  shows hidden directories / files",
+		"\t  (or -hid, -h, -show, or -s)",
+		"",
 		"\t-help  prints this message",
+		"\t  (or -usage, -u, or -?)",
 		"",
 		" Note: options can be specified by \"-opt\" or \"--opt\"",
 		"  (or on Windows by \"/opt\").",
@@ -312,6 +334,7 @@ public class Tree
 	    boolean sortByFileName = false;
 	    boolean sortByDirectory = false;
 	    boolean omitFiles = true;
+	    boolean showHidden = false;
 	    SortOrder nameOrder = SortOrder.ASCENDING;
 	    SortOrder directoryOrder = SortOrder.ASCENDING;
 	    CaseSensitivity casing = CaseSensitivity.MIXED_CASE;
@@ -349,7 +372,10 @@ public class Tree
 		    casing = CaseSensitivity.CASE_INSENSITIVE;
 		    sortByFileName = true;
 		}
-		else if (Options.matchesOption(arg, true, "help", "usage", "u", "h", "?")) {
+		else if (Options.matchesOption(arg, true, "hidden", "hid", "show", "h", "s")) {
+		    showHidden = true;
+		}
+		else if (Options.matchesOption(arg, true, "help", "usage", "u", "?")) {
 		    usage();
 		    return;
 		}
@@ -380,7 +406,7 @@ public class Tree
 	    }
 
 	    // Construct the filter for files + directories, or only directories
-	    filter = new FilterOutFiles(omitFiles);
+	    filter = new FilterOutFiles(omitFiles, showHidden);
 
 	    for (String arg : argList) {
 		File f = new File(arg);
