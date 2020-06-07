@@ -254,13 +254,13 @@ public class Tree
 		if (file.isHidden())
 		    nameEmphasis = RED;
 		else if (file.canExecute())
-		    nameEmphasis = MAGENTA_BOLD;
+		    nameEmphasis = GREEN_BOLD_BRIGHT;
 		else if (file.canWrite())
-		    nameEmphasis = BLACK_BRIGHT;
+		    nameEmphasis = BLACK;
 		else
-		    nameEmphasis = BLUE;
+		    nameEmphasis = BLUE_BOLD;
 	    }
-	    System.out.format("%s%s%s%s%s%s%n", GREEN, ancestors, branch, nameEmphasis, name, RESET);
+	    System.out.format("%s%s%s%s%s%s%n", BLACK_BRIGHT, ancestors, branch, nameEmphasis, name, RESET);
 
 	    if (isDirectory) {
 		File[] files = file.listFiles(filter);
