@@ -43,11 +43,16 @@
  *	    Add coloring to the output.
  *	    Add option to show hidden files and hide by default;
  *	    and tweak coloring for file attributes.
+ *	16-Jun-2020 (rlwhitcomb)
+ *	    Use Files method to probe the file type and change color
+ *	    based on it.
  */
 package info.rlwhitcomb.tree;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -250,28 +255,95 @@ public class Tree
 	    String name = fullPath ? file.getPath() : file.getName();
 	    boolean isDirectory = file.isDirectory();
 	    ConsoleColor nameEmphasis = BLACK_BOLD;
+	    String type = null, typeDisplay = "";
 	    if (!isDirectory) {
-		if (file.isHidden())
+		try {
+		    type = Files.probeContentType(file.toPath());
+		} catch (IOException ioe) {
+		    typeDisplay = " <unavailable>";
+		}
+		if (file.isHidden()) {
 		    nameEmphasis = RED;
-		else if (file.canExecute())
+		}
+		else if (file.canExecute()) {
 		    nameEmphasis = GREEN_BOLD_BRIGHT;
-		else if (file.canWrite())
-		    nameEmphasis = BLACK;
-		else
-		    nameEmphasis = BLUE_BOLD;
+		}
+		else if (file.canWrite()) {
+		    if (type == null) {
+			nameEmphasis = BLACK;
+		    }
+		    else {
+			String[] typeParts = type.split("/");
+			switch (typeParts[0]) {
+			    case "text":
+				switch (typeParts[1]) {
+				    case "csv":
+					nameEmphasis = MAGENTA;
+					break;
+				    default:
+					nameEmphasis = BLUE_BOLD;
+					break;
+				}
+				break;
+			    case "application":
+				switch (typeParts[1]) {
+				    case "xml":
+				    case "json":
+					nameEmphasis = MAGENTA;
+					break;
+				    case "java-archive":
+				    case "zip":
+				    case "pdf":
+					nameEmphasis = RED_BRIGHT;
+					break;
+				    case "x-msdownload":
+					nameEmphasis = GREEN_BOLD_BRIGHT;
+					break;
+				    case "msword":
+					nameEmphasis = BLUE_BOLD;
+					break;
+				    default:
+					nameEmphasis = RED_BRIGHT;
+					typeDisplay = typeParts[1];
+					break;
+				}
+				break;
+			    case "image":
+				nameEmphasis = YELLOW_BOLD;
+				break;
+			    case "audio":
+				nameEmphasis = GREEN_UNDERLINED;
+				typeDisplay = typeParts[1];
+				break;
+			    default:
+				nameEmphasis = BLACK;
+				typeDisplay = type;
+				break;
+			}
+		    }
+		}
+		else {
+		    nameEmphasis = CYAN_BOLD;
+		}
 	    }
-	    System.out.format("%s%s%s%s%s%s%n", BLACK_BRIGHT, ancestors, branch, nameEmphasis, name, RESET);
+	    if (typeDisplay.isEmpty()) {
+		System.out.format("%s%s%s%s%s%s%n", BLACK_BRIGHT, ancestors, branch, nameEmphasis, name, RESET);
+	    } else {
+		System.out.format("%s%s%s%s%s%s (%s)%n", BLACK_BRIGHT, ancestors, branch, nameEmphasis, name, RESET, typeDisplay);
+	    }
 
 	    if (isDirectory) {
 		File[] files = file.listFiles(filter);
-		if (sorter != null) {
-		    Arrays.sort(files, sorter);
-		}
+		if (files != null) {
+		    if (sorter != null) {
+			Arrays.sort(files, sorter);
+		    }
 
-		for (int i = 0; i < files.length; i++) {
-		    boolean last = i == files.length - 1;
-		    File f = files[i];
-		    list(f, ancestors + parent, parentPrefix(INDENT, !last), branchPrefix(INDENT, !last), false);
+		    for (int i = 0; i < files.length; i++) {
+			boolean last = i == files.length - 1;
+			File f = files[i];
+			list(f, ancestors + parent, parentPrefix(INDENT, !last), branchPrefix(INDENT, !last), false);
+		    }
 		}
 	    }
 	}
