@@ -71,7 +71,7 @@
 	</target>
 
 	<target name="compile" depends="preproc" description="Compiles the java source">
-		<javac includeAntRuntime="false" createMissingPackageInfoClass="false">
+		<javac includeAntRuntime="false" createMissingPackageInfoClass="false" encoding="utf-8">
 			<compilerarg line="${compiler.args}"/>
 			<src path="."/>
 			<src path="net/iharder/b64"/>
