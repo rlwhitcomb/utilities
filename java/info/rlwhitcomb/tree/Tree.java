@@ -49,6 +49,8 @@
  *	14-Jul-2020 (rlwhitcomb)
  *	    Implement option to not colorize the output if not supported
  *	    by the O/S (Windows, I'm looking at you!).
+ *	    Display canonical path of starting directory (like "tree"
+ *	    on Windows).
  */
 package info.rlwhitcomb.tree;
 
@@ -65,6 +67,7 @@ import static info.rlwhitcomb.util.CharUtil.Justification;
 import info.rlwhitcomb.util.ConsoleColor;
 import static info.rlwhitcomb.util.ConsoleColor.*;
 import info.rlwhitcomb.util.Environment;
+import info.rlwhitcomb.util.ExceptionUtil;
 import info.rlwhitcomb.util.Options;
 
 /**
@@ -508,7 +511,12 @@ public class Tree
 	    for (String arg : argList) {
 		File f = new File(arg);
 		if (f.exists()) {
-		    list(f, "", "", "", true);
+		    try {
+			list(f.getCanonicalFile(), "", "", "", true);
+		    } catch (IOException ioe) {
+			System.err.println("ERROR: Unable to get canonical name for \"" + arg + "\": "
+				+ ExceptionUtil.toString(ioe));
+		    }
 		}
 		else {
 		    System.err.println("WARNING: Ignoring non-existent file \"" + f.getPath() + "\"");
