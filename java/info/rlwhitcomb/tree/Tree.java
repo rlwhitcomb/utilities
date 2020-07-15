@@ -46,6 +46,9 @@
  *	16-Jun-2020 (rlwhitcomb)
  *	    Use Files method to probe the file type and change color
  *	    based on it.
+ *	14-Jul-2020 (rlwhitcomb)
+ *	    Implement option to not colorize the output if not supported
+ *	    by the O/S (Windows, I'm looking at you!).
  */
 package info.rlwhitcomb.tree;
 
@@ -61,10 +64,11 @@ import info.rlwhitcomb.util.CharUtil;
 import static info.rlwhitcomb.util.CharUtil.Justification;
 import info.rlwhitcomb.util.ConsoleColor;
 import static info.rlwhitcomb.util.ConsoleColor.*;
+import info.rlwhitcomb.util.Environment;
 import info.rlwhitcomb.util.Options;
 
 /**
- * Draw a directory tree.
+ * Draw a directory tree on the console.
  */
 public class Tree
 {
@@ -81,6 +85,10 @@ public class Tree
 
 	/** The amount each directory level is indented. */
 	private static final int INDENT = 4;
+
+	/** Flag to say we will use color on output. */
+	private static boolean useColoring = ! Environment.isWindows();
+
 
 	private static String line(char left, char mid, char right, int width) {
 	    StringBuilder sb = new StringBuilder(width);
@@ -326,10 +334,18 @@ public class Tree
 		    nameEmphasis = CYAN_BOLD;
 		}
 	    }
-	    if (typeDisplay.isEmpty()) {
-		System.out.format("%s%s%s%s%s%s%n", BLACK_BRIGHT, ancestors, branch, nameEmphasis, name, RESET);
+	    if (useColoring) {
+		if (typeDisplay.isEmpty()) {
+		    System.out.format("%s%s%s%s%s%s%n", BLACK_BRIGHT, ancestors, branch, nameEmphasis, name, RESET);
+		} else {
+		    System.out.format("%s%s%s%s%s%s (%s)%n", BLACK_BRIGHT, ancestors, branch, nameEmphasis, name, RESET, typeDisplay);
+		}
 	    } else {
-		System.out.format("%s%s%s%s%s%s (%s)%n", BLACK_BRIGHT, ancestors, branch, nameEmphasis, name, RESET, typeDisplay);
+		if (typeDisplay.isEmpty()) {
+		    System.out.format("%s%s%s%n", ancestors, branch, name);
+		} else {
+		    System.out.format("%s%s%s (%s)%n", ancestors, branch, name, typeDisplay);
+		}
 	    }
 
 	    if (isDirectory) {
@@ -376,6 +392,9 @@ public class Tree
 		"",
 		"\t-hidden  shows hidden directories / files",
 		"\t  (or -hid, -h, -show, or -s)",
+		"",
+		"\t-color    use colors to enhance the output (default)",
+		"\t-nocolor  do not use colors on output",
 		"",
 		"\t-help  prints this message",
 		"\t  (or -usage, -u, or -?)",
@@ -446,6 +465,12 @@ public class Tree
 		}
 		else if (Options.matchesOption(arg, true, "hidden", "hid", "show", "h", "s")) {
 		    showHidden = true;
+		}
+		else if (Options.matchesOption(arg, true, "colors", "color", "col")) {
+		    useColoring = true;
+		}
+		else if (Options.matchesOption(arg, true, "nocolors", "nocolor", "nocol", "no", "n")) {
+		    useColoring = false;
 		}
 		else if (Options.matchesOption(arg, true, "help", "usage", "u", "?")) {
 		    usage();
