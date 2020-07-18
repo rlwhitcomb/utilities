@@ -1,6 +1,8 @@
 #!/bin/bash
-if [ ! -e info/rlwhitcomb/util/Which.class ]; then
-    ant compile
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+if [ ! -e $SCRIPT_DIR/utilities.jar ]; then
+    echo Unable to locate the required '"'utilities.jar'"' file in the '"'$SCRIPT_DIR'"' directory.
+    exit 1
 fi
-java info.rlwhitcomb.util.Which $@
+java -cp $SCRIPT_DIR/utilities.jar info.rlwhitcomb.util.Which $@
 
