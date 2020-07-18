@@ -49,6 +49,8 @@
  *	    interface here (not using "null").
  *	10-Mar-2020 (rlwhitcomb)
  *	    Prepare for GitHub.
+ *	16-Jul-2020 (rlwhitcomb)
+ *	    Fix bug with "isOption" and the "--" string.
  */
 package info.rlwhitcomb.util;
 
@@ -121,7 +123,7 @@ public class Options
 		if (length > 2 && arg.startsWith("--")) {
 		    result = arg.substring(2);
 		}
-		else if (length > 1 && arg.startsWith("-")) {
+		else if (length > 1 && arg.startsWith("-") && !arg.equals("--")) {
 		    result = arg.substring(1);
 		}
 		else if (onWindows && length > 1 && arg.startsWith("/")) {
