@@ -46,6 +46,13 @@
  *	16-Jun-2020 (rlwhitcomb)
  *	    Use Files method to probe the file type and change color
  *	    based on it.
+ *	14-Jul-2020 (rlwhitcomb)
+ *	    Implement option to not colorize the output if not supported
+ *	    by the O/S (Windows, I'm looking at you!).
+ *	    Display canonical path of starting directory (like "tree"
+ *	    on Windows).
+ *	17-Jul-2020 (rlwhitcomb)
+ *	    Tweak colors on Windows, fix the executable test for Windows also.
  */
 package info.rlwhitcomb.tree;
 
@@ -61,10 +68,12 @@ import info.rlwhitcomb.util.CharUtil;
 import static info.rlwhitcomb.util.CharUtil.Justification;
 import info.rlwhitcomb.util.ConsoleColor;
 import static info.rlwhitcomb.util.ConsoleColor.*;
+import info.rlwhitcomb.util.Environment;
+import info.rlwhitcomb.util.ExceptionUtil;
 import info.rlwhitcomb.util.Options;
 
 /**
- * Draw a directory tree.
+ * Draw a directory tree on the console.
  */
 public class Tree
 {
@@ -81,6 +90,19 @@ public class Tree
 
 	/** The amount each directory level is indented. */
 	private static final int INDENT = 4;
+
+	/** Whether we are running on Windows or not. */
+	private static boolean runningOnWindows = Environment.isWindows();
+
+	/** Flag to say we will use color on output. */
+	private static boolean useColoring = true;
+
+	/** Flag to say our backgrounds are dark or not. */
+	private static boolean darkBackgrounds = runningOnWindows;
+
+	/** List of "executable" file extensions (Windows only). */
+	private static String[] executableExtensions;
+
 
 	private static String line(char left, char mid, char right, int width) {
 	    StringBuilder sb = new StringBuilder(width);
@@ -164,7 +186,7 @@ public class Tree
 		 * @param order	The sort order to use.
 		 */
 		public DirectoryComparator(SortOrder order) {
-		    this.asc = order == SortOrder.ASCENDING;;
+		    this.asc = (order == SortOrder.ASCENDING);
 		}
 
 		@Override
@@ -244,6 +266,30 @@ public class Tree
 
 
 	/**
+	 * Test if a file is an executable program.
+	 * <p> On non-Windows environments we can use {@link File#canExecute}
+	 * because there are flags to that effect. On Windows, however,
+	 * every file is executable, but we can check the file extension
+	 * to see if it is in the PATHEXT list and determine that way.
+	 * @param path	The path to the file in question.
+	 * @return Whether or not the file is an "executable".
+	 */
+	private static boolean canExecute(File path) {
+	    if (runningOnWindows) {
+		String name = path.getName();
+		int dotPos = name.lastIndexOf('.');
+		if (dotPos >= 0) {
+		    String ext = name.substring(dotPos).toUpperCase();
+		    return (Arrays.binarySearch(executableExtensions, ext) >= 0);
+		}
+		return false;
+	    } else {
+		return path.canExecute();
+	    }
+	}
+
+
+	/**
 	 * Recursively print one entry and descend into child directories.
 	 * @param file		The file/directory to display name (and directory contents).
 	 * @param ancestors	The prefix to display according from grandparents up.
@@ -254,7 +300,7 @@ public class Tree
 	private static void list(File file, String ancestors, String parent, String branch, boolean fullPath) {
 	    String name = fullPath ? file.getPath() : file.getName();
 	    boolean isDirectory = file.isDirectory();
-	    ConsoleColor nameEmphasis = BLACK_BOLD;
+	    ConsoleColor nameEmphasis = darkBackgrounds ? WHITE_BOLD : BLACK_BOLD;
 	    String type = null, typeDisplay = "";
 	    if (!isDirectory) {
 		try {
@@ -265,12 +311,12 @@ public class Tree
 		if (file.isHidden()) {
 		    nameEmphasis = RED;
 		}
-		else if (file.canExecute()) {
+		else if (canExecute(file)) {
 		    nameEmphasis = GREEN_BOLD_BRIGHT;
 		}
 		else if (file.canWrite()) {
 		    if (type == null) {
-			nameEmphasis = BLACK;
+			nameEmphasis = darkBackgrounds ? WHITE : BLACK;
 		    }
 		    else {
 			String[] typeParts = type.split("/");
@@ -281,7 +327,7 @@ public class Tree
 					nameEmphasis = MAGENTA;
 					break;
 				    default:
-					nameEmphasis = BLUE_BOLD;
+					nameEmphasis = darkBackgrounds ? CYAN_BOLD : BLUE_BOLD;
 					break;
 				}
 				break;
@@ -300,10 +346,10 @@ public class Tree
 					nameEmphasis = GREEN_BOLD_BRIGHT;
 					break;
 				    case "msword":
-					nameEmphasis = BLUE_BOLD;
+					nameEmphasis = darkBackgrounds ? CYAN_BOLD : BLUE_BOLD;
 					break;
 				    default:
-					nameEmphasis = RED_BRIGHT;
+					nameEmphasis = darkBackgrounds ? YELLOW_BRIGHT : RED_BRIGHT;
 					typeDisplay = typeParts[1];
 					break;
 				}
@@ -316,20 +362,28 @@ public class Tree
 				typeDisplay = typeParts[1];
 				break;
 			    default:
-				nameEmphasis = BLACK;
+				nameEmphasis = darkBackgrounds ? WHITE : BLACK;
 				typeDisplay = type;
 				break;
 			}
 		    }
 		}
 		else {
-		    nameEmphasis = CYAN_BOLD;
+		    nameEmphasis = darkBackgrounds ? RED_BOLD_BRIGHT : CYAN_BOLD;
 		}
 	    }
-	    if (typeDisplay.isEmpty()) {
-		System.out.format("%s%s%s%s%s%s%n", BLACK_BRIGHT, ancestors, branch, nameEmphasis, name, RESET);
+	    if (useColoring) {
+		if (typeDisplay.isEmpty()) {
+		    System.out.format("%s%s%s%s%s%s%n", BLACK_BRIGHT, ancestors, branch, nameEmphasis, name, RESET);
+		} else {
+		    System.out.format("%s%s%s%s%s%s (%s)%n", BLACK_BRIGHT, ancestors, branch, nameEmphasis, name, RESET, typeDisplay);
+		}
 	    } else {
-		System.out.format("%s%s%s%s%s%s (%s)%n", BLACK_BRIGHT, ancestors, branch, nameEmphasis, name, RESET, typeDisplay);
+		if (typeDisplay.isEmpty()) {
+		    System.out.format("%s%s%s%n", ancestors, branch, name);
+		} else {
+		    System.out.format("%s%s%s (%s)%n", ancestors, branch, name, typeDisplay);
+		}
 	    }
 
 	    if (isDirectory) {
@@ -377,6 +431,11 @@ public class Tree
 		"\t-hidden  shows hidden directories / files",
 		"\t  (or -hid, -h, -show, or -s)",
 		"",
+		"\t-color    use colors to enhance the output (default)",
+		"\t  (or -colors, or -col)",
+		"\t-nocolor  do not use colors on output",
+		"\t  (or -nocolors, -nocol, -no, or -n)",
+		"",
 		"\t-help  prints this message",
 		"\t  (or -usage, -u, or -?)",
 		"",
@@ -412,6 +471,13 @@ public class Tree
 	    CaseSensitivity casing = CaseSensitivity.MIXED_CASE;
 	    List<String> argList = new ArrayList<>(args.length);
 
+	    // Setup (for Windows) the executable file extension list
+	    if (runningOnWindows) {
+		String exts = System.getenv("PATHEXT");
+		executableExtensions = exts.split(";");
+		Arrays.sort(executableExtensions);
+	    }
+
 	    // Scan the input arguments for options vs. file/directory specs
 	    for (String arg : args) {
 		if (Options.matchesOption(arg, false, "alpha", "ascending", "asc", "a")) {
@@ -446,6 +512,12 @@ public class Tree
 		}
 		else if (Options.matchesOption(arg, true, "hidden", "hid", "show", "h", "s")) {
 		    showHidden = true;
+		}
+		else if (Options.matchesOption(arg, true, "colors", "color", "col")) {
+		    useColoring = true;
+		}
+		else if (Options.matchesOption(arg, true, "nocolors", "nocolor", "nocol", "no", "n")) {
+		    useColoring = false;
 		}
 		else if (Options.matchesOption(arg, true, "help", "usage", "u", "?")) {
 		    usage();
@@ -483,7 +555,12 @@ public class Tree
 	    for (String arg : argList) {
 		File f = new File(arg);
 		if (f.exists()) {
-		    list(f, "", "", "", true);
+		    try {
+			list(f.getCanonicalFile(), "", "", "", true);
+		    } catch (IOException ioe) {
+			System.err.println("ERROR: Unable to get canonical name for \"" + arg + "\": "
+				+ ExceptionUtil.toString(ioe));
+		    }
 		}
 		else {
 		    System.err.println("WARNING: Ignoring non-existent file \"" + f.getPath() + "\"");
