@@ -71,11 +71,12 @@
 	</target>
 
 	<target name="compile" depends="preproc" description="Compiles the java source">
-		<javac includeAntRuntime="false" createMissingPackageInfoClass="false">
+		<javac includeAntRuntime="false" createMissingPackageInfoClass="false" encoding="utf-8">
 			<compilerarg line="${compiler.args}"/>
 			<src path="."/>
 			<src path="net/iharder/b64"/>
 			<src path="info/rlwhitcomb/annotations"/>
+			<src path="info/rlwhitcomb/cat"/>
 			<src path="info/rlwhitcomb/csv"/>
 			<src path="info/rlwhitcomb/jarfile"/>
 			<src path="info/rlwhitcomb/tree"/>
@@ -94,6 +95,7 @@
 		<jar basedir="." destfile="${dest.jar}">
 			<include name="net/iharder/b64/*.class"/>
 			<include name="info/rlwhitcomb/annotations/*.class"/>
+			<include name="info/rlwhitcomb/cat/*.class"/>
 			<include name="info/rlwhitcomb/csv/*.class"/>
 			<include name="info/rlwhitcomb/jarfile/*.class"/>
 			<include name="info/rlwhitcomb/tree/*.class"/>
@@ -103,7 +105,7 @@
 	</target>
 
 	<target name="doc" depends="compile" description="Builds Javadoc">
-		<javadoc destdir="doc" access="private">
+		<javadoc destdir="doc" access="private" encoding="utf-8">
 			<arg value="-html4" if:true="${new.java.version}"/>
 			<arg value="--frames" if:true="${new.java.version}"/>
 			<link href="https://docs.oracle.com/javase/8/docs/api/"/>
@@ -125,6 +127,7 @@
 			<fileset dir="." includes="*.class"/>
 			<fileset dir="net/iharder/b64" includes="*.class"/>
 			<fileset dir="info/rlwhitcomb/annotations" includes="*.class"/>
+			<fileset dir="info/rlwhitcomb/cat" includes="*.class"/>
 			<fileset dir="info/rlwhitcomb/csv" includes="*.class"/>
 			<fileset dir="info/rlwhitcomb/jarfile" includes="*.class"/>
 			<fileset dir="info/rlwhitcomb/tree" includes="*.class"/>

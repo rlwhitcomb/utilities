@@ -1,0 +1,297 @@
+/*
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2020 Roger L. Whitcomb.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ *	Concatenate one or more files (equivalent the *nix "cat" program).
+ *
+ * History:
+ *	16-Jul-2020 (rlwhitcomb)
+ *	    First coding in Java.
+ *	    TODO: wildcard directory names on input
+ *	    TODO: -nn to limit to first nn lines, +nn to limit to LAST nn lines (hard to do?)
+ */
+package info.rlwhitcomb.cat;
+
+import java.io.Console;
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Optional;
+import java.util.stream.Stream;
+import info.rlwhitcomb.util.ExceptionUtil;
+import info.rlwhitcomb.util.Options;
+
+/**
+ * Java implementation of the *nix "cat" command.
+ */
+public class Cat {
+	/**
+	 * Enum of available expected values from the command line.
+	 */
+	private static enum Expected {
+		/** A charset name for the following input file(s). */
+		INPUT_CHARSET,
+		/** A charset name for the output file. */
+		OUTPUT_CHARSET,
+		/** An output file name. */
+		OUTPUT_FILE
+	}
+
+	/**
+	 * The charset currently in use for input files, defaults to the platform
+	 * default. Changes with the "-charset", "-utf8" or "-default" options.
+	 */
+	private static Charset currentInputCharset;
+
+	/**
+	 * The output file charset.
+	 */
+	private static Charset outputCharset;
+
+	/**
+	 * File object for the output file.
+	 */
+	private static File outputFile;
+
+	/**
+	 * The only output stream we are writing to.
+	 */
+	private static PrintStream outputStream = System.out;
+
+	/**
+	 * The iteration over the input arguments we are currently on.
+	 * Pass 1 scans for output file arguments.
+	 * Pass 2 scans for input file(s) and charset(s), and other options.
+	 */
+	private static int pass;
+
+	/**
+	 * Count of the number of input files specified (so we know whether to read from stdin or not).
+	 */
+	private static int numberOfInputFiles = 0;
+
+	/**
+	 * What to expect next on the command line (empty means a file or option flag).
+	 */
+	private static Optional<Expected> expectedValue = Optional.empty();
+
+
+	/**
+	 * Process one of our options.
+	 * What happens here depends on the {@link #pass} we are on.
+	 *
+	 * @param arg	An argument string (with the leading "-", "--", or "/").
+	 */
+	private static void processOption(final String arg) {
+	    if (Options.matchesOption(arg, true, "charset", "cs", "c")) {
+		expectedValue = Optional.of(Expected.INPUT_CHARSET);
+	    } else if (Options.matchesOption(arg, true, "utf-8", "utf_8", "utf8", "u", "8")) {
+		// Note: here and following: we set the input charset in either pass so that
+		// error checking after pass 1 can detect that a charset was given but no files.
+		currentInputCharset = StandardCharsets.UTF_8;
+	    } else if (Options.matchesOption(arg, true, "utf-16", "utf_16", "utf16", "16")) {
+		currentInputCharset = StandardCharsets.UTF_16;
+	    } else if (Options.matchesOption(arg, true, "utf-16be", "utf_16be", "utf16be", "16be", "be")) {
+		currentInputCharset = StandardCharsets.UTF_16BE;
+	    } else if (Options.matchesOption(arg, true, "utf-16le", "utf_16le", "utf16le", "16le", "le")) {
+		currentInputCharset = StandardCharsets.UTF_16LE;
+	    } else if (Options.matchesOption(arg, true, "default", "def", "standard", "d", "s")) {
+		currentInputCharset = Charset.defaultCharset();
+	    } else if (Options.matchesOption(arg, true, "win1252", "win", "w")) {
+		currentInputCharset = Charset.forName("win1252");
+	    } else if (Options.matchesOption(arg, true, "iso88591", "iso-8859-1", "iso_8859_1", "iso", "i")) {
+		currentInputCharset = StandardCharsets.ISO_8859_1;
+	    } else if (Options.matchesOption(arg, true, "ascii", "asc", "a")) {
+		currentInputCharset = StandardCharsets.US_ASCII;
+	    } else if (Options.matchesOption(arg, true,
+			"output_charset", "output-charset", "output_cs", "output-cs", "out_charset", "out-charset",
+			"out_cs", "out-cs", "outcs", "ocs")) {
+		expectedValue = Optional.of(Expected.OUTPUT_CHARSET);
+	    } else if (Options.matchesOption(arg, true,
+			"output_file", "output-file", "outputfile", "out_file", "out-file", "outfile", "out", "o")) {
+		expectedValue = Optional.of(Expected.OUTPUT_FILE);
+	    } else if (Options.matchesOption(arg, true, "stdin", "std", "in")) {
+		if (pass == 1) {
+		    numberOfInputFiles++;
+		} else {
+		    readFromConsole();
+		}
+	    } else {
+		if (pass == 1) {
+		    System.err.println("Unrecognized option: \"" + arg + "\"!");
+		    System.exit(2);
+		}
+	    }
+	}
+
+	/**
+	 * Loop reading from stdin until EOF, writing to the output file.
+	 */
+	private static void readFromConsole() {
+	    Console console = System.console();
+	    if (console == null) {
+		// Likely no console to print to either, but we'll try...
+		System.err.println("No console available to read from!");
+		System.exit(6);
+	    } else {
+		String line;
+		while ((line = console.readLine()) != null) {
+		    outputStream.println(line);
+		}
+	    }
+	}
+
+	/**
+	 * Process a single file.
+	 *
+	 * @param name	Name (path) of the file to process.
+	 */
+	private static void processFile(final String name) {
+	    File file = new File(name);
+	    if (file.exists() && !file.isDirectory() && file.canRead()) {
+		try {
+		    Files.lines(file.toPath(), currentInputCharset).forEach(line -> outputStream.println(line));
+		} catch (IOException ioe) {
+		    System.err.println("I/O error processing input file \"" + file.getPath() + "\": "
+			+ ExceptionUtil.toString(ioe));
+		}
+	    } else {
+		System.err.println("Specified file \"" + name + "\" either does not exist or cannot be read!");
+	    }
+	}
+
+	/**
+	 * Iterate over the command line arguments, processing them for either first or second pass.
+	 *
+	 * @param args	The parsed command line arguments (could be file names or options).
+	 */
+	private static void processArguments(final String[] args) {
+	    for (String arg : args) {
+		if (expectedValue.isPresent()) {
+		    switch (expectedValue.get()) {
+			case INPUT_CHARSET:
+			    currentInputCharset = Charset.forName(arg);
+			    break;
+			case OUTPUT_CHARSET:
+			    if (pass == 1) {
+				if (outputCharset != null) {
+				    System.err.println("Can only specify one charset for the output file!");
+				    System.exit(3);
+				} else {
+				    outputCharset = Charset.forName(arg);
+				}
+			    }
+			    break;
+			case OUTPUT_FILE:
+			    if (pass == 1) {
+				if (outputFile != null) {
+				    System.err.println("Can only specify one output file name!");
+				    System.exit(3);
+				} else {
+				    outputFile = new File(arg);
+				}
+			    }
+			    break;
+		    }
+		    expectedValue = Optional.empty();
+		} else {
+		    Optional<String> option = Options.checkOption(arg);
+		    if (option.isPresent()) {
+			processOption(arg);
+		    } else {
+			if (pass == 1) {
+			    numberOfInputFiles++;
+			} else {
+			    if (arg.equals("--") || arg.equals("-") || arg.equals("@")) {
+				readFromConsole();
+			    } else {
+				processFile(arg);
+			    }
+			}
+		    }
+		}
+	    }
+	}
+
+	/**
+	 * Main program invoked from the command line.
+	 * <p> Parses command line for options and file name values.
+	 * The options and files are processed in the order they appear,
+	 * so options only affect the files listed after that option.
+	 * This is particularly to be noted for the encoding flags.
+	 * <p> Except that the output file options (file and encoding)
+	 * are all processed before any input file options, because
+	 * a) It doesn't make sense to have more than one output file; and
+	 * b) It makes even less sense to have multiple output charsets.
+	 *
+	 * @param args	The parsed command line arguments.
+	 */
+	public static void main(final String[] args) {
+	    // First pass: process output file / charset options only
+	    pass = 1;
+	    processArguments(args);
+
+	    // Now do error checking on the options
+	    if (expectedValue.isPresent()) {
+		System.err.println("Missing a value for the \"--" + expectedValue.get() + "\" option!");
+		System.exit(1);
+	    }
+
+	    // Setup for the output file (if those options were specified on the first pass).
+	    if (outputCharset != null && outputFile == null) {
+		System.out.println("An output file name must be given along with an output charset!");
+		System.exit(4);
+	    }
+	    if (outputFile != null && outputCharset == null) {
+		outputCharset = Charset.defaultCharset();
+	    }
+	    if (outputFile != null) {
+		try {
+		    outputStream = new PrintStream(Files.newOutputStream(outputFile.toPath()), false, outputCharset.name());
+		} catch (IOException ioe) {
+		    // Just default (again) to stdout if there was any problem. TODO: error message also or instead?
+		    outputStream = System.out;
+		}
+	    }
+
+	    if (numberOfInputFiles == 0 && currentInputCharset != null) {
+		System.err.println("Unable to change charset when reading from the console!");
+		System.exit(5);
+	    }
+	    if (currentInputCharset == null && numberOfInputFiles > 0) {
+		currentInputCharset = Charset.defaultCharset();
+	    }
+
+	    // Second pass: process all the other options and the input files specified
+	    pass = 2;
+	    processArguments(args);
+
+	    // If no input files (or "-stdin" arguments) specified, then loop reading from console
+	    if (numberOfInputFiles == 0) {
+		readFromConsole();
+	    }
+	}
+}
