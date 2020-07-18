@@ -44,13 +44,13 @@
 #	    New error from SysConsole class.
 #	12-Feb-2018 (rlwhitcomb)
 #	    New error from NumericUtil related to binary file I/O.
-#	13-Feb-2018 (rlwhitcomb) SIR 132829
+#	13-Feb-2018 (rlwhitcomb)
 #	    Oops!  Forgot one more message for binary data types.
-#	14-Feb-2018 (rlwhitcomb) SIR 132829
+#	14-Feb-2018 (rlwhitcomb)
 #	    More errors for raw binary support.
-#	07-May-2018 (rlwhitcomb) SIR 132829
+#	07-May-2018 (rlwhitcomb)
 #	    One more error from NumericUtil for string length overflows.
-#	06-Jan-2020 (rlwhitcomb) SIR 135654
+#	06-Jan-2020 (rlwhitcomb)
 #	    Add in a copyright string (accessible from Environment).
 #	13-Feb-2020 (rlwhitcomb)
 #	    Moved a "badLocale" message from elsewhere.
