@@ -113,7 +113,7 @@
  *	Javadoc cleanup (found by Java 8).
  *    23-Feb-2016 (rlwhitcomb)
  *	Well, there are more Javadoc fixes to be made...
- *    15-Mar-2019 (rlwhitcomb) Bug 133987
+ *    15-Mar-2019 (rlwhitcomb)
  *	Don't use FileInputStream/FileOutputStream due to GC problems b/c of the finalize
  *	method in these classes. Fix wildcard imports. Use StandardCharsets.
  *    21-May-2019 (rlwhitcomb)
