@@ -51,9 +51,17 @@
  *	    Prepare for GitHub.
  *	16-Jul-2020 (rlwhitcomb)
  *	    Fix bug with "isOption" and the "--" string.
+ *	22-Jul-2020 (rlwhitcomb)
+ *	    Add processing so that we can get greater flexibility in
+ *	    interpreting input options and allowing "_", and "-" word separators.
+ *	    This system means that a desired option coded as "MixedCase" will also
+ *	    accept "Mixed-Case", "Mixed_Case", and the lower case forms (if not
+ *	    ignoring case altogether).
  */
 package info.rlwhitcomb.util;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
@@ -74,6 +82,70 @@ public class Options
 	}
 
 
+	private static String newForm(String form, boolean toLowerCase,
+		int[] breakPositions, int numberOfBreaks, char opt) {
+	    StringBuilder buf = new StringBuilder(form.length() + numberOfBreaks);
+	    int breakPos = breakPositions[0];
+	    for (int i = 1; i < numberOfBreaks; i++) {
+		int endPos = breakPositions[i];
+		char breakChar = form.charAt(endPos);
+		buf.append(form.substring(breakPos, endPos));
+		if (breakChar == '_' || breakChar == '-') {
+		    breakPos = endPos + 1;
+		} else {
+		    breakPos = endPos;
+		}
+		buf.append(opt);
+	    }
+	    if (breakPos < form.length())
+		buf.append(form.substring(breakPos));
+	    return toLowerCase ? buf.toString().toLowerCase() : buf.toString();
+	}
+
+	/**
+	 * Parse a given option string and return multiple values if the permitted
+	 * option has MixedCase, so that "mixed_case" or "mixed-case" variants also work.
+	 * <p> Note: the "ignoreCase" option if false will give more values in our
+	 * output list ("MixedCase" -> "MixedCase", "mixedcase", "Mixed-Case", "mixed-case", etc.).
+	 *
+	 * @param form		The suggested option word(s).
+	 * @param ignoreCase	Whether or not to ignore case on the user's input.
+	 * @return		A possible list of potential spellings depending on the input.
+	 */
+	public static List<String> getMixedCaseOptions(String form, boolean ignoreCase) {
+	    List<String> forms = new ArrayList<>();
+	    boolean alreadyHasSeparator = false;
+	    if (form != null && !form.isEmpty()) {
+		if (Character.isUpperCase(form.charAt(0))) {
+		    int breakPositions[] = new int[form.length()];
+		    int breakNo = 0;
+		    for (int pos = 0; pos < form.length(); pos++) {
+			char ch = form.charAt(pos);
+			if (Character.isUpperCase(ch))
+			    breakPositions[breakNo++] = pos;
+			// The '-' or '_' options give us flexibility if the break char
+			// is a number or other non-alphabet (like "Utf-16")
+			else if (ch == '_' || ch == '-') {
+			    breakPositions[breakNo++] = pos;
+			    alreadyHasSeparator = true;
+			}
+		    }
+		    forms.add(newForm(form, true, breakPositions, breakNo, '-'));
+		    forms.add(newForm(form, true, breakPositions, breakNo, '_'));
+		    if (!ignoreCase) {
+			if (!alreadyHasSeparator)
+			    forms.add(form);
+			forms.add(newForm(form, false, breakPositions, breakNo, '-'));
+			forms.add(newForm(form, false, breakPositions, breakNo, '_'));
+		    }
+		}
+		// At the very least return the input itself (lowercased)
+		if (!alreadyHasSeparator)
+		    forms.add(form.toLowerCase());
+	    }
+	    return forms;
+	}
+
 	/**
 	 * This is the workhorse method to match the first one of a number of possible forms for a given
 	 * option.
@@ -86,14 +158,20 @@ public class Options
 	private static boolean matches(String arg, boolean ignoreCase, String... forms) {
 	    if (ignoreCase) {
 		for (String form : forms) {
-		    if (arg.equalsIgnoreCase(form))
-			return true;
+		    List<String> alternateForms = getMixedCaseOptions(form, ignoreCase);
+		    for (String alt : alternateForms) {
+			if (arg.equalsIgnoreCase(alt))
+			    return true;
+		    }
 		}
 	    }
 	    else {
 		for (String form : forms) {
-		    if (arg.equals(form))
-			return true;
+		    List<String> alternateForms = getMixedCaseOptions(form, ignoreCase);
+		    for (String alt : alternateForms) {
+			if (arg.equals(alt))
+			    return true;
+		    }
 		}
 	    }
 	    return false;
@@ -241,4 +319,21 @@ public class Options
 	    return parseNumberSet(arg, -1, -1);
 	}
 
+	/**
+	 * Take a list of options (such as returned by {@link #getMixedCaseOptions})
+	 * and return a human-readable version (such as for a "help" display).
+	 *
+	 * @param optionList	The list of possible options.
+	 * @return		The nicely formatted version of them.
+	 */
+	public static String getDisplayableOptions(List<String> optionList) {
+	    StringBuilder buf = new StringBuilder(optionList.size() * 10);
+	    for (String option : optionList) {
+		if (buf.length() > 0)
+		    buf.append(", ");
+		buf.append('-');
+		buf.append(option);
+	    }
+	    return buf.toString();
+	}
 }
