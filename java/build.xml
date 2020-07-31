@@ -121,6 +121,10 @@
 
 	<target name="all" depends="compile,jar" description="Builds and jars everything"/>
 
+	<target name="test" depends="compile" description="Run extant unit tests.">
+		<java classname="TestSQLFormatter"/>
+	</target>
+
 	<target name="clean" description="cleans all generated files">
 		<delete>
 			<fileset dir="." includes="${dest.jar}"/>
