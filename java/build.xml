@@ -150,6 +150,16 @@
 		</delete>
 		<delete dir="doc"/>
 	</target>
+
+	<condition property="utilities.available" value="true" else="false">
+		<isset property="env.UTILITIES_HOME"/>
+	</condition>
+	<echo message="UTILITIES_HOME=${env.UTILITIES_HOME}" if:true="${utilities.available}"/>
+
+	<target name="install-local" depends="all" description="Build and install the utilities in a local utilities file.">
+		<copy file="${dest.jar}" todir="${env.UTILITIES_HOME}" if:true="${utilities.available}"/>
+		<echo message="Variable UTILITIES_HOME is not set in the environment!" unless:true="${utilities.available}"/>
+	</target>
 </project>
 
 
