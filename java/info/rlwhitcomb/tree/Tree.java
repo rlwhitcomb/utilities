@@ -56,6 +56,8 @@
  *	22-Jul-2020 (rlwhitcomb)
  *	    Add some more option choices now that Options can automatically add
  *	    choices like "mixed-case", or "mixed_case" from "MixedCase".
+ *	30-Jul-2020 (rlwhitcomb)
+ *	    Option to display program info (name, copyright, build info).
  */
 package info.rlwhitcomb.tree;
 
@@ -457,6 +459,9 @@ public class Tree
 		"\t-help  prints this message",
 		"\t  (or -usage, -h, -u, or -?)",
 		"",
+		"\t-version  prints the program version information",
+		"\t  (or -vers, -ver, or -v)",
+		"",
 		" Note: options can be specified by \"-opt\" or \"--opt\"",
 		"  (or on Windows by \"/opt\").",
 		"",
@@ -480,6 +485,7 @@ public class Tree
 	 * @param args The command line arguments.
 	 */
 	public static void main(String[] args) {
+	    boolean showInfoOnly = false;
 	    boolean sortByFileName = false;
 	    boolean sortByDirectory = false;
 	    boolean omitFiles = true;
@@ -488,6 +494,8 @@ public class Tree
 	    SortOrder directoryOrder = SortOrder.ASCENDING;
 	    CaseSensitivity casing = CaseSensitivity.MIXED_CASE;
 	    List<String> argList = new ArrayList<>(args.length);
+
+	    Environment.setProductName("Directory Tree Utility");
 
 	    // Setup (for Windows) the executable file extension list
 	    if (runningOnWindows) {
@@ -539,7 +547,11 @@ public class Tree
 		}
 		else if (Options.matchesOption(arg, true, "help", "usage", "h", "u", "?")) {
 		    usage();
-		    return;
+		    showInfoOnly = true;
+		}
+		else if (Options.matchesOption(arg, true, "version", "vers", "ver", "v")) {
+		    Environment.printProgramInfo(System.out, -1);
+		    showInfoOnly = true;
 		}
 		else if (Options.isOption(arg) != null) {
 		    System.err.println("WARNING: Ignoring unknown option: \"" + arg + "\"");
@@ -547,6 +559,10 @@ public class Tree
 		else {
 		    argList.add(arg);
 		}
+	    }
+
+	    if (showInfoOnly) {
+		return;
 	    }
 
 	    if (argList.isEmpty()) {

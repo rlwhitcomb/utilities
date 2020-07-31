@@ -28,6 +28,8 @@
  *	    First coding in Java.
  *	22-Jul-2020 (rlwhitcomb)
  *	    Recast the options now that Options.java has more capability.
+ *	31-Jul-2020 (rlwhitcomb)
+ *	    Add option to display product information; set program name.
  *	    TODO: wildcard directory names on input
  *	    TODO: -nn to limit to first nn lines, +nn to limit to LAST nn lines (hard to do?)
  */
@@ -43,6 +45,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Optional;
 import java.util.stream.Stream;
+import info.rlwhitcomb.util.Environment;
 import info.rlwhitcomb.util.ExceptionUtil;
 import info.rlwhitcomb.util.Options;
 
@@ -148,6 +151,9 @@ public class Cat {
 		} else {
 		    readFromConsole();
 		}
+	    } else if (Options.matchesOption(arg, true, "version", "vers", "ver", "v")) {
+		Environment.printProgramInfo(System.out, -1);
+		System.exit(0);
 	    } else {
 		if (pass == 1) {
 		    System.err.println("Unrecognized option: \"" + arg + "\"!");
@@ -259,6 +265,8 @@ public class Cat {
 	 * @param args	The parsed command line arguments.
 	 */
 	public static void main(final String[] args) {
+	    Environment.setProductName("File ConCATenation Utility");
+
 	    // First pass: process output file / charset options only
 	    pass = 1;
 	    processArguments(args);

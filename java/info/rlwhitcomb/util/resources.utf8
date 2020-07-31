@@ -60,6 +60,8 @@
 #	    Prepare for GitHub.
 #	15-Apr-2020 (rlwhitcomb)
 #	    New error message from ClassUtil.
+#	30-Jul-2020 (rlwhitcomb)
+#	    Two new format strings from Environment for program info display.
 #
 
 #
@@ -94,6 +96,8 @@ char.illegalHexLiteral		= Illegal hex literal: "%1$s"
 #
 env.unknownDataModel	= Java system has an unexpected data model value: %1$d
 env.copyright		= Copyright (c) 2008-2020 Roger L. Whitcomb.
+env.version		= Version %1$s build %2$s
+env.build		= Built on %1$s at %2$s
 
 #
 # From Intl.java!

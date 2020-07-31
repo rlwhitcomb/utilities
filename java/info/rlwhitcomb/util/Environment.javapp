@@ -82,14 +82,19 @@
  *	10-Mar-2020 (rlwhitcomb)
  *	    Prepare for GitHub.
  *	    Set the default product name from the preprocessor also.
+ *	31-Jul-2020 (rlwhitcomb)
+ *	    New method to print the product information, which we keep track of.
  */
 package info.rlwhitcomb.util;
 
 import java.io.File;
+import java.io.PrintStream;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.lang.management.ManagementFactory;
+
+import static info.rlwhitcomb.util.CharUtil.Justification.*;
 
 
 /**
@@ -602,6 +607,48 @@ public final class Environment
 	    return copyrightNotice;
 	}
 
+
+	/**
+	 * Display a program information banner using things we know about here
+	 * to the given {@link PrintStream}.
+	 *
+	 * @param ps		The print stream to display the info to.
+	 * @param centerWidth	The width to use for centering (0 = don't center,
+	 *			negative = center over longest string).
+	 */
+	public static void printProgramInfo(PrintStream ps, int centerWidth) {
+	    String versionInfo = Intl.formatString(
+		"util#env.version",
+		getAppVersion(), getAppBuild());
+	    String buildInfo = Intl.formatString(
+		"util#env.build",
+		getBuildDate(), getBuildTime());
+	    String productName = getProductName();
+	    String copyright   = getCopyrightNotice();
+
+	    int width = centerWidth;
+	    if (width == 0) {
+		ps.println(productName);
+		ps.println(versionInfo);
+		ps.println(buildInfo);
+		ps.println(copyright);
+	    } 
+	    else {
+		// Even if a width is given, the strings might be longer still
+		width = Math.max(width, productName.length());
+		width = Math.max(width, versionInfo.length());
+		width = Math.max(width, buildInfo.length());
+		width = Math.max(width, copyright.length());
+		width = (width + 1) / 2 * 2;
+
+		// Negative width puts the odd space on the right
+		ps.println(CharUtil.padToWidth(productName, -width, CENTER));
+		ps.println(CharUtil.padToWidth(versionInfo, -width, CENTER));
+		ps.println(CharUtil.padToWidth(buildInfo, -width, CENTER));
+		ps.println(CharUtil.padToWidth(copyright, -width, CENTER));
+	    }
+	    ps.println();
+	}
 
 }
 
