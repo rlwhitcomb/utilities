@@ -26,6 +26,8 @@
  * History:
  *	16-Jul-2020 (rlwhitcomb)
  *	    First coding in Java.
+ *	22-Jul-2020 (rlwhitcomb)
+ *	    Recast the options now that Options.java has more capability.
  *	    TODO: wildcard directory names on input
  *	    TODO: -nn to limit to first nn lines, +nn to limit to LAST nn lines (hard to do?)
  */
@@ -98,6 +100,12 @@ public class Cat {
 	 */
 	private static Optional<Expected> expectedValue = Optional.empty();
 
+	/**
+	 * Flag to indicate that there will be no more options, so that all the remaining
+	 * command-line values will be file names (or stdin designators).
+	 */
+	private static boolean noMoreOptions = false;
+
 
 	/**
 	 * Process one of our options.
@@ -108,31 +116,32 @@ public class Cat {
 	private static void processOption(final String arg) {
 	    if (Options.matchesOption(arg, true, "charset", "cs", "c")) {
 		expectedValue = Optional.of(Expected.INPUT_CHARSET);
-	    } else if (Options.matchesOption(arg, true, "utf-8", "utf_8", "utf8", "u", "8")) {
+	    } else if (Options.matchesOption(arg, true, "utf8", "Utf-8", "u", "8")) {
 		// Note: here and following: we set the input charset in either pass so that
 		// error checking after pass 1 can detect that a charset was given but no files.
 		currentInputCharset = StandardCharsets.UTF_8;
-	    } else if (Options.matchesOption(arg, true, "utf-16", "utf_16", "utf16", "16")) {
+	    } else if (Options.matchesOption(arg, true, "utf16", "Utf-16", "16")) {
 		currentInputCharset = StandardCharsets.UTF_16;
-	    } else if (Options.matchesOption(arg, true, "utf-16be", "utf_16be", "utf16be", "16be", "be")) {
+	    } else if (Options.matchesOption(arg, true, "utf16be", "Utf-16be", "16be", "be")) {
 		currentInputCharset = StandardCharsets.UTF_16BE;
-	    } else if (Options.matchesOption(arg, true, "utf-16le", "utf_16le", "utf16le", "16le", "le")) {
+	    } else if (Options.matchesOption(arg, true, "utf16le", "Utf-16le", "16le", "le")) {
 		currentInputCharset = StandardCharsets.UTF_16LE;
 	    } else if (Options.matchesOption(arg, true, "default", "def", "standard", "d", "s")) {
 		currentInputCharset = Charset.defaultCharset();
 	    } else if (Options.matchesOption(arg, true, "win1252", "win", "w")) {
 		currentInputCharset = Charset.forName("win1252");
-	    } else if (Options.matchesOption(arg, true, "iso88591", "iso-8859-1", "iso_8859_1", "iso", "i")) {
+	    } else if (Options.matchesOption(arg, true, "iso88591", "iso-8859-1", "iso", "i")) {
 		currentInputCharset = StandardCharsets.ISO_8859_1;
 	    } else if (Options.matchesOption(arg, true, "ascii", "asc", "a")) {
 		currentInputCharset = StandardCharsets.US_ASCII;
-	    } else if (Options.matchesOption(arg, true,
-			"output_charset", "output-charset", "output_cs", "output-cs", "out_charset", "out-charset",
-			"out_cs", "out-cs", "outcs", "ocs")) {
+	    } else if (Options.matchesOption(arg, false,
+			"OutputCharset", "OutputCs", "OutCharset", "OutCs", "ocs")) {
 		expectedValue = Optional.of(Expected.OUTPUT_CHARSET);
-	    } else if (Options.matchesOption(arg, true,
-			"output_file", "output-file", "outputfile", "out_file", "out-file", "outfile", "out", "o")) {
+	    } else if (Options.matchesOption(arg, true,	"OutputFile", "OutFile", "out", "o")) {
 		expectedValue = Optional.of(Expected.OUTPUT_FILE);
+	    } else if (Options.matchesOption(arg, true, "NoMoreOptions", "NoOptions", "NoOption",
+			"NoMore", "NoOpt", "no", "n")) {
+		noMoreOptions = true;
 	    } else if (Options.matchesOption(arg, true, "stdin", "std", "in")) {
 		if (pass == 1) {
 		    numberOfInputFiles++;
@@ -219,7 +228,7 @@ public class Cat {
 		    expectedValue = Optional.empty();
 		} else {
 		    Optional<String> option = Options.checkOption(arg);
-		    if (option.isPresent()) {
+		    if (!noMoreOptions && option.isPresent()) {
 			processOption(arg);
 		    } else {
 			if (pass == 1) {
@@ -287,6 +296,8 @@ public class Cat {
 
 	    // Second pass: process all the other options and the input files specified
 	    pass = 2;
+	    // Reset this positional flag so it works correctly on the second pass
+	    noMoreOptions = false;
 	    processArguments(args);
 
 	    // If no input files (or "-stdin" arguments) specified, then loop reading from console

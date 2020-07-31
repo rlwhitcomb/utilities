@@ -53,6 +53,9 @@
  *	    on Windows).
  *	17-Jul-2020 (rlwhitcomb)
  *	    Tweak colors on Windows, fix the executable test for Windows also.
+ *	22-Jul-2020 (rlwhitcomb)
+ *	    Add some more option choices now that Options can automatically add
+ *	    choices like "mixed-case", or "mixed_case" from "MixedCase".
  */
 package info.rlwhitcomb.tree;
 
@@ -102,6 +105,15 @@ public class Tree
 
 	/** List of "executable" file extensions (Windows only). */
 	private static String[] executableExtensions;
+
+	private static final String ALL_FILES        = "AllFiles";
+	private static final String OMIT_FILES       = "OmitFiles";
+	private static final String MIXED_CASE       = "MixedCase";
+	private static final String CASE_INSENSITIVE = "CaseInsensitive";
+	private static final String SHOW_HIDDEN      = "ShowHidden";
+	private static final String NO_COLORS        = "NoColors";
+	private static final String NO_COLOR         = "NoColor";
+	private static final String NO_COL           = "NoCol";
 
 
 	private static String line(char left, char mid, char right, int width) {
@@ -403,6 +415,10 @@ public class Tree
 	}
 
 
+	private static String helpList(String option) {
+	    return Options.getDisplayableOptions(Options.getMixedCaseOptions(option, true));
+	}
+
 	private static final String[] help = {
 		"Usage: tree [options] file_or_directory_name(s)",
 		"",
@@ -417,27 +433,29 @@ public class Tree
 		"\t  (or -Directory, or -D)",
 		"\t-mixed  sorts file names alphabetically, in mixed case",
 		"\t  (meaning \"M\" is different than \"m\")",
-		"\t  (or -mixedcase, -sensitive, -mix, -m, -s)",
+		"\t  (or " + helpList(MIXED_CASE) + ", -sensitive, -mix, -m, -s)",
 		"\t-case  sort file names alphabetically, without regard to case",
 		"\t  (meaning \"M\" sorts the same as \"m\")",
-		"\t  (or -caseinsensitive, -insensitive, -case, -c, or -i)",
+		"\t  (or " + helpList(CASE_INSENSITIVE) + ", -insensitive, -case, -c, or -i)",
 		" Default is not to sort the output at all.",
 		"",
 		"\t-file  prints file names also (default is directories only)",
-		"\t  (or -files, -all, or -f)",
+		"\t  (or " + helpList(ALL_FILES) + ", -files, -all, or -f)",
 		"\t-omit  (default) omits file names",
-		"\t  (or -o)",
+		"\t  (or " + helpList(OMIT_FILES) + ", or -o)",
 		"",
 		"\t-hidden  shows hidden directories / files",
-		"\t  (or -hid, -h, -show, or -s)",
+		"\t  (or " + helpList(SHOW_HIDDEN) + ", -hid, -show, or -s)",
 		"",
 		"\t-color    use colors to enhance the output (default)",
 		"\t  (or -colors, or -col)",
 		"\t-nocolor  do not use colors on output",
-		"\t  (or -nocolors, -nocol, -no, or -n)",
+		"\t  (or " + helpList(NO_COLORS) + ", " +
+			helpList(NO_COLOR).replace(", -nocolor", "") + ", " +
+			helpList(NO_COL) + ", -no, or -n)",
 		"",
 		"\t-help  prints this message",
-		"\t  (or -usage, -u, or -?)",
+		"\t  (or -usage, -h, -u, or -?)",
 		"",
 		" Note: options can be specified by \"-opt\" or \"--opt\"",
 		"  (or on Windows by \"/opt\").",
@@ -496,30 +514,30 @@ public class Tree
 		    sortByDirectory = true;
 		    directoryOrder = SortOrder.DESCENDING;
 		}
-		else if (Options.matchesOption(arg, true, "files", "file", "all", "f")) {
+		else if (Options.matchesOption(arg, true, "AllFiles", "files", "file", "all", "f")) {
 		    omitFiles = false;
 		}
-		else if (Options.matchesOption(arg, true, "omit", "o")) {
+		else if (Options.matchesOption(arg, true, "OmitFiles", "omit", "o")) {
 		    omitFiles = true;
 		}
-		else if (Options.matchesOption(arg, true, "mixedcase", "sensitive", "mixed", "mix", "m", "s")) {
+		else if (Options.matchesOption(arg, true, "MixedCase", "sensitive", "mixed", "mix", "m", "s")) {
 		    casing = CaseSensitivity.MIXED_CASE;
 		    sortByFileName = true;
 		}
-		else if (Options.matchesOption(arg, true, "caseinsensitive", "insensitive", "case", "c", "i")) {
+		else if (Options.matchesOption(arg, true, "CaseInsensitive", "insensitive", "case", "c", "i")) {
 		    casing = CaseSensitivity.CASE_INSENSITIVE;
 		    sortByFileName = true;
 		}
-		else if (Options.matchesOption(arg, true, "hidden", "hid", "show", "h", "s")) {
+		else if (Options.matchesOption(arg, true, "ShowHidden", "hidden", "hid", "show", "s")) {
 		    showHidden = true;
 		}
 		else if (Options.matchesOption(arg, true, "colors", "color", "col")) {
 		    useColoring = true;
 		}
-		else if (Options.matchesOption(arg, true, "nocolors", "nocolor", "nocol", "no", "n")) {
+		else if (Options.matchesOption(arg, true, "NoColors", "NoColor", "NoCol", "no", "n")) {
 		    useColoring = false;
 		}
-		else if (Options.matchesOption(arg, true, "help", "usage", "u", "?")) {
+		else if (Options.matchesOption(arg, true, "help", "usage", "h", "u", "?")) {
 		    usage();
 		    return;
 		}
