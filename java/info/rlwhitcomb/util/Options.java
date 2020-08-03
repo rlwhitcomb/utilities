@@ -106,7 +106,7 @@ public class Options
 	 * Parse a given option string and return multiple values if the permitted
 	 * option has MixedCase, so that "mixed_case" or "mixed-case" variants also work.
 	 * <p> Note: the "ignoreCase" option if false will give more values in our
-	 * output list ("MixedCase" -> "MixedCase", "mixedcase", "Mixed-Case", "mixed-case", etc.).
+	 * output list ("MixedCase" -&gt; "MixedCase", "mixedcase", "Mixed-Case", "mixed-case", etc.).
 	 *
 	 * @param form		The suggested option word(s).
 	 * @param ignoreCase	Whether or not to ignore case on the user's input.
