@@ -1,0 +1,19 @@
+cd /d,~,%USERPROFILE%,your 'home' directory (%USERPROFILE%)
+cd /d,home,%USERPROFILE%,same
+pushd,svn,%USERPROFILE%\Projects\svn,your root svn location
+pushd,documents,%USERPROFILE%\Documents,your 'Documents' directory
+pushd,doc,%USERPROFILE%\Documents,same
+pushd,d,%USERPROFILE%\Documents,also same
+pushd,jenkins,C:\Jenkins,
+pushd,j,C:\Jenkins,same
+pushd,projects,%USERPROFILE%\Projects,your 'Projects' directory
+pushd,proj,%USERPROFILE%\Projects,an alias
+pushd,p,%USERPROFILE%\Projects,ditto
+pushd,util,C:\Utilities,
+pushd,u,C:\Utilities,same
+pushd,/,C:\,the root (C:\) directory
+popd,back,,pops back to the last saved location (if any)
+popd,`,,ditto (popd)
+cd,-,..,to ..       (no pushd)
+cd,--,..\..,to ..\..    ("    "  )
+cd,---,..\..\..,to ..\..\.. ("    "  )
