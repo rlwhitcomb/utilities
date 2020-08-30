@@ -27,8 +27,11 @@
 :: by knowing about a (small) set of frequently visited
 :: locations.
 :: The list of locations, and their descriptions is in the
-:: "destinations" file in the same directory as this file.
+:: "destinations-%USERNAME%" file in the same directory as this file.
 :: Feel free to add to that list as you see fit.
+
+set DESTINATIONS=%~dp0destinations-%USERNAME%
+if not exist "%DESTINATIONS%" goto setup
 
 if "%1"=="" goto display_help
 if /I "%1" EQU "/help" goto display_help
@@ -41,7 +44,7 @@ if /I "%1" EQU "home" goto check_going_home_time
 
 :check_destination
 set COMMAND=
-for /F "delims=, tokens=1,2,3,*" %%I in (%~dp0destinations) do (
+for /F "delims=, tokens=1,2,3,*" %%I in (%DESTINATIONS%) do (
    for /f "tokens=*" %%M in  ('echo %%K') do (
       if /I "%1" EQU "%%J" set COMMAND=%%I %%M& goto execute_command
    )
@@ -51,6 +54,29 @@ if "%COMMAND%" EQU "" goto display_help
 %COMMAND%
 cd
 exit /b 0
+
+:setup
+echo The %~n0 command relies on a per-user configuration file named
+echo ^ ^ ^ %DESTINATIONS%
+echo which does not exist.
+echo Please create this file and try the command again.
+echo.
+echo The format of this file is as follows (4 fields per line):
+echo ^ ^ ^ cmd,alias,directory,description
+echo.
+echo where "cmd" is one of "cd", "cd /d", pushd", or "popd"
+echo ^ ^ and "alias" is the shortcut name you want to use for this location
+echo.
+echo Note: if "description" is omitted then the directory name itself will
+echo ^ ^ ^ ^ ^ ^ be used as the description (but the comma must still be there).
+echo.
+echo Environment variables can be specified and will be substituted
+echo as needed.
+echo.
+echo For example:
+echo cd /d,home,%%USERPROFILE%%,Your %%USERPROFILE%% directory.
+echo.
+exit /b 1
 
 :check_going_home_time
 for /F %%I in ('date /t') do set DOW=%%I
@@ -71,7 +97,7 @@ echo Usage: %~n0 LOCATION
 echo.
 echo Pushes your current directory and goes to the specified
 echo LOCATION, where LOCATION is one of the following:
-for /F "delims=, tokens=1,2,3,*" %%I in (%~dp0destinations) do (
+for /F "delims=, tokens=1,2,3,*" %%I in (%DESTINATIONS%) do (
    if "%%L" EQU "" (
       for /f "tokens=*" %%M in  ('echo %%K') do (
          set "key=%%J%SPACES%"
