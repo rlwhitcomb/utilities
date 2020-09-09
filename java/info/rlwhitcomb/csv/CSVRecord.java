@@ -41,6 +41,8 @@
  *	    we can properly implement "alwaysDelimitStrings" property.
  *	10-Mar-2020 (rlwhitcomb)
  *	    Prepare for GitHub.
+ *	08-Sep-2020 (rlwhitcomb)
+ *	    Separate out the code for header keys.
  */
 package info.rlwhitcomb.csv;
 
@@ -81,6 +83,17 @@ public class CSVRecord implements Iterator<Object>, Iterable<Object>
 	}
 
 	/**
+	 * Gets a header key for the given field index.
+	 * @param	index	The given field index.
+	 * @return	A string header key.
+	 */
+	private String getHeaderKey(int index) {
+	    return (headerKeys != null)
+		 ? headerKeys[index]
+		 : String.valueOf(index);
+	}
+
+	/**
 	 * Internal method to add fields to the record.
 	 *
 	 * @param	key	name of the current field, or <tt>null</tt>
@@ -90,15 +103,7 @@ public class CSVRecord implements Iterator<Object>, Iterable<Object>
 	 * @param	field	Value for this field.
 	 */
 	protected void addField(String key, Object field) {
-	    String thisKey = key;
-	    if (thisKey == null) {
-		if (headerKeys == null) {
-		    thisKey = String.valueOf(nextWrite++);
-		}
-		else {
-		    thisKey = headerKeys[nextWrite++];
-		}
-	    }
+	    String thisKey = (key == null) ? getHeaderKey(nextWrite++) : key;
 	    recordMap.put(thisKey, field);
 	    length++;
 	}
@@ -140,10 +145,8 @@ public class CSVRecord implements Iterator<Object>, Iterable<Object>
 	{
 	    if (nextRead >= length)
 		throw new NoSuchElementException();
-	    if (headerKeys == null)
-		return recordMap.get(String.valueOf(nextRead++));
-	    else
-		return recordMap.get(headerKeys[nextRead++]);
+
+	    return recordMap.get(getHeaderKey(nextRead++));
 	}
 
 	/**
@@ -191,10 +194,7 @@ public class CSVRecord implements Iterator<Object>, Iterable<Object>
 	    if (index < 0 || index >= length)
 		throw new IndexOutOfBoundsException(Intl.formatString("csv#record.indexOutOfRange", index, length - 1));
 
-	    if (headerKeys == null)
-		return recordMap.get(String.valueOf(index));
-	    else
-		return recordMap.get(headerKeys[index]);
+	    return recordMap.get(getHeaderKey(index));
 	}
 
 	/**
