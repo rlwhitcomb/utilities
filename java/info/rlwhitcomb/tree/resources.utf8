@@ -1,0 +1,83 @@
+#
+# The MIT License (MIT)
+#
+# Copyright (c) 2020 Roger L. Whitcomb.
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+#
+#       Internationalizable strings for the info.rlwhitcomb.tree code.
+#
+# History:
+#       13-Sep-2020 (rlwhitcomb)
+#           Moved into here from the .java file.
+
+productName	= Directory Tree Utility
+
+unavailable	= " <unavailable>"
+
+warnUnknownOpt	= "WARNING: Ignoring unknown option: \"%1$s\""
+warnNoFile	= "WARNING: Ignoring non-existent file \"%1$s\""
+errNoFilesGiven	= "ERROR: No input files or directories specified."
+errFileName	= "ERROR: Unable to get canonical name for \"%1$s\": %2$s"
+
+usage.help1	= "Usage: tree [options] file_or_directory_name(s)"
+usage.help2	= ""
+usage.help3	= " Where \"options\" can be:"
+usage.help4	= "\t-ascending  to sort by file name, alphabetically ascending"
+usage.help5	= "\t  (or -alpha, -asc, or -a)"
+usage.help6	= "\t-descending  sorts by name, descending order"
+usage.help7	= "\t  (or -Alpha, -desc, or -A)"
+usage.help8	= "\t-dir  sorts directories first, followed by files"
+usage.help9	= "\t  (or -directory, or -d)"
+usage.help10	= "\t-Dir  sorts files first, then directories"
+usage.help11	= "\t  (or -Directory, or -D)"
+usage.help12	= "\t-mixed  sorts file names alphabetically, in mixed case"
+usage.help13	= "\t  (meaning \"M\" is different than \"m\")"
+usage.help14	= "\t  (or %MIXED_CASE%, -sensitive, -mix, -m, -s)"
+usage.help15	= "\t-case  sort file names alphabetically, without regard to case"
+usage.help16	= "\t  (meaning \"M\" sorts the same as \"m\")"
+usage.help17	= "\t  (or %CASE_INSENSITIVE%, -insensitive, -case, -c, or -i)"
+usage.help18	= " Default is not to sort the output at all."
+usage.help19	= ""
+usage.help20	= "\t-file  prints file names also (default is directories only)"
+usage.help21	= "\t  (or %ALL_FILES%, -files, -all, or -f)"
+usage.help22	= "\t-omit  (default) omits file names"
+usage.help23	= "\t  (or %OMIT_FILES%, or -o)"
+usage.help24	= ""
+usage.help25	= "\t-hidden  shows hidden directories / files"
+usage.help26	= "\t  (or %SHOW_HIDDEN%, -hid, -show, or -s)"
+usage.help27	= ""
+usage.help28	= "\t-color    use colors to enhance the output (default)"
+usage.help29	= "\t  (or -colors, or -col)"
+usage.help30	= "\t-nocolor  do not use colors on output"
+usage.help31	= "\t  (or %NO_COLORS%, %NO_COLOR%, %NO_COL%, -no, or -n)"
+usage.help32	= ""
+usage.help33	= "\t-help  prints this message"
+usage.help34	= "\t  (or -usage, -h, -u, or -?)"
+usage.help35	= ""
+usage.help36	= "\t-version  prints the program version information"
+usage.help37	= "\t  (or -vers, -ver, or -v)"
+usage.help38	= ""
+usage.help39	= " Note: options can be specified by \"-opt\" or \"--opt\""
+usage.help40	= "  (or on Windows by \"/opt\")."
+usage.help41	= ""
+usage.help42	= " Also note: all options are parsed before any files are processed,"
+usage.help43	= "  so later options will override earlier ones for the entire output."
+usage.help44	= ""
+

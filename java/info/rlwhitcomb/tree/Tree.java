@@ -58,6 +58,8 @@
  *	    choices like "mixed-case", or "mixed_case" from "MixedCase".
  *	30-Jul-2020 (rlwhitcomb)
  *	    Option to display program info (name, copyright, build info).
+ *	11-Sep-2020 (rlwhitcomb)
+ *	    Move text to resource file.
  */
 package info.rlwhitcomb.tree;
 
@@ -68,13 +70,16 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import info.rlwhitcomb.util.CharUtil;
 import static info.rlwhitcomb.util.CharUtil.Justification;
 import info.rlwhitcomb.util.ConsoleColor;
 import static info.rlwhitcomb.util.ConsoleColor.*;
 import info.rlwhitcomb.util.Environment;
 import info.rlwhitcomb.util.ExceptionUtil;
+import info.rlwhitcomb.util.Intl;
 import info.rlwhitcomb.util.Options;
 
 /**
@@ -320,7 +325,7 @@ public class Tree
 		try {
 		    type = Files.probeContentType(file.toPath());
 		} catch (IOException ioe) {
-		    typeDisplay = " <unavailable>";
+		    typeDisplay = Intl.getString("tree#unavailable");
 		}
 		if (file.isHidden()) {
 		    nameEmphasis = RED;
@@ -421,62 +426,22 @@ public class Tree
 	    return Options.getDisplayableOptions(Options.getMixedCaseOptions(option, true));
 	}
 
-	private static final String[] help = {
-		"Usage: tree [options] file_or_directory_name(s)",
-		"",
-		" Where \"options\" can be:",
-		"\t-ascending  to sort by file name, alphabetically ascending",
-		"\t  (or -alpha, -asc, or -a)",
-		"\t-descending  sorts by name, descending order",
-		"\t  (or -Alpha, -desc, or -A)",
-		"\t-dir  sorts directories first, followed by files",
-		"\t  (or -directory, or -d)",
-		"\t-Dir  sorts files first, then directories",
-		"\t  (or -Directory, or -D)",
-		"\t-mixed  sorts file names alphabetically, in mixed case",
-		"\t  (meaning \"M\" is different than \"m\")",
-		"\t  (or " + helpList(MIXED_CASE) + ", -sensitive, -mix, -m, -s)",
-		"\t-case  sort file names alphabetically, without regard to case",
-		"\t  (meaning \"M\" sorts the same as \"m\")",
-		"\t  (or " + helpList(CASE_INSENSITIVE) + ", -insensitive, -case, -c, or -i)",
-		" Default is not to sort the output at all.",
-		"",
-		"\t-file  prints file names also (default is directories only)",
-		"\t  (or " + helpList(ALL_FILES) + ", -files, -all, or -f)",
-		"\t-omit  (default) omits file names",
-		"\t  (or " + helpList(OMIT_FILES) + ", or -o)",
-		"",
-		"\t-hidden  shows hidden directories / files",
-		"\t  (or " + helpList(SHOW_HIDDEN) + ", -hid, -show, or -s)",
-		"",
-		"\t-color    use colors to enhance the output (default)",
-		"\t  (or -colors, or -col)",
-		"\t-nocolor  do not use colors on output",
-		"\t  (or " + helpList(NO_COLORS) + ", " +
-			helpList(NO_COLOR).replace(", -nocolor", "") + ", " +
-			helpList(NO_COL) + ", -no, or -n)",
-		"",
-		"\t-help  prints this message",
-		"\t  (or -usage, -h, -u, or -?)",
-		"",
-		"\t-version  prints the program version information",
-		"\t  (or -vers, -ver, or -v)",
-		"",
-		" Note: options can be specified by \"-opt\" or \"--opt\"",
-		"  (or on Windows by \"/opt\").",
-		"",
-		" Also note: all options are parsed before any files are processed,",
-		"  so later options will override earlier ones for the entire output.",
-		""
-	};
-
 	private static void usage(String... messages) {
 	    for (String message : messages) {
 		System.out.println(message);
 	    }
-	    for (String helpLine : help) {
-		System.out.println(helpLine);
-	    }
+
+	    Map<String, String> symbols = new HashMap<>();
+	    symbols.put("MIXED_CASE",       helpList(MIXED_CASE));
+	    symbols.put("CASE_INSENSITIVE", helpList(CASE_INSENSITIVE));
+	    symbols.put("ALL_FILES",        helpList(ALL_FILES));
+	    symbols.put("OMIT_FILES",       helpList(OMIT_FILES));
+	    symbols.put("SHOW_HIDDEN",      helpList(SHOW_HIDDEN));
+	    symbols.put("NO_COLORS",        helpList(NO_COLORS));
+	    symbols.put("NO_COLOR",         helpList(NO_COLOR).replace(", -nocolor", ""));
+	    symbols.put("NO_COL",           helpList(NO_COL));
+
+	    Intl.printHelp("tree#usage", symbols);
 	}
 
 
@@ -495,7 +460,7 @@ public class Tree
 	    CaseSensitivity casing = CaseSensitivity.MIXED_CASE;
 	    List<String> argList = new ArrayList<>(args.length);
 
-	    Environment.setProductName("Directory Tree Utility");
+	    Environment.setProductName(Intl.getString("tree#productName"));
 
 	    // Setup (for Windows) the executable file extension list
 	    if (runningOnWindows) {
@@ -522,27 +487,27 @@ public class Tree
 		    sortByDirectory = true;
 		    directoryOrder = SortOrder.DESCENDING;
 		}
-		else if (Options.matchesOption(arg, true, "AllFiles", "files", "file", "all", "f")) {
+		else if (Options.matchesOption(arg, true, ALL_FILES, "files", "file", "all", "f")) {
 		    omitFiles = false;
 		}
-		else if (Options.matchesOption(arg, true, "OmitFiles", "omit", "o")) {
+		else if (Options.matchesOption(arg, true, OMIT_FILES, "omit", "o")) {
 		    omitFiles = true;
 		}
-		else if (Options.matchesOption(arg, true, "MixedCase", "sensitive", "mixed", "mix", "m", "s")) {
+		else if (Options.matchesOption(arg, true, MIXED_CASE, "sensitive", "mixed", "mix", "m", "s")) {
 		    casing = CaseSensitivity.MIXED_CASE;
 		    sortByFileName = true;
 		}
-		else if (Options.matchesOption(arg, true, "CaseInsensitive", "insensitive", "case", "c", "i")) {
+		else if (Options.matchesOption(arg, true, CASE_INSENSITIVE, "insensitive", "case", "c", "i")) {
 		    casing = CaseSensitivity.CASE_INSENSITIVE;
 		    sortByFileName = true;
 		}
-		else if (Options.matchesOption(arg, true, "ShowHidden", "hidden", "hid", "show", "s")) {
+		else if (Options.matchesOption(arg, true, SHOW_HIDDEN, "hidden", "hid", "show", "s")) {
 		    showHidden = true;
 		}
 		else if (Options.matchesOption(arg, true, "colors", "color", "col")) {
 		    useColoring = true;
 		}
-		else if (Options.matchesOption(arg, true, "NoColors", "NoColor", "NoCol", "no", "n")) {
+		else if (Options.matchesOption(arg, true, NO_COLORS, NO_COLOR, NO_COL, "no", "n")) {
 		    useColoring = false;
 		}
 		else if (Options.matchesOption(arg, true, "help", "usage", "h", "u", "?")) {
@@ -554,7 +519,7 @@ public class Tree
 		    showInfoOnly = true;
 		}
 		else if (Options.isOption(arg) != null) {
-		    System.err.println("WARNING: Ignoring unknown option: \"" + arg + "\"");
+		    Intl.errFormat("tree#warnUnknownOpt", arg);
 		}
 		else {
 		    argList.add(arg);
@@ -566,7 +531,7 @@ public class Tree
 	    }
 
 	    if (argList.isEmpty()) {
-		usage("ERROR: No input files or directories specified.", "");
+		usage(Intl.getString("tree#errNoFilesGiven"), "");
 		return;
 	    }
 
@@ -592,12 +557,11 @@ public class Tree
 		    try {
 			list(f.getCanonicalFile(), "", "", "", true);
 		    } catch (IOException ioe) {
-			System.err.println("ERROR: Unable to get canonical name for \"" + arg + "\": "
-				+ ExceptionUtil.toString(ioe));
+			Intl.errFormat("tree#errFileName", arg, ExceptionUtil.toString(ioe));
 		    }
 		}
 		else {
-		    System.err.println("WARNING: Ignoring non-existent file \"" + f.getPath() + "\"");
+		    Intl.errFormat("tree#warnNoFile", f.getPath());
 		}
 	    }
 	}

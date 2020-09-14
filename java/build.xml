@@ -35,39 +35,41 @@
 	<property environment="env"/>
 	<property file="build.properties"/>
 	<buildnumber/>
-        <condition property="new.java.version" value="true" else="false" >
-                <javaversion atleast="9"/>
-        </condition>
+	<condition property="new.java.version" value="true" else="false" >
+		<javaversion atleast="9"/>
+	</condition>
 
 
-        <taskdef name="preproc" classname="info.rlwhitcomb.preproc.JavaPreProc" classpath="${ant.tasks.jar}"/>
+	<taskdef name="preproc" classname="info.rlwhitcomb.preproc.JavaPreProc" classpath="${ant.tasks.jar}"/>
 
-        <macrodef name="generate-text-resources">
-                <attribute name="dir"/>
+	<macrodef name="generate-text-resources">
+		<attribute name="dir"/>
 
-                <sequential>
-                        <apply executable="native2ascii" dir="@{dir}" dest="@{dir}" failonerror="true" unless:true="${new.java.version}">
-                                <arg value="-encoding" />
-                                <arg value="utf8" />
-                                <srcfile/>
-                                <targetfile/>
-                                <fileset dir="@{dir}" includes="resources*.utf8"/>
-                                <globmapper from="*.utf8" to="*.properties"/>
-                        </apply>
-                        <copy todir="@{dir}" if:true="${new.java.version}">
-                                <fileset dir="@{dir}" includes="resources*.utf8"/>
-                                <globmapper from="*.utf8" to="*.properties"/>
-                        </copy>
-                </sequential>
-        </macrodef>
+		<sequential>
+			<apply executable="native2ascii" dir="@{dir}" dest="@{dir}" failonerror="true" unless:true="${new.java.version}">
+				<arg value="-encoding" />
+				<arg value="utf8" />
+				<srcfile/>
+				<targetfile/>
+				<fileset dir="@{dir}" includes="resources*.utf8"/>
+				<globmapper from="*.utf8" to="*.properties"/>
+			</apply>
+			<copy todir="@{dir}" if:true="${new.java.version}">
+				<fileset dir="@{dir}" includes="resources*.utf8"/>
+				<globmapper from="*.utf8" to="*.properties"/>
+			</copy>
+		</sequential>
+	</macrodef>
 
 	<target name="preproc" description="Preprocesses necessary files">
-                <preproc file="info/rlwhitcomb/util/Environment.javapp" outputExt=".java" nologo="true" verbose="true" format="UTF-8"
-                        define="PRODUCT_NAME=${product.name},APP_VERSION=${build.version},APP_BUILD=${build.number},IS_DEBUG_BUILD=false" />
-                <parallel>
-                        <generate-text-resources dir="info/rlwhitcomb/csv" />
-                        <generate-text-resources dir="info/rlwhitcomb/util" />
-                </parallel>
+		<preproc file="info/rlwhitcomb/util/Environment.javapp" outputExt=".java" nologo="true" verbose="true" format="UTF-8"
+			define="PRODUCT_NAME=${product.name},APP_VERSION=${build.version},APP_BUILD=${build.number},IS_DEBUG_BUILD=false" />
+		<parallel>
+			<generate-text-resources dir="info/rlwhitcomb/cat" />
+			<generate-text-resources dir="info/rlwhitcomb/csv" />
+			<generate-text-resources dir="info/rlwhitcomb/tree" />
+			<generate-text-resources dir="info/rlwhitcomb/util" />
+		</parallel>
 	</target>
 
 	<target name="compile" depends="preproc" description="Compiles the java source">
@@ -113,9 +115,9 @@
 				<include name="net/iharder/b64"/>
 				<include name="info/rlwhitcomb/**"/>
 			</packageset>
-                       <fileset dir=".">
-                                <include name="*.java" />
-                        </fileset>
+			<fileset dir=".">
+				<include name="*.java" />
+			</fileset>
 		</javadoc>
 	</target>
 
@@ -136,17 +138,17 @@
 			<fileset dir="info/rlwhitcomb/jarfile" includes="*.class"/>
 			<fileset dir="info/rlwhitcomb/tree" includes="*.class"/>
 			<fileset dir="info/rlwhitcomb/util" includes="*.class"/>
-                        <!-- Clean out the preprocessed files -->
-                        <fileset dir="." includes="**/*">
-                                <present targetdir=".">
-                                        <mapper type="glob" from="*.java" to="*.javapp"/>
-                                </present>
-                        </fileset>
-                        <fileset dir="." includes="**/*">
-                                <present targetdir=".">
-                                        <mapper type="glob" from="*.properties" to="*.utf8"/>
-                                </present>
-                        </fileset>
+			<!-- Clean out the preprocessed files -->
+			<fileset dir="." includes="**/*">
+				<present targetdir=".">
+					<mapper type="glob" from="*.java" to="*.javapp"/>
+				</present>
+			</fileset>
+			<fileset dir="." includes="**/*">
+				<present targetdir=".">
+					<mapper type="glob" from="*.properties" to="*.utf8"/>
+				</present>
+			</fileset>
 		</delete>
 		<delete dir="doc"/>
 	</target>

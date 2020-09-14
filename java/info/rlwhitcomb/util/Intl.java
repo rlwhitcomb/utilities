@@ -108,6 +108,15 @@
  *	    differences).
  *	10-Mar-2020 (rlwhitcomb)
  *	    Prepare for GitHub.
+ *	11-Sep-2020 (rlwhitcomb)
+ *	    Allow "printHelp" to not have the number of lines, but just stop when
+ *	    the next line number can't be found.
+ *	    Rework to add "getOptionalString" to the Provider interface, and then
+ *	    redo all the various methods to call helpers so that either "getString"
+ *	    or "getOptionalString" can be called (without duplicating a lot of logic).
+ *	    Variants of "getNumber" and "getInt" with default values if the string
+ *	    can't be found.
+ *	    Make all parameters final.
  */
 package info.rlwhitcomb.util;
 
@@ -177,17 +186,29 @@ public class Intl
 		public Locale getLocale();
 		/**
 		 * The real workhorse method.
+		 * Note: missing resources are logged as errors.
+		 *
 		 * @param	resourceName The key for the resource we need.
 		 * @return	The resource string corresponding to the given key.
 		 */
 		public String getString(String resourceName);
+		/**
+		 * A variant of our basic method that returns {@code null} if the string
+		 * can't be found (in other words, it is optional). No errors are logged
+		 * for missing resources, since they are (by definition) okay if not found.
+		 *
+		 * @param	resourceName The key for the resource we need.
+		 * @return	The resource string for the given key or {@code null}
+		 *		if the resource is not available.
+		 */
+		public String getOptionalString(String resourceName);
 	}
 
 
 	/**
 	 * The map of package/class providers.
 	 */
-	private static Map<String, Provider> providerMap = new LinkedHashMap<String, Provider>();
+	private static Map<String, Provider> providerMap = new LinkedHashMap<>();
 
 
 	/**
@@ -212,18 +233,21 @@ public class Intl
 		protected ResourceBundleProvider() {
 		}
 
-		private ResourceBundleProvider(String name, Locale locale, ClassLoader classLoader) {
+		private ResourceBundleProvider(final String name, final Locale locale,
+			final ClassLoader classLoader) {
 		    this.name = name;
 		    providerMap.put(name, this);
 		    updateResources(name, locale, classLoader);
 		}
 
-		protected void updateResources(String name, Locale locale, ClassLoader classLoader) {
+		protected void updateResources(final String name, final Locale locale,
+			final ClassLoader classLoader) {
 		    this.locale = locale;
 		    this.resources = ResourceBundle.getBundle(String.format("%1$s.resources", name), locale, classLoader);
 		}
 
-		protected static void install(String name, Locale locale, ClassLoader classLoader) {
+		protected static void install(final String name, final Locale locale,
+			final ClassLoader classLoader) {
 		    ResourceBundleProvider provider = (ResourceBundleProvider)providerMap.get(name);
 		    if (provider == null) {
 			new ResourceBundleProvider(name, locale, classLoader);
@@ -243,8 +267,16 @@ public class Intl
 		    return locale;
 		}
 
-		@Override
-		public String getString(String resourceName) {
+		/**
+		 * Lookup the resource string for the given name.
+		 * Note: it is the responsibility of the caller to log an error
+		 *  (if desired) for a missing resource.
+		 * @param	resourceName	The fully-qualified resource key.
+		 * @return	The string for that key, or null if not found.
+		 * @throws	MissingResourceException if there is no object
+		 *		for the given key.
+		 */
+		private String getResourceString(final String resourceName) {
 		    try {
 			Object obj = resources.getObject(resourceName);
 			if (obj instanceof String) {
@@ -259,17 +291,50 @@ public class Intl
 			    }
 			    return string;
 			}
-			else if (obj == null) {
-			    String method = ClassUtil.getCallingMethod(2);
-			    getLog().error("getString: Unknown string resource: \"%1$s#%2$s\", referenced from %3$s", this.name, resourceName, method);
-			    return resourceName;
-			}
-			else
+			else if (obj != null) {
 			    return obj.toString();
+			}
 		    }
 		    catch (MissingResourceException mre) {
-			getLog().except(String.format("%1$s#%2$s", this.name, resourceName), mre);
+			throw mre;
+		    }
+
+		    return null;
+		}
+
+		@Override
+		public String getString(final String resourceName) {
+		    try {
+			String resourceString = getResourceString(resourceName);
+
+			if (resourceString == null) {
+			    String method = ClassUtil.getCallingMethod(2);
+			    getLog().error(
+				    "getString: Unknown string resource: \"%1$s#%2$s\", "
+				  + "referenced from %3$s",
+				    this.name, resourceName, method);
+			    return resourceName;
+			}
+
+			return resourceString;
+		    }
+		    catch (MissingResourceException mre) {
+			String method = ClassUtil.getCallingMethod(2);
+			getLog().except(String.format(
+				"getString: Unknown string resource \"%1$s#%2$s\", "
+			      + "referenced from %3$s",
+				this.name, resourceName, method), mre);
 			return resourceName;
+		    }
+		}
+
+		@Override
+		public String getOptionalString(final String resourceName) {
+		    try {
+			return getResourceString(resourceName);
+		    }
+		    catch (MissingResourceException mre) {
+			return null;
 		    }
 		}
 	}
@@ -282,7 +347,7 @@ public class Intl
 	private static class ResourceFilter implements FileFilter
 	{
 		@Override
-		public boolean accept(File path) {
+		public boolean accept(final File path) {
 		    if (path.exists() && path.canRead()) {
 			if (path.isDirectory()) {
 			    return true;
@@ -307,11 +372,12 @@ public class Intl
 	{
 		private static FileFilter resourceFilter = new ResourceFilter();
 
-		public static void install(String pkgName, Locale locale) {
+		public static void install(final String pkgName, final Locale locale) {
 		    install(pkgName, locale, ClassUtil.getClassLoader());
 		}
 
-		private static void installFromOneDirectory(File dir, Locale locale, FileFilter filter) {
+		private static void installFromOneDirectory(final File dir, final Locale locale,
+			final FileFilter filter) {
 		    File[] files = dir.listFiles(filter);
 		    // Process this list twice, first time installing packages from the current directory
 		    // then the second time recursing through subdirectories.
@@ -344,7 +410,7 @@ public class Intl
 		 *			does not exist, is not a directory, or can't be read
 		 *			by the current user.
 		 */
-		public static void installAllPackages(File dir, Locale locale) {
+		public static void installAllPackages(final File dir, final Locale locale) {
 		    if (dir.exists() && dir.isDirectory() && dir.canRead()) {
 			installFromOneDirectory(dir, locale, resourceFilter);
 		    }
@@ -364,8 +430,24 @@ public class Intl
 		 *			does not exist, is not a directory, or can't be read
 		 *			by the current user.
 		 */
-		public static void installAllPackages(String rootDir, Locale locale) {
+		public static void installAllPackages(final String rootDir, final Locale locale) {
 		    installAllPackages(new File(rootDir), locale);
+		}
+	}
+
+
+	/**
+	 * Used by the {@link #getProviderKey} method to return both a provider
+	 * and a possibly modified key with the provider prefix stripped out.
+	 */
+	private static class ProviderKeyPair
+	{
+		Provider provider;
+		String key;
+
+		ProviderKeyPair(final Provider newProvider, final String newKey) {
+		    provider = newProvider;
+		    key      = newKey;
 		}
 	}
 
@@ -448,12 +530,12 @@ public class Intl
 	 * Initialize our localization resources.
 	 * @param	provider	The default resource provider.
 	 */
-	public static void initResources(Provider provider) {
+	public static void initResources(final Provider provider) {
 	    defaultProvider = provider;
 	}
 
 
-	public static void initJarResources(URL fileURL, Locale locale) {
+	public static void initJarResources(final URL fileURL, final Locale locale) {
 	    try {
 		// Enumerate all the "resources*.properties" files in this .jar
 		// and register their package names.
@@ -484,37 +566,29 @@ public class Intl
 	 *
 	 * @param	locale	The current locale, used to select the language.
 	 */
-	public static void initAllPackageResources(Locale locale) {
+	public static void initAllPackageResources(final Locale locale) {
 	    URL ourJarFile = Launcher.getOurJarFile();
 	    File plainFile = Launcher.urlToPlainFile(ourJarFile);
-	    if (plainFile == null || plainFile.isFile())
+	    if (plainFile == null || plainFile.isFile()) {
 		initJarResources(ourJarFile, locale);
-	    else
+	    }
+	    else {
 		PackageResourceProvider.installAllPackages(plainFile, locale);
+	    }
 	}
 
 
 	/**
-	 * Helper function to load a single string resource.
-	 * <p> Just like the <tt>BXMLSerializer</tt>, if the given
-	 * string resource does not exist the result is just the
-	 * resource name (to avoid costly exceptions).  But the
-	 * result is logged so a postprocessor can gather up these
-	 * messages for analysis.
-	 * <p> If the resource name begins with "pkg#", then the
-	 * appropriate package resources are searched, otherwise
-	 * the default resources are used.  Either the full package
-	 * name can be given (i.e., "info.rlwhitcomb.script#") or just
-	 * the part following "info.rlwhitcomb" (as in, "script#").
-	 * <p>Note: "#" by itself will refer to "info.rlwhitcomb" resources
-	 * (although "info.rlwhitcomb#" can be used as well).
+	 * Look up the provider for the given resource name, and return both
+	 * the provider (if found), and the now possible modified resource name
+	 * needed to look up the string from that provider.
 	 *
 	 * @param	resourceName	The key name of the resource to fetch.
-	 * @return	The requested resource corresponding to the key.
+	 * @return	The provider/key pair needed to fetch the resource.
 	 * @throws	IllegalArgumentException if the resource key is {@code null}
 	 *		or if a provider cannot be found for the resource key.
 	 */
-	public static String getString(String resourceName) {
+	private static ProviderKeyPair getProviderKey(final String resourceName) {
 	    if (resourceName == null) {
 		if (providerMap.get(OUR_PKG_NAME) != null) {
 		    throw new IllegalArgumentException(getString("util#intl.keyNotNull"));
@@ -543,9 +617,73 @@ public class Intl
 			throw new IllegalArgumentException(String.format("Unable to find resource provider for \"%1$s\" package.", pkgName));
 		    }
 		}
-		return provider.getString(resourceName.substring(ix + 1));
+		return new ProviderKeyPair(provider, resourceName.substring(ix + 1));
 	    }
-	    return defaultProvider.getString(resourceName);
+	    return new ProviderKeyPair(defaultProvider, resourceName);
+	}
+
+	/**
+	 * Helper function to load a single string resource.
+	 * <p> Just like the <tt>BXMLSerializer</tt>, if the given
+	 * string resource does not exist the result is just the
+	 * resource name (to avoid costly exceptions).  But the
+	 * result is logged so a postprocessor can gather up these
+	 * messages for analysis.
+	 * <p> If the resource name begins with "pkg#", then the
+	 * appropriate package resources are searched, otherwise
+	 * the default resources are used.  Either the full package
+	 * name can be given (i.e., "info.rlwhitcomb.script#") or just
+	 * the part following "info.rlwhitcomb" (as in, "script#").
+	 * <p>Note: "#" by itself will refer to "info.rlwhitcomb" resources
+	 * (although "info.rlwhitcomb#" can be used as well).
+	 *
+	 * @param	resourceName	The key name of the resource to fetch.
+	 * @return	The requested resource corresponding to the key.
+	 * @throws	IllegalArgumentException if the resource key is {@code null}
+	 *		or if a provider cannot be found for the resource key.
+	 */
+	public static String getString(String resourceName) {
+	    ProviderKeyPair source = getProviderKey(resourceName);
+	    return source.provider.getString(source.key);
+	}
+
+	/**
+	 * Get a string resource, but don't insist on it being available.
+	 *
+	 * @param	resourceName	The key name of the resource to fetch.
+	 * @return	The requested resource, or null if it can't be found.
+	 * @throws	IllegalArgumentException if the resource key is {@code null}
+	 *		or if a provider cannot be found for the resource key.
+	 */
+	public static String getOptionalString(final String resourceName) {
+	    ProviderKeyPair source = getProviderKey(resourceName);
+	    return source.provider.getOptionalString(source.key);
+	}
+
+
+	/**
+	 * @return	One resource name string from an "object" and "key" pieces.
+	 * @param	object	The "object" name (first part of an "x.y" key).
+	 * @param	key	The second part of the resource key.
+	 */
+	private static String makeKey(final String object, final String key) {
+	    return String.format("%1$s.%2$s", object, key);
+	}
+
+
+	/**
+	 * @return	One resource name string from a number of object/key pieces.
+	 * @param	objectKeys	The list of pieces to put together into
+	 *				the resource name key.
+	 */
+	private static String makeKey(final String... objectKeys) {
+	    StringBuilder buf = new StringBuilder();
+	    for (String key : objectKeys) {
+		if (buf.length() > 0)
+		    buf.append('.');
+		buf.append(key);
+	    }
+	    return buf.toString();
 	}
 
 
@@ -557,8 +695,21 @@ public class Intl
 	 * @param	key	The second part of the resource key.
 	 * @return		The resource corresponding to this combined key.
 	 */
-	public static String getString(String object, String key) {
-	    return getString(String.format("%1$s.%2$s", object, key));
+	public static String getString(final String object, final String key) {
+	    return getString(makeKey(object, key));
+	}
+
+
+	/**
+	 * And yet another flavor of {@link #getString(String)} to take an arbitrary
+	 * number of object prefixes and concatenate them to get the final resource
+	 * key name.
+	 *
+	 * @param	objectKeys	The list of object or key names to concatenate.
+	 * @return	The resource found from "x.y.z...".
+	 */
+	public static String getString(final String... objectKeys) {
+	    return getString(makeKey(objectKeys));
 	}
 
 
@@ -573,17 +724,49 @@ public class Intl
 	    return Double.valueOf(getString(key));
 	}
 
-
 	/**
 	 * Convenience method to get an integer value from the given string resource.
 	 *
 	 * @param	key	The resource key to fetch.
 	 * @return		The integer value of the resource string.
-	 * @throws	NumberFormatException if the value is not in numeric format.
+	 * @throws	NumberFormatException if the value is not in integer format.
 	 * @see		#getNumber
 	 */
 	public static int getInt(String key) {
-	    return getNumber(key).intValue();
+	    return Integer.valueOf(getString(key));
+	}
+
+	/**
+	 * Get a numeric value from the given string resource, with a given
+	 * default if the value is not found.
+	 *
+	 * @param	key		Name of the resource to fetch.
+	 * @param	defaultValue	What to return if the resource is not found.
+	 * @return	Either the numeric value of the resource if found, or the
+	 *		default value if not.
+	 * @throws	NumberFormatException if the string is found, but cannot
+	 *		be parsed into a valid number.
+	 * @see #getOptionalString
+	 */
+	public static Number getNumber(final String key, final Number defaultValue) {
+	    String numberString = getOptionalString(key);
+	    return numberString == null ? defaultValue : Double.valueOf(numberString);
+	}
+
+	/**
+	 * Get an integer value from the given string resource, or a default value
+	 * if the resource cannot be found.
+	 *
+	 * @param	key		Name of the resource to fetch.
+	 * @param	defaultValue	What to return if the resource cannot be found.
+	 * @return	The integer value of the resource if found, or the default
+	 *		value if not found.
+	 * @throws	NumberFormatException if the resource string cannot be parsed
+	 *		into a valid integer.
+	 */
+	public static int getInt(final String key, final int defaultValue) {
+	    String intString = getOptionalString(key);
+	    return intString == null ? defaultValue : Integer.valueOf(intString);
 	}
 
 
@@ -597,7 +780,7 @@ public class Intl
 	 *				final string.
 	 * @return			The fully formatted string.
 	 */
-	public static String formatString(String formatKey, Object... args) {
+	public static String formatString(final String formatKey, final Object... args) {
 	    String format = getString(formatKey);
 	    return String.format(format, args);
 	}
@@ -612,7 +795,7 @@ public class Intl
 	 *				then to lookup the resource.
 	 * @return	The resource string if the input is a key, or just the input if it is not.
 	 */
-	public static String getKeyString(String messageOrKey) {
+	public static String getKeyString(final String messageOrKey) {
 	    if (messageOrKey != null &&
 		messageOrKey.length() > 1 &&
 		messageOrKey.charAt(0) == '%' &&
@@ -635,7 +818,7 @@ public class Intl
 	 *			be chained together.
 	 * @see	#getString(String)
 	 */
-	public static StringBuilder getString(StringBuilder buf, String key) {
+	public static StringBuilder getString(final StringBuilder buf, final String key) {
 	    return buf.append(getString(key));
 	}
 
@@ -651,10 +834,9 @@ public class Intl
 	 *				appended to it.
 	 * @see	#formatString
 	 */
-	public static StringBuilder formatString(StringBuilder buf, String formatKey, Object... args) {
+	public static StringBuilder formatString(final StringBuilder buf, final String formatKey, final Object... args) {
 	    return buf.append(formatString(formatKey, args));
 	}
-
 
 
 	/**
@@ -666,7 +848,7 @@ public class Intl
 	 * @return			The input buffer with the text appended to it.
 	 * @see	#getKeyString
 	 */
-	public static StringBuilder getKeyString(StringBuilder buf, String messageOrKey) {
+	public static StringBuilder getKeyString(final StringBuilder buf, final String messageOrKey) {
 	    return buf.append(getKeyString(messageOrKey));
 	}
 
@@ -675,7 +857,7 @@ public class Intl
 	 * Print a resource string to {@link System#out}.
 	 * @param	key	Key value passed to {@link #getString(String)}.
 	 */
-	public static void outPrintln(String key) {
+	public static void outPrintln(final String key) {
 	    System.out.println(getString(key));
 	}
 
@@ -684,7 +866,7 @@ public class Intl
 	 * Print a resource string to {@link System#err}.
 	 * @param	key	Key value passed to {@link #getString(String)}.
 	 */
-	public static void errPrintln(String key) {
+	public static void errPrintln(final String key) {
 	    System.err.println(getString(key));
 	}
 
@@ -695,7 +877,7 @@ public class Intl
 	 *
 	 * @param	key	Key value passed to {@link #getString(String)}.
 	 */
-	public static void startupError(String key) {
+	public static void startupError(final String key) {
 	    String errorMsg = getString(key);
 	    try {
 	 	Launcher.startupError(errorMsg);
@@ -712,7 +894,7 @@ public class Intl
 	 * @param formatKey The key string used to obtain the format string.
 	 * @param args The (possibly empty) list of arguments used to format the message.
 	 */
-	public static void outFormat(String formatKey, Object... args) {
+	public static void outFormat(final String formatKey, final Object... args) {
 	    System.out.println(formatString(formatKey, args));
 	}
 
@@ -722,7 +904,7 @@ public class Intl
 	 * @param formatKey The key string used to obtain the format string.
 	 * @param args The (possibly empty) list of arguments used to format the message.
 	 */
-	public static void errFormat(String formatKey, Object... args) {
+	public static void errFormat(final String formatKey, final Object... args) {
 	    System.err.println(formatString(formatKey, args));
 	}
 
@@ -734,7 +916,7 @@ public class Intl
 	 * @param formatKey The key string used to obtain the format string.
 	 * @param args The (possibly empty) list of arguments used to format the message.
 	 */
-	public static void startupErrorFormat(String formatKey, Object... args) {
+	public static void startupErrorFormat(final String formatKey, final Object... args) {
 	    String errorMsg = formatString(formatKey, args);
 	    try {
 		Launcher.startupError(errorMsg);
@@ -742,6 +924,14 @@ public class Intl
 	    catch (UnsatisfiedLinkError ule) {
 		System.err.println(ERROR + errorMsg);
 	    }
+	}
+
+
+	/**
+	 * @return prefix + ".help" + line
+	 */
+	private static String helpKey(final String prefix, final int line) {
+	    return makeKey(prefix, String.format("help%1$d", line));
 	}
 
 
@@ -761,11 +951,47 @@ public class Intl
 	 *
 	 * @param	prefix	The prefix used to select the help messages.
 	 */
-	public static void printHelp(String prefix) {
+	public static void printHelp(final String prefix) {
+	    printHelp(prefix, null);
+	}
+
+	/**
+	 * Print out a series of "help" message lines described in a certain format
+	 * in the resource file.
+	 * <p> They must have a common package, common first key part ("script" in
+	 * the example below), and have a "number of lines" key ("helpNumberLines").
+	 * The individual keys are prefixed with "help".
+	 * <p> A typical example is this:
+	 * <pre>script.helpNumberLines = 22
+	 *script.help1 = "Usage..."
+	 *script.help2 = ...
+	 *...
+	 *script.help22 = "last message"
+	 * </pre>
+	 *
+	 * @param	prefix	The prefix used to select the help messages.
+	 * @param	symbols	A map of symbols used to substitute values.
+	 */
+	public static void printHelp(final String prefix, final Map<String, String> symbols) {
 	    // Grab the number of help lines from the resources first
-	    int numLines = Integer.valueOf(getString(prefix, "helpNumberLines"));
-	    for (int line = 1; line <= numLines; line++) {
-		System.out.println(getString(prefix, String.format("help%1$d", line)));
+	    int numLines = getInt(makeKey(prefix, "helpNumberLines"), -1);
+	    int lineNo = 1;
+
+	    // If the number of lines isn't supplied, then just keep
+	    // printing until we run out of items to print.
+	    if (numLines < 1) {
+		while (true) {
+		    String helpLine = getOptionalString(helpKey(prefix, lineNo++));
+		    if (helpLine == null)
+			break;
+		    System.out.println(CharUtil.substituteEnvValues(helpLine, symbols));
+		}
+	    }
+	    else {
+		while (lineNo <= numLines) {
+		    String helpLine = getString(helpKey(prefix, lineNo++));
+		    System.out.println(CharUtil.substituteEnvValues(helpLine, symbols));
+		}
 	    }
 	}
 
