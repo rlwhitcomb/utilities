@@ -426,20 +426,24 @@ public class Tree
 	    return Options.getDisplayableOptions(Options.getMixedCaseOptions(option, true));
 	}
 
+	private static void putHelpList(Map<String, String> symbols, String value) {
+	    symbols.put(value, helpList(value));
+	}
+
 	private static void usage(String... messages) {
 	    for (String message : messages) {
 		System.out.println(message);
 	    }
 
 	    Map<String, String> symbols = new HashMap<>();
-	    symbols.put("MIXED_CASE",       helpList(MIXED_CASE));
-	    symbols.put("CASE_INSENSITIVE", helpList(CASE_INSENSITIVE));
-	    symbols.put("ALL_FILES",        helpList(ALL_FILES));
-	    symbols.put("OMIT_FILES",       helpList(OMIT_FILES));
-	    symbols.put("SHOW_HIDDEN",      helpList(SHOW_HIDDEN));
-	    symbols.put("NO_COLORS",        helpList(NO_COLORS));
-	    symbols.put("NO_COLOR",         helpList(NO_COLOR).replace(", -nocolor", ""));
-	    symbols.put("NO_COL",           helpList(NO_COL));
+	    putHelpList(symbols, MIXED_CASE);
+	    putHelpList(symbols, CASE_INSENSITIVE);
+	    putHelpList(symbols, ALL_FILES);
+	    putHelpList(symbols, OMIT_FILES);
+	    putHelpList(symbols, SHOW_HIDDEN);
+	    putHelpList(symbols, NO_COLORS);
+	    symbols.put(NO_COLOR, helpList(NO_COLOR).replace(", -nocolor", ""));
+	    putHelpList(symbols, NO_COL);
 
 	    Intl.printHelp("tree#usage", symbols);
 	}

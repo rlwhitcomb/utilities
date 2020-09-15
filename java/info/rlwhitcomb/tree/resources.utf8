@@ -26,6 +26,8 @@
 # History:
 #       13-Sep-2020 (rlwhitcomb)
 #           Moved into here from the .java file.
+#	14-Sep-2020 (rlwhitcomb)
+#	    Changed the lookup symbols.
 
 productName	= Directory Tree Utility
 
@@ -49,24 +51,24 @@ usage.help10	= "\t-Dir  sorts files first, then directories"
 usage.help11	= "\t  (or -Directory, or -D)"
 usage.help12	= "\t-mixed  sorts file names alphabetically, in mixed case"
 usage.help13	= "\t  (meaning \"M\" is different than \"m\")"
-usage.help14	= "\t  (or %MIXED_CASE%, -sensitive, -mix, -m, -s)"
+usage.help14	= "\t  (or %MixedCase%, -sensitive, -mix, -m, -s)"
 usage.help15	= "\t-case  sort file names alphabetically, without regard to case"
 usage.help16	= "\t  (meaning \"M\" sorts the same as \"m\")"
-usage.help17	= "\t  (or %CASE_INSENSITIVE%, -insensitive, -case, -c, or -i)"
+usage.help17	= "\t  (or %CaseInsensitive%, -insensitive, -case, -c, or -i)"
 usage.help18	= " Default is not to sort the output at all."
 usage.help19	= ""
 usage.help20	= "\t-file  prints file names also (default is directories only)"
-usage.help21	= "\t  (or %ALL_FILES%, -files, -all, or -f)"
+usage.help21	= "\t  (or %AllFiles%, -files, -all, or -f)"
 usage.help22	= "\t-omit  (default) omits file names"
-usage.help23	= "\t  (or %OMIT_FILES%, or -o)"
+usage.help23	= "\t  (or %OmitFiles%, or -o)"
 usage.help24	= ""
 usage.help25	= "\t-hidden  shows hidden directories / files"
-usage.help26	= "\t  (or %SHOW_HIDDEN%, -hid, -show, or -s)"
+usage.help26	= "\t  (or %ShowHidden%, -hid, -show, or -s)"
 usage.help27	= ""
 usage.help28	= "\t-color    use colors to enhance the output (default)"
 usage.help29	= "\t  (or -colors, or -col)"
 usage.help30	= "\t-nocolor  do not use colors on output"
-usage.help31	= "\t  (or %NO_COLORS%, %NO_COLOR%, %NO_COL%, -no, or -n)"
+usage.help31	= "\t  (or %NoColors%, %NoColor%, %NoCol%, -no, or -n)"
 usage.help32	= ""
 usage.help33	= "\t-help  prints this message"
 usage.help34	= "\t  (or -usage, -h, -u, or -?)"
