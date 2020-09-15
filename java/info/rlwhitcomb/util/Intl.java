@@ -929,6 +929,8 @@ public class Intl
 
 	/**
 	 * @return prefix + ".help" + line
+	 * @param prefix The resource key prefix for each help line.
+	 * @param line   The help output index number used to look up the string.
 	 */
 	private static String helpKey(final String prefix, final int line) {
 	    return makeKey(prefix, String.format("help%1$d", line));
