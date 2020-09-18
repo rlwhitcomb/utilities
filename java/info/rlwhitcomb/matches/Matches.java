@@ -49,8 +49,15 @@ public class Matches
 	 * arg[2..n] = additional regex
 	 * return code 0 = matches (true)
 	 * return code 1 = no match (false)
-	 * Note: made into a separate function to facilitate testing of the algorithm
-	 * @see info.rlwhitcomb.matches.MatchesTest
+	 *
+	 * Process the command line arguments into a "matched" result.
+	 *
+	 * @param args	The complete list of command line arguments.
+	 * @return Whether or not the input argument matched any ("-or") or all ("-and")
+	 * of the given regular expressions. Reversed with "-not" flag.
+	 *
+	 * @see info.rlwhitcomb.matches.MatchesTest Made into a separate
+	 * function to facilitate testing of the algorithm.
 	 */
 	public static boolean match(final String[] args) {
 	    boolean or        = false;
@@ -149,6 +156,12 @@ public class Matches
 	    return matches;
 	}
 
+	/**
+	 * Main program invoked from the command line. Process exit code is
+	 * 0 for a match (success) and 1 for a fail.
+	 *
+	 * @param args	The complete set of (parsed) command line arguments.
+	 */
 	public static void main(String[] args) {
 	    System.exit(match(args) ? 0 : 1);
 	}
