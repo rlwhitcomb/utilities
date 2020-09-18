@@ -26,6 +26,11 @@
 
 	"Ant" build file for the utility code.
 
+	History:
+	    18-Sep-2020 (rlwhitcomb)
+		Add "History" starting from now; reformat and clean up target
+		descriptions. Added "matches" directory today also.
+
      ========================================================================== -->
 
 <project name="java-utilities" default="all" basedir="."
@@ -46,7 +51,8 @@
 		<attribute name="dir"/>
 
 		<sequential>
-			<apply executable="native2ascii" dir="@{dir}" dest="@{dir}" failonerror="true" unless:true="${new.java.version}">
+			<apply executable="native2ascii" dir="@{dir}" dest="@{dir}"
+				failonerror="true" unless:true="${new.java.version}">
 				<arg value="-encoding" />
 				<arg value="utf8" />
 				<srcfile/>
@@ -61,8 +67,9 @@
 		</sequential>
 	</macrodef>
 
-	<target name="preproc" description="Preprocesses necessary files">
-		<preproc file="info/rlwhitcomb/util/Environment.javapp" outputExt=".java" nologo="true" verbose="true" format="UTF-8"
+	<target name="preproc" description="Preprocesses necessary files.">
+		<preproc file="info/rlwhitcomb/util/Environment.javapp" outputExt=".java"
+			nologo="true" verbose="true" format="UTF-8"
 			define="PRODUCT_NAME=${product.name},APP_VERSION=${build.version},APP_BUILD=${build.number},IS_DEBUG_BUILD=false" />
 		<parallel>
 			<generate-text-resources dir="info/rlwhitcomb/cat" />
@@ -73,7 +80,7 @@
 		</parallel>
 	</target>
 
-	<target name="compile" depends="preproc" description="Compiles the java source">
+	<target name="compile" depends="preproc" description="Compiles the java source.">
 		<javac includeAntRuntime="false" createMissingPackageInfoClass="false" encoding="utf-8">
 			<compilerarg line="${compiler.args}"/>
 			<src path="."/>
@@ -95,7 +102,7 @@
 		</javac>
 	</target>
 
-	<target name="jar" depends="compile" description="jar up the compiled class files">
+	<target name="jar" depends="compile" description="Jar up the compiled class files (into ${dest.jar}).">
 		<jar basedir="." destfile="${dest.jar}">
 			<include name="net/iharder/b64/*.class"/>
 			<include name="info/rlwhitcomb/annotations/*.class"/>
@@ -109,7 +116,7 @@
 		</jar>
 	</target>
 
-	<target name="doc" depends="compile" description="Builds Javadoc">
+	<target name="doc" depends="compile" description="Builds the Javadoc for the entire project.">
 		<javadoc destdir="doc" access="private" encoding="utf-8">
 			<arg value="-html4" if:true="${new.java.version}"/>
 			<arg value="--frames" if:true="${new.java.version}"/>
@@ -124,13 +131,13 @@
 		</javadoc>
 	</target>
 
-	<target name="all" depends="compile,jar" description="Builds and jars everything"/>
+	<target name="all" depends="compile,jar" description="Builds and jars everything."/>
 
 	<target name="test" depends="compile" description="Run extant unit tests.">
 		<java classname="TestSQLFormatter"/>
 	</target>
 
-	<target name="clean" description="cleans all generated files">
+	<target name="clean" description="Cleans all generated files.">
 		<delete>
 			<fileset dir="." includes="${dest.jar}"/>
 			<fileset dir="." includes="*.class"/>
@@ -162,7 +169,7 @@
 	</condition>
 	<echo message="UTILITIES_HOME=${env.UTILITIES_HOME}" if:true="${utilities.available}"/>
 
-	<target name="install-local" depends="all" description="Build and install the utilities in a local utilities file.">
+	<target name="install" depends="all" description="Build and install the utilities in a local utilities directory.">
 		<copy file="${dest.jar}" todir="${env.UTILITIES_HOME}" if:true="${utilities.available}"/>
 		<echo message="Variable UTILITIES_HOME is not set in the environment!" unless:true="${utilities.available}"/>
 	</target>
