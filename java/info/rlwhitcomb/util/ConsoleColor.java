@@ -24,8 +24,10 @@
  * Escape sequences for colorizing console output.
  *
  *  Change History:
- *   07-Jul-2010 (rlwhitcomb)
+ *   07-Jul-2020 (rlwhitcomb)
  *	Create from examples on the web.
+ *   22-Sep-2020 (rlwhitcomb)
+ *      Add "getName" method.
  */
 package info.rlwhitcomb.util;
 
@@ -165,6 +167,14 @@ public enum ConsoleColor {
      */
     private ConsoleColor(final String code) {
         this.code = code;
+    }
+
+    /**
+     * @return The color name (enum value), as opposed to the
+     * escape code to implement it (given by {@link #toString}).
+     */
+    public String getName() {
+       return super.toString();
     }
 
     /**
