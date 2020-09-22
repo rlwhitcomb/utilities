@@ -60,7 +60,7 @@ if "%1" EQU "" goto check_dir
 set DEST=%DEST%\%1
 goto add_subdir
 :check_dir
-if exist %DEST% goto doit
+if exist "%DEST%" goto doit
 echo Location "%DEST%" does not exist!
 exit /b 1
 :doit
