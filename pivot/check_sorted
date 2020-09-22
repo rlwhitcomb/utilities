@@ -1,0 +1,10 @@
+#!/bin/bash
+WORD_FILE=$(find . -name "TWL*.txt")
+grep -v -e "^#.*" -e "^$" $WORD_FILE >words.txt
+sort words.txt > sort.txt
+diff words.txt sort.txt
+if [ $? -eq 0 ]
+then
+   echo The \"$WORD_FILE\" word list is correctly sorted.
+   rm words.txt sort.txt
+fi
