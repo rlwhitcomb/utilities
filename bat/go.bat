@@ -45,14 +45,26 @@ if /I "%1" EQU "home" goto check_going_home_time
 :check_destination
 set COMMAND=
 for /F "delims=, tokens=1,2,3,*" %%I in (%DESTINATIONS%) do (
-   for /f "tokens=*" %%M in  ('echo %%K') do (
-      if /I "%1" EQU "%%J" set COMMAND=%%I %%M& goto execute_command
+   for /f "tokens=*" %%M in ('echo %%K') do (
+      if /I "%1" EQU "%%J" set COMMAND=%%I&set DEST=%%M& goto execute_command
    )
 )
 :execute_command
 if "%COMMAND%" EQU "" goto display_help
-%COMMAND%
-cd
+if /I "%COMMAND%" EQU "popd" goto doit
+:: For "cd" or "pushd" commands, we can add any number of subdirectories
+:: below the specified one (for convenience).
+:add_subdir
+shift
+if "%1" EQU "" goto check_dir
+set DEST=%DEST%\%1
+goto add_subdir
+:check_dir
+if exist %DEST% goto doit
+echo Location "%DEST%" does not exist!
+exit /b 1
+:doit
+%COMMAND% %DEST%
 exit /b 0
 
 :setup
@@ -93,10 +105,11 @@ exit /b 0
 :display_help
 setlocal enabledelayedexpansion
 set "SPACES=             "
-echo Usage: %~n0 LOCATION
+echo Usage: %~n0 LOCATION [subdirectory [subsubdir] ...]
 echo.
 echo Pushes your current directory and goes to the specified
-echo LOCATION, where LOCATION is one of the following:
+echo LOCATION, and any given subdirectory(ies) beneath it,
+echo where LOCATION is one of the following:
 for /F "delims=, tokens=1,2,3,*" %%I in (%DESTINATIONS%) do (
    if "%%L" EQU "" (
       for /f "tokens=*" %%M in  ('echo %%K') do (
