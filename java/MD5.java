@@ -40,6 +40,8 @@
  *      Allow ":" on algorithm option in addition to "=".
  *   10-Mar-2020 (rlwhitcomb)
  *	Prepare for GitHub.
+ *   22-Sep-2020 (rlwhitcomb)
+ *	Error message if nothing given on command line to do.
  */
 
 import java.io.BufferedReader;
@@ -154,9 +156,10 @@ public class MD5 {
 	    System.err.println("\t\t\t\tMD2, SHA-1, SHA-256, SHA-384 or SHA-512");
 	    System.err.println("\t--help\t\tprint this help message");
 	    System.err.println("\t-? or -h\tsame");
+	    System.err.println();
 	    System.err.println("Note: options may be specified by \"-\", \"--\" or \"/\" (on Windows).");
 	    System.err.println("Note: [files] may not contain wild-card ('?' or '*') characters");
-	    System.err.println("[values] are assumed if the string given does not match any existing file name");
+	    System.err.println("      [values] are assumed if the string given does not match any existing file name");
 	}
 
 
@@ -371,8 +374,10 @@ public class MD5 {
 		charset = defaultCharset;
 
 	    // Now scan for the file name argument(s) (if any)
+	    boolean didAnything = false;
 	    for (String a : args) {
 		if (checkOption(a) == null) {
+		    didAnything = true;
 		    File f = new File(a);
 		    if (f.exists() && !f.isDirectory()) {
 			try {
@@ -397,6 +402,11 @@ public class MD5 {
 			printDigest(bytes);
 		    }
 		}
+	    }
+	    if (!didAnything) {
+		System.err.println("No files or strings given to process!");
+		System.err.println();
+		printHelp();
 	    }
 	}
 

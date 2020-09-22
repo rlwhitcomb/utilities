@@ -30,6 +30,8 @@
 	    18-Sep-2020 (rlwhitcomb)
 		Add "History" starting from now; reformat and clean up target
 		descriptions. Added "matches" directory today also.
+	    22-Sep-2020 (rlwhitcomb)
+		Add DumpManifest and MD5 to the .jar file for convenience.
 
      ========================================================================== -->
 
@@ -104,6 +106,8 @@
 
 	<target name="jar" depends="compile" description="Jar up the compiled class files (into ${dest.jar}).">
 		<jar basedir="." destfile="${dest.jar}">
+			<include name="DumpManifest*.class"/>
+			<include name="MD5*.class"/>
 			<include name="net/iharder/b64/*.class"/>
 			<include name="info/rlwhitcomb/annotations/*.class"/>
 			<include name="info/rlwhitcomb/cat/*.class"/>
