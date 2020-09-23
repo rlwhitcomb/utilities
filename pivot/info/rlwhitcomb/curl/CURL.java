@@ -42,12 +42,16 @@
  *	15-Apr-2020 (rlwhitcomb)
  *	    Speedup output display. Refactor code a bit.
  *	    Add some more keyboard shortcuts.
+ *	23-Sep-2020 (rlwhitcomb)
+ *	    Change keyboard shortcuts to use platform "command" modifier (not
+ *	    strictly Ctrl, esp. on Mac).
  */
 package info.rlwhitcomb.curl;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+
 import org.apache.pivot.beans.BXML;
 import org.apache.pivot.beans.BXMLSerializer;
 import org.apache.pivot.collections.Map;
@@ -56,6 +60,7 @@ import org.apache.pivot.util.concurrent.Task;
 import org.apache.pivot.util.concurrent.TaskExecutionException;
 import org.apache.pivot.util.concurrent.TaskListener;
 import org.apache.pivot.wtk.*;
+
 import info.rlwhitcomb.util.CharUtil;
 import info.rlwhitcomb.util.ClassUtil;
 import info.rlwhitcomb.util.CommandProcessor;
@@ -66,15 +71,15 @@ import info.rlwhitcomb.util.Which;
 /**
  * A GUI front-end for the <tt>"curl"</tt> command-line utility.
  * <p>Useful for doing basic testing on web services.
- * <p> Ctrl-&lt;key&gt; will nagivate to the appropriate form field:
- * <ul><li>Ctrl-C (or Ctrl-T) to "Content Type"</li>
+ * <p> Ctrl/Cmd-&lt;key&gt; will nagivate to the appropriate form field:
+ * <ul><li>Ctrl/Cmd-C (or Ctrl/Cmd-T) to "Content Type"</li>
  * <li>Ctrl-R to "Request"</li>
- * <li>Ctrl-H to "Header"</li>
- * <li>Ctrl-S to "Silent"</li>
- * <li>Ctrl-L (or Ctrl-U) to "URL"</li>
- * <li>Ctrl-I to "Data" (Input)</li>
- * <li>Ctrl-O to "Result" (Output)</li>
- * <li>Ctrl-G to "Go!" button</li>
+ * <li>Ctrl/Cmd-H to "Header"</li>
+ * <li>Ctrl/Cmd-S to "Silent"</li>
+ * <li>Ctrl/Cmd-L (or Ctrl/Cmd-U) to "URL"</li>
+ * <li>Ctrl/Cmd-I to "Data" (Input)</li>
+ * <li>Ctrl/Cmd-O to "Result" (Output)</li>
+ * <li>Ctrl/Cmd-G to "Go!" button</li>
  * </ul>
  */
 public class CURL
@@ -119,7 +124,7 @@ public class CURL
 	{
 		@Override
 		public boolean keyPressed(Component component, int keyCode, Keyboard.KeyLocation keyLocation) {
-		    if (Keyboard.isPressed(Keyboard.Modifier.CTRL)) {
+		    if (Keyboard.isPressed(Platform.getCommandModifier())) {
 			Component focusComponent = null;
 			switch (keyCode) {
 			    case Keyboard.KeyCode.L:
