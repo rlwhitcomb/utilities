@@ -45,13 +45,21 @@ if /I "%1" EQU "home" goto check_going_home_time
 :check_destination
 set COMMAND=
 for /F "delims=, tokens=1,2,3,*" %%I in (%DESTINATIONS%) do (
-   for /f "tokens=*" %%M in ('echo %%K') do (
-      if /I "%1" EQU "%%J" set COMMAND=%%I&set DEST=%%M& goto execute_command
+   if "%%K" EQU " " (
+      if /I "%1" EQU "%%J" set COMMAND=%%I&set DEST=& goto execute_command
+   ) else (
+      for /f "tokens=*" %%M in ('echo %%K') do (
+         if /I "%1" EQU "%%J" set COMMAND=%%I&set DEST=%%M& goto execute_command
+      )
    )
 )
 :execute_command
 if "%COMMAND%" EQU "" goto display_help
 if /I "%COMMAND%" EQU "popd" goto doit
+:: Also, "pushd" with no destination can also be used to list the saved locations
+if /I "%COMMAND%" EQU "pushd" (
+   if "%DEST%" EQU "" goto doit
+)
 :: For "cd" or "pushd" commands, we can add any number of subdirectories
 :: below the specified one (for convenience).
 :add_subdir
@@ -78,6 +86,9 @@ echo ^ ^ ^ cmd,alias,directory,description
 echo.
 echo where "cmd" is one of "cd", "cd /d", pushd", or "popd"
 echo ^ ^ and "alias" is the shortcut name you want to use for this location
+echo.
+echo and where "directory" should be a single blank for "popd" (or "pushd" when
+echo it is used to list the saved destinations)
 echo.
 echo Note: if "description" is omitted then the directory name itself will
 echo ^ ^ ^ ^ ^ ^ be used as the description (but the comma must still be there).
