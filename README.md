@@ -23,3 +23,18 @@ The Java programs build certainly with Java 8, and also build with Java 11 on OS
 
 Complete Javadoc for the straight Java code can be built using "ant doc" and will be available rooted at "doc/index.html" (has Frames support when built with Java 11 or earlier). Building the Pivot-based code is incomplete, and thus there is no Javadoc target yet.
 
+
+
+# ToDo
+
+Work going on currently includes:
+
+- Making a GUI version of WordFind, with the same program able to operate either from command line or as a GUI form.
+- Convert D.C to Java (include supporting code).
+- Get "pivot" builds working, including Javadoc, packaging, etc.
+- New Java-based "tail", "head", and other Linux utilities missing on Windows.
+- Add support for color-coding within Intl text using HTML-like tags, then update help text in existing programs.
+- Completely new paradigm for Options, similar to Apache commons-cli, including support for printing help text from the options list.
+- UUID program: generate random, generate from text, separate into parts, maybe more.
+- Lists program for converting to/from single- and multiple-line lists.
+- Pivot demo program for CSS colors.
