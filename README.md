@@ -10,6 +10,8 @@ C programs for use on the command line.
 ## java
 Java command line programs. Many of the latest are translations from C to Java to be useful on multiple platforms.
 
+Other pieces here include four new Ant conditions, a new Ant task, plus a preprocessor class invocable from the command line or as an Ant task.
+
 ## pivot
 GUI programs based on the Apache Pivot™ platform.
 
@@ -23,7 +25,7 @@ The Java programs build certainly with Java 8, and also build with Java 11 on OS
 
 Complete Javadoc for the straight Java code can be built using "ant doc" and will be available rooted at "doc/index.html" (has Frames support when built with Java 11 or earlier). Building the Pivot-based code is incomplete, and thus there is no Javadoc target yet.
 
-
+All the "java" directory classes are built into a single "utilities.jar" file, which can be used as the CLASSPATH for running any of the main program (such as Cat, Tree, DumpManifest, etc.). There are some wrapper shell/bat scripts ("tre", "tre.bat", etc.) to invoke these main programs, which are good examples of how to do any additional main programs.
 
 # ToDo
 
