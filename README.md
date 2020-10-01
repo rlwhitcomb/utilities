@@ -38,3 +38,5 @@ Work going on currently includes:
 - UUID program: generate random, generate from text, separate into parts, maybe more.
 - Lists program for converting to/from single- and multiple-line lists.
 - Pivot demo program for CSS colors.
+- Lots of unit tests.
+
