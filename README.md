@@ -42,3 +42,64 @@ Work going on currently includes:
 - Pivot demo program for CSS colors.
 - Lots of unit tests.
 
+## Notes on New Programs and Features
+
+### Shell invoker
+- Figure out how to do the %~dp0 thing to find the matching directory for the .jar file on OS X and Linux
+- Option to "boiler" to create this thing (along with the path/class)
+- Figure out a location to put these wrapper scripts (in "bat" folder? or root? or along with the Java source?)
+- And then figure out how to collect them to put into the UTILITIES_HOME folder along with the .jar file
+
+### Boilerplate program
+- Name should be "boiler"
+- cmd line options (at least some) to specify -cmdline vs -gui or -both, maybe path, etc.
+- Specify license option: MIT, Apache, GPL, BSD, others?
+- Option to create invoker script (windows, *nix or both)
+- Add license with correct copyright date
+- .properties file with Author, maybe History line format, default program type option, default "create wrapper" option
+- GUI program, but with (possible) option to set most/all of the values from command line and just generate it
+
+### Paradigm for doing either command line or GUI (Pivot) depending on flags
+- Add to boilerplate options
+- Boilerplate program will use this code b/c we sometime want to just do command line, other times want the GUI
+- Word Finder can also use this option
+
+### Cat
+- add help
+
+### UUID
+- lots of options
+- generate random one
+- generate from "name" using command-line string or read from file (charset given) or from -stdin (see Cat for details)
+- option to dissect and print out each field if a UUID is given on the command line (with or without - separators)
+- ??? figure out how to generate a time-based one based on the RFC (is this necessary??)
+- Use code (Apache 2) from here: https://github.com/apache/cassandra/blob/trunk/src/java/org/apache/cassandra/utils/UUIDGen.java
+
+### Options difficulties
+- how to just set an enum of what to expect next
+- how to concatenate flags or allow separately (tar -cvf for instance)
+- option to only allow long name with "--", while short name can do just "-"
+- option to allow "/" on Windows for some/all
+- each option needs case-sensitive flag
+- how to invoke code inline (like the "cat" program reading from stdin at the point the flag is encountered
+- options to just warn on bad flag, ignore it, or halt right there
+- how to handle empty command line
+- option to print help, and option whether to print it along with bad option message(s)
+- How to deal with positional vs. process options first
+- if the latter, how to package up the non-option values for later processing
+- Need to be able to format a coherent "help" message from these option objects, including the messy bit in "Tree" needed to do the various case-sensitive options, where some had to be dropped out, or formatted with the "makeDisplayableList" method. UGH!  This is hard!
+- whether the option is true/false, or sets a value
+- validation required ? (like valid Charset?) and then the message to print if the value is invalid (and/or just a validation method that has all the message, etc.)
+- Intl options (use "getKeyString" so the text itself specifies whether it is a key or just a string)
+
+### Options suggestions
+- pass in an empty map, and option structures have a map key specified to set in the map if the option is given
+- option to set true/false in the map
+- pass in an empty list, that can be filled in (if given) with the non-option values
+- each Option has flags, key options (long and short name, etc.), option type (flag, needs add'l value, can be combined, +/- turn on/off, value is int, value is charset, value is file name, etc.), description (for help), default value
+- Result of options parsing is a map, with all the default values applied, and any values given on the command line filled in with their values; warning and errors displayed, help displayed, etc.  Also list of non-option supplied on the command line.  This doesn't say how to do custom validation, how to iterate over positional arguments, etc.
+- Maybe "options" concept includes non-options, which are saved positionally, and can be accessed that way
+- can we iterate over the (already processed) command line, and get back "this is an option" or "this is a non-option string" for each position, and then we can choose to process the options positionally or ignore cuz they have already been done.... Need a way to reset to defaults if positionally is being done.
+- some kind of functional interface (Runnable or Callable)? or Predicate for custom validation, or additional processing
+- ?? should we just do that for validation?  Validator interface "boolean isValid(Object input)" ...info/.../validation package, with Validator interface, and custom implementations (such as IntValidator, FloatValidator, etc. CharsetValidator
+
