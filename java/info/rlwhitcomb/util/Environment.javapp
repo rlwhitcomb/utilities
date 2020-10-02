@@ -84,6 +84,8 @@
  *	    Set the default product name from the preprocessor also.
  *	31-Jul-2020 (rlwhitcomb)
  *	    New method to print the product information, which we keep track of.
+ *	02-Oct-2020 (rlwhitcomb)
+ *	    New method to get the numeric Java major version (6, 7, 8, 9, 10, etc.)
  */
 package info.rlwhitcomb.util;
 
@@ -132,6 +134,8 @@ public final class Environment
 	private static boolean osIsLinux = OS_NAME_LOWER.startsWith("linux");
 	private static boolean osIsOSX = OS_NAME_LOWER.startsWith("mac os x");
 
+	private static int javaMajorVersion;
+
 	private static TimeUnit timeUnit = osIsLinux ? TimeUnit.MILLISECONDS : TimeUnit.NANOSECONDS;
 
 	private static String copyrightNotice = null;
@@ -164,6 +168,15 @@ public final class Environment
 	 * Whether this is a DEBUG build or not.
 	 */
 	private static final boolean IS_DEBUG_BUILD = $(IS_DEBUG_BUILD);
+
+
+	static {
+	    String[] parts = JAVA_RUNTIME_VERSION.split("\\.");
+	    if (parts[0] == "1" && parts.length > 1)
+		javaMajorVersion = Integer.parseInt(parts[1]);
+	    else
+		javaMajorVersion = Integer.parseInt(parts[0]);
+	}
 
 
 	/**
@@ -388,6 +401,14 @@ public final class Environment
 	 */
 	public static String javaVersion() {
 	    return JAVA_RUNTIME_VERSION;
+	}
+
+
+	/**
+	 * @return The major version of Java we're running under: 6, 7, 8, 9, 10, 11, etc.
+	 */
+	public static int javaMajorVersion() {
+	    return javaMajorVersion;
 	}
 
 
