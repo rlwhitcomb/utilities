@@ -34,6 +34,8 @@
 		Add DumpManifest and MD5 to the .jar file for convenience.
 	    02-Oct-2020 (rlwhitcomb)
 		Add OS also to everywhere.
+	    02-Oct-2020 (rlwhitcomb)
+		Add Lists to the .jar file.
 
      ========================================================================== -->
 
@@ -109,6 +111,7 @@
 	<target name="jar" depends="compile" description="Jar up the compiled class files (into ${dest.jar}).">
 		<jar basedir="." destfile="${dest.jar}">
 			<include name="DumpManifest*.class"/>
+			<include name="Lists*.class"/>
 			<include name="MD5*.class"/>
 			<include name="OS*.class"/>
 			<include name="net/iharder/b64/*.class"/>
