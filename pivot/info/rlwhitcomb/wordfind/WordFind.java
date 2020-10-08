@@ -28,6 +28,8 @@
  *	22-Sep-2020 (rlwhitcomb)
  *	    Initial checkin to GitHub. Allow comments and blank lines in the
  *	    master word file. The GUI is not yet implemented.
+ *	08-Oct-2020 (rlwhitcomb)
+ *	    Allow choice of word files.
  */
 package info.rlwhitcomb.wordfind;
 
@@ -57,12 +59,22 @@ import static info.rlwhitcomb.util.ConsoleColor.*;
  */
 public class WordFind implements Application {
     /**
-     * Name of the master word file. Sourced from:
+     * Name of the default master word file. Sourced from:
      * <a href="https://scrabutility.com/TWL06.txt">TWL06.txt</a>
      * with some additions and optional words as found using
      * Words With Friends.
      */
-    private static final String WORD_FILE = "TWL06a.txt";
+    private static final String WORD_FILE_DEFAULT = "TWL06a.txt";
+    /**
+     * The original master word file without any changes or additions.
+     */
+    private static final String WORD_FILE_ORIGINAL = "TWL06.txt";
+    /**
+     * The original, original word file that others were derived from
+     * (all in upper case to be consistent with the others).
+     */
+    private static final String WORD_FILE_ANTIQUE = "ENABLE1U.txt";
+
     /** The lookup set of known words. */
     private static final Set<String> words = new HashSet<>(200_000);
     /**
@@ -77,6 +89,8 @@ public class WordFind implements Application {
     private static final boolean ON_WINDOWS = System.getProperty("os.name").startsWith("Windows");
     /** Big switch whether to run as a console app or a GUI app. */
     private static boolean runningOnConsole = true;
+    /** Which word file to load (defaults to our custom one). */
+    private static String wordFile = WORD_FILE_DEFAULT;
     /** Default column width for output. */
     private static final int DEFAULT_COLUMN_WIDTH = 10;
     /** The (possibly configurable) line length for output. */
@@ -290,7 +304,7 @@ public class WordFind implements Application {
             letter = false;
         } else if (matches(arg, "alpha", "atoz", "a")) {
            sortAlphabetically = true;
-        } else if (matches(arg, "points", "point", "default", "p")) {
+        } else if (matches(arg, "points", "point", "p")) {
            sortAlphabetically = false;
         } else if (matches(arg, "find", "additional", "addl", "extra", "ex", "f", "x")) {
            findInAdditional = true;
@@ -306,6 +320,12 @@ public class WordFind implements Application {
             runningOnConsole = true;
         } else if (matches(arg, "window", "gui", "g")) {
             runningOnConsole = false;
+        } else if (matches(arg, "default", "twl06a", "def", "d")) {
+            wordFile = WORD_FILE_DEFAULT;
+        } else if (matches(arg, "original", "twl06", "orig", "o")) {
+            wordFile = WORD_FILE_ORIGINAL;
+        } else if (matches(arg, "antique", "enable1", "enable", "en")) {
+            wordFile = WORD_FILE_ANTIQUE;
         } else {
             error("Unknown option \"" + prefix + arg + "\" ignored!");
         }
@@ -422,8 +442,8 @@ public class WordFind implements Application {
         List<String> argWords = new ArrayList<>(args.length);
         int totalInputSize = processCommandLine(args, argWords);
 
-        // Next read in the dictionary/word file
-        readDictionary(WORD_FILE, words, additionalWords);
+        // Next read in the preferred dictionary/word file
+        readDictionary(wordFile, words, additionalWords);
 
         // BIG switch here for GUI vs console operation
         if (!runningOnConsole) {
