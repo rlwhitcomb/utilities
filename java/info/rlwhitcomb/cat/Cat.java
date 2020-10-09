@@ -30,6 +30,8 @@
  *	    Recast the options now that Options.java has more capability.
  *	31-Jul-2020 (rlwhitcomb)
  *	    Add option to display product information; set program name.
+ *	08-Oct-2020 (rlwhitcomb)
+ *	    Use flavor of "printProgramInfo" with defaults.
  *	    TODO: wildcard directory names on input
  *	    TODO: -nn to limit to first nn lines, +nn to limit to LAST nn lines (hard to do?)
  */
@@ -152,7 +154,7 @@ public class Cat {
 		    readFromConsole();
 		}
 	    } else if (Options.matchesOption(arg, true, "version", "vers", "ver", "v")) {
-		Environment.printProgramInfo(System.out, -1);
+		Environment.printProgramInfo();
 		System.exit(0);
 	    } else {
 		if (pass == 1) {

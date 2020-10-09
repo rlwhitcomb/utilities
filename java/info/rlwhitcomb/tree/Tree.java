@@ -60,6 +60,8 @@
  *	    Option to display program info (name, copyright, build info).
  *	11-Sep-2020 (rlwhitcomb)
  *	    Move text to resource file.
+ *	08-Oct-2020 (rlwhitcomb)
+ *	    Use version of "printProgramInfo" with defaults.
  */
 package info.rlwhitcomb.tree;
 
@@ -519,7 +521,7 @@ public class Tree
 		    showInfoOnly = true;
 		}
 		else if (Options.matchesOption(arg, true, "version", "vers", "ver", "v")) {
-		    Environment.printProgramInfo(System.out, -1);
+		    Environment.printProgramInfo();
 		    showInfoOnly = true;
 		}
 		else if (Options.isOption(arg) != null) {

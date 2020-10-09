@@ -32,6 +32,8 @@
  *	    Simplify operation further by allowing no file name to mean
  *	    "read from console" (still support "@" too).  Reformat the help.
  *	    Use the Options class for the command line.
+ *	08-Oct-2020 (rlwhitcomb)
+ *	    Print version information.
  *
  */
 import java.io.BufferedReader;
@@ -42,6 +44,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.util.Locale;
 
+import info.rlwhitcomb.util.Environment;
 import info.rlwhitcomb.util.Options;
 
 /**
@@ -80,21 +83,26 @@ public class Lists
         }
 
         public static void main(String[] args) {
+	    Environment.setProductName("Lists Management");
 
             // First parse the command line arguments
             for (String arg : args) {
                 String option = Options.isOption(arg);
                 if (option != null) {
-                    if (Options.matchesOption(option, "c"))
+                    if (Options.matchesOption(arg, "c"))
                         concatenate = true;
-                    else if (Options.matchesOption(option, "b"))
+                    else if (Options.matchesOption(arg, "b"))
                         blanks = true;
-                    else if (Options.matchesOption(option, "w"))
+                    else if (Options.matchesOption(arg, "w"))
                         whitespace = true;
-                    else if (Options.matchesOption(option, "help", "?")) {
+                    else if (Options.matchesOption(arg, "help", "?")) {
                         usage();
                         return;
                     }
+		    else if (Options.matchesOption(arg, true, "version", "vers", "ver", "v")) {
+			Environment.printProgramInfo();
+			return;
+		    }
                     else {
                         try {
                             width = Integer.parseInt(option);

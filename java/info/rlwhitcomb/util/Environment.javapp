@@ -86,6 +86,9 @@
  *	    New method to print the product information, which we keep track of.
  *	02-Oct-2020 (rlwhitcomb)
  *	    New method to get the numeric Java major version (6, 7, 8, 9, 10, etc.)
+ *	08-Oct-2020 (rlwhitcomb)
+ *	    Change parsing of the Java version to compensate for version "11+28".
+ *	    Add variants of "printProgramInfo" for the common cases (System.out, etc.)
  */
 package info.rlwhitcomb.util;
 
@@ -171,7 +174,7 @@ public final class Environment
 
 
 	static {
-	    String[] parts = JAVA_RUNTIME_VERSION.split("\\.");
+	    String[] parts = JAVA_RUNTIME_VERSION.split("[\\.+-]");
 	    if (parts[0] == "1" && parts.length > 1)
 		javaMajorVersion = Integer.parseInt(parts[1]);
 	    else
@@ -626,6 +629,26 @@ public final class Environment
 		copyrightNotice = Intl.getString("util#env.copyright");
 	    }
 	    return copyrightNotice;
+	}
+
+
+	/**
+	 * Display a program information banner on {@link System#out} with the info
+	 * centered on the longest string.
+	 */
+	public static void printProgramInfo() {
+	    printProgramInfo(System.out);
+	}
+
+
+	/**
+	 * Display a program information banner using information we know about here
+	 * to the given {@link PrintStream}, using the longest string to center on.
+	 *
+	 * @param ps            The print stream to display the info to.
+	*/
+	public static void printProgramInfo(PrintStream ps) {
+	    printProgramInfo(ps, -1);
 	}
 
 
