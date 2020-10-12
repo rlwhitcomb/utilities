@@ -89,10 +89,13 @@
  *	08-Oct-2020 (rlwhitcomb)
  *	    Change parsing of the Java version to compensate for version "11+28".
  *	    Add variants of "printProgramInfo" for the common cases (System.out, etc.)
+ *	09-Oct-2020 (rlwhitcomb)
+ *	    New "fileSeparator" and "pathSeparator" methods to expose those values.
  */
 package info.rlwhitcomb.util;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Locale;
 import java.util.Map;
@@ -120,6 +123,8 @@ public final class Environment
 	private static final String OS_VERSION = System.getProperty("os.version");
 	private static final String JAVA_RUNTIME_VERSION = System.getProperty("java.runtime.version");
 	private static final String LINE_SEPARATOR = System.getProperty("line.separator");
+	private static final String FILE_SEPARATOR = System.getProperty("file.separator");
+	private static final String PATH_SEPARATOR = System.getProperty("path.separator");
 	private static final int DATA_MODEL = Integer.parseInt(System.getProperty("sun.arch.data.model"));
 
 	public static final int DATA_MODEL_32 = 32;
@@ -439,6 +444,28 @@ public final class Environment
 	 */
 	public static String lineSeparator() {
 	    return LINE_SEPARATOR;
+	}
+
+
+	/**
+	 * @return The system-dependent file separator (that is, separator between parts
+	 * of a file name) as a string.
+	 *
+	 * @see #FILE_SEPARATOR
+	 */
+	public static String fileSeparator() {
+	    return FILE_SEPARATOR;
+	}
+
+
+	/**
+	 * @return The system-dependent path separator (that is, separator between entries
+	 * in the PATH or CLASSPATH environment variable) as a string.
+	 *
+	 * @see #PATH_SEPARATOR
+	 */
+	public static String pathSeparator() {
+	    return PATH_SEPARATOR;
 	}
 
 
