@@ -252,6 +252,8 @@
  *	    Prepare for GitHub.
  *	14-Apr-2020 (rlwhitcomb)
  *	    Another flavor of "padToWidth" that takes single char input and char padding.
+ *	08-Oct-2020 (rlwhitcomb)
+ *	    Add "matchesAnyOf" and "matchesAnyOfIgnoreCase" methods.
  */
 
 package info.rlwhitcomb.util;
@@ -2600,6 +2602,48 @@ public class CharUtil
 		}
 	    }
 	    return locale;
+	}
+
+
+	/**
+	 * Match an input argument with any of a list of choices (case-sensitive checks).
+	 *
+	 * @param input		The input value to test.
+	 * @param choices	The expected choices to test against.
+	 * @return		{@code true} if the input matches exactly any of the choices,
+	 *			or {@code false} otherwise, including null or empty input.
+	 */
+	public static boolean matchesAnyOf(String input, String... choices) {
+	    if (input == null || input.isEmpty())
+		return false;
+
+	    for (String choice : choices) {
+		if (input.equals(choice))
+		    return true;
+	    }
+
+	    return false;
+	}
+
+
+	/**
+	 * Match an input argument with any of a list of choices (case-insensitive checks).
+	 *
+	 * @param input		The input value to test.
+	 * @param choices	The expected choices to test against.
+	 * @return		{@code true} if the input matches any of the choices, regardless
+	 *			of case, or {@code false} otherwise, including null or empty input.
+	 */
+	public static boolean matchesAnyOfIgnoreCase(String input, String... choices) {
+	    if (input == null || input.isEmpty())
+		return false;
+
+	    for (String choice : choices) {
+		if (input.equalsIgnoreCase(choice))
+		    return true;
+	    }
+
+	    return false;
 	}
 
 }
