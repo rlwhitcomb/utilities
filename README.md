@@ -44,6 +44,9 @@ Work going on currently includes:
 
 ## Notes on New Programs and Features
 
+### License
+- Need something to check proper license, copyright, etc. in all files
+
 ### Shell invoker
 - Figure out how to do the %~dp0 thing to find the matching directory for the .jar file on OS X and Linux
 - Option to "boiler" to create this thing (along with the path/class)
