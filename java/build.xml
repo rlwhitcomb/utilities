@@ -36,6 +36,8 @@
 		Add OS also to everywhere.
 	    02-Oct-2020 (rlwhitcomb)
 		Add Lists to the .jar file.
+	    14-Oct-2020 (rlwhitcomb)
+		Add the .../compare directory.
 
      ========================================================================== -->
 
@@ -79,6 +81,7 @@
 			define="PRODUCT_NAME=${product.name},APP_VERSION=${build.version},APP_BUILD=${build.number},IS_DEBUG_BUILD=false" />
 		<parallel>
 			<generate-text-resources dir="info/rlwhitcomb/cat" />
+			<generate-text-resources dir="info/rlwhitcomb/compare" />
 			<generate-text-resources dir="info/rlwhitcomb/csv" />
 			<generate-text-resources dir="info/rlwhitcomb/matches" />
 			<generate-text-resources dir="info/rlwhitcomb/tree" />
@@ -93,6 +96,7 @@
 			<src path="net/iharder/b64"/>
 			<src path="info/rlwhitcomb/annotations"/>
 			<src path="info/rlwhitcomb/cat"/>
+			<src path="info/rlwhitcomb/compare"/>
 			<src path="info/rlwhitcomb/csv"/>
 			<src path="info/rlwhitcomb/jarfile"/>
 			<src path="info/rlwhitcomb/matches"/>
@@ -117,6 +121,7 @@
 			<include name="net/iharder/b64/*.class"/>
 			<include name="info/rlwhitcomb/annotations/*.class"/>
 			<include name="info/rlwhitcomb/cat/*.class"/>
+			<include name="info/rlwhitcomb/compare/*.class"/>
 			<include name="info/rlwhitcomb/csv/*.class"/>
 			<include name="info/rlwhitcomb/jarfile/*.class"/>
 			<include name="info/rlwhitcomb/matches/*.class"/>
@@ -154,6 +159,7 @@
 			<fileset dir="net/iharder/b64" includes="*.class"/>
 			<fileset dir="info/rlwhitcomb/annotations" includes="*.class"/>
 			<fileset dir="info/rlwhitcomb/cat" includes="*.class"/>
+			<fileset dir="info/rlwhitcomb/compare" includes="*.class"/>
 			<fileset dir="info/rlwhitcomb/csv" includes="*.class"/>
 			<fileset dir="info/rlwhitcomb/jarfile" includes="*.class"/>
 			<fileset dir="info/rlwhitcomb/matches" includes="*.class"/>

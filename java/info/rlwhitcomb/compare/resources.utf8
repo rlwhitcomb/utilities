@@ -1,0 +1,87 @@
+#
+# The MIT License (MIT)
+#
+# Copyright (c) 2020 Roger L. Whitcomb.
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+#
+#	Internationalizable strings for the info.rlwhitcomb.compare stuff.
+#
+# History:
+#	14-Oct-2020 (rlwhitcomb)
+#	    Initial coding.
+#
+
+#
+# From CompareFiles.java
+#
+compare.unknownOption		= Unknown option: "%1$s"!
+
+compare.comparingTwo		= Comparing "%1$s" to "%2$s" ...
+compare.doesNotCompare		= File "%1$s" does not compare to "%2$s"!
+compare.errorOnCompare		= Error trying to compare files: %1$s
+compare.notDirectory		= "%1$s" is not a directory!
+compare.comparingFiles		= Comparing files in "%1$s" directory with "%2$s" ...
+compare.targetNotFile		= Target file "%1$s" is not a regular file!
+compare.targetNotExist		= Target file "%1$s" does not exist!
+compare.addingPath		= Adding path "%1$s" ...
+compare.noFilesCompared		= No files compared.
+compare.oneFileCompared		= One file compared, no mismatch.
+compare.filesCompared		= %1$,d files compared, no mismatches.
+compare.oneMismatch		= One file compared, not a match.
+compare.mismatches		= %1$,d files compared, %2$,d mismatches.
+compare.memoryUse		= %1$,d bytes of memory used.
+
+compare.help1			= Usage: java CompareFiles [options] source target
+compare.help2			= ""
+compare.help3			= "  where 'options' can be:"
+compare.help4			= \t-sync\tdo a two-way compare of directories to check
+compare.help5			= \t\tfor missing/extra files on both sides
+compare.help6			= \t  or -sync_mode, -sync-mode, -syncmode, or -syn
+compare.help7			= \t  (default)
+compare.help8			= \t-copy\tdo a simple compare of source to target, which
+compare.help9			= \t\tmeans files in the target that are not in the source
+compare.help10			= \t\twill not be noted (source and target should be copies)
+compare.help11			= \t  or -copy_mode, -copy-mode, -copymode, -copy, or -c
+compare.help12			= ""
+compare.help13			= \t-super\tset 'super verbose' level of output
+compare.help14			= \t  or -super_verbose, -super-verbose, -superverboser, or -sup
+compare.help15			= \t-verbose\tset 'verbose' level of output
+compare.help16			= \t  or -verb, or -v
+compare.help17			= \t-normal\tset 'normal' level of output (default)
+compare.help18			= \t  or -norm, or -n
+compare.help19			= \t-quiet\tset 'quiet' level of output
+compare.help20			= \t  or -q
+compare.help21			= \t-silent\tset 'silent' level of output (nothing)
+compare.help22			= \t  or -s
+compare.help23			= \t-debug\tset 'debug' level of output (maximum)
+compare.help24			= \t  or -deb, or -d
+compare.help25			= \t-recurse\tdescend into subdirectories
+compare.help26			= \t  or -recursive, -rec, or -r
+compare.help27			= \t-continue\tcontinue processing files even when a mismatch
+compare.help28			= \t\toccurs (default)
+compare.help29			= \t  or -continue_after_error, -continue-after-error,
+compare.help30			= \t     -continueaftererror, -cont, or -con
+compare.help31			= \t-break\tstop processing files on the first mismatch
+compare.help32			= \t  or -break_on_error, -break-on-error, -breakonerror,
+compare.help33			= \t     -brk, -br, or -b
+compare.help34			= \t-help\tdisplay this message
+compare.help35			= \t  or -h, or -?
+compare.help36			= ""
+

@@ -941,7 +941,8 @@ public class Intl
 	 * Print out a series of "help" message lines described in a certain format
 	 * in the resource file.
 	 * <p> They must have a common package, common first key part ("script" in
-	 * the example below), and have a "number of lines" key ("helpNumberLines").
+	 * the example below), and have a "number of lines" key ("helpNumberLines"),
+	 * (which is optional).
 	 * The individual keys are prefixed with "help".
 	 * <p> A typical example is this:
 	 * <pre>script.helpNumberLines = 22
@@ -961,7 +962,8 @@ public class Intl
 	 * Print out a series of "help" message lines described in a certain format
 	 * in the resource file.
 	 * <p> They must have a common package, common first key part ("script" in
-	 * the example below), and have a "number of lines" key ("helpNumberLines").
+	 * the example below), and have a "number of lines" key ("helpNumberLines"),
+	 * (which is optional).
 	 * The individual keys are prefixed with "help".
 	 * <p> A typical example is this:
 	 * <pre>script.helpNumberLines = 22
