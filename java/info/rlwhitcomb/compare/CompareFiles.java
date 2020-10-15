@@ -26,6 +26,8 @@
  *  Change History:
  *	14-Oct-2020 (rlwhitcomb)
  *	    First coding.
+ *	14-Oct-2020 (rlwhitcomb)
+ *	    Add "-version" command.
  */
 package info.rlwhitcomb.compare;
 
@@ -33,6 +35,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import info.rlwhitcomb.util.Environment;
 import info.rlwhitcomb.util.ExceptionUtil;
 import info.rlwhitcomb.util.FileUtilities;
 import info.rlwhitcomb.util.Intl;
@@ -231,6 +234,8 @@ public class CompareFiles
 	public static void main(String[] args) {
 	    long memoryUseBefore = Runtime.getRuntime().freeMemory();
 
+	    Environment.setProductName(Intl.getString("compare#compare.productName"));
+
 	    List<String> pathArgs = new ArrayList<>();
 	    boolean error = false;
 
@@ -261,6 +266,10 @@ public class CompareFiles
 		    usage();
 		    return;
 		}
+		else if (Options.matchesOption(arg, true, "version", "vers", "ver", "v")) {
+		    Environment.printProgramInfo();
+		    return;
+                }
 	    // TODO option process (-caseinsensitive)
 		else if (Options.isOption(arg) != null) {
 		    err(Level.NORMAL, "unknownOption", arg);

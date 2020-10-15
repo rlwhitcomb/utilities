@@ -26,12 +26,16 @@
 # History:
 #	14-Oct-2020 (rlwhitcomb)
 #	    Initial coding.
+#	14-Oct-2020 (rlwhitcomb)
+#	    Add product name.
 #
 
 #
 # From CompareFiles.java
 #
 compare.unknownOption		= Unknown option: "%1$s"!
+
+compare.productName		= File/Directory Compare Utility
 
 compare.comparingTwo		= Comparing "%1$s" to "%2$s" ...
 compare.doesNotCompare		= File "%1$s" does not compare to "%2$s"!
