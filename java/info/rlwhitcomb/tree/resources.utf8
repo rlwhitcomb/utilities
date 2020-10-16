@@ -28,6 +28,8 @@
 #           Moved into here from the .java file.
 #	14-Sep-2020 (rlwhitcomb)
 #	    Changed the lookup symbols.
+#	12-Oct-2020 (rlwhitcomb)
+#	    Took out duplicate option text.
 
 productName	= Directory Tree Utility
 
@@ -54,7 +56,7 @@ usage.help13	= "\t  (meaning \"M\" is different than \"m\")"
 usage.help14	= "\t  (or %MixedCase%, -sensitive, -mix, -m, -s)"
 usage.help15	= "\t-case  sort file names alphabetically, without regard to case"
 usage.help16	= "\t  (meaning \"M\" sorts the same as \"m\")"
-usage.help17	= "\t  (or %CaseInsensitive%, -insensitive, -case, -c, or -i)"
+usage.help17	= "\t  (or %CaseInsensitive%, -insensitive, -c, or -i)"
 usage.help18	= " Default is not to sort the output at all."
 usage.help19	= ""
 usage.help20	= "\t-file  prints file names also (default is directories only)"
