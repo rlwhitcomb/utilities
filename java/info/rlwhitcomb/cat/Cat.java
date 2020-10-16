@@ -32,6 +32,9 @@
  *	    Add option to display product information; set program name.
  *	08-Oct-2020 (rlwhitcomb)
  *	    Use flavor of "printProgramInfo" with defaults.
+ *	14-Oct-2020 (rlwhitcomb)
+ *	    Move text to resources.
+ *
  *	    TODO: wildcard directory names on input
  *	    TODO: -nn to limit to first nn lines, +nn to limit to LAST nn lines (hard to do?)
  */
@@ -49,6 +52,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 import info.rlwhitcomb.util.Environment;
 import info.rlwhitcomb.util.ExceptionUtil;
+import info.rlwhitcomb.util.Intl;
 import info.rlwhitcomb.util.Options;
 
 /**
@@ -158,7 +162,7 @@ public class Cat {
 		System.exit(0);
 	    } else {
 		if (pass == 1) {
-		    System.err.println("Unrecognized option: \"" + arg + "\"!");
+		    Intl.errFormat("cat#unrecognized", arg);
 		    System.exit(2);
 		}
 	    }
@@ -171,7 +175,7 @@ public class Cat {
 	    Console console = System.console();
 	    if (console == null) {
 		// Likely no console to print to either, but we'll try...
-		System.err.println("No console available to read from!");
+		Intl.errPrintln("cat#noConsole");
 		System.exit(6);
 	    } else {
 		String line;
@@ -192,11 +196,10 @@ public class Cat {
 		try {
 		    Files.lines(file.toPath(), currentInputCharset).forEach(line -> outputStream.println(line));
 		} catch (IOException ioe) {
-		    System.err.println("I/O error processing input file \"" + file.getPath() + "\": "
-			+ ExceptionUtil.toString(ioe));
+		    Intl.errFormat("cat#ioError", file.getPath(), ExceptionUtil.toString(ioe));
 		}
 	    } else {
-		System.err.println("Specified file \"" + name + "\" either does not exist or cannot be read!");
+		Intl.errFormat("cat#noFileRead", name);
 	    }
 	}
 
@@ -215,7 +218,7 @@ public class Cat {
 			case OUTPUT_CHARSET:
 			    if (pass == 1) {
 				if (outputCharset != null) {
-				    System.err.println("Can only specify one charset for the output file!");
+				    Intl.errPrintln("cat#oneCharset");
 				    System.exit(3);
 				} else {
 				    outputCharset = Charset.forName(arg);
@@ -225,7 +228,7 @@ public class Cat {
 			case OUTPUT_FILE:
 			    if (pass == 1) {
 				if (outputFile != null) {
-				    System.err.println("Can only specify one output file name!");
+				    Intl.errPrintln("cat#oneOutputFile");
 				    System.exit(3);
 				} else {
 				    outputFile = new File(arg);
@@ -275,13 +278,13 @@ public class Cat {
 
 	    // Now do error checking on the options
 	    if (expectedValue.isPresent()) {
-		System.err.println("Missing a value for the \"--" + expectedValue.get() + "\" option!");
+		Intl.errFormat("cat#missingOptionValue", expectedValue.get());
 		System.exit(1);
 	    }
 
 	    // Setup for the output file (if those options were specified on the first pass).
 	    if (outputCharset != null && outputFile == null) {
-		System.out.println("An output file name must be given along with an output charset!");
+		Intl.errPrintln("cat#outputNameCharset");
 		System.exit(4);
 	    }
 	    if (outputFile != null && outputCharset == null) {
@@ -297,7 +300,7 @@ public class Cat {
 	    }
 
 	    if (numberOfInputFiles == 0 && currentInputCharset != null) {
-		System.err.println("Unable to change charset when reading from the console!");
+		Intl.errPrintln("cat#noCharsetConsole");
 		System.exit(5);
 	    }
 	    if (currentInputCharset == null && numberOfInputFiles > 0) {
