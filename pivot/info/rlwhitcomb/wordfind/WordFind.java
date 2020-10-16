@@ -30,6 +30,10 @@
  *	    master word file. The GUI is not yet implemented.
  *	08-Oct-2020 (rlwhitcomb)
  *	    Allow choice of word files.
+ *	08-Oct-2020 (rlwhitcomb)
+ *	    Small changes to support GUI mode. Use CharUtil methods.
+ *	    Fix bug that was missing a bunch of words when using blanks.
+ *	    Also highlight and correct point values with blanks.
  */
 package info.rlwhitcomb.wordfind;
 
@@ -51,6 +55,7 @@ import java.util.function.Function;
 import org.apache.pivot.wtk.Application;
 import org.apache.pivot.wtk.DesktopApplicationContext;
 import org.apache.pivot.wtk.Display;
+import info.rlwhitcomb.util.CharUtil;
 import static info.rlwhitcomb.util.ConsoleColor.*;
 
 /**
@@ -113,6 +118,8 @@ public class WordFind implements Application {
     private static boolean endsWith = false;
     /** Optional "Ends With" value. */
     private static Optional<String> endingValue = Optional.empty();
+    /** The format string for final output of the words. */
+    private static final String WORD_FORMAT = "%1$s%2$s " + BLACK_BRIGHT + "(%3$3d)" + RESET;
 
     /**
      * Sort alphabetically?
@@ -151,6 +158,9 @@ public class WordFind implements Application {
     };
 
     /**
+     * Calculate the total point value for the given word, taking into account
+     * blanks which are delimited with "_".
+     *
      * @return The total point values (from {@link #POINT_VALUES} for the given word.
      * @param word The word to check.
      */
@@ -158,25 +168,61 @@ public class WordFind implements Application {
         int pointValue = 0;
         for (int i = 0; i < word.length(); i++) {
             char ch = word.charAt(i);
-            pointValue += POINT_VALUES[ch - alphaStart];
+            if (ch == '_')
+                i += 2; // skip "_X_" which is how a blank is marked
+            else
+                pointValue += POINT_VALUES[ch - alphaStart];
         }
         return pointValue;
+    }
+
+    /**
+     * @return The bare letter values without the _X_ markers for blanks.
+     * @param blankDelimitedWord The input with "_" around letters substituted for blanks.
+     */
+    private static String getLettersOnly(final String blankDelimitedWord) {
+        return blankDelimitedWord.replace("_", "");
+    }
+
+    /**
+     * Highlight a word making special emphasis on the blank substitutions.
+     */
+    private static String highlightWord(final String adornedWord) {
+        int wordLen = adornedWord.length();
+        StringBuilder buf = new StringBuilder(wordLen);
+        for (int i = 0; i < wordLen; i++) {
+            char ch = adornedWord.charAt(i);
+            if (ch == '_') {
+                buf.append(RED_BRIGHT).append(adornedWord.charAt(i + 1)).append(RESET);
+                i += 2;
+            } else {
+                buf.append(ch);
+            }
+        }
+        return buf.toString();
     }
 
     /**
      * A comparator of letter values.
      */
     private static final Comparator<String> valueComparator = (s1, s2) -> {
+        /* Get bare letter versions of the inputs. */
+        String word1 = getLettersOnly(s1);
+        String word2 = getLettersOnly(s2);
+
         /* Only use the point values if the words are not the same letters. */
-        if (s1.equals(s2)) {
+        if (word1.equals(word2)) {
             return 0;
         }
+
         int v1 = addLetterValues(s1);
         int v2 = addLetterValues(s2);
+
         /* If alpha sort is turned on OR the letter values are the same, sort alphabetically. */
         if (sortAlphabetically || v1 == v2) {
-            return s1.compareTo(s2);
+            return word1.compareTo(word2);
         }
+
         /* Point value sort is highest to lowest. */
         return v2 - v1;
     };
@@ -192,45 +238,81 @@ public class WordFind implements Application {
      * @param input The UPPERcase input string.
      * @param outputSoFar For the recursive call, the prefix we have already processed.
      */
-    private static void findValidPermutations(final String input, final String outputSoFar, final Set<String>[] validWords) {
-        if (input.isEmpty()) {
-            final StringBuilder buf = new StringBuilder(outputSoFar);
-            beginningValue.ifPresent(v -> buf.insert(0, v));
-            endingValue.ifPresent(v -> buf.append(v));
+    private static void findValidPermutations(
+	final String prefix,
+	final String str,
+	final Set<String> permutationSet,
+	final Set<String>[] validWords)
+    {
+        if (str.isEmpty()) {
+            // Sometimes we use the letters only, but at the end we need to leave the blank markers alone
+            String word = getLettersOnly(prefix);
 
-            final String output = buf.toString();
-            if (words.contains(output) || (findInAdditional && additionalWords.contains(output))) {
-                int index = output.length() - 1;
+            // If this is a word with blanks, but the word without blanks is already there, then
+            // don't bother working on this version. This simpler test only works because we put
+            // the blanks at the end of the sequence, so we find the better choices first.
+            if (!prefix.equals(word)) {
+                if (permutationSet.contains(word))
+                    return;
+            }
+
+	    // If the permutation was already checked, then just leave without doing any more
+            // (distinguish between the same word but using a blank vs. with regular letters)
+	    if (permutationSet.contains(prefix))
+		return;
+
+	    permutationSet.add(prefix);
+
+	    // Now start mucking with the valid word and "begins with", "ends with", etc. tests
+            // (and we need two copies, one with the blank markers and one without for word lookup
+            final StringBuilder bufAdorned   = new StringBuilder(prefix);
+            final StringBuilder bufUnadorned = new StringBuilder(word);
+            beginningValue.ifPresent(v -> { bufAdorned.insert(0, v); bufUnadorned.insert(0, v); });
+            endingValue.ifPresent   (v -> { bufAdorned.append(v);    bufUnadorned.append(v); });
+
+            final String outputUnadorned = bufUnadorned.toString();
+            if (words.contains(outputUnadorned)
+            || (findInAdditional && additionalWords.contains(outputUnadorned))) {
+                int index = outputUnadorned.length() - 1;
                 boolean matches = true;
                 if (containsValue.isPresent()) {
-                    matches = output.indexOf(containsValue.get()) >= 0;
+                    matches = outputUnadorned.indexOf(containsValue.get()) >= 0;
                 }
                 if (matches) {
-                    validWords[index].add(output);
+                    validWords[index].add(bufAdorned.toString());
                 }
             }
             return;
         }
 
-        boolean used[] = new boolean[26];
-        Arrays.fill(used, false);
-        for (int i = 0; i < input.length(); i++) {
-            char ch = input.charAt(i);
-            String restOfInput = input.substring(0, i) + input.substring(i + 1);
+	// The intermediate stages where we are permuting the input for all possibilities
+        for (int i = 0; i < str.length(); i++) {
+            String restOfString;
+	    String newPrefix;
+            char ch;
+
+            // Special case handling of the delimited blank substitutions
+            ch = str.charAt(i);
+            if (ch == '_') {
+                restOfString = str.substring(0, i) + str.substring(i + 3);
+            } else {
+                restOfString = str.substring(0, i) + str.substring(i + 1);
+            }
+
             // Deal with wildcard letter (blank)
             if (ch == ' ' || ch == '?') {
                 for (int j = 0; j < 26; j++) {
-                    if (!used[j]) {
-                        char ch2 = (char) (alphaStart + j);
-                        findValidPermutations(restOfInput, outputSoFar + ch2, validWords);
-                        used[j] = true;
-                    }
+                    char ch2 = (char) (alphaStart + j);
+                    // Make an annotated string with the blank location marked with "_"
+                    newPrefix = prefix + "_" + ch2 + "_";
+                    findValidPermutations(newPrefix, restOfString, permutationSet, validWords);
                 }
             } else {
-                if (!used[ch - alphaStart]) {
-                    findValidPermutations(restOfInput, outputSoFar + ch, validWords);
-                }
-                used[ch - alphaStart] = true;
+                if (ch == '_')
+                    newPrefix = prefix + str.substring(i, i + 3);
+                else
+                    newPrefix = prefix + ch;
+                findValidPermutations(newPrefix, restOfString, permutationSet, validWords);
             }
         }
     }
@@ -246,19 +328,31 @@ public class WordFind implements Application {
     }
 
     /**
-     * Print an error message to {@link System#err} and highlight in red.
+     * Print an error message to {@link System#err} and highlight in red when running
+     * in the console, else send to the GUI error message text.
+     *
      * @param message The error message to display.
      */
     private static void error(final String message) {
-        System.err.println(RED_BOLD + message + RESET);
+        if (runningOnConsole) {
+            System.err.println(RED_BOLD + message + RESET);
+        } else {
+            // TODO: implement; whether to have separate error/info text boxes or the same with diff colors?
+        }
     }
 
     /**
-     * Print an informational message to {@link System#out} and highlight in green.
+     * Print an informational message to {@link System#out} and highlight in green when running
+     * in the console, else send to the GUI information message text.
+     *
      * @param message The informational message to display.
      */
     private static void info(final String message) {
-        System.out.println(GREEN + message + RESET);
+        if (runningOnConsole) {
+            System.out.println(GREEN + message + RESET);
+        } else {
+            // TODO: implement; whether to have separate error/info text boxes or the same with diff colors?
+        }
     }
 
     /**
@@ -284,12 +378,7 @@ public class WordFind implements Application {
      * @return Whether the arg matches any one of the choices.
      */
     private static boolean matches(final String arg, final String... choices) {
-        for (String choice : choices) {
-            if (arg.equalsIgnoreCase(choice)) {
-                return true;
-            }
-        }
-        return false;
+        return CharUtil.matchesAnyOfIgnoreCase(arg, choices);
     }
 
     /**
@@ -442,13 +531,13 @@ public class WordFind implements Application {
         List<String> argWords = new ArrayList<>(args.length);
         int totalInputSize = processCommandLine(args, argWords);
 
-        // Next read in the preferred dictionary/word file
-        readDictionary(wordFile, words, additionalWords);
-
         // BIG switch here for GUI vs console operation
         if (!runningOnConsole) {
             DesktopApplicationContext.main(WordFind.class, argWords.toArray(new String[0]));
         } else {
+            // Next read in the preferred dictionary/word file
+            readDictionary(wordFile, words, additionalWords);
+
             StringBuilder letters = new StringBuilder(totalInputSize);
 
             // If we're running in "word" mode, then lookup each of the words given on the command line
@@ -501,37 +590,56 @@ public class WordFind implements Application {
                 }
                 heading(sb.toString());
 
-                StringBuilder buf = new StringBuilder(n);
+                // Shuffle the blanks to the end to ensure that words made either with or without
+                // blanks will find the "without" version first.
+                StringBuilder letterSubset = new StringBuilder(n);
+                int numberOfBlanks = 0;
+                for (int i = 0; i < n; i++) {
+                    char ch = letters.charAt(i);
+                    if (ch == ' ' || ch == '?')
+                        numberOfBlanks++;
+                    else
+                        letterSubset.append(ch);
+                }
+                if (numberOfBlanks > 0) {
+                    letters.setLength(0);
+                    letters.append(letterSubset);
+                    letters.append(CharUtil.makeStringOfChars('?', numberOfBlanks));
+                }
+
                 @SuppressWarnings("unchecked")
                 Set<String>[] validWords = new Set[n];
                 for (int i = 0; i < n; i++) {
                     validWords[i] = new TreeSet<>(valueComparator);
                 }
+		// This is the set used to avoid duplicate permutations
+		Set<String> permutationSet = new TreeSet<>();
 
                 /*
                  * Find all subsets of the given set of letters by running through the values
                  * of all the binary numbers from 0 to 2^n - 1 where n is the number of letters.
                  * Algorithm taken from https://www.geeksforgeeks.org/finding-all-subsets-of-a-given-set-in-java/
+		 * (assumes n <= 32)
                  */
-                for (int i = 0; i < (1 << n); i++) {
-                    buf.setLength(0);
-                    for (int j = 0; j < n; j++) {
-                        // (1<<j) is a number with jth bit 1
-                        // so when we 'and' them with the subset 
-                        // number we get which numbers are present
-                        // in the subset and which are not.
-                        if ((i & (1 << j)) != 0) {
-                            buf.append(letters.charAt(j));
+		int twoPowN = 1 << n;
+                for (int i = 0; i < twoPowN; i++) {
+                    letterSubset.setLength(0);
+                    for (int j = 0, bitMask = 1; j < n; j++, bitMask <<= 1) {
+                        // bitMask is a number with jth bit set to one,
+                        // so when we 'and' that with the subset number 
+                        // we get which letters are present in ths subset
+			// and which are not.
+                        if ((i & bitMask) != 0) {
+                            letterSubset.append(letters.charAt(j));
                         }
                     }
-                    findValidPermutations(buf.toString(), "", validWords);
+                    findValidPermutations("", letterSubset.toString(), permutationSet, validWords);
                 }
 
                 for (int index = n - 1; index >= 0; index--) {
                     Set<String> wordSet = validWords[index];
                     if (wordSet.size() > 0) {
                         int columnWidth = index + 5;
-                        final String wordFormat = String.format("%%%1$ds " + BLACK_BRIGHT + "(%%2$3d)" + RESET, columnWidth);
                         section(String.valueOf(index + 1) + " letter words (" + wordSet.size() + "):");
                         int lineLength = 0;
                         for (String word : wordSet) {
@@ -539,7 +647,16 @@ public class WordFind implements Application {
                                 System.out.println();
                                 lineLength = 0;
                             }
-                            System.out.format(wordFormat, word, addLetterValues(word));
+                            /*
+                             * This is tricky because we need to highlight blank substitutions here,
+                             * but also right-justify within the column width, which cannot count
+                             * the escape sequences as part of the word length.
+                             */
+                            String lettersOnly = getLettersOnly(word);
+                            int excessSpace = columnWidth - lettersOnly.length();
+                            String leftPadding = excessSpace == 0 ? "" : CharUtil.makeStringOfChars(' ', excessSpace); 
+                            String highlightedWord = highlightWord(word);
+                            System.out.format(WORD_FORMAT, leftPadding, highlightedWord, addLetterValues(word));
                             lineLength += columnWidth + 6;
                         }
                         System.out.println();
