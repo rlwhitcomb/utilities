@@ -28,6 +28,8 @@
  *	    First coding.
  *	14-Oct-2020 (rlwhitcomb)
  *	    Add "-version" command.
+ *	15-Oct-2020 (rlwhitcomb)
+ *	    Fix the process exit code.
  */
 package info.rlwhitcomb.compare;
 
@@ -132,6 +134,7 @@ public class CompareFiles
 	 */
 	private static void potentialExit() {
 	    if (!continueAfterError) {
+		// This should be the number of mismatches so far (namely only one).
 		System.exit(1);
 	    }
 	}
@@ -325,6 +328,11 @@ public class CompareFiles
 		    long memoryUseAfter = Runtime.getRuntime().freeMemory();
 		    Intl.outFormat("compare#compare.memoryUse", memoryUseBefore - memoryUseAfter);
 		}
+	    }
+
+	    // The process exit code needs to reflect whether there were any mismatches or not.
+	    if (numberOfMismatches > 0) {
+		System.exit(numberOfMismatches > 255 ? 255 : numberOfMismatches);
 	    }
 	}
 }
