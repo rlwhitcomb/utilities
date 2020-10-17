@@ -34,6 +34,8 @@
  *	    Small changes to support GUI mode. Use CharUtil methods.
  *	    Fix bug that was missing a bunch of words when using blanks.
  *	    Also highlight and correct point values with blanks.
+ *	16-Oct-2020 (rlwhitcomb)
+ *	    Display the number of permutations at the end.
  */
 package info.rlwhitcomb.wordfind;
 
@@ -518,7 +520,7 @@ public class WordFind implements Application {
         }
         long endTime = System.nanoTime();
         float secs = (float)(endTime - startTime) / 1.0e9f;
-        String message = String.format("Dictionary \"%1$s\" has %2$d basic and %3$d additional words (%4$5.3f secs).",
+        String message = String.format("Dictionary \"%1$s\" has %2$,d basic and %3$,d additional words (%4$5.3f secs).",
             wordFile, wordSet.size(), addlSet.size(), secs);
         info(message);
     }
@@ -665,7 +667,8 @@ public class WordFind implements Application {
 
                 long endTime = System.nanoTime();
                 float secs = (float)(endTime - startTime) / 1.0e9f;
-                String message = String.format("(Lookup time was %1$5.3f seconds)", secs);
+                String message = String.format("(Lookup time was %1$5.3f seconds, %2$,d words tested)",
+                        secs, permutationSet.size());
                 info(message);
             }
         }
