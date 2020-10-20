@@ -26,8 +26,11 @@
  *  Change History:
  *    02-Oct-2020 (rlwhitcomb)
  *	First version, based on older code.
+ *    19-Oct-2020 (rlwhitcomb)
+ *	Added MessageDigest list.
  */
 import java.nio.charset.Charset;
+import java.security.Security;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
@@ -49,6 +52,7 @@ public class OS
 		ENVIRONMENT,
 		CHARSETS,
 		LOCALES,
+		DIGESTS,
 		ALL
 	}
 
@@ -77,12 +81,16 @@ public class OS
 		else if (matches(arg, "locales", "locale", "loc", "l")) {
 		    choice = Choice.LOCALES;
 		}
+		else if (matches(arg, "message-digests", "message_digests", "messagedigests",
+				"digests", "digest", "dig", "d", "m", "md")) {
+		    choice = Choice.DIGESTS;
+		}
 		else if (matches(arg, "all", "a")) {
 		    choice = Choice.ALL;
 		}
 		else {
 		    System.err.println("Unknown choice value of \"" + arg + "\".");
-		    System.err.println("Valid choices are: 'properties', 'environment', 'charsets', 'locales', or 'all'.");
+		    System.err.println("Valid choices are: 'properties', 'environment', 'charsets', 'locales', 'digests', or 'all'.");
 		    System.err.println("  (default is 'properties')");
 		    return false;
 		}
@@ -153,6 +161,17 @@ public class OS
 	    System.out.println();
 	}
 
+	private static void displayDigests() {
+	    Set<String> availableDigests = Security.getAlgorithms("MessageDigest");
+	    Set<String> sortedDigests    = new TreeSet<>(availableDigests);
+
+	    System.out.println("Message Digests");
+	    System.out.println(HEADER);
+	    sortedDigests.forEach(name -> System.out.println(name));
+	    System.out.println(FOOTER);
+	    System.out.println();
+	}
+
 	public static void main(String[] args) {
 	    if (!parseArgs(args))
 		System.exit(1);
@@ -170,11 +189,15 @@ public class OS
 		case LOCALES:
 		    displayLocales();
 		    break;
+		case DIGESTS:
+		    displayDigests();
+		    break;
 		case ALL:
 		    displayProperties();
 		    displayEnvironment();
 		    displayCharsets();
 		    displayLocales();
+		    displayDigests();
 		    break;
 	    }
 	}
