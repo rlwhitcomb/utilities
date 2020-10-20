@@ -106,3 +106,6 @@ Work going on currently includes:
 - some kind of functional interface (Runnable or Callable)? or Predicate for custom validation, or additional processing
 - ?? should we just do that for validation?  Validator interface "boolean isValid(Object input)" ...info/.../validation package, with Validator interface, and custom implementations (such as IntValidator, FloatValidator, etc. CharsetValidator
 
+### Unit Test ideas
+- Need InitializationTask test: make a long progressive calculation, with an atomic result.  Wait on the init task to finish, test the result to make sure the task actually finishes.
+
