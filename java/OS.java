@@ -28,9 +28,12 @@
  *	First version, based on older code.
  *    19-Oct-2020 (rlwhitcomb)
  *	Added MessageDigest list.
+ *    19-Oct-2020 (rlwhitcomb)
+ *	Allow multiple choices. Make the titles look better.
  */
 import java.nio.charset.Charset;
 import java.security.Security;
+import java.util.EnumSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
@@ -40,8 +43,8 @@ import java.util.TreeSet;
 
 public class OS
 {
-	private static final String HEADER = "=====================================";
-	private static final String FOOTER = "-------------------------------------";
+	private static final String HEADER = "=======================================";
+	private static final String FOOTER = "---------------------------------------";
 
 	/**
 	 * What the user would like to display.
@@ -52,12 +55,26 @@ public class OS
 		ENVIRONMENT,
 		CHARSETS,
 		LOCALES,
-		DIGESTS,
-		ALL
+		DIGESTS
 	}
 
-	private static Choice choice = Choice.PROPERTIES;
+	private static Set<Choice> choices = EnumSet.noneOf(Choice.class);
 
+
+	private static void printTitle(final String title) {
+	    int len = title.length();
+	    StringBuilder buffer = new StringBuilder(len * 2 + 3);
+	    buffer.append("   ");
+	    for (int i = 0; i < len; i++) {
+		char ch = Character.toUpperCase(title.charAt(i));
+		buffer.append(ch);
+		if (i < len - 1)
+		    buffer.append(' ');
+	    }
+	    System.out.println(HEADER);
+	    System.out.println(buffer.toString());
+	    System.out.println(HEADER);
+	}
 
 	private static boolean matches(final String input, String... choices) {
 	    for (String choice : choices) {
@@ -70,23 +87,23 @@ public class OS
 	private static boolean parseArgs(final String[] args) {
 	    for (String arg: args) {
 		if (matches(arg, "properties", "props", "p")) {
-		    choice = Choice.PROPERTIES;
+		    choices.add(Choice.PROPERTIES);
 		}
 		else if (matches(arg, "environment", "environ", "env", "e")) {
-		    choice = Choice.ENVIRONMENT;
+		    choices.add(Choice.ENVIRONMENT);
 		}
 		else if (matches(arg, "charsets", "charset", "chars", "char", "ch", "c")) {
-		    choice = Choice.CHARSETS;
+		    choices.add(Choice.CHARSETS);
 		}
 		else if (matches(arg, "locales", "locale", "loc", "l")) {
-		    choice = Choice.LOCALES;
+		    choices.add(Choice.LOCALES);
 		}
 		else if (matches(arg, "message-digests", "message_digests", "messagedigests",
 				"digests", "digest", "dig", "d", "m", "md")) {
-		    choice = Choice.DIGESTS;
+		    choices.add(Choice.DIGESTS);
 		}
 		else if (matches(arg, "all", "a")) {
-		    choice = Choice.ALL;
+		    choices = EnumSet.allOf(Choice.class);
 		}
 		else {
 		    System.err.println("Unknown choice value of \"" + arg + "\".");
@@ -104,8 +121,7 @@ public class OS
 	    Set<String> sortedNames = new TreeSet<>();
 	    sortedNames.addAll(sysProperties.stringPropertyNames());
 
-	    System.out.println("System Properties");
-	    System.out.println(HEADER);
+	    printTitle("System Properties");
 	    for (String propertyName: sortedNames) {
 		String value = sysProperties.getProperty(propertyName);
 		System.out.format("%1$s = %2$s%n", propertyName, value);
@@ -117,8 +133,7 @@ public class OS
 	private static void displayEnvironment() {
 	    Map<String, String> env = new TreeMap<>(System.getenv());
 
-	    System.out.println("Environment");
-	    System.out.println(HEADER);
+	    printTitle("Environment");
 	    for (Map.Entry<String, String> entry : env.entrySet()) {
 		System.out.format("%1$s = %2$s%n", entry.getKey(), entry.getValue());
 	    }
@@ -130,8 +145,7 @@ public class OS
 	    Map<String, Charset> charsets = new TreeMap<>(Charset.availableCharsets());
 	    Charset defaultCharset = Charset.defaultCharset();
 
-	    System.out.println("Character Sets");
-	    System.out.println(HEADER);
+	    printTitle("Character Sets");
 	    for (Map.Entry<String, Charset> entry : charsets.entrySet()) {
 		String prefix = (entry.getValue().equals(defaultCharset)) ? "* " : "  ";
 		System.out.println(prefix + entry.getKey());
@@ -149,8 +163,7 @@ public class OS
 		sortedLocales.put(loc.toLanguageTag(), loc);
 	    }
 
-	    System.out.println("Locales");
-	    System.out.println(HEADER);
+	    printTitle("Locales");
 	    for (Map.Entry<String, Locale> entry : sortedLocales.entrySet()) {
 		String tag = entry.getKey();
 		Locale loc = entry.getValue();
@@ -165,8 +178,7 @@ public class OS
 	    Set<String> availableDigests = Security.getAlgorithms("MessageDigest");
 	    Set<String> sortedDigests    = new TreeSet<>(availableDigests);
 
-	    System.out.println("Message Digests");
-	    System.out.println(HEADER);
+	    printTitle("Message Digests");
 	    sortedDigests.forEach(name -> System.out.println(name));
 	    System.out.println(FOOTER);
 	    System.out.println();
@@ -176,30 +188,19 @@ public class OS
 	    if (!parseArgs(args))
 		System.exit(1);
 
-	    switch (choice) {
-		case PROPERTIES:
-		    displayProperties();
-		    break;
-		case ENVIRONMENT:
-		    displayEnvironment();
-		    break;
-		case CHARSETS:
-		    displayCharsets();
-		    break;
-		case LOCALES:
-		    displayLocales();
-		    break;
-		case DIGESTS:
-		    displayDigests();
-		    break;
-		case ALL:
-		    displayProperties();
-		    displayEnvironment();
-		    displayCharsets();
-		    displayLocales();
-		    displayDigests();
-		    break;
-	    }
+	    if (choices.isEmpty())
+		choices.add(Choice.PROPERTIES);
+
+	    if (choices.contains(Choice.PROPERTIES))
+		displayProperties();
+	    if (choices.contains(Choice.ENVIRONMENT))
+		displayEnvironment();
+	    if (choices.contains(Choice.CHARSETS))
+		displayCharsets();
+	    if (choices.contains(Choice.LOCALES))
+		displayLocales();
+	    if (choices.contains(Choice.DIGESTS))
+		displayDigests();
 	}
 }
 
