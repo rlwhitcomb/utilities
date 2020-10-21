@@ -30,9 +30,14 @@
  *	Added MessageDigest list.
  *    19-Oct-2020 (rlwhitcomb)
  *	Allow multiple choices. Make the titles look better.
+ *    20-Oct-2020 (rlwhitcomb)
+ *	Use streams and a FunctionalInterface to make the code cleaner.
+ *	Add some Javadoc. Add the list of security providers.
  */
 import java.nio.charset.Charset;
+import java.security.Provider;
 import java.security.Security;
+import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.Locale;
 import java.util.Map;
@@ -41,26 +46,55 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+/**
+ * Display reports of various system lists, such as the system properties,
+ * available locales, etc.
+ */
 public class OS
 {
+	/** Banner for the top of each report. */
 	private static final String HEADER = "=======================================";
+	/** Final banner for the end of the reports. */
 	private static final String FOOTER = "---------------------------------------";
 
 	/**
-	 * What the user would like to display.
+	 * What the user would like to display, and the method to display each bit.
 	 */
 	private enum Choice
 	{
-		PROPERTIES,
-		ENVIRONMENT,
-		CHARSETS,
-		LOCALES,
-		DIGESTS
+		PROPERTIES	(OS::displayProperties),
+		ENVIRONMENT	(OS::displayEnvironment),
+		CHARSETS	(OS::displayCharsets),
+		LOCALES		(OS::displayLocales),
+		DIGESTS		(OS::displayDigests),
+		PROVIDERS	(OS::displayProviders);
+
+		private Runnable displayer;
+
+		Choice(Runnable disp) {
+		    this.displayer = disp;
+		}
+
+		void display() {
+		    displayer.run();
+		}
 	}
 
+	/**
+	 * The set of reports to be run. More than one may be selected.
+	 */
 	private static Set<Choice> choices = EnumSet.noneOf(Choice.class);
 
 
+	/**
+	 * Print a nicely formatted banner before the report, with the
+	 * given title.
+	 * <p> The {@link #HEADER} line is displayed before and after,
+	 * then the title string is expanded with spaces between letters
+	 * and each letter UPPERcased.
+	 *
+	 * @param title	The title string to display in the banner.
+	 */
 	private static void printTitle(final String title) {
 	    int len = title.length();
 	    StringBuilder buffer = new StringBuilder(len * 2 + 3);
@@ -76,14 +110,30 @@ public class OS
 	    System.out.println(HEADER);
 	}
 
-	private static boolean matches(final String input, String... choices) {
-	    for (String choice : choices) {
-		if (input.equalsIgnoreCase(choice))
-		    return true;
-	    }
-	    return false;
+	/**
+	 * Match an input string (presumably a command-line argument) with a list
+	 * of choices (aliases for a report choice), and test to see if any match.
+	 * <p> Note: the comparison is done ignoring letter case differences using
+	 * {@link String#equalsIgnoreCase}.
+	 *
+	 * @param input		The input string to test against the choices.
+	 * @param choices	The list of possible matches.
+	 * @return		Whether or not any match was made.
+	 */
+	private static boolean matches(final String input, final String... choices) {
+	    return Arrays.stream(choices).anyMatch(c -> input.equalsIgnoreCase(c));
 	}
 
+	/**
+	 * Loop through the given command line arguments, determining which reports
+	 * have been selected to be run.
+	 *
+	 * @param args	The command line argument array.
+	 * @return	Whether or not the matching succeeded (meaning all of the args
+	 *		matchied one of our choices); {@code true} means success,
+	 *		while {@code false} indicates an error (the arg did not match
+	 *		ANY of the choices).
+	 */
 	private static boolean parseArgs(final String[] args) {
 	    for (String arg: args) {
 		if (matches(arg, "properties", "props", "p")) {
@@ -102,6 +152,10 @@ public class OS
 				"digests", "digest", "dig", "d", "m", "md")) {
 		    choices.add(Choice.DIGESTS);
 		}
+		else if (matches(arg, "security-providers", "security_providers",
+				"securityproviders", "providers", "security", "prov", "sec", "s", "sp")) {
+		    choices.add(Choice.PROVIDERS);
+		}
 		else if (matches(arg, "all", "a")) {
 		    choices = EnumSet.allOf(Choice.class);
 		}
@@ -115,6 +169,9 @@ public class OS
 	    return true;
 	}
 
+	/**
+	 * Display the system properties list in sorted order by key.
+	 */
 	private static void displayProperties() {
 	    Properties sysProperties = System.getProperties();
 
@@ -130,6 +187,9 @@ public class OS
 	    System.out.println();
 	}
 
+	/**
+	 * Display the environment in sorted order by variable name.
+	 */
 	private static void displayEnvironment() {
 	    Map<String, String> env = new TreeMap<>(System.getenv());
 
@@ -141,6 +201,10 @@ public class OS
 	    System.out.println();
 	}
 
+	/**
+	 * Display the available charsets sorted by the character set name.
+	 * <p> The default charset is identified by an {@code "*"} in the first column.
+	 */
 	private static void displayCharsets() {
 	    Map<String, Charset> charsets = new TreeMap<>(Charset.availableCharsets());
 	    Charset defaultCharset = Charset.defaultCharset();
@@ -154,6 +218,10 @@ public class OS
 	    System.out.println();
 	}
 
+	/**
+	 * Display the available locales (there are lots), sorted by the language tag.
+	 * <p> The default locale is identified by an {@code "*"}.
+	 */
 	private static void displayLocales() {
 	    Locale[] availableLocales = Locale.getAvailableLocales();
 	    Locale defaultLocale = Locale.getDefault();
@@ -174,16 +242,42 @@ public class OS
 	    System.out.println();
 	}
 
+	/**
+	 * Display the available message digests, sorted by algorithm name.
+	 */
 	private static void displayDigests() {
 	    Set<String> availableDigests = Security.getAlgorithms("MessageDigest");
 	    Set<String> sortedDigests    = new TreeSet<>(availableDigests);
 
 	    printTitle("Message Digests");
-	    sortedDigests.forEach(name -> System.out.println(name));
+	    sortedDigests.forEach(System.out::println);
 	    System.out.println(FOOTER);
 	    System.out.println();
 	}
 
+	private static int compare(Provider p1, Provider p2) {
+	    return p1.getName().compareTo(p2.getName());
+	}
+
+	/**
+	 * Display the sorted list of security providers.
+	 */
+	private static void displayProviders() {
+	    Provider[] providers = Security.getProviders();
+	    Arrays.sort(providers, OS::compare);
+
+	    printTitle("Security Providers");
+	    Arrays.stream(providers).forEach(p -> System.out.format("%1$12s: %2$s%n", p.getName(), p.getInfo()));
+	    System.out.println(FOOTER);
+	    System.out.println();
+	}
+
+	/**
+	 * Parse the command line arguments to get the list of desired reports,
+	 * then display them in turn.
+	 *
+	 * @param args	The parsed command line arguments.
+	 */
 	public static void main(String[] args) {
 	    if (!parseArgs(args))
 		System.exit(1);
@@ -191,16 +285,7 @@ public class OS
 	    if (choices.isEmpty())
 		choices.add(Choice.PROPERTIES);
 
-	    if (choices.contains(Choice.PROPERTIES))
-		displayProperties();
-	    if (choices.contains(Choice.ENVIRONMENT))
-		displayEnvironment();
-	    if (choices.contains(Choice.CHARSETS))
-		displayCharsets();
-	    if (choices.contains(Choice.LOCALES))
-		displayLocales();
-	    if (choices.contains(Choice.DIGESTS))
-		displayDigests();
+	    choices.forEach(Choice::display);
 	}
 }
 
