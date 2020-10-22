@@ -42,6 +42,8 @@
  *	Prepare for GitHub.
  *   22-Sep-2020 (rlwhitcomb)
  *	Error message if nothing given on command line to do.
+ *   21-Oct-2020 (rlwhitcomb)
+ *	Allow slash in the algorithm name (for "SHA-512/256", etc.).
  */
 
 import java.io.BufferedReader;
@@ -118,7 +120,7 @@ public class MD5 {
 	/** Pattern to parse the <tt>"--split"</tt> command-line option. */
 	private static Pattern splitCmd = Pattern.compile("^[sS][pP][lL][iI][tT](\\p{Punct})?$");
 	/** Pattern to parse the <tt>"--algorithm=&lt;name&gt;"</tt> command-line option. */
-	private static Pattern algoName = Pattern.compile("^[aA][lL][gG][oO][rR][iI][tT][hH][mM][:=]([\\w-]+)$");
+	private static Pattern algoName = Pattern.compile("^[aA][lL][gG][oO][rR][iI][tT][hH][mM][:=]([\\w-/]+)$");
 	/** Flag to say we're running on a Windows O/S vs. some other (for command-line option recognition). */
 	private static boolean onWindows = System.getProperty("os.name").toLowerCase().startsWith("windows");
 
