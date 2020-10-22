@@ -112,6 +112,10 @@ public class OS
 
 		/**
 		 * Display all the choices available for each choice type.
+		 *
+		 * @param ps		The stream to print to (either {@link System#out} or {@link System#err})..
+		 * @param indent	The leading indent string for consistency with other text.
+		 * @param width		The line width where wrapping should occur.
 		 */
 		static void displayAliases(final PrintStream ps, final String indent, final int width) {
 		    Arrays.stream(values())
