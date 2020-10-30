@@ -15,8 +15,9 @@ pushd,/,C:\,the root (C:\) directory
 popd,back, ,pops back to the last saved location (if any)
 popd,`, ,ditto (popd)
 popd,pop, ,also popd
-cd,-,..,to ..       (no pushd)
-cd,--,..\..,to ..\..    ("    "  )
-cd,---,..\..\..,to ..\..\.. ("    "  )
+cd,-,..,cd to ..       (no pushd)
+cd,--,..\..,cd to ..\..    ("    "  )
+cd,---,..\..\..,cd to ..\..\.. ("    "  )
+cd,., ,shows current directory
 pushd,list, ,lists saved (pushd) locations
 pushd,l, ,also lists saved locs

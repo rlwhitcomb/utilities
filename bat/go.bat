@@ -60,6 +60,10 @@ if /I "%COMMAND%" EQU "popd" goto doit
 if /I "%COMMAND%" EQU "pushd" (
    if "%DEST%" EQU "" goto doit
 )
+:: Also, "cd" with no destination can also be used to print the current directory
+if /I "%COMMAND%" EQU "cd" (
+   if "%DEST%" EQU "" goto doit
+)
 :: For "cd" or "pushd" commands, we can add any number of subdirectories
 :: below the specified one (for convenience).
 :add_subdir
@@ -72,7 +76,7 @@ if exist "%DEST%" goto doit
 echo Location "%DEST%" does not exist!
 exit /b 1
 :doit
-%COMMAND% %DEST%
+%COMMAND% "%DEST%"
 exit /b 0
 
 :setup
@@ -123,17 +127,19 @@ echo LOCATION, and any given subdirectory(ies) beneath it,
 echo where LOCATION is one of the following:
 for /F "delims=, tokens=1,2,3,*" %%I in (%DESTINATIONS%) do (
    if "%%L" EQU "" (
-      for /f "tokens=*" %%M in  ('echo %%K') do (
+      for /f "tokens=*" %%M in ('echo %%K') do (
          set "key=%%J%SPACES%"
          set line=  !key:~0,9! = %%M
          echo !line!
       )
    ) else (
-      for /f "tokens=*" %%M in  ('echo %%L') do (
+      for /f "tokens=*" %%M in ('echo %%L') do (
          set "key=%%J%SPACES%"
          set line=  !key:~0,9! = %%M
          echo !line!
       )
    )
 )
+echo.
 endlocal
+
