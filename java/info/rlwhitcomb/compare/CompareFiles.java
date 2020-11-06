@@ -30,13 +30,17 @@
  *	    Add "-version" command.
  *	15-Oct-2020 (rlwhitcomb)
  *	    Fix the process exit code.
+ *	06-Nov-2020 (rlwhitcomb)
+ *	    Use new Options processing to help.
  */
 package info.rlwhitcomb.compare;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import info.rlwhitcomb.util.Environment;
 import info.rlwhitcomb.util.ExceptionUtil;
 import info.rlwhitcomb.util.FileUtilities;
@@ -47,29 +51,50 @@ import info.rlwhitcomb.util.Options;
 /**
  * Compare sets of files.
  *
- * TODO: set exit code to number of mismatches/missing
- * explicit wildcard support (using filenamefilter)
+ * TODO: explicit wildcard support (using filenamefilter)
  */
 public class CompareFiles
 {
 	/**
 	 * Enumeration of the various possible output verbosity settings.
 	 */
-	private enum Level
+	private enum Level implements Options.ChoiceEnum
 	{
 		/** Silent implies no output at all, only setting the process exit code. */
-		SILENT,
+		SILENT		("silent", "s"),
 		/** Quiet means only the most necessary displays are done (compare failures, I/O errors). */
-		QUIET,
+		QUIET		("quiet", "q"),
 		/** Normal means all the not found/failure messages come out. */
-		NORMAL,
+		NORMAL		("normal", "norm", "n"),
 		/** Verbose puts out messages all along the way of what's happening. */
-		VERBOSE,
+		VERBOSE		("verbose", "verb", "v"),
 		/** Super Verbose gets into nit-picky detail of the operation. */
-		SUPER_VERBOSE,
+		SUPER_VERBOSE	("SuperVerbose", "super", "sup"),
 		/** Debug mode pretty much documents every line of code as we go. */
-		DEBUG;
+		DEBUG		("debug", "deb", "d");
 
+		private String[] choices;
+
+		Level(final String... validChoices) {
+		    this.choices = validChoices;
+		}
+
+		@Override
+		public String[] choices() {
+		    return this.choices;
+		}
+
+		/**
+		 * Match an input parameter against the list of valid choices for
+		 * each level and decide if any match.
+		 *
+		 * @param input The input string to (hopefully) match to one of
+		 *              our values.
+		 * @return	Either one of our values or {@code None}.
+		 */
+		public static Optional<Level> match(final String input) {
+		    return Options.matchIgnoreCase(values(), input);
+		}
 
 		/**
 		 * Method used to decide whether a given display should be done.
@@ -86,12 +111,78 @@ public class CompareFiles
 	}
 
 
-	/** Whether to keep going after the first difference. */
-	private static boolean continueAfterError = true;
-	/** Whether to descend into subdirectories. */
-	private static boolean recursive = false;
-	/** Whether to compare directories/files both directions. */
-	private static boolean syncMode = true;
+	/**
+	 * The various program options (set by command line options).
+	 */
+	private static enum Opts implements Options.ToggleEnum
+	{
+		/** Whether to keep going after the first difference. */
+		CONTINUE_AFTER_ERROR	(true,
+					 "ContinueAfterError", "continue", "cont", "con"),
+		BREAK_ON_ERROR		(CONTINUE_AFTER_ERROR,
+					 "BreakOnError", "break", "brk", "br", "b"),
+		/** Whether to descend into subdirectories. */
+		RECURSIVE		(false,
+					 "recursive", "recurse", "rec", "r"),
+		/** Whether to compare directories/files both directions. */
+		SYNC_MODE		(true,
+					 "SyncMode", "sync", "syn"),
+		COPY_MODE		(SYNC_MODE,
+					 "CopyMode", "copy", "c"),
+		/** Option to print the help message. */
+		HELP			("help", "h", "?"),
+		/** Option to print the version information. */
+		VERSION			("version", "vers", "ver");
+
+		private String[] choices;
+		private boolean value;
+		private Opts obverseOpt;
+
+		Opts(final boolean initialValue, final String... validChoices) {
+		    this.choices    = validChoices;
+		    this.value      = initialValue;
+		    this.obverseOpt = null;
+		}
+
+		Opts(final Opts otherOpt, final String... validChoices) {
+		    this.choices    = validChoices;
+		    this.value      = false;
+		    this.obverseOpt = otherOpt;
+		}
+
+		Opts(final String... validChoices) {
+		    this.choices    = validChoices;
+		    this.value      = false;
+		    this.obverseOpt = null;
+		}
+
+		@Override
+		public String[] choices() {
+		    return this.choices;
+		}
+
+		@Override
+		public void set(final boolean newValue) {
+		    if (obverseOpt != null)
+			obverseOpt.value = !newValue;
+		    else
+			this.value = newValue;
+		}
+
+		@Override
+		public boolean isSet() {
+		    if (obverseOpt != null)
+			return !obverseOpt.value;
+		    else
+			return this.value;
+		}
+
+		public static Optional<Opts> match(final String input) {
+		    return Options.matchIgnoreCase(values(), input);
+		}
+	}
+
+
 	/** What level of output to use. */
 	private static Level verbosity = Level.NORMAL;
 	/** Count of files compared. */
@@ -130,10 +221,10 @@ public class CompareFiles
 	}
 
 	/**
-	 * Exit with return code of {@code 1} unless {@link #continueAfterError} is set.
+	 * Exit with return code of {@code 1} unless {@link Opts#CONTINUE_AFTER_ERROR} is set.
 	 */
 	private static void potentialExit() {
-	    if (!continueAfterError) {
+	    if (!Opts.CONTINUE_AFTER_ERROR.isSet()) {
 		// This should be the number of mismatches so far (namely only one).
 		System.exit(1);
 	    }
@@ -141,7 +232,7 @@ public class CompareFiles
 
 	/**
 	 * Compare two files, dealing with informational messages, trapping I/O errors, and dealing
-	 * with the {@link #continueAfterError} flag.
+	 * with the {@link Opts#CONTINUE_AFTER_ERROR} flag.
 	 *
 	 * @param file1	The first file to compare.
 	 * @param file2	The other file.
@@ -172,7 +263,7 @@ public class CompareFiles
 	 *
 	 * @param f1	The first file/directory to compare.
 	 * @param f2	The second file/directory to compare it to.
-	 * @param doingReverseSync	Set to true for the second pass in {@link #syncMode}.
+	 * @param doingReverseSync	Set to true for the second pass in {@link Opts#SYNC_MODE}.
 	 */
 	private static void recursiveCompare(final File f1, final File f2, final boolean doingReverseSync) {
 	    if (f1.isDirectory()) {
@@ -197,7 +288,7 @@ public class CompareFiles
 			compareFiles(file1, file2);
 		    }
 		    else if (file1.isDirectory() && file2.isDirectory()) {
-			if (recursive) {
+			if (Opts.RECURSIVE.isSet()) {
 			    recursiveCompare(file1, file2, doingReverseSync);
 			}
 		    }
@@ -242,41 +333,33 @@ public class CompareFiles
 	    List<String> pathArgs = new ArrayList<>();
 	    boolean error = false;
 
+	    // Do the command line option processing
 	    for (String arg : args) {
-		if (Options.matchesOption(arg, true, "verbose", "verb", "v"))
-		    verbosity = Level.VERBOSE;
-		else if (Options.matchesOption(arg, true, "SuperVerbose", "super", "sup"))
-		    verbosity = Level.SUPER_VERBOSE;
-		else if (Options.matchesOption(arg, true, "normal", "norm", "n"))
-		    verbosity = Level.NORMAL;
-		else if (Options.matchesOption(arg, true, "quiet", "q"))
-		    verbosity = Level.QUIET;
-		else if (Options.matchesOption(arg, true, "silent", "s"))
-		    verbosity = Level.SILENT;
-		else if (Options.matchesOption(arg, true, "debug", "deb", "d"))
-		    verbosity = Level.DEBUG;
-		else if (Options.matchesOption(arg, true, "recursive", "recurse", "rec", "r"))
-		    recursive = true;
-		else if (Options.matchesOption(arg, true, "SyncMode", "sync", "syn"))
-		    syncMode = true;
-		else if (Options.matchesOption(arg, true, "CopyMode", "copy", "c"))
-		    syncMode = false;
-		else if (Options.matchesOption(arg, true, "ContinueAfterError", "continue", "cont", "con"))
-		    continueAfterError = true;
-		else if (Options.matchesOption(arg, true, "BreakOnError", "break", "brk", "br", "b"))
-		    continueAfterError = false;
-		else if (Options.matchesOption(arg, true, "help", "h", "?")) {
-		    usage();
-		    return;
-		}
-		else if (Options.matchesOption(arg, true, "version", "vers", "ver", "v")) {
-		    Environment.printProgramInfo();
-		    return;
-                }
+		String option = Options.isOption(arg);
+		if (option != null) {
+		    // Try the verbosity settings first
+		    Optional<Level> level = Level.match(option);
+		    if (level.isPresent()) {
+			verbosity = level.get();
+			continue;
+		    }
+		    // Next, try the regular program options
+		    Optional<Opts> opt = Opts.match(option);
+		    if (opt.isPresent()) {
+			switch (opt.get()) {
+			    case HELP:
+				usage();
+				return;
+			    case VERSION:
+				Environment.printProgramInfo();
+				return;
+			}
+		    }
 	    // TODO option process (-caseinsensitive)
-		else if (Options.isOption(arg) != null) {
-		    err(Level.NORMAL, "unknownOption", arg);
-		    error = true;
+		    else {
+			err(Level.NORMAL, "unknownOption", arg);
+			error = true;
+		    }
 		}
 		else {
 		    msg(Level.SUPER_VERBOSE, "addingPath", arg);
@@ -300,7 +383,7 @@ public class CompareFiles
 
 	    recursiveCompare(f1, f2, false);
 
-	    if (syncMode) {
+	    if (Opts.SYNC_MODE.isSet()) {
 		recursiveCompare(f2, f1, true);
 	    }
 

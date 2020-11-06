@@ -28,6 +28,8 @@
 #	    Initial coding.
 #	14-Oct-2020 (rlwhitcomb)
 #	    Add product name.
+#	06-Nov-2020 (rlwhitcomb)
+#	    Typo.
 #
 
 #
@@ -65,7 +67,7 @@ compare.help10			= \t\twill not be noted (source and target should be copies)
 compare.help11			= \t  or -copy_mode, -copy-mode, -copymode, -copy, or -c
 compare.help12			= ""
 compare.help13			= \t-super\tset 'super verbose' level of output
-compare.help14			= \t  or -super_verbose, -super-verbose, -superverboser, or -sup
+compare.help14			= \t  or -super_verbose, -super-verbose, -superverbose, or -sup
 compare.help15			= \t-verbose\tset 'verbose' level of output
 compare.help16			= \t  or -verb, or -v
 compare.help17			= \t-normal\tset 'normal' level of output (default)
