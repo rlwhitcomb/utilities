@@ -91,6 +91,8 @@
  *	    Add variants of "printProgramInfo" for the common cases (System.out, etc.)
  *	09-Oct-2020 (rlwhitcomb)
  *	    New "fileSeparator" and "pathSeparator" methods to expose those values.
+ *	06-Nov-2020 (rlwhitcomb)
+ *	    Reformat the program version info slightly to improve appearance.
  */
 package info.rlwhitcomb.util;
 
@@ -698,26 +700,34 @@ public final class Environment
 	    String copyright   = getCopyrightNotice();
 
 	    int width = centerWidth;
+
+	    // Even if a width is given, the strings might be longer still
+	    width = Math.max(width, productName.length());
+	    width = Math.max(width, versionInfo.length());
+	    width = Math.max(width, buildInfo.length());
+	    width = Math.max(width, copyright.length());
+
+	    String underline = CharUtil.makeStringOfChars('=', width);
+
+	    ps.println();
 	    if (width == 0) {
 		ps.println(productName);
 		ps.println(versionInfo);
+		ps.println();
 		ps.println(buildInfo);
 		ps.println(copyright);
 	    } 
 	    else {
-		// Even if a width is given, the strings might be longer still
-		width = Math.max(width, productName.length());
-		width = Math.max(width, versionInfo.length());
-		width = Math.max(width, buildInfo.length());
-		width = Math.max(width, copyright.length());
 		width = (width + 1) / 2 * 2;
 
 		// Negative width puts the odd space on the right
 		ps.println(CharUtil.padToWidth(productName, -width, CENTER));
 		ps.println(CharUtil.padToWidth(versionInfo, -width, CENTER));
+		ps.println();
 		ps.println(CharUtil.padToWidth(buildInfo, -width, CENTER));
 		ps.println(CharUtil.padToWidth(copyright, -width, CENTER));
 	    }
+	    ps.println(underline);
 	    ps.println();
 	}
 
