@@ -38,6 +38,8 @@
 		Add Lists to the .jar file.
 	    14-Oct-2020 (rlwhitcomb)
 		Add the .../compare directory.
+	    06-Nov-2020 (rlwhitcomb)
+		Add the external and Ant jars to the "javadoc" classpath.
 
      ========================================================================== -->
 
@@ -143,6 +145,11 @@
 			<fileset dir=".">
 				<include name="*.java" />
 			</fileset>
+			<classpath>
+				<pathelement path="."/>
+				<fileset dir="external-jars" includes="*.jar"/>
+				<fileset dir="${ant.library.dir}" includes="*.jar"/>
+			</classpath>
 		</javadoc>
 	</target>
 
