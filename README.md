@@ -42,6 +42,7 @@ Work going on currently includes:
 - Pivot demo program for CSS colors.
 - Lots of unit tests.
 - Separate version for utility library and each main program (cmp, tre, which, etc.); add to Environment.printProgramInfo
+- Java "install" task also installs the appropriate wrapper scripts for the platform.
 
 ## Notes on New Programs and Features
 
