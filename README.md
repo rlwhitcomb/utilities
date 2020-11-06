@@ -35,12 +35,13 @@ Work going on currently includes:
 - Convert D.C to Java (include supporting code).
 - Get "pivot" builds working, including Javadoc, packaging, etc.
 - New Java-based "tail", "head", and other Linux utilities missing on Windows.
+- Add "gz" and "gunz" programs to do compression on non-*nix platforms
 - Add support for color-coding within Intl text using HTML-like tags, then update help text in existing programs.
 - Completely new paradigm for Options, similar to Apache commons-cli, including support for printing help text from the options list.
 - UUID program: generate random, generate from text, separate into parts, maybe more.
-- Lists program for converting to/from single- and multiple-line lists.
 - Pivot demo program for CSS colors.
 - Lots of unit tests.
+- Separate version for utility library and each main program (cmp, tre, which, etc.); add to Environment.printProgramInfo
 
 ## Notes on New Programs and Features
 
