@@ -30,6 +30,8 @@
 #	    Add product name.
 #	06-Nov-2020 (rlwhitcomb)
 #	    Typo.
+#	06-Nov-2020 (rlwhitcomb)
+#	    Another edit to the help; add -version help
 #
 
 #
@@ -64,7 +66,7 @@ compare.help7			= \t  (default)
 compare.help8			= \t-copy\tdo a simple compare of source to target, which
 compare.help9			= \t\tmeans files in the target that are not in the source
 compare.help10			= \t\twill not be noted (source and target should be copies)
-compare.help11			= \t  or -copy_mode, -copy-mode, -copymode, -copy, or -c
+compare.help11			= \t  or -copy_mode, -copy-mode, -copymode, or -c
 compare.help12			= ""
 compare.help13			= \t-super\tset 'super verbose' level of output
 compare.help14			= \t  or -super_verbose, -super-verbose, -superverbose, or -sup
@@ -89,5 +91,7 @@ compare.help32			= \t  or -break_on_error, -break-on-error, -breakonerror,
 compare.help33			= \t     -brk, -br, or -b
 compare.help34			= \t-help\tdisplay this message
 compare.help35			= \t  or -h, or -?
-compare.help36			= ""
+compare.help36			= \t-version\tdisplay program version/copyright information
+compare.help37			= \t  or -vers, or -ver
+compare.help38			= ""
 
