@@ -57,18 +57,31 @@
  *	    This system means that a desired option coded as "MixedCase" will also
  *	    accept "Mixed-Case", "Mixed_Case", and the lower case forms (if not
  *	    ignoring case altogether).
+ *	06-Nov-2020 (rlwhitcomb)
+ *	    More work using stream processing to make code more "stream"lined.
+ *	    Make all parameters final. Return Set<> instead of List<> for the
+ *	    option choices. Rework the matching methods. Add ChoiceEnum and
+ *	    ToggleEnum interfaces.
  */
 package info.rlwhitcomb.util;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 
 
+/**
+ * Try to deal in a general way with options parsed from a program's command-line arguments.
+ */
 public class Options
 {
+	/** Determines if we are running on a Windows platform, which then allows options
+	 * to start with "/" (in addition to "--" and "-" allowed on all platforms).
+	 */
 	private static final boolean onWindows = Environment.isWindows();
 
 	/**
@@ -78,103 +91,230 @@ public class Options
 	public interface Choice
 	{
 		boolean matches(String arg);
-		boolean matches(String arg, boolean ignoreCase);
+		boolean matchesIgnoreCase(String arg);
 	}
 
 
-	private static String newForm(String form, boolean toLowerCase,
-		int[] breakPositions, int numberOfBreaks, char opt) {
-	    StringBuilder buf = new StringBuilder(form.length() + numberOfBreaks);
+	/**
+	 * An interface that can be implemented by an enum to present a list of valid choices
+	 * for that enum value.
+	 */
+	public interface ChoiceEnum
+	{
+		String[] choices();
+	}
+
+	/**
+	 * An interface that can be implemented by an enum that keeps a value of its own.
+	 */
+	public interface ToggleEnum extends ChoiceEnum
+	{
+		void set(boolean value);
+		boolean isSet();
+	}
+
+
+	/**
+	 * A template method that can be used to match one of a set of enum options based
+	 * on possible choices stored in each enum value (which implement the {@link ToggleEnum}
+	 * interface). The stored value is also set for {@link ToggleEnum} types.
+	 * The match is done in a case-sensitive way.
+	 *
+	 * @param <E>		The enum type.
+	 * @param values	The enum values.
+	 * @param input		The input value to test against.
+	 * @return		One of the enum values if there was a match, or none if there wasn't.
+	 */
+	public static <E extends Enum<E> & ChoiceEnum> Optional<E> match(final E[] values, final String input) {
+	    Optional<E> result = Arrays.stream(values)
+				       .filter(opt -> matches(input, opt.choices()))
+				       .findFirst();
+	    result.ifPresent(opt -> {
+		if (opt instanceof ToggleEnum)
+		    ((ToggleEnum)opt).set(true);
+	    });
+	    return result;
+	}
+
+	/**
+	 * A template method that can be used to match one of a set of enum options based
+	 * on possible choices stored in each enum value (which implement the {@link ToggleEnum}
+	 * interface). The stored value is also set for {@link ToggleEnum} types.
+	 * The match is done in a case-insensitive way.
+	 *
+	 * @param <E>		The enum type.
+	 * @param values	The enum values.
+	 * @param input		The input value to test against.
+	 * @return		One of the enum values if there was a match, or none if there wasn't.
+	 */
+	public static <E extends Enum<E> & ChoiceEnum> Optional<E> matchIgnoreCase(final E[] values, final String input) {
+	    Optional<E> result = Arrays.stream(values)
+				       .filter(opt -> matchesIgnoreCase(input, opt.choices()))
+				       .findFirst();
+	    result.ifPresent(opt -> {
+		if (opt instanceof ToggleEnum)
+		    ((ToggleEnum)opt).set(true);
+	    });
+	    return result;
+	}
+
+
+	/**
+	 * Construct one "new form" of an option string, given the input template, the
+	 * new "break" character to use, and the list of positions where the breaks should
+	 * occur.
+	 * <p> There could be either "-" or "_" at the break positions, in which case that
+	 * character is replaced by the given break character. Otherwise the break char
+	 * is just inserted at that position.
+	 *
+	 * @param template	The template to use.
+	 * @param toLowerCase	Whether the output should be lowercased or not.
+	 * @param breakPositions	An array of "break" positions where the break
+	 *				character should be replaced/inserted.
+	 * @param numberOfBreaks	The number of array positions to use (assuming
+	 *				the array is bigger than the valid values).
+	 * @param brk		The "break" character to replace/insert at the break
+	 *			positions. If ' ' then nothing will be added.
+	 * @return	A new form of the input template.
+	 */
+	private static String newForm(final String template, final boolean toLowerCase,
+		final int[] breakPositions, final int numberOfBreaks, final char brk)
+	{
+	    StringBuilder buf = new StringBuilder(template.length() + numberOfBreaks);
+
 	    int breakPos = breakPositions[0];
 	    for (int i = 1; i < numberOfBreaks; i++) {
 		int endPos = breakPositions[i];
-		char breakChar = form.charAt(endPos);
-		buf.append(form.substring(breakPos, endPos));
+		char breakChar = template.charAt(endPos);
+
+		// Append the next word, and the given separator to the output
+		buf.append(template.substring(breakPos, endPos));
+		if (brk != ' ')
+		    buf.append(brk);
+
+		// Advance the "breakPos" to the next starting position
 		if (breakChar == '_' || breakChar == '-') {
 		    breakPos = endPos + 1;
 		} else {
 		    breakPos = endPos;
 		}
-		buf.append(opt);
 	    }
-	    if (breakPos < form.length())
-		buf.append(form.substring(breakPos));
+	    if (breakPos < template.length())
+		buf.append(template.substring(breakPos));
 	    return toLowerCase ? buf.toString().toLowerCase() : buf.toString();
 	}
 
 	/**
-	 * Parse a given option string and return multiple values if the permitted
+	 * Parse a given option string and return a set of possible values if the permitted
 	 * option has MixedCase, so that "mixed_case" or "mixed-case" variants also work.
 	 * <p> Note: the "ignoreCase" option if false will give more values in our
 	 * output list ("MixedCase" -&gt; "MixedCase", "mixedcase", "Mixed-Case", "mixed-case", etc.).
 	 *
-	 * @param form		The suggested option word(s).
+	 * @param template	The suggested option template. If {@code null} or empty the output list
+	 *			will also be empty.
 	 * @param ignoreCase	Whether or not to ignore case on the user's input.
-	 * @return		A possible list of potential spellings depending on the input.
+	 * @return		A set of potential spellings depending on the input.
 	 */
-	public static List<String> getMixedCaseOptions(String form, boolean ignoreCase) {
-	    List<String> forms = new ArrayList<>();
-	    boolean alreadyHasSeparator = false;
-	    if (form != null && !form.isEmpty()) {
-		if (Character.isUpperCase(form.charAt(0))) {
-		    int breakPositions[] = new int[form.length()];
-		    int breakNo = 0;
-		    for (int pos = 0; pos < form.length(); pos++) {
-			char ch = form.charAt(pos);
+	public static Set<String> getMixedCaseOptions(final String template, final boolean ignoreCase) {
+	    Set<String> values = new HashSet<>();
+	    boolean inputHasSeparators = false;
+
+	    // Empty input will produce an empty output list
+	    if (template != null && !template.isEmpty()) {
+		int breakPositions[] = new int[template.length()];
+		int breakNo = 0;
+
+		// This whole process is started by the option template starting with an UPPER case letter.
+		if (Character.isUpperCase(template.charAt(0))) {
+		    for (int pos = 0; pos < template.length(); pos++) {
+			char ch = template.charAt(pos);
 			if (Character.isUpperCase(ch))
 			    breakPositions[breakNo++] = pos;
+
 			// The '-' or '_' options give us flexibility if the break char
 			// is a number or other non-alphabet (like "Utf-16")
 			else if (ch == '_' || ch == '-') {
 			    breakPositions[breakNo++] = pos;
-			    alreadyHasSeparator = true;
+			    inputHasSeparators = true;
 			}
 		    }
-		    forms.add(newForm(form, true, breakPositions, breakNo, '-'));
-		    forms.add(newForm(form, true, breakPositions, breakNo, '_'));
+
+		    // Add the lower-case versions of the option, with both '-' and '_' separators
+		    values.add(newForm(template, true, breakPositions, breakNo, '-'));
+		    values.add(newForm(template, true, breakPositions, breakNo, '_'));
+
+		    // If we're NOT ignoring case, then we need to add versions of the template
+		    // which preserve the input case, and also a version without the separators.
 		    if (!ignoreCase) {
-			if (!alreadyHasSeparator)
-			    forms.add(form);
-			forms.add(newForm(form, false, breakPositions, breakNo, '-'));
-			forms.add(newForm(form, false, breakPositions, breakNo, '_'));
+			if (!inputHasSeparators)
+			    values.add(template);
+			else
+			    values.add(newForm(template, false, breakPositions, breakNo, ' '));
+
+			values.add(newForm(template, false, breakPositions, breakNo, '-'));
+			values.add(newForm(template, false, breakPositions, breakNo, '_'));
 		    }
 		}
-		// At the very least return the input itself (lowercased)
-		if (!alreadyHasSeparator)
-		    forms.add(form.toLowerCase());
+
+		// If the input had no separators, then we need to also add the lowercase
+		// version of the template to the set (since the original case one was already
+		// added earlier if not ignoring case).
+		if (!inputHasSeparators)
+		    values.add(template.toLowerCase());
+		else
+		    values.add(newForm(template, true, breakPositions, breakNo, ' '));
+
+		// Finally, if the list is empty, just add whatever was given to us (could look
+		// like "addWord" or "add-word" at this point and we would be not ignoring case)
+		if (values.isEmpty())
+		    values.add(template);
 	    }
-	    return forms;
+
+	    return values;
 	}
+
+	/**
+	 * This is the workhorse method to match the first one of a number of possible forms for a given
+	 * option in a case-sensitive way.
+	 *
+	 * @param arg	The incoming command line argument.
+	 * @param forms	The various acceptable forms for the option name that are allowed.
+	 * @return	Whether or not the given argument matched any of the acceptable forms.
+	 */
+	private static boolean matches(final String arg, final String... forms) {
+	        return Arrays.stream(forms)
+			     .flatMap(s -> getMixedCaseOptions(s, false).stream())
+			     .anyMatch(opt -> opt.equals(arg));
+	}
+
+	/**
+	 * This is the workhorse method to match the first one of a number of possible forms for a given
+	 * option in a case-insensitive way.
+	 *
+	 * @param arg	The incoming command line argument.
+	 * @param forms	The various acceptable forms for the option name that are allowed.
+	 * @return	Whether or not the given argument matched any of the acceptable forms.
+	 */
+	private static boolean matchesIgnoreCase(final String arg, final String... forms) {
+	        return Arrays.stream(forms)
+			     .flatMap(s -> getMixedCaseOptions(s, true).stream())
+			     .anyMatch(opt -> opt.equalsIgnoreCase(arg));
+	}
+
 
 	/**
 	 * This is the workhorse method to match the first one of a number of possible forms for a given
 	 * option.
 	 *
-	 * @param arg	The incoming command line argument.
+	 * @param arg		The incoming command line argument.
 	 * @param ignoreCase	Whether or not the match should be case-sensitive.
 	 * @param forms		The various acceptable forms for the option name that are allowed.
 	 * @return		Whether or not the given argument matched any of the acceptable forms.
 	 */
 	private static boolean matches(String arg, boolean ignoreCase, String... forms) {
-	    if (ignoreCase) {
-		for (String form : forms) {
-		    List<String> alternateForms = getMixedCaseOptions(form, ignoreCase);
-		    for (String alt : alternateForms) {
-			if (arg.equalsIgnoreCase(alt))
-			    return true;
-		    }
-		}
-	    }
-	    else {
-		for (String form : forms) {
-		    List<String> alternateForms = getMixedCaseOptions(form, ignoreCase);
-		    for (String alt : alternateForms) {
-			if (arg.equals(alt))
-			    return true;
-		    }
-		}
-	    }
-	    return false;
+	    return ignoreCase
+		? matchesIgnoreCase(arg, forms)
+		: matches(arg, forms);
 	}
 
 	/**
@@ -245,7 +385,9 @@ public class Options
 	}
 
 	public static boolean matchesOption(String arg, Choice choice, boolean ignoreCase) {
-	    return choice.matches(arg, ignoreCase);
+	    return ignoreCase
+		? choice.matchesIgnoreCase(arg)
+		: choice.matches(arg);
 	}
 
 	/**
@@ -320,20 +462,84 @@ public class Options
 	}
 
 	/**
-	 * Take a list of options (such as returned by {@link #getMixedCaseOptions})
+	 * Take a set of options (such as returned by {@link #getMixedCaseOptions})
 	 * and return a human-readable version (such as for a "help" display).
 	 *
-	 * @param optionList	The list of possible options.
+	 * @param optionSet	The set of possible options.
 	 * @return		The nicely formatted version of them.
 	 */
-	public static String getDisplayableOptions(List<String> optionList) {
-	    StringBuilder buf = new StringBuilder(optionList.size() * 10);
-	    for (String option : optionList) {
+	public static String getDisplayableOptions(Set<String> optionSet) {
+	    StringBuilder buf = new StringBuilder(optionSet.size() * 10);
+	    for (String option : optionSet) {
 		if (buf.length() > 0)
 		    buf.append(", ");
-		buf.append('-');
-		buf.append(option);
+		buf.append('-').append(option);
 	    }
 	    return buf.toString();
 	}
+
+	/**
+	 * A main program that does some basic testing of this class.
+	 *
+	 * @param args	The command line arguments.
+	 */
+	public static void main(String[] args) {
+	    // Run some basic tests of the "getMixedCaseOptions" function, which is by far the most
+	    // complicated thing in here.
+
+	    final String[] testInputs = {
+		"MixedCase",
+		"SuperVerbose",
+		"mixedcase",
+		"mixed-case",
+		"Utf-16"
+	    };
+
+	    final String[][] sameCaseResults = {
+		{ "mixed_case", "mixed-case", "mixedcase", "Mixed-Case", "MixedCase", "Mixed_Case" },
+		{ "super-verbose", "superverbose", "super_verbose", "Super-Verbose", "SuperVerbose", "Super_Verbose" },
+		{ "mixedcase" },
+		{ "mixed-case" },
+		{ "utf-16", "Utf_16", "utf_16", "Utf-16", "Utf16", "utf16" }
+	    };
+
+	    final String[][] mixedCaseResults = {
+		{ "mixed_case", "mixed-case", "mixedcase" },
+		{ "super-verbose", "superverbose", "super_verbose" },
+		{ "mixedcase" },
+		{ "mixed-case" },
+		{ "utf-16", "utf_16", "utf16" }
+	    };
+
+	    // TODO: the first "test" will be just to output the results so we can do regression testing
+	    // later after we're sure these results are correct
+	    for (int i = 0; i < testInputs.length; i++) {
+		String test = testInputs[i];
+		Set<String> sameCaseOptions = getMixedCaseOptions(test, false);
+		Set<String> mixedCaseOptions = getMixedCaseOptions(test, true);
+
+		System.out.println("input '" + test + "' -> " + sameCaseOptions);
+		System.out.println("input '" + test + "' -> " + mixedCaseOptions);
+
+		if (sameCaseOptions.size() != sameCaseResults[i].length)
+		    System.out.println("different same case results for input '" + test + "'");
+		if (mixedCaseOptions.size() != mixedCaseResults[i].length)
+		    System.out.println("different mixed case results for input '" + test + "'");
+ 
+		int j = 0;
+		for (String opt : sameCaseOptions) {
+		    if (!opt.equals(sameCaseResults[i][j]))
+			System.out.println("Error: different result: expected '" + sameCaseResults[i][j] + "', actual '" + opt + "'");
+		    j++;
+		}
+		j = 0;
+		for (String opt : mixedCaseOptions) {
+		    if (!opt.equals(mixedCaseResults[i][j]))
+			System.out.println("Error: different result: expected '" + mixedCaseResults[i][j] + "', actual '" + opt + "'");
+		    j++;
+		}
+
+	    }
+	}
+
 }
