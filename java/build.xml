@@ -40,6 +40,8 @@
 		Add the .../compare directory.
 	    06-Nov-2020 (rlwhitcomb)
 		Add the external and Ant jars to the "javadoc" classpath.
+	    06-Nov-2020 (rlwhitcomb)
+		Add the new tests of Options to the "test" target.
 
      ========================================================================== -->
 
@@ -157,6 +159,7 @@
 
 	<target name="test" depends="compile" description="Run extant unit tests.">
 		<java classname="TestSQLFormatter"/>
+		<java classname="info.rlwhitcomb.util.Options"/>
 	</target>
 
 	<target name="clean" description="Cleans all generated files.">

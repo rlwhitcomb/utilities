@@ -62,6 +62,8 @@
  *	    Make all parameters final. Return Set<> instead of List<> for the
  *	    option choices. Rework the matching methods. Add ChoiceEnum and
  *	    ToggleEnum interfaces.
+ *	06-Nov-2020 (rlwhitcomb)
+ *	    Count the number of tests and failures in the main program and report.
  */
 package info.rlwhitcomb.util;
 
@@ -513,33 +515,63 @@ public class Options
 
 	    // TODO: the first "test" will be just to output the results so we can do regression testing
 	    // later after we're sure these results are correct
+	    int totalNumberOfTests = 0;
+	    int numberOfFailures   = 0;
+
 	    for (int i = 0; i < testInputs.length; i++) {
 		String test = testInputs[i];
 		Set<String> sameCaseOptions = getMixedCaseOptions(test, false);
 		Set<String> mixedCaseOptions = getMixedCaseOptions(test, true);
 
+		totalNumberOfTests += 2;
+
 		System.out.println("input '" + test + "' -> " + sameCaseOptions);
 		System.out.println("input '" + test + "' -> " + mixedCaseOptions);
 
-		if (sameCaseOptions.size() != sameCaseResults[i].length)
+		boolean sizeFailure = false;
+		if (sameCaseOptions.size() != sameCaseResults[i].length) {
 		    System.out.println("different same case results for input '" + test + "'");
-		if (mixedCaseOptions.size() != mixedCaseResults[i].length)
-		    System.out.println("different mixed case results for input '" + test + "'");
- 
-		int j = 0;
-		for (String opt : sameCaseOptions) {
-		    if (!opt.equals(sameCaseResults[i][j]))
-			System.out.println("Error: different result: expected '" + sameCaseResults[i][j] + "', actual '" + opt + "'");
-		    j++;
+		    numberOfFailures++;
+		    sizeFailure = true;
 		}
-		j = 0;
-		for (String opt : mixedCaseOptions) {
-		    if (!opt.equals(mixedCaseResults[i][j]))
-			System.out.println("Error: different result: expected '" + mixedCaseResults[i][j] + "', actual '" + opt + "'");
-		    j++;
+		if (mixedCaseOptions.size() != mixedCaseResults[i].length) {
+		    System.out.println("different mixed case results for input '" + test + "'");
+		    numberOfFailures++;
+		    sizeFailure = true;
 		}
 
+		// Don't try comparing individual values if the size check fails
+		if (sizeFailure)
+		    continue;
+ 
+		boolean valueFailure = false;
+		int j = 0;
+		for (String opt : sameCaseOptions) {
+		    if (!opt.equals(sameCaseResults[i][j])) {
+			System.out.println("Error: different result: expected '" + sameCaseResults[i][j] + "', actual '" + opt + "'");
+			valueFailure = true;
+		    }
+		    j++;
+		}
+		if (valueFailure)
+		    numberOfFailures++;
+
+		valueFailure = false;
+		j = 0;
+		for (String opt : mixedCaseOptions) {
+		    if (!opt.equals(mixedCaseResults[i][j])) {
+			System.out.println("Error: different result: expected '" + mixedCaseResults[i][j] + "', actual '" + opt + "'");
+			valueFailure = true;
+		    }
+		    j++;
+		}
+		if (valueFailure)
+		    numberOfFailures++;
+
 	    }
+
+	    System.out.println(String.format("Total number of tests = %1$d, number passed = %2$d, failed = %3$d",
+		totalNumberOfTests, (totalNumberOfTests - numberOfFailures), numberOfFailures));
 	}
 
 }
