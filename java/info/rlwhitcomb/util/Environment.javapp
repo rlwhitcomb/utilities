@@ -554,7 +554,7 @@ public final class Environment
 
 	/**
 	 * Convert a long number of timer ticks to a double number of seconds
-	 * (uses {@link #highResTimeScaleFactor} to do the calculation.
+	 * (uses {@link #highResTimeScaleFactor} to do the calculation).
 	 *
 	 * @param timerValue	The timer value in our timer ticks resolution.
 	 * @return		The value converted to fractions of seconds.
