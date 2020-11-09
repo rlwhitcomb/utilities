@@ -93,6 +93,8 @@
  *	    New "fileSeparator" and "pathSeparator" methods to expose those values.
  *	06-Nov-2020 (rlwhitcomb)
  *	    Reformat the program version info slightly to improve appearance.
+ *	09-Nov-2020 (rlwhitcomb)
+ *	    Add a new method to scale timer value to (double) seconds.
  */
 package info.rlwhitcomb.util;
 
@@ -547,6 +549,18 @@ public final class Environment
 		scale++;
 	    }
 	    return scale;
+	}
+
+
+	/**
+	 * Convert a long number of timer ticks to a double number of seconds
+	 * (uses {@link #highResTimeScaleFactor} to do the calculation.
+	 *
+	 * @param timerValue	The timer value in our timer ticks resolution.
+	 * @return		The value converted to fractions of seconds.
+	 */
+	public static double timerValueToSeconds(final long timerValue) {
+	    return (double) timerValue / (double) highResTimerResolution();
 	}
 
 
