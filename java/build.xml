@@ -42,6 +42,8 @@
 		Add the external and Ant jars to the "javadoc" classpath.
 	    06-Nov-2020 (rlwhitcomb)
 		Add the new tests of Options to the "test" target.
+	    09-Nov-2020 (rlwhitcomb)
+		New test of InitializationTask.
 
      ========================================================================== -->
 
@@ -160,6 +162,7 @@
 	<target name="test" depends="compile" description="Run extant unit tests.">
 		<java classname="TestSQLFormatter"/>
 		<java classname="info.rlwhitcomb.util.Options"/>
+		<java classname="InitTaskTest"/>
 	</target>
 
 	<target name="clean" description="Cleans all generated files.">
