@@ -37,6 +37,8 @@
  *	More code cleanup; move the command line choice matching into
  *	the Choice enum itself; display all the choices for the "help",
  *	and implement a "help" option.
+ *    09-Nov-2020 (rlwhitcomb)
+ *	Tweak the help output.
  */
 import java.io.PrintStream;
 import java.nio.charset.Charset;
@@ -141,8 +143,8 @@ public class OS
 		    printWidth += 2;
 		}
 		if (printWidth > width) {
-		    output.append('\n').append(indent);
-		    printWidth = indentWidth;
+		    output.append('\n').append(indent).append(indent);
+		    printWidth = indentWidth * 2;
 		}
 		output.append('"').append(value).append('"');
 		printWidth += value.length() + 2;
@@ -205,10 +207,12 @@ public class OS
 	 */
 	private static void usage(final PrintStream ps) {
 	    ps.println("Usage: java OS [choice]*");
+	    ps.println();
 	    ps.println("Valid choices are:");
 	    Choice.displayAliases(ps, "    ", 60);
 	    ps.println(" or \"all\" (default is \"properties\"),");
 	    ps.println(" or \"help\", \"h\", or \"?\" to display this message.");
+	    ps.println();
 	}
 
 	/**
