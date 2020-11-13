@@ -59,6 +59,8 @@
  *	    Separator enum.
  *	10-Mar-2020 (rlwhitcomb)
  *	    Prepare for GitHub.
+ *	13-Nov-2020 (rlwhitcomb)
+ *	    Print help on some errors. More error checking.
  */
 package info.rlwhitcomb.csv;
 
@@ -68,6 +70,7 @@ import java.io.FileWriter;
 import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.io.PrintStream;
 import java.io.Reader;
 import java.io.Writer;
 import java.nio.charset.Charset;
@@ -109,16 +112,22 @@ public class CSVTest
 	private static boolean useUTF8 = false;
 	private static boolean useIterator = false;
 
-	private static void doHelp() {
-	    Intl.printHelp("csv#tester");
+	private static void doHelp(PrintStream ps) {
+	    Intl.printHelp(ps, "csv#tester");
 	}
 
-	private static void processArg(String arg) {
+	private static boolean processArg(String arg) {
 	    if (arg.length() > 1) {
 		char arg0 = arg.charAt(0);
 		char arg1 = arg.charAt(1);
+		boolean moreThanOne = arg.length() > 2;
+
 		switch (arg0) {
 		    case 'q':	// quote char
+			if (moreThanOne) {
+			    Intl.errFormat("csv#tester.onlyOneChar", "q");
+			    return false;
+			}
 			quoteChar = arg1;
 			break;
 		    case 'Q':	// select from Quotes
@@ -126,9 +135,14 @@ public class CSVTest
 			quote = Quotes.fromString(quoteName);
 			if (quote == null) {
 			    Intl.errFormat("csv#tester.unknownQuote", quoteName);
+			    return false;
 			}
 			break;
 		    case 'd':	// delimiter
+			if (moreThanOne) {
+			    Intl.errFormat("csv#tester.onlyOneChar", "d");
+			    return false;
+			}
 			delimChar = arg1;
 			break;
 		    case 'D':	// delimiter from Delimiter
@@ -136,6 +150,7 @@ public class CSVTest
 			delimiter = Delimiter.fromString(delimName);
 			if (delimiter == null) {
 			    Intl.errFormat("csv#tester.unknownDelim", delimName);
+			    return false;
 			}
 			break;
 		    case 'r':	// record separator
@@ -146,14 +161,19 @@ public class CSVTest
 			separator = Separator.fromString(recordSepName);
 			if (separator == null) {
 			    Intl.errFormat("csv#tester.unknownSeparator", recordSepName);
+			    return false;
 			}
 			break;
 		    case 'e':	// escape char
+			if (moreThanOne) {
+			    Intl.errFormat("csv#tester.onlyOneChar", "e");
+			    return false;
+			}
 			escapeChar = arg1;
 			break;
 		    default:
 			Intl.errFormat("csv#tester.unknownOption", arg);
-			break;
+			return false;
 		}
 	    }
 	    else if (arg.length() > 0) {
@@ -190,13 +210,16 @@ public class CSVTest
 		    case '?':
 		    case 'h':
 		    case 'H':
-			doHelp();
+			doHelp(System.out);
 			System.exit(0);
 		    default:
 			Intl.errFormat("csv#tester.unknownOption", arg);
-			break;
+			return false;
 		}
 	    }
+
+	    // no error at this point
+	    return true;
 	}
 
 	public static void main(String[] args) {
@@ -218,24 +241,36 @@ public class CSVTest
 	    useUTF8 = false;
 	    useIterator = false;
 
+	    boolean argErrors = false;
+
 	    for (String arg : args) {
 		if (arg.startsWith("--")) {
-		    processArg(arg.substring(2));
+		    if (!processArg(arg.substring(2)))
+			argErrors = true;
 		}
 		else if (arg.startsWith("-")) {
-		    processArg(arg.substring(1));
+		    if (!processArg(arg.substring(1)))
+			argErrors = true;
 		}
 		else if (Environment.isWindows() && arg.startsWith("/")) {
-		    processArg(arg.substring(1));
+		    if (!processArg(arg.substring(1)))
+			argErrors = true;
 		}
 		else {
 		    fileList.add(arg);
 		}
 	    }
+
 	    if (fileList.size() == 0) {
 		Intl.errPrintln("csv#tester.noInputFiles");
+		argErrors = true;
+	    }
+
+	    if (argErrors) {
+		doHelp(System.err);
 		System.exit(1);
 	    }
+
 	    CSVFormat format = new CSVFormat();
 	    if (quoteChar != null)
 		format.withQuoteChar(quoteChar);
@@ -311,7 +346,7 @@ public class CSVTest
 			}
 		    }
 		    Intl.outPrintln("csv#tester.separator");
-		    System.out.println();
+		    Intl.outPrintln();
 
 		    if (writeBack) {
 			int recordErrors = 0;

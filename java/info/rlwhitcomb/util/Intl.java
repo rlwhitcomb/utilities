@@ -117,12 +117,17 @@
  *	    Variants of "getNumber" and "getInt" with default values if the string
  *	    can't be found.
  *	    Make all parameters final.
+ *	13-Nov-2020 (rlwhitcomb)
+ *	    Add variants of "printHelp" to print to an alternate PrintStream
+ *	    (System.err or System.out for instance). Add empty param versions of
+ *	    "outPrintln" and "errPrintln" (for convenience).
  */
 package info.rlwhitcomb.util;
 
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -854,11 +859,27 @@ public class Intl
 
 
 	/**
+	 * Print a blank line to {@link System#out} (convenience for {@link #outPrintln(String)}).
+	 */
+	public static void outPrintln() {
+	    System.out.println();
+	}
+
+
+	/**
 	 * Print a resource string to {@link System#out}.
 	 * @param	key	Key value passed to {@link #getString(String)}.
 	 */
 	public static void outPrintln(final String key) {
 	    System.out.println(getString(key));
+	}
+
+
+	/**
+	 * Print a blank line to {@link System#err} (convenience for {@link #errPrintln(String)}).
+	 */
+	public static void errPrintln() {
+	    System.err.println();
 	}
 
 
@@ -939,7 +960,7 @@ public class Intl
 
 	/**
 	 * Print out a series of "help" message lines described in a certain format
-	 * in the resource file.
+	 * in the resource file to {@link System#out}.
 	 * <p> They must have a common package, common first key part ("script" in
 	 * the example below), and have a "number of lines" key ("helpNumberLines"),
 	 * (which is optional).
@@ -955,12 +976,34 @@ public class Intl
 	 * @param	prefix	The prefix used to select the help messages.
 	 */
 	public static void printHelp(final String prefix) {
-	    printHelp(prefix, null);
+	    printHelp(System.out, prefix, null);
 	}
 
 	/**
 	 * Print out a series of "help" message lines described in a certain format
-	 * in the resource file.
+	 * in the resource file to the given {@link PrintStream}.
+	 * <p> They must have a common package, common first key part ("script" in
+	 * the example below), and have a "number of lines" key ("helpNumberLines"),
+	 * (which is optional).
+	 * The individual keys are prefixed with "help".
+	 * <p> A typical example is this:
+	 * <pre>script.helpNumberLines = 22
+	 *script.help1 = "Usage..."
+	 *script.help2 = ...
+	 *...
+	 *script.help22 = "last message"
+	 * </pre>
+	 *
+	 * @param	ps	The {@link PrintStream} to use to display the help.
+	 * @param	prefix	The prefix used to select the help messages.
+	 */
+	public static void printHelp(final PrintStream ps, final String prefix) {
+	    printHelp(ps, prefix, null);
+	}
+
+	/**
+	 * Print out a series of "help" message lines described in a certain format
+	 * in the resource file to {@link System#out}.
 	 * <p> They must have a common package, common first key part ("script" in
 	 * the example below), and have a "number of lines" key ("helpNumberLines"),
 	 * (which is optional).
@@ -977,6 +1020,29 @@ public class Intl
 	 * @param	symbols	A map of symbols used to substitute values.
 	 */
 	public static void printHelp(final String prefix, final Map<String, String> symbols) {
+	    printHelp(System.out, prefix, symbols);
+	}
+
+	/**
+	 * Print out a series of "help" message lines described in a certain format
+	 * in the resource file to the given {@link PrintStream}..
+	 * <p> They must have a common package, common first key part ("script" in
+	 * the example below), and have a "number of lines" key ("helpNumberLines"),
+	 * (which is optional).
+	 * The individual keys are prefixed with "help".
+	 * <p> A typical example is this:
+	 * <pre>script.helpNumberLines = 22
+	 *script.help1 = "Usage..."
+	 *script.help2 = ...
+	 *...
+	 *script.help22 = "last message"
+	 * </pre>
+	 *
+	 * @param	ps	The {@link PrintStream} to use to display the help.
+	 * @param	prefix	The prefix used to select the help messages.
+	 * @param	symbols	A map of symbols used to substitute values.
+	 */
+	public static void printHelp(final PrintStream ps, final String prefix, final Map<String, String> symbols) {
 	    // Grab the number of help lines from the resources first
 	    int numLines = getInt(makeKey(prefix, "helpNumberLines"), -1);
 	    int lineNo = 1;
