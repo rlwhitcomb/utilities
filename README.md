@@ -5,7 +5,7 @@ Some of my personal utility programs, collected over a number of years. Most wer
 Useful Windows batch files/programs.
 
 ## c
-C programs for use on the command line.
+C programs for use on the command line (mostly old/MS-DOS based).
 
 ## java
 Java command line programs. Many of the latest are translations from C to Java to be useful on multiple platforms.
@@ -107,7 +107,10 @@ Work going on currently includes:
 - can we iterate over the (already processed) command line, and get back "this is an option" or "this is a non-option string" for each position, and then we can choose to process the options positionally or ignore cuz they have already been done.... Need a way to reset to defaults if positionally is being done.
 - some kind of functional interface (Runnable or Callable)? or Predicate for custom validation, or additional processing
 - ?? should we just do that for validation?  Validator interface "boolean isValid(Object input)" ...info/.../validation package, with Validator interface, and custom implementations (such as IntValidator, FloatValidator, etc. CharsetValidator
+- How do the new interfaces fit in with this scheme (ChoiceEnum)?
 
 ### Unit Test ideas
-- Need InitializationTask test: make a long progressive calculation, with an atomic result.  Wait on the init task to finish, test the result to make sure the task actually finishes.
+- Need a way to compare canon files (expected results) with actuals (have used "diff-match-patch" in the past).
+- Incorporate CSVTest once that is ready.
+- Make a test harness facility that can take a test description file and drive the tests.
 
