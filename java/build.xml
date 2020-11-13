@@ -50,6 +50,8 @@
 		Make "all" do everything from "clean" to "test".
 	    13-Nov-2020 (rlwhitcomb)
 		Add MatchesTest to the "test" target.
+	    13-Nov-2020 (rlwhitcomb)
+		Add "diff_match_patch" code to the mix.
 
      ========================================================================== -->
 
@@ -106,6 +108,7 @@
 			<compilerarg line="${compiler.args}"/>
 			<src path="."/>
 			<src path="net/iharder/b64"/>
+			<src path="name/fraser/neil/plaintext"/>
 			<src path="info/rlwhitcomb/annotations"/>
 			<src path="info/rlwhitcomb/cat"/>
 			<src path="info/rlwhitcomb/compare"/>
@@ -131,6 +134,7 @@
 			<include name="MD5*.class"/>
 			<include name="OS*.class"/>
 			<include name="net/iharder/b64/*.class"/>
+			<include name="name/fraser/neil/plaintext/*.class"/>
 			<include name="info/rlwhitcomb/annotations/*.class"/>
 			<include name="info/rlwhitcomb/cat/*.class"/>
 			<include name="info/rlwhitcomb/compare/*.class"/>
@@ -150,6 +154,7 @@
 			<link href="https://docs.oracle.com/javase/8/docs/api/"/>
 			<packageset dir=".">
 				<include name="net/iharder/b64"/>
+				<include name="name/fraser/neil/plaintext"/>
 				<include name="info/rlwhitcomb/**"/>
 			</packageset>
 			<fileset dir=".">
@@ -176,6 +181,7 @@
 			<fileset dir="." includes="${dest.jar}"/>
 			<fileset dir="." includes="*.class"/>
 			<fileset dir="net/iharder/b64" includes="*.class"/>
+			<fileset dir="name/fraser/neil/plaintext" includes="*.class"/>
 			<fileset dir="info/rlwhitcomb/annotations" includes="*.class"/>
 			<fileset dir="info/rlwhitcomb/cat" includes="*.class"/>
 			<fileset dir="info/rlwhitcomb/compare" includes="*.class"/>
