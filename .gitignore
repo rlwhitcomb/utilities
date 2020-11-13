@@ -1,3 +1,5 @@
 *.class
 *.jar
+resources.properties
+java/doc
 
