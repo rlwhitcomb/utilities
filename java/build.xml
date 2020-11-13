@@ -46,6 +46,8 @@
 		New test of InitializationTask.
 	    13-Nov-2020 (rlwhitcomb)
 		Add DynamicArray and DynArrayTest.
+	    13-Nov-2020 (rlwhitcomb)
+		Make "all" do everything from "clean" to "test".
 
      ========================================================================== -->
 
@@ -159,8 +161,6 @@
 		</javadoc>
 	</target>
 
-	<target name="all" depends="compile,jar" description="Builds and jars everything."/>
-
 	<target name="test" depends="compile" description="Run extant unit tests.">
 		<java classname="TestSQLFormatter"/>
 		<java classname="info.rlwhitcomb.util.Options"/>
@@ -195,6 +195,8 @@
 		</delete>
 		<delete dir="doc"/>
 	</target>
+
+	<target name="all" depends="clean,compile,jar,doc,test" description="Does clean, compile, jar, doc, and test."/>
 
 	<condition property="utilities.available" value="true" else="false">
 		<isset property="env.UTILITIES_HOME"/>
