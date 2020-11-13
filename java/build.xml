@@ -44,6 +44,8 @@
 		Add the new tests of Options to the "test" target.
 	    09-Nov-2020 (rlwhitcomb)
 		New test of InitializationTask.
+	    13-Nov-2020 (rlwhitcomb)
+		Add DynamicArray and DynArrayTest.
 
      ========================================================================== -->
 
@@ -163,6 +165,7 @@
 		<java classname="TestSQLFormatter"/>
 		<java classname="info.rlwhitcomb.util.Options"/>
 		<java classname="InitTaskTest"/>
+		<java classname="DynArrayTest"/>
 	</target>
 
 	<target name="clean" description="Cleans all generated files.">
