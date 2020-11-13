@@ -35,6 +35,8 @@
  *	    For multiple input targets, print the "target -> result"
  *	12-Nov-2020 (rlwhitcomb)
  *	    On Windows, check "." as a last resort.
+ *	13-Nov-2020 (rlwhitcomb)
+ *	    Use Environment.pathSeparator; move strings to resources.
  */
 package info.rlwhitcomb.util;
 
@@ -62,7 +64,7 @@ public class Which
 	/** File date formatter. */
 	private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("MMM dd,yyyy hh:mm:ss a (z)");
 	/** Split pattern for path string (platform dependent). */
-	private static final String SPLIT_PATTERN = Environment.isWindows() ? "[,;]" : "\\:";
+	private static final String SPLIT_PATTERN = "[" + Environment.pathSeparator() + "]";
 
 	/**
 	 * @return Whether or not the given file exists and can be executed
@@ -247,7 +249,7 @@ public class Which
 			showInfo = true;
 		    }
 		    else {
-			System.err.format("Unknown option \"%1$s\"%n", arg);
+			Intl.errFormat("util#which.unknownOption", arg);
 			System.exit(1);
 		    }
 		}
