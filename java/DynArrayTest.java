@@ -24,6 +24,10 @@
  *	Test program for the DynamicArray class.
  *
  *  Change History:
+ *	13-Nov-2020 (rlwhitcomb)
+ *	    Initial coding.
+ *	13-Nov-2020 (rlwhitcomb)
+ *	    Add checks for nulls around the real value.
  */
 import info.rlwhitcomb.util.DynamicArray;
 
@@ -33,7 +37,7 @@ public class DynArrayTest
 	private static int numberOfTests = 0;
 	private static int numberOfFailures = 0;
 
-	private static <T> void report(final DynamicArray<T> array, final int index) {
+	private static <T> void reportOne(final DynamicArray<T> array, final int index) {
 	    T value = array.get(index);
 	    String valueString;
 	    String valueFormat = "%2$-8s";
@@ -54,26 +58,36 @@ public class DynArrayTest
 			index, valueString, array.size()));
 	}
 
-	private static <T> void test(final DynamicArray<T> array, final int index) {
+	private static <T> void report(final DynamicArray<T> array, final int index) {
 	    System.out.println(UNDERLINE);
-	    if (index > 1)
-		report(array, index - 1);
-	    report(array, index);
-	    report(array, index + 1);
+	    if (index > 0)
+		reportOne(array, index - 1);
+	    reportOne(array, index);
+	    reportOne(array, index + 1);
 	}
 
-	private static <T> void oneTest(final DynamicArray<T> array, final int index, T value) {
+	private static <T> void checkOne(final DynamicArray<T> array, final int index, final T expectedValue) {
 	    numberOfTests++;
-
-	    array.put(index, value);
-	    test(array, index);
 
 	    T getValue = array.get(index);
 
-	    if (getValue != value) {
-		System.out.println("ERROR: value at location " + index + " = " + getValue + " not equal " + value);
+	    if (getValue != expectedValue) {
+		System.out.println("ERROR: value at location " + index + " = " + getValue + " not equal " + expectedValue + "!");
 		numberOfFailures++;
 	    }
+	}
+
+	private static <T> void check(final DynamicArray<T> array, final int index, final T expectedValue) {
+	    if (index > 0)
+		checkOne(array, index - 1, null);
+	    checkOne(array, index, expectedValue);
+	    checkOne(array, index + 1, null);
+	}
+
+	private static <T> void oneTest(final DynamicArray<T> array, final int index, final T value) {
+	    array.put(index, value);
+	    report(array, index);
+	    check(array, index, value);
 	}
 
 	private static void integerTest() {
@@ -85,28 +99,29 @@ public class DynArrayTest
 	    oneTest(iArray, 5000, 6);
 	    oneTest(iArray, 10000, 7);
 	    oneTest(iArray, 20000, -789);
-
-	    System.out.println(UNDERLINE);
-	    System.out.println();
 	}
 
 	private static void stringTest() {
 	    /* Setup a dynamic array of default initial size */
 	    DynamicArray<String> sArray = new DynamicArray<String>(String.class);
 
-	    oneTest(sArray, 0, "abcd");
+	    oneTest(sArray, 1, "abcd");
 	    oneTest(sArray, 900, "efghi");
 	    oneTest(sArray, 4500, "jklm");
 	    oneTest(sArray, 9000, "nopqr");
 	    oneTest(sArray, 11500, "stuv");
+	}
+
+	private static void runTest(final Runnable test) {
+	    test.run();
 
 	    System.out.println(UNDERLINE);
 	    System.out.println();
 	}
 
 	public static void main(String[] args) {
-	    integerTest();
-	    stringTest();
+	    runTest(DynArrayTest::integerTest);
+	    runTest(DynArrayTest::stringTest);
 
 	    System.out.println("DynamicArray Tests: " + numberOfTests +
 			       ", succeeded: " + (numberOfTests - numberOfFailures) +
