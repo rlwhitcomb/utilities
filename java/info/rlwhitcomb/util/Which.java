@@ -33,6 +33,8 @@
  *	    Prepare for github.
  *	14-Apr-2020 (rlwhitcomb)
  *	    For multiple input targets, print the "target -> result"
+ *	12-Nov-2020 (rlwhitcomb)
+ *	    On Windows, check "." as a last resort.
  */
 package info.rlwhitcomb.util;
 
@@ -52,13 +54,15 @@ import java.io.File;
 public class Which
 {
 	/** Default path directories. */
-	private static String DEFAULT_PATH = System.getenv("PATH");
+	private static final String DEFAULT_PATH = System.getenv("PATH");
 	/** Default list of executable extensions -- Windows only. */
-	private static String DEFAULT_EXTENSIONS = System.getenv("PATHEXT");
+	private static final String DEFAULT_EXTENSIONS = System.getenv("PATHEXT");
+	/** The current user directory, which is also searched on Windows. */
+	private static final String CURRENT_DIR = System.getProperty("user.dir");
 	/** File date formatter. */
-	private static SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("MMM dd,yyyy hh:mm:ss a (z)");
+	private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("MMM dd,yyyy hh:mm:ss a (z)");
 	/** Split pattern for path string (platform dependent). */
-	private static String SPLIT_PATTERN = Environment.isWindows() ? "[,;]" : "\\:";
+	private static final String SPLIT_PATTERN = Environment.isWindows() ? "[,;]" : "\\:";
 
 	/**
 	 * @return Whether or not the given file exists and can be executed
@@ -105,6 +109,16 @@ public class Which
 	 */
 	public static File findExecutable(String name) {
 	    return findExecutable(name, null, null);
+	}
+
+	/**
+	 * @return The first executable in the given path and path extension list
+	 * that matches the given name, or {@code null} if there isn't a match.
+	 * @param name	The executable name to search for.
+	 * @param path	The path/directory to look in.
+	 */
+	public static File findExecutable(String name, String path) {
+	    return findExecutable(name, path, null);
 	}
 
 	/**
@@ -246,6 +260,16 @@ public class Which
 
 	    // Then evaluate the names one at a time
 	    for (String name : names) {
+		// On Windows the first place to look is the current directory
+		if (Environment.isWindows()) {
+		    File f = findExecutable(name, CURRENT_DIR);
+		    if (f != null) {
+			showFileInfo(name, f, showTargetNameFirst, showInfo);
+			if (!findAll)
+			    return;
+		    }
+		}
+
 		if (findAll) {
 		    for (File f : findAllExecutables(name)) {
 			showFileInfo(name, f, showTargetNameFirst, showInfo);
