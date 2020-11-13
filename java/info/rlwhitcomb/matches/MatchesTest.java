@@ -27,6 +27,8 @@
  *  Change History:
  *      18-Sep-2020 (rlwhitcomb)
  *          Initial checkin.
+ *	13-Nov-2020 (rlwhitcomb)
+ *	    Set the process exit code for use with automated testing.
  */
 package info.rlwhitcomb.matches;
 
@@ -35,6 +37,9 @@ import info.rlwhitcomb.util.Options;
 
 public class MatchesTest
 {
+	private static int numberOfTests    = 0;
+	private static int numberOfFailures = 0;
+
 	private static final String[][] TRUE_TEST_CASES = {
 	    { "-or", "aaabbb", "a.*b", ".*ab.*" },
 	    { "-not", "-or", "build.xml", "apex[/\\\\]web[/\\\\]build", ".*\\.backup" },
@@ -53,16 +58,28 @@ public class MatchesTest
 	    }
 
 	    for (int i = 0; i < TRUE_TEST_CASES.length; i++) {
+		numberOfTests++;
+
 		String[] testCase = TRUE_TEST_CASES[i];
 		boolean match = Matches.match(testCase);
 		if (!match) {
 		    System.err.println("Failure: test case \"" + CharUtil.makeSimpleStringList(testCase) + "\"");
+		    numberOfFailures++;
 		}
 		else if (verbose) {
 		    System.out.println("Test case \"" + CharUtil.makeSimpleStringList(testCase) + "\" -> " + match);
 		}
 	    }
-	}
 
+	    // TODO: more tests here
+
+	    System.out.println(
+		"MatchesTest: number of tests: " + numberOfTests +
+		", number succeeded: " + (numberOfTests - numberOfFailures) +
+		", number failed: " + numberOfFailures);
+
+	    if (numberOfFailures > 0)
+		System.exit(1);
+	}
 }
 

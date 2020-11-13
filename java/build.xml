@@ -48,6 +48,8 @@
 		Add DynamicArray and DynArrayTest.
 	    13-Nov-2020 (rlwhitcomb)
 		Make "all" do everything from "clean" to "test".
+	    13-Nov-2020 (rlwhitcomb)
+		Add MatchesTest to the "test" target.
 
      ========================================================================== -->
 
@@ -166,6 +168,7 @@
 		<java classname="info.rlwhitcomb.util.Options"/>
 		<java classname="InitTaskTest"/>
 		<java classname="DynArrayTest"/>
+		<java classname="info.rlwhitcomb.matches.MatchesTest"/>
 	</target>
 
 	<target name="clean" description="Cleans all generated files.">
