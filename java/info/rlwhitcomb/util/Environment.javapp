@@ -95,6 +95,8 @@
  *	    Reformat the program version info slightly to improve appearance.
  *	09-Nov-2020 (rlwhitcomb)
  *	    Add a new method to scale timer value to (double) seconds.
+ *	13-Nov-2020 (rlwhitcomb)
+ *	    Display debug build info in "printProgramInfo".
  */
 package info.rlwhitcomb.util;
 
@@ -704,9 +706,10 @@ public final class Environment
 	 *			negative = center over longest string).
 	 */
 	public static void printProgramInfo(PrintStream ps, int centerWidth) {
+	    String debugInfo   = isDebugBuild() ? Intl.getString("util#env.debug") : "";
 	    String versionInfo = Intl.formatString(
 		"util#env.version",
-		getAppVersion(), getAppBuild());
+		getAppVersion(), getAppBuild(), debugInfo);
 	    String buildInfo = Intl.formatString(
 		"util#env.build",
 		getBuildDate(), getBuildTime());
