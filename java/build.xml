@@ -52,6 +52,8 @@
 		Add MatchesTest to the "test" target.
 	    13-Nov-2020 (rlwhitcomb)
 		Add "diff_match_patch" code to the mix.
+	    13-Nov-2020 (rlwhitcomb)
+		Add GZip and GUnzip classes.
 
      ========================================================================== -->
 
@@ -133,6 +135,8 @@
 			<include name="Lists*.class"/>
 			<include name="MD5*.class"/>
 			<include name="OS*.class"/>
+			<include name="GZip*.class"/>
+			<include name="GUnzip*.class"/>
 			<include name="net/iharder/b64/*.class"/>
 			<include name="name/fraser/neil/plaintext/*.class"/>
 			<include name="info/rlwhitcomb/annotations/*.class"/>
