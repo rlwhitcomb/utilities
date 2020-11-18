@@ -27,7 +27,7 @@
 :: by knowing about a (small) set of frequently visited
 :: locations.
 :: The list of locations, and their descriptions is in the
-:: "destinations-%USERNAME%" file in the same directory as this file.
+:: "destinations-USERNAME" file in the same directory as this file.
 :: Feel free to add to that list as you see fit.
 
 set DESTINATIONS=%~dp0destinations-%USERNAME%
@@ -46,10 +46,12 @@ if /I "%1" EQU "home" goto check_going_home_time
 set COMMAND=
 for /F "delims=, tokens=1,2,3,*" %%I in (%DESTINATIONS%) do (
    if "%%K" EQU " " (
-      if /I "%1" EQU "%%J" set COMMAND=%%I&set DEST=& goto execute_command
+      call :parse_aliases %1 "%%J" %%I
+      if errorlevel 1 set DEST=&goto execute_command
    ) else (
       for /f "tokens=*" %%M in ('echo %%K') do (
-         if /I "%1" EQU "%%J" set COMMAND=%%I&set DEST=%%M& goto execute_command
+         call :parse_aliases %1 "%%J" %%I
+         if errorlevel 1 set DEST=%%M&goto execute_command
       )
    )
 )
@@ -78,6 +80,18 @@ exit /b 1
 :doit
 %COMMAND% "%DEST%"
 exit /b 0
+
+:parse_aliases
+set LIST=%2
+set LIST=%LIST:"=%
+:parse2
+FOR /F "delims=; tokens=1*" %%P IN ("%LIST%") DO (
+   if not "%%P" == "" (
+      if /I "%1" EQU "%%P" set COMMAND=%3&exit /b 1
+   )
+   if not "%%Q" == "" set LIST=%%Q&goto parse2
+)
+exit /b
 
 :setup
 echo The %~n0 command relies on a per-user configuration file named
@@ -119,7 +133,7 @@ exit /b 0
 
 :display_help
 setlocal enabledelayedexpansion
-set "SPACES=             "
+set "SPACES=                    "
 echo Usage: %~n0 LOCATION [subdirectory [subsubdir] ...]
 echo.
 echo Pushes your current directory and goes to the specified
@@ -129,13 +143,13 @@ for /F "delims=, tokens=1,2,3,*" %%I in (%DESTINATIONS%) do (
    if "%%L" EQU "" (
       for /f "tokens=*" %%M in ('echo %%K') do (
          set "key=%%J%SPACES%"
-         set line=  !key:~0,9! = %%M
+         set line=  !key:~0,15! = %%M
          echo !line!
       )
    ) else (
       for /f "tokens=*" %%M in ('echo %%L') do (
          set "key=%%J%SPACES%"
-         set line=  !key:~0,9! = %%M
+         set line=  !key:~0,15! = %%M
          echo !line!
       )
    )
