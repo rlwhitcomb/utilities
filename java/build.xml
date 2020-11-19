@@ -54,6 +54,8 @@
 		Add "diff_match_patch" code to the mix.
 	    13-Nov-2020 (rlwhitcomb)
 		Add GZip and GUnzip classes.
+	    18-Nov-2020 (rlwhitcomb)
+		Add FixPath.
 
      ========================================================================== -->
 
@@ -137,6 +139,7 @@
 			<include name="OS*.class"/>
 			<include name="GZip*.class"/>
 			<include name="GUnzip*.class"/>
+			<include name="FixPath*.class"/>
 			<include name="net/iharder/b64/*.class"/>
 			<include name="name/fraser/neil/plaintext/*.class"/>
 			<include name="info/rlwhitcomb/annotations/*.class"/>
