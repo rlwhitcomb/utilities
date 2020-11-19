@@ -134,7 +134,7 @@ exit /b 0
 :display_help
 setlocal enabledelayedexpansion
 set "SPACES=                    "
-echo Usage: %~n0 LOCATION [subdirectory [subsubdir] ...]
+echo Usage: %~n0 LOCATION [subdirectory [subsubdir] ...] ^| help ^| ?
 echo.
 echo Pushes your current directory and goes to the specified
 echo LOCATION, and any given subdirectory(ies) beneath it,
