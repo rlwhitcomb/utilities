@@ -897,7 +897,7 @@ public class diff_match_patch {
   /**
    * Look for single edits surrounded on both sides by equalities
    * which can be shifted sideways to align the edit to a word boundary.
-   * e.g: The c<ins>at c</ins>ame. -> The <ins>cat </ins>came.
+   * e.g: The c<ins>at c</ins>ame. &rarr; The <ins>cat </ins>came.
    * @param diffs LinkedList of Diff objects.
    */
   public void diff_cleanupSemanticLossless(LinkedList<Diff> diffs) {
@@ -1296,7 +1296,7 @@ public class diff_match_patch {
   /**
    * loc is a location in text1, compute and return the equivalent location in
    * text2.
-   * e.g. "The cat" vs "The big cat", 1->1, 5->8
+   * e.g. "The cat" vs "The big cat", 1&rarr;1, 5&rarr;8
    * @param diffs List of Diff objects.
    * @param loc Location within text1.
    * @return Location within text2.
@@ -1422,7 +1422,7 @@ public class diff_match_patch {
   /**
    * Crush the diff into an encoded string which describes the operations
    * required to transform text1 into text2.
-   * E.g. =3\t-2\t+ing  -> Keep 3 chars, delete 2 chars, insert 'ing'.
+   * E.g. =3\t-2\t+ing  &rarr; Keep 3 chars, delete 2 chars, insert 'ing'.
    * Operations are tab-separated.  Inserted text is escaped using %xx notation.
    * @param diffs List of Diff objects.
    * @return Delta text.
@@ -1801,7 +1801,7 @@ public class diff_match_patch {
    * @param text2 Ignored.
    * @param diffs Array of Diff objects for text1 to text2.
    * @return LinkedList of Patch objects.
-   * @deprecated Prefer patch_make(String text1, LinkedList<Diff> diffs).
+   * @deprecated Prefer patch_make(String text1, LinkedList&lt;Diff&gt; diffs).
    */
   @Deprecated public LinkedList<Patch> patch_make(String text1, String text2,
       LinkedList<Diff> diffs) {
@@ -2455,7 +2455,7 @@ public class diff_match_patch {
    * unescaped.  But this is ok because it is only called with the output of
    * URLEncoder.encode which returns uppercase hex.
    *
-   * Example: "%3F" -> "?", "%24" -> "$", etc.
+   * Example: "%3F" &rarr; "?", "%24" &rarr; "$", etc.
    *
    * @param str The string to escape.
    * @return The escaped string.
