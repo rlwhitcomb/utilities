@@ -56,6 +56,8 @@
 		Add GZip and GUnzip classes.
 	    18-Nov-2020 (rlwhitcomb)
 		Add FixPath.
+	    24-Nov-2020 (rlwhitcomb)
+		Copy java wrapper files along with .jar file.
 
      ========================================================================== -->
 
@@ -69,6 +71,21 @@
 	<condition property="new.java.version" value="true" else="false" >
 		<javaversion atleast="9"/>
 	</condition>
+	<patternset id="wrapper-files">
+		<include name="_find_and_run_class"/>
+		<include name="MD5"/>
+		<include name="cat"/>
+		<include name="cmp"/>
+		<include name="fixpath"/>
+		<include name="gunz"/>
+		<include name="gz"/>
+		<include name="lists"/>
+		<include name="manifest"/>
+		<include name="matches"/>
+		<include name="os"/>
+		<include name="tre"/>
+		<include name="which"/>
+	</patternset>
 
 
 	<taskdef name="preproc" classname="info.rlwhitcomb.preproc.JavaPreProc" classpath="${ant.tasks.jar}"/>
@@ -221,6 +238,20 @@
 
 	<target name="install" depends="all" description="Build and install the utilities in a local utilities directory.">
 		<copy file="${dest.jar}" todir="${env.UTILITIES_HOME}" if:true="${utilities.available}"/>
+		<copy todir="${env.UTILITIES_HOME}" if:true="${utilities.available}">
+			<fileset dir=".">
+				<patternset refid="wrapper-files"/>
+			</fileset>
+		</copy>
+		<copy todir="${env.UTILITIES_HOME}" if:true="${utilities.available}">
+			<fileset dir=".">
+				<patternset refid="wrapper-files"/>
+			</fileset>
+			<globmapper from="*" to="*.bat"/>
+		</copy>
+		<chmod dir="${env.UTILITIES_HOME}" perm="+x" if:true="${utilities.available}">
+			<patternset refid="wrapper-files"/>
+		</chmod>
 		<echo message="Variable UTILITIES_HOME is not set in the environment!" unless:true="${utilities.available}"/>
 	</target>
 </project>
