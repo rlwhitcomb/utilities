@@ -1,7 +1,5 @@
 @echo off
 setlocal
-set UTIL_JAR=%~dp0utilities.jar
-if not exist %UTIL_JAR% echo Unable to locate the required "utilities.jar" file in the "%~dp0" directory.&exit /b 1
-java -cp %UTIL_JAR% GUnzip %*
+set CLASS_NAME=GUnzip
+call %~dp0_find_and_run_class
 endlocal
-
