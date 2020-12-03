@@ -26,9 +26,12 @@
  * History:
  *	09-Nov-2020 (rlwhitcomb)
  *	    Initial coding finished.
+ *	02-Dec-2020 (rlwhitcomb)
+ *	    Move "piDigits" to NumericUtil.
  */
 import info.rlwhitcomb.util.Environment;
 import info.rlwhitcomb.util.InitializationTask;
+import info.rlwhitcomb.util.NumericUtil;
 
 /**
  * Do some tests of the InitializationTask class to make sure it functions the way we
@@ -171,60 +174,6 @@ public class InitTaskTest
 	    "556003727983940041529700287830766709444745601345564172543709069793961225714";
 
 
-	private static final int SCALE = 10000;
-	private static final int ARRINIT = 2000;
-
-	/**
-	 * Taken from <a href="http://www.codecodex.com/wiki/index.php?title=Digits_of_pi_calculation#Java">
-	 * http://www.codecodex.com/wiki/index.php?title=Digits_of_pi_calculation#Java</a>
-	 * 
-	 * @param digits - returns good results up to 12500 digits
-	 * @return that many digits of PI
-	 * @throws IllegalArgumentException if the requested number of digits is &gt; 12,500
-	 */
-	private static String piDigits(int digits) {
-	    // According to the original documentation, the given SCALE and ARRINIT
-	    // values work up to approx. 12,500 digits, so error out if we're over that
-	    if (digits > 12500)
-		throw new IllegalArgumentException("The calculation is only good for about 12,500 digits!");
-
-	    // Since each loop reduces the count by 14 while only providing 4 digits
-	    // of output, in order to produce the required number of digits we must
-	    // scale up the loop count proportionally. Add one more loop to make sure
-	    // we have enough.
-	    int loops = (digits + 1) * 14 / 4;
-
-	    StringBuffer pi = new StringBuffer(loops);
-	    int[] arr = new int[loops + 1];
-	    int carry = 0;
-
-	    for (int i = 0; i <= loops; ++i)
-		arr[i] = ARRINIT;
-
-	    for (int i = loops; i > 0; i-= 14) {
-		int sum = 0;
-		for (int j = i; j > 0; --j) {
-		    sum = sum * j + SCALE * arr[j];
-		    arr[j] = sum % (j * 2 - 1);
-		    sum /= j * 2 - 1;
-		}
-
-		pi.append(String.format("%04d", carry + sum / SCALE));
-		carry = sum % SCALE;
-	    }
-
-	    // We calculated a few more digits than we need (hopefully), so truncate
-	    // the result to the exact digit count requested. Error message is we
-	    // calculated wrong.
-	    if (pi.length() < digits)
-	        System.out.println("Calculated digit length is " + pi.length() +
-	        	", but requested number of digits was " + digits + "!");
-	    else if (pi.length() > digits)
-	        pi.setLength(digits);
-
-	    return pi.toString();
-	}
-
 	/**
 	 * This is the "long-running" task that starts right away at startup of the program,
 	 * takes some time to run to completion, at which time we can access the results
@@ -246,7 +195,7 @@ public class InitTaskTest
 		@Override
 		public void task() {
 		    for (int i = 0; i < iters; i++) {
-			digitString = piDigits(digits);
+			digitString = NumericUtil.piDigits(digits);
 		    }
 		}
 
