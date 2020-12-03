@@ -314,7 +314,7 @@ public class InitTaskTest
 		success = false;
 	    }
 
-	    System.out.format("InitTaskTest: %1$s", success ? "Success" : "Failed");
+	    System.out.format("InitTaskTest: %1$s%n", success ? "Success" : "Failed");
 	}
 }
 
