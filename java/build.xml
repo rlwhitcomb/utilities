@@ -58,6 +58,8 @@
 		Add FixPath.
 	    24-Nov-2020 (rlwhitcomb)
 		Copy java wrapper files along with .jar file.
+	    03-Dec-2020 (rlwhitcomb)
+		New tests of NumericUtil methods.
 
      ========================================================================== -->
 
@@ -198,6 +200,7 @@
 		<java classname="InitTaskTest"/>
 		<java classname="DynArrayTest"/>
 		<java classname="info.rlwhitcomb.matches.MatchesTest"/>
+		<java classname="TestNumericUtil"/>
 	</target>
 
 	<target name="clean" description="Cleans all generated files.">

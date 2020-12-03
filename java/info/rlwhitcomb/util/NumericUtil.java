@@ -67,6 +67,9 @@
  *	02-Dec-2020 (rlwhitcomb)
  *	    Add "piDigits" method (which was used to generate the PI digit string).
  *	    Add "eDecimal" method (which was used to generate the E digit string).
+ *	03-Dec-2020 (rlwhitcomb)
+ *	    Tweak the number of loops in "eDecimal" because sometimes we are off
+ *	    (according to "TestNumericUtil").
  */
 package info.rlwhitcomb.util;
 
@@ -1175,7 +1178,7 @@ public class NumericUtil
 	    BigDecimal e         = BigDecimal.valueOf(2);
 	    BigDecimal factorial = BigDecimal.ONE;
 	    // loops is a little extra to make sure the last digit we want is accurate
-	    int loops = digits + 3;
+	    int loops = digits + 10;
 	    MathContext roundingContext = new MathContext(digits + 1, RoundingMode.DOWN);
 
 	    for (int i = 2; i < loops; i++) {
