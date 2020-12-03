@@ -66,6 +66,8 @@
 #	    Tweak a little; add strings from Which.
 #	13-Nov-2020 (rlwhitcomb)
 #	    Add debug info to "printProgramInfo".
+#	02-Dec-2020 (rlwhitcomb)
+#	    New error message from NumericUtil.
 #
 
 #
@@ -122,6 +124,7 @@ numeric.badDataTypeCode	= Data type code %1$d is not recognized.
 numeric.unknownByteOrder= "%1$s" is not a valid byte order (should be LSB or MSB).
 numeric.unknownStringLength= "%1$s" is not a valid string length designation.
 numeric.stringLengthTooBig= String length of %1$d exceds limit of %2$d.
+numeric.tooManyDigits	= Too many digits of precision requested (max is %1$d).
 
 #
 # From SecurityUtil.java
