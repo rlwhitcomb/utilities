@@ -70,6 +70,8 @@
  *	03-Dec-2020 (rlwhitcomb)
  *	    Tweak the number of loops in "eDecimal" because sometimes we are off
  *	    (according to "TestNumericUtil").
+ *	03-Dec-2020 (rlwhitcomb)
+ *	    Code style tweaks.
  */
 package info.rlwhitcomb.util;
 
@@ -117,7 +119,7 @@ public class NumericUtil
 
 	    private int idCode;
 
-	    private DataType(int code) {
+	    private DataType(final int code) {
 		this.idCode = code;
 	    }
 
@@ -125,7 +127,7 @@ public class NumericUtil
 		return this.idCode;
 	    }
 
-	    public static DataType fromCode(int code) {
+	    public static DataType fromCode(final int code) {
 		// This relies on the code being the same as the ordinal
 		DataType[] values = values();
 		if (code < 0 || code >= values.length) {
@@ -144,9 +146,9 @@ public class NumericUtil
 		LSB,
 		MSB;
 
-		public static ByteOrder fromString(String value) {
+		public static ByteOrder fromString(final String value) {
 		    for (ByteOrder order : values()) {
-			if (order.toString().equals(value.toUpperCase())) {
+			if (order.toString().equalsIgnoreCase(value)) {
 			    return order;
 			}
 		    }
@@ -171,9 +173,9 @@ public class NumericUtil
 		/** String length prefix (four bytes, max 4,294,967,295 bytes). */
 		PREFIX4;
 
-		public static StringLength fromString(String value) {
+		public static StringLength fromString(final String value) {
 		    for (StringLength length : values()) {
-			if (length.toString().equals(value.toUpperCase())) {
+			if (length.toString().equalsIgnoreCase(value)) {
 			    return length;
 			}
 		    }
@@ -232,11 +234,11 @@ public class NumericUtil
 		private String shortName;
 		private String longName;
 
-		private Range(long multiplier, String prefix, String shortName, String longName) {
+		private Range(final long multiplier, final String prefix, final String shortName, final String longName) {
 		    this.multiplier = multiplier;
-		    this.prefix = prefix;
-		    this.shortName = shortName;
-		    this.longName = longName;
+		    this.prefix     = prefix;
+		    this.shortName  = shortName;
+		    this.longName   = longName;
 		}
 
 		/** @return This "binary" multiplier where 1K == 1024 (2^10) and 1M == 1024 * 1024 (2^20),
@@ -263,7 +265,7 @@ public class NumericUtil
 		 * @return A {@link Range} value that corresponds to the given prefix (as in, "K", "M", etc).
 		 * @param prefix The prefix to look up.
 		 */
-		public static Range getRangeByPrefix(String prefix) {
+		public static Range getRangeByPrefix(final String prefix) {
 		    for (Range r : values()) {
 			if (r.prefix.equalsIgnoreCase(prefix))
 			    return r;
@@ -275,7 +277,7 @@ public class NumericUtil
 		 * This will result in a formatted value in the range of 0.80 .. 799.99.
 		 * @param value The candidate value.
 		 */
-		public static Range getRangeOfValue(long value) {
+		public static Range getRangeOfValue(final long value) {
 		    long absValue = Math.abs(value);
 		    if (absValue <= 1L)
 			return BYTES;
@@ -298,7 +300,7 @@ public class NumericUtil
 	 *			1024 * 1024 * 1024 for "G".
 	 * @throws		NumberFormatException for bad input formats
 	 */
-	public static long convertKMGValue(String input) {
+	public static long convertKMGValue(final String input) {
 	    Matcher m = valueMatch.matcher(input);
 	    if (m.matches()) {
 		long value = Long.parseLong(m.group(1));
@@ -322,7 +324,7 @@ public class NumericUtil
 	 * @param	value	The input value to format.
 	 * @return		The value formatted to an appropriate range.
 	 */
-	public static String formatToRange(long value) {
+	public static String formatToRange(final long value) {
 	    Range r = Range.getRangeOfValue(value);
 	    if (r == Range.BYTES)
 		return String.format("%1$d %2$s", value, r.getShortName());
@@ -346,7 +348,7 @@ public class NumericUtil
 	 * @param	value	The input value to format.
 	 * @return		The value formatted (short form) to an appropriate range.
 	 */
-	public static String formatToRangeShort(long value) {
+	public static String formatToRangeShort(final long value) {
 	    Range r = Range.getRangeOfValue(value);
 	    if (r == Range.BYTES)
 		return String.format("%1$d B", value);
@@ -369,7 +371,7 @@ public class NumericUtil
 	 * @param	value	The input value to test for range.
 	 * @return		The long name of the appropriate range for this value.
 	 */
-	public static String getLongRangeName(long value) {
+	public static String getLongRangeName(final long value) {
 	    return Range.getRangeOfValue(value).getLongName();
 	}
 
@@ -385,13 +387,13 @@ public class NumericUtil
 	 * @param	value	The value to convert.
 	 * @return		The value written out as its English name.
 	 */
-	public static String convertToWords(long value) {
+	public static String convertToWords(final long value) {
 	    StringBuilder buf = new StringBuilder();
 	    convertToWords(value, buf);
 	    return buf.toString();
 	}
 
-	public static void convertToWords(long value, StringBuilder buf) {
+	public static void convertToWords(final long value, final StringBuilder buf) {
 	    if (value < 0L) {
 		if (value == Long.MIN_VALUE) {
 		    throw new IllegalArgumentException(Intl.getString("util#numeric.outOfRange"));
@@ -437,7 +439,7 @@ public class NumericUtil
 	 * @return		The {@link BigDecimal} equivalent.
 	 * @throws IllegalArgumentException if the input bytes are not valid BCD.
 	 */
-	public static BigDecimal convertBCDToDecimal(byte[] bcdBytes) {
+	public static BigDecimal convertBCDToDecimal(final byte[] bcdBytes) {
 	    String decimalString = convertBCDToString(bcdBytes);
 	    return new BigDecimal(decimalString);
 	}
@@ -450,7 +452,7 @@ public class NumericUtil
 	 * @return		The {@link BigInteger} equivalent.
 	 * @throws IllegalArgumentException if the input bytes are not valid BCD.
 	 */
-	public static BigInteger convertBCDToInteger(byte[] bcdBytes) {
+	public static BigInteger convertBCDToInteger(final byte[] bcdBytes) {
 	    String integerString = convertBCDToString(bcdBytes);
 	    return new BigInteger(integerString);
 	}
@@ -464,7 +466,7 @@ public class NumericUtil
 	 * @return		The string equivalent.
 	 * @throws IllegalArgumentException if the input bytes are not valid BCD.
 	 */
-	public static String convertBCDToString(byte[] bcdBytes) {
+	public static String convertBCDToString(final byte[] bcdBytes) {
 	    StringBuilder buf = new StringBuilder(bcdBytes.length * 2 + 2);
 	    int scale = bcdBytes[0];
 	    int pos = 0;
@@ -523,7 +525,7 @@ public class NumericUtil
 	 * @param decimal	A {@link BigDecimal} value to convert.
 	 * @return 		The BCD-encoded bytes of this value.
 	 */
-	public static byte[] convertToBCD(BigDecimal decimal) {
+	public static byte[] convertToBCD(final BigDecimal decimal) {
 	    return convertToBCD(decimal.toPlainString());
 	}
 
@@ -534,7 +536,7 @@ public class NumericUtil
 	 * @param integer	A {@link BigInteger} value to convert.
 	 * @return 		The BCD-encoded bytes of this value.
 	 */
-	public static byte[] convertToBCD(BigInteger integer) {
+	public static byte[] convertToBCD(final BigInteger integer) {
 	    return convertToBCD(integer.toString());
 	}
 
@@ -545,7 +547,7 @@ public class NumericUtil
 	 * @param plainText	A plain text numeric string to convert.
 	 * @return 		The BCD-encoded bytes of this value.
 	 */
-	public static byte[] convertToBCD(String plainText) {
+	public static byte[] convertToBCD(final String plainText) {
 	    int plainLength = plainText.length();
 
 	    // The format is going to be:
@@ -631,7 +633,7 @@ public class NumericUtil
 	    return bytes;
 	}
 
-	private static byte[] readBCDBytes(DataInputStream dis)
+	private static byte[] readBCDBytes(final DataInputStream dis)
 		throws IOException
 	{
 	    ByteArrayOutputStream baos = new ByteArrayOutputStream(256);
@@ -648,7 +650,7 @@ public class NumericUtil
 	    return baos.toByteArray();
 	}
 
-	private static char readChar(DataInputStream dis, ByteOrder byteOrder)
+	private static char readChar(final DataInputStream dis, final ByteOrder byteOrder)
 		throws IOException
 	{
 	    if (byteOrder == ByteOrder.LSB) {
@@ -657,7 +659,7 @@ public class NumericUtil
 	    return dis.readChar();
 	}
 
-	private static void writeChar(DataOutputStream dos, char ch, ByteOrder byteOrder)
+	private static void writeChar(final DataOutputStream dos, final char ch, final ByteOrder byteOrder)
 		throws IOException
 	{
 	    if (byteOrder == ByteOrder.LSB) {
@@ -668,7 +670,7 @@ public class NumericUtil
 	    }
 	}
 
-	private static short readShort(DataInputStream dis, ByteOrder byteOrder)
+	private static short readShort(final DataInputStream dis, final ByteOrder byteOrder)
 		throws IOException
 	{
 	    // This is "network" byte order, or MSB first
@@ -679,7 +681,7 @@ public class NumericUtil
 	    return value;
 	}
 
-	private static void writeShort(DataOutputStream dos, short value, ByteOrder byteOrder)
+	private static void writeShort(final DataOutputStream dos, final short value, final ByteOrder byteOrder)
 		throws IOException
 	{
 	    if (byteOrder == ByteOrder.LSB) {
@@ -690,7 +692,7 @@ public class NumericUtil
 	    }
 	}
 
-	private static int readInt(DataInputStream dis, ByteOrder byteOrder)
+	private static int readInt(final DataInputStream dis, final ByteOrder byteOrder)
 		throws IOException
 	{
 	    int value = dis.readInt();
@@ -700,7 +702,7 @@ public class NumericUtil
 	    return value;
 	}
 
-	private static void writeInt(DataOutputStream dos, int value, ByteOrder byteOrder)
+	private static void writeInt(final DataOutputStream dos, final int value, final ByteOrder byteOrder)
 		throws IOException
 	{
 	    if (byteOrder == ByteOrder.LSB) {
@@ -711,7 +713,7 @@ public class NumericUtil
 	    }
 	}
 
-	private static long readLong(DataInputStream dis, ByteOrder byteOrder)
+	private static long readLong(final DataInputStream dis, final ByteOrder byteOrder)
 		throws IOException
 	{
 	    long value = dis.readLong();
@@ -721,7 +723,7 @@ public class NumericUtil
 	    return value;
 	}
 
-	private static void writeLong(DataOutputStream dos, long value, ByteOrder byteOrder)
+	private static void writeLong(final DataOutputStream dos, final long value, final ByteOrder byteOrder)
 		throws IOException
 	{
 	    if (byteOrder == ByteOrder.LSB) {
@@ -732,31 +734,31 @@ public class NumericUtil
 	    }
 	}
 
-	private static float readFloat(DataInputStream dis, ByteOrder byteOrder)
+	private static float readFloat(final DataInputStream dis, final ByteOrder byteOrder)
 		throws IOException
 	{
 	    return Float.intBitsToFloat(readInt(dis, byteOrder));
 	}
 
-	private static void writeFloat(DataOutputStream dos, float value, ByteOrder byteOrder)
+	private static void writeFloat(final DataOutputStream dos, final float value, final ByteOrder byteOrder)
 		throws IOException
 	{
 	    writeInt(dos, Float.floatToRawIntBits(value), byteOrder);
 	}
 
-	private static double readDouble(DataInputStream dis, ByteOrder byteOrder)
+	private static double readDouble(final DataInputStream dis, final ByteOrder byteOrder)
 		throws IOException
 	{
 	    return Double.longBitsToDouble(readLong(dis, byteOrder));
 	}
 
-	private static void writeDouble(DataOutputStream dos, double value, ByteOrder byteOrder)
+	private static void writeDouble(final DataOutputStream dos, final double value, final ByteOrder byteOrder)
 		throws IOException
 	{
 	    writeLong(dos, Double.doubleToRawLongBits(value), byteOrder);
 	}
 
-	private static String readString(DataInputStream dis, Charset charset, int byteLength)
+	private static String readString(final DataInputStream dis, final Charset charset, final int byteLength)
 		throws IOException
 	{
 	    byte[] bytes = new byte[byteLength];
@@ -764,7 +766,8 @@ public class NumericUtil
 	    return new String(bytes, charset);
 	}
 
-	private static void writeString(DataOutputStream dos, String value, Charset charset, ByteOrder byteOrder, StringLength stringLength, int length)
+	private static void writeString(final DataOutputStream dos, final String value, final Charset charset,
+					final ByteOrder byteOrder, final StringLength stringLength, final int length)
 		throws IOException
 	{
 	    byte[] bytes = value.getBytes(charset);
@@ -805,8 +808,8 @@ public class NumericUtil
 	}
 
 
-	public static Object readRawBinaryValue(DataInputStream dis, Charset charset,
-		DataType dataType, ByteOrder byteOrder, StringLength stringLength, int length)
+	public static Object readRawBinaryValue(final DataInputStream dis, final Charset charset, final DataType dataType,
+						final ByteOrder byteOrder, final StringLength stringLength, final int length)
 		throws IOException
 	{
 	     Object value = null;
@@ -898,7 +901,7 @@ public class NumericUtil
 	 * @throws IOException especially for end of file
 	 * @throws EOFException at the end of the file
 	 */
-	public static Object readBinaryValue(DataInputStream dis, Charset charset)
+	public static Object readBinaryValue(final DataInputStream dis, final Charset charset)
 		throws IOException
 	{
 	     byte code = dis.readByte();
@@ -919,8 +922,8 @@ public class NumericUtil
 	 * @throws IOException if there is a problem doing the write.
 	 * @throws IllegalArgumentException if the data type isn't recognized.
 	 */
-	public static void writeRawBinaryValue(Object value, DataOutputStream dos, Charset charset,
-		ByteOrder byteOrder, StringLength stringLength, int length)
+	public static void writeRawBinaryValue(final Object value, final DataOutputStream dos, final Charset charset,
+					       final ByteOrder byteOrder, final StringLength stringLength, final int length)
 			throws IOException
 	{
 	    // TODO: if the value is null, write nothing.... is this the right thing to do?
@@ -973,7 +976,7 @@ public class NumericUtil
 	 * @throws IOException if there is a problem doing the write.
 	 * @throws IllegalArgumentException if the data type isn't recognized.
 	 */
-	public static void writeBinaryValue(Object value, DataOutputStream dos, Charset charset)
+	public static void writeBinaryValue(final Object value, final DataOutputStream dos, final Charset charset)
 		throws IOException
 	{
 	    if (value == null) {
@@ -1029,7 +1032,7 @@ public class NumericUtil
 	 * @return The next highest power of two greater or equal to
 	 * the input.
 	 */
-	public static int roundUpPowerTwo(int n) {
+	public static int roundUpPowerTwo(final int n) {
 	    int p = 1;
 
 	    // Check for exact power of two
@@ -1050,7 +1053,7 @@ public class NumericUtil
 	 * @param exp The power to raise the number to.
 	 * @throws IllegalArgumentException if the exponent is infinite or not-a-number.
 	 */
-	public static BigDecimal pow(BigDecimal base, double exp) {
+	public static BigDecimal pow(final BigDecimal base, final double exp) {
 	    if (Double.isNaN(exp) || Double.isInfinite(exp))
 		throw new IllegalArgumentException(Intl.getString("util#numeric.outOfRange"));
 	    if (exp == 0.0d)
@@ -1092,7 +1095,7 @@ public class NumericUtil
 	 * @param exp The power to raise the number to.
 	 * @throws IllegalArgumentException if the exponent is infinite, or not-a-number.
 	 */
-	public static Number pow(BigInteger base, double exp) {
+	public static Number pow(final BigInteger base, final double exp) {
 	    if (Double.isNaN(exp) || Double.isInfinite(exp))
 		throw new IllegalArgumentException(Intl.getString("util#numeric.outOfRange"));
 	    if (exp == 0.0d)
