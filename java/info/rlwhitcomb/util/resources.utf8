@@ -67,7 +67,7 @@
 #	13-Nov-2020 (rlwhitcomb)
 #	    Add debug info to "printProgramInfo".
 #	02-Dec-2020 (rlwhitcomb)
-#	    New error message from NumericUtil.
+#	    New error messages from NumericUtil.
 #
 
 #
@@ -127,6 +127,7 @@ numeric.stringLengthTooBig= String length of %1$d exceds limit of %2$d.
 numeric.tooManyPiDigits	= The PI digit calculation is only good for about 12,500 digits!
 numeric.piDigitMismatch	= Calculated digit length is %1$d, but requested number of digits was %2$d!
 numeric.tooManyDigits	= Too many digits of precision requested (max is %1$d).
+numeric.notInteger	= The value must be a positive whole number.
 
 #
 # From SecurityUtil.java

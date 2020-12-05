@@ -72,6 +72,9 @@
  *	    (according to "TestNumericUtil").
  *	03-Dec-2020 (rlwhitcomb)
  *	    Code style tweaks.
+ *	04-Dec-2020 (rlwhitcomb)
+ *	    Fix some compile errors from last change.
+ *	    Add "factorial" method for BigDecimal.
  */
 package info.rlwhitcomb.util;
 
@@ -393,7 +396,8 @@ public class NumericUtil
 	    return buf.toString();
 	}
 
-	public static void convertToWords(final long value, final StringBuilder buf) {
+	public static void convertToWords(final long inputValue, final StringBuilder buf) {
+	    long value = inputValue;
 	    if (value < 0L) {
 		if (value == Long.MIN_VALUE) {
 		    throw new IllegalArgumentException(Intl.getString("util#numeric.outOfRange"));
@@ -1053,7 +1057,8 @@ public class NumericUtil
 	 * @param exp The power to raise the number to.
 	 * @throws IllegalArgumentException if the exponent is infinite or not-a-number.
 	 */
-	public static BigDecimal pow(final BigDecimal base, final double exp) {
+	public static BigDecimal pow(final BigDecimal base, final double inputExp) {
+	    double exp = inputExp;
 	    if (Double.isNaN(exp) || Double.isInfinite(exp))
 		throw new IllegalArgumentException(Intl.getString("util#numeric.outOfRange"));
 	    if (exp == 0.0d)
@@ -1109,6 +1114,30 @@ public class NumericUtil
 
 	    int intExp = (int)wholeExp;
 	    return base.pow(intExp);
+	}
+
+
+	/**
+	 * Compute the factorial value for the given integer value.
+	 * <p> The value for <tt>n!</tt> is 1 * 2 * 3 * 4... to n
+	 * and where 0! = 1 (by definition)
+	 *
+	 * @param base	The integer base (n).
+	 * @return	The value of <tt>n!</tt>
+	 */
+	public static BigDecimal factorial(final Number base) {
+	    BigInteger value  = BigInteger.ONE;
+	    double baseDouble = base.doubleValue();
+	    double baseFloor  = Math.floor(baseDouble);
+
+	    if (baseFloor != baseDouble || baseFloor < 0.0)
+		throw new IllegalArgumentException(Intl.getString("util#numeric.notInteger"));
+	    long loops = (long)baseFloor;
+
+	    for (long i = 2L; i <= loops; i++) {
+		value = value.multiply(BigInteger.valueOf(i));
+	    }
+	    return new BigDecimal(value);
 	}
 
 
