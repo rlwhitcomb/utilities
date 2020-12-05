@@ -1,0 +1,3 @@
+#!/bin/bash
+java -cp $CLASSPATH:utilities.jar info.rlwhitcomb.calc.Calc $*
+

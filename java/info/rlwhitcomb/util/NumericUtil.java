@@ -1053,8 +1053,8 @@ public class NumericUtil
 	/**
 	 * @return The result of the base to the exp power, done in <code>BigDecimal</code>
 	 * precision.
-	 * @param base The number to raise to the given power.
-	 * @param exp The power to raise the number to.
+	 * @param base     The number to raise to the given power.
+	 * @param inputExp The power to raise the number to.
 	 * @throws IllegalArgumentException if the exponent is infinite or not-a-number.
 	 */
 	public static BigDecimal pow(final BigDecimal base, final double inputExp) {

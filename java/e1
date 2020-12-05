@@ -1,0 +1,27 @@
+$decimal(50)
+52+27
+3.4 + 5,x
+PI
+sin(pi/3)
+4 & 7
+true && false
+(1+2) * (3+4)
+$Double
+atan2(4, 5)
+14/7;12/4;13/9
+a = 1; b = 2; a+b;
+a<=>b;a<=b;b<a;1>2;2>=1;
+$DEFAULT
+1.2+3.4
+1/7
+$decimal 18
+e
+a
+$clear
+a
+a = b = c = 27; a+b; b+c
+e
+'This isn''t a number'
+s = sqrt(17);
+t = s * s;
+

@@ -254,6 +254,9 @@
  *	    Another flavor of "padToWidth" that takes single char input and char padding.
  *	08-Oct-2020 (rlwhitcomb)
  *	    Add "matchesAnyOf" and "matchesAnyOfIgnoreCase" methods.
+ *	04-Dec-2020 (rlwhitcomb)
+ *	    Another flavor of quote stripping that works with either flavor of doubled
+ *	    embedded quotes (such as for Calc).
  */
 
 package info.rlwhitcomb.util;
@@ -412,6 +415,24 @@ public class CharUtil
 	 */
 	public static String stripBackQuotes(String value) {
 	    return internalStripQuotes(value, "`", "\\`");
+	}
+
+
+	/**
+	 * Strip any type of quote that has embedded quotes that are doubled what the
+	 * leading/trailing quote is.
+	 * <p> Assume there is no whitespace outside the quotes.
+	 *
+	 * @param value	The original correctly quoted string.
+	 * @return	The raw text of the string with the doubled embedded quotes changed.
+	 */
+	public static String stripAnyQuotes(String value) {
+	    if (value == null || value.isEmpty())
+		return value;
+	    char quote = value.charAt(0);
+	    StringBuilder embedded = new StringBuilder(2);
+	    embedded.append(quote).append(quote);
+	    return internalStripQuotes(value, Character.toString(quote), embedded.toString());
 	}
 
 

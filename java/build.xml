@@ -60,6 +60,8 @@
 		Copy java wrapper files along with .jar file.
 	    03-Dec-2020 (rlwhitcomb)
 		New tests of NumericUtil methods.
+	    04-Dec-2020 (rlwhitcomb)
+		Add "calc" directory, wrappers, and Antlr build.
 
      ========================================================================== -->
 
@@ -127,12 +129,19 @@
 	</target>
 
 	<target name="compile" depends="preproc" description="Compiles the java source.">
+		<java jar="external-jars/antlr-4.9-complete.jar" fork="true">
+			<arg value="info/rlwhitcomb/calc/Calc.g4"/>
+			<arg value="-visitor"/>
+			<arg value="-no-listener"/>
+			<arg line="-package info.rlwhitcomb.calc"/>
+		</java>
 		<javac includeAntRuntime="false" createMissingPackageInfoClass="false" encoding="utf-8">
 			<compilerarg line="${compiler.args}"/>
 			<src path="."/>
 			<src path="net/iharder/b64"/>
 			<src path="name/fraser/neil/plaintext"/>
 			<src path="info/rlwhitcomb/annotations"/>
+			<src path="info/rlwhitcomb/calc"/>
 			<src path="info/rlwhitcomb/cat"/>
 			<src path="info/rlwhitcomb/compare"/>
 			<src path="info/rlwhitcomb/csv"/>
@@ -162,6 +171,7 @@
 			<include name="net/iharder/b64/*.class"/>
 			<include name="name/fraser/neil/plaintext/*.class"/>
 			<include name="info/rlwhitcomb/annotations/*.class"/>
+			<include name="info/rlwhitcomb/calc/*.class"/>
 			<include name="info/rlwhitcomb/cat/*.class"/>
 			<include name="info/rlwhitcomb/compare/*.class"/>
 			<include name="info/rlwhitcomb/csv/*.class"/>
@@ -210,6 +220,7 @@
 			<fileset dir="net/iharder/b64" includes="*.class"/>
 			<fileset dir="name/fraser/neil/plaintext" includes="*.class"/>
 			<fileset dir="info/rlwhitcomb/annotations" includes="*.class"/>
+			<fileset dir="info/rlwhitcomb/calc" includes="*.class,*.interp,*.tokens,CalcParser.java,CalcVisitor.java,CalcLexer.java,CalcBaseVisitor.java"/>
 			<fileset dir="info/rlwhitcomb/cat" includes="*.class"/>
 			<fileset dir="info/rlwhitcomb/compare" includes="*.class"/>
 			<fileset dir="info/rlwhitcomb/csv" includes="*.class"/>
