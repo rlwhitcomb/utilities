@@ -113,6 +113,7 @@ directive
    | DOUBLE                      # doubleDirective
    | FLOAT                       # floatDirective
    | CLEAR                       # clearDirective
+   | ( QUIT | EXIT )             # exitDirective
    ;
 
 /* Lexer rules start here */
@@ -152,6 +153,10 @@ LOG    : [lL][oO][gG] ;
 LN     : [lL][nN] ;
 
 SIGNUM : [sS][iI][gG][nN][uU][mM] ;
+
+QUIT   : [qQ][uU][iI][tT] ;
+
+EXIT   : [eE][xX][iI][tT] ;
 
 
 /* Note: this needs to be last so that these other "ID" like things

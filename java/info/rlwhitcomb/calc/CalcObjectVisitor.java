@@ -155,6 +155,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	@Override
+	public Object visitExitDirective(CalcParser.ExitDirectiveContext ctx) {
+	    System.exit(0);
+	    return null;
+	}
+
+	@Override
 	public Object visitExprStmt(CalcParser.ExprStmtContext ctx) {
 	    Object result = visit(ctx.expr());
 	    TerminalNode formatNode = ctx.FORMAT();
