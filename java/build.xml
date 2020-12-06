@@ -62,6 +62,8 @@
 		New tests of NumericUtil methods.
 	    04-Dec-2020 (rlwhitcomb)
 		Add "calc" directory, wrappers, and Antlr build.
+	    05-Dec-2020 (rlwhitcomb)
+		Copy external jars to UTILITIES_HOME.
 
      ========================================================================== -->
 
@@ -78,6 +80,7 @@
 	<patternset id="wrapper-files">
 		<include name="_find_and_run_class"/>
 		<include name="MD5"/>
+		<include name="calc"/>
 		<include name="cat"/>
 		<include name="cmp"/>
 		<include name="fixpath"/>
@@ -255,6 +258,9 @@
 		<copy todir="${env.UTILITIES_HOME}" if:true="${utilities.available}">
 			<fileset dir=".">
 				<patternset refid="wrapper-files"/>
+			</fileset>
+			<fileset dir="./external-jars">
+				<include name="*.jar"/>
 			</fileset>
 		</copy>
 		<copy todir="${env.UTILITIES_HOME}" if:true="${utilities.available}">
