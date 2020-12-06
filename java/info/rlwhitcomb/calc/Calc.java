@@ -26,21 +26,26 @@
  *  History:
  *      04-Dec-2020 (rlwhitcomb)
  *	    First version, not complete yet.
+ *	05-Dec-2020 (rlwhitcomb)
+ *	    With no input arguments, execute each line in REPL mode.
  */
 package info.rlwhitcomb.calc;
 
-import org.antlr.v4.runtime.*;
-import org.antlr.v4.runtime.tree.*;
+import java.io.Console;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.IOException;
+import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.tree.*;
 
 /**
  * Command line calculator, which will also read files or from stdin.
  */
 public class Calc
 {
+	private static final String LINESEP = System.lineSeparator();
+
 	public static class ParseException extends RuntimeException
 	{
 		public ParseException(String message) {
@@ -91,18 +96,26 @@ public class Calc
 	    for (String arg : args) {
 		buf.append(arg).append(' ');
 	    }
-	    buf.append('\n');
+	    buf.append(LINESEP);
 	    return buf.toString();
+	}
+
+	private static void process(CharStream input, CalcObjectVisitor visitor, BailErrorStrategy errorStrategy)
+		throws IOException
+	{
+	    CalcLexer lexer = new CalcBailLexer(input);
+	    CommonTokenStream tokens = new CommonTokenStream(lexer);
+	    CalcParser parser = new CalcParser(tokens);
+	    parser.setErrorHandler(errorStrategy);
+	    ParseTree tree = parser.prog();
+	    visitor.visit(tree);
 	}
 
 	public static void main(String[] args) {
 	    try {
-		CharStream input;
+		CharStream input = null;
 
-		if (args.length == 0) {
-		    input = CharStreams.fromStream(System.in);
-		}
-		else if (args.length == 1) {
+		if (args.length == 1) {
 		    if (args[0].charAt(0) == '@') {
 			if (args[0].equals("@")) {
 			    input = CharStreams.fromStream(System.in);
@@ -121,18 +134,31 @@ public class Calc
 			}
 		    }
 		}
-		else {
+		else if (args.length > 0) {
 		    String commandLine = concatArgs(args);
 		    input = CharStreams.fromString(commandLine);
 		}
 
-		CalcLexer lexer = new CalcBailLexer(input);
-		CommonTokenStream tokens = new CommonTokenStream(lexer);
-		CalcParser parser = new CalcParser(tokens);
-		parser.setErrorHandler(new BailErrorStrategy());
-		ParseTree tree = parser.prog();
+		BailErrorStrategy errorStrategy = new BailErrorStrategy();
 		CalcObjectVisitor visitor = new CalcObjectVisitor();
-		visitor.visit(tree);
+
+		// If no input arguments were given, go into "REPL" mode, reading
+		// a line at a time from the console and processing
+		if (input == null) {
+		    Console console = System.console();
+		    if (console == null) {
+			process(CharStreams.fromStream(System.in), visitor, errorStrategy);
+		    }
+		    else {
+			String line;
+			while ((line = console.readLine("> ")) != null) {
+			    process(CharStreams.fromString(line + LINESEP), visitor, errorStrategy);
+			}
+		    }
+		}
+		else {
+		    process(input, visitor, errorStrategy);
+		}
 	    }
 	    catch (IOException ioe) {
 		System.err.println("I/O Error: " + ioe.getMessage());
