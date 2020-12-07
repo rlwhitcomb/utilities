@@ -28,6 +28,8 @@
  *	    First version (not quite complete yet).
  *	06-Dec-2020 (rlwhitcomb)
  *	    More functions.
+ *	07-Dec-2020 (rlwhitcomb)
+ *	    Help and version commands.
  */
 
 grammar Calc;
@@ -118,56 +120,65 @@ directive
    | DOUBLE                      # doubleDirective
    | FLOAT                       # floatDirective
    | CLEAR                       # clearDirective
+   | VERSION                     # versionDirective
+   | ( HELP | '?' )              # helpDirective
    | ( QUIT | EXIT )             # exitDirective
    ;
 
 /* Lexer rules start here */
 
-TRUE   : [tT][rR][uU][eE] ;
+TRUE    : [tT][rR][uU][eE] ;
 
-FALSE  : [fF][aA][lL][sS][eE] ;
+FALSE   : [fF][aA][lL][sS][eE] ;
 
-NULL   : [nN][uU][lL][lL] ;
+NULL    : [nN][uU][lL][lL] ;
 
-PI     : [pP][iI] ;
+PI      : [pP][iI] ;
 
-E      : [eE] ;
+E       : [eE] ;
 
-ABS    : [aA][bB][sS] ;
+ABS     : [aA][bB][sS] ;
 
-SINH   : [sS][iI][nN][hH] ;
+SINH    : [sS][iI][nN][hH] ;
 
-SIN    : [sS][iI][nN] ;
+SIN     : [sS][iI][nN] ;
 
-COSH   : [cC][oO][sS][hH] ;
+COSH    : [cC][oO][sS][hH] ;
 
-COS    : [cC][oO][sS] ;
+COS     : [cC][oO][sS] ;
 
-TANH   : [tT][aA][nN][hH] ;
+TANH    : [tT][aA][nN][hH] ;
 
-TAN    : [tT][aA][nN] ;
+TAN     : [tT][aA][nN] ;
 
-ASIN   : [aA][sS][iI][nN] ;
+ASIN    : [aA][sS][iI][nN] ;
 
-ACOS   : [aA][cC][oO][sS] ;
+ACOS    : [aA][cC][oO][sS] ;
 
-ATAN   : [aA][tT][aA][nN] ;
+ATAN    : [aA][tT][aA][nN] ;
 
-ATAN2  : [aA][tT][aA][nN][2] ;
+ATAN2   : [aA][tT][aA][nN][2] ;
 
-SQRT   : [sS][qQ][rR][tT] ;
+SQRT    : [sS][qQ][rR][tT] ;
 
-CBRT   : [cC][bB][rR][tT] ;
+CBRT    : [cC][bB][rR][tT] ;
 
-LOG    : [lL][oO][gG] ;
+LOG     : [lL][oO][gG] ;
 
-LN     : [lL][nN] ;
+LN      : [lL][nN] ;
 
-SIGNUM : [sS][iI][gG][nN][uU][mM] ;
+SIGNUM  : [sS][iI][gG][nN][uU][mM] ;
 
-QUIT   : [qQ][uU][iI][tT] ;
+/* Commands (or directives) that are specially treated,
+ * NOT as identifiers.  */
 
-EXIT   : [eE][xX][iI][tT] ;
+HELP    : [hH][eE][lL][pP] ;
+
+VERSION : [vV][eE][rR][sS][iI][oO][nN] ;
+
+QUIT    : [qQ][uU][iI][tT] ;
+
+EXIT    : [eE][xX][iI][tT] ;
 
 
 /* Note: this needs to be last so that these other "ID" like things

@@ -28,6 +28,9 @@
  *	    First version, not complete yet.
  *	05-Dec-2020 (rlwhitcomb)
  *	    With no input arguments, execute each line in REPL mode.
+ *	07-Dec-2020 (rlwhitcomb)
+ *	    Initial help message in REPL mode; use color codes in messages;
+ *	    catch errors inside "process" so REPL mode can contine afterwards.
  */
 package info.rlwhitcomb.calc;
 
@@ -36,9 +39,13 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.IOException;
+import java.util.Arrays;
+
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
+
 import static info.rlwhitcomb.util.ConsoleColor.Code.*;
+import info.rlwhitcomb.util.Environment;
 import info.rlwhitcomb.util.ExceptionUtil;
 
 /**
@@ -46,7 +53,36 @@ import info.rlwhitcomb.util.ExceptionUtil;
  */
 public class Calc
 {
+	private static final boolean ON_WINDOWS = Environment.isWindows();
+
+	public static final String EXPR_COLOR  = (ON_WINDOWS ? CYAN_BRIGHT : BLUE_BOLD).toString();
+	public static final String ARROW_COLOR = (ON_WINDOWS ? WHITE : BLACK_BRIGHT).toString();
+	public static final String VALUE_COLOR = (ON_WINDOWS ? GREEN_BRIGHT : GREEN_BOLD).toString();
+
 	private static final String LINESEP = System.lineSeparator();
+
+	private static final String VERSION = "0.9";
+
+	private static final String[] TITLE_AND_VERSION = {
+	    BLUE_BOLD_BRIGHT +
+	    "Expression Calculator",
+	    "     Version " + VERSION,
+	    "=====================",
+	    "" + RESET
+	};
+
+	private static final String[] INTRO = {
+	    "  Enter an expression (or multiple expressions separated by ';').",
+	    "  Use '" + VALUE_COLOR + "help" + RESET
+	  + "' or '" + VALUE_COLOR + "?" + RESET + "' for a list of supported functions.",
+	    "  Enter '" + VALUE_COLOR + "quit" + RESET
+	  + "' or '" + VALUE_COLOR + "exit" + RESET + "' to end.",
+	    ""
+	};
+
+	private static final String[] HELP = {
+	    RED_BOLD + "Help is not complete yet!  Check back later." + RESET
+	};
 
 	public static class ParseException extends RuntimeException
 	{
@@ -93,6 +129,18 @@ public class Calc
 		}
 	}
 
+	public static void printTitleAndVersion() {
+	    Arrays.stream(TITLE_AND_VERSION).forEach(System.out::println);
+	}
+
+	public static void printIntro() {
+	    Arrays.stream(INTRO).forEach(System.out::println);
+	}
+
+	public static void printHelp() {
+	    Arrays.stream(HELP).forEach(System.out::println);
+	}
+
 	private static String concatArgs(String[] args) {
 	    StringBuilder buf = new StringBuilder();
 	    for (String arg : args) {
@@ -105,12 +153,20 @@ public class Calc
 	private static void process(CharStream input, CalcObjectVisitor visitor, BailErrorStrategy errorStrategy)
 		throws IOException
 	{
-	    CalcLexer lexer = new CalcBailLexer(input);
-	    CommonTokenStream tokens = new CommonTokenStream(lexer);
-	    CalcParser parser = new CalcParser(tokens);
-	    parser.setErrorHandler(errorStrategy);
-	    ParseTree tree = parser.prog();
-	    visitor.visit(tree);
+	    try {
+		CalcLexer lexer = new CalcBailLexer(input);
+		CommonTokenStream tokens = new CommonTokenStream(lexer);
+		CalcParser parser = new CalcParser(tokens);
+		parser.setErrorHandler(errorStrategy);
+		ParseTree tree = parser.prog();
+		visitor.visit(tree);
+	    }
+	    catch (IllegalArgumentException iae) {
+		System.err.println(RED_BOLD + "Error: " + iae.getMessage() + RESET);
+	    }
+	    catch (ParseException pe) {
+		System.err.println(RED_BOLD + "Error: " + pe.getMessage() + RESET);
+	    }
 	}
 
 	public static void main(String[] args) {
@@ -152,6 +208,9 @@ public class Calc
 			process(CharStreams.fromStream(System.in), visitor, errorStrategy);
 		    }
 		    else {
+			printTitleAndVersion();
+			printIntro();
+
 			String line;
 			while ((line = console.readLine("> ")) != null) {
 			    process(CharStreams.fromString(line + LINESEP), visitor, errorStrategy);
@@ -164,12 +223,6 @@ public class Calc
 	    }
 	    catch (IOException ioe) {
 		System.err.println(RED_BOLD + "I/O Error: " + ExceptionUtil.toString(ioe) + RESET);
-	    }
-	    catch (IllegalArgumentException iae) {
-		System.err.println(RED_BOLD + "Error: " + iae.getMessage() + RESET);
-	    }
-	    catch (ParseException pe) {
-		System.err.println(RED_BOLD + "Error: " + pe.getMessage() + RESET);
 	    }
 	}
 }

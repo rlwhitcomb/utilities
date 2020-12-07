@@ -64,6 +64,9 @@
 		Add "calc" directory, wrappers, and Antlr build.
 	    05-Dec-2020 (rlwhitcomb)
 		Copy external jars to UTILITIES_HOME.
+	    07-Dec-2020 (rlwhitcomb)
+		Add Javadoc window title. Only copy the antlr runtime .jar file
+		into the install directory.
 
      ========================================================================== -->
 
@@ -187,7 +190,7 @@
 	</target>
 
 	<target name="doc" depends="compile" description="Builds the Javadoc for the entire project.">
-		<javadoc destdir="doc" access="private" encoding="utf-8">
+		<javadoc destdir="doc" access="private" encoding="utf-8" windowtitle="Utilities">
 			<arg value="-html4" if:true="${new.java.version}"/>
 			<arg value="--frames" if:true="${new.java.version}"/>
 			<link href="https://docs.oracle.com/javase/8/docs/api/"/>
@@ -261,6 +264,7 @@
 			</fileset>
 			<fileset dir="./external-jars">
 				<include name="*.jar"/>
+				<exclude name="antlr-*-complete.jar"/>
 			</fileset>
 		</copy>
 		<copy todir="${env.UTILITIES_HOME}" if:true="${utilities.available}">
