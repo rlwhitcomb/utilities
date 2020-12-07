@@ -38,6 +38,8 @@ import java.io.InputStream;
 import java.io.IOException;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
+import static info.rlwhitcomb.util.ConsoleColor.Code.*;
+import info.rlwhitcomb.util.ExceptionUtil;
 
 /**
  * Command line calculator, which will also read files or from stdin.
@@ -161,13 +163,13 @@ public class Calc
 		}
 	    }
 	    catch (IOException ioe) {
-		System.err.println("I/O Error: " + ioe.getMessage());
+		System.err.println(RED_BOLD + "I/O Error: " + ExceptionUtil.toString(ioe) + RESET);
 	    }
 	    catch (IllegalArgumentException iae) {
-		System.err.println("Error: " + iae.getMessage());
+		System.err.println(RED_BOLD + "Error: " + iae.getMessage() + RESET);
 	    }
 	    catch (ParseException pe) {
-		System.err.println("Error: " + pe.getMessage());
+		System.err.println(RED_BOLD + "Error: " + pe.getMessage() + RESET);
 	    }
 	}
 }

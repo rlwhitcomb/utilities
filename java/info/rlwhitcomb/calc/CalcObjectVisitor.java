@@ -38,6 +38,8 @@ import java.util.Map;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
 import info.rlwhitcomb.util.CharUtil;
+import static info.rlwhitcomb.util.ConsoleColor.Code.*;
+import info.rlwhitcomb.util.Environment;
 import info.rlwhitcomb.util.NumericUtil;
 
 /**
@@ -46,6 +48,11 @@ import info.rlwhitcomb.util.NumericUtil;
  */
 public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 {
+	private static final boolean ON_WINDOWS = Environment.isWindows();
+	private static final String EXPR_COLOR  = (ON_WINDOWS ? CYAN_BRIGHT : BLUE_BOLD).toString();
+	private static final String ARROW_COLOR = (ON_WINDOWS ? WHITE : BLACK_BRIGHT).toString();
+	private static final String VALUE_COLOR = (ON_WINDOWS ? GREEN_BRIGHT : GREEN_BOLD).toString();
+
 	/** Note: the scale will be determined by the number of digits desired. */
 	private MathContext mc = MathContext.DECIMAL128;
 
@@ -177,14 +184,18 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    String format = formatNode == null ? "" : formatNode.getText();
 	    // TODO: deal with formats
 	    StringBuilder buf = new StringBuilder();
+	    buf.append(EXPR_COLOR);
 	    getTreeText(buf, ctx.expr());
+	    buf.append(ARROW_COLOR);
 	    buf.append("-> ");
+	    buf.append(VALUE_COLOR);
 	    if (result == null)
 		buf.append("<null>");
 	    else if (result instanceof BigDecimal)
 		buf.append(((BigDecimal)result).toPlainString());
 	    else
 		buf.append(result.toString());
+	    buf.append(RESET);
 	    System.out.println(buf.toString());
 	    return result;
 	}

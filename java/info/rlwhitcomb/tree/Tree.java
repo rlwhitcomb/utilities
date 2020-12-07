@@ -62,6 +62,8 @@
  *	    Move text to resource file.
  *	08-Oct-2020 (rlwhitcomb)
  *	    Use version of "printProgramInfo" with defaults.
+ *	07-Dec-2020 (rlwhitcomb)
+ *	    Refactor ConsoleColor;
  */
 package info.rlwhitcomb.tree;
 
@@ -76,9 +78,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import info.rlwhitcomb.util.CharUtil;
-import static info.rlwhitcomb.util.CharUtil.Justification;
+import static info.rlwhitcomb.util.CharUtil.Justification.*;
 import info.rlwhitcomb.util.ConsoleColor;
-import static info.rlwhitcomb.util.ConsoleColor.*;
+import static info.rlwhitcomb.util.ConsoleColor.Code.*;
 import info.rlwhitcomb.util.Environment;
 import info.rlwhitcomb.util.ExceptionUtil;
 import info.rlwhitcomb.util.Intl;
@@ -138,7 +140,7 @@ public class Tree
 	}
 
 	private static String parentPrefix(int width, boolean continuation) {
-	    return CharUtil.padToWidth((continuation ? VS : SPC), width, SPC, Justification.LEFT);
+	    return CharUtil.padToWidth((continuation ? VS : SPC), width, SPC, LEFT);
 	}
 
 
@@ -321,7 +323,7 @@ public class Tree
 	private static void list(File file, String ancestors, String parent, String branch, boolean fullPath) {
 	    String name = fullPath ? file.getPath() : file.getName();
 	    boolean isDirectory = file.isDirectory();
-	    ConsoleColor nameEmphasis = darkBackgrounds ? WHITE_BOLD : BLACK_BOLD;
+	    ConsoleColor.Code nameEmphasis = darkBackgrounds ? WHITE_BOLD : BLACK_BOLD;
 	    String type = null, typeDisplay = "";
 	    if (!isDirectory) {
 		try {
