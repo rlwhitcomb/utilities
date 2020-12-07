@@ -26,6 +26,8 @@
  *  History:
  *      04-Dec-2020 (rlwhitcomb)
  *	    First version (not quite complete yet).
+ *	06-Dec-2020 (rlwhitcomb)
+ *	    More functions.
  */
 
 grammar Calc;
@@ -65,6 +67,9 @@ expr
    | ACOS expr                   # acosExpr
    | ATAN expr                   # atanExpr
    | ATAN2 expr2                 # atan2Expr
+   | SINH expr                   # sinhExpr
+   | COSH expr                   # coshExpr
+   | TANH expr                   # tanhExpr
    | SQRT expr                   # sqrtExpr
    | CBRT expr                   # cbrtExpr
    | LOG expr                    # logExpr
@@ -130,9 +135,15 @@ E      : [eE] ;
 
 ABS    : [aA][bB][sS] ;
 
+SINH   : [sS][iI][nN][hH] ;
+
 SIN    : [sS][iI][nN] ;
 
+COSH   : [cC][oO][sS][hH] ;
+
 COS    : [cC][oO][sS] ;
+
+TANH   : [tT][aA][nN][hH] ;
 
 TAN    : [tT][aA][nN] ;
 

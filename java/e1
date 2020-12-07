@@ -24,4 +24,25 @@ e
 'This isn''t a number'
 s = sqrt(17);
 t = s * s;
+$decimal 30
+t = 17**0.5
+t * t
+
+I = 1; ++I; I;
+J = 2; J++; J;
+$double
+pi / 2
+asin ( sin ( pi / 2 ) )
+pi/4
+acos(cos(pi/4))
+pi/3
+atan(tan(pi/3))
+b = -27; c = 0; d = 153;
+signum b; signum c; signum d;
+h = 23
+i = ln(h)
+e**i
+m = 10000
+n = log(m)
+10**n
 
