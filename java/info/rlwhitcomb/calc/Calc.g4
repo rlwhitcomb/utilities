@@ -34,6 +34,8 @@
  *	    Degrees and radians directives.
  *	07-Dec-2020 (rlwhitcomb)
  *	    Some aliases for the directives.
+ *	08-Dec-2020 (rlwhitcomb)
+ *	    Allow Unicode pi symbol.
  */
 
 grammar Calc;
@@ -139,7 +141,7 @@ FALSE   : [fF][aA][lL][sS][eE] ;
 
 NULL    : [nN][uU][lL][lL] ;
 
-PI      : [pP][iI] ;
+PI      : ( '\u03c0' | [pP][iI] ) ;
 
 E       : [eE] ;
 
