@@ -30,6 +30,8 @@
  *	    More functions.
  *	07-Dec-2020 (rlwhitcomb)
  *	    Help and version commands.
+ *	07-Dec-2020 (rlwhitcomb)
+ *	    Degrees and radians directives.
  */
 
 grammar Calc;
@@ -119,6 +121,8 @@ directive
    | DEFAULT                     # defaultDirective
    | DOUBLE                      # doubleDirective
    | FLOAT                       # floatDirective
+   | DEGREES                     # degreesDirective
+   | RADIANS                     # radiansDirective
    | CLEAR                       # clearDirective
    | VERSION                     # versionDirective
    | ( HELP | '?' )              # helpDirective
@@ -222,6 +226,14 @@ DOUBLE
 
 FLOAT
    : DIR [fF][lL][oO][aA][tT]
+   ;
+
+DEGREES
+   : DIR ( [dD][eE][gG] | [dD][eE][gG][rR][eE][eE][sS] )
+   ;
+
+RADIANS
+   : DIR ( [rR][aA][dD] | [rR][aA][dD][iI][aA][nN][sS] )
    ;
 
 CLEAR

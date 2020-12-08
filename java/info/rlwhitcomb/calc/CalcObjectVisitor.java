@@ -28,6 +28,8 @@
  *	    More functionality.
  *	07-Dec-2020 (rlwhitcomb)
  *	    Help and Version directives; add some color.
+ *	07-Dec-2020 (rlwhitcomb)
+ *	    Degrees and radians directives.
  */
 package info.rlwhitcomb.calc;
 
@@ -49,11 +51,29 @@ import info.rlwhitcomb.util.NumericUtil;
  */
 public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 {
-	/** Note: the scale will be determined by the number of digits desired. */
-	private MathContext mc = MathContext.DECIMAL128;
+	private enum TrigMode
+	{
+		DEGREES,
+		RADIANS
+	}
+
+	/** Value used to convert degrees to radians. */
+	private static final BigDecimal B180 = BigDecimal.valueOf(180L);
 
 	/** Scale for double operations. */
-	private MathContext mcDouble = MathContext.DECIMAL64;
+	private static final MathContext mcDouble = MathContext.DECIMAL64;
+
+	/** Note: the precision will be determined by the number of digits desired. */
+	private MathContext mc;
+
+	/** Whether trig inputs are in degrees or radians. */
+	private TrigMode trigMode = TrigMode.RADIANS;;
+
+	/** PI to the precision of our current math mode. */
+	private BigDecimal pi;
+
+	/** PI / 180 for degrees to radians conversion. */
+	private BigDecimal piOver180;
 
 	/** Symbol table for variables. */
 	private Map<String, Object> variables = new HashMap<>();
@@ -69,6 +89,21 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 	}
 
+	public CalcObjectVisitor() {
+	    setMathContext(MathContext.DECIMAL128);
+	}
+
+	private void setMathContext(MathContext newMathContext) {
+	    mc        = newMathContext;
+	    pi        = NumericUtil.pi(mc.getPrecision());
+	    piOver180 = pi.divide(B180, mc);
+	}
+
+	private void setTrigMode(TrigMode newTrigMode) {
+	    trigMode = newTrigMode;
+	    System.out.println(Calc.VALUE_COLOR + "Trig mode is now " + trigMode + "." + RESET);
+	}
+
 	private BigDecimal getDecimalValue(ParserRuleContext ctx) {
 	    Object value = visit(ctx);
 	    if (value instanceof BigDecimal)
@@ -81,6 +116,22 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	private double getDoubleValue(ParserRuleContext ctx) {
 	    BigDecimal dec = getDecimalValue(ctx);
 	    return dec.doubleValue();
+	}
+
+	private double getTrigValue(ParserRuleContext ctx) {
+	    BigDecimal value = getDecimalValue(ctx);
+
+	    if (trigMode == TrigMode.DEGREES)
+		value = value.multiply(piOver180, mc);
+
+	    return value.doubleValue();
+	}
+
+	private BigDecimal returnTrigValue(double value) {
+	    BigDecimal radianValue = new BigDecimal(value, mcDouble);
+	    if (trigMode == TrigMode.DEGREES)
+		return radianValue.divide(piOver180, mcDouble);
+	    return radianValue;
 	}
 
 	private Boolean getBooleanValue(ParserRuleContext ctx) {
@@ -136,7 +187,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }	
 	    int precision = dPrecision.intValue();
 	    if (precision > 1 && precision < 32768 /* arbitrary */)
-		mc = new MathContext(precision);
+		setMathContext(new MathContext(precision));
 	    else {
 		throw new IllegalArgumentException("Decimal precision of " + precision + " is out of range at line " + line + ".");
 	    }
@@ -145,19 +196,31 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitDoubleDirective(CalcParser.DoubleDirectiveContext ctx) {
-	    mc = MathContext.DECIMAL64;
+	    setMathContext(MathContext.DECIMAL64);
 	    return null;
 	}
 
 	@Override
 	public Object visitFloatDirective(CalcParser.FloatDirectiveContext ctx) {
-	    mc = MathContext.DECIMAL32;
+	    setMathContext(MathContext.DECIMAL32);
 	    return null;
 	}
 
 	@Override
 	public Object visitDefaultDirective(CalcParser.DefaultDirectiveContext ctx) {
-	    mc = MathContext.DECIMAL128;
+	    setMathContext(MathContext.DECIMAL128);
+	    return null;
+	}
+
+	@Override
+	public Object visitDegreesDirective(CalcParser.DegreesDirectiveContext ctx) {
+	    setTrigMode(TrigMode.DEGREES);
+	    return null;
+	}
+
+	@Override
+	public Object visitRadiansDirective(CalcParser.RadiansDirectiveContext ctx) {
+	    setTrigMode(TrigMode.RADIANS);
 	    return null;
 	}
 
@@ -337,21 +400,21 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitSinExpr(CalcParser.SinExprContext ctx) {
 	    // Note: for now, convert BigDecimal to double and use standard Math method
-	    double d = getDoubleValue(ctx.expr());
+	    double d = getTrigValue(ctx.expr());
 	    return new BigDecimal(Math.sin(d), mcDouble);
 	}
 
 	@Override
 	public Object visitCosExpr(CalcParser.CosExprContext ctx) {
 	    // For now, convert to double and use standard Math method
-	    double d = getDoubleValue(ctx.expr());
+	    double d = getTrigValue(ctx.expr());
 	    return new BigDecimal(Math.cos(d), mcDouble);
 	}
 
 	@Override
 	public Object visitTanExpr(CalcParser.TanExprContext ctx) {
 	    // Convert to double and use standard Math method
-	    double d = getDoubleValue(ctx.expr());
+	    double d = getTrigValue(ctx.expr());
 	    return new BigDecimal(Math.tan(d), mcDouble);
 	}
 
@@ -359,21 +422,21 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public Object visitAsinExpr(CalcParser.AsinExprContext ctx) {
 	    // Convert to double and use standard Math method
 	    double d = getDoubleValue(ctx.expr());
-	    return new BigDecimal(Math.asin(d), mcDouble);
+	    return returnTrigValue(Math.asin(d));
 	}
 
 	@Override
 	public Object visitAcosExpr(CalcParser.AcosExprContext ctx) {
 	    // Convert to double and use standard Math method
 	    double d = getDoubleValue(ctx.expr());
-	    return new BigDecimal(Math.acos(d), mcDouble);
+	    return returnTrigValue(Math.acos(d));
 	}
 
 	@Override
 	public Object visitAtanExpr(CalcParser.AtanExprContext ctx) {
 	    // Convert to double and use standard Math method
 	    double d = getDoubleValue(ctx.expr());
-	    return new BigDecimal(Math.atan(d), mcDouble);
+	    return returnTrigValue(Math.atan(d));
 	}
 
 	@Override
@@ -532,7 +595,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitPiValue(CalcParser.PiValueContext ctx) {
-	    return NumericUtil.pi(mc.getPrecision());
+	    return pi;
 	}
 
 	@Override
