@@ -32,6 +32,8 @@
  *	    Help and version commands.
  *	07-Dec-2020 (rlwhitcomb)
  *	    Degrees and radians directives.
+ *	07-Dec-2020 (rlwhitcomb)
+ *	    Some aliases for the directives.
  */
 
 grammar Calc;
@@ -213,11 +215,11 @@ NOTEQUAL       : '!=' ;
 
 
 DECIMAL
-   : DIR [dD][eE][cC][iI][mM][aA][lL]
+   : DIR ( [dD][eE][cC] | [dD][eE][cC][iI][mM][aA][lL] )
    ;
 
 DEFAULT
-   : DIR [dD][eE][fF][aA][uU][lL][tT]
+   : DIR ( [dD][eE][fF] | [dD][eE][fF][aA][uU][lL][tT] )
    ;
 
 DOUBLE
@@ -237,7 +239,7 @@ RADIANS
    ;
 
 CLEAR
-   : DIR [cC][lL][eE][aA][rR]
+   : DIR ( [cC][lL][rR] | [cC][lL][eE][aA][rR] )
    ;
 
 FORMAT

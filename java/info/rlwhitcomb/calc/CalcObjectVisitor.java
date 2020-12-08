@@ -30,6 +30,8 @@
  *	    Help and Version directives; add some color.
  *	07-Dec-2020 (rlwhitcomb)
  *	    Degrees and radians directives.
+ *	07-Dec-2020 (rlwhitcomb)
+ *	    Cache e value when precision changes.
  */
 package info.rlwhitcomb.calc;
 
@@ -63,11 +65,14 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	/** Scale for double operations. */
 	private static final MathContext mcDouble = MathContext.DECIMAL64;
 
+	/** Initialization flag -- delays print until constructor is finished.  */
+	private boolean initialized = false;
+
 	/** Note: the precision will be determined by the number of digits desired. */
 	private MathContext mc;
 
 	/** Whether trig inputs are in degrees or radians. */
-	private TrigMode trigMode = TrigMode.RADIANS;;
+	private TrigMode trigMode;
 
 	/** PI to the precision of our current math mode. */
 	private BigDecimal pi;
@@ -75,9 +80,13 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	/** PI / 180 for degrees to radians conversion. */
 	private BigDecimal piOver180;
 
+	/** E to the precision of our current math mode. */
+	private BigDecimal e;
+
 	/** Symbol table for variables. */
-	private Map<String, Object> variables = new HashMap<>();
+	private Map<String, Object> variables;
  
+
 	private void getTreeText(StringBuilder buf, ParserRuleContext ctx) {
 	    for (ParseTree child : ctx.children) {
 		if (child instanceof ParserRuleContext) {
@@ -91,17 +100,28 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	public CalcObjectVisitor() {
 	    setMathContext(MathContext.DECIMAL128);
+	    setTrigMode(TrigMode.RADIANS);
+	    variables = new HashMap<>();
+
+	    initialized = true;
 	}
 
 	private void setMathContext(MathContext newMathContext) {
+	    int prec  = newMathContext.getPrecision();
 	    mc        = newMathContext;
-	    pi        = NumericUtil.pi(mc.getPrecision());
+	    pi        = NumericUtil.pi(prec);
 	    piOver180 = pi.divide(B180, mc);
+	    e         = NumericUtil.e(prec);
+
+	    if (initialized)
+		System.out.println(Calc.VALUE_COLOR + "Precision is now " + prec + " digits." + RESET);
 	}
 
 	private void setTrigMode(TrigMode newTrigMode) {
 	    trigMode = newTrigMode;
-	    System.out.println(Calc.VALUE_COLOR + "Trig mode is now " + trigMode + "." + RESET);
+
+	    if (initialized)
+		System.out.println(Calc.VALUE_COLOR + "Trig mode is now " + trigMode + "." + RESET);
 	}
 
 	private BigDecimal getDecimalValue(ParserRuleContext ctx) {
@@ -600,7 +620,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitEValue(CalcParser.EValueContext ctx) {
-	    return NumericUtil.e(mc.getPrecision());
+	    return e;
 	}
 
 	@Override
