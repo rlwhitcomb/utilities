@@ -75,6 +75,8 @@
  *	04-Dec-2020 (rlwhitcomb)
  *	    Fix some compile errors from last change.
  *	    Add "factorial" method for BigDecimal.
+ *	08-Dec-2020 (rlwhitcomb)
+ *	    Add "sin" method for BigDecimal (using Maclaurin series expansion).
  */
 package info.rlwhitcomb.util;
 
@@ -203,6 +205,15 @@ public class NumericUtil
 	private static final long MULT_GB = MULT_MB * MULT_KB;
 	private static final long MULT_TB = MULT_GB * MULT_KB;
 	private static final long MULT_PB = MULT_TB * MULT_KB;
+
+	private static final BigDecimal TWO = BigDecimal.valueOf(2L);
+
+	/** The previously calculated PI value (if any); cached to eliminate repeated costly calculations. */
+	private static BigDecimal CALCULATED_PI = null;
+	/* Some related values calculated at the same time (for convenience). */
+	private static BigDecimal TWO_PI;
+	private static BigDecimal MINUS_TWO_PI;
+
 
 	private static final String[] smallWords = {
 		"zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine",
@@ -1133,12 +1144,68 @@ public class NumericUtil
 	    if (baseFloor != baseDouble || baseFloor < 0.0)
 		throw new IllegalArgumentException(Intl.getString("util#numeric.notInteger"));
 	    long loops = (long)baseFloor;
+	    BigInteger term = BigInteger.ONE;
 
 	    for (long i = 2L; i <= loops; i++) {
-		value = value.multiply(BigInteger.valueOf(i));
+		term = term.add(BigInteger.ONE);
+		value = value.multiply(term);
 	    }
 	    return new BigDecimal(value);
 	}
+
+
+	/**
+	 * Find the value of sin(x) (where x is in radians).
+	 *
+	 * @param x	The value in radians to compute the "sin" function of.
+	 * @param mc	The {@link MathContext} to use for the computation.
+	 * @return	The value of the sin of x.
+	 */
+	public static BigDecimal sin(final Number x, final MathContext mc) {
+	    BigDecimal xValue;
+	    if (x instanceof BigDecimal)
+		xValue = (BigDecimal)x;
+	    else if (x instanceof BigInteger)
+		xValue = new BigDecimal((BigInteger)x);
+	    else
+		xValue = BigDecimal.valueOf(x.doubleValue());
+
+	    pi(mc.getPrecision());
+
+	    /* First do some range reduction to the range -2*pi to 2*pi */
+//System.out.println("     original x = " + xValue.toPlainString());
+	    if (xValue.compareTo(MINUS_TWO_PI) < 0 || xValue.compareTo(TWO_PI) > 0) {
+		xValue = xValue.remainder(TWO_PI, mc);
+//System.out.println("range reduced x = " + xValue.toPlainString());
+	    }
+
+	    BigDecimal result = xValue;
+	    BigDecimal power  = xValue;
+	    BigDecimal fact   = BigDecimal.ONE;
+	    BigDecimal term   = BigDecimal.ONE;
+
+	    // This converges very rapidly, except when the value is near zero
+	    int loops = mc.getPrecision() * 3 / 2;
+
+	    MathContext mc2 = new MathContext(mc.getPrecision() * 2);
+
+	    for (int i = 1; i < loops; i++) {
+		power = power.multiply(xValue).multiply(xValue);
+		term  = term.add(BigDecimal.ONE);
+		fact  = fact.multiply(term);
+		term  = term.add(BigDecimal.ONE);
+		fact  = fact.multiply(term);
+		BigDecimal seriesTerm = power.divide(fact, mc2);
+		if (i % 2 == 1)
+		    result = result.subtract(seriesTerm);
+		else
+		    result = result.add(seriesTerm);
+//System.out.println("loop " + i + " -> " + result.toPlainString());
+	    }
+
+	    return result.round(mc);
+	}
+
 
 
         private static final int SCALE = 10000;
@@ -1224,9 +1291,6 @@ public class NumericUtil
 	}
 
 
-	/** The previously calculated PI value (if any); cached to eliminate repeated costly calculations. */
-	private static BigDecimal CALCULATED_PI = null;
-
 	/**
 	 * @return A {@link BigDecimal} constant of PI to the requested number of fractional digits
 	 * (up to around 12,500).
@@ -1241,6 +1305,10 @@ public class NumericUtil
 		// Calculate a new value with the requested scale
 		// (+1 because of the leading "3" digit)
 		CALCULATED_PI = new BigDecimal(piDigits(digits + 1)).movePointLeft(digits);
+		// Now calculate the related values at the same scale
+		MathContext mc = new MathContext(digits + 1);
+		TWO_PI       = CALCULATED_PI.multiply(TWO, mc);
+		MINUS_TWO_PI = TWO_PI.negate(); 
 	    }
 
 	    return CALCULATED_PI;

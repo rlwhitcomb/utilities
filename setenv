@@ -1,17 +1,19 @@
 # Find the latest version of Ant and point the path to it
-export ANT_HOME=`find ~/Projects -maxdepth 1 -and -name "apache-ant*" -print -quit`
+PROJECTS_HOME=`find ~ -maxdepth 2 -and -name Projects -print -quit`
+echo $PROJECTS_HOME
+export ANT_HOME=`find $PROJECTS_HOME -maxdepth 1 -and -name "apache-ant*" -print -quit`
 export UTILITIES_HOME=~/Utilities
 export PATH=$UTILITIES_HOME:$ANT_HOME/bin:$PATH
 
-export PIVOT_HOME=~/Projects/pivot/trunk
+export PIVOT_HOME=$PROJECTS_HOME/pivot/trunk
 
 # Setup the CLASSPATH with everything we will need
-CLASSPATH=.:~/Projects/utilities/java
-for jar_file in ~/Projects/junit/*.jar
+CLASSPATH=.:$PROJECTS_HOME/utilities/java
+for jar_file in $PROJECTS_HOME/junit/*.jar
 do
     CLASSPATH=$CLASSPATH:$jar_file
 done
-for jar_file in ~/Projects/utilities/java/external-jars/*.jar
+for jar_file in $PROJECTS_HOME/utilities/java/external-jars/*.jar
 do
     CLASSPATH=$CLASSPATH:$jar_file
 done

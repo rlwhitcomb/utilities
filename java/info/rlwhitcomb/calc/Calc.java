@@ -31,6 +31,8 @@
  *	07-Dec-2020 (rlwhitcomb)
  *	    Initial help message in REPL mode; use color codes in messages;
  *	    catch errors inside "process" so REPL mode can contine afterwards.
+ *	09-Dec-2020 (rlwhitcomb)
+ *	    Update version; tweak title message; enhance error reporting.
  */
 package info.rlwhitcomb.calc;
 
@@ -58,16 +60,19 @@ public class Calc
 	public static final String EXPR_COLOR  = (ON_WINDOWS ? CYAN_BRIGHT : BLUE_BOLD).toString();
 	public static final String ARROW_COLOR = (ON_WINDOWS ? WHITE : BLACK_BRIGHT).toString();
 	public static final String VALUE_COLOR = (ON_WINDOWS ? GREEN_BRIGHT : GREEN_BOLD).toString();
+	public static final String ERROR_COLOR = RED_BOLD.toString();
 
 	private static final String LINESEP = System.lineSeparator();
 
-	private static final String VERSION = "0.9";
+	private static final String VERSION = "0.95";
 
 	private static final String[] TITLE_AND_VERSION = {
+	    "",
 	    BLUE_BOLD_BRIGHT +
-	    "Expression Calculator",
-	    "     Version " + VERSION,
-	    "=====================",
+	    "=======================",
+	    " Expression Calculator",
+	    "      Version " + VERSION,
+	    "=======================",
 	    "" + RESET
 	};
 
@@ -81,21 +86,36 @@ public class Calc
 	};
 
 	private static final String[] HELP = {
-	    RED_BOLD + "Help is not complete yet!  Check back later." + RESET
+	    ERROR_COLOR + "Help is not complete yet!  Check back later." + RESET
 	};
 
 	public static class ParseException extends RuntimeException
 	{
-		public ParseException(String message) {
+		private int lineNumber;
+
+		public ParseException(final String message, final int lineNo) {
 		    super(message);
+		    this.lineNumber = lineNo;
 		}
 
-		public ParseException(Throwable cause) {
+		public ParseException(final Throwable cause, final int lineNo) {
 		    super(cause.getClass().getName(), cause);
+		    this.lineNumber = lineNo;
 		}
 
-		public ParseException(String message, Throwable cause) {
+		public ParseException(final String message, final Throwable cause, final int lineNo) {
 		    super(message, cause);
+		    this.lineNumber = lineNo;
+		}
+
+		@Override
+		public String toString() {
+		    String message = getLocalizedMessage();
+		    return String.format("%1$sError: %2$s%3$s at line %4$d.",
+			ERROR_COLOR,
+			message,
+			RESET,
+			lineNumber);
 		}
 	}
 
@@ -103,14 +123,15 @@ public class Calc
 	{
 		@Override
 		public void recover(Parser recognizer, RecognitionException e) {
-		    throw new ParseException(e);
+		    throw new ParseException(e, e.getOffendingToken().getLine());
 		}
 /*
 		@Override
 		public Token recoverInline(Parser recognizer)
 			throws RecognitionException
 		{
-		    throw new ParseException(new InputMismatchException(recognizer));
+		    InputMismatchException ime = new InputMismatchException(recognizer);
+		    throw new ParseException(ime, ime.getOffendingToken().getLine());
 		}
 */
 		@Override
@@ -125,7 +146,7 @@ public class Calc
 
 		@Override
 		public void recover(LexerNoViableAltException e) {
-		    throw new ParseException(e);
+		    throw new ParseException(e, getLine());
 		}
 	}
 
@@ -162,10 +183,10 @@ public class Calc
 		visitor.visit(tree);
 	    }
 	    catch (IllegalArgumentException iae) {
-		System.err.println(RED_BOLD + "Error: " + iae.getMessage() + RESET);
+		System.err.println(ERROR_COLOR + "Error: " + iae.getMessage() + RESET);
 	    }
-	    catch (ParseException pe) {
-		System.err.println(RED_BOLD + "Error: " + pe.getMessage() + RESET);
+	    catch (ParseException | CalcException e) {
+		System.err.println(e.toString());
 	    }
 	}
 
@@ -222,7 +243,7 @@ public class Calc
 		}
 	    }
 	    catch (IOException ioe) {
-		System.err.println(RED_BOLD + "I/O Error: " + ExceptionUtil.toString(ioe) + RESET);
+		System.err.println(ERROR_COLOR + "I/O Error: " + ExceptionUtil.toString(ioe) + RESET);
 	    }
 	}
 }

@@ -257,6 +257,8 @@
  *	04-Dec-2020 (rlwhitcomb)
  *	    Another flavor of quote stripping that works with either flavor of doubled
  *	    embedded quotes (such as for Calc).
+ *	11-Dec-2020 (rlwhitcomb)
+ *	    Tweak an exception message. Change the params to "stripAnyQuotes".
  */
 
 package info.rlwhitcomb.util;
@@ -419,19 +421,26 @@ public class CharUtil
 
 
 	/**
-	 * Strip any type of quote that has embedded quotes that are doubled what the
-	 * leading/trailing quote is.
+	 * Strip any type of quote that has either embedded or escaped quotes within it
+	 * depending on what the leading/trailing quote is.
 	 * <p> Assume there is no whitespace outside the quotes.
 	 *
-	 * @param value	The original correctly quoted string.
+	 * @param value   The original correctly quoted string.
+	 * @param escaped Whether the embedded quotes are escaped (with "\") or doubled.
 	 * @return	The raw text of the string with the doubled embedded quotes changed.
 	 */
-	public static String stripAnyQuotes(String value) {
+	public static String stripAnyQuotes(String value, boolean escaped) {
 	    if (value == null || value.isEmpty())
 		return value;
+
 	    char quote = value.charAt(0);
 	    StringBuilder embedded = new StringBuilder(2);
-	    embedded.append(quote).append(quote);
+	    if (escaped)
+		embedded.append('\\');
+	    else
+		embedded.append(quote);
+	    embedded.append(quote);
+
 	    return internalStripQuotes(value, Character.toString(quote), embedded.toString());
 	}
 
@@ -2294,7 +2303,8 @@ public class CharUtil
 
 		throw new IllegalArgumentException(Intl.formatString("util#char.unknownBooleanString", stringValue));
 	    }
-	    throw new IllegalArgumentException(Intl.formatString("util#char.unknownBooleanType", value == null ? "null" : value.getClass().getName()));
+	    throw new IllegalArgumentException(Intl.formatString("util#char.unknownBooleanType",
+		value == null ? "null" : value.getClass().getSimpleName()));
 	}
 
 

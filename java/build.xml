@@ -67,6 +67,11 @@
 	    07-Dec-2020 (rlwhitcomb)
 		Add Javadoc window title. Only copy the antlr runtime .jar file
 		into the install directory.
+	    09-Dec-2020 (rlwhitcomb)
+		Add message while generating grammar.
+	    11-Dec-2020 (rlwhitcomb)
+		Java 14 doesn't support -html4 or -frames options for Javadoc
+		Don't regenerate grammar if it is up-to-date already.
 
      ========================================================================== -->
 
@@ -79,6 +84,12 @@
 	<buildnumber/>
 	<condition property="new.java.version" value="true" else="false" >
 		<javaversion atleast="9"/>
+	</condition>
+	<condition property="html4.output" value="true" else="false">
+		<and>
+			<javaversion atleast="9"/>
+			<not><javaversion atleast="14"/></not>
+		</and>
 	</condition>
 	<patternset id="wrapper-files">
 		<include name="_find_and_run_class"/>
@@ -134,8 +145,15 @@
 		</parallel>
 	</target>
 
-	<target name="compile" depends="preproc" description="Compiles the java source.">
-		<java jar="external-jars/antlr-4.9-complete.jar" fork="true">
+	<target name="check-grammar-uptodate">
+		<condition property="grammar.uptodate" value="true" else="false">
+			<uptodate srcfile="info/rlwhitcomb/calc/Calc.g4" targetfile="info/rlwhitcomb/calc/CalcParser.java"/>
+		</condition>
+	</target>
+
+	<target name="compile" depends="preproc,check-grammar-uptodate" description="Compiles the java source.">
+		<echo message="Generating Calc parser" unless:true="${grammar.uptodate}"/>
+		<java jar="external-jars/antlr-4.9-complete.jar" fork="true" unless:true="${grammar.uptodate}">
 			<arg value="info/rlwhitcomb/calc/Calc.g4"/>
 			<arg value="-visitor"/>
 			<arg value="-no-listener"/>
@@ -191,8 +209,8 @@
 
 	<target name="doc" depends="compile" description="Builds the Javadoc for the entire project.">
 		<javadoc destdir="doc" access="private" encoding="utf-8" windowtitle="Utilities">
-			<arg value="-html4" if:true="${new.java.version}"/>
-			<arg value="--frames" if:true="${new.java.version}"/>
+			<arg value="-html4" if:true="${html4.output}"/>
+			<arg value="--frames" if:true="${html4.output}"/>
 			<link href="https://docs.oracle.com/javase/8/docs/api/"/>
 			<packageset dir=".">
 				<include name="net/iharder/b64"/>

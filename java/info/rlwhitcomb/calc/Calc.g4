@@ -36,6 +36,12 @@
  *	    Some aliases for the directives.
  *	08-Dec-2020 (rlwhitcomb)
  *	    Allow Unicode pi symbol.
+ *	08-Dec-2020 (rlwhitcomb)
+ *	    Add "round" function.
+ *	09-Dec-2020 (rlwhitcomb)
+ *	    Straighten out expr-expr conflict.
+ *	11-Dec-2020 (rlwhitcomb)
+ *	    Some alias renaming; more operators; hex, octal, and binary constants.
  */
 
 grammar Calc;
@@ -83,6 +89,10 @@ expr
    | LOG expr                    # logExpr
    | LN expr                     # lnExpr
    | SIGNUM expr                 # signumExpr
+   | ROUND expr2                 # roundExpr
+   | GCD expr2                   # gcdExpr
+   | MAX exprN                   # maxExpr
+   | MIN exprN                   # minExpr
    | expr '!'                    # factorialExpr
    | expr '>>>' expr             # shiftRightUnsignedExpr
    | expr '>>' expr              # shiftRightExpr
@@ -96,11 +106,11 @@ expr
    | expr STRICTNOTEQUAL expr    # strictNotEqualExpr
    | expr EQUAL expr             # equalExpr
    | expr NOTEQUAL expr          # notEqualExpr
-   | expr L_AND expr             # logicalAndExpr
-   | expr L_XOR expr             # logicalXorExpr
-   | expr L_OR expr              # logicalOrExpr
-   | expr B_AND expr             # booleanAndExpr
-   | expr B_OR expr              # booleanOrExpr
+   | expr BIT_AND expr           # bitAndExpr
+   | expr BIT_XOR expr           # bitXorExpr
+   | expr BIT_OR expr            # bitOrExpr
+   | expr BOOL_AND expr          # booleanAndExpr
+   | expr BOOL_OR expr           # booleanOrExpr
    |<assoc=right> expr '?' expr ':' expr # eitherOrExpr
    |<assoc=right> ID ASSIGN expr # assignExpr
    ;
@@ -110,9 +120,17 @@ expr2
    | expr ',' expr
    ;
 
+exprN
+   : '(' expr ( ',' expr ) * ')'
+   | expr ( ',' expr ) *
+   ;
+
 value
    : STRING                      # stringValue
    | NUMBER                      # numberValue
+   | BIN_CONST                   # binaryValue
+   | OCT_CONST                   # octalValue
+   | HEX_CONST                   # hexValue
    | ( TRUE | FALSE )            # booleanValue
    | NULL                        # nullValue
    | PI                          # piValue
@@ -177,6 +195,15 @@ LN      : [lL][nN] ;
 
 SIGNUM  : [sS][iI][gG][nN][uU][mM] ;
 
+ROUND   : [rR][oO][uU][nN][dD] ;
+
+GCD     : [gG][cC][dD] ;
+
+MAX     : [mM][aA][xX] ;
+
+MIN     : [mM][iI][nN] ;
+
+
 /* Commands (or directives) that are specially treated,
  * NOT as identifiers.  */
 
@@ -195,15 +222,15 @@ EXIT    : [eE][xX][iI][tT] ;
 ID     : [a-zA-Z_] [a-zA-Z_0-9]* ;
 
 
-B_AND          : '&&' ;
+BOOL_AND       : '&&' ;
 
-L_AND          : '&' ;
+BIT_AND        : '&' ;
 
-B_OR           : '||' ;
+BOOL_OR        : '||' ;
 
-L_OR           : '|' ;
+BIT_OR         : '|' ;
 
-L_XOR          : '^' ;
+BIT_XOR        : '^' ;
 
 STRICTEQUAL    : '===' ;
 
@@ -245,16 +272,28 @@ CLEAR
    ;
 
 FORMAT
-   : ',' [xXtThH]
+   : ',' [xXtThH%]
    ;
 
 STRING
    : '"' (ESC | SAFECODEPOINT)* '"'
-   | '\'' (ESC2 | SAFECODEPOINT)* '\''
+   | '\'' (ESC2 | SAFECODEPOINT2)* '\''
    ;
 
 NUMBER
-   : '-'? INT ('.' [0-9] *)? EXP?
+   : INT ('.' [0-9] *)? EXP?
+   ;
+
+BIN_CONST
+   : '0' ('b' | 'B') [01]+
+   ;
+
+OCT_CONST
+   : '0' [0-7]+
+   ;
+
+HEX_CONST
+   : '0' [xX] [0-9a-fA-F] +
    ;
 
 
@@ -280,6 +319,10 @@ fragment HEX
 
 fragment SAFECODEPOINT
    : ~ ["\\\u0000-\u001F]
+   ;
+
+fragment SAFECODEPOINT2
+   : ~ ['\\\u0000-\u001F]
    ;
 
 fragment INT

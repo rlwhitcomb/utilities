@@ -32,12 +32,21 @@
  *	    Degrees and radians directives.
  *	07-Dec-2020 (rlwhitcomb)
  *	    Cache e value when precision changes.
+ *	08-Dec-2020 (rlwhitcomb)
+ *	    Use new NumericUtil.sin method; add "round" evaluation.
+ *	11-Dec-2020 (rlwhitcomb)
+ *	    Bit and shift operations implemented. Refactoring for error
+ *	    handling. More arithmetic functions (GCD, MIN, MAX).
+ *	    Implement more result formatting. Binary, octal, and hex
+ *	    constants.
  */
 package info.rlwhitcomb.calc;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.math.MathContext;
 import java.math.RoundingMode;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -108,10 +117,13 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	private void setMathContext(MathContext newMathContext) {
 	    int prec  = newMathContext.getPrecision();
+
 	    mc        = newMathContext;
-	    pi        = NumericUtil.pi(prec);
+
+	    // Calculate these values to one more place than required, just for precision
+	    e         = NumericUtil.e(prec + 1);
+	    pi        = NumericUtil.pi(prec + 1);
 	    piOver180 = pi.divide(B180, mc);
-	    e         = NumericUtil.e(prec);
 
 	    if (initialized)
 		System.out.println(Calc.VALUE_COLOR + "Precision is now " + prec + " digits." + RESET);
@@ -124,92 +136,165 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		System.out.println(Calc.VALUE_COLOR + "Trig mode is now " + trigMode + "." + RESET);
 	}
 
-	private BigDecimal getDecimalValue(ParserRuleContext ctx) {
-	    Object value = visit(ctx);
+
+	private void nullCheck(Object value, ParserRuleContext ctx) {
+	    if (value == null)
+		throw new CalcException("Value must not be null", ctx);
+	}
+
+
+	private BigDecimal toDecimalValue(Object value, ParserRuleContext ctx) {
+	    nullCheck(value, ctx);
+
 	    if (value instanceof BigDecimal)
 		return (BigDecimal)value;
+	    else if (value instanceof BigInteger)
+		return new BigDecimal((BigInteger)value);
+	    else if (value instanceof String)
+		return new BigDecimal((String)value);
+	    else if (value instanceof Boolean)
+		return ((Boolean)value).booleanValue() ? BigDecimal.ONE : BigDecimal.ZERO;
+	    else if (value instanceof Double || value instanceof Float)
+		return new BigDecimal(((Number)value).doubleValue());
 	    else if (value instanceof Number)
 		return BigDecimal.valueOf(((Number)value).longValue());
-	    throw new IllegalArgumentException("Value must be numeric, not '" + value.getClass().getSimpleName() + "'");
+
+	    throw new CalcException("Unable to convert value of type '" + value.getClass().getSimpleName() + "' to decimal", ctx);
+	}
+
+	private BigDecimal getDecimalValue(ParserRuleContext ctx) {
+	    return toDecimalValue(visit(ctx), ctx);
 	}
 
 	private double getDoubleValue(ParserRuleContext ctx) {
 	    BigDecimal dec = getDecimalValue(ctx);
+
 	    return dec.doubleValue();
 	}
 
-	private double getTrigValue(ParserRuleContext ctx) {
+	private BigDecimal getDecimalTrigValue(ParserRuleContext ctx) {
 	    BigDecimal value = getDecimalValue(ctx);
 
 	    if (trigMode == TrigMode.DEGREES)
 		value = value.multiply(piOver180, mc);
 
-	    return value.doubleValue();
+	    return value;
+	}
+
+	private BigInteger toIntegerValue(Object value, ParserRuleContext ctx) {
+	    BigDecimal decValue = toDecimalValue(value, ctx);
+
+	    try {
+		return decValue.toBigIntegerExact();
+	    }
+	    catch (ArithmeticException ae) {
+		throw new CalcException(ae.getMessage(), ae, ctx);
+	    }
+	}
+
+	private BigInteger getIntegerValue(ParserRuleContext ctx) {
+	    return toIntegerValue(visit(ctx), ctx);
+	}
+
+	private int getShiftValue(ParserRuleContext ctx) {
+	    BigDecimal value = getDecimalValue(ctx);
+
+	    try {
+		return value.intValueExact();
+	    }
+	    catch (ArithmeticException ae) {
+		throw new CalcException(ae.getMessage(), ae, ctx);
+	    }
+	}
+
+	private double getTrigValue(ParserRuleContext ctx) {
+	    return getDecimalTrigValue(ctx).doubleValue();
 	}
 
 	private BigDecimal returnTrigValue(double value) {
 	    BigDecimal radianValue = new BigDecimal(value, mcDouble);
+
 	    if (trigMode == TrigMode.DEGREES)
 		return radianValue.divide(piOver180, mcDouble);
+
 	    return radianValue;
 	}
 
+	private Boolean toBooleanValue(Object value, ParserRuleContext ctx) {
+	    nullCheck(value, ctx);
+
+	    try {
+		boolean boolValue = CharUtil.getBooleanValue(value);
+		return Boolean.valueOf(boolValue);
+	    }
+	    catch (IllegalArgumentException iae) {
+		throw new CalcException(iae.getMessage(), iae, ctx);
+	    }
+	}
+	
 	private Boolean getBooleanValue(ParserRuleContext ctx) {
-	    Object value = visit(ctx);
-	    if (value instanceof Boolean)
-		return (Boolean)value;
-	    throw new IllegalArgumentException("Value must be boolean, not '" + value.getClass().getSimpleName() + "'");
+	    return toBooleanValue(visit(ctx), ctx);
 	}
 
 	private String getStringValue(ParserRuleContext ctx) {
 	    Object value = visit(ctx);
+
+	    nullCheck(value, ctx);
+
 	    if (value instanceof String)
 		return (String)value;
-	    else if (value instanceof Character)
-		return ((Character)value).toString();
-	    throw new IllegalArgumentException("Value must be string or character, not '" + value.getClass().getSimpleName() + "'");
+	    else
+		return value.toString();
 	}
 
+
 	private int compareValues(ParserRuleContext ctx1, ParserRuleContext ctx2) {
+	    return compareValues(ctx1, ctx2, false);
+	}
+
+	private int compareValues(ParserRuleContext ctx1, ParserRuleContext ctx2, boolean strict) {
 	    Object e1 = visit(ctx1);
 	    Object e2 = visit(ctx2);
-	    // TODO: numeric / string / character conversions here?
-	    if (!e1.getClass().equals(e2.getClass()))
-		throw new IllegalArgumentException("Values are not comparable.");
 
-	    if (e1 instanceof String) {
-		String s1 = (String)e1;
-		String s2 = (String)e2;
+	    nullCheck(e1, ctx1);
+	    nullCheck(e2, ctx2);
+
+	    if (strict) {
+		if (!e1.getClass().equals(e2.getClass()))
+		    return -1;
+	    }
+
+	    if (e1 instanceof String || e2 instanceof String) {
+		String s1 = e1.toString();
+		String s2 = e2.toString();
 		return s1.compareTo(s2);
 	    }
-	    else if (e1 instanceof BigDecimal) {
-		BigDecimal d1 = (BigDecimal)e1;
-		BigDecimal d2 = (BigDecimal)e2;
+	    else if (e1 instanceof BigDecimal || e2 instanceof BigDecimal) {
+		BigDecimal d1 = toDecimalValue(e1, ctx1);
+		BigDecimal d2 = toDecimalValue(e2, ctx2);
 		return d1.compareTo(d2);
 	    }
-	    else if (e1 instanceof Boolean) {
-		Boolean b1 = (Boolean)e1;
-		Boolean b2 = (Boolean)e2;
+	    else if (e1 instanceof Boolean || e2 instanceof Boolean) {
+		Boolean b1 = toBooleanValue(e1, ctx1);
+		Boolean b2 = toBooleanValue(e2, ctx2);
 		return b1.compareTo(b2);
 	    }
-	    throw new IllegalArgumentException("Unknown value type: " + e1.getClass().getSimpleName());
+
+	    throw new CalcException("Unknown value type: " + e1.getClass().getSimpleName(), ctx1);
 	}
 
 
 	@Override
 	public Object visitDecimalDirective(CalcParser.DecimalDirectiveContext ctx) {
-	    /* Get line number in the source in case of errors. */
-	    int line = ctx.getStart().getLine();
-
 	    Double dPrecision = Double.valueOf(ctx.NUMBER().getText());
 	    if (Math.floor(dPrecision) != dPrecision) {
-		throw new IllegalArgumentException("Decimal precision of " + dPrecision + " must be an integer value at line " + line + ".");
+		throw new CalcException("Decimal precision of " + dPrecision + " must be an integer value", ctx);
 	    }	
 	    int precision = dPrecision.intValue();
-	    if (precision > 1 && precision < 32768 /* arbitrary */)
+	    if (precision > 1 && precision <= 10000 /* arbitrary, but NumericUtil.pi only has ~12,500 digit capability */)
 		setMathContext(new MathContext(precision));
 	    else {
-		throw new IllegalArgumentException("Decimal precision of " + precision + " is out of range at line " + line + ".");
+		throw new CalcException("Decimal precision of " + precision + " is out of range", ctx);
 	    }
 	    return null;
 	}
@@ -274,19 +359,71 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    Object result = visit(ctx.expr());
 	    TerminalNode formatNode = ctx.FORMAT();
 	    String format = formatNode == null ? "" : formatNode.getText();
-	    // TODO: deal with formats
+	    String suffix = "";
+
 	    StringBuilder buf = new StringBuilder();
 	    buf.append(Calc.EXPR_COLOR);
 	    getTreeText(buf, ctx.expr());
 	    buf.append(Calc.ARROW_COLOR);
 	    buf.append("-> ");
 	    buf.append(Calc.VALUE_COLOR);
-	    if (result == null)
+
+	    if (result == null) {
 		buf.append("<null>");
-	    else if (result instanceof BigDecimal)
-		buf.append(((BigDecimal)result).toPlainString());
-	    else
-		buf.append(result.toString());
+	    }
+	    else {
+		StringBuilder valueBuf = new StringBuilder();
+
+		if (!format.isEmpty()) {
+		    char formatChar = format.charAt(1);
+		    switch (formatChar) {
+			case 'h':
+			case 'H':
+			    // TODO: convert to hours
+			    break;
+			case 'x':
+			case 'X':
+			    if (result instanceof String) {
+				byte[] b = ((String)result).getBytes(StandardCharsets.UTF_8);
+				String formatString = String.format("%%1$02%1$s", formatChar);
+				valueBuf.append('\'');
+				for (int i = 0; i < b.length; i++) {
+				    int j = ((int)b[i]) & 0xFF;
+				    valueBuf.append(String.format(formatString, j));
+				}
+				valueBuf.append('\'');
+			    }
+			    else {
+				BigInteger iValue = toIntegerValue(result, ctx);
+				valueBuf.append('0').append(formatChar);
+				if (formatChar == 'x')
+				    valueBuf.append(iValue.toString(16));
+				else
+				    valueBuf.append(iValue.toString(16).toUpperCase());
+			    }
+			    result = valueBuf;
+			    break;
+			case '%':
+			    if (result instanceof BigDecimal)
+				result = ((BigDecimal)result).multiply(BigDecimal.valueOf(100L), mc);
+			    suffix = " %";
+			    break;
+		    }
+		}
+
+		if (result instanceof StringBuilder) {
+		    // This is from format conversion
+		    buf.append((StringBuilder)result);
+		}
+		else if (result instanceof String)
+		    buf.append(CharUtil.addDoubleQuotes((String)result));
+		else if (result instanceof BigDecimal)
+		    buf.append(((BigDecimal)result).toPlainString());
+		else
+		    buf.append(result.toString());
+	    }
+	    buf.append(suffix);
+
 	    buf.append(RESET);
 	    System.out.println(buf.toString());
 	    return result;
@@ -295,62 +432,59 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitPostIncExpr(CalcParser.PostIncExprContext ctx) {
 	    String name = ctx.ID().getText();
-	    Object value = variables.get(name);
-	    if (value instanceof BigDecimal) {
-		BigDecimal eAfter = ((BigDecimal)value).add(BigDecimal.ONE);
-		variables.put(name, eAfter);
-		return value;
-	    }
-	    else {
-		throw new IllegalArgumentException("Value for ++ must be numeric.");
-	    }
+
+	    BigDecimal value  = toDecimalValue(variables.get(name), ctx);
+	    BigDecimal eAfter = value.add(BigDecimal.ONE);
+
+	    variables.put(name, eAfter);
+
+	    // post increment, return original value
+	    return value;
 	}
 
 	@Override
 	public Object visitPostDecExpr(CalcParser.PostDecExprContext ctx) {
 	    String name = ctx.ID().getText();
-	    Object value = variables.get(name);
-	    if (value instanceof BigDecimal) {
-		BigDecimal eAfter = ((BigDecimal)value).subtract(BigDecimal.ONE);
-		variables.put(name, eAfter);
-		return value;
-	    }
-	    else {
-		throw new IllegalArgumentException("Value for ++ must be numeric.");
-	    }
+
+	    BigDecimal value  = toDecimalValue(variables.get(name), ctx);
+	    BigDecimal eAfter = value.subtract(BigDecimal.ONE);
+
+	    variables.put(name, eAfter);
+
+	    // post decrement, return the original value
+	    return value;
 	}
 
 	@Override
 	public Object visitPreIncExpr(CalcParser.PreIncExprContext ctx) {
 	    String name = ctx.ID().getText();
-	    Object value = variables.get(name);
-	    if (value instanceof BigDecimal) {
-		BigDecimal eAfter = ((BigDecimal)value).add(BigDecimal.ONE);
-		variables.put(name, eAfter);
-		return eAfter;
-	    }
-	    else {
-		throw new IllegalArgumentException("Value for ++ must be numeric.");
-	    }
+
+	    BigDecimal value  = toDecimalValue(variables.get(name), ctx);
+	    BigDecimal eAfter = value.add(BigDecimal.ONE);
+
+	    variables.put(name, eAfter);
+
+	    // pre increment, return the modified value
+	    return eAfter;
 	}
 
 	@Override
 	public Object visitPreDecExpr(CalcParser.PreDecExprContext ctx) {
 	    String name = ctx.ID().getText();
-	    Object value = variables.get(name);
-	    if (value instanceof BigDecimal) {
-		BigDecimal eAfter = ((BigDecimal)value).subtract(BigDecimal.ONE);
-		variables.put(name, eAfter);
-		return eAfter;
-	    }
-	    else {
-		throw new IllegalArgumentException("Value for ++ must be numeric.");
-	    }
+
+	    BigDecimal value  = toDecimalValue(variables.get(name), ctx);
+	    BigDecimal eAfter = value.subtract(BigDecimal.ONE);
+
+	    variables.put(name, eAfter);
+
+	    // pre decrement, return the modified value
+	    return eAfter;
 	}
 
 	@Override
 	public Object visitPosateExpr(CalcParser.PosateExprContext ctx) {
 	    BigDecimal e = getDecimalValue(ctx.expr());
+
 	    // Interestingly, this operation can change the value if the previous
 	    // value was not to the specified precision.
 	    return e.plus(mc);
@@ -359,6 +493,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitNegateExpr(CalcParser.NegateExprContext ctx) {
 	    BigDecimal e = getDecimalValue(ctx.expr());
+
 	    return e.negate();
 	}
 
@@ -371,6 +506,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public Object visitPowerExpr(CalcParser.PowerExprContext ctx) {
 	    BigDecimal base = getDecimalValue(ctx.expr(0));
 	    double exp = getDoubleValue(ctx.expr(1));
+
 	    return NumericUtil.pow(base, exp).round(mc);
 	}
 
@@ -378,13 +514,15 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public Object visitMultiplyExpr(CalcParser.MultiplyExprContext ctx) {
 	    BigDecimal e1 = getDecimalValue(ctx.expr(0));
 	    BigDecimal e2 = getDecimalValue(ctx.expr(1));
-	    return e1.multiply(e2);
+
+	    return e1.multiply(e2, mc);
 	}
 
 	@Override
 	public Object visitDivideExpr(CalcParser.DivideExprContext ctx) {
 	    BigDecimal e1 = getDecimalValue(ctx.expr(0));
 	    BigDecimal e2 = getDecimalValue(ctx.expr(1));
+
 	    return e1.divide(e2, mc);
 	}
 
@@ -392,42 +530,62 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public Object visitModulusExpr(CalcParser.ModulusExprContext ctx) {
 	    BigDecimal e1 = getDecimalValue(ctx.expr(0));
 	    BigDecimal e2 = getDecimalValue(ctx.expr(1));
+
 	    return e1.remainder(e2, mc);
 	}
 
 	@Override
 	public Object visitAddExpr(CalcParser.AddExprContext ctx) {
-	    // TODO: can concat strings here too, what to do with char?
+	    Object e1 = visit(ctx.expr(0));
+	    Object e2 = visit(ctx.expr(1));
+
+	    if (e1 == null && e2 == null)
+		return null;
+
+	    // Do string concatenation if either expr is a string
+	    if (e1 instanceof String || e2 instanceof String) {
+		String s1 = e1 == null ? "" : e1.toString();
+		String s2 = e2 == null ? "" : e2.toString();
+		return s1 + s2;
+	    }
+
+	    // TODO: what to do with char?
 	    // could add char codepoint values, or concat strings
-	    BigDecimal e1 = getDecimalValue(ctx.expr(0));
-	    BigDecimal e2 = getDecimalValue(ctx.expr(1));
-	    return e1.add(e2);
+
+	    // Otherwise, numeric values get added numerically
+	    BigDecimal d1 = toDecimalValue(e1, ctx);
+	    BigDecimal d2 = toDecimalValue(e2, ctx);
+
+	    return d1.add(d2, mc);
 	}
 
 	@Override
 	public Object visitSubtractExpr(CalcParser.SubtractExprContext ctx) {
 	    BigDecimal e1 = getDecimalValue(ctx.expr(0));
 	    BigDecimal e2 = getDecimalValue(ctx.expr(1));
-	    return e1.subtract(e2);
+
+	    return e1.subtract(e2, mc);
 	}
 
 	@Override
 	public Object visitAbsExpr(CalcParser.AbsExprContext ctx) {
 	    BigDecimal e = getDecimalValue(ctx.expr());
+
 	    return e.abs();
 	}
 
 	@Override
 	public Object visitSinExpr(CalcParser.SinExprContext ctx) {
-	    // Note: for now, convert BigDecimal to double and use standard Math method
-	    double d = getTrigValue(ctx.expr());
-	    return new BigDecimal(Math.sin(d), mcDouble);
+	    BigDecimal e = getDecimalTrigValue(ctx.expr());
+
+	    return NumericUtil.sin(e, mc);
 	}
 
 	@Override
 	public Object visitCosExpr(CalcParser.CosExprContext ctx) {
 	    // For now, convert to double and use standard Math method
 	    double d = getTrigValue(ctx.expr());
+
 	    return new BigDecimal(Math.cos(d), mcDouble);
 	}
 
@@ -435,6 +593,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public Object visitTanExpr(CalcParser.TanExprContext ctx) {
 	    // Convert to double and use standard Math method
 	    double d = getTrigValue(ctx.expr());
+
 	    return new BigDecimal(Math.tan(d), mcDouble);
 	}
 
@@ -442,6 +601,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public Object visitAsinExpr(CalcParser.AsinExprContext ctx) {
 	    // Convert to double and use standard Math method
 	    double d = getDoubleValue(ctx.expr());
+
 	    return returnTrigValue(Math.asin(d));
 	}
 
@@ -449,6 +609,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public Object visitAcosExpr(CalcParser.AcosExprContext ctx) {
 	    // Convert to double and use standard Math method
 	    double d = getDoubleValue(ctx.expr());
+
 	    return returnTrigValue(Math.acos(d));
 	}
 
@@ -456,6 +617,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public Object visitAtanExpr(CalcParser.AtanExprContext ctx) {
 	    // Convert to double and use standard Math method
 	    double d = getDoubleValue(ctx.expr());
+
 	    return returnTrigValue(Math.atan(d));
 	}
 
@@ -464,6 +626,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    CalcParser.Expr2Context e2ctx = ctx.expr2();
 	    double y = getDoubleValue(e2ctx.expr(0));
 	    double x = getDoubleValue(e2ctx.expr(1));
+
 	    return new BigDecimal(Math.atan2(y, x), mcDouble);
 	}
 
@@ -471,6 +634,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public Object visitSinhExpr(CalcParser.SinhExprContext ctx) {
 	    // Convert to double and use standard Math method
 	    double d = getDoubleValue(ctx.expr());
+
 	    return new BigDecimal(Math.sinh(d), mcDouble);
 	}
 
@@ -478,6 +642,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public Object visitCoshExpr(CalcParser.CoshExprContext ctx) {
 	    // Convert to double and use standard Math method
 	    double d = getDoubleValue(ctx.expr());
+
 	    return new BigDecimal(Math.cosh(d), mcDouble);
 	}
 
@@ -485,6 +650,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public Object visitTanhExpr(CalcParser.TanhExprContext ctx) {
 	    // Convert to double and use standard Math method
 	    double d = getDoubleValue(ctx.expr());
+
 	    return new BigDecimal(Math.tanh(d), mcDouble);
 	}
 
@@ -492,6 +658,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public Object visitSqrtExpr(CalcParser.SqrtExprContext ctx) {
 	    // Note: for now, convert to double and use standard Math method
 	    double d = getDoubleValue(ctx.expr());
+
 	    return new BigDecimal(Math.sqrt(d), mcDouble);
 	}
 
@@ -499,39 +666,170 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public Object visitCbrtExpr(CalcParser.CbrtExprContext ctx) {
 	    // Note: for now, convert to double and use standard Math method
 	    double d = getDoubleValue(ctx.expr());
-	    return new BigDecimal(Math.cbrt(d), mcDouble);
-	}
 
-	@Override
-	public Object visitSignumExpr(CalcParser.SignumExprContext ctx) {
-	    BigDecimal e = getDecimalValue(ctx.expr());
-	    return BigDecimal.valueOf(e.signum());
+	    return new BigDecimal(Math.cbrt(d), mcDouble);
 	}
 
 	@Override
 	public Object visitLogExpr(CalcParser.LogExprContext ctx) {
 	    double d = getDoubleValue(ctx.expr());
+
 	    return new BigDecimal(Math.log10(d), mcDouble);
 	}
 
 	@Override
 	public Object visitLnExpr(CalcParser.LnExprContext ctx) {
 	    double d = getDoubleValue(ctx.expr());
+
 	    return new BigDecimal(Math.log(d), mcDouble);
+	}
+
+	@Override
+	public Object visitSignumExpr(CalcParser.SignumExprContext ctx) {
+	    BigDecimal e = getDecimalValue(ctx.expr());
+
+	    return BigDecimal.valueOf(e.signum());
+	}
+
+	@Override
+	public Object visitRoundExpr(CalcParser.RoundExprContext ctx) {
+	    CalcParser.Expr2Context e2ctx = ctx.expr2();
+	    BigDecimal e = getDecimalValue(e2ctx.expr(0));
+	    int iPlaces  = getShiftValue(e2ctx.expr(1));
+
+	    return e.round(new MathContext(iPlaces));
+	}
+
+	@Override
+	public Object visitGcdExpr(CalcParser.GcdExprContext ctx) {
+	    CalcParser.Expr2Context e2ctx = ctx.expr2();
+	    BigInteger e1 = getIntegerValue(e2ctx.expr(0));
+	    BigInteger e2 = getIntegerValue(e2ctx.expr(1));
+
+	    return e1.gcd(e2);
+	}
+
+	@Override
+	public Object visitMaxExpr(CalcParser.MaxExprContext ctx) {
+	    CalcParser.ExprNContext eCtx = ctx.exprN();
+	    List<CalcParser.ExprContext> exprs = eCtx.expr();
+	    Object maxResult = visit(exprs.get(0));
+
+	    nullCheck(maxResult, exprs.get(0));
+
+	    if (maxResult instanceof String) {
+		String maxString = (String)maxResult;
+		for (int i = 1; i < exprs.size(); i++) {
+		    String value = getStringValue(exprs.get(i));
+		    if (value.compareTo(maxString) > 0)
+			maxString = value;
+		}
+		return maxString;
+	    }
+	    else {
+		BigDecimal maxNumber = (BigDecimal)maxResult;
+		for (int i = 1; i < exprs.size(); i++) {
+		   BigDecimal value = getDecimalValue(exprs.get(i));
+		   if (value.compareTo(maxNumber) > 0)
+			maxNumber = value;
+		}
+		return maxNumber;
+	    }
+	}
+
+	@Override
+	public Object visitMinExpr(CalcParser.MinExprContext ctx) {
+	    CalcParser.ExprNContext eCtx = ctx.exprN();
+	    List<CalcParser.ExprContext> exprs = eCtx.expr();
+	    Object minResult = visit(exprs.get(0));
+
+	    nullCheck(minResult, exprs.get(0));
+
+	    if (minResult instanceof String) {
+		String minString = (String)minResult;
+		for (int i = 1; i < exprs.size(); i++) {
+		    String value = getStringValue(exprs.get(i));
+		    if (value.compareTo(minString) < 0)
+			minString = value;
+		}
+		return minString;
+	    }
+	    else {
+		BigDecimal minNumber = (BigDecimal)minResult;
+		for (int i = 1; i < exprs.size(); i++) {
+		   BigDecimal value = getDecimalValue(exprs.get(i));
+		   if (value.compareTo(minNumber) < 0)
+			minNumber = value;
+		}
+		return minNumber;
+	    }
 	}
 
 	@Override
 	public Object visitFactorialExpr(CalcParser.FactorialExprContext ctx) {
 	    BigDecimal e = getDecimalValue(ctx.expr());
+
 	    return NumericUtil.factorial(e);
 	}
 
 	@Override
+	public Object visitShiftRightUnsignedExpr(CalcParser.ShiftRightUnsignedExprContext ctx) {
+	    BigInteger e1 = getIntegerValue(ctx.expr(0));
+	    BigInteger e2 = getIntegerValue(ctx.expr(1));
+
+	    // Convert to Long because ">>>" doesn't make sense for BigInteger (unlimited size) values
+	    try {
+		long longValue = e1.longValueExact();
+		int shiftValue = e2.intValueExact();
+		return BigInteger.valueOf(longValue >>> shiftValue);
+	    }
+	    catch (ArithmeticException ae) {
+		throw new CalcException(ae.getMessage(), ae, ctx);
+	    }
+	}
+
+	@Override
+	public Object visitShiftRightExpr(CalcParser.ShiftRightExprContext ctx) {
+	    BigInteger e1 = getIntegerValue(ctx.expr(0));
+	    int e2        = getShiftValue(ctx.expr(1));
+
+	    return e1.shiftRight(e2);
+	}
+
+	@Override
+	public Object visitShiftLeftExpr(CalcParser.ShiftLeftExprContext ctx) {
+	    BigInteger e1 = getIntegerValue(ctx.expr(0));
+	    int e2        = getShiftValue(ctx.expr(1));
+
+	    return e1.shiftLeft(e2);
+	}
+
+	@Override
 	public Object visitSpaceshipExpr(CalcParser.SpaceshipExprContext ctx) {
-	    // TODO: deal with string / boolean also
-	    BigDecimal e1 = getDecimalValue(ctx.expr(0));
-	    BigDecimal e2 = getDecimalValue(ctx.expr(1));
-	    int ret = e1.compareTo(e2);
+	    Object e1 = visit(ctx.expr(0));
+	    Object e2 = visit(ctx.expr(1));
+
+	    nullCheck(e1, ctx);
+	    nullCheck(e2, ctx);
+
+	    int ret;
+
+	    if (e1 instanceof String || e2 instanceof String) {
+		String s1 = e1.toString();
+		String s2 = e2.toString();
+		ret = s1.compareTo(s2);
+	    }
+	    else if (e1 instanceof Boolean || e2 instanceof Boolean) {
+		Boolean b1 = toBooleanValue(e1, ctx);
+		Boolean b2 = toBooleanValue(e2, ctx);
+		ret = b1.compareTo(b2);
+	    }
+	    else {
+		BigDecimal d1 = toDecimalValue(e1, ctx);
+		BigDecimal d2 = toDecimalValue(e2, ctx);
+		ret = d1.compareTo(d2);
+	    }
+
 	    if (ret < 0)
 		return BigDecimal.ONE.negate();
 	    else if (ret == 0)
@@ -542,63 +840,106 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitLessEqualExpr(CalcParser.LessEqualExprContext ctx) {
-	    // TODO: need to deal with converting value types here
 	    int cmp = compareValues(ctx.expr(0), ctx.expr(1));
-	    return (cmp <= 0) ? Boolean.TRUE : Boolean.FALSE;
+	    return Boolean.valueOf(cmp <= 0);
 	}
 
 	@Override
 	public Object visitLessExpr(CalcParser.LessExprContext ctx) {
-	    // TODO: need to deal with converting value types here
 	    int cmp = compareValues(ctx.expr(0), ctx.expr(1));
-	    return (cmp < 0) ? Boolean.TRUE : Boolean.FALSE;
+	    return Boolean.valueOf(cmp < 0);
 	}
 
 	@Override
 	public Object visitGreaterEqualExpr(CalcParser.GreaterEqualExprContext ctx) {
-	    // TODO: need to deal with converting value types here
 	    int cmp = compareValues(ctx.expr(0), ctx.expr(1));
-	    return (cmp >= 0) ? Boolean.TRUE : Boolean.FALSE;
+	    return Boolean.valueOf(cmp >= 0);
 	}
 
 	@Override
 	public Object visitGreaterExpr(CalcParser.GreaterExprContext ctx) {
-	    // TODO: need to deal with converting value types here
 	    int cmp = compareValues(ctx.expr(0), ctx.expr(1));
-	    return (cmp > 0) ? Boolean.TRUE : Boolean.FALSE;
+	    return Boolean.valueOf(cmp > 0);
 	}
 
 	@Override
 	public Object visitStrictEqualExpr(CalcParser.StrictEqualExprContext ctx) {
-	    int cmp = compareValues(ctx.expr(0), ctx.expr(1));
-	    return (cmp == 0) ? Boolean.TRUE : Boolean.FALSE;
+	    int cmp = compareValues(ctx.expr(0), ctx.expr(1), true);
+	    return Boolean.valueOf(cmp == 0);
 	}
 
 	@Override
 	public Object visitStrictNotEqualExpr(CalcParser.StrictNotEqualExprContext ctx) {
-	    int cmp = compareValues(ctx.expr(0), ctx.expr(1));
-	    return (cmp != 0) ? Boolean.TRUE : Boolean.FALSE;
+	    int cmp = compareValues(ctx.expr(0), ctx.expr(1), true);
+	    return Boolean.valueOf(cmp != 0);
 	}
 
 	@Override
 	public Object visitEqualExpr(CalcParser.EqualExprContext ctx) {
-	    // TODO: need to deal with converting value types here
 	    int cmp = compareValues(ctx.expr(0), ctx.expr(1));
-	    return (cmp == 0) ? Boolean.TRUE : Boolean.FALSE;
+	    return Boolean.valueOf(cmp == 0);
 	}
 
 	@Override
 	public Object visitNotEqualExpr(CalcParser.NotEqualExprContext ctx) {
-	    // TODO: need to deal with converting value types here
 	    int cmp = compareValues(ctx.expr(0), ctx.expr(1));
-	    return (cmp != 0) ? Boolean.TRUE : Boolean.FALSE;
+	    return Boolean.valueOf(cmp != 0);
+	}
+
+	@Override
+	public Object visitBitAndExpr(CalcParser.BitAndExprContext ctx) {
+	    BigInteger e1 = getIntegerValue(ctx.expr(0));
+	    BigInteger e2 = getIntegerValue(ctx.expr(1));
+
+	    return e1.and(e2);
+	}
+
+	@Override
+	public Object visitBitXorExpr(CalcParser.BitXorExprContext ctx) {
+	    BigInteger e1 = getIntegerValue(ctx.expr(0));
+	    BigInteger e2 = getIntegerValue(ctx.expr(1));
+
+	    return e1.xor(e2);
+	}
+
+	@Override
+	public Object visitBitOrExpr(CalcParser.BitOrExprContext ctx) {
+	    BigInteger e1 = getIntegerValue(ctx.expr(0));
+	    BigInteger e2 = getIntegerValue(ctx.expr(1));
+
+	    return e1.or(e2);
+	}
+
+	@Override
+	public Object visitBooleanAndExpr(CalcParser.BooleanAndExprContext ctx) {
+	    Boolean b1 = getBooleanValue(ctx.expr(0));
+
+	    // Due to the short-circuit nature of this operator, the second expression
+	    // is only evaluated if necessary
+	    if (!b1)
+		return Boolean.FALSE;
+
+	    return getBooleanValue(ctx.expr(1));
+	}
+
+	@Override
+	public Object visitBooleanOrExpr(CalcParser.BooleanOrExprContext ctx) {
+	    Boolean b1 = getBooleanValue(ctx.expr(0));
+
+	    // Due to the short-circuit nature of this operator, the second expression
+	    // is only evaluated if necessary
+	    if (b1)
+		return Boolean.TRUE;
+
+	    return getBooleanValue(ctx.expr(1));
 	}
 
 
 	@Override
 	public Object visitStringValue(CalcParser.StringValueContext ctx) {
 	    String value = ctx.STRING().getText();
-	    return CharUtil.stripAnyQuotes(value);
+
+	    return CharUtil.stripAnyQuotes(value, true);
 	}
 
 	@Override
@@ -611,6 +952,24 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitNumberValue(CalcParser.NumberValueContext ctx) {
 	    return new BigDecimal(ctx.NUMBER().getText());
+	}
+
+	@Override
+	public Object visitBinaryValue(CalcParser.BinaryValueContext ctx) {
+	    String value = ctx.BIN_CONST().getText();
+	    return new BigInteger(value.substring(2), 2);
+	}
+
+	@Override
+	public Object visitOctalValue(CalcParser.OctalValueContext ctx) {
+	    String value = ctx.OCT_CONST().getText();
+	    return new BigInteger(value.substring(1), 8);
+	}
+
+	@Override
+	public Object visitHexValue(CalcParser.HexValueContext ctx) {
+	    String value = ctx.HEX_CONST().getText();
+	    return new BigInteger(value.substring(2), 16);
 	}
 
 	@Override
@@ -631,17 +990,21 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitIdValue(CalcParser.IdValueContext ctx) {
 	    String name = ctx.ID().getText();
+
 	    if (variables.containsKey(name)) {
 		return variables.get(name);
 	    }
+
 	    return null;
 	}
 
 	@Override
 	public Object visitAssignExpr(CalcParser.AssignExprContext ctx) {
 	    Object value = visit(ctx.expr());
-	    String name = ctx.ID().getText();
+	    String name  = ctx.ID().getText();
+
 	    variables.put(name, value);
+
 	    return value;
 	}
 }
