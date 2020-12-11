@@ -41,6 +41,8 @@
  *	    constants.
  *	11-Dec-2020 (rlwhitcomb)
  *	    Join operator.
+ *	11-Dec-2020 (rlwhitcomb)
+ *	    Trap division by zero.
  */
 package info.rlwhitcomb.calc;
 
@@ -525,7 +527,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    BigDecimal e1 = getDecimalValue(ctx.expr(0));
 	    BigDecimal e2 = getDecimalValue(ctx.expr(1));
 
-	    return e1.divide(e2, mc);
+	    try {
+		return e1.divide(e2, mc);
+	    }
+	    catch (ArithmeticException ae) {
+		throw new CalcException(ae.getMessage(), ae, ctx);
+	    }
 	}
 
 	@Override
@@ -533,7 +540,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    BigDecimal e1 = getDecimalValue(ctx.expr(0));
 	    BigDecimal e2 = getDecimalValue(ctx.expr(1));
 
-	    return e1.remainder(e2, mc);
+	    try {
+		return e1.remainder(e2, mc);
+	    }
+	    catch (ArithmeticException ae) {
+		throw new CalcException(ae.getMessage(), ae, ctx);
+	    }
 	}
 
 	@Override
