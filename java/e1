@@ -93,3 +93,13 @@ gcd(27*2, 3*9*18)
 max('123', 456, 789)
 min(123, '-1', '14')
 
+join('This', 'is', 'a', 'test', ' ');
+join('Hello', "World!", ', ');
+join("Hello ", "handsome.");
+join "RUDE!"
+
+'[' + join (1, 2, 3, 4, 5, ', ') + ']'
+
+1 === '1'
+1 == '1'
+

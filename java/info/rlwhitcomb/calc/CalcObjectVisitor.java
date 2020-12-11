@@ -39,6 +39,8 @@
  *	    handling. More arithmetic functions (GCD, MIN, MAX).
  *	    Implement more result formatting. Binary, octal, and hex
  *	    constants.
+ *	11-Dec-2020 (rlwhitcomb)
+ *	    Join operator.
  */
 package info.rlwhitcomb.calc;
 
@@ -762,6 +764,36 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			minNumber = value;
 		}
 		return minNumber;
+	    }
+	}
+
+	@Override
+	public Object visitJoinExpr(CalcParser.JoinExprContext ctx) {
+	    CalcParser.ExprNContext eCtx = ctx.exprN();
+	    List<CalcParser.ExprContext> exprs = eCtx.expr();
+	    StringBuilder buf = new StringBuilder();
+	    int length = exprs.size();
+
+	    // This doesn't make sense unless there are at least 3 values
+	    // So, one value just gets that value
+	    // two values gets the two just concatenated together
+	    // three or more, the first n - 1 are joined by the nth (string) value
+	    if (length == 1) {
+		return getStringValue(exprs.get(0));
+	    }
+	    else if (length == 2) {
+		buf.append(getStringValue(exprs.get(0)));
+		buf.append(getStringValue(exprs.get(1)));
+		return buf.toString();
+	    }
+	    else {
+		String joinExpr = getStringValue(exprs.get(length - 1));
+		for (int i = 0; i < length - 1; i++) {
+		    if (i > 0)
+			buf.append(joinExpr);
+		    buf.append(getStringValue(exprs.get(i)));
+		}
+		return buf.toString();
 	    }
 	}
 

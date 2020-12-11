@@ -42,6 +42,8 @@
  *	    Straighten out expr-expr conflict.
  *	11-Dec-2020 (rlwhitcomb)
  *	    Some alias renaming; more operators; hex, octal, and binary constants.
+ *	11-Dec-2020 (rlwhitcomb)
+ *	    Join operator.
  */
 
 grammar Calc;
@@ -93,6 +95,7 @@ expr
    | GCD expr2                   # gcdExpr
    | MAX exprN                   # maxExpr
    | MIN exprN                   # minExpr
+   | JOIN exprN                  # joinExpr
    | expr '!'                    # factorialExpr
    | expr '>>>' expr             # shiftRightUnsignedExpr
    | expr '>>' expr              # shiftRightExpr
@@ -202,6 +205,8 @@ GCD     : [gG][cC][dD] ;
 MAX     : [mM][aA][xX] ;
 
 MIN     : [mM][iI][nN] ;
+
+JOIN    : [jJ][oO][iI][nN] ;
 
 
 /* Commands (or directives) that are specially treated,
