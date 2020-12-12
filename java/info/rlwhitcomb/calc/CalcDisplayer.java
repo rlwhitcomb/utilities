@@ -21,41 +21,50 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  *
+ *      Display interface for the Calc program.
+ *
  *  History:
  *      11-Dec-2020 (rlwhitcomb)
- *	    Initial coding.
+ *          Inital coding.
  */
 package info.rlwhitcomb.calc;
 
-
 /**
- * An exception thrown during calculation that includes the context for the
- * error so that line information can be displayed.
+ * Interface so that calculated results can be displayed in many different ways:
+ * to the console, to a GUI window, etc.
  */
-public class CalcException extends RuntimeException
+public interface CalcDisplayer
 {
-	private int lineNumber;
-
-	public CalcException(String message, Throwable cause, int lineNo) {
-	    super(message, cause);
-	    this.lineNumber = lineNo;
-	}
-
-	public CalcException(String message, int lineNo) {
-	    super(message);
-	    this.lineNumber = lineNo;
-	}
-
-	public CalcException(Throwable cause, int lineNo) {
-	    super(cause.getMessage() == null ? cause.getClass().getSimpleName() : cause.getMessage(), cause);
-	    this.lineNumber = lineNo;
-	}
+	/**
+	 * Display normal calculation results for one expression.
+	 *
+	 * @param exprString	The string representation of the expression.
+	 * @param resultString	The result converted to a string for display.
+	 */
+	void displayResult(String exprString, String resultString);
 
 	/**
-	 * @return The line number where the exception occurred.
+	 * Display an action message (such as "cleared") possibly to a special
+	 * status area, or just directly to the screen nicely colored.
+	 *
+	 * @param message	The message to display.
 	 */
-	public int getLine() {
-	    return lineNumber;
-	}
+	void displayActionMessage(String message);
+
+	/**
+	 * Display an error message, possibly in a message box, in a special
+	 * text area in the GUI, or just in a special color on the console.
+	 *
+	 * @param message	The error message to display.
+	 */
+	void displayErrorMessage(String message);
+
+	/**
+	 * Display an error message with line number context.
+	 *
+	 * @param message	The error message to display.
+	 * @param lineNumber	The line number where the error occurred.
+	 */
+	void displayErrorMessage(String message, int lineNumber);
 }
 

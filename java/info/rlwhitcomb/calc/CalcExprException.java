@@ -27,35 +27,31 @@
  */
 package info.rlwhitcomb.calc;
 
+import org.antlr.v4.runtime.*;
+
+import static info.rlwhitcomb.util.ConsoleColor.Code.*;
+
 
 /**
  * An exception thrown during calculation that includes the context for the
  * error so that line information can be displayed.
  */
-public class CalcException extends RuntimeException
+public class CalcExprException extends CalcException
 {
-	private int lineNumber;
-
-	public CalcException(String message, Throwable cause, int lineNo) {
-	    super(message, cause);
-	    this.lineNumber = lineNo;
+	private static int getContextLine(final ParserRuleContext ctx) {
+	    return ctx.getStart().getLine();
 	}
 
-	public CalcException(String message, int lineNo) {
-	    super(message);
-	    this.lineNumber = lineNo;
+	public CalcExprException(final String message, final ParserRuleContext ctx) {
+	    super(message, getContextLine(ctx));
 	}
 
-	public CalcException(Throwable cause, int lineNo) {
-	    super(cause.getMessage() == null ? cause.getClass().getSimpleName() : cause.getMessage(), cause);
-	    this.lineNumber = lineNo;
+	public CalcExprException(final String message, final Throwable cause, final ParserRuleContext ctx) {
+	    super(message, cause, getContextLine(ctx));
 	}
 
-	/**
-	 * @return The line number where the exception occurred.
-	 */
-	public int getLine() {
-	    return lineNumber;
+	public CalcExprException(final Throwable cause, final ParserRuleContext ctx) {
+	    super(cause, getContextLine(ctx));
 	}
 }
 

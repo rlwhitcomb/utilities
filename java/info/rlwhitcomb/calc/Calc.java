@@ -41,7 +41,17 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.IOException;
+import java.io.PrintStream;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+
+import org.apache.pivot.beans.BXML;
+import org.apache.pivot.beans.BXMLSerializer;
+import org.apache.pivot.collections.Map;
+import org.apache.pivot.serialization.SerializationException;
+import org.apache.pivot.wtk.*;
+import org.apache.pivot.wtk.util.TextAreaOutputStream;
 
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
@@ -54,6 +64,7 @@ import info.rlwhitcomb.util.ExceptionUtil;
  * Command line calculator, which will also read files or from stdin.
  */
 public class Calc
+	implements Application, CalcDisplayer
 {
 	private static final boolean ON_WINDOWS = Environment.isWindows();
 
@@ -89,41 +100,81 @@ public class Calc
 	    ERROR_COLOR + "Help is not complete yet!  Check back later." + RESET
 	};
 
-	public static class ParseException extends RuntimeException
-	{
-		private int lineNumber;
+	private static boolean guiMode = false;
 
-		public ParseException(final String message, final int lineNo) {
-		    super(message);
-		    this.lineNumber = lineNo;
-		}
+	private BXMLSerializer serializer = null;
 
-		public ParseException(final Throwable cause, final int lineNo) {
-		    super(cause.getClass().getName(), cause);
-		    this.lineNumber = lineNo;
-		}
+	private Display display;
 
-		public ParseException(final String message, final Throwable cause, final int lineNo) {
-		    super(message, cause);
-		    this.lineNumber = lineNo;
-		}
+	@BXML private Window mainWindow;
+	@BXML private TextArea inputTextArea;
+	@BXML private TextArea outputTextArea;
+	@BXML private Prompt helpPrompt;
 
-		@Override
-		public String toString() {
-		    String message = getLocalizedMessage();
-		    return String.format("%1$sError: %2$s%3$s at line %4$d.",
-			ERROR_COLOR,
-			message,
-			RESET,
-			lineNumber);
-		}
+	private static BailErrorStrategy errorStrategy = new BailErrorStrategy();
+	private static CalcDisplayer displayer;
+	private static CalcObjectVisitor visitor;
+
+
+	@Override
+	public void startup(Display display, Map<String, String> properties) {
+	    this.display = display;
+
+	    try {
+		Action.getNamedActions().put("help", new HelpAction());
+		Action.getNamedActions().put("clear", new ClearAction());
+		Action.getNamedActions().put("calculate", new CalculateAction());
+		Action.getNamedActions().put("exit", new ExitAction());
+
+		serializer = new BXMLSerializer();
+		serializer.readObject(Calc.class, "calc.bxml");
+		serializer.bind(this);
+
+		// To implement the displayer, redirect System.out to our TextArea for display
+		PrintStream ps = new TextAreaOutputStream(outputTextArea, 2048).toPrintStream();
+		System.setOut(ps);
+		System.setErr(ps);
+
+		displayer = this;
+		visitor = new CalcObjectVisitor(displayer);
+
+		mainWindow.open(display);
+		inputTextArea.requestFocus();
+	    }
+	    catch (Throwable ex) {
+		displayer.displayErrorMessage(ex.getMessage());
+	    }
 	}
 
+	@Override
+	public void displayResult(String exprString, String resultString) {
+	    System.out.println(exprString + "-> " + resultString);
+	}
+
+	@Override
+	public void displayActionMessage(String message) {
+	    System.out.println(message);
+	}
+
+	@Override
+	public void displayErrorMessage(String message) {
+	    System.err.println(message);
+	}
+
+	@Override
+	public void displayErrorMessage(String message, int lineNumber) {
+	    System.err.println(String.format("%1$s at line %2$d.", message, lineNumber));
+	}
+
+
+	/**
+	 * A parser error strategy that abandons the parse without trying to recover.
+	 */
 	public static class BailErrorStrategy extends DefaultErrorStrategy
 	{
 		@Override
 		public void recover(Parser recognizer, RecognitionException e) {
-		    throw new ParseException(e, e.getOffendingToken().getLine());
+		    throw new CalcException(e, e.getOffendingToken().getLine());
 		}
 /*
 		@Override
@@ -131,13 +182,16 @@ public class Calc
 			throws RecognitionException
 		{
 		    InputMismatchException ime = new InputMismatchException(recognizer);
-		    throw new ParseException(ime, ime.getOffendingToken().getLine());
+		    throw new CalcException(ime, ime.getOffendingToken().getLine());
 		}
 */
 		@Override
 		public void sync(Parser recognizer) { }
 	}
 
+	/**
+	 * A custom lexer that just quits after lexer errors.
+	 */
 	public static class CalcBailLexer extends CalcLexer
 	{
 		public CalcBailLexer(CharStream input) {
@@ -146,7 +200,76 @@ public class Calc
 
 		@Override
 		public void recover(LexerNoViableAltException e) {
-		    throw new ParseException(e, getLine());
+		    throw new CalcException(e, getLine());
+		}
+	}
+
+	private static class ConsoleDisplayer implements CalcDisplayer
+	{
+		@Override
+		public void displayResult(String exprString, String resultString) {
+		    System.out.println(EXPR_COLOR + exprString + ARROW_COLOR + "-> " + VALUE_COLOR + resultString + RESET);
+		}
+
+		@Override
+		public void displayActionMessage(String message) {
+		    System.out.println(VALUE_COLOR + message + RESET);
+		}
+
+		@Override
+		public void displayErrorMessage(String message) {
+		    System.err.println(ERROR_COLOR + message + RESET);
+		}
+
+		@Override
+		public void displayErrorMessage(String message, int lineNumber) {
+		    System.err.println(ERROR_COLOR + message + RESET + " at line " + lineNumber + ".");
+		}
+	}
+
+	private class CalculateAction extends Action
+	{
+		@Override
+		public void perform(Component source) {
+		    String inputText = inputTextArea.getText();
+
+		    try {
+			process(CharStreams.fromString(inputText + LINESEP), visitor, errorStrategy);
+		    }
+		    catch (IOException ioe) {
+			displayer.displayErrorMessage("I/O Error: " + ExceptionUtil.toString(ioe));
+		    }
+
+		    inputTextArea.setText("");
+		    inputTextArea.requestFocus();
+		}
+
+	}
+
+	private class ClearAction extends Action
+	{
+		@Override
+		public void perform(Component source) {
+		    inputTextArea.setText("");
+		    outputTextArea.setText("");
+		    inputTextArea.requestFocus();
+		}
+	}
+
+	private class HelpAction extends Action
+	{
+		@Override
+		public void perform(Component source) {
+		    // TODO: integrate our console help text with the text in the bxml file
+		    helpPrompt.open(mainWindow);
+		}
+	}
+
+	private class ExitAction extends Action
+	{
+		@Override
+		public void perform(Component source) {
+		    DesktopApplicationContext.exit(false);
 		}
 	}
 
@@ -183,14 +306,50 @@ public class Calc
 		visitor.visit(tree);
 	    }
 	    catch (IllegalArgumentException iae) {
-		System.err.println(ERROR_COLOR + "Error: " + iae.getMessage() + RESET);
+		displayer.displayErrorMessage("Error: " + iae.getMessage());
 	    }
-	    catch (ParseException | CalcException e) {
-		System.err.println(e.toString());
+	    catch (CalcException ce) {
+		displayer.displayErrorMessage("Error: " + ce.getMessage(), ce.getLine());
 	    }
 	}
 
+	private static boolean processOption(String arg, String option) {
+	    switch (option.toLowerCase()) {
+		case "gui":
+		case "g":
+		    guiMode = true;
+		    break;
+		case "console":
+		case "cons":
+		case "con":
+		case "c":
+		    guiMode = false;
+		    break;
+		default:
+		    System.err.println("Unknown option \"" + arg + "\"; ignoring.");
+		    break;
+	    }
+	    // For now, we are going to ignore unknown options, so always return true
+	    return true;
+	}
+
 	public static void main(String[] args) {
+	    List<String> argList = new ArrayList<>(args.length);
+
+	    // Scan the input arguments for the "-gui" option, removing it if found
+	    for (String arg : args) {
+		if (arg.startsWith("--"))
+		    processOption(arg, arg.substring(2));
+		else if (arg.startsWith("-"))
+		    processOption(arg, arg.substring(1));
+		else if (ON_WINDOWS && arg.startsWith("/"))
+		    processOption(arg, arg.substring(1));
+		else
+		    argList.add(arg);
+	    }
+ 
+	    args = argList.toArray(new String[0]);
+
 	    try {
 		CharStream input = null;
 
@@ -218,33 +377,47 @@ public class Calc
 		    input = CharStreams.fromString(commandLine);
 		}
 
-		BailErrorStrategy errorStrategy = new BailErrorStrategy();
-		CalcObjectVisitor visitor = new CalcObjectVisitor();
+		if (guiMode) {
 
-		// If no input arguments were given, go into "REPL" mode, reading
-		// a line at a time from the console and processing
-		if (input == null) {
-		    Console console = System.console();
-		    if (console == null) {
-			process(CharStreams.fromStream(System.in), visitor, errorStrategy);
-		    }
-		    else {
-			printTitleAndVersion();
-			printIntro();
-
-			String line;
-			while ((line = console.readLine("> ")) != null) {
-			    process(CharStreams.fromString(line + LINESEP), visitor, errorStrategy);
-			}
-		    }
+		
+		    DesktopApplicationContext.main(Calc.class, args);
 		}
 		else {
-		    process(input, visitor, errorStrategy);
+		    displayer = new ConsoleDisplayer();
+		    visitor = new CalcObjectVisitor(displayer);
+
+		    // If no input arguments were given, go into "REPL" mode, reading
+		    // a line at a time from the console and processing
+		    if (input == null) {
+			Console console = System.console();
+			if (console == null) {
+			    process(CharStreams.fromStream(System.in), visitor, errorStrategy);
+			}
+			else {
+			    printTitleAndVersion();
+			    printIntro();
+
+			    String line;
+			    while ((line = console.readLine("> ")) != null) {
+				process(CharStreams.fromString(line + LINESEP), visitor, errorStrategy);
+			    }
+			}
+		    }
+		    else {
+			process(input, visitor, errorStrategy);
+		    }
 		}
 	    }
 	    catch (IOException ioe) {
 		System.err.println(ERROR_COLOR + "I/O Error: " + ExceptionUtil.toString(ioe) + RESET);
 	    }
 	}
+
+	public Calc() {
+	    System.setProperty("org.apache.pivot.wtk.skin.terra.location", "/TerraTheme_old.json");
+
+	}
+
 }
+
 

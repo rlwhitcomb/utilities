@@ -44,6 +44,8 @@
  *	    Some alias renaming; more operators; hex, octal, and binary constants.
  *	11-Dec-2020 (rlwhitcomb)
  *	    Join operator.
+ *	11-Dec-2020 (rlwhitcomb)
+ *	    Fix precedence of factorial; rename some aliases.
  */
 
 grammar Calc;
@@ -66,8 +68,9 @@ expr
    | '--' ID                     # preDecExpr
    | '+' expr                    # posateExpr
    | '-' expr                    # negateExpr
-   | '~' expr                    # logicalNotExpr
+   | '~' expr                    # bitNotExpr
    | '!' expr                    # booleanNotExpr
+   | expr '!'                    # factorialExpr
    | '(' expr ')'                # parenExpr
    |<assoc=right> expr '**' expr # powerExpr
    | expr '*' expr               # multiplyExpr
@@ -96,7 +99,6 @@ expr
    | MAX exprN                   # maxExpr
    | MIN exprN                   # minExpr
    | JOIN exprN                  # joinExpr
-   | expr '!'                    # factorialExpr
    | expr '>>>' expr             # shiftRightUnsignedExpr
    | expr '>>' expr              # shiftRightExpr
    | expr '<<' expr              # shiftLeftExpr

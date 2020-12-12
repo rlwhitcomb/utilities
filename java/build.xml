@@ -72,6 +72,8 @@
 	    11-Dec-2020 (rlwhitcomb)
 		Java 14 doesn't support -html4 or -frames options for Javadoc
 		Don't regenerate grammar if it is up-to-date already.
+	    11-Dec-2020 (rlwhitcomb)
+		Add extra files for Calc GUI to the .jar file.
 
      ========================================================================== -->
 
@@ -196,6 +198,7 @@
 			<include name="name/fraser/neil/plaintext/*.class"/>
 			<include name="info/rlwhitcomb/annotations/*.class"/>
 			<include name="info/rlwhitcomb/calc/*.class"/>
+			<include name="info/rlwhitcomb/calc/*.bxml"/>
 			<include name="info/rlwhitcomb/cat/*.class"/>
 			<include name="info/rlwhitcomb/compare/*.class"/>
 			<include name="info/rlwhitcomb/csv/*.class"/>
@@ -204,6 +207,8 @@
 			<include name="info/rlwhitcomb/tree/*.class"/>
 			<include name="info/rlwhitcomb/util/*.class"/>
 			<include name="info/rlwhitcomb/**/*.properties"/>
+			<include name="images/*.*"/>
+			<include name="Terra*.json"/>
 		</jar>
 	</target>
 

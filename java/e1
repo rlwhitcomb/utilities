@@ -103,3 +103,8 @@ join "RUDE!"
 1 === '1'
 1 == '1'
 
+~ 0x7FFF,x
+! true
+a
+! (a == null)
+

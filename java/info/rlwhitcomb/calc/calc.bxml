@@ -1,0 +1,101 @@
+<!-- ==========================================================================
+
+        The MIT License (MIT)
+
+        Copyright (c) 2020 Roger L. Whitcomb.
+
+        Permission is hereby granted, free of charge, to any person obtaining a copy
+        of this software and associated documentation files (the "Software"), to deal
+        in the Software without restriction, including without limitation the rights
+        to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+        copies of the Software, and to permit persons to whom the Software is
+        furnished to do so, subject to the following conditions:
+
+        The above copyright notice and this permission notice shall be included in all
+        copies or substantial portions of the Software.
+
+        THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+        IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+        FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+        AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+        LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+        OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+        SOFTWARE.
+
+        	Main window for the Calc program.
+
+        History:
+            11-Dec-2020 (rlwhitcomb)
+		Converted from existing code.
+
+     ========================================================================== -->
+
+
+<Window bxml:id="mainWindow" icon="/images/calculator_32.gif"
+    title="Calc"
+    maximized="true"
+    xmlns:bxml="http://pivot.apache.org/bxml"
+    xmlns:content="org.apache.pivot.wtk.content"
+    xmlns="org.apache.pivot.wtk">
+
+    <actionMappings>
+	<Window.ActionMapping action="help" keyStroke="F1" />
+	<Window.ActionMapping action="clear" keyStroke="F6" />
+	<Window.ActionMapping action="calculate" keyStroke="F9" />
+	<Window.ActionMapping action="exit" keyStroke="F10" />
+    </actionMappings>
+
+    <bxml:define>
+	<Prompt bxml:id="helpPrompt" title="Help" messageType="QUESTION"
+		    message="Expression Calculator" preferredWidth="500">
+	    <Label styles="{wrapText:true}"
+		text="Supports most Java arithmetic, bit and shift operators.&#10;&#10;Dynamic typing is done, unless explicit casts such as '(long)' are used.&#10;&#10;Most (all?) of the Java arithmetic operators are available, plus the '===' and '!==' strict equality operators from JavaScript.&#10;&#10;Use the 'C' button (or F6) to clear the fields, and '!' (or F9) to calculate the result."
+	    />
+	</Prompt>
+    </bxml:define>
+
+    <TablePane>
+	<columns>
+	    <TablePane.Column width="1*"/>
+	</columns>
+	<rows>
+	    <TablePane.Row height="-1">
+		<BoxPane orientation="horizontal" styles="{padding:4, spacing:20, verticalAlignment:'center', horizontalAlignment:'center' }">
+		    <PushButton tooltipText="Clear input (F6)"
+				action="clear"
+				buttonData="C"
+				preferredWidth="60"
+				preferredHeight="32"
+				styles="{color:'green', font:{size:24,bold:true}}"/>
+		    <PushButton tooltipText="Calculate! (F9)"
+				action="calculate"
+				buttonData="!"
+				preferredWidth="60"
+				preferredHeight="32"
+				styles="{color:'red', font:{size:24,bold:true}}"/>
+		    <PushButton tooltipText="Help (F1)"
+				action="help"
+				buttonData="?"
+				preferredWidth="60"
+				preferredHeight="32"
+				styles="{color:'blue', font:{size:24,bold:true}}"/>
+		</BoxPane>
+	    </TablePane.Row>
+	    <TablePane.Row height="3*">
+		<Border title=" Expression " styles="{padding:4}">
+		    <ScrollPane horizontalScrollBarPolicy="fill" verticalScrollBarPolicy="fill_to_capacity" >
+			<TextArea bxml:id="inputTextArea" styles="{font:'Monospaced 18'}"/>
+		    </ScrollPane>
+		</Border>
+	    </TablePane.Row>
+	    <TablePane.Row height="1*">
+		<Border title=" Result " styles="{padding:4}">
+		    <ScrollPane horizontalScrollBarPolicy="fill" verticalScrollBarPolicy="fill_to_capacity" >
+			<TextArea bxml:id="outputTextArea" styles="{font:'Monospaced 18'}"/>
+		    </ScrollPane>
+		</Border>
+	    </TablePane.Row>
+	</rows>
+    </TablePane>
+
+</Window>

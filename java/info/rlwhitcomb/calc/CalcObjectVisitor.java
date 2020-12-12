@@ -43,6 +43,8 @@
  *	    Join operator.
  *	11-Dec-2020 (rlwhitcomb)
  *	    Trap division by zero.
+ *	11-Dec-2020 (rlwhitcomb)
+ *	    Refactor for GUI mode; implement ! and ~.
  */
 package info.rlwhitcomb.calc;
 
@@ -99,6 +101,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	/** Symbol table for variables. */
 	private Map<String, Object> variables;
  
+	/** {@link CalcDisplayer} object so we can output results to either the console or GUI window. */
+	private CalcDisplayer displayer;
 
 	private void getTreeText(StringBuilder buf, ParserRuleContext ctx) {
 	    for (ParseTree child : ctx.children) {
@@ -111,10 +115,11 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 	}
 
-	public CalcObjectVisitor() {
+	public CalcObjectVisitor(CalcDisplayer resultDisplayer) {
 	    setMathContext(MathContext.DECIMAL128);
 	    setTrigMode(TrigMode.RADIANS);
 	    variables = new HashMap<>();
+	    displayer = resultDisplayer;
 
 	    initialized = true;
 	}
@@ -130,20 +135,20 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    piOver180 = pi.divide(B180, mc);
 
 	    if (initialized)
-		System.out.println(Calc.VALUE_COLOR + "Precision is now " + prec + " digits." + RESET);
+		displayer.displayActionMessage("Precision is now " + prec + " digits.");
 	}
 
 	private void setTrigMode(TrigMode newTrigMode) {
 	    trigMode = newTrigMode;
 
 	    if (initialized)
-		System.out.println(Calc.VALUE_COLOR + "Trig mode is now " + trigMode + "." + RESET);
+		displayer.displayActionMessage("Trig mode is now " + trigMode + ".");
 	}
 
 
 	private void nullCheck(Object value, ParserRuleContext ctx) {
 	    if (value == null)
-		throw new CalcException("Value must not be null", ctx);
+		throw new CalcExprException("Value must not be null", ctx);
 	}
 
 
@@ -163,7 +168,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    else if (value instanceof Number)
 		return BigDecimal.valueOf(((Number)value).longValue());
 
-	    throw new CalcException("Unable to convert value of type '" + value.getClass().getSimpleName() + "' to decimal", ctx);
+	    throw new CalcExprException("Unable to convert value of type '" + value.getClass().getSimpleName() + "' to decimal", ctx);
 	}
 
 	private BigDecimal getDecimalValue(ParserRuleContext ctx) {
@@ -192,7 +197,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		return decValue.toBigIntegerExact();
 	    }
 	    catch (ArithmeticException ae) {
-		throw new CalcException(ae.getMessage(), ae, ctx);
+		throw new CalcExprException(ae, ctx);
 	    }
 	}
 
@@ -207,7 +212,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		return value.intValueExact();
 	    }
 	    catch (ArithmeticException ae) {
-		throw new CalcException(ae.getMessage(), ae, ctx);
+		throw new CalcExprException(ae, ctx);
 	    }
 	}
 
@@ -232,7 +237,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		return Boolean.valueOf(boolValue);
 	    }
 	    catch (IllegalArgumentException iae) {
-		throw new CalcException(iae.getMessage(), iae, ctx);
+		throw new CalcExprException(iae, ctx);
 	    }
 	}
 	
@@ -253,15 +258,25 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 
 	private int compareValues(ParserRuleContext ctx1, ParserRuleContext ctx2) {
-	    return compareValues(ctx1, ctx2, false);
+	    return compareValues(ctx1, ctx2, false, false);
 	}
 
-	private int compareValues(ParserRuleContext ctx1, ParserRuleContext ctx2, boolean strict) {
+	private int compareValues(ParserRuleContext ctx1, ParserRuleContext ctx2, boolean strict, boolean allowNull) {
 	    Object e1 = visit(ctx1);
 	    Object e2 = visit(ctx2);
 
-	    nullCheck(e1, ctx1);
-	    nullCheck(e2, ctx2);
+	    if (allowNull) {
+		if (e1 == null && e2 == null)
+		    return 0;
+		else if (e1 == null && e2 != null)
+		    return -1;
+		else if (e1 != null && e2 == null)
+		    return +1;
+	    }
+	    else {
+		nullCheck(e1, ctx1);
+		nullCheck(e2, ctx2);
+	    }
 
 	    if (strict) {
 		if (!e1.getClass().equals(e2.getClass()))
@@ -284,7 +299,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		return b1.compareTo(b2);
 	    }
 
-	    throw new CalcException("Unknown value type: " + e1.getClass().getSimpleName(), ctx1);
+	    throw new CalcExprException("Unknown value type: " + e1.getClass().getSimpleName(), ctx1);
 	}
 
 
@@ -292,13 +307,13 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public Object visitDecimalDirective(CalcParser.DecimalDirectiveContext ctx) {
 	    Double dPrecision = Double.valueOf(ctx.NUMBER().getText());
 	    if (Math.floor(dPrecision) != dPrecision) {
-		throw new CalcException("Decimal precision of " + dPrecision + " must be an integer value", ctx);
+		throw new CalcExprException("Decimal precision of " + dPrecision + " must be an integer value", ctx);
 	    }	
 	    int precision = dPrecision.intValue();
 	    if (precision > 1 && precision <= 10000 /* arbitrary, but NumericUtil.pi only has ~12,500 digit capability */)
 		setMathContext(new MathContext(precision));
 	    else {
-		throw new CalcException("Decimal precision of " + precision + " is out of range", ctx);
+		throw new CalcExprException("Decimal precision of " + precision + " is out of range", ctx);
 	    }
 	    return null;
 	}
@@ -336,7 +351,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitClearDirective(CalcParser.ClearDirectiveContext ctx) {
 	    variables.clear();
-	    System.out.println(Calc.VALUE_COLOR + "All variables cleared." + RESET);
+	    displayer.displayActionMessage("All variables cleared.");
 	    return null;
 	}
 
@@ -365,19 +380,15 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    String format = formatNode == null ? "" : formatNode.getText();
 	    String suffix = "";
 
-	    StringBuilder buf = new StringBuilder();
-	    buf.append(Calc.EXPR_COLOR);
-	    getTreeText(buf, ctx.expr());
-	    buf.append(Calc.ARROW_COLOR);
-	    buf.append("-> ");
-	    buf.append(Calc.VALUE_COLOR);
+	    StringBuilder exprBuf  = new StringBuilder();
+	    StringBuilder valueBuf = new StringBuilder();
+
+	    getTreeText(exprBuf, ctx.expr());
 
 	    if (result == null) {
-		buf.append("<null>");
+		valueBuf.append("<null>");
 	    }
 	    else {
-		StringBuilder valueBuf = new StringBuilder();
-
 		if (!format.isEmpty()) {
 		    char formatChar = format.charAt(1);
 		    switch (formatChar) {
@@ -417,20 +428,20 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 		if (result instanceof StringBuilder) {
 		    // This is from format conversion
-		    buf.append((StringBuilder)result);
+		    result = ((StringBuilder)result).toString();
 		}
 		else if (result instanceof String)
-		    buf.append(CharUtil.addDoubleQuotes((String)result));
+		    valueBuf.append(CharUtil.addDoubleQuotes((String)result));
 		else if (result instanceof BigDecimal)
-		    buf.append(((BigDecimal)result).toPlainString());
+		    valueBuf.append(((BigDecimal)result).toPlainString());
 		else
-		    buf.append(result.toString());
+		    valueBuf.append(result.toString());
 	    }
-	    buf.append(suffix);
+	    valueBuf.append(suffix);
 
-	    buf.append(RESET);
-	    System.out.println(buf.toString());
+	    displayer.displayResult(exprBuf.toString(), valueBuf.toString());
 	    return result;
+
 	}
 
 	@Override
@@ -502,6 +513,20 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	@Override
+	public Object visitBitNotExpr(CalcParser.BitNotExprContext ctx) {
+	    BigInteger iValue = getIntegerValue(ctx.expr());
+
+	    return iValue.not();
+	}
+
+	@Override
+	public Object visitBooleanNotExpr(CalcParser.BooleanNotExprContext ctx) {
+	    Boolean bValue = getBooleanValue(ctx.expr());
+
+	    return bValue.booleanValue() ? Boolean.FALSE : Boolean.TRUE;
+	}
+
+	@Override
 	public Object visitParenExpr(CalcParser.ParenExprContext ctx) {
 	    return visit(ctx.expr());
 	}
@@ -531,7 +556,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		return e1.divide(e2, mc);
 	    }
 	    catch (ArithmeticException ae) {
-		throw new CalcException(ae.getMessage(), ae, ctx);
+		throw new CalcExprException(ae, ctx);
 	    }
 	}
 
@@ -544,7 +569,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		return e1.remainder(e2, mc);
 	    }
 	    catch (ArithmeticException ae) {
-		throw new CalcException(ae.getMessage(), ae, ctx);
+		throw new CalcExprException(ae, ctx);
 	    }
 	}
 
@@ -828,7 +853,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		return BigInteger.valueOf(longValue >>> shiftValue);
 	    }
 	    catch (ArithmeticException ae) {
-		throw new CalcException(ae.getMessage(), ae, ctx);
+		throw new CalcExprException(ae, ctx);
 	    }
 	}
 
@@ -908,25 +933,25 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitStrictEqualExpr(CalcParser.StrictEqualExprContext ctx) {
-	    int cmp = compareValues(ctx.expr(0), ctx.expr(1), true);
+	    int cmp = compareValues(ctx.expr(0), ctx.expr(1), true, true);
 	    return Boolean.valueOf(cmp == 0);
 	}
 
 	@Override
 	public Object visitStrictNotEqualExpr(CalcParser.StrictNotEqualExprContext ctx) {
-	    int cmp = compareValues(ctx.expr(0), ctx.expr(1), true);
+	    int cmp = compareValues(ctx.expr(0), ctx.expr(1), true, true);
 	    return Boolean.valueOf(cmp != 0);
 	}
 
 	@Override
 	public Object visitEqualExpr(CalcParser.EqualExprContext ctx) {
-	    int cmp = compareValues(ctx.expr(0), ctx.expr(1));
+	    int cmp = compareValues(ctx.expr(0), ctx.expr(1), false, true);
 	    return Boolean.valueOf(cmp == 0);
 	}
 
 	@Override
 	public Object visitNotEqualExpr(CalcParser.NotEqualExprContext ctx) {
-	    int cmp = compareValues(ctx.expr(0), ctx.expr(1));
+	    int cmp = compareValues(ctx.expr(0), ctx.expr(1), false, true);
 	    return Boolean.valueOf(cmp != 0);
 	}
 
