@@ -27,6 +27,8 @@
         History:
             11-Dec-2020 (rlwhitcomb)
 		Converted from existing code.
+	    11-Dec-2020 (rlwhitcomb)
+		Add an exit button. Change relative sizes of input and output areas.
 
      ========================================================================== -->
 
@@ -66,7 +68,7 @@
 				buttonData="C"
 				preferredWidth="60"
 				preferredHeight="32"
-				styles="{color:'green', font:{size:24,bold:true}}"/>
+				styles="{color:'forestgreen', font:{size:24,bold:true}}"/>
 		    <PushButton tooltipText="Calculate! (F9)"
 				action="calculate"
 				buttonData="!"
@@ -79,9 +81,15 @@
 				preferredWidth="60"
 				preferredHeight="32"
 				styles="{color:'blue', font:{size:24,bold:true}}"/>
+		    <PushButton tooltipText="Exit (F10)"
+				action="exit"
+				buttonData="X"
+				preferredWidth="60"
+				preferredHeight="32"
+				styles="{color:'indigo', font:{size:24,bold:true}}"/>
 		</BoxPane>
 	    </TablePane.Row>
-	    <TablePane.Row height="3*">
+	    <TablePane.Row height="1*">
 		<Border title=" Expression " styles="{padding:4}">
 		    <ScrollPane horizontalScrollBarPolicy="fill" verticalScrollBarPolicy="fill_to_capacity" >
 			<TextArea bxml:id="inputTextArea" styles="{font:'Monospaced 18'}"/>
