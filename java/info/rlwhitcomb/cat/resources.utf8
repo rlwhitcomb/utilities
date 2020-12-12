@@ -26,9 +26,9 @@
 # History:
 #       14-Oct-2020 (rlwhitcomb)
 #           Moved into here from the .java file.
+#	11-Dec-2020 (rlwhitcomb)
+#	    Move product name to build.properties.
 #
-
-productName		= File ConCATenation Utility
 
 unrecognized		= Unrecognized option: "%1$s"!
 noConsole		= No console available to read from!

@@ -97,18 +97,23 @@
  *	    Add a new method to scale timer value to (double) seconds.
  *	13-Nov-2020 (rlwhitcomb)
  *	    Display debug build info in "printProgramInfo".
+ *	11-Dec-2020 (rlwhitcomb)
+ *	    Individual title and version information from build.properties.
  */
 package info.rlwhitcomb.util;
 
 import java.io.File;
+import java.io.InputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import java.lang.management.ManagementFactory;
 
 import static info.rlwhitcomb.util.CharUtil.Justification.*;
+import static info.rlwhitcomb.util.ConsoleColor.Code.*;
 
 
 /**
@@ -155,6 +160,12 @@ public final class Environment
 	private static String copyrightNotice = null;
 
 	/**
+	 * The set of properties read from the "build.properties" file, which should include
+	 * titles and versions for the major main programs.
+	 */
+	private static Properties buildProperties = null;
+
+	/**
 	 * Default product name -- set from the "build.properties" file externally
 	 * by the preprocessor, but can be set by the enclosing application as well.
 	 * @see #setProductName
@@ -182,6 +193,22 @@ public final class Environment
 	 * Whether this is a DEBUG build or not.
 	 */
 	private static final boolean IS_DEBUG_BUILD = $(IS_DEBUG_BUILD);
+
+	/**
+	 * Overloaded product name.
+	 * @see #productName
+	 * @see #getProductName
+	 * @see #setProductName
+	 */
+	private static String overloadedProductName = null;
+
+	/**
+	 * Overloaded app version.
+	 * @see #APP_VERSION
+	 * @see #getAppVersion
+	 * @see #setAppVersion
+	 */
+	private static String overloadedAppVersion = null;
 
 
 	static {
@@ -612,7 +639,7 @@ public final class Environment
 	 * the management server, so default to a neutral product.
 	 */
 	public static String getProductName() {
-	    return productName;
+	    return overloadedProductName != null ? overloadedProductName : productName;
 	}
 
 
@@ -622,7 +649,7 @@ public final class Environment
 	 * @param	name	The new value for the product name (overrides the "neutral" default).
 	 */
 	public static void setProductName(String name) {
-	    productName = name;
+	    overloadedProductName = name;
 	}
 
 
@@ -630,7 +657,17 @@ public final class Environment
 	 * @return The application version (set externally from the "version.properties" file).
 	 */
 	public static String getAppVersion() {
-	    return APP_VERSION;
+	    return overloadedAppVersion != null ? overloadedAppVersion : APP_VERSION;
+	}
+
+
+	/**
+	 * Set the override app version (from the "build.properties" file).
+	 *
+	 * @param appVersion The new app version string.
+	 */
+	public static void setAppVersion(String appVersion) {
+	    overloadedAppVersion = appVersion;
 	}
 
 
@@ -667,6 +704,21 @@ public final class Environment
 
 
 	/**
+	 * Read the properties from the "build.properties" file.
+	 */
+	private static void readBuildProperties() {
+	    if (buildProperties == null) {
+		buildProperties = new Properties();
+		try (InputStream is = Environment.class.getResourceAsStream("/build.properties")) {
+		    buildProperties.load(is);
+		}
+		catch (IOException ioe) {
+		}
+	    }
+	}
+
+
+	/**
 	 * @return The current copyright notice string (from the resources).
 	 */
 	public static String getCopyrightNotice() {
@@ -674,6 +726,20 @@ public final class Environment
 		copyrightNotice = Intl.getString("util#env.copyright");
 	    }
 	    return copyrightNotice;
+	}
+
+
+	/**
+	 * Load the program information (title/version) from the "build.properties" file
+	 * and save for use by {@link #printProgramInfo}.
+	 *
+	 * @param clazz	The main program class.
+	 */
+	public static void loadProgramInfo(Class<?> clazz) {
+	    String name = clazz.getSimpleName();
+	    readBuildProperties();
+	    setProductName(buildProperties.getProperty(name + ".title"));
+	    setAppVersion(buildProperties.getProperty(name + ".version"));
 	}
 
 
@@ -727,10 +793,11 @@ public final class Environment
 	    String underline = CharUtil.makeStringOfChars('=', width);
 
 	    ps.println();
+	    ps.println(BLACK_BRIGHT + underline + BLUE_BOLD_BRIGHT);
 	    if (width == 0) {
 		ps.println(productName);
 		ps.println(versionInfo);
-		ps.println();
+		ps.println(BLACK_BRIGHT);
 		ps.println(buildInfo);
 		ps.println(copyright);
 	    } 
@@ -740,11 +807,11 @@ public final class Environment
 		// Negative width puts the odd space on the right
 		ps.println(CharUtil.padToWidth(productName, -width, CENTER));
 		ps.println(CharUtil.padToWidth(versionInfo, -width, CENTER));
-		ps.println();
+		ps.println(BLACK_BRIGHT);
 		ps.println(CharUtil.padToWidth(buildInfo, -width, CENTER));
 		ps.println(CharUtil.padToWidth(copyright, -width, CENTER));
 	    }
-	    ps.println(underline);
+	    ps.println(underline + RESET);
 	    ps.println();
 	}
 

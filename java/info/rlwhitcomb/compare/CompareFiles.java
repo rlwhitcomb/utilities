@@ -32,6 +32,8 @@
  *	    Fix the process exit code.
  *	06-Nov-2020 (rlwhitcomb)
  *	    Use new Options processing to help.
+ *	11-Dec-2020 (rlwhitcomb)
+ *	    Use new program info mechanism.
  */
 package info.rlwhitcomb.compare;
 
@@ -328,7 +330,7 @@ public class CompareFiles
 	public static void main(String[] args) {
 	    long memoryUseBefore = Runtime.getRuntime().freeMemory();
 
-	    Environment.setProductName(Intl.getString("compare#compare.productName"));
+	    Environment.loadProgramInfo(CompareFiles.class);
 
 	    List<String> pathArgs = new ArrayList<>();
 	    boolean error = false;

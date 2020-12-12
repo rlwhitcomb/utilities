@@ -64,6 +64,8 @@
  *	    Use version of "printProgramInfo" with defaults.
  *	07-Dec-2020 (rlwhitcomb)
  *	    Refactor ConsoleColor;
+ *	11-Dec-2020 (rlwhitcomb)
+ *	    Use new product info mechanism.
  */
 package info.rlwhitcomb.tree;
 
@@ -468,7 +470,7 @@ public class Tree
 	    CaseSensitivity casing = CaseSensitivity.MIXED_CASE;
 	    List<String> argList = new ArrayList<>(args.length);
 
-	    Environment.setProductName(Intl.getString("tree#productName"));
+	    Environment.loadProgramInfo(Tree.class);
 
 	    // Setup (for Windows) the executable file extension list
 	    if (runningOnWindows) {

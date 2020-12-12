@@ -74,6 +74,8 @@
 		Don't regenerate grammar if it is up-to-date already.
 	    11-Dec-2020 (rlwhitcomb)
 		Add extra files for Calc GUI to the .jar file.
+	    11-Dec-2020 (rlwhitcomb)
+		Add "build.properties" to the .jar file.
 
      ========================================================================== -->
 
@@ -209,6 +211,7 @@
 			<include name="info/rlwhitcomb/**/*.properties"/>
 			<include name="images/*.*"/>
 			<include name="Terra*.json"/>
+			<include name="build.properties"/>
 		</jar>
 	</target>
 

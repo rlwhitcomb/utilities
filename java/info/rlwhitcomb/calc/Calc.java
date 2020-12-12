@@ -33,6 +33,8 @@
  *	    catch errors inside "process" so REPL mode can contine afterwards.
  *	09-Dec-2020 (rlwhitcomb)
  *	    Update version; tweak title message; enhance error reporting.
+ *	11-Dec-2020 (rlwhitcomb)
+ *	    Use new program info mechanism.
  */
 package info.rlwhitcomb.calc;
 
@@ -74,18 +76,6 @@ public class Calc
 	public static final String ERROR_COLOR = RED_BOLD.toString();
 
 	private static final String LINESEP = System.lineSeparator();
-
-	private static final String VERSION = "0.95";
-
-	private static final String[] TITLE_AND_VERSION = {
-	    "",
-	    BLUE_BOLD_BRIGHT +
-	    "=======================",
-	    " Expression Calculator",
-	    "      Version " + VERSION,
-	    "=======================",
-	    "" + RESET
-	};
 
 	private static final String[] INTRO = {
 	    "  Enter an expression (or multiple expressions separated by ';').",
@@ -274,7 +264,12 @@ public class Calc
 	}
 
 	public static void printTitleAndVersion() {
-	    Arrays.stream(TITLE_AND_VERSION).forEach(System.out::println);
+	    if (guiMode) {
+		// TOOD: what to do here?
+	    }
+	    else {
+		Environment.printProgramInfo();
+	    }
 	}
 
 	public static void printIntro() {
@@ -334,6 +329,8 @@ public class Calc
 	}
 
 	public static void main(String[] args) {
+	    Environment.loadProgramInfo(Calc.class);
+
 	    List<String> argList = new ArrayList<>(args.length);
 
 	    // Scan the input arguments for the "-gui" option, removing it if found
@@ -378,8 +375,6 @@ public class Calc
 		}
 
 		if (guiMode) {
-
-		
 		    DesktopApplicationContext.main(Calc.class, args);
 		}
 		else {

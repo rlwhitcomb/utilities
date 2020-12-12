@@ -34,6 +34,8 @@
  *	    Use flavor of "printProgramInfo" with defaults.
  *	14-Oct-2020 (rlwhitcomb)
  *	    Move text to resources.
+ *	11-Dec-2020 (rlwhitcomb)
+ *	    Use new product information mechanism.
  *
  *	    TODO: wildcard directory names on input
  *	    TODO: -nn to limit to first nn lines, +nn to limit to LAST nn lines (hard to do?)
@@ -270,7 +272,7 @@ public class Cat {
 	 * @param args	The parsed command line arguments.
 	 */
 	public static void main(final String[] args) {
-	    Environment.setProductName("File ConCATenation Utility");
+	    Environment.loadProgramInfo(Cat.class);
 
 	    // First pass: process output file / charset options only
 	    pass = 1;

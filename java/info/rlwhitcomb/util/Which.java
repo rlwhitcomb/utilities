@@ -37,6 +37,8 @@
  *	    On Windows, check "." as a last resort.
  *	13-Nov-2020 (rlwhitcomb)
  *	    Use Environment.pathSeparator; move strings to resources.
+ *	11-Dec-2020 (rlwhitcomb)
+ *	    New program info mechanism.
  */
 package info.rlwhitcomb.util;
 
@@ -239,6 +241,8 @@ public class Which
 	    boolean showInfo = false;
 	    List<String> names = new ArrayList<>(args.length);
 
+	    Environment.loadProgramInfo(Which.class);
+
 	    // Evaluate all the options first
 	    for (String arg : args) {
 		if (Options.isOption(arg) != null) {
@@ -247,6 +251,10 @@ public class Which
 		    }
 		    else if (Options.matchesOption(arg, "show", "s")) {
 			showInfo = true;
+		    }
+		    else if (Options.matchesOption(arg, true, "version", "vers", "ver", "v")) {
+			Environment.printProgramInfo();
+			return;
 		    }
 		    else {
 			Intl.errFormat("util#which.unknownOption", arg);

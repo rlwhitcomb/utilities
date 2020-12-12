@@ -30,8 +30,9 @@
 #	    Changed the lookup symbols.
 #	12-Oct-2020 (rlwhitcomb)
 #	    Took out duplicate option text.
-
-productName	= Directory Tree Utility
+#	11-Dec-2020 (rlwhitcomb)
+#	    Move program name to build.properties.
+#
 
 unavailable	= " <unavailable>"
 

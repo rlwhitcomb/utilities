@@ -32,14 +32,14 @@
 #	    Typo.
 #	06-Nov-2020 (rlwhitcomb)
 #	    Another edit to the help; add -version help
+#	11-Dec-2020 (rlwhitcomb)
+#	    Move program name to build.properties.
 #
 
 #
 # From CompareFiles.java
 #
 compare.unknownOption		= Unknown option: "%1$s"!
-
-compare.productName		= File/Directory Compare Utility
 
 compare.comparingTwo		= Comparing "%1$s" to "%2$s" ...
 compare.doesNotCompare		= File "%1$s" does not compare to "%2$s"!
