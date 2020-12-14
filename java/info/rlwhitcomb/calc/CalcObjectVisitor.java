@@ -45,6 +45,8 @@
  *	    Trap division by zero.
  *	11-Dec-2020 (rlwhitcomb)
  *	    Refactor for GUI mode; implement ! and ~.
+ *	14-Dec-2020 (rlwhitcomb)
+ *	    Octal and Binary output format.
  */
 package info.rlwhitcomb.calc;
 
@@ -103,6 +105,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
  
 	/** {@link CalcDisplayer} object so we can output results to either the console or GUI window. */
 	private CalcDisplayer displayer;
+
 
 	private void getTreeText(StringBuilder buf, ParserRuleContext ctx) {
 	    for (ParseTree child : ctx.children) {
@@ -384,6 +387,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    StringBuilder valueBuf = new StringBuilder();
 
 	    getTreeText(exprBuf, ctx.expr());
+	    exprBuf.insert(exprBuf.length() - 1, format);
 
 	    if (result == null) {
 		valueBuf.append("<null>");
@@ -410,11 +414,59 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			    }
 			    else {
 				BigInteger iValue = toIntegerValue(result, ctx);
+				if (iValue.compareTo(BigInteger.ZERO) < 0) {
+				    iValue = iValue.abs();
+				}
 				valueBuf.append('0').append(formatChar);
 				if (formatChar == 'x')
 				    valueBuf.append(iValue.toString(16));
 				else
 				    valueBuf.append(iValue.toString(16).toUpperCase());
+			    }
+			    result = valueBuf;
+			    break;
+			case 'o':
+			case 'O':
+			    if (result instanceof String) {
+				byte[] b = ((String)result).getBytes(StandardCharsets.UTF_8);
+				valueBuf.append('\'');
+				for (int i = 0; i < b.length; i++) {
+				    int j = ((int)b[i]) & 0xFF;
+				    valueBuf.append(String.format("%1$03o", j));
+				}
+				valueBuf.append('\'');
+			    }
+			    else {
+				BigInteger iValue = toIntegerValue(result, ctx);
+				if (iValue.compareTo(BigInteger.ZERO) < 0) {
+				    iValue = iValue.abs();
+				}
+				valueBuf.append('0');
+				valueBuf.append(iValue.toString(8));
+			    }
+			    result = valueBuf;
+			    break;
+			case 'b':
+			case 'B':
+			    if (result instanceof String) {
+				byte[] b = ((String)result).getBytes(StandardCharsets.UTF_8);
+				valueBuf.append('\'');
+				for (int i = 0; i < b.length; i++) {
+				    int j = ((int)b[i]) & 0xFF;
+				    for (int k = Byte.SIZE - 1; k >= 0; k--) {
+					char digit = (j & (1 << k)) != 0 ? '1' : '0';
+					valueBuf.append(digit);
+				    }
+				}
+				valueBuf.append('\'');
+			    }
+			    else {
+				BigInteger iValue = toIntegerValue(result, ctx);
+				if (iValue.compareTo(BigInteger.ZERO) < 0) {
+				    iValue = iValue.abs();
+				}
+				valueBuf.append('0').append(formatChar);
+				valueBuf.append(iValue.toString(2));
 			    }
 			    result = valueBuf;
 			    break;

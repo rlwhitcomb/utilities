@@ -88,7 +88,16 @@ gcd(27*2, 3*9*18)
 
 0xFFFF ^ 0xAAAA,x
 012
+10,o
 0b1010101010,x
+0x2aa,b
+~ 0x7FFF,x
+~ 0x7FFF,o
+~ 0x7FFF,b
+255,o
+123,b
+'def',o
+'abc',b
 
 max('123', 456, 789)
 min(123, '-1', '14')
@@ -103,7 +112,6 @@ join "RUDE!"
 1 === '1'
 1 == '1'
 
-~ 0x7FFF,x
 ! true
 a
 ! (a == null)

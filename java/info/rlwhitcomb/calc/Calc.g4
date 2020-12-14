@@ -46,6 +46,8 @@
  *	    Join operator.
  *	11-Dec-2020 (rlwhitcomb)
  *	    Fix precedence of factorial; rename some aliases.
+ *	14-Dec-2020 (rlwhitcomb)
+ *	    Allow octal and binary output format.
  */
 
 grammar Calc;
@@ -279,7 +281,7 @@ CLEAR
    ;
 
 FORMAT
-   : ',' [xXtThH%]
+   : ',' [xXtThHoObB%]
    ;
 
 STRING
