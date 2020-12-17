@@ -76,6 +76,8 @@
 		Add extra files for Calc GUI to the .jar file.
 	    11-Dec-2020 (rlwhitcomb)
 		Add "build.properties" to the .jar file.
+	    16-Dec-2020 (rlwhitcomb)
+		Add "Sleep".
 
      ========================================================================== -->
 
@@ -108,6 +110,7 @@
 		<include name="manifest"/>
 		<include name="matches"/>
 		<include name="os"/>
+		<include name="sleep"/>
 		<include name="tre"/>
 		<include name="which"/>
 	</patternset>
@@ -196,6 +199,7 @@
 			<include name="GZip*.class"/>
 			<include name="GUnzip*.class"/>
 			<include name="FixPath*.class"/>
+			<include name="Sleep*.class"/>
 			<include name="net/iharder/b64/*.class"/>
 			<include name="name/fraser/neil/plaintext/*.class"/>
 			<include name="info/rlwhitcomb/annotations/*.class"/>
