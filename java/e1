@@ -131,5 +131,11 @@ $decimal 30; 1/9
 $decimal 50; pi
 $decimal 10000; e
 
-$echo "End of expression tests (suite 1)."
+$binary
+1024**2,k
+$ten
+1000**4,k
+$mixed
+1024**3,k
 
+$echo "End of expression tests (suite 1)."

@@ -48,6 +48,9 @@
  *	    Fix precedence of factorial; rename some aliases.
  *	14-Dec-2020 (rlwhitcomb)
  *	    Allow octal and binary output format.
+ *	14-Dec-2020 (rlwhitcomb)
+ *	    Output formats in the KB, MB, etc. format (,k).
+ *	    Shortcuts for Quit or Exit.
  *	16-Dec-2020 (rlwhitcomb)
  *	    Add fib(n) and $echo directive.
  */
@@ -155,6 +158,9 @@ directive
    | FLOAT                       # floatDirective
    | DEGREES                     # degreesDirective
    | RADIANS                     # radiansDirective
+   | BINARY                      # binaryDirective
+   | SI                          # siDirective
+   | MIXED			 # mixedDirective
    | CLEAR                       # clearDirective
    | VERSION                     # versionDirective
    | ECHO expr                   # echoDirective
@@ -226,9 +232,9 @@ HELP    : [hH][eE][lL][pP] ;
 
 VERSION : [vV][eE][rR][sS][iI][oO][nN] ;
 
-QUIT    : [qQ][uU][iI][tT] ;
+QUIT    : ( [qQ] | [qQ][uU][iI][tT] ) ;
 
-EXIT    : [eE][xX][iI][tT] ;
+EXIT    : ( [xX] | [eE][xX][iI][tT] ) ;
 
 
 /* Note: this needs to be last so that these other "ID" like things
@@ -282,6 +288,19 @@ RADIANS
    : DIR ( [rR][aA][dD] | [rR][aA][dD][iI][aA][nN][sS] )
    ;
 
+BINARY
+   : DIR ( [bB][iI][nN] | [bB][iI][nN][aA][rR][yY] )
+   ;
+
+SI
+   : DIR ( [sS][iI] | [tT][eE][nN] )
+   ;
+
+MIXED
+   : DIR ( [mM][iI][xX] | [mM][iI][xX][eE][dD] )
+   ;
+
+
 CLEAR
    : DIR ( [cC][lL][rR] | [cC][lL][eE][aA][rR] )
    ;
@@ -292,7 +311,7 @@ ECHO
 
 
 FORMAT
-   : ',' [xXtThHoObB%]
+   : ',' [xXtThHoObBkK%]
    ;
 
 STRING

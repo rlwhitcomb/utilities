@@ -47,6 +47,10 @@
  *	    Refactor for GUI mode; implement ! and ~.
  *	14-Dec-2020 (rlwhitcomb)
  *	    Octal and Binary output format.
+ *	14-Dec-2020 (rlwhitcomb)
+ *	    Output to KB, MB, size format.
+ *	15-Dec-2020 (rlwhitcomb)
+ *	    Binary or SI directives.
  *	16-Dec-2020 (rlwhitcomb)
  *	    Implement fib(n) and $echo directive.
  */
@@ -65,6 +69,7 @@ import org.antlr.v4.runtime.tree.*;
 import info.rlwhitcomb.util.CharUtil;
 import static info.rlwhitcomb.util.ConsoleColor.Code.*;
 import info.rlwhitcomb.util.NumericUtil;
+import static info.rlwhitcomb.util.NumericUtil.RangeMode;
 
 /**
  * Visit each node of the parse tree and do the appropriate calculations at each level.
@@ -92,6 +97,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	/** Whether trig inputs are in degrees or radians. */
 	private TrigMode trigMode;
+
+	/** The kind of units to use for the ",k" format. */
+	private RangeMode units = RangeMode.MIXED;
 
 	/** PI to the precision of our current math mode. */
 	private BigDecimal pi;
@@ -354,6 +362,27 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	@Override
+	public Object visitBinaryDirective(CalcParser.BinaryDirectiveContext ctx) {
+	    units = RangeMode.BINARY;
+	    displayer.displayActionMessage("Units in binary.");
+	    return null;
+	}
+
+	@Override
+	public Object visitSiDirective(CalcParser.SiDirectiveContext ctx) {
+	    units = RangeMode.DECIMAL;
+	    displayer.displayActionMessage("Units in SI (base ten) form.");
+	    return null;
+	}
+
+	@Override
+	public Object visitMixedDirective(CalcParser.MixedDirectiveContext ctx) {
+	    units = RangeMode.MIXED;
+	    displayer.displayActionMessage("Units in mixed form.");
+	    return null;
+	}
+
+	@Override
 	public Object visitClearDirective(CalcParser.ClearDirectiveContext ctx) {
 	    variables.clear();
 	    displayer.displayActionMessage("All variables cleared.");
@@ -421,6 +450,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			case 'H':
 			    // TODO: convert to hours
 			    break;
+
 			case 'x':
 			case 'X':
 			    if (result instanceof String) {
@@ -446,6 +476,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			    }
 			    result = valueBuf;
 			    break;
+
 			case 'o':
 			case 'O':
 			    if (result instanceof String) {
@@ -467,6 +498,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			    }
 			    result = valueBuf;
 			    break;
+
 			case 'b':
 			case 'B':
 			    if (result instanceof String) {
@@ -491,6 +523,19 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			    }
 			    result = valueBuf;
 			    break;
+
+			case 'k':
+			case 'K':
+			    BigInteger iValue = toIntegerValue(result, ctx);
+			    try {
+				long lValue = iValue.longValueExact();
+				valueBuf.append(NumericUtil.formatToRange(lValue, units));
+			    } catch (ArithmeticException ae) {
+				throw new CalcExprException(ae, ctx);
+			    }
+			    result = valueBuf;
+			    break;
+
 			case '%':
 			    if (result instanceof BigDecimal)
 				result = ((BigDecimal)result).multiply(BigDecimal.valueOf(100L), mc);

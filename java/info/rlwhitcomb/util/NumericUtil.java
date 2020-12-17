@@ -79,6 +79,8 @@
  *	    Add "sin" method for BigDecimal (using Maclaurin series expansion).
  *	13-Dec-2020 (rlwhitcomb)
  *	    Implement fib(n).
+ *	14-Dec-2020 (rlwhitcomb)
+ *	    Add Exabytes to the long range; option for SI vs. binary values.
  */
 package info.rlwhitcomb.util;
 
@@ -191,22 +193,30 @@ public class NumericUtil
 	}
 
 
-	public static final BigInteger MIN_BYTE = BigInteger.valueOf(Byte.MIN_VALUE);
-	public static final BigInteger MAX_BYTE = BigInteger.valueOf(Byte.MAX_VALUE);
+	public static final BigInteger MIN_BYTE  = BigInteger.valueOf(Byte.MIN_VALUE);
+	public static final BigInteger MAX_BYTE  = BigInteger.valueOf(Byte.MAX_VALUE);
 	public static final BigInteger MIN_SHORT = BigInteger.valueOf(Short.MIN_VALUE);
 	public static final BigInteger MAX_SHORT = BigInteger.valueOf(Short.MAX_VALUE);
-	public static final BigInteger MIN_INT = BigInteger.valueOf(Integer.MIN_VALUE);
-	public static final BigInteger MAX_INT = BigInteger.valueOf(Integer.MAX_VALUE);
-	public static final BigInteger MIN_LONG = BigInteger.valueOf(Long.MIN_VALUE);
-	public static final BigInteger MAX_LONG = BigInteger.valueOf(Long.MAX_VALUE);
+	public static final BigInteger MIN_INT   = BigInteger.valueOf(Integer.MIN_VALUE);
+	public static final BigInteger MAX_INT   = BigInteger.valueOf(Integer.MAX_VALUE);
+	public static final BigInteger MIN_LONG  = BigInteger.valueOf(Long.MIN_VALUE);
+	public static final BigInteger MAX_LONG  = BigInteger.valueOf(Long.MAX_VALUE);
 
-	private static final Pattern valueMatch = Pattern.compile("^([0-9]+)([kKmMgGtTpP])$");
+	private static final Pattern VALUE_MATCH= Pattern.compile("^([0-9]+)([kKmMgGtTpPeE][iI]?)[bB]?$");
 
-	private static final long MULT_KB = 1024L;
+	private static final long MULT_KB = 1000L;
 	private static final long MULT_MB = MULT_KB * MULT_KB;
 	private static final long MULT_GB = MULT_MB * MULT_KB;
 	private static final long MULT_TB = MULT_GB * MULT_KB;
 	private static final long MULT_PB = MULT_TB * MULT_KB;
+	private static final long MULT_EB = MULT_PB * MULT_KB;
+
+	private static final long MULT_KIB = 1024L;
+	private static final long MULT_MIB = MULT_KIB * MULT_KIB;
+	private static final long MULT_GIB = MULT_MIB * MULT_KIB;
+	private static final long MULT_TIB = MULT_GIB * MULT_KIB;
+	private static final long MULT_PIB = MULT_TIB * MULT_KIB;
+	private static final long MULT_EIB = MULT_PIB * MULT_KIB;
 
 	private static final BigDecimal TWO = BigDecimal.valueOf(2L);
 
@@ -234,72 +244,176 @@ public class NumericUtil
 	private static final String minus = "minus";
 
 	/**
+	 * Enum to decide between modes of determining range/multipliers (Binary or SI based).
+	 */
+	public static enum RangeMode
+	{
+		/** Based on powers of 2 (each one 2**10 = 1024). */
+		BINARY,
+		/** Based on powers of 10 (each one 10**3 = 1000). */
+		DECIMAL,
+		/** Multiplier Based on powers of 2 (same as {@link #BINARY}),
+		 * but with the decimal name/suffix. */
+		MIXED
+	}
+
+	/**
 	 * Enum to represent the range of a numeric number of bytes.
 	 */
 	public static enum Range
 	{
-		BYTES		(1L, "", "bytes", "Bytes"),
-		KILOBYTES	(MULT_KB, "K", "Kbytes", "Kilobytes"),
-		MEGABYTES	(MULT_MB, "M", "Mbytes", "Megabytes"),
-		GIGABYTES	(MULT_GB, "G", "Gbytes", "Gigabytes"),
-		TERABYTES	(MULT_TB, "T", "Tbytes", "Terabytes"),
-		PETABYTES	(MULT_PB, "P", "Pbytes", "Petabytes");
+		/* Range value, mult (SI),mult (bin),suffixes, short name,            long name                 */
+		BYTES		(1L,      1L,       "",  "",   "bytes",  "bytes",     "Bytes",     "Bytes"      ),
+		KILOBYTES	(MULT_KB, MULT_KIB, "K", "Ki", "Kbytes", "Kibytes",   "Kilobytes", "Kibibytes"  ),
+		MEGABYTES	(MULT_MB, MULT_MIB, "M", "Mi", "Mbytes", "Mibytes",   "Megabytes", "Mebibytes"  ),
+		GIGABYTES	(MULT_GB, MULT_GIB, "G", "Gi", "Gbytes", "Gibytes",   "Gigabytes", "Gibibytes"  ),
+		TERABYTES	(MULT_TB, MULT_TIB, "T", "Ti", "Tbytes", "Tibytes",   "Terabytes", "Tebibytes"  ),
+		PETABYTES	(MULT_PB, MULT_PIB, "P", "Pi", "Pbytes", "Pibytes",   "Petabytes", "Pebibytes"  ),
+		EXABYTES	(MULT_EB, MULT_EIB, "E", "Ei", "Ebytes", "Eibytes",   "Exabytes",  "Exbibytes"  );
 
-		private long multiplier;
-		private String prefix;
-		private String shortName;
-		private String longName;
+		private long siMultiplier;
+		private long binMultiplier;
+		private String siSuffix;
+		private String binSuffix;
+		private String siShortName;
+		private String binShortName;
+		private String siLongName;
+		private String binLongName;
 
-		private Range(final long multiplier, final String prefix, final String shortName, final String longName) {
-		    this.multiplier = multiplier;
-		    this.prefix     = prefix;
-		    this.shortName  = shortName;
-		    this.longName   = longName;
+		private Range(final long siMult,    final long binMult,
+			      final String siSfx,   final String binSfx,
+			      final String siShort, final String binShort,
+			      final String siLong,  final String binLong) {
+		    this.siMultiplier  = siMult;
+		    this.binMultiplier = binMult;
+		    this.siSuffix      = siSfx;
+		    this.binSuffix     = binSfx;
+		    this.siShortName   = siShort;
+		    this.binShortName  = binShort;
+		    this.siLongName    = siLong;
+		    this.binLongName   = binLong;
 		}
 
-		/** @return This "binary" multiplier where 1K == 1024 (2^10) and 1M == 1024 * 1024 (2^20),
-		 * as opposed to the SI definition of the "kilo" and "mega" prefixes which are in terms
-		 * of powers of 10 (i.e., 10^3, 10^6, etc.).
-		 */
+		/** @return The mixed-mode (1024-based) multiplier for this range. */
 		public long getMultiplier() {
-		    return this.multiplier;
-		}
-
-		public String getPrefix() {
-		    return this.prefix;
-		}
-
-		public String getShortName() {
-		    return this.shortName;
-		}
-
-		public String getLongName() {
-		    return this.longName;
+		    return getMultiplier(RangeMode.MIXED);
 		}
 
 		/**
-		 * @return A {@link Range} value that corresponds to the given prefix (as in, "K", "M", etc).
-		 * @param prefix The prefix to look up.
+		 * @return The multiplier for this range, either SI or binary.
+		 * @param mode Decide which value to use.
 		 */
-		public static Range getRangeByPrefix(final String prefix) {
+		public long getMultiplier(final RangeMode mode) {
+		    switch (mode) {
+			case BINARY:
+			default:
+			    return binMultiplier;
+			case DECIMAL:
+			    return siMultiplier;
+		    }
+		}
+
+		/** @return The mixed-mode (1000-based) suffix for this range. */
+		public String getSuffix() {
+		    return getSuffix(RangeMode.MIXED);
+		}
+
+		/**
+		 * @return The suffix for this range, either SI or binary.
+		 * @param mode Decide which value to use.
+		 */
+		public String getSuffix(final RangeMode mode) {
+		    switch (mode) {
+			case BINARY:
+			    return binSuffix;
+			case DECIMAL:
+			default:
+			    return siSuffix;
+		    }
+		}
+
+		/** @return The mixed-mode name (1000-based) for this range. */
+		public String getShortName() {
+		    return getShortName(RangeMode.MIXED);
+		}
+
+		/**
+		 * @return The short name for this range, either SI or binary.
+		 * @param mode Decide which value to use.
+		 */
+		public String getShortName(final RangeMode mode) {
+		    switch (mode) {
+			case BINARY:
+			    return binShortName;
+			case DECIMAL:
+			default:
+			    return siShortName;
+		    }
+		}
+
+		/** @return The long name for this range (mixed-mode, 1000-based). */
+		public String getLongName() {
+		    return getLongName(RangeMode.MIXED);
+		}
+
+		/**
+		 * @return The long name for this range, either SI or binary.
+		 * @param mode Decide which value to use.
+		 */
+		public String getLongName(final RangeMode mode) {
+		    switch (mode) {
+			case BINARY:
+			    return binLongName;
+			case DECIMAL:
+			default:
+			    return siLongName;
+		    }
+		}
+
+		/**
+		 * @return A {@link Range} value that corresponds to the given suffix (as in, "K", "M", etc).
+		 * @param suffix The suffix to look up (either binary or SI value).
+		 */
+		public static Range getRangeBySuffix(final String suffix) {
 		    for (Range r : values()) {
-			if (r.prefix.equalsIgnoreCase(prefix))
+			if (r.binSuffix.equalsIgnoreCase(suffix) || r.siSuffix.equalsIgnoreCase(suffix))
 			    return r;
 		    }
 		    return null;
 		}
 
-		/** @return A {@link Range} value that best represents the given value.
-		 * This will result in a formatted value in the range of 0.80 .. 799.99.
+		/** @return A {@link Range} value that best represents the given value,
+		 * in mixed-mode units (1024-based, but 1000-based names).
+		* This will result in a formatted value in the range of 0.00 .. 799.99;
 		 * @param value The candidate value.
 		 */
 		public static Range getRangeOfValue(final long value) {
+		    return getRangeOfValue(value, RangeMode.MIXED);
+		}
+
+		/** @return A {@link Range} value that best represents the given value.
+		 * This will result in a formatted value in the range of 0.80 .. 799.99.
+		 * @param value The candidate value.
+		 * @param mode Decide which value to use.
+		 */
+		public static Range getRangeOfValue(final long value, final RangeMode mode) {
 		    long absValue = Math.abs(value);
+
 		    if (absValue <= 1L)
 			return BYTES;
+
 		    for (Range r : values()) {
-			if (absValue / r.multiplier < 800)
-			    return r;
+			switch (mode) {
+			    case BINARY:
+			    default:
+				if (absValue / r.binMultiplier < 800)
+				    return r;
+				break;
+			    case DECIMAL:
+				if (absValue / r.siMultiplier < 800)
+				    return r;
+				break;
+			}
 		    }
 		    return BYTES;
 		}
@@ -309,6 +423,7 @@ public class NumericUtil
 
 	/**
 	 * Helper function to convert a "nnK" or "nnM" or "nnG" to a straight number.
+	 * <p> Also deals with "nnKi" for binary-based value.
 	 *
 	 * @param	input	The input value in one of the above formats.
 	 * @return		The output as a strictly numeric value, where "nn" is
@@ -317,14 +432,19 @@ public class NumericUtil
 	 * @throws		NumberFormatException for bad input formats
 	 */
 	public static long convertKMGValue(final String input) {
-	    Matcher m = valueMatch.matcher(input);
+	    Matcher m = VALUE_MATCH.matcher(input);
 	    if (m.matches()) {
 		long value = Long.parseLong(m.group(1));
-		Range range = Range.getRangeByPrefix(m.group(2));
+		String suffix = m.group(2);
+		Range range = Range.getRangeBySuffix(suffix);
 		if (range != null) {
-		    value *= range.getMultiplier();
+		    if (suffix.toUpperCase().endsWith("I"))
+			value *= range.getMultiplier(RangeMode.BINARY);
+		    else
+			value *= range.getMultiplier(RangeMode.DECIMAL);
 		}
 		// Restrict range to less than a terabyte
+		// TODO: is this necessary anymore??
 		if (value >= -MULT_TB && value < MULT_TB)
 		    return value;
 		throw new NumberFormatException(Intl.getString("util#numeric.outsideKMGRange"));
@@ -335,18 +455,31 @@ public class NumericUtil
 
 
 	/**
-	 * Format a value using the {@link Range} enum to put into a readable range.
+	 * Format a value using the {@link Range} enum to put into a readable range,
+	 * using mixed-mode units..
 	 *
 	 * @param	value	The input value to format.
 	 * @return		The value formatted to an appropriate range.
 	 */
 	public static String formatToRange(final long value) {
-	    Range r = Range.getRangeOfValue(value);
+	    return formatToRange(value, RangeMode.MIXED);
+	}
+
+	/**
+	 * Format a value using the {@link Range} enum to put into a readable range,
+	 * using either Binary or SI-based units.
+	 *
+	 * @param	value	The input value to format.
+	 * @param	mode	Decide which value to use.
+	 * @return		The value formatted to an appropriate range.
+	 */
+	 public static String formatToRange(final long value, final RangeMode mode) {
+	    Range r = Range.getRangeOfValue(value, mode);
 	    if (r == Range.BYTES)
-		return String.format("%1$d %2$s", value, r.getShortName());
+		return String.format("%1$d %2$s", value, r.getShortName(mode));
 	    else {
-		double scaledValue = (double)value / (double)r.getMultiplier();
-		String name = r.getShortName();
+		double scaledValue = (double)value / (double)r.getMultiplier(mode);
+		String name = r.getShortName(mode);
 		if (scaledValue < 10.0d)
 		    return String.format("%1$3.2f %2$s", scaledValue, name);
 		else if (scaledValue < 100.0d)
@@ -359,24 +492,37 @@ public class NumericUtil
 
 	/**
 	 * Format a value using the {@link Range} enum to put into a readable range,
-	 * but use just the prefix (to save space).
+	 * but use just the suffix (to save space).
 	 *
 	 * @param	value	The input value to format.
 	 * @return		The value formatted (short form) to an appropriate range.
 	 */
 	public static String formatToRangeShort(final long value) {
-	    Range r = Range.getRangeOfValue(value);
+	    return formatToRangeShort(value, RangeMode.MIXED);
+	}
+
+
+	/**
+	 * Format a value using the {@link Range} enum to put into a readable range,
+	 * but use just the suffix (to save space).
+	 *
+	 * @param	value	The input value to format.
+	 * @param	mode	Whether to use binary or SI units.
+	 * @return		The value formatted (short form) to an appropriate range.
+	 */
+	public static String formatToRangeShort(final long value, final RangeMode mode) {
+	    Range r = Range.getRangeOfValue(value, mode);
 	    if (r == Range.BYTES)
 		return String.format("%1$d B", value);
 	    else {
-		double scaledValue = (double)value / (double)r.getMultiplier();
-		String prefix = r.getPrefix();
+		double scaledValue = (double)value / (double)r.getMultiplier(mode);
+		String suffix = r.getSuffix(mode);
 		if (scaledValue < 10.0d)
-		    return String.format("%1$3.2f %2$sB", scaledValue, prefix);
+		    return String.format("%1$3.2f %2$sB", scaledValue, suffix);
 		else if (scaledValue < 100.0d)
-		    return String.format("%1$3.1f %2$sB", scaledValue, prefix);
+		    return String.format("%1$3.1f %2$sB", scaledValue, suffix);
 		else
-		    return String.format("%1$3.0f %2$sB", scaledValue, prefix);
+		    return String.format("%1$3.0f %2$sB", scaledValue, suffix);
 	    }
 	}
 
@@ -389,6 +535,18 @@ public class NumericUtil
 	 */
 	public static String getLongRangeName(final long value) {
 	    return Range.getRangeOfValue(value).getLongName();
+	}
+
+
+	/**
+	 * The "long" range name will be something like "Kilobytes", or "Megabytes".
+	 *
+	 * @param	value	The input value to test for range.
+	 * @param	mode	Whether to use binary or SI units.
+	 * @return		The long name of the appropriate range for this value.
+	 */
+	public static String getLongRangeName(final long value, final RangeMode mode) {
+	    return Range.getRangeOfValue(value, mode).getLongName(mode);
 	}
 
 
