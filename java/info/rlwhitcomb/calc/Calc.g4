@@ -48,6 +48,8 @@
  *	    Fix precedence of factorial; rename some aliases.
  *	14-Dec-2020 (rlwhitcomb)
  *	    Allow octal and binary output format.
+ *	16-Dec-2020 (rlwhitcomb)
+ *	    Add fib(n) and $echo directive.
  */
 
 grammar Calc;
@@ -101,6 +103,7 @@ expr
    | MAX exprN                   # maxExpr
    | MIN exprN                   # minExpr
    | JOIN exprN                  # joinExpr
+   | FIB expr                    # fibExpr
    | expr '>>>' expr             # shiftRightUnsignedExpr
    | expr '>>' expr              # shiftRightExpr
    | expr '<<' expr              # shiftLeftExpr
@@ -154,6 +157,7 @@ directive
    | RADIANS                     # radiansDirective
    | CLEAR                       # clearDirective
    | VERSION                     # versionDirective
+   | ECHO expr                   # echoDirective
    | ( HELP | '?' )              # helpDirective
    | ( QUIT | EXIT )             # exitDirective
    ;
@@ -211,6 +215,8 @@ MAX     : [mM][aA][xX] ;
 MIN     : [mM][iI][nN] ;
 
 JOIN    : [jJ][oO][iI][nN] ;
+
+FIB     : [fF][iI][bB] ;
 
 
 /* Commands (or directives) that are specially treated,
@@ -279,6 +285,11 @@ RADIANS
 CLEAR
    : DIR ( [cC][lL][rR] | [cC][lL][eE][aA][rR] )
    ;
+
+ECHO
+   : DIR [eE][cC][hH][oO]
+   ;
+
 
 FORMAT
    : ',' [xXtThHoObB%]

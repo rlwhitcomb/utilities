@@ -77,6 +77,8 @@
  *	    Add "factorial" method for BigDecimal.
  *	08-Dec-2020 (rlwhitcomb)
  *	    Add "sin" method for BigDecimal (using Maclaurin series expansion).
+ *	13-Dec-2020 (rlwhitcomb)
+ *	    Implement fib(n).
  */
 package info.rlwhitcomb.util;
 
@@ -1137,20 +1139,47 @@ public class NumericUtil
 	 * @return	The value of <tt>n!</tt>
 	 */
 	public static BigDecimal factorial(final Number base) {
-	    BigInteger value  = BigInteger.ONE;
 	    double baseDouble = base.doubleValue();
 	    double baseFloor  = Math.floor(baseDouble);
 
 	    if (baseFloor != baseDouble || baseFloor < 0.0)
 		throw new IllegalArgumentException(Intl.getString("util#numeric.notInteger"));
-	    long loops = (long)baseFloor;
-	    BigInteger term = BigInteger.ONE;
+
+	    long loops       = base.longValue();
+	    BigInteger term  = BigInteger.ONE;
+	    BigInteger value = BigInteger.ONE;
 
 	    for (long i = 2L; i <= loops; i++) {
-		term = term.add(BigInteger.ONE);
+		term  = term.add(BigInteger.ONE);
 		value = value.multiply(term);
 	    }
+
 	    return new BigDecimal(value);
+	}
+
+
+	/**
+	 * Find the n-th Fibonacci number, where fib(0) = fib(1) = 1
+	 * and fib(n) = fib(n - 1) + n;
+	 *
+	 * @param n	The desired term number.
+	 * @return	The n-th Fibonacci number.
+	 */
+	public static BigDecimal fib(final Number n) {
+	    double nDouble = n.doubleValue();
+	    double nFloor  = Math.floor(nDouble);
+
+	    if (nFloor != nDouble || nFloor < 0.0)
+		throw new IllegalArgumentException(Intl.getString("util#numeric.notInteger"));
+
+	    long loops        = n.longValue();
+	    BigInteger result = BigInteger.ONE;
+
+	    for (long i = 2L; i <= loops; i++) {
+		result = result.multiply(BigInteger.valueOf(i));
+	    }
+
+	    return new BigDecimal(result);
 	}
 
 

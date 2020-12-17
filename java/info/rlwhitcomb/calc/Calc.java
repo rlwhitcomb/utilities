@@ -147,6 +147,11 @@ public class Calc
 	}
 
 	@Override
+	public void displayMessage(String message) {
+	    System.out.println(message);
+	}
+
+	@Override
 	public void displayErrorMessage(String message) {
 	    System.err.println(message);
 	}
@@ -204,6 +209,11 @@ public class Calc
 		@Override
 		public void displayActionMessage(String message) {
 		    System.out.println(VALUE_COLOR + message + RESET);
+		}
+
+		@Override
+		public void displayMessage(String message) {
+		    System.out.println(ARROW_COLOR + message + RESET);
 		}
 
 		@Override

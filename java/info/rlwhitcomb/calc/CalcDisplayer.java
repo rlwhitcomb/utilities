@@ -26,6 +26,8 @@
  *  History:
  *      11-Dec-2020 (rlwhitcomb)
  *          Inital coding.
+ *	16-Dec-2020 (rlwhitcomb)
+ *	    New interface method for "$echo".
  */
 package info.rlwhitcomb.calc;
 
@@ -50,6 +52,13 @@ public interface CalcDisplayer
 	 * @param message	The message to display.
 	 */
 	void displayActionMessage(String message);
+
+	/**
+	 * Display a general message (such as from "$echo").
+	 *
+	 * @param message	The message to display.
+	 */
+	void displayMessage(String message);
 
 	/**
 	 * Display an error message, possibly in a message box, in a special

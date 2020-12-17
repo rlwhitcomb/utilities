@@ -47,6 +47,8 @@
  *	    Refactor for GUI mode; implement ! and ~.
  *	14-Dec-2020 (rlwhitcomb)
  *	    Octal and Binary output format.
+ *	16-Dec-2020 (rlwhitcomb)
+ *	    Implement fib(n) and $echo directive.
  */
 package info.rlwhitcomb.calc;
 
@@ -367,6 +369,25 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitHelpDirective(CalcParser.HelpDirectiveContext ctx) {
 	    Calc.printHelp();
+	    return null;
+	}
+
+	@Override
+	public Object visitEchoDirective(CalcParser.EchoDirectiveContext ctx) {
+	    Object e = visit(ctx.expr());
+	    String msg;
+
+	    if (e == null)
+		msg = "<null>";
+	    else if (e instanceof String)
+		msg = (String)e;
+	    else if (e instanceof BigDecimal)
+		msg = ((BigDecimal)e).toPlainString();
+	    else
+		msg = e.toString();
+
+	    displayer.displayMessage(msg);
+
 	    return null;
 	}
 
@@ -883,6 +904,18 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    buf.append(getStringValue(exprs.get(i)));
 		}
 		return buf.toString();
+	    }
+	}
+
+	@Override
+	public Object visitFibExpr(CalcParser.FibExprContext ctx) {
+	    BigInteger e = getIntegerValue(ctx.expr());
+
+	    try {
+		return NumericUtil.fib(e);
+	    }
+	    catch (ArithmeticException ae) {
+		throw new CalcExprException(ae, ctx);
 	    }
 	}
 
