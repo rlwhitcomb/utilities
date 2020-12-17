@@ -53,6 +53,8 @@
  *	    Shortcuts for Quit or Exit.
  *	16-Dec-2020 (rlwhitcomb)
  *	    Add fib(n) and $echo directive.
+ *	16-Dec-2020 (rlwhitcomb)
+ *	    Add KB constant for input.
  */
 
 grammar Calc;
@@ -144,6 +146,7 @@ value
    | BIN_CONST                   # binaryValue
    | OCT_CONST                   # octalValue
    | HEX_CONST                   # hexValue
+   | KB_CONST                    # kbValue
    | ( TRUE | FALSE )            # booleanValue
    | NULL                        # nullValue
    | PI                          # piValue
@@ -333,6 +336,10 @@ OCT_CONST
 
 HEX_CONST
    : '0' [xX] [0-9a-fA-F] +
+   ;
+
+KB_CONST
+   : INT [kKmMgGtTpPeE][iI]?[bB]?
    ;
 
 

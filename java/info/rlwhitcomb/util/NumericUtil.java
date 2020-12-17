@@ -443,11 +443,7 @@ public class NumericUtil
 		    else
 			value *= range.getMultiplier(RangeMode.DECIMAL);
 		}
-		// Restrict range to less than a terabyte
-		// TODO: is this necessary anymore??
-		if (value >= -MULT_TB && value < MULT_TB)
-		    return value;
-		throw new NumberFormatException(Intl.getString("util#numeric.outsideKMGRange"));
+		return value;
 	    }
 	    else
 		throw new NumberFormatException(Intl.getString("util#numeric.badKMGFormat"));

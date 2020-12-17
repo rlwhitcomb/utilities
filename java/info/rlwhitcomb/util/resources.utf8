@@ -68,6 +68,8 @@
 #	    Add debug info to "printProgramInfo".
 #	02-Dec-2020 (rlwhitcomb)
 #	    New error messages from NumericUtil.
+#	16-Dec-2020 (rlwhitcomb)
+#	    Change error messages for KMG conversions.
 #
 
 #
@@ -116,8 +118,7 @@ intl.providerNotFound	= Unable to find resource provider for "%1$s" package.
 #
 # From NumericUtil.java
 #
-numeric.outsideKMGRange	= Value out of range of kilo-, mega- or gigabytes.
-numeric.badKMGFormat	= Improper input format: must be "nnK" or "nnM" or "nnG".
+numeric.badKMGFormat	= Improper input format: suffix must be one of [K,M,G,T,P,E].
 numeric.outOfRange	= Value is out of range.
 numeric.badDataType	= Data type %1$s is not recognized in binary files.
 numeric.badDataTypeCode	= Data type code %1$d is not recognized.

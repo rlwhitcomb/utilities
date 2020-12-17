@@ -53,6 +53,8 @@
  *	    Binary or SI directives.
  *	16-Dec-2020 (rlwhitcomb)
  *	    Implement fib(n) and $echo directive.
+ *	16-Dec-2020 (rlwhitcomb)
+ *	    Implement KB, MB, etc. inputs.
  */
 package info.rlwhitcomb.calc;
 
@@ -1169,6 +1171,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public Object visitHexValue(CalcParser.HexValueContext ctx) {
 	    String value = ctx.HEX_CONST().getText();
 	    return new BigInteger(value.substring(2), 16);
+	}
+
+	@Override
+	public Object visitKbValue(CalcParser.KbValueContext ctx) {
+	    String value = ctx.KB_CONST().getText();
+	    return BigInteger.valueOf(NumericUtil.convertKMGValue(value));
 	}
 
 	@Override

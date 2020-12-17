@@ -138,4 +138,10 @@ $ten
 $mixed
 1024**3,k
 
+100MB
+2EB
+900KB,k
+300PB
+450PiB
+
 $echo "End of expression tests (suite 1)."
