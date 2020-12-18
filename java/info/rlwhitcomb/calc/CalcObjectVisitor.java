@@ -55,6 +55,8 @@
  *	    Implement fib(n) and $echo directive.
  *	16-Dec-2020 (rlwhitcomb)
  *	    Implement KB, MB, etc. inputs.
+ *	17-Dec-2020 (rlwhitcomb)
+ *	    Implement object and array.
  */
 package info.rlwhitcomb.calc;
 
@@ -63,6 +65,7 @@ import java.math.BigInteger;
 import java.math.MathContext;
 import java.math.RoundingMode;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -271,6 +274,28 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		return value.toString();
 	}
 
+	private String toString(Map<String, Object> map) {
+	    StringBuilder buf = new StringBuilder();
+	    buf.append("{ ");
+	    for (Map.Entry<String, Object> entry : map.entrySet()) {
+		buf.append(entry.getKey()).append(": ");
+		// TODO: need a slightly better conversion for objects (like in ExprStmt)
+		buf.append(entry.getValue().toString()).append(", ");
+	    }
+	    buf.delete(buf.length() - 2, buf.length()).append(" }");
+	    return buf.toString();
+	}
+
+	private String toString(List<Object> list) {
+	    StringBuilder buf = new StringBuilder();
+	    buf.append("[ ");
+	    for (Object value : list) {
+		// TODO: need a slightly better conversion for objects (like in ExprStmt)
+		buf.append(value == null ? "<null>" : value.toString()).append(", ");
+	    }
+	    buf.delete(buf.length() - 2, buf.length()).append(" ]");
+	    return buf.toString();
+	}
 
 	private int compareValues(ParserRuleContext ctx1, ParserRuleContext ctx2) {
 	    return compareValues(ctx1, ctx2, false, false);
@@ -447,6 +472,11 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    else {
 		if (!format.isEmpty()) {
 		    char formatChar = format.charAt(1);
+
+		    if (result instanceof Map || result instanceof List) {
+			throw new CalcExprException("Cannot convert object or array to '" + formatChar + "' format.", ctx);
+		    }
+
 		    switch (formatChar) {
 			case 'h':
 			case 'H':
@@ -550,18 +580,56 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    // This is from format conversion
 		    result = ((StringBuilder)result).toString();
 		}
-		else if (result instanceof String)
+		else if (result instanceof Map) {
+		    @SuppressWarnings("unchecked")
+		    Map<String, Object> map = (Map<String, Object>)result;
+		    valueBuf.append(toString(map));
+		}
+		else if (result instanceof List) {
+		    @SuppressWarnings("unchecked")
+		    List<Object> list = (List<Object>)result;
+		    valueBuf.append(toString(list));
+		}
+		else if (result instanceof String) {
 		    valueBuf.append(CharUtil.addDoubleQuotes((String)result));
-		else if (result instanceof BigDecimal)
+		}
+		else if (result instanceof BigDecimal) {
 		    valueBuf.append(((BigDecimal)result).toPlainString());
-		else
+		}
+		else {
 		    valueBuf.append(result.toString());
+		}
 	    }
 	    valueBuf.append(suffix);
 
 	    displayer.displayResult(exprBuf.toString(), valueBuf.toString());
 	    return result;
 
+	}
+
+	@Override
+	public Object visitObjExpr(CalcParser.ObjExprContext ctx) {
+	    CalcParser.ObjContext oCtx = ctx.obj();
+	    Map<String, Object> obj = new HashMap<>();
+	    for (CalcParser.PairContext pCtx : oCtx.pair()) {
+		TerminalNode id  = pCtx.ID();
+		TerminalNode str = pCtx.STRING();
+		String key = (id != null) ? id.getText() : str.getText();
+		Object value = visit(pCtx.expr());
+		obj.put(key, value);
+	    }
+	    return obj;
+	}
+
+	@Override
+	public Object visitArrExpr(CalcParser.ArrExprContext ctx) {
+	   CalcParser.ArrContext aCtx = ctx.arr();
+	   List<Object> list = new ArrayList<>();
+	   for (CalcParser.ExprContext expr : aCtx.expr()) {
+		Object value = visit(expr);
+		list.add(value);
+	   }
+	   return list;
 	}
 
 	@Override

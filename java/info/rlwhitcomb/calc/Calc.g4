@@ -55,6 +55,8 @@
  *	    Add fib(n) and $echo directive.
  *	16-Dec-2020 (rlwhitcomb)
  *	    Add KB constant for input.
+ *	17-Dec-2020 (rlwhitcomb)
+ *	    Add object and array.
  */
 
 grammar Calc;
@@ -71,6 +73,8 @@ stmt
 
 expr
    : value                       # valueExpr
+   | obj                         # objExpr
+   | arr                         # arrExpr
    | ID '++'                     # postIncExpr
    | ID '--'                     # postDecExpr
    | '++' ID                     # preIncExpr
@@ -138,6 +142,21 @@ expr2
 exprN
    : '(' expr ( ',' expr ) * ')'
    | expr ( ',' expr ) *
+   ;
+
+obj
+   : '{' pair ( ',' pair ) * '}'
+   | '{' '}'
+   ;
+
+pair
+   : ID ':' expr
+   | STRING ':' expr
+   ;
+
+arr
+   : '[' expr ( ',' expr ) * ']'
+   | '[' ']'
    ;
 
 value
