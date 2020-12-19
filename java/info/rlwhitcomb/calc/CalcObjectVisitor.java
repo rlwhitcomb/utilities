@@ -57,6 +57,8 @@
  *	    Implement KB, MB, etc. inputs.
  *	17-Dec-2020 (rlwhitcomb)
  *	    Implement object and array.
+ *	18-Dec-2020 (rlwhitcomb)
+ *	    Start to implement assignment to array / map elements.
  */
 package info.rlwhitcomb.calc;
 
@@ -274,13 +276,23 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		return value.toString();
 	}
 
+	private String toString(Object result) {
+	    if (result == null)
+		return "<null>";
+	    else if (result instanceof String)
+		return CharUtil.addDoubleQuotes((String)result);
+	    else if (result instanceof BigDecimal)
+		return ((BigDecimal)result).toPlainString();
+
+	    return result.toString();
+	}
+
 	private String toString(Map<String, Object> map) {
 	    StringBuilder buf = new StringBuilder();
 	    buf.append("{ ");
 	    for (Map.Entry<String, Object> entry : map.entrySet()) {
 		buf.append(entry.getKey()).append(": ");
-		// TODO: need a slightly better conversion for objects (like in ExprStmt)
-		buf.append(entry.getValue().toString()).append(", ");
+		buf.append(toString(entry.getValue())).append(", ");
 	    }
 	    buf.delete(buf.length() - 2, buf.length()).append(" }");
 	    return buf.toString();
@@ -290,8 +302,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    StringBuilder buf = new StringBuilder();
 	    buf.append("[ ");
 	    for (Object value : list) {
-		// TODO: need a slightly better conversion for objects (like in ExprStmt)
-		buf.append(value == null ? "<null>" : value.toString()).append(", ");
+		buf.append(toString(value)).append(", ");
 	    }
 	    buf.delete(buf.length() - 2, buf.length()).append(" ]");
 	    return buf.toString();
@@ -430,19 +441,10 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitEchoDirective(CalcParser.EchoDirectiveContext ctx) {
-	    Object e = visit(ctx.expr());
-	    String msg;
+	    CalcParser.ExprContext expr = ctx.expr();
+	    String msg = (expr != null) ? toString(visit(expr)) : "";
 
-	    if (e == null)
-		msg = "<null>";
-	    else if (e instanceof String)
-		msg = (String)e;
-	    else if (e instanceof BigDecimal)
-		msg = ((BigDecimal)e).toPlainString();
-	    else
-		msg = e.toString();
-
-	    displayer.displayMessage(msg);
+	    displayer.displayMessage(CharUtil.stripAnyQuotes(msg, true));
 
 	    return null;
 	}
@@ -590,14 +592,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    List<Object> list = (List<Object>)result;
 		    valueBuf.append(toString(list));
 		}
-		else if (result instanceof String) {
-		    valueBuf.append(CharUtil.addDoubleQuotes((String)result));
-		}
-		else if (result instanceof BigDecimal) {
-		    valueBuf.append(((BigDecimal)result).toPlainString());
-		}
 		else {
-		    valueBuf.append(result.toString());
+		    valueBuf.append(toString(result));
 		}
 	    }
 	    valueBuf.append(suffix);
@@ -1274,11 +1270,72 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public Object visitAssignExpr(CalcParser.AssignExprContext ctx) {
 	    Object value = visit(ctx.expr());
-	    String name  = ctx.ID().getText();
+	    String name;
 
-	    variables.put(name, value);
+	    CalcParser.VarContext var   = ctx.var();
+	    TerminalNode id             = var.ID();
+	    CalcParser.ExprContext expr = var.expr();
+	    CalcParser.VarContext var2  = var.var(0);
+
+	    // TODO: until we figure out recursive lookup, just do one level of indirection
+	    // If expr is present, this is an array reference at this level
+	    if (expr != null) {
+		id        = var2.ID();
+		name      = id.getText();
+		int index = getShiftValue(expr);
+		// TODO: error out for negative indexes
+		Object listValue = variables.get(name);
+		List<Object> list = null;
+		if (listValue != null && listValue instanceof List) {
+		    list = (List<Object>)listValue;
+		}
+		else if (listValue == null) {
+		    list = new ArrayList<>();
+		    variables.put(name, list);
+		}
+		else {
+		    // TODO: throw error b/c value not a List
+		}
+		// Set empty values up to the index desired
+		int size = list.size();
+		for (int i = size; i <= index; i++)
+		    list.add(null);
+
+		list.set(index, value);
+	    }
+	    else {
+		if (id == null) {
+		    id   = var2.ID();
+		    name = id.getText();
+		    CalcParser.VarContext var3 = var.var(1);
+		    TerminalNode keyNode;
+		    if (var3 != null)
+			keyNode = var3.ID();
+		    else
+			keyNode = var.STRING(0);
+		    String nameKey = keyNode.getText();
+		    Object mapValue = variables.get(name);
+		    Map<String, Object> map = null;
+		    if (mapValue != null && mapValue instanceof Map) {
+			map = (Map<String, Object>)mapValue;
+		    }
+		    else if (mapValue == null) {
+			map = new HashMap<>();
+			variables.put(name, map);
+		    }
+		    else {
+			// TODO: throw error b/c value not a map
+		    }
+		    map.put(nameKey, value);
+		}
+		else {
+		    name = id.getText();
+		    variables.put(name, value);
+		}
+	    }
 
 	    return value;
 	}

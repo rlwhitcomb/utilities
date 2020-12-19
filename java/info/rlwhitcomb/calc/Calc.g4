@@ -57,6 +57,8 @@
  *	    Add KB constant for input.
  *	17-Dec-2020 (rlwhitcomb)
  *	    Add object and array.
+ *	18-Dec-2020 (rlwhitcomb)
+ *	    Allow assignments to object and array.
  */
 
 grammar Calc;
@@ -131,7 +133,7 @@ expr
    | expr BOOL_AND expr          # booleanAndExpr
    | expr BOOL_OR expr           # booleanOrExpr
    |<assoc=right> expr '?' expr ':' expr # eitherOrExpr
-   |<assoc=right> ID ASSIGN expr # assignExpr
+   |<assoc=right> var ASSIGN expr # assignExpr
    ;
 
 expr2
@@ -157,6 +159,12 @@ pair
 arr
    : '[' expr ( ',' expr ) * ']'
    | '[' ']'
+   ;
+
+var
+   : var ( '.' ( var | STRING ) ) +
+   | var '[' expr ']'
+   | ID
    ;
 
 value
@@ -185,7 +193,7 @@ directive
    | MIXED			 # mixedDirective
    | CLEAR                       # clearDirective
    | VERSION                     # versionDirective
-   | ECHO expr                   # echoDirective
+   | ECHO expr ?                 # echoDirective
    | ( HELP | '?' )              # helpDirective
    | ( QUIT | EXIT )             # exitDirective
    ;

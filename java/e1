@@ -1,4 +1,5 @@
 $echo "Starting expression tests (suite 1)."
+$echo
 
 $decimal(50)
 52+27
@@ -144,4 +145,28 @@ $mixed
 300PB
 450PiB
 
+$echo
+
+a = [1, 2, 3]
+a[0] = 4
+a[1] = 5
+a
+a[3] = 10
+a
+
+b = null
+b[2] = 'abc'
+b
+b[0] = 'ABC'
+b
+
+c = null
+c.d = true
+c.f = 1.2
+c.g = "Begin"
+c."key" = 'end'
+c
+
+$echo
 $echo "End of expression tests (suite 1)."
+
