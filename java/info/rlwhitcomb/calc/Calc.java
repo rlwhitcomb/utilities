@@ -91,6 +91,7 @@ public class Calc
 	};
 
 	private static boolean guiMode = false;
+	private static boolean debug   = false;
 
 	private BXMLSerializer serializer = null;
 
@@ -308,6 +309,11 @@ public class Calc
 		CalcParser parser = new CalcParser(tokens);
 		parser.setErrorHandler(errorStrategy);
 		ParseTree tree = parser.prog();
+
+		if (debug) {
+		    System.out.println(tree.toStringTree(parser));
+		}
+
 		visitor.visit(tree);
 	    }
 	    catch (IllegalArgumentException iae) {
@@ -329,6 +335,14 @@ public class Calc
 		case "con":
 		case "c":
 		    guiMode = false;
+		    break;
+		case "debug":
+		case "d":
+		    debug = true;
+		    break;
+		case "nodebug":
+		case "no":
+		    debug = false;
 		    break;
 		default:
 		    System.err.println("Unknown option \"" + arg + "\"; ignoring.");
