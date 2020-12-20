@@ -59,6 +59,7 @@
  *	    Add object and array.
  *	18-Dec-2020 (rlwhitcomb)
  *	    Allow assignments to object and array.
+ *	    Adjust precedence of functions vs. arithmetic.
  */
 
 grammar Calc;
@@ -87,12 +88,6 @@ expr
    | '!' expr                    # booleanNotExpr
    | expr '!'                    # factorialExpr
    | '(' expr ')'                # parenExpr
-   |<assoc=right> expr '**' expr # powerExpr
-   | expr '*' expr               # multiplyExpr
-   | expr '/' expr               # divideExpr
-   | expr '%' expr               # modulusExpr
-   | expr '+' expr               # addExpr
-   | expr '-' expr               # subtractExpr
    | ABS expr                    # absExpr
    | SIN expr                    # sinExpr
    | COS expr                    # cosExpr
@@ -115,6 +110,12 @@ expr
    | MIN exprN                   # minExpr
    | JOIN exprN                  # joinExpr
    | FIB expr                    # fibExpr
+   |<assoc=right> expr '**' expr # powerExpr
+   | expr '*' expr               # multiplyExpr
+   | expr '/' expr               # divideExpr
+   | expr '%' expr               # modulusExpr
+   | expr '+' expr               # addExpr
+   | expr '-' expr               # subtractExpr
    | expr '>>>' expr             # shiftRightUnsignedExpr
    | expr '>>' expr              # shiftRightExpr
    | expr '<<' expr              # shiftLeftExpr

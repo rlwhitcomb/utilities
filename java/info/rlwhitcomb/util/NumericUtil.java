@@ -81,6 +81,8 @@
  *	    Implement fib(n).
  *	14-Dec-2020 (rlwhitcomb)
  *	    Add Exabytes to the long range; option for SI vs. binary values.
+ *	19-Dec-2020 (rlwhitcomb)
+ *	    Ooops! Fib was doing factorial instead of fib.
  */
 package info.rlwhitcomb.util;
 
@@ -1313,8 +1315,8 @@ public class NumericUtil
 
 
 	/**
-	 * Find the n-th Fibonacci number, where fib(0) = fib(1) = 1
-	 * and fib(n) = fib(n - 1) + n;
+	 * Find the n-th Fibonacci number, where fib(0) = 0,
+	 * fib(1) = 1, and fib(n) = fib(n - 1) + fib(n - 2);
 	 *
 	 * @param n	The desired term number.
 	 * @return	The n-th Fibonacci number.
@@ -1327,10 +1329,20 @@ public class NumericUtil
 		throw new IllegalArgumentException(Intl.getString("util#numeric.notInteger"));
 
 	    long loops        = n.longValue();
+	    BigInteger n_2    = BigInteger.ZERO;
+	    BigInteger n_1    = BigInteger.ONE;
 	    BigInteger result = BigInteger.ONE;
 
-	    for (long i = 2L; i <= loops; i++) {
-		result = result.multiply(BigInteger.valueOf(i));
+	    if (loops == 0L)
+		result = n_2;
+	    else if (loops == 1L)
+		result = n_1;
+	    else {
+		for (long i = 2L; i <= loops; i++) {
+		    result = n_2.add(n_1);
+		    n_2    = n_1;
+		    n_1    = result;
+		}
 	    }
 
 	    return new BigDecimal(result);

@@ -78,6 +78,8 @@
 		Add "build.properties" to the .jar file.
 	    16-Dec-2020 (rlwhitcomb)
 		Add "Sleep".
+	    19-Dec-2020 (rlwhitcomb)
+		Add debug setting for javac. Add the Calc script to "test".
 
      ========================================================================== -->
 
@@ -166,7 +168,7 @@
 			<arg value="-no-listener"/>
 			<arg line="-package info.rlwhitcomb.calc"/>
 		</java>
-		<javac includeAntRuntime="false" createMissingPackageInfoClass="false" encoding="utf-8">
+		<javac includeAntRuntime="false" createMissingPackageInfoClass="false" encoding="utf-8" debug="${javac.debug}">
 			<compilerarg line="${compiler.args}"/>
 			<src path="."/>
 			<src path="net/iharder/b64"/>
@@ -247,6 +249,9 @@
 		<java classname="DynArrayTest"/>
 		<java classname="info.rlwhitcomb.matches.MatchesTest"/>
 		<java classname="TestNumericUtil"/>
+		<java classname="info.rlwhitcomb.calc.Calc">
+			<arg value="e1"/>
+		</java>
 	</target>
 
 	<target name="clean" description="Cleans all generated files.">
