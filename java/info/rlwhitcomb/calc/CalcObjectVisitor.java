@@ -63,6 +63,8 @@
  *	    Rework fib().
  *	19-Dec-2020 (rlwhitcomb)
  *	    Regularize the exit process.
+ *	20-Dec-2020 (rlwhitcomb)
+ *	    Fix the recursive print of objects inside arrays.
  */
 package info.rlwhitcomb.calc;
 
@@ -281,12 +283,25 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	private String toString(Object result) {
-	    if (result == null)
+	    if (result == null) {
 		return "<null>";
-	    else if (result instanceof String)
+	    }
+	    else if (result instanceof String) {
 		return CharUtil.addDoubleQuotes((String)result);
-	    else if (result instanceof BigDecimal)
+	    }
+	    else if (result instanceof BigDecimal) {
 		return ((BigDecimal)result).toPlainString();
+	    }
+	    else if (result instanceof Map) {
+		@SuppressWarnings("unchecked")
+		Map<String, Object> map = (Map<String, Object>)result;
+		return toString(map);
+	    }
+	    else if (result instanceof List) {
+		@SuppressWarnings("unchecked")
+		List<Object> list = (List<Object>)result;
+		return toString(list);
+	    }
 
 	    return result.toString();
 	}
@@ -585,16 +600,6 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		if (result instanceof StringBuilder) {
 		    // This is from format conversion
 		    result = ((StringBuilder)result).toString();
-		}
-		else if (result instanceof Map) {
-		    @SuppressWarnings("unchecked")
-		    Map<String, Object> map = (Map<String, Object>)result;
-		    valueBuf.append(toString(map));
-		}
-		else if (result instanceof List) {
-		    @SuppressWarnings("unchecked")
-		    List<Object> list = (List<Object>)result;
-		    valueBuf.append(toString(list));
 		}
 		else {
 		    valueBuf.append(toString(result));

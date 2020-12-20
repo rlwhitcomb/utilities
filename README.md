@@ -71,6 +71,10 @@ Work going on currently includes:
 ### Cat
 - add help
 
+### Calc
+
+- a.b.c throws NPE -> how to do recursive invocation
+
 ### UUID
 - lots of options
 - generate random one
