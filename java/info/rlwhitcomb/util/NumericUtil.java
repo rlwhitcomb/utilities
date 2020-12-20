@@ -83,6 +83,8 @@
  *	    Add Exabytes to the long range; option for SI vs. binary values.
  *	19-Dec-2020 (rlwhitcomb)
  *	    Ooops! Fib was doing factorial instead of fib.
+ *	19-Dec-2020 (rlwhitcomb)
+ *	    Implement fib for negative values.
  */
 package info.rlwhitcomb.util;
 
@@ -1318,17 +1320,18 @@ public class NumericUtil
 	 * Find the n-th Fibonacci number, where fib(0) = 0,
 	 * fib(1) = 1, and fib(n) = fib(n - 1) + fib(n - 2);
 	 *
-	 * @param n	The desired term number.
+	 * @param n	The desired term number (can be negative).
 	 * @return	The n-th Fibonacci number.
 	 */
 	public static BigDecimal fib(final Number n) {
 	    double nDouble = n.doubleValue();
-	    double nFloor  = Math.floor(nDouble);
+	    double nInt    = Math.rint(nDouble);
 
-	    if (nFloor != nDouble || nFloor < 0.0)
-		throw new IllegalArgumentException(Intl.getString("util#numeric.notInteger"));
+	    if (nInt != nDouble)
+		throw new IllegalArgumentException(Intl.getString("util#numeric.wholeInteger"));
 
-	    long loops        = n.longValue();
+	    long loops        = Math.abs(n.longValue());
+	    boolean negative  = nInt < 0.0d;
 	    BigInteger n_2    = BigInteger.ZERO;
 	    BigInteger n_1    = BigInteger.ONE;
 	    BigInteger result = BigInteger.ONE;
@@ -1345,6 +1348,10 @@ public class NumericUtil
 		}
 	    }
 
+	    if (negative) {
+		if (loops % 2L == 0)
+		    return new BigDecimal(result).negate();
+	    }
 	    return new BigDecimal(result);
 	}
 

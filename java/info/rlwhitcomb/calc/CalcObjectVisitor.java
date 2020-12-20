@@ -59,6 +59,8 @@
  *	    Implement object and array.
  *	18-Dec-2020 (rlwhitcomb)
  *	    Start to implement assignment to array / map elements.
+ *	19-Dec-2020 (rlwhitcomb)
+ *	    Rework fib().
  */
 package info.rlwhitcomb.calc;
 
@@ -1020,14 +1022,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitFibExpr(CalcParser.FibExprContext ctx) {
-	    BigInteger e = getIntegerValue(ctx.expr());
+	    BigDecimal e = getDecimalValue(ctx.expr());
 
-	    try {
-		return NumericUtil.fib(e);
-	    }
-	    catch (ArithmeticException ae) {
-		throw new CalcExprException(ae, ctx);
-	    }
+	    return NumericUtil.fib(e);
 	}
 
 	@Override

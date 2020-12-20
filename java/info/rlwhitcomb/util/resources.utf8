@@ -70,6 +70,8 @@
 #	    New error messages from NumericUtil.
 #	16-Dec-2020 (rlwhitcomb)
 #	    Change error messages for KMG conversions.
+#	19-Dec-2020 (rlwhitcomb)
+#	    One more error message.
 #
 
 #
@@ -129,6 +131,7 @@ numeric.tooManyPiDigits	= The PI digit calculation is only good for about 12,500
 numeric.piDigitMismatch	= Calculated digit length is %1$d, but requested number of digits was %2$d!
 numeric.tooManyDigits	= Too many digits of precision requested (max is %1$d).
 numeric.notInteger	= The value must be a positive whole number.
+numeric.wholeInteger	= The value must be a whole number.
 
 #
 # From SecurityUtil.java
