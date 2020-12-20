@@ -61,6 +61,8 @@
  *	    Start to implement assignment to array / map elements.
  *	19-Dec-2020 (rlwhitcomb)
  *	    Rework fib().
+ *	19-Dec-2020 (rlwhitcomb)
+ *	    Regularize the exit process.
  */
 package info.rlwhitcomb.calc;
 
@@ -453,7 +455,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitExitDirective(CalcParser.ExitDirectiveContext ctx) {
-	    System.exit(0);
+	    Calc.exit();
 	    return null;
 	}
 

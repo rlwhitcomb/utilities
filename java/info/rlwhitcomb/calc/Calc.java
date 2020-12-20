@@ -35,6 +35,8 @@
  *	    Update version; tweak title message; enhance error reporting.
  *	11-Dec-2020 (rlwhitcomb)
  *	    Use new program info mechanism.
+ *	19-Dec-2020 (rlwhitcomb)
+ *	    Regularize the exit process.
  */
 package info.rlwhitcomb.calc;
 
@@ -270,7 +272,7 @@ public class Calc
 	{
 		@Override
 		public void perform(Component source) {
-		    DesktopApplicationContext.exit(false);
+		    Calc.exit();
 		}
 	}
 
@@ -289,6 +291,13 @@ public class Calc
 
 	public static void printHelp() {
 	    Arrays.stream(HELP).forEach(System.out::println);
+	}
+
+	public static void exit() {
+	    if (guiMode)
+		DesktopApplicationContext.exit(false);
+	    else
+		System.exit(0);
 	}
 
 	private static String concatArgs(String[] args) {
