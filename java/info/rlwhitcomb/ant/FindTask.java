@@ -45,14 +45,14 @@ import org.apache.tools.ant.types.Path;
  * along those paths.
  * <p> Required options are:
  * <ul>
- * <li><tt>file=</tt> name of the file to find
- * <li><tt>location=</tt> property to set with the found location(s)
- * <li><tt>&lt;path&gt;</tt> Nested <tt>Path</tt> elements specifying places to look
+ * <li>{@code file=} name of the file to find
+ * <li>{@code location=} property to set with the found location(s)
+ * <li>{@code <path>} Nested {@code Path} elements specifying places to look
  * for the given file.
  * </ul>
  * Optional options are:
  * <ul>
- * <li><tt>all="true"|"false"</tt> whether or not to find all locations; default <tt>false</tt>
+ * <li>{@code all="true"|"false"} whether or not to find all locations; default {@code false}
  * </ul>
  * <p> Usage example:
  * <pre>
