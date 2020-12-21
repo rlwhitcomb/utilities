@@ -58,8 +58,10 @@
  *	have that thread do a final dump of the statistics, as a swan song.
  *	Construct the report titles programmatically so they are correctly
  *	centered within the width. Rename "dumpStatistics" to "reportStatistics".
- *    16-Apt-2020 (rlwhitcomb)
+ *    16-Apr-2020 (rlwhitcomb)
  *	Cleanup and prepare for GitHub.
+ *    21-Dec-2020 (rlwhitcomb)
+ *	Update obsolete Javadoc constructs.
  */
 package info.rlwhitcomb.util;
 
@@ -305,9 +307,9 @@ public class ClientStatistics implements Runnable
 	 *
 	 * @param	num	Incremental number of bytes transferred since the last call
 	 *			to this method.  Will be added to the {@link #numBytes} value.
-	 * @param	read	<tt>true</tt> if this is a "read" operation or <tt>false</tt>
+	 * @param	read	{@code true} if this is a "read" operation or {@code false}
 	 *			for "write".  The {@link #numBytesRead} will be updated if this
-	 *			value is <tt>true</tt>.
+	 *			value is {@code true}.
 	 */
 	public void addToBytes(long num, boolean read) {
 	    numBytes += num;

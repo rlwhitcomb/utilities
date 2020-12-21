@@ -44,6 +44,8 @@
  *	    Take out most of the logging now that things are working.
  *	18-Jun-2020 (rlwhitcomb)
  *	    Prepare for GitHub.
+ *	21-Dec-2020 (rlwhitcomb)
+ *	    Update obsolete Javadoc constructs.
  */
 package info.rlwhitcomb.util;
 
@@ -75,7 +77,7 @@ public class CipherInputStream extends FilterInputStream
 
 	/**
 	 * The next buffered and decrypted chunk of data that is available
-	 * through the <tt>"read"</tt> methods.
+	 * through the <code>"read"</code> methods.
 	 */
 	private byte[] availableBytes = null;
 	/**

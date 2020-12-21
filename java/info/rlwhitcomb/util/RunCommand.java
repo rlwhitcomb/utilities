@@ -51,6 +51,8 @@
  *	Simplify and fix the "commandLine" method.
  *  10-Mar-2020 (rlwhitcomb)
  *	Prepare for GitHub.
+ *  21-Dec-2020 (rlwhitcomb)
+ *	Update obsolete Javadoc constructs.
  */
 package info.rlwhitcomb.util;
 
@@ -79,9 +81,9 @@ public class RunCommand {
 	private ProcessBuilder pb = null;
 	/** The actual process object of the child. */
 	private Process p = null;
-	/** Actually this is the merged <tt>stdout</tt> and <tt>stderr</tt> of the child process. */
+	/** Actually this is the merged <code>stdout</code> and <code>stderr</code> of the child process. */
 	private BufferedInputStream stdInput = null;
-	/** The child process' <tt>stdin</tt> stream (available for writing). */
+	/** The child process' <code>stdin</code> stream (available for writing). */
 	private BufferedOutputStream stdOutput = null;
 	/** The {@link PrintStream} to use to echo the command output. */
 	private PrintStream out = System.out;
@@ -116,7 +118,7 @@ public class RunCommand {
 	}
 
 	/**
-	 * @return The subprocess' <tt>stdin</tt> stream to write to.
+	 * @return The subprocess' <code>stdin</code> stream to write to.
 	 */
 	public OutputStream getInputStream() {
 	    return this.stdOutput;
@@ -208,7 +210,7 @@ public class RunCommand {
 	 * Start the child process and wait for it to complete, possibly
 	 * echoing the output to the console.
 	 *
-	 * @param	echoOutput	<tt>true</tt> if the output from the child
+	 * @param	echoOutput	{@code true} if the output from the child
 	 *				process should be echoed to {@link System#out}
 	 * @return			return code from the child process, which will
 	 *				be {@link Integer#MIN_VALUE} if the process has
@@ -300,7 +302,7 @@ public class RunCommand {
 	 * directory first and giving a choice to echo output to the console or not.
 	 *
 	 * @param	workingDir	the child process' working directory
-	 * @param	echoOutput	<tt>true</tt> if the output from the child
+	 * @param	echoOutput	{@code true} if the output from the child
 	 *				process should be echoed to {@link System#out}
 	 * @return			return code from the child process, which will
 	 *				be {@link Integer#MIN_VALUE} if the process has

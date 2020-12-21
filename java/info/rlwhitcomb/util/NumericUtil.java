@@ -85,6 +85,8 @@
  *	    Ooops! Fib was doing factorial instead of fib.
  *	19-Dec-2020 (rlwhitcomb)
  *	    Implement fib for negative values.
+ *	21-Dec-2020 (rlwhitcomb)
+ *	    Update obsolete Javadoc constructs.
  */
 package info.rlwhitcomb.util;
 
@@ -1290,11 +1292,11 @@ public class NumericUtil
 
 	/**
 	 * Compute the factorial value for the given integer value.
-	 * <p> The value for <tt>n!</tt> is 1 * 2 * 3 * 4... to n
-	 * and where 0! = 1 (by definition)
+	 * <p> The value for <code>n!</code> is <code>1 * 2 * 3 * 4</code>... to n
+	 * and where <code>0! = 1</code> (by definition)
 	 *
 	 * @param base	The integer base (n).
-	 * @return	The value of <tt>n!</tt>
+	 * @return	The value of <code>n!</code>
 	 */
 	public static BigDecimal factorial(final Number base) {
 	    double baseDouble = base.doubleValue();

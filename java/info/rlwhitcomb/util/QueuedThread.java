@@ -48,6 +48,8 @@
  *	    Better logging throughout.
  *	28-Mar-2020 (rlwhitcomb)
  *	    I think we need an atomic integer for the id.
+ *	21-Dec-2020 (rlwhitcomb)
+ *	    Update obsolete Javadoc constructs.
  */
 package info.rlwhitcomb.util;
 
@@ -155,9 +157,9 @@ public class QueuedThread extends Thread
 	 * Submit work for this thread to do.
 	 *
 	 * @param	runnable	The work package to execute.
-	 * @return			<tt>false</tt> if waiting for
+	 * @return			<code>false</code> if waiting for
 	 *				the queue to be available is
-	 *				interrupted, <tt>true</tt>
+	 *				interrupted, <code>true</code>
 	 *				otherwise (i.e., the job was
 	 *				accepted to be run).
 	 */

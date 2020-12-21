@@ -43,6 +43,8 @@
  *	    Fix Javadoc warnings found by Java 8.
  *	10-Mar-2020 (rlwhitcomb)
  *	    Prepare for GitHub.
+ *	21-Dec-2020 (rlwhitcomb)
+ *	    Update obsolete Javadoc constructs.
  */
 package info.rlwhitcomb.util;
 
@@ -231,10 +233,10 @@ public class SecurityUtil
 	/**
 	 * Puts the password bytes into an unreadable (obfuscated) string.
 	 *
-	 * @param	b	Password bytes (UTF-8 encoded) (could be <tt>null</tt>
+	 * @param	b	Password bytes (UTF-8 encoded) (could be {@code null}
 	 *			or empty).
 	 * @return		An obfuscated string (prefixed by {@link #__OBFUSCATE})
-	 *			or an empty string if the input bytes are <tt>null</tt> or empty.
+	 *			or an empty string if the input bytes are {@code null} or empty.
 	 */
 	public static String putPasswordBytes(byte[] b) {
 	    if (b == null || b.length == 0)
@@ -245,7 +247,7 @@ public class SecurityUtil
 	/**
 	 * Get the password bytes (UTF-8) from a (possibly) obfuscated password string.
 	 *
-	 * @param	s	Potential input password string (could be <tt>null</tt> or
+	 * @param	s	Potential input password string (could be {@code null} or
 	 *			empty or obfuscated).
 	 * @return	The UTF-8 bytes of the real password value.
 	 */

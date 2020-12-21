@@ -57,6 +57,8 @@
  *	    Allow for the RunCommand to be created after the constructor.
  *	10-Mar-2020 (rlwhitcomb)
  *	    Prepare for GitHub.
+ *	21-Dec-2020 (rlwhitcomb)
+ *	    Update obsolete Javadoc constructs.
  */
 package info.rlwhitcomb.util;
 
@@ -118,7 +120,7 @@ public class CommandProcessor
 	/**
 	 * Method called for each output line produced by the command.
 	 * @param	line	The next output line produced by the command.
-	 * @return		<tt>true</tt> to continue processing, <tt>false</tt>
+	 * @return		{@code true} to continue processing, {@code false}
 	 *			if the consumer does not want to continue processing.
 	 */
 	protected boolean process(String line) {
@@ -159,7 +161,7 @@ public class CommandProcessor
 	/**
 	 * Access the subprocess environment.
 	 *
-	 * @return <tt>String, String</tt> map of the environment for the process
+	 * @return {@code <String, String>} map of the environment for the process
 	 * we will run.
 	 */
 	public Map<String, String> environment() {
@@ -206,7 +208,7 @@ public class CommandProcessor
 	 * Read an entire line from the process' output stream, breaking at the
 	 * exact system line separator (see {@link #LS}).
 	 * @param reader The output stream of the subprocess.
-	 * @return The next line from the stream or <tt>null</tt> at the end
+	 * @return The next line from the stream or {@code null} at the end
 	 * of file.
 	 * @throws IOException if there are problems
 	 */

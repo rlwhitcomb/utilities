@@ -34,6 +34,8 @@
  *	    method in these classes.
  *	10-Mar-2020 (rlwhitcomb)
  *	    Prepare for GitHub.
+ *	21-Dec-2020 (rlwhitcomb)
+ *	    Update obsolete Javadoc constructs.
  */
 package info.rlwhitcomb.util;
 
@@ -114,7 +116,7 @@ public class FileProcessor
 	 * @return	{@code true} if processing should continue (that is, no errors
 	 *		considered fatal were encountered), or {@code false} to abort
 	 *		processing.  This would be the return value from any of the
-	 *		<tt>LineProcessor</tt> methods.
+	 *		{@code LineProcessor} methods.
 	 */
 	public boolean processFile() {
 	    BufferedReader reader = null;

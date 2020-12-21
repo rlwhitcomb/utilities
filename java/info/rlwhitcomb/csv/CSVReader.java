@@ -37,6 +37,8 @@
  *	    Address Javadoc warnings found by Java 8.
  *	10-Mar-2020 (rlwhitcomb)
  *	    Prepare for GitHub.
+ *	21-Dec-2020 (rlwhitcomb)
+ *	    Update obsolete Javadoc constructs.
  */
 package info.rlwhitcomb.csv;
 
@@ -81,7 +83,7 @@ public class CSVReader implements Iterator<CSVRecord>, Iterable<CSVRecord>
 	/**
 	 * Fetch the next record from the input reader.
 	 *
-	 * @return	<tt>null</tt> for the end of input or
+	 * @return	{@code null} for the end of input or
 	 *		the next {@link CSVRecord} parsed from
 	 *		the input.
 	 *

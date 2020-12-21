@@ -44,6 +44,8 @@
  *	Error message if nothing given on command line to do.
  *   21-Oct-2020 (rlwhitcomb)
  *	Allow slash in the algorithm name (for "SHA-512/256", etc.).
+ *   21-Dec-2020 (rlwhitcomb)
+ *	Update obsolete Javadoc constructs.
  */
 
 import java.io.BufferedReader;
@@ -61,34 +63,34 @@ import java.util.regex.Pattern;
 /**
  * Calculate MD5 (or other cryptographic) hash values for input strings or files.
  * <p> This utility is meant to be run as a stand-alone executable
- * (invoked by <tt>"java MD5"</tt>) that will compute the MD5 hash value of
+ * (invoked by <code>"java MD5"</code>) that will compute the MD5 hash value of
  * a single string (given on the command line), a series of strings
  * (successive lines of a file), or of a complete file or files.
  * <p> A number of options are available -- see the help listing
- * (<tt>"java MD5 -?"</tt> or <tt>"java MD5 --help"</tt>) for explanations
+ * (<code>"java MD5 -?"</code> or <code>"java MD5 --help"</code>) for explanations
  * (see {@link #printHelp}).
  */
 public class MD5 {
 
 	/** Flag to indicate we're processing an input file one line at a time
 	 * (as opposed to hashing the whole file at once.
-	 * <p> Set by the <tt>"--line"</tt> or <tt>"--file"</tt> command-line flags.
+	 * <p> Set by the <code>"--line"</code> or <code>"--file"</code> command-line flags.
 	 */
 	private static boolean doLines = false;
 	/** Flag to indicate we want the output as lower-case hex (e.g., "abcdef")
 	 * instead of the default UPPER-CASE hex (e.g., "ABCDEF").
-	 * <p> Set by the <tt>"--lower"</tt> or <tt>"--upper"</tt> command-line flags.
+	 * <p> Set by the <code>"--lower"</code> or <code>"--upper"</code> command-line flags.
 	 */
 	private static boolean doLower = false;
 	/** Flag used to indicate what the encoding of the input file should be.
-	 * <p> Set by the <tt>"--utf8"</tt> or <tt>"--native"</tt> command-line flags.
+	 * <p> Set by the <code>"--utf8"</code> or <code>"--native"</code> command-line flags.
 	 */
 	private static boolean doUTF8 = false;
 	/** Flag to indicate verbose output is desired.
-	 * <p> Set by the <tt>"--verbose"</tt> command-line flag.
+	 * <p> Set by the <code>"--verbose"</code> command-line flag.
 	 */
 	private static boolean verbose = false;
-	/** Value set by a <tt>"--nnn"</tt> command-line flag to indicate the number of
+	/** Value set by a <code>"--nnn"</code> command-line flag to indicate the number of
 	 * bytes of the hashed value to output.
 	 */
 	private static int numBytes = 0;
@@ -98,9 +100,9 @@ public class MD5 {
 	private static boolean doSplit = false;
 	/** Value to indicate which character to use to split the hex values. */
 	private static char splitChar = ',';
-	/** Flag to indicate putting <tt>"0x"</tt> prefix on each hash byte output
-	 * (only if <tt>"--split"</tt> option is also specified).
-	 * <p> Set by <tt>"--prefix"</tt> command-line option.
+	/** Flag to indicate putting <code>"0x"</code> prefix on each hash byte output
+	 * (only if <code>"--split"</code> option is also specified).
+	 * <p> Set by <code>"--prefix"</code> command-line option.
 	 */
 	private static boolean doPrefix = false;
 	/** String to indicate an alternate hash algorithm for the digest (instead of MD5). */
@@ -117,9 +119,9 @@ public class MD5 {
 	private static char hexLowerDigits[] = { 'a', 'b', 'c', 'd', 'e', 'f' };
 	/** Hex character array used for UPPER-CASE encoding of the output. */
 	private static char hexUpperDigits[] = { 'A', 'B', 'C', 'D', 'E', 'F' };
-	/** Pattern to parse the <tt>"--split"</tt> command-line option. */
+	/** Pattern to parse the <code>"--split"</code> command-line option. */
 	private static Pattern splitCmd = Pattern.compile("^[sS][pP][lL][iI][tT](\\p{Punct})?$");
-	/** Pattern to parse the <tt>"--algorithm=&lt;name&gt;"</tt> command-line option. */
+	/** Pattern to parse the <code>"--algorithm=&lt;name&gt;"</code> command-line option. */
 	private static Pattern algoName = Pattern.compile("^[aA][lL][gG][oO][rR][iI][tT][hH][mM][:=]([\\w-/]+)$");
 	/** Flag to say we're running on a Windows O/S vs. some other (for command-line option recognition). */
 	private static boolean onWindows = System.getProperty("os.name").toLowerCase().startsWith("windows");

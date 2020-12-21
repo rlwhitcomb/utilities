@@ -121,6 +121,8 @@
  *	    Add variants of "printHelp" to print to an alternate PrintStream
  *	    (System.err or System.out for instance). Add empty param versions of
  *	    "outPrintln" and "errPrintln" (for convenience).
+ *	21-Dec-2020 (rlwhitcomb)
+ *	    Update obsolete Javadoc constructs.
  */
 package info.rlwhitcomb.util;
 
@@ -472,9 +474,9 @@ public class Intl
 	/**
 	 * Initialize all of our resource bundles automatically with the default locale
 	 * the first time we are called.  Note: {@link #initAllPackageResources} can
-	 * be called multiple times with different locales, so <tt>ScriptRunner</tt>
-	 * (for instance) which can specify the Locale name as a command-line parameter
-	 * will work correctly, even with this static initialization.
+	 * be called multiple times with different locales, so programs (for instance)
+	 * which can specify the Locale name as a command-line parameter will work
+	 * correctly, even with this static initialization.
 	 */
 	static {
 	    initAllPackageResources(Locale.getDefault());
@@ -629,7 +631,7 @@ public class Intl
 
 	/**
 	 * Helper function to load a single string resource.
-	 * <p> Just like the <tt>BXMLSerializer</tt>, if the given
+	 * <p> Just like the {@code BXMLSerializer}, if the given
 	 * string resource does not exist the result is just the
 	 * resource name (to avoid costly exceptions).  But the
 	 * result is logged so a postprocessor can gather up these

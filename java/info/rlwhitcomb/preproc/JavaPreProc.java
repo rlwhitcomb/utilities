@@ -121,6 +121,8 @@
  *	Reformat to current tab specs.  Bump version.
  *    09-Jan-2020 (rlwhitcomb)
  *	Change package, bump version, update copyright year.
+ *    21-Dec-2020 (rlwhitcomb)
+ *	Update Javadoc to latest conventions.
  */
 package info.rlwhitcomb.preproc;
 
@@ -158,129 +160,129 @@ import org.apache.tools.ant.Task;
  * Provide C/C++ style preprocessing for Java source code.
  * <p> Supports the following constructs:
  * <ul>
- * <li><tt>#define <i>var value</i></tt>
- * <li><tt>#define <i>var</i></tt>
- * <li><tt>#undef <i>var</i></tt>
- * <li><tt>#if</tt> {expr}
- * <li><tt>#ifnum</tt> {expr}
- * <li><tt>#ifstr</tt> {expr}
- * <li><tt>#ifistr</tt> {expr}
- * <li><tt>#ifdef</tt>
- * <li><tt>#ifndef</tt>
- * <li><tt>#else</tt>
- * <li><tt>#elif</tt> {expr}
- * <li><tt>#elseif</tt> {expr}
- * <li><tt>#endif</tt>
- * <li><tt>#include</tt> {file}
- * <li><tt>#error</tt> {message}
+ * <li><code>#define <var>var value</var></code>
+ * <li><code>#define <i>var</i></code>
+ * <li><code>#undef <i>var</i></code>
+ * <li><code>#if</code> {expr}
+ * <li><code>#ifnum</code> {expr}
+ * <li><code>#ifstr</code> {expr}
+ * <li><code>#ifistr</code> {expr}
+ * <li><code>#ifdef</code>
+ * <li><code>#ifndef</code>
+ * <li><code>#else</code>
+ * <li><code>#elif</code> {expr}
+ * <li><code>#elseif</code> {expr}
+ * <li><code>#endif</code>
+ * <li><code>#include</code> {file}
+ * <li><code>#error</code> {message}
  * </ul>
  * <p> The {expr} can be a combination of integer, float, or string constants
  * (floating-point numbers can be entered using exponential notation)
  * and relational or arithmetic operators:
- * <p> <tt>== != &lt; &gt; &lt;= &gt;= ! &amp;&amp; || AND OR NOT</tt>
- * <p> <tt>+ - / * %</tt> (with numeric values only)
- * or "<tt>defined(<i>var</i>)</tt>"
+ * <p> <code>== != &lt; &gt; &lt;= &gt;= ! &amp;&amp; || AND OR NOT</code>
+ * <p> <code>+ - / * %</code> (with numeric values only)
+ * or "<code>defined(<i>var</i>)</code>"
  * <p> Parentheses can be used to alter the order of operations (which
  * are otherwise done according to standard C/C++ operator precedence rules).
- * <p> The conditional operators <tt>&amp;&amp;</tt> (or <tt>AND</tt>) and <tt>||</tt> (or <tt>OR</tt>)
+ * <p> The conditional operators <code>&amp;&amp;</code> (or <code>AND</code>) and <code>||</code> (or <code>OR</code>)
  * are short-circuited so that if the first argument satisfies the condition the second is not evaluated.
  * <p> By default expressions are evaluated according to the types of the values
  * involved:  if both operands are numeric, the {op} will be performed numerically
  * otherwise the numeric operators will be illegal and the comparison will be done
- * lexicographically (case-insensitive if the <tt>#ifistr</tt> command is used).
- * <p> Using <tt>#ifnum</tt> or <tt>#ifstr</tt> or <tt>#ifistr</tt> will force the operations to be done
+ * lexicographically (case-insensitive if the <code>#ifistr</code> command is used).
+ * <p> Using <code>#ifnum</code> or <code>#ifstr</code> or <code>#ifistr</code> will force the operations to be done
  * strictly numerically or strictly as string values with errors given if the operands
- * do not conform (in the case of <tt>#ifnum</tt>).
- * <p> The rules for substituting values defined by <tt>#define</tt> are different than C:
- * the syntax is <tt>$(<i>varname</i>)</tt>.
- * However, in expressions within the <tt>#if<i>xxx</i></tt> directives the <tt><i>varname</i></tt>
+ * do not conform (in the case of <code>#ifnum</code>).
+ * <p> The rules for substituting values defined by <code>#define</code> are different than C:
+ * the syntax is <code>$(<i>varname</i>)</code>.
+ * However, in expressions within the <code>#if<i>xxx</i></code> directives the <code><i>varname</i></code>
  * can be used just by itself (to match C preprocessor usage in this case).
  * Values can be defined in terms of other values.
  * <p> By default the current environment variables are all defined as variables.  So
  * for instance, if the environment contains a variable ING_REL=10.0, to access that
- * variable in the code, use <tt>$(ING_REL)</tt>.  According to Java conventions, variable names
+ * variable in the code, use <code>$(ING_REL)</code>.  According to Java conventions, variable names
  * are case-sensitive.
  * <p> There are several other predefined variables available:
  * <ul>
- * <li><tt>__DATE__</tt> (the data the preprocessing started)
- * <li><tt>__TIME__</tt> (the time it started)
- * <li><tt>__FILE__</tt> (the current file being processed)
- * <li><tt>__LINE__</tt> (the line number within that file)
- * <li><tt>__JAVA_VERSION__</tt> (the Java version)
- * <li><tt>__JAVA_PP_VERSION__</tt> (the Java preprocessor version)
+ * <li><code>__DATE__</code> (the data the preprocessing started)
+ * <li><code>__TIME__</code> (the time it started)
+ * <li><code>__FILE__</code> (the current file being processed)
+ * <li><code>__LINE__</code> (the line number within that file)
+ * <li><code>__JAVA_VERSION__</code> (the Java version)
+ * <li><code>__JAVA_PP_VERSION__</code> (the Java preprocessor version)
  * </ul>
  * <p> Command-line arguments can be:
  * <ul>
- * <li><tt>-nologo</tt> (don't display sign-on banner)
- * <li><tt>-D<i>var</i>=<i>value</i></tt> (define variable value)
- * <li><tt>-D<i>var</i></tt> (define variable to empty value)
- * <li><tt>-U<i>var</i></tt> (undefine variable)
- * <li><tt>-C<i>char</i></tt> (set directive indicator character [normally '#'])
- * <li><tt>-O<i>ext</i></tt> (specify default output file extension)
- * <li><tt>-I<i>ext</i></tt> (specify default input file extension)
- * <li><tt>-X</tt> (ignore undefined vars in expressions)
- * <li><tt>-F:UTF8</tt> (specify UTF-8 format for input/output files)
- * <li><tt>-V</tt> (verbose reporting of progress)
- * <li><tt>-A</tt> (always process files regardless of relative timestamps)
- * <li><tt>-r</tt> (in which case the file name spec(s) are processed as directories)
- * <li><tt>-R</tt> (file name spec(s) are processed as directories and searched recursively)
- * <li><tt>-E<i>envvar</i></tt> (env var to use to search for #include'd files, defaults to "INCLUDE")
- * <li><tt>-P<i>path(s)</i></tt> (path(s) to use to search for #include'd files, separate by ";" or ",")
+ * <li><code>-nologo</code> (don't display sign-on banner)
+ * <li><code>-D<i>var</i>=<i>value</i></code> (define variable value)
+ * <li><code>-D<i>var</i></code> (define variable to empty value)
+ * <li><code>-U<i>var</i></code> (undefine variable)
+ * <li><code>-C<i>char</i></code> (set directive indicator character [normally '#'])
+ * <li><code>-O<i>ext</i></code> (specify default output file extension)
+ * <li><code>-I<i>ext</i></code> (specify default input file extension)
+ * <li><code>-X</code> (ignore undefined vars in expressions)
+ * <li><code>-F:UTF8</code> (specify UTF-8 format for input/output files)
+ * <li><code>-V</code> (verbose reporting of progress)
+ * <li><code>-A</code> (always process files regardless of relative timestamps)
+ * <li><code>-r</code> (in which case the file name spec(s) are processed as directories)
+ * <li><code>-R</code> (file name spec(s) are processed as directories and searched recursively)
+ * <li><code>-E<i>envvar</i></code> (env var to use to search for #include'd files, defaults to "INCLUDE")
+ * <li><code>-P<i>path(s)</i></code> (path(s) to use to search for #include'd files, separate by ";" or ",")
  * <li>file name(s)
  * </ul>
  * <p> This process can also be invoked as an Ant task by using the following in your "build.xml":
- * <p> <tt>&lt;taskdef name="preproc" classname="info.rlwhitcomb.preproc.JavaPreProc" classpath="anttasks.jar"/&gt;</tt>.
+ * <p> <code>&lt;taskdef name="preproc" classname="info.rlwhitcomb.preproc.JavaPreProc" classpath="anttasks.jar"/&gt;</code>.
  * <p> The directives supported in this context are:
- * <ul><li><tt>directiveChar="<i>ch</i>"</tt> (same as <tt>-C<i>ch</i></tt> parameter)
- * <li><tt>define="<i>var</i>=<i>value</i>"</tt> or
- * <li><tt>define="<i>var</i>"</tt> (same as <tt>-D<i>var</i></tt>[<tt>=<i>value</i></tt>] parameter)
- * <li><tt>undefine="<i>var</i>"</tt> (same as <tt>-U<i>var</i></tt> parameter)
- * <li><tt>outputExt="<i>.ext</i>"</tt> (same as <tt>-I<i>.ext</i></tt> parameter)
- * <li><tt>inputExt="<i>.ext</i>"</tt> (same as <tt>-O<i>.ext</i></tt> parameter)
- * <li><tt>includePath="<i>dir</i></tt>[<tt>,<i>dir</i></tt>]<tt>"</tt> (same as <tt>-P<i>dir,dir</i></tt> parameter)
- * <li><tt>ignoreUndefined="true"</tt> (same as <tt>-X</tt> parameter)
- * <li><tt>format="UTF8"</tt> (same as <tt>-F:UTF8</tt> parameter)
- * <li><tt>verbose="true"</tt> (same as <tt>-V</tt> parameter)
- * <li><tt>alwaysProcess="true"</tt> (same as <tt>-A</tt> parameter)
- * <li><tt>processAsDirectory="true"</tt> (same as <tt>-r</tt> parameter)
- * <li><tt>recurseDirectories="true"</tt> (same as <tt>-R</tt> parameter)
- * <li><tt>includeVar="<i>var</i>"</tt> (same as <tt>-E<i>var</i></tt> parameter)
- * <li><tt>nologo="true"</tt> (same as <tt>-nologo</tt> parameter)
- * <li><tt>file="<i>filename</i>"</tt> (same as file name argument)
- * <li><tt>dir="<i>directory</i>"</tt> (same as directory name argument (with <tt>-r</tt> or <tt>-R</tt> switch)
+ * <ul><li><code>directiveChar="<i>ch</i>"</code> (same as <code>-C<i>ch</i></code> parameter)
+ * <li><code>define="<i>var</i>=<i>value</i>"</code> or
+ * <li><code>define="<i>var</i>"</code> (same as <code>-D<i>var</i></code>[<code>=<i>value</i></code>] parameter)
+ * <li><code>undefine="<i>var</i>"</code> (same as <code>-U<i>var</i></code> parameter)
+ * <li><code>outputExt="<i>.ext</i>"</code> (same as <code>-I<i>.ext</i></code> parameter)
+ * <li><code>inputExt="<i>.ext</i>"</code> (same as <code>-O<i>.ext</i></code> parameter)
+ * <li><code>includePath="<i>dir</i></code>[<code>,<i>dir</i></code>]<code>"</code> (same as <code>-P<i>dir,dir</i></code> parameter)
+ * <li><code>ignoreUndefined="true"</code> (same as <code>-X</code> parameter)
+ * <li><code>format="UTF8"</code> (same as <code>-F:UTF8</code> parameter)
+ * <li><code>verbose="true"</code> (same as <code>-V</code> parameter)
+ * <li><code>alwaysProcess="true"</code> (same as <code>-A</code> parameter)
+ * <li><code>processAsDirectory="true"</code> (same as <code>-r</code> parameter)
+ * <li><code>recurseDirectories="true"</code> (same as <code>-R</code> parameter)
+ * <li><code>includeVar="<i>var</i>"</code> (same as <code>-E<i>var</i></code> parameter)
+ * <li><code>nologo="true"</code> (same as <code>-nologo</code> parameter)
+ * <li><code>file="<i>filename</i>"</code> (same as file name argument)
+ * <li><code>dir="<i>directory</i>"</code> (same as directory name argument (with <code>-r</code> or <code>-R</code> switch)
  * </ul>
- * <p> Default input file extension is <tt>".javapp"</tt> and default output
- * file extension is <tt>".java"</tt> (can be overridden with <tt>"-O<i>ext</i>"</tt> option).
+ * <p> Default input file extension is <code>".javapp"</code> and default output
+ * file extension is <code>".java"</code> (can be overridden with <code>"-O<i>ext</i>"</code> option).
  * <p> By default, all values in the current environment are automatically
- * defined for use in <tt>$(<i>var</i>)</tt> constructs, unless specifically excluded by
- * using the <tt>-U<i>var</i></tt> command-line option.  Values defined with <tt>"-D<i>var</i>=<i>value</i>"</tt>
+ * defined for use in <code>$(<i>var</i>)</code> constructs, unless specifically excluded by
+ * using the <code>-U<i>var</i></code> command-line option.  Values defined with <code>"-D<i>var</i>=<i>value</i>"</code>
  * will override values in the environment, as will values explicitly defined
  * in the source.
  * <p> File names on the #include directive can be delimited by nothing, by single or
- * double quotes or by <tt>&lt;&gt;</tt>, <tt>{}</tt> or <tt>[]</tt> brackets.  There is no difference in the search path
+ * double quotes or by <code>&lt;&gt;</code>, <code>{}</code> or <code>[]</code> brackets.  There is no difference in the search path
  * for the file depending on the brackets (unlike C/C++).  The search path for included files is:
  * <ul><li>Current directory
  * <li>paths specified by one or more -P values
- * <li>directories listed in the <tt>INCLUDE</tt> environment variable (or env var specified by <tt>-E</tt> flag)
+ * <li>directories listed in the <code>INCLUDE</code> environment variable (or env var specified by <code>-E</code> flag)
  * </ul>
  * <p> If the include file name does not have an extension, the search above will be done
  * on the unadorned file name, and if not found the search will be repeated using the
- * default (or overridden by <tt>-I<i>ext</i></tt>) input extension.
- * <p> If an input file extension is given with <tt>-I</tt> but not an output one, the default output
+ * default (or overridden by <code>-I<i>ext</i></code>) input extension.
+ * <p> If an input file extension is given with <code>-I</code> but not an output one, the default output
  * value is the input value with any trailing "pp" removed.  If output is given but not input, the input
- * is the output value with "pp" appended.  If the <tt>-r</tt> or <tt>-R</tt> switches are not
- * given and no input extension is specified with <tt>-I</tt> then the extension of each input
- * file is used (if any) and the output extension is then inferred if <tt>-O</tt> is not used.
+ * is the output value with "pp" appended.  If the <code>-r</code> or <code>-R</code> switches are not
+ * given and no input extension is specified with <code>-I</code> then the extension of each input
+ * file is used (if any) and the output extension is then inferred if <code>-O</code> is not used.
  * <p> Note: the input and output file names cannot end up being the same by these rules.
  * <p> By default, all input files are processed as if encoded in the current native
- * codepage setting, unless the <tt>"-F:UTF8"</tt> switch is used, in which case the input files
+ * codepage setting, unless the <code>"-F:UTF8"</code> switch is used, in which case the input files
  * will be read as UTF-8 encoded.
- * <p> Unless the <tt>"-A"</tt> switch is used, the processing will be skipped if the output file
+ * <p> Unless the <code>"-A"</code> switch is used, the processing will be skipped if the output file
  * already exists and is more recent than the input file.  This does not take into account
- * included files, so <tt>"-A"</tt> should be used if there is a doubt about included files being newer.
- * <p> If directives are given as <tt>##<i>directive</i></tt> then they will be passed through as
- * <tt>#<i>directive</i></tt> to the output file.
- * <p> Also, if a <tt>#*</tt> line is found, it will be ignored and not passed through to the output
+ * included files, so <code>"-A"</code> should be used if there is a doubt about included files being newer.
+ * <p> If directives are given as <code>##<i>directive</i></code> then they will be passed through as
+ * <code>#<i>directive</i></code> to the output file.
+ * <p> Also, if a <code>#*</code> line is found, it will be ignored and not passed through to the output
  * (it is a preprocessor comment).
  * <h2>Known Deficiencies:</h2>
  * <ul>
@@ -329,22 +331,22 @@ public class JavaPreProc extends Task
 	/** List of input files or directories to process. */
 	private Vector<String> fileArgs = new Vector<String>();
 
-	/** <tt>__DATE__</tt> predefined variable name. */
+	/** <code>__DATE__</code> predefined variable name. */
 	private static final String DATE_VAR_NAME = "__DATE__";
-	/** <tt>__TIME__</tt> predefined variable name. */
+	/** <code>__TIME__</code> predefined variable name. */
 	private static final String TIME_VAR_NAME = "__TIME__";
-	/** <tt>__FILE__</tt> predefined variable name. */
+	/** <code>__FILE__</code> predefined variable name. */
 	private static final String FILE_VAR_NAME = "__FILE__";
-	/** <tt>__LINE__</tt> predefined variable name. */
+	/** <code>__LINE__</code> predefined variable name. */
 	private static final String LINE_VAR_NAME = "__LINE__";
-	/** <tt>__JAVA_VERSION__</tt> predefined variable name. */
+	/** <code>__JAVA_VERSION__</code> predefined variable name. */
 	private static final String JAVA_VERSION_VAR_NAME = "__JAVA_VERSION__";
-	/** <tt>__JAVA_PP_VERSION__</tt> predefined variable name. */
+	/** <code>__JAVA_PP_VERSION__</code> predefined variable name. */
 	private static final String JAVA_PP_VERSION_VAR_NAME = "__JAVA_PP_VERSION__";
 
-	/** Pattern to parse the <tt>-D<i>var</i>=<i>value</i></tt> command-line switch. */
+	/** Pattern to parse the <code>-D<i>var</i>=<i>value</i></code> command-line switch. */
 	private static Pattern defPat = Pattern.compile("^([_A-Za-z]\\w*)=(.*)$");
-	/** Pattern to parse the <tt>-D<i>var</i></tt> command-line switch. */
+	/** Pattern to parse the <code>-D<i>var</i></code> command-line switch. */
 	private static Pattern defAltPat = Pattern.compile("^([_A-Za-z]\\w*)$");
 	/** Format string to build a regular expression to parse and recognize one of our preprocessing instructions. */
 	private static String cmdPatFormat = "^\\s*%1$c\\s*(\\S+)(.*)$";
@@ -358,32 +360,32 @@ public class JavaPreProc extends Task
 	private Pattern passPat = null;
 	/** Pattern to parse a comment directive line.  Built from {@link #commentPatFormat}. */
 	private Pattern commentPat = null;
-	/** Pattern to parse a <tt>#define <i>var value</i></tt> directive in the source. */
+	/** Pattern to parse a <code>#define <i>var value</i></code> directive in the source. */
 	private static Pattern def2Pat = Pattern.compile("^([_A-Za-z]\\w*)\\s+(.*)$");
-	/** Pattern to parse a <tt>#define <i>var</i></tt> directive in the source. */
+	/** Pattern to parse a <code>#define <i>var</i></code> directive in the source. */
 	private static Pattern def3Pat = Pattern.compile("^([_A-Za-z]\\w*)\\s*$");
 	/** Pattern used to separate the "INCLUDE" environment variable or define and undefine lists into pieces. */
 	private static Pattern comma = Pattern.compile("[,;]");
 
 	/** Pattern to skip white space inside an expression. */
 	private static Pattern WHITE_SPACE = Pattern.compile("\\s+");
-	/** Pattern to recognize a macro reference: <tt>$(<i>macroname</i>)</tt> */
+	/** Pattern to recognize a macro reference: <code>$(<i>macroname</i>)</code> */
 	private static Pattern MACRO_REF = Pattern.compile("\\$\\(([_A-Za-z]\\w*)\\)");
-	/** Pattern to match the reserved word <tt>"true"</tt>. */
+	/** Pattern to match the reserved word <code>"true"</code>. */
 	private static Pattern TRUE_CONST = Pattern.compile("^[tT][rR][uE][eE]");
-	/** Pattern to match the reserved word <tt>"false"</tt>. */
+	/** Pattern to match the reserved word <code>"false"</code>. */
 	private static Pattern FALSE_CONST = Pattern.compile("^[fF][aA][lL][sS][eE]");
 	/** Pattern to match an integer constant. */
 	private static Pattern INT_CONST = Pattern.compile("^[0-9]+");
 	/** Pattern to match a floating-point constant. */
 	private static Pattern FLT_CONST = Pattern.compile("^[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?");
-	/** Pattern to recognize the <tt>"defined(<i>var</i>)"</tt> function */
+	/** Pattern to recognize the <code>"defined(<i>var</i>)"</code> function */
 	private static Pattern DEFINED_FUNC = Pattern.compile("^[dD][eE][fF][iI][nN][eE][dD]\\s*\\(\\s*([_A-Za-z]\\w*)\\s*\\)");
-	/** Pattern to recognize a <tt>"NOT"</tt> operator. */
+	/** Pattern to recognize a <code>"NOT"</code> operator. */
 	private static Pattern NOT_OP = Pattern.compile("^[nN][oO][tT]");
-	/** Pattern to recognize an <tt>"AND"</tt> operator. */
+	/** Pattern to recognize an <code>"AND"</code> operator. */
 	private static Pattern AND_OP = Pattern.compile("^[aA][nN][dD]");
-	/** Pattern to recognize an <tt>"OR"</tt> operator. */
+	/** Pattern to recognize an <code>"OR"</code> operator. */
 	private static Pattern OR_OP = Pattern.compile("^[oO][rR]");
 	/** Pattern to recognize any old identifier. */
 	private static Pattern IDENT = Pattern.compile("^([_A-Za-z]\\w*)");
@@ -392,9 +394,9 @@ public class JavaPreProc extends Task
 	private static TimeZone zone = null;
 	/** The current calendar used to format date and time. */
 	private static Calendar currentCal = null;
-	/** The {@link SimpleDateFormat} used for the variable <tt>__DATE__</tt>. */
+	/** The {@link SimpleDateFormat} used for the variable <code>__DATE__</code>. */
 	private static DateFormat dateFmt = null;
-	/** The {@link SimpleDateFormat} used for the variable <tt>__TIME__</tt>. */
+	/** The {@link SimpleDateFormat} used for the variable <code>__TIME__</code>. */
 	private static DateFormat timeFmt = null;
 
 	/** The current version of this software. */
@@ -423,23 +425,23 @@ public class JavaPreProc extends Task
 	{
 		/** Process the expression as numeric.  All values will be coerced
 		 * to numbers and any that can't be coerced will be flagged as errors.
-		 * This is the mode for the <tt>"ifnum"</tt> statement.
+		 * This is the mode for the <code>"ifnum"</code> statement.
 		 */
 		NUMERIC,
 		/** Process the expression as strictly a string.  This means comparisons
 		 * of values will be done according to lexicographic order.  This is the
-		 * mode for the <tt>"ifstr"</tt> statement.
+		 * mode for the <code>"ifstr"</code> statement.
 		 */
 		FORCESTRING,
 		/** Process the expression as a string, but do comparisons as
 		 * case-insensitive.  This means 'abc' == 'ABC' (for instance).
-		 * This is the mode for the <tt>"ifistr"</tt> statement.
+		 * This is the mode for the <code>"ifistr"</code> statement.
 		 */
 		STRINGINSENSITIVE,
 		/** Process the expression as "normal".  This means that if the values
 		 * can be successfully coerced to numbers, they will be compared numerically
 		 * otherwise they will be compared lexicographically.  This is the mode
-		 * for the <tt>"if"</tt> statement.
+		 * for the <code>"if"</code> statement.
 		 */
 		NORMAL
 	};
@@ -449,33 +451,33 @@ public class JavaPreProc extends Task
 	 */
 	enum Operator
 	{
-		/** The equals operator, that is, <tt>"=="</tt>. */
+		/** The equals operator, that is, <code>"=="</code>. */
 		EQUAL,
-		/** The not equals operator, that is, <tt>"!="</tt>. */
+		/** The not equals operator, that is, <code>"!="</code>. */
 		NOTEQUAL,
-		/** The less than operator, that is, <tt>"&lt;"</tt>. */
+		/** The less than operator, that is, <code>"&lt;"</code>. */
 		LESS,
-		/** The less or equal operator, that is, <tt>"&lt;="</tt>. */
+		/** The less or equal operator, that is, <code>"&lt;="</code>. */
 		LESSEQUAL,
-		/** The greater than operator, that is, <tt>"&gt;"</tt>. */
+		/** The greater than operator, that is, <code>"&gt;"</code>. */
 		GREATER,
-		/** The greater or equal operator, that is, <tt>"&gt;="</tt>. */
+		/** The greater or equal operator, that is, <code>"&gt;="</code>. */
 		GREATEREQUAL,
-		/** The "AND" operator, that is, <tt>"&amp;&amp;"</tt> or the word <tt>"AND"</tt>. */
+		/** The "AND" operator, that is, <code>"&amp;&amp;"</code> or the word <code>"AND"</code>. */
 		ANDOP,
-		/** The "OR" operator, that is, <tt>"||"</tt> or the word <tt>"OR"</tt>. */
+		/** The "OR" operator, that is, <code>"||"</code> or the word <code>"OR"</code>. */
 		OROP,
-		/** The "NOT" equals operator, that is, <tt>"!"</tt> or the word <tt>"NOT"</tt>. */
+		/** The "NOT" equals operator, that is, <code>"!"</code> or the word <code>"NOT"</code>. */
 		NOTOP,
-		/** The addition operator, that is, <tt>"+"</tt>. */
+		/** The addition operator, that is, <code>"+"</code>. */
 		ADD,
-		/** The subtraction operator, that is, <tt>"-"</tt>. */
+		/** The subtraction operator, that is, <code>"-"</code>. */
 		SUBTRACT,
-		/** The multiplication operator, that is, <tt>"*"</tt>. */
+		/** The multiplication operator, that is, <code>"*"</code>. */
 		MULTIPLY,
-		/** The division operator, that is, <tt>"/"</tt>. */
+		/** The division operator, that is, <code>"/"</code>. */
 		DIVIDE,
-		/** The modulus operator, that is, <tt>"%"</tt>. */
+		/** The modulus operator, that is, <code>"%"</code>. */
 		MODULUS,
 		/** Not an operator.  This is the type for a token that is not a {@link Token#OPER}. */
 		NONE
@@ -487,12 +489,12 @@ public class JavaPreProc extends Task
 	 */
 	enum Token
 	{
-		/** A single-quoted string, that is, a string surrounded by <tt>'</tt>.
+		/** A single-quoted string, that is, a string surrounded by <code>'</code>.
 		 * <p>Note: currently does not support embedded single quotes.  Hint: use a
 		 * double-quoted string when the value must contain single quotes.
 		 */
 		SQSTRING,
-		/** A double-quoted string, that is, a string surrounded by <tt>"</tt>.
+		/** A double-quoted string, that is, a string surrounded by <code>"</code>.
 		 * <p>Note: currently does not support embedded double quotes.  Hint: use a
 		 * single-quoted string when the value must contain double quotes.
 		 */
@@ -501,20 +503,20 @@ public class JavaPreProc extends Task
 		INTCONST,
 		/** A floating-point constant.  The regular expression syntax is {@link #FLT_CONST}. */
 		FLTCONST,
-		/** Another type of constant.  At the moment only <tt>"true"</tt> and <tt>"false"</tt> fall into this category. */
+		/** Another type of constant.  At the moment only <code>"true"</code> and <code>"false"</code> fall into this category. */
 		OTHERCONST,
-		/** A variable reference.  This is a reference to a macro or symbol defined by <tt>#define</tt>.
-		 * <p>This syntax for this token is: <tt>$(<i>macroname</i>)</tt>.  Can also be just an identifier
-		 * by itself when inside an <tt>#if<i>xxx</i></tt> expression (this helps compatibility with C syntax).
+		/** A variable reference.  This is a reference to a macro or symbol defined by <code>#define</code>.
+		 * <p>This syntax for this token is: <code>$(<i>macroname</i>)</code>.  Can also be just an identifier
+		 * by itself when inside an <code>#if<i>xxx</i></code> expression (this helps compatibility with C syntax).
 		 */
 		VARREF,
 		/** An operator, that is, one of the {@link Operator} values. */
 		OPER,
-		/** An open parenthesis character <tt>"("</tt>. */
+		/** An open parenthesis character <code>"("</code>. */
 		OPENPAREN,
-		/** A close parenthesis character <tt>")"</tt>. */
+		/** A close parenthesis character <code>")"</code>. */
 		CLOSEPAREN,
-		/** The <tt>"defined(<i>var</i>)"</tt> function.  The whole sequence, including the variable name, is
+		/** The <code>"defined(<i>var</i>)"</code> function.  The whole sequence, including the variable name, is
 		 * represented by this token, whose <i>value</i> is the variable name within the parentheses.
 		 */
 		DEFINEDFUNC,
@@ -652,15 +654,15 @@ public class JavaPreProc extends Task
 
 	/**
 	 * Perform macro substitutions on the given input file line.
-	 * <p> Macros are of the form <tt>$(<i>macro</i>)</tt> where
-	 * "macro" has been defined by a <tt><b>#define</b></tt> or
+	 * <p> Macros are of the form <code>$(<i>macro</i>)</code> where
+	 * "macro" has been defined by a <code><b>#define</b></code> or
 	 * in the environment.  The derived value of the macro will be
-	 * substituted for the whole <tt>$(macro)</tt> piece.
+	 * substituted for the whole <code>$(macro)</code> piece.
 	 * <p> If one macro is defined in terms of another macro, a recursive call
 	 * will be made to perform macro substitutions on the macro value.  This
 	 * occurs as many times as necessary.
 	 *
-	 * @param	line	Input value containing <tt>$(<i>macro</i>)</tt> references.
+	 * @param	line	Input value containing <code>$(<i>macro</i>)</code> references.
 	 * @return		Input with the appropriate macro substitutions made.
 	 * @see		#MACRO_REF
 	 * @see		#defines
@@ -1314,7 +1316,7 @@ public class JavaPreProc extends Task
 	}
 
 	/**
-	 * Evaluate an integer factor, which is <tt>[+-] {int-value} [[+ -] [+-] {int-value}]*</tt>
+	 * Evaluate an integer factor, which is <code>[+-] {int-value} [[+ -] [+-] {int-value}]*</code>
 	 *
 	 * @param	type	How to process the evaluation.
 	 * @param	exprLen	The length limit on the expression.
@@ -1361,7 +1363,7 @@ public class JavaPreProc extends Task
 	}
 
 	/**
-	 * Evaluate an integer term, which is <tt>{int-factor} [[* / %] {int-factor}]*</tt>
+	 * Evaluate an integer term, which is <code>{int-factor} [[* / %] {int-factor}]*</code>
 	 *
 	 * @param	type	How to process the evaluation.
 	 * @param	exprLen	The length limit on the expression.
@@ -1422,7 +1424,7 @@ public class JavaPreProc extends Task
 	}
 
 	/**
-	 * Evaluate a double factor, which is <tt>[+-] {operand} [[+ -] [+-] {operand}]*</tt>
+	 * Evaluate a double factor, which is <code>[+-] {operand} [[+ -] [+-] {operand}]*</code>
 	 *
 	 * @param	type	How to process the evaluation.
 	 * @param	exprLen	The length limit on the expression.
@@ -1469,7 +1471,7 @@ public class JavaPreProc extends Task
 	}
 
 	/**
-	 * Evaluate a double term, which is <tt>{double-factor} [[* / %] {double-factor}]*</tt>
+	 * Evaluate a double term, which is <code>{double-factor} [[* / %] {double-factor}]*</code>
 	 *
 	 * @param	type	How to process the evaluation.
 	 * @param	exprLen	The length limit on the expression.
@@ -1530,7 +1532,7 @@ public class JavaPreProc extends Task
 	}
 
 	/**
-	 * Evaluate a relational expression, which is <tt>{term} {rel-op} {term}</tt>
+	 * Evaluate a relational expression, which is <code>{term} {rel-op} {term}</code>
 	 *
 	 * @param	type	How to process the evaluation.
 	 * @param	exprLen	The length limit on the expression.
@@ -1685,9 +1687,9 @@ public class JavaPreProc extends Task
 	}
 
 	/**
-	 * Evaluate an "and" term expression, which is <tt>{rel-term} [&amp;&amp; AND] {rel-term}</tt>
+	 * Evaluate an "and" term expression, which is <code>{rel-term} [&amp;&amp; AND] {rel-term}</code>
 	 * <p> Does "short-circuit" evaluation of the expression, so that if the
-	 * first <tt>{and-term}</tt> evaluates to {@code false} then we return right away.
+	 * first <code>{and-term}</code> evaluates to {@code false} then we return right away.
 	 *
 	 * @param	type	How to process the evaluation.
 	 * @param	exprLen	The length limit on the expression.
@@ -1727,9 +1729,9 @@ public class JavaPreProc extends Task
 	}
 
 	/**
-	 * Evaluate an "or" term expression, which is <tt>{and-term} [|| OR] {and-term}</tt>
+	 * Evaluate an "or" term expression, which is <code>{and-term} [|| OR] {and-term}</code>
 	 * <p> Does "short-circuit" evaluation of the expression, so that if the
-	 * first <tt>{and-term}</tt> evaluates to {@code true} then we return right away.
+	 * first <code>{and-term}</code> evaluates to {@code true} then we return right away.
 	 *
 	 * @param	type	How to process the evaluation.
 	 * @param	exprLen	The length limit on the expression.
@@ -1821,10 +1823,10 @@ public class JavaPreProc extends Task
 	 *
 	 * @param	lineNo	current line number in source file
 	 * @param	line	input line
-	 * @param	directive	<tt>true</tt> if this is a #directive line (always output)
-	 *				or <tt>false</tt> meaning only output this trace if
+	 * @param	directive	<code>true</code> if this is a #directive line (always output)
+	 *				or <code>false</code> meaning only output this trace if
 	 *				doing output and {@link #plusVerbose} mode.
-	 * @param	doingOutput	<tt>true</tt> if we're doing output right now
+	 * @param	doingOutput	<code>true</code> if we're doing output right now
 	 */
 	private void traceLine(long lineNo, String line, boolean directive, boolean doingOutput) {
 	    if (verbose) {
@@ -1845,8 +1847,8 @@ public class JavaPreProc extends Task
 	 * <p>This routine is called recursively for an included file, which
 	 * is why the output writer is passed as a parameter.
 	 * <p>Sets and resets the {@link #FILE_VAR_NAME} variable to this file name.
-	 * <p>At the end of the file, any errors in properly nesting <tt>#if<i>xxx</i></tt>, <tt>#else</tt>
-	 * and <tt>#endif</tt> blocks will be reported.  This means that it is not proper to
+	 * <p>At the end of the file, any errors in properly nesting <code>#if<i>xxx</i></code>, <code>#else</code>
+	 * and <code>#endif</code> blocks will be reported.  This means that it is not proper to
 	 * begin a block in one file and end it in another -- each file must contain
 	 * a complete block.
 	 * <p>If this is a top-level file (i.e., not an included one), then processing
@@ -1854,7 +1856,7 @@ public class JavaPreProc extends Task
 	 * (unless the "-A" [always process] flag is given on the command line).
 	 *
 	 * @param	inputFile	the input file to be read and processed
-	 * @param	wrtr		<tt>null</tt> if this is a top-level file
+	 * @param	wrtr		<code>null</code> if this is a top-level file
 	 *				in which case the {@link BufferedWriter}
 	 *				is created based on the input file name and
 	 *				output extension.  If non-null, this means
@@ -1862,8 +1864,8 @@ public class JavaPreProc extends Task
 	 *				output file is created, but the results of
 	 *				processing the input file are simply appended
 	 *				to what has already been generated.
-	 * @return	<tt>false</tt> if no errors (that is, success)
-	 *		<tt>true</tt> if errors (that is, failure)
+	 * @return	<code>false</code> if no errors (that is, success)
+	 *		<code>true</code> if errors (that is, failure)
 	 */
 	private boolean processFile(File inputFile, BufferedWriter wrtr) {
 	    boolean errors = false;
@@ -2184,8 +2186,8 @@ public class JavaPreProc extends Task
 	 *
 	 * @param	arg	file to process
 	 * @param	wrtr	the output file we are generating
-	 * @return	<tt>false</tt> if not errors (that is, success)
-	 *		<tt>true</tt> if errors (that is, failure)
+	 * @return	<code>false</code> if not errors (that is, success)
+	 *		<code>true</code> if errors (that is, failure)
 	 * @throws	FileNotFoundException for the obvious reason.
 	 */
 	private boolean processOneFile(String arg, BufferedWriter wrtr)
@@ -2200,8 +2202,8 @@ public class JavaPreProc extends Task
 	 *
 	 * @param	f	file to process
 	 * @param	wrtr	the output file we are generating
-	 * @return	<tt>false</tt> if not errors (that is, success)
-	 *		<tt>true</tt> if errors (that is, failure)
+	 * @return	<code>false</code> if not errors (that is, success)
+	 *		<code>true</code> if errors (that is, failure)
 	 * @throws	FileNotFoundException for the obvious reason.
 	 */
 	private boolean processOneFile(File f, BufferedWriter wrtr)
@@ -2240,8 +2242,8 @@ public class JavaPreProc extends Task
 	 * @param	arg	Full or partial path name of the file to include.
 	 * @param	wrtr	The output writer.
 	 *
-	 * @return	<tt>false</tt> if not errors (that is, success)
-	 *		<tt>true</tt> if errors (that is, failure)
+	 * @return	<code>false</code> if not errors (that is, success)
+	 *		<code>true</code> if errors (that is, failure)
 	 *		most notably if the file cannot be found anywhere
 	 */
 	private boolean processIncludeFile(String arg, BufferedWriter wrtr) {
@@ -2500,7 +2502,7 @@ public class JavaPreProc extends Task
 
 
 	/**
-	 * Set value for <tt>directiveChar</tt> option.
+	 * Set value for <code>directiveChar</code> option.
 	 *
 	 * @param	ch	The new value for the option.
 	 * @throws	BuildException if the value is more than one character.
@@ -2516,7 +2518,7 @@ public class JavaPreProc extends Task
 
 
 	/**
-	 * Set value for the <tt>define</tt> option.
+	 * Set value for the <code>define</code> option.
 	 * <p> Multiple values can be specified using comma or semicolon
 	 * delimiters.
 	 *
@@ -2553,7 +2555,7 @@ public class JavaPreProc extends Task
 
 
 	/**
-	 * Set value for <tt>undefine</tt> option.
+	 * Set value for <code>undefine</code> option.
 	 * <p> Muliple variables can be specified (comma or semicolon delimited).
 	 *
 	 * @param	var	The variable to undefine.
@@ -2578,7 +2580,7 @@ public class JavaPreProc extends Task
 
 
 	/**
-	 * Set value for <tt>outputExt</tt> option.
+	 * Set value for <code>outputExt</code> option.
 	 *
 	 * @param	arg	The new output file extension value.
 	 * @throws	BuildException if the value is empty.
@@ -2597,7 +2599,7 @@ public class JavaPreProc extends Task
 
 
 	/**
-	 * Set value for <tt>inputExt</tt> option.
+	 * Set value for <code>inputExt</code> option.
 	 *
 	 * @param	arg	The new input file extension value.
 	 * @throws	BuildException if the value is empty.
@@ -2616,7 +2618,7 @@ public class JavaPreProc extends Task
 
 
 	/**
-	 * Set value for <tt>includePath</tt> option.
+	 * Set value for <code>includePath</code> option.
 	 *
 	 * @param	pathArg	The new include path.
 	 * @throws	BuildException if the path is empty.
@@ -2635,7 +2637,7 @@ public class JavaPreProc extends Task
 
 
 	/**
-	 * Set value for <tt>nologo</tt> option.
+	 * Set value for <code>nologo</code> option.
 	 *
 	 * @param	var	The new value for the option.
 	 */
@@ -2645,7 +2647,7 @@ public class JavaPreProc extends Task
 
 
 	/**
-	 * Set value for <tt>ignoreUndefined</tt> option.
+	 * Set value for <code>ignoreUndefined</code> option.
 	 *
 	 * @param	val	The new value for the option.
 	 */
@@ -2655,7 +2657,7 @@ public class JavaPreProc extends Task
 
 
 	/**
-	 * Set value for <tt>verbose</tt> option.
+	 * Set value for <code>verbose</code> option.
 	 *
 	 * @param	value	The new value for the option.
 	 * @throws	BuildException if the value is invalid.
@@ -2677,7 +2679,7 @@ public class JavaPreProc extends Task
 
 
 	/**
-	 * Set value for the <tt>format</tt> option.
+	 * Set value for the <code>format</code> option.
 	 *
 	 * @param	value	The new value for the option.
 	 * @throws	BuildException if the value is invalid.
@@ -2693,7 +2695,7 @@ public class JavaPreProc extends Task
 
 
 	/**
-	 * Set value for the <tt>processAsDirectory</tt> option.
+	 * Set value for the <code>processAsDirectory</code> option.
 	 *
 	 * @param	val	The new value for the option.
 	 */
@@ -2703,7 +2705,7 @@ public class JavaPreProc extends Task
 
 
 	/**
-	 * Set value for the <tt>recurseDirectories</tt> option.
+	 * Set value for the <code>recurseDirectories</code> option.
 	 *
 	 * @param	val	The new value for the option.
 	 */
@@ -2713,7 +2715,7 @@ public class JavaPreProc extends Task
 
 
 	/**
-	 * Set value for the <tt>alwaysProcess</tt> option.
+	 * Set value for the <code>alwaysProcess</code> option.
 	 *
 	 * @param	val	The new value for the option.
 	 */
@@ -2723,7 +2725,7 @@ public class JavaPreProc extends Task
 
 
 	/**
-	 * Set value for the <tt>includeVar</tt> option.
+	 * Set value for the <code>includeVar</code> option.
 	 *
 	 * @param	value	The new value for the include environment variable name.
 	 */
@@ -2738,7 +2740,7 @@ public class JavaPreProc extends Task
 
 
 	/**
-	 * Set value for one or more <tt>file</tt> options.
+	 * Set value for one or more <code>file</code> options.
 	 *
 	 * @param	arg	The next {@code "file"} option.
 	 */
@@ -2748,7 +2750,7 @@ public class JavaPreProc extends Task
 
 
 	/**
-	 * Set value for one or more <tt>dir</tt> options.
+	 * Set value for one or more <var>dir</var> options.
 	 *
 	 * @param	arg	The next {@code "dir"} option.
 	 */
@@ -2779,7 +2781,7 @@ public class JavaPreProc extends Task
 
 	/**
 	 * The main execution method (called either from {@link #main} or from Ant
-	 * when the <tt>&lt;preproc.../&gt;</tt> task is executed).
+	 * when the {@code <preproc ...>} task is executed).
 	 */
 	public void execute() throws BuildException {
 	    // Output sign-on banner if "verbose" is specified and "-nologo" isn't

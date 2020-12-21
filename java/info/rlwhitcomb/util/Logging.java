@@ -126,6 +126,8 @@
  *  10-Mar-2020 (rlwhitcomb)
  *    Prepare for GitHub.
  *    Use lambdas for Runnable instances.
+ *  21-Dec-2020 (rlwhitcomb)
+ *    Update obsolete Javadoc constructs.
  */
 package info.rlwhitcomb.util;
 
@@ -246,7 +248,7 @@ public class Logging
     protected static String logFileDir = null;
     /** Log file name or name template.  Normally set by the {@link #LOG_FILE} value. */
     protected static String logFileTemplate = null;
-    /** Whether the file name template contains the <tt>{DATE}</tt> token (affects the way
+    /** Whether the file name template contains the <code>{DATE}</code> token (affects the way
      * log file rotation naming works. */
     protected static boolean fileHasDateTemplate = false;
     /** Whether or not log file rotation is enabled. */
@@ -376,7 +378,7 @@ public class Logging
      * The logging interface used for error log statements in an instance context.
      * <p> If the given level logging is enabled, call {@link #LogStream LogStream}
      * passing the {@link System#err} value for console echoing.
-     * <p> Passes <tt>true</tt> for the "logConsole" value so that these statements
+     * <p> Passes {@code true} for the "logConsole" value so that these statements
      * will always echo to the console regardless of the
      * {@link #logToConsole} setting.
      *
@@ -646,14 +648,14 @@ public class Logging
     /**
      * Determine if a given logging level is enabled.
      * <p> If the given level is less than or equal to
-     * the current {@link #loggingLevel} return <tt>true</tt>.
+     * the current {@link #loggingLevel} return {@code true}.
      * <p> The purpose of this check is to skip expensive
      * processing used solely for logging purposes if the
      * result won't show up in the logging anyway.
      *
      * @param	level	one of the {@link #DEBUG} to {@link #OFF} values
-     * @return		<tt>true</tt> if logging output with the given
-     *			level will be actually printed or <tt>false</tt>
+     * @return		{@code true} if logging output with the given
+     *			level will be actually printed or {@code false}
      *			if it will not show up.
      */
     public static boolean isLevelEnabled(int level) {
@@ -718,7 +720,7 @@ public class Logging
     /**
      * Check if logging is enabled at all.
      * <p> Calls {@link #isLevelEnabled} with the {@link #FATAL}
-     * value which will be <tt>true</tt> if and only if any
+     * value which will be {@code true} if and only if any
      * logging will occur at all.
      *
      * @return		value from <code>isLevelEnabled(FATAL)</code>
@@ -846,7 +848,7 @@ public class Logging
      * The logging interface used for error log statements.
      * <p> If the given level logging is enabled, call {@link #LogStream LogStream}
      * passing the {@link System#err} value for console echoing.
-     * <p> Passes <tt>true</tt> for the "logConsole" value so that these statements
+     * <p> Passes {@code true} for the "logConsole" value so that these statements
      * will always echo to the console regardless of the
      * {@link #logToConsole} setting.
      *
@@ -1282,7 +1284,7 @@ public class Logging
      *
      * @param	is	{@link InputStream} object to read the configuration from
      * @param	symbols	Alternate source of environment values if an override
-     *			symbol is not available in the environment; can be <tt>null</tt>
+     *			symbol is not available in the environment; can be {@code null}
      */
     public static void readConfiguration(InputStream is, Map<String,String> symbols) {
 	String logDir = null;
@@ -1367,11 +1369,11 @@ public class Logging
      *
      * @param	obj	Object specifying where to read the configuration from:
      *			either a {@link File}, {@link String}, or other object
-     *			whose <tt>toString()</tt> method will provide a file name
+     *			whose <code>toString()</code> method will provide a file name
      *			which will be converted to a {@link Path} to be passed to
      *			the {@link Files#newInputStream} method.
      * @param	symbols	Alternate source of environment values if an override
-     *			symbol is not available in the environment; can be <tt>null</tt>
+     *			symbol is not available in the environment; can be {@code null}
      */
     public static void readConfiguration(Object obj, Map<String,String> symbols) {
 	try {

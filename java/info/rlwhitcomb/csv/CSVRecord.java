@@ -43,6 +43,8 @@
  *	    Prepare for GitHub.
  *	08-Sep-2020 (rlwhitcomb)
  *	    Separate out the code for header keys.
+ *	21-Dec-2020 (rlwhitcomb)
+ *	    Update obsolete Javadoc constructs.
  */
 package info.rlwhitcomb.csv;
 
@@ -96,7 +98,7 @@ public class CSVRecord implements Iterator<Object>, Iterable<Object>
 	/**
 	 * Internal method to add fields to the record.
 	 *
-	 * @param	key	name of the current field, or <tt>null</tt>
+	 * @param	key	name of the current field, or {@code null}
 	 *			to use the default name, which will be the next
 	 *			element of the header keys array (if any) or the
 	 *			next integer.

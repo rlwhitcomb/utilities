@@ -101,6 +101,8 @@
  *	    Individual title and version information from build.properties.
  *	21-Dec-2020 (rlwhitcomb)
  *	    Use "version.properties" instead for the title/version info.
+ *	21-Dec-2020 (rlwhitcomb)
+ *	    Update obsolete Javadoc constructs.
  */
 package info.rlwhitcomb.util;
 
@@ -239,7 +241,7 @@ public final class Environment
 	 * whether the names are case-sensitive or not.
 	 *
 	 * @param	user	User name to check if it matches the {@link #currentUser}.
-	 * @return	<tt>true</tt> if the given name matches the current user value
+	 * @return	{@code true} if the given name matches the current user value
 	 *		taking into consideration the case-sensitivity of the platform
 	 */
 	public static boolean isCurrentUser(String user) {

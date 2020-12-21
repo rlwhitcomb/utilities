@@ -259,6 +259,8 @@
  *	    embedded quotes (such as for Calc).
  *	11-Dec-2020 (rlwhitcomb)
  *	    Tweak an exception message. Change the params to "stripAnyQuotes".
+ *	21-Dec-2020 (rlwhitcomb)
+ *	    Update obsolete Javadoc constructs.
  */
 
 package info.rlwhitcomb.util;
@@ -378,7 +380,7 @@ public class CharUtil
 	/**
 	 * Deals with SQL-style strings, and strips the leading/trailing
 	 * quotes and undoubles any embedded quotes.
-	 * <p> For supporting the Unicode literal forms <tt>U&amp;'<i>xxx</i>'</tt> and <tt>N'<i>...</i>'</tt>
+	 * <p> For supporting the Unicode literal forms <code>U&amp;'<i>xxx</i>'</code> and <code>N'<i>...</i>'</code>
 	 * we won't disturb anything that doesn't both start and end with
 	 * a single quote.
 	 *
@@ -621,11 +623,11 @@ public class CharUtil
 
 
 	/**
-	 * Convert a Unicode literal (such as <tt>U&amp;'<i>xxx</i>'</tt> or
-	 * <tt>N'<i>xxx</i>'</tt> to a real Java string, doing the hex literal conversion
+	 * Convert a Unicode literal (such as <code>U&amp;'<i>xxx</i>'</code> or
+	 * <code>N'<i>xxx</i>'</code> to a real Java string, doing the hex literal conversion
 	 * as we go.  Assumes the embedded single quotes are still
 	 * doubled on input and will be single on output.
-	 * <p> Also supports the <tt>U&amp;'\+000041'</tt> form.
+	 * <p> Also supports the <code>U&amp;'\+000041'</code> form.
 	 *
 	 * @param input	The Unicode literal.
 	 * @return	A Java string with the Unicode escapes correctly interpreted
@@ -963,7 +965,7 @@ public class CharUtil
 	/**
 	 * Transform an arbitrary string into a JSON compatible form.
 	 * <p> Basically takes anything for which {@link Character#isJavaIdentifierPart}
-	 * is not <tt>true</tt> and substitutes its hex representation.
+	 * is not {@code true} and substitutes its hex representation.
 	 *
 	 * @param	input	The raw text.
 	 * @return		The text with non-identifier characters replaced.
@@ -998,13 +1000,13 @@ public class CharUtil
 
 	/**
 	 * Pad a given string to a certain width with spaces at the end using a given
-	 * <tt>StringBuilder</tt>.
+	 * {@code StringBuilder}.
 	 *
 	 * @param	buf	The {@link StringBuilder} already in use.
 	 * @param	input	Input string (should always be less or equal
 	 *			the given width).
 	 * @param	width	The width to pad the string to.
-	 * @return		The original <tt>StringBuilder</tt>
+	 * @return		The original {@code StringBuilder}
 	 */
 	public static StringBuilder padToWidth(StringBuilder buf, String input, int width) {
 	    return padToWidth(buf, input, width, ' ', Justification.LEFT);
@@ -1027,14 +1029,14 @@ public class CharUtil
 
 	/**
 	 * Pad a given string to a certain width with spaces with justification
-	 * using a given <tt>StringBuilder</tt>
+	 * using a given {@code StringBuilder}
 	 *
 	 * @param	buf	The {@link StringBuilder} already in use.
 	 * @param	input	Input string (should always be less or equal
 	 *			the given width).
 	 * @param	width	The width to pad the string to.
 	 * @param	just	The justification.
-	 * @return		The original <tt>StringBuilder</tt>.
+	 * @return		The original {@code StringBuilder}.
 	 */
 	public static StringBuilder padToWidth(StringBuilder buf, String input, int width, Justification just) {
 	    return padToWidth(buf, input, width, ' ', just);
@@ -1058,13 +1060,13 @@ public class CharUtil
 
 	/**
 	 * Pad a given string to a certain width with the given character at the end using
-	 * the given <tt>StringBuilder</tt>.
+	 * the given {@code StringBuilder}.
 	 *
 	 * @param	buf	The {@link StringBuilder} already in use.
 	 * @param	input	Input string.
 	 * @param	width	The width to pad the string to.
 	 * @param	pad	The padding character.
-	 * @return		The original <tt>StringBuilder</tt>
+	 * @return		The original {@code StringBuilder}
 	 */
 	public static StringBuilder padToWidth(StringBuilder buf, String input, int width, char pad) {
 	    return padToWidth(buf, input, width, pad, Justification.LEFT);
@@ -1114,7 +1116,7 @@ public class CharUtil
 	 *			on the right, while positive width puts the odd leftovers on the left.
 	 * @param	pad	The padding character.
 	 * @param	just	The justification of the input string within the given width.
-	 * @return		The original <tt>StringBuilder</tt>.
+	 * @return		The original {@code StringBuilder}.
 	 */
 	public static StringBuilder padToWidth(StringBuilder buf, String input, int width, char pad, Justification just) {
 	    switch (just) {
@@ -1152,9 +1154,9 @@ public class CharUtil
 	 * <p>TODO: deal with keywords and length restrictions.
 	 *
 	 * @param	value	The string to be validated.
-	 * @param	uppercase	<tt>true</tt> if only UPPER CASE identifiers
+	 * @param	uppercase	{@code true} if only UPPER CASE identifiers
 	 *				should be allowed.
-	 * @return		<tt>true</tt> if the string is a valid DBMS regular
+	 * @return		{@code true} if the string is a valid DBMS regular
 	 *			identifier according to the case rules, or a valid
 	 *			delimited identifier.
 	 */
@@ -1586,7 +1588,7 @@ public class CharUtil
 	 * Get the next value from a CSV string.
 	 * <p> Assumes the input has been constructed according to
 	 * the {@link #quoteForCSV} rules.
-	 * <p> Empty strings produce <tt>null</tt> results.
+	 * <p> Empty strings produce {@code null} results.
 	 * <p> The returned string is removed from the input sequence
 	 * as is the trailing comma (if any) so the next call to read a field
 	 * will work correctly.
@@ -1600,7 +1602,7 @@ public class CharUtil
 	 * whole "info.rlwhitcomb.csv" package that works better in this regard.
 	 *
 	 * @param	buf	The CSV record we're tearing apart.
-	 * @return Next field value or <tt>null</tt> for an empty field
+	 * @return Next field value or {@code null} for an empty field
 	 * or the end of string.
 	 */
 	public static String getFromCSV(StringBuilder buf) {
@@ -1667,9 +1669,9 @@ public class CharUtil
 	/**
 	 * Gets the first CSV token from the given string.
 	 * @param	input	The complete CSV record.
-	 * @return	<tt>null</tt> if input is <tt>null</tt>, else
+	 * @return	{@code null} if input is {@code null}, else
 	 *		the first CSV-delimited token from the input
-	 *		(if any, otherwise <tt>null</tt>).
+	 *		(if any, otherwise {@code null}).
 	 * @see	#getFromCSV
 	 */
 	public static String getFirstFromCSV(String input) {
@@ -1682,10 +1684,10 @@ public class CharUtil
 
 	/**
 	* Return a list from a CSV string.
-	* <p> Note: empty fields will generate a <tt>null</tt> entry in the returned list.
+	* <p> Note: empty fields will generate a {@code null} entry in the returned list.
 	*
 	* @param csv The string in CSV format.
-	* @return The list or <tt>null</tt> if the input is <tt>null</tt> or empty.
+	* @return The list or {@code null} if the input is {@code null} or empty.
 	* @see	#getFromCSV
 	*/
 	public static List<String> getListFromCSV(String csv) {
@@ -1706,19 +1708,19 @@ public class CharUtil
 
 	/**
 	 * Substitute any environment variables found in the string
-	 * of the form <tt>%var%</tt> with their defined values from the environment or from
+	 * of the form <code>%var%</code> with their defined values from the environment or from
 	 * the alternate symbol map.
-	 * <p>If the variable is not found then if a <tt>|<i>value</i></tt> is found inside the
-	 * <tt>%var%</tt> construct (as in <tt>%var|value%</tt>) then this default value will
-	 * be used, otherwise the original token is left (without the <tt>%%</tt>).
-	 * <p> If the variable name begins with <tt>$</tt>, then search for it as a system property
+	 * <p>If the variable is not found then if a <code>|<i>value</i></code> is found inside the
+	 * <code>%var%</code> construct (as in <code>%var|value%</code>) then this default value will
+	 * be used, otherwise the original token is left (without the <code>%%</code>).
+	 * <p> If the variable name begins with <code>$</code>, then search for it as a system property
 	 * instead of from the environment (that is, using {@link System#getProperty} instead).
-	 * <p> Additionally, if the first character of the key (not the default) is <tt>^</tt> (before the
-	 * <tt>$</tt> if present), then the resulting value has its first letter capitalized (this is
+	 * <p> Additionally, if the first character of the key (not the default) is <code>^</code> (before the
+	 * <code>$</code> if present), then the resulting value has its first letter capitalized (this is
 	 * useful for Windows where this is an oft-used convention for directory names, for instance).
-	 * If the prefix is <tt>^^</tt> then the whole word is capitalized.  Capitalization is done according
+	 * If the prefix is <code>^^</code> then the whole word is capitalized.  Capitalization is done according
 	 * to the default locale.
-	 * <p> Similarly <tt>_</tt> or <tt>__</tt> is used to lowercase the resulting value (either first or all).
+	 * <p> Similarly <code>_</code> or <code>__</code> is used to lowercase the resulting value (either first or all).
 	 * <p> Examples:
 	 * <pre> %$user.home%/.acme/%_product%/%^^id|AMP% -&gt; C:\Users\admin/.acme/backup/AMP
 	 * %APPDATA%/Acme/%^product%/%^^id|AMP% -&gt; C:\Users\admin\AppData\Roaming/Acme/Backup/AMP
@@ -1729,7 +1731,7 @@ public class CharUtil
 	 *		    environment	(or the	alternate symbol map).
 	 * @param   symbols Alternate source of	environment values if an override
 	 *		    symbol is not available in the environment (usually	gotten
-	 *		    from some other configuration file); can be	<tt>null</tt>
+	 *		    from some other configuration file); can be	{@code null}
 	 * @return	    The original string with the variable substitutions made.
 	 */
 	public static String substituteEnvValues(String input, Map<String,String> symbols) {
@@ -1849,7 +1851,7 @@ public class CharUtil
 
 	/**
 	 * Turn a Java enum value into a Java case word without the
-	 * <tt>"_"</tt>s, in lower case, except for letters after the <tt>"_"</tt>s.
+	 * <code>"_"</code>s, in lower case, except for letters after the <code>"_"</code>s.
 	 * Example:
 	 * <pre>ENUM_NAME -&gt; enumName</pre>
 	 *
@@ -1974,10 +1976,10 @@ public class CharUtil
 
 
 	/**
-	 * Parse a set representation like <tt>[a, b, c]</tt> into an array of
+	 * Parse a set representation like <code>[a, b, c]</code> into an array of
 	 * the constituent strings.
 	 * @param	setString	A properly formatted set string.
-	 * @return	<tt>null</tt> if the string isn't in the proper format,
+	 * @return	{@code null} if the string isn't in the proper format,
 	 *		or the parsed set of values.
 	 */
 	public static String[] getArrayFromSetString(String setString) {
@@ -2223,8 +2225,8 @@ public class CharUtil
 	/**
 	 * Convert a null or trimmed empty string to null.
 	 *
-	 * @param	string	Input value to test (can be <tt>null</tt>).
-	 * @return	<tt>null</tt> if the input value is <tt>null</tt> OR
+	 * @param	string	Input value to test (can be {@code null}).
+	 * @return	{@code null} if the input value is {@code null} OR
 	 *		if the trimmed input string is empty (that is, the string
 	 *		consists of all blanks), or the input string otherwise.
 	 */
@@ -2319,7 +2321,7 @@ public class CharUtil
 	 * <p> Also note: treats embedded quotes like in SQL strings (double them inside).
 	 *
 	 * @param string The input value to transform.
-	 * @return The transformed value, or {@code null} if the input is <tt>null</tt>
+	 * @return The transformed value, or {@code null} if the input is {@code null}
 	 * or empty (after "trim").
 	 */
 	public static String normalizeWhitespace(String string) {

@@ -39,6 +39,8 @@
  *	    for the UTF-8 charset; add "exitDirectory" method (for use with parallel processing).
  *	10-Mar-2020 (rlwhitcomb)
  *	    Prepare for GitHub.
+ *	21-Dec-2020 (rlwhitcomb)
+ *	    Update obsolete Javadoc constructs.
  */
 package info.rlwhitcomb.util;
 
@@ -63,7 +65,7 @@ public interface LineProcessor extends FileFilter
 {
 	/**
 	 * Specifies the {@link Charset} that the input file is encoded with.
-	 * @return	the {@link Charset} to use to decode the file, or <tt>null</tt>
+	 * @return	the {@link Charset} to use to decode the file, or {@code null}
 	 *		to use the platform default character set.
 	 */
 	default Charset getCharset() {
@@ -76,7 +78,7 @@ public interface LineProcessor extends FileFilter
 	 * block, so any exceptions in here will likely terminate the application.
 	 * @param	inputFile	The file we have been processing (for annotation purposes).
 	 * @param	error		The exception that was caught.
-	 * @return	<tt>true</tt> to continue processing, <tt>false</tt>
+	 * @return	{@code true} to continue processing, {@code false}
 	 *		to abort processing for some reason.
 	 */
 	default boolean handleError(File inputFile, Throwable error) {
@@ -87,7 +89,7 @@ public interface LineProcessor extends FileFilter
 	/**
 	 * Process one line of input.
 	 * @param	line	The current input line.
-	 * @return	<tt>true</tt> to continue processing, <tt>false</tt>
+	 * @return	{@code true} to continue processing, {@code false}
 	 *		to abort processing for some reason.
 	 */
 	default boolean processLine(String line) {
@@ -100,7 +102,7 @@ public interface LineProcessor extends FileFilter
 	 *
 	 * @param	directory	The directory we're about to process.
 	 * @param	level		The nesting level of this directory (0 at the root).
-	 * @return	<tt>true</tt> to go ahead and process, <tt>false</tt> to skip.
+	 * @return	{@code true} to go ahead and process, {@code false} to skip.
 	 */
 	default boolean enterDirectory(File directory, int level) {
 	    return true;
@@ -114,7 +116,7 @@ public interface LineProcessor extends FileFilter
 	 * @param	directory	The directory we're done processing.
 	 * @param	level		The nesting level of this directory (0 at the root).
 	 * @param	error		Whether processing was successful within the directory.
-	 * @return	<tt>true</tt> to continue processing, <tt>false</tt> to stop.
+	 * @return	{@code true} to continue processing, {@code false} to stop.
 	 */
 	default boolean exitDirectory(File directory, int level, boolean error) {
 	    return true;
@@ -123,7 +125,7 @@ public interface LineProcessor extends FileFilter
 	/**
 	 * Method of {@link FileFilter}, used to filter input files.
 	 * @param	pathname	The full path to be tested by this filter.
-	 * @return	<tt>true</tt> if the file should be processed, <tt>false</tt> otherwise.
+	 * @return	{@code true} if the file should be processed, {@code false} otherwise.
 	 */
 	@Override
 	default boolean accept(File pathname) {
@@ -134,7 +136,7 @@ public interface LineProcessor extends FileFilter
 	 * Handle any stuff that needs to happen before starting to read the file.
 	 * <p> This method can be used for setting up output files for the processing results.
 	 * @param	inputFile	The file we are about to read.
-	 * @return	<tt>true</tt> to continue processing, <tt>false</tt> to abort.
+	 * @return	{@code true} to continue processing, {@code false} to abort.
 	 */
 	default boolean preProcess(File inputFile) {
 	    return true;
@@ -145,7 +147,7 @@ public interface LineProcessor extends FileFilter
 	 * been handled and the file has been closed.  Can be used to clean up or close
 	 * any generated output files (for instance).
 	 * @param	inputFile	The file we have just finished processing.
-	 * @return	<tt>true</tt> to continue processing, <tt>false</tt> to abort.
+	 * @return	{@code true} to continue processing, {@code false} to abort.
 	 */
 	default boolean postProcess(File inputFile) {
 	    return true;

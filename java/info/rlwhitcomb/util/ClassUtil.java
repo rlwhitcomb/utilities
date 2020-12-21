@@ -69,6 +69,8 @@
  *	    Rework code to avoid deprecated "Class.newInstance" method.
  *	15-Apr-2020 (rlwhitcomb)
  *	    New method to turn a class into a resource path.
+ *	21-Dec-2020 (rlwhitcomb)
+ *	    Update obsolete Javadoc constructs.
  */
 
 package info.rlwhitcomb.util;
@@ -462,7 +464,7 @@ public class ClassUtil
 
 
 	/**
-	 * Check that the given objects are either both null or if they meet the <tt>equals()</tt>
+	 * Check that the given objects are either both null or if they meet the <code>equals()</code>
 	 * criteria.
 	 *
 	 * @param o1	The first object (or null).

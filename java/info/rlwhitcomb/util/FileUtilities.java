@@ -71,6 +71,8 @@
  *	Migrate the "canWrite" function into here.
  *    10-Mar-2020 (rlwhitcomb)
  *	Prepare for GitHub.
+ *    21-Dec-2020 (rlwhitcomb)
+ *	Update obsolete Javadoc constructs.
  */
 package info.rlwhitcomb.util;
 
@@ -180,8 +182,8 @@ public class FileUtilities
      *
      * @param	prefix		Prefix for the file name (must be &gt; 3 characters)
      * @param	suffix		Should start with "." (i.e., a file extension), so one will
-     *				be added if not present (but can be <tt>null</tt>).
-     * @param	deleteOnExit	<tt>true</tt> to always delete this file
+     *				be added if not present (but can be {@code null}).
+     * @param	deleteOnExit	{@code true} to always delete this file
      *				when the JVM terminates (i.e., assumes the
      *				user will not need to examine the file later).
      * @return	The file object.
@@ -199,7 +201,7 @@ public class FileUtilities
     /**
      * Create a temporary file with the given name prefix and default extension (".tmp").
      * @param	prefix		Prefix for the file name (must be &gt; 3 characters)
-     * @param	deleteOnExit	<tt>true</tt> to always delete this file
+     * @param	deleteOnExit	{@code true} to always delete this file
      *				when the JVM terminates (i.e., assumes the
      *				user will not need to examine the file later).
      * @return	The file object.
@@ -280,9 +282,9 @@ public class FileUtilities
     }
 
     /**
-     * Compress the given file to <tt>"<i>name</i>.gz"</tt> and remove the original.
+     * Compress the given file to <code>"<i>name</i>.gz"</code> and remove the original.
      * <p> This mimics the operation of the {@code "gzip"} command line tool, which
-     * only leaves the <tt>"<i>name</i>.gz"</tt> file (and also {@code "gunzip"} which
+     * only leaves the <code>"<i>name</i>.gz"</code> file (and also {@code "gunzip"} which
      * leaves the original file only).
      *
      * @param	inputFile	The input file (in the proper directory).
@@ -307,10 +309,10 @@ public class FileUtilities
     }
 
     /**
-     * Uncompress the given file from <tt>"<i>name</i>.gz"</tt> to just <tt>"<i>name</i>"</tt>
+     * Uncompress the given file from <code>"<i>name</i>.gz"</code> to just <code>"<i>name</i>"</code>
      * and remove the original compressed file.
      * <p> This mimics the operation of the {@code "gunzip"} command line tool, which
-     * only leaves the <tt>"<i>name</i>"</tt> file (and also {@code "gzip"} which
+     * only leaves the <code>"<i>name</i>"</code> file (and also {@code "gzip"} which
      * leaves the compressed file only).
      *
      * @param	inputFile	The input file (in the proper directory).
@@ -391,7 +393,7 @@ public class FileUtilities
      *
      * @param	file	The local file to read.
      * @param	cs	The character set to use to decode the file contents. Can be
-     *			<tt>null</tt> in which case the system default is used.
+     *			{@code null} in which case the system default is used.
      * @param	tabWidth	In order to convert tab characters to spaces, specify
      *				a non-zero width.
      * @return		The complete contents of the file as a {@link String},

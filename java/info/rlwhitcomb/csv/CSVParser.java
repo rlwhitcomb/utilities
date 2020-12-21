@@ -47,6 +47,8 @@
  *	    out the reader, but going back for another char after that).
  *	10-Mar-2020 (rlwhitcomb)
  *	    Prepare for GitHub.
+ *	21-Dec-2020 (rlwhitcomb)
+ *	    Update obsolete Javadoc constructs.
  */
 package info.rlwhitcomb.csv;
 
@@ -91,9 +93,9 @@ public class CSVParser
 	 * @param	reader	A reader using whatever character set you like to convert
 	 *			bytes to Unicode characters.  A {@link BufferedReader} will
 	 *			be wrapped around it for use (unless, of course, you pass in
-	 *			a <tt>BufferedReader</tt> yourself.
+	 *			a {@code BufferedReader} yourself.
 	 * @param	format	The {@link CSVFormat} to use to interpret the data.  If
-	 *			<tt>null</tt> is passed, then a default format will be used.
+	 *			{@code null} is passed, then a default format will be used.
 	 */
 	public CSVParser(Reader reader, CSVFormat format) {
 	    if (reader == null)
@@ -131,9 +133,9 @@ public class CSVParser
 	/**
 	 * Return the next available record element (if any).
 	 *
-	 * @return the next field or <tt>null</tt>.  Check the
+	 * @return the next field or {@code null}.  Check the
 	 * {@link #atEndOfRecord} and {@link #atEndOfInput} to decide
-	 * what the <tt>null</tt> return means.
+	 * what the {@code null} return means.
 	 *
 	 * @throws	CSVException on any error.
 	 */

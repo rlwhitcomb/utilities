@@ -46,6 +46,8 @@
  *	    Add option for using new Separator enum.
  *	10-Mar-2020 (rlwhitcomb)
  *	    Prepare for GitHub.
+ *	21-Dec-2020 (rlwhitcomb)
+ *	    Update obsolete Javadoc constructs.
  */
 package info.rlwhitcomb.csv;
 
@@ -243,7 +245,7 @@ public class CSVFormat
 	/**
 	 * Set the record separator of an already existing format.
 	 *
-	 * @param	recordSep	<tt>null</tt> to set the default line ending
+	 * @param	recordSep	{@code null} to set the default line ending
 	 *				(see {@link #DEFAULT_RECORD_SEP}) or a
 	 *				one or two character string that will
 	 *				mark the end of a record.
@@ -367,7 +369,7 @@ public class CSVFormat
 
 	/**
 	 * Is this a "normal" line ending value, meaning is it any of the following:
-	 * <tt>CR</tt> or <tt>LF</tt> or <tt>CRLF</tt>
+	 * <code>CR</code> or <code>LF</code> or <code>CRLF</code>
 	 * <p> This has special meaning in that any of these combinations will also
 	 * match any of these values in the parsed file.
 	 *

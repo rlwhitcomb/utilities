@@ -33,6 +33,8 @@
  *	    Address Javadoc warnings found by Java 8.
  *	10-Mar-2020 (rlwhitcomb)
  *	    Prepare for GitHub.
+ *	21-Dec-2020 (rlwhitcomb)
+ *	    Update obsolete Javadoc constructs.
  */
 package info.rlwhitcomb.csv;
 
@@ -45,7 +47,7 @@ import info.rlwhitcomb.util.Logging;
 public class CSVException extends Exception
 {
 	/**
-	 * Construct a new exception with <tt>null</tt> as the detail message.
+	 * Construct a new exception with {@code null} as the detail message.
 	 */
 	public CSVException() {
 	    super();

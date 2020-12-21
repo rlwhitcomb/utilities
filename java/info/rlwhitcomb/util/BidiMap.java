@@ -40,6 +40,8 @@
  *	    Fix Javadoc warnings from Java 8.
  *	10-Mar-2020 (rlwhitcomb)
  *	    Prepare for GitHub.
+ *	21-Dec-2020 (rlwhitcomb)
+ *	    Update obsolete Javadoc constructs.
  */
 package info.rlwhitcomb.util;
 
@@ -54,7 +56,7 @@ import java.util.Set;
 
 /**
  * Bidirectional map class that allows lookup of either key or value with
- * equal ease.  Does not allow <tt>null</tt> keys or <tt>null</tt> values.
+ * equal ease.  Does not allow {@code null} keys or {@code null} values.
  * <p> Enforces the restriction that all keys and all values must be unique.
  * <p> Currently the map does not allow replacement of values that already
  * have a key, so it is not quite suitable for any generic map usage.
@@ -68,7 +70,7 @@ public class BidiMap<K, V> implements Map<K, V>
 	/**
 	 * One entry in the map (linked by both the {@link #keyTable} and
 	 * the {@link #valueTable}, so it must have "next" pointers for each).
-	 * <p>Both <tt>key</tt> and <tt>value</tt> are <tt>final</tt> because
+	 * <p>Both {@code key} and {@code value} are {@code final} because
 	 * the map is unmodifiable (for now), and thus only suitable for
 	 * static data that is initialized one time.
 	 */

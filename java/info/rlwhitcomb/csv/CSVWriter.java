@@ -36,6 +36,8 @@
  *	    Implement "alwaysDelimitStrings" processing.
  *	10-Mar-2020 (rlwhitcomb)
  *	    Prepare for GitHub.
+ *	21-Dec-2020 (rlwhitcomb)
+ *	    Update obsolete Javadoc constructs.
  */
 package info.rlwhitcomb.csv;
 
@@ -98,7 +100,7 @@ public class CSVWriter
 
 	/**
 	 * Write out the next record according to the given format.
-	 * If the record is <tt>null</tt> the output writer will be closed.
+	 * If the record is {@code null} the output writer will be closed.
 	 *
 	 * @param	record	The complete record to be written.
 	 *

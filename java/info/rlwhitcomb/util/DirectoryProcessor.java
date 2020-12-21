@@ -42,6 +42,8 @@
  *	    method as appropriate too; add another default flavor of "processDirectory".
  *	10-Mar-2020 (rlwhitcomb)
  *	    Prepare for GitHub.
+ *	21-Dec-2020 (rlwhitcomb)
+ *	    Update obsolete Javadoc constructs.
  */
 package info.rlwhitcomb.util;
 
@@ -123,8 +125,8 @@ public class DirectoryProcessor
 	 * @param level		The nesting level of this directory from the root.
 	 * @param stopOnError	Whether or not to stop on any errors.
 	 * @return	{@code true} if either no errors were encountered (as reported by
-	 *		the {@link LineProcessor}), or <tt>stopOnError</tt> is {@code false};
-	 *		{@code false} if any errors were reported and <tt>stopOnError</tt> is
+	 *		the {@link LineProcessor}), or <var>stopOnError</var> is {@code false};
+	 *		{@code false} if any errors were reported and <var>stopOnError</var> is
 	 *		{@code true}.
 	 */
 	private boolean processFiles(File dir, boolean recurse, int level, boolean stopOnError) {

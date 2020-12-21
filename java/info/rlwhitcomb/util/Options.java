@@ -64,6 +64,8 @@
  *	    ToggleEnum interfaces.
  *	06-Nov-2020 (rlwhitcomb)
  *	    Count the number of tests and failures in the main program and report.
+ *	21-Dec-2020 (rlwhitcomb)
+ *	    Update obsolete Javadoc constructs.
  */
 package info.rlwhitcomb.util;
 
@@ -324,7 +326,7 @@ public class Options
 	 * "--", "-" or "/" [on Windows])?
 	 * @param arg	The candidate argument value.
 	 * @return	The remaining string as an {@link Optional} if so, an
-	 *		empty <tt>Optional</tt> if not.
+	 *		empty {@code Optional} if not.
 	 */
 	public static Optional<String> checkOption(String arg) {
 	    return Optional.ofNullable(isOption(arg));
@@ -332,9 +334,9 @@ public class Options
 
 	/**
 	 * Does the given string look like an argument (that is, does it start with
-	 * "--", "-" or "/" [on Windows])?
+	 * <code>"--"</code>, <code>"-"</code> or <code>"/"</code> [on Windows])?
 	 * @param arg	The candidate argument value.
-	 * @return	The remaining string if so, or <tt>null</tt> if not.
+	 * @return	The remaining string if so, or {@code null} if not.
 	 */
 	public static String isOption(String arg) {
 	    String result = null;

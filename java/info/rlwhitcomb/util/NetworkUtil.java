@@ -70,6 +70,8 @@
  *	    Don't use a "localhost..." FQ name if the plain name is better.
  *	10-Mar-2020 (rlwhitcomb)
  *	    Prepare for GitHub.
+ *	21-Dec-2020 (rlwhitcomb)
+ *	    Update obsolete Javadoc constructs.
  */
 package info.rlwhitcomb.util;
 
@@ -141,7 +143,7 @@ public class NetworkUtil
 
 	/**
 	 * Return the local host name as known to the network.
-	 * @return  The local machine name or <tt>"local"</tt> if it can't
+	 * @return  The local machine name or <code>"local"</code> if it can't
 	 *          be determined (that is {@link #LOCAL_PREFIX}).
 	 */
 	public static String getLocalHostName() {
@@ -185,8 +187,8 @@ public class NetworkUtil
 	 * <p> Note: this method could be time consuming on some networks also.
 	 *
 	 * @param	serverName	The candidate server name to test.
-	 * @param	tryNetwork	<tt>true</tt> to try resolving the host
-	 *				name via DNS, or <tt>false</tt> to just
+	 * @param	tryNetwork	{@code true} to try resolving the host
+	 *				name via DNS, or {@code false} to just
 	 *				do simple checks that don't go out on
 	 *				the network.
 	 * @return			If the name is {@code null} or empty
@@ -442,8 +444,9 @@ public class NetworkUtil
 	/**
 	 * Extract the user name part of a domain / user combination.
 	 * <p> The allowed syntaxes are:
-	 * <ul><li><tt>DOMAIN\USER</tt>
-	 * <li><tt>USER@DOMAIN</tt>
+	 * <ul>
+	 * <li><code>DOMAIN\USER</code>
+	 * <li><code>USER@DOMAIN</code>
 	 * </ul>
 	 * <p> Strange, but if the separator char is present but no user part before/after
 	 * then just return the whole string (maybe the user name makes sense, who knows?)
@@ -471,15 +474,16 @@ public class NetworkUtil
 	/**
 	 * Extract the domain part of a domain / user combination.
 	 * <p> The allowed syntaxes are:
-	 * <ul><li><tt>DOMAIN\USER</tt>
-	 * <li><tt>USER@DOMAIN</tt>
+	 * <ul>
+	 * <li><code>DOMAIN\USER</code>
+	 * <li><code>USER@DOMAIN</code>
 	 * </ul>
 	 * <p> Strange, but if the separator char is present but no domain part before/after
-	 * then just return <tt>null</tt> (because the whole string is returned as the user part).
+	 * then just return {@code null} (because the whole string is returned as the user part).
 	 * <p>According to (for Windows): http://msdn.microsoft.com/en-us/library/windows/desktop/aa380525(v=vs.85).aspx
 	 * @param	domainUser	The candidate string.
 	 * @return	Either only the domain part of the input if there is a domain specified,
-	 *		or <tt>null</tt> if not.
+	 *		or {@code null} if not.
 	 * @see	#getUserOnly
 	 */
 	public static String getDomainOnly(String domainUser) {
