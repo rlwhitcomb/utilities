@@ -60,6 +60,8 @@
  *	18-Dec-2020 (rlwhitcomb)
  *	    Allow assignments to object and array.
  *	    Adjust precedence of functions vs. arithmetic.
+ *	20-Dec-2020 (rlwhitcomb)
+ *	    Change the way we process quit, help, etc. commands.
  */
 
 grammar Calc;
@@ -193,10 +195,7 @@ directive
    | SI                          # siDirective
    | MIXED			 # mixedDirective
    | CLEAR                       # clearDirective
-   | VERSION                     # versionDirective
    | ECHO expr ?                 # echoDirective
-   | ( HELP | '?' )              # helpDirective
-   | ( QUIT | EXIT )             # exitDirective
    ;
 
 /* Lexer rules start here */
@@ -254,18 +253,6 @@ MIN     : [mM][iI][nN] ;
 JOIN    : [jJ][oO][iI][nN] ;
 
 FIB     : [fF][iI][bB] ;
-
-
-/* Commands (or directives) that are specially treated,
- * NOT as identifiers.  */
-
-HELP    : [hH][eE][lL][pP] ;
-
-VERSION : [vV][eE][rR][sS][iI][oO][nN] ;
-
-QUIT    : ( [qQ] | [qQ][uU][iI][tT] ) ;
-
-EXIT    : ( [xX] | [eE][xX][iI][tT] ) ;
 
 
 /* Note: this needs to be last so that these other "ID" like things

@@ -65,6 +65,8 @@
  *	    Regularize the exit process.
  *	20-Dec-2020 (rlwhitcomb)
  *	    Fix the recursive print of objects inside arrays.
+ *	21-Dec-2020 (rlwhitcomb)
+ *	    Change the way we do exit and help commands in REPL mode.
  */
 package info.rlwhitcomb.calc;
 
@@ -447,30 +449,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	@Override
-	public Object visitVersionDirective(CalcParser.VersionDirectiveContext ctx) {
-	    Calc.printTitleAndVersion();
-	    return null;
-	}
-
-	@Override
-	public Object visitHelpDirective(CalcParser.HelpDirectiveContext ctx) {
-	    Calc.printHelp();
-	    return null;
-	}
-
-	@Override
 	public Object visitEchoDirective(CalcParser.EchoDirectiveContext ctx) {
 	    CalcParser.ExprContext expr = ctx.expr();
 	    String msg = (expr != null) ? toString(visit(expr)) : "";
 
 	    displayer.displayMessage(CharUtil.stripAnyQuotes(msg, true));
 
-	    return null;
-	}
-
-	@Override
-	public Object visitExitDirective(CalcParser.ExitDirectiveContext ctx) {
-	    Calc.exit();
 	    return null;
 	}
 

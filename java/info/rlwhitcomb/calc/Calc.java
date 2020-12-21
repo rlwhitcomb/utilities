@@ -37,6 +37,8 @@
  *	    Use new program info mechanism.
  *	19-Dec-2020 (rlwhitcomb)
  *	    Regularize the exit process.
+ *	20-Dec-2020 (rlwhitcomb)
+ *	    Redo the way we handle commands in REPL mode.
  */
 package info.rlwhitcomb.calc;
 
@@ -427,7 +429,24 @@ public class Calc
 
 			    String line;
 			    while ((line = console.readLine("> ")) != null) {
-				process(CharStreams.fromString(line + LINESEP), visitor, errorStrategy);
+				String cmd = line.trim().toLowerCase();
+				switch (cmd) {
+				    case "quit":
+				    case "exit":
+					exit();
+					break;
+				    case "?":
+				    case "help":
+					printIntro();
+					printHelp();
+					break;
+				    case "version":
+					printTitleAndVersion();
+					break;
+				    default:
+					process(CharStreams.fromString(line + LINESEP), visitor, errorStrategy);
+					break;
+				}
 			    }
 			}
 		    }
