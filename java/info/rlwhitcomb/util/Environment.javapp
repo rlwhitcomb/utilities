@@ -99,6 +99,8 @@
  *	    Display debug build info in "printProgramInfo".
  *	11-Dec-2020 (rlwhitcomb)
  *	    Individual title and version information from build.properties.
+ *	21-Dec-2020 (rlwhitcomb)
+ *	    Use "version.properties" instead for the title/version info.
  */
 package info.rlwhitcomb.util;
 
@@ -160,10 +162,10 @@ public final class Environment
 	private static String copyrightNotice = null;
 
 	/**
-	 * The set of properties read from the "build.properties" file, which should include
+	 * The set of properties read from the "version.properties" file, which should include
 	 * titles and versions for the major main programs.
 	 */
-	private static Properties buildProperties = null;
+	private static Properties versionProperties = null;
 
 	/**
 	 * Default product name -- set from the "build.properties" file externally
@@ -662,7 +664,7 @@ public final class Environment
 
 
 	/**
-	 * Set the override app version (from the "build.properties" file).
+	 * Set the override app version (from the "version.properties" file).
 	 *
 	 * @param appVersion The new app version string.
 	 */
@@ -672,7 +674,7 @@ public final class Environment
 
 
 	/**
-	 * @return The application build number (set externally from the "version.properties" file).
+	 * @return The application build number (set externally from the "build.number" file).
 	 */
 	public static String getAppBuild() {
 	    return APP_BUILD;
@@ -704,13 +706,13 @@ public final class Environment
 
 
 	/**
-	 * Read the properties from the "build.properties" file.
+	 * Read the properties from the "version.properties" file.
 	 */
-	private static void readBuildProperties() {
-	    if (buildProperties == null) {
-		buildProperties = new Properties();
-		try (InputStream is = Environment.class.getResourceAsStream("/build.properties")) {
-		    buildProperties.load(is);
+	private static void readVersionProperties() {
+	    if (versionProperties == null) {
+		versionProperties = new Properties();
+		try (InputStream is = Environment.class.getResourceAsStream("/version.properties")) {
+		    versionProperties.load(is);
 		}
 		catch (IOException ioe) {
 		}
@@ -730,16 +732,16 @@ public final class Environment
 
 
 	/**
-	 * Load the program information (title/version) from the "build.properties" file
+	 * Load the program information (title/version) from the "version.properties" file
 	 * and save for use by {@link #printProgramInfo}.
 	 *
 	 * @param clazz	The main program class.
 	 */
 	public static void loadProgramInfo(Class<?> clazz) {
 	    String name = clazz.getSimpleName();
-	    readBuildProperties();
-	    setProductName(buildProperties.getProperty(name + ".title"));
-	    setAppVersion(buildProperties.getProperty(name + ".version"));
+	    readVersionProperties();
+	    setProductName(versionProperties.getProperty(name + ".title"));
+	    setAppVersion(versionProperties.getProperty(name + ".version"));
 	}
 
 

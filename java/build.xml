@@ -80,6 +80,9 @@
 		Add "Sleep".
 	    19-Dec-2020 (rlwhitcomb)
 		Add debug setting for javac. Add the Calc script to "test".
+	    21-Dec-2020 (rlwhitcomb)
+		Use "version.properties" instead of "build.properties" for
+		individual title/version information.
 
      ========================================================================== -->
 
@@ -217,7 +220,7 @@
 			<include name="info/rlwhitcomb/**/*.properties"/>
 			<include name="images/*.*"/>
 			<include name="Terra*.json"/>
-			<include name="build.properties"/>
+			<include name="version.properties"/>
 		</jar>
 	</target>
 
