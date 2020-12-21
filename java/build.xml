@@ -83,6 +83,8 @@
 	    21-Dec-2020 (rlwhitcomb)
 		Use "version.properties" instead of "build.properties" for
 		individual title/version information.
+	    21-Dec-2020 (rlwhitcomb)
+		Fix Javadoc error when building on Java 14 pointing to Java 8 API.
 
      ========================================================================== -->
 
@@ -228,6 +230,7 @@
 		<javadoc destdir="doc" access="private" encoding="utf-8" windowtitle="Utilities">
 			<arg value="-html4" if:true="${html4.output}"/>
 			<arg value="--frames" if:true="${html4.output}"/>
+			<arg line="--release 8" if:true="${new.java.version}"/>
 			<link href="https://docs.oracle.com/javase/8/docs/api/"/>
 			<packageset dir=".">
 				<include name="net/iharder/b64"/>
