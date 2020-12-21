@@ -40,8 +40,9 @@ Work going on currently includes:
 - UUID program: generate random, generate from text, separate into parts, maybe more.
 - Pivot demo program for CSS colors.
 - Lots of unit tests.
-- Separate version for utility library and each main program (cmp, tre, which, etc.); add to Environment.printProgramInfo
-- Java "install" task also installs the appropriate wrapper scripts for the platform.
+- Put build date, time, number, debug settings into "build.number" file and read that inside Environment.javapp (instead of preprocessing it??).
+- Add standard Version class?? which would just default to the Environment values.
+- Consider a standard method to read .properties files (take the code from "readVersionProperties" in Environment and make it general somewhere else?)
 
 ## Notes on New Programs and Features
 
@@ -49,10 +50,8 @@ Work going on currently includes:
 - Need something to check proper license, copyright, etc. in all files
 
 ### Shell invoker
-- Figure out how to do the %~dp0 thing to find the matching directory for the .jar file on OS X and Linux
 - Option to "boiler" to create this thing (along with the path/class)
 - Figure out a location to put these wrapper scripts (in "bat" folder? or root? or along with the Java source?)
-- And then figure out how to collect them to put into the UTILITIES_HOME folder along with the .jar file
 
 ### Boilerplate program
 - Name should be "boiler"
@@ -62,11 +61,14 @@ Work going on currently includes:
 - Add license with correct copyright date
 - .properties file with Author, maybe History line format, default program type option, default "create wrapper" option
 - GUI program, but with (possible) option to set most/all of the values from command line and just generate it
+- Add title and version to "version.properties"
 
 ### Paradigm for doing either command line or GUI (Pivot) depending on flags
 - Add to boilerplate options
 - Boilerplate program will use this code b/c we sometime want to just do command line, other times want the GUI
 - Word Finder can also use this option
+- Calc is now working with this design, although some features (like "help" and "version") are not well coordinated yet between console and GUI.
+- Could we dynamically switch back and forth? (certainly console -> GUI works, but the reverse is questionable).
 
 ### Cat
 - add help
@@ -75,7 +77,13 @@ Work going on currently includes:
 
 - a.b.c throws NPE -> how to do recursive invocation
 
+### WordFind
+
+- Need to move out of Pivot directory, back to "java" folders, then update paths, build, etc.
+- Separate .jar file? Or is "utilities.jar" suitable?
+
 ### UUID
+
 - lots of options
 - generate random one
 - generate from "name" using command-line string or read from file (charset given) or from -stdin (see Cat for details)
