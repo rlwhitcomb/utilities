@@ -58,7 +58,7 @@ import org.apache.pivot.wtk.Application;
 import org.apache.pivot.wtk.DesktopApplicationContext;
 import org.apache.pivot.wtk.Display;
 import info.rlwhitcomb.util.CharUtil;
-import static info.rlwhitcomb.util.ConsoleColor.*;
+import static info.rlwhitcomb.util.ConsoleColor.Code.*;
 
 /**
  * A utility program to make sense out of random letter tiles
@@ -667,7 +667,7 @@ public class WordFind implements Application {
 
                 long endTime = System.nanoTime();
                 float secs = (float)(endTime - startTime) / 1.0e9f;
-                String message = String.format("(Lookup time was %1$5.3f seconds, %2$,d words tested)",
+                String message = String.format("(Lookup time was %1$5.3f seconds; %2$,d words tested)",
                         secs, permutationSet.size());
                 info(message);
             }
