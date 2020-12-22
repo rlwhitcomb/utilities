@@ -204,8 +204,8 @@ import org.apache.tools.ant.Task;
  * are case-sensitive.
  * <p> There are several other predefined variables available:
  * <ul>
- * <li><code>__DATE__</code> (the data the preprocessing started)
- * <li><code>__TIME__</code> (the time it started)
+ * <li><code>__DATE__</code> (the data the preprocessing started in <code>yyyy-MM-dd</code> format)
+ * <li><code>__TIME__</code> (the time it started in <code>HH:mm:ss.SSS z</code> format)
  * <li><code>__FILE__</code> (the current file being processed)
  * <li><code>__LINE__</code> (the line number within that file)
  * <li><code>__JAVA_VERSION__</code> (the Java version)
