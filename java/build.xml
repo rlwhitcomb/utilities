@@ -91,6 +91,8 @@
 		Set the build date and time in the "build.number" file.
 		Add all the build properties files to the .jar file.
 		Use the "debug.build" setting as the debug flag.
+	    22-Dec-2020 (rlwhitcomb)
+		Add the former "pivot" code to our .jar file.
 
      ========================================================================== -->
 
@@ -123,6 +125,7 @@
 		<include name="calc"/>
 		<include name="cat"/>
 		<include name="cmp"/>
+		<include name="crl"/>
 		<include name="fixpath"/>
 		<include name="gunz"/>
 		<include name="gz"/>
@@ -134,6 +137,7 @@
 		<include name="sleep"/>
 		<include name="tre"/>
 		<include name="which"/>
+		<include name="wf"/>
 	</patternset>
 
 
@@ -197,10 +201,12 @@
 			<src path="info/rlwhitcomb/cat"/>
 			<src path="info/rlwhitcomb/compare"/>
 			<src path="info/rlwhitcomb/csv"/>
+			<src path="info/rlwhitcomb/curl"/>
 			<src path="info/rlwhitcomb/jarfile"/>
 			<src path="info/rlwhitcomb/matches"/>
 			<src path="info/rlwhitcomb/tree"/>
 			<src path="info/rlwhitcomb/util"/>
+			<src path="info/rlwhitcomb/wordfind"/>
 			<exclude name="**/package-info.java"/>
 			<exclude name="**/preproc/*"/>
 			<exclude name="**/ant/*"/>
@@ -229,10 +235,15 @@
 			<include name="info/rlwhitcomb/cat/*.class"/>
 			<include name="info/rlwhitcomb/compare/*.class"/>
 			<include name="info/rlwhitcomb/csv/*.class"/>
+			<include name="info/rlwhitcomb/curl/*.class"/>
+			<include name="info/rlwhitcomb/curl/*.bxml"/>
 			<include name="info/rlwhitcomb/jarfile/*.class"/>
 			<include name="info/rlwhitcomb/matches/*.class"/>
 			<include name="info/rlwhitcomb/tree/*.class"/>
 			<include name="info/rlwhitcomb/util/*.class"/>
+			<include name="info/rlwhitcomb/wordfind/*.class"/>
+			<include name="info/rlwhitcomb/wordfind/*.bxml"/>
+			<include name="info/rlwhitcomb/wordfind/*.txt"/>
 			<include name="info/rlwhitcomb/**/*.properties"/>
 			<include name="images/*.*"/>
 			<include name="Terra*.json"/>
@@ -287,10 +298,12 @@
 			<fileset dir="info/rlwhitcomb/cat" includes="*.class"/>
 			<fileset dir="info/rlwhitcomb/compare" includes="*.class"/>
 			<fileset dir="info/rlwhitcomb/csv" includes="*.class"/>
+			<fileset dir="info/rlwhitcomb/curl" includes="*.class"/>
 			<fileset dir="info/rlwhitcomb/jarfile" includes="*.class"/>
 			<fileset dir="info/rlwhitcomb/matches" includes="*.class"/>
 			<fileset dir="info/rlwhitcomb/tree" includes="*.class"/>
 			<fileset dir="info/rlwhitcomb/util" includes="*.class"/>
+			<fileset dir="info/rlwhitcomb/wordfind" includes="*.class"/>
 			<!-- Clean out the preprocessed files -->
 			<fileset dir="." includes="**/*">
 				<present targetdir=".">

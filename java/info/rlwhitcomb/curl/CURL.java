@@ -288,9 +288,7 @@ public class CURL
 
 	public CURL() {
 	    // Select the old TerraTheme (and colors)
-	    System.setProperty(
-		"org.apache.pivot.wtk.skin.terra.location",
-		ClassUtil.getResourcePath(this) + "TerraTheme_old.json");
+	    System.setProperty("org.apache.pivot.wtk.skin.terra.location", "/TerraTheme_old.json");
 
 	    serializer = new BXMLSerializer();
 	}

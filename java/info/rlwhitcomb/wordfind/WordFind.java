@@ -36,6 +36,8 @@
  *	    Also highlight and correct point values with blanks.
  *	16-Oct-2020 (rlwhitcomb)
  *	    Display the number of permutations at the end.
+ *	22-Dec-2020 (rlwhitcomb)
+ *	    Use a different API to read the txt files from the .jar file.
  */
 package info.rlwhitcomb.wordfind;
 
@@ -484,39 +486,33 @@ public class WordFind implements Application {
     private static void readDictionary(final String wordFile, final Set<String> wordSet,
         final Set<String> addlSet) {
         long startTime = System.nanoTime();
-        try {
-            URL fileUrl = WordFind.class.getResource(wordFile);
-            Path filePath = Paths.get(fileUrl.toURI());
-            try (BufferedReader reader = Files.newBufferedReader(filePath)) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    // Just for safety's sake, trim excess blanks
-                    line = line.trim();
-                    if (line.length() == 0
-                     || line.startsWith("#")
-                     || line.startsWith("//")
-                     || line.startsWith("--")) {
-                        continue;
-                    }
-                    if (line.length() == 1) {
-                        info("One letter word \"" + line + "\"");
-                        continue;
-                    }
-                    // Assume the input word file is all in UPPER case...
-                    String word = lowerCase ? line.toLowerCase() : line;
-                    if (word.endsWith("?")) {
-                        addlSet.add(word.substring(0, word.length() - 1));
-                    } else {
-                        wordSet.add(word);
-                    }
+        InputStream is = WordFind.class.getResourceAsStream(wordFile);
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                // Just for safety's sake, trim excess blanks
+                line = line.trim();
+                if (line.length() == 0
+                 || line.startsWith("#")
+                 || line.startsWith("//")
+                 || line.startsWith("--")) {
+                    continue;
                 }
-            } catch (IOException ioe) {
-                error("Problem reading the \"" + wordFile + "\" file: "
-                    + ioe.getClass().getSimpleName() + ": " + ioe.getMessage());
+                if (line.length() == 1) {
+                    info("One letter word \"" + line + "\"");
+                    continue;
+                }
+                // Assume the input word file is all in UPPER case...
+                String word = lowerCase ? line.toLowerCase() : line;
+                if (word.endsWith("?")) {
+                    addlSet.add(word.substring(0, word.length() - 1));
+                } else {
+                    wordSet.add(word);
+                }
             }
-        } catch (URISyntaxException use) {
-            error("Unable to find the \"" + wordFile + "\" file: "
-                + use.getClass().getSimpleName() + ": " + use.getMessage());
+        } catch (IOException ioe) {
+            error("Problem reading the \"" + wordFile + "\" file: "
+                + ioe.getClass().getSimpleName() + ": " + ioe.getMessage());
         }
         long endTime = System.nanoTime();
         float secs = (float)(endTime - startTime) / 1.0e9f;
@@ -672,6 +668,10 @@ public class WordFind implements Application {
                 info(message);
             }
         }
+    }
+
+    public WordFind() {
+        System.setProperty("org.apache.pivot.wtk.skin.terra.location", "/TerraTheme_old.json");
     }
 
 }
