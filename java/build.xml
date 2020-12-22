@@ -87,6 +87,10 @@
 		Fix Javadoc error when building on Java 14 pointing to Java 8 API.
 	    21-Dec-2020 (rlwhitcomb)
 		Rename the MD5 wrappers to lowercase.
+	    22-Dec-2020 (rlwhitcomb)
+		Set the build date and time in the "build.number" file.
+		Add all the build properties files to the .jar file.
+		Use the "debug.build" setting as the debug flag.
 
      ========================================================================== -->
 
@@ -97,6 +101,14 @@
 	<property environment="env"/>
 	<property file="build.properties"/>
 	<buildnumber/>
+	<tstamp>
+		<format property="build.date" pattern="yyyy-MM-dd"/>
+		<format property="build.time" pattern="HH:mm:ss.SSS z"/>
+	</tstamp>
+	<propertyfile file="build.number" comment="Utilities Build Values">
+		<entry key="build.date" value="${build.date}"/>
+		<entry key="build.time" value="${build.time}"/>
+	</propertyfile>
 	<condition property="new.java.version" value="true" else="false" >
 		<javaversion atleast="9"/>
 	</condition>
@@ -150,7 +162,7 @@
 	<target name="preproc" description="Preprocesses necessary files.">
 		<preproc file="info/rlwhitcomb/util/Environment.javapp" outputExt=".java"
 			nologo="true" verbose="true" format="UTF-8"
-			define="PRODUCT_NAME=${product.name},APP_VERSION=${build.version},APP_BUILD=${build.number},IS_DEBUG_BUILD=false" />
+			define="PRODUCT_NAME=${product.name},APP_VERSION=${build.version},APP_BUILD=${build.number},IS_DEBUG_BUILD=${debug.build}" />
 		<parallel>
 			<generate-text-resources dir="info/rlwhitcomb/cat" />
 			<generate-text-resources dir="info/rlwhitcomb/compare" />
@@ -175,7 +187,7 @@
 			<arg value="-no-listener"/>
 			<arg line="-package info.rlwhitcomb.calc"/>
 		</java>
-		<javac includeAntRuntime="false" createMissingPackageInfoClass="false" encoding="utf-8" debug="${javac.debug}">
+		<javac includeAntRuntime="false" createMissingPackageInfoClass="false" encoding="utf-8" debug="${debug.build}">
 			<compilerarg line="${compiler.args}"/>
 			<src path="."/>
 			<src path="net/iharder/b64"/>
@@ -224,6 +236,8 @@
 			<include name="info/rlwhitcomb/**/*.properties"/>
 			<include name="images/*.*"/>
 			<include name="Terra*.json"/>
+			<include name="build.properties"/>
+			<include name="build.number"/>
 			<include name="version.properties"/>
 		</jar>
 	</target>

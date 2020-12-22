@@ -103,6 +103,9 @@
  *	    Use "version.properties" instead for the title/version info.
  *	21-Dec-2020 (rlwhitcomb)
  *	    Update obsolete Javadoc constructs.
+ *	22-Dec-2020 (rlwhitcomb)
+ *	    Get all our values from the properties files, instead of needing
+ *	    the preprocessor.
  */
 package info.rlwhitcomb.util;
 
@@ -164,39 +167,39 @@ public final class Environment
 	private static String copyrightNotice = null;
 
 	/**
-	 * The set of properties read from the "version.properties" file, which should include
-	 * titles and versions for the major main programs.
+	 * The set of properties read from various files: "build.properties", "build.number",
+	 * and "version.properties", which should include titles and versions for the major
+	 * main programs, as well as other build-related information.
 	 */
-	private static Properties versionProperties = null;
+	private static Properties buildProperties = null;
 
 	/**
-	 * Default product name -- set from the "build.properties" file externally
-	 * by the preprocessor, but can be set by the enclosing application as well.
+	 * Default product name -- read from the "build.properties" file,
+	 * but can be set by the enclosing application as well.
 	 * @see #setProductName
 	 */
-	private static String productName = "$(PRODUCT_NAME)";
+	private static String productName = null;
 
 	/**
-	 * Current version of this application -- set from the "build.properties" file externally
-	 * by the preprocessor.
+	 * Current version of this application -- read from the "build.properties" file.
 	 */
-	private static final String APP_VERSION = "$(APP_VERSION)";
+	private static String APP_VERSION = null;
 	/**
-	 * Current build number -- set from the "build.number" file externally.
+	 * Current build number -- read from the "build.number" file.
 	 */
-	private static final String APP_BUILD = "$(APP_BUILD)";
+	private static String APP_BUILD = null;
 	/**
 	 * Build date.
 	 */
-	private static final String BUILD_DATE = "$(__DATE__)";
+	private static String BUILD_DATE = null;
 	/**
 	 * Build time.
 	 */
-	private static final String BUILD_TIME = "$(__TIME__)";
+	private static String BUILD_TIME = null;
 	/**
 	 * Whether this is a DEBUG build or not.
 	 */
-	private static final boolean IS_DEBUG_BUILD = $(IS_DEBUG_BUILD);
+	private static boolean IS_DEBUG_BUILD = false;
 
 	/**
 	 * Overloaded product name.
@@ -639,11 +642,15 @@ public final class Environment
 
 
 	/**
-	 * @return The product name string, mostly used for identifying SQL sessions made through
-	 * the management server, so default to a neutral product.
+	 * @return The product name string, mostly used for identifying sessions,
+	 * so default to a neutral product.
 	 */
 	public static String getProductName() {
-	    return overloadedProductName != null ? overloadedProductName : productName;
+	    if (overloadedProductName != null)
+		return overloadedProductName;
+
+	    readBuildProperties();
+	    return productName;
 	}
 
 
@@ -661,7 +668,11 @@ public final class Environment
 	 * @return The application version (set externally from the "version.properties" file).
 	 */
 	public static String getAppVersion() {
-	    return overloadedAppVersion != null ? overloadedAppVersion : APP_VERSION;
+	    if (overloadedAppVersion != null)
+		return overloadedAppVersion;
+
+	    readBuildProperties();
+	    return APP_VERSION;
 	}
 
 
@@ -679,45 +690,97 @@ public final class Environment
 	 * @return The application build number (set externally from the "build.number" file).
 	 */
 	public static String getAppBuild() {
+	    readBuildProperties();
 	    return APP_BUILD;
 	}
 
 
 	/**
-	 * @return The date the application was built (set externally by the preprocessor).
+	 * @return The date the application was built (set externally in the "build.number" file)
+	 * in <code>yyyy-MM-dd</code> format.
 	 */
 	public static String getBuildDate() {
+	    readBuildProperties();
 	    return BUILD_DATE;
 	}
 
 
 	/**
-	 * @return The time the application was built (set externally by the preprocessor).
+	 * @return The time the application was built (set externally in the "build.number" file)
+	 * in <code>HH:mm:ss.SSS z</code> format.
 	 */
 	public static String getBuildTime() {
+	    readBuildProperties();
 	    return BUILD_TIME;
 	}
 
 
 	/**
-	 * @return Whether or not this is a DEBUG build (set externally from the environment and preprocessor).
+	 * @return Whether or not this is a DEBUG build (set externally in the "build.properties" file).
 	 */
 	public static boolean isDebugBuild() {
+	    readBuildProperties();
 	    return IS_DEBUG_BUILD;
 	}
 
 
 	/**
-	 * Read the properties from the "version.properties" file.
+	 * Read a properties file (ISO-8859-1 charset) from the default classpath and return the
+	 * properties map decoded from it.
+	 *
+	 * @param filePath	The path and name of the file to read.
+	 * @return		The decode properties or {@code null} if there was an I/O error
+	 *			reading the file.
 	 */
-	private static void readVersionProperties() {
-	    if (versionProperties == null) {
-		versionProperties = new Properties();
-		try (InputStream is = Environment.class.getResourceAsStream("/version.properties")) {
-		    versionProperties.load(is);
-		}
-		catch (IOException ioe) {
-		}
+	public static Properties readPropertiesFile(String filePath) {
+	    return readPropertiesFile(filePath, null);
+	}
+
+
+	/**
+	 * Read a properties file (ISO-8859-1 charset) from the default classpath and return the
+	 * properties map decoded from it.
+	 *
+	 * @param filePath		The path and name of the file to read.
+	 * @param baseProperties	The base properties to use as defaults (can be {@code null}).
+	 * @return			The decoded properties or {@code baseProperties}
+	 *				if there was an I/O error reading the file (which could be
+	 *				{@code null} if that was passed in).
+	 */
+	public static Properties readPropertiesFile(String filePath, Properties baseProperties) {
+	    Properties properties = (baseProperties == null)
+			? new Properties()
+			: new Properties(baseProperties);
+	    try (InputStream is = Environment.class.getResourceAsStream(filePath)) {
+		properties.load(is);
+	    }
+	    catch (IOException ioe) {
+		// TODO: error somewhere?
+		return baseProperties;
+	    }
+	    return properties;
+	}
+
+
+	/**
+	 * Read in all the build properties from the various sources.
+	 *
+	 * @see #buildProperties
+	 * @see #readPropertiesFile(String)
+	 * @see #readPropertiesFile(String, Properties)
+	 */
+	private static void readBuildProperties() {
+	    if (buildProperties == null) {
+		buildProperties = readPropertiesFile("/build.properties");
+		buildProperties = readPropertiesFile("/build.number", buildProperties);
+		buildProperties = readPropertiesFile("/version.properties", buildProperties);
+
+		productName    = buildProperties.getProperty("product.name");
+		APP_VERSION    = buildProperties.getProperty("build.version");
+		APP_BUILD      = buildProperties.getProperty("build.number");
+		BUILD_DATE     = buildProperties.getProperty("build.date");
+		BUILD_TIME     = buildProperties.getProperty("build.time");
+		IS_DEBUG_BUILD = CharUtil.getBooleanValue(buildProperties.getProperty("debug.build"));
 	    }
 	}
 
@@ -741,9 +804,9 @@ public final class Environment
 	 */
 	public static void loadProgramInfo(Class<?> clazz) {
 	    String name = clazz.getSimpleName();
-	    readVersionProperties();
-	    setProductName(versionProperties.getProperty(name + ".title"));
-	    setAppVersion(versionProperties.getProperty(name + ".version"));
+	    readBuildProperties();
+	    setProductName(buildProperties.getProperty(name + ".title"));
+	    setAppVersion(buildProperties.getProperty(name + ".version"));
 	}
 
 

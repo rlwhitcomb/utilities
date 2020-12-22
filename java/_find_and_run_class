@@ -8,4 +8,5 @@ if [ ! -e $JAR_PATH ]; then
     exit 1
 fi
 
-java -cp $CLASSPATH:$JAR_PATH $CLASS_NAME $@
+java -cp $JAR_PATH:$CLASSPATH $CLASS_NAME $@
+
