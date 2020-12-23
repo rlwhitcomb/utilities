@@ -39,6 +39,8 @@
  *	    Regularize the exit process.
  *	20-Dec-2020 (rlwhitcomb)
  *	    Redo the way we handle commands in REPL mode.
+ *	23-Dec-2020 (rlwhitcomb)
+ *	    GUI mode command in REPL mode.
  */
 package info.rlwhitcomb.calc;
 
@@ -87,6 +89,8 @@ public class Calc
 	  + "' or '" + VALUE_COLOR + "?" + RESET + "' for a list of supported functions.",
 	    "  Enter '" + VALUE_COLOR + "quit" + RESET
 	  + "' or '" + VALUE_COLOR + "exit" + RESET + "' to end.",
+	    "  Enter '" + VALUE_COLOR + "gui" + RESET
+	  + "' to enter GUI mode.",
 	    ""
 	};
 
@@ -428,6 +432,7 @@ public class Calc
 			    printIntro();
 
 			    String line;
+			replLoop:
 			    while ((line = console.readLine("> ")) != null) {
 				String cmd = line.trim().toLowerCase();
 				switch (cmd) {
@@ -443,6 +448,9 @@ public class Calc
 				    case "version":
 					printTitleAndVersion();
 					break;
+				    case "gui":
+					DesktopApplicationContext.main(Calc.class, args);
+					break replLoop;
 				    default:
 					process(CharStreams.fromString(line + LINESEP), visitor, errorStrategy);
 					break;
