@@ -32,6 +32,8 @@
 #	    Took out duplicate option text.
 #	11-Dec-2020 (rlwhitcomb)
 #	    Move program name to build.properties.
+#	23-Dec-2020 (rlwhitcomb)
+#	    More options.
 #
 
 unavailable	= " <unavailable>"
@@ -73,16 +75,25 @@ usage.help29	= "\t  (or -colors, or -col)"
 usage.help30	= "\t-nocolor  do not use colors on output"
 usage.help31	= "\t  (or %NoColors%, %NoColor%, %NoCol%, -no, or -n)"
 usage.help32	= ""
-usage.help33	= "\t-help  prints this message"
-usage.help34	= "\t  (or -usage, -h, -u, or -?)"
-usage.help35	= ""
-usage.help36	= "\t-version  prints the program version information"
-usage.help37	= "\t  (or -vers, -ver, or -v)"
-usage.help38	= ""
-usage.help39	= " Note: options can be specified by \"-opt\" or \"--opt\""
-usage.help40	= "  (or on Windows by \"/opt\")."
-usage.help41	= ""
-usage.help42	= " Also note: all options are parsed before any files are processed,"
-usage.help43	= "  so later options will override earlier ones for the entire output."
-usage.help44	= ""
+usage.help33	= "\t-dark    use appropriate colors for dark backgrounds"
+usage.help34	= "\t  (or %DarkBackground%, -darkback, or -darkbg)"
+usage.help35	= "\t-light   use colors suitable for a light/white background"
+usage.help36	= "\t  (or %LightBackground%, -lightback, or -lightbg)"
+usage.help37	= ""
+usage.help38	= "\t-help  prints this message"
+usage.help39	= "\t  (or -usage, -h, -u, or -?)"
+usage.help40	= ""
+usage.help41	= "\t-version  prints the program version information"
+usage.help42	= "\t  (or -vers, -ver, or -v)"
+usage.help43	= ""
+usage.help44	= " Note: options can be specified by \"-opt\" or \"--opt\""
+usage.help45	= "  (or on Windows by \"/opt\")."
+usage.help46	= ""
+usage.help47	= " Options can also be preset by listing them in the TREE_OPTIONS"
+usage.help48	= "  environment variable (such as TREE_OPTIONS=-nocolor)"
+usage.help49	= ""
+usage.help50	= " Also note: all options are parsed before any files are processed,"
+usage.help51	= "  so later options will override earlier ones for the entire output,"
+usage.help52	= "  and options on the command line override ones set by TREE_OPTIONS."
+usage.help53	= ""
 

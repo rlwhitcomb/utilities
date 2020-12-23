@@ -66,6 +66,9 @@
  *	    Refactor ConsoleColor;
  *	11-Dec-2020 (rlwhitcomb)
  *	    Use new product info mechanism.
+ *	22-Dec-2020 (rlwhitcomb)
+ *	    Switch for dark mode (instead of relying on O/S).
+ *	    Parse env var TREE_OPTIONS for switches.
  */
 package info.rlwhitcomb.tree;
 
@@ -116,6 +119,32 @@ public class Tree
 	/** Flag to say our backgrounds are dark or not. */
 	private static boolean darkBackgrounds = runningOnWindows;
 
+	/** Flag to say we are just printing the program info and not
+	 * processing any directories.
+	 */
+	private static boolean showInfoOnly = false;
+
+	/** Sort output by file name? */
+	private static boolean sortByFileName = false;
+
+	/** Sort output by directory name? */
+ 	private static boolean sortByDirectory = false;
+
+	/** Only show directory names, not files? */
+	private static boolean omitFiles = true;
+
+	/** Show hidden files as well? */
+	private static boolean showHidden = false;
+
+	/** The sort order for file names. */
+	private static SortOrder nameOrder = SortOrder.ASCENDING;
+
+	/** The sort order for directory names. */
+	private static SortOrder directoryOrder = SortOrder.ASCENDING;
+
+	/** Whether sorting is case-sensitive or not. */
+	private static CaseSensitivity casing = CaseSensitivity.MIXED_CASE;
+
 	/** List of "executable" file extensions (Windows only). */
 	private static String[] executableExtensions;
 
@@ -127,6 +156,9 @@ public class Tree
 	private static final String NO_COLORS        = "NoColors";
 	private static final String NO_COLOR         = "NoColor";
 	private static final String NO_COL           = "NoCol";
+	private static final String DARK             = "DarkBackground";
+	private static final String LIGHT            = "LightBackground";
+
 
 
 	private static String line(char left, char mid, char right, int width) {
@@ -450,36 +482,14 @@ public class Tree
 	    putHelpList(symbols, NO_COLORS);
 	    symbols.put(NO_COLOR, helpList(NO_COLOR).replace(", -nocolor", ""));
 	    putHelpList(symbols, NO_COL);
+	    putHelpList(symbols, DARK);
+	    putHelpList(symbols, LIGHT);
 
 	    Intl.printHelp("tree#usage", symbols);
 	}
 
 
-	/**
-	 * Main program.
-	 * @param args The command line arguments.
-	 */
-	public static void main(String[] args) {
-	    boolean showInfoOnly = false;
-	    boolean sortByFileName = false;
-	    boolean sortByDirectory = false;
-	    boolean omitFiles = true;
-	    boolean showHidden = false;
-	    SortOrder nameOrder = SortOrder.ASCENDING;
-	    SortOrder directoryOrder = SortOrder.ASCENDING;
-	    CaseSensitivity casing = CaseSensitivity.MIXED_CASE;
-	    List<String> argList = new ArrayList<>(args.length);
-
-	    Environment.loadProgramInfo(Tree.class);
-
-	    // Setup (for Windows) the executable file extension list
-	    if (runningOnWindows) {
-		String exts = System.getenv("PATHEXT");
-		executableExtensions = exts.split(";");
-		Arrays.sort(executableExtensions);
-	    }
-
-	    // Scan the input arguments for options vs. file/directory specs
+	private static void parseOptions(final String[] args, final List<String> argList) {
 	    for (String arg : args) {
 		if (Options.matchesOption(arg, false, "alpha", "ascending", "asc", "a")) {
 		    sortByFileName = true;
@@ -520,6 +530,12 @@ public class Tree
 		else if (Options.matchesOption(arg, true, NO_COLORS, NO_COLOR, NO_COL, "no", "n")) {
 		    useColoring = false;
 		}
+		else if (Options.matchesOption(arg, true, DARK, "darkback", "darkbg", "dark")) {
+		    darkBackgrounds = true;
+		}
+		else if (Options.matchesOption(arg, true, LIGHT, "lightback", "lightbg", "light")) {
+		    darkBackgrounds = false;
+		}
 		else if (Options.matchesOption(arg, true, "help", "usage", "h", "u", "?")) {
 		    usage();
 		    showInfoOnly = true;
@@ -532,9 +548,40 @@ public class Tree
 		    Intl.errFormat("tree#warnUnknownOpt", arg);
 		}
 		else {
-		    argList.add(arg);
+		    if (argList != null)
+			argList.add(arg);
 		}
 	    }
+	}
+
+
+	/**
+	 * Main program.
+	 * @param args The command line arguments.
+	 */
+	public static void main(String[] args) {
+	    List<String> argList = new ArrayList<>(args.length);
+
+	    Environment.loadProgramInfo(Tree.class);
+
+	    // Setup (for Windows) the executable file extension list
+	    if (runningOnWindows) {
+		String exts = System.getenv("PATHEXT");
+		executableExtensions = exts.split(";");
+		Arrays.sort(executableExtensions);
+	    }
+
+	    // First, parse the TREE_OPTIONS env variable for predefined options
+	    // (ignoring any non-options here)
+	    String options = System.getenv("TREE_OPTIONS");
+	    if (!CharUtil.isNullOrEmpty(options)) {
+		String[] optArgs = options.split("\\s");
+		parseOptions(optArgs, null);
+	    }
+
+	    // Now, scan the input arguments for options vs. file/directory specs
+	    // (so, the command line options override the predefined ones)
+	    parseOptions(args, argList);
 
 	    if (showInfoOnly) {
 		return;
