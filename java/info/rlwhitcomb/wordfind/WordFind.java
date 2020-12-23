@@ -38,6 +38,9 @@
  *	    Display the number of permutations at the end.
  *	22-Dec-2020 (rlwhitcomb)
  *	    Use a different API to read the txt files from the .jar file.
+ * 	22-Dec-2020 (rlwhitcomb)
+ *	    Fix obsolete Javadoc constructs and other errors. Abandon the
+ *	    searching if too many are needed (temp fix).
  */
 package info.rlwhitcomb.wordfind;
 
@@ -64,7 +67,7 @@ import static info.rlwhitcomb.util.ConsoleColor.Code.*;
 
 /**
  * A utility program to make sense out of random letter tiles
- * (such as for the "Scrabble" &tm; or "Word With Friends" &tm; games).
+ * (such as for the "Scrabble" &trade; or "Word With Friends" &trade; games).
  */
 public class WordFind implements Application {
     /**
@@ -190,6 +193,8 @@ public class WordFind implements Application {
 
     /**
      * Highlight a word making special emphasis on the blank substitutions.
+     * @param adornedWord The word to highlight with the "_" markers.
+     * @return The input with the markers replaced with the actual color codes.
      */
     private static String highlightWord(final String adornedWord) {
         int wordLen = adornedWord.length();
@@ -239,10 +244,13 @@ public class WordFind implements Application {
     /**
      * Find all the valid possible permutations of the input string (recursive call).
      * <p> Algorithm taken from: https://www.geeksforgeeks.org/print-all-permutations-of-a-string-in-java/
-     * @param input The UPPERcase input string.
-     * @param outputSoFar For the recursive call, the prefix we have already processed.
+     * @param prefix         The prefix we've checked so far.
+     * @param str            The rest of the string to check.
+     * @param permutationSet The set of permuted arrangements already made.
+     * @param validWords     The final output set of valid words to add to.
+     * @return               {@code false} to abort (time or space constraints), {@code true} to continue
      */
-    private static void findValidPermutations(
+    private static boolean findValidPermutations(
 	final String prefix,
 	final String str,
 	final Set<String> permutationSet,
@@ -252,41 +260,55 @@ public class WordFind implements Application {
             // Sometimes we use the letters only, but at the end we need to leave the blank markers alone
             String word = getLettersOnly(prefix);
 
+            // Early check for words less than two characters without begin or end additions
+            if (word.length() < 2 && !beginningValue.isPresent() && !endingValue.isPresent())
+                return true;
+
             // If this is a word with blanks, but the word without blanks is already there, then
             // don't bother working on this version. This simpler test only works because we put
             // the blanks at the end of the sequence, so we find the better choices first.
             if (!prefix.equals(word)) {
                 if (permutationSet.contains(word))
-                    return;
+                    return true;
             }
 
 	    // If the permutation was already checked, then just leave without doing any more
             // (distinguish between the same word but using a blank vs. with regular letters)
-	    if (permutationSet.contains(prefix))
-		return;
+	    if (!permutationSet.add(prefix))
+		return true;
 
-	    permutationSet.add(prefix);
+            // TODO: is there a better algorithm that will shorten the time?
+            // Or a better algorithm with "contains" tests that won't exponentially
+            // increase our time?  Or should this be a parameter, or time-based or ...?
+            if (permutationSet.size() >= 10_000_000) {
+                System.err.println("Aborting after 10,000,000 permutations checked!");
+                return false;
+            }
 
-	    // Now start mucking with the valid word and "begins with", "ends with", etc. tests
-            // (and we need two copies, one with the blank markers and one without for word lookup
+	    // Now start mucking with the valid word and "begins with", "ends with", "contains" tests
+            // (and we need two copies, one with the blank markers and one without for word lookup)
             final StringBuilder bufAdorned   = new StringBuilder(prefix);
             final StringBuilder bufUnadorned = new StringBuilder(word);
             beginningValue.ifPresent(v -> { bufAdorned.insert(0, v); bufUnadorned.insert(0, v); });
             endingValue.ifPresent   (v -> { bufAdorned.append(v);    bufUnadorned.append(v); });
 
-            final String outputUnadorned = bufUnadorned.toString();
-            if (words.contains(outputUnadorned)
-            || (findInAdditional && additionalWords.contains(outputUnadorned))) {
-                int index = outputUnadorned.length() - 1;
+            final String wordUnadorned = bufUnadorned.toString();
+            // There are no valid one letter (or blank) words
+            if (wordUnadorned.length() < 2)
+                return true;
+
+            if (words.contains(wordUnadorned)
+            || (findInAdditional && additionalWords.contains(wordUnadorned))) {
+                int index = wordUnadorned.length() - 1;
                 boolean matches = true;
                 if (containsValue.isPresent()) {
-                    matches = outputUnadorned.indexOf(containsValue.get()) >= 0;
+                    matches = wordUnadorned.indexOf(containsValue.get()) >= 0;
                 }
                 if (matches) {
                     validWords[index].add(bufAdorned.toString());
                 }
             }
-            return;
+            return true;
         }
 
 	// The intermediate stages where we are permuting the input for all possibilities
@@ -309,16 +331,21 @@ public class WordFind implements Application {
                     char ch2 = (char) (alphaStart + j);
                     // Make an annotated string with the blank location marked with "_"
                     newPrefix = prefix + "_" + ch2 + "_";
-                    findValidPermutations(newPrefix, restOfString, permutationSet, validWords);
+
+                    if (!findValidPermutations(newPrefix, restOfString, permutationSet, validWords))
+                        return false;
                 }
             } else {
                 if (ch == '_')
                     newPrefix = prefix + str.substring(i, i + 3);
                 else
                     newPrefix = prefix + ch;
-                findValidPermutations(newPrefix, restOfString, permutationSet, validWords);
+
+                if (!findValidPermutations(newPrefix, restOfString, permutationSet, validWords))
+                    return false;
             }
         }
+        return true;
     }
 
     @Override
@@ -631,8 +658,11 @@ public class WordFind implements Application {
                             letterSubset.append(letters.charAt(j));
                         }
                     }
-                    findValidPermutations("", letterSubset.toString(), permutationSet, validWords);
+                    if (!findValidPermutations("", letterSubset.toString(), permutationSet, validWords))
+                        break;
                 }
+
+                int numberOfWordsFound = 0;
 
                 for (int index = n - 1; index >= 0; index--) {
                     Set<String> wordSet = validWords[index];
@@ -656,10 +686,14 @@ public class WordFind implements Application {
                             String highlightedWord = highlightWord(word);
                             System.out.format(WORD_FORMAT, leftPadding, highlightedWord, addLetterValues(word));
                             lineLength += columnWidth + 6;
+                            numberOfWordsFound++;
                         }
                         System.out.println();
                     }
                 }
+
+                if (numberOfWordsFound == 0)
+                    error("Unable to find any valid words!");
 
                 long endTime = System.nanoTime();
                 float secs = (float)(endTime - startTime) / 1.0e9f;
