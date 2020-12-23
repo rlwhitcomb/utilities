@@ -93,6 +93,8 @@
 		Use the "debug.build" setting as the debug flag.
 	    22-Dec-2020 (rlwhitcomb)
 		Add the former "pivot" code to our .jar file.
+	    23-Dec-2020 (rlwhitcomb)
+		Don't need to preprocess Environment any more.
 
      ========================================================================== -->
 
@@ -164,9 +166,6 @@
 	</macrodef>
 
 	<target name="preproc" description="Preprocesses necessary files.">
-		<preproc file="info/rlwhitcomb/util/Environment.javapp" outputExt=".java"
-			nologo="true" verbose="true" format="UTF-8"
-			define="PRODUCT_NAME=${product.name},APP_VERSION=${build.version},APP_BUILD=${build.number},IS_DEBUG_BUILD=${debug.build}" />
 		<parallel>
 			<generate-text-resources dir="info/rlwhitcomb/cat" />
 			<generate-text-resources dir="info/rlwhitcomb/compare" />
