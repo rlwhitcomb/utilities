@@ -45,6 +45,8 @@
  *	23-Sep-2020 (rlwhitcomb)
  *	    Change keyboard shortcuts to use platform "command" modifier (not
  *	    strictly Ctrl, esp. on Mac).
+ *	22-Dec-2020 (rlwhitcomb)
+ *	    Fix obsolete Javadoc constructs.
  */
 package info.rlwhitcomb.curl;
 
@@ -69,7 +71,7 @@ import info.rlwhitcomb.util.Which;
 
 
 /**
- * A GUI front-end for the <tt>"curl"</tt> command-line utility.
+ * A GUI front-end for the <code>"curl"</code> command-line utility.
  * <p>Useful for doing basic testing on web services.
  * <p> Ctrl/Cmd-&lt;key&gt; will nagivate to the appropriate form field:
  * <ul><li>Ctrl/Cmd-C (or Ctrl/Cmd-T) to "Content Type"</li>
