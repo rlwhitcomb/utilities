@@ -294,7 +294,7 @@ public class Calc
 		// TOOD: what to do here?
 	    }
 	    else {
-		Environment.printProgramInfo();
+		Environment.printProgramInfo(50);
 	    }
 	}
 

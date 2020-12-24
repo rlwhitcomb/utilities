@@ -106,6 +106,9 @@
  *	22-Dec-2020 (rlwhitcomb)
  *	    Get all our values from the properties files, instead of needing
  *	    the preprocessor.
+ *	24-Dec-2020 (rlwhitcomb)
+ *	    Change up the colors in "printProgramInfo" a little bit. Tweak
+ *	    the spacing of the display; add another override.
  */
 package info.rlwhitcomb.util;
 
@@ -832,6 +835,18 @@ public final class Environment
 
 	/**
 	 * Display a program information banner using things we know about here
+	 * to {@link System#out}, using the given width to display.
+	 *
+	 * @param centerWidth	The width to use for centering (0 = don't center,
+	 *			negative = center over longest string).
+	 */
+	public static void printProgramInfo(int centerWidth) {
+	    printProgramInfo(System.out, centerWidth);
+	}
+
+
+	/**
+	 * Display a program information banner using things we know about here
 	 * to the given {@link PrintStream}.
 	 *
 	 * @param ps		The print stream to display the info to.
@@ -849,31 +864,35 @@ public final class Environment
 	    String productName = getProductName();
 	    String copyright   = getCopyrightNotice();
 
-	    int width = centerWidth;
+	    int lineWidth = centerWidth;
 
 	    // Even if a width is given, the strings might be longer still
-	    width = Math.max(width, productName.length());
-	    width = Math.max(width, versionInfo.length());
-	    width = Math.max(width, buildInfo.length());
-	    width = Math.max(width, copyright.length());
+	    lineWidth = Math.max(lineWidth, productName.length());
+	    lineWidth = Math.max(lineWidth, versionInfo.length());
+	    lineWidth = Math.max(lineWidth, buildInfo.length());
+	    lineWidth = Math.max(lineWidth, copyright.length());
+	    // If the given width wasn't sufficient for all the text
+	    // then give a little extra to make it look better
+	    if (lineWidth > centerWidth)
+		lineWidth += 2;
 
-	    String underline = CharUtil.makeStringOfChars('=', width);
+	    String underline = CharUtil.makeStringOfChars('=', lineWidth);
 
 	    ps.println();
 	    ps.println(BLACK_BRIGHT + underline + BLUE_BOLD_BRIGHT);
-	    if (width == 0) {
-		ps.println(productName);
-		ps.println(versionInfo);
+	    if (centerWidth == 0) {
+		ps.println(" " + productName);
+		ps.println(BLUE + " " + versionInfo);
 		ps.println(BLACK_BRIGHT);
-		ps.println(buildInfo);
-		ps.println(copyright);
+		ps.println(" " + buildInfo);
+		ps.println(" " + copyright);
 	    } 
 	    else {
-		width = (width + 1) / 2 * 2;
+		int width = (lineWidth + 1) / 2 * 2;
 
 		// Negative width puts the odd space on the right
 		ps.println(CharUtil.padToWidth(productName, -width, CENTER));
-		ps.println(CharUtil.padToWidth(versionInfo, -width, CENTER));
+		ps.println(BLUE + CharUtil.padToWidth(versionInfo, -width, CENTER));
 		ps.println(BLACK_BRIGHT);
 		ps.println(CharUtil.padToWidth(buildInfo, -width, CENTER));
 		ps.println(CharUtil.padToWidth(copyright, -width, CENTER));
