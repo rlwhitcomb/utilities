@@ -67,6 +67,9 @@
  *	    Fix the recursive print of objects inside arrays.
  *	21-Dec-2020 (rlwhitcomb)
  *	    Change the way we do exit and help commands in REPL mode.
+ *	24-Dec-2020 (rlwhitcomb)
+ *	    Implement EitherOr expression. Allow $clear to do a set
+ *	    of variables also.
  */
 package info.rlwhitcomb.calc;
 
@@ -443,8 +446,26 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitClearDirective(CalcParser.ClearDirectiveContext ctx) {
-	    variables.clear();
-	    displayer.displayActionMessage("All variables cleared.");
+	    List<TerminalNode> ids = ctx.ID();
+	    if (ids.isEmpty()) {
+		variables.clear();
+		displayer.displayActionMessage("All variables cleared.");
+	    }
+	    else {
+		StringBuilder vars = new StringBuilder();
+		for (TerminalNode node : ids) {
+		    String varName = node.getText();
+		    variables.remove(varName);
+		    if (vars.length() > 0)
+			vars.append(", ");
+		    vars.append("'").append(varName).append("'");
+		}
+		if (ids.size() == 1)
+		    vars.insert(0, "Variable ");
+		else
+		    vars.insert(0, "Variables ");
+		displayer.displayActionMessage(vars + " cleared.");
+	    }
 	    return null;
 	}
 
@@ -479,7 +500,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    char formatChar = format.charAt(1);
 
 		    if (result instanceof Map || result instanceof List) {
-			throw new CalcExprException("Cannot convert object or array to '" + formatChar + "' format.", ctx);
+			throw new CalcExprException("Cannot convert object or array to '" + formatChar + "' format", ctx);
 		    }
 
 		    switch (formatChar) {
@@ -1258,6 +1279,16 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	@Override
+	public Object visitEitherOrExpr(CalcParser.EitherOrExprContext ctx) {
+	    boolean ifExpr = getBooleanValue(ctx.expr(0));
+
+	    if (ifExpr)
+		return visit(ctx.expr(1));
+	    else
+		return visit(ctx.expr(2));
+	}
+
+	@Override
 	@SuppressWarnings("unchecked")
 	public Object visitAssignExpr(CalcParser.AssignExprContext ctx) {
 	    Object value = visit(ctx.expr());
@@ -1274,7 +1305,10 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		id        = var2.ID();
 		name      = id.getText();
 		int index = getShiftValue(expr);
-		// TODO: error out for negative indexes
+
+		if (index < 0)
+		    throw new CalcExprException("Index " + index + " cannot be negative", ctx);
+
 		Object listValue = variables.get(name);
 		List<Object> list = null;
 		if (listValue != null && listValue instanceof List) {
@@ -1285,7 +1319,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    variables.put(name, list);
 		}
 		else {
-		    // TODO: throw error b/c value not a List
+		    throw new CalcExprException("Variable '" + name + "' already has a non-array value", ctx);
 		}
 		// Set empty values up to the index desired
 		int size = list.size();
@@ -1315,7 +1349,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			variables.put(name, map);
 		    }
 		    else {
-			// TODO: throw error b/c value not a map
+			throw new CalcExprException("Variable '" + name + "' already has a non-object value", ctx);
 		    }
 		    map.put(nameKey, value);
 		}

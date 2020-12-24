@@ -69,14 +69,13 @@ Work going on currently includes:
 - Boilerplate program will use this code b/c we sometime want to just do command line, other times want the GUI
 - Word Finder can also use this option
 - Calc is now working with this design, although some features (like "help" and "version") are not well coordinated yet between console and GUI.
-- Could we dynamically switch back and forth? (certainly console -> GUI works, but the reverse is questionable).
 
 ### Cat
 - add help
 
 ### Calc
 
-- a.b.c throws NPE -> how to do recursive invocation
+- a.b.c throws NPE -> how to do recursive invocation?
 
 ### WordFind
 

@@ -95,6 +95,8 @@
 		Add the former "pivot" code to our .jar file.
 	    23-Dec-2020 (rlwhitcomb)
 		Don't need to preprocess Environment any more.
+	    24-Dec-2020 (rlwhitcomb)
+		Rearrange install targets for easier testing.
 
      ========================================================================== -->
 
@@ -325,7 +327,7 @@
 	</condition>
 	<echo message="UTILITIES_HOME=${env.UTILITIES_HOME}" if:true="${utilities.available}"/>
 
-	<target name="install" depends="all" description="Build and install the utilities in a local utilities directory.">
+	<target name="copy-to-install-directory" description="Copy the requisite files to the local utilities directory.">
 		<copy file="${dest.jar}" todir="${env.UTILITIES_HOME}" if:true="${utilities.available}"/>
 		<copy todir="${env.UTILITIES_HOME}" if:true="${utilities.available}">
 			<fileset dir=".">
@@ -347,6 +349,10 @@
 		</chmod>
 		<echo message="Variable UTILITIES_HOME is not set in the environment!" unless:true="${utilities.available}"/>
 	</target>
+
+	<target name="install" depends="all,copy-to-install-directory" description="Build the utilities from scratch and install in a local utilities directory."/>
+
+	<target name="update" depends="compile,jar,copy-to-install-directory" description="Simple incremental build and update the installed .jar file."/>
 </project>
 
 

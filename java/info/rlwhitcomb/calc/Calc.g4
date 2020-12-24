@@ -62,6 +62,11 @@
  *	    Adjust precedence of functions vs. arithmetic.
  *	20-Dec-2020 (rlwhitcomb)
  *	    Change the way we process quit, help, etc. commands.
+ *	24-Dec-2020 (rlwhitcomb)
+ *	    Change lexer rules for better readability of the
+ *	    case-insensitive rules. I don't think eitherOr or
+ *	    assign need right associativity. Allow variable
+ *	    lists on $CLEAR directive.
  */
 
 grammar Calc;
@@ -77,66 +82,66 @@ stmt
    ;
 
 expr
-   : value                       # valueExpr
-   | obj                         # objExpr
-   | arr                         # arrExpr
-   | ID '++'                     # postIncExpr
-   | ID '--'                     # postDecExpr
-   | '++' ID                     # preIncExpr
-   | '--' ID                     # preDecExpr
-   | '+' expr                    # posateExpr
-   | '-' expr                    # negateExpr
-   | '~' expr                    # bitNotExpr
-   | '!' expr                    # booleanNotExpr
-   | expr '!'                    # factorialExpr
-   | '(' expr ')'                # parenExpr
-   | ABS expr                    # absExpr
-   | SIN expr                    # sinExpr
-   | COS expr                    # cosExpr
-   | TAN expr                    # tanExpr
-   | ASIN expr                   # asinExpr
-   | ACOS expr                   # acosExpr
-   | ATAN expr                   # atanExpr
-   | ATAN2 expr2                 # atan2Expr
-   | SINH expr                   # sinhExpr
-   | COSH expr                   # coshExpr
-   | TANH expr                   # tanhExpr
-   | SQRT expr                   # sqrtExpr
-   | CBRT expr                   # cbrtExpr
-   | LOG expr                    # logExpr
-   | LN expr                     # lnExpr
-   | SIGNUM expr                 # signumExpr
-   | ROUND expr2                 # roundExpr
-   | GCD expr2                   # gcdExpr
-   | MAX exprN                   # maxExpr
-   | MIN exprN                   # minExpr
-   | JOIN exprN                  # joinExpr
-   | FIB expr                    # fibExpr
-   |<assoc=right> expr '**' expr # powerExpr
-   | expr '*' expr               # multiplyExpr
-   | expr '/' expr               # divideExpr
-   | expr '%' expr               # modulusExpr
-   | expr '+' expr               # addExpr
-   | expr '-' expr               # subtractExpr
-   | expr '>>>' expr             # shiftRightUnsignedExpr
-   | expr '>>' expr              # shiftRightExpr
-   | expr '<<' expr              # shiftLeftExpr
-   | expr '<=>' expr             # spaceshipExpr
-   | expr '<=' expr              # lessEqualExpr
-   | expr '<' expr               # lessExpr
-   | expr '>=' expr              # greaterEqualExpr
-   | expr '>' expr               # greaterExpr
-   | expr STRICTEQUAL expr       # strictEqualExpr
-   | expr STRICTNOTEQUAL expr    # strictNotEqualExpr
-   | expr EQUAL expr             # equalExpr
-   | expr NOTEQUAL expr          # notEqualExpr
-   | expr BIT_AND expr           # bitAndExpr
-   | expr BIT_XOR expr           # bitXorExpr
-   | expr BIT_OR expr            # bitOrExpr
-   | expr BOOL_AND expr          # booleanAndExpr
-   | expr BOOL_OR expr           # booleanOrExpr
-   |<assoc=right> expr '?' expr ':' expr # eitherOrExpr
-   |<assoc=right> var ASSIGN expr # assignExpr
+   : value                               # valueExpr
+   | obj                                 # objExpr
+   | arr                                 # arrExpr
+   | ID '++'                             # postIncExpr
+   | ID '--'                             # postDecExpr
+   | '++' ID                             # preIncExpr
+   | '--' ID                             # preDecExpr
+   | '+' expr                            # posateExpr
+   | '-' expr                            # negateExpr
+   | '~' expr                            # bitNotExpr
+   | '!' expr                            # booleanNotExpr
+   | expr '!'                            # factorialExpr
+   | '(' expr ')'                        # parenExpr
+   | ABS expr                            # absExpr
+   | SIN expr                            # sinExpr
+   | COS expr                            # cosExpr
+   | TAN expr                            # tanExpr
+   | ASIN expr                           # asinExpr
+   | ACOS expr                           # acosExpr
+   | ATAN expr                           # atanExpr
+   | ATAN2 expr2                         # atan2Expr
+   | SINH expr                           # sinhExpr
+   | COSH expr                           # coshExpr
+   | TANH expr                           # tanhExpr
+   | SQRT expr                           # sqrtExpr
+   | CBRT expr                           # cbrtExpr
+   | LOG expr                            # logExpr
+   | LN expr                             # lnExpr
+   | SIGNUM expr                         # signumExpr
+   | ROUND expr2                         # roundExpr
+   | GCD expr2                           # gcdExpr
+   | MAX exprN                           # maxExpr
+   | MIN exprN                           # minExpr
+   | JOIN exprN                          # joinExpr
+   | FIB expr                            # fibExpr
+   |<assoc=right> expr '**' expr         # powerExpr
+   | expr '*' expr                       # multiplyExpr
+   | expr '/' expr                       # divideExpr
+   | expr '%' expr                       # modulusExpr
+   | expr '+' expr                       # addExpr
+   | expr '-' expr                       # subtractExpr
+   | expr '>>>' expr                     # shiftRightUnsignedExpr
+   | expr '>>' expr                      # shiftRightExpr
+   | expr '<<' expr                      # shiftLeftExpr
+   | expr '<=>' expr                     # spaceshipExpr
+   | expr '<=' expr                      # lessEqualExpr
+   | expr '<' expr                       # lessExpr
+   | expr '>=' expr                      # greaterEqualExpr
+   | expr '>' expr                       # greaterExpr
+   | expr STRICTEQUAL expr               # strictEqualExpr
+   | expr STRICTNOTEQUAL expr            # strictNotEqualExpr
+   | expr EQUAL expr                     # equalExpr
+   | expr NOTEQUAL expr                  # notEqualExpr
+   | expr BIT_AND expr                   # bitAndExpr
+   | expr BIT_XOR expr                   # bitXorExpr
+   | expr BIT_OR expr                    # bitOrExpr
+   | expr BOOL_AND expr                  # booleanAndExpr
+   | expr BOOL_OR expr                   # booleanOrExpr
+   | expr '?' expr ':' expr              # eitherOrExpr
+   | var ASSIGN expr                     # assignExpr
    ;
 
 expr2
@@ -179,8 +184,8 @@ value
    | KB_CONST                    # kbValue
    | ( TRUE | FALSE )            # booleanValue
    | NULL                        # nullValue
-   | PI                          # piValue
-   | E                           # eValue
+   | PI_CONST                    # piValue
+   | E_CONST                     # eValue
    | ID                          # idValue
    ;
 
@@ -194,65 +199,65 @@ directive
    | BINARY                      # binaryDirective
    | SI                          # siDirective
    | MIXED			 # mixedDirective
-   | CLEAR                       # clearDirective
+   | CLEAR ( ID ( ',' ID ) * )?  # clearDirective
    | ECHO expr ?                 # echoDirective
    ;
 
 /* Lexer rules start here */
 
-TRUE    : [tT][rR][uU][eE] ;
+TRUE     : T R U E ;
 
-FALSE   : [fF][aA][lL][sS][eE] ;
+FALSE    : F A L S E ;
 
-NULL    : [nN][uU][lL][lL] ;
+NULL     : N U L L ;
 
-PI      : ( '\u03c0' | [pP][iI] ) ;
+PI_CONST : ( '\u03c0' | P I ) ;
 
-E       : [eE] ;
+E_CONST  : E ;
 
-ABS     : [aA][bB][sS] ;
+ABS      : A B S ;
 
-SINH    : [sS][iI][nN][hH] ;
+SINH     : S I N H ;
 
-SIN     : [sS][iI][nN] ;
+SIN      : S I N ;
 
-COSH    : [cC][oO][sS][hH] ;
+COSH     : C O S H ;
 
-COS     : [cC][oO][sS] ;
+COS      : C O S ;
 
-TANH    : [tT][aA][nN][hH] ;
+TANH     : T A N H ;
 
-TAN     : [tT][aA][nN] ;
+TAN      : T A N ;
 
-ASIN    : [aA][sS][iI][nN] ;
+ASIN     : A S I N ;
 
-ACOS    : [aA][cC][oO][sS] ;
+ACOS     : A C O S ;
 
-ATAN    : [aA][tT][aA][nN] ;
+ATAN2    : A T A N '2' ;
 
-ATAN2   : [aA][tT][aA][nN][2] ;
+ATAN     : A T A N ;
 
-SQRT    : [sS][qQ][rR][tT] ;
+SQRT     : S Q R T ;
 
-CBRT    : [cC][bB][rR][tT] ;
+CBRT     : C B R T ;
 
-LOG     : [lL][oO][gG] ;
+LOG      : L O G ;
 
-LN      : [lL][nN] ;
+LN       : L N ;
 
-SIGNUM  : [sS][iI][gG][nN][uU][mM] ;
+SIGNUM   : S I G N U M ;
 
-ROUND   : [rR][oO][uU][nN][dD] ;
+ROUND    : R O U N D ;
 
-GCD     : [gG][cC][dD] ;
+GCD      : G C D ;
 
-MAX     : [mM][aA][xX] ;
+MAX      : M A X ;
 
-MIN     : [mM][iI][nN] ;
+MIN      : M I N ;
 
-JOIN    : [jJ][oO][iI][nN] ;
+JOIN     : J O I N ;
 
-FIB     : [fF][iI][bB] ;
+FIB      : F I B ;
 
 
 /* Note: this needs to be last so that these other "ID" like things
@@ -283,53 +288,53 @@ NOTEQUAL       : '!=' ;
 
 
 DECIMAL
-   : DIR ( [dD][eE][cC] | [dD][eE][cC][iI][mM][aA][lL] )
+   : DIR ( D E C | D E C I M A L )
    ;
 
 DEFAULT
-   : DIR ( [dD][eE][fF] | [dD][eE][fF][aA][uU][lL][tT] )
+   : DIR ( D E F | D E F A U L T )
    ;
 
 DOUBLE
-   : DIR [dD][oO][uU][bB][lL][eE]
+   : DIR D O U B L E
    ;
 
 FLOAT
-   : DIR [fF][lL][oO][aA][tT]
+   : DIR F L O A T
    ;
 
 DEGREES
-   : DIR ( [dD][eE][gG] | [dD][eE][gG][rR][eE][eE][sS] )
+   : DIR ( D E G | D E G R E E S )
    ;
 
 RADIANS
-   : DIR ( [rR][aA][dD] | [rR][aA][dD][iI][aA][nN][sS] )
+   : DIR ( R A D | R A D I A N S )
    ;
 
 BINARY
-   : DIR ( [bB][iI][nN] | [bB][iI][nN][aA][rR][yY] )
+   : DIR ( B I N | B I N A R Y )
    ;
 
 SI
-   : DIR ( [sS][iI] | [tT][eE][nN] )
+   : DIR ( S I | T E N )
    ;
 
 MIXED
-   : DIR ( [mM][iI][xX] | [mM][iI][xX][eE][dD] )
+   : DIR ( M I X | M I X E D )
    ;
 
 
 CLEAR
-   : DIR ( [cC][lL][rR] | [cC][lL][eE][aA][rR] )
+   : DIR ( C L R | C L E A R )
    ;
 
 ECHO
-   : DIR [eE][cC][hH][oO]
+   : DIR E C H O
    ;
 
 
 FORMAT
-   : ',' [xXtThHoObBkK%]
+   : ',' ( X | T | H | O | B | K | '%' )
    ;
 
 STRING
@@ -342,7 +347,7 @@ NUMBER
    ;
 
 BIN_CONST
-   : '0' ('b' | 'B') [01]+
+   : '0' B [01]+
    ;
 
 OCT_CONST
@@ -350,17 +355,42 @@ OCT_CONST
    ;
 
 HEX_CONST
-   : '0' [xX] [0-9a-fA-F] +
+   : '0' X [0-9a-fA-F] +
    ;
 
 KB_CONST
-   : INT [kKmMgGtTpPeE][iI]?[bB]?
+   : INT ( K | M | G | T | P | E ) I? B?
    ;
 
 
-fragment DIR
-   : '$'
-   ;
+fragment A : [aA] ;
+fragment B : [bB] ;
+fragment C : [cC] ;
+fragment D : [dD] ;
+fragment E : [eE] ;
+fragment F : [fF] ;
+fragment G : [gG] ;
+fragment H : [hH] ;
+fragment I : [iI] ;
+fragment J : [jJ] ;
+fragment K : [kK] ;
+fragment L : [lL] ;
+fragment M : [mM] ;
+fragment N : [nN] ;
+fragment O : [oO] ;
+fragment P : [pP] ;
+fragment Q : [qQ] ;
+fragment R : [rR] ;
+fragment S : [sS] ;
+fragment T : [tT] ;
+fragment U : [uU] ;
+fragment V : [vV] ;
+fragment W : [wW] ;
+fragment X : [xX] ;
+fragment Y : [yY] ;
+fragment Z : [zZ] ;
+
+fragment DIR : '$' ;
 
 fragment ESC
    : '\\' (["\\/bfnrt] | UNICODE)
