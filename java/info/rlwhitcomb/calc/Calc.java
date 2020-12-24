@@ -41,6 +41,8 @@
  *	    Redo the way we handle commands in REPL mode.
  *	23-Dec-2020 (rlwhitcomb)
  *	    GUI mode command in REPL mode.
+ *	24-Dec-2020 (rlwhitcomb)
+ *	    DEBUG command.
  */
 package info.rlwhitcomb.calc;
 
@@ -168,6 +170,11 @@ public class Calc
 	@Override
 	public void displayErrorMessage(String message, int lineNumber) {
 	    System.err.println(String.format("%1$s at line %2$d.", message, lineNumber));
+	}
+
+
+	public static void setDebugMode(boolean mode) {
+	    debug = mode;
 	}
 
 

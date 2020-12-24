@@ -67,6 +67,8 @@
  *	    case-insensitive rules. I don't think eitherOr or
  *	    assign need right associativity. Allow variable
  *	    lists on $CLEAR directive.
+ *	24-Dec-2020 (rlwhitcomb)
+ *	    $debug directive.
  */
 
 grammar Calc;
@@ -201,6 +203,7 @@ directive
    | MIXED			 # mixedDirective
    | CLEAR ( ID ( ',' ID ) * )?  # clearDirective
    | ECHO expr ?                 # echoDirective
+   | DEBUG ( TRUE | FALSE )      # debugDirective 
    ;
 
 /* Lexer rules start here */
@@ -330,6 +333,10 @@ CLEAR
 
 ECHO
    : DIR E C H O
+   ;
+
+DEBUG
+   : DIR D E B U G
    ;
 
 

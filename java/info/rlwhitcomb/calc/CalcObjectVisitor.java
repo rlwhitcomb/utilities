@@ -70,6 +70,8 @@
  *	24-Dec-2020 (rlwhitcomb)
  *	    Implement EitherOr expression. Allow $clear to do a set
  *	    of variables also.
+ *	24-Dec-2020 (rlwhitcomb)
+ *	    $debug directive.
  */
 package info.rlwhitcomb.calc;
 
@@ -476,6 +478,14 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    displayer.displayMessage(CharUtil.stripAnyQuotes(msg, true));
 
+	    return null;
+	}
+
+	@Override
+	public Object visitDebugDirective(CalcParser.DebugDirectiveContext ctx) {
+	    boolean mode = ctx.TRUE() != null;
+	    Calc.setDebugMode(mode);
+	    displayer.displayActionMessage("Debug mode set to " + mode);
 	    return null;
 	}
 
