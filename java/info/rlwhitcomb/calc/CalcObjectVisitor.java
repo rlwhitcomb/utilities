@@ -74,6 +74,8 @@
  *	    $debug directive.
  *	28-Dec-2020 (rlwhitcomb)
  *	    Interpolated strings.
+ *	28-Dec-2020 (rlwhitcomb)
+ *	    Fix screwed up result from visitExprStmt.
  */
 package info.rlwhitcomb.calc;
 
@@ -538,7 +540,6 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    Object result = visit(ctx.expr());
 	    TerminalNode formatNode = ctx.FORMAT();
 	    String format = formatNode == null ? "" : formatNode.getText();
-	    String suffix = "";
 
 	    StringBuilder exprBuf  = new StringBuilder();
 	    StringBuilder valueBuf = new StringBuilder();
@@ -586,7 +587,6 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 				else
 				    valueBuf.append(iValue.toString(16).toUpperCase());
 			    }
-			    result = valueBuf;
 			    break;
 
 			case 'o':
@@ -608,7 +608,6 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 				valueBuf.append('0');
 				valueBuf.append(iValue.toString(8));
 			    }
-			    result = valueBuf;
 			    break;
 
 			case 'b':
@@ -633,7 +632,6 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 				valueBuf.append('0').append(formatChar);
 				valueBuf.append(iValue.toString(2));
 			    }
-			    result = valueBuf;
 			    break;
 
 			case 'k':
@@ -645,15 +643,15 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			    } catch (ArithmeticException ae) {
 				throw new CalcExprException(ae, ctx);
 			    }
-			    result = valueBuf;
 			    break;
 
 			case '%':
-			    if (result instanceof BigDecimal)
-				result = ((BigDecimal)result).multiply(BigDecimal.valueOf(100L), mc);
-			    suffix = " %";
+			    BigDecimal dValue = toDecimalValue(result, ctx);
+			    BigDecimal percentValue = dValue.multiply(BigDecimal.valueOf(100L), mc);
+			    valueBuf.append(percentValue.toPlainString()).append('%');
 			    break;
 		    }
+		    result = valueBuf;
 		}
 
 		if (result instanceof StringBuilder) {
@@ -664,7 +662,6 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    valueBuf.append(toString(result));
 		}
 	    }
-	    valueBuf.append(suffix);
 
 	    if (!silent) displayer.displayResult(exprBuf.toString(), valueBuf.toString());
 	    return result;

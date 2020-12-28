@@ -191,11 +191,14 @@ m[0] = m[1] = m[2] = 3;
 m
 
 $clear a
-a = 12
+a = 128
 ` a is $a, b isn't $a`
 `a + 1 = ${a + 1}`
 `5! = ${5!} !!`
 `g$$`
+`a = ${a,x}`
+`a = ${a,%}`
+`a = ${a,k}`
 
 $echo
 $echo "End of expression tests (suite 1)."
