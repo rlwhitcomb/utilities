@@ -152,6 +152,11 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    return oldSilent;
 	}
 
+	private void displayActionMessage(String message) {
+	    if (initialized && !silent)
+		displayer.displayActionMessage(message);
+	}
+
 	private void getTreeText(StringBuilder buf, ParserRuleContext ctx) {
 	    for (ParseTree child : ctx.children) {
 		if (child instanceof ParserRuleContext) {
@@ -201,15 +206,13 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    pi        = NumericUtil.pi(prec + 1);
 	    piOver180 = pi.divide(B180, mc);
 
-	    if (initialized && !silent)
-		displayer.displayActionMessage("Precision is now " + prec + " digits.");
+	    displayActionMessage("Precision is now " + prec + " digits.");
 	}
 
 	private void setTrigMode(TrigMode newTrigMode) {
 	    trigMode = newTrigMode;
 
-	    if (initialized && !silent)
-		displayer.displayActionMessage("Trig mode is now " + trigMode + ".");
+	    displayActionMessage("Trig mode is now " + trigMode + ".");
 	}
 
 
@@ -469,21 +472,21 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitBinaryDirective(CalcParser.BinaryDirectiveContext ctx) {
 	    units = RangeMode.BINARY;
-	    if (!silent) displayer.displayActionMessage("Units in binary.");
+	    displayActionMessage("Units in binary.");
 	    return null;
 	}
 
 	@Override
 	public Object visitSiDirective(CalcParser.SiDirectiveContext ctx) {
 	    units = RangeMode.DECIMAL;
-	    if (!silent) displayer.displayActionMessage("Units in SI (base ten) form.");
+	    displayActionMessage("Units in SI (base ten) form.");
 	    return null;
 	}
 
 	@Override
 	public Object visitMixedDirective(CalcParser.MixedDirectiveContext ctx) {
 	    units = RangeMode.MIXED;
-	    if (!silent) displayer.displayActionMessage("Units in mixed form.");
+	    displayActionMessage("Units in mixed form.");
 	    return null;
 	}
 
@@ -492,7 +495,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    List<TerminalNode> ids = ctx.ID();
 	    if (ids.isEmpty()) {
 		variables.clear();
-		if (!silent) displayer.displayActionMessage("All variables cleared.");
+		displayActionMessage("All variables cleared.");
 	    }
 	    else {
 		StringBuilder vars = new StringBuilder();
@@ -507,7 +510,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    vars.insert(0, "Variable ");
 		else
 		    vars.insert(0, "Variables ");
-		if (!silent) displayer.displayActionMessage(vars + " cleared.");
+		displayActionMessage(vars + " cleared.");
 	    }
 	    return null;
 	}
@@ -526,7 +529,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public Object visitDebugDirective(CalcParser.DebugDirectiveContext ctx) {
 	    boolean mode = ctx.TRUE() != null;
 	    Calc.setDebugMode(mode);
-	    if (!silent) displayer.displayActionMessage("Debug mode set to " + mode);
+	    displayActionMessage("Debug mode set to " + mode + ".");
 	    return null;
 	}
 
