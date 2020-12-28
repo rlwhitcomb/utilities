@@ -45,6 +45,8 @@
  *	    DEBUG command.
  *	28-Dec-2020 (rlwhitcomb)
  *	    Allow embedded expressions (for string interpolation).
+ *	28-Dec-2020 (rlwhitcomb)
+ *	    Options for color / no color.
  */
 package info.rlwhitcomb.calc;
 
@@ -97,13 +99,24 @@ public class Calc
 	  + "' to enter GUI mode.",
 	    ""
 	};
+	private static final String[] INTRO_NOCOLOR = {
+	    "  Enter an expression (or multiple expressions separated by ';').",
+	    "  Use 'help' or '?' for a list of supported functions.",
+	    "  Enter 'quit' or 'exit' to end.",
+	    "  Enter 'gui' to enter GUI mode.",
+	    ""
+	};
 
 	private static final String[] HELP = {
 	    ERROR_COLOR + "Help is not complete yet!  Check back later." + RESET
 	};
+	private static final String[] HELP_NOCOLOR = {
+	    "Help is not complete yet!  Check back later."
+	};
 
 	private static boolean guiMode = false;
 	private static boolean debug   = false;
+	private static boolean colors  = true;
 
 	private BXMLSerializer serializer = null;
 
@@ -221,27 +234,44 @@ public class Calc
 	{
 		@Override
 		public void displayResult(String exprString, String resultString) {
-		    System.out.println(EXPR_COLOR + exprString + ARROW_COLOR + "-> " + VALUE_COLOR + resultString + RESET);
+		    if (colors)
+			System.out.println(EXPR_COLOR + exprString + ARROW_COLOR + "-> " + VALUE_COLOR + resultString + RESET);
+		    else
+			System.out.println(exprString + "-> " + resultString);
 		}
 
 		@Override
 		public void displayActionMessage(String message) {
-		    System.out.println(VALUE_COLOR + message + RESET);
+		    if (colors)
+			System.out.println(VALUE_COLOR + message + RESET);
+		    else
+			System.out.println(message);
 		}
 
 		@Override
 		public void displayMessage(String message) {
-		    System.out.println(ARROW_COLOR + message + RESET);
+		    if (message == null || message.isEmpty())
+			System.out.println();
+		    else if (colors)
+			System.out.println(ARROW_COLOR + message + RESET);
+		    else
+			System.out.println(message);
 		}
 
 		@Override
 		public void displayErrorMessage(String message) {
-		    System.err.println(ERROR_COLOR + message + RESET);
+		    if (colors)
+			System.err.println(ERROR_COLOR + message + RESET);
+		    else
+			System.err.println(message);
 		}
 
 		@Override
 		public void displayErrorMessage(String message, int lineNumber) {
-		    System.err.println(ERROR_COLOR + message + RESET + " at line " + lineNumber + ".");
+		    if (colors)
+			System.err.println(ERROR_COLOR + message + RESET + " at line " + lineNumber + ".");
+		    else
+			System.err.println(message + " at line " + lineNumber + ".");
 		}
 	}
 
@@ -287,20 +317,21 @@ public class Calc
 	}
 
 	public static void printTitleAndVersion() {
-	    if (guiMode) {
-		// TOOD: what to do here?
-	    }
-	    else {
-		Environment.printProgramInfo(50);
-	    }
+	    Environment.printProgramInfo(50, colors);
 	}
 
 	public static void printIntro() {
-	    Arrays.stream(INTRO).forEach(System.out::println);
+	    if (colors)
+		Arrays.stream(INTRO).forEach(System.out::println);
+	    else
+		Arrays.stream(INTRO_NOCOLOR).forEach(System.out::println);
 	}
 
 	public static void printHelp() {
-	    Arrays.stream(HELP).forEach(System.out::println);
+	    if (colors)
+		Arrays.stream(HELP).forEach(System.out::println);
+	    else
+		Arrays.stream(HELP_NOCOLOR).forEach(System.out::println);
 	}
 
 	public static void exit() {
@@ -380,6 +411,16 @@ public class Calc
 		case "nodebug":
 		case "no":
 		    debug = false;
+		    break;
+		case "colors":
+		case "color":
+		case "col":
+		    colors = true;
+		    break;
+		case "nocolors":
+		case "nocolor":
+		case "nocol":
+		    colors = false;
 		    break;
 		default:
 		    System.err.println("Unknown option \"" + arg + "\"; ignoring.");
@@ -486,13 +527,15 @@ public class Calc
 		}
 	    }
 	    catch (IOException ioe) {
-		System.err.println(ERROR_COLOR + "I/O Error: " + ExceptionUtil.toString(ioe) + RESET);
+		if (colors)
+		    System.err.println(ERROR_COLOR + "I/O Error: " + ExceptionUtil.toString(ioe) + RESET);
+		else
+		    System.err.println("I/O Error: " + ExceptionUtil.toString(ioe));
 	    }
 	}
 
 	public Calc() {
 	    System.setProperty("org.apache.pivot.wtk.skin.terra.location", "/TerraTheme_old.json");
-
 	}
 
 }

@@ -109,6 +109,8 @@
  *	24-Dec-2020 (rlwhitcomb)
  *	    Change up the colors in "printProgramInfo" a little bit. Tweak
  *	    the spacing of the display; add another override.
+ *	28-Dec-2020 (rlwhitcomb)
+ *	    Option to use colors on "printProgramInfo".
  */
 package info.rlwhitcomb.util;
 
@@ -814,7 +816,7 @@ public final class Environment
 
 
 	/**
-	 * Display a program information banner on {@link System#out} with the info
+	 * Display a colored program information banner on {@link System#out} with the info
 	 * centered on the longest string.
 	 */
 	public static void printProgramInfo() {
@@ -823,25 +825,38 @@ public final class Environment
 
 
 	/**
-	 * Display a program information banner using information we know about here
+	 * Display a colored program information banner using information we know about here
 	 * to the given {@link PrintStream}, using the longest string to center on.
 	 *
 	 * @param ps            The print stream to display the info to.
 	*/
 	public static void printProgramInfo(PrintStream ps) {
-	    printProgramInfo(ps, -1);
+	    printProgramInfo(ps, -1, true);
 	}
 
 
 	/**
-	 * Display a program information banner using things we know about here
+	 * Display a colored program information banner using things we know about here
 	 * to {@link System#out}, using the given width to display.
 	 *
 	 * @param centerWidth	The width to use for centering (0 = don't center,
 	 *			negative = center over longest string).
 	 */
 	public static void printProgramInfo(int centerWidth) {
-	    printProgramInfo(System.out, centerWidth);
+	    printProgramInfo(System.out, centerWidth, true);
+	}
+
+
+	/**
+	 * Display a program information banner using things we know about here
+	 * to {@link System#out}, using the given width to display, optionally colored.
+	 *
+	 * @param centerWidth	The width to use for centering (0 = don't center,
+	 *			negative = center over longest string).
+	 * @param colors	Whether to use colors.
+	 */
+	public static void printProgramInfo(int centerWidth, boolean colors) {
+	    printProgramInfo(System.out, centerWidth, colors);
 	}
 
 
@@ -852,8 +867,9 @@ public final class Environment
 	 * @param ps		The print stream to display the info to.
 	 * @param centerWidth	The width to use for centering (0 = don't center,
 	 *			negative = center over longest string).
+	 * @param colors	Whether or not to use colors.
 	 */
-	public static void printProgramInfo(PrintStream ps, int centerWidth) {
+	public static void printProgramInfo(PrintStream ps, int centerWidth, boolean colors) {
 	    String debugInfo   = isDebugBuild() ? Intl.getString("util#env.debug") : "";
 	    String versionInfo = Intl.formatString(
 		"util#env.version",
@@ -879,25 +895,45 @@ public final class Environment
 	    String underline = CharUtil.makeStringOfChars('=', lineWidth);
 
 	    ps.println();
-	    ps.println(BLACK_BRIGHT + underline + BLUE_BOLD_BRIGHT);
+	    if (colors)
+		ps.println(BLACK_BRIGHT + underline + BLUE_BOLD_BRIGHT);
+	    else
+		ps.println(underline);
+
 	    if (centerWidth == 0) {
 		ps.println(" " + productName);
-		ps.println(BLUE + " " + versionInfo);
-		ps.println(BLACK_BRIGHT);
+		if (colors) {
+		    ps.println(BLUE + " " + versionInfo);
+		    ps.println(BLACK_BRIGHT);
+		}
+		else {
+		    ps.println(" " + versionInfo);
+		    ps.println();
+		}
 		ps.println(" " + buildInfo);
 		ps.println(" " + copyright);
 	    } 
 	    else {
 		int width = (lineWidth + 1) / 2 * 2;
+		String version = CharUtil.padToWidth(versionInfo, -width, CENTER);
 
 		// Negative width puts the odd space on the right
 		ps.println(CharUtil.padToWidth(productName, -width, CENTER));
-		ps.println(BLUE + CharUtil.padToWidth(versionInfo, -width, CENTER));
-		ps.println(BLACK_BRIGHT);
+		if (colors) {
+		    ps.println(BLUE + version);
+		    ps.println(BLACK_BRIGHT);
+		}
+		else {
+		    ps.println(version);
+		    ps.println();
+		}
 		ps.println(CharUtil.padToWidth(buildInfo, -width, CENTER));
 		ps.println(CharUtil.padToWidth(copyright, -width, CENTER));
 	    }
-	    ps.println(underline + RESET);
+	    if (colors)
+		ps.println(underline + RESET);
+	    else
+		ps.println(underline);
 	    ps.println();
 	}
 
