@@ -43,6 +43,8 @@
  *	    GUI mode command in REPL mode.
  *	24-Dec-2020 (rlwhitcomb)
  *	    DEBUG command.
+ *	28-Dec-2020 (rlwhitcomb)
+ *	    Allow embedded expressions (for string interpolation).
  */
 package info.rlwhitcomb.calc;
 
@@ -249,12 +251,7 @@ public class Calc
 		public void perform(Component source) {
 		    String inputText = inputTextArea.getText();
 
-		    try {
-			process(CharStreams.fromString(inputText + LINESEP), visitor, errorStrategy);
-		    }
-		    catch (IOException ioe) {
-			displayer.displayErrorMessage("I/O Error: " + ExceptionUtil.toString(ioe));
-		    }
+		    processString(inputText, false);
 
 		    inputTextArea.setText("");
 		    inputTextArea.requestFocus();
@@ -322,9 +319,22 @@ public class Calc
 	    return buf.toString();
 	}
 
-	private static void process(CharStream input, CalcObjectVisitor visitor, BailErrorStrategy errorStrategy)
+	public static Object processString(String inputText, boolean silent) {
+	    try {
+		return process(CharStreams.fromString(inputText + LINESEP), visitor, errorStrategy, silent);
+	    }
+	    catch (IOException ioe) {
+		displayer.displayErrorMessage("I/O Error: " + ExceptionUtil.toString(ioe));
+	    }
+	    return null;
+	}
+
+	private static Object process(CharStream input, CalcObjectVisitor visitor, BailErrorStrategy errorStrategy, boolean silent)
 		throws IOException
 	{
+	    Object returnValue = null;
+	    boolean oldSilent = visitor.setSilent(silent);
+
 	    try {
 		CalcLexer lexer = new CalcBailLexer(input);
 		CommonTokenStream tokens = new CommonTokenStream(lexer);
@@ -336,7 +346,7 @@ public class Calc
 		    System.out.println(tree.toStringTree(parser));
 		}
 
-		visitor.visit(tree);
+		returnValue = visitor.visit(tree);
 	    }
 	    catch (IllegalArgumentException iae) {
 		displayer.displayErrorMessage("Error: " + iae.getMessage());
@@ -344,6 +354,11 @@ public class Calc
 	    catch (CalcException ce) {
 		displayer.displayErrorMessage("Error: " + ce.getMessage(), ce.getLine());
 	    }
+	    finally {
+		visitor.setSilent(oldSilent);
+	    }
+
+	    return returnValue;
 	}
 
 	private static boolean processOption(String arg, String option) {
@@ -432,7 +447,7 @@ public class Calc
 		    if (input == null) {
 			Console console = System.console();
 			if (console == null) {
-			    process(CharStreams.fromStream(System.in), visitor, errorStrategy);
+			    process(CharStreams.fromStream(System.in), visitor, errorStrategy, false);
 			}
 			else {
 			    printTitleAndVersion();
@@ -459,14 +474,14 @@ public class Calc
 					DesktopApplicationContext.main(Calc.class, args);
 					break replLoop;
 				    default:
-					process(CharStreams.fromString(line + LINESEP), visitor, errorStrategy);
+					process(CharStreams.fromString(line + LINESEP), visitor, errorStrategy, false);
 					break;
 				}
 			    }
 			}
 		    }
 		    else {
-			process(input, visitor, errorStrategy);
+			process(input, visitor, errorStrategy, false);
 		    }
 		}
 	    }

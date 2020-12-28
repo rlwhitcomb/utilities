@@ -69,6 +69,8 @@
  *	    lists on $CLEAR directive.
  *	24-Dec-2020 (rlwhitcomb)
  *	    $debug directive.
+ *	28-Dec-2020 (rlwhitcomb)
+ *	    Interpolated strings.
  */
 
 grammar Calc;
@@ -179,6 +181,7 @@ var
 
 value
    : STRING                      # stringValue
+   | ISTRING                     # iStringValue
    | NUMBER                      # numberValue
    | BIN_CONST                   # binaryValue
    | OCT_CONST                   # octalValue
@@ -345,8 +348,12 @@ FORMAT
    ;
 
 STRING
-   : '"' (ESC | SAFECODEPOINT)* '"'
+   : '"'  (ESC  | SAFECODEPOINT)*  '"'
    | '\'' (ESC2 | SAFECODEPOINT2)* '\''
+   ;
+
+ISTRING
+   : '`'  (ESC3 | SAFECODEPOINT3)* '`'
    ;
 
 NUMBER
@@ -407,6 +414,10 @@ fragment ESC2
    : '\\' (['\\/bfnrt] | UNICODE)
    ;
 
+fragment ESC3
+   : '\\' ([`\\/bfnrt] | UNICODE)
+   ;
+
 fragment UNICODE
    : 'u' HEX HEX HEX HEX
    ;
@@ -421,6 +432,10 @@ fragment SAFECODEPOINT
 
 fragment SAFECODEPOINT2
    : ~ ['\\\u0000-\u001F]
+   ;
+
+fragment SAFECODEPOINT3
+   : ~ [`\\\u0000-\u001F]
    ;
 
 fragment INT

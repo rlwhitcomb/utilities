@@ -72,6 +72,8 @@
  *	    of variables also.
  *	24-Dec-2020 (rlwhitcomb)
  *	    $debug directive.
+ *	28-Dec-2020 (rlwhitcomb)
+ *	    Interpolated strings.
  */
 package info.rlwhitcomb.calc;
 
@@ -136,6 +138,19 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	/** {@link CalcDisplayer} object so we can output results to either the console or GUI window. */
 	private CalcDisplayer displayer;
 
+	/** Silent flag (set to true) while evaluating nested expressions. */
+	private boolean silent = false;
+
+
+	public boolean getSilent() {
+	    return silent;
+	}
+
+	public boolean setSilent(boolean newSilent) {
+	    boolean oldSilent = silent;
+	    silent = newSilent;
+	    return oldSilent;
+	}
 
 	private void getTreeText(StringBuilder buf, ParserRuleContext ctx) {
 	    for (ParseTree child : ctx.children) {
@@ -157,6 +172,25 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    initialized = true;
 	}
 
+	private boolean isIdentifierStart(char ch) {
+	    // Corresponds to the "ID" rule in Calc.g4
+	    if ((ch >= 'a' && ch <= 'z')
+	     || (ch >= 'A' && ch <= 'Z')
+	     || (ch == '_'))
+		return true;
+	    return false;
+	}
+
+	private boolean isIdentifierPart(char ch) {
+	    if (isIdentifierStart(ch))
+		return true;
+
+	    if (ch >= '0' && ch <= '9')
+		return true;
+
+	    return false;
+	}
+
 	private void setMathContext(MathContext newMathContext) {
 	    int prec  = newMathContext.getPrecision();
 
@@ -167,14 +201,14 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    pi        = NumericUtil.pi(prec + 1);
 	    piOver180 = pi.divide(B180, mc);
 
-	    if (initialized)
+	    if (initialized && !silent)
 		displayer.displayActionMessage("Precision is now " + prec + " digits.");
 	}
 
 	private void setTrigMode(TrigMode newTrigMode) {
 	    trigMode = newTrigMode;
 
-	    if (initialized)
+	    if (initialized && !silent)
 		displayer.displayActionMessage("Trig mode is now " + trigMode + ".");
 	}
 
@@ -290,11 +324,18 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	private String toString(Object result) {
+	    return toString(result, true);
+	}
+
+	private String toString(Object result, boolean quote) {
 	    if (result == null) {
-		return "<null>";
+		return quote ? "<null>" : "";
 	    }
 	    else if (result instanceof String) {
-		return CharUtil.addDoubleQuotes((String)result);
+		if (quote)
+		    return CharUtil.addDoubleQuotes((String)result);
+		else
+		    return (String)result;
 	    }
 	    else if (result instanceof BigDecimal) {
 		return ((BigDecimal)result).toPlainString();
@@ -428,21 +469,21 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitBinaryDirective(CalcParser.BinaryDirectiveContext ctx) {
 	    units = RangeMode.BINARY;
-	    displayer.displayActionMessage("Units in binary.");
+	    if (!silent) displayer.displayActionMessage("Units in binary.");
 	    return null;
 	}
 
 	@Override
 	public Object visitSiDirective(CalcParser.SiDirectiveContext ctx) {
 	    units = RangeMode.DECIMAL;
-	    displayer.displayActionMessage("Units in SI (base ten) form.");
+	    if (!silent) displayer.displayActionMessage("Units in SI (base ten) form.");
 	    return null;
 	}
 
 	@Override
 	public Object visitMixedDirective(CalcParser.MixedDirectiveContext ctx) {
 	    units = RangeMode.MIXED;
-	    displayer.displayActionMessage("Units in mixed form.");
+	    if (!silent) displayer.displayActionMessage("Units in mixed form.");
 	    return null;
 	}
 
@@ -451,7 +492,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    List<TerminalNode> ids = ctx.ID();
 	    if (ids.isEmpty()) {
 		variables.clear();
-		displayer.displayActionMessage("All variables cleared.");
+		if (!silent) displayer.displayActionMessage("All variables cleared.");
 	    }
 	    else {
 		StringBuilder vars = new StringBuilder();
@@ -466,7 +507,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    vars.insert(0, "Variable ");
 		else
 		    vars.insert(0, "Variables ");
-		displayer.displayActionMessage(vars + " cleared.");
+		if (!silent) displayer.displayActionMessage(vars + " cleared.");
 	    }
 	    return null;
 	}
@@ -485,7 +526,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public Object visitDebugDirective(CalcParser.DebugDirectiveContext ctx) {
 	    boolean mode = ctx.TRUE() != null;
 	    Calc.setDebugMode(mode);
-	    displayer.displayActionMessage("Debug mode set to " + mode);
+	    if (!silent) displayer.displayActionMessage("Debug mode set to " + mode);
 	    return null;
 	}
 
@@ -622,7 +663,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 	    valueBuf.append(suffix);
 
-	    displayer.displayResult(exprBuf.toString(), valueBuf.toString());
+	    if (!silent) displayer.displayResult(exprBuf.toString(), valueBuf.toString());
 	    return result;
 
 	}
@@ -1224,6 +1265,52 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    String value = ctx.STRING().getText();
 
 	    return CharUtil.stripAnyQuotes(value, true);
+	}
+
+	@Override
+	public Object visitIStringValue(CalcParser.IStringValueContext ctx) {
+	    String value = ctx.ISTRING().getText();
+
+	    String rawValue = CharUtil.stripAnyQuotes(value, true);
+	    int lastPos = -1;
+	    int pos;
+	    StringBuilder output = new StringBuilder(rawValue.length() * 2);
+	    while ((pos = rawValue.indexOf('$', ++lastPos)) >= 0) {
+		output.append(rawValue.substring(lastPos, pos));
+
+		if (pos == rawValue.length() - 1)
+		    throw new CalcExprException("Invalid '$' construct", ctx);
+
+		if (rawValue.charAt(pos + 1) == '$') {
+		    output.append('$');
+		    lastPos = pos + 1;
+		}
+		else if (rawValue.charAt(pos + 1) == '{') {
+		    int nextPos = rawValue.indexOf('}', pos + 1);
+
+		    if (pos + 2 >= rawValue.length() || nextPos < 0)
+			throw new CalcExprException("Invalid '${...}' construct", ctx);
+
+		    String expr = rawValue.substring(pos + 2, nextPos);
+		    Object exprValue = Calc.processString(expr, true);
+		    output.append(toString(exprValue, false));
+		    lastPos = nextPos;
+		}
+		else if (isIdentifierStart(rawValue.charAt(pos + 1))) {
+		    int identPos = pos + 2;
+		    while (identPos < rawValue.length() && isIdentifierPart(rawValue.charAt(identPos)))
+			identPos++;
+		    String varName = rawValue.substring(pos + 1, identPos);
+		    output.append(toString(variables.get(varName), false));
+		    lastPos = identPos - 1;
+		}
+		else
+		    throw new CalcExprException("Invalid '$' construct", ctx);
+	    }
+	    if (lastPos < rawValue.length())
+		output.append(rawValue.substring(lastPos));
+
+	    return output.toString();
 	}
 
 	@Override
