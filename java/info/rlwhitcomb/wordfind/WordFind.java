@@ -244,6 +244,7 @@ public class WordFind implements Application {
      * @param buf   The buffer to edit.
      * @param index The position at which to insert the string (-1 is append to end).
      * @param str   The string to insert.
+     * @return      The input buffer.
      */
     private static final StringBuilder insert(final StringBuilder buf, final int index, final String str) {
         int pos;
