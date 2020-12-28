@@ -41,6 +41,8 @@
  * 	22-Dec-2020 (rlwhitcomb)
  *	    Fix obsolete Javadoc constructs and other errors. Abandon the
  *	    searching if too many are needed (temp fix).
+ *	26-Dec-2020 (rlwhitcomb)
+ *	    Use a better algorithm for "contains".
  */
 package info.rlwhitcomb.wordfind;
 
@@ -237,6 +239,48 @@ public class WordFind implements Application {
     };
 
     /**
+     * Insert a string into either an adorned or unadorned string at the given index.
+     *
+     * @param buf   The buffer to edit.
+     * @param index The position at which to insert the string (-1 is append to end).
+     * @param str   The string to insert.
+     */
+    private static final StringBuilder insert(final StringBuilder buf, final int index, final String str) {
+        int pos;
+
+        // Don't need to do anything if the insert string is nothing
+        if (str == null || str.isEmpty())
+            return buf;
+
+        if (index == 0) {
+	    return buf.insert(0, str);
+        }
+        else if (index == -1) {
+            return buf.append(str);
+        }
+        else if (index < 0) {
+            throw new IllegalArgumentException("Negative index (except -1) not allowed.");
+        }
+        else {
+            pos = index;
+        }
+
+        // Move from 0 past the adornments to the desired position
+        int charPos = 0;
+        for (int ix = 0; ix < pos; ix++) {
+            if (charPos >= buf.length())
+                break;
+            char ch = buf.charAt(charPos);
+            if (ch == '_')
+                charPos += 3;
+            else
+                charPos++;
+        }
+
+        return buf.insert(charPos, str);
+    }
+
+    /**
      * A mapping function to convert the case of words, depending on the command line option {@link #lowerCase}.
      */
     private static final Function<String, String> caseMapper = s -> lowerCase ? s.toLowerCase() : s.toUpperCase();
@@ -260,8 +304,8 @@ public class WordFind implements Application {
             // Sometimes we use the letters only, but at the end we need to leave the blank markers alone
             String word = getLettersOnly(prefix);
 
-            // Early check for words less than two characters without begin or end additions
-            if (word.length() < 2 && !beginningValue.isPresent() && !endingValue.isPresent())
+            // Early check for words less than two characters without additions
+            if (word.length() < 2 && !containsValue.isPresent() && !beginningValue.isPresent() && !endingValue.isPresent())
                 return true;
 
             // If this is a word with blanks, but the word without blanks is already there, then
@@ -287,24 +331,31 @@ public class WordFind implements Application {
 
 	    // Now start mucking with the valid word and "begins with", "ends with", "contains" tests
             // (and we need two copies, one with the blank markers and one without for word lookup)
-            final StringBuilder bufAdorned   = new StringBuilder(prefix);
-            final StringBuilder bufUnadorned = new StringBuilder(word);
-            beginningValue.ifPresent(v -> { bufAdorned.insert(0, v); bufUnadorned.insert(0, v); });
-            endingValue.ifPresent   (v -> { bufAdorned.append(v);    bufUnadorned.append(v); });
+            final StringBuilder bufAdorned   = new StringBuilder();
+            final StringBuilder bufUnadorned = new StringBuilder();
+	    int containsEnd = containsValue.isPresent() ? word.length() : 0;
 
-            final String wordUnadorned = bufUnadorned.toString();
-            // There are no valid one letter (or blank) words
-            if (wordUnadorned.length() < 2)
-                return true;
+	    // For "containing", loop through each position of the input, inserting the "containing" string
+	    // at each position; after that insert the "beginning" and "ending" values.
+	    for (int containsIndex = 0; containsIndex <= containsEnd; containsIndex++) {
+                bufAdorned.setLength(0);   bufAdorned.append(prefix);
+                bufUnadorned.setLength(0); bufUnadorned.append(word);
 
-            if (words.contains(wordUnadorned)
-            || (findInAdditional && additionalWords.contains(wordUnadorned))) {
-                int index = wordUnadorned.length() - 1;
-                boolean matches = true;
                 if (containsValue.isPresent()) {
-                    matches = wordUnadorned.indexOf(containsValue.get()) >= 0;
+                    insert(bufAdorned,   containsIndex, containsValue.get());
+                    insert(bufUnadorned, containsIndex, containsValue.get());
                 }
-                if (matches) {
+                beginningValue.ifPresent(v -> { insert(bufAdorned, 0, v);  insert(bufUnadorned, 0, v);  });
+                endingValue.ifPresent   (v -> { insert(bufAdorned, -1, v); insert(bufUnadorned, -1, v); });
+
+                final String wordUnadorned = bufUnadorned.toString();
+                // There are no valid one letter (or blank) words
+                if (wordUnadorned.length() < 2)
+                    break;
+
+                if (words.contains(wordUnadorned)
+                || (findInAdditional && additionalWords.contains(wordUnadorned))) {
+                    int index = wordUnadorned.length() - 1;
                     validWords[index].add(bufAdorned.toString());
                 }
             }
@@ -587,6 +638,7 @@ public class WordFind implements Application {
 
             // Okay, we might have a set of letters to process (the "--letters" mode).
             int n = letters.length();
+            int cn = 0;
             if (n > 0) {
 		// See if the letters as entered are a valid word first
 		String inputWord = letters.toString();
@@ -605,8 +657,7 @@ public class WordFind implements Application {
                     containsValue = containsValue.map(caseMapper);
                     String containsString = containsValue.get();
                     sb.append(" containing \"" + containsString + "\"");
-                    letters.append(containsString);
-                    n += containsString.length();
+                    cn = containsString.length();
                 }
                 if (endingValue.isPresent()) {
                     endingValue = endingValue.map(caseMapper);
@@ -633,8 +684,8 @@ public class WordFind implements Application {
                 }
 
                 @SuppressWarnings("unchecked")
-                Set<String>[] validWords = new Set[n];
-                for (int i = 0; i < n; i++) {
+                Set<String>[] validWords = new Set[n + cn];
+                for (int i = 0; i < n + cn; i++) {
                     validWords[i] = new TreeSet<>(valueComparator);
                 }
 		// This is the set used to avoid duplicate permutations
@@ -664,7 +715,7 @@ public class WordFind implements Application {
 
                 int numberOfWordsFound = 0;
 
-                for (int index = n - 1; index >= 0; index--) {
+                for (int index = n + cn - 1; index >= 0; index--) {
                     Set<String> wordSet = validWords[index];
                     if (wordSet.size() > 0) {
                         int columnWidth = index + 5;
@@ -697,8 +748,9 @@ public class WordFind implements Application {
 
                 long endTime = System.nanoTime();
                 float secs = (float)(endTime - startTime) / 1.0e9f;
+                int wordsChecked = permutationSet.size() * (containsValue.isPresent() ? n : 1);
                 String message = String.format("(Lookup time was %1$5.3f seconds; %2$,d words tested)",
-                        secs, permutationSet.size());
+                        secs, wordsChecked);
                 info(message);
             }
         }
