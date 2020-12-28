@@ -3,4 +3,11 @@
 resources.properties
 java/doc
 .DS_Store
+*.interp
+*.tokens
+build.number
+CalcBaseVisitor.java
+CalcParser.java
+CalcLexer.java
+CalcVisitor.java
 
