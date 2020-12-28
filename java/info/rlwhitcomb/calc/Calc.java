@@ -47,6 +47,8 @@
  *	    Allow embedded expressions (for string interpolation).
  *	28-Dec-2020 (rlwhitcomb)
  *	    Options for color / no color.
+ *	28-Dec-2020 (rlwhitcomb)
+ *	    Command line "help" and "version" options.
  */
 package info.rlwhitcomb.calc;
 
@@ -422,11 +424,22 @@ public class Calc
 		case "nocol":
 		    colors = false;
 		    break;
+		case "help":
+		case "h":
+		case "?":
+		    printIntro();
+		    printHelp();
+		    return false;
+		case "version":
+		case "vers":
+		case "ver":
+		case "v":
+		    printTitleAndVersion();
+		    return false;
 		default:
 		    System.err.println("Unknown option \"" + arg + "\"; ignoring.");
 		    break;
 	    }
-	    // For now, we are going to ignore unknown options, so always return true
 	    return true;
 	}
 
@@ -437,14 +450,21 @@ public class Calc
 
 	    // Scan the input arguments for the "-gui" option, removing it if found
 	    for (String arg : args) {
+		boolean optionOnly = false;
+
 		if (arg.startsWith("--"))
-		    processOption(arg, arg.substring(2));
+		    optionOnly = !processOption(arg, arg.substring(2));
 		else if (arg.startsWith("-"))
-		    processOption(arg, arg.substring(1));
+		    optionOnly = !processOption(arg, arg.substring(1));
 		else if (ON_WINDOWS && arg.startsWith("/"))
-		    processOption(arg, arg.substring(1));
+		    optionOnly = !processOption(arg, arg.substring(1));
 		else
 		    argList.add(arg);
+
+		// For some "options" (like "-help") we just quit once we
+		// process them.
+		if (optionOnly)
+		    return;
 	    }
  
 	    args = argList.toArray(new String[0]);
