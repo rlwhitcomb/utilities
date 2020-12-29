@@ -76,6 +76,8 @@
  *	    Interpolated strings.
  *	28-Dec-2020 (rlwhitcomb)
  *	    Fix screwed up result from visitExprStmt.
+ *	28-Dec-2020 (rlwhitcomb)
+ *	    Tweak result formatting again.
  */
 package info.rlwhitcomb.calc;
 
@@ -169,6 +171,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		}
 	    }
 	}
+
 
 	public CalcObjectVisitor(CalcDisplayer resultDisplayer) {
 	    setMathContext(MathContext.DECIMAL128);
@@ -537,130 +540,121 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitExprStmt(CalcParser.ExprStmtContext ctx) {
-	    Object result = visit(ctx.expr());
+	    Object result           = visit(ctx.expr());
 	    TerminalNode formatNode = ctx.FORMAT();
-	    String format = formatNode == null ? "" : formatNode.getText();
+	    String format           = formatNode == null ? "" : formatNode.getText();
 
 	    StringBuilder exprBuf  = new StringBuilder();
 	    StringBuilder valueBuf = new StringBuilder();
 
 	    getTreeText(exprBuf, ctx.expr());
-	    exprBuf.insert(exprBuf.length() - 1, format);
+	    exprBuf.setLength(exprBuf.length() - 1); // take off trailing blank
+	    exprBuf.append(format);
 
-	    if (result == null) {
-		valueBuf.append("<null>");
+	    if (result != null && !format.isEmpty()) {
+		char formatChar = format.charAt(1);
+
+		if (result instanceof Map || result instanceof List) {
+		    throw new CalcExprException("Cannot convert object or array to '" + formatChar + "' format", ctx);
+		}
+
+		switch (formatChar) {
+		    case 'h':
+		    case 'H':
+			// TODO: convert to hours
+			break;
+
+		    case 'x':
+		    case 'X':
+			if (result instanceof String) {
+			    byte[] b = ((String)result).getBytes(StandardCharsets.UTF_8);
+			    String formatString = String.format("%%1$02%1$s", formatChar);
+			    valueBuf.append('\'');
+			    for (int i = 0; i < b.length; i++) {
+				int j = ((int)b[i]) & 0xFF;
+				valueBuf.append(String.format(formatString, j));
+			    }
+			    valueBuf.append('\'');
+			}
+			else {
+			    BigInteger iValue = toIntegerValue(result, ctx);
+			    if (iValue.compareTo(BigInteger.ZERO) < 0) {
+				iValue = iValue.abs();
+			    }
+			    valueBuf.append('0').append(formatChar);
+			    if (formatChar == 'x')
+				valueBuf.append(iValue.toString(16));
+			    else
+				valueBuf.append(iValue.toString(16).toUpperCase());
+			}
+			break;
+
+		    case 'o':
+		    case 'O':
+			if (result instanceof String) {
+			    byte[] b = ((String)result).getBytes(StandardCharsets.UTF_8);
+			    valueBuf.append('\'');
+			    for (int i = 0; i < b.length; i++) {
+				int j = ((int)b[i]) & 0xFF;
+				valueBuf.append(String.format("%1$03o", j));
+			    }
+			    valueBuf.append('\'');
+			}
+			else {
+			    BigInteger iValue = toIntegerValue(result, ctx);
+			    if (iValue.compareTo(BigInteger.ZERO) < 0) {
+				iValue = iValue.abs();
+			    }
+			    valueBuf.append('0');
+			    valueBuf.append(iValue.toString(8));
+			}
+			break;
+
+		    case 'b':
+		    case 'B':
+			if (result instanceof String) {
+			    byte[] b = ((String)result).getBytes(StandardCharsets.UTF_8);
+			    valueBuf.append('\'');
+			    for (int i = 0; i < b.length; i++) {
+				int j = ((int)b[i]) & 0xFF;
+				for (int k = Byte.SIZE - 1; k >= 0; k--) {
+				    char digit = (j & (1 << k)) != 0 ? '1' : '0';
+				    valueBuf.append(digit);
+				}
+			    }
+			    valueBuf.append('\'');
+			}
+			else {
+			    BigInteger iValue = toIntegerValue(result, ctx);
+			    if (iValue.compareTo(BigInteger.ZERO) < 0) {
+				iValue = iValue.abs();
+			    }
+			    valueBuf.append('0').append(formatChar);
+			    valueBuf.append(iValue.toString(2));
+			}
+			break;
+
+		    case 'k':
+		    case 'K':
+			BigInteger iValue = toIntegerValue(result, ctx);
+			try {
+			    long lValue = iValue.longValueExact();
+			    valueBuf.append(NumericUtil.formatToRange(lValue, units));
+			} catch (ArithmeticException ae) {
+			    throw new CalcExprException(ae, ctx);
+			}
+			break;
+
+		    case '%':
+			BigDecimal dValue = toDecimalValue(result, ctx);
+			BigDecimal percentValue = dValue.multiply(BigDecimal.valueOf(100L), mc);
+			valueBuf.append(percentValue.toPlainString()).append('%');
+			break;
+		}
+		result = valueBuf.toString();
 	    }
 	    else {
-		if (!format.isEmpty()) {
-		    char formatChar = format.charAt(1);
-
-		    if (result instanceof Map || result instanceof List) {
-			throw new CalcExprException("Cannot convert object or array to '" + formatChar + "' format", ctx);
-		    }
-
-		    switch (formatChar) {
-			case 'h':
-			case 'H':
-			    // TODO: convert to hours
-			    break;
-
-			case 'x':
-			case 'X':
-			    if (result instanceof String) {
-				byte[] b = ((String)result).getBytes(StandardCharsets.UTF_8);
-				String formatString = String.format("%%1$02%1$s", formatChar);
-				valueBuf.append('\'');
-				for (int i = 0; i < b.length; i++) {
-				    int j = ((int)b[i]) & 0xFF;
-				    valueBuf.append(String.format(formatString, j));
-				}
-				valueBuf.append('\'');
-			    }
-			    else {
-				BigInteger iValue = toIntegerValue(result, ctx);
-				if (iValue.compareTo(BigInteger.ZERO) < 0) {
-				    iValue = iValue.abs();
-				}
-				valueBuf.append('0').append(formatChar);
-				if (formatChar == 'x')
-				    valueBuf.append(iValue.toString(16));
-				else
-				    valueBuf.append(iValue.toString(16).toUpperCase());
-			    }
-			    break;
-
-			case 'o':
-			case 'O':
-			    if (result instanceof String) {
-				byte[] b = ((String)result).getBytes(StandardCharsets.UTF_8);
-				valueBuf.append('\'');
-				for (int i = 0; i < b.length; i++) {
-				    int j = ((int)b[i]) & 0xFF;
-				    valueBuf.append(String.format("%1$03o", j));
-				}
-				valueBuf.append('\'');
-			    }
-			    else {
-				BigInteger iValue = toIntegerValue(result, ctx);
-				if (iValue.compareTo(BigInteger.ZERO) < 0) {
-				    iValue = iValue.abs();
-				}
-				valueBuf.append('0');
-				valueBuf.append(iValue.toString(8));
-			    }
-			    break;
-
-			case 'b':
-			case 'B':
-			    if (result instanceof String) {
-				byte[] b = ((String)result).getBytes(StandardCharsets.UTF_8);
-				valueBuf.append('\'');
-				for (int i = 0; i < b.length; i++) {
-				    int j = ((int)b[i]) & 0xFF;
-				    for (int k = Byte.SIZE - 1; k >= 0; k--) {
-					char digit = (j & (1 << k)) != 0 ? '1' : '0';
-					valueBuf.append(digit);
-				    }
-				}
-				valueBuf.append('\'');
-			    }
-			    else {
-				BigInteger iValue = toIntegerValue(result, ctx);
-				if (iValue.compareTo(BigInteger.ZERO) < 0) {
-				    iValue = iValue.abs();
-				}
-				valueBuf.append('0').append(formatChar);
-				valueBuf.append(iValue.toString(2));
-			    }
-			    break;
-
-			case 'k':
-			case 'K':
-			    BigInteger iValue = toIntegerValue(result, ctx);
-			    try {
-				long lValue = iValue.longValueExact();
-				valueBuf.append(NumericUtil.formatToRange(lValue, units));
-			    } catch (ArithmeticException ae) {
-				throw new CalcExprException(ae, ctx);
-			    }
-			    break;
-
-			case '%':
-			    BigDecimal dValue = toDecimalValue(result, ctx);
-			    BigDecimal percentValue = dValue.multiply(BigDecimal.valueOf(100L), mc);
-			    valueBuf.append(percentValue.toPlainString()).append('%');
-			    break;
-		    }
-		    result = valueBuf;
-		}
-
-		if (result instanceof StringBuilder) {
-		    // This is from format conversion
-		    result = ((StringBuilder)result).toString();
-		}
-		else {
-		    valueBuf.append(toString(result));
-		}
+		valueBuf.append(toString(result));
 	    }
 
 	    if (!silent) displayer.displayResult(exprBuf.toString(), valueBuf.toString());

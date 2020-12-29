@@ -166,7 +166,7 @@ public class Calc
 
 	@Override
 	public void displayResult(String exprString, String resultString) {
-	    System.out.println(exprString + "-> " + resultString);
+	    System.out.println(exprString + " -> " + resultString);
 	}
 
 	@Override
@@ -237,9 +237,9 @@ public class Calc
 		@Override
 		public void displayResult(String exprString, String resultString) {
 		    if (colors)
-			System.out.println(EXPR_COLOR + exprString + ARROW_COLOR + "-> " + VALUE_COLOR + resultString + RESET);
+			System.out.println(EXPR_COLOR + exprString + ARROW_COLOR + " -> " + VALUE_COLOR + resultString + RESET);
 		    else
-			System.out.println(exprString + "-> " + resultString);
+			System.out.println(exprString + " -> " + resultString);
 		}
 
 		@Override
