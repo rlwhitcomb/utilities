@@ -9,7 +9,7 @@ export PIVOT_HOME=$PROJECTS_HOME/pivot/trunk
 
 # Setup the CLASSPATH with everything we will need
 CLASSPATH=.:$PROJECTS_HOME/utilities/java
-for jar_file in $PROJECTS_HOME/junit/*.jar
+for jar_file in $PROJECTS_HOME/junit*/*.jar
 do
     CLASSPATH=$CLASSPATH:$jar_file
 done
