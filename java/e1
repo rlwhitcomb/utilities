@@ -190,6 +190,9 @@ y;x
 $clear m
 m[0] = m[1] = m[2] = 3;
 m
+$clear n
+n.a = 'First'; n.b = 123; n.c = false;
+n
 
 $clear a
 a = 128
