@@ -99,6 +99,8 @@
 		Rearrange install targets for easier testing.
 	    30-Dec-2020 (rlwhitcomb)
 		Add "encode" and "decode" to the wrapper scripts.
+	    30-Dec-2020 (rlwhitcomb)
+		Separate target for grammar processing.
 
      ========================================================================== -->
 
@@ -182,20 +184,23 @@
 		</parallel>
 	</target>
 
-	<target name="check-grammar-uptodate">
-		<condition property="grammar.uptodate" value="true" else="false">
+	<target name="check-grammars-uptodate">
+		<condition property="grammars.uptodate" value="true" else="false">
 			<uptodate srcfile="info/rlwhitcomb/calc/Calc.g4" targetfile="info/rlwhitcomb/calc/CalcParser.java"/>
 		</condition>
 	</target>
 
-	<target name="compile" depends="preproc,check-grammar-uptodate" description="Compiles the java source.">
-		<echo message="Generating Calc parser" unless:true="${grammar.uptodate}"/>
-		<java jar="external-jars/antlr-4.9-complete.jar" fork="true" unless:true="${grammar.uptodate}">
+	<target name="process-grammars" depends="check-grammars-uptodate" description="Process the Antlr grammars to generate parsers.">
+		<echo message="Generating Calc parser" unless:true="${grammars.uptodate}"/>
+		<java jar="external-jars/antlr-4.9-complete.jar" fork="true" unless:true="${grammars.uptodate}">
 			<arg value="info/rlwhitcomb/calc/Calc.g4"/>
 			<arg value="-visitor"/>
 			<arg value="-no-listener"/>
 			<arg line="-package info.rlwhitcomb.calc"/>
 		</java>
+	</target>
+
+	<target name="compile" depends="preproc,process-grammars" description="Compiles the java source.">
 		<javac includeAntRuntime="false" createMissingPackageInfoClass="false" encoding="utf-8" debug="${debug.build}">
 			<compilerarg line="${compiler.args}"/>
 			<src path="."/>
