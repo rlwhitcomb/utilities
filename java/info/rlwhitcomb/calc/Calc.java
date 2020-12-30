@@ -49,6 +49,8 @@
  *	    Options for color / no color.
  *	28-Dec-2020 (rlwhitcomb)
  *	    Command line "help" and "version" options.
+ *	30-Dec-2020 (rlwhitcomb)
+ *	    Preload input text area from command line or file contents.
  */
 package info.rlwhitcomb.calc;
 
@@ -133,6 +135,9 @@ public class Calc
 	private static CalcDisplayer displayer;
 	private static CalcObjectVisitor visitor;
 
+	/** The text read from the command line or a file. */
+	private static String inputText = null;
+
 
 	@Override
 	public void startup(Display display, Map<String, String> properties) {
@@ -152,6 +157,10 @@ public class Calc
 		PrintStream ps = new TextAreaOutputStream(outputTextArea, 2048).toPrintStream();
 		System.setOut(ps);
 		System.setErr(ps);
+
+		// Prepopulate the text are with any text from the command line or input file
+		if (inputText != null)
+		    inputTextArea.setText(inputText);
 
 		displayer = this;
 		visitor = new CalcObjectVisitor(displayer);
@@ -281,9 +290,9 @@ public class Calc
 	{
 		@Override
 		public void perform(Component source) {
-		    String inputText = inputTextArea.getText();
+		    String exprText = inputTextArea.getText();
 
-		    processString(inputText, false);
+		    processString(exprText, false);
 
 		    inputTextArea.setText("");
 		    inputTextArea.requestFocus();
@@ -497,7 +506,9 @@ public class Calc
 		}
 
 		if (guiMode) {
-		    DesktopApplicationContext.main(Calc.class, args);
+		    if (input != null)
+			inputText = input.toString();
+		    DesktopApplicationContext.main(Calc.class, new String[0]);
 		}
 		else {
 		    displayer = new ConsoleDisplayer();
