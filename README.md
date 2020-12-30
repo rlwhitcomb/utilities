@@ -43,7 +43,7 @@ Work going on currently includes:
 - Add standard Version class?? which would just default to the Environment values.
 - Consider a standard method to read .properties files (take the code from "readVersionProperties" in Environment and make it general somewhere else?)
 - Completely update JavaPreProc to use an Antlr expression grammar to process the directives.
-- Fix WordFind to use a different search entirely for "-c" conditions (takes way too long for more than about 3 chars here)
+- Wildcard support for the Ant FindTask.
 
 ## Notes on New Programs and Features
 
