@@ -101,6 +101,8 @@
 		Add "encode" and "decode" to the wrapper scripts.
 	    30-Dec-2020 (rlwhitcomb)
 		Separate target for grammar processing.
+	    30-Dec-2020 (rlwhitcomb)
+		Fix Antlr command line arguments for Windows.
 
      ========================================================================== -->
 
@@ -193,7 +195,7 @@
 	<target name="process-grammars" depends="check-grammars-uptodate" description="Process the Antlr grammars to generate parsers.">
 		<echo message="Generating Calc parser" unless:true="${grammars.uptodate}"/>
 		<java jar="external-jars/antlr-4.9-complete.jar" fork="true" unless:true="${grammars.uptodate}">
-			<arg value="info/rlwhitcomb/calc/Calc.g4"/>
+			<arg file="info/rlwhitcomb/calc/Calc.g4"/>
 			<arg value="-visitor"/>
 			<arg value="-no-listener"/>
 			<arg line="-package info.rlwhitcomb.calc"/>
