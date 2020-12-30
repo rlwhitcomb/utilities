@@ -97,6 +97,8 @@
 		Don't need to preprocess Environment any more.
 	    24-Dec-2020 (rlwhitcomb)
 		Rearrange install targets for easier testing.
+	    30-Dec-2020 (rlwhitcomb)
+		Add "encode" and "decode" to the wrapper scripts.
 
      ========================================================================== -->
 
@@ -130,6 +132,8 @@
 		<include name="cat"/>
 		<include name="cmp"/>
 		<include name="crl"/>
+		<include name="decode"/>
+		<include name="encode"/>
 		<include name="fixpath"/>
 		<include name="gunz"/>
 		<include name="gz"/>
