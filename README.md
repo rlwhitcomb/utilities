@@ -44,6 +44,7 @@ Work going on currently includes:
 - Consider a standard method to read .properties files (take the code from "readVersionProperties" in Environment and make it general somewhere else?)
 - Completely update JavaPreProc to use an Antlr expression grammar to process the directives.
 - Wildcard support for the Ant FindTask.
+- Which on Windows needs something besides "canExecute" to determine if it is correct.
 
 ## Notes on New Programs and Features
 
