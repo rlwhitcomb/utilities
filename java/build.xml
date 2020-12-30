@@ -103,6 +103,8 @@
 		Separate target for grammar processing.
 	    30-Dec-2020 (rlwhitcomb)
 		Fix Antlr command line arguments for Windows.
+	    30-Dec-2020 (rlwhitcomb)
+		Fix wrapper files for Windows.
 
      ========================================================================== -->
 
@@ -121,6 +123,7 @@
 		<entry key="build.date" value="${build.date}"/>
 		<entry key="build.time" value="${build.time}"/>
 	</propertyfile>
+
 	<condition property="new.java.version" value="true" else="false" >
 		<javaversion atleast="9"/>
 	</condition>
@@ -130,26 +133,49 @@
 			<not><javaversion atleast="14"/></not>
 		</and>
 	</condition>
+	<condition property="on.windows" value="true" else="false">
+		<os family="windows"/>
+	</condition>
+
 	<patternset id="wrapper-files">
-		<include name="_find_and_run_class"/>
-		<include name="calc"/>
-		<include name="cat"/>
-		<include name="cmp"/>
-		<include name="crl"/>
-		<include name="decode"/>
-		<include name="encode"/>
-		<include name="fixpath"/>
-		<include name="gunz"/>
-		<include name="gz"/>
-		<include name="lists"/>
-		<include name="manifest"/>
-		<include name="matches"/>
-		<include name="md5"/>
-		<include name="os"/>
-		<include name="sleep"/>
-		<include name="tre"/>
-		<include name="which"/>
-		<include name="wf"/>
+		<include name="_find_and_run_class"     unless:true="${on.windows}"/>
+		<include name="_find_and_run_class.bat"     if:true="${on.windows}"/>
+		<include name="calc"                    unless:true="${on.windows}"/>
+		<include name="calc.bat"                    if:true="${on.windows}"/>
+		<include name="cat"                     unless:true="${on.windows}"/>
+		<include name="cat.bat"                     if:true="${on.windows}"/>
+		<include name="cmp"                     unless:true="${on.windows}"/>
+		<include name="cmp.bat"                     if:true="${on.windows}"/>
+		<include name="crl"                     unless:true="${on.windows}"/>
+		<include name="crl.bat"                     if:true="${on.windows}"/>
+		<include name="decode"                  unless:true="${on.windows}"/>
+		<include name="decode.bat"                  if:true="${on.windows}"/>
+		<include name="encode"                  unless:true="${on.windows}"/>
+		<include name="encode.bat"                  if:true="${on.windows}"/>
+		<include name="fixpath"                 unless:true="${on.windows}"/>
+		<include name="fixpath.bat"                 if:true="${on.windows}"/>
+		<include name="gunz"                    unless:true="${on.windows}"/>
+		<include name="gunz.bat"                    if:true="${on.windows}"/>
+		<include name="gz"                      unless:true="${on.windows}"/>
+		<include name="gz.bat"                      if:true="${on.windows}"/>
+		<include name="lists"                   unless:true="${on.windows}"/>
+		<include name="lists.bat"                   if:true="${on.windows}"/>
+		<include name="manifest"                unless:true="${on.windows}"/>
+		<include name="manifest.bat"                if:true="${on.windows}"/>
+		<include name="matches"                 unless:true="${on.windows}"/>
+		<include name="matches.bat"                 if:true="${on.windows}"/>
+		<include name="md5"                     unless:true="${on.windows}"/>
+		<include name="md5.bat"                     if:true="${on.windows}"/>
+		<include name="os"                      unless:true="${on.windows}"/>
+		<include name="os.bat"                      if:true="${on.windows}"/>
+		<include name="sleep"                   unless:true="${on.windows}"/>
+		<include name="sleep.bat"                   if:true="${on.windows}"/>
+		<include name="tre"                     unless:true="${on.windows}"/>
+		<include name="tre.bat"                     if:true="${on.windows}"/>
+		<include name="which"                   unless:true="${on.windows}"/>
+		<include name="which.bat"                   if:true="${on.windows}"/>
+		<include name="wf"                      unless:true="${on.windows}"/>
+		<include name="wf.bat"                      if:true="${on.windows}"/>
 	</patternset>
 
 
@@ -349,15 +375,12 @@
 				<exclude name="antlr-*-complete.jar"/>
 			</fileset>
 		</copy>
-		<copy todir="${env.UTILITIES_HOME}" if:true="${utilities.available}">
-			<fileset dir=".">
-				<patternset refid="wrapper-files"/>
-			</fileset>
-			<globmapper from="*" to="*.bat"/>
-		</copy>
 		<chmod dir="${env.UTILITIES_HOME}" perm="+x" if:true="${utilities.available}">
 			<patternset refid="wrapper-files"/>
 		</chmod>
+		<fixcrlf srcdir="${env.UTILITIES_HOME}" if:true="${utilities.available}">
+			<patternset refid="wrapper-files"/>
+		</fixcrlf>
 		<echo message="Variable UTILITIES_HOME is not set in the environment!" unless:true="${utilities.available}"/>
 	</target>
 
