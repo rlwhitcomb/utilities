@@ -105,6 +105,8 @@
 		Fix Antlr command line arguments for Windows.
 	    30-Dec-2020 (rlwhitcomb)
 		Fix wrapper files for Windows.
+	    30-Dec-2020 (rlwhitcomb)
+		More wrapper files.
 
      ========================================================================== -->
 
@@ -140,6 +142,14 @@
 	<patternset id="wrapper-files">
 		<include name="_find_and_run_class"     unless:true="${on.windows}"/>
 		<include name="_find_and_run_class.bat"     if:true="${on.windows}"/>
+		<include name="`"                       unless:true="${on.windows}"/>
+		<include name="`.bat"                       if:true="${on.windows}"/>
+		<include name="``"                      unless:true="${on.windows}"/>
+		<include name="``.bat"                      if:true="${on.windows}"/>
+		<include name="c"                       unless:true="${on.windows}"/>
+		<include name="c.bat"                       if:true="${on.windows}"/>
+		<include name="cg"                      unless:true="${on.windows}"/>
+		<include name="cg.bat"                      if:true="${on.windows}"/>
 		<include name="calc"                    unless:true="${on.windows}"/>
 		<include name="calc.bat"                    if:true="${on.windows}"/>
 		<include name="cat"                     unless:true="${on.windows}"/>
