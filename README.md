@@ -44,7 +44,8 @@ Work going on currently includes:
 - Consider a standard method to read .properties files (take the code from "readVersionProperties" in Environment and make it general somewhere else?)
 - Completely update JavaPreProc to use an Antlr expression grammar to process the directives.
 - Wildcard support for the Ant FindTask.
-- Which on Windows needs something besides "canExecute" to determine if it is correct.
+- "Which" on Windows needs something besides "canExecute" to determine if it is correct.
+- Make InitializationTask and QueuedThread work seamlessly with "synchronized" (for Calc PI / E calculations).
 
 ## Notes on New Programs and Features
 
@@ -77,6 +78,9 @@ Work going on currently includes:
 ### Calc
 
 - a.b.c throws NPE -> how to do recursive invocation?
+- do PI / E calculations to desired decimal value using background thread (somehow; InitializationTask?)
+- implement ++/-- on vars, not just IDs
+- implement += -=, etc. operators
 
 ### WordFind
 
