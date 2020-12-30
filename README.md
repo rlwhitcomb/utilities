@@ -46,6 +46,7 @@ Work going on currently includes:
 - Wildcard support for the Ant FindTask.
 - "Which" on Windows needs something besides "canExecute" to determine if it is correct.
 - Make InitializationTask and QueuedThread work seamlessly with "synchronized" (for Calc PI / E calculations).
+- Use the git hash (first 7 digits) instead of a sequential build number ("git rev-parse HEAD | cut -c 1-7") (how to do this "cut" in build.xml?). (would need to update version parsing to accept this non-numeric value for revision). (maybe require major.minor only need to be numeric (with possible [vV] prefix, then other fields could be +-.whatever)) (put this parsing into a new Version class, similar to Pivot's) (check out all the tests in Pivot "VersionTest.java").
 
 ## Notes on New Programs and Features
 
