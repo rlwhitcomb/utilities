@@ -107,6 +107,8 @@
 		Fix wrapper files for Windows.
 	    30-Dec-2020 (rlwhitcomb)
 		More wrapper files.
+	    31-Dec-2020 (rlwhitcomb)
+		Use latest git commit id as the build number.
 
      ========================================================================== -->
 
@@ -116,14 +118,23 @@
 >
 	<property environment="env"/>
 	<property file="build.properties"/>
-	<buildnumber/>
+	<exec executable="git" dir="." outputproperty="git.commit.id">
+		<arg line="rev-parse --short HEAD"/>
+	</exec>
+	<loadproperties>
+		<propertyresource name="git.commit.id"/>
+		<filterchain>
+			<prefixlines prefix="build.lastrev="/>
+		</filterchain>
+	</loadproperties>
 	<tstamp>
 		<format property="build.date" pattern="yyyy-MM-dd"/>
 		<format property="build.time" pattern="HH:mm:ss.SSS z"/>
 	</tstamp>
 	<propertyfile file="build.number" comment="Utilities Build Values">
-		<entry key="build.date" value="${build.date}"/>
-		<entry key="build.time" value="${build.time}"/>
+		<entry key="build.number" value="${build.lastrev}"/>
+		<entry key="build.date"   value="${build.date}"/>
+		<entry key="build.time"   value="${build.time}"/>
 	</propertyfile>
 
 	<condition property="new.java.version" value="true" else="false" >
