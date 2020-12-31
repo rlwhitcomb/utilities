@@ -30,7 +30,6 @@ All the "java" directory classes are built into a single "utilities.jar" file, w
 
 Work going on currently includes:
 
-- Making a GUI version of WordFind, with the same program able to operate either from command line or as a GUI form.
 - Convert D.C to Java (include supporting code).
 - Get "pivot" builds working, including Javadoc, packaging, etc.
 - New Java-based "tail", "head", and other Linux utilities missing on Windows.
@@ -79,13 +78,12 @@ Work going on currently includes:
 ### Calc
 
 - a.b.c throws NPE -> how to do recursive invocation?
-- do PI / E calculations to desired decimal value using background thread (somehow; InitializationTask?)
 - implement ++/-- on vars, not just IDs
 - implement += -=, etc. operators
 
 ### WordFind
 
-- Need to move out of Pivot directory, back to "java" folders, then update paths, build, etc.
+- Finish the GUI code.
 - Separate .jar file? Or is "utilities.jar" suitable?
 
 ### UUID

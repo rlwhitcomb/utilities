@@ -81,6 +81,9 @@
  *	30-Dec-2020 (rlwhitcomb)
  *	    Tweak the "toString" methods for Map and List for
  *	    the empty value case.
+ *	31-Dec-2020 (rlwhitcomb)
+ *	    Do the expensive e/pi calculations in a background thread
+ *	    using the CalcPiWorker class.
  */
 package info.rlwhitcomb.calc;
 
@@ -112,9 +115,6 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		RADIANS
 	}
 
-	/** Value used to convert degrees to radians. */
-	private static final BigDecimal B180 = BigDecimal.valueOf(180L);
-
 	/** Scale for double operations. */
 	private static final MathContext mcDouble = MathContext.DECIMAL64;
 
@@ -130,14 +130,10 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	/** The kind of units to use for the ",k" format. */
 	private RangeMode units = RangeMode.MIXED;
 
-	/** PI to the precision of our current math mode. */
-	private BigDecimal pi;
-
-	/** PI / 180 for degrees to radians conversion. */
-	private BigDecimal piOver180;
-
-	/** E to the precision of our current math mode. */
-	private BigDecimal e;
+	/** The worker used to maintain the current e/pi values, and calculate them
+	 * in a background thread.
+	 */
+	private CalcPiWorker piWorker = null;
 
 	/** Symbol table for variables. */
 	private Map<String, Object> variables;
@@ -206,13 +202,15 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	private void setMathContext(MathContext newMathContext) {
 	    int prec  = newMathContext.getPrecision();
-
 	    mc        = newMathContext;
 
-	    // Calculate these values to one more place than required, just for precision
-	    e         = NumericUtil.e(prec + 1);
-	    pi        = NumericUtil.pi(prec + 1);
-	    piOver180 = pi.divide(B180, mc);
+	    // Either create the worker object, or trigger a recalculation
+	    if (piWorker == null) {
+		piWorker = new CalcPiWorker(mc);
+	    }
+	    else {
+		piWorker.calculate(mc);
+	    }
 
 	    displayActionMessage("Precision is now " + prec + " digits.");
 	}
@@ -263,7 +261,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    BigDecimal value = getDecimalValue(ctx);
 
 	    if (trigMode == TrigMode.DEGREES)
-		value = value.multiply(piOver180, mc);
+		value = value.multiply(piWorker.getPiOver180(), mc);
 
 	    return value;
 	}
@@ -302,7 +300,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    BigDecimal radianValue = new BigDecimal(value, mcDouble);
 
 	    if (trigMode == TrigMode.DEGREES)
-		return radianValue.divide(piOver180, mcDouble);
+		return radianValue.divide(piWorker.getPiOver180(), mcDouble);
 
 	    return radianValue;
 	}
@@ -1355,12 +1353,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitPiValue(CalcParser.PiValueContext ctx) {
-	    return pi;
+	    return piWorker.getPi();
 	}
 
 	@Override
 	public Object visitEValue(CalcParser.EValueContext ctx) {
-	    return e;
+	    return piWorker.getE();
 	}
 
 	@Override

@@ -29,6 +29,8 @@
 		Converted from existing code.
 	    11-Dec-2020 (rlwhitcomb)
 		Add an exit button. Change relative sizes of input and output areas.
+	    31-Dec-2020 (rlwhitcomb)
+		Add a SplitPane between the input and output areas so they can be resized.
 
      ========================================================================== -->
 
@@ -90,18 +92,22 @@
 		</BoxPane>
 	    </TablePane.Row>
 	    <TablePane.Row height="1*">
-		<Border title=" Expression " styles="{padding:4}">
-		    <ScrollPane horizontalScrollBarPolicy="fill" verticalScrollBarPolicy="fill_to_capacity" >
-			<TextArea bxml:id="inputTextArea" styles="{font:'Monospaced 18'}"/>
-		    </ScrollPane>
-		</Border>
-	    </TablePane.Row>
-	    <TablePane.Row height="1*">
-		<Border title=" Result " styles="{padding:4}">
-		    <ScrollPane horizontalScrollBarPolicy="fill" verticalScrollBarPolicy="fill_to_capacity" >
-			<TextArea bxml:id="outputTextArea" styles="{font:'Monospaced 18'}"/>
-		    </ScrollPane>
-		</Border>
+		<SplitPane orientation="vertical" splitRatio="0.5">
+			<top>
+				<Border title=" Expression " styles="{padding:4}">
+				    <ScrollPane horizontalScrollBarPolicy="fill" verticalScrollBarPolicy="fill_to_capacity" >
+					<TextArea bxml:id="inputTextArea" styles="{font:'Monospaced 18'}"/>
+				    </ScrollPane>
+				</Border>
+			</top>
+			<bottom>
+				<Border title=" Result " styles="{padding:4}">
+				    <ScrollPane horizontalScrollBarPolicy="fill" verticalScrollBarPolicy="fill_to_capacity" >
+					<TextArea bxml:id="outputTextArea" styles="{font:'Monospaced 18'}"/>
+				    </ScrollPane>
+				</Border>
+			</bottom>
+		</SplitPane>
 	    </TablePane.Row>
 	</rows>
     </TablePane>
