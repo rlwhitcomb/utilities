@@ -78,6 +78,9 @@
  *	    Fix screwed up result from visitExprStmt.
  *	28-Dec-2020 (rlwhitcomb)
  *	    Tweak result formatting again.
+ *	30-Dec-2020 (rlwhitcomb)
+ *	    Tweak the "toString" methods for Map and List for
+ *	    the empty value case.
  */
 package info.rlwhitcomb.calc;
 
@@ -335,6 +338,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    return toString(result, true);
 	}
 
+	@SuppressWarnings("unchecked")
 	private String toString(Object result, boolean quote) {
 	    if (result == null) {
 		return quote ? "<null>" : "";
@@ -349,14 +353,10 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		return ((BigDecimal)result).toPlainString();
 	    }
 	    else if (result instanceof Map) {
-		@SuppressWarnings("unchecked")
-		Map<String, Object> map = (Map<String, Object>)result;
-		return toString(map);
+		return toString((Map<String, Object>)result);
 	    }
 	    else if (result instanceof List) {
-		@SuppressWarnings("unchecked")
-		List<Object> list = (List<Object>)result;
-		return toString(list);
+		return toString((List<Object>)result);
 	    }
 
 	    return result.toString();
@@ -365,21 +365,31 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	private String toString(Map<String, Object> map) {
 	    StringBuilder buf = new StringBuilder();
 	    buf.append("{ ");
-	    for (Map.Entry<String, Object> entry : map.entrySet()) {
-		buf.append(entry.getKey()).append(": ");
-		buf.append(toString(entry.getValue())).append(", ");
+	    if (map.size() > 0) {
+		for (Map.Entry<String, Object> entry : map.entrySet()) {
+		    buf.append(entry.getKey()).append(": ");
+		    buf.append(toString(entry.getValue())).append(", ");
+		}
+		buf.delete(buf.length() - 2, buf.length()).append(" }");
 	    }
-	    buf.delete(buf.length() - 2, buf.length()).append(" }");
+	    else {
+		buf.append('}');
+	    }
 	    return buf.toString();
 	}
 
 	private String toString(List<Object> list) {
 	    StringBuilder buf = new StringBuilder();
 	    buf.append("[ ");
-	    for (Object value : list) {
-		buf.append(toString(value)).append(", ");
+	    if (list.size() > 0) {
+		for (Object value : list) {
+		    buf.append(toString(value)).append(", ");
+		}
+		buf.delete(buf.length() - 2, buf.length()).append(" ]");
 	    }
-	    buf.delete(buf.length() - 2, buf.length()).append(" ]");
+	    else {
+		buf.append(']');
+	    }
 	    return buf.toString();
 	}
 
