@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2020 Roger L. Whitcomb.
+ * Copyright (c) 2020-2021 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -51,6 +51,8 @@
  *	    Command line "help" and "version" options.
  *	30-Dec-2020 (rlwhitcomb)
  *	    Preload input text area from command line or file contents.
+ *	04-Jan-2021 (rlwhitcomb)
+ *	    Add Locale option (use with numeric formatting).
  */
 package info.rlwhitcomb.calc;
 
@@ -63,6 +65,7 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 import org.apache.pivot.beans.BXML;
 import org.apache.pivot.beans.BXMLSerializer;
@@ -77,6 +80,7 @@ import org.antlr.v4.runtime.tree.*;
 import static info.rlwhitcomb.util.ConsoleColor.Code.*;
 import info.rlwhitcomb.util.Environment;
 import info.rlwhitcomb.util.ExceptionUtil;
+import info.rlwhitcomb.util.Intl;
 
 /**
  * Command line calculator, which will also read files or from stdin.
@@ -92,6 +96,22 @@ public class Calc
 	public static final String ERROR_COLOR = RED_BOLD.toString();
 
 	private static final String LINESEP = System.lineSeparator();
+
+	/**
+	 * An enumeration of what we expect next on the command line.
+	 */
+	private enum Expecting
+	{
+		/** Default is to expect an expression or file name. */
+		DEFAULT,
+		/** Some options (like "-version" or "-help") will quit right afterwards. */
+		QUIT_NOW,
+		/** Locale option requires a locale name. */
+		LOCALE
+	}
+
+	/** What we're expecting next on the command line. */
+	private static Expecting expecting;
 
 	private static final String[] INTRO = {
 	    "  Enter an expression (or multiple expressions separated by ';').",
@@ -121,6 +141,8 @@ public class Calc
 	private static boolean guiMode = false;
 	private static boolean debug   = false;
 	private static boolean colors  = true;
+
+	private static Locale  locale  = null;
 
 	private BXMLSerializer serializer = null;
 
@@ -403,7 +425,12 @@ public class Calc
 	    return returnValue;
 	}
 
-	private static boolean processOption(String arg, String option) {
+	private static Expecting processOption(String arg, String option) {
+	    if (expecting != Expecting.DEFAULT) {
+		System.err.println("Expecting " + expecting + " value, not another option.");
+		return Expecting.QUIT_NOW;
+	    }
+
 	    switch (option.toLowerCase()) {
 		case "gui":
 		case "g":
@@ -433,23 +460,27 @@ public class Calc
 		case "nocol":
 		    colors = false;
 		    break;
+		case "locale":
+		case "loc":
+		case "l":
+		    return Expecting.LOCALE;
 		case "help":
 		case "h":
 		case "?":
 		    printIntro();
 		    printHelp();
-		    return false;
+		    return Expecting.QUIT_NOW;
 		case "version":
 		case "vers":
 		case "ver":
 		case "v":
 		    printTitleAndVersion();
-		    return false;
+		    return Expecting.QUIT_NOW;
 		default:
 		    System.err.println("Unknown option \"" + arg + "\"; ignoring.");
-		    break;
+		    return Expecting.QUIT_NOW;
 	    }
-	    return true;
+	    return Expecting.DEFAULT;
 	}
 
 	public static void main(String[] args) {
@@ -457,26 +488,48 @@ public class Calc
 
 	    List<String> argList = new ArrayList<>(args.length);
 
-	    // Scan the input arguments for the "-gui" option, removing it if found
+	    expecting = Expecting.DEFAULT;
+
 	    for (String arg : args) {
-		boolean optionOnly = false;
-
 		if (arg.startsWith("--"))
-		    optionOnly = !processOption(arg, arg.substring(2));
+		    expecting = processOption(arg, arg.substring(2));
 		else if (arg.startsWith("-"))
-		    optionOnly = !processOption(arg, arg.substring(1));
+		    expecting = processOption(arg, arg.substring(1));
 		else if (ON_WINDOWS && arg.startsWith("/"))
-		    optionOnly = !processOption(arg, arg.substring(1));
-		else
-		    argList.add(arg);
+		    expecting = processOption(arg, arg.substring(1));
+		else {
+		    switch (expecting) {
+			case DEFAULT:
+			    argList.add(arg);
+			    break;
+			case QUIT_NOW:
+			    break;
+			case LOCALE:
+			    locale = new Locale(arg);
+			    expecting = Expecting.DEFAULT;
+			    break;
+			default:
+			    System.err.println("Expecting " + expecting + " value.");
+			    expecting = Expecting.QUIT_NOW;
+			    break;
+		    }
+		}
 
-		// For some "options" (like "-help") we just quit once we
-		// process them.
-		if (optionOnly)
+		if (expecting == Expecting.QUIT_NOW)
 		    return;
 	    }
  
+	    if (expecting != Expecting.DEFAULT) {
+		System.err.println("Value for " + expecting + " option was not given.");
+		System.exit(1);
+	    }
+
 	    args = argList.toArray(new String[0]);
+
+	    if (locale != null && !locale.equals(Locale.getDefault())) {
+		Locale.setDefault(locale);
+		Intl.initAllPackageResources(locale);
+	    }
 
 	    try {
 		CharStream input = null;
