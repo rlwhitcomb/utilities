@@ -1,0 +1,108 @@
+#
+# The MIT License (MIT)
+#
+# Copyright (c) 2020-2021 Roger L. Whitcomb.
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+#
+#       Internationalizable strings for the info.rlwhitcomb.tree code.
+#
+# History:
+#       13-Sep-2020 (rlwhitcomb)
+#           Moved into here from the .java file.
+#	14-Sep-2020 (rlwhitcomb)
+#	    Changed the lookup symbols.
+#	12-Oct-2020 (rlwhitcomb)
+#	    Took out duplicate option text.
+#	11-Dec-2020 (rlwhitcomb)
+#	    Move program name to build.properties.
+#	23-Dec-2020 (rlwhitcomb)
+#	    More options.
+#	04-Jan-2021 (rlwhitcomb)
+#	    Translation to Spanish.
+#
+
+unavailable	= " <no disponible>"
+
+warnUnknownOpt	= "ADVERTENCIA: Ignorando opción desconocida: \"%1$s\""
+warnNoFile	= "ADVERTENCIA: Ignorando archivo inexistente \"%1$s\""
+errNoFilesGiven	= "ERROR: No hay archivos ni directorios especificados."
+errFileName	= "ERROR: Incapaz de obtener el nombre canónico para \"%1$s\": %2$s"
+errExpectLocale = "ERROR: Esperando un valor para \"-locale\", no otra opción."
+errNoLocale     = "ERROR: No se ha dado ningún valor para \"-locale\"."
+
+usage.help1	= "Uso: tre [opciones] nombres_de_archivos_o_directorios"
+usage.help2	= ""
+usage.help3	= " Cuando las \"opciones\" sean:"
+usage.help4	= "\t-ascending  para ordenar por nombre de archivo, alfabéticamente ascendente"
+usage.help5	= "\t  (o -alpha, -asc, o -a)"
+usage.help6	= "\t-descending  ordena por nombre, orden descendente"
+usage.help7	= "\t  (o -Alpha, -desc, o -A)"
+usage.help8	= "\t-dir  ordenar directorios primero, seguido de archivos"
+usage.help9	= "\t  (o -directory, o -d)"
+usage.help10	= "\t-Dir  ordenar archivos primero, luego directorios"
+usage.help11	= "\t  (o -Directory, o -D)"
+usage.help12	= "\t-mixed  ordena los nombres de los archivos alfabéticamente, en mayúsculas y minúsculas"
+usage.help13	= "\t  (lo que significa que \"M\" es diferente de \"m\")"
+usage.help14	= "\t  (o %MixedCase%, -sensitive, -mix, -m, o -s)"
+usage.help15	= "\t-case  ordenar los nombres de los archivos alfabéticamente, sin importar el caso"
+usage.help16	= "\t  (lo que significa que \"M\" se ordena igual que \"m\")"
+usage.help17	= "\t  (o %CaseInsensitive%, -insensitive, -c, o -i)"
+usage.help18	= " El valor predeterminado es no ordenar la salida."
+usage.help19	= ""
+usage.help20	= "\t-file  también imprime los nombres de los archivos"
+usage.help21	= "\r  (el valor predeterminado es solo directorios)"
+usage.help22	= "\t  (o %AllFiles%, -files, -all, o -f)"
+usage.help23	= "\t-omit  (predeterminado) omite los nombres de los archivos"
+usage.help24	= "\t  (o %OmitFiles%, o -o)"
+usage.help25	= ""
+usage.help26	= "\t-hidden  muestra directorios / archivos ocultos"
+usage.help27	= "\t  (o %ShowHidden%, -hid, -show, o -s)"
+usage.help28	= ""
+usage.help29	= "\t-color    usar colores para mejorar la salida (predeterminado)"
+usage.help30	= "\t  (o -colors, o -col)"
+usage.help31	= "\t-nocolor  no use colores en la salida"
+usage.help32	= "\t  (o %NoColors%, %NoColor%, %NoCol%, -no, o -n)"
+usage.help33	= ""
+usage.help34	= "\t-dark    use colores apropiados para fondos oscuros"
+usage.help35	= "\t  (o %DarkBackground%, -darkback, o -darkbg)"
+usage.help36	= "\t-light   utilizar colores adecuados para un fondo claro / blanco"
+usage.help37	= "\t  (o %LightBackground%, -lightback, o -lightbg)"
+usage.help38	= ""
+usage.help39    = "\t-locale locale_name   establecer la configuración regional"
+usage.help40    = "\t  (o -loc, o -l)"
+usage.help41    = ""
+usage.help42    = "\t-help  imprime este mensaje"
+usage.help43    = "\t  (o -usage, -h, -u, o -?)"
+usage.help44    = ""
+usage.help45    = "\t-version  imprime la información de la versión del programa"
+usage.help46    = "\t  (o -vers, -ver, o -v)"
+usage.help47    = ""
+usage.help48	= " Nota: las opciones se pueden especificar mediante \"-opt\" o \"-opt\""
+usage.help49	= "  (o en Windows por \"/opt\")."
+usage.help50	= ""
+usage.help51	= " Las opciones también se pueden preestablecer enumerándolas en variable"
+usage.help52	= "  entorno TREE_OPTIONS (como TREE_OPTIONS=-nocolor)"
+usage.help53	= ""
+usage.help54	= " También tenga en cuenta: todas las opciones se analizan antes de que"
+usage.help55	= "  se procese cualquier archivo, por lo que las opciones posteriores"
+usage.help56	= "  anularán las anteriores para toda la salida, y las opciones en la"
+usage.help57	= "  línea de comando anulan las establecidas por TREE_OPTIONS."
+usage.help58    = ""
+

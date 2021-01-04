@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2020 Roger L. Whitcomb.
+ * Copyright (c) 2020-2021 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -69,6 +69,8 @@
  *	22-Dec-2020 (rlwhitcomb)
  *	    Switch for dark mode (instead of relying on O/S).
  *	    Parse env var TREE_OPTIONS for switches.
+ *	04-Jan-2021 (rlwhitcomb)
+ *	    Locale option for errors, etc.
  */
 package info.rlwhitcomb.tree;
 
@@ -81,7 +83,9 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+
 import info.rlwhitcomb.util.CharUtil;
 import static info.rlwhitcomb.util.CharUtil.Justification.*;
 import info.rlwhitcomb.util.ConsoleColor;
@@ -147,6 +151,10 @@ public class Tree
 
 	/** List of "executable" file extensions (Windows only). */
 	private static String[] executableExtensions;
+
+	/** Locale used to format messages, etc. */
+	private static Locale locale = null;
+
 
 	private static final String ALL_FILES        = "AllFiles";
 	private static final String OMIT_FILES       = "OmitFiles";
@@ -490,8 +498,21 @@ public class Tree
 
 
 	private static void parseOptions(final String[] args, final List<String> argList) {
+	    boolean expectLocale = false;
+
 	    for (String arg : args) {
-		if (Options.matchesOption(arg, false, "alpha", "ascending", "asc", "a")) {
+		if (expectLocale && Options.isOption(arg) != null) {
+		    Intl.errPrintln("tree#errExpectLocale");
+		}
+		else if (expectLocale) {
+		    locale = new Locale(arg);
+		    if (locale != null && !locale.equals(Locale.getDefault())) {
+			Locale.setDefault(locale);
+			Intl.initAllPackageResources(locale);
+		    }
+		    expectLocale = false;
+		}
+		else if (Options.matchesOption(arg, false, "alpha", "ascending", "asc", "a")) {
 		    sortByFileName = true;
 		    nameOrder = SortOrder.ASCENDING;
 		}
@@ -536,6 +557,9 @@ public class Tree
 		else if (Options.matchesOption(arg, true, LIGHT, "lightback", "lightbg", "light")) {
 		    darkBackgrounds = false;
 		}
+		else if (Options.matchesOption(arg, true, "locale", "loc", "l")) {
+		    expectLocale = true;
+		}
 		else if (Options.matchesOption(arg, true, "help", "usage", "h", "u", "?")) {
 		    usage();
 		    showInfoOnly = true;
@@ -551,6 +575,10 @@ public class Tree
 		    if (argList != null)
 			argList.add(arg);
 		}
+	    }
+
+	    if (expectLocale) {
+		Intl.errPrintln("tree#errNoLocale");
 	    }
 	}
 

@@ -1,7 +1,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2020 Roger L. Whitcomb.
+# Copyright (c) 2020-2021 Roger L. Whitcomb.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -34,6 +34,8 @@
 #	    Move program name to build.properties.
 #	23-Dec-2020 (rlwhitcomb)
 #	    More options.
+#	04-Jan-2021 (rlwhitcomb)
+#	    Small typo. New error message for Locale option.
 #
 
 unavailable	= " <unavailable>"
@@ -42,8 +44,10 @@ warnUnknownOpt	= "WARNING: Ignoring unknown option: \"%1$s\""
 warnNoFile	= "WARNING: Ignoring non-existent file \"%1$s\""
 errNoFilesGiven	= "ERROR: No input files or directories specified."
 errFileName	= "ERROR: Unable to get canonical name for \"%1$s\": %2$s"
+errExpectLocale	= "ERROR: Expecting a value for \"-locale\", not another option."
+errNoLocale	= "ERROR: No value given for \"-locale\"."
 
-usage.help1	= "Usage: tree [options] file_or_directory_name(s)"
+usage.help1	= "Usage: tre [options] file_or_directory_name(s)"
 usage.help2	= ""
 usage.help3	= " Where \"options\" can be:"
 usage.help4	= "\t-ascending  to sort by file name, alphabetically ascending"
@@ -80,20 +84,23 @@ usage.help34	= "\t  (or %DarkBackground%, -darkback, or -darkbg)"
 usage.help35	= "\t-light   use colors suitable for a light/white background"
 usage.help36	= "\t  (or %LightBackground%, -lightback, or -lightbg)"
 usage.help37	= ""
-usage.help38	= "\t-help  prints this message"
-usage.help39	= "\t  (or -usage, -h, -u, or -?)"
+usage.help38	= "\t-locale locale_name   set the locale"
+usage.help39	= "\t  (or -loc, or -l)"
 usage.help40	= ""
-usage.help41	= "\t-version  prints the program version information"
-usage.help42	= "\t  (or -vers, -ver, or -v)"
+usage.help41	= "\t-help  prints this message"
+usage.help42	= "\t  (or -usage, -h, -u, or -?)"
 usage.help43	= ""
-usage.help44	= " Note: options can be specified by \"-opt\" or \"--opt\""
-usage.help45	= "  (or on Windows by \"/opt\")."
+usage.help44	= "\t-version  prints the program version information"
+usage.help45	= "\t  (or -vers, -ver, or -v)"
 usage.help46	= ""
-usage.help47	= " Options can also be preset by listing them in the TREE_OPTIONS"
-usage.help48	= "  environment variable (such as TREE_OPTIONS=-nocolor)"
+usage.help47	= " Note: options can be specified by \"-opt\" or \"--opt\""
+usage.help48	= "  (or on Windows by \"/opt\")."
 usage.help49	= ""
-usage.help50	= " Also note: all options are parsed before any files are processed,"
-usage.help51	= "  so later options will override earlier ones for the entire output,"
-usage.help52	= "  and options on the command line override ones set by TREE_OPTIONS."
-usage.help53	= ""
+usage.help50	= " Options can also be preset by listing them in the TREE_OPTIONS"
+usage.help51	= "  environment variable (such as TREE_OPTIONS=-nocolor)"
+usage.help52	= ""
+usage.help53	= " Also note: all options are parsed before any files are processed,"
+usage.help54	= "  so later options will override earlier ones for the entire output,"
+usage.help55	= "  and options on the command line override ones set by TREE_OPTIONS."
+usage.help56	= ""
 
