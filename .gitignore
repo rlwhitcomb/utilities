@@ -1,6 +1,6 @@
 *.class
 *.jar
-resources.properties
+resources*.properties
 java/doc
 .DS_Store
 *.interp
