@@ -84,6 +84,8 @@
  *	31-Dec-2020 (rlwhitcomb)
  *	    Do the expensive e/pi calculations in a background thread
  *	    using the CalcPiWorker class.
+ *	31-Dec-2020 (rlwhitcomb)
+ *	    Get nested object/array referencing right.
  */
 package info.rlwhitcomb.calc;
 
@@ -115,6 +117,54 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		RADIANS
 	}
 
+	private static class LValueContext
+	{
+		/** The parent context (for nested naming purposes). */
+		LValueContext parent;
+		/** The surrounding context to reference into (a {@code Map} or {@code List}). */
+		Object context;
+		/** The variable / member name to reference into a {@code Map}. */
+		String name;
+		/** The integer index value to reference into a {@code List}. */
+		int index;
+
+		LValueContext(Object ctxt) {
+		    this.parent  = null;
+		    this.context = ctxt;
+		    this.name    = null;
+		    this.index   = -1;
+		}
+
+		LValueContext(LValueContext p, Object ctxt, String nm) {
+		    this.parent  = p;
+		    this.context = ctxt;
+		    this.name    = nm;
+		    this.index   = -1;
+		}
+
+		LValueContext(LValueContext p, Object ctxt, int idx) {
+		    this.parent  = p;
+		    this.context = ctxt;
+		    this.name    = null;
+		    this.index   = idx;
+		}
+
+		@Override
+		public String toString() {
+		    String parentName = parent == null ? "" : parent.toString();
+		    if (name != null) {
+			if (parent.parent == null)
+			    return parentName + name;
+			else
+			    return parentName + "." + name;
+		    }
+		    else if (index >= 0)
+			return parentName + "[" + index + "]";
+		    else
+			return "";
+		}
+	}
+
 	/** Scale for double operations. */
 	private static final MathContext mcDouble = MathContext.DECIMAL64;
 
@@ -138,6 +188,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	/** Symbol table for variables. */
 	private Map<String, Object> variables;
  
+	/** The outermost {@code LValueContext} for the (global) variables. */
+	private LValueContext globalContext;
+
 	/** {@link CalcDisplayer} object so we can output results to either the console or GUI window. */
 	private CalcDisplayer displayer;
 
@@ -160,13 +213,33 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		displayer.displayActionMessage(message);
 	}
 
+	private StringBuilder getTreeText(ParserRuleContext ctx) {
+	    StringBuilder buf = new StringBuilder();
+
+	    getTreeText(buf, ctx);
+
+	    int len = buf.length();
+	    while (buf.charAt(len - 1) == ' ')
+		len--;
+	    buf.setLength(len);
+
+	    return buf;
+	}
+
 	private void getTreeText(StringBuilder buf, ParserRuleContext ctx) {
 	    for (ParseTree child : ctx.children) {
 		if (child instanceof ParserRuleContext) {
 		    getTreeText(buf, (ParserRuleContext)child);
 		}
 		else {
-		    buf.append(child.getText()).append(' ');
+		    String childText = child.getText();
+		    boolean sp1 = false, sp2 = true;
+		    // TODO: maybe we can do better??
+		    if (sp1)
+			buf.append(' ');
+		    buf.append(childText);
+		    if (sp2)
+			buf.append(' ');
 		}
 	    }
 	}
@@ -175,10 +248,13 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public CalcObjectVisitor(CalcDisplayer resultDisplayer) {
 	    setMathContext(MathContext.DECIMAL128);
 	    setTrigMode(TrigMode.RADIANS);
-	    variables = new HashMap<>();
-	    displayer = resultDisplayer;
 
-	    initialized = true;
+	    variables     = new HashMap<>();
+	    globalContext = new LValueContext(variables);
+
+	    displayer     = resultDisplayer;
+
+	    initialized   = true;
 	}
 
 	private boolean isIdentifierStart(char ch) {
@@ -556,7 +632,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    StringBuilder valueBuf = new StringBuilder();
 
 	    getTreeText(exprBuf, ctx.expr());
-	    exprBuf.setLength(exprBuf.length() - 1); // take off trailing blank
+	    if (exprBuf.charAt(exprBuf.length() - 1) == ' ')
+		exprBuf.setLength(exprBuf.length() - 1);
 	    exprBuf.append(format);
 
 	    if (result != null && !format.isEmpty()) {
@@ -696,55 +773,65 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	@Override
+	public Object visitVarExpr(CalcParser.VarExprContext ctx) {
+	    LValueContext lValue = getLValue(ctx.var());
+	    return getContextObject(lValue);
+	}
+
+	@Override
 	public Object visitPostIncExpr(CalcParser.PostIncExprContext ctx) {
-	    String name = ctx.ID().getText();
+	    LValueContext lValue = getLValue(ctx.var());
+	    Object value = getContextObject(lValue);
 
-	    BigDecimal value  = toDecimalValue(variables.get(name), ctx);
-	    BigDecimal eAfter = value.add(BigDecimal.ONE);
+	    BigDecimal dValue = toDecimalValue(value, ctx);
+	    BigDecimal dAfter = dValue.add(BigDecimal.ONE);
 
-	    variables.put(name, eAfter);
+	    putContextObject(lValue, dAfter);
 
 	    // post increment, return original value
-	    return value;
+	    return dValue;
 	}
 
 	@Override
 	public Object visitPostDecExpr(CalcParser.PostDecExprContext ctx) {
-	    String name = ctx.ID().getText();
+	    LValueContext lValue = getLValue(ctx.var());
+	    Object value = getContextObject(lValue);
 
-	    BigDecimal value  = toDecimalValue(variables.get(name), ctx);
-	    BigDecimal eAfter = value.subtract(BigDecimal.ONE);
+	    BigDecimal dValue = toDecimalValue(value, ctx);
+	    BigDecimal dAfter = dValue.subtract(BigDecimal.ONE);
 
-	    variables.put(name, eAfter);
+	    putContextObject(lValue, dAfter);
 
 	    // post decrement, return the original value
-	    return value;
+	    return dValue;
 	}
 
 	@Override
 	public Object visitPreIncExpr(CalcParser.PreIncExprContext ctx) {
-	    String name = ctx.ID().getText();
+	    LValueContext lValue = getLValue(ctx.var());
+	    Object value = getContextObject(lValue);
 
-	    BigDecimal value  = toDecimalValue(variables.get(name), ctx);
-	    BigDecimal eAfter = value.add(BigDecimal.ONE);
+	    BigDecimal dValue = toDecimalValue(value, ctx);
+	    BigDecimal dAfter = dValue.add(BigDecimal.ONE);
 
-	    variables.put(name, eAfter);
+	    putContextObject(lValue, dAfter);
 
 	    // pre increment, return the modified value
-	    return eAfter;
+	    return dAfter;
 	}
 
 	@Override
 	public Object visitPreDecExpr(CalcParser.PreDecExprContext ctx) {
-	    String name = ctx.ID().getText();
+	    LValueContext lValue = getLValue(ctx.var());
+	    Object value = getContextObject(lValue);
 
-	    BigDecimal value  = toDecimalValue(variables.get(name), ctx);
-	    BigDecimal eAfter = value.subtract(BigDecimal.ONE);
+	    BigDecimal dValue = toDecimalValue(value, ctx);
+	    BigDecimal dAfter = dValue.subtract(BigDecimal.ONE);
 
-	    variables.put(name, eAfter);
+	    putContextObject(lValue, dAfter);
 
 	    // pre decrement, return the modified value
-	    return eAfter;
+	    return dAfter;
 	}
 
 	@Override
@@ -1367,7 +1454,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	@Override
-	public Object visitIdValue(CalcParser.IdValueContext ctx) {
+	public Object visitIdVar(CalcParser.IdVarContext ctx) {
 	    String name = ctx.ID().getText();
 
 	    if (variables.containsKey(name)) {
@@ -1381,82 +1468,132 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public Object visitEitherOrExpr(CalcParser.EitherOrExprContext ctx) {
 	    boolean ifExpr = getBooleanValue(ctx.expr(0));
 
-	    if (ifExpr)
-		return visit(ctx.expr(1));
-	    else
-		return visit(ctx.expr(2));
+	    return visit(ifExpr ? ctx.expr(1) : ctx.expr(2));
+	}
+
+	@SuppressWarnings("unchecked")
+	private Object getContextObject(LValueContext lValue) {
+	    if (lValue.name != null) {
+		Map<String, Object> obj = (Map<String, Object>)lValue.context;
+		return obj.get(lValue.name);
+	    }
+	    else if (lValue.index >= 0) {
+		List<Object> arr = (List<Object>)lValue.context;
+		return arr.get(lValue.index);
+	    }
+	    else {
+		// This should only ever be in the outermost "variables" context
+		// where the context is just the variable map
+		return lValue.context;
+	    }
+	}
+
+	@SuppressWarnings("unchecked")
+	private void putContextObject(LValueContext lValue, Object value) {
+	    if (lValue.name != null) {
+		Map<String, Object> obj = (Map<String, Object>)lValue.context;
+		obj.put(lValue.name, value);
+	    }
+	    else if (lValue.index >= 0) {
+		List<Object> arr = (List<Object>)lValue.context;
+		arr.set(lValue.index, value);
+	    }
+	    else {
+		// Should never happen
+		throw new IllegalStateException("Assignment to " + lValue.toString() + " without name or index.");
+	    }
+	}
+
+	@SuppressWarnings("unchecked")
+	private LValueContext makeMapLValue(CalcParser.VarContext var, LValueContext objLValue, String name) {
+	    Map<String, Object> obj = null;
+	    Object objValue = getContextObject(objLValue);
+	    if (objValue != null && objValue instanceof Map) {
+		obj = (Map<String, Object>)objValue;
+	    }
+	    else if (objValue == null) {
+		obj = new HashMap<>();
+		putContextObject(objLValue, obj);
+	    }
+	    else {
+		throw new CalcExprException("Variable '" + objLValue.toString() + "' already has a non-object value", var);
+	    }
+
+	    return name == null ? objLValue : new LValueContext(objLValue, obj, name);
+	}
+
+	private LValueContext getLValue(CalcParser.VarContext var) {
+	    return getLValue(var, globalContext);
+	}
+
+	@SuppressWarnings("unchecked")
+	private LValueContext getLValue(CalcParser.VarContext var, LValueContext lValue) {
+	    if (var instanceof CalcParser.IdVarContext) {
+		CalcParser.IdVarContext idVar = (CalcParser.IdVarContext)var;
+		return new LValueContext(lValue, getContextObject(lValue), idVar.ID().getText());
+	    }
+	    else if (var instanceof CalcParser.ArrVarContext) {
+		CalcParser.ArrVarContext arrVar = (CalcParser.ArrVarContext)var;
+		LValueContext arrLValue = getLValue(arrVar.var(), lValue);
+		int index = getShiftValue(arrVar.expr());
+
+		if (index < 0)
+		    throw new CalcExprException("Index " + index + " cannot be negative", arrVar);
+
+		List<Object> list = null;
+		Object arrValue = getContextObject(arrLValue);
+		if (arrValue != null && arrValue instanceof List) {
+		    list = (List<Object>)arrValue;
+		}
+		else if (arrValue == null) {
+		    list = new ArrayList<>();
+		    putContextObject(arrLValue, list);
+		}
+		else {
+		    throw new CalcExprException("Variable '" + arrLValue.toString() + "' already has a non-array value", var);
+		}
+
+                // Set empty values up to the index desired
+                int size = list.size();
+                for (int i = size; i <= index; i++)
+                    list.add(null);
+
+		return new LValueContext(arrLValue, list, index);
+	    }
+	    else if (var instanceof CalcParser.ObjVarContext) {
+		CalcParser.ObjVarContext objVar = (CalcParser.ObjVarContext)var;
+		LValueContext objLValue = getLValue(objVar.var(0), lValue);
+
+		objLValue = makeMapLValue(var, objLValue, null);
+
+		// TODO: this isn't quite right yet...
+		List<TerminalNode> strings = objVar.STRING();
+		if (strings.size() > 0) {
+		    for (TerminalNode string : strings) {
+			objLValue = makeMapLValue(var, objLValue, string.getText());
+		    }
+		}
+
+		CalcParser.VarContext rhsVar = objVar.var(1);
+		if (rhsVar != null) {
+		    LValueContext lv = getLValue(rhsVar, objLValue);
+		    return lv;
+		}
+		else
+		    return objLValue;
+	    }
+	    else {
+		throw new CalcExprException("ERROR: unknown var context subclass: " + var.getClass().getName(), var);
+	   }
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
 	public Object visitAssignExpr(CalcParser.AssignExprContext ctx) {
 	    Object value = visit(ctx.expr());
-	    String name;
 
-	    CalcParser.VarContext var   = ctx.var();
-	    TerminalNode id             = var.ID();
-	    CalcParser.ExprContext expr = var.expr();
-	    CalcParser.VarContext var2  = var.var(0);
-
-	    // TODO: until we figure out recursive lookup, just do one level of indirection
-	    // If expr is present, this is an array reference at this level
-	    if (expr != null) {
-		id        = var2.ID();
-		name      = id.getText();
-		int index = getShiftValue(expr);
-
-		if (index < 0)
-		    throw new CalcExprException("Index " + index + " cannot be negative", ctx);
-
-		Object listValue = variables.get(name);
-		List<Object> list = null;
-		if (listValue != null && listValue instanceof List) {
-		    list = (List<Object>)listValue;
-		}
-		else if (listValue == null) {
-		    list = new ArrayList<>();
-		    variables.put(name, list);
-		}
-		else {
-		    throw new CalcExprException("Variable '" + name + "' already has a non-array value", ctx);
-		}
-		// Set empty values up to the index desired
-		int size = list.size();
-		for (int i = size; i <= index; i++)
-		    list.add(null);
-
-		list.set(index, value);
-	    }
-	    else {
-		if (id == null) {
-		    id   = var2.ID();
-		    name = id.getText();
-		    CalcParser.VarContext var3 = var.var(1);
-		    TerminalNode keyNode;
-		    if (var3 != null)
-			keyNode = var3.ID();
-		    else
-			keyNode = var.STRING(0);
-		    String nameKey = keyNode.getText();
-		    Object mapValue = variables.get(name);
-		    Map<String, Object> map = null;
-		    if (mapValue != null && mapValue instanceof Map) {
-			map = (Map<String, Object>)mapValue;
-		    }
-		    else if (mapValue == null) {
-			map = new HashMap<>();
-			variables.put(name, map);
-		    }
-		    else {
-			throw new CalcExprException("Variable '" + name + "' already has a non-object value", ctx);
-		    }
-		    map.put(nameKey, value);
-		}
-		else {
-		    name = id.getText();
-		    variables.put(name, value);
-		}
-	    }
+	    LValueContext lValue = getLValue(ctx.var());
+	    putContextObject(lValue, value);
 
 	    return value;
 	}

@@ -71,6 +71,10 @@
  *	    $debug directive.
  *	28-Dec-2020 (rlwhitcomb)
  *	    Interpolated strings.
+ *	28-Dec-2020 (rlwhitcomb)
+ *	    New tree methods to distinguish nested object/array references.
+ *	31-Dec-2020 (rlwhitcomb)
+ *	    Allow variables as expressions and targets of ++ and --.
  */
 
 grammar Calc;
@@ -89,10 +93,11 @@ expr
    : value                               # valueExpr
    | obj                                 # objExpr
    | arr                                 # arrExpr
-   | ID '++'                             # postIncExpr
-   | ID '--'                             # postDecExpr
-   | '++' ID                             # preIncExpr
-   | '--' ID                             # preDecExpr
+   | var                                 # varExpr
+   | var '++'                            # postIncExpr
+   | var '--'                            # postDecExpr
+   | '++' var                            # preIncExpr
+   | '--' var                            # preDecExpr
    | '+' expr                            # posateExpr
    | '-' expr                            # negateExpr
    | '~' expr                            # bitNotExpr
@@ -174,9 +179,9 @@ arr
    ;
 
 var
-   : var ( '.' ( var | STRING ) ) +
-   | var '[' expr ']'
-   | ID
+   : var ( '.' ( var | STRING ) ) +     # objVar
+   | var '[' expr ']'                   # arrVar
+   | ID                                 # idVar
    ;
 
 value
@@ -191,7 +196,6 @@ value
    | NULL                        # nullValue
    | PI_CONST                    # piValue
    | E_CONST                     # eValue
-   | ID                          # idValue
    ;
 
 directive
