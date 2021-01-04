@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2020 Roger L. Whitcomb.
+ * Copyright (c) 2020-2021 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -75,6 +75,8 @@
  *	    New tree methods to distinguish nested object/array references.
  *	31-Dec-2020 (rlwhitcomb)
  *	    Allow variables as expressions and targets of ++ and --.
+ *	04-Jan-2020 (rlwhitcomb)
+ *	    Add NAND, ANDNOT, NOR, and XNOR bit operations, and boolean XOR.
  */
 
 grammar Calc;
@@ -145,9 +147,14 @@ expr
    | expr EQUAL expr                     # equalExpr
    | expr NOTEQUAL expr                  # notEqualExpr
    | expr BIT_AND expr                   # bitAndExpr
+   | expr BIT_NAND expr                  # bitNandExpr
+   | expr BIT_ANDNOT expr                # bitAndNotExpr
    | expr BIT_XOR expr                   # bitXorExpr
+   | expr BIT_XNOR expr                  # bitXnorExpr
    | expr BIT_OR expr                    # bitOrExpr
+   | expr BIT_NOR expr                   # bitNorExpr
    | expr BOOL_AND expr                  # booleanAndExpr
+   | expr BOOL_XOR expr                  # booleanXorExpr
    | expr BOOL_OR expr                   # booleanOrExpr
    | expr '?' expr ':' expr              # eitherOrExpr
    | var ASSIGN expr                     # assignExpr
@@ -280,11 +287,21 @@ BOOL_AND       : '&&' ;
 
 BIT_AND        : '&' ;
 
+BIT_NAND       : '~&' ;
+
+BIT_ANDNOT     : '&~' ;
+
 BOOL_OR        : '||' ;
 
 BIT_OR         : '|' ;
 
+BIT_NOR        : '~|' ;
+
+BOOL_XOR       : '^^' ;
+
 BIT_XOR        : '^' ;
+
+BIT_XNOR       : '~^' ;
 
 STRICTEQUAL    : '===' ;
 

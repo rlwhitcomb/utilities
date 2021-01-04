@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2020 Roger L. Whitcomb.
+ * Copyright (c) 2020-2021 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -86,6 +86,9 @@
  *	    using the CalcPiWorker class.
  *	31-Dec-2020 (rlwhitcomb)
  *	    Get nested object/array referencing right.
+ *	04-Jan-2021 (rlwhitcomb)
+ *	    Add the "not" bit operations, and boolean XOR.
+ *	    Fix the hex, octal and binary formats with negative values.
  */
 package info.rlwhitcomb.calc;
 
@@ -101,6 +104,7 @@ import java.util.Map;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
 import info.rlwhitcomb.util.CharUtil;
+import static info.rlwhitcomb.util.CharUtil.Justification;
 import static info.rlwhitcomb.util.ConsoleColor.Code.*;
 import info.rlwhitcomb.util.NumericUtil;
 import static info.rlwhitcomb.util.NumericUtil.RangeMode;
@@ -622,19 +626,32 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    return null;
 	}
 
+
+	private void convert(byte[] bytes, int radix, StringBuilder buf) {
+	    int padWidth = 0;
+	    switch (radix) {
+		case 2:  padWidth = 8; break;
+		case 8:  padWidth = 3; break;
+		case 16: padWidth = 2; break;
+	    }
+	    for (byte b : bytes) {
+		String number = Integer.toString(Byte.toUnsignedInt(b), radix);
+		CharUtil.padToWidth(buf, number, padWidth, '0', Justification.RIGHT);
+	    }
+	}
+
+
 	@Override
 	public Object visitExprStmt(CalcParser.ExprStmtContext ctx) {
 	    Object result           = visit(ctx.expr());
+	    String resultString     = "";
+
 	    TerminalNode formatNode = ctx.FORMAT();
 	    String format           = formatNode == null ? "" : formatNode.getText();
 
-	    StringBuilder exprBuf  = new StringBuilder();
-	    StringBuilder valueBuf = new StringBuilder();
-
-	    getTreeText(exprBuf, ctx.expr());
-	    if (exprBuf.charAt(exprBuf.length() - 1) == ' ')
-		exprBuf.setLength(exprBuf.length() - 1);
+	    StringBuilder exprBuf   = getTreeText(ctx.expr());
 	    exprBuf.append(format);
+	    String exprString       = exprBuf.toString();
 
 	    if (result != null && !format.isEmpty()) {
 		char formatChar = format.charAt(1);
@@ -643,34 +660,32 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    throw new CalcExprException("Cannot convert object or array to '" + formatChar + "' format", ctx);
 		}
 
+		StringBuilder valueBuf = new StringBuilder();
+		boolean toUpperCase    = false;
+
 		switch (formatChar) {
 		    case 'h':
 		    case 'H':
 			// TODO: convert to hours
 			break;
 
-		    case 'x':
 		    case 'X':
+			toUpperCase = true;
+			// fall through
+		    case 'x':
 			if (result instanceof String) {
 			    byte[] b = ((String)result).getBytes(StandardCharsets.UTF_8);
-			    String formatString = String.format("%%1$02%1$s", formatChar);
 			    valueBuf.append('\'');
-			    for (int i = 0; i < b.length; i++) {
-				int j = ((int)b[i]) & 0xFF;
-				valueBuf.append(String.format(formatString, j));
-			    }
+			    convert(b, 16, valueBuf);
 			    valueBuf.append('\'');
 			}
 			else {
-			    BigInteger iValue = toIntegerValue(result, ctx);
-			    if (iValue.compareTo(BigInteger.ZERO) < 0) {
-				iValue = iValue.abs();
-			    }
 			    valueBuf.append('0').append(formatChar);
-			    if (formatChar == 'x')
-				valueBuf.append(iValue.toString(16));
+			    BigInteger iValue = toIntegerValue(result, ctx);
+			    if (iValue.compareTo(BigInteger.ZERO) < 0)
+				convert(iValue.toByteArray(), 16, valueBuf);
 			    else
-				valueBuf.append(iValue.toString(16).toUpperCase());
+				valueBuf.append(iValue.toString(16));
 			}
 			break;
 
@@ -679,19 +694,16 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			if (result instanceof String) {
 			    byte[] b = ((String)result).getBytes(StandardCharsets.UTF_8);
 			    valueBuf.append('\'');
-			    for (int i = 0; i < b.length; i++) {
-				int j = ((int)b[i]) & 0xFF;
-				valueBuf.append(String.format("%1$03o", j));
-			    }
+			    convert(b, 8, valueBuf);
 			    valueBuf.append('\'');
 			}
 			else {
-			    BigInteger iValue = toIntegerValue(result, ctx);
-			    if (iValue.compareTo(BigInteger.ZERO) < 0) {
-				iValue = iValue.abs();
-			    }
 			    valueBuf.append('0');
-			    valueBuf.append(iValue.toString(8));
+			    BigInteger iValue = toIntegerValue(result, ctx);
+			    if (iValue.compareTo(BigInteger.ZERO) < 0)
+				convert(iValue.toByteArray(), 8, valueBuf);
+			    else
+				valueBuf.append(iValue.toString(8));
 			}
 			break;
 
@@ -700,27 +712,23 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			if (result instanceof String) {
 			    byte[] b = ((String)result).getBytes(StandardCharsets.UTF_8);
 			    valueBuf.append('\'');
-			    for (int i = 0; i < b.length; i++) {
-				int j = ((int)b[i]) & 0xFF;
-				for (int k = Byte.SIZE - 1; k >= 0; k--) {
-				    char digit = (j & (1 << k)) != 0 ? '1' : '0';
-				    valueBuf.append(digit);
-				}
-			    }
+			    convert(b, 2, valueBuf);
 			    valueBuf.append('\'');
 			}
 			else {
-			    BigInteger iValue = toIntegerValue(result, ctx);
-			    if (iValue.compareTo(BigInteger.ZERO) < 0) {
-				iValue = iValue.abs();
-			    }
 			    valueBuf.append('0').append(formatChar);
-			    valueBuf.append(iValue.toString(2));
+			    BigInteger iValue = toIntegerValue(result, ctx);
+			    if (iValue.compareTo(BigInteger.ZERO) < 0)
+				convert(iValue.toByteArray(), 2, valueBuf);
+			    else
+				valueBuf.append(iValue.toString(2));
 			}
 			break;
 
-		    case 'k':
 		    case 'K':
+			toUpperCase = true;
+			// fall through
+		    case 'k':
 			BigInteger iValue = toIntegerValue(result, ctx);
 			try {
 			    long lValue = iValue.longValueExact();
@@ -736,13 +744,15 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			valueBuf.append(percentValue.toPlainString()).append('%');
 			break;
 		}
-		result = valueBuf.toString();
+		// Set the "result" for the case of interpolated strings with formats
+		result = resultString = toUpperCase ? valueBuf.toString().toUpperCase() : valueBuf.toString();
 	    }
 	    else {
-		valueBuf.append(toString(result));
+		resultString = toString(result);
 	    }
 
-	    if (!silent) displayer.displayResult(exprBuf.toString(), valueBuf.toString());
+	    if (!silent) displayer.displayResult(exprString, resultString);
+
 	    return result;
 
 	}
@@ -1309,6 +1319,22 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	@Override
+	public Object visitBitNandExpr(CalcParser.BitNandExprContext ctx) {
+	    BigInteger e1 = getIntegerValue(ctx.expr(0));
+	    BigInteger e2 = getIntegerValue(ctx.expr(1));
+
+	    return e1.and(e2).not();
+	}
+
+	@Override
+	public Object visitBitAndNotExpr(CalcParser.BitAndNotExprContext ctx) {
+	    BigInteger e1 = getIntegerValue(ctx.expr(0));
+	    BigInteger e2 = getIntegerValue(ctx.expr(1));
+
+	    return e1.andNot(e2);
+	}
+
+	@Override
 	public Object visitBitXorExpr(CalcParser.BitXorExprContext ctx) {
 	    BigInteger e1 = getIntegerValue(ctx.expr(0));
 	    BigInteger e2 = getIntegerValue(ctx.expr(1));
@@ -1317,11 +1343,27 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	@Override
+	public Object visitBitXnorExpr(CalcParser.BitXnorExprContext ctx) {
+	    BigInteger e1 = getIntegerValue(ctx.expr(0));
+	    BigInteger e2 = getIntegerValue(ctx.expr(1));
+
+	    return e1.xor(e2).not();
+	}
+
+	@Override
 	public Object visitBitOrExpr(CalcParser.BitOrExprContext ctx) {
 	    BigInteger e1 = getIntegerValue(ctx.expr(0));
 	    BigInteger e2 = getIntegerValue(ctx.expr(1));
 
 	    return e1.or(e2);
+	}
+
+	@Override
+	public Object visitBitNorExpr(CalcParser.BitNorExprContext ctx) {
+	    BigInteger e1 = getIntegerValue(ctx.expr(0));
+	    BigInteger e2 = getIntegerValue(ctx.expr(1));
+
+	    return e1.or(e2).not();
 	}
 
 	@Override
@@ -1334,6 +1376,19 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		return Boolean.FALSE;
 
 	    return getBooleanValue(ctx.expr(1));
+	}
+
+	@Override
+	public Object visitBooleanXorExpr(CalcParser.BooleanXorExprContext ctx) {
+	    // Unfortunately, there is no possibility of short-circuit evaluation
+	    // for this operator -- either first value could produce either result
+	    Boolean b1 = getBooleanValue(ctx.expr(0));
+	    Boolean b2 = getBooleanValue(ctx.expr(1));
+
+	    if ((b1 && b2) || (!b1 && !b2))
+		return Boolean.FALSE;
+
+	    return Boolean.TRUE;
 	}
 
 	@Override
