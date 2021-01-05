@@ -46,7 +46,7 @@ Work going on currently includes:
 - "Which" on Windows needs something besides "canExecute" to determine if it is correct.
 - Make InitializationTask and QueuedThread work seamlessly with "synchronized"
 - Use the git hash (first 7 digits) instead of a sequential build number ("git rev-parse HEAD | cut -c 1-7") (how to do this "cut" in build.xml?). (would need to update version parsing to accept this non-numeric value for revision). (maybe require major.minor only need to be numeric (with possible [vV] prefix, then other fields could be +-.whatever)) (put this parsing into a new Version class, similar to Pivot's) (check out all the tests in Pivot "VersionTest.java").
-- Add a Spanish translation for all the current resources.
+- Add a Spanish translation for all the current resources (and ongoing for new resource files).
 
 ## Notes on New Programs and Features
 
@@ -75,6 +75,7 @@ Work going on currently includes:
 
 ### Cat
 - add help
+- then need -locale option and translation(s)
 
 ### Calc
 
@@ -85,6 +86,7 @@ Work going on currently includes:
 - allow "_" in numeric values, like Java does
 - format options for commas (or _)
 - get help and intro text (both console and GUI) from resources
+- $include directive
 
 ### Sleep
 - options for minutes, hours, days, weeks
