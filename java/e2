@@ -17,7 +17,7 @@ $clear a
 a.b.d.f = 3
 a,j
 
-$clear a
+$clear a, f
 a[0].b.c[1] = 12
 a
 d[1]."e"."f".g[3] = 14

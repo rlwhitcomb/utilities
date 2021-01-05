@@ -53,6 +53,8 @@
  *	    Preload input text area from command line or file contents.
  *	04-Jan-2021 (rlwhitcomb)
  *	    Add Locale option (use with numeric formatting).
+ *	05-Jan-2021 (rlwhitcomb)
+ *	    Allow a comma-separated list of files on command line.
  */
 package info.rlwhitcomb.calc;
 
@@ -62,6 +64,7 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -383,6 +386,12 @@ public class Calc
 	    return buf.toString();
 	}
 
+	private static void concatLines(StringBuilder buf, List<String> lines) {
+	    for (String line : lines) {
+		buf.append(line).append(LINESEP);
+	    }
+	}
+
 	public static Object processString(String inputText, boolean silent) {
 	    try {
 		return process(CharStreams.fromString(inputText + LINESEP), visitor, errorStrategy, silent);
@@ -544,12 +553,26 @@ public class Calc
 			}
 		    }
 		    else {
-			File f = new File(args[0]);
-			if (f.exists() && f.isFile() && f.canRead()) {
-			    input = CharStreams.fromFileName(args[0]);
+			if (args[0].indexOf(',') >= 0) {
+			    StringBuilder inputBuf = new StringBuilder();
+			    String[] files = args[0].split(",");
+			    for (String file : files) {
+				File f = new File(file);
+				if (f.exists() && f.isFile() && f.canRead()) {
+				    List<String> lines = Files.readAllLines(f.toPath());
+				    concatLines(inputBuf, lines);
+				}
+			    }
+			    input = CharStreams.fromString(inputBuf.toString());
 			}
 			else {
-			    input = CharStreams.fromString(concatArgs(args));
+			    File f = new File(args[0]);
+			    if (f.exists() && f.isFile() && f.canRead()) {
+				input = CharStreams.fromFileName(args[0]);
+			    }
+			    else {
+				input = CharStreams.fromString(args[0]);
+			    }
 			}
 		    }
 		}
