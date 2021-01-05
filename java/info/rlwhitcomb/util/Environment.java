@@ -113,6 +113,8 @@
  *	    Option to use colors on "printProgramInfo".
  *	05-Jan-2021 (rlwhitcomb)
  *	    Update program info colors (work better on black Windows backgrounds).
+ *	05-Jan-2021 (rlwhitcomb)
+ *	    "timeThis" methods.
  */
 package info.rlwhitcomb.util;
 
@@ -123,6 +125,7 @@ import java.io.PrintStream;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.lang.management.ManagementFactory;
 
@@ -604,6 +607,54 @@ public final class Environment
 	 */
 	public static double timerValueToSeconds(final long timerValue) {
 	    return (double) timerValue / (double) highResTimerResolution();
+	}
+
+
+	/**
+	 * Time the passed in {@link Runnable} (can be a functional interface)
+	 * and display the results on {@link System#out}.
+	 *
+	 * @param func The function to execute and time.
+	 */
+	public static void timeThis(final Runnable func) {
+	    long startTime = highResTimer();
+
+	    try {
+		func.run();
+	    }
+	    finally {
+		long endTime   = highResTimer();
+		double seconds = timerValueToSeconds(endTime - startTime);
+
+		Intl.outFormat("util#env.timeThis", seconds);
+	    }
+	}
+
+
+	/**
+	 * Time the passed in {@link Callable} (can be a functional interface)
+	 * and display the results on {@link System#out}.
+	 *
+	 * @param <V>  Type of value returned from the function.
+	 * @param func The function to execute and time.
+	 */
+	public static <V> V timeThis(final Callable<V> func) {
+	    long startTime = highResTimer();
+	    V result = null;
+
+	    try {
+		result = func.call();
+	    }
+	    catch (Exception e) {
+		; // maybe report this??
+	    }
+	    finally {
+		long endTime   = highResTimer();
+		double seconds = timerValueToSeconds(endTime - startTime);
+
+		Intl.outFormat("util#env.timeThis", seconds);
+	    }
+	    return result;
 	}
 
 

@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2011,2013-2014,2016-2018,2020 Roger L. Whitcomb.
+ * Copyright (c) 2011,2013-2014,2016-2018,2020-2021 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -87,6 +87,8 @@
  *	    Implement fib for negative values.
  *	21-Dec-2020 (rlwhitcomb)
  *	    Update obsolete Javadoc constructs.
+ *	05-Jan-2021 (rlwhitcomb)
+ *	    Optimizations in "pow".
  */
 package info.rlwhitcomb.util;
 
@@ -1234,23 +1236,30 @@ public class NumericUtil
 	    double exp = inputExp;
 	    if (Double.isNaN(exp) || Double.isInfinite(exp))
 		throw new IllegalArgumentException(Intl.getString("util#numeric.outOfRange"));
+
 	    if (exp == 0.0d)
 		return BigDecimal.ONE;
+
 	    boolean reciprocal = false;
 	    if (exp < 0) {
 		reciprocal = true;
 		exp = -exp;
 	    }
 
-	    int intExp = (int)Math.floor(exp);
+	    int intExp     = (int)Math.floor(exp);
 	    double fracExp = exp - (double)intExp;
 
+	    // Turn an integer power of two into a "setBit" on a BigInteger
+	    if (base.equals(TWO) && (double)intExp == inputExp) {
+		BigInteger value = BigInteger.ZERO.setBit(intExp);
+		return new BigDecimal(value);
+	    }
+
 	    BigDecimal result = BigDecimal.ONE;
-	    BigDecimal mult = base;
-	    while (intExp != 0) {
-		if (intExp % 2 == 1)
+	    BigDecimal mult   = base;
+	    for (int iExp = intExp; iExp != 0; iExp >>= 1) {
+		if (iExp % 2 == 1)
 		    result = result.multiply(mult);
-		intExp >>= 1;
 		mult = mult.multiply(mult);
 	    }
 

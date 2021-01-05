@@ -1,0 +1,15 @@
+$echo "Some Mersenne primes."
+
+$unlimited
+
+$echo
+$echo "17th Mersenne prime: (2**2281)-1"
+(2**2281) - 1
+
+$echo
+$echo "47th Mersenne prime: (2**43112609) - 1"
+(2**43112609) - 1
+
+$echo
+$echo "Done."
+

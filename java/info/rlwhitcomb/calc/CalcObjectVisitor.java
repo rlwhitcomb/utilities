@@ -95,6 +95,8 @@
  *	    Fix the "strings" case of object references.
  *	05-Jan-2021 (rlwhitcomb)
  *	    Add the "$include" directive.
+ *	05-Jan-2021 (rlwhitcomb)
+ *	    Allow unlimited precision setting (still limit pi to 12,000 digits though).
  */
 package info.rlwhitcomb.calc;
 
@@ -179,6 +181,11 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	/** Scale for double operations. */
 	private static final MathContext mcDouble = MathContext.DECIMAL64;
+
+	/** MathContext to use for pi/e calculations when regular context is unlimited.
+	 * Note: precision is arbitrary, but {@link NumericUtil#pi} is limited to ~12,500 digits.
+	 */
+	private static final MathContext mcMaxDigits = new MathContext(12000);
 
 	/** Initialization flag -- delays print until constructor is finished.  */
 	private boolean initialized = false;
@@ -292,15 +299,18 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    int prec  = newMathContext.getPrecision();
 	    mc        = newMathContext;
 
+	    // Use a limited precision of our max digits in the case of unlimited precision
+	    MathContext mcPi = (prec == 0) ? mcMaxDigits : mc;
+
 	    // Either create the worker object, or trigger a recalculation
 	    if (piWorker == null) {
-		piWorker = new CalcPiWorker(mc);
+		piWorker = new CalcPiWorker(mcPi);
 	    }
 	    else {
-		piWorker.calculate(mc);
+		piWorker.calculate(mcPi);
 	    }
 
-	    displayActionMessage("Precision is now " + prec + " digits.");
+	    displayActionMessage("Precision is now " + ((prec == 0) ? "unlimited." : (prec + " digits.")));
 	}
 
 	private void setTrigMode(TrigMode newTrigMode) {
@@ -541,16 +551,26 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitDecimalDirective(CalcParser.DecimalDirectiveContext ctx) {
-	    Double dPrecision = Double.valueOf(ctx.NUMBER().getText());
-	    if (Math.floor(dPrecision) != dPrecision) {
+	    BigDecimal dPrecision = new BigDecimal(ctx.NUMBER().getText());
+	    int precision = 0;
+
+	    try {
+		precision = dPrecision.intValueExact();
+	    }
+	    catch (ArithmeticException ae) {
 		throw new CalcExprException("Decimal precision of " + dPrecision + " must be an integer value", ctx);
 	    }	
-	    int precision = dPrecision.intValue();
-	    if (precision > 1 && precision <= 10000 /* arbitrary, but NumericUtil.pi only has ~12,500 digit capability */)
+
+	    if (precision == 0) {
+		setMathContext(MathContext.UNLIMITED);
+	    }
+	    else if (precision > 1 && precision <= mcMaxDigits.getPrecision()) {
 		setMathContext(new MathContext(precision));
+	    }
 	    else {
 		throw new CalcExprException("Decimal precision of " + precision + " is out of range", ctx);
 	    }
+
 	    return null;
 	}
 
@@ -569,6 +589,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitDefaultDirective(CalcParser.DefaultDirectiveContext ctx) {
 	    setMathContext(MathContext.DECIMAL128);
+	    return null;
+	}
+
+	@Override
+	public Object visitUnlimitedDirective(CalcParser.UnlimitedDirectiveContext ctx) {
+	    setMathContext(MathContext.UNLIMITED);
 	    return null;
 	}
 

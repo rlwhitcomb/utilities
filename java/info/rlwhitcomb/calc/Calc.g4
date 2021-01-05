@@ -81,6 +81,8 @@
  *	    Format option for object and arrays in "pretty" JSON format.
  *	05-Jan-2021 (rlwhitcomb)
  *	    Add "$include" directive.
+ *	05-Jan-2021 (rlwhitcomb)
+ *	    Unlimited precision directive.
  */
 
 grammar Calc;
@@ -214,6 +216,7 @@ directive
    | DEFAULT                     # defaultDirective
    | DOUBLE                      # doubleDirective
    | FLOAT                       # floatDirective
+   | UNLIMITED                   # unlimitedDirective
    | DEGREES                     # degreesDirective
    | RADIANS                     # radiansDirective
    | BINARY                      # binaryDirective
@@ -328,11 +331,15 @@ DEFAULT
    ;
 
 DOUBLE
-   : DIR  D O U B L E
+   : DIR  ( D B L | D O U B L E )
    ;
 
 FLOAT
-   : DIR  F L O A T
+   : DIR  ( F L T | F L O A T )
+   ;
+
+UNLIMITED
+   : DIR  ( U N L | U N L I M I T E D )
    ;
 
 DEGREES
