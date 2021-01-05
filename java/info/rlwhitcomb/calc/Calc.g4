@@ -75,8 +75,10 @@
  *	    New tree methods to distinguish nested object/array references.
  *	31-Dec-2020 (rlwhitcomb)
  *	    Allow variables as expressions and targets of ++ and --.
- *	04-Jan-2020 (rlwhitcomb)
+ *	04-Jan-2021 (rlwhitcomb)
  *	    Add NAND, ANDNOT, NOR, and XNOR bit operations, and boolean XOR.
+ *	04-Jan-2021 (rlwhitcomb)
+ *	    Format option for object and arrays in "pretty" JSON format.
  */
 
 grammar Calc;
@@ -365,7 +367,7 @@ DEBUG
 
 
 FORMAT
-   : ',' ( X | T | H | O | B | K | '%' )
+   : ',' ( X | T | H | O | B | K | J | '%' )
    ;
 
 STRING

@@ -89,6 +89,8 @@
  *	04-Jan-2021 (rlwhitcomb)
  *	    Add the "not" bit operations, and boolean XOR.
  *	    Fix the hex, octal and binary formats with negative values.
+ *	04-Jan-2021 (rlwhitcomb)
+ *	    Implement some "pretty" printing of object / array values.
  */
 package info.rlwhitcomb.calc;
 
@@ -413,11 +415,11 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	private String toString(Object result) {
-	    return toString(result, true);
+	    return toString(result, true, false, "");
 	}
 
 	@SuppressWarnings("unchecked")
-	private String toString(Object result, boolean quote) {
+	private String toString(Object result, boolean quote, boolean pretty, String indent) {
 	    if (result == null) {
 		return quote ? "<null>" : "";
 	    }
@@ -431,42 +433,56 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		return ((BigDecimal)result).toPlainString();
 	    }
 	    else if (result instanceof Map) {
-		return toString((Map<String, Object>)result);
+		return toString((Map<String, Object>)result, quote, pretty, indent);
 	    }
 	    else if (result instanceof List) {
-		return toString((List<Object>)result);
+		return toString((List<Object>)result, quote, pretty, indent);
 	    }
 
 	    return result.toString();
 	}
 
-	private String toString(Map<String, Object> map) {
+	private String toString(Map<String, Object> map, boolean quote, boolean pretty, String indent) {
+	    String myIndent = indent + "  ";
 	    StringBuilder buf = new StringBuilder();
-	    buf.append("{ ");
 	    if (map.size() > 0) {
+		boolean comma = false;
+		buf.append(pretty ? "{\n" : "{ ");
 		for (Map.Entry<String, Object> entry : map.entrySet()) {
+		    if (comma)
+			buf.append(pretty ? ",\n" : ", ");
+		    else
+			comma = true;
+		    if (pretty) buf.append(myIndent);
 		    buf.append(entry.getKey()).append(": ");
-		    buf.append(toString(entry.getValue())).append(", ");
+		    buf.append(toString(entry.getValue(), quote, pretty, myIndent));
 		}
-		buf.delete(buf.length() - 2, buf.length()).append(" }");
+		buf.append(pretty ? "\n" + indent + "}" : " }");
 	    }
 	    else {
-		buf.append('}');
+		buf.append("{ }");
 	    }
 	    return buf.toString();
 	}
 
-	private String toString(List<Object> list) {
+	private String toString(List<Object> list, boolean quote, boolean pretty, String indent) {
+	    String myIndent = indent + "  ";
 	    StringBuilder buf = new StringBuilder();
-	    buf.append("[ ");
 	    if (list.size() > 0) {
+		boolean comma = false;
+		buf.append(pretty ? "[\n" : "[ ");
 		for (Object value : list) {
-		    buf.append(toString(value)).append(", ");
+		    if (comma)
+			buf.append(pretty ? ",\n" : ", ");
+		    else
+			comma = true;
+		    if (pretty) buf.append(myIndent);
+		    buf.append(toString(value, quote, pretty, myIndent));
 		}
-		buf.delete(buf.length() - 2, buf.length()).append(" ]");
+		buf.append(pretty ? "\n" + indent + "]" : " ]");
 	    }
 	    else {
-		buf.append(']');
+		buf.append("[ ]");
 	    }
 	    return buf.toString();
 	}
@@ -656,7 +672,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    if (result != null && !format.isEmpty()) {
 		char formatChar = format.charAt(1);
 
-		if (result instanceof Map || result instanceof List) {
+		if ((result instanceof Map || result instanceof List) && (formatChar != 'j' && formatChar != 'J')) {
 		    throw new CalcExprException("Cannot convert object or array to '" + formatChar + "' format", ctx);
 		}
 
@@ -669,6 +685,11 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			// TODO: convert to hours
 			break;
 
+		    case 'j':
+		    case 'J':
+			valueBuf.append('\n');
+			valueBuf.append(toString(result, true, true, ""));
+			break;
 		    case 'X':
 			toUpperCase = true;
 			// fall through
@@ -1437,7 +1458,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 		    String expr = rawValue.substring(pos + 2, nextPos);
 		    Object exprValue = Calc.processString(expr, true);
-		    output.append(toString(exprValue, false));
+		    output.append(toString(exprValue, false, false, ""));
 		    lastPos = nextPos;
 		}
 		else if (isIdentifierStart(rawValue.charAt(pos + 1))) {
@@ -1445,7 +1466,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    while (identPos < rawValue.length() && isIdentifierPart(rawValue.charAt(identPos)))
 			identPos++;
 		    String varName = rawValue.substring(pos + 1, identPos);
-		    output.append(toString(variables.get(varName), false));
+		    output.append(toString(variables.get(varName), false, false, ""));
 		    lastPos = identPos - 1;
 		}
 		else
