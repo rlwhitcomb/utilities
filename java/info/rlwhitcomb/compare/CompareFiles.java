@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2020 Roger L. Whitcomb.
+ * Copyright (c) 2020-2021 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -34,6 +34,8 @@
  *	    Use new Options processing to help.
  *	11-Dec-2020 (rlwhitcomb)
  *	    Use new program info mechanism.
+ *	04-Jan-2021 (rlwhitcomb)
+ *	    Tweak the final output.
  */
 package info.rlwhitcomb.compare;
 
@@ -403,7 +405,7 @@ public class CompareFiles
 		    if (numberOfFiles == 1)
 			Intl.outPrintln("compare#compare.oneMismatch");
 		    else
-			Intl.outFormat("compare#compare.mismatches", numberOfFiles, numberOfMismatches);
+			Intl.outFormat("compare#compare.filesOneMismatch", numberOfFiles);
 		}
 		else {
 		    Intl.outFormat("compare#compare.mismatches", numberOfFiles, numberOfMismatches);

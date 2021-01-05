@@ -1,7 +1,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2020 Roger L. Whitcomb.
+# Copyright (c) 2020-2021 Roger L. Whitcomb.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -34,6 +34,8 @@
 #	    Another edit to the help; add -version help
 #	11-Dec-2020 (rlwhitcomb)
 #	    Move program name to build.properties.
+#	04-Jan-2021 (rlwhitcomb)
+#	    Tweak final messages.
 #
 
 #
@@ -53,6 +55,7 @@ compare.noFilesCompared		= No files compared.
 compare.oneFileCompared		= One file compared, no mismatch.
 compare.filesCompared		= %1$,d files compared, no mismatches.
 compare.oneMismatch		= One file compared, not a match.
+compare.filesOneMismatch	= %1$,d files compared, one mismatch.
 compare.mismatches		= %1$,d files compared, %2$,d mismatches.
 compare.memoryUse		= %1$,d bytes of memory used.
 
