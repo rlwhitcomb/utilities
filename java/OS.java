@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2020 Roger L. Whitcomb.
+ * Copyright (c) 2020-2021 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -39,6 +39,8 @@
  *	and implement a "help" option.
  *    09-Nov-2020 (rlwhitcomb)
  *	Tweak the help output.
+ *    04-Jan-2021 (rlwhitcomb)
+ *	Allow choices to be "options" format ("-props", etc.)
  */
 import java.io.PrintStream;
 import java.nio.charset.Charset;
@@ -227,14 +229,23 @@ public class OS
 	 */
 	private static boolean parseArgs(final String[] args) {
 	    for (String arg: args) {
-		Choice choice = Choice.match(arg);
+		String opt = arg;
+
+		if (arg.startsWith("--"))
+		    opt = arg.substring(2);
+		else if (arg.startsWith("-"))
+		    opt = arg.substring(1);
+		else if (arg.startsWith("/"))
+		    opt = arg.substring(1);
+
+		Choice choice = Choice.match(opt);
 		if (choice != null) {
 		    choices.add(choice);
 		}
-		else if (matches(arg, "all", "a")) {
+		else if (matches(opt, "all", "a")) {
 		    choices = EnumSet.allOf(Choice.class);
 		}
-		else if (matches(arg, "help", "h", "?")) {
+		else if (matches(opt, "help", "h", "?")) {
 		    usage(System.out);
 		    return false;
 		}
