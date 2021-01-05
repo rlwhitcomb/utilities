@@ -236,6 +236,10 @@ b[0][0][1] = 11
 b[1] = [ [ 7,9], [0,1], [3,4] ]
 b
 
+$def
+p = {b:2, c: { d:true }, "e":e }
+p,j
+
 $echo
 $echo "End of expression tests (suite 1)."
 
