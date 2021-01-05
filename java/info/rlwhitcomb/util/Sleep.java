@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2020 Roger L. Whitcomb.
+ * Copyright (c) 2020-2021 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,7 +26,14 @@
  *  History:
  *      16-Dec-2020 (rlwhitcomb)
  *          First version.
+ *	04-Jan-2021 (rlwhitcomb)
+ *	    Move to named package. Allow minutes, hours, etc. intervals.
  */
+package info.rlwhitcomb.util;
+
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
+
 
 /**
  * Sleep for the given number of seconds (can be a fraction).
@@ -36,6 +43,9 @@ public class Sleep
 	/** The default sleep interval if none given, or we can't decipher the given value. */
 	private static final double DEFAULT_SLEEP_SECS = 1.0d;
 
+	/** The pattern used to recognized valid sleep durations. */
+	private static final Pattern SLEEP_PATTERN = Pattern.compile("([0-9]+(\\.[0-9]*)?)([sSmMhHdDwW]?)");
+
 	/**
 	 * Simply parse the given string into a decimal number of seconds.
 	 * <p> Default to the default ({@link #DEFAULT_SLEEP_SECS}) if we can't do that.
@@ -44,7 +54,7 @@ public class Sleep
 	 * @return	The parsed double value, or the default if we can't successfully
 	 *		parse the input.
 	*/
-	private static double parseSeconds(final String arg) {
+	public static double parseSeconds(final String arg) {
 	    String value = (arg == null) ? "" : arg.trim();
 
 	    if (value.isEmpty()) {
@@ -52,11 +62,46 @@ public class Sleep
 	    }
 	    else {
 		try {
-		    return Double.valueOf(value);
+		    Matcher m = SLEEP_PATTERN.matcher(value);
+		    if (m.matches()) {
+			// base value in seconds
+			double dValue = Double.valueOf(m.group(1));
+
+			// multiplier suffixes
+			String suffix = m.group(3);
+			if (!suffix.isEmpty()) {
+			    switch (suffix.charAt(0)) {
+				case 'w':
+				case 'W':
+				    dValue *= 7.0d;
+				    // fall through
+				case 'd':
+				case 'D':
+				    dValue *= 24.0d;
+				    // fall through
+				case 'h':
+				case 'H':
+				    dValue *= 60.0d;
+				    // fall through
+				case 'm':
+				case 'M':
+				    dValue *= 60.0d;
+				    // fall through
+				case 's':
+				case 'S':
+				    // Default unit is seconds; nothing more to do
+				    break;
+			    }
+			}
+
+			return dValue;
+		    }
 		}
 		catch (NumberFormatException nfe) {
-		    System.err.format("Could not decipher a number of seconds to sleep from the argument \"%1$s\" given!%n  Defaulting to %2$11.9f second(s).%n", value, DEFAULT_SLEEP_SECS);
+		    ;
 		}
+
+		System.err.format("Could not decipher a number of seconds to sleep from the argument \"%1$s\" given!%n  Defaulting to %2$11.9f second(s).%n", value, DEFAULT_SLEEP_SECS);
 	    }
 
 	    // The default value
@@ -71,7 +116,7 @@ public class Sleep
 	 *			{@link Thread#sleep(long)} or {@link Thread#sleep(long,int)}
 	 *			to accomplish this).
 	 */
-	private static void sleep(final double seconds) {
+	public static void sleep(final double seconds) {
 	    // Do the (only) difficult work here of converting int/fraction double seconds to millis and nanos
 	    double wholePart = Math.floor(seconds);
 	    double fracPart  = seconds - wholePart;
@@ -114,7 +159,7 @@ public class Sleep
 		sleepTimeSecs = parseSeconds("");
 	    }
 	    else {
-		System.err.println("Only one argument needed (time in seconds); ignoring the rest!");
+		System.err.println("Only one argument needed (time value); ignoring the rest!");
 		sleepTimeSecs = parseSeconds(args[0]);
 	    }
 
