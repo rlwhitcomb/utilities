@@ -122,7 +122,7 @@
 >
 	<property environment="env"/>
 	<property file="build.properties"/>
-	<exec executable="git" dir="." outputproperty="git.commit.id" unless:set="${git.commit.id}">
+	<exec executable="git" dir="." outputproperty="git.commit.id" unless:set="git.commit.id">
 		<arg line="rev-parse --short HEAD"/>
 	</exec>
 	<loadproperties>
