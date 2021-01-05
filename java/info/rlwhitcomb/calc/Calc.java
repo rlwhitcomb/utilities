@@ -55,6 +55,8 @@
  *	    Add Locale option (use with numeric formatting).
  *	05-Jan-2021 (rlwhitcomb)
  *	    Allow a comma-separated list of files on command line.
+ *	05-Jan-2021 (rlwhitcomb)
+ *	    Remember initial file directory for $include.
  */
 package info.rlwhitcomb.calc;
 
@@ -148,6 +150,8 @@ public class Calc
 	private static Locale  locale  = null;
 
 	private BXMLSerializer serializer = null;
+
+	private static File inputDirectory = null;
 
 	private Display display;
 
@@ -392,6 +396,18 @@ public class Calc
 	    }
 	}
 
+	private static boolean readFile(File f, StringBuilder inputBuf)
+		throws IOException
+	{
+	    if (f.exists() && f.isFile() && f.canRead()) {
+		inputDirectory = f.getCanonicalFile().getParentFile();
+		List<String> lines = Files.readAllLines(f.toPath());
+		concatLines(inputBuf, lines);
+		return true;
+	    }
+	    return false;
+	}
+
 	public static String getFileContents(String paths)
 		throws IOException
 	{
@@ -399,9 +415,13 @@ public class Calc
 	    String[] files = paths.split(",");
 	    for (String file : files) {
 		File f = new File(file);
-		if (f.exists() && f.isFile() && f.canRead()) {
-		    List<String> lines = Files.readAllLines(f.toPath());
-		    concatLines(inputBuf, lines);
+		if (!readFile(f, inputBuf)) {
+		    if (inputDirectory != null) {
+			f = new File(inputDirectory, file);
+			if (!readFile(f, inputBuf)) {
+			    inputBuf.append(file).append(LINESEP);
+			}
+		    }
 		}
 	    }
 	    return inputBuf.toString();
@@ -409,7 +429,8 @@ public class Calc
 
 	public static Object processString(String inputText, boolean silent) {
 	    try {
-		return process(CharStreams.fromString(inputText + LINESEP), visitor, errorStrategy, silent);
+		String input = inputText.endsWith(LINESEP) ? inputText : inputText + LINESEP;
+		return process(CharStreams.fromString(input), visitor, errorStrategy, silent);
 	    }
 	    catch (IOException ioe) {
 		displayer.displayErrorMessage("I/O Error: " + ExceptionUtil.toString(ioe));
@@ -564,22 +585,11 @@ public class Calc
 			    input = CharStreams.fromStream(System.in);
 			}
 			else {
-			    input = CharStreams.fromFileName(args[0].substring(1));
+			    input = CharStreams.fromString(getFileContents(args[0].substring(1)));
 			}
 		    }
 		    else {
-			if (args[0].indexOf(',') >= 0) {
-			    input = CharStreams.fromString(getFileContents(args[0]));
-			}
-			else {
-			    File f = new File(args[0]);
-			    if (f.exists() && f.isFile() && f.canRead()) {
-				input = CharStreams.fromFileName(args[0]);
-			    }
-			    else {
-				input = CharStreams.fromString(args[0]);
-			    }
-			}
+			input = CharStreams.fromString(getFileContents(args[0]));
 		    }
 		}
 		else if (args.length > 0) {

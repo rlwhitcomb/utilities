@@ -113,6 +113,7 @@ import org.antlr.v4.runtime.tree.*;
 import info.rlwhitcomb.util.CharUtil;
 import static info.rlwhitcomb.util.CharUtil.Justification;
 import static info.rlwhitcomb.util.ConsoleColor.Code.*;
+import info.rlwhitcomb.util.ExceptionUtil;
 import info.rlwhitcomb.util.NumericUtil;
 import static info.rlwhitcomb.util.NumericUtil.RangeMode;
 
@@ -648,7 +649,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		return Calc.processString(contents, false);
 	    }
 	    catch (IOException ioe) {
-		throw new CalcExprException("I/O Error: " + ioe.getMessage(), ctx);
+		throw new CalcExprException("I/O Error: " + ExceptionUtil.toString(ioe), ctx);
 	    }
 	}
 
