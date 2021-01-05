@@ -422,6 +422,9 @@ public class Calc
 			    inputBuf.append(file).append(LINESEP);
 			}
 		    }
+		    else {
+			inputBuf.append(file).append(LINESEP);
+		    }
 		}
 	    }
 	    return inputBuf.toString();
