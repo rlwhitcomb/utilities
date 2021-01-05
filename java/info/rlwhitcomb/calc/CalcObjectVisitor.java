@@ -91,6 +91,8 @@
  *	    Fix the hex, octal and binary formats with negative values.
  *	04-Jan-2021 (rlwhitcomb)
  *	    Implement some "pretty" printing of object / array values.
+ *	05-Jan-2021 (rlwhitcomb)
+ *	    Fix the "strings" case of object references.
  */
 package info.rlwhitcomb.calc;
 
@@ -1220,13 +1222,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitShiftRightUnsignedExpr(CalcParser.ShiftRightUnsignedExprContext ctx) {
 	    BigInteger e1 = getIntegerValue(ctx.expr(0));
-	    BigInteger e2 = getIntegerValue(ctx.expr(1));
+	    int e2        = getShiftValue(ctx.expr(1));
 
 	    // Convert to Long because ">>>" doesn't make sense for BigInteger (unlimited size) values
 	    try {
 		long longValue = e1.longValueExact();
-		int shiftValue = e2.intValueExact();
-		return BigInteger.valueOf(longValue >>> shiftValue);
+		return BigInteger.valueOf(longValue >>> e2);
 	    }
 	    catch (ArithmeticException ae) {
 		throw new CalcExprException(ae, ctx);
@@ -1595,7 +1596,11 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		throw new CalcExprException("Variable '" + objLValue.toString() + "' already has a non-object value", var);
 	    }
 
-	    return name == null ? objLValue : new LValueContext(objLValue, obj, name);
+	    if (name != null) {
+		objLValue = new LValueContext(objLValue, obj, name);
+	    }
+
+	    return objLValue;
 	}
 
 	private LValueContext getLValue(CalcParser.VarContext var) {
@@ -1642,7 +1647,6 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 		objLValue = makeMapLValue(var, objLValue, null);
 
-		// TODO: this isn't quite right yet...
 		List<TerminalNode> strings = objVar.STRING();
 		if (strings.size() > 0) {
 		    for (TerminalNode string : strings) {
@@ -1652,8 +1656,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 		CalcParser.VarContext rhsVar = objVar.var(1);
 		if (rhsVar != null) {
-		    LValueContext lv = getLValue(rhsVar, objLValue);
-		    return lv;
+		    if (strings.size() > 0)
+			objLValue = makeMapLValue(var, objLValue, null);
+		    return getLValue(rhsVar, objLValue);
 		}
 		else
 		    return objLValue;

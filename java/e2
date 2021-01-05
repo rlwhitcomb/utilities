@@ -1,0 +1,55 @@
+$echo "Tests of nested object / array variables."
+$echo
+
+$clear a
+a = { b: { c: 4 }, "b": { c: [ 1, 8, 9], "c": { d: 5 } } }
+a
+a.b.c = 5
+a
+a."b".c[0] = 7
+a
+a."b"."c".d = 6
+a,j
+a."b"."c".d++
+a."b"."c",j
+
+$clear a
+a.b.d.f = 3
+a,j
+
+$clear a
+a[0].b.c[1] = 12
+a
+d[1]."e"."f".g[3] = 14
+d
+f[0][1] = 27
+f
+
+$clear a
+a = { "b": { c: [ 1, 8, 9], "c": { d: 5 } } }
+a
+a."b"."c".d = 6
+a
+a."b"."c".f = 3
+a
+a."b"."d".i = true
+a,j
+
+$clear a
+a.b.c.d = 6
+a
+a.b.c.f = 3
+a
+a.b.d.i = true
+a,j
+
+$clear a
+a."b"."c".d = 6
+a
+a."b"."c".f = 3
+a
+a."b"."d".i = true
+a,j
+
+$echo
+$echo "End of nested object / array tests."
