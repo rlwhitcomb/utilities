@@ -28,6 +28,8 @@
  *          First version.
  *	04-Jan-2021 (rlwhitcomb)
  *	    Move to named package. Allow minutes, hours, etc. intervals.
+ *	05-Jan-2021 (rlwhitcomb)
+ *	    Just for info, report the total elapsed time at the end.
  */
 package info.rlwhitcomb.util;
 
@@ -151,6 +153,7 @@ public class Sleep
 	 */
 	public static void main(String[] args) {
 	    double sleepTimeSecs;
+	    long startTime = Environment.highResTimer();
 
 	    if (args.length == 1) {
 		sleepTimeSecs = parseSeconds(args[0]);
@@ -165,5 +168,8 @@ public class Sleep
 
 	    // Finally do the hard work of ... sleeping ... for that long
 	    sleep(sleepTimeSecs);
+
+	    long elapsedTime = Environment.highResTimer() - startTime;
+	    System.out.format("Elapsed time %1$11.9f seconds.%n", Environment.timerValueToSeconds(elapsedTime));
 	}
 }
