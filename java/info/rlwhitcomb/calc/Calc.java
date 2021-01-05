@@ -392,6 +392,21 @@ public class Calc
 	    }
 	}
 
+	public static String getFileContents(String paths)
+		throws IOException
+	{
+	    StringBuilder inputBuf = new StringBuilder();
+	    String[] files = paths.split(",");
+	    for (String file : files) {
+		File f = new File(file);
+		if (f.exists() && f.isFile() && f.canRead()) {
+		    List<String> lines = Files.readAllLines(f.toPath());
+		    concatLines(inputBuf, lines);
+		}
+	    }
+	    return inputBuf.toString();
+	}
+
 	public static Object processString(String inputText, boolean silent) {
 	    try {
 		return process(CharStreams.fromString(inputText + LINESEP), visitor, errorStrategy, silent);
@@ -554,16 +569,7 @@ public class Calc
 		    }
 		    else {
 			if (args[0].indexOf(',') >= 0) {
-			    StringBuilder inputBuf = new StringBuilder();
-			    String[] files = args[0].split(",");
-			    for (String file : files) {
-				File f = new File(file);
-				if (f.exists() && f.isFile() && f.canRead()) {
-				    List<String> lines = Files.readAllLines(f.toPath());
-				    concatLines(inputBuf, lines);
-				}
-			    }
-			    input = CharStreams.fromString(inputBuf.toString());
+			    input = CharStreams.fromString(getFileContents(args[0]));
 			}
 			else {
 			    File f = new File(args[0]);

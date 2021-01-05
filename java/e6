@@ -1,0 +1,6 @@
+$echo "Chained / nested file."
+
+poem = [ "Twas the night before Christmas", "and all through the house", "not a creature was stirring", "not even a mouse." ]
+
+$echo "I'm out of here."
+

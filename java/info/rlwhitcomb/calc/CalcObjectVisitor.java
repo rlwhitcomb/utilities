@@ -93,9 +93,12 @@
  *	    Implement some "pretty" printing of object / array values.
  *	05-Jan-2021 (rlwhitcomb)
  *	    Fix the "strings" case of object references.
+ *	05-Jan-2021 (rlwhitcomb)
+ *	    Add the "$include" directive.
  */
 package info.rlwhitcomb.calc;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.MathContext;
@@ -634,6 +637,19 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    displayer.displayMessage(CharUtil.stripAnyQuotes(msg, true));
 
 	    return null;
+	}
+
+	@Override
+	public Object visitIncludeDirective(CalcParser.IncludeDirectiveContext ctx) {
+	    String paths = getStringValue(ctx.expr());
+
+	    try {
+		String contents = Calc.getFileContents(paths);
+		return Calc.processString(contents, false);
+	    }
+	    catch (IOException ioe) {
+		throw new CalcExprException("I/O Error: " + ioe.getMessage(), ctx);
+	    }
 	}
 
 	@Override

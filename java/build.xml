@@ -344,7 +344,7 @@
 		<java classname="info.rlwhitcomb.matches.MatchesTest"/>
 		<java classname="TestNumericUtil"/>
 		<java classname="info.rlwhitcomb.calc.Calc">
-			<arg value="e1,e2"/>
+			<arg value="e1,e2,e3"/>
 		</java>
 	</target>
 

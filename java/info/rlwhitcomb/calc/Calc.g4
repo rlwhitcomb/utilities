@@ -79,6 +79,8 @@
  *	    Add NAND, ANDNOT, NOR, and XNOR bit operations, and boolean XOR.
  *	04-Jan-2021 (rlwhitcomb)
  *	    Format option for object and arrays in "pretty" JSON format.
+ *	05-Jan-2021 (rlwhitcomb)
+ *	    Add "$include" directive.
  */
 
 grammar Calc;
@@ -219,6 +221,7 @@ directive
    | MIXED			 # mixedDirective
    | CLEAR ( ID ( ',' ID ) * )?  # clearDirective
    | ECHO expr ?                 # echoDirective
+   | INCLUDE expr                # includeDirective
    | DEBUG ( TRUE | FALSE )      # debugDirective 
    ;
 
@@ -317,52 +320,55 @@ NOTEQUAL       : '!=' ;
 
 
 DECIMAL
-   : DIR ( D E C | D E C I M A L )
+   : DIR  ( D E C | D E C I M A L )
    ;
 
 DEFAULT
-   : DIR ( D E F | D E F A U L T )
+   : DIR  ( D E F | D E F A U L T )
    ;
 
 DOUBLE
-   : DIR D O U B L E
+   : DIR  D O U B L E
    ;
 
 FLOAT
-   : DIR F L O A T
+   : DIR  F L O A T
    ;
 
 DEGREES
-   : DIR ( D E G | D E G R E E S )
+   : DIR  ( D E G | D E G R E E S )
    ;
 
 RADIANS
-   : DIR ( R A D | R A D I A N S )
+   : DIR  ( R A D | R A D I A N S )
    ;
 
 BINARY
-   : DIR ( B I N | B I N A R Y )
+   : DIR  ( B I N | B I N A R Y )
    ;
 
 SI
-   : DIR ( S I | T E N )
+   : DIR  ( S I | T E N )
    ;
 
 MIXED
-   : DIR ( M I X | M I X E D )
+   : DIR  ( M I X | M I X E D )
    ;
 
-
 CLEAR
-   : DIR ( C L R | C L E A R )
+   : DIR  ( C L R | C L E A R )
    ;
 
 ECHO
-   : DIR E C H O
+   : DIR  E C H O
+   ;
+
+INCLUDE
+   : DIR  ( I N C | I N C L U D E )
    ;
 
 DEBUG
-   : DIR D E B U G
+   : DIR  D E B U G
    ;
 
 
