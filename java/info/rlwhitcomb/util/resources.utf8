@@ -1,7 +1,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2014-2018,2020 Roger L. Whitcomb.
+# Copyright (c) 2014-2018,2020-2021 Roger L. Whitcomb.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -72,6 +72,8 @@
 #	    Change error messages for KMG conversions.
 #	19-Dec-2020 (rlwhitcomb)
 #	    One more error message.
+#	05-Jan-2021 (rlwhitcomb)
+#	    Update copyright years.
 #
 
 #
@@ -106,7 +108,7 @@ char.validFalseStrings		= F, No, N, Off
 # From Environment.java
 #
 env.unknownDataModel	= Java system has an unexpected data model value: %1$d
-env.copyright		= Copyright (c) 2008-2020 Roger L. Whitcomb.
+env.copyright		= Copyright (c) 2008-2021 Roger L. Whitcomb.
 env.version		= Version %1$s build %2$s%3$s
 env.build		= Built on %1$s at %2$s
 env.debug		= " (DEBUG)"

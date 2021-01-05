@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2011-2017,2019-2020 Roger L. Whitcomb.
+ * Copyright (c) 2011-2017,2019-2021 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -111,6 +111,8 @@
  *	    the spacing of the display; add another override.
  *	28-Dec-2020 (rlwhitcomb)
  *	    Option to use colors on "printProgramInfo".
+ *	05-Jan-2021 (rlwhitcomb)
+ *	    Update program info colors (work better on black Windows backgrounds).
  */
 package info.rlwhitcomb.util;
 
@@ -903,7 +905,7 @@ public final class Environment
 	    if (centerWidth == 0) {
 		ps.println(" " + productName);
 		if (colors) {
-		    ps.println(BLUE + " " + versionInfo);
+		    ps.println(GREEN + " " + versionInfo);
 		    ps.println(BLACK_BRIGHT);
 		}
 		else {
@@ -920,7 +922,7 @@ public final class Environment
 		// Negative width puts the odd space on the right
 		ps.println(CharUtil.padToWidth(productName, -width, CENTER));
 		if (colors) {
-		    ps.println(BLUE + version);
+		    ps.println(GREEN + version);
 		    ps.println(BLACK_BRIGHT);
 		}
 		else {
