@@ -79,7 +79,6 @@ Work going on currently includes:
 
 ### Calc
 
-- a."b".c throws NPE, while a."b"."c" works fine
 - implement += -=, etc. operators
 - implement Taylor series expansion of other trig/log functions to requested precision
 - redo the [box] formats of strings (to be? x'...', b'...', o'...') then parse such beasts back to strings

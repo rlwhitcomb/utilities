@@ -4,7 +4,7 @@
 
 	The MIT License (MIT)
 
-	Copyright (c) 2020 Roger L. Whitcomb.
+	Copyright (c) 2020-2021 Roger L. Whitcomb.
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -109,6 +109,8 @@
 		More wrapper files.
 	    31-Dec-2020 (rlwhitcomb)
 		Use latest git commit id as the build number.
+	    05-Jan-2021 (rlwhitcomb)
+		Add second test of Calc.
 
      ========================================================================== -->
 
@@ -342,7 +344,7 @@
 		<java classname="info.rlwhitcomb.matches.MatchesTest"/>
 		<java classname="TestNumericUtil"/>
 		<java classname="info.rlwhitcomb.calc.Calc">
-			<arg value="e1"/>
+			<arg value="e1,e2"/>
 		</java>
 	</target>
 
