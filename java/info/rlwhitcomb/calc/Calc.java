@@ -57,6 +57,8 @@
  *	    Allow a comma-separated list of files on command line.
  *	05-Jan-2021 (rlwhitcomb)
  *	    Remember initial file directory for $include.
+ *	05-Jan-2021 (rlwhitcomb)
+ *	    Option to report timing on each "process" call.
  */
 package info.rlwhitcomb.calc;
 
@@ -146,6 +148,7 @@ public class Calc
 	private static boolean guiMode = false;
 	private static boolean debug   = false;
 	private static boolean colors  = true;
+	private static boolean timing  = false;
 
 	private static Locale  locale  = null;
 
@@ -445,7 +448,9 @@ public class Calc
 		throws IOException
 	{
 	    Object returnValue = null;
-	    boolean oldSilent = visitor.setSilent(silent);
+	    boolean oldSilent  = visitor.setSilent(silent);
+	    long startTime     = Environment.highResTimer();
+	    long endTime;
 
 	    try {
 		CalcLexer lexer = new CalcBailLexer(input);
@@ -455,7 +460,7 @@ public class Calc
 		ParseTree tree = parser.prog();
 
 		if (debug) {
-		    System.out.println(tree.toStringTree(parser));
+		    displayer.displayMessage(tree.toStringTree(parser));
 		}
 
 		returnValue = visitor.visit(tree);
@@ -467,7 +472,13 @@ public class Calc
 		displayer.displayErrorMessage("Error: " + ce.getMessage(), ce.getLine());
 	    }
 	    finally {
+		endTime = Environment.highResTimer();
 		visitor.setSilent(oldSilent);
+	    }
+
+	    if (timing) {
+		displayer.displayMessage(String.format("Elapsed time %1$11.9f seconds.",
+			Environment.timerValueToSeconds(endTime - startTime)));
 	    }
 
 	    return returnValue;
@@ -507,6 +518,16 @@ public class Calc
 		case "nocolor":
 		case "nocol":
 		    colors = false;
+		    break;
+		case "timing":
+		case "time":
+		case "t":
+		    timing = true;
+		    break;
+		case "notiming":
+		case "notime":
+		case "not":
+		    timing = false;
 		    break;
 		case "locale":
 		case "loc":
