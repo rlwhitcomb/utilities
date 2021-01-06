@@ -63,6 +63,8 @@
  *	    Option to just print results (without echoing the expression).
  *	06-Jan-2021 (rlwhitcomb)
  *	    Display output text size (for large results).
+ *	06-Jan-2021 (rlwhitcomb)
+ *	    Use a background thread in the GUI to do the calculations.
  */
 package info.rlwhitcomb.calc;
 
@@ -93,6 +95,7 @@ import static info.rlwhitcomb.util.ConsoleColor.Code.*;
 import info.rlwhitcomb.util.Environment;
 import info.rlwhitcomb.util.ExceptionUtil;
 import info.rlwhitcomb.util.Intl;
+import info.rlwhitcomb.util.QueuedThread;
 
 /**
  * Command line calculator, which will also read files or from stdin.
@@ -170,7 +173,12 @@ public class Calc
 	@BXML private Label outputSizeLabel;
 	@BXML private Prompt helpPrompt;
 
-	private static NumberFormat sizeFormat;
+	/** The background worker thread to do the calculations in GUI mode. */
+	private QueuedThread queuedThread = new QueuedThread();
+
+	private NumberFormat sizeFormat;
+
+	private static Console console = System.console();
 
 	private static BailErrorStrategy errorStrategy = new BailErrorStrategy();
 	private static CalcDisplayer displayer;
@@ -358,9 +366,9 @@ public class Calc
 	{
 		@Override
 		public void perform(Component source) {
-		    String exprText = inputTextArea.getText();
+		    final String exprText = inputTextArea.getText();
 
-		    processString(exprText, false);
+		    queuedThread.submitWork(() -> processString(exprText, false) );
 
 		    inputTextArea.setText("");
 		    inputTextArea.requestFocus();
@@ -676,7 +684,6 @@ public class Calc
 		    // If no input arguments were given, go into "REPL" mode, reading
 		    // a line at a time from the console and processing
 		    if (input == null) {
-			Console console = System.console();
 			if (console == null) {
 			    process(CharStreams.fromStream(System.in), visitor, errorStrategy, false);
 			}
