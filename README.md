@@ -84,6 +84,7 @@ Work going on currently includes:
 - allow "_" in numeric values, like Java does
 - format options for commas (or _)
 - get help and intro text (both console and GUI) from resources
+- do calculations in a background thread for GUI, so GUI remains responsive
 
 ### Sleep
 - options for minutes, hours, days, weeks
