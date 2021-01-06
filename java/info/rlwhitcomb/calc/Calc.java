@@ -208,7 +208,7 @@ public class Calc
 		System.setErr(ps);
 
 		// Increase the maximum output text length in case of humongous calculations
-		outputTextArea.setMaximumLength(20_000_00);
+		outputTextArea.setMaximumLength(20_000_000);
 
 		sizeFormat = NumberFormat.getIntegerInstance();
 		sizeFormat.setGroupingUsed(true);
@@ -229,7 +229,9 @@ public class Calc
 	}
 
 	private void updateOutputSize() {
-	    outputSizeLabel.setText(sizeFormat.format(outputTextArea.getCharacterCount()));
+	    ApplicationContext.queueCallback(() ->
+		outputSizeLabel.setText(sizeFormat.format(outputTextArea.getCharacterCount()))
+	    );
 	}
 
 	@Override
