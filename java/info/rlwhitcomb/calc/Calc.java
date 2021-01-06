@@ -59,6 +59,8 @@
  *	    Remember initial file directory for $include.
  *	05-Jan-2021 (rlwhitcomb)
  *	    Option to report timing on each "process" call.
+ *	06-Jan-2021 (rlwhitcomb)
+ *	    Option to just print results (without echoing the expression).
  */
 package info.rlwhitcomb.calc;
 
@@ -145,10 +147,11 @@ public class Calc
 	    "Help is not complete yet!  Check back later."
 	};
 
-	private static boolean guiMode = false;
-	private static boolean debug   = false;
-	private static boolean colors  = true;
-	private static boolean timing  = false;
+	private static boolean guiMode     = false;
+	private static boolean debug       = false;
+	private static boolean colors      = true;
+	private static boolean timing      = false;
+	private static boolean resultsOnly = false;
 
 	private static Locale  locale  = null;
 
@@ -207,7 +210,10 @@ public class Calc
 
 	@Override
 	public void displayResult(String exprString, String resultString) {
-	    System.out.println(exprString + " -> " + resultString);
+	    if (resultsOnly)
+		System.out.println(resultString);
+	    else
+		System.out.println(exprString + " -> " + resultString);
 	}
 
 	@Override
@@ -278,17 +284,24 @@ public class Calc
 		@Override
 		public void displayResult(String exprString, String resultString) {
 		    if (colors)
-			System.out.println(EXPR_COLOR + exprString + ARROW_COLOR + " -> " + VALUE_COLOR + resultString + RESET);
+			if (resultsOnly)
+			    System.out.println(VALUE_COLOR + resultString + RESET);
+			else
+			    System.out.println(EXPR_COLOR + exprString + ARROW_COLOR + " -> " + VALUE_COLOR + resultString + RESET);
 		    else
-			System.out.println(exprString + " -> " + resultString);
+			if (resultsOnly)
+			    System.out.println(resultString);
+			else
+			    System.out.println(exprString + " -> " + resultString);
 		}
 
 		@Override
 		public void displayActionMessage(String message) {
-		    if (colors)
-			System.out.println(VALUE_COLOR + message + RESET);
-		    else
-			System.out.println(message);
+		    if (!resultsOnly)
+			if (colors)
+			    System.out.println(VALUE_COLOR + message + RESET);
+			else
+			    System.out.println(message);
 		}
 
 		@Override
@@ -528,6 +541,12 @@ public class Calc
 		case "notime":
 		case "not":
 		    timing = false;
+		    break;
+		case "results":
+		case "result":
+		case "res":
+		case "r":
+		    resultsOnly = true;
 		    break;
 		case "locale":
 		case "loc":
