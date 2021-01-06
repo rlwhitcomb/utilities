@@ -38,20 +38,19 @@ Work going on currently includes:
 - UUID program: generate random, generate from text, separate into parts, maybe more.
 - Pivot demo program for CSS colors.
 - Lots of unit tests.
-- Put build date, time, number, debug settings into "build.number" file and read that inside Environment.javapp (instead of preprocessing it??).
 - Add standard Version class?? which would just default to the Environment values.
 - Consider a standard method to read .properties files (take the code from "readVersionProperties" in Environment and make it general somewhere else?)
 - Completely update JavaPreProc to use an Antlr expression grammar to process the directives.
 - Wildcard support for the Ant FindTask.
 - "Which" on Windows needs something besides "canExecute" to determine if it is correct.
 - Make InitializationTask and QueuedThread work seamlessly with "synchronized"
-- Use the git hash (first 7 digits) instead of a sequential build number ("git rev-parse HEAD | cut -c 1-7") (how to do this "cut" in build.xml?). (would need to update version parsing to accept this non-numeric value for revision). (maybe require major.minor only need to be numeric (with possible [vV] prefix, then other fields could be +-.whatever)) (put this parsing into a new Version class, similar to Pivot's) (check out all the tests in Pivot "VersionTest.java").
 - Add a Spanish translation for all the current resources (and ongoing for new resource files).
 
 ## Notes on New Programs and Features
 
 ### License
 - Need something to check proper license, copyright, etc. in all files
+- Check copyright years by history; also check for out-of-order history comments, and/or bad format, or missing entirely
 
 ### Shell invoker
 - Option to "boiler" to create this thing (along with the path/class)
