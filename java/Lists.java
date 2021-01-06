@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2013-2014,2016-2020 Roger L. Whitcomb.
+ * Copyright (c) 2013-2014,2016-2021 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -57,6 +57,8 @@
  *         Incorporate latest code.
  *	21-Dec-2020 (rlwhitcomb)
  *	   Update obsolete Javadoc constructs.
+ *	05-Jan-2021 (rlwhitcomb)
+ *	   Add "-single" option to join lines without anything else.
  */
 import java.io.BufferedReader;
 import java.io.File;
@@ -85,6 +87,7 @@ public class Lists
 	private static boolean counting = false;
 	private static boolean cutting = false;
 	private static boolean newlines = false;
+	private static boolean single = false;
 	private static int width = 0;
 	private static int cutSize = 0;
 	private static List<String> fileNames = null;
@@ -221,7 +224,8 @@ public class Lists
 	    System.err.println();
 	    System.err.println("  Aliases: -c | -concat | -concatenate; -j | -join; -b | -blank | -blanks; -n | -count | -counting");
 	    System.err.println("           -l | -line | -lines | -newlines; -w | -white | -whitespace; -e | -pre | -prefix");
-	    System.err.println("           -f | -post | -postfix; -x | -cut | -cutting; -o | -out | -output");
+	    System.err.println("           -f | -post | -postfix; -x | -cut | -cutting; -s | -single");
+	    System.err.println("           -o | -out  | -output");
 	    System.err.println();
 	    System.err.println("  If you specify the \"-c\" flag the output will have all the lines");
 	    System.err.println("    of the file concatenated (using commas) into a single line.");
@@ -252,6 +256,9 @@ public class Lists
 	    System.err.println();
 	    System.err.println("  The \"-e prefix_text\" and \"-f postfix_text\" options will add this text");
 	    System.err.println("    before (after) the single line or each line of the output.");
+	    System.err.println();
+	    System.err.println("  The \"-s\" option will join the whole file into a single string without");
+	    System.err.println("    any separators.");
 	    System.err.println();
 	    System.err.format ("  Using \"%1$s\" or nothing for the list_file_name will read from stdin.%n", STDIN);
 	    System.err.format ("  Multiple file names are allowed as well as mixing \"%1$s\" with regular%n", STDIN);
@@ -310,6 +317,8 @@ public class Lists
 			newlines = true;
 			concatenate = false;
 		    }
+		    else if (Options.matchesOption(arg, "single", "s"))
+			single = true;
 		    else if (Options.matchesOption(arg, true, "counting", "count", "n"))
 			counting = true;
 		    else if (Options.matchesOption(arg, true, "cutting", "cut", "x")) {
@@ -421,8 +430,8 @@ public class Lists
 		return;
 	    }
 
-	    if (counting && (concatenate || blanks || width > 0)) {
-		System.err.format("The \"-n\" option should not be used together with either the%n\"-c\", \"-j\", or \"-b\" options%nor with an output width.%n");
+	    if (counting && (single || concatenate || blanks || width > 0)) {
+		System.err.format("The \"-n\" option should not be used together with either the%n\"-s\", \"-c\", \"-j\", or \"-b\" options%nor with an output width.%n");
 		usage();
 		return;
 	    }
@@ -476,7 +485,10 @@ public class Lists
 				    numberOfValues++;
 				}
 				else {
-				    if (concatenate) {
+				    if (single) {
+					buf.append(part);
+				    }
+				    else if (concatenate) {
 					if (buf.length() > prefixTextLength) {
 					    if (!join)
 						buf.append(",");
