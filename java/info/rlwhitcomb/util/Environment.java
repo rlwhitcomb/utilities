@@ -637,6 +637,7 @@ public final class Environment
 	 *
 	 * @param <V>  Type of value returned from the function.
 	 * @param func The function to execute and time.
+	 * @return     The return value from the callable function.
 	 */
 	public static <V> V timeThis(final Callable<V> func) {
 	    long startTime = highResTimer();
