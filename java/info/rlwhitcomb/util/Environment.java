@@ -115,6 +115,8 @@
  *	    Update program info colors (work better on black Windows backgrounds).
  *	05-Jan-2021 (rlwhitcomb)
  *	    "timeThis" methods.
+ *	06-Jan-2021 (rlwhitcomb)
+ *	    New flavor of "loadProgramInfo".
  */
 package info.rlwhitcomb.util;
 
@@ -862,7 +864,16 @@ public final class Environment
 	 * @param clazz	The main program class.
 	 */
 	public static void loadProgramInfo(Class<?> clazz) {
-	    String name = clazz.getSimpleName();
+	    loadProgramInfo(clazz.getSimpleName());
+	}
+
+	/**
+	 * Load the program information (title/version) from the "version.properties" file
+	 * and save for use by {@link #printProgramInfo}.
+	 *
+	 * @param name The class name to use.
+	 */
+	public static void loadProgramInfo(String name) {
 	    readBuildProperties();
 	    setProductName(buildProperties.getProperty(name + ".title"));
 	    setAppVersion(buildProperties.getProperty(name + ".version"));

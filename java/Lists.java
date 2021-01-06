@@ -55,10 +55,14 @@
  *         Print version information.
  *      16-Oct-2020 (rlwhitcomb)
  *         Incorporate latest code.
- *	21-Dec-2020 (rlwhitcomb)
- *	   Update obsolete Javadoc constructs.
- *	05-Jan-2021 (rlwhitcomb)
- *	   Add "-single" option to join lines without anything else.
+ *      21-Dec-2020 (rlwhitcomb)
+ *         Update obsolete Javadoc constructs.
+ *      05-Jan-2021 (rlwhitcomb)
+ *         Add "-single" option to join lines without anything else.
+ *      06-Jan-2021 (rlwhitcomb)
+ *         Fix "-single" processing. Use regular Environment program info.
+ *         Also use the regular classes instead of our duplicates (no
+ *         need for a standalone class anymore).
  */
 import java.io.BufferedReader;
 import java.io.File;
@@ -72,6 +76,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
+import info.rlwhitcomb.util.Environment;
+import info.rlwhitcomb.util.Options;
 
 /**
  * Utility program for converting lists of values between various formats
@@ -81,136 +87,30 @@ import java.util.Optional;
 public class Lists
 {
 	private static boolean concatenate = false;
-	private static boolean join = false;
-	private static boolean blanks = false;
-	private static boolean whitespace = false;
-	private static boolean counting = false;
-	private static boolean cutting = false;
-	private static boolean newlines = false;
-	private static boolean single = false;
-	private static int width = 0;
+	private static boolean join        = false;
+	private static boolean blanks      = false;
+	private static boolean whitespace  = false;
+	private static boolean counting    = false;
+	private static boolean cutting     = false;
+	private static boolean newlines    = false;
+	private static boolean single      = false;
+
+	private static int width   = 0;
 	private static int cutSize = 0;
+
 	private static List<String> fileNames = null;
-	private static String outputFileName = null;
-	private static PrintStream output = null;
+	private static String outputFileName  = null;
+	private static PrintStream output     = null;
+
 	private static boolean sawConsoleInput = false;
-	private static String prefixText = null;
-	private static String postfixText = null;
-	private static int prefixTextLength = 0;
+
+	private static String prefixText     = null;
+	private static String postfixText    = null;
+	private static int prefixTextLength  = 0;
 	private static int postfixTextLength = 0;
+
 	private static final String STDIN = "@";
 
-	private static class Options
-	{
-		private static final boolean onWindows = System.getProperty("os.name").startsWith("Windows");
-
-		/**
-		 * An interface that can be implemented by enums or other classes such that we can
-		 * call standard methods to match a command line argument with one of them.
-		 */
-		public interface Choice
-		{
-			boolean matches(String arg);
-			boolean matches(String arg, boolean ignoreCase);
-		}
-
-
-		/**
-		 * This is the workhorse method to match the first one of a number of possible forms for a given
-		 * option.
-		 *
-		 * @param arg   The incoming command line argument.
-		 * @param ignoreCase    Whether or not the match should be case-sensitive.
-		 * @param forms         The various acceptable forms for the option name that are allowed.
-		 * @return              Whether or not the given argument matched any of the acceptable forms.
-		 */
-		private static boolean matches(String arg, boolean ignoreCase, String... forms) {
-		    if (ignoreCase) {
-			for (String form : forms) {
-			    if (arg.equalsIgnoreCase(form))
-				return true;
-			}
-		    }
-		    else {
-			for (String form : forms) {
-			    if (arg.equals(form))
-				return true;
-			}
-		    }
-		    return false;
-		}
-
-		/**
-		 * Does the given string look like an argument (that is, does it start with
-		 * "--", "-" or "/" [on Windows])?
-		 * @param arg   The candidate argument value.
-		 * @return      The remaining string as an {@link Optional} if so, an
-		 *              empty {@code Optional} if not.
-		 */
-		public static Optional<String> checkOption(String arg) {
-		    return Optional.ofNullable(isOption(arg));
-		}
-
-		/**
-		 * Does the given string look like an argument (that is, does it start with
-		 * <code>"--"</code>, <code>"-"</code> or <code>"/"</code> [on Windows])?
-		 * @param arg   The candidate argument value.
-		 * @return      The remaining string if so, or {@code null} if not.
-		 */
-		public static String isOption(String arg) {
-		    String result = null;
-		    if (arg != null && !arg.isEmpty()) {
-			int length = arg.length();
-			if (length > 2 && arg.startsWith("--")) {
-			    result = arg.substring(2);
-			}
-			else if (length > 1 && arg.startsWith("-")) {
-			    result = arg.substring(1);
-			}
-			else if (onWindows && length > 1 && arg.startsWith("/")) {
-			    result = arg.substring(1);
-			}
-		    }
-		    return result;
-		}
-
-
-		public static boolean matchesOption(String arg, boolean ignoreCase, String... forms) {
-		    String option = isOption(arg);
-		    if (option != null) {
-			return matches(option, ignoreCase, forms);
-		    }
-		    return false;
-		}
-
-		public static boolean matchesOption(String arg, String longForm, String shortForm, boolean ignoreCase) {
-		    String option = isOption(arg);
-		    if (option != null) {
-			return matches(option, ignoreCase, longForm, shortForm);
-		    }
-		    return false;
-		}
-
-		public static boolean matchesOption(String arg, String option) {
-		    return matchesOption(arg, option, null, true);
-		}
-
-		public static boolean matchesOption(String arg, String option, boolean ignoreCase) {
-		    return matchesOption(arg, option, null, ignoreCase);
-		}
-
-		public static boolean matchesOption(String arg, String longForm, String shortForm) {
-		    return matchesOption(arg, longForm, shortForm, true);
-		}
-
-		public static boolean matchesOption(String arg, Choice choice) {
-		    return choice.matches(arg);
-		}
-
-		public static boolean matchesOption(String arg, Choice choice, boolean ignoreCase) {
-		    return choice.matches(arg, ignoreCase);
-		}
-	}
 
 	private static void usage() {
 	    usage(false);
@@ -273,13 +173,14 @@ public class Lists
 	}
 
 	public static void main(String[] args) {
+	    Environment.loadProgramInfo(Lists.class);
 
 	    fileNames = new ArrayList<>();
 
 	    // First parse the command line arguments
-	    boolean sawOutputOption = false;
-	    boolean sawCutOption = false;
-	    boolean sawPrefixTextOption = false;
+	    boolean sawOutputOption      = false;
+	    boolean sawCutOption         = false;
+	    boolean sawPrefixTextOption  = false;
 	    boolean sawPostfixTextOption = false;
 
 	    for (String arg : args) {
@@ -354,10 +255,7 @@ public class Lists
 			return;
 		    }
 		    else if (Options.matchesOption(arg, true, "version", "vers", "ver", "v")) {
-			System.err.println("            Lists Management Program");
-			System.err.println("                 Version 2.0.0");
-			System.err.println("Copyright (c) 2013-2014,2016-2020 Roger L. Whitcomb.");
-			System.err.println();
+			Environment.printProgramInfo(System.err);
 			return;
 		    }
 		    else {
@@ -450,11 +348,11 @@ public class Lists
 		output = System.out;
 	    }
 
-	    int numberOfValues = 0;
-	    int nextFile = 0;
+	    int numberOfValues  = 0;
+	    int nextFile        = 0;
 	    boolean readConsole = false;
-	    String fileName = "";
-	    BufferedReader r = null;
+	    String fileName     = "";
+	    BufferedReader r    = null;
 
 	    try {
 		StringBuilder buf = new StringBuilder();
@@ -462,8 +360,8 @@ public class Lists
 		    buf.append(prefixText);
 
 		while (nextFile < fileNames.size()) {
-		    fileName = fileNames.get(nextFile++);
-		    readConsole = fileName.equals(STDIN);
+		    fileName      = fileNames.get(nextFile++);
+		    readConsole   = fileName.equals(STDIN);
 		    Reader reader = readConsole ?
 			    new InputStreamReader(System.in) :
 			    new FileReader(fileName);
@@ -486,7 +384,7 @@ public class Lists
 				}
 				else {
 				    if (single) {
-					buf.append(part);
+					buf.append(value);
 				    }
 				    else if (concatenate) {
 					if (buf.length() > prefixTextLength) {
@@ -537,7 +435,7 @@ public class Lists
 		    }
 		}
 
-		if (concatenate) {
+		if (concatenate || single) {
 		    if (postfixText != null)
 			buf.append(postfixText);
 		    output.println(buf.toString());
