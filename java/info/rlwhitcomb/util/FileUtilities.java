@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2010-2011,2013-2017,2019-2020 Roger L. Whitcomb.
+ * Copyright (c) 2010-2011,2013-2017,2019-2021 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -73,6 +73,8 @@
  *	Prepare for GitHub.
  *    21-Dec-2020 (rlwhitcomb)
  *	Update obsolete Javadoc constructs.
+ *    05-Jan-2021 (rlwhitcomb)
+ *	Another flavor of "readFileAsString".
  */
 package info.rlwhitcomb.util;
 
@@ -390,6 +392,23 @@ public class FileUtilities
 
     /**
      * Read the given local file and produce a single string from the contents.
+     * <p> Default charset and tab width (8).
+     *
+     * @param	file	The local file to read.
+     * @return		The complete contents of the file as a {@link String},
+     *			with line endings translated to Unix conventions (i.e., only
+     *			{@code \n}).
+     * @throws	IllegalArgumentException if the file size is over 2MB (arbitrary).
+     * @throws	IOException if there is a problem reading the file.
+     */
+    public static String readFileAsString(File file)
+	throws IOException
+    {
+	return readFileAsString(file, null, 8);
+    }
+
+    /**
+     * Read the given local file and produce a single string from the contents.
      *
      * @param	file	The local file to read.
      * @param	cs	The character set to use to decode the file contents. Can be
@@ -411,7 +430,7 @@ public class FileUtilities
 	}
 	StringBuilder buf = new StringBuilder((int)size);
 
-	CharsetDecoder decoder = cs == null ? Charset.defaultCharset().newDecoder() : cs.newDecoder();
+	CharsetDecoder decoder = (cs == null ? Charset.defaultCharset() : cs).newDecoder();
 	decoder.onUnmappableCharacter(CodingErrorAction.REPORT);
 	decoder.onMalformedInput(CodingErrorAction.REPORT);
 
