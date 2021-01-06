@@ -2,7 +2,7 @@
 
         The MIT License (MIT)
 
-        Copyright (c) 2020 Roger L. Whitcomb.
+        Copyright (c) 2020-2021 Roger L. Whitcomb.
 
         Permission is hereby granted, free of charge, to any person obtaining a copy
         of this software and associated documentation files (the "Software"), to deal
@@ -31,6 +31,8 @@
 		Add an exit button. Change relative sizes of input and output areas.
 	    31-Dec-2020 (rlwhitcomb)
 		Add a SplitPane between the input and output areas so they can be resized.
+	    06-Jan-2021 (rlwhitcomb)
+		Add a label area to report the current output size (for large outputs).
 
      ========================================================================== -->
 
@@ -93,21 +95,27 @@
 	    </TablePane.Row>
 	    <TablePane.Row height="1*">
 		<SplitPane orientation="vertical" splitRatio="0.5">
-			<top>
-				<Border title=" Expression " styles="{padding:4}">
-				    <ScrollPane horizontalScrollBarPolicy="fill" verticalScrollBarPolicy="fill_to_capacity" >
-					<TextArea bxml:id="inputTextArea" styles="{font:'Monospaced 18'}"/>
-				    </ScrollPane>
-				</Border>
-			</top>
-			<bottom>
-				<Border title=" Result " styles="{padding:4}">
-				    <ScrollPane horizontalScrollBarPolicy="fill" verticalScrollBarPolicy="fill_to_capacity" >
-					<TextArea bxml:id="outputTextArea" styles="{font:'Monospaced 18'}"/>
-				    </ScrollPane>
-				</Border>
-			</bottom>
+		    <top>
+			<Border title=" Expression " styles="{padding:4}">
+			    <ScrollPane horizontalScrollBarPolicy="fill" verticalScrollBarPolicy="fill_to_capacity" >
+				<TextArea bxml:id="inputTextArea" styles="{font:'Monospaced 18'}"/>
+			    </ScrollPane>
+			</Border>
+		    </top>
+		    <bottom>
+			<Border title=" Result " styles="{padding:4}">
+			    <ScrollPane horizontalScrollBarPolicy="fill" verticalScrollBarPolicy="fill_to_capacity" >
+				<TextArea bxml:id="outputTextArea" styles="{font:'Monospaced 18'}"/>
+			    </ScrollPane>
+			</Border>
+		    </bottom>
 		</SplitPane>
+	    </TablePane.Row>
+	    <TablePane.Row height="-1">
+		<BoxPane orientation="horizontal" styles="{padding:4}">
+		    <Label text="Output size: "/>
+		    <Label bxml:id="outputSizeLabel" text="0"/>
+		</BoxPane>
 	    </TablePane.Row>
 	</rows>
     </TablePane>

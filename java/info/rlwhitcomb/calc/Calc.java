@@ -61,6 +61,8 @@
  *	    Option to report timing on each "process" call.
  *	06-Jan-2021 (rlwhitcomb)
  *	    Option to just print results (without echoing the expression).
+ *	06-Jan-2021 (rlwhitcomb)
+ *	    Display output text size (for large results).
  */
 package info.rlwhitcomb.calc;
 
@@ -71,6 +73,7 @@ import java.io.InputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.file.Files;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -164,7 +167,10 @@ public class Calc
 	@BXML private Window mainWindow;
 	@BXML private TextArea inputTextArea;
 	@BXML private TextArea outputTextArea;
+	@BXML private Label outputSizeLabel;
 	@BXML private Prompt helpPrompt;
+
+	private static NumberFormat sizeFormat;
 
 	private static BailErrorStrategy errorStrategy = new BailErrorStrategy();
 	private static CalcDisplayer displayer;
@@ -193,6 +199,12 @@ public class Calc
 		System.setOut(ps);
 		System.setErr(ps);
 
+		// Increase the maximum output text length in case of humongous calculations
+		outputTextArea.setMaximumLength(20_000_00);
+
+		sizeFormat = NumberFormat.getIntegerInstance();
+		sizeFormat.setGroupingUsed(true);
+
 		// Prepopulate the text are with any text from the command line or input file
 		if (inputText != null)
 		    inputTextArea.setText(inputText);
@@ -208,32 +220,43 @@ public class Calc
 	    }
 	}
 
+	private void updateOutputSize() {
+	    outputSizeLabel.setText(sizeFormat.format(outputTextArea.getCharacterCount()));
+	}
+
 	@Override
 	public void displayResult(String exprString, String resultString) {
 	    if (resultsOnly)
 		System.out.println(resultString);
 	    else
 		System.out.println(exprString + " -> " + resultString);
+	    updateOutputSize();
 	}
 
 	@Override
 	public void displayActionMessage(String message) {
-	    System.out.println(message);
+	    if (!resultsOnly) {
+		System.out.println(message);
+		updateOutputSize();
+	    }
 	}
 
 	@Override
 	public void displayMessage(String message) {
 	    System.out.println(message);
+	    updateOutputSize();
 	}
 
 	@Override
 	public void displayErrorMessage(String message) {
 	    System.err.println(message);
+	    updateOutputSize();
 	}
 
 	@Override
 	public void displayErrorMessage(String message, int lineNumber) {
 	    System.err.println(String.format("%1$s at line %2$d.", message, lineNumber));
+	    updateOutputSize();
 	}
 
 
@@ -351,6 +374,7 @@ public class Calc
 		public void perform(Component source) {
 		    inputTextArea.setText("");
 		    outputTextArea.setText("");
+		    updateOutputSize();
 		    inputTextArea.requestFocus();
 		}
 	}
