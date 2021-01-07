@@ -47,7 +47,7 @@ public class FormatValues
 	private static final String QUOTE_SEMI = "\";";
 
 	/**
-	 * Arguments: file_name, variable_name, max_digits
+	 * @param args Arguments: file_name, variable_name, max_digits
 	 */
 	public static void main(String[] args) {
 	    if (args.length != 3) {
