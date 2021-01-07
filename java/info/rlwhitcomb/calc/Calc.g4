@@ -88,6 +88,8 @@
  *	    Change format leading to ';' to reduce confusion.
  *	07-Jan-2021 (rlwhitcomb)
  *	    Start of the +=, -=, etc. assign operators.
+ *	07-Jan-2021 (rlwhitcomb)
+ *	    Allow comments.
  */
 
 grammar Calc;
@@ -535,6 +537,14 @@ fragment EXP
 
 WS
    : [ \t] + -> skip
+   ;
+
+COMMENT
+   : '/*' .*? '*/' -> skip
+   ;
+
+LINE_COMMENT
+   : ( '#' | '//' ) .*? '\r'? '\n' -> skip
    ;
 
 ENDEXPR
