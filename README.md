@@ -77,14 +77,15 @@ Work going on currently includes:
 - then need -locale option and translation(s)
 
 ### Calc
-- implement += -=, etc. operators
+- implement remaining assignment operators
 - implement Taylor series expansion of other trig/log functions to requested precision
 - redo the [box] formats of strings (to be? x'...', b'...', o'...') then parse such beasts back to strings
 - allow "_" in numeric values, like Java does
 - format options for commas (or _)
 - get help and intro text (both console and GUI) from resources
-- do calculations in a background thread for GUI, so GUI remains responsive
 - add option (both GUI and REPL modes) to open another file
+- functions for financial calculations (INTEREST, NPV, PAYMENT, etc.)
+- ?? need a way to do "setScale(...)" on the values ??
 
 ### Sleep
 - options for minutes, hours, days, weeks
