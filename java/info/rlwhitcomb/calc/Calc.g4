@@ -86,6 +86,8 @@
  *	07-Jan-2021 (rlwhitcomb)
  *	    $resultsonly directive.
  *	    Change format leading to ';' to reduce confusion.
+ *	07-Jan-2021 (rlwhitcomb)
+ *	    Start of the +=, -=, etc. assign operators.
  */
 
 grammar Calc;
@@ -166,6 +168,11 @@ expr
    | expr BOOL_XOR expr                  # booleanXorExpr
    | expr BOOL_OR expr                   # booleanOrExpr
    | expr '?' expr ':' expr              # eitherOrExpr
+   | var ADDASSIGN expr                  # addAssignExpr
+   | var SUBASSIGN expr                  # subAssignExpr
+   | var MULTASSIGN expr                 # multAssignExpr
+   | var DIVASSIGN expr                  # divAssignExpr
+   | var MODASSIGN expr                  # modAssignExpr
    | var ASSIGN expr                     # assignExpr
    ;
 
@@ -340,6 +347,16 @@ BIT_XNOR       : '~^' ;
 STRICTEQUAL    : '===' ;
 
 EQUAL          : '==' ;
+
+ADDASSIGN      : '+=' ;
+
+SUBASSIGN      : '-=' ;
+
+MULTASSIGN     : '*=' ;
+
+DIVASSIGN      : '/=' ;
+
+MODASSIGN      : '%=' ;
 
 ASSIGN         : '=' ;
 

@@ -99,6 +99,9 @@
  *	    Allow unlimited precision setting (still limit pi to 12,000 digits though).
  *	07-Jan-2021 (rlwhitcomb)
  *	    New handling of "mode" directives; add "$resultsonly".
+ *	07-Jan-2021 (rlwhitcomb)
+ *	    Move common methods into CalcUtil.
+ *	    Start of the +=, -=, etc. assign operators.
  */
 package info.rlwhitcomb.calc;
 
@@ -116,8 +119,9 @@ import java.util.List;
 import java.util.Map;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
+
+import static info.rlwhitcomb.calc.CalcUtil.*;
 import info.rlwhitcomb.util.CharUtil;
-import static info.rlwhitcomb.util.CharUtil.Justification;
 import static info.rlwhitcomb.util.ConsoleColor.Code.*;
 import info.rlwhitcomb.util.ExceptionUtil;
 import info.rlwhitcomb.util.NumericUtil;
@@ -210,7 +214,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	/** Symbol table for variables. */
 	private Map<String, Object> variables;
- 
+
 	/** The outermost {@code LValueContext} for the (global) variables. */
 	private LValueContext globalContext;
 
@@ -244,38 +248,6 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 	}
 
-	private StringBuilder getTreeText(ParserRuleContext ctx) {
-	    StringBuilder buf = new StringBuilder();
-
-	    getTreeText(buf, ctx);
-
-	    int len = buf.length();
-	    while (buf.charAt(len - 1) == ' ')
-		len--;
-	    buf.setLength(len);
-
-	    return buf;
-	}
-
-	private void getTreeText(StringBuilder buf, ParserRuleContext ctx) {
-	    for (ParseTree child : ctx.children) {
-		if (child instanceof ParserRuleContext) {
-		    getTreeText(buf, (ParserRuleContext)child);
-		}
-		else {
-		    String childText = child.getText();
-		    boolean sp1 = false, sp2 = true;
-		    // TODO: maybe we can do better??
-		    if (sp1)
-			buf.append(' ');
-		    buf.append(childText);
-		    if (sp2)
-			buf.append(' ');
-		}
-	    }
-	}
-
-
 	public CalcObjectVisitor(CalcDisplayer resultDisplayer) {
 	    setMathContext(MathContext.DECIMAL128);
 	    setTrigMode(TrigMode.RADIANS);
@@ -286,25 +258,6 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    displayer     = resultDisplayer;
 
 	    initialized   = true;
-	}
-
-	private boolean isIdentifierStart(char ch) {
-	    // Corresponds to the "ID" rule in Calc.g4
-	    if ((ch >= 'a' && ch <= 'z')
-	     || (ch >= 'A' && ch <= 'Z')
-	     || (ch == '_'))
-		return true;
-	    return false;
-	}
-
-	private boolean isIdentifierPart(char ch) {
-	    if (isIdentifierStart(ch))
-		return true;
-
-	    if (ch >= '0' && ch <= '9')
-		return true;
-
-	    return false;
 	}
 
 	private void setMathContext(MathContext newMathContext) {
@@ -335,101 +288,14 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 
-	private void nullCheck(Object value, ParserRuleContext ctx) {
-	    if (value == null)
-		throw new CalcExprException("Value must not be null", ctx);
-	}
-
-
-	private BigDecimal toDecimalValue(Object value, ParserRuleContext ctx) {
-	    nullCheck(value, ctx);
-
-	    if (value instanceof BigDecimal)
-		return (BigDecimal)value;
-	    else if (value instanceof BigInteger)
-		return new BigDecimal((BigInteger)value);
-	    else if (value instanceof String)
-		return new BigDecimal((String)value);
-	    else if (value instanceof Boolean)
-		return ((Boolean)value).booleanValue() ? BigDecimal.ONE : BigDecimal.ZERO;
-	    else if (value instanceof Double || value instanceof Float)
-		return new BigDecimal(((Number)value).doubleValue());
-	    else if (value instanceof Number)
-		return BigDecimal.valueOf(((Number)value).longValue());
-
-	    throw new CalcExprException("Unable to convert value of type '" + value.getClass().getSimpleName() + "' to decimal", ctx);
-	}
-
 	private BigDecimal getDecimalValue(ParserRuleContext ctx) {
 	    return toDecimalValue(visit(ctx), ctx);
-	}
-
-	private double getDoubleValue(ParserRuleContext ctx) {
-	    BigDecimal dec = getDecimalValue(ctx);
-
-	    return dec.doubleValue();
-	}
-
-	private BigDecimal getDecimalTrigValue(ParserRuleContext ctx) {
-	    BigDecimal value = getDecimalValue(ctx);
-
-	    if (trigMode == TrigMode.DEGREES)
-		value = value.multiply(piWorker.getPiOver180(), mc);
-
-	    return value;
-	}
-
-	private BigInteger toIntegerValue(Object value, ParserRuleContext ctx) {
-	    BigDecimal decValue = toDecimalValue(value, ctx);
-
-	    try {
-		return decValue.toBigIntegerExact();
-	    }
-	    catch (ArithmeticException ae) {
-		throw new CalcExprException(ae, ctx);
-	    }
 	}
 
 	private BigInteger getIntegerValue(ParserRuleContext ctx) {
 	    return toIntegerValue(visit(ctx), ctx);
 	}
 
-	private int getShiftValue(ParserRuleContext ctx) {
-	    BigDecimal value = getDecimalValue(ctx);
-
-	    try {
-		return value.intValueExact();
-	    }
-	    catch (ArithmeticException ae) {
-		throw new CalcExprException(ae, ctx);
-	    }
-	}
-
-	private double getTrigValue(ParserRuleContext ctx) {
-	    return getDecimalTrigValue(ctx).doubleValue();
-	}
-
-	private BigDecimal returnTrigValue(double value) {
-	    BigDecimal radianValue = new BigDecimal(value, mcDouble);
-
-	    if (trigMode == TrigMode.DEGREES)
-		return radianValue.divide(piWorker.getPiOver180(), mcDouble);
-
-	    return radianValue;
-	}
-
-	private Boolean toBooleanValue(Object value, ParserRuleContext ctx) {
-	    nullCheck(value, ctx);
-
-	    try {
-		boolean boolValue = CharUtil.getBooleanValue(value);
-		return Boolean.valueOf(boolValue);
-	    }
-	    catch (IllegalArgumentException iae) {
-		throw new CalcExprException(iae, ctx);
-	    }
-	}
-	
 	private Boolean getBooleanValue(ParserRuleContext ctx) {
 	    return toBooleanValue(visit(ctx), ctx);
 	}
@@ -445,77 +311,43 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		return value.toString();
 	}
 
-	private String toString(Object result) {
-	    return toString(result, true, false, "");
+	private double getDoubleValue(ParserRuleContext ctx) {
+	    BigDecimal dec = getDecimalValue(ctx);
+
+	    return dec.doubleValue();
 	}
 
-	@SuppressWarnings("unchecked")
-	private String toString(Object result, boolean quote, boolean pretty, String indent) {
-	    if (result == null) {
-		return quote ? "<null>" : "";
-	    }
-	    else if (result instanceof String) {
-		if (quote)
-		    return CharUtil.addDoubleQuotes((String)result);
-		else
-		    return (String)result;
-	    }
-	    else if (result instanceof BigDecimal) {
-		return ((BigDecimal)result).toPlainString();
-	    }
-	    else if (result instanceof Map) {
-		return toString((Map<String, Object>)result, quote, pretty, indent);
-	    }
-	    else if (result instanceof List) {
-		return toString((List<Object>)result, quote, pretty, indent);
-	    }
+	private int getShiftValue(ParserRuleContext ctx) {
+	    BigDecimal value = getDecimalValue(ctx);
 
-	    return result.toString();
+	    try {
+		return value.intValueExact();
+	    }
+	    catch (ArithmeticException ae) {
+		throw new CalcExprException(ae, ctx);
+	    }
 	}
 
-	private String toString(Map<String, Object> map, boolean quote, boolean pretty, String indent) {
-	    String myIndent = indent + "  ";
-	    StringBuilder buf = new StringBuilder();
-	    if (map.size() > 0) {
-		boolean comma = false;
-		buf.append(pretty ? "{\n" : "{ ");
-		for (Map.Entry<String, Object> entry : map.entrySet()) {
-		    if (comma)
-			buf.append(pretty ? ",\n" : ", ");
-		    else
-			comma = true;
-		    if (pretty) buf.append(myIndent);
-		    buf.append(entry.getKey()).append(": ");
-		    buf.append(toString(entry.getValue(), quote, pretty, myIndent));
-		}
-		buf.append(pretty ? "\n" + indent + "}" : " }");
-	    }
-	    else {
-		buf.append("{ }");
-	    }
-	    return buf.toString();
+	private BigDecimal getDecimalTrigValue(ParserRuleContext ctx) {
+	    BigDecimal value = getDecimalValue(ctx);
+
+	    if (trigMode == TrigMode.DEGREES)
+		value = value.multiply(piWorker.getPiOver180(), mc);
+
+	    return value;
 	}
 
-	private String toString(List<Object> list, boolean quote, boolean pretty, String indent) {
-	    String myIndent = indent + "  ";
-	    StringBuilder buf = new StringBuilder();
-	    if (list.size() > 0) {
-		boolean comma = false;
-		buf.append(pretty ? "[\n" : "[ ");
-		for (Object value : list) {
-		    if (comma)
-			buf.append(pretty ? ",\n" : ", ");
-		    else
-			comma = true;
-		    if (pretty) buf.append(myIndent);
-		    buf.append(toString(value, quote, pretty, myIndent));
-		}
-		buf.append(pretty ? "\n" + indent + "]" : " ]");
-	    }
-	    else {
-		buf.append("[ ]");
-	    }
-	    return buf.toString();
+	private double getTrigValue(ParserRuleContext ctx) {
+	    return getDecimalTrigValue(ctx).doubleValue();
+	}
+
+	private BigDecimal returnTrigValue(double value) {
+	    BigDecimal radianValue = new BigDecimal(value, mcDouble);
+
+	    if (trigMode == TrigMode.DEGREES)
+		return radianValue.divide(piWorker.getPiOver180(), mcDouble);
+
+	    return radianValue;
 	}
 
 	private int compareValues(ParserRuleContext ctx1, ParserRuleContext ctx2) {
@@ -563,7 +395,6 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    throw new CalcExprException("Unknown value type: " + e1.getClass().getSimpleName(), ctx1);
 	}
 
-
 	@Override
 	public Object visitDecimalDirective(CalcParser.DecimalDirectiveContext ctx) {
 	    BigDecimal dPrecision = new BigDecimal(ctx.numberOption().NUMBER().getText());
@@ -574,7 +405,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 	    catch (ArithmeticException ae) {
 		throw new CalcExprException("Decimal precision of " + dPrecision + " must be an integer value", ctx);
-	    }	
+	    }
 
 	    if (precision == 0) {
 		setMathContext(MathContext.UNLIMITED);
@@ -677,7 +508,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitEchoDirective(CalcParser.EchoDirectiveContext ctx) {
 	    CalcParser.ExprContext expr = ctx.expr();
-	    String msg = (expr != null) ? toString(visit(expr)) : "";
+	    String msg = (expr != null) ? toStringValue(visit(expr)) : "";
 
 	    displayer.displayMessage(CharUtil.stripAnyQuotes(msg, true));
 
@@ -774,20 +605,6 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 
-	private void convert(byte[] bytes, int radix, StringBuilder buf) {
-	    int padWidth = 0;
-	    switch (radix) {
-		case 2:  padWidth = 8; break;
-		case 8:  padWidth = 3; break;
-		case 16: padWidth = 2; break;
-	    }
-	    for (byte b : bytes) {
-		String number = Integer.toString(Byte.toUnsignedInt(b), radix);
-		CharUtil.padToWidth(buf, number, padWidth, '0', Justification.RIGHT);
-	    }
-	}
-
-
 	@Override
 	public Object visitExprStmt(CalcParser.ExprStmtContext ctx) {
 	    Object result           = visit(ctx.expr());
@@ -819,7 +636,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    case 'j':
 		    case 'J':
 			valueBuf.append('\n');
-			valueBuf.append(toString(result, true, true, ""));
+			valueBuf.append(toStringValue(result, true, true, ""));
 			break;
 		    case 'X':
 			toUpperCase = true;
@@ -900,7 +717,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		result = resultString = toUpperCase ? valueBuf.toString().toUpperCase() : valueBuf.toString();
 	    }
 	    else {
-		resultString = toString(result);
+		resultString = toStringValue(result);
 	    }
 
 	    if (!silent) displayer.displayResult(exprString, resultString);
@@ -1078,24 +895,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    Object e1 = visit(ctx.expr(0));
 	    Object e2 = visit(ctx.expr(1));
 
-	    if (e1 == null && e2 == null)
-		return null;
-
-	    // Do string concatenation if either expr is a string
-	    if (e1 instanceof String || e2 instanceof String) {
-		String s1 = e1 == null ? "" : e1.toString();
-		String s2 = e2 == null ? "" : e2.toString();
-		return s1 + s2;
-	    }
-
-	    // TODO: what to do with char?
-	    // could add char codepoint values, or concat strings
-
-	    // Otherwise, numeric values get added numerically
-	    BigDecimal d1 = toDecimalValue(e1, ctx);
-	    BigDecimal d2 = toDecimalValue(e2, ctx);
-
-	    return d1.add(d2, mc);
+	    return addOp(e1, e2, mc, ctx);
 	}
 
 	@Override
@@ -1588,7 +1388,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 		    String expr = rawValue.substring(pos + 2, nextPos);
 		    Object exprValue = Calc.processString(expr, true);
-		    output.append(toString(exprValue, false, false, ""));
+		    output.append(toStringValue(exprValue, false, false, ""));
 		    lastPos = nextPos;
 		}
 		else if (isIdentifierStart(rawValue.charAt(pos + 1))) {
@@ -1596,7 +1396,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    while (identPos < rawValue.length() && isIdentifierPart(rawValue.charAt(identPos)))
 			identPos++;
 		    String varName = rawValue.substring(pos + 1, identPos);
-		    output.append(toString(variables.get(varName), false, false, ""));
+		    output.append(toStringValue(variables.get(varName), false, false, ""));
 		    lastPos = identPos - 1;
 		}
 		else
@@ -1763,10 +1563,10 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    throw new CalcExprException("Variable '" + arrLValue.toString() + "' already has a non-array value", var);
 		}
 
-                // Set empty values up to the index desired
-                int size = list.size();
-                for (int i = size; i <= index; i++)
-                    list.add(null);
+		// Set empty values up to the index desired
+		int size = list.size();
+		for (int i = size; i <= index; i++)
+		    list.add(null);
 
 		return new LValueContext(arrLValue, list, index);
 	    }
@@ -1798,7 +1598,86 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
+	public Object visitAddAssignExpr(CalcParser.AddAssignExprContext ctx) {
+	    LValueContext lValue = getLValue(ctx.var());
+
+	    Object e1 = getContextObject(lValue);
+	    Object e2 = visit(ctx.expr());
+
+	    Object result = addOp(e1, e2, mc, ctx);
+
+	    putContextObject(lValue, result);
+
+	    return result;
+	}
+
+	@Override
+	public Object visitSubAssignExpr(CalcParser.SubAssignExprContext ctx) {
+	    LValueContext lValue = getLValue(ctx.var());
+
+	    BigDecimal d1 = toDecimalValue(getContextObject(lValue), ctx);
+	    BigDecimal d2 = getDecimalValue(ctx.expr());
+
+	    BigDecimal result = d1.subtract(d2, mc);
+
+	    putContextObject(lValue, result);
+
+	    return result;
+	}
+
+	@Override
+	public Object visitMultAssignExpr(CalcParser.MultAssignExprContext ctx) {
+	    LValueContext lValue = getLValue(ctx.var());
+
+	    BigDecimal d1 = toDecimalValue(getContextObject(lValue), ctx);
+	    BigDecimal d2 = getDecimalValue(ctx.expr());
+
+	    BigDecimal result = d1.multiply(d2, mc);
+
+	    putContextObject(lValue, result);
+
+	    return result;
+	}
+
+	@Override
+	public Object visitDivAssignExpr(CalcParser.DivAssignExprContext ctx) {
+	    LValueContext lValue = getLValue(ctx.var());
+
+	    BigDecimal d1 = toDecimalValue(getContextObject(lValue), ctx);
+	    BigDecimal d2 = getDecimalValue(ctx.expr());
+
+	    try {
+		BigDecimal result = d1.divide(d2, mc);
+
+		putContextObject(lValue, result);
+
+		return result;
+	    }
+	    catch (ArithmeticException ae) {
+		throw new CalcExprException(ae, ctx);
+	    }
+	}
+
+	@Override
+	public Object visitModAssignExpr(CalcParser.ModAssignExprContext ctx) {
+	    LValueContext lValue = getLValue(ctx.var());
+
+	    BigDecimal d1 = toDecimalValue(getContextObject(lValue), ctx);
+	    BigDecimal d2 = getDecimalValue(ctx.expr());
+
+	    try {
+		BigDecimal result = d1.remainder(d2, mc);
+
+		putContextObject(lValue, result);
+
+		return result;
+	    }
+	    catch (ArithmeticException ae) {
+		throw new CalcExprException(ae, ctx);
+	    }
+	}
+
+	@Override
 	public Object visitAssignExpr(CalcParser.AssignExprContext ctx) {
 	    Object value = visit(ctx.expr());
 
