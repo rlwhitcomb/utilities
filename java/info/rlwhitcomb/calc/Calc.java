@@ -64,7 +64,10 @@
  *	06-Jan-2021 (rlwhitcomb)
  *	    Display output text size (for large results).
  *	06-Jan-2021 (rlwhitcomb)
- *	    Use a background thread in the GUI to do the calculations.
+ *	    Use a background thread in the GUI to do the calculations
+ *	    so the GUI remains responsive throughout.
+ *	07-Jan-2021 (rlwhitcomb)
+ *	    New directive to set the "resultsOnly" mode.
  */
 package info.rlwhitcomb.calc;
 
@@ -270,10 +273,17 @@ public class Calc
 	}
 
 
-	public static void setDebugMode(boolean mode) {
+	public static boolean setDebugMode(boolean mode) {
+	    boolean oldMode = debug;
 	    debug = mode;
+	    return oldMode;
 	}
 
+	public static boolean setResultsOnlyMode(boolean mode) {
+	    boolean oldMode = resultsOnly;
+	    resultsOnly = mode;
+	    return oldMode;
+	}
 
 	/**
 	 * A parser error strategy that abandons the parse without trying to recover.
@@ -549,10 +559,12 @@ public class Calc
 		    guiMode = false;
 		    break;
 		case "debug":
+		case "deb":
 		case "d":
 		    debug = true;
 		    break;
 		case "nodebug":
+		case "nodeb":
 		case "no":
 		    debug = false;
 		    break;
@@ -564,6 +576,7 @@ public class Calc
 		case "nocolors":
 		case "nocolor":
 		case "nocol":
+		case "noc":
 		    colors = false;
 		    break;
 		case "timing":
@@ -576,6 +589,8 @@ public class Calc
 		case "not":
 		    timing = false;
 		    break;
+		case "resultsonly":
+		case "resultonly":
 		case "results":
 		case "result":
 		case "res":

@@ -97,6 +97,8 @@
  *	    Add the "$include" directive.
  *	05-Jan-2021 (rlwhitcomb)
  *	    Allow unlimited precision setting (still limit pi to 12,000 digits though).
+ *	07-Jan-2021 (rlwhitcomb)
+ *	    New handling of "mode" directives; add "$resultsonly".
  */
 package info.rlwhitcomb.calc;
 
@@ -106,7 +108,9 @@ import java.math.BigInteger;
 import java.math.MathContext;
 import java.math.RoundingMode;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -216,6 +220,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	/** Silent flag (set to true) while evaluating nested expressions. */
 	private boolean silent = false;
 
+	/** Stack of previous "debug" mode values. */
+	private Deque<Boolean> debugModeStack = new ArrayDeque<>();
+
+	/** Stack of previous "resultsOnly" mode values. */
+	private Deque<Boolean> resultsOnlyModeStack = new ArrayDeque<>();
+
 
 	public boolean getSilent() {
 	    return silent;
@@ -227,9 +237,11 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    return oldSilent;
 	}
 
-	private void displayActionMessage(String message) {
-	    if (initialized && !silent)
+	private void displayActionMessage(String messageFormat, Object... args) {
+	    if (initialized && !silent) {
+		String message = String.format(messageFormat, args);
 		displayer.displayActionMessage(message);
+	    }
 	}
 
 	private StringBuilder getTreeText(ParserRuleContext ctx) {
@@ -310,13 +322,16 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		piWorker.calculate(mcPi);
 	    }
 
-	    displayActionMessage("Precision is now " + ((prec == 0) ? "unlimited." : (prec + " digits.")));
+	    if (prec == 0)
+		displayActionMessage("Precision is now unlimited.");
+	    else
+		displayActionMessage("Precision is now %1$d digits.", prec);
 	}
 
 	private void setTrigMode(TrigMode newTrigMode) {
 	    trigMode = newTrigMode;
 
-	    displayActionMessage("Trig mode is now " + trigMode + ".");
+	    displayActionMessage("Trig mode is now %1$s.", trigMode);
 	}
 
 
@@ -551,7 +566,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitDecimalDirective(CalcParser.DecimalDirectiveContext ctx) {
-	    BigDecimal dPrecision = new BigDecimal(ctx.NUMBER().getText());
+	    BigDecimal dPrecision = new BigDecimal(ctx.numberOption().NUMBER().getText());
 	    int precision = 0;
 
 	    try {
@@ -633,8 +648,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitClearDirective(CalcParser.ClearDirectiveContext ctx) {
-	    List<TerminalNode> ids = ctx.ID();
-	    if (ids.isEmpty()) {
+	    CalcParser.IdListContext idList = ctx.idList();
+	    List<TerminalNode> ids;
+	    if (idList == null || (ids = idList.ID()).isEmpty()) {
 		variables.clear();
 		displayActionMessage("All variables cleared.");
 	    }
@@ -642,6 +658,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		StringBuilder vars = new StringBuilder();
 		for (TerminalNode node : ids) {
 		    String varName = node.getText();
+		    if (varName.equals("<missing ID>"))
+			continue;
 		    variables.remove(varName);
 		    if (vars.length() > 0)
 			vars.append(", ");
@@ -651,7 +669,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    vars.insert(0, "Variable ");
 		else
 		    vars.insert(0, "Variables ");
-		displayActionMessage(vars + " cleared.");
+		displayActionMessage("%1$s cleared.", vars);
 	    }
 	    return null;
 	}
@@ -681,9 +699,77 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitDebugDirective(CalcParser.DebugDirectiveContext ctx) {
-	    boolean mode = ctx.TRUE() != null;
-	    Calc.setDebugMode(mode);
-	    displayActionMessage("Debug mode set to " + mode + ".");
+	    boolean push = true;
+	    boolean mode;
+	    String option = ctx.modeOption().getText().toLowerCase();
+	    switch (option) {
+		case "true":
+		case "on":
+		    mode = true;
+		    break;
+		case "false":
+		case "off":
+		    mode = false;
+		    break;
+		case "pop":
+		case "prev":
+		case "previous":
+		    if (debugModeStack.isEmpty())
+			mode = false;
+		    else
+			mode = debugModeStack.pop();
+		    push = false;
+		    break;
+		case "":
+		default:
+		    // Syntax error -> don't do anything
+		    return null;
+	    }
+
+	    boolean previousMode = Calc.setDebugMode(mode);
+	    displayActionMessage("Debug mode set to %1$s.", mode);
+	    if (push)
+		debugModeStack.push(previousMode);
+
+	    return null;
+	}
+
+	@Override
+	public Object visitResultsOnlyDirective(CalcParser.ResultsOnlyDirectiveContext ctx) {
+	    boolean push = true;
+	    boolean mode;
+	    String option = ctx.modeOption().getText().toLowerCase();
+	    switch (option) {
+		case "true":
+		case "on":
+		    mode = true;
+		    break;
+		case "false":
+		case "off":
+		    mode = false;
+		    break;
+		case "pop":
+		case "prev":
+		case "previous":
+		    if (resultsOnlyModeStack.isEmpty())
+			mode = false;
+		    else
+			mode = resultsOnlyModeStack.pop();
+		    push = false;
+		    break;
+		case "":
+		default:
+		    // Syntax error -> don't do anything
+		    return null;
+	    }
+
+	    // Switch the mode off in order to display the message, then set to the new mode
+	    boolean previousMode = Calc.setResultsOnlyMode(false);
+	    displayActionMessage("Results-only mode set to %1$s.", mode);
+	    Calc.setResultsOnlyMode(mode);
+	    if (push)
+		resultsOnlyModeStack.push(previousMode);
+
 	    return null;
 	}
 

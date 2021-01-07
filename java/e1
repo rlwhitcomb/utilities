@@ -4,7 +4,7 @@ $echo
 $decimal(50)
 52+27
 3.4 + 5
-34 + 5,x
+34 + 5;x
 PI
 sin(pi/3)
 4 & 7
@@ -14,7 +14,7 @@ $Double
 atan2(4, 5)
 14/7;12/4;13/9
 a = 1; b = 2; a+b;
-a<=>b;a<=b;b<a;1>2;2>=1;
+a<=>b; a<=b; b<a; 1>2; 2>=1;
 $DEFAULT
 1.2+3.4
 1/7
@@ -98,12 +98,12 @@ gcd(27*2, 3*9*18)
 15 & 7
 31 ^ 10
 
-0b0011 ~& 0b0101,b
-0b0011 ~| 0b0101,b
-0b0011  ^ 0b0101,b
-~0b0110,b
-0b0011 ~^ 0b0101,b
-0x3FF &~ 0xFF0,X
+0b0011 ~& 0b0101;b
+0b0011 ~| 0b0101;b
+0b0011  ^ 0b0101;b
+~0b0110;b
+0b0011 ~^ 0b0101;b
+0x3FF &~ 0xFF0;X
 
 'abc' != "ABC" && 0 != 1
 
@@ -112,19 +112,19 @@ false ^^ true
 true ^^ false
 true ^^ true
 
-0xFFFF ^ 0xAAAA,X
+0xFFFF ^ 0xAAAA;X
 012
-10,o
-0b1010101010,x
-0x2aa,b
-~ 0x7FFF,X
-~ 0x7FFF,o
-~ 0x7FFF,b
-255,o
-123,b
-'def',o
-'abc',b
-'Hello',X
+10;o
+0b1010101010;x
+0x2aa;b
+~ 0x7FFF;X
+~ 0x7FFF;o
+~ 0x7FFF;b
+255;o
+123;b
+'def';o
+'abc';b
+'Hello';X
 
 max('123', 456, 789)
 min(123, '-1', '14')
@@ -150,16 +150,16 @@ $decimal 50; pi
 $decimal 10000; e
 
 $binary
-1024**2,k
+1024**2;k
 $ten
-1000**4,k
+1000**4;k
 $mixed
-1024**3,k
+1024**3;k
 
 100MB
 2EB
 2EiB
-900KB,k
+900KB;k
 300PB
 450PiB
 
@@ -188,10 +188,10 @@ c
 d = [ 1, { start:1, end: 2 }, { px:0, py:0}, "Area" ]
 d
 d[0] = 2; d[1].start = 3; d[2].py = 4; d[3] = "Bounding " + d[3];
-d,j
+d;j
 
 f = { coords: [1, 1, 4, 5], name: "box" }
-f,j
+f;j
 
 1 == 2 ? 'impossible' : 'correct'
 2! < 2**2 ? 'true' : 'not likely'
@@ -200,7 +200,7 @@ _min = min_plus_1 = x < y ? x + 1 : y + 1
 _min
 
 y = x = 7 + 1
-y;x
+y; x;
 
 $clear m
 m[0] = m[1] = m[2] = 3;
@@ -215,9 +215,9 @@ a = 128
 `a + 1 = ${a + 1}`
 `5! = ${5!} !!`
 `g$$`
-`a = ${a,x}`
-`a = ${a,%}`
-`a = ${a,k}`
+`a = ${a;x}`
+`a = ${a;%}`
+`a = ${a;k}`
 
 a = { b : [ 1, 2, 3 ], c : { d: 1, f: true, g: 'abcd' } } 
 a
@@ -230,7 +230,7 @@ a
 a.b[2] = a.b[0] + a.c.d
 a
 a.c.h = a.c.g + ": " + `a.b[2] = ${a.b[2]}`
-a,j
+a;j
 b = [ [ [ 1,2], [3,4], [5, 6]]]
 b[0][0][1] = 11
 b[1] = [ [ 7,9], [0,1], [3,4] ]
@@ -238,7 +238,7 @@ b
 
 $def
 p = {b:2, c: { d:true }, "e":e }
-p,j
+p;j
 
 $echo
 $echo "End of expression tests (suite 1)."

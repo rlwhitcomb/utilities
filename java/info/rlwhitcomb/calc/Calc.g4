@@ -83,6 +83,9 @@
  *	    Add "$include" directive.
  *	05-Jan-2021 (rlwhitcomb)
  *	    Unlimited precision directive.
+ *	07-Jan-2021 (rlwhitcomb)
+ *	    $resultsonly directive.
+ *	    Change format leading to ';' to reduce confusion.
  */
 
 grammar Calc;
@@ -212,7 +215,7 @@ value
    ;
 
 directive
-   : DECIMAL ( '(' NUMBER ')' | NUMBER )     # decimalDirective
+   : DECIMAL numberOption        # decimalDirective
    | DEFAULT                     # defaultDirective
    | DOUBLE                      # doubleDirective
    | FLOAT                       # floatDirective
@@ -221,12 +224,35 @@ directive
    | RADIANS                     # radiansDirective
    | BINARY                      # binaryDirective
    | SI                          # siDirective
-   | MIXED			 # mixedDirective
-   | CLEAR ( ID ( ',' ID ) * )?  # clearDirective
+   | MIXED                       # mixedDirective
+   | CLEAR idList ?              # clearDirective
    | ECHO expr ?                 # echoDirective
    | INCLUDE expr                # includeDirective
-   | DEBUG ( TRUE | FALSE )      # debugDirective 
+   | DEBUG modeOption            # debugDirective
+   | RESULTSONLY modeOption      # resultsOnlyDirective
    ;
+
+numberOption
+   : '(' NUMBER ')'
+   | NUMBER
+   ;
+
+idList
+   : '[' ID ( ',' ID ) * ']'
+   | ID ( ',' ID ) *
+   | '[' ']'
+   ;
+
+modeOption
+   : TRUE
+   | FALSE
+   | 'on'
+   | 'off'
+   | 'pop'
+   | 'previous'
+   | 'prev'
+   ;
+
 
 /* Lexer rules start here */
 
@@ -375,12 +401,16 @@ INCLUDE
    ;
 
 DEBUG
-   : DIR  D E B U G
+   : DIR  ( D E B | D E B U G )
+   ;
+
+RESULTSONLY
+   : DIR  ( R E S | R E S U L T | R E S U L T S | R E S U L T O N L Y | R E S U L T S O N L Y )
    ;
 
 
 FORMAT
-   : ',' ( X | T | H | O | B | K | J | '%' )
+   : ';' ( X | T | H | O | B | K | J | '%' )
    ;
 
 STRING

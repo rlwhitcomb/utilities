@@ -7,7 +7,7 @@ $include "e4"
 
 $echo "Back to main file."
 msg
-poem,j
+poem;j
 
 $echo
 $echo "Done with $include tests."
