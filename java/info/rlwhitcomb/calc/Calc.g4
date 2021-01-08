@@ -90,6 +90,8 @@
  *	    Start of the +=, -=, etc. assign operators.
  *	07-Jan-2021 (rlwhitcomb)
  *	    Allow comments.
+ *	07-Jan-2021 (rlwhitcomb)
+ *	    Remaining assignment operators; update associativity of operators.
  */
 
 grammar Calc;
@@ -109,16 +111,16 @@ expr
    | obj                                 # objExpr
    | arr                                 # arrExpr
    | var                                 # varExpr
+   | '(' expr ')'                        # parenExpr
    | var '++'                            # postIncExpr
    | var '--'                            # postDecExpr
-   | '++' var                            # preIncExpr
-   | '--' var                            # preDecExpr
-   | '+' expr                            # posateExpr
-   | '-' expr                            # negateExpr
-   | '~' expr                            # bitNotExpr
-   | '!' expr                            # booleanNotExpr
+   |<assoc=right> '++' var               # preIncExpr
+   |<assoc=right> '--' var               # preDecExpr
+   |<assoc=right> '+' expr               # posateExpr
+   |<assoc=right> '-' expr               # negateExpr
+   |<assoc=right> '!' expr               # booleanNotExpr
+   |<assoc=right> '~' expr               # bitNotExpr
    | expr '!'                            # factorialExpr
-   | '(' expr ')'                        # parenExpr
    | ABS expr                            # absExpr
    | SIN expr                            # sinExpr
    | COS expr                            # cosExpr
@@ -147,35 +149,20 @@ expr
    | expr '%' expr                       # modulusExpr
    | expr '+' expr                       # addExpr
    | expr '-' expr                       # subtractExpr
-   | expr '>>>' expr                     # shiftRightUnsignedExpr
-   | expr '>>' expr                      # shiftRightExpr
-   | expr '<<' expr                      # shiftLeftExpr
+   | expr SHIFT_OP expr                  # shiftExpr
    | expr '<=>' expr                     # spaceshipExpr
-   | expr '<=' expr                      # lessEqualExpr
-   | expr '<' expr                       # lessExpr
-   | expr '>=' expr                      # greaterEqualExpr
-   | expr '>' expr                       # greaterExpr
-   | expr STRICTEQUAL expr               # strictEqualExpr
-   | expr STRICTNOTEQUAL expr            # strictNotEqualExpr
-   | expr EQUAL expr                     # equalExpr
-   | expr NOTEQUAL expr                  # notEqualExpr
-   | expr BIT_AND expr                   # bitAndExpr
-   | expr BIT_NAND expr                  # bitNandExpr
-   | expr BIT_ANDNOT expr                # bitAndNotExpr
-   | expr BIT_XOR expr                   # bitXorExpr
-   | expr BIT_XNOR expr                  # bitXnorExpr
-   | expr BIT_OR expr                    # bitOrExpr
-   | expr BIT_NOR expr                   # bitNorExpr
-   | expr BOOL_AND expr                  # booleanAndExpr
-   | expr BOOL_XOR expr                  # booleanXorExpr
-   | expr BOOL_OR expr                   # booleanOrExpr
-   | expr '?' expr ':' expr              # eitherOrExpr
-   | var ADDASSIGN expr                  # addAssignExpr
-   | var SUBASSIGN expr                  # subAssignExpr
-   | var MULTASSIGN expr                 # multAssignExpr
-   | var DIVASSIGN expr                  # divAssignExpr
-   | var MODASSIGN expr                  # modAssignExpr
-   | var ASSIGN expr                     # assignExpr
+   | expr COMPARE_OP expr                # compareExpr
+   | expr BIT_OP expr                    # bitExpr
+   | expr BOOL_OP expr                   # booleanExpr
+   |<assoc=right> expr '?' expr ':' expr # eitherOrExpr
+   |<assoc=right> var ASSIGN expr        # assignExpr
+   |<assoc=right> var '+=' expr          # addAssignExpr
+   |<assoc=right> var '-=' expr          # subAssignExpr
+   |<assoc=right> var '*=' expr          # multAssignExpr
+   |<assoc=right> var '/=' expr          # divAssignExpr
+   |<assoc=right> var '%=' expr          # modAssignExpr
+   |<assoc=right> var BIT_ASSIGN expr    # bitAssignExpr
+   |<assoc=right> var SHIFT_ASSIGN expr  # shiftAssignExpr
    ;
 
 expr2
@@ -326,45 +313,56 @@ FIB      : F I B ;
 ID     : [a-zA-Z_] [a-zA-Z_0-9]* ;
 
 
-BOOL_AND       : '&&' ;
+SHIFT_ASSIGN
+       : '>>>='
+       | '>>='
+       | '<<='
+       ;
 
-BIT_AND        : '&' ;
+SHIFT_OP
+       : '>>>'
+       | '>>'
+       | '<<'
+       ;
 
-BIT_NAND       : '~&' ;
+COMPARE_OP
+       : '<='
+       | '<'
+       | '>='
+       | '>'
+       | '==='
+       | '!=='
+       | '=='
+       | '!='
+       ;
 
-BIT_ANDNOT     : '&~' ;
+BIT_ASSIGN
+       : '&='
+       | '~&='
+       | '&~='
+       | '^='
+       | '~^='
+       | '|='
+       | '~|='
+       ;
 
-BOOL_OR        : '||' ;
+BOOL_OP
+       : '&&'
+       | '||'
+       | '^^'
+       ;
 
-BIT_OR         : '|' ;
+BIT_OP
+       : '&'
+       | '~&'
+       | '&~'
+       | '^'
+       | '~^'
+       | '|'
+       | '~|'
+       ;
 
-BIT_NOR        : '~|' ;
-
-BOOL_XOR       : '^^' ;
-
-BIT_XOR        : '^' ;
-
-BIT_XNOR       : '~^' ;
-
-STRICTEQUAL    : '===' ;
-
-EQUAL          : '==' ;
-
-ADDASSIGN      : '+=' ;
-
-SUBASSIGN      : '-=' ;
-
-MULTASSIGN     : '*=' ;
-
-DIVASSIGN      : '/=' ;
-
-MODASSIGN      : '%=' ;
-
-ASSIGN         : '=' ;
-
-STRICTNOTEQUAL : '!==' ;
-
-NOTEQUAL       : '!=' ;
+ASSIGN : '=' ;
 
 
 DECIMAL

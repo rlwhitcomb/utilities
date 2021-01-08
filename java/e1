@@ -255,6 +255,15 @@ h*=g
 i/=g
 j %= 10**40;
 j
+g = 0377;o; g&=0177;o
+h = 0x400;x; h|=0x080;o
+i = 0xaaa;x; i^=0x554;x
+g;o; h;x; i;x;
+g = 0x4000;x
+g >>>= 3;x
+g >>= 2;x
+g<<=2;x
+g;x
 
 # Operations on parts of arrays and objects
 a = { b : [ 1, 2, 3 ], c : { d: 1, f: true, g: 'abcd' } } 

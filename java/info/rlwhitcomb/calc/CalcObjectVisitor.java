@@ -102,6 +102,9 @@
  *	07-Jan-2021 (rlwhitcomb)
  *	    Move common methods into CalcUtil.
  *	    Start of the +=, -=, etc. assign operators.
+ *	07-Jan-2021 (rlwhitcomb)
+ *	    The rest of the assign operators.
+ *	    Reduce common code.
  */
 package info.rlwhitcomb.calc;
 
@@ -393,6 +396,10 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 
 	    throw new CalcExprException("Unknown value type: " + e1.getClass().getSimpleName(), ctx1);
+	}
+
+	private void unknownOp(String op, ParserRuleContext ctx) {
+	    throw new CalcExprException("Unknown operator '" + op + "'", ctx);
 	}
 
 	@Override
@@ -1149,34 +1156,40 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	@Override
-	public Object visitShiftRightUnsignedExpr(CalcParser.ShiftRightUnsignedExprContext ctx) {
+	public Object visitShiftExpr(CalcParser.ShiftExprContext ctx) {
 	    BigInteger e1 = getIntegerValue(ctx.expr(0));
 	    int e2        = getShiftValue(ctx.expr(1));
+	    String op     = ctx.SHIFT_OP().getText();
 
-	    // Convert to Long because ">>>" doesn't make sense for BigInteger (unlimited size) values
-	    try {
-		long longValue = e1.longValueExact();
-		return BigInteger.valueOf(longValue >>> e2);
+	    BigInteger result = null;
+
+	    switch (op) {
+		case ">>>":
+		    // Convert to Long because ">>>" doesn't make sense for BigInteger (unlimited size) values
+		    try {
+			long longValue = e1.longValueExact();
+			result = BigInteger.valueOf(longValue >>> e2);
+		    }
+		    catch (ArithmeticException ae) {
+			throw new CalcExprException(ae, ctx);
+		    }
+		    break;
+
+		case ">>":
+		    result = e1.shiftRight(e2);
+		    break;
+
+		case "<<":
+		    result = e1.shiftLeft(e2);
+		    break;
+
+		default:
+		    unknownOp(op, ctx);
+		    break;
 	    }
-	    catch (ArithmeticException ae) {
-		throw new CalcExprException(ae, ctx);
-	    }
-	}
 
-	@Override
-	public Object visitShiftRightExpr(CalcParser.ShiftRightExprContext ctx) {
-	    BigInteger e1 = getIntegerValue(ctx.expr(0));
-	    int e2        = getShiftValue(ctx.expr(1));
+	    return result;
 
-	    return e1.shiftRight(e2);
-	}
-
-	@Override
-	public Object visitShiftLeftExpr(CalcParser.ShiftLeftExprContext ctx) {
-	    BigInteger e1 = getIntegerValue(ctx.expr(0));
-	    int e2        = getShiftValue(ctx.expr(1));
-
-	    return e1.shiftLeft(e2);
 	}
 
 	@Override
@@ -1214,146 +1227,129 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	@Override
-	public Object visitLessEqualExpr(CalcParser.LessEqualExprContext ctx) {
-	    int cmp = compareValues(ctx.expr(0), ctx.expr(1));
-	    return Boolean.valueOf(cmp <= 0);
+	public Object visitCompareExpr(CalcParser.CompareExprContext ctx) {
+	    ParserRuleContext expr1 = ctx.expr(0);
+	    ParserRuleContext expr2 = ctx.expr(1);
+	    int cmp;
+
+	    String op = ctx.COMPARE_OP().getText();
+	    switch (op) {
+		case "===":
+		case "!==":
+		    cmp = compareValues(expr1, expr2, true, true);
+		    break;
+		case "==":
+		case "!=":
+		    cmp = compareValues(expr1, expr2, false, true);
+		    break;
+		default:
+		    cmp = compareValues(expr1, expr2);
+		    break;
+	    }
+
+	    boolean result = false;
+
+	    switch (op) {
+		case "<=":
+		    result = (cmp <= 0);
+		    break;
+		case "<":
+		    result = (cmp < 0);
+		    break;
+		case ">=":
+		    result = (cmp >= 0);
+		    break;
+		case ">":
+		    result = (cmp > 0);
+		    break;
+		case "===":
+		case "==":
+		    result = (cmp == 0);
+		    break;
+		case "!==":
+		case "!=":
+		    result = (cmp != 0);
+		    break;
+		default:
+		    unknownOp(op, ctx);
+		    break;
+	    }
+
+	    return Boolean.valueOf(result);
 	}
 
 	@Override
-	public Object visitLessExpr(CalcParser.LessExprContext ctx) {
-	    int cmp = compareValues(ctx.expr(0), ctx.expr(1));
-	    return Boolean.valueOf(cmp < 0);
-	}
-
-	@Override
-	public Object visitGreaterEqualExpr(CalcParser.GreaterEqualExprContext ctx) {
-	    int cmp = compareValues(ctx.expr(0), ctx.expr(1));
-	    return Boolean.valueOf(cmp >= 0);
-	}
-
-	@Override
-	public Object visitGreaterExpr(CalcParser.GreaterExprContext ctx) {
-	    int cmp = compareValues(ctx.expr(0), ctx.expr(1));
-	    return Boolean.valueOf(cmp > 0);
-	}
-
-	@Override
-	public Object visitStrictEqualExpr(CalcParser.StrictEqualExprContext ctx) {
-	    int cmp = compareValues(ctx.expr(0), ctx.expr(1), true, true);
-	    return Boolean.valueOf(cmp == 0);
-	}
-
-	@Override
-	public Object visitStrictNotEqualExpr(CalcParser.StrictNotEqualExprContext ctx) {
-	    int cmp = compareValues(ctx.expr(0), ctx.expr(1), true, true);
-	    return Boolean.valueOf(cmp != 0);
-	}
-
-	@Override
-	public Object visitEqualExpr(CalcParser.EqualExprContext ctx) {
-	    int cmp = compareValues(ctx.expr(0), ctx.expr(1), false, true);
-	    return Boolean.valueOf(cmp == 0);
-	}
-
-	@Override
-	public Object visitNotEqualExpr(CalcParser.NotEqualExprContext ctx) {
-	    int cmp = compareValues(ctx.expr(0), ctx.expr(1), false, true);
-	    return Boolean.valueOf(cmp != 0);
-	}
-
-	@Override
-	public Object visitBitAndExpr(CalcParser.BitAndExprContext ctx) {
+	public Object visitBitExpr(CalcParser.BitExprContext ctx) {
 	    BigInteger e1 = getIntegerValue(ctx.expr(0));
 	    BigInteger e2 = getIntegerValue(ctx.expr(1));
 
-	    return e1.and(e2);
+	    BigInteger result;
+
+	    String op = ctx.BIT_OP().getText();
+	    switch (op) {
+		case "&":
+		    result = e1.and(e2);
+		    break;
+		case "~&":
+		    result = e1.and(e2).not();
+		    break;
+		case "&~":
+		    result = e1.andNot(e2);
+		    break;
+		case "^":
+		    result = e1.xor(e2);
+		    break;
+		case "~^":
+		    result = e1.xor(e2).not();
+		    break;
+		case "|":
+		    result = e1.or(e2);
+		    break;
+		case "~|":
+		    result = e1.or(e2).not();
+		    break;
+		default:
+		    throw new CalcExprException("Unknonw operator '" + op + "'", ctx);
+	    }
+
+	    return result;
 	}
 
 	@Override
-	public Object visitBitNandExpr(CalcParser.BitNandExprContext ctx) {
-	    BigInteger e1 = getIntegerValue(ctx.expr(0));
-	    BigInteger e2 = getIntegerValue(ctx.expr(1));
-
-	    return e1.and(e2).not();
-	}
-
-	@Override
-	public Object visitBitAndNotExpr(CalcParser.BitAndNotExprContext ctx) {
-	    BigInteger e1 = getIntegerValue(ctx.expr(0));
-	    BigInteger e2 = getIntegerValue(ctx.expr(1));
-
-	    return e1.andNot(e2);
-	}
-
-	@Override
-	public Object visitBitXorExpr(CalcParser.BitXorExprContext ctx) {
-	    BigInteger e1 = getIntegerValue(ctx.expr(0));
-	    BigInteger e2 = getIntegerValue(ctx.expr(1));
-
-	    return e1.xor(e2);
-	}
-
-	@Override
-	public Object visitBitXnorExpr(CalcParser.BitXnorExprContext ctx) {
-	    BigInteger e1 = getIntegerValue(ctx.expr(0));
-	    BigInteger e2 = getIntegerValue(ctx.expr(1));
-
-	    return e1.xor(e2).not();
-	}
-
-	@Override
-	public Object visitBitOrExpr(CalcParser.BitOrExprContext ctx) {
-	    BigInteger e1 = getIntegerValue(ctx.expr(0));
-	    BigInteger e2 = getIntegerValue(ctx.expr(1));
-
-	    return e1.or(e2);
-	}
-
-	@Override
-	public Object visitBitNorExpr(CalcParser.BitNorExprContext ctx) {
-	    BigInteger e1 = getIntegerValue(ctx.expr(0));
-	    BigInteger e2 = getIntegerValue(ctx.expr(1));
-
-	    return e1.or(e2).not();
-	}
-
-	@Override
-	public Object visitBooleanAndExpr(CalcParser.BooleanAndExprContext ctx) {
+	public Object visitBooleanExpr(CalcParser.BooleanExprContext ctx) {
 	    Boolean b1 = getBooleanValue(ctx.expr(0));
+	    String op = ctx.BOOL_OP().getText();
 
-	    // Due to the short-circuit nature of this operator, the second expression
-	    // is only evaluated if necessary
-	    if (!b1)
-		return Boolean.FALSE;
+	    switch (op) {
+		case "&&":
+		    // Due to the short-circuit nature of this operator, the second expression
+		    // is only evaluated if necessary
+		    if (!b1)
+			return Boolean.FALSE;
+		    break;
 
+		case "||":
+		    // Due to the short-circuit nature of this operator, the second expression
+		    // is only evaluated if necessary
+		    if (b1)
+			return Boolean.TRUE;
+		    break;
+
+		case "^^":
+		    // Unfortunately, there is no possibility of short-circuit evaluation
+		    // for this operator -- either first value could produce either result
+		    Boolean b2 = getBooleanValue(ctx.expr(1));
+
+		    return ((b1 && b2) || (!b1 && !b2)) ? Boolean.FALSE : Boolean.TRUE;
+
+		default:
+		    unknownOp(op, ctx);
+		    break;
+	    }
+
+	    // For the short-circuit operators, this is the result if the first is not conclusive
 	    return getBooleanValue(ctx.expr(1));
 	}
-
-	@Override
-	public Object visitBooleanXorExpr(CalcParser.BooleanXorExprContext ctx) {
-	    // Unfortunately, there is no possibility of short-circuit evaluation
-	    // for this operator -- either first value could produce either result
-	    Boolean b1 = getBooleanValue(ctx.expr(0));
-	    Boolean b2 = getBooleanValue(ctx.expr(1));
-
-	    if ((b1 && b2) || (!b1 && !b2))
-		return Boolean.FALSE;
-
-	    return Boolean.TRUE;
-	}
-
-	@Override
-	public Object visitBooleanOrExpr(CalcParser.BooleanOrExprContext ctx) {
-	    Boolean b1 = getBooleanValue(ctx.expr(0));
-
-	    // Due to the short-circuit nature of this operator, the second expression
-	    // is only evaluated if necessary
-	    if (b1)
-		return Boolean.TRUE;
-
-	    return getBooleanValue(ctx.expr(1));
-	}
-
 
 	@Override
 	public Object visitStringValue(CalcParser.StringValueContext ctx) {
@@ -1495,7 +1491,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	@SuppressWarnings("unchecked")
-	private void putContextObject(LValueContext lValue, Object value) {
+	private Object putContextObject(LValueContext lValue, Object value) {
 	    if (lValue.name != null) {
 		Map<String, Object> obj = (Map<String, Object>)lValue.context;
 		obj.put(lValue.name, value);
@@ -1508,6 +1504,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		// Should never happen
 		throw new IllegalStateException("Assignment to " + lValue.toString() + " without name or index.");
 	    }
+	    // For convenience for the assignment operators, return the value
+	    return value;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -1606,9 +1604,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    Object result = addOp(e1, e2, mc, ctx);
 
-	    putContextObject(lValue, result);
-
-	    return result;
+	    return putContextObject(lValue, result);
 	}
 
 	@Override
@@ -1620,9 +1616,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    BigDecimal result = d1.subtract(d2, mc);
 
-	    putContextObject(lValue, result);
-
-	    return result;
+	    return putContextObject(lValue, result);
 	}
 
 	@Override
@@ -1634,9 +1628,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    BigDecimal result = d1.multiply(d2, mc);
 
-	    putContextObject(lValue, result);
-
-	    return result;
+	    return putContextObject(lValue, result);
 	}
 
 	@Override
@@ -1649,9 +1641,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    try {
 		BigDecimal result = d1.divide(d2, mc);
 
-		putContextObject(lValue, result);
-
-		return result;
+		return putContextObject(lValue, result);
 	    }
 	    catch (ArithmeticException ae) {
 		throw new CalcExprException(ae, ctx);
@@ -1668,9 +1658,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    try {
 		BigDecimal result = d1.remainder(d2, mc);
 
-		putContextObject(lValue, result);
-
-		return result;
+		return putContextObject(lValue, result);
 	    }
 	    catch (ArithmeticException ae) {
 		throw new CalcExprException(ae, ctx);
@@ -1678,13 +1666,89 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	@Override
+	public Object visitBitAssignExpr(CalcParser.BitAssignExprContext ctx) {
+	    LValueContext lValue = getLValue(ctx.var());
+
+	    BigInteger i1 = toIntegerValue(getContextObject(lValue), ctx);
+	    BigInteger i2 = getIntegerValue(ctx.expr());
+
+	    BigInteger result = null;
+
+	    String op = ctx.BIT_ASSIGN().getText();
+	    switch (op) {
+		case "&=":
+		    result = i1.and(i2);
+		    break;
+		case "~&=":
+		    result = i1.and(i2).not();
+		    break;
+		case "&~=":
+		    result = i1.andNot(i2);
+		    break;
+		case "^=":
+		    result = i1.xor(i2);
+		    break;
+		case "~^=":
+		    result = i1.xor(i2).not();
+		    break;
+		case "|=":
+		    result = i1.or(i2);
+		    break;
+		case "~|=":
+		    result = i1.or(i2).not();
+		    break;
+		default:
+		    unknownOp(op, ctx);
+		    break;
+	    }
+
+	    return putContextObject(lValue, result);
+	}
+
+	@Override
+	public Object visitShiftAssignExpr(CalcParser.ShiftAssignExprContext ctx) {
+	    LValueContext lValue = getLValue(ctx.var());
+
+	    BigInteger i1 = toIntegerValue(getContextObject(lValue), ctx);
+	    int e2        = getShiftValue(ctx.expr());
+
+	    BigInteger result = null;
+
+	    String op = ctx.SHIFT_ASSIGN().getText();
+	    switch (op) {
+		case ">>>=":
+		    // Convert to Long because ">>>" doesn't make sense for BigInteger (unlimited size) values
+		    try {
+			long longValue = i1.longValueExact();
+			result = BigInteger.valueOf(longValue >>> e2);
+		    }
+		    catch (ArithmeticException ae) {
+			throw new CalcExprException(ae, ctx);
+		    }
+		    break;
+
+		case ">>=":
+		    result = i1.shiftRight(e2);
+		    break;
+
+		case "<<=":
+		    result = i1.shiftLeft(e2);
+		    break;
+
+		default:
+		    unknownOp(op, ctx);
+		    break;
+	    }
+
+	    return putContextObject(lValue, result);
+	}
+
+	@Override
 	public Object visitAssignExpr(CalcParser.AssignExprContext ctx) {
 	    Object value = visit(ctx.expr());
 
 	    LValueContext lValue = getLValue(ctx.var());
-	    putContextObject(lValue, value);
-
-	    return value;
+	    return putContextObject(lValue, value);
 	}
 }
 
