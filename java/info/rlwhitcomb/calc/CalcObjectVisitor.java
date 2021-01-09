@@ -693,13 +693,18 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 
 	    Object lastValue = null;
-	    for (int loop = start; loop <= stop; loop += step) {
-		if (loopVarName != null)
-		    variables.put(loopVarName, loop);
-		lastValue = visit(ctx.block());
+	    try {
+		for (int loop = start; loop <= stop; loop += step) {
+		    if (loopVarName != null)
+			variables.put(loopVarName, loop);
+		    lastValue = visit(ctx.block());
+		}
 	    }
-	    if (loopVarName != null)
-		variables.remove(loopVarName);
+	    finally {
+		// Make sure the loop var gets removed, even on exceptions
+		if (loopVarName != null)
+		    variables.remove(loopVarName);
+	    }
 
 	    return lastValue;
 	}
