@@ -26,12 +26,16 @@
  *  History:
  *	07-Jan-2021 (rlwhitcomb)
  *	    Moved into separate class from CalcObjectVisitor.
+ *	08-Jan-2021 (rlwhitcomb)
+ *	    Move more common code into here.
  */
 package info.rlwhitcomb.calc;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.MathContext;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -51,7 +55,7 @@ public final class CalcUtil
 	/** Private constructor since this is a static class. */
 	private CalcUtil() { }
 
-	public static StringBuilder getTreeText(ParserRuleContext ctx) {
+	public static StringBuilder getTreeText(final ParserRuleContext ctx) {
 	    StringBuilder buf = new StringBuilder();
 
 	    getTreeText(buf, ctx);
@@ -64,7 +68,7 @@ public final class CalcUtil
 	    return buf;
 	}
 
-	public static void getTreeText(StringBuilder buf, ParserRuleContext ctx) {
+	public static void getTreeText(final StringBuilder buf, final ParserRuleContext ctx) {
 	    for (ParseTree child : ctx.children) {
 		if (child instanceof ParserRuleContext) {
 		    getTreeText(buf, (ParserRuleContext)child);
@@ -82,7 +86,7 @@ public final class CalcUtil
 	    }
 	}
 
-	public static boolean isIdentifierStart(char ch) {
+	public static boolean isIdentifierStart(final char ch) {
 	    // Corresponds to the "ID" rule in Calc.g4
 	    if ((ch >= 'a' && ch <= 'z')
 	     || (ch >= 'A' && ch <= 'Z')
@@ -91,7 +95,7 @@ public final class CalcUtil
 	    return false;
 	}
 
-	public static boolean isIdentifierPart(char ch) {
+	public static boolean isIdentifierPart(final char ch) {
 	    if (isIdentifierStart(ch))
 		return true;
 
@@ -101,13 +105,13 @@ public final class CalcUtil
 	    return false;
 	}
 
-	public static void nullCheck(Object value, ParserRuleContext ctx) {
+	public static void nullCheck(final Object value, final ParserRuleContext ctx) {
 	    if (value == null)
-		throw new CalcExprException("Value must not be null", ctx);
+		throw new CalcExprException(ctx, "Value (\"%1$s\") must not be null", getTreeText(ctx));
 	}
 
 
-	public static BigDecimal toDecimalValue(Object value, ParserRuleContext ctx) {
+	public static BigDecimal toDecimalValue(final Object value, final ParserRuleContext ctx) {
 	    nullCheck(value, ctx);
 
 	    if (value instanceof BigDecimal)
@@ -123,10 +127,15 @@ public final class CalcUtil
 	    else if (value instanceof Number)
 		return BigDecimal.valueOf(((Number)value).longValue());
 
-	    throw new CalcExprException("Unable to convert value of type '" + value.getClass().getSimpleName() + "' to decimal", ctx);
+	    String typeName = value.getClass().getSimpleName();
+	    if (value instanceof Map)
+		typeName = "object";
+	    else if (value instanceof List)
+		typeName = "array";
+	    throw new CalcExprException(ctx, "Unable to convert value of '%1$s' type to decimal number", typeName);
 	}
 
-	public static BigInteger toIntegerValue(Object value, ParserRuleContext ctx) {
+	public static BigInteger toIntegerValue(final Object value, final ParserRuleContext ctx) {
 	    BigDecimal decValue = toDecimalValue(value, ctx);
 
 	    try {
@@ -137,7 +146,7 @@ public final class CalcUtil
 	    }
 	}
 
-	public static Boolean toBooleanValue(Object value, ParserRuleContext ctx) {
+	public static Boolean toBooleanValue(final Object value, final ParserRuleContext ctx) {
 	    nullCheck(value, ctx);
 
 	    try {
@@ -149,12 +158,12 @@ public final class CalcUtil
 	    }
 	}
 
-	public static String toStringValue(Object result) {
+	public static String toStringValue(final Object result) {
 	    return toStringValue(result, true, false, "");
 	}
 
 	@SuppressWarnings("unchecked")
-	public static String toStringValue(Object result, boolean quote, boolean pretty, String indent) {
+	public static String toStringValue(final Object result, final boolean quote, final boolean pretty, final String indent) {
 	    if (result == null) {
 		return quote ? "<null>" : "";
 	    }
@@ -177,7 +186,7 @@ public final class CalcUtil
 	    return result.toString();
 	}
 
-	public static String toStringValue(Map<String, Object> map, boolean quote, boolean pretty, String indent) {
+	public static String toStringValue(final Map<String, Object> map, final boolean quote, final boolean pretty, final String indent) {
 	    String myIndent = indent + "  ";
 	    StringBuilder buf = new StringBuilder();
 	    if (map.size() > 0) {
@@ -200,7 +209,7 @@ public final class CalcUtil
 	    return buf.toString();
 	}
 
-	public static String toStringValue(List<Object> list, boolean quote, boolean pretty, String indent) {
+	public static String toStringValue(final List<Object> list, final boolean quote, final boolean pretty, final String indent) {
 	    String myIndent = indent + "  ";
 	    StringBuilder buf = new StringBuilder();
 	    if (list.size() > 0) {
@@ -222,7 +231,7 @@ public final class CalcUtil
 	    return buf.toString();
 	}
 
-	public static void convert(byte[] bytes, int radix, StringBuilder buf) {
+	public static void convert(final byte[] bytes, final int radix, final StringBuilder buf) {
 	    int padWidth = 0;
 	    switch (radix) {
 		case 2:  padWidth = 8; break;
@@ -237,17 +246,76 @@ public final class CalcUtil
 
 
 	/**
+	 * Compare two objects of possibly differing types.
+	 *
+	 * @param visitor    The object visitor used to calculate the values.
+	 * @param ctx1       The Rule context of the first operand.
+	 * @param ctx2       The Rule context of the second operand.
+	 * @param strict     Whether or not the class must match for the comparison.
+	 * @param allowNulls Some comparisons (strings) can be compared even if one or both operands are null.
+	 * @return {@code -1} if the first object is "less than" the second,
+	 *         {@code 0} if the objects are "equal",
+	 *         {@code +1} if the first object is "greater than" the second.
+	 */
+	public static int compareValues(final CalcObjectVisitor visitor, final ParserRuleContext ctx1, final ParserRuleContext ctx2, final boolean strict, final boolean allowNulls) {
+	    Object e1 = visitor.visit(ctx1);
+	    Object e2 = visitor.visit(ctx2);
+
+	    if (allowNulls) {
+		if (e1 == null && e2 == null)
+		    return 0;
+		else if (e1 == null && e2 != null)
+		    return -1;
+		else if (e1 != null && e2 == null)
+		    return +1;
+	    }
+	    else {
+		nullCheck(e1, ctx1);
+		nullCheck(e2, ctx2);
+	    }
+
+	    if (strict) {
+		if (!e1.getClass().equals(e2.getClass()))
+		    return -1;
+	    }
+
+	    if (e1 instanceof String || e2 instanceof String) {
+		String s1 = e1.toString();
+		String s2 = e2.toString();
+		return s1.compareTo(s2);
+	    }
+	    else if (e1 instanceof BigDecimal || e2 instanceof BigDecimal) {
+		BigDecimal d1 = toDecimalValue(e1, ctx1);
+		BigDecimal d2 = toDecimalValue(e2, ctx2);
+		return d1.compareTo(d2);
+	    }
+	    else if (e1 instanceof BigInteger || e2 instanceof BigInteger) {
+		BigInteger i1 = toIntegerValue(e1, ctx1);
+		BigInteger i2 = toIntegerValue(e2, ctx2);
+		return i1.compareTo(i2);
+	    }
+	    else if (e1 instanceof Boolean || e2 instanceof Boolean) {
+		Boolean b1 = toBooleanValue(e1, ctx1);
+		Boolean b2 = toBooleanValue(e2, ctx2);
+		return b1.compareTo(b2);
+	    }
+
+	    throw new CalcExprException(ctx1, "Unknown value type: %1$s", e1.getClass().getSimpleName());
+	}
+
+	/**
 	 * Returns the result of the "add" operation on the two values.
 	 * <p> If either object is a string, do string concatenation.
 	 * <p> Else convert to {@link BigDecimal} and do the addition.
 	 *
-	 * @param e1 The LHS value.
-	 * @param e2 The RHS value.
-	 * @param mc The {@code MathContext} to use in rouding the result.
-	 * @param ctx The rule context (for error reporting).
+	 * @param e1   The LHS operand.
+	 * @param e2   The RHS operand.
+	 * @param ctx1 The Rule context for the first operand (for error reporting).
+	 * @param ctx2 The Rule context for the second operand.
+	 * @param mc   The {@code MathContext} to use in rouding the result.
 	 * @return {@code e1 + e2}
 	 */
-	public static Object addOp(final Object e1, final Object e2, MathContext mc, ParserRuleContext ctx) {
+	public static Object addOp(final Object e1, final Object e2, final ParserRuleContext ctx1, final ParserRuleContext ctx2, final MathContext mc) {
 	    if (e1 == null && e2 == null)
 		return null;
 
@@ -262,11 +330,92 @@ public final class CalcUtil
 	    // could add char codepoint values, or concat strings
 
 	    // Otherwise, numeric values get added numerically
-	    BigDecimal d1 = toDecimalValue(e1, ctx);
-	    BigDecimal d2 = toDecimalValue(e2, ctx);
+	    BigDecimal d1 = toDecimalValue(e1, ctx1);
+	    BigDecimal d2 = toDecimalValue(e2, ctx2);
 
 	    return d1.add(d2, mc);
 	}
+
+	/**
+	 * Calculates the given bit-wise operation on the operands.
+	 *
+	 * @param i1  The LHS operand
+	 * @param i2  The RHS operand.
+	 * @param op  The desired bit-wise operation.
+	 * @param ctx The rule context (for error reporting).
+	 * @return <code>i1 <i>op</i> i2</code>
+	 */
+	public static BigInteger bitOp(final BigInteger i1, final BigInteger i2, final String op, final ParserRuleContext ctx) {
+	    BigInteger result;
+
+	    switch (op) {
+		case "&":
+		    result = i1.and(i2);
+		    break;
+		case "~&":
+		    result = i1.and(i2).not();
+		    break;
+		case "&~":
+		    result = i1.andNot(i2);
+		    break;
+		case "^":
+		    result = i1.xor(i2);
+		    break;
+		case "~^":
+		    result = i1.xor(i2).not();
+		    break;
+		case "|":
+		    result = i1.or(i2);
+		    break;
+		case "~|":
+		    result = i1.or(i2).not();
+		    break;
+		default:
+		    throw new UnknownOpException(op, ctx);
+	    }
+
+	    return result;
+	}
+
+	/**
+	 * Calculates the given {@code BigInteger} shifted by the given amount according to the operator specified.
+	 *
+	 * @param i1       The LHS operand (the bits to be shifted).
+	 * @param shiftAmt The number of bits to shift (can be negative, which results in a shift the opposite direction).
+	 * @param op       The shift operator.
+	 * @param ctx      The rule context (for error reporting).
+	 * @return <code>i1 <i>op</i> shiftAmt</code>
+	 */
+	public static BigInteger shiftOp(final BigInteger i1, final int shiftAmt, final String op, final ParserRuleContext ctx) {
+	    BigInteger result;
+
+	    switch (op) {
+		case ">>>":
+		    // Convert to Long because ">>>" doesn't make sense for BigInteger (unlimited size) values
+		    try {
+			long longValue = i1.longValueExact();
+			result = BigInteger.valueOf(longValue >>> shiftAmt);
+		    }
+		    catch (ArithmeticException ae) {
+			throw new CalcExprException(ae, ctx);
+		    }
+		    break;
+
+		case ">>":
+		    result = i1.shiftRight(shiftAmt);
+		    break;
+
+		case "<<":
+		    result = i1.shiftLeft(shiftAmt);
+		    break;
+
+		default:
+		    throw new UnknownOpException(op, ctx);
+	    }
+
+	    return result;
+	}
+
 
 }
 

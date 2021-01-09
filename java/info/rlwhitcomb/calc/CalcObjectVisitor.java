@@ -105,6 +105,8 @@
  *	07-Jan-2021 (rlwhitcomb)
  *	    The rest of the assign operators.
  *	    Reduce common code.
+ *	08-Jan-2021 (rlwhitcomb)
+ *	    Implement loop construct.
  */
 package info.rlwhitcomb.calc;
 
@@ -140,54 +142,6 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	{
 		DEGREES,
 		RADIANS
-	}
-
-	private static class LValueContext
-	{
-		/** The parent context (for nested naming purposes). */
-		LValueContext parent;
-		/** The surrounding context to reference into (a {@code Map} or {@code List}). */
-		Object context;
-		/** The variable / member name to reference into a {@code Map}. */
-		String name;
-		/** The integer index value to reference into a {@code List}. */
-		int index;
-
-		LValueContext(Object ctxt) {
-		    this.parent  = null;
-		    this.context = ctxt;
-		    this.name    = null;
-		    this.index   = -1;
-		}
-
-		LValueContext(LValueContext p, Object ctxt, String nm) {
-		    this.parent  = p;
-		    this.context = ctxt;
-		    this.name    = nm;
-		    this.index   = -1;
-		}
-
-		LValueContext(LValueContext p, Object ctxt, int idx) {
-		    this.parent  = p;
-		    this.context = ctxt;
-		    this.name    = null;
-		    this.index   = idx;
-		}
-
-		@Override
-		public String toString() {
-		    String parentName = parent == null ? "" : parent.toString();
-		    if (name != null) {
-			if (parent.parent == null)
-			    return parentName + name;
-			else
-			    return parentName + "." + name;
-		    }
-		    else if (index >= 0)
-			return parentName + "[" + index + "]";
-		    else
-			return "";
-		}
 	}
 
 	/** Scale for double operations. */
@@ -304,14 +258,19 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	private String getStringValue(ParserRuleContext ctx) {
+	    return getStringValue(ctx, false);
+	}
+
+	private String getStringValue(ParserRuleContext ctx, boolean allowNull) {
 	    Object value = visit(ctx);
 
-	    nullCheck(value, ctx);
+	    if (!allowNull)
+		nullCheck(value, ctx);
 
 	    if (value instanceof String)
 		return (String)value;
 	    else
-		return value.toString();
+		return value == null ? "" : value.toString();
 	}
 
 	private double getDoubleValue(ParserRuleContext ctx) {
@@ -320,7 +279,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    return dec.doubleValue();
 	}
 
-	private int getShiftValue(ParserRuleContext ctx) {
+	protected int getIntValue(ParserRuleContext ctx) {
 	    BigDecimal value = getDecimalValue(ctx);
 
 	    try {
@@ -357,50 +316,10 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    return compareValues(ctx1, ctx2, false, false);
 	}
 
-	private int compareValues(ParserRuleContext ctx1, ParserRuleContext ctx2, boolean strict, boolean allowNull) {
-	    Object e1 = visit(ctx1);
-	    Object e2 = visit(ctx2);
-
-	    if (allowNull) {
-		if (e1 == null && e2 == null)
-		    return 0;
-		else if (e1 == null && e2 != null)
-		    return -1;
-		else if (e1 != null && e2 == null)
-		    return +1;
-	    }
-	    else {
-		nullCheck(e1, ctx1);
-		nullCheck(e2, ctx2);
-	    }
-
-	    if (strict) {
-		if (!e1.getClass().equals(e2.getClass()))
-		    return -1;
-	    }
-
-	    if (e1 instanceof String || e2 instanceof String) {
-		String s1 = e1.toString();
-		String s2 = e2.toString();
-		return s1.compareTo(s2);
-	    }
-	    else if (e1 instanceof BigDecimal || e2 instanceof BigDecimal) {
-		BigDecimal d1 = toDecimalValue(e1, ctx1);
-		BigDecimal d2 = toDecimalValue(e2, ctx2);
-		return d1.compareTo(d2);
-	    }
-	    else if (e1 instanceof Boolean || e2 instanceof Boolean) {
-		Boolean b1 = toBooleanValue(e1, ctx1);
-		Boolean b2 = toBooleanValue(e2, ctx2);
-		return b1.compareTo(b2);
-	    }
-
-	    throw new CalcExprException("Unknown value type: " + e1.getClass().getSimpleName(), ctx1);
+	private int compareValues(ParserRuleContext ctx1, ParserRuleContext ctx2, boolean strict, boolean allowNulls) {
+	    return CalcUtil.compareValues(this, ctx1, ctx2, strict, allowNulls);
 	}
 
-	private void unknownOp(String op, ParserRuleContext ctx) {
-	    throw new CalcExprException("Unknown operator '" + op + "'", ctx);
-	}
 
 	@Override
 	public Object visitDecimalDirective(CalcParser.DecimalDirectiveContext ctx) {
@@ -411,7 +330,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		precision = dPrecision.intValueExact();
 	    }
 	    catch (ArithmeticException ae) {
-		throw new CalcExprException("Decimal precision of " + dPrecision + " must be an integer value", ctx);
+		throw new CalcExprException(ctx, "Decimal precision of %1$s must be an integer value", dPrecision);
 	    }
 
 	    if (precision == 0) {
@@ -421,7 +340,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		setMathContext(new MathContext(precision));
 	    }
 	    else {
-		throw new CalcExprException("Decimal precision of " + precision + " is out of range", ctx);
+		throw new CalcExprException(ctx, "Decimal precision of %1$d is out of range", precision);
 	    }
 
 	    return null;
@@ -531,7 +450,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		return Calc.processString(contents, false);
 	    }
 	    catch (IOException ioe) {
-		throw new CalcExprException("I/O Error: " + ExceptionUtil.toString(ioe), ctx);
+		throw new CalcExprException(ctx, "I/O Error: %1$s", ExceptionUtil.toString(ioe));
 	    }
 	}
 
@@ -628,7 +547,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		char formatChar = format.charAt(1);
 
 		if ((result instanceof Map || result instanceof List) && (formatChar != 'j' && formatChar != 'J')) {
-		    throw new CalcExprException("Cannot convert object or array to '" + formatChar + "' format", ctx);
+		    throw new CalcExprException(ctx, "Cannot convert object or array to '%1$c' format", formatChar);
 		}
 
 		StringBuilder valueBuf = new StringBuilder();
@@ -734,6 +653,58 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	@Override
+	public Object visitLoopStmt(CalcParser.LoopStmtContext ctx) {
+	    CalcParser.LoopCtlContext ctlCtx = ctx.loopCtl();
+	    List<CalcParser.ExprContext> exprs = ctlCtx.expr();
+	    TerminalNode loopVar = ctx.LOOPVAR();
+	    String loopVarName   = loopVar != null ? loopVar.getText() : null;
+
+	    int start, stop, step;
+
+	    if (exprs.size() == 1) {
+		// number of times, starting from 1
+		start = step = 1;
+		stop  = getIntValue(exprs.get(0));
+	    }
+	    else if (exprs.size() == 2) {
+		if (ctlCtx.DOTS() != null) {
+		    // start .. stop
+		    start = getIntValue(exprs.get(0));
+		    stop  = getIntValue(exprs.get(1));
+		    step  = 1;
+		}
+		else {
+		    // stop, step
+		    start = 1;
+		    stop  = getIntValue(exprs.get(0));
+		    step  = getIntValue(exprs.get(1));
+		}
+	    }
+	    else {
+		// start, stop, step
+		start = getIntValue(exprs.get(0));
+		stop  = getIntValue(exprs.get(1));
+		step  = getIntValue(exprs.get(2));
+	    }
+
+	    if (loopVarName != null) {
+		if (variables.containsKey(loopVarName))
+		    throw new CalcExprException(ctx, "Duplicate loop variable name '%1$s' not allowed", loopVarName);
+	    }
+
+	    Object lastValue = null;
+	    for (int loop = start; loop <= stop; loop += step) {
+		if (loopVarName != null)
+		    variables.put(loopVarName, loop);
+		lastValue = visit(ctx.block());
+	    }
+	    if (loopVarName != null)
+		variables.remove(loopVarName);
+
+	    return lastValue;
+	}
+
+	@Override
 	public Object visitObjExpr(CalcParser.ObjExprContext ctx) {
 	    CalcParser.ObjContext oCtx = ctx.obj();
 	    Map<String, Object> obj = new HashMap<>();
@@ -761,18 +732,18 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitVarExpr(CalcParser.VarExprContext ctx) {
 	    LValueContext lValue = getLValue(ctx.var());
-	    return getContextObject(lValue);
+	    return lValue.getContextObject();
 	}
 
 	@Override
 	public Object visitPostIncExpr(CalcParser.PostIncExprContext ctx) {
 	    LValueContext lValue = getLValue(ctx.var());
-	    Object value = getContextObject(lValue);
+	    Object value = lValue.getContextObject();
 
-	    BigDecimal dValue = toDecimalValue(value, ctx);
+	    BigDecimal dValue = toDecimalValue(value, ctx.var());
 	    BigDecimal dAfter = dValue.add(BigDecimal.ONE);
 
-	    putContextObject(lValue, dAfter);
+	    lValue.putContextObject(dAfter);
 
 	    // post increment, return original value
 	    return dValue;
@@ -781,12 +752,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitPostDecExpr(CalcParser.PostDecExprContext ctx) {
 	    LValueContext lValue = getLValue(ctx.var());
-	    Object value = getContextObject(lValue);
+	    Object value = lValue.getContextObject();
 
-	    BigDecimal dValue = toDecimalValue(value, ctx);
+	    BigDecimal dValue = toDecimalValue(value, ctx.var());
 	    BigDecimal dAfter = dValue.subtract(BigDecimal.ONE);
 
-	    putContextObject(lValue, dAfter);
+	    lValue.putContextObject(dAfter);
 
 	    // post decrement, return the original value
 	    return dValue;
@@ -795,36 +766,32 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitPreIncExpr(CalcParser.PreIncExprContext ctx) {
 	    LValueContext lValue = getLValue(ctx.var());
-	    Object value = getContextObject(lValue);
+	    Object value = lValue.getContextObject();
 
-	    BigDecimal dValue = toDecimalValue(value, ctx);
+	    BigDecimal dValue = toDecimalValue(value, ctx.var());
 	    BigDecimal dAfter = dValue.add(BigDecimal.ONE);
 
-	    putContextObject(lValue, dAfter);
-
 	    // pre increment, return the modified value
-	    return dAfter;
+	    return lValue.putContextObject(dAfter);
 	}
 
 	@Override
 	public Object visitPreDecExpr(CalcParser.PreDecExprContext ctx) {
 	    LValueContext lValue = getLValue(ctx.var());
-	    Object value = getContextObject(lValue);
+	    Object value = lValue.getContextObject();
 
-	    BigDecimal dValue = toDecimalValue(value, ctx);
+	    BigDecimal dValue = toDecimalValue(value, ctx.var());
 	    BigDecimal dAfter = dValue.subtract(BigDecimal.ONE);
 
-	    putContextObject(lValue, dAfter);
-
 	    // pre decrement, return the modified value
-	    return dAfter;
+	    return lValue.putContextObject(dAfter);
 	}
 
 	@Override
 	public Object visitPosateExpr(CalcParser.PosateExprContext ctx) {
 	    BigDecimal e = getDecimalValue(ctx.expr());
 
-	    // Interestingly, this operation can change the value if the previous
+	    // Interestingly, this operation can change the value, if the previous
 	    // value was not to the specified precision.
 	    return e.plus(mc);
 	}
@@ -851,16 +818,16 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	@Override
-	public Object visitParenExpr(CalcParser.ParenExprContext ctx) {
-	    return visit(ctx.expr());
-	}
-
-	@Override
 	public Object visitPowerExpr(CalcParser.PowerExprContext ctx) {
 	    BigDecimal base = getDecimalValue(ctx.expr(0));
 	    double exp = getDoubleValue(ctx.expr(1));
 
 	    return NumericUtil.pow(base, exp).round(mc);
+	}
+
+	@Override
+	public Object visitParenExpr(CalcParser.ParenExprContext ctx) {
+	    return visit(ctx.expr());
 	}
 
 	@Override
@@ -899,10 +866,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitAddExpr(CalcParser.AddExprContext ctx) {
-	    Object e1 = visit(ctx.expr(0));
-	    Object e2 = visit(ctx.expr(1));
+	    CalcParser.ExprContext ctx1 = ctx.expr(0);
+	    CalcParser.ExprContext ctx2 = ctx.expr(1);
+	    Object e1 = visit(ctx1);
+	    Object e2 = visit(ctx2);
 
-	    return addOp(e1, e2, mc, ctx);
+	    return addOp(e1, e2, ctx1, ctx2, mc);
 	}
 
 	@Override
@@ -1041,7 +1010,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public Object visitRoundExpr(CalcParser.RoundExprContext ctx) {
 	    CalcParser.Expr2Context e2ctx = ctx.expr2();
 	    BigDecimal e = getDecimalValue(e2ctx.expr(0));
-	    int iPlaces  = getShiftValue(e2ctx.expr(1));
+	    int iPlaces  = getIntValue(e2ctx.expr(1));
 
 	    return e.round(new MathContext(iPlaces));
 	}
@@ -1057,26 +1026,27 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitMaxExpr(CalcParser.MaxExprContext ctx) {
-	    CalcParser.ExprNContext eCtx = ctx.exprN();
-	    List<CalcParser.ExprContext> exprs = eCtx.expr();
-	    Object maxResult = visit(exprs.get(0));
+	    List<CalcParser.ExprContext> exprs = ctx.exprN().exprList().expr();
+	    CalcParser.ExprContext eCtx = exprs.get(0);
+	    Object firstValue = visit(eCtx);
+	    nullCheck(firstValue, eCtx);
 
-	    nullCheck(maxResult, exprs.get(0));
-
-	    if (maxResult instanceof String) {
-		String maxString = (String)maxResult;
+	    if (firstValue instanceof String) {
+		String maxString = (String)firstValue;
 		for (int i = 1; i < exprs.size(); i++) {
-		    String value = getStringValue(exprs.get(i));
+		    eCtx = exprs.get(i);
+		    String value = getStringValue(eCtx);
 		    if (value.compareTo(maxString) > 0)
 			maxString = value;
 		}
 		return maxString;
 	    }
 	    else {
-		BigDecimal maxNumber = (BigDecimal)maxResult;
+		BigDecimal maxNumber = toDecimalValue(firstValue, ctx);
 		for (int i = 1; i < exprs.size(); i++) {
-		   BigDecimal value = getDecimalValue(exprs.get(i));
-		   if (value.compareTo(maxNumber) > 0)
+		    eCtx = exprs.get(i);
+		    BigDecimal value = getDecimalValue(eCtx);
+		    if (value.compareTo(maxNumber) > 0)
 			maxNumber = value;
 		}
 		return maxNumber;
@@ -1085,26 +1055,27 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitMinExpr(CalcParser.MinExprContext ctx) {
-	    CalcParser.ExprNContext eCtx = ctx.exprN();
-	    List<CalcParser.ExprContext> exprs = eCtx.expr();
-	    Object minResult = visit(exprs.get(0));
+	    List<CalcParser.ExprContext> exprs = ctx.exprN().exprList().expr();
+	    CalcParser.ExprContext eCtx = exprs.get(0);
+	    Object firstValue = visit(eCtx);
+	    nullCheck(firstValue, eCtx);
 
-	    nullCheck(minResult, exprs.get(0));
-
-	    if (minResult instanceof String) {
-		String minString = (String)minResult;
+	    if (firstValue instanceof String) {
+		String minString = (String)firstValue;
 		for (int i = 1; i < exprs.size(); i++) {
-		    String value = getStringValue(exprs.get(i));
+		    eCtx = exprs.get(i);
+		    String value = getStringValue(eCtx);
 		    if (value.compareTo(minString) < 0)
 			minString = value;
 		}
 		return minString;
 	    }
 	    else {
-		BigDecimal minNumber = (BigDecimal)minResult;
+		BigDecimal minNumber = toDecimalValue(firstValue, ctx);
 		for (int i = 1; i < exprs.size(); i++) {
-		   BigDecimal value = getDecimalValue(exprs.get(i));
-		   if (value.compareTo(minNumber) < 0)
+		    eCtx = exprs.get(i);
+		    BigDecimal value = getDecimalValue(eCtx);
+		    if (value.compareTo(minNumber) < 0)
 			minNumber = value;
 		}
 		return minNumber;
@@ -1113,8 +1084,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitJoinExpr(CalcParser.JoinExprContext ctx) {
-	    CalcParser.ExprNContext eCtx = ctx.exprN();
-	    List<CalcParser.ExprContext> exprs = eCtx.expr();
+	    List<CalcParser.ExprContext> exprs = ctx.exprN().exprList().expr();
 	    StringBuilder buf = new StringBuilder();
 	    int length = exprs.size();
 
@@ -1123,19 +1093,19 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    // two values gets the two just concatenated together
 	    // three or more, the first n - 1 are joined by the nth (string) value
 	    if (length == 1) {
-		return getStringValue(exprs.get(0));
+		return getStringValue(exprs.get(0), true);
 	    }
 	    else if (length == 2) {
-		buf.append(getStringValue(exprs.get(0)));
-		buf.append(getStringValue(exprs.get(1)));
+		buf.append(getStringValue(exprs.get(0), true));
+		buf.append(getStringValue(exprs.get(1), true));
 		return buf.toString();
 	    }
 	    else {
-		String joinExpr = getStringValue(exprs.get(length - 1));
+		String joinExpr = getStringValue(exprs.get(length - 1), true);
 		for (int i = 0; i < length - 1; i++) {
 		    if (i > 0)
 			buf.append(joinExpr);
-		    buf.append(getStringValue(exprs.get(i)));
+		    buf.append(getStringValue(exprs.get(i), true));
 		}
 		return buf.toString();
 	    }
@@ -1158,72 +1128,22 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitShiftExpr(CalcParser.ShiftExprContext ctx) {
 	    BigInteger e1 = getIntegerValue(ctx.expr(0));
-	    int e2        = getShiftValue(ctx.expr(1));
+	    int e2        = getIntValue(ctx.expr(1));
 	    String op     = ctx.SHIFT_OP().getText();
 
-	    BigInteger result = null;
-
-	    switch (op) {
-		case ">>>":
-		    // Convert to Long because ">>>" doesn't make sense for BigInteger (unlimited size) values
-		    try {
-			long longValue = e1.longValueExact();
-			result = BigInteger.valueOf(longValue >>> e2);
-		    }
-		    catch (ArithmeticException ae) {
-			throw new CalcExprException(ae, ctx);
-		    }
-		    break;
-
-		case ">>":
-		    result = e1.shiftRight(e2);
-		    break;
-
-		case "<<":
-		    result = e1.shiftLeft(e2);
-		    break;
-
-		default:
-		    unknownOp(op, ctx);
-		    break;
-	    }
-
-	    return result;
-
+	    return shiftOp(e1, e2, op, ctx);
 	}
 
 	@Override
 	public Object visitSpaceshipExpr(CalcParser.SpaceshipExprContext ctx) {
-	    Object e1 = visit(ctx.expr(0));
-	    Object e2 = visit(ctx.expr(1));
-
-	    nullCheck(e1, ctx);
-	    nullCheck(e2, ctx);
-
-	    int ret;
-
-	    if (e1 instanceof String || e2 instanceof String) {
-		String s1 = e1.toString();
-		String s2 = e2.toString();
-		ret = s1.compareTo(s2);
-	    }
-	    else if (e1 instanceof Boolean || e2 instanceof Boolean) {
-		Boolean b1 = toBooleanValue(e1, ctx);
-		Boolean b2 = toBooleanValue(e2, ctx);
-		ret = b1.compareTo(b2);
-	    }
-	    else {
-		BigDecimal d1 = toDecimalValue(e1, ctx);
-		BigDecimal d2 = toDecimalValue(e2, ctx);
-		ret = d1.compareTo(d2);
-	    }
+	    int ret = compareValues(ctx.expr(0), ctx.expr(1), false, true);
 
 	    if (ret < 0)
-		return BigDecimal.ONE.negate();
+		return BigInteger.ONE.negate();
 	    else if (ret == 0)
-		return BigDecimal.ZERO;
+		return BigInteger.ZERO;
 	    else
-		return BigDecimal.ONE;
+		return BigInteger.ONE;
 	}
 
 	@Override
@@ -1247,7 +1167,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    break;
 	    }
 
-	    boolean result = false;
+	    boolean result;
 
 	    switch (op) {
 		case "<=":
@@ -1271,8 +1191,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    result = (cmp != 0);
 		    break;
 		default:
-		    unknownOp(op, ctx);
-		    break;
+		    throw new UnknownOpException(op, ctx);
 	    }
 
 	    return Boolean.valueOf(result);
@@ -1283,36 +1202,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    BigInteger e1 = getIntegerValue(ctx.expr(0));
 	    BigInteger e2 = getIntegerValue(ctx.expr(1));
 
-	    BigInteger result;
-
 	    String op = ctx.BIT_OP().getText();
-	    switch (op) {
-		case "&":
-		    result = e1.and(e2);
-		    break;
-		case "~&":
-		    result = e1.and(e2).not();
-		    break;
-		case "&~":
-		    result = e1.andNot(e2);
-		    break;
-		case "^":
-		    result = e1.xor(e2);
-		    break;
-		case "~^":
-		    result = e1.xor(e2).not();
-		    break;
-		case "|":
-		    result = e1.or(e2);
-		    break;
-		case "~|":
-		    result = e1.or(e2).not();
-		    break;
-		default:
-		    throw new CalcExprException("Unknonw operator '" + op + "'", ctx);
-	    }
 
-	    return result;
+	    return bitOp(e1, e2, op, ctx);
 	}
 
 	@Override
@@ -1343,8 +1235,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    return ((b1 && b2) || (!b1 && !b2)) ? Boolean.FALSE : Boolean.TRUE;
 
 		default:
-		    unknownOp(op, ctx);
-		    break;
+		    throw new UnknownOpException(op, ctx);
 	    }
 
 	    // For the short-circuit operators, this is the result if the first is not conclusive
@@ -1456,192 +1347,65 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	@Override
-	public Object visitIdVar(CalcParser.IdVarContext ctx) {
-	    String name = ctx.ID().getText();
-
-	    if (variables.containsKey(name)) {
-		return variables.get(name);
-	    }
-
-	    return null;
-	}
-
-	@Override
 	public Object visitEitherOrExpr(CalcParser.EitherOrExprContext ctx) {
 	    boolean ifExpr = getBooleanValue(ctx.expr(0));
 
 	    return visit(ifExpr ? ctx.expr(1) : ctx.expr(2));
 	}
 
-	@SuppressWarnings("unchecked")
-	private Object getContextObject(LValueContext lValue) {
-	    if (lValue.name != null) {
-		Map<String, Object> obj = (Map<String, Object>)lValue.context;
-		return obj.get(lValue.name);
-	    }
-	    else if (lValue.index >= 0) {
-		List<Object> arr = (List<Object>)lValue.context;
-		return arr.get(lValue.index);
-	    }
-	    else {
-		// This should only ever be in the outermost "variables" context
-		// where the context is just the variable map
-		return lValue.context;
-	    }
-	}
-
-	@SuppressWarnings("unchecked")
-	private Object putContextObject(LValueContext lValue, Object value) {
-	    if (lValue.name != null) {
-		Map<String, Object> obj = (Map<String, Object>)lValue.context;
-		obj.put(lValue.name, value);
-	    }
-	    else if (lValue.index >= 0) {
-		List<Object> arr = (List<Object>)lValue.context;
-		arr.set(lValue.index, value);
-	    }
-	    else {
-		// Should never happen
-		throw new IllegalStateException("Assignment to " + lValue.toString() + " without name or index.");
-	    }
-	    // For convenience for the assignment operators, return the value
-	    return value;
-	}
-
-	@SuppressWarnings("unchecked")
-	private LValueContext makeMapLValue(CalcParser.VarContext var, LValueContext objLValue, String name) {
-	    Map<String, Object> obj = null;
-	    Object objValue = getContextObject(objLValue);
-	    if (objValue != null && objValue instanceof Map) {
-		obj = (Map<String, Object>)objValue;
-	    }
-	    else if (objValue == null) {
-		obj = new HashMap<>();
-		putContextObject(objLValue, obj);
-	    }
-	    else {
-		throw new CalcExprException("Variable '" + objLValue.toString() + "' already has a non-object value", var);
-	    }
-
-	    if (name != null) {
-		objLValue = new LValueContext(objLValue, obj, name);
-	    }
-
-	    return objLValue;
-	}
-
 	private LValueContext getLValue(CalcParser.VarContext var) {
-	    return getLValue(var, globalContext);
-	}
-
-	@SuppressWarnings("unchecked")
-	private LValueContext getLValue(CalcParser.VarContext var, LValueContext lValue) {
-	    if (var instanceof CalcParser.IdVarContext) {
-		CalcParser.IdVarContext idVar = (CalcParser.IdVarContext)var;
-		return new LValueContext(lValue, getContextObject(lValue), idVar.ID().getText());
-	    }
-	    else if (var instanceof CalcParser.ArrVarContext) {
-		CalcParser.ArrVarContext arrVar = (CalcParser.ArrVarContext)var;
-		LValueContext arrLValue = getLValue(arrVar.var(), lValue);
-		int index = getShiftValue(arrVar.expr());
-
-		if (index < 0)
-		    throw new CalcExprException("Index " + index + " cannot be negative", arrVar);
-
-		List<Object> list = null;
-		Object arrValue = getContextObject(arrLValue);
-		if (arrValue != null && arrValue instanceof List) {
-		    list = (List<Object>)arrValue;
-		}
-		else if (arrValue == null) {
-		    list = new ArrayList<>();
-		    putContextObject(arrLValue, list);
-		}
-		else {
-		    throw new CalcExprException("Variable '" + arrLValue.toString() + "' already has a non-array value", var);
-		}
-
-		// Set empty values up to the index desired
-		int size = list.size();
-		for (int i = size; i <= index; i++)
-		    list.add(null);
-
-		return new LValueContext(arrLValue, list, index);
-	    }
-	    else if (var instanceof CalcParser.ObjVarContext) {
-		CalcParser.ObjVarContext objVar = (CalcParser.ObjVarContext)var;
-		LValueContext objLValue = getLValue(objVar.var(0), lValue);
-
-		objLValue = makeMapLValue(var, objLValue, null);
-
-		List<TerminalNode> strings = objVar.STRING();
-		if (strings.size() > 0) {
-		    for (TerminalNode string : strings) {
-			objLValue = makeMapLValue(var, objLValue, string.getText());
-		    }
-		}
-
-		CalcParser.VarContext rhsVar = objVar.var(1);
-		if (rhsVar != null) {
-		    if (strings.size() > 0)
-			objLValue = makeMapLValue(var, objLValue, null);
-		    return getLValue(rhsVar, objLValue);
-		}
-		else
-		    return objLValue;
-	    }
-	    else {
-		throw new CalcExprException("ERROR: unknown var context subclass: " + var.getClass().getName(), var);
-	   }
+	    return LValueContext.getLValue(this, var, globalContext);
 	}
 
 	@Override
 	public Object visitAddAssignExpr(CalcParser.AddAssignExprContext ctx) {
 	    LValueContext lValue = getLValue(ctx.var());
 
-	    Object e1 = getContextObject(lValue);
+	    Object e1 = lValue.getContextObject();
 	    Object e2 = visit(ctx.expr());
 
-	    Object result = addOp(e1, e2, mc, ctx);
-
-	    return putContextObject(lValue, result);
+	    return lValue.putContextObject(addOp(e1, e2, ctx.var(), ctx.expr(), mc));
 	}
 
 	@Override
 	public Object visitSubAssignExpr(CalcParser.SubAssignExprContext ctx) {
 	    LValueContext lValue = getLValue(ctx.var());
 
-	    BigDecimal d1 = toDecimalValue(getContextObject(lValue), ctx);
+	    BigDecimal d1 = toDecimalValue(lValue.getContextObject(), ctx);
 	    BigDecimal d2 = getDecimalValue(ctx.expr());
 
-	    BigDecimal result = d1.subtract(d2, mc);
+	    return lValue.putContextObject(d1.subtract(d2, mc));
+	}
 
-	    return putContextObject(lValue, result);
+	@Override
+	public Object visitPowerAssignExpr(CalcParser.PowerAssignExprContext ctx) {
+	    LValueContext lValue = getLValue(ctx.var());
+
+	    BigDecimal base = toDecimalValue(lValue.getContextObject(), ctx);
+	    double exp      = getDoubleValue(ctx.expr());
+
+	    return lValue.putContextObject(NumericUtil.pow(base, exp).round(mc));
 	}
 
 	@Override
 	public Object visitMultAssignExpr(CalcParser.MultAssignExprContext ctx) {
 	    LValueContext lValue = getLValue(ctx.var());
 
-	    BigDecimal d1 = toDecimalValue(getContextObject(lValue), ctx);
+	    BigDecimal d1 = toDecimalValue(lValue.getContextObject(), ctx);
 	    BigDecimal d2 = getDecimalValue(ctx.expr());
 
-	    BigDecimal result = d1.multiply(d2, mc);
-
-	    return putContextObject(lValue, result);
+	    return lValue.putContextObject(d1.multiply(d2, mc));
 	}
 
 	@Override
 	public Object visitDivAssignExpr(CalcParser.DivAssignExprContext ctx) {
 	    LValueContext lValue = getLValue(ctx.var());
 
-	    BigDecimal d1 = toDecimalValue(getContextObject(lValue), ctx);
+	    BigDecimal d1 = toDecimalValue(lValue.getContextObject(), ctx);
 	    BigDecimal d2 = getDecimalValue(ctx.expr());
 
 	    try {
-		BigDecimal result = d1.divide(d2, mc);
-
-		return putContextObject(lValue, result);
+		return lValue.putContextObject(d1.divide(d2, mc));
 	    }
 	    catch (ArithmeticException ae) {
 		throw new CalcExprException(ae, ctx);
@@ -1652,13 +1416,11 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public Object visitModAssignExpr(CalcParser.ModAssignExprContext ctx) {
 	    LValueContext lValue = getLValue(ctx.var());
 
-	    BigDecimal d1 = toDecimalValue(getContextObject(lValue), ctx);
+	    BigDecimal d1 = toDecimalValue(lValue.getContextObject(), ctx);
 	    BigDecimal d2 = getDecimalValue(ctx.expr());
 
 	    try {
-		BigDecimal result = d1.remainder(d2, mc);
-
-		return putContextObject(lValue, result);
+		return lValue.putContextObject(d1.remainder(d2, mc));
 	    }
 	    catch (ArithmeticException ae) {
 		throw new CalcExprException(ae, ctx);
@@ -1669,78 +1431,28 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public Object visitBitAssignExpr(CalcParser.BitAssignExprContext ctx) {
 	    LValueContext lValue = getLValue(ctx.var());
 
-	    BigInteger i1 = toIntegerValue(getContextObject(lValue), ctx);
+	    BigInteger i1 = toIntegerValue(lValue.getContextObject(), ctx);
 	    BigInteger i2 = getIntegerValue(ctx.expr());
 
-	    BigInteger result = null;
-
 	    String op = ctx.BIT_ASSIGN().getText();
-	    switch (op) {
-		case "&=":
-		    result = i1.and(i2);
-		    break;
-		case "~&=":
-		    result = i1.and(i2).not();
-		    break;
-		case "&~=":
-		    result = i1.andNot(i2);
-		    break;
-		case "^=":
-		    result = i1.xor(i2);
-		    break;
-		case "~^=":
-		    result = i1.xor(i2).not();
-		    break;
-		case "|=":
-		    result = i1.or(i2);
-		    break;
-		case "~|=":
-		    result = i1.or(i2).not();
-		    break;
-		default:
-		    unknownOp(op, ctx);
-		    break;
-	    }
+	    // Strip off the trailing '=' of the operator
+	    op = op.substring(0, op.length() - 1);
 
-	    return putContextObject(lValue, result);
+	    return lValue.putContextObject(bitOp(i1, i2, op, ctx));
 	}
 
 	@Override
 	public Object visitShiftAssignExpr(CalcParser.ShiftAssignExprContext ctx) {
 	    LValueContext lValue = getLValue(ctx.var());
 
-	    BigInteger i1 = toIntegerValue(getContextObject(lValue), ctx);
-	    int e2        = getShiftValue(ctx.expr());
-
-	    BigInteger result = null;
+	    BigInteger i1 = toIntegerValue(lValue.getContextObject(), ctx);
+	    int e2        = getIntValue(ctx.expr());
 
 	    String op = ctx.SHIFT_ASSIGN().getText();
-	    switch (op) {
-		case ">>>=":
-		    // Convert to Long because ">>>" doesn't make sense for BigInteger (unlimited size) values
-		    try {
-			long longValue = i1.longValueExact();
-			result = BigInteger.valueOf(longValue >>> e2);
-		    }
-		    catch (ArithmeticException ae) {
-			throw new CalcExprException(ae, ctx);
-		    }
-		    break;
+	    // Strip off the trailing "="
+	    op = op.substring(0, op.length() - 1);
 
-		case ">>=":
-		    result = i1.shiftRight(e2);
-		    break;
-
-		case "<<=":
-		    result = i1.shiftLeft(e2);
-		    break;
-
-		default:
-		    unknownOp(op, ctx);
-		    break;
-	    }
-
-	    return putContextObject(lValue, result);
+	    return lValue.putContextObject(shiftOp(i1, e2, op, ctx));
 	}
 
 	@Override
@@ -1748,7 +1460,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    Object value = visit(ctx.expr());
 
 	    LValueContext lValue = getLValue(ctx.var());
-	    return putContextObject(lValue, value);
+	    return lValue.putContextObject(value);
 	}
 }
 

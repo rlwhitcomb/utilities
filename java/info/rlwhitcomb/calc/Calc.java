@@ -68,6 +68,8 @@
  *	    so the GUI remains responsive throughout.
  *	07-Jan-2021 (rlwhitcomb)
  *	    New directive to set the "resultsOnly" mode.
+ *	08-Jan-2021 (rlwhitcomb)
+ *	    Allow directive prefix (":") on commands in REPL mode.
  */
 package info.rlwhitcomb.calc;
 
@@ -715,17 +717,30 @@ public class Calc
 				switch (cmd) {
 				    case "quit":
 				    case "exit":
+				    case ":quit":
+				    case ":exit":
+				    case ":q":
+				    case ":e":
+				    case ":x":
 					exit();
 					break;
 				    case "?":
 				    case "help":
+				    case ":?":
+				    case ":help":
 					printIntro();
 					printHelp();
 					break;
 				    case "version":
+				    case ":version":
+				    case ":vers":
+				    case ":ver":
+				    case ":v":
 					printTitleAndVersion();
 					break;
 				    case "gui":
+				    case ":gui":
+				    case ":g":
 					DesktopApplicationContext.main(Calc.class, args);
 					break replLoop;
 				    default:

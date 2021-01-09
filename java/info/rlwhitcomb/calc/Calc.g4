@@ -92,6 +92,8 @@
  *	    Allow comments.
  *	07-Jan-2021 (rlwhitcomb)
  *	    Remaining assignment operators; update associativity of operators.
+ *	08-Jan-2021 (rlwhitcomb)
+ *	    Loop construct. Power assign op.
  */
 
 grammar Calc;
@@ -101,9 +103,18 @@ prog
    ;
 
 stmt
-   : expr FORMAT ? ENDEXPR      # exprStmt
-   | directive ENDEXPR          # directiveStmt
-   | ENDEXPR                    # emptyStmt
+   : loopOrExpr
+   | directive ENDEXPR
+   ;
+
+loopOrExpr
+   : expr FORMAT ? ENDEXPR ?               # exprStmt
+   | LOOP ( LOOPVAR IN ) ? loopCtl block   # loopStmt
+   | ENDEXPR                               # emptyStmt
+   ;
+
+block
+   : '{' loopOrExpr * '}'
    ;
 
 expr
@@ -156,11 +167,12 @@ expr
    | expr BOOL_OP expr                   # booleanExpr
    |<assoc=right> expr '?' expr ':' expr # eitherOrExpr
    |<assoc=right> var ASSIGN expr        # assignExpr
-   |<assoc=right> var '+=' expr          # addAssignExpr
-   |<assoc=right> var '-=' expr          # subAssignExpr
+   |<assoc=right> var '**=' expr         # powerAssignExpr
    |<assoc=right> var '*=' expr          # multAssignExpr
    |<assoc=right> var '/=' expr          # divAssignExpr
    |<assoc=right> var '%=' expr          # modAssignExpr
+   |<assoc=right> var '+=' expr          # addAssignExpr
+   |<assoc=right> var '-=' expr          # subAssignExpr
    |<assoc=right> var BIT_ASSIGN expr    # bitAssignExpr
    |<assoc=right> var SHIFT_ASSIGN expr  # shiftAssignExpr
    ;
@@ -171,8 +183,17 @@ expr2
    ;
 
 exprN
-   : '(' expr ( ',' expr ) * ')'
-   | expr ( ',' expr ) *
+   : '(' exprList ')'
+   | exprList
+   ;
+
+loopCtl
+   : ( expr DOTS ) ? expr ( ',' expr ) ?
+   | '(' exprList ')'
+   ;
+
+exprList
+   : expr ( ',' expr ) *
    ;
 
 obj
@@ -194,6 +215,7 @@ var
    : var ( '.' ( var | STRING ) ) +     # objVar
    | var '[' expr ']'                   # arrVar
    | ID                                 # idVar
+   | LOOPVAR                            # loopVar
    ;
 
 value
@@ -306,12 +328,21 @@ JOIN     : J O I N ;
 
 FIB      : F I B ;
 
+LOOP     : L O O P ;
+
+IN       : I N ;
+
 
 /* Note: this needs to be last so that these other "ID" like things
  * will be recognized first. */
 
 ID     : [a-zA-Z_] [a-zA-Z_0-9]* ;
 
+
+DOTS   : '..' ;
+
+LOOPVAR
+       : '$' [a-zA-Z_] [a-zA-Z_0-9]* ;
 
 SHIFT_ASSIGN
        : '>>>='
@@ -487,7 +518,7 @@ fragment X : [xX] ;
 fragment Y : [yY] ;
 fragment Z : [zZ] ;
 
-fragment DIR : '$' ;
+fragment DIR : ':' ;
 
 fragment ESC
    : '\\' (["\\/bfnrt] | UNICODE)

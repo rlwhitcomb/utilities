@@ -113,6 +113,8 @@
 		Add second test of Calc.
 	    05-Jan-2021 (rlwhitcomb)
 		Allow manual setting of "git.commit.id" in the "build.properties" file.
+	    08-Jan-2021 (rlwhitcomb)
+		Fail the build on Antlr error.
 
      ========================================================================== -->
 
@@ -245,7 +247,7 @@
 
 	<target name="process-grammars" depends="check-grammars-uptodate" description="Process the Antlr grammars to generate parsers.">
 		<echo message="Generating Calc parser" unless:true="${grammars.uptodate}"/>
-		<java jar="external-jars/antlr-4.9-complete.jar" fork="true" unless:true="${grammars.uptodate}">
+		<java jar="external-jars/antlr-4.9-complete.jar" fork="true" unless:true="${grammars.uptodate}" failonerror="true">
 			<arg file="info/rlwhitcomb/calc/Calc.g4"/>
 			<arg value="-visitor"/>
 			<arg value="-no-listener"/>
