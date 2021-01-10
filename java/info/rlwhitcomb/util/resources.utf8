@@ -74,6 +74,8 @@
 #	    One more error message.
 #	05-Jan-2021 (rlwhitcomb)
 #	    Update copyright years.
+#	09-Jan-2021 (rlwhitcomb)
+#	    More errors from NumericUtil.
 #
 
 #
@@ -135,6 +137,7 @@ numeric.piDigitMismatch	= Calculated digit length is %1$d, but requested number 
 numeric.tooManyDigits	= Too many digits of precision requested (max is %1$d).
 numeric.notInteger	= The value must be a positive whole number.
 numeric.wholeInteger	= The value must be a whole number.
+numeric.primeTooBig	= The value is too big to compute.
 
 #
 # From SecurityUtil.java

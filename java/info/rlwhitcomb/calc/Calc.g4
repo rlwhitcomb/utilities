@@ -94,6 +94,8 @@
  *	    Remaining assignment operators; update associativity of operators.
  *	08-Jan-2021 (rlwhitcomb)
  *	    Loop construct. Power assign op.
+ *	09-Jan-2021 (rlwhitcomb)
+ *	    ln2 and isprime.
  */
 
 grammar Calc;
@@ -146,9 +148,11 @@ expr
    | SQRT expr                           # sqrtExpr
    | CBRT expr                           # cbrtExpr
    | LOG expr                            # logExpr
+   | LN2 expr                            # ln2Expr
    | LN expr                             # lnExpr
    | SIGNUM expr                         # signumExpr
    | ROUND expr2                         # roundExpr
+   | ISPRIME expr                        # isPrimeExpr
    | GCD expr2                           # gcdExpr
    | MAX exprN                           # maxExpr
    | MIN exprN                           # minExpr
@@ -314,9 +318,13 @@ LOG      : L O G ;
 
 LN       : L N ;
 
+LN2      : L N '2' ;
+
 SIGNUM   : S I G N U M ;
 
 ROUND    : R O U N D ;
+
+ISPRIME  : I S P R I M E ;
 
 GCD      : G C D ;
 

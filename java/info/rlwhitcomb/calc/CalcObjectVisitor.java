@@ -107,6 +107,8 @@
  *	    Reduce common code.
  *	08-Jan-2021 (rlwhitcomb)
  *	    Implement loop construct.
+ *	09-Jan-2021 (rlwhitcomb)
+ *	    Implement ln2 and isprime.
  */
 package info.rlwhitcomb.calc;
 
@@ -998,6 +1000,16 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	@Override
+	public Object visitLn2Expr(CalcParser.Ln2ExprContext ctx) {
+	    double d = getDoubleValue(ctx.expr());
+
+	    double d10_2 = Math.log10(2.0d);
+	    double ln10  = Math.log10(d);
+
+	    return new BigDecimal(ln10 / d10_2, mcDouble);
+	}
+
+	@Override
 	public Object visitLnExpr(CalcParser.LnExprContext ctx) {
 	    double d = getDoubleValue(ctx.expr());
 
@@ -1018,6 +1030,13 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    int iPlaces  = getIntValue(e2ctx.expr(1));
 
 	    return e.round(new MathContext(iPlaces));
+	}
+
+	@Override
+	public Object visitIsPrimeExpr(CalcParser.IsPrimeExprContext ctx) {
+	    BigInteger i = getIntegerValue(ctx.expr());
+
+	    return Boolean.valueOf(NumericUtil.isPrime(i));
 	}
 
 	@Override

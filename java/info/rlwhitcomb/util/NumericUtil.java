@@ -89,6 +89,8 @@
  *	    Update obsolete Javadoc constructs.
  *	05-Jan-2021 (rlwhitcomb)
  *	    Optimizations in "pow".
+ *	09-Jan-2021 (rlwhitcomb)
+ *	    Add "isPrime()".
  */
 package info.rlwhitcomb.util;
 
@@ -226,7 +228,8 @@ public class NumericUtil
 	private static final long MULT_PIB = MULT_TIB * MULT_KIB;
 	private static final long MULT_EIB = MULT_PIB * MULT_KIB;
 
-	private static final BigDecimal TWO = BigDecimal.valueOf(2L);
+	private static final BigInteger I_TWO = BigInteger.valueOf(2L);
+	private static final BigDecimal D_TWO = BigDecimal.valueOf(2L);
 
 	/** The previously calculated PI value (if any); cached to eliminate repeated costly calculations. */
 	private static BigDecimal CALCULATED_PI = null;
@@ -1250,7 +1253,7 @@ public class NumericUtil
 	    double fracExp = exp - (double)intExp;
 
 	    // Turn an integer power of two into a "setBit" on a BigInteger
-	    if (base.equals(TWO) && (double)intExp == inputExp) {
+	    if (base.equals(D_TWO) && (double)intExp == inputExp) {
 		BigInteger value = BigInteger.ZERO.setBit(intExp);
 		return new BigDecimal(value);
 	    }
@@ -1520,7 +1523,7 @@ public class NumericUtil
 		CALCULATED_PI = new BigDecimal(piDigits(digits + 1)).movePointLeft(digits);
 		// Now calculate the related values at the same scale
 		MathContext mc = new MathContext(digits + 1);
-		TWO_PI       = CALCULATED_PI.multiply(TWO, mc);
+		TWO_PI       = CALCULATED_PI.multiply(D_TWO, mc);
 		MINUS_TWO_PI = TWO_PI.negate(); 
 	    }
 
@@ -1543,6 +1546,77 @@ public class NumericUtil
 	    }
 
 	    return CALCULATED_E;
+	}
+
+	private static final BigInteger MAX_PRIME = BigInteger.valueOf(10_000_000L);
+
+	private static int findLowestClearBit(final BigInteger bitArray, final int start, final int length) {
+	    for (int i = start; i < length; i++) {
+		if (!bitArray.testBit(i))
+		    return i;
+	    }
+	    return -1;
+	}
+
+	/**
+	 * Using a Sieve of Eratosthenes, figure out if the given number is prime.
+	 * <p> Because this uses a bunch of space, the calculation is limited to
+	 * a relatively small value (~10**7).
+	 *
+	 * @param n The number to check for possible prime-ness.
+	 * @return  {@code true} if {@code n} is a prime number, {@code false}
+	 *          if the number is composite.
+	 * @throws  IllegalArgumentException if the number is "too big" for this method.
+	 */
+	public static boolean isPrime(final BigInteger n) {
+	    if (n.compareTo(MAX_PRIME) > 0)
+		throw new IllegalArgumentException(Intl.getString("util#numeric.primeTooBig"));
+
+	    // Negative numbers are essentially the same primality as their positive counterparts
+	    BigInteger posN = n.abs();
+
+	    // Easy decision here, even numbers > 2 are not prime...
+	    if (posN.equals(BigInteger.ZERO))
+		return false;
+
+	    if (posN.compareTo(I_TWO) <= 0)
+		return true;
+
+	    if (posN.remainder(I_TWO).equals(BigInteger.ZERO))
+		return false;
+
+	    int max = (int)(Math.ceil(Math.sqrt(posN.doubleValue())) + 0.5d) + 1;
+
+	    // In this implementation, a 0 bit means prime, 1 bit is composite.
+	    BigInteger sieve = BigInteger.ZERO;
+
+	    // In this implementation, only the odd bits are present, and correspond so:
+	    // bit 0 -> 3
+	    // bit 1 -> 5
+	    // bit 2 -> 7
+	    int i = 0;
+	    while (i >= 0 && i <= max) {
+		int prime = (i * 2) + 3;
+		if (posN.equals(BigInteger.valueOf(prime)))
+		    return true;
+
+		BigInteger rem = posN.remainder(BigInteger.valueOf(prime));
+		if (rem.equals(BigInteger.ZERO))
+		    return false;
+
+		for (int j = prime; j <= max; j += prime) {
+		    if (j % 2 == 1) {
+			sieve = sieve.setBit((j - 3) / 2);
+		    }
+		}
+
+		int next = findLowestClearBit(sieve, i, max);
+		if (i == next) {
+		    break;
+		}
+		i = next;
+	    }
+	    return true;
 	}
 
 }

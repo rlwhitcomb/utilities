@@ -79,6 +79,8 @@ e**i
 m = 10000
 n = log(m)
 10**n
+p = ln2(1000000)
+2**p
 
 :degrees
 sin(45)

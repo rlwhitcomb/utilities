@@ -16,6 +16,10 @@ loop $i in SIZE {
 }
 array;j
 
+:resultonly on
+loop $i in 2 .. 102 { isprime($i) ? `${$i} is prime` : "" }
+:resultonly previous
+
 :echo
 :echo "Done with LOOP tests."
 
