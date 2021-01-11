@@ -72,6 +72,8 @@
  *	    Allow directive prefix (":") on commands in REPL mode.
  *	10-Jan-2021 (rlwhitcomb)
  *	    Quiet mode setting.
+ *	11-Jan-2021 (rlwhitcomb)
+ *	    Don't display timing for silent calculations.
  */
 package info.rlwhitcomb.calc;
 
@@ -546,7 +548,7 @@ public class Calc
 		visitor.setSilent(oldSilent);
 	    }
 
-	    if (timing) {
+	    if (timing && !silent) {
 		displayer.displayMessage(String.format("Elapsed time %1$11.9f seconds.",
 			Environment.timerValueToSeconds(endTime - startTime)));
 	    }

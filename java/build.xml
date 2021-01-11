@@ -117,6 +117,8 @@
 		Fail the build on Antlr error.
 	    08-Jan-2021 (rlwhitcomb)
 		Add the new "e10" file to the Calc tests.
+	    11-Jan-2021 (rlwhitcomb)
+		Add the new "e12" file to the Calc tests.
 
      ========================================================================== -->
 
@@ -350,7 +352,8 @@
 		<java classname="info.rlwhitcomb.matches.MatchesTest"/>
 		<java classname="TestNumericUtil"/>
 		<java classname="info.rlwhitcomb.calc.Calc">
-			<arg value="e1,e2,e3,e10"/>
+			<arg value="-timing"/>
+			<arg value="e1,e2,e3,e10,e12"/>
 		</java>
 	</target>
 
