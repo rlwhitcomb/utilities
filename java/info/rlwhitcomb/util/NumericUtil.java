@@ -1492,7 +1492,7 @@ public class NumericUtil
 	 */
 	public static BigDecimal eDecimal(final int digits) {
 	    // e will accumulate the sum of 1/i! for an ever increasing i
-	    BigDecimal e         = BigDecimal.valueOf(2);
+	    BigDecimal e         = D_TWO;
 	    BigDecimal factorial = BigDecimal.ONE;
 	    // loops is a little extra to make sure the last digit we want is accurate
 	    int loops = digits + 10;
