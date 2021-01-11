@@ -96,6 +96,8 @@
  *	    Loop construct. Power assign op.
  *	09-Jan-2021 (rlwhitcomb)
  *	    ln2 and isprime.
+ *	10-Jan-2021 (rlwhitcomb)
+ *	    Quiet mode directive.
  */
 
 grammar Calc;
@@ -252,6 +254,7 @@ directive
    | INCLUDE expr                # includeDirective
    | DEBUG modeOption            # debugDirective
    | RESULTSONLY modeOption      # resultsOnlyDirective
+   | QUIET modeOption            # quietDirective
    ;
 
 numberOption
@@ -462,6 +465,10 @@ DEBUG
 
 RESULTSONLY
    : DIR  ( R E S | R E S U L T | R E S U L T S | R E S U L T O N L Y | R E S U L T S O N L Y )
+   ;
+
+QUIET
+   : DIR  Q U I E T
    ;
 
 

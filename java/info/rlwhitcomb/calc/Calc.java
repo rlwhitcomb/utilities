@@ -70,6 +70,8 @@
  *	    New directive to set the "resultsOnly" mode.
  *	08-Jan-2021 (rlwhitcomb)
  *	    Allow directive prefix (":") on commands in REPL mode.
+ *	10-Jan-2021 (rlwhitcomb)
+ *	    Quiet mode setting.
  */
 package info.rlwhitcomb.calc;
 
@@ -163,6 +165,7 @@ public class Calc
 	private static boolean colors      = true;
 	private static boolean timing      = false;
 	private static boolean resultsOnly = false;
+	private static boolean quiet       = false;
 
 	private static Locale  locale  = null;
 
@@ -287,6 +290,14 @@ public class Calc
 	    return oldMode;
 	}
 
+	public static boolean setQuietMode(boolean mode) {
+	    boolean oldMode = quiet;
+	    quiet = mode;
+	    visitor.setSilent(quiet);
+	    return oldMode;
+	}
+
+
 	/**
 	 * A parser error strategy that abandons the parse without trying to recover.
 	 */
@@ -382,7 +393,7 @@ public class Calc
 		public void perform(Component source) {
 		    final String exprText = inputTextArea.getText();
 
-		    queuedThread.submitWork(() -> processString(exprText, false) );
+		    queuedThread.submitWork(() -> processString(exprText, quiet) );
 
 		    inputTextArea.setText("");
 		    inputTextArea.requestFocus();
@@ -599,6 +610,10 @@ public class Calc
 		case "r":
 		    resultsOnly = true;
 		    break;
+		case "quiet":
+		case "q":
+		    quiet = true;
+		    break;
 		case "locale":
 		case "loc":
 		case "l":
@@ -704,7 +719,7 @@ public class Calc
 		    // a line at a time from the console and processing
 		    if (input == null) {
 			if (console == null) {
-			    process(CharStreams.fromStream(System.in), visitor, errorStrategy, false);
+			    process(CharStreams.fromStream(System.in), visitor, errorStrategy, quiet);
 			}
 			else {
 			    printTitleAndVersion();
@@ -744,14 +759,14 @@ public class Calc
 					DesktopApplicationContext.main(Calc.class, args);
 					break replLoop;
 				    default:
-					process(CharStreams.fromString(line + LINESEP), visitor, errorStrategy, false);
+					process(CharStreams.fromString(line + LINESEP), visitor, errorStrategy, quiet);
 					break;
 				}
 			    }
 			}
 		    }
 		    else {
-			process(input, visitor, errorStrategy, false);
+			process(input, visitor, errorStrategy, quiet);
 		    }
 		}
 	    }

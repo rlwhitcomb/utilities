@@ -109,6 +109,8 @@
  *	    Implement loop construct.
  *	09-Jan-2021 (rlwhitcomb)
  *	    Implement ln2 and isprime.
+ *	10-Jan-2021 (rlwhitcomb)
+ *	    Quiet mode directive. Refactor the context mode processing.
  */
 package info.rlwhitcomb.calc;
 
@@ -124,6 +126,7 @@ import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.UnaryOperator;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
 
@@ -180,7 +183,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	/** {@link CalcDisplayer} object so we can output results to either the console or GUI window. */
 	private CalcDisplayer displayer;
 
-	/** Silent flag (set to true) while evaluating nested expressions. */
+	/** Silent flag (set to true) while evaluating nested expressions (or via :quiet directive). */
 	private boolean silent = false;
 
 	/** Stack of previous "debug" mode values. */
@@ -188,6 +191,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	/** Stack of previous "resultsOnly" mode values. */
 	private Deque<Boolean> resultsOnlyModeStack = new ArrayDeque<>();
+
+	/** Stack of previous "quiet" mode values. */
+	private Deque<Boolean> quietModeStack = new ArrayDeque<>();
 
 
 	public boolean getSilent() {
@@ -456,11 +462,11 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 	}
 
-	@Override
-	public Object visitDebugDirective(CalcParser.DebugDirectiveContext ctx) {
+
+	private void processModeOption(CalcParser.ModeOptionContext ctx, Deque<Boolean> stack, UnaryOperator<Boolean> setOperator) {
 	    boolean push = true;
 	    boolean mode;
-	    String option = ctx.modeOption().getText().toLowerCase();
+	    String option = ctx.getText().toLowerCase();
 	    switch (option) {
 		case "true":
 		case "on":
@@ -473,61 +479,58 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		case "pop":
 		case "prev":
 		case "previous":
-		    if (debugModeStack.isEmpty())
+		    if (stack.isEmpty())
 			mode = false;
 		    else
-			mode = debugModeStack.pop();
+			mode = stack.pop();
 		    push = false;
 		    break;
 		case "":
 		default:
 		    // Syntax error -> don't do anything
-		    return null;
+		    return;
 	    }
 
-	    boolean previousMode = Calc.setDebugMode(mode);
-	    displayActionMessage("Debug mode set to %1$s.", mode);
+	    // Run the process to actually set the new mode
+	    boolean previousMode = setOperator.apply(mode);
+
 	    if (push)
-		debugModeStack.push(previousMode);
+		stack.push(previousMode);
+	}
+
+	@Override
+	public Object visitDebugDirective(CalcParser.DebugDirectiveContext ctx) {
+	    processModeOption(ctx.modeOption(), debugModeStack, (mode) -> {
+		boolean previousMode = Calc.setDebugMode(mode);
+		displayActionMessage("Debug mode set to %1$s.", mode);
+		return previousMode;
+	    });
 
 	    return null;
 	}
 
 	@Override
 	public Object visitResultsOnlyDirective(CalcParser.ResultsOnlyDirectiveContext ctx) {
-	    boolean push = true;
-	    boolean mode;
-	    String option = ctx.modeOption().getText().toLowerCase();
-	    switch (option) {
-		case "true":
-		case "on":
-		    mode = true;
-		    break;
-		case "false":
-		case "off":
-		    mode = false;
-		    break;
-		case "pop":
-		case "prev":
-		case "previous":
-		    if (resultsOnlyModeStack.isEmpty())
-			mode = false;
-		    else
-			mode = resultsOnlyModeStack.pop();
-		    push = false;
-		    break;
-		case "":
-		default:
-		    // Syntax error -> don't do anything
-		    return null;
-	    }
+	    processModeOption(ctx.modeOption(), resultsOnlyModeStack, (mode) -> {
+		// Switch the mode off in order to display the message, then set to the new mode
+		boolean previousMode = Calc.setResultsOnlyMode(false);
+		displayActionMessage("Results-only mode set to %1$s.", mode);
+		Calc.setResultsOnlyMode(mode);
+		return previousMode;
+	    });
 
-	    // Switch the mode off in order to display the message, then set to the new mode
-	    boolean previousMode = Calc.setResultsOnlyMode(false);
-	    displayActionMessage("Results-only mode set to %1$s.", mode);
-	    Calc.setResultsOnlyMode(mode);
-	    if (push)
-		resultsOnlyModeStack.push(previousMode);
+	    return null;
+	}
+
+	@Override
+	public Object visitQuietDirective(CalcParser.QuietDirectiveContext ctx) {
+	    processModeOption(ctx.modeOption(), quietModeStack, (mode) -> {
+		// Switch the mode off in order to display the message, then set to the new mode
+		boolean previousMode = Calc.setQuietMode(false);
+		displayActionMessage("Quiet mode set to %1$s.", mode);
+		Calc.setQuietMode(mode);
+		return previousMode;
+	    });
 
 	    return null;
 	}
