@@ -111,6 +111,9 @@
  *	    Implement ln2 and isprime.
  *	10-Jan-2021 (rlwhitcomb)
  *	    Quiet mode directive. Refactor the context mode processing.
+ *	11-Jan-2021 (rlwhitcomb)
+ *	    No need to display action messages for the display modes (IMO), since the
+ *	    effect will be fairly obvious by the subsequent displays.
  */
 package info.rlwhitcomb.calc;
 
@@ -512,11 +515,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitResultsOnlyDirective(CalcParser.ResultsOnlyDirectiveContext ctx) {
 	    processModeOption(ctx.modeOption(), resultsOnlyModeStack, (mode) -> {
-		// Switch the mode off in order to display the message, then set to the new mode
-		boolean previousMode = Calc.setResultsOnlyMode(false);
-		displayActionMessage("Results-only mode set to %1$s.", mode);
-		Calc.setResultsOnlyMode(mode);
-		return previousMode;
+		return Calc.setResultsOnlyMode(mode);
 	    });
 
 	    return null;
@@ -525,11 +524,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitQuietDirective(CalcParser.QuietDirectiveContext ctx) {
 	    processModeOption(ctx.modeOption(), quietModeStack, (mode) -> {
-		// Switch the mode off in order to display the message, then set to the new mode
-		boolean previousMode = Calc.setQuietMode(false);
-		displayActionMessage("Quiet mode set to %1$s.", mode);
-		Calc.setQuietMode(mode);
-		return previousMode;
+		return Calc.setQuietMode(mode);
 	    });
 
 	    return null;
