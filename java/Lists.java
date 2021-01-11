@@ -66,6 +66,8 @@
  *	11-Jan-2021 (rlwhitcomb)
  *	   The "-single" option really should just make one line out of
  *	   the input without stripping out the commas, or anything else.
+ *	11-Jan-2021 (rlwhitcomb)
+ *	   Refactor to unify and simplify error reporting.
  */
 import java.io.BufferedReader;
 import java.io.File;
@@ -175,6 +177,20 @@ public class Lists
 	    System.err.println();
 	}
 
+	private static void errUsage(String messageFormat, Object... args) {
+	    System.err.println(String.format(messageFormat, args));
+	    usage();
+	}
+
+	private static void missingValue(String expected, String option) {
+	    errUsage("Expecting %1$s for the \"-%2$s\" option!", expected, option);
+	}
+
+	private static void onlyOnce(String option) {
+	    errUsage("Can only specify the %1$s once!", option);
+	}
+
+
 	public static void main(String[] args) {
 	    Environment.loadProgramInfo(Lists.class);
 
@@ -190,23 +206,19 @@ public class Lists
 		String option = Options.isOption(arg);
 		if (option != null) {
 		    if (sawOutputOption) {
-			System.err.println("Expecting an output file name for the \"-o\" option!");
-			usage();
+			missingValue("an output file name", "o");
 			return;
 		    }
 		    if (sawCutOption) {
-			System.err.println("Expecting a number for the \"-x\" option!");
-			usage();
+			missingValue("a number", "x");
 			return;
 		    }
 		    if (sawPrefixTextOption) {
-			System.err.println("Expecting prefix text for the \"-e\" option!");
-			usage();
+			missingValue("prefix text", "e");
 			return;
 		    }
 		    if (sawPostfixTextOption) {
-			System.err.println("Expecting postfix text for the \"-f\" option!");
-			usage();
+			missingValue("postfix text", "f");
 			return;
 		    }
 		    if (Options.matchesOption(arg, true, "concatenate", "concat", "c"))
@@ -231,24 +243,21 @@ public class Lists
 		    }
 		    else if (Options.matchesOption(arg, true, "output", "out", "o")) {
 			if (outputFileName != null) {
-			    System.err.println("Can only specify the output file name once.");
-			    usage();
+			    onlyOnce("output file name");
 			    return;
 			}
 			sawOutputOption = true;
 		    }
 		    else if (Options.matchesOption(arg, true, "prefix", "pre", "e")) {
 			if (prefixText != null) {
-			    System.err.println("Can only specify the prefix text once.");
-			    usage();
+			    onlyOnce("prefix text");
 			    return;
 			}
 			sawPrefixTextOption = true;
 		    }
 		    else if (Options.matchesOption(arg, true, "postfix", "post", "f")) {
 			if (postfixText != null) {
-			    System.err.println("Can only specify the postfix text once.");
-			    usage();
+			    onlyOnce("postfix text");
 			    return;
 			}
 			sawPostfixTextOption = true;
@@ -265,14 +274,12 @@ public class Lists
 			try {
 			    width = Integer.parseInt(option);
 			    if (width < 1 || width > 255) {
-				System.err.format("Width value (%1$d) must be between 1 and 255%n", width);
-				usage();
+				errUsage("Width value (%1$d) must be between 1 and 255.", width);
 				return;
 			    }
 			}
 			catch (NumberFormatException nfe) {
-			    System.err.format("Unsupported option: \"%1$s\"%n", arg);
-			    usage();
+			    errUsage("Unsupported option: \"%1$s\".", arg);
 			    return;
 			}
 		    }
@@ -290,8 +297,7 @@ public class Lists
 			    cutSize = -1; // to trigger the error below
 			}
 			if (cutSize < 1 || cutSize > 255) {
-			    System.err.format("The cut size (%1$s) should be between 1 and 255%n", arg);
-			    usage();
+			    errUsage("The cut size (%1$s) should be between 1 and 255.", arg);
 			    return;
 			}
 			sawCutOption = false;
@@ -309,8 +315,7 @@ public class Lists
 		    else {
 			if (arg.equals(STDIN)) {
 			    if (sawConsoleInput) {
-				System.err.format("Cannot specify \"%1$s\" for the input more than once.%n", STDIN);
-				usage();
+				errUsage("Cannot specify \"%1$s\" for the input more than once.", STDIN);
 				return;
 			    }
 			    sawConsoleInput = true;
@@ -326,14 +331,12 @@ public class Lists
 
 	    // Error checking on the supplied parameters
 	    if (!concatenate && width > 0) {
-		System.err.format("Specifying an output width (\"-%1$d\") is only effective with the \"-c\" or \"-j\" options.%n", width);
-		usage();
+		errUsage("Specifying an output width (\"-%1$d\") is only effective with the \"-c\" or \"-j\" options.", width);
 		return;
 	    }
 
 	    if (counting && (single || concatenate || blanks || width > 0)) {
-		System.err.format("The \"-n\" option should not be used together with either the%n\"-s\", \"-c\", \"-j\", or \"-b\" options%nor with an output width.%n");
-		usage();
+		errUsage("The \"-n\" option should not be used together with either the%n\"-s\", \"-c\", \"-j\", or \"-b\" options%nor with an output width.");
 		return;
 	    }
 
@@ -342,8 +345,7 @@ public class Lists
 		    output = new PrintStream(outputFileName);
 		}
 		catch (IOException ioe) {
-		    System.err.format("Unable to open \"%1$s\" file for writing: %2$s%n", outputFileName, ioe.getMessage());
-		    usage();
+		    errUsage("Unable to open \"%1$s\" file for writing: %2$s", outputFileName, ioe.getMessage());
 		    return;
 		}
 	    }
