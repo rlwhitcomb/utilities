@@ -1,0 +1,10 @@
+:quiet on
+:resultsonly off
+start = 11!
+end = start + 99999
+primes = []; numPrimes = 0;
+:echo `Running primality tests on ${(end-start)+1} values from $start to $end...`
+loop $i in start .. end { isprime $i ? primes[numPrimes++] = $i : '' }
+:quiet pop
+numPrimes; primes;
+

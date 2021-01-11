@@ -91,6 +91,8 @@
  *	    Optimizations in "pow".
  *	09-Jan-2021 (rlwhitcomb)
  *	    Add "isPrime()".
+ *	11-Jan-2021 (rlwhitcomb)
+ *	    Just as an experiment, raise the upper limit of "isPrime()" to 2**32-1.
  */
 package info.rlwhitcomb.util;
 
@@ -1548,7 +1550,7 @@ public class NumericUtil
 	    return CALCULATED_E;
 	}
 
-	private static final BigInteger MAX_PRIME = BigInteger.valueOf(10_000_000L);
+	private static final BigInteger MAX_PRIME = BigInteger.valueOf(Integer.MAX_VALUE);
 
 	private static int findLowestClearBit(final BigInteger bitArray, final int start, final int length) {
 	    for (int i = start; i < length; i++) {
