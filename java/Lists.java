@@ -63,6 +63,9 @@
  *         Fix "-single" processing. Use regular Environment program info.
  *         Also use the regular classes instead of our duplicates (no
  *         need for a standalone class anymore).
+ *	11-Jan-2021 (rlwhitcomb)
+ *	   The "-single" option really should just make one line out of
+ *	   the input without stripping out the commas, or anything else.
  */
 import java.io.BufferedReader;
 import java.io.File;
@@ -158,7 +161,7 @@ public class Lists
 	    System.err.println("    before (after) the single line or each line of the output.");
 	    System.err.println();
 	    System.err.println("  The \"-s\" option will join the whole file into a single string without");
-	    System.err.println("    any separators.");
+	    System.err.println("    changing anything else.");
 	    System.err.println();
 	    System.err.format ("  Using \"%1$s\" or nothing for the list_file_name will read from stdin.%n", STDIN);
 	    System.err.format ("  Multiple file names are allowed as well as mixing \"%1$s\" with regular%n", STDIN);
@@ -370,6 +373,10 @@ public class Lists
 		    String line = null;
 
 		    while ((line = r.readLine()) != null) {
+			if (single) {
+			    buf.append(line);
+			    continue;
+			}
 			if (cutting) {
 			    if (line.length() > cutSize) {
 				line = line.substring(cutSize);
@@ -383,10 +390,7 @@ public class Lists
 				    numberOfValues++;
 				}
 				else {
-				    if (single) {
-					buf.append(value);
-				    }
-				    else if (concatenate) {
+				    if (concatenate) {
 					if (buf.length() > prefixTextLength) {
 					    if (!join)
 						buf.append(",");

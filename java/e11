@@ -1,0 +1,25 @@
+#
+# Create a JSON object, then output it formatted nicely.
+#
+# Note: in order to make this work seamlessly, run with "c -q -nocol e11"
+# (that is, with the "-quiet" and "-nocolors" flags set on the command line).
+#
+# Then the (double) round-trip test can be done with:
+#    c -q -nocol e11 | lists -s | c -result -nocol @ | c @
+#
+:resultsonly on
+
+:clear [i, j, value, array, SIZE ]
+:dec 50
+:quiet on
+value = 1
+array = []
+SIZE = 5
+loop $i in SIZE {
+   loop $j in SIZE {
+      array[$i-1][$j-1] = value++!
+   }
+}
+:quiet off
+{ "factorials": array };j
+
