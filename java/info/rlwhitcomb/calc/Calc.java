@@ -74,6 +74,9 @@
  *	    Quiet mode setting.
  *	11-Jan-2021 (rlwhitcomb)
  *	    Don't display timing for silent calculations.
+ *	12-Jan-2021 (rlwhitcomb)
+ *	    Allow CALC_OPTIONS set in the environment. Options for
+ *	    light and dark background modes.
  */
 package info.rlwhitcomb.calc;
 
@@ -100,6 +103,7 @@ import org.apache.pivot.wtk.util.TextAreaOutputStream;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
 
+import info.rlwhitcomb.util.CharUtil;
 import static info.rlwhitcomb.util.ConsoleColor.Code.*;
 import info.rlwhitcomb.util.Environment;
 import info.rlwhitcomb.util.ExceptionUtil;
@@ -107,17 +111,20 @@ import info.rlwhitcomb.util.Intl;
 import info.rlwhitcomb.util.QueuedThread;
 
 /**
- * Command line calculator, which will also read files or from stdin.
+ * Command line calculator, which will also read from {@link System#in} or from one or more files.
+ * <p> Works from just the command line, from reading input from the console, or in GUI mode.
  */
 public class Calc
 	implements Application, CalcDisplayer
 {
 	private static final boolean ON_WINDOWS = Environment.isWindows();
 
-	public static final String EXPR_COLOR  = (ON_WINDOWS ? CYAN_BRIGHT : BLUE_BOLD).toString();
-	public static final String ARROW_COLOR = (ON_WINDOWS ? WHITE : BLACK_BRIGHT).toString();
-	public static final String VALUE_COLOR = (ON_WINDOWS ? GREEN_BRIGHT : GREEN_BOLD).toString();
-	public static final String ERROR_COLOR = RED_BOLD.toString();
+	private static boolean darkBackgrounds = ON_WINDOWS;
+
+	public static String EXPR_COLOR;
+	public static String ARROW_COLOR;
+	public static String VALUE_COLOR;
+	public static String ERROR_COLOR;
 
 	private static final String LINESEP = System.lineSeparator();
 
@@ -139,27 +146,14 @@ public class Calc
 
 	private static final String[] INTRO = {
 	    "  Enter an expression (or multiple expressions separated by ';').",
-	    "  Use '" + VALUE_COLOR + "help" + RESET
-	  + "' or '" + VALUE_COLOR + "?" + RESET + "' for a list of supported functions.",
-	    "  Enter '" + VALUE_COLOR + "quit" + RESET
-	  + "' or '" + VALUE_COLOR + "exit" + RESET + "' to end.",
-	    "  Enter '" + VALUE_COLOR + "gui" + RESET
-	  + "' to enter GUI mode.",
-	    ""
-	};
-	private static final String[] INTRO_NOCOLOR = {
-	    "  Enter an expression (or multiple expressions separated by ';').",
-	    "  Use 'help' or '?' for a list of supported functions.",
-	    "  Enter 'quit' or 'exit' to end.",
-	    "  Enter 'gui' to enter GUI mode.",
+	    "  Use '<v>help</v>' or '<v>?</v>' for a list of supported functions.",
+	    "  Enter '<v>quit</v>' or '<v>exit</v>' to end.",
+	    "  Enter '<v>gui</v>' to enter GUI mode.",
 	    ""
 	};
 
 	private static final String[] HELP = {
-	    ERROR_COLOR + "Help is not complete yet!  Check back later." + RESET
-	};
-	private static final String[] HELP_NOCOLOR = {
-	    "Help is not complete yet!  Check back later."
+	    "<e>Help is not complete yet!  Check back later.</e>"
 	};
 
 	private static boolean guiMode     = false;
@@ -197,6 +191,24 @@ public class Calc
 	/** The text read from the command line or a file. */
 	private static String inputText = null;
 
+
+	private static void computeColors() {
+	    EXPR_COLOR  = (darkBackgrounds ? CYAN_BRIGHT : BLUE_BOLD).toString();
+	    ARROW_COLOR = (darkBackgrounds ? WHITE : BLACK_BRIGHT).toString();
+	    VALUE_COLOR = (darkBackgrounds ? GREEN_BRIGHT : GREEN_BOLD).toString();
+	    ERROR_COLOR = RED_BOLD.toString();
+	}
+
+	private static String substituteColors(String decoratedString) {
+	    String coloredString = decoratedString;
+
+	    coloredString = coloredString.replace("<v>",  colors ? VALUE_COLOR : "");
+	    coloredString = coloredString.replace("</v>", colors ? RESET.toString() : "");
+	    coloredString = coloredString.replace("<e>",  colors ? ERROR_COLOR : "");
+	    coloredString = coloredString.replace("</e>", colors ? RESET.toString() : "");
+
+	    return coloredString;
+	}
 
 	@Override
 	public void startup(Display display, Map<String, String> properties) {
@@ -436,17 +448,15 @@ public class Calc
 	}
 
 	public static void printIntro() {
-	    if (colors)
-		Arrays.stream(INTRO).forEach(System.out::println);
-	    else
-		Arrays.stream(INTRO_NOCOLOR).forEach(System.out::println);
+	    Arrays.stream(INTRO).forEach((s) -> {
+		System.out.println(substituteColors(s));
+	    });
 	}
 
 	public static void printHelp() {
-	    if (colors)
-		Arrays.stream(HELP).forEach(System.out::println);
-	    else
-		Arrays.stream(HELP_NOCOLOR).forEach(System.out::println);
+	    Arrays.stream(HELP).forEach((s) -> {
+		System.out.println(substituteColors(s));
+	    });
 	}
 
 	public static void exit() {
@@ -594,6 +604,24 @@ public class Calc
 		case "noc":
 		    colors = false;
 		    break;
+		case "darkbackgrounds":
+		case "darkbackground":
+		case "darkback":
+		case "darkbg":
+		case "dark":
+		case "dk":
+		    darkBackgrounds = true;
+		    computeColors();
+		    break;
+		case "lightbackgrounds":
+		case "lightbackground":
+		case "lightback":
+		case "lightbg":
+		case "light":
+		case "lt":
+		    darkBackgrounds = false;
+		    computeColors();
+		    break;
 		case "timing":
 		case "time":
 		case "t":
@@ -639,11 +667,7 @@ public class Calc
 	    return Expecting.DEFAULT;
 	}
 
-	public static void main(String[] args) {
-	    Environment.loadProgramInfo(Calc.class);
-
-	    List<String> argList = new ArrayList<>(args.length);
-
+	private static void processArgs(String[] args, List<String> argList) {
 	    expecting = Expecting.DEFAULT;
 
 	    for (String arg : args) {
@@ -677,7 +701,43 @@ public class Calc
  
 	    if (expecting != Expecting.DEFAULT) {
 		System.err.println("Value for " + expecting + " option was not given.");
-		System.exit(1);
+	    }
+	}
+
+	public static void main(String[] args) {
+	    Environment.loadProgramInfo(Calc.class);
+
+	    // Preload the color values for the initial errors
+	    computeColors();
+
+	    List<String> argList = new ArrayList<>(args.length * 2);
+
+	    // Preprocess the CALC_OPTIONS environment variable (if present)
+	    String calcOptions = System.getenv("CALC_OPTIONS");
+	    if (!CharUtil.isNullOrEmpty(calcOptions)) {
+		String[] parts = calcOptions.split("\\s+");
+		processArgs(parts, argList);
+
+		switch (expecting) {
+		    case QUIT_NOW:
+			return;
+		    case DEFAULT:
+			break;
+		    default:
+			System.exit(1);
+		}
+	    }
+
+	    // Now process the command line (options will override the env var)
+	    processArgs(args, argList);
+
+	    switch (expecting) {
+		case QUIT_NOW:
+		    return;
+		case DEFAULT:
+		    break;
+		default:
+		    System.exit(1);
 	    }
 
 	    args = argList.toArray(new String[0]);
