@@ -1,0 +1,39 @@
+#
+# https://en.wikipedia.org/wiki/Sine#Continued_fraction
+#
+# sin(x) = x - (x^3)/3! + (x^5)/5! - (x^7)/7! + (x^9)/9! ...
+#
+# Sigma(0..infinity) (-1)^n / (2n + 1)! * x ^ (2n + 1)
+#
+# where x in radians
+# for x in degrees each term is multiplied by pi/180
+#
+# cos(x) = 1 - (x^2)/2! + (x^4)/4! - (x^6)/6! ...
+#
+# Sigma(0..infinity) (-1)^n * x^2n / (2n)!
+#
+
+x = pi/4
+
+sin_x = x
+sign = 1
+
+:quiet on
+loop $x in 2 .. 30, 2 { sign = - sign; sin_x += sign * ((x ** ($x + 1)) / ($x + 1)!) }
+:quiet off
+
+sin_x
+sin x
+
+:echo
+
+cos_x = 1
+sign = 1
+
+:quiet on
+loop $x in 2 .. 30, 2 { sign = - sign; cos_x += sign * ((x ** $x) / $x!) }
+:quiet off
+
+cos_x
+cos x
+

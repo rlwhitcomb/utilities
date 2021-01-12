@@ -93,6 +93,8 @@
  *	    Add "isPrime()".
  *	11-Jan-2021 (rlwhitcomb)
  *	    Just as an experiment, raise the upper limit of "isPrime()" to 2**32-1.
+ *	12-Jan-2021 (rlwhitcomb)
+ *	    Implement "cos".
  */
 package info.rlwhitcomb.util;
 
@@ -1397,10 +1399,10 @@ public class NumericUtil
 //System.out.println("range reduced x = " + xValue.toPlainString());
 	    }
 
-	    BigDecimal result = xValue;
-	    BigDecimal power  = xValue;
-	    BigDecimal fact   = BigDecimal.ONE;
-	    BigDecimal term   = BigDecimal.ONE;
+	    BigDecimal result   = xValue;
+	    BigDecimal power    = xValue;
+	    BigDecimal fact     = BigDecimal.ONE;
+	    BigDecimal factTerm = BigDecimal.ONE;
 
 	    // This converges very rapidly, except when the value is near zero
 	    int loops = mc.getPrecision() * 3 / 2;
@@ -1408,17 +1410,69 @@ public class NumericUtil
 	    MathContext mc2 = new MathContext(mc.getPrecision() * 2);
 
 	    for (int i = 1; i < loops; i++) {
-		power = power.multiply(xValue).multiply(xValue);
-		term  = term.add(BigDecimal.ONE);
-		fact  = fact.multiply(term);
-		term  = term.add(BigDecimal.ONE);
-		fact  = fact.multiply(term);
+		power     = power.multiply(xValue).multiply(xValue);
+		factTerm  = factTerm.add(BigDecimal.ONE);
+		fact      = fact.multiply(factTerm);
+		factTerm  = factTerm.add(BigDecimal.ONE);
+		fact      = fact.multiply(factTerm);
 		BigDecimal seriesTerm = power.divide(fact, mc2);
 		if (i % 2 == 1)
 		    result = result.subtract(seriesTerm);
 		else
 		    result = result.add(seriesTerm);
 //System.out.println("loop " + i + " -> " + result.toPlainString());
+	    }
+
+	    return result.round(mc);
+	}
+
+	/**
+	 * Find the value of cos(x) (where x is in radians).
+	 *
+	 * @param x	The value in radians to compute the "cos" function of.
+	 * @param mc	The {@link MathContext} to use for the computation.
+	 * @return	The value of the cos of x.
+	 */
+	public static BigDecimal cos(final Number x, final MathContext mc) {
+	    BigDecimal xValue;
+	    if (x instanceof BigDecimal)
+		xValue = (BigDecimal)x;
+	    else if (x instanceof BigInteger)
+		xValue = new BigDecimal((BigInteger)x);
+	    else
+		xValue = BigDecimal.valueOf(x.doubleValue());
+
+	    pi(mc.getPrecision());
+
+	    /* First do some range reduction to the range -2*pi to 2*pi */
+//System.out.println("     original x = " + xValue.toPlainString());
+	    if (xValue.compareTo(MINUS_TWO_PI) < 0 || xValue.compareTo(TWO_PI) > 0) {
+		xValue = xValue.remainder(TWO_PI, mc);
+//System.out.println("range reduced x = " + xValue.toPlainString());
+	    }
+
+	    BigDecimal result   = BigDecimal.ONE;
+	    BigDecimal power    = BigDecimal.ONE;
+	    BigDecimal fact     = BigDecimal.ONE;
+	    BigDecimal factTerm = BigDecimal.ONE;
+
+	    // This converges very rapidly, except when the value is near zero
+	    int loops = mc.getPrecision() * 3 / 2;
+
+	    MathContext mc2 = new MathContext(mc.getPrecision() * 2);
+
+	    for (int i = 1; i < loops; i++) {
+		power     = power.multiply(xValue).multiply(xValue);
+		factTerm  = factTerm.add(BigDecimal.ONE);
+		fact      = fact.multiply(factTerm);
+		BigDecimal seriesTerm = power.divide(fact, mc2);
+		if (i % 2 == 1)
+		    result = result.subtract(seriesTerm);
+		else
+		    result = result.add(seriesTerm);
+//System.out.println("loop " + i + " -> " + result.toPlainString());
+		factTerm  = factTerm.add(BigDecimal.ONE);
+		fact      = fact.multiply(factTerm);
 	    }
 
 	    return result.round(mc);

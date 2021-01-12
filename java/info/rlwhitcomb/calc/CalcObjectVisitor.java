@@ -114,6 +114,8 @@
  *	11-Jan-2021 (rlwhitcomb)
  *	    No need to display action messages for the display modes (IMO), since the
  *	    effect will be fairly obvious by the subsequent displays.
+ *	12-Jan-2021 (rlwhitcomb)
+ *	    Use NumericUtil.cos() now.
  */
 package info.rlwhitcomb.calc;
 
@@ -903,10 +905,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitCosExpr(CalcParser.CosExprContext ctx) {
-	    // For now, convert to double and use standard Math method
-	    double d = getTrigValue(ctx.expr());
+	    BigDecimal e = getDecimalTrigValue(ctx.expr());
 
-	    return new BigDecimal(Math.cos(d), mcDouble);
+	    return NumericUtil.cos(e, mc);
 	}
 
 	@Override
