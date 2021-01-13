@@ -41,7 +41,10 @@
  *	Tweak the help output.
  *    04-Jan-2021 (rlwhitcomb)
  *	Allow choices to be "options" format ("-props", etc.)
+ *    13-Jan-2021 (rlwhitcomb)
+ *	List fonts available in the graphics environment.
  */
+import java.awt.GraphicsEnvironment;
 import java.io.PrintStream;
 import java.nio.charset.Charset;
 import java.security.Provider;
@@ -86,7 +89,9 @@ public class OS
 		PROVIDERS	(OS::displayProviders,
 				 "security-providers", "security_providers",
 				 "securityproviders", "providers", "security", "prov",
-				 "sec", "s", "sp");
+				 "sec", "s", "sp"),
+		FONTS		(OS::displayFonts,
+				 "fonts", "font", "f");
 
 		private Runnable displayer;
 		private String[] aliasNames;
@@ -365,6 +370,20 @@ public class OS
 	    Arrays.stream(providers).forEach(p -> System.out.format("%1$12s: %2$s%n", p.getName(), p.getInfo()));
 	    printFooter();
 	}
+
+	/**
+	 * Display the sorted list of fonts available in the graphics environment.
+	 */
+	private static void displayFonts() {
+	    GraphicsEnvironment graphicsEnv = GraphicsEnvironment.getLocalGraphicsEnvironment();
+	    String[] fontFamilies = graphicsEnv.getAvailableFontFamilyNames();
+	    Arrays.sort(fontFamilies, String.CASE_INSENSITIVE_ORDER);
+
+	    printTitle("Font Families");
+	    Arrays.stream(fontFamilies).forEach(System.out::println);
+	    printFooter();
+	}
+
 
 	/**
 	 * Parse the command line arguments to get the list of desired reports,
