@@ -123,6 +123,8 @@
 		Add the new "e_trig" file to the Calc tests.
 	    13-Jan-2021 (rlwhitcomb)
 		Direct test output to a file; new "purge-logs" task.
+	    13-Jan-2021 (rlwhitcomb)
+		Add "standard" Version class.
 
      ========================================================================== -->
 
@@ -301,8 +303,11 @@
 			<include name="GUnzip*.class"/>
 			<include name="FixPath*.class"/>
 			<include name="Sleep*.class"/>
-			<include name="net/iharder/b64/*.class"/>
-			<include name="name/fraser/neil/plaintext/*.class"/>
+			<include name="Terra*.json"/>
+			<include name="build.properties"/>
+			<include name="build.number"/>
+			<include name="images/*.*"/>
+			<include name="info/rlwhitcomb/Version*.class"/>
 			<include name="info/rlwhitcomb/annotations/*.class"/>
 			<include name="info/rlwhitcomb/calc/*.class"/>
 			<include name="info/rlwhitcomb/calc/*.bxml"/>
@@ -319,10 +324,8 @@
 			<include name="info/rlwhitcomb/wordfind/*.bxml"/>
 			<include name="info/rlwhitcomb/wordfind/*.txt"/>
 			<include name="info/rlwhitcomb/**/*.properties"/>
-			<include name="images/*.*"/>
-			<include name="Terra*.json"/>
-			<include name="build.properties"/>
-			<include name="build.number"/>
+			<include name="name/fraser/neil/plaintext/*.class"/>
+			<include name="net/iharder/b64/*.class"/>
 			<include name="version.properties"/>
 		</jar>
 	</target>
