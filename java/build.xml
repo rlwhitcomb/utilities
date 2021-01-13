@@ -125,6 +125,8 @@
 		Direct test output to a file; new "purge-logs" task.
 	    13-Jan-2021 (rlwhitcomb)
 		Add "standard" Version class.
+	    13-Jan-2021 (rlwhitcomb)
+		Add some missing files and directories in various places.
 
      ========================================================================== -->
 
@@ -210,6 +212,8 @@
 		<include name="sleep.bat"                   if:true="${on.windows}"/>
 		<include name="tre"                     unless:true="${on.windows}"/>
 		<include name="tre.bat"                     if:true="${on.windows}"/>
+		<include name="version"                 unless:true="${on.windows}"/>
+		<include name="version.bat"                 if:true="${on.windows}"/>
 		<include name="which"                   unless:true="${on.windows}"/>
 		<include name="which.bat"                   if:true="${on.windows}"/>
 		<include name="wf"                      unless:true="${on.windows}"/>
@@ -272,6 +276,7 @@
 			<src path="."/>
 			<src path="net/iharder/b64"/>
 			<src path="name/fraser/neil/plaintext"/>
+			<src path="info/rlwhitcomb"/>
 			<src path="info/rlwhitcomb/annotations"/>
 			<src path="info/rlwhitcomb/calc"/>
 			<src path="info/rlwhitcomb/cat"/>
@@ -279,6 +284,7 @@
 			<src path="info/rlwhitcomb/csv"/>
 			<src path="info/rlwhitcomb/curl"/>
 			<src path="info/rlwhitcomb/jarfile"/>
+			<src path="info/rlwhitcomb/heart"/>
 			<src path="info/rlwhitcomb/matches"/>
 			<src path="info/rlwhitcomb/tree"/>
 			<src path="info/rlwhitcomb/util"/>
@@ -316,6 +322,7 @@
 			<include name="info/rlwhitcomb/csv/*.class"/>
 			<include name="info/rlwhitcomb/curl/*.class"/>
 			<include name="info/rlwhitcomb/curl/*.bxml"/>
+			<include name="info/rlwhitcomb/heart/*.class"/>
 			<include name="info/rlwhitcomb/jarfile/*.class"/>
 			<include name="info/rlwhitcomb/matches/*.class"/>
 			<include name="info/rlwhitcomb/tree/*.class"/>
@@ -379,14 +386,16 @@
 		<delete>
 			<fileset dir="." includes="${dest.jar}"/>
 			<fileset dir="." includes="*.class"/>
-			<fileset dir="net/iharder/b64" includes="*.class"/>
 			<fileset dir="name/fraser/neil/plaintext" includes="*.class"/>
+			<fileset dir="net/iharder/b64" includes="*.class"/>
+			<fileset dir="info/rlwhitcomb" includes="*.class"/>
 			<fileset dir="info/rlwhitcomb/annotations" includes="*.class"/>
 			<fileset dir="info/rlwhitcomb/calc" includes="*.class,*.interp,*.tokens,CalcParser.java,CalcVisitor.java,CalcLexer.java,CalcBaseVisitor.java"/>
 			<fileset dir="info/rlwhitcomb/cat" includes="*.class"/>
 			<fileset dir="info/rlwhitcomb/compare" includes="*.class"/>
 			<fileset dir="info/rlwhitcomb/csv" includes="*.class"/>
 			<fileset dir="info/rlwhitcomb/curl" includes="*.class"/>
+			<fileset dir="info/rlwhitcomb/heart" includes="*.class"/>
 			<fileset dir="info/rlwhitcomb/jarfile" includes="*.class"/>
 			<fileset dir="info/rlwhitcomb/matches" includes="*.class"/>
 			<fileset dir="info/rlwhitcomb/tree" includes="*.class"/>
