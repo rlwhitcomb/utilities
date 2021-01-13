@@ -119,6 +119,8 @@
 		Add the new "e10" file to the Calc tests.
 	    11-Jan-2021 (rlwhitcomb)
 		Add the new "e12" file to the Calc tests.
+	    12-Jan-2021 (rlwhitcomb)
+		Add the new "e_trig" file to the Calc tests.
 
      ========================================================================== -->
 
@@ -353,7 +355,7 @@
 		<java classname="TestNumericUtil"/>
 		<java classname="info.rlwhitcomb.calc.Calc">
 			<arg value="-timing"/>
-			<arg value="e1,e2,e3,e10,e12"/>
+			<arg value="e1,e2,e3,e10,e12,e_trig"/>
 		</java>
 	</target>
 
