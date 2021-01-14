@@ -121,6 +121,12 @@
 		Add the new "e12" file to the Calc tests.
 	    12-Jan-2021 (rlwhitcomb)
 		Add the new "e_trig" file to the Calc tests.
+	    13-Jan-2021 (rlwhitcomb)
+		Direct test output to a file; new "purge-logs" task.
+	    13-Jan-2021 (rlwhitcomb)
+		Add "standard" Version class.
+	    13-Jan-2021 (rlwhitcomb)
+		Add some missing files and directories in various places.
 
      ========================================================================== -->
 
@@ -142,6 +148,7 @@
 	<tstamp>
 		<format property="build.date" pattern="yyyy-MM-dd"/>
 		<format property="build.time" pattern="HH:mm:ss.SSS z"/>
+		<format property="test.log.file.name" pattern="'test'.yyyy-MM-dd_HH-mm.'log'" locale="en,US"/>
 	</tstamp>
 	<propertyfile file="build.number" comment="Utilities Build Values">
 		<entry key="build.number" value="${build.lastrev}"/>
@@ -205,6 +212,8 @@
 		<include name="sleep.bat"                   if:true="${on.windows}"/>
 		<include name="tre"                     unless:true="${on.windows}"/>
 		<include name="tre.bat"                     if:true="${on.windows}"/>
+		<include name="version"                 unless:true="${on.windows}"/>
+		<include name="version.bat"                 if:true="${on.windows}"/>
 		<include name="which"                   unless:true="${on.windows}"/>
 		<include name="which.bat"                   if:true="${on.windows}"/>
 		<include name="wf"                      unless:true="${on.windows}"/>
@@ -267,6 +276,7 @@
 			<src path="."/>
 			<src path="net/iharder/b64"/>
 			<src path="name/fraser/neil/plaintext"/>
+			<src path="info/rlwhitcomb"/>
 			<src path="info/rlwhitcomb/annotations"/>
 			<src path="info/rlwhitcomb/calc"/>
 			<src path="info/rlwhitcomb/cat"/>
@@ -274,6 +284,7 @@
 			<src path="info/rlwhitcomb/csv"/>
 			<src path="info/rlwhitcomb/curl"/>
 			<src path="info/rlwhitcomb/jarfile"/>
+			<src path="info/rlwhitcomb/heart"/>
 			<src path="info/rlwhitcomb/matches"/>
 			<src path="info/rlwhitcomb/tree"/>
 			<src path="info/rlwhitcomb/util"/>
@@ -298,8 +309,11 @@
 			<include name="GUnzip*.class"/>
 			<include name="FixPath*.class"/>
 			<include name="Sleep*.class"/>
-			<include name="net/iharder/b64/*.class"/>
-			<include name="name/fraser/neil/plaintext/*.class"/>
+			<include name="Terra*.json"/>
+			<include name="build.properties"/>
+			<include name="build.number"/>
+			<include name="images/*.*"/>
+			<include name="info/rlwhitcomb/Version*.class"/>
 			<include name="info/rlwhitcomb/annotations/*.class"/>
 			<include name="info/rlwhitcomb/calc/*.class"/>
 			<include name="info/rlwhitcomb/calc/*.bxml"/>
@@ -308,6 +322,7 @@
 			<include name="info/rlwhitcomb/csv/*.class"/>
 			<include name="info/rlwhitcomb/curl/*.class"/>
 			<include name="info/rlwhitcomb/curl/*.bxml"/>
+			<include name="info/rlwhitcomb/heart/*.class"/>
 			<include name="info/rlwhitcomb/jarfile/*.class"/>
 			<include name="info/rlwhitcomb/matches/*.class"/>
 			<include name="info/rlwhitcomb/tree/*.class"/>
@@ -316,10 +331,8 @@
 			<include name="info/rlwhitcomb/wordfind/*.bxml"/>
 			<include name="info/rlwhitcomb/wordfind/*.txt"/>
 			<include name="info/rlwhitcomb/**/*.properties"/>
-			<include name="images/*.*"/>
-			<include name="Terra*.json"/>
-			<include name="build.properties"/>
-			<include name="build.number"/>
+			<include name="name/fraser/neil/plaintext/*.class"/>
+			<include name="net/iharder/b64/*.class"/>
 			<include name="version.properties"/>
 		</jar>
 	</target>
@@ -347,30 +360,42 @@
 	</target>
 
 	<target name="test" depends="compile" description="Run extant unit tests.">
-		<java classname="TestSQLFormatter"/>
-		<java classname="info.rlwhitcomb.util.Options"/>
-		<java classname="InitTaskTest"/>
-		<java classname="DynArrayTest"/>
-		<java classname="info.rlwhitcomb.matches.MatchesTest"/>
-		<java classname="TestNumericUtil"/>
-		<java classname="info.rlwhitcomb.calc.Calc">
+		<echo>Running unit tests. Output going to "${test.log.file.name}" file.</echo>
+		<echo>TestSQLFormatter...</echo>
+		<java classname="TestSQLFormatter"                    output="${test.log.file.name}"/>
+		<echo>Test of Options...</echo>
+		<java classname="info.rlwhitcomb.util.Options"        output="${test.log.file.name}" append="true"/>
+		<echo>Test of InitializationTask...</echo>
+		<java classname="InitTaskTest"                        output="${test.log.file.name}" append="true"/>
+		<echo>Test of DynamicArray...</echo>
+		<java classname="DynArrayTest"                        output="${test.log.file.name}" append="true"/>
+		<echo>Test of Matches...</echo>
+		<java classname="info.rlwhitcomb.matches.MatchesTest" output="${test.log.file.name}" append="true"/>
+		<echo>Test of NumericUtil functions...</echo>
+		<java classname="TestNumericUtil"                     output="${test.log.file.name}" append="true"/>
+		<echo>Test of Calc operation...</echo>
+		<java classname="info.rlwhitcomb.calc.Calc"           output="${test.log.file.name}" append="true">
+			<arg value="-nocolors"/>
 			<arg value="-timing"/>
 			<arg value="e1,e2,e3,e10,e12,e_trig"/>
 		</java>
+		<echo>Done with unit tests. Results in "${test.log.file.name}" file.</echo>
 	</target>
 
-	<target name="clean" description="Cleans all generated files.">
+	<target name="clean" depends="purge-logs" description="Cleans all generated files, and old log files.">
 		<delete>
 			<fileset dir="." includes="${dest.jar}"/>
 			<fileset dir="." includes="*.class"/>
-			<fileset dir="net/iharder/b64" includes="*.class"/>
 			<fileset dir="name/fraser/neil/plaintext" includes="*.class"/>
+			<fileset dir="net/iharder/b64" includes="*.class"/>
+			<fileset dir="info/rlwhitcomb" includes="*.class"/>
 			<fileset dir="info/rlwhitcomb/annotations" includes="*.class"/>
 			<fileset dir="info/rlwhitcomb/calc" includes="*.class,*.interp,*.tokens,CalcParser.java,CalcVisitor.java,CalcLexer.java,CalcBaseVisitor.java"/>
 			<fileset dir="info/rlwhitcomb/cat" includes="*.class"/>
 			<fileset dir="info/rlwhitcomb/compare" includes="*.class"/>
 			<fileset dir="info/rlwhitcomb/csv" includes="*.class"/>
 			<fileset dir="info/rlwhitcomb/curl" includes="*.class"/>
+			<fileset dir="info/rlwhitcomb/heart" includes="*.class"/>
 			<fileset dir="info/rlwhitcomb/jarfile" includes="*.class"/>
 			<fileset dir="info/rlwhitcomb/matches" includes="*.class"/>
 			<fileset dir="info/rlwhitcomb/tree" includes="*.class"/>
@@ -421,6 +446,18 @@
 	<target name="install" depends="all,copy-to-install-directory" description="Build the utilities from scratch and install in a local utilities directory."/>
 
 	<target name="update" depends="compile,jar,copy-to-install-directory" description="Simple incremental build and update the installed .jar file."/>
+
+	<target name="purge-logs" description="Purge log files older than a month out of date.">
+		<tstamp>
+			<format property="last.month" pattern="MM/dd/yyyy hh:mm aa" locale="en,US" offset="-1" unit="month"/>
+		</tstamp>
+		<echo message="Purging log files from before ${last.month}..."/>
+		<delete>
+			<fileset dir="." includes="test*.log">
+				<date datetime="${last.month}" when="before"/>
+			</fileset>
+		</delete>
+	</target>
 </project>
 
 

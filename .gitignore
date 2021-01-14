@@ -10,4 +10,5 @@ CalcBaseVisitor.java
 CalcParser.java
 CalcLexer.java
 CalcVisitor.java
+test*.log
 
