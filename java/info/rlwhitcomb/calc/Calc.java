@@ -77,9 +77,12 @@
  *	12-Jan-2021 (rlwhitcomb)
  *	    Allow CALC_OPTIONS set in the environment. Options for
  *	    light and dark background modes.
+ *	14-Jan-2021 (rlwhitcomb)
+ *	    Set the text area fonts in code.
  */
 package info.rlwhitcomb.calc;
 
+import java.awt.Font;
 import java.io.Console;
 import java.io.File;
 import java.io.FileInputStream;
@@ -234,6 +237,10 @@ public class Calc
 
 		sizeFormat = NumberFormat.getIntegerInstance();
 		sizeFormat.setGroupingUsed(true);
+
+		Font monospacedFont = FontUtilities.decode(FontUtilities.MONOSPACED_FONTS + "-18");
+		inputTextArea.getStyles().put(Style.font, monospacedFont);
+		outputTextArea.getStyles().put(Style.font, monospacedFont);
 
 		// Prepopulate the text are with any text from the command line or input file
 		if (inputText != null)

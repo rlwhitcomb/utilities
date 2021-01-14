@@ -33,6 +33,8 @@
 		Add a SplitPane between the input and output areas so they can be resized.
 	    06-Jan-2021 (rlwhitcomb)
 		Add a label area to report the current output size (for large outputs).
+	    14-Jan-2021 (rlwhitcomb)
+		Set the text area fonts in code, so we can use new FontUtilities monospaced list.
 
      ========================================================================== -->
 
@@ -98,14 +100,14 @@
 		    <top>
 			<Border title=" Expression " styles="{padding:4}">
 			    <ScrollPane horizontalScrollBarPolicy="fill" verticalScrollBarPolicy="fill_to_capacity" >
-				<TextArea bxml:id="inputTextArea" styles="{font:'Monospaced 18'}"/>
+				<TextArea bxml:id="inputTextArea"/>
 			    </ScrollPane>
 			</Border>
 		    </top>
 		    <bottom>
 			<Border title=" Result " styles="{padding:4}">
 			    <ScrollPane horizontalScrollBarPolicy="fill" verticalScrollBarPolicy="fill_to_capacity" >
-				<TextArea bxml:id="outputTextArea" styles="{font:'Monospaced 18'}"/>
+				<TextArea bxml:id="outputTextArea"/>
 			    </ScrollPane>
 			</Border>
 		    </bottom>
