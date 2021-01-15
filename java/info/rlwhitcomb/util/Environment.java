@@ -117,6 +117,8 @@
  *	    "timeThis" methods.
  *	06-Jan-2021 (rlwhitcomb)
  *	    New flavor of "loadProgramInfo".
+ *	14-Jan-2021 (rlwhitcomb)
+ *	    Add "getAllProgramInfo" method.
  */
 package info.rlwhitcomb.util;
 
@@ -124,9 +126,13 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.lang.management.ManagementFactory;
@@ -228,6 +234,23 @@ public final class Environment
 	 * @see #setAppVersion
 	 */
 	private static String overloadedAppVersion = null;
+
+
+	/**
+	 * Class to hold program information.
+	 */
+	public static class ProgramInfo
+	{
+		public String className;
+		public String title;
+		public String version;
+
+		ProgramInfo(final String clsName, final String titleInfo, final String verInfo) {
+		    this.className = clsName;
+		    this.title     = titleInfo;
+		    this.version   = verInfo;
+		}
+	}
 
 
 	static {
@@ -845,6 +868,59 @@ public final class Environment
 	    }
 	}
 
+
+	/**
+	 * Get all the program info (read from "version.properties") into a list/map structure
+	 * with the following (JSON-format) form:
+	 * <code>[ { "Calc": { "title": "Expression Calculator", "version": "1.0.9" } }, { "Cat": { "title"...</code>
+	 *
+	 * @return The list of objects with all the information.
+	 */
+	public static List<ProgramInfo> getAllProgramInfo() {
+	    readBuildProperties();
+
+	    Set<String> propNames = buildProperties.stringPropertyNames();
+	    int size              = propNames.size();
+	    String[] names        = new String[size];
+	    int num               = 0;
+
+	    for (String name : propNames) {
+		if (name.endsWith(".title")) {
+		    names[num++] = name;
+		}
+		else if (name.endsWith(".version")) {
+		    if (name.equals("build.version")) {
+			continue;
+		    }
+		    else {
+			names[num++] = name;
+		    }
+		}
+	    }
+
+	    Arrays.sort(names, 0, num);
+
+	    List<ProgramInfo> results = new ArrayList<>(num / 2);
+
+	    // At this point "names" will have matching pairs of Class.title and
+	    // Class.version in it
+	    String title = "";
+
+	    for (int i = 0; i < num; i++) {
+		String name  = names[i];
+		String value = buildProperties.getProperty(name);
+		if (i % 2 == 0) {
+		    title = value;
+		}
+		else {
+		    String className = name.substring(0, name.indexOf('.'));
+		    ProgramInfo info = new ProgramInfo(className, title, value);
+		    results.add(info);
+		}
+	    }
+
+	    return results;
+	}
 
 	/**
 	 * @return The current copyright notice string (from the resources).

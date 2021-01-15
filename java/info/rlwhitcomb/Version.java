@@ -29,8 +29,12 @@
  */
 package info.rlwhitcomb;
 
-import info.rlwhitcomb.util.Environment;
+import java.util.List;
 
+import info.rlwhitcomb.util.CharUtil;
+import static info.rlwhitcomb.util.ConsoleColor.Code.*;
+import info.rlwhitcomb.util.Environment;
+import static info.rlwhitcomb.util.Environment.ProgramInfo;
 
 /**
  * Administrative class to keep track of the version number of the code release.
@@ -78,6 +82,20 @@ public class Version
 	 * @param args The parsed command line arguments (unused).
 	 */
 	public static void main(String[] args) {
-	    Environment.printProgramInfo();
+	    Environment.printProgramInfo(50);
+
+	    List<ProgramInfo> infos = Environment.getAllProgramInfo();
+
+	    String underline = CharUtil.padToWidth("", 50, '-');
+
+	    for (ProgramInfo info : infos) {
+		String version = String.format("Version %1$s", info.version);
+
+		System.out.println(BLACK_BRIGHT + underline);
+		System.out.println(BLUE_BOLD_BRIGHT + CharUtil.padToWidth(info.title, 50, CharUtil.Justification.CENTER));
+		System.out.println(GREEN + CharUtil.padToWidth(version, 50, CharUtil.Justification.CENTER));
+		System.out.println(BLACK_BRIGHT + underline + RESET);
+		System.out.println();
+	    }
 	}
 }
