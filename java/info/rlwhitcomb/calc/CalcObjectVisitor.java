@@ -116,6 +116,9 @@
  *	    effect will be fairly obvious by the subsequent displays.
  *	12-Jan-2021 (rlwhitcomb)
  *	    Use NumericUtil.cos() now.
+ *	15-Jan-2021 (rlwhitcomb)
+ *	    Make loop over an expression list, arrays, and maps work too.
+ *	    Fix looping with a negative step value and check infinite loop conditions.
  */
 package info.rlwhitcomb.calc;
 
@@ -129,6 +132,7 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.UnaryOperator;
@@ -656,37 +660,71 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitLoopStmt(CalcParser.LoopStmtContext ctx) {
-	    CalcParser.LoopCtlContext ctlCtx = ctx.loopCtl();
-	    List<CalcParser.ExprContext> exprs = ctlCtx.expr();
+	    CalcParser.LoopCtlContext ctlCtx    = ctx.loopCtl();
+	    CalcParser.ExprListContext exprList = ctlCtx.exprList();
+	    List<CalcParser.ExprContext> exprs  = ctlCtx.expr();
+
+	    Iterator<Object> iter = null;
+
 	    TerminalNode loopVar = ctx.LOOPVAR();
 	    String loopVarName   = loopVar != null ? loopVar.getText() : null;
 
-	    int start, stop, step;
+	    boolean stepWise = false;
 
-	    if (exprs.size() == 1) {
-		// number of times, starting from 1
-		start = step = 1;
-		stop  = getIntValue(exprs.get(0));
-	    }
-	    else if (exprs.size() == 2) {
-		if (ctlCtx.DOTS() != null) {
-		    // start .. stop
-		    start = getIntValue(exprs.get(0));
-		    stop  = getIntValue(exprs.get(1));
-		    step  = 1;
-		}
-		else {
-		    // stop, step
-		    start = 1;
-		    stop  = getIntValue(exprs.get(0));
-		    step  = getIntValue(exprs.get(1));
-		}
+	    int start = 1;
+	    int stop  = 1;
+	    int step  = 1;
+
+	    Object lastValue = null;
+
+	    if (exprList != null) {
+		exprs = exprList.expr();
 	    }
 	    else {
-		// start, stop, step
-		start = getIntValue(exprs.get(0));
-		stop  = getIntValue(exprs.get(1));
-		step  = getIntValue(exprs.get(2));
+		stepWise = true;
+
+		if (exprs.size() == 0) {
+		    // This is the case of '(' ')', or an empty list
+		    return lastValue;
+		}
+		else if (exprs.size() == 1) {
+		    // number of times, starting from 1
+		    // or it could be an array or object to iterate over
+		    Object obj = visit(exprs.get(0));
+		    if (obj instanceof Map) {
+			stepWise = false;
+			@SuppressWarnings("unchecked")
+			Map<String, Object> map = (Map<String, Object>)obj;
+			iter = map.values().iterator();
+		    }
+		    else if (obj instanceof List) {
+			stepWise = false;
+			@SuppressWarnings("unchecked")
+			List<Object> list = (List<Object>)obj;
+			iter = list.iterator();
+		    }
+		    else {
+			stop = getIntValue(exprs.get(0));
+		    }
+		}
+		else if (exprs.size() == 2) {
+		    if (ctlCtx.DOTS() != null) {
+			// start .. stop
+			start = getIntValue(exprs.get(0));
+			stop  = getIntValue(exprs.get(1));
+		    }
+		    else {
+			// stop, step
+			stop = getIntValue(exprs.get(0));
+			step = getIntValue(exprs.get(1));
+		    }
+		}
+		else {
+		    // start .. stop, step
+		    start = getIntValue(exprs.get(0));
+		    stop  = getIntValue(exprs.get(1));
+		    step  = getIntValue(exprs.get(2));
+		}
 	    }
 
 	    if (loopVarName != null) {
@@ -694,12 +732,40 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    throw new CalcExprException(ctx, "Duplicate loop variable name '%1$s' not allowed", loopVarName);
 	    }
 
-	    Object lastValue = null;
 	    try {
-		for (int loop = start; loop <= stop; loop += step) {
-		    if (loopVarName != null)
-			variables.put(loopVarName, loop);
-		    lastValue = visit(ctx.block());
+		if (stepWise) {
+		    if (step == 0)
+			throw new CalcExprException("Infinite loop: step value is zero", ctx);
+		    else if (step < 0) {
+			for (int loopIndex = start; loopIndex >= stop; loopIndex += step) {
+			    if (loopVarName != null)
+				variables.put(loopVarName, loopIndex);
+			    lastValue = visit(ctx.block());
+			}
+		    }
+		    else {
+			for (int loopIndex = start; loopIndex <= stop; loopIndex += step) {
+			    if (loopVarName != null)
+				variables.put(loopVarName, loopIndex);
+			    lastValue = visit(ctx.block());
+			}
+		    }
+		}
+		else if (iter != null) {
+		    while (iter.hasNext()) {
+			Object value = iter.next();
+			if (loopVarName != null)
+			    variables.put(loopVarName, value);
+			lastValue = visit(ctx.block());
+		    }
+		}
+		else {
+		    for (CalcParser.ExprContext expr : exprs) {
+			Object loopValue = visit(expr);
+			if (loopVarName != null)
+			    variables.put(loopVarName, loopValue);
+			lastValue = visit(ctx.block());
+		    }
 		}
 	    }
 	    finally {
@@ -727,11 +793,13 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitArrExpr(CalcParser.ArrExprContext ctx) {
-	   CalcParser.ArrContext aCtx = ctx.arr();
+	   CalcParser.ExprListContext exprList = ctx.arr().exprList();
 	   List<Object> list = new ArrayList<>();
-	   for (CalcParser.ExprContext expr : aCtx.expr()) {
-		Object value = visit(expr);
-		list.add(value);
+	   if (exprList != null) {
+		for (CalcParser.ExprContext expr : exprList.expr()) {
+		    Object value = visit(expr);
+		    list.add(value);
+		}
 	   }
 	   return list;
 	}

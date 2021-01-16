@@ -98,6 +98,8 @@
  *	    ln2 and isprime.
  *	10-Jan-2021 (rlwhitcomb)
  *	    Quiet mode directive.
+ *	15-Jan-2021 (rlwhitcomb)
+ *	    Allow looping over an empty expression list.
  */
 
 grammar Calc;
@@ -196,6 +198,12 @@ exprN
 loopCtl
    : ( expr DOTS ) ? expr ( ',' expr ) ?
    | '(' exprList ')'
+   | '(' ')'
+   ;
+
+arr
+   : '[' exprList ']'
+   | '[' ']'
    ;
 
 exprList
@@ -210,11 +218,6 @@ obj
 pair
    : ID ':' expr
    | STRING ':' expr
-   ;
-
-arr
-   : '[' expr ( ',' expr ) * ']'
-   | '[' ']'
    ;
 
 var
