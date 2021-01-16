@@ -100,6 +100,8 @@
  *	    Quiet mode directive.
  *	15-Jan-2021 (rlwhitcomb)
  *	    Allow looping over an empty expression list.
+ *	15-Jan-2021 (rlwhitcomb)
+ *	    Fix precedence of operators.
  */
 
 grammar Calc;
@@ -129,12 +131,9 @@ expr
    | arr                                 # arrExpr
    | var                                 # varExpr
    | '(' expr ')'                        # parenExpr
-   | var '++'                            # postIncExpr
-   | var '--'                            # postDecExpr
-   |<assoc=right> '++' var               # preIncExpr
-   |<assoc=right> '--' var               # preDecExpr
-   |<assoc=right> '+' expr               # posateExpr
-   |<assoc=right> '-' expr               # negateExpr
+   | var INC_OP                          # postIncOpExpr
+   |<assoc=right> INC_OP var             # preIncOpExpr
+   |<assoc=right> ADD_OP expr            # negPosExpr
    |<assoc=right> '!' expr               # booleanNotExpr
    |<assoc=right> '~' expr               # bitNotExpr
    | expr '!'                            # factorialExpr
@@ -163,11 +162,8 @@ expr
    | JOIN exprN                          # joinExpr
    | FIB expr                            # fibExpr
    |<assoc=right> expr '**' expr         # powerExpr
-   | expr '*' expr                       # multiplyExpr
-   | expr '/' expr                       # divideExpr
-   | expr '%' expr                       # modulusExpr
-   | expr '+' expr                       # addExpr
-   | expr '-' expr                       # subtractExpr
+   | expr MULT_OP expr                   # multiplyExpr
+   | expr ADD_OP expr                    # addExpr
    | expr SHIFT_OP expr                  # shiftExpr
    | expr '<=>' expr                     # spaceshipExpr
    | expr COMPARE_OP expr                # compareExpr
@@ -176,11 +172,8 @@ expr
    |<assoc=right> expr '?' expr ':' expr # eitherOrExpr
    |<assoc=right> var ASSIGN expr        # assignExpr
    |<assoc=right> var '**=' expr         # powerAssignExpr
-   |<assoc=right> var '*=' expr          # multAssignExpr
-   |<assoc=right> var '/=' expr          # divAssignExpr
-   |<assoc=right> var '%=' expr          # modAssignExpr
-   |<assoc=right> var '+=' expr          # addAssignExpr
-   |<assoc=right> var '-=' expr          # subAssignExpr
+   |<assoc=right> var MULT_ASSIGN expr   # multAssignExpr
+   |<assoc=right> var ADD_ASSIGN expr    # addAssignExpr
    |<assoc=right> var BIT_ASSIGN expr    # bitAssignExpr
    |<assoc=right> var SHIFT_ASSIGN expr  # shiftAssignExpr
    ;
@@ -357,6 +350,33 @@ DOTS   : '..' ;
 
 LOOPVAR
        : '$' [a-zA-Z_] [a-zA-Z_0-9]* ;
+
+INC_OP
+       : '++'
+       | '--'
+       ;
+
+ADD_OP
+       : '+'
+       | '-'
+       ;
+
+MULT_OP
+       : '*'
+       | '/'
+       | '%'
+       ;
+
+ADD_ASSIGN
+       : '+='
+       | '-='
+       ;
+
+MULT_ASSIGN
+       : '*='
+       | '/='
+       | '%='
+       ;
 
 SHIFT_ASSIGN
        : '>>>='
