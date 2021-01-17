@@ -95,6 +95,8 @@
  *	    Just as an experiment, raise the upper limit of "isPrime()" to 2**32-1.
  *	12-Jan-2021 (rlwhitcomb)
  *	    Implement "cos".
+ *	16-Jan-2021 (rlwhitcomb)
+ *	    Implement "sqrt".
  */
 package info.rlwhitcomb.util;
 
@@ -1478,6 +1480,38 @@ public class NumericUtil
 	    return result.round(mc);
 	}
 
+	/**
+	 * Find the positive square root of a number (non-negative).
+	 *
+	 * @param x	The value to find the square root of.
+	 * @param mc	The {@code MathContext} to use for rounding/calculating the result.
+	 * @return	The sqrt(x) value such that {@code x = result * result}.
+	 */
+	public static BigDecimal sqrt(final BigDecimal x, final MathContext mc) {
+	    if (x.signum() < 0)
+		throw new IllegalArgumentException(Intl.getString("util#numeric.sqrtNegative"));
+	    if (x.equals(BigDecimal.ZERO) || x.equals(BigDecimal.ONE))
+		return x;
+
+	    BigDecimal trial_root = BigDecimal.ONE.movePointRight((x.precision() - x.scale()) / 2);
+	    BigDecimal result = trial_root;
+	    BigDecimal lastResult = result;
+
+//System.out.println("trial_root = " + trial_root);
+	    // 50 is entirely arbitrary; normally the results converge in 5-10 iterations
+	    // up to 100s of digits
+	    for (int i = 0; i < 50; i++) {
+		result = result.add(x.divide(result, mc)).divide(D_TWO, mc);
+//System.out.println("result = " + result + ", lastResult = " + lastResult);
+		if (result.equals(lastResult)) {
+//System.out.println("break out early, i = " + i);
+		    break;
+		}
+		lastResult = result;
+	    }
+//System.out.println("result = " + result.toPlainString());
+	    return result.round(mc);
+	}
 
 
         private static final int SCALE = 10000;

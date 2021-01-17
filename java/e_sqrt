@@ -1,0 +1,11 @@
+:dec 100
+loop $x in 10 .. 100, 10 {
+   x = $x!
+   trial_root = 10 ** (log( x ) / 2)
+   trial_root * trial_root > x ? trial_root /= 2 : trial_root
+   result = trial_root
+   loop 10 { result = (result + x / result) / 2 }
+   r = result
+   s = sqrt x
+   r - s
+}

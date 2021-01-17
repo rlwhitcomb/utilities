@@ -121,6 +121,8 @@
  *	    Fix looping with a negative step value and check infinite loop conditions.
  *	15-Jan-2021 (rlwhitcomb)
  *	    Fix operator precedence.
+ *	16-Jan-2021 (rlwhitcomb)
+ *	    Use NumericUtil.sqrt().
  */
 package info.rlwhitcomb.calc;
 
@@ -1038,10 +1040,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitSqrtExpr(CalcParser.SqrtExprContext ctx) {
-	    // Note: for now, convert to double and use standard Math method
-	    double d = getDoubleValue(ctx.expr());
-
-	    return new BigDecimal(Math.sqrt(d), mcDouble);
+	    return NumericUtil.sqrt(getDecimalValue(ctx.expr()), mc);
 	}
 
 	@Override
