@@ -1,0 +1,8 @@
+# Tests to see if the loop value for "cbrt" is enough for large values
+
+:dec 200
+a = []
+i = 0
+loop $i in 10 .. 100, 10 { a[i++] = $i! }
+loop $i in a { b = cbrt $i; b*b*b-$i }
+
