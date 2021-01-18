@@ -23,13 +23,32 @@
 # Note: this particular example comes from
 # https://www.bankrate.com/calculators/mortgages/mortgage-calculator.aspx
 
-ctx = { P: (304000*0.80), R: 2.91, N: 30 }
+# The context for the payment calculation is:
+#   P = full principal amount to be financed
+#   R = yearly interest rate (%)
+#   N = number of years
+# Then the calculated values are:
+#   r = monthly interest as a decimal value (% / 100 / 12)
+#   n = number of months (years * 12)
+
+ctx = { P: (3004000*0.80), R: 2.91, N: 30 }
+
 ctx.r = (ctx.R / 100) / 12
 ctx.n = ctx.N * 12
+ctx
 
+# Calculate the intermediate values (which are reused)
 r_n = (1 + ctx.r) ** ctx.n
 r_r_n = ctx.r * r_n
 r_n_1 = r_n - 1
+
+# Now the final monthly payment value
 M = ctx.P * (r_r_n / r_n_1)
-# Note: the "6" comes from 2 dec places plus 4 places in the whole part
-round (M, 6)
+
+# Note: the 2nd param is the number of fractional digits (after the decimal point)
+# regardless of the number of whole digits in the result; so "0" will round
+# to a whole dollar, "2" rounds to pennies.
+:results on
+`Full monthly payment is $$${round (M, 2)}`
+`Monthly payment in whole dollars is $$${round (M, 0)}`
+:results pop

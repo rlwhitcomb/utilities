@@ -97,6 +97,8 @@ b = a * 2
 c = b*b
 round c, 14
 round(a, 10)
+round a, -2
+round c, 0
 
 sin(2700)
 sin -(4*pi)

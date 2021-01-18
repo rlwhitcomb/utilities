@@ -123,6 +123,9 @@
  *	    Fix operator precedence.
  *	16-Jan-2021 (rlwhitcomb)
  *	    Use NumericUtil.sqrt().
+ *	18-Jan-2021 (rlwhitcomb)
+ *	    Change/fix the way "round()" works, so that the number of places is the
+ *	    number of decimal places, thus independent of the scale of the value.
  */
 package info.rlwhitcomb.calc;
 
@@ -1088,7 +1091,23 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    BigDecimal e = getDecimalValue(e2ctx.expr(0));
 	    int iPlaces  = getIntValue(e2ctx.expr(1));
 
-	    return e.round(new MathContext(iPlaces));
+	    /* iPlaces is going to be the number of fractional digits to round to:
+	     * 0 = round to an integer, 1 to x.y, 2 to x.yy, etc.
+	     * and a negative number will round above the decimal point, as in:
+	     * -2 to x00.
+	     * So, if precision is the number of digits we keep, and scale is how far
+	     * left of the last digit the decimal point is situated, then
+	     * (precision - scale) is the number of whole digits, then we can add
+	     * that to "iPlaces" to get the MathContext precision to use for rounding here.
+	     * Also, it appears that rounding to 0 means no change, so we set a min value
+	     * of one to ensure *some* rounding always occurs, such that 0.714... rounded
+	     * to -2 will give 0.7, not retain the 0.714... value.
+	     */
+	    int prec       = e.precision();
+	    int scale      = e.scale();
+	    int iRoundPrec = Math.max(1, (prec - scale) + iPlaces);
+
+	    return e.round(new MathContext(iRoundPrec));
 	}
 
 	@Override
