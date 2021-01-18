@@ -126,6 +126,8 @@
  *	18-Jan-2021 (rlwhitcomb)
  *	    Change/fix the way "round()" works, so that the number of places is the
  *	    number of decimal places, thus independent of the scale of the value.
+ *	18-Jan-2021 (rlwhitcomb)
+ *	    Allow "loop" to use fractional values (not just integers) for start, end, step.
  */
 package info.rlwhitcomb.calc;
 
@@ -304,14 +306,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	protected int getIntValue(ParserRuleContext ctx) {
-	    BigDecimal value = getDecimalValue(ctx);
-
-	    try {
-		return value.intValueExact();
-	    }
-	    catch (ArithmeticException ae) {
-		throw new CalcExprException(ae, ctx);
-	    }
+	    return toIntValue(visit(ctx), ctx);
 	}
 
 	private BigDecimal getDecimalTrigValue(ParserRuleContext ctx) {
@@ -678,6 +673,10 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    boolean stepWise = false;
 
+	    BigDecimal dStart = BigDecimal.ONE;
+	    BigDecimal dStop  = BigDecimal.ONE;
+	    BigDecimal dStep  = BigDecimal.ONE;
+
 	    int start = 1;
 	    int stop  = 1;
 	    int step  = 1;
@@ -711,26 +710,26 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			iter = list.iterator();
 		    }
 		    else {
-			stop = getIntValue(exprs.get(0));
+			dStop = getDecimalValue(exprs.get(0));
 		    }
 		}
 		else if (exprs.size() == 2) {
 		    if (ctlCtx.DOTS() != null) {
 			// start .. stop
-			start = getIntValue(exprs.get(0));
-			stop  = getIntValue(exprs.get(1));
+			dStart = getDecimalValue(exprs.get(0));
+			dStop  = getDecimalValue(exprs.get(1));
 		    }
 		    else {
 			// stop, step
-			stop = getIntValue(exprs.get(0));
-			step = getIntValue(exprs.get(1));
+			dStop = getDecimalValue(exprs.get(0));
+			dStep = getDecimalValue(exprs.get(1));
 		    }
 		}
 		else {
 		    // start .. stop, step
-		    start = getIntValue(exprs.get(0));
-		    stop  = getIntValue(exprs.get(1));
-		    step  = getIntValue(exprs.get(2));
+		    dStart = getDecimalValue(exprs.get(0));
+		    dStop  = getDecimalValue(exprs.get(1));
+		    dStep  = getDecimalValue(exprs.get(2));
 		}
 	    }
 
@@ -741,20 +740,47 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    try {
 		if (stepWise) {
-		    if (step == 0)
-			throw new CalcExprException("Infinite loop: step value is zero", ctx);
-		    else if (step < 0) {
-			for (int loopIndex = start; loopIndex >= stop; loopIndex += step) {
-			    if (loopVarName != null)
-				variables.put(loopVarName, loopIndex);
-			    lastValue = visit(ctx.block());
+		    // Try to convert loop values to exact integers if possible
+		    try {
+			start = dStart.intValueExact();
+			stop  = dStop.intValueExact();
+			step  = dStep.intValueExact();
+
+			if (step == 0)
+			    throw new CalcExprException("Infinite loop: step value is zero", ctx);
+			else if (step < 0) {
+			    for (int loopIndex = start; loopIndex >= stop; loopIndex += step) {
+				if (loopVarName != null)
+				    variables.put(loopVarName, loopIndex);
+				lastValue = visit(ctx.block());
+			    }
+			}
+			else {
+			    for (int loopIndex = start; loopIndex <= stop; loopIndex += step) {
+				if (loopVarName != null)
+				    variables.put(loopVarName, loopIndex);
+				lastValue = visit(ctx.block());
+			    }
 			}
 		    }
-		    else {
-			for (int loopIndex = start; loopIndex <= stop; loopIndex += step) {
-			    if (loopVarName != null)
-				variables.put(loopVarName, loopIndex);
-			    lastValue = visit(ctx.block());
+		    catch (ArithmeticException ae) {
+			// This means we stubbornly have fractional values, so use as such
+			int sign = dStep.signum();
+			if (sign == 0)
+			    throw new CalcExprException("Infinite loop: step value is zero", ctx);
+			else if (sign < 0) {
+			    for (BigDecimal loopIndex = dStart; loopIndex.compareTo(dStop) >= 0; loopIndex = loopIndex.add(dStep)) {
+				if (loopVarName != null)
+				    variables.put(loopVarName, loopIndex);
+				lastValue = visit(ctx.block());
+			    }
+			}
+			else {
+			    for (BigDecimal loopIndex = dStart; loopIndex.compareTo(dStop) <= 0; loopIndex = loopIndex.add(dStep)) {
+				if (loopVarName != null)
+				    variables.put(loopVarName, loopIndex);
+				lastValue = visit(ctx.block());
+			    }
 			}
 		    }
 		}
@@ -1562,4 +1588,3 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    return lValue.putContextObject(value);
 	}
 }
-

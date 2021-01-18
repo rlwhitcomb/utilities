@@ -28,6 +28,8 @@
  *	    Moved into separate class from CalcObjectVisitor.
  *	08-Jan-2021 (rlwhitcomb)
  *	    Move more common code into here.
+ *	18-Jan-2021 (rlwhitcomb)
+ *	    Move "toIntValue" code into here.
  */
 package info.rlwhitcomb.calc;
 
@@ -140,6 +142,17 @@ public final class CalcUtil
 
 	    try {
 		return decValue.toBigIntegerExact();
+	    }
+	    catch (ArithmeticException ae) {
+		throw new CalcExprException(ae, ctx);
+	    }
+	}
+
+	public static int toIntValue(final Object value, final ParserRuleContext ctx) {
+	    BigDecimal decValue = toDecimalValue(value, ctx);
+
+	    try {
+		return decValue.intValueExact();
 	    }
 	    catch (ArithmeticException ae) {
 		throw new CalcExprException(ae, ctx);

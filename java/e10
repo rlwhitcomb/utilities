@@ -39,6 +39,12 @@ loop $i in map { $i }
 list = [ 'Once', 'upon', 'a', 'time', 'there', 'lived', 'a', 'princess', '...' ]
 loop $i in list {$i}
 
+:clear frac
+loop $i in 0.1 .. 0.9, 0.1 { $i }
+loop $j in 10.5 {$j}
+loop $k in 5.5, 1.5 {$k}
+loop $m in 0.5 .. -0.5, -0.08 {$m}
+
 :echo
 :echo "Done with LOOP tests."
 
