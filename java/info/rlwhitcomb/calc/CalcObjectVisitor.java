@@ -128,6 +128,8 @@
  *	    number of decimal places, thus independent of the scale of the value.
  *	18-Jan-2021 (rlwhitcomb)
  *	    Allow "loop" to use fractional values (not just integers) for start, end, step.
+ *	18-Jan-2021 (rlwhitcomb)
+ *	    Use NumericUtil.cbrt().
  */
 package info.rlwhitcomb.calc;
 
@@ -1074,14 +1076,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitCbrtExpr(CalcParser.CbrtExprContext ctx) {
-	    // Note: for now, convert to double and use standard Math method
-	    double d = getDoubleValue(ctx.expr());
-
-	    return new BigDecimal(Math.cbrt(d), mcDouble);
+	    return NumericUtil.cbrt(getDecimalValue(ctx.expr()), mc);
 	}
 
 	@Override
 	public Object visitLogExpr(CalcParser.LogExprContext ctx) {
+	    // For now, get a double value and use the standard Math method
 	    double d = getDoubleValue(ctx.expr());
 
 	    return new BigDecimal(Math.log10(d), mcDouble);
@@ -1250,7 +1250,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public Object visitFactorialExpr(CalcParser.FactorialExprContext ctx) {
 	    BigDecimal e = getDecimalValue(ctx.expr());
 
-	    return NumericUtil.factorial(e);
+	    return NumericUtil.factorial(e, mc);
 	}
 
 	@Override

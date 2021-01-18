@@ -78,6 +78,8 @@
 #	    More errors from NumericUtil.
 #	16-Jan-2021 (rlwhitcomb)
 #	    More errors from NumericUtil.
+#	18-Jan-2021 (rlwhitcomb)
+#	    Don't need one of these errors any more.
 #
 
 #
@@ -137,7 +139,6 @@ numeric.stringLengthTooBig= String length of %1$d exceds limit of %2$d.
 numeric.tooManyPiDigits	= The PI digit calculation is only good for about 12,500 digits!
 numeric.piDigitMismatch	= Calculated digit length is %1$d, but requested number of digits was %2$d!
 numeric.tooManyDigits	= Too many digits of precision requested (max is %1$d).
-numeric.notInteger	= The value must be a positive whole number.
 numeric.wholeInteger	= The value must be a whole number.
 numeric.primeTooBig	= The value is too big to compute.
 numeric.sqrtNegative	= Square root of a negative number is not real.

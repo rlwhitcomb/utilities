@@ -97,6 +97,8 @@
  *	    Implement "cos".
  *	16-Jan-2021 (rlwhitcomb)
  *	    Implement "sqrt".
+ *	18-Jan-2021 (rlwhitcomb)
+ *	    Implement "cbrt". Implement "factorial" for negative numbers.
  */
 package info.rlwhitcomb.util;
 
@@ -1314,25 +1316,42 @@ public class NumericUtil
 	 * and where <code>0! = 1</code> (by definition)
 	 *
 	 * @param base	The integer base (n).
+	 * @param mc	The {@link MathContext} used to round the result (only if base is negative).
 	 * @return	The value of <code>n!</code>
 	 */
-	public static BigDecimal factorial(final Number base) {
+	public static BigDecimal factorial(final Number base, final MathContext mc) {
 	    double baseDouble = base.doubleValue();
 	    double baseFloor  = Math.floor(baseDouble);
 
-	    if (baseFloor != baseDouble || baseFloor < 0.0)
-		throw new IllegalArgumentException(Intl.getString("util#numeric.notInteger"));
+	    if (baseFloor != baseDouble)
+		throw new IllegalArgumentException(Intl.getString("util#numeric.wholeInteger"));
 
-	    long loops       = base.longValue();
-	    BigInteger term  = BigInteger.ONE;
-	    BigInteger value = BigInteger.ONE;
+	    long loops = base.longValue();
+
+	    if (loops == 0L || loops == 1L)
+		return BigDecimal.ONE;
+
+	    boolean negative = false;
+	    if (loops < 0L) {
+		negative = true;
+		loops = -loops - 1L;
+	    }
+	    BigInteger result = BigInteger.ONE;
+	    BigInteger term   = BigInteger.ONE;
 
 	    for (long i = 2L; i <= loops; i++) {
-		term  = term.add(BigInteger.ONE);
-		value = value.multiply(term);
+		term   = term.add(BigInteger.ONE);
+		result = result.multiply(term);
 	    }
 
-	    return new BigDecimal(value);
+	    BigDecimal dResult = new BigDecimal(result);
+	    if (negative) {
+		// The so-called "Roman factorial"
+		dResult = BigDecimal.ONE.divide(dResult, mc);
+		return (loops % 2L == 1L) ? dResult.negate() : dResult;
+	    }
+
+	    return dResult;
 	}
 
 
@@ -1484,8 +1503,8 @@ public class NumericUtil
 	 * Find the positive square root of a number (non-negative).
 	 *
 	 * @param x	The value to find the square root of.
-	 * @param mc	The {@code MathContext} to use for rounding/calculating the result.
-	 * @return	The sqrt(x) value such that {@code x = result * result}.
+	 * @param mc	The {@code MathContext} to use for rounding / calculating the result.
+	 * @return	The {@code sqrt(x)} value such that {@code x = result * result}.
 	 */
 	public static BigDecimal sqrt(final BigDecimal x, final MathContext mc) {
 	    if (x.signum() < 0)
@@ -1511,6 +1530,41 @@ public class NumericUtil
 	    }
 //System.out.println("result = " + result.toPlainString());
 	    return result.round(mc);
+	}
+
+	/**
+	 * Find the cube root of a number (either positive or negative).
+	 *
+	 * @param x	The value to find the cube root of.
+	 * @param mc	The {@code MathContext} to use for rounding / calculating the result.
+	 * @return	The {@code cbrt(x)} value such that {@code x = result * result * result}.
+	 */
+	public static BigDecimal cbrt(final BigDecimal x, final MathContext mc) {
+	    int sign = x.signum();
+	    BigDecimal xValue = x.abs();
+
+	    // Taken from https://stackoverflow.com/questions/7463486/seeding-the-newton-iteration-for-cube-root-efficiently
+	    // BigDecimal trial_root = new BigDecimal("1.4774329094")
+	    //    .subtract(new BigDecimal("0.8414323527").divide(x.add(new BigDecimal("0.7387320679")), mc));
+	    BigDecimal trial_root = BigDecimal.ONE.movePointRight((x.precision() - x.scale()) / 3);
+//System.out.println("cbrt: trial_root = " + trial_root.toPlainString());
+	    BigDecimal result = trial_root;
+	    BigDecimal lastResult = result;
+
+	    for (int i = 0; i < 50; i++) {
+		BigDecimal x2 = result.multiply(result);
+		BigDecimal x3 = x2.multiply(result);
+		BigDecimal numer = xValue.subtract(x3);
+		BigDecimal denom = x2.multiply(BigDecimal.valueOf(3L));
+		result = result.add(numer.divide(denom, mc), mc);
+//System.out.println("result = " + result + ", lastResult = " + lastResult);
+		if (result.equals(lastResult)) {
+//System.out.println("break out early, i = " + i);
+		    break;
+		}
+		lastResult = result;
+	    }
+	    return (sign < 0) ? result.negate(mc) : result.plus(mc);
 	}
 
 
