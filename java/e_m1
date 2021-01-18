@@ -1,0 +1,7 @@
+# Sample mortgage payment calculation
+P = 334000 - 90000
+R = 3.25
+N = 30
+
+:include 'e_mort'
+

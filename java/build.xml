@@ -127,6 +127,8 @@
 		Add "standard" Version class.
 	    13-Jan-2021 (rlwhitcomb)
 		Add some missing files and directories in various places.
+	    18-Jan-2021 (rlwhitcomb)
+		Add mortgage payment examples for Calc.
 
      ========================================================================== -->
 
@@ -377,7 +379,7 @@
 		<java classname="info.rlwhitcomb.calc.Calc"           output="${test.log.file.name}" append="true">
 			<arg value="-nocolors"/>
 			<arg value="-timing"/>
-			<arg value="e1,e2,e3,e10,e12,e_trig"/>
+			<arg value="e1,e2,e3,e10,e12,e_trig,e_m1,e_m2"/>
 		</java>
 		<echo>Done with unit tests. Results in "${test.log.file.name}" file.</echo>
 	</target>
