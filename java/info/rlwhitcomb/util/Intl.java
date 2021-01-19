@@ -125,6 +125,8 @@
  *	    Update obsolete Javadoc constructs.
  *	18-Jan-2021 (rlwhitcomb)
  *	    Add "formatKeyString" methods.
+ *	18-Jan-2021 (rlwhitcomb)
+ *	    New "out/errKeyFormat" methods.
  */
 package info.rlwhitcomb.util;
 
@@ -956,12 +958,36 @@ public class Intl
 
 
 	/**
+	 * Format a message to {@link System#out}.
+	 * @see	#formatKeyString(String, Object...)
+	 * @param formatOrKey The raw format or key string (starting with "%") used to
+	 * obtain the format string.
+	 * @param args The (possibly empty) list of arguments used to format the message.
+	 */
+	public static void outKeyFormat(final String formatOrKey, final Object... args) {
+	    System.out.println(formatKeyString(formatOrKey, args));
+	}
+
+
+	/**
 	 * Format a message to {@link System#err}.
 	 * @param formatKey The key string used to obtain the format string.
 	 * @param args The (possibly empty) list of arguments used to format the message.
 	 */
 	public static void errFormat(final String formatKey, final Object... args) {
 	    System.err.println(formatString(formatKey, args));
+	}
+
+
+	/**
+	 * Format a message to {@link System#err}.
+	 * @see	#formatKeyString(String, Object...)
+	 * @param formatOrKey The raw format or key string (starting with "%") used to
+	 * obtain the format string.
+	 * @param args The (possibly empty) list of arguments used to format the message.
+	 */
+	public static void errKeyFormat(final String formatOrKey, final Object... args) {
+	    System.err.println(formatKeyString(formatOrKey, args));
 	}
 
 

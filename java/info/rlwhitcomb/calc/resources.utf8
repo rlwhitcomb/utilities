@@ -26,6 +26,8 @@
 # History:
 #       18-Jan-2021 (rlwhitcomb)
 #           Moved into here from the .java files.
+#	18-Jan-2021 (rlwhitcomb)
+#	    Action messages.
 #
 
 #
@@ -33,7 +35,16 @@
 #
 precUnlimited	= Precision is now unlimited.
 precDigits	= Precision is now %1$d digits.
-trigMode	= Trig mode is not %1$s.
+trigMode	= Trig mode is now %1$s.
+unitsBinary	= Units in binary.
+unitsTen	= Units in SI (base ten) form.
+unitsMixed	= Units in mixed form.
+varsAllCleared	= All variables cleared.
+varOneVariable	= "Variable "
+varVariables	= "Variables "
+varCleared	= %1$s cleared.
+debugMode	= Debug mode set to %1$s.
+
 precNotInteger	= Decimal precision of %1$s must be an integer value
 precOutOfRange	= Decimal precision of %1$d is out of range
 ioError		= I/O Error: %1$s

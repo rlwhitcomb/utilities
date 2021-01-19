@@ -130,6 +130,8 @@
  *	    Allow "loop" to use fractional values (not just integers) for start, end, step.
  *	18-Jan-2021 (rlwhitcomb)
  *	    Use NumericUtil.cbrt().
+ *	18-Jan-2021 (rlwhitcomb)
+ *	    Put the action messages in the resources.
  */
 package info.rlwhitcomb.calc;
 
@@ -227,9 +229,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    return oldSilent;
 	}
 
-	private void displayActionMessage(String messageFormat, Object... args) {
+	private void displayActionMessage(String formatOrKey, Object... args) {
 	    if (initialized && !silent) {
-		String message = String.format(messageFormat, args);
+		String message = Intl.formatKeyString(formatOrKey, args);
 		displayer.displayActionMessage(message);
 	    }
 	}
@@ -262,15 +264,15 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 
 	    if (prec == 0)
-		displayActionMessage(Intl.getKeyString("%calc#precUnlimited"));
+		displayActionMessage("%calc#precUnlimited");
 	    else
-		displayActionMessage(Intl.formatKeyString("%calc#precDigits", prec));
+		displayActionMessage("%calc#precDigits", prec);
 	}
 
 	private void setTrigMode(TrigMode newTrigMode) {
 	    trigMode = newTrigMode;
 
-	    displayActionMessage(Intl.formatKeyString("%calc#trigMode", trigMode));
+	    displayActionMessage("%calc#trigMode", trigMode);
 	}
 
 
@@ -407,21 +409,21 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitBinaryDirective(CalcParser.BinaryDirectiveContext ctx) {
 	    units = RangeMode.BINARY;
-	    displayActionMessage("Units in binary.");
+	    displayActionMessage("%calc#unitsBinary");
 	    return null;
 	}
 
 	@Override
 	public Object visitSiDirective(CalcParser.SiDirectiveContext ctx) {
 	    units = RangeMode.DECIMAL;
-	    displayActionMessage("Units in SI (base ten) form.");
+	    displayActionMessage("%calc#unitsTen");
 	    return null;
 	}
 
 	@Override
 	public Object visitMixedDirective(CalcParser.MixedDirectiveContext ctx) {
 	    units = RangeMode.MIXED;
-	    displayActionMessage("Units in mixed form.");
+	    displayActionMessage("%calc#unitsMixed");
 	    return null;
 	}
 
@@ -431,7 +433,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    List<TerminalNode> ids;
 	    if (idList == null || (ids = idList.ID()).isEmpty()) {
 		variables.clear();
-		displayActionMessage("All variables cleared.");
+		displayActionMessage("%calc#varsAllCleared");
 	    }
 	    else {
 		StringBuilder vars = new StringBuilder();
@@ -445,10 +447,10 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    vars.append("'").append(varName).append("'");
 		}
 		if (ids.size() == 1)
-		    vars.insert(0, "Variable ");
+		    vars.insert(0, Intl.getString("calc#varOneVariable"));
 		else
-		    vars.insert(0, "Variables ");
-		displayActionMessage("%1$s cleared.", vars);
+		    vars.insert(0, Intl.getString("calc#varVariables"));
+		displayActionMessage("%calc#varCleared", vars);
 	    }
 	    return null;
 	}
@@ -516,7 +518,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public Object visitDebugDirective(CalcParser.DebugDirectiveContext ctx) {
 	    processModeOption(ctx.modeOption(), debugModeStack, (mode) -> {
 		boolean previousMode = Calc.setDebugMode(mode);
-		displayActionMessage("Debug mode set to %1$s.", mode);
+		displayActionMessage("%calc#debugMode", mode);
 		return previousMode;
 	    });
 
