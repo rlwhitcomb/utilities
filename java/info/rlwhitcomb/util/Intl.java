@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2012-2018,2020 Roger L. Whitcomb.
+ * Copyright (c) 2012-2018,2020-2021 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -123,6 +123,8 @@
  *	    "outPrintln" and "errPrintln" (for convenience).
  *	21-Dec-2020 (rlwhitcomb)
  *	    Update obsolete Javadoc constructs.
+ *	18-Jan-2021 (rlwhitcomb)
+ *	    Add "formatKeyString" methods.
  */
 package info.rlwhitcomb.util;
 
@@ -817,6 +819,22 @@ public class Intl
 
 
 	/**
+	 * Helper method to check for a key string ({@code "%key"}) and call {@link #formatString}
+	 * on the trailing part if so or just use the text as-is.
+	 *
+	 * @param	formatOrKey	Either a straight text string, which is just passed
+	 *				through, or {@code "%key"} where {@code "key"} is used
+	 *				then to lookup the resource.
+	 * @param	args		The arguments to substitute into the format string.
+	 * @return			The fully formatted string.
+	 */
+	public static String formatKeyString(final String formatOrKey, final Object... args) {
+	    String format = getKeyString(formatOrKey);
+	    return String.format(format, args);
+	}
+
+
+	/**
 	 * Get a resource string and append the result to the existing
 	 * {@link StringBuilder}.
 	 * @param	buf	Existing string under construction.
@@ -857,6 +875,21 @@ public class Intl
 	 */
 	public static StringBuilder getKeyString(final StringBuilder buf, final String messageOrKey) {
 	    return buf.append(getKeyString(messageOrKey));
+	}
+
+
+	/**
+	 * Equivalent of {@code formatKeyString(String, Object...)} that appends the result to the input
+	 * {@link StringBuilder}.
+	 * @param	buf		The composite string buffer.
+	 * @param	formatOrKey	Either a plain format string or a resource key (beginning
+	 *				with '%') to use to lookup the format string.
+	 * @param	args		The value arguments to substitute into the format.
+	 * @return			The input buffer with the formatted text appended to it.
+	 * @see	#formatKeyString(String, Object...)
+	 */
+	public static StringBuilder formatKeyString(final StringBuilder buf, final String formatOrKey, final Object... args) {
+	    return buf.append(formatKeyString(formatOrKey, args));
 	}
 
 

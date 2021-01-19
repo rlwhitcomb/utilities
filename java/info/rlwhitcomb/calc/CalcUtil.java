@@ -30,6 +30,8 @@
  *	    Move more common code into here.
  *	18-Jan-2021 (rlwhitcomb)
  *	    Move "toIntValue" code into here.
+ *	18-Jan-2021 (rlwhitcomb)
+ *	    Move text to resource file.
  */
 package info.rlwhitcomb.calc;
 
@@ -109,7 +111,7 @@ public final class CalcUtil
 
 	public static void nullCheck(final Object value, final ParserRuleContext ctx) {
 	    if (value == null)
-		throw new CalcExprException(ctx, "Value (\"%1$s\") must not be null", getTreeText(ctx));
+		throw new CalcExprException(ctx, "%calc#valueNotNull", getTreeText(ctx));
 	}
 
 
@@ -134,7 +136,7 @@ public final class CalcUtil
 		typeName = "object";
 	    else if (value instanceof List)
 		typeName = "array";
-	    throw new CalcExprException(ctx, "Unable to convert value of '%1$s' type to decimal number", typeName);
+	    throw new CalcExprException(ctx, "%calc#noConvertDecimal", typeName);
 	}
 
 	public static BigInteger toIntegerValue(final Object value, final ParserRuleContext ctx) {
@@ -313,7 +315,7 @@ public final class CalcUtil
 		return b1.compareTo(b2);
 	    }
 
-	    throw new CalcExprException(ctx1, "Unknown value type: %1$s", e1.getClass().getSimpleName());
+	    throw new CalcExprException(ctx1, "%calc#unknownType", e1.getClass().getSimpleName());
 	}
 
 	/**

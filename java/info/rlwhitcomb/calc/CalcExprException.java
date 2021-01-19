@@ -26,12 +26,15 @@
  *	    Initial coding.
  *	08-Jan-2021 (rlwhitcomb)
  *	    Alternate constructors for convenience formatting messages.
+ *	18-Jan-2021 (rlwhitcomb)
+ *	    Use Intl to lookup strings.
  */
 package info.rlwhitcomb.calc;
 
 import org.antlr.v4.runtime.*;
 
 import static info.rlwhitcomb.util.ConsoleColor.Code.*;
+import info.rlwhitcomb.util.Intl;
 
 
 /**
@@ -44,16 +47,16 @@ public class CalcExprException extends CalcException
 	    return ctx.getStart().getLine();
 	}
 
-	public CalcExprException(final String message, final ParserRuleContext ctx) {
-	    super(message, getContextLine(ctx));
+	public CalcExprException(final String messageOrKey, final ParserRuleContext ctx) {
+	    super(Intl.getKeyString(messageOrKey), getContextLine(ctx));
 	}
 
 	public CalcExprException(final ParserRuleContext ctx, final String messageFormat, final Object... args) {
-	    super(String.format(messageFormat, args), getContextLine(ctx));
+	    super(Intl.formatKeyString(messageFormat, args), getContextLine(ctx));
 	}
 
-	public CalcExprException(final String message, final Throwable cause, final ParserRuleContext ctx) {
-	    super(message, cause, getContextLine(ctx));
+	public CalcExprException(final String messageOrKey, final Throwable cause, final ParserRuleContext ctx) {
+	    super(Intl.getKeyString(messageOrKey), cause, getContextLine(ctx));
 	}
 
 	public CalcExprException(final Throwable cause, final ParserRuleContext ctx) {

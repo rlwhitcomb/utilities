@@ -154,6 +154,7 @@ import static info.rlwhitcomb.calc.CalcUtil.*;
 import info.rlwhitcomb.util.CharUtil;
 import static info.rlwhitcomb.util.ConsoleColor.Code.*;
 import info.rlwhitcomb.util.ExceptionUtil;
+import info.rlwhitcomb.util.Intl;
 import info.rlwhitcomb.util.NumericUtil;
 import static info.rlwhitcomb.util.NumericUtil.RangeMode;
 
@@ -261,15 +262,15 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 
 	    if (prec == 0)
-		displayActionMessage("Precision is now unlimited.");
+		displayActionMessage(Intl.getKeyString("%calc#precUnlimited"));
 	    else
-		displayActionMessage("Precision is now %1$d digits.", prec);
+		displayActionMessage(Intl.formatKeyString("%calc#precDigits", prec));
 	}
 
 	private void setTrigMode(TrigMode newTrigMode) {
 	    trigMode = newTrigMode;
 
-	    displayActionMessage("Trig mode is now %1$s.", trigMode);
+	    displayActionMessage(Intl.formatKeyString("%calc#trigMode", trigMode));
 	}
 
 
@@ -351,7 +352,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		precision = dPrecision.intValueExact();
 	    }
 	    catch (ArithmeticException ae) {
-		throw new CalcExprException(ctx, "Decimal precision of %1$s must be an integer value", dPrecision);
+		throw new CalcExprException(ctx, "%calc#precNotInteger", dPrecision);
 	    }
 
 	    if (precision == 0) {
@@ -361,7 +362,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		setMathContext(new MathContext(precision));
 	    }
 	    else {
-		throw new CalcExprException(ctx, "Decimal precision of %1$d is out of range", precision);
+		throw new CalcExprException(ctx, "%calc#precOutOfRange", precision);
 	    }
 
 	    return null;
@@ -471,7 +472,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		return Calc.processString(contents, false);
 	    }
 	    catch (IOException ioe) {
-		throw new CalcExprException(ctx, "I/O Error: %1$s", ExceptionUtil.toString(ioe));
+		throw new CalcExprException(ctx, "%calc#ioError", ExceptionUtil.toString(ioe));
 	    }
 	}
 
@@ -557,7 +558,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		char formatChar = format.charAt(1);
 
 		if ((result instanceof Map || result instanceof List) && (formatChar != 'j' && formatChar != 'J')) {
-		    throw new CalcExprException(ctx, "Cannot convert object or array to '%1$c' format", formatChar);
+		    throw new CalcExprException(ctx, "%calc#noConvertObjArr", formatChar);
 		}
 
 		StringBuilder valueBuf = new StringBuilder();
@@ -737,7 +738,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    if (loopVarName != null) {
 		if (variables.containsKey(loopVarName))
-		    throw new CalcExprException(ctx, "Duplicate loop variable name '%1$s' not allowed", loopVarName);
+		    throw new CalcExprException(ctx, "%calc#noDupLoopVar", loopVarName);
 	    }
 
 	    try {
@@ -749,7 +750,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			step  = dStep.intValueExact();
 
 			if (step == 0)
-			    throw new CalcExprException("Infinite loop: step value is zero", ctx);
+			    throw new CalcExprException("%calc#infLoopStepZero", ctx);
 			else if (step < 0) {
 			    for (int loopIndex = start; loopIndex >= stop; loopIndex += step) {
 				if (loopVarName != null)
@@ -769,7 +770,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			// This means we stubbornly have fractional values, so use as such
 			int sign = dStep.signum();
 			if (sign == 0)
-			    throw new CalcExprException("Infinite loop: step value is zero", ctx);
+			    throw new CalcExprException("%calc#infLoopStepZero", ctx);
 			else if (sign < 0) {
 			    for (BigDecimal loopIndex = dStart; loopIndex.compareTo(dStop) >= 0; loopIndex = loopIndex.add(dStep)) {
 				if (loopVarName != null)
@@ -1389,7 +1390,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		output.append(rawValue.substring(lastPos, pos));
 
 		if (pos == rawValue.length() - 1)
-		    throw new CalcExprException("Invalid '$' construct", ctx);
+		    throw new CalcExprException("%calc#invalidConstruct", ctx);
 
 		if (rawValue.charAt(pos + 1) == '$') {
 		    output.append('$');
@@ -1399,7 +1400,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    int nextPos = rawValue.indexOf('}', pos + 1);
 
 		    if (pos + 2 >= rawValue.length() || nextPos < 0)
-			throw new CalcExprException("Invalid '${...}' construct", ctx);
+			throw new CalcExprException("%calc#invalidConst2", ctx);
 
 		    String expr = rawValue.substring(pos + 2, nextPos);
 		    Object exprValue = Calc.processString(expr, true);
@@ -1415,7 +1416,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    lastPos = identPos - 1;
 		}
 		else
-		    throw new CalcExprException("Invalid '$' construct", ctx);
+		    throw new CalcExprException("%calc#invalidConstruct", ctx);
 	    }
 	    if (lastPos < rawValue.length())
 		output.append(rawValue.substring(lastPos));

@@ -26,6 +26,8 @@
  *  History:
  *	08-Jan-2021 (rlwhitcomb)
  *	    First version.
+ *	18-Jan-2021 (rlwhitcomb)
+ *	    Move text to resource file.
  */
 package info.rlwhitcomb.calc;
 
@@ -39,7 +41,7 @@ import org.antlr.v4.runtime.ParserRuleContext;
 class UnknownOpException extends CalcExprException
 {
 	UnknownOpException(final String op, final ParserRuleContext ctx) {
-	    super(ctx, "Unknown operator '%1$s'", op);
+	    super(ctx, "%calc.unknownOp", op);
 	}
 }
 

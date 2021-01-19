@@ -129,6 +129,8 @@
 		Add some missing files and directories in various places.
 	    18-Jan-2021 (rlwhitcomb)
 		Add mortgage payment examples for Calc.
+	    18-Jan-2021 (rlwhitcomb)
+		New text resources for Calc.
 
      ========================================================================== -->
 
@@ -247,6 +249,7 @@
 
 	<target name="preproc" description="Preprocesses necessary files.">
 		<parallel>
+			<generate-text-resources dir="info/rlwhitcomb/calc" />
 			<generate-text-resources dir="info/rlwhitcomb/cat" />
 			<generate-text-resources dir="info/rlwhitcomb/compare" />
 			<generate-text-resources dir="info/rlwhitcomb/csv" />

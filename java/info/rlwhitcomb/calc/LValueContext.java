@@ -26,6 +26,8 @@
  *  History:
  *	08-Jan-2021 (rlwhitcomb)
  *	    Extracted from CalcObjectVisitor.
+ *	18-Jan-2021 (rlwhitcomb)
+ *	    Move text to the resource file.
  */
  package info.rlwhitcomb.calc;
 
@@ -35,6 +37,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.antlr.v4.runtime.tree.TerminalNode;
+
+import info.rlwhitcomb.util.Intl;
 
 
 /**
@@ -99,7 +103,7 @@ class LValueContext
 		// Special checks for loop vars (not defined means we are outside the loop)
 		if (name.startsWith("$")) {
 		    if (!obj.containsKey(name))
-		        throw new CalcExprException(varCtx, "Loop variable '%1$s' is not available outside its loop", name);
+		        throw new CalcExprException(varCtx, "%calc#loopVarNotAvail", name);
 		}
 		return obj.get(name);
 	    }
@@ -126,7 +130,7 @@ class LValueContext
 	    }
 	    else {
 		// Should never happen
-		throw new IllegalStateException("Assignment to " + this + " without name or index.");
+		throw new IllegalStateException(Intl.formatKeyString("%calc#badAssign", this));
 	    }
 
 	    // For convenience for the assignment operators, return the value
@@ -145,7 +149,7 @@ class LValueContext
 		putContextObject(obj);
 	    }
 	    else {
-		throw new CalcExprException(var, "Variable '%1$s' already has a non-object value", this);
+		throw new CalcExprException(var, "%calc#nonObjectValue", this);
 	    }
 
 	    if (memberName != null) {
@@ -171,7 +175,7 @@ class LValueContext
 		int index = visitor.getIntValue(arrVar.expr());
 
 		if (index < 0)
-		    throw new CalcExprException(arrVar, "Index %1$d cannot be negative", index);
+		    throw new CalcExprException(arrVar, "%calc#indexNegative", index);
 
 		List<Object> list = null;
 		Object arrValue = arrLValue.getContextObject();
@@ -183,7 +187,7 @@ class LValueContext
 		    arrLValue.putContextObject(list);
 		}
 		else {
-		    throw new CalcExprException(var, "Variable '%1$s' already has a non-array value", arrLValue);
+		    throw new CalcExprException(var, "%calc#nonArrayValue", arrLValue);
 		}
 
 		// Set empty values up to the index desired
@@ -216,7 +220,7 @@ class LValueContext
 		    return objLValue;
 	    }
 	    else {
-		throw new CalcExprException(var, "ERROR: unknown var context subclass: %1$s", var.getClass().getName());
+		throw new CalcExprException(var, "%calc#unknownVarCtx", var.getClass().getName());
 	   }
 	}
 
