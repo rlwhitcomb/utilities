@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2020 Roger L. Whitcomb.
+ * Copyright (c) 2020-2021 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,6 +26,8 @@
  *  Change History:
  *	18-Nov-2020 (rlwhitcomb)
  *	    First version.
+ *	19-Jan-2021 (rlwhitcomb)
+ *	    Clean up code and comments.
  */
 import java.io.File;
 import java.io.IOException;
@@ -43,35 +45,44 @@ public class FixPath
 {
 	/**
 	 * Fix the system path by doing the following:
-	 * <ul><li>remove duplicate ;</li>
+	 * <ul><li>remove duplicate entries</li>
 	 * <li>remove quotes around individual elements</li>
 	 * <li>make all paths absolute (remove . and .. refs)</li>
-	 * <li>fix any / to \</li>
-	 * <li>remove trailing ;</li>
+	 * <li>fix any {@code /} to {@code \} (or vice-versa, depending on the O/S)</li>
+	 * <li>remove trailing {@code ;}</li>
 	 * </ul>
-	 * <p> Read the path from the system and emit the fixed path
+	 * <p> Read the path from the system environment and emit the fixed path
 	 * to {@link System#out}.
 	 *
-	 * @param args	The command line arguments.
+	 * @param args	The command line arguments (ignored).
 	 */
 	public static void main(String[] args) {
 	    final String pathSep = System.getProperty("path.separator");
 	    final String fileSep = System.getProperty("file.separator");
+
 	    final String pathSepRegex = "[" + pathSep + "]";
+
+	    /* Used to remove duplicate elements. */
 	    final Set<String> pathElementSet = new HashSet<>();
 
-	    String originalPath = System.getenv("PATH");
+	    String originalPath   = System.getenv("PATH");
 	    String[] pathElements = originalPath.split(pathSepRegex);
+
 	    StringBuilder buf = new StringBuilder(originalPath.length());
+
 	    for (String pathElement : pathElements) {
 		if (!pathElement.isEmpty()) {
 		    String modifiedElement = pathElement;
+
+		    /* Remove quotes around the element. */
 		    if (pathElement.charAt(0) == '"' && pathElement.charAt(pathElement.length() - 1) == '"')
 			modifiedElement = pathElement.substring(1, pathElement.length() - 1);
+
 		    File pathDir = new File(modifiedElement);
 		    if (pathDir.exists() && pathDir.isDirectory()) {
 			try {
 			    modifiedElement = pathDir.getCanonicalPath();
+
 			    if (!pathElementSet.contains(modifiedElement)) {
 				pathElementSet.add(modifiedElement);
 				if (buf.length() > 0)
@@ -85,6 +96,7 @@ public class FixPath
 		    }
 		}
 	    }
+
 	    System.out.println(buf.toString());
 	}
 }
