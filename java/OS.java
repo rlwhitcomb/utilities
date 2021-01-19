@@ -43,14 +43,19 @@
  *	Allow choices to be "options" format ("-props", etc.)
  *    13-Jan-2021 (rlwhitcomb)
  *	List fonts available in the graphics environment.
+ *    19-Jan-2021 (rlwhitcomb)
+ *	Do output in columns if possible. A few more aliases for the
+ *	choices.
  */
 import java.awt.GraphicsEnvironment;
 import java.io.PrintStream;
 import java.nio.charset.Charset;
 import java.security.Provider;
 import java.security.Security;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
@@ -69,6 +74,13 @@ public class OS
 	/** Final banner for the end of the reports. */
 	private static final String FOOTER = "-----------------------------------------";
 
+	/** Default value for screen width (used to put values into multiple columns. */
+	private static final int SCREEN_WIDTH_DEFAULT = 80;
+
+	/** The current screen width value (for columnar output). */
+	private static int screenWidth = SCREEN_WIDTH_DEFAULT;
+
+
 	/**
 	 * What the user would like to display, the method to display each bit, and
 	 * the possible names to match.
@@ -76,20 +88,20 @@ public class OS
 	private enum Choice
 	{
 		PROPERTIES	(OS::displayProperties,
-				 "properties", "props", "p"),
+				 "properties", "props", "prop", "p"),
 		ENVIRONMENT	(OS::displayEnvironment,
 				 "environment", "environ", "env", "e"),
 		CHARSETS	(OS::displayCharsets,
 				 "charsets", "charset", "chars", "char", "ch", "c"),
 		LOCALES		(OS::displayLocales,
-				 "locales", "locale", "loc", "l"),
+				 "locales", "locale", "locs", "loc", "l"),
 		DIGESTS		(OS::displayDigests,
 				 "message-digests", "message_digests", "messagedigests",
-				 "digests", "digest", "dig", "d", "m", "md"),
+				 "digests", "digest", "digs", "dig", "d", "m", "md"),
 		PROVIDERS	(OS::displayProviders,
 				 "security-providers", "security_providers",
-				 "securityproviders", "providers", "security", "prov",
-				 "sec", "s", "sp"),
+				 "securityproviders", "providers", "security", "provs",
+				 "prov", "sec", "s", "sp"),
 		FONTS		(OS::displayFonts,
 				 "fonts", "font", "f");
 
@@ -264,6 +276,50 @@ public class OS
 	    return true;
 	}
 
+	private static void pad(final StringBuilder lineBuf, final int width) {
+	    while (lineBuf.length() < width)
+		lineBuf.append(' ');
+	}
+
+	private static void display(final String title, final List<String> values) {
+	    int size      = values.size();
+	    int maxLength = 0;
+
+	    for (String value : values)
+		maxLength = Math.max(maxLength, value.length());
+	    maxLength += 2;	// to leave some space b/w columns
+
+	    int numberColumns = Math.max(1, screenWidth / maxLength);
+	    int columnWidth   = screenWidth / numberColumns;
+
+	    printTitle(title);
+
+	    if (numberColumns == 1) {
+		values.stream().forEach(System.out::println);
+	    }
+	    else {
+		StringBuilder lineBuf = new StringBuilder(screenWidth);
+		int numberRows = size / numberColumns;
+		if (size % numberColumns > 0)
+		    numberColumns++;
+
+		for (int row = 0; row < numberRows; row++) {
+		    lineBuf.setLength(0);
+		    for (int col = 0; col < numberColumns; col++) {
+			int index = row + (col * numberRows);
+			if (index < values.size()) {
+			    if (col > 0)
+				pad(lineBuf, col * columnWidth);
+			    lineBuf.append(values.get(index));
+			}
+		    }
+		    System.out.println(lineBuf.toString());
+		}
+	    }
+
+	    printFooter();
+	}
+
 	/**
 	 * Display the system properties list in sorted order by key.
 	 */
@@ -273,12 +329,13 @@ public class OS
 	    Set<String> sortedNames = new TreeSet<>();
 	    sortedNames.addAll(sysProperties.stringPropertyNames());
 
-	    printTitle("System Properties");
+	    List<String> props = new ArrayList<>(sortedNames.size());
 	    for (String propertyName: sortedNames) {
 		String value = sysProperties.getProperty(propertyName);
-		System.out.format("%1$s = %2$s%n", propertyName, value);
+		props.add(String.format("%1$s = %2$s", propertyName, value));
 	    }
-	    printFooter();
+
+	    display("System Properties", props);
 	}
 
 	/**
@@ -287,11 +344,12 @@ public class OS
 	private static void displayEnvironment() {
 	    Map<String, String> env = new TreeMap<>(System.getenv());
 
-	    printTitle("Environment");
+	    List<String> envs = new ArrayList<>(env.size());
 	    for (Map.Entry<String, String> entry : env.entrySet()) {
-		System.out.format("%1$s = %2$s%n", entry.getKey(), entry.getValue());
+		envs.add(String.format("%1$s = %2$s", entry.getKey(), entry.getValue()));
 	    }
-	    printFooter();
+
+	    display("Environment", envs);
 	}
 
 	/**
@@ -302,12 +360,13 @@ public class OS
 	    Map<String, Charset> charsets = new TreeMap<>(Charset.availableCharsets());
 	    Charset defaultCharset = Charset.defaultCharset();
 
-	    printTitle("Character Sets");
+	    List<String> sets = new ArrayList<>(charsets.size());
 	    for (Map.Entry<String, Charset> entry : charsets.entrySet()) {
 		String prefix = (entry.getValue().equals(defaultCharset)) ? "* " : "  ";
-		System.out.println(prefix + entry.getKey());
+		sets.add(prefix + entry.getKey());
 	    }
-	    printFooter();
+
+	    display("Character Sets", sets);
 	}
 
 	/**
@@ -323,14 +382,15 @@ public class OS
 		sortedLocales.put(loc.toLanguageTag(), loc);
 	    }
 
-	    printTitle("Locales");
+	    List<String> locs = new ArrayList<>(sortedLocales.size());
 	    for (Map.Entry<String, Locale> entry : sortedLocales.entrySet()) {
 		String tag = entry.getKey();
 		Locale loc = entry.getValue();
 		String prefix = (loc.equals(defaultLocale)) ? "*" : "";
-		System.out.format("%1$1s%2$15s  %3$s%n", prefix, tag, loc.getDisplayName());
+		locs.add(String.format("%1$1s%2$15s  %3$s", prefix, tag, loc.getDisplayName()));
 	    }
-	    printFooter();
+
+	    display("Locales", locs);
 	}
 
 	/**
@@ -339,10 +399,9 @@ public class OS
 	private static void displayDigests() {
 	    Set<String> availableDigests = Security.getAlgorithms("MessageDigest");
 	    Set<String> sortedDigests    = new TreeSet<>(availableDigests);
+	    List<String> digests         = new ArrayList<>(sortedDigests);
 
-	    printTitle("Message Digests");
-	    sortedDigests.forEach(System.out::println);
-	    printFooter();
+	    display("Message Digests", digests);
 	}
 
 	/**
@@ -366,9 +425,10 @@ public class OS
 	    Provider[] providers = Security.getProviders();
 	    Arrays.sort(providers, OS::compareProviders);
 
-	    printTitle("Security Providers");
-	    Arrays.stream(providers).forEach(p -> System.out.format("%1$12s: %2$s%n", p.getName(), p.getInfo()));
-	    printFooter();
+	    final List<String> provs = new ArrayList<>(providers.length);
+	    Arrays.stream(providers).forEach(p -> provs.add(String.format("%1$12s: %2$s", p.getName(), p.getInfo())));
+
+	    display("Security Providers", provs);
 	}
 
 	/**
@@ -379,9 +439,7 @@ public class OS
 	    String[] fontFamilies = graphicsEnv.getAvailableFontFamilyNames();
 	    Arrays.sort(fontFamilies, String.CASE_INSENSITIVE_ORDER);
 
-	    printTitle("Font Families");
-	    Arrays.stream(fontFamilies).forEach(System.out::println);
-	    printFooter();
+	    display("Font Families", Arrays.asList(fontFamilies));
 	}
 
 
