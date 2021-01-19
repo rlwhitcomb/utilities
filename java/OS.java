@@ -46,6 +46,8 @@
  *    19-Jan-2021 (rlwhitcomb)
  *	Do output in columns if possible. A few more aliases for the
  *	choices.
+ *    19-Jan-2021 (rlwhitcomb)
+ *	Fix a bug in the display of the choice aliases. Reorder them.
  */
 import java.awt.GraphicsEnvironment;
 import java.io.PrintStream;
@@ -90,18 +92,18 @@ public class OS
 		PROPERTIES	(OS::displayProperties,
 				 "properties", "props", "prop", "p"),
 		ENVIRONMENT	(OS::displayEnvironment,
-				 "environment", "environ", "env", "e"),
+				 "environment", "environ", "envs", "env", "e"),
 		CHARSETS	(OS::displayCharsets,
 				 "charsets", "charset", "chars", "char", "ch", "c"),
 		LOCALES		(OS::displayLocales,
 				 "locales", "locale", "locs", "loc", "l"),
 		DIGESTS		(OS::displayDigests,
 				 "message-digests", "message_digests", "messagedigests",
-				 "digests", "digest", "digs", "dig", "d", "m", "md"),
+				 "digests", "digest", "digs", "dig", "md", "d", "m"),
 		PROVIDERS	(OS::displayProviders,
 				 "security-providers", "security_providers",
 				 "securityproviders", "providers", "security", "provs",
-				 "prov", "sec", "s", "sp"),
+				 "prov", "sec", "sp", "s"),
 		FONTS		(OS::displayFonts,
 				 "fonts", "font", "f");
 
@@ -161,12 +163,13 @@ public class OS
 		    output.append(", ");
 		    printWidth += 2;
 		}
-		if (printWidth > width) {
+		int valueWidth = value.length() + 2;
+		if (printWidth + valueWidth > width) {
 		    output.append('\n').append(indent).append(indent);
 		    printWidth = indentWidth * 2;
 		}
 		output.append('"').append(value).append('"');
-		printWidth += value.length() + 2;
+		printWidth += valueWidth;
 	    }
 
 	    return output.toString();
@@ -228,7 +231,7 @@ public class OS
 	    ps.println("Usage: java OS [choice]*");
 	    ps.println();
 	    ps.println("Valid choices are:");
-	    Choice.displayAliases(ps, "    ", 60);
+	    Choice.displayAliases(ps, "    ", 72);
 	    ps.println(" or \"all\" (default is \"properties\"),");
 	    ps.println(" or \"help\", \"h\", or \"?\" to display this message.");
 	    ps.println();
