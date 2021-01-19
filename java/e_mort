@@ -54,6 +54,6 @@ M = ctx.P * (r_r_n / r_n_1)
 # to a whole dollar, "2" rounds to pennies.
 :quiet pop
 :results on
-`Full monthly payment is $$${round (M, 2)}`
-`Monthly payment in whole dollars is $$${round (M, 0)}`
+:echo `Full monthly payment is $$${round (M, 2)}`
+:echo `Monthly payment in whole dollars is $$${round (M, 0)}`
 :results pop

@@ -28,7 +28,32 @@
 #           Moved into here from the .java files.
 #	18-Jan-2021 (rlwhitcomb)
 #	    Action messages.
+#	18-Jan-2021 (rlwhitcomb)
+#	    Results and other colored messages.
 #
+
+#
+# From Calc.java
+#
+# Note: <v> is VALUE_COLOR
+#       <a> is ARROW_COLOR
+#       <x> is EXPR_COLOR
+#       <e> is ERROR_COLOR
+#       <r> is RESET
+#
+resultOnly	= <v>%1$s<r>
+result		= <x>%1$s<a> -> <v>%2$s<r>
+action		= <v>%1$s<r>
+message		= <a>%1$s<r>
+errorLine	= <e>%1$s<r> at line %2$d.
+error		= <e>%1$s<r>
+expectNotOption	= <e>Expecting %1$s value, not another option.<r>
+expectValue	= <e>Expecting %1$s value.<r>
+noOptionValue	= <e>Value for %1$s option was not given.<r>
+unknownOption	= Unknown option "<v>%1$s<r>"; ignoring.
+inOutError	= <e>I/O Error: %1$s<r>
+argError	= Error: %1$s
+timing		= Elapsed time %1$11.9f seconds.
 
 #
 # From CalcObjectVisitor

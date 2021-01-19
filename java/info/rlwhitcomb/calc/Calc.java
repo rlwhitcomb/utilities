@@ -79,6 +79,9 @@
  *	    light and dark background modes.
  *	14-Jan-2021 (rlwhitcomb)
  *	    Set the text area fonts in code.
+ *	18-Jan-2021 (rlwhitcomb)
+ *	    Move all the other (colored) messages to the resources;
+ *	    simplify the color rendering.
  */
 package info.rlwhitcomb.calc;
 
@@ -149,14 +152,14 @@ public class Calc
 
 	private static final String[] INTRO = {
 	    "  Enter an expression (or multiple expressions separated by ';').",
-	    "  Use '<v>help</v>' or '<v>?</v>' for a list of supported functions.",
-	    "  Enter '<v>quit</v>' or '<v>exit</v>' to end.",
-	    "  Enter '<v>gui</v>' to enter GUI mode.",
+	    "  Use '<v>help<r>' or '<v>?<r>' for a list of supported functions.",
+	    "  Enter '<v>quit<r>' or '<v>exit<r>' to end.",
+	    "  Enter '<v>gui<r>' to enter GUI mode.",
 	    ""
 	};
 
 	private static final String[] HELP = {
-	    "<e>Help is not complete yet!  Check back later.</e>"
+	    "<e>Help is not complete yet!  Check back later.<r>"
 	};
 
 	private static boolean guiMode     = false;
@@ -202,16 +205,22 @@ public class Calc
 	    ERROR_COLOR = RED_BOLD.toString();
 	}
 
-	private static String substituteColors(String decoratedString) {
-	    String coloredString = decoratedString;
-
-	    coloredString = coloredString.replace("<v>",  colors ? VALUE_COLOR : "");
-	    coloredString = coloredString.replace("</v>", colors ? RESET.toString() : "");
-	    coloredString = coloredString.replace("<e>",  colors ? ERROR_COLOR : "");
-	    coloredString = coloredString.replace("</e>", colors ? RESET.toString() : "");
-
-	    return coloredString;
+	private static String renderColors(String decoratedString) {
+	    return decoratedString.replace("<v>", colors ? VALUE_COLOR : "")
+				  .replace("<e>", colors ? ERROR_COLOR : "")
+				  .replace("<x>", colors ? EXPR_COLOR  : "")
+				  .replace("<a>", colors ? ARROW_COLOR : "")
+				  .replace("<r>", colors ? RESET.toString() : "");
 	}
+
+	private static void outFormat(String formatKey, Object... args) {
+	    System.out.println(renderColors(Intl.formatString(formatKey, args)));
+	}
+
+	private static void errFormat(String formatKey, Object... args) {
+	    System.err.println(renderColors(Intl.formatString(formatKey, args)));
+	}
+
 
 	@Override
 	public void startup(Display display, Map<String, String> properties) {
@@ -231,6 +240,11 @@ public class Calc
 		PrintStream ps = new TextAreaOutputStream(outputTextArea, 2048).toPrintStream();
 		System.setOut(ps);
 		System.setErr(ps);
+
+		// For now, we won't support colors in the GUI display
+		// TODO: if we ever support going back from GUI mode to console, we will need to restore
+		// the old "colors" mode at that point
+		colors = false;
 
 		// Increase the maximum output text length in case of humongous calculations
 		outputTextArea.setMaximumLength(20_000_000);
@@ -266,35 +280,35 @@ public class Calc
 	@Override
 	public void displayResult(String exprString, String resultString) {
 	    if (resultsOnly)
-		System.out.println(resultString);
+		outFormat("calc#resultOnly", resultString);
 	    else
-		System.out.println(exprString + " -> " + resultString);
+		outFormat("calc#result", exprString, resultString);
 	    updateOutputSize();
 	}
 
 	@Override
 	public void displayActionMessage(String message) {
 	    if (!resultsOnly) {
-		System.out.println(message);
+		outFormat("calc#action", message);
 		updateOutputSize();
 	    }
 	}
 
 	@Override
 	public void displayMessage(String message) {
-	    System.out.println(message);
+	    outFormat("calc#message", message);
 	    updateOutputSize();
 	}
 
 	@Override
 	public void displayErrorMessage(String message) {
-	    System.err.println(message);
+	    outFormat("calc#error", message);
 	    updateOutputSize();
 	}
 
 	@Override
 	public void displayErrorMessage(String message, int lineNumber) {
-	    System.err.println(String.format("%1$s at line %2$d.", message, lineNumber));
+	    errFormat("calc#errorLine", message, lineNumber);
 	    updateOutputSize();
 	}
 
@@ -360,51 +374,34 @@ public class Calc
 	{
 		@Override
 		public void displayResult(String exprString, String resultString) {
-		    if (colors)
-			if (resultsOnly)
-			    System.out.println(VALUE_COLOR + resultString + RESET);
-			else
-			    System.out.println(EXPR_COLOR + exprString + ARROW_COLOR + " -> " + VALUE_COLOR + resultString + RESET);
+		    if (resultsOnly)
+			outFormat("calc#resultOnly", resultString);
 		    else
-			if (resultsOnly)
-			    System.out.println(resultString);
-			else
-			    System.out.println(exprString + " -> " + resultString);
+			outFormat("calc#result", exprString, resultString);
 		}
 
 		@Override
 		public void displayActionMessage(String message) {
 		    if (!resultsOnly)
-			if (colors)
-			    System.out.println(VALUE_COLOR + message + RESET);
-			else
-			    System.out.println(message);
+			outFormat("calc#action", message);
 		}
 
 		@Override
 		public void displayMessage(String message) {
 		    if (message == null || message.isEmpty())
 			System.out.println();
-		    else if (colors)
-			System.out.println(ARROW_COLOR + message + RESET);
 		    else
-			System.out.println(message);
+			outFormat("calc#message", message);
 		}
 
 		@Override
 		public void displayErrorMessage(String message) {
-		    if (colors)
-			System.err.println(ERROR_COLOR + message + RESET);
-		    else
-			System.err.println(message);
+		    errFormat("calc#error", message);
 		}
 
 		@Override
 		public void displayErrorMessage(String message, int lineNumber) {
-		    if (colors)
-			System.err.println(ERROR_COLOR + message + RESET + " at line " + lineNumber + ".");
-		    else
-			System.err.println(message + " at line " + lineNumber + ".");
+		    errFormat("calc#errorLine", message, lineNumber);
 		}
 	}
 
@@ -456,13 +453,13 @@ public class Calc
 
 	public static void printIntro() {
 	    Arrays.stream(INTRO).forEach((s) -> {
-		System.out.println(substituteColors(s));
+		System.out.println(renderColors(s));
 	    });
 	}
 
 	public static void printHelp() {
 	    Arrays.stream(HELP).forEach((s) -> {
-		System.out.println(substituteColors(s));
+		System.out.println(renderColors(s));
 	    });
 	}
 
@@ -528,7 +525,7 @@ public class Calc
 		return process(CharStreams.fromString(input), visitor, errorStrategy, silent);
 	    }
 	    catch (IOException ioe) {
-		displayer.displayErrorMessage("I/O Error: " + ExceptionUtil.toString(ioe));
+		displayer.displayErrorMessage(Intl.formatString("calc#ioError", ExceptionUtil.toString(ioe)));
 	    }
 	    return null;
 	}
@@ -555,10 +552,10 @@ public class Calc
 		returnValue = visitor.visit(tree);
 	    }
 	    catch (IllegalArgumentException iae) {
-		displayer.displayErrorMessage("Error: " + iae.getMessage());
+		displayer.displayErrorMessage(Intl.formatString("calc#argError", ExceptionUtil.toString(iae)));
 	    }
 	    catch (CalcException ce) {
-		displayer.displayErrorMessage("Error: " + ce.getMessage(), ce.getLine());
+		displayer.displayErrorMessage(Intl.formatString("calc#argError", ce.getMessage()), ce.getLine());
 	    }
 	    finally {
 		endTime = Environment.highResTimer();
@@ -566,7 +563,7 @@ public class Calc
 	    }
 
 	    if (timing && !silent) {
-		displayer.displayMessage(String.format("Elapsed time %1$11.9f seconds.",
+		displayer.displayMessage(Intl.formatString("calc#timing",
 			Environment.timerValueToSeconds(endTime - startTime)));
 	    }
 
@@ -575,7 +572,7 @@ public class Calc
 
 	private static Expecting processOption(String arg, String option) {
 	    if (expecting != Expecting.DEFAULT) {
-		System.err.println("Expecting " + expecting + " value, not another option.");
+		errFormat("calc#expectNotOption", expecting);
 		return Expecting.QUIT_NOW;
 	    }
 
@@ -668,7 +665,7 @@ public class Calc
 		    printTitleAndVersion();
 		    return Expecting.QUIT_NOW;
 		default:
-		    System.err.println("Unknown option \"" + arg + "\"; ignoring.");
+		    errFormat("calc#unknownOption", arg);
 		    return Expecting.QUIT_NOW;
 	    }
 	    return Expecting.DEFAULT;
@@ -696,7 +693,7 @@ public class Calc
 			    expecting = Expecting.DEFAULT;
 			    break;
 			default:
-			    System.err.println("Expecting " + expecting + " value.");
+			    errFormat("calc#expectValue", expecting);
 			    expecting = Expecting.QUIT_NOW;
 			    break;
 		    }
@@ -707,7 +704,7 @@ public class Calc
 	    }
  
 	    if (expecting != Expecting.DEFAULT) {
-		System.err.println("Value for " + expecting + " option was not given.");
+		errFormat("calc#noOptionValue", expecting);
 	    }
 	}
 
@@ -840,10 +837,7 @@ public class Calc
 		}
 	    }
 	    catch (IOException ioe) {
-		if (colors)
-		    System.err.println(ERROR_COLOR + "I/O Error: " + ExceptionUtil.toString(ioe) + RESET);
-		else
-		    System.err.println("I/O Error: " + ExceptionUtil.toString(ioe));
+		errFormat("calc#inOutError", ExceptionUtil.toString(ioe));
 	    }
 	}
 
