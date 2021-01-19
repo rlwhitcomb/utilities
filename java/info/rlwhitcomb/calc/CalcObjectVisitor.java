@@ -132,6 +132,8 @@
  *	    Use NumericUtil.cbrt().
  *	18-Jan-2021 (rlwhitcomb)
  *	    Put the action messages in the resources.
+ *	19-Jan-2021 (rlwhitcomb)
+ *	    Add "length" and "scale" functions.
  */
 package info.rlwhitcomb.calc;
 
@@ -1112,6 +1114,24 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    BigDecimal e = getDecimalValue(ctx.expr());
 
 	    return BigDecimal.valueOf(e.signum());
+	}
+
+	@Override
+	public Object visitLengthExpr(CalcParser.LengthExprContext ctx) {
+	    Object obj = visit(ctx.expr());
+
+	    // This calculates the recursive size of objects and arrays
+	    // so, use "scale" to calculate the non-recursive size
+	    return BigInteger.valueOf((long)length(ctx, obj, true));
+	}
+
+	@Override
+	public Object visitScaleExpr(CalcParser.ScaleExprContext ctx) {
+	    Object obj = visit(ctx.expr());
+
+	    // This returns the non-recursive size of objects and arrays
+	    // so, use "length" to calculate the recursive (full) size
+	    return BigInteger.valueOf((long)scale(ctx, obj));
 	}
 
 	@Override

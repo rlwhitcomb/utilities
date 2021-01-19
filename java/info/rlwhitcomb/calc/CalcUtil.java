@@ -32,6 +32,8 @@
  *	    Move "toIntValue" code into here.
  *	18-Jan-2021 (rlwhitcomb)
  *	    Move text to resource file.
+ *	19-Jan-2021 (rlwhitcomb)
+ *	    Add "length" and "scale" functions.
  */
 package info.rlwhitcomb.calc;
 
@@ -246,6 +248,107 @@ public final class CalcUtil
 	    return buf.toString();
 	}
 
+	/**
+	 * Compute the "length" of something.
+	 * <p> Differs depending on the object:
+	 * <ul><li>{@code Object} = (possibly recursive) number of entries</li>
+	 * <li>{@code Array} = (possibly recursive) length of the array</li>
+	 * <li>{@code String} = code point length</li>
+	 * <li>{@code BigDecimal} = precision (or number of significant digits)</li>
+	 * <li>{@code BigInteger} = number of digits</li>
+	 * <li>{@code Boolean} = one</li>
+	 * <li>{@code Null} = zero</li>
+	 * </ul>
+	 *
+	 * @param ctx	The context to use for error reporting.
+	 * @param obj	The object to be "measured".
+	 * @param recursive	Whether or not to descend into the object / array or not.
+	 * @return	The "length" according to the above rules.
+	 */
+	public static int length(final ParserRuleContext ctx, final Object obj, final boolean recursive) {
+	    if (obj == null)
+		return 0;
+	    if (obj instanceof Boolean)
+		return 1;
+	    if (obj instanceof BigInteger) {
+		String strValue = ((BigInteger)obj).toString();
+		// Number of digits does not include the leading sign (if present)
+		if (strValue.charAt(0) == '-')
+		    return strValue.length() - 1;
+		else
+		    return strValue.length();
+	    }
+	    if (obj instanceof BigDecimal)
+		return ((BigDecimal)obj).precision();
+	    if (obj instanceof String) {
+		String str = (String)obj;
+		return str.codePointCount(0, str.length());
+	    }
+	    if (obj instanceof List) {
+		@SuppressWarnings("unchecked")
+		List<Object> list = (List<Object>)obj;
+		if (recursive) {
+		    int len = 0;
+		    for (Object listObj : list) {
+			if (listObj instanceof List || listObj instanceof Map)
+			    len += length(ctx, listObj, recursive);
+			else
+			    len++;	// Note: this will count null entries as one
+		    }
+		    return len;
+		}
+		else {
+		    return list.size();
+		}
+	    }
+	    if (obj instanceof Map) {
+		@SuppressWarnings("unchecked")
+		Map<String, Object> map = (Map<String, Object>)obj;
+		if (recursive) {
+		    int len = 0;
+		    for (Object valueObj : map.values()) {
+			if (valueObj instanceof List || valueObj instanceof Map)
+			    len += length(ctx, valueObj, recursive);
+			else
+			    len++;	// Note: this will count null entries as one
+		    }
+		    return len;
+		}
+		else {
+		    return map.size();
+		}
+	    }
+
+	    throw new CalcExprException(ctx, "%calc#unknownType", obj.getClass().getSimpleName());
+	}
+
+	/**
+	 * Compute the "scale" of the given object:
+	 * <ul><li>{@code BigDecimal} = the {@code scale()} value.</li>
+	 * <li>{@code Object} = the non-recursive size (number of entries)</li>
+	 * <li>{@code Array} = the non-recursive size (number of entries)</li>
+	 * <li>everything else = {@code 0}</li>
+	 * </ul>
+	 *
+	 * @param ctx	The context to use for error reporting.
+	 * @param obj	The object to interrogate.
+	 * @return	The scale of the object.
+	 */
+	public static int scale(final ParserRuleContext ctx, final Object obj) {
+	    if (obj instanceof BigDecimal)
+		return ((BigDecimal)obj).scale();
+	    if (obj instanceof List || obj instanceof Map)
+		return length(ctx, obj, false);
+	    return 0;
+	}
+
+	/**
+	 * Convert an array of bytes to their numeric representation in the given radix.
+	 *
+	 * @param bytes	The set of bytes to convert.
+	 * @param radix	Radix to use for conversion (supports 2, 8, and 16).
+	 * @param buf	The buffer to append to.
+	 */
 	public static void convert(final byte[] bytes, final int radix, final StringBuilder buf) {
 	    int padWidth = 0;
 	    switch (radix) {

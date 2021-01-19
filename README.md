@@ -77,7 +77,6 @@ Work going on currently includes:
 - then need -locale option and translation(s)
 
 ### Calc
-- Fix bug with associativities that makes end-start+1 look like end-(start+1) instead of (end-start)+1 (probably also */% also)
 - implement Taylor series expansion of other trig/log functions to requested precision
 - redo the [box] formats of strings (to be? x'...', b'...', o'...') then parse such beasts back to strings
 - allow "_" in numeric values, like Java does
@@ -86,6 +85,8 @@ Work going on currently includes:
 - add option (both GUI and REPL modes) to open another file
 - functions for financial calculations (INTEREST, NPV, PAYMENT, etc.)
 - ?? need a way to do "setScale(...)" on the values ??
+- allow indexing into strings (codepoints)
+- allow indexing into maps (so, with a.b, could use a["b"]; then change "loop" over map to get keys instead of values (get values with map[key])
 
 ### Sleep
 - options for minutes, hours, days, weeks

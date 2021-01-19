@@ -102,6 +102,8 @@
  *	    Allow looping over an empty expression list.
  *	15-Jan-2021 (rlwhitcomb)
  *	    Fix precedence of operators.
+ *	19-Jan-2021 (rlwhitcomb)
+ *	    Add "length" and "scale" functions.
  */
 
 grammar Calc;
@@ -154,6 +156,8 @@ expr
    | LN2 expr                            # ln2Expr
    | LN expr                             # lnExpr
    | SIGNUM expr                         # signumExpr
+   | LENGTH expr                         # lengthExpr
+   | SCALE expr                          # scaleExpr
    | ROUND expr2                         # roundExpr
    | ISPRIME expr                        # isPrimeExpr
    | GCD expr2                           # gcdExpr
@@ -320,6 +324,10 @@ LN       : L N ;
 LN2      : L N '2' ;
 
 SIGNUM   : S I G N U M ;
+
+LENGTH   : L E N G T H ;
+
+SCALE    : S C A L E ;
 
 ROUND    : R O U N D ;
 
