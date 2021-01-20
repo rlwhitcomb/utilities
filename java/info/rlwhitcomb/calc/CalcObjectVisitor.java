@@ -134,6 +134,8 @@
  *	    Put the action messages in the resources.
  *	19-Jan-2021 (rlwhitcomb)
  *	    Add "length" and "scale" functions.
+ *	20-Jan-2021 (rlwhitcomb)
+ *	    Adjust compare / equal operator precedence.
  */
 package info.rlwhitcomb.calc;
 
@@ -1301,25 +1303,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public Object visitCompareExpr(CalcParser.CompareExprContext ctx) {
 	    ParserRuleContext expr1 = ctx.expr(0);
 	    ParserRuleContext expr2 = ctx.expr(1);
-	    int cmp;
 
-	    String op = ctx.COMPARE_OP().getText();
-	    switch (op) {
-		case "===":
-		case "!==":
-		    cmp = compareValues(expr1, expr2, true, true);
-		    break;
-		case "==":
-		case "!=":
-		    cmp = compareValues(expr1, expr2, false, true);
-		    break;
-		default:
-		    cmp = compareValues(expr1, expr2);
-		    break;
-	    }
+	    int cmp = compareValues(expr1, expr2);
 
 	    boolean result;
 
+	    String op = ctx.COMPARE_OP().getText();
 	    switch (op) {
 		case "<=":
 		    result = (cmp <= 0);
@@ -1333,6 +1322,34 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		case ">":
 		    result = (cmp > 0);
 		    break;
+		default:
+		    throw new UnknownOpException(op, ctx);
+	    }
+
+	    return Boolean.valueOf(result);
+	}
+
+	@Override
+	public Object visitEqualExpr(CalcParser.EqualExprContext ctx) {
+	    ParserRuleContext expr1 = ctx.expr(0);
+	    ParserRuleContext expr2 = ctx.expr(1);
+
+	    int cmp = 0;
+	    boolean result;
+
+	    String op = ctx.EQUAL_OP().getText();
+	    switch (op) {
+		case "===":
+		case "!==":
+		    cmp = compareValues(expr1, expr2, true, true);
+		    break;
+		case "==":
+		case "!=":
+		    cmp = compareValues(expr1, expr2, false, true);
+		    break;
+	    }
+
+	    switch (op) {
 		case "===":
 		case "==":
 		    result = (cmp == 0);

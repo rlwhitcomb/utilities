@@ -104,6 +104,8 @@
  *	    Fix precedence of operators.
  *	19-Jan-2021 (rlwhitcomb)
  *	    Add "length" and "scale" functions.
+ *	20-Jan-2021 (rlwhitcomb)
+ *	    Adjust compare / equal operator precedence.
  */
 
 grammar Calc;
@@ -171,6 +173,7 @@ expr
    | expr SHIFT_OP expr                  # shiftExpr
    | expr '<=>' expr                     # spaceshipExpr
    | expr COMPARE_OP expr                # compareExpr
+   | expr EQUAL_OP expr                  # equalExpr
    | expr BIT_OP expr                    # bitExpr
    | expr BOOL_OP expr                   # booleanExpr
    |<assoc=right> expr '?' expr ':' expr # eitherOrExpr
@@ -403,7 +406,10 @@ COMPARE_OP
        | '<'
        | '>='
        | '>'
-       | '==='
+       ;
+
+EQUAL_OP
+       : '==='
        | '!=='
        | '=='
        | '!='
