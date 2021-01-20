@@ -4,7 +4,7 @@
 
 	The MIT License (MIT)
 
-	Copyright (c) 2010-2011,2020 Roger L. Whitcomb.
+	Copyright (c) 2010-2011,2020-2021 Roger L. Whitcomb.
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -26,6 +26,11 @@
 
 	"Ant" build file to build the custom tasks.
 
+	    History:
+		... lost in antiquity ...
+		20-Jan-2021 (rlwhitcomb)
+		    Add Antlr grammar for JavaPreProc.
+
      ========================================================================== -->
 
 <project name="ant-tasks" default="all" basedir="."
@@ -35,10 +40,27 @@
 	<property environment="env"/>
 	<property file="build.properties"/>
 
-	<target name="compile" description="Compiles the java source">
+	<target name="check-grammars-uptodate">
+		<condition property="grammars.uptodate" value="true" else="false">
+			<uptodate srcfile="info/rlwhitcomb/preproc/PreProc.g4" targetfile="info/rlwhitcomb/preproc/PreProcParser.java"/>
+		</condition>
+	</target>
+
+	<target name="process-grammars" depends="check-grammars-uptodate" description="Process the Antlr grammars to generate parsers.">
+		<echo message="Generating PreProc parser" unless:true="${grammars.uptodate}"/>
+		<java jar="external-jars/antlr-4.9-complete.jar" fork="true" unless:true="${grammars.uptodate}" failonerror="true">
+			<arg file="info/rlwhitcomb/preproc/PreProc.g4"/>
+			<arg value="-visitor"/>
+			<arg value="-no-listener"/>
+			<arg line="-package info.rlwhitcomb.preproc"/>
+		</java>
+	</target>
+
+	<target name="compile" depends="process-grammars" description="Compiles the java source">
 		<javac srcdir="." includeAntRuntime="true">
 			<include name="info/rlwhitcomb/ant/*.java"/>
 			<include name="info/rlwhitcomb/preproc/*.java"/>
+			<exclude name="**/package-info.java"/>
 		</javac>
 	</target>
 
@@ -59,7 +81,7 @@
 		<delete>
 			<fileset dir="." includes="anttasks.jar" />
 			<fileset dir="info/rlwhitcomb/ant" includes="*.class" />
-			<fileset dir="info/rlwhitcomb/preproc" includes="*.class" />
+			<fileset dir="info/rlwhitcomb/preproc" includes="*.class,*.interp,*.tokens,PreProcParser.java,PreProcVisitor.java,PreProcLexer.java,PreProcBaseVisitor.java" />
 		</delete>
 	</target>
 </project>

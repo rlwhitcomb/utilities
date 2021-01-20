@@ -10,5 +10,9 @@ CalcBaseVisitor.java
 CalcParser.java
 CalcLexer.java
 CalcVisitor.java
+PreProcBaseVisitor.java
+PreProcParser.java
+PreProcLexer.java
+PreProcVisitor.java
 test*.log
 
