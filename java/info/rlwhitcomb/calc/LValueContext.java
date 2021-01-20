@@ -28,6 +28,8 @@
  *	    Extracted from CalcObjectVisitor.
  *	18-Jan-2021 (rlwhitcomb)
  *	    Move text to the resource file.
+ *	20-Jan-2021 (rlwhitcomb)
+ *	    Allow indexing into strings. Some renaming of parameters and variables.
  */
  package info.rlwhitcomb.calc;
 
@@ -65,18 +67,18 @@ class LValueContext
 	    this.index   = -1;
 	}
 
-	LValueContext(LValueContext p, CalcParser.VarContext var, Object ctxt, String nm) {
+	LValueContext(LValueContext p, CalcParser.VarContext ctx, Object obj, String nm) {
 	    this.parent  = p;
-	    this.varCtx  = var;
-	    this.context = ctxt;
+	    this.varCtx  = ctx;
+	    this.context = obj;
 	    this.name    = nm;
 	    this.index   = -1;
 	}
 
-	LValueContext(LValueContext p, CalcParser.VarContext var, Object ctxt, int idx) {
+	LValueContext(LValueContext p, CalcParser.VarContext ctx, Object obj, int idx) {
 	    this.parent  = p;
-	    this.varCtx  = var;
-	    this.context = ctxt;
+	    this.varCtx  = ctx;
+	    this.context = obj;
 	    this.name    = null;
 	    this.index   = idx;
 	}
@@ -99,17 +101,27 @@ class LValueContext
 	@SuppressWarnings("unchecked")
 	public Object getContextObject() {
 	    if (name != null) {
-		Map<String, Object> obj = (Map<String, Object>)context;
+		Map<String, Object> map = (Map<String, Object>) context;
 		// Special checks for loop vars (not defined means we are outside the loop)
 		if (name.startsWith("$")) {
-		    if (!obj.containsKey(name))
+		    if (!map.containsKey(name))
 		        throw new CalcExprException(varCtx, "%calc#loopVarNotAvail", name);
 		}
-		return obj.get(name);
+		return map.get(name);
 	    }
 	    else if (index >= 0) {
-		List<Object> arr = (List<Object>)context;
-		return arr.get(index);
+		if (context instanceof List) {
+		    List<Object> list = (List<Object>) context;
+		    return list.get(index);
+		}
+		else if (context instanceof String) {
+		    String str = (String) context;
+		    return str.substring(index, index + 1);
+		}
+		else {
+		    // Should never happen
+		    throw new IllegalStateException(Intl.formatKeyString("%calc#badAssign", this));
+		}
 	    }
 	    else {
 		// This should only ever be in the outermost "variables" context
@@ -121,12 +133,27 @@ class LValueContext
 	@SuppressWarnings("unchecked")
 	public Object putContextObject(Object value) {
 	    if (name != null) {
-		Map<String, Object> obj = (Map<String, Object>)context;
-		obj.put(name, value);
+		Map<String, Object> map = (Map<String, Object>) context;
+		map.put(name, value);
 	    }
 	    else if (index >= 0) {
-		List<Object> arr = (List<Object>)context;
-		arr.set(index, value);
+		if (context instanceof List) {
+		    List<Object> list = (List<Object>) context;
+		    list.set(index, value);
+		}
+		else if (context instanceof String) {
+		    StringBuilder buf = new StringBuilder((String) context);
+		    String newValue = CalcUtil.toStringValue(value, false, false, "");
+		    int newLen = index + newValue.length();
+		    // Ensure the builder has enough length to do the replacement
+		    while (buf.length() < newLen) {
+			buf.append(' ');
+		    }
+		    buf.replace(index, newLen, newValue);
+		    this.context = buf.toString();
+		    // Have to update the parent as well with the new string
+		    parent.putContextObject(this.context);
+		}
 	    }
 	    else {
 		// Should never happen
@@ -138,56 +165,59 @@ class LValueContext
 	}
 
 	@SuppressWarnings("unchecked")
-	private LValueContext makeMapLValue(CalcParser.VarContext var, String memberName) {
-	    Map<String, Object> obj = null;
+	private LValueContext makeMapLValue(CalcParser.VarContext ctx, String memberName) {
+	    Map<String, Object> map = null;
 	    Object objValue = getContextObject();
-	    if (objValue != null && objValue instanceof Map) {
-		obj = (Map<String, Object>)objValue;
+	    if (objValue == null) {
+		map = new HashMap<>();
+		putContextObject(map);
 	    }
-	    else if (objValue == null) {
-		obj = new HashMap<>();
-		putContextObject(obj);
+	    else if (objValue instanceof Map) {
+		map = (Map<String, Object>) objValue;
 	    }
 	    else {
-		throw new CalcExprException(var, "%calc#nonObjectValue", this);
+		throw new CalcExprException(ctx, "%calc#nonObjectValue", this);
 	    }
 
 	    if (memberName != null) {
-		return new LValueContext(this, var, obj, memberName);
+		return new LValueContext(this, ctx, map, memberName);
 	    }
 
 	    return this;
 	}
 
 	@SuppressWarnings("unchecked")
-	public static LValueContext getLValue(CalcObjectVisitor visitor, CalcParser.VarContext var, LValueContext lValue) {
-	    if (var instanceof CalcParser.IdVarContext) {
-		CalcParser.IdVarContext idVar = (CalcParser.IdVarContext)var;
-		return new LValueContext(lValue, idVar, lValue.getContextObject(), idVar.ID().getText());
+	public static LValueContext getLValue(CalcObjectVisitor visitor, CalcParser.VarContext ctx, LValueContext lValue) {
+	    if (ctx instanceof CalcParser.IdVarContext) {
+		CalcParser.IdVarContext idVarCtx = (CalcParser.IdVarContext) ctx;
+		return new LValueContext(lValue, idVarCtx, lValue.getContextObject(), idVarCtx.ID().getText());
 	    }
-	    else if (var instanceof CalcParser.LoopVarContext) {
-		CalcParser.LoopVarContext loopVar = (CalcParser.LoopVarContext)var;
-		return new LValueContext(lValue, loopVar, lValue.getContextObject(), loopVar.LOOPVAR().getText());
+	    else if (ctx instanceof CalcParser.LoopVarContext) {
+		CalcParser.LoopVarContext loopVarCtx = (CalcParser.LoopVarContext) ctx;
+		return new LValueContext(lValue, loopVarCtx, lValue.getContextObject(), loopVarCtx.LOOPVAR().getText());
 	    }
-	    else if (var instanceof CalcParser.ArrVarContext) {
-		CalcParser.ArrVarContext arrVar = (CalcParser.ArrVarContext)var;
-		LValueContext arrLValue = getLValue(visitor, arrVar.var(), lValue);
-		int index = visitor.getIntValue(arrVar.expr());
+	    else if (ctx instanceof CalcParser.ArrVarContext) {
+		CalcParser.ArrVarContext arrVarCtx = (CalcParser.ArrVarContext) ctx;
+		LValueContext arrLValue = getLValue(visitor, arrVarCtx.var(), lValue);
+		int index = visitor.getIntValue(arrVarCtx.expr());
 
 		if (index < 0)
-		    throw new CalcExprException(arrVar, "%calc#indexNegative", index);
+		    throw new CalcExprException(arrVarCtx, "%calc#indexNegative", index);
 
 		List<Object> list = null;
 		Object arrValue = arrLValue.getContextObject();
-		if (arrValue != null && arrValue instanceof List) {
-		    list = (List<Object>)arrValue;
-		}
-		else if (arrValue == null) {
+		if (arrValue == null) {
 		    list = new ArrayList<>();
 		    arrLValue.putContextObject(list);
 		}
+		else if (arrValue instanceof List) {
+		    list = (List<Object>) arrValue;
+		}
+		else if (arrValue instanceof String) {
+		    return new LValueContext(arrLValue, arrVarCtx, arrValue, index);
+		}
 		else {
-		    throw new CalcExprException(var, "%calc#nonArrayValue", arrLValue);
+		    throw new CalcExprException(arrVarCtx, "%calc#nonArrayValue", arrLValue);
 		}
 
 		// Set empty values up to the index desired
@@ -195,32 +225,32 @@ class LValueContext
 		for (int i = size; i <= index; i++)
 		    list.add(null);
 
-		return new LValueContext(arrLValue, arrVar, list, index);
+		return new LValueContext(arrLValue, arrVarCtx, list, index);
 	    }
-	    else if (var instanceof CalcParser.ObjVarContext) {
-		CalcParser.ObjVarContext objVar = (CalcParser.ObjVarContext)var;
-		LValueContext objLValue = getLValue(visitor, objVar.var(0), lValue);
+	    else if (ctx instanceof CalcParser.ObjVarContext) {
+		CalcParser.ObjVarContext objVarCtx = (CalcParser.ObjVarContext) ctx;
+		LValueContext objLValue = getLValue(visitor, objVarCtx.var(0), lValue);
 
-		objLValue = objLValue.makeMapLValue(var, null);
+		objLValue = objLValue.makeMapLValue(objVarCtx, null);
 
-		List<TerminalNode> strings = objVar.STRING();
+		List<TerminalNode> strings = objVarCtx.STRING();
 		if (strings.size() > 0) {
 		    for (TerminalNode string : strings) {
-			objLValue = objLValue.makeMapLValue(var, string.getText());
+			objLValue = objLValue.makeMapLValue(objVarCtx, string.getText());
 		    }
 		}
 
-		CalcParser.VarContext rhsVar = objVar.var(1);
-		if (rhsVar != null) {
+		CalcParser.VarContext rhsVarCtx = objVarCtx.var(1);
+		if (rhsVarCtx != null) {
 		    if (strings.size() > 0)
-			objLValue = objLValue.makeMapLValue(var, null);
-		    return getLValue(visitor, rhsVar, objLValue);
+			objLValue = objLValue.makeMapLValue(objVarCtx, null);
+		    return getLValue(visitor, rhsVarCtx, objLValue);
 		}
 		else
 		    return objLValue;
 	    }
 	    else {
-		throw new CalcExprException(var, "%calc#unknownVarCtx", var.getClass().getName());
+		throw new CalcExprException(ctx, "%calc#unknownVarCtx", ctx.getClass().getName());
 	   }
 	}
 
