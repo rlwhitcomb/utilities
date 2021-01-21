@@ -36,15 +36,13 @@ Work going on currently includes:
 - Add support for color-coding within Intl text using HTML-like tags, then update help text in existing programs.
 - Completely new paradigm for Options, similar to Apache commons-cli, including support for printing help text from the options list.
 - UUID program: generate random, generate from text, separate into parts, maybe more.
-- Pivot demo program for CSS colors.
 - Lots of unit tests.
-- Add standard Version class?? which would just default to the Environment values.
 - Consider a standard method to read .properties files (take the code from "readVersionProperties" in Environment and make it general somewhere else?)
 - Completely update JavaPreProc to use an Antlr expression grammar to process the directives.
-- Wildcard support for the Ant FindTask.
-- "Which" on Windows needs something besides "canExecute" to determine if it is correct.
 - Make InitializationTask and QueuedThread work seamlessly with "synchronized"
 - Add a Spanish translation for all the current resources (and ongoing for new resource files).
+
+Also see "issues" at https://github.com/rlwhitcomb/utilities/issues
 
 ## Notes on New Programs and Features
 
@@ -72,10 +70,6 @@ Work going on currently includes:
 - Word Finder can also use this option
 - Calc is now working with this design, although some features (like "help" and "version") are not well coordinated yet between console and GUI.
 
-### Cat
-- add help
-- then need -locale option and translation(s)
-
 ### Calc
 - implement Taylor series expansion of other trig/log functions to requested precision
 - redo the [box] formats of strings (to be? x'...', b'...', o'...') then parse such beasts back to strings
@@ -85,25 +79,13 @@ Work going on currently includes:
 - add option (both GUI and REPL modes) to open another file
 - functions for financial calculations (INTEREST, NPV, PAYMENT, etc.)
 - ?? need a way to do "setScale(...)" on the values ??
-- allow indexing into strings (codepoints)
-- allow indexing into maps (so, with a.b, could use a["b"]; then change "loop" over map to get keys instead of values (get values with map[key])
-
-### Sleep
-- options for minutes, hours, days, weeks
-- move to "util" directory so anyone can use the logic (update wrappers)
-
-### Tree
-- Update help for "tre" (not "tree")
-- Add Locale option
 
 ### WordFind
-
 - Finish the GUI code.
 - Separate .jar file? Or is "utilities.jar" suitable?
 - package info
 
 ### UUID
-
 - lots of options
 - generate random one
 - generate from "name" using command-line string or read from file (charset given) or from -stdin (see Cat for details)
