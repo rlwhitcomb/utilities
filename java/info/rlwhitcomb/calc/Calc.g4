@@ -106,6 +106,8 @@
  *	    Add "length" and "scale" functions.
  *	20-Jan-2021 (rlwhitcomb)
  *	    Adjust compare / equal operator precedence.
+ *	21-Jan-2021 (rlwhitcomb)
+ *	    Tweak operator precedence again.
  */
 
 grammar Calc;
@@ -181,8 +183,8 @@ expr
    |<assoc=right> var '**=' expr         # powerAssignExpr
    |<assoc=right> var MULT_ASSIGN expr   # multAssignExpr
    |<assoc=right> var ADD_ASSIGN expr    # addAssignExpr
-   |<assoc=right> var BIT_ASSIGN expr    # bitAssignExpr
    |<assoc=right> var SHIFT_ASSIGN expr  # shiftAssignExpr
+   |<assoc=right> var BIT_ASSIGN expr    # bitAssignExpr
    ;
 
 expr2
