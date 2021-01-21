@@ -26,6 +26,9 @@
  *  History:
  *	13-Jan-2021 (rlwhitcomb)
  *	    First version, based off the Apache POI code.
+ *	21-Jan-2021 (rlwhitcomb)
+ *	    Display all the defined fields in the "main" display.
+ *	    Add "getBuild()".
  */
 package info.rlwhitcomb;
 
@@ -56,6 +59,13 @@ public class Version
 	}
 
 	/**
+	 * @return The build "number".
+	 */
+	public static String getBuild() {
+	    return Environment.getAppBuild();
+	}
+
+	/**
 	 * @return The date of the release / build.
 	 */
 	public static String getReleaseDate() {
@@ -76,6 +86,11 @@ public class Version
 	    return "Java";
 	}
 
+	private static void printInfo(String function, String value) {
+	    String padFunc = CharUtil.padToWidth(function, 28, CharUtil.Justification.RIGHT);
+	    System.out.println(BLUE_BOLD_BRIGHT + padFunc + "()" + BLACK_BRIGHT + " -> " + GREEN + value + RESET);
+	}
+
 	/**
 	 * Prints the version to the command line.
 	 *
@@ -84,9 +99,19 @@ public class Version
 	public static void main(String[] args) {
 	    Environment.printProgramInfo(50);
 
-	    List<ProgramInfo> infos = Environment.getAllProgramInfo();
-
 	    String underline = CharUtil.padToWidth("", 50, '-');
+
+	    printInfo("getVersion",                getVersion());
+	    printInfo("getBuild",                  getBuild());
+	    printInfo("getReleaseDate",            getReleaseDate());
+	    printInfo("getProduct",                getProduct());
+	    printInfo("getImplementationLanguage", getImplementationLanguage());
+	    System.out.println();
+
+	    System.out.println(BLACK_BRIGHT + underline + RESET);
+	    System.out.println();
+
+	    List<ProgramInfo> infos = Environment.getAllProgramInfo();
 
 	    for (ProgramInfo info : infos) {
 		String version = String.format("Version %1$s", info.version);
