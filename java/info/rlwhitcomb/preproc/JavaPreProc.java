@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2010-2011,2014-2016,2019-2020 Roger L. Whitcomb.
+ * Copyright (c) 2010-2011,2014-2016,2019-2021 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -47,7 +47,7 @@
  *	if there were previous #endif errors.
  *    23-Jul-2010 (rlwhitcomb)
  *	Only allow '/' to start options on Windows; added
- *	"Usage()" and "SignOnBanner()" in response to "-?".
+ *	"usage()" and "signOnBanner()" in response to "-?".
  *    02-Aug-2010 (rlwhitcomb)
  *	Output an error message when an input file cannot be found;
  *	implement "nologo" command-line option.
@@ -123,6 +123,8 @@
  *	Change package, bump version, update copyright year.
  *    21-Dec-2020 (rlwhitcomb)
  *	Update Javadoc to latest conventions.
+ *    21-Jan-2021 (rlwhitcomb)
+ *	Add "-L" (log file) and "-W" parameters. Recognize "${macro}" format also.
  */
 package info.rlwhitcomb.preproc;
 
@@ -135,9 +137,14 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.nio.charset.CharacterCodingException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Paths;
+import static java.nio.file.StandardOpenOption.*;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -194,7 +201,7 @@ import org.apache.tools.ant.Task;
  * strictly numerically or strictly as string values with errors given if the operands
  * do not conform (in the case of <code>#ifnum</code>).
  * <p> The rules for substituting values defined by <code>#define</code> are different than C:
- * the syntax is <code>$(<i>varname</i>)</code>.
+ * the syntax is <code>$(<i>varname</i>)</code> or <code>${<i>varname</i>}</code>.
  * However, in expressions within the <code>#if<i>xxx</i></code> directives the <code><i>varname</i></code>
  * can be used just by itself (to match C preprocessor usage in this case).
  * Values can be defined in terms of other values.
@@ -228,6 +235,8 @@ import org.apache.tools.ant.Task;
  * <li><code>-R</code> (file name spec(s) are processed as directories and searched recursively)
  * <li><code>-E<i>envvar</i></code> (env var to use to search for #include'd files, defaults to "INCLUDE")
  * <li><code>-P<i>path(s)</i></code> (path(s) to use to search for #include'd files, separate by ";" or ",")
+ * <li><code>-L:<i>path</i></code> (path to log file to receive output - defaults to stdout)
+ * <li><code>-W</code> (overwrite the output log file - defaults to append)
  * <li>file name(s)
  * </ul>
  * <p> This process can also be invoked as an Ant task by using the following in your "build.xml":
@@ -250,11 +259,13 @@ import org.apache.tools.ant.Task;
  * <li><code>nologo="true"</code> (same as <code>-nologo</code> parameter)
  * <li><code>file="<i>filename</i>"</code> (same as file name argument)
  * <li><code>dir="<i>directory</i>"</code> (same as directory name argument (with <code>-r</code> or <code>-R</code> switch)
+ * <li><code>log="<i>logfilepath</i>"</code> (same as <code>-L</code> parameter)
+ * <li><code>overwrite="true"</code> (same as <code>-W</code> parameter)
  * </ul>
  * <p> Default input file extension is <code>".javapp"</code> and default output
  * file extension is <code>".java"</code> (can be overridden with <code>"-O<i>ext</i>"</code> option).
  * <p> By default, all values in the current environment are automatically
- * defined for use in <code>$(<i>var</i>)</code> constructs, unless specifically excluded by
+ * defined for use in <code>$(<i>var</i>)</code> or <code>${<i>var</i>}</code> constructs, unless specifically excluded by
  * using the <code>-U<i>var</i></code> command-line option.  Values defined with <code>"-D<i>var</i>=<i>value</i>"</code>
  * will override values in the environment, as will values explicitly defined
  * in the source.
@@ -330,6 +341,14 @@ public class JavaPreProc extends Task
 	private char directiveStartCh = '#';
 	/** List of input files or directories to process. */
 	private Vector<String> fileArgs = new Vector<String>();
+	/** Output log stream (defaults to {@link System#out}). */
+	private PrintStream out = System.out;
+	/** Error stream (defaults to {@link System#err}). */
+	private PrintStream err = System.err;
+	/** Name of the output log file (if specified). */
+	private String logFileName = null;
+	/** Overwrite the output log file (not applicable to default). */
+	private boolean overwriteLog = false;
 
 	/** <code>__DATE__</code> predefined variable name. */
 	private static final String DATE_VAR_NAME = "__DATE__";
@@ -371,6 +390,8 @@ public class JavaPreProc extends Task
 	private static Pattern WHITE_SPACE = Pattern.compile("\\s+");
 	/** Pattern to recognize a macro reference: <code>$(<i>macroname</i>)</code> */
 	private static Pattern MACRO_REF = Pattern.compile("\\$\\(([_A-Za-z]\\w*)\\)");
+	/** Alternate pattern to recognize a macro reference: <code>${<i>macroname</i>}</code> */
+	private static Pattern MACRO_REF2 = Pattern.compile("\\$\\{([_A-Za-z]\\w*)\\}");
 	/** Pattern to match the reserved word <code>"true"</code>. */
 	private static Pattern TRUE_CONST = Pattern.compile("^[tT][rR][uE][eE]");
 	/** Pattern to match the reserved word <code>"false"</code>. */
@@ -400,9 +421,9 @@ public class JavaPreProc extends Task
 	private static DateFormat timeFmt = null;
 
 	/** The current version of this software. */
-	private static final String VERSION = "1.1.5";
+	private static final String VERSION = "1.1.6";
 	/** The current copyright year. */
-	private static final String COPYRIGHT_YEAR = "2010-2011,2014-2016,2019-2020";
+	private static final String COPYRIGHT_YEAR = "2010-2011,2014-2016,2019-2021";
 
 
 	/**
@@ -506,8 +527,9 @@ public class JavaPreProc extends Task
 		/** Another type of constant.  At the moment only <code>"true"</code> and <code>"false"</code> fall into this category. */
 		OTHERCONST,
 		/** A variable reference.  This is a reference to a macro or symbol defined by <code>#define</code>.
-		 * <p>This syntax for this token is: <code>$(<i>macroname</i>)</code>.  Can also be just an identifier
-		 * by itself when inside an <code>#if<i>xxx</i></code> expression (this helps compatibility with C syntax).
+		 * <p>This syntax for this token is: <code>$(<i>macroname</i>)</code> or <code>${<i>macroname</i>}</code>.
+		 * Can also be just an identifier by itself when inside an <code>#if<i>xxx</i></code> expression
+		 * (this helps compatibility with C syntax).
 		 */
 		VARREF,
 		/** An operator, that is, one of the {@link Operator} values. */
@@ -570,7 +592,7 @@ public class JavaPreProc extends Task
 			    }
 			}
 			catch (NumberFormatException nfe) {
-			    System.err.format("Error: Numbers don't compare because of bad format!%n");
+			    err.format("Error: Numbers don't compare because of bad format!%n");
 			}
 		    }
 		    return false;
@@ -653,36 +675,72 @@ public class JavaPreProc extends Task
 
 
 	/**
+	 * Try to get a sensible message from an {@link Exception} even if the
+	 * message is empty (such as for {@code NullPointerException}).
+	 *
+	 * @param	ex	The exception to process.
+	 * @return	A (hopefully) better message than just <code>getMesssage()</code>
+	 *		will return.
+	 */
+	private static String exceptMessage(Exception ex) {
+	    String className = ex.getClass().getSimpleName();
+	    String message   = ex.getMessage();
+
+	    if (message == null || message.isEmpty())
+		message = className;
+	    else if (ex instanceof NullPointerException
+		  || ex instanceof CharacterCodingException
+		  || ex instanceof FileNotFoundException
+		  || ex instanceof NoSuchFileException
+		  || ex instanceof UnsupportedOperationException)
+		message = String.format("%1$s: %2$s", className, message);
+
+	    return message;
+	}
+
+	/**
 	 * Perform macro substitutions on the given input file line.
-	 * <p> Macros are of the form <code>$(<i>macro</i>)</code> where
-	 * "macro" has been defined by a <code><b>#define</b></code> or
-	 * in the environment.  The derived value of the macro will be
-	 * substituted for the whole <code>$(macro)</code> piece.
+	 * <p> Macros are of the form <code>$(<i>macro</i>)</code> or
+	 * <code>${<i>macro</i>}</code> where "macro" has been defined
+	 * by a <code><b>#define</b></code> or in the environment.
+	 * The derived value of the macro will be substituted for the
+	 ( whole <code>$(<i>macro</i>)</code> or <code>${<i>macro</i>}</code> piece.
 	 * <p> If one macro is defined in terms of another macro, a recursive call
 	 * will be made to perform macro substitutions on the macro value.  This
 	 * occurs as many times as necessary.
 	 *
-	 * @param	line	Input value containing <code>$(<i>macro</i>)</code> references.
+	 * @param	line	Input value containing <code>$(<i>macro</i>)</code> or
+	 *			<code>${<i>macro</i>}</code> references.
 	 * @return		Input with the appropriate macro substitutions made.
 	 * @see		#MACRO_REF
+	 * @see		#MACRO_REF2
 	 * @see		#defines
 	 */
 	private String doSubs(String line) {
 	    if (line.isEmpty())
 		return line;
-	    Matcher m = MACRO_REF.matcher(line);
+
 	    StringBuffer sb = new StringBuffer();
-	    while (m.find()) {
+
+	    Matcher m = MACRO_REF.matcher(line);
+	    boolean found = m.find();
+	    if (!found) {
+		m = MACRO_REF2.matcher(line);
+		found = m.find();
+	    }
+	    while (found) {
 		String name = m.group(1);
 		String value;
 		if ((value = defines.get(name)) == null) {
 		    if (!ignoreUndefined)
-			System.err.format("Error: Macro \"%1$s\" not defined!%n", name);
+			err.format("Error: Macro \"%1$s\" not defined!%n", name);
 		}
 		// Recursive call in common case that value
 		// is defined in terms of other macros
 		if (value != null)
 		    m.appendReplacement(sb, Matcher.quoteReplacement(doSubs(value)));
+
+		found = m.find();
 	    }
 	    m.appendTail(sb);
 	    return sb.toString();
@@ -812,7 +870,12 @@ public class JavaPreProc extends Task
 				    }
 				    else {
 					m = MACRO_REF.matcher(seq);
-					if (m.lookingAt()) {
+					boolean lookingAt = m.lookingAt();
+					if (!lookingAt) {
+					    m = MACRO_REF2.matcher(seq);
+					    lookingAt = m.lookingAt();
+					}
+					if (lookingAt) {
 					    len = m.end();
 					    tok = Token.VARREF;
 					    value = m.group(1);
@@ -962,7 +1025,7 @@ public class JavaPreProc extends Task
 			t.setPos(pos + startPos, len);
 			tokens.add(t);
 			if (superVerbose) {
-			    System.out.format("token: %1$s, pos=%2$d, len=%3$d, value=\"%4$s\"%n",
+			    out.format("token: %1$s, pos=%2$d, len=%3$d, value=\"%4$s\"%n",
 				tok.toString(), pos, len, value);
 			}
 			t = null;
@@ -1395,7 +1458,7 @@ public class JavaPreProc extends Task
 				    v /= v2;
 				}
 				else {
-				    System.err.format("Error: Divide by zero!%n");
+				    err.format("Error: Divide by zero!%n");
 				    v = 0;
 				}
 				break;
@@ -1404,7 +1467,7 @@ public class JavaPreProc extends Task
 				    v %= v2;
 				}
 				else {
-				    System.err.format("Error: Modulus value of zero (equivalent to divide by zero)!%n");
+				    err.format("Error: Modulus value of zero (equivalent to divide by zero)!%n");
 				    v = 0;
 				}
 				break;
@@ -1503,7 +1566,7 @@ public class JavaPreProc extends Task
 				    dv /= dv2;
 				}
 				else {
-				    System.err.format("Error: Divide by zero!%n");
+				    err.format("Error: Divide by zero!%n");
 				    dv = 0.0;
 				}
 				break;
@@ -1512,7 +1575,7 @@ public class JavaPreProc extends Task
 				    dv %= dv2;
 				}
 				else {
-				    System.err.format("Error: Modulus value of zero (equivalent to divide by zero)!%n");
+				    err.format("Error: Modulus value of zero (equivalent to divide by zero)!%n");
 				    dv = 0.0;
 				}
 				break;
@@ -1831,9 +1894,9 @@ public class JavaPreProc extends Task
 	private void traceLine(long lineNo, String line, boolean directive, boolean doingOutput) {
 	    if (verbose) {
 		if (plusVerbose && doingOutput)
-		    System.out.format("%1$8d.+%2$s%n", lineNo, line);
+		    out.format("%1$8d.+%2$s%n", lineNo, line);
 		else if (directive)
-		    System.out.format("%1$8d. %2$s%n", lineNo, line);
+		    out.format("%1$8d. %2$s%n", lineNo, line);
 	    }
 	}
 
@@ -1892,7 +1955,7 @@ public class JavaPreProc extends Task
 		if (wrtr == null) {
 		    String outName = name.replace(inputExt, outputExt);
 		    if (outName.equals(name)) {
-			System.err.format("Error: Output file name must not be the same as input file name: '%1$s'!%n", name);
+			err.format("Error: Output file name must not be the same as input file name: '%1$s'!%n", name);
 			rdr.close();
 			errors = true;
 			throw new DontProcessException();
@@ -1906,13 +1969,13 @@ public class JavaPreProc extends Task
 			long outTime = outFile.lastModified();
 			if (outTime > inTime) {
 			    if (verbose)
-				System.out.format("Skipping file because output '%1$s'%n         is newer than input '%2$s'.%n", outName, name);
+				out.format("Skipping file because output '%1$s'%n         is newer than input '%2$s'.%n", outName, name);
 			    rdr.close();
 			    throw new DontProcessException();
 			}
 		    }
 		    if (verbose) {
-			System.out.format("Generating output file '%1$s'%2$s%n       from input file '%3$s'...%n", outName, fileType, name);
+			out.format("Generating output file '%1$s'%2$s%n       from input file '%3$s'...%n", outName, fileType, name);
 		    }
 		    if (processAsUTF8) {
 			wrtr = Files.newBufferedWriter(Paths.get(outName), StandardCharsets.UTF_8);
@@ -1924,7 +1987,7 @@ public class JavaPreProc extends Task
 		}
 		else {
 		    if (verbose) {
-			System.out.format("Including file '%1$s'%2$s...%n", name, fileType);
+			out.format("Including file '%1$s'%2$s...%n", name, fileType);
 		    }
 		}
 
@@ -1950,7 +2013,7 @@ public class JavaPreProc extends Task
 			    int argOffset = m.end(1);
 			    if (verbose) {
 				if (firstDirective) {
-				    System.out.format("  Line     Directive%n--------- --------------------------------------%n");
+				    out.format("  Line     Directive%n--------- --------------------------------------%n");
 				    firstDirective = false;
 				}
 			    }
@@ -1995,7 +2058,7 @@ public class JavaPreProc extends Task
 				else if (directive.equalsIgnoreCase("else")) {
 				    traceLine(lineNo, line, true, false);
 				    if (nesting == 0) {
-					System.err.format("Error: Line %1$d. #else without preceding #if!%n", lineNo);
+					err.format("Error: Line %1$d. #else without preceding #if!%n", lineNo);
 					errors = true;
 				    }
 				    else {
@@ -2007,7 +2070,7 @@ public class JavaPreProc extends Task
 					 directive.equalsIgnoreCase("elseif")) {
 				    traceLine(lineNo, line, true, false);
 				    if (nesting == 0) {
-					System.err.format("Error: Line %1$d. #%2$s without preceding #if!%n", lineNo, directive);
+					err.format("Error: Line %1$d. #%2$s without preceding #if!%n", lineNo, directive);
 					errors = true;
 				    }
 				    else {
@@ -2022,7 +2085,7 @@ public class JavaPreProc extends Task
 				else if (directive.equalsIgnoreCase("endif")) {
 				    traceLine(lineNo, line, true, false);
 				    if (nesting <= 0) {
-					System.err.format("Error: Line %1$d. #endif without preceding #if!%n", lineNo);
+					err.format("Error: Line %1$d. #endif without preceding #if!%n", lineNo);
 					errors = true;
 					tooManyEndifErrors++;
 				    }
@@ -2047,7 +2110,7 @@ public class JavaPreProc extends Task
 					    String val = md.group(2);
 					    defines.put(var, val);
 					    if (superVerbose) {
-						System.out.format("Defining '%1$s' to '%2$s'%n", var, val);
+						out.format("Defining '%1$s' to '%2$s'%n", var, val);
 					    }
 					}
 					else {
@@ -2057,11 +2120,11 @@ public class JavaPreProc extends Task
 						String var = md.group(1);
 						defines.put(var, "");
 						if (superVerbose) {
-						    System.out.format("Defining '%1$s'%n", var);
+						    out.format("Defining '%1$s'%n", var);
 						}
 					    }
 					    else {
-						System.err.format("Error: Line %1$d. Wrong syntax for '#define': %2$s%n\tformat should be: #define var value or simply #define var%n", lineNo, args);
+						err.format("Error: Line %1$d. Wrong syntax for '#define': %2$s%n\tformat should be: #define var value or simply #define var%n", lineNo, args);
 						errors = true;
 					    }
 					}
@@ -2074,12 +2137,12 @@ public class JavaPreProc extends Task
 					if (defines.containsKey(args)) {
 					    defines.remove(args);
 					    if (superVerbose) {
-						System.out.format("Undefining '%1$s'%n", args);
+						out.format("Undefining '%1$s'%n", args);
 					    }
 					}
 					else {
 					    if (!ignoreUndefined) {
-						System.err.format("Error: Line %1$d. Trying to undefine variable '%2$s' which is not defined!%n", lineNo, args);
+						err.format("Error: Line %1$d. Trying to undefine variable '%2$s' which is not defined!%n", lineNo, args);
 						errors = true;
 					    }
 					}
@@ -2098,19 +2161,19 @@ public class JavaPreProc extends Task
 				    traceLine(lineNo, line, true, doingOutput);
 				    if (doingOutput) {
 					args = args.trim();
-					System.err.format("Error: %1$s%n", args);
+					err.format("Error: %1$s%n", args);
 					errors = true;
 				    }
 				}
 				else {
 				    traceLine(lineNo, line, true, false);
-				    System.err.format("Error: Line %1$d. Unknown directive: '%2$s'%n", lineNo, directive);
+				    err.format("Error: Line %1$d. Unknown directive: '%2$s'%n", lineNo, directive);
 				    errors = true;
 				}
 			    }
 			    catch (ParseException pe) {
 				if (!verbose) {
-				    System.out.format("%n%1$8d. %2$s%n", lineNo, line);
+				    out.format("%n%1$8d. %2$s%n", lineNo, line);
 				}
 				StringBuilder buf = new StringBuilder();
 				int sz = pe.getErrorOffset() + argOffset + 10;
@@ -2118,7 +2181,7 @@ public class JavaPreProc extends Task
 				Arrays.fill(blanks, ' ');
 				buf.append(blanks);
 				buf.append("^");
-				System.err.format("%1$s%nError in expression: %2$s%n",
+				err.format("%1$s%nError in expression: %2$s%n",
 					buf.toString(), pe.getMessage());
 				errors = true;
 				exprResult = false;
@@ -2146,19 +2209,19 @@ public class JavaPreProc extends Task
 		}
 		if (nesting > 0) {
 		    if (nesting == 1) {
-			System.err.format("Error: Missing one '#endif' before the end of file \"%1$s\"!%n", name);
+			err.format("Error: Missing one '#endif' before the end of file \"%1$s\"!%n", name);
 		    }
 		    else {
-			System.err.format("Error: Missing %1$d '#endif' statements before the end of file \"%2$s\"!%n", nesting, name);
+			err.format("Error: Missing %1$d '#endif' statements before the end of file \"%2$s\"!%n", nesting, name);
 		    }
 		    errors = true;
 		}
 		if (tooManyEndifErrors > 0) {
 		    if (tooManyEndifErrors == 1) {
-			System.err.format("Error: One too many '#endif' statements before the end of file \"%1$s\"!%n", name);
+			err.format("Error: One too many '#endif' statements before the end of file \"%1$s\"!%n", name);
 		    }
 		    else {
-			System.err.format("Error: %1$d too many '#endif' statements before the end of file \"%2$s\"!%n", tooManyEndifErrors, name);
+			err.format("Error: %1$d too many '#endif' statements before the end of file \"%2$s\"!%n", tooManyEndifErrors, name);
 		    }
 		    errors = true;
 		}
@@ -2170,7 +2233,7 @@ public class JavaPreProc extends Task
 		}
 	    }
 	    catch (IOException ioe) {
-		System.err.format("Error: I/O error occurred while processing file '%1$s'!%n\t%2$s%n", name, ioe.getMessage());
+		err.format("Error: I/O error occurred while processing file '%1$s'!%n\t%2$s%n", name, exceptMessage(ioe));
 		errors = true;
 	    }
 	    catch (DontProcessException dpe) {
@@ -2280,7 +2343,7 @@ public class JavaPreProc extends Task
 		}
 	    }
 	    // Tried everything but could not find the file
-	    System.err.format("Error: Unable to find include file \"%1$s\"%n", arg);
+	    err.format("Error: Unable to find include file \"%1$s\"%n", arg);
 	    return true;
 	}
 
@@ -2350,7 +2413,7 @@ public class JavaPreProc extends Task
 		    }
 		}
 		catch (FileNotFoundException fnfe) {
-		    throw new BuildException(fnfe.getMessage());
+		    throw new BuildException(exceptMessage(fnfe));
 		}
 
 		inputExt = lastInputExt;
@@ -2412,17 +2475,17 @@ public class JavaPreProc extends Task
 	 *
 	 * @param	display	Flag to say whether or not to really display it.
 	 */
-	private static void SignOnBanner(boolean display) {
+	private void signOnBanner(boolean display) {
 	    if (display)
-		System.out.format("Java Pre-Processor -- version %1$s%nCopyright (c) %2$s Roger L. Whitcomb.%n", VERSION, COPYRIGHT_YEAR);
+		out.format("Java Pre-Processor -- version %1$s%nCopyright (c) %2$s Roger L. Whitcomb.%n", VERSION, COPYRIGHT_YEAR);
 	}
 
 
 	/**
 	 * Display rudimentary help screen.
 	 */
-	private static void Usage() {
-	    System.out.format("%nFor usage instructions, see the generated Javadoc%nin the package \"info.rlwhitcomb.preproc\".%n%n");
+	private void usage() {
+	    out.format("%nFor usage instructions, see the generated Javadoc%nin the package \"info.rlwhitcomb.preproc\".%n%n");
 	}
 
 
@@ -2469,6 +2532,15 @@ public class JavaPreProc extends Task
 			    value = value.substring(1);
 			inst.setFormat(value);
 		    }
+		    else if (arg.startsWith("L") || arg.startsWith("l")) {
+			String value = arg.substring(1);
+			if (value.startsWith(":"))
+			    value = value.substring(1);
+			inst.setLog(value);
+		    }
+		    else if (arg.equalsIgnoreCase("W")) {
+			inst.setOverwrite(true);
+		    }
 		    else if (arg.startsWith("V") || arg.startsWith("v")) {
 			inst.setVerbose(arg.substring(1));
 		    }
@@ -2488,8 +2560,8 @@ public class JavaPreProc extends Task
 			inst.setNologo(true);
 		    }
 		    else if (arg.equals("?") || arg.equalsIgnoreCase("help")) {
-			SignOnBanner(true);
-			Usage();
+			inst.signOnBanner(true);
+			inst.usage();
 			return true;    // Just to quit without doing any processing
 		    }
 		    else {
@@ -2536,7 +2608,7 @@ public class JavaPreProc extends Task
 		    String val = m1.group(2);
 		    defines.put(var, val);
 		    if (plusVerbose)
-			System.out.format("Defining '%1$s' to '%2$s'%n", var, val);
+			out.format("Defining '%1$s' to '%2$s'%n", var, val);
 		}
 		else {
 		    m1 = defAltPat.matcher(d);
@@ -2544,7 +2616,7 @@ public class JavaPreProc extends Task
 			String var = m1.group(1);
 			defines.put(var, "");
 			if (plusVerbose)
-			    System.out.format("Defining '%1$s'%n", var);
+			    out.format("Defining '%1$s'%n", var);
 		    }
 		    else {
 			throw new BuildException(String.format("Cannot parse Define value: '-D%1$s'%n\tformat should be: -Dvar=value or -Dvar", d));
@@ -2573,7 +2645,7 @@ public class JavaPreProc extends Task
 		}
 		else {
 		    if (plusVerbose)
-			System.out.format("Undefining '%1$s'%n", v);
+			out.format("Undefining '%1$s'%n", v);
 		}
 	    }
 	}
@@ -2695,6 +2767,30 @@ public class JavaPreProc extends Task
 
 
 	/**
+	 * Set value for the output log file (<code>log</code> option).
+	 *
+	 * @param	value	The new file name for the output log.
+	 * @throws	BuildException if the name is invalid somehow.
+	 */
+	public void setLog(String value) throws BuildException {
+	    if (value == null || value.trim().isEmpty()) {
+		throw new BuildException("Log file value must not be empty.");
+	    }
+	    logFileName = value;
+	}
+
+
+	/**
+	 * Set value for the <code>overwrite</code> option.
+	 *
+	 * @param	value	Whether to overwrite the log file or not.
+	 */
+	public void setOverwrite(boolean value) {
+	    overwriteLog = value;
+	}
+
+
+	/**
 	 * Set value for the <code>processAsDirectory</code> option.
 	 *
 	 * @param	val	The new value for the option.
@@ -2784,9 +2880,30 @@ public class JavaPreProc extends Task
 	 * when the {@code <preproc ...>} task is executed).
 	 */
 	public void execute() throws BuildException {
+	    // Check for illegal combination of options
+	    if (overwriteLog && logFileName == null) {
+		throw new BuildException("Overwrite option is not applicable for output to console.");
+	    }
+
+	    // Build the output log and error stream if the default is overridden
+	    if (logFileName != null) {
+		try {
+		    File f = new File(logFileName);
+		    OutputStream os = Files.newOutputStream(f.toPath(), WRITE, CREATE,
+			overwriteLog ? TRUNCATE_EXISTING : APPEND);
+		    PrintStream ps = new PrintStream(os, false);
+		    out = ps;
+		    err = ps;
+		}
+		catch (IOException ioe) {
+		    throw new BuildException(String.format("I/O Error creating output log file: %1$s",
+			exceptMessage(ioe)));
+		}
+	    }
+
 	    // Output sign-on banner if "verbose" is specified and "-nologo" isn't
 	    if (verbose) {
-		SignOnBanner(displayLogo);
+		signOnBanner(displayLogo);
 	    }
 
 	    // Build the pattern matcher to recognize our directives
@@ -2802,6 +2919,14 @@ public class JavaPreProc extends Task
 	    }
 	    else {
 		processFileSpecs(fileArgs);
+	    }
+
+	    // Flush and close the output log (if not the console)
+	    if (logFileName != null) {
+		out.flush();
+		out.close();
+		out = System.out;
+		err = System.err;
 	    }
 	}
 
