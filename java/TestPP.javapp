@@ -98,7 +98,7 @@ class TestPP {
 #endif
 
 // Test 'pqr' being defined without a value: '$(pqr)'
-// Test 'xyzzy' being undefined: '$(xyzzy)'
+// Test 'xyzzy' being undefined: '${xyzzy}'
 
 # ifistr "abc" == ABC
 	// This is correct -- "abc" should equal (case-insensitive) $(ABC)
@@ -118,14 +118,14 @@ class TestPP {
 
 // Numeric expression tests
 #if JKL + 2 == 125
-	private static int JKL_PLUS = $(JKL) + 2;	// simple arithmetic test works
+	private static int JKL_PLUS = ${JKL} + 2;	// simple arithmetic test works
 #else
 	#error Numeric addition test failed!
 #endif
 
 // More extensive numeric expression tests
 #if ((JKL + 123) / JKL) % JKL + 2 == (255 % 128 % 4 +1)
-	// Correct result using JKL=$(JKL)
+	// Correct result using JKL=${JKL}
 #else
 	#error Error evaluating '((JKL + 123) / JKL) % JKL + 2 == (255 % 128 % 4 +1)'
 #endif
@@ -136,9 +136,9 @@ class TestPP {
 #endif
 
 #ifnum JKL+1 == JKL1
-	// Arithmetic test of JKL+1==JKL1 ($(JKL)+1==$(JKL1)) correct.
+	// Arithmetic test of JKL+1==JKL1 (${JKL}+1==$(JKL1)) correct.
 #else
-	// Arithmetic test of JKL+1==JKL1 ($(JKL)+1==$(JKL1)) FAILED!
+	// Arithmetic test of JKL+1==JKL1 (${JKL}+1==$(JKL1)) FAILED!
 #endif
 
 #ifnum JKL*2 == JKL2

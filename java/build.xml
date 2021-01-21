@@ -131,6 +131,8 @@
 		Add mortgage payment examples for Calc.
 	    18-Jan-2021 (rlwhitcomb)
 		New text resources for Calc.
+	    21-Jan-2021 (rlwhitcomb)
+		Move the tests from "test.xml" into "test" target here.
 
      ========================================================================== -->
 
@@ -223,6 +225,7 @@
 		<include name="wf"                      unless:true="${on.windows}"/>
 		<include name="wf.bat"                      if:true="${on.windows}"/>
 	</patternset>
+	<property name="csv.test.class" value="info.rlwhitcomb.csv.CSVTest"/>
 
 
 	<taskdef name="preproc" classname="info.rlwhitcomb.preproc.JavaPreProc" classpath="${ant.tasks.jar}"/>
@@ -366,8 +369,30 @@
 
 	<target name="test" depends="compile" description="Run extant unit tests.">
 		<echo>Running unit tests. Output going to "${test.log.file.name}" file.</echo>
+		<echo>Test JavaPreProc...</echo>
+		<delete file="TestPP.java"/>
+		<preproc dir="." processAsDirectory="true" recurseDirectories="true" nologo="true" verbose="plus"
+								      log="${test.log.file.name}"/>
+		<echo>Running CSVTest...</echo>
+		<java classname="${csv.test.class}"                   output="${test.log.file.name}" append="true">
+			<arg value="-Qall"/>
+			<arg value="-Dspace"/>
+			<arg value="-8"/>
+			<arg value="test/data/test_all_quotes.dsv"/>
+		</java>
+		<java classname="${csv.test.class}"                   output="${test.log.file.name}" append="true">
+			<arg value="test/data/test_quote.dsv"/>
+			<arg value="-Qangle"/>
+			<arg value="-Dspace"/>
+		</java>
+		<java classname="${csv.test.class}"                   output="${test.log.file.name}" append="true">
+			<arg value="test/data/nonstandard_delims.csv"/>
+			<arg value="-d@"/>
+			<arg value="-r%"/>
+			<arg value="-I"/>
+		</java>
 		<echo>TestSQLFormatter...</echo>
-		<java classname="TestSQLFormatter"                    output="${test.log.file.name}"/>
+		<java classname="TestSQLFormatter"                    output="${test.log.file.name}" append="true"/>
 		<echo>Test of Options...</echo>
 		<java classname="info.rlwhitcomb.util.Options"        output="${test.log.file.name}" append="true"/>
 		<echo>Test of InitializationTask...</echo>
