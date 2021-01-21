@@ -75,6 +75,8 @@
  *	Update obsolete Javadoc constructs.
  *    05-Jan-2021 (rlwhitcomb)
  *	Another flavor of "readFileAsString".
+ *    21-Jan-2021 (rlwhitcomb)
+ *	Move "canExecute" into here from other code.
  */
 package info.rlwhitcomb.util;
 
@@ -122,6 +124,11 @@ public class FileUtilities
      * of the {@link #compressFile} method.
      */
     public static final String COMPRESS_EXT = ".gz";
+
+    /**
+     * The list of allowed executable file extensions (Windows only).
+     */
+    private static String[] EXECUTABLE_EXTENSIONS;
 
 
     /**
@@ -388,6 +395,46 @@ public class FileUtilities
 		return false;
 	    }
 	}
+    }
+
+    /**
+     * Test if a file is an executable program.
+     * <p> On non-Windows platforms we can use {@link File#canExecute} because
+     * there are flags to that effect. On Windows, however, every file is
+     * marked as executable, but we can check the file extension to see if it
+     * is in the PATHEXT list and determine that way.
+     *
+     * @param path	The path to the file in question.
+     * @return		Whether or not the file is an "executable".
+     */
+    public static boolean canExecute(File path) {
+	// An obvious first check...
+	if (!path.exists())
+	    return false;
+
+	if (Environment.isWindows()) {
+	    String name = path.getName();
+	    int dotPos  = name.lastIndexOf('.');
+	    if (dotPos >= 0) {
+		String ext = name.substring(dotPos).toUpperCase();
+		if (EXECUTABLE_EXTENSIONS == null) {
+		    String exts = System.getenv("PATHEXT");
+		    EXECUTABLE_EXTENSIONS = exts.split(Environment.pathSeparator());
+		    Arrays.sort(EXECUTABLE_EXTENSIONS);
+		}
+		return (Arrays.binarySearch(EXECUTABLE_EXTENSIONS, ext) >= 0);
+	    }
+	}
+	else {
+	    try {
+		return path.canExecute();
+	    }
+	    catch (SecurityException se) {
+		// According to the Javadoc for "canExecute" this means
+		// execute access is denied, so, "NO".
+	    }
+	}
+	return false;
     }
 
     /**

@@ -71,6 +71,10 @@
  *	    Parse env var TREE_OPTIONS for switches.
  *	04-Jan-2021 (rlwhitcomb)
  *	    Locale option for errors, etc.
+ *	21-Jan-2021 (rlwhitcomb)
+ *	    Move "canExecute" logic into FileUtilities. Also use
+ *	    "FileUtilities.canWrite" because of special considerations
+ *	    on *nix systems (with "root" user).
  */
 package info.rlwhitcomb.tree;
 
@@ -92,6 +96,7 @@ import info.rlwhitcomb.util.ConsoleColor;
 import static info.rlwhitcomb.util.ConsoleColor.Code.*;
 import info.rlwhitcomb.util.Environment;
 import info.rlwhitcomb.util.ExceptionUtil;
+import info.rlwhitcomb.util.FileUtilities;
 import info.rlwhitcomb.util.Intl;
 import info.rlwhitcomb.util.Options;
 
@@ -148,9 +153,6 @@ public class Tree
 
 	/** Whether sorting is case-sensitive or not. */
 	private static CaseSensitivity casing = CaseSensitivity.MIXED_CASE;
-
-	/** List of "executable" file extensions (Windows only). */
-	private static String[] executableExtensions;
 
 	/** Locale used to format messages, etc. */
 	private static Locale locale = null;
@@ -330,29 +332,6 @@ public class Tree
 	private static FileFilter filter = null;
 
 
-	/**
-	 * Test if a file is an executable program.
-	 * <p> On non-Windows environments we can use {@link File#canExecute}
-	 * because there are flags to that effect. On Windows, however,
-	 * every file is executable, but we can check the file extension
-	 * to see if it is in the PATHEXT list and determine that way.
-	 * @param path	The path to the file in question.
-	 * @return Whether or not the file is an "executable".
-	 */
-	private static boolean canExecute(File path) {
-	    if (runningOnWindows) {
-		String name = path.getName();
-		int dotPos = name.lastIndexOf('.');
-		if (dotPos >= 0) {
-		    String ext = name.substring(dotPos).toUpperCase();
-		    return (Arrays.binarySearch(executableExtensions, ext) >= 0);
-		}
-		return false;
-	    } else {
-		return path.canExecute();
-	    }
-	}
-
 
 	/**
 	 * Recursively print one entry and descend into child directories.
@@ -376,10 +355,10 @@ public class Tree
 		if (file.isHidden()) {
 		    nameEmphasis = RED;
 		}
-		else if (canExecute(file)) {
+		else if (FileUtilities.canExecute(file)) {
 		    nameEmphasis = GREEN_BOLD_BRIGHT;
 		}
-		else if (file.canWrite()) {
+		else if (FileUtilities.canWrite(file)) {
 		    if (type == null) {
 			nameEmphasis = darkBackgrounds ? WHITE : BLACK;
 		    }
@@ -591,13 +570,6 @@ public class Tree
 	    List<String> argList = new ArrayList<>(args.length);
 
 	    Environment.loadProgramInfo(Tree.class);
-
-	    // Setup (for Windows) the executable file extension list
-	    if (runningOnWindows) {
-		String exts = System.getenv("PATHEXT");
-		executableExtensions = exts.split(";");
-		Arrays.sort(executableExtensions);
-	    }
 
 	    // First, parse the TREE_OPTIONS env variable for predefined options
 	    // (ignoring any non-options here)

@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2016,2020 Roger L. Whitcomb.
+ * Copyright (c) 2016,2020-2021 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -39,6 +39,8 @@
  *	    Use Environment.pathSeparator; move strings to resources.
  *	11-Dec-2020 (rlwhitcomb)
  *	    New program info mechanism.
+ *	21-Jan-2021 (rlwhitcomb)
+ *	    Move "canExecute" into FileUtilities, and beef it up for Windows.
  */
 package info.rlwhitcomb.util;
 
@@ -68,28 +70,12 @@ public class Which
 	/** Split pattern for path string (platform dependent). */
 	private static final String SPLIT_PATTERN = "[" + Environment.pathSeparator() + "]";
 
-	/**
-	 * @return Whether or not the given file exists and can be executed
-	 * (according to the O/S and any Security Manager installed).
-	 * @param f	The file (complete path) to test.
-	 */
-	public static boolean canExecute(File f) {
-	    try {
-		if (f.exists() && f.canExecute()) {
-		    return true;
-		}
-	    } catch (SecurityException se) {
-		// According to the Javadoc for "canExecute" this means
-		// execute access is denied, so "NO".
-	    }
-	    return false;
-	}
 
 	private static File findInDir(String name, File dir, String[] exts) {
 	    if (dir.exists() && dir.isDirectory() && dir.canRead()) {
 		File f = new File(dir, name);
 		// First try the name as-is
-		if (canExecute(f)) {
+		if (FileUtilities.canExecute(f)) {
 		    return f;
 		}
 		// If not found, loop through the given extensions
@@ -98,7 +84,7 @@ public class Which
 		for (String ext : exts) {
 		    String fileName = ext.startsWith(".") ? bareName + ext : bareName + "." + ext;
 		    f = new File(dir, fileName);
-		    if (canExecute(f)) {
+		    if (FileUtilities.canExecute(f)) {
 			return f;
 		    }
 		}
@@ -157,7 +143,7 @@ public class Which
 	    if (dir.exists() && dir.isDirectory() && dir.canRead()) {
 		File f = new File(dir, name);
 		// First try the name as-is
-		if (canExecute(f)) {
+		if (FileUtilities.canExecute(f)) {
 		    files.add(f);
 		}
 		else {
@@ -167,7 +153,7 @@ public class Which
 		    for (String ext : exts) {
 			String fileName = ext.startsWith(".") ? bareName + ext : bareName + "." + ext;
 			f = new File(dir, fileName);
-			if (canExecute(f)) {
+			if (FileUtilities.canExecute(f)) {
 			    files.add(f);
 			}
 		    }
