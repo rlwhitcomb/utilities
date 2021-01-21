@@ -83,7 +83,6 @@ Also see "issues" at https://github.com/rlwhitcomb/utilities/issues
 ### WordFind
 - Finish the GUI code.
 - Separate .jar file? Or is "utilities.jar" suitable?
-- package info
 
 ### UUID
 - lots of options
