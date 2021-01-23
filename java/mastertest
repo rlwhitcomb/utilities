@@ -1,0 +1,24 @@
+--
+-- Tests of the Tester class: invoke Tester with each of its description files,
+--  whose canons should all show "Passed" for each of their individual tests.
+--  This recursive testing will test each individual class, as well as Tester itself.
+--
+!testClass info.rlwhitcomb.tester.Tester
+!canonDir test/canons
+!sourceDir .
+!defaultOptions -log
+
+!echo Testing the tester...
+!echo
+
+t1: liststest
+t2: calctest
+t3: csvtest
+t4: sqltest
+t5: optiontest
+t6: dynarraytest
+t7: matchestest
+t8: numerictest
+
+!echo
+!echo Done with all the Tester tests.

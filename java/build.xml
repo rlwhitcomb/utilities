@@ -387,7 +387,7 @@
 		<echo>Running various tests through the Tester...</echo>
 		<java classname="${tester.class}"                     output="${test.log.file.name}" append="true" failonerror="true">
 			<arg value="-timing"/>
-			<arg value="testtest"/>
+			<arg value="mastertest"/>
 		</java>
 		<echo>Done with unit tests. Results in "${test.log.file.name}" file.</echo>
 	</target>

@@ -164,7 +164,8 @@
  *	18-Jan-2021 (rlwhitcomb)
  *	    Add a directive for default options; work nicely with the new Testable interface.
  *	23-Jan-2021 (rlwhitcomb)
- *	    Fix obsolete HTML constructs in Javadoc.
+ *	    Fix obsolete HTML constructs in Javadoc. Add aliases for a couple of the directives.
+ *	    Switch description comments to include "--" and use "!" as an alias for commands.
  */
 package info.rlwhitcomb.tester;
 
@@ -963,7 +964,7 @@ public class Tester
 
 
 	/**
-	 * Process the description file lines that begin with "$".
+	 * Process the description file lines that begin with "$" or "!".
 	 *
 	 * @param line	The internal instruction input line (without the leading "$").
 	 */
@@ -986,6 +987,7 @@ public class Tester
 			break;
 
 		    case "inputdir":
+		    case "canondir":
 			if (argument != null) {
 			    File inputDir = new File(argument);
 			    if (!inputDir.exists() || !inputDir.isDirectory()) {
@@ -1001,6 +1003,7 @@ public class Tester
 			break;
 
 		    case "scriptdir":
+		    case "sourcedir":
 			if (argument != null) {
 			    File scriptDir = new File(argument);
 			    if (!scriptDir.exists() || !scriptDir.isDirectory()) {
@@ -1143,10 +1146,10 @@ public class Tester
 		    line = line.trim();
 		    if (line.isEmpty() ||
 			line.startsWith("#") ||
-			line.startsWith("!") ||
+			line.startsWith("--") ||
 			line.startsWith("//"))
 			continue;
-		    if (line.startsWith("$")) {
+		    if (line.startsWith("$") || line.startsWith("!")) {
 			processInternalCommand(line.substring(1));
 			continue;
 		    }
