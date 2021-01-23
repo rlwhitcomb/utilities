@@ -127,6 +127,8 @@
  *	    Add "formatKeyString" methods.
  *	18-Jan-2021 (rlwhitcomb)
  *	    New "out/errKeyFormat" methods.
+ *	22-Jan-2021 (rlwhitcomb)
+ *	    Fixed a glitch in "makeKey" for help display.
  */
 package info.rlwhitcomb.util;
 
@@ -678,7 +680,10 @@ public class Intl
 	 * @param	key	The second part of the resource key.
 	 */
 	private static String makeKey(final String object, final String key) {
-	    return String.format("%1$s.%2$s", object, key);
+	    if (object.endsWith("#"))
+		return String.format("%1$s%2$s", object, key);
+	    else
+		return String.format("%1$s.%2$s", object, key);
 	}
 
 

@@ -77,6 +77,8 @@
  *	Another flavor of "readFileAsString".
  *    21-Jan-2021 (rlwhitcomb)
  *	Move "canExecute" into here from other code.
+ *    22-Jan-2021 (rlwhitcomb)
+ *	Two new methods to munge file names/paths.
  */
 package info.rlwhitcomb.util;
 
@@ -130,6 +132,45 @@ public class FileUtilities
      */
     private static String[] EXECUTABLE_EXTENSIONS;
 
+
+    /**
+     * @return Only the name portion of the given file, without the path
+     * or the extension (if any).
+     * @param f The file to examine.
+     */
+    public static String nameOnly(File f) {
+	String name = f.getName();
+	int dotPos  = name.lastIndexOf('.');
+	if (dotPos < 0)
+	    return name;
+	else
+	    return name.substring(0, dotPos);
+    }
+
+    /**
+     * @return A new {@code File} object with the given path and extension
+     * (unless the input already has a path and/or extension).
+     *
+     * @param name	The (possibly) bare file name to decorate.
+     * @param dir	The default directory to use if the name has none.
+     * @param ext	The default extension to use if the name has none.
+     */
+    public static File decorate(String name, File dir, String ext) {
+	String fullName = name;
+	int dotPos = fullName.lastIndexOf('.');
+	if (dotPos < 0 && ext != null) {
+	    if (ext.startsWith("."))
+		fullName = String.format("%1$s%2$s", name, ext);
+	    else
+		fullName = String.format("%1$s.%2$s", name, ext);
+	}
+
+	File f = new File(fullName);
+	if (f.getParent() == null && dir != null)
+	    return new File(dir, fullName);
+	else
+	    return f;
+    }
 
     /**
      * Copies one file to another.
@@ -367,6 +408,42 @@ public class FileUtilities
     }
 
     /**
+     * Test to see if the file given by the name is actually readable.
+     * <p> The problem this solves is that no matter the permissions on the actual
+     * file on Linux, the "root" user can "read" it, which is not what we want.
+     * We actually need to test the file permissions.  So, do that on Linux, yet
+     * the regular test is sufficient for Windows (plus on Java 10 the POSIX
+     * object isn't available there).
+     *
+     * @param	file	The local file to test.
+     * @return		Whether or not the file exists, is a regular file,
+     *			and the permissions include read access.
+     */
+    public static boolean canRead(File file) {
+	Path path = file.toPath();
+	if (!Files.exists(path) || !Files.isRegularFile(path))
+	    return false;
+
+	if (Environment.isWindows()) {
+	    return Files.isReadable(path);
+	}
+	else {
+	    // TODO: we need to follow down the parent path and check these permissions at each level
+	    try {
+		Map<String, Object> attrs = Files.readAttributes(path, "posix:permissions");
+		@SuppressWarnings("unchecked")
+		Set<PosixFilePermission> permissions = (Set<PosixFilePermission>)attrs.get("permissions");
+		return permissions.contains(PosixFilePermission.OTHERS_READ)
+		    || permissions.contains(PosixFilePermission.GROUP_READ)
+		    || permissions.contains(PosixFilePermission.OWNER_READ);
+	    }
+	    catch (IOException ioe) {
+		return false;
+	    }
+	}
+    }
+
+    /**
      * Test to see if the file given by the name is actually writable.
      * <p> The problem this solves is that no matter the permissions on the actual
      * file on Linux, the "root" user can "write" to it, which is not what we want.
@@ -375,7 +452,7 @@ public class FileUtilities
      * object isn't available there).
      *
      * @param	file	The local file to test.
-     * @return		Whether or not the file permissions include write for this file.
+     * @return		Whether or not the file permissions include write access for this file.
      */
     public static boolean canWrite(File file) {
 	Path path = file.toPath();
@@ -383,6 +460,7 @@ public class FileUtilities
 	    return Files.isWritable(path);
 	}
 	else {
+	    // TODO: we need to follow down the parent path and check these permissions at each level
 	    try {
 		Map<String, Object> attrs = Files.readAttributes(path, "posix:permissions");
 		@SuppressWarnings("unchecked")

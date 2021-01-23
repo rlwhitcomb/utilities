@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2013-2018,2020 Roger L. Whitcomb.
+ * Copyright (c) 2013-2018,2020-2021 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -50,12 +50,15 @@
  *	    Prepare for GitHub.
  *	21-Dec-2020 (rlwhitcomb)
  *	    Update obsolete Javadoc constructs.
+ *	22-Jan-2021 (rlwhitcomb)
+ *	    One more exception that needs the name and message.
  */
 package info.rlwhitcomb.util;
 
 import java.io.FileNotFoundException;
 import java.net.UnknownHostException;
 import java.nio.charset.CharacterCodingException;
+import java.nio.charset.UnsupportedCharsetException;
 import java.nio.file.NoSuchFileException;
 import java.util.Map;
 
@@ -129,15 +132,16 @@ public class ExceptionUtil
 		    if (msg == null) {
 			msg = next.getClass().getSimpleName();
 		    }
-		    else if ((next instanceof UnknownHostException) ||
-			     (next instanceof NoClassDefFoundError) ||
-			     (next instanceof ClassNotFoundException) ||
-			     (next instanceof NullPointerException) ||
-			     (next instanceof CharacterCodingException) ||
-			     (next instanceof FileNotFoundException) ||
-			     (next instanceof NoSuchFileException) ||
-			     (next instanceof UnsupportedOperationException) ||
-			     (next instanceof NumberFormatException)) {
+		    else if ((next instanceof UnknownHostException)
+			  || (next instanceof NoClassDefFoundError)
+			  || (next instanceof ClassNotFoundException)
+			  || (next instanceof NullPointerException)
+			  || (next instanceof CharacterCodingException)
+			  || (next instanceof UnsupportedCharsetException)
+			  || (next instanceof FileNotFoundException)
+			  || (next instanceof NoSuchFileException)
+			  || (next instanceof UnsupportedOperationException)
+			  || (next instanceof NumberFormatException)) {
 			msg = String.format("%1$s: %2$s", next.getClass().getSimpleName(), msg);
 		    }
 		}

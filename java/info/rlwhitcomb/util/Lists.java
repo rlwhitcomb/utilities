@@ -68,7 +68,15 @@
  *	   the input without stripping out the commas, or anything else.
  *	11-Jan-2021 (rlwhitcomb)
  *	   Refactor to unify and simplify error reporting.
+ *	22-Jan-2021 (rlwhitcomb)
+ *	   New "-u" option ("unchanged") which will read the input, do
+ *	   any prefix/postfix text, but otherwise leave the input alone.
+ *	   Refactoring. Move to "util" package so others can use us
+ *	   programmatically. Implements the Testable interface so we
+ *	   can use with the (upcoming) tester program.
  */
+package info.rlwhitcomb.util;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -77,12 +85,13 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.io.Reader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
-import info.rlwhitcomb.util.Environment;
-import info.rlwhitcomb.util.Options;
+import info.rlwhitcomb.Testable;
+
 
 /**
  * Utility program for converting lists of values between various formats
@@ -90,31 +99,90 @@ import info.rlwhitcomb.util.Options;
  * separate lines for each value, separate lines with commas, etc.
  */
 public class Lists
+	implements Testable
 {
-	private static boolean concatenate = false;
-	private static boolean join        = false;
-	private static boolean blanks      = false;
-	private static boolean whitespace  = false;
-	private static boolean counting    = false;
-	private static boolean cutting     = false;
-	private static boolean newlines    = false;
-	private static boolean single      = false;
+	private boolean concatenate = false;
+	private boolean join        = false;
+	private boolean blanks      = false;
+	private boolean whitespace  = false;
+	private boolean counting    = false;
+	private boolean cutting     = false;
+	private boolean newlines    = false;
+	private boolean single      = false;
+	private boolean unchanged   = false;
 
-	private static int width   = 0;
-	private static int cutSize = 0;
+	private int width   = 0;
+	private int cutSize = 0;
 
-	private static List<String> fileNames = null;
-	private static String outputFileName  = null;
-	private static PrintStream output     = null;
+	private List<String> fileNames = null;
+	private String outputFileName  = null;
+	private PrintStream output     = null;
 
-	private static boolean sawConsoleInput = false;
+	private boolean sawConsoleInput = false;
 
-	private static String prefixText     = null;
-	private static String postfixText    = null;
-	private static int prefixTextLength  = 0;
-	private static int postfixTextLength = 0;
+	private String prefixText     = null;
+	private String postfixText    = null;
+	private int prefixTextLength  = 0;
+	private int postfixTextLength = 0;
 
 	private static final String STDIN = "@";
+
+	private static final String[] HELP = {
+	    "Usage: java Lists [-c] [-j] [-b] [-n] [-l] [-nnn] [-w] [-e prefix_text] [-f postfix_text] [-x nn]",
+	    "                  [-o output_file] [list_file_name+ | " + STDIN + "]",
+	    "",
+	    "  Aliases: -c | -concat | -concatenate; -j | -join; -b | -blank | -blanks; -n | -count | -counting",
+	    "           -l | -line | -lines | -newlines; -w | -white | -whitespace; -e | -pre | -prefix",
+	    "           -f | -post | -postfix; -x | -cut | -cutting; -s | -single; -u | -unchanged",
+	    "           -o | -out  | -output",
+	    "",
+	    "  If you specify the \"-c\" flag the output will have all the lines",
+	    "    of the file concatenated (using commas) into a single line.",
+	    "",
+	    "  The \"-j\" flag is similar except the lines will be joined by a",
+	    "    single space between each into a single line.",
+	    "",
+	    "  Without either of these options, the input file will be deconstructed",
+	    "    into one element per line and the commas (if any) will be removed.",
+	    "",
+	    "  The \"-x nn\" option will cut the nn number of characters (if present)",
+	    "    from the start of each input line (useful for \"svn st\" output).",
+	    "",
+	    "  Using \"-b\" without \"-c\" will print a blank line between",
+	    "    each output value, while with \"-c\" will put a blank after",
+	    "    each comma.",
+	    "",
+	    "  Using \"-l\" will print newlines after each entry, even with \"-c\"",
+	    "",
+	    "  The \"-nnn\" option (where \"nnn\" is a number from 1 to 255) specifies",
+	    "    a maximum line width for the \"-c\" output mode.",
+	    "",
+	    "  The \"-n\" option simply counts the number of entries in the input",
+	    "    using the rules from the other options and outputs the number of entries.",
+	    "",
+	    "  The \"-w\" option will recognize input files where the input",
+	    "    values are separated by whitespace instead of \",\".",
+	    "",
+	    "  The \"-e prefix_text\" and \"-f postfix_text\" options will add this text",
+	    "    before (after) the single line or each line of the output.",
+	    "",
+	    "  The \"-s\" option will join the whole file into a single string without",
+	    "    changing anything else.",
+	    "",
+	    "  The \"-u\" option will do nothing to the input except do any cutting specified,",
+	    "    and add the prefix or postfix text to each line.",
+	    "",
+	    "  Using \"" + STDIN + "\" or nothing for the list_file_name will read from stdin.",
+	    "  Multiple file names are allowed as well as mixing \"" + STDIN + "\" with regular",
+	    "    file names, which will simply read and concatenate everything together.",
+	    "",
+	    "  Unless the \"-o output_file\" option is given, all output will be sent to",
+	    "    stdout. This output file option is preferable when reading from the console.",
+	    "",
+	    "  Use \"-help\" (or \"-h\" or \"-?\") to display this help text.",
+	    "  Use \"-version\" (or \"-vers\", \"-ver\", or \"-v\" to display version information.)",
+	    ""
+	};
 
 
 	private static void usage() {
@@ -124,74 +192,51 @@ public class Lists
 	private static void usage(boolean helpOnly) {
 	    if (!helpOnly)
 		System.err.println();
-	    System.err.println("Usage: java Lists [-c] [-j] [-b] [-n] [-l] [-nnn] [-w] [-e prefix_text] [-f postfix_text] [-x nn]");
-	    System.err.format ("                  [-o output_file] [list_file_name+ | %1$s]%n", STDIN);
-	    System.err.println();
-	    System.err.println("  Aliases: -c | -concat | -concatenate; -j | -join; -b | -blank | -blanks; -n | -count | -counting");
-	    System.err.println("           -l | -line | -lines | -newlines; -w | -white | -whitespace; -e | -pre | -prefix");
-	    System.err.println("           -f | -post | -postfix; -x | -cut | -cutting; -s | -single");
-	    System.err.println("           -o | -out  | -output");
-	    System.err.println();
-	    System.err.println("  If you specify the \"-c\" flag the output will have all the lines");
-	    System.err.println("    of the file concatenated (using commas) into a single line.");
-	    System.err.println();
-	    System.err.println("  The \"-j\" flag is similar except the lines will be joined by a");
-	    System.err.println("    single space between each into a single line.");
-	    System.err.println();
-	    System.err.println("  Without either of these options, the input file will be deconstructed");
-	    System.err.println("    into one element per line and the commas (if any) will be removed.");
-	    System.err.println();
-	    System.err.println("  The \"-x nn\" option will cut the nn number of characters (if present)");
-	    System.err.println("    from the start of each input line (useful for \"svn st\" output).");
-	    System.err.println();
-	    System.err.println("  Using \"-b\" without \"-c\" will print a blank line between");
-	    System.err.println("    each output value, while with \"-c\" will put a blank after");
-	    System.err.println("    each comma.");
-	    System.err.println();
-	    System.err.println("  Using \"-l\" will print newlines after each entry, even with \"-c\"");
-	    System.err.println();
-	    System.err.println("  The \"-nnn\" option (where \"nnn\" is a number from 1 to 255) specifies");
-	    System.err.println("    a maximum line width for the \"-c\" output mode.");
-	    System.err.println();
-	    System.err.println("  The \"-n\" option simply counts the number of entries in the input");
-	    System.err.println("    using the rules from the other options and outputs the number of entries.");
-	    System.err.println();
-	    System.err.println("  The \"-w\" option will recognize input files where the input");
-	    System.err.println("    values are separated by whitespace instead of \",\".");
-	    System.err.println();
-	    System.err.println("  The \"-e prefix_text\" and \"-f postfix_text\" options will add this text");
-	    System.err.println("    before (after) the single line or each line of the output.");
-	    System.err.println();
-	    System.err.println("  The \"-s\" option will join the whole file into a single string without");
-	    System.err.println("    changing anything else.");
-	    System.err.println();
-	    System.err.format ("  Using \"%1$s\" or nothing for the list_file_name will read from stdin.%n", STDIN);
-	    System.err.format ("  Multiple file names are allowed as well as mixing \"%1$s\" with regular%n", STDIN);
-	    System.err.println("    file names, which will simply read and concatenate everything together.");
-	    System.err.println();
-	    System.err.println("  Unless the \"-o output_file\" option is given, all output will be sent to");
-	    System.err.println("    stdout. This output file option is preferable when reading from the console.");
-	    System.err.println();
-	    System.err.println("  Use \"-help\" (or \"-h\" or \"-?\") to display this help text.");
-	    System.err.println("  Use \"-version\" (or \"-vers\", \"-ver\", or \"-v\" to display version information.)");
-	    System.err.println();
+	    Arrays.stream(HELP).forEach(System.err::println);
 	}
 
-	private static void errUsage(String messageFormat, Object... args) {
+	private static int errUsage(String messageFormat, Object... args) {
 	    System.err.println(String.format(messageFormat, args));
 	    usage();
+	    return BAD_ARGUMENT;
 	}
 
-	private static void missingValue(String expected, String option) {
+	private static int missingValue(String expected, String option) {
 	    errUsage("Expecting %1$s for the \"-%2$s\" option!", expected, option);
+	    return MISSING_OPTION;
 	}
 
-	private static void onlyOnce(String option) {
-	    errUsage("Can only specify the %1$s once!", option);
+	private static int onlyOnce(String option) {
+	    return errUsage("Can only specify the %1$s once!", option);
+	}
+
+	private void outputLine(StringBuilder buf) {
+	    if (postfixText != null)
+		buf.append(postfixText);
+
+	    output.println(buf.toString());
+
+	    buf.setLength(0);
+
+	    if (prefixText != null)
+		buf.append(prefixText);
 	}
 
 
-	public static void main(String[] args) {
+	@Override
+	public String getVersion() {
+	    return Environment.getAppVersion();
+	}
+
+
+	@Override
+	public String getTestName() {
+	    return CharUtil.makeFileStringList(fileNames);
+	}
+
+
+	@Override
+	public int setup(String[] args) {
 	    Environment.loadProgramInfo(Lists.class);
 
 	    fileNames = new ArrayList<>();
@@ -206,20 +251,16 @@ public class Lists
 		String option = Options.isOption(arg);
 		if (option != null) {
 		    if (sawOutputOption) {
-			missingValue("an output file name", "o");
-			return;
+			return missingValue("an output file name", "o");
 		    }
 		    if (sawCutOption) {
-			missingValue("a number", "x");
-			return;
+			return missingValue("a number", "x");
 		    }
 		    if (sawPrefixTextOption) {
-			missingValue("prefix text", "e");
-			return;
+			return missingValue("prefix text", "e");
 		    }
 		    if (sawPostfixTextOption) {
-			missingValue("postfix text", "f");
-			return;
+			return missingValue("postfix text", "f");
 		    }
 		    if (Options.matchesOption(arg, true, "concatenate", "concat", "c"))
 			concatenate = true;
@@ -235,6 +276,8 @@ public class Lists
 		    }
 		    else if (Options.matchesOption(arg, "single", "s"))
 			single = true;
+		    else if (Options.matchesOption(arg, true, "unchanged", "nochange", "noc", "un", "no", "u"))
+			unchanged = true;
 		    else if (Options.matchesOption(arg, true, "counting", "count", "n"))
 			counting = true;
 		    else if (Options.matchesOption(arg, true, "cutting", "cut", "x")) {
@@ -243,44 +286,39 @@ public class Lists
 		    }
 		    else if (Options.matchesOption(arg, true, "output", "out", "o")) {
 			if (outputFileName != null) {
-			    onlyOnce("output file name");
-			    return;
+			    return onlyOnce("output file name");
 			}
 			sawOutputOption = true;
 		    }
 		    else if (Options.matchesOption(arg, true, "prefix", "pre", "e")) {
 			if (prefixText != null) {
-			    onlyOnce("prefix text");
-			    return;
+			    return onlyOnce("prefix text");
 			}
 			sawPrefixTextOption = true;
 		    }
 		    else if (Options.matchesOption(arg, true, "postfix", "post", "f")) {
 			if (postfixText != null) {
-			    onlyOnce("postfix text");
-			    return;
+			    return onlyOnce("postfix text");
 			}
 			sawPostfixTextOption = true;
 		    }
 		    else if (Options.matchesOption(arg, true, "help", "h", "?")) {
 			usage(true);
-			return;
+			return ACTION_DONE;
 		    }
 		    else if (Options.matchesOption(arg, true, "version", "vers", "ver", "v")) {
 			Environment.printProgramInfo(System.err);
-			return;
+			return ACTION_DONE;
 		    }
 		    else {
 			try {
 			    width = Integer.parseInt(option);
 			    if (width < 1 || width > 255) {
-				errUsage("Width value (%1$d) must be between 1 and 255.", width);
-				return;
+				return errUsage("Width value (%1$d) must be between 1 and 255.", width);
 			    }
 			}
 			catch (NumberFormatException nfe) {
-			    errUsage("Unsupported option: \"%1$s\".", arg);
-			    return;
+			    return errUsage("Unsupported option: \"%1$s\".", arg);
 			}
 		    }
 		}
@@ -297,26 +335,24 @@ public class Lists
 			    cutSize = -1; // to trigger the error below
 			}
 			if (cutSize < 1 || cutSize > 255) {
-			    errUsage("The cut size (%1$s) should be between 1 and 255.", arg);
-			    return;
+			    return errUsage("The cut size (%1$s) should be between 1 and 255.", arg);
 			}
 			sawCutOption = false;
 		    }
 		    else if (sawPrefixTextOption) {
-			prefixText = arg + " ";
+			prefixText = arg;
 			prefixTextLength = prefixText.length();
 			sawPrefixTextOption = false;
 		    }
 		    else if (sawPostfixTextOption) {
-			postfixText = " " + arg;
+			postfixText = arg;
 			postfixTextLength = postfixText.length();
 			sawPostfixTextOption = false;
 		    }
 		    else {
 			if (arg.equals(STDIN)) {
 			    if (sawConsoleInput) {
-				errUsage("Cannot specify \"%1$s\" for the input more than once.", STDIN);
-				return;
+				return errUsage("Cannot specify \"%1$s\" for the input more than once.", STDIN);
 			    }
 			    sawConsoleInput = true;
 			}
@@ -331,13 +367,11 @@ public class Lists
 
 	    // Error checking on the supplied parameters
 	    if (!concatenate && width > 0) {
-		errUsage("Specifying an output width (\"-%1$d\") is only effective with the \"-c\" or \"-j\" options.", width);
-		return;
+		return errUsage("Specifying an output width (\"-%1$d\") is only effective with the \"-c\" or \"-j\" options.", width);
 	    }
 
-	    if (counting && (single || concatenate || blanks || width > 0)) {
-		errUsage("The \"-n\" option should not be used together with either the%n\"-s\", \"-c\", \"-j\", or \"-b\" options%nor with an output width.");
-		return;
+	    if (counting && (concatenate || blanks || width > 0)) {
+		return errUsage("The \"-count\" option should not be used together with either the%n\"-c\", \"-j\", or \"-b\" options%nor with an output width.");
 	    }
 
 	    if (outputFileName != null) {
@@ -346,13 +380,19 @@ public class Lists
 		}
 		catch (IOException ioe) {
 		    errUsage("Unable to open \"%1$s\" file for writing: %2$s", outputFileName, ioe.getMessage());
-		    return;
+		    return OUTPUT_IO_ERROR;
 		}
 	    }
 	    else {
 		output = System.out;
 	    }
 
+	    return SUCCESS;
+	}
+
+
+	@Override
+	public int execute() {
 	    int numberOfValues  = 0;
 	    int nextFile        = 0;
 	    boolean readConsole = false;
@@ -375,59 +415,72 @@ public class Lists
 		    String line = null;
 
 		    while ((line = r.readLine()) != null) {
-			if (single) {
-			    buf.append(line);
-			    continue;
-			}
+			// First off, do any required cutting of the input line
 			if (cutting) {
 			    if (line.length() > cutSize) {
 				line = line.substring(cutSize);
 			    }
 			}
-			String[] parts = whitespace ? line.split("\\s+") : line.split("\\s*,\\s*");
-			for (String part : parts) {
-			    String value = part.trim();
-			    if (!value.isEmpty()) {
+
+			boolean empty = line.isEmpty();
+
+			if (single) {
+			    if (!empty) {
 				if (counting) {
 				    numberOfValues++;
 				}
 				else {
-				    if (concatenate) {
-					if (buf.length() > prefixTextLength) {
-					    if (!join)
-						buf.append(",");
-					    if (width > 0 && buf.length() >= width) {
-						if (postfixText != null)
-						    buf.append(postfixText);
-						output.println(buf.toString());
-						buf.setLength(0);
-						if (prefixText != null)
-						    buf.append(prefixText);
-					    }
-					    else if (blanks || join)
-						buf.append(" ");
-					}
-					if (width > 0 && buf.length() + value.length() >= width) {
-					    if (postfixText != null)
-						buf.append(postfixText);
-					    output.println(buf.toString());
-					    buf.setLength(0);
-					    if (prefixText != null)
-						buf.append(prefixText);
-					}
-					buf.append(value);
+				    buf.append(line);
+				}
+			    }
+			}
+			else if (unchanged) {
+			    if (counting) {
+				numberOfValues++;
+			    }
+			    else {
+				if (!empty) {
+				    buf.append(line);
+				}
+				outputLine(buf);
+			    }
+			}
+			else if (!empty) {
+			    String[] parts = whitespace ? line.split("\\s+") : line.split("\\s*,\\s*");
+			    for (String part : parts) {
+				String value = part.trim();
+				if (!value.isEmpty()) {
+				    if (counting) {
+					numberOfValues++;
 				    }
 				    else {
-					if (prefixText != null)
-					    output.print(prefixText);
-					output.print(value);
-					if (newlines)
-					    output.print(",");
-					if (postfixText != null)
-					    output.print(postfixText);
-					output.println();
-					if (blanks)
+					if (concatenate) {
+					    if (buf.length() > prefixTextLength) {
+						if (!join)
+						    buf.append(",");
+						if (width > 0 && buf.length() >= width) {
+						    outputLine(buf);
+						}
+						else if (blanks || join)
+						    buf.append(" ");
+					    }
+					    if (width > 0 && buf.length() + value.length() >= width) {
+						outputLine(buf);
+					    }
+					    buf.append(value);
+					}
+					else {
+					    if (prefixText != null)
+						output.print(prefixText);
+					    output.print(value);
+					    if (newlines)
+						output.print(",");
+					    if (postfixText != null)
+						output.print(postfixText);
 					    output.println();
+					    if (blanks)
+						output.println();
+					}
 				    }
 				}
 			    }
@@ -463,7 +516,23 @@ public class Lists
 		else {
 		    System.err.format("Error accessing the file \"%1$s\": %2$s%n", fileName, ioe.getMessage());
 		}
+		return INPUT_IO_ERROR;
 	    }
+
+	    return SUCCESS;
 	}
 
+	public Lists() {
+	}
+
+	public static void main(String[] args) {
+	    Lists instance = new Lists();
+
+	    int result = SUCCESS;
+	    if ((result = instance.setup(args)) == SUCCESS) {
+		result = instance.execute();
+	    }
+
+	    Testable.exit(result);
+	}
 }

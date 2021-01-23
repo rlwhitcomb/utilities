@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2011-2020 Roger L. Whitcomb.
+ * Copyright (c) 2011-2021 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -261,10 +261,13 @@
  *	    Tweak an exception message. Change the params to "stripAnyQuotes".
  *	21-Dec-2020 (rlwhitcomb)
  *	    Update obsolete Javadoc constructs.
+ *	22-Jan-2021 (rlwhitcomb)
+ *	    New method for making a list of file names.
  */
 
 package info.rlwhitcomb.util;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -1496,6 +1499,30 @@ public class CharUtil
 		buf.append(value);
 	    }
 	    return buf.toString();
+	}
+
+
+	/**
+	 * Make a list of file names (only), suitable for display.
+	 *
+	 * @param files	The list of file names.
+	 * @return	A string that looks like: {@code [ f1, f2, ... ]}
+	 */
+	public static String makeFileStringList(List<String> files) {
+	    List<String> names = new ArrayList<>(files.size());
+	    for (String name : files) {
+		File f = new File(name);
+		String nameOnly = f.getName();
+		int dotPos = nameOnly.lastIndexOf('.');
+		if (dotPos < 0)
+		    names.add(nameOnly);
+		else
+		    names.add(nameOnly.substring(0, dotPos));
+	    }
+	    if (names.size() <= 1)
+		return makeSimpleStringList(names);
+	    else
+		return String.format("[ %1$s ]", makeSimpleStringList(names));
 	}
 
 
