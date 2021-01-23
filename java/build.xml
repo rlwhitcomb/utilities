@@ -133,6 +133,10 @@
 		New text resources for Calc.
 	    21-Jan-2021 (rlwhitcomb)
 		Move the tests from "test.xml" into "test" target here.
+	    21-Jan-2021 (rlwhitcomb)
+		Add "tester" directory, and "tester" wrappers.
+		Change most unit tests to use Tester.
+		Lists has moved to the "util" package.
 
      ========================================================================== -->
 
@@ -216,6 +220,8 @@
 		<include name="os.bat"                      if:true="${on.windows}"/>
 		<include name="sleep"                   unless:true="${on.windows}"/>
 		<include name="sleep.bat"                   if:true="${on.windows}"/>
+		<include name="tester"                  unless:true="${on.windows}"/>
+		<include name="tester.bat"                  if:true="${on.windows}"/>
 		<include name="tre"                     unless:true="${on.windows}"/>
 		<include name="tre.bat"                     if:true="${on.windows}"/>
 		<include name="version"                 unless:true="${on.windows}"/>
@@ -225,7 +231,8 @@
 		<include name="wf"                      unless:true="${on.windows}"/>
 		<include name="wf.bat"                      if:true="${on.windows}"/>
 	</patternset>
-	<property name="csv.test.class" value="info.rlwhitcomb.csv.CSVTest"/>
+
+	<property name="tester.class" value="info.rlwhitcomb.tester.Tester"/>
 
 
 	<taskdef name="preproc" classname="info.rlwhitcomb.preproc.JavaPreProc" classpath="${ant.tasks.jar}"/>
@@ -257,6 +264,7 @@
 			<generate-text-resources dir="info/rlwhitcomb/compare" />
 			<generate-text-resources dir="info/rlwhitcomb/csv" />
 			<generate-text-resources dir="info/rlwhitcomb/matches" />
+			<generate-text-resources dir="info/rlwhitcomb/tester" />
 			<generate-text-resources dir="info/rlwhitcomb/tree" />
 			<generate-text-resources dir="info/rlwhitcomb/util" />
 		</parallel>
@@ -291,9 +299,10 @@
 			<src path="info/rlwhitcomb/compare"/>
 			<src path="info/rlwhitcomb/csv"/>
 			<src path="info/rlwhitcomb/curl"/>
-			<src path="info/rlwhitcomb/jarfile"/>
 			<src path="info/rlwhitcomb/heart"/>
+			<src path="info/rlwhitcomb/jarfile"/>
 			<src path="info/rlwhitcomb/matches"/>
+			<src path="info/rlwhitcomb/tester"/>
 			<src path="info/rlwhitcomb/tree"/>
 			<src path="info/rlwhitcomb/util"/>
 			<src path="info/rlwhitcomb/wordfind"/>
@@ -310,7 +319,6 @@
 	<target name="jar" depends="compile" description="Jar up the compiled class files (into ${dest.jar}).">
 		<jar basedir="." destfile="${dest.jar}">
 			<include name="DumpManifest*.class"/>
-			<include name="Lists*.class"/>
 			<include name="MD5*.class"/>
 			<include name="OS*.class"/>
 			<include name="GZip*.class"/>
@@ -333,6 +341,7 @@
 			<include name="info/rlwhitcomb/heart/*.class"/>
 			<include name="info/rlwhitcomb/jarfile/*.class"/>
 			<include name="info/rlwhitcomb/matches/*.class"/>
+			<include name="info/rlwhitcomb/tester/*.class"/>
 			<include name="info/rlwhitcomb/tree/*.class"/>
 			<include name="info/rlwhitcomb/util/*.class"/>
 			<include name="info/rlwhitcomb/wordfind/*.class"/>
@@ -373,41 +382,12 @@
 		<delete file="TestPP.java"/>
 		<preproc dir="." processAsDirectory="true" recurseDirectories="true" nologo="true" verbose="plus"
 								      log="${test.log.file.name}"/>
-		<echo>Running CSVTest...</echo>
-		<java classname="${csv.test.class}"                   output="${test.log.file.name}" append="true">
-			<arg value="-Qall"/>
-			<arg value="-Dspace"/>
-			<arg value="-8"/>
-			<arg value="test/data/test_all_quotes.dsv"/>
-		</java>
-		<java classname="${csv.test.class}"                   output="${test.log.file.name}" append="true">
-			<arg value="test/data/test_quote.dsv"/>
-			<arg value="-Qangle"/>
-			<arg value="-Dspace"/>
-		</java>
-		<java classname="${csv.test.class}"                   output="${test.log.file.name}" append="true">
-			<arg value="test/data/nonstandard_delims.csv"/>
-			<arg value="-d@"/>
-			<arg value="-r%"/>
-			<arg value="-I"/>
-		</java>
-		<echo>TestSQLFormatter...</echo>
-		<java classname="TestSQLFormatter"                    output="${test.log.file.name}" append="true"/>
-		<echo>Test of Options...</echo>
-		<java classname="info.rlwhitcomb.util.Options"        output="${test.log.file.name}" append="true"/>
 		<echo>Test of InitializationTask...</echo>
-		<java classname="InitTaskTest"                        output="${test.log.file.name}" append="true"/>
-		<echo>Test of DynamicArray...</echo>
-		<java classname="DynArrayTest"                        output="${test.log.file.name}" append="true"/>
-		<echo>Test of Matches...</echo>
-		<java classname="info.rlwhitcomb.matches.MatchesTest" output="${test.log.file.name}" append="true"/>
-		<echo>Test of NumericUtil functions...</echo>
-		<java classname="TestNumericUtil"                     output="${test.log.file.name}" append="true"/>
-		<echo>Test of Calc operation...</echo>
-		<java classname="info.rlwhitcomb.calc.Calc"           output="${test.log.file.name}" append="true">
-			<arg value="-nocolors"/>
+		<java classname="InitTaskTest"                        output="${test.log.file.name}" append="true" failonerror="true"/>
+		<echo>Running various tests through the Tester...</echo>
+		<java classname="${tester.class}"                     output="${test.log.file.name}" append="true" failonerror="true">
 			<arg value="-timing"/>
-			<arg value="e1,e2,e3,e10,e12,e_trig,e_m1,e_m2"/>
+			<arg value="testtest"/>
 		</java>
 		<echo>Done with unit tests. Results in "${test.log.file.name}" file.</echo>
 	</target>
@@ -428,6 +408,7 @@
 			<fileset dir="info/rlwhitcomb/heart" includes="*.class"/>
 			<fileset dir="info/rlwhitcomb/jarfile" includes="*.class"/>
 			<fileset dir="info/rlwhitcomb/matches" includes="*.class"/>
+			<fileset dir="info/rlwhitcomb/tester" includes="*.class"/>
 			<fileset dir="info/rlwhitcomb/tree" includes="*.class"/>
 			<fileset dir="info/rlwhitcomb/util" includes="*.class"/>
 			<fileset dir="info/rlwhitcomb/wordfind" includes="*.class"/>

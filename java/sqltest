@@ -1,0 +1,11 @@
+#
+# TestSQLFormatter
+#
+$inputDir test/canons
+$testClass TestSQLFormatter
+
+$echo TestSQLFormatter...
+
+sql: 
+
+$echo End of TestSQLFormatter.

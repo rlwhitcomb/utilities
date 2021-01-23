@@ -1,0 +1,13 @@
+#
+# MatchesTest
+#
+$inputDir test/canons
+$testClass info.rlwhitcomb.matches.MatchesTest
+
+$echo Tests of the Matches class...
+$echo
+
+matches:
+
+$echo
+$echo End of Matches test.

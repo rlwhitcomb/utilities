@@ -1,0 +1,42 @@
+>Record 1:
+>    1. 'abc'
+>    2. 'def'
+>    3. 'ghi'
+>Record 2:
+>    1. 'jkl'
+>    2. 'mno'
+>    3. 'pqr'
+>Record 3:
+>    1. 'stu'
+>    2. 'vwx'
+>    3. 'yz_'
+>Record 4:
+>    1. 'ABC'
+>    2. 'DEF'
+>    3. 'GHI'
+>Record 5:
+>    1. 'jkl'
+>    2. 'mno'
+>    3. 'pqr'
+>Record 6:
+>    1. 'stu'
+>    2. 'vwx'
+>    3. 'yz_'
+>Record 7:
+>    1. 'abc'
+>    2. 'def'
+>    3. 'g'i'
+>Record 8:
+>    1. 'jkl'
+>    2. 'mno'
+>    3. 'p"r'
+>Record 9:
+>    1. 'stu'
+>    2. 'vwx'
+>    3. 'yz_'
+>Record 10:
+>    1. 'a c'
+>    2. 'd f'
+>    3. 'g i'
+>=============================
+>

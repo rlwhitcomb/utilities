@@ -1,0 +1,23 @@
+>Record 1:
+>    1. 'abc'
+>    2. 'def'
+>    3. 'ghi'
+>Record 2:
+>    1. 'jkl'
+>    2. 'mno'
+>    3. 'pqr'
+>Record 3:
+>    1. 's t'
+>    2. 'uvw'
+>    3. 'xy_'
+>Record 4:
+>    1. 'z 0'
+>    2. '123'
+>    3. '456'
+>Record 5:
+>    1. '789'
+>    2. 'a"b'
+>    3. 'd'e'
+>=============================
+>
+>Output file exactly equals original input file "test/data/test_quote.dsv".

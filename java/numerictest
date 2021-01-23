@@ -1,0 +1,13 @@
+#
+# TestNumericUtil
+#
+$inputDir test/canons
+$testClass TestNumericUtil
+
+$echo Tests of the NumericUtil class...
+$echo
+
+numeric:
+
+$echo
+$echo End of NumericUtil test.

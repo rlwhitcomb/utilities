@@ -1,0 +1,155 @@
+#
+# The MIT License (MIT)
+#
+# Copyright (c) 2012-2021 Roger L. Whitcomb.
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+#
+#	Internationalizable strings for the info.rlwhitcomb.tester code.
+#
+# History:
+#	29-Oct-2012 (rlwhitcomb)
+#	    Moved into here from the .java files.
+#	21-Jan-2014 (rlwhitcomb)
+#	    Add error messages and other text from Tester.
+#	04-Mar-2014 (rlwhitcomb)
+#	    More errors for the $testClass option.
+#	19-Jun-2014 (rlwhitcomb)
+#	    Add messages for "$scriptDir" directive in Tester.
+#	11-Aug-2016 (rlwhitcomb)
+#	    Add "underline" and "break" strings for the tester to improve the
+#	    look of the output.
+#	23-Aug-2016 (rlwhitcomb)
+#	    Add Tester help output.
+#	11-Oct-2016 (rlwhitcomb)
+#	    Error message for $include in tester description files.
+#	10-Jan-2017 (rlwhitcomb)
+#	    Add two texts for the case in Tester where the "test name" is different
+#	    than the canon name.
+#	13-Jun-2017 (rlwhitcomb)
+#	    Another error message for tester about the file not found, etc.
+#	26-Jul-2017 (rlwhitcomb)
+#	    Another error message from Tester about the missing main class name.
+#	26-Sep-2017 (rlwhitcomb)
+#	    Increase the digits display from tester because on some fast machines
+#	    the times for each test can show as "0.000" currently.
+#	03-Jan-2018 (rlwhitcomb)
+#	    Remove obsolete (in Java 9) classloader error message.
+#	31-Jan-2018 (rlwhitcomb)
+#	    Add an error message about bad conversion to character.
+#	04-May-2018 (rlwhitcomb)
+#	    Widen the tester timing underlines.
+#	11-Jul-2019 (rlwhitcomb)
+#	    Add version message strings for "tester".
+#	    Probably don't want to translate this ever...
+#	11-Jul-2019 (rlwhitcomb)
+#	    Add product name to the "-version" display.
+#	29-Aug-2019 (rlwhitcomb)
+#	    Remove the "helpNotSupported" message.
+#	06-Jan-2020 (rlwhitcomb) SIR 135654
+#	    Add copyright notice.
+#	13-Feb-2020 (rlwhitcomb)
+#	    Move the "badLocale" message to util resources.
+#	20-Nov-2020 (rlwhitcomb)
+#	    Prepare for GitHub.
+#	22-Jan-2021 (rlwhitcomb)
+#	    New error message.
+
+mismatch		= Mismatch on test \"%1$s\":%n  Canon file: %2$s%n Output file: %3$s
+compareError		= Error comparing files: %1$s%n  Canon file: %2$s%n Output file: %3$s
+errTempCreate		= Error creating temporary files: %1$s
+warnOverwriteCanon	= Warning: the canon file \"%1$s\" is being overwritten.
+errBadCanonCharset	= Canon character set name %1$s is not supported.
+errCanonFiles		= Error reading canon file %1$s or creating stream files: %2$s
+badInputDir		= Directory specified by \"$inputDir\" directive (%1$s) does not exist.
+badScriptDir		= Directory specified by \"$scriptDir\" directive (%1$s) does not exist.
+emptyInputDir		= The \"$inputDir\" directive should not have an empty directory name.
+emptyScriptDir		= The \"$scriptDir\" directive should not have an empty directory name.
+noTestClass		= There is no \"$testClass\" given either on the command line or in the test description file.
+testClassNotFound	= Error trying to load the \"$testClass\" (%1$s) code: %2$s
+emptyTestClass		= The \"$testClass\" directive should not have an empty class name.
+emptyInclude		= The \"$include\" directive should not have an empty file name.
+noMainMethod		= Error finding the \"main\" method of the \"$testClass\": %1$s%n
+mainInvokeError		= Error calling the \"main\" method of the \"$testClass\": %1$s%n
+badCommand		= Unrecognized command \"%1$s\".
+badSyntax		= Test description line %1$d cannot be parsed:%n\t%2$s
+totalTime		= " (%1$.6f secs total)"
+finalResultOne		= Ran %1$d test: %2$d passed, %3$d failed%4$s.
+finalResults		= Ran %1$d tests: %2$d passed, %3$d failed%4$s.
+finalBreak		= "------------------------------------"
+finalBreakTiming	= "-----------------------------------------------------------"
+finalUnderline		= "===================================="
+finalUnderlineTiming	= "==========================================================="
+initialFile		= Running %1$s...
+cannotOpenFile		= The '%1$s' file is either not found, not readable, or is not a regular file.
+readError		= Error reading '%1$s' file: %2$s
+badOption		= Unrecognized option \"%1$s\"
+cannotFindFile		= Cannot find the '%1$s' file.
+missingDescFile		= Must specify at least one description file name.
+exception		= Exception thrown during testing: %1$s
+compareFiles		= compare files(\"%1$s\",%2$s,%3$s)
+statusPassed		= Passed
+statusFailed		= Failed
+statusAndTiming		= %1$s (%2$.6f secs)
+timing			= (%1$.6f secs)
+# Note: these next strings must preserve the trailing %n (if present)
+logVerbose		= Test '%1$s': command \"%2$s\"%n
+log			= "Test '%1$s': "
+logVerboseAlt		= Test '%1$s' (%2$s): command \"%3$s\"%n
+logAlt			= "Test '%1$s' (%2$s): "
+verbose			= Running script: %1$s%n
+abnormalExit		= Abnormal exit from script: Code %1$d%n
+abnormalExitString	= Abnormal exit from test: %1$s%n
+
+#
+# Help message
+#
+help1		=
+help2		= Usage: testdescriptionfile + [-l] [-t] [-v] [-i:<instance>] [-?|-help]
+help3		= "   where the options are as follows:"
+help4		= \t-l (or "-log") = only show the test names and status
+help5		= \t-t (or "-timing") = show individual timings for each test
+help6		= \t-v (or "-verbose") = show verbose output for each test
+help7		= \t(Note: these options are progressive, each showing the
+help8		= \t preceding information and then more.)
+help9		= \tWithout any options, only the name of the description file
+help10		= \t  and the total results will be displayed.
+help11		=
+help12		= The format of a test description file is as follows:
+help13		= \tcanonfilename: test_command_line
+help14		=
+help15		= "Where \"#\" or \"!\" or \"//\" at the beginning of a line means"
+help16		= "  it is a comment that is ignored."
+help17		= "Lines beginning with \"$\" contain directives or options for"
+help18		= "  the test process."
+help19		=
+help20		= Additionally, each test line can be prefixed with a version
+help21		= "  prefix in the form of \"{[platform],[begin][-end][+]}\" where:"
+help22		= "  \"platform\" is a platform identifier,"
+help23		= "  \"begin\" and \"end\" can be \"major.minor\" with"
+help24		= "  either part missing or given as \"*\" or \"x\" (meaning"
+help25		= "  don't care), and the trailing \"+\" means 'that version or"
+help26		= "  any later one'."
+help27		=
+help28		= Canon files have the following kinds of lines:
+help29		= "  <input"
+help30		= "  >output"
+help31		= "  >>error"
+help32		=
+

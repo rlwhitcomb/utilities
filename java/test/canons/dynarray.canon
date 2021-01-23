@@ -1,0 +1,44 @@
+>----------------------------------------
+>Value at     0 =        1, size =    16
+>Value at     1 = __null__, size =    16
+>----------------------------------------
+>Value at   999 = __null__, size =  1024
+>Value at  1000 =        3, size =  1024
+>Value at  1001 = __null__, size =  1024
+>----------------------------------------
+>Value at  4999 = __null__, size =  8192
+>Value at  5000 =        6, size =  8192
+>Value at  5001 = __null__, size =  8192
+>----------------------------------------
+>Value at  9999 = __null__, size = 16384
+>Value at 10000 =        7, size = 16384
+>Value at 10001 = __null__, size = 16384
+>----------------------------------------
+>Value at 19999 = __null__, size = 32768
+>Value at 20000 =     -789, size = 32768
+>Value at 20001 = __null__, size = 32768
+>----------------------------------------
+>
+>----------------------------------------
+>Value at     0 = __null__, size =    16
+>Value at     1 = "abcd"  , size =    16
+>Value at     2 = __null__, size =    16
+>----------------------------------------
+>Value at   899 = __null__, size =  1024
+>Value at   900 = "efghi" , size =  1024
+>Value at   901 = __null__, size =  1024
+>----------------------------------------
+>Value at  4499 = __null__, size =  8192
+>Value at  4500 = "jklm"  , size =  8192
+>Value at  4501 = __null__, size =  8192
+>----------------------------------------
+>Value at  8999 = __null__, size = 16384
+>Value at  9000 = "nopqr" , size = 16384
+>Value at  9001 = __null__, size = 16384
+>----------------------------------------
+>Value at 11499 = __null__, size = 16384
+>Value at 11500 = "stuv"  , size = 16384
+>Value at 11501 = __null__, size = 16384
+>----------------------------------------
+>
+>DynamicArray Tests: 29, succeeded: 29, failed: 0

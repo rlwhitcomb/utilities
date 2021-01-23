@@ -1,0 +1,13 @@
+#
+# Options test
+#
+$inputDir test/canons
+$testClass info.rlwhitcomb.util.Options
+
+$echo Tests of the Options class...
+$echo
+
+options:
+
+$echo
+$echo End of Options test.

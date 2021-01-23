@@ -1,0 +1,13 @@
+#
+# DynArrayTest
+#
+$inputDir test/canons
+$testClass DynArrayTest
+
+$echo Tests of the DynamicArray class...
+$echo
+
+dynarray:
+
+$echo
+$echo End of DynamicArray test.

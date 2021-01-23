@@ -1,0 +1,613 @@
+>
+>*******************************
+>******* Test #  1 Input *******
+>*******************************
+>create table dummy._1010 (firstname varchar(100) with null with default, middlename varchar(255) with null with default, lastname varchar(100) with null with default, suffix varchar(100) with null with default, company varchar(100) with null with default, department bigint with null with default, jobtitle varchar(100) with null with default, businessstreet varchar(100) with null with default, businessstreet2 varchar(255) with null with default, businessstreet3 varchar(255) with null with default, businesscity varchar(100) with null with default ) with NOPARTITION
+>*****************************
+>********* Formatted *********
+>*****************************
+>CREATE TABLE dummy._1010
+>(
+>    firstname       VARCHAR(100) WITH NULL WITH DEFAULT,
+>    middlename      VARCHAR(255) WITH NULL WITH DEFAULT,
+>    lastname        VARCHAR(100) WITH NULL WITH DEFAULT,
+>    suffix          VARCHAR(100) WITH NULL WITH DEFAULT,
+>    company         VARCHAR(100) WITH NULL WITH DEFAULT,
+>    department      BIGINT       WITH NULL WITH DEFAULT,
+>    jobtitle        VARCHAR(100) WITH NULL WITH DEFAULT,
+>    businessstreet  VARCHAR(100) WITH NULL WITH DEFAULT,
+>    businessstreet2 VARCHAR(255) WITH NULL WITH DEFAULT,
+>    businessstreet3 VARCHAR(255) WITH NULL WITH DEFAULT,
+>    businesscity    VARCHAR(100) WITH NULL WITH DEFAULT
+>)
+>WITH NOPARTITION
+>
+>
+>*******************************
+>******* Test #  2 Input *******
+>*******************************
+>create view  geometry_columns(f_table_schema, f_table_name, f_geometry_column, geometry_type, coord_dimension, srid)as select VARCHAR(r.relowner, 256), VARCHAR(r.relid, 256), VARCHAR(a.attname, 256), VARCHAR(geomname(a.attgeomtype), 32), geomdimensions(a.attgeomtype), a.attsrid from "owner". relation r, "owner". attribute a where r.reltid=a.attrelid and r.reltidx=a.attrelidx and a.attver_dropped=0 and a.attgeomtype> -1
+>*****************************
+>********* Formatted *********
+>*****************************
+>CREATE VIEW  geometry_columns
+>(
+>    f_table_schema   ,
+>    f_table_name     ,
+>    f_geometry_column,
+>    geometry_type    ,
+>    coord_dimension  ,
+>    srid
+>)
+>AS SELECT
+>    varchar(r.relowner, 256),
+>    varchar(r.relid, 256),
+>    varchar(a.attname, 256),
+>    varchar(geomname(a.attgeomtype), 32),
+>    geomdimensions(a.attgeomtype),
+>    a.attsrid
+>FROM
+>    "owner". relation r, "owner". attribute a
+>WHERE
+>    r.reltid=a.attrelid
+>  AND
+>    r.reltidx=a.attrelidx
+>  AND
+>    a.attver_dropped=0
+>  AND
+>    a.attgeomtype> -1
+>
+>
+>*******************************
+>******* Test #  3 Input *******
+>*******************************
+>create view  access as select table_name=r.relid, table_owner=r.relowner, table_type=char(byteextract('TVI', (mod((r.relstat/32), (2)) +(2*(mod((r.relstat/128), (2))))) +1)), system_use=char(byteextract('USSG', (mod(r.relstat, (2))) +(mod((r.relstat/16384), (2))) +(3*mod((r.relstat2/16), (2))) +1)), permit_user=p.prouser, permit_type=permittype(p.proopset, 0)from "owner". relation r, "owner". protect p where r.reltid=p.protabbase and(mod((p.proopset/128), 2)=0)
+>*****************************
+>********* Formatted *********
+>*****************************
+>CREATE VIEW  access
+>AS SELECT
+>    table_name=r.relid,
+>    table_owner=r.relowner,
+>    table_type=char(byteextract('tvi', (mod((r.relstat/32), (2)) +(2*(mod((r.relstat/128), (2))))) +1)),
+>    system_use=char(byteextract('ussg', (mod(r.relstat, (2))) +(mod((r.relstat/16384), (2))) +(3*mod((r.relstat2/16), (2))) +1)),
+>    permit_user=p.prouser,
+>    permit_type=permittype(p.proopset, 0)
+>FROM
+>    "owner". relation r, "owner". protect p
+>WHERE
+>    r.reltid=p.protabbase
+>  AND
+>    (mod((p.proopset/128), 2)=0)
+>
+>
+>*******************************
+>******* Test #  4 Input *******
+>*******************************
+>create view  alt_columns(table_name, table_owner, key_id, column_name, key_sequence)as select r1.relid, r1.relowner, r2.reltidx, a.attname, int2(a.attkdom)from "owner". relation r1, "owner". relation r2, "owner". attribute a where r1.relidxcount>0 and r1.reltid=r2.reltid and r2.reltidx!=0 and MOD(r2.relstat/65536, (2))=1 and r2.reltid=a.attrelid and r2.reltidx=a.attrelidx and a.attname!='tidp' and a.attname!='TIDP'
+>*****************************
+>********* Formatted *********
+>*****************************
+>CREATE VIEW  alt_columns
+>(
+>    table_name  ,
+>    table_owner ,
+>    key_id      ,
+>    column_name ,
+>    key_sequence
+>)
+>AS SELECT
+>    r1.relid,
+>    r1.relowner,
+>    r2.reltidx,
+>    a.attname,
+>    int2(a.attkdom)
+>FROM
+>    "owner". relation r1, "owner". relation r2, "owner". attribute a
+>WHERE
+>    r1.relidxcount>0
+>  AND
+>    r1.reltid=r2.reltid
+>  AND
+>    r2.reltidx!=0
+>  AND
+>    MOD(r2.relstat/65536, (2))=1
+>  AND
+>    r2.reltid=a.attrelid
+>  AND
+>    r2.reltidx=a.attrelidx
+>  AND
+>    a.attname!='tidp'
+>  AND
+>    a.attname!='TIDP'
+>
+>
+>*******************************
+>******* Test #  5 Input *******
+>*******************************
+>create view  audittables as select table_name=r.relid, table_owner=r.relowner, g.audit_log, register_date=gmt_timestamp(g.reg_date)from "owner". relation r, "owner". gw06_relation g where r.reltid=g.reltid and r.reltidx=g.reltidx and session_priv('auditor')='Y'
+>*****************************
+>********* Formatted *********
+>*****************************
+>CREATE VIEW  audittables
+>AS SELECT
+>    table_name=r.relid,
+>    table_owner=r.relowner,
+>    g.audit_log,
+>    register_date=gmt_timestamp(g.reg_date)
+>FROM
+>    "owner". relation r, "owner". gw06_relation g
+>WHERE
+>    r.reltid=g.reltid
+>  AND
+>    r.reltidx=g.reltidx
+>  AND
+>    session_priv('auditor')='Y'
+>
+>
+>*******************************
+>******* Test #  6 Input *******
+>*******************************
+>create procedure  apitest1(    p1 varchar(32) not null,     p2 integer not null,     p3 char(4) with null,     p4 tinyint with null,     p5 smallint with null,     p6 bigint with null,     p7 float4 with null,     p8 float with null,     p9 integer with null,     p10 integer with null )as declare     sum integer not null; begin     message 'This is a test message from apitest1';     :sum = :p1 + :p2;    :p1 = :p1 + 1;    :p2 = :p2 + 1;    return :sum; end
+>*****************************
+>********* Formatted *********
+>*****************************
+>CREATE PROCEDURE  apitest1
+>(
+>    p1  VARCHAR(32) NOT NULL,
+>    p2  INTEGER     NOT NULL,
+>    p3  CHAR(4)     WITH NULL,
+>    p4  TINYINT     WITH NULL,
+>    p5  SMALLINT    WITH NULL,
+>    p6  BIGINT      WITH NULL,
+>    p7  FLOAT4      WITH NULL,
+>    p8  FLOAT       WITH NULL,
+>    p9  INTEGER     WITH NULL,
+>    p10 INTEGER     WITH NULL
+>)
+>AS
+>DECLARE
+>    sum INTEGER  NOT NULL;
+>BEGIN
+>        message 'This is a test message from apitest1';
+>        :sum = :p1 + :p2;
+>       :p1 = :p1 + 1;
+>       :p2 = :p2 + 1;
+>    RETURN :sum;
+>END
+>
+>
+>*******************************
+>******* Test #  7 Input *******
+>*******************************
+>create procedure  apitest2(    table_name varchar(32) with null,     column_count integer with null ) as declare     table_count integer not null; begin     message 'This is a test message from apitest2';     if ( :table_name is null ) then         select table_name into :table_name from "owner". tables;     endif;     message 'This is a second test message from apitest2';     select count(*) into :column_count from "owner". columns         where table_name = :table_name;     select count(*) into :table_count from "owner". tables;     message 'This is a third test message from apitest2';     return :table_count; end
+>*****************************
+>********* Formatted *********
+>*****************************
+>CREATE PROCEDURE  apitest2
+>(
+>    table_name   VARCHAR(32) WITH NULL,
+>    column_count INTEGER     WITH NULL
+>)
+>AS
+>DECLARE
+>    table_count INTEGER  NOT NULL;
+>BEGIN
+>        message 'This is a test message from apitest2';
+>        if ( :table_name is null ) then         select table_name into :table_name from "owner". tables;
+>        endif;
+>        message 'This is a second test message from apitest2';
+>        select count(*) into :column_count from "owner". columns         where table_name = :table_name;
+>        select count(*) into :table_count from "owner". tables;
+>        message 'This is a third test message from apitest2';
+>    RETURN :table_count;
+>END
+>
+>
+>*******************************
+>******* Test #  8 Input *******
+>*******************************
+>create rule  "rlwhitcomb"."$has_a_r00023a88000000003" AFTER DELETE FROM "rlwhitcomb"."has_primary_key" WHERE old."pkey1" IS NOT NULL  AND old."pkey2" IS NOT NULL  AND old."pkey3" IS NOT NULL  FOR EACH STATEMENT EXECUTE PROCEDURE "rlwhitcomb". "$has_a_r00023a88000000003"("pkey1" = old."pkey1","pkey2" = old."pkey2","pkey3" = old."pkey3" )
+>*****************************
+>********* Formatted *********
+>*****************************
+>CREATE RULE  "rlwhitcomb"."$has_a_r00023a88000000003"
+>AFTER DELETE FROM "RLWHITCOMB"."HAS_PRIMARY_KEY"
+>WHERE
+>    old."pkey1" IS NOT NULL
+>  AND
+>    old."pkey2" IS NOT NULL
+>  AND
+>    old."pkey3" IS NOT NULL
+>FOR EACH STATEMENT
+>EXECUTE PROCEDURE "rlwhitcomb". "$has_a_r00023a88000000003"("pkey1" = old."pkey1", "pkey2" = old."pkey2", "pkey3" = old."pkey3" )
+>
+>
+>*******************************
+>******* Test #  9 Input *******
+>*******************************
+>create rule  "rlwhitcomb"."$has_a_r00023a88000000004" AFTER UPDATE( "pkey1","pkey2","pkey3" ) OF "rlwhitcomb"."has_primary_key" WHERE old."pkey1" IS NOT NULL  AND old."pkey2" IS NOT NULL  AND old."pkey3" IS NOT NULL  AND ( new."pkey1" != old."pkey1" OR new."pkey2" != old."pkey2" OR new."pkey3" != old."pkey3" ) FOR EACH STATEMENT EXECUTE PROCEDURE "rlwhitcomb". "$has_a_r00023a88000000004"(new1 = new."pkey1",new2 = new."pkey2",new3 = new."pkey3" , old1 = old."pkey1",old2 = old."pkey2",old3 = old."pkey3" )
+>*****************************
+>********* Formatted *********
+>*****************************
+>CREATE RULE  "rlwhitcomb"."$has_a_r00023a88000000004"
+>AFTER UPDATE
+>(
+>    "pkey1",
+>    "pkey2",
+>    "pkey3"
+>)
+>OF "rlwhitcomb"."has_primary_key"
+>WHERE
+>    old."pkey1" IS NOT NULL
+>  AND
+>    old."pkey2" IS NOT NULL
+>  AND
+>    old."pkey3" IS NOT NULL
+>  AND
+>    ( new."pkey1" != old."pkey1" OR new."pkey2" != old."pkey2" OR new."pkey3" != old."pkey3" )
+>FOR EACH STATEMENT
+>EXECUTE PROCEDURE "rlwhitcomb". "$has_a_r00023a88000000004"(new1 = new."pkey1", new2 = new."pkey2", new3 = new."pkey3" ,  old1 = old."pkey1", old2 = old."pkey2", old3 = old."pkey3" )
+>
+>
+>*******************************
+>******* Test # 10 Input *******
+>*******************************
+>create rule  "rlwhitcomb"."$has_f_r00023a7b000000003" AFTER DELETE FROM "rlwhitcomb"."has_primary_key" WHERE old."pkey1" IS NOT NULL  AND old."pkey2" IS NOT NULL  AND old."pkey3" IS NOT NULL  FOR EACH STATEMENT EXECUTE PROCEDURE "rlwhitcomb". "$has_f_r00023a7b000000003"("pkey1" = old."pkey1","pkey2" = old."pkey2","pkey3" = old."pkey3" )
+>*****************************
+>********* Formatted *********
+>*****************************
+>CREATE RULE  "rlwhitcomb"."$has_f_r00023a7b000000003"
+>AFTER DELETE FROM "RLWHITCOMB"."HAS_PRIMARY_KEY"
+>WHERE
+>    old."pkey1" IS NOT NULL
+>  AND
+>    old."pkey2" IS NOT NULL
+>  AND
+>    old."pkey3" IS NOT NULL
+>FOR EACH STATEMENT
+>EXECUTE PROCEDURE "rlwhitcomb". "$has_f_r00023a7b000000003"("pkey1" = old."pkey1", "pkey2" = old."pkey2", "pkey3" = old."pkey3" )
+>
+>
+>*******************************
+>******* Test # 11 Input *******
+>*******************************
+>CREATE RULE  "system"."$user__r0000014f000000001" after insert into "system"."user_profile" WHERE new."up_airport" IS NOT NULL  FOR EACH STATEMENT EXECUTE PROCEDURE "system". "$user__r0000014f000000001"("up_airport" = new."up_airport" )
+>*****************************
+>********* Formatted *********
+>*****************************
+>CREATE RULE  "system"."$user__r0000014f000000001"
+>AFTER INSERT INTO "SYSTEM"."USER_PROFILE"
+>WHERE
+>    new."up_airport" IS NOT NULL
+>FOR EACH STATEMENT
+>EXECUTE PROCEDURE "system". "$user__r0000014f000000001"("up_airport" = new."up_airport" )
+>
+>
+>*******************************
+>******* Test # 12 Input *******
+>*******************************
+>CREATE RULE  "system"."$user__r0000014f000000002" after update ( "up_airport") OF "SYSTEM"."USER_PROFILE" WHERE NEW."UP_AIRPORT" IS NOT NULL  AND ( new."up_airport" ! = old."up_airport" OR old."up_airport" IS NULL  ) FOR EACH STATEMENT EXECUTE PROCEDURE "SYSTEM". "$USER__R0000014F000000002"("up_airport"  = new."up_airport" )
+>*****************************
+>********* Formatted *********
+>*****************************
+>CREATE RULE  "system"."$user__r0000014f000000002"
+>AFTER UPDATE
+>(
+>    "up_airport"
+>)
+>OF "SYSTEM"."USER_PROFILE"
+>WHERE
+>    NEW."UP_AIRPORT" IS NOT NULL
+>  AND
+>    ( new."up_airport" ! = old."up_airport" OR old."up_airport" IS NULL  )
+>FOR EACH STATEMENT
+>EXECUTE PROCEDURE "SYSTEM". "$USER__R0000014F000000002"("up_airport"  = new."up_airport" )
+>
+>
+>*******************************
+>******* Test # 13 Input *******
+>*******************************
+>create procedure  get_airlines result row( nchar(3) not null, nchar(3) not null, nvarchar(60) not null) as declare iatacode nchar(3); icaocode nchar(3); name nvarchar(60); begin for select al_iatacode, al_icaocode, al_name into :iatacode, :icaocode, :name from "rlwhitcomb". airline do return row (:iatacode, :icaocode, :name); endfor; end
+>*****************************
+>********* Formatted *********
+>*****************************
+>CREATE PROCEDURE  get_airlines
+>RESULT ROW
+>(
+>    NCHAR(3)     NOT NULL,
+>    NCHAR(3)     NOT NULL,
+>    NVARCHAR(60) NOT NULL
+>)
+>AS
+>DECLARE
+>    iatacode NCHAR(3)    ;
+>    icaocode NCHAR(3)    ;
+>    name     NVARCHAR(60);
+>BEGIN
+>    for select al_iatacode,
+>    al_icaocode,
+>    al_name into :iatacode,
+>    :icaocode,
+>    :name from "rlwhitcomb". airline do
+>    RETURN ROW (:iatacode, :icaocode, :name);
+>    endfor;
+>END
+>
+>
+>*******************************
+>******* Test # 14 Input *******
+>*******************************
+>create procedure  get_airports result row( nchar(3) not null, nvarchar(30) not null, nvarchar(50) not null) as declare iatacode nchar(3); place nvarchar(30); name nvarchar(50); begin for select ap_iatacode, ap_place, ap_name into :iatacode, :place, :name from "rlwhitcomb". airport do return row (:iatacode, :place, :name); endfor; end
+>*****************************
+>********* Formatted *********
+>*****************************
+>CREATE PROCEDURE  get_airports
+>RESULT ROW
+>(
+>    NCHAR(3)     NOT NULL,
+>    NVARCHAR(30) NOT NULL,
+>    NVARCHAR(50) NOT NULL
+>)
+>AS
+>DECLARE
+>    iatacode NCHAR(3)    ;
+>    place    NVARCHAR(30);
+>    name     NVARCHAR(50);
+>BEGIN
+>    for select ap_iatacode,
+>    ap_place,
+>    ap_name into :iatacode,
+>    :place,
+>    :name from "rlwhitcomb". airport do
+>    RETURN ROW (:iatacode, :place, :name);
+>    endfor;
+>END
+>
+>
+>*******************************
+>******* Test # 15 Input *******
+>*******************************
+>create procedure  get_my_airlines( alname nvarchar(60) ) result row( nchar(3) not null, nchar(3) not null, nvarchar(60) not null) as declare iatacode nchar(3); icaocode nchar(3); name nvarchar(60); begin for select al_iatacode, al_icaocode, al_name into :iatacode, :icaocode, :name from "rlwhitcomb". airline where al_name like :alname do return row (:iatacode, :icaocode, :name); endfor; end
+>*****************************
+>********* Formatted *********
+>*****************************
+>CREATE PROCEDURE  get_my_airlines
+>(
+>    alname NVARCHAR(60)
+>)
+>RESULT ROW
+>(
+>    NCHAR(3)     NOT NULL,
+>    NCHAR(3)     NOT NULL,
+>    NVARCHAR(60) NOT NULL
+>)
+>AS
+>DECLARE
+>    iatacode NCHAR(3)    ;
+>    icaocode NCHAR(3)    ;
+>    name     NVARCHAR(60);
+>BEGIN
+>    for select al_iatacode,
+>    al_icaocode,
+>    al_name into :iatacode,
+>    :icaocode,
+>    :name from "rlwhitcomb". airline where al_name like :alname do
+>    RETURN ROW (:iatacode, :icaocode, :name);
+>    endfor;
+>END
+>
+>
+>*******************************
+>******* Test # 16 Input *******
+>*******************************
+>CREATE PROCEDURE  get_my_airports ( ccode NCHAR(2) NOT NULL NOT DEFAULT, area NVARCHAR(30) NOT NULL NOT DEFAULT) RESULT ROW( nchar(3) not null,  nvarchar(30) not null,  nvarchar(50) not null) AS DECLARE IATACODE NCHAR(3); PLACE NVARCHAR(30); NAME NVARCHAR(50); MSTRING NVARCHAR(100) NOT NULL; BEGIN FOR SELECT AP_IATACODE, AP_PLACE, AP_NAME INTO :IATACODE, :PLACE, :NAME FROM "SYSTEM". AIRPORT WHERE AP_CCODE LIKE :CCODE AND AP_PLACE LIKE :AREA ORDER BY AP_IATACODE DO RETURN ROW (:iatacode,  :place,  :name); ENDFOR; END
+>*****************************
+>********* Formatted *********
+>*****************************
+>CREATE PROCEDURE  get_my_airports
+>(
+>    ccode NCHAR(2)     NOT NULL NOT DEFAULT,
+>    area  NVARCHAR(30) NOT NULL NOT DEFAULT
+>)
+>RESULT ROW
+>(
+>    NCHAR(3)     NOT NULL,
+>    NVARCHAR(30) NOT NULL,
+>    NVARCHAR(50) NOT NULL
+>)
+>AS
+>DECLARE
+>    IATACODE NCHAR(3)     ;
+>    PLACE    NVARCHAR(30) ;
+>    NAME     NVARCHAR(50) ;
+>    MSTRING  NVARCHAR(100) NOT NULL;
+>BEGIN
+>    FOR SELECT AP_IATACODE,
+>    AP_PLACE,
+>    AP_NAME INTO :IATACODE,
+>    :PLACE,
+>    :NAME FROM "SYSTEM". AIRPORT WHERE AP_CCODE LIKE :CCODE AND AP_PLACE LIKE :AREA ORDER BY AP_IATACODE DO
+>    RETURN ROW (:iatacode,  :place,  :name);
+>    ENDFOR;
+>END
+>
+>
+>*******************************
+>******* Test # 17 Input *******
+>*******************************
+>create procedure  search_route( depart_from nchar(3) not null not default, arrive_to nchar(3) not null not default, flight_day nchar(7) not null not default) result row( nchar(3) not null, integer not null, nchar(3) not null, nchar(3) not null, systemdate not null, systemdate not null, nchar(7) not null) as declare o_airline nchar(3) not null; o_flight_num integer not null; o_depart_from nchar(3) not null; o_arrive_to nchar(3) not null; o_depart_at systemdate not null; o_arrive_at systemdate not null; o_flight_day nchar(7) not null; begin for select rt_airline, rt_flight_num, rt_depart_from, rt_arrive_to, rt_depart_at, rt_arrive_at, rt_flight_day into :o_airline, :o_flight_num, :o_depart_from, :o_arrive_to, :o_depart_at, :o_arrive_at, :o_flight_day from "rlwhitcomb". route where rt_depart_from = depart_from and rt_arrive_to = arrive_to and rt_flight_day like flight_day order by rt_airline, rt_flight_num do return row(:o_airline, :o_flight_num, :o_depart_from, :o_arrive_to, :o_depart_at, :o_arrive_at, :o_flight_day); endfor; end
+>*****************************
+>********* Formatted *********
+>*****************************
+>CREATE PROCEDURE  search_route
+>(
+>    depart_from NCHAR(3) NOT NULL NOT DEFAULT,
+>    arrive_to   NCHAR(3) NOT NULL NOT DEFAULT,
+>    flight_day  NCHAR(7) NOT NULL NOT DEFAULT
+>)
+>RESULT ROW
+>(
+>    NCHAR(3)    NOT NULL,
+>    INTEGER     NOT NULL,
+>    NCHAR(3)    NOT NULL,
+>    NCHAR(3)    NOT NULL,
+>    SYSTEMDATE  NOT NULL,
+>    SYSTEMDATE  NOT NULL,
+>    NCHAR(7)    NOT NULL
+>)
+>AS
+>DECLARE
+>    o_airline     NCHAR(3)    NOT NULL;
+>    o_flight_num  INTEGER     NOT NULL;
+>    o_depart_from NCHAR(3)    NOT NULL;
+>    o_arrive_to   NCHAR(3)    NOT NULL;
+>    o_depart_at   SYSTEMDATE  NOT NULL;
+>    o_arrive_at   SYSTEMDATE  NOT NULL;
+>    o_flight_day  NCHAR(7)    NOT NULL;
+>BEGIN
+>    for select rt_airline,
+>    rt_flight_num,
+>    rt_depart_from,
+>    rt_arrive_to,
+>    rt_depart_at,
+>    rt_arrive_at,
+>    rt_flight_day into :o_airline,
+>    :o_flight_num,
+>    :o_depart_from,
+>    :o_arrive_to,
+>    :o_depart_at,
+>    :o_arrive_at,
+>    :o_flight_day from "rlwhitcomb". route where rt_depart_from = depart_from and rt_arrive_to = arrive_to and rt_flight_day like flight_day order by rt_airline,
+>    rt_flight_num do
+>    RETURN ROW(:o_airline, :o_flight_num, :o_depart_from, :o_arrive_to, :o_depart_at, :o_arrive_at, :o_flight_day);
+>    endfor;
+>END
+>
+>
+>*******************************
+>******* Test # 18 Input *******
+>*******************************
+>create procedure  "system"."$airli_r00000115000000001"("$A" SET OF ( "al_ccode" nchar(2) NOT NULL  ) ) AS DECLARE COUNTER INTEGER; BEGIN SELECT ANY( 1 ) INTO :COUNTER FROM ( "$A" "$REFING" LEFT JOIN "system"."country" "$REFED" ON "$REFING"."al_ccode" = "$REFED"."ct_code" ) WHERE "$REFED"."ct_code" IS NULL;  IF COUNTER != 0 THEN  EXECUTE PROCEDURE "owner". IIERROR( errorno = 6406, detail = 0, p_count = 3, p1 = '"airline"', p2 = '"country"', p3 = '"$airli_r0000011500000000"'); ENDIF; END
+>*****************************
+>********* Formatted *********
+>*****************************
+>CREATE PROCEDURE  "system"."$airli_r00000115000000001"
+>(
+>    "$A" SET OF ( "AL_CCODE" NCHAR(2)     NOT NULL  )
+>)
+>AS
+>DECLARE
+>    COUNTER INTEGER;
+>BEGIN
+>    SELECT ANY( 1 ) INTO :COUNTER FROM ( "$A" "$REFING" LEFT JOIN "system"."country" "$REFED" ON "$REFING"."al_ccode" = "$REFED"."ct_code" ) WHERE "$REFED"."ct_code" IS NULL;
+>     IF COUNTER != 0 THEN  EXECUTE PROCEDURE "owner". IIERROR( errorno = 6406,
+>    detail = 0,
+>    p_count = 3,
+>    p1 = '"airline"',
+>    p2 = '"country"',
+>    p3 = '"$airli_r0000011500000000"');
+>    ENDIF;
+>END
+>
+>
+>*******************************
+>******* Test # 19 Input *******
+>*******************************
+>create procedure  "system"."$airli_r00000115000000002"("$A" SET OF ( "al_ccode" nchar(2) NOT NULL  ) ) AS DECLARE COUNTER INTEGER; BEGIN SELECT ANY( 1 ) INTO :COUNTER FROM ( "$A" "$REFING" LEFT JOIN "system"."country" "$REFED" ON "$REFING"."al_ccode" = "$REFED"."ct_code" ) WHERE "$REFED"."ct_code" IS NULL;  IF COUNTER != 0 THEN  EXECUTE PROCEDURE "owner". IIERROR( errorno = 6407, detail = 0, p_count = 3, p1 = '"airline"', p2 = '"country"', p3 = '"$airli_r0000011500000000"'); ENDIF; END
+>*****************************
+>********* Formatted *********
+>*****************************
+>CREATE PROCEDURE  "system"."$airli_r00000115000000002"
+>(
+>    "$A" SET OF ( "AL_CCODE" NCHAR(2)     NOT NULL  )
+>)
+>AS
+>DECLARE
+>    COUNTER INTEGER;
+>BEGIN
+>    SELECT ANY( 1 ) INTO :COUNTER FROM ( "$A" "$REFING" LEFT JOIN "system"."country" "$REFED" ON "$REFING"."al_ccode" = "$REFED"."ct_code" ) WHERE "$REFED"."ct_code" IS NULL;
+>     IF COUNTER != 0 THEN  EXECUTE PROCEDURE "owner". IIERROR( errorno = 6407,
+>    detail = 0,
+>    p_count = 3,
+>    p1 = '"airline"',
+>    p2 = '"country"',
+>    p3 = '"$airli_r0000011500000000"');
+>    ENDIF;
+>END
+>
+>
+>*******************************
+>******* Test # 20 Input *******
+>*******************************
+>create procedure  "system"."$airpo_r00000121000000004"("$A" SET OF ( new1 nchar(2) NOT NULL  , old1 nchar(2) NOT NULL  ) ) AS DECLARE COUNTER INTEGER; BEGIN SELECT ANY( 1 ) INTO :COUNTER FROM "system"."airport" "$REFING", ( "$A" "$DEL" LEFT JOIN "$A" "$INS" ON "$DEL".old1 = "$INS".new1 ) WHERE "$REFING"."ap_ccode" = "$DEL".old1 AND "$INS".new1 IS NULL;  IF COUNTER != 0 THEN  EXECUTE PROCEDURE "owner". IIERROR( errorno = 6409, detail = 0, p_count = 3, p1 = '"country"', p2 = '"airport"', p3 = '"$airpo_r0000012100000000"'); ENDIF; END
+>*****************************
+>********* Formatted *********
+>*****************************
+>CREATE PROCEDURE  "system"."$airpo_r00000121000000004"
+>(
+>    "$A" SET OF ( NEW1 NCHAR(2)     NOT NULL  ,
+>    old1 NCHAR(2)               NOT NULL  )
+>)
+>AS
+>DECLARE
+>    COUNTER INTEGER;
+>BEGIN
+>    SELECT ANY( 1 ) INTO :COUNTER FROM "system"."airport" "$REFING",
+>    ( "$A" "$DEL" LEFT JOIN "$A" "$INS" ON "$DEL".old1 = "$INS".new1 ) WHERE "$REFING"."ap_ccode" = "$DEL".old1 AND "$INS".new1 IS NULL;
+>     IF COUNTER != 0 THEN  EXECUTE PROCEDURE "owner". IIERROR( errorno = 6409,
+>    detail = 0,
+>    p_count = 3,
+>    p1 = '"country"',
+>    p2 = '"airport"',
+>    p3 = '"$airpo_r0000012100000000"');
+>    ENDIF;
+>END
+>
+>
+>*******************************
+>******* Test # 21 Input *******
+>*******************************
+>create procedure  update_emp (in id varchar(10) NOT NULL NOT DEFAULT ) AS BEGIN insert into "dummy". emp(name, start_date) values (:id, date('now')); END 
+>*****************************
+>********* Formatted *********
+>*****************************
+>CREATE PROCEDURE  update_emp
+>(
+>    in ID VARCHAR(10)  NOT NULL NOT DEFAULT
+>)
+>AS
+>BEGIN
+>    insert into "dummy". emp(name,
+>    start_date) values (:id,
+>    date('now'));
+>END
+>
+>
+>*******************************
+>******* Test # 22 Input *******
+>*******************************
+>CREATE TABLE up_checks_part1 AS SELECT p.rowid, p.studyid, CASE WHEN p.nid IS NULL AND p.nid15 IS NULL AND p.nid18 IS NULL THEN 0 ELSE 1 END has_nid, CASE WHEN p.nid18 IS NULL THEN 0 ELSE 1 END has_nid18, CASE WHEN p.name_u64 IS NULL THEN 0 ELSE 1 END has_name,  CASE WHEN e.studyid IS NULL THEN ifnull(p.studyid,'null') END invalid_studyid, CASE WHEN multiple.studyid IS NOT NULL THEN ifnull(p.studyid,'null') END repeated_studyid, CASE WHEN p.is_female IS NULL AND p.partner_name_u64 IS NULL AND p.dob_y IS NULL AND p.dob_m IS NULL AND p.dob_d IS NULL AND p.add_town_u64 IS NULL AND p.add_village_u64 IS NULL AND p.add_home_u64 IS NULL THEN 0 ELSE 1 END has_other_data, CASE WHEN p.nid15 NOT IN (15,18) THEN ifnull(p.nid,'null') WHEN length(trim(p.nid15)) <> 15 THEN ifnull(p.nid15,'null') WHEN length(trim(p.nid18)) <> 18 THEN ifnull(p.nid18,'null') END bad_nid_length, length (CASE WHEN length(trim(p.nid)) NOT IN (15,18) THEN ifnull(p.nid,'null') WHEN length(trim(p.nid15)) <> 15 THEN ifnull(p.nid15,'null') WHEN length(trim(p.nid18)) <> 18 THEN ifnull(p.nid18,'null') END) bad_length, nullif( trim(CASE WHEN p.nid15 NOT SIMILAR TO '[0-9]{15}' THEN p.nid15 ELSE '' END) || trim(CASE WHEN p.nid18 NOT SIMILAR TO '[0-9]{17}[0-9xX]' THEN p.nid18 ELSE '' END), '') bad_nid_character, CASE WHEN right(p.nid18,1) <> substring('10X98765432' from (mod(int4(substring(p.nid18 from 1 for 1) * 7) + int4(substring(p.nid18 from 2 for 1) * 9) + int4(substring(p.nid18 from 3 for 1) * 10) + int4(substring(p.nid18 from 4 for 1) * 5) + int4(substring(p.nid18 from 5 for 1) * 8) + int4(substring(p.nid18 from 6 for 1) * 4) + int4(substring(p.nid18 from 7 for 1) * 2) + int4(substring(p.nid18 from 8 for 1) * 1) + int4(substring(p.nid18 from 9 for 1) * 6) + int4(substring(p.nid18 from 10 for 1) * 3) + int4(substring(p.nid18 from 11 for 1) * 7) + int4(substring(p.nid18 from 12 for 1) * 9) + int4(substring(p.nid18 from 13 for 1) * 10) + int4(substring(p.nid18 from 14 for 1) * 5) + int4(substring(p.nid18 from 15 for 1) * 8) + int4(substring(p.nid18 from 16 for 1) * 4) + int4(substring(p.nid18 from 17 for 1) * 2) ,11)+1) for 1) THEN substring('10X98765432' from (mod(int4(substring(p.nid18 from 1 for 1) * 7) + int4(substring(p.nid18 from 2 for 1) * 9) + int4(substring(p.nid18 from 3 for 1) * 10) + int4(substring(p.nid18 from 4 for 1) * 5) + int4(substring(p.nid18 from 5 for 1) * 8) + int4(substring(p.nid18 from 6 for 1) * 4) + int4(substring(p.nid18 from 7 for 1) * 2) + int4(substring(p.nid18 from 8 for 1) * 1) + int4(substring(p.nid18 from 9 for 1) * 6) + int4(substring(p.nid18 from 10 for 1) * 3) + int4(substring(p.nid18 from 11 for 1) * 7) + int4(substring(p.nid18 from 12 for 1) * 9) + int4(substring(p.nid18 from 13 for 1) * 10) + int4(substring(p.nid18 from 14 for 1) * 5) + int4(substring(p.nid18 from 15 for 1) * 8) + int4(substring(p.nid18 from 16 for 1) * 4) + int4(substring(p.nid18 from 17 for 1) * 2) ,11)+1) for 1) END bad_nid_checksum, CASE WHEN _isvaliddate( (CASE WHEN substring(p.nid15 from 11 for 2) <> c.dob_d THEN substring(p.nid15 from 11 for 2) WHEN substring(p.nid18 from 13 for 2) <> c.dob_d THEN substring(p.nid18 from 13 for 2) END) || '/' || (CASE WHEN substring(p.nid15 from 9 for 2) <> c.dob_m THEN substring(p.nid15 from 9 for 2) WHEN substring(p.nid18 from 11 for 2) <> c.dob_m THEN substring(p.nid18 from 11 for 2) END) || '/' || (CASE WHEN 1900 + substring(p.nid15 from 7 for 2) <> c.dob_y THEN 1900 + substring(p.nid15 from 7 for 2) WHEN substring(p.nid18 from 7 for 4) <> c.dob_y THEN substring(p.nid15 from 7 for 4) END) ) = 0 THEN (CASE WHEN substring(p.nid15 from 11 for 2) <> c.dob_d THEN substring(p.nid15 from 11 for 2) WHEN substring(p.nid18 from 13 for 2) <> c.dob_d THEN substring(p.nid18 from 13 for 2) END) || '/' || (CASE WHEN substring(p.nid15 from 9 for 2) <> c.dob_m THEN substring(p.nid15 from 9 for 2) WHEN substring(p.nid18 from 11 for 2) <> c.dob_m THEN substring(p.nid18 from 11 for 2) END) || '/' || (CASE WHEN 1900 + substring(p.nid15 from 7 for 2) <> c.dob_y THEN 1900 + substring(p.nid15 from 7 for 2) WHEN substring(p.nid18 from 7 for 4) <> c.dob_y THEN substring(p.nid15 from 7 for 4) END) END bad_nid_dob, CASE WHEN p.nid15 <> trim(char(substring(p.nid18 from 1 for 6))) + trim(char(substring(p.nid18 from 9 for 9))) THEN p.nid15 END nid15_nid18_mismatch_nid15, CASE WHEN p.nid15 <> trim(char(substring(p.nid18 from 1 for 6))) + trim(char(substring(p.nid18 from 9 for 9))) THEN trim(char(substring(p.nid18 from 1 for 6))) + trim(char(substring(p.nid18 from 9 for 9))) END nid15_nid18_mismatch_nid18, CASE WHEN p.nid15 <> e.nid15 OR p.nid18 <> e.nid18 THEN (CASE WHEN 1 - mod(substring(p.nid15 from 15 for 1),2) <> c.is_female THEN 1 - mod(substring(p.nid15 from 15 for 1),2) WHEN 1 - mod(substring(p.nid18 from 17 for 1),2) <> c.is_female THEN 1 - mod(substring(p.nid18 from 17 for 1),2) END) END nid_gender_mismatch, c.is_female current_is_female, CASE WHEN p.nid15 <> e.nid15 OR p.nid18 <> e.nid18 THEN (CASE WHEN substring(p.nid15 from 11 for 2) <> c.dob_d THEN substring(p.nid15 from 11 for 2) WHEN substring(p.nid18 from 13 for 2) <> c.dob_d THEN substring(p.nid18 from 13 for 2) END) END nid_dob_d_mismatch, c.dob_d current_dob_d, CASE WHEN p.nid15 <> e.nid15 OR p.nid18 <> e.nid18 THEN (CASE WHEN substring(p.nid15 from 9 for 2) <> c.dob_m THEN substring(p.nid15 from 9 for 2) WHEN substring(p.nid18 from 11 for 2) <> c.dob_m THEN substring(p.nid18 from 11 for 2) END) END nid_dob_m_mismatch, c.dob_m current_dob_m, CASE WHEN p.nid15 <> e.nid15 OR p.nid18 <> e.nid18 THEN (CASE WHEN 1900 + substring(p.nid15 from 7 for 2) <> c.dob_y THEN 1900 + substring(p.nid15 from 7 for 2) WHEN substring(p.nid18 from 7 for 4) <> c.dob_y THEN substring(p.nid15 from 7 for 4) END) END nid_dob_y_mismatch, c.dob_y current_dob_y,  CASE WHEN p.nid15 <> e.nid15 THEN e.nid15 WHEN p.nid18 <> e.nid18 THEN e.nid18 END nid_change_old, CASE WHEN p.nid15 <> e.nid15 THEN p.nid15 WHEN p.nid18 <> e.nid18 THEN p.nid18 END nid_change_new, CASE WHEN p.name_u64 <> c.name_u64 THEN c.name_u64 END name_change_old_u64, CASE WHEN p.name_u64 <> c.name_u64 THEN p.name_u64 END name_change_new_u64 FROM updated_participants_part1 p LEFT JOIN extra_data e ON p.studyid = e.studyid LEFT JOIN consent2 c ON e.studyid = c.studyid AND e.latest_consent_date = c.creation_date LEFT JOIN ( SELECT studyid, count(*) freq FROM ( SELECT distinct studyid, name_u64, nid, nid15, nid18, is_female, partner_name_u64, dob_d, dob_m, dob_y, add_town_u64, add_village_u64, add_home_u64 FROM updated_participants_part1 ) x GROUP BY 1 HAVING count(*) > 1 ) multiple ON p.studyid = multiple.studyid
+>*****************************
+>********* Formatted *********
+>*****************************
+>CREATE TABLE up_checks_part1
+>AS SELECT
+>    p.rowid,
+>    p.studyid,
+>    case when p.nid is null and p.nid15 is null and p.nid18 is null then 0 else 1 end has_nid,
+>    case when p.nid18 is null then 0 else 1 end has_nid18,
+>    case when p.name_u64 is null then 0 else 1 end has_name,
+>     case when e.studyid is null then ifnull(p.studyid,'null') end invalid_studyid,
+>    case when multiple.studyid is not null then ifnull(p.studyid,'null') end repeated_studyid,
+>    case when p.is_female is null and p.partner_name_u64 is null and p.dob_y is null and p.dob_m is null and p.dob_d is null and p.add_town_u64 is null and p.add_village_u64 is null and p.add_home_u64 is null then 0 else 1 end has_other_data,
+>    case when p.nid15 not in (15,18) then ifnull(p.nid,'null') when length(trim(p.nid15)) <> 15 then ifnull(p.nid15,'null') when length(trim(p.nid18)) <> 18 then ifnull(p.nid18,'null') end bad_nid_length,
+>    length (case when length(trim(p.nid)) not in (15,18) then ifnull(p.nid,'null') when length(trim(p.nid15)) <> 15 then ifnull(p.nid15,'null') when length(trim(p.nid18)) <> 18 then ifnull(p.nid18,'null') end) bad_length,
+>    nullif( trim(case when p.nid15 not similar to '[0-9]{15}' then p.nid15 else '' end) || trim(case when p.nid18 not similar to '[0-9]{17}[0-9xx]' then p.nid18 else '' end), '') bad_nid_character,
+>    case when right(p.nid18,1) <> substring('10x98765432'
+>FROM
+>    modint4substringp.nid18 from 1 for 1 * 7 + int4substringp.nid18 from 2 for 1 * 9 + int4substringp.nid18 from 3 for 1 * 10 + int4substringp.nid18 from 4 for 1 * 5 + int4substringp.nid18 from 5 for 1 * 8 + int4substringp.nid18 from 6 for 1 * 4 + int4substringp.nid18 from 7 for 1 * 2 + int4substringp.nid18 from 8 for 1 * 1 + int4substringp.nid18 from 9 for 1 * 6 + int4substringp.nid18 from 10 for 1 * 3 + int4substringp.nid18 from 11 for 1 * 7 + int4substringp.nid18 from 12 for 1 * 9 + int4substringp.nid18 from 13 for 1 * 10 + int4substringp.nid18 from 14 for 1 * 5 + int4substringp.nid18 from 15 for 1 * 8 + int4substringp.nid18 from 16 for 1 * 4 + int4substringp.nid18 from 17 for 1 * 2 , 11+1 for 1
+>)
+>THEN SUBSTRING('10X98765432' from (mod(int4(substring(p.nid18 from 1 for 1) * 7) + int4(substring(p.nid18 from 2 for 1) * 9) + int4(substring(p.nid18 from 3 for 1) * 10) + int4(substring(p.nid18 from 4 for 1) * 5) + int4(substring(p.nid18 from 5 for 1) * 8) + int4(substring(p.nid18 from 6 for 1) * 4) + int4(substring(p.nid18 from 7 for 1) * 2) + int4(substring(p.nid18 from 8 for 1) * 1) + int4(substring(p.nid18 from 9 for 1) * 6) + int4(substring(p.nid18 from 10 for 1) * 3) + int4(substring(p.nid18 from 11 for 1) * 7) + int4(substring(p.nid18 from 12 for 1) * 9) + int4(substring(p.nid18 from 13 for 1) * 10) + int4(substring(p.nid18 from 14 for 1) * 5) + int4(substring(p.nid18 from 15 for 1) * 8) + int4(substring(p.nid18 from 16 for 1) * 4) + int4(substring(p.nid18 from 17 for 1) * 2) , 11)+1) for 1) END BAD_NID_CHECKSUM, CASE WHEN _ISVALIDDATE( (CASE WHEN substring(p.nid15 from 11 for 2) <> c.dob_d THEN substring(p.nid15 from 11 for 2) WHEN substring(p.nid18 from 13 for 2) <> c.dob_d THEN substring(p.nid18 from 13 for 2) END) || '/' || (CASE WHEN substring(p.nid15 from 9 for 2) <> c.dob_m THEN substring(p.nid15 from 9 for 2) WHEN substring(p.nid18 from 11 for 2) <> c.dob_m THEN substring(p.nid18 from 11 for 2) END) || '/' || (CASE WHEN 1900 + substring(p.nid15 from 7 for 2) <> c.dob_y THEN 1900 + substring(p.nid15 from 7 for 2) WHEN substring(p.nid18 from 7 for 4) <> c.dob_y THEN substring(p.nid15 from 7 for 4) END) )  = 0 THEN (CASE WHEN substring(p.nid15 from 11 for 2) <> c.dob_d THEN substring(p.nid15 from 11 for 2) WHEN substring(p.nid18 from 13 for 2) <> c.dob_d THEN substring(p.nid18 from 13 for 2) END) || '/' || (CASE WHEN substring(p.nid15 from 9 for 2) <> c.dob_m THEN substring(p.nid15 from 9 for 2) WHEN substring(p.nid18 from 11 for 2) <> c.dob_m THEN substring(p.nid18 from 11 for 2) END) || '/' || (CASE WHEN 1900 + substring(p.nid15 from 7 for 2) <> c.dob_y THEN 1900 + substring(p.nid15 from 7 for 2) WHEN substring(p.nid18 from 7 for 4) <> c.dob_y THEN substring(p.nid15 from 7 for 4) END) END BAD_NID_DOB, CASE WHEN P.NID15 <> TRIM(char(substring(p.nid18 from 1 for 6))) + TRIM(char(substring(p.nid18 from 9 for 9))) THEN P.NID15 END NID15_NID18_MISMATCH_NID15, CASE WHEN P.NID15 <> TRIM(char(substring(p.nid18 from 1 for 6))) + TRIM(char(substring(p.nid18 from 9 for 9))) THEN TRIM(char(substring(p.nid18 from 1 for 6))) + TRIM(char(substring(p.nid18 from 9 for 9))) END NID15_NID18_MISMATCH_NID18, CASE WHEN P.NID15 <> E.NID15 OR P.NID18 <> E.NID18 THEN (CASE WHEN 1 - mod(substring(p.nid15 from 15 for 1), 2) <> c.is_female THEN 1 - mod(substring(p.nid15 from 15 for 1), 2) WHEN 1 - mod(substring(p.nid18 from 17 for 1), 2) <> c.is_female THEN 1 - mod(substring(p.nid18 from 17 for 1), 2) END) END NID_GENDER_MISMATCH, C.IS_FEMALE CURRENT_IS_FEMALE, CASE WHEN P.NID15 <> E.NID15 OR P.NID18 <> E.NID18 THEN (CASE WHEN substring(p.nid15 from 11 for 2) <> c.dob_d THEN substring(p.nid15 from 11 for 2) WHEN substring(p.nid18 from 13 for 2) <> c.dob_d THEN substring(p.nid18 from 13 for 2) END) END NID_DOB_D_MISMATCH, C.DOB_D CURRENT_DOB_D, CASE WHEN P.NID15 <> E.NID15 OR P.NID18 <> E.NID18 THEN (CASE WHEN substring(p.nid15 from 9 for 2) <> c.dob_m THEN substring(p.nid15 from 9 for 2) WHEN substring(p.nid18 from 11 for 2) <> c.dob_m THEN substring(p.nid18 from 11 for 2) END) END NID_DOB_M_MISMATCH, C.DOB_M CURRENT_DOB_M, CASE WHEN P.NID15 <> E.NID15 OR P.NID18 <> E.NID18 THEN (CASE WHEN 1900 + substring(p.nid15 from 7 for 2) <> c.dob_y THEN 1900 + substring(p.nid15 from 7 for 2) WHEN substring(p.nid18 from 7 for 4) <> c.dob_y THEN substring(p.nid15 from 7 for 4) END) END NID_DOB_Y_MISMATCH, C.DOB_Y CURRENT_DOB_Y,  CASE WHEN P.NID15 <> E.NID15 THEN E.NID15 WHEN P.NID18 <> E.NID18 THEN E.NID18 END NID_CHANGE_OLD, CASE WHEN P.NID15 <> E.NID15 THEN P.NID15 WHEN P.NID18 <> E.NID18 THEN P.NID18 END NID_CHANGE_NEW, CASE WHEN P.NAME_U64 <> C.NAME_U64 THEN C.NAME_U64 END NAME_CHANGE_OLD_U64, CASE WHEN P.NAME_U64 <> C.NAME_U64 THEN P.NAME_U64 END NAME_CHANGE_NEW_U64 FROM UPDATED_PARTICIPANTS_PART1 P LEFT JOIN EXTRA_DATA E ON P.STUDYID  = E.STUDYID LEFT JOIN CONSENT2 C ON E.STUDYID  = C.STUDYID AND E.LATEST_CONSENT_DATE  = C.CREATION_DATE LEFT JOIN ( SELECT studyid,  count(*) freq FROM ( SELECT distinct studyid,  name_u64,  nid,  nid15,  nid18,  is_female,  partner_name_u64,  dob_d,  dob_m,  dob_y,  add_town_u64,  add_village_u64,  add_home_u64 FROM updated_participants_part1 ) x GROUP BY 1 HAVING count(*) > 1 ) MULTIPLE ON P.STUDYID  = MULTIPLE.STUDYID
+>
+>Total number of tests:  22; passed:  22, failed:   0.

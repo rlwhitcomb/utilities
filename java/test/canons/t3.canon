@@ -1,0 +1,10 @@
+>====================================
+>Running csvtest...
+>------------------------------------
+>Test 'all_quotes': Passed
+>Test 'quote': Passed
+>Test 'non_standard': Passed
+>------------------------------------
+>Ran 3 tests: 3 passed, 0 failed.
+>====================================
+>

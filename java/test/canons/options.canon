@@ -1,0 +1,11 @@
+>input 'MixedCase' -> [mixed_case, mixed-case, mixedcase, Mixed-Case, MixedCase, Mixed_Case]
+>input 'MixedCase' -> [mixed_case, mixed-case, mixedcase]
+>input 'SuperVerbose' -> [super-verbose, superverbose, super_verbose, Super-Verbose, SuperVerbose, Super_Verbose]
+>input 'SuperVerbose' -> [super-verbose, superverbose, super_verbose]
+>input 'mixedcase' -> [mixedcase]
+>input 'mixedcase' -> [mixedcase]
+>input 'mixed-case' -> [mixed-case]
+>input 'mixed-case' -> [mixed-case]
+>input 'Utf-16' -> [utf-16, Utf_16, utf_16, Utf-16, Utf16, utf16]
+>input 'Utf-16' -> [utf-16, utf_16, utf16]
+>Total number of tests = 10, number passed = 10, failed = 0

@@ -1,0 +1,21 @@
+#
+# Tests of the Tester class
+#
+$testClass info.rlwhitcomb.tester.Tester
+$inputDir test/canons
+$defaultOptions -log
+
+$echo Testing the tester...
+$echo
+
+t1: liststest
+t2: calctest
+t3: csvtest
+t4: sqltest
+t5: optiontest
+t6: dynarraytest
+t7: matchestest
+t8: numerictest
+
+$echo
+$echo Done with all the Tester tests.

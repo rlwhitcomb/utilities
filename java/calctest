@@ -1,0 +1,24 @@
+# All these tests will run in Calc
+$testClass info.rlwhitcomb.calc.Calc
+
+# Location of the canon files (any inputs and expected outputs)
+$inputDir test/canons
+
+# Location of the scripts to be tested
+$scriptDir .
+
+# In order to reduce redundancy here, these are the options to
+# sent to the test program for every test
+$defaultOptions -nocolors
+
+$echo "Starting Calc tests..."
+$echo
+
+e1_e2_e3: e1,e2,e3
+e10.canon: e10
+e12.canon: e12
+e_trig.canon: e_trig
+mort: e_m1,e_m2
+
+$echo
+$echo "End of Calc tests."

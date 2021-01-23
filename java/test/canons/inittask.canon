@@ -1,0 +1,4 @@
+InitTaskTest: starting long-running PI digit calculation...
+InitTask: waited 6.971293 secs for the answer, first time.
+InitTask: waited 0.000007 secs for the answer, after first time.
+InitTaskTest: Success
