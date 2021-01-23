@@ -163,6 +163,8 @@
  *	    Prepare for GitHub.
  *	18-Jan-2021 (rlwhitcomb)
  *	    Add a directive for default options; work nicely with the new Testable interface.
+ *	23-Jan-2021 (rlwhitcomb)
+ *	    Fix obsolete HTML constructs in Javadoc.
  */
 package info.rlwhitcomb.tester;
 
@@ -673,13 +675,13 @@ public class Tester
 
 	/**
 	 * Check a potential canon line for platform, version and charset values
-	 * specified as <tt>{<i>platform</i>}</tt> or <tt>{,<i>major</i>.<i>minor</i>}</tt> or <tt>{<i>platform</i>,<i>major</i>.<i>minor</i>}</tt>.
-	 * <p>Platform can be <tt>"windows"</tt>, <tt>"linux"</tt>, <tt>"unix"</tt>, or <tt>"osx"</tt>. Also, <tt>"^platform"</tt> will match any
+	 * specified as <code>{<i>platform</i>}</code> or <code>{,<i>major</i>.<i>minor</i>}</code> or <code>{<i>platform</i>,<i>major</i>.<i>minor</i>}</code>.
+	 * <p>Platform can be <code>"windows"</code>, <code>"linux"</code>, <code>"unix"</code>, or <code>"osx"</code>. Also, <code>"^platform"</code> will match any
 	 * platform EXCEPT the given one.
-	 * <p>Version can also be <tt><i>major</i></tt>, <tt><i>major</i>.<i>x</i></tt> or <tt><i>major</i>.*</tt> or any of these
-	 * followed by <tt>+</tt> or <tt><i>major</i></tt>[<tt>.<i>minor</i></tt>]<tt>-<i>major</i></tt>[<tt>.<i>minor</i></tt>] with either one omitted.
-	 * <p>Charset is specified by <tt>[charset]</tt>, and can be given as <tt>[*]</tt> to match any character set (same as leaving out the check),
-	 * or by <tt>[^name]</tt> which matches any charset BUT the given one.
+	 * <p>Version can also be <code><i>major</i></code>, <code><i>major</i>.<i>x</i></code> or <code><i>major</i>.*</code> or any of these
+	 * followed by <code>+</code> or <code><i>major</i></code>[<code>.<i>minor</i></code>]<code>-<i>major</i></code>[<code>.<i>minor</i></code>] with either one omitted.
+	 * <p>Charset is specified by <code>[charset]</code>, and can be given as <code>[*]</code> to match any character set (same as leaving out the check),
+	 * or by <code>[^name]</code> which matches any charset BUT the given one.
 	 * <p>Either a platform/version or charset check can be given (or both, in either order) and all the given checks must pass for the canon
 	 * line to be included in the final canon test file.
 	 *
