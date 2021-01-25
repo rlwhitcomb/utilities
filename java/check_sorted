@@ -10,7 +10,7 @@ function check_file() {
    fi
 }
 
-for f in $(find . -name "*.txt")
+for f in $(find info -name "*.txt")
 do
   check_file $f
 done
