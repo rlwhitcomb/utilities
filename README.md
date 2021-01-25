@@ -69,20 +69,21 @@ Also see "issues" at https://github.com/rlwhitcomb/utilities/issues
 - Boilerplate program will use this code b/c we sometime want to just do command line, other times want the GUI
 - Word Finder can also use this option
 - Calc is now working with this design, although some features (like "help" and "version") are not well coordinated yet between console and GUI.
+- Unclear yet if a switch ***back*** from GUI to console will work.
 
 ### Calc
 - implement Taylor series expansion of other trig/log functions to requested precision
+- separate out the log/trig functions into TrigLogUtil (or something like that), for better encapsulation (NumericUtil is getting too big)
 - redo the [box] formats of strings (to be? x'...', b'...', o'...') then parse such beasts back to strings
 - allow "_" in numeric values, like Java does
-- format options for commas (or _)
+- format options for commas (or _) (';,' or ';__') or (';$' to format as dollar)??
 - get help and intro text (both console and GUI) from resources
 - add option (both GUI and REPL modes) to open another file
-- functions for financial calculations (INTEREST, NPV, PAYMENT, etc.)
+- functions for financial calculations (INTEREST, NPV, PAYMENT, etc.) (**e_mort** is a start)
 - ?? need a way to do "setScale(...)" on the values ??
 
 ### WordFind
 - Finish the GUI code.
-- Separate .jar file? Or is "utilities.jar" suitable?
 
 ### UUID
 - lots of options
@@ -120,9 +121,4 @@ Also see "issues" at https://github.com/rlwhitcomb/utilities/issues
 - some kind of functional interface (Runnable or Callable)? or Predicate for custom validation, or additional processing
 - ?? should we just do that for validation?  Validator interface "boolean isValid(Object input)" ...info/.../validation package, with Validator interface, and custom implementations (such as IntValidator, FloatValidator, etc. CharsetValidator
 - How do the new interfaces fit in with this scheme (ChoiceEnum)?
-
-### Unit Test ideas
-- Need a way to compare canon files (expected results) with actuals (have used "diff-match-patch" in the past).
-- Incorporate CSVTest once that is ready.
-- Make a test harness facility that can take a test description file and drive the tests.
 
