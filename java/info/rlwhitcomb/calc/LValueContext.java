@@ -30,6 +30,8 @@
  *	    Move text to the resource file.
  *	20-Jan-2021 (rlwhitcomb)
  *	    Allow indexing into strings. Some renaming of parameters and variables.
+ *	25-Jan-2021 (rlwhitcomb)
+ *	    Add Javadoc; one more rename; one more error check on loop variables.
  */
  package info.rlwhitcomb.calc;
 
@@ -59,14 +61,27 @@ class LValueContext
 	/** The integer index value to reference into a {@code List}. */
 	int index;
 
-	LValueContext(Object ctxt) {
+	/**
+	 * Construct given the base context object (which should be the global variables map).
+	 *
+	 * @param obj	The context object (base variables map).
+	 */
+	LValueContext(Object obj) {
 	    this.parent  = null;
 	    this.varCtx  = null;
-	    this.context = ctxt;
+	    this.context = obj;
 	    this.name    = null;
 	    this.index   = -1;
 	}
 
+	/**
+	 * Construct for a <code>map.member</code> reference.
+	 *
+	 * @param p	The parent lvalue.
+	 * @param ctx	The parser context we're working in.
+	 * @param obj	The map object we're referencing into.
+	 * @param nm	The name of the map member to reference.
+	 */
 	LValueContext(LValueContext p, CalcParser.VarContext ctx, Object obj, String nm) {
 	    this.parent  = p;
 	    this.varCtx  = ctx;
@@ -75,6 +90,14 @@ class LValueContext
 	    this.index   = -1;
 	}
 
+	/**
+	 * Construct for a <code>arr[idx]</code> reference.
+	 *
+	 * @param p	The parent lvalue.
+	 * @param ctx	The parser context we're working in.
+	 * @param obj	The array (or string) object we're referencing into.
+	 * @param idx	The index into the object.
+	 */
 	LValueContext(LValueContext p, CalcParser.VarContext ctx, Object obj, int idx) {
 	    this.parent  = p;
 	    this.varCtx  = ctx;
@@ -98,6 +121,14 @@ class LValueContext
 		return "";
 	}
 
+	/**
+	 * At the current variable nesting level, extract the referenced value.
+	 * <p> For a map, this would be <code>map.member</code>, for an array
+	 * or string, this would be <code>arr[index]</code>.
+	 * <p> One special check is made for error reporting purposes on loop variables.
+	 *
+	 * @return The member or indexed value extracted from the base object.
+	 */
 	@SuppressWarnings("unchecked")
 	public Object getContextObject() {
 	    if (name != null) {
@@ -130,9 +161,22 @@ class LValueContext
 	    }
 	}
 
+	/**
+	 * At the current nesting level, set the given value as the object.
+	 * <p> For a map, this would be <code>map.member = value</code>, for an
+	 * array or string, this would be <code>arr[index] = value</code>.
+	 * <p> One special check is made on loop variables because we don't
+	 * want them to be reassigned apart from the <code>loop</code> construct.
+	 *
+	 * @param value	The new value to assign to this context.
+	 * @return 	This value (for convenience in the assign operators.
+	 */
 	@SuppressWarnings("unchecked")
 	public Object putContextObject(Object value) {
 	    if (name != null) {
+		if (name.startsWith("$")) {
+		    throw new CalcExprException(varCtx, "%calc#loopVarNoAssign", name);
+		}
 		Map<String, Object> map = (Map<String, Object>) context;
 		map.put(name, value);
 	    }
@@ -164,6 +208,13 @@ class LValueContext
 	    return value;
 	}
 
+	/**
+	 * An intermediate step used for maps with members as a string (as in <code>map."field"</code>).
+	 *
+	 * @param ctx		The parser context we are working in.
+	 * @param memberName	The (quoted) member name to use at this level.
+	 * @return		The new context for the <code>map."member"</code>.
+	 */
 	@SuppressWarnings("unchecked")
 	private LValueContext makeMapLValue(CalcParser.VarContext ctx, String memberName) {
 	    Map<String, Object> map = null;
@@ -186,6 +237,15 @@ class LValueContext
 	    return this;
 	}
 
+	/**
+	 * The main workhorse method of this class: given a context, and the surrounding <code>lValue</code>,
+	 * get the next level of lValue.
+	 *
+	 * @param visitor	The current visitor, for use in evaluating index expressions.
+	 * @param ctx		The current parse context.
+	 * @param lValue	The surrounding lValue; for global variables, this references the global map.
+	 * @return		The next level of <code>lValue</code> as determined by the new <code>ctx</code> type.
+	 */
 	@SuppressWarnings("unchecked")
 	public static LValueContext getLValue(CalcObjectVisitor visitor, CalcParser.VarContext ctx, LValueContext lValue) {
 	    if (ctx instanceof CalcParser.IdVarContext) {

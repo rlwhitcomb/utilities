@@ -30,6 +30,8 @@
 #	    Action messages.
 #	18-Jan-2021 (rlwhitcomb)
 #	    Results and other colored messages.
+#	25-Jan-2021 (rlwhitcomb)
+#	    One more error message.
 #
 
 #
@@ -75,6 +77,7 @@ precOutOfRange	= Decimal precision of %1$d is out of range
 ioError		= I/O Error: %1$s
 noConvertObjArr	= Cannot convert object or array to '%1$c' format
 noDupLoopVar	= Duplicate loop variable name '%1$s' not allowed
+loopVarNoAssign	= The value of a loop variable ('%1$s') cannot be changed
 infLoopStepZero	= Infinite loop: step value is zero
 invalidConstruct= Invalid '$' construct
 invalidConst2	= Invalid '${...}' construct

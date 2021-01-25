@@ -381,7 +381,7 @@
 		<echo>Test JavaPreProc...</echo>
 		<delete file="TestPP.java"/>
 		<preproc dir="." processAsDirectory="true" recurseDirectories="true" nologo="true" verbose="plus"
-								      log="${test.log.file.name}"/>
+								      log="${test.log.file.name}" overwrite="true"/>
 		<echo>Test of InitializationTask...</echo>
 		<java classname="InitTaskTest"                        output="${test.log.file.name}" append="true" failonerror="true"/>
 		<echo>Running various tests through the Tester...</echo>
