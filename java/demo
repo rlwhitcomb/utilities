@@ -1,3 +1,6 @@
-$dec 1000; pi
+:dec 1000; pi
 1000!
+a = { b: 0, c: false, d: 'ABCDEFG', g: 12.75, h: 1291 }
 a.b=1;a.c=true;a.d='abc';a
+isprime a.h
+

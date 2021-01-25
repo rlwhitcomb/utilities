@@ -4,7 +4,7 @@ if [ -e M$NUMBER.txt.gz ]; then
    gunz M$NUMBER.txt.gz
 fi
 lists -single M$NUMBER.txt >ref.txt
-c -nocolor -r "\$unl;(2**$NUMBER)-1" >calc.txt
+c -nocolor -r ":unl;(2**$NUMBER)-1" >calc.txt
 diff ref.txt calc.txt
 if [ $? -eq 0 ]; then
   echo No differences for M$NUMBER! Calc correctness is verified.
