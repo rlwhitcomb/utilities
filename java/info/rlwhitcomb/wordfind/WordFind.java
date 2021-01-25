@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2020 Roger L. Whitcomb.
+ * Copyright (c) 2020-2021 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -43,6 +43,8 @@
  *	    searching if too many are needed (temp fix).
  *	26-Dec-2020 (rlwhitcomb)
  *	    Use a better algorithm for "contains".
+ *	25-Jan-2021 (rlwhitcomb)
+ *	    Implement "-version" command.
  */
 package info.rlwhitcomb.wordfind;
 
@@ -61,11 +63,15 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.Function;
+
 import org.apache.pivot.wtk.Application;
 import org.apache.pivot.wtk.DesktopApplicationContext;
 import org.apache.pivot.wtk.Display;
+
 import info.rlwhitcomb.util.CharUtil;
 import static info.rlwhitcomb.util.ConsoleColor.Code.*;
+import info.rlwhitcomb.util.Environment;
+
 
 /**
  * A utility program to make sense out of random letter tiles
@@ -498,6 +504,9 @@ public class WordFind implements Application {
             wordFile = WORD_FILE_ORIGINAL;
         } else if (matches(arg, "antique", "enable1", "enable", "en")) {
             wordFile = WORD_FILE_ANTIQUE;
+	} else if (matches(arg, "version", "vers", "ver", "v")) {
+	    Environment.printProgramInfo();
+	    System.exit(0);
         } else {
             error("Unknown option \"" + prefix + arg + "\" ignored!");
         }
@@ -605,6 +614,9 @@ public class WordFind implements Application {
      * @param args The parsed command line arguments.
      */
     public static void main(final String[] args) {
+	Environment.setDesktopApp(true);
+	Environment.loadProgramInfo(WordFind.class);
+
         List<String> argWords = new ArrayList<>(args.length);
         int totalInputSize = processCommandLine(args, argWords);
 
