@@ -5,8 +5,8 @@
 --
 !testClass info.rlwhitcomb.tester.Tester
 !canonDir test/canons
-!sourceDir .
-!defaultOptions -log
+!sourceDir test/files
+!defaultOptions -log -dir:test/files
 
 !echo Testing the tester...
 !echo

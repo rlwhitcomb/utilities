@@ -5,19 +5,19 @@ $testClass info.rlwhitcomb.calc.Calc
 $inputDir test/canons
 
 # Location of the scripts to be tested
-$scriptDir .
+$scriptDir test/files
 
 # In order to reduce redundancy here, these are the options to
 # sent to the test program for every test
-$defaultOptions -nocolors
+$defaultOptions -nocolors -dir test/files
 
 $echo "Starting Calc tests..."
 $echo
 
 e1_e2_e3: e1,e2,e3
-e10.canon: e10
-e12.canon: e12
-e_trig.canon: e_trig
+e10: e10
+e12: e12
+e_trig: e_trig
 mort: e_m1,e_m2
 
 $echo

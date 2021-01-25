@@ -70,6 +70,8 @@
 #	    Prepare for GitHub.
 #	22-Jan-2021 (rlwhitcomb)
 #	    New error message.
+#	25-Jan-2021 (rlwhitcomb)
+#	    New error message.
 
 mismatch		= Mismatch on test \"%1$s\":%n  Canon file: %2$s%n Output file: %3$s
 compareError		= Error comparing files: %1$s%n  Canon file: %2$s%n Output file: %3$s
@@ -77,6 +79,7 @@ errTempCreate		= Error creating temporary files: %1$s
 warnOverwriteCanon	= Warning: the canon file \"%1$s\" is being overwritten.
 errBadCanonCharset	= Canon character set name %1$s is not supported.
 errCanonFiles		= Error reading canon file %1$s or creating stream files: %2$s
+badInputDirArg		= Directory specified by "-dir" option (%1$s) does not exist.
 badInputDir		= Directory specified by \"$inputDir\" directive (%1$s) does not exist.
 badScriptDir		= Directory specified by \"$scriptDir\" directive (%1$s) does not exist.
 emptyInputDir		= The \"$inputDir\" directive should not have an empty directory name.

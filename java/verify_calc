@@ -1,6 +1,7 @@
 #!/bin/bash
 NUMBER=43112609
-if [ -e M$NUMBER.txt.gz ]; then
+if [ -e test/data/M$NUMBER.txt.gz ]; then
+   cp test/data/M$NUMBER.txt.gz .
    gunz M$NUMBER.txt.gz
 fi
 lists -single M$NUMBER.txt >ref.txt
@@ -8,5 +9,9 @@ c -nocolor -r ":unl;(2**$NUMBER)-1" >calc.txt
 diff ref.txt calc.txt
 if [ $? -eq 0 ]; then
   echo No differences for M$NUMBER! Calc correctness is verified.
+  rm M$NUMBER.txt ref.txt calc.txt
+else
+  echo Differences found!
+  echo Reference value in "ref.txt", calculated value in "calc.txt"
+  echo Original data in "M$NUMBER.txt"
 fi
-

@@ -137,6 +137,8 @@
 		Add "tester" directory, and "tester" wrappers.
 		Change most unit tests to use Tester.
 		Lists has moved to the "util" package.
+	    25-Jan-2021 (rlwhitcomb)
+		Add "-dir" parameter to Tester command line.
 
      ========================================================================== -->
 
@@ -387,6 +389,7 @@
 		<echo>Running various tests through the Tester...</echo>
 		<java classname="${tester.class}"                     output="${test.log.file.name}" append="true" failonerror="true">
 			<arg value="-timing"/>
+			<arg value="-dir:test/files"/>
 			<arg value="mastertest"/>
 		</java>
 		<echo>Done with unit tests. Results in "${test.log.file.name}" file.</echo>

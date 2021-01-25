@@ -166,6 +166,9 @@
  *	23-Jan-2021 (rlwhitcomb)
  *	    Fix obsolete HTML constructs in Javadoc. Add aliases for a couple of the directives.
  *	    Switch description comments to include "--" and use "!" as an alias for commands.
+ *	25-Jan-2021 (rlwhitcomb)
+ *	    Add "-inputDir" command line option; use that to find input scripts (defaultScriptDir).
+ *	    Switch to Environment.printProgramInfo.
  */
 package info.rlwhitcomb.tester;
 
@@ -1121,9 +1124,12 @@ public class Tester
 	 */
 	private void driveOneTest(String file) {
 	    File f = new File(file);
-	    if (!(f.exists() && f.isFile() && f.canRead())) {
-		Intl.errFormat("tester#cannotOpenFile", file);
-		return;
+	    if (!FileUtilities.canRead(f) && defaultScriptDir != null) {
+		f = FileUtilities.decorate(file, defaultScriptDir, null);
+		if (!FileUtilities.canRead(f)) {
+		    Intl.errFormat("tester#cannotOpenFile", file);
+		    return;
+		}
 	    }
 	    try (BufferedReader reader = new BufferedReader(new FileReader(f)))
 	    {
@@ -1253,6 +1259,16 @@ public class Tester
 		abortOnFirstError = defaultAbortOnFirstError = true;
 	    else if (Options.matchesOption(opt, true, NO_ABORT_OPTIONS))
 		abortOnFirstError = defaultAbortOnFirstError  = false;
+	    else if (Options.matchesOption(opt, true, "directory", "inputdirectory", "inputdir", "dir", "d")) {
+		File dir = new File(arg1);
+		if (dir.exists() && dir.isDirectory()) {
+		    defaultScriptDir = dir;
+		}
+		else {
+		    Intl.errFormat("tester#badInputDirArg", arg1);
+		    System.exit(2);
+		}
+	    }
 	    else if (Options.matchesOption(opt, "locale", "loc")) {
 		String localeName = arg1;
 		Locale locale = null;
@@ -1267,20 +1283,11 @@ public class Tester
 		Intl.initAllPackageResources(locale);
 	    }
 	    else if (Options.matchesOption(opt, true, "version", "vers", "ver")) {
-		String debugMsg = Environment.isDebugBuild() ? Intl.getString("tester#runner.debugVersion") : "";
-		Intl.outFormat("tester#runner.version",
-			Environment.getProductName(),
-			Environment.getCopyrightNotice(),
-			Environment.getAppVersion(), Environment.getAppBuild(),
-			debugMsg,
-			Environment.getBuildDate(), Environment.getBuildTime());
-		Intl.outFormat("tester#runner.javaVersion",
-			Environment.javaVersion(), Environment.dataModel());
+		Environment.printProgramInfo();
 		System.exit(0);
 	    }
 	    else if (Options.matchesOption(opt, true, "help", "h", "?")) {
-		System.out.println(Environment.getProductName());
-		System.out.println(Environment.getCopyrightNotice());
+		Environment.printProgramInfo();
 		Intl.printHelp("tester#");
 		System.exit(0);
 	    }
@@ -1365,7 +1372,7 @@ public class Tester
 	 */
 	public static void main(String[] args) {
 	    Environment.setDesktopApp(true);
-	    Environment.setProductName("Tester");
+	    Environment.loadProgramInfo(Tester.class);
 
 	    int result = SUCCESS;
 

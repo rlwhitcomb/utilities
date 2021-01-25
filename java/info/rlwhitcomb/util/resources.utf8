@@ -80,6 +80,8 @@
 #	    More errors from NumericUtil.
 #	18-Jan-2021 (rlwhitcomb)
 #	    Don't need one of these errors any more.
+#	25-Jan-2021 (rlwhitcomb)
+#	    Java version string for Environment.
 #
 
 #
@@ -118,6 +120,7 @@ env.copyright		= Copyright (c) 2008-2021 Roger L. Whitcomb.
 env.version		= Version %1$s build %2$s%3$s
 env.build		= Built on %1$s at %2$s
 env.debug		= " (DEBUG)"
+env.javaVersion		= Java version %1$s (%2$d-bit)
 env.timeThis		= Elapsed time %1$11.6f secs.
 
 #

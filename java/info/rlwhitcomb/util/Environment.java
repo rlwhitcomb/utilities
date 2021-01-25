@@ -119,6 +119,8 @@
  *	    New flavor of "loadProgramInfo".
  *	14-Jan-2021 (rlwhitcomb)
  *	    Add "getAllProgramInfo" method.
+ *	25-Jan-2021 (rlwhitcomb)
+ *	    Also display Java version with program info.
  */
 package info.rlwhitcomb.util;
 
@@ -1020,6 +1022,10 @@ public final class Environment
 		getBuildDate(), getBuildTime());
 	    String productName = getProductName();
 	    String copyright   = getCopyrightNotice();
+	    String javaVersion = Intl.formatString(
+		"util#env.javaVersion",
+		javaVersion(),
+		dataModel());
 
 	    int lineWidth = centerWidth;
 
@@ -1028,6 +1034,7 @@ public final class Environment
 	    lineWidth = Math.max(lineWidth, versionInfo.length());
 	    lineWidth = Math.max(lineWidth, buildInfo.length());
 	    lineWidth = Math.max(lineWidth, copyright.length());
+	    lineWidth = Math.max(lineWidth, javaVersion.length());
 	    // If the given width wasn't sufficient for all the text
 	    // then give a little extra to make it look better
 	    if (lineWidth > centerWidth)
@@ -1053,6 +1060,7 @@ public final class Environment
 		}
 		ps.println(" " + buildInfo);
 		ps.println(" " + copyright);
+		ps.println(" " + javaVersion);
 	    } 
 	    else {
 		int width = (lineWidth + 1) / 2 * 2;
@@ -1070,6 +1078,7 @@ public final class Environment
 		}
 		ps.println(CharUtil.padToWidth(buildInfo, -width, CENTER));
 		ps.println(CharUtil.padToWidth(copyright, -width, CENTER));
+		ps.println(CharUtil.padToWidth(javaVersion, -width, CENTER));
 	    }
 	    if (colors)
 		ps.println(underline + RESET);

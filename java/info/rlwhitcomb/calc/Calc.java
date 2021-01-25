@@ -82,6 +82,8 @@
  *	18-Jan-2021 (rlwhitcomb)
  *	    Move all the other (colored) messages to the resources;
  *	    simplify the color rendering.
+ *	25-Jan-2021 (rlwhitcomb)
+ *	    Add "-inputdir" command line option.
  */
 package info.rlwhitcomb.calc;
 
@@ -144,7 +146,9 @@ public class Calc
 		/** Some options (like "-version" or "-help") will quit right afterwards. */
 		QUIT_NOW,
 		/** Locale option requires a locale name. */
-		LOCALE
+		LOCALE,
+		/** Input directory option requires a directory name. */
+		DIRECTORY
 	}
 
 	/** What we're expecting next on the command line. */
@@ -652,6 +656,10 @@ public class Calc
 		case "loc":
 		case "l":
 		    return Expecting.LOCALE;
+		case "inputdir":
+		case "input":
+		case "dir":
+		    return Expecting.DIRECTORY;
 		case "help":
 		case "h":
 		case "?":
@@ -690,6 +698,10 @@ public class Calc
 			    break;
 			case LOCALE:
 			    locale = new Locale(arg);
+			    expecting = Expecting.DEFAULT;
+			    break;
+			case DIRECTORY:
+			    inputDirectory = new File(arg);
 			    expecting = Expecting.DEFAULT;
 			    break;
 			default:
