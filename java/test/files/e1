@@ -324,7 +324,7 @@ p = {b:2, c: { d:true }, "e":e }
 p;j
 length p; scale p;
 :echo "Elements of p:"
-loop $p in p { $p }
+loop $p in p { p[$p] }
 
 :echo
 :echo "End of expression tests (suite 1)."
