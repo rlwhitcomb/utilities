@@ -139,6 +139,8 @@
 		Lists has moved to the "util" package.
 	    25-Jan-2021 (rlwhitcomb)
 		Add "-dir" parameter to Tester command line.
+	    26-Jan-2021 (rlwhitcomb)
+		Add "mkcanon" script.
 
      ========================================================================== -->
 
@@ -218,6 +220,8 @@
 		<include name="matches.bat"                 if:true="${on.windows}"/>
 		<include name="md5"                     unless:true="${on.windows}"/>
 		<include name="md5.bat"                     if:true="${on.windows}"/>
+		<include name="mkcanon"                 unless:true="${on.windows}"/>
+		<include name="mkcanon.bat"                 if:true="${on.windows}"/>
 		<include name="os"                      unless:true="${on.windows}"/>
 		<include name="os.bat"                      if:true="${on.windows}"/>
 		<include name="sleep"                   unless:true="${on.windows}"/>

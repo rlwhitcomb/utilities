@@ -379,9 +379,9 @@
 >length p -> 3
 >scale p -> 3
 >Elements of p:
->p [ $p ] -> 2
->p [ $p ] -> { d: true }
->p [ $p ] -> 2.71828182845904523536028747135266249
+>"name: b, value: 2"
+>"name: c, value: { d: true }"
+>"name: \"e\", value: 2.71828182845904523536028747135266249"
 >
 >End of expression tests (suite 1).
 >Tests of nested object / array variables.
