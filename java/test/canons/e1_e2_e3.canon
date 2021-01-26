@@ -493,6 +493,8 @@
 >    }
 >  }
 >}
+>++ a [ '"b"' ] [ '"c"' ] [ 'f' ] -> 4
+>a -> { "b": { "d": { i: true }, "c": { d: 6, f: 4 } } }
 >
 >End of nested object / array tests.
 >Tests of :include directive.

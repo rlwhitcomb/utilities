@@ -33,7 +33,7 @@ loop $i in ( 'This', 'is', 'a', 'test', 'of', 'the', 'Emergency', "Broadcast", "
 
 :clear map
 map = { a:1, b:2, c:3, d:17, f:42 }
-loop $i in map { $i }
+loop $i in map { `map.${$i} = ${map[$i]}` }
 
 :clear list
 list = [ 'Once', 'upon', 'a', 'time', 'there', 'lived', 'a', 'princess', '...' ]

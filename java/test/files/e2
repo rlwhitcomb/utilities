@@ -51,5 +51,8 @@ a
 a."b"."d".i = true
 a;j
 
+++a['"b"']['"c"']['f']
+a
+
 :echo
 :echo "End of nested object / array tests."

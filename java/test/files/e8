@@ -23,3 +23,6 @@ loop $i in 50 { result = (result + x / result) / 2 }
 `sqrt($x)/2 = ${result/2}`
 `sin(pi/4) = ${sin(pi/4)}`
 
+:result off
+:quiet off
+

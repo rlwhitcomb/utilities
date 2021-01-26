@@ -136,6 +136,9 @@
  *	    Add "length" and "scale" functions.
  *	20-Jan-2021 (rlwhitcomb)
  *	    Adjust compare / equal operator precedence.
+ *	26-Jan-2021 (rlwhitcomb)
+ *	    Allow access from LValueContext to "getStringValue". And now that we have
+ *	    dynamic access to map members, make "loop" over map return keys, not values.
  */
 package info.rlwhitcomb.calc;
 
@@ -292,7 +295,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    return toBooleanValue(visit(ctx), ctx);
 	}
 
-	private String getStringValue(ParserRuleContext ctx) {
+	protected String getStringValue(ParserRuleContext ctx) {
 	    return getStringValue(ctx, false);
 	}
 
@@ -709,8 +712,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    if (obj instanceof Map) {
 			stepWise = false;
 			@SuppressWarnings("unchecked")
-			Map<String, Object> map = (Map<String, Object>)obj;
-			iter = map.values().iterator();
+			Map<Object, Object> map = (Map<Object, Object>)obj;
+			iter = map.keySet().iterator();
 		    }
 		    else if (obj instanceof List) {
 			stepWise = false;

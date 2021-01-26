@@ -32,6 +32,8 @@
  *	    Allow indexing into strings. Some renaming of parameters and variables.
  *	25-Jan-2021 (rlwhitcomb)
  *	    Add Javadoc; one more rename; one more error check on loop variables.
+ *	26-Jan-2021 (rlwhitcomb)
+ *	    Allow ["name"] to extract fields of map objects.
  */
  package info.rlwhitcomb.calc;
 
@@ -259,13 +261,25 @@ class LValueContext
 	    else if (ctx instanceof CalcParser.ArrVarContext) {
 		CalcParser.ArrVarContext arrVarCtx = (CalcParser.ArrVarContext) ctx;
 		LValueContext arrLValue = getLValue(visitor, arrVarCtx.var(), lValue);
+		Object arrValue = arrLValue.getContextObject();
+
+		// Okay, here the "arrValue" could be null, an array, a string, OR an object (map)
+		if (arrValue != null && arrValue instanceof Map) {
+		    // The "index" expression should be a string (meaning a member name)
+		    LValueContext objLValue = arrLValue.makeMapLValue(arrVarCtx, null);
+
+		    String memberName = visitor.getStringValue(arrVarCtx.expr());
+		    return objLValue.makeMapLValue(arrVarCtx, memberName);
+		}
+
+		// By now, the object must either be null, a list, a string, or a simple value (an error)
+		// but we should be able to safely evaluate the index expression as an integer
 		int index = visitor.getIntValue(arrVarCtx.expr());
 
 		if (index < 0)
 		    throw new CalcExprException(arrVarCtx, "%calc#indexNegative", index);
 
 		List<Object> list = null;
-		Object arrValue = arrLValue.getContextObject();
 		if (arrValue == null) {
 		    list = new ArrayList<>();
 		    arrLValue.putContextObject(list);
