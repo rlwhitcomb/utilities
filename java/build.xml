@@ -143,6 +143,8 @@
 		Add "mkcanon" script.
 	    27-Jan-2021 (rlwhitcomb)
 		Add HTML help for Calc.
+	    27-Jan-2021 (rlwhitcomb)
+		First attempt at cleaning out leftover tester files on "purge-logs".
 
      ========================================================================== -->
 
@@ -484,6 +486,9 @@
 		<echo message="Purging log files from before ${last.month}..."/>
 		<delete>
 			<fileset dir="." includes="test*.log">
+				<date datetime="${last.month}" when="before"/>
+			</fileset>
+			<fileset dir="${env.TMPDIR}" includes="canonerror*.tmp,canoninput*.tmp,canonoutput*.tmp,testerror*.tmp,testinput*.tmp,testoutput*.tmp">
 				<date datetime="${last.month}" when="before"/>
 			</fileset>
 		</delete>
