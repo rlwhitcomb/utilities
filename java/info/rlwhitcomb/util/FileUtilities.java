@@ -79,6 +79,10 @@
  *	Move "canExecute" into here from other code.
  *    22-Jan-2021 (rlwhitcomb)
  *	Two new methods to munge file names/paths.
+ *    27-Jan-2021 (rlwhitcomb)
+ *	New method to copy an InputStream to a temp file (for Help display of HTML).
+ *	Another omnibus method to copy entries from a jar file into a temp directory
+ *	from a given package, with given extensions.
  */
 package info.rlwhitcomb.util;
 
@@ -100,8 +104,11 @@ import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.PosixFilePermission;
 import java.security.SecureRandom;
 import java.util.Arrays;
+import java.util.Enumeration;
 import java.util.Map;
 import java.util.Set;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 import net.iharder.b64.Base64;
@@ -277,6 +284,46 @@ public class FileUtilities
 		throws IOException
     {
 	return createTempFile(prefix, null, false);
+    }
+
+    /**
+     * Copy the incoming stream to a temp file, returning the temp file reference.
+     *
+     * @param	is		The input stream (maybe a .jar file resource?) to copy to
+     *				a temporary file, created here.
+     * @param	prefix		Prefix for the temp file name (must be &gt; 3 characters).
+     * @param	suffix		The file extension to use (can be {@code null}).
+     * @param	deleteOnExit	Whether to keep the file around after the JVM exits.
+     * @return	The file object with the input contents already written to it.
+     * @throws	IOException if there was a error reading or writing.
+     * @see	#createTempFile(String, String, boolean)
+     */
+    public static File writeToTempFile(InputStream is, String prefix, String suffix, boolean deleteOnExit)
+		throws IOException
+    {
+	File tempFile = createTempFile(prefix, suffix, deleteOnExit);
+	writeStreamToFile(is, tempFile);
+	return tempFile;
+    }
+
+    /**
+     * Write an input stream to the given file.
+     *
+     * @param is	The input stream to write.
+     * @param f		The output file to write to.
+     * @throws 	IOException if anything goes wrong.
+     */
+    public static void writeStreamToFile(InputStream is, File f)
+		throws IOException
+    {
+	try (OutputStream os = Files.newOutputStream(f.toPath())) {
+	    byte[] buffer = new byte[BUFFER_SIZE];
+	    int len;
+	    while ((len = is.read(buffer)) > 0) {
+		os.write(buffer, 0, len);
+	    }
+	    os.flush();
+	}
     }
 
     /**
@@ -590,6 +637,56 @@ public class FileUtilities
 	}
 
 	return buf.toString();
+    }
+
+    /**
+     * Unpack some number of files from the .jar file into a temp directory,
+     * and return the temp directory object.
+     *
+     * @param jarFile		The {@link JarFile} object to read things from.
+     * @param dirName		Directory name where the files reside inside the .jar
+     * @param exts		A list of filename extensions that we want to unpack
+     *				(comma-separated).
+     * @param prefix		The temp directory name prefix.
+     * @param deleteOnExit	Whether the files are to be deleted on exit.
+     * @return 	The temp directory name (inside the TEMP or TMP location).
+     * @throws	IOException if there are problems doing any of this.
+     */
+    public static File unpackFiles(JarFile jarFile, String dirName, String exts, String prefix, boolean deleteOnExit)
+		throws IOException
+    {
+	Path tempDirPath = Files.createTempDirectory(prefix);
+	File tempDir     = tempDirPath.toFile();
+
+	if (deleteOnExit)
+	    tempDir.deleteOnExit();
+
+	String[] extensions = exts.split("\\s*[,;:|]\\s*");
+
+	for (Enumeration<JarEntry> e = jarFile.entries(); e.hasMoreElements(); ) {
+	    JarEntry entry = e.nextElement();
+	    String name    = entry.getName();
+
+	    if (name.startsWith(dirName)) {
+		for (String ext : extensions) {
+		    if (name.endsWith(ext)) {
+			InputStream is  = jarFile.getInputStream(entry);
+			int namePos     = name.lastIndexOf('/');
+			String fileName = namePos < 0 ? name : name.substring(namePos + 1);
+
+			File f = new File(tempDir, fileName);
+			f.createNewFile();
+
+			if (deleteOnExit)
+			    f.deleteOnExit();
+
+			writeStreamToFile(is, f);
+		    }
+		}
+	    }
+	}
+
+	return tempDir;
     }
 
     /**

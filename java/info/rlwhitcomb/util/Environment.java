@@ -121,6 +121,8 @@
  *	    Add "getAllProgramInfo" method.
  *	25-Jan-2021 (rlwhitcomb)
  *	    Also display Java version with program info.
+ *	27-Jan-2021 (rlwhitcomb)
+ *	    New method to return temp directory name.
  */
 package info.rlwhitcomb.util;
 
@@ -706,6 +708,32 @@ public final class Environment
 		}
 	    }
 	    return 0L;
+	}
+
+
+	/**
+	 * Get the (system-dependent) name of the current temporary directory
+	 * for the current user.
+	 *
+	 * @return	A temp directory name, usually from TEMP or TMP or other
+	 *		known system variables.
+	 */
+	public static String tempDirName() {
+	    String name = System.getenv("TEMP");
+	    if (CharUtil.isNullOrEmpty(name)) {
+		name = System.getenv("TMP");
+		if (CharUtil.isNullOrEmpty(name)) {
+		    name = System.getenv("TMPDIR");
+		    if (CharUtil.isNullOrEmpty(name)) {
+			File f = osIsWindows ? new File("C:\\temp") : new File ("/tmp");
+			if (f.exists() && f.isDirectory()) {
+			    return f.getPath();
+			}
+			return userDirectory().getPath();
+		    }
+		}
+	    }
+	    return name;
 	}
 
 

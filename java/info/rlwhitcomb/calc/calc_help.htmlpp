@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Expression Calculator Help</title>
+    <style>
+table {
+  font-family: helvetica, arial, sans-serif;
+  border-collapse: collapse;
+}
+
+tr, th, td {
+  border: 1px solid #dddddd;
+  text-align: center;
+  padding: 8px;
+}
+
+tr:nth-child(even) {
+  background-color: #dddddd;
+}
+
+table code {
+   font-size: 150%;
+}
+
+.redbutton {
+   font-family: Verdana, Helvetica, Arial, Sans-Serif;
+   font-size: 24pt;
+   font-weight: bold;
+   color: red;
+}
+
+.biglines {
+   line-height: 20pt;
+}
+    </style>
+  </head>
+
+  <body>
+    <h2>Expression Calculator Help</h2>
+    <h3>Introduction</h3>
+    <p>An expression calculator that combines (nearly) unlimited precision decimal arithmetic with a rich assortment
+       of operators and functions to give the ability to calculate nearly any arithmetic expression.
+    <p>As input, the expression calculator can operate on an expression given entirely on the command line (may need to be
+       quoted for certain operator characters), in a REPL loop where a prompt is displayed, and the input lines are evaluated
+       one-at-a-time and the results displayed, from a file for predefined calculations, or inside a rudimentary GUI frame.
+    <h3>Command Line Options</h3>
+    <p>Certain options can be given on the command line that affect the operation of the calculator.
+
+    <center>
+    <h3>Operators and Precedence</h3>
+    <table>
+      <tr>
+        <th width=60>Level</th>
+        <th width=150>Operator</th>
+        <th width=280>Description</th>
+        <th width=120>Associativity</th>
+      </tr>
+      <tr><td>27</td><td><code>{ }</code></td><td>define an object</td><td>left to right</td></tr>
+      <tr><td>26</td><td><code>[ ]</code></td><td>define an array,<br>or access elements of<br>an array, string, or object</td><td>left to right</td></tr>
+      <tr><td>25</td><td>.</td><td>access an object member</td><td>left to right</td></tr>
+      <tr><td>24</td><td><code>( </code><i>expr</i><code> )</code></td><td>group an expression</td><td>- none -</td></tr>
+      <tr><td>23</td><td><i>expr</i>&nbsp;<code>++</code><br><i>expr</i>&nbsp;<code>--</code></td><td>post increment/decrement</td><td>- none -</td></tr>
+      <tr><td>22</td><td><code>++</code>&nbsp;<i>expr</i><br><code>--</code>&nbsp;<i>expr</i></td><td>pre increment/decrement</td><td>right to left</td></tr>
+      <tr><td>21</td><td><code>+</code>&nbsp;<i>expr</i><br><code>-</code>&nbsp;<i>expr</i></td><td>posate/negate a value</td><td>right to left</td></tr>
+      <tr><td>20</td><td><code>!</code>&nbsp;<i>expr</i></td><td>boolean NOT</td><td>right to left</td></tr>
+      <tr><td>19</td><td><code>~</code>&nbsp;<i>expr</i></td><td>bitwise NOT</td><td>right to left</td></tr>
+      <tr><td>18</td><td><i>expr</i>&nbsp;<code>!</code></td><td>factorial</td><td>left to right</td></tr>
+      <tr><td>17</td><td class="biglines">
+                        <code>ABS</code>&nbsp;<i>expr</i><br>
+                        <code>SIN</code>&nbsp;<i>expr</i><br>
+                        <code>COS</code>&nbsp;<i>expr</i><br>
+                        <code>TAN</code>&nbsp;<i>expr</i><br>
+                        <code>ASIN</code>&nbsp;<i>expr</i><br>
+                        <code>ACOS</code>&nbsp;<i>expr</i><br>
+                        <code>ATAN</code>&nbsp;<i>expr</i><br>
+                        <code>ATAN2</code>&nbsp;<i>expr, expr</i><br>
+                        <code>SINH</code>&nbsp;<i>expr</i><br>
+                        <code>COSH</code>&nbsp;<i>expr</i><br>
+                        <code>TANH</code>&nbsp;<i>expr</i><br>
+                        <code>SQRT</code>&nbsp;<i>expr</i><br>
+                        <code>CBRT</code>&nbsp;<i>expr</i><br>
+                        <code>LOG</code>&nbsp;<i>expr</i><br>
+                        <code>LN2</code>&nbsp;<i>expr</i><br>
+                        <code>LN</code>&nbsp;<i>expr</i><br>
+                        <code>SIGNUM</code>&nbsp;<i>expr</i><br>
+                        <code>LENGTH</code>&nbsp;<i>expr</i><br>
+                        <code>SCALE</code>&nbsp;<i>expr</i><br>
+                        <code>ROUND</code>&nbsp;<i>expr, expr</i><br>
+                        <code>ISPRIME</code>&nbsp;<i>expr</i><br>
+                        <code>GCD</code>&nbsp;<i>expr ,expr</i><br>
+                        <code>MAX</code>&nbsp;<i>expr (, expr) *</i><br>
+                        <code>MIN</code>&nbsp;<i>expr (, expr) *</i><br>
+                        <code>JOIN</code>&nbsp;<i>expr (, expr) *</i><br>
+                        <code>FIB</code>&nbsp;<i>expr</i><br>
+                    </td>
+                    <td class="biglines">
+                        absolute value<br>
+                        sine<br>
+                        cosine<br>
+                        tangent<br>
+                        arcsine<br>
+                        arccosine<br>
+                        arctangent<br>
+                        arctangent(y,x)<br>
+                        hyperbolic sine<br>
+                        hyperbolic cosine<br>
+                        hyperbolic tangent<br>
+                        square root<br>
+                        cube root<br>
+                        log base 10<br>
+                        log base 2<br>
+                        natural log (base e)<br>
+                        sign (&lt; 0 = -1, 0 = 0, &gt; 0 = +1)<br>
+                        length of string, array, object<br>
+                        scale of number<br>
+                        round value to given places<br>
+                        is the value a prime number<br>
+                        greatest common divisor<br>
+                        maximum value<br>
+                        minimum value<br>
+                        join strings<br>
+                        Fibonacci number<br>
+                    </td>
+                    <td>left to right</td></tr>
+      <tr><td>16</td><td><i>expr</i>&nbsp;<code>**</code>&nbsp;<i>expr</i></td><td>x to y power</td><td>right to left</td></tr>
+      <tr><td>15</td><td><i>expr</i>&nbsp;<code>*</code>&nbsp;<i>expr</i><br><i>expr</i>&nbsp;<code>/</code>&nbsp;<i>expr</i><br><i>expr</i>&nbsp;<code>%</code>&nbsp;<i>expr</i></td><td>multiply/divide/remainder</td><td>left to right</td></tr>
+    </table>
+    </center>
+    <h3>GUI operations</h3>
+    <p>The GUI window can be opened using the "<code>cg</code>" command (or on Windows only, the <code>``</code> command), or by entering the <code>gui</code> command in REPL mode.  The following window will be presented with the focus initially in the top "Expression" field.
+    <br><img src="calc_initial.png" alt="Initial GUI screen" width="50%"/>
+    <p>An expression can be entered on each line, and all will be executed in order when the <span class="redbutton">!</span> button (or the <code>F9</code> key) is pressed, and the results displayed in the "Result" field.
+    <footer><br><br><center>&copy;&nbsp;Copyright 2021 Roger L. Whitcomb.&nbsp;&nbsp;Licensed under an <a href="https://github.com/rlwhitcomb/utilities/blob/master/LICENSE">MIT</a> license.<br>Last modified: ${__DATE__} at ${__TIME__}</center><br><br></footer>
+  </body>
+</html>
+

@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2012-2014,2016-2018,2020 Roger L. Whitcomb.
+ * Copyright (c) 2012-2014,2016-2018,2020-2021 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -71,6 +71,8 @@
  *	    New method to turn a class into a resource path.
  *	21-Dec-2020 (rlwhitcomb)
  *	    Update obsolete Javadoc constructs.
+ *	27-Jan-2021 (rlwhitcomb)
+ *	    New method to get a directory name from a class (package).
  */
 
 package info.rlwhitcomb.util;
@@ -493,8 +495,20 @@ public class ClassUtil
 	public static String getResourcePath(Object obj) {
 	    if (obj == null)
 		throw new IllegalArgumentException(Intl.getString("util#class.nullObject"));
-	    String path = obj.getClass().getPackage().getName().replace('.', '/');
+	    String path = getClassDirectory(obj.getClass());
 	    return String.format("/%1$s/", path);
+	}
+
+
+	/**
+	 * Get a relative directory name given a class, which is in a package.
+	 *
+	 * @param cls	The class we're dealing with.
+	 * @return	The class' package expressed as a directory entry ("/" separators).
+	 */
+	public static String getClassDirectory(Class<?> cls) {
+	    Package pkg = cls.getPackage();
+	    return pkg.getName().replace('.', '/');
 	}
 
 

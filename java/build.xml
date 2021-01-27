@@ -141,6 +141,8 @@
 		Add "-dir" parameter to Tester command line.
 	    26-Jan-2021 (rlwhitcomb)
 		Add "mkcanon" script.
+	    27-Jan-2021 (rlwhitcomb)
+		Add HTML help for Calc.
 
      ========================================================================== -->
 
@@ -273,6 +275,9 @@
 			<generate-text-resources dir="info/rlwhitcomb/tester" />
 			<generate-text-resources dir="info/rlwhitcomb/tree" />
 			<generate-text-resources dir="info/rlwhitcomb/util" />
+			<preproc dir="info/rlwhitcomb/calc" inputExt=".htmlpp"
+				processAsDirectory="true" recurseDirectories="false"
+				nologo="true" verbose="plus" format="UTF8"/>
 		</parallel>
 	</target>
 
@@ -339,6 +344,8 @@
 			<include name="info/rlwhitcomb/annotations/*.class"/>
 			<include name="info/rlwhitcomb/calc/*.class"/>
 			<include name="info/rlwhitcomb/calc/*.bxml"/>
+			<include name="info/rlwhitcomb/calc/*.html"/>
+			<include name="info/rlwhitcomb/calc/*.png"/>
 			<include name="info/rlwhitcomb/cat/*.class"/>
 			<include name="info/rlwhitcomb/compare/*.class"/>
 			<include name="info/rlwhitcomb/csv/*.class"/>
@@ -423,6 +430,11 @@
 			<fileset dir="." includes="**/*">
 				<present targetdir=".">
 					<mapper type="glob" from="*.java" to="*.javapp"/>
+				</present>
+			</fileset>
+			<fileset dir="." includes="**/*">
+				<present targetdir=".">
+					<mapper type="glob" from="*.html" to="*.htmlpp"/>
 				</present>
 			</fileset>
 			<fileset dir="." includes="**/*">

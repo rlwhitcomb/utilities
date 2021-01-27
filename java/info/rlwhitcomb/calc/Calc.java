@@ -84,9 +84,12 @@
  *	    simplify the color rendering.
  *	25-Jan-2021 (rlwhitcomb)
  *	    Add "-inputdir" command line option.
+ *	27-Jan-2021 (rlwhitcomb)
+ *	    Display HTML page for help.
  */
 package info.rlwhitcomb.calc;
 
+import java.awt.Desktop;
 import java.awt.Font;
 import java.io.Console;
 import java.io.File;
@@ -100,6 +103,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.jar.JarFile;
 
 import org.apache.pivot.beans.BXML;
 import org.apache.pivot.beans.BXMLSerializer;
@@ -111,10 +115,13 @@ import org.apache.pivot.wtk.util.TextAreaOutputStream;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
 
+import info.rlwhitcomb.jarfile.Launcher;
 import info.rlwhitcomb.util.CharUtil;
+import info.rlwhitcomb.util.ClassUtil;
 import static info.rlwhitcomb.util.ConsoleColor.Code.*;
 import info.rlwhitcomb.util.Environment;
 import info.rlwhitcomb.util.ExceptionUtil;
+import info.rlwhitcomb.util.FileUtilities;
 import info.rlwhitcomb.util.Intl;
 import info.rlwhitcomb.util.QueuedThread;
 
@@ -162,9 +169,6 @@ public class Calc
 	    ""
 	};
 
-	private static final String[] HELP = {
-	    "<e>Help is not complete yet!  Check back later.<r>"
-	};
 
 	private static boolean guiMode     = false;
 	private static boolean debug       = false;
@@ -200,6 +204,9 @@ public class Calc
 
 	/** The text read from the command line or a file. */
 	private static String inputText = null;
+
+	/** The previously displayed help directory. */
+	private static File tempHelpDirectory = null;
 
 
 	private static void computeColors() {
@@ -438,8 +445,7 @@ public class Calc
 	{
 		@Override
 		public void perform(Component source) {
-		    // TODO: integrate our console help text with the text in the bxml file
-		    helpPrompt.open(mainWindow);
+		    Calc.displayHelp();
 		}
 	}
 
@@ -461,10 +467,22 @@ public class Calc
 	    });
 	}
 
-	public static void printHelp() {
-	    Arrays.stream(HELP).forEach((s) -> {
-		System.out.println(renderColors(s));
-	    });
+	/**
+	 * Extract our help page(s) and supporting files, then open in a browser.
+	 */
+	public static void displayHelp() {
+	    try {
+		if (tempHelpDirectory == null) {
+		    JarFile jarFile = Launcher.getJarFile(Launcher.getOurJarFile());
+		    tempHelpDirectory = FileUtilities.unpackFiles(jarFile, ClassUtil.getClassDirectory(Calc.class),
+				".html;.png", "calchelp", true);
+		}
+		File helpFile = new File(tempHelpDirectory, "calc_help.html");
+		Desktop.getDesktop().open(helpFile);
+	    }
+	    catch (IOException ex) {
+		System.err.println(ExceptionUtil.toString(ex));
+	    }
 	}
 
 	public static void exit() {
@@ -664,7 +682,7 @@ public class Calc
 		case "h":
 		case "?":
 		    printIntro();
-		    printHelp();
+		    displayHelp();
 		    return Expecting.QUIT_NOW;
 		case "version":
 		case "vers":
@@ -822,7 +840,7 @@ public class Calc
 				    case ":?":
 				    case ":help":
 					printIntro();
-					printHelp();
+					displayHelp();
 					break;
 				    case "version":
 				    case ":version":
