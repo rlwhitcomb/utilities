@@ -125,6 +125,8 @@
  *	Update Javadoc to latest conventions.
  *    21-Jan-2021 (rlwhitcomb)
  *	Add "-L" (log file) and "-W" parameters. Recognize "${macro}" format also.
+ *    27-Jan-2021 (rlwhitcomb)
+ *	Fix a bug with flags when setting "recurseDirectories"; some tiny cleanup.
  */
 package info.rlwhitcomb.preproc;
 
@@ -421,7 +423,7 @@ public class JavaPreProc extends Task
 	private static DateFormat timeFmt = null;
 
 	/** The current version of this software. */
-	private static final String VERSION = "1.1.6";
+	private static final String VERSION = "1.1.8";
 	/** The current copyright year. */
 	private static final String COPYRIGHT_YEAR = "2010-2011,2014-2016,2019-2021";
 
@@ -645,9 +647,7 @@ public class JavaPreProc extends Task
 		@Override
 		public boolean accept(File dir, String name) {
 		    File f = new File(dir, name);
-		    if (f.exists() && f.isFile() && name.endsWith(inputExt))
-			return true;
-		    return false;
+		    return (f.exists() && f.isFile() && name.endsWith(inputExt));
 		}
 	}
 
@@ -659,9 +659,7 @@ public class JavaPreProc extends Task
 	{
 		@Override
 		public boolean accept(File f) {
-		    if (f.exists() && f.isDirectory())
-			return true;
-		    return false;
+		    return (f.exists() && f.isDirectory());
 		}
 	}
 
@@ -2396,8 +2394,7 @@ public class JavaPreProc extends Task
 		if (isOptionString(arg))
 		    continue;
 
-		// Set input and output extensions if not overridden
-		// on command line
+		// Set input and output extensions if not overridden on command line
 		String lastInputExt = inputExt;
 		String lastOutputExt = outputExt;
 		if (inputExt == null) {
@@ -2806,7 +2803,10 @@ public class JavaPreProc extends Task
 	 * @param	val	The new value for the option.
 	 */
 	public void setRecurseDirectories(boolean val) {
-	    processAsDirectory = recurseDirectories = val;
+	    if (val)
+		processAsDirectory = recurseDirectories = val;
+	    else
+		recurseDirectories = val;
 	}
 
 
