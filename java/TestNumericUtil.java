@@ -28,6 +28,8 @@
  *          Initial coding finished.
  *	05-Jan-2021 (rlwhitcomb)
  *	    More digits; add test to Calc limits (12,000).
+ *	28-Jan-2021 (rlwhitcomb)
+ *	    Tests of "convertToWords".
  */
 import java.math.BigDecimal;
 
@@ -420,6 +422,40 @@ public class TestNumericUtil
 		"30209211220526103123906829413456967859585183934913823408842743124190991528708043" +
 		"32809132993078936867127413922890033069995875921815297612482409116951587789964090";
 
+	private static final long numberValues[] = {
+	    1_000_000L,
+	    2_458_967L,
+	    0L,
+	    1L,
+	    10L,
+	    12L,
+	    99L,
+	    101L,
+	    999L,
+	    1_001L,
+	    999_999_999L,
+	    100_000_000_000L,
+	    19_889L,
+	    100_100L
+	};
+	private static final String wordValues[] = {
+	    "one million",
+	    "two million, four hundred fifty-eight thousand, nine hundred sixty-seven",
+	    "zero",
+	    "one",
+	    "ten",
+	    "twelve",
+	    "ninety-nine",
+	    "one hundred one",
+	    "nine hundred ninety-nine",
+	    "one thousand, one",
+	    "nine hundred ninety-nine million, nine hundred ninety-nine thousand, nine hundred ninety-nine",
+	    "one hundred billion",
+	    "nineteen thousand, eight hundred eighty-nine",
+	    "one hundred thousand, one hundred"
+	};
+
+
 	public static void main(final String[] args) {
 	    int numberOfTests    = 0;
 	    int numberOfFailures = 0;
@@ -456,6 +492,28 @@ public class TestNumericUtil
 	    }
 
 	    System.out.println("Done with PI and E tests.");
+
+	    System.out.println("Testing 'convertToWords' function...");
+
+	    numberOfTests++;
+	    if (numberValues.length != wordValues.length) {
+		System.err.println("Test malfunction: input and test value arrays are unequal!");
+		numberOfFailures++;
+	    }
+	    else {
+		for (int i = 0; i < numberValues.length; i++) {
+		    numberOfTests++;
+		    String result = NumericUtil.convertToWords(numberValues[i]);
+		    if (!result.equals(wordValues[i])) {
+			System.err.println("Result of 'convertToWords' for " + numberValues[i] + " = '" + result + "'");
+			System.err.println("  did not equal expected result of '" + wordValues[i] + "'");
+			numberOfFailures++;
+		    }
+		}
+	    }
+
+	    System.out.println("Done with 'convertToWords' tests.");
+
 	    System.out.println("Total number of tests: " + numberOfTests +
 		", passed: " + (numberOfTests - numberOfFailures) + ", failed: " + numberOfFailures);
 	}

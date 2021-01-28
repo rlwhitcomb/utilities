@@ -99,6 +99,8 @@
  *	    Implement "sqrt".
  *	18-Jan-2021 (rlwhitcomb)
  *	    Implement "cbrt". Implement "factorial" for negative numbers.
+ *	28-Jan-2021 (rlwhitcomb)
+ *	    Fix bug needing commas in "convertToWords" results.
  */
 package info.rlwhitcomb.util;
 
@@ -612,7 +614,10 @@ public class NumericUtil
 			convertToWords(prefix, buf);
 			buf.append(' ').append(rangeWords[i - 1]);
 			if (residual != 0L) {
-			    buf.append(' ');
+			    if (i > 1)
+				buf.append(", ");
+			    else
+				buf.append(' ');
 			    convertToWords(residual, buf);
 			}
 			break;
