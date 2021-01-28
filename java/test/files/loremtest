@@ -1,0 +1,12 @@
+$testClass info.rlwhitcomb.calc.Calc
+$sourceDir test/files
+$canonDir test/canons
+$defaultOptions -nocolors -dir test/files
+
+$echo Tests of Calc with extended characters
+$echo
+
+e_lorem,UTF-8: e_lorem
+
+$echo
+$echo That's all folks!

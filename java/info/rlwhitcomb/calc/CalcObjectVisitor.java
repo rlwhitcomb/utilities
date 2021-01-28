@@ -139,6 +139,8 @@
  *	26-Jan-2021 (rlwhitcomb)
  *	    Allow access from LValueContext to "getStringValue". And now that we have
  *	    dynamic access to map members, make "loop" over map return keys, not values.
+ *	28-Jan-2021 (rlwhitcomb)
+ *	    Allow "loop" over the characters (codepoints) in a String.
  */
 package info.rlwhitcomb.calc;
 
@@ -679,6 +681,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    List<CalcParser.ExprContext> exprs  = ctlCtx.expr();
 
 	    Iterator<Object> iter = null;
+	    java.util.stream.IntStream codePoints  = null;
 
 	    TerminalNode loopVar = ctx.LOOPVAR();
 	    String loopVarName   = loopVar != null ? loopVar.getText() : null;
@@ -696,6 +699,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    Object lastValue = null;
 
 	    if (exprList != null) {
+		// This is only true if we have "expr , expr (, expr)*"
+		// or more than one separated by commas
 		exprs = exprList.expr();
 	    }
 	    else {
@@ -707,7 +712,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		}
 		else if (exprs.size() == 1) {
 		    // number of times, starting from 1
-		    // or it could be an array or object to iterate over
+		    // or it could be an array, object, or string to iterate over
 		    Object obj = visit(exprs.get(0));
 		    if (obj instanceof Map) {
 			stepWise = false;
@@ -720,6 +725,10 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			@SuppressWarnings("unchecked")
 			List<Object> list = (List<Object>)obj;
 			iter = list.iterator();
+		    }
+		    else if (obj instanceof String) {
+			stepWise = false;
+			codePoints = ((String)obj).codePoints();
 		    }
 		    else {
 			dStop = getDecimalValue(exprs.get(0));
@@ -803,6 +812,18 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			    variables.put(loopVarName, value);
 			lastValue = visit(ctx.block());
 		    }
+		}
+		else if (codePoints != null) {
+		    StringBuilder buf = new StringBuilder(2);
+		    codePoints.forEach(cp -> {
+			buf.setLength(0);
+			buf.appendCodePoint(cp);
+			if (loopVarName != null)
+			    variables.put(loopVarName, buf.toString());
+			// TODO: this is ugly, but we can't assign to "lastValue" in a lambda
+			// BUT since lastValue isn't actually available anywhere, it doesn't matter
+			/* lastValue = */ visit(ctx.block());
+		    });
 		}
 		else {
 		    for (CalcParser.ExprContext expr : exprs) {

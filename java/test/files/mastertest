@@ -19,6 +19,7 @@ t5: optiontest
 t6: dynarraytest
 t7: matchestest
 t8: numerictest
+t9: loremtest
 
 !echo
 !echo Done with all the Tester tests.
