@@ -101,6 +101,8 @@
  *	    Implement "cbrt". Implement "factorial" for negative numbers.
  *	28-Jan-2021 (rlwhitcomb)
  *	    Fix bug needing commas in "convertToWords" results.
+ *	28-Jan-2021 (rlwhitcomb)
+ *	    Refactor around DataType. Add "BOOL" type.
  */
 package info.rlwhitcomb.util;
 
@@ -116,6 +118,8 @@ import java.math.RoundingMode;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.*;
 
 
@@ -133,36 +137,82 @@ public class NumericUtil
 	 */
 	public static enum DataType
 	{
-	    NUL   (0),
-	    BYTE  (1),
-	    SHORT (2),
-	    INT   (3),
-	    LONG  (4),
-	    DEC   (5),
-	    FLOAT (6),
-	    DOUBLE(7),
-	    DATE  (8),
-	    CHAR  (9),
-	    STRING(10),
-	    BIGINT(11);
+	    NUL   (null            ),
+	    BYTE  (Byte.class      ),
+	    SHORT (Short.class     ),
+	    INT   (Integer.class   ),
+	    LONG  (Long.class      ),
+	    DEC   (BigDecimal.class),
+	    FLOAT (Float.class     ),
+	    DOUBLE(Double.class    ),
+	    DATE  (Date.class      ),
+	    CHAR  (Character.class ),
+	    STRING(String.class    ),
+	    BIGINT(BigInteger.class),
+	    BOOL  (Boolean.class   );
 
-	    private int idCode;
+	    /**
+	     * Reverse lookup class, by class and code (ordinal).
+	     */
+	    private static class Lookup
+	    {
+		static Map<Class<?>, DataType> map = new HashMap<>();
+		static DataType[] codeMap = new DataType[20];
+		static int numValues = -1;
 
-	    private DataType(final int code) {
-		this.idCode = code;
+		static void add(final DataType type, final Class<?> clazz) {
+		    if (clazz != null)
+			map.put(clazz, type);
+		    int ord = type.ordinal();
+		    if (ord > numValues)
+			numValues = ord;
+		    codeMap[ord] = type;
+		}
+
+		static DataType fromObjClass(final Object value) {
+		    if (value == null)
+			return NUL;
+		    DataType type = map.get(value.getClass());
+		    if (type == null) {
+			throw new IllegalArgumentException(Intl.formatString("util#numeric.badDataType", value.getClass().getName()));
+		    }
+		    return type;
+		}
+
+		static DataType fromCode(final int code) {
+		    if (code < 0 || code > numValues) {
+			throw new IllegalArgumentException(Intl.formatString("util#numeric.badDataTypeCode", code));
+		    }
+		    return codeMap[code];
+		}
+	    }
+
+	    private DataType(final Class<?> thisClass) {
+		Lookup.add(this, thisClass);
 	    }
 
 	    public int getCode() {
-		return this.idCode;
+		return this.ordinal();
 	    }
 
 	    public static DataType fromCode(final int code) {
-		// This relies on the code being the same as the ordinal
-		DataType[] values = values();
-		if (code < 0 || code >= values.length) {
-		    throw new IllegalArgumentException(Intl.formatString("util#numeric.badDataTypeCode", code));
-		}
-		return values[code];
+		return Lookup.fromCode(code);
+	    }
+
+	    public static DataType fromObjClass(final Object value) {
+		return Lookup.fromObjClass(value);
+	    }
+
+	    public void writeCode(final DataOutputStream dos)
+		throws IOException
+	    {
+		dos.writeByte(ordinal());
+	    }
+
+	    public static DataType readCode(final DataInputStream dis)
+		throws IOException
+	    {
+		return Lookup.fromCode((int)dis.readByte());
 	    }
 	}
 
@@ -1014,37 +1064,29 @@ public class NumericUtil
 		    // Leave the value as null
 		    break;
 		case BYTE:
-		    value = Byte.valueOf(dis.readByte());
-		    break;
+		    value = Byte.valueOf(dis.readByte()); break;
 		case SHORT:
-		    value = Short.valueOf(readShort(dis, byteOrder));
-		    break;
+		    value = Short.valueOf(readShort(dis, byteOrder)); break;
 		case INT:
-		    value = Integer.valueOf(readInt(dis, byteOrder));
-		    break;
+		    value = Integer.valueOf(readInt(dis, byteOrder)); break;
 		case LONG:
-		    value = Long.valueOf(readLong(dis, byteOrder));
-		    break;
+		    value = Long.valueOf(readLong(dis, byteOrder)); break;
 		case BIGINT:
-		    value = convertBCDToInteger(readBCDBytes(dis));
-		    break;
+		    value = convertBCDToInteger(readBCDBytes(dis)); break;
+		case BOOL:
+		    value = Boolean.valueOf(dis.readByte() != 0); break;
 		case DEC:
 		    // Note: the last nibble of the value has the sign, so read until then.
 		    value = convertBCDToDecimal(readBCDBytes(dis));
 		    break;
 		case FLOAT:
-		    value = Float.valueOf(readFloat(dis, byteOrder));
-		    break;
+		    value = Float.valueOf(readFloat(dis, byteOrder)); break;
 		case DOUBLE:
-		    value = Double.valueOf(readDouble(dis, byteOrder));
-		    break;
+		    value = Double.valueOf(readDouble(dis, byteOrder)); break;
 		case DATE:
-		    long millis = readLong(dis, byteOrder);
-		    value = new Date(millis);
-		    break;
+		    value = new Date(readLong(dis, byteOrder)); break;
 		case CHAR:
-		    value = Character.valueOf(readChar(dis, byteOrder));
-		    break;
+		    value = Character.valueOf(readChar(dis, byteOrder)); break;
 		case STRING:
 		    switch (stringLength) {
 			case PREFIX1:
@@ -1099,8 +1141,7 @@ public class NumericUtil
 	public static Object readBinaryValue(final DataInputStream dis, final Charset charset)
 		throws IOException
 	{
-	     byte code = dis.readByte();
-	     DataType dataType = DataType.fromCode((int)code);
+	     DataType dataType = DataType.readCode(dis);
 	     return readRawBinaryValue(dis, charset, dataType, ByteOrder.MSB, StringLength.PREFIX4, -1);
 	}
 
@@ -1121,42 +1162,35 @@ public class NumericUtil
 					       final ByteOrder byteOrder, final StringLength stringLength, final int length)
 			throws IOException
 	{
-	    // TODO: if the value is null, write nothing.... is this the right thing to do?
+	    // If the value is null, we have written the NUL DataType value already, so nothing more is needed
 	    if (value == null)
 		return;
-	    Class<?> clazz = value.getClass();
-	    if (clazz == Byte.class) {
-		dos.writeByte(((Byte)value).intValue());
-	    }
-	    else if (clazz == Character.class) {
-		writeChar(dos, ((Character)value).charValue(), byteOrder);
-	    }
-	    else if (clazz == Short.class) {
-		writeShort(dos, ((Short)value).shortValue(), byteOrder);
-	    }
-	    else if (clazz == Integer.class) {
-		writeInt(dos, ((Integer)value).intValue(), byteOrder);
-	    }
-	    else if (clazz == Long.class) {
-		writeLong(dos, ((Long)value).longValue(), byteOrder);
-	    }
-	    else if (clazz == Float.class) {
-		writeFloat(dos, ((Float)value).floatValue(), byteOrder);
-	    }
-	    else if (clazz == Double.class) {
-		writeDouble(dos, ((Double)value).doubleValue(), byteOrder);
-	    }
-	    else if (clazz == BigDecimal.class) {
-		dos.write(convertToBCD((BigDecimal)value));
-	    }
-	    else if (clazz == BigInteger.class) {
-		dos.write(convertToBCD((BigInteger)value));
-	    }
-	    else if (clazz == String.class) {
-		writeString(dos, (String)value, charset, byteOrder, stringLength, length);
-	    }
-	    else {
-		throw new IllegalArgumentException(Intl.formatString("util#numeric.badDataType", clazz.getName()));
+	    String className = value.getClass().getSimpleName();
+	    switch (className) {
+		case "Byte":
+		    dos.writeByte(((Byte)value).intValue()); break;
+		case "Character":
+		    writeChar(dos, ((Character)value).charValue(), byteOrder); break;
+		case "Short":
+		    writeShort(dos, ((Short)value).shortValue(), byteOrder); break;
+		case "Integer":
+		    writeInt(dos, ((Integer)value).intValue(), byteOrder); break;
+		case "Long":
+		    writeLong(dos, ((Long)value).longValue(), byteOrder); break;
+		case "Float":
+		    writeFloat(dos, ((Float)value).floatValue(), byteOrder); break;
+		case "Double":
+		    writeDouble(dos, ((Double)value).doubleValue(), byteOrder); break;
+		case "BigDecimal":
+		    dos.write(convertToBCD((BigDecimal)value)); break;
+		case "BigInteger":
+		    dos.write(convertToBCD((BigInteger)value)); break;
+		case "Boolean":
+		    dos.writeByte(value.equals(Boolean.TRUE) ? 1 : 0); break;
+		case "String":
+		    writeString(dos, (String)value, charset, byteOrder, stringLength, length); break;
+		default:
+		    throw new IllegalArgumentException(Intl.formatString("util#numeric.badDataType", className));
 	    }
 	}
 
@@ -1174,48 +1208,8 @@ public class NumericUtil
 	public static void writeBinaryValue(final Object value, final DataOutputStream dos, final Charset charset)
 		throws IOException
 	{
-	    if (value == null) {
-		dos.writeByte(DataType.NUL.getCode());
-	    }
-	    else {
-		Class<?> clazz = value.getClass();
-		if (clazz == String.class) {
-		    dos.writeByte(DataType.STRING.getCode());
-		}
-		else if (clazz == BigDecimal.class) {
-		    dos.writeByte(DataType.DEC.getCode());
-		}
-		else if (clazz == BigInteger.class) {
-		    dos.writeByte(DataType.BIGINT.getCode());
-		}
-		else if (clazz == Long.class) {
-		    dos.writeByte(DataType.LONG.getCode());
-		}
-		else if (clazz == Integer.class) {
-		    dos.writeByte(DataType.INT.getCode());
-		}
-		else if (clazz == Short.class) {
-		    dos.writeByte(DataType.SHORT.getCode());
-		}
-		else if (clazz == Byte.class) {
-		    dos.writeByte(DataType.BYTE.getCode());
-		}
-		else if (clazz == Double.class) {
-		    dos.writeByte(DataType.DOUBLE.getCode());
-		}
-		else if (clazz == Float.class) {
-		    dos.writeByte(DataType.FLOAT.getCode());
-		}
-		else if (clazz == Date.class) {
-		    dos.writeByte(DataType.DATE.getCode());
-		}
-		else if (clazz == Character.class) {
-		    dos.writeByte(DataType.CHAR.getCode());
-		}
-		else {
-		    throw new IllegalArgumentException(Intl.formatString("util#numeric.badDataType", clazz.getName()));
-		}
-	    }
+	    DataType type = DataType.fromObjClass(value);
+	    type.writeCode(dos);
 	    writeRawBinaryValue(value, dos, charset, ByteOrder.MSB, StringLength.PREFIX4, -1);
 	}
 

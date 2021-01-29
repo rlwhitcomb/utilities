@@ -44,4 +44,6 @@
 >Done with PI and E tests.
 >Testing 'convertToWords' function...
 >Done with 'convertToWords' tests.
->Total number of tests: 101, passed: 101, failed: 0
+>Tests of Read/Write Binary Files...
+>Done with Read/Write Binary Files.
+>Total number of tests: 102, passed: 102, failed: 0

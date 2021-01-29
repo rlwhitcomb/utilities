@@ -30,9 +30,19 @@
  *	    More digits; add test to Calc limits (12,000).
  *	28-Jan-2021 (rlwhitcomb)
  *	    Tests of "convertToWords".
+ *	28-Jan-2021 (rlwhitcomb)
+ *	    Tests of the read/write binary code, which is tricky.
  */
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 
+import info.rlwhitcomb.util.FileUtilities;
 import info.rlwhitcomb.util.NumericUtil;
 
 /**
@@ -513,6 +523,53 @@ public class TestNumericUtil
 	    }
 
 	    System.out.println("Done with 'convertToWords' tests.");
+
+	    System.out.println("Tests of Read/Write Binary Files...");
+
+	    Charset cs = StandardCharsets.UTF_8;
+
+	    numberOfTests++;
+	    try {
+		final BigDecimal vPi = NumericUtil.pi(40);
+		final String vStr    = "This is a simple string.";
+		final long vMaxLong  = Long.MAX_VALUE;
+		final Boolean vTrue  = Boolean.TRUE;
+
+		File tempFile = FileUtilities.createTempFile("binary", true);
+		try (DataOutputStream dos = new DataOutputStream(Files.newOutputStream(tempFile.toPath()))) {
+		    NumericUtil.writeBinaryValue(vPi,      dos, cs);
+		    NumericUtil.writeBinaryValue(vStr,     dos, cs);
+		    NumericUtil.writeBinaryValue(vMaxLong, dos, cs);
+		    NumericUtil.writeBinaryValue(vTrue,    dos, cs);
+		}
+		try (DataInputStream dis = new DataInputStream(Files.newInputStream(tempFile.toPath()))) {
+		    Object obj = NumericUtil.readBinaryValue(dis, cs);
+		    if (!(obj instanceof BigDecimal) || ! ((BigDecimal)obj).equals(vPi)) {
+			System.err.println("Mismatch on BigDecimal value: expecting " + vPi.toPlainString() + "\n  but got " + obj);
+			numberOfFailures++;
+		    }
+		    obj = NumericUtil.readBinaryValue(dis, cs);
+		    if (!(obj instanceof String) || ! ((String)obj).equals(vStr)) {
+			System.err.println("Mismatch on String value: expecting " + vStr + "\n  but got " + obj);
+			numberOfFailures++;
+		    }
+		    obj = NumericUtil.readBinaryValue(dis, cs);
+		    if (!(obj instanceof Long) || ! ((Long)obj).equals(vMaxLong)) {
+			System.err.println("Mismatch on Long value: expecting " + vMaxLong + "\n  but got " + obj);
+			numberOfFailures++;
+		    }
+		    obj = NumericUtil.readBinaryValue(dis, cs);
+		    if (!(obj instanceof Boolean) || !((Boolean)obj).equals(vTrue)) {
+			System.err.println("Mismatch on Boolean value: expecting " + vTrue + "\n  but got " + obj);
+			numberOfFailures++;
+		    }
+		}
+	    }
+	    catch (IOException ioe) {
+		numberOfFailures++;
+	    }
+
+	    System.out.println("Done with Read/Write Binary Files.");
 
 	    System.out.println("Total number of tests: " + numberOfTests +
 		", passed: " + (numberOfTests - numberOfFailures) + ", failed: " + numberOfFailures);
