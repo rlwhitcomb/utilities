@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2014-2015,2020 Roger L. Whitcomb.
+ * Copyright (c) 2014-2015,2020-2021 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -39,6 +39,8 @@
  *	    Prepare for GitHub.
  *	21-Dec-2020 (rlwhitcomb)
  *	    Update obsolete Javadoc constructs.
+ *	29-Jan-2021 (rlwhitcomb)
+ *	    Use new Exception variants using Intl for convenience.
  */
 package info.rlwhitcomb.csv;
 
@@ -161,7 +163,7 @@ public class CSVReader implements Iterator<CSVRecord>, Iterable<CSVRecord>
 	 */
 	@Override
 	public void remove() {
-	    throw new IllegalStateException(Intl.getString("csv#removeNotSupported"));
+	    throw new Intl.IllegalStateException("csv#removeNotSupported");
 	}
 
 }

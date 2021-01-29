@@ -263,6 +263,8 @@
  *	    Update obsolete Javadoc constructs.
  *	22-Jan-2021 (rlwhitcomb)
  *	    New method for making a list of file names.
+ *	29-Jan-2021 (rlwhitcomb)
+ *	    Use new Intl Exception variants for convenience.
  */
 
 package info.rlwhitcomb.util;
@@ -664,7 +666,7 @@ public class CharUtil
 			    // If we get \+ then it is a 6-byte value
 			    if (input.charAt(i + 1) == '+') {
 				if (i >= len - 8)
-				    throw new IllegalArgumentException(Intl.formatString("util#char.illegalUnicodeEscape", input.substring(i)));
+				    throw new Intl.IllegalArgumentException("util#char.illegalUnicodeEscape", input.substring(i));
 				for (int j = 1; j <= 6; j++) {
 				    int cp = input.codePointAt(i + j + 1);
 				    value *= 16;
@@ -675,16 +677,16 @@ public class CharUtil
 				    else if (cp >= 'A' && cp <= 'F')
 					value += (cp - 'A') + 10;
 				    else
-					throw new IllegalArgumentException(Intl.formatString("util#char.illegalUnicodeEscape", input.substring(i)));
+					throw new Intl.IllegalArgumentException("util#char.illegalUnicodeEscape", input.substring(i));
 				    // Check for values outside the (current) valid range
 				    if (value > 0x10FFFF)
-					throw new IllegalArgumentException(Intl.formatString("util#char.illegalUnicodeEscape", input.substring(i)));
+					throw new Intl.IllegalArgumentException("util#char.illegalUnicodeEscape", input.substring(i));
 				}
 				i += 7;
 			    }
 			    else {
 				if (i >= len - 5)
-				    throw new IllegalArgumentException(Intl.formatString("util#char.illegalUnicodeEscape", input.substring(i)));
+				    throw new Intl.IllegalArgumentException("util#char.illegalUnicodeEscape", input.substring(i));
 				for (int j = 1; j <= 4; j++) {
 				    int cp = input.codePointAt(i + j);
 				    value *= 16;
@@ -695,7 +697,7 @@ public class CharUtil
 				    else if (cp >= 'A' && cp <= 'F')
 					value += (cp - 'A') + 10;
 				    else
-					throw new IllegalArgumentException(Intl.formatString("util#char.illegalUnicodeEscape", input.substring(i)));
+					throw new Intl.IllegalArgumentException("util#char.illegalUnicodeEscape", input.substring(i));
 				}
 				i += 4;
 			    }
@@ -775,14 +777,14 @@ public class CharUtil
 	 */
 	public static String convertHexLiteral(String input, Charset charset) {
 	    if (isNullOrEmpty(input))
-		throw new IllegalArgumentException(Intl.getString("util#char.illegalHexLiteral"));
+		throw new Intl.IllegalArgumentException("util#char.illegalHexLiteral");
 	    int len = input.length();
 	    if (len < 3 || (len - 3) % 2 != 0)
-		throw new IllegalArgumentException(Intl.getString("util#char.illegalHexLiteral"));
+		throw new Intl.IllegalArgumentException("util#char.illegalHexLiteral");
 	    if (Character.toUpperCase(input.charAt(0)) != 'X' ||
 		input.charAt(1) != '\'' ||
 		input.charAt(len - 1) != '\'')
-		throw new IllegalArgumentException(Intl.getString("util#char.illegalHexLiteral"));
+		throw new Intl.IllegalArgumentException("util#char.illegalHexLiteral");
 
 	    String digits = input.substring(2, len - 1);
 	    len = digits.length();
@@ -2330,10 +2332,10 @@ public class CharUtil
 		    // Fall through to throw IllegalArgumentException
 		}
 
-		throw new IllegalArgumentException(Intl.formatString("util#char.unknownBooleanString", stringValue));
+		throw new Intl.IllegalArgumentException("util#char.unknownBooleanString", stringValue);
 	    }
-	    throw new IllegalArgumentException(Intl.formatString("util#char.unknownBooleanType",
-		value == null ? "null" : value.getClass().getSimpleName()));
+	    throw new Intl.IllegalArgumentException("util#char.unknownBooleanType",
+		value == null ? "null" : value.getClass().getSimpleName());
 	}
 
 
@@ -2654,11 +2656,11 @@ public class CharUtil
 		    else if (names.length == 3)
 			locale = new Locale(names[0], names[1], names[2]);
 		    else {
-			throw new IllegalArgumentException(Intl.formatString("util#char.badLocale", localeName));
+			throw new Intl.IllegalArgumentException("util#char.badLocale", localeName);
 		    }
 		}
 		catch (Exception ex) {
-		    throw new IllegalArgumentException(Intl.formatString("util#char.badLocale", localeName));
+		    throw new Intl.IllegalArgumentException("util#char.badLocale", localeName);
 		}
 	    }
 	    return locale;

@@ -34,6 +34,8 @@
  *	    Add Javadoc; one more rename; one more error check on loop variables.
  *	26-Jan-2021 (rlwhitcomb)
  *	    Allow ["name"] to extract fields of map objects.
+ *	29-Jan-2021 (rlwhitcomb)
+ *	    Use new Intl Exception variants.
  */
  package info.rlwhitcomb.calc;
 
@@ -153,7 +155,7 @@ class LValueContext
 		}
 		else {
 		    // Should never happen
-		    throw new IllegalStateException(Intl.formatKeyString("%calc#badAssign", this));
+		    throw new Intl.IllegalStateException("calc#badAssign", this);
 		}
 	    }
 	    else {
@@ -203,7 +205,7 @@ class LValueContext
 	    }
 	    else {
 		// Should never happen
-		throw new IllegalStateException(Intl.formatKeyString("%calc#badAssign", this));
+		throw new Intl.IllegalStateException("calc#badAssign", this);
 	    }
 
 	    // For convenience for the assignment operators, return the value

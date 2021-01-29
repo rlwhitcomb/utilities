@@ -129,6 +129,10 @@
  *	    New "out/errKeyFormat" methods.
  *	22-Jan-2021 (rlwhitcomb)
  *	    Fixed a glitch in "makeKey" for help display.
+ *	29-Jan-2021 (rlwhitcomb)
+ *	    For convenience, define subclasses of IllegalArgumentException,
+ *	    IllegalStateException, IndexOutOfBoundsException, and UnsupportedOperationException
+ *	    that accept keys and do the lookup or formatting before sending to their superclasses.
  */
 package info.rlwhitcomb.util;
 
@@ -461,6 +465,82 @@ public class Intl
 		ProviderKeyPair(final Provider newProvider, final String newKey) {
 		    provider = newProvider;
 		    key      = newKey;
+		}
+	}
+
+
+	/**
+	 * Subclass of {@link java.lang.IllegalArgumentException} that simply provides a shortcut
+	 * when the message should come from the resources.
+	 */
+	public static class IllegalArgumentException extends java.lang.IllegalArgumentException
+	{
+		public IllegalArgumentException(final String keyString) {
+		    super(getString(keyString));
+		}
+
+		public IllegalArgumentException(final String formatKey, Object... args) {
+		    super(formatString(formatKey, args));
+		}
+
+		public IllegalArgumentException(final String keyString, Throwable cause) {
+		    super(getString(keyString), cause);
+		}
+	}
+
+
+	/**
+	 * Subclass of {@link java.lang.IllegalStateException} that simply provides a shortcut
+	 * when the message should come from the resources.
+	 */
+	public static class IllegalStateException extends java.lang.IllegalStateException
+	{
+		public IllegalStateException(final String keyString) {
+		    super(getString(keyString));
+		}
+
+		public IllegalStateException(final String formatKey, Object... args) {
+		    super(formatString(formatKey, args));
+		}
+
+		public IllegalStateException(final String keyString, Throwable cause) {
+		    super(getString(keyString), cause);
+		}
+	}
+
+
+	/**
+	 * Subclass of {@link java.lang.IndexOutOfBoundsException} that simply provides a shortcut
+	 * when the message should come from the resources.
+	 */
+	public static class IndexOutOfBoundsException extends java.lang.IndexOutOfBoundsException
+	{
+		public IndexOutOfBoundsException(final String keyString) {
+		    super(getString(keyString));
+		}
+
+		public IndexOutOfBoundsException(final String formatKey, Object... args) {
+		    super(formatString(formatKey, args));
+		}
+	}
+
+
+	/**
+	 * Subclass of {@link java.lang.UnsupportedOperationException} that simply provides a shortcut
+	 * when the message should come from the resources.
+	 */
+	public static class UnsupportedOperationException extends java.lang.UnsupportedOperationException
+	{
+		public UnsupportedOperationException(final String keyString) {
+		    super(getString(keyString));
+		}
+
+		public UnsupportedOperationException(final String formatKey, Object... args) {
+		    super(formatString(formatKey, args));
+		}
+
+		public UnsupportedOperationException(final String keyString, Throwable cause) {
+		    super(getString(keyString), cause);
 		}
 	}
 

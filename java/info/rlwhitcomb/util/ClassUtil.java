@@ -73,6 +73,8 @@
  *	    Update obsolete Javadoc constructs.
  *	27-Jan-2021 (rlwhitcomb)
  *	    New method to get a directory name from a class (package).
+ *	29-Jan-2021 (rlwhitcomb)
+ *	    Use new Intl Exception variants for convenience.
  */
 
 package info.rlwhitcomb.util;
@@ -330,9 +332,7 @@ public class ClassUtil
 		    }
 		}
 	    }
-	    catch (NoSuchMethodException nsme) { }
-	    catch (InstantiationException ie) { }
-	    catch (IllegalAccessException iae) { }
+	    catch (NoSuchMethodException | InstantiationException | IllegalAccessException ex) { }
 	    return obj;
 	}
 
@@ -442,7 +442,7 @@ public class ClassUtil
 	 */
 	public static void checkOptionTrue(boolean value, String field) {
 	    if (value) {
-		throw new IllegalStateException(Intl.formatString("util#class.optionFieldSet", field));
+		throw new Intl.IllegalStateException("util#class.optionFieldSet", field);
 	    }
 	}
 
@@ -460,7 +460,7 @@ public class ClassUtil
 	 */
 	public static void checkOptionSet(Object value, String field) {
 	    if (value != null || (value instanceof String && !((String)value).isEmpty())) {
-		throw new IllegalStateException(Intl.formatString("util#class.optionFieldSet", field));
+		throw new Intl.IllegalStateException("util#class.optionFieldSet", field);
 	    }
 	}
 
@@ -494,7 +494,7 @@ public class ClassUtil
 	 */
 	public static String getResourcePath(Object obj) {
 	    if (obj == null)
-		throw new IllegalArgumentException(Intl.getString("util#class.nullObject"));
+		throw new Intl.IllegalArgumentException("util#class.nullObject");
 	    String path = getClassDirectory(obj.getClass());
 	    return String.format("/%1$s/", path);
 	}

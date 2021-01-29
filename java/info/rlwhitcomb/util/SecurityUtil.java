@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2010,2013-2014,2016,2020 Roger L. Whitcomb.
+ * Copyright (c) 2010,2013-2014,2016,2020-2021 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -45,6 +45,8 @@
  *	    Prepare for GitHub.
  *	21-Dec-2020 (rlwhitcomb)
  *	    Update obsolete Javadoc constructs.
+ *	29-Jan-2021 (rlwhitcomb)
+ *	    Use new Intl Exception variants for convenience.
  */
 package info.rlwhitcomb.util;
 
@@ -127,7 +129,7 @@ public class SecurityUtil
 	    // Input string should be even length, otherwise error
 	    int len = input.length();
 	    if (len % 2 != 0)
-		throw new IllegalArgumentException(Intl.getString("util#security.hexNotEven"));
+		throw new Intl.IllegalArgumentException("util#security.hexNotEven");
 	    byte[] result = new byte[len / 2];
 	    for (int i = 0, j = 0; i < len; i += 2) {
 		char ch0 = Character.toLowerCase(input.charAt(i));
@@ -135,7 +137,7 @@ public class SecurityUtil
 		int val0 = hexCharString.indexOf(ch0);
 		int val1 = hexCharString.indexOf(ch1);
 		if (val0 < 0 || val1 < 0)
-		    throw new IllegalArgumentException(Intl.formatString("util#security.hexInvalidChar", ch0, ch1));
+		    throw new Intl.IllegalArgumentException("util#security.hexInvalidChar", ch0, ch1);
 		int val = (val0 << 4) + val1;
 		if (val >= 128) {
 		    result[j++] = (byte)(val - 256);

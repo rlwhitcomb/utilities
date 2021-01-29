@@ -123,6 +123,9 @@
  *	    Also display Java version with program info.
  *	27-Jan-2021 (rlwhitcomb)
  *	    New method to return temp directory name.
+ *	29-Jan-2021 (rlwhitcomb)
+ *	    New method to return a standard platform name. Use new Intl
+ *	    exception variants.
  */
 package info.rlwhitcomb.util;
 
@@ -401,6 +404,26 @@ public final class Environment
 
 
 	/**
+	 * Returns a standard platform identifier.
+	 *
+	 * @return One of: "windows", "linux", "osx", or "unix"
+	 * signifying which kind of platform we are running on.
+	 */
+	public static String platformIdentifier() {
+	    String platform = "unix";
+
+	    if (osIsWindows)
+		platform = "windows";
+	    else if (osIsLinux)
+		platform = "linux";
+	    else if (osIsOSX)
+		platform = "osx";
+
+	    return platform;
+	}
+
+
+	/**
 	 * @return The operating system version string.
 	 *
 	 * @see	#OS_VERSION
@@ -560,7 +583,7 @@ public final class Environment
 	    if (DATA_MODEL == DATA_MODEL_32 ||
 	        DATA_MODEL == DATA_MODEL_64)
 		return DATA_MODEL;
-	    throw new IllegalStateException(Intl.formatString("util#env.unknownDataModel", DATA_MODEL));
+	    throw new Intl.IllegalStateException("util#env.unknownDataModel", DATA_MODEL);
 	}
 
 

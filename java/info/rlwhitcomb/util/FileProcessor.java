@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2015,2017,2019-2020 Roger L. Whitcomb.
+ * Copyright (c) 2015,2017,2019-2021 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -36,6 +36,8 @@
  *	    Prepare for GitHub.
  *	21-Dec-2020 (rlwhitcomb)
  *	    Update obsolete Javadoc constructs.
+ *	29-Jan-2021 (rlwhitcomb)
+ *	    Use new Intl Exception variants for convenience.
  */
 package info.rlwhitcomb.util;
 
@@ -66,7 +68,7 @@ public class FileProcessor
 	 */
 	public FileProcessor(String fileName, LineProcessor lp) {
 	    if (CharUtil.isNullOrEmpty(fileName)) {
-		throw new IllegalArgumentException(Intl.getString("util#file.nullEmptyInput"));
+		throw new Intl.IllegalArgumentException("util#file.nullEmptyInput");
 	    }
 
 	    init(new File(fileName), lp);
@@ -97,13 +99,13 @@ public class FileProcessor
 	 */
 	private void init(File file, LineProcessor lp) {
 	    if (file == null) {
-		throw new IllegalArgumentException(Intl.getString("util#file.nullInputFile"));
+		throw new Intl.IllegalArgumentException("util#file.nullInputFile");
 	    }
 	    if (lp == null) {
-		throw new IllegalArgumentException(Intl.getString("util#file.nullProcessor"));
+		throw new Intl.IllegalArgumentException("util#file.nullProcessor");
 	    }
-	    if (!file.exists() || !file.canRead() || !file.isFile()) {
-		throw new IllegalArgumentException(Intl.formatString("util#file.notExistNotFile", file.getPath()));
+	    if (!FileUtilities.canRead(file)) {
+		throw new Intl.IllegalArgumentException("util#file.notExistNotFile", file.getPath());
 	    }
 
 	    this.inputFile = file;

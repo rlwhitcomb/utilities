@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2014-2015,2020 Roger L. Whitcomb.
+ * Copyright (c) 2014-2015,2020-2021 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -35,9 +35,12 @@
  *	    Prepare for GitHub.
  *	21-Dec-2020 (rlwhitcomb)
  *	    Update obsolete Javadoc constructs.
+ *	29-Jan-2021 (rlwhitcomb)
+ *	    Use Intl methods for all messages.
  */
 package info.rlwhitcomb.csv;
 
+import info.rlwhitcomb.util.Intl;
 import info.rlwhitcomb.util.Logging;
 
 
@@ -57,31 +60,45 @@ public class CSVException extends Exception
 	/**
 	 * Construct a new exception with the specified detail message.
 	 *
-	 * @param	message	Detail message for this exception.
+	 * @param	messageKey	Message key for details.
 	 */
-	public CSVException(String message) {
-	    super(message);
+	public CSVException(final String messageKey) {
+	    super(Intl.getString(messageKey));
 	    Logging.Except(this);
 	}
 
 	/**
-	 * Construct a new exception with the specified cause and the message of the cause.
+	 * Construct a new exception with the specified detail message.
+	 *
+	 * @param	formatKey	Message key for details.
+	 * @param	args		Arguments to use in formatting the message.
+	 */
+	public CSVException(final String formatKey, final Object... args) {
+	    super(Intl.formatString(formatKey, args));
+	    Logging.Except(this);
+	}
+
+	/**
+	 * Construct a new exception with the specified cause.
 	 *
 	 * @param	cause	The underlying cause.
 	 */
 	public CSVException(Throwable cause) {
-	    super(cause == null ? null : cause.toString(), cause);
+	    super(cause);
 	    Logging.Except(this);
 	}
 
 	/**
 	 * Construct a new exception with the specified message and cause.
+	 * <p> Note: the parameter order is different than normal to accommodate
+	 * the format arguments.
 	 *
-	 * @param	message	Detail message.
-	 * @param	cause	The underlying cause of this exception.
+	 * @param	cause		The underlying cause of this exception.
+	 * @param	messageKey	Key for the detail message.
+	 * @param	args		Arguments for the message format.
 	 */
-	public CSVException(String message, Throwable cause) {
-	    super(message, cause);
+	public CSVException(final Throwable cause, final String messageKey, final Object... args) {
+	    super(Intl.formatString(messageKey, args), cause);
 	    Logging.Except(this);
 	}
 

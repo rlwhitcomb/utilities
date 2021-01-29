@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2013-2014,2016,2020 Roger L. Whitcomb.
+ * Copyright (c) 2013-2014,2016,2020-2021 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -42,6 +42,8 @@
  *	    Prepare for GitHub.
  *	21-Dec-2020 (rlwhitcomb)
  *	    Update obsolete Javadoc constructs.
+ *	29-Jan-2021 (rlwhitcomb)
+ *	    Use new Intl exception variants for convenience.
  */
 package info.rlwhitcomb.util;
 
@@ -85,9 +87,9 @@ public class BidiMap<K, V> implements Map<K, V>
 
 		public Entry(K key, V value) {
 		    if (key == null)
-			throw new IllegalArgumentException(Intl.getString("util#bidi.keyNotNull"));
+			throw new Intl.IllegalArgumentException("util#bidi.keyNotNull");
 		    if (value == null)
-			throw new IllegalArgumentException(Intl.getString("util#bidi.valueNotNull"));
+			throw new Intl.IllegalArgumentException("util#bidi.valueNotNull");
 		    this.key = key;
 		    this.value = value;
 		    nextKey = null;
@@ -108,7 +110,7 @@ public class BidiMap<K, V> implements Map<K, V>
 
 		@Override
 		public V setValue(V value) {
-		    throw new UnsupportedOperationException(Intl.getString("util#bidi.entryCannotChange"));
+		    throw new Intl.UnsupportedOperationException("util#bidi.entryCannotChange");
 		}
 
 		@Override
@@ -202,9 +204,9 @@ public class BidiMap<K, V> implements Map<K, V>
 	@SuppressWarnings({"unchecked"})
 	private void allocate(int newCapacity, float loadFactor) {
 	    if (newCapacity < 0)
-		throw new IllegalArgumentException(Intl.formatString("util#bidi.illegalCapacity", newCapacity));
+		throw new Intl.IllegalArgumentException("util#bidi.illegalCapacity", newCapacity);
 	    if (loadFactor <= 0 || Float.isNaN(loadFactor))
-		throw new IllegalArgumentException(Intl.formatString("util#bidi.illegalLoadFactor", loadFactor));
+		throw new Intl.IllegalArgumentException("util#bidi.illegalLoadFactor", loadFactor);
 
 	    // Find the next highest power of two for the real capacity
 	    int oneBit = Integer.highestOneBit(newCapacity);
@@ -226,14 +228,14 @@ public class BidiMap<K, V> implements Map<K, V>
 
 	    for (Entry<K, V> e = keyTable[keyIndex]; e != null; e = e.nextKey) {
 		if (e.key.equals(key))
-		    throw new IllegalArgumentException(Intl.formatString("util#bidi.keyNotUnique", key));
+		    throw new Intl.IllegalArgumentException("util#bidi.keyNotUnique", key);
 	    }
 	    entry.nextKey = keyTable[keyIndex];
 	    keyTable[keyIndex] = entry;
 
 	    for (Entry<K, V> e = valueTable[valueIndex]; e != null; e = e.nextValue) {
 		if (e.value.equals(value))
-		    throw new IllegalArgumentException(Intl.formatString("util#bidi.valueNotUnique", value));
+		    throw new Intl.IllegalArgumentException("util#bidi.valueNotUnique", value);
 	    }
 	    entry.nextValue = valueTable[valueIndex];
 	    valueTable[valueIndex] = entry;
@@ -457,8 +459,8 @@ public class BidiMap<K, V> implements Map<K, V>
 
 	    public void remove() {
 		if (current == null)
-		    throw new IllegalStateException(Intl.getString("util#bidi.iteratorNotInit"));
-		throw new UnsupportedOperationException(Intl.getString("util#bidi.removeNotSupported"));
+		    throw new Intl.IllegalStateException("util#bidi.iteratorNotInit");
+		throw new Intl.UnsupportedOperationException("util#bidi.removeNotSupported");
 	    }
 	}
 
@@ -531,7 +533,7 @@ public class BidiMap<K, V> implements Map<K, V>
 	    }
 
 	    public boolean remove(Object o) {
-		throw new UnsupportedOperationException(Intl.getString("util#bidi.removeNotSupported"));
+		throw new Intl.UnsupportedOperationException("util#bidi.removeNotSupported");
 	    }
 
 	    public int size() {
@@ -571,7 +573,7 @@ public class BidiMap<K, V> implements Map<K, V>
 	    }
 
 	    public boolean remove(Object o) {
-		throw new UnsupportedOperationException(Intl.getString("util#bidi.removeNotSupported"));
+		throw new Intl.UnsupportedOperationException("util#bidi.removeNotSupported");
 	    }
 
 	    public void clear() {

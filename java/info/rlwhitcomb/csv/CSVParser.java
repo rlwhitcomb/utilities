@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2014-2017,2019-2020 Roger L. Whitcomb.
+ * Copyright (c) 2014-2017,2019-2021 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -49,6 +49,9 @@
  *	    Prepare for GitHub.
  *	21-Dec-2020 (rlwhitcomb)
  *	    Update obsolete Javadoc constructs.
+ *	29-Jan-2021 (rlwhitcomb)
+ *	    Use the new Intl exception subclasses and extended CSVException
+ *	    for convenience.
  */
 package info.rlwhitcomb.csv;
 
@@ -96,10 +99,11 @@ public class CSVParser
 	 *			a {@code BufferedReader} yourself.
 	 * @param	format	The {@link CSVFormat} to use to interpret the data.  If
 	 *			{@code null} is passed, then a default format will be used.
+	 * @throws	IllegalArgumentException if the {@code reader} is {@code null}.
 	 */
 	public CSVParser(Reader reader, CSVFormat format) {
 	    if (reader == null)
-		throw new IllegalArgumentException(Intl.getString("csv#parser.readerNotNull"));
+		throw new Intl.IllegalArgumentException("csv#parser.readerNotNull");
 
 	    if (reader instanceof BufferedReader)
 		this.reader = (BufferedReader)reader;
@@ -205,7 +209,7 @@ public class CSVParser
 			    continue;
 			if (nextChar == -1) {
 			    if (insideQuotes)
-				throw new CSVException(Intl.formatString("csv#parser.unterminatedToken", inputPos));
+				throw new CSVException("csv#parser.unterminatedToken", inputPos);
 			    break;
 			}
 			else {
@@ -215,7 +219,7 @@ public class CSVParser
 				if (!format.disableEscape && (char)nextChar == format.escapeChar) {
 				    nextChar = getNextChar();
 				    if (nextChar == -1) {
-					throw new CSVException(Intl.formatString("csv#parser.unexpectedEOF", inputPos));
+					throw new CSVException("csv#parser.unexpectedEOF", inputPos);
 				    }
 				    // Interpret the next character literally
 				    buf.append((char)nextChar);
@@ -260,7 +264,7 @@ public class CSVParser
 				if (!format.disableEscape && (char)nextChar == format.escapeChar) {
 				    nextChar = getNextChar();
 				    if (nextChar == -1) {
-					throw new CSVException(Intl.formatString("csv#parser.unexpectedEOF", inputPos));
+					throw new CSVException("csv#parser.unexpectedEOF", inputPos);
 				    }
 				    // Interpret the next character literally
 				    buf.append((char)nextChar);
@@ -336,7 +340,7 @@ public class CSVParser
 		}
 	    }
 	    catch (IOException ioe) {
-		throw new CSVException(Intl.formatString("csv#parser.readingException", inputPos), ioe);
+		throw new CSVException(ioe, "csv#parser.readingException", inputPos);
 	    }
 	}
 

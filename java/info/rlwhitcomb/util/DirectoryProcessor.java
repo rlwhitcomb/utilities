@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2015-2017,2020 Roger L. Whitcomb.
+ * Copyright (c) 2015-2017,2020-2021 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -44,6 +44,8 @@
  *	    Prepare for GitHub.
  *	21-Dec-2020 (rlwhitcomb)
  *	    Update obsolete Javadoc constructs.
+ *	29-Jan-2021 (rlwhitcomb)
+ *	    Use new Intl Exception variants for convenience.
  */
 package info.rlwhitcomb.util;
 
@@ -70,7 +72,7 @@ public class DirectoryProcessor
 	 */
 	public DirectoryProcessor(String dirName, LineProcessor lp) {
 	    if (CharUtil.isNullOrEmpty(dirName)) {
-		throw new IllegalArgumentException(Intl.getString("util#dir.nullEmptyInput"));
+		throw new Intl.IllegalArgumentException("util#dir.nullEmptyInput");
 	    }
 
 	    init(new File(dirName), lp);
@@ -99,13 +101,13 @@ public class DirectoryProcessor
 	 */
 	private void init(File dir, LineProcessor lp) {
 	    if (dir == null) {
-		throw new IllegalArgumentException(Intl.getString("util#dir.nullInputDir"));
+		throw new Intl.IllegalArgumentException("util#dir.nullInputDir");
 	    }
 	    if (lp == null) {
-		throw new IllegalArgumentException(Intl.getString("util#file.nullProcessor"));
+		throw new Intl.IllegalArgumentException("util#file.nullProcessor");
 	    }
-	    if (!dir.exists() || !dir.canRead() || !dir.isDirectory()) {
-		throw new IllegalArgumentException(Intl.formatString("util#dir.notExistNotDir", dir.getPath()));
+	    if (!FileUtilities.canReadDir(dir)) {
+		throw new Intl.IllegalArgumentException("util#dir.notExistNotDir", dir.getPath());
 	    }
 
 	    this.inputDir = dir;

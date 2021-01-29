@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2014-2017,2019-2020 Roger L. Whitcomb.
+ * Copyright (c) 2014-2017,2019-2021 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -48,6 +48,8 @@
  *	    Prepare for GitHub.
  *	21-Dec-2020 (rlwhitcomb)
  *	    Update obsolete Javadoc constructs.
+ *	29-Jan-2021 (rlwhitcomb)
+ *	    Use new Exception variants using Intl for convenience.
  */
 package info.rlwhitcomb.csv;
 
@@ -161,7 +163,7 @@ public class CSVFormat
 	 */
 	public CSVFormat withQuoteChar(char quoteChar) {
 	    if (quoteChar == escapeChar)
-		throw new IllegalArgumentException(Intl.getString("csv#format.quoteNotEscape"));
+		throw new Intl.IllegalArgumentException("csv#format.quoteNotEscape");
 	    this.quoteChar = this.rightQuoteChar = quoteChar;
 	    if (this.quoteChar == Quotes.Constants.NO_QUOTE_CHAR)
 		this.disableQuoting = true;
@@ -183,7 +185,7 @@ public class CSVFormat
 	 */
 	public CSVFormat withRightQuoteChar(char rightQuoteChar) {
 	    if (rightQuoteChar == escapeChar)
-		throw new IllegalArgumentException(Intl.getString("csv#format.quoteNotEscape"));
+		throw new Intl.IllegalArgumentException("csv#format.quoteNotEscape");
 	    this.rightQuoteChar = rightQuoteChar == Quotes.Constants.NO_QUOTE_CHAR ? this.quoteChar : rightQuoteChar;
 	    this.handedQuoting = this.quoteChar != this.rightQuoteChar;
 	    return this;
@@ -201,7 +203,7 @@ public class CSVFormat
 	 */
 	public CSVFormat withQuote(Quotes quote) {
 	    if (quote == null)
-		throw new IllegalArgumentException(Intl.getString("csv#format.quoteNotNull"));
+		throw new Intl.IllegalArgumentException("csv#format.quoteNotNull");
 	    this.quoteChar = quote.leftChar();
 	    this.rightQuoteChar = quote.rightChar();
 	    this.handedQuoting = this.quoteChar != this.rightQuoteChar;
@@ -221,7 +223,7 @@ public class CSVFormat
 	 */
 	public CSVFormat withFieldSepChar(char fieldSepChar) {
 	    if (fieldSepChar == '\0')
-		throw new IllegalArgumentException(Intl.getString("csv#format.fieldSepNotNull"));
+		throw new Intl.IllegalArgumentException("csv#format.fieldSepNotNull");
 	    this.fieldSepChar = fieldSepChar;
 	    return this;
 	}
@@ -237,7 +239,7 @@ public class CSVFormat
 	 */
 	public CSVFormat withDelimiter(Delimiter delimiter) {
 	    if (delimiter == null)
-		throw new IllegalArgumentException(Intl.getString("csv#format.fieldSepNotNull"));
+		throw new Intl.IllegalArgumentException("csv#format.fieldSepNotNull");
 	    this.fieldSepChar = delimiter.delim();
 	    return this;
 	}
@@ -264,10 +266,10 @@ public class CSVFormat
 		return this;
 	    }
 	    else if (recordSep.length() > 2)
-		throw new IllegalArgumentException(Intl.getString("csv#format.recordSepTwoChars"));
+		throw new Intl.IllegalArgumentException("csv#format.recordSepTwoChars");
 	    else if (recordSep.length() == 2) {
 		if (recordSep.charAt(0) == recordSep.charAt(1))
-		    throw new IllegalArgumentException(Intl.getString("csv#format.recordSepTwoDifferent"));
+		    throw new Intl.IllegalArgumentException("csv#format.recordSepTwoDifferent");
 	    }
 	    // Decide if this is a "normal" line ending, which has special meaning during parsing
 	    this.normalLineEnding = true;
@@ -278,7 +280,7 @@ public class CSVFormat
 		}
 	    }
 	    if (!normalLineEnding && recordSep.length() > 1)
-		throw new IllegalArgumentException(Intl.getString("csv#format.recordSepStandard"));
+		throw new Intl.IllegalArgumentException("csv#format.recordSepStandard");
 
 	    this.recordSep = recordSep;
 	    this.recordSepChar = recordSep.charAt(0);
@@ -323,7 +325,7 @@ public class CSVFormat
 	 */
 	public CSVFormat withEscapeChar(char escapeChar) {
 	    if (escapeChar == quoteChar)
-		throw new IllegalArgumentException(Intl.getString("csv#format.escapeNotQuote"));
+		throw new Intl.IllegalArgumentException("csv#format.escapeNotQuote");
 	    this.escapeChar = escapeChar;
 	    if (escapeChar == '\0')
 		this.disableEscape = true;

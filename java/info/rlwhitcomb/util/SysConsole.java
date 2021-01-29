@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2017,2020 Roger L. Whitcomb.
+ * Copyright (c) 2017,2020-2021 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -30,6 +30,8 @@
  *	    Created.
  *	10-Mar-2020 (rlwhitcomb)
  *	    Prepare for GitHub.
+ *	29-Jan-2021 (rlwhitcomb)
+ *	    Use new Intl Exception variants.
  */
 package info.rlwhitcomb.util;
 
@@ -59,7 +61,7 @@ public abstract class SysConsole
 
 		public Default() {
 		    if ((this.console = System.console()) == null) {
-			throw new IllegalStateException(Intl.getString("util#console.noConsole"));
+			throw new Intl.IllegalStateException("util#console.noConsole");
 		    }
 		}
 

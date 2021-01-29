@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2014-2016,2019-2020 Roger L. Whitcomb.
+ * Copyright (c) 2014-2016,2019-2021 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -45,6 +45,8 @@
  *	    Separate out the code for header keys.
  *	21-Dec-2020 (rlwhitcomb)
  *	    Update obsolete Javadoc constructs.
+ *	29-Jan-2021 (rlwhitcomb)
+ *	    Use new Intl variants of Exception classes for convenience.
  */
 package info.rlwhitcomb.csv;
 
@@ -156,7 +158,7 @@ public class CSVRecord implements Iterator<Object>, Iterable<Object>
 	 */
 	@Override
 	public void remove() {
-	    throw new IllegalStateException(Intl.getString("csv#removeNotSupported"));
+	    throw new Intl.IllegalStateException("csv#removeNotSupported");
 	}
 
 	/**
@@ -194,7 +196,7 @@ public class CSVRecord implements Iterator<Object>, Iterable<Object>
 	 */
 	public Object get(int index) {
 	    if (index < 0 || index >= length)
-		throw new IndexOutOfBoundsException(Intl.formatString("csv#record.indexOutOfRange", index, length - 1));
+		throw new Intl.IndexOutOfBoundsException("csv#record.indexOutOfRange", index, length - 1);
 
 	    return recordMap.get(getHeaderKey(index));
 	}

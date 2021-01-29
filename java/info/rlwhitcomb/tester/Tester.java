@@ -169,6 +169,8 @@
  *	25-Jan-2021 (rlwhitcomb)
  *	    Add "-inputDir" command line option; use that to find input scripts (defaultScriptDir).
  *	    Switch to Environment.printProgramInfo.
+ *	29-Jan-2021 (rlwhitcomb)
+ *	    Move standard platform code to Environment; one other code tweak.
  */
 package info.rlwhitcomb.tester;
 
@@ -1138,7 +1140,7 @@ public class Tester
 		while ((line = reader.readLine()) != null) {
 		    lineNo++;
 		    if (outputFileWriter != null) {
-			if (line.equalsIgnoreCase("$endfile")) {
+			if (line.equalsIgnoreCase("$endfile") || line.equalsIgnoreCase("!endfile")) {
 			    outputFileWriter.flush();
 			    outputFileWriter.close();
 			    outputFileWriter = null;
@@ -1326,16 +1328,7 @@ public class Tester
 	    }
 
 	    // Setup the canonical platform string
-	    boolean isWindows = Environment.isWindows();
-	    if (isWindows)
-		platform = "windows";
-	    else if (Environment.isLinux())
-		platform = "linux";
-	    else if (Environment.isOSX())
-		platform = "osx";
-	    else
-		platform = "unix";
-	    // What about VMS???
+	    platform = Environment.platformIdentifier();
 
 	    return 0;
 	}
@@ -1359,14 +1352,17 @@ public class Tester
 	}
 
 	/**
-	 * The main class method, meant to be invoked from the
-	 * command line.  The only input is the path of a test
-	 * description file that provides the input to drive
-	 * every individual test.  Each line of the file has
-	 * the name of a "canon" file used to provide input to
-	 * the test and which provides the expected output and
-	 * error results.  The test description line also has
-	 * the command-line options needed for each test.
+	 * The main class method, meant to be invoked from the command line.
+	 * The only inputs are the paths of test description files that
+	 * provide the input to drive each individual test. Plus some
+	 * basic options are accepted.
+	 * <p> Each line of one of these files has the name of a "canon"
+	 * file used to provide input to the test and which provides the
+	 * expected output and error results.  The test description line
+	 * also lists the command-line options needed for each test.
+	 * <p> The test description files may also contain directives to
+	 * guide the test operation (such as the location of files)
+	 * and comments to explain things.
 	 *
 	 * @param args	The command line arguments from the user.
 	 */

@@ -83,6 +83,9 @@
  *	New method to copy an InputStream to a temp file (for Help display of HTML).
  *	Another omnibus method to copy entries from a jar file into a temp directory
  *	from a given package, with given extensions.
+ *    29-Jan-2021 (rlwhitcomb)
+ *	Use new Intl Exception variants for convenience. New "canReadDir" variant
+ *	of "canRead" for directories.
  */
 package info.rlwhitcomb.util;
 
@@ -425,7 +428,7 @@ public class FileUtilities
 	if (inputName.endsWith(COMPRESS_EXT))
 	    outputName = inputName.substring(0, inputName.length() - COMPRESS_EXT.length());
 	else
-	    throw new IllegalArgumentException();
+	    throw new Intl.IllegalArgumentException("util#fileutil.wrongExtension", COMPRESS_EXT);
 	try (GZIPInputStream gis = new GZIPInputStream(Files.newInputStream(inputFile.toPath()), BUFFER_SIZE);
 	     OutputStream fos = Files.newOutputStream(Paths.get(outputName)))
 	{
@@ -456,20 +459,54 @@ public class FileUtilities
 
     /**
      * Test to see if the file given by the name is actually readable.
+     *
+     * @param	file	The local file to test.
+     * @return		Whether or not the file exists, is a regular file,
+     *			and the permissions include read access.
+     * @see	#canReadPath
+     */
+    public static boolean canRead(File file) {
+	return canReadPath(file.toPath(), false);
+    }
+
+    /**
+     * Test to see if the directory given by the name is actually readable.
+     *
+     * @param	dir	The local directory to test.
+     * @return		Whether or not the directory exists, is actually a
+     *			directory, and the permissions include read access.
+     * @see	#canReadPath
+     */
+    public static boolean canReadDir(File dir) {
+	return canReadPath(dir.toPath(), true);
+    }
+
+    /**
+     * Test to see if the file given by the name is actually readable.
      * <p> The problem this solves is that no matter the permissions on the actual
      * file on Linux, the "root" user can "read" it, which is not what we want.
      * We actually need to test the file permissions.  So, do that on Linux, yet
      * the regular test is sufficient for Windows (plus on Java 10 the POSIX
      * object isn't available there).
      *
-     * @param	file	The local file to test.
-     * @return		Whether or not the file exists, is a regular file,
-     *			and the permissions include read access.
+     * @param	path	The local file to test.
+     * @param	asDir	Whether to treat this file as a directory ({@code true}),
+     *			or as a regular file ({@code false}).
+     * @return		Whether or not the path exists, is the kind of file/directory
+     *			we're expecting, and the permissions include read access.
      */
-    public static boolean canRead(File file) {
-	Path path = file.toPath();
-	if (!Files.exists(path) || !Files.isRegularFile(path))
+    private static boolean canReadPath(Path path, boolean asDir) {
+	if (!Files.exists(path))
 	    return false;
+
+	if (asDir) {
+	    if (!Files.isDirectory(path))
+		return false;
+	}
+	else {
+	    if (!Files.isRegularFile(path))
+		return false;
+	}
 
 	if (Environment.isWindows()) {
 	    return Files.isReadable(path);
@@ -598,7 +635,7 @@ public class FileUtilities
     {
 	long size = file.length();
 	if (size > FILE_STRING_SIZE_LIMIT) {
-	    throw new IllegalArgumentException(Intl.formatString("util#fileutil.fileTooBig", size));
+	    throw new Intl.IllegalArgumentException("util#fileutil.fileTooBig", size);
 	}
 	StringBuilder buf = new StringBuilder((int)size);
 

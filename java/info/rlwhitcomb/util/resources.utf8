@@ -82,6 +82,8 @@
 #	    Don't need one of these errors any more.
 #	25-Jan-2021 (rlwhitcomb)
 #	    Java version string for Environment.
+#	29-Jan-2021 (rlwhitcomb)
+#	    Tweak the text of some messages. New FileUtilities message.
 #
 
 #
@@ -90,8 +92,8 @@
 bidi.keyNotNull		= Key must not be null.
 bidi.valueNotNull	= Value must not be null.
 bidi.entryCannotChange	= Map entry cannot be changed.
-bidi.illegalCapacity	= Illegal initial capacity: %1$d
-bidi.illegalLoadFactor	= Illegal load factor: %1$s
+bidi.illegalCapacity	= Initial capacity of %1$d is not supported.
+bidi.illegalLoadFactor	= Load factor of %1$s is not supported.
 bidi.keyNotUnique	= Key "%1$s" is not unique.
 bidi.valueNotUnique	= Value "%1$s" is not unique.
 bidi.removeNotSupported	= Remove is not supported.
@@ -100,28 +102,28 @@ bidi.iteratorNotInit	= Map iterator not initialized.
 #
 # From CharUtil.java
 #
-char.illegalUnicodeEscape	= Illegal Unicode escape sequence: "%1$s"
+char.illegalUnicodeEscape	= Unsupported Unicode escape sequence: "%1$s"
 char.unknownBooleanString	= Unknown boolean value: "%1$s"
 char.unknownBooleanType		= Cannot convert object of type %1$s to a boolean value.
 char.badLocale			= Locale name "%1$s" is not supported
-char.illegalHexLiteral		= Illegal hex literal: "%1$s"
+char.illegalHexLiteral		= Unsupported hex literal: "%1$s"
 
-# Note: these are lists of valid values separated by a comma and optional spaces
+# Note: these are lists of valid values separated by a comma and optional spaces.
 # The English versions should remain untranslated, but additional choices in other languages
-# can be ADDED to the list.
+# can be ADDED to either list.
 char.validTrueStrings		= T, Yes, Y, On
 char.validFalseStrings		= F, No, N, Off
 
 #
 # From Environment.java
 #
-env.unknownDataModel	= Java system has an unexpected data model value: %1$d
 env.copyright		= Copyright (c) 2008-2021 Roger L. Whitcomb.
 env.version		= Version %1$s build %2$s%3$s
 env.build		= Built on %1$s at %2$s
 env.debug		= " (DEBUG)"
 env.javaVersion		= Java version %1$s (%2$d-bit)
 env.timeThis		= Elapsed time %1$11.6f secs.
+env.unknownDataModel	= Java has an unexpected data model value of %1$d
 
 #
 # From Intl.java!
@@ -132,19 +134,19 @@ intl.providerNotFound	= Unable to find resource provider for "%1$s" package.
 #
 # From NumericUtil.java
 #
-numeric.badKMGFormat	= Improper input format: suffix must be one of [K,M,G,T,P,E].
-numeric.outOfRange	= Value is out of range.
-numeric.badDataType	= Data type %1$s is not recognized in binary files.
-numeric.badDataTypeCode	= Data type code %1$d is not recognized.
-numeric.unknownByteOrder= "%1$s" is not a valid byte order (should be LSB or MSB).
-numeric.unknownStringLength= "%1$s" is not a valid string length designation.
-numeric.stringLengthTooBig= String length of %1$d exceds limit of %2$d.
-numeric.tooManyPiDigits	= The PI digit calculation is only good for about 12,500 digits!
-numeric.piDigitMismatch	= Calculated digit length is %1$d, but requested number of digits was %2$d!
-numeric.tooManyDigits	= Too many digits of precision requested (max is %1$d).
-numeric.wholeInteger	= The value must be a whole number.
-numeric.primeTooBig	= The value is too big to compute.
-numeric.sqrtNegative	= Square root of a negative number is not real.
+numeric.badKMGFormat		= Improper input format: suffix must be one of [K,M,G,T,P, or E].
+numeric.outOfRange		= Value is out of range.
+numeric.badDataType		= Data type %1$s is not supported in binary files.
+numeric.badDataTypeCode		= Data type code %1$d is not recognized.
+numeric.unknownByteOrder	= "%1$s" is not a valid byte order (should be LSB or MSB).
+numeric.unknownStringLength	= "%1$s" is not a valid string length designation.
+numeric.stringLengthTooBig	= String length of %1$d exceds limit of %2$d.
+numeric.tooManyPiDigits		= The PI digit calculation is only good for about 12,500 digits!
+numeric.piDigitMismatch		= Calculated digit length is %1$d, but requested number of digits was %2$d!
+numeric.tooManyDigits		= Too many digits of precision requested (max is %1$d).
+numeric.wholeInteger		= The value must be a whole number.
+numeric.primeTooBig		= The value is too big to compute.
+numeric.sqrtNegative		= Square root of a negative number is not real.
 
 #
 # From SecurityUtil.java
@@ -163,19 +165,20 @@ line.genericError	= Error reading input file "%1$s": %2$s
 file.nullEmptyInput	= Input file is null or empty.
 file.nullInputFile	= Input file is null.
 file.nullProcessor	= File Processor is null.
-file.notExistNotFile	= File "%1$s" does not exist or cannot be read or is not a regular file.
+file.notExistNotFile	= File "%1$s" does not exist, is not a regular file, or cannot be read.
 
 #
 # From DirectoryProcessor.java
 #
 dir.nullEmptyInput	= Directory name is null or empty.
 dir.nullInputDir	= Input directory is null.
-dir.notExistNotDir	= Directory "%1$s" does not exist or cannot be read or is not a directory.
+dir.notExistNotDir	= Directory "%1$s" does not exist, is not a directory, or cannot be read.
 
 #
 # From FileUtilities.java
 #
 fileutil.fileTooBig	= The file's size of %1$d is too big to read.
+fileutil.wrongExtension	= The file does not have the expected "%1$s" extension.
 
 #
 # From ClassUtil.java

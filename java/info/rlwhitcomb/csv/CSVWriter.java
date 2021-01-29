@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2014-2016,2019-2020 Roger L. Whitcomb.
+ * Copyright (c) 2014-2016,2019-2021 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -38,6 +38,8 @@
  *	    Prepare for GitHub.
  *	21-Dec-2020 (rlwhitcomb)
  *	    Update obsolete Javadoc constructs.
+ *	29-Jan-2021 (rlwhitcomb)
+ *	    Use new Intl Exception variants for convenience.
  */
 package info.rlwhitcomb.csv;
 
@@ -81,7 +83,7 @@ public class CSVWriter
 	 */
 	public CSVWriter(Writer writer, CSVFormat format) {
 	    if (writer == null)
-		throw new IllegalArgumentException(Intl.getString("csv#writer.writerNotNull"));
+		throw new Intl.IllegalArgumentException("csv#writer.writerNotNull");
 	    if (format == null)
 		this.format = new CSVFormat();	// use all defaults
 	    else
@@ -111,7 +113,7 @@ public class CSVWriter
 		throws CSVException
 	{
 	    if (writer == null)
-		throw new CSVException(Intl.getString("csv#writer.noWriteAfterClose"));
+		throw new CSVException("csv#writer.noWriteAfterClose");
 	    try {
 		if (record == null) {
 		    writer.flush();
@@ -132,7 +134,7 @@ public class CSVWriter
 		}
 	    }
 	    catch (IOException ioe) {
-		throw new CSVException(Intl.getString("csv#writer.writingException"), ioe);
+		throw new CSVException(ioe, "csv#writer.writingException");
 	    }
 	}
 
@@ -207,7 +209,7 @@ public class CSVWriter
 		}
 	    }
 	    catch (IOException ioe) {
-		throw new CSVException(Intl.getString("csv#writer.writingException"), ioe);
+		throw new CSVException(ioe, "csv#writer.writingException");
 	    }
 	}
 

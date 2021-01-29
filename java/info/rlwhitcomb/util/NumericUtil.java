@@ -103,6 +103,8 @@
  *	    Fix bug needing commas in "convertToWords" results.
  *	28-Jan-2021 (rlwhitcomb)
  *	    Refactor around DataType. Add "BOOL" type.
+ *	29-Jan-2021 (rlwhitcomb)
+ *	    Use new Intl forms of exceptions.
  */
 package info.rlwhitcomb.util;
 
@@ -174,14 +176,14 @@ public class NumericUtil
 			return NUL;
 		    DataType type = map.get(value.getClass());
 		    if (type == null) {
-			throw new IllegalArgumentException(Intl.formatString("util#numeric.badDataType", value.getClass().getName()));
+			throw new Intl.IllegalArgumentException("util#numeric.badDataType", value.getClass().getName());
 		    }
 		    return type;
 		}
 
 		static DataType fromCode(final int code) {
 		    if (code < 0 || code > numValues) {
-			throw new IllegalArgumentException(Intl.formatString("util#numeric.badDataTypeCode", code));
+			throw new Intl.IllegalArgumentException("util#numeric.badDataTypeCode", code);
 		    }
 		    return codeMap[code];
 		}
@@ -231,7 +233,7 @@ public class NumericUtil
 			    return order;
 			}
 		    }
-		    throw new IllegalArgumentException(Intl.formatString("util#numeric.unknownByteOrder", value));
+		    throw new Intl.IllegalArgumentException("util#numeric.unknownByteOrder", value);
 		}
 	}
 
@@ -258,7 +260,7 @@ public class NumericUtil
 			    return length;
 			}
 		    }
-		    throw new IllegalArgumentException(Intl.formatString("util#numeric.unknownStringLength", value));
+		    throw new Intl.IllegalArgumentException("util#numeric.unknownStringLength", value);
 		}
 	}
 
@@ -638,7 +640,7 @@ public class NumericUtil
 	    long value = inputValue;
 	    if (value < 0L) {
 		if (value == Long.MIN_VALUE) {
-		    throw new IllegalArgumentException(Intl.getString("util#numeric.outOfRange"));
+		    throw new Intl.IllegalArgumentException("util#numeric.outOfRange");
 		}
 		buf.append(minus).append(' ');
 		value = -value;
@@ -1021,14 +1023,14 @@ public class NumericUtil
 		case PREFIX1:
 		    // Need a range of 0..255 here
 		    if (byteLen > 255)
-			throw new IndexOutOfBoundsException(Intl.formatString("util#numeric.stringLengthTooBig", byteLen, 255));
+			throw new Intl.IndexOutOfBoundsException("util#numeric.stringLengthTooBig", byteLen, 255);
 		    dos.write(byteLen);
 		    dos.write(bytes);
 		    break;
 		case PREFIX2:
 		    // Need a range of 0..65535 here
 		    if (byteLen > 65535)
-			throw new IndexOutOfBoundsException(Intl.formatString("util#numeric.stringLengthTooBig", byteLen, 65535));
+			throw new Intl.IndexOutOfBoundsException("util#numeric.stringLengthTooBig", byteLen, 65_535);
 		    writeShort(dos, (short)byteLen, byteOrder);
 		    dos.write(bytes);
 		    break;
@@ -1190,7 +1192,7 @@ public class NumericUtil
 		case "String":
 		    writeString(dos, (String)value, charset, byteOrder, stringLength, length); break;
 		default:
-		    throw new IllegalArgumentException(Intl.formatString("util#numeric.badDataType", className));
+		    throw new Intl.IllegalArgumentException("util#numeric.badDataType", className);
 	    }
 	}
 
@@ -1245,7 +1247,7 @@ public class NumericUtil
 	public static BigDecimal pow(final BigDecimal base, final double inputExp) {
 	    double exp = inputExp;
 	    if (Double.isNaN(exp) || Double.isInfinite(exp))
-		throw new IllegalArgumentException(Intl.getString("util#numeric.outOfRange"));
+		throw new Intl.IllegalArgumentException("util#numeric.outOfRange");
 
 	    if (exp == 0.0d)
 		return BigDecimal.ONE;
@@ -1294,7 +1296,7 @@ public class NumericUtil
 	 */
 	public static Number pow(final BigInteger base, final double exp) {
 	    if (Double.isNaN(exp) || Double.isInfinite(exp))
-		throw new IllegalArgumentException(Intl.getString("util#numeric.outOfRange"));
+		throw new Intl.IllegalArgumentException("util#numeric.outOfRange");
 	    if (exp == 0.0d)
 		return BigInteger.ONE;
 
@@ -1323,7 +1325,7 @@ public class NumericUtil
 	    double baseFloor  = Math.floor(baseDouble);
 
 	    if (baseFloor != baseDouble)
-		throw new IllegalArgumentException(Intl.getString("util#numeric.wholeInteger"));
+		throw new Intl.IllegalArgumentException("util#numeric.wholeInteger");
 
 	    long loops = base.longValue();
 
@@ -1366,7 +1368,7 @@ public class NumericUtil
 	    double nInt    = Math.rint(nDouble);
 
 	    if (nInt != nDouble)
-		throw new IllegalArgumentException(Intl.getString("util#numeric.wholeInteger"));
+		throw new Intl.IllegalArgumentException("util#numeric.wholeInteger");
 
 	    long loops        = Math.abs(n.longValue());
 	    boolean negative  = nInt < 0.0d;
@@ -1507,7 +1509,7 @@ public class NumericUtil
 	 */
 	public static BigDecimal sqrt(final BigDecimal x, final MathContext mc) {
 	    if (x.signum() < 0)
-		throw new IllegalArgumentException(Intl.getString("util#numeric.sqrtNegative"));
+		throw new Intl.IllegalArgumentException("util#numeric.sqrtNegative");
 	    if (x.equals(BigDecimal.ZERO) || x.equals(BigDecimal.ONE))
 		return x;
 
@@ -1584,7 +1586,7 @@ public class NumericUtil
 	    // According to the original documentation, the given SCALE and ARRINIT
 	    // values work up to approx. 12,500 digits, so error out if we're over that
 	    if (digits > 12_500)
-		throw new IllegalArgumentException(Intl.getString("util#numeric.tooManyPiDigits"));
+		throw new Intl.IllegalArgumentException("util#numeric.tooManyPiDigits");
 
 	    // Since each loop reduces the count by 14 while only providing 4 digits
 	    // of output, in order to produce the required number of digits we must
@@ -1615,8 +1617,8 @@ public class NumericUtil
 	    // the result to the exact digit count requested. Exception thrown if we
 	    // calculated wrong.
 	    if (pi.length() < digits)
-		throw new IllegalStateException(Intl.formatString("util#numeric.piDigitMismatch",
-			pi.length(), digits));
+		throw new Intl.IllegalStateException("util#numeric.piDigitMismatch",
+			pi.length(), digits);
 	    else if (pi.length() > digits)
 		pi.setLength(digits);
 
@@ -1713,7 +1715,7 @@ public class NumericUtil
 	 */
 	public static boolean isPrime(final BigInteger n) {
 	    if (n.compareTo(MAX_PRIME) > 0)
-		throw new IllegalArgumentException(Intl.getString("util#numeric.primeTooBig"));
+		throw new Intl.IllegalArgumentException("util#numeric.primeTooBig");
 
 	    // Negative numbers are essentially the same primality as their positive counterparts
 	    BigInteger posN = n.abs();
