@@ -108,6 +108,8 @@
  *	    Adjust compare / equal operator precedence.
  *	21-Jan-2021 (rlwhitcomb)
  *	    Tweak operator precedence again.
+ *	28-Jan-2021 (rlwhitcomb)
+ *	    Add LCM function.
  */
 
 grammar Calc;
@@ -165,6 +167,7 @@ expr
    | ROUND expr2                         # roundExpr
    | ISPRIME expr                        # isPrimeExpr
    | GCD expr2                           # gcdExpr
+   | LCM expr2                           # lcmExpr
    | MAX exprN                           # maxExpr
    | MIN exprN                           # minExpr
    | JOIN exprN                          # joinExpr
@@ -339,6 +342,8 @@ ROUND    : R O U N D ;
 ISPRIME  : I S P R I M E ;
 
 GCD      : G C D ;
+
+LCM      : L C M ;
 
 MAX      : M A X ;
 

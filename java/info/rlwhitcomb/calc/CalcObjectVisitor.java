@@ -141,6 +141,8 @@
  *	    dynamic access to map members, make "loop" over map return keys, not values.
  *	28-Jan-2021 (rlwhitcomb)
  *	    Allow "loop" over the characters (codepoints) in a String.
+ *	28-Jan-2021 (rlwhitcomb)
+ *	    Add LCM function.
  */
 package info.rlwhitcomb.calc;
 
@@ -1199,6 +1201,18 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    BigInteger e2 = getIntegerValue(e2ctx.expr(1));
 
 	    return e1.gcd(e2);
+	}
+
+	@Override
+	public Object visitLcmExpr(CalcParser.LcmExprContext ctx) {
+	    CalcParser.Expr2Context e2ctx = ctx.expr2();
+	    BigInteger e1 = getIntegerValue(e2ctx.expr(0));
+	    BigInteger e2 = getIntegerValue(e2ctx.expr(1));
+
+	    BigInteger gcd = e1.gcd(e2);
+	    BigInteger num = e1.multiply(e2);
+
+	    return num.divide(gcd);
 	}
 
 	@Override
