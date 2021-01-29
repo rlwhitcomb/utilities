@@ -110,6 +110,8 @@
  *	    Tweak operator precedence again.
  *	28-Jan-2021 (rlwhitcomb)
  *	    Add LCM function.
+ *	28-Jan-2021 (rlwhitcomb)
+ *	    New function for Bernoulli numbers.
  */
 
 grammar Calc;
@@ -172,6 +174,7 @@ expr
    | MIN exprN                           # minExpr
    | JOIN exprN                          # joinExpr
    | FIB expr                            # fibExpr
+   | BN expr                             # bernExpr
    |<assoc=right> expr '**' expr         # powerExpr
    | expr MULT_OP expr                   # multiplyExpr
    | expr ADD_OP expr                    # addExpr
@@ -352,6 +355,8 @@ MIN      : M I N ;
 JOIN     : J O I N ;
 
 FIB      : F I B ;
+
+BN       : B N ;
 
 LOOP     : L O O P ;
 

@@ -105,6 +105,8 @@
  *	    Refactor around DataType. Add "BOOL" type.
  *	29-Jan-2021 (rlwhitcomb)
  *	    Use new Intl forms of exceptions.
+ *	29-Jan-2021 (rlwhitcomb)
+ *	    Add function and tables for Bernoulli numbers.
  */
 package info.rlwhitcomb.util;
 
@@ -1395,6 +1397,119 @@ public class NumericUtil
 	    return new BigDecimal(result);
 	}
 
+
+	/**
+	 * Numerators for N-th Bernoulli number (where N &gt; 1 and even). Odd Bernoulli
+	 * numbers &gt; 1 are always 0, B0 = 1, and B1 = +- 1/2.
+	 * <p> Sourced from: <a href="https://rosettacode.org/wiki/Bernoulli_numbers#Using_System.Numerics">rosettacode.org</a>.
+	 * <p> Note: it would be great to have the generating function in here, instead of these
+	 * tables, but it would involve (probably) using Commons Math 3 (and the BigFraction class).
+	 */
+	private static String bNumerators[] = {
+	    "1",						// B2
+	    "-1",						// B4
+	    "1",						// B6
+	    "-1",						// B8
+	    "5",						// B10
+	    "-691",						// B12
+	    "7",						// B14
+	    "-3617",						// B16
+	    "43867",						// B18
+	    "-174611",						// B20
+	    "854513",						// B22
+	    "-236364091",					// B24
+	    "8553103",						// B26
+	    "-23749461029",					// B28
+	    "8615841276005",					// B30
+	    "-7709321041217",					// B32
+	    "2577687858367",					// B34
+	    "-26315271553053477373",				// B36
+	    "2929993913841559",					// B38
+	    "-261082718496449122051",				// B40
+	    "1520097643918070802691",				// B42
+	    "-27833269579301024235023",				// B44
+	    "596451111593912163277961",				// B46
+	    "-5609403368997817686249127547",			// B48
+	    "495057205241079648212477525",			// B50
+	    "-801165718135489957347924991853",			// B52
+	    "29149963634884862421418123812691",			// B54
+	    "-2479392929313226753685415739663229",		// B56
+	    "84483613348880041862046775994036021",		// B58
+	    "-1215233140483755572040304994079820246041491",	// B60
+	    "12300585434086858541953039857403386151",		// B62
+	    "-106783830147866529886385444979142647942017",	// B64
+	    "1472600022126335654051619428551932342241899101",	// B66
+	    "-78773130858718728141909149208474606244347001",	// B68
+	    "1505381347333367003803076567377857208511438160235"	// B70
+	};
+
+	/**
+	 * Denominators for N-th Bernoulli number (where N &gt; 1 and even). Odd Bernoulli
+	 * numbers &gt; 1 are always 0, B0 = 1, and B1 = +- 1/2.
+	 * <p> Sourced from: <a href="https://rosettacode.org/wiki/Bernoulli_numbers#Using_System.Numerics">rosettacode.org</a>.
+	 */
+	private static String bDenominators[] = {
+	    "6",			// B2
+	    "30",			// B4
+	    "42",			// B6
+	    "30",			// B8
+	    "66",			// B10
+	    "2730",			// B12
+	    "6",			// B14
+	    "510",			// B16
+	    "798",			// B18
+	    "330",			// B20
+	    "138",			// B22
+	    "2730",			// B24
+	    "6",			// B26
+	    "870",			// B28
+	    "14322",			// B30
+	    "510",			// B32
+	    "6",			// B34
+	    "1919190",			// B36
+	    "6",			// B38
+	    "13530",			// B40
+	    "1806",			// B42
+	    "690",			// B44
+	    "282",			// B46
+	    "46410",			// B48
+	    "66",			// B50
+	    "1590",			// B52
+	    "798",			// B54
+	    "870",			// B56
+	    "354",			// B58
+	    "56786730",			// B60
+	    "6",			// B62
+	    "510",			// B64
+	    "64722",			// B66
+	    "30",			// B68
+	    "4686"			// B70
+	};
+
+	/**
+	 * Get the value of the N-th Bernoulli number.
+	 *
+	 * @param n	Which number to get.
+	 * @param mc	The {@link MathContext} to use for rounding the division.
+	 * @return	Then N-th Bernoulli number as a decimal value, rounded per {@code mc}.
+	 */
+	public static BigDecimal bernoulli(int n, MathContext mc) {
+	    if (n == 0)
+		return BigDecimal.ONE;
+	    if (n == 1 || n == -1)
+		return BigDecimal.valueOf(n).divide(D_TWO);
+	    if (n % 2 == 1)
+		return BigDecimal.ZERO;
+
+	    int index = (Math.abs(n) / 2) - 1;
+	    if (index >= bNumerators.length)
+		throw new IllegalArgumentException(Intl.getString("util#numeric.outOfRange"));
+
+	    BigDecimal dNumer = new BigDecimal(bNumerators[index]);
+	    BigDecimal dDenom = new BigDecimal(bDenominators[index]);
+
+	    return dNumer.divide(dDenom, mc);
+	}
 
 	/**
 	 * Find the value of sin(x) (where x is in radians).

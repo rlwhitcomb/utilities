@@ -143,6 +143,8 @@
  *	    Allow "loop" over the characters (codepoints) in a String.
  *	28-Jan-2021 (rlwhitcomb)
  *	    Add LCM function.
+ *	28-Jan-2021 (rlwhitcomb)
+ *	    Add Bernoulli number function.
  */
 package info.rlwhitcomb.calc;
 
@@ -1307,6 +1309,13 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    BigDecimal e = getDecimalValue(ctx.expr());
 
 	    return NumericUtil.fib(e);
+	}
+
+	@Override
+	public Object visitBernExpr(CalcParser.BernExprContext ctx) {
+	    int n = getIntValue(ctx.expr());
+
+	    return NumericUtil.bernoulli(n, mc);
 	}
 
 	@Override
