@@ -26,6 +26,8 @@
  *          Initial coding, not complete.
  *	29-Jan-2021 (rlwhitcomb)
  *	    Continued coding and documenting.
+ *	29-Jan-2021 (rlwhitcomb)
+ *	    Add a constructor from two integer strings.
  */
 package info.rlwhitcomb.util;
 
@@ -76,6 +78,16 @@ public class BigFraction
 	 */
 	public BigFraction(final long numerator, final long denominator) {
 	    this(BigInteger.valueOf(numerator), BigInteger.valueOf(denominator));
+	}
+
+	/**
+	 * Construct a fraction given the numerator and denominator values as integer strings.
+	 *
+	 * @param numerString	The numerator as an integer string.
+	 * @param denomString	The denominator.
+	 */
+	public BigFraction(final String numerString, final String denomString) {
+	    this(new BigInteger(numerString), new BigInteger(denomString));
 	}
 
 	/**
