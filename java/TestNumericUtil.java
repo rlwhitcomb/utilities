@@ -32,6 +32,8 @@
  *	    Tests of "convertToWords".
  *	28-Jan-2021 (rlwhitcomb)
  *	    Tests of the read/write binary code, which is tricky.
+ *	29-Jan-2021 (rlwhitcomb)
+ *	    Tests of BigFraction.
  */
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -42,6 +44,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 
+import info.rlwhitcomb.util.BigFraction;
 import info.rlwhitcomb.util.FileUtilities;
 import info.rlwhitcomb.util.NumericUtil;
 
@@ -570,6 +573,45 @@ public class TestNumericUtil
 	    }
 
 	    System.out.println("Done with Read/Write Binary Files.");
+
+	    System.out.println("Testing BigFraction...");
+
+	    BigFraction f1 = new BigFraction(1L, 7L);
+	    System.out.println("1/7 = " + f1);
+	    BigFraction f2 = new BigFraction(2L, 3L);
+	    BigFraction f3 = f1.multiply(f2);
+	    System.out.println("1/7 * 2/3 = " + f3);
+	    BigFraction f4 = f1.multiply(f1);
+	    System.out.println("1/7 * 1/7 = " + f4);
+	    BigFraction f5 = new BigFraction(49, 5);
+	    System.out.println("49/5 = " + f5 + " = " + f5.toProperString());
+	    BigFraction f6 = new BigFraction(137, 19);
+	    BigFraction f7 = f6.divide(f6);
+	    System.out.println("137/19 = " + f6 + " = " + f6.toProperString() + "; " + f6 + " / " + f6 + " = " + f7 + " = " + f7.toProperString());
+	    BigFraction f8 = new BigFraction(3, 5);
+	    BigFraction f9 = new BigFraction(10, 3);
+	    BigFraction f10 = f8.multiply(f9);
+	    System.out.println(f8 + " * " + f9 + " = " + f10 + " = " + f10.toProperString());
+	    BigFraction f11 = new BigFraction(10, 11);
+	    BigFraction f12 = new BigFraction(4, 11);
+	    BigFraction f13 = f11.add(f12);
+	    System.out.println(f11 + " + " + f12 + " = " + f13 + ", " + f13.toProperString());
+	    BigFraction f14 = f13.negate();
+	    System.out.println("-" + f13 + " = " + f14 + " = " + f14.toProperString());
+	    BigFraction f15 = f12.subtract(f11);
+	    System.out.println(f12 + " - " + f11 + " = " + f15 + " = " + f15.toProperString());
+	    BigFraction f16 = new BigFraction(3);
+	    BigFraction f17 = f15.add(f16);
+	    System.out.println(f15 + " + " + f16 + " = " + f17 + " = " + f17.toProperString());
+	    BigFraction f18 = new BigFraction(412, 9);
+	    BigFraction f19 = new BigFraction(3791, 15862);
+	    BigFraction f20 = f18.multiply(f19);
+	    System.out.println(f18 + " * " + f19 + " = " + f20 + " = " + f20.toProperString());
+	    System.out.println(f20 + " = " + f20.toDecimal().toPlainString());
+	    // Results verified manually, will be put into the canon file
+	    numberOfTests += 20;
+
+	    System.out.println("Done with BigFraction tests.");
 
 	    System.out.println("Total number of tests: " + numberOfTests +
 		", passed: " + (numberOfTests - numberOfFailures) + ", failed: " + numberOfFailures);

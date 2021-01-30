@@ -84,6 +84,8 @@
 #	    Java version string for Environment.
 #	29-Jan-2021 (rlwhitcomb)
 #	    Tweak the text of some messages. New FileUtilities message.
+#	29-Jan-2021 (rlwhitcomb)
+#	    Add messages from BigFraction.
 #
 
 #
@@ -147,6 +149,11 @@ numeric.tooManyDigits		= Too many digits of precision requested (max is %1$d).
 numeric.wholeInteger		= The value must be a whole number.
 numeric.primeTooBig		= The value is too big to compute.
 numeric.sqrtNegative		= Square root of a negative number is not real.
+
+#
+# From BigFraction.java
+#
+fraction.noZeroDenominator	= Fractions cannot have zero denominators.
 
 #
 # From SecurityUtil.java

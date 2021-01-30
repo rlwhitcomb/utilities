@@ -46,4 +46,18 @@
 >Done with 'convertToWords' tests.
 >Tests of Read/Write Binary Files...
 >Done with Read/Write Binary Files.
->Total number of tests: 102, passed: 102, failed: 0
+>Testing BigFraction...
+>1/7 = 1/7
+>1/7 * 2/3 = 2/21
+>1/7 * 1/7 = 1/49
+>49/5 = 49/5 = 9 4/5
+>137/19 = 137/19 = 7 4/19; 137/19 / 137/19 = 1/1 = 1
+>3/5 * 10/3 = 2/1 = 2
+>10/11 + 4/11 = 14/11, 1 3/11
+>-14/11 = -14/11 = -1 3/11
+>4/11 - 10/11 = -6/11 = -6/11
+>-6/11 + 3/1 = 27/11 = 2 5/11
+>412/9 * 3791/15862 = 7582/693 = 10 652/693
+>7582/693 = 10.94083694083694083694083694083694
+>Done with BigFraction tests.
+>Total number of tests: 122, passed: 122, failed: 0
