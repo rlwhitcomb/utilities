@@ -1501,6 +1501,16 @@ public class NumericUtil
 	    if (n % 2 == 1)
 		return BigDecimal.ZERO;
 
+/* From rosettacode.org (reference above), the algorithm is this:
+ * allocate n+1 BigFractions
+ * for (m = 0 to n) {
+ *   arr[m] = BigFraction(1, (m+1))
+ *   for (n = m downto 1) {
+ *      arr[n-1] = arr[n-1] - arr[n] * n
+ *   }
+ * }
+ * return arr[0]
+ */
 	    int index = (Math.abs(n) / 2) - 1;
 	    if (index >= bNumerators.length)
 		throw new IllegalArgumentException(Intl.getString("util#numeric.outOfRange"));
