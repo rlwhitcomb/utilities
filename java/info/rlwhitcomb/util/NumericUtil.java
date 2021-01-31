@@ -109,6 +109,8 @@
  *	    Add function and tables for Bernoulli numbers.
  *	30-Jan-2021 (rlwhitcomb)
  *	    New "tenPower" function.
+ *	30-Jan-2021 (rlwhitcomb)
+ *	    Implement rational mode for "bernoulli".
  */
 package info.rlwhitcomb.util;
 
@@ -1504,13 +1506,17 @@ public class NumericUtil
 	 * @param mc	The {@link MathContext} to use for rounding the division.
 	 * @return	Then N-th Bernoulli number as a decimal value, rounded per {@code mc}.
 	 */
-	public static BigDecimal bernoulli(int n, MathContext mc) {
+	public static Object bernoulli(int n, MathContext mc, boolean rational) {
 	    if (n == 0)
-		return BigDecimal.ONE;
-	    if (n == 1 || n == -1)
-		return BigDecimal.valueOf(n).divide(D_TWO);
+		return rational ? BigFraction.ONE : BigDecimal.ONE;
+	    if (n == 1 || n == -1) {
+		if (rational)
+		    return new BigFraction(n, 2);
+		else
+		    return BigDecimal.valueOf(n).divide(D_TWO);
+	    }
 	    if (n % 2 == 1)
-		return BigDecimal.ZERO;
+		return rational ? BigFraction.ZERO : BigDecimal.ZERO;
 
 /* From rosettacode.org (reference above), the algorithm is this:
  * allocate n+1 BigFractions
@@ -1526,10 +1532,15 @@ public class NumericUtil
 	    if (index >= bNumerators.length)
 		throw new IllegalArgumentException(Intl.getString("util#numeric.outOfRange"));
 
-	    BigDecimal dNumer = new BigDecimal(bNumerators[index]);
-	    BigDecimal dDenom = new BigDecimal(bDenominators[index]);
+	    if (rational) {
+		return new BigFraction(bNumerators[index], bDenominators[index]);
+	    }
+	    else {
+		BigDecimal dNumer = new BigDecimal(bNumerators[index]);
+		BigDecimal dDenom = new BigDecimal(bDenominators[index]);
 
-	    return dNumer.divide(dDenom, mc);
+		return dNumer.divide(dDenom, mc);
+	    }
 	}
 
 	/**

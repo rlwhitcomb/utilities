@@ -145,6 +145,8 @@
  *	    Add LCM function.
  *	28-Jan-2021 (rlwhitcomb)
  *	    Add Bernoulli number function.
+ *	30-Jan-2021 (rlwhitcomb)
+ *	    Introduce rational / fraction mode. Start doing rational calculations.
  */
 package info.rlwhitcomb.calc;
 
@@ -165,6 +167,7 @@ import java.util.function.UnaryOperator;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
 
+import info.rlwhitcomb.util.BigFraction;
 import static info.rlwhitcomb.calc.CalcUtil.*;
 import info.rlwhitcomb.util.CharUtil;
 import static info.rlwhitcomb.util.ConsoleColor.Code.*;
@@ -179,6 +182,9 @@ import static info.rlwhitcomb.util.NumericUtil.RangeMode;
  */
 public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 {
+	/**
+	 * The mode used for doing trig calculations.
+	 */
 	private enum TrigMode
 	{
 		DEGREES,
@@ -205,6 +211,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	/** The kind of units to use for the ",k" format. */
 	private RangeMode units = RangeMode.MIXED;
 
+	/** Decimal vs. rational/fractional mode ({@code true} for rational); default {@code false}. */
+	private boolean rationalMode;
+
 	/** The worker used to maintain the current e/pi values, and calculate them
 	 * in a background thread.
 	 */
@@ -224,6 +233,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	/** Stack of previous "debug" mode values. */
 	private Deque<Boolean> debugModeStack = new ArrayDeque<>();
+
+	/** Stack of previous "rational" mode values. */
+	private Deque<Boolean> rationalModeStack = new ArrayDeque<>();
 
 	/** Stack of previous "resultsOnly" mode values. */
 	private Deque<Boolean> resultsOnlyModeStack = new ArrayDeque<>();
@@ -252,6 +264,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public CalcObjectVisitor(CalcDisplayer resultDisplayer) {
 	    setMathContext(MathContext.DECIMAL128);
 	    setTrigMode(TrigMode.RADIANS);
+	    setRationalMode(false);
 
 	    variables     = new HashMap<>();
 	    globalContext = new LValueContext(variables);
@@ -288,9 +301,18 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    displayActionMessage("%calc#trigMode", trigMode);
 	}
 
+	public boolean setRationalMode(boolean mode) {
+	    boolean oldMode = rationalMode;
+	    rationalMode = mode;
+	    return oldMode;
+	}
 
 	private BigDecimal getDecimalValue(ParserRuleContext ctx) {
 	    return toDecimalValue(visit(ctx), ctx);
+	}
+
+	private BigFraction getFractionValue(ParserRuleContext ctx) {
+	    return toFractionValue(visit(ctx), ctx);
 	}
 
 	private BigInteger getIntegerValue(ParserRuleContext ctx) {
@@ -539,6 +561,18 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	@Override
+	public Object visitRationalDirective(CalcParser.RationalDirectiveContext ctx) {
+	    processModeOption(ctx.modeOption(), rationalModeStack, (mode) -> {
+		boolean previousMode = setRationalMode(mode);
+		displayActionMessage("%calc#rationalMode",
+			Intl.getString(mode ? "calc#rational" : "calc#decimal"));
+		return previousMode;
+	    });
+
+	    return null;
+	}
+
+	@Override
 	public Object visitResultsOnlyDirective(CalcParser.ResultsOnlyDirectiveContext ctx) {
 	    processModeOption(ctx.modeOption(), resultsOnlyModeStack, (mode) -> {
 		return Calc.setResultsOnlyMode(mode);
@@ -585,6 +619,16 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			// TODO: convert to hours
 			break;
 
+		    case 'd':
+		    case 'D':
+			valueBuf.append(toDecimalValue(result, ctx));
+			break;
+		    case 'f':
+			valueBuf.append(toFractionValue(result, ctx));
+			break;
+		    case 'F':
+			valueBuf.append(toFractionValue(result, ctx).toProperString());
+			break;
 		    case 'j':
 		    case 'J':
 			valueBuf.append('\n');
@@ -932,18 +976,36 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitNegPosExpr(CalcParser.NegPosExprContext ctx) {
-	    BigDecimal e = getDecimalValue(ctx.expr());
+	    ParserRuleContext expr = ctx.expr();
+	    Object e = visit(expr);
 
 	    String op = ctx.ADD_OP().getText();
-	    switch (op) {
-		case "+":
-		    // Interestingly, this operation can change the value, if the previous
-		    // value was not to the specified precision.
-		    return e.plus(mc);
-		case "-":
-		    return e.negate();
-		default:
-		    throw new UnknownOpException(op, ctx);
+
+	    if (rationalMode) {
+		BigFraction f = toFractionValue(e, expr);
+
+		switch (op) {
+		    case "+":
+			return f;
+		    case "-":
+			return f.negate();
+		    default:
+			throw new UnknownOpException(op, expr);
+		}
+	    }
+	    else {
+		BigDecimal d = toDecimalValue(e, expr);
+
+		switch (op) {
+		    case "+":
+			// Interestingly, this operation can change the value, if the previous
+			// value was not to the specified precision.
+			return d.plus(mc);
+		    case "-":
+			return d.negate();
+		    default:
+			throw new UnknownOpException(op, expr);
+		}
 	    }
 	}
 
@@ -976,43 +1038,73 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitMultiplyExpr(CalcParser.MultiplyExprContext ctx) {
-	    BigDecimal e1 = getDecimalValue(ctx.expr(0));
-	    BigDecimal e2 = getDecimalValue(ctx.expr(1));
+	    Object e1 = visit(ctx.expr(0));
+	    Object e2 = visit(ctx.expr(1));
 
 	    String op = ctx.MULT_OP().getText();
-	    try {
+
+	    if (rationalMode) {
+		BigFraction f1 = toFractionValue(e1, ctx);
+		BigFraction f2 = toFractionValue(e2, ctx);
+
 		switch (op) {
 		    case "*":
-			return e1.multiply(e2, mc);
+			return f1.multiply(f2);
 		    case "/":
-			return e1.divide(e2, mc);
+			return f1.divide(f2);
 		    case "%":
-			return e1.remainder(e2, mc);
+			// ??? I think there is never any remainder dividing a fraction by a fraction
+			return BigFraction.ZERO;
 		    default:
 			throw new UnknownOpException(op, ctx);
 		}
 	    }
-	    catch (ArithmeticException ae) {
-		throw new CalcExprException(ae, ctx);
+	    else {
+		BigDecimal d1 = toDecimalValue(e1, ctx);
+		BigDecimal d2 = toDecimalValue(e2, ctx);
+
+		try {
+		    switch (op) {
+			case "*":
+			    return d1.multiply(d2, mc);
+			case "/":
+			    return d1.divide(d2, mc);
+			case "%":
+			    return d1.remainder(d2, mc);
+			default:
+			    throw new UnknownOpException(op, ctx);
+		    }
+		}
+		catch (ArithmeticException ae) {
+		    throw new CalcExprException(ae, ctx);
+		}
 	    }
 	}
 
 	@Override
 	public Object visitAddExpr(CalcParser.AddExprContext ctx) {
+	    CalcParser.ExprContext ctx1 = ctx.expr(0);
+	    CalcParser.ExprContext ctx2 = ctx.expr(1);
+	    Object e1 = visit(ctx1);
+	    Object e2 = visit(ctx2);
+
 	    String op = ctx.ADD_OP().getText();
 	    switch (op) {
 		case "+":
-		    CalcParser.ExprContext ctx1 = ctx.expr(0);
-		    CalcParser.ExprContext ctx2 = ctx.expr(1);
-		    Object e1 = visit(ctx1);
-		    Object e2 = visit(ctx2);
-
-		    return addOp(e1, e2, ctx1, ctx2, mc);
+		    return addOp(e1, e2, ctx1, ctx2, mc, rationalMode);
 		case "-":
-		    BigDecimal d1 = getDecimalValue(ctx.expr(0));
-		    BigDecimal d2 = getDecimalValue(ctx.expr(1));
+		    if (rationalMode) {
+			BigFraction f1 = toFractionValue(e1, ctx1);
+			BigFraction f2 = toFractionValue(e2, ctx2);
 
-		    return d1.subtract(d2, mc);
+			return f1.subtract(f2);
+		    }
+		    else {
+			BigDecimal d1 = toDecimalValue(e1, ctx1);
+			BigDecimal d2 = toDecimalValue(e2, ctx2);
+
+			return d1.subtract(d2, mc);
+		    }
 		default:
 		    throw new UnknownOpException(op, ctx);
 	    }
@@ -1020,9 +1112,14 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitAbsExpr(CalcParser.AbsExprContext ctx) {
-	    BigDecimal e = getDecimalValue(ctx.expr());
-
-	    return e.abs();
+	    if (rationalMode) {
+		BigFraction f = getFractionValue(ctx.expr());
+		return f.abs();
+	    }
+	    else {
+		BigDecimal e = getDecimalValue(ctx.expr());
+		return e.abs();
+	    }
 	}
 
 	@Override
@@ -1141,9 +1238,14 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitSignumExpr(CalcParser.SignumExprContext ctx) {
-	    BigDecimal e = getDecimalValue(ctx.expr());
-
-	    return BigDecimal.valueOf(e.signum());
+	    if (rationalMode) {
+		BigFraction f = getFractionValue(ctx.expr());
+		return new BigFraction(f.signum());
+	    }
+	    else {
+		BigDecimal e = getDecimalValue(ctx.expr());
+		return BigDecimal.valueOf(e.signum());
+	    }
 	}
 
 	@Override
@@ -1235,14 +1337,26 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		return maxString;
 	    }
 	    else {
-		BigDecimal maxNumber = toDecimalValue(firstValue, ctx);
-		for (int i = 1; i < exprs.size(); i++) {
-		    eCtx = exprs.get(i);
-		    BigDecimal value = getDecimalValue(eCtx);
-		    if (value.compareTo(maxNumber) > 0)
-			maxNumber = value;
+		if (rationalMode) {
+		    BigFraction maxFraction = toFractionValue(firstValue, ctx);
+		    for (int i = 1; i < exprs.size(); i++) {
+			eCtx = exprs.get(i);
+			BigFraction value = getFractionValue(eCtx);
+			if (value.compareTo(maxFraction) > 0)
+			    maxFraction = value;
+		    }
+		    return maxFraction;
 		}
-		return maxNumber;
+		else {
+		    BigDecimal maxNumber = toDecimalValue(firstValue, ctx);
+		    for (int i = 1; i < exprs.size(); i++) {
+			eCtx = exprs.get(i);
+			BigDecimal value = getDecimalValue(eCtx);
+			if (value.compareTo(maxNumber) > 0)
+			    maxNumber = value;
+		    }
+		    return maxNumber;
+		}
 	    }
 	}
 
@@ -1264,14 +1378,26 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		return minString;
 	    }
 	    else {
-		BigDecimal minNumber = toDecimalValue(firstValue, ctx);
-		for (int i = 1; i < exprs.size(); i++) {
-		    eCtx = exprs.get(i);
-		    BigDecimal value = getDecimalValue(eCtx);
-		    if (value.compareTo(minNumber) < 0)
-			minNumber = value;
+		if (rationalMode) {
+		    BigFraction minFraction = toFractionValue(firstValue, ctx);
+		    for (int i = 1; i < exprs.size(); i++) {
+			eCtx = exprs.get(i);
+			BigFraction value = getFractionValue(eCtx);
+			if (value.compareTo(minFraction) < 0)
+			    minFraction = value;
+		    }
+		    return minFraction;
 		}
-		return minNumber;
+		else {
+		    BigDecimal minNumber = toDecimalValue(firstValue, ctx);
+		    for (int i = 1; i < exprs.size(); i++) {
+			eCtx = exprs.get(i);
+			BigDecimal value = getDecimalValue(eCtx);
+			if (value.compareTo(minNumber) < 0)
+			    minNumber = value;
+		    }
+		    return minNumber;
+		}
 	    }
 	}
 
@@ -1315,7 +1441,16 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public Object visitBernExpr(CalcParser.BernExprContext ctx) {
 	    int n = getIntValue(ctx.expr());
 
-	    return NumericUtil.bernoulli(n, mc);
+	    return NumericUtil.bernoulli(n, mc, rationalMode);
+	}
+
+	@Override
+	public Object visitFracExpr(CalcParser.FracExprContext ctx) {
+	    CalcParser.Expr2Context e2ctx = ctx.expr2();
+	    BigInteger n = getIntegerValue(e2ctx.expr(0));
+	    BigInteger d = getIntegerValue(e2ctx.expr(1));
+
+	    return new BigFraction(n, d);
 	}
 
 	@Override
@@ -1339,11 +1474,11 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    int ret = compareValues(ctx.expr(0), ctx.expr(1), false, true);
 
 	    if (ret < 0)
-		return BigInteger.ONE.negate();
+		return rationalMode ? BigFraction.ONE.negate() : BigInteger.ONE.negate();
 	    else if (ret == 0)
-		return BigInteger.ZERO;
+		return rationalMode ? BigFraction.ONE : BigInteger.ZERO;
 	    else
-		return BigInteger.ONE;
+		return rationalMode ? BigFraction.ONE : BigInteger.ONE;
 	}
 
 	@Override
@@ -1548,12 +1683,20 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitPiValue(CalcParser.PiValueContext ctx) {
-	    return piWorker.getPi();
+	    BigDecimal d = piWorker.getPi();
+	    if (rationalMode)
+		return new BigFraction(d);
+	    else
+		return d;
 	}
 
 	@Override
 	public Object visitEValue(CalcParser.EValueContext ctx) {
-	    return piWorker.getE();
+	    BigDecimal d = piWorker.getE();
+	    if (rationalMode)
+		return new BigFraction(d);
+	    else
+		return d;
 	}
 
 	@Override
@@ -1574,22 +1717,33 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitAddAssignExpr(CalcParser.AddAssignExprContext ctx) {
-	    LValueContext lValue = getLValue(ctx.var());
+	    CalcParser.VarContext varCtx = ctx.var();
+	    ParserRuleContext exprCtx    = ctx.expr();
+
+	    LValueContext lValue = getLValue(varCtx);
 	    Object result;
 
 	    String op = ctx.ADD_ASSIGN().getText();
+	    Object e1 = lValue.getContextObject();
+	    Object e2 = visit(exprCtx);
+
 	    switch (op) {
 		case "+=":
-		    Object e1 = lValue.getContextObject();
-		    Object e2 = visit(ctx.expr());
-
-		    result = addOp(e1, e2, ctx.var(), ctx.expr(), mc);
+		    result = addOp(e1, e2, varCtx, exprCtx, mc, rationalMode);
 		    break;
 		case "-=":
-		    BigDecimal d1 = toDecimalValue(lValue.getContextObject(), ctx);
-		    BigDecimal d2 = getDecimalValue(ctx.expr());
+		    if (rationalMode) {
+			BigFraction f1 = toFractionValue(e1, varCtx);
+			BigFraction f2 = toFractionValue(e2, exprCtx);
 
-		    result = d1.subtract(d2, mc);
+			result = f1.subtract(f2);
+		    }
+		    else {
+			BigDecimal d1 = toDecimalValue(e1, varCtx);
+			BigDecimal d2 = toDecimalValue(e2, exprCtx);
+
+			result = d1.subtract(d2, mc);
+		    }
 		    break;
 		default:
 		    throw new UnknownOpException(op, ctx);
@@ -1610,26 +1764,53 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitMultAssignExpr(CalcParser.MultAssignExprContext ctx) {
-	    LValueContext lValue = getLValue(ctx.var());
+	    CalcParser.VarContext varCtx = ctx.var();
+	    ParserRuleContext exprCtx    = ctx.expr();
+
+	    LValueContext lValue = getLValue(varCtx);
 	    Object result;
 
-	    BigDecimal d1 = toDecimalValue(lValue.getContextObject(), ctx);
-	    BigDecimal d2 = getDecimalValue(ctx.expr());
-
 	    String op = ctx.MULT_ASSIGN().getText();
+	    Object e1 = lValue.getContextObject();
+	    Object e2 = visit(exprCtx);
+
 	    try {
-		switch (op) {
-		    case "*=":
-			result = d1.multiply(d2, mc);
-			break;
-		    case "/=":
-			result = d1.divide(d2, mc);
-			break;
-		    case "%=":
-			result = d1.remainder(d2, mc);
-			break;
-		    default:
-			throw new UnknownOpException(op, ctx);
+		if (rationalMode) {
+		    BigFraction f1 = toFractionValue(e1, varCtx);
+		    BigFraction f2 = toFractionValue(e2, exprCtx);
+
+		    switch (op) {
+			case "*=":
+			    result = f1.multiply(f2);
+			    break;
+			case "/=":
+			    result = f1.divide(f2);
+			    break;
+			case "%=":
+			    // ??? remainder of fraction / fraction is always 0
+			    result = BigFraction.ZERO;
+			    break;
+			default:
+			    throw new UnknownOpException(op, ctx);
+		    }
+		}
+		else {
+		    BigDecimal d1 = toDecimalValue(e1, varCtx);
+		    BigDecimal d2 = toDecimalValue(e2, exprCtx);
+
+		    switch (op) {
+			case "*=":
+			    result = d1.multiply(d2, mc);
+			    break;
+			case "/=":
+			    result = d1.divide(d2, mc);
+			    break;
+			case "%=":
+			    result = d1.remainder(d2, mc);
+			    break;
+			default:
+			    throw new UnknownOpException(op, ctx);
+		    }
 		}
 	    }
 	    catch (ArithmeticException ae) {

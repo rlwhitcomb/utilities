@@ -112,6 +112,9 @@
  *	    Add LCM function.
  *	28-Jan-2021 (rlwhitcomb)
  *	    New function for Bernoulli numbers.
+ *	30-Jan-2021 (rlwhitcomb)
+ *	    New "rational" or "fraction" mode; "frac" function to make
+ *	    a fraction value. New 'd' and 'f' formats.
  */
 
 grammar Calc;
@@ -175,6 +178,7 @@ expr
    | JOIN exprN                          # joinExpr
    | FIB expr                            # fibExpr
    | BN expr                             # bernExpr
+   | FRAC expr2                          # fracExpr
    |<assoc=right> expr '**' expr         # powerExpr
    | expr MULT_OP expr                   # multiplyExpr
    | expr ADD_OP expr                    # addExpr
@@ -263,6 +267,7 @@ directive
    | CLEAR idList ?              # clearDirective
    | ECHO expr ?                 # echoDirective
    | INCLUDE expr                # includeDirective
+   | RATIONAL modeOption         # rationalDirective
    | DEBUG modeOption            # debugDirective
    | RESULTSONLY modeOption      # resultsOnlyDirective
    | QUIET modeOption            # quietDirective
@@ -357,6 +362,8 @@ JOIN     : J O I N ;
 FIB      : F I B ;
 
 BN       : B N ;
+
+FRAC     : F R A C ;
 
 LOOP     : L O O P ;
 
@@ -496,6 +503,10 @@ MIXED
    : DIR  ( M I X | M I X E D )
    ;
 
+RATIONAL
+   : DIR  ( R A T I O N | F R A C | R A T I O N A L | F R A C T I O N )
+   ;
+
 CLEAR
    : DIR  ( C L R | C L E A R )
    ;
@@ -522,7 +533,7 @@ QUIET
 
 
 FORMAT
-   : ';' ( X | T | H | O | B | K | J | '%' )
+   : ';' ( D | F | X | T | H | O | B | K | J | '%' )
    ;
 
 STRING

@@ -32,6 +32,9 @@
  *	    Add "compareTo" and "hashCode" methods; implement Comparable and
  *	    Serializable. Add methods to construct from strings. Add
  *	    BigDecimal constructor. Add ZERO and ONE constants.
+ *	30-Jan-2021 (rlwhitcomb)
+ *	    Normalize to keep sign always in the numerator. Add "abs",
+ *	    "signum", and "equals"  methods.
  */
 package info.rlwhitcomb.util;
 
@@ -220,10 +223,17 @@ public class BigFraction
 	    if (den.equals(BigInteger.ZERO))
 		throw new ArithmeticException(Intl.getString("util#fraction.noZeroDenominator"));
 
+	    // Manage the overall sign of the fraction from the signs of numerator and denominator
+	    int signNum = num.signum();
+	    int signDen = den.signum();
+
 	    BigInteger gcd = num.gcd(den);
 
-	    this.numer = num.divide(gcd);
-	    this.denom = den.divide(gcd);
+	    this.numer = num.divide(gcd).abs();
+	    this.denom = den.divide(gcd).abs();
+
+	    if ((signNum > 0 && signDen < 0) || (signNum < 0 && signDen > 0))
+		this.numer = this.numer.negate();
 	}
 
 	/**
@@ -315,6 +325,24 @@ public class BigFraction
 	}
 
 	/**
+	 * Return the absolute value of this fraction.
+	 * <p> Since the sign is normalized to be always in the numerator, just
+	 * take the absolute value of the numerator.
+	 *
+	 * @return A new fraction that is the absolute value of the fraction.
+	 */
+	public BigFraction abs() {
+	    return new BigFraction(numer.abs(), denom);
+	}
+
+	/**
+	 * @return The {@code signum} function on this fraction.
+	 */
+	public int signum() {
+	    return numer.signum();
+	}
+
+	/**
 	 * Return the value of this fraction as a decimal value, rounded to the
 	 * {@link MathContext#DECIMAL128} scale.
 	 *
@@ -361,7 +389,10 @@ public class BigFraction
 	 * @return	A string in the form of a whole number plus the fraction.
 	 */
 	public String toProperString() {
-	    if (numer.abs().compareTo(denom) >= 0) {
+	    if (denom.equals(BigInteger.ONE)) {
+		return numer.toString();
+	    }
+	    else if (numer.abs().compareTo(denom) >= 0) {
 		BigInteger[] results = numer.divideAndRemainder(denom);
 		if (results[1].equals(BigInteger.ZERO))
 		    return results[0].toString();
@@ -393,6 +424,23 @@ public class BigFraction
 	    byte[] n = numer.toByteArray();
 	    byte[] d = denom.toByteArray();
 	    return 31 ^ Arrays.hashCode(n) ^ Arrays.hashCode(d);
+	}
+
+	/**
+	 * @return Whether this fraction equals the other one.
+	 *
+	 * @param other The other fraction to compare to.
+	 */
+	@Override
+	public boolean equals(final Object other) {
+	    if (other == null || !(other instanceof BigFraction))
+		return false;
+
+	    BigFraction otherFrac = (BigFraction)other;
+
+	    // Since these are kept normalized, then we just need to compare
+	    // the numerators and denominators directly.
+	    return this.numer.equals(otherFrac.numer) && this.denom.equals(otherFrac.denom);
 	}
 
 }

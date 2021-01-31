@@ -34,6 +34,8 @@
  *	    Move text to resource file.
  *	19-Jan-2021 (rlwhitcomb)
  *	    Add "length" and "scale" functions.
+ *	30-Jan-2021 (rlwhitcomb)
+ *	    Add BigFraction calculations.
  */
 package info.rlwhitcomb.calc;
 
@@ -48,6 +50,7 @@ import java.util.Map;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
 
+import info.rlwhitcomb.util.BigFraction;
 import info.rlwhitcomb.util.CharUtil;
 import static info.rlwhitcomb.util.CharUtil.Justification;
 
@@ -124,6 +127,8 @@ public final class CalcUtil
 		return (BigDecimal)value;
 	    else if (value instanceof BigInteger)
 		return new BigDecimal((BigInteger)value);
+	    else if (value instanceof BigFraction)
+		return ((BigFraction)value).toDecimal(/* math context */);
 	    else if (value instanceof String)
 		return new BigDecimal((String)value);
 	    else if (value instanceof Boolean)
@@ -139,6 +144,32 @@ public final class CalcUtil
 	    else if (value instanceof List)
 		typeName = "array";
 	    throw new CalcExprException(ctx, "%calc#noConvertDecimal", typeName);
+	}
+
+	public static BigFraction toFractionValue(final Object value, final ParserRuleContext ctx) {
+	    nullCheck(value, ctx);
+
+	    if (value instanceof BigFraction)
+		return (BigFraction)value;
+	    else if (value instanceof BigDecimal)
+		return new BigFraction((BigDecimal)value);
+	    else if (value instanceof BigInteger)
+		return new BigFraction((BigInteger)value);
+	    else if (value instanceof String)
+		return BigFraction.valueOf((String)value);
+	    else if (value instanceof Boolean)
+		return ((Boolean)value).booleanValue() ? BigFraction.ONE : BigFraction.ZERO;
+	    else if (value instanceof Double || value instanceof Float)
+		return new BigFraction(new BigDecimal(((Number)value).doubleValue()));
+	    else if (value instanceof Number)
+		return new BigFraction(((Number)value).longValue());
+
+	    String typeName = value.getClass().getSimpleName();
+	    if (value instanceof Map)
+		typeName = "object";
+	    else if (value instanceof List)
+		typeName = "array";
+	    throw new CalcExprException(ctx, "%calc#noConvertFraction", typeName);
 	}
 
 	public static BigInteger toIntegerValue(final Object value, final ParserRuleContext ctx) {
@@ -255,6 +286,7 @@ public final class CalcUtil
 	 * <li>{@code Array} = (possibly recursive) length of the array</li>
 	 * <li>{@code String} = code point length</li>
 	 * <li>{@code BigDecimal} = precision (or number of significant digits)</li>
+	 * <li>{@code BigFraction} = convert to BigDecimal and compute
 	 * <li>{@code BigInteger} = number of digits</li>
 	 * <li>{@code Boolean} = one</li>
 	 * <li>{@code Null} = zero</li>
@@ -280,6 +312,8 @@ public final class CalcUtil
 	    }
 	    if (obj instanceof BigDecimal)
 		return ((BigDecimal)obj).precision();
+	    if (obj instanceof BigFraction)
+		return ((BigFraction)obj).toDecimal().precision();	// ?? not really helpful, probably
 	    if (obj instanceof String) {
 		String str = (String)obj;
 		return str.codePointCount(0, str.length());
@@ -337,6 +371,8 @@ public final class CalcUtil
 	public static int scale(final ParserRuleContext ctx, final Object obj) {
 	    if (obj instanceof BigDecimal)
 		return ((BigDecimal)obj).scale();
+	    if (obj instanceof BigFraction)
+		return ((BigFraction)obj).toDecimal().scale();
 	    if (obj instanceof List || obj instanceof Map)
 		return length(ctx, obj, false);
 	    return 0;
@@ -412,6 +448,11 @@ public final class CalcUtil
 		BigInteger i2 = toIntegerValue(e2, ctx2);
 		return i1.compareTo(i2);
 	    }
+	    else if (e1 instanceof BigFraction || e2 instanceof BigFraction) {
+		BigFraction f1 = toFractionValue(e1, ctx1);
+		BigFraction f2 = toFractionValue(e2, ctx2);
+		return f1.compareTo(f2);
+	    }
 	    else if (e1 instanceof Boolean || e2 instanceof Boolean) {
 		Boolean b1 = toBooleanValue(e1, ctx1);
 		Boolean b2 = toBooleanValue(e2, ctx2);
@@ -424,16 +465,18 @@ public final class CalcUtil
 	/**
 	 * Returns the result of the "add" operation on the two values.
 	 * <p> If either object is a string, do string concatenation.
-	 * <p> Else convert to {@link BigDecimal} and do the addition.
+	 * <p> Else convert to {@link BigDecimal} or {@link BigFraction}
+	 * and do the addition.
 	 *
-	 * @param e1   The LHS operand.
-	 * @param e2   The RHS operand.
-	 * @param ctx1 The Rule context for the first operand (for error reporting).
-	 * @param ctx2 The Rule context for the second operand.
-	 * @param mc   The {@code MathContext} to use in rouding the result.
+	 * @param e1       The LHS operand.
+	 * @param e2       The RHS operand.
+	 * @param ctx1     The Rule context for the first operand (for error reporting).
+	 * @param ctx2     The Rule context for the second operand.
+	 * @param mc       The {@code MathContext} to use in rounding the result.
+	 * @param rational Whether we're doing rational ({@code true}) or decimal arithmetic.
 	 * @return {@code e1 + e2}
 	 */
-	public static Object addOp(final Object e1, final Object e2, final ParserRuleContext ctx1, final ParserRuleContext ctx2, final MathContext mc) {
+	public static Object addOp(final Object e1, final Object e2, final ParserRuleContext ctx1, final ParserRuleContext ctx2, final MathContext mc, final boolean rational) {
 	    if (e1 == null && e2 == null)
 		return null;
 
@@ -448,10 +491,18 @@ public final class CalcUtil
 	    // could add char codepoint values, or concat strings
 
 	    // Otherwise, numeric values get added numerically
-	    BigDecimal d1 = toDecimalValue(e1, ctx1);
-	    BigDecimal d2 = toDecimalValue(e2, ctx2);
+	    if (rational) {
+		BigFraction f1 = toFractionValue(e1, ctx1);
+		BigFraction f2 = toFractionValue(e2, ctx2);
 
-	    return d1.add(d2, mc);
+		return f1.add(f2);
+	    }
+	    else {
+		BigDecimal d1 = toDecimalValue(e1, ctx1);
+		BigDecimal d2 = toDecimalValue(e2, ctx2);
+
+		return d1.add(d2, mc);
+	    }
 	}
 
 	/**

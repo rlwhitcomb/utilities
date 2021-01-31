@@ -32,6 +32,8 @@
 #	    Results and other colored messages.
 #	25-Jan-2021 (rlwhitcomb)
 #	    One more error message.
+#	30-Jan-2021 (rlwhitcomb)
+#	    One more action message and more errors; calc mode strings.
 #
 
 #
@@ -71,6 +73,10 @@ varOneVariable	= "Variable "
 varVariables	= "Variables "
 varCleared	= %1$s cleared.
 debugMode	= Debug mode set to %1$s.
+rationalMode	= Calculation mode set to %1$s.
+# These two should (probably) not be translated
+rational	= RATIONAL
+decimal		= DECIMAL
 
 precNotInteger	= Decimal precision of %1$s must be an integer value
 precOutOfRange	= Decimal precision of %1$d is out of range
@@ -85,9 +91,10 @@ invalidConst2	= Invalid '${...}' construct
 #
 # From CalcUtil
 #
-valueNotNull	= Value ("%1$s") must not be null
-noConvertDecimal= Unable to convert value of '%1$s' type to decimal number
-unknownType	= Unknown value type: %1$s
+valueNotNull		= Value ("%1$s") must not be null
+noConvertDecimal	= Unable to convert value of '%1$s' type to decimal number
+noConvertFraction	= Unable to convert value of '%1$s' type to fraction
+unknownType		= Unknown value type: %1$s
 
 #
 # From LValueContext
