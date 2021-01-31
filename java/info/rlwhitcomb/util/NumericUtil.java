@@ -1502,9 +1502,12 @@ public class NumericUtil
 	/**
 	 * Get the value of the N-th Bernoulli number.
 	 *
-	 * @param n	Which number to get.
-	 * @param mc	The {@link MathContext} to use for rounding the division.
-	 * @return	Then N-th Bernoulli number as a decimal value, rounded per {@code mc}.
+	 * @param n	Which Bernoulli number to get.
+	 * @param mc	The {@link MathContext} to use for rounding the division
+	 *		(non-rational mode).
+	 * @param rational Whether to return the result as a rational number.
+	 * @return	Then N-th Bernoulli number as a decimal (rounded to {@code mc}),
+	 *		or as a fraction.
 	 */
 	public static Object bernoulli(int n, MathContext mc, boolean rational) {
 	    if (n == 0)
