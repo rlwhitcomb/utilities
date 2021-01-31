@@ -28,12 +28,20 @@
  *	    Continued coding and documenting.
  *	29-Jan-2021 (rlwhitcomb)
  *	    Add a constructor from two integer strings.
+ *	30-Jan-2021 (rlwhitcomb)
+ *	    Add "compareTo" and "hashCode" methods; implement Comparable and
+ *	    Serializable. Add methods to construct from strings. Add
+ *	    BigDecimal constructor. Add ZERO and ONE constants.
  */
 package info.rlwhitcomb.util;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.MathContext;
+import java.util.Arrays;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 
 /**
@@ -42,12 +50,34 @@ import java.math.MathContext;
  * <p> Fractions are maintained in least common denominator form.
  */
 public class BigFraction
+	implements Comparable<BigFraction>,
+		Serializable
 {
+	private static final long serialVersionUID = 3889374235914093689L;
+
+	/** The pattern used for two strings, as in "numer [;/,] denom". */
+	private static final Pattern TWO_STRINGS = Pattern.compile("(-?[0-9]+)\\s*[/,;]\\s*(-?[0-9]+)");
+	/** The pattern for three strings, as in "int [:/,] numer [:/,] denom". */
+	private static final Pattern THREE_STRINGS = Pattern.compile("(-?[0-9]+)\\s*[/,;]?\\s*(-?[0-9]+)\\s*[/,;]?\\s*(-?[0-9]+)");
+
+	/** A value of {@code 0/1} (integer 0) as a fraction. */
+	public static final BigFraction ZERO = new BigFraction(BigInteger.ZERO);
+
+	/** A value of {@code 1/1} (integer 1) as a fraction. */
+	public static final BigFraction ONE = new BigFraction();
+
 	/** The exact integer numerator of this fraction. */
 	private BigInteger numer;
 	/** The exact integer denominator of this fraction. */
 	private BigInteger denom;
 
+
+	/**
+	 * Default constructor -- a value of one.
+	 */
+	public BigFraction() {
+	    this(BigInteger.ONE, BigInteger.ONE);
+	}
 
 	/**
 	 * Construct a whole number fraction ({@code n / 1}) from the given
@@ -81,13 +111,88 @@ public class BigFraction
 	}
 
 	/**
+	 * Construct a fraction from a decimal value.
+	 * <p> Done by separating the whole number and fraction parts, and making a
+	 * rational fraction out of whatever decimal parts we have.
+	 *
+	 * @param value	A decimal value to convert.
+	 */
+	public BigFraction(final BigDecimal value) {
+	    int pow = value.scale();
+// TODO: what about negative scale?
+	    BigDecimal whole = value.scaleByPowerOfTen(pow);
+
+	    normalize(new BigInteger(whole.toPlainString()), NumericUtil.tenPower(pow));
+	}
+
+	/**
+	 * Construct a fraction from the given string in one of several forms:
+	 * <ul><li>one integer number - a whole number</li>
+	 * <li>two integers separated by comma, semicolon, or slash</li>
+	 * <li>three integers (as in 3 1/2)</li>
+	 * </ul>
+	 *
+	 * @param value	A string formatted as above.
+	 * @return	The resulting fraction value.
+	 * @throws	IllegalArgumentException if the string doesn't match one
+	 *		of the supported formats.
+	 */
+	public static BigFraction valueOf(final String value) {
+	    Matcher m3 = THREE_STRINGS.matcher(value);
+	    if (m3.matches()) {
+		return new BigFraction(m3.group(1), m3.group(2), m3.group(3));
+	    }
+	    else {
+		Matcher m2 = TWO_STRINGS.matcher(value);
+		if (m2.matches()) {
+		    return new BigFraction(m2.group(1), m2.group(2));
+		}
+		else {
+		    try {
+			return new BigFraction(new BigInteger(value));
+		    }
+		    catch (NumberFormatException nfe) {
+			;
+		    }
+		}
+	    }
+	    throw new Intl.IllegalArgumentException("util#fraction.unsupportedFormat");
+	}
+
+	/**
+	 * Construct a fraction given an integer value, numerator, and denominator as integer strings.
+	 *
+	 * @param intString	The whole number part.
+	 * @param numerString	The numerator part string.
+	 * @param denomString	The denominator string.
+	 * @throws NumberFormatException if one of the strings is not in integer format.
+	 */
+	public BigFraction(final String intString, final String numerString, final String denomString) {
+	   this(new BigInteger(intString), new BigInteger(numerString), new BigInteger(denomString));
+	}
+
+	/**
 	 * Construct a fraction given the numerator and denominator values as integer strings.
 	 *
 	 * @param numerString	The numerator as an integer string.
 	 * @param denomString	The denominator.
+	 * @throws NumberFormatException if one of the strings is not in integer format.
 	 */
 	public BigFraction(final String numerString, final String denomString) {
 	    this(new BigInteger(numerString), new BigInteger(denomString));
+	}
+
+	/**
+	 * Construct a fraction with a whole number value, plus numerator and denominator.
+	 *
+	 * @param integer	The integer value.
+	 * @param numerator	The numerator value.
+	 * @param denominator	The denominator value.
+	 */
+	public BigFraction(final BigInteger integer, final BigInteger numerator, final BigInteger denominator) {
+	    BigInteger wholeNumber = integer.multiply(denominator);
+
+	    normalize(wholeNumber.add(numerator), denominator);
 	}
 
 	/**
@@ -99,13 +204,26 @@ public class BigFraction
 	 * @throws ArithmeticException if the denominator equals {@link BigInteger#ZERO}.
 	 */
 	public BigFraction(final BigInteger numerator, final BigInteger denominator) {
-	    if (denominator.equals(BigInteger.ZERO))
+	    normalize(numerator, denominator);
+	}
+
+	/**
+	 * Normalize values and set the internal fields from the given values.
+	 * <p> Divides both numerator and denominator values by their GCD before
+	 * setting into the {@link #numer} and {@link #denom} fields.
+	 *
+	 * @param num	The proposed numerator.
+	 * @param den	The proposed denominator.
+	 * @throws ArithmeticException if the proposed denominator is zero.
+	 */
+	private void normalize(final BigInteger num, final BigInteger den) {
+	    if (den.equals(BigInteger.ZERO))
 		throw new ArithmeticException(Intl.getString("util#fraction.noZeroDenominator"));
 
-	    BigInteger gcd = numerator.gcd(denominator);
+	    BigInteger gcd = num.gcd(den);
 
-	    this.numer = numerator.divide(gcd);
-	    this.denom = denominator.divide(gcd);
+	    this.numer = num.divide(gcd);
+	    this.denom = den.divide(gcd);
 	}
 
 	/**
@@ -217,6 +335,24 @@ public class BigFraction
 	}
 
 	/**
+	 * Compare this fractional value with another one.
+	 *
+	 * @param other	The fraction to compare to.
+	 * @return	{@code < 0} if this is less than other,
+	 *		{@code == 0} if this is equal to other,
+	 *		{@code > 0} if this is greater than other.
+	 */
+	@Override
+	public int compareTo(final BigFraction other) {
+	    // Put over common denominator, as in:
+	    // n1 / d1 cmp n2 / d2 ->  (n1 * d2) / (d1 * d2) cmp (n2 * d1) / (d1 * d2)
+	    BigInteger n1a = this.numer.multiply(other.denom);
+	    BigInteger n2a = other.numer.multiply(this.denom);
+
+	    return n1a.compareTo(n2a);
+	}
+
+	/**
 	 * Return a string of this value in whole number plus fraction form.
 	 * <p> The fraction is maintained in strictly rational form of {@code numerator / denominator },
 	 * while this function will return the fraction in proper form ({@code numerator < denominator})
@@ -244,6 +380,19 @@ public class BigFraction
 	 */
 	@Override
 	public String toString() {
-	     return String.format("%1$s/%2$s", numer, denom);
+	    return String.format("%1$s/%2$s", numer, denom);
 	}
+
+	/**
+	 * Return a hash code of this value.
+	 *
+	 * @return "Unique" hash value for this fraction.
+	 */
+	@Override
+	public int hashCode() {
+	    byte[] n = numer.toByteArray();
+	    byte[] d = denom.toByteArray();
+	    return 31 ^ Arrays.hashCode(n) ^ Arrays.hashCode(d);
+	}
+
 }

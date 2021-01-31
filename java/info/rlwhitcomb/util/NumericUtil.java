@@ -107,6 +107,8 @@
  *	    Use new Intl forms of exceptions.
  *	29-Jan-2021 (rlwhitcomb)
  *	    Add function and tables for Bernoulli numbers.
+ *	30-Jan-2021 (rlwhitcomb)
+ *	    New "tenPower" function.
  */
 package info.rlwhitcomb.util;
 
@@ -1312,6 +1314,15 @@ public class NumericUtil
 	    return base.pow(intExp);
 	}
 
+
+	/**
+	 * @return A BigInteger of 10**pow.
+	 *
+	 * @param pow	The power of 10 we need.
+	 */
+	public static BigInteger tenPower(final int pow) {
+	    return new BigInteger(CharUtil.padToWidth("1", pow + 1, '0'));
+	}
 
 	/**
 	 * Compute the factorial value for the given integer value.

@@ -34,6 +34,8 @@
  *	    Tests of the read/write binary code, which is tricky.
  *	29-Jan-2021 (rlwhitcomb)
  *	    Tests of BigFraction.
+ *	30-Jan-2021 (rlwhitcomb)
+ *	    BigFraction(String) tests.
  */
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -608,8 +610,24 @@ public class TestNumericUtil
 	    BigFraction f20 = f18.multiply(f19);
 	    System.out.println(f18 + " * " + f19 + " = " + f20 + " = " + f20.toProperString());
 	    System.out.println(f20 + " = " + f20.toDecimal().toPlainString());
+
+	    String s1 = "1 2/3";
+	    BigFraction f21 = BigFraction.valueOf(s1);
+	    System.out.println(s1 + " = " + f21 + ", " + f21.toProperString());
+	    BigFraction f22 = new BigFraction("3", "4", "9");
+	    System.out.println("3 and 4 / 9 = " + f22 + ", " + f22.toProperString());
+	    BigDecimal d1 = new BigDecimal("1.375");
+	    BigFraction f23 = new BigFraction(d1);
+	    System.out.println(d1.toPlainString() + " = " + f23 + ", " + f23.toProperString());
+	    BigDecimal d2 = new BigDecimal("0.0085");
+	    BigFraction f24 = new BigFraction(d2);
+	    System.out.println(d2.toPlainString() + " = " + f24 + ", " + f24.toProperString());
+	    BigFraction f25 = BigFraction.valueOf("4 / 7");
+	    BigFraction f26 = BigFraction.valueOf("5, 9");
+	    System.out.println(f25 + " cmp " + f26 + " = " + f25.compareTo(f26));
+
 	    // Results verified manually, will be put into the canon file
-	    numberOfTests += 20;
+	    numberOfTests += 25;
 
 	    System.out.println("Done with BigFraction tests.");
 

@@ -86,6 +86,8 @@
 #	    Tweak the text of some messages. New FileUtilities message.
 #	29-Jan-2021 (rlwhitcomb)
 #	    Add messages from BigFraction.
+#	30-Jan-2021 (rlwhitcomb)
+#	    One more fraction message.
 #
 
 #
@@ -154,6 +156,7 @@ numeric.sqrtNegative		= Square root of a negative number is not real.
 # From BigFraction.java
 #
 fraction.noZeroDenominator	= Fractions cannot have zero denominators.
+fraction.unsupportedFormat	= The input value cannot be converted to a fraction value.
 
 #
 # From SecurityUtil.java
