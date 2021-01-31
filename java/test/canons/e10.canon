@@ -115,7 +115,6 @@
 >$i -> "a"
 >$i -> "princess"
 >$i -> "..."
->Variable 'frac' cleared.
 >$i -> 0.1
 >$i -> 0.2
 >$i -> 0.3
