@@ -36,6 +36,9 @@
  *	    Add "length" and "scale" functions.
  *	30-Jan-2021 (rlwhitcomb)
  *	    Add BigFraction calculations.
+ *	31-Jan-2021 (rlwhitcomb)
+ *	    Need to pass around the MathContext for rounding. Reorder some
+ * 	    parameters for consistency.
  */
 package info.rlwhitcomb.calc;
 
@@ -120,7 +123,7 @@ public final class CalcUtil
 	}
 
 
-	public static BigDecimal toDecimalValue(final Object value, final ParserRuleContext ctx) {
+	public static BigDecimal toDecimalValue(final Object value, final MathContext mc, final ParserRuleContext ctx) {
 	    nullCheck(value, ctx);
 
 	    if (value instanceof BigDecimal)
@@ -128,7 +131,7 @@ public final class CalcUtil
 	    else if (value instanceof BigInteger)
 		return new BigDecimal((BigInteger)value);
 	    else if (value instanceof BigFraction)
-		return ((BigFraction)value).toDecimal(/* math context */);
+		return ((BigFraction)value).toDecimal(mc);
 	    else if (value instanceof String)
 		return new BigDecimal((String)value);
 	    else if (value instanceof Boolean)
@@ -172,8 +175,8 @@ public final class CalcUtil
 	    throw new CalcExprException(ctx, "%calc#noConvertFraction", typeName);
 	}
 
-	public static BigInteger toIntegerValue(final Object value, final ParserRuleContext ctx) {
-	    BigDecimal decValue = toDecimalValue(value, ctx);
+	public static BigInteger toIntegerValue(final Object value, final MathContext mc, final ParserRuleContext ctx) {
+	    BigDecimal decValue = toDecimalValue(value, mc, ctx);
 
 	    try {
 		return decValue.toBigIntegerExact();
@@ -183,8 +186,8 @@ public final class CalcUtil
 	    }
 	}
 
-	public static int toIntValue(final Object value, final ParserRuleContext ctx) {
-	    BigDecimal decValue = toDecimalValue(value, ctx);
+	public static int toIntValue(final Object value, final MathContext mc, final ParserRuleContext ctx) {
+	    BigDecimal decValue = toDecimalValue(value, mc, ctx);
 
 	    try {
 		return decValue.intValueExact();
@@ -292,12 +295,12 @@ public final class CalcUtil
 	 * <li>{@code Null} = zero</li>
 	 * </ul>
 	 *
-	 * @param ctx	The context to use for error reporting.
 	 * @param obj	The object to be "measured".
+	 * @param ctx	The context to use for error reporting.
 	 * @param recursive	Whether or not to descend into the object / array or not.
 	 * @return	The "length" according to the above rules.
 	 */
-	public static int length(final ParserRuleContext ctx, final Object obj, final boolean recursive) {
+	public static int length(final Object obj, final ParserRuleContext ctx, final boolean recursive) {
 	    if (obj == null)
 		return 0;
 	    if (obj instanceof Boolean)
@@ -325,7 +328,7 @@ public final class CalcUtil
 		    int len = 0;
 		    for (Object listObj : list) {
 			if (listObj instanceof List || listObj instanceof Map)
-			    len += length(ctx, listObj, recursive);
+			    len += length(listObj, ctx, recursive);
 			else
 			    len++;	// Note: this will count null entries as one
 		    }
@@ -342,7 +345,7 @@ public final class CalcUtil
 		    int len = 0;
 		    for (Object valueObj : map.values()) {
 			if (valueObj instanceof List || valueObj instanceof Map)
-			    len += length(ctx, valueObj, recursive);
+			    len += length(valueObj, ctx, recursive);
 			else
 			    len++;	// Note: this will count null entries as one
 		    }
@@ -364,17 +367,17 @@ public final class CalcUtil
 	 * <li>everything else = {@code 0}</li>
 	 * </ul>
 	 *
-	 * @param ctx	The context to use for error reporting.
 	 * @param obj	The object to interrogate.
+	 * @param ctx	The context to use for error reporting.
 	 * @return	The scale of the object.
 	 */
-	public static int scale(final ParserRuleContext ctx, final Object obj) {
+	public static int scale(final Object obj, final ParserRuleContext ctx) {
 	    if (obj instanceof BigDecimal)
 		return ((BigDecimal)obj).scale();
 	    if (obj instanceof BigFraction)
 		return ((BigFraction)obj).toDecimal().scale();
 	    if (obj instanceof List || obj instanceof Map)
-		return length(ctx, obj, false);
+		return length(obj, ctx, false);
 	    return 0;
 	}
 
@@ -405,13 +408,16 @@ public final class CalcUtil
 	 * @param visitor    The object visitor used to calculate the values.
 	 * @param ctx1       The Rule context of the first operand.
 	 * @param ctx2       The Rule context of the second operand.
+	 * @param mc         Rounding mode used when converting to decimal.
 	 * @param strict     Whether or not the class must match for the comparison.
 	 * @param allowNulls Some comparisons (strings) can be compared even if one or both operands are null.
 	 * @return {@code -1} if the first object is "less than" the second,
 	 *         {@code 0} if the objects are "equal",
 	 *         {@code +1} if the first object is "greater than" the second.
 	 */
-	public static int compareValues(final CalcObjectVisitor visitor, final ParserRuleContext ctx1, final ParserRuleContext ctx2, final boolean strict, final boolean allowNulls) {
+	public static int compareValues(final CalcObjectVisitor visitor,
+		final ParserRuleContext ctx1, final ParserRuleContext ctx2,
+		final MathContext mc, final boolean strict, final boolean allowNulls) {
 	    Object e1 = visitor.visit(ctx1);
 	    Object e2 = visitor.visit(ctx2);
 
@@ -439,13 +445,13 @@ public final class CalcUtil
 		return s1.compareTo(s2);
 	    }
 	    else if (e1 instanceof BigDecimal || e2 instanceof BigDecimal) {
-		BigDecimal d1 = toDecimalValue(e1, ctx1);
-		BigDecimal d2 = toDecimalValue(e2, ctx2);
+		BigDecimal d1 = toDecimalValue(e1, mc, ctx1);
+		BigDecimal d2 = toDecimalValue(e2, mc, ctx2);
 		return d1.compareTo(d2);
 	    }
 	    else if (e1 instanceof BigInteger || e2 instanceof BigInteger) {
-		BigInteger i1 = toIntegerValue(e1, ctx1);
-		BigInteger i2 = toIntegerValue(e2, ctx2);
+		BigInteger i1 = toIntegerValue(e1, mc, ctx1);
+		BigInteger i2 = toIntegerValue(e2, mc, ctx2);
 		return i1.compareTo(i2);
 	    }
 	    else if (e1 instanceof BigFraction || e2 instanceof BigFraction) {
@@ -476,7 +482,9 @@ public final class CalcUtil
 	 * @param rational Whether we're doing rational ({@code true}) or decimal arithmetic.
 	 * @return {@code e1 + e2}
 	 */
-	public static Object addOp(final Object e1, final Object e2, final ParserRuleContext ctx1, final ParserRuleContext ctx2, final MathContext mc, final boolean rational) {
+	public static Object addOp(final Object e1, final Object e2,
+		final ParserRuleContext ctx1, final ParserRuleContext ctx2,
+		final MathContext mc, final boolean rational) {
 	    if (e1 == null && e2 == null)
 		return null;
 
@@ -498,8 +506,8 @@ public final class CalcUtil
 		return f1.add(f2);
 	    }
 	    else {
-		BigDecimal d1 = toDecimalValue(e1, ctx1);
-		BigDecimal d2 = toDecimalValue(e2, ctx2);
+		BigDecimal d1 = toDecimalValue(e1, mc, ctx1);
+		BigDecimal d2 = toDecimalValue(e2, mc, ctx2);
 
 		return d1.add(d2, mc);
 	    }

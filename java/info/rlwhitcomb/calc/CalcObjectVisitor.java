@@ -147,6 +147,8 @@
  *	    Add Bernoulli number function.
  *	30-Jan-2021 (rlwhitcomb)
  *	    Introduce rational / fraction mode. Start doing rational calculations.
+ *	31-Jan-2021 (rlwhitcomb)
+ *	    Have to pass the MathContext around to more places.
  */
 package info.rlwhitcomb.calc;
 
@@ -308,7 +310,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	private BigDecimal getDecimalValue(ParserRuleContext ctx) {
-	    return toDecimalValue(visit(ctx), ctx);
+	    return toDecimalValue(visit(ctx), mc, ctx);
 	}
 
 	private BigFraction getFractionValue(ParserRuleContext ctx) {
@@ -316,7 +318,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	private BigInteger getIntegerValue(ParserRuleContext ctx) {
-	    return toIntegerValue(visit(ctx), ctx);
+	    return toIntegerValue(visit(ctx), mc, ctx);
 	}
 
 	private Boolean getBooleanValue(ParserRuleContext ctx) {
@@ -346,7 +348,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	protected int getIntValue(ParserRuleContext ctx) {
-	    return toIntValue(visit(ctx), ctx);
+	    return toIntValue(visit(ctx), mc, ctx);
 	}
 
 	private BigDecimal getDecimalTrigValue(ParserRuleContext ctx) {
@@ -376,7 +378,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	private int compareValues(ParserRuleContext ctx1, ParserRuleContext ctx2, boolean strict, boolean allowNulls) {
-	    return CalcUtil.compareValues(this, ctx1, ctx2, strict, allowNulls);
+	    return CalcUtil.compareValues(this, ctx1, ctx2, mc, strict, allowNulls);
 	}
 
 
@@ -621,7 +623,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 		    case 'd':
 		    case 'D':
-			valueBuf.append(toDecimalValue(result, ctx));
+			valueBuf.append(toDecimalValue(result, mc, ctx).toPlainString());
 			break;
 		    case 'f':
 			valueBuf.append(toFractionValue(result, ctx));
@@ -646,7 +648,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			}
 			else {
 			    valueBuf.append('0').append(formatChar);
-			    BigInteger iValue = toIntegerValue(result, ctx);
+			    BigInteger iValue = toIntegerValue(result, mc, ctx);
 			    if (iValue.compareTo(BigInteger.ZERO) < 0)
 				convert(iValue.toByteArray(), 16, valueBuf);
 			    else
@@ -664,7 +666,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			}
 			else {
 			    valueBuf.append('0');
-			    BigInteger iValue = toIntegerValue(result, ctx);
+			    BigInteger iValue = toIntegerValue(result, mc, ctx);
 			    if (iValue.compareTo(BigInteger.ZERO) < 0)
 				convert(iValue.toByteArray(), 8, valueBuf);
 			    else
@@ -682,7 +684,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			}
 			else {
 			    valueBuf.append('0').append(formatChar);
-			    BigInteger iValue = toIntegerValue(result, ctx);
+			    BigInteger iValue = toIntegerValue(result, mc, ctx);
 			    if (iValue.compareTo(BigInteger.ZERO) < 0)
 				convert(iValue.toByteArray(), 2, valueBuf);
 			    else
@@ -694,7 +696,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			toUpperCase = true;
 			// fall through
 		    case 'k':
-			BigInteger iValue = toIntegerValue(result, ctx);
+			BigInteger iValue = toIntegerValue(result, mc, ctx);
 			try {
 			    long lValue = iValue.longValueExact();
 			    valueBuf.append(NumericUtil.formatToRange(lValue, units));
@@ -704,7 +706,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			break;
 
 		    case '%':
-			BigDecimal dValue = toDecimalValue(result, ctx);
+			BigDecimal dValue = toDecimalValue(result, mc, ctx);
 			BigDecimal percentValue = dValue.multiply(BigDecimal.valueOf(100L), mc);
 			valueBuf.append(percentValue.toPlainString()).append('%');
 			break;
@@ -929,7 +931,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    LValueContext lValue = getLValue(ctx.var());
 	    Object value = lValue.getContextObject();
 
-	    BigDecimal dValue = toDecimalValue(value, ctx.var());
+	    BigDecimal dValue = toDecimalValue(value, mc, ctx.var());
 	    BigDecimal dAfter;
 
 	    String op = ctx.INC_OP().getText();
@@ -955,7 +957,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    LValueContext lValue = getLValue(ctx.var());
 	    Object value = lValue.getContextObject();
 
-	    BigDecimal dValue = toDecimalValue(value, ctx.var());
+	    BigDecimal dValue = toDecimalValue(value, mc, ctx.var());
 	    BigDecimal dAfter;
 
 	    String op = ctx.INC_OP().getText();
@@ -994,7 +996,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		}
 	    }
 	    else {
-		BigDecimal d = toDecimalValue(e, expr);
+		BigDecimal d = toDecimalValue(e, mc, expr);
 
 		switch (op) {
 		    case "+":
@@ -1060,8 +1062,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		}
 	    }
 	    else {
-		BigDecimal d1 = toDecimalValue(e1, ctx);
-		BigDecimal d2 = toDecimalValue(e2, ctx);
+		BigDecimal d1 = toDecimalValue(e1, mc, ctx);
+		BigDecimal d2 = toDecimalValue(e2, mc, ctx);
 
 		try {
 		    switch (op) {
@@ -1100,8 +1102,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			return f1.subtract(f2);
 		    }
 		    else {
-			BigDecimal d1 = toDecimalValue(e1, ctx1);
-			BigDecimal d2 = toDecimalValue(e2, ctx2);
+			BigDecimal d1 = toDecimalValue(e1, mc, ctx1);
+			BigDecimal d2 = toDecimalValue(e2, mc, ctx2);
 
 			return d1.subtract(d2, mc);
 		    }
@@ -1254,7 +1256,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    // This calculates the recursive size of objects and arrays
 	    // so, use "scale" to calculate the non-recursive size
-	    return BigInteger.valueOf((long)length(ctx, obj, true));
+	    return BigInteger.valueOf((long)length(obj, ctx, true));
 	}
 
 	@Override
@@ -1263,7 +1265,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    // This returns the non-recursive size of objects and arrays
 	    // so, use "length" to calculate the recursive (full) size
-	    return BigInteger.valueOf((long)scale(ctx, obj));
+	    return BigInteger.valueOf((long)scale(obj, ctx));
 	}
 
 	@Override
@@ -1348,7 +1350,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    return maxFraction;
 		}
 		else {
-		    BigDecimal maxNumber = toDecimalValue(firstValue, ctx);
+		    BigDecimal maxNumber = toDecimalValue(firstValue, mc, ctx);
 		    for (int i = 1; i < exprs.size(); i++) {
 			eCtx = exprs.get(i);
 			BigDecimal value = getDecimalValue(eCtx);
@@ -1389,7 +1391,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    return minFraction;
 		}
 		else {
-		    BigDecimal minNumber = toDecimalValue(firstValue, ctx);
+		    BigDecimal minNumber = toDecimalValue(firstValue, mc, ctx);
 		    for (int i = 1; i < exprs.size(); i++) {
 			eCtx = exprs.get(i);
 			BigDecimal value = getDecimalValue(eCtx);
@@ -1739,8 +1741,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			result = f1.subtract(f2);
 		    }
 		    else {
-			BigDecimal d1 = toDecimalValue(e1, varCtx);
-			BigDecimal d2 = toDecimalValue(e2, exprCtx);
+			BigDecimal d1 = toDecimalValue(e1, mc, varCtx);
+			BigDecimal d2 = toDecimalValue(e2, mc, exprCtx);
 
 			result = d1.subtract(d2, mc);
 		    }
@@ -1756,7 +1758,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public Object visitPowerAssignExpr(CalcParser.PowerAssignExprContext ctx) {
 	    LValueContext lValue = getLValue(ctx.var());
 
-	    BigDecimal base = toDecimalValue(lValue.getContextObject(), ctx);
+	    BigDecimal base = toDecimalValue(lValue.getContextObject(), mc, ctx);
 	    double exp      = getDoubleValue(ctx.expr());
 
 	    return lValue.putContextObject(NumericUtil.pow(base, exp).round(mc));
@@ -1795,8 +1797,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    }
 		}
 		else {
-		    BigDecimal d1 = toDecimalValue(e1, varCtx);
-		    BigDecimal d2 = toDecimalValue(e2, exprCtx);
+		    BigDecimal d1 = toDecimalValue(e1, mc, varCtx);
+		    BigDecimal d2 = toDecimalValue(e2, mc, exprCtx);
 
 		    switch (op) {
 			case "*=":
@@ -1824,7 +1826,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public Object visitBitAssignExpr(CalcParser.BitAssignExprContext ctx) {
 	    LValueContext lValue = getLValue(ctx.var());
 
-	    BigInteger i1 = toIntegerValue(lValue.getContextObject(), ctx);
+	    BigInteger i1 = toIntegerValue(lValue.getContextObject(), mc, ctx);
 	    BigInteger i2 = getIntegerValue(ctx.expr());
 
 	    String op = ctx.BIT_ASSIGN().getText();
@@ -1838,7 +1840,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public Object visitShiftAssignExpr(CalcParser.ShiftAssignExprContext ctx) {
 	    LValueContext lValue = getLValue(ctx.var());
 
-	    BigInteger i1 = toIntegerValue(lValue.getContextObject(), ctx);
+	    BigInteger i1 = toIntegerValue(lValue.getContextObject(), mc, ctx);
 	    int e2        = getIntValue(ctx.expr());
 
 	    String op = ctx.SHIFT_ASSIGN().getText();

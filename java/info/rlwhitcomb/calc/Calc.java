@@ -86,6 +86,8 @@
  *	    Add "-inputdir" command line option.
  *	27-Jan-2021 (rlwhitcomb)
  *	    Display HTML page for help.
+ *	31-Jan-2021 (rlwhitcomb)
+ *	    Only display the Intro (not Title and Version) at start of REPL mode.
  */
 package info.rlwhitcomb.calc;
 
@@ -818,7 +820,6 @@ public class Calc
 			    process(CharStreams.fromStream(System.in), visitor, errorStrategy, quiet);
 			}
 			else {
-			    printTitleAndVersion();
 			    printIntro();
 
 			    String line;

@@ -88,6 +88,8 @@
 #	    Add messages from BigFraction.
 #	30-Jan-2021 (rlwhitcomb)
 #	    One more fraction message.
+#	31-Jan-2021 (rlwhitcomb)
+#	    Divide by zero message for BigFraction.
 #
 
 #
@@ -157,6 +159,7 @@ numeric.sqrtNegative		= Square root of a negative number is not real.
 #
 fraction.noZeroDenominator	= Fractions cannot have zero denominators.
 fraction.unsupportedFormat	= The input value cannot be converted to a fraction value.
+fraction.divideByZero		= Divide by zero.
 
 #
 # From SecurityUtil.java

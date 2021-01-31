@@ -44,6 +44,15 @@ loop $j in 10.5 {$j}
 loop $k in 5.5, 1.5 {$k}
 loop $m in 0.5 .. -0.5, -0.08 {$m}
 
+:echo "Bernoulli Numbers 0 to 60"
+:resultonly on
+:rational on
+`B(0) = ${bn 0}`
+`B(1) = ${bn 1}`
+loop $b in 2 .. 60, 2 { `B(${$b}) = ${bn $b}` }
+:rational pop
+:resultonly pop
+
 :echo
 :echo "Done with LOOP tests."
 

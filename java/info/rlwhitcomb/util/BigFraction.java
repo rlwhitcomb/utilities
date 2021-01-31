@@ -35,6 +35,8 @@
  *	30-Jan-2021 (rlwhitcomb)
  *	    Normalize to keep sign always in the numerator. Add "abs",
  *	    "signum", and "equals"  methods.
+ *	31-Jan-2021 (rlwhitcomb)
+ *	    More methods dealing with whole number operands.
  */
 package info.rlwhitcomb.util;
 
@@ -247,6 +249,19 @@ public class BigFraction
 	}
 
 	/**
+	 * Add the given whole number to this fraction.
+	 *
+	 * @param value	The other (whole) number to add.
+	 * @return	A new fraction increased by the {@code value}.
+	 */
+	public BigFraction add(final long value) {
+	    if (value == 0L)
+		return this;
+
+	    return add(new BigFraction(value));
+	}
+
+	/**
 	 * Add the other fraction to this one.
 	 *
 	 * @param other	The fraction to add to this one.
@@ -266,6 +281,19 @@ public class BigFraction
 	    return new BigFraction(
 		this.numer.multiply(other.denom).add(other.numer.multiply(this.denom)),
 		this.denom.multiply(other.denom));
+	}
+
+	/**
+	 * Subtract the given whole number from this fraction.
+	 *
+	 * @param value	The whole number to subtract.
+	 * @return	Result of the subtraction.
+	 */
+	public BigFraction subtract(final long value) {
+	    if (value == 0L)
+		return this;
+
+	    return subtract(new BigFraction(value));
 	}
 
 	/**
@@ -296,7 +324,12 @@ public class BigFraction
 	 * @return	The result of multiplying this fraction by the given whole number.
 	 */
 	public BigFraction multiply(final long value) {
-	    return new BigFraction(this.numer.multiply(BigInteger.valueOf(value)), this.denom);
+	    if (value == 0L)
+		return BigFraction.ZERO;
+	    else if (value == 1L)
+		return this;
+
+	    return multiply(new BigFraction(value));
 	}
 
 	/**
@@ -308,6 +341,11 @@ public class BigFraction
 	 * @return	The result of multiplying this fraction by the other one.
 	 */
 	public BigFraction multiply(final BigFraction other) {
+	    if (other.equals(BigFraction.ZERO))
+		return BigFraction.ZERO;
+	    else if (other.equals(BigFraction.ONE))
+		return this;
+
 	    return new BigFraction(
 		this.numer.multiply(other.numer), this.denom.multiply(other.denom));
 	}
@@ -320,6 +358,11 @@ public class BigFraction
 	 *		the same as {@code (this.n * other.d), (this.d * other.n)}.
 	 */
 	public BigFraction divide(final BigFraction other) {
+	    if (other.equals(BigFraction.ZERO))
+		throw new ArithmeticException(Intl.getString("util#fraction.divideByZero"));
+	    else if (other.equals(BigFraction.ONE))
+		return this;
+
 	    return new BigFraction(
 		this.numer.multiply(other.denom), this.denom.multiply(other.numer));
 	}
@@ -336,6 +379,10 @@ public class BigFraction
 	}
 
 	/**
+	 * Returns the "signum" value for this function.
+	 * <p> Because we keep the values normalized, the sign and zero
+	 * will always be in the numerator, so we just need to check that.
+	 *
 	 * @return The {@code signum} function on this fraction.
 	 */
 	public int signum() {
