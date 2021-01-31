@@ -37,6 +37,7 @@
  *	    "signum", and "equals"  methods.
  *	31-Jan-2021 (rlwhitcomb)
  *	    More methods dealing with whole number operands.
+ *	    Divide by long was also missing.
  */
 package info.rlwhitcomb.util;
 
@@ -348,6 +349,23 @@ public class BigFraction
 
 	    return new BigFraction(
 		this.numer.multiply(other.numer), this.denom.multiply(other.denom));
+	}
+
+	/**
+	 * Return a new fraction which is the result of this fraction divided by the
+	 * given whole number.
+	 *
+	 * @param value	The whole number to divide by.
+	 * @return	The result of {@code this.n / (this.d * value)}.
+	 */
+	public BigFraction divide(final long value) {
+	    if (value == 0L)
+		throw new ArithmeticException(Intl.getString("util#fraction.divideByZero"));
+	    else if (value == 1L)
+		return this;
+
+	    return new BigFraction(
+		this.numer, this.denom.multiply(BigInteger.valueOf(value)));
 	}
 
 	/**
