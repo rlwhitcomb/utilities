@@ -38,6 +38,8 @@
  *	31-Jan-2021 (rlwhitcomb)
  *	    More methods dealing with whole number operands.
  *	    Divide by long was also missing.
+ *	01-Feb-2021 (rlwhitcomb)
+ *	    Tweaks to "normalize".
  */
 package info.rlwhitcomb.util;
 
@@ -216,25 +218,37 @@ public class BigFraction
 	/**
 	 * Normalize values and set the internal fields from the given values.
 	 * <p> Divides both numerator and denominator values by their GCD before
-	 * setting into the {@link #numer} and {@link #denom} fields.
+	 * setting into the {@link #numer} and {@link #denom} fields. Normalizes
+	 * zero to the canonical form, and sets the sign on the numerator (so
+	 * {@link #negate} and {@link #abs} work correctly).
 	 *
 	 * @param num	The proposed numerator.
 	 * @param den	The proposed denominator.
 	 * @throws ArithmeticException if the proposed denominator is zero.
 	 */
 	private void normalize(final BigInteger num, final BigInteger den) {
-	    if (den.equals(BigInteger.ZERO))
-		throw new ArithmeticException(Intl.getString("util#fraction.noZeroDenominator"));
-
 	    // Manage the overall sign of the fraction from the signs of numerator and denominator
 	    int signNum = num.signum();
 	    int signDen = den.signum();
 
+	    // For now (at least), we cannot handle infinite values (divide by zero)
+	    if (signDen == 0)
+		throw new ArithmeticException(Intl.getString("util#fraction.noZeroDenominator"));
+
+	    // Normalize zero to "0/1"
+	    if (signNum == 0) {
+		this.numer = BigInteger.ZERO;
+		this.denom = BigInteger.ONE;
+		return;
+	    }
+
+	    // Reduce the fraction to its lowest common denominator
 	    BigInteger gcd = num.gcd(den);
 
 	    this.numer = num.divide(gcd).abs();
 	    this.denom = den.divide(gcd).abs();
 
+	    // Normalize sign to be on the numerator only
 	    if ((signNum > 0 && signDen < 0) || (signNum < 0 && signDen > 0))
 		this.numer = this.numer.negate();
 	}

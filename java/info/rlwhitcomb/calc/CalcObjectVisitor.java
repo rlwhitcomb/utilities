@@ -151,6 +151,7 @@
  *	    Have to pass the MathContext around to more places.
  *	01-Feb-2021 (rlwhitcomb)
  *	    Set rational mode on the command line, and pass to constructor here.
+ *	    Trap arithmetic exception for rational divide also.
  */
 package info.rlwhitcomb.calc;
 
@@ -1047,27 +1048,27 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    String op = ctx.MULT_OP().getText();
 
-	    if (rationalMode) {
-		BigFraction f1 = toFractionValue(e1, ctx);
-		BigFraction f2 = toFractionValue(e2, ctx);
+	    try {
+		if (rationalMode) {
+		    BigFraction f1 = toFractionValue(e1, ctx);
+		    BigFraction f2 = toFractionValue(e2, ctx);
 
-		switch (op) {
-		    case "*":
-			return f1.multiply(f2);
-		    case "/":
-			return f1.divide(f2);
-		    case "%":
-			// ??? I think there is never any remainder dividing a fraction by a fraction
-			return BigFraction.ZERO;
-		    default:
-			throw new UnknownOpException(op, ctx);
+		    switch (op) {
+			case "*":
+			    return f1.multiply(f2);
+			case "/":
+			    return f1.divide(f2);
+			case "%":
+			    // ??? I think there is never any remainder dividing a fraction by a fraction
+			    return BigFraction.ZERO;
+			default:
+			    throw new UnknownOpException(op, ctx);
+		    }
 		}
-	    }
-	    else {
-		BigDecimal d1 = toDecimalValue(e1, mc, ctx);
-		BigDecimal d2 = toDecimalValue(e2, mc, ctx);
+		else {
+		    BigDecimal d1 = toDecimalValue(e1, mc, ctx);
+		    BigDecimal d2 = toDecimalValue(e2, mc, ctx);
 
-		try {
 		    switch (op) {
 			case "*":
 			    return d1.multiply(d2, mc);
@@ -1079,9 +1080,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			    throw new UnknownOpException(op, ctx);
 		    }
 		}
-		catch (ArithmeticException ae) {
-		    throw new CalcExprException(ae, ctx);
-		}
+	    }
+	    catch (ArithmeticException ae) {
+		throw new CalcExprException(ae, ctx);
 	    }
 	}
 
