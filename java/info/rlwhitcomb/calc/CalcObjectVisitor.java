@@ -149,6 +149,8 @@
  *	    Introduce rational / fraction mode. Start doing rational calculations.
  *	31-Jan-2021 (rlwhitcomb)
  *	    Have to pass the MathContext around to more places.
+ *	01-Feb-2021 (rlwhitcomb)
+ *	    Set rational mode on the command line, and pass to constructor here.
  */
 package info.rlwhitcomb.calc;
 
@@ -263,10 +265,10 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 	}
 
-	public CalcObjectVisitor(CalcDisplayer resultDisplayer) {
+	public CalcObjectVisitor(CalcDisplayer resultDisplayer, boolean rational) {
+	    setRationalMode(rational);
 	    setMathContext(MathContext.DECIMAL128);
 	    setTrigMode(TrigMode.RADIANS);
-	    setRationalMode(false);
 
 	    variables     = new HashMap<>();
 	    globalContext = new LValueContext(variables);
@@ -303,7 +305,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    displayActionMessage("%calc#trigMode", trigMode);
 	}
 
-	public boolean setRationalMode(boolean mode) {
+	private boolean setRationalMode(boolean mode) {
 	    boolean oldMode = rationalMode;
 	    rationalMode = mode;
 	    return oldMode;

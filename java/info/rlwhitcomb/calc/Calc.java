@@ -88,6 +88,8 @@
  *	    Display HTML page for help.
  *	31-Jan-2021 (rlwhitcomb)
  *	    Only display the Intro (not Title and Version) at start of REPL mode.
+ *	01-Feb-2021 (rlwhitcomb)
+ *	    Set rational/decimal mode on the command line; convey to Visitor.
  */
 package info.rlwhitcomb.calc;
 
@@ -178,6 +180,7 @@ public class Calc
 	private static boolean timing      = false;
 	private static boolean resultsOnly = false;
 	private static boolean quiet       = false;
+	private static boolean rational    = false;
 
 	private static Locale  locale  = null;
 
@@ -274,7 +277,7 @@ public class Calc
 		    inputTextArea.setText(inputText);
 
 		displayer = this;
-		visitor = new CalcObjectVisitor(displayer);
+		visitor = new CalcObjectVisitor(displayer, rational);
 
 		mainWindow.open(display);
 		inputTextArea.requestFocus();
@@ -672,6 +675,15 @@ public class Calc
 		case "q":
 		    quiet = true;
 		    break;
+		case "rational":
+		case "ration":
+		case "rat":
+		    rational = true;
+		    break;
+		case "decimal":
+		case "dec":
+		    rational = false;
+		    break;
 		case "locale":
 		case "loc":
 		case "l":
@@ -811,7 +823,7 @@ public class Calc
 		}
 		else {
 		    displayer = new ConsoleDisplayer();
-		    visitor = new CalcObjectVisitor(displayer);
+		    visitor = new CalcObjectVisitor(displayer, rational);
 
 		    // If no input arguments were given, go into "REPL" mode, reading
 		    // a line at a time from the console and processing
