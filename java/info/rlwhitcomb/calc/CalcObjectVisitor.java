@@ -152,6 +152,7 @@
  *	01-Feb-2021 (rlwhitcomb)
  *	    Set rational mode on the command line, and pass to constructor here.
  *	    Trap arithmetic exception for rational divide also.
+ *	    Recognize the Unicode NOT EQUAL and NOT IDENTICAL characters.
  */
 package info.rlwhitcomb.calc;
 
@@ -1528,10 +1529,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    switch (op) {
 		case "===":
 		case "!==":
+		case "\u2262": // NOT IDENTICAL
 		    cmp = compareValues(expr1, expr2, true, true);
 		    break;
 		case "==":
 		case "!=":
+		case "\u2260": // NOT EQUAL
 		    cmp = compareValues(expr1, expr2, false, true);
 		    break;
 	    }
@@ -1542,7 +1545,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    result = (cmp == 0);
 		    break;
 		case "!==":
+		case "\u2262": // NOT IDENTICAL
 		case "!=":
+		case "\u2260": // NOT EQUAL
 		    result = (cmp != 0);
 		    break;
 		default:

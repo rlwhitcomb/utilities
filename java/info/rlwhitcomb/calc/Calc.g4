@@ -115,6 +115,9 @@
  *	30-Jan-2021 (rlwhitcomb)
  *	    New "rational" or "fraction" mode; "frac" function to make
  *	    a fraction value. New 'd' and 'f' formats.
+ *	01-Feb-2021 (rlwhitcomb)
+ *	    Recognize Unicode "not equal" and "not identical" symbols,
+ *	    as well as all the relevant Unicode PI symbols.
  */
 
 grammar Calc;
@@ -303,7 +306,14 @@ FALSE    : F A L S E ;
 
 NULL     : N U L L ;
 
-PI_CONST : ( '\u03c0' | P I ) ;
+PI_CONST : P I
+         | ( '\u03a0' | '\u03c0' | '\u03d6' | '\u1d28' | '\u213c' | '\u213f' )
+         | ( '\u{1D6B7}' | '\u{1D6D1}' | '\u{1D6E1}' )
+         | ( '\u{1D6F1}' | '\u{1D70B}' | '\u{1D71B}' )
+         | ( '\u{1D72B}' | '\u{1D745}' | '\u{1D755}' )
+         | ( '\u{1D765}' | '\u{1D77F}' | '\u{1D78F}' )
+         | ( '\u{1D79F}' | '\u{1D7B9}' | '\u{1D7C9}' )
+         ;
 
 E_CONST  : E ;
 
@@ -430,8 +440,10 @@ COMPARE_OP
 EQUAL_OP
        : '==='
        | '!=='
+       | '\u2262'
        | '=='
        | '!='
+       | '\u2260'
        ;
 
 BIT_ASSIGN
