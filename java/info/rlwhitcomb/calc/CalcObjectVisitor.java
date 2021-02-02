@@ -155,6 +155,7 @@
  *	    Recognize the Unicode NOT EQUAL and NOT IDENTICAL characters.
  *	02-Feb-2021 (rlwhitcomb)
  *	    Implement GCD and LCM for rational mode.
+ *	    More tweaking for rational mode.
  */
 package info.rlwhitcomb.calc;
 
@@ -1246,14 +1247,17 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitSignumExpr(CalcParser.SignumExprContext ctx) {
+	    int signum;
+
 	    if (rationalMode) {
 		BigFraction f = getFractionValue(ctx.expr());
-		return new BigFraction(f.signum());
+		signum = f.signum();
 	    }
 	    else {
 		BigDecimal e = getDecimalValue(ctx.expr());
-		return BigDecimal.valueOf(e.signum());
+		signum = e.signum();
 	    }
+	    return BigInteger.valueOf(signum);
 	}
 
 	@Override
@@ -1277,6 +1281,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitRoundExpr(CalcParser.RoundExprContext ctx) {
 	    CalcParser.Expr2Context e2ctx = ctx.expr2();
+	    // Note: this should be good even for rational mode (converts to decimal)
 	    BigDecimal e = getDecimalValue(e2ctx.expr(0));
 	    int iPlaces  = getIntValue(e2ctx.expr(1));
 
@@ -1301,7 +1306,21 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitIsPrimeExpr(CalcParser.IsPrimeExprContext ctx) {
-	    BigInteger i = getIntegerValue(ctx.expr());
+	    BigInteger i;
+
+	    if (rationalMode) {
+		BigFraction f = getFractionValue(ctx.expr());
+
+		if (f.isWholeNumber()) {
+		    i = f.toInteger();
+		}
+		else {
+		    throw new CalcExprException(ctx, "%calc#noConvertInteger", f);
+		}
+	    }
+	    else {
+		i = getIntegerValue(ctx.expr());
+	    }
 
 	    return Boolean.valueOf(NumericUtil.isPrime(i));
 	}

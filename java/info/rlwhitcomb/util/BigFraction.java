@@ -44,6 +44,10 @@
  *	    Make this a subclass of Number; implement the required methods.
  *	02-Feb-2021 (rlwhitcomb)
  *	    Implement GCD and LCM.
+ *	    Add "isWholeNumber", and "toInteger". Rework "longValue()" and
+ *	    "intValue()" in terms of "toInteger" now. Add "intValueExact()"
+ *	    and "longValueExact()" as well. Add "increment()" and "decrement()",
+ *	    as well as two more constant values.
  */
 package info.rlwhitcomb.util;
 
@@ -61,10 +65,8 @@ import java.util.regex.Matcher;
  * {@link BigInteger} numerator and denominator.
  * <p> Fractions are maintained in least common denominator form.
  */
-public class BigFraction
-	extends Number
-	implements Comparable<BigFraction>,
-		Serializable
+public class BigFraction extends Number
+	implements Comparable<BigFraction>, Serializable
 {
 	private static final long serialVersionUID = 3889374235914093689L;
 
@@ -78,6 +80,13 @@ public class BigFraction
 
 	/** A value of {@code 1/1} (integer 1) as a fraction. */
 	public static final BigFraction ONE = new BigFraction();
+
+	/** A value of {@code 2/1} (integer 2) as a fraction. */
+	public static final BigFraction TWO = new BigFraction(2);
+
+	/** A value of {@code 1/2} (one-half) as a fraction. */
+	public static final BigFraction ONE_HALF = new BigFraction(1, 2);
+
 
 	/** The exact integer numerator of this fraction. */
 	private BigInteger numer;
@@ -198,6 +207,17 @@ public class BigFraction
 	/**
 	 * Construct a fraction with a whole number value, plus numerator and denominator.
 	 *
+	 * @param integer	The integer (whole number) part.
+	 * @param numerator	The numerator of the fraction part.
+	 * @param denominator	The denominator of the fraction part.
+	 */
+	public BigFraction(final long integer, final long numerator, final long denominator) {
+	    this(BigInteger.valueOf(integer), BigInteger.valueOf(numerator), BigInteger.valueOf(denominator));
+	}
+
+	/**
+	 * Construct a fraction with a whole number value, plus numerator and denominator.
+	 *
 	 * @param integer	The integer value.
 	 * @param numerator	The numerator value.
 	 * @param denominator	The denominator value.
@@ -259,6 +279,20 @@ public class BigFraction
 	}
 
 	/**
+	 * Is this fraction actually a whole number? That is,
+	 * the denominator is one.
+	 * <p> This does really assume that our values are kept normalized
+	 * to the greatest common denominator, so that {@code 4/2} for instance
+	 * would return true (because it was reduced to {@code 2/1}).
+	 *
+	 * @return {@code true} if the denominator is one, and this
+	 * fraction actually represents a whole number.
+	 */
+	public boolean isWholeNumber() {
+	    return denom.equals(BigInteger.ONE);
+	}
+
+	/**
 	 * Compute the double value of this fraction.
 	 *
 	 * @return The decimal equivalent to ~18 digits.
@@ -285,7 +319,21 @@ public class BigFraction
 	 */
 	@Override
 	public long longValue() {
-	    return toDecimal(MathContext.DECIMAL128).longValue();
+	    return toInteger().longValue();
+	}
+
+	/**
+	 * Convert this fraction to an exact {@code long} value.
+	 *
+	 * @return The exact long value of this fraction, if possible.
+	 * @throws ArithmeticException if this value is not a whole
+	 * number or the value is out of range of a {@code long} type.
+	 */
+	public long longValueExact() {
+	    if (isWholeNumber()) {
+		return numer.longValueExact();
+	    }
+	    throw new ArithmeticException(Intl.formatString("calc#noConvertInteger", toString()));
 	}
 
 	/**
@@ -295,9 +343,22 @@ public class BigFraction
 	 */
 	@Override
 	public int intValue() {
-	    return toDecimal(MathContext.DECIMAL64).intValue();
+	    return toInteger().intValue();
 	}
 
+	/**
+	 * Convert this fraction to an exact {@code int} value.
+	 *
+	 * @return The exact int value of this fraction, if possible.
+	 * @throws ArithmeticException if this value is not a whole
+	 * number or the value is out of range of an {@code int} type.
+	 */
+	public int intValueExact() {
+	    if (isWholeNumber()) {
+		return numer.intValueExact();
+	    }
+	    throw new ArithmeticException(Intl.formatString("calc#noConvertInteger", toString()));
+	}
 
 	/**
 	 * Negate this fraction.
@@ -307,6 +368,24 @@ public class BigFraction
 	 */
 	public BigFraction negate() {
 	    return new BigFraction(numer.negate(), denom);
+	}
+
+	/**
+	 * Increment the value by one.
+	 *
+	 * @return {@code (numer/denom) + 1/1}.
+	 */
+	public BigFraction increment() {
+	    return add(1);
+	}
+
+	/**
+	 * Decrement the value by one.
+	 *
+	 * @return {@code (numer/denom) - 1/1}.
+	 */
+	public BigFraction decrement() {
+	    return subtract(1);
 	}
 
 	/**
@@ -407,8 +486,7 @@ public class BigFraction
 	    else if (other.equals(BigFraction.ONE))
 		return this;
 
-	    return new BigFraction(
-		this.numer.multiply(other.numer), this.denom.multiply(other.denom));
+	    return new BigFraction(numer.multiply(other.numer), denom.multiply(other.denom));
 	}
 
 	/**
@@ -424,8 +502,7 @@ public class BigFraction
 	    else if (value == 1L)
 		return this;
 
-	    return new BigFraction(
-		this.numer, this.denom.multiply(BigInteger.valueOf(value)));
+	    return new BigFraction(numer, denom.multiply(BigInteger.valueOf(value)));
 	}
 
 	/**
@@ -441,8 +518,7 @@ public class BigFraction
 	    else if (other.equals(BigFraction.ONE))
 		return this;
 
-	    return new BigFraction(
-		this.numer.multiply(other.denom), this.denom.multiply(other.numer));
+	    return new BigFraction(numer.multiply(other.denom), denom.multiply(other.numer));
 	}
 
 	/**
@@ -468,7 +544,8 @@ public class BigFraction
 	}
 
 	/**
-	 * Return the LCM (Least Common Multiple) of two {@link BigInteger}s.
+	 * Helper method to return the LCM (Least Common Multiple) of two
+	 * {@link BigInteger}s.
 	 * <p><code>LCM(a, b) = (a * b) / GCD(a, b)</code>
 	 *
 	 * @param a	The first integer.
@@ -518,6 +595,34 @@ public class BigFraction
 	 */
 	public BigDecimal toDecimal() {
 	    return toDecimal(MathContext.DECIMAL128);
+	}
+
+	/**
+	 * Return the value of this fraction truncated to the next lowest integer.
+	 * <p> If {@link #isWholeNumber} would return {@code true}, then this will
+	 * return that whole number, otherwise it will return the value of
+	 * {@code numer / denom}, dropping any remainder.
+	 *
+	 * @return The value of this fraction as a whole integer, which may have
+	 * chopped off any real fraction.
+	 */
+	public BigInteger toInteger() {
+	    return isWholeNumber() ? numer : numer.divide(denom);
+	}
+
+	/**
+	 * Return the value of this fraction as an exact integer if possible.
+	 * <p> If {@link #isWholeNumber} would return {@code true}, then this will
+	 * return that whole number, otherwise throw an exception.
+	 *
+	 * @return The value of this fraction as a whole integer, if possible.
+	 * @throws ArithmeticException if the fraction has a non-integer part.
+	 */
+	public BigInteger toIntegerExact() {
+	    if (isWholeNumber()) {
+		return numer;
+	    }
+	    throw new ArithmeticException(Intl.formatString("calc#noConvertInteger", this));
 	}
 
 	/**

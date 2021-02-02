@@ -39,6 +39,8 @@
  *	31-Jan-2021 (rlwhitcomb)
  *	    Need to pass around the MathContext for rounding. Reorder some
  * 	    parameters for consistency.
+ *	02-Feb-2021 (rlwhitcomb)
+ *	    Tweak the integer conversions.
  */
 package info.rlwhitcomb.calc;
 
@@ -176,10 +178,16 @@ public final class CalcUtil
 	}
 
 	public static BigInteger toIntegerValue(final Object value, final MathContext mc, final ParserRuleContext ctx) {
-	    BigDecimal decValue = toDecimalValue(value, mc, ctx);
-
 	    try {
-		return decValue.toBigIntegerExact();
+		if (value instanceof BigInteger) {
+		    return (BigInteger)value;
+		}
+		else if (value instanceof BigFraction) {
+		    return ((BigFraction)value).toIntegerExact();
+		}
+		else {
+		    return toDecimalValue(value, mc, ctx).toBigIntegerExact();
+		}
 	    }
 	    catch (ArithmeticException ae) {
 		throw new CalcExprException(ae, ctx);
@@ -187,10 +195,16 @@ public final class CalcUtil
 	}
 
 	public static int toIntValue(final Object value, final MathContext mc, final ParserRuleContext ctx) {
-	    BigDecimal decValue = toDecimalValue(value, mc, ctx);
-
 	    try {
-		return decValue.intValueExact();
+		if (value instanceof BigInteger) {
+		    return ((BigInteger)value).intValueExact();
+		}
+		else if (value instanceof BigFraction) {
+		    return ((BigFraction)value).intValueExact();
+		}
+		else {
+		    return toDecimalValue(value, mc, ctx).intValueExact();
+		}
 	    }
 	    catch (ArithmeticException ae) {
 		throw new CalcExprException(ae, ctx);
@@ -226,6 +240,9 @@ public final class CalcUtil
 	    }
 	    else if (result instanceof BigDecimal) {
 		return ((BigDecimal)result).toPlainString();
+	    }
+	    else if (result instanceof BigFraction) {
+		return ((BigFraction)result).toString();
 	    }
 	    else if (result instanceof Map) {
 		return toStringValue((Map<String, Object>)result, quote, pretty, indent);
