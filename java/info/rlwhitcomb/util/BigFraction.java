@@ -40,6 +40,8 @@
  *	    Divide by long was also missing.
  *	01-Feb-2021 (rlwhitcomb)
  *	    Tweaks to "normalize".
+ *	01-Feb-2021 (rlwhitcomb)
+ *	    Make a subclass of Number; implement the required methods.
  */
 package info.rlwhitcomb.util;
 
@@ -58,6 +60,7 @@ import java.util.regex.Matcher;
  * <p> Fractions are maintained in least common denominator form.
  */
 public class BigFraction
+	extends Number
 	implements Comparable<BigFraction>,
 		Serializable
 {
@@ -252,6 +255,47 @@ public class BigFraction
 	    if ((signNum > 0 && signDen < 0) || (signNum < 0 && signDen > 0))
 		this.numer = this.numer.negate();
 	}
+
+	/**
+	 * Compute the double value of this fraction.
+	 *
+	 * @return The decimal equivalent to ~18 digits.
+	 */
+	@Override
+	public double doubleValue() {
+	    return toDecimal(MathContext.DECIMAL64).doubleValue();
+	}
+
+	/**
+	 * Compute the float value of this fraction.
+	 *
+	 * @return The decimal equivalent to ~8 digits.
+	 */
+	@Override
+	public float floatValue() {
+	    return toDecimal(MathContext.DECIMAL32).floatValue();
+	}
+
+	/**
+	 * Compute the long value of this fraction.
+	 *
+	 * @return The rounded long equivalent of this fraction.
+	 */
+	@Override
+	public long longValue() {
+	    return toDecimal(MathContext.DECIMAL128).longValue();
+	}
+
+	/**
+	 * Compute the integer value of this fraction.
+	 *
+	 * @return The rounded int equivalent of this fraction.
+	 */
+	@Override
+	public int intValue() {
+	    return toDecimal(MathContext.DECIMAL64).intValue();
+	}
+
 
 	/**
 	 * Negate this fraction.
