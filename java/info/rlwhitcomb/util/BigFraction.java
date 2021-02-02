@@ -41,7 +41,9 @@
  *	01-Feb-2021 (rlwhitcomb)
  *	    Tweaks to "normalize".
  *	01-Feb-2021 (rlwhitcomb)
- *	    Make a subclass of Number; implement the required methods.
+ *	    Make this a subclass of Number; implement the required methods.
+ *	02-Feb-2021 (rlwhitcomb)
+ *	    Implement GCD and LCM.
  */
 package info.rlwhitcomb.util;
 
@@ -463,6 +465,49 @@ public class BigFraction
 	 */
 	public int signum() {
 	    return numer.signum();
+	}
+
+	/**
+	 * Return the LCM (Least Common Multiple) of two {@link BigInteger}s.
+	 * <p><code>LCM(a, b) = (a * b) / GCD(a, b)</code>
+	 *
+	 * @param a	The first integer.
+	 * @param b	The second integer.
+	 * @return	The LCM of a, b.
+	 */
+	public static BigInteger lcm(final BigInteger a, final BigInteger b) {
+	    BigInteger gcd = a.gcd(b);
+	    BigInteger num = a.multiply(b);
+
+	    return num.divide(gcd);
+	}
+
+	/**
+	 * Return the GCD (Greatest Common Divisor) of this and the other
+	 * fraction.
+	 * <p><code>GCD(a/b, c/d) = GCD(a, c) / LCM(b, d)</code>
+	 *
+	 * @param other	The other fraction to work on.
+	 * @return	The GCD of this, other.
+	 */
+	public BigFraction gcd(final BigFraction other) {
+	    return new BigFraction(
+		this.numer.gcd(other.numer),
+		lcm(this.denom, other.denom));
+	}
+
+	/**
+	 * Return the LCM (Least Common Multiple) of this and the other
+	 * fraction.
+	 * <p><code>LCM(a/b, c/d) = LCM(a, c) / GCD(b, d)</code>
+	 *
+	 * @param other	The other fraction to work on.
+	 * @return	The LCM of this, other.
+	 */
+	public BigFraction lcm(final BigFraction other) {
+	    return new BigFraction(
+		lcm(this.numer, other.numer),
+		this.denom.gcd(other.denom));
 	}
 
 	/**

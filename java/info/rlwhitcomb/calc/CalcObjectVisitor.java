@@ -153,6 +153,8 @@
  *	    Set rational mode on the command line, and pass to constructor here.
  *	    Trap arithmetic exception for rational divide also.
  *	    Recognize the Unicode NOT EQUAL and NOT IDENTICAL characters.
+ *	02-Feb-2021 (rlwhitcomb)
+ *	    Implement GCD and LCM for rational mode.
  */
 package info.rlwhitcomb.calc;
 
@@ -1307,22 +1309,37 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitGcdExpr(CalcParser.GcdExprContext ctx) {
 	    CalcParser.Expr2Context e2ctx = ctx.expr2();
-	    BigInteger e1 = getIntegerValue(e2ctx.expr(0));
-	    BigInteger e2 = getIntegerValue(e2ctx.expr(1));
 
-	    return e1.gcd(e2);
+	    if (rationalMode) {
+		BigFraction f1 = getFractionValue(e2ctx.expr(0));
+		BigFraction f2 = getFractionValue(e2ctx.expr(1));
+
+		return f1.gcd(f2);
+	    }
+	    else {
+		BigInteger e1 = getIntegerValue(e2ctx.expr(0));
+		BigInteger e2 = getIntegerValue(e2ctx.expr(1));
+
+		return e1.gcd(e2);
+	    }
 	}
 
 	@Override
 	public Object visitLcmExpr(CalcParser.LcmExprContext ctx) {
 	    CalcParser.Expr2Context e2ctx = ctx.expr2();
-	    BigInteger e1 = getIntegerValue(e2ctx.expr(0));
-	    BigInteger e2 = getIntegerValue(e2ctx.expr(1));
 
-	    BigInteger gcd = e1.gcd(e2);
-	    BigInteger num = e1.multiply(e2);
+	    if (rationalMode) {
+		BigFraction f1 = getFractionValue(e2ctx.expr(0));
+		BigFraction f2 = getFractionValue(e2ctx.expr(1));
 
-	    return num.divide(gcd);
+		return f1.lcm(f2);
+	    }
+	    else {
+		BigInteger e1 = getIntegerValue(e2ctx.expr(0));
+		BigInteger e2 = getIntegerValue(e2ctx.expr(1));
+
+		return BigFraction.lcm(e1, e2);
+	    }
 	}
 
 	@Override
