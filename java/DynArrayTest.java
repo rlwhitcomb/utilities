@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2020 Roger L. Whitcomb.
+ * Copyright (c) 2020-2021 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,6 +28,9 @@
  *	    Initial coding.
  *	13-Nov-2020 (rlwhitcomb)
  *	    Add checks for nulls around the real value.
+ *	01-Feb-2021 (rlwhitcomb)
+ *	    "size()" changed value in DynamicArray, so report that, but also
+ *	    new "capacity()" value.
  */
 import info.rlwhitcomb.util.DynamicArray;
 
@@ -54,8 +57,8 @@ public class DynArrayTest
 	    }
  
 	    System.out.println(
-		String.format("Value at %1$5d = " + valueFormat + ", size = %3$5d",
-			index, valueString, array.size()));
+		String.format("Value at %1$5d = " + valueFormat + ", size = %3$5d, capacity = %4$5d",
+			index, valueString, array.size(), array.capacity()));
 	}
 
 	private static <T> void report(final DynamicArray<T> array, final int index) {

@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2020 Roger L. Whitcomb.
+ * Copyright (c) 2019,2021 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,6 +26,10 @@
  *  History:
  *	04-Jun-2019 (rlwhitcomb)
  *	    Created for dynamic array support.
+ *	01-Feb-2021 (rlwhitcomb)
+ *	    Rework the get and put methods; add exception for negative indexes.
+ *	    Change the value returned by "size()" and add "capacity()" method.
+ *	    Redo the way initial allocation is done.
  */
 package info.rlwhitcomb.util;
 
@@ -36,7 +40,7 @@ import java.lang.reflect.Array;
  * <p> Note: Resizing is always upward (that is, we never recover
  * "unused" space if that ever occurs). And sizes are always powers of two
  * (that is, min 16, then 32, 64, 128, etc.) This (hopefully) keeps
- * expensive reallocation to a minimum.
+ * expensive reallocation and copying to a minimum.
  */
 public class DynamicArray<T>
 {
@@ -47,6 +51,9 @@ public class DynamicArray<T>
 	private volatile T[] internalArray;
 	/** Class of objects to be store in this array. */
 	private Class<T> internalClass;
+	/** The "size" of this array, which is the largest index yet seen by {@link #put}. */
+	private int largestIndex = -1;
+
 
 	/**
 	 * Construct a dynamic array which stores objects of the given type, and
@@ -79,11 +86,9 @@ public class DynamicArray<T>
 	 * @param size The initial size of the array (but always expandable).
 	 */
 	private void init(Class<T> clazz, int size) {
-	    int roundedSize = NumericUtil.roundUpPowerTwo(size <= 0 ? DEFAULT_SIZE : size);
-	    @SuppressWarnings("unchecked")
-	    final T[] array = (T[]) Array.newInstance(clazz, roundedSize);
-	    this.internalArray = array;
 	    this.internalClass = clazz;
+
+	    reallocate(size <= 0 ? DEFAULT_SIZE : size);
 	}
 
 	/**
@@ -92,19 +97,30 @@ public class DynamicArray<T>
 	 * @param newSize The new (presumably larger) size required for the array.
 	 */
 	private void reallocate(int newSize) {
-	    T[] oldArray = internalArray;
 	    int roundedSize = NumericUtil.roundUpPowerTwo(newSize);
+
 	    @SuppressWarnings("unchecked")
 	    final T[] newArray = (T[]) Array.newInstance(internalClass, roundedSize);
-	    System.arraycopy(oldArray, 0, newArray, 0, oldArray.length);
+
+	    if (internalArray != null)
+		System.arraycopy(internalArray, 0, newArray, 0, internalArray.length);
+
 	    this.internalArray = newArray;
 	}
 
 	/**
-	 * @return The current size of the array.
+	 * @return The current size of the array, that is, the largest
+	 * index seen by {@link #put} plus one.
 	 */
 	public int size() {
-	    return this.internalArray.length;
+	    return largestIndex + 1;
+	}
+
+	/**
+	 * @return The current capacity of the array, without needing to reallocate.
+	 */
+	public int capacity() {
+	    return internalArray.length;
 	}
 
 	/**
@@ -114,8 +130,12 @@ public class DynamicArray<T>
 	 * @param index Zero-based index into the array.
 	 */
 	public T get(int index) {
+	    if (index < 0)
+		throw new Intl.IndexOutOfBoundsException("util#dyn.indexLessThanZero", index);
+
 	    if (index >= internalArray.length)
 		return null;
+
 	    return internalArray[index];
 	}
 
@@ -128,20 +148,21 @@ public class DynamicArray<T>
 	 * at the given index position.
 	 */
 	public T put(int index, T value) {
+	    if (index < 0)
+		throw new Intl.IndexOutOfBoundsException("util#dyn.indexLessThanZero", index);
+
 	    T oldValue = null;
-	    try {
+	    if (index >= internalArray.length) {
+		reallocate(index + 1);
+		internalArray[index] = value;
+	    }
+	    else {
 		oldValue = internalArray[index];
 		internalArray[index] = value;
 	    }
-	    catch (RuntimeException re) {
-		if (index >= internalArray.length) {
-		    reallocate(index + 1);
-		    this.internalArray[index] = value;
-		}
-		else {
-		    throw re;
-		}
-	    }
+
+	    largestIndex = Math.max(largestIndex, index);
+
 	    return oldValue;
 	}
 }
