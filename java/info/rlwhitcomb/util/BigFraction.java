@@ -51,6 +51,7 @@
  *	03-Feb-2021 (rlwhitcomb)
  *	    General cleanup.
  *	    Tweak the two patterns and their doc.
+ *	    More tweaking.
  */
 package info.rlwhitcomb.util;
 
@@ -84,6 +85,9 @@ public class BigFraction extends Number
 
 	/** A value of {@code 1/1} (integer 1) as a fraction. */
 	public static final BigFraction ONE = new BigFraction();
+
+	/** A value of {@code -1/1} (integer negative 1) as a fraction. */
+	public static final BigFraction MINUS_ONE = new BigFraction(-1);
 
 	/** A value of {@code 2/1} (integer 2) as a fraction. */
 	public static final BigFraction TWO = new BigFraction(2);
@@ -266,20 +270,26 @@ public class BigFraction extends Number
 
 	    // Normalize zero to "0/1"
 	    if (signNum == 0) {
-		this.numer = BigInteger.ZERO;
-		this.denom = BigInteger.ONE;
-		return;
+		numer = BigInteger.ZERO;
+		denom = BigInteger.ONE;
 	    }
+	    else {
+		// Reduce the fraction to its lowest common denominator
+		BigInteger gcd = num.gcd(den);
 
-	    // Reduce the fraction to its lowest common denominator, and make both positive
-	    BigInteger gcd = num.gcd(den);
+		BigInteger n = num.divide(gcd);
+		BigInteger d = den.divide(gcd);
 
-	    this.numer = num.divide(gcd).abs();
-	    this.denom = den.divide(gcd).abs();
-
-	    // Normalize sign to be on the numerator only
-	    if ((signNum > 0 && signDen < 0) || (signNum < 0 && signDen > 0))
-		this.numer = this.numer.negate();
+		// Normalize sign to be on the numerator only
+		if (signDen < 0) {
+		    numer = n.negate();
+		    denom = d.negate();
+		}
+		else {
+		    numer = n;
+		    denom = d;
+		}
+	    }
 	}
 
 	/**
@@ -371,6 +381,9 @@ public class BigFraction extends Number
 	 *		of this numerator, over the same denominator.
 	 */
 	public BigFraction negate() {
+	    if (numer.equals(BigInteger.ZERO))
+		return this;
+
 	    return new BigFraction(numer.negate(), denom);
 	}
 
@@ -380,7 +393,7 @@ public class BigFraction extends Number
 	 * @return {@code (numer/denom) + 1/1}.
 	 */
 	public BigFraction increment() {
-	    return add(1);
+	    return add(ONE);
 	}
 
 	/**
@@ -389,7 +402,7 @@ public class BigFraction extends Number
 	 * @return {@code (numer/denom) - 1/1}.
 	 */
 	public BigFraction decrement() {
-	    return subtract(1);
+	    return subtract(ONE);
 	}
 
 	/**
@@ -416,15 +429,29 @@ public class BigFraction extends Number
 	    if (other.numer.equals(BigInteger.ZERO))
 		return this;
 
-	    // If the fractions have the same denominator, simply add the numerators
-	    if (other.denom.equals(this.denom))
-		return new BigFraction(this.numer.add(other.numer), this.denom);
+	    // On the other hand, if we are zero, then return the other
+	    if (this.numer.equals(BigInteger.ZERO))
+		return other;
 
-	    // General algorithm: putting on a common denominator and adding the resulting
-	    // numerators
-	    return new BigFraction(
-		this.numer.multiply(other.denom).add(other.numer.multiply(this.denom)),
-		this.denom.multiply(other.denom));
+	    BigInteger num;
+	    BigInteger den;
+
+	    // If the fractions have the same denominator, simply add the numerators
+	    if (other.denom.equals(this.denom)) {
+		num = this.numer.add(other.numer);
+		den = this.denom;
+	    }
+	    else {
+		// General algorithm: putting on a common denominator and adding the resulting
+		// numerators
+		num = this.numer.multiply(other.denom).add(other.numer.multiply(this.denom));
+		den = this.denom.multiply(other.denom);
+	    }
+
+	    if (num.equals(BigInteger.ZERO))
+		return ZERO;
+
+	    return new BigFraction(num, den);
 	}
 
 	/**
@@ -451,12 +478,25 @@ public class BigFraction extends Number
 	    if (other.numer.equals(BigInteger.ZERO))
 		return this;
 
-	    if (other.denom.equals(this.denom))
-		return new BigFraction(this.numer.subtract(other.numer), this.denom);
+	    if (this.numer.equals(BigInteger.ZERO))
+		return other.negate();
 
-	    return new BigFraction(
-		this.numer.multiply(other.denom).subtract(other.numer.multiply(this.denom)),
-		this.denom.multiply(other.denom));
+	    BigInteger num;
+	    BigInteger den;
+
+	    if (other.denom.equals(this.denom)) {
+		num = this.numer.subtract(other.numer);
+		den = this.denom;
+	    }
+	    else {
+		num = this.numer.multiply(other.denom).subtract(other.numer.multiply(this.denom));
+		den = this.denom.multiply(other.denom);
+	    }
+
+	    if (num.equals(BigInteger.ZERO))
+		return ZERO;
+
+	    return new BigFraction(num, den);
 	}
 
 	/**
@@ -469,7 +509,7 @@ public class BigFraction extends Number
 	 */
 	public BigFraction multiply(final long value) {
 	    if (value == 0L)
-		return BigFraction.ZERO;
+		return ZERO;
 	    else if (value == 1L)
 		return this;
 
@@ -485,9 +525,9 @@ public class BigFraction extends Number
 	 * @return	The result of multiplying this fraction by the other one.
 	 */
 	public BigFraction multiply(final BigFraction other) {
-	    if (other.equals(BigFraction.ZERO))
-		return BigFraction.ZERO;
-	    else if (other.equals(BigFraction.ONE))
+	    if (other.equals(ZERO) || equals(ZERO))
+		return ZERO;
+	    else if (other.equals(ONE))
 		return this;
 
 	    return new BigFraction(numer.multiply(other.numer), denom.multiply(other.denom));
@@ -517,9 +557,11 @@ public class BigFraction extends Number
 	 *		the same as {@code (this.n * other.d), (this.d * other.n)}.
 	 */
 	public BigFraction divide(final BigFraction other) {
-	    if (other.equals(BigFraction.ZERO))
+	    if (other.equals(ZERO))
 		throw new ArithmeticException(Intl.getString("util#fraction.divideByZero"));
-	    else if (other.equals(BigFraction.ONE))
+	    else if (equals(ZERO))
+		return ZERO;
+	    else if (other.equals(ONE))
 		return this;
 
 	    return new BigFraction(numer.multiply(other.denom), denom.multiply(other.numer));
@@ -533,7 +575,7 @@ public class BigFraction extends Number
 	 * @return A new fraction that is the absolute value of the fraction.
 	 */
 	public BigFraction abs() {
-	    return new BigFraction(numer.abs(), denom);
+	    return (numer.signum() < 0) ? negate() : this;
 	}
 
 	/**
@@ -558,9 +600,11 @@ public class BigFraction extends Number
 	 */
 	public static BigInteger lcm(final BigInteger a, final BigInteger b) {
 	    BigInteger gcd = a.gcd(b);
-	    BigInteger num = a.multiply(b);
 
-	    return num.divide(gcd);
+	    if (gcd.equals(BigInteger.ZERO))
+		throw new ArithmeticException(Intl.getString("util#fraction.divideByZero"));
+
+	    return a.multiply(b).divide(gcd);
 	}
 
 	/**

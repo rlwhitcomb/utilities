@@ -156,6 +156,7 @@
  *	02-Feb-2021 (rlwhitcomb)
  *	    Implement GCD and LCM for rational mode.
  *	    More tweaking for rational mode.
+ *	    Catch exception in LCM.
  */
 package info.rlwhitcomb.calc;
 
@@ -1347,17 +1348,22 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public Object visitLcmExpr(CalcParser.LcmExprContext ctx) {
 	    CalcParser.Expr2Context e2ctx = ctx.expr2();
 
-	    if (rationalMode) {
-		BigFraction f1 = getFractionValue(e2ctx.expr(0));
-		BigFraction f2 = getFractionValue(e2ctx.expr(1));
+	    try {
+		if (rationalMode) {
+		    BigFraction f1 = getFractionValue(e2ctx.expr(0));
+		    BigFraction f2 = getFractionValue(e2ctx.expr(1));
 
-		return f1.lcm(f2);
+		    return f1.lcm(f2);
+		}
+		else {
+		    BigInteger e1 = getIntegerValue(e2ctx.expr(0));
+		    BigInteger e2 = getIntegerValue(e2ctx.expr(1));
+
+		    return BigFraction.lcm(e1, e2);
+		}
 	    }
-	    else {
-		BigInteger e1 = getIntegerValue(e2ctx.expr(0));
-		BigInteger e2 = getIntegerValue(e2ctx.expr(1));
-
-		return BigFraction.lcm(e1, e2);
+	    catch (ArithmeticException ae) {
+		throw new CalcExprException(ae, ctx);
 	    }
 	}
 
