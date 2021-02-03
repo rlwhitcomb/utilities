@@ -50,6 +50,7 @@
  *	    as well as two more constant values.
  *	03-Feb-2021 (rlwhitcomb)
  *	    General cleanup.
+ *	    Tweak the two patterns and their doc.
  */
 package info.rlwhitcomb.util;
 
@@ -73,10 +74,10 @@ public class BigFraction extends Number
 {
 	private static final long serialVersionUID = 3889374235914093689L;
 
-	/** The pattern used for two strings, as in "numer [;/,] denom". */
-	private static final Pattern TWO_STRINGS = Pattern.compile("(-?[0-9]+)\\s*[/,;]\\s*(-?[0-9]+)");
-	/** The pattern for three strings, as in "int [:/,] numer [:/,] denom". */
-	private static final Pattern THREE_STRINGS = Pattern.compile("(-?[0-9]+)\\s*[/,;]?\\s*(-?[0-9]+)\\s*[/,;]?\\s*(-?[0-9]+)");
+	/** The pattern used for two strings, as in "numer [&nbsp;,/;] denom". */
+	private static final Pattern TWO_STRINGS = Pattern.compile("(-?[0-9]+)\\s*[,/;]?\\s*(-?[0-9]+)");
+	/** The pattern for three strings, as in "int [&nbsp;,/;] numer [&nbsp;,/;] denom". */
+	private static final Pattern THREE_STRINGS = Pattern.compile("(-?[0-9]+)\\s*[,/;]?\\s*(-?[0-9]+)\\s*[,/;]?\\s*(-?[0-9]+)");
 
 	/** A value of {@code 0/1} (integer 0) as a fraction. */
 	public static final BigFraction ZERO = new BigFraction(BigInteger.ZERO);
@@ -115,7 +116,7 @@ public class BigFraction extends Number
 	}
 
 	/**
-	 * Construct a whole number fraction ({@code n / 1} from the given
+	 * Construct a whole number fraction ({@code n / 1}) from the given
 	 * value.
 	 *
 	 * @param n The whole number numerator.
@@ -154,7 +155,7 @@ public class BigFraction extends Number
 	 * Construct a fraction from the given string in one of several forms:
 	 * <ul><li>one integer number - a whole number</li>
 	 * <li>two integers separated by comma, semicolon, or slash</li>
-	 * <li>three integers (as in 3 1/2)</li>
+	 * <li>three integers (as in {@code 3 1/2})</li>
 	 * </ul>
 	 *
 	 * @param value	A string formatted as above.
@@ -680,7 +681,7 @@ public class BigFraction extends Number
 	}
 
 	/**
-	 * Return a string in the form of {@code "numer / denom"}, regardless of whether
+	 * Return a string in the form of <code>"<i>numer</i>/<i>denom</i>"</code>, regardless of whether
 	 * the fraction is proper or not.
 	 *
 	 * @return	The string form of this fraction.
