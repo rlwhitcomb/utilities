@@ -48,6 +48,8 @@
  *	    "intValue()" in terms of "toInteger" now. Add "intValueExact()"
  *	    and "longValueExact()" as well. Add "increment()" and "decrement()",
  *	    as well as two more constant values.
+ *	03-Feb-2021 (rlwhitcomb)
+ *	    General cleanup.
  */
 package info.rlwhitcomb.util;
 
@@ -63,7 +65,8 @@ import java.util.regex.Matcher;
 /**
  * A class used to implement a rational number system, keeping exact accuracy in
  * {@link BigInteger} numerator and denominator.
- * <p> Fractions are maintained in least common denominator form.
+ * <p> Fractions are maintained in least common denominator form, with the sign
+ * of the fraction kept in the numerator only.
  */
 public class BigFraction extends Number
 	implements Comparable<BigFraction>, Serializable
@@ -88,9 +91,9 @@ public class BigFraction extends Number
 	public static final BigFraction ONE_HALF = new BigFraction(1, 2);
 
 
-	/** The exact integer numerator of this fraction. */
+	/** The exact integer numerator of this fraction (could be negative). */
 	private BigInteger numer;
-	/** The exact integer denominator of this fraction. */
+	/** The exact integer denominator of this fraction (always positive). */
 	private BigInteger denom;
 
 
@@ -105,20 +108,20 @@ public class BigFraction extends Number
 	 * Construct a whole number fraction ({@code n / 1}) from the given
 	 * value.
 	 *
-	 * @param value	The whole number numerator.
+	 * @param n The whole number numerator.
 	 */
-	public BigFraction(final long value) {
-	    this(value, 1L);
+	public BigFraction(final long n) {
+	    this(n, 1L);
 	}
 
 	/**
 	 * Construct a whole number fraction ({@code n / 1} from the given
 	 * value.
 	 *
-	 * @param value The whole number numerator.
+	 * @param n The whole number numerator.
 	 */
-	public BigFraction(final BigInteger value) {
-	    this(value, BigInteger.ONE);
+	public BigFraction(final BigInteger n) {
+	    this(n, BigInteger.ONE);
 	}
 
 	/**
@@ -267,7 +270,7 @@ public class BigFraction extends Number
 		return;
 	    }
 
-	    // Reduce the fraction to its lowest common denominator
+	    // Reduce the fraction to its lowest common denominator, and make both positive
 	    BigInteger gcd = num.gcd(den);
 
 	    this.numer = num.divide(gcd).abs();
@@ -315,7 +318,7 @@ public class BigFraction extends Number
 	/**
 	 * Compute the long value of this fraction.
 	 *
-	 * @return The rounded long equivalent of this fraction.
+	 * @return The (possibly truncated) long equivalent of this fraction.
 	 */
 	@Override
 	public long longValue() {
@@ -339,7 +342,7 @@ public class BigFraction extends Number
 	/**
 	 * Compute the integer value of this fraction.
 	 *
-	 * @return The rounded int equivalent of this fraction.
+	 * @return The (possibly truncated) int equivalent of this fraction.
 	 */
 	@Override
 	public int intValue() {
@@ -588,16 +591,6 @@ public class BigFraction extends Number
 	}
 
 	/**
-	 * Return the value of this fraction as a decimal value, rounded to the
-	 * {@link MathContext#DECIMAL128} scale.
-	 *
-	 * @return	The value of {@code numer / denom} as a decimal number.
-	 */
-	public BigDecimal toDecimal() {
-	    return toDecimal(MathContext.DECIMAL128);
-	}
-
-	/**
 	 * Return the value of this fraction truncated to the next lowest integer.
 	 * <p> If {@link #isWholeNumber} would return {@code true}, then this will
 	 * return that whole number, otherwise it will return the value of
@@ -623,6 +616,16 @@ public class BigFraction extends Number
 		return numer;
 	    }
 	    throw new ArithmeticException(Intl.formatString("calc#noConvertInteger", this));
+	}
+
+	/**
+	 * Return the value of this fraction as a decimal value, rounded to the
+	 * {@link MathContext#DECIMAL128} scale.
+	 *
+	 * @return	The value of {@code numer / denom} as a decimal number.
+	 */
+	public BigDecimal toDecimal() {
+	    return toDecimal(MathContext.DECIMAL128);
 	}
 
 	/**
@@ -662,7 +665,7 @@ public class BigFraction extends Number
 	 * @return	A string in the form of a whole number plus the fraction.
 	 */
 	public String toProperString() {
-	    if (denom.equals(BigInteger.ONE)) {
+	    if (isWholeNumber()) {
 		return numer.toString();
 	    }
 	    else if (numer.abs().compareTo(denom) >= 0) {
@@ -710,6 +713,10 @@ public class BigFraction extends Number
 		return false;
 
 	    BigFraction otherFrac = (BigFraction)other;
+
+	    // If comparing to ourselves, then obviously true
+	    if (this == otherFrac)
+		return true;
 
 	    // Since these are kept normalized, then we just need to compare
 	    // the numerators and denominators directly.
