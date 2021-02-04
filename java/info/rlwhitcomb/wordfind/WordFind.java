@@ -45,6 +45,9 @@
  *	    Use a better algorithm for "contains".
  *	25-Jan-2021 (rlwhitcomb)
  *	    Implement "-version" command.
+ *	04-Feb-2021 (rlwhitcomb)
+ *	    Highlight the "contained" strings in the final output.
+ *	    Display total words at the end.
  */
 package info.rlwhitcomb.wordfind;
 
@@ -174,7 +177,7 @@ public class WordFind implements Application {
 
     /**
      * Calculate the total point value for the given word, taking into account
-     * blanks which are delimited with "_".
+     * blanks which are delimited with "_", and the "contained" markers ("-").
      *
      * @return The total point values (from {@link #POINT_VALUES} for the given word.
      * @param word The word to check.
@@ -185,6 +188,8 @@ public class WordFind implements Application {
             char ch = word.charAt(i);
             if (ch == '_')
                 i += 2; // skip "_X_" which is how a blank is marked
+	    else if (ch == '-')
+		continue;    // skip the "contained" marker
             else
                 pointValue += POINT_VALUES[ch - alphaStart];
         }
@@ -192,26 +197,35 @@ public class WordFind implements Application {
     }
 
     /**
-     * @return The bare letter values without the _X_ markers for blanks.
-     * @param blankDelimitedWord The input with "_" around letters substituted for blanks.
+     * @return The bare letter values without the {@code _X_} markers for blanks, or the
+     * {@code -X-} markers for the "contained" values.
+     * @param delimitedWord The input with "_" or "-" markers included.
      */
-    private static String getLettersOnly(final String blankDelimitedWord) {
-        return blankDelimitedWord.replace("_", "");
+    private static String getLettersOnly(final String delimitedWord) {
+        return delimitedWord.replace("_", "").replace("-", "");
     }
 
     /**
-     * Highlight a word making special emphasis on the blank substitutions.
-     * @param adornedWord The word to highlight with the "_" markers.
+     * Highlight a word making special emphasis on the blank substitutions and the
+     * "contained" values.
+     * @param adornedWord The word to highlight with the "_" and "-" markers.
      * @return The input with the markers replaced with the actual color codes.
      */
     private static String highlightWord(final String adornedWord) {
         int wordLen = adornedWord.length();
         StringBuilder buf = new StringBuilder(wordLen);
+        // Note: we assume that the markers are mutually exclusive and not nested
+        boolean insideMarkers = false;
         for (int i = 0; i < wordLen; i++) {
             char ch = adornedWord.charAt(i);
-            if (ch == '_') {
-                buf.append(RED_BRIGHT).append(adornedWord.charAt(i + 1)).append(RESET);
-                i += 2;
+            if (ch == '_' || ch == '-') {
+                if (insideMarkers) {
+                    buf.append(RESET);
+                    insideMarkers = false;
+                } else {
+                    buf.append(ch == '_' ? RED_BRIGHT : CYAN_BRIGHT);
+                    insideMarkers = true;
+                }
             } else {
                 buf.append(ch);
             }
@@ -280,11 +294,17 @@ public class WordFind implements Application {
             char ch = buf.charAt(charPos);
             if (ch == '_')
                 charPos += 3;
+            else if (ch == '-')
+                charPos += 2;
             else
                 charPos++;
         }
 
         return buf.insert(charPos, str);
+    }
+
+    private static final String adorn(final String unadorned) {
+        return String.format("-%1$s-", unadorned);
     }
 
     /**
@@ -349,11 +369,13 @@ public class WordFind implements Application {
                 bufUnadorned.setLength(0); bufUnadorned.append(word);
 
                 if (containsValue.isPresent()) {
-                    insert(bufAdorned,   containsIndex, containsValue.get());
-                    insert(bufUnadorned, containsIndex, containsValue.get());
+                    String contains = containsValue.get();
+                    String containsAdorned = adorn(contains);
+                    insert(bufAdorned,   containsIndex, containsAdorned);
+                    insert(bufUnadorned, containsIndex, contains);
                 }
-                beginningValue.ifPresent(v -> { insert(bufAdorned, 0, v);  insert(bufUnadorned, 0, v);  });
-                endingValue.ifPresent   (v -> { insert(bufAdorned, -1, v); insert(bufUnadorned, -1, v); });
+                beginningValue.ifPresent(v -> { insert(bufAdorned, 0, adorn(v));  insert(bufUnadorned, 0, v);  });
+                endingValue.ifPresent   (v -> { insert(bufAdorned, -1, adorn(v)); insert(bufUnadorned, -1, v); });
 
                 final String wordUnadorned = bufUnadorned.toString();
                 // There are no valid one letter (or blank) words
@@ -375,10 +397,12 @@ public class WordFind implements Application {
 	    String newPrefix;
             char ch;
 
-            // Special case handling of the delimited blank substitutions
+            // Special case handling of the delimited substitutions
             ch = str.charAt(i);
             if (ch == '_') {
                 restOfString = str.substring(0, i) + str.substring(i + 3);
+            } else if (ch == '-') {
+                restOfString = str.substring(0, i) + str.substring(i + 2);
             } else {
                 restOfString = str.substring(0, i) + str.substring(i + 1);
             }
@@ -396,6 +420,8 @@ public class WordFind implements Application {
             } else {
                 if (ch == '_')
                     newPrefix = prefix + str.substring(i, i + 3);
+                else if (ch == '-')
+                    newPrefix = prefix + str.substring(i, i + 2);
                 else
                     newPrefix = prefix + ch;
 
@@ -762,8 +788,8 @@ public class WordFind implements Application {
                 long endTime = System.nanoTime();
                 float secs = (float)(endTime - startTime) / 1.0e9f;
                 int wordsChecked = permutationSet.size() * (containsValue.isPresent() ? n : 1);
-                String message = String.format("(Lookup time was %1$5.3f seconds; %2$,d words tested)",
-                        secs, wordsChecked);
+                String message = String.format("(Lookup time %1$5.3f seconds; %2$,d valid words out of %3$,d tested)",
+                        secs, numberOfWordsFound, wordsChecked);
                 info(message);
             }
         }
