@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2020 Roger L. Whitcomb.
+ * Copyright (c) 2020-2021 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -32,6 +32,8 @@
  *	Refactor into a base class and an embedded enum in order to more legibly
  *	construct all the values (less chance for typo errors).	Fix copy/paste
  *	comment typos.
+ *   04-Feb-2021 (rlwhitcomb)
+ *	Add methods to return the escape code prefix and suffix.
  */
 package info.rlwhitcomb.util;
 
@@ -68,8 +70,10 @@ public final class ConsoleColor
     public static final int CYAN    = 6;
     public static final int WHITE   = 7;
 
-    private static final String ESC1 = "\033[%1$dm";
-    private static final String ESC2 = "\033[%1$d;%2$dm";
+    private static final String ESC  = "\033[";
+    private static final String END  = "m";
+    private static final String ESC1 = ESC + "%1$d" + END;
+    private static final String ESC2 = ESC + "%1$d;%2$d" + END;
 
     /**
      * Format an escape sequence for the given attribute and color code.
@@ -80,7 +84,7 @@ public final class ConsoleColor
      * @param colorCode The integer color code.
      * @return The formatted escape sequence to enable this color/attribute combination.
      */
-    public static String esc(final int attrCode, final int colorCode) {
+    public static final String esc(final int attrCode, final int colorCode) {
 	return String.format(ESC2, attrCode, colorCode);
     }
 
@@ -94,10 +98,25 @@ public final class ConsoleColor
      * @param colorCode The integer color (or reset) code.
      * @return The formatted escape sequence for this color.
      */
-    public static String esc(final int colorCode) {
+    public static final String esc(final int colorCode) {
 	return String.format(ESC1, colorCode);
     }
 
+    /**
+     * @return The escape code prefix, so that others can tell when one of these
+     * is coming down the pike.
+     */
+    public static final String escapeCodePrefix() {
+	return ESC;
+    }
+
+    /**
+     * @return The escape code suffix, or the end of one of these, for scanners
+     * to recognized the end of the sequence.
+     */
+    public static final String escapeCodeSuffix() {
+	return END;
+    }
 
     /**
      * An enumeration of the various console colors and effects possible, with
