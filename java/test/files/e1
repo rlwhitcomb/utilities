@@ -94,6 +94,7 @@ n = log(m)
 10**n
 p = ln2(1000000)
 2**p
+isprime 15485863
 
 :degrees
 sin(45)
