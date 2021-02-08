@@ -695,7 +695,6 @@ public class Calc
 		case "help":
 		case "h":
 		case "?":
-		    printIntro();
 		    displayHelp();
 		    return Expecting.QUIT_NOW;
 		case "version":
