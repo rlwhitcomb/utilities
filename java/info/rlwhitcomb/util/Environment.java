@@ -126,6 +126,8 @@
  *	29-Jan-2021 (rlwhitcomb)
  *	    New method to return a standard platform name. Use new Intl
  *	    exception variants.
+ *	09-Feb-2021 (rlwhitcomb)
+ *	    Rework "printProgramInfo" using the new coloring method.
  */
 package info.rlwhitcomb.util;
 
@@ -1054,6 +1056,10 @@ public final class Environment
 	}
 
 
+	private static void println(PrintStream ps, boolean colors, String formatKey, Object... args) {
+	    ps.println(ConsoleColor.color(Intl.formatString(formatKey, args), colors));
+	}
+
 	/**
 	 * Display a program information banner using things we know about here
 	 * to the given {@link PrintStream}.
@@ -1075,8 +1081,7 @@ public final class Environment
 	    String copyright   = getCopyrightNotice();
 	    String javaVersion = Intl.formatString(
 		"util#env.javaVersion",
-		javaVersion(),
-		dataModel());
+		javaVersion(), dataModel());
 
 	    int lineWidth = centerWidth;
 
@@ -1094,47 +1099,34 @@ public final class Environment
 	    String underline = CharUtil.makeStringOfChars('=', lineWidth);
 
 	    ps.println();
-	    if (colors)
-		ps.println(BLACK_BRIGHT + underline + BLUE_BOLD_BRIGHT);
-	    else
-		ps.println(underline);
+	    println(ps, colors, "util#env.otherInfo", "", underline);
 
 	    if (centerWidth == 0) {
-		ps.println(" " + productName);
-		if (colors) {
-		    ps.println(GREEN + " " + versionInfo);
-		    ps.println(BLACK_BRIGHT);
-		}
-		else {
-		    ps.println(" " + versionInfo);
-		    ps.println();
-		}
-		ps.println(" " + buildInfo);
-		ps.println(" " + copyright);
-		ps.println(" " + javaVersion);
+		println(ps, colors, "util#env.productInfo", " ", productName);
+		println(ps, colors, "util#env.versionInfo", " ", versionInfo);
+		ps.println();
+		println(ps, colors, "util#env.otherInfo", " ", buildInfo);
+		println(ps, colors, "util#env.otherInfo", " ", copyright);
+		println(ps, colors, "util#env.otherInfo", " ", javaVersion);
 	    } 
 	    else {
 		int width = (lineWidth + 1) / 2 * 2;
-		String version = CharUtil.padToWidth(versionInfo, -width, CENTER);
 
 		// Negative width puts the odd space on the right
-		ps.println(CharUtil.padToWidth(productName, -width, CENTER));
-		if (colors) {
-		    ps.println(GREEN + version);
-		    ps.println(BLACK_BRIGHT);
-		}
-		else {
-		    ps.println(version);
-		    ps.println();
-		}
-		ps.println(CharUtil.padToWidth(buildInfo, -width, CENTER));
-		ps.println(CharUtil.padToWidth(copyright, -width, CENTER));
-		ps.println(CharUtil.padToWidth(javaVersion, -width, CENTER));
+		String product = CharUtil.padToWidth(productName, -width, CENTER);
+		String version = CharUtil.padToWidth(versionInfo, -width, CENTER);
+		String build   = CharUtil.padToWidth(buildInfo,   -width, CENTER);
+		String copy    = CharUtil.padToWidth(copyright,   -width, CENTER);
+		String java    = CharUtil.padToWidth(javaVersion, -width, CENTER);
+
+		println(ps, colors, "util#env.productInfo", "", product);
+		println(ps, colors, "util#env.versionInfo", "", version);
+		ps.println();
+		println(ps, colors, "util#env.otherInfo", "", build);
+		println(ps, colors, "util#env.otherInfo", "", copy);
+		println(ps, colors, "util#env.otherInfo", "", java);
 	    }
-	    if (colors)
-		ps.println(underline + RESET);
-	    else
-		ps.println(underline);
+	    println(ps, colors, "util#env.otherInfo", "", underline);
 	    ps.println();
 	}
 

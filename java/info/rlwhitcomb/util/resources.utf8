@@ -92,6 +92,8 @@
 #	    Divide by zero message for BigFraction.
 #	01-Feb-2021 (rlwhitcomb)
 #	    Messages for DynamicArray.
+#	09-Feb-2021 (rlwhitcomb)
+#	    Colored messages for "printProgramInfo".
 #
 
 #
@@ -135,6 +137,9 @@ env.version		= Version %1$s build %2$s%3$s
 env.build		= Built on %1$s at %2$s
 env.debug		= " (DEBUG)"
 env.javaVersion		= Java version %1$s (%2$d-bit)
+env.productInfo		= "<Bl*!>%1$s%2$s<>"
+env.versionInfo		= "<Gr>%1$s%2$s<>"
+env.otherInfo		= "<Bk!>%1$s%2$s<>"
 env.timeThis		= Elapsed time %1$11.6f secs.
 env.unknownDataModel	= Java has an unexpected data model value of %1$d
 

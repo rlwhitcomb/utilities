@@ -78,6 +78,7 @@
  *	08-Feb-2021 (rlwhitcomb)
  *	    "Don't recurse" option. Tweak hidden directory color. Setup
  *	    to colorize error messages.
+ *	    Finish coloring the help message.
  */
 package info.rlwhitcomb.tree;
 
@@ -473,8 +474,24 @@ public class Tree
 	}
 
 
+	private static String colorOptions(String options) {
+	    StringBuilder buf = new StringBuilder(options.length() * 3);
+	    for (int i = 0; i < options.length(); i++) {
+		char ch = options.charAt(i);
+		if (ch == '-') {
+		    buf.append("<Gr>");
+		}
+		else if (ch == ',') {
+		    buf.append("<>");
+		}
+		buf.append(ch);
+	    }
+	    buf.append("<>");
+	    return buf.toString();
+	}
+
 	private static String helpList(String option) {
-	    return Options.getDisplayableOptions(Options.getMixedCaseOptions(option, true));
+	    return colorOptions(Options.getDisplayableOptions(Options.getMixedCaseOptions(option, true)));
 	}
 
 	private static void putHelpList(Map<String, String> symbols, String value) {
@@ -493,7 +510,7 @@ public class Tree
 	    putHelpList(symbols, OMIT_FILES);
 	    putHelpList(symbols, SHOW_HIDDEN);
 	    putHelpList(symbols, NO_COLORS);
-	    symbols.put(NO_COLOR, helpList(NO_COLOR).replace(", -nocolor", ""));
+	    symbols.put(NO_COLOR, helpList(NO_COLOR).replace(", <Gr>-nocolor<>", ""));
 	    putHelpList(symbols, NO_COL);
 	    putHelpList(symbols, NO_RECURSE);
 	    putHelpList(symbols, DARK);
