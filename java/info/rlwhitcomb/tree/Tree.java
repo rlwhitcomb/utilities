@@ -75,6 +75,9 @@
  *	    Move "canExecute" logic into FileUtilities. Also use
  *	    "FileUtilities.canWrite" because of special considerations
  *	    on *nix systems (with "root" user).
+ *	08-Feb-2021 (rlwhitcomb)
+ *	    "Don't recurse" option. Tweak hidden directory color. Setup
+ *	    to colorize error messages.
  */
 package info.rlwhitcomb.tree;
 
@@ -154,6 +157,9 @@ public class Tree
 	/** Whether sorting is case-sensitive or not. */
 	private static CaseSensitivity casing = CaseSensitivity.MIXED_CASE;
 
+	/** Whether to actually descend into subdirectories. */
+	private static boolean recurse = true;
+
 	/** Locale used to format messages, etc. */
 	private static Locale locale = null;
 
@@ -166,9 +172,23 @@ public class Tree
 	private static final String NO_COLORS        = "NoColors";
 	private static final String NO_COLOR         = "NoColor";
 	private static final String NO_COL           = "NoCol";
+	private static final String NO_RECURSE       = "NoRecurse";
 	private static final String DARK             = "DarkBackground";
 	private static final String LIGHT            = "LightBackground";
 
+
+	/**
+	 * Format an error message from the resource key and arguments, possibly color it,
+	 * then output to {@link System#err}.
+	 *
+	 * @param formatKey The resource key for the message template.
+	 * @param args      Any arguments needed to replace in the message.
+	 * @see #useColoring
+	 */
+	private static void error(final String formatKey, final Object... args) {
+	    String msg = ConsoleColor.color(Intl.formatString(formatKey, args), useColoring);
+	    System.err.println(msg);
+	}
 
 
 	private static String line(char left, char mid, char right, int width) {
@@ -346,14 +366,20 @@ public class Tree
 	    boolean isDirectory = file.isDirectory();
 	    ConsoleColor.Code nameEmphasis = darkBackgrounds ? WHITE_BOLD : BLACK_BOLD;
 	    String type = null, typeDisplay = "";
-	    if (!isDirectory) {
+
+	    if (isDirectory) {
+		if (file.isHidden()) {
+		    nameEmphasis = RED_BOLD;
+		}
+	    }
+	    else {
 		try {
 		    type = Files.probeContentType(file.toPath());
 		} catch (IOException ioe) {
 		    typeDisplay = Intl.getString("tree#unavailable");
 		}
 		if (file.isHidden()) {
-		    nameEmphasis = RED;
+		    nameEmphasis = RED_BOLD;
 		}
 		else if (FileUtilities.canExecute(file)) {
 		    nameEmphasis = GREEN_BOLD_BRIGHT;
@@ -430,7 +456,7 @@ public class Tree
 		}
 	    }
 
-	    if (isDirectory) {
+	    if (isDirectory && (recurse || fullPath)) {
 		File[] files = file.listFiles(filter);
 		if (files != null) {
 		    if (sorter != null) {
@@ -457,7 +483,7 @@ public class Tree
 
 	private static void usage(String... messages) {
 	    for (String message : messages) {
-		System.out.println(message);
+		System.out.println(ConsoleColor.color(message, useColoring));
 	    }
 
 	    Map<String, String> symbols = new HashMap<>();
@@ -469,6 +495,7 @@ public class Tree
 	    putHelpList(symbols, NO_COLORS);
 	    symbols.put(NO_COLOR, helpList(NO_COLOR).replace(", -nocolor", ""));
 	    putHelpList(symbols, NO_COL);
+	    putHelpList(symbols, NO_RECURSE);
 	    putHelpList(symbols, DARK);
 	    putHelpList(symbols, LIGHT);
 
@@ -481,7 +508,7 @@ public class Tree
 
 	    for (String arg : args) {
 		if (expectLocale && Options.isOption(arg) != null) {
-		    Intl.errPrintln("tree#errExpectLocale");
+		    error("tree#errExpectLocale");
 		}
 		else if (expectLocale) {
 		    locale = new Locale(arg);
@@ -524,6 +551,9 @@ public class Tree
 		else if (Options.matchesOption(arg, true, SHOW_HIDDEN, "hidden", "hid", "show", "s")) {
 		    showHidden = true;
 		}
+		else if (Options.matchesOption(arg, true, NO_RECURSE, "norec", "nor")) {
+		    recurse = false;
+		}
 		else if (Options.matchesOption(arg, true, "colors", "color", "col")) {
 		    useColoring = true;
 		}
@@ -548,7 +578,7 @@ public class Tree
 		    showInfoOnly = true;
 		}
 		else if (Options.isOption(arg) != null) {
-		    Intl.errFormat("tree#warnUnknownOpt", arg);
+		    error("tree#warnUnknownOpt", arg);
 		}
 		else {
 		    if (argList != null)
@@ -557,7 +587,7 @@ public class Tree
 	    }
 
 	    if (expectLocale) {
-		Intl.errPrintln("tree#errNoLocale");
+		error("tree#errNoLocale");
 	    }
 	}
 
@@ -614,11 +644,11 @@ public class Tree
 		    try {
 			list(f.getCanonicalFile(), "", "", "", true);
 		    } catch (IOException ioe) {
-			Intl.errFormat("tree#errFileName", arg, ExceptionUtil.toString(ioe));
+			error("tree#errFileName", arg, ExceptionUtil.toString(ioe));
 		    }
 		}
 		else {
-		    Intl.errFormat("tree#warnNoFile", f.getPath());
+		    error("tree#warnNoFile", f.getPath());
 		}
 	    }
 	}
