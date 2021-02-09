@@ -36,6 +36,8 @@
 #	    One more action message and more errors; calc mode strings.
 #	02-Feb-2021 (rlwhitcomb)
 #	    Another error.
+#	08-Feb-2021 (rlwhitcomb)
+#	    One more error.
 #
 
 #
@@ -90,6 +92,7 @@ loopVarNoAssign		= The value of a loop variable ('%1$s') cannot be changed
 infLoopStepZero		= Infinite loop: step value is zero
 invalidConstruct	= Invalid '$' construct
 invalidConst2		= Invalid '${...}' construct
+modeError		= Mode option '%1$s' not recognized
 
 #
 # From CalcUtil

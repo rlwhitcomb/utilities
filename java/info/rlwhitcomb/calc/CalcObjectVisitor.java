@@ -157,6 +157,9 @@
  *	    Implement GCD and LCM for rational mode.
  *	    More tweaking for rational mode.
  *	    Catch exception in LCM.
+ *	03-Feb-2021 (rlwhitcomb)
+ *	    Use tan() from NumericUtil. Allow variable reference in "numberOption"
+ *	    and "modeOption".
  */
 package info.rlwhitcomb.calc;
 
@@ -392,7 +395,17 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitDecimalDirective(CalcParser.DecimalDirectiveContext ctx) {
-	    BigDecimal dPrecision = new BigDecimal(ctx.numberOption().NUMBER().getText());
+	    CalcParser.NumberOptionContext opt = ctx.numberOption();
+	    BigDecimal dPrecision;
+
+	    if (opt.NUMBER() != null) {
+		dPrecision = new BigDecimal(opt.NUMBER().getText());
+	    }
+	    else {
+		LValueContext lValue = getLValue(opt.var());
+		dPrecision = toDecimalValue(lValue.getContextObject(), mc, opt);
+	    }
+
 	    int precision = 0;
 
 	    try {
@@ -526,30 +539,45 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	private void processModeOption(CalcParser.ModeOptionContext ctx, Deque<Boolean> stack, UnaryOperator<Boolean> setOperator) {
 	    boolean push = true;
-	    boolean mode;
-	    String option = ctx.getText().toLowerCase();
-	    switch (option) {
-		case "true":
-		case "on":
-		    mode = true;
-		    break;
-		case "false":
-		case "off":
-		    mode = false;
-		    break;
-		case "pop":
-		case "prev":
-		case "previous":
-		    if (stack.isEmpty())
+	    boolean mode = false;
+	    String option = null;
+
+	    if (ctx.var() != null) {
+		// could be boolean, or string mode value
+		LValueContext lValue = getLValue(ctx.var());
+		Object modeObject = lValue.getContextObject();
+		if (modeObject instanceof Boolean) {
+		    mode = ((Boolean)modeObject).booleanValue();
+		}
+		else {
+		    option = toStringValue(modeObject, false, false, "");
+		}
+	    }
+	    else {
+		option = ctx.getText();
+	    }
+	    if (option != null) {
+		switch (option.toLowerCase()) {
+		    case "true":
+		    case "on":
+			mode = true;
+			break;
+		    case "false":
+		    case "off":
 			mode = false;
-		    else
-			mode = stack.pop();
-		    push = false;
-		    break;
-		case "":
-		default:
-		    // Syntax error -> don't do anything
-		    return;
+			break;
+		    case "pop":
+		    case "prev":
+		    case "previous":
+			if (stack.isEmpty())
+			    mode = false;
+			else
+			    mode = stack.pop();
+			push = false;
+			break;
+		    default:
+			throw new CalcExprException(ctx, "%calc#modeError", option);
+		}
 	    }
 
 	    // Run the process to actually set the new mode
@@ -1148,10 +1176,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitTanExpr(CalcParser.TanExprContext ctx) {
-	    // Convert to double and use standard Math method
-	    double d = getTrigValue(ctx.expr());
+	    BigDecimal e = getDecimalTrigValue(ctx.expr());
 
-	    return new BigDecimal(Math.tan(d), mcDouble);
+	    return NumericUtil.tan(e, mc);
 	}
 
 	@Override

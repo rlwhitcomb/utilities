@@ -118,6 +118,10 @@
  *	01-Feb-2021 (rlwhitcomb)
  *	    Recognize Unicode "not equal" and "not identical" symbols,
  *	    as well as all the relevant Unicode PI symbols.
+ *	08-Feb-2021 (rlwhitcomb)
+ *	    Allow "numberOption" and "modeOption" in directives to use
+ *	    a variable reference for the value. Allow "precision" as an
+ *	    alias for "decimal".
  */
 
 grammar Calc;
@@ -257,28 +261,29 @@ value
    ;
 
 directive
-   : DECIMAL numberOption        # decimalDirective
-   | DEFAULT                     # defaultDirective
-   | DOUBLE                      # doubleDirective
-   | FLOAT                       # floatDirective
-   | UNLIMITED                   # unlimitedDirective
-   | DEGREES                     # degreesDirective
-   | RADIANS                     # radiansDirective
-   | BINARY                      # binaryDirective
-   | SI                          # siDirective
-   | MIXED                       # mixedDirective
-   | CLEAR idList ?              # clearDirective
-   | ECHO expr ?                 # echoDirective
-   | INCLUDE expr                # includeDirective
-   | RATIONAL modeOption         # rationalDirective
-   | DEBUG modeOption            # debugDirective
-   | RESULTSONLY modeOption      # resultsOnlyDirective
-   | QUIET modeOption            # quietDirective
+   : ( DECIMAL | PRECISION ) numberOption  # decimalDirective
+   | DEFAULT                               # defaultDirective
+   | DOUBLE                                # doubleDirective
+   | FLOAT                                 # floatDirective
+   | UNLIMITED                             # unlimitedDirective
+   | DEGREES                               # degreesDirective
+   | RADIANS                               # radiansDirective
+   | BINARY                                # binaryDirective
+   | SI                                    # siDirective
+   | MIXED                                 # mixedDirective
+   | CLEAR idList ?                        # clearDirective
+   | ECHO expr ?                           # echoDirective
+   | INCLUDE expr                          # includeDirective
+   | RATIONAL modeOption                   # rationalDirective
+   | DEBUG modeOption                      # debugDirective
+   | RESULTSONLY modeOption                # resultsOnlyDirective
+   | QUIET modeOption                      # quietDirective
    ;
 
 numberOption
    : '(' NUMBER ')'
    | NUMBER
+   | var
    ;
 
 idList
@@ -295,6 +300,7 @@ modeOption
    | 'pop'
    | 'previous'
    | 'prev'
+   | var
    ;
 
 
@@ -477,6 +483,10 @@ ASSIGN : '=' ;
 
 DECIMAL
    : DIR  ( D E C | D E C I M A L )
+   ;
+
+PRECISION
+   : DIR  ( P R E C | P R E C I S I O N )
    ;
 
 DEFAULT

@@ -14,12 +14,14 @@ $defaultOptions -nocolors -dir test/files
 $echo "Starting Calc tests..."
 $echo
 
-e1_e2_e3: e1,e2,e3
-e8: e8
-e10: e10
-e12: e12
-e_trig: e_trig
-mort: e_m1,e_m2
+e1_e2_e3:  e1,e2,e3
+e8:        e8
+e10:       e10
+e12:       e12
+e_trig:    e_trig
+e_tan:     e_tan
+bernoulli: bernoulli
+mort:      e_m1,e_m2
 
 $echo
 $echo "End of Calc tests."

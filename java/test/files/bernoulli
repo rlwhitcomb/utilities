@@ -1,0 +1,17 @@
+#
+# Tests of the Bernoulli(n) function
+#
+# Expected values were checked against
+# https://rosettacode.org/wiki/Bernoulli_numbers#Using_System.Numerics
+#
+:resultonly on
+:decimal 200
+:rational on
+
+loop $n in 0 .. 2      { `B(${$n}) = ${Bn $n}` }
+loop $n in 4 .. 126, 2 { `B(${$n}) = ${Bn $n}` }
+
+:rational pop
+:default
+:resultonly pop
+

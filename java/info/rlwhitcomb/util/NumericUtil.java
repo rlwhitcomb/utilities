@@ -114,6 +114,9 @@
  *	31-Jan-2021 (rlwhitcomb)
  *	    Now that we have BigFraction, implement the real algorithm
  *	    for Bernoulli numbers using that class.
+ *	01-Feb-2021 (rlwhitcomb)
+ *	    And now that we have Bernoulli numbers, implement Taylor
+ *	    series expansion for tan().
  */
 package info.rlwhitcomb.util;
 
@@ -307,6 +310,8 @@ public class NumericUtil
 	/* Some related values calculated at the same time (for convenience). */
 	private static BigDecimal TWO_PI;
 	private static BigDecimal MINUS_TWO_PI;
+	private static BigDecimal PI_OVER_TWO;
+	private static BigDecimal MINUS_PI_OVER_TWO;
 
 
 	private static final String[] smallWords = {
@@ -1241,7 +1246,7 @@ public class NumericUtil
 
 	    while (p < n)
 		p <<= 1;
-	
+
 	    return p;
 	}
 
@@ -1415,6 +1420,13 @@ public class NumericUtil
 
 
 	/**
+	 * A Cache of BigFraction values for B(n), so that this expensive operation
+	 * doesn't have to be done more than once per index.
+	 * <p> The index is n / 2 since every other value is zero.
+	 */
+	private static DynamicArray<BigFraction> bernoulliCache = new DynamicArray<>(BigFraction.class, 60);
+
+	/**
 	 * From <a href="https://rosettacode.org/wiki/Bernoulli_numbers">rosettacode.org</a>
 	 * the algorithm is as follows:
 	 * allocate n+1 BigFractions
@@ -1431,6 +1443,15 @@ public class NumericUtil
 	 */
 	private static BigFraction bern(int n) {
 	    int num = Math.abs(n);
+
+	    // First, check if we have already computed and cached the value
+	    int cacheIndex = num >> 1;
+	    BigFraction cachedResult = bernoulliCache.get(cacheIndex);
+	    if (cachedResult != null) {
+//System.out.println("bern(" + num + ") gotten from cache");
+		return cachedResult;
+	    }
+
 	    BigFraction[] arr = new BigFraction[num+1];
 	    for (int m = 0; m <= num; m++) {
 		arr[m] = new BigFraction(1, (m+1));
@@ -1438,6 +1459,8 @@ public class NumericUtil
 		    arr[i-1] = (arr[i-1].subtract(arr[i])).multiply(i);
 		}
 	    }
+
+	    bernoulliCache.put(cacheIndex, arr[0]);
 	    return arr[0];
 	}
 
@@ -1472,21 +1495,26 @@ public class NumericUtil
 	    }
 	}
 
+	private static BigDecimal toDecimal(final Number x, final MathContext mc) {
+	    if (x instanceof BigDecimal)
+		return (BigDecimal) x;
+	    else if (x instanceof BigInteger)
+		return new BigDecimal((BigInteger) x);
+	    else if (x instanceof BigFraction)
+		return ((BigFraction) x).toDecimal(mc);
+	    else
+		return BigDecimal.valueOf(x.doubleValue());
+	}
+
 	/**
 	 * Find the value of sin(x) (where x is in radians).
 	 *
 	 * @param x	The value in radians to compute the "sin" function of.
-	 * @param mc	The {@link MathContext} to use for the computation.
+	 * @param mc	The {@link MathContext} to use for rounding during the computation.
 	 * @return	The value of the sin of x.
 	 */
 	public static BigDecimal sin(final Number x, final MathContext mc) {
-	    BigDecimal xValue;
-	    if (x instanceof BigDecimal)
-		xValue = (BigDecimal)x;
-	    else if (x instanceof BigInteger)
-		xValue = new BigDecimal((BigInteger)x);
-	    else
-		xValue = BigDecimal.valueOf(x.doubleValue());
+	    BigDecimal xValue = toDecimal(x, mc);
 
 	    pi(mc.getPrecision());
 
@@ -1499,6 +1527,7 @@ public class NumericUtil
 
 	    BigDecimal result   = xValue;
 	    BigDecimal power    = xValue;
+	    BigDecimal xSquared = xValue.multiply(xValue);
 	    BigDecimal fact     = BigDecimal.ONE;
 	    BigDecimal factTerm = BigDecimal.ONE;
 
@@ -1508,7 +1537,7 @@ public class NumericUtil
 	    MathContext mc2 = new MathContext(mc.getPrecision() * 2);
 
 	    for (int i = 1; i < loops; i++) {
-		power     = power.multiply(xValue).multiply(xValue);
+		power     = power.multiply(xSquared);
 		factTerm  = factTerm.add(BigDecimal.ONE);
 		fact      = fact.multiply(factTerm);
 		factTerm  = factTerm.add(BigDecimal.ONE);
@@ -1532,13 +1561,7 @@ public class NumericUtil
 	 * @return	The value of the cos of x.
 	 */
 	public static BigDecimal cos(final Number x, final MathContext mc) {
-	    BigDecimal xValue;
-	    if (x instanceof BigDecimal)
-		xValue = (BigDecimal)x;
-	    else if (x instanceof BigInteger)
-		xValue = new BigDecimal((BigInteger)x);
-	    else
-		xValue = BigDecimal.valueOf(x.doubleValue());
+	    BigDecimal xValue = toDecimal(x, mc);
 
 	    pi(mc.getPrecision());
 
@@ -1549,6 +1572,7 @@ public class NumericUtil
 //System.out.println("range reduced x = " + xValue.toPlainString());
 	    }
 
+	    BigDecimal xSquared = xValue.multiply(xValue);
 	    BigDecimal result   = BigDecimal.ONE;
 	    BigDecimal power    = BigDecimal.ONE;
 	    BigDecimal fact     = BigDecimal.ONE;
@@ -1560,7 +1584,7 @@ public class NumericUtil
 	    MathContext mc2 = new MathContext(mc.getPrecision() * 2);
 
 	    for (int i = 1; i < loops; i++) {
-		power     = power.multiply(xValue).multiply(xValue);
+		power     = power.multiply(xSquared);
 		factTerm  = factTerm.add(BigDecimal.ONE);
 		fact      = fact.multiply(factTerm);
 		BigDecimal seriesTerm = power.divide(fact, mc2);
@@ -1571,6 +1595,80 @@ public class NumericUtil
 //System.out.println("loop " + i + " -> " + result.toPlainString());
 		factTerm  = factTerm.add(BigDecimal.ONE);
 		fact      = fact.multiply(factTerm);
+	    }
+
+	    return result.round(mc);
+	}
+
+	/**
+	 * Find the value of tan(x) (where x is in radians).
+	 *
+	 * @param x	The value in radians to compute the "tan" function of.
+	 * @param mc	The {@link MathContext} to use for the computation.
+	 * @return	The value of the tan of x.
+	 */
+	public static BigDecimal tan(final Number x, final MathContext mc) {
+	    // Rounding context for the loops, to ensure we get accuracy to the requested precision
+	    MathContext mc2 = new MathContext(mc.getPrecision() + 2);
+
+	    BigDecimal xValue = toDecimal(x, mc2);
+
+	    pi(mc2.getPrecision());
+
+	    /* First, do some range reductions to the range of -pi/2 to pi/2 */
+	    if (xValue.compareTo(MINUS_PI_OVER_TWO) < 0 || xValue.compareTo(PI_OVER_TWO) > 0) {
+		xValue = xValue.remainder(PI_OVER_TWO, mc);
+	    }
+
+	    // Some simplifications
+	    if (xValue.equals(BigDecimal.ZERO))
+		return BigDecimal.ZERO;
+
+	    BigDecimal result     = xValue;
+	    BigInteger FOUR       = BigInteger.valueOf(4L);
+	    BigInteger twoPower   = FOUR;
+	    BigDecimal xPower     = xValue;
+	    BigDecimal xSquared   = xValue.multiply(xValue);
+	    BigInteger factTerm   = I_TWO;
+	    BigInteger factorial  = I_TWO; // 2!
+	    BigDecimal lastResult = result;
+	    BigInteger numer;
+
+	    // This seems to require (precision/4) * input/0.1 iterations, so for
+	    // precision 20, about 5 * 0.1, for 34 about 8 * 0.1, etc.
+	    int approxRange = (int)Math.floor(xValue.divide(new BigDecimal("0.1"), mc).doubleValue()) + 1;
+	    int loopCountPerRange = (mc.getPrecision() + 3) / 4;
+	    int loops = (approxRange + approxRange / 6) * loopCountPerRange + 3;
+//System.out.println("precision = " + mc.getPrecision() + ", approx range = " + approxRange + ", loops per = " + loopCountPerRange + " -> loops = " + loops);
+	    // Big decision here:  at some point at around 1.2 (where approxRange / 6 is > 1) we start getting
+	    // diminishing returns, so switch to using sin(x) / cos(x) as quicker AND more accurate
+	    if (approxRange > 12) {
+		return sin(xValue, mc).divide(cos(xValue, mc), mc);
+	    }
+
+	    for (int i = 2; i < loops; i++) {
+		twoPower  = twoPower.multiply(FOUR);
+		xPower    = xPower.multiply(xSquared);
+		numer     = twoPower.multiply(twoPower.subtract(BigInteger.ONE));
+		factTerm  = factTerm.add(BigInteger.ONE);
+		factorial = factorial.multiply(factTerm);
+		factTerm  = factTerm.add(BigInteger.ONE);
+		factorial = factorial.multiply(factTerm);
+
+		BigFraction t  = new BigFraction(numer, factorial);
+		// There is supposed to be a (-1)**(n-1) term, but it is exactly
+		// balanced by the oscillating sign of Bn, so just do abs() here
+		// and ignore the -1 term
+		BigFraction bn = bern(i * 2).abs();
+		BigFraction termn = t.multiply(bn);
+//System.out.println("i = " + i + ", bn(i*2) = " + bn + ", t (num/fact) = " + t + ", t*bn = " + termn);
+		BigDecimal term = termn.toDecimal(mc2).multiply(xPower, mc2);
+		result          = result.add(term, mc2);
+//System.out.println("term = " + term.toPlainString() + ", new result = " + result.toPlainString() + ", lastResult = " + lastResult.toPlainString());
+		if (lastResult.equals(result)) {
+		    break;
+		}
+		lastResult = result;
 	    }
 
 	    return result.round(mc);
@@ -1742,10 +1840,14 @@ public class NumericUtil
 		// Calculate a new value with the requested scale
 		// (+1 because of the leading "3" digit)
 		CALCULATED_PI = new BigDecimal(piDigits(digits + 1)).movePointLeft(digits);
+
 		// Now calculate the related values at the same scale
 		MathContext mc = new MathContext(digits + 1);
-		TWO_PI       = CALCULATED_PI.multiply(D_TWO, mc);
-		MINUS_TWO_PI = TWO_PI.negate(); 
+
+		TWO_PI            = CALCULATED_PI.multiply(D_TWO, mc);
+		MINUS_TWO_PI      = TWO_PI.negate();
+		PI_OVER_TWO       = CALCULATED_PI.divide(D_TWO, mc);
+		MINUS_PI_OVER_TWO = PI_OVER_TWO.negate();
 	    }
 
 	    return CALCULATED_PI;
