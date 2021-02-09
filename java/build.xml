@@ -147,6 +147,8 @@
 		First attempt at cleaning out leftover tester files on "purge-logs".
 	    01-Feb-2021 (rlwhitcomb)
 		Better attempt at identifying the temp directory.
+	    08-Feb-2021 (rlwhitcomb)
+		Let "purge-logs" keep only the last two weeks, instead of a month.
 
      ========================================================================== -->
 
@@ -481,20 +483,20 @@
 
 	<target name="update" depends="compile,jar,copy-to-install-directory" description="Simple incremental build and update the installed .jar file."/>
 
-	<target name="purge-logs" description="Purge log files older than a month out of date.">
+	<target name="purge-logs" description="Purge log files older than two weeks out of date.">
 		<tstamp>
-			<format property="last.month" pattern="MM/dd/yyyy hh:mm aa" locale="en,US" offset="-1" unit="month"/>
+			<format property="last.two.weeks" pattern="MM/dd/yyyy hh:mm aa" locale="en,US" offset="-2" unit="week"/>
 		</tstamp>
-		<echo message="Purging log files from before ${last.month}..."/>
+		<echo message="Purging log files from before ${last.two.weeks}..."/>
 		<delete>
 			<fileset dir="." includes="test*.log">
-				<date datetime="${last.month}" when="before"/>
+				<date datetime="${last.two.weeks}" when="before"/>
 			</fileset>
 			<fileset dir="${env.TMPDIR}" includes="canonerror*.tmp,canoninput*.tmp,canonoutput*.tmp,testerror*.tmp,testinput*.tmp,testoutput*.tmp" unless:true="${on.windows}">
-				<date datetime="${last.month}" when="before"/>
+				<date datetime="${last.two.weeks}" when="before"/>
 			</fileset>
 			<fileset dir="${env.TEMP}" includes="canonerror*.tmp,canoninput*.tmp,canonoutput*.tmp,testerror*.tmp,testinput*.tmp,testoutput*.tmp" if:true="${on.windows}">
-				<date datetime="${last.month}" when="before"/>
+				<date datetime="${last.two.weeks}" when="before"/>
 			</fileset>
 		</delete>
 	</target>
