@@ -135,6 +135,8 @@
  *	    that accept keys and do the lookup or formatting before sending to their superclasses.
  *	09-Feb-2021 (rlwhitcomb)
  *	    Add options to "printHelp" to color the messages or not.
+ *	10-Feb-2021 (rlwhitcomb)
+ *	    Add the color map to the "printHelp" params.
  */
 package info.rlwhitcomb.util;
 
@@ -159,6 +161,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import info.rlwhitcomb.jarfile.Launcher;
+import info.rlwhitcomb.util.ConsoleColor.Code;
 
 
 /**
@@ -1124,7 +1127,7 @@ public class Intl
 	 * @param	prefix	The prefix used to select the help messages.
 	 */
 	public static void printHelp(final String prefix) {
-	    printHelp(System.out, prefix, null, true);
+	    printHelp(System.out, prefix, null, true, null);
 	}
 
 	/**
@@ -1146,7 +1149,31 @@ public class Intl
 	 * @param	colors	Whether or not to expand the color tags.
 	 */
 	public static void printHelp(final String prefix, final boolean colors) {
-	    printHelp(System.out, prefix, null, colors);
+	    printHelp(System.out, prefix, null, colors, null);
+	}
+
+	/**
+	 * Print out a series of "help" message lines described in a certain format
+	 * in the resource file to {@link System#out}, with the option to color or not,
+	 * and the option to map the colors.
+	 * <p> They must have a common package, common first key part ("script" in
+	 * the example below), and have a "number of lines" key ("helpNumberLines"),
+	 * (which is optional).
+	 * The individual keys are prefixed with "help".
+	 * <p> A typical example is this:
+	 * <pre>script.helpNumberLines = 22
+	 *script.help1 = "Usage..."
+	 *script.help2 = ...
+	 *...
+	 *script.help22 = "last message"
+	 * </pre>
+	 *
+	 * @param	prefix	The prefix used to select the help messages.
+	 * @param	colors	Whether or not to expand the color tags.
+	 * @param	colorMap A mapping between color tags and real color codes.
+	 */
+	public static void printHelp(final String prefix, final boolean colors, final Map<String, Code> colorMap) {
+	    printHelp(System.out, prefix, null, colors, colorMap);
 	}
 
 	/**
@@ -1168,7 +1195,7 @@ public class Intl
 	 * @param	prefix	The prefix used to select the help messages.
 	 */
 	public static void printHelp(final PrintStream ps, final String prefix) {
-	    printHelp(ps, prefix, null, true);
+	    printHelp(ps, prefix, null, true, null);
 	}
 
 	/**
@@ -1192,7 +1219,33 @@ public class Intl
 	 * @param	colors	Whether or not to expand the color tags.
 	 */
 	public static void printHelp(final PrintStream ps, final String prefix, final boolean colors) {
-	    printHelp(ps, prefix, null, colors);
+	    printHelp(ps, prefix, null, colors, null);
+	}
+
+	/**
+	 * Print out a series of "help" message lines described in a certain format
+	 * in the resource file to the given {@link PrintStream}, with the option
+	 * to color the messages, and to map the colors.
+	 * <p> They must have a common package, common first key part ("script" in
+	 * the example below), and have a "number of lines" key ("helpNumberLines"),
+	 * (which is optional).
+	 * The individual keys are prefixed with "help".
+	 * <p> A typical example is this:
+	 * <pre>script.helpNumberLines = 22
+	 *script.help1 = "Usage..."
+	 *script.help2 = ...
+	 *...
+	 *script.help22 = "last message"
+	 * </pre>
+	 *
+	 * @param	ps	The {@link PrintStream} to use to display the help.
+	 * @param	prefix	The prefix used to select the help messages.
+	 * @param	colors	Whether or not to expand the color tags.
+	 * @param	colorMap A mapping between color tags and real color codes.
+	 */
+	public static void printHelp(final PrintStream ps, final String prefix,
+		final boolean colors, final Map<String, Code> colorMap) {
+	    printHelp(ps, prefix, null, colors, colorMap);
 	}
 
 	/**
@@ -1214,7 +1267,7 @@ public class Intl
 	 * @param	symbols	A map of symbols used to substitute values.
 	 */
 	public static void printHelp(final String prefix, final Map<String, String> symbols) {
-	    printHelp(System.out, prefix, symbols, true);
+	    printHelp(System.out, prefix, symbols, true, null);
 	}
 
 	/**
@@ -1237,9 +1290,10 @@ public class Intl
 	 * @param	prefix	The prefix used to select the help messages.
 	 * @param	symbols	A map of symbols used to substitute values.
 	 * @param	colors	Whether or not to expand the color tags.
+	 * @param	colorMap A mapping between color tags and real color codes.
 	 */
 	public static void printHelp(final PrintStream ps, final String prefix,
-		final Map<String, String> symbols, final boolean colors) {
+		final Map<String, String> symbols, final boolean colors, final Map<String, Code> colorMap) {
 	    // Grab the number of help lines from the resources first
 	    int numLines = getInt(makeKey(prefix, "helpNumberLines"), -1);
 	    int lineNo = 1;
@@ -1252,14 +1306,14 @@ public class Intl
 		    if (helpLine == null)
 			break;
 		    System.out.println(
-			ConsoleColor.color(CharUtil.substituteEnvValues(helpLine, symbols), colors));
+			ConsoleColor.color(CharUtil.substituteEnvValues(helpLine, symbols), colors, colorMap));
 		}
 	    }
 	    else {
 		while (lineNo <= numLines) {
 		    String helpLine = getString(helpKey(prefix, lineNo++));
 		    System.out.println(
-			ConsoleColor.color(CharUtil.substituteEnvValues(helpLine, symbols), colors));
+			ConsoleColor.color(CharUtil.substituteEnvValues(helpLine, symbols), colors, colorMap));
 		}
 	    }
 	}
