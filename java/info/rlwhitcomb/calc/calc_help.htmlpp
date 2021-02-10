@@ -36,8 +36,10 @@ table code {
   </head>
 
   <body>
-    <h2>Expression Calculator Help</h2>
-    <h4>Version ${Calc.version}</h4>
+    <center>
+      <h2>Expression Calculator Help</h2>
+      <h4>Version ${Calc.version}, build ${build.number}</h4>
+    </center>
     <h3>Introduction</h3>
     <p>An expression calculator that combines (nearly) unlimited precision decimal arithmetic with a rich assortment
        of operators and functions to give the ability to calculate nearly any arithmetic expression.
