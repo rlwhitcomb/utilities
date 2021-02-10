@@ -149,6 +149,9 @@
 		Better attempt at identifying the temp directory.
 	    08-Feb-2021 (rlwhitcomb)
 		Let "purge-logs" keep only the last two weeks, instead of a month.
+	    10-Feb-2021 (rlwhitcomb)
+		Add "touch" target, invoked during "update" so that any files that should
+		be preprocessed anew will get a new timestamp.
 
      ========================================================================== -->
 
@@ -301,6 +304,10 @@
 			<arg value="-no-listener"/>
 			<arg line="-package info.rlwhitcomb.calc"/>
 		</java>
+	</target>
+
+	<target name="touch" description="Touch files that should be preprocessed anew during 'update'.">
+		<touch file="info/rlwhitcomb/calc/calc_help.htmlpp"/>
 	</target>
 
 	<target name="compile" depends="preproc,process-grammars" description="Compiles the java source.">
@@ -481,7 +488,7 @@
 
 	<target name="install" depends="all,copy-to-install-directory" description="Build the utilities from scratch and install in a local utilities directory."/>
 
-	<target name="update" depends="compile,jar,copy-to-install-directory" description="Simple incremental build and update the installed .jar file."/>
+	<target name="update" depends="touch,compile,jar,copy-to-install-directory" description="Simple incremental build and update the installed .jar file."/>
 
 	<target name="purge-logs" description="Purge log files older than two weeks out of date.">
 		<tstamp>
