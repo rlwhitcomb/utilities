@@ -37,6 +37,10 @@
  *   09-Feb-2021 (rlwhitcomb)
  *	New color attribute tags; methods to convert the tags to color codes
  *	so that we can color resource strings, etc.
+ *   09-Feb-2021 (rlwhitcomb)
+ *	New "map" param to "color()" so that we can use either custom tags or
+ *	custom color choices in some situations (like catering to different
+ *	color backgrounds); used in Calc, at least.
  */
 package info.rlwhitcomb.util;
 
@@ -128,12 +132,26 @@ public final class ConsoleColor
     /**
      * Map color tags into the escape sequence codes.
      *
-     * @param input The string adorned with color/attribute tags.
+     * @param input   The string adorned with color/attribute tags.
      * @param colored {@code true} to use the color values, {@code false} to just
-     * remove the tags, leaving just the bare text.
-     * @return      The input with the tags converted to their escape codes.
+     *                remove the tags, leaving the bare text.
+     * @return        The input with the tags converted to their escape codes.
      */
     public static final String color(final String input, final boolean colored) {
+	return color(input, colored, null);
+    }
+
+    /**
+     * Map color tags into the escape sequence codes.
+     *
+     * @param input   The string adorned with color/attribute tags.
+     * @param colored {@code true} to use the color values, {@code false} to just
+     *                remove the tags, leaving the bare text.
+     * @param map     A {@code <String, Code>} map used to lookup custom tags, or
+     *                to override the default color selections (can be {@code null}).
+     * @return        The input with the tags converted to their escape codes.
+     */
+    public static final String color(final String input, final boolean colored, final Map<String, Code> map) {
 	StringBuilder buf = new StringBuilder(input.length() * 3);
 	for (int i = 0; i < input.length(); i++) {
 	    char ch = input.charAt(i);
@@ -144,8 +162,19 @@ public final class ConsoleColor
 		else {
 		    if (colored) {
 			String tag = input.substring(i + 1, endPos);
-			Code code = Code.fromAttrib(tag);
-			buf.append(code.toString());
+			Code code;
+			if (map != null) {
+			    code = map.get(tag);
+			    if (code == null) {
+				code = Code.fromAttrib(tag);
+			    }
+			}
+			else {
+			    code = Code.fromAttrib(tag);
+			}
+			if (code != null) {
+			    buf.append(code.toString());
+			}
 		    }
 		    i = endPos;
 		}
