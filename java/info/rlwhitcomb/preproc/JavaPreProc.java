@@ -127,6 +127,11 @@
  *	Add "-L" (log file) and "-W" parameters. Recognize "${macro}" format also.
  *    27-Jan-2021 (rlwhitcomb)
  *	Fix a bug with flags when setting "recurseDirectories"; some tiny cleanup.
+ *    10-Feb-2021 (rlwhitcomb)
+ *	Read "build.properties", "build.number", and "version.properties" and define
+ *	variables with everything we find in there. Implement #echo directive.
+ *	Macro variable names can now have "." in them. Reset the date and time
+ *	variables for each file processed.
  */
 package info.rlwhitcomb.preproc;
 
@@ -138,6 +143,7 @@ import java.io.FilenameFilter;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.InputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
@@ -156,6 +162,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Properties;
 import java.util.TimeZone;
 import java.util.Vector;
 import java.util.regex.Matcher;
@@ -184,6 +191,7 @@ import org.apache.tools.ant.Task;
  * <li><code>#endif</code>
  * <li><code>#include</code> {file}
  * <li><code>#error</code> {message}
+ * <li><code>#echo</code> {message}
  * </ul>
  * <p> The {expr} can be a combination of integer, float, or string constants
  * (floating-point numbers can be entered using exponential notation)
@@ -220,6 +228,8 @@ import org.apache.tools.ant.Task;
  * <li><code>__JAVA_VERSION__</code> (the Java version)
  * <li><code>__JAVA_PP_VERSION__</code> (the Java preprocessor version)
  * </ul>
+ * <p> In addition, the contents of the "build.properties", "build.number", and "version.properties"
+ * files will be read and a variable defined for each of the properties found in there.
  * <p> Command-line arguments can be:
  * <ul>
  * <li><code>-nologo</code> (don't display sign-on banner)
@@ -366,9 +376,9 @@ public class JavaPreProc extends Task
 	private static final String JAVA_PP_VERSION_VAR_NAME = "__JAVA_PP_VERSION__";
 
 	/** Pattern to parse the <code>-D<i>var</i>=<i>value</i></code> command-line switch. */
-	private static Pattern defPat = Pattern.compile("^([_A-Za-z]\\w*)=(.*)$");
+	private static Pattern defPat = Pattern.compile("^([_A-Za-z][\\w\\.]*)=(.*)$");
 	/** Pattern to parse the <code>-D<i>var</i></code> command-line switch. */
-	private static Pattern defAltPat = Pattern.compile("^([_A-Za-z]\\w*)$");
+	private static Pattern defAltPat = Pattern.compile("^([_A-Za-z][\\w\\.]*)$");
 	/** Format string to build a regular expression to parse and recognize one of our preprocessing instructions. */
 	private static String cmdPatFormat = "^\\s*%1$c\\s*(\\S+)(.*)$";
 	/** Format string to build a regular expression to parse and recognize a pass-through preprocessing instruction. */
@@ -382,18 +392,18 @@ public class JavaPreProc extends Task
 	/** Pattern to parse a comment directive line.  Built from {@link #commentPatFormat}. */
 	private Pattern commentPat = null;
 	/** Pattern to parse a <code>#define <i>var value</i></code> directive in the source. */
-	private static Pattern def2Pat = Pattern.compile("^([_A-Za-z]\\w*)\\s+(.*)$");
+	private static Pattern def2Pat = Pattern.compile("^([_A-Za-z][\\w\\.]*)\\s+(.*)$");
 	/** Pattern to parse a <code>#define <i>var</i></code> directive in the source. */
-	private static Pattern def3Pat = Pattern.compile("^([_A-Za-z]\\w*)\\s*$");
+	private static Pattern def3Pat = Pattern.compile("^([_A-Za-z][\\w\\.]*)\\s*$");
 	/** Pattern used to separate the "INCLUDE" environment variable or define and undefine lists into pieces. */
 	private static Pattern comma = Pattern.compile("[,;]");
 
 	/** Pattern to skip white space inside an expression. */
 	private static Pattern WHITE_SPACE = Pattern.compile("\\s+");
 	/** Pattern to recognize a macro reference: <code>$(<i>macroname</i>)</code> */
-	private static Pattern MACRO_REF = Pattern.compile("\\$\\(([_A-Za-z]\\w*)\\)");
+	private static Pattern MACRO_REF = Pattern.compile("\\$\\(([_A-Za-z][\\w\\.]*)\\)");
 	/** Alternate pattern to recognize a macro reference: <code>${<i>macroname</i>}</code> */
-	private static Pattern MACRO_REF2 = Pattern.compile("\\$\\{([_A-Za-z]\\w*)\\}");
+	private static Pattern MACRO_REF2 = Pattern.compile("\\$\\{([_A-Za-z][\\w\\.]*)\\}");
 	/** Pattern to match the reserved word <code>"true"</code>. */
 	private static Pattern TRUE_CONST = Pattern.compile("^[tT][rR][uE][eE]");
 	/** Pattern to match the reserved word <code>"false"</code>. */
@@ -403,7 +413,7 @@ public class JavaPreProc extends Task
 	/** Pattern to match a floating-point constant. */
 	private static Pattern FLT_CONST = Pattern.compile("^[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?");
 	/** Pattern to recognize the <code>"defined(<i>var</i>)"</code> function */
-	private static Pattern DEFINED_FUNC = Pattern.compile("^[dD][eE][fF][iI][nN][eE][dD]\\s*\\(\\s*([_A-Za-z]\\w*)\\s*\\)");
+	private static Pattern DEFINED_FUNC = Pattern.compile("^[dD][eE][fF][iI][nN][eE][dD]\\s*\\(\\s*([_A-Za-z][\\w\\.]*)\\s*\\)");
 	/** Pattern to recognize a <code>"NOT"</code> operator. */
 	private static Pattern NOT_OP = Pattern.compile("^[nN][oO][tT]");
 	/** Pattern to recognize an <code>"AND"</code> operator. */
@@ -411,7 +421,7 @@ public class JavaPreProc extends Task
 	/** Pattern to recognize an <code>"OR"</code> operator. */
 	private static Pattern OR_OP = Pattern.compile("^[oO][rR]");
 	/** Pattern to recognize any old identifier. */
-	private static Pattern IDENT = Pattern.compile("^([_A-Za-z]\\w*)");
+	private static Pattern IDENT = Pattern.compile("^([_A-Za-z][\\w\\.]*)");
 
 	/** The default timezone value. */
 	private static TimeZone zone = null;
@@ -423,7 +433,7 @@ public class JavaPreProc extends Task
 	private static DateFormat timeFmt = null;
 
 	/** The current version of this software. */
-	private static final String VERSION = "1.1.8";
+	private static final String VERSION = "1.1.9";
 	/** The current copyright year. */
 	private static final String COPYRIGHT_YEAR = "2010-2011,2014-2016,2019-2021";
 
@@ -1929,14 +1939,15 @@ public class JavaPreProc extends Task
 	 *		<code>true</code> if errors (that is, failure)
 	 */
 	private boolean processFile(File inputFile, BufferedWriter wrtr) {
-	    boolean errors = false;
-	    int nesting = 0;
-	    int tooManyEndifErrors = 0;
-	    boolean doingOutput = true;
-	    boolean closeOutput = false;
-	    String name = inputFile.getPath();
+	    boolean errors            = false;
+	    int nesting               = 0;
+	    int tooManyEndifErrors    = 0;
+	    boolean doingOutput       = true;
+	    boolean closeOutput       = false;
 	    LinkedList<IfState> state = new LinkedList<IfState>();
-	    String previousFileName = defines.put(FILE_VAR_NAME, name);
+
+	    String name             = inputFile.getPath();
+	    String previousFileName = setFileVariables(name);
 
 	    try {
 		String fileType = "";
@@ -2163,6 +2174,12 @@ public class JavaPreProc extends Task
 					errors = true;
 				    }
 				}
+				else if (directive.equalsIgnoreCase("echo")) {
+				    if (verbose) {
+					args = doSubs(args.trim());
+					out.format("%1$8d. %2$s%n", lineNo, args);
+				    }
+				}
 				else {
 				    traceLine(lineNo, line, true, false);
 				    err.format("Error: Line %1$d. Unknown directive: '%2$s'%n", lineNo, directive);
@@ -2237,7 +2254,10 @@ public class JavaPreProc extends Task
 	    catch (DontProcessException dpe) {
 		// This is a graceful exit, don't do anything
 	    }
-	    defines.put(FILE_VAR_NAME, previousFileName);
+	    finally {
+		defines.put(FILE_VAR_NAME, previousFileName);
+	    }
+
 	    return errors;
 	}
 
@@ -2856,6 +2876,69 @@ public class JavaPreProc extends Task
 
 
 	/**
+	 * Define the variables for the current file.
+	 * <p> Update the __DATE__ and __TIME__ variables so they
+	 * accurately reflect the instant we started processing this
+	 * file, so that ... not sure, just want to be accurate.
+	 * @param fileName The current file name.
+	 * @return The previous file name setting.
+	 */
+	private String setFileVariables(String fileName) {
+	    Date now = currentCal.getTime();
+	    defines.put(DATE_VAR_NAME, dateFmt.format(now));
+	    defines.put(TIME_VAR_NAME, timeFmt.format(now));
+
+	    // "__FILE__" will be reset for each file processed
+	    return defines.put(FILE_VAR_NAME, fileName);
+	}
+
+
+	/**
+	 * Read a properties file (ISO-8859-1 charset) from the default classpath and return the
+	 * properties map decoded from it.
+	 *
+	 * @param filePath		The path and name of the file to read.
+	 * @param baseProperties	The base properties to use as defaults (can be {@code null}).
+	 * @return			The decoded properties or {@code baseProperties}
+	 *				if there was an I/O error reading the file (which could be
+	 *				{@code null} if that was passed in).
+	 */
+	private static Properties readPropertiesFile(String filePath, Properties baseProperties) {
+	    Properties properties = (baseProperties == null)
+			? new Properties()
+			: new Properties(baseProperties);
+	    try (InputStream is = JavaPreProc.class.getResourceAsStream(filePath)) {
+		properties.load(is);
+	    }
+	    catch (IOException ioe) {
+		// TODO: error somewhere?
+		return baseProperties;
+	    }
+	    return properties;
+	}
+
+
+	/**
+	 * Read in all the build properties from the various sources and define variables
+	 * for all of them.
+	 *
+	 * @see #readPropertiesFile(String, Properties)
+	 */
+	private void defineBuildProperties() {
+	    Properties buildProperties;
+
+	    buildProperties = readPropertiesFile("/build.properties", null);
+	    buildProperties = readPropertiesFile("/build.number", buildProperties);
+	    buildProperties = readPropertiesFile("/version.properties", buildProperties);
+
+	    for (String name : buildProperties.stringPropertyNames()) {
+		String value = buildProperties.getProperty(name);
+		defines.put(name, value);
+	    }
+	}
+
+
+	/**
 	 * Default constructor which initializes all the per-instance
 	 * variables.
 	 */
@@ -2867,11 +2950,9 @@ public class JavaPreProc extends Task
 	    defines.put(JAVA_VERSION_VAR_NAME, System.getProperty("java.version"));
 	    defines.put(JAVA_PP_VERSION_VAR_NAME, VERSION);
 
-	    Date now = currentCal.getTime();
-	    defines.put(DATE_VAR_NAME, dateFmt.format(now));
-	    defines.put(TIME_VAR_NAME, timeFmt.format(now));
-	    // "__FILE__" will be reset for each file processed
-	    defines.put(FILE_VAR_NAME, "-- none --");
+	    defineBuildProperties();
+
+	    setFileVariables("-- none --");
 	}
 
 

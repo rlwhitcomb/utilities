@@ -25,6 +25,9 @@
  *
  */
 
+// Print out the build number, etc.
+#echo Build version: ${build.version}, build number: ${build.number}
+
 // Set up the test variables
 # define ABC	"ABC"
  # define DEF
