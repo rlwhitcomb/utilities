@@ -90,6 +90,8 @@
  *	    Only display the Intro (not Title and Version) at start of REPL mode.
  *	01-Feb-2021 (rlwhitcomb)
  *	    Set rational/decimal mode on the command line; convey to Visitor.
+ *	10-Feb-2021 (rlwhitcomb)
+ *	    Switch over to using the ConsoleColor.color mechanism for messages.
  */
 package info.rlwhitcomb.calc;
 
@@ -105,6 +107,7 @@ import java.nio.file.Files;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.jar.JarFile;
@@ -122,6 +125,8 @@ import org.antlr.v4.runtime.tree.*;
 import info.rlwhitcomb.jarfile.Launcher;
 import info.rlwhitcomb.util.CharUtil;
 import info.rlwhitcomb.util.ClassUtil;
+import info.rlwhitcomb.util.ConsoleColor;
+import static info.rlwhitcomb.util.ConsoleColor.Code;
 import static info.rlwhitcomb.util.ConsoleColor.Code.*;
 import info.rlwhitcomb.util.Environment;
 import info.rlwhitcomb.util.ExceptionUtil;
@@ -139,11 +144,6 @@ public class Calc
 	private static final boolean ON_WINDOWS = Environment.isWindows();
 
 	private static boolean darkBackgrounds = ON_WINDOWS;
-
-	public static String EXPR_COLOR;
-	public static String ARROW_COLOR;
-	public static String VALUE_COLOR;
-	public static String ERROR_COLOR;
 
 	private static final String LINESEP = System.lineSeparator();
 
@@ -213,20 +213,20 @@ public class Calc
 	/** The previously displayed help directory. */
 	private static File tempHelpDirectory = null;
 
+	/** The color map used for our custom colors. */
+	private static HashMap<String, Code> colorMap = new HashMap<>();
+
 
 	private static void computeColors() {
-	    EXPR_COLOR  = (darkBackgrounds ? CYAN_BRIGHT : BLUE_BOLD).toString();
-	    ARROW_COLOR = (darkBackgrounds ? WHITE : BLACK_BRIGHT).toString();
-	    VALUE_COLOR = (darkBackgrounds ? GREEN_BRIGHT : GREEN_BOLD).toString();
-	    ERROR_COLOR = RED_BOLD.toString();
+	    colorMap.put("x", (darkBackgrounds ? CYAN_BRIGHT : BLUE_BOLD));
+	    colorMap.put("a", (darkBackgrounds ? WHITE : BLACK_BRIGHT));
+	    colorMap.put("v", (darkBackgrounds ? GREEN_BRIGHT : GREEN_BOLD));
+	    colorMap.put("e", RED_BOLD);
+	    colorMap.put("r", RESET);
 	}
 
 	private static String renderColors(String decoratedString) {
-	    return decoratedString.replace("<v>", colors ? VALUE_COLOR : "")
-				  .replace("<e>", colors ? ERROR_COLOR : "")
-				  .replace("<x>", colors ? EXPR_COLOR  : "")
-				  .replace("<a>", colors ? ARROW_COLOR : "")
-				  .replace("<r>", colors ? RESET.toString() : "");
+	    return ConsoleColor.color(decoratedString, colors, colorMap);
 	}
 
 	private static void outFormat(String formatKey, Object... args) {
@@ -467,9 +467,7 @@ public class Calc
 	}
 
 	public static void printIntro() {
-	    Arrays.stream(INTRO).forEach((s) -> {
-		System.out.println(renderColors(s));
-	    });
+	    Intl.printHelp("calc#intro", colors, colorMap);
 	}
 
 	/**

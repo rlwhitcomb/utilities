@@ -41,6 +41,10 @@
  *	New "map" param to "color()" so that we can use either custom tags or
  *	custom color choices in some situations (like catering to different
  *	color backgrounds); used in Calc, at least.
+ *   10-Feb-2021 (rlwhitcomb)
+ *	"Calc" outputs a lot of "<" stuff that isn't a color tag (things like
+ *	"<null>", "<=>", "<=", "<", etc.), so just leave a tag alone if we
+ *	can't find a substitution for it.
  */
 package info.rlwhitcomb.util;
 
@@ -160,23 +164,27 @@ public final class ConsoleColor
 		if (endPos < 0)
 		    buf.append(ch);
 		else {
-		    if (colored) {
-			String tag = input.substring(i + 1, endPos);
-			Code code;
-			if (map != null) {
-			    code = map.get(tag);
-			    if (code == null) {
-				code = Code.fromAttrib(tag);
-			    }
-			}
-			else {
+		    String tag = input.substring(i + 1, endPos);
+		    Code code;
+		    if (map != null) {
+			code = map.get(tag);
+			if (code == null) {
 			    code = Code.fromAttrib(tag);
 			}
-			if (code != null) {
+		    }
+		    else {
+			code = Code.fromAttrib(tag);
+		    }
+		    // Unknown tags should be left alone (for Calc use!)
+		    if (code == null) {
+			buf.append(ch);
+		    }
+		    else {
+			if (colored) {
 			    buf.append(code.toString());
 			}
+			i = endPos;
 		    }
-		    i = endPos;
 		}
 	    }
 	    else {

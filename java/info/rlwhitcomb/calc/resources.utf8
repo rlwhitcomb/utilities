@@ -38,6 +38,8 @@
 #	    Another error.
 #	08-Feb-2021 (rlwhitcomb)
 #	    One more error.
+#	10-Feb-2021 (rlwhitcomb)
+#	    Move the INTRO text here as "help".
 #
 
 #
@@ -93,6 +95,12 @@ infLoopStepZero		= Infinite loop: step value is zero
 invalidConstruct	= Invalid '$' construct
 invalidConst2		= Invalid '${...}' construct
 modeError		= Mode option '%1$s' not recognized
+
+intro.help1	= "  Enter an expression (or multiple expressions separated by ';')."
+intro.help2	= "  Use '<v>help<r>' or '<v>?<r>' for a list of supported functions."
+intro.help3	= "  Enter '<v>quit<r>' or '<v>exit<r>' to end."
+intro.help4	= "  Enter '<v>gui<r>' to enter GUI mode."
+intro.help5	= ""
 
 #
 # From CalcUtil
