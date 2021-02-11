@@ -171,6 +171,8 @@
  *	    Switch to Environment.printProgramInfo.
  *	29-Jan-2021 (rlwhitcomb)
  *	    Move standard platform code to Environment; one other code tweak.
+ *	11-Feb-2021 (rlwhitcomb)
+ *	    Get version from test class so version checks work; refactor MajorMinor to Version.
  */
 package info.rlwhitcomb.tester;
 
@@ -237,9 +239,8 @@ public class Tester
 	private boolean abortOnFirstError = false;
 	private boolean defaultAbortOnFirstError = false;
 
-	private String platform;
-	private int majorVersion;
-	private int minorVersion;
+	private String currentPlatform;
+	private Version currentVersion;
 
 	private Charset defaultCharset = Charset.defaultCharset();
 
@@ -464,7 +465,7 @@ public class Tester
 
 	    long elapsedTime;
 
-	    int exitCode = 0;
+	    int exitCode = SUCCESS;
 
 	    try {
 		testOut = FileUtilities.createTempFile("testoutput");
@@ -496,16 +497,20 @@ public class Tester
 			    if (Testable.class.isInstance(testObject)) {
 				Testable testableObject = (Testable) testObject;
 
+				currentVersion = new Version(testableObject.getVersion());
+
 				exitCode = testableObject.setup(parseCommandLine(commandLine));
 
 				logTestName(origOut, testName, testableObject.getTestName(), commandLine);
 
-				if (exitCode == Testable.SUCCESS) {
+				if (exitCode == SUCCESS) {
 				    exitCode = testableObject.execute();
 				}
 			    }
 			    else {
 				Method main = testClass.getDeclaredMethod("main", String[].class);
+
+				currentVersion = new Version();
 
 				logTestName(origOut, testName, null, commandLine);
 
@@ -614,14 +619,23 @@ public class Tester
 	}
 
 
-	private class MajorMinor
+	private class Version implements Comparable<Version>
 	{
 		/** Major version (or -1 if empty) */
 		int major;
 		/** Minor version (or -1 if empty or equal "x" or "*") */
 		int minor;
 
-		public MajorMinor(String input) {
+		public Version() {
+		    this(-1, -1);
+		}
+
+		public Version(int maj, int min) {
+		    major = maj;
+		    minor = min;
+		}
+
+		public Version(String input) {
 		    String vers[] = input.split("\\.");
 		    if (vers[0].isEmpty())
 			major = -1;
@@ -640,20 +654,22 @@ public class Tester
 		}
 
 		/**
-		 * @return -1 if version is &lt; {@link #majorVersion}.{@link #minorVersion},
+		 * @param other The other version to compare to.
+		 * @return -1 if version is &lt; other
 		 *         0 if versions are equal
-		 *         +1 if version is &gt; {@link #majorVersion}.{@link #minorVersion};
+		 *         +1 if version is &gt; other
 		 *         will return 0 if major is -1 or major is equal and minor is -1
 		 */
-		public int compare() {
+		@Override
+		public int compareTo(Version other) {
 		    if (major == -1)
 			return 0;
-		    if (major != majorVersion) {
-			return Integer.signum(major - majorVersion);
+		    if (major != other.major) {
+			return Integer.signum(major - other.major);
 		    }
 		    if (minor == -1)
 			return 0;
-		    return Integer.signum(minor - minorVersion);
+		    return Integer.signum(minor - other.minor);
 		}
 	}
 
@@ -662,7 +678,7 @@ public class Tester
 	    if (!platformCheck.isEmpty()) {
 		if (platformCheck.startsWith("^")) {
 		    if (platformCheck.length() > 1) {
-			if (platformCheck.substring(1).equalsIgnoreCase(platform))
+			if (platformCheck.substring(1).equalsIgnoreCase(currentPlatform))
 			    return false;
 		    }
 		    else {
@@ -671,7 +687,7 @@ public class Tester
 		    }
 		}
 		else {
-		    if (!platformCheck.equalsIgnoreCase(platform))
+		    if (!platformCheck.equalsIgnoreCase(currentPlatform))
 			return false;
 		}
 	    }
@@ -696,7 +712,7 @@ public class Tester
 	 *		input line (less the version part) if the spec doesn't exist or if it does and we pass the
 	 *		tests, and thus the line should be part of the test.
 	 */
-	private String platformVersionCheck(String input) {
+	private String platformAndVersionCheck(String input) {
 	    if (input.startsWith("{")) {
 		int end = input.indexOf("}");
 		if (end > 0) {
@@ -709,7 +725,7 @@ public class Tester
 			// platform only
 			if (!platformCheck(parts[0]))
 			    return null;
-			return platformVersionCheck(canonLine);
+			return platformAndVersionCheck(canonLine);
 		    }
 		    else if (parts.length == 2) {
 			// platform + version
@@ -728,21 +744,21 @@ public class Tester
 					return input;		// will give mismatch error....
 				    }
 				    // -major[.minor] = anything up to that major[.minor]
-				    MajorMinor secondVersion = new MajorMinor(second);
-				    return (secondVersion.compare() < 0) ? null : platformVersionCheck(canonLine);
+				    Version secondVersion = new Version(second);
+				    return (secondVersion.compareTo(currentVersion) < 0) ? null : platformAndVersionCheck(canonLine);
 				}
 				else if (second.isEmpty()) {
 				    // major[.minor]- = anything beyond that major[.minor]
-				    MajorMinor firstVersion = new MajorMinor(first);
-				    return (firstVersion.compare() > 0) ? null : platformVersionCheck(canonLine);
+				    Version firstVersion = new Version(first);
+				    return (firstVersion.compareTo(currentVersion) > 0) ? null : platformAndVersionCheck(canonLine);
 				}
 				else {
 				    // major[.minor]-major[.minor] = anything in between
-				    MajorMinor firstVersion = new MajorMinor(first);
-				    MajorMinor secondVersion = new MajorMinor(second);
-				    int firstCompare = firstVersion.compare();
-				    int secondCompare = secondVersion.compare();
-				    return (firstCompare > 0 || secondCompare < 0) ? null : platformVersionCheck(canonLine);
+				    Version firstVersion = new Version(first);
+				    Version secondVersion = new Version(second);
+				    int firstCompare = firstVersion.compareTo(currentVersion);
+				    int secondCompare = secondVersion.compareTo(currentVersion);
+				    return (firstCompare > 0 || secondCompare < 0) ? null : platformAndVersionCheck(canonLine);
 				}
 			    }
 			    else {
@@ -751,17 +767,17 @@ public class Tester
 				    andBeyond = true;
 				    version = version.substring(0, version.length() - 1);
 				}
-				MajorMinor ver = new MajorMinor(version);
-				int compare = ver.compare();
+				Version ver = new Version(version);
+				int compare = ver.compareTo(currentVersion);
 				if (andBeyond) {
-				    return (compare > 0) ? null : platformVersionCheck(canonLine);
+				    return (compare > 0) ? null : platformAndVersionCheck(canonLine);
 				}
 				else {
-				    return (compare != 0) ? null : platformVersionCheck(canonLine);
+				    return (compare != 0) ? null : platformAndVersionCheck(canonLine);
 				}
 			    }
 			}
-			return platformVersionCheck(canonLine);
+			return platformAndVersionCheck(canonLine);
 		    }
 		    // else syntax error, just return the whole line which
 		    // should generate a diff to highlight the problem
@@ -780,13 +796,13 @@ public class Tester
 		    String canonLine = input.substring(end + 1);
 		    // "*" means any/all charsets (not necessary, but for annotation if desired)
 		    if (charsetName.equals("*")) {
-			return platformVersionCheck(canonLine);
+			return platformAndVersionCheck(canonLine);
 		    }
 		    // If the name is "^name" then this will match anything BUT that name
 		    if (charsetName.startsWith("^")) {
 			try {
 			    Charset charset = Charset.forName(charsetName.substring(1));
-			    return charset.equals(defaultCharset) ? null : platformVersionCheck(canonLine);
+			    return charset.equals(defaultCharset) ? null : platformAndVersionCheck(canonLine);
 			}
 			catch (UnsupportedCharsetException uce) {
 			    return input;
@@ -795,7 +811,7 @@ public class Tester
 		    else {
 			try {
 			    Charset charset = Charset.forName(charsetName);
-			    return charset.equals(defaultCharset) ? platformVersionCheck(canonLine) : null;
+			    return charset.equals(defaultCharset) ? platformAndVersionCheck(canonLine) : null;
 			}
 			catch (UnsupportedCharsetException uce) {
 			    return input;
@@ -901,19 +917,19 @@ public class Tester
 		    String line = null;
 		    while ((line = canonReader.readLine()) != null) {
 			if (line.startsWith(">>")) {
-			    String outLine = platformVersionCheck(line.substring(2));
+			    String outLine = platformAndVersionCheck(line.substring(2));
 			    if (outLine != null) {
 				files.writeErrorLine(outLine);
 			    }
 			}
 			else if (line.startsWith(">")) {
-			    String outLine = platformVersionCheck(line.substring(1));
+			    String outLine = platformAndVersionCheck(line.substring(1));
 			    if (outLine != null) {
 				files.writeOutputLine(outLine);
 			    }
 			}
 			else if (line.startsWith("<")) {
-			    String outLine = platformVersionCheck(line.substring(1));
+			    String outLine = platformAndVersionCheck(line.substring(1));
 			    if (outLine != null) {
 				files.writeInputLine(outLine);
 			    }
@@ -929,7 +945,7 @@ public class Tester
 			}
 			else if (!line.isEmpty()) {
 			    // Default is to treat the line as regular output
-			    String outLine = platformVersionCheck(line);
+			    String outLine = platformAndVersionCheck(line);
 			    if (outLine != null) {
 				files.writeOutputLine(outLine);
 			    }
@@ -1328,7 +1344,7 @@ public class Tester
 	    }
 
 	    // Setup the canonical platform string
-	    platform = Environment.platformIdentifier();
+	    currentPlatform = Environment.platformIdentifier();
 
 	    return 0;
 	}
