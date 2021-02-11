@@ -29,6 +29,8 @@
  *	21-Jan-2021 (rlwhitcomb)
  *	    Display all the defined fields in the "main" display.
  *	    Add "getBuild()".
+ *	11-Feb-2021 (rlwhitcomb)
+ *	    Simplify the "main" display.
  */
 package info.rlwhitcomb;
 
@@ -109,18 +111,16 @@ public class Version
 	    System.out.println();
 
 	    System.out.println(BLACK_BRIGHT + underline + RESET);
-	    System.out.println();
 
 	    List<ProgramInfo> infos = Environment.getAllProgramInfo();
 
 	    for (ProgramInfo info : infos) {
 		String version = String.format("Version %1$s", info.version);
 
-		System.out.println(BLACK_BRIGHT + underline);
 		System.out.println(BLUE_BOLD_BRIGHT + CharUtil.padToWidth(info.title, 50, CharUtil.Justification.CENTER));
 		System.out.println(GREEN + CharUtil.padToWidth(version, 50, CharUtil.Justification.CENTER));
 		System.out.println(BLACK_BRIGHT + underline + RESET);
-		System.out.println();
 	    }
+	    System.out.println();
 	}
 }
