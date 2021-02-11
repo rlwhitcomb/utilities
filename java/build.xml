@@ -152,6 +152,8 @@
 	    10-Feb-2021 (rlwhitcomb)
 		Add "touch" target, invoked during "update" so that any files that should
 		be preprocessed anew will get a new timestamp.
+	    11-Feb-2021 (rlwhitcomb)
+		Figure out if "anttasks.jar" needs to be updated on every startup.
 
      ========================================================================== -->
 
@@ -170,11 +172,13 @@
 			<prefixlines prefix="build.lastrev="/>
 		</filterchain>
 	</loadproperties>
+
 	<tstamp>
 		<format property="build.date" pattern="yyyy-MM-dd"/>
 		<format property="build.time" pattern="HH:mm:ss.SSS z"/>
 		<format property="test.log.file.name" pattern="'test'.yyyy-MM-dd_HH-mm.'log'" locale="en,US"/>
 	</tstamp>
+
 	<propertyfile file="build.number" comment="Utilities Build Values">
 		<entry key="build.number" value="${build.lastrev}"/>
 		<entry key="build.date"   value="${build.date}"/>
@@ -192,6 +196,9 @@
 	</condition>
 	<condition property="on.windows" value="true" else="false">
 		<os family="windows"/>
+	</condition>
+	<condition property="utilities.available" value="true" else="false">
+		<isset property="env.UTILITIES_HOME"/>
 	</condition>
 
 	<patternset id="wrapper-files">
@@ -251,6 +258,9 @@
 
 	<property name="tester.class" value="info.rlwhitcomb.tester.Tester"/>
 
+	<echo message="Build the custom Ant tasks if necessary..."/>
+	<ant antfile="build-ant-tasks.xml" target="install"/>
+	<echo message="Beginning build..."/>
 
 	<taskdef name="preproc" classname="info.rlwhitcomb.preproc.JavaPreProc" classpath="${ant.tasks.jar}"/>
 
@@ -460,11 +470,6 @@
 	</target>
 
 	<target name="all" depends="clean,compile,jar,doc,test" description="Does clean, compile, jar, doc, and test."/>
-
-	<condition property="utilities.available" value="true" else="false">
-		<isset property="env.UTILITIES_HOME"/>
-	</condition>
-	<echo message="UTILITIES_HOME=${env.UTILITIES_HOME}" if:true="${utilities.available}"/>
 
 	<target name="copy-to-install-directory" description="Copy the requisite files to the local utilities directory.">
 		<copy file="${dest.jar}" todir="${env.UTILITIES_HOME}" if:true="${utilities.available}"/>
