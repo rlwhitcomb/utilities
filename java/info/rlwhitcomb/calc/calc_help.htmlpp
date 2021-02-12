@@ -19,7 +19,13 @@ tr:nth-child(even) {
 }
 
 table code {
-   font-size: 140%;
+   font-size: 130%;
+   font-weight: bold;
+}
+
+code {
+   font-size: 120%;
+   font-weight: bold;
 }
 
 .redbutton {
@@ -33,149 +39,227 @@ table code {
    padding: 4px;
 }
     </style>
-  </head>
+</head>
 
-  <body>
-    <center>
-      <h2>Expression Calculator Help</h2>
-      <h4>Version ${Calc.version}, build ${build.number}</h4>
-    </center>
-    <h3>Introduction</h3>
-    <p>An expression calculator that combines (nearly) unlimited precision decimal arithmetic with a rich assortment
+<body>
+  <center>
+    <h2>Expression Calculator Help</h2>
+    <h4>Version ${Calc.version}, build ${build.number}</h4>
+  </center>
+  <h3>Introduction</h3>
+  <p>An expression calculator that combines (nearly) unlimited precision decimal arithmetic with a rich assortment
        of operators and functions to give the ability to calculate nearly any arithmetic expression.
-    <p>As input, the expression calculator can operate on an expression given entirely on the command line (may need to be
-       quoted for certain operator characters), in a REPL loop where a prompt is displayed, and the input lines are evaluated
-       one-at-a-time and the results displayed, from a file for predefined calculations, or inside a rudimentary GUI frame.
-    <h3>Command Line Options</h3>
-    <p>Certain options can be given on the command line that affect the operation of the calculator.
+  <p>As input, the expression calculator can operate on an expression given entirely on the command line (may need to be
+       quoted for certain operator characters); in a REPL loop where a prompt is displayed, the input lines are evaluated
+       one-at-a-time, and the results displayed; from a file for predefined calculations; or inside a simple GUI frame.
+  <h3>Command Line</h3>
+  <p>The command is assumed to have either the name of a file to process, or an expression to evaluate. There may also be options specified (see the next section). If there is a single value given and there exists a file by that name (possibly in another directory given by the prior <code>-inputdir</code> option), then that file is read, the contents parsed, and all the expressions evaluated. Otherwise, if there are more than one argument on the command line, or the single argument does not name a file, then the command line is taken as a single string, parsed, and then evaluated.
+  <h3>Command Line Options</h3>
+  <p>Certain options can be given on the command line that affect the operation of the calculator. These options can also be set via the <code>CALC_OPTIONS</code> environment variable. Options specified on the command line will override the defaults set by <code>CALC_OPTIONS</code>, and options given later on the command line override ones given earlier.
+  <p>Options are case-insensitive, and maybe be given with <code>-</code>, <code>--</code> or on Windows a <code>/</code>, prefix.
+  <center>
+  <h3>Command Line Options</h3>
+  <table>
+    <tr>
+      <th width=100>Option</th>
+      <th width=400>Description</th>
+      <th width=200>Aliases</th>
+    </tr>
+    <tr><td><code>-gui</code></td><td>Start immediately in GUI mode</td><td><code>-g</code></td></tr>
+    <tr><td><code>-console</code></td><td>Start instead in console mode (default)</td><td><code>-cons</code>, <code>-con</code>, <code>-c</code></td></tr>
+    <tr><td><code>-debug</code></td><td>Display a debug printout of the syntax tree for every input</td><td><code>-deb</code>, <code>-d</code><br>(or use the <code>:debug on</code> directive)</td></tr>
+    <tr><td><code>-nodebug</code></td><td>Don't display the syntax tree for debugging (default)</td><td><code>-nodeb</code>, <code>-no</code><br>(or use the <code>:debug off</code> directive)</td></tr>
+    <tr><td><code>-colors</code></td><td>Use coloring (on the console) for results and messages (default)</td><td><code>-color</code>, <code>-col</code></td></tr>
+    <tr><td><code>-nocolors</code></td><td>Do not use coloring in the console</td><td><code>-nocolor</code>, <code>-nocol</code>, <code>-noc</code></td></tr>
+    <tr><td><code>-darkbackgrounds</code></td><td>Use colors suitable for a dark console background (default for Windows)</td><td><code>-darkbackground</code>, <code>-darkback</code>,<br><code>-darkbg</code>, <code>-dark</code>, <code>-dk</code></td></tr>
+    <tr><td><code>-lightbackgrounds</code></td><td>Use colors suitable for a light (white) console background<br>(default for non-Windows platforms)</td><td><code>-lightbackground</code>, <code>-lightback</code>,<br><code>-lightbg</code>, <code>-light</code>, <code>-lt</code></td></tr>
+    <tr><td><code>-timing</code></td><td>Display timing after each input</td><td><code>-time</code>, <code>-t</code></td></tr>
+    <tr><td><code>-notiming</code></td><td>Do not display timings (default)</td><td><code>-notime</code>, <code>-not</code></td></tr>
+    <tr><td><code>-resultsonly</code></td><td>Do not display the input expression on output, but only the results</td><td><code>-resultonly</code>, <code>-results</code>, <code>-result</code>, <code>-res</code>, <code>-r</code><br>(also use <code>:resultsonly on/off</code> directive)</td></tr>
+    <tr><td><code>-quiet</code></td><td>Do not display anything (suitable for behind-the-scenes calculations)</td><td><code>-q</code><br>(also use the <code>:quiet on/off</code> directive)</td></tr>
+    <tr><td><code>-rational</code></td><td>Do all possible calculations in fraction mode, that is as a ratio of natural numbers<br>(as in <code>1/3</code> instead of <code>0.3333333333333333</code>)</td><td><code>-ration</code>, <code>-rat</code><br>(also use the <code>:rational on</code> directive)</td></tr>
+    <tr><td><code>-decimal</code></td><td>Do all calculations as decimal values (default)</td><td><code>-dec</code><br>(also use the <code>:rational off</code> directive)</td></tr>
+    <tr><td><code>-locale</code> <i>locale_name</i></td><td>Specify the locale to use for messages</td><td><code>-loc</code>, <code>-l</code></td></tr>
+    <tr><td><code>-inputdir</code> <i>directory</i></td><td>Specify a default directory for files to be processed</td><td><code>-input</code>, <code>-dir</code></td></tr>
+    <tr><td><code>-help</code></td><td>Display this help page</td><td><code>-h</code>, <code>-?</code></td></tr>
+    <tr><td><code>-version</code></td><td>Display on the console the version information for the program</td><td><code>-vers</code>, <code>-ver</code>, <code>-v</code></td></tr>
+  </table>
+  </center>
+  <h3>Available Operators</h3>
+  <p>There are a wide variety of arithmetic and logical operators available, as well as a number of common arithmetic functions that can be used.
+  <center>
+  <h3>Operators and Precedence</h3>
+  <table>
+    <tr>
+      <th width=60>Level</th>
+      <th width=180>Operator</th>
+      <th width=280>Description</th>
+      <th width=120>Associativity</th>
+    </tr>
+    <tr><td>27</td><td><code>{ }</code></td><td>define an object</td><td>left to right</td></tr>
+    <tr><td>26</td><td><code>[ ]</code></td><td>define an array,<br>or access elements of<br>an array, string, or object</td><td>left to right</td></tr>
+    <tr><td>25</td><td>.</td><td>access an object member</td><td>left to right</td></tr>
+    <tr><td>24</td><td><code>( </code><i>expr</i><code> )</code></td><td>group an expression</td><td>- none -</td></tr>
+    <tr><td>23</td><td><i>expr</i>&nbsp;<code>++</code><br><i>expr</i>&nbsp;<code>--</code></td><td>post increment/decrement</td><td>- none -</td></tr>
+    <tr><td>22</td><td><code>++</code>&nbsp;<i>expr</i><br><code>--</code>&nbsp;<i>expr</i></td><td>pre increment/decrement</td><td>right to left</td></tr>
+    <tr><td>21</td><td><code>+</code>&nbsp;<i>expr</i><br><code>-</code>&nbsp;<i>expr</i></td><td>posate/negate a value</td><td>right to left</td></tr>
+    <tr><td>20</td><td><code>!</code>&nbsp;<i>expr</i></td><td>boolean NOT</td><td>right to left</td></tr>
+    <tr><td>19</td><td><code>~</code>&nbsp;<i>expr</i></td><td>bitwise NOT</td><td>right to left</td></tr>
+    <tr><td>18</td><td><i>expr</i>&nbsp;<code>!</code></td><td>factorial</td><td>left to right</td></tr>
+    <tr><td>17</td><td colspan="2">
+        <table class="biglines">
+            <tr><td width="180"><code>ABS</code>&nbsp;<i>expr</i></td><td width="280">absolute value</td></tr>
+            <tr><td><code>SIN</code>&nbsp;<i>expr</i></td><td>sine</td></tr>
+            <tr><td><code>COS</code>&nbsp;<i>expr</i></td><td>cosine</td></tr>
+            <tr><td><code>TAN</code>&nbsp;<i>expr</i></td><td>tangent</td></tr>
+            <tr><td><code>ASIN</code>&nbsp;<i>expr</i></td><td>sine<sup>-1</sup></td></tr>
+            <tr><td><code>ACOS</code>&nbsp;<i>expr</i></td><td>cosine<sup>-1</sup></td></tr>
+            <tr><td><code>ATAN</code>&nbsp;<i>expr</i></td><td>tangent<sup>-1</sup></td></tr>
+            <tr><td><code>ATAN2</code>&nbsp;<i>expr<sub>y</sub></i>, <i>expr<sub>x</sub></i></td><td>the angle <i>theta</i> from converting<br>rectangular (x,y) to polar (r,<i>theta</i>) coordinates</td></tr>
+            <tr><td><code>SINH</code>&nbsp;<i>expr</i></td><td>hyperbolic sine</td></tr>
+            <tr><td><code>COSH</code>&nbsp;<i>expr</i></td><td>hyperbolic cosine</td></tr>
+            <tr><td><code>TANH</code>&nbsp;<i>expr</i></td><td>hyperbolic tangent</td></tr>
+            <tr><td><code>SQRT</code>&nbsp;<i>expr</i></td><td>square root</td></tr>
+            <tr><td><code>CBRT</code>&nbsp;<i>expr</i></td><td>cube root</td></tr>
+            <tr><td><code>LOG</code>&nbsp;<i>expr</i></td><td>log base 10</td></tr>
+            <tr><td><code>LN2</code>&nbsp;<i>expr</i></td><td>log base 2</td></tr>
+            <tr><td><code>LN</code>&nbsp;<i>expr</i></td><td>natural log (base e)</td></tr>
+            <tr><td><code>SIGNUM</code>&nbsp;<i>expr</i></td><td>sign (&lt; 0 = -1, 0 = 0, &gt; 0 = +1)</td></tr>
+            <tr><td><code>LENGTH</code>&nbsp;<i>expr</i></td><td>length of string, array, or object</td></tr>
+            <tr><td><code>SCALE</code>&nbsp;<i>expr</i></td><td>scale of number</td></tr>
+            <tr><td><code>ROUND</code>&nbsp;<i>expr, expr</i></td><td>round value to given places</td></tr>
+            <tr><td><code>ISPRIME</code>&nbsp;<i>expr</i></td><td>is the value a prime number</td></tr>
+            <tr><td><code>GCD</code>&nbsp;<i>expr ,expr</i></td><td>greatest common divisor</td></tr>
+            <tr><td><code>LCM</code>&nbsp;<i>expr, expr</i></td><td>least common multiple</td></tr>
+            <tr><td><code>MAX</code>&nbsp;<i>expr (, expr) *</i></td><td>maximum value</td></tr>
+            <tr><td><code>MIN</code>&nbsp;<i>expr (, expr) *</i></td><td>minimum value</td></tr>
+            <tr><td><code>JOIN</code>&nbsp;<i>expr (, expr) *</i></td><td>join strings</td></tr>
+            <tr><td><code>FIB</code>&nbsp;<i>expr</i></td><td>Fibonacci number</td></tr>
+            <tr><td><code>Bn</code>&nbsp;<i>expr</i></td><td>Bernoulli number</td></tr>
+            <tr><td><code>FRAC</code>&nbsp;<i>expr, expr</i></td><td>construct a rational fraction</td></tr>
+        </table></td>
+        <td>left to right</td></tr>
+    <tr><td>16</td><td><i>expr<sub>1</sub></i>&nbsp;<code> ** </code>&nbsp;<i>expr<sub>2</sub></i></td><td>expr<sub>1</sub> to expr<sub>2</sub> power</td><td>right to left</td></tr>
+    <tr><td>15</td><td>
+        <i>expr</i>&nbsp;<code> * </code>&nbsp;<i>expr</i><br>
+        <i>expr</i>&nbsp;<code> / </code>&nbsp;<i>expr</i><br>
+        <i>expr</i>&nbsp;<code> % </code>&nbsp;<i>expr</i></td>
+        <td>multiply/divide/remainder</td><td>left to right</td></tr>
+    <tr><td>14</td><td>
+        <i>expr</i>&nbsp;<code> + </code>&nbsp;<i>expr</i><br>
+        <i>expr</i>&nbsp;<code> - </code>&nbsp;<i>expr</i></td>
+        <td>add/subtract</td><td>left to right</td></tr>
+    <tr><td>13</td><td>
+        <i>expr</i>&nbsp;<code> &gt;&gt;&gt; </code>&nbsp;<i>expr</i><br>
+        <i>expr</i>&nbsp;<code> &gt;&gt; </code>&nbsp;<i>expr</i><br>
+        <i>expr</i>&nbsp;<code> &lt;&lt; </code>&nbsp;<i>expr</i></td>
+        <td>bit shift operations</td><td>left to right</td></tr>
+    <tr><td>12</td><td><i>expr</i>&nbsp;<code> &lt;=&gt; </code>&nbsp;<i>expr</i><td>returns <code>-1</code> if expr &lt; 0<br><code>0</code> if expr = 0<br><code>+1</code> if expr &gt; 0</td><td>left to right</td></tr>
+    <tr><td>11</td><td>
+        <i>expr</i>&nbsp;<code> &lt;= </code>&nbsp;<i>expr</i><br>
+        <i>expr</i>&nbsp;<code> &lt; </code>&nbsp;<i>expr</i><br>
+        <i>expr</i>&nbsp;<code> &gt;= </code>&nbsp;<i>expr</i><br>
+        <i>expr</i>&nbsp;<code> &gt; </code>&nbsp;<i>expr</i></td>
+        <td>comparison</td><td>left to right</td></tr>
+    <tr><td>10</td><td>
+        <i>expr</i>&nbsp;<code> === </code>&nbsp;<i>expr</i><br>
+        <i>expr</i>&nbsp;<code> !== </code>or<code> &#x2262; </code>&nbsp;<i>expr</i><br>
+        <i>expr</i>&nbsp;<code> == </code>&nbsp;<i>expr</i><br>
+        <i>expr</i>&nbsp;<code> != </code>or<code> &#x2260; </code>&nbsp;<i>expr</i></td>
+        <td>strict equality/inequality<br>equality/inequality</td><td>left to right</td></tr>
+    <tr><td>9</td><td>
+        <i>expr</i>&nbsp;<code> &amp; </code>&nbsp;<i>expr</i><br>
+        <i>expr</i>&nbsp;<code> ~&amp; </code>&nbsp;<i>expr</i><br>
+        <i>expr</i>&nbsp;<code> &amp;~ </code>&nbsp;<i>expr</i><br>
+        <i>expr</i>&nbsp;<code> ^ </code>&nbsp;<i>expr</i><br>
+        <i>expr</i>&nbsp;<code> ~^ </code>&nbsp;<i>expr</i><br>
+        <i>expr</i>&nbsp;<code> | </code>&nbsp;<i>expr</i><br>
+        <i>expr</i>&nbsp;<code> ~| </code>&nbsp;<i>expr</i></td>
+        <td>bitwise AND<br>NOT AND<br>AND NOT<br>exclusive OR<br>NOT exclusive OR<br>bitwise OR<br>NOT OR</td><td>left to right</td></tr>
+    <tr><td>8</td><td>
+        <i>expr</i>&nbsp;<code> &amp;&amp; </code>&nbsp;<i>expr</i><br>
+        <i>expr</i>&nbsp;<code> || </code>&nbsp;<i>expr</i><br>
+        <i>expr</i>&nbsp;<code> ^^ </code>&nbsp;<i>expr</i></td>
+        <td>logical AND,<br>OR,<br>or exclusive OR</td><td>left to right</td></tr>
+    <tr><td>7</td><td><i>expr</i>&nbsp;<code> ? </code>&nbsp;<i>expr</i>&nbsp;<code> : </code>&nbsp;<i>expr</i></td><td>select one or the other value</td><td>right to left</td></tr>
+    <tr><td>6</td><td><i>var</i>&nbsp;<code> = </code>&nbsp;<i>expr</i></td><td>assign expr value to variable</td><td>right to left</td></tr>
+    <tr><td>5</td><td><i>var</i>&nbsp;<code> **= </code>&nbsp;<i>expr</i></td><td>var to expr power, assign to var</td><td>right to left</td></tr>
+    <tr><td>4</td><td>
+        <i>var</i>&nbsp;<code> *= </code>&nbsp;<i>expr</i><br>
+        <i>var</i>&nbsp;<code> /= </code>&nbsp;<i>expr</i><br>
+        <i>var</i>&nbsp;<code> %= </code>&nbsp;<i>expr</i></td>
+        <td>perform the operation, reassign to variable</td><td>right to left</td></tr>
+    <tr><td>3</td><td>
+        <i>var</i>&nbsp;<code> += </code>&nbsp;<i>expr</i><br>
+        <i>var</i>&nbsp;<code> -= </code>&nbsp;<i>expr</i></td>
+        <td>result assigned to variable again</td><td>right to left</td></tr>
+    <tr><td>2</td><td>
+        <i>var</i>&nbsp;<code> &gt;&gt;&gt;= </code>&nbsp;<i>expr</i><br>
+        <i>var</i>&nbsp;<code> &gt;&gt;= </code>&nbsp;<i>expr</i><br>
+        <i>var</i>&nbsp;<code> &lt;&lt;= </code>&nbsp;<i>expr</i></td>
+        <td>perform the shift, reassign to variable</td><td>right to left</td></tr>
+    <tr><td>1</td><td>
+        <i>var</i>&nbsp;<code> &amp;= </code>&nbsp;<i>expr</i><br>
+        <i>var</i>&nbsp;<code> ~&amp;= </code>&nbsp;<i>expr</i><br>
+        <i>var</i>&nbsp;<code> &amp;~= </code>&nbsp;<i>expr</i><br>
+        <i>var</i>&nbsp;<code> ^= </code>&nbsp;<i>expr</i><br>
+        <i>var</i>&nbsp;<code> ~^= </code>&nbsp;<i>expr</i><br>
+        <i>var</i>&nbsp;<code> |= </code>&nbsp;<i>expr</i><br>
+        <i>var</i>&nbsp;<code> ~|= </code>&nbsp;<i>expr</i></td>
+        <td>perform the bit op, reassign to variable</td><td>right to left</td></tr>
+  </table>
+  </center>
+  <h3>Directives</h3>
+  <p>Various directives can be given within a script or on a separate input line in REPL mode that will affect the operation of the calculator. Some of them allow you to change the options given on the command line, while others are only available from within the script.
+  <center>
+  <h3>Available Directives</h3>
+  <table>
+    <tr>
+      <th width=100>Directive</th>
+      <th width=300>Description</th>
+      <th width=100>Aliases</th>
+    </tr>
+    <tr><td><code>:decimal</code> <i>number_option</i></td><td>Set the precision of all decimal calculations where<br><i>number_option</i> can be <code>(</code><i>number</i><code>)</code>, or <i>number</i>, or <i>variable</i><br>to specify the number of decimal digits of precision</td><td><code>:dec</code>, <code>:precision</code>, <code>:prec</code></td></tr>
+    <tr><td><code>:default</code></td><td>Set the default decimal precision (~34 digits) (default)</td><td><code>:def</code></td></tr>
+    <tr><td><code>:double</code></td><td>Select the "double" decimal precision (~16 digits)</td><td><code>:dbl</code></td></tr>
+    <tr><td><code>:float</code></td><td>Select "float" decimal precision (~7 digits)</td><td><code>:flt</code></td></tr>
+    <tr><td><code>:unlimited</code></td><td>Set to unlimited decimal precision (which for some calculations will result in errors)</td><td><code>:unl</code></td></tr>
+    <tr><td><code>:degrees</code></td><td>Do all trigonometric calculations assuming the inputs are in degrees</td><td><code>:deg</code></td></tr>
+    <tr><td><code>:radians</code></td><td>Do all calculations assuming inputs are radians (default)</td><td><code>:rad</code></td></tr>
+    <tr><td><code>:binary</code></td><td>Display units in terms of multiples of 1024</td><td><code>:bin</code></td></tr>
+    <tr><td><code>:si</code></td><td>Display units in terms of multiples of 1000</td><td><code>:ten</code></td></tr>
+    <tr><td><code>:mixed</code></td><td>Unit multiplier based on powers of 2 (same as <code>:binary</code>), but with SI suffix (default)</td><td><code>:mix</code></tr></tr>
+    <tr><td><code>:clear</code> [ <i>id</i> ( <code>,</code> <i>id</i> ) * ]</td><td>Clear all or only the specified variables (set values to <code>null</code>)</td><td><code>:clr</code></td></tr>
+    <tr><td><code>:echo</code> <i>expr</i></td><td>Echo the value of the expression to the output</td><td></td></tr>
+    <tr><td><code>:include</code> <i>string</i></td><td>Include the file named by <i>string</i></td><td></td></tr>
+    <tr><td><code>:rational</code> <i>mode_option</i></td><td>Set the rational calculation mode where <i>mode_option</i> is one of:<br><code>on</code>, <code>off</code>, <code>true</code>, <code>false</code>, <code>pop</code>, <code>previous</code>, <code>prev</code>, or <i>variable</i><br>(default is <code>off</code>, or the value set on the command line)</td><td><code>:ration</code>, <code>:fraction</code>, <code>:frac</code></td></tr>
+    <tr><td><code>:debug</code> <i>mode_option</i></td><td>Set the debug mode (same <i>mode_option</i> choices as for <code>:rational</code>)<br>(default is <code>off</code> or the value set on the command line)</td><td><code>:deb</code></td></tr>
+    <tr><td><code>:resultsonly</code> <i>mode_option</i></td><td>Set the results-only mode<br>(default is <code>off</code> or value on command line)</td><td><code>:res</code>, <code>:result</code>, <code>:results</code>, <code>:resultonly</code></td></tr>
+    <tr><td><code>:quiet</code> <i>mode_option</i></td><td>Set quiet mode (default is <code>off</code>)</td><td></td></tr>
+  </table>
+  </center>
+  <h3>TODO Items for This Document</h3>
+  <ul>
+    <li>REPL commands</li>
+    <li>Explanation of :include with -inputDir</li>
+    <li>Variable naming conventions</li>
+    <li>Other constants (pi/e) and Unicode options</li>
+    <li>JSON format</li>
+    <li>Format specifiers and formats</li>
+    <li>Exceptions to decimal precision (i.e., for trig, log), and also in doing factorial? or others that don't respect the precision, also limits on pi/e digits</li>
+    <li>Discussion on NaN, and Infinity</li>
+    <li>Expand on GUI operation, including examples</li>
+    <li>List of example programs, include examples in this document</li>
+    <li>Interactions with Tester (use "mkcanon" and "-nocolors")</li>
+  </ul>
+  <h3>GUI operations</h3>
+  <p>The GUI window can be opened using the "<code>cg</code>" command (or on Windows only, the <code>``</code> command), or by entering the <code>gui</code> command in REPL mode.  The following window will be presented with the focus initially in the top "Expression" field.
+  <center>
+  <br><img src="calc_initial.png" alt="Initial GUI screen" width="50%"/>
+  </center>
+  <p>An expression can be entered on each line, and all will be executed in order when the <span class="redbutton">!</span> button (or the <code>F9</code> key) is pressed, and the results displayed in the "Result" field.
 
-    <center>
-    <h3>Operators and Precedence</h3>
-    <table>
-      <tr>
-        <th width=60>Level</th>
-        <th width=180>Operator</th>
-        <th width=280>Description</th>
-        <th width=120>Associativity</th>
-      </tr>
-      <tr><td>27</td><td><code>{ }</code></td><td>define an object</td><td>left to right</td></tr>
-      <tr><td>26</td><td><code>[ ]</code></td><td>define an array,<br>or access elements of<br>an array, string, or object</td><td>left to right</td></tr>
-      <tr><td>25</td><td>.</td><td>access an object member</td><td>left to right</td></tr>
-      <tr><td>24</td><td><code>( </code><i>expr</i><code> )</code></td><td>group an expression</td><td>- none -</td></tr>
-      <tr><td>23</td><td><i>expr</i>&nbsp;<code>++</code><br><i>expr</i>&nbsp;<code>--</code></td><td>post increment/decrement</td><td>- none -</td></tr>
-      <tr><td>22</td><td><code>++</code>&nbsp;<i>expr</i><br><code>--</code>&nbsp;<i>expr</i></td><td>pre increment/decrement</td><td>right to left</td></tr>
-      <tr><td>21</td><td><code>+</code>&nbsp;<i>expr</i><br><code>-</code>&nbsp;<i>expr</i></td><td>posate/negate a value</td><td>right to left</td></tr>
-      <tr><td>20</td><td><code>!</code>&nbsp;<i>expr</i></td><td>boolean NOT</td><td>right to left</td></tr>
-      <tr><td>19</td><td><code>~</code>&nbsp;<i>expr</i></td><td>bitwise NOT</td><td>right to left</td></tr>
-      <tr><td>18</td><td><i>expr</i>&nbsp;<code>!</code></td><td>factorial</td><td>left to right</td></tr>
-      <tr><td>17</td><td colspan="2">
-          <table class="biglines">
-              <tr><td width="180"><code>ABS</code>&nbsp;<i>expr</i></td><td width="280">absolute value</td></tr>
-              <tr><td><code>SIN</code>&nbsp;<i>expr</i></td><td>sine</td></tr>
-              <tr><td><code>COS</code>&nbsp;<i>expr</i></td><td>cosine</td></tr>
-              <tr><td><code>TAN</code>&nbsp;<i>expr</i></td><td>tangent</td></tr>
-              <tr><td><code>ASIN</code>&nbsp;<i>expr</i></td><td>sine<sup>-1</sup></td></tr>
-              <tr><td><code>ACOS</code>&nbsp;<i>expr</i></td><td>cosine<sup>-1</sup></td></tr>
-              <tr><td><code>ATAN</code>&nbsp;<i>expr</i></td><td>tangent<sup>-1</sup></td></tr>
-              <tr><td><code>ATAN2</code>&nbsp;<i>expr<sub>y</sub></i>, <i>expr<sub>x</sub></i></td><td>the angle <i>theta</i> from converting<br>rectangular (x,y) to polar (r,<i>theta</i>) coordinates</td></tr>
-              <tr><td><code>SINH</code>&nbsp;<i>expr</i></td><td>hyperbolic sine</td></tr>
-              <tr><td><code>COSH</code>&nbsp;<i>expr</i></td><td>hyperbolic cosine</td></tr>
-              <tr><td><code>TANH</code>&nbsp;<i>expr</i></td><td>hyperbolic tangent</td></tr>
-              <tr><td><code>SQRT</code>&nbsp;<i>expr</i></td><td>square root</td></tr>
-              <tr><td><code>CBRT</code>&nbsp;<i>expr</i></td><td>cube root</td></tr>
-              <tr><td><code>LOG</code>&nbsp;<i>expr</i></td><td>log base 10</td></tr>
-              <tr><td><code>LN2</code>&nbsp;<i>expr</i></td><td>log base 2</td></tr>
-              <tr><td><code>LN</code>&nbsp;<i>expr</i></td><td>natural log (base e)</td></tr>
-              <tr><td><code>SIGNUM</code>&nbsp;<i>expr</i></td><td>sign (&lt; 0 = -1, 0 = 0, &gt; 0 = +1)</td></tr>
-              <tr><td><code>LENGTH</code>&nbsp;<i>expr</i></td><td>length of string, array, or object</td></tr>
-              <tr><td><code>SCALE</code>&nbsp;<i>expr</i></td><td>scale of number</td></tr>
-              <tr><td><code>ROUND</code>&nbsp;<i>expr, expr</i></td><td>round value to given places</td></tr>
-              <tr><td><code>ISPRIME</code>&nbsp;<i>expr</i></td><td>is the value a prime number</td></tr>
-              <tr><td><code>GCD</code>&nbsp;<i>expr ,expr</i></td><td>greatest common divisor</td></tr>
-              <tr><td><code>LCM</code>&nbsp;<i>expr, expr</i></td><td>least common multiple</td></tr>
-              <tr><td><code>MAX</code>&nbsp;<i>expr (, expr) *</i></td><td>maximum value</td></tr>
-              <tr><td><code>MIN</code>&nbsp;<i>expr (, expr) *</i></td><td>minimum value</td></tr>
-              <tr><td><code>JOIN</code>&nbsp;<i>expr (, expr) *</i></td><td>join strings</td></tr>
-              <tr><td><code>FIB</code>&nbsp;<i>expr</i></td><td>Fibonacci number</td></tr>
-              <tr><td><code>Bn</code>&nbsp;<i>expr</i></td><td>Bernoulli number</td></tr>
-              <tr><td><code>FRAC</code>&nbsp;<i>expr, expr</i></td><td>construct a rational fraction</td></tr>
-          </table></td>
-          <td>left to right</td></tr>
-      <tr><td>16</td><td><i>expr<sub>1</sub></i>&nbsp;<code> ** </code>&nbsp;<i>expr<sub>2</sub></i></td><td>expr<sub>1</sub> to expr<sub>2</sub> power</td><td>right to left</td></tr>
-      <tr><td>15</td><td>
-          <i>expr</i>&nbsp;<code> * </code>&nbsp;<i>expr</i><br>
-          <i>expr</i>&nbsp;<code> / </code>&nbsp;<i>expr</i><br>
-          <i>expr</i>&nbsp;<code> % </code>&nbsp;<i>expr</i></td>
-          <td>multiply/divide/remainder</td><td>left to right</td></tr>
-      <tr><td>14</td><td>
-          <i>expr</i>&nbsp;<code> + </code>&nbsp;<i>expr</i><br>
-          <i>expr</i>&nbsp;<code> - </code>&nbsp;<i>expr</i></td>
-          <td>add/subtract</td><td>left to right</td></tr>
-      <tr><td>13</td><td>
-          <i>expr</i>&nbsp;<code> &gt;&gt;&gt; </code>&nbsp;<i>expr</i><br>
-          <i>expr</i>&nbsp;<code> &gt;&gt; </code>&nbsp;<i>expr</i><br>
-          <i>expr</i>&nbsp;<code> &lt;&lt; </code>&nbsp;<i>expr</i></td>
-          <td>bit shift operations</td><td>left to right</td></tr>
-      <tr><td>12</td><td><i>expr</i>&nbsp;<code> &lt;=&gt; </code>&nbsp;<i>expr</i><td>returns <code>-1</code> if expr &lt; 0<br><code>0</code> if expr = 0<br><code>+1</code> if expr &gt; 0</td><td>left to right</td></tr>
-      <tr><td>11</td><td>
-          <i>expr</i>&nbsp;<code> &lt;= </code>&nbsp;<i>expr</i><br>
-          <i>expr</i>&nbsp;<code> &lt; </code>&nbsp;<i>expr</i><br>
-          <i>expr</i>&nbsp;<code> &gt;= </code>&nbsp;<i>expr</i><br>
-          <i>expr</i>&nbsp;<code> &gt; </code>&nbsp;<i>expr</i></td>
-          <td>comparison</td><td>left to right</td></tr>
-      <tr><td>10</td><td>
-          <i>expr</i>&nbsp;<code> === </code>&nbsp;<i>expr</i><br>
-          <i>expr</i>&nbsp;<code> !== </code>or<code> &#x2262; </code>&nbsp;<i>expr</i><br>
-          <i>expr</i>&nbsp;<code> == </code>&nbsp;<i>expr</i><br>
-          <i>expr</i>&nbsp;<code> != </code>or<code> &#x2260; </code>&nbsp;<i>expr</i></td>
-          <td>strict equality/inequality<br>equality/inequality</td><td>left to right</td></tr>
-      <tr><td>9</td><td>
-          <i>expr</i>&nbsp;<code> &amp; </code>&nbsp;<i>expr</i><br>
-          <i>expr</i>&nbsp;<code> ~&amp; </code>&nbsp;<i>expr</i><br>
-          <i>expr</i>&nbsp;<code> &amp;~ </code>&nbsp;<i>expr</i><br>
-          <i>expr</i>&nbsp;<code> ^ </code>&nbsp;<i>expr</i><br>
-          <i>expr</i>&nbsp;<code> ~^ </code>&nbsp;<i>expr</i><br>
-          <i>expr</i>&nbsp;<code> | </code>&nbsp;<i>expr</i><br>
-          <i>expr</i>&nbsp;<code> ~| </code>&nbsp;<i>expr</i></td>
-          <td>bitwise AND<br>NOT AND<br>AND NOT<br>exclusive OR<br>NOT exclusive OR<br>bitwise OR<br>NOT OR</td><td>left to right</td></tr>
-      <tr><td>8</td><td>
-          <i>expr</i>&nbsp;<code> &amp;&amp; </code>&nbsp;<i>expr</i><br>
-          <i>expr</i>&nbsp;<code> || </code>&nbsp;<i>expr</i><br>
-          <i>expr</i>&nbsp;<code> ^^ </code>&nbsp;<i>expr</i></td>
-          <td>logical AND,<br>OR,<br>or exclusive OR</td><td>left to right</td></tr>
-      <tr><td>7</td><td><i>expr</i>&nbsp;<code> ? </code>&nbsp;<i>expr</i>&nbsp;<code> : </code>&nbsp;<i>expr</i></td><td>select one or the other value</td><td>right to left</td></tr>
-      <tr><td>6</td><td><i>var</i>&nbsp;<code> = </code>&nbsp;<i>expr</i></td><td>assign expr value to variable</td><td>right to left</td></tr>
-      <tr><td>5</td><td><i>var</i>&nbsp;<code> **= </code>&nbsp;<i>expr</i></td><td>var to expr power, assign to var</td><td>right to left</td></tr>
-      <tr><td>4</td><td>
-          <i>var</i>&nbsp;<code> *= </code>&nbsp;<i>expr</i><br>
-          <i>var</i>&nbsp;<code> /= </code>&nbsp;<i>expr</i><br>
-          <i>var</i>&nbsp;<code> %= </code>&nbsp;<i>expr</i></td>
-          <td>perform the operation, reassign to variable</td><td>right to left</td></tr>
-      <tr><td>3</td><td>
-          <i>var</i>&nbsp;<code> += </code>&nbsp;<i>expr</i><br>
-          <i>var</i>&nbsp;<code> -= </code>&nbsp;<i>expr</i></td>
-          <td>result assigned to variable again</td><td>right to left</td></tr>
-      <tr><td>2</td><td>
-          <i>var</i>&nbsp;<code> &gt;&gt;&gt;= </code>&nbsp;<i>expr</i><br>
-          <i>var</i>&nbsp;<code> &gt;&gt;= </code>&nbsp;<i>expr</i><br>
-          <i>var</i>&nbsp;<code> &lt;&lt;= </code>&nbsp;<i>expr</i></td>
-          <td>perform the shift, reassign to variable</td><td>right to left</td></tr>
-      <tr><td>1</td><td>
-          <i>var</i>&nbsp;<code> &amp;= </code>&nbsp;<i>expr</i><br>
-          <i>var</i>&nbsp;<code> ~&amp;= </code>&nbsp;<i>expr</i><br>
-          <i>var</i>&nbsp;<code> &amp;~= </code>&nbsp;<i>expr</i><br>
-          <i>var</i>&nbsp;<code> ^= </code>&nbsp;<i>expr</i><br>
-          <i>var</i>&nbsp;<code> ~^= </code>&nbsp;<i>expr</i><br>
-          <i>var</i>&nbsp;<code> |= </code>&nbsp;<i>expr</i><br>
-          <i>var</i>&nbsp;<code> ~|= </code>&nbsp;<i>expr</i></td>
-          <td>perform the bit op, reassign to variable</td><td>right to left</td></tr>
-    </table>
-    </center>
-    <h3>GUI operations</h3>
-    <p>The GUI window can be opened using the "<code>cg</code>" command (or on Windows only, the <code>``</code> command), or by entering the <code>gui</code> command in REPL mode.  The following window will be presented with the focus initially in the top "Expression" field.
-    <br><img src="calc_initial.png" alt="Initial GUI screen" width="50%"/>
-    <p>An expression can be entered on each line, and all will be executed in order when the <span class="redbutton">!</span> button (or the <code>F9</code> key) is pressed, and the results displayed in the "Result" field.
-    <footer><br><br><center>&copy;&nbsp;Copyright 2021 Roger L. Whitcomb.&nbsp;&nbsp;Licensed under an <a href="https://github.com/rlwhitcomb/utilities/blob/master/LICENSE">MIT</a> license.<br>Last modified: ${__DATE__} at ${__TIME__}</center><br><br></footer>
-  </body>
+  <footer><br><br><center>&copy;&nbsp;Copyright 2021 Roger L. Whitcomb.&nbsp;&nbsp;Licensed under an <a href="https://github.com/rlwhitcomb/utilities/blob/master/LICENSE">MIT</a> license.<br>Last modified: ${__DATE__} at ${__TIME__}</center><br><br></footer>
+</body>
 </html>
 
