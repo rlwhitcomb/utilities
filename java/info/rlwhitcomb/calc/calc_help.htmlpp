@@ -14,8 +14,12 @@ tr, th, td {
   padding: 4px;
 }
 
+th {
+  background: cornflowerblue;
+}
+
 tr:nth-child(even) {
-  background-color: #dddddd;
+  background-color: #f8f0f0;
 }
 
 table code {
@@ -35,16 +39,19 @@ code {
    color: red;
 }
 
-.biglines {
+.innertable tr,
+.innertable th,
+.innertable td {
    padding: 4px;
+   border: none;
 }
     </style>
 </head>
 
 <body>
   <center>
-    <h2>Expression Calculator Help</h2>
-    <h4>Version ${Calc.version}, build ${build.number}</h4>
+    <h1>Expression Calculator Help</h1>
+    <h3>Version ${Calc.version}, build ${build.number}</h3>
   </center>
   <h3>Introduction</h3>
   <p>An expression calculator that combines (nearly) unlimited precision decimal arithmetic with a rich assortment
@@ -66,19 +73,19 @@ code {
       <th width=200>Aliases</th>
     </tr>
     <tr><td><code>-gui</code></td><td>Start immediately in GUI mode</td><td><code>-g</code></td></tr>
-    <tr><td><code>-console</code></td><td>Start instead in console mode (default)</td><td><code>-cons</code>, <code>-con</code>, <code>-c</code></td></tr>
+    <tr><td><code>-console</code></td><td>Start instead in console mode <i>(default)</i></td><td><code>-cons</code>, <code>-con</code>, <code>-c</code></td></tr>
     <tr><td><code>-debug</code></td><td>Display a debug printout of the syntax tree for every input</td><td><code>-deb</code>, <code>-d</code><br>(or use the <code>:debug on</code> directive)</td></tr>
-    <tr><td><code>-nodebug</code></td><td>Don't display the syntax tree for debugging (default)</td><td><code>-nodeb</code>, <code>-no</code><br>(or use the <code>:debug off</code> directive)</td></tr>
-    <tr><td><code>-colors</code></td><td>Use coloring (on the console) for results and messages (default)</td><td><code>-color</code>, <code>-col</code></td></tr>
+    <tr><td><code>-nodebug</code></td><td>Don't display the syntax tree for debugging <i>(default)</i></td><td><code>-nodeb</code>, <code>-no</code><br>(or use the <code>:debug off</code> directive)</td></tr>
+    <tr><td><code>-colors</code></td><td>Use coloring (on the console) for results and messages <i>(default)</i></td><td><code>-color</code>, <code>-col</code></td></tr>
     <tr><td><code>-nocolors</code></td><td>Do not use coloring in the console</td><td><code>-nocolor</code>, <code>-nocol</code>, <code>-noc</code></td></tr>
-    <tr><td><code>-darkbackgrounds</code></td><td>Use colors suitable for a dark console background (default for Windows)</td><td><code>-darkbackground</code>, <code>-darkback</code>,<br><code>-darkbg</code>, <code>-dark</code>, <code>-dk</code></td></tr>
-    <tr><td><code>-lightbackgrounds</code></td><td>Use colors suitable for a light (white) console background<br>(default for non-Windows platforms)</td><td><code>-lightbackground</code>, <code>-lightback</code>,<br><code>-lightbg</code>, <code>-light</code>, <code>-lt</code></td></tr>
+    <tr><td><code>-darkbackgrounds</code></td><td>Use colors suitable for a dark console background <i>(default for Windows)</i></td><td><code>-darkbackground</code>, <code>-darkback</code>,<br><code>-darkbg</code>, <code>-dark</code>, <code>-dk</code></td></tr>
+    <tr><td><code>-lightbackgrounds</code></td><td>Use colors suitable for a light (white) console background<br><i>(default for non-Windows platforms)</i></td><td><code>-lightbackground</code>, <code>-lightback</code>,<br><code>-lightbg</code>, <code>-light</code>, <code>-lt</code></td></tr>
     <tr><td><code>-timing</code></td><td>Display timing after each input</td><td><code>-time</code>, <code>-t</code></td></tr>
-    <tr><td><code>-notiming</code></td><td>Do not display timings (default)</td><td><code>-notime</code>, <code>-not</code></td></tr>
-    <tr><td><code>-resultsonly</code></td><td>Do not display the input expression on output, but only the results</td><td><code>-resultonly</code>, <code>-results</code>, <code>-result</code>, <code>-res</code>, <code>-r</code><br>(also use <code>:resultsonly on/off</code> directive)</td></tr>
+    <tr><td><code>-notiming</code></td><td>Do not display timings <i>(default)</i></td><td><code>-notime</code>, <code>-not</code></td></tr>
+    <tr><td><code>-resultsonly</code></td><td>Do not display the input expression on output, but only the results</td><td><code>-resultonly</code>, <code>-results</code>, <code>-result</code>,<br><code>-res</code>, <code>-r</code><br>(also use <code>:resultsonly on/off</code> directive)</td></tr>
     <tr><td><code>-quiet</code></td><td>Do not display anything (suitable for behind-the-scenes calculations)</td><td><code>-q</code><br>(also use the <code>:quiet on/off</code> directive)</td></tr>
     <tr><td><code>-rational</code></td><td>Do all possible calculations in fraction mode, that is as a ratio of natural numbers<br>(as in <code>1/3</code> instead of <code>0.3333333333333333</code>)</td><td><code>-ration</code>, <code>-rat</code><br>(also use the <code>:rational on</code> directive)</td></tr>
-    <tr><td><code>-decimal</code></td><td>Do all calculations as decimal values (default)</td><td><code>-dec</code><br>(also use the <code>:rational off</code> directive)</td></tr>
+    <tr><td><code>-decimal</code></td><td>Do all calculations as decimal values <i>(default)</i></td><td><code>-dec</code><br>(also use the <code>:rational off</code> directive)</td></tr>
     <tr><td><code>-locale</code> <i>locale_name</i></td><td>Specify the locale to use for messages</td><td><code>-loc</code>, <code>-l</code></td></tr>
     <tr><td><code>-inputdir</code> <i>directory</i></td><td>Specify a default directory for files to be processed</td><td><code>-input</code>, <code>-dir</code></td></tr>
     <tr><td><code>-help</code></td><td>Display this help page</td><td><code>-h</code>, <code>-?</code></td></tr>
@@ -96,6 +103,13 @@ code {
       <th width=280>Description</th>
       <th width=120>Associativity</th>
     </tr>
+    <tr><td>28</td>
+      <td><code>pi</code> or <code>e</code><br>
+          <code>true</code> or <code>false</code><br>
+          <code>null</code></td>
+      <td>the fundamental constants <code>&#x1D6D1;</code> and <code>e</code><br>
+          the <code>boolean</code> values<br>
+          the <code>null</code> (empty) value</td><td>- none -</td></tr>
     <tr><td>27</td><td><code>{ }</code></td><td>define an object</td><td>left to right</td></tr>
     <tr><td>26</td><td><code>[ ]</code></td><td>define an array,<br>or access elements of<br>an array, string, or object</td><td>left to right</td></tr>
     <tr><td>25</td><td>.</td><td>access an object member</td><td>left to right</td></tr>
@@ -107,7 +121,7 @@ code {
     <tr><td>19</td><td><code>~</code>&nbsp;<i>expr</i></td><td>bitwise NOT</td><td>right to left</td></tr>
     <tr><td>18</td><td><i>expr</i>&nbsp;<code>!</code></td><td>factorial</td><td>left to right</td></tr>
     <tr><td>17</td><td colspan="2">
-        <table class="biglines">
+        <table class="innertable">
             <tr><td width="180"><code>ABS</code>&nbsp;<i>expr</i></td><td width="280">absolute value</td></tr>
             <tr><td><code>SIN</code>&nbsp;<i>expr</i></td><td>sine</td></tr>
             <tr><td><code>COS</code>&nbsp;<i>expr</i></td><td>cosine</td></tr>
@@ -219,31 +233,32 @@ code {
       <th width=300>Description</th>
       <th width=100>Aliases</th>
     </tr>
-    <tr><td><code>:decimal</code> <i>number_option</i></td><td>Set the precision of all decimal calculations where<br><i>number_option</i> can be <code>(</code><i>number</i><code>)</code>, or <i>number</i>, or <i>variable</i><br>to specify the number of decimal digits of precision</td><td><code>:dec</code>, <code>:precision</code>, <code>:prec</code></td></tr>
-    <tr><td><code>:default</code></td><td>Set the default decimal precision (~34 digits) (default)</td><td><code>:def</code></td></tr>
+    <tr><td><code>:decimal</code> <i>number_option</i></td><td>Set the precision of all decimal calculations,<br>where <i>number_option</i> can be <code>(</code><i>number</i><code>)</code>, or <i>number</i>, or <i>variable</i><br>to specify the number of decimal digits of precision</td><td><code>:dec</code>, <code>:precision</code>, <code>:prec</code></td></tr>
+    <tr><td><code>:default</code></td><td>Set the default decimal precision (~34 digits) <i>(default)</i></td><td><code>:def</code></td></tr>
     <tr><td><code>:double</code></td><td>Select the "double" decimal precision (~16 digits)</td><td><code>:dbl</code></td></tr>
     <tr><td><code>:float</code></td><td>Select "float" decimal precision (~7 digits)</td><td><code>:flt</code></td></tr>
     <tr><td><code>:unlimited</code></td><td>Set to unlimited decimal precision (which for some calculations will result in errors)</td><td><code>:unl</code></td></tr>
     <tr><td><code>:degrees</code></td><td>Do all trigonometric calculations assuming the inputs are in degrees</td><td><code>:deg</code></td></tr>
-    <tr><td><code>:radians</code></td><td>Do all calculations assuming inputs are radians (default)</td><td><code>:rad</code></td></tr>
+    <tr><td><code>:radians</code></td><td>Do all calculations assuming inputs are radians <i>(default)</i></td><td><code>:rad</code></td></tr>
     <tr><td><code>:binary</code></td><td>Display units in terms of multiples of 1024</td><td><code>:bin</code></td></tr>
     <tr><td><code>:si</code></td><td>Display units in terms of multiples of 1000</td><td><code>:ten</code></td></tr>
-    <tr><td><code>:mixed</code></td><td>Unit multiplier based on powers of 2 (same as <code>:binary</code>), but with SI suffix (default)</td><td><code>:mix</code></tr></tr>
+    <tr><td><code>:mixed</code></td><td>Unit multiplier based on powers of 2 (same as <code>:binary</code>), but with SI suffix <i>(default)</i></td><td><code>:mix</code></tr></tr>
     <tr><td><code>:clear</code> [ <i>id</i> ( <code>,</code> <i>id</i> ) * ]</td><td>Clear all or only the specified variables (set values to <code>null</code>)</td><td><code>:clr</code></td></tr>
     <tr><td><code>:echo</code> <i>expr</i></td><td>Echo the value of the expression to the output</td><td></td></tr>
     <tr><td><code>:include</code> <i>string</i></td><td>Include the file named by <i>string</i></td><td></td></tr>
-    <tr><td><code>:rational</code> <i>mode_option</i></td><td>Set the rational calculation mode where <i>mode_option</i> is one of:<br><code>on</code>, <code>off</code>, <code>true</code>, <code>false</code>, <code>pop</code>, <code>previous</code>, <code>prev</code>, or <i>variable</i><br>(default is <code>off</code>, or the value set on the command line)</td><td><code>:ration</code>, <code>:fraction</code>, <code>:frac</code></td></tr>
-    <tr><td><code>:debug</code> <i>mode_option</i></td><td>Set the debug mode (same <i>mode_option</i> choices as for <code>:rational</code>)<br>(default is <code>off</code> or the value set on the command line)</td><td><code>:deb</code></td></tr>
-    <tr><td><code>:resultsonly</code> <i>mode_option</i></td><td>Set the results-only mode<br>(default is <code>off</code> or value on command line)</td><td><code>:res</code>, <code>:result</code>, <code>:results</code>, <code>:resultonly</code></td></tr>
-    <tr><td><code>:quiet</code> <i>mode_option</i></td><td>Set quiet mode (default is <code>off</code>)</td><td></td></tr>
+    <tr><td><code>:rational</code> <i>mode_option</i></td><td>Set the rational calculation mode where <i>mode_option</i> is one of:<br><code>on</code>, <code>off</code>, <code>true</code>, <code>false</code>, <code>pop</code>, <code>previous</code>, <code>prev</code>, or <i>variable</i><br><i>(default is <code>off</code>, or the value set on the command line)</i></td><td><code>:ration</code>, <code>:fraction</code>, <code>:frac</code></td></tr>
+    <tr><td><code>:debug</code> <i>mode_option</i></td><td>Set the debug mode (same <i>mode_option</i> choices as for <code>:rational</code>)<br><i>(default is <code>off</code> or the value set on the command line)</i></td><td><code>:deb</code></td></tr>
+    <tr><td><code>:resultsonly</code> <i>mode_option</i></td><td>Set the results-only mode<br><i>(default is <code>off</code> or value on command line)</i></td><td><code>:res</code>, <code>:result</code>, <code>:results</code>, <code>:resultonly</code></td></tr>
+    <tr><td><code>:quiet</code> <i>mode_option</i></td><td>Set quiet mode <i>(default is <code>off</code>)</i></td><td></td></tr>
   </table>
   </center>
   <h3>TODO Items for This Document</h3>
   <ul>
+    <li>loop statement syntax, loop variables, nested loops</li>
     <li>REPL commands</li>
     <li>Explanation of :include with -inputDir</li>
     <li>Variable naming conventions</li>
-    <li>Other constants (pi/e) and Unicode options</li>
+    <li>Unicode variants of pi</li>
     <li>JSON format</li>
     <li>Format specifiers and formats</li>
     <li>Exceptions to decimal precision (i.e., for trig, log), and also in doing factorial? or others that don't respect the precision, also limits on pi/e digits</li>
