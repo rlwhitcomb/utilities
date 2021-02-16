@@ -154,6 +154,8 @@
 		be preprocessed anew will get a new timestamp.
 	    11-Feb-2021 (rlwhitcomb)
 		Figure out if "anttasks.jar" needs to be updated on every startup.
+	    16-Feb-2021 (rlwhitcomb)
+		Add "utilities*.log" to the list of stuff deleted by "purge-logs".
 
      ========================================================================== -->
 
@@ -501,13 +503,13 @@
 		</tstamp>
 		<echo message="Purging log files from before ${last.two.weeks}..."/>
 		<delete>
-			<fileset dir="." includes="test*.log">
+			<fileset dir="." includes="test*.log,utilities*.log">
 				<date datetime="${last.two.weeks}" when="before"/>
 			</fileset>
-			<fileset dir="${env.TMPDIR}" includes="canonerror*.tmp,canoninput*.tmp,canonoutput*.tmp,testerror*.tmp,testinput*.tmp,testoutput*.tmp" unless:true="${on.windows}">
+			<fileset dir="${env.TMPDIR}" includes="canonerror*.tmp,canoninput*.tmp,canonoutput*.tmp,testerror*.tmp,testinput*.tmp,testoutput*.tmp,utilities*.log" unless:true="${on.windows}">
 				<date datetime="${last.two.weeks}" when="before"/>
 			</fileset>
-			<fileset dir="${env.TEMP}" includes="canonerror*.tmp,canoninput*.tmp,canonoutput*.tmp,testerror*.tmp,testinput*.tmp,testoutput*.tmp" if:true="${on.windows}">
+			<fileset dir="${env.TEMP}" includes="canonerror*.tmp,canoninput*.tmp,canonoutput*.tmp,testerror*.tmp,testinput*.tmp,testoutput*.tmp,utilities*.log" if:true="${on.windows}">
 				<date datetime="${last.two.weeks}" when="before"/>
 			</fileset>
 		</delete>

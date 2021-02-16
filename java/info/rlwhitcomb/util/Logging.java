@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2008-2020 Roger L. Whitcomb.
+ * Copyright (c) 2008-2021 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -128,6 +128,8 @@
  *    Use lambdas for Runnable instances.
  *  21-Dec-2020 (rlwhitcomb)
  *    Update obsolete Javadoc constructs.
+ *  16-Feb-2021 (rlwhitcomb)
+ *    Read a default configuration if none has been read previously.
  */
 package info.rlwhitcomb.util;
 
@@ -309,6 +311,11 @@ public class Logging
     /** Pattern to parse a configuration line into 'name' '=' 'value' parts (or ':' as in {@link Properties} class). */
     private static Pattern PARSER = Pattern.compile("^\\s*(\\S+)\\s*[=:]\\s*(.*)$");
 
+    /** Name of the default logging configuration file, if the application doesn't have one. */
+    private static final String DEFAULT_LOGGING_CONFIGURATION = "logging_default.properties";
+    /** Flag to say whether {@link #readConfiguration} has ever been called. */
+    private static boolean configurationLoaded = false;
+
     /** The one and only instance variable -- used to identify an instance {@link Logging} object. */
     private String prefix = null;
 
@@ -345,6 +352,7 @@ public class Logging
      */
     public Logging(String ident) {
 	prefix = ident;
+	readDefaultConfigurationIfNeeded();
     }
 
 
@@ -870,6 +878,7 @@ public class Logging
      * @param	args	arguments to substitute for the %nn$f placeholders in the fmt string
      */
     public static void Debug(String fmt, Object ... args) {
+	readDefaultConfigurationIfNeeded();
 	Log(DEBUG, fmt, args);
     }
 
@@ -880,6 +889,7 @@ public class Logging
      * @param	args	arguments to substitute for the %nn$f placeholders in the fmt string
      */
     public static void Info(String fmt, Object ... args) {
+	readDefaultConfigurationIfNeeded();
 	Log(INFO, fmt, args);
     }
 
@@ -890,6 +900,7 @@ public class Logging
      * @param	args	arguments to substitute for the %nn$f placeholders in the fmt string
      */
     public static void Warn(String fmt, Object ... args) {
+	readDefaultConfigurationIfNeeded();
 	Log(WARN, fmt, args);
     }
 
@@ -901,6 +912,7 @@ public class Logging
      * @param	args	arguments to substitute for the %nn$f placeholders in the fmt string
      */
     public static void Error(String fmt, Object ... args) {
+	readDefaultConfigurationIfNeeded();
 	LogError(ERROR, fmt, args);
     }
 
@@ -911,6 +923,7 @@ public class Logging
      * @param	args	arguments to substitute for the %nn$f placeholders in the fmt string
      */
     public static void Fatal(String fmt, Object ... args) {
+	readDefaultConfigurationIfNeeded();
 	LogError(FATAL, fmt, args);
     }
 
@@ -922,6 +935,7 @@ public class Logging
      * @param	e	any {@link Throwable} object
      */
     public static void Except(Throwable e) {
+	readDefaultConfigurationIfNeeded();
 	if (loggingLevel >= ERROR) {
 	    String exceptClassName = e.getClass().getName();
 	    String exceptMsg = e.getMessage();
@@ -948,6 +962,7 @@ public class Logging
      * @param	e	any {@link Exception} object
      */
     public static void Except(String expl, Throwable e) {
+	readDefaultConfigurationIfNeeded();
 	if (loggingLevel >= ERROR) {
 	    String exceptClassName = e.getClass().getName();
 	    String exceptMsg = e.getMessage();
@@ -1279,6 +1294,30 @@ public class Logging
 
 
     /**
+     * Load the default logging configuration from a default logging properties file
+     * in our package directory.
+     * <p> If the {@link #readConfiguration} method has already been called, then do nothing.
+     * @see #DEFAULT_LOGGING_CONFIGURATION
+     * @see #configurationLoaded
+     */
+    private static void readDefaultConfigurationIfNeeded() {
+	lock.lock();
+	try {
+	    if (!configurationLoaded) {
+		try (InputStream is = Logging.class.getResourceAsStream(DEFAULT_LOGGING_CONFIGURATION)) {
+		    readConfiguration(is, null);
+		}
+		catch (IOException ioe) {
+		    System.err.println("Unexpected I/O error reading default logging configuration: " + ExceptionUtil.toString(ioe));
+		}
+	    }
+	}
+	finally {
+	    lock.unlock();
+	}
+    }
+
+    /**
      * Sets configuration options from the given {@link InputStream} object
      * which should be a .properties file.
      *
@@ -1287,77 +1326,87 @@ public class Logging
      *			symbol is not available in the environment; can be {@code null}
      */
     public static void readConfiguration(InputStream is, Map<String,String> symbols) {
-	String logDir = null;
-	String logFile = null;
-	BufferedReader rdr = new BufferedReader(new InputStreamReader(is));
-	String line = null;
+	lock.lock();
 	try {
-	    while ((line = rdr.readLine()) != null) {
-		Matcher m = COMMENTS.matcher(line);
-		if (m.matches())
-		    continue;
-		m = PARSER.matcher(line);
-		if (m.matches()) {
-		    String name = m.group(1);
-		    String value = CharUtil.substituteEnvValues(m.group(2), symbols);
+	    String logDir = null;
+	    String logFile = null;
+	    BufferedReader rdr = new BufferedReader(new InputStreamReader(is));
+	    String line = null;
 
-		    if (name.startsWith(loggingClassName)) {
-			name = name.substring(loggingClassName.length());
-			boolean valid = true;
-			try {
-			    if (name.equalsIgnoreCase(LOGGING_LEVEL)) {
-				valid = setLoggingLevel(value);
-			    }
-			    else if (name.equalsIgnoreCase(LOG_DIRECTORY)) {
-				logDir = value;
-			    }
-			    else if (name.equalsIgnoreCase(LOG_FILE)) {
-				logFile = value;
-			    }
-			    else if (name.equalsIgnoreCase(LOG_TO_CONSOLE)) {
-				setConsoleLogging(CharUtil.getBooleanValue(value));
-			    }
-			    else if (name.equalsIgnoreCase(LOG_FILE_ROTATE)) {
-				setLogFileRotation(CharUtil.getBooleanValue(value));
-			    }
-			    else if (name.equalsIgnoreCase(LOG_FILE_INTERVAL)) {
-				valid = setLogFileRotationInterval(value);
-			    }
-			    else if (name.equalsIgnoreCase(LOG_FILE_MAX_SIZE)) {
-				try {
-				    valid = setLogFileMaxSize(Long.parseLong(value));
+	    try {
+		while ((line = rdr.readLine()) != null) {
+		    Matcher m = COMMENTS.matcher(line);
+		    if (m.matches())
+			continue;
+		    m = PARSER.matcher(line);
+		    if (m.matches()) {
+			String name = m.group(1);
+			String value = CharUtil.substituteEnvValues(m.group(2), symbols);
+
+			if (name.startsWith(loggingClassName)) {
+			    name = name.substring(loggingClassName.length());
+			    boolean valid = true;
+			    try {
+				if (name.equalsIgnoreCase(LOGGING_LEVEL)) {
+				    valid = setLoggingLevel(value);
 				}
-				catch (NumberFormatException nfe) {
-				    valid = setLogFileMaxSize(NumericUtil.convertKMGValue(value));
+				else if (name.equalsIgnoreCase(LOG_DIRECTORY)) {
+				    logDir = value;
+				}
+				else if (name.equalsIgnoreCase(LOG_FILE)) {
+				    logFile = value;
+				}
+				else if (name.equalsIgnoreCase(LOG_TO_CONSOLE)) {
+				    setConsoleLogging(CharUtil.getBooleanValue(value));
+				}
+				else if (name.equalsIgnoreCase(LOG_FILE_ROTATE)) {
+				    setLogFileRotation(CharUtil.getBooleanValue(value));
+				}
+				else if (name.equalsIgnoreCase(LOG_FILE_INTERVAL)) {
+				    valid = setLogFileRotationInterval(value);
+				}
+				else if (name.equalsIgnoreCase(LOG_FILE_MAX_SIZE)) {
+				    try {
+					valid = setLogFileMaxSize(Long.parseLong(value));
+				    }
+				    catch (NumberFormatException nfe) {
+					valid = setLogFileMaxSize(NumericUtil.convertKMGValue(value));
+				    }
+				}
+				else if (name.equalsIgnoreCase(LOG_FILE_KEEP)) {
+				    valid = setLogFileKeep(Integer.parseInt(value));
+				}
+				else if (name.equalsIgnoreCase(LOG_FILE_COMPRESS)) {
+				    setLogFileCompress(CharUtil.getBooleanValue(value));
+				}
+				else if (name.equalsIgnoreCase(LOG_FILE_CHARSET_NAME)) {
+				    valid = setLogFileCharsetName(value);
 				}
 			    }
-			    else if (name.equalsIgnoreCase(LOG_FILE_KEEP)) {
-				valid = setLogFileKeep(Integer.parseInt(value));
+			    catch (Throwable ex) {
+				valid = false;
 			    }
-			    else if (name.equalsIgnoreCase(LOG_FILE_COMPRESS)) {
-				setLogFileCompress(CharUtil.getBooleanValue(value));
-			    }
-			    else if (name.equalsIgnoreCase(LOG_FILE_CHARSET_NAME)) {
-				valid = setLogFileCharsetName(value);
+			    if (!valid) {
+				System.err.format("Invalid value for %1$s: %2$s%n", name, value);
 			    }
 			}
-			catch (Throwable ex) {
-			    valid = false;
+			else if (name.startsWith(commonsPackageName)) {
+			    System.setProperty(name, value);
 			}
-			if (!valid) {
-			    System.err.format("Invalid value for %1$s: %2$s%n", name, value);
-			}
-		    }
-		    else if (name.startsWith(commonsPackageName)) {
-			System.setProperty(name, value);
 		    }
 		}
+	    } catch (IOException ioe) {
+		System.err.format("I/O Exception reading configuration: %1$s!%n", ioe.toString());
 	    }
-	} catch (IOException ioe) {
-	    System.err.format("I/O Exception reading configuration: %1$s!%n", ioe.toString());
+
+	    if (logDir != null && logFile != null) {
+		setLogFile(logDir, logFile);
+	    }
+
+	    configurationLoaded = true;
 	}
-	if (logDir != null && logFile != null) {
-	    setLogFile(logDir, logFile);
+	finally {
+	   lock.unlock();
 	}
     }
 
