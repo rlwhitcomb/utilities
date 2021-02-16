@@ -265,6 +265,8 @@
  *	    New method for making a list of file names.
  *	29-Jan-2021 (rlwhitcomb)
  *	    Use new Intl Exception variants for convenience.
+ *	16-Feb-2021 (rlwhitcomb)
+ *	    Redo "makeStringOfChars" more succinctly.
  */
 
 package info.rlwhitcomb.util;
@@ -2122,11 +2124,9 @@ public class CharUtil
 	 * @return		That many of the fill character.
 	 */
 	public static String makeStringOfChars(char ch, int width) {
-	    StringBuilder buf = new StringBuilder(width);
-	    for (int i = 0; i < width; i++) {
-		buf.append(ch);
-	    }
-	    return buf.toString();
+	    char[] chars = new char[width];
+	    Arrays.fill(chars, ch);
+	    return new String(chars);
 	}
 
 
