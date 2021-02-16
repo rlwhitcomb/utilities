@@ -117,6 +117,8 @@
  *	01-Feb-2021 (rlwhitcomb)
  *	    And now that we have Bernoulli numbers, implement Taylor
  *	    series expansion for tan().
+ *	16-Feb-2021 (rlwhitcomb)
+ *	    Turn the debug printouts into logging statements for easy analysis.
  */
 package info.rlwhitcomb.util;
 
@@ -275,6 +277,9 @@ public class NumericUtil
 		    throw new Intl.IllegalArgumentException("util#numeric.unknownStringLength", value);
 		}
 	}
+
+
+	private static final Logging logger = new Logging(NumericUtil.class);
 
 
 	public static final BigInteger MIN_BYTE  = BigInteger.valueOf(Byte.MIN_VALUE);
@@ -1448,7 +1453,7 @@ public class NumericUtil
 	    int cacheIndex = num >> 1;
 	    BigFraction cachedResult = bernoulliCache.get(cacheIndex);
 	    if (cachedResult != null) {
-//System.out.println("bern(" + num + ") gotten from cache");
+		logger.debug("bern(%1$d) gotten from cache", num);
 		return cachedResult;
 	    }
 
@@ -1519,10 +1524,10 @@ public class NumericUtil
 	    pi(mc.getPrecision());
 
 	    /* First do some range reduction to the range -2*pi to 2*pi */
-//System.out.println("     original x = " + xValue.toPlainString());
+	    logger.debug("sin:     original x = %1$s", xValue.toPlainString());
 	    if (xValue.compareTo(MINUS_TWO_PI) < 0 || xValue.compareTo(TWO_PI) > 0) {
 		xValue = xValue.remainder(TWO_PI, mc);
-//System.out.println("range reduced x = " + xValue.toPlainString());
+		logger.debug("sin: range reduced x = %1$s", xValue.toPlainString());
 	    }
 
 	    BigDecimal result   = xValue;
@@ -1547,7 +1552,7 @@ public class NumericUtil
 		    result = result.subtract(seriesTerm);
 		else
 		    result = result.add(seriesTerm);
-//System.out.println("loop " + i + " -> " + result.toPlainString());
+		logger.debug("sin: loop %1$d -> %2$s", i, result.toPlainString());
 	    }
 
 	    return result.round(mc);
@@ -1566,10 +1571,10 @@ public class NumericUtil
 	    pi(mc.getPrecision());
 
 	    /* First do some range reduction to the range -2*pi to 2*pi */
-//System.out.println("     original x = " + xValue.toPlainString());
+	    logger.debug("cos:     original x = %1$s", xValue.toPlainString());
 	    if (xValue.compareTo(MINUS_TWO_PI) < 0 || xValue.compareTo(TWO_PI) > 0) {
 		xValue = xValue.remainder(TWO_PI, mc);
-//System.out.println("range reduced x = " + xValue.toPlainString());
+		logger.debug("cos: range reduced x = %1$s", xValue.toPlainString());
 	    }
 
 	    BigDecimal xSquared = xValue.multiply(xValue);
@@ -1587,12 +1592,15 @@ public class NumericUtil
 		power     = power.multiply(xSquared);
 		factTerm  = factTerm.add(BigDecimal.ONE);
 		fact      = fact.multiply(factTerm);
+
 		BigDecimal seriesTerm = power.divide(fact, mc2);
+
 		if (i % 2 == 1)
 		    result = result.subtract(seriesTerm);
 		else
 		    result = result.add(seriesTerm);
-//System.out.println("loop " + i + " -> " + result.toPlainString());
+
+		logger.debug("cos: loop %1$d -> %2$s", i, result.toPlainString());
 		factTerm  = factTerm.add(BigDecimal.ONE);
 		fact      = fact.multiply(factTerm);
 	    }
@@ -1639,7 +1647,7 @@ public class NumericUtil
 	    int approxRange = (int)Math.floor(xValue.divide(new BigDecimal("0.1"), mc).doubleValue()) + 1;
 	    int loopCountPerRange = (mc.getPrecision() + 3) / 4;
 	    int loops = (approxRange + approxRange / 6) * loopCountPerRange + 3;
-//System.out.println("precision = " + mc.getPrecision() + ", approx range = " + approxRange + ", loops per = " + loopCountPerRange + " -> loops = " + loops);
+	    logger.debug("tan: precision = %1$d, approx range = %2$d, loops per = %3$d -> loops = %4$d", mc.getPrecision(), approxRange, loopCountPerRange, loops);
 	    // Big decision here:  at some point at around 1.2 (where approxRange / 6 is > 1) we start getting
 	    // diminishing returns, so switch to using sin(x) / cos(x) as quicker AND more accurate
 	    if (approxRange > 12) {
@@ -1661,10 +1669,10 @@ public class NumericUtil
 		// and ignore the -1 term
 		BigFraction bn = bern(i * 2).abs();
 		BigFraction termn = t.multiply(bn);
-//System.out.println("i = " + i + ", bn(i*2) = " + bn + ", t (num/fact) = " + t + ", t*bn = " + termn);
+		logger.debug("tan: i = %1$d, bn(i*2) = %2$s, t (num/fact) = %3$s, t*bn = %4$s", i, bn, t, termn);
 		BigDecimal term = termn.toDecimal(mc2).multiply(xPower, mc2);
 		result          = result.add(term, mc2);
-//System.out.println("term = " + term.toPlainString() + ", new result = " + result.toPlainString() + ", lastResult = " + lastResult.toPlainString());
+		logger.debug("tan: term = %1$s, new result = %2$s, lastResult = %3$s", term.toPlainString(), result.toPlainString(), lastResult.toPlainString());
 		if (lastResult.equals(result)) {
 		    break;
 		}
@@ -1691,19 +1699,19 @@ public class NumericUtil
 	    BigDecimal result = trial_root;
 	    BigDecimal lastResult = result;
 
-//System.out.println("trial_root = " + trial_root);
+	    logger.debug("sqrt: trial_root = %1$s", trial_root.toPlainString());
 	    // 50 is entirely arbitrary; normally the results converge in 5-10 iterations
 	    // up to 100s of digits
 	    for (int i = 0; i < 50; i++) {
 		result = result.add(x.divide(result, mc)).divide(D_TWO, mc);
-//System.out.println("result = " + result + ", lastResult = " + lastResult);
+		logger.debug("sqrt: result = %1$s, lastResult = %2$s", result.toPlainString(), lastResult.toPlainString());
 		if (result.equals(lastResult)) {
-//System.out.println("break out early, i = " + i);
+		    logger.debug("sqrt: break out early, i = %1$d", i);
 		    break;
 		}
 		lastResult = result;
 	    }
-//System.out.println("result = " + result.toPlainString());
+	    logger.debug("sqrt: result = %1$s", result.toPlainString());
 	    return result.round(mc);
 	}
 
@@ -1722,7 +1730,7 @@ public class NumericUtil
 	    // BigDecimal trial_root = new BigDecimal("1.4774329094")
 	    //    .subtract(new BigDecimal("0.8414323527").divide(x.add(new BigDecimal("0.7387320679")), mc));
 	    BigDecimal trial_root = BigDecimal.ONE.movePointRight((x.precision() - x.scale()) / 3);
-//System.out.println("cbrt: trial_root = " + trial_root.toPlainString());
+	    logger.debug("cbrt: trial_root = %1$s", trial_root.toPlainString());
 	    BigDecimal result = trial_root;
 	    BigDecimal lastResult = result;
 
@@ -1732,9 +1740,9 @@ public class NumericUtil
 		BigDecimal numer = xValue.subtract(x3);
 		BigDecimal denom = x2.multiply(BigDecimal.valueOf(3L));
 		result = result.add(numer.divide(denom, mc), mc);
-//System.out.println("result = " + result + ", lastResult = " + lastResult);
+		logger.debug("cbrt: result = %1$s, lastResult = %2$s", result.toPlainString(), lastResult.toPlainString());
 		if (result.equals(lastResult)) {
-//System.out.println("break out early, i = " + i);
+		    logger.debug("cbrt: break out early, i = %1$d", i);
 		    break;
 		}
 		lastResult = result;
