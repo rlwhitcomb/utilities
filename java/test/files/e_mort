@@ -30,30 +30,31 @@
 # Then the calculated values are:
 #   r = monthly interest as a decimal value (% / 100 / 12)
 #   n = number of months (years * 12)
-
-# Setup the context object, given the P, R, and N values are already set
 :quiet on
-ctx = { P: P, R: R, N: N }
+define PMT = {
+  # Setup the context object, given the P, R, and N values are already set
+  ctx = { P: P, R: R, N: N }
 
-ctx.r = (ctx.R / 100) / 12
-ctx.n = ctx.N * 12
-:quiet pop
-ctx
+  ctx.r = (ctx.R / 100) / 12
+  ctx.n = ctx.N * 12
+  ctx
 
-# Calculate the intermediate values (which are reused)
-:quiet on
-r_n = (1 + ctx.r) ** ctx.n
-r_r_n = ctx.r * r_n
-r_n_1 = r_n - 1
+  # Calculate the intermediate values (which are reused)
+  r_n = (1 + ctx.r) ** ctx.n
+  r_r_n = ctx.r * r_n
+  r_n_1 = r_n - 1
 
-# Now the final monthly payment value
-M = ctx.P * (r_r_n / r_n_1)
+  # Now the final monthly payment value
+  ctx.P * (r_r_n / r_n_1)
+}
 
 # Note: the 2nd param is the number of fractional digits (after the decimal point)
 # regardless of the number of whole digits in the result; so "0" will round
 # to a whole dollar, "2" rounds to pennies.
+M = PMT
 :quiet pop
 :results on
+ctx
 :echo `Full monthly payment is $$${round (M, 2)}`
 :echo `Monthly payment in whole dollars is $$${round (M, 0)}`
 :results pop

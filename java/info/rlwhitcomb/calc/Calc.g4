@@ -125,6 +125,8 @@
  *	16-Feb-2021 (rlwhitcomb)
  *	    Add "if" and "while" statements. Make LOOP, IF, and WHILE into expressions.
  *	    Add "define" statement.
+ *	17-Feb-2021 (rlwhitcomb)
+ *	    Move LOOP, WHILE, and IF back outside of "expr" and rename "loopOrExpr" to "stmtOrExpr".
  */
 
 grammar Calc;
@@ -134,18 +136,21 @@ prog
    ;
 
 stmt
-   : loopOrExpr
+   : stmtOrExpr
    | directive ENDEXPR
    | define ENDEXPR
    ;
 
-loopOrExpr
+stmtOrExpr
    : expr FORMAT ? ENDEXPR ?             # exprStmt
+   | LOOP ( LOOPVAR IN ) ? loopCtl block # loopStmt
+   | WHILE expr block                    # whileStmt
+   | IF expr block ( ELSE block ) ?      # ifStmt
    | ENDEXPR                             # emptyStmt
    ;
 
 block
-   : '{' loopOrExpr * '}'                # stmtBlock
+   : '{' stmtOrExpr * '}'                # stmtBlock
    ;
 
 expr
@@ -153,9 +158,6 @@ expr
    | obj                                 # objExpr
    | arr                                 # arrExpr
    | var                                 # varExpr
-   | LOOP ( LOOPVAR IN ) ? loopCtl block # loopExpr
-   | WHILE expr block                    # whileExpr
-   | IF expr block ( ELSE block ) ?      # ifExpr
    | '(' expr ')'                        # parenExpr
    | var INC_OP                          # postIncOpExpr
    |<assoc=right> INC_OP var             # preIncOpExpr
@@ -267,7 +269,7 @@ value
    ;
 
 define
-   : DEFINE ID '=' ( loopOrExpr | block )  # defineStmt
+   : DEFINE ID '=' ( stmtOrExpr | block )  # defineStmt
    ;
 
 directive

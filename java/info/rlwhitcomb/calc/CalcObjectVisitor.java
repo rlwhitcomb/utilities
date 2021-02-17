@@ -774,7 +774,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	@Override
-	public Object visitLoopExpr(CalcParser.LoopExprContext ctx) {
+	public Object visitLoopStmt(CalcParser.LoopStmtContext ctx) {
 	    CalcParser.LoopCtlContext ctlCtx    = ctx.loopCtl();
 	    CalcParser.BlockContext block       = ctx.block();
 	    CalcParser.ExprListContext exprList = ctlCtx.exprList();
@@ -943,7 +943,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	@Override
-	public Object visitWhileExpr(CalcParser.WhileExprContext ctx) {
+	public Object visitWhileStmt(CalcParser.WhileStmtContext ctx) {
 	    CalcParser.ExprContext exprCtx = ctx.expr();
 	    CalcParser.BlockContext block  = ctx.block();
 
@@ -959,7 +959,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	@Override
-	public Object visitIfExpr(CalcParser.IfExprContext ctx) {
+	public Object visitIfStmt(CalcParser.IfStmtContext ctx) {
 	    CalcParser.ExprContext exprCtx = ctx.expr();
 	    CalcParser.BlockContext thenBlock = ctx.block(0);
 	    CalcParser.BlockContext elseBlock = ctx.block(1);
@@ -980,7 +980,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public Object visitStmtBlock(CalcParser.StmtBlockContext ctx) {
 	    Object lastValue = null;
 
-	    for (CalcParser.LoopOrExprContext stmtCtx : ctx.loopOrExpr()) {
+	    for (CalcParser.StmtOrExprContext stmtCtx : ctx.stmtOrExpr()) {
 		lastValue = visit(stmtCtx);
 	    }
 
@@ -991,7 +991,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public Object visitDefineStmt(CalcParser.DefineStmtContext ctx) {
 	    String functionName = ctx.ID().getText();
 
-	    CalcParser.LoopOrExprContext loopOrExpr = ctx.loopOrExpr();
+	    CalcParser.StmtOrExprContext loopOrExpr = ctx.stmtOrExpr();
 	    CalcParser.BlockContext block           = ctx.block();
 
 	    ParserRuleContext functionBody = loopOrExpr != null ? loopOrExpr : block;
