@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2020 Roger L. Whitcomb.
+ * Copyright (c) 2020-2021 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,6 +28,10 @@
  *	    Initial coding finished.
  *	02-Dec-2020 (rlwhitcomb)
  *	    Move "piDigits" to NumericUtil.
+ *	17-Feb-2021 (rlwhitcomb)
+ *	    After experiencing one failure during testing, fix it (?)
+ *	    by calling "super()" in the constructor. Reduce loop count.
+ *	    Fail with non-zero exit code.
  */
 import info.rlwhitcomb.util.Environment;
 import info.rlwhitcomb.util.InitializationTask;
@@ -187,6 +191,8 @@ public class InitTaskTest
 		private int times;
 
 		public InitTask(final int digitLength, final int iterations) {
+		    super();
+
 		    this.digits = digitLength;
 		    this.iters  = iterations;
 		    this.times  = 0;
@@ -236,7 +242,7 @@ public class InitTaskTest
 
 	    // Start the long-running task going: ~ 6-7 secs
 	    System.out.println("InitTaskTest: starting long-running PI digit calculation...");
-	    InitTask task = new InitTask(piLength, 20);
+	    InitTask task = new InitTask(piLength, 10);
 
 	    boolean success = true;
 
@@ -264,6 +270,8 @@ public class InitTaskTest
 	    }
 
 	    System.out.format("InitTaskTest: %1$s%n", success ? "Success" : "Failed");
+
+	    System.exit(success ? 0 : 1);
 	}
 }
 

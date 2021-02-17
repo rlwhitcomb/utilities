@@ -1,0 +1,13 @@
+#!/bin/bash
+
+javac InitTaskTest.java
+
+for (( c = 1; c <= 1000; c++ ))
+do
+  java InitTaskTest
+  if [[ $? -ne 0 ]]
+  then
+    break
+  fi
+done
+
