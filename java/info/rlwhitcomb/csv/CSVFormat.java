@@ -50,6 +50,9 @@
  *	    Update obsolete Javadoc constructs.
  *	29-Jan-2021 (rlwhitcomb)
  *	    Use new Exception variants using Intl for convenience.
+ *	17-Feb-2021 (rlwhitcomb)
+ *	    Add new "hasHeaderRow" and "preserveQuotes" flags; new
+ *	    "getLeftQuote" and "getRightQuote" methods.
  */
 package info.rlwhitcomb.csv;
 
@@ -118,6 +121,13 @@ public class CSVFormat
 
 	/** Whether string values are always delimited on output (regardless of contents). */
 	protected boolean alwaysDelimitStrings = false;
+
+	/** Whether to preserve quotes around values on input. */
+	protected boolean preserveQuotes = false;
+
+	/** Whether on input there is a header row before the actual data. */
+	protected boolean hasHeaderRow = false;
+
 
 	/**
 	 * Construct a new (default) format.
@@ -368,6 +378,29 @@ public class CSVFormat
 	    return this;
 	}
 
+	/**
+	 * Set the "preserve quotes" flag for input on an existing format.
+	 *
+	 * @param	flag	New value for the "preserve quotes" flag.
+	 *
+	 * @return	The updated {@link CSVFormat} object.
+	 */
+	public CSVFormat withPreserveQuotes(boolean flag) {
+	    this.preserveQuotes = flag;
+	    return this;
+	}
+
+	/**
+	 * Set the "has header row" flag on an existing format.
+	 *
+	 * @param	flag	New value for the "has header row" flag.
+	 *
+	 * @return	The updated {@link CSVFormat} object.
+	 */
+	public CSVFormat withHasHeaderRow(boolean flag) {
+	    this.hasHeaderRow = flag;
+	    return this;
+	}
 
 	/**
 	 * Is this a "normal" line ending value, meaning is it any of the following:
@@ -381,5 +414,18 @@ public class CSVFormat
 	    return normalLineEnding;
 	}
 
+	/**
+	 * @return The computed left quote value for this format.
+	 */
+	protected char getLeftQuote() {
+	    return quoteChar;
+	}
+
+	/**
+	 * @return The computed right quote value for this format.
+	 */
+	protected char getRightQuote() {
+	    return rightQuoteChar;
+	}
 }
 
