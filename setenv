@@ -1,6 +1,6 @@
 # Find the latest version of Ant and point the path to it
 PROJECTS_HOME=`find ~ -maxdepth 2 -and -name Projects -print -quit`
-echo $PROJECTS_HOME
+echo PROJECTS_HOME = $PROJECTS_HOME
 export ANT_HOME=`find $PROJECTS_HOME -maxdepth 1 -and -name "apache-ant*" -print -quit`
 export UTILITIES_HOME=~/Utilities
 export PATH=$UTILITIES_HOME:$ANT_HOME/bin:$PATH
