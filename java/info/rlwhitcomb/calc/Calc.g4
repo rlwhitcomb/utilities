@@ -122,6 +122,9 @@
  *	    Allow "numberOption" and "modeOption" in directives to use
  *	    a variable reference for the value. Allow "precision" as an
  *	    alias for "decimal".
+ *	16-Feb-2021 (rlwhitcomb)
+ *	    Add "if" and "while" statements. Make LOOP, IF, and WHILE into expressions.
+ *	    Add "define" statement.
  */
 
 grammar Calc;
@@ -133,16 +136,16 @@ prog
 stmt
    : loopOrExpr
    | directive ENDEXPR
+   | define ENDEXPR
    ;
 
 loopOrExpr
-   : expr FORMAT ? ENDEXPR ?               # exprStmt
-   | LOOP ( LOOPVAR IN ) ? loopCtl block   # loopStmt
-   | ENDEXPR                               # emptyStmt
+   : expr FORMAT ? ENDEXPR ?             # exprStmt
+   | ENDEXPR                             # emptyStmt
    ;
 
 block
-   : '{' loopOrExpr * '}'
+   : '{' loopOrExpr * '}'                # stmtBlock
    ;
 
 expr
@@ -150,6 +153,9 @@ expr
    | obj                                 # objExpr
    | arr                                 # arrExpr
    | var                                 # varExpr
+   | LOOP ( LOOPVAR IN ) ? loopCtl block # loopExpr
+   | WHILE expr block                    # whileExpr
+   | IF expr block ( ELSE block ) ?      # ifExpr
    | '(' expr ')'                        # parenExpr
    | var INC_OP                          # postIncOpExpr
    |<assoc=right> INC_OP var             # preIncOpExpr
@@ -258,6 +264,10 @@ value
    | NULL                        # nullValue
    | PI_CONST                    # piValue
    | E_CONST                     # eValue
+   ;
+
+define
+   : DEFINE ID '=' ( loopOrExpr | block )  # defineStmt
    ;
 
 directive
@@ -383,7 +393,15 @@ FRAC     : F R A C ;
 
 LOOP     : L O O P ;
 
+WHILE    : W H I L E ;
+
 IN       : I N ;
+
+IF       : I F ;
+
+ELSE     : E L S E ;
+
+DEFINE   : ( D E F | D E F I N E ) ;
 
 
 /* Note: this needs to be last so that these other "ID" like things

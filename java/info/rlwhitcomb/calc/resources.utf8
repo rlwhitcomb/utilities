@@ -40,6 +40,8 @@
 #	    One more error.
 #	10-Feb-2021 (rlwhitcomb)
 #	    Move the INTRO text here as "help".
+#	16-Feb-2021 (rlwhitcomb)
+#	    Another action message to define a function.
 #
 
 #
@@ -80,6 +82,7 @@ varVariables	= "Variables "
 varCleared	= %1$s cleared.
 debugMode	= Debug mode set to %1$s.
 rationalMode	= Calculation mode set to %1$s.
+defining	= <r>Defining function '<v>%1$s<r>' = <x>%2$s<r>
 # These two should (probably) not be translated
 rational	= RATIONAL
 decimal		= DECIMAL

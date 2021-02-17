@@ -160,6 +160,9 @@
  *	03-Feb-2021 (rlwhitcomb)
  *	    Use tan() from NumericUtil. Allow variable reference in "numberOption"
  *	    and "modeOption".
+ *	16-Feb-2021 (rlwhitcomb)
+ *	    Add "if" and "while" statements, and make them into expressions.
+ *	    Add "define" statement and implement.
  */
 package info.rlwhitcomb.calc;
 
@@ -641,6 +644,15 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    exprBuf.append(format);
 	    String exprString       = exprBuf.toString();
 
+	    // Functions can be defined in terms of other functions, so just keep evaluating
+	    // until we get to a concrete result
+	    while (result instanceof ParserRuleContext) {
+		ParserRuleContext funcCtx = (ParserRuleContext) result;
+		boolean prevSilent = setSilent(true);
+		result = visit(funcCtx);
+		setSilent(prevSilent);
+	    }
+
 	    if (result != null && !format.isEmpty()) {
 		char formatChar = format.charAt(1);
 
@@ -761,8 +773,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	@Override
-	public Object visitLoopStmt(CalcParser.LoopStmtContext ctx) {
+	public Object visitLoopExpr(CalcParser.LoopExprContext ctx) {
 	    CalcParser.LoopCtlContext ctlCtx    = ctx.loopCtl();
+	    CalcParser.BlockContext block       = ctx.block();
 	    CalcParser.ExprListContext exprList = ctlCtx.exprList();
 	    List<CalcParser.ExprContext> exprs  = ctlCtx.expr();
 
@@ -859,14 +872,14 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			    for (int loopIndex = start; loopIndex >= stop; loopIndex += step) {
 				if (loopVarName != null)
 				    variables.put(loopVarName, loopIndex);
-				lastValue = visit(ctx.block());
+				lastValue = visit(block);
 			    }
 			}
 			else {
 			    for (int loopIndex = start; loopIndex <= stop; loopIndex += step) {
 				if (loopVarName != null)
 				    variables.put(loopVarName, loopIndex);
-				lastValue = visit(ctx.block());
+				lastValue = visit(block);
 			    }
 			}
 		    }
@@ -879,14 +892,14 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			    for (BigDecimal loopIndex = dStart; loopIndex.compareTo(dStop) >= 0; loopIndex = loopIndex.add(dStep)) {
 				if (loopVarName != null)
 				    variables.put(loopVarName, loopIndex);
-				lastValue = visit(ctx.block());
+				lastValue = visit(block);
 			    }
 			}
 			else {
 			    for (BigDecimal loopIndex = dStart; loopIndex.compareTo(dStop) <= 0; loopIndex = loopIndex.add(dStep)) {
 				if (loopVarName != null)
 				    variables.put(loopVarName, loopIndex);
-				lastValue = visit(ctx.block());
+				lastValue = visit(block);
 			    }
 			}
 		    }
@@ -896,27 +909,26 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			Object value = iter.next();
 			if (loopVarName != null)
 			    variables.put(loopVarName, value);
-			lastValue = visit(ctx.block());
+			lastValue = visit(block);
 		    }
 		}
 		else if (codePoints != null) {
-		    StringBuilder buf = new StringBuilder(2);
-		    codePoints.forEach(cp -> {
+		    StringBuilder buf = new StringBuilder(4);
+		    for (Iterator<Integer> intIter = codePoints.iterator(); intIter.hasNext(); ) {
+			Integer cp = intIter.next();
 			buf.setLength(0);
 			buf.appendCodePoint(cp);
 			if (loopVarName != null)
 			    variables.put(loopVarName, buf.toString());
-			// TODO: this is ugly, but we can't assign to "lastValue" in a lambda
-			// BUT since lastValue isn't actually available anywhere, it doesn't matter
-			/* lastValue = */ visit(ctx.block());
-		    });
+			lastValue = visit(block);
+		    }
 		}
 		else {
 		    for (CalcParser.ExprContext expr : exprs) {
 			Object loopValue = visit(expr);
 			if (loopVarName != null)
 			    variables.put(loopVarName, loopValue);
-			lastValue = visit(ctx.block());
+			lastValue = visit(block);
 		    }
 		}
 	    }
@@ -927,6 +939,66 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 
 	    return lastValue;
+	}
+
+	@Override
+	public Object visitWhileExpr(CalcParser.WhileExprContext ctx) {
+	    CalcParser.ExprContext exprCtx = ctx.expr();
+	    CalcParser.BlockContext block  = ctx.block();
+
+	    Object lastValue = null;
+
+	    boolean exprResult = getBooleanValue(exprCtx);
+	    while (exprResult) {
+		lastValue = visit(block);
+		exprResult = getBooleanValue(exprCtx);
+	    }
+
+	    return lastValue;
+	}
+
+	@Override
+	public Object visitIfExpr(CalcParser.IfExprContext ctx) {
+	    CalcParser.ExprContext exprCtx = ctx.expr();
+	    CalcParser.BlockContext thenBlock = ctx.block(0);
+	    CalcParser.BlockContext elseBlock = ctx.block(1);
+	    Object resultValue = null;
+
+	    boolean controlValue = getBooleanValue(exprCtx);
+	    if (controlValue) {
+		resultValue = visit(thenBlock);
+	    }
+	    else if (elseBlock != null) {
+		resultValue = visit(elseBlock);
+	    }
+
+	    return resultValue;
+	}
+
+	@Override
+	public Object visitStmtBlock(CalcParser.StmtBlockContext ctx) {
+	    Object lastValue = null;
+
+	    for (CalcParser.LoopOrExprContext stmtCtx : ctx.loopOrExpr()) {
+		lastValue = visit(stmtCtx);
+	    }
+
+	    return lastValue;
+	}
+
+	@Override
+	public Object visitDefineStmt(CalcParser.DefineStmtContext ctx) {
+	    String functionName = ctx.ID().getText();
+
+	    CalcParser.LoopOrExprContext loopOrExpr = ctx.loopOrExpr();
+	    CalcParser.BlockContext block           = ctx.block();
+
+	    ParserRuleContext functionBody = loopOrExpr != null ? loopOrExpr : block;
+	    variables.put(functionName, functionBody);
+
+	    displayActionMessage("%calc#defining", functionName, getTreeText(functionBody));
+
+	    return functionBody;
 	}
 
 	@Override
