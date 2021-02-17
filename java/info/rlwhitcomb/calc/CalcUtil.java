@@ -41,6 +41,8 @@
  * 	    parameters for consistency.
  *	02-Feb-2021 (rlwhitcomb)
  *	    Tweak the integer conversions.
+ *	17-Feb-2021 (rlwhitcomb)
+ *	    Add "visitor" parameters and evaluate functions.
  */
 package info.rlwhitcomb.calc;
 
@@ -85,7 +87,7 @@ public final class CalcUtil
 	public static void getTreeText(final StringBuilder buf, final ParserRuleContext ctx) {
 	    for (ParseTree child : ctx.children) {
 		if (child instanceof ParserRuleContext) {
-		    getTreeText(buf, (ParserRuleContext)child);
+		    getTreeText(buf, (ParserRuleContext) child);
 		}
 		else {
 		    String childText = child.getText();
@@ -125,23 +127,27 @@ public final class CalcUtil
 	}
 
 
-	public static BigDecimal toDecimalValue(final Object value, final MathContext mc, final ParserRuleContext ctx) {
+	public static BigDecimal toDecimalValue(final CalcObjectVisitor visitor, final Object value, final MathContext mc, final ParserRuleContext ctx) {
 	    nullCheck(value, ctx);
 
 	    if (value instanceof BigDecimal)
-		return (BigDecimal)value;
+		return (BigDecimal) value;
 	    else if (value instanceof BigInteger)
-		return new BigDecimal((BigInteger)value);
+		return new BigDecimal((BigInteger) value);
 	    else if (value instanceof BigFraction)
-		return ((BigFraction)value).toDecimal(mc);
+		return ((BigFraction) value).toDecimal(mc);
 	    else if (value instanceof String)
-		return new BigDecimal((String)value);
+		return new BigDecimal((String) value);
 	    else if (value instanceof Boolean)
-		return ((Boolean)value).booleanValue() ? BigDecimal.ONE : BigDecimal.ZERO;
+		return ((Boolean) value).booleanValue() ? BigDecimal.ONE : BigDecimal.ZERO;
 	    else if (value instanceof Double || value instanceof Float)
-		return new BigDecimal(((Number)value).doubleValue());
+		return new BigDecimal(((Number) value).doubleValue());
 	    else if (value instanceof Number)
-		return BigDecimal.valueOf(((Number)value).longValue());
+		return BigDecimal.valueOf(((Number) value).longValue());
+	    else if (value instanceof ParserRuleContext) {
+		ParserRuleContext funcCtx = (ParserRuleContext) value;
+		return toDecimalValue(visitor, visitor.visit(funcCtx), mc, funcCtx);
+	    }
 
 	    String typeName = value.getClass().getSimpleName();
 	    if (value instanceof Map)
@@ -151,23 +157,27 @@ public final class CalcUtil
 	    throw new CalcExprException(ctx, "%calc#noConvertDecimal", typeName);
 	}
 
-	public static BigFraction toFractionValue(final Object value, final ParserRuleContext ctx) {
+	public static BigFraction toFractionValue(final CalcObjectVisitor visitor, final Object value, final ParserRuleContext ctx) {
 	    nullCheck(value, ctx);
 
 	    if (value instanceof BigFraction)
-		return (BigFraction)value;
+		return (BigFraction) value;
 	    else if (value instanceof BigDecimal)
-		return new BigFraction((BigDecimal)value);
+		return new BigFraction((BigDecimal) value);
 	    else if (value instanceof BigInteger)
-		return new BigFraction((BigInteger)value);
+		return new BigFraction((BigInteger) value);
 	    else if (value instanceof String)
-		return BigFraction.valueOf((String)value);
+		return BigFraction.valueOf((String) value);
 	    else if (value instanceof Boolean)
-		return ((Boolean)value).booleanValue() ? BigFraction.ONE : BigFraction.ZERO;
+		return ((Boolean) value).booleanValue() ? BigFraction.ONE : BigFraction.ZERO;
 	    else if (value instanceof Double || value instanceof Float)
-		return new BigFraction(new BigDecimal(((Number)value).doubleValue()));
+		return new BigFraction(new BigDecimal(((Number) value).doubleValue()));
 	    else if (value instanceof Number)
-		return new BigFraction(((Number)value).longValue());
+		return new BigFraction(((Number) value).longValue());
+	    else if (value instanceof ParserRuleContext) {
+		ParserRuleContext funcCtx = (ParserRuleContext) value;
+		return toFractionValue(visitor, visitor.visit(funcCtx), funcCtx);
+	    }
 
 	    String typeName = value.getClass().getSimpleName();
 	    if (value instanceof Map)
@@ -177,16 +187,16 @@ public final class CalcUtil
 	    throw new CalcExprException(ctx, "%calc#noConvertFraction", typeName);
 	}
 
-	public static BigInteger toIntegerValue(final Object value, final MathContext mc, final ParserRuleContext ctx) {
+	public static BigInteger toIntegerValue(final CalcObjectVisitor visitor, final Object value, final MathContext mc, final ParserRuleContext ctx) {
 	    try {
 		if (value instanceof BigInteger) {
-		    return (BigInteger)value;
+		    return (BigInteger) value;
 		}
 		else if (value instanceof BigFraction) {
-		    return ((BigFraction)value).toIntegerExact();
+		    return ((BigFraction) value).toIntegerExact();
 		}
 		else {
-		    return toDecimalValue(value, mc, ctx).toBigIntegerExact();
+		    return toDecimalValue(visitor, value, mc, ctx).toBigIntegerExact();
 		}
 	    }
 	    catch (ArithmeticException ae) {
@@ -194,16 +204,16 @@ public final class CalcUtil
 	    }
 	}
 
-	public static int toIntValue(final Object value, final MathContext mc, final ParserRuleContext ctx) {
+	public static int toIntValue(final CalcObjectVisitor visitor, final Object value, final MathContext mc, final ParserRuleContext ctx) {
 	    try {
 		if (value instanceof BigInteger) {
-		    return ((BigInteger)value).intValueExact();
+		    return ((BigInteger) value).intValueExact();
 		}
 		else if (value instanceof BigFraction) {
-		    return ((BigFraction)value).intValueExact();
+		    return ((BigFraction) value).intValueExact();
 		}
 		else {
-		    return toDecimalValue(value, mc, ctx).intValueExact();
+		    return toDecimalValue(visitor, value, mc, ctx).intValueExact();
 		}
 	    }
 	    catch (ArithmeticException ae) {
@@ -211,8 +221,13 @@ public final class CalcUtil
 	    }
 	}
 
-	public static Boolean toBooleanValue(final Object value, final ParserRuleContext ctx) {
+	public static Boolean toBooleanValue(final CalcObjectVisitor visitor, final Object value, final ParserRuleContext ctx) {
 	    nullCheck(value, ctx);
+
+	    if (value instanceof ParserRuleContext) {
+		ParserRuleContext funcCtx = (ParserRuleContext) value;
+		return toBooleanValue(visitor, visitor.visit(funcCtx), funcCtx);
+	    }
 
 	    try {
 		boolean boolValue = CharUtil.getBooleanValue(value);
@@ -223,38 +238,42 @@ public final class CalcUtil
 	    }
 	}
 
-	public static String toStringValue(final Object result) {
-	    return toStringValue(result, true, false, "");
+	public static String toStringValue(final CalcObjectVisitor visitor, final Object result) {
+	    return toStringValue(visitor, result, true, false, "");
 	}
 
 	@SuppressWarnings("unchecked")
-	public static String toStringValue(final Object result, final boolean quote, final boolean pretty, final String indent) {
+	public static String toStringValue(final CalcObjectVisitor visitor, final Object result, final boolean quote, final boolean pretty, final String indent) {
 	    if (result == null) {
 		return quote ? "<null>" : "";
 	    }
 	    else if (result instanceof String) {
 		if (quote)
-		    return CharUtil.addDoubleQuotes((String)result);
+		    return CharUtil.addDoubleQuotes((String) result);
 		else
-		    return (String)result;
+		    return (String) result;
 	    }
 	    else if (result instanceof BigDecimal) {
-		return ((BigDecimal)result).toPlainString();
+		return ((BigDecimal) result).toPlainString();
 	    }
 	    else if (result instanceof BigFraction) {
-		return ((BigFraction)result).toString();
+		return ((BigFraction) result).toString();
 	    }
 	    else if (result instanceof Map) {
-		return toStringValue((Map<String, Object>)result, quote, pretty, indent);
+		return toStringValue(visitor, (Map<String, Object>) result, quote, pretty, indent);
 	    }
 	    else if (result instanceof List) {
-		return toStringValue((List<Object>)result, quote, pretty, indent);
+		return toStringValue(visitor, (List<Object>) result, quote, pretty, indent);
+	    }
+	    else if (result instanceof ParserRuleContext) {
+		ParserRuleContext funcCtx = (ParserRuleContext) result;
+		return toStringValue(visitor, visitor.visit(funcCtx), quote, pretty, indent);
 	    }
 
 	    return result.toString();
 	}
 
-	public static String toStringValue(final Map<String, Object> map, final boolean quote, final boolean pretty, final String indent) {
+	public static String toStringValue(final CalcObjectVisitor visitor, final Map<String, Object> map, final boolean quote, final boolean pretty, final String indent) {
 	    String myIndent = indent + "  ";
 	    StringBuilder buf = new StringBuilder();
 	    if (map.size() > 0) {
@@ -267,7 +286,7 @@ public final class CalcUtil
 			comma = true;
 		    if (pretty) buf.append(myIndent);
 		    buf.append(entry.getKey()).append(": ");
-		    buf.append(toStringValue(entry.getValue(), quote, pretty, myIndent));
+		    buf.append(toStringValue(visitor, entry.getValue(), quote, pretty, myIndent));
 		}
 		buf.append(pretty ? "\n" + indent + "}" : " }");
 	    }
@@ -277,7 +296,7 @@ public final class CalcUtil
 	    return buf.toString();
 	}
 
-	public static String toStringValue(final List<Object> list, final boolean quote, final boolean pretty, final String indent) {
+	public static String toStringValue(final CalcObjectVisitor visitor, final List<Object> list, final boolean quote, final boolean pretty, final String indent) {
 	    String myIndent = indent + "  ";
 	    StringBuilder buf = new StringBuilder();
 	    if (list.size() > 0) {
@@ -289,7 +308,7 @@ public final class CalcUtil
 		    else
 			comma = true;
 		    if (pretty) buf.append(myIndent);
-		    buf.append(toStringValue(value, quote, pretty, myIndent));
+		    buf.append(toStringValue(visitor, value, quote, pretty, myIndent));
 		}
 		buf.append(pretty ? "\n" + indent + "]" : " ]");
 	    }
@@ -312,18 +331,19 @@ public final class CalcUtil
 	 * <li>{@code Null} = zero</li>
 	 * </ul>
 	 *
-	 * @param obj	The object to be "measured".
-	 * @param ctx	The context to use for error reporting.
+	 * @param visitor	The visitor object (for function evaluation).
+	 * @param obj		The object to be "measured".
+	 * @param ctx		The context to use for error reporting.
 	 * @param recursive	Whether or not to descend into the object / array or not.
-	 * @return	The "length" according to the above rules.
+	 * @return		The "length" according to the above rules.
 	 */
-	public static int length(final Object obj, final ParserRuleContext ctx, final boolean recursive) {
+	public static int length(final CalcObjectVisitor visitor, final Object obj, final ParserRuleContext ctx, final boolean recursive) {
 	    if (obj == null)
 		return 0;
 	    if (obj instanceof Boolean)
 		return 1;
 	    if (obj instanceof BigInteger) {
-		String strValue = ((BigInteger)obj).toString();
+		String strValue = ((BigInteger) obj).toString();
 		// Number of digits does not include the leading sign (if present)
 		if (strValue.charAt(0) == '-')
 		    return strValue.length() - 1;
@@ -331,21 +351,21 @@ public final class CalcUtil
 		    return strValue.length();
 	    }
 	    if (obj instanceof BigDecimal)
-		return ((BigDecimal)obj).precision();
+		return ((BigDecimal) obj).precision();
 	    if (obj instanceof BigFraction)
-		return ((BigFraction)obj).toDecimal().precision();	// ?? not really helpful, probably
+		return ((BigFraction) obj).toDecimal().precision();	// ?? not really helpful, probably
 	    if (obj instanceof String) {
-		String str = (String)obj;
+		String str = (String) obj;
 		return str.codePointCount(0, str.length());
 	    }
 	    if (obj instanceof List) {
 		@SuppressWarnings("unchecked")
-		List<Object> list = (List<Object>)obj;
+		List<Object> list = (List<Object>) obj;
 		if (recursive) {
 		    int len = 0;
 		    for (Object listObj : list) {
 			if (listObj instanceof List || listObj instanceof Map)
-			    len += length(listObj, ctx, recursive);
+			    len += length(visitor, listObj, ctx, recursive);
 			else
 			    len++;	// Note: this will count null entries as one
 		    }
@@ -357,12 +377,12 @@ public final class CalcUtil
 	    }
 	    if (obj instanceof Map) {
 		@SuppressWarnings("unchecked")
-		Map<String, Object> map = (Map<String, Object>)obj;
+		Map<String, Object> map = (Map<String, Object>) obj;
 		if (recursive) {
 		    int len = 0;
 		    for (Object valueObj : map.values()) {
 			if (valueObj instanceof List || valueObj instanceof Map)
-			    len += length(valueObj, ctx, recursive);
+			    len += length(visitor, valueObj, ctx, recursive);
 			else
 			    len++;	// Note: this will count null entries as one
 		    }
@@ -371,6 +391,10 @@ public final class CalcUtil
 		else {
 		    return map.size();
 		}
+	    }
+	    if (obj instanceof ParserRuleContext) {
+		ParserRuleContext funcCtx = (ParserRuleContext) obj;
+		return length(visitor, visitor.visit(funcCtx), funcCtx, recursive);
 	    }
 
 	    throw new CalcExprException(ctx, "%calc#unknownType", obj.getClass().getSimpleName());
@@ -384,17 +408,22 @@ public final class CalcUtil
 	 * <li>everything else = {@code 0}</li>
 	 * </ul>
 	 *
-	 * @param obj	The object to interrogate.
-	 * @param ctx	The context to use for error reporting.
-	 * @return	The scale of the object.
+	 * @param visitor	The visitor (for function evaluation).
+	 * @param obj		The object to interrogate.
+	 * @param ctx		The context to use for error reporting.
+	 * @return		The scale of the object.
 	 */
-	public static int scale(final Object obj, final ParserRuleContext ctx) {
+	public static int scale(final CalcObjectVisitor visitor, final Object obj, final ParserRuleContext ctx) {
 	    if (obj instanceof BigDecimal)
-		return ((BigDecimal)obj).scale();
+		return ((BigDecimal) obj).scale();
 	    if (obj instanceof BigFraction)
-		return ((BigFraction)obj).toDecimal().scale();
+		return ((BigFraction) obj).toDecimal().scale();
 	    if (obj instanceof List || obj instanceof Map)
-		return length(obj, ctx, false);
+		return length(visitor, obj, ctx, false);
+	    if (obj instanceof ParserRuleContext) {
+		ParserRuleContext funcCtx = (ParserRuleContext) obj;
+		return scale(visitor, visitor.visit(funcCtx), funcCtx);
+	    }
 	    return 0;
 	}
 
@@ -462,23 +491,23 @@ public final class CalcUtil
 		return s1.compareTo(s2);
 	    }
 	    else if (e1 instanceof BigDecimal || e2 instanceof BigDecimal) {
-		BigDecimal d1 = toDecimalValue(e1, mc, ctx1);
-		BigDecimal d2 = toDecimalValue(e2, mc, ctx2);
+		BigDecimal d1 = toDecimalValue(visitor, e1, mc, ctx1);
+		BigDecimal d2 = toDecimalValue(visitor, e2, mc, ctx2);
 		return d1.compareTo(d2);
 	    }
 	    else if (e1 instanceof BigInteger || e2 instanceof BigInteger) {
-		BigInteger i1 = toIntegerValue(e1, mc, ctx1);
-		BigInteger i2 = toIntegerValue(e2, mc, ctx2);
+		BigInteger i1 = toIntegerValue(visitor, e1, mc, ctx1);
+		BigInteger i2 = toIntegerValue(visitor, e2, mc, ctx2);
 		return i1.compareTo(i2);
 	    }
 	    else if (e1 instanceof BigFraction || e2 instanceof BigFraction) {
-		BigFraction f1 = toFractionValue(e1, ctx1);
-		BigFraction f2 = toFractionValue(e2, ctx2);
+		BigFraction f1 = toFractionValue(visitor, e1, ctx1);
+		BigFraction f2 = toFractionValue(visitor, e2, ctx2);
 		return f1.compareTo(f2);
 	    }
 	    else if (e1 instanceof Boolean || e2 instanceof Boolean) {
-		Boolean b1 = toBooleanValue(e1, ctx1);
-		Boolean b2 = toBooleanValue(e2, ctx2);
+		Boolean b1 = toBooleanValue(visitor, e1, ctx1);
+		Boolean b2 = toBooleanValue(visitor, e2, ctx2);
 		return b1.compareTo(b2);
 	    }
 
@@ -491,6 +520,7 @@ public final class CalcUtil
 	 * <p> Else convert to {@link BigDecimal} or {@link BigFraction}
 	 * and do the addition.
 	 *
+	 * @param visitor  The visitor (for function evaluation).
 	 * @param e1       The LHS operand.
 	 * @param e2       The RHS operand.
 	 * @param ctx1     The Rule context for the first operand (for error reporting).
@@ -499,7 +529,8 @@ public final class CalcUtil
 	 * @param rational Whether we're doing rational ({@code true}) or decimal arithmetic.
 	 * @return {@code e1 + e2}
 	 */
-	public static Object addOp(final Object e1, final Object e2,
+	public static Object addOp(final CalcObjectVisitor visitor,
+		final Object e1, final Object e2,
 		final ParserRuleContext ctx1, final ParserRuleContext ctx2,
 		final MathContext mc, final boolean rational) {
 	    if (e1 == null && e2 == null)
@@ -517,14 +548,14 @@ public final class CalcUtil
 
 	    // Otherwise, numeric values get added numerically
 	    if (rational) {
-		BigFraction f1 = toFractionValue(e1, ctx1);
-		BigFraction f2 = toFractionValue(e2, ctx2);
+		BigFraction f1 = toFractionValue(visitor, e1, ctx1);
+		BigFraction f2 = toFractionValue(visitor, e2, ctx2);
 
 		return f1.add(f2);
 	    }
 	    else {
-		BigDecimal d1 = toDecimalValue(e1, mc, ctx1);
-		BigDecimal d2 = toDecimalValue(e2, mc, ctx2);
+		BigDecimal d1 = toDecimalValue(visitor, e1, mc, ctx1);
+		BigDecimal d2 = toDecimalValue(visitor, e2, mc, ctx2);
 
 		return d1.add(d2, mc);
 	    }

@@ -427,7 +427,7 @@ public class Calc
 		public void perform(Component source) {
 		    final String exprText = inputTextArea.getText();
 
-		    queuedThread.submitWork(() -> processString(exprText, quiet) );
+		    queuedThread.submitWork(() -> processString(exprText, quiet));
 
 		    inputTextArea.setText("");
 		    inputTextArea.requestFocus();

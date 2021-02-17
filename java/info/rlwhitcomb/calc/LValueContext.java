@@ -36,6 +36,8 @@
  *	    Allow ["name"] to extract fields of map objects.
  *	29-Jan-2021 (rlwhitcomb)
  *	    Use new Intl Exception variants.
+ *	17-Feb-2021 (rlwhitcomb)
+ *	    Add "visitor" parameter for function evaluation.
  */
  package info.rlwhitcomb.calc;
 
@@ -172,11 +174,12 @@ class LValueContext
 	 * <p> One special check is made on loop variables because we don't
 	 * want them to be reassigned apart from the <code>loop</code> construct.
 	 *
-	 * @param value	The new value to assign to this context.
-	 * @return 	This value (for convenience in the assign operators.
+	 * @param visitor The visitor (for function evaluation).
+	 * @param value	  The new value to assign to this context.
+	 * @return	  This value (for convenience in the assign operators.
 	 */
 	@SuppressWarnings("unchecked")
-	public Object putContextObject(Object value) {
+	public Object putContextObject(final CalcObjectVisitor visitor, final Object value) {
 	    if (name != null) {
 		if (name.startsWith("$")) {
 		    throw new CalcExprException(varCtx, "%calc#loopVarNoAssign", name);
@@ -191,7 +194,7 @@ class LValueContext
 		}
 		else if (context instanceof String) {
 		    StringBuilder buf = new StringBuilder((String) context);
-		    String newValue = CalcUtil.toStringValue(value, false, false, "");
+		    String newValue = CalcUtil.toStringValue(visitor, value, false, false, "");
 		    int newLen = index + newValue.length();
 		    // Ensure the builder has enough length to do the replacement
 		    while (buf.length() < newLen) {
@@ -200,7 +203,7 @@ class LValueContext
 		    buf.replace(index, newLen, newValue);
 		    this.context = buf.toString();
 		    // Have to update the parent as well with the new string
-		    parent.putContextObject(this.context);
+		    parent.putContextObject(visitor, this.context);
 		}
 	    }
 	    else {
@@ -215,17 +218,18 @@ class LValueContext
 	/**
 	 * An intermediate step used for maps with members as a string (as in <code>map."field"</code>).
 	 *
+	 * @param visitor	The visitor object (for function evaluation).
 	 * @param ctx		The parser context we are working in.
 	 * @param memberName	The (quoted) member name to use at this level.
 	 * @return		The new context for the <code>map."member"</code>.
 	 */
 	@SuppressWarnings("unchecked")
-	private LValueContext makeMapLValue(CalcParser.VarContext ctx, String memberName) {
+	private LValueContext makeMapLValue(final CalcObjectVisitor visitor, final CalcParser.VarContext ctx, final String memberName) {
 	    Map<String, Object> map = null;
 	    Object objValue = getContextObject();
 	    if (objValue == null) {
 		map = new HashMap<>();
-		putContextObject(map);
+		putContextObject(visitor, map);
 	    }
 	    else if (objValue instanceof Map) {
 		map = (Map<String, Object>) objValue;
@@ -268,10 +272,10 @@ class LValueContext
 		// Okay, here the "arrValue" could be null, an array, a string, OR an object (map)
 		if (arrValue != null && arrValue instanceof Map) {
 		    // The "index" expression should be a string (meaning a member name)
-		    LValueContext objLValue = arrLValue.makeMapLValue(arrVarCtx, null);
+		    LValueContext objLValue = arrLValue.makeMapLValue(visitor, arrVarCtx, null);
 
 		    String memberName = visitor.getStringValue(arrVarCtx.expr());
-		    return objLValue.makeMapLValue(arrVarCtx, memberName);
+		    return objLValue.makeMapLValue(visitor, arrVarCtx, memberName);
 		}
 
 		// By now, the object must either be null, a list, a string, or a simple value (an error)
@@ -284,7 +288,7 @@ class LValueContext
 		List<Object> list = null;
 		if (arrValue == null) {
 		    list = new ArrayList<>();
-		    arrLValue.putContextObject(list);
+		    arrLValue.putContextObject(visitor, list);
 		}
 		else if (arrValue instanceof List) {
 		    list = (List<Object>) arrValue;
@@ -307,19 +311,19 @@ class LValueContext
 		CalcParser.ObjVarContext objVarCtx = (CalcParser.ObjVarContext) ctx;
 		LValueContext objLValue = getLValue(visitor, objVarCtx.var(0), lValue);
 
-		objLValue = objLValue.makeMapLValue(objVarCtx, null);
+		objLValue = objLValue.makeMapLValue(visitor, objVarCtx, null);
 
 		List<TerminalNode> strings = objVarCtx.STRING();
 		if (strings.size() > 0) {
 		    for (TerminalNode string : strings) {
-			objLValue = objLValue.makeMapLValue(objVarCtx, string.getText());
+			objLValue = objLValue.makeMapLValue(visitor, objVarCtx, string.getText());
 		    }
 		}
 
 		CalcParser.VarContext rhsVarCtx = objVarCtx.var(1);
 		if (rhsVarCtx != null) {
 		    if (strings.size() > 0)
-			objLValue = objLValue.makeMapLValue(objVarCtx, null);
+			objLValue = objLValue.makeMapLValue(visitor, objVarCtx, null);
 		    return getLValue(visitor, rhsVarCtx, objLValue);
 		}
 		else
