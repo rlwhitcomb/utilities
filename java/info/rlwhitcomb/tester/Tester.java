@@ -173,6 +173,8 @@
  *	    Move standard platform code to Environment; one other code tweak.
  *	11-Feb-2021 (rlwhitcomb)
  *	    Get version from test class so version checks work; refactor MajorMinor to Version.
+ *	18-Feb-2021 (rlwhitcomb)
+ *	    Allow spaces before colon in test description lines.
  */
 package info.rlwhitcomb.tester;
 
@@ -227,7 +229,7 @@ import info.rlwhitcomb.util.Options;
 public class Tester
 	implements Testable
 {
-	private static final Pattern DESCRIPTION = Pattern.compile("^(\\s*\\{\\s*(\\d+)\\s*\\}\\s*)?([a-zA-Z0-9_/\\-\\\\\\$\\.]+)(,([\\w\\-]+))?\\:\\s*(.*)$");
+	private static final Pattern DESCRIPTION = Pattern.compile("^(\\s*\\{\\s*(\\d+)\\s*\\}\\s*)?([a-zA-Z0-9_/\\-\\\\\\$\\.]+)(,([\\w\\-]+))?\\s*\\:\\s*(.*)$");
 	private static final Pattern DIRECTIVE   = Pattern.compile("^([a-zA-Z]+)(\\s+(.*)\\s*)?$");
 
 	private boolean createCanons = false;
