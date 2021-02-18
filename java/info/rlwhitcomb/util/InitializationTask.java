@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2014,2020 Roger L. Whitcomb.
+ * Copyright (c) 2014,2020-2021 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,6 +29,14 @@
  *	    but generalized for further use.
  *	16-Oct-2020 (rlwhitcomb)
  *	    Prepare for GitHub.
+ *	18-Feb-2021 (rlwhitcomb)
+ *	    Running "start()" inside our constructor means that the "run()"
+ *	    method (and therefore the subclass' "task()") could start or even
+ *	    finish before the subclass constructor is finished, which bollixes
+ *	    up everything. See https://stackoverflow.com/questions/84285/calling-thread-start-within-its-own-constructor
+ *	    for the answer to this question that I never even asked...
+ *	    So, we should NOT overload Thread, but make a thread pool and accept a Runnable or Callable, maybe
+ *	    using FutureTask or RunnableFuture, or something like that.
  */
 
 package info.rlwhitcomb.util;
@@ -44,6 +52,11 @@ import java.util.concurrent.Semaphore;
  */
 public abstract class InitializationTask extends Thread
 {
+	/**
+	 * The logging object.
+	 */
+	private static Logging logger = new Logging(InitializationTask.class);
+
 	/** The semaphore used to wait on the background thread to finish. The initial count of zero
 	 * ensures that {@link #waitUntilFinished} will not complete until the initial {@link #task}
 	 * has completed (called by the {@link #run} method, which does a {@link Semaphore#release}
@@ -59,7 +72,9 @@ public abstract class InitializationTask extends Thread
 	    // Since this is a convenience (i.e., the "waitUntilFinished" may never be called),
 	    // don't stall shutdown waiting for this task to finish
 	    setDaemon(true);
+	    logger.debug("Starting background thread...");
 	    start();
+	    logger.debug("Done with constructor.");
 	}
 
 	/**
@@ -68,11 +83,18 @@ public abstract class InitializationTask extends Thread
 	@Override
 	public void run() {
 	    try {
+		logger.debug("In 'run' method: starting 'task()'...");
 		task();
+		logger.debug("In 'run' method: finished 'task()'.");
+	    }
+	    catch (Throwable ex) {
+		logger.except("Caught exception running 'task()'", ex);
 	    }
 	    finally {
+		logger.debug("In 'run' method: releasing wait sempaphore.");
 		waitSemaphore.release();
 	    }
+	    logger.debug("Finished in 'run' method.");
 	}
 
 	/**
@@ -87,9 +109,12 @@ public abstract class InitializationTask extends Thread
 	 * thread is done with its work before accessing the resources.
 	 */
 	public void waitUntilFinished() {
+	    logger.debug("Inside 'waitUntilFinished': waiting for semaphore...");
 	    // We may not acquire a permit until (at least) the release at the end of the "run" method
 	    waitSemaphore.acquireUninterruptibly();
+	    logger.debug("Inside 'waitUntilFinished': acquired semaphore.");
 	    // But then, this release makes the "acquire" complete instantly after that
 	    waitSemaphore.release();
+	    logger.debug("Finished with 'waitUntilFinished' method.");
 	}
 }

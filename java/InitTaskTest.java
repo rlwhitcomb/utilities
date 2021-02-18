@@ -32,9 +32,12 @@
  *	    After experiencing one failure during testing, fix it (?)
  *	    by calling "super()" in the constructor. Reduce loop count.
  *	    Fail with non-zero exit code.
+ *	18-Feb-2021 (rlwhitcomb)
+ *	    Add logging to figure out why this fails sometimes.
  */
 import info.rlwhitcomb.util.Environment;
 import info.rlwhitcomb.util.InitializationTask;
+import info.rlwhitcomb.util.Logging;
 import info.rlwhitcomb.util.NumericUtil;
 
 /**
@@ -46,6 +49,11 @@ import info.rlwhitcomb.util.NumericUtil;
  */
 public class InitTaskTest
 {
+	/**
+	 * The logging object.
+	 */
+	private static final Logging logger = new Logging(InitTaskTest.class);
+
 	/**
 	 * 3141 * 3 digits of PI 
 	 *
@@ -196,13 +204,19 @@ public class InitTaskTest
 		    this.digits = digitLength;
 		    this.iters  = iterations;
 		    this.times  = 0;
+
+		    logger.debug("Finished 'InitTask' constructor: setting up %1$d iterations.", iterations);
 		}
 
 		@Override
 		public void task() {
+		    logger.debug("Starting 'task()' inside InitTask with %1$d iterations...", iters);
 		    for (int i = 0; i < iters; i++) {
+			logger.debug("Inside 'task()': running the calculation for loop #%1$d...", (i + 1));
 			digitString = NumericUtil.piDigits(digits);
+			logger.debug("Inside 'task()': finished calculation #%1$d: string length = %2$d", (i + 1), digitString.length());
 		    }
+		    logger.debug("Finished with 'task()'.");
 		}
 
 		/**

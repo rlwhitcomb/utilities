@@ -30,16 +30,18 @@ All the "java" directory classes are built into a single "utilities.jar" file, w
 
 Work going on currently includes:
 
+- InitializationTask is all wrong -- need a better paradigm, using existing Java mechanisms (see Issue #8)
+- Make InitializationTask and QueuedThread work seamlessly with "synchronized"
 - Convert D.C to Java (include supporting code).
 - Get "pivot" builds working, including Javadoc, packaging, etc.
 - New Java-based "tail", "head", and other Linux utilities missing on Windows.
-- Add support for color-coding within Intl text using HTML-like tags, then update help text in existing programs.
+- Use new color coding to spruce up all help and error messages; add -color and -nocolor flags everywhere
+- Maybe find a way in Options to add "standard" flags (like "-color" above)
 - Completely new paradigm for Options, similar to Apache commons-cli, including support for printing help text from the options list.
 - UUID program: generate random, generate from text, separate into parts, maybe more.
 - Lots of unit tests.
 - Consider a standard method to read .properties files (take the code from "readVersionProperties" in Environment and make it general somewhere else?)
 - Completely update JavaPreProc to use an Antlr expression grammar to process the directives.
-- Make InitializationTask and QueuedThread work seamlessly with "synchronized"
 - Add a Spanish translation for all the current resources (and ongoing for new resource files).
 
 Also see "issues" at https://github.com/rlwhitcomb/utilities/issues
