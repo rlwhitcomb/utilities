@@ -14,7 +14,7 @@ loop $i in SIZE {
       array[$i-1][$j-1] = value++!
    }
 }
-array;j
+array@j
 
 primes = []; numPrimes = 0;
 start = 2; end = 102;

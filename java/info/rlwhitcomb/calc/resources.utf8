@@ -42,6 +42,8 @@
 #	    Move the INTRO text here as "help".
 #	16-Feb-2021 (rlwhitcomb)
 #	    Another action message to define a function.
+#	19-Feb-2021 (rlwhitcomb)
+#	    Error message for bad format.
 #
 
 #
@@ -98,6 +100,7 @@ infLoopStepZero		= Infinite loop: step value is zero
 invalidConstruct	= Invalid '$' construct
 invalidConst2		= Invalid '${...}' construct
 modeError		= Mode option '%1$s' not recognized
+illegalFormat		= Unrecognized format '%1$s'
 
 intro.help1	= "  Enter an expression (or multiple expressions separated by ';')."
 intro.help2	= "  Use '<v>help<r>' or '<v>?<r>' for a list of supported functions."

@@ -166,6 +166,8 @@
  *	17-Feb-2021 (rlwhitcomb)
  *	    Add "this" parameter to various methods in order to (completely) implement
  *	    the recursion necessary for nested function evaluation.
+ *	19-Feb-2021 (rlwhitcomb)
+ *	    Illegal format error. Implement percent format precision.
  */
 package info.rlwhitcomb.calc;
 
@@ -396,6 +398,26 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	private int compareValues(ParserRuleContext ctx1, ParserRuleContext ctx2, boolean strict, boolean allowNulls) {
 	    return CalcUtil.compareValues(this, ctx1, ctx2, mc, strict, allowNulls);
+	}
+
+	private BigDecimal round(BigDecimal value, int iPlaces) {
+	    /* iPlaces is going to be the number of fractional digits to round to:
+	     * 0 = round to an integer, 1 to x.y, 2 to x.yy, etc.
+	     * and a negative number will round above the decimal point, as in:
+	     * -2 to x00.
+	     * So, if precision is the number of digits we keep, and scale is how far
+	     * left of the last digit the decimal point is situated, then
+	     * (precision - scale) is the number of whole digits, then we can add
+	     * that to "iPlaces" to get the MathContext precision to use for rounding here.
+	     * Also, it appears that rounding to 0 means no change, so we set a min value
+	     * of one to ensure *some* rounding always occurs, such that 0.714... rounded
+	     * to -2 will give 0.7, not retain the 0.714... value.
+	     */
+	    int prec       = value.precision();
+	    int scale      = value.scale();
+	    int iRoundPrec = Math.max(1, (prec - scale) + iPlaces);
+
+	    return value.round(new MathContext(iRoundPrec));
 	}
 
 
@@ -655,7 +677,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 
 	    if (result != null && !format.isEmpty()) {
-		char formatChar = format.charAt(1);
+		char formatChar = format.charAt(format.length() - 1);
 
 		if ((result instanceof Map || result instanceof List) && (formatChar != 'j' && formatChar != 'J')) {
 		    throw new CalcExprException(ctx, "%calc#noConvertObjArr", formatChar);
@@ -757,8 +779,17 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    case '%':
 			BigDecimal dValue = toDecimalValue(this, result, mc, ctx);
 			BigDecimal percentValue = dValue.multiply(BigDecimal.valueOf(100L), mc);
+			// Parse out possible precision value
+			if (format.length() > 2) {
+			    String num = format.substring(1, format.length() - 1);
+			    int prec = Integer.parseInt(num);
+			    percentValue = round(percentValue, prec);
+			}
 			valueBuf.append(percentValue.toPlainString()).append('%');
 			break;
+
+		    default:
+			throw new CalcExprException(ctx, "%calc#illegalFormat", format);
 		}
 		// Set the "result" for the case of interpolated strings with formats
 		result = resultString = toUpperCase ? valueBuf.toString().toUpperCase() : valueBuf.toString();
@@ -1386,23 +1417,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    BigDecimal e = getDecimalValue(e2ctx.expr(0));
 	    int iPlaces  = getIntValue(e2ctx.expr(1));
 
-	    /* iPlaces is going to be the number of fractional digits to round to:
-	     * 0 = round to an integer, 1 to x.y, 2 to x.yy, etc.
-	     * and a negative number will round above the decimal point, as in:
-	     * -2 to x00.
-	     * So, if precision is the number of digits we keep, and scale is how far
-	     * left of the last digit the decimal point is situated, then
-	     * (precision - scale) is the number of whole digits, then we can add
-	     * that to "iPlaces" to get the MathContext precision to use for rounding here.
-	     * Also, it appears that rounding to 0 means no change, so we set a min value
-	     * of one to ensure *some* rounding always occurs, such that 0.714... rounded
-	     * to -2 will give 0.7, not retain the 0.714... value.
-	     */
-	    int prec       = e.precision();
-	    int scale      = e.scale();
-	    int iRoundPrec = Math.max(1, (prec - scale) + iPlaces);
-
-	    return e.round(new MathContext(iRoundPrec));
+	    return round(e, iPlaces);
 	}
 
 	@Override

@@ -3,7 +3,7 @@
 a = { b: 0, c: false, d: 'ABCDEFG', g: 12.75, h: 1291 }
 a.b=1;a.c=true;a.d='abc'
 a.i = [ 3, 4, 5 ]
-a;j
+a@j
 isprime a.h
 :rational on
 Bn(52)

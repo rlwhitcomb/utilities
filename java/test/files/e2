@@ -9,13 +9,13 @@ a
 a."b".c[0] = 7
 a
 a."b"."c".d = 6
-a;j
+a@j
 a."b"."c".d++
-a."b"."c";j
+a."b"."c"@j
 
 :clear a
 a.b.d.f = 3
-a;j
+a@j
 
 :clear [a,f]
 a[0].b.c[1] = 12
@@ -33,7 +33,7 @@ a
 a."b"."c".f = 3
 a
 a."b"."d".i = true
-a;j
+a@j
 
 :clear a
 a.b.c.d = 6
@@ -41,7 +41,7 @@ a
 a.b.c.f = 3
 a
 a.b.d.i = true
-a;j
+a@j
 
 :clear a
 a."b"."c".d = 6
@@ -49,7 +49,7 @@ a
 a."b"."c".f = 3
 a
 a."b"."d".i = true
-a;j
+a@j
 
 ++a['"b"']['"c"']['f']
 a

@@ -127,6 +127,9 @@
  *	    Add "define" statement.
  *	17-Feb-2021 (rlwhitcomb)
  *	    Move LOOP, WHILE, and IF back outside of "expr" and rename "loopOrExpr" to "stmtOrExpr".
+ *	19-Feb-2021 (rlwhitcomb)
+ *	    Change format directive character because of conflicts with ENDEXPR.
+ *	    Widen possible format characters and allow % precision.
  */
 
 grammar Calc;
@@ -575,7 +578,7 @@ QUIET
 
 
 FORMAT
-   : ';' ( D | F | X | T | H | O | B | K | J | '%' )
+   : '@' ( [a-zA-Z,] | ( '-' ? [0-9]* ) ? '%' )
    ;
 
 STRING
