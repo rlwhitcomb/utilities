@@ -34,6 +34,8 @@
  *	    Fail with non-zero exit code.
  *	18-Feb-2021 (rlwhitcomb)
  *	    Add logging to figure out why this fails sometimes.
+ *	19-Feb-2021 (rlwhitcomb)
+ *	    Recast now that InitializationTask is changed/fixed.
  */
 import info.rlwhitcomb.util.Environment;
 import info.rlwhitcomb.util.InitializationTask;
@@ -257,6 +259,7 @@ public class InitTaskTest
 	    // Start the long-running task going: ~ 6-7 secs
 	    System.out.println("InitTaskTest: starting long-running PI digit calculation...");
 	    InitTask task = new InitTask(piLength, 10);
+	    task.start();
 
 	    boolean success = true;
 

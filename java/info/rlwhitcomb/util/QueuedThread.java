@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2013,2016,2018,2020 Roger L. Whitcomb.
+ * Copyright (c) 2013,2016,2018,2020-2021 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -50,6 +50,9 @@
  *	    I think we need an atomic integer for the id.
  *	21-Dec-2020 (rlwhitcomb)
  *	    Update obsolete Javadoc constructs.
+ *	19-Feb-2021 (rlwhitcomb)
+ *	    It is not appropriate to call "start()" in the constructor, so do it
+ *	    inside "submitWork" if necessary (that is, if someone else hasn't done so).
  */
 package info.rlwhitcomb.util;
 
@@ -121,7 +124,6 @@ public class QueuedThread extends Thread
 	    super(newName());
 	    setDaemon(true);
 	    this.workerQueue = workerQueue;
-	    start();
 	}
 
 	/**
@@ -169,6 +171,12 @@ public class QueuedThread extends Thread
 		    // Don't accept any more work once we have been terminated.
 		    return false;
 		}
+
+		// It is not kosher to call "start()" in the constructor, so
+		// do it now that we have work to do (if it wasn't started earlier)
+		if (!isAlive())
+		    start();
+
 		// Transfer this new work to the thread immediately, if possible,
 		// but if we're still busy, just queue it.
 		if (!workQueue.tryTransfer(runnable)) {

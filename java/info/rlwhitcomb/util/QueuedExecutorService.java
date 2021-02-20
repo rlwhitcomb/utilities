@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2013,2015,2018,2020 Roger L. Whitcomb.
+ * Copyright (c) 2013,2015,2018,2020-2021 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -38,6 +38,8 @@
  *	28-Mar-2020 (rlwhitcomb)
  *	    The synchronization was all wrong, I think, so get rid of it.
  *	    And we really need to identify the thread we're using for all logging.
+ *	19-Feb-2021 (rlwhitcomb)
+ *	    Call "start()" on our thread ourselves.
  */
 package info.rlwhitcomb.util;
 
@@ -50,9 +52,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * This class implements the {@link ExecutorService} interface via
  * a {@link QueuedThread} implementation.  This allows us to reuse
- * a single thread, which repeatedly accepts work.  The use of a
- * single thread allows the remote server instance to be kept open
- * which (should) minimize the connection overhead to run a query.
+ * a single thread, which repeatedly accepts work.
  */
 public class QueuedExecutorService extends AbstractExecutorService
 {
@@ -75,6 +75,9 @@ public class QueuedExecutorService extends AbstractExecutorService
 	 */
 	public QueuedExecutorService(QueuedThread thread) {
 	    this.queuedThread = thread;
+	    if (!queuedThread.isAlive()) {
+		queuedThread.start();
+	    }
 	    logger.info("Constructed for %1$s.", threadName());
 	}
 
