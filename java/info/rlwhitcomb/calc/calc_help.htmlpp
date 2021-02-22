@@ -57,7 +57,7 @@ code {
   <p>An expression calculator that combines (nearly) unlimited precision decimal arithmetic with a rich assortment
        of operators and functions to give the ability to calculate nearly any arithmetic expression.
   <p>As input, the expression calculator can operate on an expression given entirely on the command line (may need to be
-       quoted for certain operator characters); in a REPL loop where a prompt is displayed, the input lines are evaluated
+       quoted for certain operator characters); in a <a href="https://en.wikipedia.org/wiki/Read-eval-print_loop">REPL</a> loop where a prompt is displayed, the input lines are evaluated
        one-at-a-time, and the results displayed; from a file for predefined calculations; or inside a simple GUI frame.
   <h3>Command Line</h3>
   <p>The command is assumed to have either the name of a file to process, or an expression to evaluate. There may also be options specified (see the next section). If there is a single value given and there exists a file by that name (possibly in another directory given by the prior <code>-inputdir</code> option), then that file is read, the contents parsed, and all the expressions evaluated. Otherwise, if there are more than one argument on the command line, or the single argument does not name a file, then the command line is taken as a single string, parsed, and then evaluated.
@@ -151,6 +151,7 @@ code {
             <tr><td><code>FIB</code>&nbsp;<i>expr</i></td><td>Fibonacci number</td></tr>
             <tr><td><code>Bn</code>&nbsp;<i>expr</i></td><td>Bernoulli number</td></tr>
             <tr><td><code>FRAC</code>&nbsp;<i>expr, expr</i></td><td>construct a rational fraction</td></tr>
+            <tr><td><code>EVAL</code>&nbsp;<i>expr</i></td><td>evaluate the string result of <i>expr</i></td></tr>
         </table></td>
         <td>left to right</td></tr>
     <tr><td>16</td><td><i>expr<sub>1</sub></i>&nbsp;<code> ** </code>&nbsp;<i>expr<sub>2</sub></i></td><td>expr<sub>1</sub> to expr<sub>2</sub> power</td><td>right to left</td></tr>
@@ -254,11 +255,15 @@ code {
   </center>
   <h3>TODO Items for This Document</h3>
   <ul>
+    <li>def statement syntax</li>
     <li>loop statement syntax, loop variables, nested loops</li>
+    <li>while statement syntax</li>
+    <li>if statement syntax</li>
+    <li>interpolated string syntax, including new $var, $&dollar;loopvar and $&lbrace;expr&rbrace;, treatement of null and quoting</li>
     <li>REPL commands</li>
-    <li>Explanation of :include with -inputDir</li>
+    <li>Explanation of :include with -inputDir searching</li>
     <li>Variable naming conventions</li>
-    <li>Unicode variants of pi</li>
+    <li>Unicode variants of pi, as well as != and !==</li>
     <li>JSON format</li>
     <li>Format specifiers and formats</li>
     <li>Exceptions to decimal precision (i.e., for trig, log), and also in doing factorial? or others that don't respect the precision, also limits on pi/e digits</li>
@@ -266,6 +271,8 @@ code {
     <li>Expand on GUI operation, including examples</li>
     <li>List of example programs, include examples in this document</li>
     <li>Interactions with Tester (use "mkcanon" and "-nocolors")</li>
+    <li>Explain use of pop/prev with directives</li>
+    <li>Explain "silent" operation WRT "eval", "loop", interpolated strings, functions</li>
   </ul>
   <h3>GUI operations</h3>
   <p>The GUI window can be opened using the "<code>cg</code>" command (or on Windows only, the <code>``</code> command), or by entering the <code>gui</code> command in REPL mode.  The following window will be presented with the focus initially in the top "Expression" field.

@@ -171,6 +171,8 @@
  *	22-Feb-2021 (rlwhitcomb)
  *	    Tweak the processing of "$" inside interpolated strings so that "$$var"
  *	    will also get the "$var" value instead of having to do "${$var}" for it.
+ *	22-Feb-2021 (rlwhitcomb)
+ *	    Add "eval" function.
  */
 package info.rlwhitcomb.calc;
 
@@ -1619,6 +1621,13 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    BigInteger d = getIntegerValue(e2ctx.expr(1));
 
 	    return new BigFraction(n, d);
+	}
+
+	@Override
+	public Object visitEvalExpr(CalcParser.EvalExprContext ctx) {
+	    String exprString = getStringValue(ctx.expr());
+
+	    return Calc.processString(exprString, silent);
 	}
 
 	@Override

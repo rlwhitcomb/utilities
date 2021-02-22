@@ -130,6 +130,8 @@
  *	19-Feb-2021 (rlwhitcomb)
  *	    Change format directive character because of conflicts with ENDEXPR.
  *	    Widen possible format characters and allow % precision.
+ *	22-Feb-2021 (rlwhitcomb)
+ *	    Add "eval" function.
  */
 
 grammar Calc;
@@ -197,6 +199,7 @@ expr
    | FIB expr                            # fibExpr
    | BN expr                             # bernExpr
    | FRAC expr2                          # fracExpr
+   | EVAL expr                           # evalExpr
    |<assoc=right> expr '**' expr         # powerExpr
    | expr MULT_OP expr                   # multiplyExpr
    | expr ADD_OP expr                    # addExpr
@@ -395,6 +398,8 @@ FIB      : F I B ;
 BN       : B N ;
 
 FRAC     : F R A C ;
+
+EVAL     : E V A L ;
 
 LOOP     : L O O P ;
 
