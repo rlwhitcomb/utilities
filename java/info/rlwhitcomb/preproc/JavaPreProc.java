@@ -132,6 +132,8 @@
  *	variables with everything we find in there. Implement #echo directive.
  *	Macro variable names can now have "." in them. Reset the date and time
  *	variables for each file processed.
+ *    22-Feb-2021 (rlwhitcomb)
+ *	Align "exceptMessage" with our own ExceptionUtil code.
  */
 package info.rlwhitcomb.preproc;
 
@@ -147,8 +149,10 @@ import java.io.InputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.net.UnknownHostException;
 import java.nio.charset.CharacterCodingException;
 import java.nio.charset.StandardCharsets;
+import java.nio.charset.UnsupportedCharsetException;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Paths;
@@ -690,17 +694,22 @@ public class JavaPreProc extends Task
 	 * @return	A (hopefully) better message than just <code>getMesssage()</code>
 	 *		will return.
 	 */
-	private static String exceptMessage(Exception ex) {
+	private static String exceptMessage(Throwable ex) {
 	    String className = ex.getClass().getSimpleName();
 	    String message   = ex.getMessage();
 
 	    if (message == null || message.isEmpty())
 		message = className;
-	    else if (ex instanceof NullPointerException
+	    else if (ex instanceof UnknownHostException
+		  || ex instanceof NoClassDefFoundError
+		  || ex instanceof ClassNotFoundException
+		  || ex instanceof NullPointerException
 		  || ex instanceof CharacterCodingException
+		  || ex instanceof UnsupportedCharsetException
 		  || ex instanceof FileNotFoundException
 		  || ex instanceof NoSuchFileException
-		  || ex instanceof UnsupportedOperationException)
+		  || ex instanceof UnsupportedOperationException
+		  || ex instanceof NumberFormatException)
 		message = String.format("%1$s: %2$s", className, message);
 
 	    return message;
