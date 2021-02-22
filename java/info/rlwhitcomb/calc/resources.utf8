@@ -44,6 +44,8 @@
 #	    Another action message to define a function.
 #	19-Feb-2021 (rlwhitcomb)
 #	    Error message for bad format.
+#	22-Feb-2021 (rlwhitcomb)
+#	    Refactor "loopvar" to "localvar".
 #
 
 #
@@ -94,8 +96,8 @@ precOutOfRange		= Decimal precision of %1$d is out of range
 ioError			= I/O Error: %1$s
 noConvertInteger	= Unable to convert value of '%1$s' to an integer
 noConvertObjArr		= Cannot convert object or array to '%1$c' format
-noDupLoopVar		= Duplicate loop variable name '%1$s' not allowed
-loopVarNoAssign		= The value of a loop variable ('%1$s') cannot be changed
+noDupLocalVar		= Duplicate local variable name '%1$s' not allowed
+localVarNoAssign	= The value of a local variable ('%1$s') cannot be changed
 infLoopStepZero		= Infinite loop: step value is zero
 invalidConstruct	= Invalid '$' construct
 invalidConst2		= Invalid '${...}' construct
@@ -119,12 +121,12 @@ unknownType		= Unknown value type: %1$s
 #
 # From LValueContext
 #
-loopVarNotAvail	= Loop variable '%1$s' is not available outside its loop
-nonObjectValue	= Variable '%1$s' already has a non-object value
-nonArrayValue	= Variable '%1$s' already has a non-array value
-indexNegative	= Index value of %1$d cannot be negative
-unknownVarCtx	= ERROR: unknown var context subclass: %1$s
-badAssign	= Assignment to %1$s without name or index.
+localVarNotAvail	= Local variable '%1$s' is not available outside its loop or function
+nonObjectValue		= Variable '%1$s' already has a non-object value
+nonArrayValue		= Variable '%1$s' already has a non-array value
+indexNegative		= Index value of %1$d cannot be negative
+unknownVarCtx		= ERROR: unknown var context subclass: %1$s
+badAssign		= Assignment to %1$s without name or index.
 
 #
 # From UnknownOpException

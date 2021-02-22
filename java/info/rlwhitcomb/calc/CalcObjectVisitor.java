@@ -173,6 +173,8 @@
  *	    will also get the "$var" value instead of having to do "${$var}" for it.
  *	22-Feb-2021 (rlwhitcomb)
  *	    Add "eval" function.
+ *	22-Feb-2021 (rlwhitcomb)
+ *	    Refactor "loopvar" to "localvar".
  */
 package info.rlwhitcomb.calc;
 
@@ -819,8 +821,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    Iterator<Object> iter = null;
 	    java.util.stream.IntStream codePoints  = null;
 
-	    TerminalNode loopVar = ctx.LOOPVAR();
-	    String loopVarName   = loopVar != null ? loopVar.getText() : null;
+	    TerminalNode localVar = ctx.LOCALVAR();
+	    String localVarName   = localVar != null ? localVar.getText() : null;
 
 	    boolean stepWise = false;
 
@@ -890,9 +892,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		}
 	    }
 
-	    if (loopVarName != null) {
-		if (variables.containsKey(loopVarName))
-		    throw new CalcExprException(ctx, "%calc#noDupLoopVar", loopVarName);
+	    if (localVarName != null) {
+		if (variables.containsKey(localVarName))
+		    throw new CalcExprException(ctx, "%calc#noDupLocalVar", localVarName);
 	    }
 
 	    try {
@@ -907,15 +909,15 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			    throw new CalcExprException("%calc#infLoopStepZero", ctx);
 			else if (step < 0) {
 			    for (int loopIndex = start; loopIndex >= stop; loopIndex += step) {
-				if (loopVarName != null)
-				    variables.put(loopVarName, loopIndex);
+				if (localVarName != null)
+				    variables.put(localVarName, loopIndex);
 				lastValue = visit(block);
 			    }
 			}
 			else {
 			    for (int loopIndex = start; loopIndex <= stop; loopIndex += step) {
-				if (loopVarName != null)
-				    variables.put(loopVarName, loopIndex);
+				if (localVarName != null)
+				    variables.put(localVarName, loopIndex);
 				lastValue = visit(block);
 			    }
 			}
@@ -927,15 +929,15 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			    throw new CalcExprException("%calc#infLoopStepZero", ctx);
 			else if (sign < 0) {
 			    for (BigDecimal loopIndex = dStart; loopIndex.compareTo(dStop) >= 0; loopIndex = loopIndex.add(dStep)) {
-				if (loopVarName != null)
-				    variables.put(loopVarName, loopIndex);
+				if (localVarName != null)
+				    variables.put(localVarName, loopIndex);
 				lastValue = visit(block);
 			    }
 			}
 			else {
 			    for (BigDecimal loopIndex = dStart; loopIndex.compareTo(dStop) <= 0; loopIndex = loopIndex.add(dStep)) {
-				if (loopVarName != null)
-				    variables.put(loopVarName, loopIndex);
+				if (localVarName != null)
+				    variables.put(localVarName, loopIndex);
 				lastValue = visit(block);
 			    }
 			}
@@ -944,8 +946,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		else if (iter != null) {
 		    while (iter.hasNext()) {
 			Object value = iter.next();
-			if (loopVarName != null)
-			    variables.put(loopVarName, value);
+			if (localVarName != null)
+			    variables.put(localVarName, value);
 			lastValue = visit(block);
 		    }
 		}
@@ -955,24 +957,24 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			Integer cp = intIter.next();
 			buf.setLength(0);
 			buf.appendCodePoint(cp);
-			if (loopVarName != null)
-			    variables.put(loopVarName, buf.toString());
+			if (localVarName != null)
+			    variables.put(localVarName, buf.toString());
 			lastValue = visit(block);
 		    }
 		}
 		else {
 		    for (CalcParser.ExprContext expr : exprs) {
 			Object loopValue = visit(expr);
-			if (loopVarName != null)
-			    variables.put(loopVarName, loopValue);
+			if (localVarName != null)
+			    variables.put(localVarName, loopValue);
 			lastValue = visit(block);
 		    }
 		}
 	    }
 	    finally {
-		// Make sure the loop var gets removed, even on exceptions
-		if (loopVarName != null)
-		    variables.remove(loopVarName);
+		// Make sure the local loop var gets removed, even on exceptions
+		if (localVarName != null)
+		    variables.remove(localVarName);
 	    }
 
 	    return lastValue;

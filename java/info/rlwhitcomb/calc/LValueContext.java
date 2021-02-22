@@ -38,6 +38,8 @@
  *	    Use new Intl Exception variants.
  *	17-Feb-2021 (rlwhitcomb)
  *	    Add "visitor" parameter for function evaluation.
+ *	22-Feb-2021 (rlwhitcomb)
+ *	    Refactor "loopvar" to "localvar".
  */
  package info.rlwhitcomb.calc;
 
@@ -131,7 +133,7 @@ class LValueContext
 	 * At the current variable nesting level, extract the referenced value.
 	 * <p> For a map, this would be <code>map.member</code>, for an array
 	 * or string, this would be <code>arr[index]</code>.
-	 * <p> One special check is made for error reporting purposes on loop variables.
+	 * <p> One special check is made for error reporting purposes on local variables.
 	 *
 	 * @return The member or indexed value extracted from the base object.
 	 */
@@ -139,10 +141,10 @@ class LValueContext
 	public Object getContextObject() {
 	    if (name != null) {
 		Map<String, Object> map = (Map<String, Object>) context;
-		// Special checks for loop vars (not defined means we are outside the loop)
+		// Special checks for local vars (not defined means we are outside the loop or function)
 		if (name.startsWith("$")) {
 		    if (!map.containsKey(name))
-		        throw new CalcExprException(varCtx, "%calc#loopVarNotAvail", name);
+		        throw new CalcExprException(varCtx, "%calc#localVarNotAvail", name);
 		}
 		return map.get(name);
 	    }
@@ -171,8 +173,9 @@ class LValueContext
 	 * At the current nesting level, set the given value as the object.
 	 * <p> For a map, this would be <code>map.member = value</code>, for an
 	 * array or string, this would be <code>arr[index] = value</code>.
-	 * <p> One special check is made on loop variables because we don't
-	 * want them to be reassigned apart from the <code>loop</code> construct.
+	 * <p> One special check is made on local variables because we don't
+	 * want them to be reassigned apart from the <code>loop</code> or
+	 * <code>def</code> construct.
 	 *
 	 * @param visitor The visitor (for function evaluation).
 	 * @param value	  The new value to assign to this context.
@@ -182,7 +185,7 @@ class LValueContext
 	public Object putContextObject(final CalcObjectVisitor visitor, final Object value) {
 	    if (name != null) {
 		if (name.startsWith("$")) {
-		    throw new CalcExprException(varCtx, "%calc#loopVarNoAssign", name);
+		    throw new CalcExprException(varCtx, "%calc#localVarNoAssign", name);
 		}
 		Map<String, Object> map = (Map<String, Object>) context;
 		map.put(name, value);
@@ -260,9 +263,9 @@ class LValueContext
 		CalcParser.IdVarContext idVarCtx = (CalcParser.IdVarContext) ctx;
 		return new LValueContext(lValue, idVarCtx, lValue.getContextObject(), idVarCtx.ID().getText());
 	    }
-	    else if (ctx instanceof CalcParser.LoopVarContext) {
-		CalcParser.LoopVarContext loopVarCtx = (CalcParser.LoopVarContext) ctx;
-		return new LValueContext(lValue, loopVarCtx, lValue.getContextObject(), loopVarCtx.LOOPVAR().getText());
+	    else if (ctx instanceof CalcParser.LocalVarContext) {
+		CalcParser.LocalVarContext localVarCtx = (CalcParser.LocalVarContext) ctx;
+		return new LValueContext(lValue, localVarCtx, lValue.getContextObject(), localVarCtx.LOCALVAR().getText());
 	    }
 	    else if (ctx instanceof CalcParser.ArrVarContext) {
 		CalcParser.ArrVarContext arrVarCtx = (CalcParser.ArrVarContext) ctx;

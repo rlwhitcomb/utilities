@@ -84,6 +84,17 @@ Also see "issues" at https://github.com/rlwhitcomb/utilities/issues
 - functions for financial calculations (INTEREST, NPV, PAYMENT, etc.) (**e_mort** is a start)
 - ?? need a way to do "setScale(...)" on the values ??
 
+#### Want to add parameters and local variables to functions.
+define a($b, $c, $d) = { $f = blah; ... }
+
+#### problems:
+- need to have local variables, but how do we get that incorporated into LValueContext?
+- need a way to store the param names, then to associate the values with the names
+- how about lists and maps:  pass by reference or value?  should there be an option?
+- e.g.: def npv($pv, $pmt, $i) = { loop slkdjf;lkj npv; }
+- are the variables "defined" inside the function local to the function (i.e., what if we say def ... { a = 27; ...} where a was not defined before?  I imagine with the changes to LValueContext, the "variables" at the outer level would be local to the function... but how to reference truly global variables then? (link to global "variables"???)
+
+
 ### WordFind
 - Finish the GUI code.
 

@@ -132,6 +132,8 @@
  *	    Widen possible format characters and allow % precision.
  *	22-Feb-2021 (rlwhitcomb)
  *	    Add "eval" function.
+ *	22-Feb-2021 (rlwhitcomb)
+ *	    Refactor "loopvar" to "localvar".
  */
 
 grammar Calc;
@@ -147,11 +149,11 @@ stmt
    ;
 
 stmtOrExpr
-   : expr FORMAT ? ENDEXPR ?             # exprStmt
-   | LOOP ( LOOPVAR IN ) ? loopCtl block # loopStmt
-   | WHILE expr block                    # whileStmt
-   | IF expr block ( ELSE block ) ?      # ifStmt
-   | ENDEXPR                             # emptyStmt
+   : expr FORMAT ? ENDEXPR ?              # exprStmt
+   | LOOP ( LOCALVAR IN ) ? loopCtl block # loopStmt
+   | WHILE expr block                     # whileStmt
+   | IF expr block ( ELSE block ) ?       # ifStmt
+   | ENDEXPR                              # emptyStmt
    ;
 
 block
@@ -257,7 +259,7 @@ var
    : var ( '.' ( var | STRING ) ) +     # objVar
    | var '[' expr ']'                   # arrVar
    | ID                                 # idVar
-   | LOOPVAR                            # loopVar
+   | LOCALVAR                           # localVar
    ;
 
 value
@@ -422,7 +424,7 @@ ID     : [a-zA-Z_] [a-zA-Z_0-9]* ;
 
 DOTS   : '..' ;
 
-LOOPVAR
+LOCALVAR
        : '$' [a-zA-Z_] [a-zA-Z_0-9]* ;
 
 INC_OP
