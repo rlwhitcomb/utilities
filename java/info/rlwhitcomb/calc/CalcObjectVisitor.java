@@ -168,6 +168,9 @@
  *	    the recursion necessary for nested function evaluation.
  *	19-Feb-2021 (rlwhitcomb)
  *	    Illegal format error. Implement percent format precision.
+ *	22-Feb-2021 (rlwhitcomb)
+ *	    Tweak the processing of "$" inside interpolated strings so that "$$var"
+ *	    will also get the "$var" value instead of having to do "${$var}" for it.
  */
 package info.rlwhitcomb.calc;
 
@@ -1783,8 +1786,28 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    throw new CalcExprException("%calc#invalidConstruct", ctx);
 
 		if (rawValue.charAt(pos + 1) == '$') {
-		    output.append('$');
-		    lastPos = pos + 1;
+		    // Try to parse out a loop variable name here and substitute if found
+		    // so that $$var would get $var value, but "$$(" would result in "$("
+		    int identPos = pos + 2;
+		    while (identPos < rawValue.length() && isIdentifierPart(rawValue.charAt(identPos)))
+			identPos++;
+		    if (identPos > pos + 2) {
+			String varName = rawValue.substring(pos + 1, identPos);
+			Object varValue = variables.get(varName);
+			// But if $var is not defined, then forget it, and just output "$" and go on
+			if (varValue != null) {
+			    output.append(toStringValue(this, varValue, false, false, ""));
+			    lastPos = identPos - 1;
+			}
+			else {
+			    output.append('$');
+			    lastPos = pos + 1;
+			}
+		    }
+		    else {
+			output.append('$');
+			lastPos = pos + 1;
+		    }
 		}
 		else if (rawValue.charAt(pos + 1) == '{') {
 		    int nextPos = rawValue.indexOf('}', pos + 1);

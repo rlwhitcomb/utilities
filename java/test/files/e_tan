@@ -1,5 +1,5 @@
 :dec 50
 :result on
-loop $i in 0.1 .. pi/2-0.001, 0.1 { `tan(${$i}) = ${tan $i}` }
+loop $i in 0.1 .. pi/2-0.001, 0.1 { `tan($$i) = ${tan $i}` }
 :default
 :result pop

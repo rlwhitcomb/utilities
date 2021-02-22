@@ -329,7 +329,7 @@ p@j
 length p; scale p;
 :echo "Elements of p:"
 :result on
-loop $p in p { `name: ${$p}, value: ${p[$p]}` }
+loop $p in p { `name: $$p, value: ${p[$p]}` }
 :result pop
 
 #
