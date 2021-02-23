@@ -83,12 +83,14 @@ Also see "issues" at https://github.com/rlwhitcomb/utilities/issues
 - add option (both GUI and REPL modes) to open another file
 - functions for financial calculations (INTEREST, NPV, PAYMENT, etc.) (**e_mort** is a start)
 - ?? need a way to do "setScale(...)" on the values ??
+- See all the notes on updates needed to help page (calc_help.htmlpp); use "ant update" and then "c -?" to preprocess and view the result
 
-#### Want to add parameters and local variables to functions.
+#### Calc: Want to add parameters and local variables to functions.
 define a($b, $c, $d) = { $f = blah; ... }
 
 #### problems:
 - need to have local variables, but how do we get that incorporated into LValueContext?
+- how to deal with recursive invocations of functions with local variables (creating the dynamic context)?
 - need a way to store the param names, then to associate the values with the names
 - how about lists and maps:  pass by reference or value?  should there be an option?
 - e.g.: def npv($pv, $pmt, $i) = { loop slkdjf;lkj npv; }
