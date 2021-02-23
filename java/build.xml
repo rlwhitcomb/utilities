@@ -156,6 +156,8 @@
 		Figure out if "anttasks.jar" needs to be updated on every startup.
 	    16-Feb-2021 (rlwhitcomb)
 		Add "utilities*.log" to the list of stuff deleted by "purge-logs".
+	    23-Feb-2021 (rlwhitcomb)
+		Add "Gmt" and related wrappers.
 
      ========================================================================== -->
 
@@ -228,6 +230,8 @@
 		<include name="encode.bat"                  if:true="${on.windows}"/>
 		<include name="fixpath"                 unless:true="${on.windows}"/>
 		<include name="fixpath.bat"                 if:true="${on.windows}"/>
+		<include name="gmt"                     unless:true="${on.windows}"/>
+		<include name="gmt.bat"                     if:true="${on.windows}"/>
 		<include name="gunz"                    unless:true="${on.windows}"/>
 		<include name="gunz.bat"                    if:true="${on.windows}"/>
 		<include name="gz"                      unless:true="${on.windows}"/>
@@ -357,6 +361,7 @@
 			<include name="DumpManifest*.class"/>
 			<include name="MD5*.class"/>
 			<include name="OS*.class"/>
+			<include name="Gmt*.class"/>
 			<include name="GZip*.class"/>
 			<include name="GUnzip*.class"/>
 			<include name="FixPath*.class"/>
