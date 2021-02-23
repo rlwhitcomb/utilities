@@ -92,6 +92,9 @@
  *	    Set rational/decimal mode on the command line; convey to Visitor.
  *	10-Feb-2021 (rlwhitcomb)
  *	    Switch over to using the ConsoleColor.color mechanism for messages.
+ *	22-Feb-2021 (rlwhitcomb)
+ *	    Line numbers for errors don't make sense in REPL mode (i.e., line is always 1).
+ *	    Refine syntax error reporting.
  */
 package info.rlwhitcomb.calc;
 
@@ -175,6 +178,7 @@ public class Calc
 
 
 	private static boolean guiMode     = false;
+	private static boolean replMode    = false;
 	private static boolean debug       = false;
 	private static boolean colors      = true;
 	private static boolean timing      = false;
@@ -204,6 +208,7 @@ public class Calc
 	private static Console console = System.console();
 
 	private static BailErrorStrategy errorStrategy = new BailErrorStrategy();
+	private static ErrorListener errorListener = new ErrorListener();
 	private static CalcDisplayer displayer;
 	private static CalcObjectVisitor visitor;
 
@@ -350,13 +355,38 @@ public class Calc
 
 
 	/**
+	 * An error listener that hooks into our error reporting strategy.
+	 */
+	public static class ErrorListener extends BaseErrorListener
+	{
+		@Override
+		public void syntaxError(Recognizer<?, ?> recognizer,
+			Object offendingSymbol,
+			int line, int charPositionInLine,
+			String message,
+			RecognitionException e) {
+		    if (replMode) {
+			String indicator = CharUtil.makeStringOfChars(' ', charPositionInLine + 2);
+			System.out.format("%1$s^%n", indicator);
+		    }
+		    throw new CalcException(Intl.formatString("calc#syntaxError", charPositionInLine, message), line);
+		}
+	}
+
+	/**
 	 * A parser error strategy that abandons the parse without trying to recover.
 	 */
 	public static class BailErrorStrategy extends DefaultErrorStrategy
 	{
 		@Override
 		public void recover(Parser recognizer, RecognitionException e) {
-		    throw new CalcException(e, e.getOffendingToken().getLine());
+		    Token t = e.getOffendingToken();
+		    int charPos = t.getCharPositionInLine();
+		    if (replMode) {
+			String indicator = CharUtil.makeStringOfChars(' ', charPos + 2);
+			System.out.format("%1$s^%n", indicator);
+		    }
+		    throw new CalcException(Intl.formatString("calc#errorNoAlt", charPos, t.getText()), t.getLine());
 		}
 /*
 		@Override
@@ -385,6 +415,7 @@ public class Calc
 		    throw new CalcException(e, getLine());
 		}
 	}
+
 
 	private static class ConsoleDisplayer implements CalcDisplayer
 	{
@@ -417,7 +448,10 @@ public class Calc
 
 		@Override
 		public void displayErrorMessage(String message, int lineNumber) {
-		    errFormat("calc#errorLine", message, lineNumber);
+		    if (replMode)
+			errFormat("calc#errorPeriod", message);
+		    else
+			errFormat("calc#errorLine", message, lineNumber);
 		}
 	}
 
@@ -565,9 +599,14 @@ public class Calc
 
 	    try {
 		CalcLexer lexer = new CalcBailLexer(input);
+		lexer.removeErrorListeners();
+		lexer.addErrorListener(errorListener);
 		CommonTokenStream tokens = new CommonTokenStream(lexer);
 		CalcParser parser = new CalcParser(tokens);
 		parser.setErrorHandler(errorStrategy);
+		parser.removeErrorListeners();
+		parser.addErrorListener(errorListener);
+
 		ParseTree tree = parser.prog();
 
 		if (debug) {
@@ -831,6 +870,8 @@ public class Calc
 			else {
 			    printIntro();
 
+			    replMode = true;
+
 			    String line;
 			replLoop:
 			    while ((line = console.readLine("> ")) != null) {
@@ -869,6 +910,7 @@ public class Calc
 					break;
 				}
 			    }
+			    replMode = false;
 			}
 		    }
 		    else {

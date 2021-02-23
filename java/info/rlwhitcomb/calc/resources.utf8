@@ -46,6 +46,8 @@
 #	    Error message for bad format.
 #	22-Feb-2021 (rlwhitcomb)
 #	    Refactor "loopvar" to "localvar".
+#	22-Feb-2021 (rlwhitcomb)
+#	    New syntax error messages.
 #
 
 #
@@ -63,6 +65,7 @@ action		= <v>%1$s<r>
 message		= <a>%1$s<r>
 errorLine	= <e>%1$s<r> at line %2$d.
 error		= <e>%1$s<r>
+errorPeriod	= <e>%1$s.<r>
 expectNotOption	= <e>Expecting %1$s value, not another option.<r>
 expectValue	= <e>Expecting %1$s value.<r>
 noOptionValue	= <e>Value for %1$s option was not given.<r>
@@ -70,6 +73,8 @@ unknownOption	= Unknown option "<v>%1$s<r>"; ignoring.
 inOutError	= <e>I/O Error: %1$s<r>
 argError	= Error: %1$s
 timing		= Elapsed time %1$11.9f seconds.
+syntaxError	= Syntax error at position %1$d: %2$s
+errorNoAlt	= Syntax error at position %1$d: no viable alternative at input '%2$s'
 
 #
 # From CalcObjectVisitor

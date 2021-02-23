@@ -129,7 +129,7 @@ code {
             <tr><td><code>ASIN</code>&nbsp;<i>expr</i></td><td>sine<sup>-1</sup></td></tr>
             <tr><td><code>ACOS</code>&nbsp;<i>expr</i></td><td>cosine<sup>-1</sup></td></tr>
             <tr><td><code>ATAN</code>&nbsp;<i>expr</i></td><td>tangent<sup>-1</sup></td></tr>
-            <tr><td><code>ATAN2</code>&nbsp;<i>expr<sub>y</sub></i>, <i>expr<sub>x</sub></i></td><td>the angle <i>theta</i> from converting<br>rectangular (x,y) to polar (r,<i>theta</i>) coordinates</td></tr>
+            <tr><td><code>ATAN2</code>&nbsp;<i>e<sub>y</sub></i><code>,</code>&nbsp;<i>e<sub>x</sub></i></td><td>the angle <i>theta</i> from converting<br>rectangular (x,y) to polar (r,<i>theta</i>) coordinates</td></tr>
             <tr><td><code>SINH</code>&nbsp;<i>expr</i></td><td>hyperbolic sine</td></tr>
             <tr><td><code>COSH</code>&nbsp;<i>expr</i></td><td>hyperbolic cosine</td></tr>
             <tr><td><code>TANH</code>&nbsp;<i>expr</i></td><td>hyperbolic tangent</td></tr>
@@ -141,16 +141,16 @@ code {
             <tr><td><code>SIGNUM</code>&nbsp;<i>expr</i></td><td>sign (&lt; 0 = -1, 0 = 0, &gt; 0 = +1)</td></tr>
             <tr><td><code>LENGTH</code>&nbsp;<i>expr</i></td><td>length of string, array, or object</td></tr>
             <tr><td><code>SCALE</code>&nbsp;<i>expr</i></td><td>scale of number</td></tr>
-            <tr><td><code>ROUND</code>&nbsp;<i>expr, expr</i></td><td>round value to given places</td></tr>
+            <tr><td><code>ROUND</code>&nbsp;<i>expr</i><code>,</code>&nbsp;<i>expr</i></td><td>round value to given places</td></tr>
             <tr><td><code>ISPRIME</code>&nbsp;<i>expr</i></td><td>is the value a prime number</td></tr>
-            <tr><td><code>GCD</code>&nbsp;<i>expr ,expr</i></td><td>greatest common divisor</td></tr>
-            <tr><td><code>LCM</code>&nbsp;<i>expr, expr</i></td><td>least common multiple</td></tr>
-            <tr><td><code>MAX</code>&nbsp;<i>expr (, expr) *</i></td><td>maximum value</td></tr>
-            <tr><td><code>MIN</code>&nbsp;<i>expr (, expr) *</i></td><td>minimum value</td></tr>
-            <tr><td><code>JOIN</code>&nbsp;<i>expr (, expr) *</i></td><td>join strings</td></tr>
+            <tr><td><code>GCD</code>&nbsp;<i>expr</i><code>,</code>&nbsp;<i>expr</i></td><td>greatest common divisor</td></tr>
+            <tr><td><code>LCM</code>&nbsp;<i>expr</i><code>,</code>&nbsp;<i>expr</i></td><td>least common multiple</td></tr>
+            <tr><td><code>MAX</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;) *</td><td>maximum value</td></tr>
+            <tr><td><code>MIN</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;) *</td><td>minimum value</td></tr>
+            <tr><td><code>JOIN</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;) *</td><td>join strings</td></tr>
             <tr><td><code>FIB</code>&nbsp;<i>expr</i></td><td>Fibonacci number</td></tr>
             <tr><td><code>Bn</code>&nbsp;<i>expr</i></td><td>Bernoulli number</td></tr>
-            <tr><td><code>FRAC</code>&nbsp;<i>expr, expr</i></td><td>construct a rational fraction</td></tr>
+            <tr><td><code>FRAC</code>&nbsp;<i>e<sub>numer</sub></i><code>,</code>&nbsp;<i>e<sub>denom</sub></i></td><td>construct a rational fraction<br><code><i>numer</i> / <i>denom</i></code></td></tr>
             <tr><td><code>EVAL</code>&nbsp;<i>expr</i></td><td>evaluate the string result of <i>expr</i></td></tr>
         </table></td>
         <td>left to right</td></tr>
@@ -268,6 +268,7 @@ code {
     <li>Format specifiers and formats</li>
     <li>Exceptions to decimal precision (i.e., for trig, log), and also in doing factorial? or others that don't respect the precision, also limits on pi/e digits</li>
     <li>Discussion on NaN, and Infinity</li>
+    <li>Explain "join" operation with 1, 2, 3+ values</li>
     <li>Expand on GUI operation, including examples</li>
     <li>List of example programs, include examples in this document</li>
     <li>Interactions with Tester (use "mkcanon" and "-nocolors")</li>
