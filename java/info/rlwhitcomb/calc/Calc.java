@@ -95,6 +95,9 @@
  *	22-Feb-2021 (rlwhitcomb)
  *	    Line numbers for errors don't make sense in REPL mode (i.e., line is always 1).
  *	    Refine syntax error reporting.
+ *	23-Feb-2021 (rlwhitcomb)
+ *	    Allow Ctrl/Cmd-Enter to initiate a calculation from the input text.
+ *	    Add Cmd-F1 ("version") command to the GUI.
  */
 package info.rlwhitcomb.calc;
 
@@ -198,7 +201,12 @@ public class Calc
 	@BXML private TextArea inputTextArea;
 	@BXML private TextArea outputTextArea;
 	@BXML private Label outputSizeLabel;
-	@BXML private Prompt helpPrompt;
+	@BXML private Prompt versionPrompt;
+	@BXML private Label versionText;
+	@BXML private Label buildText;
+	@BXML private Label copyrightText;
+	@BXML private Label javaText;
+
 
 	/** The background worker thread to do the calculations in GUI mode. */
 	private QueuedThread queuedThread = new QueuedThread();
@@ -243,12 +251,30 @@ public class Calc
 	}
 
 
+	private static class KeyPressListener implements ComponentKeyListener
+	{
+		@Override
+		public boolean keyPressed(Component comp, int keyCode, Keyboard.KeyLocation keyLocation) {
+		    if (keyCode == Keyboard.KeyCode.ENTER && Keyboard.isCmdPressed()) {
+			Action.getNamedActions().get("calculate").perform(comp);
+// soon			Action.performAction("calculate", comp);
+			return true;
+		    }
+		    // Otherwise key was not consumed
+		    return false;
+		}
+	}
+
+	private KeyPressListener keyPressListener = new KeyPressListener();
+
+
 	@Override
 	public void startup(Display display, Map<String, String> properties) {
 	    this.display = display;
 
 	    try {
 		Action.getNamedActions().put("help", new HelpAction());
+		Action.getNamedActions().put("version", new VersionAction());
 		Action.getNamedActions().put("clear", new ClearAction());
 		Action.getNamedActions().put("calculate", new CalculateAction());
 		Action.getNamedActions().put("exit", new ExitAction());
@@ -276,6 +302,8 @@ public class Calc
 		Font monospacedFont = FontUtilities.decode(FontUtilities.MONOSPACED_FONTS + "-18");
 		inputTextArea.getStyles().put(Style.font, monospacedFont);
 		outputTextArea.getStyles().put(Style.font, monospacedFont);
+
+		inputTextArea.getComponentKeyListeners().add(keyPressListener);
 
 		// Prepopulate the text are with any text from the command line or input file
 		if (inputText != null)
@@ -488,6 +516,14 @@ public class Calc
 		}
 	}
 
+	private class VersionAction extends Action
+	{
+		@Override
+		public void perform(Component source) {
+		    displayVersion();
+		}
+	}
+
 	private class ExitAction extends Action
 	{
 		@Override
@@ -520,6 +556,26 @@ public class Calc
 	    catch (IOException ex) {
 		System.err.println(ExceptionUtil.toString(ex));
 	    }
+	}
+
+	/**
+	 * Display the product version information for the GUI.
+	 * <p> Note: this is the same information displayed by {@link Environment#printProgramInfo}.
+	 */
+	private void displayVersion() {
+	    String productName = Environment.getProductName();
+	    String versionInfo = Environment.getProductVersion();
+	    String buildInfo   = Environment.getProductBuildDateTime();
+	    String copyright   = Environment.getCopyrightNotice();
+	    String javaVersion = Environment.getJavaVersion();
+
+	    versionPrompt.setMessage(productName);
+	    versionText.setText(versionInfo);
+	    buildText.setText(buildInfo);
+	    copyrightText.setText(copyright);
+	    javaText.setText(javaVersion);
+
+	    versionPrompt.open(mainWindow);
 	}
 
 	public static void exit() {

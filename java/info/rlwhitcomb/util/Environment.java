@@ -128,6 +128,9 @@
  *	    exception variants.
  *	09-Feb-2021 (rlwhitcomb)
  *	    Rework "printProgramInfo" using the new coloring method.
+ *	23-Feb-2021 (rlwhitcomb)
+ *	    Make separate methods for each string printed by "printProgramInfo"
+ *	    so GUI programs can format a display with exactly the same info.
  */
 package info.rlwhitcomb.util;
 
@@ -525,6 +528,17 @@ public final class Environment
 
 
 	/**
+	 * @return The complete Java runtime version string.
+	 *
+	 * @see #javaVersion
+	 * @see #dataModel
+	 */
+	public static String getJavaVersion() {
+	    return Intl.formatString("util#env.javaVersion", javaVersion(), dataModel());
+	}
+
+
+	/**
 	 * @return The host name (computer name) we're running on.
 	 */
 	public static String hostName() {
@@ -835,6 +849,28 @@ public final class Environment
 
 
 	/**
+	 * @return Whether or not this is a DEBUG build (set externally in the "build.properties" file).
+	 */
+	public static boolean isDebugBuild() {
+	    readBuildProperties();
+	    return IS_DEBUG_BUILD;
+	}
+
+
+	/**
+	 * @return The complete product version string.
+	 *
+	 * @see #getAppVersion
+	 * @see #getAppBuild
+	 * @see #isDebugBuild
+	 */
+	public static String getProductVersion() {
+	    String debugInfo = isDebugBuild() ? Intl.getString("util#env.debug") : "";
+	    return Intl.formatString("util#env.version", getAppVersion(), getAppBuild(), debugInfo);
+	}
+
+
+	/**
 	 * @return The date the application was built (set externally in the "build.number" file)
 	 * in <code>yyyy-MM-dd</code> format.
 	 */
@@ -855,11 +891,13 @@ public final class Environment
 
 
 	/**
-	 * @return Whether or not this is a DEBUG build (set externally in the "build.properties" file).
+	 * @return The complete product build date/time string.
+	 *
+	 * @see #getBuildDate
+	 * @see #getBuildTime
 	 */
-	public static boolean isDebugBuild() {
-	    readBuildProperties();
-	    return IS_DEBUG_BUILD;
+	public static String getProductBuildDateTime() {
+	    return Intl.formatString("util#env.build", getBuildDate(), getBuildTime());
 	}
 
 
@@ -1070,18 +1108,11 @@ public final class Environment
 	 * @param colors	Whether or not to use colors.
 	 */
 	public static void printProgramInfo(PrintStream ps, int centerWidth, boolean colors) {
-	    String debugInfo   = isDebugBuild() ? Intl.getString("util#env.debug") : "";
-	    String versionInfo = Intl.formatString(
-		"util#env.version",
-		getAppVersion(), getAppBuild(), debugInfo);
-	    String buildInfo = Intl.formatString(
-		"util#env.build",
-		getBuildDate(), getBuildTime());
 	    String productName = getProductName();
+	    String versionInfo = getProductVersion();
+	    String buildInfo   = getProductBuildDateTime();
 	    String copyright   = getCopyrightNotice();
-	    String javaVersion = Intl.formatString(
-		"util#env.javaVersion",
-		javaVersion(), dataModel());
+	    String javaVersion = getJavaVersion();
 
 	    int lineWidth = centerWidth;
 

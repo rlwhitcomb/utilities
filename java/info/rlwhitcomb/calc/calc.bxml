@@ -35,6 +35,9 @@
 		Add a label area to report the current output size (for large outputs).
 	    14-Jan-2021 (rlwhitcomb)
 		Set the text area fonts in code, so we can use new FontUtilities monospaced list.
+	    23-Feb-2021 (rlwhitcomb)
+		Line up the buttons nicer; add "version" button. Change help prompt
+		to version prompt.
 
      ========================================================================== -->
 
@@ -48,17 +51,21 @@
 
     <actionMappings>
 	<Window.ActionMapping action="help" keyStroke="F1" />
+	<Window.ActionMapping action="version" keyStroke="Cmd-F1" />
 	<Window.ActionMapping action="clear" keyStroke="F6" />
 	<Window.ActionMapping action="calculate" keyStroke="F9" />
 	<Window.ActionMapping action="exit" keyStroke="F10" />
     </actionMappings>
 
     <bxml:define>
-	<Prompt bxml:id="helpPrompt" title="Help" messageType="QUESTION"
-		    message="Expression Calculator" preferredWidth="500">
-	    <Label styles="{wrapText:true}"
-		text="Supports most Java arithmetic, bit and shift operators.&#10;&#10;Dynamic typing is done, unless explicit casts such as '(long)' are used.&#10;&#10;Most (all?) of the Java arithmetic operators are available, plus the '===' and '!==' strict equality operators from JavaScript.&#10;&#10;Use the 'C' button (or F6) to clear the fields, and '!' (or F9) to calculate the result."
-	    />
+	<Prompt bxml:id="versionPrompt" title="Version" messageType="QUESTION"
+		    message="" preferredWidth="500">
+	    <BoxPane orientation="vertical" styles="{horizontalAlignment:'center'}">
+		<Label bxml:id="versionText" text="" styles="{color:'limegreen'}"/>
+		<Label bxml:id="buildText" text=""/>
+		<Label bxml:id="copyrightText" text=""/>
+		<Label bxml:id="javaText" text=""/>
+	    </BoxPane>
 	</Prompt>
     </bxml:define>
 
@@ -68,31 +75,53 @@
 	</columns>
 	<rows>
 	    <TablePane.Row height="-1">
-		<BoxPane orientation="horizontal" styles="{padding:4, spacing:20, verticalAlignment:'center', horizontalAlignment:'center' }">
-		    <PushButton tooltipText="Clear input (F6)"
+		<BoxPane orientation="horizontal" styles="{padding:4, spacing:20, verticalAlignment:'center', horizontalAlignment:'center'}">
+		    <BoxPane orientation="vertical" styles="{horizontalAlignment:'center'}">
+			<PushButton tooltipText="Clear input (F6)"
 				action="clear"
 				buttonData="C"
 				preferredWidth="60"
 				preferredHeight="32"
 				styles="{color:'forestgreen', font:{size:24,bold:true}}"/>
-		    <PushButton tooltipText="Calculate! (F9)"
+			<Label text="F6"/>
+		    </BoxPane>
+		    <BoxPane orientation="vertical" styles="{horizontalAlignment:'center'}">
+			<PushButton tooltipText="Calculate! (F9)"
 				action="calculate"
 				buttonData="!"
 				preferredWidth="60"
 				preferredHeight="32"
 				styles="{color:'red', font:{size:24,bold:true}}"/>
-		    <PushButton tooltipText="Help (F1)"
-				action="help"
-				buttonData="?"
-				preferredWidth="60"
-				preferredHeight="32"
-				styles="{color:'blue', font:{size:24,bold:true}}"/>
-		    <PushButton tooltipText="Exit (F10)"
+			<Label text="F9"/>
+		    </BoxPane>
+		    <BoxPane orientation="vertical" styles="{horizontalAlignment:'center'}">
+			<PushButton tooltipText="Exit (F10)"
 				action="exit"
 				buttonData="X"
 				preferredWidth="60"
 				preferredHeight="32"
 				styles="{color:'indigo', font:{size:24,bold:true}}"/>
+			<Label text="F10"/>
+		    </BoxPane>
+		    <Label preferredWidth="80"/>
+		    <BoxPane orientation="vertical" styles="{horizontalAlignment:'center'}">
+			<PushButton tooltipText="Help (F1)"
+				action="help"
+				buttonData="?"
+				preferredWidth="60"
+				preferredHeight="32"
+				styles="{color:'blue', font:{size:24,bold:true}}"/>
+			<Label text="F1"/>
+		    </BoxPane>
+		    <BoxPane orientation="vertical" styles="{horizontalAlignment:'center'}">
+			<PushButton tooltipText="Version (Cmd-F1)"
+				action="version"
+				buttonData="V"
+				preferredWidth="60"
+				preferredHeight="32"
+				styles="{color:'blue', font:{size:24,bold:true}}"/>
+			<Label text="Cmd-F1"/>
+		    </BoxPane>
 		</BoxPane>
 	    </TablePane.Row>
 	    <TablePane.Row height="1*">
