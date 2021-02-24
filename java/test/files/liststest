@@ -1,12 +1,12 @@
-$testClass info.rlwhitcomb.util.Lists
+:testClass info.rlwhitcomb.util.Lists
 
-$inputDir test/canons
+:inputDir test/canons
 
-$echo Tests of Lists functionality...
-$echo
+:echo Tests of Lists functionality...
+:echo
 
 primes: test/data/primes.txt -b -c -80
 Psalm23: test/data/Psalm23.txt -j
 
-$echo
-$echo Done with Lists tests.
+:echo
+:echo Done with Lists tests.

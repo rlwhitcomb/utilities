@@ -175,6 +175,8 @@
  *	    Get version from test class so version checks work; refactor MajorMinor to Version.
  *	18-Feb-2021 (rlwhitcomb)
  *	    Allow spaces before colon in test description lines.
+ *	24-Feb-2021 (rlwhitcomb)
+ *	    Allow directives in test description files to start with ":" in addition to "$" or "!".
  */
 package info.rlwhitcomb.tester;
 
@@ -987,7 +989,7 @@ public class Tester
 
 
 	/**
-	 * Process the description file lines that begin with "$" or "!".
+	 * Process the description file lines that begin with "$", "!", or ":".
 	 *
 	 * @param line	The internal instruction input line (without the leading "$").
 	 */
@@ -1175,7 +1177,7 @@ public class Tester
 			line.startsWith("--") ||
 			line.startsWith("//"))
 			continue;
-		    if (line.startsWith("$") || line.startsWith("!")) {
+		    if (line.startsWith("$") || line.startsWith("!") || line.startsWith(":")) {
 			processInternalCommand(line.substring(1));
 			continue;
 		    }
