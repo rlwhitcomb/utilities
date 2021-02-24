@@ -39,6 +39,13 @@ code {
    color: red;
 }
 
+.bluebutton {
+   font-family: Verdana, Helvetica, Arial, Sans-Serif;
+   font-size: 24pt;
+   font-weight: bold;
+   color: blue;
+}
+
 .innertable tr,
 .innertable th,
 .innertable td {
@@ -80,8 +87,8 @@ code {
     <tr><td><code>-nocolors</code></td><td>Do not use coloring in the console</td><td><code>-nocolor</code>, <code>-nocol</code>, <code>-noc</code></td></tr>
     <tr><td><code>-darkbackgrounds</code></td><td>Use colors suitable for a dark console background <i>(default for Windows)</i></td><td><code>-darkbackground</code>, <code>-darkback</code>,<br><code>-darkbg</code>, <code>-dark</code>, <code>-dk</code></td></tr>
     <tr><td><code>-lightbackgrounds</code></td><td>Use colors suitable for a light (white) console background<br><i>(default for non-Windows platforms)</i></td><td><code>-lightbackground</code>, <code>-lightback</code>,<br><code>-lightbg</code>, <code>-light</code>, <code>-lt</code></td></tr>
-    <tr><td><code>-timing</code></td><td>Display timing after each input</td><td><code>-time</code>, <code>-t</code></td></tr>
-    <tr><td><code>-notiming</code></td><td>Do not display timings <i>(default)</i></td><td><code>-notime</code>, <code>-not</code></td></tr>
+    <tr><td><code>-timing</code></td><td>Display timing after each input</td><td><code>-time</code>, <code>-t</code><br>(also use the <code>:timing on</code> directive)</td></tr>
+    <tr><td><code>-notiming</code></td><td>Do not display timings <i>(default)</i></td><td><code>-notime</code>, <code>-not</code><br>(also use the <code>:timing off</code> directive)</td></tr>
     <tr><td><code>-resultsonly</code></td><td>Do not display the input expression on output, but only the results</td><td><code>-resultonly</code>, <code>-results</code>, <code>-result</code>,<br><code>-res</code>, <code>-r</code><br>(also use <code>:resultsonly on/off</code> directive)</td></tr>
     <tr><td><code>-quiet</code></td><td>Do not display anything (suitable for behind-the-scenes calculations)</td><td><code>-q</code><br>(also use the <code>:quiet on/off</code> directive)</td></tr>
     <tr><td><code>-rational</code></td><td>Do all possible calculations in fraction mode, that is as a ratio of natural numbers<br>(as in <code>1/3</code> instead of <code>0.3333333333333333</code>)</td><td><code>-ration</code>, <code>-rat</code><br>(also use the <code>:rational on</code> directive)</td></tr>
@@ -248,6 +255,7 @@ code {
     <tr><td><code>:echo</code> <i>expr</i></td><td>Echo the value of the expression to the output</td><td></td></tr>
     <tr><td><code>:include</code> <i>string</i></td><td>Include the file named by <i>string</i></td><td></td></tr>
     <tr><td><code>:rational</code> <i>mode_option</i></td><td>Set the rational calculation mode where <i>mode_option</i> is one of:<br><code>on</code>, <code>off</code>, <code>true</code>, <code>false</code>, <code>pop</code>, <code>previous</code>, <code>prev</code>, or <i>variable</i><br><i>(default is <code>off</code>, or the value set on the command line)</i></td><td><code>:ration</code>, <code>:fraction</code>, <code>:frac</code></td></tr>
+    <tr><td><code>:timing</code> <i>mode_option</i></td><td>Set the timing mode (same <i>mode_option</i> choices as for <code>:rational</code>)<br><i>(default is <code>off</code> or the value set on the command line)</i></td><td><code>:time</code></td></tr>
     <tr><td><code>:debug</code> <i>mode_option</i></td><td>Set the debug mode (same <i>mode_option</i> choices as for <code>:rational</code>)<br><i>(default is <code>off</code> or the value set on the command line)</i></td><td><code>:deb</code></td></tr>
     <tr><td><code>:resultsonly</code> <i>mode_option</i></td><td>Set the results-only mode<br><i>(default is <code>off</code> or value on command line)</i></td><td><code>:res</code>, <code>:result</code>, <code>:results</code>, <code>:resultonly</code></td></tr>
     <tr><td><code>:quiet</code> <i>mode_option</i></td><td>Set quiet mode <i>(default is <code>off</code>)</i></td><td></td></tr>
@@ -280,7 +288,8 @@ code {
   <center>
   <br><img src="calc_initial.png" alt="Initial GUI screen" width="50%"/>
   </center>
-  <p>An expression can be entered on each line, and all will be executed in order when the <span class="redbutton">!</span> button (or the <code>F9</code> key) is pressed, and the results displayed in the "Result" field.
+  <p>An expression can be entered on each line, and all will be executed in order when the <span class="redbutton">!</span> button (or the <code>F9</code> key) is pressed, and the results displayed in the "Result" field. The Ctrl-Enter (or Cmd-Enter on Mac) key will also perform the calculation(s).
+  <p>This help page will also be displayed by the <span class="bluebutton">?</span> button (or the <code>F1</code> key).
 
   <footer><br><br><center>&copy;&nbsp;Copyright 2021 Roger L. Whitcomb.&nbsp;&nbsp;Licensed under an <a href="https://github.com/rlwhitcomb/utilities/blob/master/LICENSE">MIT</a> license.<br>Last modified: ${__DATE__} at ${__TIME__}</center><br><br></footer>
 </body>
