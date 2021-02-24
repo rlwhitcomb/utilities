@@ -160,6 +160,8 @@
 		Add "Gmt" and related wrappers.
 	    23-Feb-2021 (rlwhitcomb)
 		Add "Head" and related wrappers.
+	    24-Feb-2021 (rlwhitcomb)
+		Do a compare after the "preproc" step to test that the preprocessor still works.
 
      ========================================================================== -->
 
@@ -430,6 +432,11 @@
 		<delete file="TestPP.java"/>
 		<preproc dir="." processAsDirectory="true" recurseDirectories="true" nologo="true" verbose="plus"
 								      log="${test.log.file.name}" overwrite="true"/>
+		<fail message="Preprocessing results don't match!">
+			<condition>
+				<not><filesmatch file1="TestPP.java" file2="test/canons/TestPP.canon"/></not>
+			</condition>
+		</fail>
 		<echo>Test of InitializationTask...</echo>
 		<java classname="InitTaskTest"                        output="${test.log.file.name}" append="true" failonerror="true"/>
 		<echo>Running various tests through the Tester...</echo>
