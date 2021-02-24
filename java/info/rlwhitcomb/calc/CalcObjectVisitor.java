@@ -175,6 +175,8 @@
  *	    Add "eval" function.
  *	22-Feb-2021 (rlwhitcomb)
  *	    Refactor "loopvar" to "localvar".
+ *	23-Feb-2021 (rlwhitcomb)
+ *	    Add ":timing" directive.
  */
 package info.rlwhitcomb.calc;
 
@@ -258,6 +260,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	/** Silent flag (set to true) while evaluating nested expressions (or via :quiet directive). */
 	private boolean silent = false;
+
+	/** Stack of previous "timing" mode values. */
+	private Deque<Boolean> timingModeStack = new ArrayDeque<>();
 
 	/** Stack of previous "debug" mode values. */
 	private Deque<Boolean> debugModeStack = new ArrayDeque<>();
@@ -620,6 +625,17 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    if (push)
 		stack.push(previousMode);
+	}
+
+	@Override
+	public Object visitTimingDirective(CalcParser.TimingDirectiveContext ctx) {
+	    processModeOption(ctx.modeOption(), timingModeStack, (mode) -> {
+		boolean previousMode = Calc.setTimingMode(mode);
+		displayActionMessage("%calc#timingMode", mode);
+		return previousMode;
+	    });
+
+	    return null;
 	}
 
 	@Override

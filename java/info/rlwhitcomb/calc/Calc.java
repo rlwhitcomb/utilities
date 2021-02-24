@@ -98,6 +98,8 @@
  *	23-Feb-2021 (rlwhitcomb)
  *	    Allow Ctrl/Cmd-Enter to initiate a calculation from the input text.
  *	    Add Cmd-F1 ("version") command to the GUI.
+ *	23-Feb-2021 (rlwhitcomb)
+ *	    Add ":timing" directive.
  */
 package info.rlwhitcomb.calc;
 
@@ -361,6 +363,12 @@ public class Calc
 	    updateOutputSize();
 	}
 
+
+	public static boolean setTimingMode(boolean mode) {
+	    boolean oldMode = timing;
+	    timing = mode;
+	    return oldMode;
+	}
 
 	public static boolean setDebugMode(boolean mode) {
 	    boolean oldMode = debug;

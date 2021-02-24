@@ -48,6 +48,8 @@
 #	    Refactor "loopvar" to "localvar".
 #	22-Feb-2021 (rlwhitcomb)
 #	    New syntax error messages.
+#	23-Feb-2021 (rlwhitcomb)
+#	    Timing mode message.
 #
 
 #
@@ -89,6 +91,7 @@ varsAllCleared	= All variables cleared.
 varOneVariable	= "Variable "
 varVariables	= "Variables "
 varCleared	= %1$s cleared.
+timingMode	= Timing mode set to %1$s.
 debugMode	= Debug mode set to %1$s.
 rationalMode	= Calculation mode set to %1$s.
 defining	= <r>Defining function '<v>%1$s<r>' = <x>%2$s<r>

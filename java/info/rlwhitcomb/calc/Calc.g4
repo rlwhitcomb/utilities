@@ -134,6 +134,8 @@
  *	    Add "eval" function.
  *	22-Feb-2021 (rlwhitcomb)
  *	    Refactor "loopvar" to "localvar".
+ *	23-Feb-2021 (rlwhitcomb)
+ *	    Add ":timing" directive.
  */
 
 grammar Calc;
@@ -294,6 +296,7 @@ directive
    | CLEAR idList ?                        # clearDirective
    | ECHO expr ?                           # echoDirective
    | INCLUDE expr                          # includeDirective
+   | TIMING modeOption                     # timingDirective
    | RATIONAL modeOption                   # rationalDirective
    | DEBUG modeOption                      # debugDirective
    | RESULTSONLY modeOption                # resultsOnlyDirective
@@ -553,6 +556,10 @@ SI
 
 MIXED
    : DIR  ( M I X | M I X E D )
+   ;
+
+TIMING
+   : DIR  ( T I M E | T I M I N G )
    ;
 
 RATIONAL
