@@ -48,6 +48,8 @@
  *	choices.
  *    19-Jan-2021 (rlwhitcomb)
  *	Fix a bug in the display of the choice aliases. Reorder them.
+ *    23-Feb-2021 (rlwhitcomb)
+ *	Add "cs" as an option for "charsets".
  */
 import java.awt.GraphicsEnvironment;
 import java.io.PrintStream;
@@ -94,7 +96,7 @@ public class OS
 		ENVIRONMENT	(OS::displayEnvironment,
 				 "environment", "environ", "envs", "env", "e"),
 		CHARSETS	(OS::displayCharsets,
-				 "charsets", "charset", "chars", "char", "ch", "c"),
+				 "charsets", "charset", "chars", "char", "ch", "cs", "c"),
 		LOCALES		(OS::displayLocales,
 				 "locales", "locale", "locs", "loc", "l"),
 		DIGESTS		(OS::displayDigests,
