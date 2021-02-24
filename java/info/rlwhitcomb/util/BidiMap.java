@@ -44,6 +44,8 @@
  *	    Update obsolete Javadoc constructs.
  *	29-Jan-2021 (rlwhitcomb)
  *	    Use new Intl exception variants for convenience.
+ *	24-Feb-2021 (rlwhitcomb)
+ *	    New parameter to "dumpState" to print null entries or not.
  */
 package info.rlwhitcomb.util;
 
@@ -616,7 +618,7 @@ public class BidiMap<K, V> implements Map<K, V>
 	/**
 	 * Dump diagnostics to stdout, mainly to evaluate the hashing efficiencies.
 	 */
-	public void dumpState() {
+	public void dumpState(final boolean printNulls) {
 	    System.out.format("BidiMap statistics%n------------------%n");
 	    System.out.format("Size: %1$d, Capacity: %2$d, Load Factor: %3$6.3f%n", size, keyTable.length, loadFactor);
 	    int longestChain = 0;
@@ -625,8 +627,11 @@ public class BidiMap<K, V> implements Map<K, V>
 	    System.out.format("Key Table:%n----------%n");
 	    for (int index = 0; index < keyTable.length; index++) {
 		Entry<K, V> entry = keyTable[index];
-		if (entry == null)
-		    System.out.format("%1$d. null%n", index);
+		if (entry == null) {
+		    if (printNulls) {
+			System.out.format("%1$d. null%n", index);
+		    }
+		}
 		else {
 		    numFilled++;
 		    System.out.format("%1$d. ", index);
@@ -644,7 +649,7 @@ public class BidiMap<K, V> implements Map<K, V>
 		}
 	    }
 	    System.out.println("----------------");
-	    System.out.format("Longest key chain: %1$d, %% filled = %2$6.1f%n", longestChain, (float)numFilled / (float)keyTable.length * 100.0f);
+	    System.out.format("Longest key chain: %1$d, percent filled = %2$4.1f%%%n", longestChain, (float)numFilled / (float)keyTable.length * 100.0f);
 	    System.out.format("Size = %1$d, number of keys = %2$d%n", size, numKeys);
 	    System.out.println("================");
 	    longestChain = 0;
@@ -652,8 +657,11 @@ public class BidiMap<K, V> implements Map<K, V>
 	    System.out.format("Value Table:%n------------%n");
 	    for (int index = 0; index < valueTable.length; index++) {
 		Entry<K, V> entry = valueTable[index];
-		if (entry == null)
-		    System.out.format("%1$d. null%n", index);
+		if (entry == null) {
+		    if (printNulls) {
+			System.out.format("%1$d. null%n", index);
+		    }
+		}
 		else {
 		    numFilled++;
 		    System.out.format("%1$d. ", index);
@@ -671,7 +679,7 @@ public class BidiMap<K, V> implements Map<K, V>
 		}
 	    }
 	    System.out.println("----------------");
-	    System.out.format("Longest value chain: %1$d, %% filled = %2$6.1f%n", longestChain, (float)numFilled / (float)keyTable.length * 100.0f);
+	    System.out.format("Longest value chain: %1$d, percent filled = %2$4.1f%%%n", longestChain, (float)numFilled / (float)keyTable.length * 100.0f);
 	    System.out.format("Size = %1$d, number of values = %2$d%n", size, numValues);
 	    System.out.println("================");
 	}

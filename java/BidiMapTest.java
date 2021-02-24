@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2013-2014,2016,2020 Roger L. Whitcomb.
+ * Copyright (c) 2013-2014,2016,2020-2021 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,6 +20,11 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
+ * History:
+ *	Lost in antiquity...
+ *	24-Feb-2021 (rlwhitcomb)
+ *	    Move test files to "test/data" directory. Don't output "null" entries.
  */
 
 import java.io.BufferedReader;
@@ -54,7 +59,9 @@ public class BidiMapTest
 	private static boolean useWords = false;
 	private static boolean useUTF8 = false;
 
-	private static String[] TEXT_FILE_NAMES = {
+	private static final String TEST_DIRECTORY = "test/data";
+
+	private static final String[] TEXT_FILE_NAMES = {
 		"Declaration",
 		"Constitution",
 		"Gettysburg",
@@ -106,7 +113,7 @@ public class BidiMapTest
 			keysToRemoveList = new ArrayList<String>(size / 12);
 
 			for (String name : TEXT_FILE_NAMES) {
-				try (BufferedReader reader = Files.newBufferedReader(Paths.get(name + ".txt"),
+				try (BufferedReader reader = Files.newBufferedReader(Paths.get(TEST_DIRECTORY, name + ".txt"),
 				            useUTF8 ? StandardCharsets.UTF_8 : Charset.defaultCharset()))
 				{
 					if (verbose)
@@ -153,7 +160,7 @@ public class BidiMapTest
 			}
 		}
 		if (verbose)
-			map.dumpState();
+			map.dumpState(false);
 
 		// Now go through and remove every 13th key/value pair, checking to make sure the removed
 		// value is correct and dump the final map again.  Every other one, remove it using
@@ -182,6 +189,6 @@ public class BidiMapTest
 			which = !which;
 		}
 		if (verbose)
-			map.dumpState();
+			map.dumpState(false);
 	}
 }

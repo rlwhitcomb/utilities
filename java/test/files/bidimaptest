@@ -1,0 +1,11 @@
+$testClass BidiMapTest
+$sourceDir test/files
+$canonDir test/canons
+
+$echo Tests of BidiMap...
+$echo
+
+bidimap: -words -verbose
+
+$echo
+$echo Done with BidiMapTest

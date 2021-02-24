@@ -20,6 +20,7 @@ t6: dynarraytest
 t7: matchestest
 t8: numerictest
 t9: loremtest
+t10: bidimaptest
 
 !echo
 !echo Done with all the Tester tests.
