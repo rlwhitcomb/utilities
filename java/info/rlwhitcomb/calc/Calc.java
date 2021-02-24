@@ -100,6 +100,8 @@
  *	    Add Cmd-F1 ("version") command to the GUI.
  *	23-Feb-2021 (rlwhitcomb)
  *	    Add ":timing" directive.
+ *	24-Feb-2021 (rlwhitcomb)
+ *	    Tweak the Javadoc.
  */
 package info.rlwhitcomb.calc;
 
@@ -111,6 +113,8 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.nio.file.Files;
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -131,6 +135,7 @@ import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
 
 import info.rlwhitcomb.jarfile.Launcher;
+import info.rlwhitcomb.util.BigFraction;
 import info.rlwhitcomb.util.CharUtil;
 import info.rlwhitcomb.util.ClassUtil;
 import info.rlwhitcomb.util.ConsoleColor;
@@ -145,6 +150,10 @@ import info.rlwhitcomb.util.QueuedThread;
 /**
  * Command line calculator, which will also read from {@link System#in} or from one or more files.
  * <p> Works from just the command line, from reading input from the console, or in GUI mode.
+ * <p> Built from an <a href="https://www.antlr.org">Antlr</a> parser, this calculator implements a
+ * wide variety of operators and functions, and is built on top of the Java {@link BigDecimal}
+ * and {@link BigInteger} classes for essentially unlimited precision arithmetic. It also uses
+ * our {@link BigFraction} class to do exact rational number arithmetic.
  */
 public class Calc
 	implements Application, CalcDisplayer
@@ -253,6 +262,10 @@ public class Calc
 	}
 
 
+	/**
+	 * Listen for key press events inside the input {@link TextArea} and respond.
+	 * <p> Primarily to allow a keystroke to initiate calculation while typing.
+	 */
 	private static class KeyPressListener implements ComponentKeyListener
 	{
 		@Override
@@ -453,6 +466,10 @@ public class Calc
 	}
 
 
+	/**
+	 * The default displayer that displays messages and results (usually with colors)
+	 * to the system console ({@link System#out}).
+	 */
 	private static class ConsoleDisplayer implements CalcDisplayer
 	{
 		@Override

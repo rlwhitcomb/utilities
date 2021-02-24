@@ -31,12 +31,15 @@
  *	    Add "getBuild()".
  *	11-Feb-2021 (rlwhitcomb)
  *	    Simplify the "main" display.
+ *	24-Feb-2021 (rlwhitcomb)
+ *	    Update the Javadoc.
  */
 package info.rlwhitcomb;
 
 import java.util.List;
 
 import info.rlwhitcomb.util.CharUtil;
+import static info.rlwhitcomb.util.CharUtil.Justification.*;
 import static info.rlwhitcomb.util.ConsoleColor.Code.*;
 import info.rlwhitcomb.util.Environment;
 import static info.rlwhitcomb.util.Environment.ProgramInfo;
@@ -46,9 +49,10 @@ import static info.rlwhitcomb.util.Environment.ProgramInfo;
  *
  * <p>This class implements the upcoming standard of having
  *  <code>org.apache.<i>project-name</i>.Version.getVersion()</code> be a standard
- *  way to get version information.
+ *  way to get version information in the <a href="https://apache.org">ASF</a> world.
  *
- * <p>Relies on the {@link Environment} class to provide the necessary information.
+ * <p>This implementation for this "utilities" project relies on the {@link Environment}
+ * class to provide the necessary information.
  */
 public class Version
 {
@@ -75,14 +79,14 @@ public class Version
 	}
 
 	/**
-	 * @return Name of product.
+	 * @return Name of the product.
 	 */
 	public static String getProduct() {
 	    return Environment.getProductName();
 	}
 
 	/**
-	 * @return Implementation language.
+	 * @return Implementation language of this project.
 	 */
 	public static String getImplementationLanguage() {
 	    return "Java";
@@ -94,7 +98,8 @@ public class Version
 	}
 
 	/**
-	 * Prints the version to the command line.
+	 * Prints the version to the command line, along with all the available subproject
+	 * version information (contained in the <code>version.properties</code> file).
 	 *
 	 * @param args The parsed command line arguments (unused).
 	 */
@@ -117,9 +122,9 @@ public class Version
 	    for (ProgramInfo info : infos) {
 		String version = String.format("Version %1$s", info.version);
 
-		System.out.println(BLUE_BOLD_BRIGHT + CharUtil.padToWidth(info.title, 50, CharUtil.Justification.CENTER));
-		System.out.println(GREEN + CharUtil.padToWidth(version, 50, CharUtil.Justification.CENTER));
-		System.out.println(BLACK_BRIGHT + underline + RESET);
+		System.out.println(BLUE_BOLD_BRIGHT + CharUtil.padToWidth(info.title, 50, CENTER));
+		System.out.println(GREEN            + CharUtil.padToWidth(version, 50, CENTER));
+		System.out.println(BLACK_BRIGHT     + underline + RESET);
 	    }
 	    System.out.println();
 	}

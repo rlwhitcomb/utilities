@@ -162,6 +162,8 @@
 		Add "Head" and related wrappers.
 	    24-Feb-2021 (rlwhitcomb)
 		Do a compare after the "preproc" step to test that the preprocessor still works.
+	    24-Feb-2021 (rlwhitcomb)
+		Link our Javadoc to the online Pivot and Antlr docs as well as the JDK docs.
 
      ========================================================================== -->
 
@@ -410,6 +412,8 @@
 			<arg value="--frames" if:true="${html4.output}"/>
 			<arg line="--release 8" if:true="${new.java.version}"/>
 			<link href="https://docs.oracle.com/javase/8/docs/api/"/>
+			<link href="https://pivot.apache.org/2.0.5/docs/api/"/>
+			<link href="https://www.antlr.org/api/Java/"/>
 			<packageset dir=".">
 				<include name="net/iharder/b64"/>
 				<include name="name/fraser/neil/plaintext"/>
