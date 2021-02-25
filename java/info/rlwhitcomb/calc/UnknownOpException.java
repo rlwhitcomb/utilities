@@ -28,6 +28,8 @@
  *	    First version.
  *	18-Jan-2021 (rlwhitcomb)
  *	    Move text to resource file.
+ *	24-Feb-2021 (rlwhitcomb)
+ *	    Fix typo in message key.
  */
 package info.rlwhitcomb.calc;
 
@@ -41,7 +43,7 @@ import org.antlr.v4.runtime.ParserRuleContext;
 class UnknownOpException extends CalcExprException
 {
 	UnknownOpException(final String op, final ParserRuleContext ctx) {
-	    super(ctx, "%calc.unknownOp", op);
+	    super(ctx, "%calc#unknownOp", op);
 	}
 }
 

@@ -136,6 +136,8 @@
  *	    Refactor "loopvar" to "localvar".
  *	23-Feb-2021 (rlwhitcomb)
  *	    Add ":timing" directive.
+ *	24-Feb-2021 (rlwhitcomb)
+ *	    Add a bunch more Unicode symbols.
  */
 
 grammar Calc;
@@ -276,6 +278,7 @@ value
    | NULL                        # nullValue
    | PI_CONST                    # piValue
    | E_CONST                     # eValue
+   | FRAC_CONST                  # fracValue
    ;
 
 define
@@ -346,6 +349,15 @@ PI_CONST : P I
 
 E_CONST  : E ;
 
+FRAC_CONST
+         : ( '\u00BC' | '\u00BD' | '\u00BE' )             /* 1/4, 1/2, 3/4      */
+         | ( '\u2150' | '\u2151' | '\u2152' )             /* 1/7, 1/9, 1/10     */
+         | ( '\u2189' | '\u2153' | '\u2154' )             /* 0/3, 1/3, 2/3      */
+         | ( '\u2155' | '\u2156' | '\u2157' | '\u2158' )  /* 1/5, 2/5, 3/5, 4/5 */
+         | ( '\u2159' | '\u215A' )                        /* 1/6, 5/6           */
+         | ( '\u215B' | '\u215C' | '\u215D' | '\u215E' )  /* 1/8, 3/8, 5/8, 7/8 */
+         ;
+
 ABS      : A B S ;
 
 SINH     : S I N H ;
@@ -368,9 +380,9 @@ ATAN2    : A T A N '2' ;
 
 ATAN     : A T A N ;
 
-SQRT     : S Q R T ;
+SQRT     : ( S Q R T | '\u221A' ) ;
 
-CBRT     : C B R T ;
+CBRT     : ( C B R T | '\u221B' ) ;
 
 LOG      : L O G ;
 
@@ -442,7 +454,9 @@ ADD_OP
 
 MULT_OP
        : '*'
+       | '\u00D7'
        | '/'
+       | '\u00F7'
        | '%'
        ;
 
@@ -453,7 +467,9 @@ ADD_ASSIGN
 
 MULT_ASSIGN
        : '*='
+       | '\u00D7='
        | '/='
+       | '\u00F7='
        | '%='
        ;
 
