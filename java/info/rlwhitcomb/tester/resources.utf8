@@ -1,7 +1,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2012-2021 Roger L. Whitcomb.
+# Copyright (c) 2012,2014,2016-2021 Roger L. Whitcomb.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -72,6 +72,9 @@
 #	    New error message.
 #	25-Jan-2021 (rlwhitcomb)
 #	    New error message.
+#	24-Feb-2021 (rlwhitcomb)
+#	    Reword an error message for clarity. Update the help.
+#
 
 mismatch		= Mismatch on test \"%1$s\":%n  Canon file: %2$s%n Output file: %3$s
 compareError		= Error comparing files: %1$s%n  Canon file: %2$s%n Output file: %3$s
@@ -85,7 +88,7 @@ badScriptDir		= Directory specified by \"$scriptDir\" directive (%1$s) does not 
 emptyInputDir		= The \"$inputDir\" directive should not have an empty directory name.
 emptyScriptDir		= The \"$scriptDir\" directive should not have an empty directory name.
 noTestClass		= There is no \"$testClass\" given either on the command line or in the test description file.
-testClassNotFound	= Error trying to load the \"$testClass\" (%1$s) code: %2$s
+testClassNotFound	= Error trying to load the code for \"$testClass\" (%1$s): %2$s
 emptyTestClass		= The \"$testClass\" directive should not have an empty class name.
 emptyInclude		= The \"$include\" directive should not have an empty file name.
 noMainMethod		= Error finding the \"main\" method of the \"$testClass\": %1$s%n
@@ -139,8 +142,8 @@ help13		= \tcanonfilename: test_command_line
 help14		=
 help15		= "Where \"#\" or \"!\" or \"//\" at the beginning of a line means"
 help16		= "  it is a comment that is ignored."
-help17		= "Lines beginning with \"$\" contain directives or options for"
-help18		= "  the test process."
+help17		= "Lines beginning with \"$\", \"!\", or \":\" contain directives"
+help18		= "  and options for the test process."
 help19		=
 help20		= Additionally, each test line can be prefixed with a version
 help21		= "  prefix in the form of \"{[platform],[begin][-end][+]}\" where:"

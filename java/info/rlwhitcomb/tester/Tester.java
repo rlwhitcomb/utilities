@@ -177,6 +177,9 @@
  *	    Allow spaces before colon in test description lines.
  *	24-Feb-2021 (rlwhitcomb)
  *	    Allow directives in test description files to start with ":" in addition to "$" or "!".
+ *	24-Feb-2021 (rlwhitcomb)
+ *	    Tweak some of the initial error messages. Make some errors in the description file fatal
+ *	    to abort the whole process.
  */
 package info.rlwhitcomb.tester;
 
@@ -491,7 +494,7 @@ public class Tester
 
 		try {
 		    if (testClass == null) {
-			origErr.print(Intl.getString("tester#noTestClass"));
+			origErr.println(Intl.getString("tester#noTestClass"));
 			return CLASS_NOT_FOUND;
 		    }
 		    else {
@@ -522,15 +525,15 @@ public class Tester
 			    }
 			}
 			catch (NoSuchMethodException nsme) {
-			    origErr.print(Intl.formatString("tester#noMainMethod", ExceptionUtil.toString(nsme)));
+			    origErr.println(Intl.formatString("tester#noMainMethod", ExceptionUtil.toString(nsme)));
 			    return OTHER_ERROR;
 			}
 			catch (IllegalAccessException | IllegalArgumentException | InstantiationException ex) {
-			    origErr.print(Intl.formatString("tester#mainInvokeError", ExceptionUtil.toString(ex)));
+			    origErr.println(Intl.formatString("tester#mainInvokeError", ExceptionUtil.toString(ex)));
 			    return OTHER_ERROR;
 			}
 			catch (InvocationTargetException ite) {
-			    origErr.print(Intl.formatString("tester#abnormalExitString", ExceptionUtil.toString(ite.getTargetException())));
+			    origErr.println(Intl.formatString("tester#abnormalExitString", ExceptionUtil.toString(ite.getTargetException())));
 			    return OTHER_ERROR;
 			}
 		    }
@@ -992,8 +995,9 @@ public class Tester
 	 * Process the description file lines that begin with "$", "!", or ":".
 	 *
 	 * @param line	The internal instruction input line (without the leading "$").
+	 * @return	{@code false} to abort processing of this file (fatal error).
 	 */
-	private void processInternalCommand(String line) {
+	private boolean processInternalCommand(String line) {
 	    boolean error = false;
 	    Matcher m = DIRECTIVE.matcher(line);
 	    if (m.matches()) {
@@ -1017,6 +1021,7 @@ public class Tester
 			    File inputDir = new File(argument);
 			    if (!inputDir.exists() || !inputDir.isDirectory()) {
 				Intl.errFormat("tester#badInputDir", argument);
+				return false;
 			    }
 			    else {
 				defaultInputDir = inputDir;
@@ -1024,6 +1029,7 @@ public class Tester
 			}
 			else {
 			    Intl.errFormat("tester#emptyInputDir");
+			    return false;
 			}
 			break;
 
@@ -1033,6 +1039,7 @@ public class Tester
 			    File scriptDir = new File(argument);
 			    if (!scriptDir.exists() || !scriptDir.isDirectory()) {
 				Intl.errFormat("tester#badScriptDir", argument);
+				return false;
 			    }
 			    else {
 				defaultScriptDir = scriptDir;
@@ -1040,6 +1047,7 @@ public class Tester
 			}
 			else {
 			    Intl.errFormat("tester#emptyScriptDir");
+			    return false;
 			}
 			break;
 
@@ -1050,10 +1058,12 @@ public class Tester
 			    }
 			    catch (NoClassDefFoundError | ClassNotFoundException | ExceptionInInitializerError ex) {
 				Intl.errFormat("tester#testClassNotFound", argument, ExceptionUtil.toString(ex));
+				return false;
 			    }
 			}
 			else {
 			    Intl.errFormat("tester#emptyTestClass");
+			    return false;
 			}
 			break;
 
@@ -1109,19 +1119,19 @@ public class Tester
 			for (String option : ABORT_OPTIONS) {
 			    if (line.equalsIgnoreCase(option)) {
 				abortOnFirstError = true;
-				return;
+				return true;
 			    }
 			}
 			for (String option : NO_ABORT_OPTIONS) {
 			    if (line.equalsIgnoreCase(option)) {
 				abortOnFirstError = false;
-				return;
+				return true;
 			    }
 			}
 			for (String option : DEFAULT_ABORT_OPTIONS) {
 			    if (line.equalsIgnoreCase(option)) {
 				abortOnFirstError = defaultAbortOnFirstError;
-				return;
+				return true;
 			    }
 			}
 			error = true;
@@ -1131,6 +1141,8 @@ public class Tester
 
 	    if (error)
 		Intl.errFormat("tester#badCommand", "$" + line);
+
+	    return true;
 	}
 
 
@@ -1178,8 +1190,10 @@ public class Tester
 			line.startsWith("//"))
 			continue;
 		    if (line.startsWith("$") || line.startsWith("!") || line.startsWith(":")) {
-			processInternalCommand(line.substring(1));
-			continue;
+			if (processInternalCommand(line.substring(1)))
+			    continue;
+			else
+			    break;
 		    }
 		    Matcher m = DESCRIPTION.matcher(line);
 		    if (m.matches()) {
