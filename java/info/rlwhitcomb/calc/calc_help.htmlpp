@@ -111,12 +111,14 @@ code {
       <th width=120>Associativity</th>
     </tr>
     <tr><td>28</td>
-      <td><code>pi</code> or <code>e</code><br>
+      <td><code>pi</code>, <code>&#x1D6D1;</code>, or <code>e</code><br>
           <code>true</code> or <code>false</code><br>
-          <code>null</code></td>
+          <code>null</code><br>
+          <code>&#x00BC;</code>, <code>&#x00BD;</code>, <code>&#x00BE;</code>, <code>&#x2150;</code>, <code>&#x215E;</code>, etc.</td>
       <td>the fundamental constants <code>&#x1D6D1;</code> and <code>e</code><br>
           the <code>boolean</code> values<br>
-          the <code>null</code> (empty) value</td><td>- none -</td></tr>
+          the <code>null</code> (empty) value<br>
+          any of the Unicode fraction values</td><td>- none -</td></tr>
     <tr><td>27</td><td><code>{ }</code></td><td>define an object</td><td>left to right</td></tr>
     <tr><td>26</td><td><code>[ ]</code></td><td>define an array,<br>or access elements of<br>an array, string, or object</td><td>left to right</td></tr>
     <tr><td>25</td><td>.</td><td>access an object member</td><td>left to right</td></tr>
@@ -140,8 +142,8 @@ code {
             <tr><td><code>SINH</code>&nbsp;<i>expr</i></td><td>hyperbolic sine</td></tr>
             <tr><td><code>COSH</code>&nbsp;<i>expr</i></td><td>hyperbolic cosine</td></tr>
             <tr><td><code>TANH</code>&nbsp;<i>expr</i></td><td>hyperbolic tangent</td></tr>
-            <tr><td><code>SQRT</code>&nbsp;<i>expr</i></td><td>square root</td></tr>
-            <tr><td><code>CBRT</code>&nbsp;<i>expr</i></td><td>cube root</td></tr>
+            <tr><td><code>SQRT</code> or <code>&radic;</code>&nbsp;<i>expr</i></td><td>square root</td></tr>
+            <tr><td><code>CBRT</code> or <code>&#x221B;</code>&nbsp;<i>expr</i></td><td>cube root</td></tr>
             <tr><td><code>LOG</code>&nbsp;<i>expr</i></td><td>log base 10</td></tr>
             <tr><td><code>LN2</code>&nbsp;<i>expr</i></td><td>log base 2</td></tr>
             <tr><td><code>LN</code>&nbsp;<i>expr</i></td><td>natural log (base e)</td></tr>
@@ -163,8 +165,8 @@ code {
         <td>left to right</td></tr>
     <tr><td>16</td><td><i>expr<sub>1</sub></i>&nbsp;<code> ** </code>&nbsp;<i>expr<sub>2</sub></i></td><td>expr<sub>1</sub> to expr<sub>2</sub> power</td><td>right to left</td></tr>
     <tr><td>15</td><td>
-        <i>expr</i>&nbsp;<code> * </code>&nbsp;<i>expr</i><br>
-        <i>expr</i>&nbsp;<code> / </code>&nbsp;<i>expr</i><br>
+        <i>expr</i>&nbsp;<code> * </code>or<code> &times; </code>&nbsp;<i>expr</i><br>
+        <i>expr</i>&nbsp;<code> / </code>or<code> &divide; </code>&nbsp;<i>expr</i><br>
         <i>expr</i>&nbsp;<code> % </code>&nbsp;<i>expr</i></td>
         <td>multiply/divide/remainder</td><td>left to right</td></tr>
     <tr><td>14</td><td>
@@ -207,8 +209,8 @@ code {
     <tr><td>6</td><td><i>var</i>&nbsp;<code> = </code>&nbsp;<i>expr</i></td><td>assign expr value to variable</td><td>right to left</td></tr>
     <tr><td>5</td><td><i>var</i>&nbsp;<code> **= </code>&nbsp;<i>expr</i></td><td>var to expr power, assign to var</td><td>right to left</td></tr>
     <tr><td>4</td><td>
-        <i>var</i>&nbsp;<code> *= </code>&nbsp;<i>expr</i><br>
-        <i>var</i>&nbsp;<code> /= </code>&nbsp;<i>expr</i><br>
+        <i>var</i>&nbsp;<code> *= </code>or<code> &times;= </code>&nbsp;<i>expr</i><br>
+        <i>var</i>&nbsp;<code> /= </code>or<code> &divide;= </code>&nbsp;<i>expr</i><br>
         <i>var</i>&nbsp;<code> %= </code>&nbsp;<i>expr</i></td>
         <td>perform the operation, reassign to variable</td><td>right to left</td></tr>
     <tr><td>3</td><td>
