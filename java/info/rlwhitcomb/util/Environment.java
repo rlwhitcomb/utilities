@@ -131,6 +131,8 @@
  *	23-Feb-2021 (rlwhitcomb)
  *	    Make separate methods for each string printed by "printProgramInfo"
  *	    so GUI programs can format a display with exactly the same info.
+ *	25-Feb-2021 (rlwhitcomb)
+ *	    Make a "userDownloadsDirectory" method.
  */
 package info.rlwhitcomb.util;
 
@@ -360,6 +362,21 @@ public final class Environment
 	    File docDir = new File(USER_HOME, "Documents");
 	    if (docDir.exists() && docDir.isDirectory())
 		return docDir;
+	    return userHomeDir();
+	}
+
+
+	/**
+	 * Get the user's "downloads" directory.
+	 *
+	 * @return	The value of the 'user.home' system property with the
+	 *		"Downloads" (or equivalent) subdirectory.
+	 * @see #USER_HOME
+	 */
+	public static File userDownloadsDirectory() {
+	    File downDir = new File(USER_HOME, "Downloads");
+	    if (downDir.exists() && downDir.isDirectory())
+		return downDir;
 	    return userHomeDir();
 	}
 
