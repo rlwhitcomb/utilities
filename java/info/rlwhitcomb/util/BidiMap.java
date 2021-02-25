@@ -617,6 +617,8 @@ public class BidiMap<K, V> implements Map<K, V>
 
 	/**
 	 * Dump diagnostics to stdout, mainly to evaluate the hashing efficiencies.
+	 *
+	 * @param printNulls	Whether to print entries with null values.
 	 */
 	public void dumpState(final boolean printNulls) {
 	    System.out.format("BidiMap statistics%n------------------%n");
