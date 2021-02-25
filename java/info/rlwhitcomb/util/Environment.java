@@ -133,6 +133,9 @@
  *	    so GUI programs can format a display with exactly the same info.
  *	25-Feb-2021 (rlwhitcomb)
  *	    Make a "userDownloadsDirectory" method.
+ *	25-Feb-2021 (rlwhitcomb)
+ *	    Add a main program that prints out selected pieces of information
+ *	    to the console.
  */
 package info.rlwhitcomb.util;
 
@@ -142,13 +145,16 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 import java.lang.management.ManagementFactory;
 
 import static info.rlwhitcomb.util.CharUtil.Justification.*;
@@ -267,6 +273,71 @@ public final class Environment
 	}
 
 
+	/**
+	 * An enumeration of available pieces of information to display to the console
+	 * in the {@link #main} method.
+	 * <p> Each enum value defines aliases that can be entered by the user to specify
+	 * this piece of information, as well as the function used to provide the value.
+	 */
+	public static enum Env
+	{
+		ALL		(null, "All", "all", "a"),
+		CURRENT_DIR	(Environment::currentDirectoryString, "Current Directory", "currentDir", "cd"),
+		CURRENT_USER	(Environment::currentUser, "Current User", "currentUser", "user", "u"),
+		BUILD		(Environment::getAppBuild, "Build", "build", "bld", "b"),
+		VERSION		(Environment::getAppVersion, "Version", "version", "vers", "v"),
+		BUILD_DATE	(Environment::getBuildDate, "Build Date", "buildDate", "date", "d"),
+		BUILD_TIME	(Environment::getBuildTime, "Build Time", "buildTime", "time", "t"),
+		BUILD_DATE_TIME	(Environment::getProductBuildDateTime, "Build Date/Time", "buildDateTime", "datetime", "dt"),
+		COPYRIGHT	(Environment::getCopyrightNotice, "Copyright", "copyright", "copy", "c"),
+		JAVA_VERSION	(Environment::getJavaVersion, "Java Version", "javaVersion", "javaVer", "java", "jv"),
+		NATIVE_PATH_VAR	(Environment::getNativePathVar, "Native Code Path Variable", "nativePathVar", "npv"),
+		PRODUCT_NAME	(Environment::getProductName, "Product Name", "productName", "prodName", "name"),
+		PRODUCT_VERSION	(Environment::getProductVersion, "Product Version", "productVersion", "prodVersion", "prodVer", "pv"),
+		HOST_NAME	(Environment::hostName, "Host Name", "hostName", "host", "h"),
+		OS_VERSION	(Environment::osVersion, "O/S Version", "osVersion", "osVer", "ov"),
+		PLATFORM	(Environment::platform, "Platform", "platform", "plat", "p"),
+		PLATFORM_ID	(Environment::platformIdentifier, "Platform ID", "platformID", "platID", "pid"),
+		TEMP_DIR	(Environment::tempDirName, "Temp Directory", "tempDir", "tempd", "temp", "td"),
+		USER_HOME_DIR	(Environment::userHomeDirString, "Home Directory", "homeDir", "homed", "home", "h");
+
+		private Supplier<String> supplier;
+		private String valueTitle;
+		private String[] options;
+
+		private Env(final Supplier<String> func, final String title, final String... opts) {
+		    supplier = func;
+		    valueTitle = title;
+		    options = opts;
+		}
+
+		public Supplier<String> getSupplier() {
+		    return supplier;
+		}
+
+		public String getTitle() {
+		    return valueTitle;
+		}
+
+		public static Optional<Env> match(final String input) {
+		    return Arrays.stream(values())
+			  .filter(e -> Arrays.stream(e.options)
+					     .anyMatch(s -> s.equalsIgnoreCase(input)))
+			  .findFirst();
+		}
+
+		/**
+		 * @return The set of all the available options (except {@link #ALL}
+		 * because that's silly.
+		 */
+		public static Set<Env> all() {
+		    Set<Env> set = EnumSet.allOf(Env.class);
+		    set.remove(ALL);
+		    return set;
+		}
+	}
+
+
 	static {
 	    String[] parts = JAVA_RUNTIME_VERSION.split("[\\.+-]");
 	    if (parts[0] == "1" && parts.length > 1)
@@ -341,6 +412,15 @@ public final class Environment
 
 
 	/**
+	 * @return A string representation of the current directory.
+	 * @see #currentDirectory
+	 */
+	public static String currentDirectoryString() {
+	    return currentDirectory().getPath();
+	}
+
+
+	/**
 	 * Get the user's home directory.
 	 *
 	 * @return	The value of the 'user.home' system property as a {@link File}.
@@ -348,6 +428,15 @@ public final class Environment
 	 */
 	public static File userHomeDir() {
 	    return new File(USER_HOME);
+	}
+
+
+	/**
+	 * @return The user's home directory as a string.
+	 * @see #userHomeDir
+	 */
+	public static String userHomeDirString() {
+	    return userHomeDir().getPath();
 	}
 
 
@@ -1176,6 +1265,33 @@ public final class Environment
 	    }
 	    println(ps, colors, "util#env.otherInfo", "", underline);
 	    ps.println();
+	}
+
+
+	/**
+	 * A main program that prints out selected pieces of our precious information
+	 * to {@link System#out}.
+	 *
+	 * @param args	The parsed command line arguments, which will be a list of standard
+	 *		identifiers from the {@link Env} list to print out.
+	 */
+	public static void main(final String[] args) {
+	    Set<Env> valuesToDisplaySet = EnumSet.noneOf(Env.class);
+	    for (String arg : args) {
+		Optional<Env> opt = Env.match(arg);
+		opt.ifPresent(e -> {
+		    if (e.equals(Env.ALL))
+			valuesToDisplaySet.addAll(Env.all());
+		    else
+			valuesToDisplaySet.add(e);
+		});
+	    }
+
+	    if (valuesToDisplaySet.isEmpty())
+		valuesToDisplaySet.addAll(Env.all());
+
+	    valuesToDisplaySet.forEach(e ->
+		System.out.println(String.format("%1$s: %2$s", e.getTitle(), e.getSupplier().get())));
 	}
 
 }

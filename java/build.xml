@@ -164,6 +164,8 @@
 		Do a compare after the "preproc" step to test that the preprocessor still works.
 	    24-Feb-2021 (rlwhitcomb)
 		Link our Javadoc to the online Pivot and Antlr docs as well as the JDK docs.
+	    25-Feb-2021 (rlwhitcomb)
+		Add "environ" wrapper.
 
      ========================================================================== -->
 
@@ -234,6 +236,8 @@
 		<include name="decode.bat"                  if:true="${on.windows}"/>
 		<include name="encode"                  unless:true="${on.windows}"/>
 		<include name="encode.bat"                  if:true="${on.windows}"/>
+		<include name="environ"                 unless:true="${on.windows}"/>
+		<include name="environ.bat"                 if:true="${on.windows}"/>
 		<include name="fixpath"                 unless:true="${on.windows}"/>
 		<include name="fixpath.bat"                 if:true="${on.windows}"/>
 		<include name="gmt"                     unless:true="${on.windows}"/>
