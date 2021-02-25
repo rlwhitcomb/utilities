@@ -45,6 +45,8 @@
  *	"Calc" outputs a lot of "<" stuff that isn't a color tag (things like
  *	"<null>", "<=>", "<=", "<", etc.), so just leave a tag alone if we
  *	can't find a substitution for it.
+ *   25-Feb-2021 (rlwhitcomb)
+ *	Add another simpler version of "color(...)", and "textLength()" method.
  */
 package info.rlwhitcomb.util;
 
@@ -131,6 +133,25 @@ public final class ConsoleColor
      */
     public static final String escapeCodeSuffix() {
 	return END;
+    }
+
+    /**
+     * @return The length of the string without the color/attribute tags, that is,
+     *         the length of the text itself.
+     * @param  The colored string to measure.
+     */
+    public static final int textLength(final String input) {
+	return color(input, false).length();
+    }
+
+    /**
+     * Map color tags into the escape sequence codes.
+     *
+     * @param input The string adorned with color/attribute tags.
+     * @return      The input with the tags converted to their escape codes.
+     */
+    public static final String color(final String input) {
+	return color(input, true, null);
     }
 
     /**

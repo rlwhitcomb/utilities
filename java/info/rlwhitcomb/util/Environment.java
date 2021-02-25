@@ -135,7 +135,7 @@
  *	    Make a "userDownloadsDirectory" method.
  *	25-Feb-2021 (rlwhitcomb)
  *	    Add a main program that prints out selected pieces of information
- *	    to the console.
+ *	    to the console. Color the information.
  */
 package info.rlwhitcomb.util;
 
@@ -1291,7 +1291,7 @@ public final class Environment
 		valuesToDisplaySet.addAll(Env.all());
 
 	    valuesToDisplaySet.forEach(e ->
-		System.out.println(String.format("%1$s: %2$s", e.getTitle(), e.getSupplier().get())));
+		System.out.println(ConsoleColor.color(String.format("<Gr>%1$s: <Bk!>%2$s<>", e.getTitle(), e.getSupplier().get()))));
 	}
 
 }
