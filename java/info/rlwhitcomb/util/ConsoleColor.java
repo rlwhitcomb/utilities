@@ -138,7 +138,7 @@ public final class ConsoleColor
     /**
      * @return The length of the string without the color/attribute tags, that is,
      *         the length of the text itself.
-     * @param  The colored string to measure.
+     * @param  input The colored string to measure.
      */
     public static final int textLength(final String input) {
 	return color(input, false).length();
