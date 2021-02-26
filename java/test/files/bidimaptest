@@ -5,7 +5,7 @@ $canonDir test/canons
 $echo Tests of BidiMap...
 $echo
 
-bidimap: -words -verbose
+bidimap,UTF-8: -words -verbose -utf8
 
 $echo
 $echo Done with BidiMapTest

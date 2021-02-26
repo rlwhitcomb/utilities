@@ -166,6 +166,8 @@
 		Link our Javadoc to the online Pivot and Antlr docs as well as the JDK docs.
 	    25-Feb-2021 (rlwhitcomb)
 		Add "environ" wrapper.
+	    25-Feb-2021 (rlwhitcomb)
+		Need to do the preproc file compare ignoring line-ending differences.
 
      ========================================================================== -->
 
@@ -442,7 +444,7 @@
 								      log="${test.log.file.name}" overwrite="true"/>
 		<fail message="Preprocessing results don't match!">
 			<condition>
-				<not><filesmatch file1="TestPP.java" file2="test/canons/TestPP.canon"/></not>
+				<not><filesmatch file1="TestPP.java" file2="test/canons/TestPP.canon" textfile="true"/></not>
 			</condition>
 		</fail>
 		<echo>Test of InitializationTask...</echo>
