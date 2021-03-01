@@ -267,6 +267,9 @@
  *	    Use new Intl Exception variants for convenience.
  *	16-Feb-2021 (rlwhitcomb)
  *	    Redo "makeStringOfChars" more succinctly.
+ *	01-Mar-2021 (rlwhitcomb)
+ *	    Enhance "stripAllQuotes" to deal with all the values supported by CSV and Calc.
+ *	    Add another method to also deal with other escape sequences ("\\" and "\\uXXXX").
  */
 
 package info.rlwhitcomb.util;
@@ -397,7 +400,7 @@ public class CharUtil
 	 * @see	#addQuotes
 	 */
 	public static String stripQuotes(String value) {
-	    return internalStripQuotes(value, "'", "''");
+	    return internalStripQuotes(value, "'", "'", "''");
 	}
 
 
@@ -411,7 +414,7 @@ public class CharUtil
 	 * @see	#addDoubleQuotes
 	 */
 	public static String stripDoubleQuotes(String value) {
-	    return internalStripQuotes(value, "\"", "\\\"");
+	    return internalStripQuotes(value, "\"", "\"", "\\\"");
 	}
 
 
@@ -425,7 +428,7 @@ public class CharUtil
 	 * @see	#addBackQuotes
 	 */
 	public static String stripBackQuotes(String value) {
-	    return internalStripQuotes(value, "`", "\\`");
+	    return internalStripQuotes(value, "`", "`", "\\`");
 	}
 
 
@@ -443,22 +446,41 @@ public class CharUtil
 		return value;
 
 	    char quote = value.charAt(0);
+	    char endQuote = quote;
 	    StringBuilder embedded = new StringBuilder(2);
+
+	    // Some quotes look like parens (i.e., different end than beginning)
+	    // and the escaped values would be the ending quote
+	    switch (quote) {
+		case '\u2018':
+		    endQuote = '\u2019';
+		    break;
+		case '\u201C':
+		    endQuote = '\u201D';
+		    break;
+		case '\u2039':
+		    endQuote = '\u203A';
+		    break;
+		case '\u00AB':
+		    endQuote = '\u00BB';
+		    break;
+	    }
+
 	    if (escaped)
 		embedded.append('\\');
 	    else
-		embedded.append(quote);
-	    embedded.append(quote);
+		embedded.append(endQuote);
+	    embedded.append(endQuote);
 
-	    return internalStripQuotes(value, Character.toString(quote), embedded.toString());
+	    return internalStripQuotes(value, Character.toString(quote), Character.toString(endQuote), embedded.toString());
 	}
 
 
-	private static String internalStripQuotes(String value, String quote, String escapedQuote) {
+	private static String internalStripQuotes(String value, String startQuote, String endQuote, String escapedQuote) {
 	    // If the string doesn't start and end with a quote, then
 	    // just return as-is
 	    String trimmedValue = value.trim();
-	    if (trimmedValue.length() < 2 || !trimmedValue.startsWith(quote) || !trimmedValue.endsWith(quote)) {
+	    if (trimmedValue.length() < 2 || !trimmedValue.startsWith(startQuote) || !trimmedValue.endsWith(endQuote)) {
 		return value;
 	    }
 	    StringBuilder buf = new StringBuilder(trimmedValue);
@@ -799,6 +821,79 @@ public class CharUtil
 		return new String(bytes);
 	    else
 		return new String(bytes, charset);
+	}
+
+
+	/**
+	 * Unescape the escape sequences in a string literal.
+	 * <p> Deals with things like {@code \\} -> {@code \} and {@code \\uXXXX} to
+	 * its equivalent Unicode character.
+	 * <p> There is no real error-checking in here; we assume that a parser at a
+	 * higher level has determined the syntax here is correct. It is our job here
+	 * simply to interpret the correct syntax into an unescaped form.
+	 * <p> Also note: since the Unicode escapes are only 4 digits, values outside
+	 * the BMP must be represented as surrogate pairs.
+	 *
+	 * @param input	The input string with embedded escape sequences.
+	 * @return	The string with the embedded escape sequences converted to their
+	 *		literal character equivalents.
+	 */
+	public static String convertEscapeSequences(String input) {
+	    if (input == null || input.isEmpty())
+		return input;
+
+	    StringBuilder buf = new StringBuilder(input.length());
+	    for (int i = 0; i < input.length(); i++) {
+		char ch = input.charAt(i);
+		if (ch == '\\') {
+		    if (i + 1 < input.length()) {
+			char ch2 = input.charAt(++i);
+			switch (ch2) {
+			    case '\\':
+			    case '/':
+				buf.append(ch2);
+				break;
+			    case 'b':
+				buf.append('\b');
+				break;
+			    case 'f':
+				buf.append('\f');
+				break;
+			    case 'n':
+				buf.append('\n');
+				break;
+			    case 'r':
+				buf.append('\r');
+				break;
+			    case 't':
+				buf.append('\t');
+				break;
+			    case 'u':
+				StringBuilder hexBuilder = new StringBuilder();
+				if (input.charAt(i + 1) == '{') {
+				    i++;
+				    while ((ch2 = input.charAt(++i)) != '}') {
+					hexBuilder.append(ch2);
+				    }
+				}
+				else {
+				    for (int j = 0; j < 4; j++) {
+					if (++i < input.length()) {
+					    hexBuilder.append(input.charAt(i));
+					}
+				    }
+				}
+				int charValue = Integer.parseInt(hexBuilder.toString(), 16);
+				buf.appendCodePoint(charValue);
+				break;
+			}
+			continue;
+		    }
+		}
+		buf.append(ch);
+	    }
+
+	    return buf.toString();
 	}
 
 

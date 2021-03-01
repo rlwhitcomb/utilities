@@ -177,6 +177,8 @@
  *	    Refactor "loopvar" to "localvar".
  *	23-Feb-2021 (rlwhitcomb)
  *	    Add ":timing" directive.
+ *	01-Mar-2021 (rlwhitcomb)
+ *	    More Unicode equivalents. Correctly convert escape sequences in strings.
  */
 package info.rlwhitcomb.calc;
 
@@ -285,6 +287,10 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    boolean oldSilent = silent;
 	    silent = newSilent;
 	    return oldSilent;
+	}
+
+	private String processString(String escapedForm) {
+	    return CharUtil.convertEscapeSequences(CharUtil.stripAnyQuotes(escapedForm, true));
 	}
 
 	private void displayActionMessage(String formatOrKey, Object... args) {
@@ -558,7 +564,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    CalcParser.ExprContext expr = ctx.expr();
 	    String msg = (expr != null) ? toStringValue(this, visit(expr)) : "";
 
-	    displayer.displayMessage(CharUtil.stripAnyQuotes(msg, true));
+	    displayer.displayMessage(processString(msg));
 
 	    return null;
 	}
@@ -1103,6 +1109,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    dAfter = dValue.add(BigDecimal.ONE);
 		    break;
 		case "--":
+		case "\u2212\u2212":
 		    dAfter = dValue.subtract(BigDecimal.ONE);
 		    break;
 		default:
@@ -1129,6 +1136,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    dAfter = dValue.add(BigDecimal.ONE);
 		    break;
 		case "--":
+		case "\u2212\u2212":
 		    dAfter = dValue.subtract(BigDecimal.ONE);
 		    break;
 		default:
@@ -1153,6 +1161,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    case "+":
 			return f;
 		    case "-":
+		    case "\u2212":
 			return f.negate();
 		    default:
 			throw new UnknownOpException(op, expr);
@@ -1167,6 +1176,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			// value was not to the specified precision.
 			return d.plus(mc);
 		    case "-":
+		    case "\u2212":
 			return d.negate();
 		    default:
 			throw new UnknownOpException(op, expr);
@@ -1216,6 +1226,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    switch (op) {
 			case "*":
 			case "\u00D7":
+			case "\u2217":
 			    return f1.multiply(f2);
 			case "/":
 			case "\u00F7":
@@ -1234,6 +1245,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    switch (op) {
 			case "*":
 			case "\u00D7":
+			case "\u2217":
 			    return d1.multiply(d2, mc);
 			case "/":
 			case "\u00F7":
@@ -1262,6 +1274,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		case "+":
 		    return addOp(this, e1, e2, ctx1, ctx2, mc, rationalMode);
 		case "-":
+		case "\u2212":
 		    if (rationalMode) {
 			BigFraction f1 = toFractionValue(this, e1, ctx1);
 			BigFraction f2 = toFractionValue(this, e2, ctx2);
@@ -1692,12 +1705,14 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    String op = ctx.COMPARE_OP().getText();
 	    switch (op) {
 		case "<=":
+		case "\u2264":
 		    result = (cmp <= 0);
 		    break;
 		case "<":
 		    result = (cmp < 0);
 		    break;
 		case ">=":
+		case "\u2265":
 		    result = (cmp >= 0);
 		    break;
 		case ">":
@@ -1767,6 +1782,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    switch (op) {
 		case "&&":
+		case "\u2227":
 		    // Due to the short-circuit nature of this operator, the second expression
 		    // is only evaluated if necessary
 		    if (!b1)
@@ -1774,6 +1790,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    break;
 
 		case "||":
+		case "\u2228":
 		    // Due to the short-circuit nature of this operator, the second expression
 		    // is only evaluated if necessary
 		    if (b1)
@@ -1781,6 +1798,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    break;
 
 		case "^^":
+		case "\u22BB":
 		    // Unfortunately, there is no possibility of short-circuit evaluation
 		    // for this operator -- either first value could produce either result
 		    Boolean b2 = getBooleanValue(ctx.expr(1));
@@ -1799,14 +1817,14 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public Object visitStringValue(CalcParser.StringValueContext ctx) {
 	    String value = ctx.STRING().getText();
 
-	    return CharUtil.stripAnyQuotes(value, true);
+	    return processString(value);
 	}
 
 	@Override
 	public Object visitIStringValue(CalcParser.IStringValueContext ctx) {
 	    String value = ctx.ISTRING().getText();
 
-	    String rawValue = CharUtil.stripAnyQuotes(value, true);
+	    String rawValue = processString(value);
 	    int lastPos = -1;
 	    int pos;
 	    StringBuilder output = new StringBuilder(rawValue.length() * 2);
@@ -2013,6 +2031,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    result = addOp(this, e1, e2, varCtx, exprCtx, mc, rationalMode);
 		    break;
 		case "-=":
+		case "\u2212=":
 		    if (rationalMode) {
 			BigFraction f1 = toFractionValue(this, e1, varCtx);
 			BigFraction f2 = toFractionValue(this, e2, exprCtx);
@@ -2063,6 +2082,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    switch (op) {
 			case "*=":
 			case "\u00D7=":
+			case "\u2217=":
 			    result = f1.multiply(f2);
 			    break;
 			case "/=":
@@ -2084,6 +2104,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    switch (op) {
 			case "*=":
 			case "\u00D7=":
+			case "\u2217=":
 			    result = d1.multiply(d2, mc);
 			    break;
 			case "/=":

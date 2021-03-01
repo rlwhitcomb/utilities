@@ -138,6 +138,8 @@
  *	    Add ":timing" directive.
  *	24-Feb-2021 (rlwhitcomb)
  *	    Add a bunch more Unicode symbols.
+ *	01-Mar-2021 (rlwhitcomb)
+ *	    And more...
  */
 
 grammar Calc;
@@ -173,7 +175,7 @@ expr
    | var INC_OP                          # postIncOpExpr
    |<assoc=right> INC_OP var             # preIncOpExpr
    |<assoc=right> ADD_OP expr            # negPosExpr
-   |<assoc=right> '!' expr               # booleanNotExpr
+   |<assoc=right> ('!'|'\u00AC') expr    # booleanNotExpr
    |<assoc=right> '~' expr               # bitNotExpr
    | expr '!'                            # factorialExpr
    | ABS expr                            # absExpr
@@ -347,7 +349,9 @@ PI_CONST : P I
          | ( '\u{1D79F}' | '\u{1D7B9}' | '\u{1D7C9}' )
          ;
 
-E_CONST  : E ;
+E_CONST  : E
+         | '\u2107'
+         ;
 
 FRAC_CONST
          : ( '\u00BC' | '\u00BD' | '\u00BE' )             /* 1/4, 1/2, 3/4      */
@@ -437,24 +441,28 @@ DEFINE   : ( D E F | D E F I N E ) ;
 ID     : [a-zA-Z_] [a-zA-Z_0-9]* ;
 
 
-DOTS   : '..' ;
+DOTS
+       : '..'
+       | '\u2026'
+       ;
 
 LOCALVAR
        : '$' [a-zA-Z_] [a-zA-Z_0-9]* ;
 
 INC_OP
        : '++'
-       | '--'
+       | ( '--' | '\u2212\u2212' )
        ;
 
 ADD_OP
        : '+'
-       | '-'
+       | ( '-' | '\u2212' )
        ;
 
 MULT_OP
        : '*'
        | '\u00D7'
+       | '\u2217'
        | '/'
        | '\u00F7'
        | '%'
@@ -462,12 +470,13 @@ MULT_OP
 
 ADD_ASSIGN
        : '+='
-       | '-='
+       | ( '-=' | '\u2212=' )
        ;
 
 MULT_ASSIGN
        : '*='
        | '\u00D7='
+       | '\u2217='
        | '/='
        | '\u00F7='
        | '%='
@@ -486,9 +495,9 @@ SHIFT_OP
        ;
 
 COMPARE_OP
-       : '<='
+       : ( '<=' | '\u2264' )
        | '<'
-       | '>='
+       | ( '>=' | '\u2265' )
        | '>'
        ;
 
@@ -512,19 +521,19 @@ BIT_ASSIGN
        ;
 
 BOOL_OP
-       : '&&'
-       | '||'
-       | '^^'
+       : ( '&&' | '\u2227' )
+       | ( '||' | '\u2228' )
+       | ( '^^' | '\u22BB' )
        ;
 
 BIT_OP
        : '&'
-       | '~&'
+       | ( '~&' | '\u22BC' )
        | '&~'
        | '^'
        | '~^'
        | '|'
-       | '~|'
+       | ( '~|' | '\u22BD' )
        ;
 
 ASSIGN : '=' ;
@@ -612,12 +621,81 @@ FORMAT
    ;
 
 STRING
-   : '"'  (ESC  | SAFECODEPOINT)*  '"'
-   | '\'' (ESC2 | SAFECODEPOINT2)* '\''
+   : '"'      (ESC1 | SAFECODEPOINT1)* '"'
+   | '\''     (ESC2 | SAFECODEPOINT2)* '\''
+   | '\u2018' (ESC3 | SAFECODEPOINT3)* '\u2019'
+   | '\u201C' (ESC4 | SAFECODEPOINT4)* '\u201D'
+   | '\u2039' (ESC5 | SAFECODEPOINT5)* '\u203A'
+   | '\u00AB' (ESC6 | SAFECODEPOINT6)* '\u00BB'
    ;
 
 ISTRING
-   : '`'  (ESC3 | SAFECODEPOINT3)* '`'
+   : '`'  (ESCI | SAFECODEPOINTI)* '`'
+   ;
+
+fragment ESC1
+   : '\\' (["\\/bfnrt] | UNICODE)
+   ;
+
+fragment ESC2
+   : '\\' (['\\/bfnrt] | UNICODE)
+   ;
+
+fragment ESC3
+   : '\\' ([\\/bfnrt] | '\u2019' | UNICODE)
+   ;
+
+fragment ESC4
+   : '\\' ([\\/bfnrt] | '\u201D' | UNICODE)
+   ;
+
+fragment ESC5
+   : '\\' ([\\/bfnrt] | '\u203A' | UNICODE)
+   ;
+
+fragment ESC6
+   : '\\' ([\\/bfnrt] | '\u00BB' | UNICODE)
+   ;
+
+fragment ESCI
+   : '\\' ([`\\/bfnrt] | UNICODE)
+   ;
+
+fragment UNICODE
+   : 'u' HEX HEX HEX HEX
+   | 'u' '{' HEX + '}'
+   ;
+
+fragment HEX
+   : [0-9a-fA-F]
+   ;
+
+fragment SAFECODEPOINT1
+   : ~ ["\\\u0000-\u001F]
+   ;
+
+fragment SAFECODEPOINT2
+   : ~ ['\\\u0000-\u001F]
+   ;
+
+fragment SAFECODEPOINT3
+   : ~ [\\\u0000-\u001F\u2019]
+   ;
+
+fragment SAFECODEPOINT4
+   : ~ [\\\u0000-\u001F\u201D]
+   ;
+
+fragment SAFECODEPOINT5
+   : ~ [\\\u0000-\u001F\u203A]
+   ;
+
+fragment SAFECODEPOINT6
+   : ~ [\\\u0000-\u001F\u00BB]
+   ;
+
+fragment SAFECODEPOINTI
+   : ~ [`\\\u0000-\u001F]
    ;
 
 NUMBER
@@ -638,6 +716,16 @@ HEX_CONST
 
 KB_CONST
    : INT ( K | M | G | T | P | E ) I? B?
+   ;
+
+// no leading zeros
+fragment INT
+   : '0' | [1-9] [0-9]*
+   ;
+
+// \- since - means "range" inside [...]
+fragment EXP
+   : [Ee] [+\-]? INT
    ;
 
 
@@ -669,50 +757,6 @@ fragment Y : [yY] ;
 fragment Z : [zZ] ;
 
 fragment DIR : ':' ;
-
-fragment ESC
-   : '\\' (["\\/bfnrt] | UNICODE)
-   ;
-
-fragment ESC2
-   : '\\' (['\\/bfnrt] | UNICODE)
-   ;
-
-fragment ESC3
-   : '\\' ([`\\/bfnrt] | UNICODE)
-   ;
-
-fragment UNICODE
-   : 'u' HEX HEX HEX HEX
-   ;
-
-fragment HEX
-   : [0-9a-fA-F]
-   ;
-
-fragment SAFECODEPOINT
-   : ~ ["\\\u0000-\u001F]
-   ;
-
-fragment SAFECODEPOINT2
-   : ~ ['\\\u0000-\u001F]
-   ;
-
-fragment SAFECODEPOINT3
-   : ~ [`\\\u0000-\u001F]
-   ;
-
-fragment INT
-   : '0' | [1-9] [0-9]*
-   ;
-
-// no leading zeros
-
-fragment EXP
-   : [Ee] [+\-]? INT
-   ;
-
-// \- since - means "range" inside [...]
 
 WS
    : [ \t] + -> skip
