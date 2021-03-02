@@ -79,6 +79,8 @@
  *	    "Don't recurse" option. Tweak hidden directory color. Setup
  *	    to colorize error messages.
  *	    Finish coloring the help message.
+ *	02-Mar-2021 (rlwhitcomb)
+ *	    Allow comma-separated values for TREE_OPTIONS.
  */
 package info.rlwhitcomb.tree;
 
@@ -622,7 +624,7 @@ public class Tree
 	    // (ignoring any non-options here)
 	    String options = System.getenv("TREE_OPTIONS");
 	    if (!CharUtil.isNullOrEmpty(options)) {
-		String[] optArgs = options.split("\\s");
+		String[] optArgs = options.split("[;,]\\s*|\\s+");
 		parseOptions(optArgs, null);
 	    }
 

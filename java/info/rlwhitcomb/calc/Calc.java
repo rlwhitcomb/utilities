@@ -102,6 +102,8 @@
  *	    Add ":timing" directive.
  *	24-Feb-2021 (rlwhitcomb)
  *	    Tweak the Javadoc.
+ *	26-Feb-2021 (rlwhitcomb)
+ *	    Allow comma-separated values in CALC_OPTIONS.
  */
 package info.rlwhitcomb.calc;
 
@@ -880,7 +882,7 @@ public class Calc
 	    // Preprocess the CALC_OPTIONS environment variable (if present)
 	    String calcOptions = System.getenv("CALC_OPTIONS");
 	    if (!CharUtil.isNullOrEmpty(calcOptions)) {
-		String[] parts = calcOptions.split("\\s+");
+		String[] parts = calcOptions.split("[;,]\\s*|\\s+");
 		processArgs(parts, argList);
 
 		switch (expecting) {
