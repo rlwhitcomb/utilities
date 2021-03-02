@@ -826,7 +826,7 @@ public class CharUtil
 
 	/**
 	 * Unescape the escape sequences in a string literal.
-	 * <p> Deals with things like {@code \\} -> {@code \} and {@code \\uXXXX} to
+	 * <p> Deals with things like {@code \\} to {@code \} and {@code \\uXXXX} to
 	 * its equivalent Unicode character.
 	 * <p> There is no real error-checking in here; we assume that a parser at a
 	 * higher level has determined the syntax here is correct. It is our job here
