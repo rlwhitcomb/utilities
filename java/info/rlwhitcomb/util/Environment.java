@@ -136,6 +136,8 @@
  *	25-Feb-2021 (rlwhitcomb)
  *	    Add a main program that prints out selected pieces of information
  *	    to the console. Color the information.
+ *	01-Mar-2021 (rlwhitcomb)
+ *	    Tweaks to the "timeThis" functions.
  */
 package info.rlwhitcomb.util;
 
@@ -154,6 +156,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.lang.management.ManagementFactory;
 
@@ -791,10 +794,30 @@ public final class Environment
 	 * @param func The function to execute and time.
 	 */
 	public static void timeThis(final Runnable func) {
+	    timeThis(func, Optional.empty());
+	}
+
+	/**
+	 * Time the passed in {@link Runnable} (can be a functional interface)
+	 * and display the results on {@link System#out}.
+	 *
+	 * @param func The function to execute and time.
+	 * @param errorReporter Optional method to report exceptions thrown during timing.
+	 * If not specified, defaults to printing an error message to {@link System#err}.
+	 */
+	public static void timeThis(final Runnable func, final Optional<Consumer<Throwable> > errorReporter) {
 	    long startTime = highResTimer();
 
 	    try {
 		func.run();
+	    }
+	    catch (Throwable e) {
+		if (errorReporter.isPresent()) {
+		    errorReporter.get().accept(e);
+		}
+		else {
+		    Intl.errFormat("util#env.timeThisError", ExceptionUtil.toString(e));
+		}
 	    }
 	    finally {
 		long endTime   = highResTimer();
@@ -814,14 +837,33 @@ public final class Environment
 	 * @return     The return value from the callable function.
 	 */
 	public static <V> V timeThis(final Callable<V> func) {
+	    return timeThis(func, Optional.empty());
+	}
+
+	/**
+	 * Time the passed in {@link Callable} (can be a functional interface)
+	 * and display the results on {@link System#out}.
+	 *
+	 * @param <V>  Type of value returned from the function.
+	 * @param func The function to execute and time.
+	 * @param errorReporter Optional method to report exceptions thrown during timing.
+	 * If not specified, defaults to printing an error message to {@link System#err}.
+	 * @return     The return value from the callable function.
+	 */
+	public static <V> V timeThis(final Callable<V> func, final Optional<Consumer<Throwable> > errorReporter) {
 	    long startTime = highResTimer();
 	    V result = null;
 
 	    try {
 		result = func.call();
 	    }
-	    catch (Exception e) {
-		; // maybe report this??
+	    catch (Throwable e) {
+		if (errorReporter.isPresent()) {
+		    errorReporter.get().accept(e);
+		}
+		else {
+		    Intl.errFormat("util#env.timeThisError", ExceptionUtil.toString(e));
+		}
 	    }
 	    finally {
 		long endTime   = highResTimer();
