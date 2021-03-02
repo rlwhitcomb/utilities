@@ -180,6 +180,8 @@
  *	24-Feb-2021 (rlwhitcomb)
  *	    Tweak some of the initial error messages. Make some errors in the description file fatal
  *	    to abort the whole process.
+ *	02-Mar-2021 (rlwhitcomb)
+ *	    Another error for empty "-dir:" (which I seem to do often b/c of the different syntax here).
  */
 package info.rlwhitcomb.tester;
 
@@ -241,7 +243,6 @@ public class Tester
 	private boolean verbose = false;
 	private boolean log = false;
 	private boolean timing = false;
-	private String otherInstance = null;
 	private long totalElapsedTime = 0L;
 	private boolean abortOnFirstError = false;
 	private boolean defaultAbortOnFirstError = false;
@@ -1202,9 +1203,6 @@ public class Tester
 
 			commandLine = m.group(6);
 
-			if (!CharUtil.isNullOrEmpty(otherInstance)) {
-			    commandLine = String.format("-i:%1$s %2$s", otherInstance, commandLine);
-			}
 			if (!CharUtil.isNullOrEmpty(defaultOptions)) {
 			    commandLine = String.format("%1$s %2$s", defaultOptions, commandLine);
 			}
@@ -1289,13 +1287,15 @@ public class Tester
 		timing = log = true;
 	    else if (Options.matchesOption(opt, true, "createcanons", "create", "c"))
 		createCanons = true;
-	    else if (Options.matchesOption(opt, true, "instance", "inst", "i"))
-		otherInstance = arg1;
 	    else if (Options.matchesOption(opt, true, ABORT_OPTIONS))
 		abortOnFirstError = defaultAbortOnFirstError = true;
 	    else if (Options.matchesOption(opt, true, NO_ABORT_OPTIONS))
 		abortOnFirstError = defaultAbortOnFirstError  = false;
 	    else if (Options.matchesOption(opt, true, "directory", "inputdirectory", "inputdir", "dir", "d")) {
+		if (CharUtil.isNullOrEmpty(arg1)) {
+		    Intl.errPrintln("tester#emptyInputDirArg");
+		    System.exit(2);
+		}
 		File dir = new File(arg1);
 		if (dir.exists() && dir.isDirectory()) {
 		    defaultScriptDir = dir;

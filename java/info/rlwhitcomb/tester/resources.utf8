@@ -74,6 +74,8 @@
 #	    New error message.
 #	24-Feb-2021 (rlwhitcomb)
 #	    Reword an error message for clarity. Update the help.
+#	02-Mar-2021 (rlwhitcomb)
+#	    New error message.
 #
 
 mismatch		= Mismatch on test \"%1$s\":%n  Canon file: %2$s%n Output file: %3$s
@@ -82,7 +84,8 @@ errTempCreate		= Error creating temporary files: %1$s
 warnOverwriteCanon	= Warning: the canon file \"%1$s\" is being overwritten.
 errBadCanonCharset	= Canon character set name %1$s is not supported.
 errCanonFiles		= Error reading canon file %1$s or creating stream files: %2$s
-badInputDirArg		= Directory specified by "-dir" option (%1$s) does not exist.
+emptyInputDirArg	= No directory specified by "-dir:" option.
+badInputDirArg		= Directory specified by "-dir:" option (%1$s) does not exist.
 badInputDir		= Directory specified by \"$inputDir\" directive (%1$s) does not exist.
 badScriptDir		= Directory specified by \"$scriptDir\" directive (%1$s) does not exist.
 emptyInputDir		= The \"$inputDir\" directive should not have an empty directory name.
@@ -127,7 +130,7 @@ abnormalExitString	= Abnormal exit from test: %1$s%n
 # Help message
 #
 help1		=
-help2		= Usage: testdescriptionfile + [-l] [-t] [-v] [-i:<instance>] [-?|-help]
+help2		= Usage: testdescriptionfile + [-l] [-t] [-v] [-?|-help]
 help3		= "   where the options are as follows:"
 help4		= \t-l (or "-log") = only show the test names and status
 help5		= \t-t (or "-timing") = show individual timings for each test
