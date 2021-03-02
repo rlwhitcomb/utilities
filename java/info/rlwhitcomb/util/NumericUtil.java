@@ -119,6 +119,10 @@
  *	    series expansion for tan().
  *	16-Feb-2021 (rlwhitcomb)
  *	    Turn the debug printouts into logging statements for easy analysis.
+ *	02-Mar-2021 (rlwhitcomb)
+ *	    Some more optimization with the digits of PI/E (keep around the longest
+ *	    digit string used so far, and just harvest substrings from it), as
+ *	    well as using a rational approximation for PI for fewer than 25 digits.
  */
 package info.rlwhitcomb.util;
 
@@ -310,6 +314,15 @@ public class NumericUtil
 	private static final BigInteger I_TWO = BigInteger.valueOf(2L);
 	private static final BigDecimal D_TWO = BigDecimal.valueOf(2L);
 
+	/**
+	 * A rational approximation of PI good to ~25 decimal digits.
+	 * This is the fastest way to calculate the value for such small precision.
+	 * <p> Sourced from: <a href="http://oeis.org/A002485">A002485</a> and
+	 * <a href="http://oeis.org/A002486">A002486</a>.
+	 */
+	private static final BigFraction PI_APPROX = new BigFraction(8958937768937L, 2851718461558L);
+	/** The largest set of calculated PI digits so far. */
+	private static String PI_DIGITS = null;
 	/** The previously calculated PI value (if any); cached to eliminate repeated costly calculations. */
 	private static BigDecimal CALCULATED_PI = null;
 	/* Some related values calculated at the same time (for convenience). */
@@ -1425,7 +1438,7 @@ public class NumericUtil
 
 
 	/**
-	 * A Cache of BigFraction values for B(n), so that this expensive operation
+	 * A cache of BigFraction values for B(n), so that this expensive operation
 	 * doesn't have to be done more than once per index.
 	 * <p> The index is n / 2 since every other value is zero.
 	 */
@@ -1843,15 +1856,24 @@ public class NumericUtil
 	 * @throws IllegalArgumentException if the number of digits is more than we can handle.
 	 */
 	public static BigDecimal pi(final int digits) {
+	    // Use +1 for precision because of the "3." integer portion
+	    MathContext mc = new MathContext(digits + 1, RoundingMode.DOWN);
+
+	    // For very small values, use the rational approximation
+	    if (digits < 25) {
+		return PI_APPROX.toDecimal(mc);
+	    }
+
 	    // Use the previously calculated value if possible
 	    if (CALCULATED_PI == null || CALCULATED_PI.scale() != digits) {
 		// Calculate a new value with the requested scale
 		// (+1 because of the leading "3" digit)
-		CALCULATED_PI = new BigDecimal(piDigits(digits + 1)).movePointLeft(digits);
+		if (PI_DIGITS == null || PI_DIGITS.length() <= digits) {
+		    PI_DIGITS = piDigits(digits + 1);
+		}
+		CALCULATED_PI = new BigDecimal(PI_DIGITS.substring(0, digits + 1)).movePointLeft(digits);
 
 		// Now calculate the related values at the same scale
-		MathContext mc = new MathContext(digits + 1);
-
 		TWO_PI            = CALCULATED_PI.multiply(D_TWO, mc);
 		MINUS_TWO_PI      = TWO_PI.negate();
 		PI_OVER_TWO       = CALCULATED_PI.divide(D_TWO, mc);
@@ -1864,6 +1886,8 @@ public class NumericUtil
 
 	/** The previously calculated E value (if any); cached to eliminate repeated costly calculations. */
 	private static BigDecimal CALCULATED_E = null;
+	/** The largest number of digits of E calculated so far: use a substring for lesser precision. */
+	private static String E_DIGITS = null;
 
 	/**
 	 * @return A {@link BigDecimal} constant of E to the requested number of fractional digits.
@@ -1873,7 +1897,13 @@ public class NumericUtil
 	public static BigDecimal e(final int digits) {
 	    // Use the previously calculated value if possible
 	    if (CALCULATED_E == null || CALCULATED_E.scale() != digits) {
-		CALCULATED_E = eDecimal(digits);
+		if (E_DIGITS == null || E_DIGITS.length() < digits + 2) {
+		    CALCULATED_E = eDecimal(digits);
+		    E_DIGITS = CALCULATED_E.toPlainString();
+		}
+		else {
+		    CALCULATED_E = new BigDecimal(E_DIGITS.substring(0, digits + 2));
+		}
 	    }
 
 	    return CALCULATED_E;

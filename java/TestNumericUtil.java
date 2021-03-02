@@ -36,12 +36,16 @@
  *	    Tests of BigFraction.
  *	30-Jan-2021 (rlwhitcomb)
  *	    BigFraction(String) tests.
+ *	02-Mar-2021 (rlwhitcomb)
+ *	    One more BigFraction test. One more PI/E test with fewer digits
+ *	    to test the new caching code.
  */
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.MathContext;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -475,10 +479,10 @@ public class TestNumericUtil
 	    int numberOfTests    = 0;
 	    int numberOfFailures = 0;
 
-	    int[] scales = {   1,    2,     3,     4,   5,   6,   7,   8,   9,  10,   11,   13,  17,
-			      19,   20,    23,    29,  30,  43,  50,  57,  67,  71,   89,   97, 100,
-			     111,  137,   197,   200, 203, 219, 373, 500, 750, 999, 1200, 2000, 3000,
-			    5000, 9999, 10000, 12000 };
+	    int[] scales = {   1,    2,     3,     4,     5,   6,   7,   8,   9,  10,   11,   13,  17,
+			      19,   23,    24,    25,    30,  43,  50,  57,  67,  71,   89,   97, 100,
+			     111,  137,   197,   200,   203, 219, 373, 500, 750, 999, 1200, 2000, 3000,
+			    5000, 9999, 10000, 12000, 10000 };
 
 	    for (int i = 0; i < scales.length; i++) {
 		int digits = scales[i];
@@ -625,9 +629,13 @@ public class TestNumericUtil
 	    BigFraction f25 = BigFraction.valueOf("4 / 7");
 	    BigFraction f26 = BigFraction.valueOf("5, 9");
 	    System.out.println(f25 + " cmp " + f26 + " = " + f25.compareTo(f26));
+	    BigFraction fPi = new BigFraction(8958937768937L, 2851718461558L);
+	    BigDecimal dPi = NumericUtil.pi(MathContext.DECIMAL128.getPrecision());
+	    System.out.println(fPi + " -> " + fPi.toDecimal().toPlainString());
+	    System.out.println("                           vs. " + dPi.toPlainString());
 
 	    // Results verified manually, will be put into the canon file
-	    numberOfTests += 25;
+	    numberOfTests += 26;
 
 	    System.out.println("Done with BigFraction tests.");
 
