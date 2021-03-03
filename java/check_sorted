@@ -7,11 +7,18 @@ function check_file() {
    then
       echo The \"$1\" word list is correctly sorted.
       rm words.txt sort.txt
+      return 0
    fi
+   echo The \"$1\" word list is NOT sorted correctly!
+   return 1
 }
 
 for f in $(find info -name "*.txt")
 do
   check_file $f
+  if [ ! $? -eq 0 ]
+  then
+    exit 1
+  fi
 done
 

@@ -168,6 +168,8 @@
 		Add "environ" wrapper.
 	    25-Feb-2021 (rlwhitcomb)
 		Need to do the preproc file compare ignoring line-ending differences.
+	    03-Mar-2021 (rlwhitcomb)
+		Run the "check_sorted" script on non-Windows platforms as part of "test".
 
      ========================================================================== -->
 
@@ -455,6 +457,7 @@
 			<arg value="-dir:test/files"/>
 			<arg value="mastertest"/>
 		</java>
+		<exec executable="./check_sorted" dir="."             output="${test.log.file.name}" append="true" unless:true="${on.windows}" failonerror="true"/>
 		<echo>Done with unit tests. Results in "${test.log.file.name}" file.</echo>
 	</target>
 
