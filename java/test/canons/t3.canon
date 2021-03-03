@@ -4,7 +4,8 @@
 >Test 'all_quotes': Passed
 >Test 'quote': Passed
 >Test 'non_standard': Passed
+>Test 'border_data': Passed
 >------------------------------------
->Ran 3 tests: 3 passed, 0 failed.
+>Ran 4 tests: 4 passed, 0 failed.
 >====================================
 >
