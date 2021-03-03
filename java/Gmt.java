@@ -28,6 +28,8 @@
  *	    Initial implementation.
  *	23-Feb-2021 (rlwhitcomb)
  *	    Add options.
+ *	03-Mar-2021 (rlwhitcomb)
+ *	    Tweak the output so it matches what we're emulating better.
  */
 import java.text.DateFormat;
 import java.text.FieldPosition;
@@ -47,6 +49,11 @@ public class Gmt
 	/** Output format compatible with our {@code Logging} class. */
 	private static final String LOGGING_FORMAT = "MMM dd,yyyy HH:mm:ss.SSS z";
 
+
+	private static void sub(StringBuffer buf, int charPos) {
+	    if (buf.charAt(charPos) == '0')
+		buf.setCharAt(charPos, ' ');
+	}
 
 	/**
 	 * @param args The parsed command line argument array.
@@ -79,6 +86,17 @@ public class Gmt
 	    int size = buf.length() - 6;
 	    if (buf.charAt(size) == '+') {
 		buf.setLength(size);
+	    }
+
+	    switch (dateFormat) {
+		case DATE_FORMAT:
+		    sub(buf, 8);
+		    sub(buf, 11);
+		    break;
+		case DEFAULT_FORMAT:
+		    sub(buf, 8);
+		    sub(buf, 16);
+		    break;
 	    }
 
 	    System.out.println(buf.toString());
