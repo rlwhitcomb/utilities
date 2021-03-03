@@ -179,6 +179,10 @@
  *	    Add ":timing" directive.
  *	01-Mar-2021 (rlwhitcomb)
  *	    More Unicode equivalents. Correctly convert escape sequences in strings.
+ *	02-Mar-2021 (rlwhitcomb)
+ *	    Eval looks better if the internal calculation is silent even if that means
+ *	    we can't see the string it is executing; this is the same (now) as functions.
+ *	    Fix "eval func" case; although it is not silent...
  */
 package info.rlwhitcomb.calc;
 
@@ -374,6 +378,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    if (value instanceof String)
 		return (String) value;
+	    else if (value instanceof ParserRuleContext)
+		return getStringValue((ParserRuleContext) value, allowNull);
 	    else
 		return value == null ? "" : value.toString();
 	}
@@ -1662,7 +1668,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public Object visitEvalExpr(CalcParser.EvalExprContext ctx) {
 	    String exprString = getStringValue(ctx.expr());
 
-	    return Calc.processString(exprString, silent);
+	    return Calc.processString(exprString, true);
 	}
 
 	@Override
