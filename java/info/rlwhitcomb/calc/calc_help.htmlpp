@@ -260,7 +260,7 @@ code {
     <tr><td><code>:timing</code> <i>mode_option</i></td><td>Set the timing mode (same <i>mode_option</i> choices as for <code>:rational</code>)<br><i>(default is <code>off</code> or the value set on the command line)</i></td><td><code>:time</code></td></tr>
     <tr><td><code>:debug</code> <i>mode_option</i></td><td>Set the debug mode (same <i>mode_option</i> choices as for <code>:rational</code>)<br><i>(default is <code>off</code> or the value set on the command line)</i></td><td><code>:deb</code></td></tr>
     <tr><td><code>:resultsonly</code> <i>mode_option</i></td><td>Set the results-only mode<br><i>(default is <code>off</code> or value on command line)</i></td><td><code>:res</code>, <code>:result</code>, <code>:results</code>, <code>:resultonly</code></td></tr>
-    <tr><td><code>:quiet</code> <i>mode_option</i></td><td>Set quiet mode <i>(default is <code>off</code>)</i></td><td></td></tr>
+    <tr><td><code>:quiet</code> <i>mode_option</i></td><td>Set quiet mode<br><i>(default is <code>off</code> or the value on command line)</i></td><td></td></tr>
   </table>
   </center>
   <h3>TODO Items for This Document</h3>
