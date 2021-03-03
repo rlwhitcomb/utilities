@@ -70,7 +70,6 @@ Also see "issues" at https://github.com/rlwhitcomb/utilities/issues
 - Add to boilerplate options
 - Boilerplate program will use this code b/c we sometime want to just do command line, other times want the GUI
 - Word Finder can also use this option
-- Calc is now working with this design, although some features (like "help" and "version") are not well coordinated yet between console and GUI.
 - Unclear yet if a switch ***back*** from GUI to console will work.
 
 ### Calc
@@ -84,6 +83,24 @@ Also see "issues" at https://github.com/rlwhitcomb/utilities/issues
 - functions for financial calculations (INTEREST, NPV, PAYMENT, etc.) (**e_mort** is a start)
 - ?? need a way to do "setScale(...)" on the values ??
 - See all the notes on updates needed to help page (calc_help.htmlpp); use "ant update" and then "c -?" to preprocess and view the result
+- Unicode symbols to add:
+    4th root 221C
+    heavy plus 2795
+    heavy minus 2796
+    heavy divide 2797
+    superscript 2 00b2 (** 2)
+    superscript 3 00b3
+    superscript 4-9 (2074-2079)
+    unicode equivalents of  [ ] and { } and ( )
+    per mille sign (1/1000) and per ten thousand sign (1/10000) both western and arabic
+    other mathematical digits, or dingbat numbers
+    such as 2460--2473 (1) .. (20) or 2474--2487 or 2488--249b or 24ea, 24eb--24f4, 24f5--24fe, 24ff, 2776..277F, 2780..2789, 278a..2793
+    FF10--FF19, osmanya digit 0 at 104a0-104a9, 1d7ce-1d7d7, 1d7d8-1d7e1...1d7ff
+- roman numerals - ROMAN NUMERAL MODE (upper / lower case)
+    2160-216f and 2170-217f
+
+- !!null seems like it should work (!!"true" -> true)
+- seems like we could have an "exit from GUI mode back to REPL mode" which is available when running from within REPL mode.
 
 #### Calc: Want to add parameters and local variables to functions.
 define a($b, $c, $d) = { $f = blah; ... }
