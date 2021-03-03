@@ -183,6 +183,8 @@
  *	    Eval looks better if the internal calculation is silent even if that means
  *	    we can't see the string it is executing; this is the same (now) as functions.
  *	    Fix "eval func" case; although it is not silent...
+ *	03-Mar-2021 (rlwhitcomb) Issue #9
+ *	    Fix silent setting doing "eval" of a function.
  */
 package info.rlwhitcomb.calc;
 
@@ -370,18 +372,29 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    return getStringValue(ctx, false);
 	}
 
+	private Object evaluateFunction(Object value) {
+	    Object returnValue = value;
+
+	    if (value != null && value instanceof ParserRuleContext) {
+		ParserRuleContext funcCtx = (ParserRuleContext) value;
+		boolean prevSilent = setSilent(true);
+		returnValue = visit(funcCtx);
+		setSilent(prevSilent);
+	    }
+
+	    return returnValue;
+	}
+
 	private String getStringValue(ParserRuleContext ctx, boolean allowNull) {
-	    Object value = visit(ctx);
+	    Object value = evaluateFunction(visit(ctx));
 
 	    if (!allowNull)
 		nullCheck(value, ctx);
 
 	    if (value instanceof String)
 		return (String) value;
-	    else if (value instanceof ParserRuleContext)
-		return getStringValue((ParserRuleContext) value, allowNull);
-	    else
-		return value == null ? "" : value.toString();
+
+	    return value == null ? "" : value.toString();
 	}
 
 	private double getDoubleValue(ParserRuleContext ctx) {
@@ -694,22 +707,13 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitExprStmt(CalcParser.ExprStmtContext ctx) {
-	    Object result           = visit(ctx.expr());
+	    Object result           = evaluateFunction(visit(ctx.expr()));
 	    String resultString     = "";
 
 	    TerminalNode formatNode = ctx.FORMAT();
 	    String format           = formatNode == null ? "" : formatNode.getText();
 
-	    StringBuilder exprBuf   = getTreeText(ctx.expr());
-	    exprBuf.append(format);
-	    String exprString       = exprBuf.toString();
-
-	    if (result instanceof ParserRuleContext) {
-		ParserRuleContext funcCtx = (ParserRuleContext) result;
-		boolean prevSilent = setSilent(true);
-		result = visit(funcCtx);
-		setSilent(prevSilent);
-	    }
+	    String exprString       = String.format("%1$s%2$s", getTreeText(ctx.expr()), format);
 
 	    if (result != null && !format.isEmpty()) {
 		char formatChar = format.charAt(format.length() - 1);

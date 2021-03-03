@@ -43,6 +43,8 @@
  *	    Tweak the integer conversions.
  *	17-Feb-2021 (rlwhitcomb)
  *	    Add "visitor" parameters and evaluate functions.
+ *	03-Mar-2021 (rlwhitcomb)
+ *	    Change "getTreeText" to just return a String.
  */
 package info.rlwhitcomb.calc;
 
@@ -71,7 +73,7 @@ public final class CalcUtil
 	/** Private constructor since this is a static class. */
 	private CalcUtil() { }
 
-	public static StringBuilder getTreeText(final ParserRuleContext ctx) {
+	public static String getTreeText(final ParserRuleContext ctx) {
 	    StringBuilder buf = new StringBuilder();
 
 	    getTreeText(buf, ctx);
@@ -81,7 +83,7 @@ public final class CalcUtil
 		len--;
 	    buf.setLength(len);
 
-	    return buf;
+	    return buf.toString();
 	}
 
 	public static void getTreeText(final StringBuilder buf, final ParserRuleContext ctx) {

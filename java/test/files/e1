@@ -352,6 +352,14 @@ bn 20
 bn 126
 :rational pop
 
+#
+# Tests of functions
+#
+:clear a
+def a={ loop $i in 10 { $i }}
+a
+eval a
+
 :echo
 :echo "End of expression tests (suite 1)."
 
