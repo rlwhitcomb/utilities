@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2014-2017,2019-2020 Roger L. Whitcomb.
+ * Copyright (c) 2014-2017,2019-2021 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -61,6 +61,9 @@
  *	    Prepare for GitHub.
  *	13-Nov-2020 (rlwhitcomb)
  *	    Print help on some errors. More error checking.
+ *	02-Mar-2021 (rlwhitcomb)
+ *	    Add options for "hasHeaderRow", "alwaysDelimitStrings", and "preserveQuotes"
+ *	    (new options in CSVFormat).
  */
 package info.rlwhitcomb.csv;
 
@@ -98,6 +101,8 @@ import info.rlwhitcomb.util.Intl;
  */
 public class CSVTest
 {
+	private static final Charset utf8Charset = StandardCharsets.UTF_8;
+
 	private static Character quoteChar = null;
 	private static Quotes quote = null;
 	private static Character delimChar = null;
@@ -105,15 +110,39 @@ public class CSVTest
 	private static Character escapeChar = null;
 	private static String recordSep = null;
 	private static Separator separator = null;
+	private static boolean preserveQuotes = false;
 	private static boolean preserveWhitespace = false;
+	private static boolean alwaysDelimitStrings = false;
+	private static boolean hasHeaderRow = false;
 	private static boolean ignoreEmpty = false;
 	private static boolean writeBack = false;
-	private static Charset utf8Charset = null;
 	private static boolean useUTF8 = false;
 	private static boolean useIterator = false;
 
+	/**
+	 * Reinitialize our static members for use with {@code Tester}
+	 * where static initialization only happens once for multiple tests.
+	 */
+	private static final void resetOptions() {
+	    quoteChar = null;
+	    quote = null;
+	    delimChar = null;
+	    delimiter = null;
+	    escapeChar = null;
+	    recordSep = null;
+	    separator = null;
+	    preserveQuotes = false;
+	    preserveWhitespace = false;
+	    alwaysDelimitStrings = false;
+	    hasHeaderRow = false;
+	    ignoreEmpty = false;
+	    writeBack = false;
+	    useUTF8 = false;
+	    useIterator = false;
+	}
+
 	private static void doHelp(PrintStream ps) {
-	    Intl.printHelp(ps, "csv#tester");
+	    Intl.printHelp(ps, "csv#test");
 	}
 
 	private static boolean processArg(String arg) {
@@ -125,7 +154,7 @@ public class CSVTest
 		switch (arg0) {
 		    case 'q':	// quote char
 			if (moreThanOne) {
-			    Intl.errFormat("csv#tester.onlyOneChar", "q");
+			    Intl.errFormat("csv#test.onlyOneChar", "q");
 			    return false;
 			}
 			quoteChar = arg1;
@@ -134,13 +163,13 @@ public class CSVTest
 			String quoteName = arg.substring(1);
 			quote = Quotes.fromString(quoteName);
 			if (quote == null) {
-			    Intl.errFormat("csv#tester.unknownQuote", quoteName);
+			    Intl.errFormat("csv#test.unknownQuote", quoteName);
 			    return false;
 			}
 			break;
 		    case 'd':	// delimiter
 			if (moreThanOne) {
-			    Intl.errFormat("csv#tester.onlyOneChar", "d");
+			    Intl.errFormat("csv#test.onlyOneChar", "d");
 			    return false;
 			}
 			delimChar = arg1;
@@ -149,7 +178,7 @@ public class CSVTest
 			String delimName = arg.substring(1);
 			delimiter = Delimiter.fromString(delimName);
 			if (delimiter == null) {
-			    Intl.errFormat("csv#tester.unknownDelim", delimName);
+			    Intl.errFormat("csv#test.unknownDelim", delimName);
 			    return false;
 			}
 			break;
@@ -160,33 +189,39 @@ public class CSVTest
 			String recordSepName = arg.substring(1);
 			separator = Separator.fromString(recordSepName);
 			if (separator == null) {
-			    Intl.errFormat("csv#tester.unknownSeparator", recordSepName);
+			    Intl.errFormat("csv#test.unknownSeparator", recordSepName);
 			    return false;
 			}
 			break;
 		    case 'e':	// escape char
 			if (moreThanOne) {
-			    Intl.errFormat("csv#tester.onlyOneChar", "e");
+			    Intl.errFormat("csv#test.onlyOneChar", "e");
 			    return false;
 			}
 			escapeChar = arg1;
 			break;
 		    default:
-			Intl.errFormat("csv#tester.unknownOption", arg);
+			Intl.errFormat("csv#test.unknownOption", arg);
 			return false;
 		}
 	    }
 	    else if (arg.length() > 0) {
 		char arg0 = arg.charAt(0);
 		switch (arg0) {
+		    case 'a':	// always delimit strings
+			alwaysDelimitStrings = true;
+			break;
+		    case 'u':	// preserve quotes
+			preserveQuotes = true;
+			break;
 		    case 'w':	// preserve whitespace
 			preserveWhitespace = true;
 			break;
-		    case 'T':	// TAB
-			delimiter = Delimiter.TAB;
-			break;
 		    case 'B':	// blank
 			delimiter = Delimiter.SPACE;
+			break;
+		    case 'T':	// TAB
+			delimiter = Delimiter.TAB;
 			break;
 		    case 'R':	// CR
 			separator = Separator.CR;
@@ -194,8 +229,8 @@ public class CSVTest
 		    case 'L':	// LF (newline)
 			separator = Separator.NEWLINE;
 			break;
-		    case 'i':	// use iterator
-			useIterator = true;
+		    case 'E':	// has header row
+			hasHeaderRow = true;
 			break;
 		    case 'I':	// ignore empty lines
 			ignoreEmpty = true;
@@ -203,9 +238,11 @@ public class CSVTest
 		    case 'W':	// writeback test
 			writeBack = true;
 			break;
+		    case 'i':	// use iterator
+			useIterator = true;
+			break;
 		    case '8':	// UTF-8 charset
 			useUTF8 = true;
-			utf8Charset = StandardCharsets.UTF_8;
 			break;
 		    case '?':
 		    case 'h':
@@ -213,7 +250,7 @@ public class CSVTest
 			doHelp(System.out);
 			System.exit(0);
 		    default:
-			Intl.errFormat("csv#tester.unknownOption", arg);
+			Intl.errFormat("csv#test.unknownOption", arg);
 			return false;
 		}
 	    }
@@ -225,21 +262,7 @@ public class CSVTest
 	public static void main(String[] args) {
 	    List<String> fileList = new ArrayList<>();
 
-	    // Reinitialize our static members for use with ScriptTester
-	    // where static initialization only happens once for multiple tests.
-	    quoteChar = null;
-	    quote = null;
-	    delimChar = null;
-	    delimiter = null;
-	    escapeChar = null;
-	    recordSep = null;
-	    separator = null;
-	    preserveWhitespace = false;
-	    ignoreEmpty = false;
-	    writeBack = false;
-	    utf8Charset = null;
-	    useUTF8 = false;
-	    useIterator = false;
+	    resetOptions();
 
 	    boolean argErrors = false;
 
@@ -262,7 +285,7 @@ public class CSVTest
 	    }
 
 	    if (fileList.size() == 0) {
-		Intl.errPrintln("csv#tester.noInputFiles");
+		Intl.errPrintln("csv#test.noInputFiles");
 		argErrors = true;
 	    }
 
@@ -286,8 +309,14 @@ public class CSVTest
 		format.withSeparator(separator);
 	    if (escapeChar != null)
 		format.withEscapeChar(escapeChar);
+	    if (preserveQuotes)
+		format.withPreserveQuotes(true);
 	    if (preserveWhitespace)
 		format.withPreserveWhitespace(true);
+	    if (alwaysDelimitStrings)
+		format.withAlwaysDelimitStrings(true);
+	    if (hasHeaderRow)
+		format.withHasHeaderRow(true);
 	    if (ignoreEmpty)
 		format.withIgnoreEmptyLines(true);
 
@@ -306,10 +335,10 @@ public class CSVTest
 		    int numberOfFields = 0;
 		    if (useIterator) {
 			for (CSVRecord record : csvr) {
-			    Intl.outFormat("csv#tester.recordNum", ++num);
+			    Intl.outFormat("csv#test.recordNum", ++num);
 			    int fld = 0;
 			    for (Object field : record) {
-				Intl.outFormat("csv#tester.record", ++fld, field);
+				Intl.outFormat("csv#test.record", ++fld, field);
 			    }
 			    // Establish the baseline number of fields from the first record
 			    if (num == 1) {
@@ -317,7 +346,7 @@ public class CSVTest
 			    }
 			    else {
 				if (numberOfFields != record.size()) {
-				    Intl.errFormat("csv#tester.mismatchFieldCount", num, record.size(), numberOfFields);
+				    Intl.errFormat("csv#test.mismatchFieldCount", num, record.size(), numberOfFields);
 				}
 			    }
 			    if (writeBack)
@@ -327,10 +356,10 @@ public class CSVTest
 		    else {
 			CSVRecord record = null;
 			while ((record = csvr.getNextRecord()) != null) {
-			    Intl.outFormat("csv#tester.recordNum", ++num);
+			    Intl.outFormat("csv#test.recordNum", ++num);
 			    int fld = 0;
 			    for (Object field : record) {
-				Intl.outFormat("csv#tester.record", ++fld, field);
+				Intl.outFormat("csv#test.record", ++fld, field);
 			    }
 			    // Establish the baseline number of fields from the first record
 			    if (num == 1) {
@@ -338,14 +367,14 @@ public class CSVTest
 			    }
 			    else {
 				if (numberOfFields != record.size()) {
-				    Intl.errFormat("csv#tester.mismatchFieldCount", num, record.size(), numberOfFields);
+				    Intl.errFormat("csv#test.mismatchFieldCount", num, record.size(), numberOfFields);
 				}
 			    }
 			    if (writeBack)
 				recordList.add(record);
 			}
 		    }
-		    Intl.outPrintln("csv#tester.separator");
+		    Intl.outPrintln("csv#test.separator");
 		    Intl.outPrintln();
 
 		    if (writeBack) {
@@ -375,7 +404,7 @@ public class CSVTest
 			    recordNumber++;
 			    if (!itr.hasNext()) {
 				recordErrors++;
-				Intl.errFormat("csv#tester.outputNoInput", recordNumber);
+				Intl.errFormat("csv#test.outputNoInput", recordNumber);
 			    }
 			    else {
 				CSVRecord record = itr.next();
@@ -383,13 +412,13 @@ public class CSVTest
 				Object[] outputFields = record2.getFields();
 				if (inputFields.length != outputFields.length) {
 				    lengthErrors++;
-				    Intl.errFormat("csv#tester.lengthMismatch",
+				    Intl.errFormat("csv#test.lengthMismatch",
 					recordNumber, inputFields.length, outputFields.length);
 				}
 				for (int n = 0; n < inputFields.length; n++) {
 				    if (!inputFields[n].equals(outputFields[n])) {
 					compareErrors++;
-					Intl.errFormat("csv#tester.fieldMismatch",
+					Intl.errFormat("csv#test.fieldMismatch",
 						recordNumber, n, inputFields[n], outputFields[n]);
 				    }
 				}
@@ -397,15 +426,15 @@ public class CSVTest
 			}
 			if (itr.hasNext()) {
 			    recordErrors++;
-			    Intl.errFormat("csv#tester.inputNoOutput", recordNumber);
+			    Intl.errFormat("csv#test.inputNoOutput", recordNumber);
 			}
 			int totalErrors = recordErrors + lengthErrors + compareErrors;
 			if (totalErrors == 0) {
 			    outputFile.delete();
-			    Intl.outFormat("csv#tester.inputEqualsOutput", file);
+			    Intl.outFormat("csv#test.inputEqualsOutput", file);
 			}
 			else {
-			    Intl.outFormat("csv#tester.inputNotEqualOutput",
+			    Intl.outFormat("csv#test.inputNotEqualOutput",
 				file, outputFile.getPath(), recordErrors, lengthErrors, compareErrors);
 			}
 		    }

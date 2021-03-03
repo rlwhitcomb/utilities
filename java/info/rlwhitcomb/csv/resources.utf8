@@ -1,7 +1,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2014-2016,2020 Roger L. Whitcomb.
+# Copyright (c) 2014-2016,2020-2021 Roger L. Whitcomb.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -40,6 +40,8 @@
 #	    Prepare for GitHub.
 #	13-Nov-2020 (rlwhitcomb)
 #	    Tweak messages a little. Add a new tester error.
+#	02-Mar-2021 (rlwhitcomb)
+#	    New options for CSVTest. Update help (with colors).
 #
 
 #
@@ -81,38 +83,45 @@ writer.writingException		= Exception while writing output
 #
 # From CSVTest.java
 #
-tester.help1			= ""
-tester.help2			= Usage: [-8][-qx][-dx][-rx][-ex][-w][-B][-T][-R][-L][-I][-W] file name(s)
-tester.help3			= ""
-tester.help4			= Where the options are:
-tester.help5			= \t-8  = use the UTF-8 character set to read and write files (default to system charset)
-tester.help6			= \t-qx = set the quote character to 'x' (default is '"')
-tester.help7			= \t-dx = set the column delimiter to 'x' (default is ',')
-tester.help8			= \t-rx = set the record separator to 'x' (default is CR,LF)
-tester.help9			= \t-ex = set the escape charater to 'x' (default is '\\')
-tester.help10			= \t-w  = preserve whitespace in unquoted fields (default is not)
-tester.help11			= \t-B  = set the column delimiter to a blank
-tester.help12			= \t-T  = set the column delimiter to a tab character
-tester.help13			= \t-R  = set the record separator to CR
-tester.help14			= \t-L  = set the record separator to LF
-tester.help15			= \t-I  = ignore empty lines (default is not)
-tester.help16			= \t-W  = enable writeback mode, where the contents are written back out
-tester.help17			= \t      and then read back in and compared to the original parsed values.
-tester.help18			= ""
+test.help1			= ""
+test.help2			= <Bk!>Usage: <Gr>options<> <Cy>file name(s)<>
+test.help3			= ""
+test.help4			= Where the possible <Gr>options<> are:
+test.help5			= \t<Gr>-8<>   = use the UTF-8 character set to read and write files (default to system charset)
+test.help6			= \t<Gr>-q<Bk!>x<>  = set the quote character to '<Bk!>x<>' (default is '<Bk!>"<>')
+test.help7			= \t<Gr>-Q<Bk!>xx<> = set the quote character to a standard value ('<Bk!>single<>', '<Bk!>double<>', etc.)
+test.help8			= \t<Gr>-d<Bk!>x<>  = set the column delimiter to '<Bk!>x<>' (default is '<Bk!>,<>')
+test.help9			= \t<Gr>-D<Bk!>xx<> = set the column delimiter to a standard value ('<Bk!>comma<>', '<Bk!>space<>', etc.)
+test.help10			= \t<Gr>-r<Bk!>x<>  = set the record separator to '<Bk!>x<>' (default is CR,LF)
+test.help11			= \t<Gr>-S<Bk!>xx<> = set the record separator to a standard value ('<Bk!>newline<>', '<Bk!>semicolon<>', etc.)
+test.help12			= \t<Gr>-e<Bk!>x<>  = set the escape charater to '<Bk!>x<>' (default is '<Bk!>\\<>')
+test.help13			= \t<Gr>-a<>   = always delimit strings (default is not)
+test.help14			= \t<Gr>-u<>   = preserve quotes (default is not)
+test.help15			= \t<Gr>-w<>   = preserve whitespace in unquoted fields (default is not)
+test.help16			= \t<Gr>-B<>   = set the column delimiter to a blank
+test.help17			= \t<Gr>-T<>   = set the column delimiter to a tab character
+test.help18			= \t<Gr>-R<>   = set the record separator to CR
+test.help19			= \t<Gr>-L<>   = set the record separator to LF
+test.help20			= \t<Gr>-E<>   = data contains a header row (default is not)
+test.help21			= \t<Gr>-I<>   = ignore empty lines (default is not)
+test.help22			= \t<Gr>-W<>   = enable writeback mode, where the contents are written back out
+test.help23			= \t       and then read back in and compared to the original parsed values.
+test.help24			= \t<Gr>-i<>   = use "iterator" for testing.
+test.help25			= ""
 
-tester.onlyOneChar		= Only one character allowed for the "-%1$s" option!
-tester.unknownOption		= Unknown option "-%1$s"!
-tester.unknownQuote		= Unknown quote option "%1$s"!
-tester.unknownDelim		= Unknown delimiter option "%1$s"!
-tester.unknownSeparator		= Unknown separator option "%1$s"!
-tester.noInputFiles		= No input files specified.
-tester.recordNum		= Record %1$d:
-tester.record			= "%1$5d. '%2$s'"
-tester.separator		= "============================="
-tester.outputNoInput		= Record #%1$d: output record but no input record
-tester.lengthMismatch		= Record #%1$d: length mismatch: input len=%2$d, output len=%3$d
-tester.mismatchFieldCount	= Record #%1$d: number of fields (%2$d) does not match number in first row (%3$d)
-tester.fieldMismatch		= Record #%1$d, field #%2$d: mismatch: input='%3$s', output='%4$s'
-tester.inputNoOutput		= Record #%1$d: input record has no output record
-tester.inputEqualsOutput	= Output file exactly equals original input file "%1$s".
-tester.inputNotEqualOutput	= Output file "%1$s" does not match original input file "%2$s":%n  %3$d record errors, %4$d length errors, %5$d compare errors
+test.onlyOneChar		= Only one character allowed for the "-%1$s" option!
+test.unknownOption		= Unknown option "-%1$s"!
+test.unknownQuote		= Unknown quote option "%1$s"!
+test.unknownDelim		= Unknown delimiter option "%1$s"!
+test.unknownSeparator		= Unknown separator option "%1$s"!
+test.noInputFiles		= No input files specified.
+test.recordNum			= Record %1$d:
+test.record			= "%1$5d. '%2$s'"
+test.separator			= "============================="
+test.outputNoInput		= Record #%1$d: output record but no input record
+test.lengthMismatch		= Record #%1$d: length mismatch: input len=%2$d, output len=%3$d
+test.mismatchFieldCount		= Record #%1$d: number of fields (%2$d) does not match number in first row (%3$d)
+test.fieldMismatch		= Record #%1$d, field #%2$d: mismatch: input='%3$s', output='%4$s'
+test.inputNoOutput		= Record #%1$d: input record has no output record
+test.inputEqualsOutput		= Output file exactly equals original input file "%1$s".
+test.inputNotEqualOutput	= Output file "%1$s" does not match original input file "%2$s":%n  %3$d record errors, %4$d length errors, %5$d compare errors

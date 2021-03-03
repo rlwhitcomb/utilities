@@ -47,6 +47,9 @@
  *	    Update obsolete Javadoc constructs.
  *	29-Jan-2021 (rlwhitcomb)
  *	    Use new Intl variants of Exception classes for convenience.
+ *	02-Mar-2021 (rlwhitcomb)
+ *	    Make header keys into an array of Objects; update "getHeaderKey"
+ *	    to handle this change.
  */
 package info.rlwhitcomb.csv;
 
@@ -70,7 +73,7 @@ public class CSVRecord implements Iterator<Object>, Iterable<Object>
 	private int nextWrite = 0;
 	private int nextRead = 0;
 	private int length = 0;
-	private String[] headerKeys = null;
+	private Object[] headerKeys = null;
 
 	/**
 	 * Construct a new (empty) record.
@@ -82,7 +85,7 @@ public class CSVRecord implements Iterator<Object>, Iterable<Object>
 	 * Sets the header keys for this record.
 	 * @param	headerKeys	List of header keys for the record.
 	 */
-	public void setHeaderKeys(String[] headerKeys) {
+	public void setHeaderKeys(Object[] headerKeys) {
 	    this.headerKeys = headerKeys;
 	}
 
@@ -92,9 +95,12 @@ public class CSVRecord implements Iterator<Object>, Iterable<Object>
 	 * @return	A string header key.
 	 */
 	private String getHeaderKey(int index) {
-	    return (headerKeys != null)
-		 ? headerKeys[index]
-		 : String.valueOf(index);
+	    if (headerKeys != null && index < headerKeys.length) {
+		Object key = headerKeys[index];
+		if (key != null)
+		    return key.toString();
+	    }
+	    return String.valueOf(index);
 	}
 
 	/**

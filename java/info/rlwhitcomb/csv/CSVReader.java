@@ -41,6 +41,8 @@
  *	    Update obsolete Javadoc constructs.
  *	29-Jan-2021 (rlwhitcomb)
  *	    Use new Exception variants using Intl for convenience.
+ *	02-Mar-2021 (rlwhitcomb)
+ *	    Implement new "hasHeaderRow" logic.
  */
 package info.rlwhitcomb.csv;
 
@@ -64,6 +66,9 @@ public class CSVReader implements Iterator<CSVRecord>, Iterable<CSVRecord>
 	/** The internal format we're using to do the parse. */
 	private CSVFormat format = null;
 
+	/** The header keys if the format says we have a header row. */
+	private Object[] headerKeys = null;
+
 	/** For the iterator interface, the next record to return. */
 	private CSVRecord currentRecord = null;
 
@@ -79,7 +84,6 @@ public class CSVReader implements Iterator<CSVRecord>, Iterable<CSVRecord>
 	public CSVReader(Reader reader, CSVFormat format) {
 	    this.parser = new CSVParser(reader, format);
 	    this.format = format;
-	    // TODO: somehow deal with header row:  need flag in format? or another method??
 	}
 
 	/**
@@ -97,13 +101,23 @@ public class CSVReader implements Iterator<CSVRecord>, Iterable<CSVRecord>
 	    CSVRecord record = new CSVRecord();
 	    String field;
 
+	    record.setHeaderKeys(headerKeys);
+
 	  retryLoop:
 	    while (true) {
 		while ((field = parser.getNextField()) != null) {
-		    // TODO: put header keys in here if present
 		    record.addField(null, field);
+
 		    if (parser.atEndOfRecord())
 			break;
+		}
+
+		if (format.hasHeaderRow && headerKeys == null) {
+		    headerKeys = record.getFields();
+		    record = new CSVRecord();
+		    record.setHeaderKeys(headerKeys);
+
+		    continue retryLoop;
 		}
 
 		if ((endOfInputReached = parser.atEndOfInput()) == true)
@@ -115,6 +129,7 @@ public class CSVReader implements Iterator<CSVRecord>, Iterable<CSVRecord>
 		else
 		    break retryLoop;
 	    }
+
 	    return record;
 	}
 
