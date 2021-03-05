@@ -123,6 +123,9 @@
  *	    Some more optimization with the digits of PI/E (keep around the longest
  *	    digit string used so far, and just harvest substrings from it), as
  *	    well as using a rational approximation for PI for fewer than 25 digits.
+ *	04-Mar-2021 (rlwhitcomb)
+ *	    Keep around the prime number sieve for reuse and some other "optimizations"
+ *	    for "isPrime".
  */
 package info.rlwhitcomb.util;
 
@@ -1911,10 +1914,50 @@ public class NumericUtil
 
 	private static final BigInteger MAX_PRIME = BigInteger.valueOf(Integer.MAX_VALUE);
 
-	private static int findLowestClearBit(final BigInteger bitArray, final int start, final int length) {
-	    for (int i = start; i < length; i++) {
-		if (!bitArray.testBit(i))
-		    return i;
+	private static BigInteger primeSieve = BigInteger.ZERO;
+	private static int primeSieveMax = -1;
+
+	private static void constructSieve(final int size) {
+	    int sizeInBits = roundUpPowerTwo(Math.max(size, 100));
+
+	    // Don't need to do anything if the sieve is already big enough
+	    if (sizeInBits > primeSieveMax) {
+		// In this implementation, a 0 bit means prime, 1 bit is composite.
+		BigInteger sieve = BigInteger.ZERO;
+
+		// Only the odd bits are present, and correspond so:
+		// bit 0 -> 3
+		// bit 1 -> 5
+		// bit 2 -> 7
+		int bitPos = 0;
+		while (bitPos >= 0 && bitPos <= sizeInBits) {
+		    int prime = (bitPos * 2) + 3;
+
+		    // Start at prime * 3, increment by prime * 2
+		    // to get 3p, 5p, 7p, ... (since all the even multiples
+		    // are even numbers, and thus NOT prime and not represented
+		    // in this bitmap)
+		    for (int j = bitPos + prime; j <= sizeInBits; j += prime) {
+			sieve = sieve.setBit(j);
+		    }
+
+		    int nextBitPos = findLowestClearBit(sieve, bitPos + 1, sizeInBits);
+		    if (nextBitPos < 0) {
+			break;
+		    }
+		    bitPos = nextBitPos;
+	        }
+
+		// Save the cached sieve for next time
+		primeSieve = sieve;
+		primeSieveMax = sizeInBits;
+	    }
+	}
+
+	private static int findLowestClearBit(final BigInteger bitArray, final int startBitPos, final int lengthInBits) {
+	    for (int bitPos = startBitPos; bitPos < lengthInBits; bitPos++) {
+		if (!bitArray.testBit(bitPos))
+		    return bitPos;
 	    }
 	    return -1;
 	}
@@ -1936,48 +1979,54 @@ public class NumericUtil
 	    // Negative numbers are essentially the same primality as their positive counterparts
 	    BigInteger posN = n.abs();
 
-	    // Easy decision here, even numbers > 2 are not prime...
+	    // Easy decisions here: zero is not prime
 	    if (posN.equals(BigInteger.ZERO))
 		return false;
 
+	    // one and two ARE prime
 	    if (posN.compareTo(I_TWO) <= 0)
 		return true;
 
+	    // any even number is NOT prime
 	    if (posN.remainder(I_TWO).equals(BigInteger.ZERO))
 		return false;
 
-	    int max = (int)(Math.ceil(Math.sqrt(posN.doubleValue())) + 0.5d) + 1;
+	    // Choose a size for our sieve that is at least as big as the square root
+	    // of the number in question (a little bit bigger is better)
+	    int max = ((int)(Math.ceil(Math.sqrt(posN.doubleValue())) + 0.5d) + 1) * 2;
+	    int maxBitPos = (max + 1 - 3) / 2;
 
-	    // In this implementation, a 0 bit means prime, 1 bit is composite.
-	    BigInteger sieve = BigInteger.ZERO;
+	    // Create or expand the sieve to accommodate this ~square root value
+	    constructSieve(maxBitPos);
 
-	    // In this implementation, only the odd bits are present, and correspond so:
-	    // bit 0 -> 3
-	    // bit 1 -> 5
-	    // bit 2 -> 7
-	    int i = 0;
-	    while (i >= 0 && i <= max) {
-		int prime = (i * 2) + 3;
-		if (posN.equals(BigInteger.valueOf(prime)))
-		    return true;
+	    // Make a preliminary check in case the number itself is within the sieve size
+	    // and we can just test directly
+	    int bitPos = (posN.intValue() - 3) / 2;
+	    if (bitPos < primeSieveMax)
+		return !primeSieve.testBit(bitPos);
 
-		BigInteger rem = posN.remainder(BigInteger.valueOf(prime));
-		if (rem.equals(BigInteger.ZERO))
+	    // Loop through all the primes in the sieve less than ~sqrt(n)
+	    // to see if the number has any prime factors
+	    // bitPos 0 corresponds to 3, and bitPos will only ever correspond
+	    // to a "clear" bit in the sieve, which is a prime number
+	    bitPos = 0;
+	    while (true) {
+		int prime = (bitPos * 2) + 3;
+		BigInteger iPrime = BigInteger.valueOf(prime);
+
+		// If the number is divided evenly by one of the primes, then we have a factor
+		// and the number is by definition NOT prime
+		if (posN.remainder(iPrime).equals(BigInteger.ZERO))
 		    return false;
 
-		for (int j = prime; j <= max; j += prime) {
-		    if (j % 2 == 1) {
-			sieve = sieve.setBit((j - 3) / 2);
-		    }
-		}
+		int nextBitPos = findLowestClearBit(primeSieve, bitPos + 1, maxBitPos);
 
-		int next = findLowestClearBit(sieve, i, max);
-		if (i == next) {
-		    break;
-		}
-		i = next;
+		// No more possible prime factors below the square root -> the number must be prime
+		if (nextBitPos < 0)
+		    return true;
+
+		bitPos = nextBitPos;
 	    }
-	    return true;
 	}
 
 }
