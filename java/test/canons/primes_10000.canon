@@ -1,3 +1,8 @@
+#
+# This data was sourced from:
+#   https://primes.utm.edu/lists/small/10000.txt
+# so that we rely on a third-party for verification.
+#
 
 [
   2,
