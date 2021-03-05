@@ -11,10 +11,11 @@
 >Test 'e_tan': Passed
 >Test 'bernoulli': Passed
 >Test 'primes_10000': Passed
+>Test 'factors': Passed
 >Test 'mort': Passed
 >
 >End of Calc tests.
 >------------------------------------
->Ran 9 tests: 9 passed, 0 failed.
+>Ran 10 tests: 10 passed, 0 failed.
 >====================================
 >

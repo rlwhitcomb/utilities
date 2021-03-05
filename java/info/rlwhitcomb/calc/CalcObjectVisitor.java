@@ -185,6 +185,8 @@
  *	    Fix "eval func" case; although it is not silent...
  *	03-Mar-2021 (rlwhitcomb) Issue #9
  *	    Fix silent setting doing "eval" of a function.
+ *	04-Mar-2021 (rlwhitcomb)
+ *	    Add "FACTORS" function.
  */
 package info.rlwhitcomb.calc;
 
@@ -1673,6 +1675,16 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    String exprString = getStringValue(ctx.expr());
 
 	    return Calc.processString(exprString, true);
+	}
+
+	@Override
+	public Object visitFactorsExpr(CalcParser.FactorsExprContext ctx) {
+	    List<Integer> factors = new ArrayList<>();
+	    BigInteger n = getIntegerValue(ctx.expr());
+
+	    NumericUtil.getFactors(n, factors);
+
+	    return factors;
 	}
 
 	@Override

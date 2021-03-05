@@ -140,6 +140,8 @@
  *	    Add a bunch more Unicode symbols.
  *	01-Mar-2021 (rlwhitcomb)
  *	    And more...
+ *	04-Mar-2021 (rlwhitcomb)
+ *	    Add a "FACTORS" function.
  */
 
 grammar Calc;
@@ -208,6 +210,7 @@ expr
    | BN expr                             # bernExpr
    | FRAC expr2                          # fracExpr
    | EVAL expr                           # evalExpr
+   | FACTORS expr                        # factorsExpr
    |<assoc=right> expr '**' expr         # powerExpr
    | expr MULT_OP expr                   # multiplyExpr
    | expr ADD_OP expr                    # addExpr
@@ -421,6 +424,8 @@ BN       : B N ;
 FRAC     : F R A C ;
 
 EVAL     : E V A L ;
+
+FACTORS  : F A C T O R S ;
 
 LOOP     : L O O P ;
 

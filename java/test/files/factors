@@ -1,0 +1,3 @@
+:resultsonly on
+loop $i in 0 .. 100 { `factors of $$i = ${factors $i}` }
+:resultsonly pop

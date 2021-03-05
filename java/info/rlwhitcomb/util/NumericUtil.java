@@ -126,6 +126,10 @@
  *	04-Mar-2021 (rlwhitcomb)
  *	    Keep around the prime number sieve for reuse and some other "optimizations"
  *	    for "isPrime".
+ *	05-Mar-2021 (rlwhitcomb)
+ *	    Implement "getFactors".  And now that calculating primes is faster, start to
+ *	    implement "getPrimeFactors" (not quite working yet as I think through how to
+ *	    get it right).
  */
 package info.rlwhitcomb.util;
 
@@ -140,9 +144,13 @@ import java.math.MathContext;
 import java.math.RoundingMode;
 import java.nio.charset.Charset;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.*;
 
 
@@ -1963,6 +1971,19 @@ public class NumericUtil
 	}
 
 	/**
+	 * Compute a number ~ the square root of the given (positive) number, which is
+	 * at least as big as the integer square root, then change to a sieve bit position.
+	 * This is the highest bit position to check for prime factors.
+	 *
+	 * @param posN	A positive number to be tested for primality or factored.
+	 * @return	The maximum bit position that should be tested for prime factors.
+	 */
+	private static int maxPrimeBitPos(final BigInteger posN) {
+	    int max = ((int)(Math.ceil(Math.sqrt(posN.doubleValue())) + 0.5d) + 1) * 2;
+	    return (max + 1 - 3) / 2;
+	}
+
+	/**
 	 * Using a Sieve of Eratosthenes, figure out if the given number is prime.
 	 * <p> Because this uses a bunch of space, the calculation is limited to
 	 * a relatively small value (~10**7).
@@ -1973,11 +1994,11 @@ public class NumericUtil
 	 * @throws  IllegalArgumentException if the number is "too big" for this method.
 	 */
 	public static boolean isPrime(final BigInteger n) {
-	    if (n.compareTo(MAX_PRIME) > 0)
-		throw new Intl.IllegalArgumentException("util#numeric.primeTooBig");
-
 	    // Negative numbers are essentially the same primality as their positive counterparts
 	    BigInteger posN = n.abs();
+
+	    if (posN.compareTo(MAX_PRIME) > 0)
+		throw new Intl.IllegalArgumentException("util#numeric.primeTooBig");
 
 	    // Easy decisions here: zero is not prime
 	    if (posN.equals(BigInteger.ZERO))
@@ -1993,8 +2014,7 @@ public class NumericUtil
 
 	    // Choose a size for our sieve that is at least as big as the square root
 	    // of the number in question (a little bit bigger is better)
-	    int max = ((int)(Math.ceil(Math.sqrt(posN.doubleValue())) + 0.5d) + 1) * 2;
-	    int maxBitPos = (max + 1 - 3) / 2;
+	    int maxBitPos = maxPrimeBitPos(posN);
 
 	    // Create or expand the sieve to accommodate this ~square root value
 	    constructSieve(maxBitPos);
@@ -2027,6 +2047,166 @@ public class NumericUtil
 
 		bitPos = nextBitPos;
 	    }
+	}
+
+	/**
+	 * Get a list of all the factors of an integer number.
+	 * <p> Because this can be expensive, limit to a relatively small value (~10**7).
+	 *
+	 * @param n The number to factor.
+	 * @param factors The (empty) list to populate with the factors of the number..
+	 * @throws  IllegalArgumentException if the number is "too big" for this method.
+	 */
+	public static void getFactors(final BigInteger n, final List<Integer> factors) {
+	    int sign = n.signum();
+	    BigInteger posN = (sign < 0) ? n.negate() : n;
+
+	    if (posN.compareTo(MAX_PRIME) > 0)
+		throw new Intl.IllegalArgumentException("util#numeric.primeTooBig");
+
+	    // Zero has no factors
+	    if (posN.equals(BigInteger.ZERO))
+		return;
+
+	    // Every number has 1 and itself as a factor
+	    factors.add(1);
+	    if (sign < 0)
+		factors.add(-1);
+
+	    if (posN.equals(BigInteger.ONE))
+		return;
+
+	    int intFactor = posN.intValue();
+	    factors.add(intFactor);
+	    if (sign < 0)
+		factors.add(-intFactor);
+
+	    // For 1, 2, and 3 we are done already
+	    if (posN.compareTo(BigInteger.valueOf(3)) <= 0)
+		return;
+
+	    BigInteger factor = I_TWO;
+	    Set<BigInteger> existingFactors = new HashSet<>();
+
+	    while (true) {
+		// If we've gone beyond the square root, then we're done
+		if (factor.multiply(factor).compareTo(posN) > 0)
+		    break;
+
+		if (!existingFactors.contains(factor)) {
+		    BigInteger[] parts = posN.divideAndRemainder(factor);
+		    if (parts[1].equals(BigInteger.ZERO)) {
+		        existingFactors.add(factor);
+			existingFactors.add(parts[0]);
+		    }
+		}
+
+		factor = factor.add(BigInteger.ONE);
+	    }
+
+	    // Add all the factors we found to the list
+	    for (BigInteger fact : existingFactors) {
+		intFactor = fact.intValue();
+		factors.add(intFactor);
+		if (sign < 0)
+		    factors.add(-intFactor);
+	    }
+
+	    // Finally, sort all the factors since they are kinda out of order
+	    Collections.sort(factors);
+	}
+
+	/**
+	 * Using a Sieve of Eratosthenes, figure out the prime factors of a small-ish number.
+	 * <p> Because this uses a bunch of space, the calculation is limited to
+	 * a relatively small value (~10**7).
+	 * <p> NOTE: this is incomplete and incorrect as of 3/5/21 as I think through how
+	 * to implement.
+	 *
+	 * @param n The number to factor.
+	 * @param factors The (empty) list to populate with the prime factors.
+	 * @throws  IllegalArgumentException if the number is "too big" for this method.
+	 */
+	public static void getPrimeFactors(final BigInteger n, final List<Integer> factors) {
+	    int sign = n.signum();
+	    BigInteger posN = (sign < 0) ? n.negate() : n;
+
+	    if (posN.compareTo(MAX_PRIME) > 0)
+		throw new Intl.IllegalArgumentException("util#numeric.primeTooBig");
+
+	    // Zero has no factors
+	    if (posN.equals(BigInteger.ZERO))
+		return;
+
+	    // Every number has 1 as a factor
+	    factors.add(1);
+	    if (sign < 0)
+		factors.add(-1);
+
+	    if (posN.equals(BigInteger.ONE))
+		return;
+
+	    // TODO: factor out the pure powers of 2 here (2, 4, 8, 16, etc.) because
+	    // most of these (except maybe 2 if there is another odd factor as in 2x13)
+	    BigInteger[] possibleTwoFactorParts = posN.divideAndRemainder(I_TWO);
+	    if (possibleTwoFactorParts[1].equals(BigInteger.ZERO)) {
+		// Two is a factor, so look at its other factor to see if it is a power of two
+		// or just another odd factor (which we will catch later)
+		if (possibleTwoFactorParts[0].remainder(I_TWO).equals(BigInteger.ZERO)) {
+		    // Here we have a power of two factor, so divide out that power,
+		    // adding in as many twos are needed
+		    factors.add(2);
+		    if (sign < 0)
+			factors.add(-2);
+		   // more work to do here 
+		}
+	    }
+
+	    // Choose a size for our sieve that is at least as big as the square root
+	    // of the number in question (a little bit bigger is better)
+	    int maxBitPos = maxPrimeBitPos(posN);
+
+	    // Create or expand the sieve to accommodate this ~square root value
+	    constructSieve(maxBitPos);
+
+	    // Go through the sieve and find the prime factors
+	    int bitPos = 0;	// corresponds to 3, which is a prime
+	    while (bitPos < maxBitPos) {
+		int prime = (bitPos * 2) + 3;
+		BigInteger iPrime = BigInteger.valueOf(prime);
+
+		if (iPrime.equals(posN))
+		    break;
+
+		// If the number is divided evenly by one of the primes, then we have a factor
+		BigInteger[] parts = posN.divideAndRemainder(iPrime);
+		if (parts[1].equals(BigInteger.ZERO)) {
+		    int otherFactor = parts[0].intValue();
+		    factors.add(prime);
+		    factors.add(otherFactor);
+		    if (sign < 0) {
+			factors.add(-prime);
+			factors.add(-otherFactor);
+		    }
+		}
+
+		int nextBitPos = findLowestClearBit(primeSieve, bitPos + 1, maxBitPos);
+
+		// No more possible prime factors below the square root -> the number must be prime
+		if (nextBitPos < 0)
+		    break;
+
+		bitPos = nextBitPos;
+	    }
+
+	    // Every number also has itself as a factor
+	    int myself = posN.intValue();
+	    factors.add(myself);
+	    if (sign < 0)
+		factors.add(-myself);
+
+	    // Finally, sort all the factors since they are kinda out of order
+	    Collections.sort(factors);
 	}
 
 }

@@ -22,6 +22,7 @@ e_trig        : e_trig
 e_tan         : e_tan
 bernoulli     : bernoulli
 primes_10000  : primes_10000
+factors       : factors
 mort          : e_m1,e_m2
 
 $echo
