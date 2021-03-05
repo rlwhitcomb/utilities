@@ -52,12 +52,15 @@
  *	    Update obsolete Javadoc constructs.
  *	22-Jan-2021 (rlwhitcomb)
  *	    One more exception that needs the name and message.
+ *	05-Mar-2021 (rlwhitcomb)
+ *	    And another one. Tweak the message formatting.
  */
 package info.rlwhitcomb.util;
 
 import java.io.FileNotFoundException;
 import java.net.UnknownHostException;
 import java.nio.charset.CharacterCodingException;
+import java.nio.charset.IllegalCharsetNameException;
 import java.nio.charset.UnsupportedCharsetException;
 import java.nio.file.NoSuchFileException;
 import java.util.Map;
@@ -109,6 +112,37 @@ public class ExceptionUtil
 	}
 
 	/**
+	 * Produce a more readable exception name from the given exception.
+	 *
+	 * @param	ex	The exception in question.
+	 * @return		A "nicer" or more readable name to use in reporting.
+	 */
+	private static String exceptionName(Throwable ex) {
+	    String simpleName = ex.getClass().getSimpleName();
+	    String nicerName  = simpleName;
+
+	    switch (simpleName) {
+		case "CharacterCodingException":
+		case "NumberFormatException":
+		    break;
+		default:
+		    nicerName = simpleName.replace("Exception", "").replace("Error", "");
+		    break;
+	    }
+
+	    // Make the exception name a little easier to read
+	    StringBuilder buf = new StringBuilder(nicerName.length() * 2);
+	    for (int i = 0; i < nicerName.length(); i++) {
+		char ch = nicerName.charAt(i);
+		if (i > 0 && Character.isUpperCase(ch))
+		    buf.append(' ');
+		buf.append(ch);
+	    }
+
+	    return buf.toString();
+	}
+
+	/**
 	 * Incremental version with more options.
 	 *
 	 * @param	ex		The exception to report.
@@ -129,20 +163,21 @@ public class ExceptionUtil
 		}
 		else {
 		    msg = next.getLocalizedMessage();
-		    if (msg == null) {
-			msg = next.getClass().getSimpleName();
+		    if (msg == null || msg.trim().isEmpty()) {
+			msg = exceptionName(next);
 		    }
 		    else if ((next instanceof UnknownHostException)
 			  || (next instanceof NoClassDefFoundError)
 			  || (next instanceof ClassNotFoundException)
 			  || (next instanceof NullPointerException)
 			  || (next instanceof CharacterCodingException)
+			  || (next instanceof IllegalCharsetNameException)
 			  || (next instanceof UnsupportedCharsetException)
 			  || (next instanceof FileNotFoundException)
 			  || (next instanceof NoSuchFileException)
 			  || (next instanceof UnsupportedOperationException)
 			  || (next instanceof NumberFormatException)) {
-			msg = String.format("%1$s: %2$s", next.getClass().getSimpleName(), msg);
+			msg = String.format("%1$s \"%2$s\"", exceptionName(next), msg);
 		    }
 		}
 		buf.append(msg);
