@@ -132,6 +132,8 @@
  *	    get it right).
  *	05-Mar-2021 (rlwhitcomb)
  *	    Almost fix/finish "getPrimeFactors" -- still some bugs.
+ *	07-Mar-2021 (rlwhitcomb)
+ *	    One is NOT a prime; also finally fix "getPrimeFactors".
  */
 package info.rlwhitcomb.util;
 
@@ -2162,13 +2164,13 @@ public class NumericUtil
 	    if (posN.equals(BigInteger.ZERO))
 		return;
 
-	    // Every non-zero number has 1 as a factor
-	    factors.add(1);
-	    if (sign < 0)
-		factors.add(-1);
-
-	    if (posN.equals(BigInteger.ONE))
+	    // One has only itself
+	    if (posN.equals(BigInteger.ONE)) {
+		factors.add(1);
+		if (sign < 0)
+		    factors.add(-1);
 		return;
+	    }
 
 	    // Factor out all the powers of two first
 	    BigInteger currentN = addPrimeFactors(posN, I_TWO, sign, factors);
@@ -2193,11 +2195,6 @@ public class NumericUtil
 		// If the number is divided evenly by one of the primes, then we have a factor
 		currentN = addPrimeFactors(currentN, iPrime, sign, factors);
 
-		// If the current value is either the original number or one, then we're done
-		// TODO: or maybe it is another prime ???
-		if (currentN.equals(BigInteger.ONE) || currentN.equals(posN))
-		   break;
-
 		int nextBitPos = findLowestClearBit(primeSieve, bitPos + 1, maxBitPos);
 
 		// No more possible prime factors below the square root
@@ -2208,6 +2205,7 @@ public class NumericUtil
 	    }
 
 	    // Any remaining value not equal one will be the final prime factor
+	    // (at most one prime factor greater than square root)
 	    if (!currentN.equals(BigInteger.ONE)) {
 		int intFactor = currentN.intValue();
 		factors.add(intFactor);

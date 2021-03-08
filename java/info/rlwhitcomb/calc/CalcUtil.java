@@ -45,6 +45,8 @@
  *	    Add "visitor" parameters and evaluate functions.
  *	03-Mar-2021 (rlwhitcomb)
  *	    Change "getTreeText" to just return a String.
+ *	07-Mar-2021 (rlwhitcomb)
+ *	    Evaluate functions in "compareValues".
  */
 package info.rlwhitcomb.calc;
 
@@ -467,7 +469,16 @@ public final class CalcUtil
 		final ParserRuleContext ctx1, final ParserRuleContext ctx2,
 		final MathContext mc, final boolean strict, final boolean allowNulls) {
 	    Object e1 = visitor.visit(ctx1);
+	    if (e1 instanceof ParserRuleContext) {
+		ParserRuleContext funcCtx = (ParserRuleContext) e1;
+		return compareValues(visitor, funcCtx, ctx2, mc, strict, allowNulls);
+	    }
+
 	    Object e2 = visitor.visit(ctx2);
+	    if (e2 instanceof ParserRuleContext) {
+		ParserRuleContext funcCtx = (ParserRuleContext) e2;
+		return compareValues(visitor, ctx1, funcCtx, mc, strict, allowNulls);
+	    }
 
 	    if (allowNulls) {
 		if (e1 == null && e2 == null)
