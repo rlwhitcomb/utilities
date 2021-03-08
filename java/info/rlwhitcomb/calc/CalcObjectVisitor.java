@@ -191,6 +191,8 @@
  *	    Add "PFACTORS" function now that the code works in NumericUtil.
  *	08-Mar-2021 (rlwhitcomb)
  *	    Get the "silent" operation right for functions everywhere.
+ *	08-Mar-2021 (rlwhitcomb)
+ *	    Implement "sumOf" and "productOf" functions.
  */
 package info.rlwhitcomb.calc;
 
@@ -1709,6 +1711,98 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    NumericUtil.getPrimeFactors(n, primeFactors);
 
 	    return primeFactors;
+	}
+
+	private void buildSumProductList(ParserRuleContext ctx, Object obj, List<Object> objectList) {
+	    Object value = evaluateFunction(obj);
+
+	    nullCheck(value, ctx);
+
+	    if (value instanceof List) {
+		@SuppressWarnings("unchecked")
+		List<Object> list = (List<Object>) value;
+		for (Object listObj : list) {
+		    buildSumProductList(ctx, listObj, objectList);
+		}
+	    }
+	    else if (value instanceof Map) {
+		@SuppressWarnings("unchecked")
+		Map<String, Object> map = (Map<String, Object>) value;
+		for (Object mapObj : map.values()) {
+		    buildSumProductList(ctx, mapObj, objectList);
+		}
+	    }
+	    else {
+		if (rationalMode) {
+		    BigFraction fValue = toFractionValue(this, value, ctx);
+		    objectList.add(fValue);
+		}
+		else {
+		    BigDecimal dValue = toDecimalValue(this, value, mc, ctx);
+		    objectList.add(dValue);
+		}
+	    }
+	}
+
+	private List<Object> buildSumProductList(List<CalcParser.ExprContext> exprs) {
+	    List<Object> objects = new ArrayList<>();
+
+	    for (CalcParser.ExprContext exprCtx : exprs) {
+		buildSumProductList(exprCtx, visit(exprCtx), objects);
+	    }
+
+	    return objects;
+	}
+
+	@Override
+	public Object visitSumOfExpr(CalcParser.SumOfExprContext ctx) {
+	    List<CalcParser.ExprContext> exprs = ctx.exprN().exprList().expr();
+	    List<Object> objects = buildSumProductList(exprs);
+
+	    if (rationalMode) {
+		BigFraction sum = BigFraction.ZERO;
+
+		for (Object obj : objects) {
+		    // At this point everything should be a BigFraction, or we have thrown an error
+		    sum = sum.add((BigFraction) obj);
+		}
+
+		return sum;
+	    }
+	    else {
+		BigDecimal sum = BigDecimal.ZERO;
+
+		for (Object obj : objects) {
+		    sum = sum.add((BigDecimal) obj, mc);
+		}
+
+		return sum;
+	    }
+	}
+
+	@Override
+	public Object visitProductOfExpr(CalcParser.ProductOfExprContext ctx) {
+	    List<CalcParser.ExprContext> exprs = ctx.exprN().exprList().expr();
+	    List<Object> objects = buildSumProductList(exprs);
+
+	    if (rationalMode) {
+		BigFraction product = BigFraction.ONE;
+
+		for (Object obj : objects) {
+		    product = product.multiply((BigFraction) obj);
+		}
+
+		return product;
+	    }
+	    else {
+		BigDecimal product = BigDecimal.ONE;
+
+		for (Object obj : objects) {
+		    product = product.multiply((BigDecimal) obj, mc);
+		}
+
+		return product;
+	    }
 	}
 
 	@Override

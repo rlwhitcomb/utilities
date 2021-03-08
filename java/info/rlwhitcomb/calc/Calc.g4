@@ -144,6 +144,8 @@
  *	    Add a "FACTORS" function.
  *	05-Mar-2021 (rlwhitcomb)
  *	    Add "PFACTORS" function.
+ *	08-Mar-2021 (rlwhitcomb)
+ *	    Add "SUMOF" and "PRODUCTOF" functions.
  */
 
 grammar Calc;
@@ -207,6 +209,8 @@ expr
    | LCM expr2                           # lcmExpr
    | MAX exprN                           # maxExpr
    | MIN exprN                           # minExpr
+   | SUMOF exprN                         # sumOfExpr
+   | PRODUCTOF exprN                     # productOfExpr
    | JOIN exprN                          # joinExpr
    | FIB expr                            # fibExpr
    | BN expr                             # bernExpr
@@ -431,6 +435,10 @@ EVAL     : E V A L ;
 FACTORS  : F A C T O R S ;
 
 PFACTORS : P F A C T O R S ;
+
+SUMOF    : S U M O F ;
+
+PRODUCTOF: P R O D U C T O F ;
 
 LOOP     : L O O P ;
 
