@@ -23,6 +23,7 @@ e_tan         : e_tan
 bernoulli     : bernoulli
 primes_10000  : primes_10000
 factors       : factors
+pfactors      : pfactors
 mort          : e_m1,e_m2
 
 $echo

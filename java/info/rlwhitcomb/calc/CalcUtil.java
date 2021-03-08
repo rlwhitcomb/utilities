@@ -47,6 +47,8 @@
  *	    Change "getTreeText" to just return a String.
  *	07-Mar-2021 (rlwhitcomb)
  *	    Evaluate functions in "compareValues".
+ *	08-Mar-2021 (rlwhitcomb)
+ *	    Get the "silent" setting right everywhere when evaluating a function.
  */
 package info.rlwhitcomb.calc;
 
@@ -131,7 +133,9 @@ public final class CalcUtil
 	}
 
 
-	public static BigDecimal toDecimalValue(final CalcObjectVisitor visitor, final Object value, final MathContext mc, final ParserRuleContext ctx) {
+	public static BigDecimal toDecimalValue(final CalcObjectVisitor visitor, final Object obj, final MathContext mc, final ParserRuleContext ctx) {
+	    Object value = visitor.evaluateFunction(obj);
+
 	    nullCheck(value, ctx);
 
 	    if (value instanceof BigDecimal)
@@ -148,11 +152,8 @@ public final class CalcUtil
 		return new BigDecimal(((Number) value).doubleValue());
 	    else if (value instanceof Number)
 		return BigDecimal.valueOf(((Number) value).longValue());
-	    else if (value instanceof ParserRuleContext) {
-		ParserRuleContext funcCtx = (ParserRuleContext) value;
-		return toDecimalValue(visitor, visitor.visit(funcCtx), mc, funcCtx);
-	    }
 
+	    // Here we are not able to make sense of the object, so we have an error
 	    String typeName = value.getClass().getSimpleName();
 	    if (value instanceof Map)
 		typeName = "object";
@@ -161,7 +162,9 @@ public final class CalcUtil
 	    throw new CalcExprException(ctx, "%calc#noConvertDecimal", typeName);
 	}
 
-	public static BigFraction toFractionValue(final CalcObjectVisitor visitor, final Object value, final ParserRuleContext ctx) {
+	public static BigFraction toFractionValue(final CalcObjectVisitor visitor, final Object obj, final ParserRuleContext ctx) {
+	    Object value = visitor.evaluateFunction(obj);
+
 	    nullCheck(value, ctx);
 
 	    if (value instanceof BigFraction)
@@ -178,11 +181,8 @@ public final class CalcUtil
 		return new BigFraction(new BigDecimal(((Number) value).doubleValue()));
 	    else if (value instanceof Number)
 		return new BigFraction(((Number) value).longValue());
-	    else if (value instanceof ParserRuleContext) {
-		ParserRuleContext funcCtx = (ParserRuleContext) value;
-		return toFractionValue(visitor, visitor.visit(funcCtx), funcCtx);
-	    }
 
+	    // Here we are not able to make sense of the object, so we have an error
 	    String typeName = value.getClass().getSimpleName();
 	    if (value instanceof Map)
 		typeName = "object";
@@ -225,13 +225,10 @@ public final class CalcUtil
 	    }
 	}
 
-	public static Boolean toBooleanValue(final CalcObjectVisitor visitor, final Object value, final ParserRuleContext ctx) {
-	    nullCheck(value, ctx);
+	public static Boolean toBooleanValue(final CalcObjectVisitor visitor, final Object obj, final ParserRuleContext ctx) {
+	    Object value = visitor.evaluateFunction(obj);
 
-	    if (value instanceof ParserRuleContext) {
-		ParserRuleContext funcCtx = (ParserRuleContext) value;
-		return toBooleanValue(visitor, visitor.visit(funcCtx), funcCtx);
-	    }
+	    nullCheck(value, ctx);
 
 	    try {
 		boolean boolValue = CharUtil.getBooleanValue(value);
@@ -247,7 +244,9 @@ public final class CalcUtil
 	}
 
 	@SuppressWarnings("unchecked")
-	public static String toStringValue(final CalcObjectVisitor visitor, final Object result, final boolean quote, final boolean pretty, final String indent) {
+	public static String toStringValue(final CalcObjectVisitor visitor, final Object obj, final boolean quote, final boolean pretty, final String indent) {
+	    Object result = visitor.evaluateFunction(obj);
+
 	    if (result == null) {
 		return quote ? "<null>" : "";
 	    }
@@ -269,11 +268,8 @@ public final class CalcUtil
 	    else if (result instanceof List) {
 		return toStringValue(visitor, (List<Object>) result, quote, pretty, indent);
 	    }
-	    else if (result instanceof ParserRuleContext) {
-		ParserRuleContext funcCtx = (ParserRuleContext) result;
-		return toStringValue(visitor, visitor.visit(funcCtx), quote, pretty, indent);
-	    }
 
+	    // Any other type, just get the string representation
 	    return result.toString();
 	}
 
@@ -336,12 +332,14 @@ public final class CalcUtil
 	 * </ul>
 	 *
 	 * @param visitor	The visitor object (for function evaluation).
-	 * @param obj		The object to be "measured".
+	 * @param valueObj	The object to be "measured".
 	 * @param ctx		The context to use for error reporting.
 	 * @param recursive	Whether or not to descend into the object / array or not.
 	 * @return		The "length" according to the above rules.
 	 */
-	public static int length(final CalcObjectVisitor visitor, final Object obj, final ParserRuleContext ctx, final boolean recursive) {
+	public static int length(final CalcObjectVisitor visitor, final Object valueObj, final ParserRuleContext ctx, final boolean recursive) {
+	    Object obj = visitor.evaluateFunction(valueObj);
+
 	    if (obj == null)
 		return 0;
 	    if (obj instanceof Boolean)
@@ -384,21 +382,17 @@ public final class CalcUtil
 		Map<String, Object> map = (Map<String, Object>) obj;
 		if (recursive) {
 		    int len = 0;
-		    for (Object valueObj : map.values()) {
-			if (valueObj instanceof List || valueObj instanceof Map)
-			    len += length(visitor, valueObj, ctx, recursive);
+		    for (Object mapObj : map.values()) {
+			if (mapObj instanceof List || mapObj instanceof Map)
+			    len += length(visitor, mapObj, ctx, recursive);
 			else
-			    len++;	// Note: this will count null entries as one
+			    len++;	// Note: this will count null values as one
 		    }
 		    return len;
 		}
 		else {
 		    return map.size();
 		}
-	    }
-	    if (obj instanceof ParserRuleContext) {
-		ParserRuleContext funcCtx = (ParserRuleContext) obj;
-		return length(visitor, visitor.visit(funcCtx), funcCtx, recursive);
 	    }
 
 	    throw new CalcExprException(ctx, "%calc#unknownType", obj.getClass().getSimpleName());
@@ -413,21 +407,19 @@ public final class CalcUtil
 	 * </ul>
 	 *
 	 * @param visitor	The visitor (for function evaluation).
-	 * @param obj		The object to interrogate.
+	 * @param valueObj	The object to interrogate.
 	 * @param ctx		The context to use for error reporting.
 	 * @return		The scale of the object.
 	 */
-	public static int scale(final CalcObjectVisitor visitor, final Object obj, final ParserRuleContext ctx) {
+	public static int scale(final CalcObjectVisitor visitor, final Object valueObj, final ParserRuleContext ctx) {
+	    Object obj = visitor.evaluateFunction(valueObj);
+
 	    if (obj instanceof BigDecimal)
 		return ((BigDecimal) obj).scale();
 	    if (obj instanceof BigFraction)
 		return ((BigFraction) obj).toDecimal().scale();
 	    if (obj instanceof List || obj instanceof Map)
 		return length(visitor, obj, ctx, false);
-	    if (obj instanceof ParserRuleContext) {
-		ParserRuleContext funcCtx = (ParserRuleContext) obj;
-		return scale(visitor, visitor.visit(funcCtx), funcCtx);
-	    }
 	    return 0;
 	}
 
@@ -468,17 +460,8 @@ public final class CalcUtil
 	public static int compareValues(final CalcObjectVisitor visitor,
 		final ParserRuleContext ctx1, final ParserRuleContext ctx2,
 		final MathContext mc, final boolean strict, final boolean allowNulls) {
-	    Object e1 = visitor.visit(ctx1);
-	    if (e1 instanceof ParserRuleContext) {
-		ParserRuleContext funcCtx = (ParserRuleContext) e1;
-		return compareValues(visitor, funcCtx, ctx2, mc, strict, allowNulls);
-	    }
-
-	    Object e2 = visitor.visit(ctx2);
-	    if (e2 instanceof ParserRuleContext) {
-		ParserRuleContext funcCtx = (ParserRuleContext) e2;
-		return compareValues(visitor, ctx1, funcCtx, mc, strict, allowNulls);
-	    }
+	    Object e1 = visitor.evaluateFunction(visitor.visit(ctx1));
+	    Object e2 = visitor.evaluateFunction(visitor.visit(ctx2));
 
 	    if (allowNulls) {
 		if (e1 == null && e2 == null)

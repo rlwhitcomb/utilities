@@ -189,6 +189,8 @@
  *	    Add "FACTORS" function.
  *	05-Mar-2021 (rlwhitcomb)
  *	    Add "PFACTORS" function now that the code works in NumericUtil.
+ *	08-Mar-2021 (rlwhitcomb)
+ *	    Get the "silent" operation right for functions everywhere.
  */
 package info.rlwhitcomb.calc;
 
@@ -376,7 +378,17 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    return getStringValue(ctx, false);
 	}
 
-	private Object evaluateFunction(Object value) {
+	/**
+	 * Evaluate a function: basically call {@code visit} on that
+	 * context if the value is itself is a parse tree (that is,
+	 * the body of a function).
+	 *
+	 * @param value The result of an expression, which could be
+	 * the body of a function.
+	 * @return Either the value or the result of visiting that
+	 * function context if it is one.
+	 */
+	protected Object evaluateFunction(Object value) {
 	    Object returnValue = value;
 
 	    if (value != null && value instanceof ParserRuleContext) {

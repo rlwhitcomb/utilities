@@ -170,6 +170,8 @@
 		Need to do the preproc file compare ignoring line-ending differences.
 	    03-Mar-2021 (rlwhitcomb)
 		Run the "check_sorted" script on non-Windows platforms as part of "test".
+	    08-Mar-2021 (rlwhitcomb)
+		Add a "success" message to the test log file if preprocessing matched.
 
      ========================================================================== -->
 
@@ -449,6 +451,8 @@
 				<not><filesmatch file1="TestPP.java" file2="test/canons/TestPP.canon" textfile="true"/></not>
 			</condition>
 		</fail>
+		<echo file="${test.log.file.name}" append="true">JavaPreProc: Preprocessing results match.
+</echo>
 		<echo>Test of InitializationTask...</echo>
 		<java classname="InitTaskTest"                        output="${test.log.file.name}" append="true" failonerror="true"/>
 		<echo>Running various tests through the Tester...</echo>

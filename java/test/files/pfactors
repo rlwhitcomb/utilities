@@ -1,8 +1,7 @@
 :resultsonly on
 def prod={ product=1; loop $f in facts { product *= $f }; product }
 loop $i in 0 .. 100 {
-   facts = pfactors $i
-   `prime factors of $$i = $facts`
+   `prime factors of $$i = ${facts = pfactors $i}`
    if prod != $i { `$$i failed!` }
 }
 :resultsonly pop
