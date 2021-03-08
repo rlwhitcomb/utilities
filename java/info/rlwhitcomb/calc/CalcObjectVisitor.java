@@ -187,6 +187,8 @@
  *	    Fix silent setting doing "eval" of a function.
  *	04-Mar-2021 (rlwhitcomb)
  *	    Add "FACTORS" function.
+ *	05-Mar-2021 (rlwhitcomb)
+ *	    Add "PFACTORS" function now that the code works in NumericUtil.
  */
 package info.rlwhitcomb.calc;
 
@@ -1685,6 +1687,16 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    NumericUtil.getFactors(n, factors);
 
 	    return factors;
+	}
+
+	@Override
+	public Object visitPrimeFactorsExpr(CalcParser.PrimeFactorsExprContext ctx) {
+	    List<Integer> primeFactors = new ArrayList<>();
+	    BigInteger n = getIntegerValue(ctx.expr());
+
+	    NumericUtil.getPrimeFactors(n, primeFactors);
+
+	    return primeFactors;
 	}
 
 	@Override

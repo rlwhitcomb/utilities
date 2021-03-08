@@ -142,6 +142,8 @@
  *	    And more...
  *	04-Mar-2021 (rlwhitcomb)
  *	    Add a "FACTORS" function.
+ *	05-Mar-2021 (rlwhitcomb)
+ *	    Add "PFACTORS" function.
  */
 
 grammar Calc;
@@ -211,6 +213,7 @@ expr
    | FRAC expr2                          # fracExpr
    | EVAL expr                           # evalExpr
    | FACTORS expr                        # factorsExpr
+   | PFACTORS expr                       # primeFactorsExpr
    |<assoc=right> expr '**' expr         # powerExpr
    | expr MULT_OP expr                   # multiplyExpr
    | expr ADD_OP expr                    # addExpr
@@ -426,6 +429,8 @@ FRAC     : F R A C ;
 EVAL     : E V A L ;
 
 FACTORS  : F A C T O R S ;
+
+PFACTORS : P F A C T O R S ;
 
 LOOP     : L O O P ;
 
