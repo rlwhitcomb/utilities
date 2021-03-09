@@ -106,8 +106,8 @@ code {
   <table>
     <tr>
       <th width=60>Level</th>
-      <th width=180>Operator</th>
-      <th width=280>Description</th>
+      <th width=220>Operator</th>
+      <th width=300>Description</th>
       <th width=120>Associativity</th>
     </tr>
     <tr><td>28</td>
@@ -129,9 +129,24 @@ code {
     <tr><td>20</td><td><code>!</code> or <code>&#x00AC;</code>&nbsp;<i>expr</i></td><td>boolean NOT</td><td>right to left</td></tr>
     <tr><td>19</td><td><code>~</code>&nbsp;<i>expr</i></td><td>bitwise NOT</td><td>right to left</td></tr>
     <tr><td>18</td><td><i>expr</i>&nbsp;<code>!</code></td><td>factorial</td><td>left to right</td></tr>
-    <tr><td>17</td><td colspan="2">
+    <tr><td>17</td><td><i>expr<sub>1</sub></i>&nbsp;<code> ** </code>&nbsp;<i>expr<sub>2</sub></i></td><td>expr<sub>1</sub> to expr<sub>2</sub> power</td><td>right to left</td></tr>
+    <tr><td>16</td><td>
+        <i>expr</i>&nbsp;<code> * </code>or<code> &times; </code>or<code> &#x2217; </code>&nbsp;<i>expr</i><br>
+        <i>expr</i>&nbsp;<code> / </code>or<code> &divide; </code>&nbsp;<i>expr</i><br>
+        <i>expr</i>&nbsp;<code> % </code>&nbsp;<i>expr</i></td>
+        <td>multiply/divide/remainder</td><td>left to right</td></tr>
+    <tr><td>15</td><td>
+        <i>expr</i>&nbsp;<code> + </code>&nbsp;<i>expr</i><br>
+        <i>expr</i>&nbsp;<code> - </code>&nbsp;<i>expr</i></td>
+        <td>add/subtract</td><td>left to right</td></tr>
+    <tr><td>14</td><td>
+        <i>expr</i>&nbsp;<code> &gt;&gt;&gt; </code>&nbsp;<i>expr</i><br>
+        <i>expr</i>&nbsp;<code> &gt;&gt; </code>&nbsp;<i>expr</i><br>
+        <i>expr</i>&nbsp;<code> &lt;&lt; </code>&nbsp;<i>expr</i></td>
+        <td>bit shift operations</td><td>left to right</td></tr>
+    <tr><td>13</td><td colspan="2">
         <table class="innertable">
-            <tr><td width="180"><code>ABS</code>&nbsp;<i>expr</i></td><td width="280">absolute value</td></tr>
+            <tr><td width="220"><code>ABS</code>&nbsp;<i>expr</i></td><td width="300">absolute value</td></tr>
             <tr><td><code>SIN</code>&nbsp;<i>expr</i></td><td>sine</td></tr>
             <tr><td><code>COS</code>&nbsp;<i>expr</i></td><td>cosine</td></tr>
             <tr><td><code>TAN</code>&nbsp;<i>expr</i></td><td>tangent</td></tr>
@@ -156,28 +171,17 @@ code {
             <tr><td><code>LCM</code>&nbsp;<i>expr</i><code>,</code>&nbsp;<i>expr</i></td><td>least common multiple</td></tr>
             <tr><td><code>MAX</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;) *</td><td>maximum value</td></tr>
             <tr><td><code>MIN</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;) *</td><td>minimum value</td></tr>
+            <tr><td><code>SUMOF</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;) *</td><td>sum of all the values</td></tr>
+            <tr><td><code>PRODUCTOF</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;) *</td><td>product of all the values</td></tr>
             <tr><td><code>JOIN</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;) *</td><td>join strings</td></tr>
             <tr><td><code>FIB</code>&nbsp;<i>expr</i></td><td>Fibonacci number</td></tr>
             <tr><td><code>Bn</code>&nbsp;<i>expr</i></td><td>Bernoulli number</td></tr>
             <tr><td><code>FRAC</code>&nbsp;<i>e<sub>numer</sub></i><code>,</code>&nbsp;<i>e<sub>denom</sub></i></td><td>construct a rational fraction<br><code><i>numer</i> / <i>denom</i></code></td></tr>
             <tr><td><code>EVAL</code>&nbsp;<i>expr</i></td><td>evaluate the string result of <i>expr</i></td></tr>
+            <tr><td><code>FACTORS</code>&nbsp;<i>expr</i></td><td>calculate all the factors of the number</td></tr>
+            <tr><td><code>PFACTORS</code>&nbsp;<i>expr</i></td><td>calculate the prime factors of the number</td></tr>
         </table></td>
         <td>left to right</td></tr>
-    <tr><td>16</td><td><i>expr<sub>1</sub></i>&nbsp;<code> ** </code>&nbsp;<i>expr<sub>2</sub></i></td><td>expr<sub>1</sub> to expr<sub>2</sub> power</td><td>right to left</td></tr>
-    <tr><td>15</td><td>
-        <i>expr</i>&nbsp;<code> * </code>or<code> &times; </code>or<code> &#x2217; </code>&nbsp;<i>expr</i><br>
-        <i>expr</i>&nbsp;<code> / </code>or<code> &divide; </code>&nbsp;<i>expr</i><br>
-        <i>expr</i>&nbsp;<code> % </code>&nbsp;<i>expr</i></td>
-        <td>multiply/divide/remainder</td><td>left to right</td></tr>
-    <tr><td>14</td><td>
-        <i>expr</i>&nbsp;<code> + </code>&nbsp;<i>expr</i><br>
-        <i>expr</i>&nbsp;<code> - </code>&nbsp;<i>expr</i></td>
-        <td>add/subtract</td><td>left to right</td></tr>
-    <tr><td>13</td><td>
-        <i>expr</i>&nbsp;<code> &gt;&gt;&gt; </code>&nbsp;<i>expr</i><br>
-        <i>expr</i>&nbsp;<code> &gt;&gt; </code>&nbsp;<i>expr</i><br>
-        <i>expr</i>&nbsp;<code> &lt;&lt; </code>&nbsp;<i>expr</i></td>
-        <td>bit shift operations</td><td>left to right</td></tr>
     <tr><td>12</td><td><i>expr</i>&nbsp;<code> &lt;=&gt; </code>&nbsp;<i>expr</i><td>returns <code>-1</code> if expr &lt; 0<br><code>0</code> if expr = 0<br><code>+1</code> if expr &gt; 0</td><td>left to right</td></tr>
     <tr><td>11</td><td>
         <i>expr</i>&nbsp;<code> &lt;= </code>or<code> &#x2264; </code>&nbsp;<i>expr</i><br>

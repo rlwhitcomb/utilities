@@ -40,5 +40,5 @@ cos_x
 cos x
 
 :echo
-sqrt(2)/2
+(sqrt 2)/2
 

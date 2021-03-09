@@ -146,6 +146,9 @@
  *	    Add "PFACTORS" function.
  *	08-Mar-2021 (rlwhitcomb)
  *	    Add "SUMOF" and "PRODUCTOF" functions.
+ *	09-Mar-2021 (rlwhitcomb)
+ *	    Lower precedence of all the functions below all the other arithmetic operators
+ *	    and just above the comparison / relational operators.
  */
 
 grammar Calc;
@@ -184,6 +187,10 @@ expr
    |<assoc=right> ('!'|'\u00AC') expr    # booleanNotExpr
    |<assoc=right> '~' expr               # bitNotExpr
    | expr '!'                            # factorialExpr
+   |<assoc=right> expr '**' expr         # powerExpr
+   | expr MULT_OP expr                   # multiplyExpr
+   | expr ADD_OP expr                    # addExpr
+   | expr SHIFT_OP expr                  # shiftExpr
    | ABS expr                            # absExpr
    | SIN expr                            # sinExpr
    | COS expr                            # cosExpr
@@ -218,10 +225,6 @@ expr
    | EVAL expr                           # evalExpr
    | FACTORS expr                        # factorsExpr
    | PFACTORS expr                       # primeFactorsExpr
-   |<assoc=right> expr '**' expr         # powerExpr
-   | expr MULT_OP expr                   # multiplyExpr
-   | expr ADD_OP expr                    # addExpr
-   | expr SHIFT_OP expr                  # shiftExpr
    | expr '<=>' expr                     # spaceshipExpr
    | expr COMPARE_OP expr                # compareExpr
    | expr EQUAL_OP expr                  # equalExpr
