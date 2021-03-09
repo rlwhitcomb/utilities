@@ -195,6 +195,9 @@
  *	    Implement "sumOf" and "productOf" functions.
  *	08-Mar-2021 (rlwhitcomb)
  *	    Make the same recursive changes for min/max and join.
+ *	09-Mar-2021 (rlwhitcomb)
+ *	    One more level of recursion is necessary in "getFirstValue".
+ *	    Add Javadoc for the min/max/join list helpers.
  */
 package info.rlwhitcomb.calc;
 
@@ -1554,25 +1557,46 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 	}
 
-	private Object getFirstValue(CalcParser.ExprContext eCtx) {
-	    Object value = evaluateFunction(visit(eCtx));
+	/**
+	 * Recursively descend to the leaf values in the first object of a min/max/join list
+	 * to find the actual first value, in order to determine if the comparisons will be
+	 * done as string or numeric.
+	 *
+	 * @param eCtx	The expression context we're evaluating (i.e., the first parse tree).
+	 * @param obj	The first object, which could be an object, a list, or an actual value.
+	 * @return	The real first value, descending to the lowest level of a compound object.
+	 */
+	private Object getFirstValue(CalcParser.ExprContext eCtx, Object obj) {
+	    Object value = evaluateFunction(obj);
+
 	    nullCheck(value, eCtx);
+
 	    if (value instanceof List) {
 		@SuppressWarnings("unchecked")
 		List<Object> list = (List<Object>) value;
-		return list.size() > 0 ? evaluateFunction(list.get(0)) : null;
+		return list.size() > 0 ? getFirstValue(eCtx, list.get(0)) : null;
 	    }
 	    else if (value instanceof Map) {
 		@SuppressWarnings("unchecked")
 		Map<String, Object> map = (Map<String, Object>) value;
 		Iterator<Object> iter = map.values().iterator();
-		if (iter.hasNext())
-		    return evaluateFunction(iter.next());
-		return null;
+		return iter.hasNext() ? getFirstValue(eCtx, iter.next()) : null;
 	    }
+
 	    return value;
 	}
 
+	/**
+	 * Do a "flat map" of the arguments to the {@code min}, {@code max}, or {@code join} functions into a single list
+	 * of the values: either strings, fractions, or decimals.
+	 *
+	 * @param ctx	The outer level context (that of the function itself) (for error reporting).
+	 * @param obj	One of the objects listed as parameters to the function, which could be arrays, maps, etc.
+	 * @param objectList	The "flat map" or list of objects we're building.
+	 * @param isString	Whether to build the value list as strings, or numeric (determined by the
+	 *			first actual value, or always {@code true} for {@code join}).
+	 * @see #getFirstValue
+	 */
 	private void buildMinMaxJoinList(ParserRuleContext ctx, Object obj, List<Object> objectList, boolean isString) {
 	    Object value = evaluateFunction(obj);
 
@@ -1607,9 +1631,17 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 	}
 
+	/**
+	 * Construct the "flat map" or value list for {@code min}, {@code max}, or {@code join}
+	 * so that we can traverse a simple list to obtain the desired result.
+	 *
+	 * @param exprs	The list of expressions parsed as the arguments to the function.
+	 * @return	The "flat map" of the values from those arguments.
+	 */
 	private List<Object> buildMinMaxJoinList(List<CalcParser.ExprContext> exprs) {
 	    // Do a "peek" inside any lists or maps to get the first value
-	    boolean isString = getFirstValue(exprs.get(0)) instanceof String;
+	    CalcParser.ExprContext firstCtx = exprs.get(0);
+	    boolean isString = getFirstValue(firstCtx, visit(firstCtx)) instanceof String;
 
 	    List<Object> objects = new ArrayList<>();
 
