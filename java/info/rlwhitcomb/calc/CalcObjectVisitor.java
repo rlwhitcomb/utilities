@@ -193,6 +193,8 @@
  *	    Get the "silent" operation right for functions everywhere.
  *	08-Mar-2021 (rlwhitcomb)
  *	    Implement "sumOf" and "productOf" functions.
+ *	08-Mar-2021 (rlwhitcomb)
+ *	    Make the same recursive changes for min/max and join.
  */
 package info.rlwhitcomb.calc;
 
@@ -380,29 +382,6 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    return getStringValue(ctx, false);
 	}
 
-	/**
-	 * Evaluate a function: basically call {@code visit} on that
-	 * context if the value is itself is a parse tree (that is,
-	 * the body of a function).
-	 *
-	 * @param value The result of an expression, which could be
-	 * the body of a function.
-	 * @return Either the value or the result of visiting that
-	 * function context if it is one.
-	 */
-	protected Object evaluateFunction(Object value) {
-	    Object returnValue = value;
-
-	    if (value != null && value instanceof ParserRuleContext) {
-		ParserRuleContext funcCtx = (ParserRuleContext) value;
-		boolean prevSilent = setSilent(true);
-		returnValue = visit(funcCtx);
-		setSilent(prevSilent);
-	    }
-
-	    return returnValue;
-	}
-
 	private String getStringValue(ParserRuleContext ctx, boolean allowNull) {
 	    Object value = evaluateFunction(visit(ctx));
 
@@ -473,6 +452,29 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    int iRoundPrec = Math.max(1, (prec - scale) + iPlaces);
 
 	    return value.round(new MathContext(iRoundPrec));
+	}
+
+	/**
+	 * Evaluate a function: basically call {@code visit} on that
+	 * context if the value is itself is a parse tree (that is,
+	 * the body of a function).
+	 *
+	 * @param value The result of an expression, which could be
+	 * the body of a function.
+	 * @return Either the value or the result of visiting that
+	 * function context if it is one.
+	 */
+	protected Object evaluateFunction(Object value) {
+	    Object returnValue = value;
+
+	    if (value != null && value instanceof ParserRuleContext) {
+		ParserRuleContext funcCtx = (ParserRuleContext) value;
+		boolean prevSilent = setSilent(true);
+		returnValue = visit(funcCtx);
+		setSilent(prevSilent);
+	    }
+
+	    return returnValue;
 	}
 
 
@@ -1552,18 +1554,82 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 	}
 
+	private Object getFirstValue(CalcParser.ExprContext eCtx) {
+	    Object value = evaluateFunction(visit(eCtx));
+	    nullCheck(value, eCtx);
+	    if (value instanceof List) {
+		@SuppressWarnings("unchecked")
+		List<Object> list = (List<Object>) value;
+		return list.size() > 0 ? evaluateFunction(list.get(0)) : null;
+	    }
+	    else if (value instanceof Map) {
+		@SuppressWarnings("unchecked")
+		Map<String, Object> map = (Map<String, Object>) value;
+		Iterator<Object> iter = map.values().iterator();
+		if (iter.hasNext())
+		    return evaluateFunction(iter.next());
+		return null;
+	    }
+	    return value;
+	}
+
+	private void buildMinMaxJoinList(ParserRuleContext ctx, Object obj, List<Object> objectList, boolean isString) {
+	    Object value = evaluateFunction(obj);
+
+	    nullCheck(value, ctx);
+
+	    if (value instanceof List) {
+		@SuppressWarnings("unchecked")
+		List<Object> list = (List<Object>) value;
+		for (Object listObj : list) {
+		    buildMinMaxJoinList(ctx, listObj, objectList, isString);
+		}
+	    }
+	    else if (value instanceof Map) {
+		@SuppressWarnings("unchecked")
+		Map<String, Object> map = (Map<String, Object>) value;
+		for (Object mapObj : map.values()) {
+		    buildMinMaxJoinList(ctx, mapObj, objectList, isString);
+		}
+	    }
+	    else if (isString) {
+		// Note: this logic follows "getStringValue"
+		if (value instanceof String)
+		    objectList.add(value);
+		else
+		    objectList.add(value.toString());
+	    }
+	    else if (rationalMode) {
+		objectList.add(toFractionValue(this, value, ctx));
+	    }
+	    else {
+		objectList.add(toDecimalValue(this, value, mc, ctx));
+	    }
+	}
+
+	private List<Object> buildMinMaxJoinList(List<CalcParser.ExprContext> exprs) {
+	    // Do a "peek" inside any lists or maps to get the first value
+	    boolean isString = getFirstValue(exprs.get(0)) instanceof String;
+
+	    List<Object> objects = new ArrayList<>();
+
+	    for (CalcParser.ExprContext eCtx : exprs) {
+		buildMinMaxJoinList(eCtx, visit(eCtx), objects, isString);
+	    }
+
+	    return objects;
+	}
+
 	@Override
 	public Object visitMaxExpr(CalcParser.MaxExprContext ctx) {
 	    List<CalcParser.ExprContext> exprs = ctx.exprN().exprList().expr();
-	    CalcParser.ExprContext eCtx = exprs.get(0);
-	    Object firstValue = visit(eCtx);
-	    nullCheck(firstValue, eCtx);
+	    List<Object> objects = buildMinMaxJoinList(exprs);
+	    Object firstValue = objects.size() > 0 ? objects.get(0) : null;
 
 	    if (firstValue instanceof String) {
 		String maxString = (String) firstValue;
-		for (int i = 1; i < exprs.size(); i++) {
-		    eCtx = exprs.get(i);
-		    String value = getStringValue(eCtx);
+		for (int i = 1; i < objects.size(); i++) {
+		    String value = (String) objects.get(i);
 		    if (value.compareTo(maxString) > 0)
 			maxString = value;
 		}
@@ -1571,20 +1637,18 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 	    else {
 		if (rationalMode) {
-		    BigFraction maxFraction = toFractionValue(this, firstValue, ctx);
-		    for (int i = 1; i < exprs.size(); i++) {
-			eCtx = exprs.get(i);
-			BigFraction value = getFractionValue(eCtx);
+		    BigFraction maxFraction = (BigFraction) firstValue;
+		    for (int i = 1; i < objects.size(); i++) {
+			BigFraction value = (BigFraction) objects.get(i);
 			if (value.compareTo(maxFraction) > 0)
 			    maxFraction = value;
 		    }
 		    return maxFraction;
 		}
 		else {
-		    BigDecimal maxNumber = toDecimalValue(this, firstValue, mc, ctx);
-		    for (int i = 1; i < exprs.size(); i++) {
-			eCtx = exprs.get(i);
-			BigDecimal value = getDecimalValue(eCtx);
+		    BigDecimal maxNumber = (BigDecimal) firstValue;
+		    for (int i = 1; i < objects.size(); i++) {
+			BigDecimal value = (BigDecimal) objects.get(i);
 			if (value.compareTo(maxNumber) > 0)
 			    maxNumber = value;
 		    }
@@ -1596,15 +1660,13 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitMinExpr(CalcParser.MinExprContext ctx) {
 	    List<CalcParser.ExprContext> exprs = ctx.exprN().exprList().expr();
-	    CalcParser.ExprContext eCtx = exprs.get(0);
-	    Object firstValue = visit(eCtx);
-	    nullCheck(firstValue, eCtx);
+	    List<Object> objects = buildMinMaxJoinList(exprs);
+	    Object firstValue = objects.size() > 0 ? objects.get(0) : null;
 
 	    if (firstValue instanceof String) {
 		String minString = (String) firstValue;
-		for (int i = 1; i < exprs.size(); i++) {
-		    eCtx = exprs.get(i);
-		    String value = getStringValue(eCtx);
+		for (int i = 1; i < objects.size(); i++) {
+		    String value = (String) objects.get(i);
 		    if (value.compareTo(minString) < 0)
 			minString = value;
 		}
@@ -1612,20 +1674,18 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 	    else {
 		if (rationalMode) {
-		    BigFraction minFraction = toFractionValue(this, firstValue, ctx);
-		    for (int i = 1; i < exprs.size(); i++) {
-			eCtx = exprs.get(i);
-			BigFraction value = getFractionValue(eCtx);
+		    BigFraction minFraction = (BigFraction) firstValue;
+		    for (int i = 1; i < objects.size(); i++) {
+			BigFraction value = (BigFraction) objects.get(i);
 			if (value.compareTo(minFraction) < 0)
 			    minFraction = value;
 		    }
 		    return minFraction;
 		}
 		else {
-		    BigDecimal minNumber = toDecimalValue(this, firstValue, mc, ctx);
-		    for (int i = 1; i < exprs.size(); i++) {
-			eCtx = exprs.get(i);
-			BigDecimal value = getDecimalValue(eCtx);
+		    BigDecimal minNumber = (BigDecimal) firstValue;
+		    for (int i = 1; i < objects.size(); i++) {
+			BigDecimal value = (BigDecimal) objects.get(i);
 			if (value.compareTo(minNumber) < 0)
 			    minNumber = value;
 		    }
@@ -1637,27 +1697,33 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitJoinExpr(CalcParser.JoinExprContext ctx) {
 	    List<CalcParser.ExprContext> exprs = ctx.exprN().exprList().expr();
+	    List<Object> objects = new ArrayList<>();
+
+	    for (CalcParser.ExprContext eCtx : exprs) {
+		buildMinMaxJoinList(eCtx, visit(eCtx), objects, true);
+	    }
+
 	    StringBuilder buf = new StringBuilder();
-	    int length = exprs.size();
+	    int length = objects.size();
 
 	    // This doesn't make sense unless there are at least 3 values
 	    // So, one value just gets that value
 	    // two values gets the two just concatenated together
 	    // three or more, the first n - 1 are joined by the nth (string) value
 	    if (length == 1) {
-		return getStringValue(exprs.get(0), true);
+		return objects.get(0);
 	    }
 	    else if (length == 2) {
-		buf.append(getStringValue(exprs.get(0), true));
-		buf.append(getStringValue(exprs.get(1), true));
+		buf.append(objects.get(0));
+		buf.append(objects.get(1));
 		return buf.toString();
 	    }
 	    else {
-		String joinExpr = getStringValue(exprs.get(length - 1), true);
+		String joinExpr = objects.get(length - 1).toString();
 		for (int i = 0; i < length - 1; i++) {
 		    if (i > 0)
 			buf.append(joinExpr);
-		    buf.append(getStringValue(exprs.get(i), true));
+		    buf.append(objects.get(i));
 		}
 		return buf.toString();
 	    }
@@ -1713,6 +1779,16 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    return primeFactors;
 	}
 
+	/**
+	 * Do a "flat map" of values for the "sumof" and "productof" functions.  Since each
+	 * value to be processed could be an array or map, we need to traverse these objects
+	 * as well as the simple values in order to get the full list to process.
+	 *
+	 * @param ctx		The overall parser context for the function (for error messages).
+	 * @param obj		The object to be added to the list, or recursed into when the object
+	 *			is a list or map.
+	 * @param objectList	The complete list of values to be built.
+	 */
 	private void buildSumProductList(ParserRuleContext ctx, Object obj, List<Object> objectList) {
 	    Object value = evaluateFunction(obj);
 
@@ -1744,6 +1820,13 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 	}
 
+	/**
+	 * Traverse the expression list for the "sumof" or "productof" function and
+	 * build the complete list of values to be processed.
+	 *
+	 * @param exprs	The parsed list of expression contexts.
+	 * @return	The completely built "flat map" of values.
+	 */
 	private List<Object> buildSumProductList(List<CalcParser.ExprContext> exprs) {
 	    List<Object> objects = new ArrayList<>();
 
@@ -1763,7 +1846,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		BigFraction sum = BigFraction.ZERO;
 
 		for (Object obj : objects) {
-		    // At this point everything should be a BigFraction, or we have thrown an error
+		    // At this point everything should be a BigFraction, or we would
+		    // have already thrown an error
 		    sum = sum.add((BigFraction) obj);
 		}
 
