@@ -52,6 +52,8 @@
  *	    General cleanup.
  *	    Tweak the two patterns and their doc.
  *	    More tweaking.
+ *	09-Mar-2021 (rlwhitcomb)
+ *	    The two and three string patterns are still not right...
  */
 package info.rlwhitcomb.util;
 
@@ -76,9 +78,9 @@ public class BigFraction extends Number
 	private static final long serialVersionUID = 3889374235914093689L;
 
 	/** The pattern used for two strings, as in "numer [&nbsp;,/;] denom". */
-	private static final Pattern TWO_STRINGS = Pattern.compile("(-?[0-9]+)\\s*[,/;]?\\s*(-?[0-9]+)");
+	private static final Pattern TWO_STRINGS = Pattern.compile("(-?[0-9]+)(\\s+|\\s*[,/;]\\s*)(-?[0-9]+)");
 	/** The pattern for three strings, as in "int [&nbsp;,/;] numer [&nbsp;,/;] denom". */
-	private static final Pattern THREE_STRINGS = Pattern.compile("(-?[0-9]+)\\s*[,/;]?\\s*(-?[0-9]+)\\s*[,/;]?\\s*(-?[0-9]+)");
+	private static final Pattern THREE_STRINGS = Pattern.compile("(-?[0-9]+)(\\s+|\\s*[,/;]\\s*)(-?[0-9]+)(\\s+|\\s*[,/;]\\s*)(-?[0-9]+)");
 
 	/** A value of {@code 0/1} (integer 0) as a fraction. */
 	public static final BigFraction ZERO = new BigFraction(BigInteger.ZERO);
@@ -170,12 +172,12 @@ public class BigFraction extends Number
 	public static BigFraction valueOf(final String value) {
 	    Matcher m3 = THREE_STRINGS.matcher(value);
 	    if (m3.matches()) {
-		return new BigFraction(m3.group(1), m3.group(2), m3.group(3));
+		return new BigFraction(m3.group(1), m3.group(3), m3.group(5));
 	    }
 	    else {
 		Matcher m2 = TWO_STRINGS.matcher(value);
 		if (m2.matches()) {
-		    return new BigFraction(m2.group(1), m2.group(2));
+		    return new BigFraction(m2.group(1), m2.group(3));
 		}
 		else {
 		    try {

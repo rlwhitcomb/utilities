@@ -149,6 +149,8 @@
  *	09-Mar-2021 (rlwhitcomb)
  *	    Lower precedence of all the functions below all the other arithmetic operators
  *	    and just above the comparison / relational operators.
+ *	09-Mar-2021 (rlwhitcomb)
+ *	    Alternate argument lists for "FRAC".
  */
 
 grammar Calc;
@@ -221,7 +223,7 @@ expr
    | JOIN exprN                          # joinExpr
    | FIB expr                            # fibExpr
    | BN expr                             # bernExpr
-   | FRAC expr2                          # fracExpr
+   | FRAC ( STRING | ISTRING | expr3 | expr2 )   # fracExpr
    | EVAL expr                           # evalExpr
    | FACTORS expr                        # factorsExpr
    | PFACTORS expr                       # primeFactorsExpr
@@ -242,6 +244,11 @@ expr
 expr2
    : '(' expr ',' expr ')'
    | expr ',' expr
+   ;
+
+expr3
+   : '(' expr ',' expr ',' expr ')'
+   | expr ',' expr ',' expr
    ;
 
 exprN
