@@ -113,6 +113,15 @@ define a($b, $c, $d) = { $f = blah; ... }
 - e.g.: def npv($pv, $pmt, $i) = { loop slkdjf;lkj npv; }
 - are the variables "defined" inside the function local to the function (i.e., what if we say def ... { a = 27; ...} where a was not defined before?  I imagine with the changes to LValueContext, the "variables" at the outer level would be local to the function... but how to reference truly global variables then? (link to global "variables"???)
 
+### Small Bugs / Fixes
+
+- Add an indent parameter to "lists" (since we don't seem to be able get leading/trailing spaces with -e or -f options.
+- Add some examples in the "list" help (or make a web page out of it to allow more verbosity)
+  (I struggle with how to use the options to get what I need done)
+- Take the code from Calc ("displayHelp") and put it somewhere 'standard' so other can use it (like "Lists"...)
+  Not sure where, though: Environment, Launcher, Intl, ClassUtil, FileUtilities, or a new HelpUtil.... (or maybe HelpInfo)
+- seems like we could matrix manipulation now (multiply of conformable matrices, addition, etc.)
+- For Javadoc in CalcObjectVisitor: heading should be the grammar as in Calc.g4
 
 ### WordFind
 - Finish the GUI code.
