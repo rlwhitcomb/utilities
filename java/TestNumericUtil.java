@@ -39,6 +39,9 @@
  *	02-Mar-2021 (rlwhitcomb)
  *	    One more BigFraction test. One more PI/E test with fewer digits
  *	    to test the new caching code.
+ *	09-Mar-2021 (rlwhitcomb)
+ *	    More tests of BigFraction.valueOf since there were significant bugs
+ *	    that are supposedly fixed now.
  */
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -629,13 +632,17 @@ public class TestNumericUtil
 	    BigFraction f25 = BigFraction.valueOf("4 / 7");
 	    BigFraction f26 = BigFraction.valueOf("5, 9");
 	    System.out.println(f25 + " cmp " + f26 + " = " + f25.compareTo(f26));
+	    BigFraction f27 = BigFraction.valueOf("3/12");
+	    System.out.println("3 twelfths = " + f27);
+	    BigFraction f28 = BigFraction.valueOf("1 11/15");
+	    System.out.println("one and eleven/fifteenths = " + f28.toProperString());
 	    BigFraction fPi = new BigFraction(8958937768937L, 2851718461558L);
 	    BigDecimal dPi = NumericUtil.pi(MathContext.DECIMAL128.getPrecision());
 	    System.out.println(fPi + " -> " + fPi.toDecimal().toPlainString());
 	    System.out.println("                           vs. " + dPi.toPlainString());
 
 	    // Results verified manually, will be put into the canon file
-	    numberOfTests += 26;
+	    numberOfTests += 28;
 
 	    System.out.println("Done with BigFraction tests.");
 
