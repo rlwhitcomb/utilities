@@ -178,6 +178,9 @@
 		New hash algorithm wrappers.
 	    09-Mar-2021 (rlwhitcomb)
 		Add "verify_calc" to the "test" target (non-Windows only).
+	    10-Mar-2021 (rlwhitcomb)
+		Add the NOTICE file to the built .jar file also.
+		Enforce min Ant and Java versions.
 
      ========================================================================== -->
 
@@ -187,6 +190,25 @@
 >
 	<property environment="env"/>
 	<property file="build.properties"/>
+
+	<!-- Fail on minimum Ant version and min Java version -->
+	<fail>
+		<condition><not><antversion atleast="${min.ant.version}"/></not></condition>
+		<![CDATA[
+		Error:
+
+		Building the ${product.name} requires Apache Ant ${min.ant.version} or greater.
+		]]>
+	</fail>
+	<fail>
+		<condition><not><javaversion atleast="${compiler.target}"/></not></condition>
+		<![CDATA[
+		Error:
+
+		Building the ${product.name} requires Java version ${compiler.target} or later.
+		]]>
+	</fail>
+
 	<exec executable="git" dir="." outputproperty="git.commit.id" unless:set="git.commit.id">
 		<arg line="rev-parse --short HEAD"/>
 	</exec>
@@ -355,7 +377,13 @@
 	</target>
 
 	<target name="compile" depends="preproc,process-grammars" description="Compiles the java source.">
-		<javac includeAntRuntime="false" createMissingPackageInfoClass="false" encoding="utf-8" debug="${debug.build}">
+		<javac
+		    includeAntRuntime="false"
+		    createMissingPackageInfoClass="false"
+		    encoding="${compiler.encoding}"
+		    source="${compiler.source}"
+		    target="${compiler.target}"
+		    debug="${debug.build}">
 			<compilerarg line="${compiler.args}"/>
 			<src path="."/>
 			<src path="net/iharder/b64"/>
@@ -388,6 +416,7 @@
 		<jar basedir="." destfile="${dest.jar}">
 			<metainf dir="..">
 				<include name="LICENSE"/>
+				<include name="NOTICE"/>
 			</metainf>
 			<include name="build.properties"/>
 			<include name="build.number"/>

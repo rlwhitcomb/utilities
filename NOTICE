@@ -1,0 +1,27 @@
+This project contains code from several other open-source projects.
+
+Diff Match Patch
+================
+Diff Match Patch is licensed under an Apache-2.0 License:
+https://github.com/google/diff-match-patch/blob/master/LICENSE
+
+and lists the following contributors:
+https://github.com/google/diff-match-patch/blob/master/AUTHORS
+
+# Below is a list of people and organizations that have contributed
+# to the Diff Match Patch project.
+
+Google Inc.
+
+Duncan Cross <duncan.cross@gmail.com> (Lua port)
+Jan Weiß <jan@geheimwerk.de> (Objective C port)
+Matthaeus G. Chajdas <anteru@developer.shelter13.net> (C# port)
+Mike Slemmer <mikeslemmer@gmail.com> (C++ port)
+
+Base64
+======
+Code obtained from:
+http://iharder.sourceforge.net/current/java/base64/
+
+This code is in the Public Domain.
+
