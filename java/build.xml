@@ -176,6 +176,8 @@
 		Add the LICENSE file to the built .jar file.
 	    09-Mar-2021 (rlwhitcomb)
 		New hash algorithm wrappers.
+	    09-Mar-2021 (rlwhitcomb)
+		Add "verify_calc" to the "test" target (non-Windows only).
 
      ========================================================================== -->
 
@@ -472,6 +474,7 @@
 			<arg value="-dir:test/files"/>
 			<arg value="mastertest"/>
 		</java>
+		<exec executable="./verify_calc"  dir="."             output="${test.log.file.name}" append="true" unless:true="${on.windows}" failonerror="true"/>
 		<exec executable="./check_sorted" dir="."             output="${test.log.file.name}" append="true" unless:true="${on.windows}" failonerror="true"/>
 		<echo>Done with unit tests. Results in "${test.log.file.name}" file.</echo>
 	</target>
