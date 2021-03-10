@@ -174,6 +174,8 @@
 		Add a "success" message to the test log file if preprocessing matched.
 	    09-Mar-2021 (rlwhitcomb)
 		Add the LICENSE file to the built .jar file.
+	    09-Mar-2021 (rlwhitcomb)
+		New hash algorithm wrappers.
 
      ========================================================================== -->
 
@@ -230,12 +232,12 @@
 		<include name="``.bat"                      if:true="${on.windows}"/>
 		<include name="c"                       unless:true="${on.windows}"/>
 		<include name="c.bat"                       if:true="${on.windows}"/>
-		<include name="cg"                      unless:true="${on.windows}"/>
-		<include name="cg.bat"                      if:true="${on.windows}"/>
 		<include name="calc"                    unless:true="${on.windows}"/>
 		<include name="calc.bat"                    if:true="${on.windows}"/>
 		<include name="cat"                     unless:true="${on.windows}"/>
 		<include name="cat.bat"                     if:true="${on.windows}"/>
+		<include name="cg"                      unless:true="${on.windows}"/>
+		<include name="cg.bat"                      if:true="${on.windows}"/>
 		<include name="cmp"                     unless:true="${on.windows}"/>
 		<include name="cmp.bat"                     if:true="${on.windows}"/>
 		<include name="crl"                     unless:true="${on.windows}"/>
@@ -268,6 +270,10 @@
 		<include name="mkcanon.bat"                 if:true="${on.windows}"/>
 		<include name="os"                      unless:true="${on.windows}"/>
 		<include name="os.bat"                      if:true="${on.windows}"/>
+		<include name="sha256"                  unless:true="${on.windows}"/>
+		<include name="sha256.bat"                  if:true="${on.windows}"/>
+		<include name="sha512"                  unless:true="${on.windows}"/>
+		<include name="sha512.bat"                  if:true="${on.windows}"/>
 		<include name="sleep"                   unless:true="${on.windows}"/>
 		<include name="sleep.bat"                   if:true="${on.windows}"/>
 		<include name="tester"                  unless:true="${on.windows}"/>
@@ -276,10 +282,10 @@
 		<include name="tre.bat"                     if:true="${on.windows}"/>
 		<include name="version"                 unless:true="${on.windows}"/>
 		<include name="version.bat"                 if:true="${on.windows}"/>
-		<include name="which"                   unless:true="${on.windows}"/>
-		<include name="which.bat"                   if:true="${on.windows}"/>
 		<include name="wf"                      unless:true="${on.windows}"/>
 		<include name="wf.bat"                      if:true="${on.windows}"/>
+		<include name="which"                   unless:true="${on.windows}"/>
+		<include name="which.bat"                   if:true="${on.windows}"/>
 	</patternset>
 
 	<property name="tester.class" value="info.rlwhitcomb.tester.Tester"/>
