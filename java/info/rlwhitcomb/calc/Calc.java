@@ -104,6 +104,8 @@
  *	    Tweak the Javadoc.
  *	26-Feb-2021 (rlwhitcomb)
  *	    Allow comma-separated values in CALC_OPTIONS.
+ *	10-Mar-2021 (rlwhitcomb)
+ *	    Introduce "-nointro" flag.
  */
 package info.rlwhitcomb.calc;
 
@@ -193,6 +195,7 @@ public class Calc
 	};
 
 
+	private static boolean noIntro     = false;
 	private static boolean guiMode     = false;
 	private static boolean replMode    = false;
 	private static boolean debug       = false;
@@ -724,6 +727,15 @@ public class Calc
 	    }
 
 	    switch (option.toLowerCase()) {
+		case "nointro":
+		case "noi":
+		    noIntro = true;
+		    break;
+		case "intro":
+		case "int":
+		case "i":
+		    noIntro = false;
+		    break;
 		case "gui":
 		case "g":
 		    guiMode = true;
@@ -951,7 +963,9 @@ public class Calc
 			    process(CharStreams.fromStream(System.in), visitor, errorStrategy, quiet);
 			}
 			else {
-			    printIntro();
+			    if (!noIntro) {
+				printIntro();
+			    }
 
 			    replMode = true;
 

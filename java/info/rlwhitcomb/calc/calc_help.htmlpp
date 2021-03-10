@@ -79,6 +79,8 @@ code {
       <th width=400>Description</th>
       <th width=200>Aliases</th>
     </tr>
+    <tr><td><code>-nointro</code></td><td>Do not print the introductory message in REPL mode</td><td><code>-noi</code></td></tr>
+    <tr><td><code>-intro</code></td><td>Print the introductory message in REPL mode <i>(default)</i></td><td><code>-int</code>, <code>-i</code></td></tr>
     <tr><td><code>-gui</code></td><td>Start immediately in GUI mode</td><td><code>-g</code></td></tr>
     <tr><td><code>-console</code></td><td>Start instead in console mode <i>(default)</i></td><td><code>-cons</code>, <code>-con</code>, <code>-c</code></td></tr>
     <tr><td><code>-debug</code></td><td>Display a debug printout of the syntax tree for every input</td><td><code>-deb</code>, <code>-d</code><br>(or use the <code>:debug on</code> directive)</td></tr>
