@@ -172,6 +172,8 @@
 		Run the "check_sorted" script on non-Windows platforms as part of "test".
 	    08-Mar-2021 (rlwhitcomb)
 		Add a "success" message to the test log file if preprocessing matched.
+	    09-Mar-2021 (rlwhitcomb)
+		Add the LICENSE file to the built .jar file.
 
      ========================================================================== -->
 
@@ -376,6 +378,12 @@
 
 	<target name="jar" depends="compile" description="Jar up the compiled class files (into ${dest.jar}).">
 		<jar basedir="." destfile="${dest.jar}">
+			<metainf dir="..">
+				<include name="LICENSE"/>
+			</metainf>
+			<include name="build.properties"/>
+			<include name="build.number"/>
+			<include name="version.properties"/>
 			<include name="DumpManifest*.class"/>
 			<include name="MD5*.class"/>
 			<include name="OS*.class"/>
@@ -386,8 +394,6 @@
 			<include name="FixPath*.class"/>
 			<include name="Sleep*.class"/>
 			<include name="Terra*.json"/>
-			<include name="build.properties"/>
-			<include name="build.number"/>
 			<include name="images/*.*"/>
 			<include name="info/rlwhitcomb/Version*.class"/>
 			<include name="info/rlwhitcomb/annotations/*.class"/>
@@ -412,7 +418,6 @@
 			<include name="info/rlwhitcomb/**/*.properties"/>
 			<include name="name/fraser/neil/plaintext/*.class"/>
 			<include name="net/iharder/b64/*.class"/>
-			<include name="version.properties"/>
 		</jar>
 	</target>
 
