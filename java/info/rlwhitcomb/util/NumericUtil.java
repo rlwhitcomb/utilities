@@ -136,6 +136,8 @@
  *	    One is NOT a prime; also finally fix "getPrimeFactors".
  *	10-Mar-2021 (rlwhitcomb)
  *	    Conversions to/from Roman Numerals.
+ *	10-Mar-2021 (rlwhitcomb)
+ *	    Rework some of the Roman Numeral code.
  */
 package info.rlwhitcomb.util;
 
@@ -1283,6 +1285,22 @@ public class NumericUtil
 	    return count;
 	}
 
+	private static int countRoman(final String input,
+		final char one, final char five, final char ten, final int multiplier) {
+	    int result = 0;
+	    int length = input.length();
+
+	    if (length == 2 && input.charAt(0) == one && input.charAt(1) == ten)
+		result = 9 * multiplier;
+	    else if (length == 2 && input.charAt(0) == one && input.charAt(1) == five)
+		result = 4 * multiplier;
+	    else if (length >= 1 && input.charAt(0) == five)
+		result = (5 + countRoman(input, one)) * multiplier;
+	    else
+		result = countRoman(input, one) * multiplier;
+
+	    return result;
+	}
 
 	/**
 	 * Check and convert a Roman Numeral string to an integer.
@@ -1300,39 +1318,10 @@ public class NumericUtil
 		String units     = m.group(4);
 		int result = 0;
 
-		result += countRoman(thousands, 'M') * 1000;
-		if (hundreds.equals("CM"))
-		    result += 900;
-		else if (hundreds.equals("CD"))
-		    result += 400;
-		else if (hundreds.startsWith("D")) {
-		    result += 500;
-		    result += countRoman(hundreds, 'C') * 100;
-		}
-		else
-		    result += countRoman(hundreds, 'C') * 100;
-
-		if (tens.equals("XC"))
-		    result += 90;
-		else if (tens.equals("XL"))
-		    result += 40;
-		else if (tens.startsWith("L")) {
-		    result += 50;
-		    result += countRoman(tens, 'X') * 10;
-		}
-		else
-		    result += countRoman(tens, 'X') * 10;
-
-		if (units.equals("IX"))
-		    result += 9;
-		else if (units.equals("IV"))
-		    result += 4;
-		else if (units.startsWith("V")) {
-		    result += 5;
-		    result += countRoman(units, 'I');
-		}
-		else
-		    result += countRoman(units, 'I');
+		result += countRoman(thousands, 'M', ' ', ' ', 1000);
+		result += countRoman(hundreds,  'C', 'D', 'M', 100);
+		result += countRoman(tens,      'X', 'L', 'C', 10);
+		result += countRoman(units,     'I', 'V', 'X', 1);
 
 		return result;
 	    }
