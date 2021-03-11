@@ -108,6 +108,8 @@
  *	    Introduce "-nointro" flag.
  *	10-Mar-2021 (rlwhitcomb)
  *	    Tweak the copyright text for GUI display.
+ *	11-Mar-2021 (rlwhitcomb)
+ *	    Color the REPL prompt string.
  */
 package info.rlwhitcomb.calc;
 
@@ -972,8 +974,9 @@ public class Calc
 			    replMode = true;
 
 			    String line;
+			    String prompt = ConsoleColor.color("<Bk!>> <>");
 			replLoop:
-			    while ((line = console.readLine("> ")) != null) {
+			    while ((line = console.readLine(prompt)) != null) {
 				String cmd = line.trim().toLowerCase();
 				switch (cmd) {
 				    case "quit":
