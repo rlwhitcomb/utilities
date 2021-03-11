@@ -106,6 +106,8 @@
  *	    Allow comma-separated values in CALC_OPTIONS.
  *	10-Mar-2021 (rlwhitcomb)
  *	    Introduce "-nointro" flag.
+ *	10-Mar-2021 (rlwhitcomb)
+ *	    Tweak the copyright text for GUI display.
  */
 package info.rlwhitcomb.calc;
 
@@ -596,7 +598,7 @@ public class Calc
 	    String productName = Environment.getProductName();
 	    String versionInfo = Environment.getProductVersion();
 	    String buildInfo   = Environment.getProductBuildDateTime();
-	    String copyright   = Environment.getCopyrightNotice();
+	    String copyright   = Environment.getCopyrightNotice().replace("(c)", "\u00A9");;
 	    String javaVersion = Environment.getJavaVersion();
 
 	    versionPrompt.setMessage(productName);
