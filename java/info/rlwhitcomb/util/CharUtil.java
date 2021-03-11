@@ -270,6 +270,8 @@
  *	01-Mar-2021 (rlwhitcomb)
  *	    Enhance "stripAllQuotes" to deal with all the values supported by CSV and Calc.
  *	    Add another method to also deal with other escape sequences ("\\" and "\\uXXXX").
+ *	10-Mar-2021 (rlwhitcomb)
+ *	    Make another flavor of "makeStringOfChars" that uses a StringBuilder.
  */
 
 package info.rlwhitcomb.util;
@@ -2219,9 +2221,31 @@ public class CharUtil
 	 * @return		That many of the fill character.
 	 */
 	public static String makeStringOfChars(char ch, int width) {
-	    char[] chars = new char[width];
-	    Arrays.fill(chars, ch);
-	    return new String(chars);
+	    if (width > 0) {
+		char[] chars = new char[width];
+		Arrays.fill(chars, ch);
+		return new String(chars);
+	    }
+	    return "";
+	}
+
+
+	/**
+	 * Make a string of the given character of the given width and append
+	 * to the input {@code StringBuilder}.
+	 *
+	 * @param	buf	The buffer that is already in progress.
+	 * @param	ch	The fill character.
+	 * @param	width	How many of the fill character to add.
+	 * @return		The input {@code StringBuilder} with the chars appended.
+	 */
+	public static StringBuilder makeStringOfChars(StringBuilder buf, char ch, int width) {
+	    if (width > 0) {
+		char[] chars = new char[width];
+		Arrays.fill(chars, ch);
+		buf.append(chars);
+	    }
+	    return buf;
 	}
 
 

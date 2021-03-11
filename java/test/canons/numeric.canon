@@ -70,4 +70,51 @@
 >8958937768937/2851718461558 -> 3.141592653589793238462643375557909
 >                           vs. 3.1415926535897932384626433832795028
 >Done with BigFraction tests.
->Total number of tests: 132, passed: 132, failed: 0
+>Testing Roman numerals...
+>Input 'MMXXI' -> 2021
+>Input 'I' -> 1
+>Input 'II' -> 2
+>Input 'III' -> 3
+>Input 'IV' -> 4
+>Input 'V' -> 5
+>Input 'VI' -> 6
+>Input 'VII' -> 7
+>Input 'VIII' -> 8
+>Input 'IX' -> 9
+>Input 'X' -> 10
+>Input 'XI' -> 11
+>Input 'XII' -> 12
+>Input 'XIII' -> 13
+>Input 'XIV' -> 14
+>Input 'XV' -> 15
+>Input 'XVI' -> 16
+>Input 'XIX' -> 19
+>Input 'XXX' -> 30
+>Input 'XXXIX' -> 39
+>Input 'XL' -> 40
+>Input 'XLI' -> 41
+>Input 'XLIV' -> 44
+>Input 'XLV' -> 45
+>Input 'XLVI' -> 46
+>Input 'L' -> 50
+>Input 'LXXXIX' -> 89
+>Input 'XC' -> 90
+>Input 'XCI' -> 91
+>Input 'XCIV' -> 94
+>Input 'XCVI' -> 96
+>Input 'XCIX' -> 99
+>Input 'C' -> 100
+>Input 'CI' -> 101
+>Input 'CCXCIX' -> 299
+>Input 'CD' -> 400
+>Input 'D' -> 500
+>Input 'DCIX' -> 609
+>Input 'DCCCXCIX' -> 899
+>Input 'M' -> 1000
+>Input 'MI' -> 1001
+>Input 'MCMLXVII' -> 1967
+>Input 'MM' -> 2000
+>Input 'MMI' -> 2001
+>Input 'MMMCMXCIX' -> 3999
+>Done with Roman numeral tests.
+>Total number of tests: 222, passed: 222, failed: 0

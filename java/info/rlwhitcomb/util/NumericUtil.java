@@ -134,6 +134,8 @@
  *	    Almost fix/finish "getPrimeFactors" -- still some bugs.
  *	07-Mar-2021 (rlwhitcomb)
  *	    One is NOT a prime; also finally fix "getPrimeFactors".
+ *	10-Mar-2021 (rlwhitcomb)
+ *	    Conversions to/from Roman Numerals.
  */
 package info.rlwhitcomb.util;
 
@@ -328,6 +330,14 @@ public class NumericUtil
 
 	private static final BigInteger I_TWO = BigInteger.valueOf(2L);
 	private static final BigDecimal D_TWO = BigDecimal.valueOf(2L);
+
+	/**
+	 * Recognizes Roman numerals up to 3999.
+	 */
+	private static final Pattern ROMAN_PATTERN = Pattern.compile("^(M{0,3})(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$");
+
+	/** The maximum input value we can convert to a Roman numeral. */
+	private static final int ROMAN_MAX_VALUE = 3999;
 
 	/**
 	 * A rational approximation of PI good to ~25 decimal digits.
@@ -1262,6 +1272,128 @@ public class NumericUtil
 	    writeRawBinaryValue(value, dos, charset, ByteOrder.MSB, StringLength.PREFIX4, -1);
 	}
 
+
+	private static int countRoman(final String section, final char value) {
+	    int count = 0;
+	    for (int i = 0; i < section.length(); i++) {
+		char ch = section.charAt(i);
+		if (ch == value)
+		    count++;
+	    }
+	    return count;
+	}
+
+
+	/**
+	 * Check and convert a Roman Numeral string to an integer.
+	 *
+	 * @param input	The input (presumably a valid Roman Numeral.
+	 * @return	The input translated to an integer.
+	 * @throws	IllegalArgumentException if the input is malformed.
+	 */
+	public static int convertFromRoman(final String input) {
+	    Matcher m = ROMAN_PATTERN.matcher(input);
+	    if (m.matches()) {
+		String thousands = m.group(1);
+		String hundreds  = m.group(2);
+		String tens      = m.group(3);
+		String units     = m.group(4);
+		int result = 0;
+
+		result += countRoman(thousands, 'M') * 1000;
+		if (hundreds.equals("CM"))
+		    result += 900;
+		else if (hundreds.equals("CD"))
+		    result += 400;
+		else if (hundreds.startsWith("D")) {
+		    result += 500;
+		    result += countRoman(hundreds, 'C') * 100;
+		}
+		else
+		    result += countRoman(hundreds, 'C') * 100;
+
+		if (tens.equals("XC"))
+		    result += 90;
+		else if (tens.equals("XL"))
+		    result += 40;
+		else if (tens.startsWith("L")) {
+		    result += 50;
+		    result += countRoman(tens, 'X') * 10;
+		}
+		else
+		    result += countRoman(tens, 'X') * 10;
+
+		if (units.equals("IX"))
+		    result += 9;
+		else if (units.equals("IV"))
+		    result += 4;
+		else if (units.startsWith("V")) {
+		    result += 5;
+		    result += countRoman(units, 'I');
+		}
+		else
+		    result += countRoman(units, 'I');
+
+		return result;
+	    }
+	    else {
+		throw new Intl.IllegalArgumentException("util#numeric.badRomanFormat", input);
+	    }
+	}
+
+	private static void addRomanDigits(final StringBuilder buf,
+		final char one, final char five, final char ten, final int count) {
+	    if (count != 0) {
+		if (count == 9) {
+		    buf.append(one).append(ten);
+		}
+		else if (count == 4) {
+		    buf.append(one).append(five);
+		}
+		else if (count >= 5) {
+		    buf.append(five);
+		    CharUtil.makeStringOfChars(buf, one, count - 5);
+		}
+		else {
+		    CharUtil.makeStringOfChars(buf, one, count);
+		}
+	    }
+	}
+
+	/**
+	 * Convert a (small) integer value to a Roman Numeral string.
+	 *
+	 * @param value	A value in the range {@code 1..3999} to be converted
+	 * 		to a Roman numeral.
+	 * @return	The converted string.
+	 * @see #convertFromRoman
+	 * @throws IllegalArgumentException if the input value is out of range.
+	 */
+	public static String convertToRoman(final int value) {
+	    if (value < 1 || value > ROMAN_MAX_VALUE) {
+		throw new Intl.IllegalArgumentException("util#numeric#outOfRomanRange", value);
+	    }
+
+	    StringBuilder buf = new StringBuilder(30);
+	    int current = value;
+	    int thousands, hundreds, tens;
+
+	    thousands = current / 1000;
+	    addRomanDigits(buf, 'M', ' ', ' ', thousands);
+	    current -= thousands * 1000;
+
+	    hundreds = current / 100;
+	    addRomanDigits(buf, 'C', 'D', 'M', hundreds);
+	    current -= hundreds * 100;
+
+	    tens = current / 10;
+	    addRomanDigits(buf, 'X', 'L', 'C', tens);
+	    current -= tens * 10;
+
+	    addRomanDigits(buf, 'I', 'V', 'X', current);
+
+	    return buf.toString();
+	}
 
 	/**
 	 * Round up a value to the next highest power of two.

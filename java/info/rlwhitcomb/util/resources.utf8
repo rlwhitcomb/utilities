@@ -96,6 +96,8 @@
 #	    Colored messages for "printProgramInfo".
 #	02-Mar-2021 (rlwhitcomb)
 #	    New message from Environment.
+#	10-Mar-2021 (rlwhitcomb)
+#	    New errors from NumericUtil.
 #
 
 #
@@ -157,6 +159,8 @@ intl.providerNotFound	= Unable to find resource provider for "%1$s" package.
 #
 numeric.badKMGFormat		= Improper input format: suffix must be one of [K,M,G,T,P, or E].
 numeric.outOfRange		= Value is out of range.
+numeric.badRomanFormat		= Unable to convert Roman numeral: '%1$s'.
+numeric.outOfRomanRange		= Value %1$d is out of range for conversion to a Roman numeral.
 numeric.badDataType		= Data type %1$s is not supported in binary files.
 numeric.badDataTypeCode		= Data type code %1$d is not recognized.
 numeric.unknownByteOrder	= "%1$s" is not a valid byte order (should be LSB or MSB).

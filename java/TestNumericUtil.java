@@ -42,6 +42,8 @@
  *	09-Mar-2021 (rlwhitcomb)
  *	    More tests of BigFraction.valueOf since there were significant bugs
  *	    that are supposedly fixed now.
+ *	10-Mar-2021 (rlwhitcomb)
+ *	    Testing Roman numeral conversions.
  */
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -476,6 +478,20 @@ public class TestNumericUtil
 	    "nineteen thousand, eight hundred eighty-nine",
 	    "one hundred thousand, one hundred"
 	};
+	private static final String romanInputs[] = {
+	    "MMXXI", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X",
+	    "XI", "XII", "XIII", "XIV", "XV", "XVI", "XIX", "XXX", "XXXIX", "XL",
+	    "XLI", "XLIV", "XLV", "XLVI", "L", "LXXXIX", "XC", "XCI", "XCIV", "XCVI",
+	    "XCIX", "C", "CI", "CCXCIX", "CD", "D", "DCIX", "DCCCXCIX", "M", "MI",
+	    "MCMLXVII", "MM", "MMI", "MMMCMXCIX"
+	};
+	private static final int romanValues[] = {
+	    2021, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
+	    11, 12, 13, 14, 15, 16, 19, 30, 39, 40,
+	    41, 44, 45, 46, 50, 89, 90, 91, 94, 96,
+	    99, 100, 101, 299, 400, 500, 609, 899, 1000, 1001,
+	    1967, 2000, 2001, 3999
+	};
 
 
 	public static void main(final String[] args) {
@@ -645,6 +661,36 @@ public class TestNumericUtil
 	    numberOfTests += 28;
 
 	    System.out.println("Done with BigFraction tests.");
+
+	    // Tests of Roman Numerals
+	    System.out.println("Testing Roman numerals...");
+
+	    if (romanInputs.length != romanValues.length) {
+		System.err.println("Roman numeral test data out of sync!  Please check the code.");
+		numberOfTests++;
+		numberOfFailures++;
+	    }
+
+	    for (int i = 0; i < romanInputs.length; i++) {
+		numberOfTests += 2;
+		String input = romanInputs[i];
+		int value = NumericUtil.convertFromRoman(input);
+		int expected = romanValues[i];
+		String converted = NumericUtil.convertToRoman(value);
+		if (value != expected) {
+		    System.err.println("Input '" + input + "' produced " + value + ", but expected " + expected);
+		    numberOfFailures++;
+		}
+		else if (!converted.equals(input)) {
+		    System.err.println("Value of " + value + " produced '" + converted + "', but expected '" + input + "'");
+		    numberOfFailures++;
+		}
+		else {
+		    System.out.println("Input '" + input + "' -> " + value);
+		}
+	    }
+
+	    System.out.println("Done with Roman numeral tests.");
 
 	    System.out.println("Total number of tests: " + numberOfTests +
 		", passed: " + (numberOfTests - numberOfFailures) + ", failed: " + numberOfFailures);
