@@ -99,6 +99,8 @@ Also see "issues" at https://github.com/rlwhitcomb/utilities/issues
     FF10--FF19, osmanya digit 0 at 104a0-104a9, 1d7ce-1d7d7, 1d7d8-1d7e1...1d7ff
 - roman numerals - ROMAN NUMERAL MODE (upper / lower case)
     2160-216f and 2170-217f
+- time input and output and arithmetic (like original "at" program in C)
+  (also duration, so time - time = duration, or time +- duration = time)
 
 - !!null seems like it should work (!!"true" -> true)
 - seems like we could have an "exit from GUI mode back to REPL mode" which is available when running from within REPL mode.
