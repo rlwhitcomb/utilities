@@ -25,6 +25,8 @@
  *	Lost in antiquity...
  *	24-Feb-2021 (rlwhitcomb)
  *	    Move test files to "test/data" directory. Don't output "null" entries.
+ *	11-Mar-2021 (rlwhitcomb)
+ *	    Reformat. Add tests for non-unique value detection.
  */
 
 import java.io.BufferedReader;
@@ -61,134 +63,181 @@ public class BidiMapTest
 
 	private static final String TEST_DIRECTORY = "test/data";
 
+	private static int numberOfTests = 0;
+	private static int numberOfFailures = 0;
+
 	private static final String[] TEXT_FILE_NAMES = {
-		"Declaration",
-		"Constitution",
-		"Gettysburg",
-		"MagnaCarta",
-		"Psalm23"
+	    "Declaration",
+	    "Constitution",
+	    "Gettysburg",
+	    "MagnaCarta",
+	    "Psalm23"
 	};
 
 	public static void main(String[] args) {
-		// Go through command line arguments and interpret the options there
-		for (String arg : args) {
-			String opt = Options.isOption(arg);
-			if (opt != null) {
-				if (opt.equalsIgnoreCase("verbose") ||
-				    opt.equalsIgnoreCase("v"))
-					verbose = true;
-				else if (opt.equalsIgnoreCase("num") ||
-					 opt.equalsIgnoreCase("number") ||
-					 opt.equalsIgnoreCase("numbers") ||
-					 opt.equalsIgnoreCase("n"))
-					useNumbers = true;
-				else if (opt.equalsIgnoreCase("word") ||
-					 opt.equalsIgnoreCase("words") ||
-					 opt.equalsIgnoreCase("w"))
-					useWords = true;
-				else if (opt.equalsIgnoreCase("utf8") ||
-					 opt.equalsIgnoreCase("utf-8") ||
-					 opt.equals("8"))
-					useUTF8 = true;
-				else {
-					System.err.format("Unknown option: \"%1$s\"%n", arg);
-					System.exit(1);
-				}
-			}
-			else {
-				System.err.format("Unknown option: \"%1$s\"%n", arg);
-				System.exit(1);
-			}
-		}
-		// Decide default options if nothing specified
-		if (!useNumbers && !useWords) {
-			useNumbers = true;
+	    // Go through command line arguments and interpret the options there
+	    for (String arg : args) {
+		String opt = Options.isOption(arg);
+		if (opt != null) {
+		    if (opt.equalsIgnoreCase("verbose") ||
+			opt.equalsIgnoreCase("v"))
 			verbose = true;
+		    else if (opt.equalsIgnoreCase("num") ||
+			     opt.equalsIgnoreCase("number") ||
+			     opt.equalsIgnoreCase("numbers") ||
+			     opt.equalsIgnoreCase("n"))
+			useNumbers = true;
+		    else if (opt.equalsIgnoreCase("word") ||
+			     opt.equalsIgnoreCase("words") ||
+			     opt.equalsIgnoreCase("w"))
+			useWords = true;
+		    else if (opt.equalsIgnoreCase("utf8") ||
+			     opt.equalsIgnoreCase("utf-8") ||
+			     opt.equals("8"))
+			useUTF8 = true;
+		    else {
+			System.err.format("Unknown option: \"%1$s\"%n", arg);
+			System.exit(1);
+		    }
 		}
-		// For the "words" option go through the provided list of text files, reading each
-		// in turn, and entering all the words into the map
-		if (useWords) {
-			size = WORD_SIZE;
-			map = new BidiMap<String, String>(size, 0.80f);
-			keysToRemoveList = new ArrayList<String>(size / 12);
+		else {
+		    System.err.format("Unknown option: \"%1$s\"%n", arg);
+		    System.exit(1);
+		}
+	    }
+	    // Decide default options if nothing specified
+	    if (!useNumbers && !useWords) {
+		useNumbers = true;
+		verbose = true;
+	    }
+	    // For the "words" option go through the provided list of text files, reading each
+	    // in turn, and entering all the words into the map
+	    if (useWords) {
+		size = WORD_SIZE;
+		map = new BidiMap<String, String>(size, 0.80f);
+		keysToRemoveList = new ArrayList<String>(size / 12);
 
-			for (String name : TEXT_FILE_NAMES) {
-				try (BufferedReader reader = Files.newBufferedReader(Paths.get(TEST_DIRECTORY, name + ".txt"),
-				            useUTF8 ? StandardCharsets.UTF_8 : Charset.defaultCharset()))
-				{
-					if (verbose)
-						System.out.format("Entering words from file \"%1$s.txt\"...%n", name);
-					String line;
-					int i = 0;
-					while ((line = reader.readLine()) != null) {
-						String[] words = line.split("\\s+");
-						for (String word : words) {
-							if (!map.containsKey(word)) {
-								map.put(word, word);
-								if ((i++ % 13) == 0) {
-									keysToRemoveList.add(word);
-								}
-							}
-						}
-					}
-					if (verbose)
-						System.out.format("Entered %1$d unique words.%n", (i + 1));
-				} catch (IOException ioe) {
-					System.err.format("Error reading \"%1$.txt\": %2$s%n", name, ioe.getMessage());
-					System.exit(2);
+		for (String name : TEXT_FILE_NAMES) {
+		    try (BufferedReader reader = Files.newBufferedReader(Paths.get(TEST_DIRECTORY, name + ".txt"),
+		            useUTF8 ? StandardCharsets.UTF_8 : Charset.defaultCharset()))
+		    {
+			if (verbose)
+			    System.out.format("Entering words from file \"%1$s.txt\"...%n", name);
+			String line;
+			int i = 0;
+			while ((line = reader.readLine()) != null) {
+			    String[] words = line.split("\\s+");
+			    for (String word : words) {
+				if (!map.containsKey(word)) {
+				    map.put(word, word);
+				    if ((i++ % 13) == 0) {
+					keysToRemoveList.add(word);
+				    }
 				}
+			    }
 			}
+			if (verbose)
+			    System.out.format("Entered %1$d unique words.%n", (i + 1));
+		    } catch (IOException ioe) {
+			System.err.format("Error reading \"%1$.txt\": %2$s%n", name, ioe.getMessage());
+			System.exit(2);
+		    }
 		}
-		if (useNumbers) {
-			size = NUMBER_SIZE;
-			map = new BidiMap<String, String>(size);
-			keysToRemoveList = new ArrayList<String>(size / 12);
+	    }
+	    if (useNumbers) {
+		size = NUMBER_SIZE;
+		map = new BidiMap<String, String>(size);
+		keysToRemoveList = new ArrayList<String>(size / 12);
 
-			// Populate the map with random values pointing to itself
-			boolean neg = false;
-			for (int i = 0; i < size; i++) {
-				long random = Double.doubleToLongBits(Math.random()) & (long)Integer.MAX_VALUE;
-				if (neg)
-					random = -random;
-				String randomString = String.valueOf(random);
-				map.put(randomString, randomString);
-				// Every 13th iteration, put key into list to remove later
-				if ((i % 13) == 0) {
-					keysToRemoveList.add(randomString);
-				}
-				neg = !neg;
-			}
+		// Populate the map with random values pointing to itself
+		boolean neg = false;
+		for (int i = 0; i < size; i++) {
+		    long random = Double.doubleToLongBits(Math.random()) & (long)Integer.MAX_VALUE;
+		    if (neg)
+			random = -random;
+		    String randomString = String.valueOf(random);
+		    map.put(randomString, randomString);
+		    // Every 13th iteration, put key into list to remove later
+		    if ((i % 13) == 0) {
+			keysToRemoveList.add(randomString);
+		    }
+		    neg = !neg;
 		}
-		if (verbose)
-			map.dumpState(false);
+	    }
 
-		// Now go through and remove every 13th key/value pair, checking to make sure the removed
-		// value is correct and dump the final map again.  Every other one, remove it using
-		// the value instead.
-		boolean which = false;
-		for (String key : keysToRemoveList) {
-			if (which) {
-				String removedKey = map.removeValue(key);
-				if (!removedKey.equals(key)) {
-					System.err.format("Error removing by value '%1$s', got '%2$s' back!%n", key, removedKey);
-				}
-				// Test that the value isn't there after removal
-				if (map.removeValue(key) != null) {
-					System.err.format("Removed value '%1$s' is still found after remove!%n", key);
-				}
-			}
-			else {
-				String removedValue = map.remove(key);
-				if (!removedValue.equals(key)) {
-					System.err.format("Error removing by key '%1$s', got '%2$s' back!%n", key, removedValue);
-				}
-				if (map.remove(key) != null) {
-					System.err.format("Removed key '%1$s' is still found after remove!%n", key);
-				}
-			}
-			which = !which;
+	    // Try adding some keys and values already present
+	    boolean caughtExpectedException = false;
+	    try {
+		numberOfTests++;
+		String existing = keysToRemoveList.get(0);
+		// Existing key, different value
+		map.put(existing, String.format("--%1$s--", existing));
+	    }
+	    catch (Exception ex) {
+		if (ex instanceof IllegalArgumentException)
+		    caughtExpectedException = true;
+	    }
+	    if (!caughtExpectedException) {
+		System.err.format("Adding a duplicate key did not throw the expected exception!");
+		numberOfFailures++;
+	    }
+
+	    caughtExpectedException = false;
+	    try {
+		numberOfTests++;
+		String existing = keysToRemoveList.get(0);
+		// New key, existing value
+		map.put(String.format("--%1$s--", existing), existing);
+	    }
+	    catch (Exception ex) {
+		if (ex instanceof IllegalArgumentException)
+		    caughtExpectedException = true;
+	    }
+	    if (!caughtExpectedException) {
+		System.err.format("Adding a duplicate value did not throw the expected exception!");
+		numberOfFailures++;
+	    }
+
+	    if (verbose)
+		map.dumpState(false);
+
+	    // Now go through and remove every 13th key/value pair, checking to make sure the removed
+	    // value is correct and dump the final map again.  Every other one, remove it using
+	    // the value instead.
+	    boolean which = false;
+	    for (String key : keysToRemoveList) {
+		if (which) {
+		    numberOfTests += 2;
+		    String removedKey = map.removeValue(key);
+		    if (!removedKey.equals(key)) {
+			System.err.format("Error removing by value '%1$s', got '%2$s' back!%n", key, removedKey);
+			numberOfFailures++;
+		    }
+		    // Test that the value isn't there after removal
+		    if (map.removeValue(key) != null) {
+			System.err.format("Removed value '%1$s' is still found after remove!%n", key);
+			numberOfFailures++;
+		    }
 		}
-		if (verbose)
-			map.dumpState(false);
+		else {
+		    numberOfTests += 2;
+		    String removedValue = map.remove(key);
+		    if (!removedValue.equals(key)) {
+			System.err.format("Error removing by key '%1$s', got '%2$s' back!%n", key, removedValue);
+			numberOfFailures++;
+		    }
+		    if (map.remove(key) != null) {
+			System.err.format("Removed key '%1$s' is still found after remove!%n", key);
+			numberOfFailures++;
+		    }
+		}
+		which = !which;
+	    }
+
+	    if (verbose)
+		map.dumpState(false);
+
+	    if (numberOfFailures != 0)
+		System.exit(3);
 	}
 }

@@ -46,6 +46,8 @@
  *	    Use new Intl exception variants for convenience.
  *	24-Feb-2021 (rlwhitcomb)
  *	    New parameter to "dumpState" to print null entries or not.
+ *	11-Mar-2021 (rlwhitcomb)
+ *	    Code cleanup.
  */
 package info.rlwhitcomb.util;
 
@@ -87,15 +89,18 @@ public class BidiMap<K, V> implements Map<K, V>
 		final int keyHash;
 		final int valueHash;
 
-		public Entry(K key, V value) {
+		public Entry(final K key, final V value) {
 		    if (key == null)
 			throw new Intl.IllegalArgumentException("util#bidi.keyNotNull");
 		    if (value == null)
 			throw new Intl.IllegalArgumentException("util#bidi.valueNotNull");
+
 		    this.key = key;
 		    this.value = value;
+
 		    nextKey = null;
 		    nextValue = null;
+
 		    keyHash = key.hashCode();
 		    valueHash = value.hashCode();
 		}
@@ -111,21 +116,22 @@ public class BidiMap<K, V> implements Map<K, V>
 		}
 
 		@Override
-		public V setValue(V value) {
+		public V setValue(final V value) {
 		    throw new Intl.UnsupportedOperationException("util#bidi.entryCannotChange");
 		}
 
 		@Override
 		public int hashCode() {
-		    return key.hashCode() ^ value.hashCode();
+		    return keyHash ^ valueHash;
 		}
 
 		@Override
-		public boolean equals(Object o) {
+		public boolean equals(final Object o) {
 		    if (!(o instanceof Map.Entry))
 			return false;
-		    @SuppressWarnings({"unchecked"})
-		    Map.Entry<K,V> e = (Map.Entry<K,V>)o;
+
+		    @SuppressWarnings("unchecked")
+		    Map.Entry<K,V> e = (Map.Entry<K,V>) o;
 		    K k1 = getKey();
 		    K k2 = e.getKey();
 		    if (k1 == k2 || (k1 != null && k1.equals(k2))) {
@@ -143,11 +149,13 @@ public class BidiMap<K, V> implements Map<K, V>
 	/** Suggested by http://eternallyconfuzzled.com/tuts/datastructures/jsw_tut_hashtable.aspx */
 	private static final float DEFAULT_LOAD_FACTOR = 0.70f;
 
-	/** The percentagle of capacity that has to be reached before we will
+	/**
+	 * The percentagle of capacity that has to be reached before we will
 	 * automatically resize (constant after construction).
 	 */
 	private float loadFactor;
-	/** The actual number of entries that we will accept before resizing.
+	/**
+	 * The actual number of entries that we will accept before resizing.
 	 * <p> Computed from the capacity and the load factor.
 	 */
 	private int threshold;
@@ -159,7 +167,9 @@ public class BidiMap<K, V> implements Map<K, V>
 	private transient Set<Map.Entry<K, V>> entrySet = null;
 	private transient Collection<V> values = null;
 
-	/** Current number of entries in this map. */
+	/**
+	 * Current number of entries in this map.
+	 */
 	private transient int size;
 
 
@@ -178,7 +188,7 @@ public class BidiMap<K, V> implements Map<K, V>
 	 * @param initialCapacity	A non-default value for the initial
 	 *				map capacity.
 	 */
-	public BidiMap(int initialCapacity) {
+	public BidiMap(final int initialCapacity) {
 	    this(initialCapacity, DEFAULT_LOAD_FACTOR);
 	}
 
@@ -188,7 +198,7 @@ public class BidiMap<K, V> implements Map<K, V>
 	 *
 	 * @param loadFactor	Something other than the default load factor.
 	 */
-	public BidiMap(float loadFactor) {
+	public BidiMap(final float loadFactor) {
 	    this(DEFAULT_CAPACITY, loadFactor);
 	}
 
@@ -199,52 +209,90 @@ public class BidiMap<K, V> implements Map<K, V>
 	 * @param initialCapacity	A non-default capacity for this map.
 	 * @param loadFactor		A non-default load factor.
 	 */
-	public BidiMap(int initialCapacity, float loadFactor) {
+	public BidiMap(final int initialCapacity, final float loadFactor) {
 	    allocate(initialCapacity, loadFactor);
 	}
 
-	@SuppressWarnings({"unchecked"})
-	private void allocate(int newCapacity, float loadFactor) {
+	/**
+	 * Allocate the main hash list arrays according to the new capacity and load factor.
+	 *
+	 * @param newCapacity	The new capacity value.
+	 * @param newLoadFactor	The new load factor value.
+	 * @return		{@code true} if the arrays were actually reallocated,
+	 *			{@code false} if the existing size was sufficient.
+	 */
+	@SuppressWarnings("unchecked")
+	private boolean allocate(final int newCapacity, final float newLoadFactor) {
 	    if (newCapacity < 0)
 		throw new Intl.IllegalArgumentException("util#bidi.illegalCapacity", newCapacity);
-	    if (loadFactor <= 0 || Float.isNaN(loadFactor))
-		throw new Intl.IllegalArgumentException("util#bidi.illegalLoadFactor", loadFactor);
+	    if (newLoadFactor <= 0.0f || Float.isNaN(newLoadFactor))
+		throw new Intl.IllegalArgumentException("util#bidi.illegalLoadFactor", newLoadFactor);
 
 	    // Find the next highest power of two for the real capacity
 	    int oneBit = Integer.highestOneBit(newCapacity);
 	    int capacity = (oneBit == newCapacity && oneBit > 1) ? oneBit : (oneBit << 1);
+	    int newThreshold = (int) (capacity * newLoadFactor);
 
-	    this.loadFactor = loadFactor;
-	    this.threshold = (int)(capacity * loadFactor);
+	    // Reallocating to a smaller size won't work - threshold is dependent on
+	    // both the capacity and the load factor, but is the only number that
+	    // really counts.
+	    if (newThreshold < this.threshold)
+		throw new Intl.IllegalArgumentException("util#bidi.reallocTooSmall");
 
-	    keyTable = (Entry<K, V>[])new Entry<?, ?>[capacity];
-	    valueTable = (Entry<K, V>[])new Entry<?, ?>[capacity];
+	    // Don't do this expensive reallocation and movement if there no change
+	    if (newThreshold == this.threshold)
+		return false;
+
+	    this.loadFactor = newLoadFactor;
+	    this.threshold = newThreshold;
+
+	    keyTable = (Entry<K, V>[]) new Entry<?, ?>[capacity];
+	    valueTable = (Entry<K, V>[]) new Entry<?, ?>[capacity];
+
+	    return true;
+	}
+
+
+	private int calcKeyIndex(final Object obj) {
+	    return Math.abs(obj.hashCode() % keyTable.length);
+	}
+
+	private int calcValueIndex(final Object obj) {
+	    return Math.abs(obj.hashCode() % valueTable.length);
 	}
 
 
 	@Override
-	public V put(K key, V value) {
+	public V put(final K key, final V value) {
 	    Entry<K, V> entry = new Entry<K, V>(key, value);
-	    int keyIndex = Math.abs(entry.keyHash % (keyTable.length - 1));
-	    int valueIndex = Math.abs(entry.valueHash % (valueTable.length - 1));
+	    int keyIndex = Math.abs(entry.keyHash % keyTable.length);
+	    int valueIndex = Math.abs(entry.valueHash % valueTable.length);
 
+	    // First, check for uniqueness of both the key and the value
+	    // BEFORE entering the new entry into the lists
 	    for (Entry<K, V> e = keyTable[keyIndex]; e != null; e = e.nextKey) {
 		if (e.key.equals(key))
 		    throw new Intl.IllegalArgumentException("util#bidi.keyNotUnique", key);
 	    }
-	    entry.nextKey = keyTable[keyIndex];
-	    keyTable[keyIndex] = entry;
-
 	    for (Entry<K, V> e = valueTable[valueIndex]; e != null; e = e.nextValue) {
 		if (e.value.equals(value))
 		    throw new Intl.IllegalArgumentException("util#bidi.valueNotUnique", value);
 	    }
+
+	    // Now put the entry at the head of both lists at their respective index positions
+	    entry.nextKey = keyTable[keyIndex];
+	    keyTable[keyIndex] = entry;
+
 	    entry.nextValue = valueTable[valueIndex];
 	    valueTable[valueIndex] = entry;
 
+	    // Don't check the new size until the entry is actually in the lists
+	    // (note: this will copy all the existing entries to the new lists).
 	    if (size++ > threshold) {
 		resize(keyTable.length * 2);
 	    }
+
+	    // Return the previous value for this key, which will always be null
 	    return null;
 	}
 
@@ -264,24 +312,24 @@ public class BidiMap<K, V> implements Map<K, V>
 	    size = 0;
 	}
 
-	private void resize(int newCapacity) {
+	private void resize(final int newCapacity) {
 	    Entry<K, V>[] oldKeyTable = keyTable;
 
-	    allocate(newCapacity, loadFactor);
-	    size = 0;
+	    // If the allocation actually happens, then we need to move everything
+	    if (allocate(newCapacity, loadFactor)) {
+		size = 0;
 
-	    // Traverse only the old key table since all entries will
-	    // be in both arrays
-	    for (int i = 0; i < oldKeyTable.length; i++) {
-		for (Entry<K, V> e = oldKeyTable[i]; e != null; e = e.nextKey) {
-		    put(e.key, e.value);
+		// Traverse only the old key table since all entries were present there
+		for (int i = 0; i < oldKeyTable.length; i++) {
+		    for (Entry<K, V> e = oldKeyTable[i]; e != null; e = e.nextKey) {
+			put(e.key, e.value);
+		    }
 		}
 	    }
 	}
 
-	private Entry<K, V> findKey(Object key) {
-	    int keyHash = key.hashCode();
-	    int keyIndex = Math.abs(keyHash % (keyTable.length - 1));
+	private Entry<K, V> findKey(final Object key) {
+	    int keyIndex = calcKeyIndex(key);
 	    for (Entry<K, V> e = keyTable[keyIndex]; e != null; e = e.nextKey) {
 		if (e.key.equals(key))
 		    return e;
@@ -289,9 +337,8 @@ public class BidiMap<K, V> implements Map<K, V>
 	    return null;
 	}
 
-	private Entry<K, V> findValue(Object value) {
-	    int valueHash = value.hashCode();
-	    int valueIndex = Math.abs(valueHash % (valueTable.length - 1));
+	private Entry<K, V> findValue(final Object value) {
+	    int valueIndex = calcValueIndex(value);
 	    for (Entry<K, V> e = valueTable[valueIndex]; e != null; e = e.nextValue) {
 		if (e.value.equals(value))
 		    return e;
@@ -300,48 +347,50 @@ public class BidiMap<K, V> implements Map<K, V>
 	}
 
 	/**
-	 * @return The value associated with the given key (if any).
+	 * @return The value associated with the given key (if any) or {@code null}.
 	 * @param key The key for which we want the value.
 	 */
 	@Override
-	public V get(Object key) {
+	public V get(final Object key) {
 	    Entry<K, V> entry = findKey(key);
 	    return entry == null ? null : entry.value;
 	}
 
 	/**
-	 * @return The key that maps to the given value (if any).
+	 * @return The key that maps to the given value (if any) of {@code null}.
 	 * @param value The value to find the key for.
 	 */
-	public K getKey(Object value) {
+	public K getKey(final Object value) {
 	    Entry<K, V> entry = findValue(value);
 	    return entry ==  null ? null : entry.key;
 	}
 
 	@Override
-	public boolean containsKey(Object key) {
+	public boolean containsKey(final Object key) {
 	    return findKey(key) != null;
 	}
 
 	@Override
-	public boolean containsValue(Object value) {
+	public boolean containsValue(final Object value) {
 	    return findValue(value) != null;
 	}
 
 	@Override
-	public void putAll(Map<? extends K, ? extends V> m) {
-	    // TODO: expand size beforehand to avoid multiple resizes?
-	    for (Iterator<? extends Map.Entry<? extends K, ? extends V>> i = m.entrySet().iterator(); i.hasNext(); ) {
-		Map.Entry<? extends K, ? extends V> e = i.next();
+	public void putAll(final Map<? extends K, ? extends V> m) {
+	    // Make sure there is enough room for all the new values beforehand
+	    resize(size() + m.size());
+
+	    for (Iterator<? extends Map.Entry<? extends K, ? extends V>> iter = m.entrySet().iterator();
+			iter.hasNext(); ) {
+		Map.Entry<? extends K, ? extends V> e = iter.next();
 		put(e.getKey(), e.getValue());
 	    }
 	}
 
 	@Override
-	public V remove(Object key) {
+	public V remove(final Object key) {
 	    // Search for the key in the key hash table
-	    int keyHash = key.hashCode();
-	    int keyIndex = Math.abs(keyHash % (keyTable.length - 1));
+	    int keyIndex = calcKeyIndex(key);
 	    Entry<K, V> prev = null;
 	    for (Entry<K, V> e = keyTable[keyIndex]; e != null; prev = e, e = e.nextKey) {
 		if (e.key.equals(key)) {
@@ -353,8 +402,7 @@ public class BidiMap<K, V> implements Map<K, V>
 		    }
 		    V value = e.value;
 		    // Now search for the value in the value hash table
-		    int valueHash = value.hashCode();
-		    int valueIndex = Math.abs(valueHash % (valueTable.length - 1));
+		    int valueIndex = calcValueIndex(value);
 		    Entry<K, V> prev2 = null;
 		    for (Entry<K, V> e2 = valueTable[valueIndex]; e2 != null; prev2 = e2, e2 = e2.nextValue) {
 			if (e2.value.equals(value)) {
@@ -371,12 +419,12 @@ public class BidiMap<K, V> implements Map<K, V>
 		    return value;
 		}
 	    }
+	    // If the key was not found, then there was no previous value
 	    return null;
 	}
 
-	public K removeValue(Object value) {
-	    int valueHash = value.hashCode();
-	    int valueIndex = Math.abs(valueHash % (valueTable.length - 1));
+	public K removeValue(final Object value) {
+	    int valueIndex = calcValueIndex(value);
 	    Entry<K, V> prev = null;
 	    for (Entry<K, V> e = valueTable[valueIndex]; e != null; prev = e, e = e.nextValue) {
 		if (e.value.equals(value)) {
@@ -388,8 +436,7 @@ public class BidiMap<K, V> implements Map<K, V>
 		    }
 		    K key = e.key;
 		    // Now search for the key in the key hash table
-		    int keyHash = key.hashCode();
-		    int keyIndex = Math.abs(keyHash % (keyTable.length - 1));
+		    int keyIndex = calcKeyIndex(key);
 		    Entry<K, V> prev2 = null;
 		    for (Entry<K, V> e2 = keyTable[keyIndex]; e2 != null; prev2 = e2, e2 = e2.nextKey) {
 			if (e2.key.equals(key)) {
@@ -406,6 +453,7 @@ public class BidiMap<K, V> implements Map<K, V>
 		    return key;
 		}
 	    }
+	    // If the value was not found, then there was no previous key
 	    return null;
 	}
 
@@ -429,7 +477,7 @@ public class BidiMap<K, V> implements Map<K, V>
 	     * @param table	The entry table to iterate over.
 	     * @param onKey	Whether this is the key table or the value table.
 	     */
-	    public BidiIterator(Entry<K, V>[] table, boolean onKey) {
+	    public BidiIterator(final Entry<K, V>[] table, final boolean onKey) {
 		this.table = table;
 		this.onKey = onKey;
 
@@ -525,16 +573,16 @@ public class BidiMap<K, V> implements Map<K, V>
 	    public Iterator<Map.Entry<K,V>> iterator() {
 		return new EntryIterator();
 	    }
-	    public boolean contains(Object o) {
+	    public boolean contains(final Object o) {
 		if (!(o instanceof Map.Entry))
 		    return false;
-		@SuppressWarnings({"unchecked"})
+		@SuppressWarnings("unchecked")
 		Map.Entry<K,V> e = (Map.Entry<K,V>) o;
 		Entry<K,V> entry = findKey(e.getKey());
 		return entry != null && entry.equals(e);
 	    }
 
-	    public boolean remove(Object o) {
+	    public boolean remove(final Object o) {
 		throw new Intl.UnsupportedOperationException("util#bidi.removeNotSupported");
 	    }
 
@@ -570,11 +618,11 @@ public class BidiMap<K, V> implements Map<K, V>
 		return size;
 	    }
 
-	    public boolean contains(Object o) {
+	    public boolean contains(final Object o) {
 		return containsKey(o);
 	    }
 
-	    public boolean remove(Object o) {
+	    public boolean remove(final Object o) {
 		throw new Intl.UnsupportedOperationException("util#bidi.removeNotSupported");
 	    }
 
@@ -605,7 +653,7 @@ public class BidiMap<K, V> implements Map<K, V>
 		return size;
 	    }
 
-	    public boolean contains(Object o) {
+	    public boolean contains(final Object o) {
 		return containsValue(o);
 	    }
 
@@ -651,7 +699,7 @@ public class BidiMap<K, V> implements Map<K, V>
 		}
 	    }
 	    System.out.println("----------------");
-	    System.out.format("Longest key chain: %1$d, percent filled = %2$4.1f%%%n", longestChain, (float)numFilled / (float)keyTable.length * 100.0f);
+	    System.out.format("Longest key chain: %1$d, percent filled = %2$4.1f%%%n", longestChain, (float) numFilled / (float) keyTable.length * 100.0f);
 	    System.out.format("Size = %1$d, number of keys = %2$d%n", size, numKeys);
 	    System.out.println("================");
 	    longestChain = 0;
@@ -681,7 +729,7 @@ public class BidiMap<K, V> implements Map<K, V>
 		}
 	    }
 	    System.out.println("----------------");
-	    System.out.format("Longest value chain: %1$d, percent filled = %2$4.1f%%%n", longestChain, (float)numFilled / (float)keyTable.length * 100.0f);
+	    System.out.format("Longest value chain: %1$d, percent filled = %2$4.1f%%%n", longestChain, (float) numFilled / (float) keyTable.length * 100.0f);
 	    System.out.format("Size = %1$d, number of values = %2$d%n", size, numValues);
 	    System.out.println("================");
 	}

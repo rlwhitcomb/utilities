@@ -98,6 +98,8 @@
 #	    New message from Environment.
 #	10-Mar-2021 (rlwhitcomb)
 #	    New errors from NumericUtil.
+#	11-Mar-2021 (rlwhitcomb)
+#	    New error from BidiMap.
 #
 
 #
@@ -108,6 +110,7 @@ bidi.valueNotNull	= Value must not be null.
 bidi.entryCannotChange	= Map entry cannot be changed.
 bidi.illegalCapacity	= Initial capacity of %1$d is not supported.
 bidi.illegalLoadFactor	= Load factor of %1$s is not supported.
+bidi.reallocTooSmall	= Reallocation to a smaller map size isn't possible.
 bidi.keyNotUnique	= Key "%1$s" is not unique.
 bidi.valueNotUnique	= Value "%1$s" is not unique.
 bidi.removeNotSupported	= Remove is not supported.
