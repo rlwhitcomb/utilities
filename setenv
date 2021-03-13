@@ -27,3 +27,7 @@ export CLASSPATH
 alias rv="git rev-parse --short head"
 alias antlr4="java -jar `pwd`/java/external-jars/antlr-4.9-complete.jar"
 alias grun="java org.antlr.v4.gui.TestRig"
+
+# Switch to the Java directory for convenience
+cd java
+
