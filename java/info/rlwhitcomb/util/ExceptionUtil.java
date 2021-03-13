@@ -54,6 +54,8 @@
  *	    One more exception that needs the name and message.
  *	05-Mar-2021 (rlwhitcomb)
  *	    And another one. Tweak the message formatting.
+ *	12-Mar-2021 (rlwhitcomb)
+ *	    Remove some unneeded logic.
  */
 package info.rlwhitcomb.util;
 
@@ -156,7 +158,6 @@ public class ExceptionUtil
 	 */
 	public static void toString(Throwable ex, StringBuilder buf, boolean useToString, boolean useSpaces, boolean convertTabs) {
 	    for (Throwable next = ex; next != null; ) {
-		boolean didMessage = false;
 		String msg;
 		if (useToString) {
 		    msg = next.toString();
@@ -181,11 +182,10 @@ public class ExceptionUtil
 		    }
 		}
 		buf.append(msg);
-		didMessage = true;
 
 		next = next.getCause();
 
-		if (next != null && didMessage) {
+		if (next != null) {
 		    buf.append(useSpaces ? ' ' : '\n');
 		}
 	    }
