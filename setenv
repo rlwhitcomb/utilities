@@ -28,6 +28,14 @@ alias rv="git rev-parse --short head"
 alias antlr4="java -jar `pwd`/java/external-jars/antlr-4.9-complete.jar"
 alias grun="java org.antlr.v4.gui.TestRig"
 
+#
+# Customized settings for several programs
+#
+if [ -r .settings ]
+then
+    source .settings
+fi
+
 # Switch to the Java directory for convenience
 cd java
 

@@ -2,6 +2,7 @@
 *.jar
 resources*.properties
 java/doc
+.settings
 .DS_Store
 *.interp
 *.tokens
