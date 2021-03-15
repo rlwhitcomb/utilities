@@ -200,6 +200,8 @@
  *	    Add Javadoc for the min/max/join list helpers.
  *	09-Mar-2021 (rlwhitcomb)
  *	    Handle alternate argument lists for "FRAC".
+ *	15-Mar-2021 (rlwhitcomb)
+ *	    Trap ArithmeticException in "FRAC".
  */
 package info.rlwhitcomb.calc;
 
@@ -1783,25 +1785,31 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    if (stringNode == null)
 		stringNode = ctx.ISTRING();
 
-	    if (stringNode != null) {
-		return BigFraction.valueOf(processString(stringNode.getText()));
-	    }
-	    else {
-		CalcParser.Expr2Context e2ctx = ctx.expr2();
-		if (e2ctx != null) {
-		    BigInteger n = getIntegerValue(e2ctx.expr(0));
-		    BigInteger d = getIntegerValue(e2ctx.expr(1));
-
-		    return new BigFraction(n, d);
+	    try {
+		if (stringNode != null) {
+		    return BigFraction.valueOf(processString(stringNode.getText()));
 		}
 		else {
-		    CalcParser.Expr3Context e3ctx = ctx.expr3();
-		    BigInteger i = getIntegerValue(e3ctx.expr(0));
-		    BigInteger n = getIntegerValue(e3ctx.expr(1));
-		    BigInteger d = getIntegerValue(e3ctx.expr(2));
+		    CalcParser.Expr2Context e2ctx = ctx.expr2();
+		    if (e2ctx != null) {
+			BigInteger n = getIntegerValue(e2ctx.expr(0));
+			BigInteger d = getIntegerValue(e2ctx.expr(1));
 
-		    return new BigFraction(i, n, d);
+			return new BigFraction(n, d);
+		    }
+		    else {
+			CalcParser.Expr3Context e3ctx = ctx.expr3();
+			BigInteger i = getIntegerValue(e3ctx.expr(0));
+			BigInteger n = getIntegerValue(e3ctx.expr(1));
+			BigInteger d = getIntegerValue(e3ctx.expr(2));
+
+			return new BigFraction(i, n, d);
+		    }
 		}
+	    }
+	    catch (ArithmeticException ae) {
+		// Possible divide by zero errors (at least)
+		throw new CalcExprException(ae, ctx);
 	    }
 	}
 

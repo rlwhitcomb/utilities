@@ -110,6 +110,8 @@
  *	    Tweak the copyright text for GUI display.
  *	11-Mar-2021 (rlwhitcomb)
  *	    Color the REPL prompt string.
+ *	15-Mar-2021 (rlwhitcomb)
+ *	    Tweak the error message display to eliminate duplicate "."
  */
 package info.rlwhitcomb.calc;
 
@@ -510,10 +512,15 @@ public class Calc
 
 		@Override
 		public void displayErrorMessage(String message, int lineNumber) {
+		    // We're going to add a period ourselves, so take it out if the
+		    // underlying error already has one.
+		    String regularMessage = (message.endsWith(".") ?
+			message.substring(0, message.length() - 1) : message);
+
 		    if (replMode)
-			errFormat("calc#errorPeriod", message);
+			errFormat("calc#errorPeriod", regularMessage);
 		    else
-			errFormat("calc#errorLine", message, lineNumber);
+			errFormat("calc#errorLine", regularMessage, lineNumber);
 		}
 	}
 

@@ -50,6 +50,8 @@
 #	    New syntax error messages.
 #	23-Feb-2021 (rlwhitcomb)
 #	    Timing mode message.
+#	15-Mar-2021 (rlwhitcomb)
+#	    Tweak an error message.
 #
 
 #
@@ -121,7 +123,7 @@ intro.help5	= ""
 #
 # From CalcUtil
 #
-valueNotNull		= Value ("%1$s") must not be null
+valueNotNull		= Value of "%1$s" must not be null
 noConvertDecimal	= Unable to convert value of '%1$s' type to decimal number
 noConvertFraction	= Unable to convert value of '%1$s' type to fraction
 unknownType		= Unknown value type: %1$s
