@@ -27,6 +27,8 @@
  *	    Move test files to "test/data" directory. Don't output "null" entries.
  *	11-Mar-2021 (rlwhitcomb)
  *	    Reformat. Add tests for non-unique value detection.
+ *	15-Mar-2021 (rlwhitcomb)
+ *	    Add tests for size changes on attempted duplicate adds.
  */
 
 import java.io.BufferedReader;
@@ -166,9 +168,11 @@ public class BidiMapTest
 	    }
 
 	    // Try adding some keys and values already present
+	    // and make sure the size doesn't change (prior bug)
+	    int sizeBeforeDup = map.size();
 	    boolean caughtExpectedException = false;
 	    try {
-		numberOfTests++;
+		numberOfTests += 2;
 		String existing = keysToRemoveList.get(0);
 		// Existing key, different value
 		map.put(existing, String.format("--%1$s--", existing));
@@ -181,10 +185,17 @@ public class BidiMapTest
 		System.err.format("Adding a duplicate key did not throw the expected exception!");
 		numberOfFailures++;
 	    }
+	    int sizeAfterDup = map.size();
+	    if (sizeAfterDup != sizeBeforeDup) {
+		System.err.format("Attempting to add a duplicate key changed the size (%1$d before, %2$d after)!",
+			sizeBeforeDup, sizeAfterDup);
+		numberOfFailures++;
+	    }
 
+	    sizeBeforeDup = map.size();
 	    caughtExpectedException = false;
 	    try {
-		numberOfTests++;
+		numberOfTests += 2;
 		String existing = keysToRemoveList.get(0);
 		// New key, existing value
 		map.put(String.format("--%1$s--", existing), existing);
@@ -195,6 +206,12 @@ public class BidiMapTest
 	    }
 	    if (!caughtExpectedException) {
 		System.err.format("Adding a duplicate value did not throw the expected exception!");
+		numberOfFailures++;
+	    }
+	    sizeAfterDup = map.size();
+	    if (sizeAfterDup != sizeBeforeDup) {
+		System.err.format("Attempting to add a duplicate value changed the size (%1$d before, %2$d after)!",
+			sizeBeforeDup, sizeAfterDup);
 		numberOfFailures++;
 	    }
 
