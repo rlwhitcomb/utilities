@@ -26,6 +26,8 @@
  * History:
  *      22-Jan-2021 (rlwhitcomb)
  *          Initial coding.
+ *	15-Mar-2021 (rlwhitcomb)
+ *	    Add another return code.
  */
 package info.rlwhitcomb;
 
@@ -64,6 +66,9 @@ public interface Testable
 
 	/** Other unspecified error. */
 	public static final int OTHER_ERROR     = 99;
+
+	/** Base for non-zero status codes that need a "number of failures" code. */
+	public static final int NUMBER_OF_ERRORS = 100;
 
 
 	/**

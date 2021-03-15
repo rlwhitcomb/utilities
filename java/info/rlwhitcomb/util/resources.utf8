@@ -152,6 +152,11 @@ env.timeThisError	= Caught exception during timing: %1$s
 env.unknownDataModel	= Java has an unexpected data model value of %1$d
 
 #
+# From ExceptionUtil
+#
+except.fromStack	= from: %1$s
+
+#
 # From Intl.java!
 #
 intl.keyNotNull		= Text resource key must not be null.

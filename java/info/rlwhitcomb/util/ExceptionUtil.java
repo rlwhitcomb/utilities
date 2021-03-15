@@ -56,6 +56,8 @@
  *	    And another one. Tweak the message formatting.
  *	12-Mar-2021 (rlwhitcomb)
  *	    Remove some unneeded logic.
+ *	15-Mar-2021 (rlwhitcomb)
+ *	    Add in some stack trace info if available.
  */
 package info.rlwhitcomb.util;
 
@@ -157,6 +159,8 @@ public class ExceptionUtil
 	 *				that don't deal with tabs correctly; some do).
 	 */
 	public static void toString(Throwable ex, StringBuilder buf, boolean useToString, boolean useSpaces, boolean convertTabs) {
+	    boolean topLevel = true;
+
 	    for (Throwable next = ex; next != null; ) {
 		String msg;
 		if (useToString) {
@@ -182,6 +186,16 @@ public class ExceptionUtil
 		    }
 		}
 		buf.append(msg);
+
+		// First time through, add in the first stack trace info
+		if (topLevel) {
+		    StackTraceElement[] stack = next.getStackTrace();
+		    if (stack != null && stack.length != 0) {
+			buf.append(useSpaces ? " " : "\n    ");
+			buf.append(Intl.formatString("util#except.fromStack", stack[0].toString()));
+		    }
+		}
+		topLevel = false;
 
 		next = next.getCause();
 

@@ -182,6 +182,8 @@
  *	    to abort the whole process.
  *	02-Mar-2021 (rlwhitcomb)
  *	    Another error for empty "-dir:" (which I seem to do often b/c of the different syntax here).
+ *	15-Mar-2021 (rlwhitcomb)
+ *	    Actually return a failure exit code if any tests fail.
  */
 package info.rlwhitcomb.tester;
 
@@ -279,6 +281,7 @@ public class Tester
 	    "defaultabortonfirsterror", "defaultabortfirsterror", "defaultaborterror", "defaultabortfirst", "defaultfirsterror", "defaultabort", "defaultfirst",
 	    "defaborterror", "defabortfirst", "deffirsterror", "defabort", "deffirst"
 	};
+
 
 	/**
 	 * An object to hold the multiple file-related objects that need to be passed around
@@ -540,6 +543,7 @@ public class Tester
 		    }
 		}
 		catch (Exception e) {
+		    origErr.println(Intl.formatString("tester#abnormalExitString", ExceptionUtil.toString(e)));
 		    exitCode = OTHER_ERROR;
 		}
 		finally {
@@ -565,7 +569,7 @@ public class Tester
 
 		// For "successful failures" compare to the expected exit code
 		if (exitCode != expectedExitCode) { 
-		    origErr.print(Intl.formatString("tester#abnormalExit", exitCode));
+		    Intl.outFormat("tester#abnormalExit", exitCode);
 		    return exitCode;
 		}
 
@@ -1196,9 +1200,9 @@ public class Tester
 			else
 			    break;
 		    }
+		    numberTests++;
 		    Matcher m = DESCRIPTION.matcher(line);
 		    if (m.matches()) {
-			numberTests++;
 			String commandLine;
 
 			commandLine = m.group(6);
@@ -1226,6 +1230,7 @@ public class Tester
 		    }
 		    else {
 			Intl.errFormat("tester#badSyntax", lineNo, line);
+			numberFailed++;
 			break;
 		    }
 		}
@@ -1358,13 +1363,13 @@ public class Tester
 	    if (testDescriptionFiles.size() == 0) {
 		Intl.errPrintln("tester#missingDescFile");
 		Intl.printHelp("tester#");
-		return 1;
+		return MISSING_OPTION;
 	    }
 
 	    // Setup the canonical platform string
 	    currentPlatform = Environment.platformIdentifier();
 
-	    return 0;
+	    return SUCCESS;
 	}
 
 	@Override
@@ -1374,9 +1379,9 @@ public class Tester
 	    }
 	    catch (Exception err) {
 		Intl.errFormat("tester#exception", ExceptionUtil.toString(err));
-		return 99;
+		return OTHER_ERROR;
 	    }
-	    return 0;
+	    return numberFailed == 0 ? 0 : NUMBER_OF_ERRORS + numberFailed;
 	}
 
 	/**

@@ -505,7 +505,7 @@
 		</java>
 		<exec executable="./verify_calc"  dir="."             output="${test.log.file.name}" append="true" unless:true="${on.windows}" failonerror="true"/>
 		<exec executable="./check_sorted" dir="."             output="${test.log.file.name}" append="true" unless:true="${on.windows}" failonerror="true"/>
-		<echo>Done with unit tests. Results in "${test.log.file.name}" file.</echo>
+		<echo>Done with unit tests. Successful. Results in "${test.log.file.name}" file.</echo>
 	</target>
 
 	<target name="clean" depends="purge-logs" description="Cleans all generated files, and old log files.">

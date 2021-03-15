@@ -123,7 +123,7 @@ log			= "Test '%1$s': "
 logVerboseAlt		= Test '%1$s' (%2$s): command \"%3$s\"%n
 logAlt			= "Test '%1$s' (%2$s): "
 verbose			= Running script: %1$s%n
-abnormalExit		= Abnormal exit from script: Code %1$d%n
+abnormalExit		= Abnormal exit from script: Code %1$d
 abnormalExitString	= Abnormal exit from test: %1$s%n
 
 #
