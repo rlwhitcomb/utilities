@@ -190,12 +190,12 @@ public class ExceptionUtil
 		// First time through, add in the first stack trace info
 		if (topLevel) {
 		    StackTraceElement[] stack = next.getStackTrace();
-		    if (stack != null && stack.length != 0) {
+		    if (stack != null && stack.length > 0) {
 			buf.append(useSpaces ? " " : "\n    ");
 			buf.append(Intl.formatString("util#except.fromStack", stack[0].toString()));
 		    }
+		    topLevel = false;
 		}
-		topLevel = false;
 
 		next = next.getCause();
 
