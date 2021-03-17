@@ -578,7 +578,7 @@
 		<tstamp>
 			<format property="last.two.weeks" pattern="MM/dd/yyyy hh:mm aa" locale="en,US" offset="-2" unit="week"/>
 		</tstamp>
-		<echo message="Purging log files from before ${last.two.weeks}..."/>
+		<echo message="Purging log and temporary files from before ${last.two.weeks}..."/>
 		<delete>
 			<fileset dir="." includes="test*.log,utilities*.log">
 				<date datetime="${last.two.weeks}" when="before"/>
