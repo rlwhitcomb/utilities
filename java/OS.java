@@ -50,6 +50,8 @@
  *	Fix a bug in the display of the choice aliases. Reorder them.
  *    23-Feb-2021 (rlwhitcomb)
  *	Add "cs" as an option for "charsets".
+ *    17-Mar-2021 (rlwhitcomb)
+ *	Add timezones.
  */
 import java.awt.GraphicsEnvironment;
 import java.io.PrintStream;
@@ -58,12 +60,14 @@ import java.security.Provider;
 import java.security.Security;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
@@ -79,10 +83,13 @@ public class OS
 	private static final String FOOTER = "-----------------------------------------";
 
 	/** Default value for screen width (used to put values into multiple columns. */
-	private static final int SCREEN_WIDTH_DEFAULT = 80;
+	private static final int SCREEN_WIDTH_DEFAULT = 110;
 
 	/** The current screen width value (for columnar output). */
 	private static int screenWidth = SCREEN_WIDTH_DEFAULT;
+
+	/** The current time (for TimeZone displays). */
+	private static final Date now = new Date();
 
 
 	/**
@@ -107,7 +114,9 @@ public class OS
 				 "securityproviders", "providers", "security", "provs",
 				 "prov", "sec", "sp", "s"),
 		FONTS		(OS::displayFonts,
-				 "fonts", "font", "f");
+				 "fonts", "font", "f"),
+		TIMEZONES	(OS::displayTimeZones,
+				 "timezones", "timezone", "zones", "zone", "tz", "z");
 
 		private Runnable displayer;
 		private String[] aliasNames;
@@ -445,6 +454,84 @@ public class OS
 	    Arrays.sort(fontFamilies, String.CASE_INSENSITIVE_ORDER);
 
 	    display("Font Families", Arrays.asList(fontFamilies));
+	}
+
+	/**
+	 * Sort a {@link TimeZone} first by offset, then display name.
+	 *
+	 * @param z1 The first TimeZone to compare.
+	 * @param z2 The second TimeZone to compare to.
+	 * @return   {@code < 0} if {@code z1 < z2}, {@code =0} if they are the same,
+	 *	     {@code > 0} if {@code z1 > z2}.
+	 */
+	private static int compareTimeZones(TimeZone z1, TimeZone z2) {
+	    int offsetZ1 = z1.getRawOffset();
+	    int offsetZ2 = z2.getRawOffset();
+	    int ret = Integer.compare(offsetZ1, offsetZ2);
+	    if (ret != 0)
+		return ret;
+
+	    String nameZ1 = z1.getDisplayName();
+	    String nameZ2 = z2.getDisplayName();
+	    return nameZ1.compareTo(nameZ2);
+	}
+
+	/**
+	 * Format an offset in milliseconds to a "hh:mm" representation.
+	 *
+	 * @param offset	The offset value in milliseconds.
+	 * @return		The value formatted as "hh:mm".
+	 */
+	private static String tzOffset(int offset) {
+	    int rawMinutes = Math.abs(offset) / (1000 * 60);
+	    int hours      = rawMinutes / 60;
+	    int minutes    = rawMinutes - (hours * 60);
+
+	    return String.format("%1$s%2$d:%3$02d", offset < 0 ? "-" : "", hours, minutes);
+	}
+
+	/**
+	 * Format a timezone name for display.
+	 *
+	 * @param tz		The timezone under consideration.
+	 * @param daylight	Whether the name should be the daylight savings time name or not.
+	 * @return		A formatted string suitable for display.
+	 */
+	private static String tzDisplayName(TimeZone tz, boolean daylight) {
+	    return String.format("%1$s: %2$s (%3$s) [%4$s]",
+		tz.getID(),
+		tz.getDisplayName(daylight, TimeZone.LONG),
+		tz.getDisplayName(daylight, TimeZone.SHORT),
+		tzOffset(daylight ? tz.getOffset(now.getTime()) : tz.getRawOffset()));
+	}
+
+	/**
+	 * Display the list of available timezone ids.
+	 */
+	private static void displayTimeZones() {
+	    TimeZone defaultZone = TimeZone.getDefault();
+	    String[] availableIDs = TimeZone.getAvailableIDs();
+	    TimeZone[] availableZones = new TimeZone[availableIDs.length];
+
+	    for (int i = 0; i < availableIDs.length; i++) {
+		availableZones[i] = TimeZone.getTimeZone(availableIDs[i]);
+	    }
+
+	    final List<String> zones = new ArrayList<>(availableZones.length * 2);
+	    Arrays.sort(availableZones, OS::compareTimeZones);
+
+	    Arrays.stream(availableZones).forEach(tz -> {
+		boolean isDefault = tz.equals(defaultZone);
+		String defMarker = isDefault ? "* " : "  ";
+		zones.add(String.format("%1$s%2$s", defMarker, tzDisplayName(tz, false)));
+
+		if (tz.observesDaylightTime()) {
+		    defMarker = isDefault && tz.inDaylightTime(now) ? "+ " : "  ";
+		    zones.add(String.format("%1$s%2$s", defMarker, tzDisplayName(tz, true)));
+		}
+	    });
+
+	    display("Time Zones", zones);
 	}
 
 
