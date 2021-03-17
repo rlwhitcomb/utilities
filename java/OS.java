@@ -52,6 +52,8 @@
  *	Add "cs" as an option for "charsets".
  *    17-Mar-2021 (rlwhitcomb)
  *	Add timezones.
+ *    17-Mar-2021 (rlwhitcomb)
+ *	Additional display of the default timezone if none was "equal" to it.
  */
 import java.awt.GraphicsEnvironment;
 import java.io.PrintStream;
@@ -509,12 +511,15 @@ public class OS
 	 * Display the list of available timezone ids.
 	 */
 	private static void displayTimeZones() {
+	    boolean sawDefault = false;;
 	    TimeZone defaultZone = TimeZone.getDefault();
 	    String[] availableIDs = TimeZone.getAvailableIDs();
 	    TimeZone[] availableZones = new TimeZone[availableIDs.length];
 
 	    for (int i = 0; i < availableIDs.length; i++) {
 		availableZones[i] = TimeZone.getTimeZone(availableIDs[i]);
+		if (availableZones[i].equals(defaultZone))
+		    sawDefault = true;
 	    }
 
 	    final List<String> zones = new ArrayList<>(availableZones.length * 2);
@@ -532,6 +537,14 @@ public class OS
 	    });
 
 	    display("Time Zones", zones);
+
+	    if (!sawDefault) {
+		printTitle("Default Time Zone");
+		System.out.printf("* %1$s%n", tzDisplayName(defaultZone, false));
+		if (defaultZone.observesDaylightTime())
+		    System.out.printf("+ %1$s%n", tzDisplayName(defaultZone, true));
+		printFooter();
+	    }
 	}
 
 
