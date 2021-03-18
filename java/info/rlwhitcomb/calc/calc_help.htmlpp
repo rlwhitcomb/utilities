@@ -109,6 +109,13 @@ code {
   <p>Simple numeric constants follow the normal rules, and can be expressed as floating point constants (as in <code>1.2e-20</code>).
      The boolean constants are <code>true</code> and <code>false</code> (although they are case-insensitive, so could be spelled
      as <code>True</code> or <code>TRUE</code> as well). The special null constant is simply <code>null</code> (again, case-insensitive).
+  <p>Numeric values can also be specified using "kilobyte" notation in one of two forms: multipliers of 1000, or multipliers of 1024 (2**10).
+     These multipliers are simply appended to the number to automatically multiply by the given amount. The allowed suffixes are:
+     <code>Kb</code>, <code>Mb</code>, <code>Tb</code>, <code>Pb</code>, and <code>Eb</code> which all multiply by their respective
+     powers of 10, while <code>Kib</code>, <code>Mib</code>, etc. multiply by the successive multiples of 1024.
+  <p>For example:  <code>2Kb = 2000</code>, or <code>4Kib = 4096</code>. Any integer results can be formatted as these type of
+     values using the <code>@k</code> or <code>@K</code> formats (the latter giving all upper case results), and depending on the
+     <code>:SI</code>, <code>:BINARY</code>, or <code>:MIXED</code> mode directives in effect.
   <p>String constants are of two types: <i>simple</i> strings, constructed using either single- or double-quotes (or "smart"
      quotes: see below), or <i>interpolated</i> strings, which allow the value of expressions (or simple variables) to be
      interpolated into the final string value. These are
@@ -121,6 +128,16 @@ code {
      to delimit strings (such as <code>&#x00AB;This is a test&#x00BB;</code>. The ending quote can be included by escaping it.
      When interpolating values into an interpolated string, the string representation of the value is used. If the value is
      <code>null</code> nothing will be added to the string.
+  <p>For example, given this code: <code>name="Jack"; `Hi, $name!`</code> the result will be <code>"Hi, Jack!"</code>. For this
+     code, however, assuming that the variable <code>junk</code> has not been given a value, we have <code>`Calling $junk...`</code>
+     which gives <code>"Calling ..."</code> since the value of <code>junk</code> will be <code>null</code>. Values are
+     interpolated with the same value as would be displayed, including any format specifiers, except that string results will
+     only be included without the quotes, and without embedded quotes being escaped. Arrays and objects will be inserted
+     formatted in a canonical form, again just as they would be displayed. Using an interpolated string inside an expression
+     construct inside an interpolated string is not allowed, sadly.
+  <p>Note that string results are always finally displayed / returned using double quotes (and double quotes internally escaped),
+     regardless of the quoting used to construct them, which includes interpolated strings -- the result is always just a string
+     with the values pieced into it.
   <p>Calc reserves the names <code>pi</code> and <code>e</code> for these two fundamental constants. Calc also has the unique 
      ability to recognize the special Unicode fraction characters, and all the alternative characters of <code>&#x1D6D1;</code> to
      also represent their respective values (as in <code>&#x1D6D1;</code> = <code>3.14159...</code> or <code>&#x00BC;</code> = <code>1 / 4</code>).
@@ -143,8 +160,8 @@ code {
   <p>To reference values in arrays or objects the following syntax can be used:  <i>variable</i><code>[</code> <i>expr</i> <code>]</code>
      where the expression must evaluate to an integer value (for arrays) or the name of a key (for objects). Members of an object
      can also be referenced by <i>variable</i><code>.</code><i>member</i> (where <i>member</i> is the identifier or string referencing
-     a key of one of the key/value pairs in the object.  All this is consistent with JavaScript, or JSON usage (with the slight
-     variation that keys can be identifiers here).
+     a key of one of the key/value pairs in the object).  All this is consistent with JavaScript, or JSON usage (with the slight
+     variation that keys can also be identifiers here, while in pure JSON form only strings are allowed as keys).
   <p>Array or object constants can be expressed using this JSON notation, as in <code>{ a: 1, b:2, c:'abc', d:[ 1,3,4 ] }</code> or
      <code>[ 1, 3, 5, { a:false, b:true }, 15, 17 ]</code> or <code>[ [ 1, 3, 5 ], [ 2, 4, 6 ] ]</code> or
      <code>{ first: { "flag": true, "message": 'Testing' }, second: { "flag":true, "message": 'Working' } }</code>.
@@ -160,7 +177,12 @@ code {
   <p>Trigonometric calculations are, by default, done in radians, but this can be changed to use degrees using a directive.
   <h3>Formats</h3>
   <p>The results of most operations can be displayed using alternative formats for better comprehension. To specify an alternative
-     format, append <code>@<i>format</i></code> to the expression. The available formats are:
+     format, append <code>@<i>format</i></code> to the expression. In most cases, the uppercase equivalent can be given, which will
+     do the same formatting, except mapping the result to UPPER case as well. The exceptions are <code>@f</code> which formats the
+     result as a fraction, while <code>@F</code> formats the result as a proper fraction (as in <code>15/8@F = 1 7/8</code>),
+     <code>@O</code> or <code>@D</code> which would make no difference in the outputs, and <code>@J</code> which doesn't make sense
+     given the output could have strings which shouldn't be case-shifted.
+  <p>The available formats are:
   <center>
     <h4>Formats</h4>
     <table>
@@ -168,9 +190,16 @@ code {
         <th width="100">Format</th>
         <th width="200">Description</th>
       </tr>
+      <tr><td><code>@h</code></td><td>Display as a time value (hours:minutes:seconds.millis)<br><em>NOT IMPLEMENTED YET</em></td></tr>
+      <tr><td><code>@d</code></td><td>Primarily for rational mode -- format the result instead as a decimal value</td></tr>
+      <tr><td><code>@f</code></td><td>For decimal mode, format the result as a rational fraction</td></tr>
+      <tr><td><code>@F</code></td><td>Format as a proper fraction (with possible integer portion)</td></tr>
+      <tr><td><code>@j</code></td><td>Format the result as a "pretty printed" JSON result<br>(multiple lines with indents)</td></tr>
+      <tr><td><code>@x</code></td><td>For integers and strings, format in hexadecimal form</td></tr>
+      <tr><td><code>@o</code></td><td>For integers and strings, format in octal form</td></tr>
+      <tr><td><code>@b</code></td><td>For integers and strings, format in binary form</td></tr>
       <tr><td><code>@k</code></td><td>Use kilobyte, megabyte, etc. notation for the value</td></tr>
-      <tr><td><code>@x</code></td><td>Display the value in hexadecimal notation (integers or strings only)</td></tr>
-      <tr><td>&nbsp;</td><td>... more to come ...</td></tr>
+      <tr><td><code>@</code>[<i>nn</i>]<code>%</code></td><td>Format as a percentage, optionally rounding to <i>nn</i> digits</td></tr>
     </table>
   </center>
   <h3>Available Operators</h3>
@@ -315,7 +344,7 @@ code {
   <p>In addition to the functions and operators listed above, Calc has three different statements which can be used to do
      iterative or repeated calculations, and to select between actions based on the value of an expression. These are the <code>LOOP</code>, <code>WHILE</code> and <code>IF</code> statements.
   <p>The syntax for each is as follows:<br>
-     <code>LOOP</code>&nbsp;[ <i>loopvar</i> <code>IN</code> ] <i>expr</i> [ <code>..</code> or <code>&#x2026;</code> <i>expr</i> ] [ <code>,</code> <i>expr</i> ]<br>
+     <code>LOOP</code>&nbsp;[ <i>loopvar</i> <code>IN</code> ] <i>expr</i> [ <code>..</code> or <code>&#x2026;</code> <i>expr</i> ] [ <code>,</code> <i>expr</i> ] <code>{</code> <i>statements or expressions</i> <code>}</code><br>
      <code>WHILE</code>&nbsp;<i>expr</i> <code>{</code> <i>statements or expressions</i> <code>}</code><br>
      <code>IF</code>&nbsp;<i>expr</i>&nbsp;<code>{</code> <i>statements or expressions</i> <code>}</code> [ <code>ELSE {</code> <i>statements or expressions</i> <code>}</code> ]
   <p>The <code>LOOP</code> statement will repeatedly execute the block of statements based on several conditions:
@@ -386,7 +415,7 @@ code {
   <ul>
     <li>REPL commands</li>
     <li>Explanation of :include with -inputDir searching</li>
-    <li>Finish format specifiers and formats</li>
+    <li>More examples of KB input and output, with the modes explained</li>
     <li>Exceptions to decimal precision (i.e., for trig, log), and also in doing factorial? or others that don't respect the precision, also limits on pi/e digits</li>
     <li>Discussion on NaN, and Infinity</li>
     <li>Explain "join" operation with 1, 2, 3+ values</li>
