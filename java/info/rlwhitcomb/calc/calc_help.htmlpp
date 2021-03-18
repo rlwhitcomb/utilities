@@ -184,7 +184,7 @@ code {
      given the output could have strings which shouldn't be case-shifted.
   <p>The available formats are:
   <center>
-    <h4>Formats</h4>
+    <h3>Formats</h3>
     <table>
       <tr>
         <th width="100">Format</th>
