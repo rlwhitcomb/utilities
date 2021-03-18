@@ -202,6 +202,8 @@
  *	    Handle alternate argument lists for "FRAC".
  *	15-Mar-2021 (rlwhitcomb)
  *	    Trap ArithmeticException in "FRAC".
+ *	18-Mar-2021 (rlwhitcomb)
+ *	    Regularize the uppercasing of results with formats.
  */
 package info.rlwhitcomb.calc;
 
@@ -753,13 +755,15 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		boolean toUpperCase    = false;
 
 		switch (formatChar) {
-		    case 'h':
 		    case 'H':
+			toUpperCase = true;
+			// fall through
+		    case 'h':
 			// TODO: convert to hours
 			break;
 
-		    case 'd':
 		    case 'D':
+		    case 'd':
 			valueBuf.append(toDecimalValue(this, result, mc, ctx).toPlainString());
 			break;
 		    case 'f':
@@ -768,8 +772,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    case 'F':
 			valueBuf.append(toFractionValue(this, result, ctx).toProperString());
 			break;
-		    case 'j':
 		    case 'J':
+		    case 'j':
 			valueBuf.append('\n');
 			valueBuf.append(toStringValue(this, result, true, true, ""));
 			break;
@@ -793,8 +797,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			}
 			break;
 
-		    case 'o':
 		    case 'O':
+		    case 'o':
 			if (result instanceof String) {
 			    byte[] b = ((String) result).getBytes(StandardCharsets.UTF_8);
 			    valueBuf.append('\'');
@@ -811,8 +815,10 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			}
 			break;
 
-		    case 'b':
 		    case 'B':
+			toUpperCase = true;
+			// fall through
+		    case 'b':
 			if (result instanceof String) {
 			    byte[] b = ((String) result).getBytes(StandardCharsets.UTF_8);
 			    valueBuf.append('\'');
