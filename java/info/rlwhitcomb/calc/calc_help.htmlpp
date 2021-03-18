@@ -101,6 +101,78 @@ code {
     <tr><td><code>-version</code></td><td>Display on the console the version information for the program</td><td><code>-vers</code>, <code>-ver</code>, <code>-v</code></td></tr>
   </table>
   </center>
+  <h3>Values, Constants, and Variables</h3>
+  <p>The basic building blocks of the expressions implemented here are the basic value types: numbers (either integer or real
+     numbers with a fractional part), strings, rational fractions, boolean values, and the <code>null</code> value.
+     Numbers can be of arbitrary precision, up to a maximum of 2**32-1 digits. Strings can also be of any length up
+     to 2**32-1 characters.
+  <p>Simple numeric constants follow the normal rules, and can be expressed as floating point constants (as in <code>1.2e-20</code>).
+     The boolean constants are <code>true</code> and <code>false</code> (although they are case-insensitive, so could be spelled
+     as <code>True</code> or <code>TRUE</code> as well). The special null constant is simply <code>null</code> (again, case-insensitive).
+  <p>String constants are of two types: <i>simple</i> strings, constructed using either single- or double-quotes (or "smart"
+     quotes: see below), or <i>interpolated</i> strings, which allow the value of expressions (or simple variables) to be
+     interpolated into the final string value. These are
+     formed using the back-tick character (<code>` . . . `</code>). Interpolation is done using either <code>$<i>variable</i></code>
+     or <code>${<i>expression</i>}</code>. To embed a back-tick character in the string, use <code>\`</code>. To embed a backslash,
+     therefore, use <code>\\</code>. The normal C/Java escapes such as <code>\t</code> or <code>\n</code> are also available.
+     To embed a dollar sign in the string, use <code>$$</code> (but see the note about loop variables below). To embed any Unicode
+     codepoint, use <code>\u<i>NNNN</i></code> where <code><i>N</i></code> is a hexadecimal digit, for values up to 0xFFFF, or
+     <code>\u{<i>NNNNNN</i>}</code> for codes beyond the Unicode BMP (Basic Multilingual Plane). "Smart" quotes can also be used
+     to delimit strings (such as <code>&#x00AB;This is a test&#x00BB;</code>. The ending quote can be included by escaping it.
+     When interpolating values into an interpolated string, the string representation of the value is used. If the value is
+     <code>null</code> nothing will be added to the string.
+  <p>Calc reserves the names <code>pi</code> and <code>e</code> for these two fundamental constants. Calc also has the unique 
+     ability to recognize the special Unicode fraction characters, and all the alternative characters of <code>&#x1D6D1;</code> to
+     also represent their respective values (as in <code>&#x1D6D1;</code> = <code>3.14159...</code> or <code>&#x00BC;</code> = <code>1 / 4</code>).
+  <p>Some operators and operations require integer values (such as factorial and the logical bit operations). If the value given is not integral an error will
+     be displayed and the calculation aborted. Most of the basic arithmetic operators can operate on rational fractions. The trig,
+     log, and power operations do not. Therefore, in rational mode, if an operation returns a decimal value, Calc will attempt
+     to convert it to a rational fraction, which may look very strange. Also, in rational mode, fractions will also be maintained
+     in canonical form, that is, with the least common denominator.
+  <p>Calc has the capability to define and use variables, which are simply named representations of values. Variable names can be
+     of any length, but must start with either an underscore (<code>"_"</code>) or a letter, and may contain any combination of
+     underscore, letters, and digits.  Note that loop variables (see <code>LOOP</code> statement below) follow the same rules,
+     except they must start with a dollar sign (<code>"$"</code>). <em>Note that the predefined constant, function, and statement
+     names may NOT be used as variable names.</em> The value of a variable is the value last assigned to it by
+     one of the assignment operators.  If no value has been previously assigned the value will be <code>null</code>.
+  <p>Values can be grouped into lists of values (an <i>array</i>), or into sets of key/value pairs (an <i>object</i>). Arrays can
+     be multi-dimensional. The inside dimensions do not have to be all the same length. The types of values in an array need not
+     be homogeneous. And, in fact, the values in an array can be objects as well as simple values. The keys in an object must be
+     be either identifiers (same rules as variable names), or strings, but the values can be anything (even other objects, or arrays
+     or just simple values).
+  <p>To reference values in arrays or objects the following syntax can be used:  <i>variable</i><code>[</code> <i>expr</i> <code>]</code>
+     where the expression must evaluate to an integer value (for arrays) or the name of a key (for objects). Members of an object
+     can also be referenced by <i>variable</i><code>.</code><i>member</i> (where <i>member</i> is the identifier or string referencing
+     a key of one of the key/value pairs in the object.  All this is consistent with JavaScript, or JSON usage (with the slight
+     variation that keys can be identifiers here).
+  <p>Array or object constants can be expressed using this JSON notation, as in <code>{ a: 1, b:2, c:'abc', d:[ 1,3,4 ] }</code> or
+     <code>[ 1, 3, 5, { a:false, b:true }, 15, 17 ]</code> or <code>[ [ 1, 3, 5 ], [ 2, 4, 6 ] ]</code> or
+     <code>{ first: { "flag": true, "message": 'Testing' }, second: { "flag":true, "message": 'Working' } }</code>.
+     Note that string object keys (as in <code>"key"</code> do NOT reference the same element as an identifier key (as in
+     <code>key</code>).  Therefore, this is legal: <code>value = { "flag": true, flag: 'Red' }</code> and the elements are
+     accessed as <code>value."flag"</code> and <code>value.flag</code>.
+  <h3>Modes and Precision</h3>
+  <p>Calc can do essentially arbitrary precision arithmetic. It can also do arithmetic on rational fractions (as in <code>1/4 + 1/2 = 3/4</code>). The default setting is to do decimal arithmetic, but this can adjust using either command line options (see
+      <code>-rational</code> and <code>-decimal</code> above), or using directives during execution.  The default precision for
+      all calculations 128-bit arithmetic, or approximately 34 digits of decimal precision. The precision can be adjusted up to
+      12,500 (due to somewhat arbitrary restrictions on our calculation of the value of <code>&#x1D6D1;</code>) using any of
+      several directives.
+  <p>Trigonometric calculations are, by default, done in radians, but this can be changed to use degrees using a directive.
+  <h3>Formats</h3>
+  <p>The results of most operations can be displayed using alternative formats for better comprehension. To specify an alternative
+     format, append <code>@<i>format</i></code> to the expression. The available formats are:
+  <center>
+    <h4>Formats</h4>
+    <table>
+      <tr>
+        <th width="100">Format</th>
+        <th width="200">Description</th>
+      </tr>
+      <tr><td><code>@k</code></td><td>Use kilobyte, megabyte, etc. notation for the value</td></tr>
+      <tr><td><code>@x</code></td><td>Display the value in hexadecimal notation (integers or strings only)</td></tr>
+      <tr><td>&nbsp;</td><td>... more to come ...</td></tr>
+    </table>
+  </center>
   <h3>Available Operators</h3>
   <p>There are a wide variety of arithmetic and logical operators available, as well as a number of common arithmetic functions that can be used.
   <center>
@@ -239,6 +311,47 @@ code {
         <td>perform the bit op, reassign to variable</td><td>right to left</td></tr>
   </table>
   </center>
+  <h3>Statements</h3>
+  <p>In addition to the functions and operators listed above, Calc has three different statements which can be used to do
+     iterative or repeated calculations, and to select between actions based on the value of an expression. These are the <code>LOOP</code>, <code>WHILE</code> and <code>IF</code> statements.
+  <p>The syntax for each is as follows:<br>
+     <code>LOOP</code>&nbsp;[ <i>loopvar</i> <code>IN</code> ] <i>expr</i> [ <code>..</code> or <code>&#x2026;</code> <i>expr</i> ] [ <code>,</code> <i>expr</i> ]<br>
+     <code>WHILE</code>&nbsp;<i>expr</i> <code>{</code> <i>statements or expressions</i> <code>}</code><br>
+     <code>IF</code>&nbsp;<i>expr</i>&nbsp;<code>{</code> <i>statements or expressions</i> <code>}</code> [ <code>ELSE {</code> <i>statements or expressions</i> <code>}</code> ]
+  <p>The <code>LOOP</code> statement will repeatedly execute the block of statements based on several conditions:
+     <ul><li>if only one expression is listed, the loop will be repeated that number of times, starting from one</li>
+         <li>if the <i>expr</i> <code>..</code> <i>expr</i> form is used the loop will be repeated starting from the
+             first value, until the second value is reached, incrementing by one each time</li>
+         <li>if the <code>,</code> <i>expr</i> is given, the loop is repeated starting from either one, or the first expression value, incrementing by this <i>step</i> expression until the value reaches the maximum.
+     </ul>
+     In any case, the optional loop variable will be set to the value of the indexing expression for each time through the loop.
+     The loop variable can be referenced inside the statement block, but nowhere else.  A loop variable has the same naming
+     rules as a regular variable, but must start with <code>$</code>. Note that inside an interpolated string (inside the loop
+     block) the value of a loop variable can be accessed via <code>$$i</code> or alternatively (and more verbosely) as
+     <code>${$i}</code>.
+     Note that the loop can go in reverse if the step value is negative, and that the start and end values can also be negative
+     in this case.
+  <p>The <code>WHILE</code> statement will execute the block of statements as long as the <i>expr</i> evaluates to
+     <code>true</code> (or the result can be converted to a boolean <code>true</code> value).
+     This means the block might not be executed at all if the expression evaluates initially to <code>false</code>.
+     If the code inside the statement block requires knowledge of which iteration is currently being executed a regular variable
+     should be used (that is, there is no concept of a <i>loopvar</i> as in the <code>LOOP</code> statement).
+  <p>The <code>IF</code> statement evaluates the expression and executes the code block only if the expression evaluates to a
+     boolean <code>true</code> value. If the optional <code>ELSE</code> block is given and the expression evaluates to
+     <code>false</code> that block will be executed instead.
+  <h3>Functions</h3>
+  <p>In addition to the predefined functions above, Calc allows new functions to be defined (unfortunately they do not support
+     function parameters yet) that can be used repeatedly without having to retype the same expression.
+  <p>The syntax for a function definition is:<br>
+     <code>def</code>&nbsp;<i>name</i> <code>= {</code> <i>expressions or statements</i> <code>}</code>
+  <p>The value of a function is the value of the last expression evaluated inside it (note that the other statements have the same
+     semantics). Functions are referenced by simply invoking their name.  For example: <code>def a = { 1 }</code> gives <code>a = 1</code>, and <code>def b = { a }</code> gives <code>b = 1</code>. Redefining the underlying function will also change the value of
+     any functions that use it. So, without changing the definition of <code>b</code>, we can redefine <code>def a={2}</code>
+     which will give <code>b = 2</code>.
+     <p>A function can be used anywhere a variable can be used (which is pretty much everywhere).
+     Functions can also reference loop variables, which are normally not allowed outside loops, and will work properly as long
+     as they are only invoked inside a <code>LOOP</code> for which the loop variable is declared. In other words, functions are
+     parsed along with all other expressions, but they are stored as parse trees, and are not evaluated until they are invoked.
   <h3>Directives</h3>
   <p>Various directives can be given within a script or on a separate input line in REPL mode that will affect the operation of the calculator. Some of them allow you to change the options given on the command line, while others are only available from within the script.
   <center>
@@ -271,18 +384,9 @@ code {
   </center>
   <h3>TODO Items for This Document</h3>
   <ul>
-    <li>def statement syntax</li>
-    <li>loop statement syntax, loop variables, nested loops</li>
-    <li>while statement syntax</li>
-    <li>if statement syntax</li>
-    <li>interpolated string syntax, including new $var, $&dollar;loopvar and $&lbrace;expr&rbrace;, treatement of null and quoting</li>
     <li>REPL commands</li>
     <li>Explanation of :include with -inputDir searching</li>
-    <li>Variable naming conventions</li>
-    <li>Unicode variants of pi, and other things (minus)</li>
-    <li>Syntax of various flavors of strings and escape sequences</li>
-    <li>JSON format</li>
-    <li>Format specifiers and formats</li>
+    <li>Finish format specifiers and formats</li>
     <li>Exceptions to decimal precision (i.e., for trig, log), and also in doing factorial? or others that don't respect the precision, also limits on pi/e digits</li>
     <li>Discussion on NaN, and Infinity</li>
     <li>Explain "join" operation with 1, 2, 3+ values</li>
