@@ -38,6 +38,9 @@
 	    23-Feb-2021 (rlwhitcomb)
 		Line up the buttons nicer; add "version" button. Change help prompt
 		to version prompt.
+	    22-Mar-2021 (rlwhitcomb)
+		Extra line in version dialog (to match the console display). Match colors better.
+		Spiff up the layout, colors, and styles; requires new Pivot code.
 
      ========================================================================== -->
 
@@ -59,16 +62,19 @@
 
     <bxml:define>
 	<Prompt bxml:id="versionPrompt" title="Version" messageType="QUESTION"
-		    message="" preferredWidth="500">
+		message="" preferredWidth="500"
+		styles="{messageColor:'blue',messageFont:{bold:true,size:'120%'}}">
 	    <BoxPane orientation="vertical" styles="{horizontalAlignment:'center'}">
-		<Label bxml:id="versionText" text="" styles="{color:'limegreen'}"/>
-		<Label bxml:id="buildText" text=""/>
-		<Label bxml:id="copyrightText" text=""/>
-		<Label bxml:id="javaText" text=""/>
+		<Label bxml:id="versionText" text="" styles="{color:'limegreen',font:{size:'110%',bold:true}}"/>
+		<Label text=""/>
+		<Label bxml:id="buildText" text="" styles="{color:'grey',font:{size:'110%'}}"/>
+		<Label bxml:id="copyrightText" text="" styles="{color:'grey',font:{size:'110%'}}"/>
+		<Label bxml:id="javaText" text="" styles="{color:'grey',font:{size:'110%'}}"/>
 	    </BoxPane>
 	</Prompt>
     </bxml:define>
 
+<FillPane styles="{padding:{top:0,left:8,bottom:0,right:8}}">
     <TablePane>
 	<columns>
 	    <TablePane.Column width="1*"/>
@@ -125,18 +131,18 @@
 		</BoxPane>
 	    </TablePane.Row>
 	    <TablePane.Row height="1*">
-		<SplitPane orientation="vertical" splitRatio="0.5">
+		<SplitPane orientation="vertical" splitRatio="0.4">
 		    <top>
-			<Border title=" Expression " styles="{padding:4}">
+			<Border title=" Result " styles="{padding:{top:0,left:10,bottom:4,right:10},font:{size:18,bold:true},cornerRadii:10,backgroundColor:11}">
 			    <ScrollPane horizontalScrollBarPolicy="fill" verticalScrollBarPolicy="fill_to_capacity" >
-				<TextArea bxml:id="inputTextArea"/>
+				<TextArea bxml:id="outputTextArea"/>
 			    </ScrollPane>
 			</Border>
 		    </top>
 		    <bottom>
-			<Border title=" Result " styles="{padding:4}">
+			<Border title=" Expression " styles="{padding:{top:0,left:10,bottom:4,right:10},font:{size:18,bold:true},cornerRadii:10,backgroundColor:11}">
 			    <ScrollPane horizontalScrollBarPolicy="fill" verticalScrollBarPolicy="fill_to_capacity" >
-				<TextArea bxml:id="outputTextArea"/>
+				<TextArea bxml:id="inputTextArea"/>
 			    </ScrollPane>
 			</Border>
 		    </bottom>
@@ -151,4 +157,5 @@
 	</rows>
     </TablePane>
 
+</FillPane>
 </Window>
