@@ -44,6 +44,8 @@
  *	    that are supposedly fixed now.
  *	10-Mar-2021 (rlwhitcomb)
  *	    Testing Roman numeral conversions.
+ *	22-Mar-2021 (rlwhitcomb)
+ *	    A few more Roman numeral tests.
  */
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -480,16 +482,16 @@ public class TestNumericUtil
 	};
 	private static final String romanInputs[] = {
 	    "MMXXI", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X",
-	    "XI", "XII", "XIII", "XIV", "XV", "XVI", "XIX", "XXX", "XXXIX", "XL",
-	    "XLI", "XLIV", "XLV", "XLVI", "L", "LXXXIX", "XC", "XCI", "XCIV", "XCVI",
-	    "XCIX", "C", "CI", "CCXCIX", "CD", "D", "DCIX", "DCCCXCIX", "M", "MI",
+	    "XI", "XII", "XIII", "XIV", "XV", "XVI", "XVIII", "XIX", "XXX", "XXXIX", "XL",
+	    "XLI", "XLIV", "XLV", "XLVI", "XLVIII", "L", "LII", "LXXXVIII", "LXXXIX", "XC", "XCI", "XCIV", "XCVI",
+	    "XCIX", "C", "CI", "CCXVII", "CCXCIX", "CD", "D", "DXLV", "DCIX", "DCCCXCIX", "M", "MI",
 	    "MCMLXVII", "MM", "MMI", "MMMCMXCIX"
 	};
 	private static final int romanValues[] = {
 	    2021, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
-	    11, 12, 13, 14, 15, 16, 19, 30, 39, 40,
-	    41, 44, 45, 46, 50, 89, 90, 91, 94, 96,
-	    99, 100, 101, 299, 400, 500, 609, 899, 1000, 1001,
+	    11, 12, 13, 14, 15, 16, 18, 19, 30, 39, 40,
+	    41, 44, 45, 46, 48, 50, 52, 88, 89, 90, 91, 94, 96,
+	    99, 100, 101, 217, 299, 400, 500, 545, 609, 899, 1000, 1001,
 	    1967, 2000, 2001, 3999
 	};
 
