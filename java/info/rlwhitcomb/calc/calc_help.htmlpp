@@ -32,6 +32,10 @@ code {
    font-weight: bold;
 }
 
+.underline {
+   text-decoration: underline;
+}
+
 .redbutton {
    font-family: Verdana, Helvetica, Arial, Sans-Serif;
    font-size: 24pt;
@@ -64,7 +68,9 @@ code {
   <p>An expression calculator that combines (nearly) unlimited precision decimal arithmetic with a rich assortment
        of operators and functions to give the ability to calculate nearly any arithmetic expression.
   <p>As input, the expression calculator can operate on an expression given entirely on the command line (may need to be
-       quoted for certain operator characters); in a <a href="https://en.wikipedia.org/wiki/Read-eval-print_loop">REPL</a> loop where a prompt is displayed, the input lines are evaluated
+       quoted for certain operator characters); in <a href="https://en.wikipedia.org/wiki/Read-eval-print_loop">REPL</a> mode
+       (<span class="underline">R</span>ead, <span class="underline">E</span>val, <span class="underline">P</span>rint
+        <span class="underline">L</span>oop) where a prompt is displayed, the input lines are evaluated
        one-at-a-time, and the results displayed; from a file for predefined calculations; or inside a simple GUI frame.
   <h3>Command Line</h3>
   <p>The command is assumed to have either the name of a file to process, or an expression to evaluate. There may also be options specified (see the next section). If there is a single value given and there exists a file by that name (possibly in another directory given by the prior <code>-inputdir</code> option), then that file is read, the contents parsed, and all the expressions evaluated. Otherwise, if there are more than one argument on the command line, or the single argument does not name a file, then the command line is taken as a single string, parsed, and then evaluated.
@@ -99,6 +105,24 @@ code {
     <tr><td><code>-inputdir</code> <i>directory</i></td><td>Specify a default directory for files to be processed</td><td><code>-input</code>, <code>-dir</code></td></tr>
     <tr><td><code>-help</code></td><td>Display this help page</td><td><code>-h</code>, <code>-?</code></td></tr>
     <tr><td><code>-version</code></td><td>Display on the console the version information for the program</td><td><code>-vers</code>, <code>-ver</code>, <code>-v</code></td></tr>
+  </table>
+  </center>
+  <h3>Read, Eval, Print Loop Commands</h3>
+  <p>In REPL mode, in addition to expressions and directives (as described below), there are a few commands available to do other
+     things, mostly as alternatives to command-line options.  These commands are as follows:
+  <center>
+  <h3>REPL Commands</h3>
+  <table>
+    <tr>
+      <th width=100>Command</th>
+      <th width=300>Description</th>
+      <th width=200>Aliases</th>
+      <th width=200>Command-Line Equivalent</th>
+    </tr>
+    <tr><td><code>quit</code></td><td>Exit the program normally.</td><td><code>exit</code>, <code>:quit</code>, <code>:exit</code>,<br><code>:q</code>, <code>:e</code>, <code>:x</code></td><td></td></tr>
+    <tr><td><code>help</code></td><td>Display the HTML help page in the browser.</td><td><code>?</code>, <code>:help</code>, <code>:?</code></td><td><code>-help</code></td></tr>
+    <tr><td><code>version</code></td><td>Display program version information.</td><td><code>:version</code>, <code>:vers</code>,<br><code>:ver</code>, <code>:v</code></td><td><code>-version</code></td></tr>
+    <tr><td><code>gui</code></td><td>Switch to GUI mode</td><td><code>:gui</code>, <code>:g</code></td><td><code>-gui</code></td></tr>
   </table>
   </center>
   <h3>Values, Constants, and Variables</h3>
@@ -137,7 +161,9 @@ code {
      construct inside an interpolated string is not allowed, sadly.
   <p>Note that string results are always finally displayed / returned using double quotes (and double quotes internally escaped),
      regardless of the quoting used to construct them, which includes interpolated strings -- the result is always just a string
-     with the values pieced into it.
+     with the values pieced into it. String values are stored in variables without any surrounding quotes, and the escaped
+     characters are interpreted and stored as their actual codepoints. This means that string values inserted into interpolated
+     strings will be inserted as they are stored (without quotes, etc.).
   <p>Calc reserves the names <code>pi</code> and <code>e</code> for these two fundamental constants. Calc also has the unique 
      ability to recognize the special Unicode fraction characters, and all the alternative characters of <code>&#x1D6D1;</code> to
      also represent their respective values (as in <code>&#x1D6D1;</code> = <code>3.14159...</code> or <code>&#x00BC;</code> = <code>1 / 4</code>).
@@ -403,7 +429,7 @@ code {
     <tr><td><code>:mixed</code></td><td>Unit multiplier based on powers of 2 (same as <code>:binary</code>), but with SI suffix <i>(default)</i></td><td><code>:mix</code></tr></tr>
     <tr><td><code>:clear</code> [ <i>id</i> ( <code>,</code> <i>id</i> ) * ]</td><td>Clear all or only the specified variables (set values to <code>null</code>)</td><td><code>:clr</code></td></tr>
     <tr><td><code>:echo</code> <i>expr</i></td><td>Echo the value of the expression to the output</td><td></td></tr>
-    <tr><td><code>:include</code> <i>string</i></td><td>Include the file named by <i>string</i></td><td></td></tr>
+    <tr><td><code>:include</code> <i>string</i></td><td>Include the file(s) named by <i>string</i></td><td></td></tr>
     <tr><td><code>:rational</code> <i>mode_option</i></td><td>Set the rational calculation mode where <i>mode_option</i> is one of:<br><code>on</code>, <code>off</code>, <code>true</code>, <code>false</code>, <code>pop</code>, <code>previous</code>, <code>prev</code>, or <i>variable</i><br><i>(default is <code>off</code>, or the value set on the command line)</i></td><td><code>:ration</code>, <code>:fraction</code>, <code>:frac</code></td></tr>
     <tr><td><code>:timing</code> <i>mode_option</i></td><td>Set the timing mode (same <i>mode_option</i> choices as for <code>:rational</code>)<br><i>(default is <code>off</code> or the value set on the command line)</i></td><td><code>:time</code></td></tr>
     <tr><td><code>:debug</code> <i>mode_option</i></td><td>Set the debug mode (same <i>mode_option</i> choices as for <code>:rational</code>)<br><i>(default is <code>off</code> or the value set on the command line)</i></td><td><code>:deb</code></td></tr>
@@ -411,10 +437,28 @@ code {
     <tr><td><code>:quiet</code> <i>mode_option</i></td><td>Set quiet mode<br><i>(default is <code>off</code> or the value on command line)</i></td><td></td></tr>
   </table>
   </center>
+  <h3>Notes on Directives</h3>
+  <p>The <i>string</i> argument for the <code>:include</code> directive can be a comma-separated list of file names, with or without
+     paths. If a file cannot be read and there is a previous input directory available (set either by a previous file with a path
+     given, or by the <code>-inputDir</code> command-line option) then that directory is searched for the file. If not found there,
+     then the string is presumed not to be a file name, and the value of the string itself is processed as an expression. Note: this is
+     the same process as used for strings given on the command line.
+  <p>For directives which use a <i>mode_option</i>, the available values are as follows:
+  <ul><li><code>on</code> or <code>true</code> = set the mode <code><i>on</i></code>, and save the previous value in the stack</li>
+      <li><code>off</code> or <code>false</code> = set the mode <code><i>off</i></code>, and save the previous value</li>
+      <li><code>pop</code>, <code>previous</code>, or <code>prev</code> = pop the previous value off the stack and set the mode to
+          that previous value</li>
+  </ul>
+  <p>The initial value is as specified in the table above (always <code><i>off</i></code>, actually), or the value given by
+     the corresponding command-line option. If there are no more entries in the stack when the <code>pop</code> option is given then
+     the value will be set to <code><i>off</i></code>.
+  <p>If a string constant of any kind is given as the argument to <code>:echo</code> the surrounding quotes will be removed, and any
+     embedded quotes will be unescaped before the message is displayed. Obviously, the same is true for the contents of variables
+     (since the values are stored this way).
+  <p>The only effect of debug mode is to display the parse tree (in LISP format) before the expression(s) is/are evaluated.
+  <p>Timing mode displays the total parsing and execution time (to nanosecond precision on some systems) after the results are displayed.
   <h3>TODO Items for This Document</h3>
   <ul>
-    <li>REPL commands</li>
-    <li>Explanation of :include with -inputDir searching</li>
     <li>More examples of KB input and output, with the modes explained</li>
     <li>Exceptions to decimal precision (i.e., for trig, log), and also in doing factorial? or others that don't respect the precision, also limits on pi/e digits</li>
     <li>Discussion on NaN, and Infinity</li>
@@ -422,8 +466,8 @@ code {
     <li>Expand on GUI operation, including examples</li>
     <li>List of example programs, include examples in this document</li>
     <li>Interactions with Tester (use "mkcanon" and "-nocolors")</li>
-    <li>Explain use of pop/prev with directives</li>
     <li>Explain "silent" operation WRT "eval", "loop", interpolated strings, functions</li>
+    <li>Notes on colors and the changes with dark and light backgrounds</li>
   </ul>
   <h3>GUI operations</h3>
   <p>The GUI window can be opened using the "<code>cg</code>" command (or on Windows only, the <code>``</code> command), or by entering the <code>gui</code> command in REPL mode.  The following window will be presented with the focus initially in the top "Expression" field.

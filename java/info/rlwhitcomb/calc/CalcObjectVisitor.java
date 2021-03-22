@@ -683,7 +683,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitTimingDirective(CalcParser.TimingDirectiveContext ctx) {
-	    processModeOption(ctx.modeOption(), timingModeStack, (mode) -> {
+	    processModeOption(ctx.modeOption(), timingModeStack, mode -> {
 		boolean previousMode = Calc.setTimingMode(mode);
 		displayActionMessage("%calc#timingMode", mode);
 		return previousMode;
@@ -694,7 +694,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitDebugDirective(CalcParser.DebugDirectiveContext ctx) {
-	    processModeOption(ctx.modeOption(), debugModeStack, (mode) -> {
+	    processModeOption(ctx.modeOption(), debugModeStack, mode -> {
 		boolean previousMode = Calc.setDebugMode(mode);
 		displayActionMessage("%calc#debugMode", mode);
 		return previousMode;
@@ -705,7 +705,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitRationalDirective(CalcParser.RationalDirectiveContext ctx) {
-	    processModeOption(ctx.modeOption(), rationalModeStack, (mode) -> {
+	    processModeOption(ctx.modeOption(), rationalModeStack, mode -> {
 		boolean previousMode = setRationalMode(mode);
 		displayActionMessage("%calc#rationalMode",
 			Intl.getString(mode ? "calc#rational" : "calc#decimal"));
@@ -717,7 +717,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitResultsOnlyDirective(CalcParser.ResultsOnlyDirectiveContext ctx) {
-	    processModeOption(ctx.modeOption(), resultsOnlyModeStack, (mode) -> {
+	    processModeOption(ctx.modeOption(), resultsOnlyModeStack, mode -> {
 		return Calc.setResultsOnlyMode(mode);
 	    });
 
@@ -726,7 +726,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitQuietDirective(CalcParser.QuietDirectiveContext ctx) {
-	    processModeOption(ctx.modeOption(), quietModeStack, (mode) -> {
+	    processModeOption(ctx.modeOption(), quietModeStack, mode -> {
 		return Calc.setQuietMode(mode);
 	    });
 
