@@ -151,6 +151,8 @@
  *	    and just above the comparison / relational operators.
  *	09-Mar-2021 (rlwhitcomb)
  *	    Alternate argument lists for "FRAC".
+ *	23-Mar-2021 (rlwhitcomb)
+ *	    Add "upper" and "lower" functions (for strings).
  */
 
 grammar Calc;
@@ -224,6 +226,7 @@ expr
    | FIB expr                            # fibExpr
    | BN expr                             # bernExpr
    | FRAC ( STRING | ISTRING | expr3 | expr2 )   # fracExpr
+   | ( UPPER | LOWER ) expr              # caseConvertExpr
    | EVAL expr                           # evalExpr
    | FACTORS expr                        # factorsExpr
    | PFACTORS expr                       # primeFactorsExpr
@@ -439,6 +442,10 @@ FIB      : F I B ;
 BN       : B N ;
 
 FRAC     : F R A C ;
+
+UPPER    : U P P E R ;
+
+LOWER    : L O W E R ;
 
 EVAL     : E V A L ;
 

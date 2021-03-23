@@ -204,6 +204,8 @@
  *	    Trap ArithmeticException in "FRAC".
  *	18-Mar-2021 (rlwhitcomb)
  *	    Regularize the uppercasing of results with formats.
+ *	23-Mar-2021 (rlwhitcomb)
+ *	    Add upper/lower functions and @u, @l formats.
  */
 package info.rlwhitcomb.calc;
 
@@ -265,7 +267,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	/** Whether trig inputs are in degrees or radians. */
 	private TrigMode trigMode;
 
-	/** The kind of units to use for the ",k" format. */
+	/** The kind of units to use for the "@k" format. */
 	private RangeMode units = RangeMode.MIXED;
 
 	/** Decimal vs. rational/fractional mode ({@code true} for rational); default {@code false}. */
@@ -753,6 +755,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 		StringBuilder valueBuf = new StringBuilder();
 		boolean toUpperCase    = false;
+		boolean toLowerCase    = false;
 
 		switch (formatChar) {
 		    case 'H':
@@ -762,6 +765,16 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			// TODO: convert to hours
 			break;
 
+		    case 'U':
+		    case 'u':
+			toUpperCase = true;
+			valueBuf.append(toStringValue(this, result));
+			break;
+		    case 'L':
+		    case 'l':
+			toLowerCase = true;
+			valueBuf.append(toStringValue(this, result));
+			break;
 		    case 'D':
 		    case 'd':
 			valueBuf.append(toDecimalValue(this, result, mc, ctx).toPlainString());
@@ -864,7 +877,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			throw new CalcExprException(ctx, "%calc#illegalFormat", format);
 		}
 		// Set the "result" for the case of interpolated strings with formats
-		result = resultString = toUpperCase ? valueBuf.toString().toUpperCase() : valueBuf.toString();
+		result = resultString = toUpperCase ? valueBuf.toString().toUpperCase()
+				      : toLowerCase ? valueBuf.toString().toLowerCase()
+				      : valueBuf.toString();
 	    }
 	    else {
 		resultString = toStringValue(this, result);
@@ -1816,6 +1831,19 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    catch (ArithmeticException ae) {
 		// Possible divide by zero errors (at least)
 		throw new CalcExprException(ae, ctx);
+	    }
+	}
+
+	@Override
+	public Object visitCaseConvertExpr(CalcParser.CaseConvertExprContext ctx) {
+	    TerminalNode upper = ctx.UPPER();
+	    String exprString  = getStringValue(ctx.expr());
+
+	    if (upper != null) {
+		return exprString == null ? exprString : exprString.toUpperCase();
+	    }
+	    else {
+		return exprString == null ? exprString : exprString.toLowerCase();
 	    }
 	}
 
