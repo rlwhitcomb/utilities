@@ -44,6 +44,10 @@
  *	    that are supposedly fixed now.
  *	10-Mar-2021 (rlwhitcomb)
  *	    Testing Roman numeral conversions.
+ *	22-Mar-2021 (rlwhitcomb)
+ *	    A few more Roman numeral tests.
+ *	22-Mar-2021 (rlwhitcomb)
+ *	    Some lower-case Roman numeral tests.
  */
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -479,17 +483,17 @@ public class TestNumericUtil
 	    "one hundred thousand, one hundred"
 	};
 	private static final String romanInputs[] = {
-	    "MMXXI", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X",
-	    "XI", "XII", "XIII", "XIV", "XV", "XVI", "XIX", "XXX", "XXXIX", "XL",
-	    "XLI", "XLIV", "XLV", "XLVI", "L", "LXXXIX", "XC", "XCI", "XCIV", "XCVI",
-	    "XCIX", "C", "CI", "CCXCIX", "CD", "D", "DCIX", "DCCCXCIX", "M", "MI",
-	    "MCMLXVII", "MM", "MMI", "MMMCMXCIX"
+	    "MMXXI", "I", "II", "III", "IV", "V", "VI", "VII", "viii", "IX", "X",
+	    "XI", "XII", "XIII", "xiv", "XV", "XVI", "XVIII", "XIX", "XXX", "XXXIX", "XL",
+	    "XLI", "XLIV", "XLV", "XLVI", "XLVIII", "L", "LII", "LXXXVIII", "LXXXIX", "XC", "XCI", "XCIV", "XCVI",
+	    "XCIX", "C", "CI", "ccxvii", "CCXCIX", "CD", "D", "dxlv", "DCIX", "DCCCXCIX", "M", "MI",
+	    "mcmlxvii", "MM", "MMI", "MMMCMXCIX"
 	};
 	private static final int romanValues[] = {
 	    2021, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
-	    11, 12, 13, 14, 15, 16, 19, 30, 39, 40,
-	    41, 44, 45, 46, 50, 89, 90, 91, 94, 96,
-	    99, 100, 101, 299, 400, 500, 609, 899, 1000, 1001,
+	    11, 12, 13, 14, 15, 16, 18, 19, 30, 39, 40,
+	    41, 44, 45, 46, 48, 50, 52, 88, 89, 90, 91, 94, 96,
+	    99, 100, 101, 217, 299, 400, 500, 545, 609, 899, 1000, 1001,
 	    1967, 2000, 2001, 3999
 	};
 
@@ -681,7 +685,7 @@ public class TestNumericUtil
 		    System.err.println("Input '" + input + "' produced " + value + ", but expected " + expected);
 		    numberOfFailures++;
 		}
-		else if (!converted.equals(input)) {
+		else if (!converted.equals(input.toUpperCase())) {
 		    System.err.println("Value of " + value + " produced '" + converted + "', but expected '" + input + "'");
 		    numberOfFailures++;
 		}

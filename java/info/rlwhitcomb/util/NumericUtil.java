@@ -138,6 +138,8 @@
  *	    Conversions to/from Roman Numerals.
  *	10-Mar-2021 (rlwhitcomb)
  *	    Rework some of the Roman Numeral code.
+ *	22-Mar-2021 (rlwhitcomb)
+ *	    Implement lower-case Roman Numeral recognition and formatting.
  */
 package info.rlwhitcomb.util;
 
@@ -338,6 +340,14 @@ public class NumericUtil
 	 */
 	private static final Pattern ROMAN_PATTERN = Pattern.compile("^(M{0,3})(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$");
 
+	/** The upper case Roman Numeral values. */
+	private static final char[] ROMAN_UPPER_CHARS = {
+	    'M', 'D', 'C', 'L', 'X', 'V', 'I'
+	};
+	/** The lower case Roman Numeral values. */
+	private static final char[] ROMAN_LOWER_CHARS = {
+	    'm', 'd', 'c', 'l', 'x', 'v', 'i'
+	};
 	/** The maximum input value we can convert to a Roman numeral. */
 	private static final int ROMAN_MAX_VALUE = 3999;
 
@@ -1305,23 +1315,24 @@ public class NumericUtil
 	/**
 	 * Check and convert a Roman Numeral string to an integer.
 	 *
-	 * @param input	The input (presumably a valid Roman Numeral.
+	 * @param input	The input (presumably a valid Roman Numeral), either upper- or lower-case.
 	 * @return	The input translated to an integer.
 	 * @throws	IllegalArgumentException if the input is malformed.
 	 */
 	public static int convertFromRoman(final String input) {
-	    Matcher m = ROMAN_PATTERN.matcher(input);
+	    Matcher m = ROMAN_PATTERN.matcher(input.toUpperCase());
 	    if (m.matches()) {
+		char[] chars = ROMAN_UPPER_CHARS;
 		String thousands = m.group(1);
 		String hundreds  = m.group(2);
 		String tens      = m.group(3);
 		String units     = m.group(4);
 		int result = 0;
 
-		result += countRoman(thousands, 'M', ' ', ' ', 1000);
-		result += countRoman(hundreds,  'C', 'D', 'M', 100);
-		result += countRoman(tens,      'X', 'L', 'C', 10);
-		result += countRoman(units,     'I', 'V', 'X', 1);
+		result += countRoman(thousands, chars[0], ' ', ' ', 1000);
+		result += countRoman(hundreds,  chars[2], chars[1], chars[0], 100);
+		result += countRoman(tens,      chars[4], chars[3], chars[2], 10);
+		result += countRoman(units,     chars[6], chars[5], chars[4], 1);
 
 		return result;
 	    }
@@ -1350,7 +1361,7 @@ public class NumericUtil
 	}
 
 	/**
-	 * Convert a (small) integer value to a Roman Numeral string.
+	 * Convert a (small) integer value to a Roman Numeral string (uppercase).
 	 *
 	 * @param value	A value in the range {@code 1..3999} to be converted
 	 * 		to a Roman numeral.
@@ -1359,27 +1370,42 @@ public class NumericUtil
 	 * @throws IllegalArgumentException if the input value is out of range.
 	 */
 	public static String convertToRoman(final int value) {
+	    return convertToRoman(value, true);
+	}
+
+	/**
+	 * Convert a (small) integer value to a Roman Numeral string.
+	 *
+	 * @param value	A value in the range {@code 1..3999} to be converted
+	 * 		to a Roman numeral.
+	 * @param upper	Whether to convert to UPPER case ({@code true}) or lower case.
+	 * @return	The converted string.
+	 * @see #convertFromRoman
+	 * @throws IllegalArgumentException if the input value is out of range.
+	 */
+	public static String convertToRoman(final int value, final boolean upper) {
 	    if (value < 1 || value > ROMAN_MAX_VALUE) {
 		throw new Intl.IllegalArgumentException("util#numeric#outOfRomanRange", value);
 	    }
 
 	    StringBuilder buf = new StringBuilder(30);
+	    char[] charValues = upper ? ROMAN_UPPER_CHARS : ROMAN_LOWER_CHARS;
 	    int current = value;
 	    int thousands, hundreds, tens;
 
 	    thousands = current / 1000;
-	    addRomanDigits(buf, 'M', ' ', ' ', thousands);
+	    addRomanDigits(buf, charValues[0], ' ', ' ', thousands);
 	    current -= thousands * 1000;
 
 	    hundreds = current / 100;
-	    addRomanDigits(buf, 'C', 'D', 'M', hundreds);
+	    addRomanDigits(buf, charValues[2], charValues[1], charValues[0], hundreds);
 	    current -= hundreds * 100;
 
 	    tens = current / 10;
-	    addRomanDigits(buf, 'X', 'L', 'C', tens);
+	    addRomanDigits(buf, charValues[4], charValues[3], charValues[2], tens);
 	    current -= tens * 10;
 
-	    addRomanDigits(buf, 'I', 'V', 'X', current);
+	    addRomanDigits(buf, charValues[6], charValues[5], charValues[4], current);
 
 	    return buf.toString();
 	}
