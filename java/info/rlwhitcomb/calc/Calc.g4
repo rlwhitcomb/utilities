@@ -157,6 +157,8 @@
  *	    Add Roman Numeral constant support, and the ROMAN function.
  *	24-Mar-2021 (rlwhitcomb)
  *	    Add fourth root ("fort").
+ *	24-Mar-2021 (rlwhitcomb)
+ *	    Add two- and three-consecutive equals sign Unicode chars.
  */
 
 grammar Calc;
@@ -553,9 +555,11 @@ COMPARE_OP
 
 EQUAL_OP
        : '==='
+       | '\u2A76'
        | '!=='
        | '\u2262'
        | '=='
+       | '\u2A75'
        | '!='
        | '\u2260'
        ;

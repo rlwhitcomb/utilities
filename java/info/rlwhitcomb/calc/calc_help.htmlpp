@@ -330,9 +330,9 @@ code {
         <i>expr</i>&nbsp;<code> &gt; </code>&nbsp;<i>expr</i></td>
         <td>comparison</td><td>left to right</td></tr>
     <tr><td>10</td><td>
-        <i>expr</i>&nbsp;<code> === </code>&nbsp;<i>expr</i><br>
+        <i>expr</i>&nbsp;<code> === </code>or<code> &#x2A76; </code>&nbsp;<i>expr</i><br>
         <i>expr</i>&nbsp;<code> !== </code>or<code> &#x2262; </code>&nbsp;<i>expr</i><br>
-        <i>expr</i>&nbsp;<code> == </code>&nbsp;<i>expr</i><br>
+        <i>expr</i>&nbsp;<code> == </code>or<code> &#x2A75; </code>&nbsp;<i>expr</i><br>
         <i>expr</i>&nbsp;<code> != </code>or<code> &#x2260; </code>&nbsp;<i>expr</i></td>
         <td>strict equality/inequality<br>equality/inequality</td><td>left to right</td></tr>
     <tr><td>9</td><td>

@@ -212,6 +212,8 @@
  *	    Trap errors on Roman constant conversion to get nicer errors.
  *	24-Mar-2021 (rlwhitcomb)
  *	    Add fourth root function ("fort").
+ *	24-Mar-2021 (rlwhitcomb)
+ *	    Add Unicode two- and three-equals sign symbols.
  */
 package info.rlwhitcomb.calc;
 
@@ -2097,11 +2099,13 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    String op = ctx.EQUAL_OP().getText();
 	    switch (op) {
 		case "===":
+		case "\u2A76":
 		case "!==":
 		case "\u2262": // NOT IDENTICAL
 		    cmp = compareValues(expr1, expr2, true, true);
 		    break;
 		case "==":
+		case "\u2A75":
 		case "!=":
 		case "\u2260": // NOT EQUAL
 		    cmp = compareValues(expr1, expr2, false, true);
@@ -2110,7 +2114,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    switch (op) {
 		case "===":
+		case "\u2A76":
 		case "==":
+		case "\u2A75":
 		    result = (cmp == 0);
 		    break;
 		case "!==":
