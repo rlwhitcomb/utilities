@@ -140,6 +140,8 @@
  *	    Rework some of the Roman Numeral code.
  *	22-Mar-2021 (rlwhitcomb)
  *	    Implement lower-case Roman Numeral recognition and formatting.
+ *	24-Mar-2021 (rlwhitcomb)
+ *	    Beef up the Roman Numeral support with all the Unicode variants.
  */
 package info.rlwhitcomb.util;
 
@@ -335,21 +337,37 @@ public class NumericUtil
 	private static final BigInteger I_TWO = BigInteger.valueOf(2L);
 	private static final BigDecimal D_TWO = BigDecimal.valueOf(2L);
 
-	/**
-	 * Recognizes Roman numerals up to 3999.
-	 */
-	private static final Pattern ROMAN_PATTERN = Pattern.compile("^(M{0,3})(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$");
+	private static final String _T = "\u2182";
+	private static final String _F = "\u2181";
+	private static final String _M = "M\u216F\u2180";
+	private static final String _D = "D\u216E";
+	private static final String _C = "C\u216D";
+	private static final String _L = "L\u216C";
+	private static final String _X = "X\u2169";
+	private static final String _V = "V\u2164";
+	private static final String _I = "I\u2160";
 
-	/** The upper case Roman Numeral values. */
+	/**
+	 * Recognizes Roman numerals up to 39999 (upper case form).
+	 */
+	private static final Pattern ROMAN_PATTERN = Pattern.compile(String.format(
+	    "^([%1$s]{0,3})"
+	    +"([%3$s][%1$s]|[%3$s][%2$s]|[%2$s]?[%3$s]{0,3})"
+	    +"([%5$s][%3$s]|[%5$s][%4$s]|[%4$s]?[%5$s]{0,3})"
+	    +"([%7$s][%5$s]|[%7$s][%6$s]|[%6$s]?[%7$s]{0,3})"
+	    +"([%9$s][%7$s]|[%9$s][%8$s]|[%8$s]?[%9$s]{0,3}|[\u2161-\u2163\u2165-\u2168\u216A-\u216B])$",
+		_T, _F, _M, _D, _C, _L, _X, _V, _I));
+
+	/** The upper case Roman Numeral values for output. */
 	private static final char[] ROMAN_UPPER_CHARS = {
-	    'M', 'D', 'C', 'L', 'X', 'V', 'I'
+	    '\u2182', '\u2181', 'M', 'D', 'C', 'L', 'X', 'V', 'I'
 	};
-	/** The lower case Roman Numeral values. */
+	/** The lower case Roman Numeral values for output. */
 	private static final char[] ROMAN_LOWER_CHARS = {
-	    'm', 'd', 'c', 'l', 'x', 'v', 'i'
+	    '\u2182', '\u2181', 'm', 'd', 'c', 'l', 'x', 'v', 'i'
 	};
 	/** The maximum input value we can convert to a Roman numeral. */
-	private static final int ROMAN_MAX_VALUE = 3999;
+	private static final int ROMAN_MAX_VALUE = 39999;
 
 	/**
 	 * A rational approximation of PI good to ~25 decimal digits.
@@ -1285,26 +1303,29 @@ public class NumericUtil
 	}
 
 
-	private static int countRoman(final String section, final char value) {
+	private static boolean in(final char ch, final String values) {
+	    return values.indexOf(ch) >= 0;
+	}
+
+	private static int countRoman(final String section, final String values) {
 	    int count = 0;
 	    for (int i = 0; i < section.length(); i++) {
-		char ch = section.charAt(i);
-		if (ch == value)
+		if (in(section.charAt(i), values))
 		    count++;
 	    }
 	    return count;
 	}
 
 	private static int countRoman(final String input,
-		final char one, final char five, final char ten, final int multiplier) {
+		final String one, final String five, final String ten, final int multiplier) {
 	    int result = 0;
 	    int length = input.length();
 
-	    if (length == 2 && input.charAt(0) == one && input.charAt(1) == ten)
+	    if (length == 2 && in(input.charAt(0), one) && in(input.charAt(1), ten))
 		result = 9 * multiplier;
-	    else if (length == 2 && input.charAt(0) == one && input.charAt(1) == five)
+	    else if (length == 2 && in(input.charAt(0), one) && in(input.charAt(1), five))
 		result = 4 * multiplier;
-	    else if (length >= 1 && input.charAt(0) == five)
+	    else if (length >= 1 && in(input.charAt(0), five))
 		result = (5 + countRoman(input, one)) * multiplier;
 	    else
 		result = countRoman(input, one) * multiplier;
@@ -1322,18 +1343,27 @@ public class NumericUtil
 	public static int convertFromRoman(final String input) {
 	    Matcher m = ROMAN_PATTERN.matcher(input.toUpperCase());
 	    if (m.matches()) {
-		char[] chars = ROMAN_UPPER_CHARS;
-		String thousands = m.group(1);
-		String hundreds  = m.group(2);
-		String tens      = m.group(3);
-		String units     = m.group(4);
+		String tenthous  = m.group(1);
+		String thousands = m.group(2);
+		String hundreds  = m.group(3);
+		String tens      = m.group(4);
+		String units     = m.group(5);
 		int result = 0;
 
-		result += countRoman(thousands, chars[0], ' ', ' ', 1000);
-		result += countRoman(hundreds,  chars[2], chars[1], chars[0], 100);
-		result += countRoman(tens,      chars[4], chars[3], chars[2], 10);
-		result += countRoman(units,     chars[6], chars[5], chars[4], 1);
+		result += countRoman(tenthous,  _T, "", "", 10000);
+		result += countRoman(thousands, _M, _F, _T, 1000);
+		result += countRoman(hundreds,  _C, _D, _M, 100);
+		result += countRoman(tens,      _X, _L, _C, 10);
+		result += countRoman(units,     _I, _V, _X, 1);
 
+		// Now go through and add up the strange values (if any)
+		for (int i = 0; i < units.length(); i++) {
+		    char ch = units.charAt(i);
+		    if ((ch >= '\u2161' && ch <= '\u2163') ||
+			(ch >= '\u2165' && ch <= '\u2168') ||
+			(ch >= '\u216A' && ch <= '\u216B'))
+			result += (((int) ch) - 0x2160) + 1;
+		}
 		return result;
 	    }
 	    else {
@@ -1363,7 +1393,7 @@ public class NumericUtil
 	/**
 	 * Convert a (small) integer value to a Roman Numeral string (uppercase).
 	 *
-	 * @param value	A value in the range {@code 1..3999} to be converted
+	 * @param value	A value in the range {@code 1..39999} to be converted
 	 * 		to a Roman numeral.
 	 * @return	The converted string.
 	 * @see #convertFromRoman
@@ -1376,7 +1406,7 @@ public class NumericUtil
 	/**
 	 * Convert a (small) integer value to a Roman Numeral string.
 	 *
-	 * @param value	A value in the range {@code 1..3999} to be converted
+	 * @param value	A value in the range {@code 1..39999} to be converted
 	 * 		to a Roman numeral.
 	 * @param upper	Whether to convert to UPPER case ({@code true}) or lower case.
 	 * @return	The converted string.
@@ -1385,27 +1415,31 @@ public class NumericUtil
 	 */
 	public static String convertToRoman(final int value, final boolean upper) {
 	    if (value < 1 || value > ROMAN_MAX_VALUE) {
-		throw new Intl.IllegalArgumentException("util#numeric#outOfRomanRange", value);
+		throw new Intl.IllegalArgumentException("util#numeric.outOfRomanRange", value);
 	    }
 
 	    StringBuilder buf = new StringBuilder(30);
 	    char[] charValues = upper ? ROMAN_UPPER_CHARS : ROMAN_LOWER_CHARS;
 	    int current = value;
-	    int thousands, hundreds, tens;
+	    int tenthousands, thousands, hundreds, tens;
+
+	    tenthousands = current / 10000;
+	    addRomanDigits(buf, charValues[0], ' ', ' ', tenthousands);
+	    current -= tenthousands * 10000;
 
 	    thousands = current / 1000;
-	    addRomanDigits(buf, charValues[0], ' ', ' ', thousands);
+	    addRomanDigits(buf, charValues[2], charValues[1], charValues[0], thousands);
 	    current -= thousands * 1000;
 
 	    hundreds = current / 100;
-	    addRomanDigits(buf, charValues[2], charValues[1], charValues[0], hundreds);
+	    addRomanDigits(buf, charValues[4], charValues[3], charValues[2], hundreds);
 	    current -= hundreds * 100;
 
 	    tens = current / 10;
-	    addRomanDigits(buf, charValues[4], charValues[3], charValues[2], tens);
+	    addRomanDigits(buf, charValues[6], charValues[5], charValues[4], tens);
 	    current -= tens * 10;
 
-	    addRomanDigits(buf, charValues[6], charValues[5], charValues[4], current);
+	    addRomanDigits(buf, charValues[8], charValues[7], charValues[6], current);
 
 	    return buf.toString();
 	}

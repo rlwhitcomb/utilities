@@ -206,6 +206,8 @@
  *	    Regularize the uppercasing of results with formats.
  *	23-Mar-2021 (rlwhitcomb)
  *	    Add upper/lower functions and @u, @l formats.
+ *	24-Mar-2021 (rlwhitcomb)
+ *	    Support for Roman Numeral input and output, and the ROMAN function.
  */
 package info.rlwhitcomb.calc;
 
@@ -741,6 +743,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    Object result           = evaluateFunction(visit(ctx.expr()));
 	    String resultString     = "";
 
+	    BigInteger iValue;
+
 	    TerminalNode formatNode = ctx.FORMAT();
 	    String format           = formatNode == null ? "" : formatNode.getText();
 
@@ -802,7 +806,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			}
 			else {
 			    valueBuf.append('0').append(formatChar);
-			    BigInteger iValue = toIntegerValue(this, result, mc, ctx);
+			    iValue = toIntegerValue(this, result, mc, ctx);
 			    if (iValue.compareTo(BigInteger.ZERO) < 0)
 				convert(iValue.toByteArray(), 16, valueBuf);
 			    else
@@ -820,7 +824,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			}
 			else {
 			    valueBuf.append('0');
-			    BigInteger iValue = toIntegerValue(this, result, mc, ctx);
+			    iValue = toIntegerValue(this, result, mc, ctx);
 			    if (iValue.compareTo(BigInteger.ZERO) < 0)
 				convert(iValue.toByteArray(), 8, valueBuf);
 			    else
@@ -840,7 +844,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			}
 			else {
 			    valueBuf.append('0').append(formatChar);
-			    BigInteger iValue = toIntegerValue(this, result, mc, ctx);
+			    iValue = toIntegerValue(this, result, mc, ctx);
 			    if (iValue.compareTo(BigInteger.ZERO) < 0)
 				convert(iValue.toByteArray(), 2, valueBuf);
 			    else
@@ -848,11 +852,26 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			}
 			break;
 
+		    case 'R':
+			toUpperCase = true;
+			// fall through
+		    case 'r':
+			iValue = toIntegerValue(this, result, mc, ctx);
+			try {
+			    int intValue = iValue.intValueExact();
+			    valueBuf.append("r'");
+			    valueBuf.append(NumericUtil.convertToRoman(intValue, false));
+			    valueBuf.append("'");
+			} catch (ArithmeticException | IllegalArgumentException ex) {
+			    throw new CalcExprException(ex, ctx);
+			}
+			break;
+
 		    case 'K':
 			toUpperCase = true;
 			// fall through
 		    case 'k':
-			BigInteger iValue = toIntegerValue(this, result, mc, ctx);
+			iValue = toIntegerValue(this, result, mc, ctx);
 			try {
 			    long lValue = iValue.longValueExact();
 			    valueBuf.append(NumericUtil.formatToRange(lValue, units));
@@ -1835,6 +1854,18 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	@Override
+	public Object visitRomanExpr(CalcParser.RomanExprContext ctx) {
+	    String exprString = getStringValue(ctx.expr());
+
+	    try {
+		return NumericUtil.convertFromRoman(exprString);
+	    }
+	    catch (IllegalArgumentException ex) {
+		throw new CalcExprException(ex, ctx);
+	    }
+	}
+
+	@Override
 	public Object visitCaseConvertExpr(CalcParser.CaseConvertExprContext ctx) {
 	    TerminalNode upper = ctx.UPPER();
 	    String exprString  = getStringValue(ctx.expr());
@@ -2315,6 +2346,15 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		return fraction;
 	    else
 		return fraction.toDecimal(mc);
+	}
+
+	@Override
+	public Object visitRomanValue(CalcParser.RomanValueContext ctx) {
+	    String constant = ctx.ROMAN_CONST().getText();
+
+	    // Strip the quotes before conversion
+	    String value = CharUtil.stripQuotes(constant.substring(1));
+	    return NumericUtil.convertFromRoman(value);
 	}
 
 	@Override

@@ -167,6 +167,10 @@ code {
   <p>Calc reserves the names <code>pi</code> and <code>e</code> for these two fundamental constants. Calc also has the unique 
      ability to recognize the special Unicode fraction characters, and all the alternative characters of <code>&#x1D6D1;</code> to
      also represent their respective values (as in <code>&#x1D6D1;</code> = <code>3.14159...</code> or <code>&#x00BC;</code> = <code>1 / 4</code>).
+  <p>There is a constant type used to express values as Roman Numerals. The syntax is <code>R'<i>xxxx</i>'</code>, where the
+     digits are the typical Roman values of <code>I</code>, <code>V</code>, <code>X</code>, and so on, but also including the Unicode
+     values in the range of <code>'\u2160'</code> to <code>'\u2182'</code>. You can use the <code>@r</code> or <code>@R</code> formats
+     to display values in this form as well. Note that the range of possible values that can be represented in this way is 1..39,999.
   <p>Some operators and operations require integer values (such as factorial and the logical bit operations). If the value given is not integral an error will
      be displayed and the calculation aborted. Most of the basic arithmetic operators can operate on rational fractions. The trig,
      log, and power operations do not. Therefore, in rational mode, if an operation returns a decimal value, Calc will attempt
@@ -223,6 +227,7 @@ code {
       <tr><td><code>@f</code></td><td>For decimal mode, format the result as a rational fraction</td></tr>
       <tr><td><code>@F</code></td><td>Format as a proper fraction (with possible integer portion)</td></tr>
       <tr><td><code>@j</code></td><td>Format the result as a "pretty printed" JSON result<br>(multiple lines with indents)</td></tr>
+      <tr><td><code>@r</code></td><td>Format the result as a Roman Numeral value</td></tr>
       <tr><td><code>@x</code></td><td>For integers and strings, format in hexadecimal form</td></tr>
       <tr><td><code>@o</code></td><td>For integers and strings, format in octal form</td></tr>
       <tr><td><code>@b</code></td><td>For integers and strings, format in binary form</td></tr>
@@ -308,6 +313,7 @@ code {
             <tr><td><code>FIB</code>&nbsp;<i>expr</i></td><td>Fibonacci number</td></tr>
             <tr><td><code>Bn</code>&nbsp;<i>expr</i></td><td>Bernoulli number</td></tr>
             <tr><td><code>FRAC</code>&nbsp;<i>num</i><code>,</code>&nbsp;<i>den</i><br>or <i>int</i><code>,</code><i>num</i><code>,</code><i>den</i><br>or <i>string</i></td><td>construct a rational fraction</td></tr>
+            <tr><td><code>ROMAN</code>&nbsp;<i>expr</i></td><td>interpret <i>expr</i> as a Roman Numeral</td></tr>
             <tr><td><code>LOWER</code>&nbsp;<i>expr</i></td><td>convert <i>expr</i> to lower case</td></tr>
             <tr><td><code>UPPER</code>&nbsp;<i>expr</i></td><td>convert <i>expr</i> to UPPER case</td></tr>
             <tr><td><code>EVAL</code>&nbsp;<i>expr</i></td><td>evaluate the string result of <i>expr</i></td></tr>

@@ -153,6 +153,8 @@
  *	    Alternate argument lists for "FRAC".
  *	23-Mar-2021 (rlwhitcomb)
  *	    Add "upper" and "lower" functions (for strings).
+ *	23-Mar-2021 (rlwhitcomb)
+ *	    Add Roman Numeral constant support, and the ROMAN function.
  */
 
 grammar Calc;
@@ -226,6 +228,7 @@ expr
    | FIB expr                            # fibExpr
    | BN expr                             # bernExpr
    | FRAC ( STRING | ISTRING | expr3 | expr2 )   # fracExpr
+   | ROMAN expr                          # romanExpr
    | ( UPPER | LOWER ) expr              # caseConvertExpr
    | EVAL expr                           # evalExpr
    | FACTORS expr                        # factorsExpr
@@ -304,6 +307,7 @@ value
    | PI_CONST                    # piValue
    | E_CONST                     # eValue
    | FRAC_CONST                  # fracValue
+   | ROMAN_CONST                 # romanValue
    ;
 
 define
@@ -385,6 +389,10 @@ FRAC_CONST
          | ( '\u215B' | '\u215C' | '\u215D' | '\u215E' )  /* 1/8, 3/8, 5/8, 7/8 */
          ;
 
+ROMAN_CONST
+         : R '\'' [IiVvXxLlCcDdMm\u2160-\u2182] + '\''
+         ;
+
 ABS      : A B S ;
 
 SINH     : S I N H ;
@@ -442,6 +450,8 @@ FIB      : F I B ;
 BN       : B N ;
 
 FRAC     : F R A C ;
+
+ROMAN    : R O M A N ;
 
 UPPER    : U P P E R ;
 
