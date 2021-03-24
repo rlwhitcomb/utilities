@@ -214,6 +214,8 @@
  *	    Add fourth root function ("fort").
  *	24-Mar-2021 (rlwhitcomb)
  *	    Add Unicode two- and three-equals sign symbols.
+ *	24-Mar-2021 (rlwhitcomb)
+ *	    One more Unicode "identical to" symbol.
  */
 package info.rlwhitcomb.calc;
 
@@ -2100,6 +2102,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    switch (op) {
 		case "===":
 		case "\u2A76":
+		case "\u2261": // IDENTICAL TO
 		case "!==":
 		case "\u2262": // NOT IDENTICAL
 		    cmp = compareValues(expr1, expr2, true, true);
@@ -2115,6 +2118,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    switch (op) {
 		case "===":
 		case "\u2A76":
+		case "\u2261": // IDENTICAL TO
 		case "==":
 		case "\u2A75":
 		    result = (cmp == 0);

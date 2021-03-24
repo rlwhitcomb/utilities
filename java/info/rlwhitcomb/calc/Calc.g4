@@ -159,6 +159,8 @@
  *	    Add fourth root ("fort").
  *	24-Mar-2021 (rlwhitcomb)
  *	    Add two- and three-consecutive equals sign Unicode chars.
+ *	24-Mar-2021 (rlwhitcomb)
+ *	    One more Unicode "identical to" symbol.
  */
 
 grammar Calc;
@@ -556,6 +558,7 @@ COMPARE_OP
 EQUAL_OP
        : '==='
        | '\u2A76'
+       | '\u2261'
        | '!=='
        | '\u2262'
        | '=='
