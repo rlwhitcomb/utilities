@@ -208,6 +208,8 @@
  *	    Add upper/lower functions and @u, @l formats.
  *	24-Mar-2021 (rlwhitcomb)
  *	    Support for Roman Numeral input and output, and the ROMAN function.
+ *	24-Mar-2021 (rlwhitcomb)
+ *	    Trap errors on Roman constant conversion to get nicer errors.
  */
 package info.rlwhitcomb.calc;
 
@@ -862,7 +864,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			    valueBuf.append("r'");
 			    valueBuf.append(NumericUtil.convertToRoman(intValue, false));
 			    valueBuf.append("'");
-			} catch (ArithmeticException | IllegalArgumentException ex) {
+			}
+			catch (ArithmeticException | IllegalArgumentException ex) {
 			    throw new CalcExprException(ex, ctx);
 			}
 			break;
@@ -875,7 +878,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			try {
 			    long lValue = iValue.longValueExact();
 			    valueBuf.append(NumericUtil.formatToRange(lValue, units));
-			} catch (ArithmeticException ae) {
+			}
+			catch (ArithmeticException ae) {
 			    throw new CalcExprException(ae, ctx);
 			}
 			break;
@@ -1860,8 +1864,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    try {
 		return NumericUtil.convertFromRoman(exprString);
 	    }
-	    catch (IllegalArgumentException ex) {
-		throw new CalcExprException(ex, ctx);
+	    catch (IllegalArgumentException iae) {
+		throw new CalcExprException(iae, ctx);
 	    }
 	}
 
@@ -2354,7 +2358,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    // Strip the quotes before conversion
 	    String value = CharUtil.stripQuotes(constant.substring(1));
-	    return NumericUtil.convertFromRoman(value);
+	    try {
+		return NumericUtil.convertFromRoman(value);
+	    }
+	    catch (IllegalArgumentException iae) {
+		throw new CalcExprException(iae, ctx);
+	    }
 	}
 
 	@Override
