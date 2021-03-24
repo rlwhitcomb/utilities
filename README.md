@@ -97,10 +97,13 @@ Also see "issues" at https://github.com/rlwhitcomb/utilities/issues
     other mathematical digits, or dingbat numbers
     such as 2460--2473 (1) .. (20) or 2474--2487 or 2488--249b or 24ea, 24eb--24f4, 24f5--24fe, 24ff, 2776..277F, 2780..2789, 278a..2793
     FF10--FF19, osmanya digit 0 at 104a0-104a9, 1d7ce-1d7d7, 1d7d8-1d7e1...1d7ff
-- roman numerals - ROMAN NUMERAL MODE (upper / lower case)
-    2160-216f and 2170-217f, possibly 2180-2182, 2187-2188 (these last two not well supported by fonts)
 - time input and output and arithmetic (like original "at" program in C)
   (also duration, so time - time = duration, or time +- duration = time)
+- Add buttons in GUI for the modes: radio (:def, :dbl, :flt, :unl, :dec) (the latter with a spinner), radio(:deg, :rad),
+  radio(:bin, :si, :mix), checkbox (:rational), checkbox (:timing), checkbox(:debug), checkbox(:resultsonly), checkbox (:quiet)
+  The implementation would be to either just set the mode directly, or to run a small piece of code (depending on if feedback is desired)
+  How would we implement "pop" mode on the checkboxes? (tri-state won't work b/c it cycles through), radio won't work, maybe a little
+  button beside the checkbox??  need an icon for it
 
 - !!null seems like it should work (!!"true" -> true)
 - seems like we could have an "exit from GUI mode back to REPL mode" which is available when running from within REPL mode.
