@@ -401,6 +401,10 @@
 >Defining function 'a' = { loop $i in 10 { $i } }
 >a -> 10
 >eval a -> 10
+>r = R'MCMLXII' -> 1962
+>s = r'ⅿⅽⅿⅼⅹⅶ' -> 1967
+>1962@R -> R'MCMLXII'
+>roman 'xx' + 'ii' -> 22
 >
 >End of expression tests (suite 1).
 >Tests of nested object / array variables.

@@ -360,6 +360,17 @@ def a={ loop $i in 10 { $i }}
 a
 eval a
 
+#
+# Tests of Roman Numerals
+#
+r = R'MCMLXII'
+s = r'ⅿⅽⅿⅼⅹⅶ'
+
+1962 @R
+
+roman 'xx' + 'ii'
+
+
 :echo
 :echo "End of expression tests (suite 1)."
 
