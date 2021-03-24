@@ -41,6 +41,8 @@
 	    22-Mar-2021 (rlwhitcomb)
 		Extra line in version dialog (to match the console display). Match colors better.
 		Spiff up the layout, colors, and styles; requires new Pivot code.
+	    24-Mar-2021 (rlwhitcomb)
+		Changed to use TextPane for input so we can paste in Unicode on OSX.
 
      ========================================================================== -->
 
@@ -142,7 +144,7 @@
 		    <bottom>
 			<Border title=" Expression " styles="{padding:{top:0,left:10,bottom:4,right:10},font:{size:18,bold:true},cornerRadii:10,backgroundColor:11}">
 			    <ScrollPane horizontalScrollBarPolicy="fill" verticalScrollBarPolicy="fill_to_capacity" >
-				<TextArea bxml:id="inputTextArea"/>
+				<TextPane bxml:id="inputTextPane"/>
 			    </ScrollPane>
 			</Border>
 		    </bottom>

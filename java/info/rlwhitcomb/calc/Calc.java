@@ -112,6 +112,8 @@
  *	    Color the REPL prompt string.
  *	15-Mar-2021 (rlwhitcomb)
  *	    Tweak the error message display to eliminate duplicate "."
+ *	24-Mar-2021 (rlwhitcomb)
+ *	    Change to use a TextPane for input so we can paste in Unicode on OSX.
  */
 package info.rlwhitcomb.calc;
 
@@ -139,6 +141,7 @@ import org.apache.pivot.beans.BXMLSerializer;
 import org.apache.pivot.collections.Map;
 import org.apache.pivot.serialization.SerializationException;
 import org.apache.pivot.wtk.*;
+import org.apache.pivot.wtk.text.Document;
 import org.apache.pivot.wtk.util.TextAreaOutputStream;
 
 import org.antlr.v4.runtime.*;
@@ -173,6 +176,8 @@ public class Calc
 	private static boolean darkBackgrounds = ON_WINDOWS;
 
 	private static final String LINESEP = System.lineSeparator();
+
+	private static final String EMPTY_TEXT = "\n";
 
 	/**
 	 * An enumeration of what we expect next on the command line.
@@ -220,7 +225,7 @@ public class Calc
 	private Display display;
 
 	@BXML private Window mainWindow;
-	@BXML private TextArea inputTextArea;
+	@BXML private TextPane inputTextPane;
 	@BXML private TextArea outputTextArea;
 	@BXML private Label outputSizeLabel;
 	@BXML private Prompt versionPrompt;
@@ -326,24 +331,32 @@ public class Calc
 		sizeFormat.setGroupingUsed(true);
 
 		Font monospacedFont = FontUtilities.decode(FontUtilities.MONOSPACED_FONTS + "-18");
-		inputTextArea.getStyles().put(Style.font, monospacedFont);
+		inputTextPane.getStyles().put(Style.font, monospacedFont);
 		outputTextArea.getStyles().put(Style.font, monospacedFont);
 
-		inputTextArea.getComponentKeyListeners().add(keyPressListener);
+		inputTextPane.getComponentKeyListeners().add(keyPressListener);
+
+		inputTextPane.setDocument(new Document());
 
 		// Prepopulate the text are with any text from the command line or input file
 		if (inputText != null)
-		    inputTextArea.setText(inputText);
+		    inputTextPane.setText(inputText);
+		else
+		    inputTextPane.setText(EMPTY_TEXT);
 
 		displayer = this;
 		visitor = new CalcObjectVisitor(displayer, rational);
 
 		mainWindow.open(display);
-		inputTextArea.requestFocus();
+		requestTextPaneFocus();
 	    }
 	    catch (Throwable ex) {
 		displayer.displayErrorMessage(ex.getMessage());
 	    }
+	}
+
+	private void requestTextPaneFocus() {
+	    ApplicationContext.scheduleCallback(() -> inputTextPane.requestFocus(), 200L);
 	}
 
 	private void updateOutputSize() {
@@ -528,12 +541,12 @@ public class Calc
 	{
 		@Override
 		public void perform(Component source) {
-		    final String exprText = inputTextArea.getText();
+		    final String exprText = inputTextPane.getText();
 
 		    queuedThread.submitWork(() -> processString(exprText, quiet));
 
-		    inputTextArea.setText("");
-		    inputTextArea.requestFocus();
+		    inputTextPane.setText(EMPTY_TEXT);
+		    requestTextPaneFocus();
 		}
 
 	}
@@ -542,10 +555,10 @@ public class Calc
 	{
 		@Override
 		public void perform(Component source) {
-		    inputTextArea.setText("");
+		    inputTextPane.setText(EMPTY_TEXT);
 		    outputTextArea.setText("");
 		    updateOutputSize();
-		    inputTextArea.requestFocus();
+		    requestTextPaneFocus();
 		}
 	}
 
