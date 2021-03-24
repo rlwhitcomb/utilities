@@ -210,6 +210,8 @@
  *	    Support for Roman Numeral input and output, and the ROMAN function.
  *	24-Mar-2021 (rlwhitcomb)
  *	    Trap errors on Roman constant conversion to get nicer errors.
+ *	24-Mar-2021 (rlwhitcomb)
+ *	    Add fourth root function ("fort").
  */
 package info.rlwhitcomb.calc;
 
@@ -1471,6 +1473,11 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitCbrtExpr(CalcParser.CbrtExprContext ctx) {
 	    return NumericUtil.cbrt(getDecimalValue(ctx.expr()), mc);
+	}
+
+	@Override
+	public Object visitFortExpr(CalcParser.FortExprContext ctx) {
+	    return NumericUtil.sqrt(NumericUtil.sqrt(getDecimalValue(ctx.expr()), mc), mc);
 	}
 
 	@Override

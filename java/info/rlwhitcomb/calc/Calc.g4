@@ -155,6 +155,8 @@
  *	    Add "upper" and "lower" functions (for strings).
  *	23-Mar-2021 (rlwhitcomb)
  *	    Add Roman Numeral constant support, and the ROMAN function.
+ *	24-Mar-2021 (rlwhitcomb)
+ *	    Add fourth root ("fort").
  */
 
 grammar Calc;
@@ -210,6 +212,7 @@ expr
    | TANH expr                           # tanhExpr
    | SQRT expr                           # sqrtExpr
    | CBRT expr                           # cbrtExpr
+   | FORT expr                           # fortExpr
    | LOG expr                            # logExpr
    | LN2 expr                            # ln2Expr
    | LN expr                             # lnExpr
@@ -418,6 +421,8 @@ ATAN     : A T A N ;
 SQRT     : ( S Q R T | '\u221A' ) ;
 
 CBRT     : ( C B R T | '\u221B' ) ;
+
+FORT     : ( F O R T | '\u221C' ) ;
 
 LOG      : L O G ;
 
