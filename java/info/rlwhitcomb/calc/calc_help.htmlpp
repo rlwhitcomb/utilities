@@ -242,7 +242,7 @@ code {
   <table>
     <tr>
       <th width=60>Level</th>
-      <th width=220>Operator</th>
+      <th width=240>Operator</th>
       <th width=300>Description</th>
       <th width=120>Associativity</th>
     </tr>
@@ -282,7 +282,7 @@ code {
         <td>bit shift operations</td><td>left to right</td></tr>
     <tr><td>13</td><td colspan="2">
         <table class="innertable">
-            <tr><td width="220"><code>ABS</code>&nbsp;<i>expr</i></td><td width="300">absolute value</td></tr>
+            <tr><td width="240"><code>ABS</code>&nbsp;<i>expr</i></td><td width="300">absolute value</td></tr>
             <tr><td><code>SIN</code>&nbsp;<i>expr</i></td><td>sine</td></tr>
             <tr><td><code>COS</code>&nbsp;<i>expr</i></td><td>cosine</td></tr>
             <tr><td><code>TAN</code>&nbsp;<i>expr</i></td><td>tangent</td></tr>
@@ -311,7 +311,7 @@ code {
             <tr><td><code>SUMOF</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;) *</td><td>sum of all the values</td></tr>
             <tr><td><code>PRODUCTOF</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;) *</td><td>product of all the values</td></tr>
             <tr><td><code>JOIN</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;) *</td><td>join strings</td></tr>
-            <tr><td><code>FILL</code>&nbsp;<i>var</i> <i>expr</i>&nbsp;<code>,</code> <i>expr</i> ( <code>,</code><i>expr</i> )</td><td>fill an array or string</td></tr>
+            <tr><td><code>FILL</code>&nbsp;<i>var</i>&nbsp;<code>,</code> <i>expr</i>&nbsp;<code>,</code> <i>expr</i> ( <code>,</code><i>expr</i> )</td><td>fill an array or string</td></tr>
             <tr><td><code>FIB</code>&nbsp;<i>expr</i></td><td>Fibonacci number</td></tr>
             <tr><td><code>Bn</code>&nbsp;<i>expr</i></td><td>Bernoulli number</td></tr>
             <tr><td><code>FRAC</code>&nbsp;<i>num</i><code>,</code>&nbsp;<i>den</i><br>or <i>int</i><code>,</code><i>num</i><code>,</code><i>den</i><br>or <i>string</i></td><td>construct a rational fraction</td></tr>
@@ -485,6 +485,11 @@ code {
     <li>Discussion on NaN, and Infinity</li>
     <li>Explain "join" operation with 1, 2, 3+ values</li>
     <li>Explain "fill" operation (array/string variable, value, length or start, length) - how it fills in</li>
+    <li>Explain the best use of "SUMOF" and "PRODUCTOF" is with arrays and maps (numeric values only), although it works for any expressions</li>
+    <li>Use of array as stack: push using a[length a] = blah, pop using ?? maybe slice? but how to get the last value easily?
+    <li>Defining data structures with "def" as in, <code>def stack={ size: 0, array:[] }</code>, and then <code>t = eval stack</code> gives
+        <code>t = { size : 0, array : [ ] }</code> as it should. This is an unexpected benefit of the <code>def</code> syntax (I think)
+        So, you can setup the data structure with <code>def</code>, and make instances of that structure with just <code><i>var</i> = eval <i>struct</i></code>
     <li>Expand on GUI operation, including examples</li>
     <li>List of example programs, include examples in this document</li>
     <li>Interactions with Tester (use "mkcanon" and "-nocolors")</li>

@@ -218,6 +218,9 @@
  *	    One more Unicode "identical to" symbol.
  *	25-Mar-2021 (rlwhitcomb)
  *	    Add the "FILL" function.
+ *	25-Mar-2021 (rlwhitcomb)
+ *	    Bug fix for "getStringValue" of a Map (affects "eval func" where "func"
+ *	    is a function defined as an object).
  */
 package info.rlwhitcomb.calc;
 
@@ -414,7 +417,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    if (value instanceof String)
 		return (String) value;
 
-	    return value == null ? "" : value.toString();
+	    return value == null ? "" : toStringValue(this, value);
 	}
 
 	private double getDoubleValue(ParserRuleContext ctx) {
