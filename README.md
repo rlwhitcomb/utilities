@@ -80,7 +80,7 @@ Also see "issues" at https://github.com/rlwhitcomb/utilities/issues
 - allow "_" in numeric values, like Java does
 - format options for commas (or _) (';,' or ';__') or (';$' to format as dollar)??
 - get help and intro text (both console and GUI) from resources
-- add option (both GUI and REPL modes) to open another file
+- add option (both GUI and REPL modes) to open another file (file browser in GUI)
 - functions for financial calculations (INTEREST, NPV, PAYMENT, etc.) (**e_mort** is a start)
 - ?? need a way to do "setScale(...)" on the values ??
 - See all the notes on updates needed to help page (calc_help.htmlpp); use "ant update" and then "c -?" to preprocess and view the result
@@ -104,7 +104,8 @@ Also see "issues" at https://github.com/rlwhitcomb/utilities/issues
   The implementation would be to either just set the mode directly, or to run a small piece of code (depending on if feedback is desired)
   How would we implement "pop" mode on the checkboxes? (tri-state won't work b/c it cycles through), radio won't work, maybe a little
   button beside the checkbox??  need an icon for it
-
+- "slice" function (works like "substr" on strings, extract slice of arrays)
+- "versioninfo" function that returns a map of the version information (from Version.java)
 - !!null seems like it should work (!!"true" -> true)
 - seems like we could have an "exit from GUI mode back to REPL mode" which is available when running from within REPL mode.
 
