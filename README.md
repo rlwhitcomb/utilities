@@ -74,6 +74,7 @@ Also see "issues" at https://github.com/rlwhitcomb/utilities/issues
 
 ### Calc
 - implement Taylor series expansion of other trig/log functions to requested precision
+- implement ln2 according to this (fast) algorithm: http://www.claysturner.com/dsp/BinaryLogarithm.pdf
 - separate out the log/trig functions into TrigLogUtil (or something like that), for better encapsulation (NumericUtil is getting too big)
 - need sec, cot, csc, and inverses as well
 - redo the [box] formats of strings (to be? x'...', b'...', o'...') then parse such beasts back to strings
@@ -106,6 +107,11 @@ Also see "issues" at https://github.com/rlwhitcomb/utilities/issues
   button beside the checkbox??  need an icon for it
 - "slice" function (works like "substr" on strings, extract slice of arrays)
 - "versioninfo" function that returns a map of the version information (from Version.java)
+- "flatmap" that flattens a map or array
+- "list" that converts string or map to an array (list)
+- "map" that converts string or array (list) to a map (with index as the key)
+- ?? could there be special processing if the list values were in "key:value" form??  and vice-versa for "list"??
+- does "@_" work inside parens?  how would I convert a JSON object into a string for other processing?  ?? need "string" function??
 - !!null seems like it should work (!!"true" -> true)
 - seems like we could have an "exit from GUI mode back to REPL mode" which is available when running from within REPL mode.
 
