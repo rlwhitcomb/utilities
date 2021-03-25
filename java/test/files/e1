@@ -178,6 +178,17 @@ length this; length hello; length handsome; length rude;
 
 '[' + join (1, 2, 3, 4, 5, ', ') + ']'
 
+# The "fill" function
+arr_n = []
+fill arr_n, 0, 10
+fill arr_n, 1, 2, 3
+fill arr_n, 3, 12, 4
+
+str_b = ''
+fill str_b, '=', 25
+fill str_b, '-', 0, 3
+fill str_b, '-', 22, 3
+
 # Precedence of compare / equal operators
 1 < 2 == 3 > 4
 1 == '1' > 2 != '2'
