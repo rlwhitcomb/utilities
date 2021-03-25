@@ -40,6 +40,8 @@
  *	    Add "visitor" parameter for function evaluation.
  *	22-Feb-2021 (rlwhitcomb)
  *	    Refactor "loopvar" to "localvar".
+ *	25-Mar-2021 (rlwhitcomb)
+ *	    Check for string index out of bounds in getContextObject.
  */
  package info.rlwhitcomb.calc;
 
@@ -155,6 +157,9 @@ class LValueContext
 		}
 		else if (context instanceof String) {
 		    String str = (String) context;
+		    if (index >= str.length()) {
+			return null;
+		    }
 		    return str.substring(index, index + 1);
 		}
 		else {

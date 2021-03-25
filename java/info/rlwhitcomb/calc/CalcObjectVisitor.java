@@ -216,6 +216,8 @@
  *	    Add Unicode two- and three-equals sign symbols.
  *	24-Mar-2021 (rlwhitcomb)
  *	    One more Unicode "identical to" symbol.
+ *	25-Mar-2021 (rlwhitcomb)
+ *	    Add the "FILL" function.
  */
 package info.rlwhitcomb.calc;
 
@@ -1818,6 +1820,77 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		}
 		return buf.toString();
 	    }
+	}
+
+	@Override
+	public Object visitFillExpr(CalcParser.FillExprContext ctx) {
+	    CalcParser.VarContext varCtx = ctx.var();
+	    LValueContext lValue         = getLValue(varCtx);
+
+	    int start  = 0;
+	    int length = 0;
+	    if (ctx.expr(2) == null) {
+		length = getIntValue(ctx.expr(1));
+	    }
+	    else {
+		start  = getIntValue(ctx.expr(1));
+		length = getIntValue(ctx.expr(2));
+	    }
+
+	    Object value     = lValue.getContextObject();
+	    Object fillValue = visit(ctx.expr(0));
+
+	    if (value instanceof List) {
+		@SuppressWarnings("unchecked")
+		List<Object> list = (List<Object>) value;
+		// Fill in the missing values up to start
+		if (start > 0 && list.size() < start) {
+		    for (int index = list.size(); index < start; index++) {
+			list.add(null);
+		    }
+		}
+		for (int index = start; index < (start + length); index++) {
+		    if (index < list.size()) {
+			list.set(index, fillValue);
+		    }
+		    else {
+			list.add(fillValue);
+		    }
+		}
+	    }
+	    else if (value instanceof String) {
+		StringBuilder buf = new StringBuilder((String) value);
+		if (buf.length() < start + length) {
+		    buf.setLength(start + length);
+		}
+
+		char fillChar = '\0';
+		if (fillValue != null) {
+		    if (fillValue instanceof String) {
+			String fillString = (String) fillValue;
+			if (fillString.length() != 1) {
+			    throw new CalcExprException("%calc#fillOneCharInt", ctx);
+			}
+			fillChar = fillString.charAt(0);
+		    }
+		    else if (fillValue instanceof Number) {
+			int intValue = ((Number) fillValue).intValue();
+			if (intValue < 0 || intValue > Short.MAX_VALUE) {
+			    throw new CalcExprException("%calc#fillOneCharInt", ctx);
+			}
+			fillChar = (char) intValue;
+		    }
+		}
+		for (int index = start; index < (start + length); index++) {
+		    buf.setCharAt(index, fillChar);
+		}
+		value = buf.toString();
+	    }
+	    else {
+		throw new CalcExprException("%calc#fillTargetWrongType", ctx);
+	    }
+
+	    return lValue.putContextObject(this, value);
 	}
 
 	@Override

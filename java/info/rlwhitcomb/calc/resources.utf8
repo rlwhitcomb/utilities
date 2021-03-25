@@ -52,6 +52,8 @@
 #	    Timing mode message.
 #	15-Mar-2021 (rlwhitcomb)
 #	    Tweak an error message.
+#	25-Mar-2021 (rlwhitcomb)
+#	    New errors for FILL.
 #
 
 #
@@ -113,6 +115,8 @@ invalidConstruct	= Invalid '$' construct
 invalidConst2		= Invalid '${...}' construct
 modeError		= Mode option '%1$s' not recognized
 illegalFormat		= Unrecognized format '%1$s'
+fillTargetWrongType	= Target of a 'FILL' must be an array or string
+fillOneCharInt		= Fill value for a string must be one character or an integer <= 65535
 
 intro.help1	= "  Enter an expression (or multiple expressions separated by ';')."
 intro.help2	= "  Use '<v>help<r>' or '<v>?<r>' for a list of supported functions."

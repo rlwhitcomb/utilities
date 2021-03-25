@@ -161,6 +161,8 @@
  *	    Add two- and three-consecutive equals sign Unicode chars.
  *	24-Mar-2021 (rlwhitcomb)
  *	    One more Unicode "identical to" symbol.
+ *	25-Mar-2021 (rlwhitcomb)
+ *	    Add the "fill" function for arrays and strings.
  */
 
 grammar Calc;
@@ -232,6 +234,7 @@ expr
    | SUMOF exprN                         # sumOfExpr
    | PRODUCTOF exprN                     # productOfExpr
    | JOIN exprN                          # joinExpr
+   | FILL var ',' expr ',' expr ( ',' expr ) ?   # fillExpr
    | FIB expr                            # fibExpr
    | BN expr                             # bernExpr
    | FRAC ( STRING | ISTRING | expr3 | expr2 )   # fracExpr
@@ -453,6 +456,8 @@ MAX      : M A X ;
 MIN      : M I N ;
 
 JOIN     : J O I N ;
+
+FILL     : F I L L ;
 
 FIB      : F I B ;
 
