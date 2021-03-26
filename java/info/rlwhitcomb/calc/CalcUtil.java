@@ -49,6 +49,8 @@
  *	    Evaluate functions in "compareValues".
  *	08-Mar-2021 (rlwhitcomb)
  *	    Get the "silent" setting right everywhere when evaluating a function.
+ *	26-Mar-2021 (rlwhitcomb)
+ *	    Implement "compareValues" for lists and maps.
  */
 package info.rlwhitcomb.calc;
 
@@ -59,6 +61,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
@@ -451,7 +455,7 @@ public final class CalcUtil
 	 * @param ctx1       The Rule context of the first operand.
 	 * @param ctx2       The Rule context of the second operand.
 	 * @param mc         Rounding mode used when converting to decimal.
-	 * @param strict     Whether or not the class must match for the comparison.
+	 * @param strict     Whether or not the object classes must match for the comparison.
 	 * @param allowNulls Some comparisons (strings) can be compared even if one or both operands are null.
 	 * @return {@code -1} if the first object is "less than" the second,
 	 *         {@code 0} if the objects are "equal",
@@ -460,8 +464,32 @@ public final class CalcUtil
 	public static int compareValues(final CalcObjectVisitor visitor,
 		final ParserRuleContext ctx1, final ParserRuleContext ctx2,
 		final MathContext mc, final boolean strict, final boolean allowNulls) {
-	    Object e1 = visitor.evaluateFunction(visitor.visit(ctx1));
-	    Object e2 = visitor.evaluateFunction(visitor.visit(ctx2));
+	    return compareValues(visitor, ctx1, ctx2, visitor.visit(ctx1), visitor.visit(ctx2),
+		mc, strict, allowNulls);
+	}
+
+	/**
+	 * Compare two objects of possibly differing types.
+	 * <p> This is the recursive version, for use when comparing elements of lists and maps.
+	 *
+	 * @param visitor    The object visitor used to calculate the values.
+	 * @param ctx1       The Rule context of the first operand.
+	 * @param ctx2       The Rule context of the second operand.
+	 * @param obj1       The first object to compare.
+	 * @param obj2       The second object to compare.
+	 * @param mc         Rounding mode used when converting to decimal.
+	 * @param strict     Whether or not the object classes must match for the comparison.
+	 * @param allowNulls Some comparisons (strings) can be compared even if one or both operands are null.
+	 * @return {@code -1} if the first object is "less than" the second,
+	 *         {@code 0} if the objects are "equal",
+	 *         {@code +1} if the first object is "greater than" the second.
+	 */
+	private static int compareValues(final CalcObjectVisitor visitor,
+		final ParserRuleContext ctx1, final ParserRuleContext ctx2,
+		final Object obj1, final Object obj2,
+		final MathContext mc, final boolean strict, final boolean allowNulls) {
+	    Object e1 = visitor.evaluateFunction(obj1);
+	    Object e2 = visitor.evaluateFunction(obj2);
 
 	    if (allowNulls) {
 		if (e1 == null && e2 == null)
@@ -505,6 +533,66 @@ public final class CalcUtil
 		Boolean b1 = toBooleanValue(visitor, e1, ctx1);
 		Boolean b2 = toBooleanValue(visitor, e2, ctx2);
 		return b1.compareTo(b2);
+	    }
+	    else if (e1 instanceof List && e2 instanceof List) {
+		@SuppressWarnings("unchecked")
+		List<Object> list1 = (List<Object>) e1;
+		@SuppressWarnings("unchecked")
+		List<Object> list2 = (List<Object>) e2;
+		int size1 = list1.size();
+		int size2 = list2.size();
+
+		if (size1 != size2)
+		    return Integer.signum(size1 - size2);
+
+		for (int i = 0; i < size1; i++) {
+		    Object o1 = list1.get(i);
+		    Object o2 = list2.get(i);
+		    int ret = compareValues(visitor, ctx1, ctx2, o1, o2, mc, strict, allowNulls);
+		    if (ret != 0)
+			return ret;
+		}
+		return 0;
+	    }
+	    else if (e1 instanceof Map && e2 instanceof Map) {
+		@SuppressWarnings("unchecked")
+		Map<String, Object> map1 = (Map<String, Object>) e1;
+		@SuppressWarnings("unchecked")
+		Map<String, Object> map2 = (Map<String, Object>) e2;
+		int size1 = map1.size();
+		int size2 = map2.size();
+
+		// The "smaller" map is less than the "bigger" one
+		if (size1 != size2)
+		    return Integer.signum(size1 - size2);
+
+		// First, compare the key sets -- if they are different then sort and compare them lexicographically
+		Set<String> keySet1 = map1.keySet();
+		Set<String> keySet2 = map2.keySet();
+		if (!keySet1.equals(keySet2)) {
+		    TreeSet<String> sortedKeys1 = new TreeSet<>(keySet1);
+		    TreeSet<String> sortedKeys2 = new TreeSet<>(keySet2);
+
+		    String key1, key2;
+		    while ((key1 = sortedKeys1.pollFirst()) != null) {
+			key2 = sortedKeys2.pollFirst();
+			int ret = key1.compareTo(key2);
+			if (ret != 0)
+			    return ret;
+		    }
+		}
+
+		// If the key sets are the same, then iterate through the values and compare them
+		for (String key : keySet1) {
+		    Object value1 = map1.get(key);
+		    Object value2 = map2.get(key);
+		    int ret = compareValues(visitor, ctx1, ctx2, value1, value2, mc, strict, allowNulls);
+		    if (ret != 0)
+			return ret;
+		}
+
+		// Finally, if no differences were found, the maps are the same
+		return 0;
 	    }
 
 	    throw new CalcExprException(ctx1, "%calc#unknownType", e1.getClass().getSimpleName());
