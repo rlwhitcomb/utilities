@@ -30,6 +30,8 @@
  *	    Rework the get and put methods; add exception for negative indexes.
  *	    Change the value returned by "size()" and add "capacity()" method.
  *	    Redo the way initial allocation is done.
+ *	26-Mar-2021 (rlwhitcomb)
+ *	    Move some methods from NumericUtil to MathUtil.
  */
 package info.rlwhitcomb.util;
 
@@ -97,7 +99,7 @@ public class DynamicArray<T>
 	 * @param newSize The new (presumably larger) size required for the array.
 	 */
 	private void reallocate(int newSize) {
-	    int roundedSize = NumericUtil.roundUpPowerTwo(newSize);
+	    int roundedSize = MathUtil.roundUpPowerTwo(newSize);
 
 	    @SuppressWarnings("unchecked")
 	    final T[] newArray = (T[]) Array.newInstance(internalClass, roundedSize);

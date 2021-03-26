@@ -36,11 +36,13 @@
  *	    Add logging to figure out why this fails sometimes.
  *	19-Feb-2021 (rlwhitcomb)
  *	    Recast now that InitializationTask is changed/fixed.
+ *	26-Mar-2021 (rlwhitcomb)
+ *	    Move some methods from NumericUtil to MathUtil.
  */
 import info.rlwhitcomb.util.Environment;
 import info.rlwhitcomb.util.InitializationTask;
 import info.rlwhitcomb.util.Logging;
-import info.rlwhitcomb.util.NumericUtil;
+import info.rlwhitcomb.util.MathUtil;
 
 /**
  * Do some tests of the InitializationTask class to make sure it functions the way we
@@ -215,7 +217,7 @@ public class InitTaskTest
 		    logger.debug("Starting 'task()' inside InitTask with %1$d iterations...", iters);
 		    for (int i = 0; i < iters; i++) {
 			logger.debug("Inside 'task()': running the calculation for loop #%1$d...", (i + 1));
-			digitString = NumericUtil.piDigits(digits);
+			digitString = MathUtil.piDigits(digits);
 			logger.debug("Inside 'task()': finished calculation #%1$d: string length = %2$d", (i + 1), digitString.length());
 		    }
 		    logger.debug("Finished with 'task()'.");

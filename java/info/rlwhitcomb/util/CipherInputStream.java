@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2017,2020 Roger L. Whitcomb.
+ * Copyright (c) 2017,2020-2021 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -46,6 +46,8 @@
  *	    Prepare for GitHub.
  *	21-Dec-2020 (rlwhitcomb)
  *	    Update obsolete Javadoc constructs.
+ *	26-Mar-2021 (rlwhitcomb)
+ *	    Move some methods from NumericUtil to MathUtil.
  */
 package info.rlwhitcomb.util;
 
@@ -144,7 +146,7 @@ public class CipherInputStream extends FilterInputStream
 		DataInputStream dis = (DataInputStream)in;
 		int blockLen = dis.readInt();
 		if (blockLen > encryptedBytes.length) {
-		    encryptedBytes = new byte[NumericUtil.roundUpPowerTwo(blockLen)];
+		    encryptedBytes = new byte[MathUtil.roundUpPowerTwo(blockLen)];
 		}
 		int readLen = 0;
 		// Make sure we read the whole encrypted chunk or we won't get proper decryption

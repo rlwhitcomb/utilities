@@ -221,6 +221,8 @@
  *	25-Mar-2021 (rlwhitcomb)
  *	    Bug fix for "getStringValue" of a Map (affects "eval func" where "func"
  *	    is a function defined as an object).
+ *	26-Mar-2021 (rlwhitcomb)
+ *	    Move some methods from NumericUtil to MathUtil.
  */
 package info.rlwhitcomb.calc;
 
@@ -247,6 +249,7 @@ import info.rlwhitcomb.util.CharUtil;
 import static info.rlwhitcomb.util.ConsoleColor.Code.*;
 import info.rlwhitcomb.util.ExceptionUtil;
 import info.rlwhitcomb.util.Intl;
+import info.rlwhitcomb.util.MathUtil;
 import info.rlwhitcomb.util.NumericUtil;
 import static info.rlwhitcomb.util.NumericUtil.RangeMode;
 
@@ -269,7 +272,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	private static final MathContext mcDouble = MathContext.DECIMAL64;
 
 	/** MathContext to use for pi/e calculations when regular context is unlimited.
-	 * Note: precision is arbitrary, but {@link NumericUtil#pi} is limited to ~12,500 digits.
+	 * Note: precision is arbitrary, but {@link MathUtil#pi} is limited to ~12,500 digits.
 	 */
 	private static final MathContext mcMaxDigits = new MathContext(12000);
 
@@ -1295,7 +1298,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    BigDecimal base = getDecimalValue(ctx.expr(0));
 	    double exp = getDoubleValue(ctx.expr(1));
 
-	    return NumericUtil.pow(base, exp).round(mc);
+	    return MathUtil.pow(base, exp).round(mc);
 	}
 
 	@Override
@@ -1400,21 +1403,21 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public Object visitSinExpr(CalcParser.SinExprContext ctx) {
 	    BigDecimal e = getDecimalTrigValue(ctx.expr());
 
-	    return NumericUtil.sin(e, mc);
+	    return MathUtil.sin(e, mc);
 	}
 
 	@Override
 	public Object visitCosExpr(CalcParser.CosExprContext ctx) {
 	    BigDecimal e = getDecimalTrigValue(ctx.expr());
 
-	    return NumericUtil.cos(e, mc);
+	    return MathUtil.cos(e, mc);
 	}
 
 	@Override
 	public Object visitTanExpr(CalcParser.TanExprContext ctx) {
 	    BigDecimal e = getDecimalTrigValue(ctx.expr());
 
-	    return NumericUtil.tan(e, mc);
+	    return MathUtil.tan(e, mc);
 	}
 
 	@Override
@@ -1476,17 +1479,17 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitSqrtExpr(CalcParser.SqrtExprContext ctx) {
-	    return NumericUtil.sqrt(getDecimalValue(ctx.expr()), mc);
+	    return MathUtil.sqrt(getDecimalValue(ctx.expr()), mc);
 	}
 
 	@Override
 	public Object visitCbrtExpr(CalcParser.CbrtExprContext ctx) {
-	    return NumericUtil.cbrt(getDecimalValue(ctx.expr()), mc);
+	    return MathUtil.cbrt(getDecimalValue(ctx.expr()), mc);
 	}
 
 	@Override
 	public Object visitFortExpr(CalcParser.FortExprContext ctx) {
-	    return NumericUtil.sqrt(NumericUtil.sqrt(getDecimalValue(ctx.expr()), mc), mc);
+	    return MathUtil.sqrt(MathUtil.sqrt(getDecimalValue(ctx.expr()), mc), mc);
 	}
 
 	@Override
@@ -1575,7 +1578,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		i = getIntegerValue(ctx.expr());
 	    }
 
-	    return Boolean.valueOf(NumericUtil.isPrime(i));
+	    return Boolean.valueOf(MathUtil.isPrime(i));
 	}
 
 	@Override
@@ -1900,14 +1903,14 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public Object visitFibExpr(CalcParser.FibExprContext ctx) {
 	    BigDecimal e = getDecimalValue(ctx.expr());
 
-	    return NumericUtil.fib(e);
+	    return MathUtil.fib(e);
 	}
 
 	@Override
 	public Object visitBernExpr(CalcParser.BernExprContext ctx) {
 	    int n = getIntValue(ctx.expr());
 
-	    return NumericUtil.bernoulli(n, mc, rationalMode);
+	    return MathUtil.bernoulli(n, mc, rationalMode);
 	}
 
 	@Override
@@ -1981,7 +1984,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    List<Integer> factors = new ArrayList<>();
 	    BigInteger n = getIntegerValue(ctx.expr());
 
-	    NumericUtil.getFactors(n, factors);
+	    MathUtil.getFactors(n, factors);
 
 	    return factors;
 	}
@@ -1991,7 +1994,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    List<Integer> primeFactors = new ArrayList<>();
 	    BigInteger n = getIntegerValue(ctx.expr());
 
-	    NumericUtil.getPrimeFactors(n, primeFactors);
+	    MathUtil.getPrimeFactors(n, primeFactors);
 
 	    return primeFactors;
 	}
@@ -2110,7 +2113,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public Object visitFactorialExpr(CalcParser.FactorialExprContext ctx) {
 	    BigDecimal e = getDecimalValue(ctx.expr());
 
-	    return NumericUtil.factorial(e, mc);
+	    return MathUtil.factorial(e, mc);
 	}
 
 	@Override
@@ -2520,7 +2523,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    BigDecimal base = toDecimalValue(this, lValue.getContextObject(), mc, ctx);
 	    double exp      = getDoubleValue(ctx.expr());
 
-	    return lValue.putContextObject(this, NumericUtil.pow(base, exp).round(mc));
+	    return lValue.putContextObject(this, MathUtil.pow(base, exp).round(mc));
 	}
 
 	@Override

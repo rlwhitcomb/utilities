@@ -54,6 +54,8 @@
  *	    More tweaking.
  *	09-Mar-2021 (rlwhitcomb)
  *	    The two and three string patterns are still not right...
+ *	26-Mar-2021 (rlwhitcomb)
+ *	    Move some methods from NumericUtil to MathUtil.
  */
 package info.rlwhitcomb.util;
 
@@ -154,7 +156,7 @@ public class BigFraction extends Number
 // TODO: what about negative scale?
 	    BigDecimal whole = value.scaleByPowerOfTen(pow);
 
-	    normalize(new BigInteger(whole.toPlainString()), NumericUtil.tenPower(pow));
+	    normalize(new BigInteger(whole.toPlainString()), MathUtil.tenPower(pow));
 	}
 
 	/**

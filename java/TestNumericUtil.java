@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  *
- *      Tests of some of the NumericUtil methods.
+ *      Tests of some of the NumericUtil and MathUtil methods.
  *
  * History:
  *      03-Dec-2020 (rlwhitcomb)
@@ -48,6 +48,8 @@
  *	    A few more Roman numeral tests.
  *	22-Mar-2021 (rlwhitcomb)
  *	    Some lower-case Roman numeral tests.
+ *	26-Mar-2021 (rlwhitcomb)
+ *	    Move some methods from NumericUtil to MathUtil.
  */
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -61,10 +63,11 @@ import java.nio.file.Files;
 
 import info.rlwhitcomb.util.BigFraction;
 import info.rlwhitcomb.util.FileUtilities;
+import info.rlwhitcomb.util.MathUtil;
 import info.rlwhitcomb.util.NumericUtil;
 
 /**
- * Tests of (some of) the {@link NumericUtil} methods.
+ * Tests of (some of) the {@link NumericUtil} and {@link MathUtil} methods.
  */
 public class TestNumericUtil
 {
@@ -512,8 +515,8 @@ public class TestNumericUtil
 		numberOfTests += 2;
 		System.out.println("Testing PI and E calculation for " + digits + " digits...");
 
-		BigDecimal piCalc = NumericUtil.pi(digits);
-		BigDecimal eCalc  = NumericUtil.e(digits);
+		BigDecimal piCalc = MathUtil.pi(digits);
+		BigDecimal eCalc  = MathUtil.e(digits);
 		String piCalcDigits = piCalc.toPlainString();
 		String eCalcDigits  = eCalc.toPlainString();
 		String piKnownDigits = PI_DIGITS.substring(0, digits + 2);
@@ -562,7 +565,7 @@ public class TestNumericUtil
 
 	    numberOfTests++;
 	    try {
-		final BigDecimal vPi = NumericUtil.pi(40);
+		final BigDecimal vPi = MathUtil.pi(40);
 		final String vStr    = "This is a simple string.";
 		final long vMaxLong  = Long.MAX_VALUE;
 		final Boolean vTrue  = Boolean.TRUE;
@@ -657,7 +660,7 @@ public class TestNumericUtil
 	    BigFraction f28 = BigFraction.valueOf("1 11/15");
 	    System.out.println("one and eleven/fifteenths = " + f28.toProperString());
 	    BigFraction fPi = new BigFraction(8958937768937L, 2851718461558L);
-	    BigDecimal dPi = NumericUtil.pi(MathContext.DECIMAL128.getPrecision());
+	    BigDecimal dPi = MathUtil.pi(MathContext.DECIMAL128.getPrecision());
 	    System.out.println(fPi + " -> " + fPi.toDecimal().toPlainString());
 	    System.out.println("                           vs. " + dPi.toPlainString());
 

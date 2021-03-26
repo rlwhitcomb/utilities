@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2020 Roger L. Whitcomb.
+ * Copyright (c) 2020-2021 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,6 +24,8 @@
  *  History:
  *      31-Dec-2020 (rlwhitcomb)
  *	    Initial version.
+ *	26-Mar-2021 (rlwhitcomb)
+ *	    Move some methods from NumericUtil to MathUtil.
  */
 package info.rlwhitcomb.calc;
 
@@ -31,7 +33,7 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.concurrent.Semaphore;
 
-import info.rlwhitcomb.util.NumericUtil;
+import info.rlwhitcomb.util.MathUtil;
 import info.rlwhitcomb.util.QueuedThread;
 
 /**
@@ -101,8 +103,8 @@ public class CalcPiWorker
 	 * so others can access the values.
 	 */
 	private void calculate() {
-	    e         = NumericUtil.e(precision + 1);
-	    pi        = NumericUtil.pi(precision + 1);
+	    e         = MathUtil.e(precision + 1);
+	    pi        = MathUtil.pi(precision + 1);
 	    piOver180 = pi.divide(B180, mc);
 
 	    // Release a permit to say the calculation results are now available
