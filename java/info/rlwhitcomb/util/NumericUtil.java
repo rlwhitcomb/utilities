@@ -142,6 +142,8 @@
  *	    Implement lower-case Roman Numeral recognition and formatting.
  *	24-Mar-2021 (rlwhitcomb)
  *	    Beef up the Roman Numeral support with all the Unicode variants.
+ *	26-Mar-2021 (rlwhitcomb)
+ *	    A little bit more optimization in BigInteger "pow" method.
  */
 package info.rlwhitcomb.util;
 
@@ -1534,7 +1536,13 @@ public class NumericUtil
 		return pow(new BigDecimal(base), exp);
 	    }
 
-	    int intExp = (int)wholeExp;
+	    int intExp = (int) wholeExp;
+
+	    // Turn a power of two into a "setBit"
+	    if (base.equals(I_TWO)) {
+		return BigInteger.ZERO.setBit(intExp);
+	    }
+
 	    return base.pow(intExp);
 	}
 
