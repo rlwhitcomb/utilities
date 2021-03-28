@@ -181,6 +181,8 @@
 	    10-Mar-2021 (rlwhitcomb)
 		Add the NOTICE file to the built .jar file also.
 		Enforce min Ant and Java versions.
+	    26-Mar-2021 (rlwhitcomb)
+		Update description of "install".
 
      ========================================================================== -->
 
@@ -570,7 +572,7 @@
 		<echo message="Variable UTILITIES_HOME is not set in the environment!" unless:true="${utilities.available}"/>
 	</target>
 
-	<target name="install" depends="all,copy-to-install-directory" description="Build the utilities from scratch and install in a local utilities directory."/>
+	<target name="install" depends="all,copy-to-install-directory" description="Does 'all' + 'copy-to-install-directory'; this is the highest level target."/>
 
 	<target name="update" depends="touch,compile,jar,copy-to-install-directory" description="Simple incremental build and update the installed .jar file."/>
 
