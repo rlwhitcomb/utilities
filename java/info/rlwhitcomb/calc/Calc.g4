@@ -163,6 +163,8 @@
  *	    One more Unicode "identical to" symbol.
  *	25-Mar-2021 (rlwhitcomb)
  *	    Add the "fill" function for arrays and strings.
+ *	27-Mar-2021 (rlwhitcomb)
+ *	    Add "epow" function.
  */
 
 grammar Calc;
@@ -222,6 +224,7 @@ expr
    | LOG expr                            # logExpr
    | LN2 expr                            # ln2Expr
    | LN expr                             # lnExpr
+   | EPOW expr                           # ePowerExpr
    | SIGNUM expr                         # signumExpr
    | LENGTH expr                         # lengthExpr
    | SCALE expr                          # scaleExpr
@@ -436,6 +439,8 @@ LOG      : L O G ;
 LN       : L N ;
 
 LN2      : L N '2' ;
+
+EPOW     : E P O W ;
 
 SIGNUM   : S I G N U M ;
 

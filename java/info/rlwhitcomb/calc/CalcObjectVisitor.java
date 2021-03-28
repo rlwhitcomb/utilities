@@ -223,6 +223,8 @@
  *	    is a function defined as an object).
  *	26-Mar-2021 (rlwhitcomb)
  *	    Move some methods from NumericUtil to MathUtil.
+ *	27-Mar-2021 (rlwhitcomb)
+ *	    Add "epow" function, using new MathUtil method.
  */
 package info.rlwhitcomb.calc;
 
@@ -1515,6 +1517,13 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    double d = getDoubleValue(ctx.expr());
 
 	    return new BigDecimal(Math.log(d), mcDouble);
+	}
+
+	@Override
+	public Object visitEPowerExpr(CalcParser.EPowerExprContext ctx) {
+	    BigDecimal e = getDecimalValue(ctx.expr());
+
+	    return MathUtil.ePower(e, mc);
 	}
 
 	@Override

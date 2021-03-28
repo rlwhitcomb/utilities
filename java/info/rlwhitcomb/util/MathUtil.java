@@ -26,6 +26,8 @@
  *  History:
  *	26-Mar-2021 (rlwhitcomb)
  *	    Moved out of NumericUtil into this separate class.
+ *	27-Mar-2021 (rlwhitcomb)
+ *	    Add "ePower" method (which is e**x, or anti-logarithm).
  */
 package info.rlwhitcomb.util;
 
@@ -679,6 +681,35 @@ public class MathUtil
 		e = e.add(term);
 	    }
 	    return e.round(roundingContext);
+	}
+
+
+	/**
+	 * Calculate e**x, or the anti-logarithm of x to an arbitrary precision.
+	 * <p> The formula (same as for {@link #eDecimal} with a numerator of x**n:
+	 * <code>e**x = 1 + x/1! + x**2/2! + x**3/3! + x**4/4! + ...</code>
+	 *
+	 * @param exp	The power of e we are calculating.
+	 * @param mc	The precision and rounding mode for the result.
+	 * @return	The result of e**x rounded to the given precision.
+	 */
+	public static BigDecimal ePower(final BigDecimal exp, final MathContext mc) {
+	    BigDecimal result    = exp.add(BigDecimal.ONE);
+	    BigDecimal numer     = exp;
+	    BigDecimal factorial = BigDecimal.ONE;
+
+	    // loops is a little extra to make sure the last digit we want is accurate
+	    int loops = mc.getPrecision() + 10;
+
+	    for (int i = 2; i < loops; i++) {
+		factorial = factorial.multiply(BigDecimal.valueOf(i));
+		// compute x**i/i!, note divide is overloaded, this version is used to
+		//    ensure a limit to the iterations when division is limitless like 1/3
+		numer = numer.multiply(exp);
+		BigDecimal term = numer.divide(factorial, loops, RoundingMode.HALF_UP);
+		result = result.add(term);
+	    }
+	    return result.round(mc);
 	}
 
 
