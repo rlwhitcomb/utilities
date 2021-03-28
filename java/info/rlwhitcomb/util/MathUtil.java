@@ -28,6 +28,8 @@
  *	    Moved out of NumericUtil into this separate class.
  *	27-Mar-2021 (rlwhitcomb)
  *	    Add "ePower" method (which is e**x, or anti-logarithm).
+ *	27-Mar-2021 (rlwhitcomb)
+ *	    Clean up code in "pow()"
  */
 package info.rlwhitcomb.util;
 
@@ -121,26 +123,28 @@ public class MathUtil
 		exp = -exp;
 	    }
 
-	    int intExp     = (int)Math.floor(exp);
-	    double fracExp = exp - (double)intExp;
+	    int intExp     = (int) Math.floor(exp);
+	    double fracExp = exp - (double) intExp;
+
+	    BigDecimal result;
 
 	    // Turn an integer power of two into a "setBit" on a BigInteger
-	    if (base.equals(D_TWO) && (double)intExp == inputExp) {
+	    if (base.equals(D_TWO) && (double) intExp == inputExp) {
 		BigInteger value = BigInteger.ZERO.setBit(intExp);
-		return new BigDecimal(value);
+		result = new BigDecimal(value);
 	    }
+	    else {
+		// Do the integer power part
+		result = base.pow(intExp);
 
-	    BigDecimal result = BigDecimal.ONE;
-	    BigDecimal mult   = base;
-	    for (int iExp = intExp; iExp != 0; iExp >>= 1) {
-		if (iExp % 2 == 1)
-		    result = result.multiply(mult);
-		mult = mult.multiply(mult);
+		// If there is any fractional exponent, multiply that in
+		// (for now, use doubles for this, until we get the real code in place)
+		if (fracExp != 0.0d) {
+		    // 2.14**2.14 = 2.14**2 * 2.14**.14
+		    BigDecimal fracResult = new BigDecimal(Math.pow(base.doubleValue(), fracExp));
+		    result = result.multiply(fracResult);
+		}
 	    }
-
-	    // 2.14**2.14 = 2.14**2 * 2.14**.14
-	    BigDecimal fracResult = new BigDecimal(Math.pow(base.doubleValue(), fracExp));
-	    result = result.multiply(fracResult);
 
 	    if (reciprocal) {
 		result = BigDecimal.ONE.divide(result);
