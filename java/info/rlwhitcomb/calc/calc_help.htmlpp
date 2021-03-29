@@ -218,12 +218,12 @@ code {
     <table>
       <tr>
         <th width="100">Format</th>
-        <th width="200">Description</th>
+        <th width="460">Description</th>
       </tr>
       <tr><td><code>@h</code></td><td>Display as a time value (hours:minutes:seconds.millis)<br><em>NOT IMPLEMENTED YET</em></td></tr>
       <tr><td><code>@l</code></td><td>Format result string in lower case</td></tr>
       <tr><td><code>@u</code></td><td>Format result string in UPPER case</td></tr>
-      <tr><td><code>@d</code></td><td>Primarily for rational mode -- format the result instead as a decimal value</td></tr>
+      <tr><td><code>@</code>[<i>nn</i>]<code>d</code></td><td>Primarily for rational mode: format the result as a decimal value,<br>optionally rounding to <i>nn</i> digits</td></tr>
       <tr><td><code>@f</code></td><td>For decimal mode, format the result as a rational fraction</td></tr>
       <tr><td><code>@F</code></td><td>Format as a proper fraction (with possible integer portion)</td></tr>
       <tr><td><code>@j</code></td><td>Format the result as a "pretty printed" JSON result<br>(multiple lines with indents)</td></tr>
