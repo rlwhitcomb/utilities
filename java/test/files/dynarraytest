@@ -2,7 +2,7 @@
 # DynArrayTest
 #
 $inputDir test/canons
-$testClass DynArrayTest
+$testClass info.rlwhitcomb.test.DynArrayTest
 
 $echo Tests of the DynamicArray class...
 $echo

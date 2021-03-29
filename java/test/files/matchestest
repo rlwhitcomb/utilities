@@ -2,7 +2,7 @@
 # MatchesTest
 #
 $inputDir test/canons
-$testClass info.rlwhitcomb.matches.MatchesTest
+$testClass info.rlwhitcomb.test.MatchesTest
 
 $echo Tests of the Matches class...
 $echo

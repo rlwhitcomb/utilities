@@ -1,4 +1,4 @@
-$testClass BidiMapTest
+$testClass info.rlwhitcomb.test.BidiMapTest
 $sourceDir test/files
 $canonDir test/canons
 

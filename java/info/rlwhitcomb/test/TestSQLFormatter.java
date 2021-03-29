@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2016-2017,2020 Roger L. Whitcomb.
+ * Copyright (c) 2016-2017,2020-2021 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,7 +23,7 @@
  *
  *	Test the new SQLFormatter class so we can do stand-alone testing.
  *
- * History:
+ *  Change History:
  *	25-May-2016 (rlwhitcomb)
  *	    Initial coding.
  *	26-May-2016 (rlwhitcomb)
@@ -55,7 +55,11 @@
  *	    into Intl itself, so all the callers don't have to do it.
  *	18-Feb-2020 (rlwhitcomb)
  *	    Change to use default methods of LineProcessor interface.
+ *	29-Mar-2021 (rlwhitcomb)
+ *	    Move to new package.
  */
+package info.rlwhitcomb.test;
+
 import java.io.*;
 import java.util.*;
 
@@ -67,6 +71,9 @@ import info.rlwhitcomb.util.Options;
 import info.rlwhitcomb.util.SQLFormatter;
 
 
+/**
+ * Unit tests of the {@link SQLFormatter} class.
+ */
 public class TestSQLFormatter
 {
 	private static final String[] TEST_CASES = {

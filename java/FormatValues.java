@@ -26,6 +26,8 @@
  * History:
  *      05-Jan-2021 (rlwhitcomb)
  *          Initial coding.
+ *	29-Mar-2021 (rlwhitcomb)
+ *	    Move test code to a new package.
  */
 import java.io.*;
 import info.rlwhitcomb.util.ExceptionUtil;
@@ -34,7 +36,7 @@ import info.rlwhitcomb.util.FileUtilities;
 
 /**
  * Used to take a text file with PI or E digits and turn it into
- * a String initializer, such as used in {@link TestNumericUtil}.
+ * a String initializer, such as used in {@link info.rlwhitcomb.test.TestNumericUtil}.
  */
 public class FormatValues
 {

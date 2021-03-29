@@ -2,7 +2,7 @@
 # TestNumericUtil
 #
 $inputDir test/canons
-$testClass TestNumericUtil
+$testClass info.rlwhitcomb.test.TestNumericUtil
 
 $echo Tests of the NumericUtil class...
 $echo

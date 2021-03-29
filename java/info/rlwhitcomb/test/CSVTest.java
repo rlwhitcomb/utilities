@@ -23,7 +23,7 @@
  *
  *	Class to test the CSV parsing classes.
  *
- * History:
+ *  Change History:
  *	27-Feb-2014 (rlwhitcomb)
  *	    Initial coding, based on many other CSV packages.
  *	03-Mar-2014 (rlwhitcomb)
@@ -64,8 +64,10 @@
  *	02-Mar-2021 (rlwhitcomb)
  *	    Add options for "hasHeaderRow", "alwaysDelimitStrings", and "preserveQuotes"
  *	    (new options in CSVFormat).
+ *	29-Mar-2021 (rlwhitcomb)
+ *	    Move to new package.
  */
-package info.rlwhitcomb.csv;
+package info.rlwhitcomb.test;
 
 import java.io.File;
 import java.io.FileReader;
@@ -85,8 +87,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 
-import info.rlwhitcomb.csv.Quotes;
-import info.rlwhitcomb.csv.Delimiter;
+import info.rlwhitcomb.csv.*;
 import info.rlwhitcomb.util.Environment;
 import info.rlwhitcomb.util.FileUtilities;
 import info.rlwhitcomb.util.Intl;

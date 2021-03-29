@@ -187,6 +187,8 @@
 		Move all main programs to their own "tools" package.
 	    29-Mar-2021 (rlwhitcomb)
 		Move all the main program wrappers to the "scripts" directory.
+	    29-Mar-2021 (rlwhitcomb)
+		Move all the test programs to their own package.
 
      ========================================================================== -->
 
@@ -404,6 +406,7 @@
 			<src path="info/rlwhitcomb/heart"/>
 			<src path="info/rlwhitcomb/jarfile"/>
 			<src path="info/rlwhitcomb/matches"/>
+			<src path="info/rlwhitcomb/test"/>
 			<src path="info/rlwhitcomb/tester"/>
 			<src path="info/rlwhitcomb/tools"/>
 			<src path="info/rlwhitcomb/tree"/>
@@ -428,15 +431,6 @@
 			<include name="build.properties"/>
 			<include name="build.number"/>
 			<include name="version.properties"/>
-			<include name="DumpManifest*.class"/>
-			<include name="MD5*.class"/>
-			<include name="OS*.class"/>
-			<include name="Gmt*.class"/>
-			<include name="GZip*.class"/>
-			<include name="GUnzip*.class"/>
-			<include name="Head*.class"/>
-			<include name="FixPath*.class"/>
-			<include name="Sleep*.class"/>
 			<include name="Terra*.json"/>
 			<include name="images/*.*"/>
 			<include name="info/rlwhitcomb/Version*.class"/>
@@ -493,18 +487,18 @@
 	<target name="test" depends="compile" description="Run extant unit tests.">
 		<echo>Running unit tests. Output going to "${test.log.file.name}" file.</echo>
 		<echo>Test JavaPreProc...</echo>
-		<delete file="TestPP.java"/>
-		<preproc dir="." processAsDirectory="true" recurseDirectories="true" nologo="true" verbose="plus"
+		<delete file="test/data/TestPP.java"/>
+		<preproc dir="test/data" processAsDirectory="true" recurseDirectories="true" nologo="true" verbose="plus"
 								      log="${test.log.file.name}" overwrite="true"/>
 		<fail message="Preprocessing results don't match!">
 			<condition>
-				<not><filesmatch file1="TestPP.java" file2="test/canons/TestPP.canon" textfile="true"/></not>
+				<not><filesmatch file1="test/data/TestPP.java" file2="test/canons/TestPP.canon" textfile="true"/></not>
 			</condition>
 		</fail>
 		<echo file="${test.log.file.name}" append="true">JavaPreProc: Preprocessing results match.
 </echo>
 		<echo>Test of InitializationTask...</echo>
-		<java classname="InitTaskTest"                        output="${test.log.file.name}" append="true" failonerror="true"/>
+		<java classname="info.rlwhitcomb.test.InitTaskTest"   output="${test.log.file.name}" append="true" failonerror="true"/>
 		<echo>Running various tests through the Tester...</echo>
 		<java classname="${tester.class}"                     output="${test.log.file.name}" append="true" failonerror="true">
 			<arg value="-timing"/>
@@ -532,6 +526,7 @@
 			<fileset dir="info/rlwhitcomb/heart" includes="*.class"/>
 			<fileset dir="info/rlwhitcomb/jarfile" includes="*.class"/>
 			<fileset dir="info/rlwhitcomb/matches" includes="*.class"/>
+			<fileset dir="info/rlwhitcomb/test" includes="*.class"/>
 			<fileset dir="info/rlwhitcomb/tester" includes="*.class"/>
 			<fileset dir="info/rlwhitcomb/tools" includes="*.class"/>
 			<fileset dir="info/rlwhitcomb/tree" includes="*.class"/>

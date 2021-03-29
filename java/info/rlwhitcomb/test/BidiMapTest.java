@@ -21,15 +21,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  *
- * History:
- *	Lost in antiquity...
+ *	Tests of the BidiMap class.
+ *
+ *  Change History:
+ *	    ...Lost in antiquity...
  *	24-Feb-2021 (rlwhitcomb)
  *	    Move test files to "test/data" directory. Don't output "null" entries.
  *	11-Mar-2021 (rlwhitcomb)
  *	    Reformat. Add tests for non-unique value detection.
  *	15-Mar-2021 (rlwhitcomb)
  *	    Add tests for size changes on attempted duplicate adds.
+ *	29-Mar-2021 (rlwhitcomb)
+ *	    Move to new package.
  */
+package info.rlwhitcomb.test;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -42,6 +47,7 @@ import java.util.List;
 
 import info.rlwhitcomb.util.BidiMap;
 import info.rlwhitcomb.util.Options;
+
 
 /**
  * Test class for the {@link BidiMap} class.

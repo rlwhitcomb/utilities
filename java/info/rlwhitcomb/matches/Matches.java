@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2020 Roger L. Whitcomb.
+ * Copyright (c) 2020-2021 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,6 +26,8 @@
  *  Change History:
  *	18-Sep-2020 (rlwhitcomb)
  *	    Initial checkin.
+ *	29-Mar-2021 (rlwhitcomb)
+ *	    Move test code to a new package.
  */
 package info.rlwhitcomb.matches;
 
@@ -56,7 +58,7 @@ public class Matches
 	 * @return Whether or not the input argument matched any ("-or") or all ("-and")
 	 * of the given regular expressions. Reversed with "-not" flag.
 	 *
-	 * @see info.rlwhitcomb.matches.MatchesTest Made into a separate
+	 * @see info.rlwhitcomb.test.MatchesTest Made into a separate
 	 * function to facilitate testing of the algorithm.
 	 */
 	public static boolean match(final String[] args) {

@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2020 Roger L. Whitcomb.
+ * Copyright (c) 2020-2021 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,9 +29,12 @@
  *          Initial checkin.
  *	13-Nov-2020 (rlwhitcomb)
  *	    Set the process exit code for use with automated testing.
+ *	29-Mar-2021 (rlwhitcomb)
+ *	    Move to new package.
  */
-package info.rlwhitcomb.matches;
+package info.rlwhitcomb.test;
 
+import info.rlwhitcomb.matches.Matches;
 import info.rlwhitcomb.util.CharUtil;
 import info.rlwhitcomb.util.Options;
 

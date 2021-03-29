@@ -23,7 +23,7 @@
  *
  *	Tests of the InitializationTask class.
  *
- * History:
+ *  Change History:
  *	09-Nov-2020 (rlwhitcomb)
  *	    Initial coding finished.
  *	02-Dec-2020 (rlwhitcomb)
@@ -38,7 +38,11 @@
  *	    Recast now that InitializationTask is changed/fixed.
  *	26-Mar-2021 (rlwhitcomb)
  *	    Move some methods from NumericUtil to MathUtil.
+ *	29-Mar-2021 (rlwhitcomb)
+ *	    Move to new package.
  */
+package info.rlwhitcomb.test;
+
 import info.rlwhitcomb.util.Environment;
 import info.rlwhitcomb.util.InitializationTask;
 import info.rlwhitcomb.util.Logging;

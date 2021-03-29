@@ -31,9 +31,16 @@
  *	01-Feb-2021 (rlwhitcomb)
  *	    "size()" changed value in DynamicArray, so report that, but also
  *	    new "capacity()" value.
+ *	29-Mar-2021 (rlwhitcomb)
+ *	    Move to new package.
  */
+package info.rlwhitcomb.test;
+
 import info.rlwhitcomb.util.DynamicArray;
 
+/**
+ * Some simple tests of the {@link DynamicArray} class.
+ */
 public class DynArrayTest
 {
 	private static final String UNDERLINE = "----------------------------------------";

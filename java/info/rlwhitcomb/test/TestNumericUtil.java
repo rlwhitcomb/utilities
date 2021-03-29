@@ -23,7 +23,7 @@
  *
  *      Tests of some of the NumericUtil and MathUtil methods.
  *
- * History:
+ *  Change History:
  *      03-Dec-2020 (rlwhitcomb)
  *          Initial coding finished.
  *	05-Jan-2021 (rlwhitcomb)
@@ -50,7 +50,11 @@
  *	    Some lower-case Roman numeral tests.
  *	26-Mar-2021 (rlwhitcomb)
  *	    Move some methods from NumericUtil to MathUtil.
+ *	29-Mar-2021 (rlwhitcomb)
+ *	    Move to new package.
  */
+package info.rlwhitcomb.test;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
