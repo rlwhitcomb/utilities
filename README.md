@@ -74,8 +74,6 @@ Also see "issues" at https://github.com/rlwhitcomb/utilities/issues
 
 ### Calc
 - implement Taylor series expansion of other trig/log functions to requested precision
-- implement ln2 according to this (fast) algorithm: http://www.claysturner.com/dsp/BinaryLogarithm.pdf
-- separate out the log/trig functions into TrigLogUtil (or something like that), for better encapsulation (NumericUtil is getting too big)
 - need sec, cot, csc, and inverses as well
 - redo the [box] formats of strings (to be? x'...', b'...', o'...') then parse such beasts back to strings
 - allow "_" in numeric values, like Java does

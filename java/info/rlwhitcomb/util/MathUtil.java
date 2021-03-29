@@ -30,6 +30,9 @@
  *	    Add "ePower" method (which is e**x, or anti-logarithm).
  *	27-Mar-2021 (rlwhitcomb)
  *	    Clean up code in "pow()"
+ *	29-Mar-2021 (rlwhitcomb)
+ *	    Implement simpler, faster "ln2" function.
+ *	    Rename the resource strings.
  */
 package info.rlwhitcomb.util;
 
@@ -207,7 +210,7 @@ public class MathUtil
 	    double baseFloor  = Math.floor(baseDouble);
 
 	    if (baseFloor != baseDouble)
-		throw new Intl.IllegalArgumentException("util#numeric.wholeInteger");
+		throw new Intl.IllegalArgumentException("util#math.wholeInteger");
 
 	    long loops = base.longValue();
 
@@ -250,7 +253,7 @@ public class MathUtil
 	    double nInt    = Math.rint(nDouble);
 
 	    if (nInt != nDouble)
-		throw new Intl.IllegalArgumentException("util#numeric.wholeInteger");
+		throw new Intl.IllegalArgumentException("util#math.wholeInteger");
 
 	    long loops        = Math.abs(n.longValue());
 	    boolean negative  = nInt < 0.0d;
@@ -545,7 +548,7 @@ public class MathUtil
 	 */
 	public static BigDecimal sqrt(final BigDecimal x, final MathContext mc) {
 	    if (x.signum() < 0)
-		throw new Intl.IllegalArgumentException("util#numeric.sqrtNegative");
+		throw new Intl.IllegalArgumentException("util#math.sqrtNegative");
 	    if (x.equals(BigDecimal.ZERO) || x.equals(BigDecimal.ONE))
 		return x;
 
@@ -622,7 +625,7 @@ public class MathUtil
 	    // According to the original documentation, the given SCALE and ARRINIT
 	    // values work up to approx. 12,500 digits, so error out if we're over that
 	    if (digits > 12_500)
-		throw new Intl.IllegalArgumentException("util#numeric.tooManyPiDigits");
+		throw new Intl.IllegalArgumentException("util#math.tooManyPiDigits");
 
 	    // Since each loop reduces the count by 14 while only providing 4 digits
 	    // of output, in order to produce the required number of digits we must
@@ -653,7 +656,7 @@ public class MathUtil
 	    // the result to the exact digit count requested. Exception thrown if we
 	    // calculated wrong.
 	    if (pi.length() < digits)
-		throw new Intl.IllegalStateException("util#numeric.piDigitMismatch",
+		throw new Intl.IllegalStateException("util#math.piDigitMismatch",
 			pi.length(), digits);
 	    else if (pi.length() > digits)
 		pi.setLength(digits);
@@ -857,7 +860,7 @@ public class MathUtil
 	    BigInteger posN = n.abs();
 
 	    if (posN.compareTo(MAX_PRIME) > 0)
-		throw new Intl.IllegalArgumentException("util#numeric.primeTooBig");
+		throw new Intl.IllegalArgumentException("util#math.primeTooBig");
 
 	    // Easy decisions here: zero and one are not prime
 	    if (posN.compareTo(BigInteger.ONE) <= 0)
@@ -921,7 +924,7 @@ public class MathUtil
 	    BigInteger posN = (sign < 0) ? n.negate() : n;
 
 	    if (posN.compareTo(MAX_PRIME) > 0)
-		throw new Intl.IllegalArgumentException("util#numeric.primeTooBig");
+		throw new Intl.IllegalArgumentException("util#math.primeTooBig");
 
 	    // Zero has no factors
 	    if (posN.equals(BigInteger.ZERO))
@@ -1013,7 +1016,7 @@ public class MathUtil
 	    BigInteger posN = (sign < 0) ? n.negate() : n;
 
 	    if (posN.compareTo(MAX_PRIME) > 0)
-		throw new Intl.IllegalArgumentException("util#numeric.primeTooBig");
+		throw new Intl.IllegalArgumentException("util#math.primeTooBig");
 
 	    // Zero has no factors
 	    if (posN.equals(BigInteger.ZERO))
@@ -1070,6 +1073,61 @@ public class MathUtil
 
 	    // Finally, sort all the factors since they might be out of order (esp. if the number is negative)
 	    Collections.sort(factors);
+	}
+
+
+	/**
+	 * Calculate the logarithm base two of a number.
+	 * <p> Calculation taken from <a href="http://www.claysturner.com/dsp/BinaryLogarithm.pdf">http://www.claysturner.com/dsp/BinaryLogarithm.pdf</a>
+	 *
+	 * @param input The value to calculate the logarithm base two of.
+	 * @param mc    The desired precision and rounding mode for the result.
+	 * @return The value such that <code>2 ** value == input</code>.
+	 * @throws IllegalArgumentException if the input is negative or zero.
+	 */
+	public static BigDecimal ln2(final BigDecimal input, final MathContext mc) {
+	    if (input.compareTo(BigDecimal.ZERO) <= 0)
+		throw new Intl.IllegalArgumentException("util#numeric.outOfRange");
+
+	    BigDecimal y = BigDecimal.ZERO;
+	    BigDecimal b = new BigDecimal("0.5");
+	    BigDecimal x = input;
+
+	    // Get the integer number power required to get the input between one and two
+	    // from where we can get the fractional value below
+	    while (x.compareTo(BigDecimal.ONE) < 0 || x.compareTo(D_TWO) >= 0) {
+		while (x.compareTo(BigDecimal.ONE) < 0) {
+		    logger.debug("ln2: x = %1$s, y = %2$s", x.toPlainString(), y.toPlainString());
+		    x = x.multiply(D_TWO);
+		    y = y.subtract(BigDecimal.ONE);
+		}
+		while (x.compareTo(D_TWO) >= 0) {
+		    logger.debug("ln2: x = %1$s, y = %2$s", x.toPlainString(), y.toPlainString());
+		    x = x.divide(D_TWO);
+		    y = y.add(BigDecimal.ONE);
+		}
+	    }
+
+	    // Intermediate calculations can use a couple extra digits of precision to ensure
+	    // LSD accuracy at the end
+	    MathContext mc2 = new MathContext(mc.getPrecision() + 2, mc.getRoundingMode());
+
+	    // Since we are calculating one bit at a time, the number of loops should be about
+	    // precision * ln2(10) or about 3.3219 or say 3.4 to give us some wiggle room
+	    int loops = (mc.getPrecision() + 1) * 17 / 5;
+	    logger.debug("ln2: x = %1$s, y = %2$s, loops = %3$d", x.toPlainString(), y.toPlainString(), loops);
+
+	    for (int loop = 0; loop < loops; loop++) {
+		logger.debug("ln2: loop = %1$d, x = %2$s, y = %3$s, b = %4$s", loop, x.toPlainString(), y.toPlainString(), b.toPlainString());
+		x = x.multiply(x, mc2);
+		if (x.compareTo(D_TWO) >= 0) {
+		    x = x.divide(D_TWO);
+		    y = y.add(b);
+		}
+		b = b.divide(D_TWO);
+	    }
+
+	    return y.round(mc);
 	}
 
 }

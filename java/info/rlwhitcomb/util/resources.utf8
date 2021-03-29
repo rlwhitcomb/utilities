@@ -100,6 +100,8 @@
 #	    New errors from NumericUtil.
 #	11-Mar-2021 (rlwhitcomb)
 #	    New error from BidiMap.
+#	26-Mar-2021 (rlwhitcomb)
+#	    Move messages from NumericUtil to MathUtil.
 #
 
 #
@@ -174,12 +176,15 @@ numeric.badDataTypeCode		= Data type code %1$d is not recognized.
 numeric.unknownByteOrder	= "%1$s" is not a valid byte order (should be LSB or MSB).
 numeric.unknownStringLength	= "%1$s" is not a valid string length designation.
 numeric.stringLengthTooBig	= String length of %1$d exceds limit of %2$d.
-numeric.tooManyPiDigits		= The PI digit calculation is only good for about 12,500 digits!
-numeric.piDigitMismatch		= Calculated digit length is %1$d, but requested number of digits was %2$d!
-numeric.tooManyDigits		= Too many digits of precision requested (max is %1$d).
-numeric.wholeInteger		= The value must be a whole number.
-numeric.primeTooBig		= The value is too big to compute.
-numeric.sqrtNegative		= Square root of a negative number is not real.
+
+#
+# From MathUtil.java
+#
+math.tooManyPiDigits		= The PI digit calculation is only good for about 12,500 digits!
+math.piDigitMismatch		= Calculated digit length is %1$d, but requested number of digits was %2$d!
+math.wholeInteger		= The value must be a whole number.
+math.primeTooBig		= The value is too big to compute.
+math.sqrtNegative		= Square root of a negative number is not real.
 
 #
 # From BigFraction.java

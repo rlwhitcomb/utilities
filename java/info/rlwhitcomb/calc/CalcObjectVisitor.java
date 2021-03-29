@@ -227,6 +227,8 @@
  *	    Add "epow" function, using new MathUtil method.
  *	28-Mar-2021 (rlwhitcomb)
  *	    Allow precision on all format arguments, and implement (now) for @d.
+ *	29-Mar-2021 (rlwhitcomb)
+ *	    Calculate ln2 from our own method.
  */
 package info.rlwhitcomb.calc;
 
@@ -1517,12 +1519,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitLn2Expr(CalcParser.Ln2ExprContext ctx) {
-	    double d = getDoubleValue(ctx.expr());
+	    BigDecimal d = getDecimalValue(ctx.expr());
 
-	    double d10_2 = Math.log10(2.0d);
-	    double ln10  = Math.log10(d);
-
-	    return new BigDecimal(ln10 / d10_2, mcDouble);
+	    return MathUtil.ln2(d, mc);
 	}
 
 	@Override
