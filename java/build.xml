@@ -191,6 +191,8 @@
 		Move all the test programs to their own package.
 	    29-Mar-2021 (rlwhitcomb)
 		Move the GUI default theme file.
+	    29-Mar-2021 (rlwhitcomb)
+		Rename "purge-logs" to "purge" and update some target descriptions.
 
      ========================================================================== -->
 
@@ -512,10 +514,11 @@
 		<echo>Done with unit tests. Successful. Results in "${test.log.file.name}" file.</echo>
 	</target>
 
-	<target name="clean" depends="purge-logs" description="Cleans all generated files, and old log files.">
+	<target name="clean" depends="purge" description="Cleans all generated files, old temp files, and old log files.">
 		<delete>
 			<fileset dir="." includes="${dest.jar}"/>
 			<fileset dir="." includes="*.class"/>
+			<fileset dir="test/data" includes="*.class"/>
 			<fileset dir="name/fraser/neil/plaintext" includes="*.class"/>
 			<fileset dir="net/iharder/b64" includes="*.class"/>
 			<fileset dir="info/rlwhitcomb" includes="*.class"/>
@@ -580,7 +583,7 @@
 
 	<target name="update" depends="touch,compile,jar,copy-to-install-directory" description="Simple incremental build and update the installed .jar file."/>
 
-	<target name="purge-logs" description="Purge log files older than two weeks out of date.">
+	<target name="purge" description="Purge temp and log files older than two weeks ago.">
 		<tstamp>
 			<format property="last.two.weeks" pattern="MM/dd/yyyy hh:mm aa" locale="en,US" offset="-2" unit="week"/>
 		</tstamp>
