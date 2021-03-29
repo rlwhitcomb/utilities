@@ -309,8 +309,8 @@ code {
             <tr><td><code>LCM</code>&nbsp;<i>expr</i><code>,</code>&nbsp;<i>expr</i></td><td>least common multiple</td></tr>
             <tr><td><code>MAX</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;) *</td><td>maximum value</td></tr>
             <tr><td><code>MIN</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;) *</td><td>minimum value</td></tr>
-            <tr><td><code>SUMOF</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;) *</td><td>sum of all the values</td></tr>
-            <tr><td><code>PRODUCTOF</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;) *</td><td>product of all the values</td></tr>
+            <tr><td><code>SUMOF</code> or <code>&#x2211;</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;) *</td><td>sum of all the values</td></tr>
+            <tr><td><code>PRODUCTOF</code> or <code>&#x220F;</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;) *</td><td>product of all the values</td></tr>
             <tr><td><code>JOIN</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;) *</td><td>join strings</td></tr>
             <tr><td><code>FILL</code>&nbsp;<i>var</i>&nbsp;<code>,</code> <i>expr</i>&nbsp;<code>,</code> <i>expr</i> ( <code>,</code><i>expr</i> )</td><td>fill an array or string</td></tr>
             <tr><td><code>FIB</code>&nbsp;<i>expr</i></td><td>Fibonacci number</td></tr>

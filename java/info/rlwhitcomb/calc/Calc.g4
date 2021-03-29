@@ -167,6 +167,8 @@
  *	    Add "epow" function.
  *	28-Mar-2021 (rlwhitcomb)
  *	    Allow precision on all format arguments.
+ *	29-Mar-2021 (rlwhitcomb)
+ *	    Add Unicode equivalents for SUMOF and PRODUCTOF.
  */
 
 grammar Calc;
@@ -484,9 +486,9 @@ FACTORS  : F A C T O R S ;
 
 PFACTORS : P F A C T O R S ;
 
-SUMOF    : S U M O F ;
+SUMOF    : ( S U M O F | '\u2211' ) ;
 
-PRODUCTOF: P R O D U C T O F ;
+PRODUCTOF: ( P R O D U C T O F | '\u220F' ) ;
 
 LOOP     : L O O P ;
 
