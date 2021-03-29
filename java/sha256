@@ -1,4 +1,4 @@
 #!/bin/bash
-CLASS_NAME=MD5
+CLASS_NAME=info.rlwhitcomb.tools.MD5
 CMD_ARGS=--algorithm=SHA-256
 source _find_and_run_class

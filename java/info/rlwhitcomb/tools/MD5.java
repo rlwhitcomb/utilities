@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2010-2011,2015,2018-2020 Roger L. Whitcomb.
+ * Copyright (c) 2010-2011,2015,2018-2021 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,32 +21,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  *
- * MD5 Utility Program
+ *	MD5 Utility Program
  *
  *  Change History:
- *   07-Jul-2010 (rlwhitcomb)
- *      First version.
- *   02-Sep-2011 (rlwhitcomb)
- *      Made into public class to be accessed from Ant.
- *   24-Aug-2015 (rlwhitcomb)
- *      Javadoc cleanup pointed out by Java 8.
- *   20-Aug-2018 (rlwhitcomb)
- *      Reflow with 4-char indents. Update some Javadoc. Allow "-" or "/" for
- *      option recognition.
- *   18-Mar-2019 (rlwhitcomb)
- *      Don't use FileInputStream due to GC problems b/c of the finalize
- *      method in these classes. No wildcard imports.
- *   06-Jun-2019 (rlwhitcomb)
- *      Allow ":" on algorithm option in addition to "=".
- *   10-Mar-2020 (rlwhitcomb)
- *	Prepare for GitHub.
- *   22-Sep-2020 (rlwhitcomb)
- *	Error message if nothing given on command line to do.
- *   21-Oct-2020 (rlwhitcomb)
- *	Allow slash in the algorithm name (for "SHA-512/256", etc.).
- *   21-Dec-2020 (rlwhitcomb)
- *	Update obsolete Javadoc constructs.
+ *	07-Jul-2010 (rlwhitcomb)
+ *	    First version.
+ *	02-Sep-2011 (rlwhitcomb)
+ *	    Made into public class to be accessed from Ant.
+ *	24-Aug-2015 (rlwhitcomb)
+ *	    Javadoc cleanup pointed out by Java 8.
+ *	20-Aug-2018 (rlwhitcomb)
+ *	    Reflow with 4-char indents. Update some Javadoc. Allow "-" or "/" for
+ *	    option recognition.
+ *	18-Mar-2019 (rlwhitcomb)
+ *	    Don't use FileInputStream due to GC problems b/c of the finalize
+ *	    method in these classes. No wildcard imports.
+ *	06-Jun-2019 (rlwhitcomb)
+ *	    Allow ":" on algorithm option in addition to "=".
+ *	10-Mar-2020 (rlwhitcomb)
+ *	    Prepare for GitHub.
+ *	22-Sep-2020 (rlwhitcomb)
+ *	    Error message if nothing given on command line to do.
+ *	21-Oct-2020 (rlwhitcomb)
+ *	    Allow slash in the algorithm name (for "SHA-512/256", etc.).
+ *	21-Dec-2020 (rlwhitcomb)
+ *	    Update obsolete Javadoc constructs.
+ *	29-Mar-2021 (rlwhitcomb)
+ *	    Move to new package; reformat a little.
  */
+package info.rlwhitcomb.tools;
 
 import java.io.BufferedReader;
 import java.io.File;

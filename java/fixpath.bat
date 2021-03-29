@@ -1,3 +1,3 @@
 @echo off
-for /F "tokens=*" %%P in ('java -cp %~dp0utilities.jar FixPath') do set PATH=%%P
+for /F "tokens=*" %%P in ('java -cp %~dp0utilities.jar info.rlwhitcomb.tools.FixPath') do set PATH=%%P
 echo PATH=%PATH%

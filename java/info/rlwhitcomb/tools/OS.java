@@ -24,37 +24,41 @@
  *	Display various environment and Java system properties.
  *
  *  Change History:
- *    02-Oct-2020 (rlwhitcomb)
- *	First version, based on older code.
- *    19-Oct-2020 (rlwhitcomb)
- *	Added MessageDigest list.
- *    19-Oct-2020 (rlwhitcomb)
- *	Allow multiple choices. Make the titles look better.
- *    20-Oct-2020 (rlwhitcomb)
- *	Use streams and a FunctionalInterface to make the code cleaner.
- *	Add some Javadoc. Add the list of security providers.
- *    21-Oct-2020 (rlwhitcomb)
- *	More code cleanup; move the command line choice matching into
- *	the Choice enum itself; display all the choices for the "help",
- *	and implement a "help" option.
- *    09-Nov-2020 (rlwhitcomb)
- *	Tweak the help output.
- *    04-Jan-2021 (rlwhitcomb)
- *	Allow choices to be "options" format ("-props", etc.)
- *    13-Jan-2021 (rlwhitcomb)
- *	List fonts available in the graphics environment.
- *    19-Jan-2021 (rlwhitcomb)
- *	Do output in columns if possible. A few more aliases for the
- *	choices.
- *    19-Jan-2021 (rlwhitcomb)
- *	Fix a bug in the display of the choice aliases. Reorder them.
- *    23-Feb-2021 (rlwhitcomb)
- *	Add "cs" as an option for "charsets".
- *    17-Mar-2021 (rlwhitcomb)
- *	Add timezones.
- *    17-Mar-2021 (rlwhitcomb)
- *	Additional display of the default timezone if none was "equal" to it.
+ *	02-Oct-2020 (rlwhitcomb)
+ *	    First version, based on older code.
+ *	19-Oct-2020 (rlwhitcomb)
+ *	    Added MessageDigest list.
+ *	19-Oct-2020 (rlwhitcomb)
+ *	    Allow multiple choices. Make the titles look better.
+ *	20-Oct-2020 (rlwhitcomb)
+ *	    Use streams and a FunctionalInterface to make the code cleaner.
+ *	    Add some Javadoc. Add the list of security providers.
+ *	21-Oct-2020 (rlwhitcomb)
+ *	    More code cleanup; move the command line choice matching into
+ *	    the Choice enum itself; display all the choices for the "help",
+ *	    and implement a "help" option.
+ *	09-Nov-2020 (rlwhitcomb)
+ *	    Tweak the help output.
+ *	04-Jan-2021 (rlwhitcomb)
+ *	    Allow choices to be "options" format ("-props", etc.)
+ *	13-Jan-2021 (rlwhitcomb)
+ *	    List fonts available in the graphics environment.
+ *	19-Jan-2021 (rlwhitcomb)
+ *	    Do output in columns if possible. A few more aliases for the
+ *	    choices.
+ *	19-Jan-2021 (rlwhitcomb)
+ *	    Fix a bug in the display of the choice aliases. Reorder them.
+ *	23-Feb-2021 (rlwhitcomb)
+ *	    Add "cs" as an option for "charsets".
+ *	17-Mar-2021 (rlwhitcomb)
+ *	    Add timezones.
+ *	17-Mar-2021 (rlwhitcomb)
+ *	    Additional display of the default timezone if none was "equal" to it.
+ *	29-Mar-2021 (rlwhitcomb)
+ *	    Move to new package; reformat Change History.
  */
+package info.rlwhitcomb.tools;
+
 import java.awt.GraphicsEnvironment;
 import java.io.PrintStream;
 import java.nio.charset.Charset;

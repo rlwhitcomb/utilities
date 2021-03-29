@@ -26,7 +26,7 @@
 
 		"Ant" build file for the utility code.
 
-	History:
+	Change History:
 	    18-Sep-2020 (rlwhitcomb)
 		Add "History" starting from now; reformat and clean up target
 		descriptions. Added "matches" directory today also.
@@ -183,6 +183,8 @@
 		Enforce min Ant and Java versions.
 	    26-Mar-2021 (rlwhitcomb)
 		Update description of "install".
+	    29-Mar-2021 (rlwhitcomb)
+		Move all main programs to their own "tools" package.
 
      ========================================================================== -->
 
@@ -401,6 +403,7 @@
 			<src path="info/rlwhitcomb/jarfile"/>
 			<src path="info/rlwhitcomb/matches"/>
 			<src path="info/rlwhitcomb/tester"/>
+			<src path="info/rlwhitcomb/tools"/>
 			<src path="info/rlwhitcomb/tree"/>
 			<src path="info/rlwhitcomb/util"/>
 			<src path="info/rlwhitcomb/wordfind"/>
@@ -449,6 +452,7 @@
 			<include name="info/rlwhitcomb/jarfile/*.class"/>
 			<include name="info/rlwhitcomb/matches/*.class"/>
 			<include name="info/rlwhitcomb/tester/*.class"/>
+			<include name="info/rlwhitcomb/tools/*.class"/>
 			<include name="info/rlwhitcomb/tree/*.class"/>
 			<include name="info/rlwhitcomb/util/*.class"/>
 			<include name="info/rlwhitcomb/wordfind/*.class"/>
@@ -527,6 +531,7 @@
 			<fileset dir="info/rlwhitcomb/jarfile" includes="*.class"/>
 			<fileset dir="info/rlwhitcomb/matches" includes="*.class"/>
 			<fileset dir="info/rlwhitcomb/tester" includes="*.class"/>
+			<fileset dir="info/rlwhitcomb/tools" includes="*.class"/>
 			<fileset dir="info/rlwhitcomb/tree" includes="*.class"/>
 			<fileset dir="info/rlwhitcomb/util" includes="*.class"/>
 			<fileset dir="info/rlwhitcomb/wordfind" includes="*.class"/>

@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2010-2011,2015,2017-2018,2020 Roger L. Whitcomb.
+ * Copyright (c) 2010-2011,2015,2017-2018,2020-2021 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,16 +21,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  *
- * Dump a .jar file manifest.
+ *	Dump a .jar file manifest.
  *
+ *  Change History:
+ *	    ... lost in antiquity ...
+ *	29-Mar-2021 (rlwhitcomb)
+ *	    Move to new "tools" package; add "Change History".
  */
+package info.rlwhitcomb.tools;
+
 import java.io.*;
 import java.util.*;
 import java.util.jar.*;
 
 /**
  * Dump the .jar file contents, including any manifest that is included.
- * <p> Any number of .jar file names can be given on the command line.
+ * <p> Any number of .jar file names can be given on the command line,
+ * but wildcards are not supported (yet).
  * <p> By default the attribute entries are presented sorted by key name,
  * but the "--raw" option will show them as given by {@link Attributes#keySet}.
  

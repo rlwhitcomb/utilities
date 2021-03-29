@@ -1,4 +1,4 @@
 #!/bin/bash
-CLASS_NAME=FixPath
+CLASS_NAME=info.rlwhitcomb.tools.FixPath
 echo To set the updated path, use '"export PATH=$(fixpath)"' >/dev/stderr
 source _find_and_run_class

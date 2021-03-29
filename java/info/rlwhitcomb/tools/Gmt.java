@@ -21,16 +21,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  *
- *   Display the time in GMT.
+ *	Display the time in GMT.
  *
- * History:
+ *  Change History:
  *	23-Feb-2021 (rlwhitcomb)
  *	    Initial implementation.
  *	23-Feb-2021 (rlwhitcomb)
  *	    Add options.
  *	03-Mar-2021 (rlwhitcomb)
  *	    Tweak the output so it matches what we're emulating better.
+ *	29-Mar-2021 (rlwhitcomb)
+ *	    Move to new package.
  */
+package info.rlwhitcomb.tools;
+
 import java.text.DateFormat;
 import java.text.FieldPosition;
 import java.text.SimpleDateFormat;

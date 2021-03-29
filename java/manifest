@@ -1,3 +1,3 @@
 #!/bin/bash
-CLASS_NAME=DumpManifest
+CLASS_NAME=info.rlwhitcomb.tools.DumpManifest
 source _find_and_run_class

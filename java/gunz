@@ -1,3 +1,3 @@
 #!/bin/bash
-CLASS_NAME=GUnzip
+CLASS_NAME=info.rlwhitcomb.tools.GUnzip
 source _find_and_run_class

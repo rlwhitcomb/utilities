@@ -21,12 +21,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  *
- *   Display the beginning (head) of a file.
+ *	Display the beginning (head) of a file.
  *
- * History:
+ *  Change History:
  *	23-Feb-2021 (rlwhitcomb)
  *	    Initial implementation.
+ *	29-Mar-2021 (rlwhitcomb)
+ *	    Move to new package.
  */
+package info.rlwhitcomb.tools;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -44,7 +48,8 @@ import info.rlwhitcomb.util.ExceptionUtil;
 
 
 /**
- * Display the head of a file.
+ * Display the head (<code><i>nn</i></code> lines) of a file, with optional
+ * character set designation.
  */
 public class Head
 {

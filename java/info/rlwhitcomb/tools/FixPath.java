@@ -28,7 +28,11 @@
  *	    First version.
  *	19-Jan-2021 (rlwhitcomb)
  *	    Clean up code and comments.
+ *	29-Mar-2021 (rlwhitcomb)
+ *	    Move to new package.
  */
+package info.rlwhitcomb.tools;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;

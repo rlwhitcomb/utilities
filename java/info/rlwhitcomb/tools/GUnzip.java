@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2017,2020 Roger L. Whitcomb.
+ * Copyright (c) 2017,2020-2021 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,12 +23,16 @@
  *
  *   Test/utility program for the FileUtilities.uncompressFile method.
  *
- * History:
+ *  Change History:
  *	27-Mar-2017 (rlwhitcomb)
  *	    Clone from GZip.java.
  *	13-Nov-2020 (rlwhitcomb)
  *	    Prepare for GitHub; add Javadoc.
+ *	29-Mar-2021 (rlwhitcomb)
+ *	    Move to new package.
  */
+package info.rlwhitcomb.tools;
+
 import java.io.File;
 import java.io.IOException;
 
