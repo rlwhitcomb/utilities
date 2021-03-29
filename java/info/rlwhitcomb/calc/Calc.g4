@@ -165,6 +165,8 @@
  *	    Add the "fill" function for arrays and strings.
  *	27-Mar-2021 (rlwhitcomb)
  *	    Add "epow" function.
+ *	28-Mar-2021 (rlwhitcomb)
+ *	    Allow precision on all format arguments.
  */
 
 grammar Calc;
@@ -684,7 +686,7 @@ QUIET
 
 
 FORMAT
-   : '@' ( [a-zA-Z,] | ( '-' ? [0-9]* ) ? '%' )
+   : '@' ( '-' ? INT ) ? [a-zA-Z,%]
    ;
 
 STRING

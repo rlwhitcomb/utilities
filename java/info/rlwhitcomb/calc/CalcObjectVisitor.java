@@ -225,6 +225,8 @@
  *	    Move some methods from NumericUtil to MathUtil.
  *	27-Mar-2021 (rlwhitcomb)
  *	    Add "epow" function, using new MathUtil method.
+ *	28-Mar-2021 (rlwhitcomb)
+ *	    Allow precision on all format arguments, and implement (now) for @d.
  */
 package info.rlwhitcomb.calc;
 
@@ -762,9 +764,18 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    String resultString     = "";
 
 	    BigInteger iValue;
+	    BigDecimal dValue;
+
+	    int precision = Integer.MIN_VALUE;
 
 	    TerminalNode formatNode = ctx.FORMAT();
 	    String format           = formatNode == null ? "" : formatNode.getText();
+
+	    // Some formats allow a precision to be given ('%', and 'd' for instance)
+	    if (format.length() > 2) {
+		String num = format.substring(1, format.length() - 1);
+		precision = Integer.parseInt(num);
+	    }
 
 	    String exprString       = String.format("%1$s%2$s", getTreeText(ctx.expr()), format);
 
@@ -799,7 +810,11 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			break;
 		    case 'D':
 		    case 'd':
-			valueBuf.append(toDecimalValue(this, result, mc, ctx).toPlainString());
+			dValue = toDecimalValue(this, result, mc, ctx);
+			if (precision != Integer.MIN_VALUE) {
+			    dValue = round(dValue, precision);
+			}
+			valueBuf.append(dValue.toPlainString());
 			break;
 		    case 'f':
 			valueBuf.append(toFractionValue(this, result, ctx));
@@ -901,13 +916,11 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			break;
 
 		    case '%':
-			BigDecimal dValue = toDecimalValue(this, result, mc, ctx);
+			dValue = toDecimalValue(this, result, mc, ctx);
 			BigDecimal percentValue = dValue.multiply(BigDecimal.valueOf(100L), mc);
-			// Parse out possible precision value
-			if (format.length() > 2) {
-			    String num = format.substring(1, format.length() - 1);
-			    int prec = Integer.parseInt(num);
-			    percentValue = round(percentValue, prec);
+			// Round the value to given precision (if any)
+			if (precision != Integer.MIN_VALUE) {
+			    percentValue = round(percentValue, precision);
 			}
 			valueBuf.append(percentValue.toPlainString()).append('%');
 			break;
