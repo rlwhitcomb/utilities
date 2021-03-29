@@ -193,6 +193,8 @@
 		Move the GUI default theme file.
 	    29-Mar-2021 (rlwhitcomb)
 		Rename "purge-logs" to "purge" and update some target descriptions.
+	    29-Mar-2021 (rlwhitcomb)
+		Add WordCount program and wrappers.
 
      ========================================================================== -->
 
@@ -318,6 +320,8 @@
 		<include name="tre.bat"                     if:true="${on.windows}"/>
 		<include name="version"                 unless:true="${on.windows}"/>
 		<include name="version.bat"                 if:true="${on.windows}"/>
+		<include name="wc"                      unless:true="${on.windows}"/>
+		<include name="wc.bat"                      if:true="${on.windows}"/>
 		<include name="wf"                      unless:true="${on.windows}"/>
 		<include name="wf.bat"                      if:true="${on.windows}"/>
 		<include name="which"                   unless:true="${on.windows}"/>
