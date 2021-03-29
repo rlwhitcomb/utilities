@@ -185,6 +185,8 @@
 		Update description of "install".
 	    29-Mar-2021 (rlwhitcomb)
 		Move all main programs to their own "tools" package.
+	    29-Mar-2021 (rlwhitcomb)
+		Move all the main program wrappers to the "scripts" directory.
 
      ========================================================================== -->
 
@@ -560,7 +562,7 @@
 	<target name="copy-to-install-directory" description="Copy the requisite files to the local utilities directory.">
 		<copy file="${dest.jar}" todir="${env.UTILITIES_HOME}" if:true="${utilities.available}"/>
 		<copy todir="${env.UTILITIES_HOME}" if:true="${utilities.available}">
-			<fileset dir=".">
+			<fileset dir="./scripts">
 				<patternset refid="wrapper-files"/>
 			</fileset>
 			<fileset dir="./external-jars">
