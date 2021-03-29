@@ -189,6 +189,8 @@
 		Move all the main program wrappers to the "scripts" directory.
 	    29-Mar-2021 (rlwhitcomb)
 		Move all the test programs to their own package.
+	    29-Mar-2021 (rlwhitcomb)
+		Move the GUI default theme file.
 
      ========================================================================== -->
 
@@ -431,8 +433,8 @@
 			<include name="build.properties"/>
 			<include name="build.number"/>
 			<include name="version.properties"/>
-			<include name="Terra*.json"/>
 			<include name="images/*.*"/>
+			<include name="info/rlwhitcomb/Terra*.json"/>
 			<include name="info/rlwhitcomb/Version*.class"/>
 			<include name="info/rlwhitcomb/annotations/*.class"/>
 			<include name="info/rlwhitcomb/calc/*.class"/>

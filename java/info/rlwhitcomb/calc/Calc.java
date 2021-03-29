@@ -23,7 +23,7 @@
  *
  *	Command line calculator, based on Antlr (v4) grammar / parser.
  *
- *  History:
+ *  Change History:
  *      04-Dec-2020 (rlwhitcomb)
  *	    First version, not complete yet.
  *	05-Dec-2020 (rlwhitcomb)
@@ -114,6 +114,8 @@
  *	    Tweak the error message display to eliminate duplicate "."
  *	24-Mar-2021 (rlwhitcomb)
  *	    Change to use a TextPane for input so we can paste in Unicode on OSX.
+ *	29-Mar-2021 (rlwhitcomb)
+ *	    Move the default theme file.
  */
 package info.rlwhitcomb.calc;
 
@@ -1046,7 +1048,7 @@ public class Calc
 	}
 
 	public Calc() {
-	    System.setProperty("org.apache.pivot.wtk.skin.terra.location", "/TerraTheme_old.json");
+	    System.setProperty("org.apache.pivot.wtk.skin.terra.location", "/info/rlwhitcomb/TerraTheme_old.json");
 	}
 
 }

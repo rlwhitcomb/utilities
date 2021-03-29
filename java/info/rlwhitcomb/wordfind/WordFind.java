@@ -24,7 +24,7 @@
  *      "Word Finder" program; runs in either command line or GUI mode (using
  *      the Apache Pivot GUI framework).
  *
- *   Change History:
+ *  Change History:
  *      22-Sep-2020 (rlwhitcomb)
  *          Initial checkin to GitHub. Allow comments and blank lines in the
  *          master word file. The GUI is not yet implemented.
@@ -49,6 +49,8 @@
  *          Highlight the "contained" strings in the final output.
  *          Display total words at the end.
  *          Implement "-nocolor" option.
+ *	29-Mar-2021 (rlwhitcomb)
+ *	    Move the theme file.
  */
 package info.rlwhitcomb.wordfind;
 
@@ -827,7 +829,7 @@ public class WordFind implements Application {
     }
 
     public WordFind() {
-        System.setProperty("org.apache.pivot.wtk.skin.terra.location", "/TerraTheme_old.json");
+        System.setProperty("org.apache.pivot.wtk.skin.terra.location", "/info/rlwhitcomb/TerraTheme_old.json");
     }
 
 }

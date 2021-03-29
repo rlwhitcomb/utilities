@@ -1,7 +1,7 @@
  /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2016-2018,2020 Roger L. Whitcomb.
+ * Copyright (c) 2016-2018,2020-2021 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,7 +24,7 @@
  *	GUI utility to invoke the "curl" command line program and
  *	execute it with given parameters and display the result.
  *
- *  History:
+ *  Change History:
  *	15-Sep-2016 (rlwhitcomb)
  *	    Initial coding.
  *	16-Sep-2016 (rlwhitcomb)
@@ -47,6 +47,8 @@
  *	    strictly Ctrl, esp. on Mac).
  *	22-Dec-2020 (rlwhitcomb)
  *	    Fix obsolete Javadoc constructs.
+ *	29-Mar-2021 (rlwhitcomb)
+ *	    Move the default theme file location.
  */
 package info.rlwhitcomb.curl;
 
@@ -290,7 +292,7 @@ public class CURL
 
 	public CURL() {
 	    // Select the old TerraTheme (and colors)
-	    System.setProperty("org.apache.pivot.wtk.skin.terra.location", "/TerraTheme_old.json");
+	    System.setProperty("org.apache.pivot.wtk.skin.terra.location", "/info/rlwhitcomb/TerraTheme_old.json");
 
 	    serializer = new BXMLSerializer();
 	}
