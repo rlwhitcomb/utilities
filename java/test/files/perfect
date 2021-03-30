@@ -1,0 +1,8 @@
+:quiet on
+results = []
+loop $i in 500 { a = factors($i); b = sumof(a) - $i; (b == 1) ? results[length results] = `$$i is prime!` : (b == $i) ? results[length results] = `$$i is perfect!` : "" }
+:quiet pop
+:resultsonly on
+results @j
+:resultsonly pop
+

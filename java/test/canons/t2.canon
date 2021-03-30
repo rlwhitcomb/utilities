@@ -13,10 +13,11 @@
 >Test 'primes_10000': Passed
 >Test 'factors': Passed
 >Test 'pfactors': Passed
+>Test 'perfect': Passed
 >Test 'mort': Passed
 >
 >End of Calc tests.
 >------------------------------------
->Ran 11 tests: 11 passed, 0 failed.
+>Ran 12 tests: 12 passed, 0 failed.
 >====================================
 >
