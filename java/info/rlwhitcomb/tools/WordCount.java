@@ -27,6 +27,8 @@
  *  Change History:
  *	29-Mar-2021 (rlwhitcomb)
  *	    Initial implementation.
+ *	29-Mar-2021 (rlwhitcomb)
+ *	    Fix formatting with overflow sizes.
  */
 package info.rlwhitcomb.tools;
 
@@ -130,7 +132,7 @@ public class WordCount
 	}
 
 	private static void display(final int lines, final int words, final int chars, final String desc) {
-	    System.out.printf("%1$8d%2$8d%3$8d %4$s%n", lines, words, chars, desc);
+	    System.out.printf("%1$8d %2$7d %3$7d %4$s%n", lines, words, chars, desc);
 	}
 
 	private static void process(final int ichar) {
