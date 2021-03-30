@@ -1,0 +1,97 @@
+<!-- ==========================================================================
+
+	The MIT License (MIT)
+
+	Copyright (c) 2021 Roger L. Whitcomb.
+
+	Permission is hereby granted, free of charge, to any person obtaining a copy
+	of this software and associated documentation files (the "Software"), to deal
+	in the Software without restriction, including without limitation the rights
+	to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+	copies of the Software, and to permit persons to whom the Software is
+	furnished to do so, subject to the following conditions:
+
+	The above copyright notice and this permission notice shall be included in all
+	copies or substantial portions of the Software.
+
+	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+	IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+	FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+	AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+	LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+	OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+	SOFTWARE.
+
+		GUI definition for the WordFind program.
+
+	History:
+	    29-Mar-2021 (rlwhitcomb)
+		First version.
+
+ ========================================================================== -->
+
+<Window bxml:id="mainWindow"
+    title="Word Finder"
+    maximized="true"
+    preferredWidth="800"
+    xmlns:bxml="http://pivot.apache.org/bxml"
+    xmlns:content="org.apache.pivot.wtk.content"
+    xmlns="org.apache.pivot.wtk">
+
+    <TablePane>
+        <columns>
+            <TablePane.Column width="1*"/>
+        </columns>
+        <rows>
+            <TablePane.Row height="-1">
+                <Form styles="{labelFont:{size:20, bold:true}}">
+                    <Form.Section>
+                        <BoxPane Form.label="Letters" orientation="horizontal" styles="{padding:0,spacing:0,verticalAlignment:'center'}">
+                            <TextInput bxml:id="lettersInput"    styles="{font:{size:26,bold:true}}" maximumLength="15" preferredWidth="440"/>
+                            <PushButton bxml:id="clearLettersButton">
+                                <buttonData>
+                                    <content:ButtonData icon="@/images/backspace_32.png"/>
+                                </buttonData>
+                            </PushButton>
+                        </BoxPane>
+                        <BoxPane Form.label="Contains" orientation="horizontal" styles="{padding:0,spacing:0,verticalAlignment:'center'}">
+                            <TextInput bxml:id="containsInput"   styles="{font:{size:26,bold:true}}" maximumLength="15" preferredWidth="440"/>
+                            <PushButton bxml:id="clearContainsButton">
+                                <buttonData>
+                                    <content:ButtonData icon="@/images/backspace_32.png"/>
+                                </buttonData>
+                            </PushButton>
+                        </BoxPane>
+                        <BoxPane Form.label="Starts With" orientation="horizontal" styles="{padding:0,spacing:0,verticalAlignment:'center'}">
+                            <TextInput bxml:id="startsWithInput" styles="{font:{size:26,bold:true}}" maximumLength="15" preferredWidth="440"/>
+                            <PushButton bxml:id="clearStartsWithButton">
+                                <buttonData>
+                                    <content:ButtonData icon="@/images/backspace_32.png"/>
+                                </buttonData>
+                            </PushButton>
+                        </BoxPane>
+                        <BoxPane Form.label="Ends With" orientation="horizontal" styles="{padding:0,spacing:0,verticalAlignment:'center'}">
+                            <TextInput bxml:id="endsWithInput"   styles="{font:{size:26,bold:true}}" maximumLength="15" preferredWidth="440"/>
+                            <PushButton bxml:id="clearEndsWithButton">
+                                <buttonData>
+                                    <content:ButtonData icon="@/images/backspace_32.png"/>
+                                </buttonData>
+                            </PushButton>
+                        </BoxPane>
+                    </Form.Section>
+                </Form>
+            </TablePane.Row>
+            <TablePane.Row height="-1">
+                <Label text="" preferredHeight="20"/>
+            </TablePane.Row>
+            <TablePane.Row height="1*">
+                <ScrollPane horizontalScrollBarPolicy="FILL" verticalScrollBarPolicy="FILL_TO_CAPACITY">
+                    <Border>
+                        <TextPane bxml:id="outputArea"/>
+                    </Border>
+                </ScrollPane>
+            </TablePane.Row>
+        </rows>
+    </TablePane>
+</Window>
+

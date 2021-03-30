@@ -51,9 +51,12 @@
  *          Implement "-nocolor" option.
  *	29-Mar-2021 (rlwhitcomb)
  *	    Move the theme file.
+ *      29-Mar-2021 (rlwhitcomb)
+ *	    More actual implementation of the GUI.
  */
 package info.rlwhitcomb.wordfind;
 
+import java.awt.Font;
 import java.io.*;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -70,13 +73,22 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.Function;
 
+import org.apache.pivot.beans.BXML;
+import org.apache.pivot.beans.BXMLSerializer;
+import org.apache.pivot.text.CharSpan;
 import org.apache.pivot.wtk.Application;
 import org.apache.pivot.wtk.DesktopApplicationContext;
 import org.apache.pivot.wtk.Display;
+import org.apache.pivot.wtk.PushButton;
+import org.apache.pivot.wtk.Style;
+import org.apache.pivot.wtk.TextInput;
+import org.apache.pivot.wtk.TextPane;
+import org.apache.pivot.wtk.Window;
 
 import info.rlwhitcomb.util.CharUtil;
 import static info.rlwhitcomb.util.ConsoleColor.Code.*;
 import info.rlwhitcomb.util.Environment;
+import info.rlwhitcomb.util.ExceptionUtil;
 
 
 /**
@@ -145,6 +157,20 @@ public class WordFind implements Application {
     private static final String WORD_FORMAT = "%1$s%2$s " + BLACK_BRIGHT + "(%3$3d)" + RESET;
     /** The format string for final output without colors. */
     private static final String WORD_FORMAT_NOCOLORS = "%1$s%2$s (%3$3d)";
+
+    /** The display object for the GUI. */
+    private Display display;
+
+    @BXML private Window mainWindow;
+    @BXML private TextInput lettersInput;
+    @BXML private TextInput containsInput;
+    @BXML private TextInput startsWithInput;
+    @BXML private TextInput endsWithInput;
+    @BXML private PushButton clearLettersButton;
+    @BXML private PushButton clearContainsButton;
+    @BXML private PushButton clearStartsWithButton;
+    @BXML private PushButton clearEndsWithButton;
+    @BXML private TextPane outputArea;
 
     /**
      * Sort alphabetically?
@@ -439,9 +465,22 @@ public class WordFind implements Application {
         return true;
     }
 
+
     @Override
     public void startup(final Display display, org.apache.pivot.collections.Map<String, String> properties) {
-        // TODO: the whole GUI program!
+	this.display = display;
+
+	try {
+	    BXMLSerializer serializer = new BXMLSerializer();
+	    serializer.readObject(WordFind.class, "wordfind.bxml");
+	    serializer.bind(this);
+
+	    mainWindow.open(display);
+	    lettersInput.requestFocus();
+	} catch (Exception ex) {
+	    System.err.println("Error: " + ExceptionUtil.toString(ex) + " from " + ex.getStackTrace()[0].toString());
+ex.printStackTrace();
+	}
     }
 
     @Override
