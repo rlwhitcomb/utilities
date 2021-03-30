@@ -195,6 +195,8 @@
 		Rename "purge-logs" to "purge" and update some target descriptions.
 	    29-Mar-2021 (rlwhitcomb)
 		Add WordCount program and wrappers.
+	    29-Mar-2021 (rlwhitcomb)
+		Add wrappers for WordFind GUI.
 
      ========================================================================== -->
 
@@ -324,6 +326,8 @@
 		<include name="wc.bat"                      if:true="${on.windows}"/>
 		<include name="wf"                      unless:true="${on.windows}"/>
 		<include name="wf.bat"                      if:true="${on.windows}"/>
+		<include name="wfg"                     unless:true="${on.windows}"/>
+		<include name="wfg.bat"                     if:true="${on.windows}"/>
 		<include name="which"                   unless:true="${on.windows}"/>
 		<include name="which.bat"                   if:true="${on.windows}"/>
 	</patternset>
