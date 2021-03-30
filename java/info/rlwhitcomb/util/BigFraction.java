@@ -56,6 +56,9 @@
  *	    The two and three string patterns are still not right...
  *	26-Mar-2021 (rlwhitcomb)
  *	    Move some methods from NumericUtil to MathUtil.
+ *	29-Mar-2021 (rlwhitcomb)
+ *	    Add a flag to signal this fraction should always be represented
+ *	    as a proper fraction (helps with @F formatting in Calc).
  */
 package info.rlwhitcomb.util;
 
@@ -104,6 +107,11 @@ public class BigFraction extends Number
 	private BigInteger numer;
 	/** The exact integer denominator of this fraction (always positive). */
 	private BigInteger denom;
+	/**
+	 * Flag to say this fraction is supposed to always be "proper"
+	 * (affects {@link #toString} method).
+	 */
+	private boolean alwaysProper = false;
 
 
 	/**
@@ -308,6 +316,25 @@ public class BigFraction extends Number
 	 */
 	public boolean isWholeNumber() {
 	    return denom.equals(BigInteger.ONE);
+	}
+
+	/**
+	 * @return Whether or not this fraction is always formatted as a proper fraction.
+	 */
+	public boolean isAlwaysProper() {
+	    return alwaysProper;
+	}
+
+	/**
+	 * Set the flag to indicate this fraction should format (always) as
+	 * a "proper" string, or not.
+	 *
+	 * @param proper Whether or not to always format as a proper fraction.
+	 * @return       This fraction (so other operations can be chained).
+	 */
+	public BigFraction setAlwaysProper(final boolean proper) {
+	    alwaysProper = proper;
+	    return this;
 	}
 
 	/**
@@ -706,6 +733,13 @@ public class BigFraction extends Number
 	}
 
 	/**
+	 * @return The regular string value (<code><i>numer</i> / <i>denom</i></code>).
+	 */
+	private String internalToString() {
+	    return String.format("%1$s/%2$s", numer, denom);
+	}
+
+	/**
 	 * Return a string of this value in whole number plus fraction form.
 	 * <p> The fraction is maintained in strictly rational form of {@code numerator / denominator },
 	 * while this function will return the fraction in proper form ({@code numerator < denominator})
@@ -725,18 +759,19 @@ public class BigFraction extends Number
 		    return String.format("%1$s %2$s/%3$s",
 				results[0], results[1].abs(), denom);
 	    }
-	    return toString();
+	    return internalToString();
 	}
 
 	/**
-	 * Return a string in the form of <code>"<i>numer</i>/<i>denom</i>"</code>, regardless of whether
-	 * the fraction is proper or not.
+	 * Return a string in the form of <code>"<i>numer</i>/<i>denom</i>"</code>,
+	 * unless the {@link #alwaysProper} flag is set, in which case call
+	 * {@link #toProperString}.
 	 *
 	 * @return	The string form of this fraction.
 	 */
 	@Override
 	public String toString() {
-	    return String.format("%1$s/%2$s", numer, denom);
+	    return alwaysProper ? toProperString() : internalToString();
 	}
 
 	/**
