@@ -33,6 +33,8 @@
  *	29-Mar-2021 (rlwhitcomb)
  *	    Implement simpler, faster "ln2" function.
  *	    Rename the resource strings.
+ *	30-Mar-2021 (rlwhitcomb)
+ *	    Implement Taylor series for "ln" function. Clean up "pow" and "ePower".
  */
 package info.rlwhitcomb.util;
 
@@ -110,9 +112,10 @@ public class MathUtil
 	 * precision.
 	 * @param base     The number to raise to the given power.
 	 * @param inputExp The power to raise the number to.
+	 * @param mc       Precision and rounding for the result.
 	 * @throws IllegalArgumentException if the exponent is infinite or not-a-number.
 	 */
-	public static BigDecimal pow(final BigDecimal base, final double inputExp) {
+	public static BigDecimal pow(final BigDecimal base, final double inputExp, final MathContext mc) {
 	    double exp = inputExp;
 	    if (Double.isNaN(exp) || Double.isInfinite(exp))
 		throw new Intl.IllegalArgumentException("util#numeric.outOfRange");
@@ -149,9 +152,10 @@ public class MathUtil
 		}
 	    }
 
-	    if (reciprocal) {
-		result = BigDecimal.ONE.divide(result);
-	    }
+	    if (reciprocal)
+		result = BigDecimal.ONE.divide(result, mc);
+	    else
+		result = result.round(mc);
 
 	    return result;
 	}
@@ -162,9 +166,10 @@ public class MathUtil
 	 * or <code>BigDecimal</code> precision depending on the value of the exponent.
 	 * @param base The number to raise to the given power.
 	 * @param exp The power to raise the number to.
+	 * @parama mc The precision and rounding mode for the result.
 	 * @throws IllegalArgumentException if the exponent is infinite, or not-a-number.
 	 */
-	public static Number pow(final BigInteger base, final double exp) {
+	public static Number pow(final BigInteger base, final double exp, final MathContext mc) {
 	    if (Double.isNaN(exp) || Double.isInfinite(exp))
 		throw new Intl.IllegalArgumentException("util#numeric.outOfRange");
 	    if (exp == 0.0d)
@@ -173,7 +178,7 @@ public class MathUtil
 	    // Test for negative or fractional powers and convert to BigDecimal for those cases
 	    double wholeExp = Math.floor(exp);
 	    if (exp < 0.0d || wholeExp != exp) {
-		return pow(new BigDecimal(base), exp);
+		return pow(new BigDecimal(base), exp, mc);
 	    }
 
 	    int intExp = (int) wholeExp;
@@ -701,22 +706,59 @@ public class MathUtil
 	 * @return	The result of e**x rounded to the given precision.
 	 */
 	public static BigDecimal ePower(final BigDecimal exp, final MathContext mc) {
-	    BigDecimal result    = exp.add(BigDecimal.ONE);
-	    BigDecimal numer     = exp;
-	    BigDecimal factorial = BigDecimal.ONE;
+	    if (exp.equals(BigDecimal.ZERO))
+		return BigDecimal.ONE;
 
-	    // loops is a little extra to make sure the last digit we want is accurate
-	    int loops = mc.getPrecision() + 10;
+	    BigDecimal result;
 
-	    for (int i = 2; i < loops; i++) {
-		factorial = factorial.multiply(BigDecimal.valueOf(i));
-		// compute x**i/i!, note divide is overloaded, this version is used to
-		//    ensure a limit to the iterations when division is limitless like 1/3
-		numer = numer.multiply(exp);
-		BigDecimal term = numer.divide(factorial, loops, RoundingMode.HALF_UP);
-		result = result.add(term);
+	    boolean reciprocal = false;
+	    BigDecimal exponent = exp;
+	    if (exp.signum() < 0) {
+		reciprocal = true;
+		exponent = exp.abs();
 	    }
-	    return result.round(mc);
+
+	    if (exp.equals(BigDecimal.ONE)) {
+		result = e(mc);
+		if (reciprocal)
+		    result = BigDecimal.ONE.divide(result, mc);
+		return result;
+	    }
+
+	    int intExp         = exponent.intValue();
+	    BigDecimal fracExp = exponent.subtract(new BigDecimal(intExp));
+
+	    result = BigDecimal.ONE;
+
+	    if (!fracExp.equals(BigInteger.ZERO)) {
+		result = result.add(fracExp);
+
+		BigDecimal numer      = fracExp;
+		BigDecimal factorial  = BigDecimal.ONE;
+		BigDecimal lastResult = result;
+
+		// loops is extra to make sure the last digit we want is accurate
+		int loops = mc.getPrecision() * 2;
+
+		for (int i = 2; i < loops; i++) {
+		    factorial = factorial.multiply(BigDecimal.valueOf(i));
+		    // compute x**i/i!, note divide is overloaded, this version is used to
+		    //    ensure a limit to the iterations when division is limitless like 1/3
+		    numer = numer.multiply(fracExp);
+		    BigDecimal term = numer.divide(factorial, loops, RoundingMode.HALF_UP);
+		    result = result.add(term);
+
+		    if (result.equals(lastResult))
+			break;
+		    lastResult = result;
+		}
+	    }
+
+	    result = e(mc).pow(intExp).multiply(result, mc);
+	    if (reciprocal)
+		result = BigDecimal.ONE.divide(result, mc);
+
+	    return result;
 	}
 
 
@@ -761,6 +803,15 @@ public class MathUtil
 	private static BigDecimal CALCULATED_E = null;
 	/** The largest number of digits of E calculated so far: use a substring for lesser precision. */
 	private static String E_DIGITS = null;
+
+	/**
+	 * @return A {@link BigDecimal} constant of E to the requested precision.
+	 *
+	 * @param mc The desired precision.
+	 */
+	public static BigDecimal e(final MathContext mc) {
+	    return e(mc.getPrecision() - 1);
+	}
 
 	/**
 	 * @return A {@link BigDecimal} constant of E to the requested number of fractional digits.
@@ -1075,6 +1126,69 @@ public class MathUtil
 	    Collections.sort(factors);
 	}
 
+	/**
+	 * Calculate the natural logarithm of a number.
+	 *
+	 * @param input The value to calculate the natural logarithm of.
+	 * @param mc    The desired precision and rounding mode for the result.
+	 * @return      The value such that <code>e ** value == input</code>.
+	 * @throws IllegalArgumentException if the input is negative or zero.
+	 */
+	public static BigDecimal ln(final BigDecimal input, final MathContext mc) {
+	    if (input.compareTo(BigDecimal.ZERO) <= 0)
+		throw new Intl.IllegalArgumentException("util#numeric.outOfRange");
+
+	    // Calculate a sufficient number of loops for the value to converge nicely
+	    int loops = mc.getPrecision() * 15;	// TODO: find out a good value
+	    MathContext lc = new MathContext(mc.getPrecision() + 10, mc.getRoundingMode());
+
+	    // Range reduce to get the argument value below one, so that:
+	    // ln(x) = ln(e**n * x/e**n)
+	    //       = ln(e**n) + ln(x/e**n)
+	    //       = n * ln(e) + ln(x/e**n)
+	    //       = n + ln(x/e**n)
+	    // when x/e**n < 2
+	    BigDecimal x = input;
+	    BigDecimal eValue = e(lc);
+	    BigDecimal eSmall = BigDecimal.ONE.divide(eValue, lc);
+	    int n = 0;
+
+	    while (x.compareTo(eValue) >= 0) {
+		n++;
+		x = x.divide(eValue, lc);
+		logger.debug("ln.range reduce: n = %1$d, x = %2$s", n, x.toPlainString());
+	    }
+	    while (x.compareTo(eSmall) <= 0) {
+		n--;
+		x = x.multiply(eValue, lc);
+		logger.debug("ln.range reduce: n = %1$d, x = %2$s", n, x.toPlainString());
+	    }
+
+	    BigDecimal xm1 = x.subtract(BigDecimal.ONE);	// (x - 1)
+	    BigDecimal xp1 = x.add(BigDecimal.ONE);		// (x + 1)
+	    BigDecimal term = xm1.divide(xp1, lc);		// (x - 1) / (x + 1)
+	    BigDecimal sqterm = term.multiply(term, lc);	// ((x - 1) / (x + 1)) ** 2
+	    BigDecimal power = term;
+	    BigDecimal result = power;
+	    BigDecimal lastResult = result;
+
+	    for (int k = 3; k < loops * 2; k += 2) {
+		BigDecimal kValue = new BigDecimal((long) k);
+		power = power.multiply(sqterm, lc);
+		BigDecimal loopTerm = power.divide(kValue, lc);
+		result = result.add(loopTerm, lc);
+		logger.debug("ln: k=%1$d, loopTerm=%2$s, result=%3$s", k, loopTerm.toPlainString(), result.toPlainString());
+		if (result.equals(lastResult))
+		    break;
+		lastResult = result;
+	    }
+
+	    result = result.multiply(D_TWO, mc);
+	    if (n != 0)
+		result = result.add(new BigDecimal(n));
+
+	    return result;
+	}
 
 	/**
 	 * Calculate the logarithm base two of a number.
@@ -1082,7 +1196,7 @@ public class MathUtil
 	 *
 	 * @param input The value to calculate the logarithm base two of.
 	 * @param mc    The desired precision and rounding mode for the result.
-	 * @return The value such that <code>2 ** value == input</code>.
+	 * @return      The value such that <code>2 ** value == input</code>.
 	 * @throws IllegalArgumentException if the input is negative or zero.
 	 */
 	public static BigDecimal ln2(final BigDecimal input, final MathContext mc) {

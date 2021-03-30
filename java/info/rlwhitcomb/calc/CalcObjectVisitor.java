@@ -229,6 +229,8 @@
  *	    Allow precision on all format arguments, and implement (now) for @d.
  *	29-Mar-2021 (rlwhitcomb)
  *	    Calculate ln2 from our own method.
+ *	30-Mar-2021 (rlwhitcomb)
+ *	    Calculate ln from our own method.
  */
 package info.rlwhitcomb.calc;
 
@@ -1315,7 +1317,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    BigDecimal base = getDecimalValue(ctx.expr(0));
 	    double exp = getDoubleValue(ctx.expr(1));
 
-	    return MathUtil.pow(base, exp).round(mc);
+	    return MathUtil.pow(base, exp, mc);
 	}
 
 	@Override
@@ -1526,9 +1528,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitLnExpr(CalcParser.LnExprContext ctx) {
-	    double d = getDoubleValue(ctx.expr());
+	    BigDecimal d = getDecimalValue(ctx.expr());
 
-	    return new BigDecimal(Math.log(d), mcDouble);
+	    return MathUtil.ln(d, mc);
 	}
 
 	@Override
@@ -2544,7 +2546,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    BigDecimal base = toDecimalValue(this, lValue.getContextObject(), mc, ctx);
 	    double exp      = getDoubleValue(ctx.expr());
 
-	    return lValue.putContextObject(this, MathUtil.pow(base, exp).round(mc));
+	    return lValue.putContextObject(this, MathUtil.pow(base, exp, mc));
 	}
 
 	@Override
