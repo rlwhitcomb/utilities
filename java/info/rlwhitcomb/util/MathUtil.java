@@ -166,7 +166,7 @@ public class MathUtil
 	 * or <code>BigDecimal</code> precision depending on the value of the exponent.
 	 * @param base The number to raise to the given power.
 	 * @param exp The power to raise the number to.
-	 * @parama mc The precision and rounding mode for the result.
+	 * @param mc The precision and rounding mode for the result.
 	 * @throws IllegalArgumentException if the exponent is infinite, or not-a-number.
 	 */
 	public static Number pow(final BigInteger base, final double exp, final MathContext mc) {
