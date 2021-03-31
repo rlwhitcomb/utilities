@@ -197,6 +197,8 @@
 		Add WordCount program and wrappers.
 	    29-Mar-2021 (rlwhitcomb)
 		Add wrappers for WordFind GUI.
+	    30-Mar-2021 (rlwhitcomb)
+		Rename "install" to "all-install" so it is more obvious what it does.
 
      ========================================================================== -->
 
@@ -587,7 +589,7 @@
 		<echo message="Variable UTILITIES_HOME is not set in the environment!" unless:true="${utilities.available}"/>
 	</target>
 
-	<target name="install" depends="all,copy-to-install-directory" description="Does 'all' + 'copy-to-install-directory'; this is the highest level target."/>
+	<target name="all-install" depends="all,copy-to-install-directory" description="Does 'all' + 'copy-to-install-directory'; this is the highest level target."/>
 
 	<target name="update" depends="touch,compile,jar,copy-to-install-directory" description="Simple incremental build and update the installed .jar file."/>
 
