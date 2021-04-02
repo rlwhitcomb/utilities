@@ -231,6 +231,8 @@
  *	    Calculate ln2 from our own method.
  *	30-Mar-2021 (rlwhitcomb)
  *	    Calculate ln from our own method.
+ *	01-Apr-2021 (rlwhitcomb)
+ *	    Regularize settings so we can use a GUI dialog to set them.
  */
 package info.rlwhitcomb.calc;
 
@@ -270,7 +272,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	/**
 	 * The mode used for doing trig calculations.
 	 */
-	private enum TrigMode
+	public static enum TrigMode
 	{
 		DEGREES,
 		RADIANS
@@ -387,13 +389,21 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		displayActionMessage("%calc#precDigits", prec);
 	}
 
-	private void setTrigMode(TrigMode newTrigMode) {
+	public TrigMode getTrigMode() {
+	    return trigMode;
+	}
+
+	public void setTrigMode(TrigMode newTrigMode) {
 	    trigMode = newTrigMode;
 
 	    displayActionMessage("%calc#trigMode", trigMode);
 	}
 
-	private boolean setRationalMode(boolean mode) {
+	public boolean getRationalMode() {
+	    return rationalMode;
+	}
+
+	public boolean setRationalMode(boolean mode) {
 	    boolean oldMode = rationalMode;
 	    rationalMode = mode;
 	    return oldMode;

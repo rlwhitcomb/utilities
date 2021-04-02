@@ -43,6 +43,8 @@
 		Spiff up the layout, colors, and styles; requires new Pivot code.
 	    24-Mar-2021 (rlwhitcomb)
 		Changed to use TextPane for input so we can paste in Unicode on OSX.
+	    31-Mar-2021 (rlwhitcomb)
+		Reword some text. Add the Settings dialog and menu button.
 
      ========================================================================== -->
 
@@ -57,6 +59,7 @@
     <actionMappings>
 	<Window.ActionMapping action="help" keyStroke="F1" />
 	<Window.ActionMapping action="version" keyStroke="Cmd-F1" />
+	<Window.ActionMapping action="settings" keyStroke="F2" />
 	<Window.ActionMapping action="clear" keyStroke="F6" />
 	<Window.ActionMapping action="calculate" keyStroke="F9" />
 	<Window.ActionMapping action="exit" keyStroke="F10" />
@@ -73,6 +76,22 @@
 		<Label bxml:id="copyrightText" text="" styles="{color:'grey',font:{size:'110%'}}"/>
 		<Label bxml:id="javaText" text="" styles="{color:'grey',font:{size:'110%'}}"/>
 	    </BoxPane>
+	</Prompt>
+    </bxml:define>
+
+    <bxml:define>
+	<Prompt bxml:id="settingsPrompt" title="Settings" messageType="INFO"
+                message="Change settings for the current session" preferredWidth="600"
+		options="['Cancel','OK']" selectedOptionIndex="1">
+	    <Form bxml:id="settingsForm">
+		<Form.Section heading="Display Modes">
+		    <Checkbox bxml:id="quietCheck" buttonData="Quiet?"/>
+		    <Checkbox bxml:id="resultsCheck" buttonData="Results Only?"/>
+		</Form.Section>
+		<Form.Section heading="Calculation Modes">
+		    <Checkbox bxml:id="rationalCheck" buttonData="Rational mode"/>
+		</Form.Section>
+	    </Form>
 	</Prompt>
     </bxml:define>
 
@@ -130,19 +149,29 @@
 				styles="{color:'blue', font:{size:24,bold:true}}"/>
 			<Label text="Cmd-F1"/>
 		    </BoxPane>
+		    <Label preferredWidth="80"/>
+		    <BoxPane orientation="vertical" styles="{horizontalAlignment:'center'}">
+			<PushButton tooltipText="Settings (F2)"
+				action="settings"
+				buttonData="&#x2261;"
+				preferredWidth="60"
+				preferredHeight="32"
+				styles="{color:'DarkOrange', font:{size:24,bold:true}}"/>
+			<Label text="F2"/>
+		    </BoxPane>
 		</BoxPane>
 	    </TablePane.Row>
 	    <TablePane.Row height="1*">
 		<SplitPane orientation="vertical" splitRatio="0.4">
 		    <top>
-			<Border title=" Result " styles="{padding:{top:0,left:10,bottom:4,right:10},font:{size:18,bold:true},cornerRadii:10,backgroundColor:11}">
+			<Border title=" Results " styles="{padding:{top:0,left:10,bottom:4,right:10},font:{size:18,bold:true},cornerRadii:10,backgroundColor:11}">
 			    <ScrollPane horizontalScrollBarPolicy="fill" verticalScrollBarPolicy="fill_to_capacity" >
 				<TextArea bxml:id="outputTextArea"/>
 			    </ScrollPane>
 			</Border>
 		    </top>
 		    <bottom>
-			<Border title=" Expression " styles="{padding:{top:0,left:10,bottom:4,right:10},font:{size:18,bold:true},cornerRadii:10,backgroundColor:11}">
+			<Border title=" Expressions " styles="{padding:{top:0,left:10,bottom:4,right:10},font:{size:18,bold:true},cornerRadii:10,backgroundColor:11}">
 			    <ScrollPane horizontalScrollBarPolicy="fill" verticalScrollBarPolicy="fill_to_capacity" >
 				<TextPane bxml:id="inputTextPane"/>
 			    </ScrollPane>
@@ -152,7 +181,7 @@
 	    </TablePane.Row>
 	    <TablePane.Row height="-1">
 		<BoxPane orientation="horizontal" styles="{padding:4}">
-		    <Label text="Output size: "/>
+		    <Label text="Results length: "/>
 		    <Label bxml:id="outputSizeLabel" text="0"/>
 		</BoxPane>
 	    </TablePane.Row>

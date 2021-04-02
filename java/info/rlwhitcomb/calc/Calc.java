@@ -116,6 +116,8 @@
  *	    Change to use a TextPane for input so we can paste in Unicode on OSX.
  *	29-Mar-2021 (rlwhitcomb)
  *	    Move the default theme file.
+ *	01-Apr-2021 (rlwhitcomb)
+ *	    No joke!  Starting on the Settings dialog.
  */
 package info.rlwhitcomb.calc;
 
@@ -235,6 +237,11 @@ public class Calc
 	@BXML private Label buildText;
 	@BXML private Label copyrightText;
 	@BXML private Label javaText;
+	@BXML private Prompt settingsPrompt;
+	@BXML private Form settingsForm;
+	@BXML private Checkbox quietCheck;
+	@BXML private Checkbox resultsCheck;
+	@BXML private Checkbox rationalCheck;
 
 
 	/** The background worker thread to do the calculations in GUI mode. */
@@ -308,6 +315,7 @@ public class Calc
 	    try {
 		Action.getNamedActions().put("help", new HelpAction());
 		Action.getNamedActions().put("version", new VersionAction());
+		Action.getNamedActions().put("settings", new SettingsAction());
 		Action.getNamedActions().put("clear", new ClearAction());
 		Action.getNamedActions().put("calculate", new CalculateAction());
 		Action.getNamedActions().put("exit", new ExitAction());
@@ -580,6 +588,14 @@ public class Calc
 		}
 	}
 
+	private class SettingsAction extends Action
+	{
+		@Override
+		public void perform(Component source) {
+		    displaySettings();
+		}
+	}
+
 	private class ExitAction extends Action
 	{
 		@Override
@@ -632,6 +648,21 @@ public class Calc
 	    javaText.setText(javaVersion);
 
 	    versionPrompt.open(mainWindow);
+	}
+
+	/**
+	 * Display the settings dialog.
+	 */
+	private void displaySettings() {
+	    quietCheck.setSelected(quiet);
+	    resultsCheck.setSelected(resultsOnly);
+	    rationalCheck.setSelected(visitor.getRationalMode());
+	    // TODO: more settings here
+
+	    settingsPrompt.open(mainWindow);
+	    ApplicationContext.scheduleCallback(() -> settingsForm.requestFocus(), 200L);
+
+	    // TODO: set the settings if the dialog was OK'd
 	}
 
 	public static void exit() {
