@@ -45,6 +45,8 @@
 		Changed to use TextPane for input so we can paste in Unicode on OSX.
 	    31-Mar-2021 (rlwhitcomb)
 		Reword some text. Add the Settings dialog and menu button.
+	    02-Apr-2021 (rlwhitcomb)
+		Add the remaining options to the Settings prompt (dialog).
 
      ========================================================================== -->
 
@@ -54,6 +56,7 @@
     maximized="true"
     xmlns:bxml="http://pivot.apache.org/bxml"
     xmlns:content="org.apache.pivot.wtk.content"
+    xmlns:validators="org.apache.pivot.wtk.validation"
     xmlns="org.apache.pivot.wtk">
 
     <actionMappings>
@@ -77,6 +80,19 @@
 		<Label bxml:id="javaText" text="" styles="{color:'grey',font:{size:'110%'}}"/>
 	    </BoxPane>
 	</Prompt>
+
+	<RadioButtonGroup bxml:id="precisionGroup"
+	    circular="true"
+	    intraGroupFocusTransferEnabled="true" />
+
+	<RadioButtonGroup bxml:id="trigGroup"
+	    circular="true"
+	    intraGroupFocusTransferEnabled="true" />
+
+	<RadioButtonGroup bxml:id="unitsGroup"
+	    circular="true"
+	    intraGroupFocusTransferEnabled="true" />
+
     </bxml:define>
 
     <bxml:define>
@@ -84,12 +100,37 @@
                 message="Change settings for the current session" preferredWidth="600"
 		options="['Cancel','OK']" selectedOptionIndex="1">
 	    <Form bxml:id="settingsForm">
-		<Form.Section heading="Display Modes">
-		    <Checkbox bxml:id="quietCheck" buttonData="Quiet?"/>
-		    <Checkbox bxml:id="resultsCheck" buttonData="Results Only?"/>
+		<Form.Section heading="Precision Setting">
+		    <BoxPane orientation="horizontal" styles="{verticalAlignment:'center'}">
+			<RadioButton bxml:id="decimalPrecisionButton" buttonGroup="$precisionGroup" buttonData="Decimal:"/>
+			<TextInput bxml:id="decimalDigitsInput" maximumLength="12">
+			    <validator>
+				<validators:IntValidator/>
+			    </validator>
+			</TextInput>
+		    </BoxPane>
+		    <RadioButton bxml:id="defaultPrecisionButton" buttonGroup="$precisionGroup" buttonData="Default"/>
+		    <RadioButton bxml:id="doublePrecisionButton" buttonGroup="$precisionGroup" buttonData="Double"/>
+		    <RadioButton bxml:id="floatPrecisionButton" buttonGroup="$precisionGroup" buttonData="Float"/>
+		    <RadioButton bxml:id="unlimitedPrecisionButton" buttonGroup="$precisionGroup" buttonData="Unlimited"/>
 		</Form.Section>
-		<Form.Section heading="Calculation Modes">
+		<Form.Section heading="Trig Mode">
+		    <RadioButton bxml:id="degreesModeButton" buttonGroup="$trigGroup" buttonData="Degrees"/>
+		    <RadioButton bxml:id="radiansModeButton" buttonGroup="$trigGroup" buttonData="Radians"/>
+		</Form.Section>
+		<Form.Section heading="Units Setting">
+		    <RadioButton bxml:id="binaryModeButton" buttonGroup="$unitsGroup" buttonData="Binary"/>
+		    <RadioButton bxml:id="siModeButton" buttonGroup="$unitsGroup" buttonData="SI (base 10)"/>
+		    <RadioButton bxml:id="mixedModeButton" buttonGroup="$unitsGroup" buttonData="Mixed"/>
+		</Form.Section>
+		<Form.Section heading="Operational Modes">
 		    <Checkbox bxml:id="rationalCheck" buttonData="Rational mode"/>
+		    <Checkbox bxml:id="timingCheck" buttonData="Display timing"/>
+		    <Checkbox bxml:id="debugCheck" buttonData="Debug mode"/>
+		</Form.Section>
+		<Form.Section heading="Display Modes">
+		    <Checkbox bxml:id="quietCheck" buttonData="Quiet"/>
+		    <Checkbox bxml:id="resultsCheck" buttonData="Results only"/>
 		</Form.Section>
 	    </Form>
 	</Prompt>

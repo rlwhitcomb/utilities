@@ -292,55 +292,92 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	/** Note: the precision will be determined by the number of digits desired. */
 	private MathContext mc;
 
-	/** Whether trig inputs are in degrees or radians. */
-	private TrigMode trigMode;
+	/**
+	 * The settings object.
+	 */
+	public static class Settings
+	{
+		/** Whether trig inputs are in degrees or radians. */
+		TrigMode trigMode;
+		/** The kind of units to use for the "@k" format. */
+		RangeMode units;
+		/** Decimal vs. rational/fractional mode ({@code true} for rational); default {@code false}. */
+		boolean rationalMode;
+		/** Silent flag (set to true) while evaluating nested expressions (or via :quiet directive). */
+		boolean silent;
 
-	/** The kind of units to use for the "@k" format. */
-	private RangeMode units = RangeMode.MIXED;
+		/**
+		 * Construct default settings, including the command-line "-rational" flag.
+		 *
+		 * @param rational The initial rational mode setting.
+		 */
+		public Settings(boolean rational) {
+		    trigMode     = TrigMode.RADIANS;
+		    units        = RangeMode.MIXED;
+		    rationalMode = rational;
+		    silent       = false;
+		}
 
-	/** Decimal vs. rational/fractional mode ({@code true} for rational); default {@code false}. */
-	private boolean rationalMode;
+		/**
+		 * Copy constructor - make a copy of another {@code Settings} object.
+		 *
+		 * @param otherSettings The object to copy.
+		 */
+		public Settings(Settings otherSettings) {
+		    this.trigMode     = otherSettings.trigMode;
+		    this.units        = otherSettings.units;
+		    this.rationalMode = otherSettings.rationalMode;
+		    this.silent       = otherSettings.silent;
+		}
+	}
 
-	/** The worker used to maintain the current e/pi values, and calculate them
+	/** The mode settings for this instantiation of the visitor. */
+	private final Settings settings;
+
+	/** Symbol table for variables. */
+	private final Map<String, Object> variables;
+
+	/** The outermost {@code LValueContext} for the (global) variables. */
+	private final LValueContext globalContext;
+
+	/** {@link CalcDisplayer} object so we can output results to either the console or GUI window. */
+	private final CalcDisplayer displayer;
+
+	/**
+	 * The worker used to maintain the current e/pi values, and calculate them
 	 * in a background thread.
 	 */
 	private CalcPiWorker piWorker = null;
 
-	/** Symbol table for variables. */
-	private Map<String, Object> variables;
-
-	/** The outermost {@code LValueContext} for the (global) variables. */
-	private LValueContext globalContext;
-
-	/** {@link CalcDisplayer} object so we can output results to either the console or GUI window. */
-	private CalcDisplayer displayer;
-
-	/** Silent flag (set to true) while evaluating nested expressions (or via :quiet directive). */
-	private boolean silent = false;
-
 	/** Stack of previous "timing" mode values. */
-	private Deque<Boolean> timingModeStack = new ArrayDeque<>();
+	private final Deque<Boolean> timingModeStack = new ArrayDeque<>();
 
 	/** Stack of previous "debug" mode values. */
-	private Deque<Boolean> debugModeStack = new ArrayDeque<>();
+	private final Deque<Boolean> debugModeStack = new ArrayDeque<>();
 
 	/** Stack of previous "rational" mode values. */
-	private Deque<Boolean> rationalModeStack = new ArrayDeque<>();
+	private final Deque<Boolean> rationalModeStack = new ArrayDeque<>();
 
 	/** Stack of previous "resultsOnly" mode values. */
-	private Deque<Boolean> resultsOnlyModeStack = new ArrayDeque<>();
+	private final Deque<Boolean> resultsOnlyModeStack = new ArrayDeque<>();
 
 	/** Stack of previous "quiet" mode values. */
-	private Deque<Boolean> quietModeStack = new ArrayDeque<>();
+	private final Deque<Boolean> quietModeStack = new ArrayDeque<>();
 
 
-	public boolean getSilent() {
-	    return silent;
+	public CalcObjectVisitor(CalcDisplayer resultDisplayer, boolean rational) {
+	    setMathContext(MathContext.DECIMAL128);
+	    settings      = new Settings(rational);
+	    variables     = new HashMap<>();
+	    globalContext = new LValueContext(variables);
+	    displayer     = resultDisplayer;
+
+	    initialized   = true;
 	}
 
 	public boolean setSilent(boolean newSilent) {
-	    boolean oldSilent = silent;
-	    silent = newSilent;
+	    boolean oldSilent = settings.silent;
+	    settings.silent = newSilent;
 	    return oldSilent;
 	}
 
@@ -349,26 +386,17 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	private void displayActionMessage(String formatOrKey, Object... args) {
-	    if (initialized && !silent) {
+	    if (initialized && !settings.silent) {
 		String message = Intl.formatKeyString(formatOrKey, args);
 		displayer.displayActionMessage(message);
 	    }
 	}
 
-	public CalcObjectVisitor(CalcDisplayer resultDisplayer, boolean rational) {
-	    setRationalMode(rational);
-	    setMathContext(MathContext.DECIMAL128);
-	    setTrigMode(TrigMode.RADIANS);
-
-	    variables     = new HashMap<>();
-	    globalContext = new LValueContext(variables);
-
-	    displayer     = resultDisplayer;
-
-	    initialized   = true;
+	public MathContext getMathContext() {
+	    return mc;
 	}
 
-	private void setMathContext(MathContext newMathContext) {
+	public void setMathContext(MathContext newMathContext) {
 	    int prec  = newMathContext.getPrecision();
 	    mc        = newMathContext;
 
@@ -389,25 +417,57 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		displayActionMessage("%calc#precDigits", prec);
 	}
 
-	public TrigMode getTrigMode() {
-	    return trigMode;
+	public Settings getSettings() {
+	    return settings;
 	}
 
 	public void setTrigMode(TrigMode newTrigMode) {
-	    trigMode = newTrigMode;
+	    settings.trigMode = newTrigMode;
 
-	    displayActionMessage("%calc#trigMode", trigMode);
+	    displayActionMessage("%calc#trigMode", settings.trigMode);
 	}
 
-	public boolean getRationalMode() {
-	    return rationalMode;
+	public void setUnits(RangeMode mode) {
+	    settings.units = mode;
+	    switch (mode) {
+		case BINARY:
+		    displayActionMessage("%calc#unitsBinary");
+		    break;
+		case DECIMAL:
+		    displayActionMessage("%calc#unitsTen");
+		    break;
+		case MIXED:
+		    displayActionMessage("%calc#unitsMixed");
+		    break;
+	    }
 	}
 
 	public boolean setRationalMode(boolean mode) {
-	    boolean oldMode = rationalMode;
-	    rationalMode = mode;
+	    boolean oldMode = settings.rationalMode;
+	    settings.rationalMode = mode;
+
+	    displayActionMessage("%calc#rationalMode",
+			Intl.getString(mode ? "calc#rational" : "calc#decimal"));
+
 	    return oldMode;
 	}
+
+	public boolean setTimingMode(boolean mode) {
+	    boolean oldMode = Calc.setTimingMode(mode);
+
+	    displayActionMessage("%calc#timingMode", mode);
+
+	    return oldMode;
+	}
+
+	public boolean setDebugMode(boolean mode) {
+	    boolean oldMode = Calc.setDebugMode(mode);
+
+	    displayActionMessage("%calc#debugMode", mode);
+
+	    return oldMode;
+	}
+
 
 	private BigDecimal getDecimalValue(ParserRuleContext ctx) {
 	    return toDecimalValue(this, visit(ctx), mc, ctx);
@@ -454,7 +514,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	private BigDecimal getDecimalTrigValue(ParserRuleContext ctx) {
 	    BigDecimal value = getDecimalValue(ctx);
 
-	    if (trigMode == TrigMode.DEGREES)
+	    if (settings.trigMode == TrigMode.DEGREES)
 		value = value.multiply(piWorker.getPiOver180(), mc);
 
 	    return value;
@@ -467,7 +527,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	private BigDecimal returnTrigValue(double value) {
 	    BigDecimal radianValue = new BigDecimal(value, mcDouble);
 
-	    if (trigMode == TrigMode.DEGREES)
+	    if (settings.trigMode == TrigMode.DEGREES)
 		return radianValue.divide(piWorker.getPiOver180(), mcDouble);
 
 	    return radianValue;
@@ -598,22 +658,19 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitBinaryDirective(CalcParser.BinaryDirectiveContext ctx) {
-	    units = RangeMode.BINARY;
-	    displayActionMessage("%calc#unitsBinary");
+	    setUnits(RangeMode.BINARY);
 	    return null;
 	}
 
 	@Override
 	public Object visitSiDirective(CalcParser.SiDirectiveContext ctx) {
-	    units = RangeMode.DECIMAL;
-	    displayActionMessage("%calc#unitsTen");
+	    setUnits(RangeMode.DECIMAL);
 	    return null;
 	}
 
 	@Override
 	public Object visitMixedDirective(CalcParser.MixedDirectiveContext ctx) {
-	    units = RangeMode.MIXED;
-	    displayActionMessage("%calc#unitsMixed");
+	    setUnits(RangeMode.MIXED);
 	    return null;
 	}
 
@@ -722,9 +779,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitTimingDirective(CalcParser.TimingDirectiveContext ctx) {
 	    processModeOption(ctx.modeOption(), timingModeStack, mode -> {
-		boolean previousMode = Calc.setTimingMode(mode);
-		displayActionMessage("%calc#timingMode", mode);
-		return previousMode;
+		return setTimingMode(mode);
 	    });
 
 	    return null;
@@ -733,9 +788,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitDebugDirective(CalcParser.DebugDirectiveContext ctx) {
 	    processModeOption(ctx.modeOption(), debugModeStack, mode -> {
-		boolean previousMode = Calc.setDebugMode(mode);
-		displayActionMessage("%calc#debugMode", mode);
-		return previousMode;
+		return setDebugMode(mode);
 	    });
 
 	    return null;
@@ -744,10 +797,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitRationalDirective(CalcParser.RationalDirectiveContext ctx) {
 	    processModeOption(ctx.modeOption(), rationalModeStack, mode -> {
-		boolean previousMode = setRationalMode(mode);
-		displayActionMessage("%calc#rationalMode",
-			Intl.getString(mode ? "calc#rational" : "calc#decimal"));
-		return previousMode;
+		return setRationalMode(mode);
 	    });
 
 	    return null;
@@ -922,7 +972,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			iValue = toIntegerValue(this, result, mc, ctx);
 			try {
 			    long lValue = iValue.longValueExact();
-			    valueBuf.append(NumericUtil.formatToRange(lValue, units));
+			    valueBuf.append(NumericUtil.formatToRange(lValue, settings.units));
 			}
 			catch (ArithmeticException ae) {
 			    throw new CalcExprException(ae, ctx);
@@ -951,7 +1001,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		resultString = toStringValue(this, result);
 	    }
 
-	    if (!silent) displayer.displayResult(exprString, resultString);
+	    if (!settings.silent) displayer.displayResult(exprString, resultString);
 
 	    return result;
 
@@ -1278,7 +1328,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    String op = ctx.ADD_OP().getText();
 
-	    if (rationalMode) {
+	    if (settings.rationalMode) {
 		BigFraction f = toFractionValue(this, e, expr);
 
 		switch (op) {
@@ -1343,7 +1393,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    String op = ctx.MULT_OP().getText();
 
 	    try {
-		if (rationalMode) {
+		if (settings.rationalMode) {
 		    BigFraction f1 = toFractionValue(this, e1, ctx);
 		    BigFraction f2 = toFractionValue(this, e2, ctx);
 
@@ -1396,10 +1446,10 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    String op = ctx.ADD_OP().getText();
 	    switch (op) {
 		case "+":
-		    return addOp(this, e1, e2, ctx1, ctx2, mc, rationalMode);
+		    return addOp(this, e1, e2, ctx1, ctx2, mc, settings.rationalMode);
 		case "-":
 		case "\u2212":
-		    if (rationalMode) {
+		    if (settings.rationalMode) {
 			BigFraction f1 = toFractionValue(this, e1, ctx1);
 			BigFraction f2 = toFractionValue(this, e2, ctx2);
 
@@ -1418,7 +1468,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitAbsExpr(CalcParser.AbsExprContext ctx) {
-	    if (rationalMode) {
+	    if (settings.rationalMode) {
 		BigFraction f = getFractionValue(ctx.expr());
 		return f.abs();
 	    }
@@ -1554,7 +1604,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public Object visitSignumExpr(CalcParser.SignumExprContext ctx) {
 	    int signum;
 
-	    if (rationalMode) {
+	    if (settings.rationalMode) {
 		BigFraction f = getFractionValue(ctx.expr());
 		signum = f.signum();
 	    }
@@ -1597,7 +1647,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public Object visitIsPrimeExpr(CalcParser.IsPrimeExprContext ctx) {
 	    BigInteger i;
 
-	    if (rationalMode) {
+	    if (settings.rationalMode) {
 		BigFraction f = getFractionValue(ctx.expr());
 
 		if (f.isWholeNumber()) {
@@ -1618,7 +1668,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public Object visitGcdExpr(CalcParser.GcdExprContext ctx) {
 	    CalcParser.Expr2Context e2ctx = ctx.expr2();
 
-	    if (rationalMode) {
+	    if (settings.rationalMode) {
 		BigFraction f1 = getFractionValue(e2ctx.expr(0));
 		BigFraction f2 = getFractionValue(e2ctx.expr(1));
 
@@ -1637,7 +1687,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    CalcParser.Expr2Context e2ctx = ctx.expr2();
 
 	    try {
-		if (rationalMode) {
+		if (settings.rationalMode) {
 		    BigFraction f1 = getFractionValue(e2ctx.expr(0));
 		    BigFraction f2 = getFractionValue(e2ctx.expr(1));
 
@@ -1723,7 +1773,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		else
 		    objectList.add(value.toString());
 	    }
-	    else if (rationalMode) {
+	    else if (settings.rationalMode) {
 		objectList.add(toFractionValue(this, value, ctx));
 	    }
 	    else {
@@ -1768,7 +1818,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		return maxString;
 	    }
 	    else {
-		if (rationalMode) {
+		if (settings.rationalMode) {
 		    BigFraction maxFraction = (BigFraction) firstValue;
 		    for (int i = 1; i < objects.size(); i++) {
 			BigFraction value = (BigFraction) objects.get(i);
@@ -1805,7 +1855,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		return minString;
 	    }
 	    else {
-		if (rationalMode) {
+		if (settings.rationalMode) {
 		    BigFraction minFraction = (BigFraction) firstValue;
 		    for (int i = 1; i < objects.size(); i++) {
 			BigFraction value = (BigFraction) objects.get(i);
@@ -1943,7 +1993,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public Object visitBernExpr(CalcParser.BernExprContext ctx) {
 	    int n = getIntValue(ctx.expr());
 
-	    return MathUtil.bernoulli(n, mc, rationalMode);
+	    return MathUtil.bernoulli(n, mc, settings.rationalMode);
 	}
 
 	@Override
@@ -2062,7 +2112,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		}
 	    }
 	    else {
-		if (rationalMode) {
+		if (settings.rationalMode) {
 		    BigFraction fValue = toFractionValue(this, value, ctx);
 		    objectList.add(fValue);
 		}
@@ -2095,7 +2145,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    List<CalcParser.ExprContext> exprs = ctx.exprN().exprList().expr();
 	    List<Object> objects = buildSumProductList(exprs);
 
-	    if (rationalMode) {
+	    if (settings.rationalMode) {
 		BigFraction sum = BigFraction.ZERO;
 
 		for (Object obj : objects) {
@@ -2122,7 +2172,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    List<CalcParser.ExprContext> exprs = ctx.exprN().exprList().expr();
 	    List<Object> objects = buildSumProductList(exprs);
 
-	    if (rationalMode) {
+	    if (settings.rationalMode) {
 		BigFraction product = BigFraction.ONE;
 
 		for (Object obj : objects) {
@@ -2163,11 +2213,11 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    int ret = compareValues(ctx.expr(0), ctx.expr(1), false, true);
 
 	    if (ret < 0)
-		return rationalMode ? BigFraction.MINUS_ONE : BigInteger.ONE.negate();
+		return settings.rationalMode ? BigFraction.MINUS_ONE : BigInteger.ONE.negate();
 	    else if (ret == 0)
-		return rationalMode ? BigFraction.ZERO : BigInteger.ZERO;
+		return settings.rationalMode ? BigFraction.ZERO : BigInteger.ZERO;
 	    else
-		return rationalMode ? BigFraction.ONE : BigInteger.ONE;
+		return settings.rationalMode ? BigFraction.ONE : BigInteger.ONE;
 	}
 
 	@Override
@@ -2408,7 +2458,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitPiValue(CalcParser.PiValueContext ctx) {
 	    BigDecimal d = piWorker.getPi();
-	    if (rationalMode)
+	    if (settings.rationalMode)
 		return new BigFraction(d);
 	    else
 		return d;
@@ -2417,7 +2467,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitEValue(CalcParser.EValueContext ctx) {
 	    BigDecimal d = piWorker.getE();
-	    if (rationalMode)
+	    if (settings.rationalMode)
 		return new BigFraction(d);
 	    else
 		return d;
@@ -2475,7 +2525,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 
 	    BigFraction fraction = new BigFraction(FRACTIONS[index][0], FRACTIONS[index][1]);
-	    if (rationalMode)
+	    if (settings.rationalMode)
 		return fraction;
 	    else
 		return fraction.toDecimal(mc);
@@ -2525,11 +2575,11 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    switch (op) {
 		case "+=":
-		    result = addOp(this, e1, e2, varCtx, exprCtx, mc, rationalMode);
+		    result = addOp(this, e1, e2, varCtx, exprCtx, mc, settings.rationalMode);
 		    break;
 		case "-=":
 		case "\u2212=":
-		    if (rationalMode) {
+		    if (settings.rationalMode) {
 			BigFraction f1 = toFractionValue(this, e1, varCtx);
 			BigFraction f2 = toFractionValue(this, e2, exprCtx);
 
@@ -2572,7 +2622,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    Object e2 = visit(exprCtx);
 
 	    try {
-		if (rationalMode) {
+		if (settings.rationalMode) {
 		    BigFraction f1 = toFractionValue(this, e1, varCtx);
 		    BigFraction f2 = toFractionValue(this, e2, exprCtx);
 

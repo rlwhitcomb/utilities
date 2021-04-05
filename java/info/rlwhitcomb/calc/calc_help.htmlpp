@@ -471,11 +471,11 @@ code {
   <p>The only effect of debug mode is to display the parse tree (in LISP format) before the expression(s) is/are evaluated.
   <p>Timing mode displays the total parsing and execution time (to nanosecond precision on some systems) after the results are displayed.
   <h3>GUI operations</h3>
-  <p>The GUI window can be opened using the "<code>cg</code>" command (or on Windows only, the <code>``</code> command), or by entering the <code>gui</code> command in REPL mode.  The following window will be presented with the focus initially in the "Expression" field.
+  <p>The GUI window can be opened using the "<code>cg</code>" command (or on Windows only, the <code>``</code> command), or by entering the <code>gui</code> command in REPL mode.  The following window will be presented with the focus initially in the "Expressions" field.
   <center>
   <br><img src="calc_initial.png" alt="Initial GUI screen" width="50%"/>
   </center>
-  <p>An expression can be entered on each line, and all will be executed in order when the <span class="redbutton">!</span> button (or the <code>F9</code> key) is pressed, and the results displayed in the "Result" field. The Ctrl-Enter (or Cmd-Enter on Mac) key will also perform the calculation(s).
+  <p>An expression can be entered on each line, and all will be executed in order when the <span class="redbutton">!</span> button (or the <code>F9</code> key) is pressed, and the results displayed in the "Results" field. The Ctrl-Enter (or Cmd-Enter on Mac) key will also perform the calculation(s).
   <p>This help page will also be displayed by the <span class="bluebutton">?</span> button (or the <code>F1</code> key).
   <p>Note: colors are not currently used in the GUI display, so using the command-line options <code>-darkbg</code> or <code>-lightbg</code> will have no effect.
 
@@ -492,6 +492,7 @@ code {
         <code>t = { size : 0, array : [ ] }</code> as it should. This is an unexpected benefit of the <code>def</code> syntax (I think)
         So, you can setup the data structure with <code>def</code>, and make instances of that structure with just <code><i>var</i> = eval <i>struct</i></code>
     <li>Expand on GUI operation, including examples</li>
+    <li>Document GUI Settings dialog</li>
     <li>List of example programs, include examples in this document</li>
     <li>Interactions with Tester (use "mkcanon" and "-nocolors")</li>
     <li>Explain "silent" operation WRT "eval", "loop", interpolated strings, functions</li>

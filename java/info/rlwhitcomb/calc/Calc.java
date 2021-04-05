@@ -118,6 +118,8 @@
  *	    Move the default theme file.
  *	01-Apr-2021 (rlwhitcomb)
  *	    No joke!  Starting on the Settings dialog.
+ *	02-Apr-2021 (rlwhitcomb)
+ *	    Finish work on Settings dialog.
  */
 package info.rlwhitcomb.calc;
 
@@ -131,6 +133,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.MathContext;
 import java.nio.file.Files;
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -152,6 +155,8 @@ import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
 
 import info.rlwhitcomb.jarfile.Launcher;
+import info.rlwhitcomb.calc.CalcObjectVisitor.Settings;
+import info.rlwhitcomb.calc.CalcObjectVisitor.TrigMode;
 import info.rlwhitcomb.util.BigFraction;
 import info.rlwhitcomb.util.CharUtil;
 import info.rlwhitcomb.util.ClassUtil;
@@ -162,6 +167,7 @@ import info.rlwhitcomb.util.Environment;
 import info.rlwhitcomb.util.ExceptionUtil;
 import info.rlwhitcomb.util.FileUtilities;
 import info.rlwhitcomb.util.Intl;
+import info.rlwhitcomb.util.NumericUtil.RangeMode;
 import info.rlwhitcomb.util.QueuedThread;
 
 /**
@@ -201,13 +207,16 @@ public class Calc
 	/** What we're expecting next on the command line. */
 	private static Expecting expecting;
 
-	private static final String[] INTRO = {
-	    "  Enter an expression (or multiple expressions separated by ';').",
-	    "  Use '<v>help<r>' or '<v>?<r>' for a list of supported functions.",
-	    "  Enter '<v>quit<r>' or '<v>exit<r>' to end.",
-	    "  Enter '<v>gui<r>' to enter GUI mode.",
-	    ""
-	};
+
+	/**
+	 * Component attributes for the Settings dialog to store old and new settings.
+	 */
+	private enum Attribute
+	{
+		ORIGINAL_SETTINGS,
+		ORIGINAL_MATH_CONTEXT,
+		NEW_MATH_CONTEXT
+	}
 
 
 	private static boolean noIntro     = false;
@@ -239,9 +248,22 @@ public class Calc
 	@BXML private Label javaText;
 	@BXML private Prompt settingsPrompt;
 	@BXML private Form settingsForm;
+	@BXML private RadioButton decimalPrecisionButton;
+	@BXML private RadioButton defaultPrecisionButton;
+	@BXML private RadioButton doublePrecisionButton;
+	@BXML private RadioButton floatPrecisionButton;
+	@BXML private RadioButton unlimitedPrecisionButton;
+	@BXML private TextInput decimalDigitsInput;
+	@BXML private RadioButton degreesModeButton;
+	@BXML private RadioButton radiansModeButton;
+	@BXML private RadioButton binaryModeButton;
+	@BXML private RadioButton siModeButton;
+	@BXML private RadioButton mixedModeButton;
+	@BXML private Checkbox rationalCheck;
+	@BXML private Checkbox timingCheck;
+	@BXML private Checkbox debugCheck;
 	@BXML private Checkbox quietCheck;
 	@BXML private Checkbox resultsCheck;
-	@BXML private Checkbox rationalCheck;
 
 
 	/** The background worker thread to do the calculations in GUI mode. */
@@ -297,7 +319,7 @@ public class Calc
 		public boolean keyPressed(Component comp, int keyCode, Keyboard.KeyLocation keyLocation) {
 		    if (keyCode == Keyboard.KeyCode.ENTER && Keyboard.isCmdPressed()) {
 			Action.getNamedActions().get("calculate").perform(comp);
-// soon			Action.performAction("calculate", comp);
+			Action.performAction("calculate", comp);
 			return true;
 		    }
 		    // Otherwise key was not consumed
@@ -306,6 +328,10 @@ public class Calc
 	}
 
 	private KeyPressListener keyPressListener = new KeyPressListener();
+
+	private void requestFocus(final Component comp) {
+	    ApplicationContext.scheduleCallback(() -> comp.requestFocus(), 200L);
+	}
 
 
 	@Override
@@ -357,16 +383,95 @@ public class Calc
 		displayer = this;
 		visitor = new CalcObjectVisitor(displayer, rational);
 
+		decimalPrecisionButton.getButtonGroup().getButtonGroupListeners().add(new ButtonGroupListener() {
+		    @Override
+		    public void selectionChanged(final ButtonGroup buttonGroup, final Button previousSelection) {
+			RadioButton selectedButton = (RadioButton) buttonGroup.getSelection();
+			boolean digitsInputEnabled = false;
+			MathContext mcNew;
+
+			if (selectedButton == defaultPrecisionButton)
+			    mcNew = MathContext.DECIMAL128;
+			else if (selectedButton == doublePrecisionButton)
+			    mcNew = MathContext.DECIMAL64;
+			else if (selectedButton == floatPrecisionButton)
+			    mcNew = MathContext.DECIMAL32;
+			else if (selectedButton == unlimitedPrecisionButton)
+			    mcNew = MathContext.UNLIMITED;
+			else {
+			    mcNew = new MathContext(100);
+			    digitsInputEnabled = true;
+			}
+
+			decimalDigitsInput.setEnabled(digitsInputEnabled);
+			decimalDigitsInput.setText(String.valueOf(mcNew.getPrecision()));
+			if (digitsInputEnabled)
+			    requestFocus(decimalDigitsInput);
+
+			settingsPrompt.setAttribute(Attribute.NEW_MATH_CONTEXT, mcNew);
+		    }
+		});
+
+		settingsPrompt.getSheetStateListeners().add(new SheetStateListener() {
+		    @Override
+		    public void sheetClosed(final Sheet sheet) {
+			Prompt dialog = (Prompt) sheet;
+			int optionIndex = dialog.getSelectedOptionIndex();
+			if (optionIndex == 1) {   // "OK"
+			    Settings originalSettings = (Settings) dialog.getAttribute(Attribute.ORIGINAL_SETTINGS);
+
+			    MathContext originalMathContext = (MathContext) dialog.getAttribute(Attribute.ORIGINAL_MATH_CONTEXT);
+			    MathContext newMathContext = (MathContext) dialog.getAttribute(Attribute.NEW_MATH_CONTEXT);
+			    if (!originalMathContext.equals(newMathContext))
+				visitor.setMathContext(newMathContext);
+
+			    TrigMode newTrigMode = TrigMode.RADIANS;
+			    if (degreesModeButton.isSelected())
+				newTrigMode = TrigMode.DEGREES;
+			    if (newTrigMode != originalSettings.trigMode)
+				visitor.setTrigMode(newTrigMode);
+
+			    RangeMode newUnits = RangeMode.MIXED;
+			    if (binaryModeButton.isSelected())
+				newUnits = RangeMode.BINARY;
+			    else if (siModeButton.isSelected())
+				newUnits = RangeMode.DECIMAL;
+			    if (newUnits != originalSettings.units)
+				visitor.setUnits(newUnits);
+
+			    boolean newRational = rationalCheck.isSelected();
+			    if (newRational != originalSettings.rationalMode)
+				visitor.setRationalMode(newRational);
+
+			    boolean newTiming = timingCheck.isSelected();
+			    if (newTiming != timing)
+				visitor.setTimingMode(newTiming);
+
+			    boolean newDebug = debugCheck.isSelected();
+			    if (newDebug != debug)
+				visitor.setDebugMode(newDebug);
+
+			    boolean newQuiet = quietCheck.isSelected();
+			    if (newQuiet != quiet)
+				setQuietMode(newQuiet);
+
+			    boolean newResults = resultsCheck.isSelected();
+			    if (newResults != resultsOnly)
+				setResultsOnlyMode(newResults);
+			}
+
+			settingsPrompt.setAttribute(Attribute.ORIGINAL_SETTINGS, null);
+			settingsPrompt.setAttribute(Attribute.ORIGINAL_MATH_CONTEXT, null);
+			settingsPrompt.setAttribute(Attribute.NEW_MATH_CONTEXT, null);
+		    }
+		});
+
 		mainWindow.open(display);
-		requestTextPaneFocus();
+		requestFocus(inputTextPane);
 	    }
 	    catch (Throwable ex) {
 		displayer.displayErrorMessage(ex.getMessage());
 	    }
-	}
-
-	private void requestTextPaneFocus() {
-	    ApplicationContext.scheduleCallback(() -> inputTextPane.requestFocus(), 200L);
 	}
 
 	private void updateOutputSize() {
@@ -556,7 +661,7 @@ public class Calc
 		    queuedThread.submitWork(() -> processString(exprText, quiet));
 
 		    inputTextPane.setText(EMPTY_TEXT);
-		    requestTextPaneFocus();
+		    requestFocus(inputTextPane);
 		}
 
 	}
@@ -568,7 +673,7 @@ public class Calc
 		    inputTextPane.setText(EMPTY_TEXT);
 		    outputTextArea.setText("");
 		    updateOutputSize();
-		    requestTextPaneFocus();
+		    requestFocus(inputTextPane);
 		}
 	}
 
@@ -654,15 +759,62 @@ public class Calc
 	 * Display the settings dialog.
 	 */
 	private void displaySettings() {
+	    MathContext mc = visitor.getMathContext();
+	    Settings settings = visitor.getSettings();
+	    Settings oldSettings = new Settings(settings);
+
+	    // TODO: we really should do this view load/store and data bind mappings
+
+	    settingsPrompt.setAttribute(Attribute.ORIGINAL_SETTINGS, oldSettings);
+	    settingsPrompt.setAttribute(Attribute.ORIGINAL_MATH_CONTEXT, mc);
+	    settingsPrompt.setAttribute(Attribute.NEW_MATH_CONTEXT, mc);
+
+	    decimalDigitsInput.setText(String.valueOf(mc.getPrecision()));
+	    decimalDigitsInput.setEnabled(false);
+
+	    if (mc.equals(MathContext.UNLIMITED))
+		unlimitedPrecisionButton.setSelected(true);
+	    else if (mc.equals(MathContext.DECIMAL128))
+		defaultPrecisionButton.setSelected(true);
+	    else if (mc.equals(MathContext.DECIMAL64))
+		doublePrecisionButton.setSelected(true);
+	    else if (mc.equals(MathContext.DECIMAL32))
+		floatPrecisionButton.setSelected(true);
+	    else {
+		decimalPrecisionButton.setSelected(true);
+		decimalDigitsInput.setEnabled(true);
+	    }
+
+	    switch (settings.trigMode) {
+		case DEGREES:
+		    degreesModeButton.setSelected(true);
+		    break;
+		case RADIANS:
+		    radiansModeButton.setSelected(true);
+		    break;
+	    }
+
+	    switch (settings.units) {
+		case BINARY:
+		    binaryModeButton.setSelected(true);
+		    break;
+		case DECIMAL:
+		    siModeButton.setSelected(true);
+		    break;
+		case MIXED:
+		    mixedModeButton.setSelected(true);
+		    break;
+	    }
+
+	    rationalCheck.setSelected(settings.rationalMode);
+	    timingCheck.setSelected(timing);
+	    debugCheck.setSelected(debug);
+
 	    quietCheck.setSelected(quiet);
 	    resultsCheck.setSelected(resultsOnly);
-	    rationalCheck.setSelected(visitor.getRationalMode());
-	    // TODO: more settings here
 
 	    settingsPrompt.open(mainWindow);
-	    ApplicationContext.scheduleCallback(() -> settingsForm.requestFocus(), 200L);
-
-	    // TODO: set the settings if the dialog was OK'd
+	    requestFocus(settingsForm);
 	}
 
 	public static void exit() {
