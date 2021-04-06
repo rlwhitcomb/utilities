@@ -122,6 +122,8 @@
  *	    Finish work on Settings dialog.
  *	05-Apr-2021 (rlwhitcomb)
  *	    Code cleanup around Settings; fix bug on escape character.
+ *	06-Apr-2021 (rlwhitcomb)
+ *	    Tweak the initial focus component in the Settings dialog.
  */
 package info.rlwhitcomb.calc;
 
@@ -361,10 +363,11 @@ public class Calc
 	    settingsPrompt.setAttribute(Attribute.NEW_MATH_CONTEXT, mcNew);
 	}
 
-	private void handleDialogOpen(Prompt dialog) {
+	private Component handleDialogOpen(Prompt dialog) {
 	    MathContext mc = visitor.getMathContext();
 	    Settings settings = visitor.getSettings();
 	    Settings oldSettings = new Settings(settings);
+	    Component focusComponent = settingsForm;
 
 	    // TODO: we really should do this view load/store and data bind mappings
 
@@ -387,6 +390,8 @@ public class Calc
 		decimalPrecisionButton.setSelected(true);
 		decimalDigitsInput.setEnabled(true);
 	    }
+	    ButtonGroup precisionGroup = decimalPrecisionButton.getButtonGroup();
+	    focusComponent = precisionGroup.getSelection();
 
 	    switch (settings.trigMode) {
 		case DEGREES:
@@ -418,6 +423,8 @@ public class Calc
 
 	    // Pre-select "OK" option, so that "Return" to close will signal success
 	    dialog.setSelectedOptionIndex(1);
+
+	    return focusComponent;
 	}
 
 	private void handleDialogClosed(Prompt dialog) {
@@ -825,10 +832,10 @@ public class Calc
 	 * Display the settings dialog.
 	 */
 	private void displaySettings() {
-	    handleDialogOpen(settingsPrompt);
+	    Component focusComponent = handleDialogOpen(settingsPrompt);
 
 	    settingsPrompt.open(mainWindow);
-	    requestFocus(settingsForm);
+	    requestFocus(focusComponent);
 	}
 
 	public static void exit() {
