@@ -29,6 +29,8 @@
  *	    Initial implementation.
  *	29-Mar-2021 (rlwhitcomb)
  *	    Fix formatting with overflow sizes.
+ *	06-Apr-2021 (rlwhitcomb)
+ *	    Add "-version" command.
  */
 package info.rlwhitcomb.tools;
 
@@ -98,8 +100,13 @@ public class WordCount
 	 *
 	 * @param prefix The leading character(s) stripped before the "opt" value.
 	 * @param opt    The option string, without the leading prefix.
+	 * @return	 A code indicating an error: {@code < 0} to stop processing,
+	 *		 but it's not an error, {@code 0} for no problems, {@code > 0}
+	 *		 is an error, and also stop processing.
 	 */
-	private static void processOption(final String prefix, final String opt) {
+	private static int processOption(final String prefix, final String opt) {
+	    int code = 0;
+
 	    switch (opt.toLowerCase()) {
 		case "utf_8":
 		case "utf-8":
@@ -125,10 +132,20 @@ public class WordCount
 		case "def":
 		    cs = DEFAULT_CHARSET;
 		    break;
+		case "version":
+		case "vers":
+		case "ver":
+		case "v":
+		    Environment.printProgramInfo();
+		    code = -1;
+		    break;
 		default:
-		    System.err.format("Unknown option: \"%1$s%2$s\"; ignoring.", prefix, opt);
+		    System.err.format("Unknown option: \"%1$s%2$s\"; ignoring.%n", prefix, opt);
+		    code = 1;
 		    break;
 	    }
+
+	    return code;
 	}
 
 	private static void display(final int lines, final int words, final int chars, final String desc) {
@@ -223,19 +240,29 @@ public class WordCount
 	 * @param args The parsed command line argument array.
 	 */
 	public static void main(final String[] args) {
+	    Environment.setProductName("Word Count");
+
 	    // Scan through the options to override the defaults
 	    for (String arg : args) {
+		int code = 0;
+
 		if (arg.startsWith("--")) {
-		    processOption("--", arg.substring(2));
+		    code = processOption("--", arg.substring(2));
 		}
 		else if (arg.startsWith("-")) {
-		    processOption("-", arg.substring(1));
+		    code = processOption("-", arg.substring(1));
 		}
 		else if (ON_WINDOWS && arg.startsWith("/")) {
-		    processOption("/", arg.substring(1));
+		    code = processOption("/", arg.substring(1));
 		}
 		else {
 		    files.add(arg);
+		}
+
+		if (code != 0) {
+		    if (code < 0)
+			return;
+		    System.exit(code);
 		}
 	    }
 

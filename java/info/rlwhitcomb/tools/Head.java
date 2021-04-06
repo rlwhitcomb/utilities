@@ -28,6 +28,8 @@
  *	    Initial implementation.
  *	29-Mar-2021 (rlwhitcomb)
  *	    Move to new package.
+ *	06-Apr-2021 (rlwhitcomb)
+ *	    Add "-version" option.
  */
 package info.rlwhitcomb.tools;
 
@@ -77,8 +79,14 @@ public class Head
 	 * Process one command line option.
 	 *
 	 * @param opt The option string, without the leading "-", etc.
+	 * @return    A code indicating an error: {@code < 0} to stop
+	 *	      processing, but it's not an error, {@code 0} for
+	 *	      no problems, {@code > 0} is an error, and also
+	 *	      stop processing.
 	 */
-	private static void processOption(final String opt) {
+	private static int processOption(final String opt) {
+	    int code = 0;
+
 	    switch (opt.toLowerCase()) {
 		case "utf_8":
 		case "utf-8":
@@ -104,15 +112,25 @@ public class Head
 		case "def":
 		    cs = DEFAULT_CHARSET;
 		    break;
+		case "version":
+		case "vers":
+		case "ver":
+		case "v":
+		    Environment.printProgramInfo();
+		    code = -1;
+		    break;
 		default:
 		    try {
 			linesToDisplay = Integer.parseInt(opt);
 		    }
 		    catch (NumberFormatException nfe) {
-			System.err.format("Number of lines must be a valid integer.");
+			System.err.println("Number of lines must be a valid integer.");
+			code = 1;
 		    }
 		    break;
 	    }
+
+	    return code;
 	}
 
 	/**
@@ -156,19 +174,29 @@ public class Head
 	 * @param args The parsed command line argument array.
 	 */
 	public static void main(final String[] args) {
+	    Environment.setProductName("Head");
+
 	    // Scan through the options to override the defaults
 	    for (String arg : args) {
+		int code = 0;
+
 		if (arg.startsWith("--")) {
-		    processOption(arg.substring(2));
+		    code = processOption(arg.substring(2));
 		}
 		else if (arg.startsWith("-")) {
-		    processOption(arg.substring(1));
+		    code = processOption(arg.substring(1));
 		}
 		else if (ON_WINDOWS && arg.startsWith("/")) {
-		    processOption(arg.substring(1));
+		    code = processOption(arg.substring(1));
 		}
 		else {
 		    files.add(arg);
+		}
+
+		if (code != 0) {
+		    if (code < 0)
+			return;
+		    System.exit(code);
 		}
 	    }
 
