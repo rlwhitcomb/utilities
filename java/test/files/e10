@@ -16,12 +16,12 @@ loop $i in SIZE {
 }
 array@j
 
-primes = []; numPrimes = 0;
+primes = []
 start = 2; end = 102;
 :quiet on
-loop $i in start .. end { isprime($i) ? primes[numPrimes++] = $i : "" }
+loop $i in start .. end { isprime($i) ? primes[length(primes)] = $i : "" }
 :quiet previous
-numPrimes; primes;
+length(primes); primes;
 
 loop $i in -10 .. -2, -2 { $i }
 loop $i in -2 .. -10, -2 { $i }
