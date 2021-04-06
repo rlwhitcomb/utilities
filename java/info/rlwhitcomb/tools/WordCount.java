@@ -31,6 +31,9 @@
  *	    Fix formatting with overflow sizes.
  *	06-Apr-2021 (rlwhitcomb)
  *	    Add "-version" command.
+ *	06-Apr-2021 (rlwhitcomb)
+ *	    Add "-lines", "-words", and "-chars" options to print only that
+ *	    one value (instead of all three).
  */
 package info.rlwhitcomb.tools;
 
@@ -76,6 +79,13 @@ public class WordCount
 	private static final boolean ON_WINDOWS = Environment.isWindows();
 	/** The list of files to process. */
 	private static final List<String> files = new ArrayList<>();
+
+	/** Option to report only the number of lines. */
+	private static boolean onlyLines = false;
+	/** Option to report only the number of words. */
+	private static boolean onlyWords = false;
+	/** Option to report only the number of characters. */
+	private static boolean onlyChars = false;
 
 	/** The line count for the current file. */
 	private static int currentLines;
@@ -132,6 +142,29 @@ public class WordCount
 		case "def":
 		    cs = DEFAULT_CHARSET;
 		    break;
+		case "lines":
+		case "line":
+		case "l":
+		    onlyLines = true;
+		    onlyWords = false;
+		    onlyChars = false;
+		    break;
+		case "words":
+		case "word":
+		case "w":
+		    onlyWords = true;
+		    onlyLines = false;
+		    onlyChars = false;
+		    break;
+		case "characters":
+		case "character":
+		case "chars":
+		case "char":
+		case "c":
+		    onlyChars = true;
+		    onlyLines = false;
+		    onlyWords = false;
+		    break;
 		case "version":
 		case "vers":
 		case "ver":
@@ -141,7 +174,6 @@ public class WordCount
 		    break;
 		default:
 		    System.err.format("Unknown option: \"%1$s%2$s\"; ignoring.%n", prefix, opt);
-		    code = 1;
 		    break;
 	    }
 
@@ -149,7 +181,14 @@ public class WordCount
 	}
 
 	private static void display(final int lines, final int words, final int chars, final String desc) {
-	    System.out.printf("%1$8d %2$7d %3$7d %4$s%n", lines, words, chars, desc);
+	    if (onlyLines)
+		System.out.printf("%1$8d %2$s%n", lines, desc);
+	    else if (onlyWords)
+		System.out.printf("%1$8d %2$s%n", words, desc);
+	    else if (onlyChars)
+		System.out.printf("%1$8d %2$s%n", chars, desc);
+	    else
+		System.out.printf("%1$8d %2$7d %3$7d %4$s%n", lines, words, chars, desc);
 	}
 
 	private static void process(final int ichar) {
