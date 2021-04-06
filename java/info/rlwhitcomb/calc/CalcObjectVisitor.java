@@ -233,6 +233,8 @@
  *	    Calculate ln from our own method.
  *	01-Apr-2021 (rlwhitcomb)
  *	    Regularize settings so we can use a GUI dialog to set them.
+ *	05-Apr-2021 (rlwhitcomb)
+ *	    Catch exceptions in the root and log functions.
  */
 package info.rlwhitcomb.calc;
 
@@ -1558,7 +1560,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitSqrtExpr(CalcParser.SqrtExprContext ctx) {
-	    return MathUtil.sqrt(getDecimalValue(ctx.expr()), mc);
+	    try {
+		return MathUtil.sqrt(getDecimalValue(ctx.expr()), mc);
+	    }
+	    catch (IllegalArgumentException iae) {
+		throw new CalcExprException(iae, ctx);
+	    }
 	}
 
 	@Override
@@ -1568,7 +1575,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitFortExpr(CalcParser.FortExprContext ctx) {
-	    return MathUtil.sqrt(MathUtil.sqrt(getDecimalValue(ctx.expr()), mc), mc);
+	    try {
+		return MathUtil.sqrt(MathUtil.sqrt(getDecimalValue(ctx.expr()), mc), mc);
+	    }
+	    catch (IllegalArgumentException iae) {
+		throw new CalcExprException(iae, ctx);
+	    }
 	}
 
 	@Override
@@ -1576,21 +1588,35 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    // For now, get a double value and use the standard Math method
 	    double d = getDoubleValue(ctx.expr());
 
-	    return new BigDecimal(Math.log10(d), mcDouble);
+	    double logValue = Math.log10(d);
+	    if (Double.isInfinite(logValue) || Double.isNaN(logValue))
+		throw new CalcExprException("%util#numeric.outOfRange", ctx);
+
+	    return new BigDecimal(logValue, mcDouble);
 	}
 
 	@Override
 	public Object visitLn2Expr(CalcParser.Ln2ExprContext ctx) {
 	    BigDecimal d = getDecimalValue(ctx.expr());
 
-	    return MathUtil.ln2(d, mc);
+	    try {
+		return MathUtil.ln2(d, mc);
+	    }
+	    catch (IllegalArgumentException iae) {
+		throw new CalcExprException(iae, ctx);
+	    }
 	}
 
 	@Override
 	public Object visitLnExpr(CalcParser.LnExprContext ctx) {
 	    BigDecimal d = getDecimalValue(ctx.expr());
 
-	    return MathUtil.ln(d, mc);
+	    try {
+		return MathUtil.ln(d, mc);
+	    }
+	    catch (IllegalArgumentException iae) {
+		throw new CalcExprException(iae, ctx);
+	    }
 	}
 
 	@Override
