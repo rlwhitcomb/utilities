@@ -166,6 +166,17 @@
 >length handsome -> 15
 >length rude -> 5
 >'[' + join ( 1 , 2 , 3 , 4 , 5 , ', ' ) + ']' -> "[1, 2, 3, 4, 5]"
+>Variables 'target', 'one', 'two', 'three' cleared.
+>target = 'This is an "index" test.' -> "This is an \"index\" test."
+>one = index target , 'is' -> 2
+>two = index target , 'is' , one + 1 -> 5
+>three = index target , 'test' , - 1 -> -5
+>index ( target , 'junk' ) -> <null>
+>index ( target , 'more junk' , - 1 ) -> <null>
+>one = substr ( target , 4 ) -> " is an \"index\" test."
+>two = substr ( target , 11 , 18 ) -> "\"index\""
+>three = substr ( target , index ( target , 'test' , - 1 ) ) -> "test."
+>substr ( target , index ( target , '"' , 0 ) , index ( target , '"' , - 1 ) + 1 ) -> "\"index\""
 >arr_n = [ ] -> [ ]
 >fill arr_n , 0 , 10 -> [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
 >fill arr_n , 1 , 2 , 3 -> [ 0, 0, 1, 1, 1, 0, 0, 0, 0, 0 ]

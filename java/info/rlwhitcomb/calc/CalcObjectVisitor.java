@@ -235,6 +235,8 @@
  *	    Regularize settings so we can use a GUI dialog to set them.
  *	05-Apr-2021 (rlwhitcomb)
  *	    Catch exceptions in the root and log functions.
+ *	06-Apr-2021 (rlwhitcomb)
+ *	    Add "INDEX" and "SUBSTR" functions.
  */
 package info.rlwhitcomb.calc;
 
@@ -1938,22 +1940,103 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	@Override
-	public Object visitFillExpr(CalcParser.FillExprContext ctx) {
-	    CalcParser.VarContext varCtx = ctx.var();
-	    LValueContext lValue         = getLValue(varCtx);
+	public Object visitIndexExpr(CalcParser.IndexExprContext ctx) {
+	    CalcParser.Expr2Context e2ctx = ctx.expr2();
+	    String stringValue;
+	    String searchValue;
 
-	    int start  = 0;
-	    int length = 0;
-	    if (ctx.expr(2) == null) {
-		length = getIntValue(ctx.expr(1));
+	    int ret = -1;
+	    if (e2ctx != null) {
+		stringValue = getStringValue(e2ctx.expr(0));
+		searchValue = getStringValue(e2ctx.expr(1));
+
+		ret = stringValue.indexOf(searchValue);
+		if (ret < 0)
+		    return null;
 	    }
 	    else {
-		start  = getIntValue(ctx.expr(1));
-		length = getIntValue(ctx.expr(2));
+		CalcParser.Expr3Context e3ctx   = ctx.expr3();
+		CalcParser.ExprContext indexCtx = e3ctx.expr(2);
+		stringValue = getStringValue(e3ctx.expr(0));
+		searchValue = getStringValue(e3ctx.expr(1));
+		int index   = indexCtx == null ? 0 : getIntValue(indexCtx);
+
+		if (index < 0) {
+		    int stringLen = stringValue.length();
+		    ret = stringValue.lastIndexOf(searchValue, stringLen + index);
+		    if (ret < 0)
+			return null;
+		    ret -= stringLen;
+		}
+		else {
+		    ret = stringValue.indexOf(searchValue, index);
+		    if (ret < 0)
+			return null;
+		}
 	    }
 
-	    Object value     = lValue.getContextObject();
-	    Object fillValue = visit(ctx.expr(0));
+	    return BigInteger.valueOf((long) ret);
+	}
+
+	@Override
+	public Object visitSubstrExpr(CalcParser.SubstrExprContext ctx) {
+	    CalcParser.Expr2Context e2ctx = ctx.expr2();
+	    CalcParser.ExprContext indexCtx;
+	    String stringValue;
+
+	    if (e2ctx != null) {
+		stringValue = getStringValue(e2ctx.expr(0));
+		indexCtx    = e2ctx.expr(1);
+
+		if (indexCtx == null)
+		    return stringValue;
+		else {
+		    int beginIndex = getIntValue(indexCtx);
+		    if (beginIndex < 0) {
+			int stringLen = stringValue.length();
+			return stringValue.substring(stringLen + beginIndex);
+		    }
+		    return stringValue.substring(beginIndex);
+		}
+	    }
+	    else {
+		CalcParser.Expr3Context e3ctx = ctx.expr3();
+		stringValue    = getStringValue(e3ctx.expr(0));
+		int beginIndex = getIntValue(e3ctx.expr(1));
+		int endIndex   = getIntValue(e3ctx.expr(2));
+		int stringLen  = stringValue.length();
+
+		if (beginIndex < 0)
+		    beginIndex += stringLen;
+		if (endIndex < 0)
+		    endIndex += stringLen;
+
+		return stringValue.substring(beginIndex, endIndex);
+	    }
+	}
+
+	@Override
+	public Object visitFillExpr(CalcParser.FillExprContext ctx) {
+	    CalcParser.VarContext varCtx  = ctx.var();
+	    LValueContext lValue          = getLValue(varCtx);
+	    Object value		  = lValue.getContextObject();
+
+	    CalcParser.Expr2Context e2ctx = ctx.expr2();
+	    CalcParser.Expr3Context e3ctx = ctx.expr3();
+
+	    Object fillValue;
+	    int start  = 0;
+	    int length = 0;
+
+	    if (e3ctx == null) {
+		fillValue = visit(e2ctx.expr(0));
+		length    = getIntValue(e2ctx.expr(1));
+	    }
+	    else {
+		fillValue = visit(e3ctx.expr(0));
+		start     = getIntValue(e3ctx.expr(1));
+		length    = getIntValue(e3ctx.expr(2));
+	    }
 
 	    if (value instanceof List) {
 		@SuppressWarnings("unchecked")

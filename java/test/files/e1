@@ -178,6 +178,21 @@ length this; length hello; length handsome; length rude;
 
 '[' + join (1, 2, 3, 4, 5, ', ') + ']'
 
+# The "index" operator
+:clear target, one, two, three
+target = 'This is an "index" test.'
+one = index target, 'is'
+two = index target, 'is', one+1
+three = index target, 'test', -1
+index(target, 'junk')
+index(target, 'more junk', -1)
+
+# The "substr" operator
+one = substr(target, 4)
+two = substr(target, 11, 18)
+three = substr(target, index(target, 'test', -1))
+substr(target, index(target, '"', 0), index(target, '"', -1) + 1)
+
 # The "fill" function
 arr_n = []
 fill arr_n, 0, 10

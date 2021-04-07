@@ -169,6 +169,8 @@
  *	    Allow precision on all format arguments.
  *	29-Mar-2021 (rlwhitcomb)
  *	    Add Unicode equivalents for SUMOF and PRODUCTOF.
+ *	06-Apr-2021 (rlwhitcomb)
+ *	    Add "INDEX" and "SUBSTR" functions.
  */
 
 grammar Calc;
@@ -241,10 +243,12 @@ expr
    | SUMOF exprN                         # sumOfExpr
    | PRODUCTOF exprN                     # productOfExpr
    | JOIN exprN                          # joinExpr
-   | FILL var ',' expr ',' expr ( ',' expr ) ?   # fillExpr
+   | INDEX ( expr2 | expr3 )             # indexExpr
+   | SUBSTR ( expr2 | expr3 )            # substrExpr
+   | FILL var ',' ( expr2 | expr3 )      # fillExpr
    | FIB expr                            # fibExpr
    | BN expr                             # bernExpr
-   | FRAC ( STRING | ISTRING | expr3 | expr2 )   # fracExpr
+   | FRAC ( STRING | ISTRING | expr2 | expr3 )   # fracExpr
    | ROMAN expr                          # romanExpr
    | ( UPPER | LOWER ) expr              # caseConvertExpr
    | EVAL expr                           # evalExpr
@@ -465,6 +469,10 @@ MAX      : M A X ;
 MIN      : M I N ;
 
 JOIN     : J O I N ;
+
+INDEX    : I N D E X ;
+
+SUBSTR   : S U B S T R ;
 
 FILL     : F I L L ;
 
