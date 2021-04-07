@@ -53,7 +53,7 @@ code {
 .innertable tr,
 .innertable th,
 .innertable td {
-   padding: 4px;
+   padding: 2px;
    border: none;
 }
     </style>
@@ -242,8 +242,8 @@ code {
   <table>
     <tr>
       <th width=60>Level</th>
-      <th width=240>Operator</th>
-      <th width=300>Description</th>
+      <th width=260>Operator</th>
+      <th width=320>Description</th>
       <th width=120>Associativity</th>
     </tr>
     <tr><td>28</td>
@@ -256,7 +256,7 @@ code {
           the <code>null</code> (empty) value<br>
           any of the Unicode fraction values</td><td>- none -</td></tr>
     <tr><td>27</td><td><code>{ }</code></td><td>define an object</td><td>left to right</td></tr>
-    <tr><td>26</td><td><code>[ ]</code></td><td>define an array,<br>or access elements of<br>an array, string, or object</td><td>left to right</td></tr>
+    <tr><td>26</td><td><code>[ ]</code><br>or <i>var</i>&nbsp;&#x2080; .. &#x2089;</td><td>define an array,<br>or access elements of<br>an array, string, or object</td><td>left to right</td></tr>
     <tr><td>25</td><td>.</td><td>access an object member</td><td>left to right</td></tr>
     <tr><td>24</td><td><code>( </code><i>expr</i><code> )</code></td><td>group an expression</td><td>- none -</td></tr>
     <tr><td>23</td><td><i>expr</i>&nbsp;<code>++</code><br><i>expr</i>&nbsp;<code>--</code></td><td>post increment/decrement</td><td>- none -</td></tr>
@@ -265,7 +265,7 @@ code {
     <tr><td>20</td><td><code>!</code> or <code>&#x00AC;</code>&nbsp;<i>expr</i></td><td>boolean NOT</td><td>right to left</td></tr>
     <tr><td>19</td><td><code>~</code>&nbsp;<i>expr</i></td><td>bitwise NOT</td><td>right to left</td></tr>
     <tr><td>18</td><td><i>expr</i>&nbsp;<code>!</code></td><td>factorial</td><td>left to right</td></tr>
-    <tr><td>17</td><td><i>expr<sub>1</sub></i>&nbsp;<code> ** </code>&nbsp;<i>expr<sub>2</sub></i></td><td>expr<sub>1</sub> to expr<sub>2</sub> power</td><td>right to left</td></tr>
+    <tr><td>17</td><td><i>expr<sub>1</sub></i>&nbsp;<code> ** </code>&nbsp;<i>expr<sub>2</sub></i><br>or&nbsp;<i>expr</i>&nbsp;&#x2070; .. &#x2079;</td><td><i>expr<sub>1</sub></i> to <i>expr<sub>2</sub></i> power<br>or <i>expr</i> to given power</td><td>right to left</td></tr>
     <tr><td>16</td><td>
         <i>expr</i>&nbsp;<code> * </code>or<code> &times; </code>or<code> &#x2217; </code>&nbsp;<i>expr</i><br>
         <i>expr</i>&nbsp;<code> / </code>or<code> &divide; </code>&nbsp;<i>expr</i><br>
@@ -282,7 +282,7 @@ code {
         <td>bit shift operations</td><td>left to right</td></tr>
     <tr><td>13</td><td colspan="2">
         <table class="innertable">
-            <tr><td width="240"><code>ABS</code>&nbsp;<i>expr</i></td><td width="300">absolute value</td></tr>
+            <tr><td width="260"><code>ABS</code>&nbsp;<i>expr</i></td><td width="320">absolute value</td></tr>
             <tr><td><code>SIN</code>&nbsp;<i>expr</i></td><td>sine</td></tr>
             <tr><td><code>COS</code>&nbsp;<i>expr</i></td><td>cosine</td></tr>
             <tr><td><code>TAN</code>&nbsp;<i>expr</i></td><td>tangent</td></tr>
@@ -316,6 +316,7 @@ code {
             <tr><td><code>INDEX</code>&nbsp;<i>expr</i> <code>,</code> <i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;)</td><td>find value within a string</td></tr>
             <tr><td><code>SUBSTR</code>&nbsp;<i>expr</i> <code>,</code> <i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;)</td><td>extract a substring</td></tr>
             <tr><td><code>FILL</code>&nbsp;<i>var</i>&nbsp;<code>,</code> <i>expr</i>&nbsp;<code>,</code> <i>expr</i> ( <code>,</code><i>expr</i> )</td><td>fill an array or string</td></tr>
+            <tr><td><code>TRIM</code> or <code>LTRIM</code> or <code>RTRIM</code> <i>expr</i></td><td>trim all, leading, or trailing whitespace</td></tr>
             <tr><td><code>FIB</code>&nbsp;<i>expr</i></td><td>Fibonacci number</td></tr>
             <tr><td><code>Bn</code>&nbsp;<i>expr</i></td><td>Bernoulli number</td></tr>
             <tr><td><code>FRAC</code>&nbsp;<i>num</i><code>,</code>&nbsp;<i>den</i><br>or <i>int</i><code>,</code><i>num</i><code>,</code><i>den</i><br>or <i>string</i></td><td>construct a rational fraction</td></tr>

@@ -175,6 +175,9 @@
  *	    Add "EXEC" function.
  *	07-Apr-2021 (rlwhitcomb)
  *	    Add "SPLIT" function (same semantics as String.split).
+ *	07-Apr-2021 (rlwhitcomb)
+ *	    Implement "TRIM", "LTRIM", and "RTRIM" functions.
+ *	    Add superscript powers and subscript indexes.
  */
 
 grammar Calc;
@@ -214,6 +217,7 @@ expr
    |<assoc=right> '~' expr               # bitNotExpr
    | expr '!'                            # factorialExpr
    |<assoc=right> expr '**' expr         # powerExpr
+   |<assoc=right> expr POWERS            # powerNExpr
    | expr MULT_OP expr                   # multiplyExpr
    | expr ADD_OP expr                    # addExpr
    | expr SHIFT_OP expr                  # shiftExpr
@@ -251,6 +255,7 @@ expr
    | INDEX ( expr2 | expr3 )             # indexExpr
    | SUBSTR ( expr2 | expr3 )            # substrExpr
    | FILL var ',' ( expr2 | expr3 )      # fillExpr
+   | (TRIM|LTRIM|RTRIM) expr             # trimExpr
    | FIB expr                            # fibExpr
    | BN expr                             # bernExpr
    | FRAC ( STRING | ISTRING | expr2 | expr3 )   # fracExpr
@@ -316,7 +321,7 @@ pair
 
 var
    : var ( '.' ( var | STRING ) ) +     # objVar
-   | var '[' expr ']'                   # arrVar
+   | var ( '[' expr ']' | INDEXES )     # arrVar
    | ID                                 # idVar
    | LOCALVAR                           # localVar
    ;
@@ -484,6 +489,12 @@ SUBSTR   : S U B S T R ;
 
 FILL     : F I L L ;
 
+TRIM     : T R I M ;
+
+LTRIM    : L T R I M ;
+
+RTRIM    : R T R I M ;
+
 FIB      : F I B ;
 
 BN       : B N ;
@@ -543,6 +554,23 @@ INC_OP
 ADD_OP
        : '+'
        | ( '-' | '\u2212' )
+       ;
+
+POWERS
+       : '\u2070' // 0
+       | '\u00B9' // 1
+       | '\u00B2' // 2
+       | '\u00B3' // 3
+       | '\u2074' // 4
+       | '\u2075' // 5
+       | '\u2076' // 6
+       | '\u2077' // 7
+       | '\u2078' // 8
+       | '\u2079' // 9
+       ;
+
+INDEXES
+       : [\u2080-\u2089]
        ;
 
 MULT_OP

@@ -272,6 +272,8 @@
  *	    Add another method to also deal with other escape sequences ("\\" and "\\uXXXX").
  *	10-Mar-2021 (rlwhitcomb)
  *	    Make another flavor of "makeStringOfChars" that uses a StringBuilder.
+ *	07-Apr-2021 (rlwhitcomb)
+ *	    Add "ltrim" function and pattern; update trim patterns to include all chars below '\u0020'.
  */
 
 package info.rlwhitcomb.util;
@@ -311,7 +313,9 @@ public class CharUtil
 	/** Pattern to recognize runs of multiple spaces. */
 	private static Pattern runsOfSpacesPattern = Pattern.compile("  +");
 	/** Pattern to recognize trailing spaces. */
-	private static Pattern rtrimPattern = Pattern.compile(" +$");
+	private static Pattern rtrimPattern = Pattern.compile("[\u0000-\u0020]+$");
+	/** Pattern to recognize leading spaces. */
+	private static Pattern ltrimPattern = Pattern.compile("^[\u0000-\u0020]+");
 	/** Pattern to recognize command-line arguments that need quoting (on Windows platforms). */
 	private static Pattern winCmdArgNeedsQuotingPattern = Pattern.compile("[\\s\"\\\\]+");
 	/** Pattern to recognize a string of zero or more backslashes preceding a doublequote,
@@ -1317,7 +1321,7 @@ public class CharUtil
 	 * @return		Trimmed result.
 	 */
 	public static String delimRtrim(Object input) {
-	    String result = rtrimPattern.matcher((String)input).replaceAll("");
+	    String result = rtrimPattern.matcher((String) input).replaceAll("");
 	    if (result.length() == 0)
 		result = " ";
 	    return result;
@@ -1334,7 +1338,21 @@ public class CharUtil
 	 * @return		Trimmed result.
 	 */
 	public static String rtrim(Object input) {
-	    return rtrimPattern.matcher((String)input).replaceAll("");
+	    return rtrimPattern.matcher((String) input).replaceAll("");
+	}
+
+
+	/**
+	 * Trim leading spaces from a string.  Will return an empty string if
+	 * the input is all spaces.
+	 *
+	 * @param	input	The string to be trimmed (as an Object because
+	 *			our query result values are always Object).
+	 *
+	 * @return		Trimmed result.
+	 */
+	public static String ltrim(Object input) {
+	    return ltrimPattern.matcher((String) input).replaceAll("");
 	}
 
 

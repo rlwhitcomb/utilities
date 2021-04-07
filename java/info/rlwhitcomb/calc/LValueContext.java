@@ -42,6 +42,8 @@
  *	    Refactor "loopvar" to "localvar".
  *	25-Mar-2021 (rlwhitcomb)
  *	    Check for string index out of bounds in getContextObject.
+ *	07-Apr-2021 (rlwhitcomb)
+ *	    Implement Unicode subscripts as array indexes.
  */
  package info.rlwhitcomb.calc;
 
@@ -288,7 +290,16 @@ class LValueContext
 
 		// By now, the object must either be null, a list, a string, or a simple value (an error)
 		// but we should be able to safely evaluate the index expression as an integer
-		int index = visitor.getIntValue(arrVarCtx.expr());
+		CalcParser.ExprContext expr = arrVarCtx.expr();
+		int index;
+
+		if (expr == null) {
+		    String indexString = arrVarCtx.INDEXES().getText();
+		    index = (int) indexString.charAt(0) - 0x2080;
+		}
+		else {
+		    index = visitor.getIntValue(expr);
+		}
 
 		if (index < 0)
 		    throw new CalcExprException(arrVarCtx, "%calc#indexNegative", index);
