@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2009-2011,2013-2018,2020 Roger L. Whitcomb.
+ * Copyright (c) 2009-2011,2013-2018,2020-2021 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,7 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  *
- * Class to enable running an external program from within Java.
+ *	Class to facilitate running an external program from within Java,
+ *	and capturing its output.
  *
  * Change history:
  *  20-Mar-2009 (rlwhitcomb)
@@ -53,11 +54,15 @@
  *	Prepare for GitHub.
  *  21-Dec-2020 (rlwhitcomb)
  *	Update obsolete Javadoc constructs.
+ *  07-Apr-2021 (rlwhitcomb)
+ *	Tighten up the code and comments.
+ *	Add a "runToCompletion" that writes to a StringBuilder to store the output.
  */
 package info.rlwhitcomb.util;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.io.IOException;
@@ -73,7 +78,10 @@ import java.util.Map;
  * will be merged inline into the standard output stream.
  * <p> The "stdin" stream is also available in order to write to the process.
  */
-public class RunCommand {
+public class RunCommand
+{
+	/** The initial byte array buffer size when writing process output to a string. */
+	private static final int BUFFER_SIZE = 8192;
 
 	/** The exit code from the child process. Integer.MIN_VALUE indicates the process has not yet terminated. */
 	private int errorLevel = Integer.MIN_VALUE;
@@ -97,15 +105,15 @@ public class RunCommand {
 	 * @return	the {@link #errorLevel} value
 	 */
 	public int getErrorLevel() {
-	    if (this.errorLevel == Integer.MIN_VALUE) {
+	    if (errorLevel == Integer.MIN_VALUE) {
 		try {
-		    this.errorLevel = p.waitFor();
+		    errorLevel = p.waitFor();
 		}
 		catch (InterruptedException ie) {
 		    Logging.Except(ie);
 		}
 	    }
-	    return this.errorLevel;
+	    return errorLevel;
 	}
 
 	/**
@@ -113,15 +121,15 @@ public class RunCommand {
 	 *
 	 * @param	o	new {@link PrintStream} to use to echo command output.
 	 */
-	public void setEchoStream(PrintStream o) {
-	    this.out = o;
+	public void setEchoStream(final PrintStream o) {
+	    out = o;
 	}
 
 	/**
 	 * @return The subprocess' <code>stdin</code> stream to write to.
 	 */
 	public OutputStream getInputStream() {
-	    return this.stdOutput;
+	    return stdOutput;
 	}
 
 	/**
@@ -130,7 +138,7 @@ public class RunCommand {
 	 * @param	command	variable number of command arguments --
 	 *			the first one of which must be the executable name
 	 */
-	public RunCommand(String... command) {
+	public RunCommand(final String... command) {
 	    init(command);
 	}
 
@@ -141,7 +149,7 @@ public class RunCommand {
 	 * @param	command	The name of the program to run.
 	 * @param	args	The list of arguments (could be empty).
 	 */
-	public RunCommand(String command, List<String> args) {
+	public RunCommand(final String command, final List<String> args) {
 	    String[] allArgs = new String[args.size() + 1];
 	    allArgs[0] = command;
 	    int i = 1;
@@ -151,7 +159,7 @@ public class RunCommand {
 	    init(allArgs);
 	}
 
-	private void init(String... command) {
+	private void init(final String... command) {
 	    pb = new ProcessBuilder(command);
 	    pb.redirectErrorStream(true);
 	}
@@ -201,7 +209,7 @@ public class RunCommand {
 	 * @param	workingDir	new working directory where the process should start
 	 * @return			pointer to merged output from the child process
 	 */
-	public InputStream run(File workingDir) {
+	public InputStream run(final File workingDir) {
 	    pb.directory(workingDir);
 	    return run();
 	}
@@ -212,25 +220,26 @@ public class RunCommand {
 	 *
 	 * @param	echoOutput	{@code true} if the output from the child
 	 *				process should be echoed to {@link System#out}
-	 * @return			return code from the child process, which will
-	 *				be {@link Integer#MIN_VALUE} if the process has
-	 *				not yet completed when this method returns.
+	 * @return			return code from the child process
 	 */
-	public int runToCompletion(boolean echoOutput) {
-	    InputStream output = run();
-	    int ch;
+	public int runToCompletion(final boolean echoOutput) {
 	    try {
-		if (echoOutput) {
-		    while ((ch = output.read()) != -1) {
-			this.out.write(ch);
+		InputStream output = run();
+		int ch;
+
+		if (output != null) {
+		    if (echoOutput) {
+			while ((ch = output.read()) != -1) {
+			    out.write(ch);
+			}
 		    }
+		    else {
+			while ((ch = output.read()) != -1)
+			    ;
+		    }
+		    output.close();
+		    errorLevel = p.waitFor();
 		}
-		else {
-		    while ((ch = output.read()) != -1)
-			;
-		}
-		output.close();
-		errorLevel = p.waitFor();
 	    }
 	    catch (IOException ioe) {
 		Logging.Except(ioe);
@@ -238,6 +247,7 @@ public class RunCommand {
 	    catch (InterruptedException ie) {
 		Logging.Except(ie);
 	    }
+
 	    return errorLevel;
 	}
 
@@ -245,9 +255,7 @@ public class RunCommand {
 	 * Start the child process and wait for it to complete, all output
 	 * is echoed to the console.
 	 *
-	 * @return			return code from the child process, which will
-	 *				be {@link Integer#MIN_VALUE} if the process has
-	 *				not yet completed when this method returns.
+	 * @return			return code from the child process
 	 */
 	public int runToCompletion() {
 	    return runToCompletion(true);
@@ -258,13 +266,26 @@ public class RunCommand {
 	 * is echoed to the given stream.
 	 *
 	 * @param	o	{@link PrintStream} to use to echo process output
-	 * @return		return code from the child process, which will
-	 *			be {@link Integer#MIN_VALUE} if the process has
-	 *			not yet completed when this method returns.
+	 * @return		return code from the child process
 	 */
-	public int runToCompletion(PrintStream o) {
+	public int runToCompletion(final PrintStream o) {
 	    setEchoStream(o);
-	    return runToCompletion(true);
+	    return runToCompletion();
+	}
+
+	/**
+	 * Start the child process and wait for it to complete, all output
+	 * is echoed to the given string buffer.
+	 *
+	 * @param	buf	{@link StringBuilder} to use to echo process output
+	 * @return		return code from the child process
+	 */
+	public int runToCompletion(final StringBuilder buf) {
+	    ByteArrayOutputStream os = new ByteArrayOutputStream(BUFFER_SIZE);
+	    setEchoStream(new PrintStream(os, true));
+	    int ret = runToCompletion();
+	    buf.append(os.toString());
+	    return ret;
 	}
 
 	/**
@@ -272,11 +293,9 @@ public class RunCommand {
 	 * directory first and echoing all output to the console.
 	 *
 	 * @param	workingDir	the child process' working directory
-	 * @return			return code from the child process, which will
-	 *				be {@link Integer#MIN_VALUE} if the process has
-	 *				not yet completed when this method returns.
+	 * @return			return code from the child process
 	 */
-	public int runToCompletion(File workingDir) {
+	public int runToCompletion(final File workingDir) {
 	    pb.directory(workingDir);
 	    return runToCompletion();
 	}
@@ -287,11 +306,9 @@ public class RunCommand {
 	 *
 	 * @param	workingDir	the child process' working directory
 	 * @param	o		a {@link PrintStream} to use to echo the output
-	 * @return			return code from the child process, which will
-	 *				be {@link Integer#MIN_VALUE} if the process has
-	 *				not yet completed when this method returns.
+	 * @return			return code from the child process
 	 */
-	public int runToCompletion(File workingDir, PrintStream o) {
+	public int runToCompletion(final File workingDir, final PrintStream o) {
 	    pb.directory(workingDir);
 	    setEchoStream(o);
 	    return runToCompletion();
@@ -308,7 +325,7 @@ public class RunCommand {
 	 *				be {@link Integer#MIN_VALUE} if the process has
 	 *				not yet completed when this method returns.
 	 */
-	public int runToCompletion(File workingDir, boolean echoOutput) {
+	public int runToCompletion(final File workingDir, final boolean echoOutput) {
 	    pb.directory(workingDir);
 	    return runToCompletion(echoOutput);
 	}

@@ -237,6 +237,8 @@
  *	    Catch exceptions in the root and log functions.
  *	06-Apr-2021 (rlwhitcomb)
  *	    Add "INDEX" and "SUBSTR" functions.
+ *	07-Apr-2021 (rlwhitcomb)
+ *	    Add "EXEC" function.
  */
 package info.rlwhitcomb.calc;
 
@@ -266,6 +268,8 @@ import info.rlwhitcomb.util.Intl;
 import info.rlwhitcomb.util.MathUtil;
 import info.rlwhitcomb.util.NumericUtil;
 import static info.rlwhitcomb.util.NumericUtil.RangeMode;
+import info.rlwhitcomb.util.RunCommand;
+
 
 /**
  * Visit each node of the parse tree and do the appropriate calculations at each level.
@@ -2165,13 +2169,6 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	@Override
-	public Object visitEvalExpr(CalcParser.EvalExprContext ctx) {
-	    String exprString = getStringValue(ctx.expr());
-
-	    return Calc.processString(exprString, true);
-	}
-
-	@Override
 	public Object visitFactorsExpr(CalcParser.FactorsExprContext ctx) {
 	    List<Integer> factors = new ArrayList<>();
 	    BigInteger n = getIntegerValue(ctx.expr());
@@ -2191,8 +2188,16 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    return primeFactors;
 	}
 
+	@Override
+	public Object visitEvalExpr(CalcParser.EvalExprContext ctx) {
+	    String exprString = getStringValue(ctx.expr());
+
+	    return Calc.processString(exprString, true);
+	}
+
+
 	/**
-	 * Do a "flat map" of values for the "sumof" and "productof" functions.  Since each
+	 * Do a "flat map" of values for the "sumof", "productof", and "exec" functions.  Since each
 	 * value to be processed could be an array or map, we need to traverse these objects
 	 * as well as the simple values in order to get the full list to process.
 	 *
@@ -2200,8 +2205,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	 * @param obj		The object to be added to the list, or recursed into when the object
 	 *			is a list or map.
 	 * @param objectList	The complete list of values to be built.
+	 * @param toString      Whether to coerce values always to strings, or let them be numeric also.
 	 */
-	private void buildSumProductList(ParserRuleContext ctx, Object obj, List<Object> objectList) {
+	private void buildValueList(ParserRuleContext ctx, Object obj, List<Object> objectList, boolean toString) {
 	    Object value = evaluateFunction(obj);
 
 	    nullCheck(value, ctx);
@@ -2210,24 +2216,25 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		@SuppressWarnings("unchecked")
 		List<Object> list = (List<Object>) value;
 		for (Object listObj : list) {
-		    buildSumProductList(ctx, listObj, objectList);
+		    buildValueList(ctx, listObj, objectList, toString);
 		}
 	    }
 	    else if (value instanceof Map) {
 		@SuppressWarnings("unchecked")
 		Map<String, Object> map = (Map<String, Object>) value;
 		for (Object mapObj : map.values()) {
-		    buildSumProductList(ctx, mapObj, objectList);
+		    buildValueList(ctx, mapObj, objectList, toString);
 		}
 	    }
 	    else {
-		if (settings.rationalMode) {
-		    BigFraction fValue = toFractionValue(this, value, ctx);
-		    objectList.add(fValue);
+		if (toString) {
+		    objectList.add(toStringValue(this, value, false, false, ""));
+		}
+		else if (settings.rationalMode) {
+		    objectList.add(toFractionValue(this, value, ctx));
 		}
 		else {
-		    BigDecimal dValue = toDecimalValue(this, value, mc, ctx);
-		    objectList.add(dValue);
+		    objectList.add(toDecimalValue(this, value, mc, ctx));
 		}
 	    }
 	}
@@ -2237,22 +2244,39 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	 * build the complete list of values to be processed.
 	 *
 	 * @param exprs	The parsed list of expression contexts.
+	 * @param toString Whether to convert all values to strings or do numeric conversions.
 	 * @return	The completely built "flat map" of values.
 	 */
-	private List<Object> buildSumProductList(List<CalcParser.ExprContext> exprs) {
+	private List<Object> buildValueList(List<CalcParser.ExprContext> exprs, boolean toString) {
 	    List<Object> objects = new ArrayList<>();
 
 	    for (CalcParser.ExprContext exprCtx : exprs) {
-		buildSumProductList(exprCtx, visit(exprCtx), objects);
+		buildValueList(exprCtx, visit(exprCtx), objects, toString);
 	    }
 
 	    return objects;
 	}
 
 	@Override
+	public Object visitExecExpr(CalcParser.ExecExprContext ctx) {
+	    List<CalcParser.ExprContext> exprs = ctx.exprN().exprList().expr();
+	    List<Object> objects = buildValueList(exprs, true);
+	    String[] args = new String[objects.size()];
+	    for (int i = 0; i < objects.size(); i++) {
+		args[i] = (String) objects.get(i);
+	    }
+
+	    RunCommand cmd = new RunCommand(args);
+	    StringBuilder result = new StringBuilder();
+	    int retCode = cmd.runToCompletion(result);
+
+	    return result.toString();
+	}
+
+	@Override
 	public Object visitSumOfExpr(CalcParser.SumOfExprContext ctx) {
 	    List<CalcParser.ExprContext> exprs = ctx.exprN().exprList().expr();
-	    List<Object> objects = buildSumProductList(exprs);
+	    List<Object> objects = buildValueList(exprs, false);
 
 	    if (settings.rationalMode) {
 		BigFraction sum = BigFraction.ZERO;
@@ -2279,7 +2303,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitProductOfExpr(CalcParser.ProductOfExprContext ctx) {
 	    List<CalcParser.ExprContext> exprs = ctx.exprN().exprList().expr();
-	    List<Object> objects = buildSumProductList(exprs);
+	    List<Object> objects = buildValueList(exprs, false);
 
 	    if (settings.rationalMode) {
 		BigFraction product = BigFraction.ONE;

@@ -171,6 +171,8 @@
  *	    Add Unicode equivalents for SUMOF and PRODUCTOF.
  *	06-Apr-2021 (rlwhitcomb)
  *	    Add "INDEX" and "SUBSTR" functions.
+ *	07-Apr-2021 (rlwhitcomb)
+ *	    Add "EXEC" function.
  */
 
 grammar Calc;
@@ -251,9 +253,10 @@ expr
    | FRAC ( STRING | ISTRING | expr2 | expr3 )   # fracExpr
    | ROMAN expr                          # romanExpr
    | ( UPPER | LOWER ) expr              # caseConvertExpr
-   | EVAL expr                           # evalExpr
    | FACTORS expr                        # factorsExpr
    | PFACTORS expr                       # primeFactorsExpr
+   | EVAL expr                           # evalExpr
+   | EXEC exprN                          # execExpr
    | expr '<=>' expr                     # spaceshipExpr
    | expr COMPARE_OP expr                # compareExpr
    | expr EQUAL_OP expr                  # equalExpr
@@ -488,11 +491,13 @@ UPPER    : U P P E R ;
 
 LOWER    : L O W E R ;
 
-EVAL     : E V A L ;
-
 FACTORS  : F A C T O R S ;
 
 PFACTORS : P F A C T O R S ;
+
+EVAL     : E V A L ;
+
+EXEC     : E X E C ;
 
 SUMOF    : ( S U M O F | '\u2211' ) ;
 
