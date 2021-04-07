@@ -312,6 +312,7 @@ code {
             <tr><td><code>SUMOF</code> or <code>&#x2211;</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;) *</td><td>sum of all the values</td></tr>
             <tr><td><code>PRODUCTOF</code> or <code>&#x220F;</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;) *</td><td>product of all the values</td></tr>
             <tr><td><code>JOIN</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;) *</td><td>join strings</td></tr>
+            <tr><td><code>SPLIT</code>&nbsp;<i>expr</i> <code>,</code> <i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;)</td><td>split string into parts</td></tr>
             <tr><td><code>INDEX</code>&nbsp;<i>expr</i> <code>,</code> <i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;)</td><td>find value within a string</td></tr>
             <tr><td><code>SUBSTR</code>&nbsp;<i>expr</i> <code>,</code> <i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;)</td><td>extract a substring</td></tr>
             <tr><td><code>FILL</code>&nbsp;<i>var</i>&nbsp;<code>,</code> <i>expr</i>&nbsp;<code>,</code> <i>expr</i> ( <code>,</code><i>expr</i> )</td><td>fill an array or string</td></tr>

@@ -178,6 +178,18 @@ length this; length hello; length handsome; length rude;
 
 '[' + join (1, 2, 3, 4, 5, ', ') + ']'
 
+# The "split" function
+target = 'this is the day'
+split target, ' '
+split(target,' ',2)
+target = 'boo:and:foo'
+split target, ':', 2
+split(target, ':', 5)
+split(target, ':', -2)
+split(target, 'o', 5)
+split(target, 'o', -2)
+split target, 'o'
+
 # The "index" operator
 :clear target, one, two, three
 target = 'This is an "index" test.'

@@ -173,6 +173,8 @@
  *	    Add "INDEX" and "SUBSTR" functions.
  *	07-Apr-2021 (rlwhitcomb)
  *	    Add "EXEC" function.
+ *	07-Apr-2021 (rlwhitcomb)
+ *	    Add "SPLIT" function (same semantics as String.split).
  */
 
 grammar Calc;
@@ -245,6 +247,7 @@ expr
    | SUMOF exprN                         # sumOfExpr
    | PRODUCTOF exprN                     # productOfExpr
    | JOIN exprN                          # joinExpr
+   | SPLIT ( expr2 | expr3 )             # splitExpr
    | INDEX ( expr2 | expr3 )             # indexExpr
    | SUBSTR ( expr2 | expr3 )            # substrExpr
    | FILL var ',' ( expr2 | expr3 )      # fillExpr
@@ -472,6 +475,8 @@ MAX      : M A X ;
 MIN      : M I N ;
 
 JOIN     : J O I N ;
+
+SPLIT    : S P L I T ;
 
 INDEX    : I N D E X ;
 

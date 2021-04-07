@@ -166,6 +166,16 @@
 >length handsome -> 15
 >length rude -> 5
 >'[' + join ( 1 , 2 , 3 , 4 , 5 , ', ' ) + ']' -> "[1, 2, 3, 4, 5]"
+>target = 'this is the day' -> "this is the day"
+>split target , ' ' -> [ "this", "is", "the", "day" ]
+>split ( target , ' ' , 2 ) -> [ "this", "is the day" ]
+>target = 'boo:and:foo' -> "boo:and:foo"
+>split target , ':' , 2 -> [ "boo", "and:foo" ]
+>split ( target , ':' , 5 ) -> [ "boo", "and", "foo" ]
+>split ( target , ':' , - 2 ) -> [ "boo", "and", "foo" ]
+>split ( target , 'o' , 5 ) -> [ "b", "", ":and:f", "", "" ]
+>split ( target , 'o' , - 2 ) -> [ "b", "", ":and:f", "", "" ]
+>split target , 'o' -> [ "b", "", ":and:f" ]
 >Variables 'target', 'one', 'two', 'three' cleared.
 >target = 'This is an "index" test.' -> "This is an \"index\" test."
 >one = index target , 'is' -> 2

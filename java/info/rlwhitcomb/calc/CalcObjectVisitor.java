@@ -239,6 +239,8 @@
  *	    Add "INDEX" and "SUBSTR" functions.
  *	07-Apr-2021 (rlwhitcomb)
  *	    Add "EXEC" function.
+ *	07-Apr-2021 (rlwhitcomb)
+ *	    Add "SPLIT" function.
  */
 package info.rlwhitcomb.calc;
 
@@ -250,6 +252,7 @@ import java.math.RoundingMode;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -1941,6 +1944,31 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		}
 		return buf.toString();
 	    }
+	}
+
+	@Override
+	public Object visitSplitExpr(CalcParser.SplitExprContext ctx) {
+	    CalcParser.Expr2Context e2ctx = ctx.expr2();
+	    String stringValue;
+	    String patternValue;
+	    String[] parts;
+
+	    if (e2ctx != null) {
+		stringValue  = getStringValue(e2ctx.expr(0));
+		patternValue = getStringValue(e2ctx.expr(1));
+
+		parts = stringValue.split(patternValue);
+	    }
+	    else {
+		CalcParser.Expr3Context e3ctx = ctx.expr3();
+		stringValue  = getStringValue(e3ctx.expr(0));
+		patternValue = getStringValue(e3ctx.expr(1));
+		int limit    = getIntValue(e3ctx.expr(2));
+
+		parts = stringValue.split(patternValue, limit);
+	    }
+
+	    return Arrays.asList(parts);
 	}
 
 	@Override
