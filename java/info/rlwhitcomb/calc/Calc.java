@@ -124,6 +124,8 @@
  *	    Code cleanup around Settings; fix bug on escape character.
  *	06-Apr-2021 (rlwhitcomb)
  *	    Tweak the initial focus component in the Settings dialog.
+ *	07-Apr-2021 (rlwhitcomb)
+ *	    Add line number rulers to the text areas.
  */
 package info.rlwhitcomb.calc;
 
@@ -244,6 +246,8 @@ public class Calc
 	@BXML private Window mainWindow;
 	@BXML private TextPane inputTextPane;
 	@BXML private TextArea outputTextArea;
+	@BXML private NumberRuler inputRuler;
+	@BXML private NumberRuler outputRuler;
 	@BXML private Label outputSizeLabel;
 	@BXML private Prompt versionPrompt;
 	@BXML private Label versionText;
@@ -511,6 +515,8 @@ public class Calc
 		Font monospacedFont = FontUtilities.decode(FontUtilities.MONOSPACED_FONTS + "-18");
 		inputTextPane.getStyles().put(Style.font, monospacedFont);
 		outputTextArea.getStyles().put(Style.font, monospacedFont);
+		inputRuler.getStyles().put(Style.font, monospacedFont);
+		outputRuler.getStyles().put(Style.font, monospacedFont);
 
 		inputTextPane.getComponentKeyListeners().add(keyPressListener);
 

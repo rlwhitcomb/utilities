@@ -47,6 +47,8 @@
 		Reword some text. Add the Settings dialog and menu button.
 	    02-Apr-2021 (rlwhitcomb)
 		Add the remaining options to the Settings prompt (dialog).
+	    07-Apr-2021 (rlwhitcomb)
+		Add a line number ruler to both text areas.
 
      ========================================================================== -->
 
@@ -208,6 +210,9 @@
 			<Border title=" Results " styles="{padding:{top:0,left:10,bottom:4,right:10},font:{size:18,bold:true},cornerRadii:10,backgroundColor:11}">
 			    <ScrollPane horizontalScrollBarPolicy="fill" verticalScrollBarPolicy="fill_to_capacity" >
 				<TextArea bxml:id="outputTextArea"/>
+				<rowHeader>
+				    <NumberRuler bxml:id="outputRuler" orientation="vertical" textSize="5" styles="{markerInsets:{top:4}}"/>
+				</rowHeader>
 			    </ScrollPane>
 			</Border>
 		    </top>
@@ -215,6 +220,9 @@
 			<Border title=" Expressions " styles="{padding:{top:0,left:10,bottom:4,right:10},font:{size:18,bold:true},cornerRadii:10,backgroundColor:11}">
 			    <ScrollPane horizontalScrollBarPolicy="fill" verticalScrollBarPolicy="fill_to_capacity" >
 				<TextPane bxml:id="inputTextPane"/>
+				<rowHeader>
+				    <NumberRuler bxml:id="inputRuler" orientation="vertical" textSize="5" styles="{markerInsets:{top:4}}"/>
+				</rowHeader>
 			    </ScrollPane>
 			</Border>
 		    </bottom>
