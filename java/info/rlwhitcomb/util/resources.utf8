@@ -102,6 +102,8 @@
 #	    New error from BidiMap.
 #	26-Mar-2021 (rlwhitcomb)
 #	    Move messages from NumericUtil to MathUtil.
+#	08-Apr-2021 (rlwhitcomb)
+#	    New messages from time conversions in NumericUtil.
 #
 
 #
@@ -176,6 +178,8 @@ numeric.badDataTypeCode		= Data type code %1$d is not recognized.
 numeric.unknownByteOrder	= "%1$s" is not a valid byte order (should be LSB or MSB).
 numeric.unknownStringLength	= "%1$s" is not a valid string length designation.
 numeric.stringLengthTooBig	= String length of %1$d exceds limit of %2$d.
+numeric.badTimeValue		= Unable to interpret '%1$s' as a time value.
+numeric.badDuration		= Unable to interpret '%1$1' as a duration value.
 
 #
 # From MathUtil.java

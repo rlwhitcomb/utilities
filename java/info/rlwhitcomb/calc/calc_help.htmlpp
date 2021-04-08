@@ -171,6 +171,9 @@ code {
      digits are the typical Roman values of <code>I</code>, <code>V</code>, <code>X</code>, and so on, but also including the Unicode
      values in the range of <code>'\u2160'</code> to <code>'\u2182'</code>. You can use the <code>@r</code> or <code>@R</code> formats
      to display values in this form as well. Note that the range of possible values that can be represented in this way is 1..39,999.
+  <p>Time and duration values can be entered as <code>h'<i>hh</i>:<i>mm</i>:<i>ss</i>.<i>nnnnnnnnn</i></code>&nbsp;[<code>a</code>|<code>p</code>|<code>am</code>|<code>pm</code>]<code>'</code> or
+     <code>t'<i>nn.nn</i>&nbsp;w</code>|<code>d</code>|<code>h</code>|<code>m</code>|<code>s'</code>.  Such values are computed to nanosecond precision and can be used in any other kind of operation, or formatted again as times or durations using the <code>@h</code> or <code>@t</code> formats.
+     For example: <code>t'27h' + t'13m' + t'27.9s' @h -> h'27:13:27.9'</code> or <code>h'12:30 pm' - h'11:45 am' @mt -> t'45m'</code> or yet <code>h'8:30 am' + t'1h' + t'37m' @h -> h'10:07'</code>.
   <p>Some operators and operations require integer values (such as factorial and the logical bit operations). If the value given is not integral an error will
      be displayed and the calculation aborted. Most of the basic arithmetic operators can operate on rational fractions. The trig,
      log, and power operations do not. Therefore, in rational mode, if an operation returns a decimal value, Calc will attempt
@@ -220,7 +223,8 @@ code {
         <th width="100">Format</th>
         <th width="460">Description</th>
       </tr>
-      <tr><td><code>@h</code></td><td>Display as a time value (hours:minutes:seconds.millis)<br><em>NOT IMPLEMENTED YET</em></td></tr>
+      <tr><td><code>@h</code></td><td>Display as a time value (hours:minutes:seconds.nanos)</td></tr>
+      <tr><td><code>@</code>[<i>nn</i>][<code>w</code>|<code>d</code>|<code>h</code>|<code>m</code>|<code>s</code>]<code>t</code></td><td>Format as a time (duration), optional rounding</td></tr>
       <tr><td><code>@l</code></td><td>Format result string in lower case</td></tr>
       <tr><td><code>@u</code></td><td>Format result string in UPPER case</td></tr>
       <tr><td><code>@</code>[<i>nn</i>]<code>d</code></td><td>Primarily for rational mode: format the result as a decimal value,<br>optionally rounding to <i>nn</i> digits</td></tr>

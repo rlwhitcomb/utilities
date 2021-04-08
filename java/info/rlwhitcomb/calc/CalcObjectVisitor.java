@@ -243,6 +243,9 @@
  *	    Add "SPLIT" function.
  *	07-Apr-2021 (rlwhitcomb)
  *	    Add "TRIM" functions; add Unicode powers.
+ *	08-Apr-2021 (rlwhitcomb)
+ *	    Add time constants and time/duration formatting. Move "round" to MathUtil
+ *	    for more general use.
  */
 package info.rlwhitcomb.calc;
 
@@ -554,25 +557,6 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    return CalcUtil.compareValues(this, ctx1, ctx2, mc, strict, allowNulls);
 	}
 
-	private BigDecimal round(BigDecimal value, int iPlaces) {
-	    /* iPlaces is going to be the number of fractional digits to round to:
-	     * 0 = round to an integer, 1 to x.y, 2 to x.yy, etc.
-	     * and a negative number will round above the decimal point, as in:
-	     * -2 to x00.
-	     * So, if precision is the number of digits we keep, and scale is how far
-	     * left of the last digit the decimal point is situated, then
-	     * (precision - scale) is the number of whole digits, then we can add
-	     * that to "iPlaces" to get the MathContext precision to use for rounding here.
-	     * Also, it appears that rounding to 0 means no change, so we set a min value
-	     * of one to ensure *some* rounding always occurs, such that 0.714... rounded
-	     * to -2 will give 0.7, not retain the 0.714... value.
-	     */
-	    int prec       = value.precision();
-	    int scale      = value.scale();
-	    int iRoundPrec = Math.max(1, (prec - scale) + iPlaces);
-
-	    return value.round(new MathContext(iRoundPrec));
-	}
 
 	/**
 	 * Evaluate a function: basically call {@code visit} on that
@@ -847,14 +831,21 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    TerminalNode formatNode = ctx.FORMAT();
 	    String format           = formatNode == null ? "" : formatNode.getText();
+	    String exprString       = String.format("%1$s%2$s", getTreeText(ctx.expr()), format);
 
 	    // Some formats allow a precision to be given ('%', and 'd' for instance)
+	    // but some others (like 't') allow a second alpha as well
 	    if (format.length() > 2) {
-		String num = format.substring(1, format.length() - 1);
-		precision = Integer.parseInt(num);
+		int index = 1;
+		char ch;
+		while ((ch = format.charAt(index)) >= '0' && ch <= '9')
+		    index++;
+		if (index > 1) {
+		    String num = format.substring(1, index);
+		    precision = Integer.parseInt(num);
+		}
 	    }
 
-	    String exprString       = String.format("%1$s%2$s", getTreeText(ctx.expr()), format);
 
 	    if (result != null && !format.isEmpty()) {
 		char formatChar = format.charAt(format.length() - 1);
@@ -872,7 +863,23 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			toUpperCase = true;
 			// fall through
 		    case 'h':
-			// TODO: convert to hours
+			char meridianFlag = format.charAt(format.length() - 2);
+			// Value will be nanoseconds since midnight
+			valueBuf.append("h'");
+			iValue = toIntegerValue(this, result, mc, ctx);
+			valueBuf.append(NumericUtil.convertToTime(iValue.longValue(), meridianFlag));
+			valueBuf.append('\'');
+			break;
+		    case 'T':
+			toUpperCase = true;
+			// fall through
+		    case 't':
+			char durationUnit = format.charAt(format.length() - 2);
+			// Value will be nanoseconds
+			valueBuf.append("t'");
+			iValue = toIntegerValue(this, result, mc, ctx);
+			valueBuf.append(NumericUtil.convertToDuration(iValue.longValue(), durationUnit, mc, precision));
+			valueBuf.append('\'');
 			break;
 
 		    case 'U':
@@ -885,25 +892,29 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			toLowerCase = true;
 			valueBuf.append(toStringValue(this, result));
 			break;
+
 		    case 'D':
 		    case 'd':
 			dValue = toDecimalValue(this, result, mc, ctx);
 			if (precision != Integer.MIN_VALUE) {
-			    dValue = round(dValue, precision);
+			    dValue = MathUtil.round(dValue, precision);
 			}
 			valueBuf.append(dValue.toPlainString());
 			break;
+
 		    case 'f':
 			valueBuf.append(toFractionValue(this, result, ctx));
 			break;
 		    case 'F':
 			valueBuf.append(toFractionValue(this, result, ctx).toProperString());
 			break;
+
 		    case 'J':
 		    case 'j':
 			valueBuf.append('\n');
 			valueBuf.append(toStringValue(this, result, true, true, ""));
 			break;
+
 		    case 'X':
 			toUpperCase = true;
 			// fall through
@@ -997,7 +1008,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			BigDecimal percentValue = dValue.multiply(BigDecimal.valueOf(100L), mc);
 			// Round the value to given precision (if any)
 			if (precision != Integer.MIN_VALUE) {
-			    percentValue = round(percentValue, precision);
+			    percentValue = MathUtil.round(percentValue, precision);
 			}
 			valueBuf.append(percentValue.toPlainString()).append('%');
 			break;
@@ -1721,7 +1732,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    BigDecimal e = getDecimalValue(e2ctx.expr(0));
 	    int iPlaces  = getIntValue(e2ctx.expr(1));
 
-	    return round(e, iPlaces);
+	    return MathUtil.round(e, iPlaces);
 	}
 
 	@Override
@@ -2764,6 +2775,31 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    String value = CharUtil.stripQuotes(constant.substring(1));
 	    try {
 		return NumericUtil.convertFromRoman(value);
+	    }
+	    catch (IllegalArgumentException iae) {
+		throw new CalcExprException(iae, ctx);
+	    }
+	}
+
+	@Override
+	public Object visitTimeValue(CalcParser.TimeValueContext ctx) {
+	    String constant = ctx.TIME_CONST().getText();
+
+	    // Strip the quotes before conversion
+	    String value = CharUtil.stripQuotes(constant.substring(1));
+	    try {
+		switch (constant.charAt(0)) {
+		    case 't':
+		    case 'T':
+			// This gives us nanoseconds of duration
+			return BigInteger.valueOf(NumericUtil.convertFromDuration(value));
+		    case 'h':
+		    case 'H':
+			// This gives us nanoseconds since midnight
+			return BigInteger.valueOf(NumericUtil.convertFromTime(value));
+		    default:
+			return null;
+		}
 	    }
 	    catch (IllegalArgumentException iae) {
 		throw new CalcExprException(iae, ctx);

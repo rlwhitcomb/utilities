@@ -35,6 +35,8 @@
  *	    Rename the resource strings.
  *	30-Mar-2021 (rlwhitcomb)
  *	    Implement Taylor series for "ln" function. Clean up "pow" and "ePower".
+ *	08-Apr-2021 (rlwhitcomb)
+ *	    Move the "round" function from Calc into here.
  */
 package info.rlwhitcomb.util;
 
@@ -104,6 +106,34 @@ public class MathUtil
 		p <<= 1;
 
 	    return p;
+	}
+
+
+	/**
+	 * Round a value to the specified number of fractional places, no matter how many integer
+	 * digits there are.  This is different than simply rounding to a given precision, which
+	 * tracks the total number of digits.
+	 * <p><code>fPlaces</code> is going to be the number of fractional digits to round to:
+         * 0 = round to an integer, 1 to x.y, 2 to x.yy, etc.
+         * and a negative number will round above the decimal point, as in: -2 to x00.
+	 * <p> So, if precision is the number of total digits we keep, and scale is how far left
+	 * of the rightmost digit the decimal point is situated, then <code>(precision - scale)</code>
+	 * is the number of integer (whole number) digits, then we can add that to "fPlaces" to get
+	 * the {@link MathContext} precision to use for rounding here.
+	 * <p> Also it appears that rounding to 0 means no change, so we set a minimum value of one
+	 * to ensure that *some* rounding always occurs, such that 0.714... rounded to -2 will give
+	 * 0.7, not retain the 0.714... value.
+	 *
+	 * @param value   The incoming value to round.
+	 * @param fPlaces The number of fractional digits to round to.
+	 * @return        The incoming value rounded as above.
+	 */
+	public static BigDecimal round(final BigDecimal value, final int fPlaces) {
+	    int prec      = value.precision();
+	    int scale     = value.scale();
+	    int roundPrec = Math.max(1, (prec - scale) + fPlaces);
+
+	    return value.round(new MathContext(roundPrec));
 	}
 
 

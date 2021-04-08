@@ -417,6 +417,14 @@ s = r'ⅿⅽⅿⅼⅹⅶ'
 
 roman 'xx' + 'ii'
 
+#
+# Time and duration constants, expressions, and formats
+#
+t'27h' + t'13m' + t'27.9s' @h
+h'12:30 pm' - h'11:45 am' @mt
+h'8:30 am' + t'1h' + t'37m' @h
+t'3.0002s' @5mt
+h'12:10am' - t'20m' @ah
 
 :echo
 :echo "End of expression tests (suite 1)."

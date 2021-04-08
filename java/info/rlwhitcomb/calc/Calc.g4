@@ -178,6 +178,8 @@
  *	07-Apr-2021 (rlwhitcomb)
  *	    Implement "TRIM", "LTRIM", and "RTRIM" functions.
  *	    Add superscript powers and subscript indexes.
+ *	08-Apr-2021 (rlwhitcomb)
+ *	    Add time constants and time/duration formatting.
  */
 
 grammar Calc;
@@ -340,6 +342,7 @@ value
    | E_CONST                     # eValue
    | FRAC_CONST                  # fracValue
    | ROMAN_CONST                 # romanValue
+   | TIME_CONST                  # timeValue
    ;
 
 define
@@ -423,6 +426,11 @@ FRAC_CONST
 
 ROMAN_CONST
          : R '\'' [IiVvXxLlCcDdMm\u2160-\u2182] + '\''
+         ;
+
+TIME_CONST
+         : H '\'' '-' ? [0-9] ? [0-9] ( ':' [0-9] [0-9] ( ':' [0-9] [0-9] ( '.' [0-9]+ ) ? ) ? ) ? ( [ \t] * ( A | A M | P | P M ) ) ? '\''
+         | T '\'' '-' ? [0-9] + ( '.' [0-9] * ) ? [ \t] * ( W | D | H | M | S ) '\''
          ;
 
 ABS      : A B S ;
@@ -734,7 +742,7 @@ QUIET
 
 
 FORMAT
-   : '@' ( '-' ? INT ) ? [a-zA-Z,%]
+   : '@' ( '-' ? INT ) ? [a-zA-Z] ? [a-zA-Z,%]
    ;
 
 STRING

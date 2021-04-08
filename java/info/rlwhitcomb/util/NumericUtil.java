@@ -146,6 +146,8 @@
  *	    A little bit more optimization in BigInteger "pow" method.
  *	26-Mar-2021 (rlwhitcomb)
  *	    Move the trig, log, and other "math" functions into a separate class.
+ *	08-Apr-2021 (rlwhitcomb)
+ *	    Conversions to/from times and durations.
  */
 package info.rlwhitcomb.util;
 
@@ -156,6 +158,7 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.math.MathContext;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Date;
@@ -361,6 +364,28 @@ public class NumericUtil
 	};
 	/** The maximum input value we can convert to a Roman numeral. */
 	private static final int ROMAN_MAX_VALUE = 39999;
+
+	/** The pattern for recognizing time values. */
+	private static final Pattern TIME_PATTERN = Pattern.compile("(-)?([0-9]{1,2})(:([0-9]{1,2})(:([0-9]{1,2})(.([0-9]+))?)?)?([ \t]*([aApP])[mM]?)?");
+	/** The pattern for recognizing duration values. */
+	private static final Pattern DURATION_PATTERN = Pattern.compile("(-)?([0-9]+([\\.][0-9]*)?)[ \t]*([wWdDhHmMsS])");
+
+	/** Number of nanoseconds in a second. */
+	private static final long NANOSECONDS = 1_000_000_000L;
+	/** Number of nanoseconds in one minute. */
+	private static final long ONE_MINUTE = 60L * NANOSECONDS;
+	/** Number of nanoseconds in one hour. */
+	private static final long ONE_HOUR = 60L * ONE_MINUTE;
+	/** Number of nanoseconds in twelve hours (for AM/PM conversions). */
+	private static final long TWELVE_HOURS = 12L * ONE_HOUR;
+	/** Number of nanoseconds in one day. */
+	private static final long ONE_DAY = TWELVE_HOURS * 2L;
+	/** Number of nanoseconds in one week. */
+	private static final long ONE_WEEK = 7L * ONE_DAY;
+
+	/** Decimal value of {@link #NANOSECONDS}. */
+	private static BigDecimal D_NANOS = BigDecimal.valueOf(NANOSECONDS);
+
 
 
 	private static final String[] smallWords = {
@@ -1428,5 +1453,290 @@ public class NumericUtil
 	    return buf.toString();
 	}
 
+
+	private static long convertTime(final String t) {
+	    long value = 0L;
+	    if (t != null && !t.isEmpty()) {
+		value = Long.valueOf(t);
+	    }
+	    return value;
+	}
+
+	/**
+	 * Convert a string in the form of <code>HH:mm(:ss.mmmm)</code> to nanoseconds
+	 * since midnight (as a long).
+	 *
+	 * @param timeString The input value in the above format.
+	 * @return nanoseconds since midnight
+	 * @throws IllegalArgumentException if the format isn't recognized
+	 */
+	public static long convertFromTime(final String timeString) {
+	    Matcher m = TIME_PATTERN.matcher(timeString);
+	    if (m.matches()) {
+		String hours = m.group(2);
+		String mins  = m.group(4);
+		String secs  = m.group(6);
+		String nans  = m.group(8);
+		long nanosecs = 0L;
+		try {
+		    nanosecs = convertTime(hours) * 60L;
+		    nanosecs += convertTime(mins);
+		    nanosecs *= 60L;
+		    nanosecs += convertTime(secs);
+		    nanosecs *= 1000000000L;
+
+		    if (nans != null) {
+			long fracs = convertTime(nans);
+			// Tricky here: since 0.001 is 1/1000 or 1,000,000 nanos
+			// but the value we get back is just 1
+			// so we have to multiply by the number of digits
+			long mult = MathUtil.tenPower(9 - nans.length()).longValue();
+			nanosecs += fracs * mult;
+		    }
+		}
+		catch (NumberFormatException nfe) {
+		    throw new IllegalArgumentException(nfe);
+		}
+
+		String ampm = m.group(10);
+		if (ampm != null) {
+		    switch (ampm.charAt(0)) {
+			case 'a':
+			case 'A':
+			    // 12:00 am = 00:00
+			    if (nanosecs >= TWELVE_HOURS)
+				nanosecs -= TWELVE_HOURS;
+			    break;
+			case 'p':
+			case 'P':
+			    // 12:00 pm = 12:00
+			    if (nanosecs < TWELVE_HOURS)
+				nanosecs += TWELVE_HOURS;
+			    break;
+		    }
+		}
+		else {
+		    // AM or PM takes precedence over minus sign if both are present
+		    if (m.group(1) != null)
+			nanosecs = -nanosecs;
+		}
+
+		return nanosecs;
+	    }
+	    else {
+		throw new Intl.IllegalArgumentException("util#numeric.badTimeValue", timeString);
+	    }
+	}
+
+	/**
+	 * Convert a long number of milliseconds since midnight into a time string, omitting
+	 * trailing parts if they are zero (so, the minimum output is "HH:mm").
+	 *
+	 * @param timeValue The input millisecond value.
+	 * @param meridianFlag 'a' or 'p' to indicate adding 'am' / 'pm' indicator as appropriate.
+	 * @return The formatted time string.
+	 */
+	public static String convertToTime(final long timeValue, final char meridianFlag) {
+	    long nanosValue = timeValue;
+	    boolean negative = false;
+
+	    if (nanosValue < 0L) {
+		nanosValue = -nanosValue;
+		negative = true;
+	    }
+
+	    long nans = nanosValue % NANOSECONDS;
+	    nanosValue /= NANOSECONDS;
+	    long secs = nanosValue % 60L;
+	    nanosValue /= 60L;
+	    long mins = nanosValue % 60L;
+	    nanosValue /= 60L;
+	    long hours = nanosValue;
+
+	    String meridian = null;
+	    switch (meridianFlag) {
+		case 'a':
+		case 'A':
+		case 'p':
+		case 'P':
+		    // Negative value just leaves the value as absolute
+		    if (negative)
+			break;
+
+		    // hours is going to be absolute (0-24 or higher)
+		    if (hours < 12L) {
+			meridian = "am";
+			if (hours == 0L)
+			    hours += 12L;
+		    }
+		    else if (hours >= 12L && hours < 24L) {
+			meridian = "pm";
+			if (hours > 12L)
+			    hours -= 12L;
+		    }
+
+		    // else outside of one day, just leave as absolute hours
+		    break;
+	    }
+
+	    StringBuilder result = new StringBuilder(20);
+
+	    if (negative)
+		result.append('-');
+
+	    result.append(String.format("%1$d:%2$02d", hours, mins));
+	    if (secs != 0L || nans != 0L) {
+		result.append(String.format(":%1$02d", secs));
+	    }
+	    if (nans != 0L) {
+		// Produce either ".n", ".nn", ".nnn", ".nnnnnn", or ".nnnnnnnnn" forms
+		if (nans % 100_000_000L== 0L)
+		    result.append(String.format(".%1$d", (nans / 100_000_000L)));
+		else if (nans % 10_000_000L == 0L)
+		    result.append(String.format(".%1$02d", (nans / 10_000_000L)));
+		else if (nans % 1_000_000L == 0L)
+		    result.append(String.format(".%1$03d", (nans / 1_000_000L)));
+		else if (nans % 1_000L == 0L)
+		    result.append(String.format(".%1$06d", (nans / 1_000L)));
+		else
+		    result.append(String.format(".%1$09d", nans));
+	    }
+
+	    if (meridian != null) {
+		result.append(' ').append(meridian);
+	    }
+
+	    return result.toString();
+	}
+
+	/**
+	 * Convert from a duration value like <code>nn.nn [wdhms]</code> to nanoseconds.
+	 *
+	 * @param durString The input duration string.
+	 * @return          Number of nanoseconds representing this duration.
+	 * @throws IllegalArgumentException if the format isn't recognized.
+	 */
+	public static long convertFromDuration(final String durString) {
+	    Matcher m = DURATION_PATTERN.matcher(durString);
+	    if (m.matches()) {
+		String number = m.group(2);
+		String suffix = m.group(4);
+		double value = Double.parseDouble(number);
+
+		switch (suffix.charAt(0)) {
+		    case 'w':
+		    case 'W':
+			value *= 7.0;
+			// fall through
+		    case 'd':
+		    case 'D':
+			value *= 24.0;
+			// fall through
+		    case 'h':
+		    case 'H':
+			value *= 60.0;
+		    case 'm':
+		    case 'M':
+			value *= 60.0;
+		    case 's':
+		    case 'S':
+			value *= 1_000_000_000.0;
+			break;
+		}
+
+		if (m.group(1) != null)
+		    return -((long) value);
+		else
+		    return (long) value;
+	    }
+	    else {
+		throw new Intl.IllegalArgumentException("util#numeric.badDuration", durString);
+	    }
+	}
+
+	/**
+	 * Convert a number of nanoseconds to a duration value.
+	 *
+	 * @param nanos The long number of nanoseconds.
+	 * @param unit  Character representing the desired duration unit ('w', 'd', 'h', etc.) or
+	 *              if unknown, make it our choice depending on the magnitude.
+	 * @param mc    The {@link MathContext} to use for rounding to decimal values.
+	 * @param precision The decimal precision to round to (<code>Integer.MIN_VALUE</code> to ignore).
+	 * @return      A string representing our best (fractional) representation of the duration
+	 *              something like <code>23.75h</code>.
+	 */
+	public static String convertToDuration(final long nanos, final char unit, final MathContext mc, final int precision) {
+	    char units = '?';
+	    boolean negative = false;
+	    BigDecimal decimal;
+
+	    if (nanos < 0L) {
+		negative = true;
+		decimal = BigDecimal.valueOf(-nanos);
+	    }
+	    else {
+		decimal = BigDecimal.valueOf(nanos);
+	    }
+
+	    switch (unit) {
+		case 'w':
+		case 'W':
+		    units = 'w';
+		    break;
+		case 'd':
+		case 'D':
+		    units = 'd';
+		    break;
+		case 'h':
+		case 'H':
+		    units = 'h';
+		    break;
+		case 'm':
+		case 'M':
+		    units = 'm';
+		    break;
+		case 's':
+		case 'S':
+		    units = 's';
+		    break;
+		default:
+		    // If units weren't specified, then figure it out
+		    if (nanos > ONE_WEEK)
+			units = 'w';
+		    else if (nanos > ONE_DAY)
+			units = 'd';
+		    else if (nanos > ONE_HOUR)
+			units = 'h';
+		    else if (nanos > ONE_MINUTE)
+			units = 'm';
+		    else
+			units = 's';
+		    break;
+	    }
+
+	    switch (units) {
+		case 'w':
+		    decimal = decimal.divide(BigDecimal.valueOf(ONE_WEEK), mc);
+		    break;
+		case 'd':
+		    decimal = decimal.divide(BigDecimal.valueOf(ONE_DAY), mc);
+		    break;
+		case 'h':
+		    decimal = decimal.divide(BigDecimal.valueOf(ONE_HOUR), mc);
+		    break;
+		case 'm':
+		    decimal = decimal.divide(BigDecimal.valueOf(ONE_MINUTE), mc);
+		    break;
+		default:
+		    decimal = decimal.divide(D_NANOS, mc);
+		    break;
+	    }
+
+	    // Do a final rounding if requested
+	    if (precision != Integer.MIN_VALUE)
+		decimal = MathUtil.round(decimal, precision);
+
+	    return String.format("%1$s%2$s%3$c", negative ? "-" : "", decimal.toPlainString(), units);
+	}
 
 }
