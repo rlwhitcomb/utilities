@@ -199,6 +199,8 @@
 		Add wrappers for WordFind GUI.
 	    30-Mar-2021 (rlwhitcomb)
 		Rename "install" to "all-install" so it is more obvious what it does.
+	    09-Apr-2021 (rlwhitcomb)
+		Add "copy-pivot" target.
 
      ========================================================================== -->
 
@@ -263,6 +265,9 @@
 	</condition>
 	<condition property="utilities.available" value="true" else="false">
 		<isset property="env.UTILITIES_HOME"/>
+	</condition>
+	<condition property="pivot.available" value="true" else="false">
+		<isset property="env.PIVOT_HOME"/>
 	</condition>
 
 	<patternset id="wrapper-files">
@@ -609,6 +614,15 @@
 				<date datetime="${last.two.weeks}" when="before"/>
 			</fileset>
 		</delete>
+	</target>
+
+	<target name="copy-pivot" description="Copies new 'pivot*.jar' files from the source location.">
+		<copy todir="./external-jars" if:true="${pivot.available}">
+			<fileset dir="${env.PIVOT_HOME}/lib">
+				<include name="pivot-core*.jar"/>
+				<include name="pivot-wtk*.jar"/>
+			</fileset>
+		</copy>
 	</target>
 </project>
 
