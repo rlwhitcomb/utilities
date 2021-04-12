@@ -20,6 +20,8 @@
 
     themeIsDark: false,
 
+    thickFocusRectangle: true,
+
     colors: [
         "#000000",
         "#ffffff",
