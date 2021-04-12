@@ -36,6 +36,8 @@
 #	    Move program name to build.properties.
 #	04-Jan-2021 (rlwhitcomb)
 #	    Tweak final messages.
+#	12-Apr-2021 (rlwhitcomb)
+#	    Add messages.
 #
 
 #
@@ -48,6 +50,8 @@ compare.doesNotCompare		= File "%1$s" does not compare to "%2$s"!
 compare.errorOnCompare		= Error trying to compare files: %1$s
 compare.notDirectory		= "%1$s" is not a directory!
 compare.comparingFiles		= Comparing files in "%1$s" directory with "%2$s" ...
+compare.sourceNotFile		= Source file "%1$s" is not a regular file!
+compare.sourceNotExist		= Source file "%1$s" does not exist!
 compare.targetNotFile		= Target file "%1$s" is not a regular file!
 compare.targetNotExist		= Target file "%1$s" does not exist!
 compare.addingPath		= Adding path "%1$s" ...

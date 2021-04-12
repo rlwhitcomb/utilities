@@ -246,6 +246,8 @@
  *	08-Apr-2021 (rlwhitcomb)
  *	    Add time constants and time/duration formatting. Move "round" to MathUtil
  *	    for more general use.
+ *	12-Apr-2021 (rlwhitcomb)
+ *	    Fix problem with the fixed-size array returned from "split".
  */
 package info.rlwhitcomb.calc;
 
@@ -2025,7 +2027,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		parts = stringValue.split(patternValue, limit);
 	    }
 
-	    return Arrays.asList(parts);
+	    // We need a variable sized list, not the fixed-size one returned by Arrays.asList
+	    return new ArrayList<String>(Arrays.asList(parts));
 	}
 
 	@Override
