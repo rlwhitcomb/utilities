@@ -49,6 +49,8 @@
 		Add the remaining options to the Settings prompt (dialog).
 	    07-Apr-2021 (rlwhitcomb)
 		Add a line number ruler to both text areas.
+	    09-Apr-2021 (rlwhitcomb)
+		Add "Open" button and action.
 
      ========================================================================== -->
 
@@ -65,6 +67,7 @@
 	<Window.ActionMapping action="help" keyStroke="F1" />
 	<Window.ActionMapping action="version" keyStroke="Cmd-F1" />
 	<Window.ActionMapping action="settings" keyStroke="F2" />
+	<Window.ActionMapping action="open" keyStroke="F4" />
 	<Window.ActionMapping action="clear" keyStroke="F6" />
 	<Window.ActionMapping action="calculate" keyStroke="F9" />
 	<Window.ActionMapping action="exit" keyStroke="F10" />
@@ -146,6 +149,15 @@
 	<rows>
 	    <TablePane.Row height="-1">
 		<BoxPane orientation="horizontal" styles="{padding:4, spacing:20, verticalAlignment:'center', horizontalAlignment:'center'}">
+		    <BoxPane orientation="vertical" styles="{horizontalAlignment:'center'}">
+			<PushButton tooltipText="Open file (F4)"
+				action="open"
+				buttonData="O"
+				preferredWidth="60"
+				preferredHeight="32"
+				styles="{color:'DeepSkyBlue', font:{size:24,bold:true}}"/>
+			<Label text="F4"/>
+		    </BoxPane>
 		    <BoxPane orientation="vertical" styles="{horizontalAlignment:'center'}">
 			<PushButton tooltipText="Clear input (F6)"
 				action="clear"

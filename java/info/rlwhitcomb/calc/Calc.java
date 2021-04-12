@@ -126,6 +126,8 @@
  *	    Tweak the initial focus component in the Settings dialog.
  *	07-Apr-2021 (rlwhitcomb)
  *	    Add line number rulers to the text areas.
+ *	09-Apr-2021 (rlwhitcomb)
+ *	    Add "Open" action.
  */
 package info.rlwhitcomb.calc;
 
@@ -152,6 +154,7 @@ import java.util.jar.JarFile;
 import org.apache.pivot.beans.BXML;
 import org.apache.pivot.beans.BXMLSerializer;
 import org.apache.pivot.collections.Map;
+import org.apache.pivot.collections.Sequence;
 import org.apache.pivot.serialization.SerializationException;
 import org.apache.pivot.wtk.*;
 import org.apache.pivot.wtk.text.Document;
@@ -326,7 +329,6 @@ public class Calc
 		@Override
 		public boolean keyPressed(Component comp, int keyCode, Keyboard.KeyLocation keyLocation) {
 		    if (keyCode == Keyboard.KeyCode.ENTER && Keyboard.isCmdPressed()) {
-			Action.getNamedActions().get("calculate").perform(comp);
 			Action.performAction("calculate", comp);
 			return true;
 		    }
@@ -485,12 +487,13 @@ public class Calc
 	    this.display = display;
 
 	    try {
-		Action.getNamedActions().put("help", new HelpAction());
-		Action.getNamedActions().put("version", new VersionAction());
-		Action.getNamedActions().put("settings", new SettingsAction());
-		Action.getNamedActions().put("clear", new ClearAction());
-		Action.getNamedActions().put("calculate", new CalculateAction());
-		Action.getNamedActions().put("exit", new ExitAction());
+		Action.addNamedAction("help",      new HelpAction());
+		Action.addNamedAction("version",   new VersionAction());
+		Action.addNamedAction("settings",  new SettingsAction());
+		Action.addNamedAction("open",      new OpenAction());
+		Action.addNamedAction("clear",     new ClearAction());
+		Action.addNamedAction("calculate", new CalculateAction());
+		Action.addNamedAction("exit",      new ExitAction());
 
 		serializer = new BXMLSerializer();
 		serializer.readObject(Calc.class, "calc.bxml");
@@ -721,7 +724,7 @@ public class Calc
 		public void displayErrorMessage(String message, int lineNumber) {
 		    // We're going to add a period ourselves, so take it out if the
 		    // underlying error already has one.
-		    String regularMessage = (message.endsWith(".") ?
+		    String regularMessage = (message.endsWith("./") ?
 			message.substring(0, message.length() - 1) : message);
 
 		    if (replMode)
@@ -743,6 +746,30 @@ public class Calc
 		    requestFocus(inputTextPane);
 		}
 
+	}
+
+	private class OpenAction extends Action
+	{
+		@Override
+		public void perform(Component source) {
+		    final FileBrowserSheet browser = new FileBrowserSheet(FileBrowserSheet.Mode.OPEN_MULTIPLE);
+		    browser.open(mainWindow, sheet -> {
+			if (!sheet.getResult())
+			    return;
+			Sequence<File> selectedFiles = browser.getSelectedFiles();
+			StringBuilder buf = new StringBuilder();
+			try {
+			    for (int i = 0; i < selectedFiles.getLength(); i++) {
+				String fileText = FileUtilities.readFileAsString(selectedFiles.get(i)); // need charset and tabwidth?
+				buf.append(fileText).append('\n');
+			    }
+			}
+			catch (IOException ioe) {
+			    Alert.alert(MessageType.ERROR, ExceptionUtil.toString(ioe), mainWindow);
+			}
+			inputTextPane.setText(buf.toString());
+		    });
+		}
 	}
 
 	private class ClearAction extends Action
