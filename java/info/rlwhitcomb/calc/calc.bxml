@@ -53,6 +53,8 @@
 		Add "Open" button and action.
 	    12-Apr-2021 (rlwhitcomb)
 		Tweak our toolbar spacing.
+	    12-Apr-2021 (rlwhitcomb)
+		Change the ruler colors.
 
      ========================================================================== -->
 
@@ -225,7 +227,7 @@
 			    <ScrollPane horizontalScrollBarPolicy="fill" verticalScrollBarPolicy="fill_to_capacity" >
 				<TextArea bxml:id="outputTextArea"/>
 				<rowHeader>
-				    <NumberRuler bxml:id="outputRuler" orientation="vertical" textSize="5" styles="{markerInsets:{top:4}}"/>
+				    <NumberRuler bxml:id="outputRuler" orientation="vertical" textSize="5" styles="{markerInsets:{top:4},color:'SteelBlue',backgroundColor:'LemonChiffon'}"/>
 				</rowHeader>
 			    </ScrollPane>
 			</Border>
@@ -235,7 +237,7 @@
 			    <ScrollPane horizontalScrollBarPolicy="fill" verticalScrollBarPolicy="fill_to_capacity" >
 				<TextPane bxml:id="inputTextPane"/>
 				<rowHeader>
-				    <NumberRuler bxml:id="inputRuler" orientation="vertical" textSize="5" styles="{markerInsets:{top:4}}"/>
+				    <NumberRuler bxml:id="inputRuler" orientation="vertical" textSize="5" styles="{markerInsets:{top:4},color:'SteelBlue',backgroundColor:'LemonChiffon'}"/>
 				</rowHeader>
 			    </ScrollPane>
 			</Border>
