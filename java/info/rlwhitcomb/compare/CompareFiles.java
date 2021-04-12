@@ -36,6 +36,8 @@
  *	    Use new program info mechanism.
  *	04-Jan-2021 (rlwhitcomb)
  *	    Tweak the final output.
+ *	12-Apr-2021 (rlwhitcomb)
+ *	    Tweak error checking.
  */
 package info.rlwhitcomb.compare;
 
@@ -306,7 +308,19 @@ public class CompareFiles
 		}
 	    }
 	    else {
-		if (!f2.isFile()) {
+		if (!f1.exists()) {
+		    err(Level.NORMAL, "sourceNotExist", f1.getPath());
+		    potentialExit();
+		}
+		else if (!f1.isFile()) {
+		    err(Level.NORMAL, "sourceNotFile", f1.getPath());
+		    potentialExit();
+		}
+		else if (!f2.exists()) {
+		    err(Level.NORMAL, "targetNotExist", f2.getPath());
+		    potentialExit();
+		}
+		else if (!f2.isFile()) {
 		    err(Level.NORMAL, "targetNotFile", f2.getPath());
 		    potentialExit();
 		}
