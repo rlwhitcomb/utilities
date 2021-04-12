@@ -1153,7 +1153,7 @@ public class CharUtil
 
 	/**
 	 * Pad a given string to a certain width with the given character, adding
-	 * spaces to the end.
+	 * the pad character at the end.
 	 *
 	 * @param	input	Input string (should always be less or equal
 	 *			the given width).

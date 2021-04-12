@@ -128,6 +128,9 @@
  *	    Add line number rulers to the text areas.
  *	09-Apr-2021 (rlwhitcomb)
  *	    Add "Open" action.
+ *	12-Apr-2021 (rlwhitcomb)
+ *	    When opening multiple files at once, add a commented header to each
+ *	    one in the input window to make it easier to tell what's what.
  */
 package info.rlwhitcomb.calc;
 
@@ -724,7 +727,7 @@ public class Calc
 		public void displayErrorMessage(String message, int lineNumber) {
 		    // We're going to add a period ourselves, so take it out if the
 		    // underlying error already has one.
-		    String regularMessage = (message.endsWith("./") ?
+		    String regularMessage = (message.endsWith(".") ?
 			message.substring(0, message.length() - 1) : message);
 
 		    if (replMode)
@@ -760,7 +763,14 @@ public class Calc
 			StringBuilder buf = new StringBuilder();
 			try {
 			    for (int i = 0; i < selectedFiles.getLength(); i++) {
-				String fileText = FileUtilities.readFileAsString(selectedFiles.get(i)); // need charset and tabwidth?
+				File f = selectedFiles.get(i);
+				String fileText = FileUtilities.readFileAsString(f); // need charset and tabwidth?
+				if (selectedFiles.getLength() > 1) {
+				    String filePath = f.getPath();
+				    CharUtil.padToWidth(buf, "#", filePath.length() + 3, '-').append('\n');
+				    buf.append("# ").append(filePath).append('\n');
+				    CharUtil.padToWidth(buf, "#", filePath.length() + 3, '-').append("\n\n");
+				}
 				buf.append(fileText).append('\n');
 			    }
 			}

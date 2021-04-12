@@ -51,6 +51,8 @@
 		Add a line number ruler to both text areas.
 	    09-Apr-2021 (rlwhitcomb)
 		Add "Open" button and action.
+	    12-Apr-2021 (rlwhitcomb)
+		Tweak our toolbar spacing.
 
      ========================================================================== -->
 
@@ -185,7 +187,7 @@
 				styles="{color:'indigo', font:{size:24,bold:true}}"/>
 			<Label text="F10"/>
 		    </BoxPane>
-		    <Label preferredWidth="80"/>
+		    <Label preferredWidth="50"/>
 		    <BoxPane orientation="vertical" styles="{horizontalAlignment:'center'}">
 			<PushButton tooltipText="Help (F1)"
 				action="help"
@@ -204,7 +206,7 @@
 				styles="{color:'blue', font:{size:24,bold:true}}"/>
 			<Label text="Cmd-F1"/>
 		    </BoxPane>
-		    <Label preferredWidth="80"/>
+		    <Label preferredWidth="50"/>
 		    <BoxPane orientation="vertical" styles="{horizontalAlignment:'center'}">
 			<PushButton tooltipText="Settings (F2)"
 				action="settings"
