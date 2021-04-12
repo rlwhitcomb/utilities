@@ -2,5 +2,5 @@
 :resultonly on
 a=split(exec('cmd', '/c', 'wc.bat', 'calc.txt'), '\\s+')
 :quiet pop
-eval(a[3] === null ? 0 : a[3])-1
+eval(a[3] === null ? 0 : a[3])-2
 
