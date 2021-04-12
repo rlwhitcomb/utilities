@@ -199,6 +199,8 @@
 		Add wrappers for WordFind GUI.
 	    30-Mar-2021 (rlwhitcomb)
 		Rename "install" to "all-install" so it is more obvious what it does.
+	    12-Apr-2021 (rlwhitcomb)
+		New version of "verify_calc" for Windows.
 
      ========================================================================== -->
 
@@ -520,6 +522,10 @@
 			<arg value="mastertest"/>
 		</java>
 		<exec executable="./verify_calc"  dir="."             output="${test.log.file.name}" append="true" unless:true="${on.windows}" failonerror="true"/>
+		<exec executable="cmd"            dir="."             output="${test.log.file.name}" append="true" if:true="${on.windows}" failonerror="true">
+			<arg value="/c"/>
+			<arg value="verify_calc.bat"/>
+		</exec>
 		<exec executable="./check_sorted" dir="."             output="${test.log.file.name}" append="true" unless:true="${on.windows}" failonerror="true"/>
 		<echo>Done with unit tests. Successful. Results in "${test.log.file.name}" file.</echo>
 	</target>
