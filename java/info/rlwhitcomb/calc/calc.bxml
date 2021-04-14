@@ -55,6 +55,9 @@
 		Tweak our toolbar spacing.
 	    12-Apr-2021 (rlwhitcomb)
 		Change the ruler colors.
+	    14-Apr-2021 (rlwhitcomb)
+		Allow the tooltip and label text for "Version" to be set dynamically
+		so they reflect the proper key to be used, depending on platform.
 
      ========================================================================== -->
 
@@ -200,13 +203,13 @@
 			<Label text="F1"/>
 		    </BoxPane>
 		    <BoxPane orientation="vertical" styles="{horizontalAlignment:'center'}">
-			<PushButton tooltipText="Version (Cmd-F1)"
+			<PushButton bxml:id="versionButton" tooltipText=""
 				action="version"
 				buttonData="V"
 				preferredWidth="60"
 				preferredHeight="32"
 				styles="{color:'blue', font:{size:24,bold:true}}"/>
-			<Label text="Cmd-F1"/>
+			<Label bxml:id="versionLabel" text=""/>
 		    </BoxPane>
 		    <Label preferredWidth="50"/>
 		    <BoxPane orientation="vertical" styles="{horizontalAlignment:'center'}">

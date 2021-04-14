@@ -131,6 +131,8 @@
  *	12-Apr-2021 (rlwhitcomb)
  *	    When opening multiple files at once, add a commented header to each
  *	    one in the input window to make it easier to tell what's what.
+ *	14-Apr-2021 (rlwhitcomb)
+ *	    Dynamically set the "Cmd-F1" tooltip and label text.
  */
 package info.rlwhitcomb.calc;
 
@@ -160,6 +162,7 @@ import org.apache.pivot.collections.Map;
 import org.apache.pivot.collections.Sequence;
 import org.apache.pivot.serialization.SerializationException;
 import org.apache.pivot.wtk.*;
+import org.apache.pivot.wtk.Keyboard.KeyStroke;
 import org.apache.pivot.wtk.text.Document;
 import org.apache.pivot.wtk.util.TextAreaOutputStream;
 
@@ -255,6 +258,8 @@ public class Calc
 	@BXML private NumberRuler inputRuler;
 	@BXML private NumberRuler outputRuler;
 	@BXML private Label outputSizeLabel;
+	@BXML private PushButton versionButton;
+	@BXML private Label versionLabel;
 	@BXML private Prompt versionPrompt;
 	@BXML private Label versionText;
 	@BXML private Label buildText;
@@ -525,6 +530,12 @@ public class Calc
 		outputRuler.getStyles().put(Style.font, monospacedFont);
 
 		inputTextPane.getComponentKeyListeners().add(keyPressListener);
+
+		KeyStroke versionKey = KeyStroke.decode("Cmd-F1");
+		String key = versionKey.toString();
+
+		versionButton.setTooltipText("Version (" + key + ")");
+		versionLabel.setText(key);
 
 		inputTextPane.setDocument(new Document());
 
