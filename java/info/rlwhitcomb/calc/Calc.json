@@ -1,0 +1,85 @@
+/*
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2021 Roger L. Whitcomb.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ *      Text resources for the "Calc" GUI.
+ *
+ *  Change History:
+ *      15-Apr-2021 (rlwhitcomb)
+ *          First version; text taken from the bxml file.
+ */
+{
+    title:              'Calc',
+
+    versionTitle:       'Version',
+
+    settingsTitle:      'Settings',
+    settingsMessage:    'Change settings for the current session',
+    settingsOptions:    '["OK","Cancel"]',
+    precisionHeader:    'Precision Setting',
+    decimalPrecision:   'Decimal:',
+    defaultPrecision:   'Default',
+    doublePrecision:    'Double',
+    floatPrecision:     'Float',
+    unlimitedPrecision: 'Unlimited',
+    trigHeader:         'Trig Mode',
+    degrees:            'Degrees',
+    radians:            'Radians',
+    unitsHeader:        'Units Setting',
+    binaryUnits:        'Binary',
+    siUnits:            'SI (base 10)',
+    mixedUnits:         'Mixed',
+    operationHeader:    'Operational Modes',
+    rationalMode:       'Rational mode',
+    displayTiming:      'Display timing',
+    displayHeader:      'Display Modes',
+    debugMode:          'Debug mode',
+    quiet:              'Quiet',
+    resultsOnly:        'Results only',
+
+    openButton:         'O',
+    openTip:            'Open file (F4)',
+    openLabel:          'F4',
+    clearButton:        'C',
+    clearTip:           'Clear input (F6)',
+    clearLabel:         'F6',
+    calculateButton:    '!',
+    calculateTip:       'Calculate! (F9)',
+    calculateLabel:     'F9',
+    exitButton:         'X',
+    exitTip:            'Exit (F10)',
+    exitLabel:          'F10',
+    helpButton:         '?',
+    helpTip:            'Help (F1)',
+    helpLabel:          'F1',
+    versionButton:      'V',
+    versionTip:         'Version (%1$s)',
+    settingsButton:     '\u2261',
+    settingsTip:        'Settings (F2)',
+    settingsLabel:      'F2',
+
+    resultsBorder:      ' Results ',
+    expressionsBorder:  ' Expressions ',
+
+    resultsOutput:      'Results length: '
+}
+

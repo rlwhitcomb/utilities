@@ -203,6 +203,8 @@
 		Add "copy-pivot" target.
 	    12-Apr-2021 (rlwhitcomb)
 		New version of "verify_calc" for Windows.
+	    15-Apr-2021 (rlwhitcomb)
+		Add Calc JSON resources to the .jar file.
 
      ========================================================================== -->
 
@@ -459,6 +461,7 @@
 			<include name="info/rlwhitcomb/calc/*.class"/>
 			<include name="info/rlwhitcomb/calc/*.bxml"/>
 			<include name="info/rlwhitcomb/calc/*.html"/>
+			<include name="info/rlwhitcomb/calc/*.json"/>
 			<include name="info/rlwhitcomb/calc/*.png"/>
 			<include name="info/rlwhitcomb/cat/*.class"/>
 			<include name="info/rlwhitcomb/compare/*.class"/>

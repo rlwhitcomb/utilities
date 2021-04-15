@@ -34,11 +34,13 @@
  *	    Address Javadoc warnings found by Java 8.
  *	15-Apr-2021 (rlwhitcomb)
  *	    Prepare for GitHub.
+ *	15-Apr-2021 (rlwhitcomb)
+ *	    Alternate constructors. Add "getResources()".
  */
 package info.rlwhitcomb;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 
 import org.apache.pivot.json.JSON;
@@ -74,7 +76,28 @@ public class IntlProvider
 
 
 	/**
+	 * Initialize our localization resources, using the default locale setting.
+	 *
+	 * @param	mainClass The starting point in the main .jar file where we can find
+	 *			  our string resources (*.json files).
+	 */
+	public IntlProvider(final Class<?> mainClass) {
+	    this(mainClass.getName(), Locale.getDefault());
+	}
+
+	/**
+	 * Initialize our localization resources, using the default locale setting.
+	 *
+	 * @param	mainClassName	The starting point in the main .jar file where we can find
+	 *				our string resources (*.json files).
+	 */
+	public IntlProvider(final String mainClassName) {
+	    this(mainClassName, Locale.getDefault());
+	}
+
+	/**
 	 * Initialize our localization resources.
+	 *
 	 * @param	mainClassName	The starting point in the main .jar file where we can find
 	 *				our string resources (*.json files).
 	 * @param	uiLocale	The locale to use to select the appropriate language.
@@ -82,13 +105,12 @@ public class IntlProvider
 	public IntlProvider(final String mainClassName, final Locale uiLocale) {
 	    try {
 		// First get the default (English) version, which is presumed to be complete
-		Charset cs = Charset.forName("UTF-8");
-		Resources resParent = new Resources(null, mainClassName, Locale.US, cs);
+		Resources resParent = new Resources(null, mainClassName, Locale.US, StandardCharsets.UTF_8);
 		if (uiLocale.equals(Locale.US)) {
 		    resources = resParent;
 		    log.info("Picking US English resources (%1$s) because our locale is US English", resources);
 		} else {
-		    resources = new Resources(resParent, mainClassName, uiLocale, cs);
+		    resources = new Resources(resParent, mainClassName, uiLocale, StandardCharsets.UTF_8);
 		    log.info("Picking '%1$s' resources (%2$s) with parent '%3$s'", uiLocale, resources, resParent);
 		}
 	    }
@@ -112,8 +134,15 @@ public class IntlProvider
 	}
 
 	/**
+	 * @return The source of our resources as the {@link Resources} object it really is.
+	 */
+	public Resources getResources() {
+	    return resources;
+	}
+
+	/**
 	 * Helper function to load a single string resource.
-	 * <p> Just like the <tt>BXMLSerializer</tt>, if the given
+	 * <p> Just like the {@code BXMLSerializer}, if the given
 	 * string resource does not exist the result is just the
 	 * resource name (to avoid costly exceptions).  But the
 	 * result is logged so a postprocessor can gather up these

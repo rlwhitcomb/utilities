@@ -133,6 +133,9 @@
  *	    one in the input window to make it easier to tell what's what.
  *	14-Apr-2021 (rlwhitcomb)
  *	    Dynamically set the "Cmd-F1" tooltip and label text.
+ *	15-Apr-2021 (rlwhitcomb)
+ *	    Initialize Intl with the new GUI resources. Get the version tip text
+ *	    from there. Reverse the Settings dialog buttons to match convention.
  */
 package info.rlwhitcomb.calc;
 
@@ -161,6 +164,7 @@ import org.apache.pivot.beans.BXMLSerializer;
 import org.apache.pivot.collections.Map;
 import org.apache.pivot.collections.Sequence;
 import org.apache.pivot.serialization.SerializationException;
+import org.apache.pivot.util.Resources;
 import org.apache.pivot.wtk.*;
 import org.apache.pivot.wtk.Keyboard.KeyStroke;
 import org.apache.pivot.wtk.text.Document;
@@ -169,6 +173,7 @@ import org.apache.pivot.wtk.util.TextAreaOutputStream;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
 
+import info.rlwhitcomb.IntlProvider;
 import info.rlwhitcomb.jarfile.Launcher;
 import info.rlwhitcomb.calc.CalcObjectVisitor.Settings;
 import info.rlwhitcomb.calc.CalcObjectVisitor.TrigMode;
@@ -435,14 +440,11 @@ public class Calc
 	    quietCheck.setSelected(quiet);
 	    resultsCheck.setSelected(resultsOnly);
 
-	    // Pre-select "OK" option, so that "Return" to close will signal success
-	    dialog.setSelectedOptionIndex(1);
-
 	    return focusComponent;
 	}
 
 	private void handleDialogClosed(Prompt dialog) {
-	    if (dialog.getResult() && dialog.getSelectedOptionIndex() == 1) {
+	    if (dialog.getResult() && dialog.getSelectedOptionIndex() == 0) {
 		MathContext originalMathContext = (MathContext) dialog.getAttribute(Attribute.ORIGINAL_MATH_CONTEXT);
 		MathContext newMathContext = (MathContext) dialog.getAttribute(Attribute.NEW_MATH_CONTEXT);
 		if (!originalMathContext.equals(newMathContext))
@@ -503,8 +505,10 @@ public class Calc
 		Action.addNamedAction("calculate", new CalculateAction());
 		Action.addNamedAction("exit",      new ExitAction());
 
+		IntlProvider provider = new IntlProvider(getClass());
+		Intl.initResources(provider);
 		serializer = new BXMLSerializer();
-		serializer.readObject(Calc.class, "calc.bxml");
+		serializer.readObject(getClass().getResource("calc.bxml"), provider.getResources());
 		serializer.bind(this);
 
 		// To implement the displayer, redirect System.out to our TextArea for display
@@ -534,7 +538,7 @@ public class Calc
 		KeyStroke versionKey = KeyStroke.decode("Cmd-F1");
 		String key = versionKey.toString();
 
-		versionButton.setTooltipText("Version (" + key + ")");
+		versionButton.setTooltipText(Intl.formatString("versionTip", key));
 		versionLabel.setText(key);
 
 		inputTextPane.setDocument(new Document());

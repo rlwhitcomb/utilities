@@ -58,12 +58,14 @@
 	    14-Apr-2021 (rlwhitcomb)
 		Allow the tooltip and label text for "Version" to be set dynamically
 		so they reflect the proper key to be used, depending on platform.
+	    15-Apr-2021 (rlwhitcomb)
+		Move all text to Pivot resources.
 
      ========================================================================== -->
 
 
 <Window bxml:id="mainWindow" icon="/images/calculator_32.gif"
-    title="Calc"
+    title="%title"
     maximized="true"
     xmlns:bxml="http://pivot.apache.org/bxml"
     xmlns:content="org.apache.pivot.wtk.content"
@@ -81,7 +83,7 @@
     </actionMappings>
 
     <bxml:define>
-	<Prompt bxml:id="versionPrompt" title="Version" messageType="QUESTION"
+	<Prompt bxml:id="versionPrompt" title="%versionTitle" messageType="QUESTION"
 		message="" preferredWidth="500"
 		styles="{messageColor:'blue',messageFont:{bold:true,size:'120%'}}">
 	    <BoxPane orientation="vertical" styles="{horizontalAlignment:'center'}">
@@ -108,41 +110,41 @@
     </bxml:define>
 
     <bxml:define>
-	<Prompt bxml:id="settingsPrompt" title="Settings" messageType="INFO"
-                message="Change settings for the current session" preferredWidth="600"
-		options="['Cancel','OK']" selectedOptionIndex="1">
+	<Prompt bxml:id="settingsPrompt" title="%settingsTitle" messageType="INFO"
+                message="%settingsMessage" preferredWidth="600"
+		options="%settingsOptions">
 	    <Form bxml:id="settingsForm">
-		<Form.Section heading="Precision Setting">
+		<Form.Section heading="%precisionHeader">
 		    <BoxPane orientation="horizontal" styles="{verticalAlignment:'center'}">
-			<RadioButton bxml:id="decimalPrecisionButton" buttonGroup="$precisionGroup" buttonData="Decimal:"/>
+			<RadioButton bxml:id="decimalPrecisionButton" buttonGroup="$precisionGroup" buttonData="%decimalPrecision"/>
 			<TextInput bxml:id="decimalDigitsInput" maximumLength="12">
 			    <validator>
 				<validators:IntValidator/>
 			    </validator>
 			</TextInput>
 		    </BoxPane>
-		    <RadioButton bxml:id="defaultPrecisionButton" buttonGroup="$precisionGroup" buttonData="Default"/>
-		    <RadioButton bxml:id="doublePrecisionButton" buttonGroup="$precisionGroup" buttonData="Double"/>
-		    <RadioButton bxml:id="floatPrecisionButton" buttonGroup="$precisionGroup" buttonData="Float"/>
-		    <RadioButton bxml:id="unlimitedPrecisionButton" buttonGroup="$precisionGroup" buttonData="Unlimited"/>
+		    <RadioButton bxml:id="defaultPrecisionButton" buttonGroup="$precisionGroup" buttonData="%defaultPrecision"/>
+		    <RadioButton bxml:id="doublePrecisionButton" buttonGroup="$precisionGroup" buttonData="%doublePrecision"/>
+		    <RadioButton bxml:id="floatPrecisionButton" buttonGroup="$precisionGroup" buttonData="%floatPrecision"/>
+		    <RadioButton bxml:id="unlimitedPrecisionButton" buttonGroup="$precisionGroup" buttonData="%unlimitedPrecision"/>
 		</Form.Section>
-		<Form.Section heading="Trig Mode">
-		    <RadioButton bxml:id="degreesModeButton" buttonGroup="$trigGroup" buttonData="Degrees"/>
-		    <RadioButton bxml:id="radiansModeButton" buttonGroup="$trigGroup" buttonData="Radians"/>
+		<Form.Section heading="%trigHeader">
+		    <RadioButton bxml:id="degreesModeButton" buttonGroup="$trigGroup" buttonData="%degrees"/>
+		    <RadioButton bxml:id="radiansModeButton" buttonGroup="$trigGroup" buttonData="%radians"/>
 		</Form.Section>
-		<Form.Section heading="Units Setting">
-		    <RadioButton bxml:id="binaryModeButton" buttonGroup="$unitsGroup" buttonData="Binary"/>
-		    <RadioButton bxml:id="siModeButton" buttonGroup="$unitsGroup" buttonData="SI (base 10)"/>
-		    <RadioButton bxml:id="mixedModeButton" buttonGroup="$unitsGroup" buttonData="Mixed"/>
+		<Form.Section heading="%unitsHeader">
+		    <RadioButton bxml:id="binaryModeButton" buttonGroup="$unitsGroup" buttonData="%binaryUnits"/>
+		    <RadioButton bxml:id="siModeButton" buttonGroup="$unitsGroup" buttonData="%siUnits"/>
+		    <RadioButton bxml:id="mixedModeButton" buttonGroup="$unitsGroup" buttonData="%mixedUnits"/>
 		</Form.Section>
-		<Form.Section heading="Operational Modes">
-		    <Checkbox bxml:id="rationalCheck" buttonData="Rational mode"/>
-		    <Checkbox bxml:id="timingCheck" buttonData="Display timing"/>
-		    <Checkbox bxml:id="debugCheck" buttonData="Debug mode"/>
+		<Form.Section heading="%operationHeader">
+		    <Checkbox bxml:id="rationalCheck" buttonData="%rationalMode"/>
+		    <Checkbox bxml:id="timingCheck" buttonData="%displayTiming"/>
+		    <Checkbox bxml:id="debugCheck" buttonData="%debugMode"/>
 		</Form.Section>
-		<Form.Section heading="Display Modes">
-		    <Checkbox bxml:id="quietCheck" buttonData="Quiet"/>
-		    <Checkbox bxml:id="resultsCheck" buttonData="Results only"/>
+		<Form.Section heading="%displayHeader">
+		    <Checkbox bxml:id="quietCheck" buttonData="%quiet"/>
+		    <Checkbox bxml:id="resultsCheck" buttonData="%resultsOnly"/>
 		</Form.Section>
 	    </Form>
 	</Prompt>
@@ -157,55 +159,55 @@
 	    <TablePane.Row height="-1">
 		<BoxPane orientation="horizontal" styles="{padding:4, spacing:20, verticalAlignment:'center', horizontalAlignment:'center'}">
 		    <BoxPane orientation="vertical" styles="{horizontalAlignment:'center'}">
-			<PushButton tooltipText="Open file (F4)"
+			<PushButton tooltipText="%openTip"
 				action="open"
-				buttonData="O"
+				buttonData="%openButton"
 				preferredWidth="60"
 				preferredHeight="32"
 				styles="{color:'DeepSkyBlue', font:{size:24,bold:true}}"/>
-			<Label text="F4"/>
+			<Label text="%openLabel"/>
 		    </BoxPane>
 		    <BoxPane orientation="vertical" styles="{horizontalAlignment:'center'}">
-			<PushButton tooltipText="Clear input (F6)"
+			<PushButton tooltipText="%clearTip"
 				action="clear"
-				buttonData="C"
+				buttonData="%clearButton"
 				preferredWidth="60"
 				preferredHeight="32"
 				styles="{color:'forestgreen', font:{size:24,bold:true}}"/>
-			<Label text="F6"/>
+			<Label text="%clearLabel"/>
 		    </BoxPane>
 		    <BoxPane orientation="vertical" styles="{horizontalAlignment:'center'}">
-			<PushButton tooltipText="Calculate! (F9)"
+			<PushButton tooltipText="%calculateTip"
 				action="calculate"
-				buttonData="!"
+				buttonData="%calculateButton"
 				preferredWidth="60"
 				preferredHeight="32"
 				styles="{color:'red', font:{size:24,bold:true}}"/>
-			<Label text="F9"/>
+			<Label text="%calculateLabel"/>
 		    </BoxPane>
 		    <BoxPane orientation="vertical" styles="{horizontalAlignment:'center'}">
-			<PushButton tooltipText="Exit (F10)"
+			<PushButton tooltipText="%exitTip"
 				action="exit"
-				buttonData="X"
+				buttonData="%exitButton"
 				preferredWidth="60"
 				preferredHeight="32"
 				styles="{color:'indigo', font:{size:24,bold:true}}"/>
-			<Label text="F10"/>
+			<Label text="%exitLabel"/>
 		    </BoxPane>
 		    <Label preferredWidth="50"/>
 		    <BoxPane orientation="vertical" styles="{horizontalAlignment:'center'}">
-			<PushButton tooltipText="Help (F1)"
+			<PushButton tooltipText="%helpTip"
 				action="help"
-				buttonData="?"
+				buttonData="%helpButton"
 				preferredWidth="60"
 				preferredHeight="32"
 				styles="{color:'blue', font:{size:24,bold:true}}"/>
-			<Label text="F1"/>
+			<Label text="%helpLabel"/>
 		    </BoxPane>
 		    <BoxPane orientation="vertical" styles="{horizontalAlignment:'center'}">
 			<PushButton bxml:id="versionButton" tooltipText=""
 				action="version"
-				buttonData="V"
+				buttonData="%versionButton"
 				preferredWidth="60"
 				preferredHeight="32"
 				styles="{color:'blue', font:{size:24,bold:true}}"/>
@@ -213,20 +215,20 @@
 		    </BoxPane>
 		    <Label preferredWidth="50"/>
 		    <BoxPane orientation="vertical" styles="{horizontalAlignment:'center'}">
-			<PushButton tooltipText="Settings (F2)"
+			<PushButton tooltipText="%settingsTip"
 				action="settings"
-				buttonData="&#x2261;"
+				buttonData="%settingsButton"
 				preferredWidth="60"
 				preferredHeight="32"
 				styles="{color:'DarkOrange', font:{size:24,bold:true}}"/>
-			<Label text="F2"/>
+			<Label text="%settingsLabel"/>
 		    </BoxPane>
 		</BoxPane>
 	    </TablePane.Row>
 	    <TablePane.Row height="1*">
 		<SplitPane orientation="vertical" splitRatio="0.4">
 		    <top>
-			<Border title=" Results " styles="{padding:{top:0,left:10,bottom:4,right:10},font:{size:18,bold:true},cornerRadii:10,backgroundColor:11}">
+			<Border title="%resultsBorder" styles="{padding:{top:0,left:10,bottom:4,right:10},font:{size:18,bold:true},cornerRadii:10,backgroundColor:11}">
 			    <ScrollPane horizontalScrollBarPolicy="fill" verticalScrollBarPolicy="fill_to_capacity" >
 				<TextArea bxml:id="outputTextArea"/>
 				<rowHeader>
@@ -236,7 +238,7 @@
 			</Border>
 		    </top>
 		    <bottom>
-			<Border title=" Expressions " styles="{padding:{top:0,left:10,bottom:4,right:10},font:{size:18,bold:true},cornerRadii:10,backgroundColor:11}">
+			<Border title="%expressionsBorder" styles="{padding:{top:0,left:10,bottom:4,right:10},font:{size:18,bold:true},cornerRadii:10,backgroundColor:11}">
 			    <ScrollPane horizontalScrollBarPolicy="fill" verticalScrollBarPolicy="fill_to_capacity" >
 				<TextPane bxml:id="inputTextPane"/>
 				<rowHeader>
@@ -249,7 +251,7 @@
 	    </TablePane.Row>
 	    <TablePane.Row height="-1">
 		<BoxPane orientation="horizontal" styles="{padding:4}">
-		    <Label text="Results length: "/>
+		    <Label text="%resultsOutput"/>
 		    <Label bxml:id="outputSizeLabel" text="0"/>
 		</BoxPane>
 	    </TablePane.Row>
