@@ -205,6 +205,8 @@
 		New version of "verify_calc" for Windows.
 	    15-Apr-2021 (rlwhitcomb)
 		Add Calc JSON resources to the .jar file.
+	    15-Apr-2021 (rlwhitcomb)
+		Oops! Need to add all the classes from "info/rlwhitcomb" to the .jar file.
 
      ========================================================================== -->
 
@@ -455,8 +457,8 @@
 			<include name="build.number"/>
 			<include name="version.properties"/>
 			<include name="images/*.*"/>
-			<include name="info/rlwhitcomb/Terra*.json"/>
-			<include name="info/rlwhitcomb/Version*.class"/>
+			<include name="info/rlwhitcomb/*.json"/>
+			<include name="info/rlwhitcomb/*.class"/>
 			<include name="info/rlwhitcomb/annotations/*.class"/>
 			<include name="info/rlwhitcomb/calc/*.class"/>
 			<include name="info/rlwhitcomb/calc/*.bxml"/>
