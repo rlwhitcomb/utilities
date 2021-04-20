@@ -248,6 +248,8 @@
  *	    for more general use.
  *	12-Apr-2021 (rlwhitcomb)
  *	    Fix problem with the fixed-size array returned from "split".
+ *	20-Apr-2021 (rlwhitcomb)
+ *	    Partial implementation of function parameters.
  */
 package info.rlwhitcomb.calc;
 
@@ -1255,9 +1257,13 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    CalcParser.BlockContext block           = ctx.block();
 
 	    ParserRuleContext functionBody = loopOrExpr != null ? loopOrExpr : block;
+	    CalcParser.FormalParamsContext formalParams = ctx.formalParams();
+	    String paramString = formalParams == null ? "" : getTreeText(formalParams);
+
+// TODO: make a Function object and add name, params, body to it; save this instead of functionBody as the variable
 	    variables.put(functionName, functionBody);
 
-	    displayActionMessage("%calc#defining", functionName, getTreeText(functionBody));
+	    displayActionMessage("%calc#defining", functionName, paramString, getTreeText(functionBody));
 
 	    return functionBody;
 	}

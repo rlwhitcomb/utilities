@@ -54,5 +54,29 @@ a@j
 ++a['"b"']['"c"']['f']
 a
 
+:clear a
+a = { b:true, c:{ d:'123', f:'fghi', g: { r:4, s:5 }}}
+a.b
+a.c.d
+a.c
+a.c.g
+a.c.g.r
+++a.c.g.r
+a
+++a.c.g.r
+a.c.g."e"='E'
+a
+a.c.g."e"
+a.c.g."f"={"g":23, "h":{"i":27}}
+a
+a.c.g."f"."h"
+a['c'].g."f"['"h"']."i"++
+a
+a.c.g."f".'h'
+a.c.g."f"."h".j=15
+a
+a.c.g."f"."h".j++
+a
+
 :echo
 :echo "End of nested object / array tests."

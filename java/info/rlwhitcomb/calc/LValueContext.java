@@ -44,6 +44,8 @@
  *	    Check for string index out of bounds in getContextObject.
  *	07-Apr-2021 (rlwhitcomb)
  *	    Implement Unicode subscripts as array indexes.
+ *	20-Apr-2021 (rlwhitcomb)
+ *	    Simplify objVar parsing. Partially add "functionVar" processing.
  */
  package info.rlwhitcomb.calc;
 
@@ -332,21 +334,27 @@ class LValueContext
 
 		objLValue = objLValue.makeMapLValue(visitor, objVarCtx, null);
 
-		List<TerminalNode> strings = objVarCtx.STRING();
-		if (strings.size() > 0) {
-		    for (TerminalNode string : strings) {
-			objLValue = objLValue.makeMapLValue(visitor, objVarCtx, string.getText());
-		    }
+		TerminalNode string = objVarCtx.STRING();
+		if (string != null) {
+		    objLValue = objLValue.makeMapLValue(visitor, objVarCtx, string.getText());
 		}
 
 		CalcParser.VarContext rhsVarCtx = objVarCtx.var(1);
 		if (rhsVarCtx != null) {
-		    if (strings.size() > 0)
+		    if (string != null)
 			objLValue = objLValue.makeMapLValue(visitor, objVarCtx, null);
 		    return getLValue(visitor, rhsVarCtx, objLValue);
 		}
 		else
 		    return objLValue;
+	    }
+	    else if (ctx instanceof CalcParser.FunctionVarContext) {
+		CalcParser.FunctionVarContext funcVarCtx = (CalcParser.FunctionVarContext) ctx;
+		LValueContext funcLValue = getLValue(visitor, funcVarCtx.var(), lValue);
+		CalcParser.ActualParamsContext actuals = funcVarCtx.actualParams();
+
+// ... finish
+		/* ?? */ return funcLValue;
 	    }
 	    else {
 		throw new CalcExprException(ctx, "%calc#unknownVarCtx", ctx.getClass().getName());

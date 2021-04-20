@@ -180,6 +180,8 @@
  *	    Add superscript powers and subscript indexes.
  *	08-Apr-2021 (rlwhitcomb)
  *	    Add time constants and time/duration formatting.
+ *	20-Apr-2021 (rlwhitcomb)
+ *	    Simplify objVar. Add formal and actual params for functions.
  */
 
 grammar Calc;
@@ -322,8 +324,9 @@ pair
    ;
 
 var
-   : var ( '.' ( var | STRING ) ) +     # objVar
+   : var ( '.' ( var | STRING ) )       # objVar
    | var ( '[' expr ']' | INDEXES )     # arrVar
+   | var actualParams                   # functionVar
    | ID                                 # idVar
    | LOCALVAR                           # localVar
    ;
@@ -345,8 +348,17 @@ value
    | TIME_CONST                  # timeValue
    ;
 
+formalParams
+   : '(' LOCALVAR ( '=' expr ) ? ( ',' LOCALVAR ( '=' expr ) ? ) * ')'
+   | '(' ')'
+   ;
+
+actualParams
+   : '(' expr ? ( ',' expr ? ) * ')'
+   ;
+
 define
-   : DEFINE ID '=' ( stmtOrExpr | block )  # defineStmt
+   : DEFINE ID formalParams ? '=' ( stmtOrExpr | block )  # defineStmt
    ;
 
 directive

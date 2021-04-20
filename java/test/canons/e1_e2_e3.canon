@@ -564,6 +564,29 @@
 >}
 >++ a [ '"b"' ] [ '"c"' ] [ 'f' ] -> 4
 >a -> { "b": { "d": { i: true }, "c": { d: 6, f: 4 } } }
+>Variable 'a' cleared.
+>a = { b : true , c : { d : '123' , f : 'fghi' , g : { r : 4 , s : 5 } } } -> { b: true, c: { d: "123", f: "fghi", g: { r: 4, s: 5 } } }
+>a . b -> true
+>a . c . d -> "123"
+>a . c -> { d: "123", f: "fghi", g: { r: 4, s: 5 } }
+>a . c . g -> { r: 4, s: 5 }
+>a . c . g . r -> 4
+>++ a . c . g . r -> 5
+>a -> { b: true, c: { d: "123", f: "fghi", g: { r: 5, s: 5 } } }
+>++ a . c . g . r -> 6
+>a . c . g . "e" = 'E' -> "E"
+>a -> { b: true, c: { d: "123", f: "fghi", g: { r: 6, s: 5, "e": "E" } } }
+>a . c . g . "e" -> "E"
+>a . c . g . "f" = { "g" : 23 , "h" : { "i" : 27 } } -> { "h": { "i": 27 }, "g": 23 }
+>a -> { b: true, c: { d: "123", f: "fghi", g: { r: 6, s: 5, "f": { "h": { "i": 27 }, "g": 23 }, "e": "E" } } }
+>a . c . g . "f" . "h" -> { "i": 27 }
+>a [ 'c' ] . g . "f" [ '"h"' ] . "i" ++ -> 27
+>a -> { b: true, c: { d: "123", f: "fghi", g: { r: 6, s: 5, "f": { "h": { "i": 28 }, "g": 23 }, "e": "E" } } }
+>a . c . g . "f" . 'h' -> <null>
+>a . c . g . "f" . "h" . j = 15 -> 15
+>a -> { b: true, c: { d: "123", f: "fghi", g: { r: 6, s: 5, "f": { "h": { j: 15, "i": 28 }, "g": 23 }, "e": "E" } } }
+>a . c . g . "f" . "h" . j ++ -> 15
+>a -> { b: true, c: { d: "123", f: "fghi", g: { r: 6, s: 5, "f": { "h": { j: 16, "i": 28 }, "g": 23 }, "e": "E" } } }
 >
 >End of nested object / array tests.
 >Tests of :include directive.

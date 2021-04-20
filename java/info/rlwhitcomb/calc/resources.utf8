@@ -54,6 +54,8 @@
 #	    Tweak an error message.
 #	25-Mar-2021 (rlwhitcomb)
 #	    New errors for FILL.
+#	20-Apr-2021 (rlwhitcomb)
+#	    Tweak "defining" to add function parameters.
 #
 
 #
@@ -98,7 +100,7 @@ varCleared	= %1$s cleared.
 timingMode	= Timing mode set to %1$s.
 debugMode	= Debug mode set to %1$s.
 rationalMode	= Calculation mode set to %1$s.
-defining	= <r>Defining function '<v>%1$s<r>' = <x>%2$s<r>
+defining	= <r>Defining function '<v>%1$s%2$s<r>' = <x>%3$s<r>
 # These two should (probably) not be translated
 rational	= RATIONAL
 decimal		= DECIMAL
