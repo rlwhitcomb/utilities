@@ -51,6 +51,9 @@
  *	    Get the "silent" setting right everywhere when evaluating a function.
  *	26-Mar-2021 (rlwhitcomb)
  *	    Implement "compareValues" for lists and maps.
+ *	20-Apr-2021 (rlwhitcomb)
+ *	    Change spacing in "getTreeText()" to be context-sensitive and therefore
+ *	    a lot more intelligent.
  */
 package info.rlwhitcomb.calc;
 
@@ -81,10 +84,35 @@ public final class CalcUtil
 	/** Private constructor since this is a static class. */
 	private CalcUtil() { }
 
+	/**
+	 * Flags for how to format tree text, depending on context.
+	 */
+	private static class TreeTextOptions
+	{
+		/** {@code false} means {@code ": "}, while {@code true} means {@code " : "} */
+		boolean spaceColon = false;
+		/** {@code false} means {@code "-"}, while {@code true} means {@code "- "} */
+		boolean spaceMinus = true;
+		/** {@code false} means {@code "["}, while {@code true} means {@code " ["} */
+		boolean spaceOpenBracket = true;
+
+
+		TreeTextOptions() {
+		}
+
+		TreeTextOptions(final TreeTextOptions other) {
+		    this.spaceColon = other.spaceColon;
+		    this.spaceMinus = other.spaceMinus;
+		    this.spaceOpenBracket = other.spaceOpenBracket;
+		}
+	}
+
+
 	public static String getTreeText(final ParserRuleContext ctx) {
 	    StringBuilder buf = new StringBuilder();
+	    TreeTextOptions options = new TreeTextOptions();
 
-	    getTreeText(buf, ctx);
+	    getTreeText(buf, ctx, options);
 
 	    int len = buf.length();
 	    while (buf.charAt(len - 1) == ' ')
@@ -94,20 +122,82 @@ public final class CalcUtil
 	    return buf.toString();
 	}
 
-	public static void getTreeText(final StringBuilder buf, final ParserRuleContext ctx) {
+	private static void getTreeText(final StringBuilder buf, final ParserRuleContext ctx, final TreeTextOptions options) {
+	    TreeTextOptions localOptions = options;
+
+	    // Some situations require context-sensitive alterations
+	    if (ctx instanceof CalcParser.PairContext) {
+		localOptions = new TreeTextOptions(options);
+		localOptions.spaceColon = false;
+	    }
+	    else if (ctx instanceof CalcParser.EitherOrExprContext) {
+		localOptions = new TreeTextOptions(options);
+		localOptions.spaceColon = true;
+	    }
+	    else if (ctx instanceof CalcParser.NegPosExprContext) {
+		localOptions = new TreeTextOptions(options);
+		localOptions.spaceMinus = false;
+	    }
+	    else if (ctx instanceof CalcParser.ArrVarContext) {
+		localOptions = new TreeTextOptions(options);
+		localOptions.spaceOpenBracket = false;
+	    }
+
 	    for (ParseTree child : ctx.children) {
 		if (child instanceof ParserRuleContext) {
-		    getTreeText(buf, (ParserRuleContext) child);
+		    getTreeText(buf, (ParserRuleContext) child, localOptions);
 		}
 		else {
+		    boolean replace = false;
+		    boolean space = true;
 		    String childText = child.getText();
-		    boolean sp1 = false, sp2 = true;
-		    // TODO: maybe we can do better??
-		    if (sp1)
+
+		    switch (childText) {
+			case "(":
+			case "{":
+			     space = false;
+			     break;
+			case "[":
+			     space = false;
+			     if (!localOptions.spaceOpenBracket)
+				replace = true;
+			     break;
+			case ",":
+			case ")":
+			case "]":
+			case "}":
+			    replace = true;
+			    break;
+			case ":":
+			    if (!localOptions.spaceColon)
+				replace = true;
+			    break;
+			case "-":
+			    if (!localOptions.spaceMinus)
+				space = false;
+			    break;
+			case ".":
+			    replace = true;
+			    space = false;
+			    break;
+			default:
+			    break;
+		    }
+
+		    if (replace) {
+			int len = buf.length();
+			if (buf.charAt(len - 1) == ' ')
+			    buf.replace(len - 1, len, childText);
+			else
+			    buf.append(childText);
+		    }
+		    else {
+			buf.append(childText);
+		    }
+
+		    if (space) {
 			buf.append(' ');
-		    buf.append(childText);
-		    if (sp2)
-			buf.append(' ');
+		    }
 		}
 	    }
 	}

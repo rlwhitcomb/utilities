@@ -250,6 +250,8 @@
  *	    Fix problem with the fixed-size array returned from "split".
  *	20-Apr-2021 (rlwhitcomb)
  *	    Partial implementation of function parameters.
+ *	20-Apr-2021 (rlwhitcomb)
+ *	    Tweak spacing of expression format.
  */
 package info.rlwhitcomb.calc;
 
@@ -834,7 +836,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    int precision = Integer.MIN_VALUE;
 
 	    TerminalNode formatNode = ctx.FORMAT();
-	    String format           = formatNode == null ? "" : formatNode.getText();
+	    String format           = formatNode == null ? "" : " " + formatNode.getText();
 	    String exprString       = String.format("%1$s%2$s", getTreeText(ctx.expr()), format);
 
 	    // Some formats allow a precision to be given ('%', and 'd' for instance)

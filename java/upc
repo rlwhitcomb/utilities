@@ -1,0 +1,3 @@
+#!/bin/bash
+test=$1
+c -nocolor -dir test/files $test | mkcanon > test/canons/${test//,/_}.canon

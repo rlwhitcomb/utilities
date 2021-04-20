@@ -9,11 +9,13 @@
 value = 1
 array = []
 SIZE = 5
+:resultsonly on
 loop $i in SIZE {
    loop $j in SIZE {
       array[$i-1][$j-1] = value++!
    }
 }
+:resultsonly pop
 array@j
 
 primes = []
