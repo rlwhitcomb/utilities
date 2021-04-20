@@ -182,6 +182,8 @@
  *	    Add time constants and time/duration formatting.
  *	20-Apr-2021 (rlwhitcomb)
  *	    Simplify objVar. Add formal and actual params for functions.
+ *	20-Apr-2021 (rlwhitcomb)
+ *	    Add ":variables" directive.
  */
 
 grammar Calc;
@@ -380,6 +382,7 @@ directive
    | DEBUG modeOption                      # debugDirective
    | RESULTSONLY modeOption                # resultsOnlyDirective
    | QUIET modeOption                      # quietDirective
+   | VARIABLES idList ?                    # variablesDirective
    ;
 
 numberOption
@@ -750,6 +753,10 @@ RESULTSONLY
 
 QUIET
    : DIR  Q U I E T
+   ;
+
+VARIABLES
+   : DIR ( V A R | V A R S | V A R I A B L E | V A R I A B L E S )
    ;
 
 

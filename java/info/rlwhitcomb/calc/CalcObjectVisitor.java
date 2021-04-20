@@ -252,6 +252,8 @@
  *	    Partial implementation of function parameters.
  *	20-Apr-2021 (rlwhitcomb)
  *	    Tweak spacing of expression format.
+ *	20-Apr-2021 (rlwhitcomb)
+ *	    Add :VARIABLES directive.
  */
 package info.rlwhitcomb.calc;
 
@@ -269,6 +271,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.function.UnaryOperator;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
@@ -702,6 +706,33 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    vars.insert(0, Intl.getString("calc#varVariables"));
 		displayActionMessage("%calc#varCleared", vars);
 	    }
+	    return null;
+	}
+
+	@Override
+	public Object visitVariablesDirective(CalcParser.VariablesDirectiveContext ctx) {
+	    CalcParser.IdListContext idList = ctx.idList();
+	    List<TerminalNode> ids;
+	    Set<String> sortedKeys;
+
+	    if (idList == null || (ids = idList.ID()).isEmpty()) {
+		sortedKeys = new TreeSet<>(variables.keySet());
+	    }
+	    else {
+		sortedKeys = new TreeSet<>();
+		ids = idList.ID();
+		for (TerminalNode node : ids) {
+		    sortedKeys.add(node.getText());
+		}
+	    }
+
+	    boolean oldMode = Calc.setResultsOnlyMode(false);
+	    for (String key : sortedKeys) {
+		Object value = variables.get(key);
+		displayer.displayResult(key, toStringValue(this, value));
+	    }
+	    Calc.setResultsOnlyMode(oldMode);
+
 	    return null;
 	}
 
