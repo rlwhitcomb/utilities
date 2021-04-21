@@ -66,9 +66,9 @@ code {
 <body>
   <center>
     <h1>Expression Calculator Help</h1>
-    <h3>Version ${Calc.version}, build ${build.number}</h3>
+    <h2>Version ${Calc.version}, build ${build.number}</h2>
   </center>
-  <h3>Introduction</h3>
+  <h2>Introduction</h2>
   <p>An expression calculator that combines (nearly) unlimited precision decimal arithmetic with a rich assortment
        of operators and functions to give the ability to calculate nearly any arithmetic expression.
   <p>As input, the expression calculator can operate on an expression given entirely on the command line (may need to be
@@ -76,13 +76,13 @@ code {
        (<span class="underline">R</span>ead, <span class="underline">E</span>val, <span class="underline">P</span>rint
         <span class="underline">L</span>oop) where a prompt is displayed, the input lines are evaluated
        one-at-a-time, and the results displayed; from a file for predefined calculations; or inside a simple GUI frame.
-  <h3>Command Line</h3>
+  <h2>Command Line</h2>
   <p>The command is assumed to have either the name of a file to process, or an expression to evaluate. There may also be options specified (see the next section). If there is a single value given and there exists a file by that name (possibly in another directory given by the prior <code>-inputdir</code> option), then that file is read, the contents parsed, and all the expressions evaluated. Otherwise, if there are more than one argument on the command line, or the single argument does not name a file, then the command line is taken as a single string, parsed, and then evaluated.
-  <h3>Command Line Options</h3>
+  <h2>Command Line Options</h2>
   <p>Certain options can be given on the command line that affect the operation of the calculator. These options can also be set via the <code>CALC_OPTIONS</code> environment variable. Options specified on the command line will override the defaults set by <code>CALC_OPTIONS</code>, and options given later on the command line override ones given earlier.
   <p>Options are case-insensitive, and maybe be given with <code>-</code>, <code>--</code> or on Windows a <code>/</code>, prefix.
   <center>
-  <h3>Command Line Options</h3>
+  <h2>Command Line Options</h2>
   <table>
     <tr>
       <th width=100>Option</th>
@@ -111,11 +111,11 @@ code {
     <tr><td><code>-version</code></td><td>Display on the console the version information for the program</td><td><code>-vers</code>, <code>-ver</code>, <code>-v</code></td></tr>
   </table>
   </center>
-  <h3>Read, Eval, Print Loop Commands</h3>
+  <h2>Read, Eval, Print Loop Commands</h2>
   <p>In REPL mode, in addition to expressions and directives (as described below), there are a few commands available to do other
      things, mostly as alternatives to command-line options.  These commands are as follows:
   <center>
-  <h3>REPL Commands</h3>
+  <h2>REPL Commands</h2>
   <table>
     <tr>
       <th width=100>Command</th>
@@ -129,7 +129,7 @@ code {
     <tr><td><code>gui</code></td><td>Switch to GUI mode</td><td><code>:gui</code>, <code>:g</code></td><td><code>-gui</code></td></tr>
   </table>
   </center>
-  <h3>Values, Constants, and Variables</h3>
+  <h2>Values, Constants, and Variables</h2>
   <p>The basic building blocks of the expressions implemented here are the basic value types: numbers (either integer or real
      numbers with a fractional part), strings, rational fractions, boolean values, and the <code>null</code> value.
      Numbers can be of arbitrary precision, up to a maximum of 2**32-1 digits. Strings can also be of any length up
@@ -205,14 +205,14 @@ code {
      Note that string object keys (as in <code>"key"</code> do NOT reference the same element as an identifier key (as in
      <code>key</code>).  Therefore, this is legal: <code>value = { "flag": true, flag: 'Red' }</code> and the elements are
      accessed as <code>value."flag"</code> and <code>value.flag</code>.
-  <h3>Modes and Precision</h3>
+  <h2>Modes and Precision</h2>
   <p>Calc can do essentially arbitrary precision arithmetic. It can also do arithmetic on rational fractions (as in <code>1/4 + 1/2 = 3/4</code>). The default setting is to do decimal arithmetic, but this can adjust using either command line options (see
       <code>-rational</code> and <code>-decimal</code> above), or using directives during execution.  The default precision for
       all calculations 128-bit arithmetic, or approximately 34 digits of decimal precision. The precision can be adjusted up to
       12,500 (due to somewhat arbitrary restrictions on our calculation of the value of <code>&#x1D6D1;</code>) using any of
       several directives.
   <p>Trigonometric calculations are, by default, done in radians, but this can be changed to use degrees using a directive.
-  <h3>Formats</h3>
+  <h2>Formats</h2>
   <p>The results of most operations can be displayed using alternative formats for better comprehension. To specify an alternative
      format, append <code>@<i>format</i></code> to the expression. In most cases, the uppercase equivalent can be given, which will
      do the same formatting, except mapping the result to UPPER case as well. The exceptions are <code>@f</code> which formats the
@@ -221,7 +221,7 @@ code {
      given the output could have strings which shouldn't be case-shifted.
   <p>The available formats are:
   <center>
-    <h3>Formats</h3>
+    <h2>Formats</h2>
     <table>
       <tr>
         <th width="100">Format</th>
@@ -243,10 +243,10 @@ code {
       <tr><td><code>@</code>[<i>nn</i>]<code>%</code></td><td>Format as a percentage, optionally rounding to <i>nn</i> digits</td></tr>
     </table>
   </center>
-  <h3>Available Operators</h3>
+  <h2>Available Operators and Predefined Functions</h2>
   <p>There are a wide variety of arithmetic and logical operators available, as well as a number of common arithmetic functions that can be used.
   <center>
-  <h3>Operators and Precedence</h3>
+  <h2>Operators and Precedence</h2>
   <table>
     <tr>
       <th width=60>Level</th>
@@ -391,7 +391,7 @@ code {
         <td>perform the bit op, reassign to variable</td><td>right to left</td></tr>
   </table>
   </center>
-  <h3>Functions</h3>
+  <h2>User-Defined Functions</h2>
   <p>In addition to the predefined functions above, Calc allows new functions to be defined (unfortunately they do not support
      function parameters yet) that can be used repeatedly without having to retype the same expression.
   <p>The syntax for a function definition is:
@@ -406,7 +406,7 @@ code {
      Functions can also reference loop variables, which are normally not allowed outside loops, and will work properly as long
      as they are only invoked inside a <code>LOOP</code> for which the loop variable is declared. In other words, functions are
      parsed along with all other expressions, but they are stored as parse trees, and are not evaluated until they are invoked.
-  <h3>Statements</h3>
+  <h2>Statements</h2>
   <p>In addition to the functions and operators listed above, Calc has four different statements which can be used to do
      iterative or repeated calculations, and to select between actions based on the value of an expression. These are the <code>LOOP</code>, <code>WHILE</code> and <code>IF</code> statements.
   <p>The syntax for each is as follows:
@@ -465,10 +465,10 @@ code {
       <code style="color:blue;">a</code><code style="color:gray;"> -> </code><code style="color:green;">10</code>
   </p>
   There are many more code examples in the <code>test/files</code> directory of the source distribution.
-  <h3>Directives</h3>
+  <h2>Directives</h2>
   <p>Various directives can be given within a script or on a separate input line in REPL mode that will affect the operation of the calculator. Some of them allow you to change the options given on the command line, while others are only available from within the script.
   <center>
-  <h3>Available Directives</h3>
+  <h2>Available Directives</h2>
   <table>
     <tr>
       <th width=100>Directive</th>
@@ -496,7 +496,7 @@ code {
     <tr><td><code>:quiet</code> <i>mode_option</i></td><td>Set quiet mode<br><i>(default is <code>off</code> or the value on command line)</i></td><td></td></tr>
   </table>
   </center>
-  <h3>Notes on Directives</h3>
+  <h2>Notes on Directives</h2>
   <p>The <i>string</i> argument for the <code>:include</code> directive can be a comma-separated list of file names, with or without
      paths. If a file cannot be read and there is a previous input directory available (set either by a previous file with a path
      given, or by the <code>-inputDir</code> command-line option) then that directory is searched for the file. If not found there,
@@ -516,7 +516,7 @@ code {
      (since the values are stored this way).
   <p>The only effect of debug mode is to display the parse tree (in LISP format) before the expression(s) is/are evaluated.
   <p>Timing mode displays the total parsing and execution time (to nanosecond precision on some systems) after the results are displayed.
-  <h3>GUI operations</h3>
+  <h2>GUI operations</h2>
   <p>The GUI window can be opened using the "<code>cg</code>" command (or on Windows only, the <code>``</code> command), or by entering the <code>gui</code> command in REPL mode.  The following window will be presented with the focus initially in the "Expressions" field.
   <center>
   <br><img src="calc_initial.png" alt="Initial GUI screen" width="50%"/>
@@ -525,7 +525,7 @@ code {
   <p>This help page will also be displayed by the <span class="bluebutton">?</span> button (or the <code>F1</code> key).
   <p>Note: colors are not currently used in the GUI display, so using the command-line options <code>-darkbg</code> or <code>-lightbg</code> will have no effect.
 
-  <h3>TODO Items for This Document</h3>
+  <h2>TODO Items for This Document</h2>
   <ul>
     <li>More examples of KB input and output, with the modes explained</li>
     <li>Exceptions to decimal precision (i.e., for trig, log), and also in doing factorial? or others that don't respect the precision, also limits on pi/e digits</li>
