@@ -136,6 +136,9 @@
  *	15-Apr-2021 (rlwhitcomb)
  *	    Initialize Intl with the new GUI resources. Get the version tip text
  *	    from there. Reverse the Settings dialog buttons to match convention.
+ *	20-Apr-2021 (rlwhitcomb)
+ *	    Initialize the file browser with the current directory.
+ *	    Accessor for "replMode".
  */
 package info.rlwhitcomb.calc;
 
@@ -616,6 +619,10 @@ public class Calc
 	}
 
 
+	public static boolean getReplMode() {
+	    return replMode;
+	}
+
 	public static boolean setTimingMode(boolean mode) {
 	    boolean oldMode = timing;
 	    timing = mode;
@@ -770,7 +777,7 @@ public class Calc
 	{
 		@Override
 		public void perform(Component source) {
-		    final FileBrowserSheet browser = new FileBrowserSheet(FileBrowserSheet.Mode.OPEN_MULTIPLE);
+		    final FileBrowserSheet browser = new FileBrowserSheet(FileBrowserSheet.Mode.OPEN_MULTIPLE, "./");
 		    browser.open(mainWindow, sheet -> {
 			if (!sheet.getResult())
 			    return;

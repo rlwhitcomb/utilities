@@ -56,6 +56,8 @@
 #	    New errors for FILL.
 #	20-Apr-2021 (rlwhitcomb)
 #	    Tweak "defining" to add function parameters.
+#	20-Apr-2021 (rlwhitcomb)
+#	    Text for "Variables" directive in non-REPL mode.
 #
 
 #
@@ -101,6 +103,9 @@ timingMode	= Timing mode set to %1$s.
 debugMode	= Debug mode set to %1$s.
 rationalMode	= Calculation mode set to %1$s.
 defining	= <r>Defining function '<v>%1$s%2$s<r>' = <x>%3$s<r>
+variables	= Variables
+varUnder1	= ---------
+varUnder2	= =========
 # These two should (probably) not be translated
 rational	= RATIONAL
 decimal		= DECIMAL

@@ -254,6 +254,8 @@
  *	    Tweak spacing of expression format.
  *	20-Apr-2021 (rlwhitcomb)
  *	    Add :VARIABLES directive.
+ *	20-Apr-2021 (rlwhitcomb)
+ *	    Put text around variables list in non-REPL mode.
  */
 package info.rlwhitcomb.calc;
 
@@ -727,10 +729,20 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 
 	    boolean oldMode = Calc.setResultsOnlyMode(false);
+	    boolean replMode = Calc.getReplMode();
+
+	    if (!replMode) {
+		displayActionMessage("%calc#variables");
+		displayActionMessage("%calc#varUnder1");
+	    }
 	    for (String key : sortedKeys) {
 		Object value = variables.get(key);
 		displayer.displayResult(key, toStringValue(this, value));
 	    }
+	    if (!replMode) {
+		displayActionMessage("%calc#varUnder2");
+	    }
+
 	    Calc.setResultsOnlyMode(oldMode);
 
 	    return null;
