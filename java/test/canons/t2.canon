@@ -4,6 +4,7 @@
 >Starting Calc tests...
 >
 >Test 'e1_e2_e3': Passed
+>Test 'e7': Passed
 >Test 'e8': Passed
 >Test 'e10': Passed
 >Test 'e12': Passed
@@ -18,6 +19,6 @@
 >
 >End of Calc tests.
 >------------------------------------
->Ran 12 tests: 12 passed, 0 failed.
+>Ran 13 tests: 13 passed, 0 failed.
 >====================================
 >

@@ -184,6 +184,8 @@
  *	    Simplify objVar. Add formal and actual params for functions.
  *	20-Apr-2021 (rlwhitcomb)
  *	    Add ":variables" directive.
+ *	20-Apr-2021 (rlwhitcomb)
+ *	    Add syntax for "case" statement. Massive renaming of lexical tokens.
  */
 
 grammar Calc;
@@ -199,15 +201,20 @@ stmt
    ;
 
 stmtOrExpr
-   : expr FORMAT ? ENDEXPR ?              # exprStmt
-   | LOOP ( LOCALVAR IN ) ? loopCtl block # loopStmt
-   | WHILE expr block                     # whileStmt
-   | IF expr block ( ELSE block ) ?       # ifStmt
-   | ENDEXPR                              # emptyStmt
+   : expr FORMAT ? ENDEXPR ?                         # exprStmt
+   | K_LOOP ( LOCALVAR K_IN ) ? loopCtl block        # loopStmt
+   | K_WHILE expr block                              # whileStmt
+   | K_IF expr block ( K_ELSE block ) ?              # ifStmt
+   | K_CASE expr K_OF caseBlock ( ',' caseBlock ) *  # caseStmt
+   | ENDEXPR                                         # emptyStmt
    ;
 
 block
    : '{' stmtOrExpr * '}'                # stmtBlock
+   ;
+
+caseBlock
+   : ( exprList | K_DEFAULT ) ':' block
    ;
 
 expr
@@ -227,50 +234,50 @@ expr
    | expr MULT_OP expr                   # multiplyExpr
    | expr ADD_OP expr                    # addExpr
    | expr SHIFT_OP expr                  # shiftExpr
-   | ABS expr                            # absExpr
-   | SIN expr                            # sinExpr
-   | COS expr                            # cosExpr
-   | TAN expr                            # tanExpr
-   | ASIN expr                           # asinExpr
-   | ACOS expr                           # acosExpr
-   | ATAN expr                           # atanExpr
-   | ATAN2 expr2                         # atan2Expr
-   | SINH expr                           # sinhExpr
-   | COSH expr                           # coshExpr
-   | TANH expr                           # tanhExpr
-   | SQRT expr                           # sqrtExpr
-   | CBRT expr                           # cbrtExpr
-   | FORT expr                           # fortExpr
-   | LOG expr                            # logExpr
-   | LN2 expr                            # ln2Expr
-   | LN expr                             # lnExpr
-   | EPOW expr                           # ePowerExpr
-   | SIGNUM expr                         # signumExpr
-   | LENGTH expr                         # lengthExpr
-   | SCALE expr                          # scaleExpr
-   | ROUND expr2                         # roundExpr
-   | ISPRIME expr                        # isPrimeExpr
-   | GCD expr2                           # gcdExpr
-   | LCM expr2                           # lcmExpr
-   | MAX exprN                           # maxExpr
-   | MIN exprN                           # minExpr
-   | SUMOF exprN                         # sumOfExpr
-   | PRODUCTOF exprN                     # productOfExpr
-   | JOIN exprN                          # joinExpr
-   | SPLIT ( expr2 | expr3 )             # splitExpr
-   | INDEX ( expr2 | expr3 )             # indexExpr
-   | SUBSTR ( expr2 | expr3 )            # substrExpr
-   | FILL var ',' ( expr2 | expr3 )      # fillExpr
-   | (TRIM|LTRIM|RTRIM) expr             # trimExpr
-   | FIB expr                            # fibExpr
-   | BN expr                             # bernExpr
-   | FRAC ( STRING | ISTRING | expr2 | expr3 )   # fracExpr
-   | ROMAN expr                          # romanExpr
-   | ( UPPER | LOWER ) expr              # caseConvertExpr
-   | FACTORS expr                        # factorsExpr
-   | PFACTORS expr                       # primeFactorsExpr
-   | EVAL expr                           # evalExpr
-   | EXEC exprN                          # execExpr
+   | K_ABS expr                          # absExpr
+   | K_SIN expr                          # sinExpr
+   | K_COS expr                          # cosExpr
+   | K_TAN expr                          # tanExpr
+   | K_ASIN expr                         # asinExpr
+   | K_ACOS expr                         # acosExpr
+   | K_ATAN expr                         # atanExpr
+   | K_ATAN2 expr2                       # atan2Expr
+   | K_SINH expr                         # sinhExpr
+   | K_COSH expr                         # coshExpr
+   | K_TANH expr                         # tanhExpr
+   | K_SQRT expr                         # sqrtExpr
+   | K_CBRT expr                         # cbrtExpr
+   | K_FORT expr                         # fortExpr
+   | K_LOG expr                          # logExpr
+   | K_LN2 expr                          # ln2Expr
+   | K_LN expr                           # lnExpr
+   | K_EPOW expr                         # ePowerExpr
+   | K_SIGNUM expr                       # signumExpr
+   | K_LENGTH expr                       # lengthExpr
+   | K_SCALE expr                        # scaleExpr
+   | K_ROUND expr2                       # roundExpr
+   | K_ISPRIME expr                      # isPrimeExpr
+   | K_GCD expr2                         # gcdExpr
+   | K_LCM expr2                         # lcmExpr
+   | K_MAX exprN                         # maxExpr
+   | K_MIN exprN                         # minExpr
+   | K_SUMOF exprN                       # sumOfExpr
+   | K_PRODUCTOF exprN                   # productOfExpr
+   | K_JOIN exprN                        # joinExpr
+   | K_SPLIT ( expr2 | expr3 )           # splitExpr
+   | K_INDEX ( expr2 | expr3 )           # indexExpr
+   | K_SUBSTR ( expr2 | expr3 )          # substrExpr
+   | K_FILL var ',' ( expr2 | expr3 )    # fillExpr
+   | (K_TRIM|K_LTRIM|K_RTRIM) expr       # trimExpr
+   | K_FIB expr                          # fibExpr
+   | K_BN expr                           # bernExpr
+   | K_FRAC ( STRING | ISTRING | expr2 | expr3 ) # fracExpr
+   | K_ROMAN expr                        # romanExpr
+   | ( K_UPPER | K_LOWER ) expr          # caseConvertExpr
+   | K_FACTORS expr                      # factorsExpr
+   | K_PFACTORS expr                     # primeFactorsExpr
+   | K_EVAL expr                         # evalExpr
+   | K_EXEC exprN                        # execExpr
    | expr '<=>' expr                     # spaceshipExpr
    | expr COMPARE_OP expr                # compareExpr
    | expr EQUAL_OP expr                  # equalExpr
@@ -341,8 +348,8 @@ value
    | OCT_CONST                   # octalValue
    | HEX_CONST                   # hexValue
    | KB_CONST                    # kbValue
-   | ( TRUE | FALSE )            # booleanValue
-   | NULL                        # nullValue
+   | ( K_TRUE | K_FALSE )        # booleanValue
+   | K_NULL                      # nullValue
    | PI_CONST                    # piValue
    | E_CONST                     # eValue
    | FRAC_CONST                  # fracValue
@@ -360,29 +367,29 @@ actualParams
    ;
 
 define
-   : DEFINE ID formalParams ? '=' ( stmtOrExpr | block )  # defineStmt
+   : K_DEFINE ID formalParams ? '=' ( stmtOrExpr | block )  # defineStmt
    ;
 
 directive
-   : ( DECIMAL | PRECISION ) numberOption  # decimalDirective
-   | DEFAULT                               # defaultDirective
-   | DOUBLE                                # doubleDirective
-   | FLOAT                                 # floatDirective
-   | UNLIMITED                             # unlimitedDirective
-   | DEGREES                               # degreesDirective
-   | RADIANS                               # radiansDirective
-   | BINARY                                # binaryDirective
-   | SI                                    # siDirective
-   | MIXED                                 # mixedDirective
-   | CLEAR idList ?                        # clearDirective
-   | ECHO expr ?                           # echoDirective
-   | INCLUDE expr                          # includeDirective
-   | TIMING modeOption                     # timingDirective
-   | RATIONAL modeOption                   # rationalDirective
-   | DEBUG modeOption                      # debugDirective
-   | RESULTSONLY modeOption                # resultsOnlyDirective
-   | QUIET modeOption                      # quietDirective
-   | VARIABLES idList ?                    # variablesDirective
+   : ( D_DECIMAL | D_PRECISION ) numberOption # decimalDirective
+   | D_DEFAULT                                # defaultDirective
+   | D_DOUBLE                                 # doubleDirective
+   | D_FLOAT                                  # floatDirective
+   | D_UNLIMITED                              # unlimitedDirective
+   | D_DEGREES                                # degreesDirective
+   | D_RADIANS                                # radiansDirective
+   | D_BINARY                                 # binaryDirective
+   | D_SI                                     # siDirective
+   | D_MIXED                                  # mixedDirective
+   | D_CLEAR idList ?                         # clearDirective
+   | D_ECHO expr ?                            # echoDirective
+   | D_INCLUDE expr                           # includeDirective
+   | D_TIMING modeOption                      # timingDirective
+   | D_RATIONAL modeOption                    # rationalDirective
+   | D_DEBUG modeOption                       # debugDirective
+   | D_RESULTSONLY modeOption                 # resultsOnlyDirective
+   | D_QUIET modeOption                       # quietDirective
+   | D_VARIABLES idList ?                     # variablesDirective
    ;
 
 numberOption
@@ -398,8 +405,8 @@ idList
    ;
 
 modeOption
-   : TRUE
-   | FALSE
+   : K_TRUE
+   | K_FALSE
    | 'on'
    | 'off'
    | 'pop'
@@ -410,12 +417,6 @@ modeOption
 
 
 /* Lexer rules start here */
-
-TRUE     : T R U E ;
-
-FALSE    : F A L S E ;
-
-NULL     : N U L L ;
 
 PI_CONST : P I
          | ( '\u03a0' | '\u03c0' | '\u03d6' | '\u1d28' | '\u213c' | '\u213f' )
@@ -448,111 +449,124 @@ TIME_CONST
          | T '\'' '-' ? [0-9] + ( '.' [0-9] * ) ? [ \t] * ( W | D | H | M | S ) '\''
          ;
 
-ABS      : A B S ;
 
-SINH     : S I N H ;
+K_TRUE     : T R U E ;
 
-SIN      : S I N ;
+K_FALSE    : F A L S E ;
 
-COSH     : C O S H ;
+K_NULL     : N U L L ;
 
-COS      : C O S ;
+K_ABS      : A B S ;
 
-TANH     : T A N H ;
+K_SINH     : S I N H ;
 
-TAN      : T A N ;
+K_SIN      : S I N ;
 
-ASIN     : A S I N ;
+K_COSH     : C O S H ;
 
-ACOS     : A C O S ;
+K_COS      : C O S ;
 
-ATAN2    : A T A N '2' ;
+K_TANH     : T A N H ;
 
-ATAN     : A T A N ;
+K_TAN      : T A N ;
 
-SQRT     : ( S Q R T | '\u221A' ) ;
+K_ASIN     : A S I N ;
 
-CBRT     : ( C B R T | '\u221B' ) ;
+K_ACOS     : A C O S ;
 
-FORT     : ( F O R T | '\u221C' ) ;
+K_ATAN2    : A T A N '2' ;
 
-LOG      : L O G ;
+K_ATAN     : A T A N ;
 
-LN       : L N ;
+K_SQRT     : ( S Q R T | '\u221A' ) ;
 
-LN2      : L N '2' ;
+K_CBRT     : ( C B R T | '\u221B' ) ;
 
-EPOW     : E P O W ;
+K_FORT     : ( F O R T | '\u221C' ) ;
 
-SIGNUM   : S I G N U M ;
+K_LOG      : L O G ;
 
-LENGTH   : L E N G T H ;
+K_LN       : L N ;
 
-SCALE    : S C A L E ;
+K_LN2      : L N '2' ;
 
-ROUND    : R O U N D ;
+K_EPOW     : E P O W ;
 
-ISPRIME  : I S P R I M E ;
+K_SIGNUM   : S I G N U M ;
 
-GCD      : G C D ;
+K_LENGTH   : L E N G T H ;
 
-LCM      : L C M ;
+K_SCALE    : S C A L E ;
 
-MAX      : M A X ;
+K_ROUND    : R O U N D ;
 
-MIN      : M I N ;
+K_ISPRIME  : I S P R I M E ;
 
-JOIN     : J O I N ;
+K_GCD      : G C D ;
 
-SPLIT    : S P L I T ;
+K_LCM      : L C M ;
 
-INDEX    : I N D E X ;
+K_MAX      : M A X ;
 
-SUBSTR   : S U B S T R ;
+K_MIN      : M I N ;
 
-FILL     : F I L L ;
+K_JOIN     : J O I N ;
 
-TRIM     : T R I M ;
+K_SPLIT    : S P L I T ;
 
-LTRIM    : L T R I M ;
+K_INDEX    : I N D E X ;
 
-RTRIM    : R T R I M ;
+K_SUBSTR   : S U B S T R ;
 
-FIB      : F I B ;
+K_FILL     : F I L L ;
 
-BN       : B N ;
+K_TRIM     : T R I M ;
 
-FRAC     : F R A C ;
+K_LTRIM    : L T R I M ;
 
-ROMAN    : R O M A N ;
+K_RTRIM    : R T R I M ;
 
-UPPER    : U P P E R ;
+K_FIB      : F I B ;
 
-LOWER    : L O W E R ;
+K_BN       : B N ;
 
-FACTORS  : F A C T O R S ;
+K_FRAC     : F R A C ;
 
-PFACTORS : P F A C T O R S ;
+K_ROMAN    : R O M A N ;
 
-EVAL     : E V A L ;
+K_UPPER    : U P P E R ;
 
-EXEC     : E X E C ;
+K_LOWER    : L O W E R ;
 
-SUMOF    : ( S U M O F | '\u2211' ) ;
+K_FACTORS  : F A C T O R S ;
 
-PRODUCTOF: ( P R O D U C T O F | '\u220F' ) ;
+K_PFACTORS : P F A C T O R S ;
 
-LOOP     : L O O P ;
+K_EVAL     : E V A L ;
 
-WHILE    : W H I L E ;
+K_EXEC     : E X E C ;
 
-IN       : I N ;
+K_SUMOF    : ( S U M O F | '\u2211' ) ;
 
-IF       : I F ;
+K_PRODUCTOF: ( P R O D U C T O F | '\u220F' ) ;
 
-ELSE     : E L S E ;
+K_LOOP     : L O O P ;
 
-DEFINE   : ( D E F | D E F I N E ) ;
+K_WHILE    : W H I L E ;
+
+K_IN       : I N ;
+
+K_IF       : I F ;
+
+K_ELSE     : E L S E ;
+
+K_DEFINE   : ( D E F | D E F I N E ) ;
+
+K_CASE     : C A S E ;
+
+K_OF       : O F ;
+
+K_DEFAULT  : D E F A U L T ;
 
 
 /* Note: this needs to be last so that these other "ID" like things
@@ -679,83 +693,83 @@ BIT_OP
 ASSIGN : '=' ;
 
 
-DECIMAL
+D_DECIMAL
    : DIR  ( D E C | D E C I M A L )
    ;
 
-PRECISION
+D_PRECISION
    : DIR  ( P R E C | P R E C I S I O N )
    ;
 
-DEFAULT
+D_DEFAULT
    : DIR  ( D E F | D E F A U L T )
    ;
 
-DOUBLE
+D_DOUBLE
    : DIR  ( D B L | D O U B L E )
    ;
 
-FLOAT
+D_FLOAT
    : DIR  ( F L T | F L O A T )
    ;
 
-UNLIMITED
+D_UNLIMITED
    : DIR  ( U N L | U N L I M I T E D )
    ;
 
-DEGREES
+D_DEGREES
    : DIR  ( D E G | D E G R E E S )
    ;
 
-RADIANS
+D_RADIANS
    : DIR  ( R A D | R A D I A N S )
    ;
 
-BINARY
+D_BINARY
    : DIR  ( B I N | B I N A R Y )
    ;
 
-SI
+D_SI
    : DIR  ( S I | T E N )
    ;
 
-MIXED
+D_MIXED
    : DIR  ( M I X | M I X E D )
    ;
 
-TIMING
+D_TIMING
    : DIR  ( T I M E | T I M I N G )
    ;
 
-RATIONAL
+D_RATIONAL
    : DIR  ( R A T I O N | F R A C | R A T I O N A L | F R A C T I O N )
    ;
 
-CLEAR
+D_CLEAR
    : DIR  ( C L R | C L E A R )
    ;
 
-ECHO
+D_ECHO
    : DIR  E C H O
    ;
 
-INCLUDE
+D_INCLUDE
    : DIR  ( I N C | I N C L U D E )
    ;
 
-DEBUG
+D_DEBUG
    : DIR  ( D E B | D E B U G )
    ;
 
-RESULTSONLY
+D_RESULTSONLY
    : DIR  ( R E S | R E S U L T | R E S U L T S | R E S U L T O N L Y | R E S U L T S O N L Y )
    ;
 
-QUIET
+D_QUIET
    : DIR  Q U I E T
    ;
 
-VARIABLES
+D_VARIABLES
    : DIR ( V A R | V A R S | V A R I A B L E | V A R I A B L E S )
    ;
 

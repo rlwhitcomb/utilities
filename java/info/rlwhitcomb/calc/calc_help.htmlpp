@@ -56,6 +56,10 @@ code {
    padding: 2px;
    border: none;
 }
+
+.indent {
+   margin-left: 40px;
+}
     </style>
 </head>
 
@@ -387,13 +391,37 @@ code {
         <td>perform the bit op, reassign to variable</td><td>right to left</td></tr>
   </table>
   </center>
+  <h3>Functions</h3>
+  <p>In addition to the predefined functions above, Calc allows new functions to be defined (unfortunately they do not support
+     function parameters yet) that can be used repeatedly without having to retype the same expression.
+  <p>The syntax for a function definition is:
+  <p class="indent">
+     <code>def</code> | <code>define</code>&nbsp;<i>name</i> <code>= {</code> <i>expressions or statements</i> <code>}</code>
+  </p>
+  <p>The value of a function is the value of the last expression evaluated inside it (note that the other statements have the same
+     semantics). Functions are referenced by simply invoking their name.  For example: <code>def a = { 1 }</code> gives <code>a = 1</code>, and <code>def b = { a }</code> gives <code>b = 1</code>. Redefining the underlying function will also change the value of
+     any functions that use it. So, without changing the definition of <code>b</code>, we can redefine <code>def a={2}</code>
+     which will give <code>b = 2</code>.
+     <p>A function can be used anywhere a variable can be used (which is pretty much everywhere).
+     Functions can also reference loop variables, which are normally not allowed outside loops, and will work properly as long
+     as they are only invoked inside a <code>LOOP</code> for which the loop variable is declared. In other words, functions are
+     parsed along with all other expressions, but they are stored as parse trees, and are not evaluated until they are invoked.
   <h3>Statements</h3>
-  <p>In addition to the functions and operators listed above, Calc has three different statements which can be used to do
+  <p>In addition to the functions and operators listed above, Calc has four different statements which can be used to do
      iterative or repeated calculations, and to select between actions based on the value of an expression. These are the <code>LOOP</code>, <code>WHILE</code> and <code>IF</code> statements.
-  <p>The syntax for each is as follows:<br>
-     <code>LOOP</code>&nbsp;[ <i>loopvar</i> <code>IN</code> ] <i>expr</i> [ <code>..</code> or <code>&#x2026;</code> <i>expr</i> ] [ <code>,</code> <i>expr</i> ] <code>{</code> <i>statements or expressions</i> <code>}</code><br>
-     <code>WHILE</code>&nbsp;<i>expr</i> <code>{</code> <i>statements or expressions</i> <code>}</code><br>
+  <p>The syntax for each is as follows:
+  <p class="indent">
+     <code>LOOP</code>&nbsp;[ <i>loopvar</i> <code>IN</code> ] <i>expr</i> [ <code>..</code> or <code>&#x2026;</code> <i>expr</i> ] [ <code>,</code> <i>expr</i> ] <code>{</code> <i>statements or expressions</i> <code>}</code>
+  </p>
+  <p class="indent">
+     <code>WHILE</code>&nbsp;<i>expr</i> <code>{</code> <i>statements or expressions</i> <code>}</code>
+  </p>
+  <p class="indent">
      <code>IF</code>&nbsp;<i>expr</i>&nbsp;<code>{</code> <i>statements or expressions</i> <code>}</code> [ <code>ELSE {</code> <i>statements or expressions</i> <code>}</code> ]
+  </p>
+  <p class="indent">
+     <code>CASE</code>&nbsp;<i>expr</i>&nbsp;<code>OF</code>&nbsp;( ( <i>expr</i> ( <code>,</code> <i>expr</i> ) * | <code>DEFAULT</code> ) <code>: {</code> <i>statements or expressions</i> <code>}</code> ( <code>,</code> ) ? ) *
+  </p>
   <p>The <code>LOOP</code> statement will repeatedly execute the block of statements based on several conditions:
      <ul><li>if only one expression is listed, the loop will be repeated that number of times, starting from one</li>
          <li>if the <i>expr</i> <code>..</code> <i>expr</i> form is used the loop will be repeated starting from the
@@ -415,19 +443,28 @@ code {
   <p>The <code>IF</code> statement evaluates the expression and executes the code block only if the expression evaluates to a
      boolean <code>true</code> value. If the optional <code>ELSE</code> block is given and the expression evaluates to
      <code>false</code> that block will be executed instead.
-  <h3>Functions</h3>
-  <p>In addition to the predefined functions above, Calc allows new functions to be defined (unfortunately they do not support
-     function parameters yet) that can be used repeatedly without having to retype the same expression.
-  <p>The syntax for a function definition is:<br>
-     <code>def</code>&nbsp;<i>name</i> <code>= {</code> <i>expressions or statements</i> <code>}</code>
-  <p>The value of a function is the value of the last expression evaluated inside it (note that the other statements have the same
-     semantics). Functions are referenced by simply invoking their name.  For example: <code>def a = { 1 }</code> gives <code>a = 1</code>, and <code>def b = { a }</code> gives <code>b = 1</code>. Redefining the underlying function will also change the value of
-     any functions that use it. So, without changing the definition of <code>b</code>, we can redefine <code>def a={2}</code>
-     which will give <code>b = 2</code>.
-     <p>A function can be used anywhere a variable can be used (which is pretty much everywhere).
-     Functions can also reference loop variables, which are normally not allowed outside loops, and will work properly as long
-     as they are only invoked inside a <code>LOOP</code> for which the loop variable is declared. In other words, functions are
-     parsed along with all other expressions, but they are stored as parse trees, and are not evaluated until they are invoked.
+  <p>The <code>CASE</code> statement evaluates the expression and executes whichever code block has a matching value, or the <code>default</code> block (if given) if nothing else matches. Note: the expression match is made as if by <code>'=='</code> (that is, not a strict comparison), but the individual block values can be any kind of expression or object (including lists, objects, strings, functions, etc.).
+  <p>The value of any of these statements is the value of the last expression evaluated, inside whatever block is selected, and from the last iteration of that block inside a loop.  For instance, consider the following code:
+  <p class="indent">
+      <code>define strings = { case upper(value) of "ONE": { 1 }, "TWO": { 2 }, "THREE" : { 3.14 }, default: { "many" } }</code><br>
+      <code>value='one'; strings</code>
+  </p>
+    The final value of this function invocation will be the value of whichever block inside the <code>CASE</code> statement is executed, which in this example will be the value <code>1</code>.
+  <p class="indent">
+      <code style="color:blue;">value = 'one'</code><code style="color:gray;"> -> </code><code style="color:green;">"one"</code><br>
+      <code style="color:blue;">strings</code><code style="color:gray;"> -> </code><code style="color:green;">1</code>
+  </p>
+  Also consider this code:
+  <p class="indent">
+      <code>define a={loop $i in 10 {$i}}</code><br>
+      <code>a</code>
+  </p>
+  Which will evaluate as follows:
+  <p class="indent">
+      <code>Defining function '</code><code style="color:green;">a</code><code>' = </code><code style="color:blue;">{loop $i in 10 {$i}}</code><br>
+      <code style="color:blue;">a</code><code style="color:gray;"> -> </code><code style="color:green;">10</code>
+  </p>
+  There are many more code examples in the <code>test/files</code> directory of the source distribution.
   <h3>Directives</h3>
   <p>Various directives can be given within a script or on a separate input line in REPL mode that will affect the operation of the calculator. Some of them allow you to change the options given on the command line, while others are only available from within the script.
   <center>

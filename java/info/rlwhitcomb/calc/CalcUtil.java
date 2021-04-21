@@ -54,6 +54,8 @@
  *	20-Apr-2021 (rlwhitcomb)
  *	    Change spacing in "getTreeText()" to be context-sensitive and therefore
  *	    a lot more intelligent.
+ *	21-Apr-2021 (rlwhitcomb)
+ *	    Make the lowest-level "compareValues" method public for use in "case" statement.
  */
 package info.rlwhitcomb.calc;
 
@@ -574,7 +576,7 @@ public final class CalcUtil
 	 *         {@code 0} if the objects are "equal",
 	 *         {@code +1} if the first object is "greater than" the second.
 	 */
-	private static int compareValues(final CalcObjectVisitor visitor,
+	public static int compareValues(final CalcObjectVisitor visitor,
 		final ParserRuleContext ctx1, final ParserRuleContext ctx2,
 		final Object obj1, final Object obj2,
 		final MathContext mc, final boolean strict, final boolean allowNulls) {

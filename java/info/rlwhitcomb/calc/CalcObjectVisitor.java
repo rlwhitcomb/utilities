@@ -256,6 +256,8 @@
  *	    Add :VARIABLES directive.
  *	20-Apr-2021 (rlwhitcomb)
  *	    Put text around variables list in non-REPL mode.
+ *	21-Apr-2021 (rlwhitcomb)
+ *	    Implement "CASE" statement; rename lexical tokens.
  */
 package info.rlwhitcomb.calc;
 
@@ -1284,6 +1286,34 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	@Override
+	public Object visitCaseStmt(CalcParser.CaseStmtContext ctx) {
+	    Object caseValue = visit(ctx.expr());
+	    List<CalcParser.CaseBlockContext> blocks = ctx.caseBlock();
+	    CalcParser.CaseBlockContext defaultCtx = null;
+
+	    for (CalcParser.CaseBlockContext cbCtx : blocks) {
+		CalcParser.ExprListContext exprListCtx = cbCtx.exprList();
+		if (exprListCtx == null) {
+		    defaultCtx = cbCtx;
+		}
+		else {
+		    for (CalcParser.ExprContext exprCtx : exprListCtx.expr()) {
+			Object blockValue = visit(exprCtx);
+			if (CalcUtil.compareValues(this, ctx, cbCtx, caseValue, blockValue, mc, false, true) == 0) {
+			    return visit(cbCtx.block());
+			}
+		    }
+		}
+	    }
+
+	    if (defaultCtx != null) {
+		return visit(defaultCtx.block());
+	    }
+
+	    return null;
+	}
+
+	@Override
 	public Object visitStmtBlock(CalcParser.StmtBlockContext ctx) {
 	    Object lastValue = null;
 
@@ -2239,10 +2269,10 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    String stringValue = getStringValue(ctx.expr());
 	    String result;
 
-	    if (ctx.TRIM() != null) {
+	    if (ctx.K_TRIM() != null) {
 		result = stringValue.trim();
 	    }
-	    else if (ctx.LTRIM() != null) {
+	    else if (ctx.K_LTRIM() != null) {
 		result = CharUtil.ltrim(stringValue);
 	    }
 	    else {
@@ -2314,7 +2344,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitCaseConvertExpr(CalcParser.CaseConvertExprContext ctx) {
-	    TerminalNode upper = ctx.UPPER();
+	    TerminalNode upper = ctx.K_UPPER();
 	    String exprString  = getStringValue(ctx.expr());
 
 	    if (upper != null) {
@@ -2711,7 +2741,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitBooleanValue(CalcParser.BooleanValueContext ctx) {
-	    if (ctx.TRUE() != null)
+	    if (ctx.K_TRUE() != null)
 		return Boolean.TRUE;
 	    return Boolean.FALSE;
 	}

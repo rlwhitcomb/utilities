@@ -15,6 +15,7 @@ $echo "Starting Calc tests..."
 $echo
 
 e1_e2_e3,UTF-8: e1,e2,e3
+e7            : e7
 e8            : e8
 e10           : e10
 e12           : e12
