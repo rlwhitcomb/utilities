@@ -184,14 +184,16 @@
  *	    Simplify objVar. Add formal and actual params for functions.
  *	20-Apr-2021 (rlwhitcomb)
  *	    Add ":variables" directive.
- *	20-Apr-2021 (rlwhitcomb)
+ *	21-Apr-2021 (rlwhitcomb)
  *	    Add syntax for "case" statement. Massive renaming of lexical tokens.
+ *	21-Apr-2021 (rlwhitcomb)
+ *	    Add EOF to main rule to only allow fully valid input.
  */
 
 grammar Calc;
 
 prog
-   : stmt+
+   : stmt+ EOF
    ;
 
 stmt
