@@ -258,6 +258,8 @@
  *	    Put text around variables list in non-REPL mode.
  *	21-Apr-2021 (rlwhitcomb)
  *	    Implement "CASE" statement; rename lexical tokens.
+ *	21-Apr-2021 (rlwhitcomb)
+ *	    Ignore empty statements in a block.
  */
 package info.rlwhitcomb.calc;
 
@@ -1318,7 +1320,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    Object lastValue = null;
 
 	    for (CalcParser.StmtOrExprContext stmtCtx : ctx.stmtOrExpr()) {
-		lastValue = visit(stmtCtx);
+		if (!(stmtCtx instanceof CalcParser.EmptyStmtContext)) {
+		    lastValue = visit(stmtCtx);
+		}
 	    }
 
 	    return lastValue;

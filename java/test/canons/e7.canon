@@ -2,35 +2,75 @@
 >---------
 >=========
 >All variables cleared.
->Defining function 'oddness' = {case value % 2 of 0: {'even'}, 1: {'odd'}, default: {'NOT POSSIBLE!'}}
+>Defining function 'oddness' = {
+> case value % 2 of 0: {
+> 'even' 
+>}, 1: {
+> 'odd' 
+>}, default: {
+> 'NOT POSSIBLE!' 
+>} 
+>}
 >value = 27 -> 27
 >oddness -> "odd"
 >value = 30 -> 30
 >oddness -> "even"
 >value = -1 -> -1
 >oddness -> "NOT POSSIBLE!"
->Defining function 'oddness_if' = {if abs (value % 2) == 0 {'even'} else {'odd'}}
+>Defining function 'oddness_if' = {
+> if abs (value % 2) == 0 {
+> 'even' 
+>} else {
+> 'odd' 
+>} 
+>}
 >value = 23 -> 23
 >oddness_if -> "odd"
 >value = 14 -> 14
 >oddness_if -> "even"
 >value = pi -> 3.14159265358979323846264338327950288
 >oddness_if -> "odd"
->Defining function 'multiples' = {case value of Default: {'some other value'}, 7, 14, 21: {'multiple of 7'}, 6, 12, 18: {'multiple of 6'}}
+>Defining function 'multiples' = {
+> case value of Default: {
+> 'some other value' 
+>}, 7, 14, 21: {
+> 'multiple of 7' 
+>}, 6, 12, 18: {
+> 'multiple of 6' 
+>} 
+>}
 >value = 14 -> 14
 >multiples -> "multiple of 7"
 >value = 12 -> 12
 >multiples -> "multiple of 6"
 >value = 3 -> 3
 >multiples -> "some other value"
->Defining function 'match_arrays' = {case value of []: {'empty array'}, [1, 2]: {"one and two"}, default: {'some other array'}}
+>Defining function 'match_arrays' = {
+> case value of []: {
+> 'empty array' 
+>}, [1, 2]: {
+> "one and two" 
+>}, default: {
+> 'some other array' 
+>} 
+>}
 >value = [] -> [ ]
 >match_arrays -> "empty array"
 >value = [1, 2] -> [ 1, 2 ]
 >match_arrays -> "one and two"
 >value = [3, 4, 5] -> [ 3, 4, 5 ]
 >match_arrays -> "some other array"
->Defining function 'strings' = {case upper (value) of "ONE": {1}, "TWO": {2}, "THREE": {3.14}, default: {"many"}}
+>Defining function 'strings' = {
+> case upper (value) of "ONE": {
+> 1 
+>}, "TWO": {
+> 2 
+>}, "THREE": {
+> 3.14 
+>}, default: {
+> "many" 
+>} 
+>}
 >value = 'one' -> "one"
 >strings -> 1
 >value = 'Two' -> "Two"
