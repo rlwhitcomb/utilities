@@ -207,6 +207,8 @@
 		Add Calc JSON resources to the .jar file.
 	    15-Apr-2021 (rlwhitcomb)
 		Oops! Need to add all the classes from "info/rlwhitcomb" to the .jar file.
+	    21-Apr-2021 (rlwhitcomb)
+		Rename "dest.jar" property to "result.jar".
 
      ========================================================================== -->
 
@@ -447,8 +449,8 @@
 		</javac>
 	</target>
 
-	<target name="jar" depends="compile" description="Jar up the compiled class files (into ${dest.jar}).">
-		<jar basedir="." destfile="${dest.jar}">
+	<target name="jar" depends="compile" description="Jar up the compiled class files (into ${result.jar}).">
+		<jar basedir="." destfile="${result.jar}">
 			<metainf dir="..">
 				<include name="LICENSE"/>
 				<include name="NOTICE"/>
@@ -542,7 +544,7 @@
 
 	<target name="clean" depends="purge" description="Cleans all generated files, old temp files, and old log files.">
 		<delete>
-			<fileset dir="." includes="${dest.jar}"/>
+			<fileset dir="." includes="${result.jar}"/>
 			<fileset dir="." includes="*.class"/>
 			<fileset dir="test/data" includes="*.class"/>
 			<fileset dir="name/fraser/neil/plaintext" includes="*.class"/>
@@ -586,7 +588,7 @@
 	<target name="all" depends="clean,compile,jar,doc,test" description="Does clean, compile, jar, doc, and test."/>
 
 	<target name="copy-to-install-directory" description="Copy the requisite files to the local utilities directory.">
-		<copy file="${dest.jar}" todir="${env.UTILITIES_HOME}" if:true="${utilities.available}"/>
+		<copy file="${result.jar}" todir="${env.UTILITIES_HOME}" if:true="${utilities.available}"/>
 		<copy todir="${env.UTILITIES_HOME}" if:true="${utilities.available}">
 			<fileset dir="./scripts">
 				<patternset refid="wrapper-files"/>
