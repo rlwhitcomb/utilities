@@ -260,6 +260,10 @@
  *	    Implement "CASE" statement; rename lexical tokens.
  *	21-Apr-2021 (rlwhitcomb)
  *	    Ignore empty statements in a block.
+ *	22-Apr-2021 (rlwhitcomb)
+ *	    Now that EOF is required at "prog" level, we need to explicitly handle "prog"
+ *	    here (for "processString" to work right again). Also for "eval", return a
+ *	    value from all directives, and implement "visitStmt" here for that to work.
  */
 package info.rlwhitcomb.calc;
 
@@ -428,7 +432,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    return mc;
 	}
 
-	public void setMathContext(MathContext newMathContext) {
+	public BigInteger setMathContext(MathContext newMathContext) {
 	    int prec  = newMathContext.getPrecision();
 	    mc        = newMathContext;
 
@@ -447,20 +451,25 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		displayActionMessage("%calc#precUnlimited");
 	    else
 		displayActionMessage("%calc#precDigits", prec);
+
+	    return BigInteger.valueOf(prec);
 	}
 
 	public Settings getSettings() {
 	    return settings;
 	}
 
-	public void setTrigMode(TrigMode newTrigMode) {
+	public String setTrigMode(TrigMode newTrigMode) {
 	    settings.trigMode = newTrigMode;
 
 	    displayActionMessage("%calc#trigMode", settings.trigMode);
+
+	    return settings.trigMode.toString();
 	}
 
-	public void setUnits(RangeMode mode) {
+	public String setUnits(RangeMode mode) {
 	    settings.units = mode;
+
 	    switch (mode) {
 		case BINARY:
 		    displayActionMessage("%calc#unitsBinary");
@@ -472,6 +481,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    displayActionMessage("%calc#unitsMixed");
 		    break;
 	    }
+
+	    return settings.units.toString();
 	}
 
 	public boolean setRationalMode(boolean mode) {
@@ -612,6 +623,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 
 	    int precision = 0;
+	    BigInteger ret = null;
 
 	    try {
 		precision = dPrecision.intValueExact();
@@ -621,77 +633,71 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 
 	    if (precision == 0) {
-		setMathContext(MathContext.UNLIMITED);
+		ret = setMathContext(MathContext.UNLIMITED);
 	    }
 	    else if (precision > 1 && precision <= mcMaxDigits.getPrecision()) {
-		setMathContext(new MathContext(precision));
+		ret = setMathContext(new MathContext(precision));
 	    }
 	    else {
 		throw new CalcExprException(ctx, "%calc#precOutOfRange", precision);
 	    }
 
-	    return null;
+	    return ret;
 	}
 
 	@Override
 	public Object visitDoubleDirective(CalcParser.DoubleDirectiveContext ctx) {
-	    setMathContext(MathContext.DECIMAL64);
-	    return null;
+	    return setMathContext(MathContext.DECIMAL64);
 	}
 
 	@Override
 	public Object visitFloatDirective(CalcParser.FloatDirectiveContext ctx) {
-	    setMathContext(MathContext.DECIMAL32);
-	    return null;
+	    return setMathContext(MathContext.DECIMAL32);
 	}
 
 	@Override
 	public Object visitDefaultDirective(CalcParser.DefaultDirectiveContext ctx) {
-	    setMathContext(MathContext.DECIMAL128);
-	    return null;
+	    return setMathContext(MathContext.DECIMAL128);
 	}
 
 	@Override
 	public Object visitUnlimitedDirective(CalcParser.UnlimitedDirectiveContext ctx) {
-	    setMathContext(MathContext.UNLIMITED);
-	    return null;
+	    return setMathContext(MathContext.UNLIMITED);
 	}
 
 	@Override
 	public Object visitDegreesDirective(CalcParser.DegreesDirectiveContext ctx) {
-	    setTrigMode(TrigMode.DEGREES);
-	    return null;
+	    return setTrigMode(TrigMode.DEGREES);
 	}
 
 	@Override
 	public Object visitRadiansDirective(CalcParser.RadiansDirectiveContext ctx) {
-	    setTrigMode(TrigMode.RADIANS);
-	    return null;
+	    return setTrigMode(TrigMode.RADIANS);
 	}
 
 	@Override
 	public Object visitBinaryDirective(CalcParser.BinaryDirectiveContext ctx) {
-	    setUnits(RangeMode.BINARY);
-	    return null;
+	    return setUnits(RangeMode.BINARY);
 	}
 
 	@Override
 	public Object visitSiDirective(CalcParser.SiDirectiveContext ctx) {
-	    setUnits(RangeMode.DECIMAL);
-	    return null;
+	    return setUnits(RangeMode.DECIMAL);
 	}
 
 	@Override
 	public Object visitMixedDirective(CalcParser.MixedDirectiveContext ctx) {
-	    setUnits(RangeMode.MIXED);
-	    return null;
+	    return setUnits(RangeMode.MIXED);
 	}
 
 	@Override
 	public Object visitClearDirective(CalcParser.ClearDirectiveContext ctx) {
 	    CalcParser.IdListContext idList = ctx.idList();
 	    List<TerminalNode> ids;
+	    int numberCleared = 0;
+
 	    if (idList == null || (ids = idList.ID()).isEmpty()) {
+		numberCleared = variables.size();
 		variables.clear();
 		displayActionMessage("%calc#varsAllCleared");
 	    }
@@ -701,18 +707,20 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    String varName = node.getText();
 		    if (varName.equals("<missing ID>"))
 			continue;
+		    numberCleared++;
 		    variables.remove(varName);
 		    if (vars.length() > 0)
 			vars.append(", ");
 		    vars.append("'").append(varName).append("'");
 		}
-		if (ids.size() == 1)
+		if (numberCleared == 1)
 		    vars.insert(0, Intl.getString("calc#varOneVariable"));
 		else
 		    vars.insert(0, Intl.getString("calc#varVariables"));
 		displayActionMessage("%calc#varCleared", vars);
 	    }
-	    return null;
+
+	    return BigInteger.valueOf(numberCleared);
 	}
 
 	@Override
@@ -749,7 +757,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    Calc.setResultsOnlyMode(oldMode);
 
-	    return null;
+	    return BigInteger.valueOf(variables.size());
 	}
 
 	@Override
@@ -759,7 +767,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    displayer.displayMessage(processString(msg));
 
-	    return null;
+	    return msg;
 	}
 
 	@Override
@@ -776,7 +784,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 
-	private void processModeOption(CalcParser.ModeOptionContext ctx, Deque<Boolean> stack, UnaryOperator<Boolean> setOperator) {
+	private Boolean processModeOption(CalcParser.ModeOptionContext ctx, Deque<Boolean> stack, UnaryOperator<Boolean> setOperator) {
 	    boolean push = true;
 	    boolean mode = false;
 	    String option = null;
@@ -824,53 +832,66 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    if (push)
 		stack.push(previousMode);
+
+	    return Boolean.valueOf(mode);
 	}
 
 	@Override
 	public Object visitTimingDirective(CalcParser.TimingDirectiveContext ctx) {
-	    processModeOption(ctx.modeOption(), timingModeStack, mode -> {
+	    return processModeOption(ctx.modeOption(), timingModeStack, mode -> {
 		return setTimingMode(mode);
 	    });
-
-	    return null;
 	}
 
 	@Override
 	public Object visitDebugDirective(CalcParser.DebugDirectiveContext ctx) {
-	    processModeOption(ctx.modeOption(), debugModeStack, mode -> {
+	    return processModeOption(ctx.modeOption(), debugModeStack, mode -> {
 		return setDebugMode(mode);
 	    });
-
-	    return null;
 	}
 
 	@Override
 	public Object visitRationalDirective(CalcParser.RationalDirectiveContext ctx) {
-	    processModeOption(ctx.modeOption(), rationalModeStack, mode -> {
+	    return processModeOption(ctx.modeOption(), rationalModeStack, mode -> {
 		return setRationalMode(mode);
 	    });
-
-	    return null;
 	}
 
 	@Override
 	public Object visitResultsOnlyDirective(CalcParser.ResultsOnlyDirectiveContext ctx) {
-	    processModeOption(ctx.modeOption(), resultsOnlyModeStack, mode -> {
+	    return processModeOption(ctx.modeOption(), resultsOnlyModeStack, mode -> {
 		return Calc.setResultsOnlyMode(mode);
 	    });
-
-	    return null;
 	}
 
 	@Override
 	public Object visitQuietDirective(CalcParser.QuietDirectiveContext ctx) {
-	    processModeOption(ctx.modeOption(), quietModeStack, mode -> {
+	    return processModeOption(ctx.modeOption(), quietModeStack, mode -> {
 		return Calc.setQuietMode(mode);
 	    });
-
-	    return null;
 	}
 
+
+	@Override
+	public Object visitProg(CalcParser.ProgContext ctx) {
+	    Object returnValue = null;
+	    for (CalcParser.StmtContext stmt : ctx.stmt()) {
+		returnValue = visit(stmt);
+	    }
+	    return returnValue;
+	}
+
+	@Override
+	public Object visitStmt(CalcParser.StmtContext ctx) {
+	    Object returnValue = null;
+	    for (int i = 0; i < ctx.getChildCount(); i++) {
+		ParseTree child = ctx.getChild(i);
+		if (child instanceof ParserRuleContext) {
+		    returnValue = visit(child);
+		}
+	    }
+	    return returnValue;
+	}
 
 	@Override
 	public Object visitExprStmt(CalcParser.ExprStmtContext ctx) {
