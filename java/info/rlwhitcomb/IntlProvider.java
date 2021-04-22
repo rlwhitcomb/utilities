@@ -36,6 +36,8 @@
  *	    Prepare for GitHub.
  *	15-Apr-2021 (rlwhitcomb)
  *	    Alternate constructors. Add "getResources()".
+ *	22-Apr-2021 (rlwhitcomb)
+ *	    Another alternate constructor.
  */
 package info.rlwhitcomb;
 
@@ -55,6 +57,8 @@ import info.rlwhitcomb.util.Logging;
 /**
  * Bridge class between our generic {@link Intl} resource provider and the
  * {@link Resources} class of Apache Pivot.
+ * <p> This allows using the {@link Intl} interface to access either package resources
+ * or Pivot resources in the same way.
  */
 public class IntlProvider
 	implements Intl.Provider
@@ -83,6 +87,17 @@ public class IntlProvider
 	 */
 	public IntlProvider(final Class<?> mainClass) {
 	    this(mainClass.getName(), Locale.getDefault());
+	}
+
+	/**
+	 * Initialize our localization resources, using the given locale setting.
+	 *
+	 * @param	mainClass The starting point in the main .jar file where we can find
+	 *			  our string resources (*.json files).
+	 * @param	uiLocale  The locale to use to select the appropriate language.
+	 */
+	public IntlProvider(final Class<?> mainClass, final Locale uiLocale) {
+	    this(mainClass.getName(), uiLocale);
 	}
 
 	/**
