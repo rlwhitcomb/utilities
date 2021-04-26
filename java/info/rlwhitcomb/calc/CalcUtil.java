@@ -56,6 +56,8 @@
  *	    a lot more intelligent.
  *	21-Apr-2021 (rlwhitcomb)
  *	    Make the lowest-level "compareValues" method public for use in "case" statement.
+ *	26-Apr-2021 (rlwhitcomb)
+ *	    More generally remove whitespace at the end of tree text.
  */
 package info.rlwhitcomb.calc;
 
@@ -110,21 +112,21 @@ public final class CalcUtil
 	}
 
 
-	public static String getTreeText(final ParserRuleContext ctx) {
+	public static String getTreeText(final ParseTree ctx) {
 	    StringBuilder buf = new StringBuilder();
 	    TreeTextOptions options = new TreeTextOptions();
 
 	    getTreeText(buf, ctx, options);
 
 	    int len = buf.length();
-	    while (buf.charAt(len - 1) == ' ')
+	    while (len > 0 && Character.isWhitespace(buf.charAt(len - 1)))
 		len--;
 	    buf.setLength(len);
 
 	    return buf.toString();
 	}
 
-	private static void getTreeText(final StringBuilder buf, final ParserRuleContext ctx, final TreeTextOptions options) {
+	private static void getTreeText(final StringBuilder buf, final ParseTree ctx, final TreeTextOptions options) {
 	    TreeTextOptions localOptions = options;
 
 	    // Some situations require context-sensitive alterations
@@ -145,9 +147,10 @@ public final class CalcUtil
 		localOptions.spaceOpenBracket = false;
 	    }
 
-	    for (ParseTree child : ctx.children) {
-		if (child instanceof ParserRuleContext) {
-		    getTreeText(buf, (ParserRuleContext) child, localOptions);
+	    for (int i = 0; i < ctx.getChildCount(); i++) {
+		ParseTree child = ctx.getChild(i);
+		if (child.getChildCount() > 0) {
+		    getTreeText(buf, child, localOptions);
 		}
 		else {
 		    boolean replace = false;

@@ -3,13 +3,10 @@
 >=========
 >All variables cleared.
 >Defining function 'oddness' = {
-> case value % 2 of 0: {
-> 'even' 
->}, 1: {
-> 'odd' 
->}, default: {
-> 'NOT POSSIBLE!' 
->} 
+> case value % 2 of 
+> 0: 'even', 
+> 1: 'odd', 
+> default: 'NOT POSSIBLE!' 
 >}
 >value = 27 -> 27
 >oddness -> "odd"
@@ -18,11 +15,10 @@
 >value = -1 -> -1
 >oddness -> "NOT POSSIBLE!"
 >Defining function 'oddness_if' = {
-> if abs (value % 2) == 0 {
+> if abs (value % 2) == 0 
 > 'even' 
->} else {
+> else 
 > 'odd' 
->} 
 >}
 >value = 23 -> 23
 >oddness_if -> "odd"
@@ -30,14 +26,12 @@
 >oddness_if -> "even"
 >value = pi -> 3.14159265358979323846264338327950288
 >oddness_if -> "odd"
->Defining function 'multiples' = {
-> case value of Default: {
-> 'some other value' 
->}, 7, 14, 21: {
-> 'multiple of 7' 
->}, 6, 12, 18: {
-> 'multiple of 6' 
->} 
+>Defining function 'multiples' = 
+> {
+> case value of 
+> Default: {'some other value'}, 
+> 7, 14, 21: {'multiple of 7'}, 
+> 6, 12, 18: {'multiple of 6'} 
 >}
 >value = 14 -> 14
 >multiples -> "multiple of 7"
@@ -46,12 +40,16 @@
 >value = 3 -> 3
 >multiples -> "some other value"
 >Defining function 'match_arrays' = {
-> case value of []: {
+> case value of {
+> []: {
 > 'empty array' 
->}, [1, 2]: {
+>}, 
+> [1, 2]: {
 > "one and two" 
->}, default: {
+>}, 
+> default: {
 > 'some other array' 
+>} 
 >} 
 >}
 >value = [] -> [ ]
@@ -61,15 +59,11 @@
 >value = [3, 4, 5] -> [ 3, 4, 5 ]
 >match_arrays -> "some other array"
 >Defining function 'strings' = {
-> case upper (value) of "ONE": {
-> 1 
->}, "TWO": {
-> 2 
->}, "THREE": {
-> 3.14 
->}, default: {
-> "many" 
->} 
+> case upper (value) of 
+> "ONE": 1, 
+> "TWO": 2, 
+> "THREE": 3.14, 
+> default: "many" 
 >}
 >value = 'one' -> "one"
 >strings -> 1

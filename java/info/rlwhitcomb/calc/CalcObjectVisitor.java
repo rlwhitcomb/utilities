@@ -264,6 +264,8 @@
  *	    Now that EOF is required at "prog" level, we need to explicitly handle "prog"
  *	    here (for "processString" to work right again). Also for "eval", return a
  *	    value from all directives, and implement "visitStmt" here for that to work.
+ *	22-Apr-2021 (rlwhitcomb)
+ *	    Revamp our whole top-level grammar.
  */
 package info.rlwhitcomb.calc;
 
@@ -872,25 +874,56 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 
-	@Override
-	public Object visitProg(CalcParser.ProgContext ctx) {
-	    Object returnValue = null;
-	    for (CalcParser.StmtContext stmt : ctx.stmt()) {
-		returnValue = visit(stmt);
+	private boolean isEmptyStmt(ParseTree root) {
+	    ParseTree node = root;
+	    while (node != null) {
+		// Two cases: the "emptyStmt" from the grammar and the EOF token
+		if (node instanceof CalcParser.EmptyStmtContext)
+		    return true;
+		if (node instanceof TerminalNode) {
+		    TerminalNode terminal = (TerminalNode) node;
+		    if (terminal.getSymbol().getType() == Token.EOF)
+			return true;
+		}
+
+		if (node instanceof ParserRuleContext)
+		    node = ((ParserRuleContext)node).children.get(0);
+		else
+		    node = null;
 	    }
+	    return false;
+	}
+
+	private Object internalVisitStatements(ParserRuleContext ctx) {
+	    Object returnValue = null;
+
+	    for (ParseTree child : ctx.children) {
+		if (!isEmptyStmt(child)) {
+		    returnValue = visit(child);
+		}
+	    }
+
 	    return returnValue;
 	}
 
 	@Override
+	public Object visitProg(CalcParser.ProgContext ctx) {
+	    return internalVisitStatements(ctx);
+	}
+
+	@Override
 	public Object visitStmt(CalcParser.StmtContext ctx) {
-	    Object returnValue = null;
-	    for (int i = 0; i < ctx.getChildCount(); i++) {
-		ParseTree child = ctx.getChild(i);
-		if (child instanceof ParserRuleContext) {
-		    returnValue = visit(child);
-		}
-	    }
-	    return returnValue;
+	    return internalVisitStatements(ctx);
+	}
+
+	@Override
+	public Object visitStmtOrExpr(CalcParser.StmtOrExprContext ctx) {
+	    return internalVisitStatements(ctx);
+	}
+
+	@Override
+	public Object visitFormattedExprs(CalcParser.FormattedExprsContext ctx) {
+	    return internalVisitStatements(ctx);
 	}
 
 	@Override
@@ -1108,7 +1141,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitLoopStmt(CalcParser.LoopStmtContext ctx) {
 	    CalcParser.LoopCtlContext ctlCtx    = ctx.loopCtl();
-	    CalcParser.BlockContext block       = ctx.block();
+	    CalcParser.StmtBlockContext block   = ctx.stmtBlock();
 	    CalcParser.ExprListContext exprList = ctlCtx.exprList();
 	    List<CalcParser.ExprContext> exprs  = ctlCtx.expr();
 
@@ -1276,8 +1309,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitWhileStmt(CalcParser.WhileStmtContext ctx) {
-	    CalcParser.ExprContext exprCtx = ctx.expr();
-	    CalcParser.BlockContext block  = ctx.block();
+	    CalcParser.ExprContext exprCtx    = ctx.expr();
+	    CalcParser.StmtBlockContext block = ctx.stmtBlock();
 
 	    Object lastValue = null;
 
@@ -1292,9 +1325,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitIfStmt(CalcParser.IfStmtContext ctx) {
-	    CalcParser.ExprContext exprCtx = ctx.expr();
-	    CalcParser.BlockContext thenBlock = ctx.block(0);
-	    CalcParser.BlockContext elseBlock = ctx.block(1);
+	    CalcParser.ExprContext exprCtx        = ctx.expr();
+	    CalcParser.StmtBlockContext thenBlock = ctx.stmtBlock(0);
+	    CalcParser.StmtBlockContext elseBlock = ctx.stmtBlock(1);
 	    Object resultValue = null;
 
 	    boolean controlValue = getBooleanValue(exprCtx);
@@ -1323,14 +1356,14 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    for (CalcParser.ExprContext exprCtx : exprListCtx.expr()) {
 			Object blockValue = visit(exprCtx);
 			if (CalcUtil.compareValues(this, ctx, cbCtx, caseValue, blockValue, mc, false, true) == 0) {
-			    return visit(cbCtx.block());
+			    return visit(cbCtx.stmtBlock());
 			}
 		    }
 		}
 	    }
 
 	    if (defaultCtx != null) {
-		return visit(defaultCtx.block());
+		return visit(defaultCtx.stmtBlock());
 	    }
 
 	    return null;
@@ -1338,26 +1371,24 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitStmtBlock(CalcParser.StmtBlockContext ctx) {
-	    Object lastValue = null;
+	    Object returnValue = null;
 
-	    for (CalcParser.StmtOrExprContext stmtCtx : ctx.stmtOrExpr()) {
-		if (!(stmtCtx instanceof CalcParser.EmptyStmtContext)) {
-		    lastValue = visit(stmtCtx);
+	    for (CalcParser.StmtOrExprContext child : ctx.stmtOrExpr()) {
+		if (child.emptyStmt() == null) {
+		    returnValue = visit(child);
 		}
 	    }
 
-	    return lastValue;
+	    return returnValue;
 	}
 
 	@Override
 	public Object visitDefineStmt(CalcParser.DefineStmtContext ctx) {
 	    String functionName = ctx.ID().getText();
 
-	    CalcParser.StmtOrExprContext loopOrExpr = ctx.stmtOrExpr();
-	    CalcParser.BlockContext block           = ctx.block();
-
-	    ParserRuleContext functionBody = loopOrExpr != null ? loopOrExpr : block;
+	    CalcParser.StmtBlockContext functionBody    = ctx.stmtBlock();
 	    CalcParser.FormalParamsContext formalParams = ctx.formalParams();
+
 	    String paramString = formalParams == null ? "" : getTreeText(formalParams);
 
 // TODO: make a Function object and add name, params, body to it; save this instead of functionBody as the variable

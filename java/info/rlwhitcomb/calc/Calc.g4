@@ -188,35 +188,74 @@
  *	    Add syntax for "case" statement. Massive renaming of lexical tokens.
  *	21-Apr-2021 (rlwhitcomb)
  *	    Add EOF to main rule to only allow fully valid input.
+ *	22-Apr-2021 (rlwhitcomb)
+ *	    Allow continuation lines and a completely empty program.
+ *	    Revamp the way we do ENDEXPR.
  */
 
 grammar Calc;
 
 prog
-   : stmt+ EOF
+   : stmt* EOF
    ;
 
 stmt
    : stmtOrExpr
-   | directive ENDEXPR
-   | define ENDEXPR
+   | defineStmt
+   | directive (EOL | ENDEXPR)
    ;
 
 stmtOrExpr
-   : expr FORMAT ? ENDEXPR ?                         # exprStmt
-   | K_LOOP ( LOCALVAR K_IN ) ? loopCtl block        # loopStmt
-   | K_WHILE expr block                              # whileStmt
-   | K_IF expr block ( K_ELSE block ) ?              # ifStmt
-   | K_CASE expr K_OF caseBlock ( ',' caseBlock ) *  # caseStmt
-   | ENDEXPR                                         # emptyStmt
+   : formattedExprs
+   | loopStmt
+   | whileStmt
+   | ifStmt
+   | caseStmt
+   | emptyStmt
    ;
 
-block
-   : '{' stmtOrExpr * '}'                # stmtBlock
+formattedExprs
+   : exprStmt
+   | exprStmt (EOL | ENDEXPR) stmtOrExpr
+   ;
+
+exprStmt
+   : expr FORMAT ?
+   ;
+
+defineStmt
+   : K_DEFINE ID formalParams ? '=' stmtBlock
+   ;
+
+loopStmt
+   : K_LOOP ( LOCALVAR K_IN ) ? loopCtl stmtBlock
+   ;
+
+whileStmt
+   : K_WHILE expr stmtBlock
+   ;
+
+ifStmt
+   : K_IF expr stmtBlock ( EOL? K_ELSE stmtBlock ) ?
+   ;
+
+caseStmt
+   : K_CASE expr K_OF '{' caseBlock ( ',' caseBlock ) * '}'
+   | K_CASE expr K_OF caseBlock ( ',' caseBlock ) *
+   ;
+
+stmtBlock
+   : EOL? '{' EOL? stmtOrExpr * '}' EOL?
+   | EOL? stmtOrExpr
    ;
 
 caseBlock
-   : ( exprList | K_DEFAULT ) ':' block
+   : EOL? ( exprList | K_DEFAULT ) ':' stmtBlock
+   ;
+
+emptyStmt
+   : EOL
+   | ENDEXPR
    ;
 
 expr
@@ -366,10 +405,6 @@ formalParams
 
 actualParams
    : '(' expr ? ( ',' expr ? ) * ')'
-   ;
-
-define
-   : K_DEFINE ID formalParams ? '=' ( stmtOrExpr | block )  # defineStmt
    ;
 
 directive
@@ -918,6 +953,8 @@ fragment Z : [zZ] ;
 
 fragment DIR : ':' ;
 
+fragment NL : '\r'? '\n' ;
+
 WS
    : [ \t] + -> skip
    ;
@@ -927,11 +964,18 @@ COMMENT
    ;
 
 LINE_COMMENT
-   : ( '#' | '//' ) .*? '\r'? '\n' -> skip
+   : ( '#' | '//' ) .*? NL -> skip
+   ;
+
+LINE_ESCAPE
+   : '\\' NL -> skip
+   ;
+
+EOL
+   : NL
    ;
 
 ENDEXPR
-   : '\r'? '\n'
-   | ';'
+   : ';'
    ;
 

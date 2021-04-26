@@ -5,13 +5,10 @@
 :clear
 
 define oddness={
-   case value%2 of 0: {
-      'even'
-   }, 1: {
-      'odd'
-   }, default: {
-      'NOT POSSIBLE!'
-   }
+   case value%2 of
+    0: 'even',
+    1: 'odd',
+    default: 'NOT POSSIBLE!'
 }
 
 value=27; oddness
@@ -19,25 +16,22 @@ value=30; oddness
 value=-1; oddness
 
 def oddness_if = {
-   if abs(value%2) == 0 {
+   if abs(value%2) == 0
       'even'
-   } else {
+   else
       'odd'
-   }
 }
 
 value=23; oddness_if
 value=14; oddness_if
 value=pi; oddness_if
 
-def multiples={
-   case value of Default: {
-      'some other value'
-   }, 7,14,21: {
-      'multiple of 7'
-   }, 6,12,18: {
-      'multiple of 6'
-   }
+def multiples=
+{
+   case value of
+      Default: { 'some other value' },
+      7,14,21: { 'multiple of 7' },
+      6,12,18: { 'multiple of 6' }
 }
 
 value=14; multiples
@@ -45,12 +39,16 @@ value=12; multiples
 value=3; multiples
 
 define match_arrays = {
-   case value of [ ]: {
-      'empty array'
-   }, [ 1, 2 ]: {
-      "one and two"
-   }, default: {
-      'some other array'
+   case value of {
+      [ ]: {
+         'empty array'
+      },
+      [ 1, 2 ]: {
+         "one and two"
+      },
+      default: {
+         'some other array'
+      }
    }
 }
 
@@ -59,15 +57,11 @@ value=[1,2]; match_arrays
 value=[3,4,5]; match_arrays
 
 define strings = {
-   case upper(value) of "ONE": {
-      1
-   }, "TWO": {
-      2
-   }, "THREE" : {
-      3.14
-   }, default: {
-      "many"
-   }
+   case upper(value) of
+      "ONE": 1,
+      "TWO": 2,
+      "THREE" : 3.14,
+      default: "many"
 }
 
 value='one'; strings

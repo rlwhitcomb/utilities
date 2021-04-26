@@ -139,6 +139,8 @@
  *	20-Apr-2021 (rlwhitcomb)
  *	    Initialize the file browser with the current directory.
  *	    Accessor for "replMode".
+ *	22-Apr-2021 (rlwhitcomb)
+ *	    Allow line continuations in REPL mode (needs new grammar support to work).
  */
 package info.rlwhitcomb.calc;
 
@@ -1264,45 +1266,64 @@ public class Calc
 
 			    replMode = true;
 
+			    StringBuilder buf = new StringBuilder();
 			    String line;
 			    String prompt = ConsoleColor.color("<Bk!>> <>");
 			replLoop:
 			    while ((line = console.readLine(prompt)) != null) {
-				String cmd = line.trim().toLowerCase();
-				switch (cmd) {
-				    case "quit":
-				    case "exit":
-				    case ":quit":
-				    case ":exit":
-				    case ":q":
-				    case ":e":
-				    case ":x":
-					exit();
-					break;
-				    case "?":
-				    case "help":
-				    case ":?":
-				    case ":help":
-					printIntro();
-					displayHelp();
-					break;
-				    case "version":
-				    case ":version":
-				    case ":vers":
-				    case ":ver":
-				    case ":v":
-					printTitleAndVersion();
-					break;
-				    case "gui":
-				    case ":gui":
-				    case ":g":
-					DesktopApplicationContext.main(Calc.class, args);
-					break replLoop;
-				    default:
-					process(CharStreams.fromString(line + LINESEP), visitor, errorStrategy, quiet);
-					break;
+				boolean scriptInput = false;
+				if (buf.length() == 0) {
+				    String cmd = line.trim().toLowerCase();
+				    switch (cmd) {
+					case "quit":
+					case "exit":
+					case ":quit":
+					case ":exit":
+					case ":q":
+					case ":e":
+					case ":x":
+					    exit();
+					    break;
+					case "?":
+					case "help":
+					case ":?":
+					case ":help":
+					    printIntro();
+					    displayHelp();
+					    break;
+					case "version":
+					case ":version":
+					case ":vers":
+					case ":ver":
+					case ":v":
+					    printTitleAndVersion();
+					    break;
+					case "gui":
+					case ":gui":
+					case ":g":
+					    DesktopApplicationContext.main(Calc.class, args);
+					    break replLoop;
+					default:
+					    scriptInput = true;
+					    break;
+				    }
+				}
+				else {
+				    scriptInput = true;
+				}
+
+				if (scriptInput) {
+				    buf.append(line).append(LINESEP);
+				    if (!line.endsWith("\\")) {
+					process(CharStreams.fromString(buf.toString()), visitor, errorStrategy, quiet);
+					buf.setLength(0);
+				    }
 				}
 			    }
+
+			    if (line == null)
+				System.out.println();
+
 			    replMode = false;
 			}
 		    }
