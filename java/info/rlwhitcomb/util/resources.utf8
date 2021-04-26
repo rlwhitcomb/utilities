@@ -104,6 +104,8 @@
 #	    Move messages from NumericUtil to MathUtil.
 #	08-Apr-2021 (rlwhitcomb)
 #	    New messages from time conversions in NumericUtil.
+#	26-Apr-2021 (rlwhitcomb)
+#	    Add thousands separators to many numbers. Tweak some messages.
 #
 
 #
@@ -112,7 +114,7 @@
 bidi.keyNotNull		= Key must not be null.
 bidi.valueNotNull	= Value must not be null.
 bidi.entryCannotChange	= Map entry cannot be changed.
-bidi.illegalCapacity	= Initial capacity of %1$d is not supported.
+bidi.illegalCapacity	= Initial capacity of %1$,d is not supported.
 bidi.illegalLoadFactor	= Load factor of %1$s is not supported.
 bidi.reallocTooSmall	= Reallocation to a smaller map size isn't possible.
 bidi.keyNotUnique	= Key "%1$s" is not unique.
@@ -172,12 +174,12 @@ intl.providerNotFound	= Unable to find resource provider for "%1$s" package.
 numeric.badKMGFormat		= Improper input format: suffix must be one of [K,M,G,T,P, or E].
 numeric.outOfRange		= Value is out of range.
 numeric.badRomanFormat		= Unable to convert Roman numeral: '%1$s'.
-numeric.outOfRomanRange		= Value %1$d is out of range for conversion to a Roman numeral.
+numeric.outOfRomanRange		= Value %1$,d is out of range for conversion to a Roman numeral.
 numeric.badDataType		= Data type %1$s is not supported in binary files.
 numeric.badDataTypeCode		= Data type code %1$d is not recognized.
 numeric.unknownByteOrder	= "%1$s" is not a valid byte order (should be LSB or MSB).
 numeric.unknownStringLength	= "%1$s" is not a valid string length designation.
-numeric.stringLengthTooBig	= String length of %1$d exceds limit of %2$d.
+numeric.stringLengthTooBig	= String length of %1$,d exceds limit of %2$,d.
 numeric.badTimeValue		= Unable to interpret '%1$s' as a time value.
 numeric.badDuration		= Unable to interpret '%1$1' as a duration value.
 
@@ -185,9 +187,9 @@ numeric.badDuration		= Unable to interpret '%1$1' as a duration value.
 # From MathUtil.java
 #
 math.tooManyPiDigits		= The PI digit calculation is only good for about 12,500 digits!
-math.piDigitMismatch		= Calculated digit length is %1$d, but requested number of digits was %2$d!
-math.wholeInteger		= The value must be a whole number.
-math.primeTooBig		= The value is too big to compute.
+math.piDigitMismatch		= Calculated digit length is %1$,d, but requested number of digits was %2$,d!
+math.wholeInteger		= The value %1$,g is not an integer number.
+math.primeTooBig		= The value %1$,d is too big for the prime number calculations.
 math.sqrtNegative		= Square root of a negative number is not real.
 
 #
@@ -226,7 +228,7 @@ dir.notExistNotDir	= Directory "%1$s" does not exist, is not a directory, or can
 #
 # From FileUtilities.java
 #
-fileutil.fileTooBig	= The file's size of %1$d is too big to read.
+fileutil.fileTooBig	= The file's size of %1$,d bytes is too big to read.
 fileutil.wrongExtension	= The file does not have the expected "%1$s" extension.
 
 #

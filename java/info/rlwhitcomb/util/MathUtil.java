@@ -37,6 +37,8 @@
  *	    Implement Taylor series for "ln" function. Clean up "pow" and "ePower".
  *	08-Apr-2021 (rlwhitcomb)
  *	    Move the "round" function from Calc into here.
+ *	26-Apr-2021 (rlwhitcomb)
+ *	    Tweak some error messages.
  */
 package info.rlwhitcomb.util;
 
@@ -245,7 +247,7 @@ public class MathUtil
 	    double baseFloor  = Math.floor(baseDouble);
 
 	    if (baseFloor != baseDouble)
-		throw new Intl.IllegalArgumentException("util#math.wholeInteger");
+		throw new Intl.IllegalArgumentException("util#math.wholeInteger", baseDouble);
 
 	    long loops = base.longValue();
 
@@ -288,7 +290,7 @@ public class MathUtil
 	    double nInt    = Math.rint(nDouble);
 
 	    if (nInt != nDouble)
-		throw new Intl.IllegalArgumentException("util#math.wholeInteger");
+		throw new Intl.IllegalArgumentException("util#math.wholeInteger", nDouble);
 
 	    long loops        = Math.abs(n.longValue());
 	    boolean negative  = nInt < 0.0d;
@@ -941,7 +943,7 @@ public class MathUtil
 	    BigInteger posN = n.abs();
 
 	    if (posN.compareTo(MAX_PRIME) > 0)
-		throw new Intl.IllegalArgumentException("util#math.primeTooBig");
+		throw new Intl.IllegalArgumentException("util#math.primeTooBig", posN);
 
 	    // Easy decisions here: zero and one are not prime
 	    if (posN.compareTo(BigInteger.ONE) <= 0)
@@ -1005,7 +1007,7 @@ public class MathUtil
 	    BigInteger posN = (sign < 0) ? n.negate() : n;
 
 	    if (posN.compareTo(MAX_PRIME) > 0)
-		throw new Intl.IllegalArgumentException("util#math.primeTooBig");
+		throw new Intl.IllegalArgumentException("util#math.primeTooBig", posN);
 
 	    // Zero has no factors
 	    if (posN.equals(BigInteger.ZERO))
@@ -1097,7 +1099,7 @@ public class MathUtil
 	    BigInteger posN = (sign < 0) ? n.negate() : n;
 
 	    if (posN.compareTo(MAX_PRIME) > 0)
-		throw new Intl.IllegalArgumentException("util#math.primeTooBig");
+		throw new Intl.IllegalArgumentException("util#math.primeTooBig", posN);
 
 	    // Zero has no factors
 	    if (posN.equals(BigInteger.ZERO))
