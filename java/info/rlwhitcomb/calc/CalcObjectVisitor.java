@@ -265,7 +265,9 @@
  *	    here (for "processString" to work right again). Also for "eval", return a
  *	    value from all directives, and implement "visitStmt" here for that to work.
  *	22-Apr-2021 (rlwhitcomb)
- *	    Revamp our whole top-level grammar.
+ *	    Revamp our whole top-level grammar to allow newlines in a lot more places.
+ *	26-Apr-2021 (rlwhitcomb)
+ *	    Implement "," formatting for "d" and "%" formats.
  */
 package info.rlwhitcomb.calc;
 
@@ -935,6 +937,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    BigDecimal dValue;
 
 	    int precision = Integer.MIN_VALUE;
+	    boolean separators = false;
 
 	    TerminalNode formatNode = ctx.FORMAT();
 	    String format           = formatNode == null ? "" : " " + formatNode.getText();
@@ -952,6 +955,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    precision = Integer.parseInt(num);
 		}
 	    }
+	    separators = format.indexOf(',') >= 0;
 
 
 	    if (result != null && !format.isEmpty()) {
@@ -1006,7 +1010,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			if (precision != Integer.MIN_VALUE) {
 			    dValue = MathUtil.round(dValue, precision);
 			}
-			valueBuf.append(dValue.toPlainString());
+			valueBuf.append(formatWithSeparators(dValue, separators, ctx));
 			break;
 
 		    case 'f':
@@ -1117,11 +1121,11 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			if (precision != Integer.MIN_VALUE) {
 			    percentValue = MathUtil.round(percentValue, precision);
 			}
-			valueBuf.append(percentValue.toPlainString()).append('%');
+			valueBuf.append(formatWithSeparators(percentValue, separators, ctx)).append('%');
 			break;
 
 		    default:
-			throw new CalcExprException(ctx, "%calc#illegalFormat", format);
+			throw new CalcExprException(ctx, "%calc#illegalFormat", formatNode.getText());
 		}
 		// Set the "result" for the case of interpolated strings with formats
 		result = resultString = toUpperCase ? valueBuf.toString().toUpperCase()

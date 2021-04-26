@@ -58,6 +58,8 @@
  *	    Make the lowest-level "compareValues" method public for use in "case" statement.
  *	26-Apr-2021 (rlwhitcomb)
  *	    More generally remove whitespace at the end of tree text.
+ *	26-Apr-2021 (rlwhitcomb)
+ *	    New method to format numbers with/without thousands separators.
  */
 package info.rlwhitcomb.calc;
 
@@ -818,6 +820,35 @@ public final class CalcUtil
 	    }
 
 	    return result;
+	}
+
+
+	/**
+	 * Format a decimal/integer number with/without thousands separators.
+	 *
+	 * @param value A decimal value which could actually be an integer.
+	 * @param sep   Whether or not to use separators.
+	 * @param ctx   The rule context (for error reporting).
+	 * @return      The value formatted appropriately with thousands separators.
+	 */
+	public static String formatWithSeparators(final BigDecimal value, final boolean sep, final ParserRuleContext ctx) {
+	    if (sep) {
+		if (value.scale() == 0) {
+		    try {
+			return String.format("%1$,d", value.toBigIntegerExact());
+		    }
+		    catch (ArithmeticException ae) {
+			throw new CalcExprException(ae, ctx);
+		    }
+		}
+		else {
+		    String formatString = String.format("%%1$,.%1$df", value.scale());
+		    return String.format(formatString, value);
+		}
+	    }
+	    else {
+		return value.toPlainString();
+	    }
 	}
 
 

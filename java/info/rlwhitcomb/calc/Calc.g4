@@ -191,6 +191,8 @@
  *	22-Apr-2021 (rlwhitcomb)
  *	    Allow continuation lines and a completely empty program.
  *	    Revamp the way we do ENDEXPR.
+ *	26-Apr-2021 (rlwhitcomb)
+ *	    Fix FORMAT syntax.
  */
 
 grammar Calc;
@@ -812,7 +814,7 @@ D_VARIABLES
 
 
 FORMAT
-   : '@' ( '-' ? INT ) ? [a-zA-Z] ? [a-zA-Z,%]
+   : '@' ( '-' ? INT ) ? [a-zA-Z,] ? [a-zA-Z%]
    ;
 
 STRING
