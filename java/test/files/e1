@@ -235,6 +235,15 @@ fill str_b, '-', 22, 3
 a
 ! (a == null)
 
+# JavaScript compatible string -> boolean operations
+
+!foundset.username
+foundset.username=''
+!foundset.username
+foundset.username='Don'
+!foundset.username
+!!foundset.username
+
 # Testing operations a various precisions
 :decimal 200; 1/7
 :decimal 30; 1/9

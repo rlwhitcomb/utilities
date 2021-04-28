@@ -268,6 +268,8 @@
  *	    Revamp our whole top-level grammar to allow newlines in a lot more places.
  *	26-Apr-2021 (rlwhitcomb)
  *	    Implement "," formatting for "d" and "%" formats.
+ *	28-Apr-2021 (rlwhitcomb)
+ *	    Put "and" into the list of cleared variables when needed.
  */
 package info.rlwhitcomb.calc;
 
@@ -707,6 +709,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 	    else {
 		StringBuilder vars = new StringBuilder();
+		int lastNamePos = 0;
 		for (TerminalNode node : ids) {
 		    String varName = node.getText();
 		    if (varName.equals("<missing ID>"))
@@ -715,12 +718,21 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    variables.remove(varName);
 		    if (vars.length() > 0)
 			vars.append(", ");
+		    lastNamePos = vars.length();
 		    vars.append("'").append(varName).append("'");
 		}
-		if (numberCleared == 1)
+		if (numberCleared == 1) {
 		    vars.insert(0, Intl.getString("calc#varOneVariable"));
-		else
+		}
+		else if (numberCleared == 2) {
+		    vars.deleteCharAt(lastNamePos - 2);
+		    vars.insert(lastNamePos - 1, Intl.getString("calc#varAnd"));
 		    vars.insert(0, Intl.getString("calc#varVariables"));
+		}
+		else {
+		    vars.insert(lastNamePos, Intl.getString("calc#varAnd"));
+		    vars.insert(0, Intl.getString("calc#varVariables"));
+		}
 		displayActionMessage("%calc#varCleared", vars);
 	    }
 

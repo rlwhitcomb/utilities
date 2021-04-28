@@ -58,6 +58,8 @@
 #	    Tweak "defining" to add function parameters.
 #	20-Apr-2021 (rlwhitcomb)
 #	    Text for "Variables" directive in non-REPL mode.
+#	28-Apr-2021 (rlwhitcomb)
+#	    "and" for the list of multiple variables cleared.
 #
 
 #
@@ -99,6 +101,7 @@ varsAllCleared	= All variables cleared.
 varOneVariable	= "Variable "
 varVariables	= "Variables "
 varCleared	= %1$s cleared.
+varAnd		= "and "
 timingMode	= Timing mode set to %1$s.
 debugMode	= Debug mode set to %1$s.
 rationalMode	= Calculation mode set to %1$s.

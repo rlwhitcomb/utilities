@@ -158,7 +158,7 @@
 >'def' @o -> '144145146'
 >'abc' @b -> '011000010110001001100011'
 >'Hello' @X -> '48656C6C6F'
->Variables 'this', 'hello', 'handsome', 'rude' cleared.
+>Variables 'this', 'hello', 'handsome', and 'rude' cleared.
 >this = join ('This', 'is', 'a', 'test', ' ') -> "This is a test"
 >hello = join ('Hello', "World!", ', ') -> "Hello, World!"
 >handsome = join ("Hello ", "handsome.") -> "Hello handsome."
@@ -178,7 +178,7 @@
 >split (target, 'o', 5) -> [ "b", "", ":and:f", "", "" ]
 >split (target, 'o', -2) -> [ "b", "", ":and:f", "", "" ]
 >split target, 'o' -> [ "b", "", ":and:f" ]
->Variables 'target', 'one', 'two', 'three' cleared.
+>Variables 'target', 'one', 'two', and 'three' cleared.
 >target = 'This is an "index" test.' -> "This is an \"index\" test."
 >one = index target, 'is' -> 2
 >two = index target, 'is', one + 1 -> 5
@@ -212,6 +212,12 @@
 >! true -> false
 >a -> 0.707106781186547524400844362104849039284835937688474036588340
 >! (a == null) -> true
+>! foundset.username -> true
+>foundset.username = '' -> ""
+>! foundset.username -> true
+>foundset.username = 'Don' -> "Don"
+>! foundset.username -> false
+>! ! foundset.username -> true
 >Precision is now 200 digits.
 >1 / 7 -> 0.14285714285714285714285714285714285714285714285714285714285714285714285714285714285714285714285714285714285714285714285714285714285714285714285714285714285714285714285714285714285714285714285714285714
 >Precision is now 30 digits.
@@ -314,7 +320,7 @@
 >`a = ${a@x}` -> "a = 0x80"
 >`a = ${a@%}` -> "a = 12800%"
 >`a = ${a@k}` -> "a = 128 bytes"
->Variables 'g', 'h', 'i', 'j' cleared.
+>Variables 'g', 'h', 'i', and 'j' cleared.
 >Precision is now 200 digits.
 >g = 271 -> 271
 >h = 385 -> 385
@@ -498,7 +504,7 @@
 >    }
 >  }
 >}
->Variables 'a', 'f' cleared.
+>Variables 'a' and 'f' cleared.
 >a[0].b.c[1] = 12 -> 12
 >a -> [ { b: { c: [ <null>, 12 ] } } ]
 >d[1]."e"."f".g[3] = 14 -> 14
