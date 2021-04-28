@@ -270,6 +270,8 @@
  *	    Implement "," formatting for "d" and "%" formats.
  *	28-Apr-2021 (rlwhitcomb)
  *	    Put "and" into the list of cleared variables when needed.
+ *	28-Apr-2021 (rlwhitcomb)
+ *	    More Unicode math symbols.
  */
 package info.rlwhitcomb.calc;
 
@@ -1459,10 +1461,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    String op = ctx.INC_OP().getText();
 	    switch (op) {
 		case "++":
+		case "\u2795\u2795":
 		    dAfter = dValue.add(BigDecimal.ONE);
 		    break;
 		case "--":
 		case "\u2212\u2212":
+		case "\u2796\u2796":
 		    dAfter = dValue.subtract(BigDecimal.ONE);
 		    break;
 		default:
@@ -1486,10 +1490,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    String op = ctx.INC_OP().getText();
 	    switch (op) {
 		case "++":
+		case "\u2795\u2795":
 		    dAfter = dValue.add(BigDecimal.ONE);
 		    break;
 		case "--":
 		case "\u2212\u2212":
+		case "\u2796\u2796":
 		    dAfter = dValue.subtract(BigDecimal.ONE);
 		    break;
 		default:
@@ -1512,9 +1518,11 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 		switch (op) {
 		    case "+":
+		    case "\u2795":
 			return f;
 		    case "-":
 		    case "\u2212":
+		    case "\u2796":
 			return f.negate();
 		    default:
 			throw new UnknownOpException(op, expr);
@@ -1525,11 +1533,13 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 		switch (op) {
 		    case "+":
+		    case "\u2795":
 			// Interestingly, this operation can change the value, if the previous
 			// value was not to the specified precision.
 			return d.plus(mc);
 		    case "-":
 		    case "\u2212":
+		    case "\u2796":
 			return d.negate();
 		    default:
 			throw new UnknownOpException(op, expr);
@@ -1624,9 +1634,13 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			case "*":
 			case "\u00D7":
 			case "\u2217":
+			case "\u2715":
+			case "\u2716":
 			    return f1.multiply(f2);
 			case "/":
 			case "\u00F7":
+			case "\u2215":
+			case "\u2797":
 			    return f1.divide(f2);
 			case "%":
 			    // ??? I think there is never any remainder dividing a fraction by a fraction
@@ -1643,9 +1657,13 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			case "*":
 			case "\u00D7":
 			case "\u2217":
+			case "\u2715":
+			case "\u2716":
 			    return d1.multiply(d2, mc);
 			case "/":
 			case "\u00F7":
+			case "\u2215":
+			case "\u2797":
 			    return d1.divide(d2, mc);
 			case "%":
 			    return d1.remainder(d2, mc);
@@ -1669,9 +1687,11 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    String op = ctx.ADD_OP().getText();
 	    switch (op) {
 		case "+":
+		case "\u2795":
 		    return addOp(this, e1, e2, ctx1, ctx2, mc, settings.rationalMode);
 		case "-":
 		case "\u2212":
+		case "\u2796":
 		    if (settings.rationalMode) {
 			BigFraction f1 = toFractionValue(this, e1, ctx1);
 			BigFraction f2 = toFractionValue(this, e2, ctx2);
@@ -2992,10 +3012,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    switch (op) {
 		case "+=":
+		case "\u2795=":
 		    result = addOp(this, e1, e2, varCtx, exprCtx, mc, settings.rationalMode);
 		    break;
 		case "-=":
 		case "\u2212=":
+		case "\u2796=":
 		    if (settings.rationalMode) {
 			BigFraction f1 = toFractionValue(this, e1, varCtx);
 			BigFraction f2 = toFractionValue(this, e2, exprCtx);
@@ -3047,10 +3069,14 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			case "*=":
 			case "\u00D7=":
 			case "\u2217=":
+			case "\u2715=":
+			case "\u2716=":
 			    result = f1.multiply(f2);
 			    break;
 			case "/=":
 			case "\u00F7=":
+			case "\u2215=":
+			case "\u2797=":
 			    result = f1.divide(f2);
 			    break;
 			case "%=":
@@ -3069,10 +3095,14 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			case "*=":
 			case "\u00D7=":
 			case "\u2217=":
+			case "\u2715=":
+			case "\u2716=":
 			    result = d1.multiply(d2, mc);
 			    break;
 			case "/=":
 			case "\u00F7=":
+			case "\u2215=":
+			case "\u2797=":
 			    result = d1.divide(d2, mc);
 			    break;
 			case "%=":

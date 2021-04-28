@@ -77,32 +77,18 @@ Also see "issues" at https://github.com/rlwhitcomb/utilities/issues
 - need sec, cot, csc, and inverses as well
 - redo the [box] formats of strings (to be? x'...', b'...', o'...') then parse such beasts back to strings
 - allow "_" in numeric values, like Java does
-- format options for commas (or _) (';,' or ';__') or (';$' to format as dollar)??
-- get help and intro text (both console and GUI) from resources
-- add option (both GUI and REPL modes) to open another file (file browser in GUI)
+- format options for '_' ('@_') or ('@$' to format as dollar)??
+- add option in REPL mode to open another file
 - functions for financial calculations (INTEREST, NPV, PAYMENT, etc.) (**e_mort** is a start)
 - ?? need a way to do "setScale(...)" on the values ??
 - See all the notes on updates needed to help page (calc_help.htmlpp); use "ant update" and then "c -?" to preprocess and view the result
 - Unicode symbols to add:
-    4th root 221C
-    heavy plus 2795
-    heavy minus 2796
-    heavy divide 2797
-    superscript 2 00b2 (** 2)
-    superscript 3 00b3
-    superscript 4-9 (2074-2079)
     unicode equivalents of  [ ] and { } and ( )
     per mille sign (1/1000) and per ten thousand sign (1/10000) both western and arabic
     other mathematical digits, or dingbat numbers
     such as 2460--2473 (1) .. (20) or 2474--2487 or 2488--249b or 24ea, 24eb--24f4, 24f5--24fe, 24ff, 2776..277F, 2780..2789, 278a..2793
     FF10--FF19, osmanya digit 0 at 104a0-104a9, 1d7ce-1d7d7, 1d7d8-1d7e1...1d7ff
-- time input and output and arithmetic (like original "at" program in C)
-  (also duration, so time - time = duration, or time +- duration = time)
-- Add buttons in GUI for the modes: radio (:def, :dbl, :flt, :unl, :dec) (the latter with a spinner), radio(:deg, :rad),
-  radio(:bin, :si, :mix), checkbox (:rational), checkbox (:timing), checkbox(:debug), checkbox(:resultsonly), checkbox (:quiet)
-  The implementation would be to either just set the mode directly, or to run a small piece of code (depending on if feedback is desired)
-  How would we implement "pop" mode on the checkboxes? (tri-state won't work b/c it cycles through), radio won't work, maybe a little
-  button beside the checkbox??  need an icon for it
+ - How would we implement "pop" mode on the settings checkboxes? (tri-state won't work b/c it cycles through), radio won't work, maybe a little button beside the checkbox??  need an icon for it
 - "slice" function (works like "substr" on strings, extract slice of arrays)
 - "versioninfo" function that returns a map of the version information (from Version.java)
 - "flatmap" that flattens a map or array
@@ -110,15 +96,15 @@ Also see "issues" at https://github.com/rlwhitcomb/utilities/issues
 - "map" that converts string or array (list) to a map (with index as the key)
 - ?? could there be special processing if the list values were in "key:value" form??  and vice-versa for "list"??
 - does "@_" work inside parens?  how would I convert a JSON object into a string for other processing?  ?? need "string" function??
-- !!null seems like it should work (!!"true" -> true)
 - seems like we could have an "exit from GUI mode back to REPL mode" which is available when running from within REPL mode.
+- options to change background color in GUI (maybe in Settings dialog) and on command line (-bg red)
+- some way to not clear input in GUI mode if there is a syntax error during parsing
 
 #### Calc: Want to add parameters and local variables to functions.
 define a($b, $c, $d) = { $f = blah; ... }
 
 #### problems:
-- need to have local variables, but how do we get that incorporated into LValueContext?
-- how to deal with recursive invocations of functions with local variables (creating the dynamic context)?
+- best way is to have a Function class that saves all the old values of the param variables before setting to the new ones, then restores on function exit
 - need a way to store the param names, then to associate the values with the names
 - how about lists and maps:  pass by reference or value?  should there be an option?
 - e.g.: def npv($pv, $pmt, $i) = { loop slkdjf;lkj npv; }
@@ -126,7 +112,6 @@ define a($b, $c, $d) = { $f = blah; ... }
 
 ### Small Bugs / Fixes
 
-- Add an indent parameter to "lists" (since we don't seem to be able get leading/trailing spaces with -e or -f options.
 - Add some examples in the "list" help (or make a web page out of it to allow more verbosity)
   (I struggle with how to use the options to get what I need done)
 - Take the code from Calc ("displayHelp") and put it somewhere 'standard' so other can use it (like "Lists"...)
@@ -136,6 +121,10 @@ define a($b, $c, $d) = { $f = blah; ... }
 
 ### WordFind
 - Finish the GUI code.
+- options to limit the number of words displayed, and how small to go in displaying words
+  (in other words, only give me the top 20 in each length, and only show me words with 4 letters or more)
+- need some kind of filter to UPPER case everything, limit input to only letters and blank, and turn blank into ?
+  (probably needs to go into Pivot code)
 
 ### UUID
 - lots of options

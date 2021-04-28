@@ -250,7 +250,7 @@ code {
   <table>
     <tr>
       <th width=60>Level</th>
-      <th width=260>Operator</th>
+      <th width=300>Operator</th>
       <th width=320>Description</th>
       <th width=120>Associativity</th>
     </tr>
@@ -267,22 +267,22 @@ code {
     <tr><td>26</td><td><code>[ ]</code><br><i>var</i> <code>[</code> <i>expr</i> <code>]</code> or <i>var</i>&nbsp;&#x2080; .. &#x2089;</td><td>define an array,<br>or access elements of<br>an array, string, or object</td><td>left to right</td></tr>
     <tr><td>25</td><td>.</td><td>access an object member</td><td>left to right</td></tr>
     <tr><td>24</td><td><code>( </code><i>expr</i><code> )</code></td><td>group an expression</td><td>- none -</td></tr>
-    <tr><td>23</td><td><i>expr</i>&nbsp;<code>++</code><br><i>expr</i>&nbsp;<code>--</code></td><td>post increment/decrement</td><td>- none -</td></tr>
-    <tr><td>22</td><td><code>++</code>&nbsp;<i>expr</i><br><code>--</code>&nbsp;<i>expr</i></td><td>pre increment/decrement</td><td>right to left</td></tr>
-    <tr><td>21</td><td><code>+</code>&nbsp;<i>expr</i><br><code>-</code>&nbsp;<i>expr</i></td><td>posate/negate a value</td><td>right to left</td></tr>
+    <tr><td>23</td><td><i>expr</i>&nbsp;<code>++</code> or <code>&#x2795;&#x2795;</code><br><i>expr</i>&nbsp;<code>--</code> or <code>&#x2212;&#x2212;</code> or <code>&#x2796;&#x2796;</code></td><td>post increment/decrement</td><td>- none -</td></tr>
+    <tr><td>22</td><td><code>++</code> or <code>&#x2795;&#x2795;</code>&nbsp;<i>expr</i><br><code>--</code> or <code>&#x2212;&#x2212;</code> or <code>&#x2796;&#x2796;</code>&nbsp;<i>expr</i></td><td>pre increment/decrement</td><td>right to left</td></tr>
+    <tr><td>21</td><td><code>+</code> or <code>&#x2795;</code>&nbsp;<i>expr</i><br><code>-</code> or <code>&#x2212;</code> or <code>&#x2796;</code>&nbsp;<i>expr</i></td><td>posate/negate a value</td><td>right to left</td></tr>
     <tr><td>20</td><td><code>!</code> or <code>&#x00AC;</code>&nbsp;<i>expr</i></td><td>boolean NOT</td><td>right to left</td></tr>
     <tr><td>19</td><td><code>~</code>&nbsp;<i>expr</i></td><td>bitwise NOT</td><td>right to left</td></tr>
     <tr><td>18</td><td><i>expr</i>&nbsp;<code>!</code></td><td>factorial</td><td>left to right</td></tr>
-    <tr><td>17</td><td><i>expr<sub>1</sub></i>&nbsp;<code> ** </code>&nbsp;<i>expr<sub>2</sub></i><br>or&nbsp;<i>expr</i>&nbsp;&#x2070; .. &#x2079;</td><td><i>expr<sub>1</sub></i> to <i>expr<sub>2</sub></i> power<br>or <i>expr</i> to given power</td><td>right to left</td></tr>
+    <tr><td>17</td><td><i>expr<sub>1</sub></i>&nbsp;&nbsp;<code>**</code>, <code>&times;&times;</code>, <code>&#x2217;&#x2217;</code>, <code>&#x2715;&#x2715;</code>, or <code>&#x2716;&#x2716;</code>&nbsp;&nbsp;<i>expr<sub>2</sub></i><br>or&nbsp;<i>expr</i>&nbsp;&#x2070; .. &#x2079;</td><td><i>expr<sub>1</sub></i> to <i>expr<sub>2</sub></i> power<br>or <i>expr</i> to given power</td><td>right to left</td></tr>
     <tr><td>16</td><td>
-        <i>expr</i>&nbsp;<code> * </code>or<code> &times; </code>or<code> &#x2217; </code>&nbsp;<i>expr</i><br>
-        <i>expr</i>&nbsp;<code> / </code>or<code> &divide; </code>&nbsp;<i>expr</i><br>
+        <i>expr</i>&nbsp;&nbsp;<code>*</code>, <code>&times;</code>, <code>&#x2217;</code>, <code>&#x2715;</code>, or <code>&#x2716;</code>&nbsp;&nbsp;<i>expr</i><br>
+        <i>expr</i>&nbsp;&nbsp;<code>/</code>, <code>&divide;</code>, <code>&#x2215;</code>, or <code>&#x2797;</code>&nbsp;&nbsp;<i>expr</i><br>
         <i>expr</i>&nbsp;<code> % </code>&nbsp;<i>expr</i></td>
-        <td>multiply/divide/remainder</td><td>left to right</td></tr>
+        <td>multiply<br>divide<br>remainder</td><td>left to right</td></tr>
     <tr><td>15</td><td>
-        <i>expr</i>&nbsp;<code> + </code>&nbsp;<i>expr</i><br>
-        <i>expr</i>&nbsp;<code> - </code>&nbsp;<i>expr</i></td>
-        <td>add/subtract</td><td>left to right</td></tr>
+        <i>expr</i>&nbsp;&nbsp;<code>+</code> or <code>&#x2795;</code>&nbsp;&nbsp;<i>expr</i><br>
+        <i>expr</i>&nbsp;&nbsp;<code>-</code>,  <code>&#x2212;</code>, or <code>&#x2796;</code>&nbsp;&nbsp;<i>expr</i></td>
+        <td>add<br>subtract</td><td>left to right</td></tr>
     <tr><td>14</td><td>
         <i>expr</i>&nbsp;<code> &gt;&gt;&gt; </code>&nbsp;<i>expr</i><br>
         <i>expr</i>&nbsp;<code> &gt;&gt; </code>&nbsp;<i>expr</i><br>
@@ -290,7 +290,7 @@ code {
         <td>bit shift operations</td><td>left to right</td></tr>
     <tr><td>13</td><td colspan="2">
         <table class="innertable">
-            <tr><td width="260"><code>ABS</code>&nbsp;<i>expr</i></td><td width="320">absolute value</td></tr>
+            <tr><td width="300"><code>ABS</code>&nbsp;<i>expr</i></td><td width="320">absolute value</td></tr>
             <tr><td><code>SIN</code>&nbsp;<i>expr</i></td><td>sine</td></tr>
             <tr><td><code>COS</code>&nbsp;<i>expr</i></td><td>cosine</td></tr>
             <tr><td><code>TAN</code>&nbsp;<i>expr</i></td><td>tangent</td></tr>
@@ -336,7 +336,7 @@ code {
             <tr><td><code>PFACTORS</code>&nbsp;<i>expr</i></td><td>calculate the prime factors of the number</td></tr>
         </table></td>
         <td>left to right</td></tr>
-    <tr><td>12</td><td><i>expr</i>&nbsp;<code> &lt;=&gt; </code>&nbsp;<i>expr</i><td>returns <code>-1</code> if expr &lt; 0<br><code>0</code> if expr = 0<br><code>+1</code> if expr &gt; 0</td><td>left to right</td></tr>
+    <tr><td>12</td><td><i>expr</i>&nbsp;<code> &lt;=&gt; </code>&nbsp;<i>expr</i><td>returns <code>-1</code> if <i>expr</i> &lt; 0<br><code>0</code> if <i>expr</i> = 0<br><code>+1</code> if <i>expr</i> &gt; 0</td><td>left to right</td></tr>
     <tr><td>11</td><td>
         <i>expr</i>&nbsp;<code> &lt;= </code>or<code> &#x2264; </code>&nbsp;<i>expr</i><br>
         <i>expr</i>&nbsp;<code> &lt; </code>&nbsp;<i>expr</i><br>
@@ -348,7 +348,7 @@ code {
         <i>expr</i>&nbsp;<code> !== </code>or<code> &#x2262; </code>&nbsp;<i>expr</i><br>
         <i>expr</i>&nbsp;<code> == </code>or<code> &#x2A75; </code>&nbsp;<i>expr</i><br>
         <i>expr</i>&nbsp;<code> != </code>or<code> &#x2260; </code>&nbsp;<i>expr</i></td>
-        <td>strict equality/inequality<br>equality/inequality</td><td>left to right</td></tr>
+        <td>strict equality<br>strict inequality<br>equality<br>inequality</td><td>left to right</td></tr>
     <tr><td>9</td><td>
         <i>expr</i>&nbsp;<code> &amp; </code>&nbsp;<i>expr</i><br>
         <i>expr</i>&nbsp;<code> ~&amp; </code>or<code> &#x22BC; </code>&nbsp;<i>expr</i><br>
@@ -362,18 +362,18 @@ code {
         <i>expr</i>&nbsp;<code> &amp;&amp; </code>or<code> &#x2227; </code>&nbsp;<i>expr</i><br>
         <i>expr</i>&nbsp;<code> || </code>or<code> &#x2228; </code>&nbsp;<i>expr</i><br>
         <i>expr</i>&nbsp;<code> ^^ </code>or<code> &#x22BB; </code>&nbsp;<i>expr</i></td>
-        <td>logical AND,<br>OR,<br>or exclusive OR</td><td>left to right</td></tr>
+        <td>logical AND<br>logical OR<br>logical exclusive OR</td><td>left to right</td></tr>
     <tr><td>7</td><td><i>expr</i>&nbsp;<code> ? </code>&nbsp;<i>expr</i>&nbsp;<code> : </code>&nbsp;<i>expr</i></td><td>select one or the other value</td><td>right to left</td></tr>
-    <tr><td>6</td><td><i>var</i>&nbsp;<code> = </code>&nbsp;<i>expr</i></td><td>assign expr value to variable</td><td>right to left</td></tr>
-    <tr><td>5</td><td><i>var</i>&nbsp;<code> **= </code>&nbsp;<i>expr</i></td><td>var to expr power, assign to var</td><td>right to left</td></tr>
+    <tr><td>6</td><td><i>var</i>&nbsp;<code> = </code>&nbsp;<i>expr</i></td><td>assign <i>expr</i> value to variable</td><td>right to left</td></tr>
+    <tr><td>5</td><td><i>var</i>&nbsp;&nbsp;<code>**=</code>, <code>&times;&times;=</code>, <code>&#x2217;&#x2217;=</code>, <code>&#x2715;&#x2715;=</code>, or <code>&#x2716;&#x2716;=</code>&nbsp;&nbsp;<i>expr</i></td><td><i>var</i> to <i>expr</i> power, assign to <i>var</i></td><td>right to left</td></tr>
     <tr><td>4</td><td>
-        <i>var</i>&nbsp;<code> *= </code>or<code> &times;= </code>or<code> &#x2217;= </code>&nbsp;<i>expr</i><br>
-        <i>var</i>&nbsp;<code> /= </code>or<code> &divide;= </code>&nbsp;<i>expr</i><br>
+        <i>var</i>&nbsp;&nbsp;<code>*=</code>, <code>&times;=</code>, <code>&#x2217;=</code>, <code>&#x2715;=</code>, or <code>&#x2716;=</code>&nbsp;&nbsp;<i>expr</i><br>
+        <i>var</i>&nbsp;&nbsp;<code>/=</code>, <code>&divide;=</code>, <code>&#x2215;=</code>, or <code>&#x2797;=</code>&nbsp;&nbsp;<i>expr</i><br>
         <i>var</i>&nbsp;<code> %= </code>&nbsp;<i>expr</i></td>
         <td>perform the operation, reassign to variable</td><td>right to left</td></tr>
     <tr><td>3</td><td>
-        <i>var</i>&nbsp;<code> += </code>&nbsp;<i>expr</i><br>
-        <i>var</i>&nbsp;<code> -= </code>&nbsp;<i>expr</i></td>
+        <i>var</i>&nbsp;&nbsp;<code>+=</code> or <code>&#x2795;=</code>&nbsp;&nbsp;<i>expr</i><br>
+        <i>var</i>&nbsp;&nbsp;<code>-=</code>, <code>&#x2212;=</code>, or <code>&#x2796;=</code>&nbsp;&nbsp;<i>expr</i></td>
         <td>result assigned to variable again</td><td>right to left</td></tr>
     <tr><td>2</td><td>
         <i>var</i>&nbsp;<code> &gt;&gt;&gt;= </code>&nbsp;<i>expr</i><br>

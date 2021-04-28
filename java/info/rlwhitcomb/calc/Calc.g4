@@ -193,6 +193,8 @@
  *	    Revamp the way we do ENDEXPR.
  *	26-Apr-2021 (rlwhitcomb)
  *	    Fix FORMAT syntax.
+ *	28-Apr-2021 (rlwhitcomb)
+ *	    More Unicode math symbols.
  */
 
 grammar Calc;
@@ -272,7 +274,7 @@ expr
    |<assoc=right> ('!'|'\u00AC') expr    # booleanNotExpr
    |<assoc=right> '~' expr               # bitNotExpr
    | expr '!'                            # factorialExpr
-   |<assoc=right> expr '**' expr         # powerExpr
+   |<assoc=right> expr POW_OP expr       # powerExpr
    |<assoc=right> expr POWERS            # powerNExpr
    | expr MULT_OP expr                   # multiplyExpr
    | expr ADD_OP expr                    # addExpr
@@ -328,7 +330,7 @@ expr
    | expr BOOL_OP expr                   # booleanExpr
    |<assoc=right> expr '?' expr ':' expr # eitherOrExpr
    |<assoc=right> var ASSIGN expr        # assignExpr
-   |<assoc=right> var '**=' expr         # powerAssignExpr
+   |<assoc=right> var POW_ASSIGN expr    # powerAssignExpr
    |<assoc=right> var MULT_ASSIGN expr   # multAssignExpr
    |<assoc=right> var ADD_ASSIGN expr    # addAssignExpr
    |<assoc=right> var SHIFT_ASSIGN expr  # shiftAssignExpr
@@ -623,13 +625,13 @@ LOCALVAR
        : '$' [a-zA-Z_] [a-zA-Z_0-9]* ;
 
 INC_OP
-       : '++'
-       | ( '--' | '\u2212\u2212' )
+       : ( '++' | '\u2795\u2795' )
+       | ( '--' | '\u2212\u2212' | '\u2796\u2796' )
        ;
 
 ADD_OP
-       : '+'
-       | ( '-' | '\u2212' )
+       : ( '+' | '\u2795' )
+       | ( '-' | '\u2212' | '\u2796' )
        ;
 
 POWERS
@@ -649,27 +651,29 @@ INDEXES
        : [\u2080-\u2089]
        ;
 
+POW_OP
+       : ( '**' | '\u00D7\u00D7' | '\u2217\u2217' | '\u2715\u2715' | '\u2716\u2716' )
+       ;
+
 MULT_OP
-       : '*'
-       | '\u00D7'
-       | '\u2217'
-       | '/'
-       | '\u00F7'
+       : ( '*' | '\u00D7' | '\u2217' | '\u2715' | '\u2716' )
+       | ( '/' | '\u00F7' | '\u2215' | '\u2797' )
        | '%'
        ;
 
-ADD_ASSIGN
-       : '+='
-       | ( '-=' | '\u2212=' )
+POW_ASSIGN
+       : ( '**=' | '\u00D7\u00D7=' | '\u2217\u2217=' | '\u2715\u2715=' | '\u2716\u2716=' )
        ;
 
 MULT_ASSIGN
-       : '*='
-       | '\u00D7='
-       | '\u2217='
-       | '/='
-       | '\u00F7='
+       : ( '*=' | '\u00D7=' | '\u2217=' | '\u2715=' | '\u2716=' )
+       | ( '/=' | '\u00F7=' | '\u2215=' | '\u2797=' )
        | '%='
+       ;
+
+ADD_ASSIGN
+       : ( '+=' | '\u2795=' )
+       | ( '-=' | '\u2212=' | '\u2796=' )
        ;
 
 SHIFT_ASSIGN
