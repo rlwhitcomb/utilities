@@ -60,6 +60,8 @@
  *	    More generally remove whitespace at the end of tree text.
  *	26-Apr-2021 (rlwhitcomb)
  *	    New method to format numbers with/without thousands separators.
+ *	27-Apr-2021 (rlwhitcomb)
+ *	    Treat empty and non-empty strings as valid boolean values (as does JavaScript).
  */
 package info.rlwhitcomb.calc;
 
@@ -329,13 +331,20 @@ public final class CalcUtil
 	public static Boolean toBooleanValue(final CalcObjectVisitor visitor, final Object obj, final ParserRuleContext ctx) {
 	    Object value = visitor.evaluateFunction(obj);
 
-	    nullCheck(value, ctx);
+	    // Compatibility with JavaScript here...
+	    if (CharUtil.isNullOrEmpty(value))
+		return Boolean.FALSE;
 
 	    try {
 		boolean boolValue = CharUtil.getBooleanValue(value);
 		return Boolean.valueOf(boolValue);
 	    }
 	    catch (IllegalArgumentException iae) {
+		// Even if the string isn't a "valid" boolean value, accept a
+		// non-empty string as "true" (as does JavaScript)
+		if ((value instanceof String) && !((String) value).isEmpty())
+		    return Boolean.TRUE;
+
 		throw new CalcExprException(iae, ctx);
 	    }
 	}
