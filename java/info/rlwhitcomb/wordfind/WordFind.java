@@ -49,10 +49,15 @@
  *          Highlight the "contained" strings in the final output.
  *          Display total words at the end.
  *          Implement "-nocolor" option.
- *	29-Mar-2021 (rlwhitcomb)
- *	    Move the theme file.
  *      29-Mar-2021 (rlwhitcomb)
- *	    More actual implementation of the GUI.
+ *          Move the theme file.
+ *      29-Mar-2021 (rlwhitcomb)
+ *          More actual implementation of the GUI.
+ *      26-Apr-2021 (rlwhitcomb)
+ *          Fix index out of bounds exception. Add rudimentary help.
+ *          Tweak some of the command line options.
+ *          Allow "WORDFIND_OPTIONS" in the environment.
+ *          Add options to show timings or not.
  */
 package info.rlwhitcomb.wordfind;
 
@@ -135,6 +140,8 @@ public class WordFind implements Application {
     private static int maxLineLength = 72;
     /** Whether to use colors for the output. */
     private static boolean colored = true;
+    /** Whether to report timings or not. */
+    private static boolean timings = true;
     /** Whether to interpret the command line words as letters or whole words. */
     private static boolean letter = true;
     /** Whether to deal with input and output as all lower case or UPPER case. */
@@ -468,19 +475,19 @@ public class WordFind implements Application {
 
     @Override
     public void startup(final Display display, org.apache.pivot.collections.Map<String, String> properties) {
-	this.display = display;
+        this.display = display;
 
-	try {
-	    BXMLSerializer serializer = new BXMLSerializer();
-	    serializer.readObject(WordFind.class, "wordfind.bxml");
-	    serializer.bind(this);
+        try {
+            BXMLSerializer serializer = new BXMLSerializer();
+            serializer.readObject(WordFind.class, "wordfind.bxml");
+            serializer.bind(this);
 
-	    mainWindow.open(display);
-	    lettersInput.requestFocus();
-	} catch (Exception ex) {
-	    System.err.println("Error: " + ExceptionUtil.toString(ex) + " from " + ex.getStackTrace()[0].toString());
+            mainWindow.open(display);
+            lettersInput.requestFocus();
+        } catch (Exception ex) {
+            System.err.println("Error: " + ExceptionUtil.toString(ex) + " from " + ex.getStackTrace()[0].toString());
 ex.printStackTrace();
-	}
+        }
     }
 
     @Override
@@ -588,19 +595,30 @@ ex.printStackTrace();
             colored = true;
         } else if (matches(arg, "notcolored", "nocolors", "nocolor", "nocol", "noc")) {
             colored = false;
+        } else if (matches(arg, "notimings", "notiming", "quiet", "not", "q")) {
+            timings = false;
+        } else if (matches(arg, "timings", "timing", "verbose", "time", "t")) {
+            timings = true;
         } else if (matches(arg, "console", "con")) {
             runningOnConsole = true;
-        } else if (matches(arg, "window", "gui", "g")) {
+        } else if (matches(arg, "window", "win", "gui", "g")) {
             runningOnConsole = false;
         } else if (matches(arg, "default", "twl06a", "def", "d")) {
             wordFile = WORD_FILE_DEFAULT;
         } else if (matches(arg, "original", "twl06", "orig", "o")) {
             wordFile = WORD_FILE_ORIGINAL;
-        } else if (matches(arg, "antique", "enable1", "enable", "en")) {
+        } else if (matches(arg, "antique", "enable1", "enable", "ant", "en")) {
             wordFile = WORD_FILE_ANTIQUE;
         } else if (matches(arg, "version", "vers", "ver", "v")) {
             Environment.printProgramInfo();
             System.exit(0);
+        } else if (matches(arg, "help", "h", "?")) {
+            System.out.println("Usage: wf letters options");
+            System.out.println();
+            System.out.println("  use '-gui' option to open the GUI window.");
+            System.out.println();
+            System.out.println("(WORDFIND_OPTIONS can be set in the environment)");
+            System.out.println();
         } else {
             error("Unknown option " + quote(prefix + arg) + " ignored!");
         }
@@ -610,7 +628,8 @@ ex.printStackTrace();
      * Process all command line arguments, calling {@link #processOption} for options and
      * saving the rest in the input list.
      * @param args The command line arguments.
-     * @param nonOptions The list to fill up with all the non-option arguments.
+     * @param nonOptions The list to fill up with all the non-option arguments (can be
+     * {@code null} to not collect any).
      * @return The total length of the non-option strings.
      */
     private static int processCommandLine(final String[] args, final List<String> nonOptions) {
@@ -634,8 +653,10 @@ ex.printStackTrace();
                 endingValue = Optional.of(arg);
                 endsWith = false;
             } else {
-                nonOptions.add(arg);
-                totalInputSize = arg.length();
+                if (nonOptions != null) {
+                    nonOptions.add(arg);
+                    totalInputSize += arg.length();
+                }
             }
         }
 
@@ -668,6 +689,7 @@ ex.printStackTrace();
     private static void readDictionary(final String wordFile, final Set<String> wordSet,
         final Set<String> addlSet) {
         long startTime = System.nanoTime();
+
         InputStream is = WordFind.class.getResourceAsStream(wordFile);
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
             String line;
@@ -694,13 +716,16 @@ ex.printStackTrace();
             }
         } catch (IOException ioe) {
             error("Problem reading the " + quote(wordFile) + " file: "
-                + ioe.getClass().getSimpleName() + ": " + ioe.getMessage());
+                + ExceptionUtil.toString(ioe));
         }
         long endTime = System.nanoTime();
-        float secs = (float)(endTime - startTime) / 1.0e9f;
-        String message = String.format("Dictionary %1$s has %2$,d basic and %3$,d additional words (%4$5.3f secs).",
-            quote(wordFile), wordSet.size(), addlSet.size(), secs);
-        info(message);
+
+        if (timings) {
+            float secs = (float)(endTime - startTime) / 1.0e9f;
+            String message = String.format("Dictionary %1$s has %2$,d basic and %3$,d additional words (%4$5.3f secs).",
+                quote(wordFile), wordSet.size(), addlSet.size(), secs);
+            info(message);
+        }
     }
 
     /**
@@ -711,6 +736,13 @@ ex.printStackTrace();
         Environment.setDesktopApp(true);
         Environment.loadProgramInfo(WordFind.class);
 
+        String defaultOptions = System.getenv("WORDFIND_OPTIONS");
+        if (!CharUtil.isNullOrEmpty(defaultOptions)) {
+            String[] defaultArgs = defaultOptions.split("[,;]\\s*|\\s+");
+            processCommandLine(defaultArgs, null);
+        }
+
+        // Command line options override the defaults (if any)
         List<String> argWords = new ArrayList<>(args.length);
         int totalInputSize = processCommandLine(args, argWords);
 
@@ -759,6 +791,7 @@ ex.printStackTrace();
                     beginningValue = beginningValue.map(caseMapper);
                     String beginsString = beginningValue.get();
                     sb.append(" beginning with " + quote(beginsString));
+                    cn = beginsString.length();
                 }
                 if (containsValue.isPresent()) {
                     containsValue = containsValue.map(caseMapper);
@@ -770,6 +803,7 @@ ex.printStackTrace();
                     endingValue = endingValue.map(caseMapper);
                     String endsString = endingValue.get();
                     sb.append(" ending with " + quote(endsString));
+                    cn = endsString.length();
                 }
                 heading(sb.toString());
 
@@ -858,11 +892,14 @@ ex.printStackTrace();
                     error("Unable to find any valid words!");
 
                 long endTime = System.nanoTime();
-                float secs = (float)(endTime - startTime) / 1.0e9f;
-                int wordsChecked = permutationSet.size() * (containsValue.isPresent() ? n : 1);
-                String message = String.format("(Lookup time %1$5.3f seconds; %2$,d valid words out of %3$,d tested)",
-                        secs, numberOfWordsFound, wordsChecked);
-                info(message);
+
+                if (timings) {
+                    float secs = (float)(endTime - startTime) / 1.0e9f;
+                    int wordsChecked = permutationSet.size() * (containsValue.isPresent() ? n : 1);
+                    String message = String.format("(Lookup time %1$,5.3f seconds; %2$,d valid words out of %3$,d tested)",
+                            secs, numberOfWordsFound, wordsChecked);
+                    info(message);
+                }
             }
         }
     }

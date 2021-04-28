@@ -209,6 +209,8 @@
 		Oops! Need to add all the classes from "info/rlwhitcomb" to the .jar file.
 	    21-Apr-2021 (rlwhitcomb)
 		Rename "dest.jar" property to "result.jar".
+	    27-Apr-2021 (rlwhitcomb)
+		Exclude unused word file (reduces .jar file size).
 
      ========================================================================== -->
 
@@ -482,6 +484,7 @@
 			<include name="info/rlwhitcomb/wordfind/*.class"/>
 			<include name="info/rlwhitcomb/wordfind/*.bxml"/>
 			<include name="info/rlwhitcomb/wordfind/*.txt"/>
+			<exclude name="info/rlwhitcomb/wordfind/enable1.txt"/>
 			<include name="info/rlwhitcomb/**/*.properties"/>
 			<include name="name/fraser/neil/plaintext/*.class"/>
 			<include name="net/iharder/b64/*.class"/>
