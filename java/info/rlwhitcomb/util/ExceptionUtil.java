@@ -58,6 +58,9 @@
  *	    Remove some unneeded logic.
  *	15-Mar-2021 (rlwhitcomb)
  *	    Add in some stack trace info if available.
+ *	29-Apr-2021 (rlwhitcomb)
+ *	    The string index exception needs a bit more than the message.
+ *	    By default don't add in the stack trace, but allow it when desired.
  */
 package info.rlwhitcomb.util;
 
@@ -86,8 +89,7 @@ public class ExceptionUtil
 	 */
 	public static String toString(Throwable ex) {
 	    StringBuilder buf = new StringBuilder();
-	    toString(ex, buf);
-	    return buf.toString();
+	    return toString(ex, buf).toString();
 	}
 
 	/**
@@ -100,8 +102,22 @@ public class ExceptionUtil
 	 */
 	public static String toString(Throwable ex, boolean useSpaces) {
 	    StringBuilder buf = new StringBuilder();
-	    toString(ex, buf, false, useSpaces, false);
-	    return buf.toString();
+	    return toString(ex, buf, false, useSpaces, false, false).toString();
+	}
+
+	/**
+	 * Standalone version to do a "pure" string (using spaces instead of newlines),
+	 * with option to add the stack trace info.
+	 *
+	 * @param ex		The exception to report.
+	 * @param useSpaces	Whether to use spaces instead of newlines to separate
+	 *			the chain of causal exceptions.
+	 * @param addStackTrace	Whether to add the top level stack info to the message.
+	 * @return		String representation of the exception.
+	 */
+	public static String toString(Throwable ex, boolean useSpaces, boolean addStackTrace) {
+	    StringBuilder buf = new StringBuilder();
+	    return toString(ex, buf, false, useSpaces, false, addStackTrace).toString();
 	}
 
 	/**
@@ -110,9 +126,24 @@ public class ExceptionUtil
 	 *
 	 * @param	ex	The exception to report.
 	 * @param	buf	The buffer used to build the content.
+	 * @return		The input buffer (in order to chain).
 	 */
-	public static void toString(Throwable ex, StringBuilder buf) {
-	    toString(ex, buf, false, false, false);
+	public static StringBuilder toString(Throwable ex, StringBuilder buf) {
+	    return toString(ex, buf, false, false, false, false);
+	}
+
+	/**
+	 * Incremental version which allows for prepended or appended
+	 * content by being passed the buffer in which to work, with
+	 * the option to add the stack trace info.
+	 *
+	 * @param	ex	The exception to report.
+	 * @param	buf	The buffer used to build the content.
+	 * @param addStackTrace	Whether to add the stack trace info.
+	 * @return		The input buffer (in order to chain).
+	 */
+	public static StringBuilder toString(Throwable ex, StringBuilder buf, boolean addStackTrace) {
+	    return toString(ex, buf, false, false, false, addStackTrace);
 	}
 
 	/**
@@ -157,8 +188,11 @@ public class ExceptionUtil
 	 *				the chained exceptions.
 	 * @param	convertTabs	Convert any tab characters to single spaces (for use in controls
 	 *				that don't deal with tabs correctly; some do).
+	 * @param	addStackTrace	On the top level add the caller's caller location.
+	 * @return			The input buffer (so calls can be chained).
 	 */
-	public static void toString(Throwable ex, StringBuilder buf, boolean useToString, boolean useSpaces, boolean convertTabs) {
+	public static StringBuilder toString(Throwable ex, StringBuilder buf, boolean useToString, boolean useSpaces,
+		boolean convertTabs, boolean addStackTrace) {
 	    boolean topLevel = true;
 
 	    for (Throwable next = ex; next != null; ) {
@@ -181,7 +215,8 @@ public class ExceptionUtil
 			  || (next instanceof FileNotFoundException)
 			  || (next instanceof NoSuchFileException)
 			  || (next instanceof UnsupportedOperationException)
-			  || (next instanceof NumberFormatException)) {
+			  || (next instanceof NumberFormatException)
+			  || (next instanceof StringIndexOutOfBoundsException)) {
 			msg = String.format("%1$s \"%2$s\"", exceptionName(next), msg);
 		    }
 		}
@@ -189,10 +224,12 @@ public class ExceptionUtil
 
 		// First time through, add in the first stack trace info
 		if (topLevel) {
-		    StackTraceElement[] stack = next.getStackTrace();
-		    if (stack != null && stack.length > 0) {
-			buf.append(useSpaces ? " " : "\n    ");
-			buf.append(Intl.formatString("util#except.fromStack", stack[0].toString()));
+		    if (addStackTrace) {
+			StackTraceElement[] stack = next.getStackTrace();
+			if (stack != null && stack.length > 0) {
+			    buf.append(useSpaces ? " " : "\n    ");
+			    buf.append(Intl.formatString("util#except.fromStack", stack[0].toString()));
+			}
 		    }
 		    topLevel = false;
 		}
@@ -209,6 +246,8 @@ public class ExceptionUtil
 		    buf.setCharAt(ix++, ' ');
 		}
 	    }
+
+	    return buf;
 	}
 
 }

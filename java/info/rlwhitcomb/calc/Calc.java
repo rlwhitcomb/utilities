@@ -141,6 +141,8 @@
  *	    Accessor for "replMode".
  *	22-Apr-2021 (rlwhitcomb)
  *	    Allow line continuations in REPL mode (needs new grammar support to work).
+ *	29-Apr-2021 (rlwhitcomb)
+ *	    Fix one place that needed ExceptionUtil to get a nicer error message.
  */
 package info.rlwhitcomb.calc;
 
@@ -575,7 +577,7 @@ public class Calc
 		requestFocus(inputTextPane);
 	    }
 	    catch (Throwable ex) {
-		displayer.displayErrorMessage(ex.getMessage());
+		displayer.displayErrorMessage(ExceptionUtil.toString(ex));
 	    }
 	}
 

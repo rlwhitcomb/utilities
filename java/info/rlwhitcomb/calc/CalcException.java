@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2020 Roger L. Whitcomb.
+ * Copyright (c) 2020-2021 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,8 +24,12 @@
  *  History:
  *      11-Dec-2020 (rlwhitcomb)
  *	    Initial coding.
+ *	29-Apr-2021 (rlwhitcomb)
+ *	    Use ExceptionUtil to format the message.
  */
 package info.rlwhitcomb.calc;
+
+import info.rlwhitcomb.util.ExceptionUtil;
 
 
 /**
@@ -47,7 +51,7 @@ public class CalcException extends RuntimeException
 	}
 
 	public CalcException(Throwable cause, int lineNo) {
-	    super(cause.getMessage() == null ? cause.getClass().getSimpleName() : cause.getMessage(), cause);
+	    super(ExceptionUtil.toString(cause), cause);
 	    this.lineNumber = lineNo;
 	}
 

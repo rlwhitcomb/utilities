@@ -272,6 +272,8 @@
  *	    Put "and" into the list of cleared variables when needed.
  *	28-Apr-2021 (rlwhitcomb)
  *	    More Unicode math symbols.
+ *	29-Apr-2021 (rlwhitcomb)
+ *	    Catch out of bounds exception in "substr".
  */
 package info.rlwhitcomb.calc;
 
@@ -2249,34 +2251,39 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    CalcParser.ExprContext indexCtx;
 	    String stringValue;
 
-	    if (e2ctx != null) {
-		stringValue = getStringValue(e2ctx.expr(0));
-		indexCtx    = e2ctx.expr(1);
+	    try {
+		if (e2ctx != null) {
+		    stringValue = getStringValue(e2ctx.expr(0));
+		    indexCtx    = e2ctx.expr(1);
 
-		if (indexCtx == null)
-		    return stringValue;
-		else {
-		    int beginIndex = getIntValue(indexCtx);
-		    if (beginIndex < 0) {
-			int stringLen = stringValue.length();
-			return stringValue.substring(stringLen + beginIndex);
+		    if (indexCtx == null)
+			return stringValue;
+		    else {
+			int beginIndex = getIntValue(indexCtx);
+			if (beginIndex < 0) {
+			    int stringLen = stringValue.length();
+			    return stringValue.substring(stringLen + beginIndex);
+			}
+		        return stringValue.substring(beginIndex);
 		    }
-		    return stringValue.substring(beginIndex);
+		}
+		else {
+		    CalcParser.Expr3Context e3ctx = ctx.expr3();
+		    stringValue    = getStringValue(e3ctx.expr(0));
+		    int beginIndex = getIntValue(e3ctx.expr(1));
+		    int endIndex   = getIntValue(e3ctx.expr(2));
+		    int stringLen  = stringValue.length();
+
+		    if (beginIndex < 0)
+			beginIndex += stringLen;
+		    if (endIndex < 0)
+			endIndex += stringLen;
+
+		    return stringValue.substring(beginIndex, endIndex);
 		}
 	    }
-	    else {
-		CalcParser.Expr3Context e3ctx = ctx.expr3();
-		stringValue    = getStringValue(e3ctx.expr(0));
-		int beginIndex = getIntValue(e3ctx.expr(1));
-		int endIndex   = getIntValue(e3ctx.expr(2));
-		int stringLen  = stringValue.length();
-
-		if (beginIndex < 0)
-		    beginIndex += stringLen;
-		if (endIndex < 0)
-		    endIndex += stringLen;
-
-		return stringValue.substring(beginIndex, endIndex);
+	    catch (StringIndexOutOfBoundsException ex) {
+		throw new CalcExprException(ex, ctx);
 	    }
 	}
 
