@@ -50,6 +50,13 @@ code {
    color: blue;
 }
 
+.orangebutton {
+   font-family: Verdana, Helvetica, Arial, Sans-Serif;
+   font-size: 24pt;
+   font-weight: bold;
+   color: darkorange;
+}
+
 .innertable tr,
 .innertable th,
 .innertable td {
@@ -76,8 +83,23 @@ code {
        (<span class="underline">R</span>ead, <span class="underline">E</span>val, <span class="underline">P</span>rint
         <span class="underline">L</span>oop) where a prompt is displayed, the input lines are evaluated
        one-at-a-time, and the results displayed; from a file for predefined calculations; or inside a simple GUI frame.
+  <p>Why would I want this calculator when there are so many already available (handheld, apps on your phone, default apps on your computer)?
+      <ul>
+        <li>The ability to do (essentially) unlimited precision arithmetic.</li>
+        <li>More operators and functions than are typically available anywhere else.</li>
+        <li>The ability to define functions for repeated calculations.</li>
+        <li>Variables for storage of values for later use.</li>
+        <li>Object and array structures for storage of multiple values.</li>
+        <li>String functions for doing text manipulation.</li>
+        <li>The ability to do calculations straight from the command line, or in a convenient REPL loop, or in a GUI window.</li>
+        <li>The ability to define libraries of functions that can be accessed through the "<code>:include</code>" directive.</li>
+        <li>Looping and conditional statements to do pretty much any kind of calculation.</li>
+        <li>It is being actively developed and maintained, so more features will be added over time.</li>
+        <li>Open-Source Software (<a href="https://opensource.com/resources/what-open-source">OSS</a>) so the code can be examined, and modified (if desired) for your own use.</li>
+      </ul>
+  </p>
   <h2>Command Line</h2>
-  <p>The command is assumed to have either the name of a file to process, or an expression to evaluate. There may also be options specified (see the next section). If there is a single value given and there exists a file by that name (possibly in another directory given by the prior <code>-inputdir</code> option), then that file is read, the contents parsed, and all the expressions evaluated. Otherwise, if there are more than one argument on the command line, or the single argument does not name a file, then the command line is taken as a single string, parsed, and then evaluated.
+  <p>The command line is assumed to have either the name of a file to process, or an expression to evaluate. There may also be options specified (see the next section). If there is a single value given and there exists a file by that name (possibly in another directory given by the prior <code>-inputdir</code> option), then that file is read, the contents parsed, and all the expressions evaluated. Otherwise, if there are more than one argument on the command line, or the single argument does not name a file, then the command line is taken as a single string, parsed, and then evaluated.
   <h2>Command Line Options</h2>
   <p>Certain options can be given on the command line that affect the operation of the calculator. These options can also be set via the <code>CALC_OPTIONS</code> environment variable. Options specified on the command line will override the defaults set by <code>CALC_OPTIONS</code>, and options given later on the command line override ones given earlier.
   <p>Options are case-insensitive, and maybe be given with <code>-</code>, <code>--</code> or on Windows a <code>/</code>, prefix.
@@ -398,6 +420,7 @@ code {
   <p class="indent">
      <code>def</code> | <code>define</code>&nbsp;<i>name</i> <code>= {</code> <i>expressions or statements</i> <code>}</code>
   </p>
+  <p>Note that the <code>{</code> and <code>}</code> are optional if there is only one expression/statement in the definition.
   <p>The value of a function is the value of the last expression evaluated inside it (note that the other statements have the same
      semantics). Functions are referenced by simply invoking their name.  For example: <code>def a = { 1 }</code> gives <code>a = 1</code>, and <code>def b = { a }</code> gives <code>b = 1</code>. Redefining the underlying function will also change the value of
      any functions that use it. So, without changing the definition of <code>b</code>, we can redefine <code>def a={2}</code>
@@ -422,6 +445,7 @@ code {
   <p class="indent">
      <code>CASE</code>&nbsp;<i>expr</i>&nbsp;<code>OF</code>&nbsp;( ( <i>expr</i> ( <code>,</code> <i>expr</i> ) * | <code>DEFAULT</code> ) <code>: {</code> <i>statements or expressions</i> <code>}</code> ( <code>,</code> ) ? ) *
   </p>
+  <p>In all these statements the <code>{</code> and <code>}</code> are not needed if there is only one statement or expression in the block.
   <p>The <code>LOOP</code> statement will repeatedly execute the block of statements based on several conditions:
      <ul><li>if only one expression is listed, the loop will be repeated that number of times, starting from one</li>
          <li>if the <i>expr</i> <code>..</code> <i>expr</i> form is used the loop will be repeated starting from the
@@ -444,7 +468,7 @@ code {
      boolean <code>true</code> value. If the optional <code>ELSE</code> block is given and the expression evaluates to
      <code>false</code> that block will be executed instead.
   <p>The <code>CASE</code> statement evaluates the expression and executes whichever code block has a matching value, or the <code>default</code> block (if given) if nothing else matches. Note: the expression match is made as if by <code>'=='</code> (that is, not a strict comparison), but the individual block values can be any kind of expression or object (including lists, objects, strings, functions, etc.).
-  <p>The value of any of these statements is the value of the last expression evaluated, inside whatever block is selected, and from the last iteration of that block inside a loop.  For instance, consider the following code:
+  <p>The value of any of these statements is the value of the last expression evaluated, inside whatever block is selected, and from the last iteration of that block inside a loop.  But the grammar (for now) does not allow that final value to be used except inside a function.  For instance, consider the following code:
   <p class="indent">
       <code>define strings = { case upper(value) of "ONE": { 1 }, "TWO": { 2 }, "THREE" : { 3.14 }, default: { "many" } }</code><br>
       <code>value='one'; strings</code>
@@ -466,14 +490,14 @@ code {
   </p>
   There are many more code examples in the <code>test/files</code> directory of the source distribution.
   <h2>Directives</h2>
-  <p>Various directives can be given within a script or on a separate input line in REPL mode that will affect the operation of the calculator. Some of them allow you to change the options given on the command line, while others are only available from within the script.
+  <p>Various directives can be given within a script or on a separate input line in REPL mode that will affect the operation of the calculator. Some of them allow you to change the options given on the command line, while others are only available from within the script. All the mode-setting directives are also available in the Settings dialog (the <span class="orangebutton">&#x2261;</span> button or <code>F2</code> key) in GUI mode.
   <center>
   <h2>Available Directives</h2>
   <table>
     <tr>
-      <th width=100>Directive</th>
-      <th width=300>Description</th>
-      <th width=100>Aliases</th>
+      <th width=200>Directive</th>
+      <th width=400>Description</th>
+      <th width=150>Aliases</th>
     </tr>
     <tr><td><code>:decimal</code> <i>number_option</i></td><td>Set the precision of all decimal calculations,<br>where <i>number_option</i> can be <code>(</code><i>number</i><code>)</code>, or <i>number</i>, or <i>variable</i><br>to specify the number of decimal digits of precision</td><td><code>:dec</code>, <code>:precision</code>, <code>:prec</code></td></tr>
     <tr><td><code>:default</code></td><td>Set the default decimal precision (~34 digits) <i>(default)</i></td><td><code>:def</code></td></tr>
@@ -521,7 +545,7 @@ code {
   <center>
   <br><img src="calc_initial.png" alt="Initial GUI screen" width="50%"/>
   </center>
-  <p>An expression can be entered on each line, and all will be executed in order when the <span class="redbutton">!</span> button (or the <code>F9</code> key) is pressed, and the results displayed in the "Results" field. The Ctrl-Enter (or Cmd-Enter on Mac) key will also perform the calculation(s).
+  <p>An expression can be entered on each line, and all will be executed in order when the <span class="redbutton">!</span> button (or the <code>F9</code> key) is pressed, and the results displayed in the "Results" field. The <code>Ctrl+Enter</code> (or <code>&#x2318;Enter</code> on Mac) key will also perform the calculation(s).
   <p>This help page will also be displayed by the <span class="bluebutton">?</span> button (or the <code>F1</code> key).
   <p>Note: colors are not currently used in the GUI display, so using the command-line options <code>-darkbg</code> or <code>-lightbg</code> will have no effect.
 
