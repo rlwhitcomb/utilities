@@ -143,6 +143,8 @@
  *	    Allow line continuations in REPL mode (needs new grammar support to work).
  *	29-Apr-2021 (rlwhitcomb)
  *	    Fix one place that needed ExceptionUtil to get a nicer error message.
+ *	29-Apr-2021 (rlwhitcomb)
+ *	    Change the GUI "Version" key label id.
  */
 package info.rlwhitcomb.calc;
 
@@ -271,7 +273,7 @@ public class Calc
 	@BXML private NumberRuler outputRuler;
 	@BXML private Label outputSizeLabel;
 	@BXML private PushButton versionButton;
-	@BXML private Label versionLabel;
+	@BXML private Label versionKeyLabel;
 	@BXML private Prompt versionPrompt;
 	@BXML private Label versionText;
 	@BXML private Label buildText;
@@ -546,7 +548,7 @@ public class Calc
 		String key = versionKey.toString();
 
 		versionButton.setTooltipText(Intl.formatString("versionTip", key));
-		versionLabel.setText(key);
+		versionKeyLabel.setText(key);
 
 		inputTextPane.setDocument(new Document());
 

@@ -60,6 +60,8 @@
 		so they reflect the proper key to be used, depending on platform.
 	    15-Apr-2021 (rlwhitcomb)
 		Move all text to Pivot resources.
+	    29-Apr-2021 (rlwhitcomb)
+		Add real names to the buttons.
 
      ========================================================================== -->
 
@@ -166,6 +168,7 @@
 				preferredHeight="32"
 				styles="{color:'DeepSkyBlue', font:{size:24,bold:true}}"/>
 			<Label text="%openLabel"/>
+			<Label text="%openKeyLabel"/>
 		    </BoxPane>
 		    <BoxPane orientation="vertical" styles="{horizontalAlignment:'center'}">
 			<PushButton tooltipText="%clearTip"
@@ -175,6 +178,7 @@
 				preferredHeight="32"
 				styles="{color:'forestgreen', font:{size:24,bold:true}}"/>
 			<Label text="%clearLabel"/>
+			<Label text="%clearKeyLabel"/>
 		    </BoxPane>
 		    <BoxPane orientation="vertical" styles="{horizontalAlignment:'center'}">
 			<PushButton tooltipText="%calculateTip"
@@ -184,6 +188,7 @@
 				preferredHeight="32"
 				styles="{color:'red', font:{size:24,bold:true}}"/>
 			<Label text="%calculateLabel"/>
+			<Label text="%calculateKeyLabel"/>
 		    </BoxPane>
 		    <BoxPane orientation="vertical" styles="{horizontalAlignment:'center'}">
 			<PushButton tooltipText="%exitTip"
@@ -193,6 +198,7 @@
 				preferredHeight="32"
 				styles="{color:'indigo', font:{size:24,bold:true}}"/>
 			<Label text="%exitLabel"/>
+			<Label text="%exitKeyLabel"/>
 		    </BoxPane>
 		    <Label preferredWidth="50"/>
 		    <BoxPane orientation="vertical" styles="{horizontalAlignment:'center'}">
@@ -203,6 +209,7 @@
 				preferredHeight="32"
 				styles="{color:'blue', font:{size:24,bold:true}}"/>
 			<Label text="%helpLabel"/>
+			<Label text="%helpKeyLabel"/>
 		    </BoxPane>
 		    <BoxPane orientation="vertical" styles="{horizontalAlignment:'center'}">
 			<PushButton bxml:id="versionButton" tooltipText=""
@@ -211,7 +218,8 @@
 				preferredWidth="60"
 				preferredHeight="32"
 				styles="{color:'blue', font:{size:24,bold:true}}"/>
-			<Label bxml:id="versionLabel" text=""/>
+			<Label text="%versionLabel"/>
+			<Label bxml:id="versionKeyLabel" text=""/>
 		    </BoxPane>
 		    <Label preferredWidth="50"/>
 		    <BoxPane orientation="vertical" styles="{horizontalAlignment:'center'}">
@@ -222,6 +230,7 @@
 				preferredHeight="32"
 				styles="{color:'DarkOrange', font:{size:24,bold:true}}"/>
 			<Label text="%settingsLabel"/>
+			<Label text="%settingsKeyLabel"/>
 		    </BoxPane>
 		</BoxPane>
 	    </TablePane.Row>

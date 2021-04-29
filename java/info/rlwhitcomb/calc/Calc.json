@@ -26,6 +26,8 @@
  *  Change History:
  *      15-Apr-2021 (rlwhitcomb)
  *          First version; text taken from the bxml file.
+ *	29-Apr-2021 (rlwhitcomb)
+ *	    Add real names for the buttons.
  */
 {
     title:              'Calc',
@@ -58,24 +60,37 @@
 
     openButton:         'O',
     openTip:            'Open file (F4)',
-    openLabel:          'F4',
+    openLabel:          'Open File',
+    openKeyLabel:       'F4',
+
     clearButton:        'C',
-    clearTip:           'Clear input (F6)',
-    clearLabel:         'F6',
+    clearTip:           'Clear Expressions and Results (F6)',
+    clearLabel:         'Clear Results',
+    clearKeyLabel:      'F6',
+
     calculateButton:    '!',
-    calculateTip:       'Calculate! (F9)',
-    calculateLabel:     'F9',
+    calculateTip:       'Calculate the expressions! (F9)',
+    calculateLabel:     'Calculate',
+    calculateKeyLabel:  'F9',
+
     exitButton:         'X',
-    exitTip:            'Exit (F10)',
-    exitLabel:          'F10',
+    exitTip:            'Exit the program (F10)',
+    exitLabel:          'Exit',
+    exitKeyLabel:       'F10',
+
     helpButton:         '?',
     helpTip:            'Help (F1)',
-    helpLabel:          'F1',
+    helpLabel:          'Help',
+    helpKeyLabel:       'F1',
+
     versionButton:      'V',
-    versionTip:         'Version (%1$s)',
+    versionTip:         'Version information (%1$s)',
+    versionLabel:       'Version',
+
     settingsButton:     '\u2261',
-    settingsTip:        'Settings (F2)',
-    settingsLabel:      'F2',
+    settingsTip:        'Settings dialog (F2)',
+    settingsLabel:      'Settings',
+    settingsKeyLabel:   'F2',
 
     resultsBorder:      ' Results ',
     expressionsBorder:  ' Expressions ',
