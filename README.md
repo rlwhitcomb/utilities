@@ -73,6 +73,8 @@ Also see "issues" at https://github.com/rlwhitcomb/utilities/issues
 - Unclear yet if a switch ***back*** from GUI to console will work.
 
 ### Calc
+- Use "--" option on command line to signal end of options, rest is parameters (referenced in expressions as $0, $1, etc.) whose value is (of course) null if there isn't a parameter of that number
+- keep an array of them in Calc, with accessor function by number from LValueContext
 - implement Taylor series expansion of other trig/log functions to requested precision
 - need sec, cot, csc, and inverses as well
 - redo the [box] formats of strings (to be? x'...', b'...', o'...') then parse such beasts back to strings
@@ -121,6 +123,7 @@ define a($b, $c, $d) = { $f = blah; ... }
 
 ### WordFind
 - Finish the GUI code.
+- REPL mode (to avoid overhead of reading library file each time)
 - options to limit the number of words displayed, and how small to go in displaying words
   (in other words, only give me the top 20 in each length, and only show me words with 4 letters or more)
 - need some kind of filter to UPPER case everything, limit input to only letters and blank, and turn blank into ?
