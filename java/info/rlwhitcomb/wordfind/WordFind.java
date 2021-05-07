@@ -58,6 +58,11 @@
  *          Tweak some of the command line options.
  *          Allow "WORDFIND_OPTIONS" in the environment.
  *          Add options to show timings or not.
+ *      07-May-2021 (rlwhitcomb)
+ *          Add option for max iterations and option with code for max time.
+ *          Big change to add a REPL mode for repeated use without re-reading
+ *          the dictionary.
+ *          Options for min word size to report and max values of each size.
  */
 package info.rlwhitcomb.wordfind;
 
@@ -91,6 +96,7 @@ import org.apache.pivot.wtk.TextPane;
 import org.apache.pivot.wtk.Window;
 
 import info.rlwhitcomb.util.CharUtil;
+import info.rlwhitcomb.util.ConsoleColor;
 import static info.rlwhitcomb.util.ConsoleColor.Code.*;
 import info.rlwhitcomb.util.Environment;
 import info.rlwhitcomb.util.ExceptionUtil;
@@ -117,6 +123,15 @@ public class WordFind implements Application {
      * (all in upper case to be consistent with the others).
      */
     private static final String WORD_FILE_ANTIQUE = "ENABLE1U.txt";
+
+    /**
+     * The default number of maximum iterations looking for valid words.
+     */
+    private static final long DEFAULT_MAX_ITERATIONS = 10_000_000L;
+    /**
+     * The default amount of time (seconds) to spend iterating.
+     */
+    private static final float DEFAULT_MAX_TIME = 10.0f;
 
     /** The lookup set of known words. */
     private static final Set<String> words = new HashSet<>(200_000);
@@ -160,10 +175,33 @@ public class WordFind implements Application {
     private static boolean endsWith = false;
     /** Optional "Ends With" value. */
     private static Optional<String> endingValue = Optional.empty();
+    /** Whether next value is supposed to be a max size value. */
+    private static boolean needMaxSize = false;
+    /** Maximum number of iterations to perform. */
+    private static long maxIterations = DEFAULT_MAX_ITERATIONS;
+    /** Whether next value is supposed to be a max time value. */
+    private static boolean needMaxTime = false;
+    /** Maximum number of seconds to spend looking for values. */
+    private static float maxSeconds = DEFAULT_MAX_TIME;
+    /** Whether next value is supposed to be a min word size value. */
+    private static boolean needMinWordSize = false;
+    /** Minimum word length to report on (normally everything: {@code <= 0}). */
+    private static int minWordSizeToReport = 0;
+    /** Whether or not the next value is supposed to be the max number of words. */
+    private static boolean needMaxNumber = false;
+    /** Maximum numbers of words of each size to report (normally all: {@code <= 0}). */
+    private static int maxNumberOfWords = 0;
     /** The format string for final output of the words. */
     private static final String WORD_FORMAT = "%1$s%2$s " + BLACK_BRIGHT + "(%3$3d)" + RESET;
     /** The format string for final output without colors. */
     private static final String WORD_FORMAT_NOCOLORS = "%1$s%2$s (%3$3d)";
+    /** Continuation (colored). */
+    private static final String DOTS = " " + BLACK_BRIGHT + "..." + RESET;
+    /** Continuation (no colors). */
+    private static final String DOTS_NOCOLORS = " ...";
+
+    /** The current start time of the calculation. */
+    private static long startTime;
 
     /** The display object for the GUI. */
     private Display display;
@@ -388,11 +426,14 @@ public class WordFind implements Application {
             if (!permutationSet.add(prefix))
                 return true;
 
-            // TODO: is there a better algorithm that will shorten the time?
-            // Or a better algorithm with "contains" tests that won't exponentially
-            // increase our time?  Or should this be a parameter, or time-based or ...?
-            if (permutationSet.size() >= 10_000_000) {
-                System.err.println("Aborting after 10,000,000 permutations checked!");
+            if (maxIterations > 0L && permutationSet.size() >= maxIterations) {
+                System.err.printf("Aborting after %1$,d possible words checked!%n", maxIterations);
+                return false;
+            }
+            long currentTime = System.nanoTime();
+            float secs = (float)(currentTime - startTime) / 1.0e9f;
+            if (maxSeconds > 0.0f && secs >= maxSeconds) {
+                System.err.printf("Aborting after maximum time of %1$5.3f seconds!%n", secs);
                 return false;
             }
 
@@ -516,6 +557,10 @@ ex.printStackTrace();
         }
     }
 
+    private static void errorMissingValue(final String valueName) {
+        error("The \"--" + valueName + "\" option was specified without a value!");
+    }
+
     /**
      * Print an informational message to {@link System#out} and highlight in green when running
      * in the console, else send to the GUI information message text.
@@ -550,9 +595,18 @@ ex.printStackTrace();
      */
     private static void section(final String message) {
         if (colored)
-            System.out.println(BLACK_BOLD_BRIGHT + message + RESET);
+            System.out.print(BLACK_BOLD_BRIGHT + message + RESET);
         else
-            System.out.println(message);
+            System.out.print(message);
+    }
+
+    private static void displayHelp() {
+        System.out.println("Usage: wf letters options");
+        System.out.println();
+        System.out.println("  use '-gui' option to open the GUI window.");
+        System.out.println();
+        System.out.println("(WORDFIND_OPTIONS can be set in the environment)");
+        System.out.println();
     }
 
     /**
@@ -569,8 +623,11 @@ ex.printStackTrace();
      * Process all the possible options from the command line.
      * @param prefix Which of the possible option prefixes was found (for error message).
      * @param arg The command-line argument to process.
+     * @param ignoreOptions Whether or not to ignore certain options.
      */
-    private static void processOption(final String prefix, final String arg) {
+    private static void processOption(final String prefix, final String arg, final boolean ignoreOptions) {
+        boolean ignored = false;
+
         if (matches(arg, "letters", "letter", "l")) {
             letter = true;
         } else if (matches(arg, "words", "word", "w")) {
@@ -580,7 +637,10 @@ ex.printStackTrace();
         } else if (matches(arg, "points", "point", "p")) {
             sortAlphabetically = false;
         } else if (matches(arg, "find", "additional", "addl", "extra", "ex", "f", "x")) {
-            findInAdditional = true;
+            if (ignoreOptions)
+                ignored = true;
+            else
+                findInAdditional = true;
         } else if (matches(arg, "lowercase", "lower", "low")) {
             lowerCase = true;
         } else if (matches(arg, "uppercase", "upper", "up")) {
@@ -592,35 +652,69 @@ ex.printStackTrace();
         } else if (matches(arg, "ending", "ends", "end", "e")) {
             endsWith = true;
         } else if (matches(arg, "colored", "colors", "color", "col")) {
-            colored = true;
+            if (ignoreOptions)
+                ignored = true;
+            else
+                colored = true;
         } else if (matches(arg, "notcolored", "nocolors", "nocolor", "nocol", "noc")) {
-            colored = false;
+            if (ignoreOptions)
+                ignored = true;
+            else
+                colored = false;
         } else if (matches(arg, "notimings", "notiming", "quiet", "not", "q")) {
             timings = false;
         } else if (matches(arg, "timings", "timing", "verbose", "time", "t")) {
             timings = true;
+        } else if (matches(arg, "maxsize", "size", "max")) {
+            needMaxSize = true;
+        } else if (matches(arg, "maxtime", "maxseconds", "maxsecs", "time", "seconds", "secs")) {
+            needMaxTime = true;
+        } else if (matches(arg, "minwordsize", "minword", "minsize", "min")) {
+            needMinWordSize = true;
+        } else if (matches(arg, "maxnumberwords", "maxnumber", "maxwords")) {
+            needMaxNumber = true;
         } else if (matches(arg, "console", "con")) {
-            runningOnConsole = true;
+            if (ignoreOptions)
+                ignored = true;
+            else
+                runningOnConsole = true;
         } else if (matches(arg, "window", "win", "gui", "g")) {
-            runningOnConsole = false;
+            if (ignoreOptions)
+                ignored = true;
+            else
+                runningOnConsole = false;
         } else if (matches(arg, "default", "twl06a", "def", "d")) {
-            wordFile = WORD_FILE_DEFAULT;
+            if (ignoreOptions)
+                ignored = true;
+            else
+                wordFile = WORD_FILE_DEFAULT;
         } else if (matches(arg, "original", "twl06", "orig", "o")) {
-            wordFile = WORD_FILE_ORIGINAL;
+            if (ignoreOptions)
+                ignored = true;
+            else
+                wordFile = WORD_FILE_ORIGINAL;
         } else if (matches(arg, "antique", "enable1", "enable", "ant", "en")) {
-            wordFile = WORD_FILE_ANTIQUE;
+            if (ignoreOptions)
+                ignored = true;
+            else
+                wordFile = WORD_FILE_ANTIQUE;
         } else if (matches(arg, "version", "vers", "ver", "v")) {
-            Environment.printProgramInfo();
-            System.exit(0);
+            if (ignoreOptions)
+                ignored = true;
+            else {
+                Environment.printProgramInfo();
+                System.exit(0);
+            }
         } else if (matches(arg, "help", "h", "?")) {
-            System.out.println("Usage: wf letters options");
-            System.out.println();
-            System.out.println("  use '-gui' option to open the GUI window.");
-            System.out.println();
-            System.out.println("(WORDFIND_OPTIONS can be set in the environment)");
-            System.out.println();
+            if (ignoreOptions)
+                ignored = true;
+            else
+                displayHelp();
         } else {
             error("Unknown option " + quote(prefix + arg) + " ignored!");
+        }
+        if (ignored) {
+            error("Option " + quote(prefix + arg) + " ignored in REPL mode!");
         }
     }
 
@@ -630,19 +724,33 @@ ex.printStackTrace();
      * @param args The command line arguments.
      * @param nonOptions The list to fill up with all the non-option arguments (can be
      * {@code null} to not collect any).
+     * @param ignoreOptions For REPL mode, don't process some options on input lines.
      * @return The total length of the non-option strings.
      */
-    private static int processCommandLine(final String[] args, final List<String> nonOptions) {
+    private static int processCommandLine(final String[] args, final List<String> nonOptions,
+            final boolean ignoreOptions) {
         int totalInputSize = 0;
+
+        // Reset all the variables we can set over and over
+        beginsWith = false;
+        beginningValue = Optional.empty();
+        contains = false;
+        containsValue = Optional.empty();
+        endsWith = false;
+        endingValue = Optional.empty();
+        needMaxSize = false;
+        needMaxTime = false;
+        needMinWordSize = false;
+        needMaxNumber = false;
 
         // Process all options first before regular word/letter arguments
         for (String arg : args) {
             if (arg.startsWith("--")) {
-                processOption("--", arg.substring(2));
+                processOption("--", arg.substring(2), ignoreOptions);
             } else if (arg.startsWith("-")) {
-                processOption("-", arg.substring(1));
+                processOption("-", arg.substring(1), ignoreOptions);
             } else if (ON_WINDOWS && arg.startsWith("/")) {
-                processOption("/", arg.substring(1));
+                processOption("/", arg.substring(1), ignoreOptions);
             } else if (beginsWith) {
                 beginningValue = Optional.of(arg);
                 beginsWith = false;
@@ -652,6 +760,34 @@ ex.printStackTrace();
             } else if (endsWith) {
                 endingValue = Optional.of(arg);
                 endsWith = false;
+            } else if (needMaxSize) {
+                try {
+                    maxIterations = Long.parseLong(arg);
+                } catch (NumberFormatException nfe) {
+                    error("Value given for \"--maxsize\" (" + arg + ") was not valid!");
+                }
+                needMaxSize = false;
+            } else if (needMaxTime) {
+                try {
+                    maxSeconds = Float.parseFloat(arg);
+                } catch (NumberFormatException nfe) {
+                    error("Value give for \"--maxtime\" (" + arg + ") was not valid!");
+                }
+                needMaxTime = false;
+            } else if (needMinWordSize) {
+                try {
+                    minWordSizeToReport = Integer.parseInt(arg);
+                } catch (NumberFormatException nfe) {
+                    error("Value given for \"--minwordsize\" (" + arg + ") was not valid!");
+                }
+                needMinWordSize = false;
+            } else if (needMaxNumber) {
+                try {
+                    maxNumberOfWords = Integer.parseInt(arg);
+                } catch (NumberFormatException nfe) {
+                    error("Value given for \"--maxnumber\" (" + arg + ") was not valid!");
+                }
+                needMaxNumber = false;
             } else {
                 if (nonOptions != null) {
                     nonOptions.add(arg);
@@ -661,15 +797,20 @@ ex.printStackTrace();
         }
 
         // If there were flags that never got their arguments, then signal an error here
-        if (beginsWith) {
-            error("The \"--begins\" option was specified without a value!");
-        }
-        if (contains) {
-            error("The \"--contains\" option was specified without a value!");
-        }
-        if (endsWith) {
-            error("The \"--ends\" option was specified without a value!");
-        }
+        if (beginsWith)
+            errorMissingValue("begins");
+        if (contains)
+            errorMissingValue("contains");
+        if (endsWith)
+            errorMissingValue("ends");
+        if (needMaxSize)
+            errorMissingValue("maxsize");
+        if (needMaxTime)
+            errorMissingValue("maxtime");
+        if (needMinWordSize)
+            errorMissingValue("minwordsize");
+        if (needMaxNumber)
+            errorMissingValue("maxnumber");
 
         // Set other values that depend on the options specified.
         alphaStart = lowerCase ? 'a' : 'A';
@@ -728,6 +869,236 @@ ex.printStackTrace();
         }
     }
 
+    private static void process(final List<String> argWords, final int totalInputSize) {
+        StringBuilder letters = new StringBuilder(totalInputSize);
+
+        // If we're running in "word" mode, then lookup each of the words given on the command line
+        // to see if they are valid.  But for one letter "words" just buffer them and process
+        // as a set of letters.
+        for (String arg : argWords) {
+            String word = lowerCase ? arg.toLowerCase() : arg.toUpperCase();
+            // For one-letter case (--letter or word has length one), buffer to the end
+            if (letter || word.length() == 1) {
+                letters.append(word);
+            } else {
+                // Lookup each word on the command line to see if it is valid.
+                if (words.contains(word) || (findInAdditional && additionalWords.contains(word))) {
+                    info(arg + " is valid.");
+                } else {
+                    error(arg + " NOT VALID!");
+                }
+            }
+        }
+
+        startTime = System.nanoTime();
+
+        // Okay, we might have a set of letters to process (the "--letters" mode).
+        int n = letters.length();
+        int cn = 0;
+        if (n > 0) {
+            // See if the letters as entered are a valid word first
+            String inputWord = letters.toString();
+            if (words.contains(inputWord) || (findInAdditional && additionalWords.contains(inputWord))) {
+                info(inputWord + " is valid.");
+            }
+
+            StringBuilder sb = new StringBuilder();
+            sb.append("Valid words for: " + quote(letters.toString()) + (findInAdditional ? " (including additional)" : ""));
+            if (beginningValue.isPresent()) {
+                beginningValue = beginningValue.map(caseMapper);
+                String beginsString = beginningValue.get();
+                sb.append(" beginning with " + quote(beginsString));
+                cn = beginsString.length();
+            }
+            if (containsValue.isPresent()) {
+                containsValue = containsValue.map(caseMapper);
+                String containsString = containsValue.get();
+                sb.append(" containing " + quote(containsString));
+                cn = containsString.length();
+            }
+            if (endingValue.isPresent()) {
+                endingValue = endingValue.map(caseMapper);
+                String endsString = endingValue.get();
+                sb.append(" ending with " + quote(endsString));
+                cn = endsString.length();
+            }
+            heading(sb.toString());
+
+            // Shuffle the blanks to the end to ensure that words made either with or without
+            // blanks will find the "without" version first.
+            StringBuilder letterSubset = new StringBuilder(n);
+            int numberOfBlanks = 0;
+            for (int i = 0; i < n; i++) {
+                char ch = letters.charAt(i);
+                if (ch == ' ' || ch == '?')
+                    numberOfBlanks++;
+                else
+                    letterSubset.append(ch);
+            }
+            if (numberOfBlanks > 0) {
+                letters.setLength(0);
+                letters.append(letterSubset);
+                letters.append(CharUtil.makeStringOfChars('?', numberOfBlanks));
+            }
+
+            @SuppressWarnings("unchecked")
+            Set<String>[] validWords = new Set[n + cn];
+            for (int i = 0; i < n + cn; i++) {
+                validWords[i] = new TreeSet<>(valueComparator);
+            }
+
+            // This is the set used to avoid duplicate permutations
+            Set<String> permutationSet = new TreeSet<>();
+
+            /*
+             * Find all subsets of the given set of letters by running through the values
+             * of all the binary numbers from 0 to 2^n - 1 where n is the number of letters.
+             * Algorithm taken from https://www.geeksforgeeks.org/finding-all-subsets-of-a-given-set-in-java/
+             * (assumes n <= 32)
+             */
+            int twoPowN = 1 << n;
+            for (int i = 0; i < twoPowN; i++) {
+                letterSubset.setLength(0);
+                for (int j = 0, bitMask = 1; j < n; j++, bitMask <<= 1) {
+                    // bitMask is a number with jth bit set to one,
+                    // so when we 'and' that with the subset number
+                    // we get which letters are present in ths subset
+                    // and which are not.
+                    if ((i & bitMask) != 0) {
+                        letterSubset.append(letters.charAt(j));
+                    }
+                }
+                if (!findValidPermutations("", letterSubset.toString(), permutationSet, validWords))
+                    break;
+            }
+
+            int numberOfWordsFound = 0;
+
+            for (int index = n + cn - 1; index >= 0; index--) {
+                Set<String> wordSet = validWords[index];
+                int size = wordSet.size();
+                if (size > 0) {
+                    numberOfWordsFound += size;
+                    section(String.valueOf(index + 1) + " letter words (" + size + "):");
+
+                    if (minWordSizeToReport > 1 && (index + 1) < minWordSizeToReport) {
+                        if (colored)
+                            System.out.println(DOTS);
+                        else
+                            System.out.println(DOTS_NOCOLORS);
+                        continue;
+                    }
+                    System.out.println();
+
+                    int columnWidth = index + 5;
+                    int lineLength = 0;
+                    int wordsSoFarInSet = 0;
+
+                    for (String word : wordSet) {
+                        wordsSoFarInSet++;
+                        if (maxNumberOfWords > 0 && wordsSoFarInSet > maxNumberOfWords) {
+                            if (colored)
+                                System.out.print(DOTS);
+                            else
+                                System.out.print(DOTS_NOCOLORS);
+                            break;
+                        }
+
+                        if (lineLength + columnWidth + 6 > maxLineLength) {
+                            System.out.println();
+                            lineLength = 0;
+                        }
+                        /*
+                         * This is tricky because we need to highlight blank substitutions here,
+                         * but also right-justify within the column width, which cannot count
+                         * the escape sequences as part of the word length.
+                         */
+                        String lettersOnly = getLettersOnly(word);
+                        int excessSpace = columnWidth - lettersOnly.length();
+                        String leftPadding = excessSpace == 0 ? "" : CharUtil.makeStringOfChars(' ', excessSpace);
+                        int value = addLetterValues(word);
+                        if (colored)
+                            System.out.format(WORD_FORMAT, leftPadding, highlightWord(word), value);
+                        else
+                            System.out.format(WORD_FORMAT_NOCOLORS, leftPadding, lettersOnly, value);
+                        lineLength += columnWidth + 6;
+                    }
+                    System.out.println();
+                }
+            }
+
+            if (numberOfWordsFound == 0)
+                error("Unable to find any valid words!");
+
+            long endTime = System.nanoTime();
+
+            if (timings) {
+                float secs = (float)(endTime - startTime) / 1.0e9f;
+                int wordsChecked = permutationSet.size() * (containsValue.isPresent() ? n : 1);
+                String message = String.format("(Lookup time %1$,5.3f seconds; %2$,d valid words out of %3$,d tested)",
+                        secs, numberOfWordsFound, wordsChecked);
+                info(message);
+            }
+        }
+    }
+
+    private static void consoleMode(final List<String> argWords, final int totalInputSize) {
+        boolean replMode = false;
+
+        if (argWords.isEmpty() || totalInputSize == 0)
+            replMode = true;
+        else if (argWords.size() == 1 && argWords.get(0).equals("@"))
+            replMode = true;
+
+        if (replMode) {
+            Console console = System.console();
+            if (console == null) {
+                process(argWords, totalInputSize);
+                return;
+            }
+
+            String line;
+            String prompt = ConsoleColor.color("<Bk!>> <>");
+        replLoop:
+            while ((line = console.readLine(prompt)) != null) {
+                if (line.isEmpty())
+                    continue replLoop;
+
+                String cmd = line.trim().toLowerCase();
+                switch (cmd) {
+                    case ":quit":
+                    case ":exit":
+                    case ":q":
+                    case ":x":
+                        break replLoop;
+                    case ":help":
+                    case ":h":
+                    case ":?":
+                        displayHelp();
+                        continue replLoop;
+                    case ":version":
+                    case ":vers":
+                    case ":ver":
+                    case ":v":
+                        Environment.printProgramInfo();
+                        continue replLoop;
+                    default:
+                        if (cmd.startsWith("#") || cmd.startsWith("!") || cmd.startsWith("//"))
+                            continue replLoop;
+                        break;
+                }
+
+                argWords.clear();
+                String[] args = CharUtil.parseCommandLine(line);
+                int inputSize = processCommandLine(args, argWords, true);
+                process(argWords, inputSize);
+            }
+            System.out.println();
+        } else {
+            process(argWords, totalInputSize);
+        }
+    }
+
     /**
      * The main program, invoked from the console.
      * @param args The parsed command line arguments.
@@ -739,168 +1110,21 @@ ex.printStackTrace();
         String defaultOptions = System.getenv("WORDFIND_OPTIONS");
         if (!CharUtil.isNullOrEmpty(defaultOptions)) {
             String[] defaultArgs = defaultOptions.split("[,;]\\s*|\\s+");
-            processCommandLine(defaultArgs, null);
+            processCommandLine(defaultArgs, null, false);
         }
 
         // Command line options override the defaults (if any)
         List<String> argWords = new ArrayList<>(args.length);
-        int totalInputSize = processCommandLine(args, argWords);
+        int totalInputSize = processCommandLine(args, argWords, false);
+
+        // Next read in the preferred dictionary/word file
+        readDictionary(wordFile, words, additionalWords);
 
         // BIG switch here for GUI vs console operation
         if (!runningOnConsole) {
             DesktopApplicationContext.main(WordFind.class, argWords.toArray(new String[0]));
         } else {
-            // Next read in the preferred dictionary/word file
-            readDictionary(wordFile, words, additionalWords);
-
-            StringBuilder letters = new StringBuilder(totalInputSize);
-
-            // If we're running in "word" mode, then lookup each of the words given on the command line
-            // to see if they are valid.  But for one letter "words" just buffer them and process
-            // as a set of letters.
-            for (String arg : argWords) {
-                String word = lowerCase ? arg.toLowerCase() : arg.toUpperCase();
-                // For one-letter case (--letter or word has length one), buffer to the end
-                if (letter || word.length() == 1) {
-                    letters.append(word);
-                } else {
-                    // Lookup each word on the command line to see if it is valid.
-                    if (words.contains(word) || (findInAdditional && additionalWords.contains(word))) {
-                        info(arg + " is valid.");
-                    } else {
-                        error(arg + " NOT VALID!");
-                    }
-                }
-            }
-
-            long startTime = System.nanoTime();
-
-            // Okay, we might have a set of letters to process (the "--letters" mode).
-            int n = letters.length();
-            int cn = 0;
-            if (n > 0) {
-                // See if the letters as entered are a valid word first
-                String inputWord = letters.toString();
-                if (words.contains(inputWord) || (findInAdditional && additionalWords.contains(inputWord))) {
-                    info(inputWord + " is valid.");
-                }
-
-                StringBuilder sb = new StringBuilder();
-                sb.append("Valid words for: " + quote(letters.toString()) + (findInAdditional ? " (including additional)" : ""));
-                if (beginningValue.isPresent()) {
-                    beginningValue = beginningValue.map(caseMapper);
-                    String beginsString = beginningValue.get();
-                    sb.append(" beginning with " + quote(beginsString));
-                    cn = beginsString.length();
-                }
-                if (containsValue.isPresent()) {
-                    containsValue = containsValue.map(caseMapper);
-                    String containsString = containsValue.get();
-                    sb.append(" containing " + quote(containsString));
-                    cn = containsString.length();
-                }
-                if (endingValue.isPresent()) {
-                    endingValue = endingValue.map(caseMapper);
-                    String endsString = endingValue.get();
-                    sb.append(" ending with " + quote(endsString));
-                    cn = endsString.length();
-                }
-                heading(sb.toString());
-
-                // Shuffle the blanks to the end to ensure that words made either with or without
-                // blanks will find the "without" version first.
-                StringBuilder letterSubset = new StringBuilder(n);
-                int numberOfBlanks = 0;
-                for (int i = 0; i < n; i++) {
-                    char ch = letters.charAt(i);
-                    if (ch == ' ' || ch == '?')
-                        numberOfBlanks++;
-                    else
-                        letterSubset.append(ch);
-                }
-                if (numberOfBlanks > 0) {
-                    letters.setLength(0);
-                    letters.append(letterSubset);
-                    letters.append(CharUtil.makeStringOfChars('?', numberOfBlanks));
-                }
-
-                @SuppressWarnings("unchecked")
-                Set<String>[] validWords = new Set[n + cn];
-                for (int i = 0; i < n + cn; i++) {
-                    validWords[i] = new TreeSet<>(valueComparator);
-                }
-
-                // This is the set used to avoid duplicate permutations
-                Set<String> permutationSet = new TreeSet<>();
-
-                /*
-                 * Find all subsets of the given set of letters by running through the values
-                 * of all the binary numbers from 0 to 2^n - 1 where n is the number of letters.
-                 * Algorithm taken from https://www.geeksforgeeks.org/finding-all-subsets-of-a-given-set-in-java/
-                 * (assumes n <= 32)
-                 */
-                int twoPowN = 1 << n;
-                for (int i = 0; i < twoPowN; i++) {
-                    letterSubset.setLength(0);
-                    for (int j = 0, bitMask = 1; j < n; j++, bitMask <<= 1) {
-                        // bitMask is a number with jth bit set to one,
-                        // so when we 'and' that with the subset number
-                        // we get which letters are present in ths subset
-                        // and which are not.
-                        if ((i & bitMask) != 0) {
-                            letterSubset.append(letters.charAt(j));
-                        }
-                    }
-                    if (!findValidPermutations("", letterSubset.toString(), permutationSet, validWords))
-                        break;
-                }
-
-                int numberOfWordsFound = 0;
-
-                for (int index = n + cn - 1; index >= 0; index--) {
-                    Set<String> wordSet = validWords[index];
-                    if (wordSet.size() > 0) {
-                        int columnWidth = index + 5;
-                        section(String.valueOf(index + 1) + " letter words (" + wordSet.size() + "):");
-                        int lineLength = 0;
-                        for (String word : wordSet) {
-                            if (lineLength + columnWidth + 6 > maxLineLength) {
-                                System.out.println();
-                                lineLength = 0;
-                            }
-                            /*
-                             * This is tricky because we need to highlight blank substitutions here,
-                             * but also right-justify within the column width, which cannot count
-                             * the escape sequences as part of the word length.
-                             */
-                            String lettersOnly = getLettersOnly(word);
-                            int excessSpace = columnWidth - lettersOnly.length();
-                            String leftPadding = excessSpace == 0 ? "" : CharUtil.makeStringOfChars(' ', excessSpace);
-                            int value = addLetterValues(word);
-                            if (colored)
-                                System.out.format(WORD_FORMAT, leftPadding, highlightWord(word), value);
-                            else
-                                System.out.format(WORD_FORMAT_NOCOLORS, leftPadding, lettersOnly, value);
-                            lineLength += columnWidth + 6;
-                            numberOfWordsFound++;
-                        }
-                        System.out.println();
-                    }
-                }
-
-                if (numberOfWordsFound == 0)
-                    error("Unable to find any valid words!");
-
-                long endTime = System.nanoTime();
-
-                if (timings) {
-                    float secs = (float)(endTime - startTime) / 1.0e9f;
-                    int wordsChecked = permutationSet.size() * (containsValue.isPresent() ? n : 1);
-                    String message = String.format("(Lookup time %1$,5.3f seconds; %2$,d valid words out of %3$,d tested)",
-                            secs, numberOfWordsFound, wordsChecked);
-                    info(message);
-                }
-            }
+            consoleMode(argWords, totalInputSize);
         }
     }
 

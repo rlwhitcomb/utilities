@@ -274,6 +274,8 @@
  *	    Make another flavor of "makeStringOfChars" that uses a StringBuilder.
  *	07-Apr-2021 (rlwhitcomb)
  *	    Add "ltrim" function and pattern; update trim patterns to include all chars below '\u0020'.
+ *	07-May-2021 (rlwhitcomb)
+ *	    Add "parseCommandLine" function to deal with quotes, etc. (hopefully the same way Java does it).
  */
 
 package info.rlwhitcomb.util;
@@ -2843,6 +2845,69 @@ public class CharUtil
 	    }
 
 	    return false;
+	}
+
+	/**
+	 * Parse a command line into its separate arguments.
+	 *
+	 * @param line	The original command line string.
+	 * @return	The input parsed into pieces.
+	 */
+	public static String[] parseCommandLine(String line) {
+	    List<String> args = new ArrayList<>();
+	    boolean inQuotes = false;
+	    boolean startOfWord = true;
+	    char quoteChar ='\0';
+	    StringBuilder buf = new StringBuilder(line.length());
+
+	    for (int ix = 0; ix < line.length(); ix++) {
+		char ch = line.charAt(ix);
+		if (inQuotes) {
+		    if (ch == quoteChar) {
+			inQuotes = false;
+			args.add(buf.toString());
+			buf.setLength(0);
+			startOfWord = true;
+		    }
+		    else {
+			buf.append(ch);
+		    }
+		}
+		else {
+		    if (startOfWord && (ch == '"' || ch == '\'')) {
+			quoteChar = ch;
+			inQuotes = true;
+			startOfWord = false;
+		    }
+		    else {
+			if (startOfWord) {
+			    if (Character.isWhitespace(ch))
+				continue;
+			    else {
+				startOfWord = false;
+				buf.append(ch);
+			    }
+			}
+			else {
+			    if (Character.isWhitespace(ch)) {
+				args.add(buf.toString());
+				buf.setLength(0);
+				startOfWord = true;
+			    }
+			    else {
+				buf.append(ch);
+			    }
+			}
+		    }
+		}
+	    }
+
+	    // Add the last word (if any)
+	    if (buf.length() > 0) {
+		args.add(buf.toString());
+	    }
+
+	    return args.toArray(new String[0]);
 	}
 
 }
