@@ -62,6 +62,8 @@
 		Move all text to Pivot resources.
 	    29-Apr-2021 (rlwhitcomb)
 		Add real names to the buttons.
+	    07-May-2021 (rlwhitcomb)
+		Rearrange buttons to be more logical (in order of function keys).
 
      ========================================================================== -->
 
@@ -161,47 +163,6 @@
 	    <TablePane.Row height="-1">
 		<BoxPane orientation="horizontal" styles="{padding:4, spacing:20, verticalAlignment:'center', horizontalAlignment:'center'}">
 		    <BoxPane orientation="vertical" styles="{horizontalAlignment:'center'}">
-			<PushButton tooltipText="%openTip"
-				action="open"
-				buttonData="%openButton"
-				preferredWidth="60"
-				preferredHeight="32"
-				styles="{color:'DeepSkyBlue', font:{size:24,bold:true}}"/>
-			<Label text="%openLabel"/>
-			<Label text="%openKeyLabel"/>
-		    </BoxPane>
-		    <BoxPane orientation="vertical" styles="{horizontalAlignment:'center'}">
-			<PushButton tooltipText="%clearTip"
-				action="clear"
-				buttonData="%clearButton"
-				preferredWidth="60"
-				preferredHeight="32"
-				styles="{color:'forestgreen', font:{size:24,bold:true}}"/>
-			<Label text="%clearLabel"/>
-			<Label text="%clearKeyLabel"/>
-		    </BoxPane>
-		    <BoxPane orientation="vertical" styles="{horizontalAlignment:'center'}">
-			<PushButton tooltipText="%calculateTip"
-				action="calculate"
-				buttonData="%calculateButton"
-				preferredWidth="60"
-				preferredHeight="32"
-				styles="{color:'red', font:{size:24,bold:true}}"/>
-			<Label text="%calculateLabel"/>
-			<Label text="%calculateKeyLabel"/>
-		    </BoxPane>
-		    <BoxPane orientation="vertical" styles="{horizontalAlignment:'center'}">
-			<PushButton tooltipText="%exitTip"
-				action="exit"
-				buttonData="%exitButton"
-				preferredWidth="60"
-				preferredHeight="32"
-				styles="{color:'indigo', font:{size:24,bold:true}}"/>
-			<Label text="%exitLabel"/>
-			<Label text="%exitKeyLabel"/>
-		    </BoxPane>
-		    <Label preferredWidth="50"/>
-		    <BoxPane orientation="vertical" styles="{horizontalAlignment:'center'}">
 			<PushButton tooltipText="%helpTip"
 				action="help"
 				buttonData="%helpButton"
@@ -231,6 +192,49 @@
 				styles="{color:'DarkOrange', font:{size:24,bold:true}}"/>
 			<Label text="%settingsLabel"/>
 			<Label text="%settingsKeyLabel"/>
+		    </BoxPane>
+		    <Label preferredWidth="50"/>
+		    <BoxPane orientation="vertical" styles="{horizontalAlignment:'center'}">
+			<PushButton tooltipText="%openTip"
+				action="open"
+				buttonData="%openButton"
+				preferredWidth="60"
+				preferredHeight="32"
+				styles="{color:'DeepSkyBlue', font:{size:24,bold:true}}"/>
+			<Label text="%openLabel"/>
+			<Label text="%openKeyLabel"/>
+		    </BoxPane>
+		    <Label preferredWidth="50"/>
+		    <BoxPane orientation="vertical" styles="{horizontalAlignment:'center'}">
+			<PushButton tooltipText="%clearTip"
+				action="clear"
+				buttonData="%clearButton"
+				preferredWidth="60"
+				preferredHeight="32"
+				styles="{color:'forestgreen', font:{size:24,bold:true}}"/>
+			<Label text="%clearLabel"/>
+			<Label text="%clearKeyLabel"/>
+		    </BoxPane>
+		    <BoxPane orientation="vertical" styles="{horizontalAlignment:'center'}">
+			<PushButton tooltipText="%calculateTip"
+				action="calculate"
+				buttonData="%calculateButton"
+				preferredWidth="60"
+				preferredHeight="32"
+				styles="{color:'red', font:{size:24,bold:true}}"/>
+			<Label text="%calculateLabel"/>
+			<Label text="%calculateKeyLabel"/>
+		    </BoxPane>
+		    <Label preferredWidth="50"/>
+		    <BoxPane orientation="vertical" styles="{horizontalAlignment:'center'}">
+			<PushButton tooltipText="%exitTip"
+				action="exit"
+				buttonData="%exitButton"
+				preferredWidth="60"
+				preferredHeight="32"
+				styles="{color:'indigo', font:{size:24,bold:true}}"/>
+			<Label text="%exitLabel"/>
+			<Label text="%exitKeyLabel"/>
 		    </BoxPane>
 		</BoxPane>
 	    </TablePane.Row>

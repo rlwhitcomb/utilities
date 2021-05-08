@@ -548,7 +548,10 @@ code {
   <p>An expression can be entered on each line, and all will be executed in order when the <span class="redbutton">!</span> button (or the <code>F9</code> key) is pressed, and the results displayed in the "Results" field. The <code>Ctrl+Enter</code> (or <code>&#x2318;Enter</code> on Mac) key will also perform the calculation(s).
   <p>This help page will also be displayed by the <span class="bluebutton">?</span> button (or the <code>F1</code> key).
   <p>Note: colors are not currently used in the GUI display, so using the command-line options <code>-darkbg</code> or <code>-lightbg</code> will have no effect.
-
+  <p>Most of the settings available using Directives can be set in the GUI using the Settings dialog (the <span class="orangebutton">&#x2261;</span> button or <code>F2</code> key).
+  <center>
+  <br><img src="calc_settings.png" alt="GUI Settings screen" width="50%"/>
+  </center>
   <h2>TODO Items for This Document</h2>
   <ul>
     <li>More examples of KB input and output, with the modes explained</li>
