@@ -63,6 +63,8 @@
  *          Big change to add a REPL mode for repeated use without re-reading
  *          the dictionary.
  *          Options for min word size to report and max values of each size.
+ *      07-May-2021 (rlwhitcomb)
+ *          Options for colors based on window background color.
  */
 package info.rlwhitcomb.wordfind;
 
@@ -199,6 +201,16 @@ public class WordFind implements Application {
     private static final String DOTS = " " + BLACK_BRIGHT + "..." + RESET;
     /** Continuation (no colors). */
     private static final String DOTS_NOCOLORS = " ...";
+    /** Heading color. */
+    private static ConsoleColor.Code headingColor = null;
+    /** Info message color. */
+    private static ConsoleColor.Code infoColor = null;
+    /** Error message color. */
+    private static ConsoleColor.Code errorColor = null;
+    /** Wildcard highlight color. */
+    private static ConsoleColor.Code wildcardColor = null;
+    /** Containing highlight color. */
+    private static ConsoleColor.Code containsColor = null;
 
     /** The current start time of the calculation. */
     private static long startTime;
@@ -301,7 +313,7 @@ public class WordFind implements Application {
                     buf.append(RESET);
                     insideMarkers = false;
                 } else {
-                    buf.append(ch == '_' ? RED_BRIGHT : CYAN_BRIGHT);
+                    buf.append(ch == '_' ? wildcardColor : containsColor);
                     insideMarkers = true;
                 }
             } else {
@@ -379,6 +391,22 @@ public class WordFind implements Application {
         }
 
         return buf.insert(charPos, str);
+    }
+
+    private static void setColors(final boolean light) {
+        if (light) {
+            headingColor = CYAN;
+            infoColor = GREEN_BOLD;
+            errorColor = RED;
+            wildcardColor = RED_BRIGHT;
+            containsColor = CYAN_BOLD;
+        } else {
+            headingColor = CYAN_BOLD;
+            infoColor = GREEN;
+            errorColor = RED_BOLD;
+            wildcardColor = RED_BOLD;
+            containsColor = MAGENTA_BRIGHT;
+        }
     }
 
     private static final String adorn(final String unadorned) {
@@ -549,7 +577,7 @@ ex.printStackTrace();
     private static void error(final String message) {
         if (runningOnConsole) {
             if (colored)
-                System.err.println(RED_BOLD + message + RESET);
+                System.err.println(errorColor + message + RESET);
             else
                 System.err.println(message);
         } else {
@@ -570,7 +598,7 @@ ex.printStackTrace();
     private static void info(final String message) {
         if (runningOnConsole) {
             if (colored)
-                System.out.println(GREEN + message + RESET);
+                System.out.println(infoColor + message + RESET);
             else
                 System.out.println(message);
         } else {
@@ -584,7 +612,7 @@ ex.printStackTrace();
      */
     private static void heading(final String message) {
         if (colored)
-            System.out.println(CYAN_BOLD + message + RESET);
+            System.out.println(headingColor + message + RESET);
         else
             System.out.println(message);
     }
@@ -661,6 +689,16 @@ ex.printStackTrace();
                 ignored = true;
             else
                 colored = false;
+        } else if (matches(arg, "lightbackground", "lightback", "lightbg", "light")) {
+            if (ignoreOptions)
+                ignored = true;
+            else
+                setColors(true);
+        } else if (matches(arg, "darkbackground", "darkback", "darkbg", "dark")) {
+            if (ignoreOptions)
+                ignored = true;
+            else
+                setColors(false);
         } else if (matches(arg, "notimings", "notiming", "quiet", "not", "q")) {
             timings = false;
         } else if (matches(arg, "timings", "timing", "verbose", "time", "t")) {
@@ -1106,6 +1144,9 @@ ex.printStackTrace();
     public static void main(final String[] args) {
         Environment.setDesktopApp(true);
         Environment.loadProgramInfo(WordFind.class);
+
+        // Set default colors before options so there is a setting for error messages right away
+        setColors(!ON_WINDOWS);
 
         String defaultOptions = System.getenv("WORDFIND_OPTIONS");
         if (!CharUtil.isNullOrEmpty(defaultOptions)) {
