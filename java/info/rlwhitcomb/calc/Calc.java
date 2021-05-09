@@ -145,6 +145,9 @@
  *	    Fix one place that needed ExceptionUtil to get a nicer error message.
  *	29-Apr-2021 (rlwhitcomb)
  *	    Change the GUI "Version" key label id.
+ *	08-May-2021 (rlwhitcomb)
+ *	    Add option to switch between Cmd-Enter and just Enter to do the calculations.
+ *	    Add tabs to the Settings dialog, and put this option into the second one.
  */
 package info.rlwhitcomb.calc;
 
@@ -258,6 +261,8 @@ public class Calc
 	private static boolean quiet       = false;
 	private static boolean rational    = false;
 
+	private static boolean useCmdEnter = true;
+
 	private static Locale  locale  = null;
 
 	private BXMLSerializer serializer = null;
@@ -297,6 +302,8 @@ public class Calc
 	@BXML private Checkbox debugCheck;
 	@BXML private Checkbox quietCheck;
 	@BXML private Checkbox resultsCheck;
+	@BXML private RadioButton useEnterButton;
+	@BXML private RadioButton useCmdEnterButton;
 
 
 	/** The background worker thread to do the calculations in GUI mode. */
@@ -350,9 +357,15 @@ public class Calc
 	{
 		@Override
 		public boolean keyPressed(Component comp, int keyCode, Keyboard.KeyLocation keyLocation) {
-		    if (keyCode == Keyboard.KeyCode.ENTER && Keyboard.isCmdPressed()) {
-			Action.performAction("calculate", comp);
-			return true;
+		    if (keyCode == Keyboard.KeyCode.ENTER) {
+			if (useCmdEnter && Keyboard.isCmdPressed()) {
+			    Action.performAction("calculate", comp);
+			    return true;
+			}
+			else if (!useCmdEnter && !Keyboard.areAnyPressed(Keyboard.Modifier.ALL_MODIFIERS)) {
+			    Action.performAction("calculate", comp);
+			    return true;
+			}
 		    }
 		    // Otherwise key was not consumed
 		    return false;
@@ -449,6 +462,8 @@ public class Calc
 	    quietCheck.setSelected(quiet);
 	    resultsCheck.setSelected(resultsOnly);
 
+	    useCmdEnterButton.setSelected(useCmdEnter);
+
 	    return focusComponent;
 	}
 
@@ -494,11 +509,15 @@ public class Calc
 		boolean newResults = resultsCheck.isSelected();
 		if (newResults != resultsOnly)
 		    setResultsOnlyMode(newResults);
+
+		useCmdEnter = useCmdEnterButton.isSelected();
 	    }
 
 	    dialog.setAttribute(Attribute.ORIGINAL_SETTINGS, null);
 	    dialog.setAttribute(Attribute.ORIGINAL_MATH_CONTEXT, null);
 	    dialog.setAttribute(Attribute.NEW_MATH_CONTEXT, null);
+
+	    requestFocus(inputTextPane);
 	}
 
 	@Override
@@ -549,6 +568,13 @@ public class Calc
 
 		versionButton.setTooltipText(Intl.formatString("versionTip", key));
 		versionKeyLabel.setText(key);
+
+		KeyStroke enterKey = KeyStroke.decode("Enter");
+		KeyStroke cmdEnterKey = KeyStroke.decode("Cmd-Enter");
+
+		String keyTemplate = Intl.getString("enterToCalculate");
+		useEnterButton.setButtonData(String.format(keyTemplate, enterKey));
+		useCmdEnterButton.setButtonData(String.format(keyTemplate, cmdEnterKey));
 
 		inputTextPane.setDocument(new Document());
 
@@ -1125,6 +1151,14 @@ public class Calc
 		case "input":
 		case "dir":
 		    return Expecting.DIRECTORY;
+		case "cmdenter":
+		case "cmd":
+		    useCmdEnter = true;
+		    break;
+		case "enter":
+		case "e":
+		    useCmdEnter = false;
+		    break;
 		case "help":
 		case "h":
 		case "?":

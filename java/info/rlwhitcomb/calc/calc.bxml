@@ -64,6 +64,8 @@
 		Add real names to the buttons.
 	    07-May-2021 (rlwhitcomb)
 		Rearrange buttons to be more logical (in order of function keys).
+	    08-May-2021 (rlwhitcomb)
+		Add second tab to Settings dialog for the GUI preferences.
 
      ========================================================================== -->
 
@@ -111,13 +113,18 @@
 	    circular="true"
 	    intraGroupFocusTransferEnabled="true" />
 
+	<RadioButtonGroup bxml:id="keyboardEnterGroup"
+	    circular="true"
+	    intraGroupFocusTransferEnabled="true" />
+
     </bxml:define>
 
     <bxml:define>
 	<Prompt bxml:id="settingsPrompt" title="%settingsTitle" messageType="INFO"
                 message="%settingsMessage" preferredWidth="600"
 		options="%settingsOptions">
-	    <Form bxml:id="settingsForm">
+	<TabPane>
+	    <Form bxml:id="settingsForm" TabPane.tabData="%calcSettings">
 		<Form.Section heading="%precisionHeader">
 		    <BoxPane orientation="horizontal" styles="{verticalAlignment:'center'}">
 			<RadioButton bxml:id="decimalPrecisionButton" buttonGroup="$precisionGroup" buttonData="%decimalPrecision"/>
@@ -151,6 +158,13 @@
 		    <Checkbox bxml:id="resultsCheck" buttonData="%resultsOnly"/>
 		</Form.Section>
 	    </Form>
+	    <Form bxml:id="guiSettingsForm" TabPane.tabData="%guiSettings">
+		<Form.Section heading="%keyboard">
+		    <RadioButton bxml:id="useEnterButton" buttonGroup="$keyboardEnterGroup" buttonData=""/>
+		    <RadioButton bxml:id="useCmdEnterButton" buttonGroup="$keyboardEnterGroup" buttonData=""/>
+		</Form.Section>
+	    </Form>
+	</TabPane>
 	</Prompt>
     </bxml:define>
 

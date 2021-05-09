@@ -139,6 +139,8 @@ code {
     <tr><td><code>-decimal</code></td><td>Do all calculations as decimal values <i>(default)</i></td><td><code>-dec</code><br>(also use the <code>:rational off</code> directive)</td></tr>
     <tr><td><code>-locale</code> <i>locale_name</i></td><td>Specify the locale to use for messages</td><td><code>-loc</code>, <code>-l</code></td></tr>
     <tr><td><code>-inputdir</code> <i>directory</i></td><td>Specify a default directory for files to be processed</td><td><code>-input</code>, <code>-dir</code></td></tr>
+    <tr><td><code>-cmdenter</code></td><td>Use <code>Ctrl+Enter</code> (or <code>&#x2318;Enter</code> on Mac) to calculate in the GUI input field <i>(default)</i></td><td><code>-cmd</code></td></tr>
+    <tr><td><code>-enter</code></td><td>Use just <code>Enter</code> to calculate</td><td><code>-e</code></td></tr>
     <tr><td><code>-help</code></td><td>Display this help page</td><td><code>-h</code>, <code>-?</code></td></tr>
     <tr><td><code>-version</code></td><td>Display on the console the version information for the program</td><td><code>-vers</code>, <code>-ver</code>, <code>-v</code></td></tr>
   </table>
@@ -570,13 +572,14 @@ code {
   <br><img src="calc_initial.png" alt="Initial GUI screen" width="50%"/>
   </center>
 <div id="cols">
-  An expression can be entered on each line, and all will be executed in order when the <span class="redbutton">!</span> button (or the <code>F9</code> key) is pressed, and the results displayed in the "Results" field. The <code>Ctrl+Enter</code> (or <code>&#x2318;Enter</code> on Mac) key will also perform the calculation(s).
+  An expression can be entered on each line, and all will be executed in order when the <span class="redbutton">!</span> button (or the <code>F9</code> key) is pressed, and the results displayed in the "Results" field. The <code>Ctrl+Enter</code> (or <code>&#x2318;Enter</code> on Mac) key will also perform the calculation(s). This behavior can be changed in the Settings dialog to just use the <code>Enter</code> key on any platform.
   <p>This help page will also be displayed by the <span class="bluebutton">?</span> button (or the <code>F1</code> key).
   <p>Note: colors are not currently used in the GUI display, so using the command-line options <code>-darkbg</code> or <code>-lightbg</code> will have no effect.
   <p>Most of the settings available using Directives can be set in the GUI using the Settings dialog (the <span class="orangebutton">&#x2261;</span> button or <code>F2</code> key).
 </div>
   <center>
-  <br><img src="calc_settings.png" alt="GUI Settings screen" width="50%"/>
+  <br><img src="calc_settings.png" alt="GUI Settings screen" width="40%"/>
+      <img src="calc_window_settings.png" alt="GUI Window Settings screen" width="40%"/>
   </center>
   <h2>TODO Items for This Document</h2>
 <div id="cols">
