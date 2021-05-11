@@ -148,6 +148,9 @@
  *	08-May-2021 (rlwhitcomb)
  *	    Add option to switch between Cmd-Enter and just Enter to do the calculations.
  *	    Add tabs to the Settings dialog, and put this option into the second one.
+ *	10-May-2021 (rlwhitcomb)
+ *	    Save file directory from Open for next time.
+ *	    Fix bug on Window Settings tab.
  */
 package info.rlwhitcomb.calc;
 
@@ -268,6 +271,7 @@ public class Calc
 	private BXMLSerializer serializer = null;
 
 	private static File inputDirectory = null;
+	private static File rootDirectory = null;
 
 	private Display display;
 
@@ -462,7 +466,10 @@ public class Calc
 	    quietCheck.setSelected(quiet);
 	    resultsCheck.setSelected(resultsOnly);
 
-	    useCmdEnterButton.setSelected(useCmdEnter);
+	    if (useCmdEnter)
+		useCmdEnterButton.setSelected(true);
+	    else
+		useEnterButton.setSelected(true);
 
 	    return focusComponent;
 	}
@@ -809,11 +816,27 @@ public class Calc
 	{
 		@Override
 		public void perform(Component source) {
-		    final FileBrowserSheet browser = new FileBrowserSheet(FileBrowserSheet.Mode.OPEN_MULTIPLE, "./");
+		    if (inputDirectory == null) {
+			if (rootDirectory == null) {
+			    rootDirectory = new File("./");
+			}
+		    }
+		    else if (rootDirectory == null) {
+			rootDirectory = inputDirectory;
+		    }
+		    try {
+			rootDirectory = rootDirectory.getCanonicalFile();
+		    }
+		    catch (IOException ioe) {
+			// just leave root directory as-is
+		    }
+		    final FileBrowserSheet browser =
+			new FileBrowserSheet(FileBrowserSheet.Mode.OPEN_MULTIPLE, rootDirectory.getPath());
 		    browser.open(mainWindow, sheet -> {
 			if (!sheet.getResult())
 			    return;
 			Sequence<File> selectedFiles = browser.getSelectedFiles();
+			rootDirectory = browser.getRootDirectory();
 			StringBuilder buf = new StringBuilder();
 			try {
 			    for (int i = 0; i < selectedFiles.getLength(); i++) {

@@ -66,6 +66,8 @@
 		Rearrange buttons to be more logical (in order of function keys).
 	    08-May-2021 (rlwhitcomb)
 		Add second tab to Settings dialog for the GUI preferences.
+	    08-May-2021 (rlwhitcomb)
+		Reduce button spacing a little bit for smaller screens.
 
      ========================================================================== -->
 
@@ -196,7 +198,7 @@
 			<Label text="%versionLabel"/>
 			<Label bxml:id="versionKeyLabel" text=""/>
 		    </BoxPane>
-		    <Label preferredWidth="50"/>
+		    <Label preferredWidth="30"/>
 		    <BoxPane orientation="vertical" styles="{horizontalAlignment:'center'}">
 			<PushButton tooltipText="%settingsTip"
 				action="settings"
@@ -207,7 +209,7 @@
 			<Label text="%settingsLabel"/>
 			<Label text="%settingsKeyLabel"/>
 		    </BoxPane>
-		    <Label preferredWidth="50"/>
+		    <Label preferredWidth="30"/>
 		    <BoxPane orientation="vertical" styles="{horizontalAlignment:'center'}">
 			<PushButton tooltipText="%openTip"
 				action="open"
@@ -218,7 +220,7 @@
 			<Label text="%openLabel"/>
 			<Label text="%openKeyLabel"/>
 		    </BoxPane>
-		    <Label preferredWidth="50"/>
+		    <Label preferredWidth="30"/>
 		    <BoxPane orientation="vertical" styles="{horizontalAlignment:'center'}">
 			<PushButton tooltipText="%clearTip"
 				action="clear"
@@ -239,7 +241,7 @@
 			<Label text="%calculateLabel"/>
 			<Label text="%calculateKeyLabel"/>
 		    </BoxPane>
-		    <Label preferredWidth="50"/>
+		    <Label preferredWidth="30"/>
 		    <BoxPane orientation="vertical" styles="{horizontalAlignment:'center'}">
 			<PushButton tooltipText="%exitTip"
 				action="exit"
