@@ -65,6 +65,8 @@
  *          Options for min word size to report and max values of each size.
  *      07-May-2021 (rlwhitcomb)
  *          Options for colors based on window background color.
+ *	13-May-2021 (rlwhitcomb)
+ *	    Tweak dark background color.
  */
 package info.rlwhitcomb.wordfind;
 
@@ -405,7 +407,7 @@ public class WordFind implements Application {
             infoColor = GREEN;
             errorColor = RED_BOLD;
             wildcardColor = RED_BOLD;
-            containsColor = MAGENTA_BRIGHT;
+            containsColor = YELLOW_BOLD;
         }
     }
 
