@@ -232,6 +232,12 @@ or
 <p class="indent"> <code>h'12:30 pm' - h'11:45 am' @mt -> t'45m'</code> </p>
 or yet
 <p class="indent"> <code>h'8:30 am' + t'1h' + t'37m' @h -> h'10:07'</code> </p>
+  <p>Date values can be entered as (basically the <a href="https://en.wikipedia.org/wiki/ISO_8601">ISO-8601</a> format with more separators allowed):
+<p class="indent"> <code>d'<i>yyyy</i>-<i>mm</i>-<i>dd</i>'</code>&nbsp;|&nbsp;<code>d'<i>yyyymmdd</i>'</code> </p>
+   Such values are computed as an offset from the "epoch" day (Jan. 1, 1970) (either positive or negative). Date arithmetic is thus allowed, such as:
+<p class="indent"> <code>d'2001-09-11' + 1000@e</code> -&gt; <code>d'2004-06-07'</code> </p>
+or
+<p class="indent"> <code>d'1945/9/2' - d'1941/12/7'</code> -&gt; <code>1365</code>
   <p>Some operators and operations require integer values (such as factorial and the logical bit operations). If the value given is not integral an error will
      be displayed and the calculation aborted. Most of the basic arithmetic operators can operate on rational fractions. The trig,
      log, and power operations do not. Therefore, in rational mode, if an operation returns a decimal value, Calc will attempt
@@ -297,6 +303,7 @@ or
       <tr><td><code>@l</code></td><td>Format result string in lower case</td></tr>
       <tr><td><code>@u</code></td><td>Format result string in UPPER case</td></tr>
       <tr><td><code>@</code>[<code>,</code>][<i>nn</i>]<code>d</code></td><td>Primarily for rational mode: format the result as a decimal value,<br>with optional separators, and optionally rounding to <i>nn</i> digits</td></tr>
+      <tr><td><code>@e</code></td><td>Format an integer as a date (yyyy-mm-dd) (ISO-8601 format)</td></tr>
       <tr><td><code>@f</code></td><td>For decimal mode, format the result as a rational fraction</td></tr>
       <tr><td><code>@F</code></td><td>Format as a proper fraction (with possible integer portion)</td></tr>
       <tr><td><code>@j</code></td><td>Format the result as a "pretty printed" JSON result<br>(multiple lines with indents)</td></tr>
