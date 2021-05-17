@@ -436,6 +436,13 @@ t'3.0002s' @5mt
 h'12:10am' - t'20m' @ah
 
 #
+# Date calculations
+#
+d'990101' - d'980101'
+d'21/5/16' - d'99/12/31'
+d'1941/12/7' + 1000@e
+
+#
 # Play around with "," formatting
 #
 pi**20@,d

@@ -274,6 +274,8 @@
  *	    More Unicode math symbols.
  *	29-Apr-2021 (rlwhitcomb)
  *	    Catch out of bounds exception in "substr".
+ *	13-May-2021 (rlwhitcomb)
+ *	    Date values, arithmetic, and formatting.
  */
 package info.rlwhitcomb.calc;
 
@@ -283,6 +285,8 @@ import java.math.BigInteger;
 import java.math.MathContext;
 import java.math.RoundingMode;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1027,6 +1031,18 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			    dValue = MathUtil.round(dValue, precision);
 			}
 			valueBuf.append(formatWithSeparators(dValue, separators, ctx));
+			break;
+
+		    case 'E':
+			toUpperCase = true;
+			// fall through
+		    case 'e':
+			valueBuf.append("d'");
+			iValue = toIntegerValue(this, result, mc, ctx);
+			LocalDate date = LocalDate.ofEpochDay(iValue.longValue());
+			valueBuf.append(String.format("%1$04d-%2$02d-%3$02d",
+				date.getYear(), date.getMonthValue(), date.getDayOfMonth()));
+			valueBuf.append('\'');
 			break;
 
 		    case 'f':
@@ -2986,6 +3002,47 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 	    catch (IllegalArgumentException iae) {
 		throw new CalcExprException(iae, ctx);
+	    }
+	}
+
+	@Override
+	public Object visitDateValue(CalcParser.DateValueContext ctx) {
+	    String constant = ctx.DATE_CONST().getText();
+	    String value    = CharUtil.stripQuotes(constant.substring(1));
+	    StringBuilder buf = new StringBuilder();
+
+	    try {
+		buf.append(value.replaceAll("[\\-/,;]", "-"));
+		if (buf.indexOf("-") < 0) {
+		    if (buf.length() == 6) {
+			int year = Integer.parseInt(buf.substring(0, 2));
+			if (year < 50)
+			    year += 2000;
+			else
+			    year += 1900;
+			buf.replace(0, 2, String.valueOf(year));
+		    }
+		    buf.insert(4, "-");
+		    buf.insert(7, "-");
+		    value = buf.toString();
+		}
+		else {
+		    int ix1 = buf.indexOf("-");
+		    int ix2 = buf.indexOf("-", ix1+1);
+		    int year = Integer.parseInt(buf.substring(0, ix1));
+		    if (year < 50)
+			year += 2000;
+		    else if (year < 100)
+			year += 1900;
+		    int month = Integer.parseInt(buf.substring(ix1+1, ix2));
+		    int day = Integer.parseInt(buf.substring(ix2+1));
+		    value = String.format("%1$04d-%2$02d-%3$02d", year, month, day);
+		}
+		LocalDate date = LocalDate.parse(value);
+		return BigInteger.valueOf(date.toEpochDay());
+	    }
+	    catch (DateTimeParseException | NumberFormatException ex) {
+		throw new CalcExprException(ex, ctx);
 	    }
 	}
 

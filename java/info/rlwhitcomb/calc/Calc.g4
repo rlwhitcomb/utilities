@@ -195,6 +195,8 @@
  *	    Fix FORMAT syntax.
  *	28-Apr-2021 (rlwhitcomb)
  *	    More Unicode math symbols.
+ *	13-May-2021 (rlwhitcomb)
+ *	    Date constants (ISO-8601 format).
  */
 
 grammar Calc;
@@ -400,6 +402,7 @@ value
    | FRAC_CONST                  # fracValue
    | ROMAN_CONST                 # romanValue
    | TIME_CONST                  # timeValue
+   | DATE_CONST                  # dateValue
    ;
 
 formalParams
@@ -486,8 +489,15 @@ ROMAN_CONST
          ;
 
 TIME_CONST
-         : H '\'' '-' ? [0-9] ? [0-9] ( ':' [0-9] [0-9] ( ':' [0-9] [0-9] ( '.' [0-9]+ ) ? ) ? ) ? ( [ \t] * ( A | A M | P | P M ) ) ? '\''
-         | T '\'' '-' ? [0-9] + ( '.' [0-9] * ) ? [ \t] * ( W | D | H | M | S ) '\''
+         : H '\'' '-' ? DIG ? DIG ( ':' DIG DIG ( ':' DIG DIG ( '.' DIG+ ) ? ) ? ) ? ( [ \t] * ( A | A M | P | P M ) ) ? '\''
+         | T '\'' '-' ? DIG + ( '.' DIG * ) ? [ \t] * ( W | D | H | M | S ) '\''
+         ;
+
+/* ISO-8601 format with more separators allowed */
+DATE_CONST
+         : D '\'' ( DIG DIG | DIG DIG DIG DIG ) [\-/,;] DIG ? DIG [\-/,;] DIG ? DIG '\''
+         | D '\'' DIG DIG DIG DIG DIG DIG DIG DIG '\''
+         | D '\'' DIG DIG DIG DIG DIG DIG '\''
          ;
 
 
@@ -929,6 +939,8 @@ fragment EXP
    : [Ee] [+\-]? INT
    ;
 
+
+fragment DIG : [0-9] ;
 
 fragment A : [aA] ;
 fragment B : [bB] ;
