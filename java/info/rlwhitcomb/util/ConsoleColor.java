@@ -47,9 +47,14 @@
  *	can't find a substitution for it.
  *   25-Feb-2021 (rlwhitcomb)
  *	Add another simpler version of "color(...)", and "textLength()" method.
+ *   18-May-2021 (rlwhicomb)
+ *	Redo "color" method to push/pop colors to do nesting. Rename "attrib" to "tag".
+ *	String constants for the tag values also.
  */
 package info.rlwhitcomb.util;
 
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -91,6 +96,20 @@ public final class ConsoleColor
     private static final String END  = "m";
     private static final String ESC1 = ESC + "%1$d" + END;
     private static final String ESC2 = ESC + "%1$d;%2$d" + END;
+
+    private static final String _BK = "Bk";
+    private static final String _RD = "Rd";
+    private static final String _GR = "Gr";
+    private static final String _YW = "Yw";
+    private static final String _BL = "Bl";
+    private static final String _MG = "Mg";
+    private static final String _CY = "Cy";
+    private static final String _WH = "Wh";
+
+    private static final String BD = "*";
+    private static final String UN = "_";
+    private static final String BG = ".";
+    private static final String BR = "!";
 
     /**
      * Format an escape sequence for the given attribute and color code.
@@ -177,6 +196,9 @@ public final class ConsoleColor
      * @return        The input with the tags converted to their escape codes.
      */
     public static final String color(final String input, final boolean colored, final Map<String, Code> map) {
+	Deque<Code> colorStack = new ArrayDeque<>();
+	Code currentCode = Code.RESET;
+
 	StringBuilder buf = new StringBuilder(input.length() * 3);
 	for (int i = 0; i < input.length(); i++) {
 	    char ch = input.charAt(i);
@@ -187,14 +209,38 @@ public final class ConsoleColor
 		else {
 		    String tag = input.substring(i + 1, endPos);
 		    Code code;
-		    if (map != null) {
-			code = map.get(tag);
-			if (code == null) {
-			    code = Code.fromAttrib(tag);
+		    if (tag.isEmpty()) {
+			if (colorStack.isEmpty()) {
+			    if (map != null) {
+				code = map.get(tag);
+				if (code == null) {
+				    code = Code.fromTag(tag);
+				}
+			    }
+			    else {
+				code = Code.fromTag(tag);
+			    }
 			}
+			else {
+			    code = colorStack.pop();
+			}
+			if (code != null)
+			    currentCode = code;
 		    }
 		    else {
-			code = Code.fromAttrib(tag);
+			if (map != null) {
+			    code = map.get(tag);
+			    if (code == null) {
+				code = Code.fromTag(tag);
+			    }
+			}
+			else {
+			    code = Code.fromTag(tag);
+			}
+			if (code != null) {
+			    colorStack.push(currentCode);
+			    currentCode = code;
+			}
 		    }
 		    // Unknown tags should be left alone (for Calc use!)
 		    if (code == null) {
@@ -202,7 +248,7 @@ public final class ConsoleColor
 		    }
 		    else {
 			if (colored) {
-			    buf.append(code.toString());
+			    buf.append(code.escCode());
 			}
 			i = endPos;
 		    }
@@ -226,140 +272,142 @@ public final class ConsoleColor
 	RESET(ConsoleColor.RESET, ""),
 
 	/** Regular black, no effects. */
-	BLACK	(NORMAL, FOREGROUND + ConsoleColor.BLACK,   "Bk"),
+	BLACK	(NORMAL, FOREGROUND + ConsoleColor.BLACK,   _BK),
 	/** Regular red, no effects. */
-	RED	(NORMAL, FOREGROUND + ConsoleColor.RED,     "Rd"),
+	RED	(NORMAL, FOREGROUND + ConsoleColor.RED,     _RD),
 	/** Regular green, no effects. */
-	GREEN	(NORMAL, FOREGROUND + ConsoleColor.GREEN,   "Gr"),
+	GREEN	(NORMAL, FOREGROUND + ConsoleColor.GREEN,   _GR),
 	/** Regular yellow, no effects. */
-	YELLOW	(NORMAL, FOREGROUND + ConsoleColor.YELLOW,  "Yw"),
+	YELLOW	(NORMAL, FOREGROUND + ConsoleColor.YELLOW,  _YW),
 	/** Regular blue, no effects. */
-	BLUE	(NORMAL, FOREGROUND + ConsoleColor.BLUE,    "Bl"),
+	BLUE	(NORMAL, FOREGROUND + ConsoleColor.BLUE,    _BL),
 	/** Regular magenta, no effects. */
-	MAGENTA	(NORMAL, FOREGROUND + ConsoleColor.MAGENTA, "Mg"),
+	MAGENTA	(NORMAL, FOREGROUND + ConsoleColor.MAGENTA, _MG),
 	/** Regular cyan, no effects. */
-	CYAN	(NORMAL, FOREGROUND + ConsoleColor.CYAN,    "Cy"),
+	CYAN	(NORMAL, FOREGROUND + ConsoleColor.CYAN,    _CY),
 	/** Regular white, no effects. */
-	WHITE	(NORMAL, FOREGROUND + ConsoleColor.WHITE,   "Wh"),
+	WHITE	(NORMAL, FOREGROUND + ConsoleColor.WHITE,   _WH),
 
 	/** Black color with bold emphasis. */
-	BLACK_BOLD	(BOLD, FOREGROUND + ConsoleColor.BLACK,   "Bk*"),
+	BLACK_BOLD	(BOLD, FOREGROUND + ConsoleColor.BLACK,   _BK+BD),
 	/** Red color with bold emphasis. */
-	RED_BOLD	(BOLD, FOREGROUND + ConsoleColor.RED,     "Rd*"),
+	RED_BOLD	(BOLD, FOREGROUND + ConsoleColor.RED,     _RD+BD),
 	/** Green color with bold emphasis. */
-	GREEN_BOLD	(BOLD, FOREGROUND + ConsoleColor.GREEN,   "Gr*"),
+	GREEN_BOLD	(BOLD, FOREGROUND + ConsoleColor.GREEN,   _GR+BD),
 	/** Yellow color with bold emphasis. */
-	YELLOW_BOLD	(BOLD, FOREGROUND + ConsoleColor.YELLOW,  "Yw*"),
+	YELLOW_BOLD	(BOLD, FOREGROUND + ConsoleColor.YELLOW,  _YW+BD),
 	/** Blue color with bold emphasis. */
-	BLUE_BOLD	(BOLD, FOREGROUND + ConsoleColor.BLUE,    "Bl*"),
+	BLUE_BOLD	(BOLD, FOREGROUND + ConsoleColor.BLUE,    _BL+BD),
 	/** Magenta color with bold emphasis. */
-	MAGENTA_BOLD	(BOLD, FOREGROUND + ConsoleColor.MAGENTA, "Mg*"),
+	MAGENTA_BOLD	(BOLD, FOREGROUND + ConsoleColor.MAGENTA, _MG+BD),
 	/** Cyan color with bold emphasis. */
-	CYAN_BOLD	(BOLD, FOREGROUND + ConsoleColor.CYAN,    "Cy*"),
+	CYAN_BOLD	(BOLD, FOREGROUND + ConsoleColor.CYAN,    _CY+BD),
 	/** White color with bold emphasis. */
-	WHITE_BOLD	(BOLD, FOREGROUND + ConsoleColor.WHITE,   "Wh*"),
+	WHITE_BOLD	(BOLD, FOREGROUND + ConsoleColor.WHITE,   _WH+BD),
 
 	/** Black color, underlined. */
-	BLACK_UNDERLINED   (UNDERLINE, FOREGROUND + ConsoleColor.BLACK,   "Bk_"),
+	BLACK_UNDERLINED   (UNDERLINE, FOREGROUND + ConsoleColor.BLACK,   _BK+UN),
 	/** Red color, underlined. */
-	RED_UNDERLINED     (UNDERLINE, FOREGROUND + ConsoleColor.RED,     "Rd_"),
+	RED_UNDERLINED     (UNDERLINE, FOREGROUND + ConsoleColor.RED,     _RD+UN),
 	/** Green color, underlined. */
-	GREEN_UNDERLINED   (UNDERLINE, FOREGROUND + ConsoleColor.GREEN,   "Gr_"),
+	GREEN_UNDERLINED   (UNDERLINE, FOREGROUND + ConsoleColor.GREEN,   _GR+UN),
 	/** Yellow color, underlined. */
-	YELLOW_UNDERLINED  (UNDERLINE, FOREGROUND + ConsoleColor.YELLOW,  "Yw_"),
+	YELLOW_UNDERLINED  (UNDERLINE, FOREGROUND + ConsoleColor.YELLOW,  _YW+UN),
 	/** Blue color, underlined. */
-	BLUE_UNDERLINED    (UNDERLINE, FOREGROUND + ConsoleColor.BLUE,    "Bl_"),
+	BLUE_UNDERLINED    (UNDERLINE, FOREGROUND + ConsoleColor.BLUE,    _BL+UN),
 	/** Magenta color, underlined. */
-	MAGENTA_UNDERLINED (UNDERLINE, FOREGROUND + ConsoleColor.MAGENTA, "Mg_"),
+	MAGENTA_UNDERLINED (UNDERLINE, FOREGROUND + ConsoleColor.MAGENTA, _MG+UN),
 	/** Cyan color, underlined. */
-	CYAN_UNDERLINED    (UNDERLINE, FOREGROUND + ConsoleColor.CYAN,    "Cy_"),
+	CYAN_UNDERLINED    (UNDERLINE, FOREGROUND + ConsoleColor.CYAN,    _CY+UN),
 	/** White color, underlined. */
-	WHITE_UNDERLINED   (UNDERLINE, FOREGROUND + ConsoleColor.WHITE,   "Wh_"),
+	WHITE_UNDERLINED   (UNDERLINE, FOREGROUND + ConsoleColor.WHITE,   _WH+UN),
 
 	/** Black background color. */
-	BLACK_BACKGROUND   (BACKGROUND + ConsoleColor.BLACK,   "Bk."),
+	BLACK_BACKGROUND   (BACKGROUND + ConsoleColor.BLACK,   _BK+BG),
 	/** Red background color. */
-	RED_BACKGROUND     (BACKGROUND + ConsoleColor.RED,     "Rd."),
+	RED_BACKGROUND     (BACKGROUND + ConsoleColor.RED,     _RD+BG),
 	/** Green background color. */
-	GREEN_BACKGROUND   (BACKGROUND + ConsoleColor.GREEN,   "Gr."),
+	GREEN_BACKGROUND   (BACKGROUND + ConsoleColor.GREEN,   _GR+BG),
 	/** Yellow background color. */
-	YELLOW_BACKGROUND  (BACKGROUND + ConsoleColor.YELLOW,  "Yw."),
+	YELLOW_BACKGROUND  (BACKGROUND + ConsoleColor.YELLOW,  _YW+BG),
 	/** Blue background color. */
-	BLUE_BACKGROUND    (BACKGROUND + ConsoleColor.BLUE,    "Bl."),
+	BLUE_BACKGROUND    (BACKGROUND + ConsoleColor.BLUE,    _BL+BG),
 	/** Magenta background color. */
-	MAGENTA_BACKGROUND (BACKGROUND + ConsoleColor.MAGENTA, "Mg."),
+	MAGENTA_BACKGROUND (BACKGROUND + ConsoleColor.MAGENTA, _MG+BG),
 	/** Cyan background color. */
-	CYAN_BACKGROUND    (BACKGROUND + ConsoleColor.CYAN,    "Cy."),
+	CYAN_BACKGROUND    (BACKGROUND + ConsoleColor.CYAN,    _CY+BG),
 	/** White background color. */
-	WHITE_BACKGROUND   (BACKGROUND + ConsoleColor.WHITE,   "Wh."),
+	WHITE_BACKGROUND   (BACKGROUND + ConsoleColor.WHITE,   _WH+BG),
 
 	/** High-intensity (lighter) black color. */
-	BLACK_BRIGHT	(NORMAL, BRIGHT_FOREGROUND + ConsoleColor.BLACK,   "Bk!"),
+	BLACK_BRIGHT	(NORMAL, BRIGHT_FOREGROUND + ConsoleColor.BLACK,   _BK+BR),
 	/** High-intensity (lighter) red color. */
-	RED_BRIGHT	(NORMAL, BRIGHT_FOREGROUND + ConsoleColor.RED,     "Rd!"),
+	RED_BRIGHT	(NORMAL, BRIGHT_FOREGROUND + ConsoleColor.RED,     _RD+BR),
 	/** High-intensity (lighter) green color. */
-	GREEN_BRIGHT	(NORMAL, BRIGHT_FOREGROUND + ConsoleColor.GREEN,   "Gr!"),
+	GREEN_BRIGHT	(NORMAL, BRIGHT_FOREGROUND + ConsoleColor.GREEN,   _GR+BR),
 	/** High-intensity (lighter) yellow color. */
-	YELLOW_BRIGHT	(NORMAL, BRIGHT_FOREGROUND + ConsoleColor.YELLOW,  "Yw!"),
+	YELLOW_BRIGHT	(NORMAL, BRIGHT_FOREGROUND + ConsoleColor.YELLOW,  _YW+BR),
 	/** High-intensity (lighter) blue color. */
-	BLUE_BRIGHT	(NORMAL, BRIGHT_FOREGROUND + ConsoleColor.BLUE,    "Bl!"),
+	BLUE_BRIGHT	(NORMAL, BRIGHT_FOREGROUND + ConsoleColor.BLUE,    _BL+BR),
 	/** High-intensity (lighter) magenta color. */
-	MAGENTA_BRIGHT	(NORMAL, BRIGHT_FOREGROUND + ConsoleColor.MAGENTA, "Mg!"),
+	MAGENTA_BRIGHT	(NORMAL, BRIGHT_FOREGROUND + ConsoleColor.MAGENTA, _MG+BR),
 	/** High-intensity (lighter) cyan color. */
-	CYAN_BRIGHT	(NORMAL, BRIGHT_FOREGROUND + ConsoleColor.CYAN,    "Cy!"),
+	CYAN_BRIGHT	(NORMAL, BRIGHT_FOREGROUND + ConsoleColor.CYAN,    _CY+BR),
 	/** High-intensity (lighter) white color. */
-	WHITE_BRIGHT	(NORMAL, BRIGHT_FOREGROUND + ConsoleColor.WHITE,   "Wh!"),
+	WHITE_BRIGHT	(NORMAL, BRIGHT_FOREGROUND + ConsoleColor.WHITE,   _WH+BR),
 
 	/** Bold and high-intensity black color. */
-	BLACK_BOLD_BRIGHT   (BOLD, BRIGHT_FOREGROUND + ConsoleColor.BLACK,   "Bk*!"),
+	BLACK_BOLD_BRIGHT   (BOLD, BRIGHT_FOREGROUND + ConsoleColor.BLACK,   _BK+BD+BR),
 	/** Bold and high-intensity red color. */
-	RED_BOLD_BRIGHT     (BOLD, BRIGHT_FOREGROUND + ConsoleColor.RED,     "Rd*!"),
+	RED_BOLD_BRIGHT     (BOLD, BRIGHT_FOREGROUND + ConsoleColor.RED,     _RD+BD+BR),
 	/** Bold and high-intensity green color. */
-	GREEN_BOLD_BRIGHT   (BOLD, BRIGHT_FOREGROUND + ConsoleColor.GREEN,   "Gr*!"),
+	GREEN_BOLD_BRIGHT   (BOLD, BRIGHT_FOREGROUND + ConsoleColor.GREEN,   _GR+BD+BR),
 	/** Bold and high-intensity yellow color. */
-	YELLOW_BOLD_BRIGHT  (BOLD, BRIGHT_FOREGROUND + ConsoleColor.YELLOW,  "Yw*!"),
+	YELLOW_BOLD_BRIGHT  (BOLD, BRIGHT_FOREGROUND + ConsoleColor.YELLOW,  _YW+BD+BR),
 	/** Bold and high-intensity blue color. */
-	BLUE_BOLD_BRIGHT    (BOLD, BRIGHT_FOREGROUND + ConsoleColor.BLUE,    "Bl*!"),
+	BLUE_BOLD_BRIGHT    (BOLD, BRIGHT_FOREGROUND + ConsoleColor.BLUE,    _BL+BD+BR),
 	/** Bold and high-intensity magenta color. */
-	MAGENTA_BOLD_BRIGHT (BOLD, BRIGHT_FOREGROUND + ConsoleColor.MAGENTA, "Mg*!"),
+	MAGENTA_BOLD_BRIGHT (BOLD, BRIGHT_FOREGROUND + ConsoleColor.MAGENTA, _MG+BD+BR),
 	/** Bold and high-intensity cyan color. */
-	CYAN_BOLD_BRIGHT    (BOLD, BRIGHT_FOREGROUND + ConsoleColor.CYAN,    "Cy*!"),
+	CYAN_BOLD_BRIGHT    (BOLD, BRIGHT_FOREGROUND + ConsoleColor.CYAN,    _CY+BD+BR),
 	/** Bold and high-intensity white color. */
-	WHITE_BOLD_BRIGHT   (BOLD, BRIGHT_FOREGROUND + ConsoleColor.WHITE,   "Wh*!"),
+	WHITE_BOLD_BRIGHT   (BOLD, BRIGHT_FOREGROUND + ConsoleColor.WHITE,   _WH+BD+BR),
 
 	/** High-intensity background black. */
-	BLACK_BACKGROUND_BRIGHT   (NORMAL, BRIGHT_BACKGROUND + ConsoleColor.BLACK,   "Bk.!"),
+	BLACK_BACKGROUND_BRIGHT   (NORMAL, BRIGHT_BACKGROUND + ConsoleColor.BLACK,   _BK+BG+BR),
 	/** High-intensity background red. */
-	RED_BACKGROUND_BRIGHT     (NORMAL, BRIGHT_BACKGROUND + ConsoleColor.RED,     "Rd.!"),
+	RED_BACKGROUND_BRIGHT     (NORMAL, BRIGHT_BACKGROUND + ConsoleColor.RED,     _RD+BG+BR),
 	/** High-intensity background green. */
-	GREEN_BACKGROUND_BRIGHT   (NORMAL, BRIGHT_BACKGROUND + ConsoleColor.GREEN,   "Gr.!"),
+	GREEN_BACKGROUND_BRIGHT   (NORMAL, BRIGHT_BACKGROUND + ConsoleColor.GREEN,   _GR+BG+BR),
 	/** High-intensity background yellow. */
-	YELLOW_BACKGROUND_BRIGHT  (NORMAL, BRIGHT_BACKGROUND + ConsoleColor.YELLOW,  "Yw.!"),
+	YELLOW_BACKGROUND_BRIGHT  (NORMAL, BRIGHT_BACKGROUND + ConsoleColor.YELLOW,  _YW+BG+BR),
 	/** High-intensity background blue. */
-	BLUE_BACKGROUND_BRIGHT    (NORMAL, BRIGHT_BACKGROUND + ConsoleColor.BLUE,    "Bl.!"),
+	BLUE_BACKGROUND_BRIGHT    (NORMAL, BRIGHT_BACKGROUND + ConsoleColor.BLUE,    _BL+BG+BR),
 	/** High-intensity background magenta. */
-	MAGENTA_BACKGROUND_BRIGHT (NORMAL, BRIGHT_BACKGROUND + ConsoleColor.MAGENTA, "Mg.!"),
+	MAGENTA_BACKGROUND_BRIGHT (NORMAL, BRIGHT_BACKGROUND + ConsoleColor.MAGENTA, _MG+BG+BR),
 	/** High-intensity background cyan. */
-	CYAN_BACKGROUND_BRIGHT    (NORMAL, BRIGHT_BACKGROUND + ConsoleColor.CYAN,    "Cy.!"),
+	CYAN_BACKGROUND_BRIGHT    (NORMAL, BRIGHT_BACKGROUND + ConsoleColor.CYAN,    _CY+BG+BR),
 	/** High-intensity background white. */
-	WHITE_BACKGROUND_BRIGHT   (NORMAL, BRIGHT_BACKGROUND + ConsoleColor.WHITE,   "Wh.!");
+	WHITE_BACKGROUND_BRIGHT   (NORMAL, BRIGHT_BACKGROUND + ConsoleColor.WHITE,   _WH+BG+BR);
 
 
 	private static class Lookup
 	{
-		private static Map<String, Code>  attribMap  = new HashMap<>();
+		private static Map<String, Code> tagMap  = new HashMap<>();
 
-		static void put(final String attrib, final Code color) {
-		    attribMap.put(attrib, color);
+		static void put(final String tag, final Code color) {
+		    tagMap.put(tag, color);
 		}
 
-		static Code get(final String attrib) {
-		    return attribMap.get(attrib);
+		static Code get(final String tag) {
+		    return tagMap.get(tag);
 		}
 	}
 
 	/** The constructed escape code sequence used to render this color. */
 	private final String code;
+	/** The string tag used to represent this color for conciseness. */
+	private final String tagValue;
 
 
 	/**
@@ -367,24 +415,26 @@ public final class ConsoleColor
 	 *
 	 * @param attrCode  The integer attribute value.
 	 * @param colorCode The integer color code.
-	 * @param attrib    The string attribute for this color.
+	 * @param tag       The string tag for this color.
 	 * @see #esc(int, int)
 	 */
-	private Code(final int attrCode, final int colorCode, final String attrib) {
+	private Code(final int attrCode, final int colorCode, final String tag) {
 	    this.code = esc(attrCode, colorCode);
-	    Lookup.put(attrib, this);
+	    this.tagValue = tag;
+	    Lookup.put(tag, this);
 	}
 
 	/**
 	 * Construct given the single code for the escape sequence.
 	 *
 	 * @param colorCode The integer color code for the escape sequence.
-	 * @param attrib    The string attribute for this color.
+	 * @param tag       The string tag for this color.
 	 * @see #esc(int)
 	 */
-	private Code(final int colorCode, final String attrib) {
+	private Code(final int colorCode, final String tag) {
 	    this.code = esc(colorCode);
-	    Lookup.put(attrib, this);
+	    this.tagValue = tag;
+	    Lookup.put(tag, this);
 	}
 
 	/**
@@ -399,16 +449,24 @@ public final class ConsoleColor
 	 * @return The color enum given the string attribute tag.
 	 * @param tag The tag matching the color.
 	 */
-	public static Code fromAttrib(final String tag) {
+	public static Code fromTag(final String tag) {
 	    return Lookup.get(tag);
+	}
+
+	/**
+	 * @return The string tag used to represent this color
+	 *         in the form of <code>&lt;<i>tag</i>&gt;</code>.
+	 */
+	@Override
+	public String toString() {
+	    return String.format("<%1$s>", this.tagValue);
 	}
 
 	/**
 	 * @return The escape sequence to implement the color/style change.
 	 */
-	@Override
-	public String toString() {
-	    return code;
+	public String escCode() {
+	    return this.code;
 	}
     }
 
