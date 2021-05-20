@@ -81,6 +81,8 @@
  *	    Finish coloring the help message.
  *	02-Mar-2021 (rlwhitcomb)
  *	    Allow comma-separated values for TREE_OPTIONS.
+ *	19-May-2021 (rlwhitcomb)
+ *	    Fix color usage b/c of new ConsoleColor paradigm.
  */
 package info.rlwhitcomb.tree;
 
@@ -191,6 +193,15 @@ public class Tree
 	private static void error(final String formatKey, final Object... args) {
 	    String msg = ConsoleColor.color(Intl.formatString(formatKey, args), useColoring);
 	    System.err.println(msg);
+	}
+
+	/**
+	 * Format a regular message using colors as appropriate.
+	 *
+	 * @param message The message to output, which may have color tags.
+	 */
+	private static void output(final String message) {
+	    System.out.println(ConsoleColor.color(message, useColoring));
 	}
 
 
@@ -445,18 +456,10 @@ public class Tree
 		    nameEmphasis = darkBackgrounds ? RED_BOLD_BRIGHT : CYAN_BOLD;
 		}
 	    }
-	    if (useColoring) {
-		if (typeDisplay.isEmpty()) {
-		    System.out.format("%s%s%s%s%s%s%n", BLACK_BRIGHT, ancestors, branch, nameEmphasis, name, RESET);
-		} else {
-		    System.out.format("%s%s%s%s%s%s (%s)%n", BLACK_BRIGHT, ancestors, branch, nameEmphasis, name, RESET, typeDisplay);
-		}
+	    if (typeDisplay.isEmpty()) {
+		output(String.format("%s%s%s%s%s%s%s", BLACK_BRIGHT, ancestors, branch, nameEmphasis, name, RESET, RESET));
 	    } else {
-		if (typeDisplay.isEmpty()) {
-		    System.out.format("%s%s%s%n", ancestors, branch, name);
-		} else {
-		    System.out.format("%s%s%s (%s)%n", ancestors, branch, name, typeDisplay);
-		}
+		output(String.format("%s%s%s%s%s%s%s (%s)", BLACK_BRIGHT, ancestors, branch, nameEmphasis, name, RESET, RESET, typeDisplay));
 	    }
 
 	    if (isDirectory && (recurse || fullPath)) {
@@ -478,13 +481,16 @@ public class Tree
 
 	private static String colorOptions(String options) {
 	    StringBuilder buf = new StringBuilder(options.length() * 3);
+	    boolean colored = false;
 	    for (int i = 0; i < options.length(); i++) {
 		char ch = options.charAt(i);
-		if (ch == '-') {
+		if (ch == '-' && !colored) {
 		    buf.append("<Gr>");
+		    colored = true;
 		}
 		else if (ch == ',') {
 		    buf.append("<>");
+		    colored = false;
 		}
 		buf.append(ch);
 	    }
@@ -502,7 +508,7 @@ public class Tree
 
 	private static void usage(String... messages) {
 	    for (String message : messages) {
-		System.out.println(ConsoleColor.color(message, useColoring));
+		output(message);
 	    }
 
 	    Map<String, String> symbols = new HashMap<>();
@@ -559,7 +565,7 @@ public class Tree
 		else if (Options.matchesOption(arg, true, OMIT_FILES, "omit", "o")) {
 		    omitFiles = true;
 		}
-		else if (Options.matchesOption(arg, true, MIXED_CASE, "sensitive", "mixed", "mix", "m", "s")) {
+		else if (Options.matchesOption(arg, true, MIXED_CASE, "sensitive", "mixed", "mix", "m", "sens")) {
 		    casing = CaseSensitivity.MIXED_CASE;
 		    sortByFileName = true;
 		}

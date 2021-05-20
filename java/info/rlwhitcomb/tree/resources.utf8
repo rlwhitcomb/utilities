@@ -40,6 +40,8 @@
 #	    Missing option choice, new options. Use color tags.
 #	09-Feb-2021 (rlwhitcomb)
 #	    Finish with color tags.
+#	19-May-2021 (rlwhitcomb)
+#	    Tweaks to help message.
 #
 
 unavailable	= " <unavailable>"
@@ -64,10 +66,10 @@ usage.help10	= "\t<Gr>-Dir<>  sorts files first, then directories"
 usage.help11	= "\t  (or <Gr>-Directory<>, or <Gr>-D<>)"
 usage.help12	= "\t<Gr>-mixed<>  sorts file names alphabetically, in mixed case"
 usage.help13	= "\t  (meaning \"M\" is different than \"m\")"
-usage.help14	= "\t  (or %MixedCase%, <Gr>-sensitive<>, <Gr>-mix<>, <Gr>-m<>, <Gr>-s<>)"
+usage.help14	= "\t  (or %MixedCase%, <Gr>-sensitive<>, <Gr>-mix<>, <Gr>-m<>, <Gr>-sens<>)"
 usage.help15	= "\t<Gr>-case<>  sort file names alphabetically, without regard to case"
 usage.help16	= "\t  (meaning \"M\" sorts the same as \"m\")"
-usage.help17	= "\t  (or %CaseInsensitive%, <Gr>-insensitive<>, <Gr>-c<>, or <Gr>-<>i)"
+usage.help17	= "\t  (or %CaseInsensitive%, <Gr>-insensitive<>, <Gr>-c<>, or <Gr>-i<>)"
 usage.help18	= " Default is not to sort the output at all."
 usage.help19	= ""
 usage.help20	= "\t<Gr>-file<>  prints file names also (default is directories only)"
