@@ -197,6 +197,8 @@
  *	    More Unicode math symbols.
  *	13-May-2021 (rlwhitcomb)
  *	    Date constants (ISO-8601 format).
+ *	17-May-2021 (rlwhitcomb)
+ *	    Allow for negative date inputs.
  */
 
 grammar Calc;
@@ -495,9 +497,9 @@ TIME_CONST
 
 /* ISO-8601 format with more separators allowed */
 DATE_CONST
-         : D '\'' ( DIG DIG | DIG DIG DIG DIG ) [\-/,;] DIG ? DIG [\-/,;] DIG ? DIG '\''
-         | D '\'' DIG DIG DIG DIG DIG DIG DIG DIG '\''
-         | D '\'' DIG DIG DIG DIG DIG DIG '\''
+         : D '\'' '-' ? ( DIG DIG | DIG DIG DIG DIG ) [\-/,;] DIG ? DIG [\-/,;] DIG ? DIG '\''
+         | D '\'' '-' ? DIG DIG DIG DIG DIG DIG DIG DIG '\''
+         | D '\'' '-' ? DIG DIG DIG DIG DIG DIG '\''
          ;
 
 

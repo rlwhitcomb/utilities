@@ -1040,8 +1040,13 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			valueBuf.append("d'");
 			iValue = toIntegerValue(this, result, mc, ctx);
 			LocalDate date = LocalDate.ofEpochDay(iValue.longValue());
+			int year = date.getYear();
+			if (year < 0) {
+			    year = -year;
+			    valueBuf.append('-');
+			}
 			valueBuf.append(String.format("%1$04d-%2$02d-%3$02d",
-				date.getYear(), date.getMonthValue(), date.getDayOfMonth()));
+				year, date.getMonthValue(), date.getDayOfMonth()));
 			valueBuf.append('\'');
 			break;
 
@@ -3007,19 +3012,26 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitDateValue(CalcParser.DateValueContext ctx) {
-	    String constant = ctx.DATE_CONST().getText();
-	    String value    = CharUtil.stripQuotes(constant.substring(1));
+	    String constant   = ctx.DATE_CONST().getText();
+	    String value      = CharUtil.stripQuotes(constant.substring(1));
 	    StringBuilder buf = new StringBuilder();
+	    boolean negate    = false;
+	    int year = 0, month = 0, day = 0;
 
 	    try {
 		buf.append(value.replaceAll("[\\-/,;]", "-"));
+		if (buf.charAt(0) == '-') {
+		    negate = true;
+		    buf.deleteCharAt(0);
+		}
 		if (buf.indexOf("-") < 0) {
 		    if (buf.length() == 6) {
-			int year = Integer.parseInt(buf.substring(0, 2));
+			year = Integer.parseInt(buf.substring(0, 2));
 			if (year < 50)
 			    year += 2000;
 			else
 			    year += 1900;
+			month = Integer.parseInt(buf.substring(2, 4));
 			buf.replace(0, 2, String.valueOf(year));
 		    }
 		    buf.insert(4, "-");
@@ -3029,17 +3041,40 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		else {
 		    int ix1 = buf.indexOf("-");
 		    int ix2 = buf.indexOf("-", ix1+1);
-		    int year = Integer.parseInt(buf.substring(0, ix1));
-		    if (year < 50)
-			year += 2000;
-		    else if (year < 100)
-			year += 1900;
-		    int month = Integer.parseInt(buf.substring(ix1+1, ix2));
-		    int day = Integer.parseInt(buf.substring(ix2+1));
+		    year = Integer.parseInt(buf.substring(0, ix1));
+		    if (ix1 < 3) {
+			if (year < 50)
+			    year += 2000;
+			else if (year < 100)
+			    year += 1900;
+		    }
+		    month = Integer.parseInt(buf.substring(ix1+1, ix2));
+		    day = Integer.parseInt(buf.substring(ix2+1));
+		}
+		if (negate) {
+		// -719528 = d'0000/01/01'
+		// 10957   = d'2000/01/01'
+		// AFAICT 2000+yyyy has same leap year characteristics as 0000+yyyy
+		// So, get yyyy/01/01 and 2000+yyyy/mm/dd - 2000+yyyy/01/01
+		LocalDate startOfYear = LocalDate.parse(String.format("%04d-%02d-%02d", 2000+year, month, day));
+// need distance from 0000/01/01 to positive date, like 0100/10/12
+// should be same as 1970/01/01 + 0100/10/12 = 36809
+// -719528 - 36809 = -856337 -> 0101-03-22 oops!  100 years, 10 mo, 12 days before 0000/01/01, but not the same as negative year, positive month/day
+// 0100/01/01 = -683003
+// -719528 + 683003 = -36525
+// get 1970/mm/dd (small positive) (284)
+// -719528 - year + month/day
+// -719528 - 36525 + 284 = -100/10/11 (oops! should be 285)
+// right answer: -719528 - 36525 + 285 = -755768 = -100/10/12 
+// discrepancy is that year 0000 is counted as leap year, while 1970 is not
+// also year -0004 is leap year
+		}
+		else {
 		    value = String.format("%1$04d-%2$02d-%3$02d", year, month, day);
 		}
 		LocalDate date = LocalDate.parse(value);
-		return BigInteger.valueOf(date.toEpochDay());
+		long epochDate = date.toEpochDay();
+		return BigInteger.valueOf(epochDate);
 	    }
 	    catch (DateTimeParseException | NumberFormatException ex) {
 		throw new CalcExprException(ex, ctx);
