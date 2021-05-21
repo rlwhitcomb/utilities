@@ -50,6 +50,8 @@
  *   18-May-2021 (rlwhicomb)
  *	Redo "color" method to push/pop colors to do nesting. Rename "attrib" to "tag".
  *	String constants for the tag values also.
+ *   20-May-2021 (rlwhitcomb)
+ *	Add bright underlined forms (this actually works!)
  */
 package info.rlwhitcomb.util;
 
@@ -372,6 +374,23 @@ public final class ConsoleColor
 	CYAN_BOLD_BRIGHT    (BOLD, BRIGHT_FOREGROUND + ConsoleColor.CYAN,    _CY+BD+BR),
 	/** Bold and high-intensity white color. */
 	WHITE_BOLD_BRIGHT   (BOLD, BRIGHT_FOREGROUND + ConsoleColor.WHITE,   _WH+BD+BR),
+
+	/** Underlined and high-intensity black color. */
+	BLACK_UNDERLINED_BRIGHT   (UNDERLINE, BRIGHT_FOREGROUND + ConsoleColor.BLACK,   _BK+UN+BR),
+	/** Underlined and high-intensity red color. */
+	RED_UNDERLINED_BRIGHT     (UNDERLINE, BRIGHT_FOREGROUND + ConsoleColor.RED,     _RD+UN+BR),
+	/** Underlined and high-intensity green color. */
+	GREEN_UNDERLINED_BRIGHT   (UNDERLINE, BRIGHT_FOREGROUND + ConsoleColor.GREEN,   _GR+UN+BR),
+	/** Underlined and high-intensity yellow color. */
+	YELLOW_UNDERLINED_BRIGHT  (UNDERLINE, BRIGHT_FOREGROUND + ConsoleColor.YELLOW,  _YW+UN+BR),
+	/** Underlined and high-intensity blue color. */
+	BLUE_UNDERLINED_BRIGHT    (UNDERLINE, BRIGHT_FOREGROUND + ConsoleColor.BLUE,    _BL+UN+BR),
+	/** Underlined and high-intensity magenta color. */
+	MAGENTA_UNDERLINED_BRIGHT (UNDERLINE, BRIGHT_FOREGROUND + ConsoleColor.MAGENTA, _MG+UN+BR),
+	/** Underlined and high-intensity cyan color. */
+	CYAN_UNDERLINED_BRIGHT    (UNDERLINE, BRIGHT_FOREGROUND + ConsoleColor.CYAN,    _CY+UN+BR),
+	/** Underlined and high-intensity white color. */
+	WHITE_UNDERLINED_BRIGHT   (UNDERLINE, BRIGHT_FOREGROUND + ConsoleColor.WHITE,   _WH+UN+BR),
 
 	/** High-intensity background black. */
 	BLACK_BACKGROUND_BRIGHT   (NORMAL, BRIGHT_BACKGROUND + ConsoleColor.BLACK,   _BK+BG+BR),

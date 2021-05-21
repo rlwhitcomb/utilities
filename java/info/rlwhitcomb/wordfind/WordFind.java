@@ -65,8 +65,10 @@
  *          Options for min word size to report and max values of each size.
  *      07-May-2021 (rlwhitcomb)
  *          Options for colors based on window background color.
- *	13-May-2021 (rlwhitcomb)
- *	    Tweak dark background color.
+ *      13-May-2021 (rlwhitcomb)
+ *         Tweak dark background color.
+ *      20-May-2021 (rlwhitcomb)
+ *         Fix output coloring.
  */
 package info.rlwhitcomb.wordfind;
 
@@ -197,12 +199,8 @@ public class WordFind implements Application {
     private static int maxNumberOfWords = 0;
     /** The format string for final output of the words. */
     private static final String WORD_FORMAT = "%1$s%2$s " + BLACK_BRIGHT + "(%3$3d)" + RESET;
-    /** The format string for final output without colors. */
-    private static final String WORD_FORMAT_NOCOLORS = "%1$s%2$s (%3$3d)";
-    /** Continuation (colored). */
+    /** Continuation. */
     private static final String DOTS = " " + BLACK_BRIGHT + "..." + RESET;
-    /** Continuation (no colors). */
-    private static final String DOTS_NOCOLORS = " ...";
     /** Heading color. */
     private static ConsoleColor.Code headingColor = null;
     /** Info message color. */
@@ -399,13 +397,13 @@ public class WordFind implements Application {
         if (light) {
             headingColor = CYAN;
             infoColor = GREEN_BOLD;
-            errorColor = RED;
+            errorColor = RED_UNDERLINED;
             wildcardColor = RED_BRIGHT;
             containsColor = CYAN_BOLD;
         } else {
             headingColor = CYAN_BOLD;
             infoColor = GREEN;
-            errorColor = RED_BOLD;
+            errorColor = RED_UNDERLINED_BRIGHT;;
             wildcardColor = RED_BOLD;
             containsColor = YELLOW_BOLD;
         }
@@ -579,7 +577,7 @@ ex.printStackTrace();
     private static void error(final String message) {
         if (runningOnConsole) {
             if (colored)
-                System.err.println(errorColor + message + RESET);
+                System.err.println(ConsoleColor.color(errorColor + message + RESET));
             else
                 System.err.println(message);
         } else {
@@ -591,6 +589,14 @@ ex.printStackTrace();
         error("The \"--" + valueName + "\" option was specified without a value!");
     }
 
+    private static void output(final String coloredMessage) {
+        System.out.print(ConsoleColor.color(coloredMessage, colored));
+    }
+
+    private static void outputln(final String coloredMessage) {
+        System.out.println(ConsoleColor.color(coloredMessage, colored));
+    }
+
     /**
      * Print an informational message to {@link System#out} and highlight in green when running
      * in the console, else send to the GUI information message text.
@@ -599,10 +605,7 @@ ex.printStackTrace();
      */
     private static void info(final String message) {
         if (runningOnConsole) {
-            if (colored)
-                System.out.println(infoColor + message + RESET);
-            else
-                System.out.println(message);
+            outputln(infoColor + message + RESET);
         } else {
             // TODO: implement; whether to have separate error/info text boxes or the same with diff colors?
         }
@@ -613,10 +616,7 @@ ex.printStackTrace();
      * @param message The heading message to display.
      */
     private static void heading(final String message) {
-        if (colored)
-            System.out.println(headingColor + message + RESET);
-        else
-            System.out.println(message);
+        outputln(headingColor + message + RESET);
     }
 
     /**
@@ -624,10 +624,7 @@ ex.printStackTrace();
      * @param message The section message to display.
      */
     private static void section(final String message) {
-        if (colored)
-            System.out.print(BLACK_BOLD_BRIGHT + message + RESET);
-        else
-            System.out.print(message);
+        output(BLACK_BOLD_BRIGHT + message + RESET);
     }
 
     private static void displayHelp() {
@@ -1022,10 +1019,7 @@ ex.printStackTrace();
                     section(String.valueOf(index + 1) + " letter words (" + size + "):");
 
                     if (minWordSizeToReport > 1 && (index + 1) < minWordSizeToReport) {
-                        if (colored)
-                            System.out.println(DOTS);
-                        else
-                            System.out.println(DOTS_NOCOLORS);
+                        outputln(DOTS);
                         continue;
                     }
                     System.out.println();
@@ -1037,10 +1031,7 @@ ex.printStackTrace();
                     for (String word : wordSet) {
                         wordsSoFarInSet++;
                         if (maxNumberOfWords > 0 && wordsSoFarInSet > maxNumberOfWords) {
-                            if (colored)
-                                System.out.print(DOTS);
-                            else
-                                System.out.print(DOTS_NOCOLORS);
+                            outputln(DOTS);
                             break;
                         }
 
@@ -1057,10 +1048,7 @@ ex.printStackTrace();
                         int excessSpace = columnWidth - lettersOnly.length();
                         String leftPadding = excessSpace == 0 ? "" : CharUtil.makeStringOfChars(' ', excessSpace);
                         int value = addLetterValues(word);
-                        if (colored)
-                            System.out.format(WORD_FORMAT, leftPadding, highlightWord(word), value);
-                        else
-                            System.out.format(WORD_FORMAT_NOCOLORS, leftPadding, lettersOnly, value);
+                        output(String.format(WORD_FORMAT, leftPadding, highlightWord(word), value));
                         lineLength += columnWidth + 6;
                     }
                     System.out.println();
