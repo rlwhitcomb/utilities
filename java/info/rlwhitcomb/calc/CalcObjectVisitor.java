@@ -276,6 +276,8 @@
  *	    Catch out of bounds exception in "substr".
  *	13-May-2021 (rlwhitcomb)
  *	    Date values, arithmetic, and formatting.
+ *	20-May-2021 (rlwhitcomb)
+ *	    Fix negative date parsing.
  */
 package info.rlwhitcomb.calc;
 
@@ -3010,6 +3012,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 	}
 
+	static final long ZERO_DAY = -719528; // d'0000-01-01'
+	static final long Y10K_DAY = 2932897; // d'10000-01-01'
+
 	@Override
 	public Object visitDateValue(CalcParser.DateValueContext ctx) {
 	    String constant   = ctx.DATE_CONST().getText();
@@ -3017,6 +3022,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    StringBuilder buf = new StringBuilder();
 	    boolean negate    = false;
 	    int year = 0, month = 0, day = 0;
+	    long epochDate;
 
 	    try {
 		buf.append(value.replaceAll("[\\-/,;]", "-"));
@@ -3032,11 +3038,13 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			else
 			    year += 1900;
 			month = Integer.parseInt(buf.substring(2, 4));
-			buf.replace(0, 2, String.valueOf(year));
+			day = Integer.parseInt(buf.substring(4, 6));
 		    }
-		    buf.insert(4, "-");
-		    buf.insert(7, "-");
-		    value = buf.toString();
+		    else {
+			year = Integer.parseInt(buf.substring(0, 4));
+			month = Integer.parseInt(buf.substring(4, 6));
+			day = Integer.parseInt(buf.substring(6, 8));
+		    }
 		}
 		else {
 		    int ix1 = buf.indexOf("-");
@@ -3052,28 +3060,19 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    day = Integer.parseInt(buf.substring(ix2+1));
 		}
 		if (negate) {
-		// -719528 = d'0000/01/01'
-		// 10957   = d'2000/01/01'
-		// AFAICT 2000+yyyy has same leap year characteristics as 0000+yyyy
-		// So, get yyyy/01/01 and 2000+yyyy/mm/dd - 2000+yyyy/01/01
-		LocalDate startOfYear = LocalDate.parse(String.format("%04d-%02d-%02d", 2000+year, month, day));
-// need distance from 0000/01/01 to positive date, like 0100/10/12
-// should be same as 1970/01/01 + 0100/10/12 = 36809
-// -719528 - 36809 = -856337 -> 0101-03-22 oops!  100 years, 10 mo, 12 days before 0000/01/01, but not the same as negative year, positive month/day
-// 0100/01/01 = -683003
-// -719528 + 683003 = -36525
-// get 1970/mm/dd (small positive) (284)
-// -719528 - year + month/day
-// -719528 - 36525 + 284 = -100/10/11 (oops! should be 285)
-// right answer: -719528 - 36525 + 285 = -755768 = -100/10/12 
-// discrepancy is that year 0000 is counted as leap year, while 1970 is not
-// also year -0004 is leap year
+		    // Use year 10,000 as a base to figure out how negative from d'0000-01-01'
+		    // we need to go (since LocalDate won't handle negative years in parsing)
+		    // since year 10,000 and ff. share the same leap year calculations as year 0000
+		    String y10kDateString = String.format("%1$04d-%2$02d-%3$02d", 10000 - year, month, day);
+		    LocalDate y10kDateDate = LocalDate.parse(y10kDateString);
+		    long offset = y10kDateDate.toEpochDay() - Y10K_DAY;
+		    epochDate = ZERO_DAY + offset;
 		}
 		else {
 		    value = String.format("%1$04d-%2$02d-%3$02d", year, month, day);
+		    LocalDate date = LocalDate.parse(value);
+		    epochDate = date.toEpochDay();
 		}
-		LocalDate date = LocalDate.parse(value);
-		long epochDate = date.toEpochDay();
 		return BigInteger.valueOf(epochDate);
 	    }
 	    catch (DateTimeParseException | NumberFormatException ex) {
