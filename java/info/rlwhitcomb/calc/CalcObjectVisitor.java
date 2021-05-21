@@ -280,6 +280,8 @@
  *	    Fix negative date parsing.
  *	21-May-2021 (rlwhitcomb)
  *	    Introduce US format dates.
+ *	21-May-2021 (rlwhitcomb)
+ *	    DOW, TODAY, and NOW functions.
  */
 package info.rlwhitcomb.calc;
 
@@ -289,7 +291,9 @@ import java.math.BigInteger;
 import java.math.MathContext;
 import java.math.RoundingMode;
 import java.nio.charset.StandardCharsets;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -2506,6 +2510,23 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	@Override
+	public Object visitDayOfWeekExpr(CalcParser.DayOfWeekExprContext ctx) {
+	    BigInteger iValue = getIntegerValue(ctx.expr());
+	    try {
+		LocalDate date = LocalDate.ofEpochDay(iValue.longValueExact());
+		DayOfWeek dow = date.getDayOfWeek();
+		// Adjust the return b/c I didn't like their ordering
+		// theirs = 1 (Monday) to 7 (Sunday) while we have defined
+		// ours = 0 (Sunday) to 6 (Saturday)
+		int adjustedDow = dow.getValue() % 7;
+		return BigInteger.valueOf((long) adjustedDow);
+	    }
+	    catch (ArithmeticException ae) {
+		throw new CalcExprException(ae, ctx);
+	    }
+	}
+
+	@Override
 	public Object visitEvalExpr(CalcParser.EvalExprContext ctx) {
 	    String exprString = getStringValue(ctx.expr());
 
@@ -3102,6 +3123,18 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    catch (DateTimeParseException | NumberFormatException ex) {
 		throw new CalcExprException(ex, ctx);
 	    }
+	}
+
+	@Override
+	public Object visitTodayValue(CalcParser.TodayValueContext ctx) {
+	    LocalDate today = LocalDate.now();
+	    return BigInteger.valueOf(today.toEpochDay());
+	}
+
+	@Override
+	public Object visitNowValue(CalcParser.NowValueContext ctx) {
+	    LocalTime now = LocalTime.now();
+	    return BigInteger.valueOf(now.toNanoOfDay());
 	}
 
 	@Override

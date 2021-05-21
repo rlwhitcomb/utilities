@@ -337,12 +337,14 @@ or
           <code>true</code> or <code>false</code><br>
           <code>null</code><br>
           <code>&#x00BC;</code>, <code>&#x00BD;</code>, <code>&#x00BE;</code>, <code>&#x2150;</code>, <code>&#x215E;</code>, etc.<br>
-          <code>today</code></td>
+          <code>today</code><br>
+          <code>now</code></td>
       <td>the fundamental constants <code>&#x1D6D1;</code> and <code>e</code><br>
           the <code>boolean</code> values<br>
           the <code>null</code> (empty) value<br>
           any of the Unicode fraction values<br>
-          date value of the current date</td><td>N/A</td></tr>
+          date value of the current date<br>
+          time value of the current time</td><td>N/A</td></tr>
     <tr><td>27</td><td><code>{ }</code></td><td>define an object</td><td>left to right</td></tr>
     <tr><td>26</td><td><code>[ ]</code><br><i>var</i> <code>[</code> <i>expr</i> <code>]</code> or <i>var</i>&nbsp;&#x2080; .. &#x2089;</td><td>define an array,<br>or access elements of<br>an array, string, or object</td><td>left to right</td></tr>
     <tr><td>25</td><td>.</td><td>access an object member</td><td>left to right</td></tr>
@@ -412,8 +414,10 @@ or
             <tr><td><code>LOWER</code>&nbsp;<i>expr</i></td><td>convert <i>expr</i> to lower case</td></tr>
             <tr><td><code>UPPER</code>&nbsp;<i>expr</i></td><td>convert <i>expr</i> to UPPER case</td></tr>
             <tr><td><code>EVAL</code>&nbsp;<i>expr</i></td><td>evaluate the string result of <i>expr</i></td></tr>
+            <tr><td><code>EXEC</code>&nbsp;</i>expr</i>&nbsp;( <code>,</code>&nbsp;<i>expr</i>&nbsp;) *</td><td>execute the given O/S command<br>(with arguments)<br>and return the output as a string</td></tr>
             <tr><td><code>FACTORS</code>&nbsp;<i>expr</i></td><td>calculate all the factors of the number</td></tr>
             <tr><td><code>PFACTORS</code>&nbsp;<i>expr</i></td><td>calculate the prime factors of the number</td></tr>
+            <tr><td><code>DOW</code>&nbsp;<i>expr</i></td><td>day of the week of a date (integer) value<br>(0=Sunday to 6=Saturday)</td></tr>
         </table></td>
         <td>left to right</td></tr>
     <tr><td>12</td><td><i>expr</i>&nbsp;<code> &lt;=&gt; </code>&nbsp;<i>expr</i><td>returns <code>-1</code> if <i>expr</i> &lt; 0<br><code>0</code> if <i>expr</i> = 0<br><code>+1</code> if <i>expr</i> &gt; 0</td><td>left to right</td></tr>

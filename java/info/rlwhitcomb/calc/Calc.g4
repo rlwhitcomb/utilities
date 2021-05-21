@@ -202,6 +202,8 @@
  *	21-May-2021 (rlwhitcomb)
  *	    Allow d'...' for ISO dates and D'...' for US dates (MM/dd/yyyy).
  *	    Add "TODAY" constant.
+ *	21-May-2021 (rlwhitcomb)
+ *	    Add "DOW" (day of week) function and "NOW" constant.
  */
 
 grammar Calc;
@@ -328,6 +330,7 @@ expr
    | ( K_UPPER | K_LOWER ) expr          # caseConvertExpr
    | K_FACTORS expr                      # factorsExpr
    | K_PFACTORS expr                     # primeFactorsExpr
+   | K_DOW expr                          # dayOfWeekExpr
    | K_EVAL expr                         # evalExpr
    | K_EXEC exprN                        # execExpr
    | expr '<=>' expr                     # spaceshipExpr
@@ -409,6 +412,7 @@ value
    | TIME_CONST                  # timeValue
    | DATE_CONST                  # dateValue
    | K_TODAY                     # todayValue
+   | K_NOW                       # nowValue
    ;
 
 formalParams
@@ -519,6 +523,8 @@ K_NULL     : N U L L ;
 
 K_TODAY    : T O D A Y ;
 
+K_NOW      : N O W ;
+
 K_ABS      : A B S ;
 
 K_SINH     : S I N H ;
@@ -604,6 +610,8 @@ K_LOWER    : L O W E R ;
 K_FACTORS  : F A C T O R S ;
 
 K_PFACTORS : P F A C T O R S ;
+
+K_DOW      : D O W ;
 
 K_EVAL     : E V A L ;
 
