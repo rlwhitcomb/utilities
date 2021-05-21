@@ -450,6 +450,13 @@ d'500101'@e
 d'49/01/01'@e
 d'-9999/01/01'@e
 d'9999/12/31'@e
+_911 = D'9/11/01'
+_911@e;_911@E
+D'1/1/1999'@e
+_waterloo = d'1815/6/18'
+_waterloo@e;_waterloo@E
+
+
 
 #
 # Play around with "," formatting

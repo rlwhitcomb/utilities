@@ -278,6 +278,8 @@
  *	    Date values, arithmetic, and formatting.
  *	20-May-2021 (rlwhitcomb)
  *	    Fix negative date parsing.
+ *	21-May-2021 (rlwhitcomb)
+ *	    Introduce US format dates.
  */
 package info.rlwhitcomb.calc;
 
@@ -1035,11 +1037,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			valueBuf.append(formatWithSeparators(dValue, separators, ctx));
 			break;
 
+		    // @E = US format: MM/dd/yyyy
+		    // @e = ISO format: yyyy-MM-dd
 		    case 'E':
-			toUpperCase = true;
-			// fall through
 		    case 'e':
-			valueBuf.append("d'");
+			char dateChar = (formatChar == 'E') ? 'D' : 'd';
+			valueBuf.append(dateChar).append('\'');
 			iValue = toIntegerValue(this, result, mc, ctx);
 			LocalDate date = LocalDate.ofEpochDay(iValue.longValue());
 			int year = date.getYear();
@@ -1047,9 +1050,14 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			    year = -year;
 			    valueBuf.append('-');
 			}
-			valueBuf.append(String.format("%1$04d-%2$02d-%3$02d",
-				year, date.getMonthValue(), date.getDayOfMonth()));
-			valueBuf.append('\'');
+			String dateStr;
+			if (formatChar == 'E')
+			    dateStr = String.format("%1$02d/%2$02d/%3$04d",
+				date.getMonthValue(), date.getDayOfMonth(), year);
+			else
+			    dateStr = String.format("%1$04d-%2$02d-%3$02d",
+				year, date.getMonthValue(), date.getDayOfMonth());
+			valueBuf.append(dateStr).append('\'');
 			break;
 
 		    case 'f':
@@ -3019,46 +3027,60 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public Object visitDateValue(CalcParser.DateValueContext ctx) {
 	    String constant   = ctx.DATE_CONST().getText();
 	    String value      = CharUtil.stripQuotes(constant.substring(1));
+
 	    StringBuilder buf = new StringBuilder();
 	    boolean negate    = false;
-	    int year = 0, month = 0, day = 0;
+	    boolean isoDate   = constant.charAt(0) == 'd';
+	    boolean shortYear = false;
+
+	    int ixSep1, ixSep2, sepWidth = 0;
+	    String yearStr, monthStr, dayStr;
+	    int year, month, day;;
 	    long epochDate;
 
 	    try {
-		buf.append(value.replaceAll("[\\-/,;]", "-"));
+		// Note: this regex should be the same as DTSEP in Calc.g4
+		buf.append(value.replaceAll("[\\-/,;\\._]", "-"));
+
 		if (buf.charAt(0) == '-') {
 		    negate = true;
 		    buf.deleteCharAt(0);
 		}
+
 		if (buf.indexOf("-") < 0) {
-		    if (buf.length() == 6) {
-			year = Integer.parseInt(buf.substring(0, 2));
-			if (year < 50)
-			    year += 2000;
-			else
-			    year += 1900;
-			month = Integer.parseInt(buf.substring(2, 4));
-			day = Integer.parseInt(buf.substring(4, 6));
-		    }
-		    else {
-			year = Integer.parseInt(buf.substring(0, 4));
-			month = Integer.parseInt(buf.substring(4, 6));
-			day = Integer.parseInt(buf.substring(6, 8));
-		    }
+		    shortYear = (buf.length() == 6);
+		    ixSep1 = isoDate ? (shortYear ? 2 : 4) : 2;
+		    ixSep2 = ixSep1 + 2;
 		}
 		else {
-		    int ix1 = buf.indexOf("-");
-		    int ix2 = buf.indexOf("-", ix1+1);
-		    year = Integer.parseInt(buf.substring(0, ix1));
-		    if (ix1 < 3) {
-			if (year < 50)
-			    year += 2000;
-			else if (year < 100)
-			    year += 1900;
-		    }
-		    month = Integer.parseInt(buf.substring(ix1+1, ix2));
-		    day = Integer.parseInt(buf.substring(ix2+1));
+		    sepWidth = 1;
+		    ixSep1 = buf.indexOf("-");
+		    ixSep2 = buf.indexOf("-", ixSep1 + 1);
+		    shortYear = isoDate ? (ixSep1 < 3) : (buf.length() - ixSep2 < 4);
 		}
+
+		if (isoDate) {
+		    yearStr = buf.substring(0, ixSep1);
+		    monthStr = buf.substring(ixSep1 + sepWidth, ixSep2);
+		    dayStr = buf.substring(ixSep2 + sepWidth);
+		}
+		else {
+		    monthStr = buf.substring(0, ixSep1);
+		    dayStr = buf.substring(ixSep1 + sepWidth, ixSep2);
+		    yearStr = buf.substring(ixSep2 + sepWidth);
+		}
+
+		year = Integer.parseInt(yearStr);
+		month = Integer.parseInt(monthStr);
+		day = Integer.parseInt(dayStr);
+
+		if (shortYear) {
+		    if (year < 50)
+			year += 2000;
+		    else
+			year += 1900;
+		}
+
 		if (negate) {
 		    // Use year 10,000 as a base to figure out how negative from d'0000-01-01'
 		    // we need to go (since LocalDate won't handle negative years in parsing)
@@ -3069,10 +3091,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    epochDate = ZERO_DAY + offset;
 		}
 		else {
+		    // Get a value in strict ISO-8601 format for parsing
 		    value = String.format("%1$04d-%2$02d-%3$02d", year, month, day);
 		    LocalDate date = LocalDate.parse(value);
 		    epochDate = date.toEpochDay();
 		}
+
 		return BigInteger.valueOf(epochDate);
 	    }
 	    catch (DateTimeParseException | NumberFormatException ex) {

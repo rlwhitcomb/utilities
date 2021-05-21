@@ -199,6 +199,9 @@
  *	    Date constants (ISO-8601 format).
  *	17-May-2021 (rlwhitcomb)
  *	    Allow for negative date inputs.
+ *	21-May-2021 (rlwhitcomb)
+ *	    Allow d'...' for ISO dates and D'...' for US dates (MM/dd/yyyy).
+ *	    Add "TODAY" constant.
  */
 
 grammar Calc;
@@ -405,6 +408,7 @@ value
    | ROMAN_CONST                 # romanValue
    | TIME_CONST                  # timeValue
    | DATE_CONST                  # dateValue
+   | K_TODAY                     # todayValue
    ;
 
 formalParams
@@ -495,11 +499,15 @@ TIME_CONST
          | T '\'' '-' ? DIG + ( '.' DIG * ) ? [ \t] * ( W | D | H | M | S ) '\''
          ;
 
-/* ISO-8601 format with more separators allowed */
 DATE_CONST
-         : D '\'' '-' ? ( DIG DIG | DIG DIG DIG DIG ) [\-/,;] DIG ? DIG [\-/,;] DIG ? DIG '\''
-         | D '\'' '-' ? DIG DIG DIG DIG DIG DIG DIG DIG '\''
-         | D '\'' '-' ? DIG DIG DIG DIG DIG DIG '\''
+/* ISO-8601 format with more separators allowed */
+         : 'd' '\'' '-' ? ( DIG DIG | DIG DIG DIG DIG ) DTSEP DIG ? DIG DTSEP DIG ? DIG '\''
+         | 'd' '\'' '-' ? DIG DIG DIG DIG DIG DIG DIG DIG '\''
+         | 'd' '\'' '-' ? DIG DIG DIG DIG DIG DIG '\''
+/* US format (MM/dd/yyyy or MM/dd/yy or MMddyyyy or MMddyy) */
+         | 'D' '\'' '-' ? DIG ? DIG DTSEP DIG ? DIG DTSEP ( DIG DIG | DIG DIG DIG DIG ) '\''
+         | 'D' '\'' '-' ? DIG DIG DIG DIG DIG DIG DIG DIG '\''
+         | 'D' '\'' '-' ? DIG DIG DIG DIG DIG DIG '\''
          ;
 
 
@@ -508,6 +516,8 @@ K_TRUE     : T R U E ;
 K_FALSE    : F A L S E ;
 
 K_NULL     : N U L L ;
+
+K_TODAY    : T O D A Y ;
 
 K_ABS      : A B S ;
 
@@ -941,6 +951,7 @@ fragment EXP
    : [Ee] [+\-]? INT
    ;
 
+fragment DTSEP : [\-/,;._] ;
 
 fragment DIG : [0-9] ;
 

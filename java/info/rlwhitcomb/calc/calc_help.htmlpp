@@ -112,7 +112,7 @@ code {
   <h2>Command Line Options</h2>
 <div id="cols">
   Certain options can be given on the command line that affect the operation of the calculator. These options can also be set via the <code>CALC_OPTIONS</code> environment variable. Options specified on the command line will override the defaults set by <code>CALC_OPTIONS</code>, and options given later on the command line override ones given earlier.
-  <p>Options are case-insensitive, and maybe be prefixed with either <code>-</code>, <code>--</code>, or on Windows <code>/</code>, as in: <code>--lightbg</code>, <code>-rational</code>, or <code>/quiet</code> <i>(Windows only)</i>.
+  <p>Options are case-insensitive, and maybe be prefixed with either <code>-</code>, <code>--</code>, or on Windows <code>/</code>, as in: <code>--lightbg</code>, <code>-rational</code>, or <code>/quiet</code> <i>(Windows only)</i>. Almost all of the options have several aliases (mostly fewer characters) as shown in the table below. Some of these settings, in addition, can be set using Directives from within a script, or from the Settings dialog in the GUI window.
 </div>
   <center>
   <h2>Command Line Options</h2>
@@ -148,7 +148,8 @@ code {
   </center>
   <h2>Read, Eval, Print Loop Commands</h2>
   <p>In REPL mode, in addition to expressions and directives (as described below), there are a few commands available to do other
-     things, mostly as alternatives to command-line options.  These commands are as follows:
+     things, mostly as alternatives to command-line options. Note that these commands are only available in REPL mode, and not
+     from a script file, nor in the GUI input window (although there are GUI buttons for most of them). These commands are as follows:
   <center>
   <h2>REPL Commands</h2>
   <table>
@@ -234,10 +235,12 @@ or yet
 <p class="indent"> <code>h'8:30 am' + t'1h' + t'37m' @h -> h'10:07'</code> </p>
   <p>Date values can be entered as (basically the <a href="https://en.wikipedia.org/wiki/ISO_8601">ISO-8601</a> format with more separators allowed):
 <p class="indent"> <code>d'<i>yyyy</i>-<i>mm</i>-<i>dd</i>'</code>&nbsp;|&nbsp;<code>d'<i>yyyymmdd</i>'</code> </p>
+or as U.S. format dates:
+<p class="indent"> <code>D'<i>mm</i>/<i>dd</i>/<i>yyyy</i>'</code>&nbsp;|&nbsp;<code>D'<i>mmddyyyy</i>'</code> </p>
    Such values are computed as an offset from the "epoch" day (Jan. 1, 1970) (either positive or negative). Date arithmetic is thus allowed, such as:
 <p class="indent"> <code>d'2001-09-11' + 1000@e</code> -&gt; <code>d'2004-06-07'</code> </p>
 or
-<p class="indent"> <code>d'1945/9/2' - d'1941/12/7'</code> -&gt; <code>1365</code>
+<p class="indent"> <code>D'9/2/1945' - d'1941/12/7'</code> -&gt; <code>1365</code> </p>
   <p>Some operators and operations require integer values (such as factorial and the logical bit operations). If the value given is not integral an error will
      be displayed and the calculation aborted. Most of the basic arithmetic operators can operate on rational fractions. The trig,
      log, and power operations do not. Therefore, in rational mode, if an operation returns a decimal value, Calc will attempt
@@ -284,8 +287,10 @@ or
   <h2>Formats</h2>
 <div id="cols">
   The results of most operations can be displayed using alternative formats for better comprehension. To specify an alternative
-     format, append <code>@<i>format</i></code> to the expression. In most cases, the uppercase equivalent can be given, which will
-     do the same formatting, except mapping the result to UPPER case as well. The exceptions are <code>@f</code> which formats the
+     format, append <code>@<i>format</i></code> to the expression. In some cases, the uppercase equivalent can be given, which will
+     do the same formatting, except mapping the result to UPPER case as well. The exceptions are <code>@e</code> which formats the
+     value as a date in ISO-8601 form (<code><i>yyyy</i>-<i>mm</i>-<i>dd</i></code>), while <code>@E</code> puts the value in U.S.
+     format (<code><i>mm</i>/<i>dd</i>/<i>yyyy</i></code>), <code>@f</code> which formats the
      result as a fraction, while <code>@F</code> formats the result as a proper fraction (as in <code>15/8@F = 1 7/8</code>),
      <code>@O</code> or <code>@D</code> which would make no difference in the outputs, and <code>@J</code> which doesn't make sense
      given the output could have strings which shouldn't be case-shifted.
@@ -304,6 +309,7 @@ or
       <tr><td><code>@u</code></td><td>Format result string in UPPER case</td></tr>
       <tr><td><code>@</code>[<code>,</code>][<i>nn</i>]<code>d</code></td><td>Primarily for rational mode: format the result as a decimal value,<br>with optional separators, and optionally rounding to <i>nn</i> digits</td></tr>
       <tr><td><code>@e</code></td><td>Format an integer as a date (yyyy-mm-dd) (ISO-8601 format)</td></tr>
+      <tr><td><code>@E</code></td><td>Format an integer as a date (mm/dd/yyyy) (U.S. format)</td></tr>
       <tr><td><code>@f</code></td><td>For decimal mode, format the result as a rational fraction</td></tr>
       <tr><td><code>@F</code></td><td>Format as a proper fraction (with possible integer portion)</td></tr>
       <tr><td><code>@j</code></td><td>Format the result as a "pretty printed" JSON result<br>(multiple lines with indents)</td></tr>
@@ -318,7 +324,7 @@ or
   <h2>Available Operators and Predefined Functions</h2>
   <p>There are a wide variety of arithmetic and logical operators available, as well as a number of common arithmetic functions that can be used.
   <center>
-  <h2>Operators and Precedence</h2>
+  <h2>Operators, Functions, and Precedence</h2>
   <table>
     <tr>
       <th width=60>Level</th>
@@ -330,16 +336,18 @@ or
       <td><code>pi</code>, <code>&#x1D6D1;</code>, <code>e</code>, or <code>&#x2107;</code><br>
           <code>true</code> or <code>false</code><br>
           <code>null</code><br>
-          <code>&#x00BC;</code>, <code>&#x00BD;</code>, <code>&#x00BE;</code>, <code>&#x2150;</code>, <code>&#x215E;</code>, etc.</td>
+          <code>&#x00BC;</code>, <code>&#x00BD;</code>, <code>&#x00BE;</code>, <code>&#x2150;</code>, <code>&#x215E;</code>, etc.<br>
+          <code>today</code></td>
       <td>the fundamental constants <code>&#x1D6D1;</code> and <code>e</code><br>
           the <code>boolean</code> values<br>
           the <code>null</code> (empty) value<br>
-          any of the Unicode fraction values</td><td>- none -</td></tr>
+          any of the Unicode fraction values<br>
+          date value of the current date</td><td>N/A</td></tr>
     <tr><td>27</td><td><code>{ }</code></td><td>define an object</td><td>left to right</td></tr>
     <tr><td>26</td><td><code>[ ]</code><br><i>var</i> <code>[</code> <i>expr</i> <code>]</code> or <i>var</i>&nbsp;&#x2080; .. &#x2089;</td><td>define an array,<br>or access elements of<br>an array, string, or object</td><td>left to right</td></tr>
     <tr><td>25</td><td>.</td><td>access an object member</td><td>left to right</td></tr>
-    <tr><td>24</td><td><code>( </code><i>expr</i><code> )</code></td><td>group an expression</td><td>- none -</td></tr>
-    <tr><td>23</td><td><i>expr</i>&nbsp;<code>++</code> or <code>&#x2795;&#x2795;</code><br><i>expr</i>&nbsp;<code>--</code> or <code>&#x2212;&#x2212;</code> or <code>&#x2796;&#x2796;</code></td><td>post increment/decrement</td><td>- none -</td></tr>
+    <tr><td>24</td><td><code>( </code><i>expr</i><code> )</code></td><td>group an expression</td><td>N/A</td></tr>
+    <tr><td>23</td><td><i>expr</i>&nbsp;<code>++</code> or <code>&#x2795;&#x2795;</code><br><i>expr</i>&nbsp;<code>--</code> or <code>&#x2212;&#x2212;</code> or <code>&#x2796;&#x2796;</code></td><td>post increment/decrement</td><td>N/A</td></tr>
     <tr><td>22</td><td><code>++</code> or <code>&#x2795;&#x2795;</code>&nbsp;<i>expr</i><br><code>--</code> or <code>&#x2212;&#x2212;</code> or <code>&#x2796;&#x2796;</code>&nbsp;<i>expr</i></td><td>pre increment/decrement</td><td>right to left</td></tr>
     <tr><td>21</td><td><code>+</code> or <code>&#x2795;</code>&nbsp;<i>expr</i><br><code>-</code> or <code>&#x2212;</code> or <code>&#x2796;</code>&nbsp;<i>expr</i></td><td>posate/negate a value</td><td>right to left</td></tr>
     <tr><td>20</td><td><code>!</code> or <code>&#x00AC;</code>&nbsp;<i>expr</i></td><td>boolean NOT</td><td>right to left</td></tr>
@@ -599,7 +607,8 @@ or
   <p>Timing mode displays the total parsing and execution time (to nanosecond precision on some systems) after the results are displayed.
 </div>
   <h2>GUI operations</h2>
-  <p>The GUI window can be opened using the "<code>cg</code>" command (or on Windows only, the <code>``</code> command), or by entering the <code>gui</code> command in REPL mode.  The following window will be presented with the focus initially in the "Expressions" field.
+  <p>The GUI window can be opened initially using the "<code>cg</code>" command (or on Windows only, the <code>``</code> command),
+     or by entering the <code>gui</code> command in REPL mode. Note that although you can switch from REPL mode to GUI mode, the reverse is not possible. The GUI window looks like this with the focus initially in the "Expressions" field:
   <center>
   <br><img src="calc_initial.png" alt="Initial GUI screen" width="50%"/>
   </center>
