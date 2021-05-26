@@ -33,6 +33,9 @@
  *	    Simplify the "main" display.
  *	24-Feb-2021 (rlwhitcomb)
  *	    Update the Javadoc.
+ *	26-May-2021 (rlwhitcomb)
+ *	    Update outputs using colors because of new ConsoleColor
+ *	    paradigm.
  */
 package info.rlwhitcomb;
 
@@ -41,6 +44,7 @@ import java.util.List;
 import info.rlwhitcomb.util.CharUtil;
 import static info.rlwhitcomb.util.CharUtil.Justification.*;
 import static info.rlwhitcomb.util.ConsoleColor.Code.*;
+import info.rlwhitcomb.util.ConsoleColor;
 import info.rlwhitcomb.util.Environment;
 import static info.rlwhitcomb.util.Environment.ProgramInfo;
 
@@ -92,9 +96,17 @@ public class Version
 	    return "Java";
 	}
 
+	private static void output() {
+	    System.out.println();
+	}
+
+	private static void output(String message) {
+	    System.out.println(ConsoleColor.color(message));
+	}
+
 	private static void printInfo(String function, String value) {
 	    String padFunc = CharUtil.padToWidth(function, 28, CharUtil.Justification.RIGHT);
-	    System.out.println(BLUE_BOLD_BRIGHT + padFunc + "()" + BLACK_BRIGHT + " -> " + GREEN + value + RESET);
+	    output(BLUE_BOLD_BRIGHT + padFunc + "()" + BLACK_BRIGHT + " -> " + GREEN + value + RESET);
 	}
 
 	/**
@@ -113,19 +125,19 @@ public class Version
 	    printInfo("getReleaseDate",            getReleaseDate());
 	    printInfo("getProduct",                getProduct());
 	    printInfo("getImplementationLanguage", getImplementationLanguage());
-	    System.out.println();
+	    output();
 
-	    System.out.println(BLACK_BRIGHT + underline + RESET);
+	    output(BLACK_BRIGHT + underline + RESET);
 
 	    List<ProgramInfo> infos = Environment.getAllProgramInfo();
 
 	    for (ProgramInfo info : infos) {
 		String version = String.format("Version %1$s", info.version);
 
-		System.out.println(BLUE_BOLD_BRIGHT + CharUtil.padToWidth(info.title, 50, CENTER));
-		System.out.println(GREEN            + CharUtil.padToWidth(version, 50, CENTER));
-		System.out.println(BLACK_BRIGHT     + underline + RESET);
+		output(BLUE_BOLD_BRIGHT + CharUtil.padToWidth(info.title, 50, CENTER));
+		output(GREEN            + CharUtil.padToWidth(version, 50, CENTER));
+		output(BLACK_BRIGHT     + underline + RESET);
 	    }
-	    System.out.println();
+	    output();
 	}
 }
