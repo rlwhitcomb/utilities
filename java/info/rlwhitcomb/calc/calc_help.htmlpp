@@ -328,8 +328,8 @@ or
   <table>
     <tr>
       <th width=60>Level</th>
-      <th width=300>Operator</th>
-      <th width=320>Description</th>
+      <th width=340>Operator</th>
+      <th width=380>Description</th>
       <th width=120>Associativity</th>
     </tr>
     <tr><td>28</td>
@@ -352,7 +352,7 @@ or
     <tr><td>23</td><td><i>expr</i>&nbsp;<code>++</code> or <code>&#x2795;&#x2795;</code><br><i>expr</i>&nbsp;<code>--</code> or <code>&#x2212;&#x2212;</code> or <code>&#x2796;&#x2796;</code></td><td>post increment/decrement</td><td>N/A</td></tr>
     <tr><td>22</td><td><code>++</code> or <code>&#x2795;&#x2795;</code>&nbsp;<i>expr</i><br><code>--</code> or <code>&#x2212;&#x2212;</code> or <code>&#x2796;&#x2796;</code>&nbsp;<i>expr</i></td><td>pre increment/decrement</td><td>right to left</td></tr>
     <tr><td>21</td><td><code>+</code> or <code>&#x2795;</code>&nbsp;<i>expr</i><br><code>-</code> or <code>&#x2212;</code> or <code>&#x2796;</code>&nbsp;<i>expr</i></td><td>posate/negate a value</td><td>right to left</td></tr>
-    <tr><td>20</td><td><code>!</code> or <code>&#x00AC;</code>&nbsp;<i>expr</i></td><td>boolean NOT</td><td>right to left</td></tr>
+    <tr><td>20</td><td><code>!</code> or <code>&#x00AC;</code>&nbsp;<i>expr</i></td><td>boolean NOT<br>(can also use <code>!!</code> to convert any value to a <i>true</i> boolean:<br><code>true</code> if set, non-empty, and non-zero,<br>or <code>false</code> if null, empty, or 0)</td><td>right to left</td></tr>
     <tr><td>19</td><td><code>~</code>&nbsp;<i>expr</i></td><td>bitwise NOT</td><td>right to left</td></tr>
     <tr><td>18</td><td><i>expr</i>&nbsp;<code>!</code></td><td>factorial</td><td>left to right</td></tr>
     <tr><td>17</td><td><i>expr<sub>1</sub></i>&nbsp;&nbsp;<code>**</code>, <code>&times;&times;</code>, <code>&#x2217;&#x2217;</code>, <code>&#x2715;&#x2715;</code>, or <code>&#x2716;&#x2716;</code>&nbsp;&nbsp;<i>expr<sub>2</sub></i><br>or&nbsp;<i>expr</i>&nbsp;&#x2070; .. &#x2079;</td><td><i>expr<sub>1</sub></i> to <i>expr<sub>2</sub></i> power<br>or <i>expr</i> to given power</td><td>right to left</td></tr>
@@ -372,7 +372,7 @@ or
         <td>bit shift operations</td><td>left to right</td></tr>
     <tr><td>13</td><td colspan="2">
         <table class="innertable">
-            <tr><td width="300"><code>ABS</code>&nbsp;<i>expr</i></td><td width="320">absolute value</td></tr>
+            <tr><td width="348"><code>ABS</code>&nbsp;<i>expr</i></td><td width="388">absolute value</td></tr>
             <tr><td><code>SIN</code>&nbsp;<i>expr</i></td><td>sine</td></tr>
             <tr><td><code>COS</code>&nbsp;<i>expr</i></td><td>cosine</td></tr>
             <tr><td><code>TAN</code>&nbsp;<i>expr</i></td><td>tangent</td></tr>
