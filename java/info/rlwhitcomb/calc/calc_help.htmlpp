@@ -6,10 +6,7 @@
 table {
   font-family: helvetica, arial, sans-serif;
   border-collapse: collapse;
-}
-
-##cols {
-    columns: 4;
+  table-layout: fixed;
 }
 
 tr, th, td {
@@ -22,7 +19,7 @@ th {
   background: cornflowerblue;
 }
 
-tr:nth-child(even) {
+tr:nth-child(odd) {
   background-color: #f8f0f0;
 }
 
@@ -34,6 +31,14 @@ table code {
 code {
    font-size: 120%;
    font-weight: bold;
+}
+
+.cols {
+    columns: 4;
+}
+
+.center {
+    text-align: center;
 }
 
 .underline {
@@ -61,11 +66,24 @@ code {
    color: darkorange;
 }
 
+.innertable {
+   margin-left: auto;
+   margin-right: auto;
+   border-spacing: 0;
+   border: none;
+   table-layout: fixed;
+}
+
 .innertable tr,
 .innertable th,
 .innertable td {
-   padding: 2px;
+   padding: 4px;
+   border-spacing: 0;
    border: none;
+}
+
+.innertable tr:nth-child(odd) {
+  background-color: #f8f0f0;
 }
 
 .indent {
@@ -75,12 +93,12 @@ code {
 </head>
 
 <body>
-  <center>
+  <div class="center">
     <h1>Expression Calculator Help</h1>
     <h2>Version ${Calc.version}, build ${build.number}</h2>
-  </center>
+  </div>
   <h2>Introduction</h2>
-<div id="cols">
+<div class="cols">
   An expression calculator that combines (nearly) unlimited precision decimal arithmetic with a rich assortment
        of operators and functions to give the ability to calculate nearly any arithmetic expression.
   <p>As input, the expression calculator can operate on an expression given entirely on the command line (may need to be
@@ -98,30 +116,35 @@ code {
         <li>String functions for doing text manipulation.</li>
         <li>The ability to do calculations straight from the command line, or in a convenient REPL loop, or in a GUI window.</li>
         <li>The ability to define libraries of functions that can be accessed through the "<code>:include</code>" directive.</li>
-        <li>Calculations can be edited (using backspace, etc.) to reduce the chance of keyboard errors.
+        <li>Calculations can be edited (using backspace, etc.) to reduce the chance of keyboard errors.</li>
         <li>Looping and conditional statements to do pretty much any kind of calculation.</li>
         <li>It is being actively developed and maintained, so more features will be added over time.</li>
         <li>This is Open-Source Software (<a href="https://opensource.com/resources/what-open-source">OSS</a>) so the code can be examined, and modified (if desired) for your own use.</li>
       </ul>
-  </p>
 </div>
   <h2>Command Line</h2>
-<div id="cols">
+<div class="cols">
   The command line is assumed to have either the name of a file to process, or an expression to evaluate. There may also be options specified (see the next section). If there is a single value given and there exists a file by that name (possibly in another directory given by the prior <code>-inputdir</code> option), then that file is read, the contents parsed, and all the expressions evaluated. Otherwise, if there are more than one argument on the command line, or the single argument does not name a file, then the command line is taken as a single string, parsed, and then evaluated.
 </div>
   <h2>Command Line Options</h2>
-<div id="cols">
+<div class="cols">
   Certain options can be given on the command line that affect the operation of the calculator. These options can also be set via the <code>CALC_OPTIONS</code> environment variable. Options specified on the command line will override the defaults set by <code>CALC_OPTIONS</code>, and options given later on the command line override ones given earlier.
   <p>Options are case-insensitive, and maybe be prefixed with either <code>-</code>, <code>--</code>, or on Windows <code>/</code>, as in: <code>--lightbg</code>, <code>-rational</code>, or <code>/quiet</code> <i>(Windows only)</i>. Almost all of the options have several aliases (mostly fewer characters) as shown in the table below. Some of these settings, in addition, can be set using Directives from within a script, or from the Settings dialog in the GUI window.
 </div>
-  <center>
+  <div class="center">
   <h2>Command Line Options</h2>
-  <table>
+  <table style="margin-left:auto;margin-right:auto;">
+    <col style="width:100">
+    <col style="width:400">
+    <col style="width:300">
+    <thead>
     <tr>
-      <th width=100>Option</th>
-      <th width=400>Description</th>
-      <th width=300>Aliases</th>
+      <th>Option</th>
+      <th>Description</th>
+      <th>Aliases</th>
     </tr>
+    </thead>
+    <tbody>
     <tr><td><code>-nointro</code></td><td>Do not print the introductory message in REPL mode</td><td><code>-noi</code></td></tr>
     <tr><td><code>-intro</code></td><td>Print the introductory message in REPL mode <i>(default)</i></td><td><code>-int</code>, <code>-i</code></td></tr>
     <tr><td><code>-gui</code></td><td>Start immediately in GUI mode</td><td><code>-g</code></td></tr>
@@ -144,29 +167,40 @@ code {
     <tr><td><code>-enter</code></td><td>Use just <code>Enter</code> to calculate</td><td><code>-e</code></td></tr>
     <tr><td><code>-help</code></td><td>Display this help page</td><td><code>-h</code>, <code>-?</code></td></tr>
     <tr><td><code>-version</code></td><td>Display on the console the version information for the program</td><td><code>-vers</code>, <code>-ver</code>, <code>-v</code></td></tr>
+  </tbody>
   </table>
-  </center>
+  </div>
   <h2>Read, Eval, Print Loop Commands</h2>
+  <div class="cols">
   <p>In REPL mode, in addition to expressions and directives (as described below), there are a few commands available to do other
      things, mostly as alternatives to command-line options. Note that these commands are only available in REPL mode, and not
      from a script file, nor in the GUI input window (although there are GUI buttons for most of them). These commands are as follows:
-  <center>
+  </div>
+  <div class="center">
   <h2>REPL Commands</h2>
-  <table>
+  <table style="margin-left:auto;margin-right:auto;">
+    <col style="width:100">
+    <col style="width:300">
+    <col style="width:200">
+    <col style="width:200">
+    <thead>
     <tr>
-      <th width=100>Command</th>
-      <th width=300>Description</th>
-      <th width=200>Aliases</th>
-      <th width=200>Command-Line Equivalent</th>
+      <th>Command</th>
+      <th>Description</th>
+      <th>Aliases</th>
+      <th>Command-Line Equivalent</th>
     </tr>
+    </thead>
+    <tbody>
     <tr><td><code>quit</code></td><td>Exit the program normally.</td><td><code>exit</code>, <code>:quit</code>, <code>:exit</code>,<br><code>:q</code>, <code>:e</code>, <code>:x</code></td><td></td></tr>
     <tr><td><code>help</code></td><td>Display the HTML help page in the browser.</td><td><code>?</code>, <code>:help</code>, <code>:?</code></td><td><code>-help</code></td></tr>
     <tr><td><code>version</code></td><td>Display program version information.</td><td><code>:version</code>, <code>:vers</code>,<br><code>:ver</code>, <code>:v</code></td><td><code>-version</code></td></tr>
     <tr><td><code>gui</code></td><td>Switch to GUI mode</td><td><code>:gui</code>, <code>:g</code></td><td><code>-gui</code></td></tr>
+  </tbody>
   </table>
-  </center>
+  </div>
   <h2>Values, Constants, and Variables</h2>
-<div id="cols">
+<div class="cols">
   The basic building blocks of the expressions implemented here are the basic value types: numbers (either integer or real
      numbers with a fractional part), strings, rational fractions, boolean values, and the <code>null</code> value.
      Numbers can be of arbitrary precision, up to a maximum of 2**32-1 digits. Strings can also be of any length up
@@ -228,11 +262,11 @@ or
 <p class="indent"> <code>t'<i>nn.nn</i>&nbsp;w</code>|<code>d</code>|<code>h</code>|<code>m</code>|<code>s'</code> </p>
      Such values are computed to nanosecond precision and can be used in any other kind of operation, or formatted again as times or durations using the <code>@h</code> or <code>@t</code> formats.
      For example:
-<p class="indent"> <code>t'27h' + t'13m' + t'27.9s' @h -> h'27:13:27.9'</code> </p>
+<p class="indent"> <code>t'27h' + t'13m' + t'27.9s' @h -&gt; h'27:13:27.9'</code> </p>
 or
-<p class="indent"> <code>h'12:30 pm' - h'11:45 am' @mt -> t'45m'</code> </p>
+<p class="indent"> <code>h'12:30 pm' - h'11:45 am' @mt -&gt; t'45m'</code> </p>
 or yet
-<p class="indent"> <code>h'8:30 am' + t'1h' + t'37m' @h -> h'10:07'</code> </p>
+<p class="indent"> <code>h'8:30 am' + t'1h' + t'37m' @h -&gt; h'10:07'</code> </p>
   <p>Date values can be entered as (basically the <a href="https://en.wikipedia.org/wiki/ISO_8601">ISO-8601</a> format with more separators allowed):
 <p class="indent"> <code>d'<i>yyyy</i>-<i>mm</i>-<i>dd</i>'</code>&nbsp;|&nbsp;<code>d'<i>yyyymmdd</i>'</code> </p>
 or as U.S. format dates:
@@ -276,7 +310,7 @@ or
    and the elements are accessed as <code>value."flag"</code> and <code>value.flag</code>.
 </div>
   <h2>Modes and Precision</h2>
-<div id="cols">
+<div class="cols">
   Calc can do essentially arbitrary precision arithmetic. It can also do arithmetic on rational fractions (as in <code>1/4 + 1/2 = 3/4</code>). The default setting is to do decimal arithmetic, but this can adjust using either command line options (see
       <code>-rational</code> and <code>-decimal</code> above), or using directives during execution.  The default precision for
       all calculations 128-bit arithmetic, or approximately 34 digits of decimal precision. The precision can be adjusted up to
@@ -285,7 +319,7 @@ or
   <p>Trigonometric calculations are, by default, done in radians, but this can be changed to use degrees using a directive.
 </div>
   <h2>Formats</h2>
-<div id="cols">
+<div class="cols">
   The results of most operations can be displayed using alternative formats for better comprehension. To specify an alternative
      format, append <code>@<i>format</i></code> to the expression. In some cases, the uppercase equivalent can be given, which will
      do the same formatting, except mapping the result to UPPER case as well. The exceptions are <code>@e</code> which formats the
@@ -294,15 +328,19 @@ or
      result as a fraction, while <code>@F</code> formats the result as a proper fraction (as in <code>15/8@F = 1 7/8</code>),
      <code>@O</code> or <code>@D</code> which would make no difference in the outputs, and <code>@J</code> which doesn't make sense
      given the output could have strings which shouldn't be case-shifted.
-  <p>The available formats are:
 </div>
-  <center>
+  <div class="center">
     <h2>Formats</h2>
-    <table>
+    <table style="margin-left:auto;margin-right:auto;">
+      <col style="width:100">
+      <col style="width:460">
+      <thead>
       <tr>
-        <th width="100">Format</th>
-        <th width="460">Description</th>
+        <th>Format</th>
+        <th>Description</th>
       </tr>
+      </thead>
+      <tbody>
       <tr><td><code>@h</code></td><td>Display as a time value (hours:minutes:seconds.nanos)</td></tr>
       <tr><td><code>@</code>[<i>nn</i>][<code>w</code>|<code>d</code>|<code>h</code>|<code>m</code>|<code>s</code>]<code>t</code></td><td>Format as a time (duration), optional rounding</td></tr>
       <tr><td><code>@l</code></td><td>Format result string in lower case</td></tr>
@@ -319,19 +357,27 @@ or
       <tr><td><code>@b</code></td><td>For integers and strings, format in binary form</td></tr>
       <tr><td><code>@k</code></td><td>Use kilobyte, megabyte, etc. notation for the value</td></tr>
       <tr><td><code>@</code>[<code>,</code>][<i>nn</i>]<code>%</code></td><td>Format as a percentage, with optional separators, and<br>optionally rounding to <i>nn</i> digits</td></tr>
+    </tbody>
     </table>
-  </center>
+  </div>
   <h2>Available Operators and Predefined Functions</h2>
   <p>There are a wide variety of arithmetic and logical operators available, as well as a number of common arithmetic functions that can be used.
-  <center>
+  <div class="center">
   <h2>Operators, Functions, and Precedence</h2>
-  <table>
+  <table style="margin-left:auto;margin-right:auto;">
+    <col style="width:60">
+    <col style="width:320">
+    <col style="width:320">
+    <col style="width:120">
+    <thead>
     <tr>
-      <th width=60>Level</th>
-      <th width=300>Operator</th>
-      <th width=320>Description</th>
-      <th width=120>Associativity</th>
+      <th>Level</th>
+      <th>Operator</th>
+      <th>Description</th>
+      <th>Associativity</th>
     </tr>
+    </thead>
+    <tbody>
     <tr><td>28</td>
       <td><code>pi</code>, <code>&#x1D6D1;</code>, <code>e</code>, or <code>&#x2107;</code><br>
           <code>true</code> or <code>false</code><br>
@@ -370,9 +416,11 @@ or
         <i>expr</i>&nbsp;<code> &gt;&gt; </code>&nbsp;<i>expr</i><br>
         <i>expr</i>&nbsp;<code> &lt;&lt; </code>&nbsp;<i>expr</i></td>
         <td>bit shift operations</td><td>left to right</td></tr>
-    <tr><td>13</td><td colspan="2">
+    <tr><td>13</td><td colspan="2" style="padding:0;margin:0;">
         <table class="innertable">
-            <tr><td width="300"><code>ABS</code>&nbsp;<i>expr</i></td><td width="320">absolute value</td></tr>
+            <col style="width:50%;"><col style="width:50%;">
+            <tbody>
+            <tr><td><code>ABS</code>&nbsp;<i>expr</i></td><td>absolute value</td></tr>
             <tr><td><code>SIN</code>&nbsp;<i>expr</i></td><td>sine</td></tr>
             <tr><td><code>COS</code>&nbsp;<i>expr</i></td><td>cosine</td></tr>
             <tr><td><code>TAN</code>&nbsp;<i>expr</i></td><td>tangent</td></tr>
@@ -414,10 +462,11 @@ or
             <tr><td><code>LOWER</code>&nbsp;<i>expr</i></td><td>convert <i>expr</i> to lower case</td></tr>
             <tr><td><code>UPPER</code>&nbsp;<i>expr</i></td><td>convert <i>expr</i> to UPPER case</td></tr>
             <tr><td><code>EVAL</code>&nbsp;<i>expr</i></td><td>evaluate the string result of <i>expr</i></td></tr>
-            <tr><td><code>EXEC</code>&nbsp;</i>expr</i>&nbsp;( <code>,</code>&nbsp;<i>expr</i>&nbsp;) *</td><td>execute the given O/S command<br>(with arguments)<br>and return the output as a string</td></tr>
+            <tr><td><code>EXEC</code>&nbsp;<i>expr</i>&nbsp;( <code>,</code>&nbsp;<i>expr</i>&nbsp;) *</td><td>execute the given O/S command<br>(with arguments)<br>and return the output as a string</td></tr>
             <tr><td><code>FACTORS</code>&nbsp;<i>expr</i></td><td>calculate all the factors of the number</td></tr>
             <tr><td><code>PFACTORS</code>&nbsp;<i>expr</i></td><td>calculate the prime factors of the number</td></tr>
             <tr><td><code>DOW</code>&nbsp;<i>expr</i></td><td>day of the week of a date (integer) value<br>(0=Sunday to 6=Saturday)</td></tr>
+          </tbody>
         </table></td>
         <td>left to right</td></tr>
     <tr><td>12</td><td><i>expr</i>&nbsp;<code> &lt;=&gt; </code>&nbsp;<i>expr</i><td>returns <code>-1</code> if <i>expr</i> &lt; 0<br><code>0</code> if <i>expr</i> = 0<br><code>+1</code> if <i>expr</i> &gt; 0</td><td>left to right</td></tr>
@@ -473,10 +522,11 @@ or
         <i>var</i>&nbsp;<code> |= </code>&nbsp;<i>expr</i><br>
         <i>var</i>&nbsp;<code> ~|= </code>or<code> &#x22BD;= </code>&nbsp;<i>expr</i></td>
         <td>perform the bit op, reassign to variable</td><td>right to left</td></tr>
+    </tbody>
   </table>
-  </center>
+  </div>
   <h2>User-Defined Functions</h2>
-<div id="cols">
+<div class="cols">
   In addition to the predefined functions above, Calc allows new functions to be defined (unfortunately they do not support
      function parameters yet) that can be used repeatedly without having to retype the same expression.
   <p>The syntax for a function definition is:
@@ -494,7 +544,7 @@ or
      parsed along with all other expressions, but they are stored as parse trees, and are not evaluated until they are invoked.
 </div>
   <h2>Statements</h2>
-<div id="cols">
+<div class="cols">
   In addition to the functions and operators listed above, Calc has four different statements which can be used to do
      iterative or repeated calculations, and to select between actions based on the value of an expression. These are the <code>LOOP</code>, <code>WHILE</code> and <code>IF</code> statements.
   <p>The syntax for each is as follows:
@@ -540,8 +590,8 @@ or
   </p>
     The final value of this function invocation will be the value of whichever block inside the <code>CASE</code> statement is executed, which in this example will be the value <code>1</code>.
   <p class="indent">
-      <code style="color:blue;">value = 'one'</code><code style="color:gray;"> -> </code><code style="color:green;">"one"</code><br>
-      <code style="color:blue;">strings</code><code style="color:gray;"> -> </code><code style="color:green;">1</code>
+      <code style="color:blue;">value = 'one'</code><code style="color:gray;"> -&gt; </code><code style="color:green;">"one"</code><br>
+      <code style="color:blue;">strings</code><code style="color:gray;"> -&gt; </code><code style="color:green;">1</code>
   </p>
   Also consider this code:
   <p class="indent">
@@ -551,22 +601,28 @@ or
   Which will evaluate as follows:
   <p class="indent">
       <code>Defining function '</code><code style="color:green;">a</code><code>' = </code><code style="color:blue;">{loop $i in 10 {$i}}</code><br>
-      <code style="color:blue;">a</code><code style="color:gray;"> -> </code><code style="color:green;">10</code>
+      <code style="color:blue;">a</code><code style="color:gray;"> -&gt; </code><code style="color:green;">10</code>
   </p>
   There are many more code examples in the <code>test/files</code> directory of the source distribution.
 </div>
   <h2>Directives</h2>
-<div id="cols">
+<div class="cols">
   Various directives can be given within a script or on a separate input line in REPL mode that will affect the operation of the calculator. Some of them allow you to change the options given on the command line, while others are only available from within the script. All the mode-setting directives are also available in the Settings dialog (the <span class="orangebutton">&#x2261;</span> button or <code>F2</code> key) in GUI mode.
 </div>
-  <center>
+  <div class="center">
   <h2>Available Directives</h2>
-  <table>
+  <table style="margin-left:auto;margin-right:auto;">
+    <col style="width:200">
+    <col style="width:400">
+    <col style="width:150">
+    <thead>
     <tr>
-      <th width=200>Directive</th>
-      <th width=400>Description</th>
-      <th width=150>Aliases</th>
+      <th>Directive</th>
+      <th>Description</th>
+      <th>Aliases</th>
     </tr>
+    </thead>
+    <tbody>
     <tr><td><code>:decimal</code> <i>number_option</i></td><td>Set the precision of all decimal calculations,<br>where <i>number_option</i> can be <code>(</code><i>number</i><code>)</code>, or <i>number</i>, or <i>variable</i><br>to specify the number of decimal digits of precision</td><td><code>:dec</code>, <code>:precision</code>, <code>:prec</code></td></tr>
     <tr><td><code>:default</code></td><td>Set the default decimal precision (~34 digits) <i>(default)</i></td><td><code>:def</code></td></tr>
     <tr><td><code>:double</code></td><td>Select the "double" decimal precision (~16 digits)</td><td><code>:dbl</code></td></tr>
@@ -576,7 +632,7 @@ or
     <tr><td><code>:radians</code></td><td>Do all calculations assuming inputs are radians <i>(default)</i></td><td><code>:rad</code></td></tr>
     <tr><td><code>:binary</code></td><td>Display units in terms of multiples of 1024</td><td><code>:bin</code></td></tr>
     <tr><td><code>:si</code></td><td>Display units in terms of multiples of 1000</td><td><code>:ten</code></td></tr>
-    <tr><td><code>:mixed</code></td><td>Unit multiplier based on powers of 2 (same as <code>:binary</code>), but with SI suffix <i>(default)</i></td><td><code>:mix</code></tr></tr>
+    <tr><td><code>:mixed</code></td><td>Unit multiplier based on powers of 2 (same as <code>:binary</code>), but with SI suffix <i>(default)</i></td><td><code>:mix</code></tr>
     <tr><td><code>:clear</code> [ <i>id</i> ( <code>,</code> <i>id</i> ) * ]</td><td>Clear all or only the specified variables (set values to <code>null</code>)</td><td><code>:clr</code></td></tr>
     <tr><td><code>:variables</code> [ <i>id</i> ( <code>,</code> <i>id</i> ) * ]</td><td>Display the values of all or only the specified variables</td><td><code>:var</code>, <code>:vars</code>, <code>:variable</code></td></tr>
     <tr><td><code>:echo</code> <i>expr</i></td><td>Echo the value of the expression to the output</td><td></td></tr>
@@ -586,10 +642,11 @@ or
     <tr><td><code>:debug</code> <i>mode_option</i></td><td>Set the debug mode (same <i>mode_option</i> choices as for <code>:rational</code>)<br><i>(default is <code>off</code> or the value set on the command line)</i></td><td><code>:deb</code></td></tr>
     <tr><td><code>:resultsonly</code> <i>mode_option</i></td><td>Set the results-only mode<br><i>(default is <code>off</code> or value on command line)</i></td><td><code>:res</code>, <code>:result</code>, <code>:results</code>, <code>:resultonly</code></td></tr>
     <tr><td><code>:quiet</code> <i>mode_option</i></td><td>Set quiet mode<br><i>(default is <code>off</code> or the value on command line)</i></td><td></td></tr>
+  </tbody>
   </table>
-  </center>
+  </div>
   <h2>Notes on Directives</h2>
-<div id="cols">
+<div class="cols">
   The <i>string</i> argument for the <code>:include</code> directive can be a comma-separated list of file names, with or without
      paths. If a file cannot be read and there is a previous input directory available (set either by a previous file with a path
      given, or by the <code>-inputDir</code> command-line option) then that directory is searched for the file. If not found there,
@@ -613,21 +670,21 @@ or
   <h2>GUI operations</h2>
   <p>The GUI window can be opened initially using the "<code>cg</code>" command (or on Windows only, the <code>``</code> command),
      or by entering the <code>gui</code> command in REPL mode. Note that although you can switch from REPL mode to GUI mode, the reverse is not possible. The GUI window looks like this with the focus initially in the "Expressions" field:
-  <center>
-  <br><img src="calc_initial.png" alt="Initial GUI screen" width="50%"/>
-  </center>
-<div id="cols">
+  <div class="center">
+  <br><img src="calc_initial.png" alt="Initial GUI screen" width="50%">
+  </div>
+<div class="cols">
   An expression can be entered on each line, and all will be executed in order when the <span class="redbutton">!</span> button (or the <code>F9</code> key) is pressed, and the results displayed in the "Results" field. The <code>Ctrl+Enter</code> (or <code>&#x2318;Enter</code> on Mac) key will also perform the calculation(s). This behavior can be changed in the Settings dialog to just use the <code>Enter</code> key on any platform.
   <p>This help page will also be displayed by the <span class="bluebutton">?</span> button (or the <code>F1</code> key).
   <p>Note: colors are not currently used in the GUI display, so using the command-line options <code>-darkbg</code> or <code>-lightbg</code> will have no effect.
   <p>Most of the settings available using Directives can be set in the GUI using the Settings dialog (the <span class="orangebutton">&#x2261;</span> button or <code>F2</code> key).
 </div>
-  <center>
-  <br><img src="calc_settings.png" alt="GUI Settings screen" width="40%"/>
-      <img src="calc_window_settings.png" alt="GUI Window Settings screen" width="40%"/>
-  </center>
+  <div class="center">
+  <br><img src="calc_settings.png" alt="GUI Settings screen" width="40%">
+      <img src="calc_window_settings.png" alt="GUI Window Settings screen" width="40%">
+  </div>
   <h2>TODO Items for This Document</h2>
-<div id="cols">
+<div class="cols">
   <ul>
     <li>More examples of KB input and output, with the modes explained</li>
     <li>Exceptions to decimal precision (i.e., for trig, log), and also in doing factorial? or others that don't respect the precision, also limits on pi/e digits</li>
@@ -648,7 +705,7 @@ or
   </ul>
 </div>
 
-  <footer><br><br><center>&copy;&nbsp;Copyright 2020-2021 Roger L. Whitcomb.&nbsp;&nbsp;Licensed under an <a href="https://github.com/rlwhitcomb/utilities/blob/master/LICENSE">MIT</a> license.<br>Last modified: ${__DATE__} at ${__TIME__}</center><br><br></footer>
+  <footer><br><br><div class="center">&copy;&nbsp;Copyright 2020-2021 Roger L. Whitcomb.&nbsp;&nbsp;Licensed under an <a href="https://github.com/rlwhitcomb/utilities/blob/master/LICENSE">MIT</a> license.<br>Last modified: ${__DATE__} at ${__TIME__}</div><br><br></footer>
 </body>
 </html>
 

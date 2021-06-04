@@ -211,6 +211,8 @@
 		Rename "dest.jar" property to "result.jar".
 	    27-Apr-2021 (rlwhitcomb)
 		Exclude unused word file (reduces .jar file size).
+	    04-Jun-2021 (rlwhitcomb)
+		Don't try to generate HTML4 output anymore. Add Calc help page to the doc.
 
      ========================================================================== -->
 
@@ -390,6 +392,10 @@
 			<preproc dir="info/rlwhitcomb/calc" inputExt=".htmlpp"
 				processAsDirectory="true" recurseDirectories="false"
 				nologo="true" verbose="plus" format="UTF8"/>
+			<mkdir dir="doc-files"/>
+			<copy todir="doc-files">
+				<fileset dir="info/rlwhitcomb/calc" includes="calc_help.html"/>
+			</copy>
 		</parallel>
 	</target>
 
@@ -493,7 +499,6 @@
 
 	<target name="doc" depends="compile" description="Builds the Javadoc for the entire project.">
 		<javadoc destdir="doc" access="private" encoding="utf-8" windowtitle="Utilities">
-			<arg value="-html4" if:true="${html4.output}"/>
 			<arg value="--frames" if:true="${html4.output}"/>
 			<arg line="--release 8" if:true="${new.java.version}"/>
 			<link href="https://docs.oracle.com/javase/8/docs/api/"/>
