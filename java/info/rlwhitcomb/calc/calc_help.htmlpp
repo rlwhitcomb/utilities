@@ -603,14 +603,11 @@ or
   <div class="center">
   <h2>Available Directives</h2>
   <table style="margin-left:auto;margin-right:auto;">
-    <col style="width:200">
-    <col style="width:400">
-    <col style="width:150">
     <thead>
     <tr>
-      <th>Directive</th>
-      <th>Description</th>
-      <th>Aliases</th>
+      <th style="width:200">Directive</th>
+      <th style="width:400">Description</th>
+      <th style="width:150">Aliases</th>
     </tr>
     </thead>
     <tbody>
