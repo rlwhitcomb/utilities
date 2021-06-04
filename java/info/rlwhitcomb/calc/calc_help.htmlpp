@@ -71,14 +71,19 @@ code {
    margin-right: auto;
    border-spacing: 0;
    border: none;
-   table-layout: fixed;
 }
 
-.innertable tr,
+.innertable tr {
+   padding: 4px;
+   border-spacing: 20;
+   border: none;
+}
+
 .innertable th,
 .innertable td {
    padding: 4px;
-   border-spacing: 0;
+   margin: 8px;
+   border-spacing: 20;
    border: none;
 }
 
@@ -133,15 +138,12 @@ code {
 </div>
   <div class="center">
   <h2>Command Line Options</h2>
-  <table style="margin-left:auto;margin-right:auto;">
-    <col style="width:100">
-    <col style="width:400">
-    <col style="width:300">
+  <table style="margin-left:auto;margin-right:auto;width:60%;">
     <thead>
     <tr>
-      <th>Option</th>
-      <th>Description</th>
-      <th>Aliases</th>
+      <th style="width:20%">Option</th>
+      <th style="width:45%">Description</th>
+      <th style="width:35%">Aliases</th>
     </tr>
     </thead>
     <tbody>
@@ -153,20 +155,20 @@ code {
     <tr><td><code>-nodebug</code></td><td>Don't display the syntax tree for debugging <i>(default)</i></td><td><code>-nodeb</code>, <code>-no</code><br>(or use the <code>:debug off</code> directive)</td></tr>
     <tr><td><code>-colors</code></td><td>Use coloring (on the console) for results and messages <i>(default)</i></td><td><code>-color</code>, <code>-col</code></td></tr>
     <tr><td><code>-nocolors</code></td><td>Do not use coloring in the console</td><td><code>-nocolor</code>, <code>-nocol</code>, <code>-noc</code></td></tr>
-    <tr><td><code>-darkbackgrounds</code></td><td>Use colors suitable for a dark console background <i>(default for Windows)</i></td><td><code>-darkbackground</code>, <code>-darkback</code>,<br><code>-darkbg</code>, <code>-dark</code>, <code>-dk</code></td></tr>
+    <tr><td><code>-darkbackgrounds</code></td><td>Use colors suitable for a dark console background<br><i>(default for Windows)</i></td><td><code>-darkbackground</code>, <code>-darkback</code>,<br><code>-darkbg</code>, <code>-dark</code>, <code>-dk</code></td></tr>
     <tr><td><code>-lightbackgrounds</code></td><td>Use colors suitable for a light (white) console background<br><i>(default for non-Windows platforms)</i></td><td><code>-lightbackground</code>, <code>-lightback</code>,<br><code>-lightbg</code>, <code>-light</code>, <code>-lt</code></td></tr>
     <tr><td><code>-timing</code></td><td>Display timing after each input</td><td><code>-time</code>, <code>-t</code><br>(also use the <code>:timing on</code> directive)</td></tr>
     <tr><td><code>-notiming</code></td><td>Do not display timings <i>(default)</i></td><td><code>-notime</code>, <code>-not</code><br>(also use the <code>:timing off</code> directive)</td></tr>
-    <tr><td><code>-resultsonly</code></td><td>Do not display the input expression on output, but only the results</td><td><code>-resultonly</code>, <code>-results</code>, <code>-result</code>,<br><code>-res</code>, <code>-r</code><br>(also use <code>:resultsonly on/off</code> directive)</td></tr>
-    <tr><td><code>-quiet</code></td><td>Do not display anything (suitable for behind-the-scenes calculations)</td><td><code>-q</code><br>(also use the <code>:quiet on/off</code> directive)</td></tr>
-    <tr><td><code>-rational</code></td><td>Do all possible calculations in fraction mode, that is as a ratio of natural numbers<br>(as in <code>1/3</code> instead of <code>0.3333333333333333</code>)</td><td><code>-ration</code>, <code>-rat</code><br>(also use the <code>:rational on</code> directive)</td></tr>
+    <tr><td><code>-resultsonly</code></td><td>Do not display the input expression on output,<br>but only the results</td><td><code>-resultonly</code>, <code>-results</code>, <code>-result</code>,<br><code>-res</code>, <code>-r</code><br>(also use <code>:resultsonly on/off</code> directive)</td></tr>
+    <tr><td><code>-quiet</code></td><td>Do not display anything<br>(suitable for behind-the-scenes calculations)</td><td><code>-q</code><br>(also use the <code>:quiet on/off</code> directive)</td></tr>
+    <tr><td><code>-rational</code></td><td>Do all possible calculations in fraction mode,<br>that is as a ratio of natural numbers<br>(as in <code>1/3</code> instead of <code>0.3333333333333333</code>)</td><td><code>-ration</code>, <code>-rat</code><br>(also use the <code>:rational on</code> directive)</td></tr>
     <tr><td><code>-decimal</code></td><td>Do all calculations as decimal values <i>(default)</i></td><td><code>-dec</code><br>(also use the <code>:rational off</code> directive)</td></tr>
     <tr><td><code>-locale</code> <i>locale_name</i></td><td>Specify the locale to use for messages</td><td><code>-loc</code>, <code>-l</code></td></tr>
     <tr><td><code>-inputdir</code> <i>directory</i></td><td>Specify a default directory for files to be processed</td><td><code>-input</code>, <code>-dir</code></td></tr>
-    <tr><td><code>-cmdenter</code></td><td>Use <code>Ctrl+Enter</code> (or <code>&#x2318;Enter</code> on Mac) to calculate in the GUI input field <i>(default)</i></td><td><code>-cmd</code></td></tr>
-    <tr><td><code>-enter</code></td><td>Use just <code>Enter</code> to calculate</td><td><code>-e</code></td></tr>
+    <tr><td><code>-cmdenter</code></td><td>Use <code>Ctrl+Enter</code> (or <code>&#x2318;Enter</code> on Mac)<br>to calculate in the GUI input field <i>(default)</i></td><td><code>-cmd</code></td></tr>
+    <tr><td><code>-enter</code></td><td>Use just <code>Enter</code> to calculate in GUI input field</td><td><code>-e</code></td></tr>
     <tr><td><code>-help</code></td><td>Display this help page</td><td><code>-h</code>, <code>-?</code></td></tr>
-    <tr><td><code>-version</code></td><td>Display on the console the version information for the program</td><td><code>-vers</code>, <code>-ver</code>, <code>-v</code></td></tr>
+    <tr><td><code>-version</code></td><td>Display the version information for the program on the console</td><td><code>-vers</code>, <code>-ver</code>, <code>-v</code></td></tr>
   </tbody>
   </table>
   </div>
@@ -174,21 +176,17 @@ code {
   <div class="cols">
   <p>In REPL mode, in addition to expressions and directives (as described below), there are a few commands available to do other
      things, mostly as alternatives to command-line options. Note that these commands are only available in REPL mode, and not
-     from a script file, nor in the GUI input window (although there are GUI buttons for most of them). These commands are as follows:
+     from a script file, nor in the GUI input window (although there are GUI buttons for most of them).
   </div>
   <div class="center">
   <h2>REPL Commands</h2>
   <table style="margin-left:auto;margin-right:auto;">
-    <col style="width:100">
-    <col style="width:300">
-    <col style="width:200">
-    <col style="width:200">
     <thead>
     <tr>
-      <th>Command</th>
-      <th>Description</th>
-      <th>Aliases</th>
-      <th>Command-Line Equivalent</th>
+      <th style="width:100">Command</th>
+      <th style="width:300">Description</th>
+      <th style="width:200">Aliases</th>
+      <th style="width:200">Command-Line Equivalent</th>
     </tr>
     </thead>
     <tbody>
@@ -332,12 +330,10 @@ or
   <div class="center">
     <h2>Formats</h2>
     <table style="margin-left:auto;margin-right:auto;">
-      <col style="width:100">
-      <col style="width:460">
       <thead>
       <tr>
-        <th>Format</th>
-        <th>Description</th>
+        <th style="width:100">Format</th>
+        <th style="width:460">Description</th>
       </tr>
       </thead>
       <tbody>
@@ -365,16 +361,12 @@ or
   <div class="center">
   <h2>Operators, Functions, and Precedence</h2>
   <table style="margin-left:auto;margin-right:auto;">
-    <col style="width:60">
-    <col style="width:320">
-    <col style="width:320">
-    <col style="width:120">
     <thead>
     <tr>
-      <th>Level</th>
-      <th>Operator</th>
-      <th>Description</th>
-      <th>Associativity</th>
+      <th style="width:60">Level</th>
+      <th style="width:350">Operator</th>
+      <th style="width:350">Description</th>
+      <th style="120">Associativity</th>
     </tr>
     </thead>
     <tbody>
@@ -398,7 +390,7 @@ or
     <tr><td>23</td><td><i>expr</i>&nbsp;<code>++</code> or <code>&#x2795;&#x2795;</code><br><i>expr</i>&nbsp;<code>--</code> or <code>&#x2212;&#x2212;</code> or <code>&#x2796;&#x2796;</code></td><td>post increment/decrement</td><td>N/A</td></tr>
     <tr><td>22</td><td><code>++</code> or <code>&#x2795;&#x2795;</code>&nbsp;<i>expr</i><br><code>--</code> or <code>&#x2212;&#x2212;</code> or <code>&#x2796;&#x2796;</code>&nbsp;<i>expr</i></td><td>pre increment/decrement</td><td>right to left</td></tr>
     <tr><td>21</td><td><code>+</code> or <code>&#x2795;</code>&nbsp;<i>expr</i><br><code>-</code> or <code>&#x2212;</code> or <code>&#x2796;</code>&nbsp;<i>expr</i></td><td>posate/negate a value</td><td>right to left</td></tr>
-    <tr><td>20</td><td><code>!</code> or <code>&#x00AC;</code>&nbsp;<i>expr</i></td><td>boolean NOT</td><td>right to left</td></tr>
+    <tr><td>20</td><td><code>!</code> or <code>&#x00AC;</code>&nbsp;<i>expr</i></td><td>boolean NOT<br>(can also use <code>!!</code> to convert any value to a <i>true</i> boolean:<br><code>true</code> if set, non-empty, and non-zero,<br>or <code>false</code> if null, empty, or 0)</td><td>right to left</td></tr>
     <tr><td>19</td><td><code>~</code>&nbsp;<i>expr</i></td><td>bitwise NOT</td><td>right to left</td></tr>
     <tr><td>18</td><td><i>expr</i>&nbsp;<code>!</code></td><td>factorial</td><td>left to right</td></tr>
     <tr><td>17</td><td><i>expr<sub>1</sub></i>&nbsp;&nbsp;<code>**</code>, <code>&times;&times;</code>, <code>&#x2217;&#x2217;</code>, <code>&#x2715;&#x2715;</code>, or <code>&#x2716;&#x2716;</code>&nbsp;&nbsp;<i>expr<sub>2</sub></i><br>or&nbsp;<i>expr</i>&nbsp;&#x2070; .. &#x2079;</td><td><i>expr<sub>1</sub></i> to <i>expr<sub>2</sub></i> power<br>or <i>expr</i> to given power</td><td>right to left</td></tr>
@@ -418,9 +410,8 @@ or
         <td>bit shift operations</td><td>left to right</td></tr>
     <tr><td>13</td><td colspan="2" style="padding:0;margin:0;">
         <table class="innertable">
-            <col style="width:50%;"><col style="width:50%;">
             <tbody>
-            <tr><td><code>ABS</code>&nbsp;<i>expr</i></td><td>absolute value</td></tr>
+            <tr><td style="width:300"><code>ABS</code>&nbsp;<i>expr</i></td><td style="width:400">absolute value</td></tr>
             <tr><td><code>SIN</code>&nbsp;<i>expr</i></td><td>sine</td></tr>
             <tr><td><code>COS</code>&nbsp;<i>expr</i></td><td>cosine</td></tr>
             <tr><td><code>TAN</code>&nbsp;<i>expr</i></td><td>tangent</td></tr>
