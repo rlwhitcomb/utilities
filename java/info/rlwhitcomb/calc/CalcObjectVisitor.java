@@ -282,6 +282,8 @@
  *	    Introduce US format dates.
  *	21-May-2021 (rlwhitcomb)
  *	    DOW, TODAY, and NOW functions.
+ *	07-Jun-2021 (rlwhitcomb)
+ *	    Use not-quite-unlimited precision for divide operations.
  */
 package info.rlwhitcomb.calc;
 
@@ -349,6 +351,10 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	/** Note: the precision will be determined by the number of digits desired. */
 	private MathContext mc;
+
+	/** The precision to use for certain operations (division) when UNLIMITED is otherwise specified. */
+	private MathContext mcDivide;
+
 
 	/**
 	 * The settings object.
@@ -460,6 +466,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    // Use a limited precision of our max digits in the case of unlimited precision
 	    MathContext mcPi = (prec == 0) ? mcMaxDigits : mc;
+	    mcDivide = (prec == 0) ? mcMaxDigits : mc;
 
 	    // Either create the worker object, or trigger a recalculation
 	    if (piWorker == null) {
@@ -1017,7 +1024,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			// Value will be nanoseconds
 			valueBuf.append("t'");
 			iValue = toIntegerValue(this, result, mc, ctx);
-			valueBuf.append(NumericUtil.convertToDuration(iValue.longValue(), durationUnit, mc, precision));
+			valueBuf.append(NumericUtil.convertToDuration(iValue.longValue(), durationUnit, mcDivide, precision));
 			valueBuf.append('\'');
 			break;
 
@@ -1701,9 +1708,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			case "\u00F7":
 			case "\u2215":
 			case "\u2797":
-			    return d1.divide(d2, mc);
+			    return d1.divide(d2, mcDivide);
 			case "%":
-			    return d1.remainder(d2, mc);
+			    return d1.remainder(d2, mcDivide);
 			default:
 			    throw new UnknownOpException(op, ctx);
 		    }
@@ -3258,10 +3265,10 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			case "\u00F7=":
 			case "\u2215=":
 			case "\u2797=":
-			    result = d1.divide(d2, mc);
+			    result = d1.divide(d2, mcDivide);
 			    break;
 			case "%=":
-			    result = d1.remainder(d2, mc);
+			    result = d1.remainder(d2, mcDivide);
 			    break;
 			default:
 			    throw new UnknownOpException(op, ctx);
