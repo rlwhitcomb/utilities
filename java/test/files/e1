@@ -465,6 +465,7 @@ pi**20@,d
 pi@,d
 200!@,d
 10e-9@,d
+nanosperday=24*60*60*1e9@,d
 
 #
 # New Unicode math symbols

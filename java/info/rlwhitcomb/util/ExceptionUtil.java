@@ -61,6 +61,8 @@
  *	29-Apr-2021 (rlwhitcomb)
  *	    The string index exception needs a bit more than the message.
  *	    By default don't add in the stack trace, but allow it when desired.
+ *	07-Jun-2021 (rlwhitcomb)
+ *	    One more strange exception.
  */
 package info.rlwhitcomb.util;
 
@@ -71,6 +73,7 @@ import java.nio.charset.IllegalCharsetNameException;
 import java.nio.charset.UnsupportedCharsetException;
 import java.nio.file.NoSuchFileException;
 import java.util.Map;
+import java.util.UnknownFormatConversionException;
 
 
 /**
@@ -216,7 +219,8 @@ public class ExceptionUtil
 			  || (next instanceof NoSuchFileException)
 			  || (next instanceof UnsupportedOperationException)
 			  || (next instanceof NumberFormatException)
-			  || (next instanceof StringIndexOutOfBoundsException)) {
+			  || (next instanceof StringIndexOutOfBoundsException)
+			  || (next instanceof UnknownFormatConversionException)) {
 			msg = String.format("%1$s \"%2$s\"", exceptionName(next), msg);
 		    }
 		}

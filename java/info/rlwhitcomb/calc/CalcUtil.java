@@ -62,6 +62,8 @@
  *	    New method to format numbers with/without thousands separators.
  *	27-Apr-2021 (rlwhitcomb)
  *	    Treat empty and non-empty strings as valid boolean values (as does JavaScript).
+ *	07-Jun-2021 (rlwhitcomb)
+ *	    Fix thousands separator formatting with negative scale.
  */
 package info.rlwhitcomb.calc;
 
@@ -842,17 +844,18 @@ public final class CalcUtil
 	 */
 	public static String formatWithSeparators(final BigDecimal value, final boolean sep, final ParserRuleContext ctx) {
 	    if (sep) {
-		if (value.scale() == 0) {
-		    try {
+		try {
+		    int scale = value.scale();
+		    if (scale <= 0) {
 			return String.format("%1$,d", value.toBigIntegerExact());
 		    }
-		    catch (ArithmeticException ae) {
-			throw new CalcExprException(ae, ctx);
+		    else {
+			String formatString = String.format("%%1$,.%1$df", scale);
+			return String.format(formatString, value);
 		    }
 		}
-		else {
-		    String formatString = String.format("%%1$,.%1$df", value.scale());
-		    return String.format(formatString, value);
+		catch (Exception ex) {
+		    throw new CalcExprException(ex, ctx);
 		}
 	    }
 	    else {
