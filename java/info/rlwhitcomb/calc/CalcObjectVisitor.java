@@ -284,6 +284,8 @@
  *	    DOW, TODAY, and NOW functions.
  *	07-Jun-2021 (rlwhitcomb)
  *	    Use not-quite-unlimited precision for divide operations.
+ *	02-Jul-2021 (rlwhitcomb)
+ *	    Implement "always displaying thousands separators" mode.
  */
 package info.rlwhitcomb.calc;
 
@@ -367,19 +369,23 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		RangeMode units;
 		/** Decimal vs. rational/fractional mode ({@code true} for rational); default {@code false}. */
 		boolean rationalMode;
+		/** Separators displayed always. */
+		boolean separatorMode;
 		/** Silent flag (set to true) while evaluating nested expressions (or via :quiet directive). */
 		boolean silent;
 
 		/**
 		 * Construct default settings, including the command-line "-rational" flag.
 		 *
-		 * @param rational The initial rational mode setting.
+		 * @param rational   The initial rational mode setting.
+		 * @param separators The initial setting for displaying separators.
 		 */
-		public Settings(boolean rational) {
-		    trigMode     = TrigMode.RADIANS;
-		    units        = RangeMode.MIXED;
-		    rationalMode = rational;
-		    silent       = false;
+		public Settings(boolean rational, boolean separators) {
+		    trigMode      = TrigMode.RADIANS;
+		    units         = RangeMode.MIXED;
+		    rationalMode  = rational;
+		    separatorMode = separators;
+		    silent        = false;
 		}
 
 		/**
@@ -422,6 +428,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	/** Stack of previous "rational" mode values. */
 	private final Deque<Boolean> rationalModeStack = new ArrayDeque<>();
 
+	/** Stack of previous "separator" mode values. */
+	private final Deque<Boolean> separatorModeStack = new ArrayDeque<>();
+
 	/** Stack of previous "resultsOnly" mode values. */
 	private final Deque<Boolean> resultsOnlyModeStack = new ArrayDeque<>();
 
@@ -429,9 +438,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	private final Deque<Boolean> quietModeStack = new ArrayDeque<>();
 
 
-	public CalcObjectVisitor(CalcDisplayer resultDisplayer, boolean rational) {
+	public CalcObjectVisitor(CalcDisplayer resultDisplayer, boolean rational, boolean separators) {
 	    setMathContext(MathContext.DECIMAL128);
-	    settings      = new Settings(rational);
+	    settings      = new Settings(rational, separators);
 	    variables     = new HashMap<>();
 	    globalContext = new LValueContext(variables);
 	    displayer     = resultDisplayer;
@@ -514,6 +523,15 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    return settings.units.toString();
 	}
 
+	public boolean setSeparatorMode(boolean mode) {
+	    boolean oldMode = settings.separatorMode;
+	    settings.separatorMode = mode;
+
+	    displayActionMessage("%calc#separatorMode", mode);
+
+	    return oldMode;
+	}
+
 	public boolean setRationalMode(boolean mode) {
 	    boolean oldMode = settings.rationalMode;
 	    settings.rationalMode = mode;
@@ -570,7 +588,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    if (value instanceof String)
 		return (String) value;
 
-	    return value == null ? "" : toStringValue(this, value);
+	    return value == null ? "" : toStringValue(this, value, settings.separatorMode);
 	}
 
 	private double getDoubleValue(ParserRuleContext ctx) {
@@ -788,7 +806,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 	    for (String key : sortedKeys) {
 		Object value = variables.get(key);
-		displayer.displayResult(key, toStringValue(this, value));
+		displayer.displayResult(key, toStringValue(this, value, settings.separatorMode));
 	    }
 	    if (!replMode) {
 		displayActionMessage("%calc#varUnder2");
@@ -802,7 +820,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitEchoDirective(CalcParser.EchoDirectiveContext ctx) {
 	    CalcParser.ExprContext expr = ctx.expr();
-	    String msg = (expr != null) ? toStringValue(this, visit(expr)) : "";
+	    String msg = (expr != null) ? toStringValue(this, visit(expr), settings.separatorMode) : "";
 
 	    displayer.displayMessage(processString(msg));
 
@@ -836,7 +854,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    mode = ((Boolean) modeObject).booleanValue();
 		}
 		else {
-		    option = toStringValue(this, modeObject, false, false, "");
+		    option = toStringValue(this, modeObject, false, false, false, "");
 		}
 	    }
 	    else {
@@ -907,6 +925,13 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public Object visitQuietDirective(CalcParser.QuietDirectiveContext ctx) {
 	    return processModeOption(ctx.modeOption(), quietModeStack, mode -> {
 		return Calc.setQuietMode(mode);
+	    });
+	}
+
+	@Override
+	public Object visitSeparatorsDirective(CalcParser.SeparatorsDirectiveContext ctx) {
+	    return processModeOption(ctx.modeOption(), separatorModeStack, mode -> {
+		return setSeparatorMode(mode);
 	    });
 	}
 
@@ -990,7 +1015,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    precision = Integer.parseInt(num);
 		}
 	    }
-	    separators = format.indexOf(',') >= 0;
+	    separators = format.indexOf(',') >= 0 || settings.separatorMode;
 
 
 	    if (result != null && !format.isEmpty()) {
@@ -1031,12 +1056,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    case 'U':
 		    case 'u':
 			toUpperCase = true;
-			valueBuf.append(toStringValue(this, result));
+			valueBuf.append(toStringValue(this, result, false));
 			break;
 		    case 'L':
 		    case 'l':
 			toLowerCase = true;
-			valueBuf.append(toStringValue(this, result));
+			valueBuf.append(toStringValue(this, result, false));
 			break;
 
 		    case 'D':
@@ -1045,7 +1070,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			if (precision != Integer.MIN_VALUE) {
 			    dValue = MathUtil.round(dValue, precision);
 			}
-			valueBuf.append(formatWithSeparators(dValue, separators, ctx));
+			valueBuf.append(formatWithSeparators(dValue, separators));
 			break;
 
 		    // @E = US format: MM/dd/yyyy
@@ -1081,7 +1106,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    case 'J':
 		    case 'j':
 			valueBuf.append('\n');
-			valueBuf.append(toStringValue(this, result, true, true, ""));
+			valueBuf.append(toStringValue(this, result, true, true, separators, ""));
 			break;
 
 		    case 'X':
@@ -1179,7 +1204,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			if (precision != Integer.MIN_VALUE) {
 			    percentValue = MathUtil.round(percentValue, precision);
 			}
-			valueBuf.append(formatWithSeparators(percentValue, separators, ctx)).append('%');
+			valueBuf.append(formatWithSeparators(percentValue, separators)).append('%');
 			break;
 
 		    default:
@@ -1191,7 +1216,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 				      : valueBuf.toString();
 	    }
 	    else {
-		resultString = toStringValue(this, result);
+		resultString = toStringValue(this, result, separators);
 	    }
 
 	    if (!settings.silent) displayer.displayResult(exprString, resultString);
@@ -2573,7 +2598,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 	    else {
 		if (toString) {
-		    objectList.add(toStringValue(this, value, false, false, ""));
+		    objectList.add(toStringValue(this, value, false, false, false, ""));
 		}
 		else if (settings.rationalMode) {
 		    objectList.add(toFractionValue(this, value, ctx));
@@ -2856,7 +2881,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			Object varValue = variables.get(varName);
 			// But if $var is not defined, then forget it, and just output "$" and go on
 			if (varValue != null) {
-			    output.append(toStringValue(this, varValue, false, false, ""));
+			    output.append(toStringValue(this, varValue, false, false, settings.separatorMode, ""));
 			    lastPos = identPos - 1;
 			}
 			else {
@@ -2877,7 +2902,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 		    String expr = rawValue.substring(pos + 2, nextPos);
 		    Object exprValue = Calc.processString(expr, true);
-		    output.append(toStringValue(this, exprValue, false, false, ""));
+		    output.append(toStringValue(this, exprValue, false, false, settings.separatorMode, ""));
 		    lastPos = nextPos;
 		}
 		else if (isIdentifierStart(rawValue.charAt(pos + 1))) {
@@ -2885,7 +2910,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    while (identPos < rawValue.length() && isIdentifierPart(rawValue.charAt(identPos)))
 			identPos++;
 		    String varName = rawValue.substring(pos + 1, identPos);
-		    output.append(toStringValue(this, variables.get(varName), false, false, ""));
+		    output.append(toStringValue(this, variables.get(varName), false, false, settings.separatorMode, ""));
 		    lastPos = identPos - 1;
 		}
 		else

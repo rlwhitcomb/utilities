@@ -64,6 +64,8 @@
  *	    Treat empty and non-empty strings as valid boolean values (as does JavaScript).
  *	07-Jun-2021 (rlwhitcomb)
  *	    Fix thousands separator formatting with negative scale.
+ *	02-Jul-2021 (rlwhitcomb)
+ *	    Changes for always displaying thousands separators.
  */
 package info.rlwhitcomb.calc;
 
@@ -351,12 +353,19 @@ public final class CalcUtil
 	    }
 	}
 
-	public static String toStringValue(final CalcObjectVisitor visitor, final Object result) {
-	    return toStringValue(visitor, result, true, false, "");
+	public static String toStringValue(final CalcObjectVisitor visitor, final Object result, final boolean separators) {
+	    return toStringValue(visitor, result, true, false, separators, "");
 	}
 
 	@SuppressWarnings("unchecked")
-	public static String toStringValue(final CalcObjectVisitor visitor, final Object obj, final boolean quote, final boolean pretty, final String indent) {
+	public static String toStringValue(
+		final CalcObjectVisitor visitor,
+		final Object obj,
+		final boolean quote,
+		final boolean pretty,
+		final boolean separators,
+		final String indent)
+	{
 	    Object result = visitor.evaluateFunction(obj);
 
 	    if (result == null) {
@@ -369,23 +378,36 @@ public final class CalcUtil
 		    return (String) result;
 	    }
 	    else if (result instanceof BigDecimal) {
-		return ((BigDecimal) result).toPlainString();
+		return formatWithSeparators(((BigDecimal) result), separators);
+	    }
+	    else if (result instanceof BigInteger) {
+		if (separators)
+		    return String.format("%1$,d", (BigInteger)result);
+		else
+		    return result.toString();
 	    }
 	    else if (result instanceof BigFraction) {
 		return ((BigFraction) result).toString();
 	    }
 	    else if (result instanceof Map) {
-		return toStringValue(visitor, (Map<String, Object>) result, quote, pretty, indent);
+		return toStringValue(visitor, (Map<String, Object>) result, quote, pretty, separators, indent);
 	    }
 	    else if (result instanceof List) {
-		return toStringValue(visitor, (List<Object>) result, quote, pretty, indent);
+		return toStringValue(visitor, (List<Object>) result, quote, pretty, separators, indent);
 	    }
 
 	    // Any other type, just get the string representation
 	    return result.toString();
 	}
 
-	public static String toStringValue(final CalcObjectVisitor visitor, final Map<String, Object> map, final boolean quote, final boolean pretty, final String indent) {
+	public static String toStringValue(
+		final CalcObjectVisitor visitor,
+		final Map<String, Object> map,
+		final boolean quote,
+		final boolean pretty,
+		final boolean separators,
+		final String indent)
+	{
 	    String myIndent = indent + "  ";
 	    StringBuilder buf = new StringBuilder();
 	    if (map.size() > 0) {
@@ -398,7 +420,7 @@ public final class CalcUtil
 			comma = true;
 		    if (pretty) buf.append(myIndent);
 		    buf.append(entry.getKey()).append(": ");
-		    buf.append(toStringValue(visitor, entry.getValue(), quote, pretty, myIndent));
+		    buf.append(toStringValue(visitor, entry.getValue(), quote, pretty, separators, myIndent));
 		}
 		buf.append(pretty ? "\n" + indent + "}" : " }");
 	    }
@@ -408,7 +430,14 @@ public final class CalcUtil
 	    return buf.toString();
 	}
 
-	public static String toStringValue(final CalcObjectVisitor visitor, final List<Object> list, final boolean quote, final boolean pretty, final String indent) {
+	public static String toStringValue(
+		final CalcObjectVisitor visitor,
+		final List<Object> list,
+		final boolean quote,
+		final boolean pretty,
+		final boolean separators,
+		final String indent)
+	{
 	    String myIndent = indent + "  ";
 	    StringBuilder buf = new StringBuilder();
 	    if (list.size() > 0) {
@@ -420,7 +449,7 @@ public final class CalcUtil
 		    else
 			comma = true;
 		    if (pretty) buf.append(myIndent);
-		    buf.append(toStringValue(visitor, value, quote, pretty, myIndent));
+		    buf.append(toStringValue(visitor, value, quote, pretty, separators, myIndent));
 		}
 		buf.append(pretty ? "\n" + indent + "]" : " ]");
 	    }
@@ -839,23 +868,18 @@ public final class CalcUtil
 	 *
 	 * @param value A decimal value which could actually be an integer.
 	 * @param sep   Whether or not to use separators.
-	 * @param ctx   The rule context (for error reporting).
 	 * @return      The value formatted appropriately with thousands separators.
 	 */
-	public static String formatWithSeparators(final BigDecimal value, final boolean sep, final ParserRuleContext ctx) {
+	public static String formatWithSeparators(final BigDecimal value, final boolean sep) {
 	    if (sep) {
-		try {
-		    int scale = value.scale();
-		    if (scale <= 0) {
-			return String.format("%1$,d", value.toBigIntegerExact());
-		    }
-		    else {
-			String formatString = String.format("%%1$,.%1$df", scale);
-			return String.format(formatString, value);
-		    }
+		int scale = value.scale();
+		// There are no digits right of the decimal point, so treat as an integer
+		if (scale <= 0) {
+		    return String.format("%1$,d", value.toBigInteger());
 		}
-		catch (Exception ex) {
-		    throw new CalcExprException(ex, ctx);
+		else {
+		    String formatString = String.format("%%1$,.%1$df", scale);
+		    return String.format(formatString, value);
 		}
 	    }
 	    else {

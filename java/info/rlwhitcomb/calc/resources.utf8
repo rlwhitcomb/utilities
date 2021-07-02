@@ -60,6 +60,8 @@
 #	    Text for "Variables" directive in non-REPL mode.
 #	28-Apr-2021 (rlwhitcomb)
 #	    "and" for the list of multiple variables cleared.
+#	02-Jul-2021 (rlwhitcomb)
+#	    Separator mode.
 #
 
 #
@@ -105,6 +107,7 @@ varAnd		= "and "
 timingMode	= Timing mode set to %1$s.
 debugMode	= Debug mode set to %1$s.
 rationalMode	= Calculation mode set to %1$s.
+separatorMode	= Separator display set to %1$s.
 defining	= <r>Defining function '<v>%1$s%2$s<r>' = <x>%3$s<r>
 variables	= Variables
 varUnder1	= ---------

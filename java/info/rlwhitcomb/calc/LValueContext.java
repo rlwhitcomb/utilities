@@ -46,6 +46,8 @@
  *	    Implement Unicode subscripts as array indexes.
  *	20-Apr-2021 (rlwhitcomb)
  *	    Simplify objVar parsing. Partially add "functionVar" processing.
+ *	02-Jul-2021 (rlwhitcomb)
+ *	    Changes for always displaying thousands separators.
  */
  package info.rlwhitcomb.calc;
 
@@ -206,7 +208,7 @@ class LValueContext
 		}
 		else if (context instanceof String) {
 		    StringBuilder buf = new StringBuilder((String) context);
-		    String newValue = CalcUtil.toStringValue(visitor, value, false, false, "");
+		    String newValue = CalcUtil.toStringValue(visitor, value, false, false, false, "");
 		    int newLen = index + newValue.length();
 		    // Ensure the builder has enough length to do the replacement
 		    while (buf.length() < newLen) {

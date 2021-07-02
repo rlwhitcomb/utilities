@@ -151,6 +151,9 @@
  *	10-May-2021 (rlwhitcomb)
  *	    Save file directory from Open for next time.
  *	    Fix bug on Window Settings tab.
+ *	02-Jul-2021 (rlwhitcomb)
+ *	    New Settings for the background colors (still not effective, but ...).
+ *	    Option to always display thousands separators.
  */
 package info.rlwhitcomb.calc;
 
@@ -263,6 +266,7 @@ public class Calc
 	private static boolean resultsOnly = false;
 	private static boolean quiet       = false;
 	private static boolean rational    = false;
+	private static boolean separators  = false;
 
 	private static boolean useCmdEnter = true;
 
@@ -306,8 +310,11 @@ public class Calc
 	@BXML private Checkbox debugCheck;
 	@BXML private Checkbox quietCheck;
 	@BXML private Checkbox resultsCheck;
+	@BXML private Checkbox separatorCheck;
 	@BXML private RadioButton useEnterButton;
 	@BXML private RadioButton useCmdEnterButton;
+	@BXML private RadioButton lightBackgroundButton;
+	@BXML private RadioButton darkBackgroundButton;
 
 
 	/** The background worker thread to do the calculations in GUI mode. */
@@ -465,11 +472,17 @@ public class Calc
 
 	    quietCheck.setSelected(quiet);
 	    resultsCheck.setSelected(resultsOnly);
+	    separatorCheck.setSelected(settings.separatorMode);
 
 	    if (useCmdEnter)
 		useCmdEnterButton.setSelected(true);
 	    else
 		useEnterButton.setSelected(true);
+
+	    if (darkBackgrounds)
+		darkBackgroundButton.setSelected(true);
+	    else
+		lightBackgroundButton.setSelected(true);
 
 	    return focusComponent;
 	}
@@ -517,7 +530,14 @@ public class Calc
 		if (newResults != resultsOnly)
 		    setResultsOnlyMode(newResults);
 
+		boolean newSeparators = separatorCheck.isSelected();
+		if (newSeparators != originalSettings.separatorMode)
+		    visitor.setSeparatorMode(newSeparators);
+
 		useCmdEnter = useCmdEnterButton.isSelected();
+
+		darkBackgrounds = darkBackgroundButton.isSelected();
+		computeColors();
 	    }
 
 	    dialog.setAttribute(Attribute.ORIGINAL_SETTINGS, null);
@@ -592,7 +612,7 @@ public class Calc
 		    inputTextPane.setText(EMPTY_TEXT);
 
 		displayer = this;
-		visitor = new CalcObjectVisitor(displayer, rational);
+		visitor = new CalcObjectVisitor(displayer, rational, separators);
 
 		decimalPrecisionButton.getButtonGroup().getButtonGroupListeners().add(new ButtonGroupListener() {
 		    @Override
@@ -1166,6 +1186,13 @@ public class Calc
 		case "dec":
 		    rational = false;
 		    break;
+		case "separators":
+		case "separator":
+		case "seps":
+		case "sep":
+		case "s":
+		    separators = true;
+		    break;
 		case "locale":
 		case "loc":
 		case "l":
@@ -1312,7 +1339,7 @@ public class Calc
 		}
 		else {
 		    displayer = new ConsoleDisplayer();
-		    visitor = new CalcObjectVisitor(displayer, rational);
+		    visitor = new CalcObjectVisitor(displayer, rational, separators);
 
 		    // If no input arguments were given, go into "REPL" mode, reading
 		    // a line at a time from the console and processing

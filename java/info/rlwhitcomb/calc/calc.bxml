@@ -68,6 +68,10 @@
 		Add second tab to Settings dialog for the GUI preferences.
 	    08-May-2021 (rlwhitcomb)
 		Reduce button spacing a little bit for smaller screens.
+	    02-Jul-2021 (rlwhitcomb)
+		Add background color setting to "Window Settings" tab in Settings (doesn't really work yet).
+		Rearrange Settings dialog to put radios horizontally in preparation for things to come.
+		Add Separator mode to Settings.
 
      ========================================================================== -->
 
@@ -119,11 +123,15 @@
 	    circular="true"
 	    intraGroupFocusTransferEnabled="true" />
 
+	<RadioButtonGroup bxml:id="backgroundColorGroup"
+	    circular="true"
+	    intraGroupFocusTransferEnabled="true" />
+
     </bxml:define>
 
     <bxml:define>
 	<Prompt bxml:id="settingsPrompt" title="%settingsTitle" messageType="INFO"
-                message="%settingsMessage" preferredWidth="600"
+                message="%settingsMessage" preferredWidth="700"
 		options="%settingsOptions">
 	<TabPane>
 	    <Form bxml:id="settingsForm" TabPane.tabData="%calcSettings">
@@ -136,34 +144,66 @@
 			    </validator>
 			</TextInput>
 		    </BoxPane>
-		    <RadioButton bxml:id="defaultPrecisionButton" buttonGroup="$precisionGroup" buttonData="%defaultPrecision"/>
-		    <RadioButton bxml:id="doublePrecisionButton" buttonGroup="$precisionGroup" buttonData="%doublePrecision"/>
-		    <RadioButton bxml:id="floatPrecisionButton" buttonGroup="$precisionGroup" buttonData="%floatPrecision"/>
-		    <RadioButton bxml:id="unlimitedPrecisionButton" buttonGroup="$precisionGroup" buttonData="%unlimitedPrecision"/>
+		    <GridPane columnCount="3" styles="{horizontalSpacing:10}" preferredWidth="560">
+			<GridPane.Row>
+			    <RadioButton bxml:id="defaultPrecisionButton" buttonGroup="$precisionGroup" buttonData="%defaultPrecision"/>
+			    <Label text="" enabled="false"/>
+			    <Label text="" enabled="false"/>
+			</GridPane.Row>
+		    </GridPane>
+		    <GridPane columnCount="3" styles="{horizontalSpacing:10}" preferredWidth="560">
+			<GridPane.Row>
+			    <RadioButton bxml:id="doublePrecisionButton" buttonGroup="$precisionGroup" buttonData="%doublePrecision"/>
+			    <RadioButton bxml:id="floatPrecisionButton" buttonGroup="$precisionGroup" buttonData="%floatPrecision"/>
+			    <RadioButton bxml:id="unlimitedPrecisionButton" buttonGroup="$precisionGroup" buttonData="%unlimitedPrecision"/>
+			</GridPane.Row>
+		    </GridPane>
 		</Form.Section>
 		<Form.Section heading="%trigHeader">
-		    <RadioButton bxml:id="degreesModeButton" buttonGroup="$trigGroup" buttonData="%degrees"/>
-		    <RadioButton bxml:id="radiansModeButton" buttonGroup="$trigGroup" buttonData="%radians"/>
+		    <GridPane columnCount="3" styles="{horizontalSpacing:10}" preferredWidth="560">
+			<GridPane.Row>
+			    <RadioButton bxml:id="degreesModeButton" buttonGroup="$trigGroup" buttonData="%degrees"/>
+			    <RadioButton bxml:id="radiansModeButton" buttonGroup="$trigGroup" buttonData="%radians"/>
+			    <Label text="" enabled="false"/>
+			</GridPane.Row>
+		    </GridPane>
 		</Form.Section>
 		<Form.Section heading="%unitsHeader">
-		    <RadioButton bxml:id="binaryModeButton" buttonGroup="$unitsGroup" buttonData="%binaryUnits"/>
-		    <RadioButton bxml:id="siModeButton" buttonGroup="$unitsGroup" buttonData="%siUnits"/>
-		    <RadioButton bxml:id="mixedModeButton" buttonGroup="$unitsGroup" buttonData="%mixedUnits"/>
+		    <GridPane columnCount="3" styles="{horizontalSpacing:10}" preferredWidth="560">
+			<GridPane.Row>
+			    <RadioButton bxml:id="binaryModeButton" buttonGroup="$unitsGroup" buttonData="%binaryUnits"/>
+			    <RadioButton bxml:id="siModeButton" buttonGroup="$unitsGroup" buttonData="%siUnits"/>
+			    <RadioButton bxml:id="mixedModeButton" buttonGroup="$unitsGroup" buttonData="%mixedUnits"/>
+			</GridPane.Row>
+		    </GridPane>
 		</Form.Section>
 		<Form.Section heading="%operationHeader">
-		    <Checkbox bxml:id="rationalCheck" buttonData="%rationalMode"/>
-		    <Checkbox bxml:id="timingCheck" buttonData="%displayTiming"/>
-		    <Checkbox bxml:id="debugCheck" buttonData="%debugMode"/>
+		    <GridPane columnCount="3" styles="{horizontalSpacing:10}" preferredWidth="560">
+			<GridPane.Row>
+			    <Checkbox bxml:id="rationalCheck" buttonData="%rationalMode"/>
+			    <Checkbox bxml:id="timingCheck" buttonData="%displayTiming"/>
+			    <Checkbox bxml:id="debugCheck" buttonData="%debugMode"/>
+			</GridPane.Row>
+		    </GridPane>
 		</Form.Section>
 		<Form.Section heading="%displayHeader">
-		    <Checkbox bxml:id="quietCheck" buttonData="%quiet"/>
-		    <Checkbox bxml:id="resultsCheck" buttonData="%resultsOnly"/>
+		    <GridPane columnCount="3" styles="{horizontalSpacing:10}" preferredWidth="560">
+			<GridPane.Row>
+			    <Checkbox bxml:id="quietCheck" buttonData="%quiet"/>
+			    <Checkbox bxml:id="resultsCheck" buttonData="%resultsOnly"/>
+			    <Checkbox bxml:id="separatorCheck" buttonData="%separators"/>
+			</GridPane.Row>
+		    </GridPane>
 		</Form.Section>
 	    </Form>
 	    <Form bxml:id="guiSettingsForm" TabPane.tabData="%guiSettings">
 		<Form.Section heading="%keyboard">
 		    <RadioButton bxml:id="useEnterButton" buttonGroup="$keyboardEnterGroup" buttonData=""/>
 		    <RadioButton bxml:id="useCmdEnterButton" buttonGroup="$keyboardEnterGroup" buttonData=""/>
+		</Form.Section>
+		<Form.Section heading="%colors">
+		    <RadioButton bxml:id="lightBackgroundButton" buttonGroup="$backgroundColorGroup" buttonData="%lightBackground"/>
+		    <RadioButton bxml:id="darkBackgroundButton" buttonGroup="$backgroundColorGroup" buttonData="%darkBackground"/>
 		</Form.Section>
 	    </Form>
 	</TabPane>

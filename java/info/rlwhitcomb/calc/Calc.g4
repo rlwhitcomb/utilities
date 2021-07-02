@@ -204,6 +204,9 @@
  *	    Add "TODAY" constant.
  *	21-May-2021 (rlwhitcomb)
  *	    Add "DOW" (day of week) function and "NOW" constant.
+ *	02-Jul-2021 (rlwhitcomb)
+ *	    New directive to turn on thousands separators always (without
+ *	    the format specified). New aliases for some directives.
  */
 
 grammar Calc;
@@ -444,6 +447,7 @@ directive
    | D_RESULTSONLY modeOption                 # resultsOnlyDirective
    | D_QUIET modeOption                       # quietDirective
    | D_VARIABLES idList ?                     # variablesDirective
+   | D_SEPARATORS modeOption                  # separatorsDirective
    ;
 
 numberOption
@@ -815,7 +819,7 @@ D_TIMING
    ;
 
 D_RATIONAL
-   : DIR  ( R A T I O N | F R A C | R A T I O N A L | F R A C T I O N )
+   : DIR  ( F R | F R A C | R A T I O N | R A T I O N A L | F R A C T I O N )
    ;
 
 D_CLEAR
@@ -831,7 +835,7 @@ D_INCLUDE
    ;
 
 D_DEBUG
-   : DIR  ( D E B | D E B U G )
+   : DIR  ( D E B | D B G | D E B U G )
    ;
 
 D_RESULTSONLY
@@ -844,6 +848,10 @@ D_QUIET
 
 D_VARIABLES
    : DIR ( V A R | V A R S | V A R I A B L E | V A R I A B L E S )
+   ;
+
+D_SEPARATORS
+   : DIR ( S E P | S E P S | S E P A R A T O R | S E P A R A T O R S )
    ;
 
 

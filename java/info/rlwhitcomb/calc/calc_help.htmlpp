@@ -163,6 +163,7 @@ code {
     <tr><td><code>-quiet</code></td><td>Do not display anything<br>(suitable for behind-the-scenes calculations)</td><td><code>-q</code><br>(also use the <code>:quiet on/off</code> directive)</td></tr>
     <tr><td><code>-rational</code></td><td>Do all possible calculations in fraction mode,<br>that is as a ratio of natural numbers<br>(as in <code>1/3</code> instead of <code>0.3333333333333333</code>)</td><td><code>-ration</code>, <code>-rat</code><br>(also use the <code>:rational on</code> directive)</td></tr>
     <tr><td><code>-decimal</code></td><td>Do all calculations as decimal values <i>(default)</i></td><td><code>-dec</code><br>(also use the <code>:rational off</code> directive)</td></tr>
+    <tr><td><code>-separators</code></td><td>Display all numeric values with thousands separators</td><td><code>-separator</code>, <code>-seps</code>, <code>-sep</code>, <code>-s</code><br>(also use the <code>:separators on</code> directive)</td></tr>
     <tr><td><code>-locale</code> <i>locale_name</i></td><td>Specify the locale to use for messages</td><td><code>-loc</code>, <code>-l</code></td></tr>
     <tr><td><code>-inputdir</code> <i>directory</i></td><td>Specify a default directory for files to be processed</td><td><code>-input</code>, <code>-dir</code></td></tr>
     <tr><td><code>-cmdenter</code></td><td>Use <code>Ctrl+Enter</code> (or <code>&#x2318;Enter</code> on Mac)<br>to calculate in the GUI input field <i>(default)</i></td><td><code>-cmd</code></td></tr>
@@ -346,7 +347,7 @@ or
       <tr><td><code>@E</code></td><td>Format an integer as a date (mm/dd/yyyy) (U.S. format)</td></tr>
       <tr><td><code>@f</code></td><td>For decimal mode, format the result as a rational fraction</td></tr>
       <tr><td><code>@F</code></td><td>Format as a proper fraction (with possible integer portion)</td></tr>
-      <tr><td><code>@j</code></td><td>Format the result as a "pretty printed" JSON result<br>(multiple lines with indents)</td></tr>
+      <tr><td><code>@</code>[<code>,</code>]<code>j</code></td><td>Format the result as a "pretty printed" JSON result<br>(multiple lines with indents)</td></tr>
       <tr><td><code>@r</code></td><td>Format the result as a Roman Numeral value</td></tr>
       <tr><td><code>@x</code></td><td>For integers and strings, format in hexadecimal form</td></tr>
       <tr><td><code>@o</code></td><td>For integers and strings, format in octal form</td></tr>
@@ -622,13 +623,14 @@ or
     <tr><td><code>:si</code></td><td>Display units in terms of multiples of 1000</td><td><code>:ten</code></td></tr>
     <tr><td><code>:mixed</code></td><td>Unit multiplier based on powers of 2 (same as <code>:binary</code>), but with SI suffix <i>(default)</i></td><td><code>:mix</code></tr>
     <tr><td><code>:clear</code> [ <i>id</i> ( <code>,</code> <i>id</i> ) * ]</td><td>Clear all or only the specified variables (set values to <code>null</code>)</td><td><code>:clr</code></td></tr>
-    <tr><td><code>:variables</code> [ <i>id</i> ( <code>,</code> <i>id</i> ) * ]</td><td>Display the values of all or only the specified variables</td><td><code>:var</code>, <code>:vars</code>, <code>:variable</code></td></tr>
+    <tr><td><code>:variables</code> [ <i>id</i> ( <code>,</code> <i>id</i> ) * ]</td><td>Display the values of all or only the specified variables</td><td><code>:variable</code>, <code>:vars</code>, <code>:var</code></td></tr>
     <tr><td><code>:echo</code> <i>expr</i></td><td>Echo the value of the expression to the output</td><td></td></tr>
-    <tr><td><code>:include</code> <i>string</i></td><td>Include the file(s) named by <i>string</i></td><td></td></tr>
-    <tr><td><code>:rational</code> <i>mode_option</i></td><td>Set the rational calculation mode where <i>mode_option</i> is one of:<br><code>on</code>, <code>off</code>, <code>true</code>, <code>false</code>, <code>pop</code>, <code>previous</code>, <code>prev</code>, or <i>variable</i><br><i>(default is <code>off</code>, or the value set on the command line)</i></td><td><code>:ration</code>, <code>:fraction</code>, <code>:frac</code></td></tr>
+    <tr><td><code>:include</code> <i>string</i></td><td>Include the file(s) named by <i>string</i></td><td><code>:inc</code></td></tr>
+    <tr><td><code>:rational</code> <i>mode_option</i></td><td>Set the rational calculation mode where <i>mode_option</i> is one of:<br><code>on</code>, <code>off</code>, <code>true</code>, <code>false</code>, <code>pop</code>, <code>previous</code>, <code>prev</code>, or <i>variable</i><br><i>(default is <code>off</code>, or the value set on the command line)</i></td><td><code>:ration</code>, <code>:fraction</code>, <code>:frac</code>, <code>:fr</code></td></tr>
+    <tr><td><code>:separators</code> <i>mode_option</i></td><td>Set whether to display thousands separators always<br><i>(default is <code>off</code> or value on command line)</i></td><td><code>:separator</code>, <code>:seps</code>, <code>:sep</code></td></tr>
     <tr><td><code>:timing</code> <i>mode_option</i></td><td>Set the timing mode (same <i>mode_option</i> choices as for <code>:rational</code>)<br><i>(default is <code>off</code> or the value set on the command line)</i></td><td><code>:time</code></td></tr>
-    <tr><td><code>:debug</code> <i>mode_option</i></td><td>Set the debug mode (same <i>mode_option</i> choices as for <code>:rational</code>)<br><i>(default is <code>off</code> or the value set on the command line)</i></td><td><code>:deb</code></td></tr>
-    <tr><td><code>:resultsonly</code> <i>mode_option</i></td><td>Set the results-only mode<br><i>(default is <code>off</code> or value on command line)</i></td><td><code>:res</code>, <code>:result</code>, <code>:results</code>, <code>:resultonly</code></td></tr>
+    <tr><td><code>:debug</code> <i>mode_option</i></td><td>Set the debug mode (same <i>mode_option</i> choices as for <code>:rational</code>)<br><i>(default is <code>off</code> or the value set on the command line)</i></td><td><code>:deb</code>, <code>:dbg</code></td></tr>
+    <tr><td><code>:resultsonly</code> <i>mode_option</i></td><td>Set the results-only mode<br><i>(default is <code>off</code> or value on command line)</i></td><td><code>:resultonly</code>, <code>:results</code>, <code>:result</code>, <code>:res</code></td></tr>
     <tr><td><code>:quiet</code> <i>mode_option</i></td><td>Set quiet mode<br><i>(default is <code>off</code> or the value on command line)</i></td><td></td></tr>
   </tbody>
   </table>

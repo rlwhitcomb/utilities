@@ -30,6 +30,9 @@
  *	    Add real names for the buttons.
  *	08-May-2021 (rlwhitcomb)
  *	    New text for the second tab in Settings dialog.
+ *	02-Jul-2021 (rlwhitcomb)
+ *	    New colors settings text. Separator mode setting.
+ *	    Tweak some of the Settings text.
  */
 {
     title:              'Calc',
@@ -55,16 +58,20 @@
     siUnits:            'SI (base 10)',
     mixedUnits:         'Mixed',
     operationHeader:    'Operational Modes',
-    rationalMode:       'Rational mode',
-    displayTiming:      'Display timing',
+    rationalMode:       'Rational mode?',
+    displayTiming:      'Display timing?',
     displayHeader:      'Display Modes',
-    debugMode:          'Debug mode',
-    quiet:              'Quiet',
-    resultsOnly:        'Results only',
+    debugMode:          'Debug mode?',
+    quiet:              'Quiet?',
+    resultsOnly:        'Results only?',
+    separators:         'Thousands separators?',
 
     guiSettings:        'Window Settings',
     keyboard:           'Keyboard',
     enterToCalculate:   '%1$s to calculate',
+    colors:             'Colors',
+    lightBackground:    'Suitable for light backgrounds',
+    darkBackground:     'Or for dark backgrounds',
 
     openButton:         'O',
     openTip:            'Open file (F4)',
