@@ -148,6 +148,8 @@
  *	    Move the trig, log, and other "math" functions into a separate class.
  *	08-Apr-2021 (rlwhitcomb)
  *	    Conversions to/from times and durations.
+ *	07-Jul-2021 (rlwhitcomb)
+ *	    Make the class final.
  */
 package info.rlwhitcomb.util;
 
@@ -174,7 +176,7 @@ import java.util.regex.*;
  * in the computer industry.  This differs from the units used by disk-drive
  * manufacturers (for instance) which specify sizes in SI (decimal) units.
  */
-public class NumericUtil
+public final class NumericUtil
 {
 	/**
 	 * Enum representing the binary data types.

@@ -63,6 +63,8 @@
  *	    By default don't add in the stack trace, but allow it when desired.
  *	07-Jun-2021 (rlwhitcomb)
  *	    One more strange exception.
+ *	07-Jul-2021 (rlwhitcomb)
+ *	    Make class final and constructor private.
  */
 package info.rlwhitcomb.util;
 
@@ -80,8 +82,14 @@ import java.util.UnknownFormatConversionException;
  * Utility class that has various methods to help with exception handling
  * and display.
  */
-public class ExceptionUtil
+public final class ExceptionUtil
 {
+	/**
+	 * Private constructor since this is a utility class.
+	 */
+	private ExceptionUtil() {
+	}
+
 	/**
 	 * Standalone function to produce a reasonable string of the given
 	 * exception, including the message and cause (all the way up to

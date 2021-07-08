@@ -86,6 +86,8 @@
  *    29-Jan-2021 (rlwhitcomb)
  *	Use new Intl Exception variants for convenience. New "canReadDir" variant
  *	of "canRead" for directories.
+ *    07-Jul-2021 (rlwhitcomb)
+ *	Make the class final and the constructor private.
  */
 package info.rlwhitcomb.util;
 
@@ -120,10 +122,10 @@ import net.iharder.b64.Base64;
 /**
  * Utility class for dealing with files.
  */
-public class FileUtilities
+public final class FileUtilities
 {
     /** Source of randomness for {@link #getRandomName}. */
-    static SecureRandom random = new SecureRandom();
+    private static SecureRandom random = new SecureRandom();
 
     /** Buffer size for the file compression method. */
     private static final int BUFFER_SIZE = 65_536;
@@ -142,6 +144,12 @@ public class FileUtilities
      */
     private static String[] EXECUTABLE_EXTENSIONS;
 
+
+    /**
+     * Private constructor because this is a utility class.
+     */
+    private FileUtilities() {
+    }
 
     /**
      * @return Only the name portion of the given file, without the path

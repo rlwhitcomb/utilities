@@ -276,6 +276,8 @@
  *	    Add "ltrim" function and pattern; update trim patterns to include all chars below '\u0020'.
  *	07-May-2021 (rlwhitcomb)
  *	    Add "parseCommandLine" function to deal with quotes, etc. (hopefully the same way Java does it).
+ *	07-Jul-2021 (rlwhitcomb)
+ *	    Make class final and constructor private.
  */
 
 package info.rlwhitcomb.util;
@@ -298,7 +300,7 @@ import java.util.regex.Pattern;
 /**
  * Various utility routines dealing with character strings.
  */
-public class CharUtil
+public final class CharUtil
 {
 	/** Pattern string for a regular DBMS identifier. */
 	public static String regularIdentifier = "[_\\p{IsAlphabetic}][_\\p{IsAlphabetic}\\p{IsDigit}\\$@#]*";
@@ -392,6 +394,13 @@ public class CharUtil
 		CENTER,
 		/** Text is justified on the right, with spaces on the left. */
 		RIGHT
+	}
+
+
+	/**
+	 * Private constructor since this is a utility class.
+	 */
+	private CharUtil() {
 	}
 
 

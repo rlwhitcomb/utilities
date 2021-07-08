@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2012-2018,2020 Roger L. Whitcomb.
+ * Copyright (c) 2012-2018,2020-2021 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -72,6 +72,8 @@
  *	    Prepare for GitHub.
  *	21-Dec-2020 (rlwhitcomb)
  *	    Update obsolete Javadoc constructs.
+ *	07-Jul-2021 (rlwhitcomb)
+ *	    Make the class final and the constructor private.
  */
 package info.rlwhitcomb.util;
 
@@ -90,7 +92,7 @@ import org.apache.commons.validator.routines.InetAddressValidator;
 /**
  * A package of static utility functions for various network things.
  */
-public class NetworkUtil
+public final class NetworkUtil
 {
 	/** The local address according to IPv4. */
 	private static InetAddress localv4;
@@ -114,6 +116,12 @@ public class NetworkUtil
 	public static final String LOCAL_PREFIX = "local";
 
 	public static final String LOCALHOST = "localhost";
+
+	/**
+	 * Private constructor since this is a utility class.
+	 */
+	private NetworkUtil() {
+	}
 
 	/**
 	** Is the given socket connection from a local client?

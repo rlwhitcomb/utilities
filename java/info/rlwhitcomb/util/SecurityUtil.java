@@ -47,6 +47,8 @@
  *	    Update obsolete Javadoc constructs.
  *	29-Jan-2021 (rlwhitcomb)
  *	    Use new Intl Exception variants for convenience.
+ *	07-Jul-2021 (rlwhitcomb)
+ *	    Make class final and constructor private.
  */
 package info.rlwhitcomb.util;
 
@@ -63,7 +65,7 @@ import net.iharder.b64.Base64;
  * Some miscellaneous static functions having to do with security (encryption, obfuscation,
  * hashing, etc.).
  */
-public class SecurityUtil
+public final class SecurityUtil
 {
 	/** Prefix used to identify passwords and other values that have been obfuscated by our
 	 * internal {@link #obfuscate} routine. */
@@ -94,6 +96,14 @@ public class SecurityUtil
 		Logging.Except("MessageDigest init", e);
 	    }
 	}
+
+
+	/**
+	 * Private constructor since this is a utility class.
+	 */
+	private SecurityUtil() {
+	}
+
 
 	/**
 	 * Encodes a byte array into hex (base 16) notation.

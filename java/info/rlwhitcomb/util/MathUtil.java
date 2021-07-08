@@ -39,6 +39,8 @@
  *	    Move the "round" function from Calc into here.
  *	26-Apr-2021 (rlwhitcomb)
  *	    Tweak some error messages.
+ *	07-Jul-2021 (rlwhitcomb)
+ *	    Make the class final.
  */
 package info.rlwhitcomb.util;
 
@@ -57,7 +59,7 @@ import java.util.Set;
  * other "mathematical" operations, such as square root, Bernoulli numbers, factorial,
  * and etc.
  */
-public class MathUtil
+public final class MathUtil
 {
 	private static final Logging logger = new Logging(MathUtil.class);
 

@@ -75,6 +75,8 @@
  *	    New method to get a directory name from a class (package).
  *	29-Jan-2021 (rlwhitcomb)
  *	    Use new Intl Exception variants for convenience.
+ *	07-Jul-2021 (rlwhitcomb)
+ *	    Make the class final and the constructor private.
  */
 
 package info.rlwhitcomb.util;
@@ -95,13 +97,20 @@ import info.rlwhitcomb.annotations.*;
  * A collection of static methods mostly to deal with issues around Java classes (but actually
  * just things having to do with Java reflection).
  */
-public class ClassUtil
+public final class ClassUtil
 {
 	/** Pattern used to parse out the generic type class name from a field. */
 	private static Pattern GENERIC_PATTERN = Pattern.compile("[^<]+<([\\.\\w\\$]+)>.*");
 
 	/** A string to describe the situation where caller information is not available. */
 	public static final String UNKNOWN_CALLER = "<unknown caller>";
+
+	/**
+	 * Private constructor since this is a utility class.
+	 */
+	private ClassUtil() {
+	}
+
 
 	private static Field findField(Field[] fields, String fieldName)
 		throws NoSuchFieldException
