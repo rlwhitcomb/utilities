@@ -138,9 +138,12 @@
  *	    to the console. Color the information.
  *	01-Mar-2021 (rlwhitcomb)
  *	    Tweaks to the "timeThis" functions.
+ *	07-Jul-2021 (rlwhitcomb)
+ *	    Implement "consoleSize" function.
  */
 package info.rlwhitcomb.util;
 
+import java.awt.Dimension;
 import java.io.File;
 import java.io.InputStream;
 import java.io.IOException;
@@ -895,6 +898,59 @@ public final class Environment
 		}
 	    }
 	    return 0L;
+	}
+
+
+	/**
+	 * Compute the (character) size of the terminal, using native system commands.
+	 *
+	 * @return A {@link Dimension} object containing the current character width
+	 * and height of the console.
+	 */
+	public static Dimension consoleSize() {
+	    try {
+		File f = FileUtilities.createTempFile("size");
+		ProcessBuilder pb;
+
+		if (osIsWindows) {
+		    pb = new ProcessBuilder(
+			"powershell",
+			"-command",
+			"out-file",
+			"-inputobject",
+			"$host.ui.rawui.windowsize.height",
+			"-encoding",
+			"ascii",
+			"-filepath",
+			f.getPath(),
+			";",
+			"out-file",
+			"-inputobject",
+			"$host.ui.rawui.windowsize.width",
+			"-encoding",
+			"ascii",
+			"-filepath",
+			f.getPath(),
+			"-append").inheritIO();
+		}
+		else {
+		    pb = new ProcessBuilder(
+			"stty",
+			"size").inheritIO().redirectOutput(f);
+		}
+		pb.start().waitFor();
+
+		String[] sizes = FileUtilities.readFileAsString(f).split("\\s+");
+
+		if (!f.delete())
+		    f.deleteOnExit();
+
+		return new Dimension(Integer.valueOf(sizes[1]), Integer.valueOf(sizes[0]));
+	    }
+	    catch (Exception ex) {
+		// If we can't determine the dimensions, return a default size
+		return new Dimension(80, 25);
+	    }
 	}
 
 

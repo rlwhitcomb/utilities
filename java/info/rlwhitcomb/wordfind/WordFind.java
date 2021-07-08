@@ -69,9 +69,12 @@
  *         Tweak dark background color.
  *      20-May-2021 (rlwhitcomb)
  *         Fix output coloring.
+ *	07-Jul-2021 (rlwhitcomb)
+ *         Determine console width from Environment.
  */
 package info.rlwhitcomb.wordfind;
 
+import java.awt.Dimension;
 import java.awt.Font;
 import java.io.*;
 import java.net.URISyntaxException;
@@ -158,7 +161,7 @@ public class WordFind implements Application {
     /** Default column width for output. */
     private static final int DEFAULT_COLUMN_WIDTH = 10;
     /** The (possibly configurable) line length for output. */
-    private static int maxLineLength = 72;
+    private static int maxLineLength;
     /** Whether to use colors for the output. */
     private static boolean colored = true;
     /** Whether to report timings or not. */
@@ -1134,6 +1137,8 @@ ex.printStackTrace();
     public static void main(final String[] args) {
         Environment.setDesktopApp(true);
         Environment.loadProgramInfo(WordFind.class);
+        Dimension dim = Environment.consoleSize();
+        maxLineLength = dim.width;
 
         // Set default colors before options so there is a setting for error messages right away
         setColors(!ON_WINDOWS);
