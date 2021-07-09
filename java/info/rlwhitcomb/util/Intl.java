@@ -137,6 +137,8 @@
  *	    Add options to "printHelp" to color the messages or not.
  *	10-Feb-2021 (rlwhitcomb)
  *	    Add the color map to the "printHelp" params.
+ *	09-Jul-2021 (rlwhitcomb)
+ *	    Final class and private constructor.
  */
 package info.rlwhitcomb.util;
 
@@ -171,7 +173,7 @@ import info.rlwhitcomb.util.ConsoleColor.Code;
  * the Pivot <code>Resources</code> class without having to reference
  * Pivot classes or so that we can use ResourceBundles (or both).
  */
-public class Intl
+public final class Intl
 {
 	/**
 	 * The default package prefix if there is none on a "pkg#" key prefix.
@@ -571,6 +573,13 @@ public class Intl
 	 */
 	static {
 	    initAllPackageResources(Locale.getDefault());
+	}
+
+
+	/**
+	 * Private constructor for this static class.
+	 */
+	private Intl() {
 	}
 
 

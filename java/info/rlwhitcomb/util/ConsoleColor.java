@@ -52,6 +52,8 @@
  *	String constants for the tag values also.
  *   20-May-2021 (rlwhitcomb)
  *	Add bright underlined forms (this actually works!)
+ *   09-Jul-2021 (rlwhitcomb)
+ *	Make the constructor private.
  */
 package info.rlwhitcomb.util;
 
@@ -112,6 +114,14 @@ public final class ConsoleColor
     private static final String UN = "_";
     private static final String BG = ".";
     private static final String BR = "!";
+
+
+    /**
+     * Private constructor since this is a static class.
+     */
+    private ConsoleColor() {
+    }
+
 
     /**
      * Format an escape sequence for the given attribute and color code.

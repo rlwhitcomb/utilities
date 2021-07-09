@@ -130,6 +130,8 @@
  *    Update obsolete Javadoc constructs.
  *  16-Feb-2021 (rlwhitcomb)
  *    Read a default configuration if none has been read previously.
+ *  09-Jul-2021 (rlwhitcomb)
+ *    Make this class "final" so no one can muck with the functionality.
  */
 package info.rlwhitcomb.util;
 
@@ -160,7 +162,7 @@ import java.util.regex.*;
  * But experience has shown that having client logs directly comparable to server logs is a good
  * thing.
  */
-public class Logging
+public final class Logging
 {
     /** Highest logging level that produces the most verbose output.  Useful for debugging purposes. */
     public static final int DEBUG = 5;

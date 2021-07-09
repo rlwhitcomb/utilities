@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2008-2010,2014,2020 Roger L. Whitcomb.
+ * Copyright (c) 2008-2010,2014,2020-2021 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -34,6 +34,8 @@
  *	    Cleanup "lint" warnings.
  *	14-Apr-2020 (rlwhitcomb)
  *	    Cleanup and prepare for GitHub.
+ *	09-Jul-2021 (rlwhitcomb)
+ *	    Make the class final and constructor private for a utility class.
  */
 package info.rlwhitcomb.util;
 
@@ -50,7 +52,7 @@ import java.util.regex.*;
  * internally, so all these methods must be invoked in a thread-safe manner using
  * synchronization externally.
  */
-public class Num
+public final class Num
 {
 	/** Used to format long integer values. Uses grouping to nicely display the numbers. */
 	private static NumberFormat f1 = null;
@@ -67,6 +69,13 @@ public class Num
 		df.setDecimalSeparatorAlwaysShown(true);
 		df.setMinimumFractionDigits(3);
 	    }
+	}
+
+
+	/**
+	 * Private constructor so no one can instantiate this as an object.
+	 */
+	private Num() {
 	}
 
 	/**

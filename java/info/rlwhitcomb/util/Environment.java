@@ -140,6 +140,8 @@
  *	    Tweaks to the "timeThis" functions.
  *	07-Jul-2021 (rlwhitcomb)
  *	    Implement "consoleSize" function.
+ *	09-Jul-2021 (rlwhitcomb)
+ *	    Private constructor since this is a utility class (all static methods).
  */
 package info.rlwhitcomb.util;
 
@@ -350,6 +352,13 @@ public final class Environment
 		javaMajorVersion = Integer.parseInt(parts[1]);
 	    else
 		javaMajorVersion = Integer.parseInt(parts[0]);
+	}
+
+
+	/**
+	 * Private constructor so no one can instantiate another.
+	 */
+	private Environment() {
 	}
 
 
