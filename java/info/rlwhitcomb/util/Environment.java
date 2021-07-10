@@ -142,6 +142,8 @@
  *	    Implement "consoleSize" function.
  *	09-Jul-2021 (rlwhitcomb)
  *	    Private constructor since this is a utility class (all static methods).
+ *	09-Jul-2021 (rlwhitcomb)
+ *	    Switch to using either "release.build" or "debug.build" from the properties.
  */
 package info.rlwhitcomb.util;
 
@@ -1170,7 +1172,15 @@ public final class Environment
 		APP_BUILD      = buildProperties.getProperty("build.number");
 		BUILD_DATE     = buildProperties.getProperty("build.date");
 		BUILD_TIME     = buildProperties.getProperty("build.time");
-		IS_DEBUG_BUILD = CharUtil.getBooleanValue(buildProperties.getProperty("debug.build"));
+
+		String debugBuild   = buildProperties.getProperty("debug.build");
+		String releaseBuild = buildProperties.getProperty("release.build");
+		if (debugBuild != null)
+		    IS_DEBUG_BUILD = CharUtil.getBooleanValue(debugBuild);
+		else if (releaseBuild != null)
+		    IS_DEBUG_BUILD = !CharUtil.getBooleanValue(releaseBuild);
+		else
+		    IS_DEBUG_BUILD = false;
 	    }
 	}
 

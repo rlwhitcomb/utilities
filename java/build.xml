@@ -215,6 +215,8 @@
 		Don't try to generate HTML4 output anymore. Add Calc help page to the doc.
 	    10-Jun-2021 (rlwhitcomb)
 		Really use "-html5" for Javadoc, copy Calc help image files.
+	    09-Jul-2021 (rlwhitcomb)
+		Switch to using "release.build" in the properties file instead of "debug.build".
 
      ========================================================================== -->
 
@@ -282,6 +284,9 @@
 	</condition>
 	<condition property="pivot.available" value="true" else="false">
 		<isset property="env.PIVOT_HOME"/>
+	</condition>
+	<condition property="debug.build" value="false" else="true">
+		<istrue value="${release.build}"/>
 	</condition>
 
 	<patternset id="wrapper-files">
