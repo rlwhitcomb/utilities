@@ -286,6 +286,8 @@
  *	    Use not-quite-unlimited precision for divide operations.
  *	02-Jul-2021 (rlwhitcomb)
  *	    Implement "always displaying thousands separators" mode.
+ *	10-Jul-2021 (rlwhitcomb)
+ *	    Implement ignore variable / member name case.
  */
 package info.rlwhitcomb.calc;
 
@@ -373,19 +375,23 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		boolean separatorMode;
 		/** Silent flag (set to true) while evaluating nested expressions (or via :quiet directive). */
 		boolean silent;
+		/** Ignore case when selecting members / variables. */
+		boolean ignoreNameCase;
 
 		/**
 		 * Construct default settings, including the command-line "-rational" flag.
 		 *
 		 * @param rational   The initial rational mode setting.
 		 * @param separators The initial setting for displaying separators.
+		 * @param ignoreCase Whether to ignore case on variable / member names.
 		 */
-		public Settings(boolean rational, boolean separators) {
-		    trigMode      = TrigMode.RADIANS;
-		    units         = RangeMode.MIXED;
-		    rationalMode  = rational;
-		    separatorMode = separators;
-		    silent        = false;
+		public Settings(boolean rational, boolean separators, boolean ignoreCase) {
+		    trigMode       = TrigMode.RADIANS;
+		    units          = RangeMode.MIXED;
+		    rationalMode   = rational;
+		    separatorMode  = separators;
+		    silent         = false;
+		    ignoreNameCase = ignoreCase;
 		}
 
 		/**
@@ -394,10 +400,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		 * @param otherSettings The object to copy.
 		 */
 		public Settings(Settings otherSettings) {
-		    this.trigMode     = otherSettings.trigMode;
-		    this.units        = otherSettings.units;
-		    this.rationalMode = otherSettings.rationalMode;
-		    this.silent       = otherSettings.silent;
+		    this.trigMode       = otherSettings.trigMode;
+		    this.units          = otherSettings.units;
+		    this.rationalMode   = otherSettings.rationalMode;
+		    this.separatorMode  = otherSettings.separatorMode;
+		    this.silent         = otherSettings.silent;
+		    this.ignoreNameCase = otherSettings.ignoreNameCase;
 		}
 	}
 
@@ -431,6 +439,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	/** Stack of previous "separator" mode values. */
 	private final Deque<Boolean> separatorModeStack = new ArrayDeque<>();
 
+	/** Stack of previous "ignore case" mode values. */
+	private final Deque<Boolean> ignoreCaseModeStack = new ArrayDeque<>();
+
 	/** Stack of previous "resultsOnly" mode values. */
 	private final Deque<Boolean> resultsOnlyModeStack = new ArrayDeque<>();
 
@@ -438,11 +449,11 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	private final Deque<Boolean> quietModeStack = new ArrayDeque<>();
 
 
-	public CalcObjectVisitor(CalcDisplayer resultDisplayer, boolean rational, boolean separators) {
+	public CalcObjectVisitor(CalcDisplayer resultDisplayer, boolean rational, boolean separators, boolean ignoreCase) {
 	    setMathContext(MathContext.DECIMAL128);
-	    settings      = new Settings(rational, separators);
+	    settings      = new Settings(rational, separators, ignoreCase);
 	    variables     = new HashMap<>();
-	    globalContext = new LValueContext(variables);
+	    globalContext = new LValueContext(variables, ignoreCase);
 	    displayer     = resultDisplayer;
 
 	    initialized   = true;
@@ -528,6 +539,16 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    settings.separatorMode = mode;
 
 	    displayActionMessage("%calc#separatorMode", mode);
+
+	    return oldMode;
+	}
+
+	public boolean setIgnoreCaseMode(boolean mode) {
+	    boolean oldMode = settings.ignoreNameCase;
+	    settings.ignoreNameCase = mode;
+	    globalContext.setIgnoreCase(mode);
+
+	    displayActionMessage("%calc#ignoreCaseMode", mode);
 
 	    return oldMode;
 	}
@@ -756,7 +777,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    if (varName.equals("<missing ID>"))
 			continue;
 		    numberCleared++;
-		    variables.remove(varName);
+		    removeMember(variables, varName, settings.ignoreNameCase);
 		    if (vars.length() > 0)
 			vars.append(", ");
 		    lastNamePos = vars.length();
@@ -805,7 +826,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		displayActionMessage("%calc#varUnder1");
 	    }
 	    for (String key : sortedKeys) {
-		Object value = variables.get(key);
+		Object value = getMemberValue(variables, key, settings.ignoreNameCase);
 		displayer.displayResult(key, toStringValue(this, value, settings.separatorMode));
 	    }
 	    if (!replMode) {
@@ -932,6 +953,13 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public Object visitSeparatorsDirective(CalcParser.SeparatorsDirectiveContext ctx) {
 	    return processModeOption(ctx.modeOption(), separatorModeStack, mode -> {
 		return setSeparatorMode(mode);
+	    });
+	}
+
+	@Override
+	public Object visitIgnoreCaseDirective(CalcParser.IgnoreCaseDirectiveContext ctx) {
+	    return processModeOption(ctx.modeOption(), ignoreCaseModeStack, mode -> {
+		return setIgnoreCaseMode(mode);
 	    });
 	}
 
@@ -1307,7 +1335,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 
 	    if (localVarName != null) {
-		if (variables.containsKey(localVarName))
+		if (isMemberDefined(variables, localVarName, settings.ignoreNameCase))
 		    throw new CalcExprException(ctx, "%calc#noDupLocalVar", localVarName);
 	    }
 
@@ -1388,7 +1416,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    finally {
 		// Make sure the local loop var gets removed, even on exceptions
 		if (localVarName != null)
-		    variables.remove(localVarName);
+		    removeMember(variables, localVarName, settings.ignoreNameCase);
 	    }
 
 	    return lastValue;
@@ -2878,7 +2906,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			identPos++;
 		    if (identPos > pos + 2) {
 			String varName = rawValue.substring(pos + 1, identPos);
-			Object varValue = variables.get(varName);
+			Object varValue = getMemberValue(variables, varName, settings.ignoreNameCase);
 			// But if $var is not defined, then forget it, and just output "$" and go on
 			if (varValue != null) {
 			    output.append(toStringValue(this, varValue, false, false, settings.separatorMode, ""));
@@ -2910,7 +2938,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    while (identPos < rawValue.length() && isIdentifierPart(rawValue.charAt(identPos)))
 			identPos++;
 		    String varName = rawValue.substring(pos + 1, identPos);
-		    output.append(toStringValue(this, variables.get(varName), false, false, settings.separatorMode, ""));
+		    output.append(toStringValue(this,
+			getMemberValue(variables, varName, settings.ignoreNameCase), false, false, settings.separatorMode, ""));
 		    lastPos = identPos - 1;
 		}
 		else

@@ -48,6 +48,8 @@
  *	    Simplify objVar parsing. Partially add "functionVar" processing.
  *	02-Jul-2021 (rlwhitcomb)
  *	    Changes for always displaying thousands separators.
+ *	10-Jul-2021 (rlwhitcomb)
+ *	    Implement "ignore case" for variable / member names.
  */
  package info.rlwhitcomb.calc;
 
@@ -58,6 +60,8 @@ import java.util.Map;
 
 import org.antlr.v4.runtime.tree.TerminalNode;
 
+import static info.rlwhitcomb.calc.CalcUtil.getMemberValue;
+import static info.rlwhitcomb.calc.CalcUtil.isMemberDefined;
 import info.rlwhitcomb.util.Intl;
 
 
@@ -76,18 +80,33 @@ class LValueContext
 	String name;
 	/** The integer index value to reference into a {@code List}. */
 	int index;
+	/** The "ignore case for members" flag. */
+	boolean ignoreCase;
+
+
+	/**
+	 * Set a new "ignore case" mode (only for the global context).
+	 *
+	 * @param ignoreNameCase The new global "ignore case" value.
+	 */
+	void setIgnoreCase(boolean ignoreNameCase) {
+	    this.ignoreCase = ignoreNameCase;
+	}
+
 
 	/**
 	 * Construct given the base context object (which should be the global variables map).
 	 *
-	 * @param obj	The context object (base variables map).
+	 * @param obj            The context object (base variables map).
+	 * @param ignoreNameCase The global "ignore case" value.
 	 */
-	LValueContext(Object obj) {
-	    this.parent  = null;
-	    this.varCtx  = null;
-	    this.context = obj;
-	    this.name    = null;
-	    this.index   = -1;
+	LValueContext(Object obj, boolean ignoreNameCase) {
+	    this.parent     = null;
+	    this.varCtx     = null;
+	    this.context    = obj;
+	    this.name       = null;
+	    this.index      = -1;
+	    this.ignoreCase = ignoreNameCase;
 	}
 
 	/**
@@ -99,11 +118,12 @@ class LValueContext
 	 * @param nm	The name of the map member to reference.
 	 */
 	LValueContext(LValueContext p, CalcParser.VarContext ctx, Object obj, String nm) {
-	    this.parent  = p;
-	    this.varCtx  = ctx;
-	    this.context = obj;
-	    this.name    = nm;
-	    this.index   = -1;
+	    this.parent     = p;
+	    this.varCtx     = ctx;
+	    this.context    = obj;
+	    this.name       = nm;
+	    this.index      = -1;
+	    this.ignoreCase = p.ignoreCase;
 	}
 
 	/**
@@ -115,11 +135,12 @@ class LValueContext
 	 * @param idx	The index into the object.
 	 */
 	LValueContext(LValueContext p, CalcParser.VarContext ctx, Object obj, int idx) {
-	    this.parent  = p;
-	    this.varCtx  = ctx;
-	    this.context = obj;
-	    this.name    = null;
-	    this.index   = idx;
+	    this.parent     = p;
+	    this.varCtx     = ctx;
+	    this.context    = obj;
+	    this.name       = null;
+	    this.index      = idx;
+	    this.ignoreCase = p.ignoreCase;
 	}
 
 	@Override
@@ -151,10 +172,10 @@ class LValueContext
 		Map<String, Object> map = (Map<String, Object>) context;
 		// Special checks for local vars (not defined means we are outside the loop or function)
 		if (name.startsWith("$")) {
-		    if (!map.containsKey(name))
+		    if (!isMemberDefined(map, name, ignoreCase))
 		        throw new CalcExprException(varCtx, "%calc#localVarNotAvail", name);
 		}
-		return map.get(name);
+		return getMemberValue(map, name, ignoreCase);
 	    }
 	    else if (index >= 0) {
 		if (context instanceof List) {

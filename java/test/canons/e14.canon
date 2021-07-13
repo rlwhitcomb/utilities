@@ -1,0 +1,30 @@
+>m1 = {} -> { }
+>m1["ix1"] = 23 -> 23
+>m2.ix2 = 47 -> 47
+>m3.abc = 'ABC' -> "ABC"
+>Ignoring case is now true.
+>m1 -> { ix1: 23 }
+>M1 -> { ix1: 23 }
+>M1.iX1 -> 23
+>M2["IX2"] -> 47
+>M3.Abc -> "ABC"
+>M4.e5.E6 = 99 -> 99
+>$I * $i -> 1
+>$I * $i -> 4
+>$I * $i -> 9
+>$I * $i -> 16
+>$I * $i -> 25
+>$I * $i -> 36
+>$I * $i -> 49
+>$I * $i -> 64
+>$I * $i -> 81
+>$I * $i -> 100
+>Ignoring case is now false.
+>M1 -> <null>
+>M2 -> <null>
+>M3 -> <null>
+>M4 -> { e5: { E6: 99 } }
+>m1 -> { ix1: 23 }
+>m2 -> { ix2: 47 }
+>m3 -> { abc: "ABC" }
+>m4 -> <null>

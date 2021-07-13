@@ -1,0 +1,31 @@
+#
+# Testing variables and members with "ignore case" both on and off
+#
+m1 = {}
+m1["ix1"] = 23;
+m2.ix2 = 47;
+m3.abc = 'ABC';
+
+:ignorecase on
+
+m1
+M1
+M1.iX1
+M2["IX2"]
+M3.Abc
+
+M4.e5.E6 = 99
+
+loop $i in 1 .. 10 { $I * $i }
+
+:ignorecase pop
+
+M1
+M2
+M3
+M4
+m1
+m2
+m3
+m4
+

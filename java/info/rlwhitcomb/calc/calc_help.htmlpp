@@ -164,6 +164,7 @@ code {
     <tr><td><code>-rational</code></td><td>Do all possible calculations in fraction mode,<br>that is as a ratio of natural numbers<br>(as in <code>1/3</code> instead of <code>0.3333333333333333</code>)</td><td><code>-ration</code>, <code>-rat</code><br>(also use the <code>:rational on</code> directive)</td></tr>
     <tr><td><code>-decimal</code></td><td>Do all calculations as decimal values <i>(default)</i></td><td><code>-dec</code><br>(also use the <code>:rational off</code> directive)</td></tr>
     <tr><td><code>-separators</code></td><td>Display all numeric values with thousands separators</td><td><code>-separator</code>, <code>-seps</code>, <code>-sep</code>, <code>-s</code><br>(also use the <code>:separators on</code> directive)</td></tr>
+    <tr><td><code>-ignorecase</code></td><td>Ignore case of variable and member names</td><td><code>-caseinsensitive</code>, <code>-insensitive</code>, <code>-ignore</code>, <code>-case</code>, <code>-ign</code>, <code>-ins</code><br>(also use the <code>:ignorecase on</code> directive)</td></tr>
     <tr><td><code>-locale</code> <i>locale_name</i></td><td>Specify the locale to use for messages</td><td><code>-loc</code>, <code>-l</code></td></tr>
     <tr><td><code>-inputdir</code> <i>directory</i></td><td>Specify a default directory for files to be processed</td><td><code>-input</code>, <code>-dir</code></td></tr>
     <tr><td><code>-cmdenter</code></td><td>Use <code>Ctrl+Enter</code> (or <code>&#x2318;Enter</code> on Mac)<br>to calculate in the GUI input field <i>(default)</i></td><td><code>-cmd</code></td></tr>
@@ -281,10 +282,14 @@ or
      in canonical form, that is, with the least common denominator.
   <p>Calc has the capability to define and use variables, which are simply named representations of values. Variable names can be
      of any length, but must start with either an underscore (<code>"_"</code>) or a letter, and may contain any combination of
-     underscore, letters, and digits.  Note that loop variables (see <code>LOOP</code> statement below) follow the same rules,
+     underscores, letters, and digits.  Note that loop variables (see <code>LOOP</code> statement below) follow the same rules,
      except they must start with a dollar sign (<code>"$"</code>). <em>Note that the predefined constant, function, and statement
      names may NOT be used as variable names.</em> The value of a variable is the value last assigned to it by
      one of the assignment operators.  If no value has been previously assigned the value will be <code>null</code>.
+  <p>Normally variable names (and object member names (see below)) are case-sensitive (that is, <code>"f" != "F"</code>), but there is a command-line option and a directive
+     to change this behavior. The predefined values and functions are always case-insensitive, regardless of the mode setting. Variables remain defined with the
+     same casing as they were found in a script, but the "ignore case" mode simply changes how they are looked up in the variable dictionary. Therefore, changing
+     the mode option will not "undefine" any variables from the way they were originally declared / used.
   <p>Values can be grouped into lists of values (an <i>array</i>), or into sets of key/value pairs (an <i>object</i>). Arrays can
      be multi-dimensional. The inside dimensions do not have to be all the same length. The types of values in an array need not
      be homogeneous. And, in fact, the values in an array can be objects as well as simple values. The keys in an object must be
@@ -628,6 +633,7 @@ or
     <tr><td><code>:include</code> <i>string</i></td><td>Include the file(s) named by <i>string</i></td><td><code>:inc</code></td></tr>
     <tr><td><code>:rational</code> <i>mode_option</i></td><td>Set the rational calculation mode where <i>mode_option</i> is one of:<br><code>on</code>, <code>off</code>, <code>true</code>, <code>false</code>, <code>pop</code>, <code>previous</code>, <code>prev</code>, or <i>variable</i><br><i>(default is <code>off</code>, or the value set on the command line)</i></td><td><code>:ration</code>, <code>:fraction</code>, <code>:frac</code>, <code>:fr</code></td></tr>
     <tr><td><code>:separators</code> <i>mode_option</i></td><td>Set whether to display thousands separators always<br><i>(default is <code>off</code> or value on command line)</i></td><td><code>:separator</code>, <code>:seps</code>, <code>:sep</code></td></tr>
+    <tr><td><code>:ignorecase</code> <i>mode_option</i></td><td>Set whether to ignore case of variable and member names<br><i>(default is <code>off</code> or value on command line)</i></td><td><code>:caseinsensitive</code>, <code>:insensitive</code>,<br><code>:ignore</code>, <code>:case</code>, <code>:ign</code>, <code>:ins</code></td></tr>
     <tr><td><code>:timing</code> <i>mode_option</i></td><td>Set the timing mode (same <i>mode_option</i> choices as for <code>:rational</code>)<br><i>(default is <code>off</code> or the value set on the command line)</i></td><td><code>:time</code></td></tr>
     <tr><td><code>:debug</code> <i>mode_option</i></td><td>Set the debug mode (same <i>mode_option</i> choices as for <code>:rational</code>)<br><i>(default is <code>off</code> or the value set on the command line)</i></td><td><code>:deb</code>, <code>:dbg</code></td></tr>
     <tr><td><code>:resultsonly</code> <i>mode_option</i></td><td>Set the results-only mode<br><i>(default is <code>off</code> or value on command line)</i></td><td><code>:resultonly</code>, <code>:results</code>, <code>:result</code>, <code>:res</code></td></tr>

@@ -207,6 +207,8 @@
  *	02-Jul-2021 (rlwhitcomb)
  *	    New directive to turn on thousands separators always (without
  *	    the format specified). New aliases for some directives.
+ *	12-Jul-2021 (rlwhitcomb)
+ *	    New directive to ignore case of variable/member names.
  */
 
 grammar Calc;
@@ -448,6 +450,7 @@ directive
    | D_QUIET modeOption                       # quietDirective
    | D_VARIABLES idList ?                     # variablesDirective
    | D_SEPARATORS modeOption                  # separatorsDirective
+   | D_IGNORECASE modeOption                  # ignoreCaseDirective
    ;
 
 numberOption
@@ -852,6 +855,10 @@ D_VARIABLES
 
 D_SEPARATORS
    : DIR ( S E P | S E P S | S E P A R A T O R | S E P A R A T O R S )
+   ;
+
+D_IGNORECASE
+   : DIR ( I N S | I G N | C A S E | I N S E N S I T I V E | C A S E I N S E N S I T I V E | I G N O R E | I G N O R E C A S E )
    ;
 
 

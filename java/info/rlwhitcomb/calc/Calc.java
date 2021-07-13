@@ -154,6 +154,8 @@
  *	02-Jul-2021 (rlwhitcomb)
  *	    New Settings for the background colors (still not effective, but ...).
  *	    Option to always display thousands separators.
+ *	10-Jul-2021 (rlwhitcomb)
+ *	    Option to ignore case on variable names.
  */
 package info.rlwhitcomb.calc;
 
@@ -267,6 +269,7 @@ public class Calc
 	private static boolean quiet       = false;
 	private static boolean rational    = false;
 	private static boolean separators  = false;
+	private static boolean ignoreCase  = false;
 
 	private static boolean useCmdEnter = true;
 
@@ -612,7 +615,7 @@ public class Calc
 		    inputTextPane.setText(EMPTY_TEXT);
 
 		displayer = this;
-		visitor = new CalcObjectVisitor(displayer, rational, separators);
+		visitor = new CalcObjectVisitor(displayer, rational, separators, ignoreCase);
 
 		decimalPrecisionButton.getButtonGroup().getButtonGroupListeners().add(new ButtonGroupListener() {
 		    @Override
@@ -1193,6 +1196,15 @@ public class Calc
 		case "s":
 		    separators = true;
 		    break;
+		case "ignorecase":
+		case "ignore":
+		case "caseinsensitive":
+		case "insensitive":
+		case "case":
+		case "ign":
+		case "ins":
+		    ignoreCase = true;
+		    break;
 		case "locale":
 		case "loc":
 		case "l":
@@ -1339,7 +1351,7 @@ public class Calc
 		}
 		else {
 		    displayer = new ConsoleDisplayer();
-		    visitor = new CalcObjectVisitor(displayer, rational, separators);
+		    visitor = new CalcObjectVisitor(displayer, rational, separators, ignoreCase);
 
 		    // If no input arguments were given, go into "REPL" mode, reading
 		    // a line at a time from the console and processing

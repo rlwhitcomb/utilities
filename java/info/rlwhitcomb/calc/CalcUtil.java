@@ -66,6 +66,8 @@
  *	    Fix thousands separator formatting with negative scale.
  *	02-Jul-2021 (rlwhitcomb)
  *	    Changes for always displaying thousands separators.
+ *	10-Jul-2021 (rlwhitcomb)
+ *	    Implement "ignore case" functions for variables / members.
  */
 package info.rlwhitcomb.calc;
 
@@ -82,6 +84,8 @@ import java.util.TreeSet;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
 
+import static info.rlwhitcomb.calc.CalcUtil.getMemberValue;
+import static info.rlwhitcomb.calc.CalcUtil.isMemberDefined;
 import info.rlwhitcomb.util.BigFraction;
 import info.rlwhitcomb.util.CharUtil;
 import static info.rlwhitcomb.util.CharUtil.Justification;
@@ -887,6 +891,68 @@ public final class CalcUtil
 	    }
 	}
 
+
+	public static boolean isMemberDefined(Map<String, Object> map, String varName, boolean ignoreNameCase) {
+	    if (ignoreNameCase) {
+		if (map.containsKey(varName)) {
+		    return true;
+		}
+		else {
+		    for (Map.Entry<String, Object> entry : map.entrySet()) {
+			if (entry.getKey().equalsIgnoreCase(varName)) {
+			    return true;
+			}
+		    }
+		    return false;
+		}
+	    }
+	    else {
+		return map.containsKey(varName);
+	    }
+	}
+
+
+	public static Object getMemberValue(Map<String, Object> map, String varName, boolean ignoreNameCase) {
+	    if (ignoreNameCase) {
+		if (map.containsKey(varName)) {
+		    return map.get(varName);
+		}
+		else {
+		    // The names could have been saved either with case sensitive mode or not,
+		    // so, the keys are always caseSensitive, and we need to search the entry set
+		    // and do case-insensitive compares of the keys
+		    for (Map.Entry<String, Object> entry : map.entrySet()) {
+			if (entry.getKey().equalsIgnoreCase(varName)) {
+			    return entry.getValue();
+			}
+		    }
+		    return null;
+		}
+	    }
+	    else {
+		return map.get(varName);
+	    }
+	}
+
+
+	public static void removeMember(Map<String, Object> map, String varName, boolean ignoreNameCase) {
+	    if (ignoreNameCase) {
+		if (map.containsKey(varName)) {
+		    map.remove(varName);
+		}
+		else {
+		    for (Map.Entry<String, Object> entry : map.entrySet()) {
+			if (entry.getKey().equalsIgnoreCase(varName)) {
+			    map.remove(entry.getKey());
+			    return;
+			}
+		    }
+		}
+	    }
+	    else {
+		map.remove(varName);
+	    }
+	}
 
 }
 

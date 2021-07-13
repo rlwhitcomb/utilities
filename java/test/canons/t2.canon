@@ -8,6 +8,7 @@
 >Test 'e8': Passed
 >Test 'e10': Passed
 >Test 'e12': Passed
+>Test 'e14': Passed
 >Test 'e_trig': Passed
 >Test 'e_tan': Passed
 >Test 'bernoulli': Passed
@@ -19,6 +20,6 @@
 >
 >End of Calc tests.
 >------------------------------------
->Ran 13 tests: 13 passed, 0 failed.
+>Ran 14 tests: 14 passed, 0 failed.
 >====================================
 >
