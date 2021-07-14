@@ -538,15 +538,15 @@ or
         <td>logical AND<br>logical OR<br>logical exclusive OR</td><td>left to right</td></tr>
     <tr><td>7</td><td><i>expr</i>&nbsp;<code> ? </code>&nbsp;<i>expr</i>&nbsp;<code> : </code>&nbsp;<i>expr</i></td><td>select one or the other value</td><td>right to left</td></tr>
     <tr><td>6</td><td><i>var</i>&nbsp;<code> = </code>&nbsp;<i>expr</i></td><td>assign <i>expr</i> value to variable</td><td>right to left</td></tr>
-    <tr><td>5</td><td><i>var</i>&nbsp;&nbsp;<code>**=</code>, <code>&times;&times;=</code>, <code>&#x2217;&#x2217;=</code>, <code>&#x2715;&#x2715;=</code>, or <code>&#x2716;&#x2716;=</code>&nbsp;&nbsp;<i>expr</i></td><td><i>var</i> to <i>expr</i> power, assign to <i>var</i></td><td>right to left</td></tr>
+    <tr><td>5</td><td><i>var</i>&nbsp;<code> **=</code>,<code> &times;&times;=</code>,<code> &#x2217;&#x2217;=</code>,<code> &#x2715;&#x2715;=</code>, or<code> &#x2716;&#x2716;= </code>&nbsp;<i>expr</i></td><td><i>var</i> to <i>expr</i> power, assign to <i>var</i></td><td>right to left</td></tr>
     <tr><td>4</td><td>
-        <i>var</i>&nbsp;&nbsp;<code>*=</code>, <code>&times;=</code>, <code>&#x2217;=</code>, <code>&#x2715;=</code>, or <code>&#x2716;=</code>&nbsp;&nbsp;<i>expr</i><br>
-        <i>var</i>&nbsp;&nbsp;<code>/=</code>, <code>&divide;=</code>, <code>&#x2215;=</code>, or <code>&#x2797;=</code>&nbsp;&nbsp;<i>expr</i><br>
+        <i>var</i>&nbsp;<code> *=</code>,<code> &times;=</code>,<code> &#x2217;=</code>,<code> &#x2715;=</code>, or<code> &#x2716;= </code>&nbsp;<i>expr</i><br>
+        <i>var</i>&nbsp;<code> /=</code>,<code> &divide;=</code>,<code> &#x2215;=</code>, or<code> &#x2797;= </code>&nbsp;<i>expr</i><br>
         <i>var</i>&nbsp;<code> %= </code>&nbsp;<i>expr</i></td>
         <td>perform the operation, reassign to variable</td><td>right to left</td></tr>
     <tr><td>3</td><td>
-        <i>var</i>&nbsp;&nbsp;<code>+=</code> or <code>&#x2795;=</code>&nbsp;&nbsp;<i>expr</i><br>
-        <i>var</i>&nbsp;&nbsp;<code>-=</code>, <code>&#x2212;=</code>, or <code>&#x2796;=</code>&nbsp;&nbsp;<i>expr</i></td>
+        <i>var</i>&nbsp;<code> += </code>or<code> &#x2795;= </code>&nbsp;<i>expr</i><br>
+        <i>var</i>&nbsp;<code> -= </code>,<code> &#x2212;=</code>, or<code> &#x2796;= </code>&nbsp;<i>expr</i></td>
         <td>result assigned to variable again</td><td>right to left</td></tr>
     <tr><td>2</td><td>
         <i>var</i>&nbsp;<code> &gt;&gt;&gt;= </code>&nbsp;<i>expr</i><br>
