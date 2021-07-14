@@ -33,8 +33,26 @@ code {
    font-weight: bold;
 }
 
+h2 {
+   margin-left: 30px;
+   margin-right: 30px;
+}
+
 .cols {
-    columns: 4;
+    columns: 3;
+    column-rule: 2px double cornflowerblue;
+    column-gap: 40px;
+    margin-left: 40px;
+    margin-right: 40px;
+}
+
+.sectionsep {
+    border: 0 none;
+    background-color: cornflowerblue;
+    height: 2px;
+    margin-left: 40px;
+    margin-right: 40px;
+    margin-top: 30px;
 }
 
 .center {
@@ -66,6 +84,15 @@ code {
    color: darkorange;
 }
 
+.tablecap {
+   font-size: 1.5em;
+   margin-top: 0.83em;
+   margin-bottom: 0.83em;
+   margin-left: 0;
+   margin-right: 0;
+   font-weight: bold;
+}
+
 .innertable {
    margin-left: auto;
    margin-right: auto;
@@ -85,6 +112,10 @@ code {
    margin: 8px;
    border-spacing: 20;
    border: none;
+}
+
+.innertable caption {
+   display: none;
 }
 
 .innertable tr:nth-child(odd) {
@@ -127,6 +158,7 @@ code {
         <li>This is Open-Source Software (<a href="https://opensource.com/resources/what-open-source">OSS</a>) so the code can be examined, and modified (if desired) for your own use.</li>
       </ul>
 </div>
+<hr class="sectionsep">
   <h2>Command Line</h2>
 <div class="cols">
   The command line is assumed to have either the name of a file to process, or an expression to evaluate. There may also be options specified (see the next section). If there is a single value given and there exists a file by that name (possibly in another directory given by the prior <code>-inputdir</code> option), then that file is read, the contents parsed, and all the expressions evaluated. Otherwise, if there are more than one argument on the command line, or the single argument does not name a file, then the command line is taken as a single string, parsed, and then evaluated.
@@ -137,8 +169,8 @@ code {
   <p>Options are case-insensitive, and maybe be prefixed with either <code>-</code>, <code>--</code>, or on Windows <code>/</code>, as in: <code>--lightbg</code>, <code>-rational</code>, or <code>/quiet</code> <i>(Windows only)</i>. Almost all of the options have several aliases (mostly fewer characters) as shown in the table below. Some of these settings, in addition, can be set using Directives from within a script, or from the Settings dialog in the GUI window.
 </div>
   <div class="center">
-  <h2>Command Line Options</h2>
   <table style="margin-left:auto;margin-right:auto;width:60%;">
+    <caption class="tablecap">Command Line Options</caption>
     <thead>
     <tr>
       <th style="width:20%">Option</th>
@@ -174,6 +206,7 @@ code {
   </tbody>
   </table>
   </div>
+<hr class="sectionsep">
   <h2>Read, Eval, Print Loop Commands</h2>
   <div class="cols">
   <p>In REPL mode, in addition to expressions and directives (as described below), there are a few commands available to do other
@@ -181,8 +214,8 @@ code {
      from a script file, nor in the GUI input window (although there are GUI buttons for most of them).
   </div>
   <div class="center">
-  <h2>REPL Commands</h2>
   <table style="margin-left:auto;margin-right:auto;">
+    <caption class="tablecap">REPL Commands</caption>
     <thead>
     <tr>
       <th style="width:100">Command</th>
@@ -199,6 +232,7 @@ code {
   </tbody>
   </table>
   </div>
+<hr class="sectionsep">
   <h2>Values, Constants, and Variables</h2>
 <div class="cols">
   The basic building blocks of the expressions implemented here are the basic value types: numbers (either integer or real
@@ -313,6 +347,7 @@ or
 <p class="indent"> <code>value = { "flag": true, flag: 'Red' }</code> </p>
    and the elements are accessed as <code>value."flag"</code> and <code>value.flag</code>.
 </div>
+<hr class="sectionsep">
   <h2>Modes and Precision</h2>
 <div class="cols">
   Calc can do essentially arbitrary precision arithmetic. It can also do arithmetic on rational fractions (as in <code>1/4 + 1/2 = 3/4</code>). The default setting is to do decimal arithmetic, but this can adjust using either command line options (see
@@ -322,6 +357,7 @@ or
       several directives.
   <p>Trigonometric calculations are, by default, done in radians, but this can be changed to use degrees using a directive.
 </div>
+<hr class="sectionsep">
   <h2>Formats</h2>
 <div class="cols">
   The results of most operations can be displayed using alternative formats for better comprehension. To specify an alternative
@@ -334,8 +370,8 @@ or
      given the output could have strings which shouldn't be case-shifted.
 </div>
   <div class="center">
-    <h2>Formats</h2>
     <table style="margin-left:auto;margin-right:auto;">
+      <caption class="tablecap">Formats</caption>
       <thead>
       <tr>
         <th style="width:100">Format</th>
@@ -362,11 +398,17 @@ or
     </tbody>
     </table>
   </div>
+<hr class="sectionsep">
   <h2>Available Operators and Predefined Functions</h2>
-  <p>There are a wide variety of arithmetic and logical operators available, as well as a number of common arithmetic functions that can be used.
+<div class="cols">
+  <p>There are a wide variety of arithmetic and logical operators available, as well as a number of common arithmetic functions supported by Calc.
+     For the most part, automatic coercions are applied to the operands of functions if necessary (and possible), and the results of operations are
+     automatically widened to support the results. The only exception to this are the trig and log functions which (for the most part) can only be
+     done to "double" precision (currently &mdash; this may change in subsequent versions).
+</div>
   <div class="center">
-  <h2>Operators, Functions, and Precedence</h2>
   <table style="margin-left:auto;margin-right:auto;">
+    <caption class="tablecap">Operators, Functions, and Precedence</caption>
     <thead>
     <tr>
       <th style="width:60">Level</th>
@@ -416,6 +458,7 @@ or
         <td>bit shift operations</td><td>left to right</td></tr>
     <tr><td>13</td><td colspan="2" style="padding:0;margin:0;">
         <table class="innertable">
+          <caption></caption>
             <tbody>
             <tr><td style="width:300"><code>ABS</code>&nbsp;<i>expr</i></td><td style="width:400">absolute value</td></tr>
             <tr><td><code>SIN</code>&nbsp;<i>expr</i></td><td>sine</td></tr>
@@ -522,6 +565,7 @@ or
     </tbody>
   </table>
   </div>
+<hr class="sectionsep">
   <h2>User-Defined Functions</h2>
 <div class="cols">
   In addition to the predefined functions above, Calc allows new functions to be defined (unfortunately they do not support
@@ -540,6 +584,7 @@ or
      as they are only invoked inside a <code>LOOP</code> for which the loop variable is declared. In other words, functions are
      parsed along with all other expressions, but they are stored as parse trees, and are not evaluated until they are invoked.
 </div>
+<hr class="sectionsep">
   <h2>Statements</h2>
 <div class="cols">
   In addition to the functions and operators listed above, Calc has four different statements which can be used to do
@@ -602,13 +647,14 @@ or
   </p>
   There are many more code examples in the <code>test/files</code> directory of the source distribution.
 </div>
+<hr class="sectionsep">
   <h2>Directives</h2>
 <div class="cols">
   Various directives can be given within a script or on a separate input line in REPL mode that will affect the operation of the calculator. Some of them allow you to change the options given on the command line, while others are only available from within the script. All the mode-setting directives are also available in the Settings dialog (the <span class="orangebutton">&#x2261;</span> button or <code>F2</code> key) in GUI mode.
 </div>
   <div class="center">
-  <h2>Available Directives</h2>
   <table style="margin-left:auto;margin-right:auto;">
+    <caption class="tablecap">Available Directives</caption>
     <thead>
     <tr>
       <th style="width:200">Directive</th>
@@ -641,6 +687,7 @@ or
   </tbody>
   </table>
   </div>
+<hr class="sectionsep">
   <h2>Notes on Directives</h2>
 <div class="cols">
   The <i>string</i> argument for the <code>:include</code> directive can be a comma-separated list of file names, with or without
@@ -663,9 +710,12 @@ or
   <p>The only effect of debug mode is to display the parse tree (in LISP format) before the expression(s) is/are evaluated.
   <p>Timing mode displays the total parsing and execution time (to nanosecond precision on some systems) after the results are displayed.
 </div>
-  <h2>GUI operations</h2>
+<hr class="sectionsep">
+  <h2>GUI Operations</h2>
+<div class="cols">
   <p>The GUI window can be opened initially using the "<code>cg</code>" command (or on Windows only, the <code>``</code> command),
      or by entering the <code>gui</code> command in REPL mode. Note that although you can switch from REPL mode to GUI mode, the reverse is not possible. The GUI window looks like this with the focus initially in the "Expressions" field:
+</div>
   <div class="center">
   <br><img src="calc_initial.png" alt="Initial GUI screen" width="50%">
   </div>
@@ -679,6 +729,7 @@ or
   <br><img src="calc_settings.png" alt="GUI Settings screen" width="40%">
       <img src="calc_window_settings.png" alt="GUI Window Settings screen" width="40%">
   </div>
+<hr class="sectionsep">
   <h2>TODO Items for This Document</h2>
 <div class="cols">
   <ul>
