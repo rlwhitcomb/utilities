@@ -364,7 +364,7 @@ public class Calc
 
 
 	/**
-	 * Listen for key press events inside the input {@link TextArea} and respond.
+	 * Listen for key press events inside the input {@link TextPane} and respond.
 	 * <p> Primarily to allow a keystroke to initiate calculation while typing.
 	 */
 	private static class KeyPressListener implements ComponentKeyListener
