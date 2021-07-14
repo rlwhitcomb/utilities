@@ -1,4 +1,4 @@
-$testClass info.rlwhitcomb.calc.Calc
+# specified on command line $testClass info.rlwhitcomb.calc.Calc
 $sourceDir test/files
 $canonDir test/canons
 $defaultOptions -nocolors -dir test/files

@@ -184,6 +184,8 @@
  *	    Another error for empty "-dir:" (which I seem to do often b/c of the different syntax here).
  *	15-Mar-2021 (rlwhitcomb)
  *	    Actually return a failure exit code if any tests fail.
+ *	13-Jul-2021 (rlwhitcomb)
+ *	    Add "-testclass" option to the command line.
  */
 package info.rlwhitcomb.tester;
 
@@ -1322,6 +1324,15 @@ public class Tester
 		}
 		Locale.setDefault(locale);
 		Intl.initAllPackageResources(locale);
+	    }
+	    else if (Options.matchesOption(opt, true, "testclass", "class", "test")) {
+		try {
+		    testClass = Class.forName(arg1);
+		}
+		catch (NoClassDefFoundError | ClassNotFoundException | ExceptionInInitializerError ex) {
+		    Intl.errFormat("tester#testClassNotFound", arg1, ExceptionUtil.toString(ex));
+		    System.exit(2);
+		}
 	    }
 	    else if (Options.matchesOption(opt, true, "version", "vers", "ver")) {
 		Environment.printProgramInfo();

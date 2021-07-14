@@ -19,7 +19,7 @@ t5: optiontest
 t6: dynarraytest
 t7: matchestest
 t8: numerictest
-t9: loremtest
+t9: -testclass:info.rlwhitcomb.calc.Calc loremtest
 t10: bidimaptest
 
 !echo
