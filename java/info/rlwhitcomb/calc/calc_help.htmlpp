@@ -237,18 +237,33 @@ h2 {
 <div class="cols">
   The basic building blocks of the expressions implemented here are the basic value types: numbers (either integer or real
      numbers with a fractional part), strings, rational fractions, boolean values, and the <code>null</code> value.
-     Numbers can be of arbitrary precision, up to a maximum of 2**32-1 digits. Strings can also be of any length up
-     to 2**32-1 characters.
-  <p>Simple numeric constants follow the normal rules, and can be expressed as floating point constants (as in <code>1.2e-20</code>).
+     Numbers can be of arbitrary precision, up to a maximum of 2**32-1 (4,294,967,295) digits. Strings can also be of any length up
+     to the same number of characters.
+  <p>Simple numeric constants follow the normal rules, and can be expressed as simple integers (as in <code>4129</code>),
+     decimal numbers (as in <code>23.47</code>), or floating point constants in scientific notation (as in <code>1.2e-20</code>).
      The boolean constants are <code>true</code> and <code>false</code> (although they are case-insensitive, so could be spelled
      as <code>True</code> or <code>TRUE</code> as well). The special null constant is simply <code>null</code> (again, case-insensitive).
   <p>Numeric values can also be specified using "kilobyte" notation in one of two forms: multipliers of 1000, or multipliers of 1024 (2**10).
      These multipliers are simply appended to the number to automatically multiply by the given amount. The allowed suffixes are:
      <code>Kb</code>, <code>Mb</code>, <code>Tb</code>, <code>Pb</code>, and <code>Eb</code> which all multiply by their respective
-     powers of 10, while <code>Kib</code>, <code>Mib</code>, etc. multiply by the successive multiples of 1024.
+     powers of 1000, while <code>Kib</code>, <code>Mib</code>, etc. multiply by the successive multiples of 1024. Note that these
+     multiplier suffixes are case-insensitive.
   <p>For example:  <code>2Kb = 2000</code>, or <code>4Kib = 4096</code>. Any integer results can be formatted as these type of
      values using the <code>@k</code> or <code>@K</code> formats (the latter giving all upper case results), and depending on the
-     <code>:SI</code>, <code>:BINARY</code>, or <code>:MIXED</code> mode directives in effect.
+     <code>:SI</code>, <code>:BINARY</code>, or <code>:MIXED</code> mode directives in effect. These modes function as illustrated here:<br>
+<code><span style="color:grey;">&gt;</span> :mixed<br>
+<span style="color:green;">Units in mixed form.</span><br>
+<span style="color:grey;">&gt;</span> 2000@k<br>
+<span style="color:blue;">2000 @k</span> <span style="color:grey;">-&gt;</span> <span style="color:green;">1.95 Kbytes</span><br>
+<span style="color:grey;">&gt;</span> :si<br>
+<span style="color:green;">Units in SI (base ten) form.</span><br>
+<span style="color:grey;">&gt;</span> 2000@k<br>
+<span style="color:blue;">2000 @k</span> <span style="color:grey;">-&gt;</span> <span style="color:green;">2.00 Kbytes</span><br>
+<span style="color:grey;">&gt;</span> :bin<br>
+<span style="color:green;">Units in binary.</span><br>
+<span style="color:grey;">&gt;</span> 2000@k<br>
+<span style="color:blue;">2000 @k</span> <span style="color:grey;">-&gt;</span> <span style="color:green;">1.95 Kibytes</span>
+</code>
   <p>String constants are of two types: <i>simple</i> strings, constructed using either single- or double-quotes (or "smart"
      quotes: see below), or <i>interpolated</i> strings, which allow the value of expressions (or simple variables) to be
      interpolated into the final string value. These are
@@ -279,11 +294,10 @@ which gives:
      with the values pieced into it. String values are stored in variables without any surrounding quotes, and the escaped
      characters are interpreted and stored as their actual codepoints. This means that string values inserted into interpolated
      strings will be inserted as they are stored (without quotes, etc.).
-  <p>Calc reserves the names <code>pi</code> and <code>e</code> for these two fundamental constants. Calc also has the unique 
-     ability to recognize the special Unicode fraction characters, and all the alternative characters of <code>&#x1D6D1;</code> to
-     also represent their respective values, as in:
+  <p>Calc reserves the names <code>pi</code> and <code>e</code> for these two fundamental constants. All the alternative characters
+     of <code>&#x1D6D1;</code> are also supported.
 <p class="indent"> <code>&#x1D6D1;</code> = <code>3.14159265358979323846264338327950288...</code> <br> <code>e</code> = <code>2.71828182845904523536028747135266249...</code> </p>
-or
+  <p>The Unicode fraction characters also represent their respective values, as in:
 <p class="indent"> <code>&#x00BC;</code> = <code>1/4</code> or <code>0.25</code> <br> <code>&#x215A;</code> = <code>5/6</code> or <code>0.8333...</code> </p>
 
   <p>There is a constant type used to express values as Roman Numerals. The syntax is <code>R'<i>xxxx</i>'</code>, where the
@@ -296,19 +310,19 @@ or
 <p class="indent"> <code>t'<i>nn.nn</i>&nbsp;w</code>|<code>d</code>|<code>h</code>|<code>m</code>|<code>s'</code> </p>
      Such values are computed to nanosecond precision and can be used in any other kind of operation, or formatted again as times or durations using the <code>@h</code> or <code>@t</code> formats.
      For example:
-<p class="indent"> <code>t'27h' + t'13m' + t'27.9s' @h -&gt; h'27:13:27.9'</code> </p>
+<p class="indent"> <code><span style="color:blue;">t'27h' + t'13m' + t'27.9s' @h</span> <span style="color:grey;">-&gt;</span> <span style="color:green;">h'27:13:27.9'</span></code> </p>
 or
-<p class="indent"> <code>h'12:30 pm' - h'11:45 am' @mt -&gt; t'45m'</code> </p>
+<p class="indent"> <code><span style="color:blue;">h'12:30 pm' - h'11:45 am' @mt</span> <span style="color:grey;">-&gt;</span> <span style="color:green;">t'45m'</span></code> </p>
 or yet
-<p class="indent"> <code>h'8:30 am' + t'1h' + t'37m' @h -&gt; h'10:07'</code> </p>
+<p class="indent"> <code><span style="color:blue;">h'8:30 am' + t'1h' + t'37m' @h</span> <span style="color:grey;">-&gt;</span> <span style="color:green;">h'10:07'</span></code> </p>
   <p>Date values can be entered as (basically the <a href="https://en.wikipedia.org/wiki/ISO_8601">ISO-8601</a> format with more separators allowed):
 <p class="indent"> <code>d'<i>yyyy</i>-<i>mm</i>-<i>dd</i>'</code>&nbsp;|&nbsp;<code>d'<i>yyyymmdd</i>'</code> </p>
 or as U.S. format dates:
 <p class="indent"> <code>D'<i>mm</i>/<i>dd</i>/<i>yyyy</i>'</code>&nbsp;|&nbsp;<code>D'<i>mmddyyyy</i>'</code> </p>
    Such values are computed as an offset from the "epoch" day (Jan. 1, 1970) (either positive or negative). Date arithmetic is thus allowed, such as:
-<p class="indent"> <code>d'2001-09-11' + 1000@e</code> -&gt; <code>d'2004-06-07'</code> </p>
+<p class="indent"> <code><span style="color:blue;">d'2001-09-11' + 1000@e</span> <span style="color:grey;">-&gt;</span> <span style="color:green;">d'2004-06-07'</span></code> </p>
 or
-<p class="indent"> <code>D'9/2/1945' - d'1941/12/7'</code> -&gt; <code>1365</code> </p>
+<p class="indent"> <code><span style="color:blue;">D'9/2/1945' - d'1941/12/7'</span> <span style="color:grey;">-&gt;</span> <span style="color:green;">1365</span></code> </p>
   <p>Some operators and operations require integer values (such as factorial and the logical bit operations). If the value given is not integral an error will
      be displayed and the calculation aborted. Most of the basic arithmetic operators can operate on rational fractions. The trig,
      log, and power operations do not. Therefore, in rational mode, if an operation returns a decimal value, Calc will attempt
@@ -335,27 +349,28 @@ or
      a key of one of the key/value pairs in the object).  All this is consistent with JavaScript, or JSON usage (with the slight
      variation that keys can also be identifiers here, while in pure JSON form only strings are allowed as keys).
   <p>Array or object constants can be expressed using this JSON notation, as in:
-<p class="indent"> <code>{ a: 1, b:2, c:'abc', d:[ 1,3,4 ] }</code> </p>
+<p class="indent"> <code style="color:green;">{ a: 1, b:2, c:'abc', d:[ 1,3,4 ] }</code> </p>
 or
-<p class="indent"> <code>[ 1, 3, 5, { a:false, b:true }, 15, 17 ]</code> </p>
+<p class="indent"> <code style="color:green;">[ 1, 3, 5, { a:false, b:true }, 15, 17 ]</code> </p>
 or
-<p class="indent"> <code>[ [ 1, 3, 5 ], [ 2, 4, 6 ] ]</code> </p>
+<p class="indent"> <code style="color:green;">[ [ 1, 3, 5 ], [ 2, 4, 6 ] ]</code> </p>
 or
-<p class="indent"> <code>{ first: { "flag": true, "message": 'Testing' }, second: { "flag":true, "message": 'Working' } }</code> </p>
-     Note that string object keys (as in <code>"key"</code> do NOT reference the same element as an identifier key (as in
+<p class="indent"> <code style="color:green;">{ first: { "flag": true, "message": 'Testing' }, second: { "flag":true, "message": 'Working' } }</code> </p>
+     Note that string object keys (as in <code>"key"</code>) do NOT reference the same element as an identifier key (as in
      <code>key</code>).  Therefore, this is legal:
-<p class="indent"> <code>value = { "flag": true, flag: 'Red' }</code> </p>
+<p class="indent"> <code style="color:green;">value = { "flag": true, flag: 'Red' }</code> </p>
    and the elements are accessed as <code>value."flag"</code> and <code>value.flag</code>.
 </div>
 <hr class="sectionsep">
   <h2>Modes and Precision</h2>
 <div class="cols">
-  Calc can do essentially arbitrary precision arithmetic. It can also do arithmetic on rational fractions (as in <code>1/4 + 1/2 = 3/4</code>). The default setting is to do decimal arithmetic, but this can adjust using either command line options (see
+  Calc can do essentially arbitrary precision arithmetic. It can also do arithmetic on rational fractions (as in <code>1/4 + 1/2 = 3/4</code>).
+      The default setting is to do decimal arithmetic, but this can be adjusted using either command line options (see
       <code>-rational</code> and <code>-decimal</code> above), or using directives during execution.  The default precision for
-      all calculations 128-bit arithmetic, or approximately 34 digits of decimal precision. The precision can be adjusted up to
+      all calculations is 128-bit arithmetic, or approximately 34 digits of decimal precision. The precision can be adjusted up to
       12,500 (due to somewhat arbitrary restrictions on our calculation of the value of <code>&#x1D6D1;</code>) using any of
       several directives.
-  <p>Trigonometric calculations are, by default, done in radians, but this can be changed to use degrees using a directive.
+  <p>Trigonometric calculations are, by default, done in radians, but this can be changed to use degrees using the <code>:degrees</code> directive.
 </div>
 <hr class="sectionsep">
   <h2>Formats</h2>
@@ -388,7 +403,7 @@ or
       <tr><td><code>@E</code></td><td>Format an integer as a date (mm/dd/yyyy) (U.S. format)</td></tr>
       <tr><td><code>@f</code></td><td>For decimal mode, format the result as a rational fraction</td></tr>
       <tr><td><code>@F</code></td><td>Format as a proper fraction (with possible integer portion)</td></tr>
-      <tr><td><code>@</code>[<code>,</code>]<code>j</code></td><td>Format the result as a "pretty printed" JSON result<br>(multiple lines with indents)</td></tr>
+      <tr><td><code>@</code>[<code>,</code>]<code>j</code></td><td>Format the result as a "pretty printed" JSON result<br>(multiple lines with indents)<br>with optional separators for numeric values</td></tr>
       <tr><td><code>@r</code></td><td>Format the result as a Roman Numeral value</td></tr>
       <tr><td><code>@x</code></td><td>For integers and strings, format in hexadecimal form</td></tr>
       <tr><td><code>@o</code></td><td>For integers and strings, format in octal form</td></tr>

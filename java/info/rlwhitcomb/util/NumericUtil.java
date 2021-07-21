@@ -623,7 +623,7 @@ public final class NumericUtil
 
 	/**
 	 * Format a value using the {@link Range} enum to put into a readable range,
-	 * using mixed-mode units..
+	 * using mixed-mode units.
 	 *
 	 * @param	value	The input value to format.
 	 * @return		The value formatted to an appropriate range.
