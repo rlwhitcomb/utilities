@@ -267,6 +267,15 @@
 		<entry key="build.time"   value="${build.time}"/>
 	</propertyfile>
 
+	<echo message="=========================================================="/>
+	<echo message=""/>
+	<echo message="             U T I L I T I E S   B U I L D"/>
+	<echo message=""/>
+	<echo message="          Build number = ${build.lastrev}"/>
+	<echo message="       Build date/time = ${build.date} ${build.time}"/>
+	<echo message=""/>
+	<echo message="=========================================================="/>
+
 	<condition property="new.java.version" value="true" else="false" >
 		<javaversion atleast="9"/>
 	</condition>
