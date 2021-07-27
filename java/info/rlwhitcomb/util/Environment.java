@@ -366,7 +366,7 @@ public final class Environment
 	    try {
 		semVer = new SemanticVersion(Environment.class);
 	    }
-	    catch (ParseException pe) {
+	    catch (ParseException | NullPointerException ex) {
 		semVer = new SemanticVersion();
 	    }
 	    IMPLEMENTATION_VERSION = semVer;
