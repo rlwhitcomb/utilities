@@ -59,6 +59,8 @@
  *	29-Mar-2021 (rlwhitcomb)
  *	    Add a flag to signal this fraction should always be represented
  *	    as a proper fraction (helps with @F formatting in Calc).
+ *	27-Jul-2021 (rlwhitcomb)
+ *	    Add "pow" function.
  */
 package info.rlwhitcomb.util;
 
@@ -596,6 +598,15 @@ public class BigFraction extends Number
 		return this;
 
 	    return new BigFraction(numer.multiply(other.denom), denom.multiply(other.numer));
+	}
+
+	/**
+	 * Return this fraction taken to the exponent power.
+	 *
+	 * @return this<sup>exponent</sup>.
+	 */
+	public BigFraction pow(final int exponent) {
+	    return new BigFraction(numer.pow(exponent), denom.pow(exponent));
 	}
 
 	/**

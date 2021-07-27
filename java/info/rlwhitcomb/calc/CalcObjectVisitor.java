@@ -288,6 +288,8 @@
  *	    Implement "always displaying thousands separators" mode.
  *	10-Jul-2021 (rlwhitcomb)
  *	    Implement ignore variable / member name case.
+ *	27-Jul-2021 (rlwhitcomb)
+ *	    Start on fractional powers.
  */
 package info.rlwhitcomb.calc;
 
@@ -1668,46 +1670,90 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitPowerNExpr(CalcParser.PowerNExprContext ctx) {
-	    BigDecimal base = getDecimalValue(ctx.expr());
-	    String power    = ctx.POWERS().getText();
-	    double exp;
+	    String power = ctx.POWERS().getText();
 
-	    switch (power) {
-		case "\u2070":
-		    exp = 0.0d;
-		    break;
-		case "\u00B9":
-		    exp = 1.0d;
-		    break;
-		case "\u00B2":
-		    exp = 2.0d;
-		    break;
-		case "\u00B3":
-		    exp = 3.0d;
-		    break;
-		case "\u2074":
-		    exp = 4.0d;
-		    break;
-		case "\u2075":
-		    exp = 5.0d;
-		    break;
-		case "\u2076":
-		    exp = 6.0d;
-		    break;
-		case "\u2077":
-		    exp = 7.0d;
-		    break;
-		case "\u2078":
-		    exp = 8.0d;
-		    break;
-		case "\u2079":
-		    exp = 9.0d;
-		    break;
-		default:
-		    throw new UnknownOpException(power, ctx);
+	    if (settings.rationalMode) {
+		BigFraction base = getFractionValue(ctx.expr());
+		int exp;
+
+		switch (power) {
+		    case "\u2070":
+			exp = 0;
+			break;
+		    case "\u00B9":
+			exp = 1;
+			break;
+		    case "\u00B2":
+			exp = 2;
+			break;
+		    case "\u00B3":
+			exp = 3;
+			break;
+		    case "\u2074":
+			exp = 4;
+			break;
+		    case "\u2075":
+			exp = 5;
+			break;
+		    case "\u2076":
+			exp = 6;
+			break;
+		    case "\u2077":
+			exp = 7;
+			break;
+		    case "\u2078":
+			exp = 8;
+			break;
+		    case "\u2079":
+			exp = 9;
+			break;
+		    default:
+			throw new UnknownOpException(power, ctx);
+		}
+
+		return base.pow(exp);
 	    }
+	    else {
+		BigDecimal base = getDecimalValue(ctx.expr());
+		double exp;
 
-	    return MathUtil.pow(base, exp, mc);
+		switch (power) {
+		    case "\u2070":
+			exp = 0.0d;
+			break;
+		    case "\u00B9":
+			exp = 1.0d;
+			break;
+		    case "\u00B2":
+			exp = 2.0d;
+			break;
+		    case "\u00B3":
+			exp = 3.0d;
+			break;
+		    case "\u2074":
+			exp = 4.0d;
+			break;
+		    case "\u2075":
+			exp = 5.0d;
+			break;
+		    case "\u2076":
+			exp = 6.0d;
+			break;
+		    case "\u2077":
+			exp = 7.0d;
+			break;
+		    case "\u2078":
+			exp = 8.0d;
+			break;
+		    case "\u2079":
+			exp = 9.0d;
+			break;
+		    default:
+			throw new UnknownOpException(power, ctx);
+		}
+
+		return MathUtil.pow(base, exp, mc);
+	    }
 	}
 
 	@Override
