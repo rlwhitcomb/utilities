@@ -144,6 +144,8 @@
  *	    Private constructor since this is a utility class (all static methods).
  *	09-Jul-2021 (rlwhitcomb)
  *	    Switch to using either "release.build" or "debug.build" from the properties.
+ *	26-Jul-2021 (rlwhitcomb)
+ *	    Add an accessor to get the Implementation-Version (as a SemanticVersion).
  */
 package info.rlwhitcomb.util;
 
@@ -152,6 +154,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
@@ -166,6 +169,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.lang.management.ManagementFactory;
+
+import de.onyxbits.SemanticVersion;
 
 import static info.rlwhitcomb.util.CharUtil.Justification.*;
 import static info.rlwhitcomb.util.ConsoleColor.Code.*;
@@ -192,6 +197,7 @@ public final class Environment
 	private static final String FILE_SEPARATOR = System.getProperty("file.separator");
 	private static final String PATH_SEPARATOR = System.getProperty("path.separator");
 	private static final int DATA_MODEL = Integer.parseInt(System.getProperty("sun.arch.data.model"));
+	private static final SemanticVersion IMPLEMENTATION_VERSION;
 
 	public static final int DATA_MODEL_32 = 32;
 	public static final int DATA_MODEL_64 = 64;
@@ -304,6 +310,7 @@ public final class Environment
 		NATIVE_PATH_VAR	(Environment::getNativePathVar, "Native Code Path Variable", "nativePathVar", "npv"),
 		PRODUCT_NAME	(Environment::getProductName, "Product Name", "productName", "prodName", "name"),
 		PRODUCT_VERSION	(Environment::getProductVersion, "Product Version", "productVersion", "prodVersion", "prodVer", "pv"),
+		IMPL_VERSION	(Environment::getImplementationVersion, "Implementation Version", "implementationVersion", "implVersion", "iv"),
 		HOST_NAME	(Environment::hostName, "Host Name", "hostName", "host", "h"),
 		OS_VERSION	(Environment::osVersion, "O/S Version", "osVersion", "osVer", "ov"),
 		PLATFORM	(Environment::platform, "Platform", "platform", "plat", "p"),
@@ -354,6 +361,15 @@ public final class Environment
 		javaMajorVersion = Integer.parseInt(parts[1]);
 	    else
 		javaMajorVersion = Integer.parseInt(parts[0]);
+
+	    SemanticVersion semVer;
+	    try {
+		semVer = new SemanticVersion(Environment.class);
+	    }
+	    catch (ParseException pe) {
+		semVer = new SemanticVersion();
+	    }
+	    IMPLEMENTATION_VERSION = semVer;
 	}
 
 
@@ -558,6 +574,27 @@ public final class Environment
 	 */
 	public static String osVersion() {
 	    return OS_VERSION;
+	}
+
+
+	/**
+	 * Read the "Implementation-Version" attribute of the .jar file
+	 * and parse into a semantic version.
+	 *
+	 * @return the implementation version.
+	 */
+	public static SemanticVersion implementationVersion() {
+	    return IMPLEMENTATION_VERSION;
+	}
+
+
+	/**
+	 * Get a formatted string of the implementation version.
+	 *
+	 * @return The formatted implementation version.
+	 */
+	public static String getImplementationVersion() {
+	    return Intl.formatString("util#env.implVersion", IMPLEMENTATION_VERSION);
 	}
 
 
@@ -1334,6 +1371,7 @@ public final class Environment
 	    String productName = getProductName();
 	    String versionInfo = getProductVersion();
 	    String buildInfo   = getProductBuildDateTime();
+	    String implVersion = getImplementationVersion();
 	    String copyright   = getCopyrightNotice();
 	    String javaVersion = getJavaVersion();
 
@@ -1343,6 +1381,7 @@ public final class Environment
 	    lineWidth = Math.max(lineWidth, productName.length());
 	    lineWidth = Math.max(lineWidth, versionInfo.length());
 	    lineWidth = Math.max(lineWidth, buildInfo.length());
+	    lineWidth = Math.max(lineWidth, implVersion.length());
 	    lineWidth = Math.max(lineWidth, copyright.length());
 	    lineWidth = Math.max(lineWidth, javaVersion.length());
 	    // If the given width wasn't sufficient for all the text
@@ -1359,6 +1398,7 @@ public final class Environment
 		println(ps, colors, "util#env.productInfo", " ", productName);
 		println(ps, colors, "util#env.versionInfo", " ", versionInfo);
 		ps.println();
+		println(ps, colors, "util#env.otherInfo", " ", implVersion);
 		println(ps, colors, "util#env.otherInfo", " ", buildInfo);
 		println(ps, colors, "util#env.otherInfo", " ", copyright);
 		println(ps, colors, "util#env.otherInfo", " ", javaVersion);
@@ -1369,6 +1409,7 @@ public final class Environment
 		// Negative width puts the odd space on the right
 		String product = CharUtil.padToWidth(productName, -width, CENTER);
 		String version = CharUtil.padToWidth(versionInfo, -width, CENTER);
+		String implVer = CharUtil.padToWidth(implVersion, -width, CENTER);
 		String build   = CharUtil.padToWidth(buildInfo,   -width, CENTER);
 		String copy    = CharUtil.padToWidth(copyright,   -width, CENTER);
 		String java    = CharUtil.padToWidth(javaVersion, -width, CENTER);
@@ -1376,6 +1417,7 @@ public final class Environment
 		println(ps, colors, "util#env.productInfo", "", product);
 		println(ps, colors, "util#env.versionInfo", "", version);
 		ps.println();
+		println(ps, colors, "util#env.otherInfo", "", implVer);
 		println(ps, colors, "util#env.otherInfo", "", build);
 		println(ps, colors, "util#env.otherInfo", "", copy);
 		println(ps, colors, "util#env.otherInfo", "", java);

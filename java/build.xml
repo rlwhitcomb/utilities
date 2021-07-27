@@ -217,6 +217,8 @@
 		Really use "-html5" for Javadoc, copy Calc help image files.
 	    09-Jul-2021 (rlwhitcomb)
 		Switch to using "release.build" in the properties file instead of "debug.build".
+	    26-Jul2-2021 (rlwhitcomb)
+		Add a new package for SemanticVersion class. Add manifest to .jar file.
 
      ========================================================================== -->
 
@@ -446,8 +448,9 @@
 		    debug="${debug.build}">
 			<compilerarg line="${compiler.args}"/>
 			<src path="."/>
-			<src path="net/iharder/b64"/>
+			<src path="de/onyxbits"/>
 			<src path="name/fraser/neil/plaintext"/>
+			<src path="net/iharder/b64"/>
 			<src path="info/rlwhitcomb"/>
 			<src path="info/rlwhitcomb/annotations"/>
 			<src path="info/rlwhitcomb/calc"/>
@@ -475,7 +478,13 @@
 	</target>
 
 	<target name="jar" depends="compile" description="Jar up the compiled class files (into ${result.jar}).">
-		<jar basedir="." destfile="${result.jar}">
+		<delete file="MANIFEST.MF"/>
+		<manifest file="MANIFEST.MF">
+			<attribute name="Built-By" value="${user.name}"/>
+			<attribute name="Implementation-Title" value="${product.name}"/>
+			<attribute name="Implementation-Version" value="${build.version}+${build.lastrev}"/>
+		</manifest>
+		<jar basedir="." destfile="${result.jar}" manifest="MANIFEST.MF">
 			<metainf dir="..">
 				<include name="LICENSE"/>
 				<include name="NOTICE"/>
@@ -509,6 +518,7 @@
 			<include name="info/rlwhitcomb/wordfind/*.txt"/>
 			<exclude name="info/rlwhitcomb/wordfind/enable1.txt"/>
 			<include name="info/rlwhitcomb/**/*.properties"/>
+			<include name="de/onyxbits/*.class"/>
 			<include name="name/fraser/neil/plaintext/*.class"/>
 			<include name="net/iharder/b64/*.class"/>
 		</jar>
@@ -523,6 +533,7 @@
 			<link href="https://pivot.apache.org/2.0.5/docs/api/"/>
 			<link href="https://www.antlr.org/api/Java/"/>
 			<packageset dir=".">
+				<include name="de/onyxbits"/>
 				<include name="net/iharder/b64"/>
 				<include name="name/fraser/neil/plaintext"/>
 				<include name="info/rlwhitcomb/**"/>
@@ -573,6 +584,7 @@
 			<fileset dir="." includes="${result.jar}"/>
 			<fileset dir="." includes="*.class"/>
 			<fileset dir="test/data" includes="*.class"/>
+			<fileset dir="de/onyxbits" includes="*.class"/>
 			<fileset dir="name/fraser/neil/plaintext" includes="*.class"/>
 			<fileset dir="net/iharder/b64" includes="*.class"/>
 			<fileset dir="info/rlwhitcomb" includes="*.class"/>
