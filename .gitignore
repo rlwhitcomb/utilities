@@ -18,3 +18,4 @@ PreProcVisitor.java
 test*.log
 TestPP.java
 calc_help.html
+MANIFEST.MF
