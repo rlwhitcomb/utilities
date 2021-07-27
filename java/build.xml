@@ -217,8 +217,10 @@
 		Really use "-html5" for Javadoc, copy Calc help image files.
 	    09-Jul-2021 (rlwhitcomb)
 		Switch to using "release.build" in the properties file instead of "debug.build".
-	    26-Jul2-2021 (rlwhitcomb)
+	    26-Jul-2021 (rlwhitcomb)
 		Add a new package for SemanticVersion class. Add manifest to .jar file.
+	    26-Jul-2021 (rlwhitcomb)
+		Sometimes the Calc help page in the doc was empty - fix race condition.
 
      ========================================================================== -->
 
@@ -407,14 +409,16 @@
 			<generate-text-resources dir="info/rlwhitcomb/tester" />
 			<generate-text-resources dir="info/rlwhitcomb/tree" />
 			<generate-text-resources dir="info/rlwhitcomb/util" />
-			<preproc dir="info/rlwhitcomb/calc" inputExt=".htmlpp"
-				processAsDirectory="true" recurseDirectories="false"
-				nologo="true" verbose="plus" format="UTF8"/>
-			<mkdir dir="doc-files"/>
-			<copy todir="doc-files">
-				<fileset dir="info/rlwhitcomb/calc" includes="calc_help.html"/>
-				<fileset dir="info/rlwhitcomb/calc" includes="*.png"/>
-			</copy>
+			<sequential>
+				<preproc dir="info/rlwhitcomb/calc" inputExt=".htmlpp"
+					processAsDirectory="true" recurseDirectories="false"
+					nologo="true" verbose="plus" format="UTF8"/>
+				<mkdir dir="doc-files"/>
+				<copy todir="doc-files">
+					<fileset dir="info/rlwhitcomb/calc" includes="calc_help.html"/>
+					<fileset dir="info/rlwhitcomb/calc" includes="*.png"/>
+				</copy>
+			</sequential>
 		</parallel>
 	</target>
 
