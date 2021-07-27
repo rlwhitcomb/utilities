@@ -61,6 +61,8 @@
  *	    as a proper fraction (helps with @F formatting in Calc).
  *	27-Jul-2021 (rlwhitcomb)
  *	    Add "pow" function.
+ *	27-Jul-2021 (rlwhitcomb)
+ *	    Negative powers and special cases for 0 and 1. Add "reciprocal".
  */
 package info.rlwhitcomb.util;
 
@@ -596,16 +598,35 @@ public class BigFraction extends Number
 		return ZERO;
 	    else if (other.equals(ONE))
 		return this;
+	    else if (equals(ONE))
+		return other.reciprocal();
 
 	    return new BigFraction(numer.multiply(other.denom), denom.multiply(other.numer));
 	}
 
 	/**
+	 * Return the reciprocal of this fraction (which would be <code>denom/numer</code>).
+	 *
+	 * @return The result of <code>1/this</code>.
+	 */
+	public BigFraction reciprocal() {
+	    return new BigFraction(denom, numer);
+	}
+
+	/**
 	 * Return this fraction taken to the exponent power.
 	 *
+	 * @param exponent The power to raise this fraction to.
 	 * @return this<sup>exponent</sup>.
 	 */
 	public BigFraction pow(final int exponent) {
+	    if (exponent < 0)
+		return reciprocal().pow(-exponent);
+	    else if (exponent == 0)
+		return ONE;
+	    else if (exponent == 1)
+		return this;
+
 	    return new BigFraction(numer.pow(exponent), denom.pow(exponent));
 	}
 

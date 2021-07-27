@@ -290,6 +290,8 @@
  *	    Implement ignore variable / member name case.
  *	27-Jul-2021 (rlwhitcomb)
  *	    Start on fractional powers.
+ *	27-Jul-2021 (rlwhitcomb)
+ *	    More work on powers of fractions.
  */
 package info.rlwhitcomb.calc;
 
@@ -1662,9 +1664,16 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitPowerExpr(CalcParser.PowerExprContext ctx) {
-	    BigDecimal base = getDecimalValue(ctx.expr(0));
 	    double exp = getDoubleValue(ctx.expr(1));
 
+	    if (settings.rationalMode) {
+		if (Math.floor(exp) == exp && !Double.isInfinite(exp)) {
+		    BigFraction f = getFractionValue(ctx.expr(0));
+		    return f.pow((int)exp);
+		}
+	    }
+
+	    BigDecimal base = getDecimalValue(ctx.expr(0));
 	    return MathUtil.pow(base, exp, mc);
 	}
 
