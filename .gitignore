@@ -2,6 +2,7 @@
 *.jar
 resources*.properties
 java/doc
+java/doc-files
 .settings
 .DS_Store
 *.interp
