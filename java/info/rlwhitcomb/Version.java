@@ -36,11 +36,14 @@
  *	26-May-2021 (rlwhitcomb)
  *	    Update outputs using colors because of new ConsoleColor
  *	    paradigm.
+ *	27-Jul-2021 (rlwhitcomb)
+ *	    Check for correctness of version strings using Semantic Version parser.
  */
 package info.rlwhitcomb;
 
+import java.text.ParseException;
 import java.util.List;
-
+import de.onyxbits.SemanticVersion;
 import info.rlwhitcomb.util.CharUtil;
 import static info.rlwhitcomb.util.CharUtil.Justification.*;
 import static info.rlwhitcomb.util.ConsoleColor.Code.*;
@@ -132,7 +135,17 @@ public class Version
 	    List<ProgramInfo> infos = Environment.getAllProgramInfo();
 
 	    for (ProgramInfo info : infos) {
-		String version = String.format("Version %1$s", info.version);
+		String rawVersion = info.version;
+		// Get the version string in a "canonical" form (according to the Semantic Version spec).
+		try {
+		    SemanticVersion semVer = new SemanticVersion(info.version);
+		    rawVersion = semVer.toString();
+		}
+		catch (ParseException pe) {
+		    rawVersion += " (raw)";	// this is not in the resource file b/c it is an error
+						// condition that should never happen anyway.
+		}
+		String version = String.format("Version %1$s", rawVersion);
 
 		output(BLUE_BOLD_BRIGHT + CharUtil.padToWidth(info.title, 50, CENTER));
 		output(GREEN            + CharUtil.padToWidth(version, 50, CENTER));
