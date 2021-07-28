@@ -17,9 +17,10 @@
 >Test 'pfactors': Passed
 >Test 'perfect': Passed
 >Test 'mort': Passed
+>Test 'f1': Passed
 >
 >End of Calc tests.
 >------------------------------------
->Ran 14 tests: 14 passed, 0 failed.
+>Ran 15 tests: 15 passed, 0 failed.
 >====================================
 >
