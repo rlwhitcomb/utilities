@@ -292,6 +292,8 @@
  *	    Start on fractional powers.
  *	27-Jul-2021 (rlwhitcomb)
  *	    More work on powers of fractions.
+ *	27-Jul-2021 (rlwhitcomb)
+ *	    Fix #13 - parse/format of negative years.
  */
 package info.rlwhitcomb.calc;
 
@@ -1114,17 +1116,23 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			iValue = toIntegerValue(this, result, mc, ctx);
 			LocalDate date = LocalDate.ofEpochDay(iValue.longValue());
 			int year = date.getYear();
-			if (year < 0) {
-			    year = -year;
-			    valueBuf.append('-');
-			}
 			String dateStr;
-			if (formatChar == 'E')
-			    dateStr = String.format("%1$02d/%2$02d/%3$04d",
-				date.getMonthValue(), date.getDayOfMonth(), year);
-			else
-			    dateStr = String.format("%1$04d-%2$02d-%3$02d",
-				year, date.getMonthValue(), date.getDayOfMonth());
+			if (formatChar == 'E') {
+			    if (year < 0)
+				dateStr = String.format("%1$02d/%2$02d/-%3$04d",
+				    date.getMonthValue(), date.getDayOfMonth(), -year);
+			    else
+				dateStr = String.format("%1$02d/%2$02d/%3$04d",
+				    date.getMonthValue(), date.getDayOfMonth(), year);
+			}
+			else {
+			    if (year < 0)
+				dateStr = String.format("-%1$04d-%2$02d-%3$02d",
+				    -year, date.getMonthValue(), date.getDayOfMonth());
+			    else
+				dateStr = String.format("%1$04d-%2$02d-%3$02d",
+				    year, date.getMonthValue(), date.getDayOfMonth());
+			}
 			valueBuf.append(dateStr).append('\'');
 			break;
 
@@ -3176,6 +3184,13 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    long epochDate;
 
 	    try {
+		// Special case of US date with minus sign before 4-digit year
+		int slot = value.length() - 5;
+		if (!isoDate && value.charAt(slot) == '-' && !Character.isDigit(value.charAt(slot - 1))) {
+		    negate = true;
+		    value = value.substring(0, slot) + value.substring(slot + 1);
+		}
+
 		// Note: this regex should be the same as DTSEP in Calc.g4
 		buf.append(value.replaceAll("[\\-/,;\\._]", "-"));
 

@@ -209,6 +209,8 @@
  *	    the format specified). New aliases for some directives.
  *	12-Jul-2021 (rlwhitcomb)
  *	    New directive to ignore case of variable/member names.
+ *	27-Jul-2021 (rlwhitcomb)
+ *	    Allow negative years in US format in the "proper" place.
  */
 
 grammar Calc;
@@ -516,7 +518,7 @@ DATE_CONST
          | 'd' '\'' '-' ? DIG DIG DIG DIG DIG DIG DIG DIG '\''
          | 'd' '\'' '-' ? DIG DIG DIG DIG DIG DIG '\''
 /* US format (MM/dd/yyyy or MM/dd/yy or MMddyyyy or MMddyy) */
-         | 'D' '\'' '-' ? DIG ? DIG DTSEP DIG ? DIG DTSEP ( DIG DIG | DIG DIG DIG DIG ) '\''
+         | 'D' '\'' '-' ? DIG ? DIG DTSEP DIG ? DIG DTSEP '-' ? ( DIG DIG | DIG DIG DIG DIG ) '\''
          | 'D' '\'' '-' ? DIG DIG DIG DIG DIG DIG DIG DIG '\''
          | 'D' '\'' '-' ? DIG DIG DIG DIG DIG DIG '\''
          ;
