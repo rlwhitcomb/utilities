@@ -28,7 +28,7 @@ factors       : factors
 pfactors      : pfactors
 perfect       : perfect
 mort          : e_m1,e_m2
-f1            : f1
+f1,UTF-8      : f1
 
 $echo
 $echo "End of Calc tests."
