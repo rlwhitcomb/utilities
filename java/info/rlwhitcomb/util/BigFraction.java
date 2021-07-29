@@ -63,6 +63,8 @@
  *	    Add "pow" function.
  *	27-Jul-2021 (rlwhitcomb)
  *	    Negative powers and special cases for 0 and 1. Add "reciprocal".
+ *	28-Jul-2021 (rlwhitcomb)
+ *	    Beef up the "valueOf" with treatment of the Unicode fraction chars.
  */
 package info.rlwhitcomb.util;
 
@@ -106,6 +108,28 @@ public class BigFraction extends Number
 	/** A value of {@code 1/2} (one-half) as a fraction. */
 	public static final BigFraction ONE_HALF = new BigFraction(1, 2);
 
+	/** Conversion table from Unicode fraction characters to real fractions. */
+	private static final int[][] FRACTIONS = {
+	    {  1,  4 },
+	    {  1,  2 },
+	    {  3,  4 },
+	    {  1,  7 },
+	    {  1,  9 },
+	    {  1, 10 },
+	    {  0,  3 },
+	    {  1,  3 },
+	    {  2,  3 },
+	    {  1,  5 },
+	    {  2,  5 },
+	    {  3,  5 },
+	    {  4,  5 },
+	    {  1,  6 },
+	    {  5,  6 },
+	    {  1,  8 },
+	    {  3,  8 },
+	    {  5,  8 },
+	    {  7,  8 }
+	};
 
 	/** The exact integer numerator of this fraction (could be negative). */
 	private BigInteger numer;
@@ -116,6 +140,20 @@ public class BigFraction extends Number
 	 * (affects {@link #toString} method).
 	 */
 	private boolean alwaysProper = false;
+
+
+	/**
+	 * Parser for fraction strings.
+	 * <p>Forms accepted (where "frac" is one of the Unicode fractions):<ul>
+	 * <li>frac</li>
+	 * <li>nn</li>
+	 * <li>nn\s*frac</li>
+	 * <li>nn[/;
+	 */
+	static class Parser
+	{
+	    
+	}
 
 
 	/**
@@ -176,6 +214,7 @@ public class BigFraction extends Number
 	 * <ul><li>one integer number - a whole number</li>
 	 * <li>two integers separated by comma, semicolon, or slash</li>
 	 * <li>three integers (as in {@code 3 1/2})</li>
+	 * <li>or some combination with the Unicode fraction characters</li>
 	 * </ul>
 	 *
 	 * @param value	A string formatted as above.
