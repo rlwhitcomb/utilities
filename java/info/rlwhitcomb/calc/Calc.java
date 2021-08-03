@@ -156,6 +156,8 @@
  *	    Option to always display thousands separators.
  *	10-Jul-2021 (rlwhitcomb)
  *	    Option to ignore case on variable names.
+ *	03-Aug-2021 (rlwhitcomb)
+ *	    Display the last input on errors in GUI mode.
  */
 package info.rlwhitcomb.calc;
 
@@ -324,6 +326,11 @@ public class Calc
 	private QueuedThread queuedThread = new QueuedThread();
 
 	private NumberFormat sizeFormat;
+
+	/** The last expression text to be displayed from the GUI in case of error. */
+	private static String currentText = null;
+	/** An error indicator pointing to the offending text. */
+	private static String currentIndicator = null;
 
 	private static Console console = System.console();
 
@@ -668,14 +675,34 @@ public class Calc
 	    updateOutputSize();
 	}
 
+	private String stripLineEndings(String message) {
+	    int endPos = message.length();
+	    char ch;
+	    while (--endPos > 0 && ((ch = message.charAt(endPos)) == '\n' || ch == '\r'))
+		;
+	    return message.substring(0, ++endPos);
+	}
+
+	private void displayInputTextAndIndicator() {
+	    if (currentText != null) {
+		outFormat("calc#resultOnly", stripLineEndings(currentText));
+	    }
+	    if (currentIndicator != null) {
+		outFormat("calc#resultOnly", currentIndicator);
+		currentIndicator = null;
+	    }
+	}
+
 	@Override
 	public void displayErrorMessage(String message) {
+	    displayInputTextAndIndicator();
 	    outFormat("calc#error", message);
 	    updateOutputSize();
 	}
 
 	@Override
 	public void displayErrorMessage(String message, int lineNumber) {
+	    displayInputTextAndIndicator();
 	    errFormat("calc#errorLine", message, lineNumber);
 	    updateOutputSize();
 	}
@@ -722,9 +749,10 @@ public class Calc
 			int line, int charPositionInLine,
 			String message,
 			RecognitionException e) {
+		    int width = guiMode ? charPositionInLine + 1 : charPositionInLine + 3;
+		    currentIndicator = CharUtil.padToWidth("^", width, CharUtil.Justification.RIGHT);
 		    if (replMode) {
-			String indicator = CharUtil.makeStringOfChars(' ', charPositionInLine + 2);
-			System.out.format("%1$s^%n", indicator);
+			System.out.println(currentIndicator);
 		    }
 		    throw new CalcException(Intl.formatString("calc#syntaxError", charPositionInLine, message), line);
 		}
@@ -739,9 +767,10 @@ public class Calc
 		public void recover(Parser recognizer, RecognitionException e) {
 		    Token t = e.getOffendingToken();
 		    int charPos = t.getCharPositionInLine();
+		    int width = guiMode ? charPos + 1 : charPos + 3;
+		    currentIndicator = CharUtil.padToWidth("^", width, CharUtil.Justification.RIGHT);
 		    if (replMode) {
-			String indicator = CharUtil.makeStringOfChars(' ', charPos + 2);
-			System.out.format("%1$s^%n", indicator);
+			System.out.println(currentIndicator);
 		    }
 		    throw new CalcException(Intl.formatString("calc#errorNoAlt", charPos, t.getText()), t.getLine());
 		}
@@ -826,13 +855,21 @@ public class Calc
 		@Override
 		public void perform(Component source) {
 		    final String exprText = inputTextPane.getText();
+		    currentText = exprText;
 
-		    queuedThread.submitWork(() -> processString(exprText, quiet));
-
-		    inputTextPane.setText(EMPTY_TEXT);
-		    requestFocus(inputTextPane);
+		    queuedThread.submitWork(() -> {
+			try {
+			    processString(exprText, quiet);
+			}
+			finally {
+			    ApplicationContext.queueCallback(() -> {
+				currentText = null;
+				inputTextPane.setText(EMPTY_TEXT);
+				requestFocus(inputTextPane);
+			    });
+			}
+		    });
 		}
-
 	}
 
 	private class OpenAction extends Action
