@@ -56,6 +56,8 @@
  *	    Additional display of the default timezone if none was "equal" to it.
  *	29-Mar-2021 (rlwhitcomb)
  *	    Move to new package; reformat Change History.
+ *	03-Aug-2021 (rlwhitcomb)
+ *	    Add some color to most displays.
  */
 package info.rlwhitcomb.tools;
 
@@ -76,6 +78,9 @@ import java.util.Set;
 import java.util.TimeZone;
 import java.util.TreeMap;
 import java.util.TreeSet;
+
+import info.rlwhitcomb.util.ConsoleColor;
+
 
 /**
  * Display reports of various system lists, such as the system properties,
@@ -297,7 +302,8 @@ public class OS
 	}
 
 	private static void pad(final StringBuilder lineBuf, final int width) {
-	    while (lineBuf.length() < width)
+	    int length = ConsoleColor.textLength(lineBuf);
+	    while (length++ <= width)
 		lineBuf.append(' ');
 	}
 
@@ -306,7 +312,7 @@ public class OS
 	    int maxLength = 0;
 
 	    for (String value : values)
-		maxLength = Math.max(maxLength, value.length());
+		maxLength = Math.max(maxLength, ConsoleColor.textLength(value));
 	    maxLength += 2;	// to leave some space b/w columns
 
 	    int numberColumns = Math.max(1, screenWidth / maxLength);
@@ -315,7 +321,7 @@ public class OS
 	    printTitle(title);
 
 	    if (numberColumns == 1) {
-		values.stream().forEach(System.out::println);
+		values.stream().forEach(s -> System.out.println(ConsoleColor.color(s)));
 	    }
 	    else {
 		StringBuilder lineBuf = new StringBuilder(screenWidth);
@@ -328,12 +334,12 @@ public class OS
 		    for (int col = 0; col < numberColumns; col++) {
 			int index = row + (col * numberRows);
 			if (index < values.size()) {
-			    if (col > 0)
-				pad(lineBuf, col * columnWidth);
 			    lineBuf.append(values.get(index));
+			    if (col < numberColumns - 1)
+				pad(lineBuf, (col + 1) * columnWidth);
 			}
 		    }
-		    System.out.println(lineBuf.toString());
+		    System.out.println(ConsoleColor.color(lineBuf.toString()));
 		}
 	    }
 
@@ -352,7 +358,7 @@ public class OS
 	    List<String> props = new ArrayList<>(sortedNames.size());
 	    for (String propertyName: sortedNames) {
 		String value = sysProperties.getProperty(propertyName);
-		props.add(String.format("%1$s = %2$s", propertyName, value));
+		props.add(String.format("<Bk!>%1$s<> = <Gr>%2$s<>", propertyName, value));
 	    }
 
 	    display("System Properties", props);
@@ -366,7 +372,7 @@ public class OS
 
 	    List<String> envs = new ArrayList<>(env.size());
 	    for (Map.Entry<String, String> entry : env.entrySet()) {
-		envs.add(String.format("%1$s = %2$s", entry.getKey(), entry.getValue()));
+		envs.add(String.format("<Bk!>%1$s<> = <Gr>%2$s<>", entry.getKey(), entry.getValue()));
 	    }
 
 	    display("Environment", envs);
@@ -382,8 +388,8 @@ public class OS
 
 	    List<String> sets = new ArrayList<>(charsets.size());
 	    for (Map.Entry<String, Charset> entry : charsets.entrySet()) {
-		String prefix = (entry.getValue().equals(defaultCharset)) ? "* " : "  ";
-		sets.add(prefix + entry.getKey());
+		String prefix = (entry.getValue().equals(defaultCharset)) ? "<Rd!>*<> " : "  ";
+		sets.add(String.format("%1$s<Gr>%2$s<>", prefix, entry.getKey()));
 	    }
 
 	    display("Character Sets", sets);
@@ -406,8 +412,8 @@ public class OS
 	    for (Map.Entry<String, Locale> entry : sortedLocales.entrySet()) {
 		String tag = entry.getKey();
 		Locale loc = entry.getValue();
-		String prefix = (loc.equals(defaultLocale)) ? "*" : "";
-		locs.add(String.format("%1$1s%2$15s  %3$s", prefix, tag, loc.getDisplayName()));
+		String prefix = (loc.equals(defaultLocale)) ? "<Rd!>*<>" : "";
+		locs.add(String.format("%1$1s<Cy>%2$15s<>  <Gr>%3$s<>", prefix, tag, loc.getDisplayName()));
 	    }
 
 	    display("Locales", locs);
@@ -446,7 +452,7 @@ public class OS
 	    Arrays.sort(providers, OS::compareProviders);
 
 	    final List<String> provs = new ArrayList<>(providers.length);
-	    Arrays.stream(providers).forEach(p -> provs.add(String.format("%1$12s: %2$s", p.getName(), p.getInfo())));
+	    Arrays.stream(providers).forEach(p -> provs.add(String.format("<Bk!>%1$12s<>: <Gr>%2$s<>", p.getName(), p.getInfo())));
 
 	    display("Security Providers", provs);
 	}
@@ -504,7 +510,7 @@ public class OS
 	 * @return		A formatted string suitable for display.
 	 */
 	private static String tzDisplayName(TimeZone tz, boolean daylight) {
-	    return String.format("%1$s: %2$s (%3$s) [%4$s]",
+	    return String.format("<Gr>%1$s<>: <Bk!>%2$s<> <Bl!>(%3$s)<> <Cy>[%4$s]<>",
 		tz.getID(),
 		tz.getDisplayName(daylight, TimeZone.LONG),
 		tz.getDisplayName(daylight, TimeZone.SHORT),
@@ -531,11 +537,11 @@ public class OS
 
 	    Arrays.stream(availableZones).forEach(tz -> {
 		boolean isDefault = tz.equals(defaultZone);
-		String defMarker = isDefault ? "* " : "  ";
+		String defMarker = isDefault ? "<Rd!>*<> " : "  ";
 		zones.add(String.format("%1$s%2$s", defMarker, tzDisplayName(tz, false)));
 
 		if (tz.observesDaylightTime()) {
-		    defMarker = isDefault && tz.inDaylightTime(now) ? "+ " : "  ";
+		    defMarker = isDefault && tz.inDaylightTime(now) ? "<Rd!>+<> " : "  ";
 		    zones.add(String.format("%1$s%2$s", defMarker, tzDisplayName(tz, true)));
 		}
 	    });
@@ -544,9 +550,12 @@ public class OS
 
 	    if (!sawDefault) {
 		printTitle("Default Time Zone");
-		System.out.printf("* %1$s%n", tzDisplayName(defaultZone, false));
-		if (defaultZone.observesDaylightTime())
-		    System.out.printf("+ %1$s%n", tzDisplayName(defaultZone, true));
+		String value = String.format("<Rd!>*<> %1$s", tzDisplayName(defaultZone, false));
+		System.out.println(ConsoleColor.color(value));
+		if (defaultZone.observesDaylightTime()) {
+		    value = String.format("<Rd!>+<> %1$s", tzDisplayName(defaultZone, true));
+		    System.out.println(ConsoleColor.color(value));
+		}
 		printFooter();
 	    }
 	}

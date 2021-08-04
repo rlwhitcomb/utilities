@@ -54,6 +54,8 @@
  *	Add bright underlined forms (this actually works!)
  *   09-Jul-2021 (rlwhitcomb)
  *	Make the constructor private.
+ *   03-Aug-2021 (rlwhitcomb)
+ *	Change String to CharSequence in the low-level routines.
  */
 package info.rlwhitcomb.util;
 
@@ -171,7 +173,7 @@ public final class ConsoleColor
      *         the length of the text itself.
      * @param  input The colored string to measure.
      */
-    public static final int textLength(final String input) {
+    public static final int textLength(final CharSequence input) {
 	return color(input, false).length();
     }
 
@@ -181,7 +183,7 @@ public final class ConsoleColor
      * @param input The string adorned with color/attribute tags.
      * @return      The input with the tags converted to their escape codes.
      */
-    public static final String color(final String input) {
+    public static final String color(final CharSequence input) {
 	return color(input, true, null);
     }
 
@@ -193,8 +195,26 @@ public final class ConsoleColor
      *                remove the tags, leaving the bare text.
      * @return        The input with the tags converted to their escape codes.
      */
-    public static final String color(final String input, final boolean colored) {
+    public static final String color(final CharSequence input, final boolean colored) {
 	return color(input, colored, null);
+    }
+
+    /**
+     * Find a character (if present) in the given character sequence.
+     *
+     * @param input The sequence to search.
+     * @param ch    The character to search for.
+     * @param startPos Starting position for the search.
+     * @return         The index (0-based) of the character, if found, or -1 if not.
+     */
+    private static int indexOf(final CharSequence input, final char ch, final int startPos) {
+	int pos = startPos;
+	while (pos < input.length()) {
+	    if (input.charAt(pos) == ch)
+		return pos;
+	    pos++;
+	}
+	return -1;
     }
 
     /**
@@ -207,7 +227,7 @@ public final class ConsoleColor
      *                to override the default color selections (can be {@code null}).
      * @return        The input with the tags converted to their escape codes.
      */
-    public static final String color(final String input, final boolean colored, final Map<String, Code> map) {
+    public static final String color(final CharSequence input, final boolean colored, final Map<String, Code> map) {
 	Deque<Code> colorStack = new ArrayDeque<>();
 	Code currentCode = Code.RESET;
 
@@ -215,11 +235,11 @@ public final class ConsoleColor
 	for (int i = 0; i < input.length(); i++) {
 	    char ch = input.charAt(i);
 	    if (ch == '<') {
-		int endPos = input.indexOf('>', i + 1);
+		int endPos = indexOf(input, '>', i + 1);
 		if (endPos < 0)
 		    buf.append(ch);
 		else {
-		    String tag = input.substring(i + 1, endPos);
+		    String tag = input.subSequence(i + 1, endPos).toString();
 		    Code code;
 		    if (tag.isEmpty()) {
 			if (colorStack.isEmpty()) {
