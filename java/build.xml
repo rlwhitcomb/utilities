@@ -221,6 +221,8 @@
 		Add a new package for SemanticVersion class. Add manifest to .jar file.
 	    26-Jul-2021 (rlwhitcomb)
 		Sometimes the Calc help page in the doc was empty - fix race condition.
+	    03-Aug-2021 (rlwhitcomb)
+		Add "check_sorted" to Windows build.
 
      ========================================================================== -->
 
@@ -580,6 +582,10 @@
 			<arg value="verify_calc.bat"/>
 		</exec>
 		<exec executable="./check_sorted" dir="."             output="${test.log.file.name}" append="true" unless:true="${on.windows}" failonerror="true"/>
+		<exec executable="cmd"            dir="."             output="${test.log.file.name}" append="true" if:true="${on.windows}" failonerror="true">
+			<arg value="/c"/>
+			<arg value="check_sorted.bat"/>
+		</exec>
 		<echo>Done with unit tests. Successful. Results in "${test.log.file.name}" file.</echo>
 	</target>
 
