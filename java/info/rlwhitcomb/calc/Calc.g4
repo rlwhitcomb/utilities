@@ -214,6 +214,8 @@
  *	28-Jul-2021 (rlwhitcomb)
  *	    New fraction constants (f'...') - accepts the same string format
  *	    as "FRAC" function.
+ *	04-Aug-2021 (rlwhitcomb)
+ *	    Support "yes" and "no" for mode options.
  */
 
 grammar Calc;
@@ -475,6 +477,8 @@ modeOption
    | K_FALSE
    | 'on'
    | 'off'
+   | 'yes'
+   | 'no'
    | 'pop'
    | 'previous'
    | 'prev'

@@ -158,6 +158,8 @@
  *	    Option to ignore case on variable names.
  *	03-Aug-2021 (rlwhitcomb)
  *	    Display the last input on errors in GUI mode.
+ *	04-Aug-2021 (rlwhitcomb)
+ *	    Set focus back to input field after Version closes.
  */
 package info.rlwhitcomb.calc;
 
@@ -635,6 +637,13 @@ public class Calc
 		    @Override
 		    public void sheetClosed(final Sheet sheet) {
 			handleDialogClosed((Prompt) sheet);
+		    }
+		});
+
+		versionPrompt.getSheetStateListeners().add(new SheetStateListener() {
+		    @Override
+		    public void sheetClosed(final Sheet sheet) {
+			requestFocus(inputTextPane);
 		    }
 		});
 

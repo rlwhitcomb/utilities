@@ -1531,10 +1531,10 @@ public final class NumericUtil
 	}
 
 	/**
-	 * Convert a long number of milliseconds since midnight into a time string, omitting
+	 * Convert a long number of nanoseconds since midnight into a time string, omitting
 	 * trailing parts if they are zero (so, the minimum output is "HH:mm").
 	 *
-	 * @param timeValue The input millisecond value.
+	 * @param timeValue The input nanosecond value.
 	 * @param meridianFlag 'a' or 'p' to indicate adding 'am' / 'pm' indicator as appropriate.
 	 * @return The formatted time string.
 	 */

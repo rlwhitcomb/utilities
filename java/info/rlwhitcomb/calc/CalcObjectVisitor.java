@@ -294,6 +294,8 @@
  *	    More work on powers of fractions.
  *	27-Jul-2021 (rlwhitcomb)
  *	    Fix #13 - parse/format of negative years.
+ *	04-Aug-2021 (rlwhitcomb)
+ *	    Support "yes" and "no" for mode options.
  */
 package info.rlwhitcomb.calc;
 
@@ -891,10 +893,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		switch (option.toLowerCase()) {
 		    case "true":
 		    case "on":
+		    case "yes":
 			mode = true;
 			break;
 		    case "false":
 		    case "off":
+		    case "no":
 			mode = false;
 			break;
 		    case "pop":
