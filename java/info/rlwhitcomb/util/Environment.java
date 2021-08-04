@@ -146,6 +146,8 @@
  *	    Switch to using either "release.build" or "debug.build" from the properties.
  *	26-Jul-2021 (rlwhitcomb)
  *	    Add an accessor to get the Implementation-Version (as a SemanticVersion).
+ *	03-Aug-2021 (rlwhitcomb)
+ *	    Display screen size in the environment list; tweak the colors.
  */
 package info.rlwhitcomb.util;
 
@@ -316,7 +318,8 @@ public final class Environment
 		PLATFORM	(Environment::platform, "Platform", "platform", "plat", "p"),
 		PLATFORM_ID	(Environment::platformIdentifier, "Platform ID", "platformID", "platID", "pid"),
 		TEMP_DIR	(Environment::tempDirName, "Temp Directory", "tempDir", "tempd", "temp", "td"),
-		USER_HOME_DIR	(Environment::userHomeDirString, "Home Directory", "homeDir", "homed", "home", "h");
+		USER_HOME_DIR	(Environment::userHomeDirString, "Home Directory", "homeDir", "homed", "home", "h"),
+		SCREEN_SIZE	(Environment::getScreenSize, "Screen Size", "screenSize", "screen", "size", "ss");
 
 		private Supplier<String> supplier;
 		private String valueTitle;
@@ -1003,6 +1006,17 @@ public final class Environment
 
 
 	/**
+	 * Return a human-readable string of the screen size, found from {@link #consoleSize}.
+	 *
+	 * @return The printable screen size.
+	 */
+	public static String getScreenSize() {
+	    Dimension size = consoleSize();
+	    return Intl.formatString("util#env.screenSize", size.width, size.height);
+	}
+
+
+	/**
 	 * Get the (system-dependent) name of the current temporary directory
 	 * for the current user.
 	 *
@@ -1450,7 +1464,7 @@ public final class Environment
 		valuesToDisplaySet.addAll(Env.all());
 
 	    valuesToDisplaySet.forEach(e ->
-		System.out.println(ConsoleColor.color(String.format("<Gr>%1$s: <Bk!>%2$s<>", e.getTitle(), e.getSupplier().get()))));
+		System.out.println(ConsoleColor.color(String.format("<Bk!>%1$s:<> <Gr>%2$s<>", e.getTitle(), e.getSupplier().get()))));
 	}
 
 }

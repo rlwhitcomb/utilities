@@ -106,6 +106,8 @@
 #	    New messages from time conversions in NumericUtil.
 #	26-Apr-2021 (rlwhitcomb)
 #	    Add thousands separators to many numbers. Tweak some messages.
+#	03-Aug-2021 (rlwhitcomb)
+#	    New message for screen size in Environment.
 #
 
 #
@@ -157,6 +159,7 @@ env.otherInfo		= "<Bk!>%1$s%2$s<>"
 env.timeThis		= Elapsed time %1$11.6f secs.
 env.timeThisError	= Caught exception during timing: %1$s
 env.unknownDataModel	= Java has an unexpected data model value of %1$d
+env.screenSize		= %1$dw x %2$dh
 
 #
 # From ExceptionUtil
