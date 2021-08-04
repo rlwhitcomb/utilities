@@ -296,6 +296,9 @@
  *	    Fix #13 - parse/format of negative years.
  *	04-Aug-2021 (rlwhitcomb)
  *	    Support "yes" and "no" for mode options.
+ *	04-Aug-2021 (rlwhitcomb)
+ *	    For "@d" conversions if the input is a single codepoint,
+ *	    convert the codepoint and print the numeric value.
  */
 package info.rlwhitcomb.calc;
 
@@ -1031,8 +1034,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    Object result           = evaluateFunction(visit(ctx.expr()));
 	    String resultString     = "";
 
-	    BigInteger iValue;
-	    BigDecimal dValue;
+	    BigInteger iValue = null;
+	    BigDecimal dValue = null;
 
 	    int precision = Integer.MIN_VALUE;
 	    boolean separators = false;
@@ -1104,7 +1107,20 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 		    case 'D':
 		    case 'd':
-			dValue = toDecimalValue(this, result, mc, ctx);
+			// special case for a one character string -> codepoint
+			if (result instanceof String) {
+			    String stringValue = (String) result;
+			    int count = Character.codePointCount(stringValue, 0, stringValue.length());
+			    if (count == 1) {
+				int cp = Character.codePointAt(stringValue, 0);
+				dValue = new BigDecimal(cp);
+			    }
+			}
+
+			// This is the default handling for all other cases
+			if (dValue == null)
+			    dValue = toDecimalValue(this, result, mc, ctx);
+
 			if (precision != Integer.MIN_VALUE) {
 			    dValue = MathUtil.round(dValue, precision);
 			}
