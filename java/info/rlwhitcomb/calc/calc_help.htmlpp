@@ -133,6 +133,7 @@ h2 {
     <h1>Expression Calculator Help</h1>
     <h2>Version ${Calc.version}, build ${build.number}</h2>
   </div>
+<hr class="sectionsep">
   <h2>Introduction</h2>
 <div class="cols">
   An expression calculator that combines (nearly) unlimited precision decimal arithmetic with a rich assortment
