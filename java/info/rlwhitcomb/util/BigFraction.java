@@ -65,6 +65,8 @@
  *	    Negative powers and special cases for 0 and 1. Add "reciprocal".
  *	28-Jul-2021 (rlwhitcomb)
  *	    Beef up the "valueOf" with treatment of the Unicode fraction chars.
+ *	06-Aug-2021 (rlwhitcomb)
+ *	    And ... finish that work.
  */
 package info.rlwhitcomb.util;
 
@@ -88,10 +90,14 @@ public class BigFraction extends Number
 {
 	private static final long serialVersionUID = 3889374235914093689L;
 
-	/** The pattern used for two strings, as in "numer [&nbsp;,/;] denom". */
-	private static final Pattern TWO_STRINGS = Pattern.compile("(-?[0-9]+)(\\s+|\\s*[,/;]\\s*)(-?[0-9]+)");
-	/** The pattern for three strings, as in "int [&nbsp;,/;] numer [&nbsp;,/;] denom". */
-	private static final Pattern THREE_STRINGS = Pattern.compile("(-?[0-9]+)(\\s+|\\s*[,/;]\\s*)(-?[0-9]+)(\\s+|\\s*[,/;]\\s*)(-?[0-9]+)");
+	/** The pattern used for two ints, as in "numer [&nbsp;,/;] denom". */
+	private static final Pattern TWO_INTS = Pattern.compile("(-?[0-9]+)(\\s+|\\s*[,/;]\\s*)(-?[0-9]+)");
+	/** The pattern for three ints, as in "int [&nbsp;,/;] numer [&nbsp;,/;] denom". */
+	private static final Pattern THREE_INTS = Pattern.compile("(-?[0-9]+)(\\s+|\\s*[,/;]\\s*)(-?[0-9]+)(\\s+|\\s*[,/;]\\s*)(-?[0-9]+)");
+	/** The pattern for an int and a fraction character, as in "int [&nbsp;,/;] frac". */
+	private static final Pattern INT_FRAC = Pattern.compile("(-?[0-9]+)(\\s*[,/;]?\\s*)(-?[\u00BC-\u00BE\u2150-\u215E\\u2189])");
+	/** The pattern for a single fraction character. */
+	private static final Pattern FRAC_ONLY = Pattern.compile("-?[\u00BC-\u00BE\u2150-\u215E\u2189]");
 
 	/** A value of {@code 0/1} (integer 0) as a fraction. */
 	public static final BigFraction ZERO = new BigFraction(BigInteger.ZERO);
@@ -143,16 +149,49 @@ public class BigFraction extends Number
 
 
 	/**
-	 * Parser for fraction strings.
-	 * <p>Forms accepted (where "frac" is one of the Unicode fractions):<ul>
-	 * <li>frac</li>
-	 * <li>nn</li>
-	 * <li>nn\s*frac</li>
-	 * <li>nn[/;
+	 * Convert a string of <code>- <i>fraction</i></code> to a real fraction value.
+	 *
+	 * @param value A string consisting of an optional minus sign and a single
+	 *              Unicode fraction character (hopefully I found them all!)
+	 * @return The real fraction value.
+	 * @throws IllegalArgumentException if the character/string is not recognized.
 	 */
-	static class Parser
-	{
-	    
+	private static BigFraction fractionValue(final String value) {
+	    String frac = value;
+	    boolean negative = !frac.isEmpty() && frac.charAt(0) == '-';
+	    int index = 0;
+
+	    if (negative)
+		frac = value.substring(1);
+
+	    switch (frac) {
+		case "\u00BC": index = 0;  break; /* 1/4  */
+		case "\u00BD": index = 1;  break; /* 1/2  */
+		case "\u00BE": index = 2;  break; /* 3/4  */
+		case "\u2150": index = 3;  break; /* 1/7  */
+		case "\u2151": index = 4;  break; /* 1/9  */
+		case "\u2152": index = 5;  break; /* 1/10 */
+		case "\u2189": index = 6;  break; /* 0/3  */
+		case "\u2153": index = 7;  break; /* 1/3  */
+		case "\u2154": index = 8;  break; /* 2/3  */
+		case "\u2155": index = 9;  break; /* 1/5  */
+		case "\u2156": index = 10; break; /* 2/5  */
+		case "\u2157": index = 11; break; /* 3/5  */
+		case "\u2158": index = 12; break; /* 4/5  */
+		case "\u2159": index = 13; break; /* 1/6  */
+		case "\u215A": index = 14; break; /* 5/6  */
+		case "\u215B": index = 15; break; /* 1/8  */
+		case "\u215C": index = 16; break; /* 3/8  */
+		case "\u215D": index = 17; break; /* 5/8  */
+		case "\u215E": index = 18; break; /* 7/8  */
+		default:
+		    throw new Intl.IllegalArgumentException("util#fraction.unknownFracChar", frac);
+	    }
+
+	    if (negative)
+		return new BigFraction(-FRACTIONS[index][0], FRACTIONS[index][1]);
+	    else
+		return new BigFraction(FRACTIONS[index][0], FRACTIONS[index][1]);
 	}
 
 
@@ -223,21 +262,42 @@ public class BigFraction extends Number
 	 *		of the supported formats.
 	 */
 	public static BigFraction valueOf(final String value) {
-	    Matcher m3 = THREE_STRINGS.matcher(value);
+	    Matcher m3 = THREE_INTS.matcher(value);
 	    if (m3.matches()) {
 		return new BigFraction(m3.group(1), m3.group(3), m3.group(5));
 	    }
 	    else {
-		Matcher m2 = TWO_STRINGS.matcher(value);
+		Matcher m2 = TWO_INTS.matcher(value);
 		if (m2.matches()) {
 		    return new BigFraction(m2.group(1), m2.group(3));
 		}
 		else {
-		    try {
-			return new BigFraction(new BigInteger(value));
+		    Matcher m1 = INT_FRAC.matcher(value);
+		    if (m1.matches()) {
+			BigFraction fraction = fractionValue(m1.group(3));
+			BigInteger integer   = new BigInteger(m1.group(1));
+			int fracSgn = fraction.signum();
+			int intSgn  = integer.signum();
+			boolean negative = fracSgn < 0 || intSgn < 0;
+			BigFraction fullValue = new BigFraction(integer).abs().add(fraction.abs());
+			if (negative)
+			    return fullValue.negate();
+			else
+			    return fullValue;
 		    }
-		    catch (NumberFormatException nfe) {
-			;
+		    else {
+			Matcher m0 = FRAC_ONLY.matcher(value);
+			if (m0.matches()) {
+			    return fractionValue(value);
+			}
+			else {
+			    try {
+				return new BigFraction(new BigInteger(value));
+			    }
+			    catch (NumberFormatException nfe) {
+				;
+			    }
+			}
 		    }
 		}
 	    }
@@ -280,15 +340,31 @@ public class BigFraction extends Number
 
 	/**
 	 * Construct a fraction with a whole number value, plus numerator and denominator.
+	 * <p> Deal righteously with any mix of positive/negative values for the parts:
+	 * <ul><li>numer,denom are normalized with the sign in the numerator</li>
+	 * <li>then, if fraction or integer are either one or both negative, then the whole value is negative</li>
+	 * <li>regardless of signs, the resulting value is <code>+/- int + frac</code></li>
+	 * </ul>
 	 *
 	 * @param integer	The integer value.
 	 * @param numerator	The numerator value.
 	 * @param denominator	The denominator value.
 	 */
 	public BigFraction(final BigInteger integer, final BigInteger numerator, final BigInteger denominator) {
-	    BigInteger wholeNumber = integer.multiply(denominator);
+	    boolean negative = false;
+	    BigFraction fraction = new BigFraction(numerator, denominator);
+	    int wholeSgn = integer.signum();
+	    int fracSgn  = fraction.signum();
+	    if (wholeSgn < 0 || fracSgn < 0)
+		negative = true;
 
-	    normalize(wholeNumber.add(numerator), denominator);
+	    BigFraction value = new BigFraction(integer);
+	    value = value.abs().add(fraction.abs());
+	    if (negative)
+		this.numer = value.negate().numer;
+	    else
+		this.numer = value.numer;
+	    this.denom = value.denom;
 	}
 
 	/**

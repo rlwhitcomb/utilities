@@ -169,13 +169,13 @@ h2 {
   <p>Options are case-insensitive, and maybe be prefixed with either <code>-</code>, <code>--</code>, or on Windows <code>/</code>, as in: <code>--lightbg</code>, <code>-rational</code>, or <code>/quiet</code> <i>(Windows only)</i>. Almost all of the options have several aliases (mostly fewer characters) as shown in the table below. Some of these settings, in addition, can be set using Directives from within a script, or from the Settings dialog in the GUI window.
 </div>
   <div class="center">
-  <table style="margin-left:auto;margin-right:auto;width:60%;">
+  <table style="margin-left:auto;margin-right:auto;width:65%;">
     <caption class="tablecap">Command Line Options</caption>
     <thead>
     <tr>
-      <th style="width:20%">Option</th>
+      <th style="width:22%">Option</th>
       <th style="width:45%">Description</th>
-      <th style="width:35%">Aliases</th>
+      <th style="width:33%">Aliases</th>
     </tr>
     </thead>
     <tbody>
@@ -298,8 +298,11 @@ which gives:
      of <code>&#x1D6D1;</code> are also supported.
 <p class="indent"> <code>&#x1D6D1;</code> = <code>3.14159265358979323846264338327950288...</code> <br> <code>e</code> = <code>2.71828182845904523536028747135266249...</code> </p>
   <p>The Unicode fraction characters also represent their respective values, as in:
-<p class="indent"> <code>&#x00BC;</code> = <code>1/4</code> or <code>0.25</code> <br> <code>&#x215A;</code> = <code>5/6</code> or <code>0.8333...</code> </p>
-
+<p class="indent"> <code>&#x00BC;</code> = <code>1/4</code> or <code>0.25</code> <br> <code>&#x215A;</code> = <code>5/6</code> or <code>0.8333...</code>
+  <p>A fraction (rational) value can also be constructed using the <code>f'...'</code> syntax, where the string within the quotes can be one,
+    two, or three integers (optional minus signs), separated by spaces or <code>,</code> or <code>;</code> or <code>/</code>, or one of the
+    Unicode fraction characters optionally preceded by an integer. Some examples:
+  <p class="indent"> <code>f'2&#x00BC;'</code> = <code>2.25</code> or <code>f'1 2/3'</code> = <code>1.66666...</code>
   <p>There is a constant type used to express values as Roman Numerals. The syntax is <code>R'<i>xxxx</i>'</code>, where the
      digits are the typical Roman values of <code>I</code>, <code>V</code>, <code>X</code>, and so on, but also including the Unicode
      values in the range of <code>'\u2160'</code> to <code>'\u2182'</code>. You can use the <code>@r</code> or <code>@R</code> formats
@@ -692,7 +695,7 @@ or
     <tr><td><code>:variables</code> [ <i>id</i> ( <code>,</code> <i>id</i> ) * ]</td><td>Display the values of all or only the specified variables</td><td><code>:variable</code>, <code>:vars</code>, <code>:var</code></td></tr>
     <tr><td><code>:echo</code> <i>expr</i></td><td>Echo the value of the expression to the output</td><td></td></tr>
     <tr><td><code>:include</code> <i>string</i></td><td>Include the file(s) named by <i>string</i></td><td><code>:inc</code></td></tr>
-    <tr><td><code>:rational</code> <i>mode_option</i></td><td>Set the rational calculation mode where <i>mode_option</i> is one of:<br><code>on</code>, <code>off</code>, <code>true</code>, <code>false</code>, <code>pop</code>, <code>previous</code>, <code>prev</code>, or <i>variable</i><br><i>(default is <code>off</code>, or the value set on the command line)</i></td><td><code>:ration</code>, <code>:fraction</code>, <code>:frac</code>, <code>:fr</code></td></tr>
+    <tr><td><code>:rational</code> <i>mode_option</i></td><td>Set the rational calculation mode where <i>mode_option</i> is one of:<br><code>on</code>, <code>off</code>, <code>true</code>, <code>false</code>, <code>yes</code>, <code>no</code>, <code>pop</code>, <code>previous</code>, <code>prev</code>, or <i>variable</i><br><i>(default is <code>off</code>, or the value set on the command line)</i></td><td><code>:ration</code>, <code>:fraction</code>, <code>:frac</code>, <code>:fr</code></td></tr>
     <tr><td><code>:separators</code> <i>mode_option</i></td><td>Set whether to display thousands separators always<br><i>(default is <code>off</code> or value on command line)</i></td><td><code>:separator</code>, <code>:seps</code>, <code>:sep</code></td></tr>
     <tr><td><code>:ignorecase</code> <i>mode_option</i></td><td>Set whether to ignore case of variable and member names<br><i>(default is <code>off</code> or value on command line)</i></td><td><code>:caseinsensitive</code>, <code>:insensitive</code>,<br><code>:ignore</code>, <code>:case</code>, <code>:ign</code>, <code>:ins</code></td></tr>
     <tr><td><code>:timing</code> <i>mode_option</i></td><td>Set the timing mode (same <i>mode_option</i> choices as for <code>:rational</code>)<br><i>(default is <code>off</code> or the value set on the command line)</i></td><td><code>:time</code></td></tr>
@@ -711,8 +714,8 @@ or
      then the string is presumed not to be a file name, and the value of the string itself is processed as an expression. Note: this is
      the same process as used for strings given on the command line.
   <p>For directives which use a <i>mode_option</i>, the available values are as follows:
-  <ul><li><code>on</code> or <code>true</code> = set the mode <code><i>on</i></code>, and save the previous value in the stack</li>
-      <li><code>off</code> or <code>false</code> = set the mode <code><i>off</i></code>, and save the previous value</li>
+  <ul><li><code>on</code>, <code>true</code>, or <code>yes</code> = set the mode <code><i>on</i></code>, and save the previous value in the stack</li>
+      <li><code>off</code>, <code>false</code>, or <code>no</code> = set the mode <code><i>off</i></code>, and save the previous value</li>
       <li><code>pop</code>, <code>previous</code>, or <code>prev</code> = pop the previous value off the stack and set the mode to
           that previous value</li>
   </ul>

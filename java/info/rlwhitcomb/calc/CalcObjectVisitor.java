@@ -299,6 +299,8 @@
  *	04-Aug-2021 (rlwhitcomb)
  *	    For "@d" conversions if the input is a single codepoint,
  *	    convert the codepoint and print the numeric value.
+ *	06-Aug-2021 (rlwhitcomb)
+ *	    Finish moving the fraction parsing to BigFraction entirely.
  */
 package info.rlwhitcomb.calc;
 
@@ -3088,66 +3090,17 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		return d;
 	}
 
-	private static final int[][] FRACTIONS = {
-	    {  1,  4 },
-	    {  1,  2 },
-	    {  3,  4 },
-	    {  1,  7 },
-	    {  1,  9 },
-	    {  1, 10 },
-	    {  0,  3 },
-	    {  1,  3 },
-	    {  2,  3 },
-	    {  1,  5 },
-	    {  2,  5 },
-	    {  3,  5 },
-	    {  4,  5 },
-	    {  1,  6 },
-	    {  5,  6 },
-	    {  1,  8 },
-	    {  3,  8 },
-	    {  5,  8 },
-	    {  7,  8 }
-	};
-
 	@Override
 	public Object visitFracValue(CalcParser.FracValueContext ctx) {
 	    String value = ctx.FRAC_CONST().getText();
 	    BigFraction fraction;
 
-	    // Big IF here - the fractional string possibility or
-	    // the single fraction char
 	    if (value.startsWith("f'") || value.startsWith("F'")) {
 		value = CharUtil.stripQuotes(value.substring(1));
 		fraction = BigFraction.valueOf(value);
 	    }
 	    else {
-		int index = 0;
-		switch (value) {
-		    case "\u00BC": index = 0;  break; /* 1/4  */
-		    case "\u00BD": index = 1;  break; /* 1/2  */
-		    case "\u00BE": index = 2;  break; /* 3/4  */
-		    case "\u2150": index = 3;  break; /* 1/7  */
-		    case "\u2151": index = 4;  break; /* 1/9  */
-		    case "\u2152": index = 5;  break; /* 1/10 */
-		    case "\u2189": index = 6;  break; /* 0/3  */
-		    case "\u2153": index = 7;  break; /* 1/3  */
-		    case "\u2154": index = 8;  break; /* 2/3  */
-		    case "\u2155": index = 9;  break; /* 1/5  */
-		    case "\u2156": index = 10; break; /* 2/5  */
-		    case "\u2157": index = 11; break; /* 3/5  */
-		    case "\u2158": index = 12; break; /* 4/5  */
-		    case "\u2159": index = 13; break; /* 1/6  */
-		    case "\u215A": index = 14; break; /* 5/6  */
-		    case "\u215B": index = 15; break; /* 1/8  */
-		    case "\u215C": index = 16; break; /* 3/8  */
-		    case "\u215D": index = 17; break; /* 5/8  */
-		    case "\u215E": index = 18; break; /* 7/8  */
-		    default:
-			throw new UnknownOpException(value, ctx);
-		}
-
-		fraction = new BigFraction(FRACTIONS[index][0], FRACTIONS[index][1]);
+		fraction = BigFraction.valueOf(value);
 	    }
 
 	    if (settings.rationalMode)

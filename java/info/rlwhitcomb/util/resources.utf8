@@ -108,6 +108,8 @@
 #	    Add thousands separators to many numbers. Tweak some messages.
 #	03-Aug-2021 (rlwhitcomb)
 #	    New message for screen size in Environment.
+#	06-Aug-2021 (rlwhitcomb)
+#	    New error in BigFraction.
 #
 
 #
@@ -202,6 +204,7 @@ math.sqrtNegative		= Square root of a negative number is not real.
 fraction.noZeroDenominator	= Fractions cannot have zero denominators.
 fraction.unsupportedFormat	= The input value cannot be converted to a fraction value.
 fraction.divideByZero		= Divide by zero.
+fraction.unknownFracChar	= Unsupported fraction character '%1$s'.
 
 #
 # From SecurityUtil.java

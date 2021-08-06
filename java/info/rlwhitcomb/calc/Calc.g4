@@ -216,6 +216,8 @@
  *	    as "FRAC" function.
  *	04-Aug-2021 (rlwhitcomb)
  *	    Support "yes" and "no" for mode options.
+ *	06-Aug-2021 (rlwhitcomb)
+ *	    Finish work moving fraction constant parsing to BigFraction.
  */
 
 grammar Calc;
@@ -503,7 +505,7 @@ E_CONST  : E
 
 FRAC_CONST
          : FRACTIONS
-         | F '\'' ( [\-,/;0-9 \t] | FRACTIONS ) + '\''
+         | F '\'' '-' ? ( ( INT ( FS ? '-' ? ( INT | ( INT FS ? '-' ? INT ) | FRACTIONS ) ) ? ) | FRACTIONS ) '\''
          ;
 
 ROMAN_CONST
@@ -956,6 +958,10 @@ fragment FRACTIONS
    | ( '\u2155' | '\u2156' | '\u2157' | '\u2158' )  /* 1/5, 2/5, 3/5, 4/5 */
    | ( '\u2159' | '\u215A' )                        /* 1/6, 5/6           */
    | ( '\u215B' | '\u215C' | '\u215D' | '\u215E' )  /* 1/8, 3/8, 5/8, 7/8 */
+   ;
+
+fragment FS
+   : [ \t] * ( ',' | ';' | '/' | [ \t] + ) [ \t] *
    ;
 
 NUMBER
