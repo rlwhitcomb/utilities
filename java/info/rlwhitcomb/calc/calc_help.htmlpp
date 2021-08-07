@@ -38,6 +38,17 @@ h2 {
    margin-right: 30px;
 }
 
+.title-box {
+    margin: 25px;
+    overflow: hidden;
+    text-align: center;
+    padding: 20px;
+    background-color: lightgreen;
+    border: 1px solid cornflowerblue;
+    -webkit-border-radius: 20px;
+    border-radius: 20px;
+}
+
 .cols {
     columns: 3;
     column-rule: 2px double cornflowerblue;
@@ -129,7 +140,7 @@ h2 {
 </head>
 
 <body>
-  <div class="center">
+  <div class="title-box">
     <h1>Expression Calculator Help</h1>
     <h2>Version ${Calc.version}, build ${build.number}</h2>
   </div>
@@ -143,7 +154,7 @@ h2 {
        (<span class="underline">R</span>ead, <span class="underline">E</span>val, <span class="underline">P</span>rint
         <span class="underline">L</span>oop) where a prompt is displayed, the input lines are evaluated
        one-at-a-time, and the results displayed; from a file for predefined calculations; or inside a simple GUI frame.
-  <p>Why would I want this calculator when there are so many already available (handheld, apps on your phone, default apps on your computer)?
+  <p><em><strong>Why would I want this calculator when there are so many already available (handheld, apps on your phone, default apps on your computer)?</strong></em>
       <ul>
         <li>The ability to do (essentially) unlimited precision arithmetic.</li>
         <li>More operators and functions than are typically available anywhere else.</li>
@@ -602,6 +613,15 @@ or
      Functions can also reference loop variables, which are normally not allowed outside loops, and will work properly as long
      as they are only invoked inside a <code>LOOP</code> for which the loop variable is declared. In other words, functions are
      parsed along with all other expressions, but they are stored as parse trees, and are not evaluated until they are invoked.
+  <p>One side-effect of the way functions are implemented in combination with the <code>eval</code> function is that objects can be created
+     as follows:
+  <p class="indent"><code>def stack={ size: 0, array:[] }</code>
+  <p>and then
+  <p class="indent"><code>t = eval stack</code>
+  <p>gives
+  <p class="indent"><code>t = { size : 0, array : [ ] }</code>
+  <p>as it should. So, you can setup the data structure with <code>def</code>, and make instances of that structure with just
+     <code><i>var</i> = eval <i>struct</i></code>.
 </div>
 <hr class="sectionsep">
   <h2>Statements</h2>
@@ -759,9 +779,6 @@ or
     <li>Explain "fill" operation (array/string variable, value, length or start, length) - how it fills in</li>
     <li>Explain the best use of "SUMOF" and "PRODUCTOF" is with arrays and maps (numeric values only), although it works for any expressions</li>
     <li>Use of array as stack: push using a[length a] = blah, pop using ?? maybe slice? but how to get the last value easily?
-    <li>Defining data structures with "def" as in, <code>def stack={ size: 0, array:[] }</code>, and then <code>t = eval stack</code> gives
-        <code>t = { size : 0, array : [ ] }</code> as it should. This is an unexpected benefit of the <code>def</code> syntax (I think)
-        So, you can setup the data structure with <code>def</code>, and make instances of that structure with just <code><i>var</i> = eval <i>struct</i></code>
     <li>Expand on GUI operation, including examples</li>
     <li>Document GUI Settings dialog</li>
     <li>List of example programs, include examples in this document</li>
@@ -770,8 +787,9 @@ or
     <li>Notes on colors and the changes with dark and light backgrounds</li>
   </ul>
 </div>
+<hr class="sectionsep">
 
-  <footer><br><br><div class="center">&copy;&nbsp;Copyright 2020-2021 Roger L. Whitcomb.&nbsp;&nbsp;Licensed under an <a href="https://github.com/rlwhitcomb/utilities/blob/master/LICENSE">MIT</a> license.<br>Last modified: ${__DATE__} at ${__TIME__}</div><br><br></footer>
+  <footer><br><br><div class="title-box">&copy;&nbsp;Copyright 2020-2021 Roger L. Whitcomb.&nbsp;&nbsp;Licensed under an <a href="https://github.com/rlwhitcomb/utilities/blob/master/LICENSE">MIT</a> license.<br>Last modified: ${__DATE__} at ${__TIME__}</div><br><br></footer>
 </body>
 </html>
 
