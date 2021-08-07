@@ -62,10 +62,10 @@ public final class SemanticVersion implements Comparable<SemanticVersion> {
 	private final String[] buildMeta;
 
 	/**
-	 * Construct a new default version object <code>0.0.0</code>
+	 * Construct a new default version <code>0.0.0</code> object.
 	 */
 	public SemanticVersion() {
-	    this(0, 0, 0);
+		this(0, 0, 0);
 	}
 
 	/**
@@ -78,7 +78,7 @@ public final class SemanticVersion implements Comparable<SemanticVersion> {
 	 * @param patch
 	 *          patchlevel. Must not be negative.
 	 */
-	public SemanticVersion(int major, int minor, int patch) {
+	public SemanticVersion(final int major, final int minor, final int patch) {
 		this(major, minor, patch, new String[0], new String[0]);
 	}
 
@@ -98,8 +98,8 @@ public final class SemanticVersion implements Comparable<SemanticVersion> {
 	 *          build meta identifiers. Must not be null, all parts must match
 	 *          "[0-9A-Za-z-]+".
 	 */
-	public SemanticVersion(int major, int minor, int patch, String[] preRelease,
-			String[] buildMeta) {
+	public SemanticVersion(final int major, final int minor, final int patch,
+			final String[] preRelease, final String[] buildMeta) {
 		if (major < 0 || minor < 0 || patch < 0) {
 			throw new IllegalArgumentException("Version numbers must be positive!");
 		}
@@ -134,7 +134,7 @@ public final class SemanticVersion implements Comparable<SemanticVersion> {
 	 * @throws ParseException
 	 *           if the versionstring does not conform to the semver specs.
 	 */
-	public SemanticVersion(Class<?> clazz) throws ParseException {
+	public SemanticVersion(final Class<?> clazz) throws ParseException {
 		this(clazz.getPackage().getImplementationVersion());
 	}
 
@@ -146,7 +146,7 @@ public final class SemanticVersion implements Comparable<SemanticVersion> {
 	 * @throws ParseException
 	 *           if the version string does not conform to the semver specs.
 	 */
-	public SemanticVersion(String version) throws ParseException {
+	public SemanticVersion(final String version) throws ParseException {
 		vParts = new int[3];
 		preParts = new ArrayList<String>(5);
 		metaParts = new ArrayList<String>(5);
@@ -168,7 +168,7 @@ public final class SemanticVersion implements Comparable<SemanticVersion> {
 	 *          the tag to check for.
 	 * @return true if the tag is found in {@link SemanticVersion#buildMeta}.
 	 */
-	public boolean hasBuildMeta(String tag) {
+	public boolean hasBuildMeta(final String tag) {
 		for (String s : buildMeta) {
 			if (s.equals(tag)) {
 				return true;
@@ -184,7 +184,7 @@ public final class SemanticVersion implements Comparable<SemanticVersion> {
 	 *          the tag to check for
 	 * @return true if the tag is found in {@link SemanticVersion#preRelease}.
 	 */
-	public boolean hasPreRelease(String tag) {
+	public boolean hasPreRelease(final String tag) {
 		for (String s : preRelease) {
 			if (s.equals(tag)) {
 				return true;
@@ -222,7 +222,7 @@ public final class SemanticVersion implements Comparable<SemanticVersion> {
 	 *          the other version object
 	 * @return true if this version is newer than the other one.
 	 */
-	public boolean isUpdateFor(SemanticVersion v) {
+	public boolean isUpdateFor(final SemanticVersion v) {
 		return compareTo(v) > 0;
 	}
 
@@ -233,7 +233,7 @@ public final class SemanticVersion implements Comparable<SemanticVersion> {
 	 *          the other version object.
 	 * @return true if this version is newer and both have the same major version.
 	 */
-	public boolean isCompatibleUpdateFor(SemanticVersion v) {
+	public boolean isCompatibleUpdateFor(final SemanticVersion v) {
 		return isUpdateFor(v) && (major == v.major) && (major != 0 || v.major != 0);
 	}
 
@@ -282,7 +282,7 @@ public final class SemanticVersion implements Comparable<SemanticVersion> {
 	}
 
 	@Override
-	public boolean equals(Object other) {
+	public boolean equals(final Object other) {
 		if (this == other) {
 			return true;
 		}
@@ -313,7 +313,7 @@ public final class SemanticVersion implements Comparable<SemanticVersion> {
 	}
 
 	@Override
-	public int compareTo(SemanticVersion v) {
+	public int compareTo(final SemanticVersion v) {
 		int result = major - v.major;
 		if (result == 0) { // Same major
 			result = minor - v.minor;
@@ -345,7 +345,7 @@ public final class SemanticVersion implements Comparable<SemanticVersion> {
 		return result;
 	}
 
-	private int comparePreReleaseTag(int pos, SemanticVersion ov) {
+	private int comparePreReleaseTag(final int pos, final SemanticVersion ov) {
 		Integer here = null;
 		Integer there = null;
 		try {
@@ -398,7 +398,7 @@ public final class SemanticVersion implements Comparable<SemanticVersion> {
 		return false;
 	}
 
-	private boolean stateMinor(int index) {
+	private boolean stateMinor(final int index) {
 		int pos = index;
 		while (pos < input.length && input[pos] >= '0' && input[pos] <= '9') {
 			pos++;// match [0..9]+
@@ -421,7 +421,7 @@ public final class SemanticVersion implements Comparable<SemanticVersion> {
 		return false;
 	}
 
-	private boolean statePatch(int index) {
+	private boolean statePatch(final int index) {
 		int pos = index;
 		while (pos < input.length && input[pos] >= '0' && input[pos] <= '9') {
 			pos++; // match [0..9]+
@@ -453,7 +453,7 @@ public final class SemanticVersion implements Comparable<SemanticVersion> {
 		return false;
 	}
 
-	private boolean stateRelease(int index) {
+	private boolean stateRelease(final int index) {
 		int pos = index;
 		while ((pos < input.length)
 				&& ((input[pos] >= '0' && input[pos] <= '9')
@@ -481,7 +481,7 @@ public final class SemanticVersion implements Comparable<SemanticVersion> {
 		return false;
 	}
 
-	private boolean stateMeta(int index) {
+	private boolean stateMeta(final int index) {
 		int pos = index;
 		while ((pos < input.length)
 				&& ((input[pos] >= '0' && input[pos] <= '9')
