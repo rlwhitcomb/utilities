@@ -148,6 +148,8 @@
  *	    Add an accessor to get the Implementation-Version (as a SemanticVersion).
  *	03-Aug-2021 (rlwhitcomb)
  *	    Display screen size in the environment list; tweak the colors.
+ *	08-Aug-2021 (rlwhitcomb)
+ *	    Use box-drawing character to color display of program info.
  */
 package info.rlwhitcomb.util;
 
@@ -1403,7 +1405,7 @@ public final class Environment
 	    if (lineWidth > centerWidth)
 		lineWidth += 2;
 
-	    String underline = CharUtil.makeStringOfChars('=', lineWidth);
+	    String underline = CharUtil.makeStringOfChars(colors ? '\u2550' : '=', lineWidth);
 
 	    ps.println();
 	    println(ps, colors, "util#env.otherInfo", "", underline);

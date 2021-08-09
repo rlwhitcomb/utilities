@@ -38,6 +38,9 @@
  *	    paradigm.
  *	27-Jul-2021 (rlwhitcomb)
  *	    Check for correctness of version strings using Semantic Version parser.
+ *	08-Aug-2021 (rlwhitcomb)
+ *	    Use box-drawing characters for the separator lines; implement options
+ *	    for colors or not.
  */
 package info.rlwhitcomb;
 
@@ -63,6 +66,12 @@ import static info.rlwhitcomb.util.Environment.ProgramInfo;
  */
 public class Version
 {
+	/** Whether or not to display info in color (default <code>true</code>). */
+	private static boolean colors = true;
+
+	/** The display width for the information (constant). */
+	private static final int WIDTH = 50;
+
 	/**
 	 * @return The basic version string, of the form
 	 *  <code>nn.nn(.nn)</code>.
@@ -104,7 +113,7 @@ public class Version
 	}
 
 	private static void output(String message) {
-	    System.out.println(ConsoleColor.color(message));
+	    System.out.println(ConsoleColor.color(message, colors));
 	}
 
 	private static void printInfo(String function, String value) {
@@ -119,9 +128,40 @@ public class Version
 	 * @param args The parsed command line arguments (unused).
 	 */
 	public static void main(String[] args) {
-	    Environment.printProgramInfo(50);
+	    // Parse the command line options
+	    for (String arg : args) {
+		String option = null;
+		if (arg.startsWith("--"))
+		    option = arg.substring(2);
+		else if (arg.startsWith("-") || arg.startsWith("/"))
+		    option = arg.substring(1);
+		if (option != null) {
+		    switch (option) {
+			case "nocolors":
+			case "nocolor":
+			case "nocols":
+			case "nocol":
+			case "noc":
+			case "nc":
+			    colors = false;
+			    break;
+			case "colors":
+			case "color":
+			case "col":
+			case "c":
+			    colors = true;
+			    break;
+			default:
+			    // just ignore (silently)
+			    break;
+		    }
+		}
+	    }
 
-	    String underline = CharUtil.padToWidth("", 50, '-');
+	    Environment.printProgramInfo(WIDTH, colors);
+
+	    String underline = CharUtil.padToWidth("", WIDTH, colors ? '\u2500' : '-');
+	    String separator = BLACK_BRIGHT + underline + RESET;
 
 	    printInfo("getVersion",                getVersion());
 	    printInfo("getBuild",                  getBuild());
@@ -130,7 +170,7 @@ public class Version
 	    printInfo("getImplementationLanguage", getImplementationLanguage());
 	    output();
 
-	    output(BLACK_BRIGHT + underline + RESET);
+	    output(separator);
 
 	    List<ProgramInfo> infos = Environment.getAllProgramInfo();
 
@@ -147,9 +187,9 @@ public class Version
 		}
 		String version = String.format("Version %1$s", rawVersion);
 
-		output(BLUE_BOLD_BRIGHT + CharUtil.padToWidth(info.title, 50, CENTER));
-		output(GREEN            + CharUtil.padToWidth(version, 50, CENTER));
-		output(BLACK_BRIGHT     + underline + RESET);
+		output(BLUE_BOLD_BRIGHT + CharUtil.padToWidth(info.title, WIDTH, CENTER));
+		output(GREEN            + CharUtil.padToWidth(version, WIDTH, CENTER));
+		output(separator);
 	    }
 	    output();
 	}
