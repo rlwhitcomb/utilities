@@ -40,6 +40,8 @@
  *	    Move some methods from NumericUtil to MathUtil.
  *	29-Mar-2021 (rlwhitcomb)
  *	    Move to new package.
+ *	08-Aug-2021 (rlwhitcomb)
+ *	    Test the ratio of first to second access times.
  */
 package info.rlwhitcomb.test;
 
@@ -193,6 +195,11 @@ public class InitTaskTest
 	    "2335628236089632080682224680122482611771858963814091839036736722208883215137" +
 	    "556003727983940041529700287830766709444745601345564172543709069793961225714";
 
+	/** The desired ratio of first time / second time (that is, the first time should be a lot,
+	 * while the second time is very little).
+	 */
+	private static final double DESIRED_RATIO = 1.5e5;
+
 
 	/**
 	 * This is the "long-running" task that starts right away at startup of the program,
@@ -205,6 +212,8 @@ public class InitTaskTest
 		private int iters;
 		private String digitString = "";
 		private int times;
+		private double firstTimeSecs  = 1.0d;
+		private double secondTimeSecs = 1.0d;
 
 		public InitTask(final int digitLength, final int iterations) {
 		    super();
@@ -238,14 +247,28 @@ public class InitTaskTest
 		    // subsequent accesses complete right away.
 		    long startTime = Environment.highResTimer();
 		    waitUntilFinished();
-		    long endTime = Environment.highResTimer();
+		    long endTime   = Environment.highResTimer();
+		    double seconds = Environment.timerValueToSeconds(endTime - startTime);
 
-		    String timesMessage = ++times == 1 ? "first time" : "after first time";
+		    if (++times == 1) firstTimeSecs  = seconds;
+		    else              secondTimeSecs = seconds;
+
+		    String timesMessage = times == 1 ? "first time" : "after first time";
 		    System.out.println(String.format("InitTask: waited %1$8.6f secs for the answer, %2$s.",
-			Environment.timerValueToSeconds(endTime - startTime),
-			timesMessage));
+			seconds, timesMessage));
 
 		    return digitString;
+		}
+
+		/**
+		 * After the second (or subsequent) accesses, compute the ratio of first/second, which is an
+		 * indication of the success of the initialization work.
+		 * @return First time seconds / second time seconds.
+		 */
+		public double timeRatio() {
+		    double ratio = Math.round(firstTimeSecs / secondTimeSecs);
+		    System.out.println(String.format("InitTask: time ratio %1$,5.0fx.", ratio));
+		    return ratio;
 		}
 	}
 
@@ -289,6 +312,14 @@ public class InitTaskTest
 
 	    if (!secondPiDigits.equals(firstPiDigits)) {
 		System.out.println("Got different results the second time!");
+		success = false;
+	    }
+
+	    // Final check: the ratio of first to second elapsed time should be ~100,000 x
+	    double timeRatio = task.timeRatio();
+	    if (timeRatio < DESIRED_RATIO) {
+		System.out.format("Time ratio too small:  was %1$5.2f, should be %2$5.2f%n",
+			timeRatio, DESIRED_RATIO);
 		success = false;
 	    }
 
