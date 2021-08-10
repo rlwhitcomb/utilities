@@ -218,6 +218,8 @@
  *	    Support "yes" and "no" for mode options.
  *	06-Aug-2021 (rlwhitcomb)
  *	    Finish work moving fraction constant parsing to BigFraction.
+ *	09-Aug-2021 (rlwhitcomb)
+ *	    Trying to get 1..10 to work as loop control.
  */
 
 grammar Calc;
@@ -402,7 +404,7 @@ pair
    ;
 
 var
-   : var ( '.' ( var | STRING ) )       # objVar
+   : var ( DOT ( var | STRING ) )       # objVar
    | var ( '[' expr ']' | INDEXES )     # arrVar
    | var actualParams                   # functionVar
    | ID                                 # idVar
@@ -513,8 +515,8 @@ ROMAN_CONST
          ;
 
 TIME_CONST
-         : H '\'' '-' ? DIG ? DIG ( ':' DIG DIG ( ':' DIG DIG ( '.' DIG+ ) ? ) ? ) ? ( [ \t] * ( A | A M | P | P M ) ) ? '\''
-         | T '\'' '-' ? DIG + ( '.' DIG * ) ? [ \t] * ( W | D | H | M | S ) '\''
+         : H '\'' '-' ? DIG ? DIG ( ':' DIG DIG ( ':' DIG DIG ( DOT DIG+ ) ? ) ? ) ? ( [ \t] * ( A | A M | P | P M ) ) ? '\''
+         | T '\'' '-' ? DIG + ( DOT DIG * ) ? [ \t] * ( W | D | H | M | S ) '\''
          ;
 
 DATE_CONST
@@ -663,6 +665,10 @@ ID     : [a-zA-Z_] [a-zA-Z_0-9]* ;
 DOTS
        : '..'
        | '\u2026'
+       ;
+
+DOT
+       : '.'
        ;
 
 LOCALVAR
@@ -965,7 +971,7 @@ fragment FS
    ;
 
 NUMBER
-   : INT ('.' [0-9] *)? EXP?
+   : INT ('.' [0-9] +)? EXP?
    ;
 
 BIN_CONST
