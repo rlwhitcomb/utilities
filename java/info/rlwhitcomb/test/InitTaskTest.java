@@ -198,7 +198,7 @@ public class InitTaskTest
 	/** The desired ratio of first time / second time (that is, the first time should be a lot,
 	 * while the second time is very little).
 	 */
-	private static final double DESIRED_RATIO = 1.0e5;
+	private static final double DESIRED_RATIO = 5.0e4;
 
 
 	/**
