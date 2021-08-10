@@ -225,6 +225,8 @@
 		Add "check_sorted" to Windows build.
 	    08-Aug-2021 (rlwhitcomb)
 		Also check the super verbose output from JavaPreProc.
+	    09-Aug-2021 (rlwhitcomb)
+		Alternate test canon for Windows vs. other platforms.
 
      ========================================================================== -->
 
@@ -304,6 +306,9 @@
 	</condition>
 	<condition property="debug.build" value="false" else="true">
 		<istrue value="${release.build}"/>
+	</condition>
+	<condition property="test.log.canon" value="TestPP.log.windows.canon" else="TestPP.log.other.canon">
+		<os family="windows"/>
 	</condition>
 
 	<patternset id="wrapper-files">
@@ -572,7 +577,7 @@
 		</fail>
 		<fail message="Preprocessing log doesn't match!">
 			<condition>
-				<not><filesmatch file1="test/data/TestPP.log" file2="test/canons/TestPP.log.canon" textfile="true"/></not>
+				<not><filesmatch file1="test/data/TestPP.log" file2="test/canons/${test.log.canon}" textfile="true"/></not>
 			</condition>
 		</fail>
 		<echo file="${test.log.file.name}" append="true">JavaPreProc: Preprocessing results and log match.
