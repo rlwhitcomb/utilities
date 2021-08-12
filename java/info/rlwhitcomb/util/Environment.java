@@ -555,8 +555,9 @@ public final class Environment
 	/**
 	 * Returns a standard platform identifier.
 	 *
-	 * @return One of: "windows", "linux", "osx", or "unix"
-	 * signifying which kind of platform we are running on.
+	 * @return One of: <code>"windows"</code>, <code>"linux"</code>,
+	 * <code>"osx"</code>, or <code>"unix"</code> signifying which
+	 * kind of platform we are running on.
 	 */
 	public static String platformIdentifier() {
 	    String platform = "unix";
@@ -583,7 +584,7 @@ public final class Environment
 
 
 	/**
-	 * Read the "Implementation-Version" attribute of the .jar file
+	 * Read the <code>"Implementation-Version"</code> attribute of the .jar file
 	 * and parse into a semantic version.
 	 *
 	 * @return the implementation version.
@@ -968,23 +969,23 @@ public final class Environment
 		if (osIsWindows) {
 		    pb = new ProcessBuilder(
 			"powershell",
-			"-command",
-			"out-file",
-			"-inputobject",
-			"$host.ui.rawui.windowsize.height",
-			"-encoding",
-			"ascii",
-			"-filepath",
+			"-Command",
+			"Out-File",
+			"-InputObject",
+			"$host.UI.RawUI.WindowSize.Height",
+			"-Encoding",
+			"ASCII",
+			"-FilePath",
 			f.getPath(),
 			";",
-			"out-file",
-			"-inputobject",
-			"$host.ui.rawui.windowsize.width",
-			"-encoding",
-			"ascii",
-			"-filepath",
+			"Out-File",
+			"-InputObject",
+			"$host.UI.RawUI.WindowSize.Width",
+			"-Encoding",
+			"ASCII",
+			"-FilePath",
 			f.getPath(),
-			"-append").inheritIO();
+			"-Append").inheritIO();
 		}
 		else {
 		    pb = new ProcessBuilder(
