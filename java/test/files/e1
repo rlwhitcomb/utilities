@@ -136,6 +136,13 @@ lcm -20, 30
 max('123', 456, 789)
 min(123, '-1', '14')
 
+# Integer division
+ty=47
+ty\13
+ty\=6
+10\3
+5\6
+
 # Bit and logical operators
 127 | 128
 15 & 7
@@ -387,6 +394,14 @@ length p; scale p;
 :result on
 loop $p in p { `name: $$p, value: ${p[$p]}` }
 :result pop
+
+#
+# "CHARS" function
+#
+chars 'abc'
+chars 123
+loop chars(123) {$_}
+loop chars "⅛34" {$_}
 
 #
 # Fractions

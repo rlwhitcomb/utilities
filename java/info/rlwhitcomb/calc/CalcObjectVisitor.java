@@ -306,6 +306,8 @@
  *	    Put loop value into special "$_" variable if none specified.
  *	11-Aug-2021 (rlwhitcomb)
  *	    Add integer divide "\" and "\=".
+ *	11-Aug-2021 (rlwhitcomb)
+ *	    Add "CHARS" function to break up a string into an array of codepoints.
  */
 package info.rlwhitcomb.calc;
 
@@ -2717,6 +2719,16 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    MathUtil.getPrimeFactors(n, primeFactors);
 
 	    return primeFactors;
+	}
+
+	@Override
+	public Object visitCharsExpr(CalcParser.CharsExprContext ctx) {
+	    final List<Integer> chars = new ArrayList<>();
+	    String string = getStringValue(ctx.expr());
+
+	    string.codePoints().forEachOrdered(cp -> chars.add(cp));
+
+	    return chars;
 	}
 
 	@Override

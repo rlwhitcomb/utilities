@@ -536,6 +536,7 @@ or
             <tr><td><code>EXEC</code>&nbsp;<i>expr</i>&nbsp;( <code>,</code>&nbsp;<i>expr</i>&nbsp;) *</td><td>execute the given O/S command<br>(with arguments)<br>and return the output as a string</td></tr>
             <tr><td><code>FACTORS</code>&nbsp;<i>expr</i></td><td>calculate all the factors of the number</td></tr>
             <tr><td><code>PFACTORS</code>&nbsp;<i>expr</i></td><td>calculate the prime factors of the number</td></tr>
+            <tr><td><code>CHARS</code>&nbsp;<i>expr</i></td><td>separate a string into a list of its characters</td></tr>
             <tr><td><code>DOW</code>&nbsp;<i>expr</i></td><td>day of the week of a date (integer) value<br>(0=Sunday to 6=Saturday)</td></tr>
           </tbody>
         </table></td>

@@ -224,6 +224,8 @@
  *	    Allowing a dot range on "length", "sumof", and "productof".
  *	11-Aug-2021 (rlwhitcomb)
  *	    Add integer divide ("\") operator.
+ *	11-Aug-2021 (rlwhitcomb)
+ *	    Add "CHARS" function to break up a string into codepoints.
  */
 
 grammar Calc;
@@ -350,6 +352,7 @@ expr
    | ( K_UPPER | K_LOWER ) expr          # caseConvertExpr
    | K_FACTORS expr                      # factorsExpr
    | K_PFACTORS expr                     # primeFactorsExpr
+   | K_CHARS expr                        # charsExpr
    | K_DOW expr                          # dayOfWeekExpr
    | K_EVAL expr                         # evalExpr
    | K_EXEC exprN                        # execExpr
@@ -634,6 +637,8 @@ K_LOWER    : L O W E R ;
 K_FACTORS  : F A C T O R S ;
 
 K_PFACTORS : P F A C T O R S ;
+
+K_CHARS    : C H A R S ;
 
 K_DOW      : D O W ;
 
