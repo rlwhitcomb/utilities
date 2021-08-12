@@ -1,0 +1,39 @@
+:quiet on
+/*
+ * Convert one of our dates to an Excel date serial number
+ * where 1/1/1900 is considered day 1 (BUT 1900 is also considered
+ * [erroneously] as a leap year)
+ * From here: https://docs.microsoft.com/en-us/office/troubleshoot/excel/determine-a-leap-year
+ * "However, in order to be compatible with other programs, Microsoft Excel treats the year 1900 as a leap year."
+ *
+ * @param date The input date value
+ * @return     The Excel date serial number, where 1/1/1900 is 1
+ */
+def excel_date = { date < D'3/1/1900' ? date - D'1/1/1900' + 1 : date - D'1/1/1900' + 2 }
+
+/*
+ * Convert one of our dates to an Excel date serial number using the 1904 system
+ * where 1/1/1904 is considered day 0
+ *
+ * @param date The input date value
+ * @return     The Excel 1904-system date serial number, where 1/1/1904 is 0
+ */
+def excel_date_1904 = { date - D'1/1/1904' }
+
+/*
+ * Convert radians to degrees: 2*pi = 360, so radians / pi * 180 = degrees
+ *
+ * @param rad The input radians value
+ * @return    Computed degrees
+ */
+def rad_to_deg = { rad / pi * 180 }
+
+/*
+ * Convert degrees to radians: 2*pi = 360, so degrees / 180 * pi = radians
+ *
+ * @param deg The input degrees value
+ * @return    Computed radians
+ */
+def deg_to_rad = { deg / 180 * pi }
+
+:quiet pop
