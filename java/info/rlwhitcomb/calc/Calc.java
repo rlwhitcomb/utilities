@@ -160,6 +160,8 @@
  *	    Display the last input on errors in GUI mode.
  *	04-Aug-2021 (rlwhitcomb)
  *	    Set focus back to input field after Version closes.
+ *	12-Aug-2021 (rlwhitcomb)
+ *	    Add "-library" command line option.
  */
 package info.rlwhitcomb.calc;
 
@@ -245,7 +247,9 @@ public class Calc
 		/** Locale option requires a locale name. */
 		LOCALE,
 		/** Input directory option requires a directory name. */
-		DIRECTORY
+		DIRECTORY,
+		/** Library name(s) requires the names. */
+		LIBRARY
 	}
 
 	/** What we're expecting next on the command line. */
@@ -283,6 +287,7 @@ public class Calc
 
 	private static File inputDirectory = null;
 	private static File rootDirectory = null;
+	private static List<String> libraryNames = null;
 
 	private Display display;
 
@@ -623,9 +628,6 @@ public class Calc
 		else
 		    inputTextPane.setText(EMPTY_TEXT);
 
-		displayer = this;
-		visitor = new CalcObjectVisitor(displayer, rational, separators, ignoreCase);
-
 		decimalPrecisionButton.getButtonGroup().getButtonGroupListeners().add(new ButtonGroupListener() {
 		    @Override
 		    public void selectionChanged(final ButtonGroup buttonGroup, final Button previousSelection) {
@@ -646,6 +648,12 @@ public class Calc
 			requestFocus(inputTextPane);
 		    }
 		});
+
+		displayer = this;
+		visitor = new CalcObjectVisitor(displayer, rational, separators, ignoreCase);
+
+		// Try to read and process any given libraries before doing anything else
+		readAndProcessLibraries(visitor, errorStrategy, quiet);
 
 		mainWindow.open(display);
 		requestFocus(inputTextPane);
@@ -1139,6 +1147,16 @@ public class Calc
 	    return returnValue;
 	}
 
+	private static void readAndProcessLibraries(CalcObjectVisitor visitor, BailErrorStrategy errorStrategy, boolean silent)
+		throws IOException
+	{
+	    if (libraryNames != null) {
+		for (String libraryName : libraryNames) {
+		    process(CharStreams.fromString(getFileContents(libraryName)), visitor, errorStrategy, quiet);
+		}
+	    }
+	}
+
 	private static Expecting processOption(String arg, String option) {
 	    if (expecting != Expecting.DEFAULT) {
 		errFormat("calc#expectNotOption", expecting);
@@ -1259,6 +1277,11 @@ public class Calc
 		case "input":
 		case "dir":
 		    return Expecting.DIRECTORY;
+		case "libraries":
+		case "library":
+		case "libs":
+		case "lib":
+		    return Expecting.LIBRARY;
 		case "cmdenter":
 		case "cmd":
 		    useCmdEnter = true;
@@ -1308,6 +1331,14 @@ public class Calc
 			    break;
 			case DIRECTORY:
 			    inputDirectory = new File(arg);
+			    expecting = Expecting.DEFAULT;
+			    break;
+			case LIBRARY:
+			    if (libraryNames == null)
+				libraryNames = new ArrayList<>();
+			    String[] names = arg.split(ON_WINDOWS ? "[;,]" : "[,;:]");
+			    for (String name : names)
+				libraryNames.add(name);
 			    expecting = Expecting.DEFAULT;
 			    break;
 			default:
@@ -1398,6 +1429,9 @@ public class Calc
 		else {
 		    displayer = new ConsoleDisplayer();
 		    visitor = new CalcObjectVisitor(displayer, rational, separators, ignoreCase);
+
+		    // Try to read and process any given libraries before doing anything else
+		    readAndProcessLibraries(visitor, errorStrategy, quiet);
 
 		    // If no input arguments were given, go into "REPL" mode, reading
 		    // a line at a time from the console and processing
