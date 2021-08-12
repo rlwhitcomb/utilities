@@ -509,7 +509,7 @@ or
             <tr><td><code>LN</code>&nbsp;<i>expr</i></td><td>natural log (base e)</td></tr>
             <tr><td><code>EPOW</code>&nbsp;<i>expr</i></td><td>anti-log (e ** <i>expr</i>)</td></tr>
             <tr><td><code>SIGNUM</code>&nbsp;<i>expr</i></td><td>sign (&lt; 0 = -1, 0 = 0, &gt; 0 = +1)</td></tr>
-            <tr><td><code>LENGTH</code>&nbsp;<i>expr</i></td><td>length of string, array, or object</td></tr>
+            <tr><td><code>LENGTH</code>&nbsp;<i>expr</i><br>or <i>expr</i> [ <code>..</code> or <code>&#x2026;</code> <i>expr</i> ] [ <code>,</code> <i>expr</i></td><td>length of string, array, object, or range</td></tr>
             <tr><td><code>SCALE</code>&nbsp;<i>expr</i></td><td>scale of number</td></tr>
             <tr><td><code>ROUND</code>&nbsp;<i>expr</i><code>,</code>&nbsp;<i>expr</i></td><td>round value to given places</td></tr>
             <tr><td><code>ISPRIME</code>&nbsp;<i>expr</i></td><td>is the value a prime number</td></tr>
@@ -517,8 +517,8 @@ or
             <tr><td><code>LCM</code>&nbsp;<i>expr</i><code>,</code>&nbsp;<i>expr</i></td><td>least common multiple</td></tr>
             <tr><td><code>MAX</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;) *</td><td>maximum value</td></tr>
             <tr><td><code>MIN</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;) *</td><td>minimum value</td></tr>
-            <tr><td><code>SUMOF</code> or <code>&#x2211;</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;) *</td><td>sum of all the values</td></tr>
-            <tr><td><code>PRODUCTOF</code> or <code>&#x220F;</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;) *</td><td>product of all the values</td></tr>
+            <tr><td><code>SUMOF</code> or <code>&#x2211;</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;) *<br>or <i>expr</i> [ <code>..</code> or <code>&#x2026;</code> <i>expr</i> ] [ <code>,</code> <i>expr</i></td><td>sum of all the values</td></tr>
+            <tr><td><code>PRODUCTOF</code> or <code>&#x220F;</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;) *<br>or <i>expr</i> [ <code>..</code> or <code>&#x2026;</code> <i>expr</i> ] [ <code>,</code> <i>expr</i></td><td>product of all the values</td></tr>
             <tr><td><code>JOIN</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;) *</td><td>join strings</td></tr>
             <tr><td><code>SPLIT</code>&nbsp;<i>expr</i> <code>,</code> <i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;)</td><td>split string into parts</td></tr>
             <tr><td><code>INDEX</code>&nbsp;<i>expr</i> <code>,</code> <i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;)</td><td>find value within a string</td></tr>
@@ -649,6 +649,7 @@ or
          <li>if the <code>,</code> <i>expr</i> is given, the loop is repeated starting from either one, or the first expression value, incrementing by this <i>step</i> expression until the value reaches the maximum.
      </ul>
      In any case, the optional loop variable will be set to the value of the indexing expression for each time through the loop.
+     If no loop variable is given, the default variable <code>$_</code> will be used (except this is an error for nested loops without explicit variables).
      The loop variable can be referenced inside the statement block, but nowhere else.  A loop variable has the same naming
      rules as a regular variable, but must start with <code>$</code>. Note that inside an interpolated string (inside the loop
      block) the value of a loop variable can be accessed via <code>$$i</code> or alternatively (and more verbosely) as

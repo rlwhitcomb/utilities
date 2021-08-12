@@ -62,6 +62,8 @@
 #	    "and" for the list of multiple variables cleared.
 #	02-Jul-2021 (rlwhitcomb)
 #	    Separator mode.
+#	09-Aug-2021 (rlwhitcomb)
+#	    Tweak an error message, and add another.
 #
 
 #
@@ -123,6 +125,7 @@ ioError			= I/O Error: %1$s
 noConvertInteger	= Unable to convert value of '%1$s' to an integer
 noConvertObjArr		= Cannot convert object or array to '%1$c' format
 noDupLocalVar		= Duplicate local variable name '%1$s' not allowed
+noDupAnonVar		= Cannot use anonymous loop variable '$_' in nested loops
 localVarNoAssign	= The value of a local variable ('%1$s') cannot be changed
 infLoopStepZero		= Infinite loop: step value is zero
 invalidConstruct	= Invalid '$' construct
@@ -149,7 +152,7 @@ unknownType		= Unknown value type: %1$s
 #
 # From LValueContext
 #
-localVarNotAvail	= Local variable '%1$s' is not available outside its loop or function
+localVarNotAvail	= Local variable '%1$s' is not available
 nonObjectValue		= Variable '%1$s' already has a non-object value
 nonArrayValue		= Variable '%1$s' already has a non-array value
 indexNegative		= Index value of %1$d cannot be negative

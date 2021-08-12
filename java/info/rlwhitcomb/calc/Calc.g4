@@ -220,6 +220,8 @@
  *	    Finish work moving fraction constant parsing to BigFraction.
  *	09-Aug-2021 (rlwhitcomb)
  *	    Trying to get 1..10 to work as loop control.
+ *	09-Aug-2021 (rlwhitcomb)
+ *	    Allowing a dot range on "length", "sumof", and "productof".
  */
 
 grammar Calc;
@@ -323,7 +325,7 @@ expr
    | K_LN expr                           # lnExpr
    | K_EPOW expr                         # ePowerExpr
    | K_SIGNUM expr                       # signumExpr
-   | K_LENGTH expr                       # lengthExpr
+   | K_LENGTH ( expr | dotRange )        # lengthExpr
    | K_SCALE expr                        # scaleExpr
    | K_ROUND expr2                       # roundExpr
    | K_ISPRIME expr                      # isPrimeExpr
@@ -331,8 +333,8 @@ expr
    | K_LCM expr2                         # lcmExpr
    | K_MAX exprN                         # maxExpr
    | K_MIN exprN                         # minExpr
-   | K_SUMOF exprN                       # sumOfExpr
-   | K_PRODUCTOF exprN                   # productOfExpr
+   | K_SUMOF ( exprN | dotRange )        # sumOfExpr
+   | K_PRODUCTOF ( exprN | dotRange )    # productOfExpr
    | K_JOIN exprN                        # joinExpr
    | K_SPLIT ( expr2 | expr3 )           # splitExpr
    | K_INDEX ( expr2 | expr3 )           # indexExpr
@@ -378,8 +380,12 @@ exprN
    | exprList
    ;
 
-loopCtl
+dotRange
    : ( expr DOTS ) ? expr ( ',' expr ) ?
+   ;
+
+loopCtl
+   : dotRange
    | '(' exprList ')'
    | '(' ')'
    ;

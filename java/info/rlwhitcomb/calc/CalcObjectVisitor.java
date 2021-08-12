@@ -301,6 +301,9 @@
  *	    convert the codepoint and print the numeric value.
  *	06-Aug-2021 (rlwhitcomb)
  *	    Finish moving the fraction parsing to BigFraction entirely.
+ *	09-Aug-2021 (rlwhitcomb)
+ *	    Implement dot range for "length", "sumof", and "productof".
+ *	    Put loop value into special "$_" variable if none specified.
  */
 package info.rlwhitcomb.calc;
 
@@ -325,6 +328,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.UnaryOperator;
+import java.util.function.Function;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
 
@@ -371,6 +375,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	/** The precision to use for certain operations (division) when UNLIMITED is otherwise specified. */
 	private MathContext mcDivide;
+
+	/** A BigInteger <code>-1</code> value (for repeated use here). */
+	private static BigInteger I_MINUS_ONE = BigInteger.ONE.negate();
 
 
 	/**
@@ -1287,18 +1294,39 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	}
 
-	@Override
-	public Object visitLoopStmt(CalcParser.LoopStmtContext ctx) {
-	    CalcParser.LoopCtlContext ctlCtx    = ctx.loopCtl();
-	    CalcParser.StmtBlockContext block   = ctx.stmtBlock();
-	    CalcParser.ExprListContext exprList = ctlCtx.exprList();
-	    List<CalcParser.ExprContext> exprs  = ctlCtx.expr();
+	private class LoopVisitor implements Function<Object, Object>
+	{
+		private CalcParser.StmtBlockContext block;
+		private String localVarName;
+
+		LoopVisitor(CalcParser.StmtBlockContext blockContext, String varName) {
+		    this.block        = blockContext;
+		    this.localVarName = varName;
+		}
+
+		@Override
+		public Object apply(Object value) {
+		    if (localVarName != null)
+			variables.put(localVarName, value);
+		    return visit(block);
+		}
+
+		public void finish() {
+		    // Make sure the local loop var gets removed, even on exceptions
+		    removeMember(variables, localVarName, settings.ignoreNameCase);
+		}
+	}
+
+	private Object iterateOverDotRange(
+		CalcParser.ExprListContext exprList,
+		CalcParser.DotRangeContext dotRange,
+		Function<Object, Object> visitor,
+		boolean allowSingle)
+	{
+	    List<CalcParser.ExprContext> exprs;
 
 	    Iterator<Object> iter = null;
 	    java.util.stream.IntStream codePoints  = null;
-
-	    TerminalNode localVar = ctx.LOCALVAR();
-	    String localVarName   = localVar != null ? localVar.getText() : null;
 
 	    boolean stepWise = false;
 
@@ -1318,6 +1346,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		exprs = exprList.expr();
 	    }
 	    else {
+		exprs = dotRange.expr();
 		stepWise = true;
 
 		if (exprs.size() == 0) {
@@ -1326,30 +1355,35 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		}
 		else if (exprs.size() == 1) {
 		    // number of times, starting from 1
-		    // or it could be an array, object, or string to iterate over
-		    Object obj = visit(exprs.get(0));
-		    if (obj instanceof Map) {
-			stepWise = false;
-			@SuppressWarnings("unchecked")
-			Map<Object, Object> map = (Map<Object, Object>) obj;
-			iter = map.keySet().iterator();
-		    }
-		    else if (obj instanceof List) {
-			stepWise = false;
-			@SuppressWarnings("unchecked")
-			List<Object> list = (List<Object>) obj;
-			iter = list.iterator();
-		    }
-		    else if (obj instanceof String) {
-			stepWise = false;
-			codePoints = ((String) obj).codePoints();
+		    if (allowSingle) {
+			// or it could be an array, object, or string to iterate over
+			Object obj = visit(exprs.get(0));
+			if (obj instanceof Map) {
+			    stepWise = false;
+			    @SuppressWarnings("unchecked")
+			    Map<Object, Object> map = (Map<Object, Object>) obj;
+			    iter = map.keySet().iterator();
+			}
+			else if (obj instanceof List) {
+			    stepWise = false;
+			    @SuppressWarnings("unchecked")
+			    List<Object> list = (List<Object>) obj;
+			    iter = list.iterator();
+			}
+			else if (obj instanceof String) {
+			    stepWise = false;
+			    codePoints = ((String) obj).codePoints();
+			}
+			else {
+			    dStop = getDecimalValue(exprs.get(0));
+			}
 		    }
 		    else {
 			dStop = getDecimalValue(exprs.get(0));
 		    }
 		}
 		else if (exprs.size() == 2) {
-		    if (ctlCtx.DOTS() != null) {
+		    if (dotRange != null && dotRange.DOTS() != null) {
 			// start .. stop
 			dStart = getDecimalValue(exprs.get(0));
 			dStop  = getDecimalValue(exprs.get(1));
@@ -1368,11 +1402,6 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		}
 	    }
 
-	    if (localVarName != null) {
-		if (isMemberDefined(variables, localVarName, settings.ignoreNameCase))
-		    throw new CalcExprException(ctx, "%calc#noDupLocalVar", localVarName);
-	    }
-
 	    try {
 		if (stepWise) {
 		    // Try to convert loop values to exact integers if possible
@@ -1382,19 +1411,15 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			step  = dStep.intValueExact();
 
 			if (step == 0)
-			    throw new CalcExprException("%calc#infLoopStepZero", ctx);
+			    throw new CalcExprException("%calc#infLoopStepZero", dotRange);
 			else if (step < 0) {
 			    for (int loopIndex = start; loopIndex >= stop; loopIndex += step) {
-				if (localVarName != null)
-				    variables.put(localVarName, loopIndex);
-				lastValue = visit(block);
+				lastValue = visitor.apply(loopIndex);
 			    }
 			}
 			else {
 			    for (int loopIndex = start; loopIndex <= stop; loopIndex += step) {
-				if (localVarName != null)
-				    variables.put(localVarName, loopIndex);
-				lastValue = visit(block);
+				lastValue = visitor.apply(loopIndex);
 			    }
 			}
 		    }
@@ -1402,19 +1427,15 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			// This means we stubbornly have fractional values, so use as such
 			int sign = dStep.signum();
 			if (sign == 0)
-			    throw new CalcExprException("%calc#infLoopStepZero", ctx);
+			    throw new CalcExprException("%calc#infLoopStepZero", dotRange);
 			else if (sign < 0) {
 			    for (BigDecimal loopIndex = dStart; loopIndex.compareTo(dStop) >= 0; loopIndex = loopIndex.add(dStep)) {
-				if (localVarName != null)
-				    variables.put(localVarName, loopIndex);
-				lastValue = visit(block);
+				lastValue = visitor.apply(loopIndex);
 			    }
 			}
 			else {
 			    for (BigDecimal loopIndex = dStart; loopIndex.compareTo(dStop) <= 0; loopIndex = loopIndex.add(dStep)) {
-				if (localVarName != null)
-				    variables.put(localVarName, loopIndex);
-				lastValue = visit(block);
+				lastValue = visitor.apply(loopIndex);
 			    }
 			}
 		    }
@@ -1422,9 +1443,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		else if (iter != null) {
 		    while (iter.hasNext()) {
 			Object value = iter.next();
-			if (localVarName != null)
-			    variables.put(localVarName, value);
-			lastValue = visit(block);
+			lastValue = visitor.apply(value);
 		    }
 		}
 		else if (codePoints != null) {
@@ -1433,27 +1452,49 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			Integer cp = intIter.next();
 			buf.setLength(0);
 			buf.appendCodePoint(cp);
-			if (localVarName != null)
-			    variables.put(localVarName, buf.toString());
-			lastValue = visit(block);
+			lastValue = visitor.apply(buf.toString());
 		    }
 		}
 		else {
 		    for (CalcParser.ExprContext expr : exprs) {
-			Object loopValue = visit(expr);
-			if (localVarName != null)
-			    variables.put(localVarName, loopValue);
-			lastValue = visit(block);
+			lastValue = visitor.apply(visit(expr));
 		    }
 		}
 	    }
 	    finally {
-		// Make sure the local loop var gets removed, even on exceptions
-		if (localVarName != null)
-		    removeMember(variables, localVarName, settings.ignoreNameCase);
+		return lastValue;
+	    }
+	}
+
+	@Override
+	public Object visitLoopStmt(CalcParser.LoopStmtContext ctx) {
+	    CalcParser.LoopCtlContext ctlCtx    = ctx.loopCtl();
+	    CalcParser.StmtBlockContext block   = ctx.stmtBlock();
+	    CalcParser.ExprListContext exprList = ctlCtx.exprList();
+	    CalcParser.DotRangeContext dotCtx   = ctlCtx.dotRange();
+
+	    TerminalNode localVar = ctx.LOCALVAR();
+	    String localVarName   = localVar != null ? localVar.getText() : "$_";
+
+	    if (isMemberDefined(variables, localVarName, settings.ignoreNameCase)) {
+		if (localVar == null)
+		    throw new CalcExprException(ctx, "%calc#noDupAnonVar");
+		else
+		    throw new CalcExprException(ctx, "%calc#noDupLocalVar", localVarName);
 	    }
 
-	    return lastValue;
+	    LoopVisitor visitor = new LoopVisitor(block, localVarName);
+
+	    Object value = null;
+
+	    try {
+		value = iterateOverDotRange(exprList, dotCtx, visitor, true);
+	    }
+	    finally {
+		visitor.finish();
+	    }
+
+	    return value;
 	}
 
 	@Override
@@ -2064,13 +2105,32 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    return BigInteger.valueOf(signum);
 	}
 
+	private class LengthVisitor implements Function<Object, Object>
+	{
+		private BigInteger count = BigInteger.ZERO;
+
+		@Override
+		public Object apply(Object value) {
+		    count = count.add(BigInteger.ONE);
+		    return count;
+		}
+	}
+
 	@Override
 	public Object visitLengthExpr(CalcParser.LengthExprContext ctx) {
-	    Object obj = visit(ctx.expr());
+	    CalcParser.DotRangeContext dotRange = ctx.dotRange();
 
-	    // This calculates the recursive size of objects and arrays
-	    // so, use "scale" to calculate the non-recursive size
-	    return BigInteger.valueOf((long) length(this, obj, ctx, true));
+	    if (dotRange != null) {
+		LengthVisitor visitor = new LengthVisitor();
+		return iterateOverDotRange(null, dotRange, visitor, false);
+	    }
+	    else {
+		Object obj = visit(ctx.expr());
+
+		// This calculates the recursive size of objects and arrays
+		// so, use "scale" to calculate the non-recursive size
+		return BigInteger.valueOf((long) length(this, obj, ctx, true));
+	    }
 	}
 
 	@Override
@@ -2756,56 +2816,104 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    return result.toString();
 	}
 
+	private class SumOfVisitor implements Function<Object, Object>
+	{
+		private BigFraction sumFrac = BigFraction.ZERO;
+		private BigDecimal sum = BigDecimal.ZERO;
+		private ParserRuleContext ctx;
+
+		public SumOfVisitor(ParserRuleContext context) {
+		    this.ctx = context;
+		}
+
+		@Override
+		public Object apply(Object value) {
+		    if (settings.rationalMode) {
+			BigFraction frac = value instanceof BigFraction
+				? (BigFraction) value
+				: toFractionValue(CalcObjectVisitor.this, value, ctx);
+			sumFrac = sumFrac.add(frac);
+			return sumFrac;
+		    }
+		    else {
+			BigDecimal dec = value instanceof BigDecimal
+				? (BigDecimal) value
+				: toDecimalValue(CalcObjectVisitor.this, value, mc, ctx);
+			sum = sum.add(dec, mc);
+			return sum;
+		    }
+		}
+	}
+
 	@Override
 	public Object visitSumOfExpr(CalcParser.SumOfExprContext ctx) {
-	    List<CalcParser.ExprContext> exprs = ctx.exprN().exprList().expr();
-	    List<Object> objects = buildValueList(exprs, false);
+	    SumOfVisitor sumVisitor = new SumOfVisitor(ctx);
+	    Object sum = null;
 
-	    if (settings.rationalMode) {
-		BigFraction sum = BigFraction.ZERO;
+	    CalcParser.DotRangeContext dotRange = ctx.dotRange();
+	    if (dotRange == null) {
+		List<CalcParser.ExprContext> exprs = ctx.exprN().exprList().expr();
+		List<Object> objects = buildValueList(exprs, false);
 
 		for (Object obj : objects) {
-		    // At this point everything should be a BigFraction, or we would
-		    // have already thrown an error
-		    sum = sum.add((BigFraction) obj);
+		    sum = sumVisitor.apply(obj);
 		}
-
-		return sum;
 	    }
 	    else {
-		BigDecimal sum = BigDecimal.ZERO;
+		sum = iterateOverDotRange(null, dotRange, sumVisitor, false);
+	    }
 
-		for (Object obj : objects) {
-		    sum = sum.add((BigDecimal) obj, mc);
+	    return sum;
+	}
+
+	private class ProductOfVisitor implements Function<Object, Object>
+	{
+		private BigFraction productFrac = BigFraction.ONE;
+		private BigDecimal product = BigDecimal.ONE;
+		private ParserRuleContext ctx;
+
+		public ProductOfVisitor(ParserRuleContext context) {
+		    this.ctx = context;
 		}
 
-		return sum;
-	    }
+		@Override
+		public Object apply(Object value) {
+		    if (settings.rationalMode) {
+			BigFraction frac = value instanceof BigFraction
+				? (BigFraction) value
+				: toFractionValue(CalcObjectVisitor.this, value, ctx);
+			productFrac = productFrac.multiply(frac);
+			return productFrac;
+		    }
+		    else {
+			BigDecimal dec = value instanceof BigDecimal
+				? (BigDecimal) value
+				: toDecimalValue(CalcObjectVisitor.this, value, mc, ctx);
+			product = product.multiply(dec, mc);
+			return product;
+		    }
+		}
 	}
 
 	@Override
 	public Object visitProductOfExpr(CalcParser.ProductOfExprContext ctx) {
-	    List<CalcParser.ExprContext> exprs = ctx.exprN().exprList().expr();
-	    List<Object> objects = buildValueList(exprs, false);
+	    ProductOfVisitor productVisitor = new ProductOfVisitor(ctx);
+	    Object product = null;
 
-	    if (settings.rationalMode) {
-		BigFraction product = BigFraction.ONE;
+	    CalcParser.DotRangeContext dotRange = ctx.dotRange();
+	    if (dotRange == null) {
+		List<CalcParser.ExprContext> exprs = ctx.exprN().exprList().expr();
+		List<Object> objects = buildValueList(exprs, false);
 
 		for (Object obj : objects) {
-		    product = product.multiply((BigFraction) obj);
+		    product = productVisitor.apply(obj);
 		}
-
-		return product;
 	    }
 	    else {
-		BigDecimal product = BigDecimal.ONE;
-
-		for (Object obj : objects) {
-		    product = product.multiply((BigDecimal) obj, mc);
-		}
-
-		return product;
+		product = iterateOverDotRange(null, dotRange, productVisitor, false);
 	    }
+
+	    return product;
 	}
 
 	@Override
@@ -2829,7 +2937,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    int ret = compareValues(ctx.expr(0), ctx.expr(1), false, true);
 
 	    if (ret < 0)
-		return settings.rationalMode ? BigFraction.MINUS_ONE : BigInteger.ONE.negate();
+		return settings.rationalMode ? BigFraction.MINUS_ONE : I_MINUS_ONE;
 	    else if (ret == 0)
 		return settings.rationalMode ? BigFraction.ZERO : BigInteger.ZERO;
 	    else
