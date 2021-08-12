@@ -304,6 +304,8 @@
  *	09-Aug-2021 (rlwhitcomb)
  *	    Implement dot range for "length", "sumof", and "productof".
  *	    Put loop value into special "$_" variable if none specified.
+ *	11-Aug-2021 (rlwhitcomb)
+ *	    Add integer divide "\" and "\=".
  */
 package info.rlwhitcomb.calc;
 
@@ -1864,6 +1866,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			case "\u00F7":
 			case "\u2215":
 			case "\u2797":
+			case "\\":
 			    return f1.divide(f2);
 			case "%":
 			    // ??? I think there is never any remainder dividing a fraction by a fraction
@@ -1888,6 +1891,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			case "\u2215":
 			case "\u2797":
 			    return d1.divide(d2, mcDivide);
+			case "\\":
+			    return d1.divideToIntegralValue(d2, mcDivide);
 			case "%":
 			    return d1.remainder(d2, mcDivide);
 			default:
@@ -3454,6 +3459,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			case "\u00F7=":
 			case "\u2215=":
 			case "\u2797=":
+			case "\\=":
 			    result = f1.divide(f2);
 			    break;
 			case "%=":
@@ -3481,6 +3487,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			case "\u2215=":
 			case "\u2797=":
 			    result = d1.divide(d2, mcDivide);
+			    break;
+			case "\\=":
+			    result = d1.divideToIntegralValue(d2, mcDivide);
 			    break;
 			case "%=":
 			    result = d1.remainder(d2, mcDivide);

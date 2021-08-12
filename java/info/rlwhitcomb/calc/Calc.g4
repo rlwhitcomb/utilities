@@ -222,6 +222,8 @@
  *	    Trying to get 1..10 to work as loop control.
  *	09-Aug-2021 (rlwhitcomb)
  *	    Allowing a dot range on "length", "sumof", and "productof".
+ *	11-Aug-2021 (rlwhitcomb)
+ *	    Add integer divide ("\") operator.
  */
 
 grammar Calc;
@@ -714,6 +716,7 @@ POW_OP
 MULT_OP
        : ( '*' | '\u00D7' | '\u2217' | '\u2715' | '\u2716' )
        | ( '/' | '\u00F7' | '\u2215' | '\u2797' )
+       | '\\'
        | '%'
        ;
 
@@ -724,6 +727,7 @@ POW_ASSIGN
 MULT_ASSIGN
        : ( '*=' | '\u00D7=' | '\u2217=' | '\u2715=' | '\u2716=' )
        | ( '/=' | '\u00F7=' | '\u2215=' | '\u2797=' )
+       | '\\='
        | '%='
        ;
 
