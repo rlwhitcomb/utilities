@@ -226,6 +226,8 @@
  *	    Add integer divide ("\") operator.
  *	11-Aug-2021 (rlwhitcomb)
  *	    Add "CHARS" function to break up a string into codepoints.
+ *	12-Aug-2021 (rlwhitcomb)
+ *	    More date functions.
  */
 
 grammar Calc;
@@ -354,6 +356,10 @@ expr
    | K_PFACTORS expr                     # primeFactorsExpr
    | K_CHARS expr                        # charsExpr
    | K_DOW expr                          # dayOfWeekExpr
+   | K_DOM expr                          # dayOfMonthExpr
+   | K_DOY expr                          # dayOfYearExpr
+   | K_MOY expr                          # monthOfYearExpr
+   | K_YOD expr                          # yearOfDateExpr
    | K_EVAL expr                         # evalExpr
    | K_EXEC exprN                        # execExpr
    | expr '<=>' expr                     # spaceshipExpr
@@ -641,6 +647,14 @@ K_PFACTORS : P F A C T O R S ;
 K_CHARS    : C H A R S ;
 
 K_DOW      : D O W ;
+
+K_DOM      : D O M ;
+
+K_DOY      : D O Y ;
+
+K_MOY      : M O Y ;
+
+K_YOD      : Y O D ;
 
 K_EVAL     : E V A L ;
 

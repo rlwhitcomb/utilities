@@ -36,4 +36,31 @@ def rad_to_deg = { rad / pi * 180 }
  */
 def deg_to_rad = { deg / 180 * pi }
 
+/*
+ * Get the day of week name for a given date.
+ *
+ * @param date The input date value.
+ * @return     The day name ("Sunday" .. "Saturday").
+ */
+_day_names_  = [ "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" ]
+def dow_name = { _day_names_ [ dow(date) ] }
+
+/*
+ * Get the month name for a given date.
+ *
+ * @param date The input date value.
+ * @return     The month name ("January" .. "December").
+ */
+_month_names_ = [ "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" ]
+def moy_name = { _month_names_ [ (moy date) - 1 ] }
+
+/*
+ * Get the long form of a date.
+ * From D'2/1/1980' -> Friday, February 1, 1980
+ *
+ * @param date The input date value.
+ * @return     The long string representation of the date.
+ */
+def long_date = { `${dow_name}, ${moy_name} ${dom(date)}, ${yod(date)}` }
+
 :quiet pop

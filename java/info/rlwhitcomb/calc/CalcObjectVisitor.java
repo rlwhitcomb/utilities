@@ -312,6 +312,8 @@
  *	    In the Variables list, for a function list the body, not the value since
  *	    many times the function shouldn't be executed at this time, and the
  *	    definition is more germane in this setting.
+ *	12-Aug-2021 (rlwhitcomb)
+ *	    More date functions.
  */
 package info.rlwhitcomb.calc;
 
@@ -2749,6 +2751,61 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		// ours = 0 (Sunday) to 6 (Saturday)
 		int adjustedDow = dow.getValue() % 7;
 		return BigInteger.valueOf((long) adjustedDow);
+	    }
+	    catch (ArithmeticException ae) {
+		throw new CalcExprException(ae, ctx);
+	    }
+	}
+
+	@Override
+	public Object visitDayOfMonthExpr(CalcParser.DayOfMonthExprContext ctx) {
+	    BigInteger iValue = getIntegerValue(ctx.expr());
+	    try {
+		LocalDate date = LocalDate.ofEpochDay(iValue.longValueExact());
+		int dom = date.getDayOfMonth();
+		// Theirs matches ours: 1 .. n value
+		return BigInteger.valueOf((long) dom);
+	    }
+	    catch (ArithmeticException ae) {
+		throw new CalcExprException(ae, ctx);
+	    }
+	}
+
+	@Override
+	public Object visitDayOfYearExpr(CalcParser.DayOfYearExprContext ctx) {
+	    BigInteger iValue = getIntegerValue(ctx.expr());
+	    try {
+		LocalDate date = LocalDate.ofEpochDay(iValue.longValueExact());
+		int doy = date.getDayOfYear();
+		// Theirs matches ours: 1 .. 365/366 value
+		return BigInteger.valueOf((long) doy);
+	    }
+	    catch (ArithmeticException ae) {
+		throw new CalcExprException(ae, ctx);
+	    }
+	}
+
+	@Override
+	public Object visitMonthOfYearExpr(CalcParser.MonthOfYearExprContext ctx) {
+	    BigInteger iValue = getIntegerValue(ctx.expr());
+	    try {
+		LocalDate date = LocalDate.ofEpochDay(iValue.longValueExact());
+		int moy = date.getMonthValue();
+		// Theirs matches ours: 1 .. 12 value
+		return BigInteger.valueOf((long) moy);
+	    }
+	    catch (ArithmeticException ae) {
+		throw new CalcExprException(ae, ctx);
+	    }
+	}
+
+	@Override
+	public Object visitYearOfDateExpr(CalcParser.YearOfDateExprContext ctx) {
+	    BigInteger iValue = getIntegerValue(ctx.expr());
+	    try {
+		LocalDate date = LocalDate.ofEpochDay(iValue.longValueExact());
+		int yod = date.getYear();
+		return BigInteger.valueOf((long) yod);
 	    }
 	    catch (ArithmeticException ae) {
 		throw new CalcExprException(ae, ctx);
