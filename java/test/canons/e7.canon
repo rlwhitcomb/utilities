@@ -1,7 +1,7 @@
+>All variables cleared.
 >Variables
 >---------
 >=========
->All variables cleared.
 >Defining function 'oddness' = {
 > case value % 2 of 
 > 0: 'even', 

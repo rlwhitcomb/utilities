@@ -1,8 +1,8 @@
 #
 # Tests of IF, and CASE
 #
-:variables
 :clear
+:variables
 
 define oddness={
    case value%2 of

@@ -308,6 +308,10 @@
  *	    Add integer divide "\" and "\=".
  *	11-Aug-2021 (rlwhitcomb)
  *	    Add "CHARS" function to break up a string into an array of codepoints.
+ *	12-Aug-2021 (rlwhitcomb)
+ *	    In the Variables list, for a function list the body, not the value since
+ *	    many times the function shouldn't be executed at this time, and the
+ *	    definition is more germane in this setting.
  */
 package info.rlwhitcomb.calc;
 
@@ -851,7 +855,10 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 	    for (String key : sortedKeys) {
 		Object value = getMemberValue(variables, key, settings.ignoreNameCase);
-		displayer.displayResult(key, toStringValue(this, value, settings.separatorMode));
+		if (value instanceof ParserRuleContext)
+		    displayer.displayResult(key, getTreeText((ParserRuleContext) value));
+		else
+		    displayer.displayResult(key, toStringValue(this, value, settings.separatorMode));
 	    }
 	    if (!replMode) {
 		displayActionMessage("%calc#varUnder2");
