@@ -538,7 +538,11 @@ or
             <tr><td><code>FACTORS</code>&nbsp;<i>expr</i></td><td>calculate all the factors of the number</td></tr>
             <tr><td><code>PFACTORS</code>&nbsp;<i>expr</i></td><td>calculate the prime factors of the number</td></tr>
             <tr><td><code>CHARS</code>&nbsp;<i>expr</i></td><td>separate a string into a list of its characters</td></tr>
-            <tr><td><code>DOW</code>&nbsp;<i>expr</i></td><td>day of the week of a date (integer) value<br>(0=Sunday to 6=Saturday)</td></tr>
+            <tr><td><code>DOW</code>&nbsp;<i>expr</i></td><td>day of the week of a date (integer)<br>(0=Sunday to 6=Saturday)</td></tr>
+            <tr><td><code>DOM</code>&nbsp;<i>expr</i></td><td>day of the month of a date (integer)<br>(1 .. 31)</td></tr>
+            <tr><td><code>DOY</code>&nbsp;<i>expr</i></td><td>day of the year of a date (integer)<br>(1 .. 365/366)</td></tr>
+            <tr><td><code>MOY</code>&nbsp;<i>expr</i></td><td>month of the year of a date (integer)<br>(1 .. 12)</td></tr>
+            <tr><td><code>YOD</code>&nbsp;<i>expr</i></td><td>year of the date (integer)</td></tr>
           </tbody>
         </table></td>
         <td>left to right</td></tr>
