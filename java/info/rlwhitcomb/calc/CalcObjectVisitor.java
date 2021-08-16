@@ -314,6 +314,8 @@
  *	    definition is more germane in this setting.
  *	12-Aug-2021 (rlwhitcomb)
  *	    More date functions.
+ *	16-Aug-2021 (rlwhitcomb)
+ *	    Need to use "mcDivide" for Bernoulli numbers to avoid infinite repeating digits errors.
  */
 package info.rlwhitcomb.calc;
 
@@ -2648,7 +2650,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public Object visitBernExpr(CalcParser.BernExprContext ctx) {
 	    int n = getIntValue(ctx.expr());
 
-	    return MathUtil.bernoulli(n, mc, settings.rationalMode);
+	    return MathUtil.bernoulli(n, mcDivide, settings.rationalMode);
 	}
 
 	@Override
