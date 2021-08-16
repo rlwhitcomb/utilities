@@ -230,6 +230,8 @@
  *	    More date functions.
  *	16-Aug-2021 (rlwhitcomb)
  *	    Add ":OPEN" as an alternative to ":INCLUDE".
+ *	16-Aug-2021 (rlwhitcomb)
+ *	    Got the precedence of all the functions wrong; adjust.
  */
 
 grammar Calc;
@@ -303,17 +305,6 @@ expr
    | arr                                 # arrExpr
    | var                                 # varExpr
    | '(' expr ')'                        # parenExpr
-   | var INC_OP                          # postIncOpExpr
-   |<assoc=right> INC_OP var             # preIncOpExpr
-   |<assoc=right> ADD_OP expr            # negPosExpr
-   |<assoc=right> ('!'|'\u00AC') expr    # booleanNotExpr
-   |<assoc=right> '~' expr               # bitNotExpr
-   | expr '!'                            # factorialExpr
-   |<assoc=right> expr POW_OP expr       # powerExpr
-   |<assoc=right> expr POWERS            # powerNExpr
-   | expr MULT_OP expr                   # multiplyExpr
-   | expr ADD_OP expr                    # addExpr
-   | expr SHIFT_OP expr                  # shiftExpr
    | K_ABS expr                          # absExpr
    | K_SIN expr                          # sinExpr
    | K_COS expr                          # cosExpr
@@ -364,6 +355,17 @@ expr
    | K_YOD expr                          # yearOfDateExpr
    | K_EVAL expr                         # evalExpr
    | K_EXEC exprN                        # execExpr
+   | var INC_OP                          # postIncOpExpr
+   |<assoc=right> INC_OP var             # preIncOpExpr
+   |<assoc=right> ADD_OP expr            # negPosExpr
+   |<assoc=right> ('!'|'\u00AC') expr    # booleanNotExpr
+   |<assoc=right> '~' expr               # bitNotExpr
+   | expr '!'                            # factorialExpr
+   |<assoc=right> expr POW_OP expr       # powerExpr
+   |<assoc=right> expr POWERS            # powerNExpr
+   | expr MULT_OP expr                   # multiplyExpr
+   | expr ADD_OP expr                    # addExpr
+   | expr SHIFT_OP expr                  # shiftExpr
    | expr '<=>' expr                     # spaceshipExpr
    | expr COMPARE_OP expr                # compareExpr
    | expr EQUAL_OP expr                  # equalExpr

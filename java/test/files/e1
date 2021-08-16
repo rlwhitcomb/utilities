@@ -440,7 +440,7 @@ s = r'ⅿⅽⅿⅼⅹⅶ'
 
 1962 @R
 
-roman 'xx' + 'ii'
+roman('xx' + 'ii')
 
 #
 # Time and duration constants, expressions, and formats
