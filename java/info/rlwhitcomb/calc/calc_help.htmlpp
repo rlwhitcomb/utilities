@@ -404,7 +404,7 @@ or
   <p>As another side note, the Bernoulli numbers are best calculated in rational mode, since they are defined as the ratio of integer values.
      Of course, in decimal mode the fractions will be divided and the results returned as a decimal value up the specified precision.
   <p>Trigonometric calculations are, by default, done in radians, but this can be changed to use degrees using the <code>:degrees</code> directive.
-  <p>Dates have a valid range of <code>d'-9999/01/01'</code> to <code>d'9999/12/31'</code>, or a total range of 7,304,484 days. Significantlly, dates
+  <p>Dates have a valid range of <code>d'-9999/01/01'</code> to <code>d'9999/12/31'</code>, or a total range of 7,304,484 days. Significantly, dates
      use the proleptic values of the Gregorian calendar extended infinitely to the past and future, so that correspondence to the actual calendar
      dates prior to the adoption of the Gregorian calendar <strong>will be wrong</strong>.
   <p>Dates and times represent date/time values (such as birthdays, anniversaries, or wall clock times), and have no reference to time zones, although
