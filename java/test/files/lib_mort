@@ -50,6 +50,8 @@ define PMT($ctx) = {
   ctx.P * (r_r_n / r_n_1)
 }
 
+def help_mort = { "\nUsage: P=<present value>; R=<yearly interest rate (%)> or r=<monthly interest %>; N=<number of years> or n=<number of months>\nThen use one of PMT, PMT_M, monthly or monthly_whole to get the results in different forms." }
+
 # Note: the 2nd param is the number of fractional digits (after the decimal point)
 # regardless of the number of whole digits in the result; so "0" will round
 # to a whole dollar, "2" rounds to pennies.
