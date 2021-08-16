@@ -1,7 +1,10 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Expression Calculator Help</title>
+    <title>Expression Calculator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredericka+the+Great&amp;display=swap" rel="stylesheet">
     <style>
 table {
   font-family: helvetica, arial, sans-serif;
@@ -42,7 +45,7 @@ h2 {
     margin: 25px;
     overflow: hidden;
     text-align: center;
-    padding: 20px;
+    padding: 10px 20px;
     background-color: lightgreen;
     border: 1px solid cornflowerblue;
     -webkit-border-radius: 20px;
@@ -112,7 +115,7 @@ h2 {
 
 <body>
   <div class="title-box">
-    <h1>Expression Calculator Help</h1>
+    <h1 style="font-family:'Fredericka the Great',cursive;font-size:400%;">Expression Calculator</h1>
     <h2>Version ${Calc.version}, build ${build.number}</h2>
   </div>
 <hr class="sectionsep">
