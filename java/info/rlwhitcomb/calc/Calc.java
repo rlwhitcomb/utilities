@@ -162,6 +162,8 @@
  *	    Set focus back to input field after Version closes.
  *	12-Aug-2021 (rlwhitcomb)
  *	    Add "-library" command line option.
+ *	16-Aug-2021 (rlwhitcomb)
+ *	    Immediately process stdin if redirected.
  */
 package info.rlwhitcomb.calc;
 
@@ -1436,7 +1438,7 @@ public class Calc
 		    // If no input arguments were given, go into "REPL" mode, reading
 		    // a line at a time from the console and processing
 		    if (input == null) {
-			if (console == null) {
+			if (console == null || System.in.available() > 0) {
 			    process(CharStreams.fromStream(System.in), visitor, errorStrategy, quiet);
 			}
 			else {
