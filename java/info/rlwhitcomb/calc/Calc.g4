@@ -228,6 +228,8 @@
  *	    Add "CHARS" function to break up a string into codepoints.
  *	12-Aug-2021 (rlwhitcomb)
  *	    More date functions.
+ *	16-Aug-2021 (rlwhitcomb)
+ *	    Add ":OPEN" as an alternative to ":INCLUDE".
  */
 
 grammar Calc;
@@ -876,7 +878,7 @@ D_ECHO
    ;
 
 D_INCLUDE
-   : DIR  ( I N C | I N C L U D E )
+   : DIR  ( I N C | I N C L U D E | O P E N )
    ;
 
 D_DEBUG
