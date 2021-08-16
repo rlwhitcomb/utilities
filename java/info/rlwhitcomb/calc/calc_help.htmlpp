@@ -12,7 +12,7 @@ table {
 tr, th, td {
   border: 1px solid #dddddd;
   text-align: center;
-  padding: 4px;
+  padding: 4px 10px;
 }
 
 th {
@@ -102,35 +102,6 @@ h2 {
    margin-left: 0;
    margin-right: 0;
    font-weight: bold;
-}
-
-.innertable {
-   margin-left: auto;
-   margin-right: auto;
-   border-spacing: 0;
-   border: none;
-}
-
-.innertable tr {
-   padding: 4px;
-   border-spacing: 20;
-   border: none;
-}
-
-.innertable th,
-.innertable td {
-   padding: 4px;
-   margin: 8px;
-   border-spacing: 20;
-   border: none;
-}
-
-.innertable caption {
-   display: none;
-}
-
-.innertable tr:nth-child(odd) {
-  background-color: #f8f0f0;
 }
 
 .indent {
@@ -493,10 +464,10 @@ or
     <caption class="tablecap">Operators, Functions, and Precedence</caption>
     <thead>
     <tr>
-      <th style="width:60">Level</th>
-      <th style="width:360">Operator</th>
-      <th style="width:360">Description</th>
-      <th style="120">Associativity</th>
+      <th style="width:8%">Level</th>
+      <th style="width:40%">Operator</th>
+      <th style="width:40%">Description</th>
+      <th style="12%">Associativity</th>
     </tr>
     </thead>
     <tbody>
@@ -539,11 +510,8 @@ or
         <i>expr</i>&nbsp;<code> &gt;&gt; </code>&nbsp;<i>expr</i><br>
         <i>expr</i>&nbsp;<code> &lt;&lt; </code>&nbsp;<i>expr</i></td>
         <td>bit shift operations</td><td>left to right</td></tr>
-    <tr><td>13</td><td colspan="2" style="padding:0;margin:0;">
-        <table class="innertable">
-          <caption></caption>
-            <tbody>
-            <tr><td style="width:50%;"><code>ABS</code>&nbsp;<i>expr</i></td><td style="width:50%;">absolute value</td></tr>
+    <tr><td rowspan="51">13</td>
+            <td><code>ABS</code>&nbsp;<i>expr</i></td><td>absolute value</td><td rowspan="51">left to right</td></tr>
             <tr><td><code>SIN</code>&nbsp;<i>expr</i></td><td>sine</td></tr>
             <tr><td><code>COS</code>&nbsp;<i>expr</i></td><td>cosine</td></tr>
             <tr><td><code>TAN</code>&nbsp;<i>expr</i></td><td>tangent</td></tr>
@@ -594,9 +562,6 @@ or
             <tr><td><code>DOY</code>&nbsp;<i>expr</i></td><td>day of the year of a date (integer)<br>(1 .. 365/366)</td></tr>
             <tr><td><code>MOY</code>&nbsp;<i>expr</i></td><td>month of the year of a date (integer)<br>(1 .. 12)</td></tr>
             <tr><td><code>YOD</code>&nbsp;<i>expr</i></td><td>year of the date (integer)</td></tr>
-          </tbody>
-        </table></td>
-        <td>left to right</td></tr>
     <tr><td>12</td><td><i>expr</i>&nbsp;<code> &lt;=&gt; </code>&nbsp;<i>expr</i><td>returns <code>-1</code> if <i>expr</i> &lt; 0<br><code>0</code> if <i>expr</i> = 0<br><code>+1</code> if <i>expr</i> &gt; 0</td><td>left to right</td></tr>
     <tr><td>11</td><td>
         <i>expr</i>&nbsp;<code> &lt;= </code>or<code> &#x2264; </code>&nbsp;<i>expr</i><br>
