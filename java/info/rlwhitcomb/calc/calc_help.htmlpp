@@ -173,8 +173,20 @@ h2 {
 <hr class="sectionsep">
   <h2>Command Line</h2>
 <div class="cols">
-  The command line is assumed to have either the name of a file to process, or an expression to evaluate. There may also be options specified (see the next section). If there is a single value given and there exists a file by that name (possibly in another directory given by the prior <code>-inputdir</code> option), then that file is read, the contents parsed, and all the expressions evaluated. Otherwise, if there are more than one argument on the command line, or the single argument does not name a file, then the command line is taken as a single string, parsed, and then evaluated.
+  The command line is assumed to have either the name of a file to process, or an expression to evaluate. There may also be options specified
+  (see the next section). If there is a single value given and there exists a file by that name (possibly in another directory given by the
+  <code>-inputdir</code> option), then that file is read, the contents parsed, and all the expressions evaluated. Otherwise, if there is more than
+  one argument on the command line, or the single argument does not name a file, then the command line is taken as a single string, parsed, and
+  then evaluated. The single string can also name more than one file if the file names are separated by <code>,</code> or <code>;</code>
+  (and these files can be found, possibly in the <code>-inputdir</code> location).
+  <p>If Calc is invoked by piping or redirecting input from somewhere, the input stream is immediately read and evaluated and then Calc will exit.
+  <p>If there is a single <code>@</code> name given on the command line, or there are no non-option arguments given then Calc will enter REPL mode.
+  <p>Also, if the input argument looks like <code>@<i>file_name</i></code> then the <code>@</code> is discarded and the <i>file_name</i> is read.
+  <p>Files are found by first trying to locate the file just as it is named. If not found, then the latest input directory is used as a prefix
+     (either the directory of the last file found, or the value of <code>-inputdir</code> if set). This same process is used anytime a file is read
+     (such as with <code>:include</code>, or on the command line).
 </div>
+<hr class="sectionsep">
   <h2>Command Line Options</h2>
 <div class="cols">
   Certain options can be given on the command line that affect the operation of the calculator. These options can also be set via the <code>CALC_OPTIONS</code> environment variable. Options specified on the command line will override the defaults set by <code>CALC_OPTIONS</code>, and options given later on the command line override ones given earlier.
@@ -220,11 +232,34 @@ h2 {
   </table>
   </div>
 <hr class="sectionsep">
-  <h2>Read, Eval, Print Loop Commands</h2>
+  <h2>Notes on Command Line Options</h2>
+  <div class="cols">
+  <ul>
+  <li>All the options are collected to begin with before processing any input files, or the input directory and library specifications. This ensures
+      that any options affecting the output format, or any processing, are fully respected in the code from the very start.
+  <li>The libraries are searched for beginning in the current directory, but then searching the <code>-inputdir</code> location if not found
+      (same process as for regular input files).
+  <li>The list of library names can be separated by commas (<code>,</code>), semicolons (<code>;</code>), or on non-Windows platforms by colons
+      (<code>:</code>).
+  <li>If there are errors in (say) the <i>locale_name</i>, <i>input directory</i>, or <i>library names</i>, these errors will (for the most part)
+      be silently ignored.
+  <li>Some errors (such as syntax errors within the library code) will be output as errors prior to the REPL prompt, however.
+  <li>This help page (of course) is an HTML document, and so depends on a browser being installed to display it. Note that this help is also included
+     as part of the Javadoc for the <code style="font-size:100%;">info.rlwhitcomb.calc</code> package.
+  </ul>
+  </div>
+<hr class="sectionsep">
+  <h2><span class="underline">R</span>ead, <span class="underline">E</span>val, <span class="underline">P</span>rint
+      <span class="underline">L</span>oop Commands</h2>
   <div class="cols">
   <p>In REPL mode, in addition to expressions and directives (as described below), there are a few commands available to do other
-     things, mostly as alternatives to command-line options. Note that these commands are only available in REPL mode, and not
-     from a script file, nor in the GUI input window (although there are GUI buttons for most of them).
+     things (all of which are alternatives to command-line options). Note that these commands are only available in REPL mode, and not
+     from a script or library file, nor in the GUI input window (although there are buttons in the GUI window for all but
+     <code>gui</code> [obviously]).
+  <p>Interestingly, although the Calculator can switch from console mode to GUI mode, the reverse is not possible. Also, the console application will
+     not actually exit after switching modes until the GUI window is closed. This also applies to using the <code>-gui</code> option on the command line.
+  <p>Also note that using the command line options (such as <code>c -version</code>) will do the operation and immediately exit, while using the
+     equivalent REPL command will do the operation and return to the REPL prompt to accept further work.
   </div>
   <div class="center">
   <table style="margin-left:auto;margin-right:auto;">
@@ -250,8 +285,9 @@ h2 {
 <div class="cols">
   The basic building blocks of the expressions implemented here are the basic value types: numbers (either integer or real
      numbers with a fractional part), strings, rational fractions, boolean values, and the <code>null</code> value.
-     Numbers can be of arbitrary precision, up to a maximum of 2**32-1 (4,294,967,295) digits. Strings can also be of any length up
-     to the same number of characters.
+     Numbers can be of arbitrary precision, up to a maximum of 2**32-1 (4,294,967,295) digits (although see the discussion under
+     "Modes and Precision" below for further details). Strings can also be of any length up to the same number of characters (subject to
+     system memory constraints of course).
   <p>Simple numeric constants follow the normal rules, and can be expressed as simple integers (as in <code>4129</code>),
      decimal numbers (as in <code>23.47</code>), or floating point constants in scientific notation (as in <code>1.2e-20</code>).
      The boolean constants are <code>true</code> and <code>false</code> (although they are case-insensitive, so could be spelled
@@ -307,8 +343,9 @@ which gives:
      with the values pieced into it. String values are stored in variables without any surrounding quotes, and the escaped
      characters are interpreted and stored as their actual codepoints. This means that string values inserted into interpolated
      strings will be inserted as they are stored (without quotes, etc.).
-  <p>Calc reserves the names <code>pi</code> and <code>e</code> for these two fundamental constants. All the alternative characters
-     of <code>&#x1D6D1;</code> are also supported.
+  <p>Calc reserves the names <code>pi</code> and <code>e</code> for these two fundamental constants. All the various Unicode characters
+     for <code>&#x1D6D1;</code> are also supported, as well as one Unicode alternative for <code>e</code> (see "Operators, Functions, and Precedence"
+     table below).
 <p class="indent"> <code>&#x1D6D1;</code> = <code>3.14159265358979323846264338327950288...</code> <br> <code>e</code> = <code>2.71828182845904523536028747135266249...</code> </p>
   <p>The Unicode fraction characters also represent their respective values, as in:
 <p class="indent"> <code>&#x00BC;</code> = <code>1/4</code> or <code>0.25</code> <br> <code>&#x215A;</code> = <code>5/6</code> or <code>0.8333...</code>
@@ -386,7 +423,21 @@ or
       all calculations is 128-bit arithmetic, or approximately 34 digits of decimal precision. The precision can be adjusted up to
       12,500 (due to somewhat arbitrary restrictions on our calculation of the value of <code>&#x1D6D1;</code>) using any of
       several directives.
+  <p>Unlimited (up to the plaform limit of 4 billion digits) precision is available, and many/most calculations will honor that,
+      although some trig / log calculations are still (implementation-restriction) limited to "double" precision, and the precision of division
+      operations will be automatically limited to our 12,500 digits if the result is in an infinitely repeating value (such as the result of
+      <code>1/7 = 0.142857142857...</code>).
+  <p>Some operators (such as factorial) do not respect the precision setting, and do their calculations to their exact value regardless of the setting
+     (not sure if this is wise or not, but it seems weird to restrict the precision in such cases in a rather arbitrary and unintuitive way). Also, in
+     rational mode the precision setting does not apply to the numerator or denominator values of the fractions.
+  <p>As another side note, the Bernoulli numbers are best calculated in rational mode, since they are defined as the ratio of integer values.
+     Of course, in decimal mode the fractions will be divided and the results returned as a decimal value up the specified precision.
   <p>Trigonometric calculations are, by default, done in radians, but this can be changed to use degrees using the <code>:degrees</code> directive.
+  <p>Dates have a valid range of <code>d'-9999/01/01'</code> to <code>d'9999/12/31'</code>, or a total range of 7,304,484 days. Significantlly, dates
+     use the proleptic values of the Gregorian calendar extended infinitely to the past and future, so that correspondence to the actual calendar
+     dates prior to the adoption of the Gregorian calendar <strong>will be wrong</strong>.
+  <p>Dates and times represent date/time values (such as birthdays, anniversaries, or wall clock times), and have no reference to time zones, although
+     using time arithmetic can be a convenient way to do conversion of times between time zones.
 </div>
 <hr class="sectionsep">
   <h2>Formats</h2>
@@ -443,8 +494,8 @@ or
     <thead>
     <tr>
       <th style="width:60">Level</th>
-      <th style="width:350">Operator</th>
-      <th style="width:350">Description</th>
+      <th style="width:360">Operator</th>
+      <th style="width:360">Description</th>
       <th style="120">Associativity</th>
     </tr>
     </thead>
@@ -492,7 +543,7 @@ or
         <table class="innertable">
           <caption></caption>
             <tbody>
-            <tr><td style="width:300"><code>ABS</code>&nbsp;<i>expr</i></td><td style="width:400">absolute value</td></tr>
+            <tr><td style="width:50%;"><code>ABS</code>&nbsp;<i>expr</i></td><td style="width:50%;">absolute value</td></tr>
             <tr><td><code>SIN</code>&nbsp;<i>expr</i></td><td>sine</td></tr>
             <tr><td><code>COS</code>&nbsp;<i>expr</i></td><td>cosine</td></tr>
             <tr><td><code>TAN</code>&nbsp;<i>expr</i></td><td>tangent</td></tr>
@@ -722,9 +773,9 @@ or
     <tr><td><code>:si</code></td><td>Display units in terms of multiples of 1000</td><td><code>:ten</code></td></tr>
     <tr><td><code>:mixed</code></td><td>Unit multiplier based on powers of 2 (same as <code>:binary</code>), but with SI suffix <i>(default)</i></td><td><code>:mix</code></tr>
     <tr><td><code>:clear</code> [ <i>id</i> ( <code>,</code> <i>id</i> ) * ]</td><td>Clear all or only the specified variables (set values to <code>null</code>)</td><td><code>:clr</code></td></tr>
-    <tr><td><code>:variables</code> [ <i>id</i> ( <code>,</code> <i>id</i> ) * ]</td><td>Display the values of all or only the specified variables<br>(for a function the text will be displayed, not the value)</td><td><code>:variable</code>, <code>:vars</code>, <code>:var</code></td></tr>
+    <tr><td><code>:variables</code> [ <i>id</i> ( <code>,</code> <i>id</i> ) * ]</td><td>Display the values of all or only the specified variables<br>(for a function the definition will be displayed, not the current value)</td><td><code>:variable</code>, <code>:vars</code>, <code>:var</code></td></tr>
     <tr><td><code>:echo</code> <i>expr</i></td><td>Echo the value of the expression to the output</td><td></td></tr>
-    <tr><td><code>:include</code> <i>string</i></td><td>Include the file(s) named by <i>string</i></td><td><code>:inc</code></td></tr>
+    <tr><td><code>:include</code> <i>string</i></td><td>Include the file(s) named by <i>string</i></td><td><code>:inc</code>, <code>:open</code></td></tr>
     <tr><td><code>:rational</code> <i>mode_option</i></td><td>Set the rational calculation mode where <i>mode_option</i> is one of:<br><code>on</code>, <code>off</code>, <code>true</code>, <code>false</code>, <code>yes</code>, <code>no</code>, <code>pop</code>, <code>previous</code>, <code>prev</code>, or <i>variable</i><br><i>(default is <code>off</code>, or the value set on the command line)</i></td><td><code>:ration</code>, <code>:fraction</code>, <code>:frac</code>, <code>:fr</code></td></tr>
     <tr><td><code>:separators</code> <i>mode_option</i></td><td>Set whether to display thousands separators always<br><i>(default is <code>off</code> or value on command line)</i></td><td><code>:separator</code>, <code>:seps</code>, <code>:sep</code></td></tr>
     <tr><td><code>:ignorecase</code> <i>mode_option</i></td><td>Set whether to ignore case of variable and member names<br><i>(default is <code>off</code> or value on command line)</i></td><td><code>:caseinsensitive</code>, <code>:insensitive</code>,<br><code>:ignore</code>, <code>:case</code>, <code>:ign</code>, <code>:ins</code></td></tr>
@@ -757,6 +808,15 @@ or
      (since the values are stored this way).
   <p>The only effect of debug mode is to display the parse tree (in LISP format) before the expression(s) is/are evaluated.
   <p>Timing mode displays the total parsing and execution time (to nanosecond precision on some systems) after the results are displayed.
+</div>
+<hr class="sectionsep">
+  <h2>Standard Libraries of Functions</h2>
+<div class="cols">
+  <p>There are currently two "standard" libraries available in the <code>test/files</code> directory of the source code:  <code>"library"</code> and
+     <code>"lib_mort"</code>.  Since the contents of these libraries change frequently, you should open the current versions in the GUI window
+     or your favorite text editor to examine the contents before using them.  There is also a "help_mort" function defined in "lib_mort" to explain its use.
+  <p>At a minimum, the "library" has code to convert to/from our date values and the standard Excel&trade; date values, and do other date-related manipulation.
+     The "lib_mort" library has some mortgage-related (or "time value of money") functions defined.
 </div>
 <hr class="sectionsep">
   <h2>GUI Operations</h2>
