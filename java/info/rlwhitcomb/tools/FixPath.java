@@ -30,6 +30,8 @@
  *	    Clean up code and comments.
  *	29-Mar-2021 (rlwhitcomb)
  *	    Move to new package.
+ *	17-Aug-2021 (rlwhitcomb)
+ *	    Check for unmatched leading or trailing quotes.
  */
 package info.rlwhitcomb.tools;
 
@@ -81,6 +83,10 @@ public class FixPath
 		    /* Remove quotes around the element. */
 		    if (pathElement.charAt(0) == '"' && pathElement.charAt(pathElement.length() - 1) == '"')
 			modifiedElement = pathElement.substring(1, pathElement.length() - 1);
+		    else if (pathElement.charAt(0) == '"')
+			modifiedElement = pathElement.substring(1);
+		    else if (pathElement.charAt(pathElement.length() - 1) == '"')
+			modifiedElement = pathElement.substring(0, pathElement.length() - 1);
 
 		    File pathDir = new File(modifiedElement);
 		    if (pathDir.exists() && pathDir.isDirectory()) {
