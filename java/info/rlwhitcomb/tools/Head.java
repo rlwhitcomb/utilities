@@ -30,6 +30,8 @@
  *	    Move to new package.
  *	06-Apr-2021 (rlwhitcomb)
  *	    Add "-version" option.
+ *	16-Aug-2021 (rlwhitcomb)
+ *	    Get version and program title from properties file.
  */
 package info.rlwhitcomb.tools;
 
@@ -174,7 +176,7 @@ public class Head
 	 * @param args The parsed command line argument array.
 	 */
 	public static void main(final String[] args) {
-	    Environment.setProductName("Head");
+	    Environment.loadProgramInfo(Head.class);
 
 	    // Scan through the options to override the defaults
 	    for (String arg : args) {

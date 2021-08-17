@@ -34,6 +34,8 @@
  *	06-Apr-2021 (rlwhitcomb)
  *	    Add "-lines", "-words", and "-chars" options to print only that
  *	    one value (instead of all three).
+ *	16-Aug-2021 (rlwhitcomb)
+ *	    Put program title and version into properties file.
  */
 package info.rlwhitcomb.tools;
 
@@ -279,7 +281,7 @@ public class WordCount
 	 * @param args The parsed command line argument array.
 	 */
 	public static void main(final String[] args) {
-	    Environment.setProductName("Word Count");
+	    Environment.loadProgramInfo(WordCount.class);
 
 	    // Scan through the options to override the defaults
 	    for (String arg : args) {
