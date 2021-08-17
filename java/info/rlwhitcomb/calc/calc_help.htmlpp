@@ -167,7 +167,7 @@ h2 {
   <p>Options are case-insensitive, and maybe be prefixed with either <code>-</code>, <code>--</code>, or on Windows <code>/</code>, as in: <code>--lightbg</code>, <code>-rational</code>, or <code>/quiet</code> <i>(Windows only)</i>. Almost all of the options have several aliases (mostly fewer characters) as shown in the table below. Some of these settings, in addition, can be set using Directives from within a script, or from the Settings dialog in the GUI window.
 </div>
   <div class="center">
-  <table style="margin-left:auto;margin-right:auto;width:65%;">
+  <table style="margin-left:auto;margin-right:auto;width:75%;">
     <caption class="tablecap">Command Line Options</caption>
     <thead>
     <tr>
@@ -194,7 +194,9 @@ h2 {
     <tr><td><code>-rational</code></td><td>Do all possible calculations in fraction mode,<br>that is as a ratio of natural numbers<br>(as in <code>1/3</code> instead of <code>0.3333333333333333</code>)</td><td><code>-ration</code>, <code>-rat</code><br>(also use the <code>:rational on</code> directive)</td></tr>
     <tr><td><code>-decimal</code></td><td>Do all calculations as decimal values <i>(default)</i></td><td><code>-dec</code><br>(also use the <code>:rational off</code> directive)</td></tr>
     <tr><td><code>-separators</code></td><td>Display all numeric values with thousands separators</td><td><code>-separator</code>, <code>-seps</code>, <code>-sep</code>, <code>-s</code><br>(also use the <code>:separators on</code> directive)</td></tr>
-    <tr><td><code>-ignorecase</code></td><td>Ignore case of variable and member names</td><td><code>-caseinsensitive</code>, <code>-insensitive</code>, <code>-ignore</code>, <code>-case</code>, <code>-ign</code>, <code>-ins</code><br>(also use the <code>:ignorecase on</code> directive)</td></tr>
+    <tr><td><code>-noseparators</code></td><td>Display all numeric values without thousands separators <i>(default)</i></td><td><code>-noseparator</code>, <code>-noseps</code>, <code>-nosep</code>, <code>-ns</code><br>(also use the <code>:separators off</code> directive)</td></tr>
+    <tr><td><code>-ignorecase</code></td><td>Ignore case of variable and member names</td><td><code>-caseinsensitive</code>, <code>-insensitive</code>,<br><code>-ignore</code>, <code>-case</code>, <code>-ign</code>, <code>-ins</code><br>(also use the <code>:ignorecase on</code> directive)</td></tr>
+    <tr><td><code>-casesense</code></td><td>Respect case of variable and member names <i>(default)</i></td><td><code>-casesensitive</code>, <code>-sensitive</code>,<br><code>-sense</code>, <code>-sens</code>, <code>-sen</code><br>(also use the <code>:ignorecase off</code> directive)</td></tr>
     <tr><td><code>-locale</code> <i>locale_name</i></td><td>Specify the locale to use for messages</td><td><code>-loc</code>, <code>-l</code></td></tr>
     <tr><td><code>-inputdir</code> <i>directory</i></td><td>Specify a default directory for files to be processed</td><td><code>-input</code>, <code>-dir</code></td></tr>
     <tr><td><code>-library</code> <i>library name(s)</i></td><td>Specify one or more libraries to load to begin with</td><td><code>-libraries</code>, <code>-libs</code>, <code>-lib</code><br>(also use the <code>:include</code> directive)</td></tr>

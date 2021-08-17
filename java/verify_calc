@@ -6,7 +6,7 @@ if [ -e test/data/M$NUMBER.txt.gz ]; then
    gunz M$NUMBER.txt.gz
 fi
 lists -single M$NUMBER.txt >ref.txt
-c -nocolor -r ":unl;(2**$NUMBER)-1" >calc.txt
+c -nocolor -noseps -sense -r ":unl;(2**$NUMBER)-1" >calc.txt
 count=`wc calc.txt | cut -c18-25`
 let count=$count-1
 diff ref.txt calc.txt

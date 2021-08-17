@@ -164,6 +164,8 @@
  *	    Add "-library" command line option.
  *	16-Aug-2021 (rlwhitcomb)
  *	    Immediately process stdin if redirected.
+ *	16-Aug-2021 (rlwhitcomb)
+ *	    Add "noseparators" and "casesense" options.
  */
 package info.rlwhitcomb.calc;
 
@@ -1262,6 +1264,13 @@ public class Calc
 		case "s":
 		    separators = true;
 		    break;
+		case "noseparators":
+		case "noseparator":
+		case "noseps":
+		case "nosep":
+		case "ns":
+		    separators = false;
+		    break;
 		case "ignorecase":
 		case "ignore":
 		case "caseinsensitive":
@@ -1270,6 +1279,14 @@ public class Calc
 		case "ign":
 		case "ins":
 		    ignoreCase = true;
+		    break;
+		case "casesense":
+		case "casesensitive":
+		case "sensitive":
+		case "sense":
+		case "sens":
+		case "sen":
+		    ignoreCase = false;
 		    break;
 		case "locale":
 		case "loc":

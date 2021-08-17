@@ -4,7 +4,7 @@ set NUMBER=43112609
 set DIGITS=12978189
 if exist test\data\M%NUMBER%.txt.gz (copy test\data\M%NUMBER%.txt.gz .) && (call gunz M%NUMBER%.txt.gz)
 call lists -single M%NUMBER%.txt >ref.txt
-call c -nocolor -r ":unl;(2**%NUMBER%)-1" >calc.txt
+call c -nocolor -noseps -sense -r ":unl;(2**%NUMBER%)-1" >calc.txt
 for /f %%f in ('call c -nocolor verify') do set count=%%f
 if /I %count% neq %DIGITS% (
    echo Digit count is different!
