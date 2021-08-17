@@ -166,6 +166,10 @@
  *	    Immediately process stdin if redirected.
  *	16-Aug-2021 (rlwhitcomb)
  *	    Add "noseparators" and "casesense" options.
+ *	17-Aug-2021 (rlwhitcomb)
+ *	    After some consideration (and fixing broken tests) it appears that
+ *	    permanently setting "inputDirectory" during library processing is daft.
+ *	    So, reset to what the command line had before processing the libraries.
  */
 package info.rlwhitcomb.calc;
 
@@ -1450,7 +1454,10 @@ public class Calc
 		    visitor = new CalcObjectVisitor(displayer, rational, separators, ignoreCase);
 
 		    // Try to read and process any given libraries before doing anything else
+		    // But save the "-inputdir" setting and restore once we're done
+		    File savedInputDirectory = inputDirectory;
 		    readAndProcessLibraries(visitor, errorStrategy, quiet);
+		    inputDirectory = savedInputDirectory;
 
 		    // If no input arguments were given, go into "REPL" mode, reading
 		    // a line at a time from the console and processing

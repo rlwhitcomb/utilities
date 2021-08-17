@@ -3,5 +3,5 @@ P = 334000 - 90000
 R = 3.25
 N = 30
 
-:include 'test/files/e_mort'
+:include 'e_mort'
 

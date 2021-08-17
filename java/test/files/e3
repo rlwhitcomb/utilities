@@ -3,7 +3,7 @@
 
 :echo "This is the main file."
 
-:include "test/files/e4"
+:include "e4"
 
 :echo "Back to main file."
 msg

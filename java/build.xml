@@ -227,6 +227,8 @@
 		Also check the super verbose output from JavaPreProc.
 	    09-Aug-2021 (rlwhitcomb)
 		Alternate test canon for Windows vs. other platforms.
+	    17-Aug-2021 (rlwhitcomb)
+		Copy our "library" files to the installation directory for external use.
 
      ========================================================================== -->
 
@@ -658,6 +660,9 @@
 			<fileset dir="./external-jars">
 				<include name="*.jar"/>
 				<exclude name="antlr-*-complete.jar"/>
+			</fileset>
+			<fileset dir="./test/files">
+				<include name="lib*"/>
 			</fileset>
 		</copy>
 		<chmod dir="${env.UTILITIES_HOME}" perm="+x" if:true="${utilities.available}">
