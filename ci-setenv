@@ -1,6 +1,6 @@
 export PROJECT_HOME=`pwd`
 export UTILITIES_HOME=$PROJECT_HOME/dist
-mkdir $UTILITIES_HOME
+mkdir -p $UTILITIES_HOME
 
 # Setup the CLASSPATH with everything we will need
 CLASSPATH=.:$PROJECT_HOME/java
