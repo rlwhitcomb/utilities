@@ -1,6 +1,7 @@
 export PROJECT_HOME=`pwd`
 export UTILITIES_HOME=$PROJECT_HOME/dist
 mkdir -p $UTILITIES_HOME
+export PATH=$PATH:$UTILITIES_HOME
 
 # Setup the CLASSPATH with everything we will need
 CLASSPATH=.:$PROJECT_HOME/java
@@ -22,7 +23,4 @@ if [ -r .settings ]
 then
     source .settings
 fi
-
-# Switch to the Java directory for convenience
-cd java
 
