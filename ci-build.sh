@@ -2,5 +2,5 @@
 . ci-setenv
 cd /home/runner/work/utilities/utilities/java
 ls
-ant clean update doc test
+ant -DCI_BUILD=true clean update doc test
 

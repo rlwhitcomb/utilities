@@ -229,6 +229,8 @@
 		Alternate test canon for Windows vs. other platforms.
 	    17-Aug-2021 (rlwhitcomb)
 		Copy our "library" files to the installation directory for external use.
+	    18-Aug-2021 (rlwhitcomb)
+		Do some things differently for the CI builds.
 
      ========================================================================== -->
 
@@ -279,12 +281,17 @@
 		<entry key="build.time"   value="${build.time}"/>
 	</propertyfile>
 
+	<condition property="ci.build" value="true" else="false">
+		<isset property="CI_BUILD"/>
+	</condition>
+
 	<echo message="=========================================================="/>
 	<echo message=""/>
 	<echo message="             U T I L I T I E S   B U I L D"/>
 	<echo message=""/>
 	<echo message="          Build number = ${build.lastrev}"/>
 	<echo message="       Build date/time = ${build.date} ${build.time}"/>
+	<echo message="           Is CI build ? ${ci.build}"/>
 	<echo message=""/>
 	<echo message="=========================================================="/>
 
@@ -299,6 +306,12 @@
 	</condition>
 	<condition property="on.windows" value="true" else="false">
 		<os family="windows"/>
+	</condition>
+	<condition property="windows.temp.exists" value="true" else="false">
+		<and><istrue value="${on.windows}"/><resourceexists><file file="${env.TEMP}" directory="true"/></resourceexists></and>
+	</condition>
+	<condition property="other.temp.exists" value="true" else="false">
+		<and><isfalse value="${on.windows}"/><resourceexists><file file="${env.TMPDIR}" directory="true"/></resourceexists></and>
 	</condition>
 	<condition property="utilities.available" value="true" else="false">
 		<isset property="env.UTILITIES_HOME"/>
@@ -687,10 +700,10 @@
 			<fileset dir="." includes="test*.log,utilities*.log">
 				<date datetime="${last.two.weeks}" when="before"/>
 			</fileset>
-			<fileset dir="${env.TMPDIR}" includes="canonerror*.tmp,canoninput*.tmp,canonoutput*.tmp,testerror*.tmp,testinput*.tmp,testoutput*.tmp,utilities*.log" unless:true="${on.windows}">
+			<fileset dir="${env.TMPDIR}" includes="canonerror*.tmp,canoninput*.tmp,canonoutput*.tmp,testerror*.tmp,testinput*.tmp,testoutput*.tmp,utilities*.log" if:true="${other.temp.exists}">
 				<date datetime="${last.two.weeks}" when="before"/>
 			</fileset>
-			<fileset dir="${env.TEMP}" includes="canonerror*.tmp,canoninput*.tmp,canonoutput*.tmp,testerror*.tmp,testinput*.tmp,testoutput*.tmp,utilities*.log" if:true="${on.windows}">
+			<fileset dir="${env.TEMP}" includes="canonerror*.tmp,canoninput*.tmp,canonoutput*.tmp,testerror*.tmp,testinput*.tmp,testoutput*.tmp,utilities*.log" if:true="${windows.temp.exists}">
 				<date datetime="${last.two.weeks}" when="before"/>
 			</fileset>
 		</delete>
