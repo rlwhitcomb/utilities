@@ -8,7 +8,7 @@ if [ -e test/data/M$NUMBER.txt.gz ]; then
 fi
 lists -single M$NUMBER.txt >ref.txt
 c -nocolor -noseps -sense -r ":unl;(2**$NUMBER)-1" >calc.txt
-(( count = `wc calc.txt | cut -c18-25` - 1 ))
+(( count = `wc -c <calc.txt` - 1 ))
 diff ref.txt calc.txt
 if [[ $? -eq 0 ]] && [[ $count -eq $DIGITS ]]; then
   echo No differences for M$NUMBER \($count digits\)! Calculation is correct.
