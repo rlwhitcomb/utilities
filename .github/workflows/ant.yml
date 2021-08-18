@@ -22,4 +22,4 @@ jobs:
         java-version: '11'
         distribution: 'adopt'
     - name: Build with Ant
-      run: ./setenv & ant -noinput -buildfile build.xml clean update doc test
+      run: ./ci-setenv & ant -noinput -buildfile build.xml clean update doc test
