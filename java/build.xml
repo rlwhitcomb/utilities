@@ -231,6 +231,7 @@
 		Copy our "library" files to the installation directory for external use.
 	    18-Aug-2021 (rlwhitcomb)
 		Do some things differently for the CI builds.
+		Like putting the test log in the "dist" location.
 
      ========================================================================== -->
 
@@ -324,6 +325,9 @@
 	</condition>
 	<condition property="test.log.canon" value="TestPP.log.windows.canon" else="TestPP.log.other.canon">
 		<os family="windows"/>
+	</condition>
+	<condition property="test.log.path" value="dist/${test.log.file.name}" else="${test.log.file.name}">
+		<istrue value="${ci.build}"/>
 	</condition>
 
 	<patternset id="wrapper-files">
@@ -578,7 +582,7 @@
 	</target>
 
 	<target name="test" depends="compile" description="Run extant unit tests.">
-		<echo>Running unit tests. Output going to "${test.log.file.name}" file.</echo>
+		<echo>Running unit tests. Output going to "${test.log.path}" file.</echo>
 		<echo>Test JavaPreProc...</echo>
 		<delete>
 			<fileset dir="test/data" includes="TestPP.java,TestPP.log"/>
@@ -595,27 +599,27 @@
 				<not><filesmatch file1="test/data/TestPP.log" file2="test/canons/${test.log.canon}" textfile="true"/></not>
 			</condition>
 		</fail>
-		<echo file="${test.log.file.name}" append="true">JavaPreProc: Preprocessing results and log match.
+		<echo file="${test.log.path}" append="true">JavaPreProc: Preprocessing results and log match.
 </echo>
 		<echo>Test of InitializationTask...</echo>
-		<java classname="info.rlwhitcomb.test.InitTaskTest"   output="${test.log.file.name}" append="true" failonerror="true"/>
+		<java classname="info.rlwhitcomb.test.InitTaskTest"   output="${test.log.path}" append="true" failonerror="true"/>
 		<echo>Running various tests through the Tester...</echo>
-		<java classname="${tester.class}"                     output="${test.log.file.name}" append="true" failonerror="true">
+		<java classname="${tester.class}"                     output="${test.log.path}" append="true" failonerror="true">
 			<arg value="-timing"/>
 			<arg value="-dir:test/files"/>
 			<arg value="mastertest"/>
 		</java>
-		<exec executable="./verify_calc"  dir="."             output="${test.log.file.name}" append="true" unless:true="${on.windows}" failonerror="true"/>
-		<exec executable="cmd"            dir="."             output="${test.log.file.name}" append="true" if:true="${on.windows}" failonerror="true">
+		<exec executable="./verify_calc"  dir="."             output="${test.log.path}" append="true" unless:true="${on.windows}" failonerror="true"/>
+		<exec executable="cmd"            dir="."             output="${test.log.path}" append="true" if:true="${on.windows}" failonerror="true">
 			<arg value="/c"/>
 			<arg value="verify_calc.bat"/>
 		</exec>
-		<exec executable="./check_sorted" dir="."             output="${test.log.file.name}" append="true" unless:true="${on.windows}" failonerror="true"/>
-		<exec executable="cmd"            dir="."             output="${test.log.file.name}" append="true" if:true="${on.windows}" failonerror="true">
+		<exec executable="./check_sorted" dir="."             output="${test.log.path}" append="true" unless:true="${on.windows}" failonerror="true"/>
+		<exec executable="cmd"            dir="."             output="${test.log.path}" append="true" if:true="${on.windows}" failonerror="true">
 			<arg value="/c"/>
 			<arg value="check_sorted.bat"/>
 		</exec>
-		<echo>Done with unit tests. Successful. Results in "${test.log.file.name}" file.</echo>
+		<echo>Done with unit tests. Successful. Results in "${test.log.path}" file.</echo>
 	</target>
 
 	<target name="clean" depends="purge" description="Cleans all generated files, old temp files, and old log files.">

@@ -20,3 +20,4 @@ test*.log
 TestPP.java
 calc_help.html
 MANIFEST.MF
+dist
