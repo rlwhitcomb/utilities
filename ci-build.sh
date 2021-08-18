@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash
 . ci-setenv
 cd /home/runner/work/utilities/utilities/java
 ls
