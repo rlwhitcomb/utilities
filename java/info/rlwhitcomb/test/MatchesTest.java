@@ -31,6 +31,8 @@
  *	    Set the process exit code for use with automated testing.
  *	29-Mar-2021 (rlwhitcomb)
  *	    Move to new package.
+ *	19-Aug-2021 (rlwhitcomb)
+ *	    Add more test cases.
  */
 package info.rlwhitcomb.test;
 
@@ -43,13 +45,44 @@ public class MatchesTest
 	private static int numberOfTests    = 0;
 	private static int numberOfFailures = 0;
 
+	private static boolean verbose = false;
+
+	private static final String PASSWORD = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{6,20}$";
+	private static final String HTML_TAG = "<(\\w+).*>(.*?)<\\/\\1>";
+	private static final String HTML_TAG_2 = "<(\\w+).*(\\/)?>";
+
 	private static final String[][] TRUE_TEST_CASES = {
 	    { "-or", "aaabbb", "a.*b", ".*ab.*" },
 	    { "-not", "-or", "build.xml", "apex[/\\\\]web[/\\\\]build", ".*\\.backup" },
-	    { "-and", "apex/help/HTML/abc.htm", ".*HTML.*", ".*\\.htm[l]?" }
+	    { "-and", "apex/help/HTML/abc.htm", ".*HTML.*", ".*\\.htm[l]?" },
+	    { "IsThisAG@odPassw0rd", PASSWORD },
+	    { "<a href='abc.com'>abc.com</a>", HTML_TAG },
+	    { "-or", "<br>", HTML_TAG, HTML_TAG_2 }
 	};
 
-	private static boolean verbose = false;
+	private static final String[][] FALSE_TEST_CASES = {
+	    { "123455789", PASSWORD },
+	    { "Tom", PASSWORD },
+	    { "<br>", HTML_TAG },
+	    { "<h1>Header</h2>", HTML_TAG }
+	};
+
+
+	private static void runTests(String[][] testCases, boolean expectedResult) {
+	    for (int i = 0; i < testCases.length; i++) {
+		numberOfTests++;
+
+		String[] testCase = testCases[i];
+		boolean match = Matches.match(testCase);
+		if (match != expectedResult) {
+		    System.err.println("Failure: test case \"" + CharUtil.makeSimpleStringList(testCase) + "\"");
+		    numberOfFailures++;
+		}
+		else if (verbose) {
+		    System.out.println("Test case \"" + CharUtil.makeSimpleStringList(testCase) + "\" -> " + match);
+		}
+	    }
+	}
 
 	public static void main(String[] args) {
 	    for (String arg : args) {
@@ -60,19 +93,8 @@ public class MatchesTest
 		}
 	    }
 
-	    for (int i = 0; i < TRUE_TEST_CASES.length; i++) {
-		numberOfTests++;
-
-		String[] testCase = TRUE_TEST_CASES[i];
-		boolean match = Matches.match(testCase);
-		if (!match) {
-		    System.err.println("Failure: test case \"" + CharUtil.makeSimpleStringList(testCase) + "\"");
-		    numberOfFailures++;
-		}
-		else if (verbose) {
-		    System.out.println("Test case \"" + CharUtil.makeSimpleStringList(testCase) + "\" -> " + match);
-		}
-	    }
+	    runTests(TRUE_TEST_CASES, true);
+	    runTests(FALSE_TEST_CASES, false);
 
 	    // TODO: more tests here
 
