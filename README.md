@@ -1,3 +1,5 @@
+[![Build Status](https://github.com/rlwhitcomb/utilities/actions/workflows/ant.yml/badge.svg)](https://github.com/rlwhitcomb/utilities/actions/workflows/ant.yml)
+
 # utilities
 Some of my personal utility programs, collected over a number of years. Most were developed to be useful to me in my own programming, and so may be useful to others.
 
