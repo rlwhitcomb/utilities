@@ -32,17 +32,18 @@ Work going on currently includes:
 
 - InitializationTask is all wrong -- need a better paradigm, using existing Java mechanisms (see Issue #8)
 - Make InitializationTask and QueuedThread work seamlessly with "synchronized"
-- Convert D.C to Java (include supporting code).
-- Get "pivot" builds working, including Javadoc, packaging, etc.
-- New Java-based "tail", "head", and other Linux utilities missing on Windows.
-- Use new color coding to spruce up all help and error messages; add -color and -nocolor flags everywhere
+- Finish converting D.C to Java (include supporting code).
+- New Java-based "tail", "uniq", and other Linux utilities missing on Windows.
+- Finish -color and -nocolor flags everywhere
+- Implement color coding in Calc GUI.
 - Maybe find a way in Options to add "standard" flags (like "-color" above)
 - Completely new paradigm for Options, similar to Apache commons-cli, including support for printing help text from the options list.
 - UUID program: generate random, generate from text, separate into parts, maybe more.
 - Lots of unit tests.
 - Consider a standard method to read .properties files (take the code from "readVersionProperties" in Environment and make it general somewhere else?)
-- Completely update JavaPreProc to use an Antlr expression grammar to process the directives.
+- Finish update of JavaPreProc to use the Antlr expression grammar for directives.
 - Add a Spanish translation for all the current resources (and ongoing for new resource files).
+- Finish WordFind GUI, including the input filtering or else do "editing" with a bunch of separate fields.
 
 Also see "issues" at https://github.com/rlwhitcomb/utilities/issues
 
@@ -70,7 +71,6 @@ Also see "issues" at https://github.com/rlwhitcomb/utilities/issues
 - Add to boilerplate options
 - Boilerplate program will use this code b/c we sometime want to just do command line, other times want the GUI
 - Word Finder can also use this option
-- Unclear yet if a switch ***back*** from GUI to console will work.
 
 ### Calc
 - Use "--" option on command line to signal end of options, rest is parameters (referenced in expressions as $0, $1, etc.) whose value is (of course) null if there isn't a parameter of that number
@@ -123,7 +123,6 @@ define a($b, $c, $d) = { $f = blah; ... }
 
 ### WordFind
 - Finish the GUI code.
-- REPL mode (to avoid overhead of reading library file each time)
 - options to limit the number of words displayed, and how small to go in displaying words
   (in other words, only give me the top 20 in each length, and only show me words with 4 letters or more)
 - need some kind of filter to UPPER case everything, limit input to only letters and blank, and turn blank into ?
