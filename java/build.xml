@@ -232,6 +232,8 @@
 	    18-Aug-2021 (rlwhitcomb)
 		Do some things differently for the CI builds.
 		Like putting the test log in the "dist" location.
+	    18-Aug-2021 (rlwhitcomb)
+		Add "d" wrapper scripts, add the "directory" files as needed.
 
      ========================================================================== -->
 
@@ -349,6 +351,8 @@
 		<include name="cmp.bat"                     if:true="${on.windows}"/>
 		<include name="crl"                     unless:true="${on.windows}"/>
 		<include name="crl.bat"                     if:true="${on.windows}"/>
+		<include name="d"                       unless:true="${on.windows}"/>
+		<include name="d.bat"                       if:true="${on.windows}"/>
 		<include name="decode"                  unless:true="${on.windows}"/>
 		<include name="decode.bat"                  if:true="${on.windows}"/>
 		<include name="encode"                  unless:true="${on.windows}"/>
@@ -490,6 +494,7 @@
 			<src path="info/rlwhitcomb/compare"/>
 			<src path="info/rlwhitcomb/csv"/>
 			<src path="info/rlwhitcomb/curl"/>
+			<src path="info/rlwhitcomb/directory"/>
 			<src path="info/rlwhitcomb/heart"/>
 			<src path="info/rlwhitcomb/jarfile"/>
 			<src path="info/rlwhitcomb/matches"/>
@@ -538,6 +543,7 @@
 			<include name="info/rlwhitcomb/csv/*.class"/>
 			<include name="info/rlwhitcomb/curl/*.class"/>
 			<include name="info/rlwhitcomb/curl/*.bxml"/>
+			<include name="info/rlwhitcomb/directory/*.class"/>
 			<include name="info/rlwhitcomb/heart/*.class"/>
 			<include name="info/rlwhitcomb/jarfile/*.class"/>
 			<include name="info/rlwhitcomb/matches/*.class"/>
@@ -637,6 +643,7 @@
 			<fileset dir="info/rlwhitcomb/compare" includes="*.class"/>
 			<fileset dir="info/rlwhitcomb/csv" includes="*.class"/>
 			<fileset dir="info/rlwhitcomb/curl" includes="*.class"/>
+			<fileset dir="info/rlwhitcomb/directory" includes="*.class"/>
 			<fileset dir="info/rlwhitcomb/heart" includes="*.class"/>
 			<fileset dir="info/rlwhitcomb/jarfile" includes="*.class"/>
 			<fileset dir="info/rlwhitcomb/matches" includes="*.class"/>

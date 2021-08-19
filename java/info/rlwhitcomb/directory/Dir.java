@@ -863,6 +863,52 @@ System.out.println("size = " + basicAttrs.size() + ", createTime = " + basicAttr
 	}
 
 
+	private static boolean processOneOption(String option) {
+	    switch (option.toLowerCase()) {
+		case "version":
+		case "vers":
+		case "ver":
+		case "v":
+		    Environment.printProgramInfo(50);
+		    return false;
+		default:
+		    System.err.format("Error: unknown option '%1$s', ignoring!%n", option);
+		    break;
+	    }
+	    return true;
+	}
+
+
+	private static boolean processOption(String option, List<String> specs) {
+	    if (option.startsWith("--")) {
+		if (!processOneOption(option.substring(2)))
+		    return false;
+	    }
+	    else if (option.startsWith("-")) {
+		if (!processOneOption(option.substring(1)))
+		    return false;
+	    }
+	    else if (runningOnWindows && option.startsWith("/")) {
+		if (!processOneOption(option.substring(1)))
+		    return false;
+	    }
+	    else {
+		specs.add(option);
+	    }
+	
+	    return true;	// continue processing
+	}
+
+
+	private static void processSpec(String spec) {
+	    // This could be a directory name, a wildcard file spec, or just a file name
+	    // Note: Java actually processes some wildcard things already, but may not,
+	    // depending on how we arrange the options: such as "-dir basedir spec1, spec2 ..."
+// This method will do whatever is called for on one directory / name / file name, possibly saving
+// the file information for sorting and later display
+	}
+
+
 	public static void main(String[] args) {
 	    Environment.loadProgramInfo(Dir.class);
 	    // TODO: a bunch of Environment and Intl stuff
@@ -872,7 +918,22 @@ System.out.println("size = " + basicAttrs.size() + ", createTime = " + basicAttr
 
 	    currentDriveIndex = getDriveIndex(getDrive(Environment.currentDirectory()));
 
+	    // Process command line options
+	    List<String> specs = new ArrayList<>();
+	    for (String arg : args) {
+		if (!processOption(arg, specs))
+		    return;
+	    }
 
+	    // If there are no directory/file specs the just list the current directory
+	    if (specs.isEmpty())
+		specs.add(".");
+
+	    for (String spec : specs) {
+		processSpec(spec);
+	    }
+
+	    // TODO: for sorted outputs, need to display the saved/sorted values
 	}
 
 }
