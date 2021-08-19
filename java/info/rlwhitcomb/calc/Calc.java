@@ -170,6 +170,9 @@
  *	    After some consideration (and fixing broken tests) it appears that
  *	    permanently setting "inputDirectory" during library processing is daft.
  *	    So, reset to what the command line had before processing the libraries.
+ *	19-Aug-2021 (rlwhitcomb)
+ *	    Only select a font that is capable of displaying at least some of our recognized
+ *	    Unicode character symbols (new API in Pivot).
  */
 package info.rlwhitcomb.calc;
 
@@ -607,7 +610,10 @@ public class Calc
 		sizeFormat = NumberFormat.getIntegerInstance();
 		sizeFormat.setGroupingUsed(true);
 
-		Font monospacedFont = FontUtilities.decode(FontUtilities.MONOSPACED_FONTS + "-18");
+		Font monospacedFont = FontUtilities.decodeCapable(FontUtilities.MONOSPACED_FONTS + "-18",
+			// These are some of the (most) useful Unicode chars we recognize, so it would be nice
+			// if we could display them ...
+			"\u2192\u1d28\u213c\u213f\u2107\u221a\u221b\u220f\u2211");
 		inputTextPane.getStyles().put(Style.font, monospacedFont);
 		outputTextArea.getStyles().put(Style.font, monospacedFont);
 		inputRuler.getStyles().put(Style.font, monospacedFont);
