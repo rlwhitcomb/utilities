@@ -179,6 +179,9 @@
  *	    Use a different arrow for results in the GUI.
  *	23-Aug-2021 (rlwhitcomb)
  *	    Ship and use a standard open-source font for the GUI.
+ *	23-Aug-2021 (rlwhitcomb)
+ *	    In the absence of a charset designation on the Open dialog, trap exceptions
+ *	    and try UTF-8 in the case of coding errors.
  */
 package info.rlwhitcomb.calc;
 
@@ -956,7 +959,14 @@ public class Calc
 			try {
 			    for (int i = 0; i < selectedFiles.getLength(); i++) {
 				File f = selectedFiles.get(i);
-				String fileText = FileUtilities.readFileAsString(f); // need charset and tabwidth?
+				String fileText = "";
+				try {
+				    fileText = FileUtilities.readFileAsString(f);
+				}
+				catch (IOException ioe) {
+				    // We're gonna bet the problem is the charset
+				    fileText = FileUtilities.readFileAsString(f, StandardCharsets.UTF_8);
+				}
 				if (selectedFiles.getLength() > 1) {
 				    String filePath = f.getPath();
 				    CharUtil.padToWidth(buf, "#", filePath.length() + 3, '-').append('\n');
@@ -967,7 +977,7 @@ public class Calc
 			    }
 			}
 			catch (IOException ioe) {
-			    Alert.alert(MessageType.ERROR, ExceptionUtil.toString(ioe), mainWindow);
+			    Alert.alert(MessageType.ERROR, ExceptionUtil.toString(ioe), ioe.getClass().getSimpleName(), null, mainWindow, null);
 			}
 			inputTextPane.setText(buf.toString());
 		    });
