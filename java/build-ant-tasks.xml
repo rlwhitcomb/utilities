@@ -30,6 +30,8 @@
 		... lost in antiquity ...
 		20-Jan-2021 (rlwhitcomb)
 		    Add Antlr grammar for JavaPreProc.
+		23-Aug-2021 (rlwhitcomb)
+		    Rename "external-jars" to "external-files".
 
      ========================================================================== -->
 
@@ -48,7 +50,7 @@
 
 	<target name="process-grammars" depends="check-grammars-uptodate" description="Process the Antlr grammars to generate parsers.">
 		<echo message="Generating PreProc parser" unless:true="${grammars.uptodate}"/>
-		<java jar="external-jars/antlr-4.9-complete.jar" fork="true" unless:true="${grammars.uptodate}" failonerror="true">
+		<java jar="external-files/antlr-4.9-complete.jar" fork="true" unless:true="${grammars.uptodate}" failonerror="true">
 			<arg file="info/rlwhitcomb/preproc/PreProc.g4"/>
 			<arg value="-visitor"/>
 			<arg value="-no-listener"/>
