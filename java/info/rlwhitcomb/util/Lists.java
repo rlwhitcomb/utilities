@@ -74,6 +74,8 @@
  *	   Refactoring. Move to "util" package so others can use us
  *	   programmatically. Implements the Testable interface so we
  *	   can use with the (upcoming) tester program.
+ *	22-Aug-2021 (rlwhitcomb)
+ *	   Add "-upper" and "-lower" options.
  */
 package info.rlwhitcomb.util;
 
@@ -110,6 +112,8 @@ public class Lists
 	private boolean newlines    = false;
 	private boolean single      = false;
 	private boolean unchanged   = false;
+	private boolean makeLower   = false;
+	private boolean makeUpper   = false;
 
 	private int width   = 0;
 	private int cutSize = 0;
@@ -129,12 +133,12 @@ public class Lists
 
 	private static final String[] HELP = {
 	    "Usage: java Lists [-c] [-j] [-b] [-n] [-l] [-nnn] [-w] [-e prefix_text] [-f postfix_text] [-x nn]",
-	    "                  [-o output_file] [list_file_name+ | " + STDIN + "]",
+	    "                  [-lower] [-upper] [-o output_file] [list_file_name+ | " + STDIN + "]",
 	    "",
 	    "  Aliases: -c | -concat | -concatenate; -j | -join; -b | -blank | -blanks; -n | -count | -counting",
 	    "           -l | -line | -lines | -newlines; -w | -white | -whitespace; -e | -pre | -prefix",
 	    "           -f | -post | -postfix; -x | -cut | -cutting; -s | -single; -u | -unchanged",
-	    "           -o | -out  | -output",
+	    "           -lower | -low; -upper | -up; -o | -out  | -output",
 	    "",
 	    "  If you specify the \"-c\" flag the output will have all the lines",
 	    "    of the file concatenated (using commas) into a single line.",
@@ -210,11 +214,29 @@ public class Lists
 	    return errUsage("Can only specify the %1$s once!", option);
 	}
 
+	private void outPrint(String value) {
+	    if (makeLower)
+		output.print(value.toLowerCase());
+	    else if (makeUpper)
+		output.print(value.toUpperCase());
+	    else
+		output.print(value);
+	}
+
+	private void outPrintln() {
+	    output.println();
+	}
+
+	private void outPrintln(String value) {
+	    outPrint(value);
+	    outPrintln();
+	}
+
 	private void outputLine(StringBuilder buf) {
 	    if (postfixText != null)
 		buf.append(postfixText);
 
-	    output.println(buf.toString());
+	    outPrintln(buf.toString());
 
 	    buf.setLength(0);
 
@@ -284,6 +306,10 @@ public class Lists
 			cutting = true;
 			sawCutOption = true;
 		    }
+		    else if (Options.matchesOption(arg, true, "lower", "low"))
+			makeLower = true;
+		    else if (Options.matchesOption(arg, true, "upper", "up"))
+			makeUpper = true;
 		    else if (Options.matchesOption(arg, true, "output", "out", "o")) {
 			if (outputFileName != null) {
 			    return onlyOnce("output file name");
@@ -372,6 +398,10 @@ public class Lists
 
 	    if (counting && (concatenate || blanks || width > 0)) {
 		return errUsage("The \"-count\" option should not be used together with either the%n\"-c\", \"-j\", or \"-b\" options%nor with an output width.");
+	    }
+
+	    if (makeUpper && makeLower) {
+		return errUsage("You can specify either \"-lower\" or \"-upper\", but not both.");
 	    }
 
 	    if (outputFileName != null) {
@@ -471,15 +501,15 @@ public class Lists
 					}
 					else {
 					    if (prefixText != null)
-						output.print(prefixText);
-					    output.print(value);
+						outPrint(prefixText);
+					    outPrint(value);
 					    if (newlines)
-						output.print(",");
+						outPrint(",");
 					    if (postfixText != null)
-						output.print(postfixText);
-					    output.println();
+						outPrint(postfixText);
+					    outPrintln();
 					    if (blanks)
-						output.println();
+						outPrintln();
 					}
 				    }
 				}
@@ -497,11 +527,11 @@ public class Lists
 		if (concatenate || single) {
 		    if (postfixText != null)
 			buf.append(postfixText);
-		    output.println(buf.toString());
+		    outPrintln(buf.toString());
 		}
 
 		if (counting) {
-		    output.format("%1$d%n", numberOfValues);
+		    outPrintln(String.format("%1$d", numberOfValues));
 		}
 
 		if (outputFileName != null) {
