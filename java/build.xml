@@ -234,6 +234,8 @@
 		Like putting the test log in the "dist" location.
 	    18-Aug-2021 (rlwhitcomb)
 		Add "d" wrapper scripts, add the "directory" files as needed.
+	    23-Aug-2021 (rlwhitcomb)
+		Rename "external-jars" to "external-files".
 
      ========================================================================== -->
 
@@ -462,7 +464,7 @@
 
 	<target name="process-grammars" depends="check-grammars-uptodate" description="Process the Antlr grammars to generate parsers.">
 		<echo message="Generating Calc parser" unless:true="${grammars.uptodate}"/>
-		<java jar="external-jars/antlr-4.9-complete.jar" fork="true" unless:true="${grammars.uptodate}" failonerror="true">
+		<java jar="external-files/antlr-4.9-complete.jar" fork="true" unless:true="${grammars.uptodate}" failonerror="true">
 			<arg file="info/rlwhitcomb/calc/Calc.g4"/>
 			<arg value="-visitor"/>
 			<arg value="-no-listener"/>
@@ -509,7 +511,7 @@
 			<exclude name="**/ant/*"/>
 			<classpath>
 				<pathelement path="."/>
-				<fileset dir="external-jars" includes="*.jar"/>
+				<fileset dir="external-files" includes="*.jar"/>
 			</classpath>
 		</javac>
 	</target>
@@ -581,7 +583,7 @@
 			</fileset>
 			<classpath>
 				<pathelement path="."/>
-				<fileset dir="external-jars" includes="*.jar"/>
+				<fileset dir="external-files" includes="*.jar"/>
 				<fileset dir="${ant.library.dir}" includes="*.jar"/>
 			</classpath>
 		</javadoc>
@@ -681,7 +683,7 @@
 			<fileset dir="./scripts">
 				<patternset refid="wrapper-files"/>
 			</fileset>
-			<fileset dir="./external-jars">
+			<fileset dir="./external-files">
 				<include name="*.jar"/>
 				<exclude name="antlr-*-complete.jar"/>
 			</fileset>
@@ -721,7 +723,7 @@
 	</target>
 
 	<target name="copy-pivot" description="Copies new 'pivot*.jar' files from the source location.">
-		<copy todir="./external-jars" if:true="${pivot.available}">
+		<copy todir="./external-files" if:true="${pivot.available}">
 			<fileset dir="${env.PIVOT_HOME}/lib">
 				<include name="pivot-core*.jar"/>
 				<include name="pivot-wtk*.jar"/>
