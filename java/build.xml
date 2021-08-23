@@ -236,6 +236,8 @@
 		Add "d" wrapper scripts, add the "directory" files as needed.
 	    23-Aug-2021 (rlwhitcomb)
 		Rename "external-jars" to "external-files".
+	    23-Aug-2021 (rlwhitcomb)
+		Add a nice open-source font for Calc (and others?) to use in the GUI.
 
      ========================================================================== -->
 
@@ -561,6 +563,7 @@
 			<include name="de/onyxbits/*.class"/>
 			<include name="name/fraser/neil/plaintext/*.class"/>
 			<include name="net/iharder/b64/*.class"/>
+			<include name="external-files/FiraCode-Regular.ttf"/>
 		</jar>
 	</target>
 

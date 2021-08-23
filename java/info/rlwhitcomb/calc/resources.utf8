@@ -64,6 +64,8 @@
 #	    Separator mode.
 #	09-Aug-2021 (rlwhitcomb)
 #	    Tweak an error message, and add another.
+#	23-Aug-2021 (rlwhitcomb)
+#	    Add a "resultGUI" text with a nice arrow symbol.
 #
 
 #

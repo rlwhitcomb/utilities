@@ -177,11 +177,15 @@
  *	    The biggest problem is that the TextAreaOutputStream was using the default system
  *	    charset instead of UTF-8....
  *	    Use a different arrow for results in the GUI.
+ *	23-Aug-2021 (rlwhitcomb)
+ *	    Ship and use a standard open-source font for the GUI.
  */
 package info.rlwhitcomb.calc;
 
 import java.awt.Desktop;
 import java.awt.Font;
+import java.awt.FontFormatException;
+import java.awt.GraphicsEnvironment;
 import java.io.Console;
 import java.io.File;
 import java.io.FileInputStream;
@@ -599,6 +603,17 @@ public class Calc
 		serializer.readObject(getClass().getResource("calc.bxml"), provider.getResources());
 		serializer.bind(this);
 
+		// On Windows, use a nice font that at least has some decent glyph coverage
+		if (ON_WINDOWS) {
+		    try (InputStream fontStream = getClass().getResourceAsStream("/external-files/FiraCode-Regular.ttf")) {
+			GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+			ge.registerFont(Font.createFont(Font.TRUETYPE_FONT, fontStream));
+		    }
+		    catch (IOException|FontFormatException ex) {
+			System.err.format("Error creating our custom font: %1$s%n", ExceptionUtil.toString(ex));
+		    }
+		}
+
 		// To implement the displayer, redirect System.out to our TextArea for display
 		PrintStream ps = new TextAreaOutputStream(outputTextArea, StandardCharsets.UTF_8, 16_384).toPrintStream();
 		System.setOut(ps);
@@ -615,10 +630,14 @@ public class Calc
 		sizeFormat = NumberFormat.getIntegerInstance();
 		sizeFormat.setGroupingUsed(true);
 
-		Font monospacedFont = FontUtilities.decodeCapable(FontUtilities.MONOSPACED_FONTS + "-18",
-			// These are some of the (most) useful Unicode chars we recognize, so it would be nice
-			// if we could display them ...
-			"\u2192\u1d28\u213c\u213f\u2107\u221a\u221b\u220f\u2211");
+		// On MacOS at least we can count on the monospaced font list to give us something nice,
+		// but on Windows, explicitly request the font we have just installed
+		String fontNames = ON_WINDOWS ? "Fira Code" : FontUtilities.MONOSPACED_FONTS;
+		// These are some of the (most) useful Unicode chars we recognize, so it would be nice
+		// if we could display them ...
+		String testChars = "\u21e8\u1d28\u213c\u213f\u2107\u221a\u221b\u220f\u2211";
+		Font monospacedFont = FontUtilities.decodeCapable(fontNames + "-18", testChars);
+
 		inputTextPane.getStyles().put(Style.font, monospacedFont);
 		outputTextArea.getStyles().put(Style.font, monospacedFont);
 		inputRuler.getStyles().put(Style.font, monospacedFont);
