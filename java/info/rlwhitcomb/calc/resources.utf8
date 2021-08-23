@@ -77,6 +77,7 @@
 #
 resultOnly	= <v>%1$s<r>
 result		= <x>%1$s<a> -> <v>%2$s<r>
+resultGUI	= <x>%1$s<a> \u21e8 <v>%2$s<r>
 action		= <v>%1$s<r>
 message		= <a>%1$s<r>
 errorLine	= <e>%1$s<r> at line %2$d.

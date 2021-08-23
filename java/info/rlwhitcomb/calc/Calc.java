@@ -173,6 +173,10 @@
  *	19-Aug-2021 (rlwhitcomb)
  *	    Only select a font that is capable of displaying at least some of our recognized
  *	    Unicode character symbols (new API in Pivot).
+ *	23-Aug-2021 (rlwhitcomb)
+ *	    The biggest problem is that the TextAreaOutputStream was using the default system
+ *	    charset instead of UTF-8....
+ *	    Use a different arrow for results in the GUI.
  */
 package info.rlwhitcomb.calc;
 
@@ -187,6 +191,7 @@ import java.io.PrintStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.MathContext;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -595,7 +600,7 @@ public class Calc
 		serializer.bind(this);
 
 		// To implement the displayer, redirect System.out to our TextArea for display
-		PrintStream ps = new TextAreaOutputStream(outputTextArea, 2048).toPrintStream();
+		PrintStream ps = new TextAreaOutputStream(outputTextArea, StandardCharsets.UTF_8, 16_384).toPrintStream();
 		System.setOut(ps);
 		System.setErr(ps);
 
@@ -688,7 +693,7 @@ public class Calc
 	    if (resultsOnly)
 		outFormat("calc#resultOnly", resultString);
 	    else
-		outFormat("calc#result", exprString, resultString);
+		outFormat("calc#resultGUI", exprString, resultString);
 	    updateOutputSize();
 	}
 
