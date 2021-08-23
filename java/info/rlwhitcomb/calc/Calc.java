@@ -182,13 +182,13 @@
  *	23-Aug-2021 (rlwhitcomb)
  *	    In the absence of a charset designation on the Open dialog, trap exceptions
  *	    and try UTF-8 in the case of coding errors.
+ *	23-Aug-2021 (rlwhitcomb)
+ *	    Actually ... the best font on Windows is MONOSPACED.
  */
 package info.rlwhitcomb.calc;
 
 import java.awt.Desktop;
 import java.awt.Font;
-import java.awt.FontFormatException;
-import java.awt.GraphicsEnvironment;
 import java.io.Console;
 import java.io.File;
 import java.io.FileInputStream;
@@ -606,17 +606,6 @@ public class Calc
 		serializer.readObject(getClass().getResource("calc.bxml"), provider.getResources());
 		serializer.bind(this);
 
-		// On Windows, use a nice font that at least has some decent glyph coverage
-		if (ON_WINDOWS) {
-		    try (InputStream fontStream = getClass().getResourceAsStream("/external-files/FiraCode-Regular.ttf")) {
-			GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-			ge.registerFont(Font.createFont(Font.TRUETYPE_FONT, fontStream));
-		    }
-		    catch (IOException|FontFormatException ex) {
-			System.err.format("Error creating our custom font: %1$s%n", ExceptionUtil.toString(ex));
-		    }
-		}
-
 		// To implement the displayer, redirect System.out to our TextArea for display
 		PrintStream ps = new TextAreaOutputStream(outputTextArea, StandardCharsets.UTF_8, 16_384).toPrintStream();
 		System.setOut(ps);
@@ -635,7 +624,7 @@ public class Calc
 
 		// On MacOS at least we can count on the monospaced font list to give us something nice,
 		// but on Windows, explicitly request the font we have just installed
-		String fontNames = ON_WINDOWS ? "Fira Code" : FontUtilities.MONOSPACED_FONTS;
+		String fontNames = ON_WINDOWS ? Font.MONOSPACED : FontUtilities.MONOSPACED_FONTS;
 		// These are some of the (most) useful Unicode chars we recognize, so it would be nice
 		// if we could display them ...
 		String testChars = "\u21e8\u1d28\u213c\u213f\u2107\u221a\u221b\u220f\u2211";
