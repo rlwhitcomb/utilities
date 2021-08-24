@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2020 Roger L. Whitcomb.
+ * Copyright (c) 2020-2021 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -36,6 +36,8 @@
  *	    Move text to resources.
  *	11-Dec-2020 (rlwhitcomb)
  *	    Use new product information mechanism.
+ *	24-Aug-2021 (rlwhitcomb)
+ *	    Add "-locale" option (and Spanish translation).
  *
  *	    TODO: wildcard directory names on input
  *	    TODO: -nn to limit to first nn lines, +nn to limit to LAST nn lines (hard to do?)
@@ -50,6 +52,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.stream.Stream;
 import info.rlwhitcomb.util.Environment;
@@ -70,7 +73,9 @@ public class Cat {
 		/** A charset name for the output file. */
 		OUTPUT_CHARSET,
 		/** An output file name. */
-		OUTPUT_FILE
+		OUTPUT_FILE,
+		/** The locale to use for messages. */
+		LOCALE
 	}
 
 	/**
@@ -93,6 +98,11 @@ public class Cat {
 	 * The only output stream we are writing to.
 	 */
 	private static PrintStream outputStream = System.out;
+
+	/**
+	 * The locale to use for our translated messages.
+	 */
+	private static Locale locale = null;
 
 	/**
 	 * The iteration over the input arguments we are currently on.
@@ -150,6 +160,8 @@ public class Cat {
 		expectedValue = Optional.of(Expected.OUTPUT_CHARSET);
 	    } else if (Options.matchesOption(arg, true,	"OutputFile", "OutFile", "out", "o")) {
 		expectedValue = Optional.of(Expected.OUTPUT_FILE);
+	    } else if (Options.matchesOption(arg, true, "locale", "loc", "l")) {
+		expectedValue = Optional.of(Expected.LOCALE);
 	    } else if (Options.matchesOption(arg, true, "NoMoreOptions", "NoOptions", "NoOption",
 			"NoMore", "NoOpt", "no", "n")) {
 		noMoreOptions = true;
@@ -234,6 +246,20 @@ public class Cat {
 				    System.exit(3);
 				} else {
 				    outputFile = new File(arg);
+				}
+			    }
+			    break;
+			case LOCALE:
+			    if (pass == 1) {
+				if (locale != null) {
+				    Intl.errPrintln("cat#oneLocale");
+				    System.exit(3);
+				} else {
+				    locale = new Locale(arg);
+				    if (locale != null && !locale.equals(Locale.getDefault())) {
+					Locale.setDefault(locale);
+					Intl.initAllPackageResources(locale);
+				    }
 				}
 			    }
 			    break;

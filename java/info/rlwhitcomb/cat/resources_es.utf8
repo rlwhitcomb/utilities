@@ -29,17 +29,17 @@
 #	11-Dec-2020 (rlwhitcomb)
 #	    Move product name to build.properties.
 #	24-Aug-2021 (rlwhitcomb)
-#	    One more error for the locale option.
+#	    Clone and translate to Spanish.
 #
 
-unrecognized		= Unrecognized option: "%1$s"!
-noConsole		= No console available to read from!
-ioError			= I/O error processing input file "%1$s": %2$s
-noFileRead		= Specified file "%1$s" either does not exist or cannot be read!
-oneCharset		= Can only specify one charset for the output file!
-oneOutputFile		= Can only specify one output file name!
-oneLocale		= Can only specify one locale name!
-missingOptionValue	= Missing a value for the "--%1$s" option!
-outputNameCharset	= An output file name must be given along with an output charset!
-noCharsetConsole	= Unable to change charset when reading from the console!
+unrecognized		= ¡Opción "%1$s" no reconocida!
+noConsole		= ¡No hay consola disponible para leer!
+ioError			= Error al procesar el archivo de entrada "%1$s": %2$s
+noFileRead		= ¡El archivo especificado "%1$s" no existe o no se puede leer!
+oneCharset		= ¡Solo se puede especificar un juego de caracteres para el archivo de salida!
+oneOutputFile		= ¡Solo se puede especificar un nombre de archivo de salida!
+oneLocale		= ¡Solo se puede especificar un nombre de configuración regional!
+missingOptionValue	= ¡Falta un valor para la opción "--%1$s"!
+outputNameCharset	= ¡Un nombre de archivo de salida debe darse junto con un juego de caracteres!
+noCharsetConsole	= ¡No se puede cambiar juego de caracteres cuando se lee desde la consola!
 
