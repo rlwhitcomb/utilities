@@ -88,6 +88,8 @@
  *	of "canRead" for directories.
  *    07-Jul-2021 (rlwhitcomb)
  *	Make the class final and the constructor private.
+ *    23-Aug-2021 (rlwhitcomb)
+ *	Add another flavor of "readFileAsString".
  */
 package info.rlwhitcomb.util;
 
@@ -622,6 +624,24 @@ public final class FileUtilities
 	throws IOException
     {
 	return readFileAsString(file, null, 8);
+    }
+
+    /**
+     * Read the given local file and produce a single string from the contents.
+     *
+     * @param	file	The local file to read.
+     * @param	cs	The character set to use to decode the file contents. Can be
+     *			{@code null} in which case the system default is used.
+     * @return		The complete contents of the file as a {@link String},
+     *			with line endings translated to Unix conventions (i.e., only
+     *			{@code \n}).
+     * @throws	IllegalArgumentException if the file size is over 2MB (arbitrary).
+     * @throws	IOException if there is a problem reading the file.
+     */
+    public static String readFileAsString(File file, Charset cs)
+	throws IOException
+    {
+	return readFileAsString(file, cs, 8);
     }
 
     /**
