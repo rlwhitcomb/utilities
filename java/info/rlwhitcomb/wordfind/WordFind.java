@@ -66,14 +66,18 @@
  *      07-May-2021 (rlwhitcomb)
  *          Options for colors based on window background color.
  *      13-May-2021 (rlwhitcomb)
- *         Tweak dark background color.
+ *          Tweak dark background color.
  *      20-May-2021 (rlwhitcomb)
- *         Fix output coloring.
+ *          Fix output coloring.
  *	07-Jul-2021 (rlwhitcomb)
- *         Determine console width from Environment.
+ *          Determine console width from Environment.
  *	23-Aug-2021 (rlwhitcomb)
- *	   In REPL mode, don't automatically clear the letters each time.
- *	   Tweak some colors.
+ *	    In REPL mode, don't automatically clear the letters each time.
+ *	    Tweak some colors.
+ *	24-Aug-2021 (rlwhitcomb)
+ *	    Allow '.' as the wildcard also; allow '/' to signal an option even
+ *	    on non-Windows platforms, since we never have paths on the command
+ *	    line (which is the principal source of confusion for *nix).
  */
 package info.rlwhitcomb.wordfind;
 
@@ -523,7 +527,7 @@ public class WordFind implements Application {
             }
 
             // Deal with wildcard letter (blank)
-            if (ch == ' ' || ch == '?') {
+            if (ch == ' ' || ch == '?' || ch == '.') {
                 for (int j = 0; j < 26; j++) {
                     char ch2 = (char) (alphaStart + j);
                     // Make an annotated string with the blank location marked with "_"
@@ -792,7 +796,7 @@ ex.printStackTrace();
                 processOption("--", arg.substring(2), ignoreOptions);
             } else if (arg.startsWith("-")) {
                 processOption("-", arg.substring(1), ignoreOptions);
-            } else if (ON_WINDOWS && arg.startsWith("/")) {
+            } else if (arg.startsWith("/")) {
                 processOption("/", arg.substring(1), ignoreOptions);
             } else if (beginsWith) {
                 beginningValue = Optional.of(arg);
@@ -975,7 +979,7 @@ ex.printStackTrace();
             int numberOfBlanks = 0;
             for (int i = 0; i < n; i++) {
                 char ch = letters.charAt(i);
-                if (ch == ' ' || ch == '?')
+                if (ch == ' ' || ch == '?' || ch == '.')
                     numberOfBlanks++;
                 else
                     letterSubset.append(ch);
