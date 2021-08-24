@@ -42,6 +42,8 @@
  *	    Move to new package.
  *	08-Aug-2021 (rlwhitcomb)
  *	    Test the ratio of first to second access times.
+ *	24-Aug-2021 (rlwhitcomb)
+ *	    For Windows, halve the expected ratio.
  */
 package info.rlwhitcomb.test;
 
@@ -59,6 +61,9 @@ import info.rlwhitcomb.util.MathUtil;
  */
 public class InitTaskTest
 {
+	/** Are we running on a Windows machine? */
+	private static final boolean ON_WINDOWS = Environment.isWindows();
+
 	/**
 	 * The logging object.
 	 */
@@ -317,9 +322,10 @@ public class InitTaskTest
 
 	    // Final check: the ratio of first to second elapsed time should be ~100,000 x
 	    double timeRatio = task.timeRatio();
-	    if (timeRatio < DESIRED_RATIO) {
+	    double desiredRatio = ON_WINDOWS ? DESIRED_RATIO / 2.0d : DESIRED_RATIO;
+	    if (timeRatio < desiredRatio) {
 		System.out.format("Time ratio too small:  was %1$5.2f, should be %2$5.2f%n",
-			timeRatio, DESIRED_RATIO);
+			timeRatio, desiredRatio);
 		success = false;
 	    }
 
