@@ -316,6 +316,8 @@
  *	    More date functions.
  *	16-Aug-2021 (rlwhitcomb)
  *	    Need to use "mcDivide" for Bernoulli numbers to avoid infinite repeating digits errors.
+ *	23-Aug-2021 (rlwhitcomb)
+ *	    Fix precision value for formatting.
  */
 package info.rlwhitcomb.calc;
 
@@ -1070,13 +1072,13 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    // Some formats allow a precision to be given ('%', and 'd' for instance)
 	    // but some others (like 't') allow a second alpha as well
-	    if (format.length() > 2) {
-		int index = 1;
+	    if (format.length() > 3) {
+		int index = 2;
 		char ch;
 		while ((ch = format.charAt(index)) >= '0' && ch <= '9')
 		    index++;
-		if (index > 1) {
-		    String num = format.substring(1, index);
+		if (index > 2) {
+		    String num = format.substring(2, index);
 		    precision = Integer.parseInt(num);
 		}
 	    }
