@@ -318,6 +318,8 @@
  *	    Need to use "mcDivide" for Bernoulli numbers to avoid infinite repeating digits errors.
  *	23-Aug-2021 (rlwhitcomb)
  *	    Fix precision value for formatting.
+ *	24-Aug-2021 (rlwhitcomb)
+ *	    Implement "@c" formatting (integer -> character).
  */
 package info.rlwhitcomb.calc;
 
@@ -1129,6 +1131,20 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    case 'l':
 			toLowerCase = true;
 			valueBuf.append(toStringValue(this, result, false));
+			break;
+
+		    case 'C':
+		    case 'c':
+			iValue = toIntegerValue(this, result, mc, ctx);
+			try {
+			    int cValue = iValue.intValueExact();
+			    if (cValue < 0 || cValue > 0x10FFFF)
+				throw new CalcExprException(ctx, "%calc#charOutOfRange", cValue);
+			    valueBuf.append('"').appendCodePoint(cValue).append('"');
+			}
+			catch (ArithmeticException ae) {
+			    throw new CalcExprException(ae, ctx);
+			}
 			break;
 
 		    case 'D':

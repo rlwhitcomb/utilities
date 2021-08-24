@@ -66,6 +66,8 @@
 #	    Tweak an error message, and add another.
 #	23-Aug-2021 (rlwhitcomb)
 #	    Add a "resultGUI" text with a nice arrow symbol.
+#	24-Aug-2021 (rlwhitcomb)
+#	    New error for converting int to codepoint.
 #
 
 #
@@ -124,6 +126,7 @@ decimal		= DECIMAL
 
 precNotInteger		= Decimal precision of %1$s must be an integer value
 precOutOfRange		= Decimal precision of %1$d is out of range
+charOutOfRange		= Integer value of 0x%1$08X out of range of Unicode characters (0..0x10FFFF)
 ioError			= I/O Error: %1$s
 noConvertInteger	= Unable to convert value of '%1$s' to an integer
 noConvertObjArr		= Cannot convert object or array to '%1$c' format

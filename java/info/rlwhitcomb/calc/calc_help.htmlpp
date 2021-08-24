@@ -441,11 +441,12 @@ or
       <tr><td><code>@</code>[<i>nn</i>][<code>w</code>|<code>d</code>|<code>h</code>|<code>m</code>|<code>s</code>]<code>t</code></td><td>Format as a time (duration), optional rounding</td></tr>
       <tr><td><code>@l</code></td><td>Format result string in lower case</td></tr>
       <tr><td><code>@u</code></td><td>Format result string in UPPER case</td></tr>
-      <tr><td><code>@</code>[<code>,</code>][<i>nn</i>]<code>d</code></td><td>Primarily for rational mode: format the result as a decimal value,<br>with optional separators, and optionally rounding to <i>nn</i> digits<br>prints codepoint for single character</td></tr>
+      <tr><td><code>@</code>[<code>,</code>][<i>nn</i>]<code>d</code></td><td>Primarily for rational mode: format the result as a decimal value,<br>with optional separators, and optionally rounding to <i>nn</i> digits<br>(prints codepoint for single character)</td></tr>
       <tr><td><code>@e</code></td><td>Format an integer as a date (yyyy-mm-dd) (ISO-8601 format)</td></tr>
       <tr><td><code>@E</code></td><td>Format an integer as a date (mm/dd/yyyy) (U.S. format)</td></tr>
       <tr><td><code>@f</code></td><td>For decimal mode, format the result as a rational fraction</td></tr>
       <tr><td><code>@F</code></td><td>Format as a proper fraction (with possible integer portion)</td></tr>
+      <tr><td><code>@c</code></td><td>Format an integer (range of 0 .. 0x10FFFF) as a Unicode character</td></tr>
       <tr><td><code>@</code>[<code>,</code>]<code>j</code></td><td>Format the result as a "pretty printed" JSON result<br>(multiple lines with indents)<br>with optional separators for numeric values</td></tr>
       <tr><td><code>@r</code></td><td>Format the result as a Roman Numeral value</td></tr>
       <tr><td><code>@x</code></td><td>For integers and strings, format in hexadecimal form</td></tr>
