@@ -1,0 +1,5 @@
+#
+# Calculate winning percentage from wins/ties/losses
+#
+def winpct = { ties == null ? wins / (wins + losses) : wins / (wins + ties + losses)@2% }
+

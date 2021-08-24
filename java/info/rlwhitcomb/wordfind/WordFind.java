@@ -71,6 +71,9 @@
  *         Fix output coloring.
  *	07-Jul-2021 (rlwhitcomb)
  *         Determine console width from Environment.
+ *	23-Aug-2021 (rlwhitcomb)
+ *	   In REPL mode, don't automatically clear the letters each time.
+ *	   Tweak some colors.
  */
 package info.rlwhitcomb.wordfind;
 
@@ -398,15 +401,15 @@ public class WordFind implements Application {
 
     private static void setColors(final boolean light) {
         if (light) {
-            headingColor = CYAN;
+            headingColor = CYAN_UNDERLINED;
             infoColor = GREEN_BOLD;
             errorColor = RED_UNDERLINED;
             wildcardColor = RED_BRIGHT;
             containsColor = CYAN_BOLD;
         } else {
-            headingColor = CYAN_BOLD;
+            headingColor = CYAN_UNDERLINED_BRIGHT;
             infoColor = GREEN;
-            errorColor = RED_UNDERLINED_BRIGHT;;
+            errorColor = RED_UNDERLINED_BRIGHT;
             wildcardColor = RED_BOLD;
             containsColor = YELLOW_BOLD;
         }
@@ -830,6 +833,8 @@ ex.printStackTrace();
                 needMaxNumber = false;
             } else {
                 if (nonOptions != null) {
+                    if (totalInputSize == 0)
+                        nonOptions.clear();
                     nonOptions.add(arg);
                     totalInputSize += arg.length();
                 }
@@ -1119,7 +1124,6 @@ ex.printStackTrace();
                         break;
                 }
 
-                argWords.clear();
                 String[] args = CharUtil.parseCommandLine(line);
                 int inputSize = processCommandLine(args, argWords, true);
                 process(argWords, inputSize);
