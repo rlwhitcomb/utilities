@@ -110,6 +110,8 @@
 #	    New message for screen size in Environment.
 #	06-Aug-2021 (rlwhitcomb)
 #	    New error in BigFraction.
+#	25-Aug-2021 (rlwhitcomb)
+#	    Tweak one BigFraction error message.
 #
 
 #
@@ -202,7 +204,7 @@ math.sqrtNegative		= Square root of a negative number is not real.
 # From BigFraction.java
 #
 fraction.noZeroDenominator	= Fractions cannot have zero denominators.
-fraction.unsupportedFormat	= The input value cannot be converted to a fraction value.
+fraction.unsupportedFormat	= The value "%1$s" cannot be converted to a fraction.
 fraction.divideByZero		= Divide by zero.
 fraction.unknownFracChar	= Unsupported fraction character '%1$s'.
 

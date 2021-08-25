@@ -69,6 +69,7 @@
  *	    And ... finish that work.
  *	25-Aug-2021 (rlwhitcomb)
  *	    Correct a typo in the INT_FRAC regex.
+ *	    Display the input value in the "unsupportedFormat" exception.
  */
 package info.rlwhitcomb.util;
 
@@ -303,7 +304,7 @@ public class BigFraction extends Number
 		    }
 		}
 	    }
-	    throw new Intl.IllegalArgumentException("util#fraction.unsupportedFormat");
+	    throw new Intl.IllegalArgumentException("util#fraction.unsupportedFormat", value);
 	}
 
 	/**
