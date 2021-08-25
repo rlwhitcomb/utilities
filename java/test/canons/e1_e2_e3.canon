@@ -183,6 +183,7 @@
 >split (target, 'o', 5) -> [ "b", "", ":and:f", "", "" ]
 >split (target, 'o', -2) -> [ "b", "", ":and:f", "", "" ]
 >split target, 'o' -> [ "b", "", ":and:f" ]
+>split 1.2, '\\.' -> [ "1", "2" ]
 >Variables 'target', 'one', 'two', and 'three' cleared.
 >target = 'This is an "index" test.' -> "This is an \"index\" test."
 >one = index target, 'is' -> 2
@@ -190,10 +191,12 @@
 >three = index target, 'test', -1 -> -5
 >index (target, 'junk') -> <null>
 >index (target, 'more junk', -1) -> <null>
+>index 1.2, '2' -> 2
 >one = substr (target, 4) -> " is an \"index\" test."
 >two = substr (target, 11, 18) -> "\"index\""
 >three = substr (target, index (target, 'test', -1)) -> "test."
 >substr (target, index (target, '"', 0), index (target, '"', -1) + 1) -> "\"index\""
+>substr 1.234, 1, 3 -> ".2"
 >funny_string = ' \t\f  \r\n   345  \f  \t \r\n  ' -> " 	  
 >   345    	 
 >  "
@@ -202,14 +205,15 @@
 >  "
 >rtrim funny_string -> " 	  
 >   345"
+>trim (1.2 + " ") -> "1.2"
 >arr_n = [] -> [ ]
 >fill arr_n, 0, 10 -> [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
 >fill arr_n, 1, 2, 3 -> [ 0, 0, 1, 1, 1, 0, 0, 0, 0, 0 ]
 >fill arr_n, 3, 12, 4 -> [ 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, <null>, <null>, 3, 3, 3, 3 ]
 >str_b = '' -> ""
->fill str_b, '=', 25 -> "========================="
->fill str_b, '-', 0, 3 -> "---======================"
->fill str_b, '-', 22, 3 -> "---===================---"
+>fill (str_b, '=', 25) -> "========================="
+>fill (str_b, '-', 0, 3) -> "---======================"
+>fill (str_b, '-', 22, 3) -> "---===================---"
 >1 < 2 == 3 > 4 -> false
 >1 == '1' > 2 != '2' -> true
 >1 === '1' -> false

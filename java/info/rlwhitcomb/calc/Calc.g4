@@ -232,6 +232,9 @@
  *	    Add ":OPEN" as an alternative to ":INCLUDE".
  *	16-Aug-2021 (rlwhitcomb)
  *	    Got the precedence of all the functions wrong; adjust.
+ *	25-Aug-2021 (rlwhitcomb)
+ *	    Redo the syntax for a couple functions to get the optional
+ *	    parens correct.
  */
 
 grammar Calc;
@@ -338,11 +341,11 @@ expr
    | K_SPLIT ( expr2 | expr3 )           # splitExpr
    | K_INDEX ( expr2 | expr3 )           # indexExpr
    | K_SUBSTR ( expr2 | expr3 )          # substrExpr
-   | K_FILL var ',' ( expr2 | expr3 )    # fillExpr
+   | K_FILL fillExprs                    # fillExpr
    | (K_TRIM|K_LTRIM|K_RTRIM) expr       # trimExpr
    | K_FIB expr                          # fibExpr
    | K_BN expr                           # bernExpr
-   | K_FRAC ( STRING | ISTRING | expr2 | expr3 ) # fracExpr
+   | K_FRAC ( expr1 | expr2 | expr3 )    # fracExpr
    | K_ROMAN expr                        # romanExpr
    | ( K_UPPER | K_LOWER ) expr          # caseConvertExpr
    | K_FACTORS expr                      # factorsExpr
@@ -380,6 +383,11 @@ expr
    |<assoc=right> var BIT_ASSIGN expr    # bitAssignExpr
    ;
 
+expr1
+   : '(' expr ')'
+   | expr
+   ;
+
 expr2
    : '(' expr ',' expr ')'
    | expr ',' expr
@@ -393,6 +401,13 @@ expr3
 exprN
    : '(' exprList ')'
    | exprList
+   ;
+
+fillExprs
+   : '(' var ',' expr ',' expr ')'
+   | '(' var ',' expr ',' expr ',' expr ')'
+   | var ',' expr ',' expr
+   | var ',' expr ',' expr ',' expr
    ;
 
 dotRange

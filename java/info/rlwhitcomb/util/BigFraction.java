@@ -67,6 +67,8 @@
  *	    Beef up the "valueOf" with treatment of the Unicode fraction chars.
  *	06-Aug-2021 (rlwhitcomb)
  *	    And ... finish that work.
+ *	25-Aug-2021 (rlwhitcomb)
+ *	    Correct a typo in the INT_FRAC regex.
  */
 package info.rlwhitcomb.util;
 
@@ -95,7 +97,7 @@ public class BigFraction extends Number
 	/** The pattern for three ints, as in "int [&nbsp;,/;] numer [&nbsp;,/;] denom". */
 	private static final Pattern THREE_INTS = Pattern.compile("(-?[0-9]+)(\\s+|\\s*[,/;]\\s*)(-?[0-9]+)(\\s+|\\s*[,/;]\\s*)(-?[0-9]+)");
 	/** The pattern for an int and a fraction character, as in "int [&nbsp;,/;] frac". */
-	private static final Pattern INT_FRAC = Pattern.compile("(-?[0-9]+)(\\s*[,/;]?\\s*)(-?[\u00BC-\u00BE\u2150-\u215E\\u2189])");
+	private static final Pattern INT_FRAC = Pattern.compile("(-?[0-9]+)(\\s*[,/;]?\\s*)(-?[\u00BC-\u00BE\u2150-\u215E\u2189])");
 	/** The pattern for a single fraction character. */
 	private static final Pattern FRAC_ONLY = Pattern.compile("-?[\u00BC-\u00BE\u2150-\u215E\u2189]");
 

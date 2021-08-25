@@ -8,6 +8,9 @@
 #
 :rational on
 
+# The "frac" function
+frac('1 \u215c')
+
 # The new fraction constant
 f'3 4'
 f'4;5;6'
@@ -66,9 +69,9 @@ F'3,-3,-8'@F
 :echo '#8 Stanley ordered two pizzas cut into eighths. If he ate 5/8 of a pizza, how much was left?'
 `${2 * (8/8) - 5/8@F} pizzas`
 :echo '#9 Sandra bought 2 3⁄4 yards of red fabric and 1 1⁄4 of blue. How much cloth did she buy in all?'
-`${frac '2 3/4' + frac '1 1/4'@F} yards`
+`${frac('2 3/4') + frac('1 1/4')@F} yards`
 :echo '#10 An equilateral triangle measures 3 1⁄2 inches on one side. What is the perimeter of the triangle?'
-`${frac '3 1/2' * 3@F} inches`
+`${f'3 1/2' * 3@F} inches`
 :echo
 
 :rational pop

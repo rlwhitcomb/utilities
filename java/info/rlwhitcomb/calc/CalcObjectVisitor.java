@@ -320,6 +320,9 @@
  *	    Fix precision value for formatting.
  *	24-Aug-2021 (rlwhitcomb)
  *	    Implement "@c" formatting (integer -> character).
+ *	25-Aug-2021 (rlwhitcomb)
+ *	    Fix the parsing of a couple of functions when optional parens are given. Fix a LOT of
+ *	    weirdness with "getStringValue" when separators and quotes were improperly handled.
  */
 package info.rlwhitcomb.calc;
 
@@ -633,19 +636,19 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	protected String getStringValue(ParserRuleContext ctx) {
-	    return getStringValue(ctx, false);
+	    return getStringValue(ctx, false, false, settings.separatorMode);
 	}
 
-	private String getStringValue(ParserRuleContext ctx, boolean allowNull) {
+	private String getStringValue(ParserRuleContext ctx, boolean allowNull, boolean quote, boolean separators) {
+	    if (ctx == null && allowNull)
+		return "";
+
 	    Object value = evaluateFunction(visit(ctx));
 
 	    if (!allowNull)
 		nullCheck(value, ctx);
 
-	    if (value instanceof String)
-		return (String) value;
-
-	    return value == null ? "" : toStringValue(this, value, settings.separatorMode);
+	    return value == null ? "" : toStringValue(this, value, quote, false, separators, "");
 	}
 
 	private double getDoubleValue(ParserRuleContext ctx) {
@@ -879,8 +882,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitEchoDirective(CalcParser.EchoDirectiveContext ctx) {
-	    CalcParser.ExprContext expr = ctx.expr();
-	    String msg = (expr != null) ? toStringValue(this, visit(expr), settings.separatorMode) : "";
+	    String msg = getStringValue(ctx.expr(), true, false, settings.separatorMode);
 
 	    displayer.displayMessage(processString(msg));
 
@@ -889,7 +891,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitIncludeDirective(CalcParser.IncludeDirectiveContext ctx) {
-	    String paths = getStringValue(ctx.expr());
+	    String paths = getStringValue(ctx.expr(), false, false, false);
 
 	    try {
 		String contents = Calc.getFileContents(paths);
@@ -2565,25 +2567,24 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitFillExpr(CalcParser.FillExprContext ctx) {
-	    CalcParser.VarContext varCtx  = ctx.var();
-	    LValueContext lValue          = getLValue(varCtx);
-	    Object value		  = lValue.getContextObject();
-
-	    CalcParser.Expr2Context e2ctx = ctx.expr2();
-	    CalcParser.Expr3Context e3ctx = ctx.expr3();
+	    CalcParser.FillExprsContext fillCtx = ctx.fillExprs();
+	    CalcParser.VarContext varCtx        = fillCtx.var();
+	    LValueContext lValue                = getLValue(varCtx);
+	    Object value		        = lValue.getContextObject();
+	    List<CalcParser.ExprContext> exprs  = fillCtx.expr();
 
 	    Object fillValue;
 	    int start  = 0;
 	    int length = 0;
 
-	    if (e3ctx == null) {
-		fillValue = visit(e2ctx.expr(0));
-		length    = getIntValue(e2ctx.expr(1));
+	    if (exprs.size() == 2) {
+		fillValue = visit(exprs.get(0));
+		length    = getIntValue(exprs.get(1));
 	    }
 	    else {
-		fillValue = visit(e3ctx.expr(0));
-		start     = getIntValue(e3ctx.expr(1));
-		length    = getIntValue(e3ctx.expr(2));
+		fillValue = visit(exprs.get(0));
+		start     = getIntValue(exprs.get(1));
+		length    = getIntValue(exprs.get(2));
 	    }
 
 	    if (value instanceof List) {
@@ -2673,13 +2674,10 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitFracExpr(CalcParser.FracExprContext ctx) {
-	    TerminalNode stringNode = ctx.STRING();
-	    if (stringNode == null)
-		stringNode = ctx.ISTRING();
-
 	    try {
-		if (stringNode != null) {
-		    return BigFraction.valueOf(processString(stringNode.getText()));
+		CalcParser.Expr1Context expr1 = ctx.expr1();
+		if (expr1 != null) {
+		    return BigFraction.valueOf(getStringValue(expr1.expr(), false, false, false));
 		}
 		else {
 		    CalcParser.Expr2Context e2ctx = ctx.expr2();
