@@ -242,6 +242,8 @@
 		Actually ... we don't really need this nice font.
 	    25-Aug-2021 (rlwhitcomb)
 		Report the Java version in the info printout.
+	    25-Aug-2021 (rlwhitcomb)
+		"dist" is actually "../dist" in here.
 
      ========================================================================== -->
 
@@ -337,7 +339,7 @@
 	<condition property="test.log.canon" value="TestPP.log.windows.canon" else="TestPP.log.other.canon">
 		<os family="windows"/>
 	</condition>
-	<condition property="test.log.path" value="dist/${test.log.file.name}" else="${test.log.file.name}">
+	<condition property="test.log.path" value="../dist/${test.log.file.name}" else="${test.log.file.name}">
 		<istrue value="${ci.build}"/>
 	</condition>
 
