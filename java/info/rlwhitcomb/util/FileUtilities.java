@@ -90,6 +90,8 @@
  *	Make the class final and the constructor private.
  *    23-Aug-2021 (rlwhitcomb)
  *	Add another flavor of "readFileAsString".
+ *    24-Aug-2021 (rlwhitcomb)
+ *	Tweak some of the Javdoc.
  */
 package info.rlwhitcomb.util;
 
@@ -148,15 +150,17 @@ public final class FileUtilities
 
 
     /**
-     * Private constructor because this is a utility class.
+     * Private constructor because this is a utility class with only static methods.
      */
     private FileUtilities() {
     }
 
     /**
+     * Compute the bare name part of the file.
+     *
+     * @param f The file to examine.
      * @return Only the name portion of the given file, without the path
      * or the extension (if any).
-     * @param f The file to examine.
      */
     public static String nameOnly(File f) {
 	String name = f.getName();
@@ -168,12 +172,13 @@ public final class FileUtilities
     }
 
     /**
-     * @return A new {@code File} object with the given path and extension
-     * (unless the input already has a path and/or extension).
+     * Decorate a bare file with the required but missing pieces.
      *
      * @param name	The (possibly) bare file name to decorate.
      * @param dir	The default directory to use if the name has none.
      * @param ext	The default extension to use if the name has none.
+     * @return		A new {@code File} object with the given path and extension
+     *			(unless the input already has a path and/or extension).
      */
     public static File decorate(String name, File dir, String ext) {
 	String fullName = name;
@@ -373,9 +378,11 @@ public final class FileUtilities
     }
 
     /**
-     * @return The count of the number of lines in the file.
+     * Count the number of lines in the given file. See the contract for
+     * {@link BufferedReader#readLine} for what constitutes a line for this purpose.
      *
      * @param	f	The file to inspect.
+     * @return	The count of the number of lines in the file.
      * @throws	IOException if the file couldn't be read.
      */
     public static int countLines(File f)
