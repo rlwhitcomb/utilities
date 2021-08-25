@@ -8,3 +8,6 @@ then
    cat dist/test*.log
    exit 1
 fi
+echo Distribution Files
+echo ------------------
+ls -al dist
