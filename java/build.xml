@@ -240,6 +240,8 @@
 		Add a nice open-source font for Calc (and others?) to use in the GUI.
 	    23-Aug-2021 (rlwhitcomb)
 		Actually ... we don't really need this nice font.
+	    25-Aug-2021 (rlwhitcomb)
+		Report the Java version in the info printout.
 
      ========================================================================== -->
 
@@ -294,15 +296,16 @@
 		<isset property="CI_BUILD"/>
 	</condition>
 
-	<echo message="=========================================================="/>
+	<echo message="======================================================================"/>
 	<echo message=""/>
-	<echo message="             U T I L I T I E S   B U I L D"/>
+	<echo message="                    U T I L I T I E S   B U I L D"/>
 	<echo message=""/>
-	<echo message="          Build number = ${build.lastrev}"/>
-	<echo message="       Build date/time = ${build.date} ${build.time}"/>
-	<echo message="           Is CI build ? ${ci.build}"/>
+	<echo message="       Build number = ${build.lastrev}"/>
+	<echo message="    Build date/time = ${build.date} ${build.time}"/>
+	<echo message="        Is CI build ? ${ci.build}"/>
+	<echo message="       Java version : ${java.vm.name} ${java.vm.version}"/>
 	<echo message=""/>
-	<echo message="=========================================================="/>
+	<echo message="======================================================================"/>
 
 	<condition property="new.java.version" value="true" else="false" >
 		<javaversion atleast="9"/>

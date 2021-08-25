@@ -23,8 +23,8 @@ jobs:
         distribution: 'adopt'
     - name: Build with Ant
       run: ./ci-build.sh
-    - name: Upload build results
+    - name: Upload test results
       uses: actions/upload-artifact@v2
       with:
-        name: build-results
-        path: dist/
+        name: test-results
+        path: dist/test*.log
