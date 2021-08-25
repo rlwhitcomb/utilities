@@ -1,5 +1,4 @@
 #!/bin/bash
-set -xv # enable debugging
 NUMBER=43112609
 DIGITS=12978189
 if [ -e test/data/M$NUMBER.txt.gz ]; then
