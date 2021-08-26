@@ -486,27 +486,31 @@ or
           <code>true</code> or <code>false</code><br>
           <code>null</code><br>
           <code>&#x00BC;</code>, <code>&#x00BD;</code>, <code>&#x00BE;</code>, <code>&#x2150;</code>, <code>&#x215E;</code>, etc.<br>
+          <code>&#x2460;</code> .. <code>&#x2473;</code>, <code>&#x2474;</code> .. <code>&#x2487;</code>, <code>&#xFF10;</code> .. <code>&#xFF19;</code>, etc.<br>
           <code>today</code><br>
-          <code>now</code></td>
+          <code>now</code><br>
+          any string, binary, octal, hex, fraction, etc. constant</td>
       <td>the fundamental constants <code>&#x1D6D1;</code> and <code>e</code><br>
           the <code>boolean</code> values<br>
           the <code>null</code> (empty) value<br>
           any of the Unicode fraction values<br>
+          other Unicode digit / number symbols<br>
           date value of the current date<br>
-          time value of the current time</td><td>N/A</td></tr>
+          time value of the current time<br>
+          the constant value</td><td>N/A</td></tr>
     <tr><td>27</td><td><code>{ }</code></td><td>define an object</td><td>left to right</td></tr>
-    <tr><td>26</td><td><code>[ ]</code><br><i>var</i> <code>[</code> <i>expr</i> <code>]</code> or <i>var</i>&nbsp;&#x2080; .. &#x2089;</td><td>define an array,<br>or access elements of<br>an array, string, or object</td><td>left to right</td></tr>
-    <tr><td>25</td><td>.</td><td>access an object member</td><td>left to right</td></tr>
+    <tr><td>26</td><td><code>[ ]</code><br><i>var</i> <code>[</code> <i>expr</i> <code>]</code> or <i>var</i>&nbsp;<code>&#x2080;</code> .. <code>&#x2089;</code></td><td>define an array,<br>or access elements of an array, string, or object</td><td>left to right</td></tr>
+    <tr><td>25</td><td><code>.</code></td><td>access an object member</td><td>left to right</td></tr>
     <tr><td>24</td><td><code>( </code><i>expr</i><code> )</code></td><td>group an expression</td><td>N/A</td></tr>
-    <tr><td rowspan="51">23</td>
-            <td><code>ABS</code>&nbsp;<i>expr</i></td><td>absolute value</td><td rowspan="51">left to right</td></tr>
+    <tr><td rowspan="52">23</td>
+            <td><code>ABS</code>&nbsp;<i>expr</i></td><td>absolute value</td><td rowspan="52">left to right</td></tr>
             <tr><td><code>SIN</code>&nbsp;<i>expr</i></td><td>sine</td></tr>
             <tr><td><code>COS</code>&nbsp;<i>expr</i></td><td>cosine</td></tr>
             <tr><td><code>TAN</code>&nbsp;<i>expr</i></td><td>tangent</td></tr>
             <tr><td><code>ASIN</code>&nbsp;<i>expr</i></td><td>sine<sup>-1</sup></td></tr>
             <tr><td><code>ACOS</code>&nbsp;<i>expr</i></td><td>cosine<sup>-1</sup></td></tr>
             <tr><td><code>ATAN</code>&nbsp;<i>expr</i></td><td>tangent<sup>-1</sup></td></tr>
-            <tr><td><code>ATAN2</code>&nbsp;<i>e<sub>y</sub></i><code>,</code>&nbsp;<i>e<sub>x</sub></i></td><td>the angle <i>theta</i> from converting<br>rectangular (x,y) to polar (r,<i>theta</i>) coordinates</td></tr>
+            <tr><td><code>ATAN2</code>&nbsp;<i>e<sub>y</sub></i><code>,</code>&nbsp;<i>e<sub>x</sub></i></td><td>the angle &theta; from converting<br>rectangular (x,y) to polar (r,&theta;) coordinates</td></tr>
             <tr><td><code>SINH</code>&nbsp;<i>expr</i></td><td>hyperbolic sine</td></tr>
             <tr><td><code>COSH</code>&nbsp;<i>expr</i></td><td>hyperbolic cosine</td></tr>
             <tr><td><code>TANH</code>&nbsp;<i>expr</i></td><td>hyperbolic tangent</td></tr>
@@ -521,7 +525,8 @@ or
             <tr><td><code>LENGTH</code>&nbsp;<i>expr</i><br>or <i>expr</i> [ <code>..</code> or <code>&#x2026;</code> <i>expr</i> [ <code>,</code> <i>expr</i> ] ]</td><td>length of string, array, object, or range</td></tr>
             <tr><td><code>SCALE</code>&nbsp;<i>expr</i></td><td>scale of number</td></tr>
             <tr><td><code>ROUND</code>&nbsp;<i>expr</i><code>,</code>&nbsp;<i>expr</i></td><td>round value to given places</td></tr>
-            <tr><td><code>ISPRIME</code>&nbsp;<i>expr</i></td><td>is the value a prime number</td></tr>
+            <tr><td><code>ISPRIME</code>&nbsp;<i>expr</i></td><td>is the value a prime number?</td></tr>
+            <tr><td><code>ISNULL</code>&nbsp;<i>expr</i></td><td>is the value null?</td></tr>
             <tr><td><code>GCD</code>&nbsp;<i>expr</i><code>,</code>&nbsp;<i>expr</i></td><td>greatest common divisor</td></tr>
             <tr><td><code>LCM</code>&nbsp;<i>expr</i><code>,</code>&nbsp;<i>expr</i></td><td>least common multiple</td></tr>
             <tr><td><code>MAX</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;) *</td><td>maximum value</td></tr>

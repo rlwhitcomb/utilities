@@ -237,6 +237,8 @@
  *	    parens correct.
  *	25-Aug-2021 (rlwhitcomb)
  *	    Add global variables.
+ *	26-Aug-2021 (rlwhitcomb)
+ *	    Add some more Unicode number symbols. Add "isnull" function.
  */
 
 grammar Calc;
@@ -333,6 +335,7 @@ expr
    | K_SCALE expr                        # scaleExpr
    | K_ROUND expr2                       # roundExpr
    | K_ISPRIME expr                      # isPrimeExpr
+   | K_ISNULL expr                       # isNullExpr
    | K_GCD expr2                         # gcdExpr
    | K_LCM expr2                         # lcmExpr
    | K_MAX exprN                         # maxExpr
@@ -454,6 +457,7 @@ value
    : STRING                      # stringValue
    | ISTRING                     # iStringValue
    | NUMBER                      # numberValue
+   | NUM_CONST                   # numberConstValue
    | BIN_CONST                   # binaryValue
    | OCT_CONST                   # octalValue
    | HEX_CONST                   # hexValue
@@ -532,7 +536,7 @@ modeOption
 /* Lexer rules start here */
 
 PI_CONST : P I
-         | ( '\u03a0' | '\u03c0' | '\u03d6' | '\u1d28' | '\u213c' | '\u213f' )
+         | ( '\u03A0' | '\u03C0' | '\u03D6' | '\u1D28' | '\u213C' | '\u213F' )
          | ( '\u{1D6B7}' | '\u{1D6D1}' | '\u{1D6E1}' )
          | ( '\u{1D6F1}' | '\u{1D70B}' | '\u{1D71B}' )
          | ( '\u{1D72B}' | '\u{1D745}' | '\u{1D755}' )
@@ -625,6 +629,8 @@ K_SCALE    : S C A L E ;
 K_ROUND    : R O U N D ;
 
 K_ISPRIME  : I S P R I M E ;
+
+K_ISNULL   : I S N U L L ;
 
 K_GCD      : G C D ;
 
@@ -1026,6 +1032,24 @@ fragment FS
 
 NUMBER
    : INT ('.' [0-9] +)? EXP?
+   ;
+
+NUM_CONST
+   : [\u2460-\u2473]         /* circled 1..20       */
+   | [\u2474-\u2487]         /* (1)..(20)           */
+   | [\u2488-\u249B]         /* 1. .. 20.           */
+   | ( '\u24EA' | '\u24FF' ) /* 0                   */
+   | [\u24EB-\u24F4]         /* circled 11..20      */
+   | [\u24F5-\u24FE]         /* circled 1..10       */
+   | [\u2776-\u277F]         /* small circled 1..10 */
+   | [\u2780-\u2789]         /* small circled 1..10 */
+   | [\u278A-\u2793]         /* small circled 1..10 */
+   | [\uFF10-\uFF19]         /* full width 0..9     */
+   | [\u{1D7CE}-\u{1D7D7}]   /* mathematical 0..9   */
+   | [\u{1D7D8}-\u{1D7E1}]   /* mathematical 0..9   */
+   | [\u{1D7E2}-\u{1D7EB}]   /* mathematical 0..9   */
+   | [\u{1D7EC}-\u{1D7F5}]   /* mathematical 0..9   */
+   | [\u{1D7F6}-\u{1D7FF}]   /* mathematical 0..9   */
    ;
 
 BIN_CONST

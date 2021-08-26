@@ -150,6 +150,8 @@
  *	    Conversions to/from times and durations.
  *	07-Jul-2021 (rlwhitcomb)
  *	    Make the class final.
+ *	26-Aug-2021 (rlwhitcomb)
+ *	    Add a converter method for all the strange Unicode digit/number glyphs.
  */
 package info.rlwhitcomb.util;
 
@@ -1739,6 +1741,51 @@ public final class NumericUtil
 		decimal = MathUtil.round(decimal, precision);
 
 	    return String.format("%1$s%2$s%3$c", negative ? "-" : "", decimal.toPlainString(), units);
+	}
+
+	/**
+	 * The conversion tables for the dingbat numbers.
+	 */
+	private static final int DINGBAT_TABLE[][] = {
+	 /* base,  start,   end   */
+	    {  1, 0x2460,  0x2473  },
+	    {  1, 0x2474,  0x2487  },
+	    {  1, 0x2488,  0x249B  },
+	    {  0, 0x24EA,  0x24EA  },
+	    {  0, 0x24FF,  0x24FF  },
+	    { 11, 0x24EB,  0x24F4  },
+	    {  1, 0x24F5,  0x24FE  },
+	    {  1, 0x2776,  0x277F  },
+	    {  1, 0x2780,  0x2789  },
+	    {  1, 0x278A,  0x2793  },
+	    {  0, 0xFF10,  0xFF19  },
+	    {  0, 0x1D7CE, 0x1D7D7 },
+	    {  0, 0x1D7D8, 0x1D7E1 },
+	    {  0, 0x1D7E2, 0x1D7EB },
+	    {  0, 0x1D7EC, 0x1D7F5 },
+	    {  0, 0x1D7F6, 0x1D7FF }
+	};
+
+	/**
+	 * Convert a single codepoint dingbat number to a real integer.
+	 * <p> This will convert things like &#x2460; or &#xFF10; to their equivalent numeric values.
+	 *
+	 * @param input	The input codepoint.
+	 * @return	The value it represents.
+	 * @throws	IllegalArgumentException if the input value isn't something we recognize.
+	 */
+	public static int convertDingbatNumber(final int input) {
+	    for (int i = 0; i < DINGBAT_TABLE.length; i++) {
+		int base  = DINGBAT_TABLE[i][0];
+		int start = DINGBAT_TABLE[i][1];
+		int end   = DINGBAT_TABLE[i][2];
+		if (input >= start && input <= end) {
+		    return input - start + base;
+		}
+	    }
+	    // If the value wasn't matched, then we have an error
+	    String value = new String(Character.toChars(input));
+	    throw new Intl.IllegalArgumentException("util#numeric.badNumberSymbol", input, value);
 	}
 
 }

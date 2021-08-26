@@ -325,6 +325,8 @@
  *	    weirdness with "getStringValue" when separators and quotes were improperly handled.
  *	25-Aug-2021 (rlwhitcomb)
  *	    Add "setArgument" for global variables.
+ *	26-Aug-2021 (rlwhitcomb)
+ *	    Add number constant conversion, and "isnull" function.
  */
 package info.rlwhitcomb.calc;
 
@@ -2218,6 +2220,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	@Override
+	public Object visitIsNullExpr(CalcParser.IsNullExprContext ctx) {
+	    Object obj = visit(ctx.expr());
+	    return Boolean.valueOf(obj == null);
+	}
+
+	@Override
 	public Object visitGcdExpr(CalcParser.GcdExprContext ctx) {
 	    CalcParser.Expr2Context e2ctx = ctx.expr2();
 
@@ -3259,6 +3267,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitNumberValue(CalcParser.NumberValueContext ctx) {
 	    return new BigDecimal(ctx.NUMBER().getText());
+	}
+
+	@Override
+	public Object visitNumberConstValue(CalcParser.NumberConstValueContext ctx) {
+	    String constant = ctx.NUM_CONST().getText();
+	    return NumericUtil.convertDingbatNumber(constant.codePointAt(0));
 	}
 
 	@Override

@@ -96,6 +96,7 @@ n = log(m)
 p = ln2(1000000)
 2**p
 isprime 15485863
+isnull junk
 
 :degrees
 sin(45)
@@ -515,6 +516,16 @@ t∗2
 t÷3
 t∕4
 
+#
+# New Unicode number symbols
+#
+０
+①
+⓯
+𝟦
+⑳
+⒇
+⒚
 
 :echo
 :echo "End of expression tests (suite 1)."

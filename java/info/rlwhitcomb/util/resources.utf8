@@ -112,6 +112,8 @@
 #	    New error in BigFraction.
 #	25-Aug-2021 (rlwhitcomb)
 #	    Tweak one BigFraction error message.
+#	26-Aug-2021 (rlwhitcomb)
+#	    A new NumericUtil error.
 #
 
 #
@@ -189,7 +191,8 @@ numeric.unknownByteOrder	= "%1$s" is not a valid byte order (should be LSB or MS
 numeric.unknownStringLength	= "%1$s" is not a valid string length designation.
 numeric.stringLengthTooBig	= String length of %1$,d exceds limit of %2$,d.
 numeric.badTimeValue		= Unable to interpret '%1$s' as a time value.
-numeric.badDuration		= Unable to interpret '%1$1' as a duration value.
+numeric.badDuration		= Unable to interpret '%1$s' as a duration value.
+numeric.badNumberSymbol		= Unable to interpret 0x%1$06X ('%2$s')as a number symbol.
 
 #
 # From MathUtil.java
