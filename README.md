@@ -83,7 +83,6 @@ Also see "issues" at https://github.com/rlwhitcomb/utilities/issues
 - redo the [box] formats of strings (to be? x'...', b'...', o'...') then parse such beasts back to strings
 - allow "_" in numeric values, like Java does
 - format options for '_' ('@_') or ('@$' to format as dollar)??
-- add option in REPL mode to open another file
 - functions for financial calculations (INTEREST, NPV, PAYMENT, etc.) (**e_mort** is a start)
 - ?? need a way to do "setScale(...)" on the values ??
 - See all the notes on updates needed to help page (calc_help.htmlpp); use "ant update" and then "c -?" to preprocess and view the result
@@ -101,7 +100,6 @@ Also see "issues" at https://github.com/rlwhitcomb/utilities/issues
 - "map" that converts string or array (list) to a map (with index as the key)
 - ?? could there be special processing if the list values were in "key:value" form??  and vice-versa for "list"??
 - does "@_" work inside parens?  how would I convert a JSON object into a string for other processing?  ?? need "string" function??
-- seems like we could have an "exit from GUI mode back to REPL mode" which is available when running from within REPL mode.
 - options to change background color in GUI (maybe in Settings dialog) and on command line (-bg red)
 - some way to not clear input in GUI mode if there is a syntax error during parsing
 
@@ -122,7 +120,6 @@ define a($b, $c, $d) = { $f = blah; ... }
 - Take the code from Calc ("displayHelp") and put it somewhere 'standard' so other can use it (like "Lists"...)
   Not sure where, though: Environment, Launcher, Intl, ClassUtil, FileUtilities, or a new HelpUtil.... (or maybe HelpInfo)
 - seems like we could matrix manipulation now (multiply of conformable matrices, addition, etc.)
-- For Javadoc in CalcObjectVisitor: heading should be the grammar as in Calc.g4
 
 ### WordFind
 - Finish the GUI code.
