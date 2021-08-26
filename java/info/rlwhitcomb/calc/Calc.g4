@@ -235,6 +235,8 @@
  *	25-Aug-2021 (rlwhitcomb)
  *	    Redo the syntax for a couple functions to get the optional
  *	    parens correct.
+ *	25-Aug-2021 (rlwhitcomb)
+ *	    Add global variables.
  */
 
 grammar Calc;
@@ -445,6 +447,7 @@ var
    | var actualParams                   # functionVar
    | ID                                 # idVar
    | LOCALVAR                           # localVar
+   | GLOBALVAR                          # globalVar
    ;
 
 value
@@ -719,6 +722,9 @@ DOT
 
 LOCALVAR
        : '$' [a-zA-Z_] [a-zA-Z_0-9]* ;
+
+GLOBALVAR
+       : '$' INT ;
 
 INC_OP
        : ( '++' | '\u2795\u2795' )

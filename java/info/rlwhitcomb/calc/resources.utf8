@@ -68,6 +68,8 @@
 #	    Add a "resultGUI" text with a nice arrow symbol.
 #	24-Aug-2021 (rlwhitcomb)
 #	    New error for converting int to codepoint.
+#	25-Aug-2021 (rlwhitcomb)
+#	    New error message for attempted assignments to the global arguments.
 #
 
 #
@@ -133,6 +135,7 @@ noConvertObjArr		= Cannot convert object or array to '%1$c' format
 noDupLocalVar		= Duplicate local variable name '%1$s' not allowed
 noDupAnonVar		= Cannot use anonymous loop variable '$_' in nested loops
 localVarNoAssign	= The value of a local variable ('%1$s') cannot be changed
+globalArgNoAssign	= The value of the global argument '%1$s' cannot be changed
 infLoopStepZero		= Infinite loop: step value is zero
 invalidConstruct	= Invalid '$' construct
 invalidConst2		= Invalid '${...}' construct

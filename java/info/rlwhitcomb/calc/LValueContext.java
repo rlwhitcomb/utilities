@@ -50,6 +50,9 @@
  *	    Changes for always displaying thousands separators.
  *	10-Jul-2021 (rlwhitcomb)
  *	    Implement "ignore case" for variable / member names.
+ *	25-Aug-2021 (rlwhitcomb)
+ *	    Implement global variables ($nn, set on command line) and do
+ *	    special error handling for them.
  */
  package info.rlwhitcomb.calc;
 
@@ -172,8 +175,11 @@ class LValueContext
 		Map<String, Object> map = (Map<String, Object>) context;
 		// Special checks for local vars (not defined means we are outside the loop or function)
 		if (name.startsWith("$")) {
-		    if (!isMemberDefined(map, name, ignoreCase))
-		        throw new CalcExprException(varCtx, "%calc#localVarNotAvail", name);
+		    if (!isMemberDefined(map, name, ignoreCase)) {
+			if (name.charAt(1) < '0' || name.charAt(1) > '9')
+			    throw new CalcExprException(varCtx, "%calc#localVarNotAvail", name);
+			// just let the global argument value be null if it's missing
+		    }
 		}
 		return getMemberValue(map, name, ignoreCase);
 	    }
@@ -217,7 +223,10 @@ class LValueContext
 	public Object putContextObject(final CalcObjectVisitor visitor, final Object value) {
 	    if (name != null) {
 		if (name.startsWith("$")) {
-		    throw new CalcExprException(varCtx, "%calc#localVarNoAssign", name);
+		    if (name.charAt(1) >= '0' && name.charAt(1) <= '9')
+			throw new CalcExprException(varCtx, "%calc#globalArgNoAssign", name);
+		    else
+			throw new CalcExprException(varCtx, "%calc#localVarNoAssign", name);
 		}
 		Map<String, Object> map = (Map<String, Object>) context;
 		map.put(name, value);
@@ -298,6 +307,10 @@ class LValueContext
 	    else if (ctx instanceof CalcParser.LocalVarContext) {
 		CalcParser.LocalVarContext localVarCtx = (CalcParser.LocalVarContext) ctx;
 		return new LValueContext(lValue, localVarCtx, lValue.getContextObject(), localVarCtx.LOCALVAR().getText());
+	    }
+	    else if (ctx instanceof CalcParser.GlobalVarContext) {
+		CalcParser.GlobalVarContext globalVarCtx = (CalcParser.GlobalVarContext) ctx;
+		return new LValueContext(lValue, globalVarCtx, lValue.getContextObject(), globalVarCtx.GLOBALVAR().getText());
 	    }
 	    else if (ctx instanceof CalcParser.ArrVarContext) {
 		CalcParser.ArrVarContext arrVarCtx = (CalcParser.ArrVarContext) ctx;

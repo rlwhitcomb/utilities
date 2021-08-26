@@ -323,6 +323,8 @@
  *	25-Aug-2021 (rlwhitcomb)
  *	    Fix the parsing of a couple of functions when optional parens are given. Fix a LOT of
  *	    weirdness with "getStringValue" when separators and quotes were improperly handled.
+ *	25-Aug-2021 (rlwhitcomb)
+ *	    Add "setArgument" for global variables.
  */
 package info.rlwhitcomb.calc;
 
@@ -513,6 +515,10 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		String message = Intl.formatKeyString(formatOrKey, args);
 		displayer.displayActionMessage(message);
 	    }
+	}
+
+	public void setArgument(int index, String arg) {
+	    variables.put(String.format("$%1$d", index), arg);
 	}
 
 	public MathContext getMathContext() {

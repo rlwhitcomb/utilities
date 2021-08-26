@@ -184,6 +184,8 @@
  *	    and try UTF-8 in the case of coding errors.
  *	23-Aug-2021 (rlwhitcomb)
  *	    Actually ... the best font on Windows is MONOSPACED.
+ *	25-Aug-2021 (rlwhitcomb)
+ *	    Implement arguments on the command line.
  */
 package info.rlwhitcomb.calc;
 
@@ -272,7 +274,9 @@ public class Calc
 		/** Input directory option requires a directory name. */
 		DIRECTORY,
 		/** Library name(s) requires the names. */
-		LIBRARY
+		LIBRARY,
+		/** All the remaining parameters are $n global parameters. */
+		ARGUMENTS
 	}
 
 	/** What we're expecting next on the command line. */
@@ -377,6 +381,9 @@ public class Calc
 
 	/** The color map used for our custom colors. */
 	private static HashMap<String, Code> colorMap = new HashMap<>();
+
+	/** The argument values from the command line. */
+	private static List<String> argValues = new ArrayList<>();
 
 
 	private static void computeColors() {
@@ -681,6 +688,12 @@ public class Calc
 
 		displayer = this;
 		visitor = new CalcObjectVisitor(displayer, rational, separators, ignoreCase);
+
+		// Set the command-line arguments into the symbol table as $nn
+		int index = 0;
+		for (String argument : argValues) {
+		    visitor.setArgument(index++, argument);
+		}
 
 		// Try to read and process any given libraries before doing anything else
 		readAndProcessLibraries(visitor, errorStrategy, quiet);
@@ -1195,6 +1208,19 @@ public class Calc
 	}
 
 	private static Expecting processOption(String arg, String option) {
+	    if (option.isEmpty() && arg.equals("--")) {
+		if (expecting == Expecting.ARGUMENTS)
+		    return Expecting.DEFAULT;
+		else if (expecting == Expecting.DEFAULT)
+		    return Expecting.ARGUMENTS;
+	    }
+
+	    // Allow whatever kind of string while reading arguments
+	    if (expecting == Expecting.ARGUMENTS) {
+		argValues.add(arg);
+		return expecting;
+	    }
+
 	    if (expecting != Expecting.DEFAULT) {
 		errFormat("calc#expectNotOption", expecting);
 		return Expecting.QUIT_NOW;
@@ -1393,6 +1419,9 @@ public class Calc
 				libraryNames.add(name);
 			    expecting = Expecting.DEFAULT;
 			    break;
+			case ARGUMENTS:
+			    argValues.add(arg);
+			    break;
 			default:
 			    errFormat("calc#expectValue", expecting);
 			    expecting = Expecting.QUIT_NOW;
@@ -1404,8 +1433,15 @@ public class Calc
 		    return;
 	    }
  
-	    if (expecting != Expecting.DEFAULT) {
-		errFormat("calc#noOptionValue", expecting);
+	    switch (expecting) {
+		case DEFAULT:
+		    break;
+		case ARGUMENTS:
+		    if (argValues.size() > 0)
+			break;
+		    // else fall through to error
+		default:
+		    errFormat("calc#noOptionValue", expecting);
 	    }
 	}
 
@@ -1427,6 +1463,7 @@ public class Calc
 		    case QUIT_NOW:
 			return;
 		    case DEFAULT:
+		    case ARGUMENTS:
 			break;
 		    default:
 			System.exit(1);
@@ -1440,6 +1477,7 @@ public class Calc
 		case QUIT_NOW:
 		    return;
 		case DEFAULT:
+		case ARGUMENTS:
 		    break;
 		default:
 		    System.exit(1);
@@ -1481,6 +1519,12 @@ public class Calc
 		else {
 		    displayer = new ConsoleDisplayer();
 		    visitor = new CalcObjectVisitor(displayer, rational, separators, ignoreCase);
+
+		    // Set the command-line arguments into the symbol table as $nn
+		    int index = 0;
+		    for (String argument : argValues) {
+			visitor.setArgument(index++, argument);
+		    }
 
 		    // Try to read and process any given libraries before doing anything else
 		    // But save the "-inputdir" setting and restore once we're done
