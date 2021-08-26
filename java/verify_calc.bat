@@ -1,7 +1,7 @@
 @echo off
 :: Verify the calculation of Mersenne prime M43112609
-set NUMBER=43112609
-set DIGITS=12978189
+set NUMBER=%1
+set DIGITS=%2
 if exist test\data\M%NUMBER%.txt.gz (copy test\data\M%NUMBER%.txt.gz .) && (call gunz M%NUMBER%.txt.gz)
 call lists -single M%NUMBER%.txt >ref.txt
 call c -nocolor -noseps -sense -r ":unl;(2**%NUMBER%)-1" >calc.txt

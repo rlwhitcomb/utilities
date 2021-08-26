@@ -244,6 +244,8 @@
 		Report the Java version in the info printout.
 	    25-Aug-2021 (rlwhitcomb)
 		"dist" is actually "../dist" in here.
+		Add another progress message for the "verify_calc" step.
+		Get the values for "verify_calc" from the build.properties file.
 
      ========================================================================== -->
 
@@ -626,10 +628,16 @@
 			<arg value="-dir:test/files"/>
 			<arg value="mastertest"/>
 		</java>
-		<exec executable="./verify_calc"  dir="."             output="${test.log.path}" append="true" unless:true="${on.windows}" failonerror="true"/>
+		<echo>Verifying the M${mersenne.number} prime (${mersenne.digits} digits)...</echo>
+		<exec executable="./verify_calc"  dir="."             output="${test.log.path}" append="true" unless:true="${on.windows}" failonerror="true">
+			<arg value="${mersenne.number}"/>
+			<arg value="${mersenne.digits}"/>
+		</exec>
 		<exec executable="cmd"            dir="."             output="${test.log.path}" append="true" if:true="${on.windows}" failonerror="true">
 			<arg value="/c"/>
 			<arg value="verify_calc.bat"/>
+			<arg value="${mersenne.number}"/>
+			<arg value="${mersenne.digits}"/>
 		</exec>
 		<exec executable="./check_sorted" dir="."             output="${test.log.path}" append="true" unless:true="${on.windows}" failonerror="true"/>
 		<exec executable="cmd"            dir="."             output="${test.log.path}" append="true" if:true="${on.windows}" failonerror="true">

@@ -1,6 +1,6 @@
 #!/bin/bash
-NUMBER=43112609
-DIGITS=12978189
+NUMBER=$1
+DIGITS=$2
 if [ -e test/data/M$NUMBER.txt.gz ]; then
    cp test/data/M$NUMBER.txt.gz .
    gunz M$NUMBER.txt.gz
