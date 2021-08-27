@@ -69,15 +69,18 @@
  *          Tweak dark background color.
  *      20-May-2021 (rlwhitcomb)
  *          Fix output coloring.
- *	07-Jul-2021 (rlwhitcomb)
+ *      07-Jul-2021 (rlwhitcomb)
  *          Determine console width from Environment.
- *	23-Aug-2021 (rlwhitcomb)
- *	    In REPL mode, don't automatically clear the letters each time.
- *	    Tweak some colors.
- *	24-Aug-2021 (rlwhitcomb)
- *	    Allow '.' as the wildcard also; allow '/' to signal an option even
- *	    on non-Windows platforms, since we never have paths on the command
- *	    line (which is the principal source of confusion for *nix).
+ *      23-Aug-2021 (rlwhitcomb)
+ *          In REPL mode, don't automatically clear the letters each time.
+ *          Tweak some colors.
+ *      24-Aug-2021 (rlwhitcomb)
+ *          Allow '.' as the wildcard also; allow '/' to signal an option even
+ *          on non-Windows platforms, since we never have paths on the command
+ *          line (which is the principal source of confusion for *nix).
+ *      27-Aug-2021 (rlwhitcomb)
+ *          Allow some more directives in REPL mode.
+ *          Move all the text to resources file.
  */
 package info.rlwhitcomb.wordfind;
 
@@ -116,6 +119,7 @@ import info.rlwhitcomb.util.ConsoleColor;
 import static info.rlwhitcomb.util.ConsoleColor.Code.*;
 import info.rlwhitcomb.util.Environment;
 import info.rlwhitcomb.util.ExceptionUtil;
+import info.rlwhitcomb.util.Intl;
 
 
 /**
@@ -380,7 +384,7 @@ public class WordFind implements Application {
             return buf.append(str);
         }
         else if (index < 0) {
-            throw new IllegalArgumentException("Negative index (except -1) not allowed.");
+            throw new Intl.IllegalArgumentException("wordfind#errNegativeIndex");
         }
         else {
             pos = index;
@@ -465,13 +469,13 @@ public class WordFind implements Application {
                 return true;
 
             if (maxIterations > 0L && permutationSet.size() >= maxIterations) {
-                System.err.printf("Aborting after %1$,d possible words checked!%n", maxIterations);
+                Intl.errFormat("wordfind#maxIterationsReached", maxIterations);
                 return false;
             }
             long currentTime = System.nanoTime();
             float secs = (float)(currentTime - startTime) / 1.0e9f;
             if (maxSeconds > 0.0f && secs >= maxSeconds) {
-                System.err.printf("Aborting after maximum time of %1$5.3f seconds!%n", secs);
+                Intl.errFormat("wordfind#maxTimeReached", secs);
                 return false;
             }
 
@@ -564,8 +568,8 @@ public class WordFind implements Application {
             mainWindow.open(display);
             lettersInput.requestFocus();
         } catch (Exception ex) {
-            System.err.println("Error: " + ExceptionUtil.toString(ex) + " from " + ex.getStackTrace()[0].toString());
-ex.printStackTrace();
+            Intl.errFormat("wordfind#exception", ExceptionUtil.toString(ex), ex.getStackTrace()[0].toString());
+            ex.printStackTrace();
         }
     }
 
@@ -582,9 +586,12 @@ ex.printStackTrace();
      * Print an error message to {@link System#err} and highlight in red when running
      * in the console, else send to the GUI error message text.
      *
-     * @param message The error message to display.
+     * @param messageKey The message key for the error to display.
+     * @param args       Any optional formatting arguments for the message.
      */
-    private static void error(final String message) {
+    private static void error(final String messageKey, final Object... args) {
+        String message = Intl.formatString(messageKey, args);
+
         if (runningOnConsole) {
             if (colored)
                 System.err.println(ConsoleColor.color(errorColor + message + RESET));
@@ -596,7 +603,7 @@ ex.printStackTrace();
     }
 
     private static void errorMissingValue(final String valueName) {
-        error("The \"--" + valueName + "\" option was specified without a value!");
+        error("wordfind#errMissingValue", valueName);
     }
 
     private static void output(final String coloredMessage) {
@@ -611,9 +618,12 @@ ex.printStackTrace();
      * Print an informational message to {@link System#out} and highlight in green when running
      * in the console, else send to the GUI information message text.
      *
-     * @param message The informational message to display.
+     * @param messageKey The key for the informational message to display.
+     * @param args       Optional format arguments for the message.
      */
-    private static void info(final String message) {
+    private static void info(final String messageKey, final Object... args) {
+        String message = Intl.formatString(messageKey, args);
+
         if (runningOnConsole) {
             outputln(infoColor + message + RESET);
         } else {
@@ -637,13 +647,18 @@ ex.printStackTrace();
         output(BLACK_BOLD_BRIGHT + message + RESET);
     }
 
-    private static void displayHelp() {
-        System.out.println("Usage: wf letters options");
-        System.out.println();
-        System.out.println("  use '-gui' option to open the GUI window.");
-        System.out.println();
-        System.out.println("(WORDFIND_OPTIONS can be set in the environment)");
-        System.out.println();
+    /**
+     * Print one of two flavors of help: one from the command line, and the other one
+     * during REPL mode, which has more detail.
+     * @param intro Display the opening help message.
+     */
+    private static void displayHelp(final boolean intro) {
+        Intl.printHelp(intro ? "wordfind#intro" : "wordfind#repl", colored);
+        if (intro) {
+            if (timings)
+                Intl.printHelp("wordfind#repl", colored);
+            Intl.printHelp("wordfind#addl", colored);
+        }
     }
 
     /**
@@ -660,7 +675,8 @@ ex.printStackTrace();
      * Process all the possible options from the command line.
      * @param prefix Which of the possible option prefixes was found (for error message).
      * @param arg The command-line argument to process.
-     * @param ignoreOptions Whether or not to ignore certain options.
+     * @param ignoreOptions Whether or not to ignore certain options, like console/GUI mode, and word file
+     * choices, which can only be processed once at startup time.
      */
     private static void processOption(final String prefix, final String arg, final boolean ignoreOptions) {
         boolean ignored = false;
@@ -674,14 +690,17 @@ ex.printStackTrace();
         } else if (matches(arg, "points", "point", "p")) {
             sortAlphabetically = false;
         } else if (matches(arg, "find", "additional", "addl", "extra", "ex", "f", "x")) {
+            findInAdditional = true;
+        } else if (matches(arg, "lowercase", "lower", "low")) {
             if (ignoreOptions)
                 ignored = true;
             else
-                findInAdditional = true;
-        } else if (matches(arg, "lowercase", "lower", "low")) {
-            lowerCase = true;
+                lowerCase = true;
         } else if (matches(arg, "uppercase", "upper", "up")) {
-            lowerCase = false;
+            if (ignoreOptions)
+                ignored = true;
+            else
+                lowerCase = false;
         } else if (matches(arg, "beginning", "begins", "begin", "starting", "starts", "start", "b", "s")) {
             beginsWith = true;
         } else if (matches(arg, "contains", "contain", "middle", "mid", "c", "m")) {
@@ -689,28 +708,16 @@ ex.printStackTrace();
         } else if (matches(arg, "ending", "ends", "end", "e")) {
             endsWith = true;
         } else if (matches(arg, "colored", "colors", "color", "col")) {
-            if (ignoreOptions)
-                ignored = true;
-            else
-                colored = true;
+            colored = true;
         } else if (matches(arg, "notcolored", "nocolors", "nocolor", "nocol", "noc")) {
-            if (ignoreOptions)
-                ignored = true;
-            else
-                colored = false;
+            colored = false;
         } else if (matches(arg, "lightbackground", "lightback", "lightbg", "light")) {
-            if (ignoreOptions)
-                ignored = true;
-            else
-                setColors(true);
+            setColors(true);
         } else if (matches(arg, "darkbackground", "darkback", "darkbg", "dark")) {
-            if (ignoreOptions)
-                ignored = true;
-            else
-                setColors(false);
+            setColors(false);
         } else if (matches(arg, "notimings", "notiming", "quiet", "not", "q")) {
             timings = false;
-        } else if (matches(arg, "timings", "timing", "verbose", "time", "t")) {
+        } else if (matches(arg, "timings", "timing", "verbose", "time", "t", "v")) {
             timings = true;
         } else if (matches(arg, "maxsize", "size", "max")) {
             needMaxSize = true;
@@ -749,19 +756,21 @@ ex.printStackTrace();
             if (ignoreOptions)
                 ignored = true;
             else {
-                Environment.printProgramInfo();
+                Environment.printProgramInfo(50, colored);
                 System.exit(0);
             }
         } else if (matches(arg, "help", "h", "?")) {
             if (ignoreOptions)
                 ignored = true;
-            else
-                displayHelp();
+            else {
+                displayHelp(true);
+                System.exit(0);
+            }
         } else {
-            error("Unknown option " + quote(prefix + arg) + " ignored!");
+            error("wordfind#errUnknownOption", quote(prefix + arg));
         }
         if (ignored) {
-            error("Option " + quote(prefix + arg) + " ignored in REPL mode!");
+            error("wordfind#errIgnoredOption", quote(prefix + arg));
         }
     }
 
@@ -811,28 +820,28 @@ ex.printStackTrace();
                 try {
                     maxIterations = Long.parseLong(arg);
                 } catch (NumberFormatException nfe) {
-                    error("Value given for \"--maxsize\" (" + arg + ") was not valid!");
+                    error("wordfind#errBadOptionValue", "maxsize", arg);
                 }
                 needMaxSize = false;
             } else if (needMaxTime) {
                 try {
                     maxSeconds = Float.parseFloat(arg);
                 } catch (NumberFormatException nfe) {
-                    error("Value give for \"--maxtime\" (" + arg + ") was not valid!");
+                    error("wordfind#errBadOptionValue", "maxtime", arg);
                 }
                 needMaxTime = false;
             } else if (needMinWordSize) {
                 try {
                     minWordSizeToReport = Integer.parseInt(arg);
                 } catch (NumberFormatException nfe) {
-                    error("Value given for \"--minwordsize\" (" + arg + ") was not valid!");
+                    error("wordfind#errBadOptionValue", "minwordsize", arg);
                 }
                 needMinWordSize = false;
             } else if (needMaxNumber) {
                 try {
                     maxNumberOfWords = Integer.parseInt(arg);
                 } catch (NumberFormatException nfe) {
-                    error("Value given for \"--maxnumber\" (" + arg + ") was not valid!");
+                    error("wordfind#errBadOptionValue", "maxnumber", arg);
                 }
                 needMaxNumber = false;
             } else {
@@ -893,7 +902,7 @@ ex.printStackTrace();
                     continue;
                 }
                 if (line.length() == 1) {
-                    info("One letter word " + quote(line));
+                    info("wordfind#infoOneLetterWord", quote(line));
                     continue;
                 }
                 // Assume the input word file is all in UPPER case...
@@ -905,16 +914,13 @@ ex.printStackTrace();
                 }
             }
         } catch (IOException ioe) {
-            error("Problem reading the " + quote(wordFile) + " file: "
-                + ExceptionUtil.toString(ioe));
+            error("wordfind#errReadingWordFile", quote(wordFile), ExceptionUtil.toString(ioe));
         }
         long endTime = System.nanoTime();
 
         if (timings) {
             float secs = (float)(endTime - startTime) / 1.0e9f;
-            String message = String.format("Dictionary %1$s has %2$,d basic and %3$,d additional words (%4$5.3f secs).",
-                quote(wordFile), wordSet.size(), addlSet.size(), secs);
-            info(message);
+            info("wordfind#infoDictionary", quote(wordFile), wordSet.size(), addlSet.size(), secs);
         }
     }
 
@@ -932,9 +938,9 @@ ex.printStackTrace();
             } else {
                 // Lookup each word on the command line to see if it is valid.
                 if (words.contains(word) || (findInAdditional && additionalWords.contains(word))) {
-                    info(arg + " is valid.");
+                    info("wordfind#infoArgValid", arg);
                 } else {
-                    error(arg + " NOT VALID!");
+                    error("wordfind#errArgNotValid", arg);
                 }
             }
         }
@@ -948,27 +954,28 @@ ex.printStackTrace();
             // See if the letters as entered are a valid word first
             String inputWord = letters.toString();
             if (words.contains(inputWord) || (findInAdditional && additionalWords.contains(inputWord))) {
-                info(inputWord + " is valid.");
+                info("wordfind#infoArgValid", inputWord);
             }
 
             StringBuilder sb = new StringBuilder();
-            sb.append("Valid words for: " + quote(letters.toString()) + (findInAdditional ? " (including additional)" : ""));
+            sb.append(Intl.formatString("wordfind#validWords", quote(letters.toString()),
+                (findInAdditional ? Intl.getString("wordfind#additional") : "")));
             if (beginningValue.isPresent()) {
                 beginningValue = beginningValue.map(caseMapper);
                 String beginsString = beginningValue.get();
-                sb.append(" beginning with " + quote(beginsString));
+                sb.append(Intl.getString("wordfind#beginningWith")).append(quote(beginsString));
                 cn = beginsString.length();
             }
             if (containsValue.isPresent()) {
                 containsValue = containsValue.map(caseMapper);
                 String containsString = containsValue.get();
-                sb.append(" containing " + quote(containsString));
+                sb.append(Intl.getString("wordfind#containing")).append(quote(containsString));
                 cn = containsString.length();
             }
             if (endingValue.isPresent()) {
                 endingValue = endingValue.map(caseMapper);
                 String endsString = endingValue.get();
-                sb.append(" ending with " + quote(endsString));
+                sb.append(Intl.getString("wordfind#endingWith")).append(quote(endsString));
                 cn = endsString.length();
             }
             heading(sb.toString());
@@ -1028,7 +1035,7 @@ ex.printStackTrace();
                 int size = wordSet.size();
                 if (size > 0) {
                     numberOfWordsFound += size;
-                    section(String.valueOf(index + 1) + " letter words (" + size + "):");
+                    section(Intl.formatString("wordfind#section", (index + 1), size));
 
                     if (minWordSizeToReport > 1 && (index + 1) < minWordSizeToReport) {
                         outputln(DOTS);
@@ -1068,16 +1075,14 @@ ex.printStackTrace();
             }
 
             if (numberOfWordsFound == 0)
-                error("Unable to find any valid words!");
+                error("wordfind#errNoValidWords");
 
             long endTime = System.nanoTime();
 
             if (timings) {
                 float secs = (float)(endTime - startTime) / 1.0e9f;
                 int wordsChecked = permutationSet.size() * (containsValue.isPresent() ? n : 1);
-                String message = String.format("(Lookup time %1$,5.3f seconds; %2$,d valid words out of %3$,d tested)",
-                        secs, numberOfWordsFound, wordsChecked);
-                info(message);
+                info("wordfind#infoLookup", secs, numberOfWordsFound, wordsChecked);
             }
         }
     }
@@ -1114,13 +1119,13 @@ ex.printStackTrace();
                     case ":help":
                     case ":h":
                     case ":?":
-                        displayHelp();
+                        displayHelp(false);
                         continue replLoop;
                     case ":version":
                     case ":vers":
                     case ":ver":
                     case ":v":
-                        Environment.printProgramInfo();
+                        Environment.printProgramInfo(50, colored);
                         continue replLoop;
                     default:
                         if (cmd.startsWith("#") || cmd.startsWith("!") || cmd.startsWith("//"))

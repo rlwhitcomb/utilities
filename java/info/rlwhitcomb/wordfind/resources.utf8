@@ -1,0 +1,108 @@
+#
+# The MIT License (MIT)
+#
+# Copyright (c) 2021 Roger L. Whitcomb.
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+#
+#       Internationalizable strings for the info.rlwhitcomb.wordfind code.
+#
+# History:
+#       27-Aug-2021 (rlwhitcomb)
+#           Moved into here from the .java file.
+#
+
+errNegativeIndex	= Negative index (except -1) not allowed.
+maxIterationsReached	= Aborting after %1$,d possible words checked!%n
+maxTimeReached		= Aborting after maximum time of %1$5.3f seconds!%n
+exception		= Error: %1$s from %2$s%n
+
+validWords		= Valid words for: %1$s%2$s
+additional		= " (including additional)"
+beginningWith		= " beginning with "
+containing		= " containing "
+endingWith		= " ending with "
+section			= %1$d letter words (%2$d):
+
+errMissingValue		= The "--%1$s" option was specified without a value!
+errUnknownOption	= Unknown option %1$s ignored!
+errIgnoredOption	= Option %1$s ignored in REPL mode!
+errBadOptionValue	= Value given for "--%1$s" (%2$s) was not valid!
+errReadingWordFile	= Problem reading the %1$s file: %2$s
+errArgNotValid		= %1$s NOT VALID!
+errNoValidWords		= Unable to find any valid words!
+
+infoOneLetterWord	= One letter word %1$s
+infoDictionary		= Dictionary %1$s has %2$,d basic and %3$,d additional words (%4$5.3f secs).
+infoLookup		= (Lookup time %1$,5.3f seconds; %2$,d valid words out of %3$,d tested)
+infoArgValid		= %1$s is valid.
+
+intro.help1	= Usage: wf [ letters ] [ options ]
+intro.help2	= ""
+intro.help3	= "  use '-gui' option to open the GUI window."
+intro.help4	= ""
+intro.help5	= (WORDFIND_OPTIONS can be set in th environment)
+intro.help6	= ""
+intro.help7	= For one-time use, the letters and options are given on the command line.
+intro.help8	= If no letters are given on the command line, then we enter REPL mode.
+intro.help9	= ""
+
+repl.help1	= In REPL mode, each line can contain the letters to use plus any options.
+repl.help2	= ""
+repl.help3	= If no letters are given the previous letters are used; this can be
+repl.help4	= useful when testing a bunch of beginning/ending/containing options
+repl.help5	= with the same set of letters.
+repl.help6	= ""
+repl.help7	= The possible options are:
+repl.help8	= ""
+repl.help9	= "  -letters, -letter, -l\t\tuse \"letter\" mode"
+repl.help10	= "  -words, -word, -w\t\tuse \"word\" mode"
+repl.help11	= "  -alpha, -atoz, -a\t\tsort the results alphabetically"
+repl.help12	= "  -points, -point, -p\t\tsort the result by point values"
+repl.help13	= "  -find, -additional, -addl, -extra, -ex, -f, -x\tsearch in the additional words list also"
+repl.help14	= "  -beginning, -begins, -begin, -starting, -starts, -start, -b, -s\tresults must start with ..."
+repl.help15	= "  -contains, -contain, -middle, -mid, -c, -m\t\t\t\tresults must contain ..."
+repl.help16	= "  -ending, -ends, -end, -e\t\t\t\t\t\tresults must end with ..."
+repl.help17	= "  -colored, -colors, -color, -col\t\t\tuse colors to highlight the results"
+repl.help18	= "  -notcolored, -nocolors, -nocolor, -nocol, -noc\tdon't, just don't"
+repl.help19	= "  -lightbackground, -lightback, -lightbg, -light\tuse colors for a light window background"
+repl.help20	= "  -darkbackground, -darkback, -darkbg, -dark\t\tuse colors for a dark window background"
+repl.help21	= "  -timings, -timing, -verbose, -time, -t, -v\tshow lookup timing"
+repl.help22	= "  -notimings, -notiming, -quiet, -not, -q\tdon't show the timings"
+repl.help23	= "  -maxsize, -size, -max\t\t\t\tset the maximum number of combinations to check\n\t\t\t\t\t\t  before stopping the search"
+repl.help24	= "  -maxtime, -maxseconds, -maxsecs, -time, -seconds, -secs\n\t\t\t\t\t\tset the maximum amount of time to use for the search"
+repl.help25	= "  -minwordsize, -minword, -minsize, -min\tset the minimum length of word to display in the results"
+repl.help26	= "  -maxnumberwords, -maxnumber, -maxwords\tset the maximum number of words of each length to display"
+repl.help27	= ""
+
+addl.help1	= Additional options available only on the command line:
+addl.help2	= ""
+addl.help3	= "  -console, -con\t\t\tstartup in console (not GUI) mode"
+addl.help4	= "  -window, -win, -gui, -g\t\tstartup in GUI mode"
+addl.help5	= "  -default, -twl06a, -def, -d\t\t\tuse the default word file"
+addl.help6	= "  -original, -twl06, -orig, -o\t\t\tuse the original word file"
+addl.help7	= "  -antique, -enable1, -enable, -ant, -en\tuse the antique word file"
+addl.help8	= "  -lowercase, -lower, -low\t\tdisplay the results in lowercase"
+addl.help9	= "  -uppercase, -upper, -up\t\tdisplay the results in UPPERCASE"
+addl.help10	= ""
+addl.help11	= "  -version, -vers, -ver, -v\tdisplay the program version and quit"
+addl.help12	= "  -help, -h, -?\t\t\tdisplay this help message"
+addl.help13	= "     (use \"-verbose\" or \"-v\" to display all the possible options)"
+addl.help14	= ""
+

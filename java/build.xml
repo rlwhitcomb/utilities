@@ -246,6 +246,8 @@
 		"dist" is actually "../dist" in here.
 		Add another progress message for the "verify_calc" step.
 		Get the values for "verify_calc" from the build.properties file.
+	    26-Aug-2021 (rlwhitcomb)
+		Text resources for WordFind.
 
      ========================================================================== -->
 
@@ -454,6 +456,7 @@
 			<generate-text-resources dir="info/rlwhitcomb/tester" />
 			<generate-text-resources dir="info/rlwhitcomb/tree" />
 			<generate-text-resources dir="info/rlwhitcomb/util" />
+			<generate-text-resources dir="info/rlwhitcomb/wordfind" />
 			<sequential>
 				<preproc dir="info/rlwhitcomb/calc" inputExt=".htmlpp"
 					processAsDirectory="true" recurseDirectories="false"
@@ -566,9 +569,11 @@
 			<include name="info/rlwhitcomb/util/*.class"/>
 			<include name="info/rlwhitcomb/wordfind/*.class"/>
 			<include name="info/rlwhitcomb/wordfind/*.bxml"/>
+			<include name="info/rlwhitcomb/wordfind/*.json"/>
 			<include name="info/rlwhitcomb/wordfind/*.txt"/>
 			<exclude name="info/rlwhitcomb/wordfind/enable1.txt"/>
-			<include name="info/rlwhitcomb/**/*.properties"/>
+			<include name="info/rlwhitcomb/**/logging*.properties"/>
+			<include name="info/rlwhitcomb/**/resources*.properties"/>
 			<include name="de/onyxbits/*.class"/>
 			<include name="name/fraser/neil/plaintext/*.class"/>
 			<include name="net/iharder/b64/*.class"/>
