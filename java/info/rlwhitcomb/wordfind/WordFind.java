@@ -752,7 +752,7 @@ public class WordFind implements Application {
                 ignored = true;
             else
                 wordFile = WORD_FILE_ANTIQUE;
-        } else if (matches(arg, "version", "vers", "ver", "v")) {
+        } else if (matches(arg, "version", "vers", "ver")) {
             if (ignoreOptions)
                 ignored = true;
             else {

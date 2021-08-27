@@ -26,6 +26,7 @@
 # History:
 #       27-Aug-2021 (rlwhitcomb)
 #           Moved into here from the .java file.
+#	    "-v" is only for "-verbose", not "-version"
 #
 
 errNegativeIndex	= Negative index (except -1) not allowed.
@@ -101,7 +102,7 @@ addl.help7	= "  -antique, -enable1, -enable, -ant, -en\tuse the antique word fil
 addl.help8	= "  -lowercase, -lower, -low\t\tdisplay the results in lowercase"
 addl.help9	= "  -uppercase, -upper, -up\t\tdisplay the results in UPPERCASE"
 addl.help10	= ""
-addl.help11	= "  -version, -vers, -ver, -v\tdisplay the program version and quit"
+addl.help11	= "  -version, -vers, -ver\t\tdisplay the program version and quit"
 addl.help12	= "  -help, -h, -?\t\t\tdisplay this help message"
 addl.help13	= "     (use \"-verbose\" or \"-v\" to display all the possible options)"
 addl.help14	= ""
