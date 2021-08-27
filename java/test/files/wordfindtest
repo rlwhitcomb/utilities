@@ -1,0 +1,16 @@
+:testClass info.rlwhitcomb.wordfind.WordFind
+
+:inputDir test/canons
+:defaultOptions -nocolor -maxtime 0 -notimings -maxwords 0 -maxwidth 100
+
+:echo Tests of WordFind functionality...
+:echo
+
+fatherly: fatherly
+hunger: hunger
+painful: painful
+politics: politics
+frame: frame.
+
+:echo
+:echo Done with WordFind tests.

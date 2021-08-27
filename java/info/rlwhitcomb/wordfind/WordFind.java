@@ -81,6 +81,7 @@
  *      27-Aug-2021 (rlwhitcomb)
  *          Allow some more directives in REPL mode.
  *          Move all the text to resources file.
+ *          Add "-maxlinelength" option for automated testing.
  */
 package info.rlwhitcomb.wordfind;
 
@@ -211,6 +212,8 @@ public class WordFind implements Application {
     private static boolean needMaxNumber = false;
     /** Maximum numbers of words of each size to report (normally all: {@code <= 0}). */
     private static int maxNumberOfWords = 0;
+    /** Whether or not the next value is supposed to be the max line length. */
+    private static boolean needMaxLineLength = false;
     /** The format string for final output of the words. */
     private static final String WORD_FORMAT = "%1$s%2$s " + BLACK_BRIGHT + "(%3$3d)" + RESET;
     /** Continuation. */
@@ -727,6 +730,8 @@ public class WordFind implements Application {
             needMinWordSize = true;
         } else if (matches(arg, "maxnumberwords", "maxnumber", "maxwords")) {
             needMaxNumber = true;
+        } else if (matches(arg, "maxlinelength", "maxwidth", "width", "wid")) {
+            needMaxLineLength = true;
         } else if (matches(arg, "console", "con")) {
             if (ignoreOptions)
                 ignored = true;
@@ -798,6 +803,7 @@ public class WordFind implements Application {
         needMaxTime = false;
         needMinWordSize = false;
         needMaxNumber = false;
+        needMaxLineLength = false;
 
         // Process all options first before regular word/letter arguments
         for (String arg : args) {
@@ -844,6 +850,13 @@ public class WordFind implements Application {
                     error("wordfind#errBadOptionValue", "maxnumber", arg);
                 }
                 needMaxNumber = false;
+            } else if (needMaxLineLength) {
+                try {
+                    maxLineLength = Integer.parseInt(arg);
+                } catch (NumberFormatException nfe) {
+                    error("wordfind#errBadOptionValue", "maxlinelength", arg);
+                }
+                needMaxLineLength = false;
             } else {
                 if (nonOptions != null) {
                     if (totalInputSize == 0)
@@ -869,6 +882,8 @@ public class WordFind implements Application {
             errorMissingValue("minwordsize");
         if (needMaxNumber)
             errorMissingValue("maxnumber");
+        if (needMaxLineLength)
+            errorMissingValue("maxlinelength");
 
         // Set other values that depend on the options specified.
         alphaStart = lowerCase ? 'a' : 'A';

@@ -1,0 +1,16 @@
+====================================
+Running wordfindtest...
+------------------------------------
+Tests of WordFind functionality...
+
+Test 'fatherly': Passed
+Test 'hunger': Passed
+Test 'painful': Passed
+Test 'politics': Passed
+Test 'frame': Passed
+
+Done with WordFind tests.
+------------------------------------
+Ran 5 tests: 5 passed, 0 failed.
+====================================
+

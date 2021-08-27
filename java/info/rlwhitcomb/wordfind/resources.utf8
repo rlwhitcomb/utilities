@@ -27,6 +27,7 @@
 #       27-Aug-2021 (rlwhitcomb)
 #           Moved into here from the .java file.
 #	    "-v" is only for "-verbose", not "-version"
+#	    Add "-maxlinelength" option.
 #
 
 errNegativeIndex	= Negative index (except -1) not allowed.
@@ -90,7 +91,8 @@ repl.help23	= "  -maxsize, -size, -max\t\t\t\tset the maximum number of combinat
 repl.help24	= "  -maxtime, -maxseconds, -maxsecs, -time, -seconds, -secs\n\t\t\t\t\t\tset the maximum amount of time to use for the search"
 repl.help25	= "  -minwordsize, -minword, -minsize, -min\tset the minimum length of word to display in the results"
 repl.help26	= "  -maxnumberwords, -maxnumber, -maxwords\tset the maximum number of words of each length to display"
-repl.help27	= ""
+repl.help27	= "  -maxlinelength, -maxwidth, -width, -wid\tset the maximum line width for wrapping the display"
+repl.help28	= ""
 
 addl.help1	= Additional options available only on the command line:
 addl.help2	= ""
