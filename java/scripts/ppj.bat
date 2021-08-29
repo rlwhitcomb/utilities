@@ -1,3 +1,3 @@
 @echo off
-call lists -single -post "@j" %* | call c
+call lists -single -post "@j" %* | call c -results
 

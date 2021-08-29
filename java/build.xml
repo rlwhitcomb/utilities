@@ -248,6 +248,8 @@
 		Get the values for "verify_calc" from the build.properties file.
 	    26-Aug-2021 (rlwhitcomb)
 		Text resources for WordFind.
+	    29-Aug-2021 (rlwhitcomb)
+		Add "ppj" wrapper scripts.
 
      ========================================================================== -->
 
@@ -396,6 +398,8 @@
 		<include name="mkcanon.bat"                 if:true="${on.windows}"/>
 		<include name="os"                      unless:true="${on.windows}"/>
 		<include name="os.bat"                      if:true="${on.windows}"/>
+		<include name="ppj"                     unless:true="${on.windows}"/>
+		<include name="ppj.bat"                     if:true="${on.windows}"/>
 		<include name="sha256"                  unless:true="${on.windows}"/>
 		<include name="sha256.bat"                  if:true="${on.windows}"/>
 		<include name="sha512"                  unless:true="${on.windows}"/>
