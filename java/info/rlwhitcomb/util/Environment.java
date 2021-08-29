@@ -150,6 +150,8 @@
  *	    Display screen size in the environment list; tweak the colors.
  *	08-Aug-2021 (rlwhitcomb)
  *	    Use box-drawing character to color display of program info.
+ *	29-Aug-2021 (rlwhitcomb)
+ *	    Trap errors from "stty" if we're running headless (as in CI builds).
  */
 package info.rlwhitcomb.util;
 
@@ -962,6 +964,8 @@ public final class Environment
 	 * and height of the console.
 	 */
 	public static Dimension consoleSize() {
+	    Dimension defaultSize = new Dimension(80, 25);
+
 	    try {
 		File f = FileUtilities.createTempFile("size");
 		ProcessBuilder pb;
@@ -990,20 +994,27 @@ public final class Environment
 		else {
 		    pb = new ProcessBuilder(
 			"stty",
-			"size").inheritIO().redirectOutput(f);
+			"size").inheritIO().redirectOutput(f).redirectErrorStream(true);
 		}
 		pb.start().waitFor();
 
-		String[] sizes = FileUtilities.readFileAsString(f).split("\\s+");
+		String outputStream = FileUtilities.readFileAsString(f);
 
 		if (!f.delete())
 		    f.deleteOnExit();
 
+		if (!osIsWindows) {
+		    if (outputStream.indexOf("Inappropriate ioctl for device") >= 0) {
+			return defaultSize;
+		    }
+		}
+
+		String[] sizes = outputStream.split("\\s+");
 		return new Dimension(Integer.valueOf(sizes[1]), Integer.valueOf(sizes[0]));
 	    }
 	    catch (Exception ex) {
 		// If we can't determine the dimensions, return a default size
-		return new Dimension(80, 25);
+		return defaultSize;
 	    }
 	}
 
