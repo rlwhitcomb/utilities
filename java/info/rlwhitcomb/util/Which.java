@@ -41,6 +41,9 @@
  *	    New program info mechanism.
  *	21-Jan-2021 (rlwhitcomb)
  *	    Move "canExecute" into FileUtilities, and beef it up for Windows.
+ *	30-Aug-2021 (rlwhitcomb)
+ *	    Set program exit code to 1 if nothing found. Put the main logic
+ *	    into a method "which" can be called from anywhere.
  */
 package info.rlwhitcomb.util;
 
@@ -59,6 +62,27 @@ import java.io.File;
  */
 public class Which
 {
+	/**
+	 * An enumeration of the possible outcomes / things to be done from the
+	 * main {@link #which} processing.
+	 */
+	public static enum Result
+	{
+		/** One or more executables were found, and their information displayed. */
+		SUCCESS,
+		/** Print the program version information. */
+		VERSION,
+		/** There was an unknown option given. */
+		UNKNOWN,
+		/** There was a format error in the options. */
+		MALFORMED,
+		/** There were no names listed in the arguments. */
+		EMPTY,
+		/** There were no executables found to match the listed names. */
+		NOTFOUND
+	}
+
+
 	/** Default path directories. */
 	private static final String DEFAULT_PATH = System.getenv("PATH");
 	/** Default list of executable extensions -- Windows only. */
@@ -69,8 +93,20 @@ public class Which
 	private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("MMM dd,yyyy hh:mm:ss a (z)");
 	/** Split pattern for path string (platform dependent). */
 	private static final String SPLIT_PATTERN = "[" + Environment.pathSeparator() + "]";
+	/** Are we running in a Windows environment? */
+	private static final boolean ON_WINDOWS = Environment.isWindows();
 
 
+	/**
+	 * Attempt to find an executable with the given name in the target directory, given
+	 * the list of executable file extensions to try.
+	 *
+	 * @param name	Name of the executable to find.
+	 * @param dir	Directory to search in.
+	 * @param exts	List of file name extensions to try.
+	 * @return	The file object if found, or <code>null</code> otherwise.
+	 * @see FileUtilities#canExecute
+	 */
 	private static File findInDir(String name, File dir, String[] exts) {
 	    if (dir.exists() && dir.isDirectory() && dir.canRead()) {
 		File f = new File(dir, name);
@@ -135,11 +171,22 @@ public class Which
 		    return file;
 		}
 	    }
+
 	    return null;
 	}
 
+	/**
+	 * Attempt to find all the executables that match the given name in the target directory.
+	 *
+	 * @param name	Name of the executable(s) to find.
+	 * @param dir	Target directory to look in.
+	 * @param exts	List of file name extensions to try if the name itself isn't found.
+	 * @return	The possibly empty list of executables found to match.
+	 * @see FileUtilities#canExecute
+	 */
 	private static List<File> findAllInDir(String name, File dir, String[] exts) {
 	    List<File> files = new ArrayList<>();
+
 	    if (dir.exists() && dir.isDirectory() && dir.canRead()) {
 		File f = new File(dir, name);
 		// First try the name as-is
@@ -159,6 +206,7 @@ public class Which
 		    }
 		}
 	    }
+
 	    return files;
 	}
 
@@ -206,7 +254,9 @@ public class Which
 	 */
 	public static String getFileTimeString(File f) {
 	    Date fileTime = new Date(f.lastModified());
-	    return DATE_FORMAT.format(fileTime);
+	    synchronized(DATE_FORMAT) {
+		return DATE_FORMAT.format(fileTime);
+	    }
 	}
 
 	private static void showFileInfo(String name, File f, boolean showTarget, boolean showMore) {
@@ -219,15 +269,19 @@ public class Which
 	}
 
 	/**
-	 * Provide a main program in here so we can test from the command line.
-	 * @param args	The parsed command line arguments.
+	 * The guts of the "which" algorithm: process the command line arguments
+	 * (names and options) and produce the report.
+	 *
+	 * @param args	The parsed command line arguments (names and options).
+	 * @return	One of the status enum values indicating the result and/or
+	 *		action to be taken by the caller.
 	 */
-	public static void main(String[] args) {
+	public static Result which(String[] args) {
 	    boolean findAll = false;
 	    boolean showInfo = false;
-	    List<String> names = new ArrayList<>(args.length);
+	    boolean quiet = false;
 
-	    Environment.loadProgramInfo(Which.class);
+	    List<String> names = new ArrayList<>(args.length);
 
 	    // Evaluate all the options first
 	    for (String arg : args) {
@@ -238,13 +292,16 @@ public class Which
 		    else if (Options.matchesOption(arg, "show", "s")) {
 			showInfo = true;
 		    }
+		    else if (Options.matchesOption(arg, "quiet", "q")) {
+			quiet = true;
+		    }
 		    else if (Options.matchesOption(arg, true, "version", "vers", "ver", "v")) {
-			Environment.printProgramInfo();
-			return;
+			return Result.VERSION;
 		    }
 		    else {
-			Intl.errFormat("util#which.unknownOption", arg);
-			System.exit(1);
+			if (!quiet)
+			    Intl.errFormat("util#which.unknownOption", arg);
+			return Result.UNKNOWN;
 		    }
 		}
 		else {
@@ -252,32 +309,70 @@ public class Which
 		}
 	    }
 
+	    if (names.isEmpty())
+		return Result.EMPTY;
+
 	    boolean showTargetNameFirst = names.size() > 1;
+	    boolean foundAny = false;
 
 	    // Then evaluate the names one at a time
+	nameLoop:
 	    for (String name : names) {
 		// On Windows the first place to look is the current directory
-		if (Environment.isWindows()) {
+		if (ON_WINDOWS) {
 		    File f = findExecutable(name, CURRENT_DIR);
 		    if (f != null) {
-			showFileInfo(name, f, showTargetNameFirst, showInfo);
+			if (!quiet)
+			    showFileInfo(name, f, showTargetNameFirst, showInfo);
+			foundAny = true;
 			if (!findAll)
-			    return;
+			    break nameLoop;
 		    }
 		}
 
 		if (findAll) {
 		    for (File f : findAllExecutables(name)) {
-			showFileInfo(name, f, showTargetNameFirst, showInfo);
+			if (!quiet)
+			    showFileInfo(name, f, showTargetNameFirst, showInfo);
+			foundAny = true;
 		    }
 		}
 		else {
 		    File f = findExecutable(name);
 		    if (f != null) {
-			showFileInfo(name, f, showTargetNameFirst, showInfo);
+			if (!quiet)
+			    showFileInfo(name, f, showTargetNameFirst, showInfo);
+			foundAny = true;
 		    }
 		}
 	    }
+
+	    return foundAny ? Result.SUCCESS : Result.NOTFOUND;
+	}
+
+	/**
+	 * Provide a main program in here so we can test from the command line.
+	 * @param args	The parsed command line arguments.
+	 */
+	public static void main(String[] args) {
+	    Environment.loadProgramInfo(Which.class);
+
+	    Result result = which(args);
+	    switch (result) {
+		case SUCCESS:
+		case EMPTY:
+		    return;
+		case VERSION:
+		    Environment.printProgramInfo();
+		    break;
+		case UNKNOWN:
+		case MALFORMED:
+		case NOTFOUND:
+		    break;
+	    }
+
+	    // Anything but a SUCCESS or EMPTY result will set the program exit code
+	    System.exit(1);
 	}
 
 }
