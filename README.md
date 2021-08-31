@@ -58,7 +58,6 @@ Also see "issues" at https://github.com/rlwhitcomb/utilities/issues
 
 ### Shell invoker
 - Option to "boiler" to create this thing (along with the path/class)
-- Figure out a location to put these wrapper scripts (in "bat" folder? or root? or along with the Java source?)
 
 ### Boilerplate program
 - Name should be "boiler"
@@ -118,8 +117,6 @@ define a($b, $c, $d) = { $f = blah; ... }
 
 ### WordFind
 - Finish the GUI code.
-- options to limit the number of words displayed, and how small to go in displaying words
-  (in other words, only give me the top 20 in each length, and only show me words with 4 letters or more)
 - need some kind of filter to UPPER case everything, limit input to only letters and blank, and turn blank into ?
   (probably needs to go into Pivot code)
 
