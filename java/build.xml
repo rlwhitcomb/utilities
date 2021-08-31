@@ -250,6 +250,8 @@
 		Text resources for WordFind.
 	    29-Aug-2021 (rlwhitcomb)
 		Add "ppj" wrapper scripts.
+	    30-Aug-2021 (rlwhitcomb)
+		Add "timethis" wrapper scripts.
 
      ========================================================================== -->
 
@@ -408,6 +410,8 @@
 		<include name="sleep.bat"                   if:true="${on.windows}"/>
 		<include name="tester"                  unless:true="${on.windows}"/>
 		<include name="tester.bat"                  if:true="${on.windows}"/>
+		<include name="timethis"                unless:true="${on.windows}"/>
+		<include name="timethis.bat"                if:true="${on.windows}"/>
 		<include name="tre"                     unless:true="${on.windows}"/>
 		<include name="tre.bat"                     if:true="${on.windows}"/>
 		<include name="version"                 unless:true="${on.windows}"/>
