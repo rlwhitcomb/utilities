@@ -93,6 +93,11 @@ repl.help25	= "  -minwordsize, -minword, -minsize, -min\tset the minimum length 
 repl.help26	= "  -maxnumberwords, -maxnumber, -maxwords\tset the maximum number of words of each length to display"
 repl.help27	= "  -maxlinelength, -maxwidth, -width, -wid\tset the maximum line width for wrapping the display"
 repl.help28	= ""
+repl.help29	= There are also a few commands available in this mode:
+repl.help30	= "  :help, :h, :?\t\t\tdisplay this help text"
+repl.help31	= "  :version, :vers, :ver, :v\tdisplay the program version information"
+repl.help32	= "  :quit, :exit, :q, :x\t\tleave the program"
+repl.help33	= ""
 
 addl.help1	= Additional options available only on the command line:
 addl.help2	= ""
