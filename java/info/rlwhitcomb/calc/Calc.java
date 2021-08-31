@@ -186,6 +186,8 @@
  *	    Actually ... the best font on Windows is MONOSPACED.
  *	25-Aug-2021 (rlwhitcomb)
  *	    Implement arguments on the command line.
+ *	31-Aug-2021 (rlwhitcomb)
+ *	    Regularize reading files, whether from the command line or the GUI file browser.
  */
 package info.rlwhitcomb.calc;
 
@@ -961,21 +963,13 @@ public class Calc
 			try {
 			    for (int i = 0; i < selectedFiles.getLength(); i++) {
 				File f = selectedFiles.get(i);
-				String fileText = "";
-				try {
-				    fileText = FileUtilities.readFileAsString(f);
-				}
-				catch (IOException ioe) {
-				    // We're gonna bet the problem is the charset
-				    fileText = FileUtilities.readFileAsString(f, StandardCharsets.UTF_8);
-				}
 				if (selectedFiles.getLength() > 1) {
 				    String filePath = f.getPath();
 				    CharUtil.padToWidth(buf, "#", filePath.length() + 3, '-').append('\n');
 				    buf.append("# ").append(filePath).append('\n');
 				    CharUtil.padToWidth(buf, "#", filePath.length() + 3, '-').append("\n\n");
 				}
-				buf.append(fileText).append('\n');
+				readFile(f, buf);
 			    }
 			}
 			catch (IOException ioe) {
@@ -1101,43 +1095,84 @@ public class Calc
 	    return buf.toString();
 	}
 
-	private static void concatLines(StringBuilder buf, List<String> lines) {
-	    for (String line : lines) {
-		buf.append(line).append(LINESEP);
-	    }
-	}
-
+	/**
+	 * Read the contents of one file and append to the buffer, if the file
+	 * can be found as given, and is readable. Initially the file is read
+	 * using the platform default charset, but if an error occurs we attempt
+	 * to use UTF-8 instead (which we assume will work). This is not ideal
+	 * since Windows-1252 basically accepts any byte sequence, so we probably
+	 * wouldn't get things right on Windows with a real UTF-8 encoded file.
+	 *
+	 * @param f		The file path to read (no other location is attempted).
+	 * @param inputBuf	The buffer to append the file contents to.
+	 * @return		Whether or not the file could be found and was readable.
+	 * @throws IOException if there was a problem reading the existing file.
+	 */
 	private static boolean readFile(File f, StringBuilder inputBuf)
 		throws IOException
 	{
-	    if (f.exists() && f.isFile() && f.canRead()) {
+	    if (FileUtilities.canRead(f)) {
 		inputDirectory = f.getCanonicalFile().getParentFile();
-		List<String> lines = Files.readAllLines(f.toPath());
-		concatLines(inputBuf, lines);
+		String fileText = "";
+		try {
+		    fileText = FileUtilities.readFileAsString(f);
+		}
+		catch (IOException ioe) {
+		    // We're gonna bet the problem is the charset
+		    fileText = FileUtilities.readFileAsString(f, StandardCharsets.UTF_8);
+		}
+		inputBuf.append(fileText).append(LINESEP);
 		return true;
 	    }
 	    return false;
 	}
 
+	/**
+	 * Take the input as a delimited string of file names/paths and try to
+	 * read all of them in. If the path does not exist as given, then try to
+	 * find it using the latest {@link #inputDirectory} value. But, if any
+	 * of the potential files cannot be found, then take the entire input
+	 * string as a single expression and return that instead.
+	 *
+	 * @param paths	A possible list of file names/paths separated by either
+	 *		comma or semicolon.
+	 * @return	Either the contents of all the files listed, if found,
+	 *		or the <code>paths</code> string itself as an expression.
+	 * @throws	IOException if there was an error trying to read the files
+	 *		that exist (obviously if the files do not exist this is
+	 *		not an "error" condition per se).
+	 */
 	public static String getFileContents(String paths)
 		throws IOException
 	{
+	    /* We must be able to read all the files listed, or else the input
+	     * is treated as a single expression.
+	     */
+	    boolean unableToRead = false;
 	    StringBuilder inputBuf = new StringBuilder();
-	    String[] files = paths.split(",");
+
+	    String[] files = paths.split("[,;]");
 	    for (String file : files) {
 		File f = new File(file);
 		if (!readFile(f, inputBuf)) {
 		    if (inputDirectory != null) {
 			f = new File(inputDirectory, file);
 			if (!readFile(f, inputBuf)) {
-			    inputBuf.append(file).append(LINESEP);
+			    unableToRead = true;
+			    break;
 			}
 		    }
 		    else {
-			inputBuf.append(file).append(LINESEP);
+			unableToRead = true;
+			break;
 		    }
 		}
 	    }
+	    if (unableToRead) {
+		inputBuf.setLength(0);
+		inputBuf.append(paths).append(LINESEP);
+	    }
+
 	    return inputBuf.toString();
 	}
 
