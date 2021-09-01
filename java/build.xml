@@ -252,6 +252,9 @@
 		Add "ppj" wrapper scripts.
 	    30-Aug-2021 (rlwhitcomb)
 		Add "timethis" wrapper scripts.
+	    01-Sep-2021 (rlwhitcomb)
+		Change the order of targets for "all-install" so that the install part
+		happens before test, because testing should use the newly built code.
 
      ========================================================================== -->
 
@@ -730,7 +733,7 @@
 		<echo message="Variable UTILITIES_HOME is not set in the environment!" unless:true="${utilities.available}"/>
 	</target>
 
-	<target name="all-install" depends="all,copy-to-install-directory" description="Does 'all' + 'copy-to-install-directory'; this is the highest level target."/>
+	<target name="all-install" depends="clean,compile,jar,doc,copy-to-install-directory,test" description="Does 'all' + 'copy-to-install-directory'; this is the highest level target."/>
 
 	<target name="update" depends="touch,compile,jar,copy-to-install-directory" description="Simple incremental build and update the installed .jar file."/>
 
