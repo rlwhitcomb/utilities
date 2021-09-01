@@ -92,6 +92,8 @@
  *	Add another flavor of "readFileAsString".
  *    24-Aug-2021 (rlwhitcomb)
  *	Tweak some of the Javdoc.
+ *    01-Sep-2021 (rlwhitcomb)
+ *	Deal with InvalidPathExceptions in the "canRead" / "canWrite" methods.
  */
 package info.rlwhitcomb.util;
 
@@ -107,6 +109,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CodingErrorAction;
 import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
@@ -483,7 +486,12 @@ public final class FileUtilities
      * @see	#canReadPath
      */
     public static boolean canRead(File file) {
-	return canReadPath(file.toPath(), false);
+	try {
+	    return canReadPath(file.toPath(), false);
+	}
+	catch (InvalidPathException ipe) {
+	    return false;
+	}
     }
 
     /**
@@ -495,7 +503,12 @@ public final class FileUtilities
      * @see	#canReadPath
      */
     public static boolean canReadDir(File dir) {
-	return canReadPath(dir.toPath(), true);
+	try {
+	    return canReadPath(dir.toPath(), true);
+	}
+	catch (InvalidPathException ipe) {
+	    return false;
+	}
     }
 
     /**
@@ -556,23 +569,28 @@ public final class FileUtilities
      * @return		Whether or not the file permissions include write access for this file.
      */
     public static boolean canWrite(File file) {
-	Path path = file.toPath();
-	if (Environment.isWindows()) {
-	    return Files.isWritable(path);
+	try {
+	    Path path = file.toPath();
+	    if (Environment.isWindows()) {
+		return Files.isWritable(path);
+	    }
+	    else {
+		// TODO: we need to follow down the parent path and check these permissions at each level
+		try {
+		    Map<String, Object> attrs = Files.readAttributes(path, "posix:permissions");
+		    @SuppressWarnings("unchecked")
+		    Set<PosixFilePermission> permissions = (Set<PosixFilePermission>)attrs.get("permissions");
+		    return permissions.contains(PosixFilePermission.OTHERS_WRITE)
+			|| permissions.contains(PosixFilePermission.GROUP_WRITE)
+			|| permissions.contains(PosixFilePermission.OWNER_WRITE);
+		}
+		catch (IOException ioe) {
+		    return false;
+		}
+	    }
 	}
-	else {
-	    // TODO: we need to follow down the parent path and check these permissions at each level
-	    try {
-		Map<String, Object> attrs = Files.readAttributes(path, "posix:permissions");
-		@SuppressWarnings("unchecked")
-		Set<PosixFilePermission> permissions = (Set<PosixFilePermission>)attrs.get("permissions");
-		return permissions.contains(PosixFilePermission.OTHERS_WRITE)
-		    || permissions.contains(PosixFilePermission.GROUP_WRITE)
-		    || permissions.contains(PosixFilePermission.OWNER_WRITE);
-	    }
-	    catch (IOException ioe) {
-		return false;
-	    }
+	catch (InvalidPathException ipe) {
+	    return false;
 	}
     }
 
