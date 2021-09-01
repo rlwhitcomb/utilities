@@ -70,6 +70,8 @@
 #	    New error for converting int to codepoint.
 #	25-Aug-2021 (rlwhitcomb)
 #	    New error message for attempted assignments to the global arguments.
+#	01-Sep-2021 (rlwhitcomb)
+#	    Error for bad input charset.
 #
 
 #
@@ -95,6 +97,7 @@ noOptionValue	= <e>Value for %1$s option was not given.<r>
 unknownOption	= Unknown option "<v>%1$s<r>"; ignoring.
 inOutError	= <e>I/O Error: %1$s<r>
 argError	= Error: %1$s
+charsetError	= Problem with character set "<v>%1$s<>": <e>%2$s<r>
 timing		= Elapsed time %1$11.9f seconds.
 syntaxError	= Syntax error at position %1$d: %2$s
 errorNoAlt	= Syntax error at position %1$d: no viable alternative at input '%2$s'

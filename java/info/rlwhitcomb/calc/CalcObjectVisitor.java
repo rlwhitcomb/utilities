@@ -327,6 +327,8 @@
  *	    Add "setArgument" for global variables.
  *	26-Aug-2021 (rlwhitcomb)
  *	    Add number constant conversion, and "isnull" function.
+ *	01-Sep-2021 (rlwhitcomb)
+ *	    Attempt to convert global variables to numbers if possible, otherwise leave as strings.
  */
 package info.rlwhitcomb.calc;
 
@@ -519,8 +521,23 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 	}
 
+	/**
+	 * Set one of the global argument variables ({@code $0}, {@code $1}, etc)
+	 * to the given value.
+	 *
+	 * @param index	The zero-based index for the variable.
+	 * @param arg	The argument value, which will be parsed and set as a numeric value
+	 *		if it successfully parses as a {@link BigDecimal}, otherwise it
+	 *		will be set as a string.
+	 */
 	public void setArgument(int index, String arg) {
-	    variables.put(String.format("$%1$d", index), arg);
+	    try {
+		BigDecimal dValue = new BigDecimal(arg);
+		variables.put(String.format("$%1$d", index), dValue);
+	    }
+	    catch (NumberFormatException nfe) {
+		variables.put(String.format("$%1$d", index), arg);
+	    }
 	}
 
 	public MathContext getMathContext() {

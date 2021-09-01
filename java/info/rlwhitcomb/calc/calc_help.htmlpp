@@ -203,9 +203,15 @@ h2 {
     <tr><td><code>-casesense</code></td><td>Respect case of variable and member names <i>(default)</i></td><td><code>-casesensitive</code>, <code>-sensitive</code>,<br><code>-sense</code>, <code>-sens</code>, <code>-sen</code><br>(also use the <code>:ignorecase off</code> directive)</td></tr>
     <tr><td><code>-locale</code> <i>locale_name</i></td><td>Specify the locale to use for messages</td><td><code>-loc</code>, <code>-l</code></td></tr>
     <tr><td><code>-inputdir</code> <i>directory</i></td><td>Specify a default directory location to find files to be processed</td><td><code>-input</code>, <code>-dir</code></td></tr>
-    <tr><td><code>-library</code> <i>library name(s)</i></td><td>Specify one or more libraries to load to begin with</td><td><code>-libraries</code>, <code>-libs</code>, <code>-lib</code><br>(also use the <code>:include</code> directive)</td></tr>
+    <tr><td><code>-library</code> <i>library_name(s)</i></td><td>Specify one or more libraries to load to begin with</td><td><code>-libraries</code>, <code>-libs</code>, <code>-lib</code><br>(also use the <code>:include</code> directive)</td></tr>
     <tr><td><code>-cmdenter</code></td><td>Use <code>Ctrl+Enter</code> (or <code>&#x2318;Enter</code> on Mac)<br>to calculate in the GUI input field <i>(default)</i></td><td><code>-cmd</code></td></tr>
     <tr><td><code>-enter</code></td><td>Use just <code>Enter</code> to calculate in GUI input field</td><td><code>-e</code></td></tr>
+    <tr><td><code>-utf8</code></td><td>Decode all input files using the UTF-8 charset</td><td><code>-utf</code>, <code>-u</code></td></tr>
+    <tr><td><code>-win1252</code></td><td>Use Windows-1252 as the input charset</td><td><code>-win</code>, <code>-w</code></td></tr>
+    <tr><td><code>-charset</code> <i>charset_name</i></td><td>Use the given charset to read input files</td><td><code>-char</code>, <code>-cs</code></td></tr>
+    <tr><td><code>-default</code></td><td>Use the platform default charset <i>(default)</i></td><td><code>-def</code></td></tr>
+    <tr><td><code>--</code> <i>script_arguments</i> [ <code>--</code> ]</td><td>Provide values for the <code>$0</code>, <code>$1</code>, etc. parameters<br>
+            everything between the <code>--</code> markers is taken as parameter values</td><td>&nbsp;</td></tr>
     <tr><td><code>-help</code></td><td>Display this help page</td><td><code>-h</code>, <code>-?</code></td></tr>
     <tr><td><code>-version</code></td><td>Display the version information for the program on the console</td><td><code>-vers</code>, <code>-ver</code>, <code>-v</code></td></tr>
   </tbody>

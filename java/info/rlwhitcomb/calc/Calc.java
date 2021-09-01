@@ -188,6 +188,9 @@
  *	    Implement arguments on the command line.
  *	31-Aug-2021 (rlwhitcomb)
  *	    Regularize reading files, whether from the command line or the GUI file browser.
+ *	01-Sep-2021 (rlwhitcomb)
+ *	    We desperately need a "-utf8" flag for reading files (esp. on Windows). Add several
+ *	    other options for input charset as well.
  */
 package info.rlwhitcomb.calc;
 
@@ -202,7 +205,10 @@ import java.io.PrintStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.MathContext;
+import java.nio.charset.Charset;
+import java.nio.charset.IllegalCharsetNameException;
 import java.nio.charset.StandardCharsets;
+import java.nio.charset.UnsupportedCharsetException;
 import java.nio.file.Files;
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -278,7 +284,9 @@ public class Calc
 		/** Library name(s) requires the names. */
 		LIBRARY,
 		/** All the remaining parameters are $n global parameters. */
-		ARGUMENTS
+		ARGUMENTS,
+		/** A charset to use for reading files. */
+		CHARSET
 	}
 
 	/** What we're expecting next on the command line. */
@@ -317,6 +325,8 @@ public class Calc
 	private static File inputDirectory = null;
 	private static File rootDirectory = null;
 	private static List<String> libraryNames = null;
+
+	private static Charset inputCharset = null;
 
 	private Display display;
 
@@ -1098,10 +1108,9 @@ public class Calc
 	/**
 	 * Read the contents of one file and append to the buffer, if the file
 	 * can be found as given, and is readable. Initially the file is read
-	 * using the platform default charset, but if an error occurs we attempt
-	 * to use UTF-8 instead (which we assume will work). This is not ideal
-	 * since Windows-1252 basically accepts any byte sequence, so we probably
-	 * wouldn't get things right on Windows with a real UTF-8 encoded file.
+	 * using the platform default charset, or the charset specified on the
+	 * command line (if any), but if an error occurs we attempt
+	 * to use UTF-8 instead (which we assume will work).
 	 *
 	 * @param f		The file path to read (no other location is attempted).
 	 * @param inputBuf	The buffer to append the file contents to.
@@ -1115,7 +1124,12 @@ public class Calc
 		inputDirectory = f.getCanonicalFile().getParentFile();
 		String fileText = "";
 		try {
-		    fileText = FileUtilities.readFileAsString(f);
+		    if (inputCharset != null) {
+			fileText = FileUtilities.readFileAsString(f, inputCharset);
+		    }
+		    else {
+			fileText = FileUtilities.readFileAsString(f);
+		    }
 		}
 		catch (IOException ioe) {
 		    // We're gonna bet the problem is the charset
@@ -1403,6 +1417,24 @@ public class Calc
 		case "e":
 		    useCmdEnter = false;
 		    break;
+		case "utf8":
+		case "utf":
+		case "u":
+		    inputCharset = StandardCharsets.UTF_8;
+		    break;
+		case "win1252":
+		case "win":
+		case "w":
+		    inputCharset = Charset.forName("windows-1252");
+		    break;
+		case "charset":
+		case "char":
+		case "cs":
+		    return Expecting.CHARSET;
+		case "default":
+		case "def":
+		    inputCharset = null;
+		    break;
 		case "help":
 		case "h":
 		case "?":
@@ -1456,6 +1488,16 @@ public class Calc
 			    break;
 			case ARGUMENTS:
 			    argValues.add(arg);
+			    break;
+			case CHARSET:
+			    try {
+				inputCharset = Charset.forName(arg);
+				expecting = Expecting.DEFAULT;
+			    }
+			    catch (IllegalCharsetNameException | UnsupportedCharsetException cse) {
+				errFormat("calc#charsetError", arg, ExceptionUtil.toString(cse));
+				expecting = Expecting.QUIT_NOW;
+			    }
 			    break;
 			default:
 			    errFormat("calc#expectValue", expecting);

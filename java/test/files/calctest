@@ -9,7 +9,7 @@ $scriptDir test/files
 
 # In order to reduce redundancy here, these are the options to
 # sent to the test program for every test
-$defaultOptions -nocolors -dir test/files -noseps -sense
+$defaultOptions -nocolors -dir test/files -noseps -sense -utf8
 
 $echo "Starting Calc tests..."
 $echo
