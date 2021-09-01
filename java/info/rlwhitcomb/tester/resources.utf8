@@ -76,6 +76,8 @@
 #	    Reword an error message for clarity. Update the help.
 #	02-Mar-2021 (rlwhitcomb)
 #	    New error message.
+#	31-Aug-2021 (rlwhitcomb)
+#	    Change wording slightly.
 #
 
 mismatch		= Mismatch on test \"%1$s\":%n  Canon file: %2$s%n Output file: %3$s
@@ -123,7 +125,7 @@ log			= "Test '%1$s': "
 logVerboseAlt		= Test '%1$s' (%2$s): command \"%3$s\"%n
 logAlt			= "Test '%1$s' (%2$s): "
 verbose			= Running script: %1$s%n
-abnormalExit		= Abnormal exit from script: Code %1$d
+abnormalExit		= Abnormal exit from test: Code %1$d
 abnormalExitString	= Abnormal exit from test: %1$s%n
 
 #

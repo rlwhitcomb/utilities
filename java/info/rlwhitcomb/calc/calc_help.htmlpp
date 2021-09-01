@@ -136,7 +136,7 @@ h2 {
         <li>Variables can be used for storage of values for later use.</li>
         <li>Object and array structures for storage of multiple values.</li>
         <li>String functions for doing text manipulation.</li>
-        <li>The ability to do calculations straight from the command line, or in a convenient REPL loop, or in a GUI window.</li>
+        <li>The ability to do calculations straight from the command line, or in a convenient REPL mode, or in a GUI window.</li>
         <li>The ability to define libraries of functions available using the "<code>-library</code>" command line option or the "<code>:include</code>" directive.</li>
         <li>Calculations can be edited (using backspace, etc.) to reduce the chance of keyboard errors.</li>
         <li>Looping and conditional statements to do pretty much any kind of calculation.</li>
