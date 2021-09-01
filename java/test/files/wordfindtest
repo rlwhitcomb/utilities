@@ -11,6 +11,7 @@ hunger: hunger
 painful: painful
 politics: politics
 frame: frame.
+phalangeal: phalangeal
 
 :echo
 :echo Done with WordFind tests.
