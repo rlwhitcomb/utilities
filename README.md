@@ -157,3 +157,20 @@ define a($b, $c, $d) = { $f = blah; ... }
 - ?? should we just do that for validation?  Validator interface "boolean isValid(Object input)" ...info/.../validation package, with Validator interface, and custom implementations (such as IntValidator, FloatValidator, etc. CharsetValidator
 - How do the new interfaces fit in with this scheme (ChoiceEnum)?
 
+### Translation
+- Nothing in .../tools directory has had their text moved to resources.
+- Much more translation could be done.
+- Is there a good way to check the existing translations with native speakers?
+- Need a way to check the text resources to make sure of:
+  - all keys are in all translations
+  - no other necessary, translatable text is in the source
+
+### Unit Testing
+- Some things that come to mind are:
+  - Head, WordCount could easily use "test/data" files to be tested
+
+### Character Sets
+- Head and WordCount have a good set of charset options; Calc could use more.
+- Could we normalize some of this somehow and put this processing into one place so
+  everyone can use it?
+
