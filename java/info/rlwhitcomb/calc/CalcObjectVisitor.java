@@ -329,6 +329,8 @@
  *	    Add number constant conversion, and "isnull" function.
  *	01-Sep-2021 (rlwhitcomb)
  *	    Attempt to convert global variables to numbers if possible, otherwise leave as strings.
+ *	02-Sep-2021 (rlwhitcomb)
+ *	    Don't convert result to a string if "silent" because we won't display that string anyway.
  */
 package info.rlwhitcomb.calc;
 
@@ -1345,7 +1347,10 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 				      : valueBuf.toString();
 	    }
 	    else {
-		resultString = toStringValue(this, result, separators);
+		// For large numbers it takes a significant amount of time just to convert
+		// to a string, so don't even try if we don't need to for display
+		if (!settings.silent)
+		    resultString = toStringValue(this, result, separators);
 	    }
 
 	    if (!settings.silent) displayer.displayResult(exprString, resultString);
