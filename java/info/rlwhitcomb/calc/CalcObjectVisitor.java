@@ -333,6 +333,7 @@
  *	    Don't convert result to a string if "silent" because we won't display that string anyway.
  *	02-Sep-2021 (rlwhitcomb)
  *	    Issue #16: Change cutover for two-digit years to "today + 30 years" instead of 50.
+ *	    Issue #10: Use BigInteger for duration conversions.
  */
 package info.rlwhitcomb.calc;
 
@@ -1149,7 +1150,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			// Value will be nanoseconds
 			valueBuf.append("t'");
 			iValue = toIntegerValue(this, result, mc, ctx);
-			valueBuf.append(NumericUtil.convertToDuration(iValue.longValue(), durationUnit, mcDivide, precision));
+			valueBuf.append(NumericUtil.convertToDuration(iValue, durationUnit, mcDivide, precision));
 			valueBuf.append('\'');
 			break;
 
@@ -3385,7 +3386,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    case 't':
 		    case 'T':
 			// This gives us nanoseconds of duration
-			return BigInteger.valueOf(NumericUtil.convertFromDuration(value));
+			return NumericUtil.convertFromDuration(value);
 		    case 'h':
 		    case 'H':
 			// This gives us nanoseconds since midnight

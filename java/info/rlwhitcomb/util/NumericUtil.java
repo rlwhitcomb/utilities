@@ -152,6 +152,8 @@
  *	    Make the class final.
  *	26-Aug-2021 (rlwhitcomb)
  *	    Add a converter method for all the strange Unicode digit/number glyphs.
+ *	02-Sep-2021 (rlwhitcomb)
+ *	    Duration now uses BigInteger, not long (to fix overflow errors).
  */
 package info.rlwhitcomb.util;
 
@@ -388,8 +390,13 @@ public final class NumericUtil
 	private static final long ONE_WEEK = 7L * ONE_DAY;
 
 	/** Decimal value of {@link #NANOSECONDS}. */
-	private static BigDecimal D_NANOS = BigDecimal.valueOf(NANOSECONDS);
-
+	private static final BigDecimal D_NANOS = BigDecimal.valueOf(NANOSECONDS);
+	/** Decimal value of 7. */
+	private static final BigDecimal D_7 = BigDecimal.valueOf(7L);
+	/** Decimal value of 24. */
+	private static final BigDecimal D_24 = BigDecimal.valueOf(24L);
+	/** Decimal value of 60. */
+	private static final BigDecimal D_60 = BigDecimal.valueOf(60L);
 
 
 	private static final String[] smallWords = {
@@ -1487,7 +1494,7 @@ public final class NumericUtil
 		    nanosecs += convertTime(mins);
 		    nanosecs *= 60L;
 		    nanosecs += convertTime(secs);
-		    nanosecs *= 1000000000L;
+		    nanosecs *= NANOSECONDS;
 
 		    if (nans != null) {
 			long fracs = convertTime(nans);
@@ -1620,38 +1627,38 @@ public final class NumericUtil
 	 * @return          Number of nanoseconds representing this duration.
 	 * @throws IllegalArgumentException if the format isn't recognized.
 	 */
-	public static long convertFromDuration(final String durString) {
+	public static BigInteger convertFromDuration(final String durString) {
 	    Matcher m = DURATION_PATTERN.matcher(durString);
 	    if (m.matches()) {
 		String number = m.group(2);
 		String suffix = m.group(4);
-		double value = Double.parseDouble(number);
+		BigDecimal value = new BigDecimal(number);
 
 		switch (suffix.charAt(0)) {
 		    case 'w':
 		    case 'W':
-			value *= 7.0;
+			value = value.multiply(D_7);
 			// fall through
 		    case 'd':
 		    case 'D':
-			value *= 24.0;
+			value = value.multiply(D_24);
 			// fall through
 		    case 'h':
 		    case 'H':
-			value *= 60.0;
+			value = value.multiply(D_60);
 		    case 'm':
 		    case 'M':
-			value *= 60.0;
+			value = value.multiply(D_60);
 		    case 's':
 		    case 'S':
-			value *= 1_000_000_000.0;
+			value = value.multiply(D_NANOS);
 			break;
 		}
 
 		if (m.group(1) != null)
-		    return -((long) value);
+		    return value.toBigInteger().negate();
 		else
-		    return (long) value;
+		    return value.toBigInteger();
 	    }
 	    else {
 		throw new Intl.IllegalArgumentException("util#numeric.badDuration", durString);
@@ -1661,7 +1668,7 @@ public final class NumericUtil
 	/**
 	 * Convert a number of nanoseconds to a duration value.
 	 *
-	 * @param nanos The long number of nanoseconds.
+	 * @param nanos The number of nanoseconds.
 	 * @param unit  Character representing the desired duration unit ('w', 'd', 'h', etc.) or
 	 *              if unknown, make it our choice depending on the magnitude.
 	 * @param mc    The {@link MathContext} to use for rounding to decimal values.
@@ -1669,17 +1676,17 @@ public final class NumericUtil
 	 * @return      A string representing our best (fractional) representation of the duration
 	 *              something like <code>23.75h</code>.
 	 */
-	public static String convertToDuration(final long nanos, final char unit, final MathContext mc, final int precision) {
+	public static String convertToDuration(final BigInteger nanos, final char unit, final MathContext mc, final int precision) {
 	    char units = '?';
 	    boolean negative = false;
 	    BigDecimal decimal;
 
-	    if (nanos < 0L) {
+	    if (nanos.signum() < 0) {
 		negative = true;
-		decimal = BigDecimal.valueOf(-nanos);
+		decimal = new BigDecimal(nanos.negate());
 	    }
 	    else {
-		decimal = BigDecimal.valueOf(nanos);
+		decimal = new BigDecimal(nanos);
 	    }
 
 	    switch (unit) {
@@ -1705,13 +1712,13 @@ public final class NumericUtil
 		    break;
 		default:
 		    // If units weren't specified, then figure it out
-		    if (nanos > ONE_WEEK)
+		    if (nanos.compareTo(BigInteger.valueOf(ONE_WEEK)) > 0)
 			units = 'w';
-		    else if (nanos > ONE_DAY)
+		    else if (nanos.compareTo(BigInteger.valueOf(ONE_DAY)) > 0)
 			units = 'd';
-		    else if (nanos > ONE_HOUR)
+		    else if (nanos.compareTo(BigInteger.valueOf(ONE_HOUR)) > 0)
 			units = 'h';
-		    else if (nanos > ONE_MINUTE)
+		    else if (nanos.compareTo(BigInteger.valueOf(ONE_MINUTE)) > 0)
 			units = 'm';
 		    else
 			units = 's';
