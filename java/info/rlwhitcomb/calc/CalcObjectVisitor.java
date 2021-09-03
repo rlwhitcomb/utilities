@@ -331,6 +331,8 @@
  *	    Attempt to convert global variables to numbers if possible, otherwise leave as strings.
  *	02-Sep-2021 (rlwhitcomb)
  *	    Don't convert result to a string if "silent" because we won't display that string anyway.
+ *	02-Sep-2021 (rlwhitcomb)
+ *	    Issue #16: Change cutover for two-digit years to "today + 30 years" instead of 50.
  */
 package info.rlwhitcomb.calc;
 
@@ -3459,7 +3461,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		day = Integer.parseInt(dayStr);
 
 		if (shortYear) {
-		    if (year < 50)
+		    int cutoverYear = (LocalDate.now().getYear() % 100) + 30;
+		    if (year < cutoverYear)
 			year += 2000;
 		    else
 			year += 1900;

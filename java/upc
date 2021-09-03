@@ -6,4 +6,4 @@ then
    exit 1
 fi
 test=$1
-c -nocolor -dir test/files $test | mkcanon > test/canons/${test//[,;]/_}.canon
+c -nocolors -dir test/files -noseps -sense -utf8 $test | mkcanon > test/canons/${test//[,;]/_}.canon
