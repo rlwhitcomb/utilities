@@ -2,7 +2,7 @@
 # Options test
 #
 $inputDir test/canons
-$testClass info.rlwhitcomb.util.Options
+$testClass info.rlwhitcomb.test.OptionsTest
 
 $echo Tests of the Options class...
 $echo
