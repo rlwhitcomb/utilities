@@ -255,6 +255,9 @@
 	    01-Sep-2021 (rlwhitcomb)
 		Change the order of targets for "all-install" so that the install part
 		happens before test, because testing should use the newly built code.
+	    02-Sep-2021 (rlwhitcomb)
+		Turn off "doclint" for Java less than 14 because of all the
+		"invalid entity" errors.
 
      ========================================================================== -->
 
@@ -328,6 +331,11 @@
 			<javaversion atleast="9"/>
 			<not><javaversion atleast="14"/></not>
 		</and>
+	</condition>
+	<condition property="doclint.off" value="true" else="false">
+		<not>
+			<javaversion atleast="14"/>
+		</not>
 	</condition>
 	<condition property="on.windows" value="true" else="false">
 		<os family="windows"/>
@@ -596,6 +604,7 @@
 			<arg value="-html5"/>
 			<arg value="--frames" if:true="${html4.output}"/>
 			<arg line="--release 8" if:true="${new.java.version}"/>
+			<arg line="-Xdoclint:none" if:true="${doclint.off}"/>
 			<link href="https://docs.oracle.com/javase/8/docs/api/"/>
 			<link href="https://pivot.apache.org/2.0.5/docs/api/"/>
 			<link href="https://www.antlr.org/api/Java/"/>
