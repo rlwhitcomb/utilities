@@ -12,6 +12,7 @@ painful: painful
 politics: politics
 frame: frame.
 phalangeal: phalangeal
+tottery: tty.rot
 
 :echo
 :echo Done with WordFind tests.
