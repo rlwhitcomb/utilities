@@ -9,9 +9,10 @@ Test 'painful': Passed
 Test 'politics': Passed
 Test 'frame': Passed
 Test 'phalangeal': Passed
+Test 'tottery': Passed
 
 Done with WordFind tests.
 ------------------------------------
-Ran 6 tests: 6 passed, 0 failed.
+Ran 7 tests: 7 passed, 0 failed.
 ====================================
 
