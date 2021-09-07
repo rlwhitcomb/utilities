@@ -52,9 +52,9 @@ Also see "issues" at https://github.com/rlwhitcomb/utilities/issues
 
 ## Notes on New Programs and Features
 
-### License
-- Need something to check proper license, copyright, etc. in all files
-- Check copyright years by history; also check for out-of-order history comments, and/or bad format, or missing entirely
+### Copyrights
+- Check for out-of-order history comments, and/or bad format, or missing entirely
+- Need to deal with "git move" operations that generate false errors about bad copyright years
 
 ### Shell invoker
 - Option to "boiler" to create this thing (along with the path/class)
