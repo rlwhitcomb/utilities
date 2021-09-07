@@ -258,6 +258,8 @@
 	    02-Sep-2021 (rlwhitcomb)
 		Turn off "doclint" for Java less than 14 because of all the
 		"invalid entity" errors.
+	    06-Sep-2021 (rlwhitcomb)
+		Add a target to check copyrights.
 
      ========================================================================== -->
 
@@ -771,6 +773,10 @@
 				<include name="pivot-wtk*.jar"/>
 			</fileset>
 		</copy>
+	</target>
+
+	<target name="check-copyrights" depends="compile" description="Check copyright years and proper LICENSE text.">
+		<java classname="CheckCopyrights"/>
 	</target>
 </project>
 
