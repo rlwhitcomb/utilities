@@ -239,6 +239,9 @@
  *	    Add global variables.
  *	26-Aug-2021 (rlwhitcomb)
  *	    Add some more Unicode number symbols. Add "isnull" function.
+ *	07-Sep-2021 (rlwhitcomb)
+ *	    Make ":library", ":lib", ":libs", and ":libraries" synonyms for
+ *	    ":include" (because the command line option is "-library").
  */
 
 grammar Calc;
@@ -907,7 +910,7 @@ D_ECHO
    ;
 
 D_INCLUDE
-   : DIR  ( I N C | I N C L U D E | O P E N )
+   : DIR  ( I N C | I N C L U D E | O P E N | L I B | L I B R A R Y | L I B S | L I B R A R I E S )
    ;
 
 D_DEBUG
