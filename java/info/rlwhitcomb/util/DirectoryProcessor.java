@@ -46,6 +46,8 @@
  *	    Update obsolete Javadoc constructs.
  *	29-Jan-2021 (rlwhitcomb)
  *	    Use new Intl Exception variants for convenience.
+ *	06-Sep-2021 (rlwhitcomb)
+ *	    Use FileUtilities.canRead everywhere. Final parameters.
  */
 package info.rlwhitcomb.util;
 
@@ -55,7 +57,8 @@ import java.io.File;
 /**
  * Processor for a group of files in one directory and (optionally) its
  * subdirectories.
- * <p> Will call {@link FileProcessor} for each file encountered.
+ * <p> Will call {@link FileProcessor} for each file encountered, which will
+ * in turn call the supplied {@link LineProcessor} for each file and line in it.
  */
 public class DirectoryProcessor
 {
@@ -70,7 +73,7 @@ public class DirectoryProcessor
 	 * @throws IllegalArgumentException if the input name is {@code null} or empty.
 	 * @see	#init(File, LineProcessor)
 	 */
-	public DirectoryProcessor(String dirName, LineProcessor lp) {
+	public DirectoryProcessor(final String dirName, final LineProcessor lp) {
 	    if (CharUtil.isNullOrEmpty(dirName)) {
 		throw new Intl.IllegalArgumentException("util#dir.nullEmptyInput");
 	    }
@@ -86,7 +89,7 @@ public class DirectoryProcessor
 	 * @throws IllegalArgumentException if the input file is {@code null}.
 	 * @see	#init(File, LineProcessor)
 	 */
-	public DirectoryProcessor(File dir, LineProcessor lp) {
+	public DirectoryProcessor(final File dir, final LineProcessor lp) {
 	    init(dir, lp);
 	}
 
@@ -99,7 +102,7 @@ public class DirectoryProcessor
 	 * @throws IllegalArgumentException for {@code null} inputs or a non-existent or
 	 * non-accessible directory.
 	 */
-	private void init(File dir, LineProcessor lp) {
+	private void init(final File dir, final LineProcessor lp) {
 	    if (dir == null) {
 		throw new Intl.IllegalArgumentException("util#dir.nullInputDir");
 	    }
@@ -131,7 +134,7 @@ public class DirectoryProcessor
 	 *		{@code false} if any errors were reported and <var>stopOnError</var> is
 	 *		{@code true}.
 	 */
-	private boolean processFiles(File dir, boolean recurse, int level, boolean stopOnError) {
+	private boolean processFiles(final File dir, final boolean recurse, final int level, final boolean stopOnError) {
 	    if (!this.lp.enterDirectory(dir, level)) {
 		// Not wanting to process this directory is not an "error" per se.
 		return true;
@@ -141,7 +144,7 @@ public class DirectoryProcessor
 		return this.lp.exitDirectory(dir, level, true);
 	    }
 	    for (File f : files) {
-		if (f.canRead() && f.isDirectory()) {
+		if (FileUtilities.canReadDir(f)) {
 		    if (recurse) {
 			if (!processFiles(f, recurse, level + 1, stopOnError) && stopOnError) {
 			    this.lp.exitDirectory(dir, level, false);
@@ -150,7 +153,7 @@ public class DirectoryProcessor
 		    }
 		    // Else just continue to the next file in the current directory
 		}
-		else if (f.canRead() && f.isFile()) {
+		else if (FileUtilities.canRead(f)) {
 		    FileProcessor fp = new FileProcessor(f, this.lp);
 		    if (!fp.processFile() && stopOnError) {
 			this.lp.exitDirectory(dir, level, false);
@@ -182,7 +185,7 @@ public class DirectoryProcessor
 	 * @param	recurse	Whether or not to descend into subdirectories or limit
 	 *		processing to the specified directory only.
 	 */
-	public void processDirectory(boolean recurse) {
+	public void processDirectory(final boolean recurse) {
 	    processFiles(this.inputDir, recurse, 0, false);
 	}
 
@@ -198,7 +201,7 @@ public class DirectoryProcessor
 	 *		processing to the specified directory only.
 	 * @param	stopOnError	Whether or not to stop on any errors.
 	 */
-	public void processDirectory(boolean recurse, boolean stopOnError) {
+	public void processDirectory(final boolean recurse, final boolean stopOnError) {
 	    processFiles(this.inputDir, recurse, 0, stopOnError);
 	}
 

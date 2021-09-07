@@ -73,7 +73,6 @@ import java.util.regex.*;
 import info.rlwhitcomb.util.CommandProcessor;
 import info.rlwhitcomb.util.DirectoryProcessor;
 import info.rlwhitcomb.util.Environment;
-import info.rlwhitcomb.util.FileProcessor;
 import info.rlwhitcomb.util.Intl;
 import info.rlwhitcomb.util.LineProcessor;
 import info.rlwhitcomb.util.Options;

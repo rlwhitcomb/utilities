@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2013-2016,2018,2020 Roger L. Whitcomb.
+ * Copyright (c) 2013-2016,2018,2020-2021 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -59,6 +59,8 @@
  *	    Prepare for GitHub.
  *	21-Dec-2020 (rlwhitcomb)
  *	    Update obsolete Javadoc constructs.
+ *	06-Sep-2021 (rlwhitcomb)
+ *	    Final parameters.
  */
 package info.rlwhitcomb.util;
 
@@ -123,7 +125,7 @@ public class CommandProcessor
 	 * @return		{@code true} to continue processing, {@code false}
 	 *			if the consumer does not want to continue processing.
 	 */
-	protected boolean process(String line) {
+	protected boolean process(final String line) {
 	    return true;
 	}
 
@@ -145,7 +147,7 @@ public class CommandProcessor
 	 *
 	 * @param	command	The command name and its arguments.
 	 */
-	public CommandProcessor(String... command) {
+	public CommandProcessor(final String... command) {
 	    setup(command);
 	}
 
@@ -154,7 +156,7 @@ public class CommandProcessor
 	 *
 	 * @param	command	The command name and its arguments.
 	 */
-	public void setup(String... command) {
+	public void setup(final String... command) {
 	    rc = new RunCommand(command);
 	}
 
@@ -193,7 +195,7 @@ public class CommandProcessor
 	 * {@code false} to only accept the specific line separators for the
 	 * current platform.
 	 */
-	public void setUseDefaultSeparators(boolean value) {
+	public void setUseDefaultSeparators(final boolean value) {
 	    this.useDefaultSeparators = value;
 	}
 
@@ -212,7 +214,7 @@ public class CommandProcessor
 	 * of file.
 	 * @throws IOException if there are problems
 	 */
-	private String readLine(Reader reader)
+	private String readLine(final Reader reader)
 		throws IOException
 	{
 	    StringBuilder buf = new StringBuilder();
@@ -260,7 +262,7 @@ public class CommandProcessor
 	 *
 	 * @param	dir	The working directory to set for the process.
 	 */
-	public void run(File dir) {
+	public void run(final File dir) {
 	    beginProcess();
 	    ByteArrayOutputStream baos = new ByteArrayOutputStream(8192);
 	    PrintStream ps = new PrintStream(baos);

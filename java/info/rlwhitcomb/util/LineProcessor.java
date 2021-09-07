@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2015,2017,2020 Roger L. Whitcomb.
+ * Copyright (c) 2015,2017,2020-2021 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -41,6 +41,8 @@
  *	    Prepare for GitHub.
  *	21-Dec-2020 (rlwhitcomb)
  *	    Update obsolete Javadoc constructs.
+ *	06-Sep-2021 (rlwhitcomb)
+ *	    Final parameters.
  */
 package info.rlwhitcomb.util;
 
@@ -81,7 +83,7 @@ public interface LineProcessor extends FileFilter
 	 * @return	{@code true} to continue processing, {@code false}
 	 *		to abort processing for some reason.
 	 */
-	default boolean handleError(File inputFile, Throwable error) {
+	default boolean handleError(final File inputFile, final Throwable error) {
 	    Intl.errFormat("util#line.genericError", inputFile == null ? "<none>" : inputFile.getPath(), error.getMessage());
 	    return true;
 	}
@@ -92,7 +94,7 @@ public interface LineProcessor extends FileFilter
 	 * @return	{@code true} to continue processing, {@code false}
 	 *		to abort processing for some reason.
 	 */
-	default boolean processLine(String line) {
+	default boolean processLine(final String line) {
 	    return true;
 	}
 
@@ -104,7 +106,7 @@ public interface LineProcessor extends FileFilter
 	 * @param	level		The nesting level of this directory (0 at the root).
 	 * @return	{@code true} to go ahead and process, {@code false} to skip.
 	 */
-	default boolean enterDirectory(File directory, int level) {
+	default boolean enterDirectory(final File directory, final int level) {
 	    return true;
 	}
 
@@ -118,7 +120,7 @@ public interface LineProcessor extends FileFilter
 	 * @param	error		Whether processing was successful within the directory.
 	 * @return	{@code true} to continue processing, {@code false} to stop.
 	 */
-	default boolean exitDirectory(File directory, int level, boolean error) {
+	default boolean exitDirectory(final File directory, final int level, final boolean error) {
 	    return true;
 	}
 
@@ -128,7 +130,7 @@ public interface LineProcessor extends FileFilter
 	 * @return	{@code true} if the file should be processed, {@code false} otherwise.
 	 */
 	@Override
-	default boolean accept(File pathname) {
+	default boolean accept(final File pathname) {
 	    return true;
 	}
 
@@ -138,7 +140,7 @@ public interface LineProcessor extends FileFilter
 	 * @param	inputFile	The file we are about to read.
 	 * @return	{@code true} to continue processing, {@code false} to abort.
 	 */
-	default boolean preProcess(File inputFile) {
+	default boolean preProcess(final File inputFile) {
 	    return true;
 	}
 
@@ -149,7 +151,7 @@ public interface LineProcessor extends FileFilter
 	 * @param	inputFile	The file we have just finished processing.
 	 * @return	{@code true} to continue processing, {@code false} to abort.
 	 */
-	default boolean postProcess(File inputFile) {
+	default boolean postProcess(final File inputFile) {
 	    return true;
 	}
 

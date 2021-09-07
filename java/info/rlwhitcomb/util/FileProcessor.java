@@ -38,6 +38,8 @@
  *	    Update obsolete Javadoc constructs.
  *	29-Jan-2021 (rlwhitcomb)
  *	    Use new Intl Exception variants for convenience.
+ *	06-Sep-2021 (rlwhitcomb)
+ *	    Final parameters.
  */
 package info.rlwhitcomb.util;
 
@@ -66,7 +68,7 @@ public class FileProcessor
 	 * the file cannot be accessed.
 	 * @see #init
 	 */
-	public FileProcessor(String fileName, LineProcessor lp) {
+	public FileProcessor(final String fileName, final LineProcessor lp) {
 	    if (CharUtil.isNullOrEmpty(fileName)) {
 		throw new Intl.IllegalArgumentException("util#file.nullEmptyInput");
 	    }
@@ -84,7 +86,7 @@ public class FileProcessor
 	 * cannot be accessed.
 	 * @see #init
 	 */
-	public FileProcessor(File file, LineProcessor lp) {
+	public FileProcessor(final File file, final LineProcessor lp) {
 	    init(file, lp);
 	}
 
@@ -97,7 +99,7 @@ public class FileProcessor
 	 * @throws IllegalArgumentException if inputs are {@code null} or the file
 	 * cannot be accessed.
 	 */
-	private void init(File file, LineProcessor lp) {
+	private void init(final File file, final LineProcessor lp) {
 	    if (file == null) {
 		throw new Intl.IllegalArgumentException("util#file.nullInputFile");
 	    }
