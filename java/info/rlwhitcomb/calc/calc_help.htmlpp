@@ -308,7 +308,7 @@ h2 {
      To embed a dollar sign in the string, use <code>$$</code> (but see the note about loop variables below). To embed any Unicode
      codepoint, use <code>\u<i>NNNN</i></code> where <code><i>N</i></code> is a hexadecimal digit, for values up to 0xFFFF, or
      <code>\u{<i>NNNNNN</i>}</code> for codes beyond the Unicode BMP (Basic Multilingual Plane). "Smart" quotes can also be used
-     to delimit strings (such as <code>&#x00AB;This is a test&#x00BB;</code>. The ending quote can be included by escaping it.
+     to delimit strings (such as <code>&#x00AB;This is a test&#x00BB;</code>). The ending quote can be included by escaping it.
      When interpolating values into an interpolated string, the string representation of the value is used. If the value is
      <code>null</code> nothing will be added to the string.
   <p>For example, given this code:
