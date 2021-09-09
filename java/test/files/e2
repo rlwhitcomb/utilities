@@ -77,6 +77,11 @@ a.c.g."f"."h".j=15
 a
 a.c.g."f"."h".j++
 a
+m1 = '"f"'
+m2 = "'h'"
+a.c.g.`$m1`.`$m2` = 3.45
+a
+
 
 :echo
 :echo "End of nested object / array tests."

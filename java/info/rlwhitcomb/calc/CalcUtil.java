@@ -68,6 +68,8 @@
  *	    Changes for always displaying thousands separators.
  *	10-Jul-2021 (rlwhitcomb)
  *	    Implement "ignore case" functions for variables / members.
+ *	09-Sep-2021 (rlwhitcomb)
+ *	    More Javadoc. Move the "istring" processing into here for member names.
  */
 package info.rlwhitcomb.calc;
 
@@ -84,8 +86,7 @@ import java.util.TreeSet;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
 
-import static info.rlwhitcomb.calc.CalcUtil.getMemberValue;
-import static info.rlwhitcomb.calc.CalcUtil.isMemberDefined;
+import info.rlwhitcomb.calc.CalcObjectVisitor.Settings;
 import info.rlwhitcomb.util.BigFraction;
 import info.rlwhitcomb.util.CharUtil;
 import static info.rlwhitcomb.util.CharUtil.Justification;
@@ -124,6 +125,12 @@ public final class CalcUtil
 	}
 
 
+	/**
+	 * Get a nicely formatted string of the contents of the given parse tree.
+	 *
+	 * @param ctx Root node of the parse tree to display.
+	 * @return    The formatted string of the contents.
+	 */
 	public static String getTreeText(final ParseTree ctx) {
 	    StringBuilder buf = new StringBuilder();
 	    TreeTextOptions options = new TreeTextOptions();
@@ -138,6 +145,15 @@ public final class CalcUtil
 	    return buf.toString();
 	}
 
+	/**
+	 * The workhorse recursive method for retrieving / formatting parse tree text.
+	 * <p> This method makes context-sensitive decisions about spacing and other
+	 * formatting embellishments.
+	 *
+	 * @param buf     The buffer where we're building the final text.
+	 * @param ctx     Current parse tree node.
+	 * @param options The current options used for adjusting spacing.
+	 */
 	private static void getTreeText(final StringBuilder buf, final ParseTree ctx, final TreeTextOptions options) {
 	    TreeTextOptions localOptions = options;
 
@@ -219,6 +235,13 @@ public final class CalcUtil
 	    }
 	}
 
+	/**
+	 * Is this character a valid start for an identifier name?
+	 * <p> Corresponds to the {@code ID} rule in the Calc.g4 grammar.
+	 *
+	 * @param ch	The character to check.
+	 * @return	Whether or not this is a valid identifier start character.
+	 */
 	public static boolean isIdentifierStart(final char ch) {
 	    // Corresponds to the "ID" rule in Calc.g4
 	    if ((ch >= 'a' && ch <= 'z')
@@ -228,6 +251,13 @@ public final class CalcUtil
 	    return false;
 	}
 
+	/**
+	 * Is this character a valid identifier character (after the start)?
+	 * <p> Corresponds to the grammar for ID.
+	 *
+	 * @param ch	The character to check.
+	 * @return	Whether the character is a valid following part of an identifier.
+	 */
 	public static boolean isIdentifierPart(final char ch) {
 	    if (isIdentifierStart(ch))
 		return true;
@@ -238,12 +268,28 @@ public final class CalcUtil
 	    return false;
 	}
 
+	/**
+	 * Check if the given value is {@code null} and throw an exception if so.
+	 *
+	 * @param value	The value to check.
+	 * @param ctx	Parsing context for error reporting.
+	 * @throws CalcExprException if the value is null
+	 */
 	public static void nullCheck(final Object value, final ParserRuleContext ctx) {
 	    if (value == null)
 		throw new CalcExprException(ctx, "%calc#valueNotNull", getTreeText(ctx));
 	}
 
-
+	/**
+	 * Cast or convert the given value to a {@link BigDecimal} value for use in calculations.
+	 *
+	 * @param visitor	The visitor, used to evaluate expressions.
+	 * @param obj		The object to convert.
+	 * @param mc		Math precision to use for any necessary conversions.
+	 * @param ctx		The parse tree (used for error reporting).
+	 * @return		A decimal value converted (if needed) from the input object.
+	 * @throws CalcExprException for null input values, or other errors in conversion.
+	 */
 	public static BigDecimal toDecimalValue(final CalcObjectVisitor visitor, final Object obj, final MathContext mc, final ParserRuleContext ctx) {
 	    Object value = visitor.evaluateFunction(obj);
 
@@ -273,6 +319,15 @@ public final class CalcUtil
 	    throw new CalcExprException(ctx, "%calc#noConvertDecimal", typeName);
 	}
 
+	/**
+	 * Cast or convert the given value to a {@link BigFraction} value for use in rational mode calculations.
+	 *
+	 * @param visitor	The visitor, used to evaluate expressions.
+	 * @param obj		The input object value to be converted.
+	 * @param ctx		The parse tree context (for error reporting).
+	 * @return		The converted fraction value from the input.
+	 * @throws CalcExprException for null inputs, or other errors from conversion.
+	 */
 	public static BigFraction toFractionValue(final CalcObjectVisitor visitor, final Object obj, final ParserRuleContext ctx) {
 	    Object value = visitor.evaluateFunction(obj);
 
@@ -302,6 +357,16 @@ public final class CalcUtil
 	    throw new CalcExprException(ctx, "%calc#noConvertFraction", typeName);
 	}
 
+	/**
+	 * Cast or convert the given object value to a {@link BigInteger} for certain integer calculations.
+	 *
+	 * @param visitor	The visitor used to evaluate expressions.
+	 * @param value		The input value to convert.
+	 * @param mc		The math context to use for any conversions from decimal values.
+	 * @param ctx		The parse tree context, used for error reporting.
+	 * @return		The converted value, if possible.
+	 * @throws CalcExprException if the value is not or cannot be converted to an exact integer value.
+	 */
 	public static BigInteger toIntegerValue(final CalcObjectVisitor visitor, final Object value, final MathContext mc, final ParserRuleContext ctx) {
 	    try {
 		if (value instanceof BigInteger) {
@@ -319,6 +384,16 @@ public final class CalcUtil
 	    }
 	}
 
+	/**
+	 * Cast or convert the given object value to a regular integer value for certain parameter values.
+	 *
+	 * @param visitor	The visitor used to evaluate expressions.
+	 * @param value		The input value to convert.
+	 * @param mc		The math context to use for any conversions from decimal values.
+	 * @param ctx		The parse tree context, used for error reporting.
+	 * @return		The converted value, if possible.
+	 * @throws CalcExprException if the value is not or cannot be converted to an exact integer value.
+	 */
 	public static int toIntValue(final CalcObjectVisitor visitor, final Object value, final MathContext mc, final ParserRuleContext ctx) {
 	    try {
 		if (value instanceof BigInteger) {
@@ -336,6 +411,16 @@ public final class CalcUtil
 	    }
 	}
 
+	/**
+	 * Cast or convert the given value to a boolean, using JavaScript semantics for "truthy" values (that is,
+	 * null or empty strings are {@code false} and string which are non-empty are {@code true}.
+	 *
+	 * @param visitor	The visitor for evaluating expressions.
+	 * @param obj		The input object to convert.
+	 * @param ctx		The parse tree context for error reporting.
+	 * @return		The converted boolean value from the input.
+	 * @throws CalcExprException if there was a problem (for instance, in evaluating an expression).
+	 */
 	public static Boolean toBooleanValue(final CalcObjectVisitor visitor, final Object obj, final ParserRuleContext ctx) {
 	    Object value = visitor.evaluateFunction(obj);
 
@@ -357,10 +442,31 @@ public final class CalcUtil
 	    }
 	}
 
+	/**
+	 * Convenience method to convert a value to a string, using the most common parameters.
+	 *
+	 * @param visitor	The tree visitor, for calculating expressions.
+	 * @param result	The input value to be converted.
+	 * @param separators	Whether or not to use thousands separators when converting numeric values.
+	 * @return		The converted string value.
+	 * @see #toStringValue(CalcObjectVisitor, Object, boolean, boolean, boolean, String)
+	 */
 	public static String toStringValue(final CalcObjectVisitor visitor, final Object result, final boolean separators) {
 	    return toStringValue(visitor, result, true, false, separators, "");
 	}
 
+	/**
+	 * The workhorse, recursive method used to convert values to strings.
+	 *
+	 * @param visitor	The outermost visitor object that is being used to calculate everything.
+	 * @param obj		The input object to be converted to a string.
+	 * @param quote		Whether or not the resulting string should be quoted (double quotes) if
+	 *			the input is an actual string object.
+	 * @param pretty	Whether or not to "pretty" print the contents of an object (map) or list (array).
+	 * @param separators	Should thousands separators be used for numeric values?
+	 * @param indent	The recursive indentation for pretty printing.
+	 * @return		The formatted string representation of the input object.
+	 */
 	@SuppressWarnings("unchecked")
 	public static String toStringValue(
 		final CalcObjectVisitor visitor,
@@ -404,6 +510,17 @@ public final class CalcUtil
 	    return result.toString();
 	}
 
+	/**
+	 * The recursive method used to convert an object (map) to a string.
+	 *
+	 * @param visitor	The outermost visitor object that is being used to calculate everything.
+	 * @param map		The input object (map) to be converted.
+	 * @param quote		Whether or not actual string objects should be double-quoted in the result.
+	 * @param pretty	Whether or not to "pretty" print the contents of an object (map) or list (array).
+	 * @param separators	Should thousands separators be used for numeric values?
+	 * @param indent	The recursive indentation for pretty printing.
+	 * @return		The formatted string representation of the input object.
+	 */
 	public static String toStringValue(
 		final CalcObjectVisitor visitor,
 		final Map<String, Object> map,
@@ -434,6 +551,17 @@ public final class CalcUtil
 	    return buf.toString();
 	}
 
+	/**
+	 * The recursive method used to convert a list (array) to a string.
+	 *
+	 * @param visitor	The outermost visitor object that is being used to calculate everything.
+	 * @param list		The input list (array) to be converted.
+	 * @param quote		Whether or not actual string objects should be double-quoted in the result.
+	 * @param pretty	Whether or not to "pretty" print the contents of an object (map) or list (array).
+	 * @param separators	Should thousands separators be used for numeric values?
+	 * @param indent	The recursive indentation for pretty printing.
+	 * @return		The formatted string representation of the input list.
+	 */
 	public static String toStringValue(
 		final CalcObjectVisitor visitor,
 		final List<Object> list,
@@ -891,7 +1019,116 @@ public final class CalcUtil
 	    }
 	}
 
+	/**
+	 * Given an interpolated string constant, get the current interpolated value, by evaluating all
+	 * embedded variable references and expressions and substituting their values in place.
+	 *
+	 * @param visitor	The visitor used to calculate expressions.
+	 * @param iStringNode	The parse tree node containing the parsed constant.
+	 * @param ctx		The parsing context which the node is part of (for error reporting).
+	 * @return		The current value of this interpolated string.
+	 */
+	public static String getIStringValue(final CalcObjectVisitor visitor, final TerminalNode iStringNode, final ParserRuleContext ctx) {
+	    String value = iStringNode.getText();
+	    Map<String, Object> variables = visitor.getVariables();
+	    Settings settings = visitor.getSettings();
 
+	    String rawValue = getRawString(value);
+	    int lastPos = -1;
+	    int pos;
+	    StringBuilder output = new StringBuilder(rawValue.length() * 2);
+	    while ((pos = rawValue.indexOf('$', ++lastPos)) >= 0) {
+		output.append(rawValue.substring(lastPos, pos));
+
+		if (pos == rawValue.length() - 1)
+		    throw new CalcExprException("%calc#invalidConstruct", ctx);
+
+		if (rawValue.charAt(pos + 1) == '$') {
+		    // Try to parse out a loop variable name here and substitute if found
+		    // so that $$var would get $var value, but "$$(" would result in "$("
+		    int identPos = pos + 2;
+		    while (identPos < rawValue.length() && isIdentifierPart(rawValue.charAt(identPos)))
+			identPos++;
+		    if (identPos > pos + 2) {
+			String varName = rawValue.substring(pos + 1, identPos);
+			Object varValue = getMemberValue(variables, varName, settings.ignoreNameCase);
+			// But if $var is not defined, then forget it, and just output "$" and go on
+			if (varValue != null) {
+			    output.append(toStringValue(visitor, varValue, false, false, settings.separatorMode, ""));
+			    lastPos = identPos - 1;
+			}
+			else {
+			    output.append('$');
+			    lastPos = pos + 1;
+			}
+		    }
+		    else {
+			output.append('$');
+			lastPos = pos + 1;
+		    }
+		}
+		else if (rawValue.charAt(pos + 1) == '{') {
+		    int nextPos = rawValue.indexOf('}', pos + 1);
+
+		    if (pos + 2 >= rawValue.length() || nextPos < 0)
+			throw new CalcExprException("%calc#invalidConst2", ctx);
+
+		    String expr = rawValue.substring(pos + 2, nextPos);
+		    Object exprValue = Calc.processString(expr, true);
+		    output.append(toStringValue(visitor, exprValue, false, false, settings.separatorMode, ""));
+		    lastPos = nextPos;
+		}
+		else if (isIdentifierStart(rawValue.charAt(pos + 1))) {
+		    int identPos = pos + 2;
+		    while (identPos < rawValue.length() && isIdentifierPart(rawValue.charAt(identPos)))
+			identPos++;
+		    String varName = rawValue.substring(pos + 1, identPos);
+		    output.append(toStringValue(visitor,
+			getMemberValue(variables, varName, settings.ignoreNameCase), false, false, settings.separatorMode, ""));
+		    lastPos = identPos - 1;
+		}
+		else
+		    throw new CalcExprException("%calc#invalidConstruct", ctx);
+	    }
+	    if (lastPos < rawValue.length())
+		output.append(rawValue.substring(lastPos));
+
+	    return output.toString();
+	}
+
+	/**
+	 * Given the escaped form of a string (that is, what appears in the script as the user
+	 * typed it), remove the outer quotes, convert any escape sequences, and return the
+	 * raw string ready to be further processed.
+	 *
+	 * @param escapedForm	The input string value.
+	 * @return		The raw string data, with all quotes removed and escape sequences converted.
+	 */
+	public static String getRawString(final String escapedForm) {
+	    return CharUtil.convertEscapeSequences(CharUtil.stripAnyQuotes(escapedForm, true));
+	}
+
+	/**
+	 * A string constant can be used as a member name, but it needs quotes around it.
+	 * This method gets the raw string value (with Unicode escapes decoded, and etc.) and
+	 * adds the required quotes (whichever quotes it started with).
+	 *
+	 * @param constantText	The text as it appears in the script.
+	 * @return		The properly decoded and quoted member name from it.
+	 */
+	public static String getStringMemberName(final String constantText) {
+	    char quoteChar = constantText.charAt(0);
+	    return CharUtil.addQuotes(getRawString(constantText), quoteChar);
+	}
+
+	/**
+	 * Is the given member name defined in the object?
+	 *
+	 * @param map		 The object to search.
+	 * @param varName	 The member name to search for.
+	 * @param ignoreNameCase Whether the search should ignore name case or not.
+	 * @return	{@code true} or {@code false} if the object has such a member
+	 */
 	public static boolean isMemberDefined(Map<String, Object> map, String varName, boolean ignoreNameCase) {
 	    if (ignoreNameCase) {
 		if (map.containsKey(varName)) {
@@ -912,6 +1149,14 @@ public final class CalcUtil
 	}
 
 
+	/**
+	 * Retrieve the named member's value from the object.
+	 *
+	 * @param map		 The object to search.
+	 * @param varName	 The member name to search for.
+	 * @param ignoreNameCase Whether the search should ignore name case or not.
+	 * @return		 The member value, if any, or {@code null}.
+	 */
 	public static Object getMemberValue(Map<String, Object> map, String varName, boolean ignoreNameCase) {
 	    if (ignoreNameCase) {
 		if (map.containsKey(varName)) {
@@ -935,6 +1180,13 @@ public final class CalcUtil
 	}
 
 
+	/**
+	 * Remove the member entry from the object, effectively setting that member's value back to {@code null}.
+	 *
+	 * @param map		 The object to modify.
+	 * @param varName	 Name of the member to remove.
+	 * @param ignoreNameCase Whether the member name search should ignore name case or not.
+	 */
 	public static void removeMember(Map<String, Object> map, String varName, boolean ignoreNameCase) {
 	    if (ignoreNameCase) {
 		if (map.containsKey(varName)) {

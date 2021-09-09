@@ -242,6 +242,8 @@
  *	07-Sep-2021 (rlwhitcomb)
  *	    Make ":library", ":lib", ":libs", and ":libraries" synonyms for
  *	    ":include" (because the command line option is "-library").
+ *	08-Sep-2021 (rlwhitcomb)
+ *	    Allow ISTRING as a member name for objects!
  */
 
 grammar Calc;
@@ -445,15 +447,16 @@ obj
 pair
    : ID ':' expr
    | STRING ':' expr
+   | ISTRING ':' expr
    ;
 
 var
-   : var ( DOT ( var | STRING ) )       # objVar
-   | var ( '[' expr ']' | INDEXES )     # arrVar
-   | var actualParams                   # functionVar
-   | ID                                 # idVar
-   | LOCALVAR                           # localVar
-   | GLOBALVAR                          # globalVar
+   : var ( DOT ( var | STRING | ISTRING ) ) # objVar
+   | var ( '[' expr ']' | INDEXES )         # arrVar
+   | var actualParams                       # functionVar
+   | ID                                     # idVar
+   | LOCALVAR                               # localVar
+   | GLOBALVAR                              # globalVar
    ;
 
 value

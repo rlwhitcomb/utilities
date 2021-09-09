@@ -278,6 +278,8 @@
  *	    Add "parseCommandLine" function to deal with quotes, etc. (hopefully the same way Java does it).
  *	07-Jul-2021 (rlwhitcomb)
  *	    Make class final and constructor private.
+ *	09-Sep-2021 (rlwhitcomb)
+ *	    Another form of "addQuotes".
  */
 
 package info.rlwhitcomb.util;
@@ -604,6 +606,20 @@ public final class CharUtil
 	 */
 	public static void addBackQuotes(String value, StringBuilder buf) {
 	    internalAddQuotes(value, "`", '\\', buf);
+	}
+
+
+	/**
+	 * Add any kind of quote, while escaping any embedded ones.
+	 *
+	 * @param value	The raw text value to quote.
+	 * @param quote	The quote character to use.
+	 * @return	The text correctly quoted and escaped.
+	 */
+	public static String addQuotes(String value, char quote) {
+	    StringBuilder buf = new StringBuilder();
+	    internalAddQuotes(value, Character.toString(quote), '\\', buf);
+	    return buf.toString();
 	}
 
 

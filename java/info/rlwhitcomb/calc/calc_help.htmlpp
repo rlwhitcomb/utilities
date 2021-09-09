@@ -390,6 +390,11 @@ or
      can also be referenced by <i>variable</i><code>.</code><i>member</i> (where <i>member</i> is the identifier or string referencing
      a key of one of the key/value pairs in the object).  All this is consistent with JavaScript, or JSON usage (with the slight
      variation that keys can also be identifiers here, while in pure JSON form only strings are allowed as keys).
+  <p>As another convenience for dynamically referencing member names, an interpolated string (in the form <code>`...`</code>) can be used to reference
+     the member, and the current value of any expressions or variables referenced in the string will be used to construct the member name. Note that
+     when regular strings are used as member names, the exact quotes will be used as part of the name (so, for instance <code>'h'</code> is a different
+     member than <code>"h"</code>, or than <code>h</code>). When using interpolated strings to reference these <i>"string"</i> name members, the quotes
+     must be explicit. Here is an (extreme) example: <code>a."f".'h'</code> can be referenced using <code>m1='"f"';m2="'h'";a.`$m1`.`$m2`</code>.
   <p>Array or object constants can be expressed using this JSON notation, as in:
 <p class="indent"> <code style="color:green;">{ a: 1, b:2, c:'abc', d:[ 1,3,4 ] }</code> </p>
 or

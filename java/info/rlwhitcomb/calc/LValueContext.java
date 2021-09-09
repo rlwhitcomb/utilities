@@ -53,6 +53,9 @@
  *	25-Aug-2021 (rlwhitcomb)
  *	    Implement global variables ($nn, set on command line) and do
  *	    special error handling for them.
+ *	09-Sep-2021 (rlwhitcomb)
+ *	    Allow interpolated strings as member names; fix potential
+ *	    problems with string names having escape sequences.
  */
  package info.rlwhitcomb.calc;
 
@@ -63,7 +66,9 @@ import java.util.Map;
 
 import org.antlr.v4.runtime.tree.TerminalNode;
 
+import static info.rlwhitcomb.calc.CalcUtil.getIStringValue;
 import static info.rlwhitcomb.calc.CalcUtil.getMemberValue;
+import static info.rlwhitcomb.calc.CalcUtil.getStringMemberName;
 import static info.rlwhitcomb.calc.CalcUtil.isMemberDefined;
 import info.rlwhitcomb.util.Intl;
 
@@ -372,7 +377,11 @@ class LValueContext
 
 		TerminalNode string = objVarCtx.STRING();
 		if (string != null) {
-		    objLValue = objLValue.makeMapLValue(visitor, objVarCtx, string.getText());
+		    objLValue = objLValue.makeMapLValue(visitor, objVarCtx, getStringMemberName(string.getText()));
+		}
+		string = objVarCtx.ISTRING();
+		if (string != null) {
+		    objLValue = objLValue.makeMapLValue(visitor, objVarCtx, getIStringValue(visitor, string, objVarCtx));
 		}
 
 		CalcParser.VarContext rhsVarCtx = objVarCtx.var(1);

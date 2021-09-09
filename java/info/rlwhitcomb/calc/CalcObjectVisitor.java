@@ -334,6 +334,8 @@
  *	02-Sep-2021 (rlwhitcomb)
  *	    Issue #16: Change cutover for two-digit years to "today + 30 years" instead of 50.
  *	    Issue #10: Use BigInteger for duration conversions.
+ *	08-Sep-2021 (rlwhitcomb)
+ *	    Allow ISTRING for member names.
  */
 package info.rlwhitcomb.calc;
 
@@ -515,10 +517,6 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    return oldSilent;
 	}
 
-	private String processString(String escapedForm) {
-	    return CharUtil.convertEscapeSequences(CharUtil.stripAnyQuotes(escapedForm, true));
-	}
-
 	private void displayActionMessage(String formatOrKey, Object... args) {
 	    if (initialized && !settings.silent) {
 		String message = Intl.formatKeyString(formatOrKey, args);
@@ -543,6 +541,10 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    catch (NumberFormatException nfe) {
 		variables.put(String.format("$%1$d", index), arg);
 	    }
+	}
+
+	public Map<String, Object> getVariables() {
+	    return variables;
 	}
 
 	public MathContext getMathContext() {
@@ -914,7 +916,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public Object visitEchoDirective(CalcParser.EchoDirectiveContext ctx) {
 	    String msg = getStringValue(ctx.expr(), true, false, settings.separatorMode);
 
-	    displayer.displayMessage(processString(msg));
+	    displayer.displayMessage(getRawString(msg));
 
 	    return msg;
 	}
@@ -1662,9 +1664,13 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    CalcParser.ObjContext oCtx = ctx.obj();
 	    Map<String, Object> obj = new HashMap<>();
 	    for (CalcParser.PairContext pCtx : oCtx.pair()) {
-		TerminalNode id  = pCtx.ID();
-		TerminalNode str = pCtx.STRING();
-		String key = (id != null) ? id.getText() : str.getText();
+		TerminalNode id   = pCtx.ID();
+		TerminalNode str  = pCtx.STRING();
+		TerminalNode istr = pCtx.ISTRING();
+		String key =
+			(id != null) ? id.getText()
+		      : (str != null) ? getStringMemberName(str.getText())
+		      : getIStringValue(this, istr, ctx);
 		Object value = visit(pCtx.expr());
 		obj.put(key, value);
 	    }
@@ -3212,74 +3218,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public Object visitStringValue(CalcParser.StringValueContext ctx) {
 	    String value = ctx.STRING().getText();
 
-	    return processString(value);
+	    return getRawString(value);
 	}
 
 	@Override
 	public Object visitIStringValue(CalcParser.IStringValueContext ctx) {
-	    String value = ctx.ISTRING().getText();
-
-	    String rawValue = processString(value);
-	    int lastPos = -1;
-	    int pos;
-	    StringBuilder output = new StringBuilder(rawValue.length() * 2);
-	    while ((pos = rawValue.indexOf('$', ++lastPos)) >= 0) {
-		output.append(rawValue.substring(lastPos, pos));
-
-		if (pos == rawValue.length() - 1)
-		    throw new CalcExprException("%calc#invalidConstruct", ctx);
-
-		if (rawValue.charAt(pos + 1) == '$') {
-		    // Try to parse out a loop variable name here and substitute if found
-		    // so that $$var would get $var value, but "$$(" would result in "$("
-		    int identPos = pos + 2;
-		    while (identPos < rawValue.length() && isIdentifierPart(rawValue.charAt(identPos)))
-			identPos++;
-		    if (identPos > pos + 2) {
-			String varName = rawValue.substring(pos + 1, identPos);
-			Object varValue = getMemberValue(variables, varName, settings.ignoreNameCase);
-			// But if $var is not defined, then forget it, and just output "$" and go on
-			if (varValue != null) {
-			    output.append(toStringValue(this, varValue, false, false, settings.separatorMode, ""));
-			    lastPos = identPos - 1;
-			}
-			else {
-			    output.append('$');
-			    lastPos = pos + 1;
-			}
-		    }
-		    else {
-			output.append('$');
-			lastPos = pos + 1;
-		    }
-		}
-		else if (rawValue.charAt(pos + 1) == '{') {
-		    int nextPos = rawValue.indexOf('}', pos + 1);
-
-		    if (pos + 2 >= rawValue.length() || nextPos < 0)
-			throw new CalcExprException("%calc#invalidConst2", ctx);
-
-		    String expr = rawValue.substring(pos + 2, nextPos);
-		    Object exprValue = Calc.processString(expr, true);
-		    output.append(toStringValue(this, exprValue, false, false, settings.separatorMode, ""));
-		    lastPos = nextPos;
-		}
-		else if (isIdentifierStart(rawValue.charAt(pos + 1))) {
-		    int identPos = pos + 2;
-		    while (identPos < rawValue.length() && isIdentifierPart(rawValue.charAt(identPos)))
-			identPos++;
-		    String varName = rawValue.substring(pos + 1, identPos);
-		    output.append(toStringValue(this,
-			getMemberValue(variables, varName, settings.ignoreNameCase), false, false, settings.separatorMode, ""));
-		    lastPos = identPos - 1;
-		}
-		else
-		    throw new CalcExprException("%calc#invalidConstruct", ctx);
-	    }
-	    if (lastPos < rawValue.length())
-		output.append(rawValue.substring(lastPos));
-
-	    return output.toString();
+	    return getIStringValue(this, ctx.ISTRING(), ctx);
 	}
 
 	@Override
