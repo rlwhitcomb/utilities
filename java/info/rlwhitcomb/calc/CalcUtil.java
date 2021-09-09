@@ -70,6 +70,7 @@
  *	    Implement "ignore case" functions for variables / members.
  *	09-Sep-2021 (rlwhitcomb)
  *	    More Javadoc. Move the "istring" processing into here for member names.
+ *	    Fix an issue with string member names with "handed" quotes.
  */
 package info.rlwhitcomb.calc;
 
@@ -1111,14 +1112,16 @@ public final class CalcUtil
 	/**
 	 * A string constant can be used as a member name, but it needs quotes around it.
 	 * This method gets the raw string value (with Unicode escapes decoded, and etc.) and
-	 * adds the required quotes (whichever quotes it started with).
+	 * adds the required quotes (whichever quotes it started with, which could be "handed"
+	 * quotes as in <code>&#x00AB;</code> and <code>&#x00BB;</code>).
 	 *
 	 * @param constantText	The text as it appears in the script.
 	 * @return		The properly decoded and quoted member name from it.
 	 */
 	public static String getStringMemberName(final String constantText) {
-	    char quoteChar = constantText.charAt(0);
-	    return CharUtil.addQuotes(getRawString(constantText), quoteChar);
+	    char leftQuote = constantText.charAt(0);
+	    char rightQuote = constantText.charAt(constantText.length() - 1);
+	    return CharUtil.addQuotes(getRawString(constantText), leftQuote, rightQuote);
 	}
 
 	/**

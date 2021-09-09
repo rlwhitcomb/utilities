@@ -280,6 +280,7 @@
  *	    Make class final and constructor private.
  *	09-Sep-2021 (rlwhitcomb)
  *	    Another form of "addQuotes".
+ *	    Which needs tweaking for "handed" quotes.
  */
 
 package info.rlwhitcomb.util;
@@ -543,7 +544,7 @@ public final class CharUtil
 	 * @param buf	The buffer we're working in.
 	 */
 	public static void addQuotes(String value, StringBuilder buf) {
-	    internalAddQuotes(value, "'", '\'', buf);
+	    internalAddQuotes(value, "'", "'", '\'', buf);
 	}
 
 
@@ -574,7 +575,7 @@ public final class CharUtil
 	 * @see	#stripDoubleQuotes
 	 */
 	public static void addDoubleQuotes(String value, StringBuilder buf) {
-	    internalAddQuotes(value, "\"", '\\', buf);
+	    internalAddQuotes(value, "\"", "\"", '\\', buf);
 	}
 
 
@@ -605,35 +606,37 @@ public final class CharUtil
 	 * @see	#stripBackQuotes
 	 */
 	public static void addBackQuotes(String value, StringBuilder buf) {
-	    internalAddQuotes(value, "`", '\\', buf);
+	    internalAddQuotes(value, "`", "`", '\\', buf);
 	}
 
 
 	/**
 	 * Add any kind of quote, while escaping any embedded ones.
 	 *
-	 * @param value	The raw text value to quote.
-	 * @param quote	The quote character to use.
-	 * @return	The text correctly quoted and escaped.
+	 * @param value		The raw text value to quote.
+	 * @param leftQuote	The left quote character to use.
+	 * @param rightQuote	The right quote (often the same as the left).
+	 * @return		The text correctly quoted and escaped.
 	 */
-	public static String addQuotes(String value, char quote) {
+	public static String addQuotes(String value, char leftQuote, char rightQuote) {
 	    StringBuilder buf = new StringBuilder();
-	    internalAddQuotes(value, Character.toString(quote), '\\', buf);
+	    internalAddQuotes(value, Character.toString(leftQuote), Character.toString(rightQuote), '\\', buf);
 	    return buf.toString();
 	}
 
 
-	private static void internalAddQuotes(String value, String quote, char escapeChar, StringBuilder buf) {
+	private static void internalAddQuotes(String value, String leftQuote, String rightQuote, char escapeChar, StringBuilder buf) {
 	    if (value != null) {
-		buf.append(quote);
+		buf.append(leftQuote);
 		int ix = buf.length();
 		buf.append(value);
-		ix = buf.indexOf(quote, ix);
+		int len = rightQuote.length();
+		ix = buf.indexOf(rightQuote, ix);
 		while (ix >= 0) {
 		    buf.insert(ix, escapeChar);
-		    ix = buf.indexOf(quote, ix + 2);
+		    ix = buf.indexOf(rightQuote, ix + len + 1);
 		}
-		buf.append(quote);
+		buf.append(rightQuote);
 	    }
 	}
 
