@@ -336,6 +336,8 @@
  *	    Issue #10: Use BigInteger for duration conversions.
  *	08-Sep-2021 (rlwhitcomb)
  *	    Allow ISTRING for member names.
+ *	10-Sep-2021 (rlwhitcomb)
+ *	    #21 Fix the way "join" works with maps and lists.
  */
 package info.rlwhitcomb.calc;
 
@@ -2304,25 +2306,28 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	 * to find the actual first value, in order to determine if the comparisons will be
 	 * done as string or numeric.
 	 *
-	 * @param eCtx	The expression context we're evaluating (i.e., the first parse tree).
-	 * @param obj	The first object, which could be an object, a list, or an actual value.
-	 * @return	The real first value, descending to the lowest level of a compound object.
+	 * @param eCtx	  The expression context we're evaluating (i.e., the first parse tree).
+	 * @param obj	  The first object, which could be an object, a list, or an actual value.
+	 * @param forJoin Whether or not this is a "join" operation.
+	 * @return	  The real first value, descending to the lowest level of a compound object.
 	 */
-	private Object getFirstValue(CalcParser.ExprContext eCtx, Object obj) {
+	private Object getFirstValue(CalcParser.ExprContext eCtx, Object obj, boolean forJoin) {
 	    Object value = evaluateFunction(obj);
 
 	    nullCheck(value, eCtx);
 
-	    if (value instanceof List) {
-		@SuppressWarnings("unchecked")
-		List<Object> list = (List<Object>) value;
-		return list.size() > 0 ? getFirstValue(eCtx, list.get(0)) : null;
-	    }
-	    else if (value instanceof Map) {
-		@SuppressWarnings("unchecked")
-		Map<String, Object> map = (Map<String, Object>) value;
-		Iterator<Object> iter = map.values().iterator();
-		return iter.hasNext() ? getFirstValue(eCtx, iter.next()) : null;
+	    if (!forJoin) {
+		if (value instanceof List) {
+		    @SuppressWarnings("unchecked")
+		    List<Object> list = (List<Object>) value;
+		    return list.size() > 0 ? getFirstValue(eCtx, list.get(0), forJoin) : null;
+		}
+		else if (value instanceof Map) {
+		    @SuppressWarnings("unchecked")
+		    Map<String, Object> map = (Map<String, Object>) value;
+		    Iterator<Object> iter = map.values().iterator();
+		    return iter.hasNext() ? getFirstValue(eCtx, iter.next(), forJoin) : null;
+		}
 	    }
 
 	    return value;
@@ -2337,9 +2342,10 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	 * @param objectList	The "flat map" or list of objects we're building.
 	 * @param isString	Whether to build the value list as strings, or numeric (determined by the
 	 *			first actual value, or always {@code true} for {@code join}).
+	 * @param forJoin	{@code true} for a "join" operation, which will not recurse into lists or maps to begin with.
 	 * @see #getFirstValue
 	 */
-	private void buildMinMaxJoinList(ParserRuleContext ctx, Object obj, List<Object> objectList, boolean isString) {
+	private void buildFlatMap(ParserRuleContext ctx, Object obj, List<Object> objectList, boolean isString, boolean forJoin) {
 	    Object value = evaluateFunction(obj);
 
 	    nullCheck(value, ctx);
@@ -2347,15 +2353,25 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    if (value instanceof List) {
 		@SuppressWarnings("unchecked")
 		List<Object> list = (List<Object>) value;
-		for (Object listObj : list) {
-		    buildMinMaxJoinList(ctx, listObj, objectList, isString);
+		if (forJoin) {
+		    objectList.add(list);
+		}
+		else {
+		    for (Object listObj : list) {
+			buildFlatMap(ctx, listObj, objectList, isString, forJoin);
+		    }
 		}
 	    }
 	    else if (value instanceof Map) {
 		@SuppressWarnings("unchecked")
 		Map<String, Object> map = (Map<String, Object>) value;
-		for (Object mapObj : map.values()) {
-		    buildMinMaxJoinList(ctx, mapObj, objectList, isString);
+		if (forJoin) {
+		    objectList.add(map);
+		}
+		else {
+		    for (Object mapObj : map.values()) {
+			buildFlatMap(ctx, mapObj, objectList, isString, forJoin);
+		    }
 		}
 	    }
 	    else if (isString) {
@@ -2377,18 +2393,19 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	 * Construct the "flat map" or value list for {@code min}, {@code max}, or {@code join}
 	 * so that we can traverse a simple list to obtain the desired result.
 	 *
-	 * @param exprs	The list of expressions parsed as the arguments to the function.
-	 * @return	The "flat map" of the values from those arguments.
+	 * @param exprs	  The list of expressions parsed as the arguments to the function.
+	 * @param forJoin Whether or not this is a "join" operation.
+	 * @return	  The "flat map" of the values from those arguments.
 	 */
-	private List<Object> buildMinMaxJoinList(List<CalcParser.ExprContext> exprs) {
+	private List<Object> buildFlatMap(List<CalcParser.ExprContext> exprs, boolean forJoin) {
 	    // Do a "peek" inside any lists or maps to get the first value
 	    CalcParser.ExprContext firstCtx = exprs.get(0);
-	    boolean isString = getFirstValue(firstCtx, visit(firstCtx)) instanceof String;
+	    boolean isString = getFirstValue(firstCtx, visit(firstCtx), forJoin) instanceof String;
 
 	    List<Object> objects = new ArrayList<>();
 
 	    for (CalcParser.ExprContext eCtx : exprs) {
-		buildMinMaxJoinList(eCtx, visit(eCtx), objects, isString);
+		buildFlatMap(eCtx, visit(eCtx), objects, isString, forJoin);
 	    }
 
 	    return objects;
@@ -2397,7 +2414,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitMaxExpr(CalcParser.MaxExprContext ctx) {
 	    List<CalcParser.ExprContext> exprs = ctx.exprN().exprList().expr();
-	    List<Object> objects = buildMinMaxJoinList(exprs);
+	    List<Object> objects = buildFlatMap(exprs, false);
 	    Object firstValue = objects.size() > 0 ? objects.get(0) : null;
 
 	    if (firstValue instanceof String) {
@@ -2434,7 +2451,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitMinExpr(CalcParser.MinExprContext ctx) {
 	    List<CalcParser.ExprContext> exprs = ctx.exprN().exprList().expr();
-	    List<Object> objects = buildMinMaxJoinList(exprs);
+	    List<Object> objects = buildFlatMap(exprs, false);
 	    Object firstValue = objects.size() > 0 ? objects.get(0) : null;
 
 	    if (firstValue instanceof String) {
@@ -2474,7 +2491,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    List<Object> objects = new ArrayList<>();
 
 	    for (CalcParser.ExprContext eCtx : exprs) {
-		buildMinMaxJoinList(eCtx, visit(eCtx), objects, true);
+		buildFlatMap(eCtx, visit(eCtx), objects, true, true);
 	    }
 
 	    StringBuilder buf = new StringBuilder();
@@ -2483,13 +2500,38 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    // This doesn't make sense unless there are at least 3 values
 	    // So, one value just gets that value
 	    // two values gets the two just concatenated together
-	    // three or more, the first n - 1 are joined by the nth (string) value
+	    // three or more, the first N - 1 are joined by the Nth (string) value
 	    if (length == 1) {
-		return objects.get(0);
+		Object obj0 = objects.get(0);
+		// One map or list => concatenate all objects in it
+		if (obj0 instanceof List || obj0 instanceof Map) {
+		    objects.clear();
+		    buildFlatMap(ctx, obj0, objects, true, false);
+		    for (Object obj : objects) {
+			buf.append(obj);
+		    }
+		    return buf.toString();
+		}
+		return obj0;
 	    }
 	    else if (length == 2) {
-		buf.append(objects.get(0));
-		buf.append(objects.get(1));
+		Object obj0 = objects.get(0);
+		Object obj1 = objects.get(1);
+		if (obj0 instanceof List || obj0 instanceof Map) {
+		    // One map or list, plus a join expression
+		    objects.clear();
+		    buildFlatMap(ctx, obj0, objects, true, false);
+		    for (int i = 0; i < objects.size(); i++) {
+			if (i > 0)
+			    buf.append(obj1);
+			buf.append(objects.get(i));
+		    }
+		}
+		else {
+		    // Two simple objects, just concatenate their string representations
+		    buf.append(obj0);
+		    buf.append(obj1);
+		}
 		return buf.toString();
 	    }
 	    else {
@@ -2497,7 +2539,19 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		for (int i = 0; i < length - 1; i++) {
 		    if (i > 0)
 			buf.append(joinExpr);
-		    buf.append(objects.get(i));
+		    Object obj = objects.get(i);
+		    if (obj instanceof List || obj instanceof Map) {
+			List<Object> objects1 = new ArrayList<>();
+			buildFlatMap(ctx, obj, objects1, true, false);
+			for (int j = 0; j < objects1.size(); j++) {
+			    if (j > 0)
+				buf.append(joinExpr);
+			    buf.append(objects1.get(j));
+			}
+		    }
+		    else {
+			buf.append(objects.get(i));
+		    }
 		}
 		return buf.toString();
 	    }

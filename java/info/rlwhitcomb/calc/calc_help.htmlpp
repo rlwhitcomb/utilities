@@ -671,15 +671,15 @@ or
   <p>The <code>min</code> and <code>max</code> functions do either numeric or string comparisons, depending on the type of the
      first value in the list. While the <code>sumof</code> and <code>productof</code> functions try to convert all their
      values to numbers.
-  <p>The <code>join</code> function is a little complicated, but still intuitive once you figure it out. With one argument the
-     result is the string representation of the value. Two arguments simply concatenates the string representations. With three
-     or more arguments, the last argument in the list is the "glue" value, which is inserted in between the string
-     representations of each of the other arguments. For arrays or objects the values in the object are treated as if they were
-     separately listed as parameters, so for three or more elements the "last" one is treated as the glue value. <em>This can get
-     really weird for objects, so BEWARE! Of course, this sounds less than helpful, so this behavior may be subject to change
-     at some point!</em><br>
-     Some examples:  <code>join 1 -&gt; "1"</code>, while
-     <code>join 1, 2 -&gt; "12"</code>. The complicated ones look like this:  <code>join 'a','b','c','-' -&gt; "a-b-c"</code>.
+  <p>The <code>join</code> function is a little complicated, but still intuitive once you figure it out. With one simple value argument
+     the result is the string representation of the value. With one array or object value, the result is the concatenation of the values
+     within the object (the flat map of the values, that is). With one array/object value and one other value, the flat map of the values
+     in the array or object are concatenated with the second argument as the join string. With any two other objects, the result is
+     simply the concatenation of the two values. With three or more arguments, the join (or "glue") value is the last argument in the
+     list, and the flat map of all the other values is joined together by that string.<br>
+     Some examples:  <code>join 1 -&gt; "1"</code>, while <code>join 1, 2 -&gt; "12"</code>.
+     The complicated ones look like this:  <code>join 'a','b','c','-' -&gt; "a-b-c"</code>.
+     While <code>arr=[1,2,3];join arr,'-' -&gt; 1-2-3</code>.
   <p>The <code>split</code> function takes one string argument, a second regular expression string, and an optional limit
      value that determines how many splits are returned. See the documentation for the Java <code>String.split</code> method
      for further details on how this parameter works.
