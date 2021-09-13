@@ -63,4 +63,12 @@ def moy_name = { _month_names_ [ moy date - 1 ] }
  */
 def long_date = { `${dow_name}, ${moy_name} ${dom(date)}, ${yod(date)}` }
 
+/*
+ * Compute the flat map of an array.
+ *
+ * @param arr The input array.
+ * @return    The flat map of that array.
+ */
+def flat_map = { eval `[${join arr, ','}]` }
+
 :quiet pop
