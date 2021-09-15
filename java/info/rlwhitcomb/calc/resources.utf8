@@ -72,6 +72,8 @@
 #	    New error message for attempted assignments to the global arguments.
 #	01-Sep-2021 (rlwhitcomb)
 #	    Error for bad input charset.
+#	15-Sep-2021 (rlwhitcomb)
+#	    Add more color tags to error messages.
 #
 
 #
@@ -129,23 +131,23 @@ varUnder2	= =========
 rational	= RATIONAL
 decimal		= DECIMAL
 
-precNotInteger		= Decimal precision of %1$s must be an integer value
-precOutOfRange		= Decimal precision of %1$d is out of range
-charOutOfRange		= Integer value of 0x%1$08X out of range of Unicode characters (0..0x10FFFF)
+precNotInteger		= Decimal precision of <v>%1$s<> must be a 32-bit integer value
+precOutOfRange		= Decimal precision of <v>%1$d<> is out of range
+charOutOfRange		= Integer value of <v>0x%1$08X<> out of range of Unicode characters (0..0x10FFFF)
 ioError			= I/O Error: %1$s
-noConvertInteger	= Unable to convert value of '%1$s' to an integer
-noConvertObjArr		= Cannot convert object or array to '%1$c' format
-noDupLocalVar		= Duplicate local variable name '%1$s' not allowed
-noDupAnonVar		= Cannot use anonymous loop variable '$_' in nested loops
-localVarNoAssign	= The value of a local variable ('%1$s') cannot be changed
-globalArgNoAssign	= The value of the global argument '%1$s' cannot be changed
+noConvertInteger	= Unable to convert value of '<x>%1$s<>' to an integer
+noConvertObjArr		= Cannot convert object or array to '<x>%1$c<>' format
+noDupLocalVar		= Duplicate local variable name '<x>%1$s<>' not allowed
+noDupAnonVar		= Cannot use anonymous loop variable '<x>$_<>' in nested loops
+localVarNoAssign	= The value of the local variable '<x>%1$s<>' cannot be changed directly
+globalArgNoAssign	= The value of the global argument '<x>%1$s<>' cannot be changed directly
 infLoopStepZero		= Infinite loop: step value is zero
 invalidConstruct	= Invalid '$' construct
 invalidConst2		= Invalid '${...}' construct
-modeError		= Mode option '%1$s' not recognized
-illegalFormat		= Unrecognized format '%1$s'
+modeError		= Mode option '<x>%1$s<>' not recognized
+illegalFormat		= Unrecognized format '<x>%1$s<>'
 fillTargetWrongType	= Target of a 'FILL' must be an array or string
-fillOneCharInt		= Fill value for a string must be one character or an integer <= 65535
+fillOneCharInt		= Fill value for a string must be one character or an integer \u2264 65535
 
 intro.help1	= "  Enter an expression (or multiple expressions separated by ';')."
 intro.help2	= "  Use '<v>help<r>' or '<v>?<r>' for a list of supported functions."
@@ -156,23 +158,23 @@ intro.help5	= ""
 #
 # From CalcUtil
 #
-valueNotNull		= Value of "%1$s" must not be null
-noConvertDecimal	= Unable to convert value of '%1$s' type to decimal number
-noConvertFraction	= Unable to convert value of '%1$s' type to fraction
-unknownType		= Unknown value type: %1$s
+valueNotNull		= Value of "<x>%1$s<>" must not be null
+noConvertDecimal	= Unable to convert value of '<x>%1$s<>' type to decimal number
+noConvertFraction	= Unable to convert value of '<x>%1$s<>' type to fraction
+unknownType		= Unknown value type: <x>%1$s<>
 
 #
 # From LValueContext
 #
-localVarNotAvail	= Local variable '%1$s' is not available
-nonObjectValue		= Variable '%1$s' already has a non-object value
-nonArrayValue		= Variable '%1$s' already has a non-array value
-indexNegative		= Index value of %1$d cannot be negative
-unknownVarCtx		= ERROR: unknown var context subclass: %1$s
-badAssign		= Assignment to %1$s without name or index.
+localVarNotAvail	= Local variable '<x>%1$s<>' is not available
+nonObjectValue		= Variable '<x>%1$s<>' already has a non-object value
+nonArrayValue		= Variable '<x>%1$s<>' already has a non-array value
+indexNegative		= Index value of <v>%1$d<> cannot be negative
+unknownVarCtx		= ERROR: unknown var context subclass: <x>%1$s<>
+badAssign		= Assignment to '<x>%1$s<>' without name or index.
 
 #
 # From UnknownOpException
 #
-unknownOp	= Unknown operator '%1$s'
+unknownOp	= Unknown operator '<x>%1$s<>'
 

@@ -191,6 +191,8 @@
  *	01-Sep-2021 (rlwhitcomb)
  *	    We desperately need a "-utf8" flag for reading files (esp. on Windows). Add several
  *	    other options for input charset as well.
+ *	15-Sep-2021 (rlwhitcomb)
+ *	    Use more color in error messages; color the error position indicator.
  */
 package info.rlwhitcomb.calc;
 
@@ -824,7 +826,7 @@ public class Calc
 		    int width = guiMode ? charPositionInLine + 1 : charPositionInLine + 3;
 		    currentIndicator = CharUtil.padToWidth("^", width, CharUtil.Justification.RIGHT);
 		    if (replMode) {
-			System.out.println(currentIndicator);
+			outFormat("calc#error", currentIndicator);
 		    }
 		    throw new CalcException(Intl.formatString("calc#syntaxError", charPositionInLine, message), line);
 		}
