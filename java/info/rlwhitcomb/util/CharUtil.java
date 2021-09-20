@@ -281,6 +281,8 @@
  *	09-Sep-2021 (rlwhitcomb)
  *	    Another form of "addQuotes".
  *	    Which needs tweaking for "handed" quotes.
+ *	20-Sep-2021 (rlwhitcomb)
+ *	    Fix Javadoc for "convertEscapeSequences" and add "\$" processing.
  */
 
 package info.rlwhitcomb.util;
@@ -867,8 +869,8 @@ public final class CharUtil
 	 * <p> There is no real error-checking in here; we assume that a parser at a
 	 * higher level has determined the syntax here is correct. It is our job here
 	 * simply to interpret the correct syntax into an unescaped form.
-	 * <p> Also note: since the Unicode escapes are only 4 digits, values outside
-	 * the BMP must be represented as surrogate pairs.
+	 * <p> Handles either <code>&bsol;uXXXX</code> or <code>&bsol;u{XXXXXX}</code> Unicode escapes,
+	 * and also {@code \$} (which is non-standard).
 	 *
 	 * @param input	The input string with embedded escape sequences.
 	 * @return	The string with the embedded escape sequences converted to their
@@ -887,6 +889,7 @@ public final class CharUtil
 			switch (ch2) {
 			    case '\\':
 			    case '/':
+			    case '$':
 				buf.append(ch2);
 				break;
 			    case 'b':

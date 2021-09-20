@@ -1648,10 +1648,11 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public Object visitDefineStmt(CalcParser.DefineStmtContext ctx) {
 	    String functionName = ctx.ID().getText();
 
-	    CalcParser.StmtBlockContext functionBody    = ctx.stmtBlock();
-	    CalcParser.FormalParamsContext formalParams = ctx.formalParams();
+	    CalcParser.StmtBlockContext functionBody       = ctx.stmtBlock();
+	    CalcParser.FormalParamListContext formalParams = ctx.formalParamList();
 
 	    String paramString = formalParams == null ? "" : getTreeText(formalParams);
+	    List<CalcParser.FormalParamContext> paramVars = formalParams == null ? null : formalParams.formalParam();
 
 // TODO: make a Function object and add name, params, body to it; save this instead of functionBody as the variable
 	    variables.put(functionName, functionBody);

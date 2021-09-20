@@ -244,6 +244,10 @@
  *	    ":include" (because the command line option is "-library").
  *	08-Sep-2021 (rlwhitcomb)
  *	    Allow ISTRING as a member name for objects!
+ *	20-Sep-2021 (rlwhitcomb)
+ *	    Slightly redefine formalParams to make it easier to implement.
+ *	    Allow "\$" in interpolated strings, to make currency constructs
+ *	    easier to read.
  */
 
 grammar Calc;
@@ -277,7 +281,7 @@ exprStmt
    ;
 
 defineStmt
-   : K_DEFINE ID formalParams ? '=' stmtBlock
+   : K_DEFINE ID formalParamList ? '=' stmtBlock
    ;
 
 loopStmt
@@ -480,9 +484,13 @@ value
    | K_NOW                       # nowValue
    ;
 
-formalParams
-   : '(' LOCALVAR ( '=' expr ) ? ( ',' LOCALVAR ( '=' expr ) ? ) * ')'
+formalParamList
+   : '(' formalParam ( ',' formalParam ) * ')'
    | '(' ')'
+   ;
+
+formalParam
+   : LOCALVAR ( '=' expr ) ?
    ;
 
 actualParams
@@ -983,7 +991,7 @@ fragment ESC6
    ;
 
 fragment ESCI
-   : '\\' ([`\\/bfnrt] | UNICODE)
+   : '\\' ([`\\/$bfnrt] | UNICODE)
    ;
 
 fragment UNICODE
