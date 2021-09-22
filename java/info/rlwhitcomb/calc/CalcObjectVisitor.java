@@ -338,6 +338,8 @@
  *	    Allow ISTRING for member names.
  *	10-Sep-2021 (rlwhitcomb)
  *	    #21 Fix the way "join" works with maps and lists.
+ *	20-Sep-2021 (rlwhitcomb)
+ *	    Add "tenpow" function (like "epow"). Add "fixup" calls to strip trailing zeros.
  */
 package info.rlwhitcomb.calc;
 
@@ -739,8 +741,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	protected Object evaluateFunction(Object value) {
 	    Object returnValue = value;
 
-	    if (value != null && value instanceof ParserRuleContext) {
-		ParserRuleContext funcCtx = (ParserRuleContext) value;
+	    if (returnValue != null && returnValue instanceof ParserRuleContext) {
+		ParserRuleContext funcCtx = (ParserRuleContext) returnValue;
 		boolean prevSilent = setSilent(true);
 		returnValue = visit(funcCtx);
 		setSilent(prevSilent);
@@ -1785,11 +1787,11 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    case "\u2795":
 			// Interestingly, this operation can change the value, if the previous
 			// value was not to the specified precision.
-			return d.plus(mc);
+			return fixup(d.plus(mc));
 		    case "-":
 		    case "\u2212":
 		    case "\u2796":
-			return d.negate();
+			return fixup(d.negate());
 		    default:
 			throw new UnknownOpException(op, expr);
 		}
@@ -1960,16 +1962,16 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			case "\u2217":
 			case "\u2715":
 			case "\u2716":
-			    return d1.multiply(d2, mc);
+			    return fixup(d1.multiply(d2, mc));
 			case "/":
 			case "\u00F7":
 			case "\u2215":
 			case "\u2797":
-			    return d1.divide(d2, mcDivide);
+			    return fixup(d1.divide(d2, mcDivide));
 			case "\\":
-			    return d1.divideToIntegralValue(d2, mcDivide);
+			    return fixup(d1.divideToIntegralValue(d2, mcDivide));
 			case "%":
-			    return d1.remainder(d2, mcDivide);
+			    return fixup(d1.remainder(d2, mcDivide));
 			default:
 			    throw new UnknownOpException(op, ctx);
 		    }
@@ -2005,7 +2007,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			BigDecimal d1 = toDecimalValue(this, e1, mc, ctx1);
 			BigDecimal d2 = toDecimalValue(this, e2, mc, ctx2);
 
-			return d1.subtract(d2, mc);
+			return fixup(d1.subtract(d2, mc));
 		    }
 		default:
 		    throw new UnknownOpException(op, ctx);
@@ -2168,6 +2170,13 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    BigDecimal e = getDecimalValue(ctx.expr());
 
 	    return MathUtil.ePower(e, mc);
+	}
+
+	@Override
+	public Object visitTenPowerExpr(CalcParser.TenPowerExprContext ctx) {
+	    BigDecimal e = getDecimalValue(ctx.expr());
+
+	    return MathUtil.tenPower(e, mc);
 	}
 
 	@Override

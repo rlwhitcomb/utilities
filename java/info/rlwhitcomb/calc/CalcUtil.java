@@ -71,6 +71,8 @@
  *	09-Sep-2021 (rlwhitcomb)
  *	    More Javadoc. Move the "istring" processing into here for member names.
  *	    Fix an issue with string member names with "handed" quotes.
+ *	21-Sep-2021 (rlwhitcomb)
+ *	    Add "fixup" method to strip trailing (unnecessary) zeros.
  */
 package info.rlwhitcomb.calc;
 
@@ -282,6 +284,16 @@ public final class CalcUtil
 	}
 
 	/**
+	 * Fixup a {@link BigDecimal} value by stripping trailing zeros for a nicer presentation.
+	 *
+	 * @param bd	The candidate value.
+	 * @return	The numerically equivalent value with no trailing zeros.
+	 */
+	public static BigDecimal fixup(final BigDecimal bd) {
+	    return bd.stripTrailingZeros();
+	}
+
+	/**
 	 * Cast or convert the given value to a {@link BigDecimal} value for use in calculations.
 	 *
 	 * @param visitor	The visitor, used to evaluate expressions.
@@ -297,19 +309,19 @@ public final class CalcUtil
 	    nullCheck(value, ctx);
 
 	    if (value instanceof BigDecimal)
-		return (BigDecimal) value;
+		return fixup((BigDecimal) value);
 	    else if (value instanceof BigInteger)
-		return new BigDecimal((BigInteger) value);
+		return fixup(new BigDecimal((BigInteger) value));
 	    else if (value instanceof BigFraction)
-		return ((BigFraction) value).toDecimal(mc);
+		return fixup(((BigFraction) value).toDecimal(mc));
 	    else if (value instanceof String)
-		return new BigDecimal((String) value);
+		return fixup(new BigDecimal((String) value));
 	    else if (value instanceof Boolean)
 		return ((Boolean) value).booleanValue() ? BigDecimal.ONE : BigDecimal.ZERO;
 	    else if (value instanceof Double || value instanceof Float)
-		return new BigDecimal(((Number) value).doubleValue());
+		return fixup(new BigDecimal(((Number) value).doubleValue()));
 	    else if (value instanceof Number)
-		return BigDecimal.valueOf(((Number) value).longValue());
+		return fixup(BigDecimal.valueOf(((Number) value).longValue()));
 
 	    // Here we are not able to make sense of the object, so we have an error
 	    String typeName = value.getClass().getSimpleName();

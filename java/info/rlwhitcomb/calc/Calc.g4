@@ -248,6 +248,7 @@
  *	    Slightly redefine formalParams to make it easier to implement.
  *	    Allow "\$" in interpolated strings, to make currency constructs
  *	    easier to read.
+ *	    Add "tenpow" function.
  */
 
 grammar Calc;
@@ -339,6 +340,7 @@ expr
    | K_LN2 expr                          # ln2Expr
    | K_LN expr                           # lnExpr
    | K_EPOW expr                         # ePowerExpr
+   | K_TENPOW expr                       # tenPowerExpr
    | K_SIGNUM expr                       # signumExpr
    | K_LENGTH ( expr | dotRange )        # lengthExpr
    | K_SCALE expr                        # scaleExpr
@@ -633,6 +635,8 @@ K_LN       : L N ;
 K_LN2      : L N '2' ;
 
 K_EPOW     : E P O W ;
+
+K_TENPOW   : T E N P O W ;
 
 K_SIGNUM   : S I G N U M ;
 

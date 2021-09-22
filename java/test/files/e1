@@ -90,9 +90,11 @@ scale b; scale c; scale d;
 h = 23
 i = ln(h)
 e**i
+epow(i)
 m = 10000
 n = log(m)
 10**n
+tenpow(n)
 p = ln2(1000000)
 2**p
 isprime 15485863

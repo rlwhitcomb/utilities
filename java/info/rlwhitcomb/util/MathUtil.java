@@ -41,6 +41,8 @@
  *	    Tweak some error messages.
  *	07-Jul-2021 (rlwhitcomb)
  *	    Make the class final.
+ *	20-Sep-2021 (rlwhitcomb)
+ *	    Add 'tenPower' method (like 'ePower').
  */
 package info.rlwhitcomb.util;
 
@@ -65,6 +67,7 @@ public final class MathUtil
 
 	private static final BigInteger I_TWO = BigInteger.valueOf(2L);
 	private static final BigDecimal D_TWO = BigDecimal.valueOf(2L);
+	private static final BigDecimal D_TEN = BigDecimal.valueOf(10L);
 
 	/**
 	 * A rational approximation of PI good to ~25 decimal digits.
@@ -232,7 +235,7 @@ public final class MathUtil
 	 * @param pow	The power of 10 we need.
 	 */
 	public static BigInteger tenPower(final int pow) {
-	    return new BigInteger(CharUtil.padToWidth("1", pow + 1, '0'));
+	    return BigInteger.TEN.pow(pow);
 	}
 
 	/**
@@ -764,7 +767,7 @@ public final class MathUtil
 
 	    result = BigDecimal.ONE;
 
-	    if (!fracExp.equals(BigInteger.ZERO)) {
+	    if (!fracExp.equals(BigDecimal.ZERO)) {
 		result = result.add(fracExp);
 
 		BigDecimal numer      = fracExp;
@@ -791,6 +794,44 @@ public final class MathUtil
 	    result = e(mc).pow(intExp).multiply(result, mc);
 	    if (reciprocal)
 		result = BigDecimal.ONE.divide(result, mc);
+
+	    return result;
+	}
+
+
+	/**
+	 * Calculate 10**x to an arbitrary precision.
+	 *
+	 * @param exp	The power of 10 we are calculating.
+	 * @param mc	The precision and rounding mode for the result.
+	 * @return	The result of 10**x rounded to the given precision.
+	 */
+	public static BigDecimal tenPower(final BigDecimal exp, final MathContext mc) {
+	    if (exp.equals(BigDecimal.ZERO))
+		return BigDecimal.ONE;
+
+	    BigDecimal result;
+
+	    int intExp         = exp.intValue();
+	    BigDecimal fracExp = exp.subtract(new BigDecimal(intExp));
+
+	    if (!fracExp.equals(BigDecimal.ZERO)) {
+		boolean reciprocal = false;
+		BigDecimal exponent = exp;
+		if (exp.signum() < 0) {
+		    reciprocal = true;
+		    exponent = exp.abs();
+		}
+
+		result = pow(D_TEN, fracExp.doubleValue(), mc);
+	    }
+	    else {
+		// Integer (positive or negative) power
+		if (intExp > 0)
+		    result = BigDecimal.ONE.scaleByPowerOfTen(intExp);
+		else
+		    result = D_TEN.pow(intExp, mc);
+	    }
 
 	    return result;
 	}
