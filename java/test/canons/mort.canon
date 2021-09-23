@@ -4,9 +4,9 @@
 >{ P: 244000, R: 3.25, r: 0.002708333333333333333333333333333333, N: 30, n: 360 }
 >Full monthly payment is $1061.90
 >Monthly payment in whole dollars is $1062
->P = 3004000 * 0.80 -> 2403200.00
+>P = 3004000 * 0.80 -> 2403200
 >R = 2.91 -> 2.91
 >N = 30 -> 30
->{ P: 2403200.00, R: 2.91, r: 0.002425, N: 30, n: 360 }
+>{ P: 2403200, R: 2.91, r: 0.002425, N: 30, n: 360 }
 >Full monthly payment is $10015.71
 >Monthly payment in whole dollars is $10016
