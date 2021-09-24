@@ -340,6 +340,8 @@
  *	    #21 Fix the way "join" works with maps and lists.
  *	20-Sep-2021 (rlwhitcomb)
  *	    Add "tenpow" function (like "epow"). Add "fixup" calls to strip trailing zeros.
+ *	26-Sep-2021 (rlwhitcomb)
+ *	    Refine the error context for multiply/divide errors.
  */
 package info.rlwhitcomb.calc;
 
@@ -1922,15 +1924,17 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitMultiplyExpr(CalcParser.MultiplyExprContext ctx) {
-	    Object e1 = visit(ctx.expr(0));
-	    Object e2 = visit(ctx.expr(1));
+	    CalcParser.ExprContext ctx1 = ctx.expr(0);
+	    CalcParser.ExprContext ctx2 = ctx.expr(1);
+	    Object e1 = visit(ctx1);
+	    Object e2 = visit(ctx2);
 
 	    String op = ctx.MULT_OP().getText();
 
 	    try {
 		if (settings.rationalMode) {
-		    BigFraction f1 = toFractionValue(this, e1, ctx);
-		    BigFraction f2 = toFractionValue(this, e2, ctx);
+		    BigFraction f1 = toFractionValue(this, e1, ctx1);
+		    BigFraction f2 = toFractionValue(this, e2, ctx2);
 
 		    switch (op) {
 			case "*":
@@ -1953,8 +1957,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    }
 		}
 		else {
-		    BigDecimal d1 = toDecimalValue(this, e1, mc, ctx);
-		    BigDecimal d2 = toDecimalValue(this, e2, mc, ctx);
+		    BigDecimal d1 = toDecimalValue(this, e1, mc, ctx1);
+		    BigDecimal d2 = toDecimalValue(this, e2, mc, ctx2);
 
 		    switch (op) {
 			case "*":
