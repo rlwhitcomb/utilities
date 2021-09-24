@@ -57,6 +57,6 @@ def help_mort = { "\nUsage: P=<present value>; R=<yearly interest rate (%)> or r
 # to a whole dollar, "2" rounds to pennies.
 def PMT_M($ctx) = { round(PMT, 2) }
 
-def monthly = { `Full monthly payment is \$${PMT_M}` }
-def monthly_whole = { `Monthly payment in whole dollars is \$${round (PMT, 0)}` }
+def monthly = { `Full monthly payment is $$${PMT_M}` }
+def monthly_whole = { `Monthly payment in whole dollars is $$${round (PMT, 0)}` }
 :quiet pop

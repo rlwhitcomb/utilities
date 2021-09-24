@@ -249,6 +249,8 @@
  *	    Allow "\$" in interpolated strings, to make currency constructs
  *	    easier to read.
  *	    Add "tenpow" function.
+ *	26-Sep-2021 (rlwhitcomb)
+ *	    Oops! The "\$" experiment doesn't work well.
  */
 
 grammar Calc;
@@ -995,7 +997,7 @@ fragment ESC6
    ;
 
 fragment ESCI
-   : '\\' ([`\\/$bfnrt] | UNICODE)
+   : '\\' ([`\\/bfnrt] | UNICODE)
    ;
 
 fragment UNICODE
