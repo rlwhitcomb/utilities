@@ -191,8 +191,9 @@
  *	01-Sep-2021 (rlwhitcomb)
  *	    We desperately need a "-utf8" flag for reading files (esp. on Windows). Add several
  *	    other options for input charset as well.
- *	15-Sep-2021 (rlwhitcomb)
- *	    Use more color in error messages; color the error position indicator.
+ *	26-Sep-2021 (rlwhitcomb)
+ *	    Use more color in error messages; color the error position indicator. Tweak the color mapping.
+ *	    Tweak one message from Antlr to match our colored version of it.
  */
 package info.rlwhitcomb.calc;
 
@@ -401,9 +402,9 @@ public class Calc
 
 
 	private static void computeColors() {
-	    colorMap.put("x", (darkBackgrounds ? CYAN_BRIGHT : BLUE_BOLD));
+	    colorMap.put("x", (darkBackgrounds ? YELLOW_BRIGHT : BLUE_BOLD));
 	    colorMap.put("a", (darkBackgrounds ? WHITE : BLACK_BRIGHT));
-	    colorMap.put("v", (darkBackgrounds ? GREEN_BRIGHT : GREEN_BOLD));
+	    colorMap.put("v", GREEN_BOLD);
 	    colorMap.put("e", RED_BOLD);
 	    colorMap.put("r", RESET);
 	}
@@ -828,6 +829,11 @@ public class Calc
 		    if (replMode) {
 			outFormat("calc#error", currentIndicator);
 		    }
+		    int ix = message.indexOf("at input '");
+		    if (ix > 0) {
+			message = message.replace("at input '", "at input <x>");
+			message = message.replace("'", "<>");
+		    }
 		    throw new CalcException(Intl.formatString("calc#syntaxError", charPositionInLine, message), line);
 		}
 	}
@@ -844,7 +850,7 @@ public class Calc
 		    int width = guiMode ? charPos + 1 : charPos + 3;
 		    currentIndicator = CharUtil.padToWidth("^", width, CharUtil.Justification.RIGHT);
 		    if (replMode) {
-			System.out.println(currentIndicator);
+			outFormat("calc#error", currentIndicator);
 		    }
 		    throw new CalcException(Intl.formatString("calc#errorNoAlt", charPos, t.getText()), t.getLine());
 		}
