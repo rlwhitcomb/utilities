@@ -39,6 +39,7 @@
  *	27-Sep-2021 (rlwhitcomb)
  *	    Make this class testable using "Tester".
  *	    Add option to "regularize" paths to *nix standards (for testing).
+ *	    And oops! Fix that code.
  */
 package info.rlwhitcomb.tools;
 
@@ -235,7 +236,7 @@ public class WordCount
 	    if (path == null)
 		return "";
 	    if (regularizePaths) {
-		return path.toString().replace("[\\/]", "/");
+		return path.toString().replaceAll("[\\\\/]", "/");
 	    }
 	    else {
 		return path.toString();
