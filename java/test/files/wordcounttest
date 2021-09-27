@@ -3,6 +3,7 @@
 #
 $inputDir test/canons
 $testClass info.rlwhitcomb.tools.WordCount
+$defaultOptions -regularize
 
 $echo Tests of the WordCount class...
 $echo

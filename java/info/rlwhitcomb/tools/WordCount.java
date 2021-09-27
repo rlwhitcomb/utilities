@@ -38,6 +38,7 @@
  *	    Put program title and version into properties file.
  *	27-Sep-2021 (rlwhitcomb)
  *	    Make this class testable using "Tester".
+ *	    Add option to "regularize" paths to *nix standards (for testing).
  */
 package info.rlwhitcomb.tools;
 
@@ -86,6 +87,9 @@ public class WordCount
 
 	/** The list of files to process. */
 	private static final List<String> files = new ArrayList<>();
+
+	/** Option to regularize path separators in file names to Unix/Linux standards. */
+	private static boolean regularizePaths;
 
 	/** Option to report only the number of lines. */
 	private static boolean onlyLines;
@@ -172,6 +176,11 @@ public class WordCount
 		    onlyLines = false;
 		    onlyWords = false;
 		    break;
+		case "regularize":
+		case "regular":
+		case "reg":
+		    regularizePaths = true;
+		    break;
 		case "version":
 		case "vers":
 		case "ver":
@@ -213,6 +222,23 @@ public class WordCount
 		    currentInWord = true;
 		    currentWords++;
 		}
+	    }
+	}
+
+	/**
+	 * Get a displayable form of a file path, taking into account the {@link #regularizePaths} option.
+	 *
+	 * @param path	The input path.
+	 * @return	The string form, possibly regularized.
+	 */
+	private static String getString(final Path path) {
+	    if (path == null)
+		return "";
+	    if (regularizePaths) {
+		return path.toString().replace("[\\/]", "/");
+	    }
+	    else {
+		return path.toString();
 	    }
 	}
 
@@ -275,7 +301,7 @@ public class WordCount
 		return;
 	    }
 
-	    display(currentLines, currentWords, currentChars, path == null ? "" : path.toString());
+	    display(currentLines, currentWords, currentChars, getString(path));
 
 	    totalLines += currentLines;
 	    totalWords += currentWords;
@@ -296,6 +322,7 @@ public class WordCount
 	    totalLines = 0;
 	    totalWords = 0;
 	    totalChars = 0;
+	    regularizePaths = false;
 	    onlyLines = false;
 	    onlyWords = false;
 	    onlyChars = false;
