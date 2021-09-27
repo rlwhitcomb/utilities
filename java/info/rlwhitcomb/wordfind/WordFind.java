@@ -82,6 +82,8 @@
  *          Allow some more directives in REPL mode.
  *          Move all the text to resources file.
  *          Add "-maxlinelength" option for automated testing.
+ *	26-Sep-2021 (rlwhitcomb)
+ *	    #23 Fix inconsistent options.
  */
 package info.rlwhitcomb.wordfind;
 
@@ -724,7 +726,7 @@ public class WordFind implements Application {
             timings = true;
         } else if (matches(arg, "maxsize", "size", "max")) {
             needMaxSize = true;
-        } else if (matches(arg, "maxtime", "maxseconds", "maxsecs", "time", "seconds", "secs")) {
+        } else if (matches(arg, "maxtime", "maxseconds", "maxsecs", "maxt", "seconds", "secs")) {
             needMaxTime = true;
         } else if (matches(arg, "minwordsize", "minword", "minsize", "min")) {
             needMinWordSize = true;

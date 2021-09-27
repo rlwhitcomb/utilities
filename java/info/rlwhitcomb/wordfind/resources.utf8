@@ -28,6 +28,8 @@
 #           Moved into here from the .java file.
 #	    "-v" is only for "-verbose", not "-version"
 #	    Add "-maxlinelength" option.
+#	26-Sep-2021 (rlwhitcomb)
+#	    #23 Fix inconsistent options.
 #
 
 errNegativeIndex	= Negative index (except -1) not allowed.
@@ -88,7 +90,7 @@ repl.help20	= "  -darkbackground, -darkback, -darkbg, -dark\t\tuse colors for a 
 repl.help21	= "  -timings, -timing, -verbose, -time, -t, -v\tshow lookup timing"
 repl.help22	= "  -notimings, -notiming, -quiet, -not, -q\tdon't show the timings"
 repl.help23	= "  -maxsize, -size, -max\t\t\t\tset the maximum number of combinations to check\n\t\t\t\t\t\t  before stopping the search"
-repl.help24	= "  -maxtime, -maxseconds, -maxsecs, -time, -seconds, -secs\n\t\t\t\t\t\tset the maximum amount of time to use for the search"
+repl.help24	= "  -maxtime, -maxseconds, -maxsecs, -maxt, -seconds, -secs\n\t\t\t\t\t\tset the maximum amount of time to use for the search"
 repl.help25	= "  -minwordsize, -minword, -minsize, -min\tset the minimum length of word to display in the results"
 repl.help26	= "  -maxnumberwords, -maxnumber, -maxwords\tset the maximum number of words of each length to display"
 repl.help27	= "  -maxlinelength, -maxwidth, -width, -wid\tset the maximum line width for wrapping the display"
