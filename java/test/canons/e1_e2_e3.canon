@@ -466,7 +466,7 @@
 >bn 126 -> 5556330281949274850616324408918951380525567307126747246796782304333594286400508981287241419934529638692081513802696639/4357878
 >Calculation mode set to DECIMAL.
 >Variable 'a' cleared.
->Defining function 'a' = {loop $i in 10 {$i}}
+>Defining function a = {loop $i in 10 {$i}}
 >a -> 10
 >eval a -> 10
 >r = R'MCMLXII' -> 1962
