@@ -1,0 +1,16 @@
+#
+# Head test
+#
+$inputDir test/canons
+$testClass info.rlwhitcomb.tools.Head
+
+$echo Tests of the Head class...
+$echo
+
+hd1: test/data/Declaration.txt
+hd2: -5 test/data/Declaration.txt
+hd3: -3 test/data/Gettysburg.txt
+hd4: test/data/Psalm23.txt
+
+$echo
+$echo End of Head test.

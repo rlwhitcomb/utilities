@@ -22,6 +22,8 @@ t8: numerictest
 t9: -testclass:info.rlwhitcomb.calc.Calc loremtest
 t10: bidimaptest
 t11: wordfindtest
+t12: wordcounttest
+t13: headtest
 
 !echo
 !echo Done with all the Tester tests.

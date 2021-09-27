@@ -1,0 +1,14 @@
+>====================================
+>Running wordcounttest...
+>------------------------------------
+>Tests of the WordCount class...
+>
+>Test 'wc1': Passed
+>Test 'wc2': Passed
+>Test 'wc3': Passed
+>
+>End of WordCount test.
+>------------------------------------
+>Ran 3 tests: 3 passed, 0 failed.
+>====================================
+>

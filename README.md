@@ -165,10 +165,6 @@ define a($b, $c, $d) = { $f = blah; ... }
   - all keys are in all translations
   - no other necessary, translatable text is in the source
 
-### Unit Testing
-- Some things that come to mind are:
-  - Head, WordCount could easily use "test/data" files to be tested
-
 ### Character Sets
 - Head and WordCount have a good set of charset options; Calc could use more.
 - Could we normalize some of this somehow and put this processing into one place so

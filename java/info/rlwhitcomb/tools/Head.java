@@ -32,6 +32,8 @@
  *	    Add "-version" option.
  *	16-Aug-2021 (rlwhitcomb)
  *	    Get version and program title from properties file.
+ *	27-Sep-2021 (rlwhitcomb)
+ *	    Initialize the static variables inside "main" for testing purposes.
  */
 package info.rlwhitcomb.tools;
 
@@ -60,7 +62,8 @@ public class Head
 	/** Default number of lines to display. */
 	private static final int DEFAULT_LINES = 10;
 	/** User can override this default, so this is the current. */
-	private static int linesToDisplay = DEFAULT_LINES;
+	private static int linesToDisplay;
+
 	/** The default charset to use. */
 	private static final Charset DEFAULT_CHARSET = Charset.defaultCharset();
 	/** The ISO-8859-1 charset. */
@@ -70,9 +73,11 @@ public class Head
 	/** A UTF-8 charset (another popular choice). */
 	private static final Charset UTF_8 = StandardCharsets.UTF_8;
 	/** The charset we will actually use. */
-	private static Charset cs = DEFAULT_CHARSET;
+	private static Charset cs;
+
 	/** Whether we are operating in a Windows environment. */
 	private static final boolean ON_WINDOWS = Environment.isWindows();
+
 	/** The list of files to process. */
 	private static final List<String> files = new ArrayList<>();
 
@@ -177,6 +182,12 @@ public class Head
 	 */
 	public static void main(final String[] args) {
 	    Environment.loadProgramInfo(Head.class);
+
+	    // In order to be testable, we need to actually initialize the static
+	    // variables here, so it happens for each test run.
+	    files.clear();
+	    cs = DEFAULT_CHARSET;
+	    linesToDisplay = DEFAULT_LINES;
 
 	    // Scan through the options to override the defaults
 	    for (String arg : args) {

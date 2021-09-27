@@ -36,6 +36,8 @@
  *	    one value (instead of all three).
  *	16-Aug-2021 (rlwhitcomb)
  *	    Put program title and version into properties file.
+ *	27-Sep-2021 (rlwhitcomb)
+ *	    Make this class testable using "Tester".
  */
 package info.rlwhitcomb.tools;
 
@@ -67,6 +69,7 @@ public class WordCount
 {
 	/** The maximum file size we want to read in all at once (2MB). */
 	private static final long MAX_ONE_SHOT_FILE_SIZE = 2_097_152L;
+
 	/** The default charset to use. */
 	private static final Charset DEFAULT_CHARSET = Charset.defaultCharset();
 	/** The ISO-8859-1 charset. */
@@ -76,18 +79,20 @@ public class WordCount
 	/** A UTF-8 charset (another popular choice). */
 	private static final Charset UTF_8 = StandardCharsets.UTF_8;
 	/** The charset we will actually use. */
-	private static Charset cs = DEFAULT_CHARSET;
+	private static Charset cs;
+
 	/** Whether we are operating in a Windows environment. */
 	private static final boolean ON_WINDOWS = Environment.isWindows();
+
 	/** The list of files to process. */
 	private static final List<String> files = new ArrayList<>();
 
 	/** Option to report only the number of lines. */
-	private static boolean onlyLines = false;
+	private static boolean onlyLines;
 	/** Option to report only the number of words. */
-	private static boolean onlyWords = false;
+	private static boolean onlyWords;
 	/** Option to report only the number of characters. */
-	private static boolean onlyChars = false;
+	private static boolean onlyChars;
 
 	/** The line count for the current file. */
 	private static int currentLines;
@@ -100,11 +105,11 @@ public class WordCount
 	private static boolean currentInWord;
 
 	/** The total line count for all files. */
-	private static int totalLines = 0;
+	private static int totalLines;
 	/** The total word count for all files. */
-	private static int totalWords = 0;
+	private static int totalWords;
 	/** The total character count for all files. */
-	private static int totalChars = 0;
+	private static int totalChars;
 
 
 	/**
@@ -282,6 +287,18 @@ public class WordCount
 	 */
 	public static void main(final String[] args) {
 	    Environment.loadProgramInfo(WordCount.class);
+
+	    // In order to make this class testable, we need to reinitialize our static data
+	    // every time through here, even though in normal operation it won't make any
+	    // difference
+	    files.clear();
+	    cs = DEFAULT_CHARSET;
+	    totalLines = 0;
+	    totalWords = 0;
+	    totalChars = 0;
+	    onlyLines = false;
+	    onlyWords = false;
+	    onlyChars = false;
 
 	    // Scan through the options to override the defaults
 	    for (String arg : args) {

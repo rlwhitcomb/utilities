@@ -1,0 +1,15 @@
+#
+# WordCount (wc) test
+#
+$inputDir test/canons
+$testClass info.rlwhitcomb.tools.WordCount
+
+$echo Tests of the WordCount class...
+$echo
+
+wc1: test/data/Declaration.txt
+wc2: test/data/Border_Crossing_Entry_Data_2020.csv
+wc3: test/data/e.txt
+
+$echo
+$echo End of WordCount test.
