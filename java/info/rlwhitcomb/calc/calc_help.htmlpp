@@ -434,7 +434,7 @@ or
       The default setting is to do decimal arithmetic, but this can be adjusted using either command line options (see
       <code>-rational</code> and <code>-decimal</code> above), or using directives during execution.  The default precision for
       all calculations is 128-bit arithmetic, or approximately 34 digits of decimal precision. The precision can be adjusted up to
-      12,500 (due to somewhat arbitrary restrictions on our calculation of the value of <code>&#x1D6D1;</code>) using any of
+      12,500 decimal digits (due to somewhat arbitrary restrictions on our calculation of the value of <code>&#x1D6D1;</code>) using any of
       several directives.
   <p>Unlimited (up to the plaform limit of 4 billion digit) precision is available, and many/most calculations will honor that,
       although some trig / log calculations are still (implementation-restriction) limited to "double" precision. Also, the precision of division
@@ -449,8 +449,9 @@ or
      or back using the <code>:radians</code> directive.
   <p>Dates have a valid range of <code>d'-9999/01/01'</code> to <code>d'9999/12/31'</code>, or a total range of 7,304,484 days. Significantly, dates
      use the <a href="https://www.dictionary.com/browse/proleptic">proleptic</a> values of the Gregorian calendar extended indefinitely to the past
-     and future, such that correspondence to the actual calendar dates prior to the adoption of the Gregorian calendar (in roughly 1582 AD)
-     <strong>will be wrong</strong>.
+     and future, such that date results prior to the adoption of the Gregorian calendar (in roughly 1582 AD) <strong>will not correspond</strong>
+     to the actual calendar dates at that time. Also note that none of the other calendar systems that are or were used around the world (such as
+     Julian, Hebrew, Iranian Muslim, Buddhist, Japanese, Chinese, Ethiopian, etc.) are supported.
   <p>Dates and times represent date/time values (such as birthdays, anniversaries, or wall clock times), and have no reference to time zones, although
      using time arithmetic can be a convenient way to do conversion of times between time zones.
 </div>
