@@ -251,6 +251,8 @@
  *	    Add "tenpow" function.
  *	26-Sep-2021 (rlwhitcomb)
  *	    Oops! The "\$" experiment doesn't work well.
+ *	02-Oct-2021 (rlwhitcomb)
+ *	    Add charset to ":include", add ":save".
  */
 
 grammar Calc;
@@ -514,7 +516,8 @@ directive
    | D_MIXED                                  # mixedDirective
    | D_CLEAR idList ?                         # clearDirective
    | D_ECHO expr ?                            # echoDirective
-   | D_INCLUDE expr                           # includeDirective
+   | D_INCLUDE expr ( ',' expr ) ?            # includeDirective
+   | D_SAVE expr ( ',' expr ) ?               # saveDirective
    | D_TIMING modeOption                      # timingDirective
    | D_RATIONAL modeOption                    # rationalDirective
    | D_DEBUG modeOption                       # debugDirective
@@ -928,6 +931,10 @@ D_ECHO
 
 D_INCLUDE
    : DIR  ( I N C | I N C L U D E | O P E N | L I B | L I B R A R Y | L I B S | L I B R A R I E S )
+   ;
+
+D_SAVE
+   : DIR S A V E
    ;
 
 D_DEBUG
