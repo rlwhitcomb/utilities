@@ -36,7 +36,7 @@ Work going on currently includes:
 - InitializationTask is all wrong -- need a better paradigm, using existing Java mechanisms (see Issue #8)
 - Make InitializationTask and QueuedThread work seamlessly with "synchronized"
 - Finish converting D.C to Java (include supporting code).
-- New Java-based "tail", "uniq", and other Linux utilities missing on Windows.
+- New Java-based "tail", and other Linux utilities missing on Windows.
 - Finish -color and -nocolor flags everywhere
 - Implement color coding in Calc GUI.
 - Maybe find a way in Options to add "standard" flags (like "-color" above)
