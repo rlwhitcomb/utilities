@@ -84,6 +84,8 @@
  *          Add "-maxlinelength" option for automated testing.
  *	26-Sep-2021 (rlwhitcomb)
  *	    #23 Fix inconsistent options.
+ *	04-Oct-2021 (rlwhitcomb)
+ *	    Tweak colors.
  */
 package info.rlwhitcomb.wordfind;
 
@@ -414,14 +416,14 @@ public class WordFind implements Application {
 
     private static void setColors(final boolean light) {
         if (light) {
-            headingColor = CYAN_UNDERLINED;
-            infoColor = GREEN_BOLD;
+            headingColor = GREEN_UNDERLINED;
+            infoColor = CYAN_BOLD;
             errorColor = RED_UNDERLINED;
             wildcardColor = RED_BRIGHT;
-            containsColor = CYAN_BOLD;
+            containsColor = GREEN_BOLD;
         } else {
-            headingColor = CYAN_UNDERLINED_BRIGHT;
-            infoColor = GREEN;
+            headingColor = GREEN_UNDERLINED_BRIGHT;
+            infoColor = CYAN;
             errorColor = RED_UNDERLINED_BRIGHT;
             wildcardColor = RED_BOLD;
             containsColor = YELLOW_BOLD;
