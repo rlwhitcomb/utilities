@@ -1,0 +1,10 @@
+#!/bin/bash
+if [ -z "$1" ]
+then
+   echo Update a WordFind test canon file.
+   echo Usage: upw test_name
+   exit 1
+fi
+test=$1
+# Note: these options must match the $defaultOptions in wordfindtest
+wf -nocolor -maxtime 0 -notimings -maxwords 0 -maxwidth 100 $test | mkcanon > test/canons/${test//[\.]/}.canon
