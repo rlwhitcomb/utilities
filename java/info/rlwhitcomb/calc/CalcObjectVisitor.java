@@ -346,6 +346,8 @@
  *	    Implement ":save" directive, with charset selection for it and ":open". Rename some
  *	    static final values as the constants they really are. Use LinkedHashMap for variables
  *	    so that the key sets list in the order they were defined.
+ *	05-Oct-2021 (rlwhitcomb)
+ *	    Split out "saveVariables" method to be called from GUI button code.
  */
 package info.rlwhitcomb.calc;
 
@@ -360,6 +362,7 @@ import java.nio.charset.IllegalCharsetNameException;
 import java.nio.charset.StandardCharsets;
 import java.nio.charset.UnsupportedCharsetException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -979,12 +982,10 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 	}
 
-	@Override
-	public Object visitSaveDirective(CalcParser.SaveDirectiveContext ctx) {
-	    String path = getStringValue(ctx.expr(0), false, false, false);
-	    Charset charset = getCharsetValue(ctx.expr(1), true);
-
-	    try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(path), charset)) {
+	public void saveVariables(final Path path, final Charset charset)
+		throws IOException
+	{
+	    try (BufferedWriter writer = Files.newBufferedWriter(path, charset == null ? DEFAULT_CHARSET : charset)) {
 		// Note: using LinkedHashMap for "variables" means the key set will be in the order
 		// they were defined, which is important here, since we must be able to read back
 		// the saved file and have the values computed to be the same as they are now.
@@ -996,6 +997,16 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			writer.write(String.format("%1$s = %2$s", key, toStringValue(this, value, settings.separatorMode)));
 		    writer.newLine();
 		}
+	    }
+	}
+
+	@Override
+	public Object visitSaveDirective(CalcParser.SaveDirectiveContext ctx) {
+	    String path = getStringValue(ctx.expr(0), false, false, false);
+	    Charset charset = getCharsetValue(ctx.expr(1), true);
+
+	    try {
+		saveVariables(Paths.get(path), charset);
 	    }
 	    catch (IOException ioe) {
 		throw new CalcExprException(ctx, "%calc#ioError", ExceptionUtil.toString(ioe));

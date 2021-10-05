@@ -72,6 +72,8 @@
 		Add background color setting to "Window Settings" tab in Settings (doesn't really work yet).
 		Rearrange Settings dialog to put radios horizontally in preparation for things to come.
 		Add Separator mode to Settings.
+	    05-Oct-2021 (rlwhitcomb)
+		Add "Save" icon to toolbar.
 
      ========================================================================== -->
 
@@ -88,6 +90,7 @@
 	<Window.ActionMapping action="help" keyStroke="F1" />
 	<Window.ActionMapping action="version" keyStroke="Cmd-F1" />
 	<Window.ActionMapping action="settings" keyStroke="F2" />
+	<Window.ActionMapping action="save" keyStroke="F3" />
 	<Window.ActionMapping action="open" keyStroke="F4" />
 	<Window.ActionMapping action="clear" keyStroke="F6" />
 	<Window.ActionMapping action="calculate" keyStroke="F9" />
@@ -250,6 +253,16 @@
 			<Label text="%settingsKeyLabel"/>
 		    </BoxPane>
 		    <Label preferredWidth="30"/>
+		    <BoxPane orientation="vertical" styles="{horizontalAlignment:'center'}">
+			<PushButton tooltipText="%saveTip"
+				action="save"
+				buttonData="%saveButton"
+				preferredWidth="60"
+				preferredHeight="32"
+				styles="{color:'DodgerBlue', font:{size:24,bold:true}}"/>
+			<Label text="%saveLabel"/>
+			<Label text="%saveKeyLabel"/>
+		    </BoxPane>
 		    <BoxPane orientation="vertical" styles="{horizontalAlignment:'center'}">
 			<PushButton tooltipText="%openTip"
 				action="open"

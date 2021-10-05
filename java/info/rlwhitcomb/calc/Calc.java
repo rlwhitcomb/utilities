@@ -196,6 +196,8 @@
  *	    Tweak one message from Antlr to match our colored version of it.
  *	05-Oct-2021 (rlwhitcomb)
  *	    Add charset spec to "getFileContents" and "readFile".
+ *	05-Oct-2021 (rlwhitcomb)
+ *	    Add Save function to GUI.
  */
 package info.rlwhitcomb.calc;
 
@@ -619,6 +621,7 @@ public class Calc
 		Action.addNamedAction("help",      new HelpAction());
 		Action.addNamedAction("version",   new VersionAction());
 		Action.addNamedAction("settings",  new SettingsAction());
+		Action.addNamedAction("save",      new SaveAction());
 		Action.addNamedAction("open",      new OpenAction());
 		Action.addNamedAction("clear",     new ClearAction());
 		Action.addNamedAction("calculate", new CalculateAction());
@@ -949,6 +952,42 @@ public class Calc
 				inputTextPane.setText(EMPTY_TEXT);
 				requestFocus(inputTextPane);
 			    });
+			}
+		    });
+		}
+	}
+
+	private class SaveAction extends Action
+	{
+		@Override
+		public void perform(Component source) {
+		    if (inputDirectory == null) {
+			if (rootDirectory == null) {
+			    rootDirectory = new File("./");
+			}
+		    }
+		    else if (rootDirectory == null) {
+			rootDirectory = inputDirectory;
+		    }
+		    try {
+			rootDirectory = rootDirectory.getCanonicalFile();
+		    }
+		    catch (IOException ioe) {
+			// just leave root directory as-is
+		    }
+		    final FileBrowserSheet browser =
+			new FileBrowserSheet(FileBrowserSheet.Mode.SAVE_AS, rootDirectory.getPath());
+		    browser.open(mainWindow, sheet -> {
+			if (!sheet.getResult())
+			    return;
+			File selectedFile = browser.getSelectedFile();
+			rootDirectory = browser.getRootDirectory();
+			try {
+			    visitor.saveVariables(selectedFile.toPath(), null);
+			    Alert.alert(MessageType.INFO, Intl.formatString("saveSuccess", selectedFile.getPath()), Intl.getString("save"), null, mainWindow, null);
+			}
+			catch (IOException ioe) {
+			    Alert.alert(MessageType.ERROR, ExceptionUtil.toString(ioe), ioe.getClass().getSimpleName(), null, mainWindow, null);
 			}
 		    });
 		}

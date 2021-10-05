@@ -33,6 +33,8 @@
  *	02-Jul-2021 (rlwhitcomb)
  *	    New colors settings text. Separator mode setting.
  *	    Tweak some of the Settings text.
+ *	05-Oct-2021 (rlwhitcomb)
+ *	    Add Save button text.
  */
 {
     title:              'Calc',
@@ -73,6 +75,11 @@
     lightBackground:    'Suitable for light backgrounds',
     darkBackground:     'Or for dark backgrounds',
 
+    saveButton:         'S',
+    saveTip:            'Save to file (F3)',
+    saveLabel:          'Save to File',
+    saveKeyLabel:       'F3',
+
     openButton:         'O',
     openTip:            'Open file (F4)',
     openLabel:          'Open File',
@@ -110,6 +117,10 @@
     resultsBorder:      ' Results ',
     expressionsBorder:  ' Expressions ',
 
-    resultsOutput:      'Results length: '
+    resultsOutput:      'Results length: ',
+
+    save:               'Save',
+    saveSuccess:        'Variables successfully saved to "%1$s"'
+
 }
 
