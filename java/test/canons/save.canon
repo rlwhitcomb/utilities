@@ -4,7 +4,7 @@
 >Defining function Z = {cbrt (a)}
 >Defining function A = {Z == b}
 >a -> 19683
->Z -> 27.00000000000000000000000000000000
+>Z -> 27
 >A -> true
 >All variables cleared.
 >b = 27 -> 27
@@ -13,5 +13,5 @@
 >Defining function A = {Z == b}
 >b -> 27
 >a -> 19683
->Z -> 27.00000000000000000000000000000000
+>Z -> 27
 >A -> true

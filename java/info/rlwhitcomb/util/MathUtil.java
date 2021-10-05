@@ -43,6 +43,8 @@
  *	    Make the class final.
  *	20-Sep-2021 (rlwhitcomb)
  *	    Add 'tenPower' method (like 'ePower').
+ *	05-Oct-2021 (rlwhitcomb)
+ *	    Make "fixup" method that does "round" and "stripTrailingZeros".
  */
 package info.rlwhitcomb.util;
 
@@ -145,6 +147,18 @@ public final class MathUtil
 
 
 	/**
+	 * Round the final value to the given precision and strip trailing zeros.
+	 *
+	 * @param result The final result of a calculation, ready to be fixed up and returned to caller.
+	 * @param mc     The rounding mode and precision.
+	 * @return       Final result rounded as specified and with trailing (superfluous) zeros removed.
+	 */
+	private static BigDecimal fixup(final BigDecimal result, final MathContext mc) {
+	    return result.round(mc).stripTrailingZeros();
+	}
+
+
+	/**
 	 * @return The result of the base to the exp power, done in <code>BigDecimal</code>
 	 * precision.
 	 * @param base     The number to raise to the given power.
@@ -192,7 +206,7 @@ public final class MathUtil
 	    if (reciprocal)
 		result = BigDecimal.ONE.divide(result, mc);
 	    else
-		result = result.round(mc);
+		result = fixup(result, mc);
 
 	    return result;
 	}
@@ -454,7 +468,7 @@ public final class MathUtil
 		logger.debug("sin: loop %1$d -> %2$s", i, result.toPlainString());
 	    }
 
-	    return result.round(mc);
+	    return fixup(result, mc);
 	}
 
 	/**
@@ -504,7 +518,7 @@ public final class MathUtil
 		fact      = fact.multiply(factTerm);
 	    }
 
-	    return result.round(mc);
+	    return fixup(result, mc);
 	}
 
 	/**
@@ -578,7 +592,7 @@ public final class MathUtil
 		lastResult = result;
 	    }
 
-	    return result.round(mc);
+	    return fixup(result, mc);
 	}
 
 	/**
@@ -611,7 +625,7 @@ public final class MathUtil
 		lastResult = result;
 	    }
 	    logger.debug("sqrt: result = %1$s", result.toPlainString());
-	    return result.round(mc);
+	    return fixup(result, mc);
 	}
 
 	/**
@@ -646,7 +660,7 @@ public final class MathUtil
 		}
 		lastResult = result;
 	    }
-	    return (sign < 0) ? result.negate(mc) : result.plus(mc);
+	    return ((sign < 0) ? result.negate(mc) : result.plus(mc)).stripTrailingZeros();
 	}
 
 
@@ -1316,7 +1330,7 @@ public final class MathUtil
 		b = b.divide(D_TWO);
 	    }
 
-	    return y.round(mc);
+	    return fixup(y, mc);
 	}
 
 }

@@ -70,6 +70,8 @@
  *	25-Aug-2021 (rlwhitcomb)
  *	    Correct a typo in the INT_FRAC regex.
  *	    Display the input value in the "unsupportedFormat" exception.
+ *	05-Oct-2021 (rlwhitcomb)
+ *	    Strip trailing zeros in "toDecimal".
  */
 package info.rlwhitcomb.util;
 
@@ -861,7 +863,7 @@ public class BigFraction extends Number
 	 * @return	The value of {@code numer / denom} as a decimal number.
 	 */
 	public BigDecimal toDecimal(final MathContext mc) {
-	    return new BigDecimal(numer).divide(new BigDecimal(denom), mc);
+	    return new BigDecimal(numer).divide(new BigDecimal(denom), mc).stripTrailingZeros();
 	}
 
 	/**
