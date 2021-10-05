@@ -1,0 +1,17 @@
+#
+# Testing that ":save" followed by ":load" produces the same results
+# as the initial definitions (important).
+#
+:clear
+b = 27
+def a={ b**3 }
+def Z={ cbrt(a) }
+def A={ Z==b }
+a;Z;A
+
+:save 'savetest'
+
+:clear
+:open 'savetest'
+b;a;Z;A
+

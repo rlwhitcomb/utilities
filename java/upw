@@ -2,9 +2,15 @@
 if [ -z "$1" ]
 then
    echo Update a WordFind test canon file.
-   echo Usage: upw test_name
+   echo Usage: upw test_name [ canon_name ]
    exit 1
 fi
 test=$1
+if [ -z "$2" ]
+then
+   canon=$1
+else
+   canon=$2
+fi
 # Note: these options must match the $defaultOptions in wordfindtest
-wf -nocolor -maxtime 0 -notimings -maxwords 0 -maxwidth 100 $test | mkcanon > test/canons/${test//[\.]/}.canon
+wf -nocolor -maxtime 0 -notimings -maxwords 0 -maxwidth 100 $test | mkcanon > test/canons/${canon//[\.]/}.canon

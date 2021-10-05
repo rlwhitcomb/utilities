@@ -342,15 +342,25 @@
  *	    Add "tenpow" function (like "epow"). Add "fixup" calls to strip trailing zeros.
  *	26-Sep-2021 (rlwhitcomb)
  *	    Refine the error context for multiply/divide errors.
+ *	04-Oct-2021 (rlwhitcomb)
+ *	    Implement ":save" directive, with charset selection for it and ":open". Rename some
+ *	    static final values as the constants they really are. Use LinkedHashMap for variables
+ *	    so that the key sets list in the order they were defined.
  */
 package info.rlwhitcomb.calc;
 
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.MathContext;
 import java.math.RoundingMode;
+import java.nio.charset.Charset;
+import java.nio.charset.IllegalCharsetNameException;
 import java.nio.charset.StandardCharsets;
+import java.nio.charset.UnsupportedCharsetException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -359,7 +369,7 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Deque;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -398,12 +408,22 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	/** Scale for double operations. */
-	private static final MathContext mcDouble = MathContext.DECIMAL64;
+	private static final MathContext MC_DOUBLE = MathContext.DECIMAL64;
 
-	/** MathContext to use for pi/e calculations when regular context is unlimited.
+	/**
+	 * MathContext to use for pi/e calculations when regular context is unlimited.
 	 * Note: precision is arbitrary, but {@link MathUtil#pi} is limited to ~12,500 digits.
+	 * Note also that this precision is used for division operations in unlimited mode,
+	 * where often an exception would be thrown due to infinite repeating digits.
 	 */
-	private static final MathContext mcMaxDigits = new MathContext(12000);
+	private static final MathContext MC_MAX_DIGITS = new MathContext(12000);
+
+	/**
+	 * The system-specific default charset to use for ":open" and ":save" when no other
+	 * charset is specified.
+	 */
+	private static final Charset DEFAULT_CHARSET = Charset.defaultCharset();
+
 
 	/** Initialization flag -- delays print until constructor is finished.  */
 	private boolean initialized = false;
@@ -510,7 +530,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public CalcObjectVisitor(CalcDisplayer resultDisplayer, boolean rational, boolean separators, boolean ignoreCase) {
 	    setMathContext(MathContext.DECIMAL128);
 	    settings      = new Settings(rational, separators, ignoreCase);
-	    variables     = new HashMap<>();
+	    variables     = new LinkedHashMap<>();
 	    globalContext = new LValueContext(variables, ignoreCase);
 	    displayer     = resultDisplayer;
 
@@ -562,8 +582,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    mc        = newMathContext;
 
 	    // Use a limited precision of our max digits in the case of unlimited precision
-	    MathContext mcPi = (prec == 0) ? mcMaxDigits : mc;
-	    mcDivide = (prec == 0) ? mcMaxDigits : mc;
+	    MathContext mcPi = (prec == 0) ? MC_MAX_DIGITS : mc;
+	    mcDivide = mcPi;
 
 	    // Either create the worker object, or trigger a recalculation
 	    if (piWorker == null) {
@@ -713,12 +733,30 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	private BigDecimal returnTrigValue(double value) {
-	    BigDecimal radianValue = new BigDecimal(value, mcDouble);
+	    BigDecimal radianValue = new BigDecimal(value, MC_DOUBLE);
 
 	    if (settings.trigMode == TrigMode.DEGREES)
-		return radianValue.divide(piWorker.getPiOver180(), mcDouble);
+		return radianValue.divide(piWorker.getPiOver180(), MC_DOUBLE);
 
 	    return radianValue;
+	}
+
+	private Charset getCharsetValue(ParserRuleContext ctx, boolean useDefault) {
+	    Charset defaultCharset = useDefault ? DEFAULT_CHARSET : null;
+
+	    if (ctx == null)
+		return defaultCharset;
+
+	    String charsetName = getStringValue(ctx, true, false, false);
+	    if (charsetName == null)
+		return defaultCharset;
+
+	    try {
+		return Charset.forName(charsetName);
+	    }
+	    catch (IllegalCharsetNameException | UnsupportedCharsetException ex) {
+		throw new CalcExprException(ctx, "%calc#charsetError", charsetName, ExceptionUtil.toString(ex));
+	    }
 	}
 
 	private int compareValues(ParserRuleContext ctx1, ParserRuleContext ctx2) {
@@ -780,7 +818,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    if (precision == 0) {
 		ret = setMathContext(MathContext.UNLIMITED);
 	    }
-	    else if (precision > 1 && precision <= mcMaxDigits.getPrecision()) {
+	    else if (precision > 1 && precision <= MC_MAX_DIGITS.getPrecision()) {
 		ret = setMathContext(new MathContext(precision));
 	    }
 	    else {
@@ -929,15 +967,41 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitIncludeDirective(CalcParser.IncludeDirectiveContext ctx) {
-	    String paths = getStringValue(ctx.expr(), false, false, false);
+	    String paths = getStringValue(ctx.expr(0), false, false, false);
+	    Charset charset = getCharsetValue(ctx.expr(1), false);
 
 	    try {
-		String contents = Calc.getFileContents(paths);
+		String contents = Calc.getFileContents(paths, charset);
 		return Calc.processString(contents, false);
 	    }
 	    catch (IOException ioe) {
 		throw new CalcExprException(ctx, "%calc#ioError", ExceptionUtil.toString(ioe));
 	    }
+	}
+
+	@Override
+	public Object visitSaveDirective(CalcParser.SaveDirectiveContext ctx) {
+	    String path = getStringValue(ctx.expr(0), false, false, false);
+	    Charset charset = getCharsetValue(ctx.expr(1), true);
+
+	    try (BufferedWriter writer = Files.newBufferedWriter(Paths.get(path), charset)) {
+		// Note: using LinkedHashMap for "variables" means the key set will be in the order
+		// they were defined, which is important here, since we must be able to read back
+		// the saved file and have the values computed to be the same as they are now.
+		for (String key : variables.keySet()) {
+		    Object value = getMemberValue(variables, key, settings.ignoreNameCase);
+		    if (value instanceof ParserRuleContext)
+			writer.write(String.format("def %1$s = %2$s", key, getTreeText((ParserRuleContext) value)));
+		    else
+			writer.write(String.format("%1$s = %2$s", key, toStringValue(this, value, settings.separatorMode)));
+		    writer.newLine();
+		}
+	    }
+	    catch (IOException ioe) {
+		throw new CalcExprException(ctx, "%calc#ioError", ExceptionUtil.toString(ioe));
+	    }
+
+	    return BigInteger.valueOf(variables.size());
 	}
 
 
@@ -1669,7 +1733,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitObjExpr(CalcParser.ObjExprContext ctx) {
 	    CalcParser.ObjContext oCtx = ctx.obj();
-	    Map<String, Object> obj = new HashMap<>();
+	    Map<String, Object> obj = new LinkedHashMap<>();
 	    for (CalcParser.PairContext pCtx : oCtx.pair()) {
 		TerminalNode id   = pCtx.ID();
 		TerminalNode str  = pCtx.STRING();
@@ -2081,7 +2145,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    double y = getDoubleValue(e2ctx.expr(0));
 	    double x = getDoubleValue(e2ctx.expr(1));
 
-	    return new BigDecimal(Math.atan2(y, x), mcDouble);
+	    return new BigDecimal(Math.atan2(y, x), MC_DOUBLE);
 	}
 
 	@Override
@@ -2089,7 +2153,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    // Convert to double and use standard Math method
 	    double d = getDoubleValue(ctx.expr());
 
-	    return new BigDecimal(Math.sinh(d), mcDouble);
+	    return new BigDecimal(Math.sinh(d), MC_DOUBLE);
 	}
 
 	@Override
@@ -2097,7 +2161,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    // Convert to double and use standard Math method
 	    double d = getDoubleValue(ctx.expr());
 
-	    return new BigDecimal(Math.cosh(d), mcDouble);
+	    return new BigDecimal(Math.cosh(d), MC_DOUBLE);
 	}
 
 	@Override
@@ -2105,7 +2169,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    // Convert to double and use standard Math method
 	    double d = getDoubleValue(ctx.expr());
 
-	    return new BigDecimal(Math.tanh(d), mcDouble);
+	    return new BigDecimal(Math.tanh(d), MC_DOUBLE);
 	}
 
 	@Override
@@ -2142,7 +2206,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    if (Double.isInfinite(logValue) || Double.isNaN(logValue))
 		throw new CalcExprException("%util#numeric.outOfRange", ctx);
 
-	    return new BigDecimal(logValue, mcDouble);
+	    return new BigDecimal(logValue, MC_DOUBLE);
 	}
 
 	@Override

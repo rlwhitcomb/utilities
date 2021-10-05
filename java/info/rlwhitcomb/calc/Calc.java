@@ -194,6 +194,8 @@
  *	26-Sep-2021 (rlwhitcomb)
  *	    Use more color in error messages; color the error position indicator. Tweak the color mapping.
  *	    Tweak one message from Antlr to match our colored version of it.
+ *	05-Oct-2021 (rlwhitcomb)
+ *	    Add charset spec to "getFileContents" and "readFile".
  */
 package info.rlwhitcomb.calc;
 
@@ -987,7 +989,7 @@ public class Calc
 				    buf.append("# ").append(filePath).append('\n');
 				    CharUtil.padToWidth(buf, "#", filePath.length() + 3, '-').append("\n\n");
 				}
-				readFile(f, buf);
+				readFile(f, buf, null);
 			    }
 			}
 			catch (IOException ioe) {
@@ -1115,24 +1117,28 @@ public class Calc
 
 	/**
 	 * Read the contents of one file and append to the buffer, if the file
-	 * can be found as given, and is readable. Initially the file is read
-	 * using the platform default charset, or the charset specified on the
-	 * command line (if any), but if an error occurs we attempt
-	 * to use UTF-8 instead (which we assume will work).
+	 * can be found as given, and is readable. If a charset is specified, use
+	 * that, otherwise try with the charset given on the command line (if any),
+	 * or the platform default as a last resort. But, if a decoding error occurs
+	 * use UTF-8 one more time (which we assume will work).
 	 *
 	 * @param f		The file path to read (no other location is attempted).
 	 * @param inputBuf	The buffer to append the file contents to.
+	 * @param charset	The charset to use to decode the contents (can be {@code null}).
 	 * @return		Whether or not the file could be found and was readable.
 	 * @throws IOException if there was a problem reading the existing file.
 	 */
-	private static boolean readFile(File f, StringBuilder inputBuf)
+	private static boolean readFile(File f, StringBuilder inputBuf, Charset charset)
 		throws IOException
 	{
 	    if (FileUtilities.canRead(f)) {
 		inputDirectory = f.getCanonicalFile().getParentFile();
 		String fileText = "";
 		try {
-		    if (inputCharset != null) {
+		    if (charset != null) {
+			fileText = FileUtilities.readFileAsString(f, charset);
+		    }
+		    else if (inputCharset != null) {
 			fileText = FileUtilities.readFileAsString(f, inputCharset);
 		    }
 		    else {
@@ -1158,13 +1164,15 @@ public class Calc
 	 *
 	 * @param paths	A possible list of file names/paths separated by either
 	 *		comma or semicolon.
+	 * @param charset The charset to use for decoding the files (could be {@code null}
+	 *		in which case the logic in {@link #readFile} is used instead).
 	 * @return	Either the contents of all the files listed, if found,
 	 *		or the <code>paths</code> string itself as an expression.
 	 * @throws	IOException if there was an error trying to read the files
 	 *		that exist (obviously if the files do not exist this is
 	 *		not an "error" condition per se).
 	 */
-	public static String getFileContents(String paths)
+	public static String getFileContents(String paths, Charset charset)
 		throws IOException
 	{
 	    /* We must be able to read all the files listed, or else the input
@@ -1176,10 +1184,10 @@ public class Calc
 	    String[] files = paths.split("[,;]");
 	    for (String file : files) {
 		File f = new File(file);
-		if (!readFile(f, inputBuf)) {
+		if (!readFile(f, inputBuf, charset)) {
 		    if (inputDirectory != null) {
 			f = new File(inputDirectory, file);
-			if (!readFile(f, inputBuf)) {
+			if (!readFile(f, inputBuf, charset)) {
 			    unableToRead = true;
 			    break;
 			}
@@ -1259,7 +1267,7 @@ public class Calc
 	{
 	    if (libraryNames != null) {
 		for (String libraryName : libraryNames) {
-		    process(CharStreams.fromString(getFileContents(libraryName)), visitor, errorStrategy, quiet);
+		    process(CharStreams.fromString(getFileContents(libraryName, null)), visitor, errorStrategy, quiet);
 		}
 	    }
 	}
@@ -1584,11 +1592,11 @@ public class Calc
 			    input = CharStreams.fromStream(System.in);
 			}
 			else {
-			    input = CharStreams.fromString(getFileContents(args[0].substring(1)));
+			    input = CharStreams.fromString(getFileContents(args[0].substring(1), null));
 			}
 		    }
 		    else {
-			input = CharStreams.fromString(getFileContents(args[0]));
+			input = CharStreams.fromString(getFileContents(args[0], null));
 		    }
 		}
 		else if (args.length > 0) {

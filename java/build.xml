@@ -260,6 +260,8 @@
 		"invalid entity" errors.
 	    06-Sep-2021 (rlwhitcomb)
 		Add a target to check copyrights.
+	    05-Oct-2021 (rlwhitcomb)
+		Clean out the "savetest" created during the Calc unit tests in "purge".
 
      ========================================================================== -->
 
@@ -754,6 +756,7 @@
 		</tstamp>
 		<echo message="Purging log and temporary files from before ${last.two.weeks}..."/>
 		<delete>
+			<fileset dir="." includes="savetest"/>
 			<fileset dir="." includes="test*.log,utilities*.log">
 				<date datetime="${last.two.weeks}" when="before"/>
 			</fileset>
