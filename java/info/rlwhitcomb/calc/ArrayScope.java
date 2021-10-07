@@ -27,6 +27,8 @@
  *  History:
  *	06-Oct-2021 (rlwhitcomb)
  *	    Initial coding.
+ *	07-Oct-2021 (rlwhitcomb)
+ *	    Use generic data types.
  */
 package info.rlwhitcomb.calc;
 
@@ -38,13 +40,15 @@ import info.rlwhitcomb.util.Intl;
 
 /**
  * Scope that represents an array or list of values, accessible by index.
+ *
+ * @param <T> Type of value stored in the array.
  */
-class ArrayScope extends Scope
+class ArrayScope<T> extends Scope
 {
 	/**
 	 * The list / array of values contained in this scope, accessible by index value.
 	 */
-	private List<Object> values;
+	private List<T> values;
 
 
 	/**
@@ -60,10 +64,11 @@ class ArrayScope extends Scope
 	 *
 	 * @param initialValues The initial set of values.
 	 */
-	ArrayScope(final Object... initialValues) {
+	@SuppressWarnings("unchecked")
+	ArrayScope(final T... initialValues) {
 	    super(Type.ARRAY);
 	    this.values = new ArrayList<>(initialValues.length);
-	    for (Object value : initialValues) {
+	    for (T value : initialValues) {
 		values.add(value);
 	    }
 	}
@@ -73,10 +78,10 @@ class ArrayScope extends Scope
 	 *
 	 * @param initialValueList List of initial values.
 	 */
-	ArrayScope(final List<?> initialValueList) {
+	ArrayScope(final List<T> initialValueList) {
 	    super(Type.ARRAY);
 	    this.values = new ArrayList<>(initialValueList.size());
-	    for (Object value : initialValueList) {
+	    for (T value : initialValueList) {
 		values.add(value);
 	    }
 	}
@@ -88,7 +93,7 @@ class ArrayScope extends Scope
 	 * @return      The value at that index, which could be {@code null} if no value has been assigned yet.
 	 * @throws      IndexOutOfBoundsException if the index is negative.
 	 */
-	public Object getValue(final int index) {
+	public T getValue(final int index) {
 	    if (index < 0)
 		throw new Intl.IndexOutOfBoundsException("calc#indexNegative", index);
 
@@ -105,7 +110,7 @@ class ArrayScope extends Scope
 	 * @param value The value to put there.
 	 * @throws      IndexOutOfBoundsException if the index is negative.
 	 */
-	public void setValue(final int index, final Object value) {
+	public void setValue(final int index, final T value) {
 	    if (index < 0)
 		throw new Intl.IndexOutOfBoundsException("calc#indexNegative", index);
 
@@ -126,7 +131,7 @@ class ArrayScope extends Scope
 	 *
 	 * @param value The next value to add to the end of the list.
 	 */
-	public void add(final Object value) {
+	public void add(final T value) {
 	    values.add(value);
 	}
 
@@ -135,7 +140,7 @@ class ArrayScope extends Scope
 	 *
 	 * @return The underlying list we are wrapping.
 	 */
-	public List<Object> list() {
+	public List<T> list() {
 	    return values;
 	}
 

@@ -29,6 +29,9 @@
  *	    Initial coding.
  *	07-Oct-2021 (rlwhitcomb)
  *	    Return "found" status from "remove".
+ *	    Break out the guts of "isDefined", "getValue", and "setValue" so they
+ *	    can be called from NestedScope in order to put things in their proper
+ *	    scopes when nested. Fix "keyObjectSet".
  */
 package info.rlwhitcomb.calc;
 
@@ -69,13 +72,14 @@ class ObjectScope extends Scope
 
 
 	/**
-	 * Get the value of one of our variables.
+	 * Get the value of one of our variables, explicitly in the current scope, so that
+	 * with nested scopes we can find the appropriate place.
 	 *
 	 * @param name       The variable name to search for.
 	 * @param ignoreCase Whether case is important in finding the name.
 	 * @return           The value (which could be {@code null} if it hasn't been defined yet.
 	 */
-	Object getValue(final String name, final boolean ignoreCase) {
+	Object getValueImpl(final String name, final boolean ignoreCase) {
 	    if (ignoreCase) {
 		// Many times, even if we're ignoring case, the name works as given
 		if (variables.containsKey(name)) {
@@ -99,13 +103,25 @@ class ObjectScope extends Scope
 	}
 
 	/**
-	 * Set the value of one of our variables.
+	 * Get the value of one of our variables.
+	 *
+	 * @param name       The variable name to search for.
+	 * @param ignoreCase Whether case is important in finding the name.
+	 * @return           The value (which could be {@code null} if it hasn't been defined yet.
+	 */
+	Object getValue(final String name, final boolean ignoreCase) {
+	    return getValueImpl(name, ignoreCase);
+	}
+
+	/**
+	 * Set the value of one of our variables, explicitly in this object, so a nested scope
+	 * can set values where they are defined.
 	 *
 	 * @param name       Name of the variable to set.
 	 * @param ignoreCase Whether to ignore case in order to access the variable.
 	 * @param value      The new value for the variable.
 	 */
-	void setValue(final String name, final boolean ignoreCase, final Object value) {
+	void setValueImpl(final String name, final boolean ignoreCase, final Object value) {
 	    if (ignoreCase) {
 		if (variables.containsKey(name)) {
 		    variables.put(name, value);
@@ -127,13 +143,25 @@ class ObjectScope extends Scope
 	}
 
 	/**
-	 * For some functions we need to know if the name is defined or not.
+	 * Set the value of one of our variables.
 	 *
-	 * @param name     Name of the variable to check.
+	 * @param name       Name of the variable to set.
+	 * @param ignoreCase Whether to ignore case in order to access the variable.
+	 * @param value      The new value for the variable.
+	 */
+	void setValue(final String name, final boolean ignoreCase, final Object value) {
+	    setValueImpl(name, ignoreCase, value);
+	}
+
+	/**
+	 * For some functions we need to know if the name is defined or not, check in this local scope,
+	 * for use by {@link NestedScope} in override method.
+	 *
+	 * @param name       Name of the variable to check.
 	 * @param ignoreCase Whether or not to ignore the case of names when searching.
 	 * @return           {@code true} or {@code false} if the scope has such a variable.
 	 */
-	public boolean isDefined(final String name, final boolean ignoreCase) {
+	public boolean isDefinedHere(final String name, final boolean ignoreCase) {
 	    if (ignoreCase) {
 		if (variables.containsKey(name)) {
 		    return true;
@@ -150,6 +178,17 @@ class ObjectScope extends Scope
 	    else {
 		return variables.containsKey(name);
 	    }
+	}
+
+	/**
+	 * For some functions we need to know if the name is defined or not.
+	 *
+	 * @param name       Name of the variable to check.
+	 * @param ignoreCase Whether or not to ignore the case of names when searching.
+	 * @return           {@code true} or {@code false} if the scope has such a variable.
+	 */
+	public boolean isDefined(final String name, final boolean ignoreCase) {
+	    return isDefinedHere(name, ignoreCase);
 	}
 
 	/**
@@ -199,7 +238,9 @@ class ObjectScope extends Scope
 	 */
 	public Set<Object> keyObjectSet() {
 	    Set<Object> set = new LinkedHashSet<>();
-	    Collections.addAll(set, variables.keySet());
+	    for (String key : variables.keySet()) {
+		set.add(key);
+	    }
 	    return set;
 	}
 

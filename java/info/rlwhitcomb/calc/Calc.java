@@ -198,6 +198,8 @@
  *	    Add charset spec to "getFileContents" and "readFile".
  *	05-Oct-2021 (rlwhitcomb)
  *	    Add Save function to GUI.
+ *	07-Oct-2021 (rlwhitcomb)
+ *	    New parameter to "saveVariables".
  */
 package info.rlwhitcomb.calc;
 
@@ -983,7 +985,7 @@ public class Calc
 			File selectedFile = browser.getSelectedFile();
 			rootDirectory = browser.getRootDirectory();
 			try {
-			    visitor.saveVariables(selectedFile.toPath(), null);
+			    visitor.saveVariables(null, selectedFile.toPath(), null);
 			    Alert.alert(MessageType.INFO, Intl.formatString("saveSuccess", selectedFile.getPath()), Intl.getString("save"), null, mainWindow, null);
 			}
 			catch (IOException ioe) {

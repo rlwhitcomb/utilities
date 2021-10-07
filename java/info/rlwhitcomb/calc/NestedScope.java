@@ -28,7 +28,8 @@
  *	06-Oct-2021 (rlwhitcomb)
  *	    Initial coding.
  *	07-Oct-2021 (rlwhitcomb)
- *	    Override "remove".
+ *	    Override "remove". Also override "isDefined" and "setValue", and tweak
+ *	    the way "getValue" works so that we get/set things in the proper scope.
  */
 package info.rlwhitcomb.calc;
 
@@ -73,6 +74,22 @@ class NestedScope extends ObjectScope
 	}
 
 	/**
+	 * See if the given name is defined in this or any enclosing scope(s).
+	 *
+	 * @param name       Name of the variable to search for.
+	 * @param ignoreCase Whether to consider case in the search or not.
+	 * @return           Does this name exist anywhere?
+	 */
+	@Override
+	public boolean isDefined(final String name, final boolean ignoreCase) {
+	    if (isDefinedHere(name, ignoreCase))
+		return true;
+	    if (enclosingScope != null)
+		return enclosingScope.isDefined(name, ignoreCase);
+	    return false;
+	}
+
+	/**
 	 * Search for a value in this and any enclosing scope(s).
 	 *
 	 * @param name  Name of the variable to search for.
@@ -81,13 +98,33 @@ class NestedScope extends ObjectScope
 	 */
 	@Override
 	public Object getValue(final String name, final boolean ignoreCase) {
-	    Object value = super.getValue(name, ignoreCase);
+	    NestedScope scope = this;
+	    while (scope != null && !scope.isDefinedHere(name, ignoreCase))
+		scope = scope.enclosingScope;
 
-	    if (value == null && enclosingScope != null) {
-		value = enclosingScope.getValue(name, ignoreCase);
-	    }
+	    if (scope != null)
+		return scope.getValueImpl(name, ignoreCase);
 
-	    return value;
+	    return null;
+	}
+
+	/**
+	 * Set the value of one of our variables, which could be in an enclosing scope already.
+	 *
+	 * @param name       Name of the variable to set.
+	 * @param ignoreCase Whether or not to ignore the case of name in finding it.
+	 * @param value      The new value for the variable.
+	 */
+	@Override
+	public void setValue(final String name, final boolean ignoreCase, final Object value) {
+	    NestedScope scope = this;
+	    while (scope != null && !scope.isDefinedHere(name, ignoreCase))
+		scope = scope.enclosingScope;
+
+	    if (scope != null)
+		scope.setValueImpl(name, ignoreCase, value);
+	    else
+		setValueImpl(name, ignoreCase, value);
 	}
 
 	/**

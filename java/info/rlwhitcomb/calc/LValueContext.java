@@ -56,8 +56,11 @@
  *	09-Sep-2021 (rlwhitcomb)
  *	    Allow interpolated strings as member names; fix potential
  *	    problems with string names having escape sequences.
- *	06-Sep-2021 (rlwhitcomb)
+ *	06-Oct-2021 (rlwhitcomb)
  *	    #24 Fully implement function parameters.
+ *	07-Oct-2021 (rlwhitcomb)
+ *	    Add context parameter to "toStringValue", move function call setup
+ *	    to CalcObjectVisitor so it can be called from there if needed also.
  */
  package info.rlwhitcomb.calc;
 
@@ -258,7 +261,7 @@ class LValueContext
 		}
 		else if (context instanceof String) {
 		    StringBuilder buf = new StringBuilder((String) context);
-		    String newValue = CalcUtil.toStringValue(visitor, value, false, false, false, "");
+		    String newValue = CalcUtil.toStringValue(visitor, varCtx, value, false, false, false, "");
 		    int newLen = index + newValue.length();
 		    // Ensure the builder has enough length to do the replacement
 		    while (buf.length() < newLen) {
@@ -409,16 +412,7 @@ class LValueContext
 		FunctionDeclaration func = (FunctionDeclaration) funcLValue.getContextObject();
 		List<CalcParser.ExprContext> exprs = funcVarCtx.actualParams().expr();
 
-		FunctionScope funcScope = new FunctionScope(func);
-
-		if (exprs.size() > func.getNumberOfParameters())
-		    throw new CalcExprException(funcVarCtx, "%calc#tooManyValues", exprs.size(), func.getNumberOfParameters());
-
-		for (int index = 0; index < exprs.size(); index++) {
-		    funcScope.setParameterValue(visitor, index, exprs.get(index));
-		}
-
-		return new LValueContext(funcLValue, funcVarCtx, funcScope);
+		return new LValueContext(funcLValue, funcVarCtx, visitor.setupFunctionCall(funcVarCtx, func, exprs));
 	    }
 	    else {
 		throw new CalcExprException(ctx, "%calc#unknownVarCtx", ctx.getClass().getName());

@@ -27,6 +27,8 @@
  *  History:
  *	06-Oct-2021 (rlwhitcomb)
  *	    Initial coding.
+ *	07-Oct-2021 (rlwhitcomb)
+ *	    Add context parameter to "evaluateFunction".
  */
 package info.rlwhitcomb.calc;
 
@@ -77,7 +79,7 @@ class FunctionScope extends NestedScope
 	    if (valueExpr == null)
 		setValue(paramName, false, null);
 	    else
-		setValue(paramName, false, visitor.evaluateFunction(visitor.visit(valueExpr)));
+		setValue(paramName, false, visitor.evaluateFunction(valueExpr, visitor.visit(valueExpr)));
 	}
 
 	/**

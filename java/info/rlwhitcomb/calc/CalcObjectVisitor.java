@@ -352,6 +352,9 @@
  *	    #24 Full implementation of function parameters. Massive rewrite to use Scope.
  *	07-Oct-2021 (rlwhitcomb)
  *	    #24 Fix places that create List to convert to ArrayScope.
+ *	    Context parameter for "toStringValue", new "setupFunctionCall" method, add
+ *	    context also to "evaluateFunction", and "saveVariables". Add data type param
+ *	    to ArrayScope, and change the way we initialize ArrayScope from regular lists.
  */
 package info.rlwhitcomb.calc;
 
@@ -701,17 +704,54 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 
 	/**
+	 * Setup a {@link FunctionScope} given a {@link FunctionDeclaration} and the
+	 * list of actual parameter values.
+	 *
+	 * @param ctx   The function call context.
+	 * @param decl  The function declaration.
+	 * @param exprs The actual parameter value list.
+	 * @return      The function scope with the actual values set in the scope.
+	 */
+	FunctionScope setupFunctionCall(final ParserRuleContext ctx, final FunctionDeclaration decl, final List<CalcParser.ExprContext> exprs) {
+	    FunctionScope funcScope = new FunctionScope(decl);
+	    int numParams = decl.getNumberOfParameters();
+	    int numActuals = exprs != null ? exprs.size() : 0;
+
+	    if (exprs != null) {
+		if (numActuals > numParams)
+		    throw new CalcExprException(ctx, "%calc#tooManyValues", numActuals, numParams);
+
+		for (int index = 0; index < numActuals; index++) {
+		    funcScope.setParameterValue(this, index, exprs.get(index));
+		}
+	    }
+
+	    // In case there were fewer actuals passed than declared, explicitly set the remaining values
+	    // to null so that their parameter names are present in the symbol table
+	    for (int index = numActuals; index < numParams; index++) {
+		funcScope.setParameterValue(this, index, null);
+	    }
+
+	    return funcScope;
+	}
+
+	/**
 	 * Evaluate a function: basically call {@code visit} on that
 	 * context if the value is itself is a function scope (that is,
 	 * the declaration of a function).
 	 *
-	 * @param value The result of an expression, which could be
-	 * the body of a function.
-	 * @return Either the value or the result of visiting that
-	 * function context if it is one.
+	 * @param ctx   The parsing context (for error reporting).
+	 * @param value The result of an expression, which could be a reference to a function call.
+	 * @return Either the value or the result of visiting that function context if it is one.
 	 */
-	protected Object evaluateFunction(final Object value) {
+	Object evaluateFunction(final ParserRuleContext ctx, final Object value) {
 	    Object returnValue = value;
+
+	    // Here we could have an actual function call, but without "()" on it, so there are
+	    // no actual parameters, but we need the scope declared anyway
+	    if (returnValue instanceof FunctionDeclaration) {
+		returnValue = setupFunctionCall(ctx, (FunctionDeclaration) returnValue, null);
+	    }
 
 	    if (returnValue != null && returnValue instanceof FunctionScope) {
 		FunctionScope func = (FunctionScope) returnValue;
@@ -754,12 +794,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    if (ctx == null && allowNull)
 		return "";
 
-	    Object value = evaluateFunction(visit(ctx));
+	    Object value = evaluateFunction(ctx, visit(ctx));
 
 	    if (!allowNull)
 		nullCheck(value, ctx);
 
-	    return value == null ? "" : toStringValue(this, value, quote, false, separators, "");
+	    return value == null ? "" : toStringValue(this, ctx, value, quote, false, separators, "");
 	}
 
 	private double getDoubleValue(final ParserRuleContext ctx) {
@@ -976,7 +1016,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    displayer.displayResult(func.getFullFunctionName(), getTreeText(func.getFunctionBody()));
 		}
 		else {
-		    displayer.displayResult(key, toStringValue(this, value, settings.separatorMode));
+		    displayer.displayResult(key, toStringValue(this, ctx, value, settings.separatorMode));
 		}
 	    }
 	    if (!replMode) {
@@ -1011,7 +1051,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 	}
 
-	public void saveVariables(final Path path, final Charset charset)
+	public void saveVariables(final ParserRuleContext ctx, final Path path, final Charset charset)
 		throws IOException
 	{
 	    try (BufferedWriter writer = Files.newBufferedWriter(path, charset == null ? DEFAULT_CHARSET : charset)) {
@@ -1024,7 +1064,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			writer.write(String.format("def %1$s = %2$s", func.getFullFunctionName(), getTreeText(func.getFunctionBody())));
 		    }
 		    else {
-			writer.write(String.format("%1$s = %2$s", key, toStringValue(this, value, settings.separatorMode)));
+			writer.write(String.format("%1$s = %2$s", key, toStringValue(this, ctx, value, settings.separatorMode)));
 		    }
 		    writer.newLine();
 		}
@@ -1037,7 +1077,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    Charset charset = getCharsetValue(ctx.expr(1), true);
 
 	    try {
-		saveVariables(Paths.get(path), charset);
+		saveVariables(ctx, Paths.get(path), charset);
 	    }
 	    catch (IOException ioe) {
 		throw new CalcExprException(ctx, "%calc#ioError", ExceptionUtil.toString(ioe));
@@ -1053,14 +1093,15 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    String option = null;
 
 	    if (ctx.var() != null) {
+		CalcParser.VarContext var = ctx.var();
 		// could be boolean, or string mode value
-		LValueContext lValue = getLValue(ctx.var());
+		LValueContext lValue = getLValue(var);
 		Object modeObject = lValue.getContextObject();
 		if (modeObject instanceof Boolean) {
 		    mode = ((Boolean) modeObject).booleanValue();
 		}
 		else {
-		    option = toStringValue(this, modeObject, false, false, false, "");
+		    option = toStringValue(this, var, modeObject, false, false, false, "");
 		}
 	    }
 	    else {
@@ -1205,8 +1246,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitExprStmt(CalcParser.ExprStmtContext ctx) {
-	    Object result           = evaluateFunction(visit(ctx.expr()));
-	    String resultString     = "";
+	    CalcParser.ExprContext expr = ctx.expr();
+	    Object result               = evaluateFunction(expr, visit(expr));
+	    String resultString         = "";
 
 	    BigInteger iValue = null;
 	    BigDecimal dValue = null;
@@ -1271,12 +1313,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    case 'U':
 		    case 'u':
 			toUpperCase = true;
-			valueBuf.append(toStringValue(this, result, false));
+			valueBuf.append(toStringValue(this, ctx, result, false));
 			break;
 		    case 'L':
 		    case 'l':
 			toLowerCase = true;
-			valueBuf.append(toStringValue(this, result, false));
+			valueBuf.append(toStringValue(this, ctx, result, false));
 			break;
 
 		    case 'C':
@@ -1354,7 +1396,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    case 'J':
 		    case 'j':
 			valueBuf.append('\n');
-			valueBuf.append(toStringValue(this, result, true, true, separators, ""));
+			valueBuf.append(toStringValue(this, ctx, result, true, true, separators, ""));
 			break;
 
 		    case 'X':
@@ -1467,7 +1509,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		// For large numbers it takes a significant amount of time just to convert
 		// to a string, so don't even try if we don't need to for display
 		if (!settings.silent)
-		    resultString = toStringValue(this, result, separators);
+		    resultString = toStringValue(this, ctx, result, separators);
 	    }
 
 	    if (!settings.silent) displayer.displayResult(exprString, resultString);
@@ -1549,7 +1591,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			else if (obj instanceof ArrayScope) {
 			    stepWise = false;
 			    @SuppressWarnings("unchecked")
-			    ArrayScope array = (ArrayScope) obj;
+			    ArrayScope<Object> array = (ArrayScope<Object>) obj;
 			    iter = array.list().iterator();
 			}
 			else if (obj instanceof String) {
@@ -1826,7 +1868,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitArrExpr(CalcParser.ArrExprContext ctx) {
 	   CalcParser.ExprListContext exprList = ctx.arr().exprList();
-	   ArrayScope list = new ArrayScope();
+	   ArrayScope<Object> list = new ArrayScope<>();
 	   if (exprList != null) {
 		for (CalcParser.ExprContext expr : exprList.expr()) {
 		    Object value = visit(expr);
@@ -2465,7 +2507,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	 * @return	  The real first value, descending to the lowest level of a compound object.
 	 */
 	private Object getFirstValue(final CalcParser.ExprContext eCtx, final Object obj, final boolean forJoin) {
-	    Object value = evaluateFunction(obj);
+	    Object value = evaluateFunction(eCtx, obj);
 
 	    nullCheck(value, eCtx);
 
@@ -2505,7 +2547,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		final boolean isString,
 		final boolean forJoin)
 	{
-	    Object value = evaluateFunction(obj);
+	    Object value = evaluateFunction(ctx, obj);
 
 	    nullCheck(value, ctx);
 
@@ -2738,7 +2780,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		parts = stringValue.split(patternValue, limit);
 	    }
 
-	    return new ArrayScope((Object[]) parts);
+	    return new ArrayScope<Object>((Object[]) parts);
 	}
 
 	@Override
@@ -2846,7 +2888,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    if (value instanceof ArrayScope) {
 		@SuppressWarnings("unchecked")
-		ArrayScope list = (ArrayScope) value;
+		ArrayScope<Object> list = (ArrayScope<Object>) value;
 		for (int index = start; index < (start + length); index++) {
 		    list.setValue(index, fillValue);
 		}
@@ -2976,32 +3018,32 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitFactorsExpr(CalcParser.FactorsExprContext ctx) {
-	    List<Integer> factors = new ArrayList<>();
+	    ArrayScope<Integer> result = new ArrayScope<>();
 	    BigInteger n = getIntegerValue(ctx.expr());
 
-	    MathUtil.getFactors(n, factors);
+	    MathUtil.getFactors(n, result.list());
 
-	    return new ArrayScope(factors);
+	    return result;
 	}
 
 	@Override
 	public Object visitPrimeFactorsExpr(CalcParser.PrimeFactorsExprContext ctx) {
-	    List<Integer> primeFactors = new ArrayList<>();
+	    ArrayScope<Integer> result = new ArrayScope<>();
 	    BigInteger n = getIntegerValue(ctx.expr());
 
-	    MathUtil.getPrimeFactors(n, primeFactors);
+	    MathUtil.getPrimeFactors(n, result.list());
 
-	    return new ArrayScope(primeFactors);
+	    return result;
 	}
 
 	@Override
 	public Object visitCharsExpr(CalcParser.CharsExprContext ctx) {
-	    final List<Integer> chars = new ArrayList<>();
+	    final ArrayScope<Integer> result = new ArrayScope<>();
 	    String string = getStringValue(ctx.expr());
 
-	    string.codePoints().forEachOrdered(cp -> chars.add(cp));
+	    string.codePoints().forEachOrdered(cp -> result.list().add(cp));
 
-	    return new ArrayScope(chars);
+	    return result;
 	}
 
 	@Override
@@ -3101,7 +3143,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		final List<Object> objectList,
 		final boolean toString)
 	{
-	    Object value = evaluateFunction(obj);
+	    Object value = evaluateFunction(ctx, obj);
 
 	    nullCheck(value, ctx);
 
@@ -3121,7 +3163,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 	    else {
 		if (toString) {
-		    objectList.add(toStringValue(this, value, false, false, false, ""));
+		    objectList.add(toStringValue(this, ctx, value, false, false, false, ""));
 		}
 		else if (settings.rationalMode) {
 		    objectList.add(toFractionValue(this, value, ctx));

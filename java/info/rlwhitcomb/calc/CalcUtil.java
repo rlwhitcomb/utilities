@@ -75,6 +75,8 @@
  *	    Add "fixup" method to strip trailing (unnecessary) zeros.
  *	06-Oct-2021 (rlwhitcomb)
  *	    #24 Full implementation of function parameters.
+ *	07-Oct-2021 (rlwhitcomb)
+ *	    Add context parameter to "toStringValue" and "evaluateFunction".
  */
 package info.rlwhitcomb.calc;
 
@@ -304,7 +306,7 @@ public final class CalcUtil
 	 * @throws CalcExprException for null input values, or other errors in conversion.
 	 */
 	public static BigDecimal toDecimalValue(final CalcObjectVisitor visitor, final Object obj, final MathContext mc, final ParserRuleContext ctx) {
-	    Object value = visitor.evaluateFunction(obj);
+	    Object value = visitor.evaluateFunction(ctx, obj);
 
 	    nullCheck(value, ctx);
 
@@ -342,7 +344,7 @@ public final class CalcUtil
 	 * @throws CalcExprException for null inputs, or other errors from conversion.
 	 */
 	public static BigFraction toFractionValue(final CalcObjectVisitor visitor, final Object obj, final ParserRuleContext ctx) {
-	    Object value = visitor.evaluateFunction(obj);
+	    Object value = visitor.evaluateFunction(ctx, obj);
 
 	    nullCheck(value, ctx);
 
@@ -435,7 +437,7 @@ public final class CalcUtil
 	 * @throws CalcExprException if there was a problem (for instance, in evaluating an expression).
 	 */
 	public static Boolean toBooleanValue(final CalcObjectVisitor visitor, final Object obj, final ParserRuleContext ctx) {
-	    Object value = visitor.evaluateFunction(obj);
+	    Object value = visitor.evaluateFunction(ctx, obj);
 
 	    // Compatibility with JavaScript here...
 	    if (CharUtil.isNullOrEmpty(value))
@@ -459,19 +461,25 @@ public final class CalcUtil
 	 * Convenience method to convert a value to a string, using the most common parameters.
 	 *
 	 * @param visitor	The tree visitor, for calculating expressions.
+	 * @param ctx		The parsing context, for error reporting.
 	 * @param result	The input value to be converted.
 	 * @param separators	Whether or not to use thousands separators when converting numeric values.
 	 * @return		The converted string value.
-	 * @see #toStringValue(CalcObjectVisitor, Object, boolean, boolean, boolean, String)
+	 * @see #toStringValue(CalcObjectVisitor, ParserRuleContext, Object, boolean, boolean, boolean, String)
 	 */
-	public static String toStringValue(final CalcObjectVisitor visitor, final Object result, final boolean separators) {
-	    return toStringValue(visitor, result, true, false, separators, "");
+	public static String toStringValue(
+		final CalcObjectVisitor visitor,
+		final ParserRuleContext ctx,
+		final Object result,
+		final boolean separators) {
+	    return toStringValue(visitor, ctx, result, true, false, separators, "");
 	}
 
 	/**
 	 * The workhorse, recursive method used to convert values to strings.
 	 *
 	 * @param visitor	The outermost visitor object that is being used to calculate everything.
+	 * @param ctx		The parsing context, for error reporting.
 	 * @param obj		The input object to be converted to a string.
 	 * @param quote		Whether or not the resulting string should be quoted (double quotes) if
 	 *			the input is an actual string object.
@@ -483,13 +491,14 @@ public final class CalcUtil
 	@SuppressWarnings("unchecked")
 	public static String toStringValue(
 		final CalcObjectVisitor visitor,
+		final ParserRuleContext ctx,
 		final Object obj,
 		final boolean quote,
 		final boolean pretty,
 		final boolean separators,
 		final String indent)
 	{
-	    Object result = visitor.evaluateFunction(obj);
+	    Object result = visitor.evaluateFunction(ctx, obj);
 
 	    if (result == null) {
 		return quote ? "<null>" : "";
@@ -513,10 +522,10 @@ public final class CalcUtil
 		return ((BigFraction) result).toString();
 	    }
 	    else if (result instanceof ObjectScope) {
-		return toStringValue(visitor, ((ObjectScope) result).map(), quote, pretty, separators, indent);
+		return toStringValue(visitor, ctx, ((ObjectScope) result).map(), quote, pretty, separators, indent);
 	    }
 	    else if (result instanceof ArrayScope) {
-		return toStringValue(visitor, ((ArrayScope) result).list(), quote, pretty, separators, indent);
+		return toStringValue(visitor, ctx, ((ArrayScope) result).list(), quote, pretty, separators, indent);
 	    }
 
 	    // Any other type, just get the string representation
@@ -527,6 +536,7 @@ public final class CalcUtil
 	 * The recursive method used to convert an object (map) to a string.
 	 *
 	 * @param visitor	The outermost visitor object that is being used to calculate everything.
+	 * @param ctx		The parsing context, for error reporting.
 	 * @param map		The input object (map) to be converted.
 	 * @param quote		Whether or not actual string objects should be double-quoted in the result.
 	 * @param pretty	Whether or not to "pretty" print the contents of an object (map) or list (array).
@@ -536,6 +546,7 @@ public final class CalcUtil
 	 */
 	public static String toStringValue(
 		final CalcObjectVisitor visitor,
+		final ParserRuleContext ctx,
 		final Map<String, Object> map,
 		final boolean quote,
 		final boolean pretty,
@@ -554,7 +565,7 @@ public final class CalcUtil
 			comma = true;
 		    if (pretty) buf.append(myIndent);
 		    buf.append(entry.getKey()).append(": ");
-		    buf.append(toStringValue(visitor, entry.getValue(), quote, pretty, separators, myIndent));
+		    buf.append(toStringValue(visitor, ctx, entry.getValue(), quote, pretty, separators, myIndent));
 		}
 		buf.append(pretty ? "\n" + indent + "}" : " }");
 	    }
@@ -568,6 +579,7 @@ public final class CalcUtil
 	 * The recursive method used to convert a list (array) to a string.
 	 *
 	 * @param visitor	The outermost visitor object that is being used to calculate everything.
+	 * @param ctx		The parsing context, for error reporting.
 	 * @param list		The input list (array) to be converted.
 	 * @param quote		Whether or not actual string objects should be double-quoted in the result.
 	 * @param pretty	Whether or not to "pretty" print the contents of an object (map) or list (array).
@@ -577,6 +589,7 @@ public final class CalcUtil
 	 */
 	public static String toStringValue(
 		final CalcObjectVisitor visitor,
+		final ParserRuleContext ctx,
 		final List<Object> list,
 		final boolean quote,
 		final boolean pretty,
@@ -594,7 +607,7 @@ public final class CalcUtil
 		    else
 			comma = true;
 		    if (pretty) buf.append(myIndent);
-		    buf.append(toStringValue(visitor, value, quote, pretty, separators, myIndent));
+		    buf.append(toStringValue(visitor, ctx, value, quote, pretty, separators, myIndent));
 		}
 		buf.append(pretty ? "\n" + indent + "]" : " ]");
 	    }
@@ -624,7 +637,7 @@ public final class CalcUtil
 	 * @return		The "length" according to the above rules.
 	 */
 	public static int length(final CalcObjectVisitor visitor, final Object valueObj, final ParserRuleContext ctx, final boolean recursive) {
-	    Object obj = visitor.evaluateFunction(valueObj);
+	    Object obj = visitor.evaluateFunction(ctx, valueObj);
 
 	    if (obj == null)
 		return 0;
@@ -698,7 +711,7 @@ public final class CalcUtil
 	 * @return		The scale of the object.
 	 */
 	public static int scale(final CalcObjectVisitor visitor, final Object valueObj, final ParserRuleContext ctx) {
-	    Object obj = visitor.evaluateFunction(valueObj);
+	    Object obj = visitor.evaluateFunction(ctx, valueObj);
 
 	    if (obj instanceof BigDecimal)
 		return ((BigDecimal) obj).scale();
@@ -770,8 +783,8 @@ public final class CalcUtil
 		final ParserRuleContext ctx1, final ParserRuleContext ctx2,
 		final Object obj1, final Object obj2,
 		final MathContext mc, final boolean strict, final boolean allowNulls) {
-	    Object e1 = visitor.evaluateFunction(obj1);
-	    Object e2 = visitor.evaluateFunction(obj2);
+	    Object e1 = visitor.evaluateFunction(ctx1, obj1);
+	    Object e2 = visitor.evaluateFunction(ctx2, obj2);
 
 	    if (allowNulls) {
 		if (e1 == null && e2 == null)
@@ -1067,7 +1080,7 @@ public final class CalcUtil
 			Object varValue = variables.getValue(varName, settings.ignoreNameCase);
 			// But if $var is not defined, then forget it, and just output "$" and go on
 			if (varValue != null) {
-			    output.append(toStringValue(visitor, varValue, false, false, settings.separatorMode, ""));
+			    output.append(toStringValue(visitor, ctx, varValue, false, false, settings.separatorMode, ""));
 			    lastPos = identPos - 1;
 			}
 			else {
@@ -1088,7 +1101,7 @@ public final class CalcUtil
 
 		    String expr = rawValue.substring(pos + 2, nextPos);
 		    Object exprValue = Calc.processString(expr, true);
-		    output.append(toStringValue(visitor, exprValue, false, false, settings.separatorMode, ""));
+		    output.append(toStringValue(visitor, ctx, exprValue, false, false, settings.separatorMode, ""));
 		    lastPos = nextPos;
 		}
 		else if (isIdentifierStart(rawValue.charAt(pos + 1))) {
@@ -1096,7 +1109,7 @@ public final class CalcUtil
 		    while (identPos < rawValue.length() && isIdentifierPart(rawValue.charAt(identPos)))
 			identPos++;
 		    String varName = rawValue.substring(pos + 1, identPos);
-		    output.append(toStringValue(visitor,
+		    output.append(toStringValue(visitor, ctx,
 			variables.getValue(varName, settings.ignoreNameCase), false, false, settings.separatorMode, ""));
 		    lastPos = identPos - 1;
 		}
