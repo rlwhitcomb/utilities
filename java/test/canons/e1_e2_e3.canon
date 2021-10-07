@@ -271,7 +271,7 @@
 >c.f = 1.2 -> 1.2
 >c.g = "Begin" -> "Begin"
 >c."key" = 'end' -> "end"
->c -> { d: true, "key": "end", f: 1.2, g: "Begin" }
+>c -> { d: true, f: 1.2, g: "Begin", "key": "end" }
 >length c -> 4
 >scale c -> 4
 >d = [1, {start: 1, end: 2}, {px: 0, py: 0}, "Area"] -> [ 1, { start: 1, end: 2 }, { px: 0, py: 0 }, "Area" ]
@@ -634,17 +634,17 @@
 >a @j -> 
 >{
 >  "b": {
->    "d": {
->      i: true
->    },
 >    "c": {
 >      d: 6,
 >      f: 3
+>    },
+>    "d": {
+>      i: true
 >    }
 >  }
 >}
 >++ a['"b"']['"c"']['f'] -> 4
->a -> { "b": { "d": { i: true }, "c": { d: 6, f: 4 } } }
+>a -> { "b": { "c": { d: 6, f: 4 }, "d": { i: true } } }
 >Variable 'a' cleared.
 >a = {b: true, c: {d: '123', f: 'fghi', g: {r: 4, s: 5}}} -> { b: true, c: { d: "123", f: "fghi", g: { r: 4, s: 5 } } }
 >a.b -> true

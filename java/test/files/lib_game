@@ -1,5 +1,10 @@
-#
-# Calculate winning percentage from wins/ties/losses
-#
-def winpct = { ties == null ? wins / (wins + losses) : wins / (wins + ties + losses)@2% }
+/*
+ * Compute the winning percentage, given wins, ties, and losses.
+ *
+ * @param $wins   Number of wins.
+ * @param $losses Number of times lost.
+ * @param $ties   Number of ties (default 0).
+ * @return        Winning percentage.
+ */
+def win_pct($wins, $losses, $ties = 0) = { $wins / ($wins + $ties + $losses) @2% }
 

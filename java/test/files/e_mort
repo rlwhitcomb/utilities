@@ -13,31 +13,26 @@
 #      a 30-year fixed mortgage would have 360 payments (30x12=360).
 #
 
-#
-# grammar is PMT obj
-# where "obj" has P, r or R, n or N
-# where r = monthly rate, R = yearly rate
-#   and n = months, N = years
-#
-
 # Note: this particular example comes from
 # https://www.bankrate.com/calculators/mortgages/mortgage-calculator.aspx
 
+#
 # The context for the payment calculation is:
-#   P = full principal amount to be financed
-#   R = yearly interest rate (%)
-#   N = number of years
+#   $P = full principal amount to be financed
+#   $R = yearly interest rate (%)
+#   $N = number of years
 # Then the calculated values are:
 #   r = monthly interest as a decimal value (% / 100 / 12)
 #   n = number of months (years * 12)
+#
 :quiet on
-define PMT = {
-  # Setup the context object, given the P, R, and N values are already set
-  ctx = { P: P, R: R, N: N }
+ctx = { }
+
+define PMT($P, $R, $N) = {
+  ctx = { P: $P, R: $R, N: $N }
 
   ctx.r = (ctx.R / 100) / 12
   ctx.n = ctx.N * 12
-  ctx
 
   # Calculate the intermediate values (which are reused)
   r_n = (1 + ctx.r) ** ctx.n
@@ -51,7 +46,7 @@ define PMT = {
 # Note: the 2nd param is the number of fractional digits (after the decimal point)
 # regardless of the number of whole digits in the result; so "0" will round
 # to a whole dollar, "2" rounds to pennies.
-M = PMT
+M = PMT(P, R, N)
 :quiet pop
 :results on
 ctx
