@@ -1,7 +1,7 @@
 :testClass info.rlwhitcomb.wordfind.WordFind
 
 :inputDir test/canons
-:defaultOptions -nocolor -maxtime 0 -notimings -maxwords 0 -maxwidth 100
+:defaultOptions -nocolor -maxtime 0 -notimings -maxwords 0 -maxsize 0 -maxwidth 100
 
 :echo Tests of WordFind functionality...
 :echo
