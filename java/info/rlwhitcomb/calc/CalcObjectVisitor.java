@@ -350,6 +350,8 @@
  *	    Split out "saveVariables" method to be called from GUI button code.
  *	06-Oct-2021 (rlwhitcomb)
  *	    #24 Full implementation of function parameters. Massive rewrite to use Scope.
+ *	07-Oct-2021 (rlwhitcomb)
+ *	    #24 Fix places that create List to convert to ArrayScope.
  */
 package info.rlwhitcomb.calc;
 
@@ -2979,7 +2981,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    MathUtil.getFactors(n, factors);
 
-	    return factors;
+	    return new ArrayScope(factors);
 	}
 
 	@Override
@@ -2989,7 +2991,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    MathUtil.getPrimeFactors(n, primeFactors);
 
-	    return primeFactors;
+	    return new ArrayScope(primeFactors);
 	}
 
 	@Override
@@ -2999,7 +3001,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    string.codePoints().forEachOrdered(cp -> chars.add(cp));
 
-	    return chars;
+	    return new ArrayScope(chars);
 	}
 
 	@Override
@@ -3102,7 +3104,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    Object value = evaluateFunction(obj);
 
 	    nullCheck(value, ctx);
-System.out.println("buildValueList value class = " + value.getClass().getSimpleName());
+
 	    if (value instanceof ArrayScope) {
 		@SuppressWarnings("unchecked")
 		ArrayScope array = (ArrayScope) value;

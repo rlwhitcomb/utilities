@@ -27,6 +27,8 @@
  *  History:
  *	06-Oct-2021 (rlwhitcomb)
  *	    Initial coding.
+ *	07-Oct-2021 (rlwhitcomb)
+ *	    Return "found" status from "remove".
  */
 package info.rlwhitcomb.calc;
 
@@ -153,26 +155,32 @@ class ObjectScope extends Scope
 	/**
 	 * Remove the variable entry from our map, effectively setting that variable's value back to {@code null}.
 	 *
-	 * @param name      Name of the variable to remove.
+	 * @param name       Name of the variable to remove.
 	 * @param ignoreCase Ignore the case of the name when searching for it.
+	 * @return           Whether or not the variable was found to be removed.
 	 */
-	public void remove(final String name, final boolean ignoreCase) {
+	public boolean remove(final String name, final boolean ignoreCase) {
 	    if (ignoreCase) {
 		if (variables.containsKey(name)) {
 		    variables.remove(name);
+		    return true;
 		}
 		else {
 		    for (Map.Entry<String, Object> entry : variables.entrySet()) {
 			if (entry.getKey().equalsIgnoreCase(name)) {
 			    variables.remove(entry.getKey());
-			    return;
+			    return true;
 			}
 		    }
 		}
 	    }
 	    else {
-		variables.remove(name);
+		if (variables.containsKey(name)) {
+		    variables.remove(name);
+		    return true;
+		}
 	    }
+	    return false;
 	}
 
 	/**

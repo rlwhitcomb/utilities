@@ -27,6 +27,8 @@
  *  History:
  *	06-Oct-2021 (rlwhitcomb)
  *	    Initial coding.
+ *	07-Oct-2021 (rlwhitcomb)
+ *	    Override "remove".
  */
 package info.rlwhitcomb.calc;
 
@@ -77,6 +79,7 @@ class NestedScope extends ObjectScope
 	 * @param ignoreCase Whether to ignore case in the search.
 	 * @return           The value of the variable, if found, or {@code null} if not.
 	 */
+	@Override
 	public Object getValue(final String name, final boolean ignoreCase) {
 	    Object value = super.getValue(name, ignoreCase);
 
@@ -85,6 +88,23 @@ class NestedScope extends ObjectScope
 	    }
 
 	    return value;
+	}
+
+	/**
+	 * Remove a variable in either this, or the most closely enclosing scope
+	 * that actually has the variable.
+	 *
+	 * @param name       The variable name to remove.
+	 * @param ignoreCase Whether to ignore name case to find it.
+	 * @return           Whether or not the variable was found to be removed.
+	 */
+	@Override
+	public boolean remove(final String name, final boolean ignoreCase) {
+	    if (super.remove(name, ignoreCase))
+		return true;
+	    if (enclosingScope != null && enclosingScope.remove(name, true))
+		return true;
+	    return false;
 	}
 
 }
