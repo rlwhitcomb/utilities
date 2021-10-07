@@ -66,8 +66,9 @@ class FunctionScope extends NestedScope
 	/**
 	 * Set the value of the given parameter number to the given expression.
 	 *
-	 * @param index 0-based parameter index.
-	 * @param expr  The expression value (could be {@code null}) to be assigned.
+	 * @param visitor The visitor class used to evaluate expressions.
+	 * @param index   0-based parameter index.
+	 * @param expr    The expression value (could be {@code null}) to be assigned.
 	 */
 	public void setParameterValue(final CalcObjectVisitor visitor, final int index, final ParserRuleContext expr) {
 	    ParserRuleContext valueExpr = expr;
