@@ -736,13 +736,24 @@ or
 <hr class="sectionsep">
   <h2>User-Defined Functions</h2>
 <div class="cols">
-  In addition to the predefined functions above, Calc allows new functions to be defined (unfortunately they do not support
-     function parameters yet) that can be used repeatedly without having to retype the same expression.
+  In addition to the predefined functions above, Calc allows new functions to be defined that can be used repeatedly without having to
+  retype the same expression.
   <p>The syntax for a function definition is:
   <p class="indent">
-     <code>def</code> | <code>define</code>&nbsp;<i>name</i> <code>= {</code> <i>expressions or statements</i> <code>}</code>
+     <code>def</code> | <code>define</code>&nbsp;<i>name</i> <i>optional parameter list</i> <code>= {</code> <i>expressions or statements</i> <code>}</code>
+  </p>
+  <p>The optional parameter list looks like:
+  <p class="indent">
+    <code>( </code> <code>$</code><i>name</i> [ <code> = </code> <i>expr</i> ] [ <code>,</code> ... ] <code> )</code>
   </p>
   <p>Note that the <code>{</code> and <code>}</code> are optional if there is only one expression/statement in the definition.
+  <p>The parameter values are assigned when the function is called, and there can be fewer actual values given than are declared; the remaining values
+     will be assigned <code>null</code> unless there is a default expression given in the declaration, in which case that expression is evaluated.
+     The parentheses are optional on the function call if there are no parameters being sent.
+  <p>Any variables referenced inside the function, including the parameters, are local to the function, unless they had been defined outside the function previously.
+  <p class="indent">
+    <code>def win_pct($wins, $losses, $ties = 0) = { $wins / ($wins + $ties + $losses) @2% }</code>
+  </p>
   <p>The value of a function is the value of the last expression evaluated inside it (note that the other statements have the same
      semantics). Functions are referenced by simply invoking their name.  For example: <code>def a = { 1 }</code> gives <code>a = 1</code>, and <code>def b = { a }</code> gives <code>b = 1</code>. Redefining the underlying function will also change the value of
      any functions that use it. So, without changing the definition of <code>b</code>, we can redefine <code>def a={2}</code>
