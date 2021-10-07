@@ -56,6 +56,8 @@
  *	09-Sep-2021 (rlwhitcomb)
  *	    Allow interpolated strings as member names; fix potential
  *	    problems with string names having escape sequences.
+ *	06-Sep-2021 (rlwhitcomb)
+ *	    #24 Fully implement function parameters.
  */
  package info.rlwhitcomb.calc;
 
@@ -63,13 +65,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import static info.rlwhitcomb.calc.CalcUtil.getIStringValue;
-import static info.rlwhitcomb.calc.CalcUtil.getMemberValue;
 import static info.rlwhitcomb.calc.CalcUtil.getStringMemberName;
-import static info.rlwhitcomb.calc.CalcUtil.isMemberDefined;
 import info.rlwhitcomb.util.Intl;
 
 
@@ -151,6 +152,22 @@ class LValueContext
 	    this.ignoreCase = p.ignoreCase;
 	}
 
+	/**
+	 * Construct for a function reference.
+	 *
+	 * @param p	The parent lvalue.
+	 * @param ctx	The parser context we're working in.
+	 * @param obj	The new function scope.
+	 */
+	LValueContext(LValueContext p, CalcParser.VarContext ctx, Object obj) {
+	    this.parent     = p;
+	    this.varCtx     = ctx;
+	    this.context    = obj;
+	    this.name       = null;
+	    this.index      = -1;
+	    this.ignoreCase = p.ignoreCase;
+	}
+
 	@Override
 	public String toString() {
 	    String parentName = parent == null ? "" : parent.toString();
@@ -177,21 +194,19 @@ class LValueContext
 	@SuppressWarnings("unchecked")
 	public Object getContextObject() {
 	    if (name != null) {
-		Map<String, Object> map = (Map<String, Object>) context;
+		ObjectScope map = (ObjectScope) context;
 		// Special checks for local vars (not defined means we are outside the loop or function)
-		if (name.startsWith("$")) {
-		    if (!isMemberDefined(map, name, ignoreCase)) {
-			if (name.charAt(1) < '0' || name.charAt(1) > '9')
-			    throw new CalcExprException(varCtx, "%calc#localVarNotAvail", name);
-			// just let the global argument value be null if it's missing
+		if (name.startsWith("$") && !Pattern.matches("^\\$[0-9]+$", name)) {
+		    if (!map.isDefined(name, ignoreCase)) {
+			throw new CalcExprException(varCtx, "%calc#localVarNotAvail", name);
 		    }
 		}
-		return getMemberValue(map, name, ignoreCase);
+		return map.getValue(name, ignoreCase);
 	    }
 	    else if (index >= 0) {
-		if (context instanceof List) {
-		    List<Object> list = (List<Object>) context;
-		    return list.get(index);
+		if (context instanceof ArrayScope) {
+		    ArrayScope list = (ArrayScope) context;
+		    return list.getValue(index);
 		}
 		else if (context instanceof String) {
 		    String str = (String) context;
@@ -206,8 +221,8 @@ class LValueContext
 		}
 	    }
 	    else {
-		// This should only ever be in the outermost "variables" context
-		// where the context is just the variables map
+		// This should only ever be in the outermost global context
+		// where the context is just the global variables scope
 		return context;
 	    }
 	}
@@ -233,13 +248,13 @@ class LValueContext
 		    else
 			throw new CalcExprException(varCtx, "%calc#localVarNoAssign", name);
 		}
-		Map<String, Object> map = (Map<String, Object>) context;
-		map.put(name, value);
+		ObjectScope map = (ObjectScope) context;
+		map.setValue(name, ignoreCase, value);
 	    }
 	    else if (index >= 0) {
-		if (context instanceof List) {
-		    List<Object> list = (List<Object>) context;
-		    list.set(index, value);
+		if (context instanceof ArrayScope) {
+		    ArrayScope list = (ArrayScope) context;
+		    list.setValue(index, value);
 		}
 		else if (context instanceof String) {
 		    StringBuilder buf = new StringBuilder((String) context);
@@ -274,14 +289,14 @@ class LValueContext
 	 */
 	@SuppressWarnings("unchecked")
 	private LValueContext makeMapLValue(final CalcObjectVisitor visitor, final CalcParser.VarContext ctx, final String memberName) {
-	    Map<String, Object> map = null;
+	    ObjectScope map = null;
 	    Object objValue = getContextObject();
 	    if (objValue == null) {
-		map = new HashMap<>();
+		map = new ObjectScope();
 		putContextObject(visitor, map);
 	    }
-	    else if (objValue instanceof Map) {
-		map = (Map<String, Object>) objValue;
+	    else if (objValue instanceof ObjectScope) {
+		map = (ObjectScope) objValue;
 	    }
 	    else {
 		throw new CalcExprException(ctx, "%calc#nonObjectValue", this);
@@ -323,7 +338,7 @@ class LValueContext
 		Object arrValue = arrLValue.getContextObject();
 
 		// Okay, here the "arrValue" could be null, an array, a string, OR an object (map)
-		if (arrValue != null && arrValue instanceof Map) {
+		if (arrValue != null && arrValue instanceof ObjectScope) {
 		    // The "index" expression should be a string (meaning a member name)
 		    LValueContext objLValue = arrLValue.makeMapLValue(visitor, arrVarCtx, null);
 
@@ -347,13 +362,13 @@ class LValueContext
 		if (index < 0)
 		    throw new CalcExprException(arrVarCtx, "%calc#indexNegative", index);
 
-		List<Object> list = null;
+		ArrayScope list = null;
 		if (arrValue == null) {
-		    list = new ArrayList<>();
+		    list = new ArrayScope();
 		    arrLValue.putContextObject(visitor, list);
 		}
-		else if (arrValue instanceof List) {
-		    list = (List<Object>) arrValue;
+		else if (arrValue instanceof ArrayScope) {
+		    list = (ArrayScope) arrValue;
 		}
 		else if (arrValue instanceof String) {
 		    return new LValueContext(arrLValue, arrVarCtx, arrValue, index);
@@ -361,11 +376,6 @@ class LValueContext
 		else {
 		    throw new CalcExprException(arrVarCtx, "%calc#nonArrayValue", arrLValue);
 		}
-
-		// Set empty values up to the index desired
-		int size = list.size();
-		for (int i = size; i <= index; i++)
-		    list.add(null);
 
 		return new LValueContext(arrLValue, arrVarCtx, list, index);
 	    }
@@ -396,10 +406,19 @@ class LValueContext
 	    else if (ctx instanceof CalcParser.FunctionVarContext) {
 		CalcParser.FunctionVarContext funcVarCtx = (CalcParser.FunctionVarContext) ctx;
 		LValueContext funcLValue = getLValue(visitor, funcVarCtx.var(), lValue);
-		CalcParser.ActualParamsContext actuals = funcVarCtx.actualParams();
+		FunctionDeclaration func = (FunctionDeclaration) funcLValue.getContextObject();
+		List<CalcParser.ExprContext> exprs = funcVarCtx.actualParams().expr();
 
-// ... finish
-		/* ?? */ return funcLValue;
+		FunctionScope funcScope = new FunctionScope(func);
+
+		if (exprs.size() > func.getNumberOfParameters())
+		    throw new CalcExprException(funcVarCtx, "%calc#tooManyValues", exprs.size(), func.getNumberOfParameters());
+
+		for (int index = 0; index < exprs.size(); index++) {
+		    funcScope.setParameterValue(visitor, index, exprs.get(index));
+		}
+
+		return new LValueContext(funcLValue, funcVarCtx, funcScope);
 	    }
 	    else {
 		throw new CalcExprException(ctx, "%calc#unknownVarCtx", ctx.getClass().getName());

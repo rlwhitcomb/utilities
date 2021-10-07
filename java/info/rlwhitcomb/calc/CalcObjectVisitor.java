@@ -348,6 +348,8 @@
  *	    so that the key sets list in the order they were defined.
  *	05-Oct-2021 (rlwhitcomb)
  *	    Split out "saveVariables" method to be called from GUI button code.
+ *	06-Oct-2021 (rlwhitcomb)
+ *	    #24 Full implementation of function parameters. Massive rewrite to use Scope.
  */
 package info.rlwhitcomb.calc;
 
@@ -493,11 +495,14 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	/** The mode settings for this instantiation of the visitor. */
 	private final Settings settings;
 
-	/** Symbol table for variables. */
-	private final Map<String, Object> variables;
+	/** Global symbol table for variables. */
+	private final GlobalScope globals;
 
-	/** The outermost {@code LValueContext} for the (global) variables. */
-	private final LValueContext globalContext;
+	/** The current topmost scope for variables. */
+	private NestedScope currentScope;
+
+	/** The current {@code LValueContext} for variables. */
+	private LValueContext currentContext;
 
 	/** {@link CalcDisplayer} object so we can output results to either the console or GUI window. */
 	private final CalcDisplayer displayer;
@@ -530,23 +535,40 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	private final Deque<Boolean> quietModeStack = new ArrayDeque<>();
 
 
-	public CalcObjectVisitor(CalcDisplayer resultDisplayer, boolean rational, boolean separators, boolean ignoreCase) {
+	public NestedScope getVariables() {
+	    return currentScope;
+	}
+
+	public void pushScope(final NestedScope newScope) {
+	    newScope.setEnclosingScope(currentScope);
+	    currentScope = newScope;
+	    currentContext = new LValueContext(currentScope, settings.ignoreNameCase);
+	}
+
+	public void popScope() {
+	    currentScope = currentScope.getEnclosingScope();
+	    currentContext = new LValueContext(currentScope, settings.ignoreNameCase);
+	}
+
+	public CalcObjectVisitor(final CalcDisplayer resultDisplayer, final boolean rational, final boolean separators, final boolean ignoreCase) {
 	    setMathContext(MathContext.DECIMAL128);
-	    settings      = new Settings(rational, separators, ignoreCase);
-	    variables     = new LinkedHashMap<>();
-	    globalContext = new LValueContext(variables, ignoreCase);
-	    displayer     = resultDisplayer;
+
+	    settings  = new Settings(rational, separators, ignoreCase);
+	    globals   = new GlobalScope();
+	    displayer = resultDisplayer;
+
+	    pushScope(globals);
 
 	    initialized   = true;
 	}
 
-	public boolean setSilent(boolean newSilent) {
+	public boolean setSilent(final boolean newSilent) {
 	    boolean oldSilent = settings.silent;
 	    settings.silent = newSilent;
 	    return oldSilent;
 	}
 
-	private void displayActionMessage(String formatOrKey, Object... args) {
+	private void displayActionMessage(final String formatOrKey, final Object... args) {
 	    if (initialized && !settings.silent) {
 		String message = Intl.formatKeyString(formatOrKey, args);
 		displayer.displayActionMessage(message);
@@ -562,25 +584,21 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	 *		if it successfully parses as a {@link BigDecimal}, otherwise it
 	 *		will be set as a string.
 	 */
-	public void setArgument(int index, String arg) {
+	public void setArgument(final int index, final String arg) {
 	    try {
 		BigDecimal dValue = new BigDecimal(arg);
-		variables.put(String.format("$%1$d", index), dValue);
+		globals.setValue(String.format("$%1$d", index), false, dValue);
 	    }
 	    catch (NumberFormatException nfe) {
-		variables.put(String.format("$%1$d", index), arg);
+		globals.setValue(String.format("$%1$d", index), false, arg);
 	    }
-	}
-
-	public Map<String, Object> getVariables() {
-	    return variables;
 	}
 
 	public MathContext getMathContext() {
 	    return mc;
 	}
 
-	public BigInteger setMathContext(MathContext newMathContext) {
+	public BigInteger setMathContext(final MathContext newMathContext) {
 	    int prec  = newMathContext.getPrecision();
 	    mc        = newMathContext;
 
@@ -608,7 +626,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    return settings;
 	}
 
-	public String setTrigMode(TrigMode newTrigMode) {
+	public String setTrigMode(final TrigMode newTrigMode) {
 	    settings.trigMode = newTrigMode;
 
 	    displayActionMessage("%calc#trigMode", settings.trigMode);
@@ -616,7 +634,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    return settings.trigMode.toString();
 	}
 
-	public String setUnits(RangeMode mode) {
+	public String setUnits(final RangeMode mode) {
 	    settings.units = mode;
 
 	    switch (mode) {
@@ -634,7 +652,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    return settings.units.toString();
 	}
 
-	public boolean setSeparatorMode(boolean mode) {
+	public boolean setSeparatorMode(final boolean mode) {
 	    boolean oldMode = settings.separatorMode;
 	    settings.separatorMode = mode;
 
@@ -643,17 +661,17 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    return oldMode;
 	}
 
-	public boolean setIgnoreCaseMode(boolean mode) {
+	public boolean setIgnoreCaseMode(final boolean mode) {
 	    boolean oldMode = settings.ignoreNameCase;
 	    settings.ignoreNameCase = mode;
-	    globalContext.setIgnoreCase(mode);
+	    currentContext.setIgnoreCase(mode);
 
 	    displayActionMessage("%calc#ignoreCaseMode", mode);
 
 	    return oldMode;
 	}
 
-	public boolean setRationalMode(boolean mode) {
+	public boolean setRationalMode(final boolean mode) {
 	    boolean oldMode = settings.rationalMode;
 	    settings.rationalMode = mode;
 
@@ -663,7 +681,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    return oldMode;
 	}
 
-	public boolean setTimingMode(boolean mode) {
+	public boolean setTimingMode(final boolean mode) {
 	    boolean oldMode = Calc.setTimingMode(mode);
 
 	    displayActionMessage("%calc#timingMode", mode);
@@ -671,7 +689,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    return oldMode;
 	}
 
-	public boolean setDebugMode(boolean mode) {
+	public boolean setDebugMode(final boolean mode) {
 	    boolean oldMode = Calc.setDebugMode(mode);
 
 	    displayActionMessage("%calc#debugMode", mode);
@@ -680,27 +698,57 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 
-	private BigDecimal getDecimalValue(ParserRuleContext ctx) {
+	/**
+	 * Evaluate a function: basically call {@code visit} on that
+	 * context if the value is itself is a function scope (that is,
+	 * the declaration of a function).
+	 *
+	 * @param value The result of an expression, which could be
+	 * the body of a function.
+	 * @return Either the value or the result of visiting that
+	 * function context if it is one.
+	 */
+	protected Object evaluateFunction(final Object value) {
+	    Object returnValue = value;
+
+	    if (returnValue != null && returnValue instanceof FunctionScope) {
+		FunctionScope func = (FunctionScope) returnValue;
+
+		boolean prevSilent = setSilent(true);
+		pushScope(func);
+		try {
+		    returnValue = visit(func.getDeclaration().getFunctionBody());
+		}
+		finally {
+		    popScope();
+		    setSilent(prevSilent);
+		}
+	    }
+
+	    return returnValue;
+	}
+
+	private BigDecimal getDecimalValue(final ParserRuleContext ctx) {
 	    return toDecimalValue(this, visit(ctx), mc, ctx);
 	}
 
-	private BigFraction getFractionValue(ParserRuleContext ctx) {
+	private BigFraction getFractionValue(final ParserRuleContext ctx) {
 	    return toFractionValue(this, visit(ctx), ctx);
 	}
 
-	private BigInteger getIntegerValue(ParserRuleContext ctx) {
+	private BigInteger getIntegerValue(final ParserRuleContext ctx) {
 	    return toIntegerValue(this, visit(ctx), mc, ctx);
 	}
 
-	private Boolean getBooleanValue(ParserRuleContext ctx) {
+	private Boolean getBooleanValue(final ParserRuleContext ctx) {
 	    return toBooleanValue(this, visit(ctx), ctx);
 	}
 
-	protected String getStringValue(ParserRuleContext ctx) {
+	protected String getStringValue(final ParserRuleContext ctx) {
 	    return getStringValue(ctx, false, false, settings.separatorMode);
 	}
 
-	private String getStringValue(ParserRuleContext ctx, boolean allowNull, boolean quote, boolean separators) {
+	private String getStringValue(final ParserRuleContext ctx, final boolean allowNull, final boolean quote, final boolean separators) {
 	    if (ctx == null && allowNull)
 		return "";
 
@@ -712,17 +760,17 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    return value == null ? "" : toStringValue(this, value, quote, false, separators, "");
 	}
 
-	private double getDoubleValue(ParserRuleContext ctx) {
+	private double getDoubleValue(final ParserRuleContext ctx) {
 	    BigDecimal dec = getDecimalValue(ctx);
 
 	    return dec.doubleValue();
 	}
 
-	protected int getIntValue(ParserRuleContext ctx) {
+	protected int getIntValue(final ParserRuleContext ctx) {
 	    return toIntValue(this, visit(ctx), mc, ctx);
 	}
 
-	private BigDecimal getDecimalTrigValue(ParserRuleContext ctx) {
+	private BigDecimal getDecimalTrigValue(final ParserRuleContext ctx) {
 	    BigDecimal value = getDecimalValue(ctx);
 
 	    if (settings.trigMode == TrigMode.DEGREES)
@@ -731,11 +779,11 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    return value;
 	}
 
-	private double getTrigValue(ParserRuleContext ctx) {
+	private double getTrigValue(final ParserRuleContext ctx) {
 	    return getDecimalTrigValue(ctx).doubleValue();
 	}
 
-	private BigDecimal returnTrigValue(double value) {
+	private BigDecimal returnTrigValue(final double value) {
 	    BigDecimal radianValue = new BigDecimal(value, MC_DOUBLE);
 
 	    if (settings.trigMode == TrigMode.DEGREES)
@@ -744,7 +792,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    return radianValue;
 	}
 
-	private Charset getCharsetValue(ParserRuleContext ctx, boolean useDefault) {
+	private Charset getCharsetValue(final ParserRuleContext ctx, final boolean useDefault) {
 	    Charset defaultCharset = useDefault ? DEFAULT_CHARSET : null;
 
 	    if (ctx == null)
@@ -762,36 +810,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 	}
 
-	private int compareValues(ParserRuleContext ctx1, ParserRuleContext ctx2) {
+	private int compareValues(final ParserRuleContext ctx1, final ParserRuleContext ctx2) {
 	    return compareValues(ctx1, ctx2, false, false);
 	}
 
-	private int compareValues(ParserRuleContext ctx1, ParserRuleContext ctx2, boolean strict, boolean allowNulls) {
+	private int compareValues(final ParserRuleContext ctx1, final ParserRuleContext ctx2, final boolean strict, final boolean allowNulls) {
 	    return CalcUtil.compareValues(this, ctx1, ctx2, mc, strict, allowNulls);
-	}
-
-
-	/**
-	 * Evaluate a function: basically call {@code visit} on that
-	 * context if the value is itself is a parse tree (that is,
-	 * the body of a function).
-	 *
-	 * @param value The result of an expression, which could be
-	 * the body of a function.
-	 * @return Either the value or the result of visiting that
-	 * function context if it is one.
-	 */
-	protected Object evaluateFunction(Object value) {
-	    Object returnValue = value;
-
-	    if (returnValue != null && returnValue instanceof ParserRuleContext) {
-		ParserRuleContext funcCtx = (ParserRuleContext) returnValue;
-		boolean prevSilent = setSilent(true);
-		returnValue = visit(funcCtx);
-		setSilent(prevSilent);
-	    }
-
-	    return returnValue;
 	}
 
 
@@ -883,8 +907,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    int numberCleared = 0;
 
 	    if (idList == null || (ids = idList.ID()).isEmpty()) {
-		numberCleared = variables.size();
-		variables.clear();
+		numberCleared = globals.size();
+		globals.clear();
 		displayActionMessage("%calc#varsAllCleared");
 	    }
 	    else {
@@ -895,7 +919,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    if (varName.equals("<missing ID>"))
 			continue;
 		    numberCleared++;
-		    removeMember(variables, varName, settings.ignoreNameCase);
+		    globals.remove(varName, settings.ignoreNameCase);
 		    if (vars.length() > 0)
 			vars.append(", ");
 		    lastNamePos = vars.length();
@@ -926,7 +950,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    Set<String> sortedKeys;
 
 	    if (idList == null || (ids = idList.ID()).isEmpty()) {
-		sortedKeys = new TreeSet<>(variables.keySet());
+		sortedKeys = new TreeSet<>(globals.keySet());
 	    }
 	    else {
 		sortedKeys = new TreeSet<>();
@@ -944,11 +968,14 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		displayActionMessage("%calc#varUnder1");
 	    }
 	    for (String key : sortedKeys) {
-		Object value = getMemberValue(variables, key, settings.ignoreNameCase);
-		if (value instanceof ParserRuleContext)
-		    displayer.displayResult(key, getTreeText((ParserRuleContext) value));
-		else
+		Object value = globals.getValue(key, settings.ignoreNameCase);
+		if (value instanceof FunctionDeclaration) {
+		    FunctionDeclaration func = (FunctionDeclaration) value;
+		    displayer.displayResult(func.getFullFunctionName(), getTreeText(func.getFunctionBody()));
+		}
+		else {
 		    displayer.displayResult(key, toStringValue(this, value, settings.separatorMode));
+		}
 	    }
 	    if (!replMode) {
 		displayActionMessage("%calc#varUnder2");
@@ -956,7 +983,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    Calc.setResultsOnlyMode(oldMode);
 
-	    return BigInteger.valueOf(variables.size());
+	    return BigInteger.valueOf(sortedKeys.size());
 	}
 
 	@Override
@@ -986,15 +1013,17 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		throws IOException
 	{
 	    try (BufferedWriter writer = Files.newBufferedWriter(path, charset == null ? DEFAULT_CHARSET : charset)) {
-		// Note: using LinkedHashMap for "variables" means the key set will be in the order
-		// they were defined, which is important here, since we must be able to read back
-		// the saved file and have the values computed to be the same as they are now.
-		for (String key : variables.keySet()) {
-		    Object value = getMemberValue(variables, key, settings.ignoreNameCase);
-		    if (value instanceof ParserRuleContext)
-			writer.write(String.format("def %1$s = %2$s", key, getTreeText((ParserRuleContext) value)));
-		    else
+		// Note: the keySet returned from ObjectScope is in order of declaration, which is important here, since we
+		// must be able to read back the saved file and have the values computed to be the same as they are now.
+		for (String key : globals.keySet()) {
+		    Object value = globals.getValue(key, settings.ignoreNameCase);
+		    if (value instanceof FunctionDeclaration) {
+			FunctionDeclaration func = (FunctionDeclaration) value;
+			writer.write(String.format("def %1$s = %2$s", func.getFullFunctionName(), getTreeText(func.getFunctionBody())));
+		    }
+		    else {
 			writer.write(String.format("%1$s = %2$s", key, toStringValue(this, value, settings.separatorMode)));
+		    }
 		    writer.newLine();
 		}
 	    }
@@ -1012,11 +1041,11 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		throw new CalcExprException(ctx, "%calc#ioError", ExceptionUtil.toString(ioe));
 	    }
 
-	    return BigInteger.valueOf(variables.size());
+	    return BigInteger.valueOf(globals.size());
 	}
 
 
-	private Boolean processModeOption(CalcParser.ModeOptionContext ctx, Deque<Boolean> stack, UnaryOperator<Boolean> setOperator) {
+	private Boolean processModeOption(final CalcParser.ModeOptionContext ctx, final Deque<Boolean> stack, final UnaryOperator<Boolean> setOperator) {
 	    boolean push = true;
 	    boolean mode = false;
 	    String option = null;
@@ -1120,7 +1149,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 
-	private boolean isEmptyStmt(ParseTree root) {
+	private boolean isEmptyStmt(final ParseTree root) {
 	    ParseTree node = root;
 	    while (node != null) {
 		// Two cases: the "emptyStmt" from the grammar and the EOF token
@@ -1140,7 +1169,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    return false;
 	}
 
-	private Object internalVisitStatements(ParserRuleContext ctx) {
+	private Object internalVisitStatements(final ParserRuleContext ctx) {
 	    Object returnValue = null;
 
 	    for (ParseTree child : ctx.children) {
@@ -1205,7 +1234,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    if (result != null && !format.isEmpty()) {
 		char formatChar = format.charAt(format.length() - 1);
 
-		if ((result instanceof Map || result instanceof List) && (formatChar != 'j' && formatChar != 'J')) {
+		if ((result instanceof Scope) && (formatChar != 'j' && formatChar != 'J')) {
 		    throw new CalcExprException(ctx, "%calc#noConvertObjArr", formatChar);
 		}
 
@@ -1450,29 +1479,29 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		private CalcParser.StmtBlockContext block;
 		private String localVarName;
 
-		LoopVisitor(CalcParser.StmtBlockContext blockContext, String varName) {
+		LoopVisitor(final CalcParser.StmtBlockContext blockContext, final String varName) {
 		    this.block        = blockContext;
 		    this.localVarName = varName;
 		}
 
 		@Override
-		public Object apply(Object value) {
+		public Object apply(final Object value) {
 		    if (localVarName != null)
-			variables.put(localVarName, value);
+			currentScope.setValue(localVarName, settings.ignoreNameCase, value);
 		    return visit(block);
 		}
 
 		public void finish() {
 		    // Make sure the local loop var gets removed, even on exceptions
-		    removeMember(variables, localVarName, settings.ignoreNameCase);
+		    currentScope.remove(localVarName, settings.ignoreNameCase);
 		}
 	}
 
 	private Object iterateOverDotRange(
-		CalcParser.ExprListContext exprList,
-		CalcParser.DotRangeContext dotRange,
-		Function<Object, Object> visitor,
-		boolean allowSingle)
+		final CalcParser.ExprListContext exprList,
+		final CalcParser.DotRangeContext dotRange,
+		final Function<Object, Object> visitor,
+		final boolean allowSingle)
 	{
 	    List<CalcParser.ExprContext> exprs;
 
@@ -1509,17 +1538,17 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    if (allowSingle) {
 			// or it could be an array, object, or string to iterate over
 			Object obj = visit(exprs.get(0));
-			if (obj instanceof Map) {
+			if (obj instanceof ObjectScope) {
 			    stepWise = false;
 			    @SuppressWarnings("unchecked")
-			    Map<Object, Object> map = (Map<Object, Object>) obj;
-			    iter = map.keySet().iterator();
+			    ObjectScope map = (ObjectScope) obj;
+			    iter = map.keyObjectSet().iterator();
 			}
-			else if (obj instanceof List) {
+			else if (obj instanceof ArrayScope) {
 			    stepWise = false;
 			    @SuppressWarnings("unchecked")
-			    List<Object> list = (List<Object>) obj;
-			    iter = list.iterator();
+			    ArrayScope array = (ArrayScope) obj;
+			    iter = array.list().iterator();
 			}
 			else if (obj instanceof String) {
 			    stepWise = false;
@@ -1627,13 +1656,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    TerminalNode localVar = ctx.LOCALVAR();
 	    String localVarName   = localVar != null ? localVar.getText() : "$_";
 
-	    if (isMemberDefined(variables, localVarName, settings.ignoreNameCase)) {
-		if (localVar == null)
-		    throw new CalcExprException(ctx, "%calc#noDupAnonVar");
-		else
-		    throw new CalcExprException(ctx, "%calc#noDupLocalVar", localVarName);
-	    }
-
+	    pushScope(new LoopScope());
 	    LoopVisitor visitor = new LoopVisitor(block, localVarName);
 
 	    Object value = null;
@@ -1643,6 +1666,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 	    finally {
 		visitor.finish();
+		popScope();
 	    }
 
 	    return value;
@@ -1656,9 +1680,16 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    Object lastValue = null;
 
 	    boolean exprResult = getBooleanValue(exprCtx);
-	    while (exprResult) {
-		lastValue = visit(block);
-		exprResult = getBooleanValue(exprCtx);
+
+	    pushScope(new WhileScope());
+	    try {
+		while (exprResult) {
+		    lastValue = visit(block);
+		    exprResult = getBooleanValue(exprCtx);
+		}
+	    }
+	    finally {
+		popScope();
 	    }
 
 	    return lastValue;
@@ -1672,11 +1703,18 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    Object resultValue = null;
 
 	    boolean controlValue = getBooleanValue(exprCtx);
-	    if (controlValue) {
-		resultValue = visit(thenBlock);
+
+	    pushScope(new IfScope());
+	    try {
+		if (controlValue) {
+		    resultValue = visit(thenBlock);
+		}
+		else if (elseBlock != null) {
+		    resultValue = visit(elseBlock);
+		}
 	    }
-	    else if (elseBlock != null) {
-		resultValue = visit(elseBlock);
+	    finally {
+		popScope();
 	    }
 
 	    return resultValue;
@@ -1687,6 +1725,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    Object caseValue = visit(ctx.expr());
 	    List<CalcParser.CaseBlockContext> blocks = ctx.caseBlock();
 	    CalcParser.CaseBlockContext defaultCtx = null;
+	    CaseScope scope = new CaseScope();
 
 	    for (CalcParser.CaseBlockContext cbCtx : blocks) {
 		CalcParser.ExprListContext exprListCtx = cbCtx.exprList();
@@ -1697,14 +1736,30 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    for (CalcParser.ExprContext exprCtx : exprListCtx.expr()) {
 			Object blockValue = visit(exprCtx);
 			if (CalcUtil.compareValues(this, ctx, cbCtx, caseValue, blockValue, mc, false, true) == 0) {
-			    return visit(cbCtx.stmtBlock());
+			    Object returnValue = null;
+			    pushScope(scope);
+			    try {
+				returnValue = visit(cbCtx.stmtBlock());
+			    }
+			    finally {
+				popScope();
+			    }
+			    return returnValue;
 			}
 		    }
 		}
 	    }
 
 	    if (defaultCtx != null) {
-		return visit(defaultCtx.stmtBlock());
+		Object returnValue = null;
+		pushScope(scope);
+		try {
+		    returnValue = visit(defaultCtx.stmtBlock());
+		}
+		finally {
+		    popScope();
+		}
+		return returnValue;
 	    }
 
 	    return null;
@@ -1732,11 +1787,18 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    String paramString = formalParams == null ? "" : getTreeText(formalParams);
 	    List<CalcParser.FormalParamContext> paramVars = formalParams == null ? null : formalParams.formalParam();
+	    FunctionDeclaration func = new FunctionDeclaration(functionName, functionBody);
 
-// TODO: make a Function object and add name, params, body to it; save this instead of functionBody as the variable
-	    variables.put(functionName, functionBody);
+	    if (formalParams != null) {
+		for (CalcParser.FormalParamContext paramVar : formalParams.formalParam()) {
+		    String paramName = paramVar.LOCALVAR().getText();
+		    func.defineParameter(paramVar, paramName, paramVar.expr());
+		}
+	    }
 
-	    displayActionMessage("%calc#defining", functionName, paramString, getTreeText(functionBody));
+	    currentScope.setValue(functionName, settings.ignoreNameCase, func);
+
+	    displayActionMessage("%calc#defining", func.getFullFunctionName(), getTreeText(functionBody));
 
 	    return functionBody;
 	}
@@ -1744,7 +1806,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitObjExpr(CalcParser.ObjExprContext ctx) {
 	    CalcParser.ObjContext oCtx = ctx.obj();
-	    Map<String, Object> obj = new LinkedHashMap<>();
+	    ObjectScope obj = new ObjectScope();
 	    for (CalcParser.PairContext pCtx : oCtx.pair()) {
 		TerminalNode id   = pCtx.ID();
 		TerminalNode str  = pCtx.STRING();
@@ -1754,7 +1816,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		      : (str != null) ? getStringMemberName(str.getText())
 		      : getIStringValue(this, istr, ctx);
 		Object value = visit(pCtx.expr());
-		obj.put(key, value);
+		obj.setValue(key, settings.ignoreNameCase, value);
 	    }
 	    return obj;
 	}
@@ -1762,7 +1824,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitArrExpr(CalcParser.ArrExprContext ctx) {
 	   CalcParser.ExprListContext exprList = ctx.arr().exprList();
-	   List<Object> list = new ArrayList<>();
+	   ArrayScope list = new ArrayScope();
 	   if (exprList != null) {
 		for (CalcParser.ExprContext expr : exprList.expr()) {
 		    Object value = visit(expr);
@@ -2278,7 +2340,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		private BigInteger count = BigInteger.ZERO;
 
 		@Override
-		public Object apply(Object value) {
+		public Object apply(final Object value) {
 		    count = count.add(BigInteger.ONE);
 		    return count;
 		}
@@ -2400,20 +2462,20 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	 * @param forJoin Whether or not this is a "join" operation.
 	 * @return	  The real first value, descending to the lowest level of a compound object.
 	 */
-	private Object getFirstValue(CalcParser.ExprContext eCtx, Object obj, boolean forJoin) {
+	private Object getFirstValue(final CalcParser.ExprContext eCtx, final Object obj, final boolean forJoin) {
 	    Object value = evaluateFunction(obj);
 
 	    nullCheck(value, eCtx);
 
 	    if (!forJoin) {
-		if (value instanceof List) {
+		if (value instanceof ArrayScope) {
 		    @SuppressWarnings("unchecked")
-		    List<Object> list = (List<Object>) value;
-		    return list.size() > 0 ? getFirstValue(eCtx, list.get(0), forJoin) : null;
+		    ArrayScope list = (ArrayScope) value;
+		    return list.size() > 0 ? getFirstValue(eCtx, list.getValue(0), forJoin) : null;
 		}
-		else if (value instanceof Map) {
+		else if (value instanceof ObjectScope) {
 		    @SuppressWarnings("unchecked")
-		    Map<String, Object> map = (Map<String, Object>) value;
+		    ObjectScope map = (ObjectScope) value;
 		    Iterator<Object> iter = map.values().iterator();
 		    return iter.hasNext() ? getFirstValue(eCtx, iter.next(), forJoin) : null;
 		}
@@ -2434,31 +2496,37 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	 * @param forJoin	{@code true} for a "join" operation, which will not recurse into lists or maps to begin with.
 	 * @see #getFirstValue
 	 */
-	private void buildFlatMap(ParserRuleContext ctx, Object obj, List<Object> objectList, boolean isString, boolean forJoin) {
+	private void buildFlatMap(
+		final ParserRuleContext ctx,
+		final Object obj,
+		final List<Object> objectList,
+		final boolean isString,
+		final boolean forJoin)
+	{
 	    Object value = evaluateFunction(obj);
 
 	    nullCheck(value, ctx);
 
-	    if (value instanceof List) {
+	    if (value instanceof ArrayScope) {
 		@SuppressWarnings("unchecked")
-		List<Object> list = (List<Object>) value;
+		ArrayScope array = (ArrayScope) value;
 		if (forJoin) {
-		    objectList.add(list);
+		    objectList.add(array);
 		}
 		else {
-		    for (Object listObj : list) {
+		    for (Object listObj : array.list()) {
 			buildFlatMap(ctx, listObj, objectList, isString, forJoin);
 		    }
 		}
 	    }
-	    else if (value instanceof Map) {
+	    else if (value instanceof ObjectScope) {
 		@SuppressWarnings("unchecked")
-		Map<String, Object> map = (Map<String, Object>) value;
+		ObjectScope object = (ObjectScope) value;
 		if (forJoin) {
-		    objectList.add(map);
+		    objectList.add(object);
 		}
 		else {
-		    for (Object mapObj : map.values()) {
+		    for (Object mapObj : object.values()) {
 			buildFlatMap(ctx, mapObj, objectList, isString, forJoin);
 		    }
 		}
@@ -2486,7 +2554,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	 * @param forJoin Whether or not this is a "join" operation.
 	 * @return	  The "flat map" of the values from those arguments.
 	 */
-	private List<Object> buildFlatMap(List<CalcParser.ExprContext> exprs, boolean forJoin) {
+	private List<Object> buildFlatMap(final List<CalcParser.ExprContext> exprs, final boolean forJoin) {
 	    // Do a "peek" inside any lists or maps to get the first value
 	    CalcParser.ExprContext firstCtx = exprs.get(0);
 	    boolean isString = getFirstValue(firstCtx, visit(firstCtx), forJoin) instanceof String;
@@ -2593,7 +2661,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    if (length == 1) {
 		Object obj0 = objects.get(0);
 		// One map or list => concatenate all objects in it
-		if (obj0 instanceof List || obj0 instanceof Map) {
+		if (obj0 instanceof ArrayScope || obj0 instanceof ObjectScope) {
 		    objects.clear();
 		    buildFlatMap(ctx, obj0, objects, true, false);
 		    for (Object obj : objects) {
@@ -2606,7 +2674,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    else if (length == 2) {
 		Object obj0 = objects.get(0);
 		Object obj1 = objects.get(1);
-		if (obj0 instanceof List || obj0 instanceof Map) {
+		if (obj0 instanceof ArrayScope || obj0 instanceof ObjectScope) {
 		    // One map or list, plus a join expression
 		    objects.clear();
 		    buildFlatMap(ctx, obj0, objects, true, false);
@@ -2629,7 +2697,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    if (i > 0)
 			buf.append(joinExpr);
 		    Object obj = objects.get(i);
-		    if (obj instanceof List || obj instanceof Map) {
+		    if (obj instanceof Scope) {
 			List<Object> objects1 = new ArrayList<>();
 			buildFlatMap(ctx, obj, objects1, true, false);
 			for (int j = 0; j < objects1.size(); j++) {
@@ -2668,8 +2736,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		parts = stringValue.split(patternValue, limit);
 	    }
 
-	    // We need a variable sized list, not the fixed-size one returned by Arrays.asList
-	    return new ArrayList<String>(Arrays.asList(parts));
+	    return new ArrayScope((Object[]) parts);
 	}
 
 	@Override
@@ -2775,22 +2842,11 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		length    = getIntValue(exprs.get(2));
 	    }
 
-	    if (value instanceof List) {
+	    if (value instanceof ArrayScope) {
 		@SuppressWarnings("unchecked")
-		List<Object> list = (List<Object>) value;
-		// Fill in the missing values up to start
-		if (start > 0 && list.size() < start) {
-		    for (int index = list.size(); index < start; index++) {
-			list.add(null);
-		    }
-		}
+		ArrayScope list = (ArrayScope) value;
 		for (int index = start; index < (start + length); index++) {
-		    if (index < list.size()) {
-			list.set(index, fillValue);
-		    }
-		    else {
-			list.add(fillValue);
-		    }
+		    list.setValue(index, fillValue);
 		}
 	    }
 	    else if (value instanceof String) {
@@ -3037,21 +3093,26 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	 * @param objectList	The complete list of values to be built.
 	 * @param toString      Whether to coerce values always to strings, or let them be numeric also.
 	 */
-	private void buildValueList(ParserRuleContext ctx, Object obj, List<Object> objectList, boolean toString) {
+	private void buildValueList(
+		final ParserRuleContext ctx,
+		final Object obj,
+		final List<Object> objectList,
+		final boolean toString)
+	{
 	    Object value = evaluateFunction(obj);
 
 	    nullCheck(value, ctx);
-
-	    if (value instanceof List) {
+System.out.println("buildValueList value class = " + value.getClass().getSimpleName());
+	    if (value instanceof ArrayScope) {
 		@SuppressWarnings("unchecked")
-		List<Object> list = (List<Object>) value;
-		for (Object listObj : list) {
+		ArrayScope array = (ArrayScope) value;
+		for (Object listObj : array.list()) {
 		    buildValueList(ctx, listObj, objectList, toString);
 		}
 	    }
-	    else if (value instanceof Map) {
+	    else if (value instanceof ObjectScope) {
 		@SuppressWarnings("unchecked")
-		Map<String, Object> map = (Map<String, Object>) value;
+		ObjectScope map = (ObjectScope) value;
 		for (Object mapObj : map.values()) {
 		    buildValueList(ctx, mapObj, objectList, toString);
 		}
@@ -3077,7 +3138,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	 * @param toString Whether to convert all values to strings or do numeric conversions.
 	 * @return	The completely built "flat map" of values.
 	 */
-	private List<Object> buildValueList(List<CalcParser.ExprContext> exprs, boolean toString) {
+	private List<Object> buildValueList(final List<CalcParser.ExprContext> exprs, final boolean toString) {
 	    List<Object> objects = new ArrayList<>();
 
 	    for (CalcParser.ExprContext exprCtx : exprs) {
@@ -3109,12 +3170,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		private BigDecimal sum = BigDecimal.ZERO;
 		private ParserRuleContext ctx;
 
-		public SumOfVisitor(ParserRuleContext context) {
+		public SumOfVisitor(final ParserRuleContext context) {
 		    this.ctx = context;
 		}
 
 		@Override
-		public Object apply(Object value) {
+		public Object apply(final Object value) {
 		    if (settings.rationalMode) {
 			BigFraction frac = value instanceof BigFraction
 				? (BigFraction) value
@@ -3159,12 +3220,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		private BigDecimal product = BigDecimal.ONE;
 		private ParserRuleContext ctx;
 
-		public ProductOfVisitor(ParserRuleContext context) {
+		public ProductOfVisitor(final ParserRuleContext context) {
 		    this.ctx = context;
 		}
 
 		@Override
-		public Object apply(Object value) {
+		public Object apply(final Object value) {
 		    if (settings.rationalMode) {
 			BigFraction frac = value instanceof BigFraction
 				? (BigFraction) value
@@ -3604,7 +3665,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	private LValueContext getLValue(CalcParser.VarContext var) {
-	    return LValueContext.getLValue(this, var, globalContext);
+	    return LValueContext.getLValue(this, var, currentContext);
 	}
 
 	@Override

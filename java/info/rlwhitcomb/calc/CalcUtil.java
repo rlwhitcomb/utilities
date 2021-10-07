@@ -73,14 +73,14 @@
  *	    Fix an issue with string member names with "handed" quotes.
  *	21-Sep-2021 (rlwhitcomb)
  *	    Add "fixup" method to strip trailing (unnecessary) zeros.
+ *	06-Oct-2021 (rlwhitcomb)
+ *	    #24 Full implementation of function parameters.
  */
 package info.rlwhitcomb.calc;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.MathContext;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -325,9 +325,9 @@ public final class CalcUtil
 
 	    // Here we are not able to make sense of the object, so we have an error
 	    String typeName = value.getClass().getSimpleName();
-	    if (value instanceof Map)
+	    if (value instanceof ObjectScope)
 		typeName = "object";
-	    else if (value instanceof List)
+	    else if (value instanceof ArrayScope)
 		typeName = "array";
 	    throw new CalcExprException(ctx, "%calc#noConvertDecimal", typeName);
 	}
@@ -363,9 +363,9 @@ public final class CalcUtil
 
 	    // Here we are not able to make sense of the object, so we have an error
 	    String typeName = value.getClass().getSimpleName();
-	    if (value instanceof Map)
+	    if (value instanceof ObjectScope)
 		typeName = "object";
-	    else if (value instanceof List)
+	    else if (value instanceof ArrayScope)
 		typeName = "array";
 	    throw new CalcExprException(ctx, "%calc#noConvertFraction", typeName);
 	}
@@ -512,11 +512,11 @@ public final class CalcUtil
 	    else if (result instanceof BigFraction) {
 		return ((BigFraction) result).toString();
 	    }
-	    else if (result instanceof Map) {
-		return toStringValue(visitor, (Map<String, Object>) result, quote, pretty, separators, indent);
+	    else if (result instanceof ObjectScope) {
+		return toStringValue(visitor, ((ObjectScope) result).map(), quote, pretty, separators, indent);
 	    }
-	    else if (result instanceof List) {
-		return toStringValue(visitor, (List<Object>) result, quote, pretty, separators, indent);
+	    else if (result instanceof ArrayScope) {
+		return toStringValue(visitor, ((ArrayScope) result).list(), quote, pretty, separators, indent);
 	    }
 
 	    // Any other type, just get the string representation
@@ -646,13 +646,13 @@ public final class CalcUtil
 		String str = (String) obj;
 		return str.codePointCount(0, str.length());
 	    }
-	    if (obj instanceof List) {
+	    if (obj instanceof ArrayScope) {
 		@SuppressWarnings("unchecked")
-		List<Object> list = (List<Object>) obj;
+		ArrayScope array = (ArrayScope) obj;
 		if (recursive) {
 		    int len = 0;
-		    for (Object listObj : list) {
-			if (listObj instanceof List || listObj instanceof Map)
+		    for (Object listObj : array.list()) {
+			if (listObj instanceof ArrayScope || listObj instanceof ObjectScope)
 			    len += length(visitor, listObj, ctx, recursive);
 			else
 			    len++;	// Note: this will count null entries as one
@@ -660,16 +660,16 @@ public final class CalcUtil
 		    return len;
 		}
 		else {
-		    return list.size();
+		    return array.size();
 		}
 	    }
-	    if (obj instanceof Map) {
+	    if (obj instanceof ObjectScope) {
 		@SuppressWarnings("unchecked")
-		Map<String, Object> map = (Map<String, Object>) obj;
+		ObjectScope map = (ObjectScope) obj;
 		if (recursive) {
 		    int len = 0;
 		    for (Object mapObj : map.values()) {
-			if (mapObj instanceof List || mapObj instanceof Map)
+			if (mapObj instanceof ArrayScope || mapObj instanceof ObjectScope)
 			    len += length(visitor, mapObj, ctx, recursive);
 			else
 			    len++;	// Note: this will count null values as one
@@ -704,7 +704,7 @@ public final class CalcUtil
 		return ((BigDecimal) obj).scale();
 	    if (obj instanceof BigFraction)
 		return ((BigFraction) obj).toDecimal().scale();
-	    if (obj instanceof List || obj instanceof Map)
+	    if (obj instanceof ArrayScope || obj instanceof ObjectScope)
 		return length(visitor, obj, ctx, false);
 	    return 0;
 	}
@@ -816,11 +816,11 @@ public final class CalcUtil
 		Boolean b2 = toBooleanValue(visitor, e2, ctx2);
 		return b1.compareTo(b2);
 	    }
-	    else if (e1 instanceof List && e2 instanceof List) {
+	    else if (e1 instanceof ArrayScope && e2 instanceof ArrayScope) {
 		@SuppressWarnings("unchecked")
-		List<Object> list1 = (List<Object>) e1;
+		ArrayScope list1 = (ArrayScope) e1;
 		@SuppressWarnings("unchecked")
-		List<Object> list2 = (List<Object>) e2;
+		ArrayScope list2 = (ArrayScope) e2;
 		int size1 = list1.size();
 		int size2 = list2.size();
 
@@ -828,19 +828,19 @@ public final class CalcUtil
 		    return Integer.signum(size1 - size2);
 
 		for (int i = 0; i < size1; i++) {
-		    Object o1 = list1.get(i);
-		    Object o2 = list2.get(i);
+		    Object o1 = list1.getValue(i);
+		    Object o2 = list2.getValue(i);
 		    int ret = compareValues(visitor, ctx1, ctx2, o1, o2, mc, strict, allowNulls);
 		    if (ret != 0)
 			return ret;
 		}
 		return 0;
 	    }
-	    else if (e1 instanceof Map && e2 instanceof Map) {
+	    else if (e1 instanceof ObjectScope && e2 instanceof ObjectScope) {
 		@SuppressWarnings("unchecked")
-		Map<String, Object> map1 = (Map<String, Object>) e1;
+		ObjectScope map1 = (ObjectScope) e1;
 		@SuppressWarnings("unchecked")
-		Map<String, Object> map2 = (Map<String, Object>) e2;
+		ObjectScope map2 = (ObjectScope) e2;
 		int size1 = map1.size();
 		int size2 = map2.size();
 
@@ -866,8 +866,8 @@ public final class CalcUtil
 
 		// If the key sets are the same, then iterate through the values and compare them
 		for (String key : keySet1) {
-		    Object value1 = map1.get(key);
-		    Object value2 = map2.get(key);
+		    Object value1 = map1.getValue(key, false);
+		    Object value2 = map2.getValue(key, false);
 		    int ret = compareValues(visitor, ctx1, ctx2, value1, value2, mc, strict, allowNulls);
 		    if (ret != 0)
 			return ret;
@@ -1043,7 +1043,7 @@ public final class CalcUtil
 	 */
 	public static String getIStringValue(final CalcObjectVisitor visitor, final TerminalNode iStringNode, final ParserRuleContext ctx) {
 	    String value = iStringNode.getText();
-	    Map<String, Object> variables = visitor.getVariables();
+	    NestedScope variables = visitor.getVariables();
 	    Settings settings = visitor.getSettings();
 
 	    String rawValue = getRawString(value);
@@ -1064,7 +1064,7 @@ public final class CalcUtil
 			identPos++;
 		    if (identPos > pos + 2) {
 			String varName = rawValue.substring(pos + 1, identPos);
-			Object varValue = getMemberValue(variables, varName, settings.ignoreNameCase);
+			Object varValue = variables.getValue(varName, settings.ignoreNameCase);
 			// But if $var is not defined, then forget it, and just output "$" and go on
 			if (varValue != null) {
 			    output.append(toStringValue(visitor, varValue, false, false, settings.separatorMode, ""));
@@ -1097,7 +1097,7 @@ public final class CalcUtil
 			identPos++;
 		    String varName = rawValue.substring(pos + 1, identPos);
 		    output.append(toStringValue(visitor,
-			getMemberValue(variables, varName, settings.ignoreNameCase), false, false, settings.separatorMode, ""));
+			variables.getValue(varName, settings.ignoreNameCase), false, false, settings.separatorMode, ""));
 		    lastPos = identPos - 1;
 		}
 		else
@@ -1134,91 +1134,6 @@ public final class CalcUtil
 	    char leftQuote = constantText.charAt(0);
 	    char rightQuote = constantText.charAt(constantText.length() - 1);
 	    return CharUtil.addQuotes(getRawString(constantText), leftQuote, rightQuote);
-	}
-
-	/**
-	 * Is the given member name defined in the object?
-	 *
-	 * @param map		 The object to search.
-	 * @param varName	 The member name to search for.
-	 * @param ignoreNameCase Whether the search should ignore name case or not.
-	 * @return	{@code true} or {@code false} if the object has such a member
-	 */
-	public static boolean isMemberDefined(Map<String, Object> map, String varName, boolean ignoreNameCase) {
-	    if (ignoreNameCase) {
-		if (map.containsKey(varName)) {
-		    return true;
-		}
-		else {
-		    for (Map.Entry<String, Object> entry : map.entrySet()) {
-			if (entry.getKey().equalsIgnoreCase(varName)) {
-			    return true;
-			}
-		    }
-		    return false;
-		}
-	    }
-	    else {
-		return map.containsKey(varName);
-	    }
-	}
-
-
-	/**
-	 * Retrieve the named member's value from the object.
-	 *
-	 * @param map		 The object to search.
-	 * @param varName	 The member name to search for.
-	 * @param ignoreNameCase Whether the search should ignore name case or not.
-	 * @return		 The member value, if any, or {@code null}.
-	 */
-	public static Object getMemberValue(Map<String, Object> map, String varName, boolean ignoreNameCase) {
-	    if (ignoreNameCase) {
-		if (map.containsKey(varName)) {
-		    return map.get(varName);
-		}
-		else {
-		    // The names could have been saved either with case sensitive mode or not,
-		    // so, the keys are always caseSensitive, and we need to search the entry set
-		    // and do case-insensitive compares of the keys
-		    for (Map.Entry<String, Object> entry : map.entrySet()) {
-			if (entry.getKey().equalsIgnoreCase(varName)) {
-			    return entry.getValue();
-			}
-		    }
-		    return null;
-		}
-	    }
-	    else {
-		return map.get(varName);
-	    }
-	}
-
-
-	/**
-	 * Remove the member entry from the object, effectively setting that member's value back to {@code null}.
-	 *
-	 * @param map		 The object to modify.
-	 * @param varName	 Name of the member to remove.
-	 * @param ignoreNameCase Whether the member name search should ignore name case or not.
-	 */
-	public static void removeMember(Map<String, Object> map, String varName, boolean ignoreNameCase) {
-	    if (ignoreNameCase) {
-		if (map.containsKey(varName)) {
-		    map.remove(varName);
-		}
-		else {
-		    for (Map.Entry<String, Object> entry : map.entrySet()) {
-			if (entry.getKey().equalsIgnoreCase(varName)) {
-			    map.remove(entry.getKey());
-			    return;
-			}
-		    }
-		}
-	    }
-	    else {
-		map.remove(varName);
-	    }
 	}
 
 }

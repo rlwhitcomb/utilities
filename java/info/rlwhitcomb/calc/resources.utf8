@@ -76,6 +76,8 @@
 #	    Add more color tags to error messages.
 #	26-Sep-2021 (rlwhitcomb)
 #	    Remove quotes around colored phrases.
+#	06-Oct-2021 (rlwhitcomb)
+#	    Errors from Scope. Remove now unneeded messages.
 #
 
 #
@@ -128,7 +130,7 @@ debugMode	= Debug mode set to <v>%1$s<>.
 rationalMode	= Calculation mode set to <v>%1$s<>.
 separatorMode	= Separator display set to <v>%1$s<>.
 ignoreCaseMode  = Ignoring case is now <v>%1$s<>.
-defining	= <r>Defining function <x>%1$s%2$s<r> = <v>%3$s<r>
+defining	= <r>Defining function <x>%1$s<r> = <v>%2$s<r>
 variables	= Variables
 varUnder1	= ---------
 varUnder2	= =========
@@ -143,7 +145,6 @@ ioError			= I/O Error: %1$s
 noConvertInteger	= Unable to convert value of <x>%1$s<> to an integer
 noConvertObjArr		= Cannot convert object or array to <x>%1$c<> format
 noDupLocalVar		= Duplicate local variable name <x>%1$s<> not allowed
-noDupAnonVar		= Cannot use anonymous loop variable <x>$_<> in nested loops
 localVarNoAssign	= The value of the local variable <x>%1$s<> cannot be changed directly
 globalArgNoAssign	= The value of the global argument <x>%1$s<> cannot be changed directly
 infLoopStepZero		= Infinite loop: step value is zero
@@ -178,9 +179,15 @@ callNotAFunction	= Cannot make a function call on the non-function value <x>%1$s
 indexNegative		= Index value of <v>%1$d<> cannot be negative
 unknownVarCtx		= ERROR: unknown var context subclass: <x>%1$s<>
 badAssign		= Assignment to <x>%1$s<> without name or index.
+tooManyValues		= Too many actual values (%1$d) passed for only %2$d parameters
 
 #
 # From UnknownOpException
 #
 unknownOp	= Unknown operator <x>%1$s<>
+
+#
+# From Scope
+#
+indexOutOfBounds	= Index value of <v>%1$d<> is out of bounds
 
