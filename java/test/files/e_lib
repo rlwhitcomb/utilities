@@ -1,0 +1,33 @@
+#
+# Testing of some of the Calc standard library functions
+#
+:clear
+:separators off
+:open 'test/files/library,test/files/lib_game,test/files/lib_mort'
+
+# Tests of "library"
+excel_date(d'2021/10/8')
+excel_date_1904(D'12/7/1941')
+rad_to_deg(pi/4)
+deg_to_rad(135)
+dow_name(D'10/13/1957')
+moy_name(D'9/11/2001')
+long_date(D'11/11/1918')
+flat_map([[[1,2],[3,4]],[[5,6],[7,8]],[[9,10],[11,12]]])
+is_perfect(28)
+is_perfect(99)
+quad(3,-4,-9)
+quad(1,0,-25)
+
+# Tests of "lib_game"
+win_pct(25,75)
+win_pct(662,174,2)
+
+# Tests of "lib_mort"
+help_mort
+monthly(244000, 3.25, 30)
+PMT2(350000, 0.3, 180)
+
+:separators pop
+:clear
+

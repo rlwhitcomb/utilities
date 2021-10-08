@@ -1,3 +1,5 @@
+:quiet on
+
 /*
  * Compute the winning percentage, given wins, ties, and losses.
  *
@@ -7,4 +9,6 @@
  * @return        Winning percentage.
  */
 def win_pct($wins, $losses, $ties = 0) = { $wins / ($wins + $ties + $losses) @2% }
+
+:quiet pop
 
