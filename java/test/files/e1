@@ -118,6 +118,12 @@ round(a, 10)
 round a, -2
 round c, 0
 
+v = 1621.9
+
+:resultonly on
+loop -10 .. 10 { `round to $$_ -> ${round(v, $_)}` }
+:resultonly pop
+
 sin(2700)
 sin -(4*pi)
 
