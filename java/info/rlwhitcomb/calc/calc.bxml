@@ -74,6 +74,8 @@
 		Add Separator mode to Settings.
 	    05-Oct-2021 (rlwhitcomb)
 		Add "Save" icon to toolbar.
+	    08-Oct-2021 (rlwhitcomb)
+		Reduce space between toolbar buttons. Tweak button text colors.
 
      ========================================================================== -->
 
@@ -220,14 +222,14 @@
 	</columns>
 	<rows>
 	    <TablePane.Row height="-1">
-		<BoxPane orientation="horizontal" styles="{padding:4, spacing:20, verticalAlignment:'center', horizontalAlignment:'center'}">
+		<BoxPane orientation="horizontal" styles="{padding:4, spacing:15, verticalAlignment:'center', horizontalAlignment:'center'}">
 		    <BoxPane orientation="vertical" styles="{horizontalAlignment:'center'}">
 			<PushButton tooltipText="%helpTip"
 				action="help"
 				buttonData="%helpButton"
 				preferredWidth="60"
 				preferredHeight="32"
-				styles="{color:'blue', font:{size:24,bold:true}}"/>
+				styles="{color:'BlueViolet', font:{size:24,bold:true}}"/>
 			<Label text="%helpLabel"/>
 			<Label text="%helpKeyLabel"/>
 		    </BoxPane>
@@ -237,11 +239,11 @@
 				buttonData="%versionButton"
 				preferredWidth="60"
 				preferredHeight="32"
-				styles="{color:'blue', font:{size:24,bold:true}}"/>
+				styles="{color:'MediumOrchid', font:{size:24,bold:true}}"/>
 			<Label text="%versionLabel"/>
 			<Label bxml:id="versionKeyLabel" text=""/>
 		    </BoxPane>
-		    <Label preferredWidth="30"/>
+		    <Label preferredWidth="25"/>
 		    <BoxPane orientation="vertical" styles="{horizontalAlignment:'center'}">
 			<PushButton tooltipText="%settingsTip"
 				action="settings"
@@ -252,7 +254,7 @@
 			<Label text="%settingsLabel"/>
 			<Label text="%settingsKeyLabel"/>
 		    </BoxPane>
-		    <Label preferredWidth="30"/>
+		    <Label preferredWidth="25"/>
 		    <BoxPane orientation="vertical" styles="{horizontalAlignment:'center'}">
 			<PushButton tooltipText="%saveTip"
 				action="save"
@@ -273,7 +275,7 @@
 			<Label text="%openLabel"/>
 			<Label text="%openKeyLabel"/>
 		    </BoxPane>
-		    <Label preferredWidth="30"/>
+		    <Label preferredWidth="25"/>
 		    <BoxPane orientation="vertical" styles="{horizontalAlignment:'center'}">
 			<PushButton tooltipText="%clearTip"
 				action="clear"
@@ -294,7 +296,7 @@
 			<Label text="%calculateLabel"/>
 			<Label text="%calculateKeyLabel"/>
 		    </BoxPane>
-		    <Label preferredWidth="30"/>
+		    <Label preferredWidth="25"/>
 		    <BoxPane orientation="vertical" styles="{horizontalAlignment:'center'}">
 			<PushButton tooltipText="%exitTip"
 				action="exit"
