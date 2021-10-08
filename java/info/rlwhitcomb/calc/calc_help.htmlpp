@@ -88,7 +88,7 @@ h2 {
    font-family: Verdana, Helvetica, Arial, Sans-Serif;
    font-size: 24pt;
    font-weight: bold;
-   color: blue;
+   color: blueviolet;
 }
 
 .orangebutton {
