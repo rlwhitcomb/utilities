@@ -45,6 +45,8 @@
  *	    Add 'tenPower' method (like 'ePower').
  *	05-Oct-2021 (rlwhitcomb)
  *	    Make "fixup" method that does "round" and "stripTrailingZeros".
+ *	07-Oct-2021 (rlwhitcomb)
+ *	    Fix operation of "round" when rounding to more precision than the original.
  */
 package info.rlwhitcomb.util;
 
@@ -142,7 +144,9 @@ public final class MathUtil
 	    int scale     = value.scale();
 	    int roundPrec = Math.max(1, (prec - scale) + fPlaces);
 
-	    return value.round(new MathContext(roundPrec));
+	    return (roundPrec > prec)
+		? value.setScale(scale + (roundPrec - prec))
+		: value.round(new MathContext(roundPrec));
 	}
 
 

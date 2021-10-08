@@ -262,6 +262,8 @@
 		Add a target to check copyrights.
 	    05-Oct-2021 (rlwhitcomb)
 		Clean out the "savetest" created during the Calc unit tests in "purge".
+	    07-Oct-2021 (rlwhitcomb)
+		Move clean of "savetest" to the end of the testing section instead.
 
      ========================================================================== -->
 
@@ -673,6 +675,9 @@
 			<arg value="/c"/>
 			<arg value="check_sorted.bat"/>
 		</exec>
+		<delete>
+			<fileset dir="." includes="savetest"/>
+		</delete>
 		<echo>Done with unit tests. Successful. Results in "${test.log.path}" file.</echo>
 	</target>
 
@@ -756,7 +761,6 @@
 		</tstamp>
 		<echo message="Purging log and temporary files from before ${last.two.weeks}..."/>
 		<delete>
-			<fileset dir="." includes="savetest"/>
 			<fileset dir="." includes="test*.log,utilities*.log">
 				<date datetime="${last.two.weeks}" when="before"/>
 			</fileset>
