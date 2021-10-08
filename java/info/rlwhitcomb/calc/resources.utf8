@@ -78,6 +78,8 @@
 #	    Remove quotes around colored phrases.
 #	06-Oct-2021 (rlwhitcomb)
 #	    Errors from Scope. Remove now unneeded messages.
+#	08-Oct-2021 (rlwhitcomb)
+#	    Undefined function error.
 #
 
 #
@@ -154,6 +156,7 @@ modeError		= Mode option <x>%1$s<> not recognized
 illegalFormat		= Unrecognized format <x>%1$s<>
 fillTargetWrongType	= Target of a <x>FILL<> must be an array or string
 fillOneCharInt		= Fill value for a string must be one character or an integer \u2264 65535
+undefinedFunction	= Cannot call undefined function <x>%1$s<>
 
 intro.help1	= "  Enter an expression (or multiple expressions separated by <v>;<>)."
 intro.help2	= "  Use <v>help<> or <v>?<> for a list of supported functions."

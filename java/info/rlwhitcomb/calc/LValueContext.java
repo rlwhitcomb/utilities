@@ -61,6 +61,8 @@
  *	07-Oct-2021 (rlwhitcomb)
  *	    Add context parameter to "toStringValue", move function call setup
  *	    to CalcObjectVisitor so it can be called from there if needed also.
+ *	08-Oct-2021 (rlwhitcomb)
+ *	    Error if function is undefined.
  */
  package info.rlwhitcomb.calc;
 
@@ -74,6 +76,7 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 
 import static info.rlwhitcomb.calc.CalcUtil.getIStringValue;
 import static info.rlwhitcomb.calc.CalcUtil.getStringMemberName;
+import static info.rlwhitcomb.calc.CalcUtil.getTreeText;
 import info.rlwhitcomb.util.Intl;
 
 
@@ -411,6 +414,9 @@ class LValueContext
 		LValueContext funcLValue = getLValue(visitor, funcVarCtx.var(), lValue);
 		FunctionDeclaration func = (FunctionDeclaration) funcLValue.getContextObject();
 		List<CalcParser.ExprContext> exprs = funcVarCtx.actualParams().expr();
+
+		if (func == null)
+		    throw new CalcExprException(funcVarCtx, "%calc#undefinedFunction", getTreeText(funcVarCtx.var()));
 
 		return new LValueContext(funcLValue, funcVarCtx, visitor.setupFunctionCall(funcVarCtx, func, exprs));
 	    }
