@@ -484,7 +484,7 @@ or
       <tr><td><code>@</code>[<i>nn</i>][<code>w</code>|<code>d</code>|<code>h</code>|<code>m</code>|<code>s</code>]<code>t</code></td><td>Format as a time (duration), optional rounding</td></tr>
       <tr><td><code>@l</code></td><td>Format result string in lower case</td></tr>
       <tr><td><code>@u</code></td><td>Format result string in UPPER case</td></tr>
-      <tr><td><code>@</code>[<code>,</code>][<i>nn</i>]<code>d</code></td><td>Primarily for rational mode: format the result as a decimal value,<br>with optional separators, and optionally rounding to <i>nn</i> digits<br>(prints codepoint for single character)</td></tr>
+      <tr><td><code>@</code>[<i>nn</i>][<code>,</code>]<code>d</code></td><td>Primarily for rational mode: format the result as a decimal value,<br>with optional separators, and optionally rounding to <i>nn</i> digits<br>(prints codepoint for single character)</td></tr>
       <tr><td><code>@e</code></td><td>Format an integer as a date (yyyy-mm-dd) (ISO-8601 format)</td></tr>
       <tr><td><code>@E</code></td><td>Format an integer as a date (mm/dd/yyyy) (U.S. format)</td></tr>
       <tr><td><code>@f</code></td><td>For decimal mode, format the result as a rational fraction</td></tr>
@@ -496,7 +496,7 @@ or
       <tr><td><code>@o</code></td><td>For integers and strings, format in octal form</td></tr>
       <tr><td><code>@b</code></td><td>For integers and strings, format in binary form</td></tr>
       <tr><td><code>@k</code></td><td>Use kilobyte, megabyte, etc. notation for the value</td></tr>
-      <tr><td><code>@</code>[<code>,</code>][<i>nn</i>]<code>%</code></td><td>Format as a percentage, with optional separators, and<br>optionally rounding to <i>nn</i> digits</td></tr>
+      <tr><td><code>@</code>[<i>nn</i>][<code>,</code>]<code>%</code></td><td>Format as a percentage, with optional separators, and<br>optionally rounding to <i>nn</i> digits</td></tr>
     </tbody>
     </table>
   </div>
