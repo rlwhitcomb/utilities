@@ -115,13 +115,13 @@ h2 {
 
 <body>
   <div class="title-box">
-    <h1 style="font-family:'Fredericka the Great',cursive;font-size:400%;">Expression Calculator</h1>
+    <h1 style="font-family:'Fredericka the Great',cursive;font-size:400%;">Calculator</h1>
     <h2>Version ${Calc.version}, build ${build.number}</h2>
   </div>
 <hr class="sectionsep">
   <h2>Introduction</h2>
 <div class="cols">
-  An expression calculator that combines (nearly) unlimited precision decimal arithmetic with a rich assortment
+  A calculator of arithmetic "expressions" (such as <code style="color:blue;">1 + 1</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">2</code>) that combines (nearly) unlimited precision decimal arithmetic with a rich assortment
        of operators and functions to give the ability to calculate nearly any arithmetic expression.
   <p>As input, the expression calculator can operate on an expression given entirely on the command line (may need to be
        quoted for certain operator characters); in <a href="https://en.wikipedia.org/wiki/Read-eval-print_loop">REPL</a> mode
@@ -303,15 +303,15 @@ h2 {
 <code><span style="color:grey;">&gt;</span> :mixed<br>
 <span style="color:green;">Units in mixed form.</span><br>
 <span style="color:grey;">&gt;</span> 2000@k<br>
-<span style="color:blue;">2000 @k</span> <span style="color:grey;">-&gt;</span> <span style="color:green;">1.95 Kbytes</span><br>
+<span style="color:blue;">2000 @k</span><span style="color:grey;"> &#x21E8; </span><span style="color:green;">1.95 Kbytes</span><br>
 <span style="color:grey;">&gt;</span> :si<br>
 <span style="color:green;">Units in SI (base ten) form.</span><br>
 <span style="color:grey;">&gt;</span> 2000@k<br>
-<span style="color:blue;">2000 @k</span> <span style="color:grey;">-&gt;</span> <span style="color:green;">2.00 Kbytes</span><br>
+<span style="color:blue;">2000 @k</span><span style="color:grey;"> &#x21E8; </span><span style="color:green;">2.00 Kbytes</span><br>
 <span style="color:grey;">&gt;</span> :bin<br>
 <span style="color:green;">Units in binary.</span><br>
 <span style="color:grey;">&gt;</span> 2000@k<br>
-<span style="color:blue;">2000 @k</span> <span style="color:grey;">-&gt;</span> <span style="color:green;">1.95 Kibytes</span>
+<span style="color:blue;">2000 @k</span><span style="color:grey;"> &#x21E8; </span><span style="color:green;">1.95 Kibytes</span>
 </code>
   <p>String constants are of two types: <i>simple</i> strings, constructed using either single- or double-quotes (or "smart"
      quotes: see below), or <i>interpolated</i> strings, which allow the value of expressions (or simple variables) to be
@@ -367,20 +367,20 @@ or
      These values are computed and stored as decimal seconds, with midnight (<code>12:00:00.0 am</code>) as zero for time-of-day, and they can be used
      in any other kind of operation, or formatted again as an <i>hour:minute:second</i> time or a duration (in weeks, down to seconds) using the <code>@h</code> or <code>@t</code> formats. See the Formats section below for more details.
      For example:
-<p class="indent"> <code><span style="color:blue;">t'27h' + t'13m' + t'27.9s' @h</span> <span style="color:grey;">-&gt;</span> <span style="color:green;">h'27:13:27.9'</span></code> </p>
+<p class="indent"> <code><span style="color:blue;">t'27h' + t'13m' + t'27.9s' @h</span><span style="color:grey;"> &#x21E8; </span><span style="color:green;">h'27:13:27.9'</span></code> </p>
 or
-<p class="indent"> <code><span style="color:blue;">h'12:30 pm' - h'11:45 am' @mt</span> <span style="color:grey;">-&gt;</span> <span style="color:green;">t'45m'</span></code> </p>
+<p class="indent"> <code><span style="color:blue;">h'12:30 pm' - h'11:45 am' @mt</span><span style="color:grey;"> &#x21E8; </span><span style="color:green;">t'45m'</span></code> </p>
 or yet
-<p class="indent"> <code><span style="color:blue;">h'8:30 am' + t'1h' + t'37m' @h</span> <span style="color:grey;">-&gt;</span> <span style="color:green;">h'10:07'</span></code> </p>
+<p class="indent"> <code><span style="color:blue;">h'8:30 am' + t'1h' + t'37m' @h</span><span style="color:grey;"> &#x21E8; </span><span style="color:green;">h'10:07'</span></code> </p>
   <p>Date values can be entered as (basically the <a href="https://en.wikipedia.org/wiki/ISO_8601">ISO-8601</a> format with more separators allowed):
 <p class="indent"> <code>d'<i>yyyy</i>-<i>mm</i>-<i>dd</i>'</code>&nbsp;|&nbsp;<code>d'<i>yyyymmdd</i>'</code> </p>
 or as U.S. format dates:
 <p class="indent"> <code>D'<i>mm</i>/<i>dd</i>/<i>yyyy</i>'</code>&nbsp;|&nbsp;<code>D'<i>mmddyyyy</i>'</code> </p>
    Such values are computed as a positive or negative integer number of days from the "epoch" day (Jan. 1, 1970) (which is day zero, so that
    <code>D'12/31/1969'</code> is <code>-1</code> and <code>d'1970-01-02'</code> is <code>1</code>). Date arithmetic is supported, such as:
-<p class="indent"> <code><span style="color:blue;">d'2001-09-11' + 1000@e</span> <span style="color:grey;">-&gt;</span> <span style="color:green;">d'2004-06-07'</span></code> </p>
+<p class="indent"> <code><span style="color:blue;">d'2001-09-11' + 1000@e</span><span style="color:grey;"> &#x21E8; </span><span style="color:green;">d'2004-06-07'</span></code> </p>
 or
-<p class="indent"> <code><span style="color:blue;">D'9/2/1945' - d'1941/12/7'</span> <span style="color:grey;">-&gt;</span> <span style="color:green;">1365</span></code> </p>
+<p class="indent"> <code><span style="color:blue;">D'9/2/1945' - d'1941/12/7'</span><span style="color:grey;"> &#x21E8; </span><span style="color:green;">1365</span></code> </p>
   <p>Dates (either U.S. or ISO format) can be entered with two-digit years, which are interpreted as 21<sup>st</sup> century for values less than the
      current year plus 30, or 20<sup>th</sup> century otherwise. So, for instance, <code>D'9/1/50'</code> refers to Sept. 1, 2050, while <code>D'9/1/51'</code>
      is Sept. 1, 1951 (as of 2021).
@@ -480,23 +480,24 @@ or
       </tr>
       </thead>
       <tbody>
-      <tr><td><code>@h</code></td><td>Display as a time value (hours:minutes:seconds.nanos)</td></tr>
-      <tr><td><code>@</code>[<i>nn</i>][<code>w</code>|<code>d</code>|<code>h</code>|<code>m</code>|<code>s</code>]<code>t</code></td><td>Format as a time (duration), optional rounding</td></tr>
-      <tr><td><code>@l</code></td><td>Format result string in lower case</td></tr>
-      <tr><td><code>@u</code></td><td>Format result string in UPPER case</td></tr>
-      <tr><td><code>@</code>[<i>nn</i>][<code>,</code>]<code>d</code></td><td>Primarily for rational mode: format the result as a decimal value,<br>with optional separators, and optionally rounding to <i>nn</i> digits<br>(prints codepoint for single character)</td></tr>
-      <tr><td><code>@e</code></td><td>Format an integer as a date (yyyy-mm-dd) (ISO-8601 format)</td></tr>
-      <tr><td><code>@E</code></td><td>Format an integer as a date (mm/dd/yyyy) (U.S. format)</td></tr>
-      <tr><td><code>@f</code></td><td>For decimal mode, format the result as a rational fraction</td></tr>
-      <tr><td><code>@F</code></td><td>Format as a proper fraction (with possible integer portion)</td></tr>
-      <tr><td><code>@c</code></td><td>Format an integer (range of 0 .. 0x10FFFF) as a Unicode character</td></tr>
+      <tr><td><code>@h</code></td><td>Display as a time value (hours:minutes:seconds.nanos)<br>as in <code style="color:blue;">98007900000000 @h</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">h'27:13:27.9'</code></td></tr>
+      <tr><td><code>@</code>[<i>nn</i>][<code>w</code>|<code>d</code>|<code>h</code>|<code>m</code>|<code>s</code>]<code>t</code></td><td>Format as a time (duration), optional rounding<br>as in <code style="color:blue;">98007900000000 @2ht</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">t'27.22h'</code></td></tr>
+      <tr><td><code>@l</code></td><td>Format result string in lower case<br>as in <code style="color:blue;">'Hello, World!' @l</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">"hello, world!"</code></td></tr>
+      <tr><td><code>@u</code></td><td>Format result string in UPPER case<br>as in <code style="color:blue;">'Hello, Everyone!' @u</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">"HELLO, EVERYONE!"</code></td></tr>
+      <tr><td><code>@</code>[<i>nn</i>][<code>,</code>]<code>d</code></td><td>Primarily for rational mode: format the result as a decimal value,<br>with optional separators, and optionally rounding to <i>nn</i> digits<br>as in <code style="color:blue;">1234.567 @2,d</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">1,234.57</code><br>(prints codepoint for single character<br>as in <code style="color:blue;">"&#x1D6D1;" @d</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">120529</code>)</td></tr>
+      <tr><td><code>@e</code></td><td>Format an integer as a date (yyyy-mm-dd) (ISO-8601 format)<br>as in <code style="color:blue;">18908 @e</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">d'2021-10-08'</code></td></tr>
+      <tr><td><code>@E</code></td><td>Format an integer as a date (mm/dd/yyyy) (U.S. format)<br> as in <code style="color:blue;">-10252 @E</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">D'12/07/1941'</code></td></tr>
+      <tr><td><code>@f</code></td><td>For decimal mode, format the result as a rational fraction<br>as in <code style="color:blue;">5.125 @f</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">41/8</code></td></tr>
+      <tr><td><code>@F</code></td><td>Format as a proper fraction (with possible integer portion)<br>as in <code style="color:blue;"</code>3.75 @F</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">3 3/4</code></td></tr>
+      <tr><td><code>@c</code></td><td>Format an integer (range of 0 .. 0x10FFFF) as a Unicode character<br>as in <code style="color:blue;">120529 @c</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">"&#x1D6D1;"</code></td></tr>
       <tr><td><code>@</code>[<code>,</code>]<code>j</code></td><td>Format the result as a "pretty printed" JSON result<br>(multiple lines with indents)<br>with optional separators for numeric values</td></tr>
-      <tr><td><code>@r</code></td><td>Format the result as a Roman Numeral value</td></tr>
-      <tr><td><code>@x</code></td><td>For integers and strings, format in hexadecimal form</td></tr>
-      <tr><td><code>@o</code></td><td>For integers and strings, format in octal form</td></tr>
-      <tr><td><code>@b</code></td><td>For integers and strings, format in binary form</td></tr>
-      <tr><td><code>@k</code></td><td>Use kilobyte, megabyte, etc. notation for the value</td></tr>
-      <tr><td><code>@</code>[<i>nn</i>][<code>,</code>]<code>%</code></td><td>Format as a percentage, with optional separators, and<br>optionally rounding to <i>nn</i> digits</td></tr>
+      <tr><td><code>@r</code></td><td>Format the result as a Roman Numeral value<br>as in <code style="color:blue;">2021 @R</code><code style="color:gray;"> &#x21E8; </code><code style="color:green;">R'MMXXI'</code></td></tr>
+      <tr><td><code>@x</code></td><td>For integers and strings, format in hexadecimal form<br>as in <code style="color:blue;">456 @x</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">0x1c8</code><br>and as in <code style="color:blue;">'abc' @x</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">'616263'</code></td></tr>
+      <tr><td><code>@o</code></td><td>For integers and strings, format in octal form<br>as in <code style="color:blue;">345 @o</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">0531</code><br>and as in <code style="color:blue;">'abc' @o</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">'141142143'</code></td></tr>
+      <tr><td><code>@b</code></td><td>For integers and strings, format in binary form<br>as in <code style="color:blue;">231 @b</code><code style="grey;"> &#x21E8; </code><code style="color:green;">0b11100111</code><br>and as in <code style="color:blue;">'abc' @b</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">'011000010110001001100011'</code></td></tr>
+      <tr><td><code>@k</code></td><td>Use kilobyte, megabyte, etc. notation for the value<br>(depending on the SI / BINARY mode)<br>as in <code style="color:blue;">2000 @k</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">1.95 Kibytes</code> (binary)<br>or <code style="color:blue;">2000 @k</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">2.00 Kbytes</code> (SI)</td></tr>
+      <tr><td><code>@w</code></td><td>Convert the (integer) value to words<br>as in <code style="color:blue;">35@w</code><code style="color:gray;"> &#x21E8; </code><code style="color:green;">thirty-five</code></td></tr>
+      <tr><td><code>@</code>[<i>nn</i>][<code>,</code>]<code>%</code></td><td>Format as a percentage, with optional separators, and<br>optionally rounding to <i>nn</i> digits<br>as in <code style="color:blue;">10.08745 @2,%</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">1,008.75%</code></td></tr>
     </tbody>
     </table>
   </div>
@@ -689,11 +690,11 @@ or
      decimal numbers or fractions the value is the "scale" of the decimal representation of the number, which is complicated
      but basically means where the decimal point is placed relative to the raw digits: zero or positive is the number of digits
      to the right of the decimal point, negative is the number of extra zeros after the significant digits and to the left of
-     the decimal point.  Some examples: <code>scale(1.2) -&gt; 1</code>, <code>scale 10e4 -&gt; -4</code>, while
-     <code>scale 10000 -&gt; 0</code>.
+     the decimal point.  Some examples: <code>scale(1.2) &#x21E8; 1</code>, <code>scale 10e4 &#x21E8; -4</code>, while
+     <code>scale 10000 &#x21E8; 0</code>.
   <p>The <code>round</code> function rounds to the number of places after the decimal, with a negative value rounding to the
-     left of the decimal point.  For example: <code>round(1.335577,2) -&gt; 1.34</code>, and
-     <code>round(1234567.890,-3) -&gt; 1235000</code>.
+     left of the decimal point.  For example: <code>round(1.335577,2) &#x21E8; 1.34</code>, and
+     <code>round(1234567.890,-3) &#x21E8; 1235000</code>.
   <p>The <code>min</code> and <code>max</code> functions do either numeric or string comparisons, depending on the type of the
      first value in the list. While the <code>sumof</code> and <code>productof</code> functions try to convert all their
      values to numbers.
@@ -703,9 +704,9 @@ or
      in the array or object are concatenated with the second argument as the join string. With any two other objects, the result is
      simply the concatenation of the two values. With three or more arguments, the join (or "glue") value is the last argument in the
      list, and the flat map of all the other values is joined together by that string.<br>
-     Some examples:  <code>join 1 -&gt; "1"</code>, while <code>join 1, 2 -&gt; "12"</code>.
-     The complicated ones look like this:  <code>join 'a','b','c','-' -&gt; "a-b-c"</code>.
-     While <code>arr=[1,2,3];join arr,'-' -&gt; 1-2-3</code>.
+     Some examples:  <code>join 1 &#x21E8; "1"</code>, while <code>join 1, 2 &#x21E8; "12"</code>.
+     The complicated ones look like this:  <code>join 'a','b','c','-' &#x21E8; "a-b-c"</code>.
+     While <code>arr=[1,2,3];join arr,'-' &#x21E8; 1-2-3</code>.
   <p>The <code>split</code> function takes one string argument, a second regular expression string, and an optional limit
      value that determines how many splits are returned. See the documentation for the Java <code>String.split</code> method
      for further details on how this parameter works.
@@ -731,7 +732,7 @@ or
      be expressed for this function as Unicode escape sequences in the string, as in <code>frac('2 \u215c')</code>
      while for an <code>f'...'</code> constant the real fraction character(s) must be used.
   <p>The <code>FACTORS</code> and <code>PFACTORS</code> functions only accept integer values, and produce arrays of the
-     desired values.<br>Examples: <code>factors(123) -&gt; [ 1, 3, 41, 123 ]</code>, while <code>pfactors 123 -&gt; [ 3, 41 ]</code>.
+     desired values.<br>Examples: <code>factors(123) &#x21E8; [ 1, 3, 41, 123 ]</code>, while <code>pfactors 123 &#x21E8; [ 3, 41 ]</code>.
 </div>
 <hr class="sectionsep">
   <h2>User-Defined Functions</h2>
@@ -821,8 +822,8 @@ or
   </p>
     The final value of this function invocation will be the value of whichever block inside the <code>CASE</code> statement is executed, which in this example will be the value <code>1</code>.
   <p class="indent">
-      <code style="color:blue;">value = 'one'</code><code style="color:gray;"> -&gt; </code><code style="color:green;">"one"</code><br>
-      <code style="color:blue;">strings</code><code style="color:gray;"> -&gt; </code><code style="color:green;">1</code>
+      <code style="color:blue;">value = 'one'</code><code style="color:gray;"> &#x21E8; </code><code style="color:green;">"one"</code><br>
+      <code style="color:blue;">strings</code><code style="color:gray;"> &#x21E8; </code><code style="color:green;">1</code>
   </p>
   Also consider this code:
   <p class="indent">
@@ -832,7 +833,7 @@ or
   Which will evaluate as follows:
   <p class="indent">
       <code>Defining function '</code><code style="color:green;">a</code><code>' = </code><code style="color:blue;">{loop $i in 10 {$i}}</code><br>
-      <code style="color:blue;">a</code><code style="color:gray;"> -&gt; </code><code style="color:green;">10</code>
+      <code style="color:blue;">a</code><code style="color:gray;"> &#x21E8; </code><code style="color:green;">10</code>
   </p>
   There are many more code examples in the <code>test/files</code> directory of the source distribution.
 </div>

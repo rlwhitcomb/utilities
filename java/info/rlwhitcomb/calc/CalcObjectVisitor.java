@@ -355,6 +355,8 @@
  *	    Context parameter for "toStringValue", new "setupFunctionCall" method, add
  *	    context also to "evaluateFunction", and "saveVariables". Add data type param
  *	    to ArrayScope, and change the way we initialize ArrayScope from regular lists.
+ *	08-Oct-2021 (rlwhitcomb)
+ *	    Add format to convert an integer value to words.
  */
 package info.rlwhitcomb.calc;
 
@@ -1484,6 +1486,20 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			}
 			catch (ArithmeticException ae) {
 			    throw new CalcExprException(ae, ctx);
+			}
+			break;
+
+		    case 'W':
+			toUpperCase = true;
+			// fall through
+		    case 'w':
+			iValue = toIntegerValue(this, result, mc, ctx);
+			try {
+			    long lValue = iValue.longValueExact();
+			    NumericUtil.convertToWords(lValue, valueBuf);
+			}
+			catch (IllegalArgumentException iae) {
+			    throw new CalcExprException(iae, ctx);
 			}
 			break;
 
