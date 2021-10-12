@@ -264,6 +264,8 @@
 		Clean out the "savetest" created during the Calc unit tests in "purge".
 	    07-Oct-2021 (rlwhitcomb)
 		Move clean of "savetest" to the end of the testing section instead.
+	    11-Oct-2021 (rlwhitcomb)
+		Add "fixup" task so that setting up manual "git.commit.id" is more automatic.
 
      ========================================================================== -->
 
@@ -784,6 +786,19 @@
 
 	<target name="check-copyrights" depends="compile" description="Check copyright years and proper LICENSE text.">
 		<java classname="CheckCopyrights"/>
+	</target>
+
+	<target name="fixup" description="Manually update 'git.commit.id' for an offline build.">
+		<fail>
+			<condition><not><isset property="commit"/></not></condition>
+			<![CDATA[
+	Error:
+
+	Define the desired git commit id with -Dcommit=xxxxxxx on the command line.
+			]]>
+		</fail>
+		<replace file="build.properties" token="release.build = false" value="release.build = true"/>
+		<replace file="build.properties" token="#git.commit.id = 00cc121" value="git.commit.id = ${commit}"/>
 	</target>
 </project>
 
