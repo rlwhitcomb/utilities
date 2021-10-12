@@ -3,9 +3,8 @@
 #
 :clear
 :separators off
-:open 'test/files/library,test/files/lib_game,test/files/lib_mort'
+:open 'test/files/library'
 
-# Tests of "library"
 excel_date(d'2021/10/8')
 excel_date_1904(D'12/7/1941')
 rad_to_deg(pi/4)
@@ -19,11 +18,9 @@ is_perfect(99)
 quad(3,-4,-9)
 quad(1,0,-25)
 
-# Tests of "lib_game"
 win_pct(25,75)
 win_pct(662,174,2)
 
-# Tests of "lib_mort"
 help_mort
 monthly(244000, 3.25, 30)
 PMT2(350000, 0.3, 180)
