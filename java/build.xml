@@ -268,6 +268,8 @@
 		Add "fixup" task so that setting up manual "git.commit.id" is more automatic.
 	    12-Oct-2021 (rlwhitcomb)
 		Needs help when "git" is not installed (Windows).
+	    13-Oct-2021 (rlwhitcomb)
+		Echo the test log file to console for CI builds.
 
      ========================================================================== -->
 
@@ -689,7 +691,11 @@
 		<delete>
 			<fileset dir="." includes="savetest"/>
 		</delete>
-		<echo>Done with unit tests. Successful. Results in "${test.log.path}" file.</echo>
+		<echo unless:true="${ci.build}">Done with unit tests. Successful. Results in "${test.log.path}" file.</echo>
+		<echo if:true="${ci.build}">Done with unit tests. Successful.</echo>
+		<concat if:true="${ci.build}">
+			<fileset dir="../dist" includes="${test.log.file.name}"/>
+		</concat>
 	</target>
 
 	<target name="clean" depends="purge" description="Cleans all generated files, old temp files, and old log files.">
