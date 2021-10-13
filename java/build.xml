@@ -266,6 +266,8 @@
 		Move clean of "savetest" to the end of the testing section instead.
 	    11-Oct-2021 (rlwhitcomb)
 		Add "fixup" task so that setting up manual "git.commit.id" is more automatic.
+	    12-Oct-2021 (rlwhitcomb)
+		Needs help when "git" is not installed (Windows).
 
      ========================================================================== -->
 
@@ -294,11 +296,18 @@
 		]]>
 	</fail>
 
-	<exec executable="git" dir="." outputproperty="git.commit.id" unless:set="git.commit.id">
+	<condition property="commit.id" value="${git.commit.id}">
+		<isset property="git.commit.id"/>
+	</condition>
+	<condition property="commit.id" value="${commit}">
+		<isset property="commit"/>
+	</condition>
+
+	<exec executable="git" dir="." outputproperty="commit.id" unless:set="commit.id">
 		<arg line="rev-parse --short HEAD"/>
 	</exec>
 	<loadproperties>
-		<propertyresource name="git.commit.id"/>
+		<propertyresource name="commit.id"/>
 		<filterchain>
 			<prefixlines prefix="build.lastrev="/>
 		</filterchain>
@@ -797,6 +806,7 @@
 	Define the desired git commit id with -Dcommit=xxxxxxx on the command line.
 			]]>
 		</fail>
+		<echo message="Updating 'build.properties' with git.commit.id = ${commit} and release.build = true"/>
 		<replace file="build.properties" token="release.build = false" value="release.build = true"/>
 		<replace file="build.properties" token="#git.commit.id = 00cc121" value="git.commit.id = ${commit}"/>
 	</target>
