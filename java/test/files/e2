@@ -82,6 +82,15 @@ m2 = "'h'"
 a.c.g.`$m1`.`$m2` = 3.45
 a
 
+def stack = { _len:0, _arr:[] }
+def push($s, $v) = { $s._arr[$s._len++] = $v }
+def pop($s) = { $s._arr[--$s._len] }
+
+s1 = eval stack;
+push(s1, 19)
+s1
+pop(s1)
+s1
 
 :echo
 :echo "End of nested object / array tests."

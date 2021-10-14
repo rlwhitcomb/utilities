@@ -694,6 +694,14 @@
 >m2 = "'h'" -> "'h'"
 >a.c.g.`$m1`.`$m2` = 3.45 -> 3.45
 >a -> { b: true, c: { d: "123", f: "fghi", g: { r: 6, s: 5, "e": "E", "f": { "g": 23, "h": { "i": 28, j: 16 }, 'h': 3.45 } } } }
+>Defining function stack = {_len: 0, _arr: []}
+>Defining function push($s,$v) = {$s._arr[$s._len ++] = $v}
+>Defining function pop($s) = {$s._arr[-- $s._len]}
+>s1 = eval stack -> { _len: 0, _arr: [ ] }
+>push (s1, 19) -> 19
+>s1 -> { _len: 1, _arr: [ 19 ] }
+>pop (s1) -> 19
+>s1 -> { _len: 0, _arr: [ 19 ] }
 >
 >End of nested object / array tests.
 >Tests of :include directive.

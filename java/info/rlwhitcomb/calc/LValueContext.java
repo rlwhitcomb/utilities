@@ -63,6 +63,8 @@
  *	    to CalcObjectVisitor so it can be called from there if needed also.
  *	08-Oct-2021 (rlwhitcomb)
  *	    Error if function is undefined.
+ *	14-Oct-2021 (rlwhitcomb)
+ *	    Allow the "mode" option values as IDs.
  */
  package info.rlwhitcomb.calc;
 
@@ -328,7 +330,7 @@ class LValueContext
 	public static LValueContext getLValue(CalcObjectVisitor visitor, CalcParser.VarContext ctx, LValueContext lValue) {
 	    if (ctx instanceof CalcParser.IdVarContext) {
 		CalcParser.IdVarContext idVarCtx = (CalcParser.IdVarContext) ctx;
-		return new LValueContext(lValue, idVarCtx, lValue.getContextObject(), idVarCtx.ID().getText());
+		return new LValueContext(lValue, idVarCtx, lValue.getContextObject(), idVarCtx.id().getText());
 	    }
 	    else if (ctx instanceof CalcParser.LocalVarContext) {
 		CalcParser.LocalVarContext localVarCtx = (CalcParser.LocalVarContext) ctx;

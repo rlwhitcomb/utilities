@@ -253,6 +253,8 @@
  *	    Oops! The "\$" experiment doesn't work well.
  *	02-Oct-2021 (rlwhitcomb)
  *	    Add charset to ":include", add ":save".
+ *	14-Oct-2021 (rlwhitcomb)
+ *	    Add mode words as possible IDs. Add ":load" as alias for ":include".
  */
 
 grammar Calc;
@@ -286,7 +288,7 @@ exprStmt
    ;
 
 defineStmt
-   : K_DEFINE ID formalParamList ? '=' stmtBlock
+   : K_DEFINE id formalParamList ? '=' stmtBlock
    ;
 
 loopStmt
@@ -455,7 +457,7 @@ obj
    ;
 
 pair
-   : ID ':' expr
+   : id ':' expr
    | STRING ':' expr
    | ISTRING ':' expr
    ;
@@ -464,7 +466,7 @@ var
    : var ( DOT ( var | STRING | ISTRING ) ) # objVar
    | var ( '[' expr ']' | INDEXES )         # arrVar
    | var actualParams                       # functionVar
-   | ID                                     # idVar
+   | id                                     # idVar
    | LOCALVAR                               # localVar
    | GLOBALVAR                              # globalVar
    ;
@@ -535,21 +537,30 @@ numberOption
    ;
 
 idList
-   : '[' ID ( ',' ID ) * ']'
-   | ID ( ',' ID ) *
+   : '[' id ( ',' id ) * ']'
+   | id ( ',' id ) *
    | '[' ']'
    ;
 
-modeOption
-   : K_TRUE
-   | K_FALSE
-   | 'on'
+id
+   : ID
+   | modes
+   ;
+
+modes
+   : 'on'
    | 'off'
    | 'yes'
    | 'no'
    | 'pop'
    | 'previous'
    | 'prev'
+   ;
+
+modeOption
+   : K_TRUE
+   | K_FALSE
+   | modes
    | var
    ;
 
@@ -930,7 +941,7 @@ D_ECHO
    ;
 
 D_INCLUDE
-   : DIR  ( I N C | I N C L U D E | O P E N | L I B | L I B R A R Y | L I B S | L I B R A R I E S )
+   : DIR  ( I N C | I N C L U D E | O P E N | L O A D | L I B | L I B R A R Y | L I B S | L I B R A R I E S )
    ;
 
 D_SAVE

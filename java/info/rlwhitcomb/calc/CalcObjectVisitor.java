@@ -357,6 +357,8 @@
  *	    to ArrayScope, and change the way we initialize ArrayScope from regular lists.
  *	08-Oct-2021 (rlwhitcomb)
  *	    Add format to convert an integer value to words.
+ *	14-Oct-2021 (rlwhitcomb)
+ *	    Allow the "mode" keywords as ID values.
  */
 package info.rlwhitcomb.calc;
 
@@ -947,10 +949,10 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitClearDirective(CalcParser.ClearDirectiveContext ctx) {
 	    CalcParser.IdListContext idList = ctx.idList();
-	    List<TerminalNode> ids;
+	    List<CalcParser.IdContext> ids;
 	    int numberCleared = 0;
 
-	    if (idList == null || (ids = idList.ID()).isEmpty()) {
+	    if (idList == null || (ids = idList.id()).isEmpty()) {
 		numberCleared = globals.size();
 		globals.clear();
 		displayActionMessage("%calc#varsAllCleared");
@@ -958,7 +960,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    else {
 		StringBuilder vars = new StringBuilder();
 		int lastNamePos = 0;
-		for (TerminalNode node : ids) {
+		for (CalcParser.IdContext node : ids) {
 		    String varName = node.getText();
 		    if (varName.equals("<missing ID>"))
 			continue;
@@ -990,16 +992,16 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitVariablesDirective(CalcParser.VariablesDirectiveContext ctx) {
 	    CalcParser.IdListContext idList = ctx.idList();
-	    List<TerminalNode> ids;
+	    List<CalcParser.IdContext> ids;
 	    Set<String> sortedKeys;
 
-	    if (idList == null || (ids = idList.ID()).isEmpty()) {
+	    if (idList == null || (ids = idList.id()).isEmpty()) {
 		sortedKeys = new TreeSet<>(globals.keySet());
 	    }
 	    else {
 		sortedKeys = new TreeSet<>();
-		ids = idList.ID();
-		for (TerminalNode node : ids) {
+		ids = idList.id();
+		for (CalcParser.IdContext node : ids) {
 		    sortedKeys.add(node.getText());
 		}
 	    }
@@ -1840,7 +1842,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitDefineStmt(CalcParser.DefineStmtContext ctx) {
-	    String functionName = ctx.ID().getText();
+	    String functionName = ctx.id().getText();
 
 	    CalcParser.StmtBlockContext functionBody       = ctx.stmtBlock();
 	    CalcParser.FormalParamListContext formalParams = ctx.formalParamList();
@@ -1868,7 +1870,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    CalcParser.ObjContext oCtx = ctx.obj();
 	    ObjectScope obj = new ObjectScope();
 	    for (CalcParser.PairContext pCtx : oCtx.pair()) {
-		TerminalNode id   = pCtx.ID();
+		CalcParser.IdContext id = pCtx.id();
 		TerminalNode str  = pCtx.STRING();
 		TerminalNode istr = pCtx.ISTRING();
 		String key =
