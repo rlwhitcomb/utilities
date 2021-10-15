@@ -255,6 +255,8 @@
  *	    Add charset to ":include", add ":save".
  *	14-Oct-2021 (rlwhitcomb)
  *	    Add mode words as possible IDs. Add ":load" as alias for ":include".
+ *	15-Oct-2021 (rlwhitcomb)
+ *	    #32: Fix arg parsing for all one-arg predefined functions.
  */
 
 grammar Calc;
@@ -328,31 +330,31 @@ expr
    | arr                                 # arrExpr
    | var                                 # varExpr
    | '(' expr ')'                        # parenExpr
-   | K_ABS expr                          # absExpr
-   | K_SIN expr                          # sinExpr
-   | K_COS expr                          # cosExpr
-   | K_TAN expr                          # tanExpr
-   | K_ASIN expr                         # asinExpr
-   | K_ACOS expr                         # acosExpr
-   | K_ATAN expr                         # atanExpr
+   | K_ABS expr1                         # absExpr
+   | K_SIN expr1                         # sinExpr
+   | K_COS expr1                         # cosExpr
+   | K_TAN expr1                         # tanExpr
+   | K_ASIN expr1                        # asinExpr
+   | K_ACOS expr1                        # acosExpr
+   | K_ATAN expr1                        # atanExpr
    | K_ATAN2 expr2                       # atan2Expr
-   | K_SINH expr                         # sinhExpr
-   | K_COSH expr                         # coshExpr
-   | K_TANH expr                         # tanhExpr
-   | K_SQRT expr                         # sqrtExpr
-   | K_CBRT expr                         # cbrtExpr
-   | K_FORT expr                         # fortExpr
-   | K_LOG expr                          # logExpr
-   | K_LN2 expr                          # ln2Expr
-   | K_LN expr                           # lnExpr
-   | K_EPOW expr                         # ePowerExpr
-   | K_TENPOW expr                       # tenPowerExpr
-   | K_SIGNUM expr                       # signumExpr
-   | K_LENGTH ( expr | dotRange )        # lengthExpr
-   | K_SCALE expr                        # scaleExpr
+   | K_SINH expr1                        # sinhExpr
+   | K_COSH expr1                        # coshExpr
+   | K_TANH expr1                        # tanhExpr
+   | K_SQRT expr1                        # sqrtExpr
+   | K_CBRT expr1                        # cbrtExpr
+   | K_FORT expr1                        # fortExpr
+   | K_LOG expr1                         # logExpr
+   | K_LN2 expr1                         # ln2Expr
+   | K_LN expr1                          # lnExpr
+   | K_EPOW expr1                        # ePowerExpr
+   | K_TENPOW expr1                      # tenPowerExpr
+   | K_SIGNUM expr1                      # signumExpr
+   | K_LENGTH ( expr1 | dotRange )       # lengthExpr
+   | K_SCALE expr1                       # scaleExpr
    | K_ROUND expr2                       # roundExpr
-   | K_ISPRIME expr                      # isPrimeExpr
-   | K_ISNULL expr                       # isNullExpr
+   | K_ISPRIME expr1                     # isPrimeExpr
+   | K_ISNULL expr1                      # isNullExpr
    | K_GCD expr2                         # gcdExpr
    | K_LCM expr2                         # lcmExpr
    | K_MAX exprN                         # maxExpr
@@ -364,21 +366,21 @@ expr
    | K_INDEX ( expr2 | expr3 )           # indexExpr
    | K_SUBSTR ( expr2 | expr3 )          # substrExpr
    | K_FILL fillExprs                    # fillExpr
-   | (K_TRIM|K_LTRIM|K_RTRIM) expr       # trimExpr
-   | K_FIB expr                          # fibExpr
-   | K_BN expr                           # bernExpr
+   | (K_TRIM|K_LTRIM|K_RTRIM) expr1      # trimExpr
+   | K_FIB expr1                         # fibExpr
+   | K_BN expr1                          # bernExpr
    | K_FRAC ( expr1 | expr2 | expr3 )    # fracExpr
-   | K_ROMAN expr                        # romanExpr
-   | ( K_UPPER | K_LOWER ) expr          # caseConvertExpr
-   | K_FACTORS expr                      # factorsExpr
-   | K_PFACTORS expr                     # primeFactorsExpr
-   | K_CHARS expr                        # charsExpr
-   | K_DOW expr                          # dayOfWeekExpr
-   | K_DOM expr                          # dayOfMonthExpr
-   | K_DOY expr                          # dayOfYearExpr
-   | K_MOY expr                          # monthOfYearExpr
-   | K_YOD expr                          # yearOfDateExpr
-   | K_EVAL expr                         # evalExpr
+   | K_ROMAN expr1                       # romanExpr
+   | ( K_UPPER | K_LOWER ) expr1         # caseConvertExpr
+   | K_FACTORS expr1                     # factorsExpr
+   | K_PFACTORS expr1                    # primeFactorsExpr
+   | K_CHARS expr1                       # charsExpr
+   | K_DOW expr1                         # dayOfWeekExpr
+   | K_DOM expr1                         # dayOfMonthExpr
+   | K_DOY expr1                         # dayOfYearExpr
+   | K_MOY expr1                         # monthOfYearExpr
+   | K_YOD expr1                         # yearOfDateExpr
+   | K_EVAL expr1                        # evalExpr
    | K_EXEC exprN                        # execExpr
    | var INC_OP                          # postIncOpExpr
    |<assoc=right> INC_OP var             # preIncOpExpr

@@ -4,7 +4,7 @@ start = 11!
 end = start + 99999
 primes = []
 :echo `Running primality tests on ${(end-start)+1} values from $start to $end...`
-loop $i in start .. end { isprime $i ? primes[length(primes)] = $i : '' }
+loop $i in start .. end { isprime($i) ? primes[length(primes)] = $i : '' }
 :quiet pop
 length(primes); primes;
 

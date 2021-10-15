@@ -56,7 +56,7 @@ def dow_name($date) = { _day_names_ [ dow($date) ] }
  * @return      The month name ("January" .. "December").
  */
 _month_names_ = [ "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" ]
-def moy_name($date) = { _month_names_ [ moy $date - 1 ] }
+def moy_name($date) = { _month_names_ [ moy($date) - 1 ] }
 
 /*
  * Get the long form of a date.

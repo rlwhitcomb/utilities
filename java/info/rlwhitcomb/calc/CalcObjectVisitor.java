@@ -359,6 +359,8 @@
  *	    Add format to convert an integer value to words.
  *	14-Oct-2021 (rlwhitcomb)
  *	    Allow the "mode" keywords as ID values.
+ *	15-Oct-2021 (rlwhitcomb)
+ *	    #32: Fix arg parsing precedence with single-arg predefined functions.
  */
 package info.rlwhitcomb.calc;
 
@@ -2220,32 +2222,32 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitAbsExpr(CalcParser.AbsExprContext ctx) {
 	    if (settings.rationalMode) {
-		BigFraction f = getFractionValue(ctx.expr());
+		BigFraction f = getFractionValue(ctx.expr1().expr());
 		return f.abs();
 	    }
 	    else {
-		BigDecimal e = getDecimalValue(ctx.expr());
+		BigDecimal e = getDecimalValue(ctx.expr1().expr());
 		return e.abs();
 	    }
 	}
 
 	@Override
 	public Object visitSinExpr(CalcParser.SinExprContext ctx) {
-	    BigDecimal e = getDecimalTrigValue(ctx.expr());
+	    BigDecimal e = getDecimalTrigValue(ctx.expr1().expr());
 
 	    return MathUtil.sin(e, mc);
 	}
 
 	@Override
 	public Object visitCosExpr(CalcParser.CosExprContext ctx) {
-	    BigDecimal e = getDecimalTrigValue(ctx.expr());
+	    BigDecimal e = getDecimalTrigValue(ctx.expr1().expr());
 
 	    return MathUtil.cos(e, mc);
 	}
 
 	@Override
 	public Object visitTanExpr(CalcParser.TanExprContext ctx) {
-	    BigDecimal e = getDecimalTrigValue(ctx.expr());
+	    BigDecimal e = getDecimalTrigValue(ctx.expr1().expr());
 
 	    return MathUtil.tan(e, mc);
 	}
@@ -2253,7 +2255,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitAsinExpr(CalcParser.AsinExprContext ctx) {
 	    // Convert to double and use standard Math method
-	    double d = getDoubleValue(ctx.expr());
+	    double d = getDoubleValue(ctx.expr1().expr());
 
 	    return returnTrigValue(Math.asin(d));
 	}
@@ -2261,7 +2263,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitAcosExpr(CalcParser.AcosExprContext ctx) {
 	    // Convert to double and use standard Math method
-	    double d = getDoubleValue(ctx.expr());
+	    double d = getDoubleValue(ctx.expr1().expr());
 
 	    return returnTrigValue(Math.acos(d));
 	}
@@ -2269,7 +2271,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitAtanExpr(CalcParser.AtanExprContext ctx) {
 	    // Convert to double and use standard Math method
-	    double d = getDoubleValue(ctx.expr());
+	    double d = getDoubleValue(ctx.expr1().expr());
 
 	    return returnTrigValue(Math.atan(d));
 	}
@@ -2286,7 +2288,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitSinhExpr(CalcParser.SinhExprContext ctx) {
 	    // Convert to double and use standard Math method
-	    double d = getDoubleValue(ctx.expr());
+	    double d = getDoubleValue(ctx.expr1().expr());
 
 	    return new BigDecimal(Math.sinh(d), MC_DOUBLE);
 	}
@@ -2294,7 +2296,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitCoshExpr(CalcParser.CoshExprContext ctx) {
 	    // Convert to double and use standard Math method
-	    double d = getDoubleValue(ctx.expr());
+	    double d = getDoubleValue(ctx.expr1().expr());
 
 	    return new BigDecimal(Math.cosh(d), MC_DOUBLE);
 	}
@@ -2302,7 +2304,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitTanhExpr(CalcParser.TanhExprContext ctx) {
 	    // Convert to double and use standard Math method
-	    double d = getDoubleValue(ctx.expr());
+	    double d = getDoubleValue(ctx.expr1().expr());
 
 	    return new BigDecimal(Math.tanh(d), MC_DOUBLE);
 	}
@@ -2310,7 +2312,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitSqrtExpr(CalcParser.SqrtExprContext ctx) {
 	    try {
-		return MathUtil.sqrt(getDecimalValue(ctx.expr()), mc);
+		return MathUtil.sqrt(getDecimalValue(ctx.expr1().expr()), mc);
 	    }
 	    catch (IllegalArgumentException iae) {
 		throw new CalcExprException(iae, ctx);
@@ -2319,13 +2321,13 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitCbrtExpr(CalcParser.CbrtExprContext ctx) {
-	    return MathUtil.cbrt(getDecimalValue(ctx.expr()), mc);
+	    return MathUtil.cbrt(getDecimalValue(ctx.expr1().expr()), mc);
 	}
 
 	@Override
 	public Object visitFortExpr(CalcParser.FortExprContext ctx) {
 	    try {
-		return MathUtil.sqrt(MathUtil.sqrt(getDecimalValue(ctx.expr()), mc), mc);
+		return MathUtil.sqrt(MathUtil.sqrt(getDecimalValue(ctx.expr1().expr()), mc), mc);
 	    }
 	    catch (IllegalArgumentException iae) {
 		throw new CalcExprException(iae, ctx);
@@ -2335,7 +2337,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitLogExpr(CalcParser.LogExprContext ctx) {
 	    // For now, get a double value and use the standard Math method
-	    double d = getDoubleValue(ctx.expr());
+	    double d = getDoubleValue(ctx.expr1().expr());
 
 	    double logValue = Math.log10(d);
 	    if (Double.isInfinite(logValue) || Double.isNaN(logValue))
@@ -2346,7 +2348,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitLn2Expr(CalcParser.Ln2ExprContext ctx) {
-	    BigDecimal d = getDecimalValue(ctx.expr());
+	    BigDecimal d = getDecimalValue(ctx.expr1().expr());
 
 	    try {
 		return MathUtil.ln2(d, mc);
@@ -2358,7 +2360,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitLnExpr(CalcParser.LnExprContext ctx) {
-	    BigDecimal d = getDecimalValue(ctx.expr());
+	    BigDecimal d = getDecimalValue(ctx.expr1().expr());
 
 	    try {
 		return MathUtil.ln(d, mc);
@@ -2370,14 +2372,14 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitEPowerExpr(CalcParser.EPowerExprContext ctx) {
-	    BigDecimal e = getDecimalValue(ctx.expr());
+	    BigDecimal e = getDecimalValue(ctx.expr1().expr());
 
 	    return MathUtil.ePower(e, mc);
 	}
 
 	@Override
 	public Object visitTenPowerExpr(CalcParser.TenPowerExprContext ctx) {
-	    BigDecimal e = getDecimalValue(ctx.expr());
+	    BigDecimal e = getDecimalValue(ctx.expr1().expr());
 
 	    return MathUtil.tenPower(e, mc);
 	}
@@ -2387,11 +2389,11 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    int signum;
 
 	    if (settings.rationalMode) {
-		BigFraction f = getFractionValue(ctx.expr());
+		BigFraction f = getFractionValue(ctx.expr1().expr());
 		signum = f.signum();
 	    }
 	    else {
-		BigDecimal e = getDecimalValue(ctx.expr());
+		BigDecimal e = getDecimalValue(ctx.expr1().expr());
 		signum = e.signum();
 	    }
 	    return BigInteger.valueOf(signum);
@@ -2417,7 +2419,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		return iterateOverDotRange(null, dotRange, visitor, false);
 	    }
 	    else {
-		Object obj = visit(ctx.expr());
+		Object obj = visit(ctx.expr1().expr());
 
 		// This calculates the recursive size of objects and arrays
 		// so, use "scale" to calculate the non-recursive size
@@ -2427,7 +2429,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitScaleExpr(CalcParser.ScaleExprContext ctx) {
-	    Object obj = visit(ctx.expr());
+	    Object obj = visit(ctx.expr1().expr());
 
 	    // This returns the non-recursive size of objects and arrays
 	    // so, use "length" to calculate the recursive (full) size
@@ -2449,7 +2451,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    BigInteger i;
 
 	    if (settings.rationalMode) {
-		BigFraction f = getFractionValue(ctx.expr());
+		BigFraction f = getFractionValue(ctx.expr1().expr());
 
 		if (f.isWholeNumber()) {
 		    i = f.toInteger();
@@ -2459,7 +2461,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		}
 	    }
 	    else {
-		i = getIntegerValue(ctx.expr());
+		i = getIntegerValue(ctx.expr1().expr());
 	    }
 
 	    return Boolean.valueOf(MathUtil.isPrime(i));
@@ -2467,7 +2469,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitIsNullExpr(CalcParser.IsNullExprContext ctx) {
-	    Object obj = visit(ctx.expr());
+	    Object obj = visit(ctx.expr1().expr());
 	    return Boolean.valueOf(obj == null);
 	}
 
@@ -2948,7 +2950,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitTrimExpr(CalcParser.TrimExprContext ctx) {
-	    String stringValue = getStringValue(ctx.expr());
+	    String stringValue = getStringValue(ctx.expr1().expr());
 	    String result;
 
 	    if (ctx.K_TRIM() != null) {
@@ -2966,14 +2968,14 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitFibExpr(CalcParser.FibExprContext ctx) {
-	    BigDecimal e = getDecimalValue(ctx.expr());
+	    BigDecimal e = getDecimalValue(ctx.expr1().expr());
 
 	    return MathUtil.fib(e);
 	}
 
 	@Override
 	public Object visitBernExpr(CalcParser.BernExprContext ctx) {
-	    int n = getIntValue(ctx.expr());
+	    int n = getIntValue(ctx.expr1().expr());
 
 	    return MathUtil.bernoulli(n, mcDivide, settings.rationalMode);
 	}
@@ -3011,7 +3013,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitRomanExpr(CalcParser.RomanExprContext ctx) {
-	    String exprString = getStringValue(ctx.expr());
+	    String exprString = getStringValue(ctx.expr1().expr());
 
 	    try {
 		return NumericUtil.convertFromRoman(exprString);
@@ -3024,7 +3026,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitCaseConvertExpr(CalcParser.CaseConvertExprContext ctx) {
 	    TerminalNode upper = ctx.K_UPPER();
-	    String exprString  = getStringValue(ctx.expr());
+	    String exprString  = getStringValue(ctx.expr1().expr());
 
 	    if (upper != null) {
 		return exprString == null ? exprString : exprString.toUpperCase();
@@ -3037,7 +3039,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitFactorsExpr(CalcParser.FactorsExprContext ctx) {
 	    ArrayScope<Integer> result = new ArrayScope<>();
-	    BigInteger n = getIntegerValue(ctx.expr());
+	    BigInteger n = getIntegerValue(ctx.expr1().expr());
 
 	    MathUtil.getFactors(n, result.list());
 
@@ -3047,7 +3049,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitPrimeFactorsExpr(CalcParser.PrimeFactorsExprContext ctx) {
 	    ArrayScope<Integer> result = new ArrayScope<>();
-	    BigInteger n = getIntegerValue(ctx.expr());
+	    BigInteger n = getIntegerValue(ctx.expr1().expr());
 
 	    MathUtil.getPrimeFactors(n, result.list());
 
@@ -3057,7 +3059,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitCharsExpr(CalcParser.CharsExprContext ctx) {
 	    final ArrayScope<Integer> result = new ArrayScope<>();
-	    String string = getStringValue(ctx.expr());
+	    String string = getStringValue(ctx.expr1().expr());
 
 	    string.codePoints().forEachOrdered(cp -> result.list().add(cp));
 
@@ -3066,7 +3068,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitDayOfWeekExpr(CalcParser.DayOfWeekExprContext ctx) {
-	    BigInteger iValue = getIntegerValue(ctx.expr());
+	    BigInteger iValue = getIntegerValue(ctx.expr1().expr());
 	    try {
 		LocalDate date = LocalDate.ofEpochDay(iValue.longValueExact());
 		DayOfWeek dow = date.getDayOfWeek();
@@ -3083,7 +3085,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitDayOfMonthExpr(CalcParser.DayOfMonthExprContext ctx) {
-	    BigInteger iValue = getIntegerValue(ctx.expr());
+	    BigInteger iValue = getIntegerValue(ctx.expr1().expr());
 	    try {
 		LocalDate date = LocalDate.ofEpochDay(iValue.longValueExact());
 		int dom = date.getDayOfMonth();
@@ -3097,7 +3099,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitDayOfYearExpr(CalcParser.DayOfYearExprContext ctx) {
-	    BigInteger iValue = getIntegerValue(ctx.expr());
+	    BigInteger iValue = getIntegerValue(ctx.expr1().expr());
 	    try {
 		LocalDate date = LocalDate.ofEpochDay(iValue.longValueExact());
 		int doy = date.getDayOfYear();
@@ -3111,7 +3113,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitMonthOfYearExpr(CalcParser.MonthOfYearExprContext ctx) {
-	    BigInteger iValue = getIntegerValue(ctx.expr());
+	    BigInteger iValue = getIntegerValue(ctx.expr1().expr());
 	    try {
 		LocalDate date = LocalDate.ofEpochDay(iValue.longValueExact());
 		int moy = date.getMonthValue();
@@ -3125,7 +3127,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitYearOfDateExpr(CalcParser.YearOfDateExprContext ctx) {
-	    BigInteger iValue = getIntegerValue(ctx.expr());
+	    BigInteger iValue = getIntegerValue(ctx.expr1().expr());
 	    try {
 		LocalDate date = LocalDate.ofEpochDay(iValue.longValueExact());
 		int yod = date.getYear();
@@ -3138,7 +3140,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitEvalExpr(CalcParser.EvalExprContext ctx) {
-	    String exprString = getStringValue(ctx.expr());
+	    String exprString = getStringValue(ctx.expr1().expr());
 
 	    return Calc.processString(exprString, true);
 	}
