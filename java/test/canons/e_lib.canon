@@ -20,5 +20,20 @@
 >   Or use monthly(P,R,N) or monthly_whole(P,R,N) to get the results in different forms."
 >monthly (244000, 3.25, 30) -> "Full monthly payment is $1,061.90"
 >PMT2 (350000, 0.3, 180) -> 2519.31
+>s1 = eval stack -> { _values: [ ] }
+>isempty (s1) -> true
+>peek (s1) -> <null>
+>push (s1, 'abc') -> "abc"
+>isempty (s1) -> false
+>push (s1, 'def') -> "def"
+>peek (s1) -> "def"
+>s1 -> { _values: [ "abc", "def" ] }
+>pop (s1) -> "def"
+>peek (s1) -> "abc"
+>pop (s1) -> "abc"
+>isempty (s1) -> true
+>peek (s1) -> <null>
+>pop (s1) -> <null>
+>isempty (s1) -> true
 >Separator display set to false.
 >All variables cleared.

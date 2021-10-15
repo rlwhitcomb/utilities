@@ -25,6 +25,22 @@ help_mort
 monthly(244000, 3.25, 30)
 PMT2(350000, 0.3, 180)
 
+s1 = eval stack
+isempty(s1)
+peek(s1)
+push(s1, 'abc')
+isempty(s1)
+push(s1, 'def')
+peek(s1)
+s1
+pop(s1)
+peek(s1)
+pop(s1)
+isempty(s1)
+peek(s1)
+pop(s1)
+isempty(s1)
+ 
 :separators pop
 :clear
 
