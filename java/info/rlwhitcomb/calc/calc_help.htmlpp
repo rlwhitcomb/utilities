@@ -542,8 +542,8 @@ or
     <tr><td>26</td><td><code>[ ]</code><br><i>var</i> <code>[</code> <i>expr</i> <code>]</code> or <i>var</i>&nbsp;<code>&#x2080;</code> .. <code>&#x2089;</code></td><td>define an array,<br>or access elements of an array, string, or object</td><td>left to right</td></tr>
     <tr><td>25</td><td><code>.</code></td><td>access an object member</td><td>left to right</td></tr>
     <tr><td>24</td><td><code>( </code><i>expr</i><code> )</code></td><td>group an expression</td><td>N/A</td></tr>
-    <tr><td rowspan="52">23</td>
-            <td><code>ABS</code>&nbsp;<i>expr</i></td><td>absolute value</td><td rowspan="52">left to right</td></tr>
+    <tr><td rowspan="55">23</td>
+            <td><code>ABS</code>&nbsp;<i>expr</i></td><td>absolute value</td><td rowspan="55">left to right</td></tr>
             <tr><td><code>SIN</code>&nbsp;<i>expr</i></td><td>sine</td></tr>
             <tr><td><code>COS</code>&nbsp;<i>expr</i></td><td>cosine</td></tr>
             <tr><td><code>TAN</code>&nbsp;<i>expr</i></td><td>tangent</td></tr>
@@ -577,7 +577,9 @@ or
             <tr><td><code>JOIN</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;) *</td><td>join strings</td></tr>
             <tr><td><code>SPLIT</code>&nbsp;<i>expr</i> <code>,</code> <i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;)</td><td>split string into parts</td></tr>
             <tr><td><code>INDEX</code>&nbsp;<i>expr</i> <code>,</code> <i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;)</td><td>find value within a string</td></tr>
-            <tr><td><code>SUBSTR</code>&nbsp;<i>expr</i> <code>,</code> <i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;)</td><td>extract a substring</td></tr>
+            <tr><td><code>SUBSTR</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;)&nbsp;)</td><td>extract a substring</td></tr>
+            <tr><td><code>SLICE</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;)&nbsp;)</td><td>extract a slice of an array (or string)</td></tr>
+            <tr><td><code>SPLICE</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;) *</td><td>modify an array by deleting and/or adding elements</td></tr>
             <tr><td><code>FILL</code>&nbsp;<i>var</i>&nbsp;<code>,</code> <i>expr</i>&nbsp;<code>,</code> <i>expr</i> ( <code>,</code><i>expr</i> )</td><td>fill an array or string</td></tr>
             <tr><td><code>TRIM</code> or <code>LTRIM</code> or <code>RTRIM</code> <i>expr</i></td><td>trim all, leading, or trailing whitespace</td></tr>
             <tr><td><code>FIB</code>&nbsp;<i>expr</i></td><td>Fibonacci number</td></tr>
@@ -715,10 +717,30 @@ or
      negative if the search string is found (an offset from the end of the string). Otherwise the search starts from the
      beginning and returns a non-negative value. If the search string is not found, the function returns <code>null</code>.
      In addition, the starting index value can also be null, which starts the search at the beginning of the string.
-  <p>The arguments to <code>substr</code> are the value (converted to a string), and starting and optional ending indices
+  <p>The arguments to <code>substr</code> are the value (converted to a string), and optional starting and ending indices
      for the extraction. If the start/end are negative, they refer to offsets from the end of the string (same as returned
      by <code>index</code>), otherwise they are zero-based indices from the beginning. If the ending value is given, this is
-     the ending value exclusive, while if null or not given the end of the string is used.
+     the ending value exclusive, while if null or not given the end of the string is used. Calling <code>substr</code> with
+     just one argument is a convenient way to convert a non-string value to a string as in: <code>substr 1 &#x21E8; "1"</code>.
+  <p>The arguments to <code>slice</code> work exactly the same was as for <code>substr</code>, except for arrays or the values of
+     an object. But if a simple value is given by the first expression, the value is converted to a string and it will work exactly
+     the same as <code>substr</code> on the string value.
+     The original array or string is not modified by the <code>slice</code> operation; instead it
+     constructs a new array as a copy of the specified portion of the original, leaving the original unmodified.
+  <p>By contrast, the <code>splice</code> function DOES modify the original array by potentially removing elements and adding new ones.
+     If only the array/string argument is given, the entire contents are removed and returned. This is a convenient way to
+     break a string into its component characters, as in <code>a="abc";splice(a) &#x21E8; [ "a", "b", "c" ]</code>. The
+     second argument is a starting index (zero-based) into the array from which to operate. If only two arguments are given, the
+     elements in the array beginning with the start index until the end are removed and returned. The 3rd argument will be a count of
+     elements to remove, which if it is <code>0</code> or negative means no elements will be removed. If the count is greater than
+     the remaining length of the original array, then all the elements beginning with the start position will be removed. If there
+     are four or more arguments given, then the 4th and remaining arguments will be added to the array beginning at the start position, but
+     after the specified number of values (if any) are removed. Thus, a count of zero with 4 or more arguments will be a pure "add" operation,
+     while only specifying one, two, or three arguments to <code>splice</code> will be a pure "remove" operation.
+     If the first argument is actually a string, the string (or string representation of a numeric value) will be broken up into an
+     array of each character value before doing the remove / add operations. The return value from <code>splice</code> will be a
+     (possibly empty) array of the elements that were removed. See the <code>pop</code> function defined in the <code>test/files/library</code>
+     file for an example of how this can be exploited to implement a stack data structure.
   <p>The <code>fill</code> function requires a variable as the first argument. The contents of the variable are replaced or
      set to the second argument value, depending on the third and optional fourth parameters. If only the third argument is
      given this is taken as the length, and the array or string is filled to that length with the value. If both the

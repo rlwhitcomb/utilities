@@ -362,6 +362,8 @@
  *	15-Oct-2021 (rlwhitcomb)
  *	    #32: Fix arg parsing precedence with single-arg predefined functions.
  *	    Fix "substr" so we don't get index errors.
+ *	    New "slice" and "splice" functions (equivalent to JavaScript). Enhance "substr" also
+ *	    to perform sensibly with only one argument.
  */
 package info.rlwhitcomb.calc;
 
@@ -2843,65 +2845,184 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    return BigInteger.valueOf((long) ret);
 	}
 
-	private String substring(CalcParser.Expr2Context e2ctx, CalcParser.Expr3Context e3ctx) {
-	    CalcParser.ExprContext beginCtx, endCtx;
-	    String stringValue;
-	    int beginIndex, endIndex;
-	    int stringLen;
+	private String substring(Object value, CalcParser.ExprContext ctx, CalcParser.Expr2Context e2ctx, CalcParser.Expr3Context e3ctx) {
+	    CalcParser.ExprContext beginCtx = null, endCtx = null;
 
 	    if (e2ctx != null) {
-		stringValue = getStringValue(e2ctx.expr(0));
-		stringLen   = stringValue.length();
-		beginCtx    = e2ctx.expr(1);
+		beginCtx = e2ctx.expr(1);
+	    }
+	    else if (e3ctx != null) {
+		beginCtx = e3ctx.expr(1);
+		endCtx   = e3ctx.expr(2);
+	    }
 
-		if (beginCtx == null) {
-		    return stringValue;
-		}
-		else {
-		    beginIndex = getIntValue(beginCtx);
-		    if (beginIndex < 0) {
-			if (stringLen + beginIndex <= 0)
-			    return stringValue;
-			else
-			    return stringValue.substring(stringLen + beginIndex);
-		    }
-		    else if (beginIndex < stringLen) {
-			return stringValue.substring(beginIndex);
-		    }
-		    else {
-			return "";
-		    }
-		}
+	    String stringValue = toStringValue(this, ctx, value, false, false, settings.separatorMode, "");
+
+	    if (beginCtx == null) {
+		return stringValue;
+	    }
+
+	    int stringLen  = stringValue.length();
+	    int beginIndex = beginCtx == null ? 0 : getIntValue(beginCtx);
+	    int endIndex   = endCtx == null ? stringLen : getIntValue(endCtx);
+
+	    if (beginIndex < 0)
+		beginIndex += stringLen;
+	    if (endIndex < 0)
+		endIndex += stringLen;
+
+	    if (beginIndex < 0)
+		beginIndex = 0;
+	    if (beginIndex > stringLen)
+		beginIndex = stringLen;
+	    if (endIndex < beginIndex)
+		endIndex = beginIndex;
+	    if (endIndex > stringLen)
+		endIndex = stringLen;
+
+	    return stringValue.substring(beginIndex, endIndex);
+	}
+
+	private String substring(CalcParser.Expr1Context e1ctx, CalcParser.Expr2Context e2ctx, CalcParser.Expr3Context e3ctx) {
+	    CalcParser.ExprContext valueCtx;
+
+	    if (e1ctx != null) {
+		valueCtx = e1ctx.expr();
+	    }
+	    else if (e2ctx != null) {
+		valueCtx = e2ctx.expr(0);
 	    }
 	    else {
-		stringValue = getStringValue(e3ctx.expr(0));
-		stringLen   = stringValue.length();
-		beginCtx    = e3ctx.expr(1);
-		endCtx      = e3ctx.expr(2);
-		beginIndex  = beginCtx == null ? 0 : getIntValue(beginCtx);
-		endIndex    = endCtx == null ? stringLen : getIntValue(endCtx);
-
-		if (beginIndex < 0)
-		    beginIndex += stringLen;
-		if (endIndex < 0)
-		    endIndex += stringLen;
-
-		if (beginIndex < 0)
-		    beginIndex = 0;
-		if (beginIndex > stringLen)
-		    beginIndex = stringLen;
-		if (endIndex < beginIndex)
-		    endIndex = beginIndex;
-		if (endIndex > stringLen)
-		    endIndex = stringLen;
-
-		return stringValue.substring(beginIndex, endIndex);
+		valueCtx = e3ctx.expr(0);
 	    }
+
+	    String stringValue = getStringValue(valueCtx);
+
+	    return substring(stringValue, valueCtx, e2ctx, e3ctx);
 	}
 
 	@Override
 	public Object visitSubstrExpr(CalcParser.SubstrExprContext ctx) {
-	    return substring(ctx.expr2(), ctx.expr3());
+	    return substring(ctx.expr1(), ctx.expr2(), ctx.expr3());
+	}
+
+	@Override
+	public Object visitSliceExpr(CalcParser.SliceExprContext ctx) {
+	    CalcParser.Expr1Context e1ctx = ctx.expr1();
+	    CalcParser.Expr2Context e2ctx = ctx.expr2();
+	    CalcParser.Expr3Context e3ctx = ctx.expr3();
+	    CalcParser.ExprContext valueCtx, beginCtx = null, endCtx = null;
+	    int beginIndex, endIndex;
+	    int arrayLen;
+	    Object value;
+	    ArrayScope<?> listValue;
+
+	    if (e1ctx != null) {
+		valueCtx = e1ctx.expr();
+	    }
+	    else if (e2ctx != null) {
+		valueCtx = e2ctx.expr(0);
+		beginCtx = e2ctx.expr(1);
+	    }
+	    else {
+		valueCtx = e3ctx.expr(0);
+		beginCtx = e3ctx.expr(1);
+		endCtx   = e3ctx.expr(2);
+	    }
+
+	    value = evaluateFunction(valueCtx, visit(valueCtx));
+
+	    if (value instanceof ArrayScope || value instanceof ObjectScope) {
+		listValue = getArrayValue(this, valueCtx, value);
+		arrayLen = listValue.size();
+		beginIndex = beginCtx == null ? 0 : getIntValue(beginCtx);
+		endIndex   = endCtx == null ? arrayLen : getIntValue(endCtx);
+
+		if (beginIndex < 0)
+		    beginIndex += arrayLen;
+		if (endIndex < 0)
+		    endIndex += arrayLen;
+
+		if (beginIndex < 0)
+		    beginIndex = 0;
+		if (beginIndex > arrayLen)
+		    beginIndex = arrayLen;
+		if (endIndex < beginIndex)
+		    endIndex = beginIndex;
+		if (endIndex > arrayLen)
+		    endIndex = arrayLen;
+
+		ArrayScope<Object> result = new ArrayScope<>();
+
+		for (int index = beginIndex; index < endIndex; index++) {
+		    Object val = listValue.list().get(index);
+		    result.add(val);
+		}
+
+		return result;
+	    }
+
+	    // Any simple object behaves the same way as "substr"
+	    return substring(value, valueCtx, e2ctx, e3ctx);
+	}
+
+	@Override
+	public Object visitSpliceExpr(CalcParser.SpliceExprContext ctx) {
+	    CalcParser.Expr1Context e1ctx = ctx.expr1();
+	    CalcParser.Expr2Context e2ctx = ctx.expr2();
+	    CalcParser.Expr3Context e3ctx = ctx.expr3();
+	    CalcParser.ExprNContext eNctx = ctx.exprN();
+	    List<CalcParser.ExprContext> exprs = null;
+	    CalcParser.ExprContext arrCtx = null;
+
+	    if (e1ctx != null) {
+		arrCtx = e1ctx.expr();
+	    }
+	    else if (e2ctx != null) {
+		exprs = e2ctx.expr();
+	    }
+	    else if (e3ctx != null) {
+		exprs = e3ctx.expr();
+	    }
+	    else {
+		exprs = eNctx.exprList().expr();
+	    }
+
+	    if (arrCtx == null)
+		arrCtx = exprs.get(0);
+
+	    @SuppressWarnings("unchecked")
+	    ArrayScope<Object> array = (ArrayScope<Object>) getArrayValue(this, arrCtx, evaluateFunction(arrCtx, visit(arrCtx)));
+	    ArrayScope<Object> result = new ArrayScope<>();
+	    int arrayLen = array.size();
+	    int start = (exprs != null && exprs.size() > 1) ? getIntValue(exprs.get(1)) : 0;
+	    if (start < 0)
+		start += arrayLen;
+	    if (start < 0)
+		start = 0;
+	    if (start > arrayLen)
+		start = arrayLen;
+
+	    int count = (exprs != null && exprs.size() > 2) ? getIntValue(exprs.get(2)) : arrayLen - start;
+	    if (count < 0)
+		count = 0;
+	    if (count > arrayLen - start)
+		count = arrayLen - start;
+
+	    // Remove the specified number of elements beginning from "start" and add to the result array
+	    for (int index = 0; index < count; index++) {
+		result.list().add(array.list().remove(start));
+	    }
+
+	    // Now if any elements were given to add/insert, do that starting from "start" also
+	    int exprLen = exprs != null ? exprs.size() : 0;
+	    for (int index = 3; index < exprLen; index++) {
+		CalcParser.ExprContext valueCtx = exprs.get(index);
+		Object value = evaluateFunction(valueCtx, visit(valueCtx));
+		array.list().add(index - 3 + start, value);
+	    }
+
+	    return result;
 	}
 
 	@Override
@@ -2911,19 +3032,18 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    LValueContext lValue                = getLValue(varCtx);
 	    Object value		        = lValue.getContextObject();
 	    List<CalcParser.ExprContext> exprs  = fillCtx.expr();
+	    CalcParser.ExprContext fillExpr     = exprs.get(0);
 
-	    Object fillValue;
+	    Object fillValue = evaluateFunction(fillExpr, visit(fillExpr));
 	    int start  = 0;
 	    int length = 0;
 
 	    if (exprs.size() == 2) {
-		fillValue = visit(exprs.get(0));
-		length    = getIntValue(exprs.get(1));
+		length = getIntValue(exprs.get(1));
 	    }
 	    else {
-		fillValue = visit(exprs.get(0));
-		start     = getIntValue(exprs.get(1));
-		length    = getIntValue(exprs.get(2));
+		start  = getIntValue(exprs.get(1));
+		length = getIntValue(exprs.get(2));
 	    }
 
 	    if (value instanceof ArrayScope) {

@@ -223,6 +223,9 @@
 >substr (target, index (target, '"', 0), index (target, '"', -1) + 1) -> "\"index\""
 >substr 1.234, 1, 3 -> ".2"
 >substr (target, -1, -3) -> ""
+>n = [1, 2, 3, 4, 5] -> [ 1, 2, 3, 4, 5 ]
+>slice n, 2, -1 -> [ 3, 4 ]
+>slice (target, -5) -> "test."
 >funny_string = ' \t\f  \r\n   345  \f  \t \r\n  ' -> " 	  
 >   345    	 
 >  "
@@ -697,12 +700,15 @@
 >a -> { b: true, c: { d: "123", f: "fghi", g: { r: 6, s: 5, "e": "E", "f": { "g": 23, "h": { "i": 28, j: 16 }, 'h': 3.45 } } } }
 >Defining function stack = {_len: 0, _arr: []}
 >Defining function push($s,$v) = {$s._arr[$s._len ++] = $v}
->Defining function pop($s) = {$s._arr[-- $s._len]}
+>Defining function pop($s) = {_v = splice ($s._arr, -- $s._len, 1) ; _v[0]}
 >s1 = eval stack -> { _len: 0, _arr: [ ] }
 >push (s1, 19) -> 19
+>push (s1, 20) -> 20
+>push (s1, 21) -> 21
+>s1 -> { _len: 3, _arr: [ 19, 20, 21 ] }
+>pop (s1) -> 21
+>pop (s1) -> 20
 >s1 -> { _len: 1, _arr: [ 19 ] }
->pop (s1) -> 19
->s1 -> { _len: 0, _arr: [ 19 ] }
 >
 >End of nested object / array tests.
 >Tests of :include directive.

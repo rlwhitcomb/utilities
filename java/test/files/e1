@@ -226,6 +226,11 @@ substr(target, index(target, '"', 0), index(target, '"', -1) + 1)
 substr 1.234, 1, 3
 substr(target, -1, -3)
 
+# Slice function
+n = [ 1, 2, 3, 4, 5 ]
+slice n, 2, -1
+slice(target, -5)
+
 # Trim functions
 funny_string = ' \t\f  \r\n   345  \f  \t \r\n  '
 trim funny_string

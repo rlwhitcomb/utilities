@@ -257,6 +257,7 @@
  *	    Add mode words as possible IDs. Add ":load" as alias for ":include".
  *	15-Oct-2021 (rlwhitcomb)
  *	    #32: Fix arg parsing for all one-arg predefined functions.
+ *	    New "slice" and "splice" functions (as per JavaScript).
  */
 
 grammar Calc;
@@ -364,7 +365,9 @@ expr
    | K_JOIN exprN                        # joinExpr
    | K_SPLIT ( expr2 | expr3 )           # splitExpr
    | K_INDEX ( expr2 | expr3 )           # indexExpr
-   | K_SUBSTR ( expr2 | expr3 )          # substrExpr
+   | K_SUBSTR ( expr1 | expr2 | expr3 )  # substrExpr
+   | K_SLICE ( expr1 | expr2 | expr3 )   # sliceExpr
+   | K_SPLICE ( expr1 | expr2 | expr3 | exprN )  # spliceExpr
    | K_FILL fillExprs                    # fillExpr
    | (K_TRIM|K_LTRIM|K_RTRIM) expr1      # trimExpr
    | K_FIB expr1                         # fibExpr
@@ -683,6 +686,10 @@ K_SPLIT    : S P L I T ;
 K_INDEX    : I N D E X ;
 
 K_SUBSTR   : S U B S T R ;
+
+K_SLICE    : S L I C E ;
+
+K_SPLICE   : S P L I C E ;
 
 K_FILL     : F I L L ;
 
