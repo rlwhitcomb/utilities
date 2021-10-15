@@ -361,6 +361,7 @@
  *	    Allow the "mode" keywords as ID values.
  *	15-Oct-2021 (rlwhitcomb)
  *	    #32: Fix arg parsing precedence with single-arg predefined functions.
+ *	    Fix "substr" so we don't get index errors.
  */
 package info.rlwhitcomb.calc;
 
@@ -2842,46 +2843,65 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    return BigInteger.valueOf((long) ret);
 	}
 
-	@Override
-	public Object visitSubstrExpr(CalcParser.SubstrExprContext ctx) {
-	    CalcParser.Expr2Context e2ctx = ctx.expr2();
-	    CalcParser.ExprContext indexCtx;
+	private String substring(CalcParser.Expr2Context e2ctx, CalcParser.Expr3Context e3ctx) {
+	    CalcParser.ExprContext beginCtx, endCtx;
 	    String stringValue;
+	    int beginIndex, endIndex;
+	    int stringLen;
 
-	    try {
-		if (e2ctx != null) {
-		    stringValue = getStringValue(e2ctx.expr(0));
-		    indexCtx    = e2ctx.expr(1);
+	    if (e2ctx != null) {
+		stringValue = getStringValue(e2ctx.expr(0));
+		stringLen   = stringValue.length();
+		beginCtx    = e2ctx.expr(1);
 
-		    if (indexCtx == null)
-			return stringValue;
-		    else {
-			int beginIndex = getIntValue(indexCtx);
-			if (beginIndex < 0) {
-			    int stringLen = stringValue.length();
-			    return stringValue.substring(stringLen + beginIndex);
-			}
-		        return stringValue.substring(beginIndex);
-		    }
+		if (beginCtx == null) {
+		    return stringValue;
 		}
 		else {
-		    CalcParser.Expr3Context e3ctx = ctx.expr3();
-		    stringValue    = getStringValue(e3ctx.expr(0));
-		    int beginIndex = getIntValue(e3ctx.expr(1));
-		    int endIndex   = getIntValue(e3ctx.expr(2));
-		    int stringLen  = stringValue.length();
-
-		    if (beginIndex < 0)
-			beginIndex += stringLen;
-		    if (endIndex < 0)
-			endIndex += stringLen;
-
-		    return stringValue.substring(beginIndex, endIndex);
+		    beginIndex = getIntValue(beginCtx);
+		    if (beginIndex < 0) {
+			if (stringLen + beginIndex <= 0)
+			    return stringValue;
+			else
+			    return stringValue.substring(stringLen + beginIndex);
+		    }
+		    else if (beginIndex < stringLen) {
+			return stringValue.substring(beginIndex);
+		    }
+		    else {
+			return "";
+		    }
 		}
 	    }
-	    catch (StringIndexOutOfBoundsException ex) {
-		throw new CalcExprException(ex, ctx);
+	    else {
+		stringValue = getStringValue(e3ctx.expr(0));
+		stringLen   = stringValue.length();
+		beginCtx    = e3ctx.expr(1);
+		endCtx      = e3ctx.expr(2);
+		beginIndex  = beginCtx == null ? 0 : getIntValue(beginCtx);
+		endIndex    = endCtx == null ? stringLen : getIntValue(endCtx);
+
+		if (beginIndex < 0)
+		    beginIndex += stringLen;
+		if (endIndex < 0)
+		    endIndex += stringLen;
+
+		if (beginIndex < 0)
+		    beginIndex = 0;
+		if (beginIndex > stringLen)
+		    beginIndex = stringLen;
+		if (endIndex < beginIndex)
+		    endIndex = beginIndex;
+		if (endIndex > stringLen)
+		    endIndex = stringLen;
+
+		return stringValue.substring(beginIndex, endIndex);
 	    }
+	}
+
+	@Override
+	public Object visitSubstrExpr(CalcParser.SubstrExprContext ctx) {
+	    return substring(ctx.expr2(), ctx.expr3());
 	}
 
 	@Override
