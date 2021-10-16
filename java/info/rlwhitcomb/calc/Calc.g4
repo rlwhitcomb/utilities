@@ -258,6 +258,8 @@
  *	15-Oct-2021 (rlwhitcomb)
  *	    #32: Fix arg parsing for all one-arg predefined functions.
  *	    New "slice" and "splice" functions (as per JavaScript).
+ *	16-Oct-2021 (rlwhitcomb)
+ *	    "sort" function.
  */
 
 grammar Calc;
@@ -369,6 +371,7 @@ expr
    | K_SLICE ( expr1 | expr2 | expr3 )   # sliceExpr
    | K_SPLICE ( expr1 | expr2 | expr3 | exprN )  # spliceExpr
    | K_FILL fillExprs                    # fillExpr
+   | K_SORT ( expr1 | expr2 )            # sortExpr
    | (K_TRIM|K_LTRIM|K_RTRIM) expr1      # trimExpr
    | K_FIB expr1                         # fibExpr
    | K_BN expr1                          # bernExpr
@@ -692,6 +695,8 @@ K_SLICE    : S L I C E ;
 K_SPLICE   : S P L I C E ;
 
 K_FILL     : F I L L ;
+
+K_SORT     : S O R T ;
 
 K_TRIM     : T R I M ;
 

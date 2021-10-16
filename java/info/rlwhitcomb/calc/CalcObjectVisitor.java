@@ -367,6 +367,7 @@
  *	16-Oct-2021 (rlwhitcomb)
  *	    #33: Make the convention that a bare reference to a function that was defined with parameters
  *	    is NOT a call to that function, but just a reference to it, then our problem is solved.
+ *	    Implement "sort", and add "ignoreCase" parameter to base "compareValues" function.
  */
 package info.rlwhitcomb.calc;
 
@@ -390,6 +391,8 @@ import java.time.format.DateTimeParseException;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Deque;
 import java.util.LinkedHashMap;
 import java.util.Iterator;
@@ -1810,7 +1813,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		else {
 		    for (CalcParser.ExprContext exprCtx : exprListCtx.expr()) {
 			Object blockValue = visit(exprCtx);
-			if (CalcUtil.compareValues(this, ctx, cbCtx, caseValue, blockValue, mc, false, true) == 0) {
+			if (CalcUtil.compareValues(this, ctx, cbCtx, caseValue, blockValue, mc, false, true, false) == 0) {
 			    Object returnValue = null;
 			    pushScope(scope);
 			    try {
@@ -3031,6 +3034,47 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 
 	    return result;
+	}
+
+	private class ObjectComparator implements Comparator<Object>
+	{
+		private CalcObjectVisitor visitor;
+		private ParserRuleContext ctx;
+		private boolean ignoreCase;
+
+		ObjectComparator(CalcObjectVisitor v, ParserRuleContext c, boolean ignore) {
+		    this.visitor    = v;
+		    this.ctx        = c;
+		    this.ignoreCase = ignore;
+		}
+
+		@Override
+		public int compare(Object o1, Object o2) {
+		    return CalcUtil.compareValues(visitor, ctx, ctx, o1, o2, mc, false, true, ignoreCase);
+		}
+	}
+
+	@Override
+	public Object visitSortExpr(CalcParser.SortExprContext ctx) {
+	    CalcParser.Expr1Context e1ctx = ctx.expr1();
+	    CalcParser.Expr2Context e2ctx = ctx.expr2();
+	    CalcParser.ExprContext arrCtx;
+	    boolean caseInsensitive = false;
+
+	    if (e1ctx != null) {
+		arrCtx = e1ctx.expr();
+	    }
+	    else {
+		arrCtx = e2ctx.expr(0);
+		caseInsensitive = getBooleanValue(e2ctx.expr(1));
+	    }
+
+	    @SuppressWarnings("unchecked")
+	    ArrayScope<Object> array = (ArrayScope<Object>) getArrayValue(this, arrCtx, evaluateFunction(arrCtx, visit(arrCtx)));
+
+	    Collections.sort(array.list(), new ObjectComparator(this, arrCtx, caseInsensitive));
+
+	    return array;
 	}
 
 	@Override

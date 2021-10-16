@@ -79,6 +79,8 @@
  *	    Add context parameter to "toStringValue" and "evaluateFunction".
  *	14-Oct-2021 (rlwhitcomb)
  *	    New "getArrayValue" method.
+ *	16-Oct-2021 (rlwhitcomb)
+ *	    Add "ignoreCase" parameter to "compareValues".
  */
 package info.rlwhitcomb.calc;
 
@@ -793,7 +795,7 @@ public final class CalcUtil
 		final ParserRuleContext ctx1, final ParserRuleContext ctx2,
 		final MathContext mc, final boolean strict, final boolean allowNulls) {
 	    return compareValues(visitor, ctx1, ctx2, visitor.visit(ctx1), visitor.visit(ctx2),
-		mc, strict, allowNulls);
+		mc, strict, allowNulls, false);
 	}
 
 	/**
@@ -808,6 +810,7 @@ public final class CalcUtil
 	 * @param mc         Rounding mode used when converting to decimal.
 	 * @param strict     Whether or not the object classes must match for the comparison.
 	 * @param allowNulls Some comparisons (strings) can be compared even if one or both operands are null.
+	 * @param ignoreCase For strings, whether to ignore case or not.
 	 * @return {@code -1} if the first object is "less than" the second,
 	 *         {@code 0} if the objects are "equal",
 	 *         {@code +1} if the first object is "greater than" the second.
@@ -815,7 +818,8 @@ public final class CalcUtil
 	public static int compareValues(final CalcObjectVisitor visitor,
 		final ParserRuleContext ctx1, final ParserRuleContext ctx2,
 		final Object obj1, final Object obj2,
-		final MathContext mc, final boolean strict, final boolean allowNulls) {
+		final MathContext mc, final boolean strict, final boolean allowNulls,
+		final boolean ignoreCase) {
 	    Object e1 = visitor.evaluateFunction(ctx1, obj1);
 	    Object e2 = visitor.evaluateFunction(ctx2, obj2);
 
@@ -840,7 +844,7 @@ public final class CalcUtil
 	    if (e1 instanceof String || e2 instanceof String) {
 		String s1 = e1.toString();
 		String s2 = e2.toString();
-		return s1.compareTo(s2);
+		return ignoreCase ? s1.compareToIgnoreCase(s2) : s1.compareTo(s2);
 	    }
 	    else if (e1 instanceof BigDecimal || e2 instanceof BigDecimal) {
 		BigDecimal d1 = toDecimalValue(visitor, e1, mc, ctx1);
@@ -876,7 +880,7 @@ public final class CalcUtil
 		for (int i = 0; i < size1; i++) {
 		    Object o1 = list1.getValue(i);
 		    Object o2 = list2.getValue(i);
-		    int ret = compareValues(visitor, ctx1, ctx2, o1, o2, mc, strict, allowNulls);
+		    int ret = compareValues(visitor, ctx1, ctx2, o1, o2, mc, strict, allowNulls, ignoreCase);
 		    if (ret != 0)
 			return ret;
 		}
@@ -904,7 +908,7 @@ public final class CalcUtil
 		    String key1, key2;
 		    while ((key1 = sortedKeys1.pollFirst()) != null) {
 			key2 = sortedKeys2.pollFirst();
-			int ret = key1.compareTo(key2);
+			int ret = ignoreCase ? key1.compareToIgnoreCase(key2) : key1.compareTo(key2);
 			if (ret != 0)
 			    return ret;
 		    }
@@ -914,7 +918,7 @@ public final class CalcUtil
 		for (String key : keySet1) {
 		    Object value1 = map1.getValue(key, false);
 		    Object value2 = map2.getValue(key, false);
-		    int ret = compareValues(visitor, ctx1, ctx2, value1, value2, mc, strict, allowNulls);
+		    int ret = compareValues(visitor, ctx1, ctx2, value1, value2, mc, strict, allowNulls, ignoreCase);
 		    if (ret != 0)
 			return ret;
 		}
