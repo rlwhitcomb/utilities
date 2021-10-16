@@ -368,6 +368,8 @@
  *	    #33: Make the convention that a bare reference to a function that was defined with parameters
  *	    is NOT a call to that function, but just a reference to it, then our problem is solved.
  *	    Implement "sort", and add "ignoreCase" parameter to base "compareValues" function.
+ *	    Use "buildValueList" for "sort" so it works better for multi-dim arrays. Change the way
+ *	    value conversion is done for that method.
  */
 package info.rlwhitcomb.calc;
 
@@ -431,6 +433,23 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		DEGREES,
 		RADIANS
 	}
+
+
+	/**
+	 * Conversion mode for "buildValueList".
+	 */
+	public static enum Conversion
+	{
+		/** Convert all values to strings (for "exec"). */
+		STRING,
+		/** Convert all values to decimal (for "sumof" or "productof" in decimal mode). */
+		DECIMAL,
+		/** Convert to fractions (rational mode). */
+		FRACTION,
+		/** Leave values as they are (for "sort"). */
+		UNCHANGED
+	}
+
 
 	/** Scale for double operations. */
 	private static final MathContext MC_DOUBLE = MathContext.DECIMAL64;
@@ -3069,12 +3088,13 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		caseInsensitive = getBooleanValue(e2ctx.expr(1));
 	    }
 
-	    @SuppressWarnings("unchecked")
-	    ArrayScope<Object> array = (ArrayScope<Object>) getArrayValue(this, arrCtx, evaluateFunction(arrCtx, visit(arrCtx)));
+	    List<CalcParser.ExprContext> exprs = new ArrayList<>();
+	    exprs.add(arrCtx);
+	    List<Object> values = buildValueList(exprs, Conversion.UNCHANGED);
 
-	    Collections.sort(array.list(), new ObjectComparator(this, arrCtx, caseInsensitive));
+	    Collections.sort(values, new ObjectComparator(this, arrCtx, caseInsensitive));
 
-	    return array;
+	    return new ArrayScope<Object>(values);
 	}
 
 	@Override
@@ -3339,7 +3359,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 
 	/**
-	 * Do a "flat map" of values for the "sumof", "productof", and "exec" functions.  Since each
+	 * Do a "flat map" of values for the "sumof", "productof", "sort", and "exec" functions.  Since each
 	 * value to be processed could be an array or map, we need to traverse these objects
 	 * as well as the simple values in order to get the full list to process.
 	 *
@@ -3347,13 +3367,13 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	 * @param obj		The object to be added to the list, or recursed into when the object
 	 *			is a list or map.
 	 * @param objectList	The complete list of values to be built.
-	 * @param toString      Whether to coerce values always to strings, or let them be numeric also.
+	 * @param conversion	Type of conversion to do on the values.
 	 */
 	private void buildValueList(
 		final ParserRuleContext ctx,
 		final Object obj,
 		final List<Object> objectList,
-		final boolean toString)
+		final Conversion conversion)
 	{
 	    Object value = evaluateFunction(ctx, obj);
 
@@ -3363,42 +3383,47 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		@SuppressWarnings("unchecked")
 		ArrayScope array = (ArrayScope) value;
 		for (Object listObj : array.list()) {
-		    buildValueList(ctx, listObj, objectList, toString);
+		    buildValueList(ctx, listObj, objectList, conversion);
 		}
 	    }
 	    else if (value instanceof ObjectScope) {
 		@SuppressWarnings("unchecked")
 		ObjectScope map = (ObjectScope) value;
 		for (Object mapObj : map.values()) {
-		    buildValueList(ctx, mapObj, objectList, toString);
+		    buildValueList(ctx, mapObj, objectList, conversion);
 		}
 	    }
 	    else {
-		if (toString) {
-		    objectList.add(toStringValue(this, ctx, value, false, false, false, ""));
-		}
-		else if (settings.rationalMode) {
-		    objectList.add(toFractionValue(this, value, ctx));
-		}
-		else {
-		    objectList.add(toDecimalValue(this, value, mc, ctx));
+		switch (conversion) {
+		    case STRING:
+			objectList.add(toStringValue(this, ctx, value, false, false, false, ""));
+			break;
+		    case DECIMAL:
+			objectList.add(toDecimalValue(this, value, mc, ctx));
+			break;
+		    case FRACTION:
+			objectList.add(toFractionValue(this, value, ctx));
+			break;
+		    case UNCHANGED:
+			objectList.add(value);
+			break;
 		}
 	    }
 	}
 
 	/**
-	 * Traverse the expression list for the "sumof" or "productof" function and
+	 * Traverse the expression list for the "sumof", "productof", and "sort" functions and
 	 * build the complete list of values to be processed.
 	 *
-	 * @param exprs	The parsed list of expression contexts.
-	 * @param toString Whether to convert all values to strings or do numeric conversions.
-	 * @return	The completely built "flat map" of values.
+	 * @param exprs	     The parsed list of expression contexts.
+	 * @param conversion How or whether to convert the values for the final list.
+	 * @return	     The completely built "flat map" of values.
 	 */
-	private List<Object> buildValueList(final List<CalcParser.ExprContext> exprs, final boolean toString) {
+	private List<Object> buildValueList(final List<CalcParser.ExprContext> exprs, final Conversion conversion) {
 	    List<Object> objects = new ArrayList<>();
 
 	    for (CalcParser.ExprContext exprCtx : exprs) {
-		buildValueList(exprCtx, visit(exprCtx), objects, toString);
+		buildValueList(exprCtx, visit(exprCtx), objects, conversion);
 	    }
 
 	    return objects;
@@ -3407,7 +3432,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitExecExpr(CalcParser.ExecExprContext ctx) {
 	    List<CalcParser.ExprContext> exprs = ctx.exprN().exprList().expr();
-	    List<Object> objects = buildValueList(exprs, true);
+	    List<Object> objects = buildValueList(exprs, Conversion.STRING);
 	    String[] args = new String[objects.size()];
 	    for (int i = 0; i < objects.size(); i++) {
 		args[i] = (String) objects.get(i);
@@ -3457,7 +3482,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    CalcParser.DotRangeContext dotRange = ctx.dotRange();
 	    if (dotRange == null) {
 		List<CalcParser.ExprContext> exprs = ctx.exprN().exprList().expr();
-		List<Object> objects = buildValueList(exprs, false);
+		List<Object> objects = buildValueList(exprs,
+			settings.rationalMode ? Conversion.FRACTION : Conversion.DECIMAL);
 
 		for (Object obj : objects) {
 		    sum = sumVisitor.apply(obj);
@@ -3507,7 +3533,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    CalcParser.DotRangeContext dotRange = ctx.dotRange();
 	    if (dotRange == null) {
 		List<CalcParser.ExprContext> exprs = ctx.exprN().exprList().expr();
-		List<Object> objects = buildValueList(exprs, false);
+		List<Object> objects = buildValueList(exprs,
+			settings.rationalMode ? Conversion.FRACTION : Conversion.DECIMAL);
 
 		for (Object obj : objects) {
 		    product = productVisitor.apply(obj);

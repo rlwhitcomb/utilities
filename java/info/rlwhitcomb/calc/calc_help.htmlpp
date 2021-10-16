@@ -582,7 +582,7 @@ or
             <tr><td><code>SLICE</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;)&nbsp;)</td><td>extract a slice of an array (or string)</td></tr>
             <tr><td><code>SPLICE</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;) *</td><td>modify an array by deleting and/or adding elements</td></tr>
             <tr><td><code>FILL</code>&nbsp;<i>var</i>&nbsp;<code>,</code> <i>expr</i>&nbsp;<code>,</code> <i>expr</i> ( <code>,</code><i>expr</i> )</td><td>fill an array or string</td></tr>
-            <tr><td><code>SORT</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;)</td><td>sort the array expression, optionally ignoring case</td></tr>
+            <tr><td><code>SORT</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;)</td><td>sort the array expression, optionally ignoring case,<br>returning the array of sorted values</td></tr>
             <tr><td><code>TRIM</code> or <code>LTRIM</code> or <code>RTRIM</code> <i>expr</i></td><td>trim all, leading, or trailing whitespace</td></tr>
             <tr><td><code>FIB</code>&nbsp;<i>expr</i></td><td>Fibonacci number</td></tr>
             <tr><td><code>Bn</code>&nbsp;<i>expr</i></td><td>Bernoulli number</td></tr>
@@ -750,6 +750,10 @@ or
      If a string is filled and the starting offset is past the end of the existing string, the intervening characters are
      set to the <code>nul</code> character. The fill value for a string can only be one character, or an integer
      (in the range of 0..65535) that is converted to a char value (NOT a codepoint value!).
+  <p>The <code>sort</code> function will do a "flat map" of the values in a list or object, sort them, and return the sorted list.
+     Because of the "flat" mapping, the original values are left as-is. So in order to sort a list in place, you must reassign
+     the result of the sort back to the original variable, as in <code>arr = sort arr</code>. This also allows you to create
+     a sorted list from an unsorted array constant in one step, by doing <code>arr = sort [ 3,2,5,0,4 ] &#x21E8; [ 0, 2, 3, 4, 5 ]</code>.
   <p>The <code>FRAC</code> function constructs a fraction value from a numerator and denominator, from an integer along with
      a numerator and denominator, or a single expression which is converted to a string and parsed in the same manner as
      a fractional constant, such as <code>frac('1 &#x215c;')</code>, except that any of the Unicode fraction values can
