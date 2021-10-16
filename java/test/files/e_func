@@ -1,0 +1,10 @@
+#
+# Issue #33: Allow Calc to return functions from other functions
+#
+# The LValue for a function needs to be allowed to be another function
+#
+def f1($a, $b) = { $a + $b }
+def f2($a, $b) = { $a * $b }
+def f($c) = { $c ? f1 : f2 }
+f(true)(1,2)
+
