@@ -200,6 +200,8 @@
  *	    Add Save function to GUI.
  *	07-Oct-2021 (rlwhitcomb)
  *	    New parameter to "saveVariables".
+ *	15-Oct-2021 (rlwhitcomb)
+ *	    New command-line option to ignore previous libraries.
  */
 package info.rlwhitcomb.calc;
 
@@ -1466,6 +1468,13 @@ public class Calc
 		case "libs":
 		case "lib":
 		    return Expecting.LIBRARY;
+		case "ignorelibraries":
+		case "nolibraries":
+		case "nolibrary":
+		case "nolibs":
+		case "nolib":
+		    libraryNames = null;
+		    break;
 		case "cmdenter":
 		case "cmd":
 		    useCmdEnter = true;
