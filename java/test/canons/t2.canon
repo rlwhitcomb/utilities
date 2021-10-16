@@ -20,9 +20,10 @@
 >Test 'f1': Passed
 >Test 'save': Passed
 >Test 'e_lib': Passed
+>Test 'e_func': Passed
 >
 >End of Calc tests.
 >------------------------------------
->Ran 17 tests: 17 passed, 0 failed.
+>Ran 18 tests: 18 passed, 0 failed.
 >====================================
 >

@@ -65,6 +65,10 @@
  *	    Error if function is undefined.
  *	14-Oct-2021 (rlwhitcomb)
  *	    Allow the "mode" option values as IDs.
+ *	16-Oct-2021 (rlwhitcomb)
+ *	    #33: If we have a function var context (that is a function call with parameters)
+ *	    and the context object is a FunctionScope (that is another function call) then we
+ *	    need to call it, and setup the context with the result.
  */
  package info.rlwhitcomb.calc;
 
@@ -414,11 +418,19 @@ class LValueContext
 	    else if (ctx instanceof CalcParser.FunctionVarContext) {
 		CalcParser.FunctionVarContext funcVarCtx = (CalcParser.FunctionVarContext) ctx;
 		LValueContext funcLValue = getLValue(visitor, funcVarCtx.var(), lValue);
-		FunctionDeclaration func = (FunctionDeclaration) funcLValue.getContextObject();
-		List<CalcParser.ExprContext> exprs = funcVarCtx.actualParams().expr();
+		Object funcObj = funcLValue.getContextObject();
 
-		if (func == null)
+		if (funcObj instanceof FunctionScope) {
+		    // We are already setup to make the function call with this FunctionScope, so just do it
+		    // and hope the return value is itself the function object we need to call...
+		    funcObj = visitor.evaluateFunction(funcVarCtx, funcObj);
+		}
+
+		if (funcObj == null || !(funcObj instanceof FunctionDeclaration))
 		    throw new CalcExprException(funcVarCtx, "%calc#undefinedFunction", getTreeText(funcVarCtx.var()));
+
+		FunctionDeclaration func = (FunctionDeclaration) funcObj;
+		List<CalcParser.ExprContext> exprs = funcVarCtx.actualParams().expr();
 
 		return new LValueContext(funcLValue, funcVarCtx, visitor.setupFunctionCall(funcVarCtx, func, exprs));
 	    }

@@ -31,6 +31,7 @@ mort          : e_m1,e_m2
 f1,UTF-8      : f1
 save          : save
 e_lib         : e_lib
+e_func        : e_func
 
 $echo
 $echo "End of Calc tests."

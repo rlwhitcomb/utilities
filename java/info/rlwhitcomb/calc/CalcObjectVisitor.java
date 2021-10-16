@@ -364,6 +364,9 @@
  *	    Fix "substr" so we don't get index errors.
  *	    New "slice" and "splice" functions (equivalent to JavaScript). Enhance "substr" also
  *	    to perform sensibly with only one argument.
+ *	16-Oct-2021 (rlwhitcomb)
+ *	    #33: Make the convention that a bare reference to a function that was defined with parameters
+ *	    is NOT a call to that function, but just a reference to it, then our problem is solved.
  */
 package info.rlwhitcomb.calc;
 
@@ -745,9 +748,13 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	/**
-	 * Evaluate a function: basically call {@code visit} on that
-	 * context if the value is itself is a function scope (that is,
-	 * the declaration of a function).
+	 * Evaluate a function: basically call {@code visit} on that context if the value itself
+	 * is a function scope (that is, the declaration of a function).
+	 * <p> But also, if the value is a {@link FunctionDeclaration} we have a choice:
+	 * <ul><li> if the function was declared WITHOUT parameters, then call the function</li>
+	 * <li> if the function was defined WITH parameters, then treat the value as a function object
+	 * and just return the value</li>
+	 * </ul>
 	 *
 	 * @param ctx   The parsing context (for error reporting).
 	 * @param value The result of an expression, which could be a reference to a function call.
@@ -756,10 +763,11 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	Object evaluateFunction(final ParserRuleContext ctx, final Object value) {
 	    Object returnValue = value;
 
-	    // Here we could have an actual function call, but without "()" on it, so there are
-	    // no actual parameters, but we need the scope declared anyway
 	    if (returnValue instanceof FunctionDeclaration) {
-		returnValue = setupFunctionCall(ctx, (FunctionDeclaration) returnValue, null);
+		FunctionDeclaration funcDecl = (FunctionDeclaration) returnValue;
+		if (funcDecl.getNumberOfParameters() == 0) {
+		    returnValue = setupFunctionCall(ctx, funcDecl, null);
+		}
 	    }
 
 	    if (returnValue != null && returnValue instanceof FunctionScope) {
