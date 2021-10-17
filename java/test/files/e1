@@ -231,6 +231,14 @@ n = [ 1, 2, 3, 4, 5 ]
 slice n, 2, -1
 slice(target, -5)
 
+# Splice function
+s1 = [ 1, 2, 3 ]
+splice(s1, 1, 0, 5, 6)
+s1
+s2 = [ "This", "is", "a", "test" ]
+splice s2, 2, 1, "an", "important", "little"
+s2
+
 # Trim functions
 funny_string = ' \t\f  \r\n   345  \f  \t \r\n  '
 trim funny_string
@@ -302,6 +310,9 @@ foundset.username='Don'
 450PiB
 
 :echo
+
+10! @w
+500 + 40 + 7 @W
 
 //
 // Now, start on the array and object stuff
