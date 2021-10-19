@@ -370,6 +370,10 @@
  *	    Implement "sort", and add "ignoreCase" parameter to base "compareValues" function.
  *	    Use "buildValueList" for "sort" so it works better for multi-dim arrays. Change the way
  *	    value conversion is done for that method.
+ *	19-Oct-2021 (rlwhitcomb)
+ *	    #35: Add "replace" function for strings. For options set using variables, throw an error
+ *	    if the variable is not defined (makes more sense in that other values are keywords, and this
+ *	    could just be a typo ("pre" instead of "prev") so saying '"pre" is undefined' is more user-friendly).
  */
 package info.rlwhitcomb.calc;
 
@@ -910,7 +914,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 	    else {
 		LValueContext lValue = getLValue(opt.var());
-		dPrecision = toDecimalValue(this, lValue.getContextObject(), mc, opt);
+		dPrecision = toDecimalValue(this, lValue.getContextObject(false), mc, opt);
 	    }
 
 	    int precision = 0;
@@ -1135,7 +1139,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		CalcParser.VarContext var = ctx.var();
 		// could be boolean, or string mode value
 		LValueContext lValue = getLValue(var);
-		Object modeObject = lValue.getContextObject();
+		Object modeObject = lValue.getContextObject(false);
 		if (modeObject instanceof Boolean) {
 		    mode = ((Boolean) modeObject).booleanValue();
 		}
@@ -2934,6 +2938,57 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitSubstrExpr(CalcParser.SubstrExprContext ctx) {
 	    return substring(ctx.expr1(), ctx.expr2(), ctx.expr3());
+	}
+
+	@Override
+	public Object visitReplaceExpr(CalcParser.ReplaceExprContext ctx) {
+	    CalcParser.ReplaceArgsContext args = ctx.replaceArgs();
+	    String option = "";
+
+	    String original = getStringValue(args.expr(0));
+	    String pattern  = getStringValue(args.expr(1));
+	    String replace  = getStringValue(args.expr(2));
+	    String result   = original;
+
+	    if (args.replaceOption() != null) {
+		if (args.replaceOption().var() != null) {
+		    CalcParser.VarContext var = args.replaceOption().var();
+		    LValueContext lValue = getLValue(var);
+		    Object optionObject = lValue.getContextObject(false);
+		    option = optionObject == null ? "" : toStringValue(this, var, optionObject, true, false, false, "");
+		}
+		else {
+		    option = args.replaceOption().getText();
+		}
+	    }
+
+	    try {
+		switch (option) {
+		    case "":
+			// Regular replace using the pattern as a literal
+			result = original.replace(pattern, replace);
+			break;
+		    case "all":
+			// Use pattern as a regex and replace all matching values
+			result = original.replaceAll(pattern, replace);
+			break;
+		    case "first":
+			// Again, pattern is a regex, but only replace the first match
+			result = original.replaceFirst(pattern, replace);
+			break;
+		    case "last":
+			// New functionality, pattern is a regex, but only replace the last match
+			result = original.replaceFirst("(?s)(.*)" + pattern, "$1" + replace);
+			break;
+		    default:
+			throw new CalcExprException(args.replaceOption(), "%calc#replaceOptionError", option);
+		}
+	    }
+	    catch (Exception ex) {
+		throw new CalcExprException(ex, ctx);
+	    }
+
+	    return result;
 	}
 
 	@Override

@@ -226,6 +226,18 @@ substr(target, index(target, '"', 0), index(target, '"', -1) + 1)
 substr 1.234, 1, 3
 substr(target, -1, -3)
 
+# The "replace" function in all of its options
+tl = 'tell teal tail teel toil tool toll'
+replace(tl, 't(..)l', 't$1b', all)
+replace tl, 't..l', 'test', first
+replace tl, 't..l', 'test', last
+replace tl, 't', 'b'
+
+# Make sure the option keywords still work as variable names
+all = 1; first = 2; last=7; all+first-last
+on = true; off ='OFF'; prev = 12; previous = 15; yes = 'really'; no = 'fat chance'; pop = 27
+on; off; prev; previous; yes; no; pop
+
 # Slice function
 n = [ 1, 2, 3, 4, 5 ]
 slice n, 2, -1

@@ -223,6 +223,29 @@
 >substr (target, index (target, '"', 0), index (target, '"', -1) + 1) -> "\"index\""
 >substr 1.234, 1, 3 -> ".2"
 >substr (target, -1, -3) -> ""
+>tl = 'tell teal tail teel toil tool toll' -> "tell teal tail teel toil tool toll"
+>replace (tl, 't(..)l', 't$1b', all) -> "telb teab taib teeb toib toob tolb"
+>replace tl, 't..l', 'test', first -> "test teal tail teel toil tool toll"
+>replace tl, 't..l', 'test', last -> "tell teal tail teel toil tool test"
+>replace tl, 't', 'b' -> "bell beal bail beel boil bool boll"
+>all = 1 -> 1
+>first = 2 -> 2
+>last = 7 -> 7
+>all + first - last -> -4
+>on = true -> true
+>off = 'OFF' -> "OFF"
+>prev = 12 -> 12
+>previous = 15 -> 15
+>yes = 'really' -> "really"
+>no = 'fat chance' -> "fat chance"
+>pop = 27 -> 27
+>on -> true
+>off -> "OFF"
+>prev -> 12
+>previous -> 15
+>yes -> "really"
+>no -> "fat chance"
+>pop -> 27
 >n = [1, 2, 3, 4, 5] -> [ 1, 2, 3, 4, 5 ]
 >slice n, 2, -1 -> [ 3, 4 ]
 >slice (target, -5) -> "test."

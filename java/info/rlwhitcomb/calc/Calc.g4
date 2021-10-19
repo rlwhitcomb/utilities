@@ -260,6 +260,8 @@
  *	    New "slice" and "splice" functions (as per JavaScript).
  *	16-Oct-2021 (rlwhitcomb)
  *	    "sort" function.
+ *	19-Oct-2021 (rlwhitcomb)
+ *	    "replace" function for strings.
  */
 
 grammar Calc;
@@ -368,6 +370,7 @@ expr
    | K_SPLIT ( expr2 | expr3 )           # splitExpr
    | K_INDEX ( expr2 | expr3 )           # indexExpr
    | K_SUBSTR ( expr1 | expr2 | expr3 )  # substrExpr
+   | K_REPLACE replaceArgs               # replaceExpr
    | K_SLICE ( expr1 | expr2 | expr3 )   # sliceExpr
    | K_SPLICE ( expr1 | expr2 | expr3 | exprN )  # spliceExpr
    | K_FILL fillExprs                    # fillExpr
@@ -431,6 +434,11 @@ expr3
 exprN
    : '(' exprList ')'
    | exprList
+   ;
+
+replaceArgs
+   : '(' expr ',' expr ',' expr ( ',' replaceOption ) ? ')'
+   | expr ',' expr ',' expr ( ',' replaceOption ) ?
    ;
 
 fillExprs
@@ -553,6 +561,7 @@ idList
 id
    : ID
    | modes
+   | replaceModes
    ;
 
 modes
@@ -572,6 +581,16 @@ modeOption
    | var
    ;
 
+replaceModes
+   : 'all'
+   | 'first'
+   | 'last'
+   ;
+
+replaceOption
+   : replaceModes
+   | var
+   ;
 
 /* Lexer rules start here */
 
@@ -689,6 +708,8 @@ K_SPLIT    : S P L I T ;
 K_INDEX    : I N D E X ;
 
 K_SUBSTR   : S U B S T R ;
+
+K_REPLACE  : R E P L A C E ;
 
 K_SLICE    : S L I C E ;
 

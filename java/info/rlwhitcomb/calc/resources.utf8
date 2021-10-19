@@ -80,6 +80,8 @@
 #	    Errors from Scope. Remove now unneeded messages.
 #	08-Oct-2021 (rlwhitcomb)
 #	    Undefined function error.
+#	19-Oct-2021 (rlwhitcomb)
+#	    Errors for "replace".
 #
 
 #
@@ -149,10 +151,12 @@ noConvertObjArr		= Cannot convert object or array to <x>%1$c<> format
 noDupLocalVar		= Duplicate local variable name <x>%1$s<> not allowed
 localVarNoAssign	= The value of the local variable <x>%1$s<> cannot be changed directly
 globalArgNoAssign	= The value of the global argument <x>%1$s<> cannot be changed directly
+undefined		= Variable <x>%1$s<> is not defined
 infLoopStepZero		= Infinite loop: step value is zero
 invalidConstruct	= Invalid <x>$<> construct
 invalidConst2		= Invalid <x>${...}<> construct
 modeError		= Mode option <x>%1$s<> not recognized
+replaceOptionError	= Replace option <x>%1$s<> not recognized
 illegalFormat		= Unrecognized format <x>%1$s<>
 fillTargetWrongType	= Target of a <x>FILL<> must be an array or string
 fillOneCharInt		= Fill value for a string must be one character or an integer \u2264 65535

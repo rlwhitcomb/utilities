@@ -69,6 +69,8 @@
  *	    #33: If we have a function var context (that is a function call with parameters)
  *	    and the context object is a FunctionScope (that is another function call) then we
  *	    need to call it, and setup the context with the result.
+ *	19-Oct-2021 (rlwhitcomb)
+ *	    Special mode for "getContextObject" to throw if the variable/member is not defined.
  */
  package info.rlwhitcomb.calc;
 
@@ -203,14 +205,33 @@ class LValueContext
 	 *
 	 * @return The member or indexed value extracted from the base object.
 	 */
-	@SuppressWarnings("unchecked")
 	public Object getContextObject() {
+	    return getContextObject(true);
+	}
+
+	/**
+	 * At the current variable nesting level, extract the referenced value.
+	 * <p> For a map, this would be <code>map.member</code>, for an array
+	 * or string, this would be <code>arr[index]</code>.
+	 * <p> One special check is made for error reporting purposes on local variables.
+	 *
+	 * @param allowUndefined if {@code true} (which is the default) then undefined
+	 *                       variables or members are allowed, otherwise error out
+	 * @return The member or indexed value extracted from the base object.
+	 */
+	@SuppressWarnings("unchecked")
+	public Object getContextObject(final boolean allowUndefined) {
 	    if (name != null) {
 		ObjectScope map = (ObjectScope) context;
 		// Special checks for local vars (not defined means we are outside the loop or function)
 		if (name.startsWith("$") && !Pattern.matches("^\\$[0-9]+$", name)) {
 		    if (!map.isDefined(name, ignoreCase)) {
 			throw new CalcExprException(varCtx, "%calc#localVarNotAvail", name);
+		    }
+		}
+		if (!allowUndefined) {
+		    if (!map.isDefined(name, ignoreCase)) {
+			throw new CalcExprException(varCtx, "%calc#undefined", name);
 		    }
 		}
 		return map.getValue(name, ignoreCase);
