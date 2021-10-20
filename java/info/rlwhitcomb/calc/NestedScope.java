@@ -30,6 +30,8 @@
  *	07-Oct-2021 (rlwhitcomb)
  *	    Override "remove". Also override "isDefined" and "setValue", and tweak
  *	    the way "getValue" works so that we get/set things in the proper scope.
+ *	19-Oct-2021 (rlwhitcomb)
+ *	    Change return value of "remove" to the previous value.
  */
 package info.rlwhitcomb.calc;
 
@@ -133,15 +135,15 @@ class NestedScope extends ObjectScope
 	 *
 	 * @param name       The variable name to remove.
 	 * @param ignoreCase Whether to ignore name case to find it.
-	 * @return           Whether or not the variable was found to be removed.
+	 * @return           The previous value mapped to the variable.
 	 */
 	@Override
-	public boolean remove(final String name, final boolean ignoreCase) {
-	    if (super.remove(name, ignoreCase))
-		return true;
-	    if (enclosingScope != null && enclosingScope.remove(name, true))
-		return true;
-	    return false;
+	public Object remove(final String name, final boolean ignoreCase) {
+	    if (isDefinedHere(name, ignoreCase))
+		return super.remove(name, ignoreCase);
+	    if (enclosingScope != null)
+		return enclosingScope.remove(name, true);
+	    return null;
 	}
 
 }

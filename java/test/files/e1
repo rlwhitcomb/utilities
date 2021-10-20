@@ -250,6 +250,9 @@ s1
 s2 = [ "This", "is", "a", "test" ]
 splice s2, 2, 1, "an", "important", "little"
 s2
+s3 = { a:1, b:true, c:'tree', d:14 }
+splice s3, [ b, c ], { f: 'def', g: 'green' }
+s3
 
 # Trim functions
 funny_string = ' \t\f  \r\n   345  \f  \t \r\n  '

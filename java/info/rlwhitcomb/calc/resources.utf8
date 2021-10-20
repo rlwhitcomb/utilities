@@ -81,7 +81,7 @@
 #	08-Oct-2021 (rlwhitcomb)
 #	    Undefined function error.
 #	19-Oct-2021 (rlwhitcomb)
-#	    Errors for "replace".
+#	    Errors for "replace". Errors for "splice".
 #
 
 #
@@ -151,6 +151,8 @@ noConvertObjArr		= Cannot convert object or array to <x>%1$c<> format
 noDupLocalVar		= Duplicate local variable name <x>%1$s<> not allowed
 localVarNoAssign	= The value of the local variable <x>%1$s<> cannot be changed directly
 globalArgNoAssign	= The value of the global argument <x>%1$s<> cannot be changed directly
+mustBeObject		= Source variable type <x>%1$s<> must be an object
+mustBeArray		= Source variable type <x>%1$s<> must be an array
 undefined		= Variable <x>%1$s<> is not defined
 infLoopStepZero		= Infinite loop: step value is zero
 invalidConstruct	= Invalid <x>$<> construct

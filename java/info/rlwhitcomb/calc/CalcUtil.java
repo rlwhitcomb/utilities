@@ -81,6 +81,8 @@
  *	    New "getArrayValue" method.
  *	16-Oct-2021 (rlwhitcomb)
  *	    Add "ignoreCase" parameter to "compareValues".
+ *	18-Oct-2021 (rlwhitcomb)
+ *	    #34: Remove "getArrayValue" now that it is not used anywhere.
  */
 package info.rlwhitcomb.calc;
 
@@ -619,37 +621,6 @@ public final class CalcUtil
 		buf.append("[ ]");
 	    }
 	    return buf.toString();
-	}
-
-	/**
-	 * Get an array value out of the given object.
-	 * <p> For a null value, or an existing array, just return as-is.
-	 * For a string, break it up into strings of each character.
-	 * For an object / map, return an array of the values (not the keys).
-	 *
-	 * @param visitor Used to finalize evaluation of the value.
-	 * @param ctx     The parse tree context, for error reporting.
-	 * @param value   The value to be converted.
-	 * @return        The array derived from the input value.
-	 */
-	public static ArrayScope<?> getArrayValue(final CalcObjectVisitor visitor, final ParserRuleContext ctx, final Object value)
-	{
-	    if (value == null)
-		return null;
-
-	    if (value instanceof ArrayScope)
-		return (ArrayScope) value;
-
-	    if (value instanceof ObjectScope) {
-		ObjectScope obj = (ObjectScope) value;
-		ArrayScope<Object> array = new ArrayScope<>();
-		for (Object val : obj.values()) {
-		    array.add(val);
-		}
-		return array;
-	    }
-
-	    return new ArrayScope<String>(toStringValue(visitor, ctx, value, false, false, false, "").split(""));
 	}
 
 	/**
