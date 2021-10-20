@@ -11,7 +11,7 @@ if errorlevel 1 (
    echo The "%1" word list is NOT sorted correctly!
    exit /b 1
 ) else (
-   echo The "%1" word list is correctly sorted.
+   for /F %%C in ('call wc %1 /w') do echo The "%1" word list is correctly sorted ^( %%C words ^).
    del words.txt sort.txt
    exit /b 0
 )
