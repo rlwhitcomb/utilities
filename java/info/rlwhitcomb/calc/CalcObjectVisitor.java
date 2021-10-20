@@ -374,6 +374,8 @@
  *	    #35: Add "replace" function for strings. For options set using variables, throw an error
  *	    if the variable is not defined (makes more sense in that other values are keywords, and this
  *	    could just be a typo ("pre" instead of "prev") so saying '"pre" is undefined' is more user-friendly).
+ *	    #34: Completely rewrite "splice" with new syntax for objects that makes sense, and not allowing
+ *	    non-object, non-array values.
  */
 package info.rlwhitcomb.calc;
 
@@ -397,6 +399,7 @@ import java.time.format.DateTimeParseException;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Deque;
@@ -1904,21 +1907,27 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    return functionBody;
 	}
 
-	@Override
-	public Object visitObjExpr(CalcParser.ObjExprContext ctx) {
-	    CalcParser.ObjContext oCtx = ctx.obj();
-	    ObjectScope obj = new ObjectScope();
-	    for (CalcParser.PairContext pCtx : oCtx.pair()) {
-		CalcParser.IdContext id = pCtx.id();
-		TerminalNode str  = pCtx.STRING();
-		TerminalNode istr = pCtx.ISTRING();
+	private void addPairsToObject(CalcParser.ObjContext objCtx, ObjectScope object) {
+	    for (CalcParser.PairContext pairCtx : objCtx.pair()) {
+		CalcParser.IdContext id = pairCtx.id();
+		TerminalNode str  = pairCtx.STRING();
+		TerminalNode istr = pairCtx.ISTRING();
 		String key =
 			(id != null) ? id.getText()
 		      : (str != null) ? getStringMemberName(str.getText())
-		      : getIStringValue(this, istr, ctx);
-		Object value = visit(pCtx.expr());
-		obj.setValue(key, settings.ignoreNameCase, value);
+		      : getIStringValue(this, istr, pairCtx);
+		Object value = visit(pairCtx.expr());
+		object.setValue(key, settings.ignoreNameCase, value);
 	    }
+	}
+
+	@Override
+	public Object visitObjExpr(CalcParser.ObjExprContext ctx) {
+	    CalcParser.ObjContext objCtx = ctx.obj();
+	    ObjectScope obj = new ObjectScope();
+
+	    addPairsToObject(objCtx, obj);
+
 	    return obj;
 	}
 
@@ -3017,97 +3026,186 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    value = evaluateFunction(valueCtx, visit(valueCtx));
 
-	    if (value instanceof ArrayScope || value instanceof ObjectScope) {
-		listValue = getArrayValue(this, valueCtx, value);
-		arrayLen = listValue.size();
-		beginIndex = beginCtx == null ? 0 : getIntValue(beginCtx);
-		endIndex   = endCtx == null ? arrayLen : getIntValue(endCtx);
-
-		if (beginIndex < 0)
-		    beginIndex += arrayLen;
-		if (endIndex < 0)
-		    endIndex += arrayLen;
-
-		if (beginIndex < 0)
-		    beginIndex = 0;
-		if (beginIndex > arrayLen)
-		    beginIndex = arrayLen;
-		if (endIndex < beginIndex)
-		    endIndex = beginIndex;
-		if (endIndex > arrayLen)
-		    endIndex = arrayLen;
-
-		ArrayScope<Object> result = new ArrayScope<>();
-
-		for (int index = beginIndex; index < endIndex; index++) {
-		    Object val = listValue.list().get(index);
-		    result.add(val);
-		}
-
-		return result;
+	    if (value instanceof ArrayScope) {
+		arrayLen = ((ArrayScope) value).size();
+	    }
+	    else if (value instanceof ObjectScope) {
+		arrayLen = ((ObjectScope) value).size();
+	    }
+	    else {
+		// Any simple object behaves the same way as "substr"
+		return substring(value, valueCtx, e2ctx, e3ctx);
 	    }
 
-	    // Any simple object behaves the same way as "substr"
-	    return substring(value, valueCtx, e2ctx, e3ctx);
+	    beginIndex = beginCtx == null ? 0 : getIntValue(beginCtx);
+	    endIndex   = endCtx == null ? arrayLen : getIntValue(endCtx);
+
+	    if (beginIndex < 0)
+		beginIndex += arrayLen;
+	    if (endIndex < 0)
+		endIndex += arrayLen;
+
+	    if (beginIndex < 0)
+		beginIndex = 0;
+	    if (beginIndex > arrayLen)
+		beginIndex = arrayLen;
+	    if (endIndex < beginIndex)
+		endIndex = beginIndex;
+	    if (endIndex > arrayLen)
+		endIndex = arrayLen;
+
+	    ArrayScope<Object> result = new ArrayScope<>();
+
+	    if (value instanceof ArrayScope) {
+		List<?> valueList = ((ArrayScope) value).list();
+		for (int index = beginIndex; index < endIndex; index++) {
+		    Object val = valueList.get(index);
+		    result.add(val);
+		}
+	    }
+	    else {
+		Object[] valueArray = ((ObjectScope) value).values().toArray();
+		for (int index = beginIndex; index < endIndex; index++) {
+		    Object val = valueArray[index];
+		    result.add(val);
+		}
+	    }
+
+	    return result;
 	}
 
 	@Override
 	public Object visitSpliceExpr(CalcParser.SpliceExprContext ctx) {
-	    CalcParser.Expr1Context e1ctx = ctx.expr1();
-	    CalcParser.Expr2Context e2ctx = ctx.expr2();
-	    CalcParser.Expr3Context e3ctx = ctx.expr3();
-	    CalcParser.ExprNContext eNctx = ctx.exprN();
+	    CalcParser.SpliceArgsContext args = ctx.spliceArgs();
+	    CalcParser.Expr1Context e1ctx = args.expr1();
+	    CalcParser.Expr2Context e2ctx = args.expr2();
+	    CalcParser.Expr3Context e3ctx = args.expr3();
+	    CalcParser.ExprNContext eNctx = args.exprN();
 	    List<CalcParser.ExprContext> exprs = null;
-	    CalcParser.ExprContext arrCtx = null;
+	    CalcParser.ExprContext objCtx = null;
+	    boolean doingArray;
 
-	    if (e1ctx != null) {
-		arrCtx = e1ctx.expr();
-	    }
-	    else if (e2ctx != null) {
-		exprs = e2ctx.expr();
-	    }
-	    else if (e3ctx != null) {
-		exprs = e3ctx.expr();
+	    if (args.dropObjs() != null || args.obj() != null) {
+		doingArray = false;
+
+		objCtx = args.expr();
 	    }
 	    else {
-		exprs = eNctx.exprList().expr();
+		// Actually, this could be an object with no drops or adds, so check below
+		// for the actual object type
+		doingArray = true;
+
+		if (e1ctx != null) {
+		    objCtx = e1ctx.expr();
+		}
+		else if (e2ctx != null) {
+		    exprs = e2ctx.expr();
+		}
+		else if (e3ctx != null) {
+		    exprs = e3ctx.expr();
+		}
+		else {
+		    exprs = eNctx.exprList().expr();
+		}
+
+		if (objCtx == null)
+		    objCtx = exprs.get(0);
 	    }
 
-	    if (arrCtx == null)
-		arrCtx = exprs.get(0);
+	    Object source = evaluateFunction(objCtx, visit(objCtx));
 
-	    @SuppressWarnings("unchecked")
-	    ArrayScope<Object> array = (ArrayScope<Object>) getArrayValue(this, arrCtx, evaluateFunction(arrCtx, visit(arrCtx)));
-	    ArrayScope<Object> result = new ArrayScope<>();
-	    int arrayLen = array.size();
-	    int start = (exprs != null && exprs.size() > 1) ? getIntValue(exprs.get(1)) : 0;
-	    if (start < 0)
-		start += arrayLen;
-	    if (start < 0)
-		start = 0;
-	    if (start > arrayLen)
-		start = arrayLen;
+	    String sourceClass = source.getClass().getSimpleName();
 
-	    int count = (exprs != null && exprs.size() > 2) ? getIntValue(exprs.get(2)) : arrayLen - start;
-	    if (count < 0)
-		count = 0;
-	    if (count > arrayLen - start)
-		count = arrayLen - start;
+	    // Special case here: with a single argument (the source) we will set "doingArray" true
+	    // without knowing the argument type, so check that here
+	    if (doingArray && (source instanceof ObjectScope))
+		doingArray = false;
 
-	    // Remove the specified number of elements beginning from "start" and add to the result array
-	    for (int index = 0; index < count; index++) {
-		result.list().add(array.list().remove(start));
+	    if (doingArray) {
+		if (source instanceof ArrayScope) {
+		    @SuppressWarnings("unchecked")
+		    ArrayScope<Object> array = (ArrayScope<Object>) source;
+		    ArrayScope<Object> removed = new ArrayScope<>();
+
+		    int arrayLen = array.size();
+		    int exprLen = exprs != null ? exprs.size() : 0;
+		    int start = exprLen > 1 ? getIntValue(exprs.get(1)) : 0;
+
+		    if (start < 0)
+			start += arrayLen;
+		    if (start < 0)
+			start = 0;
+		    if (start > arrayLen)
+			start = arrayLen;
+
+		    int count = exprLen > 2 ? getIntValue(exprs.get(2)) : arrayLen - start;
+		    if (count < 0)
+			count = 0;
+		    if (count > arrayLen - start)
+			count = arrayLen - start;
+
+		    // Remove the specified number of elements beginning from "start" and add to the result array
+		    List<Object> list = array.list();
+		    for (int index = 0; index < count; index++) {
+			removed.list().add(list.remove(start));
+		    }
+
+		    // Now if any elements were given to add/insert, do that starting from "start" also
+		    for (int index = 3; index < exprLen; index++) {
+			CalcParser.ExprContext valueCtx = exprs.get(index);
+			Object value = evaluateFunction(valueCtx, visit(valueCtx));
+			list.add(index - 3 + start, value);
+		    }
+
+		    return removed;
+		}
+		else {
+		    throw new CalcExprException(ctx, "%calc#mustBeArray", sourceClass);
+		}
 	    }
+	    else {
+		if (source instanceof ObjectScope) {
+		    ObjectScope object = (ObjectScope) source;
+		    ObjectScope removed = new ObjectScope();
+		    CalcParser.DropObjsContext dropObjs = args.dropObjs();
+		    CalcParser.ObjContext addObjs = args.obj();
 
-	    // Now if any elements were given to add/insert, do that starting from "start" also
-	    int exprLen = exprs != null ? exprs.size() : 0;
-	    for (int index = 3; index < exprLen; index++) {
-		CalcParser.ExprContext valueCtx = exprs.get(index);
-		Object value = evaluateFunction(valueCtx, visit(valueCtx));
-		array.list().add(index - 3 + start, value);
+		    if (dropObjs != null) {
+			String key;
+			Object value;
+
+			for (CalcParser.IdContext id : dropObjs.id()) {
+			    key = id.getText();
+			    value = object.remove(key, settings.ignoreNameCase);
+			    removed.map().put(key, value);
+			}
+			for (TerminalNode string : dropObjs.STRING()) {
+			    key = string.getText();
+			    value = object.remove(key, settings.ignoreNameCase);
+			    removed.map().put(key, value);
+			}
+			for (TerminalNode istring : dropObjs.ISTRING()) {
+			    key = getIStringValue(this, istring, addObjs);
+			    value = object.remove(key, settings.ignoreNameCase);
+			    removed.map().put(key, value);
+			}
+		    }
+		    else {
+			// With no drop list, we need to clear out and return everything
+			removed.map().putAll(object.map());
+			object.clear();
+		    }
+
+		    if (addObjs != null) {
+			addPairsToObject(addObjs, object);
+		    }
+
+		    return removed;
+		}
+		else {
+		    throw new CalcExprException(ctx, "%calc#mustBeObject", sourceClass);
+		}
 	    }
-
-	    return result;
 	}
 
 	private class ObjectComparator implements Comparator<Object>
@@ -3154,7 +3252,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitFillExpr(CalcParser.FillExprContext ctx) {
-	    CalcParser.FillExprsContext fillCtx = ctx.fillExprs();
+	    CalcParser.FillArgsContext fillCtx  = ctx.fillArgs();
 	    CalcParser.VarContext varCtx        = fillCtx.var();
 	    LValueContext lValue                = getLValue(varCtx);
 	    Object value		        = lValue.getContextObject();

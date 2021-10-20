@@ -261,7 +261,8 @@
  *	16-Oct-2021 (rlwhitcomb)
  *	    "sort" function.
  *	19-Oct-2021 (rlwhitcomb)
- *	    "replace" function for strings.
+ *	    #35: "replace" function for strings.
+ *	    #34: Update arguments to "splice" to work with objects.
  */
 
 grammar Calc;
@@ -372,8 +373,8 @@ expr
    | K_SUBSTR ( expr1 | expr2 | expr3 )  # substrExpr
    | K_REPLACE replaceArgs               # replaceExpr
    | K_SLICE ( expr1 | expr2 | expr3 )   # sliceExpr
-   | K_SPLICE ( expr1 | expr2 | expr3 | exprN )  # spliceExpr
-   | K_FILL fillExprs                    # fillExpr
+   | K_SPLICE spliceArgs                 # spliceExpr
+   | K_FILL fillArgs                     # fillExpr
    | K_SORT ( expr1 | expr2 )            # sortExpr
    | (K_TRIM|K_LTRIM|K_RTRIM) expr1      # trimExpr
    | K_FIB expr1                         # fibExpr
@@ -441,7 +442,20 @@ replaceArgs
    | expr ',' expr ',' expr ( ',' replaceOption ) ?
    ;
 
-fillExprs
+spliceArgs
+   : '(' expr ',' dropObjs ',' obj ')'
+   | '(' expr ',' dropObjs ')'
+   | '(' expr ',' obj ')'
+   | expr ',' dropObjs ',' obj
+   | expr ',' dropObjs
+   | expr ',' obj
+   | expr1
+   | expr2
+   | expr3
+   | exprN
+   ;
+
+fillArgs
    : '(' var ',' expr ',' expr ')'
    | '(' var ',' expr ',' expr ',' expr ')'
    | var ',' expr ',' expr
@@ -519,6 +533,11 @@ formalParam
 
 actualParams
    : '(' expr ? ( ',' expr ? ) * ')'
+   ;
+
+dropObjs
+   : '[' ( id | STRING | ISTRING ) ( ',' ( id | STRING | ISTRING ) ) * ']'
+   | '[' ']'
    ;
 
 directive

@@ -32,6 +32,8 @@
  *	    Break out the guts of "isDefined", "getValue", and "setValue" so they
  *	    can be called from NestedScope in order to put things in their proper
  *	    scopes when nested. Fix "keyObjectSet".
+ *	19-Oct-2021 (rlwhitcomb)
+ *	    Return last value from "remove" instead of boolean.
  */
 package info.rlwhitcomb.calc;
 
@@ -196,30 +198,28 @@ class ObjectScope extends Scope
 	 *
 	 * @param name       Name of the variable to remove.
 	 * @param ignoreCase Ignore the case of the name when searching for it.
-	 * @return           Whether or not the variable was found to be removed.
+	 * @return           The previous value of the variable, if any, or {@code null} if the entry was not found.
+	 *		     The value {@code null} could also be returned if the previous value of the entry was {@code null}.
 	 */
-	public boolean remove(final String name, final boolean ignoreCase) {
+	public Object remove(final String name, final boolean ignoreCase) {
 	    if (ignoreCase) {
 		if (variables.containsKey(name)) {
-		    variables.remove(name);
-		    return true;
+		    return variables.remove(name);
 		}
 		else {
 		    for (Map.Entry<String, Object> entry : variables.entrySet()) {
 			if (entry.getKey().equalsIgnoreCase(name)) {
-			    variables.remove(entry.getKey());
-			    return true;
+			    return variables.remove(entry.getKey());
 			}
 		    }
 		}
 	    }
 	    else {
 		if (variables.containsKey(name)) {
-		    variables.remove(name);
-		    return true;
+		    return variables.remove(name);
 		}
 	    }
-	    return false;
+	    return null;
 	}
 
 	/**

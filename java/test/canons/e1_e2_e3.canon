@@ -255,6 +255,9 @@
 >s2 = ["This", "is", "a", "test"] -> [ "This", "is", "a", "test" ]
 >splice s2, 2, 1, "an", "important", "little" -> [ "a" ]
 >s2 -> [ "This", "is", "an", "important", "little", "test" ]
+>s3 = {a: 1, b: true, c: 'tree', d: 14} -> { a: 1, b: true, c: "tree", d: 14 }
+>splice s3, [b, c], {f: 'def', g: 'green'} -> { b: true, c: "tree" }
+>s3 -> { a: 1, d: 14, f: "def", g: "green" }
 >funny_string = ' \t\f  \r\n   345  \f  \t \r\n  ' -> " 	  
 >   345    	 
 >  "

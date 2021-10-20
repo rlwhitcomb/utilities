@@ -539,12 +539,12 @@ or
           date value of the current date<br>
           time value of the current time<br>
           the constant value</td><td>N/A</td></tr>
-    <tr><td>27</td><td><code>{ }</code></td><td>define an object</td><td>left to right</td></tr>
-    <tr><td>26</td><td><code>[ ]</code><br><i>var</i> <code>[</code> <i>expr</i> <code>]</code> or <i>var</i>&nbsp;<code>&#x2080;</code> .. <code>&#x2089;</code></td><td>define an array,<br>or access elements of an array, string, or object</td><td>left to right</td></tr>
+    <tr><td>27</td><td><code>{</code> (&nbsp;<i>key:value pairs</i>&nbsp;) <code>}</code></td><td>define an object</td><td>left to right</td></tr>
+    <tr><td>26</td><td><code>[</code> (&nbsp;<i>expr list</i>&nbsp;) <code>]</code><br><i>var</i> <code>[</code> <i>expr</i> <code>]</code> or <i>var</i>&nbsp;<code>&#x2080;</code> .. <code>&#x2089;</code></td><td>define an array,<br>or access elements of an array, string, or object</td><td>left to right</td></tr>
     <tr><td>25</td><td><code>.</code></td><td>access an object member</td><td>left to right</td></tr>
     <tr><td>24</td><td><code>( </code><i>expr</i><code> )</code></td><td>group an expression</td><td>N/A</td></tr>
-    <tr><td rowspan="57">23</td>
-            <td><code>ABS</code>&nbsp;<i>expr</i></td><td>absolute value</td><td rowspan="57">left to right</td></tr>
+    <tr><td rowspan="58">23</td>
+            <td><code>ABS</code>&nbsp;<i>expr</i></td><td>absolute value</td><td rowspan="58">left to right</td></tr>
             <tr><td><code>SIN</code>&nbsp;<i>expr</i></td><td>sine</td></tr>
             <tr><td><code>COS</code>&nbsp;<i>expr</i></td><td>cosine</td></tr>
             <tr><td><code>TAN</code>&nbsp;<i>expr</i></td><td>tangent</td></tr>
@@ -582,6 +582,7 @@ or
             <tr><td><code>REPLACE</code>&nbsp;<i>expr</i> <code>,</code> <i>expr</i> <code>,</code> <i>expr</i> (&nbsp;<code>,</code> <i>mode</i>&nbsp;)</td><td>replace substrings within a string</td></tr>
             <tr><td><code>SLICE</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;)&nbsp;)</td><td>extract a slice of an array (or string)</td></tr>
             <tr><td><code>SPLICE</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;) *</td><td>modify an array by deleting and/or adding elements</td></tr>
+            <tr><td><code>SPLICE</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <code>[</code> <i>id or string list</i> <code>]</code>&nbsp;)<br>(&nbsp;<code>,</code> <code>{</code> <i>key:value pairs</i> <code>}</code>&nbsp;)</td><td>modify an object by deleting and/or adding elements</td></tr>
             <tr><td><code>FILL</code>&nbsp;<i>var</i>&nbsp;<code>,</code> <i>expr</i>&nbsp;<code>,</code> <i>expr</i> ( <code>,</code><i>expr</i> )</td><td>fill an array or string</td></tr>
             <tr><td><code>SORT</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;)</td><td>sort the array expression, optionally ignoring case,<br>returning the array of sorted values</td></tr>
             <tr><td><code>TRIM</code> or <code>LTRIM</code> or <code>RTRIM</code> <i>expr</i></td><td>trim all, leading, or trailing whitespace</td></tr>
@@ -736,20 +737,17 @@ or
      the same as <code>substr</code> on the string value.
      The original array or string is not modified by the <code>slice</code> operation; instead it
      constructs a new array as a copy of the specified portion of the original, leaving the original unmodified.
-  <p>By contrast, the <code>splice</code> function DOES modify the original array by potentially removing elements and adding new ones.
-     If only the array/string argument is given, the entire contents are removed and returned. This is a convenient way to
-     break a string into its component characters, as in <code>a="abc";splice(a) &#x21E8; [ "a", "b", "c" ]</code>. The
-     second argument is a starting index (zero-based) into the array from which to operate. If only two arguments are given, the
-     elements in the array beginning with the start index until the end are removed and returned. The 3rd argument will be a count of
-     elements to remove, which if it is <code>0</code> or negative means no elements will be removed. If the count is greater than
-     the remaining length of the original array, then all the elements beginning with the start position will be removed. If there
-     are four or more arguments given, then the 4th and remaining arguments will be added to the array beginning at the start position, but
-     after the specified number of values (if any) are removed. Thus, a count of zero with 4 or more arguments will be a pure "add" operation,
-     while only specifying one, two, or three arguments to <code>splice</code> will be a pure "remove" operation.
-     If the first argument is actually a string, the string (or string representation of a numeric value) will be broken up into an
-     array of each character value before doing the remove / add operations. The return value from <code>splice</code> will be a
-     (possibly empty) array of the elements that were removed. See the <code>pop</code> function defined in the <code>test/files/library</code>
-     file for an example of how this can be exploited to implement a stack data structure.
+  <p>By contrast, the <code>splice</code> function DOES modify the original array or object by potentially removing elements and
+     adding new ones.
+     If only the array/object argument is given, the entire contents are removed and returned. This is a convenient way to
+     clear out the source. For arrays, the optional arguments are the starting index (which can be negative, meaning relative to
+     the end of the array, the count of elements to delete, and then a series of arguments to add into the array at the given
+     start position.  For objects, the optional arguments are a list of member ids (which can be straight ids, strings, or
+     interpolated strings), and an optional object with the new members (key:value pairs) to add to the original object.
+     The returned value for an array source is another (possibly empty) array containing the elements removed from the source.
+     For an object source, the return is a possibly empty object containing the key:value pairs removed from the original.
+     Also, for an object, if the drop list is omitted, the object is cleared of all values, but specifying an empty list
+     will not clear any values, so be careful. For an array, specifying a start value and a count of zero will clear nothing.
   <p>The <code>fill</code> function requires a variable as the first argument. The contents of the variable are replaced or
      set to the second argument value, depending on the third and optional fourth parameters. If only the third argument is
      given this is taken as the length, and the array or string is filled to that length with the value. If both the
