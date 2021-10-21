@@ -188,6 +188,7 @@
  *	    Add "-testclass" option to the command line.
  *	21-Oct-2021 (rlwhitcomb)
  *	    Use new method in Intl to get/test the locale value.
+ *	    #36: Implement TESTER_OPTIONS from the environment. Make all function parameters final.
  */
 package info.rlwhitcomb.tester;
 
@@ -245,18 +246,19 @@ public class Tester
 	private static final Pattern DESCRIPTION = Pattern.compile("^(\\s*\\{\\s*(\\d+)\\s*\\}\\s*)?([a-zA-Z0-9_/\\-\\\\\\$\\.]+)(,([\\w\\-]+))?\\s*\\:\\s*(.*)$");
 	private static final Pattern DIRECTIVE   = Pattern.compile("^([a-zA-Z]+)(\\s+(.*)\\s*)?$");
 
+	private static final Charset DEFAULT_CHARSET = Charset.defaultCharset();
+
 	private boolean createCanons = false;
 	private boolean verbose = false;
 	private boolean log = false;
 	private boolean timing = false;
-	private long totalElapsedTime = 0L;
 	private boolean abortOnFirstError = false;
 	private boolean defaultAbortOnFirstError = false;
 
+	private long totalElapsedTime = 0L;
+
 	private String currentPlatform;
 	private Version currentVersion;
-
-	private Charset defaultCharset = Charset.defaultCharset();
 
 	private File defaultInputDir  = null;
 	private File defaultScriptDir = null;
@@ -300,7 +302,7 @@ public class Tester
 		public BufferedWriter outputWriter = null;
 		public BufferedWriter errorWriter = null;
 
-		public void createStreams(Charset cs)
+		public void createStreams(final Charset cs)
 			throws IOException
 		{
 		    inputFile = FileUtilities.createTempFile("canoninput");
@@ -312,21 +314,21 @@ public class Tester
 		    errorWriter = Files.newBufferedWriter(errorFile.toPath(), cs);
 		}
 
-		public void writeInputLine(String line)
+		public void writeInputLine(final String line)
 			throws IOException
 		{
 		    inputWriter.write(line);
 		    inputWriter.newLine();
 		}
 
-		public void writeOutputLine(String line)
+		public void writeOutputLine(final String line)
 			throws IOException
 		{
 		    outputWriter.write(line);
 		    outputWriter.newLine();
 		}
 
-		public void writeErrorLine(String line)
+		public void writeErrorLine(final String line)
 			throws IOException
 		{
 		    errorWriter.write(line);
@@ -379,7 +381,7 @@ public class Tester
 	 *			there were differences, {@link #INPUT_IO_ERROR} if
 	 *			an I/O error occurred.
 	 */
-	private int compareFiles(String testName, File canonFile, File realFile, Charset cs) {
+	private int compareFiles(final String testName, final File canonFile, final File realFile, final Charset cs) {
 	    if (verbose)
 		Intl.outFormat("tester#compareFiles", testName, canonFile.getPath(), realFile.getPath());
 
@@ -416,10 +418,18 @@ public class Tester
 	 * @param cs		The charset used to encode these files.
 	 * @return		The return from {@link #compareFiles}.
 	 */
-	private int compareCanons(String testName, File canonOut, File realOut, File canonErr, File realErr, Charset cs) {
+	private int compareCanons(
+		final String testName,
+		final File canonOut,
+		final File realOut,
+		final File canonErr,
+		final File realErr,
+		final Charset cs)
+	{
 	    int ret = compareFiles(testName, canonOut, realOut, cs);
 	    if (ret != SUCCESS)
 		return ret;
+
 	    return compareFiles(testName, canonErr, realErr, cs);
 	}
 
@@ -430,12 +440,12 @@ public class Tester
 	 * @param commandLine	The complete command line string.
 	 * @return		The array of parsed arguments.
 	 */
-	private String[] parseCommandLine(String commandLine) {
+	private String[] parseCommandLine(final String commandLine) {
 	    // For now, until we think this through, just split on spaces
 	    return commandLine.split("\\s");
 	}
 
-	private void logTestName(PrintStream origOut, String testName, String altTestName, String commandLine) {
+	private void logTestName(final PrintStream origOut, final String testName, final String altTestName, final String commandLine) {
 	    if (!CharUtil.isNullOrEmpty(altTestName) && !testName.equals(altTestName)) {
 		if (log && verbose)
 		    origOut.print(Intl.formatString("tester#logVerboseAlt", testName, altTestName, commandLine));
@@ -466,7 +476,13 @@ public class Tester
 	 * @return		The result of {@link #compareCanons} or some other precheck errors
 	 *			(or zero for {@link #createCanons} mode).
 	 */
-	private int runTestAndCompareOrCreateCanons(String testName, TestFiles files, Charset cs, String commandLine, int expectedExitCode) {
+	private int runTestAndCompareOrCreateCanons(
+		final String testName,
+		final TestFiles files,
+		final Charset cs,
+		final String commandLine,
+		final int expectedExitCode)
+	{
 	    InputStream origIn = System.in;
 	    PrintStream origOut = System.out;
 	    PrintStream origErr = System.err;
@@ -646,12 +662,12 @@ public class Tester
 		    this(-1, -1);
 		}
 
-		public Version(int maj, int min) {
+		public Version(final int maj, final int min) {
 		    major = maj;
 		    minor = min;
 		}
 
-		public Version(String input) {
+		public Version(final String input) {
 		    String vers[] = input.split("\\.");
 		    if (vers[0].isEmpty())
 			major = -1;
@@ -677,7 +693,7 @@ public class Tester
 		 *         will return 0 if major is -1 or major is equal and minor is -1
 		 */
 		@Override
-		public int compareTo(Version other) {
+		public int compareTo(final Version other) {
 		    if (major == -1)
 			return 0;
 		    if (major != other.major) {
@@ -690,7 +706,7 @@ public class Tester
 	}
 
 
-	private boolean platformCheck(String platformCheck) {
+	private boolean platformCheck(final String platformCheck) {
 	    if (!platformCheck.isEmpty()) {
 		if (platformCheck.startsWith("^")) {
 		    if (platformCheck.length() > 1) {
@@ -728,7 +744,7 @@ public class Tester
 	 *		input line (less the version part) if the spec doesn't exist or if it does and we pass the
 	 *		tests, and thus the line should be part of the test.
 	 */
-	private String platformAndVersionCheck(String input) {
+	private String platformAndVersionCheck(final String input) {
 	    if (input.startsWith("{")) {
 		int end = input.indexOf("}");
 		if (end > 0) {
@@ -818,7 +834,7 @@ public class Tester
 		    if (charsetName.startsWith("^")) {
 			try {
 			    Charset charset = Charset.forName(charsetName.substring(1));
-			    return charset.equals(defaultCharset) ? null : platformAndVersionCheck(canonLine);
+			    return charset.equals(DEFAULT_CHARSET) ? null : platformAndVersionCheck(canonLine);
 			}
 			catch (UnsupportedCharsetException uce) {
 			    return input;
@@ -827,7 +843,7 @@ public class Tester
 		    else {
 			try {
 			    Charset charset = Charset.forName(charsetName);
-			    return charset.equals(defaultCharset) ? platformAndVersionCheck(canonLine) : null;
+			    return charset.equals(DEFAULT_CHARSET) ? platformAndVersionCheck(canonLine) : null;
 			}
 			catch (UnsupportedCharsetException uce) {
 			    return input;
@@ -855,16 +871,22 @@ public class Tester
 	 *				description with the expected exit code.
 	 * @return			Test result (0 = success, or an error code).
 	 */
-	private int runOneTest(String canonFileName, String canonCharsetName, String commandLine, int expectedExitCode) {
+	private int runOneTest(
+		final String canonFileName,
+		final String canonCharsetName,
+		final String commandLine,
+		final int expectedExitCode)
+	{
 	    Charset cs = null;
 	    try {
 		cs = CharUtil.isNullOrEmpty(canonCharsetName) ?
-			defaultCharset : Charset.forName(canonCharsetName);
+			DEFAULT_CHARSET : Charset.forName(canonCharsetName);
 	    }
 	    catch (IllegalArgumentException iae) {
 		Intl.errFormat("tester#errBadCanonCharset", canonCharsetName);
 		return BAD_ARGUMENT;
 	    }
+
 	    BufferedReader canonReader = null;
 	    BufferedWriter canonWriter = null;
 	    TestFiles files = new TestFiles();
@@ -1006,7 +1028,7 @@ public class Tester
 	 * @param line	The internal instruction input line (without the leading "$").
 	 * @return	{@code false} to abort processing of this file (fatal error).
 	 */
-	private boolean processInternalCommand(String line) {
+	private boolean processInternalCommand(final String line) {
 	    boolean error = false;
 	    Matcher m = DIRECTIVE.matcher(line);
 	    if (m.matches()) {
@@ -1016,7 +1038,7 @@ public class Tester
 
 		switch (command) {
 		    case "echo":
-			if (argument != null) {
+			if (!CharUtil.isNullOrEmpty(argument)) {
 			    System.out.println(argument);
 			}
 			else {
@@ -1026,7 +1048,7 @@ public class Tester
 
 		    case "inputdir":
 		    case "canondir":
-			if (argument != null) {
+			if (!CharUtil.isNullOrEmpty(argument)) {
 			    File inputDir = new File(argument);
 			    if (!inputDir.exists() || !inputDir.isDirectory()) {
 				Intl.errFormat("tester#badInputDir", argument);
@@ -1044,7 +1066,7 @@ public class Tester
 
 		    case "scriptdir":
 		    case "sourcedir":
-			if (argument != null) {
+			if (!CharUtil.isNullOrEmpty(argument)) {
 			    File scriptDir = new File(argument);
 			    if (!scriptDir.exists() || !scriptDir.isDirectory()) {
 				Intl.errFormat("tester#badScriptDir", argument);
@@ -1061,7 +1083,7 @@ public class Tester
 			break;
 
 		    case "testclass":
-			if (argument != null) {
+			if (!CharUtil.isNullOrEmpty(argument)) {
 			    try {
 				testClass = Class.forName(argument);
 			    }
@@ -1077,7 +1099,7 @@ public class Tester
 			break;
 
 		    case "defaultoptions":
-			if (argument != null) {
+			if (!CharUtil.isNullOrEmpty(argument)) {
 			    defaultOptions = argument;
 			}
 			else {
@@ -1086,7 +1108,7 @@ public class Tester
 			break;
 
 		    case "inputext":
-			if (argument != null) {
+			if (!CharUtil.isNullOrEmpty(argument)) {
 			    defaultInputExt = argument;
 			}
 			else {
@@ -1095,7 +1117,7 @@ public class Tester
 			break;
 
 		    case "include":
-			if (argument != null) {
+			if (!CharUtil.isNullOrEmpty(argument)) {
 			    driveOneTest(argument);
 			}
 			else {
@@ -1105,7 +1127,7 @@ public class Tester
 
 		    case "file":
 			error = true;
-			if (argument != null) {
+			if (!CharUtil.isNullOrEmpty(argument)) {
 			    try {
 				outputFileWriter = new FileWriter(argument);
 				error = false;
@@ -1118,7 +1140,7 @@ public class Tester
 
 		    case "delete":
 			error = true;
-			if (argument != null) {
+			if (!CharUtil.isNullOrEmpty(argument)) {
 			    if (new File(argument).delete())
 				error = false;
 			}
@@ -1165,7 +1187,7 @@ public class Tester
 	 *
 	 * @param file	The test description file name.
 	 */
-	private void driveOneTest(String file) {
+	private void driveOneTest(final String file) {
 	    File f = new File(file);
 	    if (!FileUtilities.canRead(f) && defaultScriptDir != null) {
 		f = FileUtilities.decorate(file, defaultScriptDir, null);
@@ -1250,7 +1272,7 @@ public class Tester
 	 *
 	 * @param file	The test description file name.
 	 */
-	private void driveTests(String file) {
+	private void driveTests(final String file) {
 	    Intl.outPrintln(timing ? "tester#finalUnderlineTiming" : "tester#finalUnderline");
 	    Intl.outFormat("tester#initialFile", file);
 	    if (timing || verbose || log)
@@ -1272,11 +1294,36 @@ public class Tester
 
 
 	/**
+	 * Reset all the options back to default values (used by "-ignoreoptions" command-line argument
+	 * to ignore any TESTER_OPTIONS specified in the environment.
+	 */
+	private void resetToInitialOptions() {
+	    createCanons = false;
+
+	    verbose = false;
+	    log     = false;
+	    timing  = false;
+
+	    abortOnFirstError = defaultAbortOnFirstError = false;
+
+	    defaultScriptDir = null;
+
+	    testClass = null;
+
+	    testDescriptionFiles.clear();
+	}
+
+	/**
 	 * Process a single command-line option.
 	 *
 	 * @param arg	The option to process (without the leading "-", or whatever).
 	 */
-	private void processOption(String arg) {
+	private void processOption(final String arg) {
+	    if (Options.isOption(arg) == null) {
+		testDescriptionFiles.add(arg);
+		return;
+	    }
+
 	    String opt = null, arg1 = null;
 	    int splitIndex = arg.indexOf(':');
 	    if (splitIndex >= 0) {
@@ -1288,6 +1335,7 @@ public class Tester
 	    else {
 		opt = arg;
 	    }
+
 	    if (Options.matchesOption(opt, "verbose", "v"))
 		verbose = true;
 	    else if (Options.matchesOption(opt, "log", "l"))
@@ -1336,6 +1384,9 @@ public class Tester
 		    System.exit(2);
 		}
 	    }
+	    else if (Options.matchesOption(opt, true, "ignoreoptions", "ignoreopt", "ignore", "ign", "i")) {
+		resetToInitialOptions();
+	    }
 	    else if (Options.matchesOption(opt, true, "version", "vers", "ver")) {
 		Environment.printProgramInfo();
 		System.exit(0);
@@ -1361,18 +1412,26 @@ public class Tester
 	    return CharUtil.makeFileStringList(testDescriptionFiles);
 	}
 
+	private void processArgs(final String[] args) {
+	    for (String arg : args) {
+		processOption(arg);
+	    }
+	}
+
 	@Override
-	public int setup(String[] args) {
+	public int setup(final String[] args) {
 	    testDescriptionFiles = new ArrayList<>(args.length);
 
-	    for (String arg : args) {
-		if (Options.isOption(arg) != null) {
-		    processOption(arg);
-		}
-		else {
-		    testDescriptionFiles.add(arg);
-		}
+	    // Preprocess the TESTER_OPTIONS environment variable (if present)
+	    String testerOptions = System.getenv("TESTER_OPTIONS");
+	    if (!CharUtil.isNullOrEmpty(testerOptions)) {
+		String[] parts = testerOptions.split("[;,]\\s*|\\s+");
+		processArgs(parts);
 	    }
+
+	    // Now the regular command-line arguments
+	    processArgs(args);
+
 	    if (testDescriptionFiles.size() == 0) {
 		Intl.errPrintln("tester#missingDescFile");
 		Intl.printHelp("tester#");
@@ -1418,7 +1477,7 @@ public class Tester
 	 *
 	 * @param args	The command line arguments from the user.
 	 */
-	public static void main(String[] args) {
+	public static void main(final String[] args) {
 	    Environment.setDesktopApp(true);
 	    Environment.loadProgramInfo(Tester.class);
 
