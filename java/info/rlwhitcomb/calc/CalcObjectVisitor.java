@@ -378,6 +378,8 @@
  *	    non-object, non-array values.
  *	20-Oct-2021 (rlwhitcomb)
  *	    #37: Currency format.
+ *	21-Oct-2021 (rlwhitcomb)
+ *	    #40: Use locale-based "%" formatter.
  */
 package info.rlwhitcomb.calc;
 
@@ -545,9 +547,6 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	/** The mode settings for this instantiation of the visitor. */
 	private final Settings settings;
 
-	/** The formatter for currency format. */
-	private final NumberFormat currencyFormat;
-
 	/** Global symbol table for variables. */
 	private final GlobalScope globals;
 
@@ -609,8 +608,6 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    settings  = new Settings(rational, separators, ignoreCase);
 	    globals   = new GlobalScope();
 	    displayer = resultDisplayer;
-
-	    currencyFormat = NumberFormat.getCurrencyInstance();
 
 	    pushScope(globals);
 
@@ -1338,6 +1335,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		}
 
 		StringBuilder valueBuf = new StringBuilder();
+		StringBuffer buf       = new StringBuffer();
 		boolean toUpperCase    = false;
 		boolean toLowerCase    = false;
 
@@ -1558,23 +1556,31 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 		    case '%':
 			dValue = toDecimalValue(this, result, mc, ctx);
-			BigDecimal percentValue = dValue.multiply(BigDecimal.valueOf(100L), mc);
+			NumberFormat percentFormat = NumberFormat.getPercentInstance();
 			// Round the value to given precision (if any)
 			if (precision != Integer.MIN_VALUE) {
-			    percentValue = MathUtil.round(percentValue, precision);
+			    // Precision here is digits in the fraction portion, but because we're effectively
+			    // multiplying by 100, we need to get 2 more decimal places out of the precision
+			    dValue = MathUtil.round(dValue, precision + 2);
+			    percentFormat.setMinimumFractionDigits(precision);
+			    percentFormat.setMaximumFractionDigits(precision);
 			}
-			valueBuf.append(formatWithSeparators(percentValue, separators)).append('%');
+			percentFormat.setGroupingUsed(separators);
+			buf.setLength(0);
+			percentFormat.format(dValue, buf, new FieldPosition(NumberFormat.Field.PERCENT));
+			valueBuf.append(buf);
 			break;
 
 		    case '$':
 			dValue = toDecimalValue(this, result, mc, ctx);
+			NumberFormat currencyFormat = NumberFormat.getCurrencyInstance();
 			if (precision != Integer.MIN_VALUE) {
 			    dValue = MathUtil.round(dValue, precision);
 			    currencyFormat.setMinimumFractionDigits(precision);
 			    currencyFormat.setMaximumFractionDigits(precision);
 			}
 			currencyFormat.setGroupingUsed(separators);
-			StringBuffer buf = new StringBuffer();
+			buf.setLength(0);
 			currencyFormat.format(dValue, buf, new FieldPosition(NumberFormat.Field.CURRENCY));
 			valueBuf.append(buf);
 			break;
