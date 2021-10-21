@@ -38,6 +38,8 @@
  *	    Use new product information mechanism.
  *	24-Aug-2021 (rlwhitcomb)
  *	    Add "-locale" option (and Spanish translation).
+ *	21-Oct-2021 (rlwhitcomb)
+ *	    Use better method to get a valid Locale.
  *
  *	    TODO: wildcard directory names on input
  *	    TODO: -nn to limit to first nn lines, +nn to limit to LAST nn lines (hard to do?)
@@ -255,10 +257,16 @@ public class Cat {
 				    Intl.errPrintln("cat#oneLocale");
 				    System.exit(3);
 				} else {
-				    locale = new Locale(arg);
-				    if (locale != null && !locale.equals(Locale.getDefault())) {
-					Locale.setDefault(locale);
-					Intl.initAllPackageResources(locale);
+				    try {
+					locale = Intl.getValidLocale(arg);
+					if (locale != null && !locale.equals(Locale.getDefault())) {
+					    Locale.setDefault(locale);
+					    Intl.initAllPackageResources(locale);
+					}
+				    }
+				    catch (IllegalArgumentException iae) {
+					System.err.println(ExceptionUtil.toString(iae));
+					System.exit(3);
 				    }
 				}
 			    }

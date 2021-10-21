@@ -83,6 +83,8 @@
  *	    Allow comma-separated values for TREE_OPTIONS.
  *	19-May-2021 (rlwhitcomb)
  *	    Fix color usage b/c of new ConsoleColor paradigm.
+ *	21-Oct-2021 (rlwhitcomb)
+ *	    Use better method to get a valid Locale.
  */
 package info.rlwhitcomb.tree;
 
@@ -536,12 +538,17 @@ public class Tree
 		    error("tree#errExpectLocale");
 		}
 		else if (expectLocale) {
-		    locale = new Locale(arg);
-		    if (locale != null && !locale.equals(Locale.getDefault())) {
-			Locale.setDefault(locale);
-			Intl.initAllPackageResources(locale);
+		    try {
+			locale = Intl.getValidLocale(arg);
+			if (locale != null && !locale.equals(Locale.getDefault())) {
+			    Locale.setDefault(locale);
+			    Intl.initAllPackageResources(locale);
+			}
+			expectLocale = false;
 		    }
-		    expectLocale = false;
+		    catch (IllegalArgumentException iae) {
+			error("tree#error", ExceptionUtil.toString(iae));
+		    }
 		}
 		else if (Options.matchesOption(arg, false, "alpha", "ascending", "asc", "a")) {
 		    sortByFileName = true;

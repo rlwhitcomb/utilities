@@ -85,7 +85,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Locale;
 
 import info.rlwhitcomb.csv.*;
 import info.rlwhitcomb.util.Environment;

@@ -285,6 +285,8 @@
  *	    Fix Javadoc for "convertEscapeSequences" and add "\$" processing.
  *	26-Sep-2021 (rlwhitcomb)
  *	    The "\$" processing doesn't work well.
+ *	21-Oct-2021 (rlwhitcomb)
+ *	    #41: Remove "getLocale" in favor of better method in Intl ("getValidLocale").
  */
 
 package info.rlwhitcomb.util;
@@ -2798,42 +2800,6 @@ public final class CharUtil
 		return false;
 	    }
 	    return true;
-	}
-
-
-	/**
-	 * Get the proper locale given an input string (in up to three parts).
-	 *
-	 * @param spec	The input locale specification, which can be {@code null} or empty
-	 *		to get the default locale.
-	 * @return	The appropriate {@link Locale}.
-	 * @throws	IllegalArgumentException if the input specification can't be parsed,
-	 *		or some other error finding the locale specified.
-	 */
-	public static Locale getLocale(String spec) {
-	    Locale locale = null;
-	    if (isNullOrEmpty(spec)) {
-		locale = Locale.getDefault();
-	    }
-	    else {
-		String localeName = spec;
-		try {
-		    String names[] = localeName.split("\\_");
-		    if (names.length == 1)
-			locale = new Locale(names[0]);
-		    else if (names.length == 2)
-			locale = new Locale(names[0], names[1]);
-		    else if (names.length == 3)
-			locale = new Locale(names[0], names[1], names[2]);
-		    else {
-			throw new Intl.IllegalArgumentException("util#char.badLocale", localeName);
-		    }
-		}
-		catch (Exception ex) {
-		    throw new Intl.IllegalArgumentException("util#char.badLocale", localeName);
-		}
-	    }
-	    return locale;
 	}
 
 

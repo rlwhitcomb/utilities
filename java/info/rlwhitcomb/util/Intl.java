@@ -141,6 +141,7 @@
  *	    Final class and private constructor.
  *	21-Oct-2021 (rlwhitcomb)
  *	    Convenience class for getting and validating a Locale.
+ *	    Allow null or empty string for locale to specify the default.
  */
 package info.rlwhitcomb.util;
 
@@ -630,12 +631,17 @@ public final class Intl
 	/**
 	 * Validate a user's choice of {@link Locale} to see if it is valid.
 	 *
-	 * @param tag	A candidate locale name to be tested.
+	 * @param tag	A candidate locale name to be tested. A {@code null} or
+	 *		empty string will return the default Locale for the system.
 	 * @return	The locale object if the name is valid.
 	 * @throws	IllegalArgumentException if the locale name is invalid
 	 *		or does not reference a valid locale.
 	 */
 	public static Locale getValidLocale(final String tag) {
+	    if (tag == null || tag.trim().isEmpty()) {
+		return Locale.getDefault();
+	    }
+
 	    try {
 		Locale.Builder builder = new Locale.Builder();
 		builder.setLanguageTag(tag);

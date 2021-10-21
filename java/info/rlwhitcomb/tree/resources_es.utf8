@@ -40,6 +40,8 @@
 #	    New messages, add color tags.
 #	09-Feb-2021 (rlwhitcomb)
 #	    Finish the color tags.
+#	21-Oct-2021 (rlwhitcomb)
+#	    Generic error message.
 #
 
 unavailable	= " <no disponible>"
@@ -50,6 +52,7 @@ errNoFilesGiven	= "<Rd*!>ERROR: No hay archivos ni directorios especificados.<>"
 errFileName	= "<Rd*!>ERROR: Incapaz de obtener el nombre canónico para <Bl*>\"%1$s\"<>: %2$s"
 errExpectLocale = "<Rd*!>ERROR: Esperando un valor para <Bl*>\"-locale\"<Rd*!>, no otra opción.<>"
 errNoLocale     = "<Rd*!>ERROR: No se ha dado ningún valor para <Bl*>\"-locale\"<Rd*!>.<>"
+error		= "<Rd*!>ERROR: %1$s"
 
 usage.help1	= "<Bk!>Uso:<> tre [<Gr>opciones<>] nombres_de_archivos_o_directorios"
 usage.help2	= ""

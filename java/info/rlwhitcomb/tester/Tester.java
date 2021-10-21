@@ -186,6 +186,8 @@
  *	    Actually return a failure exit code if any tests fail.
  *	13-Jul-2021 (rlwhitcomb)
  *	    Add "-testclass" option to the command line.
+ *	21-Oct-2021 (rlwhitcomb)
+ *	    Use new method in Intl to get/test the locale value.
  */
 package info.rlwhitcomb.tester;
 
@@ -1316,10 +1318,10 @@ public class Tester
 		String localeName = arg1;
 		Locale locale = null;
 		try {
-		    locale = CharUtil.getLocale(localeName);
+		    locale = Intl.getValidLocale(localeName);
 		}
-		catch (Exception ex) {
-		    Intl.errFormat("util#char.badLocale", localeName);
+		catch (IllegalArgumentException iae) {
+		    System.err.println(ExceptionUtil.toString(iae));
 		    System.exit(2);
 		}
 		Locale.setDefault(locale);

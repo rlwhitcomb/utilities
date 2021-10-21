@@ -42,6 +42,8 @@
 #	    Finish with color tags.
 #	19-May-2021 (rlwhitcomb)
 #	    Tweaks to help message.
+#	21-Oct-2021 (rlwhitcomb)
+#	    Generic error message.
 #
 
 unavailable	= " <unavailable>"
@@ -52,6 +54,7 @@ errNoFilesGiven	= "<Rd*!>ERROR: No input files or directories specified.<>"
 errFileName	= "<Rd*!>ERROR: Unable to get canonical name for <Bl*>\"%1$s\"<>: %2$s"
 errExpectLocale	= "<Rd*!>ERROR: Expecting a value for <Bl*>\"-locale\"<Rd*!>, not another option.<>"
 errNoLocale	= "<Rd*!>ERROR: No value given for <Bl*>\"-locale\"<Rd*!>.<>"
+error		= "<Rd*!>ERROR: %1$s"
 
 usage.help1	= "<Bk!>Usage:<> tre [<Gr>options<>] file_or_directory_name(s)"
 usage.help2	= ""

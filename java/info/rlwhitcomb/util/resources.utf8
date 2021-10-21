@@ -116,6 +116,7 @@
 #	    A new NumericUtil error.
 #	21-Oct-2021 (rlwhitcomb)
 #	    New Locale errors from Intl.
+#	    Remove now unused locale error from CharUtil.
 #
 
 #
@@ -138,7 +139,6 @@ bidi.iteratorNotInit	= Map iterator not initialized.
 char.illegalUnicodeEscape	= Unsupported Unicode escape sequence: "%1$s"
 char.unknownBooleanString	= Unknown boolean value: "%1$s"
 char.unknownBooleanType		= Cannot convert object of type %1$s to a boolean value.
-char.badLocale			= Locale name "%1$s" is not supported
 char.illegalHexLiteral		= Unsupported hex literal: "%1$s"
 
 # Note: these are lists of valid values separated by a comma and optional spaces.
