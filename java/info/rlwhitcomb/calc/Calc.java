@@ -202,6 +202,8 @@
  *	    New parameter to "saveVariables".
  *	15-Oct-2021 (rlwhitcomb)
  *	    New command-line option to ignore previous libraries.
+ *	21-Oct-2021 (rlwhitcomb)
+ *	    #41: Use new Intl method to more correctly construct the Locale desired.
  */
 package info.rlwhitcomb.calc;
 
@@ -225,6 +227,7 @@ import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.IllformedLocaleException;
 import java.util.List;
 import java.util.Locale;
 import java.util.jar.JarFile;
@@ -1537,8 +1540,13 @@ public class Calc
 			case QUIT_NOW:
 			    break;
 			case LOCALE:
-			    locale = new Locale(arg);
-			    expecting = Expecting.DEFAULT;
+			    try {
+				locale = Intl.getValidLocale(arg);
+				expecting = Expecting.DEFAULT;
+			    }
+			    catch (IllegalArgumentException iae) {
+				errFormat("calc#errorPeriod", ExceptionUtil.toString(iae));
+			    }
 			    break;
 			case DIRECTORY:
 			    inputDirectory = new File(arg);

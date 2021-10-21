@@ -139,6 +139,8 @@
  *	    Add the color map to the "printHelp" params.
  *	09-Jul-2021 (rlwhitcomb)
  *	    Final class and private constructor.
+ *	21-Oct-2021 (rlwhitcomb)
+ *	    Convenience class for getting and validating a Locale.
  */
 package info.rlwhitcomb.util;
 
@@ -150,6 +152,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Enumeration;
+import java.util.IllformedLocaleException;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -621,6 +624,30 @@ public final class Intl
 	 */
 	public static Object getSource() {
 	    return defaultProvider.getSource();
+	}
+
+
+	/**
+	 * Validate a user's choice of {@link Locale} to see if it is valid.
+	 *
+	 * @param tag	A candidate locale name to be tested.
+	 * @return	The locale object if the name is valid.
+	 * @throws	IllegalArgumentException if the locale name is invalid
+	 *		or does not reference a valid locale.
+	 */
+	public static Locale getValidLocale(final String tag) {
+	    try {
+		Locale.Builder builder = new Locale.Builder();
+		builder.setLanguageTag(tag);
+		Locale locale = builder.build();
+		if (locale.getISO3Language() != null && locale.getISO3Country() != null) {
+		    return locale;
+		}
+		throw new IllegalArgumentException("util#intl.invalidLocale", tag);
+	    }
+	    catch (MissingResourceException | IllformedLocaleException ex) {
+		throw new IllegalArgumentException("util#intl.localeError", tag, ExceptionUtil.toString(ex));
+	    }
 	}
 
 

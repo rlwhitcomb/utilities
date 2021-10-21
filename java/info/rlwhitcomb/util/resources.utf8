@@ -114,6 +114,8 @@
 #	    Tweak one BigFraction error message.
 #	26-Aug-2021 (rlwhitcomb)
 #	    A new NumericUtil error.
+#	21-Oct-2021 (rlwhitcomb)
+#	    New Locale errors from Intl.
 #
 
 #
@@ -175,6 +177,8 @@ except.fromStack	= from: %1$s
 #
 # From Intl.java!
 #
+intl.invalidLocale	= Locale name '%1$s' is not valid.
+intl.localeError	= Locale name '%1$s' is not valid: %2$s
 intl.keyNotNull		= Text resource key must not be null.
 intl.providerNotFound	= Unable to find resource provider for "%1$s" package.
 
