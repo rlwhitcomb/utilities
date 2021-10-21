@@ -148,8 +148,8 @@ define PMT2($P,$r,$n) = {
    round(_pmt_internal_({P:$P, r:$r, n:$n}), 2)
 }
 
-def monthly($P,$R,$N) = { `Full monthly payment is $$${PMT($P,$R,$N)@2,d}` }
-def monthly_whole($P,$R,$N) = { `Monthly payment in whole dollars is $$${PMT($P,$R,$N)@0,d}` }
+def monthly($P,$R,$N) = { `Full monthly payment is ${PMT($P,$R,$N)@2,$}` }
+def monthly_whole($P,$R,$N) = { `Monthly payment in whole dollars is ${PMT($P,$R,$N)@0,$}` }
 
 def help_mort = { "\nUsage: PMT(P=<present value>,R=<yearly interest rate (%)>,N=<number of years>)\n    or PMT2(P,r=<monthly interest %>,n=<number of months>)\n   Or use monthly(P,R,N) or monthly_whole(P,R,N) to get the results in different forms." }
 

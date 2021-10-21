@@ -263,6 +263,8 @@
  *	19-Oct-2021 (rlwhitcomb)
  *	    #35: "replace" function for strings.
  *	    #34: Update arguments to "splice" to work with objects.
+ *	20-Oct-2021 (rlwhitcomb)
+ *	    #37: Currency format.
  */
 
 grammar Calc;
@@ -1028,7 +1030,7 @@ D_IGNORECASE
 
 
 FORMAT
-   : '@' ( '-' ? INT ) ? [a-zA-Z,] ? [a-zA-Z%]
+   : '@' ( '-' ? INT ) ? [a-zA-Z,] ? [a-zA-Z%$]
    ;
 
 STRING

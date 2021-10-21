@@ -50,6 +50,6 @@ M = PMT(P, R, N)
 :quiet pop
 :results on
 ctx
-:echo `Full monthly payment is $$${round (M, 2)}`
-:echo `Monthly payment in whole dollars is $$${round (M, 0)}`
+:echo `Full monthly payment is ${M@2,$}`
+:echo `Monthly payment in whole dollars is ${M@0,$}`
 :results pop

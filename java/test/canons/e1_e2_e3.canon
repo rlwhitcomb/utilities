@@ -316,9 +316,11 @@
 >900KB @k -> 0.86 Mbytes
 >300PB -> 300000000000000000
 >450PiB -> 506654958079180800
->
 >10 ! @w -> three million, six hundred twenty-eight thousand, eight hundred
 >500 + 40 + 7 @W -> FIVE HUNDRED FORTY-SEVEN
+>20 ! + 0.5 @2,$ -> $2,432,902,008,176,640,000.50
+>1500 @$ -> $1500.00
+>
 >a = [1, 2, 3] -> [ 1, 2, 3 ]
 >a[0] = 4 -> 4
 >a[1] = 5 -> 5

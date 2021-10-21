@@ -376,6 +376,8 @@
  *	    could just be a typo ("pre" instead of "prev") so saying '"pre" is undefined' is more user-friendly).
  *	    #34: Completely rewrite "splice" with new syntax for objects that makes sense, and not allowing
  *	    non-object, non-array values.
+ *	20-Oct-2021 (rlwhitcomb)
+ *	    #37: Currency format.
  */
 package info.rlwhitcomb.calc;
 
@@ -392,6 +394,8 @@ import java.nio.charset.UnsupportedCharsetException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.FieldPosition;
+import java.text.NumberFormat;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -541,6 +545,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	/** The mode settings for this instantiation of the visitor. */
 	private final Settings settings;
 
+	/** The formatter for currency format. */
+	private final NumberFormat currencyFormat;
+
 	/** Global symbol table for variables. */
 	private final GlobalScope globals;
 
@@ -602,6 +609,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    settings  = new Settings(rational, separators, ignoreCase);
 	    globals   = new GlobalScope();
 	    displayer = resultDisplayer;
+
+	    currencyFormat = NumberFormat.getCurrencyInstance();
 
 	    pushScope(globals);
 
@@ -1306,7 +1315,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    String format           = formatNode == null ? "" : " " + formatNode.getText();
 	    String exprString       = String.format("%1$s%2$s", getTreeText(ctx.expr()), format);
 
-	    // Some formats allow a precision to be given ('%', and 'd' for instance)
+	    // Some formats allow a precision to be given ('%', '$', and 'd' for instance)
 	    // but some others (like 't') allow a second alpha as well
 	    if (format.length() > 3) {
 		int index = 2;
@@ -1555,6 +1564,19 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			    percentValue = MathUtil.round(percentValue, precision);
 			}
 			valueBuf.append(formatWithSeparators(percentValue, separators)).append('%');
+			break;
+
+		    case '$':
+			dValue = toDecimalValue(this, result, mc, ctx);
+			if (precision != Integer.MIN_VALUE) {
+			    dValue = MathUtil.round(dValue, precision);
+			    currencyFormat.setMinimumFractionDigits(precision);
+			    currencyFormat.setMaximumFractionDigits(precision);
+			}
+			currencyFormat.setGroupingUsed(separators);
+			StringBuffer buf = new StringBuffer();
+			currencyFormat.format(dValue, buf, new FieldPosition(NumberFormat.Field.CURRENCY));
+			valueBuf.append(buf);
 			break;
 
 		    default:
