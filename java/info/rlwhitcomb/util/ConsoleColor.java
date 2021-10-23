@@ -56,6 +56,9 @@
  *	Make the constructor private.
  *   03-Aug-2021 (rlwhitcomb)
  *	Change String to CharSequence in the low-level routines.
+ *   22-Oct-2021 (rlwhitcomb)
+ *	Since "<>" pops the color stack in the "color" routine, add an "END" ("--")
+ *	code to explicitly do the reset without needing to pop the whole stack.
  */
 package info.rlwhitcomb.util;
 
@@ -302,6 +305,12 @@ public final class ConsoleColor
     {
 	/** End string: reset to default color. */
 	RESET(ConsoleColor.RESET, ""),
+
+	/**
+	 * Since {@link #RESET} is used in {@link ConsoleColor#color} to pop the color
+	 * this is an unconditional reset (without the "pop").
+	 */
+	END(ConsoleColor.RESET, "--"),
 
 	/** Regular black, no effects. */
 	BLACK	(NORMAL, FOREGROUND + ConsoleColor.BLACK,   _BK),

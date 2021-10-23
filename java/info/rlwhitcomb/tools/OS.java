@@ -58,6 +58,8 @@
  *	    Move to new package; reformat Change History.
  *	03-Aug-2021 (rlwhitcomb)
  *	    Add some color to most displays.
+ *	22-Oct-2021 (rlwhitcomb)
+ *	    More Locale information, verbose flag, and filters.
  */
 package info.rlwhitcomb.tools;
 
@@ -66,13 +68,17 @@ import java.io.PrintStream;
 import java.nio.charset.Charset;
 import java.security.Provider;
 import java.security.Security;
+import java.text.DecimalFormatSymbols;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.MissingResourceException;
 import java.util.Properties;
 import java.util.Set;
 import java.util.TimeZone;
@@ -93,6 +99,9 @@ public class OS
 	/** Final banner for the end of the reports. */
 	private static final String FOOTER = "-----------------------------------------";
 
+	/** Empty Locale code field substitute. */
+	private static final String EMPTY_CODE = "---";
+
 	/** Default value for screen width (used to put values into multiple columns. */
 	private static final int SCREEN_WIDTH_DEFAULT = 110;
 
@@ -101,6 +110,15 @@ public class OS
 
 	/** The current time (for TimeZone displays). */
 	private static final Date now = new Date();
+
+	/** Some choices can have optional additional information. */
+	private static boolean verbose = false;
+
+	/**
+	 * List of filter values (dependent on which selection(s) is/are made
+	 * (most useful for single choices).
+	 */
+	private static Set<String> filterValues = new HashSet<>();
 
 
 	/**
@@ -287,6 +305,16 @@ public class OS
 		else if (matches(opt, "all", "a")) {
 		    choices = EnumSet.allOf(Choice.class);
 		}
+		else if (matches(opt, "verbose", "v")) {
+		    verbose = true;
+		}
+		else if (opt.startsWith("filter:") || opt.startsWith("filt:")) {
+		    int ix = opt.indexOf(":");
+		    String[] parts = opt.substring(ix + 1).split("[,;]\\s*|\\s+");
+		    for (String part : parts) {
+			filterValues.add(part);
+		    }
+		}
 		else if (matches(opt, "help", "h", "?")) {
 		    usage(System.out);
 		    return false;
@@ -395,6 +423,31 @@ public class OS
 	    display("Character Sets", sets);
 	}
 
+	private static String countryCode(final Locale loc) {
+	    try {
+		String code = loc.getISO3Country();
+		return (code == null || code.isEmpty()) ? EMPTY_CODE : code;
+	    }
+	    catch (MissingResourceException mre) {
+		return EMPTY_CODE;
+	    }
+	}
+
+	private static String languageCode(final Locale loc) {
+	    try {
+		String code = loc.getISO3Language();
+		return (code == null || code.isEmpty()) ? EMPTY_CODE : code;
+	    }
+	    catch (MissingResourceException mre) {
+		return EMPTY_CODE;
+	    }
+	}
+
+	private static String variant(final Locale loc) {
+	    String code = loc.getVariant();
+	    return (code == null || code.isEmpty()) ? EMPTY_CODE : code;
+	}
+
 	/**
 	 * Display the available locales (there are lots), sorted by the language tag.
 	 * <p> The default locale is identified by an {@code "*"}.
@@ -412,8 +465,38 @@ public class OS
 	    for (Map.Entry<String, Locale> entry : sortedLocales.entrySet()) {
 		String tag = entry.getKey();
 		Locale loc = entry.getValue();
+
+		// We will use the tag to do the filtering
+		if (!filterValues.isEmpty() && !filterValues.contains(tag))
+		    continue;
+
+		NumberFormat format   = NumberFormat.getInstance(loc);
+		NumberFormat currency = NumberFormat.getCurrencyInstance(loc);
+		NumberFormat percent  = NumberFormat.getPercentInstance(loc);
+
+		DecimalFormatSymbols symbols = DecimalFormatSymbols.getInstance(loc);
+
 		String prefix = (loc.equals(defaultLocale)) ? "<Rd!>*<>" : "";
-		locs.add(String.format("%1$1s<Cy>%2$15s<>  <Gr>%3$s<>", prefix, tag, loc.getDisplayName()));
+		String message = "";
+		if (verbose) {
+		    message = String.format(
+			"%1$1s<Cy>%2$15s<>  <Gr>%3$s<>%n" +
+			"\t\t<Bk!>language: <Gr>%4$s<Bk!>  country: <Gr>%5$s<Bk!>  variant: <Gr>%6$s%n" +
+			"\t\t<Bk!>currency: <Gr>%7$s<Bk!>  minus: <Gr>%8$c<Bk!>  decimal: <Gr>%9$c<Bk!>  grouping: <Gr>%10$c<Bk!>  exponent: <Gr>%11$s%n" +
+			"\t\t<Bk!>Infinity: <Gr>%12$s<Bk!>  NaN: <Gr>%13$s<Bk!>  percent: <Gr>%14$c<-->",
+			prefix, tag, loc.getDisplayName(),
+			languageCode(loc), countryCode(loc), variant(loc),
+			symbols.getCurrencySymbol(), symbols.getMinusSign(), symbols.getDecimalSeparator(),
+			symbols.getGroupingSeparator(), symbols.getExponentSeparator(),
+			symbols.getInfinity(), symbols.getNaN(), symbols.getPercent()
+			);
+		}
+		else {
+		    message = String.format(
+			"%1$1s<Cy>%2$15s<>  <Gr>%3$s<-->",
+			prefix, tag, loc.getDisplayName());
+		}
+		locs.add(message);
 	    }
 
 	    display("Locales", locs);
