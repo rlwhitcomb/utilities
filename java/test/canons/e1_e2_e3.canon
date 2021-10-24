@@ -604,6 +604,8 @@
 >⑳ -> 20
 >⒇ -> 20
 >⒚ -> 19
+>encode ('This is a Base64 test.') -> "VGhpcyBpcyBhIEJhc2U2NCB0ZXN0Lg=="
+>decode "VGhpcyBpcyBhIEJhc2U2NCB0ZXN0Lg==" -> "This is a Base64 test."
 >
 >End of expression tests (suite 1).
 >Tests of nested object / array variables.

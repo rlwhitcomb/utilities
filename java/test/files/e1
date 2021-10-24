@@ -583,6 +583,12 @@ t∕4
 ⒇
 ⒚
 
+#
+# Base64 encode/decode
+#
+encode ('This is a Base64 test.')
+decode "VGhpcyBpcyBhIEJhc2U2NCB0ZXN0Lg=="
+
 :echo
 :echo "End of expression tests (suite 1)."
 

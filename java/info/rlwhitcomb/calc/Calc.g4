@@ -265,6 +265,8 @@
  *	    #34: Update arguments to "splice" to work with objects.
  *	20-Oct-2021 (rlwhitcomb)
  *	    #37: Currency format.
+ *	23-Oct-2021 (rlwhitcomb)
+ *	    #42: Add encode/decode functions.
  */
 
 grammar Calc;
@@ -394,6 +396,8 @@ expr
    | K_YOD expr1                         # yearOfDateExpr
    | K_EVAL expr1                        # evalExpr
    | K_EXEC exprN                        # execExpr
+   | K_DECODE expr1                      # decodeExpr
+   | K_ENCODE expr1                      # encodeExpr
    | var INC_OP                          # postIncOpExpr
    |<assoc=right> INC_OP var             # preIncOpExpr
    |<assoc=right> ADD_OP expr            # negPosExpr
@@ -777,6 +781,10 @@ K_YOD      : Y O D ;
 K_EVAL     : E V A L ;
 
 K_EXEC     : E X E C ;
+
+K_DECODE   : D E C O D E ;
+
+K_ENCODE   : E N C O D E ;
 
 K_SUMOF    : ( S U M O F | '\u2211' ) ;
 

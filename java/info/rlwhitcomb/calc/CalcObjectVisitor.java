@@ -380,6 +380,8 @@
  *	    #37: Currency format.
  *	21-Oct-2021 (rlwhitcomb)
  *	    #40: Use locale-based "%" formatter.
+ *	23-Oct-2021 (rlwhitcomb)
+ *	    #42: Implement decode and encode (base64) functions.
  */
 package info.rlwhitcomb.calc;
 
@@ -417,6 +419,9 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.UnaryOperator;
 import java.util.function.Function;
+
+import net.iharder.b64.Base64;
+
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
 
@@ -3624,6 +3629,18 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    int retCode = cmd.runToCompletion(result);
 
 	    return result.toString();
+	}
+
+	@Override
+	public Object visitDecodeExpr(CalcParser.DecodeExprContext ctx) {
+	    String source = getStringValue(ctx.expr1().expr());
+	    return Base64.decodeUTF8(source);
+	}
+
+	@Override
+	public Object visitEncodeExpr(CalcParser.EncodeExprContext ctx) {
+	    String source = getStringValue(ctx.expr1().expr());
+	    return Base64.encodeUTF8(source);
 	}
 
 	private class SumOfVisitor implements Function<Object, Object>
