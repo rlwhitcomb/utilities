@@ -588,6 +588,14 @@ t∕4
 #
 encode ('This is a Base64 test.')
 decode "VGhpcyBpcyBhIEJhc2U2NCB0ZXN0Lg=="
+arr1 = [1,2,3]
+enc1 = encode arr1
+arr2 = eval(decode enc1)
+arr1 === arr2
+p1 = encode pi
+p2 = eval(decode p1)
+pi === p2
+
 
 :echo
 :echo "End of expression tests (suite 1)."

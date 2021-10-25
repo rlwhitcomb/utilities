@@ -606,6 +606,13 @@
 >⒚ -> 19
 >encode ('This is a Base64 test.') -> "VGhpcyBpcyBhIEJhc2U2NCB0ZXN0Lg=="
 >decode "VGhpcyBpcyBhIEJhc2U2NCB0ZXN0Lg==" -> "This is a Base64 test."
+>arr1 = [1, 2, 3] -> [ 1, 2, 3 ]
+>enc1 = encode arr1 -> "WyAxLCAyLCAzIF0="
+>arr2 = eval (decode enc1) -> [ 1, 2, 3 ]
+>arr1 === arr2 -> true
+>p1 = encode pi -> "My4xNDE1OTI2NTM1ODk3OTMyMzg0NjI2NDMzODMyNzk1MDI4OA=="
+>p2 = eval (decode p1) -> 3.14159265358979323846264338327950288
+>pi === p2 -> true
 >
 >End of expression tests (suite 1).
 >Tests of nested object / array variables.

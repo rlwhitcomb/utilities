@@ -544,8 +544,8 @@ or
     <tr><td>26</td><td><code>[</code> (&nbsp;<i>expr list</i>&nbsp;) <code>]</code><br><i>var</i> <code>[</code> <i>expr</i> <code>]</code> or <i>var</i>&nbsp;<code>&#x2080;</code> .. <code>&#x2089;</code></td><td>define an array,<br>or access elements of an array, string, or object</td><td>left to right</td></tr>
     <tr><td>25</td><td><code>.</code></td><td>access an object member</td><td>left to right</td></tr>
     <tr><td>24</td><td><code>( </code><i>expr</i><code> )</code></td><td>group an expression</td><td>N/A</td></tr>
-    <tr><td rowspan="58">23</td>
-            <td><code>ABS</code>&nbsp;<i>expr</i></td><td>absolute value</td><td rowspan="58">left to right</td></tr>
+    <tr><td rowspan="60">23</td>
+            <td><code>ABS</code>&nbsp;<i>expr</i></td><td>absolute value</td><td rowspan="60">left to right</td></tr>
             <tr><td><code>SIN</code>&nbsp;<i>expr</i></td><td>sine</td></tr>
             <tr><td><code>COS</code>&nbsp;<i>expr</i></td><td>cosine</td></tr>
             <tr><td><code>TAN</code>&nbsp;<i>expr</i></td><td>tangent</td></tr>
@@ -595,6 +595,8 @@ or
             <tr><td><code>UPPER</code>&nbsp;<i>expr</i></td><td>convert <i>expr</i> to UPPER case</td></tr>
             <tr><td><code>EVAL</code>&nbsp;<i>expr</i></td><td>evaluate the string result of <i>expr</i></td></tr>
             <tr><td><code>EXEC</code>&nbsp;<i>expr</i>&nbsp;( <code>,</code>&nbsp;<i>expr</i>&nbsp;) *</td><td>execute the given O/S command<br>(with arguments)<br>and return the output as a string</td></tr>
+            <tr><td><code>DECODE</code>&nbsp;<i>expr</i></td><td>decode a base64 string into the original string value</td></tr>
+            <tr><td><code>ENCODE</code>&nbsp;<i>expr</i></td><td>encode a string into its base64 form</td></tr>
             <tr><td><code>FACTORS</code>&nbsp;<i>expr</i></td><td>calculate all the factors of the number</td></tr>
             <tr><td><code>PFACTORS</code>&nbsp;<i>expr</i></td><td>calculate the prime factors of the number</td></tr>
             <tr><td><code>CHARS</code>&nbsp;<i>expr</i></td><td>convert a string into an array of its codepoint values</td></tr>
@@ -767,6 +769,18 @@ or
      while for an <code>f'...'</code> constant the real fraction character(s) must be used.
   <p>The <code>FACTORS</code> and <code>PFACTORS</code> functions only accept integer values, and produce arrays of the
      desired values.<br>Examples: <code>factors(123) &#x21E8; [ 1, 3, 41, 123 ]</code>, while <code>pfactors 123 &#x21E8; [ 3, 41 ]</code>.
+  <p>The <code>EXEC</code> function will execute the operating system program given by the first (string) expression, using the remaining
+     expression values as parameters, and return the merged stdout and stderr streams as a string result. For instance, one of our
+     standard build tests involves this expression (for use on Windows):
+     <p class="indent"><code>split(exec('cmd', '/c', 'wc.bat', 'calc.txt'), '\\s+')</code></p>
+  <p>For now, the <code>encode</code> and <code>decode</code> functions only work on string objects (or other values / objects converted
+     to their string representations). So, in order to reconstruct an array (for instance) from its encoded form you would need to do:
+     <code>eval(decode '</code>...<code>')</code>.
+     <p class="indent">
+&gt;<code style="color:blue;">arr1 = [1, 2, 3] </code><code style="color:grey;">&#x21E8;</code><code style="color:green;"> [ 1, 2, 3 ]</code><br>
+&gt;<code style="color:blue;">enc1 = encode arr1 </code><code style="color:grey;">&#x21E8;</code><code style="color:green;"> "WyAxLCAyLCAzIF0="</code><br>
+&gt;<code style="color:blue;">arr2 = eval (decode enc1) </code><code style="color:grey;">&#x21E8;</code><code style="color:green;"> [ 1, 2, 3 ]</code><br>
+&gt;<code style="color:blue;">arr1 === arr2 </code><code style="color:grey;">&#x21E8;</code><code style="color:green;"> true</code></p>
 </div>
 <hr class="sectionsep">
   <h2>User-Defined Functions</h2>
