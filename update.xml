@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="utilities" default="unzip" basedir=".">
+
+        <property name="source.file" value="utilities-master.zip"/>
+
+        <target name="move" description="Move the '${source.file}' from the download location.">
+                <move file="${user.home}/Downloads/${source.file}" todir="." failonerror="true" verbose="true"/>
+        </target>
+
+        <target name="unzip" depends="move" description="Unzip the '${source.file}' file into the proper location.">
+                <unzip src="utilities-master.zip" dest="." overwrite="true"/>
+        </target>
+
+</project>
+
