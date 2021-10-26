@@ -382,6 +382,8 @@
  *	    #40: Use locale-based "%" formatter.
  *	23-Oct-2021 (rlwhitcomb)
  *	    #42: Implement decode and encode (base64) functions.
+ *	25-Oct-2021 (rlwhitcomb)
+ *	    #46: Implement "versioninfo" structure.
  */
 package info.rlwhitcomb.calc;
 
@@ -422,6 +424,8 @@ import java.util.function.Function;
 
 import net.iharder.b64.Base64;
 
+import de.onyxbits.SemanticVersion;
+
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
 
@@ -429,6 +433,7 @@ import info.rlwhitcomb.util.BigFraction;
 import static info.rlwhitcomb.calc.CalcUtil.*;
 import info.rlwhitcomb.util.CharUtil;
 import static info.rlwhitcomb.util.ConsoleColor.Code.*;
+import info.rlwhitcomb.util.Environment;
 import info.rlwhitcomb.util.ExceptionUtil;
 import info.rlwhitcomb.util.Intl;
 import info.rlwhitcomb.util.MathUtil;
@@ -4136,6 +4141,20 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitNullValue(CalcParser.NullValueContext ctx) {
 	    return null;
+	}
+
+	@Override
+	public Object visitVersionValue(CalcParser.VersionValueContext ctx) {
+	    SemanticVersion v = Environment.programVersion();
+	    ObjectScope result = new ObjectScope();
+
+	    result.setValue("major",      settings.ignoreNameCase, v.major);
+	    result.setValue("minor",      settings.ignoreNameCase, v.minor);
+	    result.setValue("patch",      settings.ignoreNameCase, v.patch);
+	    result.setValue("prerelease", settings.ignoreNameCase, v.getPreReleaseString());
+	    result.setValue("build",      settings.ignoreNameCase, v.getBuildMetaString());
+
+	    return result;
 	}
 
 	@Override

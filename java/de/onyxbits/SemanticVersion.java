@@ -247,14 +247,14 @@ public final class SemanticVersion implements Comparable<SemanticVersion> {
 		return major > 0 && preRelease.length == 0;
 	}
 
-	@Override
-	public String toString() {
+	/**
+	 * Get the prerelease information (if any) as a string.
+	 *
+	 * @return The prerelease tags, combined with '.' and prefixed
+	 *         by '-', if there are any, or an empty string if none.
+	 */
+	public String getPreReleaseString() {
 		StringBuilder ret = new StringBuilder();
-		ret.append(major);
-		ret.append('.');
-		ret.append(minor);
-		ret.append('.');
-		ret.append(patch);
 		if (preRelease.length > 0) {
 			ret.append('-');
 			for (int i = 0; i < preRelease.length; i++) {
@@ -264,6 +264,17 @@ public final class SemanticVersion implements Comparable<SemanticVersion> {
 				}
 			}
 		}
+		return ret.toString();
+	}
+
+	/**
+	 * Get the build metadata information (if any) as a string.
+	 *
+	 * @return The build metadata tags, combined with '.' and prefixed
+	 *         by '+', if there are any, or an empty string if none.
+	 */
+	public String getBuildMetaString() {
+		StringBuilder ret = new StringBuilder();
 		if (buildMeta.length > 0) {
 			ret.append('+');
 			for (int i = 0; i < buildMeta.length; i++) {
@@ -273,6 +284,19 @@ public final class SemanticVersion implements Comparable<SemanticVersion> {
 				}
 			}
 		}
+		return ret.toString();
+	}
+
+	@Override
+	public String toString() {
+		StringBuilder ret = new StringBuilder();
+		ret.append(major);
+		ret.append('.');
+		ret.append(minor);
+		ret.append('.');
+		ret.append(patch);
+		ret.append(getPreReleaseString());
+		ret.append(getBuildMetaString());
 		return ret.toString();
 	}
 

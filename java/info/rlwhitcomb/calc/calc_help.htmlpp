@@ -531,6 +531,7 @@ or
           <code>&#x2460;</code> .. <code>&#x2473;</code>, <code>&#x2474;</code> .. <code>&#x2487;</code>, <code>&#xFF10;</code> .. <code>&#xFF19;</code>, etc.<br>
           <code>today</code><br>
           <code>now</code><br>
+          <code>versioninfo</code><br>
           any string, binary, octal, hex, fraction, etc. constant</td>
       <td>the fundamental constants <code>&#x1D6D1;</code> and <code>e</code><br>
           the <code>boolean</code> values<br>
@@ -539,6 +540,7 @@ or
           other Unicode digit / number symbols<br>
           date value of the current date<br>
           time value of the current time<br>
+          current Calc version information<br>
           the constant value</td><td>N/A</td></tr>
     <tr><td>27</td><td><code>{</code> (&nbsp;<i>key:value pairs</i>&nbsp;) <code>}</code></td><td>define an object</td><td>left to right</td></tr>
     <tr><td>26</td><td><code>[</code> (&nbsp;<i>expr list</i>&nbsp;) <code>]</code><br><i>var</i> <code>[</code> <i>expr</i> <code>]</code> or <i>var</i>&nbsp;<code>&#x2080;</code> .. <code>&#x2089;</code></td><td>define an array,<br>or access elements of an array, string, or object</td><td>left to right</td></tr>

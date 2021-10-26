@@ -267,6 +267,8 @@
  *	    #37: Currency format.
  *	23-Oct-2021 (rlwhitcomb)
  *	    #42: Add encode/decode functions.
+ *	25-Oct-2021 (rlwhitcomb)
+ *	    #46: Add "versioninfo" predefined structure.
  */
 
 grammar Calc;
@@ -526,6 +528,7 @@ value
    | DATE_CONST                  # dateValue
    | K_TODAY                     # todayValue
    | K_NOW                       # nowValue
+   | K_VERSIONINFO               # versionValue
    ;
 
 formalParamList
@@ -667,6 +670,9 @@ K_NULL     : N U L L ;
 K_TODAY    : T O D A Y ;
 
 K_NOW      : N O W ;
+
+K_VERSIONINFO
+           : V E R S I O N I N F O ;
 
 K_ABS      : A B S ;
 

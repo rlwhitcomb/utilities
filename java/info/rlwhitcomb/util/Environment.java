@@ -152,6 +152,8 @@
  *	    Use box-drawing character to color display of program info.
  *	29-Aug-2021 (rlwhitcomb)
  *	    Trap errors from "stty" if we're running headless (as in CI builds).
+ *	25-Oct-2021 (rlwhitcomb)
+ *	    New SemanticVersion of program version information.
  */
 package info.rlwhitcomb.util;
 
@@ -605,6 +607,27 @@ public final class Environment
 	    return Intl.formatString("util#env.implVersion", IMPLEMENTATION_VERSION);
 	}
 
+
+	/**
+	 * Get the current program version information.
+	 *
+	 * @return The program version information, determined the same way
+	 *	   as {@link #printProgramInfo}.
+	 */
+	public static SemanticVersion programVersion() {
+	    // First build a version string compatible with the semantic versioning spec
+	    String versionSpec = String.format("%1$s%2$s+%3$s",
+		getAppVersion(),
+		isDebugBuild() ? "-debug" : "",
+		getAppBuild());
+	    try {
+		return new SemanticVersion(versionSpec);
+	    }
+	    catch (ParseException pe) {
+		// This is guaranteed to have a value, but this *should* never happen
+		return IMPLEMENTATION_VERSION;
+	    }
+	}
 
 	/**
 	 * @return Are we running as a desktop application?
