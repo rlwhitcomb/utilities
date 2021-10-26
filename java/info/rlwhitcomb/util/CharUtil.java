@@ -287,6 +287,8 @@
  *	    The "\$" processing doesn't work well.
  *	21-Oct-2021 (rlwhitcomb)
  *	    #41: Remove "getLocale" in favor of better method in Intl ("getValidLocale").
+ *	26-Oct-2021 (rlwhitcomb)
+ *	    #31: Introduce octal and binary escape sequences.
  */
 
 package info.rlwhitcomb.util;
@@ -866,6 +868,31 @@ public final class CharUtil
 	}
 
 
+	private static int parseCharEscape(String input, int index, int base, int normalLength, StringBuilder output) {
+	    StringBuilder charBuilder = new StringBuilder();
+	    int charValue;
+	    char ch;
+
+	    if (input.charAt(index + 1) == '{') {
+		index++;
+		while ((ch = input.charAt(++index)) != '}') {
+		    charBuilder.append(ch);
+		}
+	    }
+	    else {
+		for (int j = 0; j < normalLength; j++) {
+		    if (++index < input.length()) {
+			charBuilder.append(input.charAt(index));
+		    }
+		}
+	    }
+
+	    charValue = Integer.parseInt(charBuilder.toString(), base);
+	    output.appendCodePoint(charValue);
+
+	    return index;
+	}
+
 	/**
 	 * Unescape the escape sequences in a string literal.
 	 * <p> Deals with things like {@code \\} to {@code \} and {@code \\uXXXX} to
@@ -882,6 +909,7 @@ public final class CharUtil
 	public static String convertEscapeSequences(String input) {
 	    if (input == null || input.isEmpty())
 		return input;
+
 
 	    StringBuilder buf = new StringBuilder(input.length());
 	    for (int i = 0; i < input.length(); i++) {
@@ -910,22 +938,13 @@ public final class CharUtil
 				buf.append('\t');
 				break;
 			    case 'u':
-				StringBuilder hexBuilder = new StringBuilder();
-				if (input.charAt(i + 1) == '{') {
-				    i++;
-				    while ((ch2 = input.charAt(++i)) != '}') {
-					hexBuilder.append(ch2);
-				    }
-				}
-				else {
-				    for (int j = 0; j < 4; j++) {
-					if (++i < input.length()) {
-					    hexBuilder.append(input.charAt(i));
-					}
-				    }
-				}
-				int charValue = Integer.parseInt(hexBuilder.toString(), 16);
-				buf.appendCodePoint(charValue);
+				i = parseCharEscape(input, i, 16, 4, buf);
+				break;
+			    case 'o':
+				i = parseCharEscape(input, i, 8, 3, buf);
+				break;
+			    case 'B':
+				i = parseCharEscape(input, i, 2, 8, buf);
 				break;
 			}
 			continue;

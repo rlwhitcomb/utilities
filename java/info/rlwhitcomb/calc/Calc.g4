@@ -269,6 +269,8 @@
  *	    #42: Add encode/decode functions.
  *	25-Oct-2021 (rlwhitcomb)
  *	    #46: Add "versioninfo" predefined structure.
+ *	26-Oct-2021 (rlwhitcomb)
+ *	    #31: Add octal and binary escape forms in strings.
  */
 
 grammar Calc;
@@ -1091,10 +1093,22 @@ fragment ESCI
 fragment UNICODE
    : 'u' HEX HEX HEX HEX
    | 'u' '{' HEX + '}'
+   | 'o' OCT OCT OCT
+   | 'o' '{' OCT + '}'
+   | 'B' BIN BIN BIN BIN BIN BIN BIN BIN
+   | 'B' '{' BIN + '}'
    ;
 
 fragment HEX
    : [0-9a-fA-F]
+   ;
+
+fragment OCT
+   : [0-7]
+   ;
+
+fragment BIN
+   : [01]
    ;
 
 fragment SAFECODEPOINT1

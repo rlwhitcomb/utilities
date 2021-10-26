@@ -319,12 +319,18 @@ h2 {
      interpolated into the final string value. These are
      formed using the back-tick character: <code>`</code> ... <code>`</code>. Interpolation of values is done using either
      <code>$<i>variable</i></code> or <code>${<i>expression</i>}</code>. To embed a back-tick character in the string, use
-     <code>\`</code>. Similarly, to embed a backslash, use <code>\\</code>.
-     The normal C/Java escapes such as <code>\t</code> or <code>\n</code> are also available.
-     To embed a dollar sign in the string, use <code>$$</code> (but see the note about loop variables below). To embed any Unicode
-     codepoint, use <code>\u<i>NNNN</i></code> where <code><i>N</i></code> is a hexadecimal digit, for values up to 0xFFFF, or
-     <code>\u{<i>NNNNNN</i>}</code> for codepoints beyond the Unicode BMP (Basic Multilingual Plane) (that is, above 65536 or 0xFFFF).
-     Several types of "smart" quotes can also be used to delimit strings, such as <code>&#x00AB;This is a test&#x00BB;</code>,
+     <code>\`</code>. Similarly, to embed a backslash, use <code>\\</code>. To embed a dollar sign in the string, use <code>$$</code>
+     (but see the note about loop variables below).
+   <p>For any kind of string, the normal C/Java escapes such as <code>\t</code> or <code>\n</code> are also available.
+     To embed any Unicode codepoint, use <code>\u<i>NNNN</i></code> where <code><i>N</i></code> is a hexadecimal digit, for values up
+     to 0xFFFF, or <code>\u{<i>NNNNNN</i>}</code> for codepoints beyond the Unicode BMP (Basic Multilingual Plane) (that is, above
+     65536 or 0xFFFF). Arbitrary byte values can be embedded in any strings using either octal or binary escapes, such as <code>\o345</code>
+     or <code>\B00110010</code>, as in:
+   <p class="indent">
+&gt;<code style="color:blue;">'\B01100001\B01100010\B01100011'</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">"abc"</code><br>
+&gt;<code style="color:blue;">'\o144\o145\o146'</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">"def"</code><br>
+&gt;<code style="color:blue;">'\u0048\u0065\u006C\u006C\u006F'</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">"Hello"</code>
+   <p>Several types of "smart" quotes can also be used to delimit strings, such as <code>&#x00AB;This is a test&#x00BB;</code>,
      <code>&ldquo;Another test&rdquo;</code>, or <code>&lsaquo;Testing&rsaquo;</code>. The ending quote can be included in the string by escaping it.
      When interpolating values into an interpolated string, the string representation of the value is used. If the value to be interpolated is
      <code>null</code>, nothing will be added to the string.
@@ -493,11 +499,11 @@ or
       <tr><td><code>@c</code></td><td>Format an integer (range of 0 .. 0x10FFFF) as a Unicode character<br>as in <code style="color:blue;">120529 @c</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">"&#x1D6D1;"</code></td></tr>
       <tr><td><code>@</code>[<code>,</code>]<code>j</code></td><td>Format the result as a "pretty printed" JSON result<br>(multiple lines with indents)<br>with optional separators for numeric values</td></tr>
       <tr><td><code>@r</code></td><td>Format the result as a Roman Numeral value<br>as in <code style="color:blue;">2021 @R</code><code style="color:gray;"> &#x21E8; </code><code style="color:green;">R'MMXXI'</code></td></tr>
-      <tr><td><code>@x</code></td><td>For integers and strings, format in hexadecimal form<br>as in <code style="color:blue;">456 @x</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">0x1c8</code><br>and as in <code style="color:blue;">'abc' @x</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">'616263'</code></td></tr>
-      <tr><td><code>@o</code></td><td>For integers and strings, format in octal form<br>as in <code style="color:blue;">345 @o</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">0531</code><br>and as in <code style="color:blue;">'abc' @o</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">'141142143'</code></td></tr>
-      <tr><td><code>@b</code></td><td>For integers and strings, format in binary form<br>as in <code style="color:blue;">231 @b</code><code style="grey;"> &#x21E8; </code><code style="color:green;">0b11100111</code><br>and as in <code style="color:blue;">'abc' @b</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">'011000010110001001100011'</code></td></tr>
+      <tr><td><code>@x</code></td><td>For integers and strings, format in hexadecimal form<br>as in <code style="color:blue;">456 @x</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">0x1c8</code><br>or <code style="color:blue;">'abc' @x</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">'\u0061\u0062\u0063'</code></td></tr>
+      <tr><td><code>@o</code></td><td>For integers and strings, format in octal form<br>as in <code style="color:blue;">345 @o</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">0531</code><br>or <code style="color:blue;">'abc' @o</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">'\o141\o142\o143'</code></td></tr>
+      <tr><td><code>@b</code></td><td>For integers and strings, format in binary form<br>as in <code style="color:blue;">231 @b</code><code style="grey;"> &#x21E8; </code><code style="color:green;">0b11100111</code><br>or <code style="color:blue;">'abc' @b</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">'\B01100001\B01100010\B01100011'</code></td></tr>
       <tr><td><code>@k</code></td><td>Use kilobyte, megabyte, etc. notation for the value<br>(depending on the SI / BINARY mode)<br>as in <code style="color:blue;">2000 @k</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">1.95 Kibytes</code> (binary)<br>or <code style="color:blue;">2000 @k</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">2.00 Kbytes</code> (SI)</td></tr>
-      <tr><td><code>@w</code></td><td>Convert the (integer) value to words<br>as in <code style="color:blue;">35 @w</code><code style="color:gray;"> &#x21E8; </code><code style="color:green;">thirty-five</code></td></tr>
+      <tr><td><code>@w</code></td><td>Convert the (integer) value to words<br>as in <code style="color:blue;">235 @w</code><code style="color:gray;"> &#x21E8; </code><code style="color:green;">two hundred thirty-five</code></td></tr>
       <tr><td><code>@</code>[<i>nn</i>][<code>,</code>]<code>%</code></td><td>Format as a percentage, with optional separators, and<br>optionally rounding to <i>nn</i> digits<br>as in <code style="color:blue;">10.08745 @2,%</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">1,008.75%</code></td></tr>
       <tr><td><code>@</code>[<i>nn</i>][<code>,</code>]<code>$</code></td><td>Format as a currency value with the locale-specific currency symbol,<br>optionally setting separators and number of fraction digits<br>as in <code style="color:blue;">1500 @3,$</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">$1,500.000</code></td></tr>
     </tbody>

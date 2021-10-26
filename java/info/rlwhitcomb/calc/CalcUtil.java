@@ -83,6 +83,8 @@
  *	    Add "ignoreCase" parameter to "compareValues".
  *	18-Oct-2021 (rlwhitcomb)
  *	    #34: Remove "getArrayValue" now that it is not used anywhere.
+ *	26-Oct-2021 (rlwhitcomb)
+ *	    #31: Change the way "convert" works to make real escape sequences.
  */
 package info.rlwhitcomb.calc;
 
@@ -731,19 +733,32 @@ public final class CalcUtil
 	/**
 	 * Convert an array of bytes to their numeric representation in the given radix.
 	 *
-	 * @param bytes	The set of bytes to convert.
-	 * @param radix	Radix to use for conversion (supports 2, 8, and 16).
-	 * @param buf	The buffer to append to.
+	 * @param bytes  The set of bytes to convert.
+	 * @param radix  Radix to use for conversion (supports 2, 8, and 16).
+	 * @param upper  Whether to use UPPER case characters (hex only).
+	 * @param escape Use escape sequences (suitable for strings)?
+	 * @param buf	 The buffer to append to.
 	 */
-	public static void convert(final byte[] bytes, final int radix, final StringBuilder buf) {
+	public static void convert(
+		final byte[] bytes,
+		final int radix,
+		final boolean upper,
+		final boolean escape,
+		final StringBuilder buf)
+	{
+	    char formatChar = ' ';
 	    int padWidth = 0;
 	    switch (radix) {
-		case 2:  padWidth = 8; break;
-		case 8:  padWidth = 3; break;
-		case 16: padWidth = 2; break;
+		case 2:  formatChar = 'B'; padWidth = 8; break;
+		case 8:  formatChar = 'o'; padWidth = 3; break;
+		case 16: formatChar = 'u'; padWidth = escape ? 4 : 2; break;
 	    }
 	    for (byte b : bytes) {
 		String number = Integer.toString(Byte.toUnsignedInt(b), radix);
+		if (upper)
+		    number = number.toUpperCase();
+		if (escape)
+		    buf.append('\\').append(formatChar);
 		CharUtil.padToWidth(buf, number, padWidth, '0', Justification.RIGHT);
 	    }
 	}

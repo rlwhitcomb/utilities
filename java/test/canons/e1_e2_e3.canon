@@ -185,9 +185,12 @@
 >~ 0x7FFF @b -> 0b1000000000000000
 >255 @o -> 0377
 >123 @b -> 0b1111011
->'def' @o -> '144145146'
->'abc' @b -> '011000010110001001100011'
->'Hello' @X -> '48656C6C6F'
+>f1 = `${'def' @o}` -> "'\o144\o145\o146'"
+>f2 = `${'abc' @b}` -> "'\B01100001\B01100010\B01100011'"
+>f3 = `${'Hello' @X}` -> "'\u0048\u0065\u006C\u006C\u006F'"
+>eval f1 -> "def"
+>eval f2 -> "abc"
+>eval f3 -> "Hello"
 >Variables 'this', 'hello', 'handsome', and 'rude' cleared.
 >this = join ('This', 'is', 'a', 'test', ' ') -> "This is a test"
 >hello = join ('Hello', "World!", ', ') -> "Hello, World!"

@@ -1463,22 +1463,22 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			break;
 
 		    case 'X':
-			toUpperCase = true;
-			// fall through
 		    case 'x':
 			if (result instanceof String) {
 			    byte[] b = ((String) result).getBytes(StandardCharsets.UTF_8);
 			    valueBuf.append('\'');
-			    convert(b, 16, valueBuf);
+			    convert(b, 16, formatChar == 'X', true, valueBuf);
 			    valueBuf.append('\'');
 			}
 			else {
 			    valueBuf.append('0').append(formatChar);
 			    iValue = toIntegerValue(this, result, mc, ctx);
 			    if (iValue.compareTo(BigInteger.ZERO) < 0)
-				convert(iValue.toByteArray(), 16, valueBuf);
-			    else
+				convert(iValue.toByteArray(), 16, formatChar == 'X', false, valueBuf);
+			    else {
+				toUpperCase = formatChar == 'X';
 				valueBuf.append(iValue.toString(16));
+			    }
 			}
 			break;
 
@@ -1487,34 +1487,32 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			if (result instanceof String) {
 			    byte[] b = ((String) result).getBytes(StandardCharsets.UTF_8);
 			    valueBuf.append('\'');
-			    convert(b, 8, valueBuf);
+			    convert(b, 8, false, true, valueBuf);
 			    valueBuf.append('\'');
 			}
 			else {
 			    valueBuf.append('0');
 			    iValue = toIntegerValue(this, result, mc, ctx);
 			    if (iValue.compareTo(BigInteger.ZERO) < 0)
-				convert(iValue.toByteArray(), 8, valueBuf);
+				convert(iValue.toByteArray(), 8, false, false, valueBuf);
 			    else
 				valueBuf.append(iValue.toString(8));
 			}
 			break;
 
 		    case 'B':
-			toUpperCase = true;
-			// fall through
 		    case 'b':
 			if (result instanceof String) {
 			    byte[] b = ((String) result).getBytes(StandardCharsets.UTF_8);
 			    valueBuf.append('\'');
-			    convert(b, 2, valueBuf);
+			    convert(b, 2, false, true, valueBuf);
 			    valueBuf.append('\'');
 			}
 			else {
 			    valueBuf.append('0').append(formatChar);
 			    iValue = toIntegerValue(this, result, mc, ctx);
 			    if (iValue.compareTo(BigInteger.ZERO) < 0)
-				convert(iValue.toByteArray(), 2, valueBuf);
+				convert(iValue.toByteArray(), 2, false, false, valueBuf);
 			    else
 				valueBuf.append(iValue.toString(2));
 			}
