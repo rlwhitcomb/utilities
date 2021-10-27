@@ -552,8 +552,8 @@ or
     <tr><td>26</td><td><code>[</code> (&nbsp;<i>expr list</i>&nbsp;) <code>]</code><br><i>var</i> <code>[</code> <i>expr</i> <code>]</code> or <i>var</i>&nbsp;<code>&#x2080;</code> .. <code>&#x2089;</code></td><td>define an array,<br>or access elements of an array, string, or object</td><td>left to right</td></tr>
     <tr><td>25</td><td><code>.</code></td><td>access an object member</td><td>left to right</td></tr>
     <tr><td>24</td><td><code>( </code><i>expr</i><code> )</code></td><td>group an expression</td><td>N/A</td></tr>
-    <tr><td rowspan="60">23</td>
-            <td><code>ABS</code>&nbsp;<i>expr</i></td><td>absolute value</td><td rowspan="60">left to right</td></tr>
+    <tr><td rowspan="61">23</td>
+            <td><code>ABS</code>&nbsp;<i>expr</i></td><td>absolute value</td><td rowspan="61">left to right</td></tr>
             <tr><td><code>SIN</code>&nbsp;<i>expr</i></td><td>sine</td></tr>
             <tr><td><code>COS</code>&nbsp;<i>expr</i></td><td>cosine</td></tr>
             <tr><td><code>TAN</code>&nbsp;<i>expr</i></td><td>tangent</td></tr>
@@ -605,6 +605,7 @@ or
             <tr><td><code>EXEC</code>&nbsp;<i>expr</i>&nbsp;( <code>,</code>&nbsp;<i>expr</i>&nbsp;) *</td><td>execute the given O/S command<br>(with arguments)<br>and return the output as a string</td></tr>
             <tr><td><code>DECODE</code>&nbsp;<i>expr</i></td><td>decode a base64 string into the original string value</td></tr>
             <tr><td><code>ENCODE</code>&nbsp;<i>expr</i></td><td>encode a string into its base64 form</td></tr>
+            <tr><td><code>READ</code>&nbsp;<i>expr</i>&nbsp;( <code>,</code>&nbsp;<i>expr</i>&nbsp;)</td><td>read the file (or files) using the optional charset</td></tr>
             <tr><td><code>FACTORS</code>&nbsp;<i>expr</i></td><td>calculate all the factors of the number</td></tr>
             <tr><td><code>PFACTORS</code>&nbsp;<i>expr</i></td><td>calculate the prime factors of the number</td></tr>
             <tr><td><code>CHARS</code>&nbsp;<i>expr</i></td><td>convert a string into an array of its codepoint values</td></tr>
@@ -789,6 +790,10 @@ or
 &gt;<code style="color:blue;">enc1 = encode arr1 </code><code style="color:grey;">&#x21E8;</code><code style="color:green;"> "WyAxLCAyLCAzIF0="</code><br>
 &gt;<code style="color:blue;">arr2 = eval (decode enc1) </code><code style="color:grey;">&#x21E8;</code><code style="color:green;"> [ 1, 2, 3 ]</code><br>
 &gt;<code style="color:blue;">arr1 === arr2 </code><code style="color:grey;">&#x21E8;</code><code style="color:green;"> true</code></p>
+  <p>The first expression for <code>read</code> can be a single file name, or a list of files separated by comma or semi-colon. In fact, the
+     rules are the same as for the input values on the command line. And if the string cannot be interpreted as file names that exist, the
+     entire string is just returned as-is as the result. The second (optional) expression is the name of the charset to use (system default
+     if not given, or empty/null). The entire contents of the file(s) is returned, with the end-of-line sequences changed to just newline (0x0A or "\n"), and can be assigned to a variable or used in some other way.
 </div>
 <hr class="sectionsep">
   <h2>User-Defined Functions</h2>

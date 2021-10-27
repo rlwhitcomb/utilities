@@ -271,6 +271,8 @@
  *	    #46: Add "versioninfo" predefined structure.
  *	26-Oct-2021 (rlwhitcomb)
  *	    #31: Add octal and binary escape forms in strings.
+ *	27-Oct-2021 (rlwhitcomb)
+ *	    #45: Add "read" function.
  */
 
 grammar Calc;
@@ -402,6 +404,7 @@ expr
    | K_EXEC exprN                        # execExpr
    | K_DECODE expr1                      # decodeExpr
    | K_ENCODE expr1                      # encodeExpr
+   | K_READ ( expr1 | expr2 )            # readExpr
    | var INC_OP                          # postIncOpExpr
    |<assoc=right> INC_OP var             # preIncOpExpr
    |<assoc=right> ADD_OP expr            # negPosExpr
@@ -793,6 +796,8 @@ K_EXEC     : E X E C ;
 K_DECODE   : D E C O D E ;
 
 K_ENCODE   : E N C O D E ;
+
+K_READ     : R E A D ;
 
 K_SUMOF    : ( S U M O F | '\u2211' ) ;
 

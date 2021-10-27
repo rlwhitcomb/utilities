@@ -384,6 +384,8 @@
  *	    #42: Implement decode and encode (base64) functions.
  *	25-Oct-2021 (rlwhitcomb)
  *	    #46: Implement "versioninfo" structure.
+ *	27-Oct-2021 (rlwhitcomb)
+ *	    #45: Implement "read" function.
  */
 package info.rlwhitcomb.calc;
 
@@ -3644,6 +3646,29 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public Object visitEncodeExpr(CalcParser.EncodeExprContext ctx) {
 	    String source = getStringValue(ctx.expr1().expr());
 	    return Base64.encodeUTF8(source);
+	}
+
+	@Override
+	public Object visitReadExpr(CalcParser.ReadExprContext ctx) {
+	    CalcParser.Expr1Context e1ctx = ctx.expr1();
+	    CalcParser.Expr2Context e2ctx = ctx.expr2();
+	    String fileName = "";
+	    Charset cs = null;
+
+	    if (e1ctx != null) {
+		fileName = getStringValue(e1ctx.expr());
+	    }
+	    else {
+		fileName = getStringValue(e2ctx.expr(0));
+		cs = getCharsetValue(e2ctx.expr(1), false);
+	    }
+
+	    try {
+		return Calc.getFileContents(fileName, cs);
+	    }
+	    catch (IOException ioe) {
+		throw new CalcExprException(ioe, ctx);
+	    }
 	}
 
 	private class SumOfVisitor implements Function<Object, Object>

@@ -642,7 +642,8 @@ public final class FileUtilities
      * @return		The complete contents of the file as a {@link String},
      *			with line endings translated to Unix conventions (i.e., only
      *			{@code \n}).
-     * @throws	IllegalArgumentException if the file size is over 2MB (arbitrary).
+     * @throws	IllegalArgumentException if the file size is over 2MB or 2,097,512 bytes
+     *			(arbitrary limit).
      * @throws	IOException if there is a problem reading the file.
      */
     public static String readFileAsString(File file)
@@ -660,7 +661,8 @@ public final class FileUtilities
      * @return		The complete contents of the file as a {@link String},
      *			with line endings translated to Unix conventions (i.e., only
      *			{@code \n}).
-     * @throws	IllegalArgumentException if the file size is over 2MB (arbitrary).
+     * @throws	IllegalArgumentException if the file size is over 2MB or 2,097,512 bytes
+     *			(arbitrary limit).
      * @throws	IOException if there is a problem reading the file.
      */
     public static String readFileAsString(File file, Charset cs)
@@ -680,7 +682,8 @@ public final class FileUtilities
      * @return		The complete contents of the file as a {@link String},
      *			with line endings translated to Unix conventions (i.e., only
      *			{@code \n}).
-     * @throws	IllegalArgumentException if the file size is over 2MB (arbitrary).
+     * @throws	IllegalArgumentException if the file size is over 2MB or 2,097,512 bytes
+     *			(arbitrary limit).
      * @throws	IOException if there is a problem reading the file.
      */
     public static String readFileAsString(File file, Charset cs, int tabWidth)
