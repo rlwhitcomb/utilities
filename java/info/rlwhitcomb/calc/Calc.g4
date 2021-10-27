@@ -273,6 +273,8 @@
  *	    #31: Add octal and binary escape forms in strings.
  *	27-Oct-2021 (rlwhitcomb)
  *	    #45: Add "read" function.
+ *	    Adjust precedence such that expr3 is preferred over expr2 over expr1
+ *	    (another attempt to get function parameters correct).
  */
 
 grammar Calc;
@@ -378,18 +380,18 @@ expr
    | K_SUMOF ( exprN | dotRange )        # sumOfExpr
    | K_PRODUCTOF ( exprN | dotRange )    # productOfExpr
    | K_JOIN exprN                        # joinExpr
-   | K_SPLIT ( expr2 | expr3 )           # splitExpr
-   | K_INDEX ( expr2 | expr3 )           # indexExpr
-   | K_SUBSTR ( expr1 | expr2 | expr3 )  # substrExpr
+   | K_SPLIT ( expr3 | expr2 )           # splitExpr
+   | K_INDEX ( expr3 | expr2 )           # indexExpr
+   | K_SUBSTR ( expr3 | expr2 | expr1 )  # substrExpr
    | K_REPLACE replaceArgs               # replaceExpr
-   | K_SLICE ( expr1 | expr2 | expr3 )   # sliceExpr
+   | K_SLICE ( expr3 | expr2 | expr1 )   # sliceExpr
    | K_SPLICE spliceArgs                 # spliceExpr
    | K_FILL fillArgs                     # fillExpr
-   | K_SORT ( expr1 | expr2 )            # sortExpr
+   | K_SORT ( expr2 | expr1 )            # sortExpr
    | (K_TRIM|K_LTRIM|K_RTRIM) expr1      # trimExpr
    | K_FIB expr1                         # fibExpr
    | K_BN expr1                          # bernExpr
-   | K_FRAC ( expr1 | expr2 | expr3 )    # fracExpr
+   | K_FRAC ( expr3 | expr2 | expr1 )    # fracExpr
    | K_ROMAN expr1                       # romanExpr
    | ( K_UPPER | K_LOWER ) expr1         # caseConvertExpr
    | K_FACTORS expr1                     # factorsExpr
@@ -404,7 +406,7 @@ expr
    | K_EXEC exprN                        # execExpr
    | K_DECODE expr1                      # decodeExpr
    | K_ENCODE expr1                      # encodeExpr
-   | K_READ ( expr1 | expr2 )            # readExpr
+   | K_READ ( expr2 | expr1 )            # readExpr
    | var INC_OP                          # postIncOpExpr
    |<assoc=right> INC_OP var             # preIncOpExpr
    |<assoc=right> ADD_OP expr            # negPosExpr
@@ -462,10 +464,10 @@ spliceArgs
    | expr ',' dropObjs ',' obj
    | expr ',' dropObjs
    | expr ',' obj
-   | expr1
-   | expr2
-   | expr3
    | exprN
+   | expr3
+   | expr2
+   | expr1
    ;
 
 fillArgs
