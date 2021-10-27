@@ -76,6 +76,8 @@
  *	   can use with the (upcoming) tester program.
  *	22-Aug-2021 (rlwhitcomb)
  *	   Add "-upper" and "-lower" options.
+ *	27-Oct-2021 (rlwhitcomb)
+ *	   Strip off line continuations ("\" at the end of the line).
  */
 package info.rlwhitcomb.util;
 
@@ -443,6 +445,13 @@ public class Lists
 		    String line = null;
 
 		    while ((line = r.readLine()) != null) {
+			// In "single" mode, strip off a line continuation character
+			// (maybe, eventually, all modes; still not sure)
+			if (single) {
+			    if (line.endsWith("\\"))
+				line = line.substring(0, line.length() - 1);
+			}
+
 			// First off, do any required cutting of the input line
 			if (cutting) {
 			    if (line.length() > cutSize) {
