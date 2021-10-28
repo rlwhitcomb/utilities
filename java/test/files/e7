@@ -79,4 +79,5 @@ define fieldType($typeid) = {
     }
 }
 fieldType(4);fieldType(7);fieldType(23);fieldType(19);fieldType(99)
+'type: ' + fieldType(4)
 

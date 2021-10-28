@@ -87,3 +87,4 @@
 >fieldType (23) -> "23"
 >fieldType (19) -> "19"
 >fieldType (99) -> "99"
+>'type: ' + fieldType (4) -> "type:  TEXT"

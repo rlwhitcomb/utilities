@@ -85,6 +85,8 @@
  *	    #34: Remove "getArrayValue" now that it is not used anywhere.
  *	26-Oct-2021 (rlwhitcomb)
  *	    #31: Change the way "convert" works to make real escape sequences.
+ *	28-Oct-2021 (rlwhitcomb)
+ *	    Fix addOp if the values are functions that must be evaluated.
  */
 package info.rlwhitcomb.calc;
 
@@ -315,7 +317,10 @@ public final class CalcUtil
 	 */
 	public static BigDecimal toDecimalValue(final CalcObjectVisitor visitor, final Object obj, final MathContext mc, final ParserRuleContext ctx) {
 	    Object value = visitor.evaluateFunction(ctx, obj);
+	    return convertToDecimal(value, mc, ctx);
+	}
 
+	public static BigDecimal convertToDecimal(final Object value, final MathContext mc, final ParserRuleContext ctx) {
 	    nullCheck(value, ctx);
 
 	    if (value instanceof BigDecimal)
@@ -353,7 +358,10 @@ public final class CalcUtil
 	 */
 	public static BigFraction toFractionValue(final CalcObjectVisitor visitor, final Object obj, final ParserRuleContext ctx) {
 	    Object value = visitor.evaluateFunction(ctx, obj);
+	    return convertToFraction(value, ctx);
+	}
 
+	public static BigFraction convertToFraction(final Object value, final ParserRuleContext ctx) {
 	    nullCheck(value, ctx);
 
 	    if (value instanceof BigFraction)
@@ -938,10 +946,13 @@ public final class CalcUtil
 	    if (e1 == null && e2 == null)
 		return null;
 
+	    Object v1 = visitor.evaluateFunction(ctx1, e1);
+	    Object v2 = visitor.evaluateFunction(ctx2, e2);
+
 	    // Do string concatenation if either expr is a string
-	    if (e1 instanceof String || e2 instanceof String) {
-		String s1 = e1 == null ? "" : e1.toString();
-		String s2 = e2 == null ? "" : e2.toString();
+	    if (v1 instanceof String || v2 instanceof String) {
+		String s1 = v1 == null ? "" : v1.toString();
+		String s2 = v2 == null ? "" : v2.toString();
 		return s1 + s2;
 	    }
 
@@ -950,14 +961,14 @@ public final class CalcUtil
 
 	    // Otherwise, numeric values get added numerically
 	    if (rational) {
-		BigFraction f1 = toFractionValue(visitor, e1, ctx1);
-		BigFraction f2 = toFractionValue(visitor, e2, ctx2);
+		BigFraction f1 = convertToFraction(v1, ctx1);
+		BigFraction f2 = convertToFraction(v2, ctx2);
 
 		return f1.add(f2);
 	    }
 	    else {
-		BigDecimal d1 = toDecimalValue(visitor, e1, mc, ctx1);
-		BigDecimal d2 = toDecimalValue(visitor, e2, mc, ctx2);
+		BigDecimal d1 = convertToDecimal(v1, mc, ctx1);
+		BigDecimal d2 = convertToDecimal(v2, mc, ctx2);
 
 		return d1.add(d2, mc);
 	    }
