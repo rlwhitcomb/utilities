@@ -386,6 +386,8 @@
  *	    #46: Implement "versioninfo" structure.
  *	27-Oct-2021 (rlwhitcomb)
  *	    #45: Implement "read" function.
+ *	28-Oct-2021 (rlwhitcomb)
+ *	    Revise CASE syntax a little bit to make "default" work better.
  */
 package info.rlwhitcomb.calc;
 
@@ -1870,23 +1872,25 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    CaseScope scope = new CaseScope();
 
 	    for (CalcParser.CaseBlockContext cbCtx : blocks) {
-		CalcParser.ExprListContext exprListCtx = cbCtx.exprList();
-		if (exprListCtx == null) {
+		List<CalcParser.ExprListContext> exprLists = cbCtx.caseExprList().exprList();
+		if (cbCtx.caseExprList().K_DEFAULT() != null) {
 		    defaultCtx = cbCtx;
 		}
-		else {
-		    for (CalcParser.ExprContext exprCtx : exprListCtx.expr()) {
-			Object blockValue = visit(exprCtx);
-			if (CalcUtil.compareValues(this, ctx, cbCtx, caseValue, blockValue, mc, false, true, false) == 0) {
-			    Object returnValue = null;
-			    pushScope(scope);
-			    try {
-				returnValue = visit(cbCtx.stmtBlock());
+		if (exprLists != null) {
+		    for (CalcParser.ExprListContext exprListCtx : exprLists) {
+			for (CalcParser.ExprContext exprCtx : exprListCtx.expr()) {
+			    Object blockValue = visit(exprCtx);
+			    if (CalcUtil.compareValues(this, ctx, cbCtx, caseValue, blockValue, mc, false, true, false) == 0) {
+				Object returnValue = null;
+				pushScope(scope);
+				try {
+				    returnValue = visit(cbCtx.stmtBlock());
+				}
+				finally {
+				    popScope();
+				}
+				return returnValue;
 			    }
-			    finally {
-				popScope();
-			    }
-			    return returnValue;
 			}
 		    }
 		}

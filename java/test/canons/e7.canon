@@ -73,3 +73,17 @@
 >strings -> 3.14
 >value = "zero" -> "zero"
 >strings -> "many"
+>Defining function fieldType($typeid) = {
+> case $typeid of {
+> 4: ' TEXT', 
+> 7: 'LABEL', 
+> 19, 
+> default, 
+> 23: `$$typeid` 
+>} 
+>}
+>fieldType (4) -> " TEXT"
+>fieldType (7) -> "LABEL"
+>fieldType (23) -> "23"
+>fieldType (19) -> "19"
+>fieldType (99) -> "99"

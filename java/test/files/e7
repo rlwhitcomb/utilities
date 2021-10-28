@@ -69,3 +69,14 @@ value='Two'; strings
 value='THREE'; strings
 value="zero"; strings
 
+define fieldType($typeid) = {
+    case $typeid of {
+	4: ' TEXT',
+	7: 'LABEL',
+	19,
+	default,
+	23: `$$typeid`
+    }
+}
+fieldType(4);fieldType(7);fieldType(23);fieldType(19);fieldType(99)
+

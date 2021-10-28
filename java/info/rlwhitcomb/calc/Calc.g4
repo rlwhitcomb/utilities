@@ -275,6 +275,9 @@
  *	    #45: Add "read" function.
  *	    Adjust precedence such that expr3 is preferred over expr2 over expr1
  *	    (another attempt to get function parameters correct).
+ *	28-Oct-2021 (rlwhitcomb)
+ *	    Needed another possible EOL at end of 2nd type of stmtBlock. Revise
+ *	    CASE expression list syntax to make "default" work better.
  */
 
 grammar Calc;
@@ -330,11 +333,11 @@ caseStmt
 
 stmtBlock
    : EOL? '{' EOL? stmtOrExpr * '}' EOL?
-   | EOL? stmtOrExpr
+   | EOL? stmtOrExpr EOL?
    ;
 
 caseBlock
-   : EOL? ( exprList | K_DEFAULT ) ':' stmtBlock
+   : EOL? caseExprList ':' stmtBlock
    ;
 
 emptyStmt
@@ -494,6 +497,12 @@ arr
 
 exprList
    : expr ( ',' expr ) *
+   ;
+
+caseExprList
+   : exprList ',' EOL? K_DEFAULT ',' EOL? exprList
+   | K_DEFAULT ( ',' EOL? exprList ) ?
+   | exprList ( ',' EOL? K_DEFAULT ) ?
    ;
 
 obj
