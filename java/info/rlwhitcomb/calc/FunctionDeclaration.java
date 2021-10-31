@@ -27,6 +27,8 @@
  *  History:
  *	06-Oct-2021 (rlwhitcomb)
  *	    Initial coding.
+ *	30-Oct-2021 (rlwhitcomb)
+ *	    Implement "toString()".
  */
 package info.rlwhitcomb.calc;
 
@@ -160,6 +162,11 @@ class FunctionDeclaration
 	    }
 
 	    return buf.toString();
+	}
+
+	@Override
+	public String toString() {
+	    return String.format("define %1$s = %2$s", getFullFunctionName(), getTreeText(functionBody));
 	}
 
 	/**

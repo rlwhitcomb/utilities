@@ -1,10 +1,11 @@
 >Starting expression tests (suite 1).
 >
+>versioninfo.major > 2 || (versioninfo.major == 2 && versioninfo.minor > 3) || (versioninfo.major == 2 && versioninfo.minor == 3 && versioninfo.patch >= 0) -> true
 >Precision is now 50 digits.
 >52 + 27 -> 79
 >3.4 + 5 -> 8.4
 >34 + 5 @x -> 0x27
->PI -> 3.141592653589793238462643383279502884197169399375105
+>pi -> 3.141592653589793238462643383279502884197169399375105
 >sin (pi / 3) -> 0.86602540378443864676372317075293618347140262690517
 >4 & 7 -> 4
 >true && false -> false
@@ -326,6 +327,16 @@
 >20 ! + 0.5 @2,$ -> $2,432,902,008,176,640,000.50
 >1500 @$ -> $1500.00
 >
+>Calculation mode set to RATIONAL.
+>fr1 = 5 / 6 -> 5/6
+>++ fr1 -> 11/6
+>-- fr1 -> 5/6
+>fr2 = 15 / 7 -> 15/7
+>fr2 ++ -> 15/7
+>fr2 -- -> 22/7
+>fr2 -- -> 15/7
+>fr2 @F -> 1 1/7
+>Calculation mode set to DECIMAL.
 >a = [1, 2, 3] -> [ 1, 2, 3 ]
 >a[0] = 4 -> 4
 >a[1] = 5 -> 5

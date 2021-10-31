@@ -71,6 +71,8 @@
  *	    need to call it, and setup the context with the result.
  *	19-Oct-2021 (rlwhitcomb)
  *	    Special mode for "getContextObject" to throw if the variable/member is not defined.
+ *	28-Oct-2021 (rlwhitcomb)
+ *	    Changes for new predefined value paradigm.
  */
  package info.rlwhitcomb.calc;
 
@@ -203,26 +205,19 @@ class LValueContext
 	 * or string, this would be <code>arr[index]</code>.
 	 * <p> One special check is made for error reporting purposes on local variables.
 	 *
-	 * @return The member or indexed value extracted from the base object.
-	 */
-	public Object getContextObject() {
-	    return getContextObject(true);
-	}
-
-	/**
-	 * At the current variable nesting level, extract the referenced value.
-	 * <p> For a map, this would be <code>map.member</code>, for an array
-	 * or string, this would be <code>arr[index]</code>.
-	 * <p> One special check is made for error reporting purposes on local variables.
-	 *
 	 * @param allowUndefined if {@code true} (which is the default) then undefined
 	 *                       variables or members are allowed, otherwise error out
 	 * @return The member or indexed value extracted from the base object.
 	 */
 	@SuppressWarnings("unchecked")
-	public Object getContextObject(final boolean allowUndefined) {
+	public Object getPredefinedContextObject(final boolean allowUndefined) {
+	    Object contextObject = context;
+	    if (contextObject instanceof PredefinedValue) {
+		contextObject = ((PredefinedValue) contextObject).getValue();
+	    }
+	    Object result;
 	    if (name != null) {
-		ObjectScope map = (ObjectScope) context;
+		ObjectScope map = (ObjectScope) contextObject;
 		// Special checks for local vars (not defined means we are outside the loop or function)
 		if (name.startsWith("$") && !Pattern.matches("^\\$[0-9]+$", name)) {
 		    if (!map.isDefined(name, ignoreCase)) {
@@ -234,15 +229,15 @@ class LValueContext
 			throw new CalcExprException(varCtx, "%calc#undefined", name);
 		    }
 		}
-		return map.getValue(name, ignoreCase);
+		result = map.getValue(name, ignoreCase);
 	    }
 	    else if (index >= 0) {
-		if (context instanceof ArrayScope) {
-		    ArrayScope list = (ArrayScope) context;
-		    return list.getValue(index);
+		if (contextObject instanceof ArrayScope) {
+		    ArrayScope list = (ArrayScope) contextObject;
+		    result = list.getValue(index);
 		}
-		else if (context instanceof String) {
-		    String str = (String) context;
+		else if (contextObject instanceof String) {
+		    String str = (String) contextObject;
 		    if (index >= str.length()) {
 			return null;
 		    }
@@ -256,8 +251,33 @@ class LValueContext
 	    else {
 		// This should only ever be in the outermost global context
 		// where the context is just the global variables scope
-		return context;
+		result = contextObject;
 	    }
+
+	    return result;
+	}
+
+	/**
+	 * At the current variable nesting level, extract the referenced value.
+	 * <p> For a map, this would be <code>map.member</code>, for an array
+	 * or string, this would be <code>arr[index]</code>.
+	 * <p> One special check is made for error reporting purposes on local variables.
+	 *
+	 * @return The member or indexed value extracted from the base object.
+	 */
+	public Object getContextObject() {
+	    return getContextObject(true);
+	}
+
+	public Object getContextObject(final boolean allowUndefined) {
+	    Object result = getPredefinedContextObject(allowUndefined);
+
+	    if (result instanceof PredefinedValue) {
+		PredefinedValue predef = (PredefinedValue) result;
+		result = predef.getValue();
+	    }
+
+	    return result;
 	}
 
 	/**
@@ -274,6 +294,12 @@ class LValueContext
 	 */
 	@SuppressWarnings("unchecked")
 	public Object putContextObject(final CalcObjectVisitor visitor, final Object value) {
+	    Object contextObject = context;
+	    if (contextObject instanceof PredefinedValue) {
+		PredefinedValue predef = (PredefinedValue) contextObject;
+		throw new CalcExprException(varCtx, "%calc#noChangePredefined", predef.getName(),
+			name != null ? "." + name : "[" + String.valueOf(index) + "]");
+	    }
 	    if (name != null) {
 		if (name.startsWith("$")) {
 		    if (name.charAt(1) >= '0' && name.charAt(1) <= '9')
@@ -282,6 +308,11 @@ class LValueContext
 			throw new CalcExprException(varCtx, "%calc#localVarNoAssign", name);
 		}
 		ObjectScope map = (ObjectScope) context;
+		Object oldValue = map.getValue(name, ignoreCase);
+		if (oldValue instanceof PredefinedValue) {
+		    PredefinedValue predef = (PredefinedValue) oldValue;
+		    throw new CalcExprException(varCtx, "%calc#noChangePredefined", predef.getName(), "");
+		}
 		map.setValue(name, ignoreCase, value);
 	    }
 	    else if (index >= 0) {
@@ -324,6 +355,7 @@ class LValueContext
 	private LValueContext makeMapLValue(final CalcObjectVisitor visitor, final CalcParser.VarContext ctx, final String memberName) {
 	    ObjectScope map = null;
 	    Object objValue = getContextObject();
+
 	    if (objValue == null) {
 		map = new ObjectScope();
 		putContextObject(visitor, map);
@@ -355,15 +387,15 @@ class LValueContext
 	public static LValueContext getLValue(CalcObjectVisitor visitor, CalcParser.VarContext ctx, LValueContext lValue) {
 	    if (ctx instanceof CalcParser.IdVarContext) {
 		CalcParser.IdVarContext idVarCtx = (CalcParser.IdVarContext) ctx;
-		return new LValueContext(lValue, idVarCtx, lValue.getContextObject(), idVarCtx.id().getText());
+		return new LValueContext(lValue, idVarCtx, lValue.getPredefinedContextObject(true), idVarCtx.id().getText());
 	    }
 	    else if (ctx instanceof CalcParser.LocalVarContext) {
 		CalcParser.LocalVarContext localVarCtx = (CalcParser.LocalVarContext) ctx;
-		return new LValueContext(lValue, localVarCtx, lValue.getContextObject(), localVarCtx.LOCALVAR().getText());
+		return new LValueContext(lValue, localVarCtx, lValue.getPredefinedContextObject(true), localVarCtx.LOCALVAR().getText());
 	    }
 	    else if (ctx instanceof CalcParser.GlobalVarContext) {
 		CalcParser.GlobalVarContext globalVarCtx = (CalcParser.GlobalVarContext) ctx;
-		return new LValueContext(lValue, globalVarCtx, lValue.getContextObject(), globalVarCtx.GLOBALVAR().getText());
+		return new LValueContext(lValue, globalVarCtx, lValue.getPredefinedContextObject(true), globalVarCtx.GLOBALVAR().getText());
 	    }
 	    else if (ctx instanceof CalcParser.ArrVarContext) {
 		CalcParser.ArrVarContext arrVarCtx = (CalcParser.ArrVarContext) ctx;

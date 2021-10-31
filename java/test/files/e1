@@ -4,12 +4,16 @@
 :echo "Starting expression tests (suite 1)."
 :echo
 
+# Simple version check ...
+# version 2.3.0 was first version where these checks would work
+versioninfo.major > 2 || (versioninfo.major == 2 && versioninfo.minor > 3) || (versioninfo.major == 2 && versioninfo.minor == 3 && versioninfo.patch >= 0)
+
 # Various simple expressions
 :decimal(50)
 52+27
 3.4 + 5
 34 + 5 @x
-PI
+pi
 sin(pi/3)
 4 & 7
 true && false
@@ -335,6 +339,19 @@ foundset.username='Don'
 1500@$
 
 :echo
+
+# Rational mode pre/post inc/dec
+:rational true
+fr1 = 5/6
+++fr1
+--fr1
+fr2 = 15/7
+fr2++
+fr2--
+fr2--
+fr2@F
+
+:rational pop
 
 //
 // Now, start on the array and object stuff

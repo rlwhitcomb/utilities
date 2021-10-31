@@ -388,6 +388,7 @@
  *	    #45: Implement "read" function.
  *	28-Oct-2021 (rlwhitcomb)
  *	    Revise CASE syntax a little bit to make "default" work better.
+ *	    Implement predefined values very differently.
  */
 package info.rlwhitcomb.calc;
 
@@ -425,6 +426,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.UnaryOperator;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import net.iharder.b64.Base64;
 
@@ -600,6 +602,25 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	/** Stack of previous "quiet" mode values. */
 	private final Deque<Boolean> quietModeStack = new ArrayDeque<>();
 
+	/**
+	 * Aliases for "pi" - need prefixes of '\\' and 'u'  before calling {@link CharUtil#convertEscapeSequences}.
+	 */
+	private static final String[] PI_ALIASES = {
+	    "\u03A0", "\u03C0", "\u03D6", "\u1D28", "\u213C", "\u213F",
+	    "{1D6B7}", "{1D6D1}", "{1D6E1}",
+	    "{1D6F1}", "{1D70B}", "{1D71B}",
+	    "{1D72B}", "{1D745}", "{1D755}",
+	    "{1D765}", "{1D77F}", "{1D78F}",
+	    "{1D79F}", "{1D7B9}", "{1D7C9}"
+	};
+
+	/**
+	 * Aliases for "e".
+	 */
+	private static final String[] E_ALIASES = {
+	    "\u2107"
+	};
+
 
 	public NestedScope getVariables() {
 	    return currentScope;
@@ -616,6 +637,64 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    currentContext = new LValueContext(currentScope, settings.ignoreNameCase);
 	}
 
+	private void predefine(final GlobalScope globalScope) {
+	    PredefinedValue.define(globalScope, "true", Boolean.TRUE);
+	    PredefinedValue.define(globalScope, "false", Boolean.FALSE);
+	    PredefinedValue.define(globalScope, "null", null);
+
+	    PredefinedValue.define(globalScope, "today", () -> {
+		LocalDate today = LocalDate.now();
+		return BigInteger.valueOf(today.toEpochDay());
+	    });
+	    PredefinedValue.define(globalScope, "now", () -> {
+		LocalTime now = LocalTime.now();
+		return BigInteger.valueOf(now.toNanoOfDay());
+	    });
+
+	    SemanticVersion v = Environment.programVersion();
+	    ObjectScope version = new ObjectScope();
+
+	    version.setValue("major",      settings.ignoreNameCase, v.major);
+	    version.setValue("minor",      settings.ignoreNameCase, v.minor);
+	    version.setValue("patch",      settings.ignoreNameCase, v.patch);
+	    version.setValue("prerelease", settings.ignoreNameCase, v.getPreReleaseString());
+	    version.setValue("build",      settings.ignoreNameCase, v.getBuildMetaString());
+
+	    PredefinedValue.define(globalScope, "versioninfo", version);
+
+	    Supplier<Object> piSupplier = () -> {
+		BigDecimal d = piWorker.getPi();
+		if (settings.rationalMode)
+		    return new BigFraction(d);
+		else
+		    return d;
+	    };
+	    PredefinedValue.define(globalScope, "pi", piSupplier);
+	    for (int i = 0; i < PI_ALIASES.length; i++) {
+		String alias = PI_ALIASES[i];
+		if (alias.charAt(0) == '{') {
+		    String key = CharUtil.convertEscapeSequences("\\u" + alias);
+		    PredefinedValue.define(globalScope, key, piSupplier);
+		}
+		else {
+		    PredefinedValue.define(globalScope, alias, piSupplier);
+		}
+	    }
+
+	    Supplier<Object> eSupplier = () -> {
+		BigDecimal d = piWorker.getE();
+		if (settings.rationalMode)
+		    return new BigFraction(d);
+		else
+		    return d;
+	    };
+	    PredefinedValue.define(globalScope, "e", eSupplier);
+	    for (int i = 0; i < E_ALIASES.length; i++) {
+		String alias = E_ALIASES[i];
+		PredefinedValue.define(globalScope, alias, eSupplier);
+	    }
+	}
+
 	public CalcObjectVisitor(final CalcDisplayer resultDisplayer, final boolean rational, final boolean separators, final boolean ignoreCase) {
 	    setMathContext(MathContext.DECIMAL128);
 
@@ -624,6 +703,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    displayer = resultDisplayer;
 
 	    pushScope(globals);
+
+	    predefine(globals);
 
 	    initialized   = true;
 	}
@@ -836,6 +917,10 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    return returnValue;
 	}
 
+	private LValueContext getLValue(CalcParser.VarContext var) {
+	    return LValueContext.getLValue(this, var, currentContext);
+	}
+
 	private BigDecimal getDecimalValue(final ParserRuleContext ctx) {
 	    return toDecimalValue(this, visit(ctx), mc, ctx);
 	}
@@ -1015,8 +1100,14 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    int numberCleared = 0;
 
 	    if (idList == null || (ids = idList.id()).isEmpty()) {
-		numberCleared = globals.size();
-		globals.clear();
+		Iterator<Map.Entry<String, Object>> iter = globals.map().entrySet().iterator();
+		while (iter.hasNext()) {
+		    Map.Entry<String, Object> entry = iter.next();
+		    if (entry.getValue() instanceof PredefinedValue)
+			continue;
+		    iter.remove();
+		    numberCleared++;
+		}
 		displayActionMessage("%calc#varsAllCleared");
 	    }
 	    else {
@@ -1025,6 +1116,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		for (CalcParser.IdContext node : ids) {
 		    String varName = node.getText();
 		    if (varName.equals("<missing ID>"))
+			continue;
+		    if (globals.getValue(varName, settings.ignoreNameCase) instanceof PredefinedValue)
 			continue;
 		    numberCleared++;
 		    globals.remove(varName, settings.ignoreNameCase);
@@ -1077,7 +1170,10 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 	    for (String key : sortedKeys) {
 		Object value = globals.getValue(key, settings.ignoreNameCase);
-		if (value instanceof FunctionDeclaration) {
+		if (value instanceof PredefinedValue) {
+		    continue;
+		}
+		else if (value instanceof FunctionDeclaration) {
 		    FunctionDeclaration func = (FunctionDeclaration) value;
 		    displayer.displayResult(func.getFullFunctionName(), getTreeText(func.getFunctionBody()));
 		}
@@ -1125,7 +1221,10 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		// must be able to read back the saved file and have the values computed to be the same as they are now.
 		for (String key : globals.keySet()) {
 		    Object value = globals.getValue(key, settings.ignoreNameCase);
-		    if (value instanceof FunctionDeclaration) {
+		    if (value instanceof PredefinedValue) {
+			continue;
+		    }
+		    else if (value instanceof FunctionDeclaration) {
 			FunctionDeclaration func = (FunctionDeclaration) value;
 			writer.write(String.format("def %1$s = %2$s", func.getFullFunctionName(), getTreeText(func.getFunctionBody())));
 		    }
@@ -1162,7 +1261,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		CalcParser.VarContext var = ctx.var();
 		// could be boolean, or string mode value
 		LValueContext lValue = getLValue(var);
-		Object modeObject = lValue.getContextObject(false);
+		Object modeObject = evaluateFunction(ctx, lValue.getContextObject(false));
 		if (modeObject instanceof Boolean) {
 		    mode = ((Boolean) modeObject).booleanValue();
 		}
@@ -1989,63 +2088,106 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitVarExpr(CalcParser.VarExprContext ctx) {
 	    LValueContext lValue = getLValue(ctx.var());
-	    return lValue.getContextObject();
+	    return evaluateFunction(ctx, lValue.getContextObject());
 	}
 
 	@Override
 	public Object visitPostIncOpExpr(CalcParser.PostIncOpExprContext ctx) {
-	    LValueContext lValue = getLValue(ctx.var());
-	    Object value = lValue.getContextObject();
-
-	    BigDecimal dValue = toDecimalValue(this, value, mc, ctx.var());
-	    BigDecimal dAfter;
-
+	    CalcParser.VarContext var = ctx.var();
+	    LValueContext lValue = getLValue(var);
+	    Object value = evaluateFunction(var, lValue.getContextObject());
 	    String op = ctx.INC_OP().getText();
-	    switch (op) {
-		case "++":
-		case "\u2795\u2795":
-		    dAfter = dValue.add(BigDecimal.ONE);
-		    break;
-		case "--":
-		case "\u2212\u2212":
-		case "\u2796\u2796":
-		    dAfter = dValue.subtract(BigDecimal.ONE);
-		    break;
-		default:
-		    throw new UnknownOpException(op, ctx);
+	    Object beforeValue;
+	    Object afterValue;
+
+	    if (settings.rationalMode) {
+		BigFraction fValue = toFractionValue(this, value, var);
+		beforeValue = fValue;
+
+		switch (op) {
+		    case "++":
+		    case "\u2795\u2795":
+			afterValue = fValue.add(BigFraction.ONE);
+			break;
+		    case "--":
+		    case "\u2212\u2212":
+		    case "\u2796\u2796":
+			afterValue = fValue.subtract(BigFraction.ONE);
+			break;
+		    default:
+			throw new UnknownOpException(op, ctx);
+		}
+	    }
+	    else {
+		BigDecimal dValue = toDecimalValue(this, value, mc, var);
+		beforeValue = dValue;
+
+		switch (op) {
+		    case "++":
+		    case "\u2795\u2795":
+			afterValue = dValue.add(BigDecimal.ONE);
+			break;
+		    case "--":
+		    case "\u2212\u2212":
+		    case "\u2796\u2796":
+			afterValue = dValue.subtract(BigDecimal.ONE);
+			break;
+		    default:
+			throw new UnknownOpException(op, ctx);
+		}
 	    }
 
-	    lValue.putContextObject(this, dAfter);
+	    lValue.putContextObject(this, afterValue);
 
 	    // post operation, return original value
-	    return dValue;
+	    return beforeValue;
 	}
 
 	@Override
 	public Object visitPreIncOpExpr(CalcParser.PreIncOpExprContext ctx) {
-	    LValueContext lValue = getLValue(ctx.var());
-	    Object value = lValue.getContextObject();
-
-	    BigDecimal dValue = toDecimalValue(this, value, mc, ctx.var());
-	    BigDecimal dAfter;
-
+	    CalcParser.VarContext var = ctx.var();
+	    LValueContext lValue = getLValue(var);
+	    Object value = evaluateFunction(var, lValue.getContextObject());
 	    String op = ctx.INC_OP().getText();
-	    switch (op) {
-		case "++":
-		case "\u2795\u2795":
-		    dAfter = dValue.add(BigDecimal.ONE);
-		    break;
-		case "--":
-		case "\u2212\u2212":
-		case "\u2796\u2796":
-		    dAfter = dValue.subtract(BigDecimal.ONE);
-		    break;
-		default:
-		    throw new UnknownOpException(op, ctx);
+	    Object afterValue;
+
+	    if (settings.rationalMode) {
+		BigFraction fValue = toFractionValue(this, value, var);
+
+		switch (op) {
+		    case "++":
+		    case "\u2795\u2795":
+			afterValue = fValue.add(BigFraction.ONE);
+			break;
+		    case "--":
+		    case "\u2212\u2212":
+		    case "\u2796\u2796":
+			afterValue = fValue.subtract(BigFraction.ONE);
+			break;
+		    default:
+			throw new UnknownOpException(op, ctx);
+		}
+	    }
+	    else {
+		BigDecimal dValue = toDecimalValue(this, value, mc, var);
+
+		switch (op) {
+		    case "++":
+		    case "\u2795\u2795":
+			afterValue = dValue.add(BigDecimal.ONE);
+			break;
+		    case "--":
+		    case "\u2212\u2212":
+		    case "\u2796\u2796":
+			afterValue = dValue.subtract(BigDecimal.ONE);
+			break;
+		    default:
+			throw new UnknownOpException(op, ctx);
+		}
 	    }
 
 	    // pre operation, return the modified value
-	    return lValue.putContextObject(this, dAfter);
+	    return lValue.putContextObject(this, afterValue);
 	}
 
 	@Override
@@ -3944,13 +4086,6 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	@Override
-	public Object visitBooleanValue(CalcParser.BooleanValueContext ctx) {
-	    if (ctx.K_TRUE() != null)
-		return Boolean.TRUE;
-	    return Boolean.FALSE;
-	}
-
-	@Override
 	public Object visitNumberValue(CalcParser.NumberValueContext ctx) {
 	    return new BigDecimal(ctx.NUMBER().getText());
 	}
@@ -3983,24 +4118,6 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public Object visitKbValue(CalcParser.KbValueContext ctx) {
 	    String value = ctx.KB_CONST().getText();
 	    return BigInteger.valueOf(NumericUtil.convertKMGValue(value));
-	}
-
-	@Override
-	public Object visitPiValue(CalcParser.PiValueContext ctx) {
-	    BigDecimal d = piWorker.getPi();
-	    if (settings.rationalMode)
-		return new BigFraction(d);
-	    else
-		return d;
-	}
-
-	@Override
-	public Object visitEValue(CalcParser.EValueContext ctx) {
-	    BigDecimal d = piWorker.getE();
-	    if (settings.rationalMode)
-		return new BigFraction(d);
-	    else
-		return d;
 	}
 
 	@Override
@@ -4154,45 +4271,10 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	@Override
-	public Object visitTodayValue(CalcParser.TodayValueContext ctx) {
-	    LocalDate today = LocalDate.now();
-	    return BigInteger.valueOf(today.toEpochDay());
-	}
-
-	@Override
-	public Object visitNowValue(CalcParser.NowValueContext ctx) {
-	    LocalTime now = LocalTime.now();
-	    return BigInteger.valueOf(now.toNanoOfDay());
-	}
-
-	@Override
-	public Object visitNullValue(CalcParser.NullValueContext ctx) {
-	    return null;
-	}
-
-	@Override
-	public Object visitVersionValue(CalcParser.VersionValueContext ctx) {
-	    SemanticVersion v = Environment.programVersion();
-	    ObjectScope result = new ObjectScope();
-
-	    result.setValue("major",      settings.ignoreNameCase, v.major);
-	    result.setValue("minor",      settings.ignoreNameCase, v.minor);
-	    result.setValue("patch",      settings.ignoreNameCase, v.patch);
-	    result.setValue("prerelease", settings.ignoreNameCase, v.getPreReleaseString());
-	    result.setValue("build",      settings.ignoreNameCase, v.getBuildMetaString());
-
-	    return result;
-	}
-
-	@Override
 	public Object visitEitherOrExpr(CalcParser.EitherOrExprContext ctx) {
 	    boolean ifExpr = getBooleanValue(ctx.expr(0));
 
 	    return visit(ifExpr ? ctx.expr(1) : ctx.expr(2));
-	}
-
-	private LValueContext getLValue(CalcParser.VarContext var) {
-	    return LValueContext.getLValue(this, var, currentContext);
 	}
 
 	@Override

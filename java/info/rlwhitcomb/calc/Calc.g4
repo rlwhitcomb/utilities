@@ -278,6 +278,8 @@
  *	28-Oct-2021 (rlwhitcomb)
  *	    Needed another possible EOL at end of 2nd type of stmtBlock. Revise
  *	    CASE expression list syntax to make "default" work better.
+ *	    Remove the predefined constants, in favor of predefined variables / values.
+ *	    Allow BMP letters (plus high PI values) in identifiers.
  */
 
 grammar Calc;
@@ -534,17 +536,10 @@ value
    | OCT_CONST                   # octalValue
    | HEX_CONST                   # hexValue
    | KB_CONST                    # kbValue
-   | ( K_TRUE | K_FALSE )        # booleanValue
-   | K_NULL                      # nullValue
-   | PI_CONST                    # piValue
-   | E_CONST                     # eValue
    | FRAC_CONST                  # fracValue
    | ROMAN_CONST                 # romanValue
    | TIME_CONST                  # timeValue
    | DATE_CONST                  # dateValue
-   | K_TODAY                     # todayValue
-   | K_NOW                       # nowValue
-   | K_VERSIONINFO               # versionValue
    ;
 
 formalParamList
@@ -609,7 +604,9 @@ id
    ;
 
 modes
-   : 'on'
+   : 'true'
+   | 'false'
+   | 'on'
    | 'off'
    | 'yes'
    | 'no'
@@ -619,9 +616,7 @@ modes
    ;
 
 modeOption
-   : K_TRUE
-   | K_FALSE
-   | modes
+   : modes
    | var
    ;
 
@@ -637,19 +632,6 @@ replaceOption
    ;
 
 /* Lexer rules start here */
-
-PI_CONST : P I
-         | ( '\u03A0' | '\u03C0' | '\u03D6' | '\u1D28' | '\u213C' | '\u213F' )
-         | ( '\u{1D6B7}' | '\u{1D6D1}' | '\u{1D6E1}' )
-         | ( '\u{1D6F1}' | '\u{1D70B}' | '\u{1D71B}' )
-         | ( '\u{1D72B}' | '\u{1D745}' | '\u{1D755}' )
-         | ( '\u{1D765}' | '\u{1D77F}' | '\u{1D78F}' )
-         | ( '\u{1D79F}' | '\u{1D7B9}' | '\u{1D7C9}' )
-         ;
-
-E_CONST  : E
-         | '\u2107'
-         ;
 
 FRAC_CONST
          : FRACTIONS
@@ -677,18 +659,9 @@ DATE_CONST
          ;
 
 
-K_TRUE     : T R U E ;
-
-K_FALSE    : F A L S E ;
-
-K_NULL     : N U L L ;
-
-K_TODAY    : T O D A Y ;
-
-K_NOW      : N O W ;
-
-K_VERSIONINFO
-           : V E R S I O N I N F O ;
+/*
+ * Predefined function names
+ */
 
 K_ABS      : A B S ;
 
@@ -814,6 +787,10 @@ K_SUMOF    : ( S U M O F | '\u2211' ) ;
 
 K_PRODUCTOF: ( P R O D U C T O F | '\u220F' ) ;
 
+/*
+ * Statement keywords
+ */
+
 K_LOOP     : L O O P ;
 
 K_WHILE    : W H I L E ;
@@ -836,7 +813,8 @@ K_DEFAULT  : D E F A U L T ;
 /* Note: this needs to be last so that these other "ID" like things
  * will be recognized first. */
 
-ID     : [a-zA-Z_] [a-zA-Z_0-9]* ;
+ID     : NAME_START_CHAR NAME_CHAR *
+       ;
 
 
 DOTS
@@ -849,7 +827,8 @@ DOT
        ;
 
 LOCALVAR
-       : '$' [a-zA-Z_] [a-zA-Z_0-9]* ;
+       : '$' NAME_START_CHAR NAME_CHAR *
+       ;
 
 GLOBALVAR
        : '$' INT ;
@@ -1166,6 +1145,42 @@ fragment FRACTIONS
 
 fragment FS
    : [ \t] * ( ',' | ';' | '/' | [ \t] + ) [ \t] *
+   ;
+
+fragment NAME_START_CHAR
+   : 'A'..'Z' | 'a'..'z'
+   | '_'
+   | '\u00C0'..'\u00D6'
+   | '\u00D8'..'\u00F6'
+   | '\u00F8'..'\u02FF'
+   | '\u0370'..'\u037D'
+   | '\u037F'..'\u1FFF'
+   | '\u200C'..'\u200D'
+   | '\u2071'..'\u2073'
+   | '\u207A'..'\u207F'
+   | '\u208A'..'\u218F'
+   | '\u2C00'..'\u2FEF'
+   | '\u3001'..'\uD7FF'
+   | '\uF900'..'\uFDCF'
+   | '\uFDF0'..'\uFF0F'
+   | '\uFF1A'..'\uFFFD'
+   | PI_VALUES
+   ;
+
+fragment NAME_CHAR
+   : NAME_START_CHAR
+   | '0'..'9'
+   | '\u00B7'
+   | '\u0300'..'\u036F'
+   | '\u203F'..'\u2040'
+   ;
+
+fragment PI_VALUES
+   : '\u{1D6B7}' | '\u{1D6D1}' | '\u{1D6E1}'
+   | '\u{1D6F1}' | '\u{1D70B}' | '\u{1D71B}'
+   | '\u{1D72B}' | '\u{1D745}' | '\u{1D755}'
+   | '\u{1D765}' | '\u{1D77F}' | '\u{1D78F}'
+   | '\u{1D79F}' | '\u{1D7B9}' | '\u{1D7C9}'
    ;
 
 NUMBER

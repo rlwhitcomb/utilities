@@ -82,6 +82,8 @@
 #	    Undefined function error.
 #	19-Oct-2021 (rlwhitcomb)
 #	    Errors for "replace". Errors for "splice".
+#	28-Oct-2021 (rlwhitcomb)
+#	    New error for predefined value assignment.
 #
 
 #
@@ -187,8 +189,9 @@ nonArrayValue		= Variable <x>%1$s<> already has a non-array value
 callNotAFunction	= Cannot make a function call on the non-function value <x>%1$s<>
 indexNegative		= Index value of <v>%1$d<> cannot be negative
 unknownVarCtx		= ERROR: unknown var context subclass: <x>%1$s<>
-badAssign		= Assignment to <x>%1$s<> without name or index.
+badAssign		= Assignment to <x>%1$s<> without name or index
 tooManyValues		= Too many actual values (%1$d) passed for only %2$d parameters
+noChangePredefined	= Cannot change predefined value <x>%1$s%2$s<>
 
 #
 # From UnknownOpException

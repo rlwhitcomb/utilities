@@ -27,6 +27,8 @@
  *  History:
  *	06-Oct-2021 (rlwhitcomb)
  *	    Initial coding.
+ *	26-Oct-2021 (rlwhitcomb)
+ *	    Add PREDEFINED type.
  */
 package info.rlwhitcomb.calc;
 
@@ -56,7 +58,9 @@ class Scope
 		/** A {@code CASE} statement block. */
 		CASE,
 		/** A user-defined function, which includes a local symbol table. */
-		FUNCTION
+		FUNCTION,
+		/** A predefined variable or function. */
+		PREDEFINED
 	}
 
 	/**
