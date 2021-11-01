@@ -286,9 +286,8 @@ h2 {
      decimal numbers (as in <code>23.47</code>), or floating point constants in scientific notation (as in <code>1.2e-20</code>). Note that a number
      of the special Unicode number-like symbols are also interpreted as single numbers (see the "Operators, Functions, and Precedence" table below), such as:
      <code>&#x2473;</code> = <code>20</code>, <code>&#x247D;</code> = <code>10</code>, or <code>&#xFF19;</code> = <code>9</code>.
-  <p>The boolean (or "logical") constants are <code>true</code> and <code>false</code> (although they are case-insensitive, so could be spelled
-     as <code>True</code> or <code>TRUE</code> as well).
-  <p>The special null constant, which signifies no value, or a value that hasn't been assigned or defined yet, is simply <code>null</code> (again, case-insensitive).
+  <p>The boolean (or "logical") constants are <code>true</code> and <code>false</code>.
+  <p>The special null constant, which signifies no value, or a value that hasn't been assigned or defined yet, is simply <code>null</code>.
      Any regular variables, or list or object elements that are not (yet) defined will have the <code>null</code> value. Most operations will result
      in an error if one or more of the operands are null. There is a special <code>isnull</code> function that can be used to test for this to avoid
      errors if desired, as can simply using the equality / inequality operators with the null constant. Null values inserted into interpolated strings
@@ -408,6 +407,8 @@ or
      to change this behavior. The predefined values and functions are always case-insensitive, regardless of the mode setting. Variables remain defined with the
      same casing as they were found in a script, but the "ignore case" mode simply changes how they are looked up in the variable dictionary. Therefore, changing
      the mode option will not "undefine" any variables from the way they were originally declared / used.
+     Note that that special constant values are predefined in lower-case only, but the predefined function names are matched regardless
+     of case, and regardless of the mode setting.
   <p>Values can be grouped into lists of values (an <i>array</i>), or into sets of key/value pairs (an <i>object</i>). Arrays can
      be multi-dimensional. The inside dimensions do not have to be all the same length. The types of values in an array need not
      be homogeneous. And, in fact, the values in an array can be objects as well as simple values. The keys in an object must be
@@ -794,6 +795,9 @@ or
      rules are the same as for the input values on the command line. And if the string cannot be interpreted as file names that exist, the
      entire string is just returned as-is as the result. The second (optional) expression is the name of the charset to use (system default
      if not given, or empty/null). The entire contents of the file(s) is returned, with the end-of-line sequences changed to just newline (0x0A or "\n"), and can be assigned to a variable or used in some other way.
+  <p>The version information from <code>versioninfo</code> is returned as an object with the following fields, e.g.:
+  <p class="indent">
+    <code style="color:blue;">versioninfo</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">{ major: 2, minor: 3, patch: 0, prerelease: "-debug", build: "+9cce83e" }</code>
 </div>
 <hr class="sectionsep">
   <h2>User-Defined Functions</h2>
