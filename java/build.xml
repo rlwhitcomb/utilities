@@ -673,6 +673,7 @@
 			<arg value="mastertest"/>
 		</java>
 		<echo>Verifying the M${mersenne.number} prime (${mersenne.digits} digits)...</echo>
+		<echo>GIMPS Milestones: October 6, 2021: All tests below M(57 885 161) verified, confirming its place as the 48th Mersenne prime.</echo>
 		<exec executable="./verify_calc"  dir="."             output="${test.log.path}" append="true" unless:true="${on.windows}" failonerror="true">
 			<arg value="${mersenne.number}"/>
 			<arg value="${mersenne.digits}"/>
