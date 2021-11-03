@@ -280,6 +280,8 @@
  *	    CASE expression list syntax to make "default" work better.
  *	    Remove the predefined constants, in favor of predefined variables / values.
  *	    Allow BMP letters (plus high PI values) in identifiers.
+ *	02-Nov-2021 (rlwhitcomb)
+ *	    #60: Fix order of declarations for "fillArgs" to get the 3-arg version correct.
  */
 
 grammar Calc;
@@ -476,10 +478,10 @@ spliceArgs
    ;
 
 fillArgs
-   : '(' var ',' expr ',' expr ')'
-   | '(' var ',' expr ',' expr ',' expr ')'
-   | var ',' expr ',' expr
+   : '(' var ',' expr ',' expr ',' expr ')'
+   | '(' var ',' expr ',' expr ')'
    | var ',' expr ',' expr ',' expr
+   | var ',' expr ',' expr
    ;
 
 dotRange
