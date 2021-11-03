@@ -81,3 +81,5 @@ define fieldType($typeid) = {
 fieldType(4);fieldType(7);fieldType(23);fieldType(19);fieldType(99)
 'type: ' + fieldType(4)
 
+def srt($a1, $a2, $f) = { $f($a1, $a2) > 0 ? $a1 : $a2 }
+

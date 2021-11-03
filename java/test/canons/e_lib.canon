@@ -1,39 +1,39 @@
 >All variables cleared.
 >Separator display set to false.
->excel_date (d'2021/10/8') -> 44477
->excel_date_1904 (D'12/7/1941') -> 13855
->rad_to_deg (pi / 4) -> 45
->deg_to_rad (135) -> 2.356194490192344928846982537459627
->dow_name (D'10/13/1957') -> "Sunday"
->moy_name (D'9/11/2001') -> "September"
->long_date (D'11/11/1918') -> "Monday, November 11, 1918"
->flat_map ([[[1, 2], [3, 4]], [[5, 6], [7, 8]], [[9, 10], [11, 12]]]) -> [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 ]
->is_perfect (28) -> true
->is_perfect (99) -> false
->quad (3, -4, -9) -> [ 2.52258812094334064070649043297285, -1.189254787610007307373157099639517 ]
->quad (1, 0, -25) -> [ 5, -5 ]
->win_pct (25, 75) -> "25.00%"
->win_pct (662, 174, 2) -> "79.00%"
+>excel_date(d'2021/10/8') -> 44477
+>excel_date_1904(D'12/7/1941') -> 13855
+>rad_to_deg(pi / 4) -> 45
+>deg_to_rad(135) -> 2.356194490192344928846982537459627
+>dow_name(D'10/13/1957') -> "Sunday"
+>moy_name(D'9/11/2001') -> "September"
+>long_date(D'11/11/1918') -> "Monday, November 11, 1918"
+>flat_map([[[1, 2], [3, 4]], [[5, 6], [7, 8]], [[9, 10], [11, 12]]]) -> [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 ]
+>is_perfect(28) -> true
+>is_perfect(99) -> false
+>quad(3, -4, -9) -> [ 2.52258812094334064070649043297285, -1.189254787610007307373157099639517 ]
+>quad(1, 0, -25) -> [ 5, -5 ]
+>win_pct(25, 75) -> "25.00%"
+>win_pct(662, 174, 2) -> "79.00%"
 >help_mort -> "
 >Usage: PMT(P=<present value>,R=<yearly interest rate (%)>,N=<number of years>)
 >    or PMT2(P,r=<monthly interest %>,n=<number of months>)
 >   Or use monthly(P,R,N) or monthly_whole(P,R,N) to get the results in different forms."
->monthly (244000, 3.25, 30) -> "Full monthly payment is $1,061.90"
->PMT2 (350000, 0.3, 180) -> 2519.31
+>monthly(244000, 3.25, 30) -> "Full monthly payment is $1,061.90"
+>PMT2(350000, 0.3, 180) -> 2519.31
 >s1 = eval stack -> { _values: [ ] }
->isempty (s1) -> true
->peek (s1) -> <null>
->push (s1, 'abc') -> "abc"
->isempty (s1) -> false
->push (s1, 'def') -> "def"
->peek (s1) -> "def"
+>isempty(s1) -> true
+>peek(s1) -> <null>
+>push(s1, 'abc') -> "abc"
+>isempty(s1) -> false
+>push(s1, 'def') -> "def"
+>peek(s1) -> "def"
 >s1 -> { _values: [ "abc", "def" ] }
->pop (s1) -> "def"
->peek (s1) -> "abc"
->pop (s1) -> "abc"
->isempty (s1) -> true
->peek (s1) -> <null>
->pop (s1) -> <null>
->isempty (s1) -> true
+>pop(s1) -> "def"
+>peek(s1) -> "abc"
+>pop(s1) -> "abc"
+>isempty(s1) -> true
+>peek(s1) -> <null>
+>pop(s1) -> <null>
+>isempty(s1) -> true
 >Separator display set to false.
 >All variables cleared.

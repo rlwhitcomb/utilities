@@ -82,9 +82,10 @@
 > 23: `$$typeid` 
 >} 
 >}
->fieldType (4) -> " TEXT"
->fieldType (7) -> "LABEL"
->fieldType (23) -> "23"
->fieldType (19) -> "19"
->fieldType (99) -> "99"
->'type: ' + fieldType (4) -> "type:  TEXT"
+>fieldType(4) -> " TEXT"
+>fieldType(7) -> "LABEL"
+>fieldType(23) -> "23"
+>fieldType(19) -> "19"
+>fieldType(99) -> "99"
+>'type: ' + fieldType(4) -> "type:  TEXT"
+>Defining function srt($a1,$a2,$f) = {$f($a1, $a2) > 0 ? $a1 : $a2}

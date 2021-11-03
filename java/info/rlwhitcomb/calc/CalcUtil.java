@@ -87,6 +87,8 @@
  *	    #31: Change the way "convert" works to make real escape sequences.
  *	28-Oct-2021 (rlwhitcomb)
  *	    Fix addOp if the values are functions that must be evaluated.
+ *	02-Nov-2021 (rlwhitcomb)
+ *	    #56: Take out extra space before "(" in function call.
  */
 package info.rlwhitcomb.calc;
 
@@ -127,6 +129,8 @@ public final class CalcUtil
 		boolean spaceMinus = true;
 		/** {@code false} means {@code "["}, while {@code true} means {@code " ["} */
 		boolean spaceOpenBracket = true;
+		/** {@code false} means {@code "("}, while {@code true} means ({@code " ("} */
+		boolean spaceOpenParen = true;
 
 
 		TreeTextOptions() {
@@ -136,6 +140,7 @@ public final class CalcUtil
 		    this.spaceColon = other.spaceColon;
 		    this.spaceMinus = other.spaceMinus;
 		    this.spaceOpenBracket = other.spaceOpenBracket;
+		    this.spaceOpenParen = other.spaceOpenParen;
 		}
 	}
 
@@ -189,6 +194,10 @@ public final class CalcUtil
 		localOptions = new TreeTextOptions(options);
 		localOptions.spaceOpenBracket = false;
 	    }
+	    else if (ctx instanceof CalcParser.ActualParamsContext) {
+		localOptions = new TreeTextOptions(options);
+		localOptions.spaceOpenParen = false;
+	    }
 
 	    for (int i = 0; i < ctx.getChildCount(); i++) {
 		ParseTree child = ctx.getChild(i);
@@ -202,6 +211,10 @@ public final class CalcUtil
 
 		    switch (childText) {
 			case "(":
+			     space = false;
+			     if (!localOptions.spaceOpenParen)
+				replace = true;
+			     break;
 			case "{":
 			     space = false;
 			     break;

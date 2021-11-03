@@ -771,12 +771,12 @@
 >Defining function push($s,$v) = {$s._arr[$s._len ++] = $v}
 >Defining function pop($s) = {_v = splice ($s._arr, -- $s._len, 1) ; _v[0]}
 >s1 = eval stack -> { _len: 0, _arr: [ ] }
->push (s1, 19) -> 19
->push (s1, 20) -> 20
->push (s1, 21) -> 21
+>push(s1, 19) -> 19
+>push(s1, 20) -> 20
+>push(s1, 21) -> 21
 >s1 -> { _len: 3, _arr: [ 19, 20, 21 ] }
->pop (s1) -> 21
->pop (s1) -> 20
+>pop(s1) -> 21
+>pop(s1) -> 20
 >s1 -> { _len: 1, _arr: [ 19 ] }
 >
 >End of nested object / array tests.
