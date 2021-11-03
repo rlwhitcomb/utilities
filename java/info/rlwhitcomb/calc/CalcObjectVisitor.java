@@ -389,6 +389,8 @@
  *	28-Oct-2021 (rlwhitcomb)
  *	    Revise CASE syntax a little bit to make "default" work better.
  *	    Implement predefined values very differently.
+ *	02-Nov-2021 (rlwhitcomb)
+ *	    #57: Implement "@+nns" formatting.
  */
 package info.rlwhitcomb.calc;
 
@@ -1420,6 +1422,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    int precision = Integer.MIN_VALUE;
 	    boolean separators = false;
+	    char signChar = ' ';
 
 	    TerminalNode formatNode = ctx.FORMAT();
 	    String format           = formatNode == null ? "" : " " + formatNode.getText();
@@ -1430,10 +1433,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    if (format.length() > 3) {
 		int index = 2;
 		char ch;
-		while ((ch = format.charAt(index)) >= '0' && ch <= '9')
+		while (((ch = format.charAt(index)) >= '0' && ch <= '9') || (ch == '-' || ch == '+'))
 		    index++;
 		if (index > 2) {
 		    String num = format.substring(2, index);
+		    if (num.charAt(0) == '-' || num.charAt(0) == '+')
+			signChar = num.charAt(0);
 		    precision = Integer.parseInt(num);
 		}
 	    }
@@ -1694,6 +1699,24 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			buf.setLength(0);
 			currencyFormat.format(dValue, buf, new FieldPosition(NumberFormat.Field.CURRENCY));
 			valueBuf.append(buf);
+			break;
+
+		    case 'S':
+		    case 's':
+			valueBuf.append('"');
+			String stringValue = toStringValue(this, ctx, result, false, false, separators, "");
+			switch (signChar) {
+			    case '+':	/* center - positive width puts extra spaces on left always */
+				CharUtil.padToWidth(valueBuf, stringValue, precision, CharUtil.Justification.CENTER);
+				break;
+			    case '-':	/* right-justify (spaces on left) */
+				CharUtil.padToWidth(valueBuf, stringValue, Math.abs(precision), CharUtil.Justification.RIGHT);
+				break;
+			    default:	/* left-justify (spaces on right) */
+				CharUtil.padToWidth(valueBuf, stringValue, precision, CharUtil.Justification.LEFT);
+				break;
+			}
+			valueBuf.append('"');
 			break;
 
 		    default:

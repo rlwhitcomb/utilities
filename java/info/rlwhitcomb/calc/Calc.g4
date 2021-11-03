@@ -282,6 +282,7 @@
  *	    Allow BMP letters (plus high PI values) in identifiers.
  *	02-Nov-2021 (rlwhitcomb)
  *	    #60: Fix order of declarations for "fillArgs" to get the 3-arg version correct.
+ *	    #57: Add "+" to format prefix options.
  */
 
 grammar Calc;
@@ -1043,7 +1044,7 @@ D_IGNORECASE
 
 
 FORMAT
-   : '@' ( '-' ? INT ) ? [a-zA-Z,] ? [a-zA-Z%$]
+   : '@' ( [\-+] ? INT ) ? [a-zA-Z,] ? [a-zA-Z%$]
    ;
 
 STRING
