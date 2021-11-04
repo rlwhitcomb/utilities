@@ -73,6 +73,8 @@
  *	    Special mode for "getContextObject" to throw if the variable/member is not defined.
  *	28-Oct-2021 (rlwhitcomb)
  *	    Changes for new predefined value paradigm.
+ *	03-Nov-2021 (rlwhitcomb)
+ *	    #69: New global variables "$#" and "$*".
  */
  package info.rlwhitcomb.calc;
 
@@ -219,7 +221,7 @@ class LValueContext
 	    if (name != null) {
 		ObjectScope map = (ObjectScope) contextObject;
 		// Special checks for local vars (not defined means we are outside the loop or function)
-		if (name.startsWith("$") && !Pattern.matches("^\\$[0-9]+$", name)) {
+		if (name.startsWith("$") && !Pattern.matches("^\\$[0-9#\\*]+$", name)) {
 		    if (!map.isDefined(name, ignoreCase)) {
 			throw new CalcExprException(varCtx, "%calc#localVarNotAvail", name);
 		    }
@@ -302,7 +304,8 @@ class LValueContext
 	    }
 	    if (name != null) {
 		if (name.startsWith("$")) {
-		    if (name.charAt(1) >= '0' && name.charAt(1) <= '9')
+		    char nameChar = name.charAt(1);
+		    if ((nameChar >= '0' && nameChar <= '9') || (nameChar == '*' || nameChar == '#'))
 			throw new CalcExprException(varCtx, "%calc#globalArgNoAssign", name);
 		    else
 			throw new CalcExprException(varCtx, "%calc#localVarNoAssign", name);

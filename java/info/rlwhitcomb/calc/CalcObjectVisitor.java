@@ -391,6 +391,8 @@
  *	    Implement predefined values very differently.
  *	02-Nov-2021 (rlwhitcomb)
  *	    #57: Implement "@+nns" formatting.
+ *	03-Nov-2021 (rlwhitcomb)
+ *	    #69: Introduce "$*" and "$#" global variables.
  */
 package info.rlwhitcomb.calc;
 
@@ -571,6 +573,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	/** The current topmost scope for variables. */
 	private NestedScope currentScope;
 
+	/** The array object of the command-line arguments. */
+	private ArrayScope<Object> arguments;
+
 	/** The current {@code LValueContext} for variables. */
 	private LValueContext currentContext;
 
@@ -622,6 +627,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	private static final String[] E_ALIASES = {
 	    "\u2107"
 	};
+
+	/** Name for global argument array value. */
+	private static final String ARG_ARRAY = "$*";
+
+	/** Name for global argument count value. */
+	private static final String ARG_COUNT = "$#";
 
 
 	public NestedScope getVariables() {
@@ -695,6 +706,10 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		String alias = E_ALIASES[i];
 		PredefinedValue.define(globalScope, alias, eSupplier);
 	    }
+
+	    arguments = new ArrayScope<Object>();
+	    globalScope.setValue(ARG_ARRAY, false, arguments);
+	    globalScope.setValue(ARG_COUNT, false, BigInteger.ZERO);
 	}
 
 	public CalcObjectVisitor(final CalcDisplayer resultDisplayer, final boolean rational, final boolean separators, final boolean ignoreCase) {
@@ -727,6 +742,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	/**
 	 * Set one of the global argument variables ({@code $0}, {@code $1}, etc)
 	 * to the given value.
+	 * <p> Also maintain the {@link #ARG_ARRAY} array and {@link #ARG_COUNT} count variables.
 	 *
 	 * @param index	The zero-based index for the variable.
 	 * @param arg	The argument value, which will be parsed and set as a numeric value
@@ -737,10 +753,13 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    try {
 		BigDecimal dValue = new BigDecimal(arg);
 		globals.setValue(String.format("$%1$d", index), false, dValue);
+		arguments.add(dValue);
 	    }
 	    catch (NumberFormatException nfe) {
 		globals.setValue(String.format("$%1$d", index), false, arg);
+		arguments.add(arg);
 	    }
+	    globals.setValue(ARG_COUNT, false, BigInteger.valueOf(arguments.size()));
 	}
 
 	public MathContext getMathContext() {

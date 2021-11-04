@@ -283,6 +283,8 @@
  *	02-Nov-2021 (rlwhitcomb)
  *	    #60: Fix order of declarations for "fillArgs" to get the 3-arg version correct.
  *	    #57: Add "+" to format prefix options.
+ *	03-Nov-2021 (rlwhitcomb)
+ *	    #69: Introduce "$*" and "$#" global variables.
  */
 
 grammar Calc;
@@ -834,7 +836,10 @@ LOCALVAR
        ;
 
 GLOBALVAR
-       : '$' INT ;
+       : '$' INT
+       | '$' '#'
+       | '$' '*'
+       ;
 
 INC_OP
        : ( '++' | '\u2795\u2795' )
