@@ -393,6 +393,7 @@
  *	    #57: Implement "@+nns" formatting.
  *	03-Nov-2021 (rlwhitcomb)
  *	    #69: Introduce "$*" and "$#" global variables.
+ *	    Don't clear "$..." variables in ":clear", nor display by ":variables", nor write in ":save".
  */
 package info.rlwhitcomb.calc;
 
@@ -1126,6 +1127,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    Map.Entry<String, Object> entry = iter.next();
 		    if (entry.getValue() instanceof PredefinedValue)
 			continue;
+		    if (entry.getKey().startsWith("$"))
+			continue;
 		    iter.remove();
 		    numberCleared++;
 		}
@@ -1191,7 +1194,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 	    for (String key : sortedKeys) {
 		Object value = globals.getValue(key, settings.ignoreNameCase);
-		if (value instanceof PredefinedValue) {
+		if (value instanceof PredefinedValue || key.startsWith("$")) {
 		    continue;
 		}
 		else if (value instanceof FunctionDeclaration) {
@@ -1242,7 +1245,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		// must be able to read back the saved file and have the values computed to be the same as they are now.
 		for (String key : globals.keySet()) {
 		    Object value = globals.getValue(key, settings.ignoreNameCase);
-		    if (value instanceof PredefinedValue) {
+		    if (value instanceof PredefinedValue || key.startsWith("$")) {
 			continue;
 		    }
 		    else if (value instanceof FunctionDeclaration) {

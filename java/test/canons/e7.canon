@@ -89,3 +89,8 @@
 >fieldType(99) -> "99"
 >'type: ' + fieldType(4) -> "type:  TEXT"
 >Defining function srt($a1,$a2,$f) = {$f($a1, $a2) > 0 ? $a1 : $a2}
+>$# -> 5
+>$* -> [ "abc", "def", 1, 2, 3 ]
+>$0 -> "abc"
+>$4 -> 3
+>$*[2] -> 1

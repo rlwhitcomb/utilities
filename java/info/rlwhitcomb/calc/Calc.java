@@ -204,6 +204,8 @@
  *	    New command-line option to ignore previous libraries.
  *	21-Oct-2021 (rlwhitcomb)
  *	    #41: Use new Intl method to more correctly construct the Locale desired.
+ *	03-Nov-2021 (rlwhitcomb)
+ *	    Clear "argValues" in "main".
  */
 package info.rlwhitcomb.calc;
 
@@ -1602,6 +1604,7 @@ public class Calc
 	    computeColors();
 
 	    List<String> argList = new ArrayList<>(args.length * 2);
+	    argValues.clear();
 
 	    // Preprocess the CALC_OPTIONS environment variable (if present)
 	    String calcOptions = System.getenv("CALC_OPTIONS");

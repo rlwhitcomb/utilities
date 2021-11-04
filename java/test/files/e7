@@ -83,3 +83,8 @@ fieldType(4);fieldType(7);fieldType(23);fieldType(19);fieldType(99)
 
 def srt($a1, $a2, $f) = { $f($a1, $a2) > 0 ? $a1 : $a2 }
 
+# Test input arguments
+$#
+$*
+$0;$4
+$*[2]
