@@ -89,6 +89,8 @@
  *	    Fix addOp if the values are functions that must be evaluated.
  *	02-Nov-2021 (rlwhitcomb)
  *	    #56: Take out extra space before "(" in function call.
+ *	04-Nov-2021 (rlwhitcomb)
+ *	    #71: Add natural order comparator to "compareValues".
  */
 package info.rlwhitcomb.calc;
 
@@ -103,6 +105,8 @@ import java.util.TreeSet;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
 
+import org.padler.natorder.NaturalOrderComparator;
+
 import info.rlwhitcomb.calc.CalcObjectVisitor.Settings;
 import info.rlwhitcomb.util.BigFraction;
 import info.rlwhitcomb.util.CharUtil;
@@ -115,8 +119,16 @@ import static info.rlwhitcomb.util.CharUtil.Justification;
  */
 public final class CalcUtil
 {
+	/** Natural order comparator, case-sensitive. */
+	private static final NaturalOrderComparator NATURAL_SENSITIVE_COMPARATOR = new NaturalOrderComparator(true);
+
+	/** Natural order comparator, case-insensitive. */
+	private static final NaturalOrderComparator NATURAL_INSENSITIVE_COMPARATOR = new NaturalOrderComparator(false);
+
+
 	/** Private constructor since this is a static class. */
 	private CalcUtil() { }
+
 
 	/**
 	 * Flags for how to format tree text, depending on context.
@@ -785,6 +797,16 @@ public final class CalcUtil
 	}
 
 
+	private static int compareStrings(final String s1, final String s2, final boolean ignoreCase, final boolean naturalOrder) {
+	    return naturalOrder
+		? (ignoreCase
+			? NATURAL_INSENSITIVE_COMPARATOR.compare(s1, s2)
+			: NATURAL_SENSITIVE_COMPARATOR.compare(s1, s2))
+		: (ignoreCase
+			? s1.compareToIgnoreCase(s2)
+			: s1.compareTo(s2));
+	}
+
 	/**
 	 * Compare two objects of possibly differing types.
 	 *
@@ -802,22 +824,23 @@ public final class CalcUtil
 		final ParserRuleContext ctx1, final ParserRuleContext ctx2,
 		final MathContext mc, final boolean strict, final boolean allowNulls) {
 	    return compareValues(visitor, ctx1, ctx2, visitor.visit(ctx1), visitor.visit(ctx2),
-		mc, strict, allowNulls, false);
+		mc, strict, allowNulls, false, false);
 	}
 
 	/**
 	 * Compare two objects of possibly differing types.
 	 * <p> This is the recursive version, for use when comparing elements of lists and maps.
 	 *
-	 * @param visitor    The object visitor used to calculate the values.
-	 * @param ctx1       The Rule context of the first operand.
-	 * @param ctx2       The Rule context of the second operand.
-	 * @param obj1       The first object to compare.
-	 * @param obj2       The second object to compare.
-	 * @param mc         Rounding mode used when converting to decimal.
-	 * @param strict     Whether or not the object classes must match for the comparison.
-	 * @param allowNulls Some comparisons (strings) can be compared even if one or both operands are null.
-	 * @param ignoreCase For strings, whether to ignore case or not.
+	 * @param visitor      The object visitor used to calculate the values.
+	 * @param ctx1         The Rule context of the first operand.
+	 * @param ctx2         The Rule context of the second operand.
+	 * @param obj1         The first object to compare.
+	 * @param obj2         The second object to compare.
+	 * @param mc           Rounding mode used when converting to decimal.
+	 * @param strict       Whether or not the object classes must match for the comparison.
+	 * @param allowNulls   Some comparisons (strings) can be compared even if one or both operands are null.
+	 * @param ignoreCase   For strings, whether to ignore case or not.
+	 * @param naturalOrder For strings, whether to use natural ordering or normal string ordering.
 	 * @return {@code -1} if the first object is "less than" the second,
 	 *         {@code 0} if the objects are "equal",
 	 *         {@code +1} if the first object is "greater than" the second.
@@ -826,7 +849,7 @@ public final class CalcUtil
 		final ParserRuleContext ctx1, final ParserRuleContext ctx2,
 		final Object obj1, final Object obj2,
 		final MathContext mc, final boolean strict, final boolean allowNulls,
-		final boolean ignoreCase) {
+		final boolean ignoreCase, final boolean naturalOrder) {
 	    Object e1 = visitor.evaluateFunction(ctx1, obj1);
 	    Object e2 = visitor.evaluateFunction(ctx2, obj2);
 
@@ -851,26 +874,31 @@ public final class CalcUtil
 	    if (e1 instanceof String || e2 instanceof String) {
 		String s1 = e1.toString();
 		String s2 = e2.toString();
-		return ignoreCase ? s1.compareToIgnoreCase(s2) : s1.compareTo(s2);
+
+		return compareStrings(s1, s2, ignoreCase, naturalOrder);
 	    }
 	    else if (e1 instanceof BigDecimal || e2 instanceof BigDecimal) {
 		BigDecimal d1 = toDecimalValue(visitor, e1, mc, ctx1);
 		BigDecimal d2 = toDecimalValue(visitor, e2, mc, ctx2);
+
 		return d1.compareTo(d2);
 	    }
 	    else if (e1 instanceof BigInteger || e2 instanceof BigInteger) {
 		BigInteger i1 = toIntegerValue(visitor, e1, mc, ctx1);
 		BigInteger i2 = toIntegerValue(visitor, e2, mc, ctx2);
+
 		return i1.compareTo(i2);
 	    }
 	    else if (e1 instanceof BigFraction || e2 instanceof BigFraction) {
 		BigFraction f1 = toFractionValue(visitor, e1, ctx1);
 		BigFraction f2 = toFractionValue(visitor, e2, ctx2);
+
 		return f1.compareTo(f2);
 	    }
 	    else if (e1 instanceof Boolean || e2 instanceof Boolean) {
 		Boolean b1 = toBooleanValue(visitor, e1, ctx1);
 		Boolean b2 = toBooleanValue(visitor, e2, ctx2);
+
 		return b1.compareTo(b2);
 	    }
 	    else if (e1 instanceof ArrayScope && e2 instanceof ArrayScope) {
@@ -887,7 +915,8 @@ public final class CalcUtil
 		for (int i = 0; i < size1; i++) {
 		    Object o1 = list1.getValue(i);
 		    Object o2 = list2.getValue(i);
-		    int ret = compareValues(visitor, ctx1, ctx2, o1, o2, mc, strict, allowNulls, ignoreCase);
+
+		    int ret = compareValues(visitor, ctx1, ctx2, o1, o2, mc, strict, allowNulls, ignoreCase, naturalOrder);
 		    if (ret != 0)
 			return ret;
 		}
@@ -915,7 +944,7 @@ public final class CalcUtil
 		    String key1, key2;
 		    while ((key1 = sortedKeys1.pollFirst()) != null) {
 			key2 = sortedKeys2.pollFirst();
-			int ret = ignoreCase ? key1.compareToIgnoreCase(key2) : key1.compareTo(key2);
+			int ret = compareStrings(key1, key2, ignoreCase, naturalOrder);
 			if (ret != 0)
 			    return ret;
 		    }
@@ -925,7 +954,8 @@ public final class CalcUtil
 		for (String key : keySet1) {
 		    Object value1 = map1.getValue(key, false);
 		    Object value2 = map2.getValue(key, false);
-		    int ret = compareValues(visitor, ctx1, ctx2, value1, value2, mc, strict, allowNulls, ignoreCase);
+
+		    int ret = compareValues(visitor, ctx1, ctx2, value1, value2, mc, strict, allowNulls, ignoreCase, naturalOrder);
 		    if (ret != 0)
 			return ret;
 		}

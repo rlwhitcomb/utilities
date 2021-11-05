@@ -394,6 +394,8 @@
  *	03-Nov-2021 (rlwhitcomb)
  *	    #69: Introduce "$*" and "$#" global variables.
  *	    Don't clear "$..." variables in ":clear", nor display by ":variables", nor write in ":save".
+ *	04-Nov-2021 (rlwhitcomb)
+ *	    #71: Use "natural" ordering for "sort".
  */
 package info.rlwhitcomb.calc;
 
@@ -2024,7 +2026,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    for (CalcParser.ExprListContext exprListCtx : exprLists) {
 			for (CalcParser.ExprContext exprCtx : exprListCtx.expr()) {
 			    Object blockValue = visit(exprCtx);
-			    if (CalcUtil.compareValues(this, ctx, cbCtx, caseValue, blockValue, mc, false, true, false) == 0) {
+			    if (CalcUtil.compareValues(this, ctx, cbCtx, caseValue, blockValue, mc, false, true, false, false) == 0) {
 				Object returnValue = null;
 				pushScope(scope);
 				try {
@@ -3451,7 +3453,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 		@Override
 		public int compare(Object o1, Object o2) {
-		    return CalcUtil.compareValues(visitor, ctx, ctx, o1, o2, mc, false, true, ignoreCase);
+		    return CalcUtil.compareValues(visitor, ctx, ctx, o1, o2, mc, false, true, ignoreCase, true);
 		}
 	}
 

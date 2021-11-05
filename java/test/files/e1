@@ -280,11 +280,16 @@ fill(str_b, '-', 22, 3)
 # The "sort" function
 a1 = [ 4, 3, 1, 2, -1, 5, -10 ]
 a2 = [ "abc", "Abc", "aBc", "abC" ]
+a3 = [ "abc", "DEF", "Abc", "def", "1.1.0", "1.10.0", "1.2.0" ]
 a1 = sort a1
 a1
 sort(a2)
 a2
 sort(a2, true)
+sort a3
+sort a3, true
+sort a3, false
+
 sort [[3,9], [4, 7], [1, 2], [10, 8]]
 
 # Precedence of compare / equal operators
