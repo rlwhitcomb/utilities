@@ -269,10 +269,10 @@ h2 {
     </tr>
     </thead>
     <tbody>
-    <tr><td><code>quit</code></td><td>Exit the program normally.</td><td><code>exit</code>, <code>:quit</code>, <code>:exit</code>,<br><code>:q</code>, <code>:e</code>, <code>:x</code></td><td></td></tr>
-    <tr><td><code>help</code></td><td>Display the HTML help page in the browser.</td><td><code>?</code>, <code>:help</code>, <code>:?</code></td><td><code>-help</code></td></tr>
-    <tr><td><code>version</code></td><td>Display program version information.</td><td><code>:version</code>, <code>:vers</code>,<br><code>:ver</code>, <code>:v</code></td><td><code>-version</code></td></tr>
-    <tr><td><code>gui</code></td><td>Switch to GUI mode</td><td><code>:gui</code>, <code>:g</code></td><td><code>-gui</code></td></tr>
+    <tr><td><code>:quit</code></td><td>Exit the program normally.</td><td><code>:exit</code>,<br><code>:q</code>, <code>:e</code>, <code>:x</code></td><td></td></tr>
+    <tr><td><code>:help</code></td><td>Display the HTML help page in the browser.</td><td><code>?</code>, <code>:?</code>, <code>:h</code></td><td><code>-help</code></td></tr>
+    <tr><td><code>:version</code></td><td>Display program version information.</td><td><code>:vers</code>,<br><code>:ver</code>, <code>:v</code></td><td><code>-version</code></td></tr>
+    <tr><td><code>:gui</code></td><td>Switch to GUI mode</td><td><code>:g</code></td><td><code>-gui</code></td></tr>
   </tbody>
   </table>
   </div>

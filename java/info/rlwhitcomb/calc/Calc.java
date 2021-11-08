@@ -206,6 +206,9 @@
  *	    #41: Use new Intl method to more correctly construct the Locale desired.
  *	03-Nov-2021 (rlwhitcomb)
  *	    Clear "argValues" in "main".
+ *	07-Nov-2021 (rlwhitcomb)
+ *	    Don't allow non-directive forms (as in plain "quit" or "help") in REPL mode
+ *	    anymore, in preparation for allowing all function/command words as identifiers.
  */
 package info.rlwhitcomb.calc;
 
@@ -1707,8 +1710,6 @@ public class Calc
 				if (buf.length() == 0) {
 				    String cmd = line.trim().toLowerCase();
 				    switch (cmd) {
-					case "quit":
-					case "exit":
 					case ":quit":
 					case ":exit":
 					case ":q":
@@ -1717,20 +1718,18 @@ public class Calc
 					    exit();
 					    break;
 					case "?":
-					case "help":
 					case ":?":
 					case ":help":
+					case ":h":
 					    printIntro();
 					    displayHelp();
 					    break;
-					case "version":
 					case ":version":
 					case ":vers":
 					case ":ver":
 					case ":v":
 					    printTitleAndVersion();
 					    break;
-					case "gui":
 					case ":gui":
 					case ":g":
 					    DesktopApplicationContext.main(Calc.class, args);
