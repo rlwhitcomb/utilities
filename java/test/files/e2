@@ -92,5 +92,18 @@ s1
 pop(s1); pop(s1)
 s1
 
+# New EOL tests
+[
+  1,
+  2,
+  3
+]
+
+{
+  a : 10,
+  b : true,
+  c : 'ABC'
+}
+
 :echo
 :echo "End of nested object / array tests."

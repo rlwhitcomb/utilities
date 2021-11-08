@@ -785,6 +785,16 @@
 >pop(s1) -> 21
 >pop(s1) -> 20
 >s1 -> { _len: 1, _arr: [ 19 ] }
+>[
+> 1, 
+> 2, 
+> 3 
+>] -> [ 1, 2, 3 ]
+>{
+> a: 10, 
+> b: true, 
+> c: 'ABC' 
+>} -> { a: 10, b: true, c: "ABC" }
 >
 >End of nested object / array tests.
 >Tests of :include directive.

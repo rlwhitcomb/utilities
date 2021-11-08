@@ -285,6 +285,8 @@
  *	    #57: Add "+" to format prefix options.
  *	03-Nov-2021 (rlwhitcomb)
  *	    #69: Introduce "$*" and "$#" global variables.
+ *	07-Nov-2021 (rlwhitcomb)
+ *	    #67: Allow multi-line array and object declarations.
  */
 
 grammar Calc;
@@ -498,12 +500,12 @@ loopCtl
    ;
 
 arr
-   : '[' exprList ']'
-   | '[' ']'
+   : '[' EOL? exprList EOL? ']'
+   | '[' EOL? ']'
    ;
 
 exprList
-   : expr ( ',' expr ) *
+   : expr ( ',' EOL? expr ) *
    ;
 
 caseExprList
@@ -513,8 +515,8 @@ caseExprList
    ;
 
 obj
-   : '{' pair ( ',' pair ) * '}'
-   | '{' '}'
+   : '{' EOL? pair ( ',' EOL? pair ) * EOL? '}'
+   | '{' EOL? '}'
    ;
 
 pair
