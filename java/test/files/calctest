@@ -32,6 +32,7 @@ f1,UTF-8      : f1
 save          : save
 e_lib         : e_lib
 e_func        : e_func
+e_s           : e_s
 
 $echo
 $echo "End of Calc tests."

@@ -1,0 +1,14 @@
+#
+# Test cases for the @s formatting inside interpolated strings
+#
+a = 'A Thrilling "Story" To Be Told'
+`$a`
+`${a}`
+a@-40s
+`${a@-40s}`
+b = 'Psalm 23: "The Lord is my Shepherd"'
+b@u
+`$b`
+`${b}`
+`${b@u}`
+`${b@+40s}`

@@ -396,6 +396,8 @@
  *	    Don't clear "$..." variables in ":clear", nor display by ":variables", nor write in ":save".
  *	04-Nov-2021 (rlwhitcomb)
  *	    #71: Use "natural" ordering for "sort".
+ *	07-Nov-2021 (rlwhitcomb)
+ *	    #73: Fix '@s' formatting.
  */
 package info.rlwhitcomb.calc;
 
@@ -1446,6 +1448,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    int precision = Integer.MIN_VALUE;
 	    boolean separators = false;
+	    boolean addQuotes = false;
 	    char signChar = ' ';
 
 	    TerminalNode formatNode = ctx.FORMAT();
@@ -1727,7 +1730,6 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 		    case 'S':
 		    case 's':
-			valueBuf.append('"');
 			String stringValue = toStringValue(this, ctx, result, false, false, separators, "");
 			switch (signChar) {
 			    case '+':	/* center - positive width puts extra spaces on left always */
@@ -1740,16 +1742,24 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 				CharUtil.padToWidth(valueBuf, stringValue, precision, CharUtil.Justification.LEFT);
 				break;
 			}
-			valueBuf.append('"');
+			addQuotes = true;
 			break;
 
 		    default:
 			throw new CalcExprException(ctx, "%calc#illegalFormat", formatNode.getText());
 		}
+
+		resultString = valueBuf.toString();
+
+		if (toUpperCase)
+		    resultString = resultString.toUpperCase();
+		else if (toLowerCase)
+		    resultString = resultString.toLowerCase();
+		else if (addQuotes)
+		    resultString = CharUtil.addDoubleQuotes(resultString);
+
 		// Set the "result" for the case of interpolated strings with formats
-		result = resultString = toUpperCase ? valueBuf.toString().toUpperCase()
-				      : toLowerCase ? valueBuf.toString().toLowerCase()
-				      : valueBuf.toString();
+		result = resultString;
 	    }
 	    else {
 		// For large numbers it takes a significant amount of time just to convert

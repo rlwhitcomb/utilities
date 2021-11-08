@@ -91,6 +91,8 @@
  *	    #56: Take out extra space before "(" in function call.
  *	04-Nov-2021 (rlwhitcomb)
  *	    #71: Add natural order comparator to "compareValues".
+ *	07-Nov-2021 (rlwhitcomb)
+ *	    #73: Strip outer quotes during interpolation.
  */
 package info.rlwhitcomb.calc;
 
@@ -1178,7 +1180,11 @@ public final class CalcUtil
 
 		    String expr = rawValue.substring(pos + 2, nextPos);
 		    Object exprValue = Calc.processString(expr, true);
-		    output.append(toStringValue(visitor, ctx, exprValue, false, false, settings.separatorMode, ""));
+		    String stringValue = toStringValue(visitor, ctx, exprValue, false, false, settings.separatorMode, "");
+		    // The result is going to be formatted with quotes, separators, everything that it currently
+		    // needs to be output, BUT it will go through the quoting again inside the formatter code
+		    // so we need to strip quotes and escaped quotes or we will get double
+		    output.append(CharUtil.stripDoubleQuotes(stringValue));
 		    lastPos = nextPos;
 		}
 		else if (isIdentifierStart(rawValue.charAt(pos + 1))) {
