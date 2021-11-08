@@ -287,6 +287,7 @@
  *	    #69: Introduce "$*" and "$#" global variables.
  *	07-Nov-2021 (rlwhitcomb)
  *	    #67: Allow multi-line array and object declarations.
+ *	    #69: Allow dots for function declarations for variable parameter lists.
  */
 
 grammar Calc;
@@ -550,7 +551,8 @@ value
    ;
 
 formalParamList
-   : '(' formalParam ( ',' formalParam ) * ')'
+   : '(' formalParam ( ',' formalParam ) * ( ',' DOTS ) ? ')'
+   | '(' DOTS ')'
    | '(' ')'
    ;
 
@@ -825,7 +827,8 @@ ID     : NAME_START_CHAR NAME_CHAR *
 
 
 DOTS
-       : '..'
+       : '...'
+       | '..'
        | '\u2026'
        ;
 

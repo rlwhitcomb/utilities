@@ -29,9 +29,12 @@
  *	    Initial coding.
  *	07-Oct-2021 (rlwhitcomb)
  *	    Add context parameter to "evaluateFunction".
+ *	07-Nov-2021 (rlwhitcomb)
+ *	    #69: Maintain "$*" and "$#" variables for function parameters.
  */
 package info.rlwhitcomb.calc;
 
+import java.math.BigInteger;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -52,6 +55,11 @@ class FunctionScope extends NestedScope
 	 */
 	private final FunctionDeclaration declaration;
 
+	/**
+	 * An array, addressable by index, of the parameter values in order of declaration.
+	 */
+	private final ArrayScope<Object> parameters;
+
 
 	/**
 	 * Constructor given the function name and its declaration.
@@ -61,10 +69,15 @@ class FunctionScope extends NestedScope
 	FunctionScope(final FunctionDeclaration decl) {
 	    super(Type.FUNCTION);
 	    this.declaration = decl;
+	    this.parameters = new ArrayScope<>();
+	    setValue(CalcObjectVisitor.ARG_ARRAY, false, parameters);
+	    setValue(CalcObjectVisitor.ARG_COUNT, false, BigInteger.ZERO);
 	}
 
 	/**
 	 * Set the value of the given parameter number to the given expression.
+	 * <p> Also maintain the {@link CalcObjectVisitor#ARG_ARRAY} and {@link CalcObjectVisitor#ARG_COUNT} variables
+	 * for this function.
 	 *
 	 * @param visitor The visitor class used to evaluate expressions.
 	 * @param index   0-based parameter index.
@@ -77,10 +90,16 @@ class FunctionScope extends NestedScope
 	    if (valueExpr == null) {
 		valueExpr = declaration.getParameterExpr(paramName);
 	    }
-	    if (valueExpr == null)
+	    if (valueExpr == null) {
 		setValue(paramName, false, null);
-	    else
-		setValue(paramName, false, visitor.evaluateFunction(valueExpr, visitor.visit(valueExpr)));
+		parameters.add(null);
+	    }
+	    else {
+		Object paramValue = visitor.evaluateFunction(valueExpr, visitor.visit(valueExpr));
+		setValue(paramName, false, paramValue);
+		parameters.add(paramValue);
+	    }
+	    setValue(CalcObjectVisitor.ARG_COUNT, false, BigInteger.valueOf(parameters.size()));
 	}
 
 	/**

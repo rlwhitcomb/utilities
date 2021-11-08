@@ -823,6 +823,17 @@ or
   <p>The parameter values are assigned when the function is called, and there can be fewer actual values given than are declared; the remaining values
      will be assigned <code>null</code> unless there is a default expression given in the declaration, in which case that expression is evaluated.
      The parentheses are optional on the function call if there are no parameters being sent.
+  <p>Similarly to the <code>$#</code> and <code>$*</code> variables maintained for the command line arguments, local variables named the
+     same are maintained for each function call. Thus the number of actual parameters passed to the function is available as
+     <code>$#</code> inside the function, the first parameter is available through <code>$*[0]</code>, etc. and the whole array of
+     parameters is available via <code>$*</code>.
+     Thus the command-line arguments are not accessible directly inside functions (but, of course, can be made available simply by
+     copying to another array).
+  <p>A function can declare any number (including zero) of fixed parameters, and use <code>...</code> or <code>..</code> or <code>&#x2026;</code>
+     at the end of the parameter list to signify any number of variable parameters after the fixed ones. These variable parameters can be
+     accessed using the <code>$*[</code><i>nn</i><code>]</code> parameter array, or using <code>$</code><i>nn</i> where <i>nn</i> is the
+     parameter index, starting from zero. For instance, <code>def g($a, ...) = { $a + $1 }</code> and calling with <code>g(1, 2)</code>
+     will assign <code>$a = 1</code> and <code>$1 = 2</code>, and therefore  <code>$a == $*[0]</code>, <code>$*[1] == $1</code>, and etc.
   <p>Any variables referenced inside the function, including the parameters, are local to the function, unless they had been defined outside the function previously.
   <p class="indent">
     <code>def win_pct($wins, $losses, $ties = 0) = { $wins / ($wins + $ties + $losses) @2% }</code>

@@ -84,6 +84,8 @@
 #	    Errors for "replace". Errors for "splice".
 #	28-Oct-2021 (rlwhitcomb)
 #	    New error for predefined value assignment.
+#	07-Nov-2021 (rlwhitcomb)
+#	    #69: New error for varargs.
 #
 
 #
@@ -190,7 +192,8 @@ callNotAFunction	= Cannot make a function call on the non-function value <x>%1$s
 indexNegative		= Index value of <v>%1$d<> cannot be negative
 unknownVarCtx		= ERROR: unknown var context subclass: <x>%1$s<>
 badAssign		= Assignment to <x>%1$s<> without name or index
-tooManyValues		= Too many actual values (%1$d) passed for only %2$d parameters
+tooManyForOneValue	= Too many actual values (%1$d) passed for only one parameter
+tooManyForValues	= Too many actual values (%1$d) passed for only %2$d parameters
 noChangePredefined	= Cannot change predefined value <x>%1$s%2$s<>
 
 #
@@ -202,4 +205,9 @@ unknownOp	= Unknown operator <x>%1$s<>
 # From Scope
 #
 indexOutOfBounds	= Index value of <v>%1$d<> is out of bounds
+
+#
+# From FunctionDeclaration
+#
+varargsLast		= Variable argument declaration must be last in the parameter list
 

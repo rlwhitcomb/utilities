@@ -29,6 +29,8 @@
  *	    Initial coding.
  *	30-Oct-2021 (rlwhitcomb)
  *	    Implement "toString()".
+ *	07-Nov-2021 (rlwhitcomb)
+ *	    #69: Implement variable number of parameters.
  */
 package info.rlwhitcomb.calc;
 
@@ -67,6 +69,16 @@ class FunctionDeclaration
 	 */
 	private String[] parameterNames;
 
+	/**
+	 * Does this function declare a variable number of arguments?
+	 */
+	private boolean hasVarargs;
+
+	/**
+	 * Placeholder parameter name for the variable parameter list.
+	 */
+	public static final String VARARG = "...";
+
 
 	/**
 	 * Constructor given the function name and its declaration (body).
@@ -79,6 +91,7 @@ class FunctionDeclaration
 	    this.functionBody   = body;
 	    this.parameters     = new LinkedHashMap<>();
 	    this.parameterNames = null;
+	    this.hasVarargs     = false;
 	}
 
 	/**
@@ -90,10 +103,15 @@ class FunctionDeclaration
 	 * @param expr	The (possibly {@code null}) initializer expression.
 	 */
 	public void defineParameter(final ParserRuleContext ctx, final String name, final ParserRuleContext expr) {
+	    if (hasVarargs)
+		throw new CalcExprException(ctx, "%calc#varargsLast");
+
 	    if (parameters.containsKey(name))
 		throw new CalcExprException(ctx, "%calc#noDupLocalVar", name);
 
 	    parameters.put(name, expr);
+	    if (name.equals(VARARG))
+		hasVarargs = true;
 
 	    /* Invalidate the parameter names array (if it exists) since we just added a new one */
 	    parameterNames = null;
@@ -113,10 +131,13 @@ class FunctionDeclaration
 		parameterNames = parameters.keySet().toArray(new String[0]);
 	    }
 
-	    if (index < 0 || index >= parameterNames.length)
+	    if (index < 0 || (!hasVarargs && index >= parameterNames.length))
 		throw new Intl.IndexOutOfBoundsException("calc#indexOutOfBounds", index);
 
-	    return parameterNames[index];
+	    if ((hasVarargs && index < parameterNames.length - 1) || (!hasVarargs && index < parameterNames.length))
+		return parameterNames[index];
+
+	    return String.format("$%1$d", index);
 	}
 
 	/**
@@ -170,12 +191,15 @@ class FunctionDeclaration
 	}
 
 	/**
-	 * Access the number of formal parameters.
+	 * Access the number of formal parameters: negative number of formals declared along with
+	 * a varargs indicator, or a positive, fixed number.
+	 * <p> Thus: <code>def f($a, ...)</code> will give <code>-2</code>, while
+	 * <code>def f($a, $b, $c)</code> will give <code>3</code>.
 	 *
 	 * @return Number of formal parameters defined.
 	 */
 	public int getNumberOfParameters() {
-	    return parameters.size();
+	    return hasVarargs ? -parameters.size() : parameters.size();
 	}
 
 	/**

@@ -398,6 +398,7 @@
  *	    #71: Use "natural" ordering for "sort".
  *	07-Nov-2021 (rlwhitcomb)
  *	    #73: Fix '@s' formatting.
+ *	    #69: Implement "$#" and "$*" for function parameters, and varargs in param lists.
  */
 package info.rlwhitcomb.calc;
 
@@ -634,10 +635,10 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	};
 
 	/** Name for global argument array value. */
-	private static final String ARG_ARRAY = "$*";
+	static final String ARG_ARRAY = "$*";
 
 	/** Name for global argument count value. */
-	private static final String ARG_COUNT = "$#";
+	static final String ARG_COUNT = "$#";
 
 
 	public NestedScope getVariables() {
@@ -886,8 +887,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    int numActuals = exprs != null ? exprs.size() : 0;
 
 	    if (exprs != null) {
-		if (numActuals > numParams)
-		    throw new CalcExprException(ctx, "%calc#tooManyValues", numActuals, numParams);
+		if (numParams >= 0 && numActuals > numParams) {
+		    if (numParams == 1)
+			throw new CalcExprException(ctx, "%calc#tooManyForOneValue", numActuals);
+		    else
+			throw new CalcExprException(ctx, "%calc#tooManyForValues", numActuals, numParams);
+		}
 
 		for (int index = 0; index < numActuals; index++) {
 		    funcScope.setParameterValue(this, index, exprs.get(index));
@@ -2095,6 +2100,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		for (CalcParser.FormalParamContext paramVar : formalParams.formalParam()) {
 		    String paramName = paramVar.LOCALVAR().getText();
 		    func.defineParameter(paramVar, paramName, paramVar.expr());
+		}
+		if (formalParams.DOTS() != null) {
+		    func.defineParameter(formalParams, FunctionDeclaration.VARARG, null);
 		}
 	    }
 

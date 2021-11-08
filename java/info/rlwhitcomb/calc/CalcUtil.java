@@ -93,6 +93,7 @@
  *	    #71: Add natural order comparator to "compareValues".
  *	07-Nov-2021 (rlwhitcomb)
  *	    #73: Strip outer quotes during interpolation.
+ *	    #69: Define "$#" and "$*" inside interpolations.
  */
 package info.rlwhitcomb.calc;
 
@@ -1124,6 +1125,10 @@ public final class CalcUtil
 	    }
 	}
 
+	private static boolean isLocalVarPart(final char ch) {
+	    return (isIdentifierPart(ch) || ch == '#' || ch == '*');
+	}
+
 	/**
 	 * Given an interpolated string constant, get the current interpolated value, by evaluating all
 	 * embedded variable references and expressions and substituting their values in place.
@@ -1152,7 +1157,7 @@ public final class CalcUtil
 		    // Try to parse out a loop variable name here and substitute if found
 		    // so that $$var would get $var value, but "$$(" would result in "$("
 		    int identPos = pos + 2;
-		    while (identPos < rawValue.length() && isIdentifierPart(rawValue.charAt(identPos)))
+		    while (identPos < rawValue.length() && isLocalVarPart(rawValue.charAt(identPos)))
 			identPos++;
 		    if (identPos > pos + 2) {
 			String varName = rawValue.substring(pos + 1, identPos);
