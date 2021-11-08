@@ -35,6 +35,8 @@
  *	    Tweak some of the Settings text.
  *	05-Oct-2021 (rlwhitcomb)
  *	    Add Save button text.
+ *	07-Nov-2021 (rlwhitcomb)
+ *	    #72: Tweak tooltip for Save button.
  */
 {
     title:              'Calc',
@@ -76,7 +78,7 @@
     darkBackground:     'Or for dark backgrounds',
 
     saveButton:         'S',
-    saveTip:            'Save to file (F3)',
+    saveTip:            'Save Results to file (F3)',
     saveLabel:          'Save to File',
     saveKeyLabel:       'F3',
 
