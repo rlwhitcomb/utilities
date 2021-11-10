@@ -1,0 +1,18 @@
+#
+# Tests of natural ordering in "sort", "min", and "max"
+#
+sort($*)
+min($*)
+max($*)
+
+a = [ ]
+values = [ 10, 11, 1, 20, 2, 3, 40, 41, 30, 4, 5, 6, 7, 8, 9, 21, 12, 13, 14, 15, 16, 26, 42, 35, 39, 31, 32, 33 ]
+
+:quiet on
+loop over values { a[length(a)] = `$$_` }
+:quiet pop
+a
+sort(a)
+min(a)
+max(a)
+

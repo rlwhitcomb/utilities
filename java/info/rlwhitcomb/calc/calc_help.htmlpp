@@ -863,7 +863,7 @@ or
      iterative or repeated calculations, and to select between actions based on the value of an expression. These are the <code>LOOP</code>, <code>WHILE</code> and <code>IF</code> statements.
   <p>The syntax for each is as follows:
   <p class="indent">
-     <code>LOOP</code>&nbsp;[ <i>loopvar</i> ( <code>IN</code> | <code>OVER</code> ) ] <i>expr</i> [ <code>...</code>, <code>..</code>, or <code>&#x2026;</code> <i>expr</i> ] [ <code>,</code> <i>expr</i> ] <code>{</code> <i>statements or expressions</i> <code>}</code>
+     <code>LOOP</code>&nbsp;[ [ <i>loopvar</i> ] ( <code>IN</code> | <code>OVER</code> ) ] <i>expr</i> [ <code>...</code>, <code>..</code>, or <code>&#x2026;</code> <i>expr</i> ] [ <code>,</code> <i>expr</i> ] <code>{</code> <i>statements or expressions</i> <code>}</code>
   </p>
   <p class="indent">
      <code>WHILE</code>&nbsp;<i>expr</i> <code>{</code> <i>statements or expressions</i> <code>}</code>
@@ -872,7 +872,7 @@ or
      <code>IF</code>&nbsp;<i>expr</i>&nbsp;<code>{</code> <i>statements or expressions</i> <code>}</code> [ <code>ELSE {</code> <i>statements or expressions</i> <code>}</code> ]
   </p>
   <p class="indent">
-     <code>CASE</code>&nbsp;<i>expr</i>&nbsp;<code>OF</code>&nbsp;( ( <i>expr</i> ( <code>,</code> <i>expr</i> ) * | <code>DEFAULT</code> ) <code>: {</code> <i>statements or expressions</i> <code>}</code> ( <code>,</code> ) ? ) *
+     <code>CASE</code>&nbsp;<i>expr</i>(&nbsp;<code>OF</code> | <code>IN</code>&nbsp;) ( ( <i>expr</i> ( <code>,</code> <i>expr</i> ) * | <code>DEFAULT</code> ) <code>: {</code> <i>statements or expressions</i> <code>}</code> ( <code>,</code> ) ? ) *
   </p>
   <p>In all these statements the <code>{</code> and <code>}</code> are not needed if there is only one statement or expression in the block.
   <p>The <code>LOOP</code> statement will repeatedly execute the block of statements based on several conditions:

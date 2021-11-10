@@ -289,7 +289,8 @@
  *	    #67: Allow multi-line array and object declarations.
  *	    #69: Allow dots for function declarations for variable parameter lists.
  *	09-Nov-2021 (rlwhitcomb)
- *	    Allow "over" as a synonym for "in" in loop, as in "loop $i over 0..9"
+ *	    Allow "over" as a synonym for "in" in loop, as in "loop $i over 0..9"; allow
+ *	    "in" or "over" without loop variable; also allow "in" for "case" statements.
  */
 
 grammar Calc;
@@ -327,7 +328,7 @@ defineStmt
    ;
 
 loopStmt
-   : K_LOOP ( LOCALVAR ( K_IN | K_OVER ) ) ? loopCtl stmtBlock
+   : K_LOOP ( LOCALVAR ? ( K_IN | K_OVER ) ) ? loopCtl stmtBlock
    ;
 
 whileStmt
@@ -339,8 +340,8 @@ ifStmt
    ;
 
 caseStmt
-   : K_CASE expr K_OF '{' caseBlock ( ',' caseBlock ) * '}'
-   | K_CASE expr K_OF caseBlock ( ',' caseBlock ) *
+   : K_CASE expr ( K_OF | K_IN ) '{' caseBlock ( ',' caseBlock ) * '}'
+   | K_CASE expr ( K_OF | K_IN ) caseBlock ( ',' caseBlock ) *
    ;
 
 stmtBlock

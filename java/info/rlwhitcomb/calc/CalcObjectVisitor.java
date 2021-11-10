@@ -401,6 +401,7 @@
  *	    #69: Implement "$#" and "$*" for function parameters, and varargs in param lists.
  *	09-Nov-2021 (rlwhitcomb)
  *	    #62: Don't return inside the finally block inside "iterateOverDotRange"
+ *	    #78: use same string compare as "sort" for "min" and "max".
  */
 package info.rlwhitcomb.calc;
 
@@ -2936,7 +2937,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		String maxString = (String) firstValue;
 		for (int i = 1; i < objects.size(); i++) {
 		    String value = (String) objects.get(i);
-		    if (value.compareTo(maxString) > 0)
+		    if (compareStrings(value, maxString, settings.ignoreNameCase, true) > 0)
 			maxString = value;
 		}
 		return maxString;
@@ -2973,7 +2974,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		String minString = (String) firstValue;
 		for (int i = 1; i < objects.size(); i++) {
 		    String value = (String) objects.get(i);
-		    if (value.compareTo(minString) < 0)
+		    if (compareStrings(value, minString, settings.ignoreNameCase, true) < 0)
 			minString = value;
 		}
 		return minString;

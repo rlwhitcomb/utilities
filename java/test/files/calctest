@@ -33,6 +33,7 @@ save          : save
 e_lib         : e_lib
 e_func        : e_func
 e_s           : e_s
+e_sort        : e_sort -- e10 e1 e11 e12 e20 e2 e3 e5 e30 e31
 
 $echo
 $echo "End of Calc tests."

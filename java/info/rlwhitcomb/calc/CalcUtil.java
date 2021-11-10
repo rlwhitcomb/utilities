@@ -94,6 +94,8 @@
  *	07-Nov-2021 (rlwhitcomb)
  *	    #73: Strip outer quotes during interpolation.
  *	    #69: Define "$#" and "$*" inside interpolations.
+ *	09-Nov-2021 (rlwhitcomb)
+ *	    #78: Make "compareStrings" public for use in "min", "max".
  */
 package info.rlwhitcomb.calc;
 
@@ -800,7 +802,17 @@ public final class CalcUtil
 	}
 
 
-	private static int compareStrings(final String s1, final String s2, final boolean ignoreCase, final boolean naturalOrder) {
+	/**
+	 * Compare string values using either the natural-order comparator or the standard string comparison, either ignoring case or not.
+	 *
+	 * @param s1		First string to compare.
+	 * @param s2		Second string to compare to it.
+	 * @param ignoreCase	Whether to ignore letter case in the comparison.
+	 * @param naturalOrder	Whether to use the natural order comparator.
+	 * @return		<code>&lt; 0</code> if s1 compares "before" s2, <code>== 0</code> if they compare the same,
+	 *			<code>&gt; 0</code> if s1 compares "after" s2
+	 */
+	public static int compareStrings(final String s1, final String s2, final boolean ignoreCase, final boolean naturalOrder) {
 	    return naturalOrder
 		? (ignoreCase
 			? NATURAL_INSENSITIVE_COMPARATOR.compare(s1, s2)
@@ -809,6 +821,7 @@ public final class CalcUtil
 			? s1.compareToIgnoreCase(s2)
 			: s1.compareTo(s2));
 	}
+
 
 	/**
 	 * Compare two objects of possibly differing types.
