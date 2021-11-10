@@ -270,6 +270,8 @@
 		Needs help when "git" is not installed (Windows).
 	    13-Oct-2021 (rlwhitcomb)
 		Echo the test log file to console for CI builds.
+	    09-Nov-2021 (rlwhitcomb)
+		Add "uuid" wrappers.
 
      ========================================================================== -->
 
@@ -444,6 +446,8 @@
 		<include name="timethis.bat"                if:true="${on.windows}"/>
 		<include name="tre"                     unless:true="${on.windows}"/>
 		<include name="tre.bat"                     if:true="${on.windows}"/>
+		<include name="uuid"                    unless:true="${on.windows}"/>
+		<include name="uuid.bat"                    if:true="${on.windows}"/>
 		<include name="version"                 unless:true="${on.windows}"/>
 		<include name="version.bat"                 if:true="${on.windows}"/>
 		<include name="wc"                      unless:true="${on.windows}"/>
