@@ -399,6 +399,8 @@
  *	07-Nov-2021 (rlwhitcomb)
  *	    #73: Fix '@s' formatting.
  *	    #69: Implement "$#" and "$*" for function parameters, and varargs in param lists.
+ *	09-Nov-2021 (rlwhitcomb)
+ *	    #62: Don't return inside the finally block inside "iterateOverDotRange"
  */
 package info.rlwhitcomb.calc;
 
@@ -1887,68 +1889,65 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		}
 	    }
 
-	    try {
-		if (stepWise) {
-		    // Try to convert loop values to exact integers if possible
-		    try {
-			start = dStart.intValueExact();
-			stop  = dStop.intValueExact();
-			step  = dStep.intValueExact();
+	    if (stepWise) {
+		// Try to convert loop values to exact integers if possible
+		try {
+		    start = dStart.intValueExact();
+		    stop  = dStop.intValueExact();
+		    step  = dStep.intValueExact();
 
-			if (step == 0)
-			    throw new CalcExprException("%calc#infLoopStepZero", dotRange);
-			else if (step < 0) {
-			    for (int loopIndex = start; loopIndex >= stop; loopIndex += step) {
-				lastValue = visitor.apply(loopIndex);
-			    }
-			}
-			else {
-			    for (int loopIndex = start; loopIndex <= stop; loopIndex += step) {
-				lastValue = visitor.apply(loopIndex);
-			    }
+		    if (step == 0)
+			throw new CalcExprException("%calc#infLoopStepZero", dotRange);
+		    else if (step < 0) {
+			for (int loopIndex = start; loopIndex >= stop; loopIndex += step) {
+			    lastValue = visitor.apply(loopIndex);
 			}
 		    }
-		    catch (ArithmeticException ae) {
-			// This means we stubbornly have fractional values, so use as such
-			int sign = dStep.signum();
-			if (sign == 0)
-			    throw new CalcExprException("%calc#infLoopStepZero", dotRange);
-			else if (sign < 0) {
-			    for (BigDecimal loopIndex = dStart; loopIndex.compareTo(dStop) >= 0; loopIndex = loopIndex.add(dStep)) {
-				lastValue = visitor.apply(loopIndex);
-			    }
-			}
-			else {
-			    for (BigDecimal loopIndex = dStart; loopIndex.compareTo(dStop) <= 0; loopIndex = loopIndex.add(dStep)) {
-				lastValue = visitor.apply(loopIndex);
-			    }
+		    else {
+			for (int loopIndex = start; loopIndex <= stop; loopIndex += step) {
+			    lastValue = visitor.apply(loopIndex);
 			}
 		    }
 		}
-		else if (iter != null) {
-		    while (iter.hasNext()) {
-			Object value = iter.next();
-			lastValue = visitor.apply(value);
+		catch (ArithmeticException ae) {
+		    // This means we stubbornly have fractional values, so use as such
+		    int sign = dStep.signum();
+		    if (sign == 0)
+			throw new CalcExprException("%calc#infLoopStepZero", dotRange);
+		    else if (sign < 0) {
+			for (BigDecimal loopIndex = dStart; loopIndex.compareTo(dStop) >= 0; loopIndex = loopIndex.add(dStep)) {
+			    lastValue = visitor.apply(loopIndex);
+			}
 		    }
-		}
-		else if (codePoints != null) {
-		    StringBuilder buf = new StringBuilder(4);
-		    for (Iterator<Integer> intIter = codePoints.iterator(); intIter.hasNext(); ) {
-			Integer cp = intIter.next();
-			buf.setLength(0);
-			buf.appendCodePoint(cp);
-			lastValue = visitor.apply(buf.toString());
-		    }
-		}
-		else {
-		    for (CalcParser.ExprContext expr : exprs) {
-			lastValue = visitor.apply(visit(expr));
+		    else {
+			for (BigDecimal loopIndex = dStart; loopIndex.compareTo(dStop) <= 0; loopIndex = loopIndex.add(dStep)) {
+			    lastValue = visitor.apply(loopIndex);
+			}
 		    }
 		}
 	    }
-	    finally {
-		return lastValue;
+	    else if (iter != null) {
+		while (iter.hasNext()) {
+		    Object value = iter.next();
+		    lastValue = visitor.apply(value);
+		}
 	    }
+	    else if (codePoints != null) {
+		StringBuilder buf = new StringBuilder(4);
+		for (Iterator<Integer> intIter = codePoints.iterator(); intIter.hasNext(); ) {
+		    Integer cp = intIter.next();
+		    buf.setLength(0);
+		    buf.appendCodePoint(cp);
+		    lastValue = visitor.apply(buf.toString());
+		}
+	    }
+	    else {
+		for (CalcParser.ExprContext expr : exprs) {
+		    lastValue = visitor.apply(visit(expr));
+		}
+	    }
+
+	    return lastValue;
 	}
 
 	@Override
