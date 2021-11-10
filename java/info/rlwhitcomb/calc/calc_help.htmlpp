@@ -863,7 +863,7 @@ or
      iterative or repeated calculations, and to select between actions based on the value of an expression. These are the <code>LOOP</code>, <code>WHILE</code> and <code>IF</code> statements.
   <p>The syntax for each is as follows:
   <p class="indent">
-     <code>LOOP</code>&nbsp;[ <i>loopvar</i> <code>IN</code> ] <i>expr</i> [ <code>..</code> or <code>&#x2026;</code> <i>expr</i> ] [ <code>,</code> <i>expr</i> ] <code>{</code> <i>statements or expressions</i> <code>}</code>
+     <code>LOOP</code>&nbsp;[ <i>loopvar</i> ( <code>IN</code> | <code>OVER</code> ) ] <i>expr</i> [ <code>...</code>, <code>..</code>, or <code>&#x2026;</code> <i>expr</i> ] [ <code>,</code> <i>expr</i> ] <code>{</code> <i>statements or expressions</i> <code>}</code>
   </p>
   <p class="indent">
      <code>WHILE</code>&nbsp;<i>expr</i> <code>{</code> <i>statements or expressions</i> <code>}</code>
