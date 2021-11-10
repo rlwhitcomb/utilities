@@ -31,6 +31,8 @@
  *	    Implement "toString()".
  *	07-Nov-2021 (rlwhitcomb)
  *	    #69: Implement variable number of parameters.
+ *	09-Nov-2021 (rlwhitcomb)
+ *	    #74: Add "hasVarargs" method.
  */
 package info.rlwhitcomb.calc;
 
@@ -188,6 +190,15 @@ class FunctionDeclaration
 	@Override
 	public String toString() {
 	    return String.format("define %1$s = %2$s", getFullFunctionName(), getTreeText(functionBody));
+	}
+
+	/**
+	 * Access whether this function accepts a variable number of arguments.
+	 *
+	 * @return The varargs value for this function.
+	 */
+	public boolean hasVarargs() {
+	    return hasVarargs;
 	}
 
 	/**

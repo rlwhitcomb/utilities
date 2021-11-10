@@ -75,6 +75,8 @@
  *	    Changes for new predefined value paradigm.
  *	03-Nov-2021 (rlwhitcomb)
  *	    #69: New global variables "$#" and "$*".
+ *	09-Nov-2021 (rlwhitcomb)
+ *	    #74: Improve error messages.
  */
  package info.rlwhitcomb.calc;
 
@@ -305,10 +307,26 @@ class LValueContext
 	    if (name != null) {
 		if (name.startsWith("$")) {
 		    char nameChar = name.charAt(1);
-		    if ((nameChar >= '0' && nameChar <= '9') || (nameChar == '*' || nameChar == '#'))
-			throw new CalcExprException(varCtx, "%calc#globalArgNoAssign", name);
-		    else
-			throw new CalcExprException(varCtx, "%calc#localVarNoAssign", name);
+		    boolean numberedArg = (nameChar >= '0' && nameChar <= '9');
+		    boolean arrayArg = (nameChar == '*' || nameChar == '#');
+		    boolean global = true;
+		    // $abc are always local
+		    // $* and $# are local inside a function, otherwise global
+		    // $0, $1, ... are global unless this is a function with variable args
+		    if (!numberedArg && !arrayArg)
+			global = false;
+		    else if (context instanceof FunctionScope) {
+			if (arrayArg)
+			    global = false;
+			else {
+			    FunctionDeclaration funcDecl = ((FunctionScope) context).getDeclaration();
+			    if (funcDecl.hasVarargs()) {
+				if (numberedArg)
+				    global = false;
+			    }
+			}
+		    }
+		    throw new CalcExprException(varCtx, global ? "%calc#globalArgNoAssign" : "%calc#localVarNoAssign", name);
 		}
 		ObjectScope map = (ObjectScope) context;
 		Object oldValue = map.getValue(name, ignoreCase);
