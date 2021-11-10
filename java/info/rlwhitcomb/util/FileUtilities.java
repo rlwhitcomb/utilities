@@ -94,6 +94,8 @@
  *	Tweak some of the Javdoc.
  *    01-Sep-2021 (rlwhitcomb)
  *	Deal with InvalidPathExceptions in the "canRead" / "canWrite" methods.
+ *    09-Nov-2021 (rlwhitcomb)
+ *	Add method to get extension only.
  */
 package info.rlwhitcomb.util;
 
@@ -172,6 +174,21 @@ public final class FileUtilities
 	    return name;
 	else
 	    return name.substring(0, dotPos);
+    }
+
+    /**
+     * Compute the extension of the file name, including the "." if any.
+     *
+     * @param f The file to examine.
+     * @return Only the extension portion of the given file name.
+     */
+    public static String extOnly(File f) {
+	String name = f.getName();
+	int dotPos  = name.lastIndexOf('.');
+	if (dotPos < 0)
+	    return "";
+	else
+	    return name.substring(dotPos);
     }
 
     /**

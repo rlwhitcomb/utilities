@@ -209,6 +209,8 @@
  *	07-Nov-2021 (rlwhitcomb)
  *	    Don't allow non-directive forms (as in plain "quit" or "help") in REPL mode
  *	    anymore, in preparation for allowing all function/command words as identifiers.
+ *	09-Nov-2021 (rlwhitcomb)
+ *	    #51: Try default extensions to find files.
  */
 package info.rlwhitcomb.calc;
 
@@ -414,6 +416,14 @@ public class Calc
 
 	/** The argument values from the command line. */
 	private static List<String> argValues = new ArrayList<>();
+
+	/** The list of default file extensions to use to find input files. */
+	private static final String[] DEFAULT_EXTS = {
+		".calc",
+		".expr",
+		".ca",
+		".ex"
+	};
 
 
 	private static void computeColors() {
@@ -1201,6 +1211,15 @@ public class Calc
 		}
 		inputBuf.append(fileText).append(LINESEP);
 		return true;
+	    }
+	    else {
+		if (FileUtilities.extOnly(f).isEmpty()) {
+		    for (String ext : DEFAULT_EXTS) {
+			File newFile = FileUtilities.decorate(f.getName(), f.getParentFile(), ext);
+			if (readFile(newFile, inputBuf, charset))
+			    return true;
+		    }
+		}
 	    }
 	    return false;
 	}

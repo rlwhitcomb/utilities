@@ -159,6 +159,10 @@ h2 {
   <p>Files are found by first trying to locate the file just as it is named. If not found, the latest input directory is used as a prefix
      (either the directory of the last file found, or the value of <code>-inputdir</code> if set). This same process is used anytime a file is read
      (such as with <code>:include</code>, or from the command line).
+  <p>If a file name is given without any extension (such as <code>e_trig</code>) and the file cannot be found via the process just described, then a series
+     of default file name extensions are appended to the bare name to try to find it. These extensions are: <code>".calc"</code>, <code>".expr"</code>,
+     <code>".ca"</code>, and <code>".ex"</code> (in that order). Once all this searching fails to find the file, then the supposed file name(s) are
+     treated as if they were a set of expressions to evaluate.
 </div>
 <hr class="sectionsep">
   <h2>Command Line Options</h2>
