@@ -27,10 +27,13 @@
  *	09-Nov-2021 (rlwhitcomb)
  *	    Initial first-pass implementation to just generate random UUIDs.
  *	11-Nov-2021 (rlwhitcomb)
- *	    Add "-lower", "-upper", "-string", "-bytes" options, as well as "-nn".
+ *	    #80: Add "-lower", "-upper", "-string", "-bytes" options, as well as "-nn".
+ *	12-Nov-2021 (rlwhitcomb)
+ *	    #80: Add "-int" option.
  */
 package info.rlwhitcomb.tools;
 
+import java.math.BigInteger;
 import java.util.UUID;
 
 import info.rlwhitcomb.util.CharUtil;
@@ -50,6 +53,9 @@ public class Uuid
 	/** Option to format as an array of bytes. */
 	private static boolean toBytes = false;
 
+	/** Option to format as a long, long integer. */
+	private static boolean toInteger = false;
+
 	/** Option to make the result uppercase (default for bytes). */
 	private static boolean toUpper = false;
 
@@ -61,7 +67,7 @@ public class Uuid
 
 	/** Help/usage message. */
 	private static final String[] USAGE = {
-	    "Usage: uuid [-lower][-upper][-string][-bytes][-nn]",
+	    "Usage: uuid [-lower][-upper][-string][-bytes][-int][-nn]",
 	    "",
 	    "   Default is lower-case string; default for bytes is upper-case.",
 	    "   Aliases for options are:",
@@ -69,6 +75,7 @@ public class Uuid
 	    "     -upper = -uppercase, -up, -u",
 	    "     -string = -str, -s",
 	    "     -bytes = -byte, -by, -b",
+	    "     -int = -integer, -i",
 	    "     -nn means output nn unique values (1..99)",
 	    ""
 	};
@@ -127,6 +134,7 @@ public class Uuid
 		    else if (Options.matchesIgnoreCase(value, "string", "str", "s")) {
 			toBytes = false;
 			toString = true;
+			toInteger = false;
 			// Strings default to lower case
 			if (!seenCaseOption) {
 			    toUpper = false;
@@ -136,11 +144,17 @@ public class Uuid
 		    else if (Options.matchesIgnoreCase(value, "bytes", "byte", "by", "b")) {
 			toBytes = true;
 			toString = false;
+			toInteger = false;
 			// bytes default to upper case
 			if (!seenCaseOption) {
 			    toUpper = true;
 			    toLower = false;
 			}
+		    }
+		    else if (Options.matchesIgnoreCase(value, "integer", "int", "i")) {
+			toBytes = false;
+			toString = false;
+			toInteger = true;
 		    }
 		    else if (Options.matchesIgnoreCase(value, "help", "h", "?")) {
 			usage();
@@ -179,13 +193,18 @@ public class Uuid
 		    else
 			System.out.println(result); // is lowercase by default
 		}
-		else {
+		else if (toBytes) {
 		    byte[] bytes = longLongToBytes(uuid.getMostSignificantBits(), uuid.getLeastSignificantBits());
 		    String result = CharUtil.toHexArrayForm(bytes);
 		    if (toLower)
 			System.out.println(result.toLowerCase());
 		    else
 			System.out.println(result); // is uppercase by default
+		}
+		else {
+		    byte[] bytes = longLongToBytes(uuid.getMostSignificantBits(), uuid.getLeastSignificantBits());
+		    BigInteger iValue = new BigInteger(1, bytes);
+		    System.out.println(iValue.toString());
 		}
 	    }
 	}
