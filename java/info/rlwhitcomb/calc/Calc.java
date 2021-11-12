@@ -211,6 +211,8 @@
  *	    anymore, in preparation for allowing all function/command words as identifiers.
  *	09-Nov-2021 (rlwhitcomb)
  *	    #51: Try default extensions to find files.
+ *	12-Nov-2021 (rlwhitcomb)
+ *	    #81: Options to quote result strings or not.
  */
 package info.rlwhitcomb.calc;
 
@@ -335,6 +337,7 @@ public class Calc
 	private static boolean rational    = false;
 	private static boolean separators  = false;
 	private static boolean ignoreCase  = false;
+	private static boolean quotes      = true;
 
 	private static boolean useCmdEnter = true;
 
@@ -728,7 +731,7 @@ public class Calc
 		});
 
 		displayer = this;
-		visitor = new CalcObjectVisitor(displayer, rational, separators, ignoreCase);
+		visitor = new CalcObjectVisitor(displayer, rational, separators, ignoreCase, quotes);
 
 		// Set the command-line arguments into the symbol table as $nn
 		int index = 0;
@@ -1481,6 +1484,20 @@ public class Calc
 		case "sen":
 		    ignoreCase = false;
 		    break;
+		case "quotestrings":
+		case "quotestring":
+		case "quotes":
+		case "quote":
+		case "quo":
+		    quotes = true;
+		    break;
+		case "noquotestrings":
+		case "noquotestring":
+		case "noquotes":
+		case "noquote":
+		case "noq":
+		    quotes = false;
+		    break;
 		case "locale":
 		case "loc":
 		case "l":
@@ -1693,7 +1710,7 @@ public class Calc
 		}
 		else {
 		    displayer = new ConsoleDisplayer();
-		    visitor = new CalcObjectVisitor(displayer, rational, separators, ignoreCase);
+		    visitor = new CalcObjectVisitor(displayer, rational, separators, ignoreCase, quotes);
 
 		    // Set the command-line arguments into the symbol table as $nn
 		    int index = 0;

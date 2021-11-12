@@ -96,6 +96,8 @@
  *	    #69: Define "$#" and "$*" inside interpolations.
  *	09-Nov-2021 (rlwhitcomb)
  *	    #78: Make "compareStrings" public for use in "min", "max".
+ *	12-Nov-2021 (rlwhitcomb)
+ *	    #81: Add "quotes" param to most common form of "toStringValue".
  */
 package info.rlwhitcomb.calc;
 
@@ -509,6 +511,7 @@ public final class CalcUtil
 	 * @param visitor	The tree visitor, for calculating expressions.
 	 * @param ctx		The parsing context, for error reporting.
 	 * @param result	The input value to be converted.
+	 * @param quotes	Whether or not to quote strings on output.
 	 * @param separators	Whether or not to use thousands separators when converting numeric values.
 	 * @return		The converted string value.
 	 * @see #toStringValue(CalcObjectVisitor, ParserRuleContext, Object, boolean, boolean, boolean, String)
@@ -517,8 +520,9 @@ public final class CalcUtil
 		final CalcObjectVisitor visitor,
 		final ParserRuleContext ctx,
 		final Object result,
+		final boolean quotes,
 		final boolean separators) {
-	    return toStringValue(visitor, ctx, result, true, false, separators, "");
+	    return toStringValue(visitor, ctx, result, quotes, false, separators, "");
 	}
 
 	/**

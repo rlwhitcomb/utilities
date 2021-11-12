@@ -291,6 +291,8 @@
  *	09-Nov-2021 (rlwhitcomb)
  *	    Allow "over" as a synonym for "in" in loop, as in "loop $i over 0..9"; allow
  *	    "in" or "over" without loop variable; also allow "in" for "case" statements.
+ *	11-Nov-2021 (rlwhitcomb)
+ *	    #81: Add directive to not quote strings on output.
  */
 
 grammar Calc;
@@ -595,6 +597,7 @@ directive
    | D_VARIABLES idList ?                     # variablesDirective
    | D_SEPARATORS modeOption                  # separatorsDirective
    | D_IGNORECASE modeOption                  # ignoreCaseDirective
+   | D_QUOTESTRINGS modeOption                # quoteStringsDirective
    ;
 
 numberOption
@@ -1055,6 +1058,10 @@ D_SEPARATORS
 
 D_IGNORECASE
    : DIR ( I N S | I G N | C A S E | I N S E N S I T I V E | C A S E I N S E N S I T I V E | I G N O R E | I G N O R E C A S E )
+   ;
+
+D_QUOTESTRINGS
+   : DIR ( Q U O T E S T R I N G S | Q U O T E S T R I N G | Q U O T E S | Q U O T E )
    ;
 
 

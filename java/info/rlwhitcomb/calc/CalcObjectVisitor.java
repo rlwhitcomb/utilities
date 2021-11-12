@@ -402,6 +402,8 @@
  *	09-Nov-2021 (rlwhitcomb)
  *	    #62: Don't return inside the finally block inside "iterateOverDotRange"
  *	    #78: use same string compare as "sort" for "min" and "max".
+ *	12-Nov-2021 (rlwhitcomb)
+ *	    #81: Add directive to quote strings (or not).
  */
 package info.rlwhitcomb.calc;
 
@@ -541,6 +543,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		boolean silent;
 		/** Ignore case when selecting members / variables. */
 		boolean ignoreNameCase;
+		/** Quote strings on output. */
+		boolean quoteStrings;
 
 		/**
 		 * Construct default settings, including the command-line "-rational" flag.
@@ -548,14 +552,16 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		 * @param rational   The initial rational mode setting.
 		 * @param separators The initial setting for displaying separators.
 		 * @param ignoreCase Whether to ignore case on variable / member names.
+		 * @param quotes     Whether to quote string values on output.
 		 */
-		public Settings(boolean rational, boolean separators, boolean ignoreCase) {
+		public Settings(boolean rational, boolean separators, boolean ignoreCase, boolean quotes) {
 		    trigMode       = TrigMode.RADIANS;
 		    units          = RangeMode.MIXED;
 		    rationalMode   = rational;
 		    separatorMode  = separators;
 		    silent         = false;
 		    ignoreNameCase = ignoreCase;
+		    quoteStrings   = quotes;
 		}
 
 		/**
@@ -570,6 +576,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    this.separatorMode  = otherSettings.separatorMode;
 		    this.silent         = otherSettings.silent;
 		    this.ignoreNameCase = otherSettings.ignoreNameCase;
+		    this.quoteStrings   = otherSettings.quoteStrings;
 		}
 	}
 
@@ -611,6 +618,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	/** Stack of previous "ignore case" mode values. */
 	private final Deque<Boolean> ignoreCaseModeStack = new ArrayDeque<>();
+
+	/** Stack of previous "quote strings" mode values. */
+	private final Deque<Boolean> quoteStringsModeStack = new ArrayDeque<>();
 
 	/** Stack of previous "resultsOnly" mode values. */
 	private final Deque<Boolean> resultsOnlyModeStack = new ArrayDeque<>();
@@ -721,18 +731,17 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    globalScope.setValue(ARG_COUNT, false, BigInteger.ZERO);
 	}
 
-	public CalcObjectVisitor(final CalcDisplayer resultDisplayer, final boolean rational, final boolean separators, final boolean ignoreCase) {
+	public CalcObjectVisitor(final CalcDisplayer resultDisplayer, final boolean rational, final boolean separators, final boolean ignoreCase, final boolean quotes) {
 	    setMathContext(MathContext.DECIMAL128);
 
-	    settings  = new Settings(rational, separators, ignoreCase);
-	    globals   = new GlobalScope();
 	    displayer = resultDisplayer;
+	    settings  = new Settings(rational, separators, ignoreCase, quotes);
+	    globals   = new GlobalScope();
 
 	    pushScope(globals);
-
 	    predefine(globals);
 
-	    initialized   = true;
+	    initialized = true;
 	}
 
 	public boolean setSilent(final boolean newSilent) {
@@ -844,6 +853,15 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    currentContext.setIgnoreCase(mode);
 
 	    displayActionMessage("%calc#ignoreCaseMode", mode);
+
+	    return oldMode;
+	}
+
+	public boolean setQuoteStringsMode(final boolean mode) {
+	    boolean oldMode = settings.quoteStrings;
+	    settings.quoteStrings = mode;
+
+	    displayActionMessage("%calc#quoteStringsMode", mode);
 
 	    return oldMode;
 	}
@@ -1214,7 +1232,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    displayer.displayResult(func.getFullFunctionName(), getTreeText(func.getFunctionBody()));
 		}
 		else {
-		    displayer.displayResult(key, toStringValue(this, ctx, value, settings.separatorMode));
+		    displayer.displayResult(key, toStringValue(this, ctx, value, true, settings.separatorMode));
 		}
 	    }
 	    if (!replMode) {
@@ -1265,7 +1283,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			writer.write(String.format("def %1$s = %2$s", func.getFullFunctionName(), getTreeText(func.getFunctionBody())));
 		    }
 		    else {
-			writer.write(String.format("%1$s = %2$s", key, toStringValue(this, ctx, value, settings.separatorMode)));
+			writer.write(String.format("%1$s = %2$s", key, toStringValue(this, ctx, value, true, settings.separatorMode)));
 		    }
 		    writer.newLine();
 		}
@@ -1389,6 +1407,13 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public Object visitIgnoreCaseDirective(CalcParser.IgnoreCaseDirectiveContext ctx) {
 	    return processModeOption(ctx.modeOption(), ignoreCaseModeStack, mode -> {
 		return setIgnoreCaseMode(mode);
+	    });
+	}
+
+	@Override
+	public Object visitQuoteStringsDirective(CalcParser.QuoteStringsDirectiveContext ctx) {
+	    return processModeOption(ctx.modeOption(), quoteStringsModeStack, mode -> {
+		return setQuoteStringsMode(mode);
 	    });
 	}
 
@@ -1519,12 +1544,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    case 'U':
 		    case 'u':
 			toUpperCase = true;
-			valueBuf.append(toStringValue(this, ctx, result, false));
+			valueBuf.append(toStringValue(this, ctx, result, settings.quoteStrings, settings.separatorMode));
 			break;
 		    case 'L':
 		    case 'l':
 			toLowerCase = true;
-			valueBuf.append(toStringValue(this, ctx, result, false));
+			valueBuf.append(toStringValue(this, ctx, result, settings.quoteStrings, settings.separatorMode));
 			break;
 
 		    case 'C':
@@ -1750,7 +1775,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 				CharUtil.padToWidth(valueBuf, stringValue, precision, CharUtil.Justification.LEFT);
 				break;
 			}
-			addQuotes = true;
+			addQuotes = settings.quoteStrings;
 			break;
 
 		    default:
@@ -1773,7 +1798,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		// For large numbers it takes a significant amount of time just to convert
 		// to a string, so don't even try if we don't need to for display
 		if (!settings.silent)
-		    resultString = toStringValue(this, ctx, result, separators);
+		    resultString = toStringValue(this, ctx, result, settings.quoteStrings, separators);
 	    }
 
 	    if (!settings.silent) displayer.displayResult(exprString, resultString);

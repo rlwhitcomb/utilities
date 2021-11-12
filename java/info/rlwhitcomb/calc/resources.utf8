@@ -86,6 +86,8 @@
 #	    New error for predefined value assignment.
 #	07-Nov-2021 (rlwhitcomb)
 #	    #69: New error for varargs.
+#	11-Nov-2021 (rlwhitcomb)
+#	    #81: New option for quoting strings.
 #
 
 #
@@ -138,6 +140,7 @@ debugMode	= Debug mode set to <v>%1$s<>.
 rationalMode	= Calculation mode set to <v>%1$s<>.
 separatorMode	= Separator display set to <v>%1$s<>.
 ignoreCaseMode  = Ignoring case is now <v>%1$s<>.
+quoteStringsMode= Quoting result strings is now <v>%1$s<>.
 defining	= <r>Defining function <x>%1$s<r> = <v>%2$s<r>
 variables	= Variables
 varUnder1	= ---------
