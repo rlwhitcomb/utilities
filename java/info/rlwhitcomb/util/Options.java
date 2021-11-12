@@ -68,6 +68,8 @@
  *	    Update obsolete Javadoc constructs.
  *	02-Sep-2021 (rlwhitcomb)
  *	    Move the main (testing) method to OptionsTest class.
+ *	11-Nov-2021 (rlwhitcomb)
+ *	    Make "matches" and "matchesIgnoreCase" public for use elsewhere.
  */
 package info.rlwhitcomb.util;
 
@@ -287,7 +289,7 @@ public class Options
 	 * @param forms	The various acceptable forms for the option name that are allowed.
 	 * @return	Whether or not the given argument matched any of the acceptable forms.
 	 */
-	private static boolean matches(final String arg, final String... forms) {
+	public static boolean matches(final String arg, final String... forms) {
 	        return Arrays.stream(forms)
 			     .flatMap(s -> getMixedCaseOptions(s, false).stream())
 			     .anyMatch(opt -> opt.equals(arg));
@@ -301,7 +303,7 @@ public class Options
 	 * @param forms	The various acceptable forms for the option name that are allowed.
 	 * @return	Whether or not the given argument matched any of the acceptable forms.
 	 */
-	private static boolean matchesIgnoreCase(final String arg, final String... forms) {
+	public static boolean matchesIgnoreCase(final String arg, final String... forms) {
 	        return Arrays.stream(forms)
 			     .flatMap(s -> getMixedCaseOptions(s, true).stream())
 			     .anyMatch(opt -> opt.equalsIgnoreCase(arg));

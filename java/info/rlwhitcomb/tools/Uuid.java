@@ -26,10 +26,15 @@
  *  Change History:
  *	09-Nov-2021 (rlwhitcomb)
  *	    Initial first-pass implementation to just generate random UUIDs.
+ *	11-Nov-2021 (rlwhitcomb)
+ *	    Add "-lower", "-upper", "-string", "-bytes" options, as well as "-nn".
  */
 package info.rlwhitcomb.tools;
 
 import java.util.UUID;
+
+import info.rlwhitcomb.util.CharUtil;
+import info.rlwhitcomb.util.Options;
 
 
 /**
@@ -39,12 +44,150 @@ import java.util.UUID;
  */
 public class Uuid
 {
+	/** Option to format as a string (default). */
+	private static boolean toString = true;
+
+	/** Option to format as an array of bytes. */
+	private static boolean toBytes = false;
+
+	/** Option to make the result uppercase (default for bytes). */
+	private static boolean toUpper = false;
+
+	/** Option to make the result lowercase (default for string). */
+	private static boolean toLower = false;
+
+	/** Number of iterations, default one. */
+	private static int numberOfValues = 1;
+
+	/** Help/usage message. */
+	private static final String[] USAGE = {
+	    "Usage: uuid [-lower][-upper][-string][-bytes][-nn]",
+	    "",
+	    "   Default is lower-case string; default for bytes is upper-case.",
+	    "   Aliases for options are:",
+	    "     -lower = -lowercase, -low, -l",
+	    "     -upper = -uppercase, -up, -u",
+	    "     -string = -str, -s",
+	    "     -bytes = -byte, -by, -b",
+	    "     -nn means output nn unique values (1..99)",
+	    ""
+	};
+
+	/**
+	 * Display a message about the usage of this program.
+	 */
+	private static void usage() {
+	    for (String msg : USAGE) {
+		System.out.println(msg);
+	    }
+	}
+
+	/**
+	 * Convert a long value to its constituent bytes (network byte order: MSB first).
+	 *
+	 * @param msb	The input most-significant long value.
+	 * @param lsb	The input least-significant long value.
+	 * @return	The MSB-first array of bytes of the two long values.
+	 */
+	private static byte[] longLongToBytes(final long msb, final long lsb) {
+	    byte[] result = new byte[16];
+	    long shiftedValue = 0L;
+	    for (int i = 0; i < 16; i++) {
+		if (i == 0)
+		    shiftedValue = msb;
+		else if (i == 8)
+		    shiftedValue = lsb;
+
+		shiftedValue = Long.rotateLeft(shiftedValue, 8);
+		byte b = (byte) (shiftedValue & 0xFF);
+		result[i] = b;
+	    }
+	    return result;
+	}
+
 	/**
 	 * @param args The parsed command line argument array.
 	 */
 	public static void main(String[] args) {
-	    UUID uuid = UUID.randomUUID();
-	    System.out.println(uuid.toString());
+	    boolean seenCaseOption = false;
+
+	    for (String arg : args) {
+		String value = Options.isOption(arg);
+		if (value != null) {
+		    if (Options.matchesIgnoreCase(value, "lowercase", "lower", "low", "l")) {
+			toUpper = false;
+			toLower = true;
+			seenCaseOption = true;
+		    }
+		    else if (Options.matchesIgnoreCase(value, "uppercase", "upper", "up", "u")) {
+			toUpper = true;
+			toLower = false;
+			seenCaseOption = true;
+		    }
+		    else if (Options.matchesIgnoreCase(value, "string", "str", "s")) {
+			toBytes = false;
+			toString = true;
+			// Strings default to lower case
+			if (!seenCaseOption) {
+			    toUpper = false;
+			    toLower = true;
+			}
+		    }
+		    else if (Options.matchesIgnoreCase(value, "bytes", "byte", "by", "b")) {
+			toBytes = true;
+			toString = false;
+			// bytes default to upper case
+			if (!seenCaseOption) {
+			    toUpper = true;
+			    toLower = false;
+			}
+		    }
+		    else if (Options.matchesIgnoreCase(value, "help", "h", "?")) {
+			usage();
+			return;
+		    }
+		    else {
+			try {
+			    int nn = Integer.parseInt(value);
+			    if (nn < 1 || nn > 99) {
+				System.err.println("Number of values should be between 1 and 99.");
+				usage();
+				return;
+			    }
+			    numberOfValues = nn;
+			}
+			catch (NumberFormatException nfe) {
+			    System.err.println("Unrecognized option \"" + arg + "\"!");
+			    usage();
+			    return;
+			}
+		    }
+		}
+		else {
+		    System.err.println("Unrecognized argument \"" + arg + "\"!");
+		    usage();
+		    return;
+		}
+	    }
+
+	    for (int i = 0; i < numberOfValues; i++) {
+		UUID uuid = UUID.randomUUID();
+		if (toString) {
+		    String result = uuid.toString();
+		    if (toUpper)
+			System.out.println(result.toUpperCase());
+		    else
+			System.out.println(result); // is lowercase by default
+		}
+		else {
+		    byte[] bytes = longLongToBytes(uuid.getMostSignificantBits(), uuid.getLeastSignificantBits());
+		    String result = CharUtil.toHexArrayForm(bytes);
+		    if (toLower)
+			System.out.println(result.toLowerCase());
+		    else
+			System.out.println(result); // is uppercase by default
+		}
+	    }
 	}
 }
 

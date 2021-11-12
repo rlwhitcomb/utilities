@@ -289,6 +289,8 @@
  *	    #41: Remove "getLocale" in favor of better method in Intl ("getValidLocale").
  *	26-Oct-2021 (rlwhitcomb)
  *	    #31: Introduce octal and binary escape sequences.
+ *	11-Nov-2021 (rlwhitcomb)
+ *	    #53: Tweak both versions of "toHexArrayForm" to always output two digits per byte.
  */
 
 package info.rlwhitcomb.util;
@@ -2619,7 +2621,7 @@ public final class CharUtil
 
 	/**
 	 * For debug purposes, convert a string to an array of chars and format
-	 * into a string of hex.
+	 * into a string of hex (upper case).
 	 *
 	 * @param input The input string to convert.
 	 * @return The characters of this string, in hex, surrounded with "[ ]"
@@ -2637,7 +2639,10 @@ public final class CharUtil
 	    for (char c : chars) {
 		if (buf.length() > 1)
 		    buf.append(',');
-		buf.append(Integer.toString((int)c, 16).toUpperCase());
+		int i = (int) c;
+		if (i < 16)
+		    buf.append('0');
+		buf.append(Integer.toString(i, 16).toUpperCase());
 	    }
 	    buf.append(']');
 	    return buf.toString();
@@ -2645,7 +2650,7 @@ public final class CharUtil
 
 	/**
 	 * For debug purposes, convert an array of bytes and format
-	 * into a string of hex.
+	 * into a string of hex (upper case).
 	 *
 	 * @param input The array of bytes to convert.
 	 * @return The bytes of this array, in hex, surrounded with "[ ]"
@@ -2662,7 +2667,10 @@ public final class CharUtil
 	    for (byte b : input) {
 		if (buf.length() > 1)
 		    buf.append(',');
-		buf.append(Integer.toString(((int)b) & 0xFF, 16).toUpperCase());
+		int i = ((int) b) & 0xFF;
+		if (i < 16)
+		    buf.append('0');
+		buf.append(Integer.toString(i, 16).toUpperCase());
 	    }
 	    buf.append(']');
 	    return buf.toString();
