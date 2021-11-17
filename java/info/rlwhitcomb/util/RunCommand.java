@@ -57,6 +57,8 @@
  *  07-Apr-2021 (rlwhitcomb)
  *	Tighten up the code and comments.
  *	Add a "runToCompletion" that writes to a StringBuilder to store the output.
+ *  16-Nov-2021 (rlwhitcomb)
+ *	#85: Further versions to log exceptions or throw them.
  */
 package info.rlwhitcomb.util;
 
@@ -185,6 +187,18 @@ public class RunCommand
 	 * @return	pointer to the merged error and standard output of the child process
 	 */
 	public InputStream run() {
+	    return run(false);
+	}
+
+	/**
+	 * Run this child process using whatever has been established as the command
+	 * and its environment.
+	 *
+	 * @param	logOrThrow <code>false</code> to log exceptions or <code>true</code>
+	 *		to wrap in a {@link RuntimeException} and throw them
+	 * @return	pointer to the merged error and standard output of the child process
+	 */
+	public InputStream run(final boolean logOrThrow) {
 	    try {
 		if (Logging.isLevelEnabled(Logging.DEBUG)) {
 		    Logging.Debug("RunCommand.run: %1$s", commandLine());
@@ -198,7 +212,10 @@ public class RunCommand
 		return stdInput;
 	    }
 	    catch (IOException ioe) {
-		Logging.Except(ioe);
+		if (logOrThrow)
+		    throw new RuntimeException(ioe);
+		else
+		    Logging.Except(ioe);
 	    }
 	    return null;
 	}
@@ -210,8 +227,20 @@ public class RunCommand
 	 * @return			pointer to merged output from the child process
 	 */
 	public InputStream run(final File workingDir) {
+	    return run(workingDir, false);
+	}
+
+	/**
+	 * Run the given command in this new working directory.
+	 *
+	 * @param	workingDir	new working directory where the process should start
+	 * @param	logOrThrow	<code>false</code> to log exceptions or <code>true</code>
+	 *				to wrap in a {@link RuntimeException} and throw them
+	 * @return			pointer to merged output from the child process
+	 */
+	public InputStream run(final File workingDir, final boolean logOrThrow) {
 	    pb.directory(workingDir);
-	    return run();
+	    return run(logOrThrow);
 	}
 
 	/**
@@ -220,11 +249,25 @@ public class RunCommand
 	 *
 	 * @param	echoOutput	{@code true} if the output from the child
 	 *				process should be echoed to {@link System#out}
-	 * @return			return code from the child process
+	 * @return	return code from the child process
 	 */
 	public int runToCompletion(final boolean echoOutput) {
+	    return runToCompletion(echoOutput, false);
+	}
+
+	/**
+	 * Start the child process and wait for it to complete, possibly
+	 * echoing the output to the console.
+	 *
+	 * @param	echoOutput	{@code true} if the output from the child
+	 *				process should be echoed to {@link System#out}
+	 * @param	logOrThrow	<code>false</code> to log exceptions or <code>true</code>
+	 *				to wrap in a {@link RuntimeException} and throw them
+	 * @return	return code from the child process
+	 */
+	public int runToCompletion(final boolean echoOutput, final boolean logOrThrow) {
 	    try {
-		InputStream output = run();
+		InputStream output = run(logOrThrow);
 		int ch;
 
 		if (output != null) {
@@ -242,10 +285,16 @@ public class RunCommand
 		}
 	    }
 	    catch (IOException ioe) {
-		Logging.Except(ioe);
+		if (logOrThrow)
+		    throw new RuntimeException(ioe);
+		else
+		    Logging.Except(ioe);
 	    }
 	    catch (InterruptedException ie) {
-		Logging.Except(ie);
+		if (logOrThrow)
+		    throw new RuntimeException(ie);
+		else
+		    Logging.Except(ie);
 	    }
 
 	    return errorLevel;
@@ -255,10 +304,10 @@ public class RunCommand
 	 * Start the child process and wait for it to complete, all output
 	 * is echoed to the console.
 	 *
-	 * @return			return code from the child process
+	 * @return		return code from the child process
 	 */
 	public int runToCompletion() {
-	    return runToCompletion(true);
+	    return runToCompletion(true, false);
 	}
 
 	/**
@@ -281,9 +330,22 @@ public class RunCommand
 	 * @return		return code from the child process
 	 */
 	public int runToCompletion(final StringBuilder buf) {
+	    return runToCompletion(buf, false);
+	}
+
+	/**
+	 * Start the child process and wait for it to complete, all output
+	 * is echoed to the given string buffer.
+	 *
+	 * @param	buf		{@link StringBuilder} to use to echo process output
+	 * @param	logOrThrow	<code>false</code> to log exceptions, or <code>true</code>
+	 *				to wrap in a {@link RuntimeException} and throw them
+	 * @return	return code from the child process
+	 */
+	public int runToCompletion(final StringBuilder buf, final boolean logOrThrow) {
 	    ByteArrayOutputStream os = new ByteArrayOutputStream(BUFFER_SIZE);
 	    setEchoStream(new PrintStream(os, true));
-	    int ret = runToCompletion();
+	    int ret = runToCompletion(true, logOrThrow);
 	    buf.append(os.toString());
 	    return ret;
 	}
@@ -326,8 +388,25 @@ public class RunCommand
 	 *				not yet completed when this method returns.
 	 */
 	public int runToCompletion(final File workingDir, final boolean echoOutput) {
+	    return runToCompletion(workingDir, echoOutput, false);
+	}
+
+	/**
+	 * Start the child process and wait for it to complete, setting the working
+	 * directory first and giving a choice to echo output to the console or not.
+	 *
+	 * @param	workingDir	the child process' working directory
+	 * @param	echoOutput	{@code true} if the output from the child
+	 *				process should be echoed to {@link System#out}
+	 * @param	logOrThrow	<code>false</code> to log exceptions, or <code>true</code>
+	 *				to wrap them in a {@link RuntimeException} and throw them
+	 * @return			return code from the child process, which will
+	 *				be {@link Integer#MIN_VALUE} if the process has
+	 *				not yet completed when this method returns.
+	 */
+	public int runToCompletion(final File workingDir, final boolean echoOutput, final boolean logOrThrow) {
 	    pb.directory(workingDir);
-	    return runToCompletion(echoOutput);
+	    return runToCompletion(echoOutput, logOrThrow);
 	}
 
 }

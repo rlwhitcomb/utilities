@@ -406,6 +406,7 @@
  *	    #81: Add directive to quote strings (or not).
  *	16-Nov-2021 (rlwhitcomb)
  *	    #87: Strip any quotes from incoming string argument values.
+ *	    #85: Trap exceptions and wrap in our own during "exec" call.
  */
 package info.rlwhitcomb.calc;
 
@@ -3869,11 +3870,17 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		args[i] = (String) objects.get(i);
 	    }
 
-	    RunCommand cmd = new RunCommand(args);
-	    StringBuilder result = new StringBuilder();
-	    int retCode = cmd.runToCompletion(result);
+	    try {
+		RunCommand cmd = new RunCommand(args);
+		StringBuilder result = new StringBuilder();
+		int retCode = cmd.runToCompletion(result, true);
 
-	    return result.toString();
+		return result.toString();
+	    }
+	    catch (RuntimeException rex) {
+		// These will wrap other checked exceptions, so unwrap first
+		throw new CalcExprException(ctx, rex.getCause().getLocalizedMessage());
+	    }
 	}
 
 	@Override
