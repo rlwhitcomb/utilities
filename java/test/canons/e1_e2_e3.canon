@@ -1,6 +1,6 @@
 >Starting expression tests (suite 1).
 >
->versioninfo.major > 2 || (versioninfo.major == 2 && versioninfo.minor > 3) || (versioninfo.major == 2 && versioninfo.minor == 3 && versioninfo.patch >= 0) -> true
+>info.version.major > 2 || (info.version.major == 2 && info.version.minor > 4) || (info.version.major == 2 && info.version.minor == 4 && info.version.patch >= 11) -> true
 >Precision is now 50 digits.
 >52 + 27 -> 79
 >3.4 + 5 -> 8.4
