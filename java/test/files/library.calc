@@ -215,4 +215,11 @@ def versionstring = `Version ${versioninfo.major}.${versioninfo.minor}.${version
  */
 define pad($s, $width) = { _s = $s ? $s : ''; fill(_s, ' ', length(_s), $width - length(_s)) }
 
+/*
+ * Exeute the "uuid" program to return a unique identifier.
+ *
+ * @return A unique identifier.
+ */
+define uuid() = {  trim(info.os.id == 'windows' ? exec('cmd', '/c', 'uuid.bat') : exec('uuid')) }
+
 :quiet pop
