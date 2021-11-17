@@ -5,8 +5,8 @@
 :echo
 
 # Simple version check ...
-# version 2.3.0 was first version where these checks would work
-versioninfo.major > 2 || (versioninfo.major == 2 && versioninfo.minor > 3) || (versioninfo.major == 2 && versioninfo.minor == 3 && versioninfo.patch >= 0)
+# version 2.3.0 was first version where these checks would work, and 2.4.11 is where versioninfo -> info.version
+info.version.major > 2 || (info.version.major == 2 && info.version.minor > 4) || (info.version.major == 2 && info.version.minor == 4 && info.version.patch >= 11)
 
 # Various simple expressions
 :decimal(50)
