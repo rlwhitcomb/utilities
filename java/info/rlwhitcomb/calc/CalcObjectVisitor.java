@@ -404,6 +404,8 @@
  *	    #78: use same string compare as "sort" for "min" and "max".
  *	12-Nov-2021 (rlwhitcomb)
  *	    #81: Add directive to quote strings (or not).
+ *	16-Nov-2021 (rlwhitcomb)
+ *	    #87: Strip any quotes from incoming string argument values.
  */
 package info.rlwhitcomb.calc;
 
@@ -768,14 +770,16 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	 *		will be set as a string.
 	 */
 	public void setArgument(final int index, final String arg) {
+	    String argKey = String.format("$%1$d", index);
 	    try {
 		BigDecimal dValue = new BigDecimal(arg);
-		globals.setValue(String.format("$%1$d", index), false, dValue);
+		globals.setValue(argKey, false, dValue);
 		arguments.add(dValue);
 	    }
 	    catch (NumberFormatException nfe) {
-		globals.setValue(String.format("$%1$d", index), false, arg);
-		arguments.add(arg);
+		String unquotedArg = CharUtil.stripAnyQuotes(arg, true);
+		globals.setValue(argKey, false, unquotedArg);
+		arguments.add(unquotedArg);
 	    }
 	    globals.setValue(ARG_COUNT, false, BigInteger.valueOf(arguments.size()));
 	}
