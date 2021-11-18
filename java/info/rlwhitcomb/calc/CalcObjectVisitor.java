@@ -407,6 +407,7 @@
  *	16-Nov-2021 (rlwhitcomb)
  *	    #87: Strip any quotes from incoming string argument values.
  *	    #85: Trap exceptions and wrap in our own during "exec" call.
+ *	    #86: Change "versioninfo" to just "info" and add "os" and "java" parts.
  */
 package info.rlwhitcomb.calc;
 
@@ -689,13 +690,32 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    SemanticVersion v = Environment.programVersion();
 	    ObjectScope version = new ObjectScope();
 
-	    version.setValue("major",      settings.ignoreNameCase, v.major);
-	    version.setValue("minor",      settings.ignoreNameCase, v.minor);
-	    version.setValue("patch",      settings.ignoreNameCase, v.patch);
-	    version.setValue("prerelease", settings.ignoreNameCase, v.getPreReleaseString());
-	    version.setValue("build",      settings.ignoreNameCase, v.getBuildMetaString());
+	    version.setValue("major",      false, v.major);
+	    version.setValue("minor",      false, v.minor);
+	    version.setValue("patch",      false, v.patch);
+	    version.setValue("prerelease", false, v.getPreReleaseString());
+	    version.setValue("build",      false, v.getBuildMetaString());
 
-	    PredefinedValue.define(globalScope, "versioninfo", version);
+	    ObjectScope os = new ObjectScope();
+
+	    os.setValue("platform", false, Environment.platform());
+	    os.setValue("version",  false, Environment.osVersion());
+	    os.setValue("id",       false, Environment.platformIdentifier());
+	    os.setValue("user",     false, Environment.currentUser());
+
+	    ObjectScope java = new ObjectScope();
+
+	    java.setValue("major",   false, Environment.javaMajorVersion());
+	    java.setValue("version", false, Environment.javaVersion());
+	    java.setValue("model",   false, Environment.dataModel());
+
+	    ObjectScope info = new ObjectScope();
+
+	    info.setValue("version", false, version);
+	    info.setValue("os",      false, os);
+	    info.setValue("java",    false, java);
+
+	    PredefinedValue.define(globalScope, "info", info);
 
 	    Supplier<Object> piSupplier = () -> {
 		BigDecimal d = piWorker.getPi();
