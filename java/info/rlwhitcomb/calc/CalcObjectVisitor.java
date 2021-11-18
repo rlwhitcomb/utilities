@@ -408,6 +408,9 @@
  *	    #87: Strip any quotes from incoming string argument values.
  *	    #85: Trap exceptions and wrap in our own during "exec" call.
  *	    #86: Change "versioninfo" to just "info" and add "os" and "java" parts.
+ *	17-Nov-2021 (rlwhitcomb)
+ *	    #96: add "this" to "getContextObject" calls so that LHS functions can be
+ *	    evaluated.
  */
 package info.rlwhitcomb.calc;
 
@@ -1099,7 +1102,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 	    else {
 		LValueContext lValue = getLValue(opt.var());
-		dPrecision = toDecimalValue(this, lValue.getContextObject(false), mc, opt);
+		dPrecision = toDecimalValue(this, lValue.getContextObject(this, false), mc, opt);
 	    }
 
 	    int precision = 0;
@@ -1340,7 +1343,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		CalcParser.VarContext var = ctx.var();
 		// could be boolean, or string mode value
 		LValueContext lValue = getLValue(var);
-		Object modeObject = evaluateFunction(ctx, lValue.getContextObject(false));
+		Object modeObject = evaluateFunction(ctx, lValue.getContextObject(this, false));
 		if (modeObject instanceof Boolean) {
 		    mode = ((Boolean) modeObject).booleanValue();
 		}
@@ -2203,14 +2206,14 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitVarExpr(CalcParser.VarExprContext ctx) {
 	    LValueContext lValue = getLValue(ctx.var());
-	    return evaluateFunction(ctx, lValue.getContextObject());
+	    return evaluateFunction(ctx, lValue.getContextObject(this));
 	}
 
 	@Override
 	public Object visitPostIncOpExpr(CalcParser.PostIncOpExprContext ctx) {
 	    CalcParser.VarContext var = ctx.var();
 	    LValueContext lValue = getLValue(var);
-	    Object value = evaluateFunction(var, lValue.getContextObject());
+	    Object value = evaluateFunction(var, lValue.getContextObject(this));
 	    String op = ctx.INC_OP().getText();
 	    Object beforeValue;
 	    Object afterValue;
@@ -2262,7 +2265,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public Object visitPreIncOpExpr(CalcParser.PreIncOpExprContext ctx) {
 	    CalcParser.VarContext var = ctx.var();
 	    LValueContext lValue = getLValue(var);
-	    Object value = evaluateFunction(var, lValue.getContextObject());
+	    Object value = evaluateFunction(var, lValue.getContextObject(this));
 	    String op = ctx.INC_OP().getText();
 	    Object afterValue;
 
@@ -3262,7 +3265,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		if (args.replaceOption().var() != null) {
 		    CalcParser.VarContext var = args.replaceOption().var();
 		    LValueContext lValue = getLValue(var);
-		    Object optionObject = lValue.getContextObject(false);
+		    Object optionObject = lValue.getContextObject(this, false);
 		    option = optionObject == null ? "" : toStringValue(this, var, optionObject, true, false, false, "");
 		}
 		else {
@@ -3554,7 +3557,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    CalcParser.FillArgsContext fillCtx  = ctx.fillArgs();
 	    CalcParser.VarContext varCtx        = fillCtx.var();
 	    LValueContext lValue                = getLValue(varCtx);
-	    Object value		        = lValue.getContextObject();
+	    Object value		        = lValue.getContextObject(this);
 	    List<CalcParser.ExprContext> exprs  = fillCtx.expr();
 	    CalcParser.ExprContext fillExpr     = exprs.get(0);
 
@@ -4407,7 +4410,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    Object result;
 
 	    String op = ctx.ADD_ASSIGN().getText();
-	    Object e1 = lValue.getContextObject();
+	    Object e1 = lValue.getContextObject(this);
 	    Object e2 = visit(exprCtx);
 
 	    switch (op) {
@@ -4442,7 +4445,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public Object visitPowerAssignExpr(CalcParser.PowerAssignExprContext ctx) {
 	    LValueContext lValue = getLValue(ctx.var());
 
-	    BigDecimal base = toDecimalValue(this, lValue.getContextObject(), mc, ctx);
+	    BigDecimal base = toDecimalValue(this, lValue.getContextObject(this), mc, ctx);
 	    double exp      = getDoubleValue(ctx.expr());
 
 	    return lValue.putContextObject(this, MathUtil.pow(base, exp, mc));
@@ -4457,7 +4460,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    Object result;
 
 	    String op = ctx.MULT_ASSIGN().getText();
-	    Object e1 = lValue.getContextObject();
+	    Object e1 = lValue.getContextObject(this);
 	    Object e2 = visit(exprCtx);
 
 	    try {
@@ -4528,7 +4531,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public Object visitBitAssignExpr(CalcParser.BitAssignExprContext ctx) {
 	    LValueContext lValue = getLValue(ctx.var());
 
-	    BigInteger i1 = toIntegerValue(this, lValue.getContextObject(), mc, ctx);
+	    BigInteger i1 = toIntegerValue(this, lValue.getContextObject(this), mc, ctx);
 	    BigInteger i2 = getIntegerValue(ctx.expr());
 
 	    String op = ctx.BIT_ASSIGN().getText();
@@ -4542,7 +4545,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public Object visitShiftAssignExpr(CalcParser.ShiftAssignExprContext ctx) {
 	    LValueContext lValue = getLValue(ctx.var());
 
-	    BigInteger i1 = toIntegerValue(this, lValue.getContextObject(), mc, ctx);
+	    BigInteger i1 = toIntegerValue(this, lValue.getContextObject(this), mc, ctx);
 	    int e2        = getIntValue(ctx.expr());
 
 	    String op = ctx.SHIFT_ASSIGN().getText();

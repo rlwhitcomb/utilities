@@ -77,6 +77,9 @@
  *	    #69: New global variables "$#" and "$*".
  *	09-Nov-2021 (rlwhitcomb)
  *	    #74: Improve error messages.
+ *	17-Nov-2021 (rlwhitcomb)
+ *	    #96: Add "visitor" to "getContextObject" parameters so that functions can be evaluated.
+ *	    Two changes to make LValues that are function results work correctly for indexes and members.
  */
  package info.rlwhitcomb.calc;
 
@@ -267,15 +270,19 @@ class LValueContext
 	 * or string, this would be <code>arr[index]</code>.
 	 * <p> One special check is made for error reporting purposes on local variables.
 	 *
+	 * @param visitor The object visitor used to do calculations.
 	 * @return The member or indexed value extracted from the base object.
 	 */
-	public Object getContextObject() {
-	    return getContextObject(true);
+	public Object getContextObject(final CalcObjectVisitor visitor) {
+	    return getContextObject(visitor, true);
 	}
 
-	public Object getContextObject(final boolean allowUndefined) {
+	public Object getContextObject(final CalcObjectVisitor visitor, final boolean allowUndefined) {
 	    Object result = getPredefinedContextObject(allowUndefined);
 
+	    if (result instanceof FunctionScope) {
+		result = visitor.evaluateFunction(varCtx, result);
+	    }
 	    if (result instanceof PredefinedValue) {
 		PredefinedValue predef = (PredefinedValue) result;
 		result = predef.getValue();
@@ -375,7 +382,7 @@ class LValueContext
 	@SuppressWarnings("unchecked")
 	private LValueContext makeMapLValue(final CalcObjectVisitor visitor, final CalcParser.VarContext ctx, final String memberName) {
 	    ObjectScope map = null;
-	    Object objValue = getContextObject();
+	    Object objValue = getContextObject(visitor);
 
 	    if (objValue == null) {
 		map = new ObjectScope();
@@ -383,6 +390,9 @@ class LValueContext
 	    }
 	    else if (objValue instanceof ObjectScope) {
 		map = (ObjectScope) objValue;
+		if (memberName == null) {
+		    return new LValueContext(this, ctx, map, null);
+		}
 	    }
 	    else {
 		throw new CalcExprException(ctx, "%calc#nonObjectValue", this);
@@ -421,7 +431,7 @@ class LValueContext
 	    else if (ctx instanceof CalcParser.ArrVarContext) {
 		CalcParser.ArrVarContext arrVarCtx = (CalcParser.ArrVarContext) ctx;
 		LValueContext arrLValue = getLValue(visitor, arrVarCtx.var(), lValue);
-		Object arrValue = arrLValue.getContextObject();
+		Object arrValue = arrLValue.getContextObject(visitor);
 
 		// Okay, here the "arrValue" could be null, an array, a string, OR an object (map)
 		if (arrValue != null && arrValue instanceof ObjectScope) {
@@ -484,6 +494,7 @@ class LValueContext
 		if (rhsVarCtx != null) {
 		    if (string != null)
 			objLValue = objLValue.makeMapLValue(visitor, objVarCtx, null);
+
 		    return getLValue(visitor, rhsVarCtx, objLValue);
 		}
 		else
@@ -492,7 +503,7 @@ class LValueContext
 	    else if (ctx instanceof CalcParser.FunctionVarContext) {
 		CalcParser.FunctionVarContext funcVarCtx = (CalcParser.FunctionVarContext) ctx;
 		LValueContext funcLValue = getLValue(visitor, funcVarCtx.var(), lValue);
-		Object funcObj = funcLValue.getContextObject();
+		Object funcObj = funcLValue.getContextObject(visitor);
 
 		if (funcObj instanceof FunctionScope) {
 		    // We are already setup to make the function call with this FunctionScope, so just do it

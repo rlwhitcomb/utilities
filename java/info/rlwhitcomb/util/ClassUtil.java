@@ -77,6 +77,8 @@
  *	    Use new Intl Exception variants for convenience.
  *	07-Jul-2021 (rlwhitcomb)
  *	    Make the class final and the constructor private.
+ *	17-Nov-2021 (rlwhitcomb)
+ *	    Add "defaultToString". Make all parameters final.
  */
 
 package info.rlwhitcomb.util;
@@ -112,7 +114,7 @@ public final class ClassUtil
 	}
 
 
-	private static Field findField(Field[] fields, String fieldName)
+	private static Field findField(final Field[] fields, final String fieldName)
 		throws NoSuchFieldException
 	{
 	    for (Field field : fields) {
@@ -122,7 +124,7 @@ public final class ClassUtil
 	    throw new NoSuchFieldException(fieldName);
 	}
 
-	private static Method findMethod(Method[] methods, String methodName)
+	private static Method findMethod(final Method[] methods, final String methodName)
 		throws NoSuchMethodException
 	{
 	    for (Method method : methods) {
@@ -132,7 +134,7 @@ public final class ClassUtil
 	    throw new NoSuchMethodException(methodName);
 	}
 
-	private static Method findMethod(Method[] methods, String methodName, Class<?> paramType)
+	private static Method findMethod(final Method[] methods, final String methodName, final Class<?> paramType)
 		throws NoSuchMethodException
 	{
 	    for (Method method : methods) {
@@ -154,7 +156,7 @@ public final class ClassUtil
 	 * @return	Whether or not the property exists there, and has the
 	 *		{@link Scriptable} annotation.
 	 */
-	public static boolean findScriptable(Class<?> clazz, String name) {
+	public static boolean findScriptable(final Class<?> clazz, final String name) {
 	    Scriptable annotation = null;
 	    try {
 		Field[] fields = clazz.getDeclaredFields();
@@ -190,7 +192,7 @@ public final class ClassUtil
 	 *			properties set to their values.
 	 * @throws	Throwable for whatever might go wrong.
 	 */
-	public static Object createAndSetValues(Class<?> clazz, List<String> keys, List<Object> values)
+	public static Object createAndSetValues(final Class<?> clazz, final List<String> keys, final List<Object> values)
 		throws Throwable
 	{
 	    Object obj = null;
@@ -354,7 +356,7 @@ public final class ClassUtil
 	 *		out of range or a formatted string that describes the
 	 *		caller at the given level.
 	 */
-	public static String getCallingMethod(int level) {
+	public static String getCallingMethod(final int level) {
 	    StackTraceElement[] elements = Thread.currentThread().getStackTrace();
 	    if (elements == null || level + 2 >= elements.length)
 		return UNKNOWN_CALLER;
@@ -370,7 +372,7 @@ public final class ClassUtil
 	 *				which if supplied starts logging the call stack up one
 	 *				further level (3 instead of 2).
 	 */
-	public static void logCallers(Logging logger, String methodName) {
+	public static void logCallers(final Logging logger, final String methodName) {
 	    StackTraceElement[] elements = Thread.currentThread().getStackTrace();
 	    int startLevel = CharUtil.isNullOrEmpty(methodName) ? 2 : 3;
 	    if (elements == null || elements.length < startLevel)
@@ -405,7 +407,7 @@ public final class ClassUtil
 	 * @return		The serialized bytes of that object, or {@code null} if there
 	 *			was a problem (such as, the object isn't serializable).
 	 */
-	public static byte[] toByteArray(Object object) {
+	public static byte[] toByteArray(final Object object) {
 	    try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		 ObjectOutputStream oos = new ObjectOutputStream(bos))
 	    {
@@ -426,7 +428,7 @@ public final class ClassUtil
 	 * @return	The bytes of the value (but could be {@code null}
 	 *		if something weird happened).
 	 */
-	public static byte[] toByteArray(long value) {
+	public static byte[] toByteArray(final long value) {
 	    try (ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		 DataOutputStream os = new DataOutputStream(bos))
 	    {
@@ -449,7 +451,7 @@ public final class ClassUtil
 	 * @throws IllegalStateException if the option value is {@code true},
 	 * otherwise just return.
 	 */
-	public static void checkOptionTrue(boolean value, String field) {
+	public static void checkOptionTrue(final boolean value, final String field) {
 	    if (value) {
 		throw new Intl.IllegalStateException("util#class.optionFieldSet", field);
 	    }
@@ -467,7 +469,7 @@ public final class ClassUtil
 	 * @throws IllegalStateException if the option value is not {@code null},
 	 * or non empty if the value is a {@code String}.
 	 */
-	public static void checkOptionSet(Object value, String field) {
+	public static void checkOptionSet(final Object value, final String field) {
 	    if (value != null || (value instanceof String && !((String)value).isEmpty())) {
 		throw new Intl.IllegalStateException("util#class.optionFieldSet", field);
 	    }
@@ -482,7 +484,7 @@ public final class ClassUtil
 	 * @param o2	The second object (or null).
 	 * @return	If both are null or both non-null and "equal" then true, else false.
 	 */
-	public static boolean objectsEqual(Object o1, Object o2) {
+	public static boolean objectsEqual(final Object o1, final Object o2) {
 	    if (o1 != null && o2 != null) {
 		return o1.equals(o2);
 	    }
@@ -501,7 +503,7 @@ public final class ClassUtil
 	 * @return	The package name with "." changed to "/", and with leading and
 	 *		trailing "/" (suitable for adding specific resource names).
 	 */
-	public static String getResourcePath(Object obj) {
+	public static String getResourcePath(final Object obj) {
 	    if (obj == null)
 		throw new Intl.IllegalArgumentException("util#class.nullObject");
 	    String path = getClassDirectory(obj.getClass());
@@ -515,10 +517,23 @@ public final class ClassUtil
 	 * @param cls	The class we're dealing with.
 	 * @return	The class' package expressed as a directory entry ("/" separators).
 	 */
-	public static String getClassDirectory(Class<?> cls) {
+	public static String getClassDirectory(final Class<?> cls) {
 	    Package pkg = cls.getPackage();
 	    return pkg.getName().replace('.', '/');
 	}
 
+
+	/**
+	 * Get the default value of {@link Object#toString} for the given object.
+	 *
+	 * @param obj	The object in question.
+	 * @return	What {@link Object#toString} would return if there were no intervening
+	 *		superclass implementations of the <code>toString()</code> method.
+	 */
+	public static String defaultToString(final Object obj) {
+	    return String.format("%1$s@%2$s",
+		obj.getClass().getSimpleName(),
+		Integer.toHexString(System.identityHashCode(obj)));
+	}
 
 }
