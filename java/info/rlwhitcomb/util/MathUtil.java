@@ -47,6 +47,8 @@
  *	    Make "fixup" method that does "round" and "stripTrailingZeros".
  *	07-Oct-2021 (rlwhitcomb)
  *	    Fix operation of "round" when rounding to more precision than the original.
+ *	18-Nov-2021 (rlwhitcomb)
+ *	    #95: Add calculation of "phi".
  */
 package info.rlwhitcomb.util;
 
@@ -69,9 +71,10 @@ public final class MathUtil
 {
 	private static final Logging logger = new Logging(MathUtil.class);
 
-	private static final BigInteger I_TWO = BigInteger.valueOf(2L);
-	private static final BigDecimal D_TWO = BigDecimal.valueOf(2L);
-	private static final BigDecimal D_TEN = BigDecimal.valueOf(10L);
+	private static final BigInteger I_TWO  = BigInteger.valueOf(2L);
+	private static final BigDecimal D_TWO  = BigDecimal.valueOf(2L);
+	private static final BigDecimal D_FIVE = BigDecimal.valueOf(5L);
+	private static final BigDecimal D_TEN  = BigDecimal.valueOf(10L);
 
 	/**
 	 * A rational approximation of PI good to ~25 decimal digits.
@@ -925,6 +928,29 @@ public final class MathUtil
 
 	    return CALCULATED_E;
 	}
+
+	/**
+	 * Calculate the value of "phi" (the "Golden Ratio"), which is the solution to
+	 * the equation <code>x^2 - x - 1 = 0</code> which is <code>(1 + sqrt(5)) / 2</code>.
+	 * <p> Interestingly, <code>1 / phi == phi - 1</code>
+	 * <p> <code>phi - 1 == 1 / phi</code> but because of rounding this doesn't always
+	 * work out in practice, so this code prioritizes that <code>1 / phi == PHI</code>
+	 * and <code>1 / PHI == phi</code>, which also means that <code>phi - 1 != PHI</code>
+	 * though it should be, and <code>PHI + 1 != phi</code> though that should be also.
+	 *
+	 * @param mc         The math context (precision) requested.
+	 * @param reciprocal Whether to get the reciprocal value (upper case PHI).
+	 *
+	 * @return A {@link BigDecimal} constant of PHI to the requested precision.
+	 */
+	public static BigDecimal phi(final MathContext mc, final boolean reciprocal) {
+	    BigDecimal term = sqrt(D_FIVE, mc).add(BigDecimal.ONE);
+	    if (reciprocal)
+		return D_TWO.divide(term, mc);
+	    else
+		return term.divide(D_TWO, mc);
+	}
+
 
 	private static final BigInteger MAX_PRIME = BigInteger.valueOf(Integer.MAX_VALUE);
 

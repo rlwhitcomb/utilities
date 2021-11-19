@@ -411,6 +411,9 @@
  *	17-Nov-2021 (rlwhitcomb)
  *	    #96: add "this" to "getContextObject" calls so that LHS functions can be
  *	    evaluated.
+ *	18-Nov-2021 (rlwhitcomb)
+ *	    #95: Add constant predefined values for "phi" and "PHI" (the Golden Ratio
+ *	    and its reciprocal).
  */
 package info.rlwhitcomb.calc;
 
@@ -654,6 +657,15 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    "\u2107"
 	};
 
+	/**
+	 * Aliases for "phi" -- lower case for the value (the "Golden Ratio"),
+	 * and UPPER case for the reciprocal (the "Silver Ratio") (semi-standard usage,
+	 * according to https://en.wikipedia.org/wiki/Golden_ratio).
+	 */
+	private static final String[] PHI_ALIASES = {
+	    "phi", "\u03C6", "\u03D5", "PHI", "\u03A6"
+	};
+
 	/** Name for global argument array value. */
 	static final String ARG_ARRAY = "$*";
 
@@ -750,6 +762,29 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    for (int i = 0; i < E_ALIASES.length; i++) {
 		String alias = E_ALIASES[i];
 		PredefinedValue.define(globalScope, alias, eSupplier);
+	    }
+
+	    Supplier<Object> phiSupplier = () -> {
+		BigDecimal phi = MathUtil.phi(mcDivide, false);
+		if (settings.rationalMode)
+		    return new BigFraction(phi);
+		else
+		    return phi;
+	    };
+	    Supplier<Object> phi1Supplier = () -> {
+		BigDecimal phi = MathUtil.phi(mcDivide, true);
+		if (settings.rationalMode)
+		    return new BigFraction(phi);
+		else
+		    return phi;
+	    };
+	    Supplier<Object> supplier = phiSupplier;
+	    for (int i = 0; i < PHI_ALIASES.length; i++) {
+		String alias = PHI_ALIASES[i];
+		// Switch to the reciprocal
+		if (alias.equals("PHI"))
+		    supplier = phi1Supplier;
+		PredefinedValue.define(globalScope, alias, supplier);
 	    }
 
 	    arguments = new ArrayScope<Object>();

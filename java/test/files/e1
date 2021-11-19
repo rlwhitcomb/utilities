@@ -14,6 +14,10 @@ info.version.major > 2 || (info.version.major == 2 && info.version.minor > 4) ||
 3.4 + 5
 34 + 5 @x
 pi
+phi
+Φ
+1/phi == PHI
+1/PHI == phi
 sin(pi/3)
 4 & 7
 true && false

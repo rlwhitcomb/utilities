@@ -544,6 +544,8 @@ or
     <tbody>
     <tr><td>28</td>
       <td><code>pi</code>, <code>&#x1D6D1;</code>, <code>e</code>, or <code>&#x2107;</code><br>
+          <code>phi</code>, <code>&#x03C6;</code>, <code>&#x03D5;</code><br>
+          <code>PHI</code>, <code>&#x03A6;</code><br>
           <code>true</code> or <code>false</code><br>
           <code>null</code><br>
           <code>&#x2205;</code> or <code>&#x29B0;</code><br>
@@ -554,15 +556,17 @@ or
           <code>info</code><br>
           any string, binary, octal, hex, fraction, etc. constant</td>
       <td>the fundamental constants <code>&#x1D6D1;</code> and <code>e</code><br>
+          the fundamental Golden Ratio constant <code>&#x03C6;</code> or <code>phi</code><br>
+          <code>(1 / &#x03C6;)</code> which is also <code>(&#x03C6; - 1)</code><br>
           the <code>boolean</code> values<br>
           the <code>null</code> (empty) value<br>
-          the empty set<br>
-          any of the Unicode fraction values<br>
-          other Unicode digit / number symbols<br>
-          date value of the current date<br>
-          time value of the current time<br>
-          current Calc information (version, os, java)<br>
-          the constant value</td><td>N/A</td></tr>
+          the empty object / set (same as <code>{ }</code>)<br>
+          any of the Unicode fraction values, where <code>&#x215E; = 7/8</code><br>
+          other Unicode digit / number symbols, where <code>&#x2487; = 20</code><br>
+          the current date, comparable to <code>d'2021/11/19'</code><br>
+          the current time, comparable to <code>h'11:10 am'</code><br>
+          current Calc information (<code>version</code>, <code>os</code>, <code>java</code>)<br>
+          that constant value, as in <code>"Hello"</code>, <code>127</code>, or <code>0xA8</code></td><td>N/A</td></tr>
     <tr><td>27</td><td><code>{</code> (&nbsp;<i>key:value pairs</i>&nbsp;) <code>}</code></td><td>define an object</td><td>left to right</td></tr>
     <tr><td>26</td><td><code>[</code> (&nbsp;<i>expr list</i>&nbsp;) <code>]</code><br><i>var</i> <code>[</code> <i>expr</i> <code>]</code> or <i>var</i>&nbsp;<code>&#x2080;</code> .. <code>&#x2089;</code></td><td>define an array,<br>or access elements of an array, string, or object</td><td>left to right</td></tr>
     <tr><td>25</td><td><code>.</code></td><td>access an object member</td><td>left to right</td></tr>
@@ -813,9 +817,18 @@ or
      rules are the same as for the input values on the command line. And if the string cannot be interpreted as file names that exist, the
      entire string is just returned as-is as the result. The second (optional) expression is the name of the charset to use (system default
      if not given, or empty/null). The entire contents of the file(s) is returned, with the end-of-line sequences changed to just newline (0x0A or "\n"), and can be assigned to a variable or used in some other way.
-  <p>The version information from <code>versioninfo</code> is returned as an object with the following fields, e.g.:
+  <p>The <code>info</code> object contains three subobjects:  <code>version</code>, <code>os</code>, and <code>java</code>. The contents of each are similar to this:
   <p class="indent">
-    <code style="color:blue;">versioninfo</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">{ major: 2, minor: 3, patch: 0, prerelease: "-debug", build: "+9cce83e" }</code>
+    <code style="color:blue;">info.version</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">{ major: 2, minor: 3, patch: 0, prerelease: "-debug", build: "+9cce83e" }</code>
+  <p>The values of <code>phi</code> and <code>PHI</code> are constructed (due to precision and rounding) such that <code>1 / phi == PHI</code> and also <code>1 / PHI == phi</code>,
+     but even though mathematically <code>phi - 1 == PHI</code> and <code>PHI + 1 == phi</code> the values computed here will not match exactly ("PHI" will have one more
+     fractional digit of precision compared to "phi"):
+  <p class="indent">
+     <code style="color:blue;">phi </code><code style="color:grey;">&#x21E8;</code><code style="color:green;"> 1.618033988749894848204586834365638</code><br>
+     <code style="color:blue;">PHI </code><code style="color:grey;">&#x21E8;</code><code style="color:green;"> 0.6180339887498948482045868343656382</code><br>
+  <p>This value is also available from the standard <code>library.calc</code> via:
+  <p class="indent">
+     <code style="color:blue;">quad(1, -1, -1)[0] </code><code style="color:grey;">&#x21E8;</code><code style="color:green;"> 1.618033988749894848204586834365638</code>
 </div>
 <hr class="sectionsep">
   <h2>User-Defined Functions</h2>
