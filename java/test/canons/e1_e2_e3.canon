@@ -478,6 +478,11 @@
 >}
 >length a -> 7
 >scale a.b -> 3
+>r = ∅ -> { }
+>s = ⦰ -> { }
+>length r -> 0
+>length s -> 0
+>r == s -> true
 >str = 'abcdefg' -> "abcdefg"
 >str[1] = 'z' -> "z"
 >str[2] = 'y' -> "y"

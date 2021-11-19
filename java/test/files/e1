@@ -461,6 +461,10 @@ a.c.h = a.c.g + ": " + `a.b[2] = ${a.b[2]}`
 a@j
 length a; scale a.b;
 
+r = ∅; s = ⦰
+length r; length s
+r == s
+
 str = 'abcdefg'
 str[1] = 'z'
 str[2] = 'y'
@@ -480,7 +484,7 @@ p@j
 length p; scale p;
 :echo "Elements of p:"
 :result on
-loop $p in p { `name: $$p, value: ${p[$p]}` }
+loop $p ∈ p { `name: $$p, value: ${p[$p]}` }
 :result pop
 
 #

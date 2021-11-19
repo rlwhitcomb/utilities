@@ -293,6 +293,8 @@
  *	    "in" or "over" without loop variable; also allow "in" for "case" statements.
  *	11-Nov-2021 (rlwhitcomb)
  *	    #81: Add directive to not quote strings on output.
+ *	18-Nov-2021 (rlwhitcomb)
+ *	    #83: Add Unicode symbols for "in" and "empty set".
  */
 
 grammar Calc;
@@ -330,7 +332,7 @@ defineStmt
    ;
 
 loopStmt
-   : K_LOOP ( LOCALVAR ? ( K_IN | K_OVER ) ) ? loopCtl stmtBlock
+   : K_LOOP ( LOCALVAR ? ( K_IN | K_OVER | SET_IN ) ) ? loopCtl stmtBlock
    ;
 
 whileStmt
@@ -342,8 +344,8 @@ ifStmt
    ;
 
 caseStmt
-   : K_CASE expr ( K_OF | K_IN ) '{' caseBlock ( ',' caseBlock ) * '}'
-   | K_CASE expr ( K_OF | K_IN ) caseBlock ( ',' caseBlock ) *
+   : K_CASE expr ( K_OF | K_IN | SET_IN ) '{' caseBlock ( ',' caseBlock ) * '}'
+   | K_CASE expr ( K_OF | K_IN | SET_IN ) caseBlock ( ',' caseBlock ) *
    ;
 
 stmtBlock
@@ -523,6 +525,7 @@ caseExprList
 obj
    : '{' EOL? pair ( ',' EOL? pair ) * EOL? '}'
    | '{' EOL? '}'
+   | EMPTY_SET
    ;
 
 pair
@@ -966,6 +969,13 @@ BIT_OP
        ;
 
 ASSIGN : '=' ;
+
+SET_IN : '\u2208' ;
+
+EMPTY_SET
+       : '\u2205'
+       | '\u29B0'
+       ;
 
 
 D_DECIMAL
