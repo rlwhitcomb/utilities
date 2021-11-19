@@ -154,6 +154,8 @@
  *	    Trap errors from "stty" if we're running headless (as in CI builds).
  *	25-Oct-2021 (rlwhitcomb)
  *	    New SemanticVersion of program version information.
+ *	18-Nov-2021 (rlwhitcomb)
+ *	    New method for getting SemanticVersion of an arbitrary class / package.
  */
 package info.rlwhitcomb.util;
 
@@ -371,14 +373,7 @@ public final class Environment
 	    else
 		javaMajorVersion = Integer.parseInt(parts[0]);
 
-	    SemanticVersion semVer;
-	    try {
-		semVer = new SemanticVersion(Environment.class);
-	    }
-	    catch (ParseException | NullPointerException ex) {
-		semVer = new SemanticVersion();
-	    }
-	    IMPLEMENTATION_VERSION = semVer;
+	    IMPLEMENTATION_VERSION = getVersion(Environment.class);
 	}
 
 
@@ -954,6 +949,26 @@ public final class Environment
 		Intl.outFormat("util#env.timeThis", seconds);
 	    }
 	    return result;
+	}
+
+
+	/**
+	 * Find and parse the semantic version from an arbitrary class (from its "Implementation-Version"
+	 * attribute in the corresponding .jar file).
+	 *
+	 * @param cls	The class to interrogate.
+	 * @return	The implementation version of the class (except in the case of error, in which case
+	 *		the version will be a default (0.0.0) version).
+	 */
+	public static SemanticVersion getVersion(final Class<?> cls) {
+	    SemanticVersion semVer;
+	    try {
+		semVer = new SemanticVersion(cls);
+	    }
+	    catch (ParseException | NullPointerException ex) {
+		semVer = new SemanticVersion();
+	    }
+	    return semVer;
 	}
 
 
