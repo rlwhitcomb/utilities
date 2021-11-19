@@ -272,6 +272,8 @@
 		Echo the test log file to console for CI builds.
 	    09-Nov-2021 (rlwhitcomb)
 		Add "uuid" wrappers.
+	    18-Nov-2021 (rlwhitcomb)
+		Put Antlr version into build.properties
 
      ========================================================================== -->
 
@@ -520,7 +522,7 @@
 
 	<target name="process-grammars" depends="check-grammars-uptodate" description="Process the Antlr grammars to generate parsers.">
 		<echo message="Generating Calc parser" unless:true="${grammars.uptodate}"/>
-		<java jar="external-files/antlr-4.9-complete.jar" fork="true" unless:true="${grammars.uptodate}" failonerror="true">
+		<java jar="external-files/antlr-${antlr.version}-complete.jar" fork="true" unless:true="${grammars.uptodate}" failonerror="true">
 			<arg file="info/rlwhitcomb/calc/Calc.g4"/>
 			<arg value="-visitor"/>
 			<arg value="-no-listener"/>

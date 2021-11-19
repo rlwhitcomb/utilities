@@ -32,6 +32,8 @@
 		    Add Antlr grammar for JavaPreProc.
 		23-Aug-2021 (rlwhitcomb)
 		    Rename "external-jars" to "external-files".
+		18-Nov-2021 (rlwhitcomb)
+		    Put Antlr version into build.properties
 
      ========================================================================== -->
 
@@ -50,7 +52,7 @@
 
 	<target name="process-grammars" depends="check-grammars-uptodate" description="Process the Antlr grammars to generate parsers.">
 		<echo message="Generating PreProc parser" unless:true="${grammars.uptodate}"/>
-		<java jar="external-files/antlr-4.9-complete.jar" fork="true" unless:true="${grammars.uptodate}" failonerror="true">
+		<java jar="external-files/antlr-${antlr.version}-complete.jar" fork="true" unless:true="${grammars.uptodate}" failonerror="true">
 			<arg file="info/rlwhitcomb/preproc/PreProc.g4"/>
 			<arg value="-visitor"/>
 			<arg value="-no-listener"/>
