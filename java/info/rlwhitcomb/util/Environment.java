@@ -156,6 +156,8 @@
  *	    New SemanticVersion of program version information.
  *	18-Nov-2021 (rlwhitcomb)
  *	    New method for getting SemanticVersion of an arbitrary class / package.
+ *	19-Nov-2021 (rlwhitcomb)
+ *	    #98: Add separate methods for screen width and height.
  */
 package info.rlwhitcomb.util;
 
@@ -1054,6 +1056,32 @@ public final class Environment
 		// If we can't determine the dimensions, return a default size
 		return defaultSize;
 	    }
+	}
+
+
+	/**
+	 * Get just the screen width, using the {@link #consoleSize} method.
+	 * <p> It is more efficient, if both width and height are needed, to
+	 * call {@link #consoleSize} instead of this method.
+	 *
+	 * @return The current width of the screen (in characters).
+	 */
+	public static int consoleWidth() {
+	    Dimension size = consoleSize();
+	    return size.width;
+	}
+
+
+	/**
+	 * Get just the screen height, using the {@link #consoleSize} method.
+	 * <p> It is more efficient, if both width and height are needed, to
+	 * call {@link #consoleSize} instead of this method.
+	 *
+	 * @return The current height of the screen (in characters).
+	 */
+	public static int consoleHeight() {
+	    Dimension size = consoleSize();
+	    return size.height;
 	}
 
 

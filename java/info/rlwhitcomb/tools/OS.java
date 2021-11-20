@@ -60,6 +60,9 @@
  *	    Add some color to most displays.
  *	22-Oct-2021 (rlwhitcomb)
  *	    More Locale information, verbose flag, and filters.
+ *	19-Nov-2021 (rlwhitcomb)
+ *	    #98: Use the real screen width, add "-width:nn" option, fix the indexing
+ *	    in the columnar display.
  */
 package info.rlwhitcomb.tools;
 
@@ -86,6 +89,7 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 
 import info.rlwhitcomb.util.ConsoleColor;
+import info.rlwhitcomb.util.Environment;
 
 
 /**
@@ -102,11 +106,8 @@ public class OS
 	/** Empty Locale code field substitute. */
 	private static final String EMPTY_CODE = "---";
 
-	/** Default value for screen width (used to put values into multiple columns. */
-	private static final int SCREEN_WIDTH_DEFAULT = 110;
-
 	/** The current screen width value (for columnar output). */
-	private static int screenWidth = SCREEN_WIDTH_DEFAULT;
+	private static int screenWidth;
 
 	/** The current time (for TimeZone displays). */
 	private static final Date now = new Date();
@@ -290,6 +291,7 @@ public class OS
 	private static boolean parseArgs(final String[] args) {
 	    for (String arg: args) {
 		String opt = arg;
+		String[] parts = null;
 
 		if (arg.startsWith("--"))
 		    opt = arg.substring(2);
@@ -297,6 +299,12 @@ public class OS
 		    opt = arg.substring(1);
 		else if (arg.startsWith("/"))
 		    opt = arg.substring(1);
+
+		int pos = opt.indexOf(':');
+		if (pos > 0) {
+		    parts = opt.substring(pos + 1).split("[,;]\\s*|\\s+");
+		    opt = opt.substring(0, pos);
+		}
 
 		Choice choice = Choice.match(opt);
 		if (choice != null) {
@@ -308,19 +316,33 @@ public class OS
 		else if (matches(opt, "verbose", "v")) {
 		    verbose = true;
 		}
-		else if (opt.startsWith("filter:") || opt.startsWith("filt:")) {
-		    int ix = opt.indexOf(":");
-		    String[] parts = opt.substring(ix + 1).split("[,;]\\s*|\\s+");
-		    for (String part : parts) {
-			filterValues.add(part);
+		else if (matches(opt, "width", "w")) {
+		    if (parts != null) {
+			try {
+			    screenWidth = Integer.parseInt(parts[0]);
+			    continue;
+			}
+			catch (NumberFormatException nfe) {
+			}
 		    }
+		    System.err.println("Invalid screen width setting: \"" + arg + "\"");
+		    return false;
+		}
+		else if (matches(opt, "filter", "filt")) {
+		    if (parts != null) {
+			for (String part : parts) {
+			    filterValues.add(part);
+			}
+		    }
+		    System.err.println("Invalid filter settings: \"" + arg + "\"");
+		    return false;
 		}
 		else if (matches(opt, "help", "h", "?")) {
 		    usage(System.out);
 		    return false;
 		}
 		else {
-		    System.err.println("Unknown choice value of \"" + arg + "\".");
+		    System.err.println("Unknown choice value of \"" + arg + "\"!");
 		    System.err.println();
 		    usage(System.err);
 		    return false;
@@ -354,18 +376,27 @@ public class OS
 	    else {
 		StringBuilder lineBuf = new StringBuilder(screenWidth);
 		int numberRows = size / numberColumns;
-		if (size % numberColumns > 0)
-		    numberColumns++;
+		int remainder = size - (numberColumns * numberRows);
+
+		int[] columnRows = new int[numberColumns];
+		for (int column = 0; column < numberColumns; column++) {
+		    columnRows[column] = numberRows;
+		    if (column < remainder)
+			columnRows[column]++;
+		}
+		if (remainder > 0)
+		    numberRows++;
 
 		for (int row = 0; row < numberRows; row++) {
 		    lineBuf.setLength(0);
+		    int index = row;
 		    for (int col = 0; col < numberColumns; col++) {
-			int index = row + (col * numberRows);
-			if (index < values.size()) {
+			if (index < size && row < columnRows[col]) {
 			    lineBuf.append(values.get(index));
 			    if (col < numberColumns - 1)
 				pad(lineBuf, (col + 1) * columnWidth);
 			}
+			index += columnRows[col];
 		    }
 		    System.out.println(ConsoleColor.color(lineBuf.toString()));
 		}
@@ -651,6 +682,8 @@ public class OS
 	 * @param args	The parsed command line arguments.
 	 */
 	public static void main(String[] args) {
+	    screenWidth = Environment.consoleWidth();
+
 	    if (!parseArgs(args))
 		System.exit(1);
 
