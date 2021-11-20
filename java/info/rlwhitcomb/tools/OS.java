@@ -63,6 +63,7 @@
  *	19-Nov-2021 (rlwhitcomb)
  *	    #98: Use the real screen width, add "-width:nn" option, fix the indexing
  *	    in the columnar display.
+ *	    Add options for no titles, no columns.
  */
 package info.rlwhitcomb.tools;
 
@@ -114,6 +115,15 @@ public class OS
 
 	/** Some choices can have optional additional information. */
 	private static boolean verbose = false;
+
+	/** Whether to do single column (not columnar) displays. */
+	private static boolean singleColumn = false;
+
+	/** Whether to display titles and footers (works well in conjunction with "-single"). */
+	private static boolean showTitles = true;
+
+	/** Whether to use colors on output. */
+	private static boolean colors = true;
 
 	/**
 	 * List of filter values (dependent on which selection(s) is/are made
@@ -269,12 +279,22 @@ public class OS
 	 * @param ps	The stream to output to.
 	 */
 	private static void usage(final PrintStream ps) {
-	    ps.println("Usage: java OS [choice]*");
+	    ps.println("Usage: java OS [choice]* [options]");
 	    ps.println();
 	    ps.println("Valid choices are:");
 	    Choice.displayAliases(ps, "    ", 72);
+	    ps.println();
 	    ps.println(" or \"all\" (default is \"properties\"),");
 	    ps.println(" or \"help\", \"h\", or \"?\" to display this message.");
+	    ps.println();
+	    ps.println("Options can include:");
+	    ps.println(" -verbose = print more detail for some choices");
+	    ps.println(" -single  = display values in a single (vs. multi) column");
+	    ps.println(" -notitle = display only values without header / footer");
+	    ps.println(" -nocolor = no colors on display");
+	    ps.println();
+	    ps.println(" -width:nn   = force screen width for multi-column display");
+	    ps.println(" -filter:xxx = filter locale tags");
 	    ps.println();
 	}
 
@@ -312,6 +332,15 @@ public class OS
 		}
 		else if (matches(opt, "all", "a")) {
 		    choices = EnumSet.allOf(Choice.class);
+		}
+		else if (matches(opt, "single", "nocolumns", "nocolumn", "nocol")) {
+		    singleColumn = true;
+		}
+		else if (matches(opt, "notitles", "notitle", "not")) {
+		    showTitles = false;
+		}
+		else if (matches(opt, "nocolors", "nocolor", "noc")) {
+		    colors = false;
 		}
 		else if (matches(opt, "verbose", "v")) {
 		    verbose = true;
@@ -368,10 +397,11 @@ public class OS
 	    int numberColumns = Math.max(1, screenWidth / maxLength);
 	    int columnWidth   = screenWidth / numberColumns;
 
-	    printTitle(title);
+	    if (showTitles)
+		printTitle(title);
 
-	    if (numberColumns == 1) {
-		values.stream().forEach(s -> System.out.println(ConsoleColor.color(s)));
+	    if (singleColumn || numberColumns == 1) {
+		values.stream().forEach(s -> System.out.println(ConsoleColor.color(s, colors)));
 	    }
 	    else {
 		StringBuilder lineBuf = new StringBuilder(screenWidth);
@@ -398,11 +428,12 @@ public class OS
 			}
 			index += columnRows[col];
 		    }
-		    System.out.println(ConsoleColor.color(lineBuf.toString()));
+		    System.out.println(ConsoleColor.color(lineBuf.toString(), colors));
 		}
 	    }
 
-	    printFooter();
+	    if (showTitles)
+		printFooter();
 	}
 
 	/**
@@ -665,10 +696,10 @@ public class OS
 	    if (!sawDefault) {
 		printTitle("Default Time Zone");
 		String value = String.format("<Rd!>*<> %1$s", tzDisplayName(defaultZone, false));
-		System.out.println(ConsoleColor.color(value));
+		System.out.println(ConsoleColor.color(value, colors));
 		if (defaultZone.observesDaylightTime()) {
 		    value = String.format("<Rd!>+<> %1$s", tzDisplayName(defaultZone, true));
-		    System.out.println(ConsoleColor.color(value));
+		    System.out.println(ConsoleColor.color(value, colors));
 		}
 		printFooter();
 	    }
