@@ -12,7 +12,7 @@
 !echo
 
 t1: liststest
-t2: calctest
+t2: -charset:UTF-8 calctest
 t3: csvtest
 t4: sqltest
 t5: optiontest

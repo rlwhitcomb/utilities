@@ -291,6 +291,8 @@
  *	    #31: Introduce octal and binary escape sequences.
  *	11-Nov-2021 (rlwhitcomb)
  *	    #53: Tweak both versions of "toHexArrayForm" to always output two digits per byte.
+ *	20-Nov-2021 (rlwhitcomb)
+ *	    #97: Change parameter type of "makeFileStringList".
  */
 
 package info.rlwhitcomb.util;
@@ -1680,13 +1682,13 @@ public final class CharUtil
 	/**
 	 * Make a list of file names (only), suitable for display.
 	 *
-	 * @param files	The list of file names.
+	 * @param files	The list of objects (which resolve to file names).
 	 * @return	A string that looks like: {@code [ f1, f2, ... ]}
 	 */
-	public static String makeFileStringList(List<String> files) {
+	public static String makeFileStringList(List<?> files) {
 	    List<String> names = new ArrayList<>(files.size());
-	    for (String name : files) {
-		File f = new File(name);
+	    for (Object file : files) {
+		File f = new File(file.toString());
 		String nameOnly = f.getName();
 		int dotPos = nameOnly.lastIndexOf('.');
 		if (dotPos < 0)

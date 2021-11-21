@@ -189,6 +189,8 @@
  *	21-Oct-2021 (rlwhitcomb)
  *	    Use new method in Intl to get/test the locale value.
  *	    #36: Implement TESTER_OPTIONS from the environment. Make all function parameters final.
+ *	20-Nov-2021 (rlwhitcomb)
+ *	    #97: Implement charset for each description file.
  */
 package info.rlwhitcomb.tester;
 
@@ -210,6 +212,8 @@ import java.net.URLClassLoader;
 import java.nio.charset.Charset;
 import java.nio.charset.UnsupportedCharsetException;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -268,7 +272,30 @@ public class Tester
 
 	private Class<?> testClass = null;
 
-	List<String> testDescriptionFiles = null;
+	private Charset currentCharset = null;
+
+
+	/**
+	 * Consists of a file name and character set to use to read it.
+	 */
+	private static class DescriptionFile
+	{
+		public String descriptionFileName;
+		public Charset charset;
+
+		public DescriptionFile(final String descFile, final Charset cs) {
+		    this.descriptionFileName = descFile;
+		    this.charset = cs;
+		}
+
+		@Override
+		public String toString() {
+		    return descriptionFileName;
+		}
+	}
+
+
+	List<DescriptionFile> testDescriptionFiles = null;
 
 	private FileWriter outputFileWriter = null;
 
@@ -1118,7 +1145,7 @@ public class Tester
 
 		    case "include":
 			if (!CharUtil.isNullOrEmpty(argument)) {
-			    driveOneTest(argument);
+			    driveOneTest(new DescriptionFile(argument, currentCharset));
 			}
 			else {
 			    Intl.errFormat("tester#emptyInclude");
@@ -1176,6 +1203,14 @@ public class Tester
 	    return true;
 	}
 
+	private BufferedReader fileReader(final File file, final Charset cs)
+		throws IOException
+	{
+	    if (cs == null)
+		return Files.newBufferedReader(file.toPath());
+	    else
+		return Files.newBufferedReader(file.toPath(), cs);
+	}
 
 	private int numberTests = 0;
 	private int numberPassed = 0;
@@ -1185,18 +1220,19 @@ public class Tester
 	 * Read and process one test description file (can be recursive
 	 * for included files).
 	 *
-	 * @param file	The test description file name.
+	 * @param desc	The test description file attributes.
 	 */
-	private void driveOneTest(final String file) {
-	    File f = new File(file);
+	private void driveOneTest(final DescriptionFile desc) {
+	    String name = desc.toString();
+	    File f = new File(name);
 	    if (!FileUtilities.canRead(f) && defaultScriptDir != null) {
-		f = FileUtilities.decorate(file, defaultScriptDir, null);
+		f = FileUtilities.decorate(name, defaultScriptDir, null);
 		if (!FileUtilities.canRead(f)) {
-		    Intl.errFormat("tester#cannotOpenFile", file);
+		    Intl.errFormat("tester#cannotOpenFile", name);
 		    return;
 		}
 	    }
-	    try (BufferedReader reader = new BufferedReader(new FileReader(f)))
+	    try (BufferedReader reader = fileReader(f, desc.charset))
 	    {
 		String line = null;
 		int lineNo = 0;
@@ -1262,7 +1298,7 @@ public class Tester
 		}
 	    }
 	    catch (IOException ioe) {
-		Intl.errFormat("tester#readError", file, ioe.getMessage());
+		Intl.errFormat("tester#readError", name, ioe.getMessage());
 	    }
 	}
 
@@ -1270,15 +1306,15 @@ public class Tester
 	/**
 	 * Drive all the tests from the given test description file.
 	 *
-	 * @param file	The test description file name.
+	 * @param desc	The test description file attributes.
 	 */
-	private void driveTests(final String file) {
+	private void driveTests(final DescriptionFile desc) {
 	    Intl.outPrintln(timing ? "tester#finalUnderlineTiming" : "tester#finalUnderline");
-	    Intl.outFormat("tester#initialFile", file);
+	    Intl.outFormat("tester#initialFile", desc.toString());
 	    if (timing || verbose || log)
 		Intl.outPrintln(timing ? "tester#finalBreakTiming" : "tester#finalBreak");
 
-	    driveOneTest(file);
+	    driveOneTest(desc);
 
 	    String totalTiming = "";
 	    if (timing) {
@@ -1320,7 +1356,7 @@ public class Tester
 	 */
 	private void processOption(final String arg) {
 	    if (Options.isOption(arg) == null) {
-		testDescriptionFiles.add(arg);
+		testDescriptionFiles.add(new DescriptionFile(arg, currentCharset));
 		return;
 	    }
 
@@ -1374,6 +1410,18 @@ public class Tester
 		}
 		Locale.setDefault(locale);
 		Intl.initAllPackageResources(locale);
+	    }
+	    else if (Options.matchesOption(opt, true, "charset", "char", "cs")) {
+		String charsetName = arg1;
+		Charset charset = null;
+		try {
+		    charset = Charset.forName(charsetName);
+		    currentCharset = charset;
+		}
+		catch (Exception ex) {
+		    System.err.println(ExceptionUtil.toString(ex));
+		    System.exit(2);
+		}
 	    }
 	    else if (Options.matchesOption(opt, true, "testclass", "class", "test")) {
 		try {
