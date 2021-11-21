@@ -274,6 +274,8 @@
 		Add "uuid" wrappers.
 	    18-Nov-2021 (rlwhitcomb)
 		Put Antlr version into build.properties
+	    20-Nov-2021 (rlwhitcomb)
+		#90: Add "hsh" wrapper scripts (MD5 renamed to Hash).
 
      ========================================================================== -->
 
@@ -420,6 +422,8 @@
 		<include name="gunz.bat"                    if:true="${on.windows}"/>
 		<include name="gz"                      unless:true="${on.windows}"/>
 		<include name="gz.bat"                      if:true="${on.windows}"/>
+		<include name="hsh"                     unless:true="${on.windows}"/>
+		<include name="hsh.bat"                     if:true="${on.windows}"/>
 		<include name="hd"                      unless:true="${on.windows}"/>
 		<include name="hd.bat"                      if:true="${on.windows}"/>
 		<include name="lists"                   unless:true="${on.windows}"/>

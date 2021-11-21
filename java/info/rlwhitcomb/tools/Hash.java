@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  *
- *	MD5 Utility Program
+ *	Hash Utility Program
  *
  *  Change History:
  *	07-Jul-2010 (rlwhitcomb)
@@ -48,6 +48,8 @@
  *	    Update obsolete Javadoc constructs.
  *	29-Mar-2021 (rlwhitcomb)
  *	    Move to new package; reformat a little.
+ *	20-Nov-2021 (rlwhitcomb)
+ *	    #90: Rename from MD5 to Hash; make default SHA-256.
  */
 package info.rlwhitcomb.tools;
 
@@ -64,16 +66,16 @@ import java.util.regex.Pattern;
 
 
 /**
- * Calculate MD5 (or other cryptographic) hash values for input strings or files.
+ * Calculate cryptographic hash values for input strings or files.
  * <p> This utility is meant to be run as a stand-alone executable
- * (invoked by <code>"java MD5"</code>) that will compute the MD5 hash value of
+ * (invoked by <code>"java Hash"</code>) that will compute the hash value of
  * a single string (given on the command line), a series of strings
  * (successive lines of a file), or of a complete file or files.
  * <p> A number of options are available -- see the help listing
- * (<code>"java MD5 -?"</code> or <code>"java MD5 --help"</code>) for explanations
+ * (<code>"java Hash -?"</code> or <code>"java Hash --help"</code>) for explanations
  * (see {@link #printHelp}).
  */
-public class MD5 {
+public class Hash {
 
 	/** Flag to indicate we're processing an input file one line at a time
 	 * (as opposed to hashing the whole file at once.
@@ -108,7 +110,7 @@ public class MD5 {
 	 * <p> Set by <code>"--prefix"</code> command-line option.
 	 */
 	private static boolean doPrefix = false;
-	/** String to indicate an alternate hash algorithm for the digest (instead of MD5). */
+	/** String to indicate an alternate hash algorithm for the digest (instead of SHA-256). */
 	private static String algorithmName = null;
 	/** {@link MessageDigest} used to do the hashing of the input file(s). */
 	private static MessageDigest __md = null;
@@ -131,7 +133,7 @@ public class MD5 {
 
 	static {
 	    try {
-		__md = MessageDigest.getInstance("MD5");
+		__md = MessageDigest.getInstance("SHA-256");
 		defaultCharset = Charset.defaultCharset();
 	    } catch( Exception e ) {
 		e.printStackTrace();
@@ -143,9 +145,9 @@ public class MD5 {
 	 * Output a small help screen.
 	 */
 	private static void printHelp() {
-	    System.err.println("MD5 - a program to compute MD5 (or other) hash values");
+	    System.err.println("Hash - a program to compute cryptographic hash values");
 	    System.err.println("-----------------------------------------------------");
-	    System.err.println("Usage: java MD5 [options] [files] [values]");
+	    System.err.println("Usage: java Hash [options] [files] [values]");
 	    System.err.println("Options:");
 	    System.err.println("\t--lower\t\tforce hex output to lower-case");
 	    System.err.println("\t--upper\t\tforce hex output to UPPER-CASE");
@@ -159,8 +161,9 @@ public class MD5 {
 	    System.err.println("\t--<nnn>\t\tlimit output to <nnn> bytes");
 	    System.err.println("\t--split[<ch>]\tsplit the hex bytes with comma or given <ch>");
 	    System.err.println("\t--prefix\tif splitting bytes, output a \"0x\" prefix on each byte");
-	    System.err.println("\t--algorithm=<name>\tspecify an alternate digest algorithm (not MD5):");
-	    System.err.println("\t\t\t\tMD2, SHA-1, SHA-256, SHA-384 or SHA-512");
+	    System.err.println("\t--algorithm=<name>\tspecify an alternate digest algorithm (not SHA-256):");
+	    System.err.println("\t\t\t\tMD2, MD5, SHA-1, SHA-256, SHA-384 or SHA-512");
+	    System.err.println("\t\t\t\t(use \"os md\" to list the available algorithms)");
 	    System.err.println("\t--help\t\tprint this help message");
 	    System.err.println("\t-? or -h\tsame");
 	    System.err.println();
