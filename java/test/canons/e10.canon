@@ -87,15 +87,15 @@
 >$i -> 4
 >$i -> 3
 >$i -> 2
->$i -> "This"
->$i -> "is"
->$i -> "a"
->$i -> "test"
->$i -> "of"
->$i -> "the"
->$i -> "Emergency"
->$i -> "Broadcast"
->$i -> "System"
+>$_ -> "This"
+>$_ -> "is"
+>$_ -> "a"
+>$_ -> "test"
+>$_ -> "of"
+>$_ -> "the"
+>$_ -> "Emergency"
+>$_ -> "Broadcast"
+>$_ -> "System"
 >Variable 'map' cleared.
 >map = {a: 1, b: 2, c: 3, d: 17, f: 42} -> { a: 1, b: 2, c: 3, d: 17, f: 42 }
 >`map.$$i = ${map[$i]}` -> "map.a = 1"
@@ -150,6 +150,69 @@
 >$m -> -0.30
 >$m -> -0.38
 >$m -> -0.46
+>Precision is now 10 digits.
+>pi -> 3.14159265358
+>Precision is now 11 digits.
+>pi -> 3.141592653589
+>Precision is now 12 digits.
+>pi -> 3.1415926535897
+>Precision is now 13 digits.
+>pi -> 3.14159265358979
+>Precision is now 14 digits.
+>pi -> 3.141592653589793
+>Precision is now 15 digits.
+>pi -> 3.1415926535897932
+>Precision is now 16 digits.
+>pi -> 3.14159265358979323
+>Precision is now 17 digits.
+>pi -> 3.141592653589793238
+>Precision is now 18 digits.
+>pi -> 3.1415926535897932384
+>Precision is now 19 digits.
+>pi -> 3.14159265358979323846
+>Precision is now 20 digits.
+>pi -> 3.141592653589793238462
+>Precision is now 21 digits.
+>pi -> 3.1415926535897932384626
+>Precision is now 22 digits.
+>pi -> 3.14159265358979323846264
+>Precision is now 23 digits.
+>pi -> 3.141592653589793238462643
+>Precision is now 24 digits.
+>pi -> 3.1415926535897932384626433
+>Precision is now 25 digits.
+>pi -> 3.14159265358979323846264338
+>Precision is now 26 digits.
+>pi -> 3.141592653589793238462643383
+>Precision is now 27 digits.
+>pi -> 3.1415926535897932384626433832
+>Precision is now 28 digits.
+>pi -> 3.14159265358979323846264338327
+>Precision is now 29 digits.
+>pi -> 3.141592653589793238462643383279
+>Precision is now 30 digits.
+>pi -> 3.1415926535897932384626433832795
+>Precision is now 31 digits.
+>pi -> 3.14159265358979323846264338327950
+>Precision is now 32 digits.
+>pi -> 3.141592653589793238462643383279502
+>Precision is now 33 digits.
+>pi -> 3.1415926535897932384626433832795028
+>Precision is now 34 digits.
+>pi -> 3.14159265358979323846264338327950288
+>Precision is now 35 digits.
+>pi -> 3.141592653589793238462643383279502884
+>Precision is now 36 digits.
+>pi -> 3.1415926535897932384626433832795028841
+>Precision is now 37 digits.
+>pi -> 3.14159265358979323846264338327950288419
+>Precision is now 38 digits.
+>pi -> 3.141592653589793238462643383279502884197
+>Precision is now 39 digits.
+>pi -> 3.1415926535897932384626433832795028841971
+>Precision is now 40 digits.
+>pi -> 3.14159265358979323846264338327950288419716
+>Precision is now 34 digits.
 >Bernoulli Numbers 0 to 60
 >"B(0) = 1/1"
 >"B(1) = 1/2"

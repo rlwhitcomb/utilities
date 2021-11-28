@@ -31,7 +31,7 @@ loop $i in 10 .. 2, -1 { $i }
 loop $i in 10 .. 20, -1 { $i }
 loop $i in -2 .. -10 { $i }
 
-loop $i in ( 'This', 'is', 'a', 'test', 'of', 'the', 'Emergency', "Broadcast", "System" ) { $i }
+loop ( 'This', 'is', 'a', 'test', 'of', 'the', 'Emergency', "Broadcast", "System" ) { $_ }
 
 :clear map
 map = { a:1, b:2, c:3, d:17, f:42 }
@@ -46,6 +46,9 @@ loop $j in 10.5 {$j}
 loop $k in 5.5, 1.5 {$k}
 loop $m in 0.5 .. -0.5, -0.08 {$m}
 
+loop $p ∈ 10...40 { :dec $p; pi }
+:default
+
 :echo "Bernoulli Numbers 0 to 60"
 :resultonly on
 :rational on
@@ -54,6 +57,7 @@ loop $m in 0.5 .. -0.5, -0.08 {$m}
 loop $b in 2 .. 60, 2 { `B($$b) = ${bn $b}` }
 :rational pop
 :resultonly pop
+
 
 :echo
 :echo "Done with LOOP tests."

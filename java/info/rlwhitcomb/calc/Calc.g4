@@ -295,6 +295,8 @@
  *	    #81: Add directive to not quote strings on output.
  *	18-Nov-2021 (rlwhitcomb)
  *	    #83: Add Unicode symbols for "in" and "empty set".
+ *	27-Nov-2021 (rlwhitcomb)
+ *	    #105: Allow directives inside loops and functions.
  */
 
 grammar Calc;
@@ -306,7 +308,6 @@ prog
 stmt
    : stmtOrExpr
    | defineStmt
-   | directive (EOL | ENDEXPR)
    ;
 
 stmtOrExpr
@@ -321,6 +322,8 @@ stmtOrExpr
 formattedExprs
    : exprStmt
    | exprStmt (EOL | ENDEXPR) stmtOrExpr
+   | directive
+   | directive (EOL | ENDEXPR) stmtOrExpr
    ;
 
 exprStmt
