@@ -83,6 +83,16 @@ fieldType(4);fieldType(7);fieldType(23);fieldType(19);fieldType(99)
 
 def srt($a1, $a2, $f) = { $f($a1, $a2) > 0 ? $a1 : $a2 }
 
+#
+# Using functions for objects
+#
+w = { universal: true }
+def u = { "universal" }
+def v = { w }
+v().`$u`
+v().`$u` = 127
+v()
+
 # Test input arguments
 $#
 $*

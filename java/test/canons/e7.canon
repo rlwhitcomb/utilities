@@ -89,6 +89,12 @@
 >fieldType(99) -> "99"
 >'type: ' + fieldType(4) -> "type:  TEXT"
 >Defining function srt($a1,$a2,$f) = {$f($a1, $a2) > 0 ? $a1 : $a2}
+>w = {universal: true} -> { universal: true }
+>Defining function u = {"universal"}
+>Defining function v = {w}
+>v().`$u` -> true
+>v().`$u` = 127 -> 127
+>v() -> { universal: 127 }
 >$# -> 5
 >$* -> [ "abc", "def", 1, 2, 3 ]
 >$0 -> "abc"
