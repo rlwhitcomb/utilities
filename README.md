@@ -77,7 +77,6 @@ Also see "issues" at https://github.com/rlwhitcomb/utilities/issues
 ### Calc
 - implement Taylor series expansion of other trig/log functions to requested precision
 - need sec, cot, csc, and inverses as well
-- redo the [box] formats of strings (to be? x'...', b'...', o'...') then parse such beasts back to strings
 - allow "_" in numeric values, like Java does
 - format options for '_' ('@_') or ('@$' to format as dollar)??
 - functions for financial calculations (INTEREST, NPV, PAYMENT, etc.) (**e_mort** is a start)
@@ -87,9 +86,6 @@ Also see "issues" at https://github.com/rlwhitcomb/utilities/issues
     unicode equivalents of  [ ] and { } and ( )
     per mille sign (1/1000) and per ten thousand sign (1/10000) both western and arabic
  - How would we implement "pop" mode on the settings checkboxes? (tri-state won't work b/c it cycles through), radio won't work, maybe a little button beside the checkbox??  need an icon for it
-- "slice" function (works like "substr" on strings, extract slice of arrays)
-- "versioninfo" function that returns a map of the version information (from Version.java)
-- "flatmap" that flattens a map or array
 - "list" that converts string or map to an array (list)
 - "map" that converts string or array (list) to a map (with index as the key)
 - ?? could there be special processing if the list values were in "key:value" form??  and vice-versa for "list"??
@@ -97,18 +93,7 @@ Also see "issues" at https://github.com/rlwhitcomb/utilities/issues
 - options to change background color in GUI (maybe in Settings dialog) and on command line (-bg red)
 - some way to not clear input in GUI mode if there is a syntax error during parsing
 
-#### Calc: Want to add parameters and local variables to functions.
-define a($b, $c, $d) = { $f = blah; ... }
-
-#### problems:
-- best way is to have a Function class that saves all the old values of the param variables before setting to the new ones, then restores on function exit
-- need a way to store the param names, then to associate the values with the names
-- how about lists and maps:  pass by reference or value?  should there be an option?
-- e.g.: def npv($pv, $pmt, $i) = { loop slkdjf;lkj npv; }
-- are the variables "defined" inside the function local to the function (i.e., what if we say def ... { a = 27; ...} where a was not defined before?  I imagine with the changes to LValueContext, the "variables" at the outer level would be local to the function... but how to reference truly global variables then? (link to global "variables"???)
-
 ### Small Bugs / Fixes
-
 - Add some examples in the "list" help (or make a web page out of it to allow more verbosity)
   (I struggle with how to use the options to get what I need done)
 - Take the code from Calc ("displayHelp") and put it somewhere 'standard' so other can use it (like "Lists"...)
@@ -122,7 +107,6 @@ define a($b, $c, $d) = { $f = blah; ... }
 
 ### UUID
 - lots of options
-- generate random one
 - generate from "name" using command-line string or read from file (charset given) or from -stdin (see Cat for details)
 - option to dissect and print out each field if a UUID is given on the command line (with or without - separators)
 - ??? figure out how to generate a time-based one based on the RFC (is this necessary??)
@@ -166,7 +150,6 @@ define a($b, $c, $d) = { $f = blah; ... }
   - no other necessary, translatable text is in the source
 
 ### Character Sets
-- Head and WordCount have a good set of charset options; Calc could use more.
 - Could we normalize some of this somehow and put this processing into one place so
   everyone can use it?
 
