@@ -297,6 +297,8 @@
  *	    #83: Add Unicode symbols for "in" and "empty set".
  *	27-Nov-2021 (rlwhitcomb)
  *	    #105: Allow directives inside loops and functions.
+ * 30-Nov-2021 (rlwhitcomb)
+ *     #83: Another symbol for "in" (found in the issue).
  */
 
 grammar Calc;
@@ -973,7 +975,10 @@ BIT_OP
 
 ASSIGN : '=' ;
 
-SET_IN : '\u2208' ;
+SET_IN
+       : '\u2208'
+       | '\u220A'
+       ;
 
 EMPTY_SET
        : '\u2205'
