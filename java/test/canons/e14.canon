@@ -2,7 +2,7 @@
 >m1["ix1"] = 23 -> 23
 >m2.ix2 = 47 -> 47
 >m3.abc = 'ABC' -> "ABC"
->Ignoring case is now true.
+>Ignoring case is now “true”.
 >m1 -> { ix1: 23 }
 >M1 -> { ix1: 23 }
 >M1.iX1 -> 23
@@ -19,7 +19,7 @@
 >$I * $i -> 64
 >$I * $i -> 81
 >$I * $i -> 100
->Ignoring case is now false.
+>Ignoring case is now “false”.
 >M1 -> <null>
 >M2 -> <null>
 >M3 -> <null>
