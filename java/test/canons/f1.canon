@@ -1,4 +1,4 @@
->Calculation mode set to RATIONAL.
+>Calculation mode set to “RATIONAL”.
 >frac ('1 \u215c') -> 11/8
 >f'3 4' -> 3/4
 >f'4;5;6' -> 29/6
@@ -55,4 +55,4 @@
 >#10 An equilateral triangle measures 3 1⁄2 inches on one side. What is the perimeter of the triangle?
 >`${f'3 1/2' * 3@F} inches` -> "10 1/2 inches"
 >
->Calculation mode set to DECIMAL.
+>Calculation mode set to “DECIMAL”.
