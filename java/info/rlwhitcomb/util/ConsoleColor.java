@@ -62,6 +62,8 @@
  *   28-Nov-2021 (rlwhitcomb)
  *	#111: Generalize the color map to <String, Object> so we can pass other strings too.
  *	Rework the logic in "color" to deal with the quoted instead of colored text in Calc.
+ *   01-Dec-2021 (rlwhitcomb)
+ *	#111: Fix the uncolored case in "color(...)".
  */
 package info.rlwhitcomb.util;
 
@@ -287,7 +289,7 @@ public final class ConsoleColor
 			}
 		    }
 		    else {
-			codeStr = sub(map, tag, colored);
+			codeStr = sub(map, tag, true);
 			if (codeStr != null) {
 			    colorStack.push(currentStr);
 			    currentStr = codeStr;
