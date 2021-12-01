@@ -59,6 +59,9 @@
  *   22-Oct-2021 (rlwhitcomb)
  *	Since "<>" pops the color stack in the "color" routine, add an "END" ("--")
  *	code to explicitly do the reset without needing to pop the whole stack.
+ *   28-Nov-2021 (rlwhitcomb)
+ *	#111: Generalize the color map to <String, Object> so we can pass other strings too.
+ *	Rework the logic in "color" to deal with the quoted instead of colored text in Calc.
  */
 package info.rlwhitcomb.util;
 
@@ -220,70 +223,83 @@ public final class ConsoleColor
 	return -1;
     }
 
+    private static String sub(final Map<String, Object> map, final String tag, final boolean lookup) {
+	Object obj = map != null ? map.get(tag) : null;
+	if (obj == null && lookup) {
+	    obj = Code.fromTag(tag);
+	}
+	if (obj != null) {
+	    if (obj instanceof Code) {
+		Code code = (Code) obj;
+		return code.escCode();
+	    }
+	    if (obj instanceof String) {
+		return (String) obj;
+	    }
+	}
+	return null;
+    }
+
     /**
      * Map color tags into the escape sequence codes.
      *
      * @param input   The string adorned with color/attribute tags.
      * @param colored {@code true} to use the color values, {@code false} to just
      *                remove the tags, leaving the bare text.
-     * @param map     A {@code <String, Code>} map used to lookup custom tags, or
+     * @param map     A {@code <String, Object>} map used to lookup custom tags, or
      *                to override the default color selections (can be {@code null}).
      * @return        The input with the tags converted to their escape codes.
      */
-    public static final String color(final CharSequence input, final boolean colored, final Map<String, Code> map) {
-	Deque<Code> colorStack = new ArrayDeque<>();
-	Code currentCode = Code.RESET;
+    public static final String color(final CharSequence input, final boolean colored, final Map<String, Object> map) {
+	Deque<String> colorStack = new ArrayDeque<>();
+	String currentStr = colored ? Code.RESET.escCode() : "";
 
 	StringBuilder buf = new StringBuilder(input.length() * 3);
 	for (int i = 0; i < input.length(); i++) {
 	    char ch = input.charAt(i);
 	    if (ch == '<') {
 		int endPos = indexOf(input, '>', i + 1);
-		if (endPos < 0)
+		if (endPos < 0) {
 		    buf.append(ch);
+		}
 		else {
 		    String tag = input.subSequence(i + 1, endPos).toString();
-		    Code code;
+		    String codeStr;
 		    if (tag.isEmpty()) {
-			if (colorStack.isEmpty()) {
-			    if (map != null) {
-				code = map.get(tag);
-				if (code == null) {
-				    code = Code.fromTag(tag);
-				}
+			// Give the map a first chance to set a value for the empty tag
+			codeStr = sub(map, tag, false);
+			// Otherwise pop the stack if anything is pushed
+			if (codeStr == null) {
+			    if (colorStack.isEmpty()) {
+				codeStr = sub(map, tag, true);
 			    }
 			    else {
-				code = Code.fromTag(tag);
+				codeStr = colorStack.pop();
 			    }
 			}
 			else {
-			    code = colorStack.pop();
+			    if (!colorStack.isEmpty()) {
+				colorStack.pop();
+			    }
 			}
-			if (code != null)
-			    currentCode = code;
+			if (codeStr != null) {
+			    currentStr = codeStr;
+			}
 		    }
 		    else {
-			if (map != null) {
-			    code = map.get(tag);
-			    if (code == null) {
-				code = Code.fromTag(tag);
-			    }
-			}
-			else {
-			    code = Code.fromTag(tag);
-			}
-			if (code != null) {
-			    colorStack.push(currentCode);
-			    currentCode = code;
+			codeStr = sub(map, tag, colored);
+			if (codeStr != null) {
+			    colorStack.push(currentStr);
+			    currentStr = codeStr;
 			}
 		    }
 		    // Unknown tags should be left alone (for Calc use!)
-		    if (code == null) {
+		    if (codeStr == null) {
 			buf.append(ch);
 		    }
 		    else {
 			if (colored) {
-			    buf.append(code.escCode());
+			    buf.append(codeStr);
 			}
 			i = endPos;
 		    }

@@ -213,6 +213,8 @@
  *	    #51: Try default extensions to find files.
  *	12-Nov-2021 (rlwhitcomb)
  *	    #81: Options to quote result strings or not.
+ *	28-Nov-2021 (rlwhitcomb)
+ #	    #111: New color map for quoted (not colored) output.
  */
 package info.rlwhitcomb.calc;
 
@@ -415,7 +417,10 @@ public class Calc
 	private static File tempHelpDirectory = null;
 
 	/** The color map used for our custom colors. */
-	private static HashMap<String, Code> colorMap = new HashMap<>();
+	private static HashMap<String, Object> colorMap = new HashMap<>();
+
+	/** The color map used for quoting values instead of coloring them. */
+	private static HashMap<String, Object> quoteMap = new HashMap<>();
 
 	/** The argument values from the command line. */
 	private static List<String> argValues = new ArrayList<>();
@@ -431,14 +436,26 @@ public class Calc
 
 	private static void computeColors() {
 	    colorMap.put("x", (darkBackgrounds ? YELLOW_BRIGHT : BLUE_BOLD));
+	    colorMap.put("y", (darkBackgrounds ? YELLOW_BRIGHT : BLUE_BOLD));
 	    colorMap.put("a", (darkBackgrounds ? WHITE : BLACK_BRIGHT));
 	    colorMap.put("v", GREEN_BOLD);
+	    colorMap.put("u", GREEN_BOLD);
 	    colorMap.put("e", RED_BOLD);
 	    colorMap.put("r", RESET);
+	    colorMap.put("", null);
+
+	    quoteMap.put("x", "");
+	    quoteMap.put("y", "\u201C");
+	    quoteMap.put("a", "");
+	    quoteMap.put("v", "");
+	    quoteMap.put("u", "\u201C");
+	    quoteMap.put("e", "");
+	    quoteMap.put("r", "");
+	    quoteMap.put("",  "\u201D");
 	}
 
 	private static String renderColors(String decoratedString) {
-	    return ConsoleColor.color(decoratedString, colors, colorMap);
+	    return ConsoleColor.color(decoratedString, true, colors ? colorMap : quoteMap);
 	}
 
 	private static void outFormat(String formatKey, Object... args) {

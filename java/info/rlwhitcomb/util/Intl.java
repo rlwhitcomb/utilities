@@ -142,6 +142,9 @@
  *	21-Oct-2021 (rlwhitcomb)
  *	    Convenience class for getting and validating a Locale.
  *	    Allow null or empty string for locale to specify the default.
+ *	28-Nov-2021 (rlwhitcomb)
+ *	    #111: Add "getOptionalKeyString", make "isAKey" into a separate method.
+ *	    Rework the color map to be Map<String, Object>.
  */
 package info.rlwhitcomb.util;
 
@@ -867,6 +870,7 @@ public final class Intl
 	    return Double.valueOf(getString(key));
 	}
 
+
 	/**
 	 * Convenience method to get an integer value from the given string resource.
 	 *
@@ -878,6 +882,7 @@ public final class Intl
 	public static int getInt(String key) {
 	    return Integer.valueOf(getString(key));
 	}
+
 
 	/**
 	 * Get a numeric value from the given string resource, with a given
@@ -895,6 +900,7 @@ public final class Intl
 	    String numberString = getOptionalString(key);
 	    return numberString == null ? defaultValue : Double.valueOf(numberString);
 	}
+
 
 	/**
 	 * Get an integer value from the given string resource, or a default value
@@ -930,6 +936,27 @@ public final class Intl
 
 
 	/**
+	 * Decide if a "messageOrKey" is a key.
+	 *
+	 * @param	messageOrKey	Either a straight text string, which is just passed through,
+	 *				or {@code "%key"} where {@code "key"} is used then to lookup
+	 *				the resource.
+	 * @return	{@code true} if the passed in string is a key, or {@code false} if it is just
+	 *		a message (could even contain format strings).
+	 */
+	public static boolean isAKey(final String messageOrKey) {
+	    return (messageOrKey != null &&
+		    messageOrKey.length() > 1 &&
+		    messageOrKey.charAt(0) == '%' &&
+		    // Check to make sure this really is a key (i.e., alphabetic key or '#'
+		    // identifier meaning the default package provider)
+		    // If it is a format specifier at the beginning of the string we would get %n or %%
+		    (Character.isAlphabetic(messageOrKey.charAt(1)) ||
+		     messageOrKey.charAt(1) == '#'));
+	}
+
+
+	/**
 	 * Helper method to check for a key string ({@code "%key"}) and call {@link #getString(String)}
 	 * on the trailing part if so or just use the text as-is.
 	 *
@@ -939,16 +966,23 @@ public final class Intl
 	 * @return	The resource string if the input is a key, or just the input if it is not.
 	 */
 	public static String getKeyString(final String messageOrKey) {
-	    if (messageOrKey != null &&
-		messageOrKey.length() > 1 &&
-		messageOrKey.charAt(0) == '%' &&
-		// Check to make sure this really is a key (i.e., alphabetic key or '#'
-		// identifier meaning the default package provider)
-		// If it is a format specifier at the beginning of the string we would get %n or %%
-		(Character.isAlphabetic(messageOrKey.charAt(1)) ||
-		 messageOrKey.charAt(1) == '#'))
-		return getString(messageOrKey.substring(1));
-	    return messageOrKey;
+	    return isAKey(messageOrKey) ? getString(messageOrKey.substring(1)) : messageOrKey;
+	}
+
+
+	/**
+	 * Helper method to check for a key string ({@code "%key"}) and call {@link #getOptionalString}
+	 * on the trailing part if so, or just return the text as-is.
+	 *
+	 * @param	messageOrKey	Either a straight text string, which is just passed
+	 *				through, or {@code "%key"} where {@code "key"} is used
+	 *				then to lookup the resource.
+	 * @return	The resource string if the input is a key, or just the input if it is not,
+	 *		but if the specified resource key is not found, just return {@code null} (do not
+	 *		throw an exception about the missing resource).
+	 */
+	public static String getOptionalKeyString(final String messageOrKey) {
+	    return isAKey(messageOrKey) ? getOptionalString(messageOrKey.substring(1)) : messageOrKey;
 	}
 
 
@@ -1214,7 +1248,7 @@ public final class Intl
 	 * @param	colors	Whether or not to expand the color tags.
 	 * @param	colorMap A mapping between color tags and real color codes.
 	 */
-	public static void printHelp(final String prefix, final boolean colors, final Map<String, Code> colorMap) {
+	public static void printHelp(final String prefix, final boolean colors, final Map<String, Object> colorMap) {
 	    printHelp(System.out, prefix, null, colors, colorMap);
 	}
 
@@ -1286,7 +1320,7 @@ public final class Intl
 	 * @param	colorMap A mapping between color tags and real color codes.
 	 */
 	public static void printHelp(final PrintStream ps, final String prefix,
-		final boolean colors, final Map<String, Code> colorMap) {
+		final boolean colors, final Map<String, Object> colorMap) {
 	    printHelp(ps, prefix, null, colors, colorMap);
 	}
 
@@ -1335,7 +1369,7 @@ public final class Intl
 	 * @param	colorMap A mapping between color tags and real color codes.
 	 */
 	public static void printHelp(final PrintStream ps, final String prefix,
-		final Map<String, String> symbols, final boolean colors, final Map<String, Code> colorMap) {
+		final Map<String, String> symbols, final boolean colors, final Map<String, Object> colorMap) {
 	    // Grab the number of help lines from the resources first
 	    int numLines = getInt(makeKey(prefix, "helpNumberLines"), -1);
 	    int lineNo = 1;
