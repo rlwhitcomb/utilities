@@ -1,24 +1,24 @@
->Defining function f1($a,$b) = {$a + $b}
->Defining function f2($a,$b) = {$a * $b}
->Defining function f($c) = {$c ? f1 : f2}
+>Defining function “f1($a,$b)” = {$a + $b}
+>Defining function “f2($a,$b)” = {$a * $b}
+>Defining function “f($c)” = {$c ? f1 : f2}
 >f(true)(1, 2) -> 3
 >f(true)(7, 8) -> 15
 >f(false)(3, 4) -> 12
->Defining function visit($type) = {case $type of 1: f1, 2: f2}
+>Defining function “visit($type)” = {case $type of 1: f1, 2: f2}
 >visit(1)(4, 5) -> 9
 >visit(2)(7, 8) -> 56
->Defining function g1(...) = {`number = $$#`}
+>Defining function “g1(...)” = {`number = $$#`}
 >g1(1, 2, 3) -> "number = 3"
->Defining function g2(...) = {$*}
+>Defining function “g2(...)” = {$*}
 >g2() -> [ ]
 >g2(1) -> [ 1 ]
 >g2(1, 2) -> [ 1, 2 ]
 >g2(3, 4, 5) -> [ 3, 4, 5 ]
->Defining function g3($a,...) = {$a + (isnull ($*[1]) ? '' : ' ' + $*[1])}
+>Defining function “g3($a,...)” = {$a + (isnull ($*[1]) ? '' : ' ' + $*[1])}
 >g3(1) -> "1"
 >g3(2, 'days') -> "2 days"
->Defining function g4($a,...) = {$a + $1}
+>Defining function “g4($a,...)” = {$a + $1}
 >g4(1, 2) -> 3
 >set = {os: {ver: '7.3', major: 7, minor: 3}} -> { os: { ver: "7.3", major: 7, minor: 3 } }
->Defining function i = {set.os}
+>Defining function “i” = {set.os}
 >i().ver -> "7.3"
