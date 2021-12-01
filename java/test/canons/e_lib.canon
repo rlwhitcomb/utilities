@@ -36,5 +36,5 @@
 >peek(s1) -> <null>
 >pop(s1) -> <null>
 >isempty(s1) -> true
->Separator display set to false.
+>Separator display set to “false”.
 >All variables cleared.
