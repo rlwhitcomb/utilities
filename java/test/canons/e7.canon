@@ -24,7 +24,7 @@
 >oddness_if -> "odd"
 >value = 14 -> 14
 >oddness_if -> "even"
->value = pi -> 3.14159265358979323846264338327950288
+>value = pi -> 3.141592653589793238462643383279503
 >oddness_if -> "odd"
 >Defining function “multiples” = 
 > {

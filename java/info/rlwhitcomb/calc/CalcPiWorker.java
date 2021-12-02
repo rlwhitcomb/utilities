@@ -26,6 +26,8 @@
  *	    Initial version.
  *	26-Mar-2021 (rlwhitcomb)
  *	    Move some methods from NumericUtil to MathUtil.
+ *	01-Dec-2021 (rlwhitcomb)
+ *	    #114: Fix final precision of e/pi compared to "phi" (normal precision).
  */
 package info.rlwhitcomb.calc;
 
@@ -101,6 +103,9 @@ public class CalcPiWorker
 	 * The process run in the background thread to do the actual calculations.
 	 * <p> Once the calculation is finished, release a permit to the semaphore
 	 * so others can access the values.
+	 * <p> Note: this calculation goes two more places than necessary, which helps
+	 * other calculations be more accurate. The final accuracy (see {@link #getE}
+	 * and {@link #getPi} is determined exactly by the desired precision.
 	 */
 	private void calculate() {
 	    e         = MathUtil.e(precision + 1);
@@ -121,7 +126,7 @@ public class CalcPiWorker
 	public BigDecimal getE() {
 	    readySem.acquireUninterruptibly();
 	    try {
-		return e;
+		return e.round(mc);
 	    }
 	    finally {
 		readySem.release();
@@ -138,7 +143,7 @@ public class CalcPiWorker
 	public BigDecimal getPi() {
 	    readySem.acquireUninterruptibly();
 	    try {
-		return pi;
+		return pi.round(mc);
 	    }
 	    finally {
 		readySem.release();
