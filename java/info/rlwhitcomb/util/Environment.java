@@ -158,6 +158,8 @@
  *	    New method for getting SemanticVersion of an arbitrary class / package.
  *	19-Nov-2021 (rlwhitcomb)
  *	    #98: Add separate methods for screen width and height.
+ *	01-Dec-2021 (rlwhitcomb)
+ *	    #120: Eliminate other extraneous ".version" strings.
  */
 package info.rlwhitcomb.util;
 
@@ -1336,7 +1338,8 @@ public final class Environment
 		    names[num++] = name;
 		}
 		else if (name.endsWith(".version")) {
-		    if (name.equals("build.version")) {
+		    // The real program versions all start with Upper Case letters
+		    if (Character.isLowerCase(name.charAt(0))) {
 			continue;
 		    }
 		    else {
