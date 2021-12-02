@@ -10,28 +10,29 @@ $scriptDir test/files
 # In order to reduce redundancy here, these are the options to
 # sent to the test program for every test
 $defaultOptions -nocolors -dir test/files -noseps -quotes -sense -utf8 -loc en-US
+$canonCharset UTF-8
 
 $echo "Starting Calc tests..."
 $echo
 
-e1_e2_e3,UTF-8: e1,e2,e3
-e7,UTF-8      : e7 -- 'abc' «def» 1 2 3 --
-e8,UTF-8      : e8
-e10,UTF-8     : e10
+e1_e2_e3      : e1,e2,e3
+e7            : e7 -- 'abc' «def» 1 2 3 --
+e8            : e8
+e10           : e10
 e12           : e12
-e14,UTF-8     : e14
-e_trig,UTF-8  : e_trig
-e_tan,UTF-8   : e_tan
+e14           : e14
+e_trig        : e_trig
+e_tan         : e_tan
 bernoulli     : bernoulli
 primes_10000  : primes_10000
 factors       : factors
 pfactors      : pfactors
 perfect       : perfect
 mort          : e_m1,e_m2
-f1,UTF-8      : f1
-save,UTF-8    : save
-e_lib,UTF-8   : e_lib
-e_func,UTF-8  : e_func
+f1            : f1
+save          : save
+e_lib         : e_lib
+e_func        : e_func
 e_s           : e_s
 e_sort        : e_sort -- e10 e1 e11 e12 e20 e2 e3 e5 e30 e31
 

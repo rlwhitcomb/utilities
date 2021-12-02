@@ -191,6 +191,8 @@
  *	    #36: Implement TESTER_OPTIONS from the environment. Make all function parameters final.
  *	20-Nov-2021 (rlwhitcomb)
  *	    #97: Implement charset for each description file.
+ *	01-Dec-2021 (rlwhitcomb)
+ *	    #119: Allow default canon charset in description file.
  */
 package info.rlwhitcomb.tester;
 
@@ -267,8 +269,9 @@ public class Tester
 	private File defaultInputDir  = null;
 	private File defaultScriptDir = null;
 
-	private String defaultOptions  = "";
-	private String defaultInputExt = ".canon";
+	private String defaultOptions      = "";
+	private String defaultInputExt     = ".canon";
+	private String defaultCanonCharset = "";
 
 	private Class<?> testClass = null;
 
@@ -572,7 +575,7 @@ public class Tester
 
 				logTestName(origOut, testName, null, commandLine);
 
-				main.invoke(null, (Object)parseCommandLine(commandLine));
+				main.invoke(null, (Object) parseCommandLine(commandLine));
 			    }
 			}
 			catch (NoSuchMethodException nsme) {
@@ -1134,6 +1137,16 @@ public class Tester
 			}
 			break;
 
+		    case "canoncharset":
+		    case "canoncs":
+			if (!CharUtil.isNullOrEmpty(argument)) {
+			    defaultCanonCharset = argument;
+			}
+			else {
+			    error = true;
+			}
+			break;
+
 		    case "inputext":
 			if (!CharUtil.isNullOrEmpty(argument)) {
 			    defaultInputExt = argument;
@@ -1280,7 +1293,11 @@ public class Tester
 			    expectedExitCode = Integer.parseInt(exit);
 			}
 
-			int ret = runOneTest(m.group(3), m.group(5), commandLine, expectedExitCode);
+			String charset = m.group(5);
+			if (charset == null)
+			    charset = defaultCanonCharset;
+
+			int ret = runOneTest(m.group(3), charset, commandLine, expectedExitCode);
 			if (ret == 0) {
 			    numberPassed++;
 			}
