@@ -37,6 +37,8 @@
  *	    Add Save button text.
  *	07-Nov-2021 (rlwhitcomb)
  *	    #72: Tweak tooltip for Save button.
+ *	01-Dec-2021 (rlwhitcomb)
+ *	    #109: Add "quote strings" to the Settings dialog.
  */
 {
     title:              'Calc',
@@ -69,6 +71,7 @@
     quiet:              'Quiet?',
     resultsOnly:        'Results only?',
     separators:         'Thousands separators?',
+    quoteStrings:       'Quote string results?',
 
     guiSettings:        'Window Settings',
     keyboard:           'Keyboard',

@@ -214,7 +214,9 @@
  *	12-Nov-2021 (rlwhitcomb)
  *	    #81: Options to quote result strings or not.
  *	28-Nov-2021 (rlwhitcomb)
- #	    #111: New color map for quoted (not colored) output.
+ *	    #111: New color map for quoted (not colored) output.
+ *	01-Dec-2021 (rlwhitcomb)
+ *	    #109: Add "quote strings" to the Settings dialog.
  */
 package info.rlwhitcomb.calc;
 
@@ -387,6 +389,7 @@ public class Calc
 	@BXML private Checkbox quietCheck;
 	@BXML private Checkbox resultsCheck;
 	@BXML private Checkbox separatorCheck;
+	@BXML private Checkbox quoteStringsCheck;
 	@BXML private RadioButton useEnterButton;
 	@BXML private RadioButton useCmdEnterButton;
 	@BXML private RadioButton lightBackgroundButton;
@@ -580,6 +583,7 @@ public class Calc
 	    quietCheck.setSelected(quiet);
 	    resultsCheck.setSelected(resultsOnly);
 	    separatorCheck.setSelected(settings.separatorMode);
+	    quoteStringsCheck.setSelected(settings.quoteStrings);
 
 	    if (useCmdEnter)
 		useCmdEnterButton.setSelected(true);
@@ -640,6 +644,10 @@ public class Calc
 		boolean newSeparators = separatorCheck.isSelected();
 		if (newSeparators != originalSettings.separatorMode)
 		    visitor.setSeparatorMode(newSeparators);
+
+		boolean newQuoteStrings = quoteStringsCheck.isSelected();
+		if (newQuoteStrings != originalSettings.quoteStrings)
+		    visitor.setQuoteStringsMode(newQuoteStrings);
 
 		useCmdEnter = useCmdEnterButton.isSelected();
 

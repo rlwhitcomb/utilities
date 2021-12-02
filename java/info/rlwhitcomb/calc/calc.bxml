@@ -76,6 +76,8 @@
 		Add "Save" icon to toolbar.
 	    08-Oct-2021 (rlwhitcomb)
 		Reduce space between toolbar buttons. Tweak button text colors.
+	    01-Dec-2021 (rlwhitcomb)
+		#109: Add "Quote Strings" option to settings.
 
      ========================================================================== -->
 
@@ -197,6 +199,11 @@
 			    <Checkbox bxml:id="quietCheck" buttonData="%quiet"/>
 			    <Checkbox bxml:id="resultsCheck" buttonData="%resultsOnly"/>
 			    <Checkbox bxml:id="separatorCheck" buttonData="%separators"/>
+			</GridPane.Row>
+			<GridPane.Row>
+			    <Checkbox bxml:id="quoteStringsCheck" buttonData="%quoteStrings"/>
+			    <Label text="" enabled="false"/>
+			    <Label text="" enabled="false"/>
 			</GridPane.Row>
 		    </GridPane>
 		</Form.Section>
