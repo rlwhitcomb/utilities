@@ -28,12 +28,15 @@
  *	    Move some methods from NumericUtil to MathUtil.
  *	01-Dec-2021 (rlwhitcomb)
  *	    #114: Fix final precision of e/pi compared to "phi" (normal precision).
+ *	03-Dec-2021 (rlwhitcomb)
+ *	    #122: Refactor to reduce duplicated code.
  */
 package info.rlwhitcomb.calc;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.concurrent.Semaphore;
+import java.util.function.Supplier;
 
 import info.rlwhitcomb.util.MathUtil;
 import info.rlwhitcomb.util.QueuedThread;
@@ -117,6 +120,24 @@ public class CalcPiWorker
 	}
 
 	/**
+	 * Generic function to wait on the {@link #readySem} before returning the value
+	 * produced by the given supplier.
+	 * <p> Once the value is ready the semaphore is released for the next caller.
+	 *
+	 * @param f	The value supplier lambda expression.
+	 * @return	The value produced by the supplier.
+	 */
+	private BigDecimal getWhenReady(final Supplier<BigDecimal> f) {
+	    readySem.acquireUninterruptibly();
+	    try {
+		return f.get();
+	    }
+	    finally {
+		readySem.release();
+	    }
+	}
+
+	/**
 	 * Get the calculated value of <code>e</code> to the current number of digits.
 	 * <p> Waits until the background thread is done with the calculation
 	 * if a new precision was just recently specified.
@@ -124,13 +145,7 @@ public class CalcPiWorker
 	 * @return The value of <code>e</code> to the current precision.
 	 */
 	public BigDecimal getE() {
-	    readySem.acquireUninterruptibly();
-	    try {
-		return e.round(mc);
-	    }
-	    finally {
-		readySem.release();
-	    }
+	    return getWhenReady(() -> e.round(mc));
 	}
 
 	/**
@@ -141,13 +156,7 @@ public class CalcPiWorker
 	 * @return The value of <code>pi</code> to the current precision.
 	 */
 	public BigDecimal getPi() {
-	    readySem.acquireUninterruptibly();
-	    try {
-		return pi.round(mc);
-	    }
-	    finally {
-		readySem.release();
-	    }
+	    return getWhenReady(() -> pi.round(mc));
 	}
 
 	/**
@@ -158,13 +167,7 @@ public class CalcPiWorker
 	 * @return The value of <code>pi / 180</code> to the current precision.
 	 */
 	public BigDecimal getPiOver180() {
-	    readySem.acquireUninterruptibly();
-	    try {
-		return piOver180;
-	    }
-	    finally {
-		readySem.release();
-	    }
+	    return getWhenReady(() -> piOver180);
 	}
 
 }
