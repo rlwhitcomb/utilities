@@ -666,7 +666,7 @@ public class TestNumericUtil
 	    BigFraction fPi = new BigFraction(8958937768937L, 2851718461558L);
 	    BigDecimal dPi = MathUtil.pi(MathContext.DECIMAL128.getPrecision());
 	    System.out.println(fPi + " -> " + fPi.toDecimal().toPlainString());
-	    System.out.println("                           vs. " + dPi.toPlainString());
+	    System.out.println("                             vs. " + dPi.toPlainString());
 
 	    // Results verified manually, will be put into the canon file
 	    numberOfTests += 28;
