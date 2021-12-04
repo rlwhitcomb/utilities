@@ -217,6 +217,8 @@
  *	    #111: New color map for quoted (not colored) output.
  *	01-Dec-2021 (rlwhitcomb)
  *	    #109: Add "quote strings" to the Settings dialog.
+ *	03-Dec-2021 (rlwhitcomb)
+ *	    #116: Break out parse and execution times.
  */
 package info.rlwhitcomb.calc;
 
@@ -1320,6 +1322,8 @@ public class Calc
 	    Object returnValue = null;
 	    boolean oldSilent  = visitor.setSilent(silent);
 	    long startTime     = Environment.highResTimer();
+	    long parseEndTime  = 0L;
+	    long execStartTime = 0L;
 	    long endTime;
 
 	    try {
@@ -1334,9 +1338,13 @@ public class Calc
 
 		ParseTree tree = parser.prog();
 
+		parseEndTime = Environment.highResTimer();
+
 		if (debug) {
 		    displayer.displayMessage(tree.toStringTree(parser));
 		}
+
+		execStartTime = Environment.highResTimer();
 
 		returnValue = visitor.visit(tree);
 	    }
@@ -1352,8 +1360,10 @@ public class Calc
 	    }
 
 	    if (timing && !silent) {
-		displayer.displayMessage(Intl.formatString("calc#timing",
-			Environment.timerValueToSeconds(endTime - startTime)));
+		double parseTime = Environment.timerValueToSeconds(parseEndTime - startTime);
+		double execTime  = Environment.timerValueToSeconds(endTime - execStartTime);
+		double totalTime = Environment.timerValueToSeconds(endTime - startTime);
+		displayer.displayMessage(Intl.formatString("calc#timing", parseTime, execTime, totalTime));
 	    }
 
 	    return returnValue;
