@@ -49,6 +49,8 @@
  *	    Fix operation of "round" when rounding to more precision than the original.
  *	18-Nov-2021 (rlwhitcomb)
  *	    #95: Add calculation of "phi".
+ *	01-Dec-2021 (rlwhitcomb)
+ *	    #95: Add "ratphi" and "fib2" to support it.
  */
 package info.rlwhitcomb.util;
 
@@ -341,6 +343,105 @@ public final class MathUtil
 		    return new BigDecimal(result).negate();
 	    }
 	    return new BigDecimal(result);
+	}
+
+
+	/**
+	 * Special version of {@link #fib} that returns {@code fib(n)} and {@code fib(n+1)}
+	 * for use with {@link #ratphi} to calculate the closest rational approximations of "phi".
+	 *
+	 * @param n	The desired term number (can NOT be negative in this version).
+	 * @return	The n-th and n+1-th Fibonacci numbers.
+	 */
+	private static BigInteger[] fib2(final Number n) {
+	    long nValue = n.longValue();
+
+	    long loops        = nValue + 1L;
+	    BigInteger n_2    = BigInteger.ZERO;
+	    BigInteger n_1    = BigInteger.ONE;
+	    BigInteger result = BigInteger.ONE;
+
+	    if (loops == 0L)
+		result = n_2;
+	    else if (loops == 1L)
+		result = n_1;
+	    else {
+		for (long i = 2L; i <= loops; i++) {
+		    result = n_2.add(n_1);
+		    n_2    = n_1;
+		    n_1    = result;
+		}
+	    }
+
+	    BigInteger[] results = new BigInteger[2];
+	    results[0] = n_2;
+	    results[1] = n_1;
+
+	    return results;
+	}
+
+
+	/**
+	 * Table of empirically-derived closest approximations of rational value of "phi" constructed from the ratio
+	 * of consecutive Fibonacci numbers. Index is number of digits of precision required, starting at 2.
+	 * Values are {@code n} where {@code fib(n + 1) / fib(n) == phi}.
+	 * <p> Empirically derived using this program ("ratphi.calc"):
+	 * <pre> :quiet on
+	 * define ratphi($n) = { fib($n+1) / fib($n) }
+	 * PHI_VALUES = [ ]
+	 * loop over 2..400 { :dec $_; loop $n in $_ * 4 { if (ratphi($n) == phi) { if isnull(PHI_VALUES[$_]) { PHI_VALUES[$_] = $n } } } }
+	 * :quiet pop
+	 * PHI_VALUES@j</pre>
+	 * <p> Also note that 6 of these values had no "solution" (such as prec = 97, 117, 122, 137, etc.) so the
+	 * value here is roughly interpolated from the surrounding values. The values should be +/- one LSD.
+	 */
+	private static final int[] PHI_VALUES = {
+	    4, 7, 9, 12, 14, 16, 19, 21, 24, 26, 28, 31, 33, 36, 38, 40, 42, 44, 47, 50, 52, 54, 58, 60, 62,
+	    64, 66, 70, 72, 74, 76, 78, 81, 82, 86, 88, 90, 93, 94, 98, 100, 102, 105, 107, 110, 112, 114,
+	    116, 120, 122, 124, 126, 128, 130, 134, 136, 138, 140, 144, 146, 148, 150, 152, 155, 158, 160,
+	    162, 165, 166, 170, 172, 174, 176, 179, 182, 184, 186, 188, 190, 194, 196, 198, 200, 202, 205,
+	    208, 210, 213, 214, 216, 220, 222, 224, 227, 229, 231 /* ? */, 234, 236, 238, 242, 244, 246, 248, 250,
+	    253, 256, 258, 261, 262, 266, 268, 270, 272, 275, 277, 279 /* ? */, 282, 284, 286, 288, 291 /* ? */, 294,
+	    296, 298, 300, 304, 306, 308, 310, 312, 316, 318, 320, 322, 325, 327 /* ? */, 329 /* ? */, 332, 334, 336,
+	    338, 342, 344, 347, 348, 351, 354, 356, 358, 360, 362, 366, 368, 370, 372, 374, 378, 380, 382,
+	    385, 387, 389, 392, 394, 396, 399, 402, 404, 406, 409, 412, 414, 416, 418, 421, 422, 426, 428,
+	    430, 432, 434, 437 /* ? */, 440, 442, 444, 446, 448, 452, 454, 456, 459, 460, 464, 466, 468, 470, 474,
+	    476, 478, 481, 482, 486, 488, 490, 493, 495, 498, 500, 502, 504, 507, 508, 512, 514, 516, 518,
+	    521, 524 /* ? */, 526, 528, 530, 532, 535, 538, 540, 542, 544, 547 /* ? */, 550, 553, 555, 556, 560, 562 /* ? */,
+	    564, 566, 568, 572, 574, 576, 578, 581, 584, 586, 588, 590, 593, 596, 598, 600, 602, 604, 606,
+	    610, 612, 614, 617, 618, 622, 624, 626, 628, 632, 634, 636, 639, 640, 642, 646, 648, 650, 653,
+	    656, 657, 660, 662, 665, 668, 670, 672, 674, 676, 678, 682, 684, 686, 689, 690, 694, 696, 698,
+	    700, 702, 706, 708, 710, 712, 714, 718, 720, 722, 724, 726, 730, 732, 734, 736, 739, 741, 744,
+	    746, 748, 750, 753, 756, 758, 760, 762, 764, 768, 770, 772, 774, 777, 780, 782, 784, 786, 790,
+	    792, 794, 796, 798, 801, 804, 806, 809, 811, 813, 816, 818, 820, 822, 825, 828, 830, 832, 834,
+	    836, 838, 842, 844, 846, 849, 852, 854, 856, 858, 860, 864, 866, 868, 871, 873, 874, 878, 880,
+	    882, 884, 888, 890, 892, 894, 897, 899, 902, 904, 906, 909, 910, 914, 916, 919, 920, 924, 926,
+	    928, 930, 932, 935, 938, 940, 942, 944, 948, 950, 952, 954, 956
+	};
+
+
+	/**
+	 * Calculate the closest rational approximation to "phi" (the "Golden Ratio") as a ratio of two
+	 * consecutive Fibonacci numbers.
+	 * <p> Note: above a certain precision (currently ~200 digits, the size of {@link #PHI_VALUES} above)
+	 * we will resort to calculating the decimal expansion and converting that to a fraction instead of
+	 * using this (interesting) rational number approach.
+	 *
+	 * @param mc	The given precision needed.
+	 * @param recip	Whether to calculate {@code 1 / phi} (the reciprocal).
+	 * @return	{@link BigFraction} value.
+	 */
+	public static BigFraction ratphi(final MathContext mc, final boolean recip) {
+	    int prec = mc.getPrecision();
+	    if (prec < 2)
+		prec = 2;
+	    else if (prec >= PHI_VALUES.length + 2) {
+		// Default for high precision to using decimal "phi" converted to BigFraction
+		return new BigFraction(phi(mc, recip));
+	    }
+
+	    BigInteger[] values = fib2(PHI_VALUES[prec - 2]);
+	    return recip ? new BigFraction(values[0], values[1]) : new BigFraction(values[1], values[0]);
 	}
 
 

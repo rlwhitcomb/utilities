@@ -20,6 +20,11 @@ phi
 1/phi == PHI
 1/PHI == phi
 PHI+1 == phi
+:rational on
+phi
+PHI
+phi@d
+:rational off
 
 sin(pi/3)
 4 & 7

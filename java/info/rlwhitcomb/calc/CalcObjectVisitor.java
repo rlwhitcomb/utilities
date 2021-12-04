@@ -414,6 +414,8 @@
  *	18-Nov-2021 (rlwhitcomb)
  *	    #95: Add constant predefined values for "phi" and "PHI" (the Golden Ratio
  *	    and its reciprocal).
+ *	03-Dec-2021 (rlwhitcomb)
+ *	    #95: Add new "ratphi" function for rational approximations of "phi" and "PHI".
  */
 package info.rlwhitcomb.calc;
 
@@ -765,18 +767,16 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 
 	    Supplier<Object> phiSupplier = () -> {
-		BigDecimal phi = MathUtil.phi(mcDivide, false);
 		if (settings.rationalMode)
-		    return new BigFraction(phi);
+		    return MathUtil.ratphi(mcDivide, false);
 		else
-		    return phi;
+		    return MathUtil.phi(mcDivide, false);
 	    };
 	    Supplier<Object> phi1Supplier = () -> {
-		BigDecimal phi = MathUtil.phi(mcDivide, true);
 		if (settings.rationalMode)
-		    return new BigFraction(phi);
+		    return MathUtil.ratphi(mcDivide, true);
 		else
-		    return phi;
+		    return MathUtil.phi(mcDivide, true);
 	    };
 	    Supplier<Object> supplier = phiSupplier;
 	    for (int i = 0; i < PHI_ALIASES.length; i++) {
