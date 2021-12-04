@@ -52,32 +52,34 @@
  *          Allow longer aliases for the command-line options, just for grins.
  *          Update "usage" to document the aliases.
  *      08-Oct-2020 (rlwhitcomb)
- *         Print version information.
+ *          Print version information.
  *      16-Oct-2020 (rlwhitcomb)
- *         Incorporate latest code.
+ *          Incorporate latest code.
  *      21-Dec-2020 (rlwhitcomb)
- *         Update obsolete Javadoc constructs.
+ *          Update obsolete Javadoc constructs.
  *      05-Jan-2021 (rlwhitcomb)
- *         Add "-single" option to join lines without anything else.
+ *          Add "-single" option to join lines without anything else.
  *      06-Jan-2021 (rlwhitcomb)
- *         Fix "-single" processing. Use regular Environment program info.
- *         Also use the regular classes instead of our duplicates (no
- *         need for a standalone class anymore).
+ *          Fix "-single" processing. Use regular Environment program info.
+ *          Also use the regular classes instead of our duplicates (no
+ *          need for a standalone class anymore).
  *	11-Jan-2021 (rlwhitcomb)
- *	   The "-single" option really should just make one line out of
- *	   the input without stripping out the commas, or anything else.
+ *	    The "-single" option really should just make one line out of
+ *	    the input without stripping out the commas, or anything else.
  *	11-Jan-2021 (rlwhitcomb)
- *	   Refactor to unify and simplify error reporting.
+ *	    Refactor to unify and simplify error reporting.
  *	22-Jan-2021 (rlwhitcomb)
- *	   New "-u" option ("unchanged") which will read the input, do
- *	   any prefix/postfix text, but otherwise leave the input alone.
- *	   Refactoring. Move to "util" package so others can use us
- *	   programmatically. Implements the Testable interface so we
- *	   can use with the (upcoming) tester program.
+ *	    New "-u" option ("unchanged") which will read the input, do
+ *	    any prefix/postfix text, but otherwise leave the input alone.
+ *	    Refactoring. Move to "util" package so others can use us
+ *	    programmatically. Implements the Testable interface so we
+ *	    can use with the (upcoming) tester program.
  *	22-Aug-2021 (rlwhitcomb)
- *	   Add "-upper" and "-lower" options.
+ *	    Add "-upper" and "-lower" options.
  *	27-Oct-2021 (rlwhitcomb)
- *	   Strip off line continuations ("\" at the end of the line).
+ *	    Strip off line continuations ("\" at the end of the line).
+ *	03-Dec-2021 (rlwhitcomb)
+ *	    Add "-indent" option.
  */
 package info.rlwhitcomb.util;
 
@@ -117,6 +119,7 @@ public class Lists
 
 	private int width   = 0;
 	private int cutSize = 0;
+	private int indent  = 0;
 
 	private List<String> fileNames = null;
 	private String outputFileName  = null;
@@ -124,6 +127,7 @@ public class Lists
 
 	private boolean sawConsoleInput = false;
 
+	private String indentText     = null;
 	private String prefixText     = null;
 	private String postfixText    = null;
 	private int prefixTextLength  = 0;
@@ -133,12 +137,12 @@ public class Lists
 
 	private static final String[] HELP = {
 	    "Usage: java Lists [-c] [-j] [-b] [-n] [-l] [-nnn] [-w] [-e prefix_text] [-f postfix_text] [-x nn]",
-	    "                  [-lower] [-upper] [-o output_file] [list_file_name+ | " + STDIN + "]",
+	    "                  [-lower] [-upper] [-o output_file] [-i nn] [list_file_name+ | " + STDIN + "]",
 	    "",
 	    "  Aliases: -c | -concat | -concatenate; -j | -join; -b | -blank | -blanks; -n | -count | -counting",
 	    "           -l | -line | -lines | -newlines; -w | -white | -whitespace; -e | -pre | -prefix",
 	    "           -f | -post | -postfix; -x | -cut | -cutting; -s | -single; -u | -unchanged",
-	    "           -lower | -low; -upper | -up; -o | -out  | -output",
+	    "           -lower | -low; -upper | -up; -o | -out | -output; -i | -in | -indent",
 	    "",
 	    "  If you specify the \"-c\" flag the output will have all the lines",
 	    "    of the file concatenated (using commas) into a single line.",
@@ -175,6 +179,8 @@ public class Lists
 	    "",
 	    "  The \"-u\" option will do nothing to the input except do any cutting specified,",
 	    "    and add the prefix or postfix text to each line.",
+	    "",
+	    "  The \"-i nn\" option will indent each line by nn tab/space characters.",
 	    "",
 	    "  Using \"" + STDIN + "\" or nothing for the list_file_name will read from stdin.",
 	    "  Multiple file names are allowed as well as mixing \"" + STDIN + "\" with regular",
@@ -240,6 +246,9 @@ public class Lists
 
 	    buf.setLength(0);
 
+	    if (indentText != null)
+		buf.append(indentText);
+
 	    if (prefixText != null)
 		buf.append(prefixText);
 	}
@@ -268,6 +277,7 @@ public class Lists
 	    boolean sawCutOption         = false;
 	    boolean sawPrefixTextOption  = false;
 	    boolean sawPostfixTextOption = false;
+	    boolean sawIndentOption      = false;
 
 	    for (String arg : args) {
 		String option = Options.isOption(arg);
@@ -283,6 +293,9 @@ public class Lists
 		    }
 		    if (sawPostfixTextOption) {
 			return missingValue("postfix text", "f");
+		    }
+		    if (sawIndentOption) {
+			return missingValue("a number", "i");
 		    }
 		    if (Options.matchesOption(arg, true, "concatenate", "concat", "c"))
 			concatenate = true;
@@ -327,6 +340,12 @@ public class Lists
 			    return onlyOnce("postfix text");
 			}
 			sawPostfixTextOption = true;
+		    }
+		    else if (Options.matchesOption(arg, true, "indent", "in", "i")) {
+			if (indent > 0) {
+			    return onlyOnce("indent value");
+			}
+			sawIndentOption = true;
 		    }
 		    else if (Options.matchesOption(arg, true, "help", "h", "?")) {
 			usage(true);
@@ -375,6 +394,18 @@ public class Lists
 			postfixTextLength = postfixText.length();
 			sawPostfixTextOption = false;
 		    }
+		    else if (sawIndentOption) {
+			try {
+			    indent = Integer.parseInt(arg);
+			}
+			catch (NumberFormatException nfe) {
+			    indent = -1; // to trigger the error below
+			}
+			if (indent < 1 || indent > 255) {
+			    return errUsage("The indent value (%1$s) should be between 1 and 255.", arg);
+			}
+			sawIndentOption = false;
+		    }
 		    else {
 			if (arg.equals(STDIN)) {
 			    if (sawConsoleInput) {
@@ -420,6 +451,29 @@ public class Lists
 	    return SUCCESS;
 	}
 
+	private static String indentString(final int width) {
+	    StringBuilder buf = new StringBuilder(width);
+	    int tabs = width / 8;
+	    for (int i = 0; i < tabs; i++)
+		buf.append('\t');
+	    int spaces = width - (tabs * 8);
+	    for (int i = 0; i < spaces; i++)
+		buf.append(' ');
+	    return buf.toString();
+	}
+
+	private static int outputLength(final StringBuilder buf) {
+	    int length = 0;
+	    for (int i = 0; i < buf.length(); i++) {
+		char ch = buf.charAt(i);
+		if (ch == '\t')
+		    length += 8;
+		else
+		    length++;
+	    }
+	    return length;
+	}
+
 
 	@Override
 	public int execute() {
@@ -429,8 +483,14 @@ public class Lists
 	    String fileName     = "";
 	    BufferedReader r    = null;
 
+	    if (indent > 0) {
+		indentText = indentString(indent);
+	    }
+
 	    try {
 		StringBuilder buf = new StringBuilder();
+		if (indentText != null)
+		    buf.append(indentText);
 		if (prefixText != null)
 		    buf.append(prefixText);
 
@@ -492,21 +552,24 @@ public class Lists
 				    }
 				    else {
 					if (concatenate) {
-					    if (buf.length() > prefixTextLength) {
+					    int textLength = outputLength(buf);
+					    if (textLength > indent + prefixTextLength) {
 						if (!join)
 						    buf.append(",");
-						if (width > 0 && buf.length() >= width) {
+						if (width > 0 && outputLength(buf) >= width) {
 						    outputLine(buf);
 						}
 						else if (blanks || join)
 						    buf.append(" ");
 					    }
-					    if (width > 0 && buf.length() + value.length() >= width) {
+					    if (width > 0 && outputLength(buf) + value.length() >= width) {
 						outputLine(buf);
 					    }
 					    buf.append(value);
 					}
 					else {
+					    if (indentText != null)
+						outPrint(indentText);
 					    if (prefixText != null)
 						outPrint(prefixText);
 					    outPrint(value);
