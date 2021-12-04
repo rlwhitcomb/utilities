@@ -72,6 +72,8 @@
  *	    Display the input value in the "unsupportedFormat" exception.
  *	05-Oct-2021 (rlwhitcomb)
  *	    Strip trailing zeros in "toDecimal".
+ *	02-Dec-2021 (rlwhitcomb)
+ *	    #124: Tweak default display, not proper form.
  */
 package info.rlwhitcomb.util;
 
@@ -888,7 +890,7 @@ public class BigFraction extends Number
 	 * @return The regular string value (<code><i>numer</i> / <i>denom</i></code>).
 	 */
 	private String internalToString() {
-	    return String.format("%1$s/%2$s", numer, denom);
+	    return String.format("%1$s / %2$s", numer, denom);
 	}
 
 	/**
