@@ -32,6 +32,8 @@
  *	    Redo the way initial allocation is done.
  *	26-Mar-2021 (rlwhitcomb)
  *	    Move some methods from NumericUtil to MathUtil.
+ *	03-Dec-2021 (rlwhitcomb)
+ *	    #123: New constructor that takes varargs.
  */
 package info.rlwhitcomb.util;
 
@@ -78,6 +80,19 @@ public class DynamicArray<T>
 	 */
 	public DynamicArray(Class<T> clazz, int size) {
 	    init(clazz, size);
+	}
+
+	/**
+	 * Initialize this array with the given values. Note: they should all be the same type.
+	 *
+	 * @param clazz Class of objects to store in this array.
+	 * @param values The initial values for the array.
+	 */
+	@SuppressWarnings("unchecked")
+	public DynamicArray(Class<T> clazz, T... values) {
+	    init(clazz, values.length);
+	    System.arraycopy(values, 0, internalArray, 0, values.length);
+	    largestIndex = values.length - 1;
 	}
 
 	/**

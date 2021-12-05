@@ -33,6 +33,8 @@
  *	    new "capacity()" value.
  *	29-Mar-2021 (rlwhitcomb)
  *	    Move to new package.
+ *	03-Dec-2021 (rlwhitcomb)
+ *	    #123: Test new constructor.
  */
 package info.rlwhitcomb.test;
 
@@ -122,6 +124,16 @@ public class DynArrayTest
 	    oneTest(sArray, 11500, "stuv");
 	}
 
+	private static void constructorTest() {
+	    DynamicArray<String> sArray = new DynamicArray<>(String.class, "This", "is", "the", "day");
+
+	    checkOne(sArray, 0, "This");
+	    checkOne(sArray, 1, "is");
+	    checkOne(sArray, 2, "the");
+	    checkOne(sArray, 3, "day");
+	    checkOne(sArray, 4, null);
+	}
+
 	private static void runTest(final Runnable test) {
 	    test.run();
 
@@ -132,6 +144,7 @@ public class DynArrayTest
 	public static void main(String[] args) {
 	    runTest(DynArrayTest::integerTest);
 	    runTest(DynArrayTest::stringTest);
+	    runTest(DynArrayTest::constructorTest);
 
 	    System.out.println("DynamicArray Tests: " + numberOfTests +
 			       ", succeeded: " + (numberOfTests - numberOfFailures) +

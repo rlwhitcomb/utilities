@@ -41,4 +41,6 @@
 >Value at 11501 = __null__, size = 11501, capacity = 16384
 >----------------------------------------
 >
->DynamicArray Tests: 29, succeeded: 29, failed: 0
+>----------------------------------------
+>
+>DynamicArray Tests: 34, succeeded: 34, failed: 0
