@@ -98,6 +98,8 @@
  *	    #78: Make "compareStrings" public for use in "min", "max".
  *	12-Nov-2021 (rlwhitcomb)
  *	    #81: Add "quotes" param to most common form of "toStringValue".
+ *	08-Dec-2021 (rlwhitcomb)
+ *	    #131: Allow null/not-null check for arrays and objects in "toBooleanValue".
  */
 package info.rlwhitcomb.calc;
 
@@ -476,7 +478,8 @@ public final class CalcUtil
 
 	/**
 	 * Cast or convert the given value to a boolean, using JavaScript semantics for "truthy" values (that is,
-	 * null or empty strings are {@code false} and string which are non-empty are {@code true}.
+	 * null objects or empty strings are {@code false}, objects which are non-empty are {@code true}, and
+	 * non-empty strings and numbers are sent to {@link CharUtil#getBooleanValue} for evaluation).
 	 *
 	 * @param visitor	The visitor for evaluating expressions.
 	 * @param obj		The input object to convert.
@@ -490,6 +493,9 @@ public final class CalcUtil
 	    // Compatibility with JavaScript here...
 	    if (CharUtil.isNullOrEmpty(value))
 		return Boolean.FALSE;
+
+	    if (value instanceof ArrayScope || value instanceof ObjectScope)
+		   return Boolean.TRUE;
 
 	    try {
 		boolean boolValue = CharUtil.getBooleanValue(value);
