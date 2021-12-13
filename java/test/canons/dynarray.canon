@@ -41,6 +41,15 @@
 >Value at 11501 = __null__, size = 11501, capacity = 16384
 >----------------------------------------
 >
+>Value at     0 = "This"  , size =     4, capacity =     4
+>Value at     1 = "is"    , size =     4, capacity =     4
+>Value at     2 = "the"   , size =     4, capacity =     4
+>Value at     3 = "day"   , size =     4, capacity =     4
+>Value at     4 = __null__, size =     4, capacity =     4
+>Value at     0 =        1, size =    11, capacity =    16
+>Value at     5 =        8, size =    11, capacity =    16
+>Value at    10 =       89, size =    11, capacity =    16
+>Value at    11 = __null__, size =    11, capacity =    16
 >----------------------------------------
 >
->DynamicArray Tests: 34, succeeded: 34, failed: 0
+>DynamicArray Tests: 38, succeeded: 38, failed: 0

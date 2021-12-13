@@ -34,6 +34,9 @@
  *	    Move some methods from NumericUtil to MathUtil.
  *	03-Dec-2021 (rlwhitcomb)
  *	    #123: New constructor that takes varargs.
+ *	13-Dec-2021 (rlwhitcomb)
+ *	    #123: Redo this new constructor by reworking "internalClass" as
+ *	    "Class<?>" and all users.
  */
 package info.rlwhitcomb.util;
 
@@ -53,8 +56,8 @@ public class DynamicArray<T>
 
 	/** The actual array used for storage (of objects, not primitives). */
 	private volatile T[] internalArray;
-	/** Class of objects to be store in this array. */
-	private Class<T> internalClass;
+	/** Class of objects to be stored in this array. */
+	private Class<?> internalClass;
 	/** The "size" of this array, which is the largest index yet seen by {@link #put}. */
 	private int largestIndex = -1;
 
@@ -85,14 +88,18 @@ public class DynamicArray<T>
 	/**
 	 * Initialize this array with the given values. Note: they should all be the same type.
 	 *
-	 * @param clazz Class of objects to store in this array.
 	 * @param values The initial values for the array.
 	 */
 	@SuppressWarnings("unchecked")
-	public DynamicArray(Class<T> clazz, T... values) {
-	    init(clazz, values.length);
-	    System.arraycopy(values, 0, internalArray, 0, values.length);
-	    largestIndex = values.length - 1;
+	public DynamicArray(T... values) {
+	    if (values == null || values.length == 0) {
+		init(Object.class, 0);
+	    }
+	    else {
+		init(values[0].getClass(), values.length);
+		System.arraycopy(values, 0, internalArray, 0, values.length);
+		largestIndex = values.length - 1;
+	    }
 	}
 
 	/**
@@ -102,7 +109,7 @@ public class DynamicArray<T>
 	 * @param clazz Class of objects to store in this array.
 	 * @param size The initial size of the array (but always expandable).
 	 */
-	private void init(Class<T> clazz, int size) {
+	private void init(Class<?> clazz, int size) {
 	    this.internalClass = clazz;
 
 	    reallocate(size <= 0 ? DEFAULT_SIZE : size);

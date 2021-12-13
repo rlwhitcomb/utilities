@@ -35,6 +35,8 @@
  *	    Move to new package.
  *	03-Dec-2021 (rlwhitcomb)
  *	    #123: Test new constructor.
+ *	13-Dec-2021 (rlwhitcomb)
+ *	    #123: Rework new constructor.
  */
 package info.rlwhitcomb.test;
 
@@ -102,6 +104,11 @@ public class DynArrayTest
 	    check(array, index, value);
 	}
 
+	private static <T> void oneCheck(final DynamicArray<T> array, final int index, final T value) {
+	    reportOne(array, index);
+	    checkOne(array, index, value);
+	}
+
 	private static void integerTest() {
 	    /* Setup a dynamic array of initial size 10 */
 	    DynamicArray<Integer> iArray = new DynamicArray<Integer>(Integer.class, 10);
@@ -125,13 +132,19 @@ public class DynArrayTest
 	}
 
 	private static void constructorTest() {
-	    DynamicArray<String> sArray = new DynamicArray<>(String.class, "This", "is", "the", "day");
+	    DynamicArray<String> sArray = new DynamicArray<>("This", "is", "the", "day");
+	    DynamicArray<Integer> iArray = new DynamicArray<>(1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89);
 
-	    checkOne(sArray, 0, "This");
-	    checkOne(sArray, 1, "is");
-	    checkOne(sArray, 2, "the");
-	    checkOne(sArray, 3, "day");
-	    checkOne(sArray, 4, null);
+	    oneCheck(sArray, 0, "This");
+	    oneCheck(sArray, 1, "is");
+	    oneCheck(sArray, 2, "the");
+	    oneCheck(sArray, 3, "day");
+	    oneCheck(sArray, 4, null);
+
+	    oneCheck(iArray, 0, 1);
+	    oneCheck(iArray, 5, 8);
+	    oneCheck(iArray, 10, 89);
+	    oneCheck(iArray, 11, null);
 	}
 
 	private static void runTest(final Runnable test) {
