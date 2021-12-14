@@ -220,6 +220,6 @@ define pad($s, $width) = { _s = $s ? $s : ''; fill(_s, ' ', length(_s), $width -
  *
  * @return A unique identifier.
  */
-define uuid() = {  trim(info.os.id == 'windows' ? exec('cmd', '/c', 'uuid.bat') : exec('uuid')) }
+define uuid() = {  trim(exec('uuid')) }
 
 :quiet pop
