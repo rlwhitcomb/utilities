@@ -416,10 +416,13 @@
  *	    and its reciprocal).
  *	03-Dec-2021 (rlwhitcomb)
  *	    #95: Add new "ratphi" function for rational approximations of "phi" and "PHI".
+ *	13-Dec-2021 (rlwhitcomb)
+ *	    #129: Check for ".bat" or ".cmd" file for "exec" and automatically call "cmd /c".
  */
 package info.rlwhitcomb.calc;
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -473,6 +476,7 @@ import info.rlwhitcomb.util.MathUtil;
 import info.rlwhitcomb.util.NumericUtil;
 import static info.rlwhitcomb.util.NumericUtil.RangeMode;
 import info.rlwhitcomb.util.RunCommand;
+import info.rlwhitcomb.util.Which;
 
 
 /**
@@ -523,6 +527,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	 * charset is specified.
 	 */
 	private static final Charset DEFAULT_CHARSET = Charset.defaultCharset();
+
+	/** Whether we are running on Windows or not. */
+	private static final boolean RUNNING_ON_WINDOWS = Environment.isWindows();
 
 
 	/** Initialization flag -- delays print until constructor is finished.  */
@@ -3923,9 +3930,25 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public Object visitExecExpr(CalcParser.ExecExprContext ctx) {
 	    List<CalcParser.ExprContext> exprs = ctx.exprN().exprList().expr();
 	    List<Object> objects = buildValueList(exprs, Conversion.STRING);
+
+	    // As a convenience, if we're on Windows and the target is a ".bat" or ".cmd" file
+	    // then prepend "cmd /c" before running it.
+	    if (RUNNING_ON_WINDOWS) {
+		List<String> names = new ArrayList<>();
+		names.add(objects.get(0).toString());
+		List<File> files = Which.findAll(names, false);
+		if (!files.isEmpty()) {
+		    String name = files.get(0).getName().toLowerCase();
+		    if (name.endsWith(".bat") || name.endsWith(".cmd")) {
+			objects.add(0, "cmd");
+			objects.add(1, "/c");
+		    }
+		}
+	    }
+
 	    String[] args = new String[objects.size()];
 	    for (int i = 0; i < objects.size(); i++) {
-		args[i] = (String) objects.get(i);
+		args[i] = objects.get(i).toString();
 	    }
 
 	    try {

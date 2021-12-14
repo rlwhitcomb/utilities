@@ -44,6 +44,9 @@
  *	30-Aug-2021 (rlwhitcomb)
  *	    Set program exit code to 1 if nothing found. Put the main logic
  *	    into a method "which" can be called from anywhere.
+ *	13-Dec-2021 (rlwhitcomb)
+ *	    #129: Change "which" method to use varargs for convenience.
+ *	    Add "findAll" intermediate method for use by other utilities.
  */
 package info.rlwhitcomb.util;
 
@@ -269,14 +272,49 @@ public class Which
 	}
 
 	/**
-	 * The guts of the "which" algorithm: process the command line arguments
+	 * Find first or all of the named executables and return the file list of those found.
+	 *
+	 * @param names	The list of executable names to search for.
+	 * @param all	{@code true} to find all the occurrences of each, or just the first.
+	 * @return	The list of files found, which could be empty.
+	 */
+	public static List<File> findAll(final List<String> names, final boolean all) {
+	    List<File> files = new ArrayList<>();
+
+	    for (String name : names) {
+		// On Windows the first place to look is the current directory
+		if (ON_WINDOWS) {
+		    File f = findExecutable(name, CURRENT_DIR);
+		    if (f != null) {
+			files.add(f);
+			if (!all)
+			    break;
+		    }
+		}
+
+		if (all) {
+		    files.addAll(findAllExecutables(name));
+		}
+		else {
+		    File f = findExecutable(name);
+		    if (f != null) {
+			files.add(f);
+		    }
+		}
+	    }
+
+	    return files;
+	}
+
+	/**
+	 * The main body of the "which" algorithm: process the command line arguments
 	 * (names and options) and produce the report.
 	 *
 	 * @param args	The parsed command line arguments (names and options).
 	 * @return	One of the status enum values indicating the result and/or
 	 *		action to be taken by the caller.
 	 */
-	public static Result which(String[] args) {
+	public static Result which(String... args) {
 	    boolean findAll = false;
 	    boolean showInfo = false;
 	    boolean quiet = false;
@@ -312,42 +350,19 @@ public class Which
 	    if (names.isEmpty())
 		return Result.EMPTY;
 
-	    boolean showTargetNameFirst = names.size() > 1;
-	    boolean foundAny = false;
+	    List<File> files = findAll(names, findAll);
 
-	    // Then evaluate the names one at a time
-	nameLoop:
-	    for (String name : names) {
-		// On Windows the first place to look is the current directory
-		if (ON_WINDOWS) {
-		    File f = findExecutable(name, CURRENT_DIR);
-		    if (f != null) {
-			if (!quiet)
-			    showFileInfo(name, f, showTargetNameFirst, showInfo);
-			foundAny = true;
-			if (!findAll)
-			    break nameLoop;
-		    }
-		}
+	    if (!quiet) {
+		boolean showTargetNameFirst = names.size() > 1;
 
-		if (findAll) {
-		    for (File f : findAllExecutables(name)) {
-			if (!quiet)
-			    showFileInfo(name, f, showTargetNameFirst, showInfo);
-			foundAny = true;
-		    }
-		}
-		else {
-		    File f = findExecutable(name);
-		    if (f != null) {
-			if (!quiet)
-			    showFileInfo(name, f, showTargetNameFirst, showInfo);
-			foundAny = true;
-		    }
+		for (File f : files) {
+		    // Note: the "nameOnly" call is only an approximation of the input name, but because
+		    // we haven't saved the correspondence between "name" and "files" we can only guess now
+		    showFileInfo(FileUtilities.nameOnly(f), f, showTargetNameFirst, showInfo);
 		}
 	    }
 
-	    return foundAny ? Result.SUCCESS : Result.NOTFOUND;
+	    return files.isEmpty() ? Result.NOTFOUND : Result.SUCCESS;
 	}
 
 	/**
