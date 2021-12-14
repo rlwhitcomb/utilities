@@ -219,6 +219,8 @@
  *	    #109: Add "quote strings" to the Settings dialog.
  *	03-Dec-2021 (rlwhitcomb)
  *	    #116: Break out parse and execution times.
+ *	05-Dec-2021 (rlwhitcomb)
+ *	    #106: Catch LeaveException at the highest level to gracefully exit the whole script.
  */
 package info.rlwhitcomb.calc;
 
@@ -1717,6 +1719,8 @@ public class Calc
 		Intl.initAllPackageResources(locale);
 	    }
 
+	    Object exitValue = null;
+
 	    try {
 		CharStream input = null;
 
@@ -1834,8 +1838,26 @@ public class Calc
 		    }
 		}
 	    }
+	    catch (LeaveException lex) {
+		if (lex.hasValue()) {
+		    exitValue = lex.getValue();
+		}
+	    }
 	    catch (IOException ioe) {
 		errFormat("calc#inOutError", ExceptionUtil.toString(ioe));
+	    }
+
+	    if (exitValue != null) {
+		short exitCode = 0;
+		try {
+		    exitCode = Short.parseShort(exitValue.toString());
+		}
+		catch (NumberFormatException nfe) {
+		    ;
+		}
+		if (exitCode != 0) {
+		    System.exit(exitCode);
+		}
 	    }
 	}
 

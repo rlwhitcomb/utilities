@@ -297,8 +297,10 @@
  *	    #83: Add Unicode symbols for "in" and "empty set".
  *	27-Nov-2021 (rlwhitcomb)
  *	    #105: Allow directives inside loops and functions.
- * 30-Nov-2021 (rlwhitcomb)
- *     #83: Another symbol for "in" (found in the issue).
+ *	30-Nov-2021 (rlwhitcomb)
+ *	    #83: Another symbol for "in" (found in the issue).
+ *	05-Dec-2021 (rlwhitcomb)
+ *	    #106: Add "leave" statement.
  */
 
 grammar Calc;
@@ -318,6 +320,7 @@ stmtOrExpr
    | whileStmt
    | ifStmt
    | caseStmt
+   | leaveStmt
    | emptyStmt
    ;
 
@@ -351,6 +354,10 @@ ifStmt
 caseStmt
    : K_CASE expr ( K_OF | K_IN | SET_IN ) '{' caseBlock ( ',' caseBlock ) * '}'
    | K_CASE expr ( K_OF | K_IN | SET_IN ) caseBlock ( ',' caseBlock ) *
+   ;
+
+leaveStmt
+   : K_LEAVE expr1 ?
    ;
 
 stmtBlock
@@ -833,6 +840,8 @@ K_CASE     : C A S E ;
 K_OF       : O F ;
 
 K_DEFAULT  : D E F A U L T ;
+
+K_LEAVE    : L E A V E ;
 
 
 /* Note: this needs to be last so that these other "ID" like things

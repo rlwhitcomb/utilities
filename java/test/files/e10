@@ -52,9 +52,11 @@ loop $p ∈ 10...40 { :dec $p; pi }
 :echo "Bernoulli Numbers 0 to 60"
 :resultonly on
 :rational on
+:quotestrings off
 `B(0) = ${bn 0}`
 `B(1) = ${bn 1}`
 loop $b in 2 .. 60, 2 { `B($$b) = ${bn $b}` }
+:quotestrings pop
 :rational pop
 :resultonly pop
 

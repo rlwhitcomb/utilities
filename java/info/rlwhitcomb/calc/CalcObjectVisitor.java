@@ -418,6 +418,8 @@
  *	    #95: Add new "ratphi" function for rational approximations of "phi" and "PHI".
  *	13-Dec-2021 (rlwhitcomb)
  *	    #129: Check for ".bat" or ".cmd" file for "exec" and automatically call "cmd /c".
+ *	14-Dec-2021 (rlwhitcomb)
+ *	    #106: Add "leave" statement to exit loops and functions.
  */
 package info.rlwhitcomb.calc;
 
@@ -1029,6 +1031,11 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		pushScope(func);
 		try {
 		    returnValue = visit(func.getDeclaration().getFunctionBody());
+		}
+		catch (LeaveException lex) {
+		    if (lex.hasValue()) {
+			returnValue = lex.getValue();
+		    }
 		}
 		finally {
 		    popScope();
@@ -2064,6 +2071,11 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    try {
 		value = iterateOverDotRange(exprList, dotCtx, visitor, true);
 	    }
+	    catch (LeaveException lex) {
+		if (lex.hasValue()) {
+		    value = lex.getValue();
+		}
+	    }
 	    finally {
 		visitor.finish();
 		popScope();
@@ -2086,6 +2098,11 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		while (exprResult) {
 		    lastValue = visit(block);
 		    exprResult = getBooleanValue(exprCtx);
+		}
+	    }
+	    catch (LeaveException lex) {
+		if (lex.hasValue()) {
+		    lastValue = lex.getValue();
 		}
 	    }
 	    finally {
@@ -2165,6 +2182,17 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 
 	    return null;
+	}
+
+	@Override
+	public Object visitLeaveStmt(CalcParser.LeaveStmtContext ctx) {
+	    CalcParser.Expr1Context exprCtx = ctx.expr1();
+	    if (exprCtx != null) {
+		throw new LeaveException(visit(exprCtx.expr()));
+	    }
+	    else {
+		throw new LeaveException();
+	    }
 	}
 
 	@Override

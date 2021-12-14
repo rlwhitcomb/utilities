@@ -1,7 +1,11 @@
 :quiet on
 :resultsonly on
 primes = [ ]
-loop $i in 2 … 9997 { if isprime($i) { primes[length(primes)] = $i } }
+loop over 2 … 9997 {
+  if isprime($_) {
+    primes[length(primes)] = $_
+  }
+}
 :quiet pop
 primes @j
 :resultsonly pop

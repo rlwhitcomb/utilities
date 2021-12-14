@@ -22,3 +22,8 @@
 >set = {os: {ver: '7.3', major: 7, minor: 3}} -> { os: { ver: "7.3", major: 7, minor: 3 } }
 >Defining function “i” = {set.os}
 >i().ver -> "7.3"
+>Defining function “l($a)” = {
+> if $a & 1 {leave 'odd'} else {leave 'even'} 
+>}
+>l(3) -> "odd"
+>l(4) -> "even"

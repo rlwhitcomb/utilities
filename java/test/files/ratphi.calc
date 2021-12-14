@@ -1,6 +1,16 @@
 :quiet on
 define ratphi($n) = { fib($n+1) / fib($n) }
 PHI_VALUES = [ ]
-loop over 2..400 { :dec $_; loop $n in $_ * 4 { if (ratphi($n) == phi) { if isnull(PHI_VALUES[$_]) { PHI_VALUES[$_] = $n } } } }
+loop over 2..400 {
+  :dec $_
+  loop $n in $_ * 4 {
+    if (ratphi($n) == phi) {
+      if isnull(PHI_VALUES[$_]) {
+        PHI_VALUES[$_] = $n
+        leave $n
+      }
+    }
+  }
+}
 :quiet pop
 PHI_VALUES@j
