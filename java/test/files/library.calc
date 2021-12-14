@@ -25,6 +25,49 @@ def excel_date($date) = { $date < D'3/1/1900' ? $date - D'1/1/1900' + 1 : $date 
 def excel_date_1904($date) = { $date - D'1/1/1904' }
 
 /*
+ * Helpers for the Excel column conversion code.
+ */
+define to_int($c) = { eval(`${$c@d}`) }
+define _A_ = { to_int('A') }
+define _Z_ = { to_int('Z') }
+define _BASE_ = { _Z_ - _A_ + 1 }
+define to_alpha($v) = { `${(_A_ + $v)@c}` }
+
+/*
+ * Convert a numeric Excel column index (1..16384) into a regular column name ("A" .. "XFD").
+ *
+ * @param $index The numeric column index to convert.
+ * @return       The column name.
+ *
+ * Algorithm taken from example given here:
+ * https://stackoverflow.com/questions/181596/how-to-convert-a-column-number-e-g-127-into-an-excel-column-e-g-aa
+ */
+define to_excel_col($index) = {
+   _col = ''
+   _i = $index - 1
+   while _i >= 0 {
+      _col = to_alpha(_i % _BASE_) + _col
+      _i = _i \ _BASE_ - 1
+   }
+   _col
+}
+
+/*
+ * Convert an Excel column name ("A" .. "XFD") to a numeric column index (1..16384).
+ *
+ * @param $col The column name to convert.
+ * @return     The numeric index of the column.
+ */
+define from_excel_col($col) = {
+   _col = 0
+   loop $c over chars(upper($col)) {
+      _v = $c - _A_ + 1
+      _col *= _BASE_
+      _col += _v
+   }
+}
+
+/*
  * Convert radians to degrees: 2*pi = 360, so radians / pi * 180 = degrees
  *
  * @param $rad The input radians value

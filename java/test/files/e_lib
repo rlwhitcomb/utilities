@@ -42,6 +42,33 @@ peek(s1)
 pop(s1)
 isempty(s1)
  
+to_excel_col(1)
+to_excel_col(2)
+to_excel_col(25)
+to_excel_col(26)
+to_excel_col(27)
+to_excel_col(32)
+to_excel_col(52)
+to_excel_col(53)
+to_excel_col(256)
+to_excel_col(702)
+to_excel_col(16384)
+
+from_excel_col('A')
+from_excel_col('Z')
+from_excel_col('AA')
+from_excel_col('AF')
+from_excel_col('ZZ')
+from_excel_col('XFD')
+
+:echo 'Checking all columns from 1 - 16384 ...'
+:quiet on
+_tests = 0
+_mistakes = 0
+loop over 16384 { _tests++; if from_excel_col(to_excel_col($_)) != $_ { _mistakes++ } }
+:quiet pop
+:echo `Number of tests = $_tests, mistakes = $_mistakes`
+
 :separators pop
 :clear
 

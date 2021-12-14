@@ -36,5 +36,24 @@
 >peek(s1) -> <null>
 >pop(s1) -> <null>
 >isempty(s1) -> true
+>to_excel_col(1) -> "A"
+>to_excel_col(2) -> "B"
+>to_excel_col(25) -> "Y"
+>to_excel_col(26) -> "Z"
+>to_excel_col(27) -> "AA"
+>to_excel_col(32) -> "AF"
+>to_excel_col(52) -> "AZ"
+>to_excel_col(53) -> "BA"
+>to_excel_col(256) -> "IV"
+>to_excel_col(702) -> "ZZ"
+>to_excel_col(16384) -> "XFD"
+>from_excel_col('A') -> 1
+>from_excel_col('Z') -> 26
+>from_excel_col('AA') -> 27
+>from_excel_col('AF') -> 32
+>from_excel_col('ZZ') -> 702
+>from_excel_col('XFD') -> 16384
+>Checking all columns from 1 - 16384 ...
+>Number of tests = 16384, mistakes = 0
 >Separator display set to “false”.
 >All variables cleared.
