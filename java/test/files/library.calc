@@ -265,4 +265,11 @@ define pad($s, $width) = { _s = $s ? $s : ''; fill(_s, ' ', length(_s), $width -
  */
 define uuid() = {  trim(exec('uuid')) }
 
+/*
+ * Execute the "sleep" program for the given time period.
+ *
+ * @param $time A time period to sleep (could be "n" seconds, or other units such as "2m").
+ */
+define sleep($time) = { trim(exec('sleep', $time)) }
+
 :quiet pop
