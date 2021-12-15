@@ -301,6 +301,8 @@
  *	    #83: Another symbol for "in" (found in the issue).
  *	05-Dec-2021 (rlwhitcomb)
  *	    #106: Add "leave" statement.
+ *	14-Dec-2021 (rlwhitcomb)
+ *	    #142: Cosmetic cleanup.
  */
 
 grammar Calc;
@@ -634,15 +636,9 @@ id
    ;
 
 modes
-   : 'true'
-   | 'false'
-   | 'on'
-   | 'off'
-   | 'yes'
-   | 'no'
-   | 'pop'
-   | 'previous'
-   | 'prev'
+   : 'true'  | 'on'       | 'yes'
+   | 'false' | 'off'      | 'no'
+   | 'pop'   | 'previous' | 'prev'
    ;
 
 modeOption
@@ -945,15 +941,10 @@ COMPARE_OP
        ;
 
 EQUAL_OP
-       : '==='
-       | '\u2A76'
-       | '\u2261'
-       | '!=='
-       | '\u2262'
-       | '=='
-       | '\u2A75'
-       | '!='
-       | '\u2260'
+       : ( '===' | '\u2A76' | '\u2261' )
+       | ( '!==' | '\u2262' )
+       | ( '==' | '\u2A75' )
+       | ( '!=' | '\u2260' )
        ;
 
 BIT_ASSIGN
@@ -1200,7 +1191,8 @@ fragment FS
    ;
 
 fragment NAME_START_CHAR
-   : 'A'..'Z' | 'a'..'z'
+   : 'A'..'Z'
+   | 'a'..'z'
    | '_'
    | '\u00C0'..'\u00D6'
    | '\u00D8'..'\u00F6'
@@ -1275,7 +1267,8 @@ KB_CONST
 
 // no leading zeros
 fragment INT
-   : '0' | [1-9] [0-9]*
+   : '0'
+   | [1-9] [0-9]*
    ;
 
 // \- since - means "range" inside [...]
@@ -1283,9 +1276,13 @@ fragment EXP
    : [Ee] [+\-]? INT
    ;
 
-fragment DTSEP : [\-/,;._] ;
+fragment DTSEP
+   : [\-/,;._]
+   ;
 
-fragment DIG : [0-9] ;
+fragment DIG
+   : [0-9]
+   ;
 
 fragment A : [aA] ;
 fragment B : [bB] ;
@@ -1316,7 +1313,10 @@ fragment Z : [zZ] ;
 
 fragment DIR : ':' ;
 
-fragment NL : '\r'? '\n' ;
+fragment NL
+   : '\r'? '\n'
+   ;
+
 
 WS
    : [ \t] + -> skip
