@@ -278,6 +278,8 @@
 		#90: Add "hsh" wrapper scripts (MD5 renamed to Hash).
 	    15-Dec-2021 (rlwhitcomb)
 		#149: Add "csv" wrappers for CSVTest.
+	    16-Dec-2021 (rlwhitcomb)
+		Take out "-html5" flag for Javadoc on JDK 8 builds.
 
      ========================================================================== -->
 
@@ -634,7 +636,7 @@
 
 	<target name="doc" depends="compile" description="Builds the Javadoc for the entire project.">
 		<javadoc destdir="doc" access="private" encoding="utf-8" windowtitle="Utilities">
-			<arg value="-html5"/>
+			<arg value="-html5" if:true="{new.java.version}"/>
 			<arg value="--frames" if:true="${html4.output}"/>
 			<arg line="--release 8" if:true="${new.java.version}"/>
 			<arg line="-Xdoclint:none" if:true="${doclint.off}"/>
