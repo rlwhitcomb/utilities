@@ -5,7 +5,8 @@
 >Test 'quote': Passed
 >Test 'non_standard': Passed
 >Test 'border_data': Passed
+>Test 'emp': Passed
 >------------------------------------
->Ran 4 tests: 4 passed, 0 failed.
+>Ran 5 tests: 5 passed, 0 failed.
 >====================================
 >

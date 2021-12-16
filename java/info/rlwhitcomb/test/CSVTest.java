@@ -66,6 +66,8 @@
  *	    (new options in CSVFormat).
  *	29-Mar-2021 (rlwhitcomb)
  *	    Move to new package.
+ *	15-Dec-2021 (rlwhitcomb)
+ *	    #150: Change "=E" option to be "no escape" and make "-H" into "has header row".
  */
 package info.rlwhitcomb.test;
 
@@ -198,9 +200,13 @@ public class CSVTest
 			    Intl.errFormat("csv#test.onlyOneChar", "e");
 			    return false;
 			}
-			escapeChar = arg1;
+			escapeChar = Character.valueOf(arg1);
 			break;
 		    default:
+			if (arg.equalsIgnoreCase("help")) {
+			    doHelp(System.out);
+			    System.exit(0);
+			}
 			Intl.errFormat("csv#test.unknownOption", arg);
 			return false;
 		}
@@ -217,6 +223,9 @@ public class CSVTest
 		    case 'w':	// preserve whitespace
 			preserveWhitespace = true;
 			break;
+		    case 'E':	// no escape char
+			escapeChar = Character.valueOf('\0');
+			break;
 		    case 'B':	// blank
 			delimiter = Delimiter.SPACE;
 			break;
@@ -229,7 +238,7 @@ public class CSVTest
 		    case 'L':	// LF (newline)
 			separator = Separator.NEWLINE;
 			break;
-		    case 'E':	// has header row
+		    case 'H':	// has header row
 			hasHeaderRow = true;
 			break;
 		    case 'I':	// ignore empty lines
@@ -245,8 +254,6 @@ public class CSVTest
 			useUTF8 = true;
 			break;
 		    case '?':
-		    case 'h':
-		    case 'H':
 			doHelp(System.out);
 			System.exit(0);
 		    default:

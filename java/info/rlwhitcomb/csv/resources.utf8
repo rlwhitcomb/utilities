@@ -42,6 +42,8 @@
 #	    Tweak messages a little. Add a new tester error.
 #	02-Mar-2021 (rlwhitcomb)
 #	    New options for CSVTest. Update help (with colors).
+#	15-Dec-2021 (rlwhitcomb)
+#	    #150: Update options for CSVTest. Fix help colors.
 #
 
 #
@@ -84,30 +86,31 @@ writer.writingException		= Exception while writing output
 # From CSVTest.java
 #
 test.help1			= ""
-test.help2			= <Bk!>Usage: <Gr>options<> <Cy>file name(s)<>
+test.help2			= <Bk!>Usage: <Gr>options<--> <Cy>file name(s)<-->
 test.help3			= ""
-test.help4			= Where the possible <Gr>options<> are:
-test.help5			= \t<Gr>-8<>   = use the UTF-8 character set to read and write files (default to system charset)
-test.help6			= \t<Gr>-q<Bk!>x<>  = set the quote character to '<Bk!>x<>' (default is '<Bk!>"<>')
-test.help7			= \t<Gr>-Q<Bk!>xx<> = set the quote character to a standard value ('<Bk!>single<>', '<Bk!>double<>', etc.)
-test.help8			= \t<Gr>-d<Bk!>x<>  = set the column delimiter to '<Bk!>x<>' (default is '<Bk!>,<>')
-test.help9			= \t<Gr>-D<Bk!>xx<> = set the column delimiter to a standard value ('<Bk!>comma<>', '<Bk!>space<>', etc.)
-test.help10			= \t<Gr>-r<Bk!>x<>  = set the record separator to '<Bk!>x<>' (default is CR,LF)
-test.help11			= \t<Gr>-S<Bk!>xx<> = set the record separator to a standard value ('<Bk!>newline<>', '<Bk!>semicolon<>', etc.)
-test.help12			= \t<Gr>-e<Bk!>x<>  = set the escape charater to '<Bk!>x<>' (default is '<Bk!>\\<>')
-test.help13			= \t<Gr>-a<>   = always delimit strings (default is not)
-test.help14			= \t<Gr>-u<>   = preserve quotes (default is not)
-test.help15			= \t<Gr>-w<>   = preserve whitespace in unquoted fields (default is not)
-test.help16			= \t<Gr>-B<>   = set the column delimiter to a blank
-test.help17			= \t<Gr>-T<>   = set the column delimiter to a tab character
-test.help18			= \t<Gr>-R<>   = set the record separator to CR
-test.help19			= \t<Gr>-L<>   = set the record separator to LF
-test.help20			= \t<Gr>-E<>   = data contains a header row (default is not)
-test.help21			= \t<Gr>-I<>   = ignore empty lines (default is not)
-test.help22			= \t<Gr>-W<>   = enable writeback mode, where the contents are written back out
-test.help23			= \t       and then read back in and compared to the original parsed values.
-test.help24			= \t<Gr>-i<>   = use "iterator" for testing.
-test.help25			= ""
+test.help4			= Where the possible <Gr>options<--> are:
+test.help5			= \t<Gr>-8<-->   = use the UTF-8 character set to read and write files (default to system charset)
+test.help6			= \t<Gr>-q<Bk!>x<-->  = set the quote character to '<Bk!>x<>' (default is '<Bk!>"<>')
+test.help7			= \t<Gr>-Q<Bk!>xx<--> = set the quote character to a standard value ('<Bk!>single<>', '<Bk!>double<>', etc.)
+test.help8			= \t<Gr>-d<Bk!>x<-->  = set the column delimiter to '<Bk!>x<>' (default is '<Bk!>,<>')
+test.help9			= \t<Gr>-D<Bk!>xx<--> = set the column delimiter to a standard value ('<Bk!>comma<>', '<Bk!>space<>', etc.)
+test.help10			= \t<Gr>-r<Bk!>x<-->  = set the record separator to '<Bk!>x<>' (default is CR,LF)
+test.help11			= \t<Gr>-S<Bk!>xx<--> = set the record separator to a standard value ('<Bk!>newline<>', '<Bk!>semicolon<>', etc.)
+test.help12			= \t<Gr>-e<Bk!>x<-->  = set the escape charater to '<Bk!>x<>' (default is '<Bk!>\\<>')
+test.help13			= \t<Gr>-a<-->   = always delimit strings (default is not)
+test.help14			= \t<Gr>-u<-->   = preserve quotes (default is not)
+test.help15			= \t<Gr>-w<-->   = preserve whitespace in unquoted fields (default is not)
+test.help16			= \t<Gr>-E<-->   = set to no escape character in strings
+test.help17			= \t<Gr>-B<-->   = set the column delimiter to a blank
+test.help18			= \t<Gr>-T<-->   = set the column delimiter to a tab character
+test.help19			= \t<Gr>-R<-->   = set the record separator to CR
+test.help20			= \t<Gr>-L<-->   = set the record separator to LF
+test.help21			= \t<Gr>-H<-->   = data contains a header row (default is not)
+test.help22			= \t<Gr>-I<-->   = ignore empty lines (default is not)
+test.help23			= \t<Gr>-W<-->   = enable writeback mode, where the contents are written back out
+test.help24			= \t       and then read back in and compared to the original parsed values.
+test.help25			= \t<Gr>-i<-->   = use "iterator" for testing.
+test.help26			= ""
 
 test.onlyOneChar		= Only one character allowed for the "-%1$s" option!
 test.unknownOption		= Unknown option "-%1$s"!

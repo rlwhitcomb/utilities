@@ -1,0 +1,9 @@
+1 "A" "Testing of the newline
+capability of the CSV format.
+
+Doing nothing here is fine." 0 no false "" "*" "" "testcalculations.html#end"
+2 "B" "Simple test" 1 yes true " " "+" "" ""
+3 "C" "Longer test with embedded ""quotes"" within a string" 1 yes false "=" "=" "" ""
+4 "D" "
+Going with the flow here
+" -1 no true "/" "" "" "firsttest\final\"
