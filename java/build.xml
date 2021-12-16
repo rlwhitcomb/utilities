@@ -276,6 +276,8 @@
 		Put Antlr version into build.properties
 	    20-Nov-2021 (rlwhitcomb)
 		#90: Add "hsh" wrapper scripts (MD5 renamed to Hash).
+	    15-Dec-2021 (rlwhitcomb)
+		#149: Add "csv" wrappers for CSVTest.
 
      ========================================================================== -->
 
@@ -406,6 +408,8 @@
 		<include name="cmp.bat"                     if:true="${on.windows}"/>
 		<include name="crl"                     unless:true="${on.windows}"/>
 		<include name="crl.bat"                     if:true="${on.windows}"/>
+		<include name="csv"                     unless:true="${on.windows}"/>
+		<include name="csv.bat"                     if:true="${on.windows}"/>
 		<include name="d"                       unless:true="${on.windows}"/>
 		<include name="d.bat"                       if:true="${on.windows}"/>
 		<include name="decode"                  unless:true="${on.windows}"/>
