@@ -420,6 +420,8 @@
  *	    #129: Check for ".bat" or ".cmd" file for "exec" and automatically call "cmd /c".
  *	14-Dec-2021 (rlwhitcomb)
  *	    #106: Add "leave" statement to exit loops and functions.
+ *	15-Dec-2021 (rlwhitcomb)
+ *	    #151: Fix precedence of the logical operators.
  */
 package info.rlwhitcomb.calc;
 
@@ -4246,41 +4248,37 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	@Override
-	public Object visitBooleanExpr(CalcParser.BooleanExprContext ctx) {
+	public Object visitBooleanAndExpr(CalcParser.BooleanAndExprContext ctx) {
 	    Boolean b1 = getBooleanValue(ctx.expr(0));
-	    String op = ctx.BOOL_OP().getText();
 
-	    switch (op) {
-		case "&&":
-		case "\u2227":
-		    // Due to the short-circuit nature of this operator, the second expression
-		    // is only evaluated if necessary
-		    if (!b1)
-			return Boolean.FALSE;
-		    break;
+	    // Due to the short-circuit nature of this operator, the second expression
+	    // is only evaluated if necessary
+	    if (!b1)
+		return Boolean.FALSE;
 
-		case "||":
-		case "\u2228":
-		    // Due to the short-circuit nature of this operator, the second expression
-		    // is only evaluated if necessary
-		    if (b1)
-			return Boolean.TRUE;
-		    break;
-
-		case "^^":
-		case "\u22BB":
-		    // Unfortunately, there is no possibility of short-circuit evaluation
-		    // for this operator -- either first value could produce either result
-		    Boolean b2 = getBooleanValue(ctx.expr(1));
-
-		    return ((b1 && b2) || (!b1 && !b2)) ? Boolean.FALSE : Boolean.TRUE;
-
-		default:
-		    throw new UnknownOpException(op, ctx);
-	    }
-
-	    // For the short-circuit operators, this is the result if the first is not conclusive
 	    return getBooleanValue(ctx.expr(1));
+	}
+
+	@Override
+	public Object visitBooleanOrExpr(CalcParser.BooleanOrExprContext ctx) {
+	    Boolean b1 = getBooleanValue(ctx.expr(0));
+
+	    // Due to the short-circuit nature of this operator, the second expression
+	    // is only evaluated if necessary
+	    if (b1)
+		return Boolean.TRUE;
+
+	    return getBooleanValue(ctx.expr(1));
+	}
+
+	@Override
+	public Object visitBooleanXorExpr(CalcParser.BooleanXorExprContext ctx) {
+	    Boolean b1 = getBooleanValue(ctx.expr(0));
+	    Boolean b2 = getBooleanValue(ctx.expr(1));
+
+	    // Unfortunately, there is no possibility of short-circuit evaluation
+	    // for this operator -- either first value could produce either result
+	    return ((b1 && b2) || (!b1 && !b2)) ? Boolean.FALSE : Boolean.TRUE;
 	}
 
 	@Override

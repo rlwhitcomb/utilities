@@ -542,7 +542,7 @@ or
     </tr>
     </thead>
     <tbody>
-    <tr><td>28</td>
+    <tr><td>30</td>
       <td><code>pi</code>, <code>&#x1D6D1;</code>, <code>e</code>, or <code>&#x2107;</code><br>
           <code>phi</code>, <code>&#x03C6;</code>, <code>&#x03D5;</code><br>
           <code>PHI</code>, <code>&#x03A6;</code><br>
@@ -567,11 +567,11 @@ or
           the current time, comparable to <code>h'11:10 am'</code><br>
           current Calc information (<code>version</code>, <code>os</code>, <code>java</code>)<br>
           that constant value, as in <code>"Hello"</code>, <code>127</code>, or <code>0xA8</code></td><td>N/A</td></tr>
-    <tr><td>27</td><td><code>{</code> (&nbsp;<i>key:value pairs</i>&nbsp;) <code>}</code></td><td>define an object</td><td>left to right</td></tr>
-    <tr><td>26</td><td><code>[</code> (&nbsp;<i>expr list</i>&nbsp;) <code>]</code><br><i>var</i> <code>[</code> <i>expr</i> <code>]</code> or <i>var</i>&nbsp;<code>&#x2080;</code> .. <code>&#x2089;</code></td><td>define an array,<br>or access elements of an array, string, or object</td><td>left to right</td></tr>
-    <tr><td>25</td><td><code>.</code></td><td>access an object member</td><td>left to right</td></tr>
-    <tr><td>24</td><td><code>( </code><i>expr</i><code> )</code></td><td>group an expression</td><td>N/A</td></tr>
-    <tr><td rowspan="61">23</td>
+    <tr><td>29</td><td><code>{</code> (&nbsp;<i>key:value pairs</i>&nbsp;) <code>}</code></td><td>define an object</td><td>left to right</td></tr>
+    <tr><td>28</td><td><code>[</code> (&nbsp;<i>expr list</i>&nbsp;) <code>]</code><br><i>var</i> <code>[</code> <i>expr</i> <code>]</code> or <i>var</i>&nbsp;<code>&#x2080;</code> .. <code>&#x2089;</code></td><td>define an array,<br>or access elements of an array, string, or object</td><td>left to right</td></tr>
+    <tr><td>27</td><td><code>.</code></td><td>access an object member</td><td>left to right</td></tr>
+    <tr><td>26</td><td><code>( </code><i>expr</i><code> )</code></td><td>group an expression</td><td>N/A</td></tr>
+    <tr><td rowspan="61">25</td>
             <td><code>ABS</code>&nbsp;<i>expr</i></td><td>absolute value</td><td rowspan="61">left to right</td></tr>
             <tr><td><code>SIN</code>&nbsp;<i>expr</i></td><td>sine</td></tr>
             <tr><td><code>COS</code>&nbsp;<i>expr</i></td><td>cosine</td></tr>
@@ -633,42 +633,42 @@ or
             <tr><td><code>DOY</code>&nbsp;<i>expr</i></td><td>day of the year of a date (integer)<br>(1 .. 365/366)</td></tr>
             <tr><td><code>MOY</code>&nbsp;<i>expr</i></td><td>month of the year of a date (integer)<br>(1 .. 12)</td></tr>
             <tr><td><code>YOD</code>&nbsp;<i>expr</i></td><td>year of the date (integer)</td></tr>
-    <tr><td>22</td><td><i>expr</i>&nbsp;<code>++</code> or <code>&#x2795;&#x2795;</code><br><i>expr</i>&nbsp;<code>--</code> or <code>&#x2212;&#x2212;</code> or <code>&#x2796;&#x2796;</code></td><td>post increment/decrement</td><td>N/A</td></tr>
-    <tr><td>21</td><td><code>++</code> or <code>&#x2795;&#x2795;</code>&nbsp;<i>expr</i><br><code>--</code> or <code>&#x2212;&#x2212;</code> or <code>&#x2796;&#x2796;</code>&nbsp;<i>expr</i></td><td>pre increment/decrement</td><td>right to left</td></tr>
-    <tr><td>20</td><td><code>+</code> or <code>&#x2795;</code>&nbsp;<i>expr</i><br><code>-</code> or <code>&#x2212;</code> or <code>&#x2796;</code>&nbsp;<i>expr</i></td><td>posate/negate a value</td><td>right to left</td></tr>
-    <tr><td>19</td><td><code>!</code> or <code>&#x00AC;</code>&nbsp;<i>expr</i></td><td>boolean NOT<br>(can also use <code>!!</code> to convert any value to a <i>true</i> boolean:<br><code>true</code> if set, non-empty, and non-zero,<br>or <code>false</code> if null, empty, or 0)</td><td>right to left</td></tr>
-    <tr><td>18</td><td><code>~</code>&nbsp;<i>expr</i></td><td>bitwise NOT</td><td>right to left</td></tr>
-    <tr><td>17</td><td><i>expr</i>&nbsp;<code>!</code></td><td>factorial</td><td>left to right</td></tr>
-    <tr><td>16</td><td><i>expr<sub>1</sub></i>&nbsp;&nbsp;<code>**</code>, <code>&times;&times;</code>, <code>&#x2217;&#x2217;</code>, <code>&#x2715;&#x2715;</code>, or <code>&#x2716;&#x2716;</code>&nbsp;&nbsp;<i>expr<sub>2</sub></i><br>or&nbsp;<i>expr</i>&nbsp;&#x2070; .. &#x2079;</td><td><i>expr<sub>1</sub></i> to <i>expr<sub>2</sub></i> power<br>or <i>expr</i> to given power</td><td>right to left</td></tr>
-    <tr><td>15</td><td>
+    <tr><td>24</td><td><i>expr</i>&nbsp;<code>++</code> or <code>&#x2795;&#x2795;</code><br><i>expr</i>&nbsp;<code>--</code> or <code>&#x2212;&#x2212;</code> or <code>&#x2796;&#x2796;</code></td><td>post increment/decrement</td><td>N/A</td></tr>
+    <tr><td>23</td><td><code>++</code> or <code>&#x2795;&#x2795;</code>&nbsp;<i>expr</i><br><code>--</code> or <code>&#x2212;&#x2212;</code> or <code>&#x2796;&#x2796;</code>&nbsp;<i>expr</i></td><td>pre increment/decrement</td><td>right to left</td></tr>
+    <tr><td>22</td><td><code>+</code> or <code>&#x2795;</code>&nbsp;<i>expr</i><br><code>-</code> or <code>&#x2212;</code> or <code>&#x2796;</code>&nbsp;<i>expr</i></td><td>posate/negate a value</td><td>right to left</td></tr>
+    <tr><td>21</td><td><code>!</code> or <code>&#x00AC;</code>&nbsp;<i>expr</i></td><td>boolean NOT<br>(can also use <code>!!</code> to convert any value to a <i>true</i> boolean:<br><code>true</code> if set, non-empty, and non-zero,<br>or <code>false</code> if null, empty, or 0)</td><td>right to left</td></tr>
+    <tr><td>20</td><td><code>~</code>&nbsp;<i>expr</i></td><td>bitwise NOT</td><td>right to left</td></tr>
+    <tr><td>19</td><td><i>expr</i>&nbsp;<code>!</code></td><td>factorial</td><td>left to right</td></tr>
+    <tr><td>18</td><td><i>expr<sub>1</sub></i>&nbsp;&nbsp;<code>**</code>, <code>&times;&times;</code>, <code>&#x2217;&#x2217;</code>, <code>&#x2715;&#x2715;</code>, or <code>&#x2716;&#x2716;</code>&nbsp;&nbsp;<i>expr<sub>2</sub></i><br>or&nbsp;<i>expr</i>&nbsp;&#x2070; .. &#x2079;</td><td><i>expr<sub>1</sub></i> to <i>expr<sub>2</sub></i> power<br>or <i>expr</i> to given power</td><td>right to left</td></tr>
+    <tr><td>17</td><td>
         <i>expr</i>&nbsp;&nbsp;<code>*</code>, <code>&times;</code>, <code>&#x2217;</code>, <code>&#x2715;</code>, or <code>&#x2716;</code>&nbsp;&nbsp;<i>expr</i><br>
         <i>expr</i>&nbsp;&nbsp;<code>/</code>, <code>&divide;</code>, <code>&#x2215;</code>, or <code>&#x2797;</code>&nbsp;&nbsp;<i>expr</i><br>
         <i>expr</i>&nbsp;&nbsp;<code>\</code>&nbsp;&nbsp;<i>expr</i><br>
         <i>expr</i>&nbsp;<code> % </code>&nbsp;<i>expr</i></td>
         <td>multiply<br>divide<br>integer divide<br>remainder</td><td>left to right</td></tr>
-    <tr><td>14</td><td>
+    <tr><td>16</td><td>
         <i>expr</i>&nbsp;&nbsp;<code>+</code> or <code>&#x2795;</code>&nbsp;&nbsp;<i>expr</i><br>
         <i>expr</i>&nbsp;&nbsp;<code>-</code>,  <code>&#x2212;</code>, or <code>&#x2796;</code>&nbsp;&nbsp;<i>expr</i></td>
         <td>add<br>subtract</td><td>left to right</td></tr>
-    <tr><td>13</td><td>
+    <tr><td>15</td><td>
         <i>expr</i>&nbsp;<code> &gt;&gt;&gt; </code>&nbsp;<i>expr</i><br>
         <i>expr</i>&nbsp;<code> &gt;&gt; </code>&nbsp;<i>expr</i><br>
         <i>expr</i>&nbsp;<code> &lt;&lt; </code>&nbsp;<i>expr</i></td>
         <td>bit shift operations</td><td>left to right</td></tr>
-    <tr><td>12</td><td><i>expr</i>&nbsp;<code> &lt;=&gt; </code>&nbsp;<i>expr</i><td>returns <code>-1</code> if <i>expr</i> &lt; 0<br><code>0</code> if <i>expr</i> = 0<br><code>+1</code> if <i>expr</i> &gt; 0</td><td>left to right</td></tr>
-    <tr><td>11</td><td>
+    <tr><td>14</td><td><i>expr</i>&nbsp;<code> &lt;=&gt; </code>&nbsp;<i>expr</i><td>returns <code>-1</code> if <i>expr</i> &lt; 0<br><code>0</code> if <i>expr</i> = 0<br><code>+1</code> if <i>expr</i> &gt; 0</td><td>left to right</td></tr>
+    <tr><td>13</td><td>
         <i>expr</i>&nbsp;<code> &lt;= </code>or<code> &#x2264; </code>&nbsp;<i>expr</i><br>
         <i>expr</i>&nbsp;<code> &lt; </code>&nbsp;<i>expr</i><br>
         <i>expr</i>&nbsp;<code> &gt;= </code>or<code> &#x2265; </code>&nbsp;<i>expr</i><br>
         <i>expr</i>&nbsp;<code> &gt; </code>&nbsp;<i>expr</i></td>
         <td>comparison</td><td>left to right</td></tr>
-    <tr><td>10</td><td>
+    <tr><td>12</td><td>
         <i>expr</i>&nbsp;<code> === </code>or<code> &#x2A76; </code>or<code> &#x2261; </code>&nbsp;<i>expr</i><br>
         <i>expr</i>&nbsp;<code> !== </code>or<code> &#x2262; </code>&nbsp;<i>expr</i><br>
         <i>expr</i>&nbsp;<code> == </code>or<code> &#x2A75; </code>&nbsp;<i>expr</i><br>
         <i>expr</i>&nbsp;<code> != </code>or<code> &#x2260; </code>&nbsp;<i>expr</i></td>
         <td>strict equality<br>strict inequality<br>equality<br>inequality</td><td>left to right</td></tr>
-    <tr><td>9</td><td>
+    <tr><td>11</td><td>
         <i>expr</i>&nbsp;<code> &amp; </code>&nbsp;<i>expr</i><br>
         <i>expr</i>&nbsp;<code> ~&amp; </code>or<code> &#x22BC; </code>&nbsp;<i>expr</i><br>
         <i>expr</i>&nbsp;<code> &amp;~ </code>&nbsp;<i>expr</i><br>
@@ -677,11 +677,12 @@ or
         <i>expr</i>&nbsp;<code> | </code>&nbsp;<i>expr</i><br>
         <i>expr</i>&nbsp;<code> ~| </code>or<code> &#x22BD; </code>&nbsp;<i>expr</i></td>
         <td>bitwise AND<br>NOT AND (or NAND)<br>AND NOT<br>exclusive OR<br>NOT exclusive OR<br>bitwise OR<br>NOT OR (or NOR)</td><td>left to right</td></tr>
+    <tr><td>10</td><td>
+        <i>expr</i>&nbsp;<code> &amp;&amp; </code>or<code> &#x2227; </code>&nbsp;<i>expr</i></td><td>logical AND</td><td>left to right</td></tr>
+    <tr><td>9</td><td>
+        <i>expr</i>&nbsp;<code> || </code>or<code> &#x2228; </code>&nbsp;<i>expr</i></td><td>logical OR</td><td>left to right</td></tr>
     <tr><td>8</td><td>
-        <i>expr</i>&nbsp;<code> &amp;&amp; </code>or<code> &#x2227; </code>&nbsp;<i>expr</i><br>
-        <i>expr</i>&nbsp;<code> || </code>or<code> &#x2228; </code>&nbsp;<i>expr</i><br>
-        <i>expr</i>&nbsp;<code> ^^ </code>or<code> &#x22BB; </code>&nbsp;<i>expr</i></td>
-        <td>logical AND<br>logical OR<br>logical exclusive OR</td><td>left to right</td></tr>
+        <i>expr</i>&nbsp;<code> ^^ </code>or<code> &#x22BB; </code>&nbsp;<i>expr</i></td><td>logical exclusive OR</td><td>left to right</td></tr>
     <tr><td>7</td><td><i>expr</i>&nbsp;<code> ? </code>&nbsp;<i>expr</i>&nbsp;<code> : </code>&nbsp;<i>expr</i></td><td>select one or the other value</td><td>right to left</td></tr>
     <tr><td>6</td><td><i>var</i>&nbsp;<code> = </code>&nbsp;<i>expr</i></td><td>assign <i>expr</i> value to variable</td><td>right to left</td></tr>
     <tr><td>5</td><td><i>var</i>&nbsp;<code> **=</code>,<code> &times;&times;=</code>,<code> &#x2217;&#x2217;=</code>,<code> &#x2715;&#x2715;=</code>, or<code> &#x2716;&#x2716;= </code>&nbsp;<i>expr</i></td><td><i>var</i> to <i>expr</i> power, assign to <i>var</i></td><td>right to left</td></tr>

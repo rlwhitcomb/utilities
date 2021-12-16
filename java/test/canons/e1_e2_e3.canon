@@ -186,6 +186,10 @@
 >false ^^ true -> true
 >true ^^ false -> true
 >true ^^ true -> false
+>A = 1 -> 1
+>B = 2 -> 2
+>A == 1 || A == 2 && B == 1 -> true
+>A == 1 && A == 2 || B == 1 -> false
 >0xFFFF ^ 0xAAAA @X -> 0X5555
 >012 -> 10
 >10 @o -> 012

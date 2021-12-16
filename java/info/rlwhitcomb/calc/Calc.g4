@@ -303,6 +303,8 @@
  *	    #106: Add "leave" statement.
  *	14-Dec-2021 (rlwhitcomb)
  *	    #142: Cosmetic cleanup.
+ *	15-Dec-2021 (rlwhitcomb)
+ *	    #151: Fix precedence of boolean operators.
  */
 
 grammar Calc;
@@ -456,7 +458,9 @@ expr
    | expr COMPARE_OP expr                # compareExpr
    | expr EQUAL_OP expr                  # equalExpr
    | expr BIT_OP expr                    # bitExpr
-   | expr BOOL_OP expr                   # booleanExpr
+   | expr BOOL_AND_OP expr               # booleanAndExpr
+   | expr BOOL_OR_OP expr                # booleanOrExpr
+   | expr BOOL_XOR_OP expr               # booleanXorExpr
    |<assoc=right> expr '?' expr ':' expr # eitherOrExpr
    |<assoc=right> var ASSIGN expr        # assignExpr
    |<assoc=right> var POW_ASSIGN expr    # powerAssignExpr
@@ -957,10 +961,16 @@ BIT_ASSIGN
        | '~|='
        ;
 
-BOOL_OP
+BOOL_AND_OP
        : ( '&&' | '\u2227' )
-       | ( '||' | '\u2228' )
-       | ( '^^' | '\u22BB' )
+       ;
+
+BOOL_OR_OP
+       : ( '||' | '\u2228' )
+       ;
+
+BOOL_XOR_OP
+       : ( '^^' | '\u22BB' )
        ;
 
 BIT_OP
