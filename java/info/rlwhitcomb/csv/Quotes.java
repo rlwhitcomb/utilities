@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2016-2017,2020 Roger L. Whitcomb.
+ * Copyright (c) 2016-2017,2020-2021 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -35,6 +35,9 @@
  *	    class for simplicity.
  *	10-Mar-2020 (rlwhitcomb)
  *	    Prepare for GitHub.
+ *	17-Dec-2021 (rlwhitcomb)
+ *	    #155: Fix NO_QUOTE_CHAR to be '\0' to be consistent with usage in CSVFormat.
+ *	    Simplify constructors.
  */
 package info.rlwhitcomb.csv;
 
@@ -49,9 +52,9 @@ import java.util.Set;
  */
 public enum Quotes
 {
-	NONE		('\0', '\0', false),
-	SINGLE		('\'', '\''),
-	DOUBLE		('"', '"'),
+	NONE		(Constants.NO_QUOTE_CHAR, false),
+	SINGLE		('\''),
+	DOUBLE		('"'),
 	PAREN		('(', ')'),
 	ANGLE		('<', '>'),
 	BRACKET		('[', ']'),
@@ -60,11 +63,11 @@ public enum Quotes
 	DOUBLEARROW	('\u00AB', '\u00BB'),
 	SMARTSINGLE	('\u2018', '\u2019'),
 	SMARTDOUBLE	('\u201C', '\u201D'),
-	ALL		(Constants.ALL_QUOTE_CHAR, Constants.ALL_QUOTE_CHAR, false);
+	ALL		(Constants.ALL_QUOTE_CHAR, false);
 
 	public static class Constants
 	{
-		public static final char NO_QUOTE_CHAR  = ' ';
+		public static final char NO_QUOTE_CHAR  = '\0';
 		public static final char ALL_QUOTE_CHAR = '\u00A0';
 	}
 
@@ -75,19 +78,19 @@ public enum Quotes
 		private static final Set<Character> rightSet = new HashSet<>();
 	}
 
-	private char left;
-	private char right;
+	private char leftChar;
+	private char rightChar;
 	private boolean allowDoubled;
 
 	/** @return The left quote character for this quote type. */
 	public char leftChar() {
-	    return this.left;
+	    return this.leftChar;
 	}
 
 	/** @return The right quote character for this quote type (could be
 	 * the same as the left, but not always). */
 	public char rightChar() {
-	    return this.right;
+	    return this.rightChar;
 	}
 
 	/** @return Are the left and right delimiters the same so that
@@ -96,27 +99,35 @@ public enum Quotes
 	    return this.allowDoubled;
 	}
 
-	private Quotes(char left, char right) {
+	private Quotes(final char quote) {
+	    this(quote, quote, true);
+	}
+
+	private Quotes(final char quote, final boolean set) {
+	    this(quote, quote, set);
+	}
+
+	private Quotes(final char left, final char right) {
 	    this(left, right, true);
 	}
 
-	private Quotes(char left, char right, boolean set) {
-	    this.left = left;
-	    this.right = right;
+	private Quotes(final char left, final char right, final boolean set) {
+	    this.leftChar = left;
+	    this.rightChar = right;
 	    this.allowDoubled = (left == right);
 
 	    Lookup.map.put(this.toString().toUpperCase(), this);
 	    if (set) {
-		Lookup.leftSet.add(this.left);
-		Lookup.rightSet.add(this.right);
+		Lookup.leftSet.add(this.leftChar);
+		Lookup.rightSet.add(this.rightChar);
 	    }
 	}
 
-	public static boolean isValidStart(char ch) {
+	public static boolean isValidStart(final char ch) {
 	    return Lookup.leftSet.contains(ch);
 	}
 
-	public static boolean isValidEnd(char ch) {
+	public static boolean isValidEnd(final char ch) {
 	    return Lookup.rightSet.contains(ch);
 	}
 
@@ -132,9 +143,9 @@ public enum Quotes
 	 * @return	If we found a match, then one of ourselves.  If not
 	 *		return {@code null}.
 	 */
-	public static Quotes fromChar(char left, char right) {
+	public static Quotes fromChar(final char left, final char right) {
 	    for (Quotes quote : values()) {
-		if (quote.left == left && (right == '\0' || quote.right == right)) {
+		if (quote.leftChar == left && (right == '\0' || quote.rightChar == right)) {
 		    return quote;
 		}
 	    }
@@ -149,7 +160,7 @@ public enum Quotes
 	 * @param value	The supposed name of one of our values.
 	 * @return	The appropriate enum value if found, or {@code null} if not.
 	 */
-	public static Quotes fromString(String value) {
+	public static Quotes fromString(final String value) {
 	    return Lookup.map.get(value.toUpperCase());
 	}
 
