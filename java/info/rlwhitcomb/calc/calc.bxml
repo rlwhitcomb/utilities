@@ -78,6 +78,8 @@
 		Reduce space between toolbar buttons. Tweak button text colors.
 	    01-Dec-2021 (rlwhitcomb)
 		#109: Add "Quote Strings" option to settings.
+	    18-Dec-2021 (rlwhitcomb)
+		#159: New "Silence Directives" option.
 
      ========================================================================== -->
 
@@ -197,12 +199,12 @@
 		    <GridPane columnCount="3" styles="{horizontalSpacing:10}" preferredWidth="560">
 			<GridPane.Row>
 			    <Checkbox bxml:id="quietCheck" buttonData="%quiet"/>
+			    <Checkbox bxml:id="silenceCheck" buttonData="%silence"/>
 			    <Checkbox bxml:id="resultsCheck" buttonData="%resultsOnly"/>
-			    <Checkbox bxml:id="separatorCheck" buttonData="%separators"/>
 			</GridPane.Row>
 			<GridPane.Row>
+			    <Checkbox bxml:id="separatorCheck" buttonData="%separators"/>
 			    <Checkbox bxml:id="quoteStringsCheck" buttonData="%quoteStrings"/>
-			    <Label text="" enabled="false"/>
 			    <Label text="" enabled="false"/>
 			</GridPane.Row>
 		    </GridPane>

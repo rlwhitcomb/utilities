@@ -221,6 +221,8 @@
  *	    #116: Break out parse and execution times.
  *	05-Dec-2021 (rlwhitcomb)
  *	    #106: Catch LeaveException at the highest level to gracefully exit the whole script.
+ *	18-Dec-2021 (rlwhitcomb)
+ *	    #159: New command line option to silence directives.
  */
 package info.rlwhitcomb.calc;
 
@@ -334,18 +336,19 @@ public class Calc
 	}
 
 
-	private static boolean noIntro     = false;
-	private static boolean guiMode     = false;
-	private static boolean replMode    = false;
-	private static boolean debug       = false;
-	private static boolean colors      = true;
-	private static boolean timing      = false;
-	private static boolean resultsOnly = false;
-	private static boolean quiet       = false;
-	private static boolean rational    = false;
-	private static boolean separators  = false;
-	private static boolean ignoreCase  = false;
-	private static boolean quotes      = true;
+	private static boolean noIntro           = false;
+	private static boolean guiMode           = false;
+	private static boolean replMode          = false;
+	private static boolean debug             = false;
+	private static boolean colors            = true;
+	private static boolean timing            = false;
+	private static boolean resultsOnly       = false;
+	private static boolean quiet             = false;
+	private static boolean rational          = false;
+	private static boolean separators        = false;
+	private static boolean ignoreCase        = false;
+	private static boolean quotes            = true;
+	private static boolean silenceDirectives = false;
 
 	private static boolean useCmdEnter = true;
 
@@ -391,6 +394,7 @@ public class Calc
 	@BXML private Checkbox timingCheck;
 	@BXML private Checkbox debugCheck;
 	@BXML private Checkbox quietCheck;
+	@BXML private Checkbox silenceCheck;
 	@BXML private Checkbox resultsCheck;
 	@BXML private Checkbox separatorCheck;
 	@BXML private Checkbox quoteStringsCheck;
@@ -585,6 +589,7 @@ public class Calc
 	    debugCheck.setSelected(debug);
 
 	    quietCheck.setSelected(quiet);
+	    silenceCheck.setSelected(silenceDirectives);
 	    resultsCheck.setSelected(resultsOnly);
 	    separatorCheck.setSelected(settings.separatorMode);
 	    quoteStringsCheck.setSelected(settings.quoteStrings);
@@ -640,6 +645,10 @@ public class Calc
 		boolean newQuiet = quietCheck.isSelected();
 		if (newQuiet != quiet)
 		    setQuietMode(newQuiet);
+
+		boolean newSilence = silenceCheck.isSelected();
+		if (newSilence != silenceDirectives)
+		    setSilenceMode(newSilence);
 
 		boolean newResults = resultsCheck.isSelected();
 		if (newResults != resultsOnly)
@@ -760,7 +769,7 @@ public class Calc
 		});
 
 		displayer = this;
-		visitor = new CalcObjectVisitor(displayer, rational, separators, ignoreCase, quotes);
+		visitor = new CalcObjectVisitor(displayer, rational, separators, silenceDirectives, ignoreCase, quotes);
 
 		// Set the command-line arguments into the symbol table as $nn
 		int index = 0;
@@ -867,6 +876,13 @@ public class Calc
 	    boolean oldMode = quiet;
 	    quiet = mode;
 	    visitor.setSilent(quiet);
+	    return oldMode;
+	}
+
+	public static boolean setSilenceMode(boolean mode) {
+	    boolean oldMode = silenceDirectives;
+	    silenceDirectives = mode;
+	    visitor.setSilenceDirectives(silenceDirectives);
 	    return oldMode;
 	}
 
@@ -1535,6 +1551,19 @@ public class Calc
 		case "noq":
 		    quotes = false;
 		    break;
+		case "silencedirectives":
+		case "silentdirectives":
+		case "silencedir":
+		case "silentdir":
+		case "silence":
+		case "silent":
+		    silenceDirectives = true;
+		    break;
+		case "displaydirectives":
+		case "displaydir":
+		case "display":
+		    silenceDirectives = false;
+		    break;
 		case "locale":
 		case "loc":
 		case "l":
@@ -1749,7 +1778,7 @@ public class Calc
 		}
 		else {
 		    displayer = new ConsoleDisplayer();
-		    visitor = new CalcObjectVisitor(displayer, rational, separators, ignoreCase, quotes);
+		    visitor = new CalcObjectVisitor(displayer, rational, separators, silenceDirectives, ignoreCase, quotes);
 
 		    // Set the command-line arguments into the symbol table as $nn
 		    int index = 0;

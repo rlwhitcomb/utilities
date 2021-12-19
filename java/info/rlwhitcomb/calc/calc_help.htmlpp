@@ -208,6 +208,8 @@ h2 {
     <tr><td><code>-notiming</code></td><td>Do not display timings <i>(default)</i></td><td><code>-notime</code>, <code>-not</code></td><td><code>:timing off</code></td></tr>
     <tr><td><code>-resultsonly</code></td><td>Do not display the input expression on output,<br>but only the results</td><td><code>-resultonly</code>, <code>-results</code>, <code>-result</code>,<br><code>-res</code>, <code>-r</code></td><td><code>:resultsonly on</code>/<code>off</code></td></tr>
     <tr><td><code>-quiet</code></td><td>Do not display anything<br>(suitable for behind-the-scenes calculations)</td><td><code>-q</code></td><td><code>:quiet on</code>/<code>off</code></td></tr>
+    <tr><td><code>-silence</code></td><td>Do not display directives</td><td><code>-silencedirectives</code>,<br><code>-silentdirectives</code>,<br><code>-silencedir</code>, <code>-silentdir</code>,<br><code>-silent</code></td><td><code>:silence on</code></td></tr>
+    <tr><td><code>-display</code></td><td>Display results of directives</td><td><code>-displaydirectives</code>,<br><code>-displaydir</code></td><td><code>:silence off</code></td></tr>
     <tr><td><code>-rational</code></td><td>Do all possible calculations in fraction mode,<br>that is as a ratio of natural numbers<br>(as in <code>1/3</code> instead of <code>0.3333333333333333</code>)</td><td><code>-ration</code>, <code>-rat</code></td><td><code>:rational on</code></td></tr>
     <tr><td><code>-decimal</code></td><td>Do all calculations as decimal values <i>(default)</i></td><td><code>-dec</code></td><td><code>:rational off</code></td></tr>
     <tr><td><code>-separators</code></td><td>Display all numeric values with thousands separators</td><td><code>-separator</code>, <code>-seps</code>, <code>-sep</code>, <code>-s</code></td><td><code>:separators on</code></td></tr>
@@ -988,6 +990,7 @@ or
     <tr><td><code>:debug</code> <i>mode_option</i></td><td>Set the debug mode (same <i>mode_option</i> choices as for <code>:rational</code>)<br><i>(default is <code>off</code> or the value set on the command line)</i></td><td><code>:deb</code>, <code>:dbg</code></td></tr>
     <tr><td><code>:resultsonly</code> <i>mode_option</i></td><td>Set the results-only mode<br><i>(default is <code>off</code> or value on command line)</i></td><td><code>:resultonly</code>, <code>:results</code>, <code>:result</code>, <code>:res</code></td></tr>
     <tr><td><code>:quiet</code> <i>mode_option</i></td><td>Set quiet mode<br><i>(default is <code>off</code> or the value on command line)</i></td><td></td></tr>
+    <tr><td><code>:silence</code> <i>mode_option</i></td><td>Set "silence directives" mode<br><i>(default is <code>off</code> or the value on the command line)</i></td><td><code>:silencedirectives</code>,<br><code>:silentdirectives</code>,<br><code>:silencedir</code>, <code>:silentdir</code>,<br><code>:silent</code></td></tr>
   </tbody>
   </table>
   </div>

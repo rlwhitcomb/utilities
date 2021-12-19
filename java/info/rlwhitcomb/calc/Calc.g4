@@ -305,6 +305,8 @@
  *	    #142: Cosmetic cleanup.
  *	15-Dec-2021 (rlwhitcomb)
  *	    #151: Fix precedence of boolean operators.
+ *	18-Dec-2021 (rlwhitcomb)
+ *	    #159: Add directive to silence display of directives.
  */
 
 grammar Calc;
@@ -615,6 +617,7 @@ directive
    | D_DEBUG modeOption                       # debugDirective
    | D_RESULTSONLY modeOption                 # resultsOnlyDirective
    | D_QUIET modeOption                       # quietDirective
+   | D_SILENCE modeOption                     # silenceDirective
    | D_VARIABLES idList ?                     # variablesDirective
    | D_SEPARATORS modeOption                  # separatorsDirective
    | D_IGNORECASE modeOption                  # ignoreCaseDirective
@@ -1074,6 +1077,10 @@ D_RESULTSONLY
 
 D_QUIET
    : DIR  Q U I E T
+   ;
+
+D_SILENCE
+   : DIR ( S I L E N C E D I R E C T I V E S | S I L E N T D I R E C T I V E S | S I L E N C E D I R | S I L E N T D I R | S I L E N C E | S I L E N T )
    ;
 
 D_VARIABLES

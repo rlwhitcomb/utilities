@@ -39,6 +39,8 @@
  *	    #72: Tweak tooltip for Save button.
  *	01-Dec-2021 (rlwhitcomb)
  *	    #109: Add "quote strings" to the Settings dialog.
+ *	18-Dec-2021 (rlwhitcomb)
+ *	    #159: Add "Silence Directives" to Settings.
  */
 {
     title:              'Calc',
@@ -69,6 +71,7 @@
     displayHeader:      'Display Modes',
     debugMode:          'Debug mode?',
     quiet:              'Quiet?',
+    silence:            'Silence directives?',
     resultsOnly:        'Results only?',
     separators:         'Thousands separators?',
     quoteStrings:       'Quote string results?',

@@ -422,6 +422,8 @@
  *	    #106: Add "leave" statement to exit loops and functions.
  *	15-Dec-2021 (rlwhitcomb)
  *	    #151: Fix precedence of the logical operators.
+ *	18-Dec-2021 (rlwhitcomb)
+ *	    #159: Silence directives on command.
  */
 package info.rlwhitcomb.calc;
 
@@ -564,6 +566,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		boolean separatorMode;
 		/** Silent flag (set to true) while evaluating nested expressions (or via :quiet directive). */
 		boolean silent;
+		/** Silence directives flag. */
+		boolean silenceDirectives;
 		/** Ignore case when selecting members / variables. */
 		boolean ignoreNameCase;
 		/** Quote strings on output. */
@@ -574,17 +578,19 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		 *
 		 * @param rational   The initial rational mode setting.
 		 * @param separators The initial setting for displaying separators.
+		 * @param silence    Whether to silence directives.
 		 * @param ignoreCase Whether to ignore case on variable / member names.
 		 * @param quotes     Whether to quote string values on output.
 		 */
-		public Settings(boolean rational, boolean separators, boolean ignoreCase, boolean quotes) {
-		    trigMode       = TrigMode.RADIANS;
-		    units          = RangeMode.MIXED;
-		    rationalMode   = rational;
-		    separatorMode  = separators;
-		    silent         = false;
-		    ignoreNameCase = ignoreCase;
-		    quoteStrings   = quotes;
+		public Settings(boolean rational, boolean separators, boolean silence, boolean ignoreCase, boolean quotes) {
+		    trigMode          = TrigMode.RADIANS;
+		    units             = RangeMode.MIXED;
+		    rationalMode      = rational;
+		    separatorMode     = separators;
+		    silent            = false;
+		    silenceDirectives = silence;
+		    ignoreNameCase    = ignoreCase;
+		    quoteStrings      = quotes;
 		}
 
 		/**
@@ -593,13 +599,14 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		 * @param otherSettings The object to copy.
 		 */
 		public Settings(Settings otherSettings) {
-		    this.trigMode       = otherSettings.trigMode;
-		    this.units          = otherSettings.units;
-		    this.rationalMode   = otherSettings.rationalMode;
-		    this.separatorMode  = otherSettings.separatorMode;
-		    this.silent         = otherSettings.silent;
-		    this.ignoreNameCase = otherSettings.ignoreNameCase;
-		    this.quoteStrings   = otherSettings.quoteStrings;
+		    this.trigMode          = otherSettings.trigMode;
+		    this.units             = otherSettings.units;
+		    this.rationalMode      = otherSettings.rationalMode;
+		    this.separatorMode     = otherSettings.separatorMode;
+		    this.silent            = otherSettings.silent;
+		    this.silenceDirectives = otherSettings.silenceDirectives;
+		    this.ignoreNameCase    = otherSettings.ignoreNameCase;
+		    this.quoteStrings      = otherSettings.quoteStrings;
 		}
 	}
 
@@ -650,6 +657,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	/** Stack of previous "quiet" mode values. */
 	private final Deque<Boolean> quietModeStack = new ArrayDeque<>();
+
+	/** Stack of previous "silence" mode values. */
+	private final Deque<Boolean> silenceModeStack = new ArrayDeque<>();
 
 	/**
 	 * Aliases for "pi" - need prefixes of '\\' and 'u'  before calling {@link CharUtil#convertEscapeSequences}.
@@ -803,11 +813,18 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    globalScope.setValue(ARG_COUNT, false, BigInteger.ZERO);
 	}
 
-	public CalcObjectVisitor(final CalcDisplayer resultDisplayer, final boolean rational, final boolean separators, final boolean ignoreCase, final boolean quotes) {
+	public CalcObjectVisitor(
+		final CalcDisplayer resultDisplayer,
+		final boolean rational,
+		final boolean separators,
+		final boolean silence,
+		final boolean ignoreCase,
+		final boolean quotes)
+	{
 	    setMathContext(MathContext.DECIMAL128);
 
 	    displayer = resultDisplayer;
-	    settings  = new Settings(rational, separators, ignoreCase, quotes);
+	    settings  = new Settings(rational, separators, silence, ignoreCase, quotes);
 	    globals   = new GlobalScope();
 
 	    pushScope(globals);
@@ -820,6 +837,19 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    boolean oldSilent = settings.silent;
 	    settings.silent = newSilent;
 	    return oldSilent;
+	}
+
+	public boolean setSilenceDirectives(final boolean newSilence) {
+	    boolean oldSilence = settings.silenceDirectives;
+	    settings.silenceDirectives = newSilence;
+	    return oldSilence;
+	}
+
+	private void displayDirectiveMessage(final String formatOrKey, final Object... args) {
+	    if (initialized && !settings.silent && !settings.silenceDirectives) {
+		String message = Intl.formatKeyString(formatOrKey, args);
+		displayer.displayActionMessage(message);
+	    }
 	}
 
 	private void displayActionMessage(final String formatOrKey, final Object... args) {
@@ -875,9 +905,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 
 	    if (prec == 0)
-		displayActionMessage("%calc#precUnlimited");
+		displayDirectiveMessage("%calc#precUnlimited");
 	    else
-		displayActionMessage("%calc#precDigits", prec);
+		displayDirectiveMessage("%calc#precDigits", prec);
 
 	    return BigInteger.valueOf(prec);
 	}
@@ -889,7 +919,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public String setTrigMode(final TrigMode newTrigMode) {
 	    settings.trigMode = newTrigMode;
 
-	    displayActionMessage("%calc#trigMode", settings.trigMode);
+	    displayDirectiveMessage("%calc#trigMode", settings.trigMode);
 
 	    return settings.trigMode.toString();
 	}
@@ -899,13 +929,13 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    switch (mode) {
 		case BINARY:
-		    displayActionMessage("%calc#unitsBinary");
+		    displayDirectiveMessage("%calc#unitsBinary");
 		    break;
 		case DECIMAL:
-		    displayActionMessage("%calc#unitsTen");
+		    displayDirectiveMessage("%calc#unitsTen");
 		    break;
 		case MIXED:
-		    displayActionMessage("%calc#unitsMixed");
+		    displayDirectiveMessage("%calc#unitsMixed");
 		    break;
 	    }
 
@@ -916,7 +946,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    boolean oldMode = settings.separatorMode;
 	    settings.separatorMode = mode;
 
-	    displayActionMessage("%calc#separatorMode", mode);
+	    displayDirectiveMessage("%calc#separatorMode", mode);
 
 	    return oldMode;
 	}
@@ -926,7 +956,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    settings.ignoreNameCase = mode;
 	    currentContext.setIgnoreCase(mode);
 
-	    displayActionMessage("%calc#ignoreCaseMode", mode);
+	    displayDirectiveMessage("%calc#ignoreCaseMode", mode);
 
 	    return oldMode;
 	}
@@ -935,7 +965,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    boolean oldMode = settings.quoteStrings;
 	    settings.quoteStrings = mode;
 
-	    displayActionMessage("%calc#quoteStringsMode", mode);
+	    displayDirectiveMessage("%calc#quoteStringsMode", mode);
 
 	    return oldMode;
 	}
@@ -944,7 +974,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    boolean oldMode = settings.rationalMode;
 	    settings.rationalMode = mode;
 
-	    displayActionMessage("%calc#rationalMode",
+	    displayDirectiveMessage("%calc#rationalMode",
 			Intl.getString(mode ? "calc#rational" : "calc#decimal"));
 
 	    return oldMode;
@@ -953,7 +983,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public boolean setTimingMode(final boolean mode) {
 	    boolean oldMode = Calc.setTimingMode(mode);
 
-	    displayActionMessage("%calc#timingMode", mode);
+	    displayDirectiveMessage("%calc#timingMode", mode);
 
 	    return oldMode;
 	}
@@ -961,7 +991,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public boolean setDebugMode(final boolean mode) {
 	    boolean oldMode = Calc.setDebugMode(mode);
 
-	    displayActionMessage("%calc#debugMode", mode);
+	    displayDirectiveMessage("%calc#debugMode", mode);
 
 	    return oldMode;
 	}
@@ -1241,7 +1271,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    iter.remove();
 		    numberCleared++;
 		}
-		displayActionMessage("%calc#varsAllCleared");
+		displayDirectiveMessage("%calc#varsAllCleared");
 	    }
 	    else {
 		StringBuilder vars = new StringBuilder();
@@ -1271,7 +1301,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    vars.insert(lastNamePos, Intl.getString("calc#varAnd"));
 		    vars.insert(0, Intl.getString("calc#varVariables"));
 		}
-		displayActionMessage("%calc#varCleared", vars);
+		displayDirectiveMessage("%calc#varCleared", vars);
 	    }
 
 	    return BigInteger.valueOf(numberCleared);
@@ -1472,6 +1502,13 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public Object visitQuietDirective(CalcParser.QuietDirectiveContext ctx) {
 	    return processModeOption(ctx.modeOption(), quietModeStack, mode -> {
 		return Calc.setQuietMode(mode);
+	    });
+	}
+
+	@Override
+	public Object visitSilenceDirective(CalcParser.SilenceDirectiveContext ctx) {
+	    return processModeOption(ctx.modeOption(), silenceModeStack, mode -> {
+		return Calc.setSilenceMode(mode);
 	    });
 	}
 
