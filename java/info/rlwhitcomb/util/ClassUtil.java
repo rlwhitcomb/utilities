@@ -79,6 +79,8 @@
  *	    Make the class final and the constructor private.
  *	17-Nov-2021 (rlwhitcomb)
  *	    Add "defaultToString". Make all parameters final.
+ *	18-Dec-2021 (rlwhitcomb)
+ *	    #148: Method to construct map from Scriptable fields. Cleanup.
  */
 
 package info.rlwhitcomb.util;
@@ -216,9 +218,9 @@ public final class ClassUtil
 			    }
 			    else if (fieldClass == boolean.class) {
 				if (value instanceof Boolean)
-				    field.setBoolean(obj, ((Boolean)value).booleanValue());
+				    field.setBoolean(obj, ((Boolean) value).booleanValue());
 				else if (value instanceof Number)
-				    field.setBoolean(obj, ((Number)value).intValue() != 0);
+				    field.setBoolean(obj, ((Number) value).intValue() != 0);
 				else if (value instanceof String)
 				    field.setBoolean(obj, Boolean.valueOf((String)value));
 				else
@@ -226,42 +228,42 @@ public final class ClassUtil
 			    }
 			    else if (fieldClass == int.class) {
 				if (value instanceof Number)
-				    field.setInt(obj, ((Number)value).intValue());
+				    field.setInt(obj, ((Number) value).intValue());
 				else if (value instanceof String)
 				    try {
-					field.setInt(obj, Integer.valueOf((String)value));
+					field.setInt(obj, Integer.valueOf((String) value));
 				    }
 				    catch (NumberFormatException nfe) {
-					field.setInt(obj, Integer.valueOf((String)value, 16));
+					field.setInt(obj, Integer.valueOf((String) value, 16));
 				    }
 				else
 				    field.set(obj, value);
 			    }
 			    else if (fieldClass == long.class) {
 				if (value instanceof Number)
-				    field.setLong(obj, ((Number)value).longValue());
+				    field.setLong(obj, ((Number) value).longValue());
 				else if (value instanceof String)
 				    try {
-					field.setLong(obj, Long.valueOf((String)value));
+					field.setLong(obj, Long.valueOf((String) value));
 				    }
 				    catch (NumberFormatException nfe) {
-					field.setLong(obj, Long.valueOf((String)value, 16));
+					field.setLong(obj, Long.valueOf((String) value, 16));
 				    }
 				else
 				    field.set(obj, value);
 			    }
 			    else if (fieldClass == double.class) {
 				if (value instanceof Number)
-				    field.setDouble(obj, ((Number)value).doubleValue());
+				    field.setDouble(obj, ((Number) value).doubleValue());
 				else if (value instanceof String)
-				    field.setDouble(obj, Double.valueOf((String)value));
+				    field.setDouble(obj, Double.valueOf((String) value));
 				else
 				    field.set(obj, value);
 			    }
 			    else if (fieldClass.isEnum()) {
 				if (value instanceof String) {
 				    Method valueMethod = fieldClass.getDeclaredMethod("valueOf", String.class);
-				    field.set(obj, valueMethod.invoke(null, ((String)value).toUpperCase()));
+				    field.set(obj, valueMethod.invoke(null, ((String) value).toUpperCase()));
 				}
 				else
 				    field.set(obj, value);
@@ -298,7 +300,7 @@ public final class ClassUtil
 					int len = Array.getLength(value);
 					for (int j = 0; j < len; j++) {
 					    Object enumValue =
-						valueMethod.invoke(null, ((String)(Array.get(value, j))).toUpperCase());
+						valueMethod.invoke(null, ((String) (Array.get(value, j))).toUpperCase());
 					    newList.add(enumValue);
 					}
 				    }
@@ -306,7 +308,7 @@ public final class ClassUtil
 				}
 				else if (valueClass == String.class) {
 				    // string value should be [a, b, c]
-				    String[] setValues = CharUtil.getArrayFromSetString((String)value);
+				    String[] setValues = CharUtil.getArrayFromSetString((String) value);
 				    for (String oneValue : setValues) {
 					Object enumValue = valueMethod.invoke(null, oneValue.toUpperCase());
 					newList.add(enumValue);
@@ -318,7 +320,7 @@ public final class ClassUtil
 				EnumSet<? extends Enum<?>> currentSet = null;
 				Method[] fieldMethods = fieldClass.getMethods();
 				Method method = findMethod(fieldMethods, "noneOf");
-				currentSet = (EnumSet<? extends Enum<?>>)method.invoke(null, enumClass);
+				currentSet = (EnumSet<? extends Enum<?>>) method.invoke(null, enumClass);
 				method = findMethod(fieldMethods, "addAll");
 				method.invoke(currentSet, newList);
 				field.set(obj, currentSet);
@@ -345,6 +347,56 @@ public final class ClassUtil
 	    }
 	    catch (NoSuchMethodException | InstantiationException | IllegalAccessException ex) { }
 	    return obj;
+	}
+
+
+	/**
+	 * Traverse the given object finding the {@link Scriptable} elements, creating a map
+	 * of the name/value pairs.
+	 *
+	 * @param	obj	The input object to be mapped.
+	 * @return	A map of the scriptable fields and their values.
+	 */
+	public static Map<String, Object> getMapFromObject(final Object obj) {
+	    Map<String, Object> map = new LinkedHashMap<>();
+	    Field[] fields = obj.getClass().getDeclaredFields();
+
+	    for (Field f : fields) {
+		Scriptable annotation = f.getAnnotation(Scriptable.class);
+		if (annotation != null) {
+		    String key = f.getName();
+		    Class<?> cls = f.getType();
+		    try {
+			f.setAccessible(true);
+			if (cls == Long.class || cls == Long.TYPE) {
+			    map.put(key, f.getLong(obj));
+			}
+			else if (cls == Integer.class || cls == Integer.TYPE) {
+			    map.put(key, f.getInt(obj));
+			}
+			else if (cls == Short.class || cls == Short.TYPE) {
+			    map.put(key, f.getShort(obj));
+			}
+			else if (cls == Character.class || cls == Character.TYPE) {
+			    map.put(key, f.getChar(obj));
+			}
+			else if (cls == Byte.class || cls == Byte.TYPE) {
+			    map.put(key, f.getByte(obj));
+			}
+			else if (cls == Boolean.class || cls == Boolean.TYPE) {
+			    map.put(key, f.getBoolean(obj));
+			}
+			else {
+			    map.put(key, f.get(obj));
+			}
+		    }
+		    catch (IllegalAccessException ex) {
+			map.put(key, null);
+		    }
+		}
+	    }
+
+	    return map;
 	}
 
 
@@ -470,7 +522,7 @@ public final class ClassUtil
 	 * or non empty if the value is a {@code String}.
 	 */
 	public static void checkOptionSet(final Object value, final String field) {
-	    if (value != null || (value instanceof String && !((String)value).isEmpty())) {
+	    if (value != null || (value instanceof String && !((String) value).isEmpty())) {
 		throw new Intl.IllegalStateException("util#class.optionFieldSet", field);
 	    }
 	}

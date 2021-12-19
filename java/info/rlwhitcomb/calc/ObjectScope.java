@@ -34,6 +34,8 @@
  *	    scopes when nested. Fix "keyObjectSet".
  *	19-Oct-2021 (rlwhitcomb)
  *	    Return last value from "remove" instead of boolean.
+ *	18-Dec=2021 (rlwhitcomb)
+ *	    #148: Add constructor from regular Map.
  */
 package info.rlwhitcomb.calc;
 
@@ -56,7 +58,7 @@ class ObjectScope extends Scope
 	 * The symbol table for this object (global or local), kept in order of declaration
 	 * for such things as ":save" where order is important.
 	 */
-	private final Map<String, Object> variables = new LinkedHashMap<>();
+	private final Map<String, Object> variables;
 
 
 	ObjectScope() {
@@ -70,6 +72,17 @@ class ObjectScope extends Scope
 	 */
 	ObjectScope(final Type t) {
 	    super(t);
+	    variables = new LinkedHashMap<>();
+	}
+
+	/**
+	 * Construct one of these given an already existing map of key/value pairs.
+	 *
+	 * @param map An existing map of values.
+	 */
+	ObjectScope(final Map<String, Object> map) {
+	    super(Type.OBJECT);
+	    variables = new LinkedHashMap<>(map);
 	}
 
 

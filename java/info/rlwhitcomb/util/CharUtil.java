@@ -293,6 +293,8 @@
  *	    #53: Tweak both versions of "toHexArrayForm" to always output two digits per byte.
  *	20-Nov-2021 (rlwhitcomb)
  *	    #97: Change parameter type of "makeFileStringList".
+ *	18-Dec-2021 (rlwhitcomb)
+ *	    #148: Add handling of "\" in "quoteControl".
  */
 
 package info.rlwhitcomb.util;
@@ -690,6 +692,9 @@ public final class CharUtil
 			    buf.append(Integer.toHexString((int)ch));
 			    break;
 		    }
+		}
+		else if (ch == '\\') {
+		    buf.append("\\\\");
 		}
 		else {
 		    buf.append(ch);

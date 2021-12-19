@@ -100,6 +100,8 @@
  *	    #81: Add "quotes" param to most common form of "toStringValue".
  *	08-Dec-2021 (rlwhitcomb)
  *	    #131: Allow null/not-null check for arrays and objects in "toBooleanValue".
+ *	18-Dec-2021 (rlwhitcomb)
+ *	    #148: Deal more gracefully with char values in "toStringValue"
  */
 package info.rlwhitcomb.calc;
 
@@ -559,9 +561,16 @@ public final class CalcUtil
 	    if (result == null) {
 		return quote ? "<null>" : "";
 	    }
+	    else if (result instanceof Character) {
+		String charString = Character.toString((Character) result);
+		if (quote)
+		    return CharUtil.addDoubleQuotes(CharUtil.quoteControl(charString));
+		else
+		    return charString;
+	    }
 	    else if (result instanceof String) {
 		if (quote)
-		    return CharUtil.addDoubleQuotes((String) result);
+		    return CharUtil.addDoubleQuotes(CharUtil.quoteControl((String) result));
 		else
 		    return (String) result;
 	    }
