@@ -38,6 +38,8 @@
  *	17-Dec-2021 (rlwhitcomb)
  *	    #155: Fix NO_QUOTE_CHAR to be '\0' to be consistent with usage in CSVFormat.
  *	    Simplify constructors.
+ *	19-Dec-2021 (rlwhitcomb)
+ *	    #154: Set back tick as another valid value.
  */
 package info.rlwhitcomb.csv;
 
@@ -55,6 +57,7 @@ public enum Quotes
 	NONE		(Constants.NO_QUOTE_CHAR, false),
 	SINGLE		('\''),
 	DOUBLE		('"'),
+	BACK		('`'),
 	PAREN		('(', ')'),
 	ANGLE		('<', '>'),
 	BRACKET		('[', ']'),
