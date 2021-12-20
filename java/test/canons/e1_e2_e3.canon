@@ -276,14 +276,10 @@
 >s3 = {a: 1, b: true, c: 'tree', d: 14} -> { a: 1, b: true, c: "tree", d: 14 }
 >splice s3, [b, c], {f: 'def', g: 'green'} -> { b: true, c: "tree" }
 >s3 -> { a: 1, d: 14, f: "def", g: "green" }
->funny_string = ' \t\f  \r\n   345  \f  \t \r\n  ' -> " 	  
->   345    	 
->  "
+>funny_string = ' \t\f  \r\n   345  \f  \t \r\n  ' -> " \t\f  \r\n   345  \f  \t \r\n  "
 >trim funny_string -> "345"
->ltrim funny_string -> "345    	 
->  "
->rtrim funny_string -> " 	  
->   345"
+>ltrim funny_string -> "345  \f  \t \r\n  "
+>rtrim funny_string -> " \t\f  \r\n   345"
 >trim (1.2 + " ") -> "1.2"
 >arr_n = [] -> [ ]
 >fill arr_n, 0, 10 -> [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]

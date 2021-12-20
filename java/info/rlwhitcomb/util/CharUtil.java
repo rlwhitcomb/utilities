@@ -295,6 +295,8 @@
  *	    #97: Change parameter type of "makeFileStringList".
  *	18-Dec-2021 (rlwhitcomb)
  *	    #148: Add handling of "\" in "quoteControl".
+ *	19=Dec-2021 (rlwhitcomb)
+ *	    #148: Fix handling of "\" with valid escape sequences in "quoteControl".
  */
 
 package info.rlwhitcomb.util;
@@ -694,7 +696,29 @@ public final class CharUtil
 		    }
 		}
 		else if (ch == '\\') {
-		    buf.append("\\\\");
+		    if (i < input.length() - 1) {
+			// Valid escape sequences don't need changing
+			char escapeCode = input.charAt(i + 1);
+			switch (escapeCode) {
+			    case 'b':
+			    case 'f':
+			    case 'n':
+			    case 'r':
+			    case 't':
+			    case 'u':
+			    case 'o':
+			    case 'B':
+			    case '\\':
+				buf.append(ch);
+				break;
+			    default:
+				buf.append("\\\\");
+				break;
+			}
+		    }
+		    else {
+			buf.append("\\\\");
+		    }
 		}
 		else {
 		    buf.append(ch);
