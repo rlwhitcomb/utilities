@@ -41,6 +41,8 @@
  *	    #109: Add "quote strings" to the Settings dialog.
  *	18-Dec-2021 (rlwhitcomb)
  *	    #159: Add "Silence Directives" to Settings.
+ *	20-Dec-2021 (rlwhitcomb)
+ *	    #163: Reword Save tip.
  */
 {
     title:              'Calc',
@@ -84,7 +86,7 @@
     darkBackground:     'Or for dark backgrounds',
 
     saveButton:         'S',
-    saveTip:            'Save Results to file (F3)',
+    saveTip:            'Save values to file (F3)',
     saveLabel:          'Save to File',
     saveKeyLabel:       'F3',
 
