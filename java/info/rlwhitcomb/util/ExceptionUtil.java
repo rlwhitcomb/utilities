@@ -65,6 +65,8 @@
  *	    One more strange exception.
  *	07-Jul-2021 (rlwhitcomb)
  *	    Make class final and constructor private.
+ *	24-Dec-2021 (rlwhitcomb)
+ *	    Add ParseException to the mix.
  */
 package info.rlwhitcomb.util;
 
@@ -74,6 +76,7 @@ import java.nio.charset.CharacterCodingException;
 import java.nio.charset.IllegalCharsetNameException;
 import java.nio.charset.UnsupportedCharsetException;
 import java.nio.file.NoSuchFileException;
+import java.text.ParseException;
 import java.util.Map;
 import java.util.UnknownFormatConversionException;
 
@@ -230,6 +233,10 @@ public final class ExceptionUtil
 			  || (next instanceof StringIndexOutOfBoundsException)
 			  || (next instanceof UnknownFormatConversionException)) {
 			msg = String.format("%1$s \"%2$s\"", exceptionName(next), msg);
+		    }
+		    else if (next instanceof ParseException) {
+			ParseException pe = (ParseException) next;
+			msg = Intl.formatString("util#except.parse", exceptionName(pe), pe.getErrorOffset(), msg);
 		    }
 		}
 		buf.append(msg);

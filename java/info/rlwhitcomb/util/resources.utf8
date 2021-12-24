@@ -119,6 +119,8 @@
 #	    Remove now unused locale error from CharUtil.
 #	05-Dec-2021 (rlwhitcomb)
 #	    Tweak the "time this" timing message.
+#	24-Dec-2021 (rlwhitcomb)
+#	    New message for ParseException from ExceptionUtil.
 #
 
 #
@@ -175,6 +177,7 @@ env.screenSize		= %1$dw x %2$dh
 # From ExceptionUtil
 #
 except.fromStack	= from: %1$s
+except.parse		= %1$s error at offset %2$d, input "%3$s"
 
 #
 # From Intl.java!
