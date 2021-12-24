@@ -424,6 +424,8 @@
  *	    #151: Fix precedence of the logical operators.
  *	18-Dec-2021 (rlwhitcomb)
  *	    #159: Silence directives on command.
+ *	24-Dec-2021 (rlwhitcomb)
+ *	    #125: Add new Java version fields to "info.java".
  */
 package info.rlwhitcomb.calc;
 
@@ -443,6 +445,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.FieldPosition;
 import java.text.NumberFormat;
+import java.text.ParseException;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -728,30 +731,51 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    SemanticVersion v = Environment.programVersion();
 	    ObjectScope version = new ObjectScope();
 
-	    version.setValue("major",      false, v.major);
-	    version.setValue("minor",      false, v.minor);
-	    version.setValue("patch",      false, v.patch);
-	    version.setValue("prerelease", false, v.getPreReleaseString());
-	    version.setValue("build",      false, v.getBuildMetaString());
+	    version.setValue("major",      v.major);
+	    version.setValue("minor",      v.minor);
+	    version.setValue("patch",      v.patch);
+	    version.setValue("prerelease", v.getPreReleaseString());
+	    version.setValue("build",      v.getBuildMetaString());
 
 	    ObjectScope os = new ObjectScope();
 
-	    os.setValue("platform", false, Environment.platform());
-	    os.setValue("version",  false, Environment.osVersion());
-	    os.setValue("id",       false, Environment.platformIdentifier());
-	    os.setValue("user",     false, Environment.currentUser());
+	    os.setValue("platform", Environment.platform());
+	    os.setValue("version",  Environment.osVersion());
+	    os.setValue("id",       Environment.platformIdentifier());
+	    os.setValue("user",     Environment.currentUser());
 
 	    ObjectScope java = new ObjectScope();
+	    int javaMajor = Environment.javaMajorVersion();
+	    String javaVersion = Environment.javaVersion();
 
-	    java.setValue("major",   false, Environment.javaMajorVersion());
-	    java.setValue("version", false, Environment.javaVersion());
-	    java.setValue("model",   false, Environment.dataModel());
+	    java.setValue("major",   javaMajor);
+	    java.setValue("version", javaVersion);
+	    java.setValue("model",   Environment.dataModel());
+
+	    try {
+		SemanticVersion jv = new SemanticVersion(javaVersion);
+		if (javaMajor > 8) {
+		    java.setValue("minor",      jv.minor);
+		    java.setValue("patch",      jv.patch);
+		    java.setValue("prerelease", jv.getPreReleaseString());
+		    java.setValue("build",      jv.getBuildMetaString());
+		}
+		else {
+		    // Version looks like: "1.8.0_292"
+		    java.setValue("minor", jv.patch);
+		    java.setValue("patch", jv.getBuildMetaString());
+		}
+	    }
+	    catch (ParseException pe) {
+		// This is a programmer error and needs to be fixed in SemanticVersion
+		System.err.println("ERROR: Problem with Java version: " + ExceptionUtil.toString(pe));
+	    }
 
 	    ObjectScope info = new ObjectScope();
 
-	    info.setValue("version", false, version);
-	    info.setValue("os",      false, os);
-	    info.setValue("java",    false, java);
+	    info.setValue("version", version);
+	    info.setValue("os",      os);
+	    info.setValue("java",    java);
 
 	    PredefinedValue.define(globalScope, "info", info);
 
@@ -809,8 +833,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 
 	    arguments = new ArrayScope<Object>();
-	    globalScope.setValue(ARG_ARRAY, false, arguments);
-	    globalScope.setValue(ARG_COUNT, false, BigInteger.ZERO);
+	    globalScope.setValue(ARG_ARRAY, arguments);
+	    globalScope.setValue(ARG_COUNT, BigInteger.ZERO);
 	}
 
 	public CalcObjectVisitor(
@@ -873,15 +897,15 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    String argKey = String.format("$%1$d", index);
 	    try {
 		BigDecimal dValue = new BigDecimal(arg);
-		globals.setValue(argKey, false, dValue);
+		globals.setValue(argKey, dValue);
 		arguments.add(dValue);
 	    }
 	    catch (NumberFormatException nfe) {
 		String unquotedArg = CharUtil.stripAnyQuotes(arg, true);
-		globals.setValue(argKey, false, unquotedArg);
+		globals.setValue(argKey, unquotedArg);
 		arguments.add(unquotedArg);
 	    }
-	    globals.setValue(ARG_COUNT, false, BigInteger.valueOf(arguments.size()));
+	    globals.setValue(ARG_COUNT, BigInteger.valueOf(arguments.size()));
 	}
 
 	public MathContext getMathContext() {

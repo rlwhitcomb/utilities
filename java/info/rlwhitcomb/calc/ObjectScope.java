@@ -36,6 +36,8 @@
  *	    Return last value from "remove" instead of boolean.
  *	18-Dec=2021 (rlwhitcomb)
  *	    #148: Add constructor from regular Map.
+ *	24-Dec-2021 (rlwhitcomb)
+ *	    Add another "setValue" without default "ignoreCase" parameter.
  */
 package info.rlwhitcomb.calc;
 
@@ -155,6 +157,16 @@ class ObjectScope extends Scope
 	    else {
 		variables.put(name, value);
 	    }
+	}
+
+	/**
+	 * Set the value of one of our variables, case-sensitive (used for predefined values).
+	 *
+	 * @param name       Name of the variable to set.
+	 * @param value      The new value for the variable.
+	 */
+	void setValue(final String name, final Object value) {
+	    setValueImpl(name, false, value);
 	}
 
 	/**
