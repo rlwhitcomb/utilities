@@ -1522,7 +1522,7 @@ public final class CharUtil
 		// We need to doublequote the entire argument (which prevents ProcessBuilder
 		// from doing that), and escape any embedded doublequotes, and ensure that
 		// existing embedded backslashes survive the argv parsing.
-		StringBuilder sb = new StringBuilder();
+		StringBuffer sb = new StringBuffer();
 		m = backslashesBeforeDoubleQuotePattern.matcher(value);
 		while (m.find()) {
 		    if (!m.hitEnd()) {
