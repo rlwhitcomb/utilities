@@ -102,6 +102,9 @@
  *	    #131: Allow null/not-null check for arrays and objects in "toBooleanValue".
  *	18-Dec-2021 (rlwhitcomb)
  *	    #148: Deal more gracefully with char values in "toStringValue"
+ *	23-Dec-2021 (rlwhitcomb)
+ *	    #179: Fix interpolated expression evaluation with nested brackets.
+ *	    Fix identifier identification to completely match the expanded definitions in the grammar.
  */
 package info.rlwhitcomb.calc;
 
@@ -288,32 +291,78 @@ public final class CalcUtil
 
 	/**
 	 * Is this character a valid start for an identifier name?
-	 * <p> Corresponds to the {@code ID} rule in the Calc.g4 grammar.
+	 * <p> Corresponds to the {@code NAME_START_CHAR} rule in the Calc.g4 grammar.
 	 *
-	 * @param ch	The character to check.
+	 * @param str	The string we're navigating through
+	 * @param pos	Position of the character to examine
 	 * @return	Whether or not this is a valid identifier start character.
 	 */
-	public static boolean isIdentifierStart(final char ch) {
-	    // Corresponds to the "ID" rule in Calc.g4
+	public static boolean isIdentifierStart(final String str, final int pos) {
+	    char ch = str.charAt(pos);
+
 	    if ((ch >= 'a' && ch <= 'z')
 	     || (ch >= 'A' && ch <= 'Z')
+	     || (ch >= '\u00C0' && ch <= '\u00D6')
+	     || (ch >= '\u00D8' && ch <= '\u00F6')
+	     || (ch >= '\u00F8' && ch <= '\u02FF')
+	     || (ch >= '\u0370' && ch <= '\u037D')
+	     || (ch >= '\u037F' && ch <= '\u1FFF')
+	     || (ch >= '\u200C' && ch <= '\u200D')
+	     || (ch >= '\u2071' && ch <= '\u2073')
+	     || (ch >= '\u207A' && ch <= '\u207F')
+	     || (ch >= '\u208A' && ch <= '\u218F')
+	     || (ch >= '\u2C00' && ch <= '\u2FEF')
+	     || (ch >= '\u3001' && ch <= '\uD7FF')
+	     || (ch >= '\uF900' && ch <= '\uFDCF')
+	     || (ch >= '\uFDF0' && ch <= '\uFF0F')
+	     || (ch >= '\uFF1A' && ch <= '\uFFFD')
 	     || (ch == '_'))
 		return true;
+
+	    // This is the low surrogate of all the PI_VALUES below
+	    if (pos >= str.length() || ch != '\uD835')
+		return false;
+
+	    // These are the high surrogates of the PI_VALUES from Calc.g4
+	    char ch2 = str.charAt(pos + 1);
+	    if (ch2 == '\uDEB7'  // '\u{1D6B7}'
+	     || ch2 == '\uDED1'  // '\u{1D6D1}'
+	     || ch2 == '\uDEE1'  // '\u{1D6E1}'
+	     || ch2 == '\uDEF1'  // '\u{1D6F1}'
+	     || ch2 == '\uDF0B'  // '\u{1D70B}'
+	     || ch2 == '\uDF1B'  // '\u{1D71B}'
+	     || ch2 == '\uDF2B'  // '\u{1D72B}'
+	     || ch2 == '\uDF45'  // '\u{1D745}'
+	     || ch2 == '\uDF55'  // '\u{1D755}'
+	     || ch2 == '\uDF65'  // '\u{1D765}'
+	     || ch2 == '\uDF7F'  // '\u{1D77F}'
+	     || ch2 == '\uDF8F'  // '\u{1D78F}'
+	     || ch2 == '\uDF9F'  // '\u{1D79F}'
+	     || ch2 == '\uDFB9'  // '\u{1D7B9}'
+	     || ch2 == '\uDFC9') // '\u{1D7C9}'
+		return true;
+
 	    return false;
 	}
 
 	/**
 	 * Is this character a valid identifier character (after the start)?
-	 * <p> Corresponds to the grammar for ID.
+	 * <p> Corresponds to the grammar for {@code NAME_CHAR}.
 	 *
-	 * @param ch	The character to check.
+	 * @param str	The string we're navigating through
+	 * @param pos	Position of the character to examine
 	 * @return	Whether the character is a valid following part of an identifier.
 	 */
-	public static boolean isIdentifierPart(final char ch) {
-	    if (isIdentifierStart(ch))
+	public static boolean isIdentifierPart(final String str, final int pos) {
+	    if (isIdentifierStart(str, pos))
 		return true;
 
-	    if (ch >= '0' && ch <= '9')
+	    char ch = str.charAt(pos);
+
+	    if ((ch >= '0' && ch <= '9')
+	     || (ch == '\u00B7')
+	     || (ch >= '\u0300' && ch <= '\u036F')
+	     || (ch >= '\u203F' && ch <= '\u2040'))
 		return true;
 
 	    return false;
@@ -1157,8 +1206,65 @@ public final class CalcUtil
 	    }
 	}
 
-	private static boolean isLocalVarPart(final char ch) {
-	    return (isIdentifierPart(ch) || ch == '#' || ch == '*');
+	/**
+	 * Find the matching end bracket/brace/paren/quote for the start character
+	 * at the given position.
+	 *
+	 * @param value	The string to search.
+	 * @param pos   Position of the starting character to match.
+	 * @return      -1 if the end character is not found in the string, otherwise
+	 *              the position of the ending character that matches the beginning.
+	 */
+	private static int findMatching(final String value, final int pos) {
+	    char start = value.charAt(pos);
+	    char end = start;
+
+	    switch (start) {
+		case '{':
+		    end = '}';
+		    break;
+		case '(':
+		    end = ')';
+		    break;
+		case '[':
+		    end = ']';
+		    break;
+		case '`':
+		case '"':
+		case '\'':
+		    end = start;
+		    break;
+	    }
+
+	    int depth = 0;
+	    for (int ix = pos; ix < value.length(); ix++) {
+		char ch = value.charAt(ix);
+		if (ch == start) {
+		    depth++;
+		}
+		else if (ch == end) {
+		    if (--depth == 0)
+			return ix;
+		}
+	    }
+
+	    return -1;
+	}
+
+	/**
+	 * Is the given character a "part" (that is, legal for after the start char)
+	 * of a local variable name.
+	 *
+	 * @param str	The string we're navigating through
+	 * @param pos	Position of the character to examine
+	 * @return	Whether the given character is legal for a local variable name.
+	 */
+	private static boolean isLocalVarPart(final String str, final int pos) {
+	    if (isIdentifierPart(str, pos))
+		return true;
+
+	    char ch = str.charAt(pos);
+	    return (ch == '#' || ch == '*');
 	}
 
 	/**
@@ -1189,7 +1295,7 @@ public final class CalcUtil
 		    // Try to parse out a loop variable name here and substitute if found
 		    // so that $$var would get $var value, but "$$(" would result in "$("
 		    int identPos = pos + 2;
-		    while (identPos < rawValue.length() && isLocalVarPart(rawValue.charAt(identPos)))
+		    while (identPos < rawValue.length() && isLocalVarPart(rawValue, identPos))
 			identPos++;
 		    if (identPos > pos + 2) {
 			String varName = rawValue.substring(pos + 1, identPos);
@@ -1210,7 +1316,8 @@ public final class CalcUtil
 		    }
 		}
 		else if (rawValue.charAt(pos + 1) == '{') {
-		    int nextPos = rawValue.indexOf('}', pos + 1);
+		    // Get position of matching '}'
+		    int nextPos = findMatching(rawValue, pos + 1);
 
 		    if (pos + 2 >= rawValue.length() || nextPos < 0)
 			throw new CalcExprException("%calc#invalidConst2", ctx);
@@ -1218,15 +1325,16 @@ public final class CalcUtil
 		    String expr = rawValue.substring(pos + 2, nextPos);
 		    Object exprValue = Calc.processString(expr, true);
 		    String stringValue = toStringValue(visitor, ctx, exprValue, false, false, settings.separatorMode, "");
+
 		    // The result is going to be formatted with quotes, separators, everything that it currently
 		    // needs to be output, BUT it will go through the quoting again inside the formatter code
 		    // so we need to strip quotes and escaped quotes or we will get double
 		    output.append(CharUtil.stripDoubleQuotes(stringValue));
 		    lastPos = nextPos;
 		}
-		else if (isIdentifierStart(rawValue.charAt(pos + 1))) {
+		else if (isIdentifierStart(rawValue, pos + 1)) {
 		    int identPos = pos + 2;
-		    while (identPos < rawValue.length() && isIdentifierPart(rawValue.charAt(identPos)))
+		    while (identPos < rawValue.length() && isIdentifierPart(rawValue, identPos))
 			identPos++;
 		    String varName = rawValue.substring(pos + 1, identPos);
 		    output.append(toStringValue(visitor, ctx,

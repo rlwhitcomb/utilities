@@ -1207,6 +1207,9 @@ fragment FS
    : [ \t] * ( ',' | ';' | '/' | [ \t] + ) [ \t] *
    ;
 
+//
+// This must match "isIdentifierStart" in CalcUtil
+//
 fragment NAME_START_CHAR
    : 'A'..'Z'
    | 'a'..'z'
@@ -1228,6 +1231,9 @@ fragment NAME_START_CHAR
    | PI_VALUES
    ;
 
+//
+// This must match "isIdentifierPart" in CalcUtil
+//
 fragment NAME_CHAR
    : NAME_START_CHAR
    | '0'..'9'

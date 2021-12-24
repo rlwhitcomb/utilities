@@ -105,5 +105,11 @@ s1
   c : 'ABC'
 }
 
+// Tests of extended idenfier characters
+:clear p9
+p9 = { '\u{1D71B}': pi }
+p9
+` Value of \u{1D71B} = ${p9.'𝜛'}`
+
 :echo
 :echo "End of nested object / array tests."

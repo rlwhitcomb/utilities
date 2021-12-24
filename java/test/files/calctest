@@ -16,7 +16,7 @@ $echo "Starting Calc tests..."
 $echo
 
 e1_e2_e3      : e1,e2,e3
-e7            : e7 -- 'abc' «def» 1 2 3 --
+e7            : e7 -- 'abc' «def» 1 2 3 text --
 e8            : e8
 e10           : e10
 e12           : e12
