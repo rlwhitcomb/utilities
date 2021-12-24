@@ -271,12 +271,12 @@ public final class SemanticVersion implements Comparable<SemanticVersion> {
 	 * Get the build metadata information (if any) as a string.
 	 *
 	 * @return The build metadata tags, combined with '.' and prefixed
-	 *         by '+', if there are any, or an empty string if none.
+	 *         by '+' or '_', if there are any, or an empty string if none.
 	 */
 	public String getBuildMetaString() {
 		StringBuilder ret = new StringBuilder();
 		if (buildMeta.length > 0) {
-			ret.append('+');
+			ret.append(metaPrefix);
 			for (int i = 0; i < buildMeta.length; i++) {
 				ret.append(buildMeta[i]);
 				if (i < buildMeta.length - 1) {
@@ -397,6 +397,7 @@ public final class SemanticVersion implements Comparable<SemanticVersion> {
 	// Parser implementation below
 
 	private int[] vParts;
+	private char metaPrefix;
 	private ArrayList<String> preParts, metaParts;
 	private int errPos;
 	private char[] input;
@@ -415,10 +416,21 @@ public final class SemanticVersion implements Comparable<SemanticVersion> {
 
 		vParts[0] = Integer.parseInt(new String(input, 0, pos), 10);
 
+		if (pos == input.length) { // We have a clean version string
+			return true;
+		}
+
 		if (input[pos] == '.') {
 			return stateMinor(pos + 1);
 		}
-
+		if (input[pos] == '+' || input[pos] == '_') { // We have build meta tags -> descend
+			metaPrefix = input[pos];
+			return stateMeta(pos + 1);
+		}
+		if (input[pos] == '-') { // We have pre release tags -> descend
+			return stateRelease(pos + 1);
+		}
+		errPos = pos; // We have junk
 		return false;
 	}
 
@@ -440,7 +452,13 @@ public final class SemanticVersion implements Comparable<SemanticVersion> {
 		if (input[pos] == '.') {
 			return statePatch(pos + 1);
 		}
-
+		if (input[pos] == '+' || input[pos] == '_') { // We have build meta tags -> descend
+			metaPrefix = input[pos];
+			return stateMeta(pos + 1);
+		}
+		if (input[pos] == '-') { // We have pre release tags -> descend
+			return stateRelease(pos + 1);
+		}
 		errPos = pos;
 		return false;
 	}
@@ -465,14 +483,13 @@ public final class SemanticVersion implements Comparable<SemanticVersion> {
 			return true;
 		}
 
-		if (input[pos] == '+') { // We have build meta tags -> descend
+		if (input[pos] == '+' || input[pos] == '_') { // We have build meta tags -> descend
+			metaPrefix = input[pos];
 			return stateMeta(pos + 1);
 		}
-
 		if (input[pos] == '-') { // We have pre release tags -> descend
 			return stateRelease(pos + 1);
 		}
-
 		errPos = pos; // We have junk
 		return false;
 	}
@@ -497,7 +514,8 @@ public final class SemanticVersion implements Comparable<SemanticVersion> {
 		if (input[pos] == '.') { // More parts -> descend
 			return stateRelease(pos + 1);
 		}
-		if (input[pos] == '+') { // Build meta -> descend
+		if (input[pos] == '+' || input[pos] == '_') { // We have build meta tags -> descend
+			metaPrefix = input[pos];
 			return stateMeta(pos + 1);
 		}
 
