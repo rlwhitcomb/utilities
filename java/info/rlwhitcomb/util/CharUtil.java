@@ -297,6 +297,11 @@
  *	    #148: Add handling of "\" in "quoteControl".
  *	19=Dec-2021 (rlwhitcomb)
  *	    #148: Fix handling of "\" with valid escape sequences in "quoteControl".
+ *	22-Dec-2021 (rlwhitcomb)
+ *	    Another version of "quoteControl" with control over the escape char. Don't do
+ *	    any other fixups in there now.
+ *	    #174: Fix "stripAnyQuotes" to make sure the string is actually quoted using the
+ *	    "Quotes" class before stripping them. Make all parameters final.
  */
 
 package info.rlwhitcomb.util;
@@ -314,6 +319,8 @@ import java.nio.charset.CharsetEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import info.rlwhitcomb.csv.Quotes;
 
 
 /**
@@ -397,10 +404,13 @@ public final class CharUtil
 
 	public static final String SANITIZATION_PREFIX = "_";
 
+	public static final char STD_ESCAPE_CHAR = '\\';
+
 	/**
 	* The characters we will allow when attempting to construct a valid identifier from an arbitrary string.
 	*/
 	private static String identifierConstructionCharacterSet ="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890_";
+
 
 	/**
 	 * Enum to specify padding justification values.
@@ -435,7 +445,7 @@ public final class CharUtil
 	 *
 	 * @see	#addQuotes
 	 */
-	public static String stripQuotes(String value) {
+	public static String stripQuotes(final String value) {
 	    return internalStripQuotes(value, "'", "'", "''");
 	}
 
@@ -449,7 +459,7 @@ public final class CharUtil
 	 *
 	 * @see	#addDoubleQuotes
 	 */
-	public static String stripDoubleQuotes(String value) {
+	public static String stripDoubleQuotes(final String value) {
 	    return internalStripQuotes(value, "\"", "\"", "\\\"");
 	}
 
@@ -463,7 +473,7 @@ public final class CharUtil
 	 *
 	 * @see	#addBackQuotes
 	 */
-	public static String stripBackQuotes(String value) {
+	public static String stripBackQuotes(final String value) {
 	    return internalStripQuotes(value, "`", "`", "\\`");
 	}
 
@@ -476,34 +486,25 @@ public final class CharUtil
 	 * @param value   The original correctly quoted string.
 	 * @param escaped Whether the embedded quotes are escaped (with "\") or doubled.
 	 * @return	The raw text of the string with the doubled embedded quotes changed.
+	 * @see Quotes for all the supported values
 	 */
-	public static String stripAnyQuotes(String value, boolean escaped) {
-	    if (value == null || value.isEmpty())
+	public static String stripAnyQuotes(final String value, final boolean escaped) {
+	    if (value == null || value.length() < 2)
 		return value;
 
 	    char quote = value.charAt(0);
-	    char endQuote = quote;
+	    char endQuote = value.charAt(value.length() - 1);
+
+	    // If the quotes are not valid, then skip this whole process
+	    Quotes q = Quotes.fromChar(quote, endQuote);
+	    if (q == null)
+		return value;
+
+	    // Construct the embedded string to either doubled or escaped quotes
 	    StringBuilder embedded = new StringBuilder(2);
 
-	    // Some quotes look like parens (i.e., different end than beginning)
-	    // and the escaped values would be the ending quote
-	    switch (quote) {
-		case '\u2018':
-		    endQuote = '\u2019';
-		    break;
-		case '\u201C':
-		    endQuote = '\u201D';
-		    break;
-		case '\u2039':
-		    endQuote = '\u203A';
-		    break;
-		case '\u00AB':
-		    endQuote = '\u00BB';
-		    break;
-	    }
-
 	    if (escaped)
-		embedded.append('\\');
+		embedded.append(STD_ESCAPE_CHAR);
 	    else
 		embedded.append(endQuote);
 	    embedded.append(endQuote);
@@ -512,23 +513,30 @@ public final class CharUtil
 	}
 
 
-	private static String internalStripQuotes(String value, String startQuote, String endQuote, String escapedQuote) {
-	    // If the string doesn't start and end with a quote, then
-	    // just return as-is
+	private static String internalStripQuotes(
+		final String value,
+		final String startQuote,
+		final String endQuote,
+		final String escapedQuote)
+	{
+	    // If the string doesn't start and end with a quote, then just return as-is
 	    String trimmedValue = value.trim();
 	    if (trimmedValue.length() < 2 || !trimmedValue.startsWith(startQuote) || !trimmedValue.endsWith(endQuote)) {
 		return value;
 	    }
+
 	    StringBuilder buf = new StringBuilder(trimmedValue);
 	    // Strip the leading/trailing quotes
 	    buf.deleteCharAt(0);
 	    buf.deleteCharAt(buf.length() - 1);
+
 	    // Unescape any embedded quotes
 	    int ix = buf.indexOf(escapedQuote);
 	    while (ix >= 0) {
 		buf.deleteCharAt(ix);
 		ix = buf.indexOf(escapedQuote, ix + 1);
 	    }
+
 	    return buf.toString();
 	}
 
@@ -542,7 +550,7 @@ public final class CharUtil
 	 *
 	 * @see	#stripQuotes
 	 */
-	public static String addQuotes(String value) {
+	public static String addQuotes(final String value) {
 	    StringBuilder buf = new StringBuilder();
 	    addQuotes(value, buf);
 	    return buf.toString();
@@ -559,7 +567,7 @@ public final class CharUtil
 	 * @param value	The raw text value to quote.
 	 * @param buf	The buffer we're working in.
 	 */
-	public static void addQuotes(String value, StringBuilder buf) {
+	public static void addQuotes(final String value, final StringBuilder buf) {
 	    internalAddQuotes(value, "'", "'", '\'', buf);
 	}
 
@@ -571,7 +579,7 @@ public final class CharUtil
 	 * @param value	The raw text value.
 	 * @return	The text correctly quoted and ready for use.
 	 */
-	public static String addDoubleQuotes(String value) {
+	public static String addDoubleQuotes(final String value) {
 	    StringBuilder buf = new StringBuilder();
 	    addDoubleQuotes(value, buf);
 	    return buf.toString();
@@ -590,8 +598,8 @@ public final class CharUtil
 	 *
 	 * @see	#stripDoubleQuotes
 	 */
-	public static void addDoubleQuotes(String value, StringBuilder buf) {
-	    internalAddQuotes(value, "\"", "\"", '\\', buf);
+	public static void addDoubleQuotes(final String value, final StringBuilder buf) {
+	    internalAddQuotes(value, "\"", "\"", STD_ESCAPE_CHAR, buf);
 	}
 
 
@@ -602,7 +610,7 @@ public final class CharUtil
 	 * @param value	The raw text value.
 	 * @return	The text correctly quoted and ready for use.
 	 */
-	public static String addBackQuotes(String value) {
+	public static String addBackQuotes(final String value) {
 	    StringBuilder buf = new StringBuilder();
 	    addBackQuotes(value, buf);
 	    return buf.toString();
@@ -621,8 +629,8 @@ public final class CharUtil
 	 *
 	 * @see	#stripBackQuotes
 	 */
-	public static void addBackQuotes(String value, StringBuilder buf) {
-	    internalAddQuotes(value, "`", "`", '\\', buf);
+	public static void addBackQuotes(final String value, final StringBuilder buf) {
+	    internalAddQuotes(value, "`", "`", STD_ESCAPE_CHAR, buf);
 	}
 
 
@@ -634,14 +642,20 @@ public final class CharUtil
 	 * @param rightQuote	The right quote (often the same as the left).
 	 * @return		The text correctly quoted and escaped.
 	 */
-	public static String addQuotes(String value, char leftQuote, char rightQuote) {
+	public static String addQuotes(final String value, final char leftQuote, final char rightQuote) {
 	    StringBuilder buf = new StringBuilder();
-	    internalAddQuotes(value, Character.toString(leftQuote), Character.toString(rightQuote), '\\', buf);
+	    internalAddQuotes(value, Character.toString(leftQuote), Character.toString(rightQuote), STD_ESCAPE_CHAR, buf);
 	    return buf.toString();
 	}
 
 
-	private static void internalAddQuotes(String value, String leftQuote, String rightQuote, char escapeChar, StringBuilder buf) {
+	private static void internalAddQuotes(
+		final String value,
+		final String leftQuote,
+		final String rightQuote,
+		final char escapeChar,
+		final StringBuilder buf)
+	{
 	    if (value != null) {
 		buf.append(leftQuote);
 		int ix = buf.length();
@@ -658,66 +672,54 @@ public final class CharUtil
 
 
 	/**
-	 * Quote control characters in the string.
+	 * Quote control characters in the string, using '\\' as the escape char.
 	 *
 	 * @param input The input string to process.
 	 * @return The string with ISO control characters (usually \n or \r)
 	 * escaped to the "\n" form.
 	 */
-	public static String quoteControl(String input) {
-	    if (input == null)
+	public static String quoteControl(final String input) {
+	    return quoteControl(input, STD_ESCAPE_CHAR);
+	}
+
+	/**
+	 * Quote control characters in the string, using the designated escape char.
+	 *
+	 * @param input      The input string to process.
+	 * @param escapeChar The escape character to recognize and use.
+	 * @return The string with ISO control characters (usually \n or \r)
+	 * escaped to the "\n" form (with designated escape char).
+	 */
+	public static String quoteControl(final String input, final char escapeChar) {
+	    if (input == null || input.isEmpty())
 		return input;
+
 	    StringBuilder buf = new StringBuilder(input.length() + 10);
 	    for (int i = 0; i < input.length(); i++) {
 		char ch = input.charAt(i);
 		if (Character.isISOControl(ch)) {
 		    switch (ch) {
 			case '\r':
-			    buf.append("\\r");
+			    buf.append(escapeChar).append('r');
 			    break;
 			case '\n':
-			    buf.append("\\n");
+			    buf.append(escapeChar).append('n');
 			    break;
 			case '\t':
-			    buf.append("\\t");
+			    buf.append(escapeChar).append('t');
 			    break;
 			case '\f':
-			    buf.append("\\f");
+			    buf.append(escapeChar).append('f');
 			    break;
 			case '\b':
-			    buf.append("\\b");
+			    buf.append(escapeChar).append('b');
 			    break;
+			case '\0':
+			    buf.append(escapeChar).append('0');
 			default:
-			    // Note: we don't expect to encounter these, and
-			    // this probably won't work, but give it a try anyway
-			    buf.append("\\u");
-			    buf.append(Integer.toHexString((int)ch));
+			    buf.append(escapeChar).append('u');
+			    buf.append(String.format("%1$04x", (int) ch));
 			    break;
-		    }
-		}
-		else if (ch == '\\') {
-		    if (i < input.length() - 1) {
-			// Valid escape sequences don't need changing
-			char escapeCode = input.charAt(i + 1);
-			switch (escapeCode) {
-			    case 'b':
-			    case 'f':
-			    case 'n':
-			    case 'r':
-			    case 't':
-			    case 'u':
-			    case 'o':
-			    case 'B':
-			    case '\\':
-				buf.append(ch);
-				break;
-			    default:
-				buf.append("\\\\");
-				break;
-			}
-		    }
-		    else {
-			buf.append("\\\\");
 		    }
 		}
 		else {
@@ -740,11 +742,12 @@ public final class CharUtil
 	 *		({@code null} input produces {@code null} output).
 	 * @throws	IllegalArgumentException if a Unicode escape is improperly formatted.
 	 */
-	public static String convertUnicodeLiteral(String input) {
+	public static String convertUnicodeLiteral(final String input) {
 	    int len = input == null ? 0 : input.length();
 	    if (len < 3) {
 		return input;
 	    }
+
 	    char ch0 = input.charAt(0);
 	    char ch1 = input.charAt(1);
 	    char ch2 = input.charAt(2);
@@ -757,8 +760,8 @@ public final class CharUtil
 		boolean sawQuote = false;
 		for (int i = start; i < len - 1; i++) {
 		    char ch = input.charAt(i);
-		    if (ch == '\\') {
-			if (input.charAt(i + 1) == '\\') {
+		    if (ch == STD_ESCAPE_CHAR) {
+			if (input.charAt(i + 1) == STD_ESCAPE_CHAR) {
 			    buf.append("\\\\");
 			    i++;
 			}
@@ -834,7 +837,7 @@ public final class CharUtil
 	 * @return	A "U&amp;" formatted literal with all the non-ASCII escaped,
 	 *		or {@code null} if the input is null.
 	 */
-	public static String escapeToUnicodeLiteral(String input) {
+	public static String escapeToUnicodeLiteral(final String input) {
 	    if (input != null) {
 		StringBuilder buf = new StringBuilder(input.length() * 4);
 		buf.append("U&'");
@@ -876,7 +879,7 @@ public final class CharUtil
 	 * @return The hex literal converted to a String according to the charset.
 	 * @throws IllegalArgumentException if the string is malformed.
 	 */
-	public static String convertHexLiteral(String input, Charset charset) {
+	public static String convertHexLiteral(final String input, final Charset charset) {
 	    if (isNullOrEmpty(input))
 		throw new Intl.IllegalArgumentException("util#char.illegalHexLiteral");
 	    int len = input.length();
@@ -901,21 +904,28 @@ public final class CharUtil
 	}
 
 
-	private static int parseCharEscape(String input, int index, int base, int normalLength, StringBuilder output) {
+	private static int parseCharEscape(
+		final String input,
+		final int index,
+		final int base,
+		final int normalLength,
+		final StringBuilder output)
+	{
 	    StringBuilder charBuilder = new StringBuilder();
+	    int pos = index;
 	    int charValue;
 	    char ch;
 
-	    if (input.charAt(index + 1) == '{') {
-		index++;
-		while ((ch = input.charAt(++index)) != '}') {
+	    if (input.charAt(pos + 1) == '{') {
+		pos++;
+		while ((ch = input.charAt(++pos)) != '}') {
 		    charBuilder.append(ch);
 		}
 	    }
 	    else {
 		for (int j = 0; j < normalLength; j++) {
-		    if (++index < input.length()) {
-			charBuilder.append(input.charAt(index));
+		    if (++pos < input.length()) {
+			charBuilder.append(input.charAt(pos));
 		    }
 		}
 	    }
@@ -923,7 +933,7 @@ public final class CharUtil
 	    charValue = Integer.parseInt(charBuilder.toString(), base);
 	    output.appendCodePoint(charValue);
 
-	    return index;
+	    return pos;
 	}
 
 	/**
@@ -939,7 +949,7 @@ public final class CharUtil
 	 * @return	The string with the embedded escape sequences converted to their
 	 *		literal character equivalents.
 	 */
-	public static String convertEscapeSequences(String input) {
+	public static String convertEscapeSequences(final String input) {
 	    if (input == null || input.isEmpty())
 		return input;
 
@@ -947,11 +957,11 @@ public final class CharUtil
 	    StringBuilder buf = new StringBuilder(input.length());
 	    for (int i = 0; i < input.length(); i++) {
 		char ch = input.charAt(i);
-		if (ch == '\\') {
+		if (ch == STD_ESCAPE_CHAR) {
 		    if (i + 1 < input.length()) {
 			char ch2 = input.charAt(++i);
 			switch (ch2) {
-			    case '\\':
+			    case STD_ESCAPE_CHAR:
 			    case '/':
 				buf.append(ch2);
 				break;
@@ -1000,7 +1010,7 @@ public final class CharUtil
 	 * @param charset	The character set whose encoder we need to get.
 	 * @return		Either a new or cached encoder for this character set.
 	 */
-	public static CharsetEncoder getCharsetEncoder(Charset charset) {
+	public static CharsetEncoder getCharsetEncoder(final Charset charset) {
 	    CharsetEncoder encoder = encoderMap.get(charset);
 	    if (encoder == null) {
 		encoder = charset.newEncoder();
@@ -1037,7 +1047,7 @@ public final class CharUtil
 	 * @return		A valid DBMS string literal that completely and
 	 *			correctly represents the input value.
 	 */
-	public static String checkAndEscapeString(String value, Charset charset, boolean fromUnicodeLiteral) {
+	public static String checkAndEscapeString(final String value, final Charset charset, final boolean fromUnicodeLiteral) {
 	    if (value == null) {
 		return null;
 	    }
@@ -1045,7 +1055,7 @@ public final class CharUtil
 		return "''";
 	    }
 	    boolean needsEscaping = false;
-	    if (fromUnicodeLiteral && value.indexOf('\\') >= 0) {
+	    if (fromUnicodeLiteral && value.indexOf(STD_ESCAPE_CHAR) >= 0) {
 		needsEscaping = true;
 	    }
 	    else {
@@ -1068,7 +1078,7 @@ public final class CharUtil
 	 * @return	The properly quoted text, or the original input
 	 *		if nothing was found that required quoting.
 	 */
-	public static String doubleQuoteIfNeeded(String input) {
+	public static String doubleQuoteIfNeeded(final String input) {
 	    if (input.indexOf(' ') >= 0 ||
 		input.indexOf(',') >= 0 ||
 		input.indexOf(';') >= 0 ||
@@ -1092,27 +1102,30 @@ public final class CharUtil
 	 *				supports mixed case (i.e., SQL-92 compliant)
 	 * @return		Delimited result if necessary or the original.
 	 */
-	public static String delimitIdentifier(String value, boolean mixedcase) {
+	public static String delimitIdentifier(final String value, final boolean mixedcase) {
 	    boolean needsDelimiting = false;
-	    if (value != null) {
-		int len = value.length();
-		boolean isDelimited = len > 1 && value.charAt(0) == '"' && value.charAt(len-1) == '"';
+	    String strValue = value;
+
+	    if (strValue != null) {
+		int len = strValue.length();
+		boolean isDelimited = len > 1 && strValue.charAt(0) == '"' && strValue.charAt(len-1) == '"';
 		if (isDelimited) {
 		    needsDelimiting = true;
-		    value = value.substring(1, len - 1);
+		    strValue = strValue.substring(1, len - 1);
 		}
 		else {
 		    // TODO: deal with proper charset in this casing test
 		    if (mixedcase)
-			needsDelimiting = !value.toUpperCase().equals(value);
+			needsDelimiting = !strValue.toUpperCase().equals(strValue);
 		    if (!needsDelimiting) {
-			Matcher m = specialCharsPattern.matcher(value);
+			Matcher m = specialCharsPattern.matcher(strValue);
 			needsDelimiting = m.matches();
 		    }
 		}
 	    }
+
 	    if (needsDelimiting) {
-		StringBuilder buf = new StringBuilder(value);
+		StringBuilder buf = new StringBuilder(strValue);
 		// Double the embedded double quotes
 		int ix = buf.indexOf("\"");
 		while (ix >= 0) {
@@ -1123,6 +1136,7 @@ public final class CharUtil
 		buf.append('"');
 		return buf.toString();
 	    }
+
 	    return value;
 	}
 
@@ -1136,7 +1150,7 @@ public final class CharUtil
 	 * @return		The identifer in raw form (suitable for
 	 *			input to {@link #delimitIdentifier}).
 	 */
-	public static String undelimitIdentifier(String input) {
+	public static String undelimitIdentifier(final String input) {
 	    int len = input.length();
 	    boolean leading = len > 1 && input.charAt(0) == '"';
 	    boolean trailing = len > 1 && input.charAt(len-1) == '"';
@@ -1165,7 +1179,7 @@ public final class CharUtil
 	 * @param	input	The raw text.
 	 * @return		The text with non-identifier characters replaced.
 	 */
-	public static String getJSONForm(String input) {
+	public static String getJSONForm(final String input) {
 	    StringBuilder buf = new StringBuilder();
 	    for (int i = 0; i < input.length(); i++) {
 		char ch = input.charAt(i);
@@ -1188,7 +1202,7 @@ public final class CharUtil
 	 * @param	width	The width to pad the string to.
 	 * @return		The padded string.
 	 */
-	public static String padToWidth(String input, int width) {
+	public static String padToWidth(final String input, final int width) {
 	    return padToWidth(input, width, ' ');
 	}
 
@@ -1203,7 +1217,7 @@ public final class CharUtil
 	 * @param	width	The width to pad the string to.
 	 * @return		The original {@code StringBuilder}
 	 */
-	public static StringBuilder padToWidth(StringBuilder buf, String input, int width) {
+	public static StringBuilder padToWidth(final StringBuilder buf, final String input, final int width) {
 	    return padToWidth(buf, input, width, ' ', Justification.LEFT);
 	}
 
@@ -1217,7 +1231,7 @@ public final class CharUtil
 	 * @param	just	The justification.
 	 * @return		The padded string.
 	 */
-	public static String padToWidth(String input, int width, Justification just) {
+	public static String padToWidth(final String input, final int width, final Justification just) {
 	    return padToWidth(input, width, ' ', just);
 	}
 
@@ -1233,7 +1247,7 @@ public final class CharUtil
 	 * @param	just	The justification.
 	 * @return		The original {@code StringBuilder}.
 	 */
-	public static StringBuilder padToWidth(StringBuilder buf, String input, int width, Justification just) {
+	public static StringBuilder padToWidth(final StringBuilder buf, final String input, final int width, final Justification just) {
 	    return padToWidth(buf, input, width, ' ', just);
 	}
 
@@ -1248,7 +1262,7 @@ public final class CharUtil
 	 * @param	pad	The padding character.
 	 * @return		The padded string.
 	 */
-	public static String padToWidth(String input, int width, char pad) {
+	public static String padToWidth(final String input, final int width, final char pad) {
 	    return padToWidth(input, width, pad, Justification.LEFT);
 	}
 
@@ -1263,7 +1277,7 @@ public final class CharUtil
 	 * @param	pad	The padding character.
 	 * @return		The original {@code StringBuilder}
 	 */
-	public static StringBuilder padToWidth(StringBuilder buf, String input, int width, char pad) {
+	public static StringBuilder padToWidth(final StringBuilder buf, final String input, final int width, final char pad) {
 	    return padToWidth(buf, input, width, pad, Justification.LEFT);
 	}
 
@@ -1279,7 +1293,7 @@ public final class CharUtil
 	 * @param	just	The justification.
 	 * @return		The padded string.
 	 */
-	public static String padToWidth(String input, int width, char pad, Justification just) {
+	public static String padToWidth(final String input, final int width, final char pad, final Justification just) {
 	    if (input.length() >= Math.abs(width))
 		return input;
 	    return padToWidth(new StringBuilder(), input, width, pad, just).toString();
@@ -1295,7 +1309,7 @@ public final class CharUtil
 	 * @param	just	The justification for the padding.
 	 * @return		The padded string.
 	 */
-	public static String padToWidth(char input, int width, char pad, Justification just) {
+	public static String padToWidth(final char input, final int width, final char pad, final Justification just) {
 	    return padToWidth(Character.toString(input), width, pad, just);
 	}
 
@@ -1313,7 +1327,13 @@ public final class CharUtil
 	 * @param	just	The justification of the input string within the given width.
 	 * @return		The original {@code StringBuilder}.
 	 */
-	public static StringBuilder padToWidth(StringBuilder buf, String input, int width, char pad, Justification just) {
+	public static StringBuilder padToWidth(
+		final StringBuilder buf,
+		final String input,
+		final int width,
+		final char pad,
+		final Justification just)
+	{
 	    switch (just) {
 		case LEFT:	// text on the left, pad on the right
 		    buf.append(input);
@@ -1321,6 +1341,7 @@ public final class CharUtil
 			buf.append(pad);
 		    }
 		    break;
+
 		case CENTER:	// text in the center, pad on both left and right
 		    int leftover = Math.abs(width) - input.length();
 		    int left = (width < 0) ? leftover / 2 : (leftover + 1) / 2;
@@ -1333,6 +1354,7 @@ public final class CharUtil
 			buf.append(pad);
 		    }
 		    break;
+
 		case RIGHT:	// pad on the left, text on the right
 		    for (int i = input.length(); i < width; i++) {
 			buf.append(pad);
@@ -1355,7 +1377,7 @@ public final class CharUtil
 	 *			identifier according to the case rules, or a valid
 	 *			delimited identifier.
 	 */
-	public static boolean isValidIdentifier(String value, boolean uppercase) {
+	public static boolean isValidIdentifier(final String value, final boolean uppercase) {
 	    Matcher m;
 	    int len = value.length();
 	    if (len > 1 && value.charAt(0) == '"' && value.charAt(len-1) == '"') {
@@ -1383,7 +1405,7 @@ public final class CharUtil
 	 *
 	 * @return		Regularized result.
 	 */
-	public static String regularizeSpaces(String value) {
+	public static String regularizeSpaces(final String value) {
 	    return runsOfSpacesPattern.matcher(value.trim()).replaceAll(" ");
 	}
 
@@ -1407,7 +1429,7 @@ public final class CharUtil
 	 *
 	 * @return		Trimmed result.
 	 */
-	public static String delimRtrim(Object input) {
+	public static String delimRtrim(final Object input) {
 	    String result = rtrimPattern.matcher((String) input).replaceAll("");
 	    if (result.length() == 0)
 		result = " ";
@@ -1424,7 +1446,7 @@ public final class CharUtil
 	 *
 	 * @return		Trimmed result.
 	 */
-	public static String rtrim(Object input) {
+	public static String rtrim(final Object input) {
 	    return rtrimPattern.matcher((String) input).replaceAll("");
 	}
 
@@ -1438,7 +1460,7 @@ public final class CharUtil
 	 *
 	 * @return		Trimmed result.
 	 */
-	public static String ltrim(Object input) {
+	public static String ltrim(final Object input) {
 	    return ltrimPattern.matcher((String) input).replaceAll("");
 	}
 
@@ -1452,7 +1474,7 @@ public final class CharUtil
 	 * @return			A camelCase version with the underscores removed
 	 *				and the characters after the underscores UpperCased.
 	 */
-	public static String toCamelCase(String enumName) {
+	public static String toCamelCase(final String enumName) {
 	    StringBuilder buf = new StringBuilder(enumName.toLowerCase());
 	    int ix;
 	    while ((ix = buf.indexOf("_")) >= 0) {
@@ -1488,19 +1510,20 @@ public final class CharUtil
 	 * @param	arg	One command argument string.
 	 * @return		That argument string escaped to survive command-line parsing.
 	 */
-	public static String windowsEscapeForCmdLine(String arg) {
+	public static String windowsEscapeForCmdLine(final String arg) {
+	    String value = arg;
 	    //
 	    // If there are no doubleqoutes, backslashes, or whitespace, our argument
 	    // will pass through the CRTL parsing (and ProcessBuilder) unchanged, so we
 	    // don't even need to add our own doublequotes.
 	    //
-	    Matcher m = winCmdArgNeedsQuotingPattern.matcher(arg);
+	    Matcher m = winCmdArgNeedsQuotingPattern.matcher(value);
 	    if (m.find()) {
 		// We need to doublequote the entire argument (which prevents ProcessBuilder
 		// from doing that), and escape any embedded doublequotes, and ensure that
 		// existing embedded backslashes survive the argv parsing.
-		StringBuffer sb = new StringBuffer();
-		m = backslashesBeforeDoubleQuotePattern.matcher(arg);
+		StringBuilder sb = new StringBuilder();
+		m = backslashesBeforeDoubleQuotePattern.matcher(value);
 		while (m.find()) {
 		    if (!m.hitEnd()) {
 			// We found a doublequote, preceded by N (possibly zero) backslashes.
@@ -1530,10 +1553,10 @@ public final class CharUtil
 
 		// Now surround the whole thing with our own doublequotes
 		// (which will be stripped by the CRTL).
-		arg = sb.insert(0, '"').append('"').toString();
+		value = sb.insert(0, '"').append('"').toString();
 	    }
 
-	    return arg;
+	    return value;
 	}
 
 
@@ -1549,7 +1572,7 @@ public final class CharUtil
 	 *				found, or the text quoted by the "opposite"
 	 *				kind of quote if it is found.
 	 */
-	public static String quoteValue(String value, char delimiter) {
+	public static String quoteValue(final String value, final char delimiter) {
 	    if (value.indexOf(delimiter) >= 0) {
 		char quoteChar;
 		switch (delimiter) {
@@ -1581,7 +1604,7 @@ public final class CharUtil
 	 * @return	String consisting of "(" followed by the values in
 	 *		single quotes and separated by commas, then ")".
 	 */
-	public static String makeStringList(String[] values) {
+	public static String makeStringList(final String[] values) {
 	    StringBuilder buf = new StringBuilder();
 	    makeStringList(values, buf);
 	    return buf.toString();
@@ -1596,7 +1619,7 @@ public final class CharUtil
 	 * @param	values	Array of values to insert as a parenthesized list.
 	 * @param	buf	The existing {@link StringBuilder} to append to.
 	 */
-	public static void makeStringList(String[] values, StringBuilder buf) {
+	public static void makeStringList(final String[] values, final StringBuilder buf) {
 	    buf.append('(');
 	    for (String value : values) {
 		addQuotes(value, buf);
@@ -1614,7 +1637,7 @@ public final class CharUtil
 	 * @return	String consisting of "(" followed by the values in
 	 *		single quotes and separated by commas, then ")".
 	 */
-	public static String makeStringList(Object[] values) {
+	public static String makeStringList(final Object[] values) {
 	    StringBuilder buf = new StringBuilder();
 	    makeStringList(values, buf);
 	    return buf.toString();
@@ -1629,7 +1652,7 @@ public final class CharUtil
 	 * @param	values	Array of arbitrary values to insert.
 	 * @param	buf	The existing {@link StringBuilder} to append to.
 	 */
-	public static void makeStringList(Object[] values, StringBuilder buf) {
+	public static void makeStringList(final Object[] values, final StringBuilder buf) {
 	    buf.append('(');
 	    for (Object value : values) {
 		addQuotes(value == null ? null : value.toString(), buf);
@@ -1646,7 +1669,7 @@ public final class CharUtil
 	 * @param	values	The list of values.
 	 * @param	buf	The buffer we're appending this list to.
 	 */
-	public static void addStringList(List<?> values, StringBuilder buf) {
+	public static void addStringList(final List<?> values, final StringBuilder buf) {
 	    buf.append('(');
 	    for (Object value : values) {
 		if (value != null) {
@@ -1664,7 +1687,7 @@ public final class CharUtil
 	 * @param	values	Array of strings
 	 * @return		Comma-separated list as one string
 	 */
-	public static String makeSimpleStringList(String[] values) {
+	public static String makeSimpleStringList(final String[] values) {
 	    return makeSimpleStringList(Arrays.asList(values));
 	}
 
@@ -1675,7 +1698,7 @@ public final class CharUtil
 	 * @param	separator	The character to use to separate the values.
 	 * @return		The list as one string.
 	 */
-	public static String makeSimpleStringList(String[] values, char separator) {
+	public static String makeSimpleStringList(final String[] values, final char separator) {
 	    return makeSimpleStringList(Arrays.asList(values), separator);
 	}
 
@@ -1685,7 +1708,7 @@ public final class CharUtil
 	 * @param	values	{@link Collection} of string values
 	 * @return		Comma-separated list as one string
 	 */
-	public static String makeSimpleStringList(Collection<String> values) {
+	public static String makeSimpleStringList(final Collection<String> values) {
 	    return makeSimpleStringList(values, ',');
 	}
 
@@ -1696,7 +1719,7 @@ public final class CharUtil
 	 * @param	separator	The character to use to separate the values.
 	 * @return		The list as one string.
 	 */
-	public static String makeSimpleStringList(Collection<String> values, char separator) {
+	public static String makeSimpleStringList(final Collection<String> values, final char separator) {
 	    StringBuilder buf = new StringBuilder();
 	    for (String value : values) {
 		if (buf.length() > 0) {
@@ -1714,7 +1737,7 @@ public final class CharUtil
 	 * @param files	The list of objects (which resolve to file names).
 	 * @return	A string that looks like: {@code [ f1, f2, ... ]}
 	 */
-	public static String makeFileStringList(List<?> files) {
+	public static String makeFileStringList(final List<?> files) {
 	    List<String> names = new ArrayList<>(files.size());
 	    for (Object file : files) {
 		File f = new File(file.toString());
@@ -1739,7 +1762,7 @@ public final class CharUtil
 	 * @return		The list of separate values (or {@code null}
 	 *			if the input string is {@code null} or empty).
 	 */
-	public static String[] getListFromString(String value) {
+	public static String[] getListFromString(final String value) {
 	    if (value != null && !value.isEmpty()) {
 		return value.trim().split("\\,\\s*");
 	    }
@@ -1754,7 +1777,7 @@ public final class CharUtil
 	 * @return		The constituent bytes encoded as UTF-8
 	 *			(or {@code null} if the input is).
 	 */
-	public static byte[] getUtf8Bytes(String s) {
+	public static byte[] getUtf8Bytes(final String s) {
 	    return s == null ? null : s.getBytes(utf8Charset);
 	}
 
@@ -1766,7 +1789,7 @@ public final class CharUtil
 	 * @return		The Java string that corresponds (or
 	 *			{@code null} if the input is {@code null}).
 	 */
-	public static String getUtf8String(byte[] bytes) {
+	public static String getUtf8String(final byte[] bytes) {
 	    return bytes == null ? null : new String(bytes, utf8Charset);
 	}
 
@@ -1778,14 +1801,15 @@ public final class CharUtil
 	 *			be {@code null} or empty).
 	 * @param	buf	The buffer where we're building the record.
 	 */
-	public static void quoteForCSV(String input, StringBuilder buf) {
+	public static void quoteForCSV(final String input, final StringBuilder buf) {
 	    if (input != null && !input.isEmpty()) {
 		if (input.indexOf("\"") >= 0 ||
 		    input.indexOf(",") >= 0 ||
 		    input.indexOf("\n") >= 0 ||
 		    input.indexOf("\r") >= 0 ||
 		    input.startsWith(" ") ||
-		    input.endsWith(" ")) {
+		    input.endsWith(" "))
+		{
 		    buf.append('"');
 		    int ix = buf.length();
 		    buf.append(input);
@@ -1811,7 +1835,7 @@ public final class CharUtil
 	 * @param	input	The raw value to append to the CSV record.
 	 * @param	buf	The record buffer.
 	 */
-	public static void appendToCSV(String input, StringBuilder buf) {
+	public static void appendToCSV(final String input, final StringBuilder buf) {
 	    quoteForCSV(input, buf);
 	    buf.append(',');
 	}
@@ -1838,7 +1862,7 @@ public final class CharUtil
 	 * @return Next field value or {@code null} for an empty field
 	 * or the end of string.
 	 */
-	public static String getFromCSV(StringBuilder buf) {
+	public static String getFromCSV(final StringBuilder buf) {
 	    String result = null;
 	    // Skip leading whitespace
 	    int ix = 0;
@@ -1907,7 +1931,7 @@ public final class CharUtil
 	 *		(if any, otherwise {@code null}).
 	 * @see	#getFromCSV
 	 */
-	public static String getFirstFromCSV(String input) {
+	public static String getFirstFromCSV(final String input) {
 	    if (input == null)
 		return input;
 	    StringBuilder buf = new StringBuilder(input);
@@ -1923,7 +1947,7 @@ public final class CharUtil
 	* @return The list or {@code null} if the input is {@code null} or empty.
 	* @see	#getFromCSV
 	*/
-	public static List<String> getListFromCSV(String csv) {
+	public static List<String> getListFromCSV(final String csv) {
 	    if (csv == null || csv.trim().isEmpty()){
 		return null;
 	    }
@@ -1967,7 +1991,7 @@ public final class CharUtil
 	 *		    from some other configuration file); can be	{@code null}
 	 * @return	    The original string with the variable substitutions made.
 	 */
-	public static String substituteEnvValues(String input, Map<String,String> symbols) {
+	public static String substituteEnvValues(final String input, final Map<String,String> symbols) {
 	    StringBuilder buf = new StringBuilder(input);
 	    int ix = buf.indexOf("%");
 	    while (ix >= 0) {
@@ -2061,7 +2085,7 @@ public final class CharUtil
 	 * @return		The input suitable munged (or just the input if it 
 	 *			is {@code null} or empty).
 	 */
-	public static String changeJavaNameToWords(String input) {
+	public static String changeJavaNameToWords(final String input) {
 	    if (input != null && !input.isEmpty()) {
 		StringBuilder buf = new StringBuilder();
 		buf.append(Character.toTitleCase(input.charAt(0)));
@@ -2091,7 +2115,7 @@ public final class CharUtil
 	 * @param	enumName	The input name (presumably in the form we want).
 	 * @return			The transformed name.
 	 */
-	public static String changeEnumNameToWords(String enumName) {
+	public static String changeEnumNameToWords(final String enumName) {
 	    StringBuilder buf = new StringBuilder(enumName.length());
 	    boolean sawUnderscore = false;
 	    for (int i = 0; i < enumName.length(); i++) {
@@ -2119,7 +2143,7 @@ public final class CharUtil
 	 *			{@link String} or a buffer, or something else).
 	 * @return	The number of separate lines in the text.
 	 */
-	public static int countNumberOfLines(CharSequence seq) {
+	public static int countNumberOfLines(final CharSequence seq) {
 	    int count = 0;
 	    if (seq != null) {
 		boolean seenCR = false;
@@ -2147,22 +2171,20 @@ public final class CharUtil
 	*
 	* @return An identifier based on the input string. Returns {@code null} if a suitable identifier cannot be found.
 	*/
-	public static String getValidIdentifier(String str) {
+	public static String getValidIdentifier(final String str) {
 	    if (str == null || str.isEmpty()) {
 		return null;
 	    }
 
 	    // Replace spaces with underscores.
-	    if (str != null) {
-		str = str.trim().replace(' ', '_');
-	    }
+	    String strValue = str.trim().replace(' ', '_');
 
 	    String cleanedString = "";
 
 	    // Ensure that any characters in the string are valid.
-	    for(int index = 0; index < str.length(); index++) {
-		char currentCharacter = str.charAt(index);
-		if(identifierConstructionCharacterSet.indexOf(currentCharacter)>=0){
+	    for (int index = 0; index < strValue.length(); index++) {
+		char currentCharacter = strValue.charAt(index);
+		if (identifierConstructionCharacterSet.indexOf(currentCharacter) >= 0){
 		    cleanedString += currentCharacter;
 		}
 	    }
@@ -2174,9 +2196,9 @@ public final class CharUtil
 
 	    // Ensure that we don't have just a string containing underscores!
 	    boolean hasNonUnderscoreCharacter = false;
-	    for(int index = 0; index < cleanedString.length(); index++) {
+	    for (int index = 0; index < cleanedString.length(); index++) {
 		char currentCharacter = cleanedString.charAt(index);
-		if(currentCharacter != '_'){
+		if (currentCharacter != '_') {
 		    hasNonUnderscoreCharacter = true;
 		    break;
 		}
@@ -2215,7 +2237,7 @@ public final class CharUtil
 	 * @return	{@code null} if the string isn't in the proper format,
 	 *		or the parsed set of values.
 	 */
-	public static String[] getArrayFromSetString(String setString) {
+	public static String[] getArrayFromSetString(final String setString) {
 	    int length = setString.length();
 	    if (length > 2 && setString.charAt(0) == '[' && setString.charAt(length - 1) == ']') {
 		return setString.substring(1, length - 1).split("\\,\\s*");
@@ -2231,7 +2253,7 @@ public final class CharUtil
 	 * @param	input	The simple expression string.
 	 * @return		The input with the escapes parsed out.
 	 */
-	public static String unescape(String input) {
+	public static String unescape(final String input) {
 	    StringBuilder buf = new StringBuilder(input);
 	    int ix = 0;
 	    while ((ix = buf.indexOf("\\", ix)) >= 0) {
@@ -2247,7 +2269,7 @@ public final class CharUtil
 	 * @param	list	The list of values to make printable.
 	 * @return		A JSON-compatible version.
 	 */
-	public static String listToNameString(List<Integer> list) {
+	public static String listToNameString(final List<Integer> list) {
 	    StringBuilder buf = new StringBuilder(list.size() * 5);
 	    buf.append('_');
 	    for (Integer i : list) {
@@ -2263,7 +2285,7 @@ public final class CharUtil
 	 * @param	array	The array of values to make printable.
 	 * @return		A JSON-compatible version.
 	 */
-	public static String arrayToNameString(Object[] array) {
+	public static String arrayToNameString(final Object[] array) {
 	    StringBuilder buf = new StringBuilder(array.length * 5);
 	    buf.append('_');
 	    for (int i = 0; i < array.length; i++) {
@@ -2283,15 +2305,17 @@ public final class CharUtil
 	 *			the input is {@code null} or empty, in which
 	 *			case the input itself is returned.
 	 */
-	public static String capitalizeFirst(String input) {
+	public static String capitalizeFirst(final String input) {
 	    if (input == null || input.isEmpty())
 		return input;
+
 	    char first = input.charAt(0);
 	    StringBuilder buf = new StringBuilder(input.length());
 	    buf.append(Character.toUpperCase(first));
 	    if (input.length() > 1) {
 		buf.append(input.substring(1));
 	    }
+
 	    return buf.toString();
 	}
 
@@ -2305,15 +2329,17 @@ public final class CharUtil
 	 *			the input is {@code null} or empty, in which
 	 *			case the input itself is returned.
 	 */
-	public static String lowercaseFirst(String input) {
+	public static String lowercaseFirst(final String input) {
 	    if (input == null || input.isEmpty())
 		return input;
+
 	    char first = input.charAt(0);
 	    StringBuilder buf = new StringBuilder(input.length());
 	    buf.append(Character.toLowerCase(first));
 	    if (input.length() > 1) {
 		buf.append(input.substring(1));
 	    }
+
 	    return buf.toString();
 	}
 
@@ -2325,7 +2351,7 @@ public final class CharUtil
 	 * @param	width	How much of it you want.
 	 * @return		That many of the fill character.
 	 */
-	public static String makeStringOfChars(char ch, int width) {
+	public static String makeStringOfChars(final char ch, final int width) {
 	    if (width > 0) {
 		char[] chars = new char[width];
 		Arrays.fill(chars, ch);
@@ -2344,7 +2370,7 @@ public final class CharUtil
 	 * @param	width	How many of the fill character to add.
 	 * @return		The input {@code StringBuilder} with the chars appended.
 	 */
-	public static StringBuilder makeStringOfChars(StringBuilder buf, char ch, int width) {
+	public static StringBuilder makeStringOfChars(final StringBuilder buf, final char ch, final int width) {
 	    if (width > 0) {
 		char[] chars = new char[width];
 		Arrays.fill(chars, ch);
@@ -2363,7 +2389,7 @@ public final class CharUtil
 	 * @param	buf	The buffer that is already in progress.
 	 * @param	word	The new word to add at the end of the string.
 	 */
-	public static void addWord(StringBuilder buf, String word) {
+	public static void addWord(final StringBuilder buf, final String word) {
 	    if (buf.length() > 0 &&
 		buf.charAt(buf.length() - 1) != '(' &&
 		!word.startsWith(")")) {
@@ -2381,7 +2407,7 @@ public final class CharUtil
 	 * @param	buf	The buffer that is already in progress.
 	 * @param	value	The new value to add as a word at the end of the string.
 	 */
-	public static void addWord(StringBuilder buf, int value) {
+	public static void addWord(final StringBuilder buf, final int value) {
 	    addWord(buf, Integer.toString(value));
 	}
 
@@ -2394,7 +2420,7 @@ public final class CharUtil
 	 * @param	buf	The buffer that is already in progress.
 	 * @param	words	The new words to add at the end of the string.
 	 */
-	public static void addWords(StringBuilder buf, Object... words) {
+	public static void addWords(final StringBuilder buf, final Object... words) {
 	    for (Object word : words) {
 		if (word != null) {
 		    addWord(buf, word.toString());
@@ -2410,7 +2436,7 @@ public final class CharUtil
 	 * @param	buf	The SQL string buffer that is already in progress.
 	 * @param	word	The new word to add after the comma.
 	 */
-	public static void addClause(StringBuilder buf, String word) {
+	public static void addClause(final StringBuilder buf, final String word) {
 	    if (buf.length() > 0) {
 		buf.append(',');
 	    }
@@ -2427,7 +2453,7 @@ public final class CharUtil
 	 * @param	keyWord	The new keyword to add after the comma.
 	 * @param	value	The value for the keyword phrase.
 	 */
-	public static void addClause(StringBuilder buf, String keyWord, String value) {
+	public static void addClause(final StringBuilder buf, final String keyWord, final String value) {
 	    addClause(buf, keyWord, value, false);
 	}
 
@@ -2443,7 +2469,12 @@ public final class CharUtil
 	 * @param	value	The value for the keyword phrase.
 	 * @param	quoteValue Whether or not to quote the value part.
 	 */
-	public static void addClause(StringBuilder buf, String keyWord, String value, boolean quoteValue) {
+	public static void addClause(
+		final StringBuilder buf,
+		final String keyWord,
+		final String value,
+		final boolean quoteValue)
+	{
 	    if (buf.length() > 0) {
 		buf.append(',');
 	    }
@@ -2470,7 +2501,7 @@ public final class CharUtil
 	 * @return Is the given string null or (trimmed) empty?
 	 * @param value	The (presumably) string value to test.
 	 */
-	public static boolean isNullOrEmpty(Object value) {
+	public static boolean isNullOrEmpty(final Object value) {
 	    return value == null || (value instanceof String && ((String)value).trim().isEmpty());
 	}
 
@@ -2483,7 +2514,7 @@ public final class CharUtil
 	 *		if the trimmed input string is empty (that is, the string
 	 *		consists of all blanks), or the input string otherwise.
 	 */
-	public static String getNullForEmpty(String string) {
+	public static String getNullForEmpty(final String string) {
 	    return (string == null || string.trim().isEmpty()) ? null : string;
 	}
 
@@ -2496,7 +2527,7 @@ public final class CharUtil
 	 * @return		{@code ""} if the input is {@code null} or
 	 *			the input otherwise.
 	 */
-	public static String getEmptyForNull(String string) {
+	public static String getEmptyForNull(final String string) {
 	    return (string == null) ? "" : string;
 	}
 
@@ -2510,7 +2541,7 @@ public final class CharUtil
 	 * @return		If possible, the boolean value that corresponds.
 	 * @throws	IllegalArgumentException for bad string values or bad types.
 	 */
-	public static boolean getBooleanValue(Object value) {
+	public static boolean getBooleanValue(final Object value) {
 	    if (value instanceof Boolean) {
 		return ((Boolean)value).booleanValue();
 	    }
@@ -2577,7 +2608,7 @@ public final class CharUtil
 	 * @return The transformed value, or {@code null} if the input is {@code null}
 	 * or empty (after "trim").
 	 */
-	public static String normalizeWhitespace(String string) {
+	public static String normalizeWhitespace(final String string) {
 	    if (string == null)
 		return string;
 	    String workString = string.trim();
@@ -2641,11 +2672,13 @@ public final class CharUtil
 	 * @return	{@code true} if both strings are null or compare exactly
 	 *		with the {@link String#equals} method, or {@code false} otherwise.
 	 */
-	public static boolean stringsEqual(String s1, String s2) {
+	public static boolean stringsEqual(final String s1, final String s2) {
 	    if (s1 == null && s2 == null)
 		return true;
+
 	    if (s1 != null && s2 != null && s1.equals(s2))
 		return true;
+
 	    return false;
 	}
 
@@ -2658,7 +2691,7 @@ public final class CharUtil
 	 * @return The characters of this string, in hex, surrounded with "[ ]"
 	 * and separated by commas.
 	 */
-	public static String toHexArrayForm(String input) {
+	public static String toHexArrayForm(final String input) {
 	    if (input == null)
 		return "null";
 	    if (input.isEmpty()) {
@@ -2687,7 +2720,7 @@ public final class CharUtil
 	 * @return The bytes of this array, in hex, surrounded with "[ ]"
 	 * and separated by commas.
 	 */
-	public static String toHexArrayForm(byte[] input) {
+	public static String toHexArrayForm(final byte[] input) {
 	    if (input == null)
 		return "null";
 	    if (input.length == 0) {
@@ -2714,7 +2747,7 @@ public final class CharUtil
 	 * @param wildcard The wildcard format string to convert.
 	 * @return The equivalent regex string.
 	 */
-	public static String wildcardToRegex(String wildcard) {
+	public static String wildcardToRegex(final String wildcard) {
 	    // Here are the rules:
 	    // . -> \.
 	    // * -> .*
@@ -2737,7 +2770,7 @@ public final class CharUtil
 		    case '?':
 			buf.append(".");
 			break;
-		    case '\\':
+		    case STD_ESCAPE_CHAR:
 			buf.append("\\\\");
 			break;
 		    case ':':
@@ -2762,7 +2795,7 @@ public final class CharUtil
 	 * without additional padding.
 	 * @return The wrapped string.
 	 */
-	public static String wrapText(String input, int width, boolean pad) {
+	public static String wrapText(final String input, final int width, final boolean pad) {
 	    StringBuilder buf = new StringBuilder(input.length() + 50);
 
 	    int currentLineWidth = 0;
@@ -2850,7 +2883,7 @@ public final class CharUtil
 	 * @param input The input string to test.
 	 * @return {@code true} or {@code false} depending on whether the input represents a valid integer value.
 	 */
-	public static boolean isValidInt(String input) {
+	public static boolean isValidInt(final String input) {
 	    try {
 		int value = Integer.parseUnsignedInt(input);
 	    }
@@ -2869,7 +2902,7 @@ public final class CharUtil
 	 * @return		{@code true} if the input matches exactly any of the choices,
 	 *			or {@code false} otherwise, including null or empty input.
 	 */
-	public static boolean matchesAnyOf(String input, String... choices) {
+	public static boolean matchesAnyOf(final String input, final String... choices) {
 	    if (input == null || input.isEmpty())
 		return false;
 
@@ -2890,7 +2923,7 @@ public final class CharUtil
 	 * @return		{@code true} if the input matches any of the choices, regardless
 	 *			of case, or {@code false} otherwise, including null or empty input.
 	 */
-	public static boolean matchesAnyOfIgnoreCase(String input, String... choices) {
+	public static boolean matchesAnyOfIgnoreCase(final String input, final String... choices) {
 	    if (input == null || input.isEmpty())
 		return false;
 
@@ -2908,7 +2941,7 @@ public final class CharUtil
 	 * @param line	The original command line string.
 	 * @return	The input parsed into pieces.
 	 */
-	public static String[] parseCommandLine(String line) {
+	public static String[] parseCommandLine(final String line) {
 	    List<String> args = new ArrayList<>();
 	    boolean inQuotes = false;
 	    boolean startOfWord = true;
