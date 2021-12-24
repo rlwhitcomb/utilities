@@ -810,10 +810,12 @@
 > b: true, 
 > c: 'ABC' 
 >} -> { a: 10, b: true, c: "ABC" }
->Variable 'p9' cleared.
+>Variables 'p8' and 'p9' cleared.
 >p9 = {'\u{1D71B}': pi} -> { '𝜛': 3.141592653589793238462643383279503 }
 >p9 -> { '𝜛': 3.141592653589793238462643383279503 }
 >` Value of \u{1D71B} = ${p9.'𝜛'}` -> " Value of 𝜛 = 3.141592653589793238462643383279503"
+>p8 = {align: 4, pos: {x: 30, y: 15}, size: {width: 1000, height: '75%'}} -> { align: 4, pos: { x: 30, y: 15 }, size: { width: 1000, height: "75%" } }
+>`align: ${case p8.align of { 2: 'LEFT', 0: 'CENTER', 4: 'RIGHT', default: 'DEFAULT' } }` -> "align: RIGHT"
 >
 >End of nested object / array tests.
 >Tests of :include directive.

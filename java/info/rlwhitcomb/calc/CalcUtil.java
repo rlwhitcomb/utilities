@@ -325,21 +325,21 @@ public final class CalcUtil
 
 	    // These are the high surrogates of the PI_VALUES from Calc.g4
 	    char ch2 = str.charAt(pos + 1);
-	    if (ch2 == '\uDEB7'  // '\u{1D6B7}'
-	     || ch2 == '\uDED1'  // '\u{1D6D1}'
-	     || ch2 == '\uDEE1'  // '\u{1D6E1}'
-	     || ch2 == '\uDEF1'  // '\u{1D6F1}'
-	     || ch2 == '\uDF0B'  // '\u{1D70B}'
-	     || ch2 == '\uDF1B'  // '\u{1D71B}'
-	     || ch2 == '\uDF2B'  // '\u{1D72B}'
-	     || ch2 == '\uDF45'  // '\u{1D745}'
-	     || ch2 == '\uDF55'  // '\u{1D755}'
-	     || ch2 == '\uDF65'  // '\u{1D765}'
-	     || ch2 == '\uDF7F'  // '\u{1D77F}'
-	     || ch2 == '\uDF8F'  // '\u{1D78F}'
-	     || ch2 == '\uDF9F'  // '\u{1D79F}'
-	     || ch2 == '\uDFB9'  // '\u{1D7B9}'
-	     || ch2 == '\uDFC9') // '\u{1D7C9}'
+	    if (ch2 == '\uDEB7'  // 1D6B7
+	     || ch2 == '\uDED1'  // 1D6D1
+	     || ch2 == '\uDEE1'  // 1D6E1
+	     || ch2 == '\uDEF1'  // 1D6F1
+	     || ch2 == '\uDF0B'  // 1D70B
+	     || ch2 == '\uDF1B'  // 1D71B
+	     || ch2 == '\uDF2B'  // 1D72B
+	     || ch2 == '\uDF45'  // 1D745
+	     || ch2 == '\uDF55'  // 1D755
+	     || ch2 == '\uDF65'  // 1D765
+	     || ch2 == '\uDF7F'  // 1D77F
+	     || ch2 == '\uDF8F'  // 1D78F
+	     || ch2 == '\uDF9F'  // 1D79F
+	     || ch2 == '\uDFB9'  // 1D7B9
+	     || ch2 == '\uDFC9') // 1D7C9
 		return true;
 
 	    return false;

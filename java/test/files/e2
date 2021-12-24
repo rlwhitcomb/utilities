@@ -105,11 +105,14 @@ s1
   c : 'ABC'
 }
 
-// Tests of extended idenfier characters
-:clear p9
+// Tests of extended identifier characters
+:clear p8, p9
 p9 = { '\u{1D71B}': pi }
 p9
 ` Value of \u{1D71B} = ${p9.'𝜛'}`
+p8 = { align: 4, pos: { x: 30, y: 15 }, size: { width: 1000, height: '75%' }}
+`align: ${case p8.align of { 2: 'LEFT', 0: 'CENTER', 4: 'RIGHT', default: 'DEFAULT' } }`
+
 
 :echo
 :echo "End of nested object / array tests."
