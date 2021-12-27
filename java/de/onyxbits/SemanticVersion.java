@@ -424,7 +424,6 @@ public final class SemanticVersion implements Comparable<SemanticVersion> {
 			return stateMinor(pos + 1);
 		}
 		if (input[pos] == '+' || input[pos] == '_') { // We have build meta tags -> descend
-			metaPrefix = input[pos];
 			return stateMeta(pos + 1);
 		}
 		if (input[pos] == '-') { // We have pre release tags -> descend
@@ -453,7 +452,6 @@ public final class SemanticVersion implements Comparable<SemanticVersion> {
 			return statePatch(pos + 1);
 		}
 		if (input[pos] == '+' || input[pos] == '_') { // We have build meta tags -> descend
-			metaPrefix = input[pos];
 			return stateMeta(pos + 1);
 		}
 		if (input[pos] == '-') { // We have pre release tags -> descend
@@ -484,7 +482,6 @@ public final class SemanticVersion implements Comparable<SemanticVersion> {
 		}
 
 		if (input[pos] == '+' || input[pos] == '_') { // We have build meta tags -> descend
-			metaPrefix = input[pos];
 			return stateMeta(pos + 1);
 		}
 		if (input[pos] == '-') { // We have pre release tags -> descend
@@ -515,7 +512,6 @@ public final class SemanticVersion implements Comparable<SemanticVersion> {
 			return stateRelease(pos + 1);
 		}
 		if (input[pos] == '+' || input[pos] == '_') { // We have build meta tags -> descend
-			metaPrefix = input[pos];
 			return stateMeta(pos + 1);
 		}
 
@@ -525,6 +521,10 @@ public final class SemanticVersion implements Comparable<SemanticVersion> {
 
 	private boolean stateMeta(final int index) {
 		int pos = index;
+		if (input[pos - 1] != '.') {
+			metaPrefix = input[pos - 1];
+		}
+
 		while ((pos < input.length)
 				&& ((input[pos] >= '0' && input[pos] <= '9')
 						|| (input[pos] >= 'a' && input[pos] <= 'z')
