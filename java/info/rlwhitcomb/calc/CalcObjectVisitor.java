@@ -426,6 +426,8 @@
  *	    #159: Silence directives on command.
  *	24-Dec-2021 (rlwhitcomb)
  *	    #125: Add new Java version fields to "info.java".
+ *	27-Dec-2021 (rlwhitcomb)
+ *	    #125: Changed order of "info.java" fields.
  */
 package info.rlwhitcomb.calc;
 
@@ -748,9 +750,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    int javaMajor = Environment.javaMajorVersion();
 	    String javaVersion = Environment.javaVersion();
 
-	    java.setValue("major",   javaMajor);
-	    java.setValue("version", javaVersion);
-	    java.setValue("model",   Environment.dataModel());
+	    java.setValue("major", javaMajor);
 
 	    try {
 		SemanticVersion jv = new SemanticVersion(javaVersion);
@@ -770,6 +770,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		// This is a programmer error and needs to be fixed in SemanticVersion
 		System.err.println("ERROR: Problem with Java version: " + ExceptionUtil.toString(pe));
 	    }
+
+	    java.setValue("version", javaVersion);
+	    java.setValue("model",   Environment.dataModel());
 
 	    ObjectScope info = new ObjectScope();
 
