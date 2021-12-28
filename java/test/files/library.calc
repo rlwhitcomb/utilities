@@ -130,7 +130,7 @@ define is_perfect($n) = { sumof ( factors ($n) ) - $n == $n }
 
 /*
  * Solve the quadratic formula to find the roots of a general
- * quadratice equation: a*x**2 + b*x + c = 0.
+ * quadratic equation: a*x**2 + b*x + c = 0.
  * x = (-b +- sqrt(b**2 - 4 * a * c))/2*a
  *
  * @param $a
@@ -191,10 +191,10 @@ define PMT2($P,$r,$n) = {
    round(_pmt_internal_({P:$P, r:$r, n:$n}), 2)
 }
 
-def monthly($P,$R,$N) = { `Full monthly payment is ${PMT($P,$R,$N)@2,$}` }
-def monthly_whole($P,$R,$N) = { `Monthly payment in whole dollars is ${PMT($P,$R,$N)@0,$}` }
+def monthly($P,$R,$N)@q = { `Full monthly payment is ${PMT($P,$R,$N)@2,$}` }
+def monthly_whole($P,$R,$N)@q = { `Monthly payment in whole dollars is ${PMT($P,$R,$N)@0,$}` }
 
-def help_mort = { "\nUsage: PMT(P=<present value>,R=<yearly interest rate (%)>,N=<number of years>)\n    or PMT2(P,r=<monthly interest %>,n=<number of months>)\n   Or use monthly(P,R,N) or monthly_whole(P,R,N) to get the results in different forms." }
+def help_mort@q = { "\nUsage: PMT(P=<present value>,R=<yearly interest rate (%)>,N=<number of years>)\n    or PMT2(P,r=<monthly interest %>,n=<number of months>)\n   Or use monthly(P,R,N) or monthly_whole(P,R,N) to get the results in different forms." }
 
 /*
  * Compute the winning percentage, given wins, ties, and losses.
