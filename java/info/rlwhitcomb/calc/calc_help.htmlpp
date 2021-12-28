@@ -955,6 +955,9 @@ or
   <h2>Directives</h2>
 <div class="cols">
   Various directives can be given within a script or on a separate input line in REPL mode that will affect the operation of the calculator. Some of them allow you to change the options given on the command line, while others are only available from within the script. All the mode-setting directives are also available in the Settings dialog (the <span class="orangebutton">&#x2261;</span> button or <code>F2</code> key) in GUI mode.
+  <p>Note that directives do not themselves have values. This means that directives can be nested around expressions in functions (for instance)
+     and the function value will be the same as if the directives were not present (well, unless the directives directly affect the calculation,
+     as in <code>:rational on</code>).
 </div>
   <div class="center">
   <table style="margin-left:auto;margin-right:auto;">

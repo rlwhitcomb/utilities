@@ -429,6 +429,7 @@
  *	27-Dec-2021 (rlwhitcomb)
  *	    #125: Changed order of "info.java" fields.
  *	    #170: Switch "length" and "scale" computation.
+ *	    #176: Directives shouldn't affect a return value.
  */
 package info.rlwhitcomb.calc;
 
@@ -1575,7 +1576,28 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		}
 
 		if (node instanceof ParserRuleContext)
-		    node = ((ParserRuleContext)node).children.get(0);
+		    node = ((ParserRuleContext) node).children.get(0);
+		else
+		    node = null;
+	    }
+	    return false;
+	}
+
+	/**
+	 * Given the root of a parse tree (branch), is the leaf node of this branch
+	 * a directive (that is, the class name contains "Directive").
+	 *
+	 * @param root The parse tree to examine.
+	 * @return     Whether the leftmost leaf node is a "directive" or not.
+	 */
+	private boolean isDirective(final ParseTree root) {
+	    ParseTree node = root;
+	    while (node != null) {
+		if (node.getClass().getSimpleName().indexOf("Directive") >= 0)
+		    return true;
+
+		if (node instanceof ParserRuleContext)
+		    node = ((ParserRuleContext) node).children.get(0);
 		else
 		    node = null;
 	    }
@@ -2268,7 +2290,10 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    for (CalcParser.StmtOrExprContext child : ctx.stmtOrExpr()) {
 		if (child.emptyStmt() == null) {
-		    returnValue = visit(child);
+		    if (isDirective(child))
+			visit(child);
+		    else
+			returnValue = visit(child);
 		}
 	    }
 
