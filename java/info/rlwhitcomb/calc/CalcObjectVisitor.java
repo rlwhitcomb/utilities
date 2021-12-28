@@ -430,6 +430,8 @@
  *	    #125: Changed order of "info.java" fields.
  *	    #170: Switch "length" and "scale" computation.
  *	    #176: Directives shouldn't affect a return value.
+ *	28-Dec-2021 (rlwhitcomb)
+ *	    #183: Introduce '@q' to deliver unquoted strings, no matter the settings.
  */
 package info.rlwhitcomb.calc;
 
@@ -1716,6 +1718,11 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    case 'l':
 			toLowerCase = true;
 			valueBuf.append(toStringValue(this, ctx, result, settings.quoteStrings, settings.separatorMode));
+			break;
+
+		    case 'Q':
+		    case 'q':
+			valueBuf.append(toStringValue(this, ctx, result, false, settings.separatorMode));
 			break;
 
 		    case 'C':
