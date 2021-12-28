@@ -307,6 +307,8 @@
  *	    #151: Fix precedence of boolean operators.
  *	18-Dec-2021 (rlwhitcomb)
  *	    #159: Add directive to silence display of directives.
+ *	28-Dec-2021 (rlwhitcomb)
+ *	    #183: Allow FORMAT on function declarations.
  */
 
 grammar Calc;
@@ -342,7 +344,7 @@ exprStmt
    ;
 
 defineStmt
-   : K_DEFINE id formalParamList ? '=' stmtBlock
+   : K_DEFINE id formalParamList ? FORMAT ? '=' stmtBlock
    ;
 
 loopStmt

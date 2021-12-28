@@ -33,6 +33,8 @@
  *	    #69: Implement variable number of parameters.
  *	09-Nov-2021 (rlwhitcomb)
  *	    #74: Add "hasVarargs" method.
+ *	28-Dec-2021 (rlwhitcomb)
+ *	    #183: Save FORMAT spec (if any given).
  */
 package info.rlwhitcomb.calc;
 
@@ -77,6 +79,11 @@ class FunctionDeclaration
 	private boolean hasVarargs;
 
 	/**
+	 * Format specification for the return value (if any).
+	 */
+	private String formatSpec;
+
+	/**
 	 * Placeholder parameter name for the variable parameter list.
 	 */
 	public static final String VARARG = "...";
@@ -94,6 +101,7 @@ class FunctionDeclaration
 	    this.parameters     = new LinkedHashMap<>();
 	    this.parameterNames = null;
 	    this.hasVarargs     = false;
+	    this.formatSpec     = null;
 	}
 
 	/**
@@ -117,6 +125,24 @@ class FunctionDeclaration
 
 	    /* Invalidate the parameter names array (if it exists) since we just added a new one */
 	    parameterNames = null;
+	}
+
+	/**
+	 * Set the return value format specification (string like {@code "@+20s"}).
+	 *
+	 * @param formatString	Taken from the user input, right after the formal params.
+	 */
+	public void setFormat(final String formatString) {
+	    formatSpec = formatString;
+	}
+
+	/**
+	 * Access the format specification (if any).
+	 *
+	 * @return The format specified at declaration time, or {@code null} if none was given.
+	 */
+	public String getFormat() {
+	    return formatSpec;
 	}
 
 	/**
@@ -182,6 +208,9 @@ class FunctionDeclaration
 		    first = false;
 		}
 		buf.append(')');
+	    }
+	    if (formatSpec != null) {
+		buf.append(formatSpec);
 	    }
 
 	    return buf.toString();

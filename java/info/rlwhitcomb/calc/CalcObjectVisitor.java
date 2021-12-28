@@ -432,6 +432,8 @@
  *	    #176: Directives shouldn't affect a return value.
  *	28-Dec-2021 (rlwhitcomb)
  *	    #183: Introduce '@q' to deliver unquoted strings, no matter the settings.
+ *	    #183: Allow FORMAT on function declarations. Break out formatting code to
+ *	    its own method, now being called in two places.
  */
 package info.rlwhitcomb.calc;
 
@@ -490,6 +492,7 @@ import info.rlwhitcomb.util.Intl;
 import info.rlwhitcomb.util.MathUtil;
 import info.rlwhitcomb.util.NumericUtil;
 import static info.rlwhitcomb.util.NumericUtil.RangeMode;
+import info.rlwhitcomb.util.Pair;
 import info.rlwhitcomb.util.RunCommand;
 import info.rlwhitcomb.util.Which;
 
@@ -1089,11 +1092,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    if (returnValue != null && returnValue instanceof FunctionScope) {
 		FunctionScope func = (FunctionScope) returnValue;
+		FunctionDeclaration funcDecl = func.getDeclaration();
 
 		boolean prevSilent = setSilent(true);
 		pushScope(func);
 		try {
-		    returnValue = visit(func.getDeclaration().getFunctionBody());
+		    returnValue = visit(funcDecl.getFunctionBody());
 		}
 		catch (LeaveException lex) {
 		    if (lex.hasValue()) {
@@ -1103,6 +1107,11 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		finally {
 		    popScope();
 		    setSilent(prevSilent);
+		}
+		String format = funcDecl.getFormat();
+		if (format != null) {
+		    Pair<Object, String> formattedResults = formatResults(ctx, returnValue, format, false);
+		    returnValue = formattedResults.getFirst();
 		}
 	    }
 
@@ -1644,6 +1653,34 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    Object result               = evaluateFunction(expr, visit(expr));
 	    String resultString         = "";
 
+	    TerminalNode formatNode = ctx.FORMAT();
+	    String format           = formatNode == null ? "" : " " + formatNode.getText();
+
+	    Pair<Object, String> formattedResults = formatResults(ctx, result, format, !settings.silent);
+
+	    // Some formats change the result to the formatted string, so take that into account
+	    result = formattedResults.getFirst();
+	    resultString = formattedResults.getSecond();
+
+	    if (!settings.silent) {
+		String exprString = String.format("%1$s%2$s", getTreeText(ctx.expr()), format);
+		displayer.displayResult(exprString, resultString);
+	    }
+
+	    return result;
+	}
+
+	/**
+	 * Format the given result according to the format specification (if any).
+	 *
+	 * @param ctx        The context where we're called from (for error reporting).
+	 * @param result     The actual expression result (previously computed).
+	 * @param format     The format specification to use (can be null or empty).
+	 * @param doDisplay  Whether to actually convert to a displayable result (usually the "!silent" flag,
+	 *                   but can be set for other reasons, like doing function results).
+	 * @return           A pair containing the possibly updated result value, and the formatted result string.
+	 */
+	private Pair<Object, String> formatResults(ParserRuleContext ctx, Object result, String format, boolean doDisplay) {
 	    BigInteger iValue = null;
 	    BigDecimal dValue = null;
 
@@ -1651,10 +1688,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    boolean separators = false;
 	    boolean addQuotes = false;
 	    char signChar = ' ';
-
-	    TerminalNode formatNode = ctx.FORMAT();
-	    String format           = formatNode == null ? "" : " " + formatNode.getText();
-	    String exprString       = String.format("%1$s%2$s", getTreeText(ctx.expr()), format);
+	    String resultString = "";
 
 	    // Some formats allow a precision to be given ('%', '$', and 'd' for instance)
 	    // but some others (like 't') allow a second alpha as well
@@ -1952,7 +1986,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			break;
 
 		    default:
-			throw new CalcExprException(ctx, "%calc#illegalFormat", formatNode.getText());
+			throw new CalcExprException(ctx, "%calc#illegalFormat", format);
 		}
 
 		resultString = valueBuf.toString();
@@ -1970,14 +2004,11 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    else {
 		// For large numbers it takes a significant amount of time just to convert
 		// to a string, so don't even try if we don't need to for display
-		if (!settings.silent)
+		if (doDisplay)
 		    resultString = toStringValue(this, ctx, result, settings.quoteStrings, separators);
 	    }
 
-	    if (!settings.silent) displayer.displayResult(exprString, resultString);
-
-	    return result;
-
+	    return new Pair<Object, String>(result, resultString);
 	}
 
 	private class LoopVisitor implements Function<Object, Object>
@@ -2313,6 +2344,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    CalcParser.StmtBlockContext functionBody       = ctx.stmtBlock();
 	    CalcParser.FormalParamListContext formalParams = ctx.formalParamList();
+	    TerminalNode formatNode                        = ctx.FORMAT();
 
 	    String paramString = formalParams == null ? "" : getTreeText(formalParams);
 	    List<CalcParser.FormalParamContext> paramVars = formalParams == null ? null : formalParams.formalParam();
@@ -2326,6 +2358,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		if (formalParams.DOTS() != null) {
 		    func.defineParameter(formalParams, FunctionDeclaration.VARARG, null);
 		}
+	    }
+	    if (formatNode != null) {
+		func.setFormat(formatNode.getText());
 	    }
 
 	    currentScope.setValue(functionName, settings.ignoreNameCase, func);
