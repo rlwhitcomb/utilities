@@ -80,6 +80,8 @@
 		#109: Add "Quote Strings" option to settings.
 	    18-Dec-2021 (rlwhitcomb)
 		#159: New "Silence Directives" option.
+	    28-Dec-2021 (rlwhitcomb)
+		#167: Increase spacing under "Display Modes" in Settings.
 
      ========================================================================== -->
 
@@ -196,7 +198,7 @@
 		    </GridPane>
 		</Form.Section>
 		<Form.Section heading="%displayHeader">
-		    <GridPane columnCount="3" styles="{horizontalSpacing:10}" preferredWidth="560">
+		    <GridPane columnCount="3" styles="{horizontalSpacing:10,verticalSpacing:8}" preferredWidth="560">
 			<GridPane.Row>
 			    <Checkbox bxml:id="quietCheck" buttonData="%quiet"/>
 			    <Checkbox bxml:id="silenceCheck" buttonData="%silence"/>
