@@ -428,6 +428,7 @@
  *	    #125: Add new Java version fields to "info.java".
  *	27-Dec-2021 (rlwhitcomb)
  *	    #125: Changed order of "info.java" fields.
+ *	    #170: Switch "length" and "scale" computation.
  */
 package info.rlwhitcomb.calc;
 
@@ -2905,9 +2906,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    else {
 		Object obj = visit(ctx.expr1().expr());
 
-		// This calculates the recursive size of objects and arrays
-		// so, use "scale" to calculate the non-recursive size
-		return BigInteger.valueOf((long) length(this, obj, ctx, true));
+		// This returns the non-recursive size of objects and arrays
+		// so, use "scale" to calculate the recursive (full) size
+		return BigInteger.valueOf((long) length(this, obj, ctx, false));
 	    }
 	}
 
@@ -2915,8 +2916,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public Object visitScaleExpr(CalcParser.ScaleExprContext ctx) {
 	    Object obj = visit(ctx.expr1().expr());
 
-	    // This returns the non-recursive size of objects and arrays
-	    // so, use "length" to calculate the recursive (full) size
+	    // This calculates the recursive size of objects and arrays
+	    // so, use "length" to calculate the non-recursive size
 	    return BigInteger.valueOf((long) scale(this, obj, ctx));
 	}
 

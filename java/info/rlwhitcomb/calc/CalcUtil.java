@@ -105,6 +105,8 @@
  *	23-Dec-2021 (rlwhitcomb)
  *	    #179: Fix interpolated expression evaluation with nested brackets.
  *	    Fix identifier identification to completely match the expanded definitions in the grammar.
+ *	27-Dec-2021 (rlwhitcomb)
+ *	    #170: Switch "length" and "scale".
  */
 package info.rlwhitcomb.calc;
 
@@ -814,8 +816,8 @@ public final class CalcUtil
 	/**
 	 * Compute the "scale" of the given object:
 	 * <ul><li>{@code BigDecimal} = the {@code scale()} value.</li>
-	 * <li>{@code Object} = the non-recursive size (number of entries)</li>
-	 * <li>{@code Array} = the non-recursive size (number of entries)</li>
+	 * <li>{@code Object} = the recursive (total) size</li>
+	 * <li>{@code Array} = the recursive (total) size</li>
 	 * <li>everything else = {@code 0}</li>
 	 * </ul>
 	 *
@@ -832,7 +834,7 @@ public final class CalcUtil
 	    if (obj instanceof BigFraction)
 		return ((BigFraction) obj).toDecimal().scale();
 	    if (obj instanceof ArrayScope || obj instanceof ObjectScope)
-		return length(visitor, obj, ctx, false);
+		return length(visitor, obj, ctx, true);
 	    return 0;
 	}
 

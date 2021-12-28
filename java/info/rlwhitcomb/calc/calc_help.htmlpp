@@ -595,7 +595,7 @@ or
             <tr><td><code>TENPOW</code>&nbsp;<i>expr</i></td><td>10 ** <i>expr</i> (anti-log base ten)</td></tr>
             <tr><td><code>SIGNUM</code>&nbsp;<i>expr</i></td><td>sign (&lt; 0 = -1, 0 = 0, &gt; 0 = +1)</td></tr>
             <tr><td><code>LENGTH</code>&nbsp;<i>expr</i><br>or <i>expr</i> [ <code>..</code> or <code>&#x2026;</code> <i>expr</i> [ <code>,</code> <i>expr</i> ] ]</td><td>length of string, array, object, or range</td></tr>
-            <tr><td><code>SCALE</code>&nbsp;<i>expr</i></td><td>scale of number</td></tr>
+            <tr><td><code>SCALE</code>&nbsp;<i>expr</i></td><td>scale of number, total size of object or array</td></tr>
             <tr><td><code>ROUND</code>&nbsp;<i>expr</i><code>,</code>&nbsp;<i>expr</i></td><td>round value to given places</td></tr>
             <tr><td><code>ISPRIME</code>&nbsp;<i>expr</i></td><td>is the value a prime number?</td></tr>
             <tr><td><code>ISNULL</code>&nbsp;<i>expr</i></td><td>is the value null?</td></tr>
@@ -719,14 +719,14 @@ or
 <div class="cols">
   <p>Some of the functions might require a bit of explanation as to how they work. The <code>length</code> function takes
      any one of a number, an array, an object, a string, or a range expression and returns the "size" of the value. For strings,
-     this is the number of codepoints in the string, for arrays it is the number of elements (recursive for multi-dimensional
-     arrays), for objects it is the number of elements in the object (again, recursive for nested objects). A string embedded
+     this is the number of codepoints in the string, for arrays it is the number of items in the array (first-level size),
+     for objects it is the number of elements in the object (again, not recursive for nested objects). A string embedded
      inside an array or object counts as one object, however. Also, inside arrays or objects a null entry counts as one
      object. For integer numbers the length is the number of digits in the absolute value, and for decimal numbers it is the
      "precision" or number of digits in the unscaled value. For a range expression the length is the number of elements in
      the range. So, for instance, a range of <code>49..300,21</code> gives a length of 12, corresponding to the values of
      <code>49, 70, 91, 112, ..., 280</code>. For fractions, the length is the same as the length of its decimal representation.
-  <p>The <code>scale</code> function returns the non-recursive size of arrays or objects, for strings the value is 0, for
+  <p>The <code>scale</code> function returns the total (recursive) size of arrays or objects, for strings the value is 0, for
      decimal numbers or fractions the value is the "scale" of the decimal representation of the number, which is complicated
      but basically means where the decimal point is placed relative to the raw digits: zero or positive is the number of digits
      to the right of the decimal point, negative is the number of extra zeros after the significant digits and to the left of
