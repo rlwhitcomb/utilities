@@ -44,6 +44,8 @@
  *	    Test the ratio of first to second access times.
  *	24-Aug-2021 (rlwhitcomb)
  *	    For Windows, halve the expected ratio.
+ *	28-Dec-2021 (rlwhitcomb)
+ *	    #187: Fix ratio if the 2nd time is zero (rounded).
  */
 package info.rlwhitcomb.test;
 
@@ -271,8 +273,8 @@ public class InitTaskTest
 		 * @return First time seconds / second time seconds.
 		 */
 		public double timeRatio() {
-		    double ratio = Math.round(firstTimeSecs / secondTimeSecs);
-		    System.out.println(String.format("InitTask: time ratio %1$,5.0fx.", ratio));
+		    double ratio = secondTimeSecs < 1.0e-6 ? Double.POSITIVE_INFINITY : Math.round(firstTimeSecs / secondTimeSecs);
+		    System.out.println(String.format("InitTask: time ratio %1$,5.0f x.", ratio));
 		    return ratio;
 		}
 	}
