@@ -1,18 +1,19 @@
-====================================
-Running wordfindtest...
-------------------------------------
-Tests of WordFind functionality...
-
-Test 'fatherly': Passed
-Test 'hunger': Passed
-Test 'painful': Passed
-Test 'politics': Passed
-Test 'frame': Passed
-Test 'phalangeal': Passed
-Test 'tottery': Passed
-
-Done with WordFind tests.
-------------------------------------
-Ran 7 tests: 7 passed, 0 failed.
-====================================
-
+>====================================
+>Running wordfindtest...
+>------------------------------------
+>Tests of WordFind functionality...
+>
+>Test 'fatherly': Passed
+>Test 'hunger': Passed
+>Test 'painful': Passed
+>Test 'politics': Passed
+>Test 'frame': Passed
+>Test 'phalangeal': Passed
+>Test 'tottery': Passed
+>Test 'dacted': Passed
+>
+>Done with WordFind tests.
+>------------------------------------
+>Ran 8 tests: 8 passed, 0 failed.
+>====================================
+>

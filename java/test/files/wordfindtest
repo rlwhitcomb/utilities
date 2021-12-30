@@ -13,6 +13,7 @@ politics: politics
 frame: frame.
 phalangeal: phalangeal
 tottery: tty.rot
+dacted: dacted. -c e
 
 :echo
 :echo Done with WordFind tests.
