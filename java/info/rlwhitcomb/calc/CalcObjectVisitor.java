@@ -435,6 +435,9 @@
  *	    #188: Add "ceil" and "floor" functions.
  *	    #137: Add "reverse" function.
  *	    #128: Add "lpad", "pad", and "rpad" functions.
+ *	31-Dec-2021 (rlwhitcomb)
+ *	    Refactor the "getCharValue" code into a single method. Refactor "fill"
+ *	    a bit to make only the variable mandatory.
  */
 package info.rlwhitcomb.calc;
 
@@ -3761,6 +3764,38 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 	}
 
+	/**
+	 * Get a one-character value for "fill" or "pad" from the given value, in the given context.
+	 *
+	 * @param ctx	The parser context (for error reporting).
+	 * @param value	The expression value to be evaluated.
+	 * @param op	Whether this is a "fill" or "pad" operation (for errors).
+	 * @param def	The default character to use (in case the value is {@code null}).
+	 * @return	The single character (either the first of a string, or an int converted to char).
+	 */
+	private char getCharValue(ParserRuleContext ctx, Object value, String op, char def) {
+	    char charValue = def;
+
+	    if (value != null) {
+		if (value instanceof String) {
+		    String string = (String) value;
+		    if (string.length() != 1) {
+			throw new CalcExprException(ctx, "%calc#oneCharInt", op);
+		    }
+		    charValue = string.charAt(0);
+		}
+		else if (value instanceof Number) {
+		    int intValue = ((Number) value).intValue();
+		    if (intValue < 0 || intValue > Short.MAX_VALUE) {
+			throw new CalcExprException(ctx, "%calc#oneCharInt", op);
+		    }
+		    charValue = (char) intValue;
+		}
+	    }
+
+	    return charValue;
+	}
+
 	@Override
 	public Object visitFillExpr(CalcParser.FillExprContext ctx) {
 	    CalcParser.FillArgsContext fillCtx  = ctx.fillArgs();
@@ -3768,16 +3803,20 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    LValueContext lValue                = getLValue(varCtx);
 	    Object value		        = lValue.getContextObject(this);
 	    List<CalcParser.ExprContext> exprs  = fillCtx.expr();
-	    CalcParser.ExprContext fillExpr     = exprs.get(0);
+	    CalcParser.ExprContext fillExpr	= null;
 
-	    Object fillValue = evaluateFunction(fillExpr, visit(fillExpr));
+	    Object fillValue = null;
 	    int start  = 0;
 	    int length = 0;
 
+	    if (exprs.size() > 0) {
+		fillExpr = exprs.get(0);
+		fillValue = evaluateFunction(fillExpr, visit(fillExpr));
+	    }
 	    if (exprs.size() == 2) {
 		length = getIntValue(exprs.get(1));
 	    }
-	    else {
+	    else if (exprs.size() == 3) {
 		start  = getIntValue(exprs.get(1));
 		length = getIntValue(exprs.get(2));
 	    }
@@ -3785,33 +3824,22 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    if (value instanceof ArrayScope) {
 		@SuppressWarnings("unchecked")
 		ArrayScope<Object> list = (ArrayScope<Object>) value;
+		if (length == 0)
+		    length = list.size();
 		for (int index = start; index < (start + length); index++) {
 		    list.setValue(index, fillValue);
 		}
 	    }
 	    else if (value instanceof String) {
 		StringBuilder buf = new StringBuilder((String) value);
+		if (length == 0)
+		    length = buf.length();
 		if (buf.length() < start + length) {
 		    buf.setLength(start + length);
 		}
 
-		char fillChar = '\0';
-		if (fillValue != null) {
-		    if (fillValue instanceof String) {
-			String fillString = (String) fillValue;
-			if (fillString.length() != 1) {
-			    throw new CalcExprException(ctx, "%calc#oneCharInt", "Fill");
-			}
-			fillChar = fillString.charAt(0);
-		    }
-		    else if (fillValue instanceof Number) {
-			int intValue = ((Number) fillValue).intValue();
-			if (intValue < 0 || intValue > Short.MAX_VALUE) {
-			    throw new CalcExprException(ctx, "%calc#oneCharInt", "Fill");
-			}
-			fillChar = (char) intValue;
-		    }
-		}
+		char fillChar = getCharValue(fillExpr, fillValue, "Fill", '\0');
+
 		for (int index = start; index < (start + length); index++) {
 		    buf.setCharAt(index, fillChar);
 		}
@@ -3919,20 +3947,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    if (exprs.size() > 1) {
 			padExpr = exprs.get(1);
 			padValue = evaluateFunction(padExpr, visit(padExpr));
-			if (padValue instanceof String) {
-			    String padString = (String) padValue;
-			    if (padString.length() != 1) {
-				throw new CalcExprException(ctx, "%calc#oneCharInt", "Pad");
-			    }
-			    padChar = padString.charAt(0);
-			}
-			else if (padValue instanceof Number) {
-			    int intValue = ((Number) padValue).intValue();
-			    if (intValue < 0 || intValue > Short.MAX_VALUE) {
-				throw new CalcExprException(ctx, "%calc#oneCharInt", "Pad");
-			    }
-			    padChar = (char) intValue;
-			}
+			padChar = getCharValue(padExpr, padValue, "Pad", ' ');
 		    }
 
 		    switch (op.toLowerCase()) {

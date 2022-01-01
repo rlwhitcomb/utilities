@@ -616,7 +616,7 @@ or
             <tr><td><code>SLICE</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;)&nbsp;)</td><td>extract a slice of an array (or string)</td></tr>
             <tr><td><code>SPLICE</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;) *</td><td>modify an array by deleting and/or adding elements</td></tr>
             <tr><td><code>SPLICE</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <code>[</code> <i>id or string list</i> <code>]</code>&nbsp;)<br>(&nbsp;<code>,</code> <code>{</code> <i>key:value pairs</i> <code>}</code>&nbsp;)</td><td>modify an object by deleting and/or adding elements</td></tr>
-            <tr><td><code>FILL</code>&nbsp;<i>var</i>&nbsp;<code>,</code> <i>expr</i>&nbsp;<code>,</code> <i>expr</i> ( <code>,</code><i>expr</i> )</td><td>fill an array or string</td></tr>
+            <tr><td><code>FILL</code>&nbsp;<i>var</i>&nbsp;( <code>,</code> <i>expr</i>&nbsp;( <code>,</code> <i>expr</i>&nbsp;( <code>,</code><i>expr</i> ) ) )</td><td>fill an array or string</td></tr>
             <tr><td><code>SORT</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;)</td><td>sort the array expression, optionally ignoring case,<br>returning the array of sorted values</td></tr>
             <tr><td><code>TRIM</code> or <code>LTRIM</code> or <code>RTRIM</code> <i>expr</i></td><td>trim all, leading, or trailing whitespace</td></tr>
             <tr><td><code>PAD</code> or <code>LPAD</code> or <code>RPAD</code>&nbsp;<i>var</i>&nbsp;<code>,</code> <i>expr</i>&nbsp;( <code>,</code><i>expr</i> )</td><td>pad an array or string to the given width<br>with 0 or space (default) or the given value/character</td></tr>
@@ -787,12 +787,13 @@ or
      Also, for an object, if the drop list is omitted, the object is cleared of all values, but specifying an empty list
      will not clear any values, so be careful. For an array, specifying a start value and a count of zero will clear nothing.
   <p>The <code>fill</code> function requires a variable as the first argument. The contents of the variable are replaced or
-     set to the second argument value, depending on the third and optional fourth parameters. If only the third argument is
+     set to the second argument value (or <code>null</code> or <code>'\0'</code> if missing), depending on the optional third and fourth parameters. If only the third argument is
      given this is taken as the length, and the array or string is filled to that length with the value. If both the
      3<sup>rd</sup> and 4<sup>th</sup> arguments are given, these are taken as the starting offset and a length.
      If a string is filled and the starting offset is past the end of the existing string, the intervening characters are
      set to the <code>nul</code> character. The fill value for a string can only be one character, or an integer
-     (in the range of 0..65535) that is converted to a char value (NOT a codepoint value!).
+     (in the range of 0..65535) that is converted to a char value (NOT a codepoint value!). If the 3<sup>rd</sup> value is missing,
+     the existing array or string's length is used (that is, the entire existing value is overwritten).
   <p>The <code>sort</code> function will do a "flat map" of the values in a list or object, sort them, and return the sorted list.
      Because of the "flat" mapping, the original values are left as-is. So in order to sort a list in place, you must reassign
      the result of the sort back to the original variable, as in <code>arr = sort arr</code>. This also allows you to create

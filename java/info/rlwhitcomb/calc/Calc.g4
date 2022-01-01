@@ -312,6 +312,8 @@
  *	    #137: Add "reverse" function.
  *	    #128: Add "lpad", "pad", and "rpad" functions.
  *	    Refactor "trim" and "pad" lexical tokens.
+ *	31-Dec-2021 (rlwhitcomb)
+ *	    Allow "fill" to only have one or two arguments.
  */
 
 grammar Calc;
@@ -522,8 +524,12 @@ spliceArgs
 fillArgs
    : '(' var ',' expr ',' expr ',' expr ')'
    | '(' var ',' expr ',' expr ')'
+   | '(' var ',' expr ')'
+   | '(' var ')'
    | var ',' expr ',' expr ',' expr
    | var ',' expr ',' expr
+   | var ',' expr
+   | var
    ;
 
 padArgs

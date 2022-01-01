@@ -302,6 +302,8 @@
  *	    any other fixups in there now.
  *	    #174: Fix "stripAnyQuotes" to make sure the string is actually quoted using the
  *	    "Quotes" class before stripping them. Make all parameters final.
+ *	31-Dec-2021 (rlwhitcomb)
+ *	    Fix missing "break" in "quoteControl" that was causing dup values.
  */
 
 package info.rlwhitcomb.util;
@@ -716,6 +718,7 @@ public final class CharUtil
 			    break;
 			case '\0':
 			    buf.append(escapeChar).append('0');
+			    break;
 			default:
 			    buf.append(escapeChar).append('u');
 			    buf.append(String.format("%1$04x", (int) ch));
