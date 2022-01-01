@@ -223,6 +223,9 @@
  *	    #106: Catch LeaveException at the highest level to gracefully exit the whole script.
  *	18-Dec-2021 (rlwhitcomb)
  *	    #159: New command line option to silence directives.
+ *	01-Jan-2022 (rlwhitcomb)
+ *	    #178: Set quiet mode reading libraries (by default; they can still turn quiet off if desired).
+ *	    #172: Fix parse timing if there is a parser error.
  */
 package info.rlwhitcomb.calc;
 
@@ -778,7 +781,7 @@ public class Calc
 		}
 
 		// Try to read and process any given libraries before doing anything else
-		readAndProcessLibraries(visitor, errorStrategy, quiet);
+		readAndProcessLibraries(visitor, errorStrategy);
 
 		mainWindow.open(display);
 		requestFocus(inputTextPane);
@@ -1374,6 +1377,10 @@ public class Calc
 	    }
 	    finally {
 		endTime = Environment.highResTimer();
+		if (parseEndTime == 0L)
+		    parseEndTime = endTime;
+		if (execStartTime == 0L)
+		    execStartTime = endTime;
 		visitor.setSilent(oldSilent);
 	    }
 
@@ -1387,12 +1394,12 @@ public class Calc
 	    return returnValue;
 	}
 
-	private static void readAndProcessLibraries(CalcObjectVisitor visitor, BailErrorStrategy errorStrategy, boolean silent)
+	private static void readAndProcessLibraries(CalcObjectVisitor visitor, BailErrorStrategy errorStrategy)
 		throws IOException
 	{
 	    if (libraryNames != null) {
 		for (String libraryName : libraryNames) {
-		    process(CharStreams.fromString(getFileContents(libraryName, null)), visitor, errorStrategy, quiet);
+		    process(CharStreams.fromString(getFileContents(libraryName, null)), visitor, errorStrategy, true);
 		}
 	    }
 	}
@@ -1789,7 +1796,7 @@ public class Calc
 		    // Try to read and process any given libraries before doing anything else
 		    // But save the "-inputdir" setting and restore once we're done
 		    File savedInputDirectory = inputDirectory;
-		    readAndProcessLibraries(visitor, errorStrategy, quiet);
+		    readAndProcessLibraries(visitor, errorStrategy);
 		    inputDirectory = savedInputDirectory;
 
 		    // If no input arguments were given, go into "REPL" mode, reading
