@@ -5,8 +5,7 @@
 
 /*
  * Convert one of our dates to an Excel date serial number
- * where 1/1/1900 is considered day 1 (BUT 1900 is also considered
- * [erroneously] as a leap year)
+ * where 1/1/1900 is considered day 1 (BUT 1900 is also considered [erroneously] as a leap year).
  * From here: https://docs.microsoft.com/en-us/office/troubleshoot/excel/determine-a-leap-year
  * "However, in order to be compatible with other programs, Microsoft Excel treats the year 1900 as a leap year."
  *
@@ -17,7 +16,7 @@ def excel_date($date) = { $date < D'3/1/1900' ? $date - D'1/1/1900' + 1 : $date 
 
 /*
  * Convert one of our dates to an Excel date serial number using the 1904 system
- * where 1/1/1904 is considered day 0
+ * where 1/1/1904 is considered day 0.
  *
  * @param $date The input date value
  * @return      The Excel 1904-system date serial number, where 1/1/1904 is 0
@@ -130,7 +129,7 @@ define is_perfect($n) = { sumof ( factors ($n) ) - $n == $n }
 
 /*
  * Solve the quadratic formula to find the roots of a general
- * quadratice equation: a*x**2 + b*x + c = 0.
+ * quadratic equation: a*x**2 + b*x + c = 0.
  * x = (-b +- sqrt(b**2 - 4 * a * c))/2*a
  *
  * @param $a
@@ -250,16 +249,7 @@ def peek($s) = { _len = length($s._values) - 1; _len < 0 ? null : $s._values[_le
 def versionstring = `Version ${info.version.major}.${info.version.minor}.${info.version.patch} build ${substr(info.version.build, 1)}${info.version.prerelease}`
 
 /*
- * Pad the given string to the given width with spaces on the right.
- *
- * @param $s     The string to pad.
- * @param $width The width to pad to.
- * @return       The input string padded to the right with spaces.
- */
-define pad($s, $width) = { _s = $s ? $s : ''; fill(_s, ' ', length(_s), $width - length(_s)) }
-
-/*
- * Exeute the "uuid" program to return a unique identifier.
+ * Execute the "uuid" program to return a unique identifier.
  *
  * @return A unique identifier.
  */

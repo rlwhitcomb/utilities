@@ -432,6 +432,9 @@
  *	    #176: Directives shouldn't affect a return value.
  *	28-Dec-2021 (rlwhitcomb)
  *	    #183: Introduce '@q' to deliver unquoted strings, no matter the settings.
+ *	    #188: Add "ceil" and "floor" functions.
+ *	    #137: Add "reverse" function.
+ *	    #128: Add "lpad", "pad", and "rpad" functions.
  */
 package info.rlwhitcomb.calc;
 
@@ -483,6 +486,7 @@ import org.antlr.v4.runtime.tree.*;
 import info.rlwhitcomb.util.BigFraction;
 import static info.rlwhitcomb.calc.CalcUtil.*;
 import info.rlwhitcomb.util.CharUtil;
+import static info.rlwhitcomb.util.CharUtil.Justification.*;
 import static info.rlwhitcomb.util.ConsoleColor.Code.*;
 import info.rlwhitcomb.util.Environment;
 import info.rlwhitcomb.util.ExceptionUtil;
@@ -1939,13 +1943,13 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			String stringValue = toStringValue(this, ctx, result, false, false, separators, "");
 			switch (signChar) {
 			    case '+':	/* center - positive width puts extra spaces on left always */
-				CharUtil.padToWidth(valueBuf, stringValue, precision, CharUtil.Justification.CENTER);
+				CharUtil.padToWidth(valueBuf, stringValue, precision, CENTER);
 				break;
 			    case '-':	/* right-justify (spaces on left) */
-				CharUtil.padToWidth(valueBuf, stringValue, Math.abs(precision), CharUtil.Justification.RIGHT);
+				CharUtil.padToWidth(valueBuf, stringValue, Math.abs(precision), RIGHT);
 				break;
 			    default:	/* left-justify (spaces on right) */
-				CharUtil.padToWidth(valueBuf, stringValue, precision, CharUtil.Justification.LEFT);
+				CharUtil.padToWidth(valueBuf, stringValue, precision, LEFT);
 				break;
 			}
 			addQuotes = settings.quoteStrings;
@@ -2964,6 +2968,20 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	@Override
+	public Object visitCeilExpr(CalcParser.CeilExprContext ctx) {
+	    BigDecimal e = getDecimalValue(ctx.expr1().expr());
+
+	    return MathUtil.ceil(e);
+	}
+
+	@Override
+	public Object visitFloorExpr(CalcParser.FloorExprContext ctx) {
+	    BigDecimal e = getDecimalValue(ctx.expr1().expr());
+
+	    return MathUtil.floor(e);
+	}
+
+	@Override
 	public Object visitIsPrimeExpr(CalcParser.IsPrimeExprContext ctx) {
 	    BigInteger i;
 
@@ -3722,6 +3740,28 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	@Override
+	public Object visitReverseExpr(CalcParser.ReverseExprContext ctx) {
+	    CalcParser.ExprContext expr = ctx.expr1().expr();
+	    Object value = evaluateFunction(expr, visit(expr));
+
+	    if (value instanceof ArrayScope) {
+		@SuppressWarnings("unchecked")
+		ArrayScope<Object> array = (ArrayScope<Object>) value;
+		Collections.reverse(array.list());
+		return array;
+	    }
+	    else {
+		String string;
+		if (value instanceof String)
+		    string = (String) value;
+		else
+		    string = toStringValue(this, expr, value, false, false);
+		StringBuilder buf = new StringBuilder(string);
+		return buf.reverse().toString();
+	    }
+	}
+
+	@Override
 	public Object visitFillExpr(CalcParser.FillExprContext ctx) {
 	    CalcParser.FillArgsContext fillCtx  = ctx.fillArgs();
 	    CalcParser.VarContext varCtx        = fillCtx.var();
@@ -3760,14 +3800,14 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    if (fillValue instanceof String) {
 			String fillString = (String) fillValue;
 			if (fillString.length() != 1) {
-			    throw new CalcExprException("%calc#fillOneCharInt", ctx);
+			    throw new CalcExprException(ctx, "%calc#oneCharInt", "Fill");
 			}
 			fillChar = fillString.charAt(0);
 		    }
 		    else if (fillValue instanceof Number) {
 			int intValue = ((Number) fillValue).intValue();
 			if (intValue < 0 || intValue > Short.MAX_VALUE) {
-			    throw new CalcExprException("%calc#fillOneCharInt", ctx);
+			    throw new CalcExprException(ctx, "%calc#oneCharInt", "Fill");
 			}
 			fillChar = (char) intValue;
 		    }
@@ -3778,7 +3818,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		value = buf.toString();
 	    }
 	    else {
-		throw new CalcExprException("%calc#fillTargetWrongType", ctx);
+		throw new CalcExprException(ctx, "%calc#targetWrongType", ctx.K_FILL().getText());
 	    }
 
 	    return lValue.putContextObject(this, value);
@@ -3787,19 +3827,140 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitTrimExpr(CalcParser.TrimExprContext ctx) {
 	    String stringValue = getStringValue(ctx.expr1().expr());
+	    String op          = ctx.K_TRIM().getText().toLowerCase();
 	    String result;
 
-	    if (ctx.K_TRIM() != null) {
-		result = stringValue.trim();
-	    }
-	    else if (ctx.K_LTRIM() != null) {
-		result = CharUtil.ltrim(stringValue);
-	    }
-	    else {
-		result = CharUtil.rtrim(stringValue);
+	    switch (op) {
+		case "trim":
+		    result = stringValue.trim();
+		    break;
+
+		case "ltrim":
+		    result = CharUtil.ltrim(stringValue);
+		    break;
+
+		case "rtrim":
+		    result = CharUtil.rtrim(stringValue);
+		    break;
+
+		default:
+		    throw new UnknownOpException(op, ctx);
 	    }
 
 	    return result;
+	}
+
+	@Override
+	public Object visitPadExpr(CalcParser.PadExprContext ctx) {
+	    CalcParser.PadArgsContext args	= ctx.padArgs();
+	    CalcParser.VarContext varCtx	= args.var();
+	    LValueContext lValue		= getLValue(varCtx);
+	    Object value			= lValue.getContextObject(this);
+	    List<CalcParser.ExprContext> exprs	= args.expr();
+	    String op				= ctx.K_PAD().getText();
+
+	    int width = getIntValue(exprs.get(0));
+	    int posWidth = Math.abs(width);
+
+	    CalcParser.ExprContext padExpr;
+	    Object padValue = null;
+
+	    if (value instanceof ArrayScope) {
+		@SuppressWarnings("unchecked")
+		ArrayScope<Object> array = (ArrayScope<Object>) value;
+		if (array.size() < posWidth) {
+		    if (exprs.size() > 1) {
+			padExpr = exprs.get(1);
+			padValue = evaluateFunction(padExpr, visit(padExpr));
+		    }
+		    else {
+			padValue = BigInteger.ZERO;
+		    }
+
+		    int leftover = posWidth - array.size();
+
+		    switch (op.toLowerCase()) {
+			case "pad":
+			    // Note: same logic as CharUtil.padToWidth
+			    int left = (width < 0) ? leftover / 2 : (leftover + 1) / 2;
+			    int right = leftover - left;
+			    for (int i = 0; i < left; i++) {
+				array.insert(i, padValue);
+			    }
+			    for (int i = 0; i < right; i++) {
+				array.add(padValue);
+			    }
+			    break;
+
+			case "lpad":
+			    for (int i = 0; i < leftover; i++) {
+				array.insert(i, padValue);
+			    }
+			    break;
+
+			case "rpad":
+			    for (int i = 0; i < leftover; i++) {
+				array.add(padValue);
+			    }
+			    break;
+
+			default:
+			    throw new UnknownOpException(op, ctx);
+		    }
+		}
+	    }
+	    else if (value instanceof String) {
+		String input = (String) value;
+		if (input.length() < posWidth) {
+		    StringBuilder buf = new StringBuilder(width);
+		    CharUtil.Justification just;
+		    char padChar = ' ';
+
+		    if (exprs.size() > 1) {
+			padExpr = exprs.get(1);
+			padValue = evaluateFunction(padExpr, visit(padExpr));
+			if (padValue instanceof String) {
+			    String padString = (String) padValue;
+			    if (padString.length() != 1) {
+				throw new CalcExprException(ctx, "%calc#oneCharInt", "Pad");
+			    }
+			    padChar = padString.charAt(0);
+			}
+			else if (padValue instanceof Number) {
+			    int intValue = ((Number) padValue).intValue();
+			    if (intValue < 0 || intValue > Short.MAX_VALUE) {
+				throw new CalcExprException(ctx, "%calc#oneCharInt", "Pad");
+			    }
+			    padChar = (char) intValue;
+			}
+		    }
+
+		    switch (op.toLowerCase()) {
+			case "pad":
+			    just = CENTER;
+			    break;
+
+			case "lpad":
+			    just = RIGHT;
+			    break;
+
+			case "rpad":
+			    just = LEFT;
+			    break;
+
+			default:
+			    throw new UnknownOpException(op, ctx);
+		    }
+
+		    CharUtil.padToWidth(buf, input, width, padChar, just);
+		    value = buf.toString();
+		}
+	    }
+	    else {
+		throw new CalcExprException(ctx, "%calc#targetWrongType", op);
+	    }
+
+	    return lValue.putContextObject(this, value);
 	}
 
 	@Override

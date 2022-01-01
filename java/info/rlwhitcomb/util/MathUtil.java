@@ -51,6 +51,8 @@
  *	    #95: Add calculation of "phi".
  *	01-Dec-2021 (rlwhitcomb)
  *	    #95: Add "ratphi" and "fib2" to support it.
+ *	29-Dec-2021 (rlwhitcomb)
+ *	    #188: Add "ceil" and "floor" methods.
  */
 package info.rlwhitcomb.util;
 
@@ -1462,6 +1464,28 @@ public final class MathUtil
 	    }
 
 	    return fixup(y, mc);
+	}
+
+	/**
+	 * Calculate the "ceil" of the given value, which is the smallest value greater than or equal
+	 * to the given value, which is an exact integer.
+	 *
+	 * @param value	The given value.
+	 * @return	The {@code ceil} of that value.
+	 */
+	public static BigInteger ceil(final BigDecimal value) {
+	    return value.setScale(0, RoundingMode.CEILING).unscaledValue();
+	}
+
+	/**
+	 * Calculate the "floor" of the given value, which is the largest value less than or equal
+	 * to the given value, which is an exact integer.
+	 *
+	 * @param value	The given value.
+	 * @return	The {@code floor} of that value.
+	 */
+	public static BigInteger floor(final BigDecimal value) {
+	    return value.setScale(0, RoundingMode.FLOOR).unscaledValue();
 	}
 
 }

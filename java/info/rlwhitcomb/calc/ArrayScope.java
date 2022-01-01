@@ -29,6 +29,8 @@
  *	    Initial coding.
  *	07-Oct-2021 (rlwhitcomb)
  *	    Use generic data types.
+ *	28-Dec-2021 (rlwhitcomb)
+ *	    #128: Add "insert" method for "pad".
  */
 package info.rlwhitcomb.calc;
 
@@ -124,6 +126,17 @@ class ArrayScope<T> extends Scope
 	    else {
 		values.add(value);
 	    }
+	}
+
+	/**
+	 * Insert a value at the given index, moving any existing values further out.
+	 *
+	 * @param index Where in the list to insert the new value. Values from index to length
+	 *              will move to positions index + 1, index + 2, etc.
+	 * @param value The new value to insert at position index.
+	 */
+	public void insert(final int index, final T value) {
+	    values.add(index, value);
 	}
 
 	/**

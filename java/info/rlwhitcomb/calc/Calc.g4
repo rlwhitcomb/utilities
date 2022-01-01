@@ -307,6 +307,11 @@
  *	    #151: Fix precedence of boolean operators.
  *	18-Dec-2021 (rlwhitcomb)
  *	    #159: Add directive to silence display of directives.
+ *	28-Dec-2021 (rlwhitcomb)
+ *	    #188: Add "ceil" and "floor" functions.
+ *	    #137: Add "reverse" function.
+ *	    #128: Add "lpad", "pad", and "rpad" functions.
+ *	    Refactor "trim" and "pad" lexical tokens.
  */
 
 grammar Calc;
@@ -409,6 +414,8 @@ expr
    | K_LENGTH ( expr1 | dotRange )       # lengthExpr
    | K_SCALE expr1                       # scaleExpr
    | K_ROUND expr2                       # roundExpr
+   | K_CEIL expr1                        # ceilExpr
+   | K_FLOOR expr1                       # floorExpr
    | K_ISPRIME expr1                     # isPrimeExpr
    | K_ISNULL expr1                      # isNullExpr
    | K_GCD expr2                         # gcdExpr
@@ -426,7 +433,9 @@ expr
    | K_SPLICE spliceArgs                 # spliceExpr
    | K_FILL fillArgs                     # fillExpr
    | K_SORT ( expr2 | expr1 )            # sortExpr
-   | (K_TRIM|K_LTRIM|K_RTRIM) expr1      # trimExpr
+   | K_REVERSE expr1                     # reverseExpr
+   | K_TRIM expr1                        # trimExpr
+   | K_PAD padArgs                       # padExpr
    | K_FIB expr1                         # fibExpr
    | K_BN expr1                          # bernExpr
    | K_FRAC ( expr3 | expr2 | expr1 )    # fracExpr
@@ -515,6 +524,13 @@ fillArgs
    | '(' var ',' expr ',' expr ')'
    | var ',' expr ',' expr ',' expr
    | var ',' expr ',' expr
+   ;
+
+padArgs
+   : '(' var ',' expr ',' expr ')'
+   | '(' var ',' expr ')'
+   | var ',' expr ',' expr
+   | var ',' expr
    ;
 
 dotRange
@@ -742,6 +758,10 @@ K_SCALE    : S C A L E ;
 
 K_ROUND    : R O U N D ;
 
+K_CEIL     : C E I L ;
+
+K_FLOOR    : F L O O R ;
+
 K_ISPRIME  : I S P R I M E ;
 
 K_ISNULL   : I S N U L L ;
@@ -772,11 +792,11 @@ K_FILL     : F I L L ;
 
 K_SORT     : S O R T ;
 
-K_TRIM     : T R I M ;
+K_REVERSE  : R E V E R S E ;
 
-K_LTRIM    : L T R I M ;
+K_TRIM     : ( T R I M | L T R I M | R T R I M ) ;
 
-K_RTRIM    : R T R I M ;
+K_PAD      : ( P A D | L P A D | R P A D ) ;
 
 K_FIB      : F I B ;
 

@@ -573,8 +573,8 @@ or
     <tr><td>28</td><td><code>[</code> (&nbsp;<i>expr list</i>&nbsp;) <code>]</code><br><i>var</i> <code>[</code> <i>expr</i> <code>]</code> or <i>var</i>&nbsp;<code>&#x2080;</code> .. <code>&#x2089;</code></td><td>define an array,<br>or access elements of an array, string, or object</td><td>left to right</td></tr>
     <tr><td>27</td><td><code>.</code></td><td>access an object member</td><td>left to right</td></tr>
     <tr><td>26</td><td><code>( </code><i>expr</i><code> )</code></td><td>group an expression</td><td>N/A</td></tr>
-    <tr><td rowspan="61">25</td>
-            <td><code>ABS</code>&nbsp;<i>expr</i></td><td>absolute value</td><td rowspan="61">left to right</td></tr>
+    <tr><td rowspan="65">25</td>
+            <td><code>ABS</code>&nbsp;<i>expr</i></td><td>absolute value</td><td rowspan="65">left to right</td></tr>
             <tr><td><code>SIN</code>&nbsp;<i>expr</i></td><td>sine</td></tr>
             <tr><td><code>COS</code>&nbsp;<i>expr</i></td><td>cosine</td></tr>
             <tr><td><code>TAN</code>&nbsp;<i>expr</i></td><td>tangent</td></tr>
@@ -597,6 +597,8 @@ or
             <tr><td><code>LENGTH</code>&nbsp;<i>expr</i><br>or <i>expr</i> [ <code>..</code> or <code>&#x2026;</code> <i>expr</i> [ <code>,</code> <i>expr</i> ] ]</td><td>length of string, array, object, or range</td></tr>
             <tr><td><code>SCALE</code>&nbsp;<i>expr</i></td><td>scale of number, total size of object or array</td></tr>
             <tr><td><code>ROUND</code>&nbsp;<i>expr</i><code>,</code>&nbsp;<i>expr</i></td><td>round value to given places</td></tr>
+            <tr><td><code>FLOOR</code>&nbsp;<i>expr</i></td><td>the "floor" of a numeric value</td></tr>
+            <tr><td><code>CEIL</code>&nbsp;<i>expr</i></td><td>the "ceil" of a numeric value</td></tr>
             <tr><td><code>ISPRIME</code>&nbsp;<i>expr</i></td><td>is the value a prime number?</td></tr>
             <tr><td><code>ISNULL</code>&nbsp;<i>expr</i></td><td>is the value null?</td></tr>
             <tr><td><code>GCD</code>&nbsp;<i>expr</i><code>,</code>&nbsp;<i>expr</i></td><td>greatest common divisor</td></tr>
@@ -607,6 +609,7 @@ or
             <tr><td><code>PRODUCTOF</code> or <code>&#x220F;</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;) *<br>or <i>expr</i> [ <code>..</code> or <code>&#x2026;</code> <i>expr</i> [ <code>,</code> <i>expr</i> ] ]</td><td>product of all the values</td></tr>
             <tr><td><code>JOIN</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;) *</td><td>join strings</td></tr>
             <tr><td><code>SPLIT</code>&nbsp;<i>expr</i> <code>,</code> <i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;)</td><td>split string into parts</td></tr>
+	    <tr><td><code>REVERSE</code>&nbsp;<i>expr</i></td><td>reverse the order of an array or string</td></tr>
             <tr><td><code>INDEX</code>&nbsp;<i>expr</i> <code>,</code> <i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;)</td><td>find value within a string</td></tr>
             <tr><td><code>SUBSTR</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;)&nbsp;)</td><td>extract a substring</td></tr>
             <tr><td><code>REPLACE</code>&nbsp;<i>expr</i> <code>,</code> <i>expr</i> <code>,</code> <i>expr</i> (&nbsp;<code>,</code> <i>mode</i>&nbsp;)</td><td>replace substrings within a string</td></tr>
@@ -616,6 +619,7 @@ or
             <tr><td><code>FILL</code>&nbsp;<i>var</i>&nbsp;<code>,</code> <i>expr</i>&nbsp;<code>,</code> <i>expr</i> ( <code>,</code><i>expr</i> )</td><td>fill an array or string</td></tr>
             <tr><td><code>SORT</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;)</td><td>sort the array expression, optionally ignoring case,<br>returning the array of sorted values</td></tr>
             <tr><td><code>TRIM</code> or <code>LTRIM</code> or <code>RTRIM</code> <i>expr</i></td><td>trim all, leading, or trailing whitespace</td></tr>
+            <tr><td><code>PAD</code> or <code>LPAD</code> or <code>RPAD</code>&nbsp;<i>var</i>&nbsp;<code>,</code> <i>expr</i>&nbsp;( <code>,</code><i>expr</i> )</td><td>pad an array or string to the given width<br>with 0 or space (default) or the given value/character</td></tr>
             <tr><td><code>FIB</code>&nbsp;<i>expr</i></td><td>Fibonacci number</td></tr>
             <tr><td><code>Bn</code>&nbsp;<i>expr</i></td><td>Bernoulli number</td></tr>
             <tr><td><code>FRAC</code>&nbsp;<i>num</i><code>,</code>&nbsp;<i>den</i><br>or <i>int</i><code>,</code><i>num</i><code>,</code><i>den</i><br>or <i>string</i></td><td>construct a rational fraction</td></tr>

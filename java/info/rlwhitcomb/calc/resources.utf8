@@ -93,6 +93,8 @@
 #	    when not colored.
 #	03-Dec-2021 (rlwhitcomb)
 #	    #116: New format for timing message.
+#	28-Dec-2021 (rlwhitcomb)
+#	    #128: Generalize "fill" errors for "pad" also.
 #
 
 #
@@ -174,8 +176,8 @@ invalidConst2		= Invalid <y>${...}<> construct
 modeError		= Mode option <y>%1$s<> not recognized
 replaceOptionError	= Replace option <y>%1$s<> not recognized
 illegalFormat		= Unrecognized format <y>%1$s<>
-fillTargetWrongType	= Target of a <y>FILL<> must be an array or string
-fillOneCharInt		= Fill value for a string must be one character or an integer \u2264 65535
+targetWrongType		= Target of a <y>%1$s<> must be an array or string
+oneCharInt		= %1$s value for a string must be one character or an integer \u2264 65535
 undefinedFunction	= Cannot call undefined function <y>%1$s<>
 
 intro.help1	= "  Enter an expression (or multiple expressions separated by <u>;<>)."

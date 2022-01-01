@@ -206,6 +206,13 @@ f2 = `${'abc' @b}`
 f3 = `${'Hello' @X}`
 eval f1;eval f2;eval f3
 
+t1=5.9
+t2=-6.2
+ceil(t1);ceil(t2)
+ceil(0);ceil(10e22)
+floor(t1);floor(t2)
+floor(0);floor(1.2e9)
+
 # The "join" operator
 :clear this, hello, handsome, rude
 this = join('This', 'is', 'a', 'test', ' ');
@@ -292,6 +299,28 @@ str_b = ''
 fill(str_b, '=', 25)
 fill(str_b, '-', 0, 3)
 fill(str_b, '-', 22, 3)
+
+# The "pad" functions
+arr_m = [ 10 ]
+pad(arr_m, 10, -1)
+lpad(arr_m, 15, -2)
+rpad(arr_m, 17, 20)
+pad(arr_m, 23)
+arr_m
+
+str_c = '#'
+rpad(str_c, 9, '>')
+lpad(str_c, 18, '<')
+pad(str_c, 24, '_')
+pad(str_c, 30)
+str_c
+
+# The "reverse" function
+palin = 'Was it a car or a cat I saw'
+reverse(palin)
+arr_m = [ 1, 2, 3, 4, 5, 6, 7, 8, 9 ]
+reverse arr_m
+arr_m
 
 # The "sort" function
 a1 = [ 4, 3, 1, 2, -1, 5, -10 ]
