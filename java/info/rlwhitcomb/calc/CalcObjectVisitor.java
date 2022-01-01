@@ -438,6 +438,8 @@
  *	31-Dec-2021 (rlwhitcomb)
  *	    Refactor the "getCharValue" code into a single method. Refactor "fill"
  *	    a bit to make only the variable mandatory.
+ *	    #180: Use nn.mm on @j notation to specify indent size and increment,
+ *	    and "-" to eliminate leading newline. Refactor parameters on "toStringValue".
  */
 package info.rlwhitcomb.calc;
 
@@ -1149,7 +1151,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    if (!allowNull)
 		nullCheck(value, ctx);
 
-	    return value == null ? "" : toStringValue(this, ctx, value, quote, false, separators, "");
+	    return value == null ? "" : toStringValue(this, ctx, value, quote, separators);
 	}
 
 	private double getDoubleValue(final ParserRuleContext ctx) {
@@ -1467,7 +1469,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    mode = ((Boolean) modeObject).booleanValue();
 		}
 		else {
-		    option = toStringValue(this, var, modeObject, false, false, false, "");
+		    option = toStringValue(this, var, modeObject, false, false);
 		}
 	    }
 	    else {
@@ -1655,6 +1657,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    BigDecimal dValue = null;
 
 	    int precision = Integer.MIN_VALUE;
+	    int scale     = Integer.MIN_VALUE;
 	    boolean separators = false;
 	    boolean addQuotes = false;
 	    char signChar = ' ';
@@ -1668,13 +1671,22 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    if (format.length() > 3) {
 		int index = 2;
 		char ch;
-		while (((ch = format.charAt(index)) >= '0' && ch <= '9') || (ch == '-' || ch == '+'))
+		while (((ch = format.charAt(index)) >= '0' && ch <= '9') || (ch == '-' || ch == '+' || ch == '.'))
 		    index++;
 		if (index > 2) {
 		    String num = format.substring(2, index);
+		    int pos;
 		    if (num.charAt(0) == '-' || num.charAt(0) == '+')
 			signChar = num.charAt(0);
-		    precision = Integer.parseInt(num);
+		    if ((signChar != ' ' && index > 3) || signChar == ' ') {
+			if ((pos = num.indexOf('.')) > 0) {
+			    precision = Integer.parseInt(num.substring(0, pos));
+			    scale     = Integer.parseInt(num.substring(pos + 1));
+			}
+			else {
+			    precision = Integer.parseInt(num);
+			}
+		    }
 		}
 	    }
 	    separators = format.indexOf(',') >= 0 || settings.separatorMode;
@@ -1683,8 +1695,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    if (result != null && !format.isEmpty()) {
 		char formatChar = format.charAt(format.length() - 1);
 
-		if ((result instanceof Scope) && (formatChar != 'j' && formatChar != 'J')) {
-		    throw new CalcExprException(ctx, "%calc#noConvertObjArr", formatChar);
+		// JSON format has some special properties not supported by another other formats
+		if (formatChar != 'j' && formatChar != 'J') {
+		    if (scale != Integer.MIN_VALUE)
+			throw new CalcExprException(ctx, "%calc#noScaleFormat", scale, formatChar);
+		    if (result instanceof Scope)
+			throw new CalcExprException(ctx, "%calc#noConvertObjArr", formatChar);
 		}
 
 		StringBuilder valueBuf = new StringBuilder();
@@ -1806,8 +1822,16 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 		    case 'J':
 		    case 'j':
-			valueBuf.append('\n');
-			valueBuf.append(toStringValue(this, ctx, result, true, true, separators, ""));
+			if (signChar != '-')
+			    valueBuf.append('\n');
+			String indent = "";
+			String increment = null;
+			if (precision != Integer.MIN_VALUE)
+			    indent = CharUtil.padToWidth("", Math.abs(precision));
+			if (scale != Integer.MIN_VALUE)
+			    increment = CharUtil.padToWidth("", scale);
+			valueBuf.append(indent);
+			valueBuf.append(toStringValue(this, ctx, result, true, true, separators, indent, increment));
 			break;
 
 		    case 'X':
@@ -1943,7 +1967,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 		    case 'S':
 		    case 's':
-			String stringValue = toStringValue(this, ctx, result, false, false, separators, "");
+			String stringValue = toStringValue(this, ctx, result, false, separators);
 			switch (signChar) {
 			    case '+':	/* center - positive width puts extra spaces on left always */
 				CharUtil.padToWidth(valueBuf, stringValue, precision, CENTER);
@@ -3391,7 +3415,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		endCtx   = e3ctx.expr(2);
 	    }
 
-	    String stringValue = toStringValue(this, ctx, value, false, false, settings.separatorMode, "");
+	    String stringValue = toStringValue(this, ctx, value, false, settings.separatorMode);
 
 	    if (beginCtx == null) {
 		return stringValue;
@@ -3456,7 +3480,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    CalcParser.VarContext var = args.replaceOption().var();
 		    LValueContext lValue = getLValue(var);
 		    Object optionObject = lValue.getContextObject(this, false);
-		    option = optionObject == null ? "" : toStringValue(this, var, optionObject, true, false, false, "");
+		    option = optionObject == null ? "" : toStringValue(this, var, optionObject, true, false);
 		}
 		else {
 		    option = args.replaceOption().getText();
@@ -4196,7 +4220,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    else {
 		switch (conversion) {
 		    case STRING:
-			objectList.add(toStringValue(this, ctx, value, false, false, false, ""));
+			objectList.add(toStringValue(this, ctx, value, false, false));
 			break;
 		    case DECIMAL:
 			objectList.add(toDecimalValue(this, value, mc, ctx));

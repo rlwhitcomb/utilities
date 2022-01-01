@@ -107,6 +107,8 @@
  *	    Fix identifier identification to completely match the expanded definitions in the grammar.
  *	27-Dec-2021 (rlwhitcomb)
  *	    #170: Switch "length" and "scale".
+ *	31-Dec-2021 (rlwhitcomb)
+ *	    #180: Refactor parameters to "toStringValue"; allow variable indent increment.
  */
 package info.rlwhitcomb.calc;
 
@@ -140,6 +142,9 @@ public final class CalcUtil
 
 	/** Natural order comparator, case-insensitive. */
 	private static final NaturalOrderComparator NATURAL_INSENSITIVE_COMPARATOR = new NaturalOrderComparator(false);
+
+	/** Default indent increment for JSON display. */
+	private static final String DEFAULT_INCREMENT = "  ";
 
 
 	/** Private constructor since this is a static class. */
@@ -573,7 +578,7 @@ public final class CalcUtil
 	 * @param quotes	Whether or not to quote strings on output.
 	 * @param separators	Whether or not to use thousands separators when converting numeric values.
 	 * @return		The converted string value.
-	 * @see #toStringValue(CalcObjectVisitor, ParserRuleContext, Object, boolean, boolean, boolean, String)
+	 * @see #toStringValue(CalcObjectVisitor, ParserRuleContext, Object, boolean, boolean, boolean, String, String)
 	 */
 	public static String toStringValue(
 		final CalcObjectVisitor visitor,
@@ -581,7 +586,29 @@ public final class CalcUtil
 		final Object result,
 		final boolean quotes,
 		final boolean separators) {
-	    return toStringValue(visitor, ctx, result, quotes, false, separators, "");
+	    return toStringValue(visitor, ctx, result, quotes, false, separators, "", null);
+	}
+
+	/**
+	 * Convenience method to convert a value to a string, using the most common parameters.
+	 *
+	 * @param visitor	The tree visitor, for calculating expressions.
+	 * @param ctx		The parsing context, for error reporting.
+	 * @param result	The input value to be converted.
+	 * @param quotes	Whether or not to quote strings on output.
+	 * @param pretty	Whether or not to "pretty" print the contents of an object (map) or list (array).
+	 * @param separators	Whether or not to use thousands separators when converting numeric values.
+	 * @return		The converted string value.
+	 * @see #toStringValue(CalcObjectVisitor, ParserRuleContext, Object, boolean, boolean, boolean, String, String)
+	 */
+	public static String toStringValue(
+		final CalcObjectVisitor visitor,
+		final ParserRuleContext ctx,
+		final Object result,
+		final boolean quotes,
+		final boolean pretty,
+		final boolean separators) {
+	    return toStringValue(visitor, ctx, result, quotes, pretty, separators, "", null);
 	}
 
 	/**
@@ -590,11 +617,12 @@ public final class CalcUtil
 	 * @param visitor	The outermost visitor object that is being used to calculate everything.
 	 * @param ctx		The parsing context, for error reporting.
 	 * @param obj		The input object to be converted to a string.
-	 * @param quote		Whether or not the resulting string should be quoted (double quotes) if
+	 * @param quotes	Whether or not the resulting string should be quoted (double quotes) if
 	 *			the input is an actual string object.
 	 * @param pretty	Whether or not to "pretty" print the contents of an object (map) or list (array).
 	 * @param separators	Should thousands separators be used for numeric values?
 	 * @param indent	The recursive indentation for pretty printing.
+	 * @param increment	The increment for each level of indentation.
 	 * @return		The formatted string representation of the input object.
 	 */
 	@SuppressWarnings("unchecked")
@@ -602,25 +630,26 @@ public final class CalcUtil
 		final CalcObjectVisitor visitor,
 		final ParserRuleContext ctx,
 		final Object obj,
-		final boolean quote,
+		final boolean quotes,
 		final boolean pretty,
 		final boolean separators,
-		final String indent)
+		final String indent,
+		final String increment)
 	{
 	    Object result = visitor.evaluateFunction(ctx, obj);
 
 	    if (result == null) {
-		return quote ? "<null>" : "";
+		return quotes ? "<null>" : "";
 	    }
 	    else if (result instanceof Character) {
 		String charString = Character.toString((Character) result);
-		if (quote)
+		if (quotes)
 		    return CharUtil.addDoubleQuotes(CharUtil.quoteControl(charString));
 		else
 		    return charString;
 	    }
 	    else if (result instanceof String) {
-		if (quote)
+		if (quotes)
 		    return CharUtil.addDoubleQuotes(CharUtil.quoteControl((String) result));
 		else
 		    return (String) result;
@@ -638,10 +667,10 @@ public final class CalcUtil
 		return ((BigFraction) result).toString();
 	    }
 	    else if (result instanceof ObjectScope) {
-		return toStringValue(visitor, ctx, ((ObjectScope) result).map(), quote, pretty, separators, indent);
+		return toStringValue(visitor, ctx, ((ObjectScope) result).map(), quotes, pretty, separators, indent, increment);
 	    }
 	    else if (result instanceof ArrayScope) {
-		return toStringValue(visitor, ctx, ((ArrayScope) result).list(), quote, pretty, separators, indent);
+		return toStringValue(visitor, ctx, ((ArrayScope) result).list(), quotes, pretty, separators, indent, increment);
 	    }
 
 	    // Any other type, just get the string representation
@@ -654,22 +683,24 @@ public final class CalcUtil
 	 * @param visitor	The outermost visitor object that is being used to calculate everything.
 	 * @param ctx		The parsing context, for error reporting.
 	 * @param map		The input object (map) to be converted.
-	 * @param quote		Whether or not actual string objects should be double-quoted in the result.
+	 * @param quotes	Whether or not actual string objects should be double-quoted in the result.
 	 * @param pretty	Whether or not to "pretty" print the contents of an object (map) or list (array).
 	 * @param separators	Should thousands separators be used for numeric values?
 	 * @param indent	The recursive indentation for pretty printing.
+	 * @param increment	The increment for each level of indentation (<code>null</code> = {@link #DEFAULT_INCREMENT}).
 	 * @return		The formatted string representation of the input object.
 	 */
 	public static String toStringValue(
 		final CalcObjectVisitor visitor,
 		final ParserRuleContext ctx,
 		final Map<String, Object> map,
-		final boolean quote,
+		final boolean quotes,
 		final boolean pretty,
 		final boolean separators,
-		final String indent)
+		final String indent,
+		final String increment)
 	{
-	    String myIndent = indent + "  ";
+	    String myIndent = indent + (increment == null ? DEFAULT_INCREMENT : increment);
 	    StringBuilder buf = new StringBuilder();
 	    if (map.size() > 0) {
 		boolean comma = false;
@@ -681,7 +712,7 @@ public final class CalcUtil
 			comma = true;
 		    if (pretty) buf.append(myIndent);
 		    buf.append(entry.getKey()).append(": ");
-		    buf.append(toStringValue(visitor, ctx, entry.getValue(), quote, pretty, separators, myIndent));
+		    buf.append(toStringValue(visitor, ctx, entry.getValue(), quotes, pretty, separators, myIndent, increment));
 		}
 		buf.append(pretty ? "\n" + indent + "}" : " }");
 	    }
@@ -697,22 +728,24 @@ public final class CalcUtil
 	 * @param visitor	The outermost visitor object that is being used to calculate everything.
 	 * @param ctx		The parsing context, for error reporting.
 	 * @param list		The input list (array) to be converted.
-	 * @param quote		Whether or not actual string objects should be double-quoted in the result.
+	 * @param quotes	Whether or not actual string objects should be double-quoted in the result.
 	 * @param pretty	Whether or not to "pretty" print the contents of an object (map) or list (array).
 	 * @param separators	Should thousands separators be used for numeric values?
 	 * @param indent	The recursive indentation for pretty printing.
+	 * @param increment	The increment for each level of indentation.
 	 * @return		The formatted string representation of the input list.
 	 */
 	public static String toStringValue(
 		final CalcObjectVisitor visitor,
 		final ParserRuleContext ctx,
 		final List<Object> list,
-		final boolean quote,
+		final boolean quotes,
 		final boolean pretty,
 		final boolean separators,
-		final String indent)
+		final String indent,
+		final String increment)
 	{
-	    String myIndent = indent + "  ";
+	    String myIndent = indent + (increment == null ? DEFAULT_INCREMENT : increment);
 	    StringBuilder buf = new StringBuilder();
 	    if (list.size() > 0) {
 		boolean comma = false;
@@ -723,7 +756,7 @@ public final class CalcUtil
 		    else
 			comma = true;
 		    if (pretty) buf.append(myIndent);
-		    buf.append(toStringValue(visitor, ctx, value, quote, pretty, separators, myIndent));
+		    buf.append(toStringValue(visitor, ctx, value, quotes, pretty, separators, myIndent, increment));
 		}
 		buf.append(pretty ? "\n" + indent + "]" : " ]");
 	    }
@@ -1304,7 +1337,7 @@ public final class CalcUtil
 			Object varValue = variables.getValue(varName, settings.ignoreNameCase);
 			// But if $var is not defined, then forget it, and just output "$" and go on
 			if (varValue != null) {
-			    output.append(toStringValue(visitor, ctx, varValue, false, false, settings.separatorMode, ""));
+			    output.append(toStringValue(visitor, ctx, varValue, false, settings.separatorMode));
 			    lastPos = identPos - 1;
 			}
 			else {
@@ -1326,7 +1359,7 @@ public final class CalcUtil
 
 		    String expr = rawValue.substring(pos + 2, nextPos);
 		    Object exprValue = Calc.processString(expr, true);
-		    String stringValue = toStringValue(visitor, ctx, exprValue, false, false, settings.separatorMode, "");
+		    String stringValue = toStringValue(visitor, ctx, exprValue, false, settings.separatorMode);
 
 		    // The result is going to be formatted with quotes, separators, everything that it currently
 		    // needs to be output, BUT it will go through the quoting again inside the formatter code
@@ -1340,7 +1373,7 @@ public final class CalcUtil
 			identPos++;
 		    String varName = rawValue.substring(pos + 1, identPos);
 		    output.append(toStringValue(visitor, ctx,
-			variables.getValue(varName, settings.ignoreNameCase), false, false, settings.separatorMode, ""));
+			variables.getValue(varName, settings.ignoreNameCase), false, settings.separatorMode));
 		    lastPos = identPos - 1;
 		}
 		else

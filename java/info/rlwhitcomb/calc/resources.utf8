@@ -95,6 +95,8 @@
 #	    #116: New format for timing message.
 #	28-Dec-2021 (rlwhitcomb)
 #	    #128: Generalize "fill" errors for "pad" also.
+#	31-Dec-2021 (rlwhitcomb)
+#	    #180: New error for scale value in formats.
 #
 
 #
@@ -164,6 +166,7 @@ charOutOfRange		= Integer value of <u>0x%1$08X<> out of range of Unicode charact
 ioError			= I/O Error: %1$s
 noConvertInteger	= Unable to convert value of <y>%1$s<> to an integer
 noConvertObjArr		= Cannot convert object or array to <y>%1$c<> format
+noScaleFormat		= Format with scale (<u>.%1$d<>) value not supported in <y>%2$c<> format
 noDupLocalVar		= Duplicate local variable name <y>%1$s<> not allowed
 localVarNoAssign	= The value of the local variable <y>%1$s<> cannot be changed directly
 globalArgNoAssign	= The value of the global argument <y>%1$s<> cannot be changed directly

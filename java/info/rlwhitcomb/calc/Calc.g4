@@ -314,6 +314,7 @@
  *	    Refactor "trim" and "pad" lexical tokens.
  *	31-Dec-2021 (rlwhitcomb)
  *	    Allow "fill" to only have one or two arguments.
+ *	    #180: Allow fractional precision on FORMAT.
  */
 
 grammar Calc;
@@ -1127,7 +1128,7 @@ D_QUOTESTRINGS
 
 
 FORMAT
-   : '@' ( [\-+] ? INT ) ? [a-zA-Z,] ? [a-zA-Z%$]
+   : '@' [\-+] ? ( INT ( '.' INT ) ? ) ? [a-zA-Z,] ? [a-zA-Z%$]
    ;
 
 STRING

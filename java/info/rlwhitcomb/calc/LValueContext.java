@@ -80,6 +80,8 @@
  *	17-Nov-2021 (rlwhitcomb)
  *	    #96: Add "visitor" to "getContextObject" parameters so that functions can be evaluated.
  *	    Two changes to make LValues that are function results work correctly for indexes and members.
+ *	31-Dec-2021 (rlwhitcomb)
+ *	    #180: Change parameters to "toStringValue".
  */
  package info.rlwhitcomb.calc;
 
@@ -350,7 +352,7 @@ class LValueContext
 		}
 		else if (context instanceof String) {
 		    StringBuilder buf = new StringBuilder((String) context);
-		    String newValue = CalcUtil.toStringValue(visitor, varCtx, value, false, false, false, "");
+		    String newValue = CalcUtil.toStringValue(visitor, varCtx, value, false, false);
 		    int newLen = index + newValue.length();
 		    // Ensure the builder has enough length to do the replacement
 		    while (buf.length() < newLen) {
