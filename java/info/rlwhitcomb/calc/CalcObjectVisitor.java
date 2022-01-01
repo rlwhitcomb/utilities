@@ -440,6 +440,8 @@
  *	    a bit to make only the variable mandatory.
  *	    #180: Use nn.mm on @j notation to specify indent size and increment,
  *	    and "-" to eliminate leading newline. Refactor parameters on "toStringValue".
+ *	01-Jan-2022 (rlwhitcomb)
+ *	    #178: Use current "silent" setting for ":include", instead of "false".
  */
 package info.rlwhitcomb.calc;
 
@@ -1409,7 +1411,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    try {
 		String contents = Calc.getFileContents(paths, charset);
-		return Calc.processString(contents, false);
+		return Calc.processString(contents, settings.silent);
 	    }
 	    catch (IOException ioe) {
 		throw new CalcExprException(ctx, "%calc#ioError", ExceptionUtil.toString(ioe));
