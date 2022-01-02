@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2020-2021 Roger L. Whitcomb.
+ * Copyright (c) 2020-2022 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -442,6 +442,7 @@
  *	    and "-" to eliminate leading newline. Refactor parameters on "toStringValue".
  *	01-Jan-2022 (rlwhitcomb)
  *	    #178: Use current "silent" setting for ":include", instead of "false".
+ *	    #175: More precise message going back to decimal mode (with precision).
  */
 package info.rlwhitcomb.calc;
 
@@ -1015,9 +1016,20 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public boolean setRationalMode(final boolean mode) {
 	    boolean oldMode = settings.rationalMode;
 	    settings.rationalMode = mode;
+	    String msg;
 
-	    displayDirectiveMessage("%calc#rationalMode",
-			Intl.getString(mode ? "calc#rational" : "calc#decimal"));
+	    if (mode) {
+		msg = Intl.getString("calc#rational");
+	    }
+	    else {
+		int prec = mc.getPrecision();
+		if (prec == 0)
+		    msg = Intl.formatString("calc#decimal", Intl.getString("calc#unlimited"));
+		else
+		    msg = Intl.formatString("calc#decimal", prec);
+	    }
+
+	    displayDirectiveMessage("%calc#rationalMode", msg);
 
 	    return oldMode;
 	}

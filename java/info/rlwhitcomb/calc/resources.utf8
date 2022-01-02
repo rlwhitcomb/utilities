@@ -1,7 +1,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2021 Roger L. Whitcomb.
+# Copyright (c) 2021-2022 Roger L. Whitcomb.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -97,6 +97,8 @@
 #	    #128: Generalize "fill" errors for "pad" also.
 #	31-Dec-2021 (rlwhitcomb)
 #	    #180: New error for scale value in formats.
+#	01-Jan-2022 (rlwhitcomb)
+#	    #175: New format for decimal message to display precision.
 #
 
 #
@@ -135,7 +137,7 @@ errorNoAlt	= Syntax error at position %1$d: no viable alternative at input <y>%2
 #
 # From CalcObjectVisitor
 #
-precUnlimited	= Precision is now <u>unlimited<>.
+precUnlimited	= Precision is now <u>UNLIMITED<>.
 precDigits	= Precision is now <u>%1$d<> digits.
 trigMode	= Trig mode is now <u>%1$s<>.
 unitsBinary	= Units in <u>binary<>.
@@ -158,7 +160,8 @@ varUnder1	= ---------
 varUnder2	= =========
 # These two should (probably) not be translated
 rational	= RATIONAL
-decimal		= DECIMAL
+decimal		= DECIMAL(%1$s)
+unlimited	= UNLIMITED
 
 precNotInteger		= Decimal precision of <u>%1$s<> must be a 32-bit integer value
 precOutOfRange		= Decimal precision of <u>%1$d<> is out of range

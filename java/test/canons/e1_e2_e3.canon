@@ -15,7 +15,7 @@
 >phi -> 8670007398507948658051921 / 5358359254990966640871840
 >PHI -> 5358359254990966640871840 / 8670007398507948658051921
 >phi @d -> 1.6180339887498948482045868343656381177203091798058
->Calculation mode set to “DECIMAL”.
+>Calculation mode set to “DECIMAL(50)”.
 >sin (pi / 3) -> 0.86602540378443864676372317075293618347140262690517
 >4 & 7 -> 4
 >true && false -> false
@@ -380,7 +380,7 @@
 >fr2 -- -> 22 / 7
 >fr2 -- -> 15 / 7
 >fr2 @F -> 1 1/7
->Calculation mode set to “DECIMAL”.
+>Calculation mode set to “DECIMAL(10000)”.
 >a = [1, 2, 3] -> [ 1, 2, 3 ]
 >a[0] = 4 -> 4
 >a[1] = 5 -> 5
@@ -598,7 +598,7 @@
 >bn 2 -> 1 / 6
 >bn 20 -> -174611 / 330
 >bn 126 -> 5556330281949274850616324408918951380525567307126747246796782304333594286400508981287241419934529638692081513802696639 / 4357878
->Calculation mode set to “DECIMAL”.
+>Calculation mode set to “DECIMAL(34)”.
 >Variable 'a' cleared.
 >Defining function “a” = {loop $i in 10 {$i}}
 >a -> 10
