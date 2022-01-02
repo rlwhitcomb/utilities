@@ -300,6 +300,16 @@ public final class SemanticVersion implements Comparable<SemanticVersion> {
 		return ret.toString();
 	}
 
+	public String toSimpleString() {
+		StringBuilder ret = new StringBuilder();
+		ret.append(major);
+		ret.append('.');
+		ret.append(minor);
+		ret.append('.');
+		ret.append(patch);
+		return ret.toString();
+	}
+
 	@Override
 	public int hashCode() {
 		return toString().hashCode(); // Lazy

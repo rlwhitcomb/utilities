@@ -99,6 +99,7 @@
 #	    #180: New error for scale value in formats.
 #	01-Jan-2022 (rlwhitcomb)
 #	    #175: New format for decimal message to display precision.
+#	    #177: Library version mismatch error.
 #
 
 #
@@ -133,6 +134,8 @@ charsetError	= <e>Problem with character set <y>%1$s<>: %2$s<r>
 timing		= Parse time %1$11.9f secs. Execution time %2$11.9f secs. Total elapsed time %3$11.9f seconds.
 syntaxError	= Syntax error at position %1$d: %2$s
 errorNoAlt	= Syntax error at position %1$d: no viable alternative at input <y>%2$s<>
+
+libVersionMismatch	= Library <y>%1$s<> is not compatible with the current program version.
 
 #
 # From CalcObjectVisitor

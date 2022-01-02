@@ -443,6 +443,7 @@
  *	01-Jan-2022 (rlwhitcomb)
  *	    #178: Use current "silent" setting for ":include", instead of "false".
  *	    #175: More precise message going back to decimal mode (with precision).
+ *	    #177: Save current program version as part of saved variables (to ensure compatibility).
  */
 package info.rlwhitcomb.calc;
 
@@ -512,6 +513,9 @@ import info.rlwhitcomb.util.Which;
  */
 public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 {
+	/** Version identifier for library (saved) files; compatible with <code>LIB_VERSION</code> in Calc. */
+	private static final String LIB_FORMAT = "//** Version: %1$s Base: %2$s";
+
 	/**
 	 * The mode used for doing trig calculations.
 	 */
@@ -1434,6 +1438,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		throws IOException
 	{
 	    try (BufferedWriter writer = Files.newBufferedWriter(path, charset == null ? DEFAULT_CHARSET : charset)) {
+		// Write out the current version
+		SemanticVersion prog_version = Environment.programVersion();
+		SemanticVersion prog_base = Environment.implementationVersion();
+		writer.write(String.format(LIB_FORMAT, prog_version.toSimpleString(), prog_base.toSimpleString()));
+		writer.newLine();
+
 		// Note: the keySet returned from ObjectScope is in order of declaration, which is important here, since we
 		// must be able to read back the saved file and have the values computed to be the same as they are now.
 		for (String key : globals.keySet()) {

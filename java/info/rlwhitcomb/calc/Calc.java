@@ -227,6 +227,7 @@
  *	    #178: Set quiet mode reading libraries (by default; they can still turn quiet off if desired).
  *	    #172: Fix parse timing if there is a parser error.
  *	    #175: Fix decimal digits input in Settings dialog.
+ *	    #177: Do version check of library code to ensure compatibility.
  */
 package info.rlwhitcomb.calc;
 
@@ -247,12 +248,15 @@ import java.nio.charset.StandardCharsets;
 import java.nio.charset.UnsupportedCharsetException;
 import java.nio.file.Files;
 import java.text.NumberFormat;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.jar.JarFile;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.pivot.beans.BXML;
 import org.apache.pivot.beans.BXMLSerializer;
@@ -267,6 +271,8 @@ import org.apache.pivot.wtk.util.TextAreaOutputStream;
 
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
+
+import de.onyxbits.SemanticVersion;
 
 import info.rlwhitcomb.IntlProvider;
 import info.rlwhitcomb.jarfile.Launcher;
@@ -303,6 +309,8 @@ public class Calc
 	private static final String LINESEP = System.lineSeparator();
 
 	private static final String EMPTY_TEXT = "\n";
+
+	private static final Pattern LIB_VERSION = Pattern.compile("//\\*\\* Version\\: (\\d+\\.\\d+\\.\\d+.*) Base\\: (\\d+\\.\\d+\\.\\d+.*)[\\r?\\n]");
 
 	/**
 	 * An enumeration of what we expect next on the command line.
@@ -1261,6 +1269,30 @@ public class Calc
 		    // We're gonna bet the problem is the charset
 		    fileText = FileUtilities.readFileAsString(f, StandardCharsets.UTF_8);
 		}
+
+		// Do a version check for library files
+		Matcher m = LIB_VERSION.matcher(fileText);
+		if (m.lookingAt()) {
+		    String version = m.group(1);
+		    String base = m.group(2);
+		    try {
+			SemanticVersion lib_version = new SemanticVersion(version);
+			SemanticVersion lib_base = new SemanticVersion(base);
+			SemanticVersion prog_version = Environment.programVersion();
+			SemanticVersion prog_base = Environment.implementationVersion();
+
+			int ret = lib_version.compareTo(prog_version);
+			if (ret < 0)
+			    throw new Intl.IllegalArgumentException("calc#libVersionMismatch", f.getPath());
+			ret = lib_base.compareTo(prog_base);
+			if (ret < 0)
+			    throw new Intl.IllegalArgumentException("calc#libVersionMismatch", f.getPath());
+		    }
+		    catch (ParseException pe) {
+			throw new Intl.IllegalArgumentException("calc#libVersionMismatch", f.getPath());
+		    }
+		}
+
 		inputBuf.append(fileText).append(LINESEP);
 		return true;
 	    }
@@ -1874,6 +1906,9 @@ public class Calc
 			process(input, visitor, errorStrategy, quiet);
 		    }
 		}
+	    }
+	    catch (IllegalArgumentException iae) {
+		displayer.displayErrorMessage(Intl.formatString("calc#argError", ExceptionUtil.toString(iae)));
 	    }
 	    catch (LeaveException lex) {
 		if (lex.hasValue()) {
