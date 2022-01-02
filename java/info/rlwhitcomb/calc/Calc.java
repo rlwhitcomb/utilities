@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2020-2021 Roger L. Whitcomb.
+ * Copyright (c) 2020-2022 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -226,6 +226,7 @@
  *	01-Jan-2022 (rlwhitcomb)
  *	    #178: Set quiet mode reading libraries (by default; they can still turn quiet off if desired).
  *	    #172: Fix parse timing if there is a parser error.
+ *	    #175: Fix decimal digits input in Settings dialog.
  */
 package info.rlwhitcomb.calc;
 
@@ -524,7 +525,7 @@ public class Calc
 	    else if (selectedButton == unlimitedPrecisionButton)
 		mcNew = MathContext.UNLIMITED;
 	    else {
-		mcNew = new MathContext(100);
+		mcNew = new MathContext(visitor.getMathContext().toString());
 		digitsInputEnabled = true;
 	    }
 
