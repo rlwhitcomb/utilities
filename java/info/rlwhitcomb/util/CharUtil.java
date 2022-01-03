@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2011-2021 Roger L. Whitcomb.
+ * Copyright (c) 2011-2022 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -304,6 +304,8 @@
  *	    "Quotes" class before stripping them. Make all parameters final.
  *	31-Dec-2021 (rlwhitcomb)
  *	    Fix missing "break" in "quoteControl" that was causing dup values.
+ *	02-Jan-2022 (rlwhitcomb)
+ *	    #192: New "countQuotes" method to detect embedded quotes.
  */
 
 package info.rlwhitcomb.util;
@@ -432,6 +434,23 @@ public final class CharUtil
 	 * Private constructor since this is a utility class.
 	 */
 	private CharUtil() {
+	}
+
+
+	/**
+	 * Count the number of the given quote in the input string.
+	 *
+	 * @param input	The original input string.
+	 * @param quote	The quote character to count.
+	 * @return	Number of the given quote in the input string.
+	 */
+	public static int countQuotes(final String input, final char quote) {
+	    int count = 0;
+	    for (int i = 0; i < input.length(); i++) {
+		if (input.charAt(i) == quote)
+		    count++;
+	    }
+	    return count;
 	}
 
 

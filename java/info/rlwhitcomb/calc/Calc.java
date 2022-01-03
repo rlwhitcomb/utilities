@@ -228,6 +228,8 @@
  *	    #172: Fix parse timing if there is a parser error.
  *	    #175: Fix decimal digits input in Settings dialog.
  *	    #177: Do version check of library code to ensure compatibility.
+ *	02-Jan-2022 (rlwhitcomb)
+ *	    #192: Fix coloring of some error messages with embedded quotes.
  */
 package info.rlwhitcomb.calc;
 
@@ -918,7 +920,16 @@ public class Calc
 		    int ix = message.indexOf("at input '");
 		    if (ix > 0) {
 			message = message.replace("at input '", "at input <x>");
-			message = message.replace("'", "<>");
+			// Sometimes the message has embedded quotes, so be careful
+			int count = CharUtil.countQuotes(message, '\'');
+			if (count > 2) {
+			    // embedded quotes, replace only the last one with end tag
+			    ix = message.lastIndexOf('\'');
+			    message = message.substring(0, ix) + "<>" + message.substring(ix + 1);
+			}
+			else {
+			    message = message.replace("'", "<>");
+			}
 		    }
 		    throw new CalcException(Intl.formatString("calc#syntaxError", charPositionInLine, message), line);
 		}

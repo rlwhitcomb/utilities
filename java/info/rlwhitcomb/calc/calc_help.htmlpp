@@ -1070,7 +1070,7 @@ or
 </div>
 <hr class="sectionsep">
 
-  <footer><br><div class="title-box">Copyright&nbsp;&copy;&nbsp;2020-2021 Roger L. Whitcomb.<br>Licensed under an <a href="https://github.com/rlwhitcomb/utilities/blob/master/LICENSE">MIT</a> license.<br>Last modified: ${__DATE__} at ${__TIME__}</div><br></footer>
+  <footer><br><div class="title-box">Copyright&nbsp;&copy;&nbsp;2020-2022 Roger L. Whitcomb.<br>Licensed under an <a href="https://github.com/rlwhitcomb/utilities/blob/master/LICENSE">MIT</a> license.<br>Last modified: ${__DATE__} at ${__TIME__}</div><br></footer>
 </body>
 </html>
 
