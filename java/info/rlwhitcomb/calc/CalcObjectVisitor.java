@@ -444,6 +444,8 @@
  *	    #178: Use current "silent" setting for ":include", instead of "false".
  *	    #175: More precise message going back to decimal mode (with precision).
  *	    #177: Save current program version as part of saved variables (to ensure compatibility).
+ *	04-Jan-2022 (rlwhitcomb)
+ *	    #194: New library version description in ":save".
  */
 package info.rlwhitcomb.calc;
 
@@ -1442,6 +1444,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		SemanticVersion prog_version = Environment.programVersion();
 		SemanticVersion prog_base = Environment.implementationVersion();
 		writer.write(String.format(LIB_FORMAT, prog_version.toSimpleString(), prog_base.toSimpleString()));
+		writer.newLine();
+		writer.write(Intl.getString("calc#libVersionDescription"));
 		writer.newLine();
 
 		// Note: the keySet returned from ObjectScope is in order of declaration, which is important here, since we

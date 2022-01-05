@@ -100,6 +100,8 @@
 #	01-Jan-2022 (rlwhitcomb)
 #	    #175: New format for decimal message to display precision.
 #	    #177: Library version mismatch error.
+#	04-Jan-2022 (rlwhitcomb)
+#	    #194: New comment to explain library versions.
 #
 
 #
@@ -136,6 +138,7 @@ syntaxError	= Syntax error at position %1$d: %2$s
 errorNoAlt	= Syntax error at position %1$d: no viable alternative at input <y>%2$s<>
 
 libVersionMismatch	= Library <y>%1$s<> is not compatible with the current program version.
+libVersionDescription	= //** The versions above must conform to the latest values in "version.properties" and "build.properties"
 
 #
 # From CalcObjectVisitor
