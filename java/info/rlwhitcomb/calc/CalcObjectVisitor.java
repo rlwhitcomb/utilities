@@ -4061,6 +4061,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	@Override
+	public Object visitDecExpr(CalcParser.DecExprContext ctx) {
+	    // Note: this will convert fractions, strings, etc.
+	    return getDecimalValue(ctx.expr1().expr());
+	}
+
+	@Override
 	public Object visitFracExpr(CalcParser.FracExprContext ctx) {
 	    try {
 		CalcParser.Expr1Context expr1 = ctx.expr1();

@@ -622,6 +622,7 @@ or
             <tr><td><code>PAD</code> or <code>LPAD</code> or <code>RPAD</code>&nbsp;<i>var</i>&nbsp;<code>,</code> <i>expr</i>&nbsp;( <code>,</code><i>expr</i> )</td><td>pad an array or string to the given width<br>with 0 or space (default) or the given value/character</td></tr>
             <tr><td><code>FIB</code>&nbsp;<i>expr</i></td><td>Fibonacci number</td></tr>
             <tr><td><code>Bn</code>&nbsp;<i>expr</i></td><td>Bernoulli number</td></tr>
+            <tr><td><code>DEC</code>&nbsp;<i>expr</i></td><td>convert string or fraction to decimal number</td></tr>
             <tr><td><code>FRAC</code>&nbsp;<i>num</i><code>,</code>&nbsp;<i>den</i><br>or <i>int</i><code>,</code><i>num</i><code>,</code><i>den</i><br>or <i>string</i></td><td>construct a rational fraction</td></tr>
             <tr><td><code>ROMAN</code>&nbsp;<i>expr</i></td><td>interpret <i>expr</i> as a Roman Numeral</td></tr>
             <tr><td><code>LOWER</code>&nbsp;<i>expr</i></td><td>convert <i>expr</i> to lower case</td></tr>

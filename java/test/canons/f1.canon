@@ -55,4 +55,7 @@
 >#10 An equilateral triangle measures 3 1⁄2 inches on one side. What is the perimeter of the triangle?
 >`${f'3 1/2' * 3@F} inches` -> "10 1/2 inches"
 >
+>dec (f'3,7/8') -> 3.875
+>dec (5 / 14) -> 0.3571428571428571428571428571428571
+>dec ("-14.67583") -> -14.67583
 >Calculation mode set to “DECIMAL(34)”.

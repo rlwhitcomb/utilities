@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2020-2021 Roger L. Whitcomb.
+ * Copyright (c) 2020-2022 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -315,6 +315,8 @@
  *	31-Dec-2021 (rlwhitcomb)
  *	    Allow "fill" to only have one or two arguments.
  *	    #180: Allow fractional precision on FORMAT.
+ *	05-Jan-2022 (rlwhitcomb)
+ *	    #104: Add "dec()" function to convert from fraction or string, etc.
  */
 
 grammar Calc;
@@ -441,6 +443,7 @@ expr
    | K_PAD padArgs                       # padExpr
    | K_FIB expr1                         # fibExpr
    | K_BN expr1                          # bernExpr
+   | K_DEC expr1                         # decExpr
    | K_FRAC ( expr3 | expr2 | expr1 )    # fracExpr
    | K_ROMAN expr1                       # romanExpr
    | ( K_UPPER | K_LOWER ) expr1         # caseConvertExpr
@@ -808,6 +811,8 @@ K_PAD      : ( P A D | L P A D | R P A D ) ;
 K_FIB      : F I B ;
 
 K_BN       : B N ;
+
+K_DEC      : D E C ;
 
 K_FRAC     : F R A C ;
 
