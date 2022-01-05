@@ -446,6 +446,10 @@
  *	    #177: Save current program version as part of saved variables (to ensure compatibility).
  *	04-Jan-2022 (rlwhitcomb)
  *	    #194: New library version description in ":save".
+ *	05-Jan-2022 (rlwhitcomb)
+ *	    #182: Do the redirection of predefined values inside "evaluateFunction" as a common
+ *	    location to get it done everywhere it is necessary. Define the subobjects of "info"
+ *	    as predefined values themselves, to avoid redefinition.
  */
 package info.rlwhitcomb.calc;
 
@@ -755,37 +759,37 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    SemanticVersion v = Environment.programVersion();
 	    ObjectScope version = new ObjectScope();
 
-	    version.setValue("major",      v.major);
-	    version.setValue("minor",      v.minor);
-	    version.setValue("patch",      v.patch);
-	    version.setValue("prerelease", v.getPreReleaseString());
-	    version.setValue("build",      v.getBuildMetaString());
+	    PredefinedValue.define(version, "major",      v.major);
+	    PredefinedValue.define(version, "minor",      v.minor);
+	    PredefinedValue.define(version, "patch",      v.patch);
+	    PredefinedValue.define(version, "prerelease", v.getPreReleaseString());
+	    PredefinedValue.define(version, "build",      v.getBuildMetaString());
 
 	    ObjectScope os = new ObjectScope();
 
-	    os.setValue("platform", Environment.platform());
-	    os.setValue("version",  Environment.osVersion());
-	    os.setValue("id",       Environment.platformIdentifier());
-	    os.setValue("user",     Environment.currentUser());
+	    PredefinedValue.define(os, "platform", Environment.platform());
+	    PredefinedValue.define(os, "version",  Environment.osVersion());
+	    PredefinedValue.define(os, "id",       Environment.platformIdentifier());
+	    PredefinedValue.define(os, "user",     Environment.currentUser());
 
 	    ObjectScope java = new ObjectScope();
 	    int javaMajor = Environment.javaMajorVersion();
 	    String javaVersion = Environment.javaVersion();
 
-	    java.setValue("major", javaMajor);
+	    PredefinedValue.define(java, "major", javaMajor);
 
 	    try {
 		SemanticVersion jv = new SemanticVersion(javaVersion);
 		if (javaMajor > 8) {
-		    java.setValue("minor",      jv.minor);
-		    java.setValue("patch",      jv.patch);
-		    java.setValue("prerelease", jv.getPreReleaseString());
-		    java.setValue("build",      jv.getBuildMetaString());
+		    PredefinedValue.define(java, "minor",      jv.minor);
+		    PredefinedValue.define(java, "patch",      jv.patch);
+		    PredefinedValue.define(java, "prerelease", jv.getPreReleaseString());
+		    PredefinedValue.define(java, "build",      jv.getBuildMetaString());
 		}
 		else {
 		    // Version looks like: "1.8.0_292"
-		    java.setValue("minor", jv.patch);
-		    java.setValue("patch", jv.getBuildMetaString());
+		    PredefinedValue.define(java, "minor", jv.patch);
+		    PredefinedValue.define(java, "patch", jv.getBuildMetaString());
 		}
 	    }
 	    catch (ParseException pe) {
@@ -793,14 +797,14 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		System.err.println("ERROR: Problem with Java version: " + ExceptionUtil.toString(pe));
 	    }
 
-	    java.setValue("version", javaVersion);
-	    java.setValue("model",   Environment.dataModel());
+	    PredefinedValue.define(java, "version", javaVersion);
+	    PredefinedValue.define(java, "model",   Environment.dataModel());
 
 	    ObjectScope info = new ObjectScope();
 
-	    info.setValue("version", version);
-	    info.setValue("os",      os);
-	    info.setValue("java",    java);
+	    PredefinedValue.define(info, "version", version);
+	    PredefinedValue.define(info, "os",      os);
+	    PredefinedValue.define(info, "java",    java);
 
 	    PredefinedValue.define(globalScope, "info", info);
 
@@ -1101,6 +1105,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	 * <li> if the function was defined WITH parameters, then treat the value as a function object
 	 * and just return the value</li>
 	 * </ul>
+	 * <p> Also, if the function return (or the initial value, for that matter) is a {@link PredefinedValue}
+	 * then call its {@code getValue()} function to get the real value (which, for the moment at least,
+	 * will never be another function).
 	 *
 	 * @param ctx   The parsing context (for error reporting).
 	 * @param value The result of an expression, which could be a reference to a function call.
@@ -1133,6 +1140,10 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    popScope();
 		    setSilent(prevSilent);
 		}
+	    }
+
+	    if (returnValue instanceof PredefinedValue) {
+		returnValue = ((PredefinedValue) returnValue).getValue();
 	    }
 
 	    return returnValue;
@@ -2386,6 +2397,11 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    func.defineParameter(formalParams, FunctionDeclaration.VARARG, null);
 		}
 	    }
+
+	    // Can't redefine a predefined value
+	    Object oldValue = currentScope.getValue(functionName, settings.ignoreNameCase);
+	    if (oldValue != null && oldValue instanceof PredefinedValue)
+		throw new CalcExprException(ctx, "%calc#noChangePredefined", functionName, "");
 
 	    currentScope.setValue(functionName, settings.ignoreNameCase, func);
 

@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2021 Roger L. Whitcomb.
+ * Copyright (c) 2021-2022 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -109,6 +109,8 @@
  *	    #170: Switch "length" and "scale".
  *	31-Dec-2021 (rlwhitcomb)
  *	    #180: Refactor parameters to "toStringValue"; allow variable indent increment.
+ *	05-Jan-2022 (rlwhitcomb)
+ *	    As part of #182: we need to evaluate Number subclasses since they are "in the wild" now too.
  */
 package info.rlwhitcomb.calc;
 
@@ -387,6 +389,21 @@ public final class CalcUtil
 		throw new CalcExprException(ctx, "%calc#valueNotNull", getTreeText(ctx));
 	}
 
+	private static String typeName(final Object value) {
+	    String name = value.getClass().getSimpleName();
+
+	    if (value instanceof ObjectScope)
+		name = "object";
+	    else if (value instanceof ArrayScope)
+		name = "array";
+
+	    return name;
+	}
+
+	private static boolean isFloat(final Object value) {
+	    return (value instanceof Double || value instanceof Float);
+	}
+
 	/**
 	 * Fixup a {@link BigDecimal} value by stripping trailing zeros for a nicer presentation.
 	 *
@@ -425,18 +442,13 @@ public final class CalcUtil
 		return fixup(new BigDecimal((String) value));
 	    else if (value instanceof Boolean)
 		return ((Boolean) value).booleanValue() ? BigDecimal.ONE : BigDecimal.ZERO;
-	    else if (value instanceof Double || value instanceof Float)
+	    else if (isFloat(value))
 		return fixup(new BigDecimal(((Number) value).doubleValue()));
 	    else if (value instanceof Number)
 		return fixup(BigDecimal.valueOf(((Number) value).longValue()));
 
 	    // Here we are not able to make sense of the object, so we have an error
-	    String typeName = value.getClass().getSimpleName();
-	    if (value instanceof ObjectScope)
-		typeName = "object";
-	    else if (value instanceof ArrayScope)
-		typeName = "array";
-	    throw new CalcExprException(ctx, "%calc#noConvertDecimal", typeName);
+	    throw new CalcExprException(ctx, "%calc#noConvertDecimal", typeName(value));
 	}
 
 	/**
@@ -466,18 +478,13 @@ public final class CalcUtil
 		return BigFraction.valueOf((String) value);
 	    else if (value instanceof Boolean)
 		return ((Boolean) value).booleanValue() ? BigFraction.ONE : BigFraction.ZERO;
-	    else if (value instanceof Double || value instanceof Float)
+	    else if (isFloat(value))
 		return new BigFraction(new BigDecimal(((Number) value).doubleValue()));
 	    else if (value instanceof Number)
 		return new BigFraction(((Number) value).longValue());
 
 	    // Here we are not able to make sense of the object, so we have an error
-	    String typeName = value.getClass().getSimpleName();
-	    if (value instanceof ObjectScope)
-		typeName = "object";
-	    else if (value instanceof ArrayScope)
-		typeName = "array";
-	    throw new CalcExprException(ctx, "%calc#noConvertFraction", typeName);
+	    throw new CalcExprException(ctx, "%calc#noConvertFraction", typeName(value));
 	}
 
 	/**
@@ -497,6 +504,9 @@ public final class CalcUtil
 		}
 		else if (value instanceof BigFraction) {
 		    return ((BigFraction) value).toIntegerExact();
+		}
+		else if (value instanceof Number) {
+		    return BigInteger.valueOf(((Number) value).longValue());
 		}
 		else {
 		    return toDecimalValue(visitor, value, mc, ctx).toBigIntegerExact();
@@ -525,6 +535,9 @@ public final class CalcUtil
 		else if (value instanceof BigFraction) {
 		    return ((BigFraction) value).intValueExact();
 		}
+		else if (value instanceof Number) {
+		    return ((Number) value).intValue();
+		}
 		else {
 		    return toDecimalValue(visitor, value, mc, ctx).intValueExact();
 		}
@@ -552,8 +565,8 @@ public final class CalcUtil
 	    if (CharUtil.isNullOrEmpty(value))
 		return Boolean.FALSE;
 
-	    if (value instanceof ArrayScope || value instanceof ObjectScope)
-		   return Boolean.TRUE;
+	    if (value instanceof Scope)
+		return Boolean.TRUE;
 
 	    try {
 		boolean boolValue = CharUtil.getBooleanValue(value);
@@ -808,13 +821,16 @@ public final class CalcUtil
 		String str = (String) obj;
 		return str.codePointCount(0, str.length());
 	    }
+	    if (obj instanceof Number) {
+		return ((Number) obj).toString().length();
+	    }
 	    if (obj instanceof ArrayScope) {
 		@SuppressWarnings("unchecked")
 		ArrayScope array = (ArrayScope) obj;
 		if (recursive) {
 		    int len = 0;
 		    for (Object listObj : array.list()) {
-			if (listObj instanceof ArrayScope || listObj instanceof ObjectScope)
+			if (listObj instanceof Scope)
 			    len += length(visitor, listObj, ctx, recursive);
 			else
 			    len++;	// Note: this will count null entries as one
@@ -831,7 +847,7 @@ public final class CalcUtil
 		if (recursive) {
 		    int len = 0;
 		    for (Object mapObj : map.values()) {
-			if (mapObj instanceof ArrayScope || mapObj instanceof ObjectScope)
+			if (mapObj instanceof Scope)
 			    len += length(visitor, mapObj, ctx, recursive);
 			else
 			    len++;	// Note: this will count null values as one
@@ -866,7 +882,7 @@ public final class CalcUtil
 		return ((BigDecimal) obj).scale();
 	    if (obj instanceof BigFraction)
 		return ((BigFraction) obj).toDecimal().scale();
-	    if (obj instanceof ArrayScope || obj instanceof ObjectScope)
+	    if (obj instanceof Scope)
 		return length(visitor, obj, ctx, true);
 	    return 0;
 	}
@@ -1019,6 +1035,18 @@ public final class CalcUtil
 		Boolean b2 = toBooleanValue(visitor, e2, ctx2);
 
 		return b1.compareTo(b2);
+	    }
+	    else if (isFloat(e1) || isFloat(e2)) {
+		double d1 = ((Number) e1).doubleValue();
+		double d2 = ((Number) e2).doubleValue();
+
+		return Double.compare(d1, d2);
+	    }
+	    else if (e1 instanceof Number || e2 instanceof Number) {
+		long l1 = ((Number) e1).longValue();
+		long l2 = ((Number) e2).longValue();
+
+		return Long.compare(l1, l2);
 	    }
 	    else if (e1 instanceof ArrayScope && e2 instanceof ArrayScope) {
 		@SuppressWarnings("unchecked")

@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2021 Roger L. Whitcomb.
+ * Copyright (c) 2021-2022 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,6 +26,8 @@
  *  History:
  *	28-Oct-2021 (rlwhitcomb)
  *	    Initial coding.
+ *	04-Jan-2022 (rlwhitcomb)
+ *	    #182: Allow defining into any ObjectScope.
  */
 package info.rlwhitcomb.calc;
 
@@ -105,25 +107,25 @@ class PredefinedValue extends Scope
 	/**
 	 * Define one of these into the global symbols.
 	 *
-	 * @param globals	The global symbol table in which to define it.
+	 * @param scope		The symbol table in which to define it.
 	 * @param name		The name of this predefined value.
 	 * @param supplier	Supplier for the value.
 	 */
-	static void define(final GlobalScope globals, final String name, final Supplier<Object> supplier) {
+	static void define(final ObjectScope scope, final String name, final Supplier<Object> supplier) {
 	    PredefinedValue predef = new PredefinedValue(name, supplier);
-	    globals.setValue(name, false, predef);
+	    scope.setValue(name, false, predef);
 	}
 
 	/**
 	 * Define one of these into the global symbols.
 	 *
-	 * @param globals	The global symbol table in which to define it.
+	 * @param scope		The symbol table in which to define it.
 	 * @param name		The name of this predefined value.
 	 * @param value		The constant value of it.
 	 */
-	static void define(final GlobalScope globals, final String name, final Object value) {
+	static void define(final ObjectScope scope, final String name, final Object value) {
 	    PredefinedValue predef = new PredefinedValue(name, value);
-	    globals.setValue(name, false, predef);
+	    scope.setValue(name, false, predef);
 	}
 
 }
