@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2010-2011,2013-2017,2019-2021 Roger L. Whitcomb.
+ * Copyright (c) 2010-2011,2013-2017,2019-2022 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -96,6 +96,8 @@
  *	Deal with InvalidPathExceptions in the "canRead" / "canWrite" methods.
  *    09-Nov-2021 (rlwhitcomb)
  *	Add method to get extension only.
+ *    06-Jan-2022 (rlwhitcomb)
+ *	Fix "Zip Slip" vulnerability in "unpackFiles".
  */
 package info.rlwhitcomb.util;
 
@@ -125,6 +127,7 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
+import java.util.zip.ZipException;
 import net.iharder.b64.Base64;
 
 
@@ -776,6 +779,11 @@ public final class FileUtilities
 	for (Enumeration<JarEntry> e = jarFile.entries(); e.hasMoreElements(); ) {
 	    JarEntry entry = e.nextElement();
 	    String name    = entry.getName();
+
+	    // Make sure we don't "slip" outside the destination dir bounds with ".." or similar
+	    File trialFile = new File(tempDir, name);
+	    if (!trialFile.toPath().normalize().startsWith(tempDirPath))
+		throw new ZipException(Intl.formatString("util#fileutil.outsideDir", name));
 
 	    if (name.startsWith(dirName)) {
 		for (String ext : extensions) {

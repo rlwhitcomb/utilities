@@ -123,6 +123,8 @@
 #	    New message for ParseException from ExceptionUtil.
 #	02-Jan-2022 (rlwhitcomb)
 #	    Update copyright years.
+#	06-Jan-2022 (rlwhitcomb)
+#	    #89: New error for "Zip Slip" detection.
 #
 
 #
@@ -253,6 +255,7 @@ dir.notExistNotDir	= Directory "%1$s" does not exist, is not a directory, or can
 #
 fileutil.fileTooBig	= The file's size of %1$,d bytes is too big to read.
 fileutil.wrongExtension	= The file does not have the expected "%1$s" extension.
+fileutil.outsideDir	= The zip entry '%1$s' is outside the destination directory bounds!
 
 #
 # From ClassUtil.java
