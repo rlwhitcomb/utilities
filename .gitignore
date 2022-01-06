@@ -16,6 +16,10 @@ PreProcBaseVisitor.java
 PreProcParser.java
 PreProcLexer.java
 PreProcVisitor.java
+JSONBaseVisitor.java
+JSONParser.java
+JSONLexer.java
+JSONVisitor.java
 test*.log
 TestPP.java
 calc_help.html
