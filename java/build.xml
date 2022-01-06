@@ -4,7 +4,7 @@
 
 	The MIT License (MIT)
 
-	Copyright (c) 2020-2021 Roger L. Whitcomb.
+	Copyright (c) 2020-2022 Roger L. Whitcomb.
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -282,6 +282,8 @@
 		Take out "-html5" flag for Javadoc on JDK 8 builds.
 	    27-Dec-2021 (rlwhitcomb)
 		Add "isdir" wrapper scripts.
+	    05-Jan-2022 (rlwhitcomb)
+		#196: Add "json" directory and JSON grammar.
 
      ========================================================================== -->
 
@@ -529,18 +531,28 @@
 	</target>
 
 	<target name="check-grammars-uptodate">
-		<condition property="grammars.uptodate" value="true" else="false">
+		<condition property="calc.grammar.uptodate" value="true" else="false">
 			<uptodate srcfile="info/rlwhitcomb/calc/Calc.g4" targetfile="info/rlwhitcomb/calc/CalcParser.java"/>
+		</condition>
+		<condition property="json.grammar.uptodate" value="true" else="false">
+			<uptodate srcfile="info/rlwhitcomb/json/JSON.g4" targetfile="info/rlwhitcomb/json/JSONParser.java"/>
 		</condition>
 	</target>
 
 	<target name="process-grammars" depends="check-grammars-uptodate" description="Process the Antlr grammars to generate parsers.">
-		<echo message="Generating Calc parser" unless:true="${grammars.uptodate}"/>
-		<java jar="external-files/antlr-${antlr.version}-complete.jar" fork="true" unless:true="${grammars.uptodate}" failonerror="true">
+		<echo message="Generating Calc parser" unless:true="${calc.grammar.uptodate}"/>
+		<java jar="external-files/antlr-${antlr.version}-complete.jar" fork="true" unless:true="${calc.grammar.uptodate}" failonerror="true">
 			<arg file="info/rlwhitcomb/calc/Calc.g4"/>
 			<arg value="-visitor"/>
 			<arg value="-no-listener"/>
 			<arg line="-package info.rlwhitcomb.calc"/>
+		</java>
+		<echo message="Generating JSON parser" unless:true="${json.grammar.uptodate}"/>
+		<java jar="external-files/antlr-${antlr.version}-complete.jar" fork="true" unless:true="${json.grammar.uptodate}" failonerror="true">
+			<arg file="info/rlwhitcomb/json/JSON.g4"/>
+			<arg value="-visitor"/>
+			<arg value="-no-listener"/>
+			<arg line="-package info.rlwhitcomb.json"/>
 		</java>
 	</target>
 
@@ -571,6 +583,7 @@
 			<src path="info/rlwhitcomb/directory"/>
 			<src path="info/rlwhitcomb/heart"/>
 			<src path="info/rlwhitcomb/jarfile"/>
+			<src path="info/rlwhitcomb/json"/>
 			<src path="info/rlwhitcomb/matches"/>
 			<src path="info/rlwhitcomb/test"/>
 			<src path="info/rlwhitcomb/tester"/>
@@ -620,6 +633,7 @@
 			<include name="info/rlwhitcomb/directory/*.class"/>
 			<include name="info/rlwhitcomb/heart/*.class"/>
 			<include name="info/rlwhitcomb/jarfile/*.class"/>
+			<include name="info/rlwhitcomb/json/*.class"/>
 			<include name="info/rlwhitcomb/matches/*.class"/>
 			<include name="info/rlwhitcomb/tester/*.class"/>
 			<include name="info/rlwhitcomb/tools/*.class"/>
@@ -737,6 +751,7 @@
 			<fileset dir="info/rlwhitcomb/directory" includes="*.class"/>
 			<fileset dir="info/rlwhitcomb/heart" includes="*.class"/>
 			<fileset dir="info/rlwhitcomb/jarfile" includes="*.class"/>
+			<fileset dir="info/rlwhitcomb/json" includes="*.class"/>
 			<fileset dir="info/rlwhitcomb/matches" includes="*.class"/>
 			<fileset dir="info/rlwhitcomb/test" includes="*.class"/>
 			<fileset dir="info/rlwhitcomb/tester" includes="*.class"/>
