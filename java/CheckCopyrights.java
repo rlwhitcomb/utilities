@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2015-2018,2020-2021 Roger L. Whitcomb
+ * Copyright (c) 2015-2018,2020-2022 Roger L. Whitcomb
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -60,6 +60,9 @@
  *	    Prepare for GitHub.
  *	04-Sep-2021 (rlwhitcomb)
  *	    Use "git" commands to get information. Check license information.
+ *	05-Jan-2022 (rlwhitcomb)
+ *	    Tweak output; update copyright year.
+ *	    #99: Quit early if "git" is not available.
  */
 import java.io.File;
 import java.util.ArrayList;
@@ -76,6 +79,7 @@ import info.rlwhitcomb.util.Environment;
 import info.rlwhitcomb.util.Intl;
 import info.rlwhitcomb.util.LineProcessor;
 import info.rlwhitcomb.util.Options;
+import info.rlwhitcomb.util.Which;
 
 
 /**
@@ -86,6 +90,7 @@ import info.rlwhitcomb.util.Options;
 public class CheckCopyrights
 {
 	private static final String STARTING_DIRECTORY = "..";
+	private static final String UNDERLINE = "======================================";
 
 	private static int totalFiles;
 	private static int missingCopyrightErrors;
@@ -98,7 +103,7 @@ public class CheckCopyrights
 	private static String[] licenseTemplate = {
 		"The MIT License (MIT)",
 		"",
-		"Copyright (c) 2008-2021 Roger L. Whitcomb.",
+		"Copyright (c) 2008-2022 Roger L. Whitcomb.",
 		"",
 		"Permission is hereby granted, free of charge, to any person obtaining a copy",
 		"of this software and associated documentation files (the \"Software\"), to deal",
@@ -570,6 +575,10 @@ public class CheckCopyrights
 	public static void main(String[] args) {
 	    Environment.setDesktopApp(true);
 
+	    if (Which.findExecutable("git") == null) {
+		throw new RuntimeException("Unable to locate 'git' utility on the system PATH!");
+	    }
+
 	    // Parse options from the command line args
 	    for (String arg : args) {
 		if (Options.matchesOption(arg, "verbose", "v")) {
@@ -582,10 +591,11 @@ public class CheckCopyrights
 
 	    new DirectoryProcessor(STARTING_DIRECTORY, new Processor()).processDirectory();
 
-	    System.out.println("======================================");
+	    System.out.println(UNDERLINE);
 	    System.out.format("         Total files checked: %1$d%n", totalFiles);
 	    System.out.format("Files with missing copyright: %1$d%n", missingCopyrightErrors);
 	    System.out.format(" Files with wrong copyrights: %1$d%n", wrongCopyrightErrors);
+	    System.out.println(UNDERLINE);
 	}
 
 }
