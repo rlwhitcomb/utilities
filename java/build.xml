@@ -284,6 +284,7 @@
 		Add "isdir" wrapper scripts.
 	    05-Jan-2022 (rlwhitcomb)
 		#196: Add "json" directory and JSON grammar.
+		Additional targets there for "clean".
 
      ========================================================================== -->
 
@@ -752,6 +753,7 @@
 			<fileset dir="info/rlwhitcomb/heart" includes="*.class"/>
 			<fileset dir="info/rlwhitcomb/jarfile" includes="*.class"/>
 			<fileset dir="info/rlwhitcomb/json" includes="*.class"/>
+			<fileset dir="info/rlwhitcomb/json" includes="*.class,*.interp,*.tokens,JSONParser.java,JSONVisitor.java,JSONLexer.java,JSONBaseVisitor.java"/>
 			<fileset dir="info/rlwhitcomb/matches" includes="*.class"/>
 			<fileset dir="info/rlwhitcomb/test" includes="*.class"/>
 			<fileset dir="info/rlwhitcomb/tester" includes="*.class"/>
