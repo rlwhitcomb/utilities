@@ -1,7 +1,7 @@
 # specified on command line $testClass info.rlwhitcomb.calc.Calc
 $sourceDir test/files
 $canonDir test/canons
-$defaultOptions -nocolors -dir test/files
+$defaultOptions -nocolors -dir test/files -expressions
 
 $echo Tests of Calc with extended characters
 $echo

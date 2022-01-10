@@ -230,6 +230,8 @@
  *	    #177: Do version check of library code to ensure compatibility.
  *	02-Jan-2022 (rlwhitcomb)
  *	    #192: Fix coloring of some error messages with embedded quotes.
+ *	09-Jan-2022 (rlwhitcomb)
+ *	    #201: Add "-expressions" option (opposite of "-resultsonly").
  */
 package info.rlwhitcomb.calc;
 
@@ -1543,6 +1545,15 @@ public class Calc
 		case "res":
 		case "r":
 		    resultsOnly = true;
+		    break;
+		case "expressions":
+		case "expression":
+		case "express":
+		case "exprs":
+		case "expr":
+		case "exp":
+		case "ex":
+		    resultsOnly = false;
 		    break;
 		case "quiet":
 		case "q":
