@@ -63,6 +63,8 @@
  *	05-Jan-2022 (rlwhitcomb)
  *	    Tweak output; update copyright year.
  *	    #99: Quit early if "git" is not available.
+ *	10-Jan-2022 (rlwhitcomb)
+ *	    #99: Don't throw an exception, just error out.
  */
 import java.io.File;
 import java.util.ArrayList;
@@ -576,7 +578,8 @@ public class CheckCopyrights
 	    Environment.setDesktopApp(true);
 
 	    if (Which.findExecutable("git") == null) {
-		throw new RuntimeException("Unable to locate 'git' utility on the system PATH!");
+		System.err.println("Unable to locate 'git' utility on the system PATH!");
+		System.exit(1);
 	    }
 
 	    // Parse options from the command line args
