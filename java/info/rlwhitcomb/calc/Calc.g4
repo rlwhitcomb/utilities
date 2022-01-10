@@ -1149,7 +1149,7 @@ STRING
    ;
 
 ISTRING
-   : '`'  ( ESCI | SAFECODEPOINTI ) `* '`'
+   : '`'  ( ESCI | SAFECODEPOINTI ) * '`'
    ;
 
 fragment ESC1
