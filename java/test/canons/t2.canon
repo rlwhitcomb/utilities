@@ -23,9 +23,10 @@
 >Test 'e_func': Passed
 >Test 'e_s': Passed
 >Test 'e_sort': Passed
+>Test 'quine': Passed
 >
 >End of Calc tests.
 >------------------------------------
->Ran 20 tests: 20 passed, 0 failed.
+>Ran 21 tests: 21 passed, 0 failed.
 >====================================
 >

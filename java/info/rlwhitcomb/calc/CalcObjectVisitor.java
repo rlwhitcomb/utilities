@@ -450,6 +450,9 @@
  *	    #182: Do the redirection of predefined values inside "evaluateFunction" as a common
  *	    location to get it done everywhere it is necessary. Define the subobjects of "info"
  *	    as predefined values themselves, to avoid redefinition.
+ *	08-Jan-2022 (rlwhitcomb)
+ *	    #183: Change '@Q' to double quote the result (whereas '@q' gets rid of quotes).
+ *	    Enable '@q' and '@Q' for arrays and objects.
  */
 package info.rlwhitcomb.calc;
 
@@ -1734,10 +1737,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    if (result != null && !format.isEmpty()) {
 		char formatChar = format.charAt(format.length() - 1);
 
-		// JSON format has some special properties not supported by another other formats
-		if (formatChar != 'j' && formatChar != 'J') {
+		// Some formats have special characteristics
+		if (Character.toLowerCase(formatChar) != 'j') {
 		    if (scale != Integer.MIN_VALUE)
 			throw new CalcExprException(ctx, "%calc#noScaleFormat", scale, formatChar);
+		}
+		if (Character.toLowerCase(formatChar) != 'j' && Character.toLowerCase(formatChar) != 'q') {
 		    if (result instanceof Scope)
 			throw new CalcExprException(ctx, "%calc#noConvertObjArr", formatChar);
 		}
@@ -1783,6 +1788,10 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			break;
 
 		    case 'Q':
+			valueBuf.append(toStringValue(this, ctx, result, true, settings.separatorMode));
+			addQuotes = true;	// double quote the result
+			break;
+
 		    case 'q':
 			valueBuf.append(toStringValue(this, ctx, result, false, settings.separatorMode));
 			break;

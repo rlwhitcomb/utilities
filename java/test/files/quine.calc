@@ -1,0 +1,5 @@
+def quine = {
+ a = [ "def quine = {\n a = ", "\n b = `${a@Q}`\n return a[0] + b + a[1]\n}" ]
+ b = `${a@Q}`
+ return a[0] + b + a[1]
+}

@@ -36,5 +36,8 @@ e_func        : e_func
 e_s           : e_s
 e_sort        : e_sort -- e10 e1 e11 e12 e20 e2 e3 e5 e30 e31
 
+# Note: this needs to be last because we change the library and other settings
+test/files/quine.calc : -nolibs -lib test/files/quine.calc -results quine@q
+
 $echo
 $echo "End of Calc tests."
