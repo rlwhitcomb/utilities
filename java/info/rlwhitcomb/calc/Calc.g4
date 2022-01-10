@@ -317,6 +317,9 @@
  *	    #180: Allow fractional precision on FORMAT.
  *	05-Jan-2022 (rlwhitcomb)
  *	    #104: Add "dec()" function to convert from fraction or string, etc.
+ *	09-Jan-2022 (rlwhitcomb)
+ *	    #200: Redo the escape sequences for strings (to match CharUtil.quoteControl and
+ *	    convertEscapeSequences).
  */
 
 grammar Calc;
@@ -1137,44 +1140,52 @@ FORMAT
    ;
 
 STRING
-   : '"'      (ESC1 | SAFECODEPOINT1)* '"'
-   | '\''     (ESC2 | SAFECODEPOINT2)* '\''
-   | '\u2018' (ESC3 | SAFECODEPOINT3)* '\u2019'
-   | '\u201C' (ESC4 | SAFECODEPOINT4)* '\u201D'
-   | '\u2039' (ESC5 | SAFECODEPOINT5)* '\u203A'
-   | '\u00AB' (ESC6 | SAFECODEPOINT6)* '\u00BB'
+   : '"'      ( ESC1 | SAFECODEPOINT1 ) * '"'
+   | '\''     ( ESC2 | SAFECODEPOINT2 ) * '\''
+   | '\u2018' ( ESC3 | SAFECODEPOINT3 ) * '\u2019'
+   | '\u201C' ( ESC4 | SAFECODEPOINT4 ) * '\u201D'
+   | '\u2039' ( ESC5 | SAFECODEPOINT5 ) * '\u203A'
+   | '\u00AB' ( ESC6 | SAFECODEPOINT6 ) * '\u00BB'
    ;
 
 ISTRING
-   : '`'  (ESCI | SAFECODEPOINTI)* '`'
+   : '`'  ( ESCI | SAFECODEPOINTI ) `* '`'
    ;
 
 fragment ESC1
-   : '\\' (["\\/bfnrt] | UNICODE)
+   : ESC ( ["] | ESCAPES | UNICODE )
    ;
 
 fragment ESC2
-   : '\\' (['\\/bfnrt] | UNICODE)
+   : ESC ( ['] | ESCAPES | UNICODE )
    ;
 
 fragment ESC3
-   : '\\' ([\\/bfnrt] | '\u2019' | UNICODE)
+   : ESC ( '\u2019' | ESCAPES | UNICODE )
    ;
 
 fragment ESC4
-   : '\\' ([\\/bfnrt] | '\u201D' | UNICODE)
+   : ESC ( '\u201D' | ESCAPES | UNICODE )
    ;
 
 fragment ESC5
-   : '\\' ([\\/bfnrt] | '\u203A' | UNICODE)
+   : ESC ( '\u203A' | ESCAPES | UNICODE )
    ;
 
 fragment ESC6
-   : '\\' ([\\/bfnrt] | '\u00BB' | UNICODE)
+   : ESC ( '\u00BB' | ESCAPES | UNICODE )
    ;
 
 fragment ESCI
-   : '\\' ([`\\/bfnrt] | UNICODE)
+   : ESC ( [`] | ESCAPES | UNICODE )
+   ;
+
+fragment ESCAPES
+   : [\\bfnrt0]
+   ;
+
+fragment ESC
+   : '\\'
    ;
 
 fragment UNICODE

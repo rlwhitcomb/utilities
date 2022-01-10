@@ -306,6 +306,9 @@
  *	    Fix missing "break" in "quoteControl" that was causing dup values.
  *	02-Jan-2022 (rlwhitcomb)
  *	    #192: New "countQuotes" method to detect embedded quotes.
+ *	09-Jan-2022 (rlwhitcomb)
+ *	    #200: Redo "quoteControl" and "convertEscapeSequences" to match escape sequences
+ *	    in Calc grammar.
  */
 
 package info.rlwhitcomb.util;
@@ -720,20 +723,20 @@ public final class CharUtil
 		char ch = input.charAt(i);
 		if (Character.isISOControl(ch)) {
 		    switch (ch) {
-			case '\r':
-			    buf.append(escapeChar).append('r');
-			    break;
-			case '\n':
-			    buf.append(escapeChar).append('n');
-			    break;
-			case '\t':
-			    buf.append(escapeChar).append('t');
+			case '\b':
+			    buf.append(escapeChar).append('b');
 			    break;
 			case '\f':
 			    buf.append(escapeChar).append('f');
 			    break;
-			case '\b':
-			    buf.append(escapeChar).append('b');
+			case '\n':
+			    buf.append(escapeChar).append('n');
+			    break;
+			case '\r':
+			    buf.append(escapeChar).append('r');
+			    break;
+			case '\t':
+			    buf.append(escapeChar).append('t');
 			    break;
 			case '\0':
 			    buf.append(escapeChar).append('0');
@@ -966,6 +969,7 @@ public final class CharUtil
 	 * higher level has determined the syntax here is correct. It is our job here
 	 * simply to interpret the correct syntax into an unescaped form.
 	 * <p> Handles either <code>&bsol;uXXXX</code> or <code>&bsol;u{XXXXXX}</code> Unicode escapes.
+	 * <p> This should match the grammar in Calc.g4 (ESCAPES and UNICODE).
 	 *
 	 * @param input	The input string with embedded escape sequences.
 	 * @return	The string with the embedded escape sequences converted to their
@@ -984,7 +988,6 @@ public final class CharUtil
 			char ch2 = input.charAt(++i);
 			switch (ch2) {
 			    case STD_ESCAPE_CHAR:
-			    case '/':
 				buf.append(ch2);
 				break;
 			    case 'b':
@@ -1010,6 +1013,9 @@ public final class CharUtil
 				break;
 			    case 'B':
 				i = parseCharEscape(input, i, 2, 8, buf);
+				break;
+			    case '0':
+				buf.append('\0');
 				break;
 			}
 			continue;
