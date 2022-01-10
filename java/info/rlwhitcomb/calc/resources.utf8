@@ -102,6 +102,8 @@
 #	    #177: Library version mismatch error.
 #	04-Jan-2022 (rlwhitcomb)
 #	    #194: New comment to explain library versions.
+#	09-Jan-2022 (rlwhitcomb)
+#	    #153: New error from command-line declaration.
 #
 
 #
@@ -133,6 +135,7 @@ unknownOption	= Unknown option <u>%1$s<>; ignoring.
 inOutError	= <e>I/O Error: %1$s<>
 argError	= Error: %1$s
 charsetError	= <e>Problem with character set <y>%1$s<>: %2$s<r>
+declError	= <e>Improper syntax for variable declaration: <y>%1$s<><r>
 timing		= Parse time %1$11.9f secs. Execution time %2$11.9f secs. Total elapsed time %3$11.9f seconds.
 syntaxError	= Syntax error at position %1$d: %2$s
 errorNoAlt	= Syntax error at position %1$d: no viable alternative at input <y>%2$s<>

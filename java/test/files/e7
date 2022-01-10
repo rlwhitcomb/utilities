@@ -1,6 +1,10 @@
 #
 # Tests of IF, and CASE
 #
+
+# Test variables defined on the command line
+verbose
+
 :clear
 :variables
 
@@ -99,3 +103,4 @@ $*
 $0;$4
 $*[2]
 $5
+

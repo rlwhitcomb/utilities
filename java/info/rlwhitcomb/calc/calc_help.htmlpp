@@ -163,6 +163,7 @@ h2 {
      of default file name extensions are appended to the bare name to try to find it. These extensions are: <code>".calc"</code>, <code>".expr"</code>,
      <code>".ca"</code>, and <code>".ex"</code> (in that order). Once all this searching fails to find the file, then the supposed file name(s) are
      treated as if they were a set of expressions to evaluate.
+  <p>Variables can also be defined on the command line using the syntax: <code>-variable <i>name</i>=<i>value</i></code>.
 </div>
 <hr class="sectionsep">
   <h2>Command Line Options</h2>
@@ -229,6 +230,7 @@ h2 {
     <tr><td><code>-win1252</code></td><td>Use Windows-1252 as the input charset</td><td><code>-win</code>, <code>-w</code></td><td></td></tr>
     <tr><td><code>-charset</code> <i>charset_name</i></td><td>Use the given charset to decode input files</td><td><code>-char</code>, <code>-cs</code></td><td></td></tr>
     <tr><td><code>-default</code></td><td>Use the platform default charset <i>(default)</i></td><td><code>-def</code></td><td></td></tr>
+    <tr><td><code>-variable</code><br><i>name</i><code>=</code><i>value</i><br>or <i>name</i><code>:</code><i>value</i></td><td>Set the value of a variable</td><td><code>-define</code>, <code>-var</code></td><td><i>name</i>&nbsp;<code>=</code>&nbsp;<i>value</i></td></tr>
     <tr><td><code>--</code> <i>parameter_values</i><br>[ <code>--</code> ]</td><td>Provide values for the <code>$0</code>, <code>$1</code>, etc. parameters<br>
             (every value between the <code>--</code> markers<br>is taken as a parameter value)</td><td></td><td></td></tr>
     <tr><td><code>-help</code></td><td>Display this help page</td><td><code>-h</code>, <code>-?</code></td><td><code>:help</code> (REPL mode only)</td></tr>

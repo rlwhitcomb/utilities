@@ -232,6 +232,8 @@
  *	    #192: Fix coloring of some error messages with embedded quotes.
  *	09-Jan-2022 (rlwhitcomb)
  *	    #201: Add "-expressions" option (opposite of "-resultsonly").
+ *	10-Jan-2022 (rlwhitcomb)
+ *	    #153: Define variables on command line.
  */
 package info.rlwhitcomb.calc;
 
@@ -334,7 +336,9 @@ public class Calc
 		/** All the remaining parameters are $n global parameters. */
 		ARGUMENTS,
 		/** A charset to use for reading files. */
-		CHARSET
+		CHARSET,
+		/** A named variable declaration. */
+		VARIABLE
 	}
 
 	/** What we're expecting next on the command line. */
@@ -451,6 +455,10 @@ public class Calc
 
 	/** The argument values from the command line. */
 	private static List<String> argValues = new ArrayList<>();
+
+	/** The map of variable declarations from the command line. */
+	private static HashMap<String, String> variables = new HashMap<>();
+
 
 	/** The list of default file extensions to use to find input files. */
 	private static final String[] DEFAULT_EXTS = {
@@ -791,6 +799,11 @@ public class Calc
 		int index = 0;
 		for (String argument : argValues) {
 		    visitor.setArgument(index++, argument);
+		}
+
+		// Set the variables defined on the command line
+		for (java.util.Map.Entry<String, String> var : variables.entrySet()) {
+		    visitor.setVariable(var.getKey(), var.getValue());
 		}
 
 		// Try to read and process any given libraries before doing anything else
@@ -1646,6 +1659,10 @@ public class Calc
 		case "nolib":
 		    libraryNames = null;
 		    break;
+		case "variable":
+		case "define":
+		case "var":
+		    return Expecting.VARIABLE;
 		case "cmdenter":
 		case "cmd":
 		    useCmdEnter = true;
@@ -1738,6 +1755,23 @@ public class Calc
 			    }
 			    catch (IllegalCharsetNameException | UnsupportedCharsetException cse) {
 				errFormat("calc#charsetError", arg, ExceptionUtil.toString(cse));
+				expecting = Expecting.QUIT_NOW;
+			    }
+			    break;
+			case VARIABLE:
+			    String parts[] = arg.split("[=:]");
+			    if (parts.length == 2) {
+				if (CharUtil.isNullOrEmpty(parts[0])) {
+				    errFormat("calc#declError", arg);
+				    expecting = Expecting.QUIT_NOW;
+				}
+				else {
+				    variables.put(parts[0], parts[1]);
+				    expecting = Expecting.DEFAULT;
+				}
+			    }
+			    else {
+				errFormat("calc#declError", arg);
 				expecting = Expecting.QUIT_NOW;
 			    }
 			    break;
@@ -1846,6 +1880,11 @@ public class Calc
 		    int index = 0;
 		    for (String argument : argValues) {
 			visitor.setArgument(index++, argument);
+		    }
+
+		    // Set the variables defined on the command line
+		    for (java.util.Map.Entry<String, String> var : variables.entrySet()) {
+			visitor.setVariable(var.getKey(), var.getValue());
 		    }
 
 		    // Try to read and process any given libraries before doing anything else

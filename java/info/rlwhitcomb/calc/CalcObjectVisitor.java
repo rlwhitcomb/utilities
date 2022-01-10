@@ -453,6 +453,8 @@
  *	08-Jan-2022 (rlwhitcomb)
  *	    #183: Change '@Q' to double quote the result (whereas '@q' gets rid of quotes).
  *	    Enable '@q' and '@Q' for arrays and objects.
+ *	10-Jan-2022 (rlwhitcomb)
+ *	    #153: Add "setVariable" method, break out conversions to "stringToValue" method.
  */
 package info.rlwhitcomb.calc;
 
@@ -915,6 +917,31 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 	}
 
+
+	/**
+	 * Convert a string argument (sourced from the command line) to a possibly better value
+	 * (as in, more accurate of its true value). Tries to convert to a number, a boolean, or
+	 * just leave as an unquoted string.
+	 *
+	 * @param arg	The command line argument as typed by the user.
+	 * @return	The best possible representation of that argument.
+	 * @see #setArgument
+	 * @see #setVariable
+	 */
+	private Object stringToValue(final String arg) {
+	    try {
+		return new BigDecimal(arg);
+	    }
+	    catch (NumberFormatException nfe) {
+		try {
+		    return Boolean.valueOf(CharUtil.getBooleanValue(arg));
+		}
+		catch (IllegalArgumentException iae) {
+		    return CharUtil.stripAnyQuotes(arg, true);
+		}
+	    }
+	}
+
 	/**
 	 * Set one of the global argument variables ({@code $0}, {@code $1}, etc)
 	 * to the given value.
@@ -922,23 +949,29 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	 *
 	 * @param index	The zero-based index for the variable.
 	 * @param arg	The argument value, which will be parsed and set as a numeric value
-	 *		if it successfully parses as a {@link BigDecimal}, otherwise it
-	 *		will be set as a string.
+	 *		if it successfully parses as a {@link BigDecimal}, or a boolean
+	 *		if it fails that, otherwise it will be set as a string.
 	 */
 	public void setArgument(final int index, final String arg) {
 	    String argKey = String.format("$%1$d", index);
-	    try {
-		BigDecimal dValue = new BigDecimal(arg);
-		globals.setValue(argKey, dValue);
-		arguments.add(dValue);
-	    }
-	    catch (NumberFormatException nfe) {
-		String unquotedArg = CharUtil.stripAnyQuotes(arg, true);
-		globals.setValue(argKey, unquotedArg);
-		arguments.add(unquotedArg);
-	    }
+	    Object value = stringToValue(arg);
+
+	    globals.setValue(argKey, value);
+	    arguments.add(value);
 	    globals.setValue(ARG_COUNT, BigInteger.valueOf(arguments.size()));
 	}
+
+	/**
+	 * Set the value of a global variable (from command line).
+	 *
+	 * @param name	The variable's name.
+	 * @param value	The original string value to set, which will be converted
+	 *		(if possible) to a number or boolean.
+	 */
+	public void setVariable(final String name, final String value) {
+	    globals.setValue(name, stringToValue(value));
+	}
+
 
 	public MathContext getMathContext() {
 	    return mc;
