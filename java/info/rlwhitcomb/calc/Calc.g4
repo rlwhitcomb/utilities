@@ -320,6 +320,8 @@
  *	09-Jan-2022 (rlwhitcomb)
  *	    #200: Redo the escape sequences for strings (to match CharUtil.quoteControl and
  *	    convertEscapeSequences).
+ *	10-Jan-2022 (rlwhitcomb)
+ *	    #108: Allow the Unicode null character as an identifier start (for the alias to "null").
  */
 
 grammar Calc;
@@ -1266,6 +1268,7 @@ fragment NAME_START_CHAR
    | '\u2071'..'\u2073'
    | '\u207A'..'\u207F'
    | '\u208A'..'\u218F'
+   | '\u2400'
    | '\u2C00'..'\u2FEF'
    | '\u3001'..'\uD7FF'
    | '\uF900'..'\uFDCF'

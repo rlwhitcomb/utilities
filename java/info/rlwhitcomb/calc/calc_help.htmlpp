@@ -554,7 +554,7 @@ or
           <code>phi</code>, <code>&#x03C6;</code>, <code>&#x03D5;</code><br>
           <code>PHI</code>, <code>&#x03A6;</code><br>
           <code>true</code> or <code>false</code><br>
-          <code>null</code><br>
+          <code>null</code> or <code>nil</code> or <code>&#x2400;</code><br>
           <code>&#x2205;</code> or <code>&#x29B0;</code><br>
           <code>&#x00BC;</code>, <code>&#x00BD;</code>, <code>&#x00BE;</code>, <code>&#x2150;</code>, <code>&#x215E;</code>, etc.<br>
           <code>&#x2460;</code> .. <code>&#x2473;</code>, <code>&#x2474;</code> .. <code>&#x2487;</code>, <code>&#xFF10;</code> .. <code>&#xFF19;</code>, etc.<br>
@@ -578,8 +578,8 @@ or
     <tr><td>28</td><td><code>[</code> (&nbsp;<i>expr list</i>&nbsp;) <code>]</code><br><i>var</i> <code>[</code> <i>expr</i> <code>]</code> or <i>var</i>&nbsp;<code>&#x2080;</code> .. <code>&#x2089;</code></td><td>define an array,<br>or access elements of an array, string, or object</td><td>left to right</td></tr>
     <tr><td>27</td><td><code>.</code></td><td>access an object member</td><td>left to right</td></tr>
     <tr><td>26</td><td><code>( </code><i>expr</i><code> )</code></td><td>group an expression</td><td>N/A</td></tr>
-    <tr><td rowspan="65">25</td>
-            <td><code>ABS</code>&nbsp;<i>expr</i></td><td>absolute value</td><td rowspan="65">left to right</td></tr>
+    <tr><td rowspan="66">25</td>
+            <td><code>ABS</code>&nbsp;<i>expr</i></td><td>absolute value</td><td rowspan="66">left to right</td></tr>
             <tr><td><code>SIN</code>&nbsp;<i>expr</i></td><td>sine</td></tr>
             <tr><td><code>COS</code>&nbsp;<i>expr</i></td><td>cosine</td></tr>
             <tr><td><code>TAN</code>&nbsp;<i>expr</i></td><td>tangent</td></tr>
@@ -816,9 +816,11 @@ or
   <p>The <code>FACTORS</code> and <code>PFACTORS</code> functions only accept integer values, and produce arrays of the
      desired values.<br>Examples: <code>factors(123) &#x21E8; [ 1, 3, 41, 123 ]</code>, while <code>pfactors 123 &#x21E8; [ 3, 41 ]</code>.
   <p>The <code>EXEC</code> function will execute the operating system program given by the first (string) expression, using the remaining
-     expression values as parameters, and return the merged stdout and stderr streams as a string result. For instance, one of our
-     standard build tests involves this expression (for use on Windows):
-     <p class="indent"><code>split(exec('cmd', '/c', 'wc.bat', 'calc.txt'), '\\s+')</code></p>
+     expression values as parameters, and return the merged stdout and stderr streams as a string result. On Windows operating systems
+     if the command to execute is a batch file (<code>.bat</code> or <code>.cmd</code> extension) then <code>cmd /c</code> is automatically
+     prepended to the command. For instance, one of our standard build tests involves this expression:
+     <p class="indent"><code>split(exec('wc', 'calc.txt'), '\\s+')</code></p>
+     which will invoke the <code>wc</code> executable on Linux or MacOS, but will also run <code>cmd /c wc.bat</code> on Windows.
   <p>For now, the <code>encode</code> and <code>decode</code> functions only work on string objects (or other values / objects converted
      to their string representations). So, in order to reconstruct an array (for instance) from its encoded form you would need to do:
      <code>eval(decode '</code>...<code>')</code>.

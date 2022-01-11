@@ -115,6 +115,10 @@ p = ln2(1000000)
 2**p
 isprime 15485863
 isnull junk
+j2=nil
+isnull j2
+j3=␀
+isnull j3
 
 :degrees
 sin(45)

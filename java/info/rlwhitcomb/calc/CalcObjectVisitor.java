@@ -455,6 +455,7 @@
  *	    Enable '@q' and '@Q' for arrays and objects.
  *	10-Jan-2022 (rlwhitcomb)
  *	    #153: Add "setVariable" method, break out conversions to "stringToValue" method.
+ *	    #108: Add more aliases for "null" as predefined values.
  */
 package info.rlwhitcomb.calc;
 
@@ -747,10 +748,19 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    currentContext = new LValueContext(currentScope, settings.ignoreNameCase);
 	}
 
+	/**
+	 * Predefine all the global variables we start with (things like <code>true</code>,
+	 * <code>null</code>, <code>today</code>, <code>pi</code>, <code>PHI</code>, and
+	 * stuff like that).
+	 *
+	 * @param globalScope	The global symbol table where these need to be defined.
+	 */
 	private void predefine(final GlobalScope globalScope) {
 	    PredefinedValue.define(globalScope, "true", Boolean.TRUE);
 	    PredefinedValue.define(globalScope, "false", Boolean.FALSE);
 	    PredefinedValue.define(globalScope, "null", null);
+	    PredefinedValue.define(globalScope, "nil", null);
+	    PredefinedValue.define(globalScope, "\u2400", null);
 
 	    PredefinedValue.define(globalScope, "today", () -> {
 		LocalDate today = LocalDate.now();

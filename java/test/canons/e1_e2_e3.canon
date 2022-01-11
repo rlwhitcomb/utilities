@@ -115,6 +115,10 @@
 >2 ** p -> 999999.9999999974
 >isprime 15485863 -> true
 >isnull junk -> true
+>j2 = nil -> <null>
+>isnull j2 -> true
+>j3 = ␀ -> <null>
+>isnull j3 -> true
 >Trig mode is now “DEGREES”.
 >sin (45) -> 0.7071067811865477
 >cos (60) -> 0.4999999999999998
