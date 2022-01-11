@@ -2,9 +2,9 @@
 <html>
   <head>
     <title>Calculator Help</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fredericka+the+Great&amp;display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredericka+the+Great&amp;display=swap" rel="stylesheet">
     <style>
 table {
   font-family: helvetica, arial, sans-serif;
@@ -32,7 +32,7 @@ table code {
 }
 
 code {
-   font-size: 120%;
+   font-size: 110%;
    font-weight: bold;
 }
 
@@ -45,7 +45,7 @@ h2 {
     margin: 25px;
     overflow: hidden;
     text-align: center;
-    padding: 10px 20px;
+    padding: 10px 10px;
     background-color: lightgreen;
     border: 1px solid cornflowerblue;
     -webkit-border-radius: 20px;
@@ -115,7 +115,7 @@ h2 {
 
 <body>
   <div class="title-box">
-    <h1 style="font-family:'Fredericka the Great',cursive;font-size:400%;">Calculator</h1>
+    <h1 style="font-family:'Fredericka the Great';font-size:400%;">Calculator</h1>
     <h2>Version ${Calc.version}, build ${build.number}</h2>
   </div>
 <hr class="sectionsep">
@@ -135,11 +135,13 @@ h2 {
         <li>Custom function definitions for calculations beyond the list of predefined functions.</li>
         <li>Variables can be used for storage of values for later use.</li>
         <li>Object and array structures for storage of multiple values.</li>
-        <li>String functions for doing text manipulation.</li>
-        <li>The ability to do calculations straight from the command line, or in a convenient REPL mode, or in a GUI window.</li>
+        <li>Therefore, JSON objects are a native part of the language.</li>
+        <li>String functions for doing text manipulation, including <a href="https://en.wikipedia.org/wiki/String_interpolation">string interpolation</a>.</li>
+        <li>The ability to do calculations straight from the command line, from a text file, in a convenient REPL mode, or in a GUI window.</li>
         <li>The ability to define libraries of functions available using the "<code>-library</code>" command line option or the "<code>:include</code>" directive.</li>
         <li>Calculations can be edited (using backspace, etc.) to reduce the chance of keyboard errors.</li>
         <li>Looping and conditional statements to do pretty much any kind of calculation.</li>
+        <li>Therefore, the language is <a href="https://en.wikipedia.org/wiki/Turing_completeness">&ldquo;Turing Complete&rdquo;</a>.</li>
         <li>Current, active development and maintenance, so features and fixes are constantly being added.</li>
         <li>This is Open-Source Software (<a href="https://opensource.com/resources/what-open-source">OSS</a>) so the code can be examined, and modified (if desired) for your own use.</li>
       </ul>
@@ -836,13 +838,13 @@ or
   <p>The <code>info</code> object contains three subobjects:  <code>version</code>, <code>os</code>, and <code>java</code>. The contents of each are similar to this:
   <p class="indent">
     <code style="color:blue;">info.version</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">{ major: 2, minor: 3, patch: 0, prerelease: "-debug", build: "+9cce83e" }</code>
-  <p>The values of <code>phi</code> and <code>PHI</code> are constructed (due to precision and rounding) such that <code>1 / phi == PHI</code> and also <code>1 / PHI == phi</code>,
-     but even though mathematically <code>phi - 1 == PHI</code> and <code>PHI + 1 == phi</code> the values computed here will not match exactly ("PHI" will have one more
-     fractional digit of precision compared to "phi"):
+  <p>The values of <code>phi</code> and <code>PHI</code> (or <code>&#x03C6;</code> and <code>&#x03A6;</code>) (the <a href="https://en.wikipedia.org/wiki/Golden_ratio">&ldquo;Golden Ratio&rdquo;</a> and its inverse) are constructed (due to precision and rounding) such that <code>1 / phi == PHI</code> and also <code>1 / PHI == phi</code>.
+     But even though mathematically <code>phi - 1 == PHI</code> and <code>PHI + 1 == phi</code> the values computed here will not match exactly
+     ("PHI" will have one more fractional digit of precision than "phi"):
   <p class="indent">
      <code style="color:blue;">phi </code><code style="color:grey;">&#x21E8;</code><code style="color:green;"> 1.618033988749894848204586834365638</code><br>
      <code style="color:blue;">PHI </code><code style="color:grey;">&#x21E8;</code><code style="color:green;"> 0.6180339887498948482045868343656382</code><br>
-  <p>This value is also available from the standard <code>library.calc</code> via:
+  <p>This value is also available from the standard <code>library.calc</code> (as the first solution to the quadratic equation &xscr;&sup2; - &xscr; - 1 = 0) via:
   <p class="indent">
      <code style="color:blue;">quad(1, -1, -1)[0] </code><code style="color:grey;">&#x21E8;</code><code style="color:green;"> 1.618033988749894848204586834365638</code>
 </div>
