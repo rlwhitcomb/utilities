@@ -163,6 +163,8 @@
  *	11-Jan-2022 (rlwhitcomb)
  *	    #204: Report the number of available processors, plus max and total memory.
  *	    Allow comma-separated arguments on command line.
+ *	12-Jan-2022 (rlwhitcomb)
+ *	    #204: Also free memory.
  */
 package info.rlwhitcomb.util;
 
@@ -340,6 +342,7 @@ public final class Environment
 		PLATFORM_ID	(Environment::platformIdentifier, "Platform ID", "platformID", "platID", "pid"),
 		PROCESSORS	(Environment::processors, "Processors", "process", "proc"),
 		MAX_MEMORY	(Environment::maxMemory, "Maximum Memory", "maxMemory", "maxm"),
+		FREE_MEMORY	(Environment::freeMemory, "Free Memory", "freeMemory", "freem"),
 		TOTAL_MEMORY	(Environment::totalMemory, "Total Memory", "totalMemory", "totm"),
 		TEMP_DIR	(Environment::tempDirName, "Temp Directory", "tempDir", "tempd", "temp", "td"),
 		USER_HOME_DIR	(Environment::userHomeDirString, "Home Directory", "homeDir", "homed", "home", "h"),
@@ -1301,6 +1304,26 @@ public final class Environment
 	 */
 	public static String maxMemory() {
 	    return longFormat.format(maximumMemorySize());
+	}
+
+
+	/**
+	 * Report the free memory available.
+	 *
+	 * @return The free memory available from the {@link Runtime} class (in bytes).
+	 */
+	public static long freeMemorySize() {
+	    return Runtime.getRuntime().freeMemory();
+	}
+
+
+	/**
+	 * String version of the {@link #freeMemorySize}.
+	 *
+	 * @return The free memory size.
+	 */
+	public static String freeMemory() {
+	    return longFormat.format(freeMemorySize());
 	}
 
 
