@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2011-2017,2019-2021 Roger L. Whitcomb.
+ * Copyright (c) 2011-2017,2019-2022 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -160,6 +160,9 @@
  *	    #98: Add separate methods for screen width and height.
  *	01-Dec-2021 (rlwhitcomb)
  *	    #120: Eliminate other extraneous ".version" strings.
+ *	11-Jan-2022 (rlwhitcomb)
+ *	    #204: Report the number of available processors, plus max and total memory.
+ *	    Allow comma-separated arguments on command line.
  */
 package info.rlwhitcomb.util;
 
@@ -168,6 +171,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -240,6 +244,11 @@ public final class Environment
 	 * main programs, as well as other build-related information.
 	 */
 	private static Properties buildProperties = null;
+
+	/**
+	 * Number format for grouping thousands (for memory size, etc.)
+	 */
+	private static NumberFormat longFormat = null;
 
 	/**
 	 * Default product name -- read from the "build.properties" file,
@@ -329,6 +338,9 @@ public final class Environment
 		OS_VERSION	(Environment::osVersion, "O/S Version", "osVersion", "osVer", "ov"),
 		PLATFORM	(Environment::platform, "Platform", "platform", "plat", "p"),
 		PLATFORM_ID	(Environment::platformIdentifier, "Platform ID", "platformID", "platID", "pid"),
+		PROCESSORS	(Environment::processors, "Processors", "process", "proc"),
+		MAX_MEMORY	(Environment::maxMemory, "Maximum Memory", "maxMemory", "maxm"),
+		TOTAL_MEMORY	(Environment::totalMemory, "Total Memory", "totalMemory", "totm"),
 		TEMP_DIR	(Environment::tempDirName, "Temp Directory", "tempDir", "tempd", "temp", "td"),
 		USER_HOME_DIR	(Environment::userHomeDirString, "Home Directory", "homeDir", "homed", "home", "h"),
 		SCREEN_SIZE	(Environment::getScreenSize, "Screen Size", "screenSize", "screen", "size", "ss");
@@ -378,6 +390,9 @@ public final class Environment
 		javaMajorVersion = Integer.parseInt(parts[0]);
 
 	    IMPLEMENTATION_VERSION = getVersion(Environment.class);
+
+	    longFormat = NumberFormat.getInstance();
+	    longFormat.setGroupingUsed(true);
 	}
 
 
@@ -1250,6 +1265,66 @@ public final class Environment
 
 
 	/**
+	 * Report the number of available processors.
+	 *
+	 * @return The number of processors available via the {@link Runtime} class.
+	 */
+	public static int numberOfProcessors() {
+	    return Runtime.getRuntime().availableProcessors();
+	}
+
+
+	/**
+	 * String version of {@link #numberOfProcessors}.
+	 *
+	 * @return The number of available processors.
+	 */
+	public static String processors() {
+	    return String.valueOf(numberOfProcessors());
+	}
+
+
+	/**
+	 * Report the maximum memory available.
+	 *
+	 * @return The maximum memory available via the {@link Runtime} class (in bytes).
+	 */
+	public static long maximumMemorySize() {
+	    return Runtime.getRuntime().maxMemory();
+	}
+
+
+	/**
+	 * String version of the {@link #maximumMemorySize}.
+	 *
+	 * @return The maximum memory size.
+	 */
+	public static String maxMemory() {
+	    return longFormat.format(maximumMemorySize());
+	}
+
+
+	/**
+	 * Report the total memory available.
+	 *
+	 * @return The total memory available via the {@link Runtime} class (in bytes).
+	 */
+	public static long totalMemorySize() {
+	    return Runtime.getRuntime().totalMemory();
+	}
+
+
+	/**
+	 * String version of the {@link #totalMemorySize}.
+	 *
+	 * @return The total memory size.
+	 */
+	public static String totalMemory() {
+	    return longFormat.format(totalMemorySize());
+	}
+
+
+	/**
 	 * Read a properties file (ISO-8859-1 charset) from the default classpath and return the
 	 * properties map decoded from it.
 	 *
@@ -1534,13 +1609,16 @@ public final class Environment
 	public static void main(final String[] args) {
 	    Set<Env> valuesToDisplaySet = EnumSet.noneOf(Env.class);
 	    for (String arg : args) {
-		Optional<Env> opt = Env.match(arg);
-		opt.ifPresent(e -> {
-		    if (e.equals(Env.ALL))
-			valuesToDisplaySet.addAll(Env.all());
-		    else
-			valuesToDisplaySet.add(e);
-		});
+		String parts[] = arg.split("[,;]");
+		for (String part : parts) {
+		    Optional<Env> opt = Env.match(part);
+		    opt.ifPresent(e -> {
+			if (e.equals(Env.ALL))
+			    valuesToDisplaySet.addAll(Env.all());
+			else
+			    valuesToDisplaySet.add(e);
+		    });
+		}
 	    }
 
 	    if (valuesToDisplaySet.isEmpty())
