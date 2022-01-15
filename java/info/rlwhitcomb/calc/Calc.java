@@ -234,6 +234,9 @@
  *	    #201: Add "-expressions" option (opposite of "-resultsonly").
  *	10-Jan-2022 (rlwhitcomb)
  *	    #153: Define variables on command line.
+ *	11-Jan-2022 (rlwhitcomb)
+ *	    #132: Disable GUI buttons and input field while calculating. Reorganize
+ *	    actions in a CalcAction enum.
  */
 package info.rlwhitcomb.calc;
 
@@ -245,6 +248,7 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.lang.reflect.Constructor;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.MathContext;
@@ -340,6 +344,52 @@ public class Calc
 		/** A named variable declaration. */
 		VARIABLE
 	}
+
+	/**
+	 * An enumeration of the button actions for the GUI screen.
+	 */
+	private enum CalcAction
+	{
+		HELP     ("help",      HelpAction.class),
+		VERSION  ("version",   VersionAction.class),
+		SETTINGS ("settings",  SettingsAction.class),
+		SAVE     ("save",      SaveAction.class),
+		OPEN     ("open",      OpenAction.class),
+		CLEAR    ("clear",     ClearAction.class),
+		CALCULATE("calculate", CalculateAction.class),
+		EXIT     ("exit",      ExitAction.class);
+
+		private final String id;
+		private final Class<? extends Action> actionClass;
+		private Action action;
+
+		CalcAction(final String name, final Class<? extends Action> act) {
+		    id = name;
+		    actionClass = act;
+		}
+
+		@Override
+		public String toString() {
+		    return id;
+		}
+
+		Action register(final Calc instance) {
+		    try {
+			Constructor<? extends Action> constructor = actionClass.getDeclaredConstructor(Calc.class);
+			constructor.setAccessible(true);
+			Action act = constructor.newInstance(instance);
+			return Action.addNamedAction(id, act);
+		    }
+		    catch (Exception ex) {
+			throw new RuntimeException(ex);
+		    }
+		}
+
+		void enable(final boolean enabled) {
+		    Action.getNamedAction(id).setEnabled(enabled);
+		}
+	}
+
 
 	/** What we're expecting next on the command line. */
 	private static Expecting expecting;
@@ -512,11 +562,11 @@ public class Calc
 		public boolean keyPressed(Component comp, int keyCode, Keyboard.KeyLocation keyLocation) {
 		    if (keyCode == Keyboard.KeyCode.ENTER) {
 			if (useCmdEnter && Keyboard.isCmdPressed()) {
-			    Action.performAction("calculate", comp);
+			    Action.performAction(CalcAction.CALCULATE, comp);
 			    return true;
 			}
 			else if (!useCmdEnter && !Keyboard.areAnyPressed(Keyboard.Modifier.ALL_MODIFIERS)) {
-			    Action.performAction("calculate", comp);
+			    Action.performAction(CalcAction.CALCULATE, comp);
 			    return true;
 			}
 		    }
@@ -704,14 +754,9 @@ public class Calc
 	    this.display = display;
 
 	    try {
-		Action.addNamedAction("help",      new HelpAction());
-		Action.addNamedAction("version",   new VersionAction());
-		Action.addNamedAction("settings",  new SettingsAction());
-		Action.addNamedAction("save",      new SaveAction());
-		Action.addNamedAction("open",      new OpenAction());
-		Action.addNamedAction("clear",     new ClearAction());
-		Action.addNamedAction("calculate", new CalculateAction());
-		Action.addNamedAction("exit",      new ExitAction());
+		for (CalcAction action : CalcAction.values()) {
+		    action.register(this);
+		}
 
 		IntlProvider provider = new IntlProvider(getClass());
 		Intl.initResources(provider);
@@ -813,7 +858,11 @@ public class Calc
 		requestFocus(inputTextPane);
 	    }
 	    catch (Throwable ex) {
-		displayer.displayErrorMessage(ExceptionUtil.toString(ex));
+		String message = ExceptionUtil.toString(ex) + ClassUtil.getCallingMethod(1);
+		if (displayer != null)
+		    displayer.displayErrorMessage(message);
+		else
+		    System.err.println(message);
 	    }
 	}
 
@@ -1042,12 +1091,24 @@ public class Calc
 		}
 	}
 
+	private void enableActions(boolean enable) {
+	    CalcAction.SETTINGS.enable(enable);
+	    CalcAction.SAVE.enable(enable);
+	    CalcAction.OPEN.enable(enable);
+	    CalcAction.CLEAR.enable(enable);
+	    CalcAction.CALCULATE.enable(enable);
+	    CalcAction.EXIT.enable(enable);
+
+	    inputTextPane.setEnabled(enable);
+	}
+
 	private class CalculateAction extends Action
 	{
 		@Override
 		public void perform(Component source) {
 		    final String exprText = inputTextPane.getText();
 		    currentText = exprText;
+		    enableActions(false);
 
 		    queuedThread.submitWork(() -> {
 			try {
@@ -1057,6 +1118,7 @@ public class Calc
 			    ApplicationContext.queueCallback(() -> {
 				currentText = null;
 				inputTextPane.setText(EMPTY_TEXT);
+				enableActions(true);
 				requestFocus(inputTextPane);
 			    });
 			}
