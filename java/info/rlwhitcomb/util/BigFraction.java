@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2021 Roger L. Whitcomb.
+ * Copyright (c) 2021-2022 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -74,6 +74,8 @@
  *	    Strip trailing zeros in "toDecimal".
  *	02-Dec-2021 (rlwhitcomb)
  *	    #124: Tweak default display, not proper form.
+ *	14-Jan-2022 (rlwhitcomb)
+ *	    Some optimizations in "pow()".
  */
 package info.rlwhitcomb.util;
 
@@ -749,7 +751,17 @@ public class BigFraction extends Number
 	    else if (exponent == 1)
 		return this;
 
-	    return new BigFraction(numer.pow(exponent), denom.pow(exponent));
+	    // Trivial cases to avoid meaningless calculations
+	    if (equals(ZERO) || equals(ONE))
+		return this;
+
+	    // Some easy optimizations for numerator or denominator of one
+	    if (numer.equals(BigInteger.ONE))
+		return new BigFraction(numer, denom.pow(exponent));
+	    else if (denom.equals(BigInteger.ONE))
+		return new BigFraction(numer.pow(exponent), denom);
+	    else
+		return new BigFraction(numer.pow(exponent), denom.pow(exponent));
 	}
 
 	/**

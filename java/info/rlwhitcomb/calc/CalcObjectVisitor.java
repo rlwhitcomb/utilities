@@ -456,6 +456,8 @@
  *	10-Jan-2022 (rlwhitcomb)
  *	    #153: Add "setVariable" method, break out conversions to "stringToValue" method.
  *	    #108: Add more aliases for "null" as predefined values.
+ *	14-Jan-2022 (rlwhitcomb)
+ *	    Fix "frac" with one argument to convert anything to a fraction (not just a string).
  */
 package info.rlwhitcomb.calc;
 
@@ -4123,7 +4125,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    try {
 		CalcParser.Expr1Context expr1 = ctx.expr1();
 		if (expr1 != null) {
-		    return BigFraction.valueOf(getStringValue(expr1.expr(), false, false, false));
+		    CalcParser.ExprContext expr = expr1.expr();
+		    Object e = evaluateFunction(expr, visit(expr));
+		    return toFractionValue(this, e, expr);
 		}
 		else {
 		    CalcParser.Expr2Context e2ctx = ctx.expr2();
