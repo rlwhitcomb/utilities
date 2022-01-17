@@ -1,4 +1,4 @@
-//** Version: 2.4.64 Base: 1.6.1
+//** Version: 2.4.65 Base: 1.6.1
 //** The versions above must conform to the latest values in "version.properties" and "build.properties"
 
 /*
@@ -144,11 +144,11 @@ define quad($a, $b, $c) = { _b2 = $b * $b; _2a = 2 * $a; _r = (_b2 - 4 * $a * $c
  * Reference:
  * https://en.wikipedia.org/wiki/Riemann_zeta_function
  *
- * @param $two_n Positive even integer value
- * @return       The Euler "zeta" function of that value
+ * @param $2n Positive even integer value
+ * @return    The Euler "zeta" function of that value
  * Note: no error checking if the parameter is not a positive even integer.
  */
-define zeta_2n($two_n) = { ((-1)**($two_n / 2 + 1) * Bn($two_n) * (2 * pi) ** $two_n) / (2 * $two_n!) }
+define zeta_2n($2n) = { ((-1)**($2n / 2 + 1) * Bn($2n) * (2 * pi) ** $2n) / (2 * $2n!) }
 
 #
 # M = P[r(1+r)^n/((1+r)^n)-1)]

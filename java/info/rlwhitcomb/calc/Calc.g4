@@ -322,6 +322,9 @@
  *	    convertEscapeSequences).
  *	10-Jan-2022 (rlwhitcomb)
  *	    #108: Allow the Unicode null character as an identifier start (for the alias to "null").
+ *	17-Jan-2022 (rlwhitcomb)
+ *	    Allow local variable names to have a digit right after the '$' (as long as there is one
+ *	    other name start character, so "$2n" is valid, for instance.
  */
 
 grammar Calc;
@@ -902,7 +905,7 @@ DOT
        ;
 
 LOCALVAR
-       : '$' NAME_START_CHAR NAME_CHAR *
+       : '$' [0-9] ? NAME_START_CHAR NAME_CHAR *
        ;
 
 GLOBALVAR
