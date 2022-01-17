@@ -458,6 +458,8 @@
  *	    #108: Add more aliases for "null" as predefined values.
  *	14-Jan-2022 (rlwhitcomb)
  *	    Fix "frac" with one argument to convert anything to a fraction (not just a string).
+ *	17-Jan-2022 (rlwhitcomb)
+ *	    #130: Add "info.locale" object with relevant information.
  */
 package info.rlwhitcomb.calc;
 
@@ -475,6 +477,8 @@ import java.nio.charset.UnsupportedCharsetException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.DateFormatSymbols;
+import java.text.DecimalFormatSymbols;
 import java.text.FieldPosition;
 import java.text.NumberFormat;
 import java.text.ParseException;
@@ -485,11 +489,13 @@ import java.time.format.DateTimeParseException;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Deque;
 import java.util.LinkedHashMap;
+import java.util.Locale;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -817,11 +823,48 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    PredefinedValue.define(java, "version", javaVersion);
 	    PredefinedValue.define(java, "model",   Environment.dataModel());
 
+	    DateFormatSymbols dfs       = new DateFormatSymbols();
+	    DecimalFormatSymbols efs    = new DecimalFormatSymbols();
+	    ObjectScope locale          = new ObjectScope();
+	    ArrayScope<String> amPm     = new ArrayScope<>(dfs.getAmPmStrings());
+	    String[] weekDayNames       = dfs.getWeekdays();
+	    String[] monthNames         = dfs.getMonths();
+	    ArrayScope<String> weekDays = new ArrayScope<>(
+		weekDayNames[Calendar.SUNDAY],
+		weekDayNames[Calendar.MONDAY],
+		weekDayNames[Calendar.TUESDAY],
+		weekDayNames[Calendar.WEDNESDAY],
+		weekDayNames[Calendar.THURSDAY],
+		weekDayNames[Calendar.FRIDAY],
+		weekDayNames[Calendar.SATURDAY]);
+	    ArrayScope<String> months   = new ArrayScope<>(
+		monthNames[0], monthNames[1], monthNames[2], monthNames[3], monthNames[4], monthNames[5],
+		monthNames[6], monthNames[7], monthNames[8], monthNames[9], monthNames[10], monthNames[11]);
+	    Locale currentLocale        = Locale.getDefault();
+
+	    PredefinedValue.define(locale, "name",      currentLocale.getDisplayName());
+	    PredefinedValue.define(locale, "tag",       currentLocale.toLanguageTag());
+	    PredefinedValue.define(locale, "language",  currentLocale.getISO3Language());
+	    PredefinedValue.define(locale, "country",   currentLocale.getISO3Country());
+	    PredefinedValue.define(locale, "variant",   currentLocale.getVariant());
+
+	    PredefinedValue.define(locale, "currency",     efs.getCurrencySymbol());
+	    PredefinedValue.define(locale, "currencycode", efs.getInternationalCurrencySymbol());
+	    PredefinedValue.define(locale, "decimal",      Character.toString(efs.getDecimalSeparator()));
+	    PredefinedValue.define(locale, "exponent",     efs.getExponentSeparator());
+	    PredefinedValue.define(locale, "minus",        Character.toString(efs.getMinusSign()));
+	    PredefinedValue.define(locale, "separator",    Character.toString(efs.getGroupingSeparator()));
+
+	    PredefinedValue.define(locale, "ampm",      amPm);
+	    PredefinedValue.define(locale, "weekdays",  weekDays);
+	    PredefinedValue.define(locale, "months",    months);
+
 	    ObjectScope info = new ObjectScope();
 
 	    PredefinedValue.define(info, "version", version);
 	    PredefinedValue.define(info, "os",      os);
 	    PredefinedValue.define(info, "java",    java);
+	    PredefinedValue.define(info, "locale",  locale);
 
 	    PredefinedValue.define(globalScope, "info", info);
 

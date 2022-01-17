@@ -1,4 +1,4 @@
-//** Version: 2.4.63 Base: 1.6.1
+//** Version: 2.4.64 Base: 1.6.1
 //** The versions above must conform to the latest values in "version.properties" and "build.properties"
 
 /*
@@ -90,8 +90,7 @@ def deg_to_rad($deg) = { $deg / 180 * pi }
  * @param $date The input date value.
  * @return      The day name ("Sunday" .. "Saturday").
  */
-_day_names_  = [ "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" ]
-def dow_name($date) = { _day_names_ [ dow($date) ] }
+def dow_name($date) = { info.locale.weekdays [ dow($date) ] }
 
 /*
  * Get the month name for a given date.
@@ -99,8 +98,7 @@ def dow_name($date) = { _day_names_ [ dow($date) ] }
  * @param $date The input date value.
  * @return      The month name ("January" .. "December").
  */
-_month_names_ = [ "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" ]
-def moy_name($date) = { _month_names_ [ moy($date) - 1 ] }
+def moy_name($date) = { info.locale.months [ moy($date) - 1 ] }
 
 /*
  * Get the long form of a date.
