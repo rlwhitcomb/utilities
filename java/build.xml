@@ -289,6 +289,7 @@
 		#130: Add essentially a debug printout of the extant locales during "test"
 		so we can figure out how to fix the "e_lorem" test on the Linux CI machines.
 		And yet another.
+		Now take them out since we're gonna use "en-US" anyway.
 
      ========================================================================== -->
 
@@ -703,17 +704,6 @@
 		</fail>
 		<echo file="${test.log.path}" append="true">JavaPreProc: Preprocessing results and log match.
 </echo>
-		<echo>Debug printout of available locales and their information...</echo>
-		<java classname="info.rlwhitcomb.tools.OS">
-			<arg value="locales"/>
-			<arg value="-verbose"/>
-		</java>
-		<java classname="info.rlwhitcomb.calc.Calc">
-			<arg value="-nocolors"/>
-			<arg value="-locale"/>
-			<arg value="zh-CN"/>
-			<arg value="info.locale@j"/>
-		</java>
 		<echo>Test of InitializationTask...</echo>
 		<java classname="info.rlwhitcomb.test.InitTaskTest"   output="${test.log.path}" append="true" failonerror="true"/>
 		<echo>Running various tests through the Tester...</echo>

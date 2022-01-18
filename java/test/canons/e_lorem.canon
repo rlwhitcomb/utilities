@@ -176,3 +176,44 @@
 >$cp -> "ぞ"
 >$cp -> "や"
 >$cp -> "。"
+>info.locale @j -> 
+>{
+>  name: "English (United States)",
+>  tag: "en-US",
+>  language: "eng",
+>  country: "USA",
+>  variant: "",
+>  currency: "$",
+>  currencycode: "USD",
+>  decimal: ".",
+>  exponent: "E",
+>  minus: "-",
+>  separator: ",",
+>  ampm: [
+>    "AM",
+>    "PM"
+>  ],
+>  weekdays: [
+>    "Sunday",
+>    "Monday",
+>    "Tuesday",
+>    "Wednesday",
+>    "Thursday",
+>    "Friday",
+>    "Saturday"
+>  ],
+>  months: [
+>    "January",
+>    "February",
+>    "March",
+>    "April",
+>    "May",
+>    "June",
+>    "July",
+>    "August",
+>    "September",
+>    "October",
+>    "November",
+>    "December"
+>  ]
+>}
