@@ -460,6 +460,7 @@
  *	    Fix "frac" with one argument to convert anything to a fraction (not just a string).
  *	17-Jan-2022 (rlwhitcomb)
  *	    #130: Add "info.locale" object with relevant information.
+ *	    #125: Add timezone information to "info" also.
  */
 package info.rlwhitcomb.calc;
 
@@ -493,6 +494,7 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.Deque;
 import java.util.LinkedHashMap;
 import java.util.Locale;
@@ -500,6 +502,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.TreeSet;
 import java.util.function.UnaryOperator;
 import java.util.function.Function;
@@ -756,6 +759,15 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    currentContext = new LValueContext(currentScope, settings.ignoreNameCase);
 	}
 
+	private static String tzOffset(final int offset) {
+	    int rawMinutes = Math.abs(offset) / (1000 * 60);
+	    int hours      = rawMinutes / 60;
+	    int minutes    = rawMinutes - (hours * 60);
+
+	    return String.format("h'%1$s%2$d:%3$02d'", offset < 0 ? "-" : "", hours, minutes);
+	}
+
+
 	/**
 	 * Predefine all the global variables we start with (things like <code>true</code>,
 	 * <code>null</code>, <code>today</code>, <code>pi</code>, <code>PHI</code>, and
@@ -859,12 +871,25 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    PredefinedValue.define(locale, "weekdays",  weekDays);
 	    PredefinedValue.define(locale, "months",    months);
 
+	    ObjectScope tz = new ObjectScope();
+	    TimeZone zone  = TimeZone.getDefault();
+	    Date now       = new Date();
+	    boolean daylight = zone.inDaylightTime(now);
+	    int offset       = daylight ? zone.getOffset(now.getTime()) : zone.getRawOffset();
+
+	    PredefinedValue.define(tz, "id",       zone.getID());
+	    PredefinedValue.define(tz, "daylight", daylight);
+	    PredefinedValue.define(tz, "longname", zone.getDisplayName(daylight, TimeZone.LONG));
+	    PredefinedValue.define(tz, "name",     zone.getDisplayName(daylight, TimeZone.SHORT));
+	    PredefinedValue.define(tz, "offset",   tzOffset(offset));
+
 	    ObjectScope info = new ObjectScope();
 
-	    PredefinedValue.define(info, "version", version);
-	    PredefinedValue.define(info, "os",      os);
-	    PredefinedValue.define(info, "java",    java);
-	    PredefinedValue.define(info, "locale",  locale);
+	    PredefinedValue.define(info, "version",  version);
+	    PredefinedValue.define(info, "os",       os);
+	    PredefinedValue.define(info, "java",     java);
+	    PredefinedValue.define(info, "locale",   locale);
+	    PredefinedValue.define(info, "timezone", tz);
 
 	    PredefinedValue.define(globalScope, "info", info);
 
