@@ -285,6 +285,9 @@
 	    05-Jan-2022 (rlwhitcomb)
 		#196: Add "json" directory and JSON grammar.
 		Additional targets there for "clean".
+	    18-Jan-2022 (rlwhitcomb)
+		#130: Add essentially a debug printout of the extant locales during "test"
+		so we can figure out how to fix the "e_lorem" test on the Linux CI machines.
 
      ========================================================================== -->
 
@@ -699,6 +702,11 @@
 		</fail>
 		<echo file="${test.log.path}" append="true">JavaPreProc: Preprocessing results and log match.
 </echo>
+		<echo>Debug printout of available locales and their information...</echo>
+		<java classname="info.rlwhitcomb.tools.OS">
+			<arg value="locales"/>
+			<arg value="-verbose"/>
+		</java>
 		<echo>Test of InitializationTask...</echo>
 		<java classname="info.rlwhitcomb.test.InitTaskTest"   output="${test.log.path}" append="true" failonerror="true"/>
 		<echo>Running various tests through the Tester...</echo>
