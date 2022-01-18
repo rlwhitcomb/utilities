@@ -120,6 +120,21 @@ isnull j2
 j3=␀
 isnull j3
 
+typeof "abc"
+typeof null
+typeof PHI
+typeof(1.2)
+:rational on
+typeof(½)
+:rational pop
+typeof(tenpow(5))
+typeof(false)
+typeof(info)
+typeof(info.locale.weekdays)
+# Note: these will both be "integer" for now, until we figure out how to differentiate them
+typeof(D'9/11/2001')
+typeof(now)
+
 :degrees
 sin(45)
 cos(60)

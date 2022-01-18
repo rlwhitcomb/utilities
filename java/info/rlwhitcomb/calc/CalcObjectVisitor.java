@@ -461,6 +461,8 @@
  *	17-Jan-2022 (rlwhitcomb)
  *	    #130: Add "info.locale" object with relevant information.
  *	    #125: Add timezone information to "info" also.
+ *	18-Jan-2022 (rlwhitcomb)
+ *	    #211: Add "typeof" operator.
  */
 package info.rlwhitcomb.calc;
 
@@ -3113,6 +3115,19 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    return BigInteger.valueOf(signum);
 	}
 
+	@Override
+	public Object visitIsNullExpr(CalcParser.IsNullExprContext ctx) {
+	    Object obj = visit(ctx.expr1().expr());
+	    return Boolean.valueOf(obj == null);
+	}
+
+	@Override
+	public Object visitTypeofExpr(CalcParser.TypeofExprContext ctx) {
+	    Object obj = visit(ctx.expr1().expr());
+
+	    return typeof(obj);
+	}
+
 	private class LengthVisitor implements Function<Object, Object>
 	{
 		private BigInteger count = BigInteger.ZERO;
@@ -3193,12 +3208,6 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 
 	    return Boolean.valueOf(MathUtil.isPrime(i));
-	}
-
-	@Override
-	public Object visitIsNullExpr(CalcParser.IsNullExprContext ctx) {
-	    Object obj = visit(ctx.expr1().expr());
-	    return Boolean.valueOf(obj == null);
 	}
 
 	@Override

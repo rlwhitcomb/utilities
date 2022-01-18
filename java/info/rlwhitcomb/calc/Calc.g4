@@ -325,6 +325,8 @@
  *	17-Jan-2022 (rlwhitcomb)
  *	    Allow local variable names to have a digit right after the '$' (as long as there is one
  *	    other name start character, so "$2n" is valid, for instance.
+ *	18-Jan-2022 (rlwhitcomb)
+ *	    #211: Add "typeof"; rearrange the function list a little bit.
  */
 
 grammar Calc;
@@ -424,13 +426,14 @@ expr
    | K_EPOW expr1                        # ePowerExpr
    | K_TENPOW expr1                      # tenPowerExpr
    | K_SIGNUM expr1                      # signumExpr
+   | K_ISNULL expr1                      # isNullExpr
+   | K_TYPEOF expr1                      # typeofExpr
    | K_LENGTH ( expr1 | dotRange )       # lengthExpr
    | K_SCALE expr1                       # scaleExpr
    | K_ROUND expr2                       # roundExpr
    | K_CEIL expr1                        # ceilExpr
    | K_FLOOR expr1                       # floorExpr
    | K_ISPRIME expr1                     # isPrimeExpr
-   | K_ISNULL expr1                      # isNullExpr
    | K_GCD expr2                         # gcdExpr
    | K_LCM expr2                         # lcmExpr
    | K_MAX exprN                         # maxExpr
@@ -783,6 +786,8 @@ K_FLOOR    : F L O O R ;
 K_ISPRIME  : I S P R I M E ;
 
 K_ISNULL   : I S N U L L ;
+
+K_TYPEOF   : T Y P E O F ;
 
 K_GCD      : G C D ;
 

@@ -119,6 +119,19 @@
 >isnull j2 -> true
 >j3 = ␀ -> <null>
 >isnull j3 -> true
+>typeof "abc" -> "string"
+>typeof null -> "null"
+>typeof PHI -> "float"
+>typeof (1.2) -> "float"
+>Calculation mode set to “RATIONAL”.
+>typeof (½) -> "fraction"
+>Calculation mode set to “DECIMAL(16)”.
+>typeof (tenpow (5)) -> "integer"
+>typeof (false) -> "boolean"
+>typeof (info) -> "object"
+>typeof (info.locale.weekdays) -> "array"
+>typeof (D'9/11/2001') -> "integer"
+>typeof (now) -> "integer"
 >Trig mode is now “DEGREES”.
 >sin (45) -> 0.7071067811865477
 >cos (60) -> 0.4999999999999998

@@ -111,6 +111,8 @@
  *	    #180: Refactor parameters to "toStringValue"; allow variable indent increment.
  *	05-Jan-2022 (rlwhitcomb)
  *	    As part of #182: we need to evaluate Number subclasses since they are "in the wild" now too.
+ *	18-Jan-2022 (rlwhitcomb)
+ *	    #211: Implement "typeof" operator.
  */
 package info.rlwhitcomb.calc;
 
@@ -1242,6 +1244,39 @@ public final class CalcUtil
 	    }
 
 	    return result;
+	}
+
+
+	/**
+	 * Get the type of the given object.
+	 *
+	 * @param obj	An object to inspect.
+	 * @return	The type of the value as a string.
+	 */
+	public static String typeof(final Object obj) {
+	    if (obj == null)
+		return "null";
+	    if (obj instanceof String)
+		return "string";
+	    if (obj instanceof BigDecimal) {
+		BigDecimal dValue = (BigDecimal) obj;
+		if (dValue.scale() <= 0)
+		    return "integer";
+		return "float";
+	    }
+	    if (obj instanceof BigInteger || obj instanceof Long || obj instanceof Integer)
+		return "integer";
+	    if (obj instanceof BigFraction)
+		return "fraction";
+	    if (obj instanceof Boolean)
+		return "boolean";
+	    if (obj instanceof ArrayScope)
+		return "array";
+	    if (obj instanceof ObjectScope)
+		return "object";
+// TODO: "date" or "time" ??
+
+	    return "unknown";
 	}
 
 
