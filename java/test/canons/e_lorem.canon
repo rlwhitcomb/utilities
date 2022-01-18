@@ -176,4 +176,4 @@
 >$cp -> "ぞ"
 >$cp -> "や"
 >$cp -> "。"
->info.locale -> { name: "中文 (简体，中国澳门特别行政区)", tag: "zh-Hans-MO", language: "zho", country: "MAC", variant: "", currency: "MOP$", currencycode: "MOP", decimal: ".", exponent: "E", minus: "-", separator: ",", ampm: [ "上午", "下午" ], weekdays: [ "星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六" ], months: [ "一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月" ] }
+>info.locale -> { name: "中文 (中国)", tag: "zh-CN", language: "zho", country: "CHN", variant: "", currency: "¥", currencycode: "CNY", decimal: ".", exponent: "E", minus: "-", separator: ",", ampm: [ "上午", "下午" ], weekdays: [ "星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六" ], months: [ "一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月" ] }
