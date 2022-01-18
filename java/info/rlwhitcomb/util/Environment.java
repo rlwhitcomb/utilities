@@ -165,6 +165,8 @@
  *	    Allow comma-separated arguments on command line.
  *	12-Jan-2022 (rlwhitcomb)
  *	    #204: Also free memory.
+ *	17-Jan-2022 (rlwhitcomb)
+ *	    Add variants of "timeThis" with function name / description.
  */
 package info.rlwhitcomb.util;
 
@@ -893,18 +895,30 @@ public final class Environment
 	 * @param func The function to execute and time.
 	 */
 	public static void timeThis(final Runnable func) {
-	    timeThis(func, Optional.empty());
+	    timeThis(null, func, Optional.empty());
+	}
+
+	/**
+	 * Time the named {@link Runnable} (can be a functional interface)
+	 * and display the results on {@link System#out}.
+	 *
+	 * @param name Name or description of the function we're going to execute.
+	 * @param func The function to execute and time.
+	 */
+	public static void timeThis(final String name, final Runnable func) {
+	    timeThis(name, func, Optional.empty());
 	}
 
 	/**
 	 * Time the passed in {@link Runnable} (can be a functional interface)
 	 * and display the results on {@link System#out}.
 	 *
+	 * @param name Name or description of the function we're going to execute.
 	 * @param func The function to execute and time.
 	 * @param errorReporter Optional method to report exceptions thrown during timing.
 	 * If not specified, defaults to printing an error message to {@link System#err}.
 	 */
-	public static void timeThis(final Runnable func, final Optional<Consumer<Throwable> > errorReporter) {
+	public static void timeThis(final String name, final Runnable func, final Optional<Consumer<Throwable> > errorReporter) {
 	    long startTime = highResTimer();
 
 	    try {
@@ -915,14 +929,20 @@ public final class Environment
 		    errorReporter.get().accept(e);
 		}
 		else {
-		    Intl.errFormat("util#env.timeThisError", ExceptionUtil.toString(e));
+		    if (CharUtil.isNullOrEmpty(name))
+			Intl.errFormat("util#env.timeThisError", ExceptionUtil.toString(e));
+		    else
+			Intl.errFormat("util#env.timeThisErrorNamed", name, ExceptionUtil.toString(e));
 		}
 	    }
 	    finally {
 		long endTime   = highResTimer();
 		double seconds = timerValueToSeconds(endTime - startTime);
 
-		Intl.outFormat("util#env.timeThis", seconds);
+		if (CharUtil.isNullOrEmpty(name))
+		    Intl.outFormat("util#env.timeThis", seconds);
+		else
+		    Intl.outFormat("util#env.timeThisNamed", name, seconds);
 	    }
 	}
 
@@ -936,7 +956,20 @@ public final class Environment
 	 * @return     The return value from the callable function.
 	 */
 	public static <V> V timeThis(final Callable<V> func) {
-	    return timeThis(func, Optional.empty());
+	    return timeThis(null, func, Optional.empty());
+	}
+
+	/**
+	 * Time the named {@link Callable} (can be a functional interface)
+	 * and display the results on {@link System#out}.
+	 *
+	 * @param <V>  Type of value returned from the function.
+	 * @param name Name or description of the function we're going to execute.
+	 * @param func The function to execute and time.
+	 * @return     The return value from the callable function.
+	 */
+	public static <V> V timeThis(final String name, final Callable<V> func) {
+	    return timeThis(name, func, Optional.empty());
 	}
 
 	/**
@@ -944,12 +977,13 @@ public final class Environment
 	 * and display the results on {@link System#out}.
 	 *
 	 * @param <V>  Type of value returned from the function.
+	 * @param name Name or description of the function we're going to execute.
 	 * @param func The function to execute and time.
 	 * @param errorReporter Optional method to report exceptions thrown during timing.
 	 * If not specified, defaults to printing an error message to {@link System#err}.
 	 * @return     The return value from the callable function.
 	 */
-	public static <V> V timeThis(final Callable<V> func, final Optional<Consumer<Throwable> > errorReporter) {
+	public static <V> V timeThis(final String name, final Callable<V> func, final Optional<Consumer<Throwable> > errorReporter) {
 	    long startTime = highResTimer();
 	    V result = null;
 
@@ -961,14 +995,20 @@ public final class Environment
 		    errorReporter.get().accept(e);
 		}
 		else {
-		    Intl.errFormat("util#env.timeThisError", ExceptionUtil.toString(e));
+		    if (CharUtil.isNullOrEmpty(name))
+			Intl.errFormat("util#env.timeThisError", ExceptionUtil.toString(e));
+		    else
+			Intl.errFormat("util#env.timeThisErrorNamed", name, ExceptionUtil.toString(e));
 		}
 	    }
 	    finally {
 		long endTime   = highResTimer();
 		double seconds = timerValueToSeconds(endTime - startTime);
 
-		Intl.outFormat("util#env.timeThis", seconds);
+		if (CharUtil.isNullOrEmpty(name))
+		    Intl.outFormat("util#env.timeThis", seconds);
+		else
+		    Intl.outFormat("util#env.timeThisNamed", name, seconds);
 	    }
 	    return result;
 	}

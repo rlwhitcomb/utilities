@@ -125,6 +125,9 @@
 #	    Update copyright years.
 #	06-Jan-2022 (rlwhitcomb)
 #	    #89: New error for "Zip Slip" detection.
+#	18-Jan-2022 (rlwhitcomb)
+#	    Two new variants of "timeThis" messages when named.
+#	    Add coloring instead of quotes to some messages only in Calc.
 #
 
 #
@@ -173,7 +176,9 @@ env.productInfo		= "<Bl*!>%1$s%2$s<>"
 env.versionInfo		= "<Gr>%1$s%2$s<>"
 env.otherInfo		= "<Bk!>%1$s%2$s<>"
 env.timeThis		= Elapsed time %1$8.6f secs.
+env.timeThisNamed	= Elapsed time of "%1$s" was %2$8.6f secs.
 env.timeThisError	= Caught exception during timing: %1$s
+env.timeThisErrorNamed	= Caught exception during "%1$s": %2$s
 env.unknownDataModel	= Java has an unexpected data model value of %1$d
 env.screenSize		= %1$dw x %2$dh
 
@@ -212,17 +217,17 @@ numeric.badNumberSymbol		= Unable to interpret 0x%1$06X ('%2$s')as a number symb
 #
 math.tooManyPiDigits		= The PI digit calculation is only good for about 12,500 digits!
 math.piDigitMismatch		= Calculated digit length is %1$,d, but requested number of digits was %2$,d!
-math.wholeInteger		= The value %1$,g is not an integer number.
-math.primeTooBig		= The value %1$,d is too big for the prime number calculations.
+math.wholeInteger		= The value <y>%1$,g<> is not an integer number.
+math.primeTooBig		= The value <y>%1$,d<> is too big for the prime number calculations.
 math.sqrtNegative		= Square root of a negative number is not real.
 
 #
 # From BigFraction.java
 #
 fraction.noZeroDenominator	= Fractions cannot have zero denominators.
-fraction.unsupportedFormat	= The value "%1$s" cannot be converted to a fraction.
+fraction.unsupportedFormat	= The value <y>%1$s<> cannot be converted to a fraction.
 fraction.divideByZero		= Divide by zero.
-fraction.unknownFracChar	= Unsupported fraction character '%1$s'.
+fraction.unknownFracChar	= Unsupported fraction character <y>%1$s<>.
 
 #
 # From SecurityUtil.java
