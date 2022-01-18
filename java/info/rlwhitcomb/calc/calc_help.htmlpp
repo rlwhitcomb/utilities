@@ -27,7 +27,7 @@ tr:nth-child(odd) {
 }
 
 table code {
-   font-size: 130%;
+   font-size: 120%;
    font-weight: bold;
 }
 
@@ -39,6 +39,33 @@ code {
 h2 {
    margin-left: 30px;
    margin-right: 30px;
+}
+
+.top-link {
+   margin-right: 30px;
+   text-align: right;
+   float: right;
+}
+
+.toc_container  {
+    margin: 25px;
+    overflow: hidden;
+    padding: 10px 10px;
+    background-color: lightgreen;
+    border: 1px solid cornflowerblue;
+    -webkit-border-radius: 20px;
+    border-radius: 20px;
+    font-size: 110%;
+}
+
+.toc_title {
+    font-size: 200%;
+    font-weight: bold;
+    text-align: center;
+}
+
+.toc_container ol li {
+    list-style: decimal outside none !important;
 }
 
 .title-box {
@@ -114,11 +141,35 @@ h2 {
 </head>
 
 <body>
-  <div class="title-box">
+  <div id="topofpage" class="title-box">
     <h1 style="font-family:'Fredericka the Great';font-size:400%;">Calculator</h1>
     <h2>Version ${Calc.version}, build ${build.number}</h2>
   </div>
-<hr class="sectionsep">
+<div class="toc_container">
+  <p class="toc_title">Contents</p>
+  <div class="cols">
+  <ol type="1">
+    <li><a href="#Introduction">Introduction</a>
+    <li><a href="#Command_Line">Command Line</a>
+    <li><a href="#Command_Line_Options">Command Line Options</a>
+    <li><a href="#Notes_on_Command_Line_Options">Notes on Command Line Options</a>
+    <li><a href="#Read_Eval_Print_loop_Commands">Read, Eval, Print Loop Commands</a>
+    <li><a href="#Values_Constants_and_Variables">Values, Constants, and Variables</a>
+    <li><a href="#Modes_and_Precision">Modes and Precision</a>
+    <li><a href="#Formats">Formats</a>
+    <li><a href="#Available_Operators_and_Predefined_Functions">Available Operators and Predefined Functions</a>
+    <li><a href="#Notes_on_Functions">Notes on Functions</a>
+    <li><a href="#User_Defined_Functions">User-Defined Functions</a>
+    <li><a href="#Statements">Statements</a>
+    <li><a href="#Directives">Directives</a>
+    <li><a href="#Notes_on_Directives">Notes on Directives</a>
+    <li><a href="#Standard_Libraries_of_Functions">Standard Libraries of Functions</a>
+    <li><a href="#GUI_Operations">GUI Operations</a>
+    <li><a href="#TODO_Items_for_This_Document">TODO Items for This Document</a>
+  </ol>
+  </div>
+</div>
+<hr id="Introduction" class="sectionsep">
   <h2>Introduction</h2>
 <div class="cols">
   A calculator of arithmetic "expressions" (such as <code style="color:blue;">1 + 1</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">2</code>) that combines (nearly) unlimited precision decimal arithmetic with a rich assortment
@@ -142,11 +193,12 @@ h2 {
         <li>Calculations can be edited (using backspace, etc.) to reduce the chance of keyboard errors.</li>
         <li>Looping and conditional statements to do pretty much any kind of calculation.</li>
         <li>Therefore, the language is <a href="https://en.wikipedia.org/wiki/Turing_completeness">&ldquo;Turing Complete&rdquo;</a>.</li>
-        <li>Current, active development and maintenance, so features and fixes are constantly being added.</li>
-        <li>This is Open-Source Software (<a href="https://opensource.com/resources/what-open-source">OSS</a>) so the code can be examined, and modified (if desired) for your own use.</li>
+        <li>Current, active development and maintenance, meaning features and fixes are constantly being added.</li>
+        <li>This is <a href="https://opensource.com/resources/what-open-source">Open-Source Software</a> so the code can be examined, and modified (if desired) for your own use.</li>
       </ul>
 </div>
-<hr class="sectionsep">
+<a class="top-link" href="#topofpage">Top</a>
+<hr id="Command_Line" class="sectionsep">
   <h2>Command Line</h2>
 <div class="cols">
   The command line is assumed to have either the name of one or more files to process, or an expression to evaluate. There may also be options specified
@@ -167,7 +219,8 @@ h2 {
      treated as if they were a set of expressions to evaluate.
   <p>Variables can also be defined on the command line using the syntax: <code>-variable <i>name</i>=<i>value</i></code>.
 </div>
-<hr class="sectionsep">
+<a class="top-link" href="#topofpage">Top</a>
+<hr id="Command_Line_Options" class="sectionsep">
   <h2>Command Line Options</h2>
 <div class="cols">
   Certain options can be given on the command line that affect the operation of the calculator. These options can also be set via the
@@ -240,7 +293,8 @@ h2 {
   </tbody>
   </table>
   </div>
-<hr class="sectionsep">
+<a class="top-link" href="#topofpage">Top</a>
+<hr id="Notes_on_Command_Line_Options" class="sectionsep">
   <h2>Notes on Command Line Options</h2>
   <div class="cols">
   <ul>
@@ -260,7 +314,8 @@ h2 {
      as part of the Javadoc for the <code style="font-size:100%;">info.rlwhitcomb.calc</code> package.
   </ul>
   </div>
-<hr class="sectionsep">
+<a class="top-link" href="#topofpage">Top</a>
+<hr id="Read_Eval_Print_loop_Commands" class="sectionsep">
   <h2><span class="underline">R</span>ead, <span class="underline">E</span>val, <span class="underline">P</span>rint
       <span class="underline">L</span>oop Commands</h2>
   <div class="cols">
@@ -292,7 +347,8 @@ h2 {
   </tbody>
   </table>
   </div>
-<hr class="sectionsep">
+<a class="top-link" href="#topofpage">Top</a>
+<hr id="Values_Constants_and_Variables" class="sectionsep">
   <h2>Values, Constants, and Variables</h2>
 <div class="cols">
   The basic building blocks of the expressions implemented here are the basic value types: numbers (either integer or real
@@ -456,7 +512,8 @@ or
 <p class="indent"> <code style="color:green;">value = { "flag": true, flag: 'Red' }</code> </p>
    and the elements are accessed as <code>value."flag"</code> and <code>value.flag</code>.
 </div>
-<hr class="sectionsep">
+<a class="top-link" href="#topofpage">Top</a>
+<hr id="Modes_and_Precision" class="sectionsep">
   <h2>Modes and Precision</h2>
 <div class="cols">
   Calc can do essentially arbitrary precision arithmetic. It can also do arithmetic on rational fractions (as in <code>1/4 + 1/2 = 3/4</code>).
@@ -484,7 +541,8 @@ or
   <p>Dates and times represent date/time values (such as birthdays, anniversaries, or wall clock times), and have no reference to time zones, although
      using time arithmetic can be a convenient way to do conversion of times between time zones.
 </div>
-<hr class="sectionsep">
+<a class="top-link" href="#topofpage">Top</a>
+<hr id="Formats" class="sectionsep">
   <h2>Formats</h2>
 <div class="cols">
   The results of most operations can be displayed using alternative formats for better comprehension. To specify an alternative
@@ -531,7 +589,8 @@ or
     </tbody>
     </table>
   </div>
-<hr class="sectionsep">
+<a class="top-link" href="#topofpage">Top</a>
+<hr id="Available_Operators_and_Predefined_Functions" class="sectionsep">
   <h2>Available Operators and Predefined Functions</h2>
 <div class="cols">
   <p>There are a wide variety of arithmetic and logical operators available, as well as a number of common arithmetic functions supported by Calc.
@@ -727,7 +786,7 @@ or
     </tbody>
   </table>
   </div>
-  <h2>Notes on Functions</h2>
+  <h2 id="Notes_on_Functions">Notes on Functions</h2>
 <div class="cols">
   <p>Some of the functions might require a bit of explanation as to how they work. The <code>length</code> function takes
      any one of a number, an array, an object, a string, or a range expression and returns the "size" of the value. For strings,
@@ -848,7 +907,8 @@ or
   <p class="indent">
      <code style="color:blue;">quad(1, -1, -1)[0] </code><code style="color:grey;">&#x21E8;</code><code style="color:green;"> 1.618033988749894848204586834365638</code>
 </div>
-<hr class="sectionsep">
+<a class="top-link" href="#topofpage">Top</a>
+<hr id="User_Defined_Functions" class="sectionsep">
   <h2>User-Defined Functions</h2>
 <div class="cols">
   In addition to the predefined functions above, Calc allows new functions to be defined that can be used repeatedly without having to
@@ -898,7 +958,8 @@ or
   <p>as it should. So, you can setup the data structure with <code>def</code>, and make instances of that structure with just
      <code><i>var</i> = eval <i>struct</i></code>.
 </div>
-<hr class="sectionsep">
+<a class="top-link" href="#topofpage">Top</a>
+<hr id="Statements" class="sectionsep">
   <h2>Statements</h2>
 <div class="cols">
   In addition to the functions and operators listed above, Calc has four different statements which can be used to do
@@ -966,7 +1027,8 @@ or
   </p>
   There are many more code examples in the <code>test/files</code> directory of the source distribution.
 </div>
-<hr class="sectionsep">
+<a class="top-link" href="#topofpage">Top</a>
+<hr id="Directives" class="sectionsep">
   <h2>Directives</h2>
 <div class="cols">
   Various directives can be given within a script or on a separate input line in REPL mode that will affect the operation of the calculator. Some of them allow you to change the options given on the command line, while others are only available from within the script. All the mode-setting directives are also available in the Settings dialog (the <span class="orangebutton">&#x2261;</span> button or <code>F2</code> key) in GUI mode.
@@ -1012,7 +1074,8 @@ or
   </tbody>
   </table>
   </div>
-<hr class="sectionsep">
+<a class="top-link" href="#topofpage">Top</a>
+<hr id="Notes_on_Directives" class="sectionsep">
   <h2>Notes on Directives</h2>
 <div class="cols">
   The <i>string</i> argument for the <code>:include</code> directive can be a comma-separated list of file names, with or without
@@ -1035,7 +1098,8 @@ or
   <p>The only effect of debug mode is to display the parse tree (in LISP format) before the expression(s) is/are evaluated.
   <p>Timing mode displays the total parsing and execution time (to nanosecond precision on some systems) after the results are displayed.
 </div>
-<hr class="sectionsep">
+<a class="top-link" href="#topofpage">Top</a>
+<hr id="Standard_Libraries_of_Functions" class="sectionsep">
   <h2>Standard Libraries of Functions</h2>
 <div class="cols">
   <p>There are currently two "standard" libraries available in the <code>test/files</code> directory of the source code:  <code>"library"</code> and
@@ -1044,7 +1108,8 @@ or
   <p>At a minimum, the "library" has code to convert to/from our date values and the standard Excel&trade; date values, and do other date-related manipulation.
      The "lib_mort" library has some mortgage-related (or "time value of money") functions defined.
 </div>
-<hr class="sectionsep">
+<a class="top-link" href="#topofpage">Top</a>
+<hr id="GUI_Operations" class="sectionsep">
   <h2>GUI Operations</h2>
 <div class="cols">
   <p>The GUI window can be opened initially using the "<code>cg</code>" command (or on Windows only, the <code>``</code> command),
@@ -1063,21 +1128,21 @@ or
   <br><img src="calc_settings.png" alt="GUI Settings screen" width="40%">
       <img src="calc_window_settings.png" alt="GUI Window Settings screen" width="40%">
   </div>
-<hr class="sectionsep">
+<a class="top-link" href="#topofpage">Top</a>
+<hr id="TODO_Items_for_This_Document" class="sectionsep">
   <h2>TODO Items for This Document</h2>
 <div class="cols">
   <ul>
-    <li>Exceptions to decimal precision (i.e., for trig, log), and also in doing factorial? or others that don't respect the precision, also limits on pi/e digits</li>
     <li>Discussion on NaN, and Infinity</li>
-    <li>Use of array as stack: push using a[length a] = blah, pop using ?? maybe slice? but how to get the last value easily?
     <li>Expand on GUI operation, including examples</li>
     <li>Document GUI Settings dialog</li>
-    <li>List of example programs, include examples in this document</li>
+    <li>List of example programs and the standard library, include examples in this document</li>
     <li>Interactions with Tester (use "mkcanon" and "-nocolors")</li>
     <li>Explain "silent" operation WRT "eval", "loop", interpolated strings, functions</li>
     <li>Notes on colors and the changes with dark and light backgrounds</li>
   </ul>
 </div>
+<a class="top-link" href="#topofpage">Top</a>
 <hr class="sectionsep">
 
   <footer><br><div class="title-box">Copyright&nbsp;&copy;&nbsp;2020-2022 Roger L. Whitcomb.<br>Licensed under an <a href="https://github.com/rlwhitcomb/utilities/blob/master/LICENSE">MIT</a> license.<br>Last modified: ${__DATE__} at ${__TIME__}</div><br></footer>
