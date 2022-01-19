@@ -34,6 +34,7 @@
  *	    #126: Add "-quiet" and "-verbose" flags with lots of aliases 😉.
  *	    Using Optional and OptionalDouble.
  *	    Process SLEEP_OPTIONS env variable.
+ *	    Refactor a bit more.
  */
 package info.rlwhitcomb.util;
 
@@ -62,6 +63,18 @@ public class Sleep
 
 
 	/**
+	 * Provide the default sleep duration, with a message.
+	 *
+	 * @return The default value ({@link #DEFAULT_SLEEP_SECS}).
+	 */
+	private static double defaultValue() {
+	    if (prolijo)
+		System.err.format("Missing or empty value, defaulting to %1$11.9f second(s).%n", DEFAULT_SLEEP_SECS);
+
+	    return DEFAULT_SLEEP_SECS;
+	}
+
+	/**
 	 * Simply parse the given string into a decimal number of seconds.
 	 * <p> Default to an empty Optional if empty.
 	 *
@@ -72,11 +85,7 @@ public class Sleep
 	public static OptionalDouble parseSeconds(final String arg) {
 	    String value = (arg == null) ? "" : arg.trim();
 
-	    if (value.isEmpty()) {
-		if (prolijo)
-		    System.err.format("Missing or empty value, defaulting to %1$11.9f second(s).%n", DEFAULT_SLEEP_SECS);
-	    }
-	    else {
+	    if (!value.isEmpty()) {
 		try {
 		    Matcher m = SLEEP_PATTERN.matcher(value);
 		    if (m.matches()) {
@@ -166,6 +175,11 @@ public class Sleep
 	    }
 	}
 
+	/**
+	 * Parse and process the list of arguments, looking for options or the sleep value.
+	 *
+	 * @param args The (possibly empty) list of arguments to process.
+	 */
 	private static void processOptions(String[] args) {
 	    for (String arg : args) {
 		Optional<String> option = Options.checkOption(arg);
@@ -222,7 +236,7 @@ public class Sleep
 	    processOptions(args);
 
 	    // Finally do the hard work of ... sleeping ... for that long
-	    sleep(sleepTimeSecs.orElseGet(() -> parseSeconds("").orElse(DEFAULT_SLEEP_SECS)));
+	    sleep(sleepTimeSecs.orElseGet(() -> defaultValue()));
 
 	    if (prolijo) {
 		long elapsedTime = Environment.highResTimer() - startTime;
