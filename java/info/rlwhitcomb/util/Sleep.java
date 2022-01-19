@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2020-2021 Roger L. Whitcomb.
+ * Copyright (c) 2020-2022 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -30,9 +30,15 @@
  *	    Move to named package. Allow minutes, hours, etc. intervals.
  *	05-Jan-2021 (rlwhitcomb)
  *	    Just for info, report the total elapsed time at the end.
+ *	19-Jan-2022 (rlwhitcomb)
+ *	    #126: Add "-quiet" and "-verbose" flags with lots of aliases 😉.
+ *	    Using Optional and OptionalDouble.
+ *	    Process SLEEP_OPTIONS env variable.
  */
 package info.rlwhitcomb.util;
 
+import java.util.Optional;
+import java.util.OptionalDouble;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
@@ -48,19 +54,27 @@ public class Sleep
 	/** The pattern used to recognized valid sleep durations. */
 	private static final Pattern SLEEP_PATTERN = Pattern.compile("([0-9]+(\\.[0-9]*)?)([sSmMhHdDwW]?)");
 
+	/** The (optional) amount of time to sleep. */
+	private static OptionalDouble sleepTimeSecs = OptionalDouble.empty();
+
+	/** Whether to display messages during operation. */
+	private static boolean prolijo = true;
+
+
 	/**
 	 * Simply parse the given string into a decimal number of seconds.
-	 * <p> Default to the default ({@link #DEFAULT_SLEEP_SECS}) if we can't do that.
+	 * <p> Default to an empty Optional if empty.
 	 *
 	 * @param arg	The supposed number of seconds to parse.
-	 * @return	The parsed double value, or the default if we can't successfully
-	 *		parse the input.
-	*/
-	public static double parseSeconds(final String arg) {
+	 * @return	The parsed double value, or an empty Optional (which will use the default)
+	 *		if unable to parse the input.
+	 */
+	public static OptionalDouble parseSeconds(final String arg) {
 	    String value = (arg == null) ? "" : arg.trim();
 
 	    if (value.isEmpty()) {
-		System.err.format("Missing or empty value, defaulting to %1$11.9f second(s).%n", DEFAULT_SLEEP_SECS);
+		if (prolijo)
+		    System.err.format("Missing or empty value, defaulting to %1$11.9f second(s).%n", DEFAULT_SLEEP_SECS);
 	    }
 	    else {
 		try {
@@ -96,18 +110,19 @@ public class Sleep
 			    }
 			}
 
-			return dValue;
+			return OptionalDouble.of(dValue);
 		    }
 		}
 		catch (NumberFormatException nfe) {
 		    ;
 		}
 
-		System.err.format("Could not decipher a number of seconds to sleep from the argument \"%1$s\" given!%n  Defaulting to %2$11.9f second(s).%n", value, DEFAULT_SLEEP_SECS);
+		if (prolijo)
+		    System.err.format("Could not decipher a number of seconds to sleep from the argument \"%1$s\" given!%n  Defaulting to %2$11.9f second(s).%n", value, DEFAULT_SLEEP_SECS);
 	    }
 
-	    // The default value
-	    return DEFAULT_SLEEP_SECS;
+	    // The default value indicator (empty)
+	    return OptionalDouble.empty();
 	}
 
 	/**
@@ -129,7 +144,8 @@ public class Sleep
 	    long milliSeconds = wholeSeconds * 1000L + (long)milliPart;
 	    int nanoSeconds   = (int)nanoPart;
 
-	    System.out.format("Sleeping for %1$11.9f seconds...", seconds);
+	    if (prolijo)
+		System.out.format("Sleeping for %1$11.9f seconds...", seconds);
 
 	    long startTime = System.nanoTime();
 	    try {
@@ -137,12 +153,55 @@ public class Sleep
 		    Thread.sleep(milliSeconds, nanoSeconds);
 		else
 		    Thread.sleep(milliSeconds);
-		System.out.println();
+
+		if (prolijo)
+		    System.out.println();
 	    }
 	    catch (InterruptedException ie) {
-		long interruptedTime = System.nanoTime();
-		double secs = ((double)(interruptedTime - startTime)) / 1e9d;
-		System.out.format("%nInterrupted after only %1$11.9f seconds.%n", secs);
+		if (prolijo) {
+		    long interruptedTime = System.nanoTime();
+		    double secs = ((double)(interruptedTime - startTime)) / 1e9d;
+		    System.out.format("%nInterrupted after only %1$11.9f seconds.%n", secs);
+		}
+	    }
+	}
+
+	private static void processOptions(String[] args) {
+	    for (String arg : args) {
+		Optional<String> option = Options.checkOption(arg);
+		if (option.isPresent()) {
+		    switch (option.get().toLowerCase()) {
+			case "quiet":
+			case "quieto":
+			case "q":
+			case "sucinto":
+			case "s":
+			case "conciso":
+			case "c":
+			    prolijo = false;
+			    break;
+			case "verbose":
+			case "verboso":
+			case "v":
+			case "prolijo":
+			case "p":
+			case "diserto":
+			case "d":
+			    prolijo = true;
+			    break;
+			default:
+			    System.err.println("Unknown option \"" + arg + "\" specified. Ignored!");
+			    break;
+		    }
+		}
+		else {
+		    if (sleepTimeSecs.isPresent()) {
+			System.err.println("Only one sleep duration value allowed; ignoring any more!");
+		    }
+		    else {
+			sleepTimeSecs = parseSeconds(arg);
+		    }
+		}
 	    }
 	}
 
@@ -152,24 +211,22 @@ public class Sleep
 	 * @param args	The parsed command line arguments (we only need one).
 	 */
 	public static void main(String[] args) {
-	    double sleepTimeSecs;
 	    long startTime = Environment.highResTimer();
 
-	    if (args.length == 1) {
-		sleepTimeSecs = parseSeconds(args[0]);
+	    String envOptions = System.getenv("SLEEP_OPTIONS");
+	    if (envOptions != null) {
+		String[] options = envOptions.split("[,;:]");
+		processOptions(options);
 	    }
-	    else if (args.length == 0) {
-		sleepTimeSecs = parseSeconds("");
-	    }
-	    else {
-		System.err.println("Only one argument needed (time value); ignoring the rest!");
-		sleepTimeSecs = parseSeconds(args[0]);
-	    }
+
+	    processOptions(args);
 
 	    // Finally do the hard work of ... sleeping ... for that long
-	    sleep(sleepTimeSecs);
+	    sleep(sleepTimeSecs.orElseGet(() -> parseSeconds("").orElse(DEFAULT_SLEEP_SECS)));
 
-	    long elapsedTime = Environment.highResTimer() - startTime;
-	    System.out.format("Elapsed time %1$11.9f seconds.%n", Environment.timerValueToSeconds(elapsedTime));
+	    if (prolijo) {
+		long elapsedTime = Environment.highResTimer() - startTime;
+		System.out.format("Elapsed time %1$11.9f seconds.%n", Environment.timerValueToSeconds(elapsedTime));
+	    }
 	}
 }
