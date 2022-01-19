@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2021 Roger L. Whitcomb.
+ * Copyright (c) 2021-2022 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -38,6 +38,8 @@
  *	    #148: Add constructor from regular Map.
  *	24-Dec-2021 (rlwhitcomb)
  *	    Add another "setValue" without default "ignoreCase" parameter.
+ *	18-Jan-2022 (rlwhitcomb)
+ *	    Add "getKey" method.
  */
 package info.rlwhitcomb.calc;
 
@@ -128,6 +130,22 @@ class ObjectScope extends Scope
 	 */
 	Object getValue(final String name, final boolean ignoreCase) {
 	    return getValueImpl(name, ignoreCase);
+	}
+
+	/**
+	 * Get the key associated with one of the objects in the variables map.
+	 *
+	 * @param value	The value to search for.
+	 * @return	The key associated with that value, if found, or {@code null} if not.
+	 */
+	String getKey(final Object value) {
+	    for (Map.Entry<String, Object> entry : variables.entrySet()) {
+		Object mapValue = entry.getValue();
+		if ((mapValue != null && mapValue.equals(value)) ||
+		    (mapValue == null && value == null))
+		    return entry.getKey();
+	    }
+	    return null;
 	}
 
 	/**
