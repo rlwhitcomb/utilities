@@ -1,0 +1,3 @@
+#!/bin/bash
+LOGFILENAME=`c -nocol -- test*.log -- ':results on;max(sort($*)) @q'`
+vi $LOGFILENAME

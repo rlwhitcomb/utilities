@@ -290,6 +290,8 @@
 		so we can figure out how to fix the "e_lorem" test on the Linux CI machines.
 		And yet another.
 		Now take them out since we're gonna use "en-US" anyway.
+	    19-Jan-2022 (rlwhitcomb)
+		Timestamp inside the test results log.
 
      ========================================================================== -->
 
@@ -686,12 +688,16 @@
 
 	<target name="test" depends="compile" description="Run extant unit tests.">
 		<echo>Running unit tests. Output going to "${test.log.path}" file.</echo>
+		<echo file="${test.log.path}" append="false">===============================================
+Test starting on ${build.date} at ${build.time}
+-----------------------------------------------
+</echo>
 		<echo>Test JavaPreProc...</echo>
 		<delete>
 			<fileset dir="test/data" includes="TestPP.java,TestPP.log"/>
 		</delete>
 		<preproc dir="test/data" processAsDirectory="true" recurseDirectories="true" nologo="true" verbose="plus"
-								      log="test/data/TestPP.log" overwrite="true"/>
+								      log="test/data/TestPP.log" overwrite="false"/>
 		<fail message="Preprocessing results don't match!">
 			<condition>
 				<not><filesmatch file1="test/data/TestPP.java" file2="test/canons/TestPP.canon" textfile="true"/></not>
