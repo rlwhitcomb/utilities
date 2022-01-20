@@ -64,6 +64,8 @@
  *	Rework the logic in "color" to deal with the quoted instead of colored text in Calc.
  *   01-Dec-2021 (rlwhitcomb)
  *	#111: Fix the uncolored case in "color(...)".
+ *   19-Jan-2022 (rlwhitcomb)
+ *	#210: Clear color stack when RESET code is hit.
  */
 package info.rlwhitcomb.util;
 
@@ -302,6 +304,9 @@ public final class ConsoleColor
 		    else {
 			if (colored) {
 			    buf.append(codeStr);
+			}
+			if (codeStr.equals(Code.RESET.escCode())) {
+			    colorStack.clear();
 			}
 			i = endPos;
 		    }

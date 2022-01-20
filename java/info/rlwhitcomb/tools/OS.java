@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2020-2021 Roger L. Whitcomb.
+ * Copyright (c) 2020-2022 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -64,6 +64,9 @@
  *	    #98: Use the real screen width, add "-width:nn" option, fix the indexing
  *	    in the columnar display.
  *	    Add options for no titles, no columns.
+ *	19-Jan-2022 (rlwhitcomb)
+ *	    #210: Fix the coloring for verbose locale display
+ *	    #209: Add international currency symbol (same as Calc "info.locale").
  */
 package info.rlwhitcomb.tools;
 
@@ -542,13 +545,15 @@ public class OS
 		String message = "";
 		if (verbose) {
 		    message = String.format(
-			"%1$1s<Cy>%2$15s<>  <Gr>%3$s<>%n" +
-			"\t\t<Bk!>language: <Gr>%4$s<Bk!>  country: <Gr>%5$s<Bk!>  variant: <Gr>%6$s%n" +
-			"\t\t<Bk!>currency: <Gr>%7$s<Bk!>  minus: <Gr>%8$c<Bk!>  decimal: <Gr>%9$c<Bk!>  grouping: <Gr>%10$c<Bk!>  exponent: <Gr>%11$s%n" +
-			"\t\t<Bk!>Infinity: <Gr>%12$s<Bk!>  NaN: <Gr>%13$s<Bk!>  percent: <Gr>%14$c<-->",
+			"%1$1s<Cy>%2$15s<>  <Gr>%3$s<-->%n" +
+			"\t\t<Bk!>language: <Gr>%4$s<Bk!>  country: <Gr>%5$s<Bk!>  variant: <Gr>%6$s<-->%n" +
+			"\t\t<Bk!>currency: <Gr>%7$s<Bk!>  symbol: <Gr>%8$s<-->%n" +
+			"\t\t<Bk!>minus: <Gr>%9$c<Bk!>  decimal: <Gr>%10$c<Bk!>  grouping: <Gr>%11$c<Bk!>  exponent: <Gr>%12$s<-->%n" +
+			"\t\t<Bk!>Infinity: <Gr>%13$s<Bk!>  NaN: <Gr>%14$s<Bk!>  percent: <Gr>%15$c<-->",
 			prefix, tag, loc.getDisplayName(),
 			languageCode(loc), countryCode(loc), variant(loc),
-			symbols.getCurrencySymbol(), symbols.getMinusSign(), symbols.getDecimalSeparator(),
+			symbols.getCurrencySymbol(), symbols.getInternationalCurrencySymbol(),
+			symbols.getMinusSign(), symbols.getDecimalSeparator(),
 			symbols.getGroupingSeparator(), symbols.getExponentSeparator(),
 			symbols.getInfinity(), symbols.getNaN(), symbols.getPercent()
 			);
