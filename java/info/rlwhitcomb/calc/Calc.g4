@@ -327,6 +327,8 @@
  *	    other name start character, so "$2n" is valid, for instance.
  *	18-Jan-2022 (rlwhitcomb)
  *	    #211: Add "typeof"; rearrange the function list a little bit.
+ *	19-Jan-2022 (rlwhitcomb)
+ *	    #214: Add "cast" operator.
  */
 
 grammar Calc;
@@ -428,6 +430,7 @@ expr
    | K_SIGNUM expr1                      # signumExpr
    | K_ISNULL expr1                      # isNullExpr
    | K_TYPEOF expr1                      # typeofExpr
+   | K_CAST ( expr2 | expr1 )            # castExpr
    | K_LENGTH ( expr1 | dotRange )       # lengthExpr
    | K_SCALE expr1                       # scaleExpr
    | K_ROUND expr2                       # roundExpr
@@ -788,6 +791,8 @@ K_ISPRIME  : I S P R I M E ;
 K_ISNULL   : I S N U L L ;
 
 K_TYPEOF   : T Y P E O F ;
+
+K_CAST     : C A S T ;
 
 K_GCD      : G C D ;
 

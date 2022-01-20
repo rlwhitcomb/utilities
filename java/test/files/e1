@@ -135,6 +135,18 @@ typeof(info.locale.weekdays)
 typeof(D'9/11/2001')
 typeof(now)
 
+cast(null)
+cast(1, 'string')
+cast("23", 'float')
+cast("true", 'boolean')
+cast(10**n)
+cast(1, 'array')
+cast("abc", 'object')
+cast(3, 'null')
+cast([1,2,3], 'array')
+cast({ a:'123' }, 'object')
+cast(null, 'object')
+
 :degrees
 sin(45)
 cos(60)

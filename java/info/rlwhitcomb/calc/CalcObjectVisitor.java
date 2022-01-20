@@ -463,6 +463,8 @@
  *	    #125: Add timezone information to "info" also.
  *	18-Jan-2022 (rlwhitcomb)
  *	    #211: Add "typeof" operator.
+ *	19-Jan-2022 (rlwhitcomb)
+ *	    #214: Add "cast" operator.
  */
 package info.rlwhitcomb.calc;
 
@@ -3125,7 +3127,31 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public Object visitTypeofExpr(CalcParser.TypeofExprContext ctx) {
 	    Object obj = visit(ctx.expr1().expr());
 
-	    return typeof(obj);
+	    return typeof(obj).getValue();
+	}
+
+	@Override
+	public Object visitCastExpr(CalcParser.CastExprContext ctx) {
+	    Typeof castType = Typeof.STRING;
+	    CalcParser.ExprContext expr;
+	    Object obj;
+
+	    if (ctx.expr2() != null) {
+		expr = ctx.expr2().expr(0);
+		CalcParser.ExprContext type = ctx.expr2().expr(1);
+		castType = Typeof.fromString(getStringValue(type));
+	    }
+	    else {
+		expr = ctx.expr1().expr();
+	    }
+	    obj = evaluateFunction(expr, visit(expr));
+
+	    try {
+		return cast(this, expr, obj, castType, mc, settings.separatorMode);
+	    }
+	    catch (IllegalArgumentException iae) {
+		throw new CalcExprException(iae, ctx);
+	    }
 	}
 
 	private class LengthVisitor implements Function<Object, Object>

@@ -633,21 +633,21 @@ or
           other Unicode digit / number symbols, where <code>&#x2487; = 20</code><br>
           the current date, comparable to <code>d'2021/11/19'</code><br>
           the current time, comparable to <code>h'11:10 am'</code><br>
-          current Calc information (<code>version</code>, <code>os</code>, <code>java</code>)<br>
+          current Calc information (<code>version</code>, <code>os</code>, etc.)<br>
           that constant value, as in <code>"Hello"</code>, <code>127</code>, or <code>0xA8</code></td><td>N/A</td></tr>
     <tr><td>29</td><td><code>{</code> (&nbsp;<i>key:value pairs</i>&nbsp;) <code>}</code></td><td>define an object</td><td>left to right</td></tr>
     <tr><td>28</td><td><code>[</code> (&nbsp;<i>expr list</i>&nbsp;) <code>]</code><br><i>var</i> <code>[</code> <i>expr</i> <code>]</code> or <i>var</i>&nbsp;<code>&#x2080;</code> .. <code>&#x2089;</code></td><td>define an array,<br>or access elements of an array, string, or object</td><td>left to right</td></tr>
     <tr><td>27</td><td><code>.</code></td><td>access an object member</td><td>left to right</td></tr>
     <tr><td>26</td><td><code>( </code><i>expr</i><code> )</code></td><td>group an expression</td><td>N/A</td></tr>
-    <tr><td rowspan="67">25</td>
-            <td><code>ABS</code>&nbsp;<i>expr</i></td><td>absolute value</td><td rowspan="67">left to right</td></tr>
+    <tr><td rowspan="68">25</td>
+            <td><code>ABS</code>&nbsp;<i>expr</i></td><td>absolute value</td><td rowspan="68">left to right</td></tr>
             <tr><td><code>SIN</code>&nbsp;<i>expr</i></td><td>sine</td></tr>
             <tr><td><code>COS</code>&nbsp;<i>expr</i></td><td>cosine</td></tr>
             <tr><td><code>TAN</code>&nbsp;<i>expr</i></td><td>tangent</td></tr>
             <tr><td><code>ASIN</code>&nbsp;<i>expr</i></td><td>sine<sup>-1</sup></td></tr>
             <tr><td><code>ACOS</code>&nbsp;<i>expr</i></td><td>cosine<sup>-1</sup></td></tr>
             <tr><td><code>ATAN</code>&nbsp;<i>expr</i></td><td>tangent<sup>-1</sup></td></tr>
-            <tr><td><code>ATAN2</code>&nbsp;<i>e<sub>y</sub></i><code>,</code>&nbsp;<i>e<sub>x</sub></i></td><td>the angle &theta; from converting<br>rectangular (x,y) to polar (r,&theta;) coordinates</td></tr>
+            <tr><td><code>ATAN2</code>&nbsp;<i>expr<sub>y</sub></i><code>,</code>&nbsp;<i>expr<sub>x</sub></i></td><td>the angle &theta; from converting<br>rectangular (x,y) to polar (r,&theta;) coordinates</td></tr>
             <tr><td><code>SINH</code>&nbsp;<i>expr</i></td><td>hyperbolic sine</td></tr>
             <tr><td><code>COSH</code>&nbsp;<i>expr</i></td><td>hyperbolic cosine</td></tr>
             <tr><td><code>TANH</code>&nbsp;<i>expr</i></td><td>hyperbolic tangent</td></tr>
@@ -661,10 +661,11 @@ or
             <tr><td><code>TENPOW</code>&nbsp;<i>expr</i></td><td>10 ** <i>expr</i> (anti-log base ten)</td></tr>
             <tr><td><code>SIGNUM</code>&nbsp;<i>expr</i></td><td>sign (&lt; 0 = -1, 0 = 0, &gt; 0 = +1)</td></tr>
             <tr><td><code>ISNULL</code>&nbsp;<i>expr</i></td><td>is the value null?</td></tr>
-            <tr><td><code>TYPEOF</code>&nbsp;<i>expr</i></td><td>the type of the result<br>as in "string", "integer", "boolean", "float", etc.</td></tr>
+            <tr><td><code>TYPEOF</code>&nbsp;<i>expr</i></td><td>the type of the result<br>as in <code>"string"</code>, <code>"integer"</code>, <code>"boolean"</code>, etc.</td></tr>
+            <tr><td><code>CAST</code>&nbsp;<i>expr</i>&nbsp;[ <code>,</code> <i>type_expr</i> ]</td><td>convert the value to the given type<br>(default type is <code>"string"</code>)</td></tr>
             <tr><td><code>LENGTH</code>&nbsp;<i>expr</i><br>or <i>expr</i> [ <code>..</code> or <code>&#x2026;</code> <i>expr</i> [ <code>,</code> <i>expr</i> ] ]</td><td>length of string, array, object, or range</td></tr>
             <tr><td><code>SCALE</code>&nbsp;<i>expr</i></td><td>scale of number, total size of object or array</td></tr>
-            <tr><td><code>ROUND</code>&nbsp;<i>expr</i><code>,</code>&nbsp;<i>expr</i></td><td>round value to given places</td></tr>
+            <tr><td><code>ROUND</code>&nbsp;<i>expr</i><code>,</code>&nbsp;<i>places_expr</i></td><td>round value to given places</td></tr>
             <tr><td><code>FLOOR</code>&nbsp;<i>expr</i></td><td>the "floor" of a numeric value</td></tr>
             <tr><td><code>CEIL</code>&nbsp;<i>expr</i></td><td>the "ceil" of a numeric value</td></tr>
             <tr><td><code>ISPRIME</code>&nbsp;<i>expr</i></td><td>is the value a prime number?</td></tr>
@@ -675,16 +676,16 @@ or
             <tr><td><code>SUMOF</code> or <code>&#x2211;</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;) *<br>or <i>expr</i> [ <code>..</code> or <code>&#x2026;</code> <i>expr</i> [ <code>,</code> <i>expr</i> ] ]</td><td>sum of all the values</td></tr>
             <tr><td><code>PRODUCTOF</code> or <code>&#x220F;</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;) *<br>or <i>expr</i> [ <code>..</code> or <code>&#x2026;</code> <i>expr</i> [ <code>,</code> <i>expr</i> ] ]</td><td>product of all the values</td></tr>
             <tr><td><code>JOIN</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;) *</td><td>join strings</td></tr>
-            <tr><td><code>SPLIT</code>&nbsp;<i>expr</i> <code>,</code> <i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;)</td><td>split string into parts</td></tr>
+            <tr><td><code>SPLIT</code>&nbsp;<i>expr</i> <code>,</code> <i>regexpr</i> (&nbsp;<code>,</code> <i>limit_expr</i>&nbsp;)</td><td>split string into parts</td></tr>
 	    <tr><td><code>REVERSE</code>&nbsp;<i>expr</i></td><td>reverse the order of an array or string</td></tr>
-            <tr><td><code>INDEX</code>&nbsp;<i>expr</i> <code>,</code> <i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;)</td><td>find value within a string</td></tr>
-            <tr><td><code>SUBSTR</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;)&nbsp;)</td><td>extract a substring</td></tr>
+            <tr><td><code>INDEX</code>&nbsp;<i>expr</i> <code>,</code> <i>search_expr</i> (&nbsp;<code>,</code> <i>start_expr</i>&nbsp;)</td><td>find value within a string</td></tr>
+            <tr><td><code>SUBSTR</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>start_expr</i> (&nbsp;<code>,</code> <i>end_expr</i>&nbsp;)&nbsp;)</td><td>extract a substring</td></tr>
             <tr><td><code>REPLACE</code>&nbsp;<i>expr</i> <code>,</code> <i>expr</i> <code>,</code> <i>expr</i> (&nbsp;<code>,</code> <i>mode</i>&nbsp;)</td><td>replace substrings within a string</td></tr>
             <tr><td><code>SLICE</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;)&nbsp;)</td><td>extract a slice of an array (or string)</td></tr>
             <tr><td><code>SPLICE</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;) *</td><td>modify an array by deleting and/or adding elements</td></tr>
             <tr><td><code>SPLICE</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <code>[</code> <i>id or string list</i> <code>]</code>&nbsp;)<br>(&nbsp;<code>,</code> <code>{</code> <i>key:value pairs</i> <code>}</code>&nbsp;)</td><td>modify an object by deleting and/or adding elements</td></tr>
             <tr><td><code>FILL</code>&nbsp;<i>var</i>&nbsp;( <code>,</code> <i>expr</i>&nbsp;( <code>,</code> <i>expr</i>&nbsp;( <code>,</code><i>expr</i> ) ) )</td><td>fill an array or string</td></tr>
-            <tr><td><code>SORT</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;)</td><td>sort the array expression, optionally ignoring case,<br>returning the array of sorted values</td></tr>
+            <tr><td><code>SORT</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>case_expr</i>&nbsp;)</td><td>sort the array expression, optionally ignoring case,<br>returning the array of sorted values</td></tr>
             <tr><td><code>TRIM</code> or <code>LTRIM</code> or <code>RTRIM</code> <i>expr</i></td><td>trim all, leading, or trailing whitespace</td></tr>
             <tr><td><code>PAD</code> or <code>LPAD</code> or <code>RPAD</code>&nbsp;<i>var</i>&nbsp;<code>,</code> <i>expr</i>&nbsp;( <code>,</code><i>expr</i> )</td><td>pad an array or string to the given width<br>with 0 or space (default) or the given value/character</td></tr>
             <tr><td><code>FIB</code>&nbsp;<i>expr</i></td><td>Fibonacci number</td></tr>
@@ -698,7 +699,7 @@ or
             <tr><td><code>EXEC</code>&nbsp;<i>expr</i>&nbsp;( <code>,</code>&nbsp;<i>expr</i>&nbsp;) *</td><td>execute the given O/S command<br>(with arguments)<br>and return the output as a string</td></tr>
             <tr><td><code>DECODE</code>&nbsp;<i>expr</i></td><td>decode a base64 string into the original string value</td></tr>
             <tr><td><code>ENCODE</code>&nbsp;<i>expr</i></td><td>encode a string into its base64 form</td></tr>
-            <tr><td><code>READ</code>&nbsp;<i>expr</i>&nbsp;( <code>,</code>&nbsp;<i>expr</i>&nbsp;)</td><td>read the file (or files) using the optional charset</td></tr>
+            <tr><td><code>READ</code>&nbsp;<i>expr</i>&nbsp;( <code>,</code>&nbsp;<i>charset_expr</i>&nbsp;)</td><td>read the file (or files) using the optional charset</td></tr>
             <tr><td><code>FACTORS</code>&nbsp;<i>expr</i></td><td>calculate all the factors of the number</td></tr>
             <tr><td><code>PFACTORS</code>&nbsp;<i>expr</i></td><td>calculate the prime factors of the number</td></tr>
             <tr><td><code>CHARS</code>&nbsp;<i>expr</i></td><td>convert a string into an array of its codepoint values</td></tr>
@@ -804,6 +805,10 @@ or
      to the right of the decimal point, negative is the number of extra zeros after the significant digits and to the left of
      the decimal point.  Some examples: <code>scale(1.2) &#x21E8; 1</code>, <code>scale 10e4 &#x21E8; -4</code>, while
      <code>scale 10000 &#x21E8; 0</code>.
+  <p>The <i>type</i> value returned from <code>typeof</code>, which can be the optional second parameter to <code>cast</code>
+     can be one of the following (string) values:
+  <p class="indent"><code>"null"</code>, <code>"string</code>, <code>"integer"</code>, <code>"float"</code>,
+     <code>"fraction"</code>, <code>"boolean"</code>, <code>"array"</code>, <code>"object"</code>, or <code>"unknown"</code>.
   <p>The <code>round</code> function rounds to the number of places after the decimal, with a negative value rounding to the
      left of the decimal point.  For example: <code>round(1.335577,2) &#x21E8; 1.34</code>, and
      <code>round(1234567.890,-3) &#x21E8; 1235000</code>.
@@ -895,9 +900,10 @@ or
      rules are the same as for the input values on the command line. And if the string cannot be interpreted as file names that exist, the
      entire string is just returned as-is as the result. The second (optional) expression is the name of the charset to use (system default
      if not given, or empty/null). The entire contents of the file(s) is returned, with the end-of-line sequences changed to just newline (0x0A or "\n"), and can be assigned to a variable or used in some other way.
-  <p>The <code>info</code> object contains three subobjects:  <code>version</code>, <code>os</code>, and <code>java</code>. The contents of each are similar to this:
+  <p>The <code>info</code> object contains five subobjects:  <code>version</code>, <code>os</code>, <code>java</code>, <code>locale</code>, and <code>timezone</code>. The contents of each are similar to this:
   <p class="indent">
     <code style="color:blue;">info.version</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">{ major: 2, minor: 3, patch: 0, prerelease: "-debug", build: "+9cce83e" }</code>
+  <p>and the standard <code>"library.calc"</code> contains several examples of the use of these fields.
   <p>The values of <code>phi</code> and <code>PHI</code> (or <code>&#x03C6;</code> and <code>&#x03A6;</code>) (the <a href="https://en.wikipedia.org/wiki/Golden_ratio">&ldquo;Golden Ratio&rdquo;</a> and its inverse) are constructed (due to precision and rounding) such that <code>1 / phi == PHI</code> and also <code>1 / PHI == phi</code>.
      But even though mathematically <code>phi - 1 == PHI</code> and <code>PHI + 1 == phi</code> the values computed here will not match exactly
      ("PHI" will have one more fractional digit of precision than "phi"):

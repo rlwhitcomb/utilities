@@ -132,6 +132,17 @@
 >typeof (info.locale.weekdays) -> "array"
 >typeof (D'9/11/2001') -> "integer"
 >typeof (now) -> "integer"
+>cast (null) -> ""
+>cast (1, 'string') -> "1"
+>cast ("23", 'float') -> 23
+>cast ("true", 'boolean') -> true
+>cast (10 ** n) -> "10000"
+>cast (1, 'array') -> [ 1 ]
+>cast ("abc", 'object') -> { _: "abc" }
+>cast (3, 'null') -> <null>
+>cast ([1, 2, 3], 'array') -> [ 1, 2, 3 ]
+>cast ({a: '123'}, 'object') -> { a: "123" }
+>cast (null, 'object') -> { _: <null> }
 >Trig mode is now “DEGREES”.
 >sin (45) -> 0.7071067811865477
 >cos (60) -> 0.4999999999999998

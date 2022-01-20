@@ -113,6 +113,8 @@
  *	    As part of #182: we need to evaluate Number subclasses since they are "in the wild" now too.
  *	18-Jan-2022 (rlwhitcomb)
  *	    #211: Implement "typeof" operator.
+ *	19-Jan-2022 (rlwhitcomb)
+ *	    #214: Implement "cast"; add an enum for the values.
  */
 package info.rlwhitcomb.calc;
 
@@ -1251,32 +1253,94 @@ public final class CalcUtil
 	 * Get the type of the given object.
 	 *
 	 * @param obj	An object to inspect.
-	 * @return	The type of the value as a string.
+	 * @return	The type of the value.
 	 */
-	public static String typeof(final Object obj) {
+	public static Typeof typeof(final Object obj) {
 	    if (obj == null)
-		return "null";
+		return Typeof.NULL;
 	    if (obj instanceof String)
-		return "string";
+		return Typeof.STRING;
 	    if (obj instanceof BigDecimal) {
 		BigDecimal dValue = (BigDecimal) obj;
 		if (dValue.scale() <= 0)
-		    return "integer";
-		return "float";
+		    return Typeof.INTEGER;
+		return Typeof.FLOAT;
 	    }
 	    if (obj instanceof BigInteger || obj instanceof Long || obj instanceof Integer)
-		return "integer";
+		return Typeof.INTEGER;
 	    if (obj instanceof BigFraction)
-		return "fraction";
+		return Typeof.FRACTION;
 	    if (obj instanceof Boolean)
-		return "boolean";
+		return Typeof.BOOLEAN;
 	    if (obj instanceof ArrayScope)
-		return "array";
+		return Typeof.ARRAY;
 	    if (obj instanceof ObjectScope)
-		return "object";
+		return Typeof.OBJECT;
 // TODO: "date" or "time" ??
 
-	    return "unknown";
+	    return Typeof.UNKNOWN;
+	}
+
+
+	/**
+	 * Convert the input object to the cast type.
+	 *
+	 * @param visitor The calculation engine for conversions.
+	 * @param ctx     The parse tree position (for error reporting).
+	 * @param value   The value to convert.
+	 * @param cast    The type to convert to (if possible).
+	 * @param mc      The math context to use for rounding (if necessary).
+	 * @param separators Whether to use numeric separators in numeric to string conversions.
+	 * @return Input value converted to the given type.
+	 */
+	public static Object cast(
+		final CalcObjectVisitor visitor,
+		final ParserRuleContext ctx,
+		final Object value,
+		final Typeof cast,
+		final MathContext mc,
+		final boolean separators)
+	{
+	    Object castValue = value;
+
+	    switch (cast) {
+		case NULL:
+		    castValue = null;	// just ... WHY???
+		    break;
+		case STRING:
+		    castValue = toStringValue(visitor, ctx, value, false, separators);
+		    break;
+		case INTEGER:
+		    castValue = toIntegerValue(visitor, value, mc, ctx);
+		    break;
+		case FLOAT:
+		    castValue = toDecimalValue(visitor, value, mc, ctx);
+		    break;
+		case FRACTION:
+		    castValue = toFractionValue(visitor, value, ctx);
+		    break;
+		case BOOLEAN:
+		    castValue = toBooleanValue(visitor, value, ctx);
+		    break;
+		case ARRAY:
+		    if (!(value instanceof ArrayScope)) {
+			ArrayScope<Object> array = new ArrayScope<>(value);
+			castValue = array;
+		    }
+		    break;
+		case OBJECT:
+		    if (!(value instanceof ObjectScope)) {
+			ObjectScope obj = new ObjectScope();
+			obj.setValue("_", value); // Name??
+			castValue = obj;
+		    }
+		    break;
+		case UNKNOWN:
+		    // Just leave the object as-is, since we don't know what kind it is
+		    break;
+	    }
+
+	    return castValue;
 	}
 
 
