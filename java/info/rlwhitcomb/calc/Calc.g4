@@ -329,6 +329,8 @@
  *	    #211: Add "typeof"; rearrange the function list a little bit.
  *	19-Jan-2022 (rlwhitcomb)
  *	    #214: Add "cast" operator.
+ *	20-Jan-2022 (rlwhitcomb)
+ *	    #215: Tweak the pattern for FORMAT.
  */
 
 grammar Calc;
@@ -1151,7 +1153,7 @@ D_QUOTESTRINGS
 
 
 FORMAT
-   : '@' [\-+] ? ( INT ( '.' INT ) ? ) ? [a-zA-Z,] ? [a-zA-Z%$]
+   : '@' [\-+] ? INT ? ( '.' INT ) ? [a-zA-Z,_] ? [a-zA-Z%$]
    ;
 
 STRING

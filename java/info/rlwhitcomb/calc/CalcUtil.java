@@ -115,6 +115,8 @@
  *	    #211: Implement "typeof" operator.
  *	19-Jan-2022 (rlwhitcomb)
  *	    #214: Implement "cast"; add an enum for the values.
+ *	20-Jan-2022 (rlwhitcomb)
+ *	    #215: Add "scale" parameter to "formatWithSeparators" to add leading zeros.
  */
 package info.rlwhitcomb.calc;
 
@@ -672,7 +674,7 @@ public final class CalcUtil
 		    return (String) result;
 	    }
 	    else if (result instanceof BigDecimal) {
-		return formatWithSeparators(((BigDecimal) result), separators);
+		return formatWithSeparators(((BigDecimal) result), separators, Integer.MIN_VALUE);
 	    }
 	    else if (result instanceof BigInteger) {
 		if (separators)
@@ -1349,22 +1351,51 @@ public final class CalcUtil
 	 *
 	 * @param value A decimal value which could actually be an integer.
 	 * @param sep   Whether or not to use separators.
+	 * @param scale The minimum number of decimal digits to display (pad on the left
+	 *              with zeros, before adding separators); {@code Integer.MIN_VALUE}
+	 *              to ignore.
 	 * @return      The value formatted appropriately with thousands separators.
 	 */
-	public static String formatWithSeparators(final BigDecimal value, final boolean sep) {
-	    if (sep) {
-		int scale = value.scale();
-		// There are no digits right of the decimal point, so treat as an integer
-		if (scale <= 0) {
-		    return String.format("%1$,d", value.toBigInteger());
+	public static String formatWithSeparators(final BigDecimal value, final boolean sep, final int scale) {
+	    String formatString = "";
+	    int valueScale = value.scale();
+	    int valuePrec = value.precision();
+	    int displayScale = scale;
+
+	    // There are no digits right of the decimal point, so treat as an integer
+	    if (valueScale <= 0) {
+		if (scale != Integer.MIN_VALUE) {
+		    if (sep)
+			displayScale += (valuePrec - valueScale) / 3;
+		    formatString = String.format("%%1$0%1$dd", displayScale);
 		}
 		else {
-		    String formatString = String.format("%%1$,.%1$df", scale);
-		    return String.format(formatString, value);
+		    formatString = "%1$d";
 		}
 	    }
 	    else {
+		if (scale != Integer.MIN_VALUE) {
+		    if (sep)
+			displayScale += (valuePrec - valueScale) / 3;
+		    formatString = String.format("%%1$0%1$d.%2$df", displayScale, valueScale);
+		}
+		else {
+		    formatString = String.format("%%1$.%1$df", valueScale);
+		}
+	    }
+
+	    if (sep && !formatString.isEmpty()) {
+		formatString = formatString.replace("%1$", "%1$,");
+	    }
+
+	    if (formatString.isEmpty()) {
 		return value.toPlainString();
+	    }
+	    else {
+		if (formatString.endsWith("d"))
+		    return String.format(formatString, value.toBigInteger());
+		else
+		    return String.format(formatString, value);
 	    }
 	}
 

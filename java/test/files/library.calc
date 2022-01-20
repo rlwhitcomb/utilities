@@ -1,4 +1,4 @@
-//** Version: 2.4.68 Base: 1.6.4
+//** Version: 2.4.69 base: 1.6.4
 //** The versions above must conform to the latest values in "version.properties" and "build.properties"
 
 /*
@@ -104,10 +104,58 @@ def moy_name($date) = { info.locale.months [ moy($date) - 1 ] }
  * Get the long form of a date.
  * From D'2/1/1980' -> Friday, February 1, 1980
  *
- * @param $date The input date value.
+ * @param $date The input date value, defaults to "today" if omitted.
  * @return      The long string representation of the date.
  */
-def long_date($date) = { `${dow_name($date)}, ${moy_name($date)} ${dom($date)}, ${yod($date)}` }
+def long_date($date = today) = { `${dow_name($date)}, ${moy_name($date)} ${dom($date)}, ${yod($date)@_d}` }
+
+/*
+ * For time values, number of ticks (nanoseconds) in a second.
+ */
+TICKS_PER_SECOND = 1e9
+/*
+ * For time values, the number of ticks in a minute.
+ */
+TICKS_PER_MINUTE = TICKS_PER_SECOND * 60
+/*
+ * For time values, the number of ticks in an hour.
+ */
+TICKS_PER_HOUR = TICKS_PER_MINUTE * 60
+
+/*
+ * Get the number of hours in a time value.
+ *
+ * @param $time The time value (as from "now")
+ * @return The integer number of hours.
+ */
+define hot($time) = { $time \ TICKS_PER_HOUR }
+
+/*
+ * Get the number of minutes in a time value.
+ *
+ * @param $time The time value (as from "now")
+ * @return The integer number of minutes.
+ */
+define mot($time) = { ($time - (hot($time) * TICKS_PER_HOUR)) \ TICKS_PER_MINUTE }
+
+/*
+ * Get the number of seconds in a time value.
+ *
+ * @param $time The time value (as from "now")
+ * @return The integer number of seconds.
+ */
+define sot($time) = { ($time - (hot($time) * TICKS_PER_HOUR) - (mot($time) * TICKS_PER_MINUTE)) \ TICKS_PER_SECOND }
+
+/*
+ * Get a timestamp from the given date and time in the Linux "date" form.
+ *
+ * @param $date The desired date.
+ * @param $time The desired time.
+ * @return      Timestamp in the form of "Mon Dec 20  6:46:19 PST 2021"
+ */
+def timestamp($date = today, $time = now) = {
+   `${substr(dow_name($date),0,3)} ${substr(moy_name($date),0,3)} ${dom($date)@.2d} ${hot($time)@-2s}:${mot($time)@.2d}:${sot($time)@.2d} ${info.timezone.name} ${yod($date)@_d}`
+}
 
 /*
  * Compute the flat map of an array.

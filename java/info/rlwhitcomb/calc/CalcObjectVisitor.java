@@ -465,6 +465,9 @@
  *	    #211: Add "typeof" operator.
  *	19-Jan-2022 (rlwhitcomb)
  *	    #214: Add "cast" operator.
+ *	20-Jan-2022 (rlwhitcomb)
+ *	    #215: Enhance "@d" formatting to use "scale" for left padding with zeros.
+ *	    Broaden "pad" functions to convert numbers, etc. to strings.
  */
 package info.rlwhitcomb.calc;
 
@@ -511,6 +514,8 @@ import java.util.TreeSet;
 import java.util.function.UnaryOperator;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import net.iharder.b64.Base64;
 
@@ -542,6 +547,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 {
 	/** Version identifier for library (saved) files; compatible with <code>LIB_VERSION</code> in Calc. */
 	private static final String LIB_FORMAT = "//** Version: %1$s Base: %2$s";
+
+	/** Pattern for format specifiers. */
+	private static final Pattern FORMAT_PATTERN = Pattern.compile("\\s*@([\\-+])?([0-9]+)?([\\.]([0-9]+))?([a-zA-Z,_])?([a-zA-Z%$])");
 
 	/**
 	 * The mode used for doing trig calculations.
@@ -1818,48 +1826,47 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    int precision = Integer.MIN_VALUE;
 	    int scale     = Integer.MIN_VALUE;
 	    boolean separators = false;
-	    boolean addQuotes = false;
-	    char signChar = ' ';
+	    boolean addQuotes  = false;
+	    char signChar      = ' ';
+	    char formatChar    = ' ';
+	    char modifierChar  = ' ';
 
 	    TerminalNode formatNode = ctx.FORMAT();
 	    String format           = formatNode == null ? "" : " " + formatNode.getText();
 	    String exprString       = String.format("%1$s%2$s", getTreeText(ctx.expr()), format);
 
-	    // Some formats allow a precision to be given ('%', '$', and 'd' for instance)
-	    // but some others (like 't') allow a second alpha as well
-	    if (format.length() > 3) {
-		int index = 2;
-		char ch;
-		while (((ch = format.charAt(index)) >= '0' && ch <= '9') || (ch == '-' || ch == '+' || ch == '.'))
-		    index++;
-		if (index > 2) {
-		    String num = format.substring(2, index);
-		    int pos;
-		    if (num.charAt(0) == '-' || num.charAt(0) == '+')
-			signChar = num.charAt(0);
-		    if ((signChar != ' ' && index > 3) || signChar == ' ') {
-			if ((pos = num.indexOf('.')) > 0) {
-			    precision = Integer.parseInt(num.substring(0, pos));
-			    scale     = Integer.parseInt(num.substring(pos + 1));
-			}
-			else {
-			    precision = Integer.parseInt(num);
-			}
-		    }
+	    if (!format.isEmpty()) {
+		// Some formats allow a precision to be given ('%', '$', and 'd' for instance)
+		// but some others (like 't') allow a second alpha as well
+		Matcher m = FORMAT_PATTERN.matcher(format);
+		if (m.matches()) {
+		    String signStr  = m.group(1);
+		    String precStr  = m.group(2);
+		    String scaleStr = m.group(4);
+		    String modStr   = m.group(5);
+		    String formStr  = m.group(6);
+
+		    if (signStr != null)
+			signChar = signStr.charAt(0);
+		    if (precStr != null)
+			precision = Integer.parseInt(precStr);
+		    if (scaleStr != null)
+			scale = Integer.parseInt(scaleStr);
+		    if (modStr != null)
+			modifierChar = modStr.charAt(0);
+		    formatChar = formStr.charAt(0);
 		}
 	    }
-	    separators = format.indexOf(',') >= 0 || settings.separatorMode;
-
+	    separators = modifierChar == ',' || (settings.separatorMode && modifierChar != '_');
 
 	    if (result != null && !format.isEmpty()) {
-		char formatChar = format.charAt(format.length() - 1);
-
 		// Some formats have special characteristics
-		if (Character.toLowerCase(formatChar) != 'j') {
+		char formatTestChar = Character.toLowerCase(formatChar);
+		if (formatTestChar != 'j' && formatTestChar != 'd') {
 		    if (scale != Integer.MIN_VALUE)
 			throw new CalcExprException(ctx, "%calc#noScaleFormat", scale, formatChar);
 		}
-		if (Character.toLowerCase(formatChar) != 'j' && Character.toLowerCase(formatChar) != 'q') {
+		if (formatTestChar != 'j' && formatTestChar != 'q') {
 		    if (result instanceof Scope)
 			throw new CalcExprException(ctx, "%calc#noConvertObjArr", formatChar);
 		}
@@ -1874,7 +1881,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			toUpperCase = true;
 			// fall through
 		    case 'h':
-			char meridianFlag = format.charAt(format.length() - 2);
+			char meridianFlag = modifierChar;
 			// Value will be nanoseconds since midnight
 			valueBuf.append("h'");
 			iValue = toIntegerValue(this, result, mc, ctx);
@@ -1885,7 +1892,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			toUpperCase = true;
 			// fall through
 		    case 't':
-			char durationUnit = format.charAt(format.length() - 2);
+			char durationUnit = modifierChar;
 			// Value will be nanoseconds
 			valueBuf.append("t'");
 			iValue = toIntegerValue(this, result, mc, ctx);
@@ -1946,7 +1953,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			if (precision != Integer.MIN_VALUE) {
 			    dValue = MathUtil.round(dValue, precision);
 			}
-			valueBuf.append(formatWithSeparators(dValue, separators));
+			valueBuf.append(formatWithSeparators(dValue, separators, scale));
 			break;
 
 		    // @E = US format: MM/dd/yyyy
@@ -4162,8 +4169,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    }
 		}
 	    }
-	    else if (value instanceof String) {
-		String input = (String) value;
+	    else if (!(value instanceof ObjectScope)) {
+		String input = toStringValue(this, varCtx, value, false, settings.separatorMode);
 		if (input.length() < posWidth) {
 		    StringBuilder buf = new StringBuilder(width);
 		    CharUtil.Justification just;
