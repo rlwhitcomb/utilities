@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2012-2021 Roger L. Whitcomb.
+ * Copyright (c) 2012-2022 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -193,6 +193,8 @@
  *	    #97: Implement charset for each description file.
  *	01-Dec-2021 (rlwhitcomb)
  *	    #119: Allow default canon charset in description file.
+ *	19-Jan-2022 (rlwhitcomb)
+ *	    #208: Fix NPE when testclass is not specified after ":".
  */
 package info.rlwhitcomb.tester;
 
@@ -1366,6 +1368,13 @@ public class Tester
 	    testDescriptionFiles.clear();
 	}
 
+	private void checkNullValue(final String arg1, final String optionValue) {
+	    if (CharUtil.isNullOrEmpty(arg1)) {
+		Intl.errFormat("tester#emptyArgFor", optionValue);
+		System.exit(2);
+	    }
+	}
+
 	/**
 	 * Process a single command-line option.
 	 *
@@ -1402,10 +1411,7 @@ public class Tester
 	    else if (Options.matchesOption(opt, true, NO_ABORT_OPTIONS))
 		abortOnFirstError = defaultAbortOnFirstError  = false;
 	    else if (Options.matchesOption(opt, true, "directory", "inputdirectory", "inputdir", "dir", "d")) {
-		if (CharUtil.isNullOrEmpty(arg1)) {
-		    Intl.errPrintln("tester#emptyInputDirArg");
-		    System.exit(2);
-		}
+		checkNullValue(arg1, opt);
 		File dir = new File(arg1);
 		if (dir.exists() && dir.isDirectory()) {
 		    defaultScriptDir = dir;
@@ -1416,6 +1422,7 @@ public class Tester
 		}
 	    }
 	    else if (Options.matchesOption(opt, "locale", "loc")) {
+		checkNullValue(arg1, opt);
 		String localeName = arg1;
 		Locale locale = null;
 		try {
@@ -1429,6 +1436,7 @@ public class Tester
 		Intl.initAllPackageResources(locale);
 	    }
 	    else if (Options.matchesOption(opt, true, "charset", "char", "cs")) {
+		checkNullValue(arg1, opt);
 		String charsetName = arg1;
 		Charset charset = null;
 		try {
@@ -1441,6 +1449,7 @@ public class Tester
 		}
 	    }
 	    else if (Options.matchesOption(opt, true, "testclass", "class", "test")) {
+		checkNullValue(arg1, opt);
 		try {
 		    testClass = Class.forName(arg1);
 		}
