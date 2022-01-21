@@ -468,6 +468,8 @@
  *	20-Jan-2022 (rlwhitcomb)
  *	    #215: Enhance "@d" formatting to use "scale" for left padding with zeros.
  *	    Broaden "pad" functions to convert numbers, etc. to strings.
+ *	21-Jan-20222 (rlwhitcomb)
+ *	    Add "libversion" with the base implementation version of the library to "info".
  */
 package info.rlwhitcomb.calc;
 
@@ -812,6 +814,15 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    PredefinedValue.define(version, "prerelease", v.getPreReleaseString());
 	    PredefinedValue.define(version, "build",      v.getBuildMetaString());
 
+	    SemanticVersion lib = Environment.implementationVersion();
+	    ObjectScope libVersion = new ObjectScope();
+
+	    PredefinedValue.define(libVersion, "major",      lib.major);
+	    PredefinedValue.define(libVersion, "minor",      lib.minor);
+	    PredefinedValue.define(libVersion, "patch",      lib.patch);
+	    PredefinedValue.define(libVersion, "prerelease", lib.getPreReleaseString());
+	    PredefinedValue.define(libVersion, "build",      lib.getBuildMetaString());
+
 	    ObjectScope os = new ObjectScope();
 
 	    PredefinedValue.define(os, "platform", Environment.platform());
@@ -897,11 +908,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    ObjectScope info = new ObjectScope();
 
-	    PredefinedValue.define(info, "version",  version);
-	    PredefinedValue.define(info, "os",       os);
-	    PredefinedValue.define(info, "java",     java);
-	    PredefinedValue.define(info, "locale",   locale);
-	    PredefinedValue.define(info, "timezone", tz);
+	    PredefinedValue.define(info, "version",    version);
+	    PredefinedValue.define(info, "libversion", libVersion);
+	    PredefinedValue.define(info, "os",         os);
+	    PredefinedValue.define(info, "java",       java);
+	    PredefinedValue.define(info, "locale",     locale);
+	    PredefinedValue.define(info, "timezone",   tz);
 
 	    PredefinedValue.define(globalScope, "info", info);
 

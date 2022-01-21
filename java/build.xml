@@ -292,6 +292,8 @@
 		Now take them out since we're gonna use "en-US" anyway.
 	    19-Jan-2022 (rlwhitcomb)
 		Timestamp inside the test results log.
+	    21-Jan-2022 (rlwhitcomb)
+		Add "-debug" to manifest "Implementation-Version" if applicable.
 
      ========================================================================== -->
 
@@ -395,6 +397,9 @@
 	</condition>
 	<condition property="debug.build" value="false" else="true">
 		<istrue value="${release.build}"/>
+	</condition>
+	<condition property="debug.flag" value="-debug" else="">
+		<istrue value="${debug.build}"/>
 	</condition>
 	<condition property="test.log.canon" value="TestPP.log.windows.canon" else="TestPP.log.other.canon">
 		<os family="windows"/>
@@ -614,7 +619,7 @@
 		<manifest file="MANIFEST.MF">
 			<attribute name="Built-By" value="${user.name}"/>
 			<attribute name="Implementation-Title" value="${product.name}"/>
-			<attribute name="Implementation-Version" value="${build.version}+${build.lastrev}"/>
+			<attribute name="Implementation-Version" value="${build.version}${debug.flag}+${build.lastrev}"/>
 		</manifest>
 		<jar basedir="." destfile="${result.jar}" manifest="MANIFEST.MF">
 			<metainf dir="..">
