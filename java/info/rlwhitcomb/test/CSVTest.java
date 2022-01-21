@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2014-2017,2019-2021 Roger L. Whitcomb.
+ * Copyright (c) 2014-2017,2019-2022 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -68,6 +68,9 @@
  *	    Move to new package.
  *	15-Dec-2021 (rlwhitcomb)
  *	    #150: Change "=E" option to be "no escape" and make "-H" into "has header row".
+ *	21-Jan-2021 (rlwhitcomb)
+ *	    #217: Allow default options from CSVTEST_OPTIONS environment variable, using new
+ *	    Options method.
  */
 package info.rlwhitcomb.test;
 
@@ -92,6 +95,7 @@ import info.rlwhitcomb.csv.*;
 import info.rlwhitcomb.util.Environment;
 import info.rlwhitcomb.util.FileUtilities;
 import info.rlwhitcomb.util.Intl;
+import info.rlwhitcomb.util.Options;
 
 
 /**
@@ -121,6 +125,9 @@ public class CSVTest
 	private static boolean useUTF8 = false;
 	private static boolean useIterator = false;
 
+	private static boolean argErrors = false;
+
+
 	/**
 	 * Reinitialize our static members for use with {@code Tester}
 	 * where static initialization only happens once for multiple tests.
@@ -141,6 +148,7 @@ public class CSVTest
 	    writeBack = false;
 	    useUTF8 = false;
 	    useIterator = false;
+	    argErrors = false;
 	}
 
 	private static void doHelp(PrintStream ps) {
@@ -266,13 +274,7 @@ public class CSVTest
 	    return true;
 	}
 
-	public static void main(String[] args) {
-	    List<String> fileList = new ArrayList<>();
-
-	    resetOptions();
-
-	    boolean argErrors = false;
-
+	private static void processArguments(final String[] args, final List<String> fileList) {
 	    for (String arg : args) {
 		if (arg.startsWith("--")) {
 		    if (!processArg(arg.substring(2)))
@@ -286,10 +288,24 @@ public class CSVTest
 		    if (!processArg(arg.substring(1)))
 			argErrors = true;
 		}
-		else {
+		else if (fileList != null) {
 		    fileList.add(arg);
 		}
 	    }
+	}
+
+	public static void main(String[] args) {
+	    List<String> fileList = new ArrayList<>();
+
+	    resetOptions();
+
+	    // Process default options from the environment, but ignore any files listed there
+	    Options.environmentOptions(CSVTest.class, (options) -> {
+		processArguments(options, null);
+	    });
+
+	    // Process override options AND file names present on the command line
+	    processArguments(args, fileList);
 
 	    if (fileList.size() == 0) {
 		Intl.errPrintln("csv#test.noInputFiles");

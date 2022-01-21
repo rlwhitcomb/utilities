@@ -35,6 +35,8 @@
  *	    Using Optional and OptionalDouble.
  *	    Process SLEEP_OPTIONS env variable.
  *	    Refactor a bit more.
+ *	21-Jan-2022 (rlwhitcomb)
+ *	    Use new Options method to process environment options.
  */
 package info.rlwhitcomb.util;
 
@@ -227,11 +229,9 @@ public class Sleep
 	public static void main(String[] args) {
 	    long startTime = Environment.highResTimer();
 
-	    String envOptions = System.getenv("SLEEP_OPTIONS");
-	    if (envOptions != null) {
-		String[] options = envOptions.split("[,;:]");
+	    Options.environmentOptions(Sleep.class, (options) -> {
 		processOptions(options);
-	    }
+	    });
 
 	    processOptions(args);
 

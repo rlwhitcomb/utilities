@@ -239,6 +239,8 @@
  *	    actions in a CalcAction enum.
  *	19-Jan-2022 (rlwhitcomb)
  *	    #93: Delegate all string coloring to new mechanism in Intl.
+ *	21-Jan-2022 (rlwhitcomb)
+ *	    #217: Delegate environment options parsing to new Options method.
  */
 package info.rlwhitcomb.calc;
 
@@ -301,6 +303,7 @@ import info.rlwhitcomb.util.ExceptionUtil;
 import info.rlwhitcomb.util.FileUtilities;
 import info.rlwhitcomb.util.Intl;
 import info.rlwhitcomb.util.NumericUtil.RangeMode;
+import info.rlwhitcomb.util.Options;
 import info.rlwhitcomb.util.QueuedThread;
 
 /**
@@ -1873,25 +1876,23 @@ public class Calc
 	    // Preload the color values for the initial errors
 	    computeColors(colors);
 
-	    List<String> argList = new ArrayList<>(args.length * 2);
+	    final List<String> argList = new ArrayList<>(args.length * 2);
 	    argValues.clear();
 
 	    // Preprocess the CALC_OPTIONS environment variable (if present)
-	    String calcOptions = System.getenv("CALC_OPTIONS");
-	    if (!CharUtil.isNullOrEmpty(calcOptions)) {
-		String[] parts = calcOptions.split("[;,]\\s*|\\s+");
-		processArgs(parts, argList);
+	    Options.environmentOptions(Calc.class, (options) -> {
+		processArgs(options, argList);
 
 		switch (expecting) {
 		    case QUIT_NOW:
-			return;
+			System.exit(0);
 		    case DEFAULT:
 		    case ARGUMENTS:
 			break;
 		    default:
 			System.exit(1);
 		}
-	    }
+	    });
 
 	    // Now process the command line (options will override the env var)
 	    processArgs(args, argList);

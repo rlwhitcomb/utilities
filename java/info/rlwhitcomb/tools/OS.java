@@ -67,6 +67,8 @@
  *	19-Jan-2022 (rlwhitcomb)
  *	    #210: Fix the coloring for verbose locale display
  *	    #209: Add international currency symbol (same as Calc "info.locale").
+ *	21-Jan-2022 (rlwhitcomb)
+ *	    #217: Use new Options method to process an environment variable for default options.
  */
 package info.rlwhitcomb.tools;
 
@@ -94,6 +96,7 @@ import java.util.TreeSet;
 
 import info.rlwhitcomb.util.ConsoleColor;
 import info.rlwhitcomb.util.Environment;
+import info.rlwhitcomb.util.Options;
 
 
 /**
@@ -719,6 +722,11 @@ public class OS
 	 */
 	public static void main(String[] args) {
 	    screenWidth = Environment.consoleWidth();
+
+	    Options.environmentOptions(OS.class, (options) -> {
+		if (!parseArgs(options))
+		    System.exit(1);
+	    });
 
 	    if (!parseArgs(args))
 		System.exit(1);

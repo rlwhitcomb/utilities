@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2020-2021 Roger L. Whitcomb.
+ * Copyright (c) 2020-2022 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -85,6 +85,8 @@
  *	    Fix color usage b/c of new ConsoleColor paradigm.
  *	21-Oct-2021 (rlwhitcomb)
  *	    Use better method to get a valid Locale.
+ *	21-Jan-2022 (rlwhitcomb)
+ *	    #217: Use new Options method to process environment options.
  */
 package info.rlwhitcomb.tree;
 
@@ -634,12 +636,10 @@ public class Tree
 	    Environment.loadProgramInfo(Tree.class);
 
 	    // First, parse the TREE_OPTIONS env variable for predefined options
-	    // (ignoring any non-options here)
-	    String options = System.getenv("TREE_OPTIONS");
-	    if (!CharUtil.isNullOrEmpty(options)) {
-		String[] optArgs = options.split("[;,]\\s*|\\s+");
-		parseOptions(optArgs, null);
-	    }
+	    // (ignoring any non-options, that is directory names, here)
+	    Options.environmentOptions(Tree.class, (options) -> {
+		parseOptions(options, null);
+	    });
 
 	    // Now, scan the input arguments for options vs. file/directory specs
 	    // (so, the command line options override the predefined ones)

@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2020-2021 Roger L. Whitcomb.
+ * Copyright (c) 2020-2022 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -86,6 +86,8 @@
  *	    #23 Fix inconsistent options.
  *	04-Oct-2021 (rlwhitcomb)
  *	    Tweak colors.
+ *	21-Jan-2022 (rlwhitcomb)
+ *	    #217: Use new Options method to process environment methods.
  */
 package info.rlwhitcomb.wordfind;
 
@@ -125,6 +127,7 @@ import static info.rlwhitcomb.util.ConsoleColor.Code.*;
 import info.rlwhitcomb.util.Environment;
 import info.rlwhitcomb.util.ExceptionUtil;
 import info.rlwhitcomb.util.Intl;
+import info.rlwhitcomb.util.Options;
 
 
 /**
@@ -1175,11 +1178,9 @@ public class WordFind implements Application {
         // Set default colors before options so there is a setting for error messages right away
         setColors(!ON_WINDOWS);
 
-        String defaultOptions = System.getenv("WORDFIND_OPTIONS");
-        if (!CharUtil.isNullOrEmpty(defaultOptions)) {
-            String[] defaultArgs = defaultOptions.split("[,;]\\s*|\\s+");
-            processCommandLine(defaultArgs, null, false);
-        }
+	Options.environmentOptions(WordFind.class, (options) -> {
+            processCommandLine(options, null, false);
+        });
 
         // Command line options override the defaults (if any)
         List<String> argWords = new ArrayList<>(args.length);

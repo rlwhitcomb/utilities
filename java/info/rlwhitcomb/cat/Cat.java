@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2020-2021 Roger L. Whitcomb.
+ * Copyright (c) 2020-2022 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -40,6 +40,9 @@
  *	    Add "-locale" option (and Spanish translation).
  *	21-Oct-2021 (rlwhitcomb)
  *	    Use better method to get a valid Locale.
+ *	21-Jan-2022 (rlwhitcomb)
+ *	    #217: Allow environment default options from CAT_OPTIONS via
+ *	    new Options method.
  *
  *	    TODO: wildcard directory names on input
  *	    TODO: -nn to limit to first nn lines, +nn to limit to LAST nn lines (hard to do?)
@@ -307,6 +310,12 @@ public class Cat {
 	 */
 	public static void main(final String[] args) {
 	    Environment.loadProgramInfo(Cat.class);
+
+	    // Process environment options first, under pass 1 rules
+	    pass = 1;
+	    Options.environmentOptions(Cat.class, (options) -> {
+		processArguments(options);
+	    });
 
 	    // First pass: process output file / charset options only
 	    pass = 1;

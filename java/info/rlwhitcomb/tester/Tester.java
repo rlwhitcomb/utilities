@@ -195,6 +195,8 @@
  *	    #119: Allow default canon charset in description file.
  *	19-Jan-2022 (rlwhitcomb)
  *	    #208: Fix NPE when testclass is not specified after ":".
+ *	21-Jan-2022 (rlwhitcomb)
+ *	    #217: Use new Options method to parse environment default options.
  */
 package info.rlwhitcomb.tester;
 
@@ -1497,11 +1499,9 @@ public class Tester
 	    testDescriptionFiles = new ArrayList<>(args.length);
 
 	    // Preprocess the TESTER_OPTIONS environment variable (if present)
-	    String testerOptions = System.getenv("TESTER_OPTIONS");
-	    if (!CharUtil.isNullOrEmpty(testerOptions)) {
-		String[] parts = testerOptions.split("[;,]\\s*|\\s+");
-		processArgs(parts);
-	    }
+	    Options.environmentOptions(Tester.class, (options) -> {
+		processArgs(options);
+	    });
 
 	    // Now the regular command-line arguments
 	    processArgs(args);

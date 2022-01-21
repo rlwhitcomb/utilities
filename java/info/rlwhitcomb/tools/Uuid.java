@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2021 Roger L. Whitcomb.
+ * Copyright (c) 2021-2022 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -30,6 +30,8 @@
  *	    #80: Add "-lower", "-upper", "-string", "-bytes" options, as well as "-nn".
  *	12-Nov-2021 (rlwhitcomb)
  *	    #80: Add "-int" option.
+ *	21-Jan-2022 (rlwhitcomb)
+ *	    #217: Allow environment options through new Options method.
  */
 package info.rlwhitcomb.tools;
 
@@ -61,6 +63,9 @@ public class Uuid
 
 	/** Option to make the result lowercase (default for string). */
 	private static boolean toLower = false;
+
+	/** Whether or not we have seen one of the casing options. */
+	private static boolean seenCaseOption = false;
 
 	/** Number of iterations, default one. */
 	private static int numberOfValues = 1;
@@ -112,14 +117,9 @@ public class Uuid
 	    return result;
 	}
 
-	/**
-	 * @param args The parsed command line argument array.
-	 */
-	public static void main(String[] args) {
-	    boolean seenCaseOption = false;
-
-	    for (String arg : args) {
-		String value = Options.isOption(arg);
+	private static boolean processOptions(final String[] options) {
+	    for (String opt : options) {
+		String value = Options.isOption(opt);
 		if (value != null) {
 		    if (Options.matchesIgnoreCase(value, "lowercase", "lower", "low", "l")) {
 			toUpper = false;
@@ -158,7 +158,7 @@ public class Uuid
 		    }
 		    else if (Options.matchesIgnoreCase(value, "help", "h", "?")) {
 			usage();
-			return;
+			return false;
 		    }
 		    else {
 			try {
@@ -166,23 +166,38 @@ public class Uuid
 			    if (nn < 1 || nn > 99) {
 				System.err.println("Number of values should be between 1 and 99.");
 				usage();
-				return;
+				return false;
 			    }
 			    numberOfValues = nn;
 			}
 			catch (NumberFormatException nfe) {
-			    System.err.println("Unrecognized option \"" + arg + "\"!");
+			    System.err.println("Unrecognized option \"" + opt + "\"!");
 			    usage();
-			    return;
+			    return false;
 			}
 		    }
 		}
 		else {
-		    System.err.println("Unrecognized argument \"" + arg + "\"!");
+		    System.err.println("Unrecognized argument \"" + opt + "\"!");
 		    usage();
-		    return;
+		    return false;
 		}
 	    }
+	    return true;
+	}
+
+	/**
+	 * @param args The parsed command line argument array.
+	 */
+	public static void main(String[] args) {
+
+	    Options.environmentOptions(Uuid.class, (options) -> {
+		if (!processOptions(options))
+		    System.exit(0);
+	    });
+
+	    if (!processOptions(args))
+		return;
 
 	    for (int i = 0; i < numberOfValues; i++) {
 		UUID uuid = UUID.randomUUID();

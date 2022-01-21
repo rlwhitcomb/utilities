@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2015-2018,2020-2021 Roger L. Whitcomb
+ * Copyright (c) 2015-2018,2020-2022 Roger L. Whitcomb
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -70,6 +70,8 @@
  *	    Move the main (testing) method to OptionsTest class.
  *	11-Nov-2021 (rlwhitcomb)
  *	    Make "matches" and "matchesIgnoreCase" public for use elsewhere.
+ *	21-Jan-2022 (rlwhitcomb)
+ *	    #217: Add method to process default options from the environment.
  */
 package info.rlwhitcomb.util;
 
@@ -80,6 +82,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.function.Consumer;
 
 
 /**
@@ -90,7 +93,7 @@ public class Options
 	/** Determines if we are running on a Windows platform, which then allows options
 	 * to start with "/" (in addition to "--" and "-" allowed on all platforms).
 	 */
-	private static final boolean onWindows = Environment.isWindows();
+	private static final boolean ON_WINDOWS = Environment.isWindows();
 
 	/**
 	 * An interface that can be implemented by enums or other classes such that we can
@@ -352,7 +355,7 @@ public class Options
 		else if (length > 1 && arg.startsWith("-") && !arg.equals("--")) {
 		    result = arg.substring(1);
 		}
-		else if (onWindows && length > 1 && arg.startsWith("/")) {
+		else if (ON_WINDOWS && length > 1 && arg.startsWith("/")) {
 		    result = arg.substring(1);
 		}
 	    }
@@ -484,6 +487,24 @@ public class Options
 		buf.append('-').append(option);
 	    }
 	    return buf.toString();
+	}
+
+	/**
+	 * Generic method to find an environment variable that may contain default options for a particular class
+	 * and then call a class-specific processing routine through a lambda.
+	 *
+	 * @param clazz The class name used to specify the environment variable name:
+	 *              ({@code classSimpleName.toUpperCase + "_OPTIONS"}).
+	 * @param processor The class-specific handler to process the option(s).
+	 */
+	public static void environmentOptions(final Class<?> clazz, final Consumer<String[]> processor) {
+	    String optionsVariableName = clazz.getSimpleName().toUpperCase() + "_OPTIONS";
+	    String optionsString = System.getenv(optionsVariableName);
+
+	    if (!CharUtil.isNullOrEmpty(optionsString)) {
+		String[] options = optionsString.split("[,;]\\s*|\\s+");
+		processor.accept(options);
+	    }
 	}
 
 }
