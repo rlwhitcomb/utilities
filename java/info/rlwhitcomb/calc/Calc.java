@@ -237,6 +237,8 @@
  *	11-Jan-2022 (rlwhitcomb)
  *	    #132: Disable GUI buttons and input field while calculating. Reorganize
  *	    actions in a CalcAction enum.
+ *	19-Jan-2022 (rlwhitcomb)
+ *	    #93: Delegate all string coloring to new mechanism in Intl.
  */
 package info.rlwhitcomb.calc;
 
@@ -519,36 +521,41 @@ public class Calc
 	};
 
 
-	private static void computeColors() {
+	/**
+	 * Initialize or update the color map and quote map (used for
+	 * coloring or else quoting values in error messages, etc.).
+	 * <p> Also sets the appropriate map based on the coloring mode
+	 * and sets the global {@link #colors} flag from the parameter.
+	 *
+	 * @param useColors	The (new) value for the {@link #colors}
+	 *			flag to indicate colored messages or not.
+	 */
+	private static void computeColors(final boolean useColors) {
+	    if (colorMap.isEmpty()) {
+		colorMap.put("v", GREEN_BOLD);
+		colorMap.put("u", GREEN_BOLD);
+		colorMap.put("e", RED_BOLD);
+		colorMap.put("r", RESET);
+		colorMap.put("", null);
+	    }
 	    colorMap.put("x", (darkBackgrounds ? YELLOW_BRIGHT : BLUE_BOLD));
 	    colorMap.put("y", (darkBackgrounds ? YELLOW_BRIGHT : BLUE_BOLD));
 	    colorMap.put("a", (darkBackgrounds ? WHITE : BLACK_BRIGHT));
-	    colorMap.put("v", GREEN_BOLD);
-	    colorMap.put("u", GREEN_BOLD);
-	    colorMap.put("e", RED_BOLD);
-	    colorMap.put("r", RESET);
-	    colorMap.put("", null);
 
-	    quoteMap.put("x", "");
-	    quoteMap.put("y", "\u201C");
-	    quoteMap.put("a", "");
-	    quoteMap.put("v", "");
-	    quoteMap.put("u", "\u201C");
-	    quoteMap.put("e", "");
-	    quoteMap.put("r", "");
-	    quoteMap.put("",  "\u201D");
-	}
 
-	private static String renderColors(String decoratedString) {
-	    return ConsoleColor.color(decoratedString, true, colors ? colorMap : quoteMap);
-	}
+	    if (quoteMap.isEmpty()) {
+		quoteMap.put("x", "");
+		quoteMap.put("y", "\u201C");
+		quoteMap.put("a", "");
+		quoteMap.put("v", "");
+		quoteMap.put("u", "\u201C");
+		quoteMap.put("e", "");
+		quoteMap.put("r", "");
+		quoteMap.put("",  "\u201D");
+	    }
 
-	private static void outFormat(String formatKey, Object... args) {
-	    System.out.println(renderColors(Intl.formatString(formatKey, args)));
-	}
-
-	private static void errFormat(String formatKey, Object... args) {
-	    System.err.println(renderColors(Intl.formatString(formatKey, args)));
+	    colors = useColors;
+	    Intl.setColoring(true, useColors ? colorMap : quoteMap);
 	}
 
 
@@ -739,7 +746,7 @@ public class Calc
 		useCmdEnter = useCmdEnterButton.isSelected();
 
 		darkBackgrounds = darkBackgroundButton.isSelected();
-		computeColors();
+		computeColors(colors);
 	    }
 
 	    dialog.setAttribute(Attribute.ORIGINAL_SETTINGS, null);
@@ -772,7 +779,7 @@ public class Calc
 		// For now, we won't support colors in the GUI display
 		// TODO: if we ever support going back from GUI mode to console, we will need to restore
 		// the old "colors" mode at that point
-		colors = false;
+		computeColors(false);
 
 		// Increase the maximum output text length in case of humongous calculations
 		outputTextArea.setMaximumLength(20_000_000);
@@ -875,23 +882,23 @@ public class Calc
 	@Override
 	public void displayResult(String exprString, String resultString) {
 	    if (resultsOnly)
-		outFormat("calc#resultOnly", resultString);
+		Intl.outFormat("calc#resultOnly", resultString);
 	    else
-		outFormat("calc#resultGUI", exprString, resultString);
+		Intl.outFormat("calc#resultGUI", exprString, resultString);
 	    updateOutputSize();
 	}
 
 	@Override
 	public void displayActionMessage(String message) {
 	    if (!resultsOnly) {
-		outFormat("calc#action", message);
+		Intl.outFormat("calc#action", message);
 		updateOutputSize();
 	    }
 	}
 
 	@Override
 	public void displayMessage(String message) {
-	    outFormat("calc#message", message);
+	    Intl.outFormat("calc#message", message);
 	    updateOutputSize();
 	}
 
@@ -905,10 +912,10 @@ public class Calc
 
 	private void displayInputTextAndIndicator() {
 	    if (currentText != null) {
-		outFormat("calc#resultOnly", stripLineEndings(currentText));
+		Intl.outFormat("calc#resultOnly", stripLineEndings(currentText));
 	    }
 	    if (currentIndicator != null) {
-		outFormat("calc#resultOnly", currentIndicator);
+		Intl.outFormat("calc#resultOnly", currentIndicator);
 		currentIndicator = null;
 	    }
 	}
@@ -916,14 +923,14 @@ public class Calc
 	@Override
 	public void displayErrorMessage(String message) {
 	    displayInputTextAndIndicator();
-	    outFormat("calc#error", message);
+	    Intl.outFormat("calc#error", message);
 	    updateOutputSize();
 	}
 
 	@Override
 	public void displayErrorMessage(String message, int lineNumber) {
 	    displayInputTextAndIndicator();
-	    errFormat("calc#errorLine", message, lineNumber);
+	    Intl.errFormat("calc#errorLine", message, lineNumber);
 	    updateOutputSize();
 	}
 
@@ -979,7 +986,7 @@ public class Calc
 		    int width = guiMode ? charPositionInLine + 1 : charPositionInLine + 3;
 		    currentIndicator = CharUtil.padToWidth("^", width, CharUtil.Justification.RIGHT);
 		    if (replMode) {
-			outFormat("calc#error", currentIndicator);
+			Intl.outFormat("calc#error", currentIndicator);
 		    }
 		    int ix = message.indexOf("at input '");
 		    if (ix > 0) {
@@ -1011,7 +1018,7 @@ public class Calc
 		    int width = guiMode ? charPos + 1 : charPos + 3;
 		    currentIndicator = CharUtil.padToWidth("^", width, CharUtil.Justification.RIGHT);
 		    if (replMode) {
-			outFormat("calc#error", currentIndicator);
+			Intl.outFormat("calc#error", currentIndicator);
 		    }
 		    throw new CalcException(Intl.formatString("calc#errorNoAlt", charPos, t.getText()), t.getLine());
 		}
@@ -1053,28 +1060,28 @@ public class Calc
 		@Override
 		public void displayResult(String exprString, String resultString) {
 		    if (resultsOnly)
-			outFormat("calc#resultOnly", resultString);
+			Intl.outFormat("calc#resultOnly", resultString);
 		    else
-			outFormat("calc#result", exprString, resultString);
+			Intl.outFormat("calc#result", exprString, resultString);
 		}
 
 		@Override
 		public void displayActionMessage(String message) {
 		    if (!resultsOnly)
-			outFormat("calc#action", message);
+			Intl.outFormat("calc#action", message);
 		}
 
 		@Override
 		public void displayMessage(String message) {
 		    if (message == null || message.isEmpty())
-			System.out.println();
+			Intl.outPrintln();
 		    else
-			outFormat("calc#message", message);
+			Intl.outFormat("calc#message", message);
 		}
 
 		@Override
 		public void displayErrorMessage(String message) {
-		    errFormat("calc#error", message);
+		    Intl.errFormat("calc#error", message);
 		}
 
 		@Override
@@ -1085,9 +1092,9 @@ public class Calc
 			message.substring(0, message.length() - 1) : message);
 
 		    if (replMode)
-			errFormat("calc#errorPeriod", regularMessage);
+			Intl.errFormat("calc#errorPeriod", regularMessage);
 		    else
-			errFormat("calc#errorLine", regularMessage, lineNumber);
+			Intl.errFormat("calc#errorLine", regularMessage, lineNumber);
 		}
 	}
 
@@ -1256,7 +1263,7 @@ public class Calc
 	}
 
 	public static void printIntro() {
-	    Intl.printHelp("calc#intro", colors, colorMap);
+	    Intl.printHelp("calc#intro", colors);
 	}
 
 	/**
@@ -1540,7 +1547,7 @@ public class Calc
 	    }
 
 	    if (expecting != Expecting.DEFAULT) {
-		errFormat("calc#expectNotOption", expecting);
+		Intl.errFormat("calc#expectNotOption", expecting);
 		return Expecting.QUIT_NOW;
 	    }
 
@@ -1577,13 +1584,13 @@ public class Calc
 		case "colors":
 		case "color":
 		case "col":
-		    colors = true;
+		    computeColors(true);
 		    break;
 		case "nocolors":
 		case "nocolor":
 		case "nocol":
 		case "noc":
-		    colors = false;
+		    computeColors(false);
 		    break;
 		case "darkbackgrounds":
 		case "darkbackground":
@@ -1592,7 +1599,7 @@ public class Calc
 		case "dark":
 		case "dk":
 		    darkBackgrounds = true;
-		    computeColors();
+		    computeColors(colors);
 		    break;
 		case "lightbackgrounds":
 		case "lightbackground":
@@ -1601,7 +1608,7 @@ public class Calc
 		case "light":
 		case "lt":
 		    darkBackgrounds = false;
-		    computeColors();
+		    computeColors(colors);
 		    break;
 		case "timing":
 		case "time":
@@ -1763,7 +1770,7 @@ public class Calc
 		    printTitleAndVersion();
 		    return Expecting.QUIT_NOW;
 		default:
-		    errFormat("calc#unknownOption", arg);
+		    Intl.errFormat("calc#unknownOption", arg);
 		    return Expecting.QUIT_NOW;
 	    }
 	    return Expecting.DEFAULT;
@@ -1792,7 +1799,7 @@ public class Calc
 				expecting = Expecting.DEFAULT;
 			    }
 			    catch (IllegalArgumentException iae) {
-				errFormat("calc#errorPeriod", ExceptionUtil.toString(iae));
+				Intl.errFormat("calc#errorPeriod", ExceptionUtil.toString(iae));
 			    }
 			    break;
 			case DIRECTORY:
@@ -1816,7 +1823,7 @@ public class Calc
 				expecting = Expecting.DEFAULT;
 			    }
 			    catch (IllegalCharsetNameException | UnsupportedCharsetException cse) {
-				errFormat("calc#charsetError", arg, ExceptionUtil.toString(cse));
+				Intl.errFormat("calc#charsetError", arg, ExceptionUtil.toString(cse));
 				expecting = Expecting.QUIT_NOW;
 			    }
 			    break;
@@ -1824,7 +1831,7 @@ public class Calc
 			    String parts[] = arg.split("[=:]");
 			    if (parts.length == 2) {
 				if (CharUtil.isNullOrEmpty(parts[0])) {
-				    errFormat("calc#declError", arg);
+				    Intl.errFormat("calc#declError", arg);
 				    expecting = Expecting.QUIT_NOW;
 				}
 				else {
@@ -1833,12 +1840,12 @@ public class Calc
 				}
 			    }
 			    else {
-				errFormat("calc#declError", arg);
+				Intl.errFormat("calc#declError", arg);
 				expecting = Expecting.QUIT_NOW;
 			    }
 			    break;
 			default:
-			    errFormat("calc#expectValue", expecting);
+			    Intl.errFormat("calc#expectValue", expecting);
 			    expecting = Expecting.QUIT_NOW;
 			    break;
 		    }
@@ -1856,7 +1863,7 @@ public class Calc
 			break;
 		    // else fall through to error
 		default:
-		    errFormat("calc#noOptionValue", expecting);
+		    Intl.errFormat("calc#noOptionValue", expecting);
 	    }
 	}
 
@@ -1864,7 +1871,7 @@ public class Calc
 	    Environment.loadProgramInfo(Calc.class);
 
 	    // Preload the color values for the initial errors
-	    computeColors();
+	    computeColors(colors);
 
 	    List<String> argList = new ArrayList<>(args.length * 2);
 	    argValues.clear();
@@ -2039,7 +2046,7 @@ public class Calc
 		}
 	    }
 	    catch (IOException ioe) {
-		errFormat("calc#inOutError", ExceptionUtil.toString(ioe));
+		Intl.errFormat("calc#inOutError", ExceptionUtil.toString(ioe));
 	    }
 
 	    if (exitValue != null) {

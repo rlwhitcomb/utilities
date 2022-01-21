@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2012-2018,2020-2021 Roger L. Whitcomb.
+ * Copyright (c) 2012-2018,2020-2022 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -145,6 +145,11 @@
  *	28-Nov-2021 (rlwhitcomb)
  *	    #111: Add "getOptionalKeyString", make "isAKey" into a separate method.
  *	    Rework the color map to be Map<String, Object>.
+ *	19-Jan-2022 (rlwhitcomb)
+ *	    #93: Make the color map a global, instead of parameter only to "printHelp";
+ *	    also set a global "color" flag for default use in the print methods. Do
+ *	    optional coloring of strings down at this level so any other code can
+ *	    easily take advantage of it.
  */
 package info.rlwhitcomb.util;
 
@@ -572,6 +577,19 @@ public final class Intl
 
 
 	/**
+	 * Whether to do coloring of strings by default (the {@code printHelp} methods
+	 * have a separator parameter for this). Default to {@code false} for compatibility
+	 * with previous behavior.
+	 */
+	private static boolean colorByDefault = false;
+
+	/**
+	 * The mapping between color tags and real color codes.
+	 */
+	private static Map<String, Object> colorCodeMap = null;
+
+
+	/**
 	 * Initialize all of our resource bundles automatically with the default locale
 	 * the first time we are called.  Note: {@link #initAllPackageResources} can
 	 * be called multiple times with different locales, so programs (for instance)
@@ -718,6 +736,19 @@ public final class Intl
 	    else {
 		PackageResourceProvider.installAllPackages(plainFile, locale);
 	    }
+	}
+
+
+	/**
+	 * Set the flag for coloring of strings, along with the map to use for converting
+	 * color keys to actual color codes.
+	 *
+	 * @param	useColors	Whether or not to honor the color codes in strings.
+	 * @param	colorMapToUse	The new map for use, or {@code null} to remove the color map.
+	 */
+	public static void setColoring(final boolean useColors, final Map<String, Object> colorMapToUse) {
+	    colorByDefault = useColors;
+	    colorCodeMap = colorMapToUse;
 	}
 
 
@@ -1074,7 +1105,7 @@ public final class Intl
 	 * @param	key	Key value passed to {@link #getString(String)}.
 	 */
 	public static void outPrintln(final String key) {
-	    System.out.println(getString(key));
+	    System.out.println(ConsoleColor.color(getString(key), colorByDefault, colorCodeMap));
 	}
 
 
@@ -1091,7 +1122,7 @@ public final class Intl
 	 * @param	key	Key value passed to {@link #getString(String)}.
 	 */
 	public static void errPrintln(final String key) {
-	    System.err.println(getString(key));
+	    System.err.println(ConsoleColor.color(getString(key), colorByDefault, colorCodeMap));
 	}
 
 
@@ -1119,7 +1150,7 @@ public final class Intl
 	 * @param args The (possibly empty) list of arguments used to format the message.
 	 */
 	public static void outFormat(final String formatKey, final Object... args) {
-	    System.out.println(formatString(formatKey, args));
+	    System.out.println(ConsoleColor.color(formatString(formatKey, args), colorByDefault, colorCodeMap));
 	}
 
 
@@ -1131,7 +1162,7 @@ public final class Intl
 	 * @param args The (possibly empty) list of arguments used to format the message.
 	 */
 	public static void outKeyFormat(final String formatOrKey, final Object... args) {
-	    System.out.println(formatKeyString(formatOrKey, args));
+	    System.out.println(ConsoleColor.color(formatKeyString(formatOrKey, args), colorByDefault, colorCodeMap));
 	}
 
 
@@ -1141,7 +1172,7 @@ public final class Intl
 	 * @param args The (possibly empty) list of arguments used to format the message.
 	 */
 	public static void errFormat(final String formatKey, final Object... args) {
-	    System.err.println(formatString(formatKey, args));
+	    System.err.println(ConsoleColor.color(formatString(formatKey, args), colorByDefault, colorCodeMap));
 	}
 
 
@@ -1153,7 +1184,7 @@ public final class Intl
 	 * @param args The (possibly empty) list of arguments used to format the message.
 	 */
 	public static void errKeyFormat(final String formatOrKey, final Object... args) {
-	    System.err.println(formatKeyString(formatOrKey, args));
+	    System.err.println(ConsoleColor.color(formatKeyString(formatOrKey, args), colorByDefault, colorCodeMap));
 	}
 
 
@@ -1203,7 +1234,7 @@ public final class Intl
 	 * @param	prefix	The prefix used to select the help messages.
 	 */
 	public static void printHelp(final String prefix) {
-	    printHelp(System.out, prefix, null, true, null);
+	    printHelp(System.out, prefix, null, true);
 	}
 
 	/**
@@ -1225,31 +1256,7 @@ public final class Intl
 	 * @param	colors	Whether or not to expand the color tags.
 	 */
 	public static void printHelp(final String prefix, final boolean colors) {
-	    printHelp(System.out, prefix, null, colors, null);
-	}
-
-	/**
-	 * Print out a series of "help" message lines described in a certain format
-	 * in the resource file to {@link System#out}, with the option to color or not,
-	 * and the option to map the colors.
-	 * <p> They must have a common package, common first key part ("script" in
-	 * the example below), and have a "number of lines" key ("helpNumberLines"),
-	 * (which is optional).
-	 * The individual keys are prefixed with "help".
-	 * <p> A typical example is this:
-	 * <pre>script.helpNumberLines = 22
-	 *script.help1 = "Usage..."
-	 *script.help2 = ...
-	 *...
-	 *script.help22 = "last message"
-	 * </pre>
-	 *
-	 * @param	prefix	The prefix used to select the help messages.
-	 * @param	colors	Whether or not to expand the color tags.
-	 * @param	colorMap A mapping between color tags and real color codes.
-	 */
-	public static void printHelp(final String prefix, final boolean colors, final Map<String, Object> colorMap) {
-	    printHelp(System.out, prefix, null, colors, colorMap);
+	    printHelp(System.out, prefix, null, colors);
 	}
 
 	/**
@@ -1271,7 +1278,7 @@ public final class Intl
 	 * @param	prefix	The prefix used to select the help messages.
 	 */
 	public static void printHelp(final PrintStream ps, final String prefix) {
-	    printHelp(ps, prefix, null, true, null);
+	    printHelp(ps, prefix, null, true);
 	}
 
 	/**
@@ -1295,33 +1302,7 @@ public final class Intl
 	 * @param	colors	Whether or not to expand the color tags.
 	 */
 	public static void printHelp(final PrintStream ps, final String prefix, final boolean colors) {
-	    printHelp(ps, prefix, null, colors, null);
-	}
-
-	/**
-	 * Print out a series of "help" message lines described in a certain format
-	 * in the resource file to the given {@link PrintStream}, with the option
-	 * to color the messages, and to map the colors.
-	 * <p> They must have a common package, common first key part ("script" in
-	 * the example below), and have a "number of lines" key ("helpNumberLines"),
-	 * (which is optional).
-	 * The individual keys are prefixed with "help".
-	 * <p> A typical example is this:
-	 * <pre>script.helpNumberLines = 22
-	 *script.help1 = "Usage..."
-	 *script.help2 = ...
-	 *...
-	 *script.help22 = "last message"
-	 * </pre>
-	 *
-	 * @param	ps	The {@link PrintStream} to use to display the help.
-	 * @param	prefix	The prefix used to select the help messages.
-	 * @param	colors	Whether or not to expand the color tags.
-	 * @param	colorMap A mapping between color tags and real color codes.
-	 */
-	public static void printHelp(final PrintStream ps, final String prefix,
-		final boolean colors, final Map<String, Object> colorMap) {
-	    printHelp(ps, prefix, null, colors, colorMap);
+	    printHelp(ps, prefix, null, colors);
 	}
 
 	/**
@@ -1343,7 +1324,7 @@ public final class Intl
 	 * @param	symbols	A map of symbols used to substitute values.
 	 */
 	public static void printHelp(final String prefix, final Map<String, String> symbols) {
-	    printHelp(System.out, prefix, symbols, true, null);
+	    printHelp(System.out, prefix, symbols, true);
 	}
 
 	/**
@@ -1366,10 +1347,9 @@ public final class Intl
 	 * @param	prefix	The prefix used to select the help messages.
 	 * @param	symbols	A map of symbols used to substitute values.
 	 * @param	colors	Whether or not to expand the color tags.
-	 * @param	colorMap A mapping between color tags and real color codes.
 	 */
 	public static void printHelp(final PrintStream ps, final String prefix,
-		final Map<String, String> symbols, final boolean colors, final Map<String, Object> colorMap) {
+		final Map<String, String> symbols, final boolean colors) {
 	    // Grab the number of help lines from the resources first
 	    int numLines = getInt(makeKey(prefix, "helpNumberLines"), -1);
 	    int lineNo = 1;
@@ -1382,14 +1362,14 @@ public final class Intl
 		    if (helpLine == null)
 			break;
 		    System.out.println(
-			ConsoleColor.color(CharUtil.substituteEnvValues(helpLine, symbols), colors, colorMap));
+			ConsoleColor.color(CharUtil.substituteEnvValues(helpLine, symbols), colors, colorCodeMap));
 		}
 	    }
 	    else {
 		while (lineNo <= numLines) {
 		    String helpLine = getString(helpKey(prefix, lineNo++));
 		    System.out.println(
-			ConsoleColor.color(CharUtil.substituteEnvValues(helpLine, symbols), colors, colorMap));
+			ConsoleColor.color(CharUtil.substituteEnvValues(helpLine, symbols), colors, colorCodeMap));
 		}
 	    }
 	}
