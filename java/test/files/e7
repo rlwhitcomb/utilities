@@ -5,14 +5,14 @@
 # Test variables defined on the command line
 verbose
 
-:clear
-:variables
+:Clear
+:Variables
 
 define oddness={
-   case value%2 of
+   Case value%2 Of
     0: 'even',
     1: 'odd',
-    default: 'NOT POSSIBLE!'
+    Default: 'NOT POSSIBLE!'
 }
 
 value=27; oddness
@@ -20,9 +20,9 @@ value=30; oddness
 value=-1; oddness
 
 def oddness_if = {
-   if abs(value%2) == 0
+   IF Abs(value%2) == 0
       'even'
-   else
+   ELSE
       'odd'
 }
 

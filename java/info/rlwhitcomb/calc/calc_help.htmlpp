@@ -482,11 +482,11 @@ or
      names may NOT be used as variable names.</em> The value of a variable is the value last assigned to it by
      one of the assignment operators.  If no value has been previously assigned the value will be <code>null</code>.
   <p>Normally variable names (and object member names (see below)) are case-sensitive (that is, <code>"f" != "F"</code>), but there is a command-line option and a directive
-     to change this behavior. The predefined values and functions are always case-insensitive, regardless of the mode setting. Variables remain defined with the
+     to change this behavior. The predefined values are all defined as lower case (with the addition of <code>PHI</code> which is the reciprocal of <code>phi</code>.
+     The predefined functions generally have three different case spellings in case-sensitive mode, and, of course,
+     can be cased however you like in case-insensitive mode. Variables remain defined with the
      same casing as they were found in a script, but the "ignore case" mode simply changes how they are looked up in the variable dictionary. Therefore, changing
      the mode option will not "undefine" any variables from the way they were originally declared / used.
-     Note that that special constant values are predefined in lower-case only, but the predefined function names are matched regardless
-     of case, and regardless of the mode setting.
   <p>Values can be grouped into lists of values (an <i>array</i>), or into sets of key/value pairs (an <i>object</i>). Arrays can
      be multi-dimensional. The inside dimensions do not have to be all the same length. The types of values in an array need not
      be homogeneous. And, in fact, the values in an array can be objects as well as simple values. The keys in an object must be
@@ -602,6 +602,7 @@ or
      For the most part, automatic coercions are applied to the operands of functions if necessary (and possible), and the results of operations are
      automatically widened to support the results. The only exception to this are the trig and log functions which (for the most part) can only be
      done to "double" precision (currently &mdash; this may change in subsequent versions).
+  <p>Names of predefined functions are available in 3 or 4 forms: all lower case, all UPPER case, and one or two MixedCase forms. For example: <code>sin</code>, <code>SIN</code>, or <code>Sin</code>, and <code>sumof</code>, <code>SUMOF</code>, <code>Sumof</code>, or <code>SumOf</code>.
 </div>
   <div class="center">
   <table style="margin-left:auto;margin-right:auto;">
@@ -664,7 +665,7 @@ or
             <tr><td><code>LN</code>&nbsp;<i>expr</i></td><td>natural log (base e)</td></tr>
             <tr><td><code>EPOW</code>&nbsp;<i>expr</i></td><td>anti-log (e ** <i>expr</i>)</td></tr>
             <tr><td><code>TENPOW</code>&nbsp;<i>expr</i></td><td>10 ** <i>expr</i> (anti-log base ten)</td></tr>
-            <tr><td><code>SIGNUM</code>&nbsp;<i>expr</i></td><td>sign (&lt; 0 = -1, 0 = 0, &gt; 0 = +1)</td></tr>
+            <tr><td><code>SIGNUM</code> or <code>SGN</code>&nbsp;<i>expr</i></td><td>sign (&lt; 0 = -1, 0 = 0, &gt; 0 = +1)</td></tr>
             <tr><td><code>ISNULL</code>&nbsp;<i>expr</i></td><td>is the value null?</td></tr>
             <tr><td><code>TYPEOF</code>&nbsp;<i>expr</i></td><td>the type of the result<br>as in <code>"string"</code>, <code>"integer"</code>, <code>"boolean"</code>, etc.</td></tr>
             <tr><td><code>CAST</code>&nbsp;<i>expr</i>&nbsp;[ <code>,</code> <i>type_expr</i> ]</td><td>convert the value to the given type<br>(default type is <code>"string"</code>)</td></tr>
@@ -793,9 +794,12 @@ or
     </tbody>
   </table>
   </div>
-  <h2 id="Notes_on_Functions">Notes on Functions</h2>
+<a class="top-link" href="#topofpage">Top</a>
+<hr id="Notes_on_Functions" class="sectionsep">
+  <h2>Notes on Functions</h2>
 <div class="cols">
-  <p>Some of the functions might require a bit of explanation as to how they work. The <code>length</code> function takes
+  <p>Some of the functions might require a bit of explanation as to how they work.
+  <p>The <code>length</code> function takes
      any one of a number, an array, an object, a string, or a range expression and returns the "size" of the value. For strings,
      this is the number of codepoints in the string, for arrays it is the number of items in the array (first-level size),
      for objects it is the number of elements in the object (again, not recursive for nested objects). A string embedded
@@ -974,8 +978,9 @@ or
 <hr id="Statements" class="sectionsep">
   <h2>Statements</h2>
 <div class="cols">
-  In addition to the functions and operators listed above, Calc has four different statements which can be used to do
-     iterative or repeated calculations, and to select between actions based on the value of an expression. These are the <code>LOOP</code>, <code>WHILE</code> and <code>IF</code> statements.
+  In addition to the functions and operators listed above, Calc has five different statements which can be used to do
+     iterative or repeated calculations, and to select between actions based on the value of an expression. These are the <code>LOOP</code>, <code>WHILE</code>, <code>IF</code>, <code>CASE</code> and <code>LEAVE</code> statements.
+     All keywords in these statements have three differently-cased forms: all lower case, all UPPER case, and MixedCase.  For example: <code>loop</code>, <code>LOOP</code>, and <code>Loop</code>.
   <p>The syntax for each is as follows:
   <p class="indent">
      <code>LOOP</code>&nbsp;[ [ <i>loopvar</i> ] ( <code>IN</code> | <code>OVER</code> | <code>&#x2208;</code>) ] <i>expr</i> [ <code>...</code>, <code>..</code>, or <code>&#x2026;</code> <i>expr</i> ] [ <code>,</code> <i>expr</i> ] <code>{</code> <i>statements or expressions</i> <code>}</code>
@@ -1047,6 +1052,7 @@ or
   <p>Note that directives do not themselves have values. This means that directives can be nested around expressions in functions (for instance)
      and the function value will be the same as if the directives were not present (well, unless the directives directly affect the calculation,
      as in <code>:rational on</code>).
+  <p>The directives can be spelled in several ways (same as for predefined functions): all lower case, all UPPER case, and one or two MixedCase forms. For example: <code>:resultsonly</code>, <code>:RESULTSONLY</code>, <code>:Resultsonly</code>, or <code>:ResultsOnly</code>.
 </div>
   <div class="center">
   <table style="margin-left:auto;margin-right:auto;">

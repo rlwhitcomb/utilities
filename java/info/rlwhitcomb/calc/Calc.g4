@@ -333,6 +333,9 @@
  *	    #215: Tweak the pattern for FORMAT.
  *	21-Jan-2022 (rlwhitcomb)
  *	    #135: Add "const" values.
+ *	    #160: Restrict function names, directives, and statement keywords to
+ *		  3 variants: all lower, all upper, and a canonical mixed-case form
+ *		  (usually "Exp" with Title case), except some like "sinh" have one more: "SinH".
  */
 
 grammar Calc;
@@ -687,29 +690,17 @@ idList
 
 id
    : ID
-   | modes
-   | replaceModes
-   ;
-
-modes
-   : 'true'  | 'on'       | 'yes'
-   | 'false' | 'off'      | 'no'
-   | 'pop'   | 'previous' | 'prev'
+   | MODES
+   | REPLACE_MODES
    ;
 
 modeOption
-   : modes
+   : MODES
    | var
    ;
 
-replaceModes
-   : 'all'
-   | 'first'
-   | 'last'
-   ;
-
 replaceOption
-   : replaceModes
+   : REPLACE_MODES
    | var
    ;
 
@@ -717,16 +708,43 @@ replaceOption
 
 FRAC_CONST
          : FRACTIONS
-         | F '\'' '-' ? ( ( INT ( FS ? '-' ? ( INT | ( INT FS ? '-' ? INT ) | FRACTIONS ) ) ? ) | FRACTIONS ) '\''
+         | [Ff] '\'' '-' ? ( ( INT ( FS ? '-' ? ( INT | ( INT FS ? '-' ? INT ) | FRACTIONS ) ) ? ) | FRACTIONS ) '\''
          ;
 
 ROMAN_CONST
-         : R '\'' [IiVvXxLlCcDdMm\u2160-\u2182] + '\''
+         : [Rr] '\'' [IiVvXxLlCcDdMm\u2160-\u2182] + '\''
+         ;
+
+MODES
+         : 'true'  | 'on'       | 'yes'
+         | 'TRUE'  | 'ON'       | 'YES'
+         | 'True'  | 'On'       | 'Yes'
+         | 'false' | 'off'      | 'no'
+         | 'FALSE' | 'OFF'      | 'NO'
+         | 'False' | 'Off'      | 'No'
+         | 'pop'   | 'previous' | 'prev'
+         | 'POP'   | 'PREVIOUS' | 'PREV'
+         | 'Pop'   | 'Previous' | 'Prev'
+         ;
+
+REPLACE_MODES
+         : 'all'   | 'ALL'   | 'All'
+         | 'first' | 'FIRST' | 'First'
+         | 'last'  | 'LAST'  | 'Last'
+         ;
+
+fragment AM_PM
+         : [Aa] | 'am' | 'AM'
+         | [Pp] | 'pm' | 'PM'
+         ;
+
+fragment DURATIONS
+         : [Ww] | [Dd] | [Hh] | [Mm] | [Ss]
          ;
 
 TIME_CONST
-         : H '\'' '-' ? DIG ? DIG ( ':' DIG DIG ( ':' DIG DIG ( DOT DIG+ ) ? ) ? ) ? ( [ \t] * ( A | A M | P | P M ) ) ? '\''
-         | T '\'' '-' ? DIG + ( DOT DIG * ) ? [ \t] * ( W | D | H | M | S ) '\''
+         : [Hh] '\'' '-' ? DIG ? DIG ( ':' DIG DIG ( ':' DIG DIG ( DOT DIG+ ) ? ) ? ) ? ( [ \t] * AM_PM ) ? '\''
+         | [Tt] '\'' '-' ? DIG + ( DOT DIG * ) ? [ \t] * DURATIONS '\''
          ;
 
 DATE_CONST
@@ -745,167 +763,177 @@ DATE_CONST
  * Predefined function names
  */
 
-K_ABS      : A B S ;
+K_ABS      : 'abs' | 'ABS' | 'Abs' ;
 
-K_SINH     : S I N H ;
+K_SINH     : 'sinh' | 'SINH' | 'Sinh' | 'SinH' ;
 
-K_SIN      : S I N ;
+K_SIN      : 'sin' | 'SIN' | 'Sin' ;
 
-K_COSH     : C O S H ;
+K_COSH     : 'cosh' | 'COSH' | 'Cosh' | 'CosH' ;
 
-K_COS      : C O S ;
+K_COS      : 'cos' | 'COS' | 'Cos' ;
 
-K_TANH     : T A N H ;
+K_TANH     : 'tanh' | 'TANH' | 'Tanh' | 'TanH' ;
 
-K_TAN      : T A N ;
+K_TAN      : 'tan' | 'TAN' | 'Tan' ;
 
-K_ASIN     : A S I N ;
+K_ASIN     : 'asin' | 'ASIN' | 'Asin' | 'ASin' ;
 
-K_ACOS     : A C O S ;
+K_ACOS     : 'acos' | 'ACOS' | 'Acos' | 'ACos' ;
 
-K_ATAN2    : A T A N '2' ;
+K_ATAN2    : 'atan2' | 'ATAN2' | 'Atan2' | 'ATan2' ;
 
-K_ATAN     : A T A N ;
+K_ATAN     : 'atan' | 'ATAN' | 'Atan' | 'ATan' ;
 
-K_SQRT     : ( S Q R T | '\u221A' ) ;
+K_SQRT     : 'sqrt' | 'SQRT' | 'Sqrt' | '\u221A' ;
 
-K_CBRT     : ( C B R T | '\u221B' ) ;
+K_CBRT     : 'cbrt' | 'CBRT' | 'Cbrt' | '\u221B' ;
 
-K_FORT     : ( F O R T | '\u221C' ) ;
+K_FORT     : 'fort' | 'FORT' | 'Fort' | '\u221C' ;
 
-K_LOG      : L O G ;
+K_LOG      : 'log' | 'LOG' | 'Log' ;
 
-K_LN       : L N ;
+K_LN       : 'ln' | 'LN' | 'Ln' ;
 
-K_LN2      : L N '2' ;
+K_LN2      : 'ln2' | 'LN2' | 'Ln2' ;
 
-K_EPOW     : E P O W ;
+K_EPOW     : 'epow' | 'EPOW' | 'Epow' | 'EPow' ;
 
-K_TENPOW   : T E N P O W ;
+K_TENPOW   : 'tenpow' | 'TENPOW' | 'Tenpow' | 'TenPow' ;
 
-K_SIGNUM   : S I G N U M ;
+K_SIGNUM   : 'signum' | 'SIGNUM' | 'Signum' | 'SigNum'
+           | 'sgn' | 'SGN' | 'Sgn' | 'SgN'
+           ;
 
-K_LENGTH   : L E N G T H ;
+K_LENGTH   : 'length' | 'LENGTH' | 'Length' ;
 
-K_SCALE    : S C A L E ;
+K_SCALE    : 'scale' | 'SCALE' | 'Scale' ;
 
-K_ROUND    : R O U N D ;
+K_ROUND    : 'round' | 'ROUND' | 'Round' ;
 
-K_CEIL     : C E I L ;
+K_CEIL     : 'ceil' | 'CEIL' | 'Ceil' ;
 
-K_FLOOR    : F L O O R ;
+K_FLOOR    : 'floor' | 'FLOOR' | 'Floor' ;
 
-K_ISPRIME  : I S P R I M E ;
+K_ISPRIME  : 'isprime' | 'ISPRIME' | 'Isprime' | 'IsPrime' ;
 
-K_ISNULL   : I S N U L L ;
+K_ISNULL   : 'isnull' | 'ISNULL' | 'Isnull' | 'IsNull' ;
 
-K_TYPEOF   : T Y P E O F ;
+K_TYPEOF   : 'typeof' | 'TYPEOF' | 'Typeof' | 'TypeOf' ;
 
-K_CAST     : C A S T ;
+K_CAST     : 'cast' | 'CAST' | 'Cast' ;
 
-K_GCD      : G C D ;
+K_GCD      : 'gcd' | 'GCD' ;
 
-K_LCM      : L C M ;
+K_LCM      : 'lcm' | 'LCM' ;
 
-K_MAX      : M A X ;
+K_MAX      : 'max' | 'MAX' | 'Max' ;
 
-K_MIN      : M I N ;
+K_MIN      : 'min' | 'MIN' | 'Min' ;
 
-K_JOIN     : J O I N ;
+K_JOIN     : 'join' | 'JOIN' | 'Join' ;
 
-K_SPLIT    : S P L I T ;
+K_SPLIT    : 'split' | 'SPLIT' | 'Split' ;
 
-K_INDEX    : I N D E X ;
+K_INDEX    : 'index' | 'INDEX' | 'Index' ;
 
-K_SUBSTR   : S U B S T R ;
+K_SUBSTR   : 'substr' | 'SUBSTR' | 'Substr' | 'SubStr' ;
 
-K_REPLACE  : R E P L A C E ;
+K_REPLACE  : 'replace' | 'REPLACE' | 'Replace' ;
 
-K_SLICE    : S L I C E ;
+K_SLICE    : 'slice' | 'SLICE' | 'Slice' ;
 
-K_SPLICE   : S P L I C E ;
+K_SPLICE   : 'splice' | 'SPLICE' | 'Splice' ;
 
-K_FILL     : F I L L ;
+K_FILL     : 'fill' | 'FILL' | 'Fill' ;
 
-K_SORT     : S O R T ;
+K_SORT     : 'sort' | 'SORT' | 'Sort' ;
 
-K_REVERSE  : R E V E R S E ;
+K_REVERSE  : 'reverse' | 'REVERSE' | 'Reverse' ;
 
-K_TRIM     : ( T R I M | L T R I M | R T R I M ) ;
+K_TRIM     : 'trim'  | 'TRIM'  | 'Trim'
+           | 'ltrim' | 'LTRIM' | 'Ltrim' | 'LTrim'
+           | 'rtrim' | 'RTRIM' | 'Rtrim' | 'RTrim'
+           ;
 
-K_PAD      : ( P A D | L P A D | R P A D ) ;
+K_PAD      : 'pad'  | 'PAD'  | 'Pad'
+           | 'lpad' | 'LPAD' | 'Lpad' | 'LPad'
+           | 'rpad' | 'RPAD' | 'Rpad' | 'RPad'
+           ;
 
-K_FIB      : F I B ;
+K_FIB      : 'fib' | 'FIB' | 'Fib' ;
 
-K_BN       : B N ;
+K_BN       : 'bn' | 'BN' | 'Bn' ;
 
-K_DEC      : D E C ;
+K_DEC      : 'dec' | 'DEC' | 'Dec' ;
 
-K_FRAC     : F R A C ;
+K_FRAC     : 'frac' | 'FRAC' | 'Frac' ;
 
-K_ROMAN    : R O M A N ;
+K_ROMAN    : 'roman' | 'ROMAN' | 'Roman' ;
 
-K_UPPER    : U P P E R ;
+K_UPPER    : 'upper' | 'UPPER' | 'Upper' ;
 
-K_LOWER    : L O W E R ;
+K_LOWER    : 'lower' | 'LOWER' | 'Lower' ;
 
-K_FACTORS  : F A C T O R S ;
+K_FACTORS  : 'factors' | 'FACTORS' | 'Factors' ;
 
-K_PFACTORS : P F A C T O R S ;
+K_PFACTORS : 'pfactors' | 'PFACTORS' | 'Pfactors' | 'PFactors' ;
 
-K_CHARS    : C H A R S ;
+K_CHARS    : 'chars' | 'CHARS' | 'Chars' ;
 
-K_DOW      : D O W ;
+K_DOW      : 'dow' | 'DOW' | 'DoW' ;
 
-K_DOM      : D O M ;
+K_DOM      : 'dom' | 'DOM' | 'DoM' ;
 
-K_DOY      : D O Y ;
+K_DOY      : 'doy' | 'DOY' | 'DoY' ;
 
-K_MOY      : M O Y ;
+K_MOY      : 'moy' | 'MOY' | 'MoY' ;
 
-K_YOD      : Y O D ;
+K_YOD      : 'yod' | 'YOD' | 'YoD' ;
 
-K_EVAL     : E V A L ;
+K_EVAL     : 'eval' | 'EVAL' | 'Eval' ;
 
-K_EXEC     : E X E C ;
+K_EXEC     : 'exec' | 'EXEC' | 'Exec' ;
 
-K_DECODE   : D E C O D E ;
+K_DECODE   : 'decode' | 'DECODE' | 'Decode' ;
 
-K_ENCODE   : E N C O D E ;
+K_ENCODE   : 'encode' | 'ENCODE' | 'Encode' ;
 
-K_READ     : R E A D ;
+K_READ     : 'read' | 'READ' | 'Read' ;
 
-K_SUMOF    : ( S U M O F | '\u2211' ) ;
+K_SUMOF    : 'sumof' | 'SUMOF' | 'Sumof' | 'SumOf' | '\u2211' ;
 
-K_PRODUCTOF: ( P R O D U C T O F | '\u220F' ) ;
+K_PRODUCTOF: 'productof' | 'PRODUCTOF' | 'Productof' | 'ProductOf' | '\u220F' ;
 
 /*
  * Statement keywords
  */
 
-K_LOOP     : L O O P ;
+K_LOOP     : 'loop' | 'LOOP' | 'Loop' ;
 
-K_WHILE    : W H I L E ;
+K_WHILE    : 'while' | 'WHILE' | 'While' ;
 
-K_IN       : I N ;
+K_IN       : 'in' | 'IN' | 'In' ;
 
-K_OVER     : O V E R ;
+K_OVER     : 'over' | 'OVER' | 'Over' ;
 
-K_IF       : I F ;
+K_IF       : 'if' | 'IF' | 'If' ;
 
-K_ELSE     : E L S E ;
+K_ELSE     : 'else' | 'ELSE' | 'Else' ;
 
-K_DEFINE   : ( D E F I N E | D E F ) ;
+K_DEFINE   : 'define' | 'DEFINE' | 'Define'
+           | 'def' | 'DEF' | 'Def' ;
 
-K_CONST    : ( C O N S T A N T | C O N S T ) ;
+K_CONST    : 'constant' | 'CONSTANT' | 'Constant'
+           | 'const' | 'CONST' | 'Const' ;
 
-K_CASE     : C A S E ;
+K_CASE     : 'case' | 'CASE' | 'Case' ;
 
-K_OF       : O F ;
+K_OF       : 'of' | 'OF' | 'Of' ;
 
-K_DEFAULT  : D E F A U L T ;
+K_DEFAULT  : 'default' | 'DEFAULT' | 'Default' ;
 
-K_LEAVE    : L E A V E ;
+K_LEAVE    : 'leave' | 'LEAVE' | 'Leave' ;
 
 
 /* Note: this needs to be last so that these other "ID" like things
@@ -1061,103 +1089,153 @@ EMPTY_SET
 
 
 D_DECIMAL
-   : DIR  ( D E C | D E C I M A L )
+   : DIR  ( 'decimal' | 'DECIMAL' | 'Decimal' )
+   | DIR  ( 'dec'     | 'DEC'     | 'Dec'     )
    ;
 
 D_PRECISION
-   : DIR  ( P R E C | P R E C I S I O N )
+   : DIR  ( 'precision' | 'PRECISION' | 'Precision' )
+   | DIR  ( 'prec'      | 'PREC'      | 'Prec'      )
    ;
 
 D_DEFAULT
-   : DIR  ( D E F | D E F A U L T )
+   : DIR  ( 'default' | 'DEFAULT' | 'Default' )
+   | DIR  ( 'def'     | 'DEF'     | 'Def'     )
    ;
 
 D_DOUBLE
-   : DIR  ( D B L | D O U B L E )
+   : DIR  ( 'double' | 'DOUBLE' | 'Double' )
+   | DIR  ( 'dbl'    | 'DBL'    | 'Dbl'    )
    ;
 
 D_FLOAT
-   : DIR  ( F L T | F L O A T )
+   : DIR  ( 'float' | 'FLOAT' | 'Float' )
+   | DIR  ( 'flt'   | 'FLT'   | 'Flt'   )
    ;
 
 D_UNLIMITED
-   : DIR  ( U N L | U N L I M I T E D )
+   : DIR  ( 'unlimited' | 'UNLIMITED' | 'Unlimited' )
+   | DIR  ( 'unl'       | 'UNL'       | 'Unl'       )
    ;
 
 D_DEGREES
-   : DIR  ( D E G | D E G R E E S )
+   : DIR  ( 'degrees' | 'DEGREES' | 'Degrees' )
+   | DIR  ( 'deg'     | 'DEG'     | 'Deg'     )
    ;
 
 D_RADIANS
-   : DIR  ( R A D | R A D I A N S )
+   : DIR  ( 'radians' | 'RADIANS' | 'Radians' )
+   | DIR  ( 'rad'     | 'RAD'     | 'Rad'     )
    ;
 
 D_BINARY
-   : DIR  ( B I N | B I N A R Y )
+   : DIR  ( 'binary' | 'BINARY' | 'Binary' )
+   | DIR  ( 'bin'    | 'BIN'    | 'Bin'    )
    ;
 
 D_SI
-   : DIR  ( S I | T E N )
+   : DIR  ( 'ten' | 'TEN' | 'Ten' )
+   | DIR  ( 'si'  | 'SI'  )
    ;
 
 D_MIXED
-   : DIR  ( M I X | M I X E D )
+   : DIR  ( 'mixed' | 'MIXED' | 'Mixed' )
+   | DIR  ( 'mix'   | 'MIX'   | 'Mix'   )
    ;
 
 D_TIMING
-   : DIR  ( T I M E | T I M I N G )
+   : DIR  ( 'timing' | 'TIMING' | 'Timing' )
+   | DIR  ( 'time'   | 'TIME'   | 'Time'   )
    ;
 
 D_RATIONAL
-   : DIR  ( F R | F R A C | R A T I O N | R A T I O N A L | F R A C T I O N )
+   : DIR  ( 'rational' | 'RATIONAL' | 'Rational' )
+   | DIR  ( 'fraction' | 'FRACTION' | 'Fraction' )
+   | DIR  ( 'ration'   | 'RATION'   | 'Ration'   )
+   | DIR  ( 'frac'     | 'FRAC'     | 'Frac'     )
+   | DIR  ( 'fr'       | 'FR'       | 'Fr'       )
    ;
 
 D_CLEAR
-   : DIR  ( C L R | C L E A R )
+   : DIR  ( 'clear' | 'CLEAR' | 'Clear' )
+   | DIR  ( 'clr'   | 'CLR'   | 'Clr'   )
    ;
 
 D_ECHO
-   : DIR  E C H O
+   : DIR  ( 'echo' | 'ECHO' | 'Echo' )
    ;
 
 D_INCLUDE
-   : DIR  ( I N C | I N C L U D E | O P E N | L O A D | L I B | L I B R A R Y | L I B S | L I B R A R I E S )
+   : DIR  ( 'libraries' | 'LIBRARIES' | 'Libraries' )
+   | DIR  ( 'library'   | 'LIBRARY'   | 'Library'   )
+   | DIR  ( 'include'   | 'INCLUDE'   | 'Include'   )
+   | DIR  ( 'load'      | 'LOAD'      | 'Load'      )
+   | DIR  ( 'open'      | 'OPEN'      | 'Open'      )
+   | DIR  ( 'libs'      | 'LIBS'      | 'Libs'      )
+   | DIR  ( 'lib'       | 'LIB'       | 'Lib'       )
+   | DIR  ( 'inc'       | 'INC'       | 'Inc'       )
    ;
 
 D_SAVE
-   : DIR S A V E
+   : DIR  ( 'save' | 'SAVE' | 'Save' )
    ;
 
 D_DEBUG
-   : DIR  ( D E B | D B G | D E B U G )
+   : DIR  ( 'debug' | 'DEBUG' | 'Debug' )
+   | DIR  ( 'deb'   | 'DEB'   | 'Deb'   )
+   | DIR  ( 'dbg'   | 'DBG'   | 'Dbg'   )
    ;
 
 D_RESULTSONLY
-   : DIR  ( R E S | R E S U L T | R E S U L T S | R E S U L T O N L Y | R E S U L T S O N L Y )
+   : DIR  ( 'resultsonly' | 'RESULTSONLY' | 'Resultsonly' | 'ResultsOnly' )
+   | DIR  ( 'resultonly'  | 'RESULTONLY'  | 'Resultonly'  | 'ResultOnly'  )
+   | DIR  ( 'results'     | 'RESULTS'     | 'Results'     )
+   | DIR  ( 'result'      | 'RESULT'      | 'Result'      )
+   | DIR  ( 'res'         | 'RES'         | 'Res'         )
    ;
 
 D_QUIET
-   : DIR  Q U I E T
+   : DIR  ( 'quiet' | 'QUIET' | 'Quiet' )
    ;
 
 D_SILENCE
-   : DIR ( S I L E N C E D I R E C T I V E S | S I L E N T D I R E C T I V E S | S I L E N C E D I R | S I L E N T D I R | S I L E N C E | S I L E N T )
+   : DIR  ( 'silencedirectives' | 'SILENCEDIRECTIVES' | 'Silencedirectives' | 'SilenceDirectives' )
+   | DIR  ( 'silentdirectives'  | 'SILENTDIRECTIVES'  | 'Silentdirectives'  | 'SilentDirectives'  )
+   | DIR  ( 'silencedir'        | 'SILENCEDIR'        | 'Silencedir'        | 'SilenceDir'        )
+   | DIR  ( 'silentdir'         | 'SILENTDIR'         | 'Silentdir'         | 'SilentDir'         )
+   | DIR  ( 'silence'           | 'SILENCE'           | 'Silence'           )
+   | DIR  ( 'silent'            | 'SILENT'            | 'Silent'            )
    ;
 
 D_VARIABLES
-   : DIR ( V A R | V A R S | V A R I A B L E | V A R I A B L E S )
+   : DIR  ( 'variables' | 'VARIABLES' | 'Variables' )
+   | DIR  ( 'variable'  | 'VARIABLE'  | 'Variable'  )
+   | DIR  ( 'vars'      | 'VARS'      | 'Vars'      )
+   | DIR  ( 'var'       | 'VAR'       | 'Var'       )
    ;
 
 D_SEPARATORS
-   : DIR ( S E P | S E P S | S E P A R A T O R | S E P A R A T O R S )
+   : DIR  ( 'separators' | 'SEPARATORS' | 'Separators' )
+   | DIR  ( 'separator'  | 'SEPARATOR'  | 'Separator'  )
+   | DIR  ( 'seps'       | 'SEPS'       | 'Seps'       )
+   | DIR  ( 'sep'        | 'SEP'        | 'Sep'        )
    ;
 
 D_IGNORECASE
-   : DIR ( I N S | I G N | C A S E | I N S E N S I T I V E | C A S E I N S E N S I T I V E | I G N O R E | I G N O R E C A S E )
+   : DIR  ( 'caseinsensitive' | 'CASEINSENSITIVE' | 'Caseinsensitive' | 'CaseInsensitive' )
+   | DIR  ( 'insensitive'     | 'INSENSITIVE'     | 'Insensitive'     )
+   | DIR  ( 'ignorecase'      | 'IGNORECASE'      | 'Ignorecase'      | 'IgnoreCase'      )
+   | DIR  ( 'ignore'          | 'IGNORE'          | 'Ignore'          )
+   | DIR  ( 'case'            | 'CASE'            | 'Case'            )
+   | DIR  ( 'ins'             | 'INS'             | 'Ins'             )
+   | DIR  ( 'ign'             | 'IGN'             | 'Ign'             )
    ;
 
 D_QUOTESTRINGS
-   : DIR ( Q U O T E S T R I N G S | Q U O T E S T R I N G | Q U O T E S | Q U O T E )
+   : DIR  ( 'quotestrings' | 'QUOTESTRINGS' | 'Quotestrings' | 'QuoteStrings' )
+   | DIR  ( 'quotestring'  | 'QUOTESTRING'  | 'Quotestring'  | 'QuoteString'  )
+   | DIR  ( 'quotes'       | 'QUOTES'       | 'Quotes'       )
+   | DIR  ( 'quote'        | 'QUOTE'        | 'Quote'        )
    ;
 
 
@@ -1343,7 +1421,7 @@ NUM_CONST
    ;
 
 BIN_CONST
-   : '0' B [01]+
+   : '0' [Bb] [01]+
    ;
 
 OCT_CONST
@@ -1351,11 +1429,11 @@ OCT_CONST
    ;
 
 HEX_CONST
-   : '0' X [0-9a-fA-F] +
+   : '0' [Xx] [0-9a-fA-F] +
    ;
 
 KB_CONST
-   : INT ( K | M | G | T | P | E ) I? B?
+   : INT ( [Kk] | [Mm] | [Gg] | [Tt] | [Pp] | [Ee] ) [Ii]? [Bb]?
    ;
 
 // no leading zeros
@@ -1377,34 +1455,9 @@ fragment DIG
    : [0-9]
    ;
 
-fragment A : [aA] ;
-fragment B : [bB] ;
-fragment C : [cC] ;
-fragment D : [dD] ;
-fragment E : [eE] ;
-fragment F : [fF] ;
-fragment G : [gG] ;
-fragment H : [hH] ;
-fragment I : [iI] ;
-fragment J : [jJ] ;
-fragment K : [kK] ;
-fragment L : [lL] ;
-fragment M : [mM] ;
-fragment N : [nN] ;
-fragment O : [oO] ;
-fragment P : [pP] ;
-fragment Q : [qQ] ;
-fragment R : [rR] ;
-fragment S : [sS] ;
-fragment T : [tT] ;
-fragment U : [uU] ;
-fragment V : [vV] ;
-fragment W : [wW] ;
-fragment X : [xX] ;
-fragment Y : [yY] ;
-fragment Z : [zZ] ;
-
-fragment DIR : ':' ;
+fragment DIR
+   : ':'
+   ;
 
 fragment NL
    : '\r'? '\n'

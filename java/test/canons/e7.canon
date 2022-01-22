@@ -4,10 +4,10 @@
 >---------
 >=========
 >Defining function “oddness” = {
-> case value % 2 of 
+> Case value % 2 Of 
 > 0: 'even', 
 > 1: 'odd', 
-> default: 'NOT POSSIBLE!' 
+> Default: 'NOT POSSIBLE!' 
 >}
 >value = 27 -> 27
 >oddness -> "odd"
@@ -16,9 +16,9 @@
 >value = -1 -> -1
 >oddness -> "NOT POSSIBLE!"
 >Defining function “oddness_if” = {
-> if abs (value % 2) == 0 
+> IF Abs (value % 2) == 0 
 > 'even' 
-> else 
+> ELSE 
 > 'odd' 
 >}
 >value = 23 -> 23
