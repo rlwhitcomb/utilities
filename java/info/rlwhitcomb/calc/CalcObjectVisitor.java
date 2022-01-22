@@ -468,8 +468,9 @@
  *	20-Jan-2022 (rlwhitcomb)
  *	    #215: Enhance "@d" formatting to use "scale" for left padding with zeros.
  *	    Broaden "pad" functions to convert numbers, etc. to strings.
- *	21-Jan-20222 (rlwhitcomb)
+ *	21-Jan-2022 (rlwhitcomb)
  *	    Add "libversion" with the base implementation version of the library to "info".
+ *	    #135: Add "const" values.
  */
 package info.rlwhitcomb.calc;
 
@@ -1475,9 +1476,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		Iterator<Map.Entry<String, Object>> iter = globals.map().entrySet().iterator();
 		while (iter.hasNext()) {
 		    Map.Entry<String, Object> entry = iter.next();
-		    if (entry.getValue() instanceof PredefinedValue)
-			continue;
-		    if (entry.getKey().startsWith("$"))
+		    String key = entry.getKey();
+		    Object value = entry.getValue();
+		    if ((!(value instanceof ConstantValue) && (value instanceof PredefinedValue)) || key.startsWith("$"))
 			continue;
 		    iter.remove();
 		    numberCleared++;
@@ -1491,7 +1492,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    String varName = node.getText();
 		    if (varName.equals("<missing ID>"))
 			continue;
-		    if (globals.getValue(varName, settings.ignoreNameCase) instanceof PredefinedValue)
+		    Object value = globals.getValue(varName, settings.ignoreNameCase);
+		    if (!(value instanceof ConstantValue) && (value instanceof PredefinedValue))
 			continue;
 		    numberCleared++;
 		    globals.remove(varName, settings.ignoreNameCase);
@@ -1544,7 +1546,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 	    for (String key : sortedKeys) {
 		Object value = globals.getValue(key, settings.ignoreNameCase);
-		if (value instanceof PredefinedValue || key.startsWith("$")) {
+		if ((!(value instanceof ConstantValue) && (value instanceof PredefinedValue)) || key.startsWith("$")) {
 		    continue;
 		}
 		else if (value instanceof FunctionDeclaration) {
@@ -1603,7 +1605,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		// must be able to read back the saved file and have the values computed to be the same as they are now.
 		for (String key : globals.keySet()) {
 		    Object value = globals.getValue(key, settings.ignoreNameCase);
-		    if (value instanceof PredefinedValue || key.startsWith("$")) {
+		    if ((!(value instanceof ConstantValue) && (value instanceof PredefinedValue)) || key.startsWith("$")) {
 			continue;
 		    }
 		    else if (value instanceof FunctionDeclaration) {
@@ -2545,14 +2547,31 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    // Can't redefine a predefined value
 	    Object oldValue = currentScope.getValue(functionName, settings.ignoreNameCase);
-	    if (oldValue != null && oldValue instanceof PredefinedValue)
-		throw new CalcExprException(ctx, "%calc#noChangePredefined", functionName, "");
+	    if (oldValue != null && oldValue instanceof PredefinedValue) {
+		if (oldValue instanceof ConstantValue)
+		    throw new CalcExprException(ctx, "%calc#noChangeConstant", functionName, "");
+		else
+		    throw new CalcExprException(ctx, "%calc#noChangePredefined", functionName, "");
+	    }
 
 	    currentScope.setValue(functionName, settings.ignoreNameCase, func);
 
-	    displayActionMessage("%calc#defining", func.getFullFunctionName(), getTreeText(functionBody));
+	    displayActionMessage("%calc#definingFunc", func.getFullFunctionName(), getTreeText(functionBody));
 
 	    return functionBody;
+	}
+
+	@Override
+	public Object visitConstStmt(CalcParser.ConstStmtContext ctx) {
+	    String constantName = ctx.id().getText();
+	    CalcParser.ExprContext expr = ctx.expr();
+	    Object value = evaluateFunction(expr, visit(expr));
+
+	    ConstantValue.define(currentScope, constantName, value);
+
+	    displayActionMessage("%calc#definingConst", constantName, value);
+
+	    return value;
 	}
 
 	private void addPairsToObject(CalcParser.ObjContext objCtx, ObjectScope object) {

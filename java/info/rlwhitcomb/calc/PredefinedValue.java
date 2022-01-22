@@ -28,6 +28,8 @@
  *	    Initial coding.
  *	04-Jan-2022 (rlwhitcomb)
  *	    #182: Allow defining into any ObjectScope.
+ *	21-Jan-2022 (rlwhitcomb)
+ *	    #135: Changes to allow ConstantValue to derive from this.
  */
 package info.rlwhitcomb.calc;
 
@@ -35,25 +37,35 @@ import java.util.function.Supplier;
 
 
 /**
- * A local scope that could be nested inside another scope, so value lookup extends
- * to the enclosing scope if not found locally.
+ * One of the predefined values, such as <code>true</code>, <code>null</code>, etc.
+ * which can be computed either as a constant, or from a {@link Supplier} (which is
+ * necessary for <code>today</code> (for instance) because it isn't completely constant.
  */
 class PredefinedValue extends Scope
 {
 	/**
 	 * Name of this predefined value (for error reporting).
 	 */
-	final String name;
+	String name;
 
 	/**
 	 * First choice, the "get value" function used to obtain the value.
 	 */
-	final Supplier<Object> valueSupplier;
+	Supplier<Object> valueSupplier;
 
 	/**
 	 * Second choice, the constant value of this predefined variable.
 	 */
-	final Object constantValue;
+	Object constantValue;
+
+	/**
+	 * Constructor just given the type.
+	 *
+	 * @param typ The type of this object.
+	 */
+	protected PredefinedValue(Type typ) {
+	    super(typ);
+	}
 
 	/**
 	 * Construct one of these, given a supplier for the (maybe not constant) value.
@@ -62,7 +74,7 @@ class PredefinedValue extends Scope
 	 * @param supplier The supplier function.
 	 */
 	private PredefinedValue(final String nm, final Supplier<Object> supplier) {
-	    super(Type.PREDEFINED);
+	    this(Type.PREDEFINED);
 
 	    this.name          = nm;
 	    this.valueSupplier = supplier;
@@ -76,7 +88,7 @@ class PredefinedValue extends Scope
 	 * @param value The unchanging value of this predefined entity.
 	 */
 	private PredefinedValue(final String nm, final Object value) {
-	    super(Type.PREDEFINED);
+	    this(Type.PREDEFINED);
 
 	    this.name          = nm;
 	    this.valueSupplier = null;
@@ -105,7 +117,7 @@ class PredefinedValue extends Scope
 	}
 
 	/**
-	 * Define one of these into the global symbols.
+	 * Define one of these into the given symbol table.
 	 *
 	 * @param scope		The symbol table in which to define it.
 	 * @param name		The name of this predefined value.
@@ -113,11 +125,11 @@ class PredefinedValue extends Scope
 	 */
 	static void define(final ObjectScope scope, final String name, final Supplier<Object> supplier) {
 	    PredefinedValue predef = new PredefinedValue(name, supplier);
-	    scope.setValue(name, false, predef);
+	    scope.setValue(name, predef);
 	}
 
 	/**
-	 * Define one of these into the global symbols.
+	 * Define one of these into the given symbol table.
 	 *
 	 * @param scope		The symbol table in which to define it.
 	 * @param name		The name of this predefined value.
@@ -125,7 +137,7 @@ class PredefinedValue extends Scope
 	 */
 	static void define(final ObjectScope scope, final String name, final Object value) {
 	    PredefinedValue predef = new PredefinedValue(name, value);
-	    scope.setValue(name, false, predef);
+	    scope.setValue(name, predef);
 	}
 
 }

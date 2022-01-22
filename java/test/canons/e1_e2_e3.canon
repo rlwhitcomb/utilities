@@ -709,6 +709,9 @@
 >p1 = encode pi -> "My4xNDE1OTI2NTM1ODk3OTMyMzg0NjI2NDMzODMyNzk1MDM="
 >p2 = eval (decode p1) -> 3.141592653589793238462643383279503
 >pi === p2 -> true
+>Defining constant “two_pi” = 6.283185307179586476925286766559006
+>sin (two_pi) -> 0.0000000000000000000000000000000004
+>two_pi / pi -> 2
 >
 >End of expression tests (suite 1).
 >Tests of nested object / array variables.

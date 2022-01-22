@@ -709,6 +709,13 @@ p1 = encode pi
 p2 = eval(decode p1)
 pi === p2
 
+#
+# "const" declarations
+#
+const two_pi = 2*pi
+sin(two_pi)
+two_pi/pi
+
 
 :echo
 :echo "End of expression tests (suite 1)."

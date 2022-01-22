@@ -104,6 +104,8 @@
 #	    #194: New comment to explain library versions.
 #	09-Jan-2022 (rlwhitcomb)
 #	    #153: New error from command-line declaration.
+#	21-Jan-2022 (rlwhitcomb)
+#	    #135: New defining message and new error for "const" declarations.
 #
 
 #
@@ -163,7 +165,8 @@ rationalMode	= Calculation mode set to <u>%1$s<>.
 separatorMode	= Separator display set to <u>%1$s<>.
 ignoreCaseMode  = Ignoring case is now <u>%1$s<>.
 quoteStringsMode= Quoting result strings is now <u>%1$s<>.
-defining	= <r>Defining function <y>%1$s<><r> = <v>%2$s<r>
+definingFunc	= <r>Defining function <y>%1$s<><r> = <v>%2$s<r>
+definingConst	= <r>Defining constant <y>%1$s<><r> = <v>%2$s<r>
 variables	= Variables
 varUnder1	= ---------
 varUnder2	= =========
@@ -222,6 +225,7 @@ badAssign		= Assignment to <y>%1$s<> without name or index
 tooManyForOneValue	= Too many actual values (%1$d) passed for only one parameter
 tooManyForValues	= Too many actual values (%1$d) passed for only %2$d parameters
 noChangePredefined	= Cannot change predefined value <y>%1$s%2$s<>
+noChangeConstant	= Cannot change constant value <y>%1$s%2$s<>
 
 #
 # From UnknownOpException

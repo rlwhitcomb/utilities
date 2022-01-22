@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2021 Roger L. Whitcomb.
+ * Copyright (c) 2021-2022 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  *
- *      Utility methods for the command-line calculator.
+ *      Deal with LValue context in Calc -- mostly for nested variables (such as objects and arrays).
  *
  *  History:
  *	08-Jan-2021 (rlwhitcomb)
@@ -82,6 +82,8 @@
  *	    Two changes to make LValues that are function results work correctly for indexes and members.
  *	31-Dec-2021 (rlwhitcomb)
  *	    #180: Change parameters to "toStringValue".
+ *	21-Jan-2022 (rlwhitcomb)
+ *	    #135: Add support for constant values.
  */
  package info.rlwhitcomb.calc;
 
@@ -308,11 +310,18 @@ class LValueContext
 	@SuppressWarnings("unchecked")
 	public Object putContextObject(final CalcObjectVisitor visitor, final Object value) {
 	    Object contextObject = context;
-	    if (contextObject instanceof PredefinedValue) {
+
+	    if (contextObject instanceof ConstantValue) {
+		ConstantValue constant = (ConstantValue) contextObject;
+		throw new CalcExprException(varCtx, "%calc#noChangeConstant", constant.getName(),
+			name != null ? "." + name : "[" + String.valueOf(index) + "]");
+	    }
+	    else if (contextObject instanceof PredefinedValue) {
 		PredefinedValue predef = (PredefinedValue) contextObject;
 		throw new CalcExprException(varCtx, "%calc#noChangePredefined", predef.getName(),
 			name != null ? "." + name : "[" + String.valueOf(index) + "]");
 	    }
+
 	    if (name != null) {
 		if (name.startsWith("$")) {
 		    char nameChar = name.charAt(1);
@@ -337,12 +346,18 @@ class LValueContext
 		    }
 		    throw new CalcExprException(varCtx, global ? "%calc#globalArgNoAssign" : "%calc#localVarNoAssign", name);
 		}
+
 		ObjectScope map = (ObjectScope) context;
 		Object oldValue = map.getValue(name, ignoreCase);
-		if (oldValue instanceof PredefinedValue) {
+		if (oldValue instanceof ConstantValue) {
+		    ConstantValue constant = (ConstantValue) oldValue;
+		    throw new CalcExprException(varCtx, "%calc#noChangeConstant", constant.getName(), "");
+		}
+		else if (oldValue instanceof PredefinedValue) {
 		    PredefinedValue predef = (PredefinedValue) oldValue;
 		    throw new CalcExprException(varCtx, "%calc#noChangePredefined", predef.getName(), "");
 		}
+
 		map.setValue(name, ignoreCase, value);
 	    }
 	    else if (index >= 0) {

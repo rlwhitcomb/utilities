@@ -29,6 +29,8 @@
  *	    Initial coding.
  *	26-Oct-2021 (rlwhitcomb)
  *	    Add PREDEFINED type.
+ *	21-Jan-2021 (rlwhitcomb)
+ *	    #135: Add CONSTANT; refactor "toString()".
  */
 package info.rlwhitcomb.calc;
 
@@ -60,7 +62,9 @@ class Scope
 		/** A user-defined function, which includes a local symbol table. */
 		FUNCTION,
 		/** A predefined variable or function. */
-		PREDEFINED
+		PREDEFINED,
+		/** A constant value, evaluated once and cached. */
+		CONSTANT
 	}
 
 	/**
@@ -89,10 +93,16 @@ class Scope
 
 	@Override
 	public String toString() {
-	    if (type == Type.FUNCTION)
-		return String.format("function %1$s scope", ((FunctionScope) this).getDeclaration().getFunctionName());
-	    else
-		return String.format("%1$s scope", type);
+	    String name = type.toString().toLowerCase();
+	    switch (type) {
+		case FUNCTION:
+		    return String.format("%1$s %2$s scope", name, ((FunctionScope) this).getDeclaration().getFunctionName());
+		case PREDEFINED:
+		case CONSTANT:
+		    return String.format("%1$s value", name);
+		default:
+		    return String.format("%1$s scope", name);
+	    }
 	}
 }
 

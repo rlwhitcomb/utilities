@@ -331,6 +331,8 @@
  *	    #214: Add "cast" operator.
  *	20-Jan-2022 (rlwhitcomb)
  *	    #215: Tweak the pattern for FORMAT.
+ *	21-Jan-2022 (rlwhitcomb)
+ *	    #135: Add "const" values.
  */
 
 grammar Calc;
@@ -342,6 +344,7 @@ prog
 stmt
    : stmtOrExpr
    | defineStmt
+   | constStmt
    ;
 
 stmtOrExpr
@@ -367,6 +370,10 @@ exprStmt
 
 defineStmt
    : K_DEFINE id formalParamList ? '=' stmtBlock
+   ;
+
+constStmt
+   : K_CONST id '=' expr
    ;
 
 loopStmt
@@ -888,7 +895,9 @@ K_IF       : I F ;
 
 K_ELSE     : E L S E ;
 
-K_DEFINE   : ( D E F | D E F I N E ) ;
+K_DEFINE   : ( D E F I N E | D E F ) ;
+
+K_CONST    : ( C O N S T A N T | C O N S T ) ;
 
 K_CASE     : C A S E ;
 
