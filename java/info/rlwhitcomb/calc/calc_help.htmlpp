@@ -645,8 +645,8 @@ or
     <tr><td>28</td><td><code>[</code> (&nbsp;<i>expr list</i>&nbsp;) <code>]</code><br><i>var</i> <code>[</code> <i>expr</i> <code>]</code> or <i>var</i>&nbsp;<code>&#x2080;</code> .. <code>&#x2089;</code></td><td>define an array,<br>or access elements of an array, string, or object</td><td>left to right</td></tr>
     <tr><td>27</td><td><code>.</code></td><td>access an object member</td><td>left to right</td></tr>
     <tr><td>26</td><td><code>( </code><i>expr</i><code> )</code></td><td>group an expression</td><td>N/A</td></tr>
-    <tr><td rowspan="68">25</td>
-            <td><code>ABS</code>&nbsp;<i>expr</i></td><td>absolute value</td><td rowspan="68">left to right</td></tr>
+    <tr><td rowspan="69">25</td>
+            <td><code>ABS</code>&nbsp;<i>expr</i></td><td>absolute value</td><td rowspan="69">left to right</td></tr>
             <tr><td><code>SIN</code>&nbsp;<i>expr</i></td><td>sine</td></tr>
             <tr><td><code>COS</code>&nbsp;<i>expr</i></td><td>cosine</td></tr>
             <tr><td><code>TAN</code>&nbsp;<i>expr</i></td><td>tangent</td></tr>
@@ -691,6 +691,7 @@ or
             <tr><td><code>SPLICE</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;) *</td><td>modify an array by deleting and/or adding elements</td></tr>
             <tr><td><code>SPLICE</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <code>[</code> <i>id or string list</i> <code>]</code>&nbsp;)<br>(&nbsp;<code>,</code> <code>{</code> <i>key:value pairs</i> <code>}</code>&nbsp;)</td><td>modify an object by deleting and/or adding elements</td></tr>
             <tr><td><code>FILL</code>&nbsp;<i>var</i>&nbsp;( <code>,</code> <i>expr</i>&nbsp;( <code>,</code> <i>expr</i>&nbsp;( <code>,</code><i>expr</i> ) ) )</td><td>fill an array or string</td></tr>
+            <tr><td><code>FORMAT</code>&nbsp;<i>format_expr</i>&nbsp;( <code>,</code> <i>expr</i> ) *</td><td>use the expressions to replace<br>the parameter args in the format string</td></tr>
             <tr><td><code>SORT</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>case_expr</i>&nbsp;)</td><td>sort the array expression, optionally ignoring case,<br>returning the array of sorted values</td></tr>
             <tr><td><code>TRIM</code> or <code>LTRIM</code> or <code>RTRIM</code> <i>expr</i></td><td>trim all, leading, or trailing whitespace</td></tr>
             <tr><td><code>PAD</code> or <code>LPAD</code> or <code>RPAD</code>&nbsp;<i>var</i>&nbsp;<code>,</code> <i>expr</i>&nbsp;( <code>,</code><i>expr</i> )</td><td>pad an array or string to the given width<br>with 0 or space (default) or the given value/character</td></tr>
@@ -876,6 +877,10 @@ or
      set to the <code>nul</code> character. The fill value for a string can only be one character, or an integer
      (in the range of 0..65535) that is converted to a char value (NOT a codepoint value!). If the 3<sup>rd</sup> value is missing,
      the existing array or string's length is used (that is, the entire existing value is overwritten).
+  <p>The <code>format</code> function works exactly like <code>String.format</code> in Java, or <code>sprintf</code> in C/C++, meaning the format string
+     will (optionally) have replaceable parameters, which are replaced by the values of the respective arguments in the expression list. The completed
+     string with all the values replaced will be the result. For example:
+  <p class="indent"><code style="color:blue;">format("%1$s, %2$s!", "Hello", "World")</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">"Hello, World!"</code>
   <p>The <code>sort</code> function will do a "flat map" of the values in a list or object, sort them, and return the sorted list.
      Because of the "flat" mapping, the original values are left as-is. So in order to sort a list in place, you must reassign
      the result of the sort back to the original variable, as in <code>arr = sort arr</code>. This also allows you to create

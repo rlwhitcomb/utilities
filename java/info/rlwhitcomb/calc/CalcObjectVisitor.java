@@ -4120,6 +4120,21 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	@Override
+	public Object visitFormatExpr(CalcParser.FormatExprContext ctx) {
+	    CalcParser.ExprListContext exprList = ctx.exprN().exprList();
+	    CalcParser.ExprContext formatExpr = exprList.expr(0);
+	    String formatString = getStringValue(formatExpr);
+
+	    Object[] args = new Object[exprList.expr().size() - 1];
+	    for (int i = 1; i < exprList.expr().size(); i++) {
+		CalcParser.ExprContext expr = exprList.expr(i);
+		args[i - 1] = evaluateFunction(expr, visit(expr));
+	    }
+
+	    return String.format(formatString, args);
+	}
+
+	@Override
 	public Object visitTrimExpr(CalcParser.TrimExprContext ctx) {
 	    String stringValue = getStringValue(ctx.expr1().expr());
 	    String op          = ctx.K_TRIM().getText().toLowerCase();

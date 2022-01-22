@@ -333,9 +333,11 @@
  *	    #215: Tweak the pattern for FORMAT.
  *	21-Jan-2022 (rlwhitcomb)
  *	    #135: Add "const" values.
+ *	22-Jan-2022 (rlwhitcomb)
  *	    #160: Restrict function names, directives, and statement keywords to
  *		  3 variants: all lower, all upper, and a canonical mixed-case form
  *		  (usually "Exp" with Title case), except some like "sinh" have one more: "SinH".
+ *	    #216: Add "format" function.
  */
 
 grammar Calc;
@@ -463,6 +465,7 @@ expr
    | K_SLICE ( expr3 | expr2 | expr1 )   # sliceExpr
    | K_SPLICE spliceArgs                 # spliceExpr
    | K_FILL fillArgs                     # fillExpr
+   | K_FORMAT exprN                      # formatExpr
    | K_SORT ( expr2 | expr1 )            # sortExpr
    | K_REVERSE expr1                     # reverseExpr
    | K_TRIM expr1                        # trimExpr
@@ -846,6 +849,8 @@ K_SLICE    : 'slice' | 'SLICE' | 'Slice' ;
 K_SPLICE   : 'splice' | 'SPLICE' | 'Splice' ;
 
 K_FILL     : 'fill' | 'FILL' | 'Fill' ;
+
+K_FORMAT   : 'format' | 'FORMAT' | 'Format' ;
 
 K_SORT     : 'sort' | 'SORT' | 'Sort' ;
 

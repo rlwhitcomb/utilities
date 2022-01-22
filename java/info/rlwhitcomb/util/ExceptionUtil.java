@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2013-2018,2020-2021 Roger L. Whitcomb.
+ * Copyright (c) 2013-2018,2020-2022 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -67,6 +67,8 @@
  *	    Make class final and constructor private.
  *	24-Dec-2021 (rlwhitcomb)
  *	    Add ParseException to the mix.
+ *	22-Jan-2022 (rlwhitcomb)
+ *	    IllegalFormatException needs name as well as message.
  */
 package info.rlwhitcomb.util;
 
@@ -77,6 +79,7 @@ import java.nio.charset.IllegalCharsetNameException;
 import java.nio.charset.UnsupportedCharsetException;
 import java.nio.file.NoSuchFileException;
 import java.text.ParseException;
+import java.util.IllegalFormatException;
 import java.util.Map;
 import java.util.UnknownFormatConversionException;
 
@@ -231,7 +234,8 @@ public final class ExceptionUtil
 			  || (next instanceof UnsupportedOperationException)
 			  || (next instanceof NumberFormatException)
 			  || (next instanceof StringIndexOutOfBoundsException)
-			  || (next instanceof UnknownFormatConversionException)) {
+			  || (next instanceof UnknownFormatConversionException)
+			  || (next instanceof IllegalFormatException)) {
 			msg = String.format("%1$s \"%2$s\"", exceptionName(next), msg);
 		    }
 		    else if (next instanceof ParseException) {
