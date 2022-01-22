@@ -471,6 +471,8 @@
  *	21-Jan-2022 (rlwhitcomb)
  *	    Add "libversion" with the base implementation version of the library to "info".
  *	    #135: Add "const" values.
+ *	22-Jan-2022 (rlwhitcomb)
+ *	    #220: Don't output a message for ":clear pi" (for instance) where nothing gets cleared.
  */
 package info.rlwhitcomb.calc;
 
@@ -1502,19 +1504,21 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    lastNamePos = vars.length();
 		    vars.append("'").append(varName).append("'");
 		}
-		if (numberCleared == 1) {
-		    vars.insert(0, Intl.getString("calc#varOneVariable"));
+		if (numberCleared > 0) {
+		    if (numberCleared == 1) {
+			vars.insert(0, Intl.getString("calc#varOneVariable"));
+		    }
+		    else if (numberCleared == 2) {
+			vars.deleteCharAt(lastNamePos - 2);
+			vars.insert(lastNamePos - 1, Intl.getString("calc#varAnd"));
+			vars.insert(0, Intl.getString("calc#varVariables"));
+		    }
+		    else {
+			vars.insert(lastNamePos, Intl.getString("calc#varAnd"));
+			vars.insert(0, Intl.getString("calc#varVariables"));
+		    }
+		    displayDirectiveMessage("%calc#varCleared", vars);
 		}
-		else if (numberCleared == 2) {
-		    vars.deleteCharAt(lastNamePos - 2);
-		    vars.insert(lastNamePos - 1, Intl.getString("calc#varAnd"));
-		    vars.insert(0, Intl.getString("calc#varVariables"));
-		}
-		else {
-		    vars.insert(lastNamePos, Intl.getString("calc#varAnd"));
-		    vars.insert(0, Intl.getString("calc#varVariables"));
-		}
-		displayDirectiveMessage("%calc#varCleared", vars);
 	    }
 
 	    return BigInteger.valueOf(numberCleared);
