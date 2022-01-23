@@ -1,0 +1,124 @@
+//
+// The game of "Tic-Tac-Toe"
+// User plays against the computer and is allowed to pick whether to start first
+// and which "color" to use.
+//
+// Winning strategies from here:
+// http://www.wikihow.com/Win-at-Tic-Tac-Toe
+//
+:quiet on
+
+/* The values that correspond to each side. */
+const X = -1
+const O = +1
+const EMPTY = 0
+
+board = [
+  [ EMPTY, EMPTY, EMPTY ],
+  [ EMPTY, EMPTY, EMPTY ],
+  [ EMPTY, EMPTY, EMPTY ]
+]
+
+/* The board layout is as follows:
+   0, 0   |   0, 1   |   0, 2
+     1    |     2    |     3
+----------+----------+---------
+   1, 0   |   1, 1   |   1, 2
+     4    |     5    |     6
+----------+----------+---------
+   2, 0   |   2, 1   |   2, 2
+     7    |     8    |     9
+*/
+
+/*
+Diagonals are (by index):
+ 0 = NW to SE (1, 5, 9)
+ 1 = SW to NE (7, 5, 3)
+*/
+const diagonals = [
+  [ 1, 5, 9 ],
+  [ 7, 5, 3 ]
+]
+
+/* Which "color" is the user playing? */
+userColor = EMPTY
+/* Which "color" is the computer playing? */
+ourColor = EMPTY
+/* Does the user want to start first? */
+userFirst = false
+/* Input variable for user's color choice. */
+userColorChoice = EMPTY
+/* Did the user win? */
+userWon = false
+/* Game ended in a draw. */
+gameIsDrawn = false
+/* Number of moves made by either party so far. */
+numberOfMoves = 0
+
+/* Various constant strings used for board display. */
+const EOL        = info.os.linesep
+const HDR_LINE   = ' = Current Board ='
+const SEP_LINE   = ' -----+-----+-----'
+const FINAL_LINE = ' ================='
+const COL_SEP  = '|'
+const X_BOX = [
+    ' \\ / ',
+    '  X  ',
+    ' / \\ '
+]
+const O_BOX = [
+    ' OOO ',
+    ' O O ',
+    ' OOO '
+]
+FINAL[4] = '     \\_/';
+FINAL[3] = '      -';
+FINAL[1] = '     O   O';
+FINAL[0] = '    ~~~~~~';
+FINAL[2] = '   (  /   )';
+
+/*
+ * Convert a 0-based (row,col) pari to a 1-9 index.
+ */
+define toIndex($row, $col) = { $row * 3 + $col + 1 }
+
+/*
+ * Convert the given index to (row,col) and return the board value there.
+ */
+define valueAt($index) = { _row = ($index - 1) \ 3; _col = ($index - 1) % 3; board[row][col] }
+
+/*
+ * Display the current state of the board.
+ */
+define displayBoard() = {
+  display = HDR_LINE + EOL
+  loop $row in 0..2 {
+    loop $x in 0..2 {
+      _line = ' '
+      loop $col in 0..2 {
+        case board[$row][$col] of {
+          X: _line += X_BOX[$x],
+          O: _line += O_BOX[$x],
+      EMPTY: case $x of {
+               1: _line += '  ' + toIndex($row, $col) + '  ',
+         default: _line += '     '
+          }
+        }
+        if $col < 2 { _line += COL_SEP }
+      }
+      display += _line + EOL
+    }
+    if $row < 2 { display += SEP_LINE + EOL }
+  }
+  display += FINAL_LINE + EOL
+  display += EOL
+}
+:quiet pop
+:resultsonly on
+displayBoard()@q
+/* demo!! */
+:quiet on
+board[1][0] = X
+board[1][1] = O
+:quiet pop
+displayBoard()@q
