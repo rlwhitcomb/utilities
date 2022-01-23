@@ -474,9 +474,11 @@
  *	22-Jan-2022 (rlwhitcomb)
  *	    #220: Don't output a message for ":clear pi" (for instance) where nothing gets cleared.
  *	    #216: Add "format" function; try to keep primitive numbers as integers if possible.
+ *	    Add more environment-related values to the "info.os" object.
  */
 package info.rlwhitcomb.calc;
 
+import java.awt.Dimension;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
@@ -833,6 +835,18 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    PredefinedValue.define(os, "version",  Environment.osVersion());
 	    PredefinedValue.define(os, "id",       Environment.platformIdentifier());
 	    PredefinedValue.define(os, "user",     Environment.currentUser());
+	    PredefinedValue.define(os, "linesep",  Environment.lineSeparator());
+	    PredefinedValue.define(os, "filesep",  Environment.fileSeparator());
+	    PredefinedValue.define(os, "pathsep",  Environment.pathSeparator());
+
+	    PredefinedValue.define(os, "screenheight", () -> {
+		Dimension consoleSize = Environment.consoleSize();
+		return BigInteger.valueOf(consoleSize.height);
+	    });
+	    PredefinedValue.define(os, "screenwidth", () -> {
+		Dimension consoleSize = Environment.consoleSize();
+		return BigInteger.valueOf(consoleSize.width);
+	    });
 
 	    ObjectScope java = new ObjectScope();
 	    int javaMajor = Environment.javaMajorVersion();
