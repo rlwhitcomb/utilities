@@ -331,6 +331,11 @@ fill(str_b, '=', 25)
 fill(str_b, '-', 0, 3)
 fill(str_b, '-', 22, 3)
 
+# Tiny tests of "format"
+format('%1$s, %2$s!', 'Hello', 'World')
+format("Rate is %1$8.6f", 12.34567)
+format('Name: %1$-20s, Age: %2$5d', 'Agnes Brown', 97)
+
 # The "pad" functions
 arr_m = [ 10 ]
 pad(arr_m, 10, -1)

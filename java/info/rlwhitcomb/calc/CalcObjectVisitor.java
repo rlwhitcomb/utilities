@@ -473,6 +473,7 @@
  *	    #135: Add "const" values.
  *	22-Jan-2022 (rlwhitcomb)
  *	    #220: Don't output a message for ":clear pi" (for instance) where nothing gets cleared.
+ *	    #216: Add "format" function; try to keep primitive numbers as integers if possible.
  */
 package info.rlwhitcomb.calc;
 
@@ -4858,7 +4859,10 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitNumberValue(CalcParser.NumberValueContext ctx) {
-	    return new BigDecimal(ctx.NUMBER().getText());
+	    BigDecimal dValue = new BigDecimal(ctx.NUMBER().getText());
+	    if (dValue.scale() <= 0)
+		return dValue.toBigIntegerExact();
+	    return dValue;
 	}
 
 	@Override
