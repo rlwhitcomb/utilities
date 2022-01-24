@@ -4,7 +4,7 @@
 :echo "Tests of the new LOOP construct"
 :echo
 
-:clear [i, j, value, array, SIZE ]
+:clear [j, k, value, array, SIZE ]
 :dec 50
 value = 1
 array = []

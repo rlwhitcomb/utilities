@@ -150,6 +150,8 @@
  *	    also set a global "color" flag for default use in the print methods. Do
  *	    optional coloring of strings down at this level so any other code can
  *	    easily take advantage of it.
+ *	24-Jan-2022 (rlwhitcomb)
+ *	    #103: Add Intl.ArithmeticException for some occasions that need it.
  */
 package info.rlwhitcomb.util;
 
@@ -524,6 +526,22 @@ public final class Intl
 
 		public IllegalStateException(final String keyString, Throwable cause) {
 		    super(getString(keyString), cause);
+		}
+	}
+
+
+	/**
+	 * Subclass of {@link java.lang.ArithmeticException} that simply provides a shortcut
+	 * when the message should come from the resources.
+	 */
+	public static class ArithmeticException extends java.lang.ArithmeticException
+	{
+		public ArithmeticException(final String keyString) {
+		    super(getString(keyString));
+		}
+
+		public ArithmeticException(final String formatKey, Object... args) {
+		    super(formatString(formatKey, args));
 		}
 	}
 

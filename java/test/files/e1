@@ -104,9 +104,9 @@ signum b; signum c; signum d;
 length b; length c; length d;
 scale b; scale c; scale d;
 h = 23
-i = ln(h)
-e**i
-epow(i)
+h2 = ln(h)
+e**h2
+epow(h2)
 m = 10000
 n = log(m)
 10**n
@@ -508,19 +508,19 @@ a = 128
 `a = ${a@k}`
 
 # The various assignment operators
-:clr [g,h,i,j]
+:clr [g,h,j,k]
 :dec(200)
-g = 271; h = 385; i = 192; j = 120!
+g = 271; h = 385; j = 192; k = 120!
 g+=h
-i-=g
+j-=g
 h*=g
-i/=g
-j %= 10**40;
-j
+j/=g
+k %= 10**40;
+k
 g = 0377@o; g&=0177@o
 h = 0x400@x; h|=0x080@o
-i = 0xaaa@x; i^=0x554@x
-g@o; h@x; i@x;
+j = 0xaaa@x; j^=0x554@x
+g@o; h@x; j@x;
 g = 0x4000@x
 g >>>= 3@x
 g >>= 2@x

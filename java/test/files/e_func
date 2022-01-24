@@ -34,8 +34,8 @@ g4(1, 2)
 
 set = { os: { ver: '7.3', major: 7, minor: 3 } }
 
-def i = { set.os }
-i().ver
+def is = { set.os }
+is().ver
 
 def l($a) = {
   if $a & 1 { leave 'odd' } else { leave 'even' }

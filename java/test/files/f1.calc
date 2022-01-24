@@ -1,10 +1,11 @@
 #
-# Tests of fractions
+# Tests of fractions and complex numbers
 #
 # Problems taken from:
 # https://www.math10.com/problems/fraction-addition-and-subtraction-problems/difficult/
 # https://nzmaths.co.nz/resource/harder-division-fractions
 # https://www.thirteen.org/edonline/adulted/lessons/stuff/lp46_fracword.pdf
+# https://www.hackmath.net/en/calculator/complex-number
 #
 :rational on
 
@@ -79,4 +80,42 @@ dec(5/14)
 dec("-14.67583")
 
 :rational pop
+
+#
+# Complex Numbers
+#
+( 1.5, 2.5 )
+
+c1 = ( 1, 1 )
+c2 = (6,-5)
+c1+c2
+c3 = ( 12, 0 )
+c4 = ( 6, -5 )
+c3+c4
+12+c4
+c5 = complex('(10-5I)')
+c6 = (-5,+5)
+c5+c6
+
+(1,1) - (3, -5)
+(-0.5,0) - (6, -5)
+-1/2 - (6, -5)
+c5 - c6
+
+-1/2 * (6, -5)
+(1,1)*(3,5)
+-1/2*c4
+c5*c6
+
+abs((1, -1))
+abs((0,6))
+c7 = complex("(2+5i)")
+abs(c7)
+
+ı
+Ι + 2*ι
+5+3*ⅈ
+
+// more to come (division, sqrt, **, etc)
+
 

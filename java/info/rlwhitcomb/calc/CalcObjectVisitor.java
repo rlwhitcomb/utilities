@@ -475,6 +475,8 @@
  *	    #220: Don't output a message for ":clear pi" (for instance) where nothing gets cleared.
  *	    #216: Add "format" function; try to keep primitive numbers as integers if possible.
  *	    Add more environment-related values to the "info.os" object.
+ *	24-Jan-2022 (rlwhitcomb)
+ *	    #103: Start to implement complex number support.
  */
 package info.rlwhitcomb.calc;
 
@@ -537,6 +539,7 @@ import static info.rlwhitcomb.calc.CalcUtil.*;
 import info.rlwhitcomb.util.CharUtil;
 import static info.rlwhitcomb.util.CharUtil.Justification.*;
 import static info.rlwhitcomb.util.ConsoleColor.Code.*;
+import info.rlwhitcomb.util.ComplexNumber;
 import info.rlwhitcomb.util.Environment;
 import info.rlwhitcomb.util.ExceptionUtil;
 import info.rlwhitcomb.util.Intl;
@@ -745,7 +748,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	 * Aliases for "e".
 	 */
 	private static final String[] E_ALIASES = {
-	    "\u2107"
+	    "\u2107", "\u2147"
 	};
 
 	/**
@@ -755,6 +758,13 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	 */
 	private static final String[] PHI_ALIASES = {
 	    "phi", "\u03C6", "\u03D5", "PHI", "\u03A6"
+	};
+
+	/**
+	 * Aliases for "i".
+	 */
+	private static final String[] I_ALIASES = {
+	    "i", "\u0131", "\u0399", "\u03B9", "\u2148"
 	};
 
 	/** Name for global argument array value. */
@@ -986,6 +996,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		if (alias.equals("PHI"))
 		    supplier = phi1Supplier;
 		PredefinedValue.define(globalScope, alias, supplier);
+	    }
+	    for (int i = 0; i < I_ALIASES.length; i++) {
+		PredefinedValue.define(globalScope, I_ALIASES[i], ComplexNumber.I);
 	    }
 
 	    arguments = new ArrayScope<Object>();
@@ -2631,6 +2644,15 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	@Override
+	public Object visitComplexValueExpr(CalcParser.ComplexValueExprContext ctx) {
+	    CalcParser.ComplexContext complex = ctx.complex();
+	    BigDecimal r = getDecimalValue(complex.expr(0));
+	    BigDecimal i = getDecimalValue(complex.expr(1));
+
+	    return new ComplexNumber(r, i);
+	}
+
+	@Override
 	public Object visitVarExpr(CalcParser.VarExprContext ctx) {
 	    LValueContext lValue = getLValue(ctx.var());
 	    return evaluateFunction(ctx, lValue.getContextObject(this));
@@ -2658,6 +2680,24 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    case "\u2212\u2212":
 		    case "\u2796\u2796":
 			afterValue = fValue.subtract(BigFraction.ONE);
+			break;
+		    default:
+			throw new UnknownOpException(op, ctx);
+		}
+	    }
+	    else if (value instanceof ComplexNumber) {
+		ComplexNumber cValue = (ComplexNumber) value;
+		beforeValue = cValue;
+
+		switch (op) {
+		    case "++":
+		    case "\u2795\u2795":
+			afterValue = cValue.add(ComplexNumber.ONE);
+			break;
+		    case "--":
+		    case "\u2212\u2212":
+		    case "\u2796\u2796":
+			afterValue = cValue.subtract(ComplexNumber.ONE);
 			break;
 		    default:
 			throw new UnknownOpException(op, ctx);
@@ -2708,6 +2748,23 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    case "\u2212\u2212":
 		    case "\u2796\u2796":
 			afterValue = fValue.subtract(BigFraction.ONE);
+			break;
+		    default:
+			throw new UnknownOpException(op, ctx);
+		}
+	    }
+	    else if (value instanceof ComplexNumber) {
+		ComplexNumber cValue = (ComplexNumber) value;
+
+		switch (op) {
+		    case "++":
+		    case "\u2795\u2795":
+			afterValue = cValue.add(ComplexNumber.ONE);
+			break;
+		    case "--":
+		    case "\u2212\u2212":
+		    case "\u2796\u2796":
+			afterValue = cValue.subtract(ComplexNumber.ONE);
 			break;
 		    default:
 			throw new UnknownOpException(op, ctx);
@@ -2932,6 +2989,30 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			    throw new UnknownOpException(op, ctx);
 		    }
 		}
+		else if (e1 instanceof ComplexNumber || e2 instanceof ComplexNumber) {
+		    ComplexNumber c1 = ComplexNumber.valueOf(e1);
+		    ComplexNumber c2 = ComplexNumber.valueOf(e2);
+
+		    switch (op) {
+			case "*":
+			case "\u00D7":
+			case "\u2217":
+			case "\u2715":
+			case "\u2716":
+			    return c1.multiply(c2, mc);
+			case "/":
+			case "\u00F7":
+			case "\u2215":
+			case "\u2797":
+			    return c1.divide(c2, mcDivide);
+			case "\\":
+			    throw new UnknownOpException(op, ctx); // ?? what to do here?
+			case "%":
+			    throw new UnknownOpException(op, ctx); // ?? I don't know the math yet!!
+			default:
+			    throw new UnknownOpException(op, ctx);
+		    }
+		}
 		else {
 		    BigDecimal d1 = toDecimalValue(this, e1, mc, ctx1);
 		    BigDecimal d2 = toDecimalValue(this, e2, mc, ctx2);
@@ -2983,6 +3064,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 			return f1.subtract(f2);
 		    }
+		    else if (e1 instanceof ComplexNumber || e2 instanceof ComplexNumber) {
+			ComplexNumber c1 = ComplexNumber.valueOf(e1);
+			ComplexNumber c2 = ComplexNumber.valueOf(e2);
+
+			return c1.subtract(c2);
+		    }
 		    else {
 			BigDecimal d1 = toDecimalValue(this, e1, mc, ctx1);
 			BigDecimal d2 = toDecimalValue(this, e2, mc, ctx2);
@@ -2996,12 +3083,19 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitAbsExpr(CalcParser.AbsExprContext ctx) {
+	    CalcParser.ExprContext expr = ctx.expr1().expr();
+	    Object value = evaluateFunction(expr, visit(expr));
+
 	    if (settings.rationalMode) {
-		BigFraction f = getFractionValue(ctx.expr1().expr());
+		BigFraction f = toFractionValue(this, value, ctx);
 		return f.abs();
 	    }
+	    else if (value instanceof ComplexNumber) {
+		ComplexNumber c = (ComplexNumber) value;
+		return c.abs(mc);
+	    }
 	    else {
-		BigDecimal e = getDecimalValue(ctx.expr1().expr());
+		BigDecimal e = toDecimalValue(this, value, mc, ctx);
 		return e.abs();
 	    }
 	}
@@ -4329,6 +4423,29 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	@Override
+	public Object visitComplexFuncExpr(CalcParser.ComplexFuncExprContext ctx) {
+	    try {
+		CalcParser.Expr1Context expr1 = ctx.expr1();
+		if (expr1 != null) {
+		    CalcParser.ExprContext expr = expr1.expr();
+		    Object e = evaluateFunction(expr, visit(expr));
+
+		    return ComplexNumber.valueOf(e);
+		}
+		else {
+		    CalcParser.Expr2Context e2ctx = ctx.expr2();
+		    BigDecimal r = getDecimalValue(e2ctx.expr(0));
+		    BigDecimal i = getDecimalValue(e2ctx.expr(1));
+
+		    return new ComplexNumber(r, i);
+		}
+	    }
+	    catch (Exception ex) {
+		throw new CalcExprException(ex, ctx);
+	    }
+	}
+
+	@Override
 	public Object visitRomanExpr(CalcParser.RomanExprContext ctx) {
 	    String exprString = getStringValue(ctx.expr1().expr());
 
@@ -5092,6 +5209,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 			result = f1.subtract(f2);
 		    }
+		    else if (e1 instanceof ComplexNumber || e2 instanceof ComplexNumber) {
+			ComplexNumber c1 = ComplexNumber.valueOf(e1);
+			ComplexNumber c2 = ComplexNumber.valueOf(e2);
+
+			result = c1.subtract(c2);
+		    }
 		    else {
 			BigDecimal d1 = toDecimalValue(this, e1, mc, varCtx);
 			BigDecimal d2 = toDecimalValue(this, e2, mc, exprCtx);
@@ -5152,6 +5275,30 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			    // ??? remainder of fraction / fraction is always 0
 			    result = BigFraction.ZERO;
 			    break;
+			default:
+			    throw new UnknownOpException(op, ctx);
+		    }
+		}
+		else if (e1 instanceof ComplexNumber || e2 instanceof ComplexNumber) {
+		    ComplexNumber c1 = ComplexNumber.valueOf(e1);
+		    ComplexNumber c2 = ComplexNumber.valueOf(e2);
+
+		    switch (op) {
+			case "*=":
+			case "\u00D7=":
+			case "\u2217=":
+			case "\u2715=":
+			case "\u2716=":
+			    result = c1.multiply(c2, mc);
+			case "/=":
+			case "\u00F7=":
+			case "\u2215=":
+			case "\u2797=":
+			    result = c1.divide(c2, mcDivide);
+			case "\\=":
+			    throw new UnknownOpException(op, ctx); // ?? what to do here?
+			case "%=":
+			    throw new UnknownOpException(op, ctx); // ?? I don't know the math yet!!
 			default:
 			    throw new UnknownOpException(op, ctx);
 		    }

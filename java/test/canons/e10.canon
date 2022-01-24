@@ -1,6 +1,6 @@
 >Tests of the new LOOP construct
 >
->Variables 'i', 'j', 'value', 'array', and 'SIZE' cleared.
+>Variables 'j', 'k', 'value', 'array', and 'SIZE' cleared.
 >Precision is now “50” digits.
 >value = 1 -> 1
 >array = [] -> [ ]

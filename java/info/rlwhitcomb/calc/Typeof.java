@@ -26,6 +26,8 @@
  *  History:
  *	19-Jan-2022 (rlwhitcomb)
  *	    Initial coding.
+ *	24-Jan-2022 (rlwhitcomb)
+ *	    #103: Add COMPLEX type.
  */
 package info.rlwhitcomb.calc;
 
@@ -61,6 +63,11 @@ enum Typeof
 	 * A true rational fraction.
 	 */
 	FRACTION,
+
+	/**
+	 * Complex number value ({@code a+bi}).
+	 */
+	COMPLEX,
 
 	/**
 	 * Boolean value ({@code true} or {@code false}).

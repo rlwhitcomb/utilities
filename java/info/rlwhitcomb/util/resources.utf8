@@ -128,6 +128,8 @@
 #	18-Jan-2022 (rlwhitcomb)
 #	    Two new variants of "timeThis" messages when named.
 #	    Add coloring instead of quotes to some messages only in Calc.
+#	24-Jan-2022 (rlwhitcomb)
+#	    #103: New message for ComplexNumber class.
 #
 
 #
@@ -228,6 +230,11 @@ fraction.noZeroDenominator	= Fractions cannot have zero denominators.
 fraction.unsupportedFormat	= The value <y>%1$s<> cannot be converted to a fraction.
 fraction.divideByZero		= Divide by zero.
 fraction.unknownFracChar	= Unsupported fraction character <y>%1$s<>.
+
+#
+# From ComplexNumber.java
+#
+complex.notRecognized	= Unable to convert <y>%1$s<> to complex number.
 
 #
 # From SecurityUtil.java

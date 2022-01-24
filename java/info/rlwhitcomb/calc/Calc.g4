@@ -338,6 +338,8 @@
  *		  3 variants: all lower, all upper, and a canonical mixed-case form
  *		  (usually "Exp" with Title case), except some like "sinh" have one more: "SinH".
  *	    #216: Add "format" function.
+ *	24-Jan-2022 (rlwhitcomb)
+ *	    #103: Add "complex" object, and "COMPLEX" function (similar to "FRAC").
  */
 
 grammar Calc;
@@ -420,6 +422,7 @@ expr
    : value                               # valueExpr
    | obj                                 # objExpr
    | arr                                 # arrExpr
+   | complex                             # complexValueExpr
    | var                                 # varExpr
    | '(' expr ')'                        # parenExpr
    | K_ABS expr1                         # absExpr
@@ -474,6 +477,7 @@ expr
    | K_BN expr1                          # bernExpr
    | K_DEC expr1                         # decExpr
    | K_FRAC ( expr3 | expr2 | expr1 )    # fracExpr
+   | K_COMPLEX ( expr2 | expr1 )         # complexFuncExpr
    | K_ROMAN expr1                       # romanExpr
    | ( K_UPPER | K_LOWER ) expr1         # caseConvertExpr
    | K_FACTORS expr1                     # factorsExpr
@@ -607,6 +611,11 @@ pair
    : id ':' expr
    | STRING ':' expr
    | ISTRING ':' expr
+   ;
+
+complex
+   : '(' expr ',' expr ')'
+   | '(' ')'
    ;
 
 var
@@ -873,6 +882,8 @@ K_BN       : 'bn' | 'BN' | 'Bn' ;
 K_DEC      : 'dec' | 'DEC' | 'Dec' ;
 
 K_FRAC     : 'frac' | 'FRAC' | 'Frac' ;
+
+K_COMPLEX  : 'complex' | 'COMPLEX' | 'Complex' ;
 
 K_ROMAN    : 'roman' | 'ROMAN' | 'Roman' ;
 

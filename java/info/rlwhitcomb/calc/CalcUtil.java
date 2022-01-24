@@ -117,6 +117,8 @@
  *	    #214: Implement "cast"; add an enum for the values.
  *	20-Jan-2022 (rlwhitcomb)
  *	    #215: Add "scale" parameter to "formatWithSeparators" to add leading zeros.
+ *	24-Jan-2022 (rlwhitcomb)
+ *	    #103: Start of complex number support.
  */
 package info.rlwhitcomb.calc;
 
@@ -137,6 +139,7 @@ import info.rlwhitcomb.calc.CalcObjectVisitor.Settings;
 import info.rlwhitcomb.util.BigFraction;
 import info.rlwhitcomb.util.CharUtil;
 import static info.rlwhitcomb.util.CharUtil.Justification;
+import info.rlwhitcomb.util.ComplexNumber;
 
 
 /**
@@ -444,6 +447,8 @@ public final class CalcUtil
 		return fixup(new BigDecimal((BigInteger) value));
 	    else if (value instanceof BigFraction)
 		return fixup(((BigFraction) value).toDecimal(mc));
+	    else if (value instanceof ComplexNumber)
+		return fixup(((ComplexNumber) value).r());
 	    else if (value instanceof String)
 		return fixup(new BigDecimal((String) value));
 	    else if (value instanceof Boolean)
@@ -480,6 +485,8 @@ public final class CalcUtil
 		return new BigFraction((BigDecimal) value);
 	    else if (value instanceof BigInteger)
 		return new BigFraction((BigInteger) value);
+	    else if (value instanceof ComplexNumber)
+		return new BigFraction(((ComplexNumber) value).r());
 	    else if (value instanceof String)
 		return BigFraction.valueOf((String) value);
 	    else if (value instanceof Boolean)
@@ -511,6 +518,9 @@ public final class CalcUtil
 		else if (value instanceof BigFraction) {
 		    return ((BigFraction) value).toIntegerExact();
 		}
+		else if (value instanceof ComplexNumber) {
+		    return (((ComplexNumber) value).r().toBigIntegerExact());
+		}
 		else if (value instanceof Number) {
 		    return BigInteger.valueOf(((Number) value).longValue());
 		}
@@ -540,6 +550,9 @@ public final class CalcUtil
 		}
 		else if (value instanceof BigFraction) {
 		    return ((BigFraction) value).intValueExact();
+		}
+		else if (value instanceof ComplexNumber) {
+		    return (((ComplexNumber) value).r().intValueExact());
 		}
 		else if (value instanceof Number) {
 		    return ((Number) value).intValue();
@@ -682,9 +695,6 @@ public final class CalcUtil
 		else
 		    return result.toString();
 	    }
-	    else if (result instanceof BigFraction) {
-		return ((BigFraction) result).toString();
-	    }
 	    else if (result instanceof ObjectScope) {
 		return toStringValue(visitor, ctx, ((ObjectScope) result).map(), quotes, pretty, separators, indent, increment);
 	    }
@@ -823,6 +833,8 @@ public final class CalcUtil
 		return ((BigDecimal) obj).precision();
 	    if (obj instanceof BigFraction)
 		return ((BigFraction) obj).toDecimal().precision();	// ?? not really helpful, probably
+	    if (obj instanceof ComplexNumber)
+		return ((ComplexNumber) obj).r().precision();		// ?? again, not helpful, probably
 	    if (obj instanceof String) {
 		String str = (String) obj;
 		return str.codePointCount(0, str.length());
@@ -888,6 +900,8 @@ public final class CalcUtil
 		return ((BigDecimal) obj).scale();
 	    if (obj instanceof BigFraction)
 		return ((BigFraction) obj).toDecimal().scale();
+	    if (obj instanceof ComplexNumber)
+		return ((ComplexNumber) obj).r().scale();	// ??
 	    if (obj instanceof Scope)
 		return length(visitor, obj, ctx, true);
 	    return 0;
@@ -1036,6 +1050,12 @@ public final class CalcUtil
 
 		return f1.compareTo(f2);
 	    }
+	    else if (e1 instanceof ComplexNumber || e2 instanceof ComplexNumber) {
+		ComplexNumber c1 = ComplexNumber.valueOf(e1);
+		ComplexNumber c2 = ComplexNumber.valueOf(e2);
+		// TODO: implement Comparable in ComplexNumber
+		/* ?? */return 0;
+	    }
 	    else if (e1 instanceof Boolean || e2 instanceof Boolean) {
 		Boolean b1 = toBooleanValue(visitor, e1, ctx1);
 		Boolean b2 = toBooleanValue(visitor, e2, ctx2);
@@ -1157,16 +1177,25 @@ public final class CalcUtil
 
 	    // Otherwise, numeric values get added numerically
 	    if (rational) {
+		// TODO: deal with complex numbers here??
 		BigFraction f1 = convertToFraction(v1, ctx1);
 		BigFraction f2 = convertToFraction(v2, ctx2);
 
 		return f1.add(f2);
 	    }
 	    else {
-		BigDecimal d1 = convertToDecimal(v1, mc, ctx1);
-		BigDecimal d2 = convertToDecimal(v2, mc, ctx2);
+		if (v1 instanceof ComplexNumber || v2 instanceof ComplexNumber) {
+		    ComplexNumber c1 = ComplexNumber.valueOf(v1);
+		    ComplexNumber c2 = ComplexNumber.valueOf(v2);
 
-		return d1.add(d2, mc);
+		    return c1.add(c2);
+		}
+		else {
+		    BigDecimal d1 = convertToDecimal(v1, mc, ctx1);
+		    BigDecimal d2 = convertToDecimal(v2, mc, ctx2);
+
+		    return d1.add(d2, mc);
+		}
 	    }
 	}
 
@@ -1272,6 +1301,8 @@ public final class CalcUtil
 		return Typeof.INTEGER;
 	    if (obj instanceof BigFraction)
 		return Typeof.FRACTION;
+	    if (obj instanceof ComplexNumber)
+		return Typeof.COMPLEX;
 	    if (obj instanceof Boolean)
 		return Typeof.BOOLEAN;
 	    if (obj instanceof ArrayScope)
@@ -1320,6 +1351,14 @@ public final class CalcUtil
 		    break;
 		case FRACTION:
 		    castValue = toFractionValue(visitor, value, ctx);
+		    break;
+		case COMPLEX:
+		    try {
+			castValue = ComplexNumber.valueOf(value);
+		    }
+		    catch (ArithmeticException ae) {
+			throw new CalcExprException(ae, ctx);
+		    }
 		    break;
 		case BOOLEAN:
 		    castValue = toBooleanValue(visitor, value, ctx);
