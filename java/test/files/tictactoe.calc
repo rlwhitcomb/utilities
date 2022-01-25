@@ -78,14 +78,15 @@ FINAL[0] = '    ~~~~~~';
 FINAL[2] = '   (  /   )';
 
 /*
- * Convert a 0-based (row,col) pari to a 1-9 index.
+ * Convert a 0-based (row,col) pair to a 1-9 index.
  */
 define toIndex($row, $col) = { $row * 3 + $col + 1 }
 
 /*
- * Convert the given index to (row,col) and return the board value there.
+ * Convert the given 1-9 index to (row,col) pair
+ * and return the board value there.
  */
-define valueAt($index) = { _row = ($index - 1) \ 3; _col = ($index - 1) % 3; board[row][col] }
+define valueAt($index) = { board[($index - 1) \ 3][($index - 1) % 3] }
 
 /*
  * Display the current state of the board.
@@ -94,31 +95,268 @@ define displayBoard() = {
   display = HDR_LINE + EOL
   loop $row in 0..2 {
     loop $x in 0..2 {
-      _line = ' '
+      line = ' '
       loop $col in 0..2 {
         case board[$row][$col] of {
-          X: _line += X_BOX[$x],
-          O: _line += O_BOX[$x],
+          X: line += X_BOX[$x],
+          O: line += O_BOX[$x],
       EMPTY: case $x of {
-               1: _line += '  ' + toIndex($row, $col) + '  ',
-         default: _line += '     '
+               1: line += '  ' + toIndex($row, $col) + '  ',
+         default: line += '     '
           }
         }
-        if $col < 2 { _line += COL_SEP }
+        if $col < 2 { line += COL_SEP }
       }
-      display += _line + EOL
+      display += line + EOL
     }
     if $row < 2 { display += SEP_LINE + EOL }
   }
   display += FINAL_LINE + EOL
   display += EOL
 }
+
+/*
+ * Make the desired move for the given color.
+ */
+define makeMove($index, $color) = {
+  board[($index - 1) \ 3][($index - 1) % 3] = color;
+  if color === userColor {
+    :echo `You have chosen space $$index`
+  } else {
+    :echo `Choosing space $$index`
+  }
+  displayBoard()@q
+}
+
+/*
+ * Sum the given row.
+ */
+define sumRow($row) = { sumof board[$row] }
+
+/*
+ * Sum the given column.
+ */
+define sumColumn($col) = { board[0][$col] + board[1][$col] + board[2][$col] }
+
+/*
+ * Sum the given diagonal.
+ */
+define sumDiagonal($which) = {
+  sum = 0
+  loop $diag over diagonals[$which] { sum += valueAt($diag) }
+}
+
+/*
+ * Return 1 if the color at the given position matches, or 0 if it does not.
+ * Called by the various "count" functions.
+ */
+define countValue($row, $col, $color) = { board[$row][$col] === $color ? 1 : 0 }
+
+/*
+ * Return count of the given color in the given row.
+ */
+define countInRow($row, $color) = {
+  count = 0
+  loop $col over 0..2 { count += countValue($row, $col, $color) }
+}
+
+/*
+ * Return count of the given color in the given column.
+ */
+define countInCol($col, $color) = {
+  count = 0
+  loop $row over 0..2 { count += countValue($row, $col, $color) }
+}
+
+/*
+ * Count the number of the given color in the given diagonal
+ * (0 = NW to SE, 1 = SW to NE).
+ */
+define countInDiag($which, $color) = {
+  count = 0
+  loop $diag over diagonals[$which] { if $color == valueAt($diag) { count++ } }
+  count
+}
+
+/*
+ * Check whether the sum is -3 or +3 and set the global "userWon" depending.
+ */
+define checkWinner($sum) = {
+  userWon = ($sum == userColor * 3)
+  abs($sum) == 3
+}
+
+/*
+ * Decide if any of the corners are filled with the given color.
+ */
+define cornerIsFilled($color) = {
+  board[0][0] == $color || board[0][2] == $color || board[2][0] == $color || board[2][2] == $color
+}
+
+/*
+ * Decide whether someone won the game or not.
+ * As a side-effect, the "userWon" variable will also be set.
+ */
+define gameIsOver() = {
+  // Check the rows
+  loop $row over 0..2 { if checkWinner(sumRow($row)) { leave true } }
+  // Check the columns
+  loop $col over 0..2 { if checkWinner(sumColumn($col)) { leave true } }
+  // Check the two diagonals
+  if checkWinner(sumDiagonal(0)) || checkWinner(checkDiagonal(1)) { leave true }
+  // Lastly, check for a draw
+  if numberOfMoves == 9 { gameIsDrawn = true } else { false }
+}
+
+/*
+ * Get a random "corner" value (either 0 or 2)
+ */
+define getRandomCorner() = { random >= 0.5 ? 2 : 0 }
+
+/*
+ * Fill a random cornder with the given color piece.
+ */
+define selectRandomCorner($color) = {
+  makeMove(toIndex(getRandomCorner(), getRandomCorner()), $color)
+}
+
+/*
+ * Accept a user move.
+ */
+define acceptUserMove() = {
+  move = EMPTY
+  while true {
+    // need "input" function to integer "move" (range 1-9)
+    // input 'Which square do you want?', move:"integer"(1-9)
+    if valueAt(move) != EMPTY {
+      :echo `Position $move is already taken. Choose another.`
+      :echo
+    } else {
+      makeMove(move, userColor)
+    }
+  }
+}
+
+/*
+ * Find the column (0, 1, or 2) in the given row where there are two
+ * of the given color and none of the other color. Or return -1 if not found.
+ */
+define findRowMove($row, $color, $otherColor) = {
+  if countInRow($row, $color) == 2 && countInRow($row, $otherColor) == 0 {
+    loop $col over 0..2 { if board[$row][$col] == EMPTY { leave $col } }
+  }
+  -1
+}
+
+/*
+ * Find the row (0, 1, or 2) in the given column where there are two
+ * of the given color and none of the other color. Or return -1 if not found.
+ */
+define findColMove($col, $color, $otherColor) = {
+  if countInCol($col, $color) == 2 && countInCol($col, $otherColor) == 0 {
+    loop $row over 0..2 { if board[$row][$col] == EMPTY { leave $row } }
+  }
+  -1
+}
+
+/*
+ * Find a needed diagonal block and return the 1-9 index of the spot
+ * or return 0 if not needed.
+ */
+define findDiagMove($which, $color, $otherColor) = {
+  if countInDiag($which, $color) == 2 && countInDiag($which, $otherColor) == 0 {
+    loop $diag over diagonals[$which] { if valueAt($diag) == EMPTY { leave $diag } }
+  }
+  0
+}
+
+/*
+ * Find a "necessary" move (that is, one where we have two of the one color
+ * and none of the other). This could be a win for us, or a necessary block
+ * so the user won't win.
+ * Returns 0 for none.
+ */
+define findNecessaryMove($color, $otherColor) = {
+  // Check rows
+  loop $row over 0..2 {
+    col = findRowMove($row, $color, $otherColor)
+    if col >= 0 { leave toIndex($row, col) }
+  }
+  // Check columns
+  loop $col over 0..2 {
+    row = findColMove($col, $color, $otherColor)
+    if row >= 0 { leave toIndex(row, $col) }
+  }
+  // Check diagonals
+  loop $diag over 0..1 {
+    ix = findDiagMove($diag, $color, $otherColor)
+    if ix > 0 { leave ix }
+  }
+  0
+}
+
+/*
+ * Pick the best computer move.
+ */
+define pickComputerMove() = {
+  // Method 1. 1. If we're starting first, then pick a random corner to guarantee win or draw
+  if numberOfMoves == 0 { leave selectRandomCorner(ourColor) }
+
+  // Method 2. 1. If user picked a corner on first move, force a draw by choosing center
+  if userFirst {
+    if numberOfMoves == 1 {
+      if cornerIsFilled(userColor) {
+        leave makeMove(5, ourColor)
+      }
+    }
+  } else {
+    // Method 1. 2a. Our first move (above) was a random corner,
+    // and user picked the middle then pick the opposite diagonal
+    if numberOfMoves == 2 && valueAt(5) == userColor {
+      case ourColor of {
+        valueAt(1): leave makeMove(9, ourColor),
+        valueAt(3): leave makeMove(7, ourColor),
+        valueAt(7): leave makeMove(3, ourColor),
+           default: leave makeMove(1, ourColor)
+      }
+    }
+  }
+  // TODO: implement the rest of the winning logic
+
+  winningMove = findNecessaryMove(ourColor, userColor)
+  if winningMove > 0 {
+    leave makeMove(winningMove, ourColor)
+  }
+
+  blockingMove = findNecessaryMove(ourColor, userColor)
+  if blockingMove > 0 {
+    leave makeMove(blockingMove, ourColor)
+  }
+
+  // Last-ditch attempt:  find the first available empty position
+  loop $slot over 1..9 {
+    if valueAt($slot) == EMPTY {
+      leave makeMove($slot, ourColor)
+    }
+  }
+
+:echo 'No code for this situation!'
+
+  displayBoard() @q
+}
+
 :quiet pop
 :resultsonly on
 displayBoard()@q
 /* demo!! */
+:echo '*** Start of Demo ***'
+:echo 'Set up two moves'
 :quiet on
 board[1][0] = X
 board[1][1] = O
 :quiet pop
 displayBoard()@q
+`Count of 'X' in column 0 = ${countInCol(0, X)}`
+`Count of 'O' in row 1 = ${countInRow(1, O)}`
+`Count of 'O' in top-left to bottom-right = ${countInDiag(0, O)}`
+
