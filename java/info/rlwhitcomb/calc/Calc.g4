@@ -340,6 +340,7 @@
  *	    #216: Add "format" function.
  *	24-Jan-2022 (rlwhitcomb)
  *	    #103: Add "complex" object, and "COMPLEX" function (similar to "FRAC").
+ *	    #79: Implement "random" function. Complex value cannot be empty.
  */
 
 grammar Calc;
@@ -444,6 +445,7 @@ expr
    | K_LN expr1                          # lnExpr
    | K_EPOW expr1                        # ePowerExpr
    | K_TENPOW expr1                      # tenPowerExpr
+   | K_RANDOM expr1 ?                    # randomExpr
    | K_SIGNUM expr1                      # signumExpr
    | K_ISNULL expr1                      # isNullExpr
    | K_TYPEOF expr1                      # typeofExpr
@@ -615,7 +617,6 @@ pair
 
 complex
    : '(' expr ',' expr ')'
-   | '(' ')'
    ;
 
 var
@@ -812,6 +813,10 @@ K_LN2      : 'ln2' | 'LN2' | 'Ln2' ;
 K_EPOW     : 'epow' | 'EPOW' | 'Epow' | 'EPow' ;
 
 K_TENPOW   : 'tenpow' | 'TENPOW' | 'Tenpow' | 'TenPow' ;
+
+K_RANDOM   : 'random' | 'RANDOM' | 'Random'
+           | 'rand'   | 'RAND'   | 'Rand'
+           ;
 
 K_SIGNUM   : 'signum' | 'SIGNUM' | 'Signum' | 'SigNum'
            | 'sgn' | 'SGN' | 'Sgn' | 'SgN'

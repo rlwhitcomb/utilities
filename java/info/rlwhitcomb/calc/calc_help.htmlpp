@@ -650,8 +650,8 @@ or
     <tr><td>28</td><td><code>(</code> <i>expr</i> <code>,</code> <i>expr</i> <code>)</code></td><td>define a complex number</td><td>left to right</td></tr>
     <tr><td>27</td><td><code>.</code></td><td>access an object member</td><td>left to right</td></tr>
     <tr><td>26</td><td><code>( </code><i>expr</i><code> )</code></td><td>group an expression</td><td>N/A</td></tr>
-    <tr><td rowspan="70">25</td>
-            <td><code>ABS</code>&nbsp;<i>expr</i></td><td>absolute value</td><td rowspan="70">left to right</td></tr>
+    <tr><td rowspan="71">25</td>
+            <td><code>ABS</code>&nbsp;<i>expr</i></td><td>absolute value</td><td rowspan="71">left to right</td></tr>
             <tr><td><code>SIN</code>&nbsp;<i>expr</i></td><td>sine</td></tr>
             <tr><td><code>COS</code>&nbsp;<i>expr</i></td><td>cosine</td></tr>
             <tr><td><code>TAN</code>&nbsp;<i>expr</i></td><td>tangent</td></tr>
@@ -670,6 +670,7 @@ or
             <tr><td><code>LN</code>&nbsp;<i>expr</i></td><td>natural log (base e)</td></tr>
             <tr><td><code>EPOW</code>&nbsp;<i>expr</i></td><td>anti-log (e ** <i>expr</i>)</td></tr>
             <tr><td><code>TENPOW</code>&nbsp;<i>expr</i></td><td>10 ** <i>expr</i> (anti-log base ten)</td></tr>
+            <tr><td><code>RANDOM</code>&nbsp;( <i>expr<i/> ) ?&nbsp;</td><td>random number with optional seed value</td></tr>
             <tr><td><code>SIGNUM</code> or <code>SGN</code>&nbsp;<i>expr</i></td><td>sign (&lt; 0 = -1, 0 = 0, &gt; 0 = +1)</td></tr>
             <tr><td><code>ISNULL</code>&nbsp;<i>expr</i></td><td>is the value null?</td></tr>
             <tr><td><code>TYPEOF</code>&nbsp;<i>expr</i></td><td>the type of the result<br>as in <code>"string"</code>, <code>"integer"</code>, <code>"boolean"</code>, etc.</td></tr>
@@ -821,6 +822,7 @@ or
      to the right of the decimal point, negative is the number of extra zeros after the significant digits and to the left of
      the decimal point.  Some examples: <code>scale(1.2) &#x21E8; 1</code>, <code>scale 10e4 &#x21E8; -4</code>, while
      <code>scale 10000 &#x21E8; 0</code>.
+  <p>The <code>random</code> function will generate a random value, of the current decimal precision, with a value between 0 and 1 (exclusive). If a seed expression is given, the bytes of that value will be used to seed the random number generator, which will produce a predictable value every time the same seed is used (useful for testing purposes), otherwise a different value will be returned every time (without the seed value).
   <p>The <i>type</i> value returned from <code>typeof</code>, which can be the optional second parameter to <code>cast</code>
      can be one of the following (string) values:
   <p class="indent"><code>"null"</code>, <code>"string</code>, <code>"integer"</code>, <code>"float"</code>,

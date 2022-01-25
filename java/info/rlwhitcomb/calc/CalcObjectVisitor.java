@@ -495,6 +495,7 @@ import java.nio.charset.UnsupportedCharsetException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.SecureRandom;
 import java.text.DateFormatSymbols;
 import java.text.DecimalFormatSymbols;
 import java.text.FieldPosition;
@@ -518,6 +519,7 @@ import java.util.Locale;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.TreeSet;
@@ -538,6 +540,7 @@ import info.rlwhitcomb.util.BigFraction;
 import static info.rlwhitcomb.calc.CalcUtil.*;
 import info.rlwhitcomb.util.CharUtil;
 import static info.rlwhitcomb.util.CharUtil.Justification.*;
+import info.rlwhitcomb.util.ClassUtil;
 import static info.rlwhitcomb.util.ConsoleColor.Code.*;
 import info.rlwhitcomb.util.ComplexNumber;
 import info.rlwhitcomb.util.Environment;
@@ -704,6 +707,11 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	 * in a background thread.
 	 */
 	private CalcPiWorker piWorker = null;
+
+	/**
+	 * Our provider of random values.
+	 */
+	private Random random = null;
 
 	/** Stack of previous "timing" mode values. */
 	private final Deque<Boolean> timingModeStack = new ArrayDeque<>();
@@ -3251,6 +3259,28 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    BigDecimal e = getDecimalValue(ctx.expr1().expr());
 
 	    return MathUtil.tenPower(e, mc);
+	}
+
+	@Override
+	public Object visitRandomExpr(CalcParser.RandomExprContext ctx) {
+	    if (ctx.expr1() != null) {
+		CalcParser.ExprContext expr = ctx.expr1().expr();
+		if (expr != null) {
+		    Object seed = evaluateFunction(expr, visit(expr));
+		    if (seed != null) {
+			byte[] bytes = ClassUtil.getBytes(seed);
+			BigInteger seedInt = new BigInteger(bytes);
+			random = new Random(seedInt.longValue());
+		    }
+		}
+	    }
+	    if (random == null) {
+		random = new SecureRandom();
+	    }
+	    int precision = mc.getPrecision();
+	    BigInteger randomBits = new BigInteger(precision * 6, random);
+	    BigDecimal dValue = new BigDecimal(randomBits, mcDivide);
+	    return dValue.scaleByPowerOfTen(dValue.scale() - precision);
 	}
 
 	@Override

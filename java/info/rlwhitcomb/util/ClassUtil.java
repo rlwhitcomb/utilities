@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2012-2014,2016-2018,2020-2021 Roger L. Whitcomb.
+ * Copyright (c) 2012-2014,2016-2018,2020-2022 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -81,6 +81,8 @@
  *	    Add "defaultToString". Make all parameters final.
  *	18-Dec-2021 (rlwhitcomb)
  *	    #148: Method to construct map from Scriptable fields. Cleanup.
+ *	24-Jan-2022 (rlwhitcomb)
+ *	    #79: New method to convert an object to a byte array.
  */
 
 package info.rlwhitcomb.util;
@@ -92,6 +94,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.nio.charset.Charset;
 import java.util.*;
 import java.util.regex.*;
 import info.rlwhitcomb.annotations.*;
@@ -586,6 +589,27 @@ public final class ClassUtil
 	    return String.format("%1$s@%2$s",
 		obj.getClass().getSimpleName(),
 		Integer.toHexString(System.identityHashCode(obj)));
+	}
+
+
+	/**
+	 * Get the bytes of the given object.
+	 *
+	 * @param obj Any arbitrary object.
+	 * @return    The bytes of the object's value, as best we can determine.
+	 */
+	public static byte[] getBytes(final Object obj) {
+	    ByteArrayOutputStream baos = new ByteArrayOutputStream();	// default size
+	    try {
+		DataOutputStream dos = new DataOutputStream(baos);
+		NumericUtil.writeRawBinaryValue(obj, dos, Charset.defaultCharset(),
+			NumericUtil.ByteOrder.LSB, NumericUtil.StringLength.EOS, 0);
+	    }
+	    catch (IOException ioe) {
+		;
+	    }
+	    // will be empty in case of I/O error
+	    return baos.toByteArray();
 	}
 
 }
