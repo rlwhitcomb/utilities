@@ -106,6 +106,8 @@
 #	    #153: New error from command-line declaration.
 #	21-Jan-2022 (rlwhitcomb)
 #	    #135: New defining message and new error for "const" declarations.
+#	24-Jan-2022 (rlwhitcomb)
+#	    #223: New ":predefined" command messages.
 #
 
 #
@@ -170,6 +172,10 @@ definingConst	= <r>Defining constant <y>%1$s<><r> = <v>%2$s<r>
 variables	= Variables
 varUnder1	= ---------
 varUnder2	= =========
+predefined	= Predefined
+preUnder1	= ----------
+preUnder2	= ==========
+predefVariable	= <a>Varies, currently:<> %1$s
 # These two should (probably) not be translated
 rational	= RATIONAL
 decimal		= DECIMAL(%1$s)

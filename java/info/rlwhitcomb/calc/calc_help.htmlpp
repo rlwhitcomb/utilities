@@ -670,7 +670,7 @@ or
             <tr><td><code>LN</code>&nbsp;<i>expr</i></td><td>natural log (base e)</td></tr>
             <tr><td><code>EPOW</code>&nbsp;<i>expr</i></td><td>anti-log (e ** <i>expr</i>)</td></tr>
             <tr><td><code>TENPOW</code>&nbsp;<i>expr</i></td><td>10 ** <i>expr</i> (anti-log base ten)</td></tr>
-            <tr><td><code>RANDOM</code>&nbsp;( <i>expr<i/> ) ?&nbsp;</td><td>random number with optional seed value</td></tr>
+            <tr><td><code>RANDOM</code>&nbsp;( <i>expr</i> ) ?&nbsp;</td><td>random number with optional seed value</td></tr>
             <tr><td><code>SIGNUM</code> or <code>SGN</code>&nbsp;<i>expr</i></td><td>sign (&lt; 0 = -1, 0 = 0, &gt; 0 = +1)</td></tr>
             <tr><td><code>ISNULL</code>&nbsp;<i>expr</i></td><td>is the value null?</td></tr>
             <tr><td><code>TYPEOF</code>&nbsp;<i>expr</i></td><td>the type of the result<br>as in <code>"string"</code>, <code>"integer"</code>, <code>"boolean"</code>, etc.</td></tr>
@@ -1091,6 +1091,7 @@ or
     <tr><td><code>:mixed</code></td><td>Unit multiplier based on powers of 2 (same as <code>:binary</code>), but with SI suffix <i>(default)</i></td><td><code>:mix</code></tr>
     <tr><td><code>:clear</code> [ <i>id</i> ( <code>,</code> <i>id</i> ) * ]</td><td>Clear all or only the specified variables (set values to <code>null</code>)</td><td><code>:clr</code></td></tr>
     <tr><td><code>:variables</code> [ <i>id</i> ( <code>,</code> <i>id</i> ) * ]</td><td>Display the values of all or only the specified variables<br>(for a function the definition will be displayed, not the current value)</td><td><code>:variable</code>, <code>:vars</code>, <code>:var</code></td></tr>
+    <tr><td><code>:predefined</code></td><td>Display the current values of all the predefined variables</td><td><code>:predefs</code>, <code>:predef</code></td></tr>
     <tr><td><code>:echo</code> <i>expr</i></td><td>Echo the value of the expression to the output</td><td></td></tr>
     <tr><td><code>:include</code> <i>name_expr</i> ( <code>,</code> <i>charset_expr</i> )</td><td>Include the contents of the file(s) named by <i>name_expr</i>,<br>using the optional <i>charset_expr</i> as the charset</td><td><code>:inc</code>, <code>:load</code>, <code>:open</code>, <code>:lib</code>, <code>:library</code><br><code>:libs</code>, <code>:libraries</code></td></tr>
     <tr><td><code>:save</code> <i>name_expr</i> ( <code>,</code> <i>charset_expr</i> )</td><td>Save all variable values and function definitions in the file, using the optional charset</td><td>&nbsp;</td></tr>

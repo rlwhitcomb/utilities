@@ -341,6 +341,7 @@
  *	24-Jan-2022 (rlwhitcomb)
  *	    #103: Add "complex" object, and "COMPLEX" function (similar to "FRAC").
  *	    #79: Implement "random" function. Complex value cannot be empty.
+ *	    #223: Implement ":predefined" command.
  */
 
 grammar Calc;
@@ -684,6 +685,7 @@ directive
    | D_QUIET modeOption                       # quietDirective
    | D_SILENCE modeOption                     # silenceDirective
    | D_VARIABLES idList ?                     # variablesDirective
+   | D_PREDEFINED                             # predefinedDirective
    | D_SEPARATORS modeOption                  # separatorsDirective
    | D_IGNORECASE modeOption                  # ignoreCaseDirective
    | D_QUOTESTRINGS modeOption                # quoteStringsDirective
@@ -1233,6 +1235,12 @@ D_VARIABLES
    | DIR  ( 'variable'  | 'VARIABLE'  | 'Variable'  )
    | DIR  ( 'vars'      | 'VARS'      | 'Vars'      )
    | DIR  ( 'var'       | 'VAR'       | 'Var'       )
+   ;
+
+D_PREDEFINED
+   : DIR  ( 'predefined' | 'PREDEFINED' | 'Predefined' )
+   | DIR  ( 'predefs'    | 'PREDEFS'    | 'Predefs'    )
+   | DIR  ( 'predef'     | 'PREDEF'     | 'Predef'     )
    ;
 
 D_SEPARATORS

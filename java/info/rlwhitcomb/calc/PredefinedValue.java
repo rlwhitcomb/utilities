@@ -30,6 +30,8 @@
  *	    #182: Allow defining into any ObjectScope.
  *	21-Jan-2022 (rlwhitcomb)
  *	    #135: Changes to allow ConstantValue to derive from this.
+ *	24-Jan-2022 (rlwhitcomb)
+ *	    #223: New method to decide if the value is a constant or not.
  */
 package info.rlwhitcomb.calc;
 
@@ -93,6 +95,15 @@ class PredefinedValue extends Scope
 	    this.name          = nm;
 	    this.valueSupplier = null;
 	    this.constantValue = value;
+	}
+
+	/**
+	 * Is this a constant value or not (tests the {@link #valueSupplier}).
+	 *
+	 * @return <code>true</code> if the value is always constant.
+	 */
+	public boolean isConstant() {
+	    return this.valueSupplier == null;
 	}
 
 	/**

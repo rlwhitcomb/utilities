@@ -477,6 +477,7 @@
  *	    Add more environment-related values to the "info.os" object.
  *	24-Jan-2022 (rlwhitcomb)
  *	    #103: Start to implement complex number support.
+ *	    #223: Implement ":predefined" command.
  */
 package info.rlwhitcomb.calc;
 
@@ -1599,6 +1600,43 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 	    if (!replMode) {
 		displayActionMessage("%calc#varUnder2");
+	    }
+
+	    Calc.setResultsOnlyMode(oldMode);
+
+	    return BigInteger.valueOf(sortedKeys.size());
+	}
+
+	@Override
+	public Object visitPredefinedDirective(CalcParser.PredefinedDirectiveContext ctx) {
+	    Set<String> sortedKeys = new TreeSet<>(globals.keySet());
+	    boolean oldMode = Calc.setResultsOnlyMode(false);
+	    boolean replMode = Calc.getReplMode();
+
+	    if (!replMode) {
+		displayActionMessage("%calc#predefined");
+		displayActionMessage("%calc#preUnder1");
+	    }
+	    for (String key : sortedKeys) {
+		Object value = globals.getValue(key, settings.ignoreNameCase);
+		if ((!(value instanceof ConstantValue) && (value instanceof PredefinedValue)) || key.startsWith("$")) {
+		    if (key.startsWith("$")) {
+			displayer.displayResult(key, toStringValue(this, ctx, value, true, settings.separatorMode));
+		    }
+		    else {
+			PredefinedValue predef = (PredefinedValue) value;
+			if (predef.isConstant()) {
+			    displayer.displayResult(key, toStringValue(this, ctx, value, true, settings.separatorMode));
+			}
+			else {
+			    displayer.displayResult(key, Intl.formatString("calc#predefVariable",
+				toStringValue(this, ctx, value, true, settings.separatorMode)));
+			}
+		    }
+		}
+	    }
+	    if (!replMode) {
+		displayActionMessage("%calc#preUnder2");
 	    }
 
 	    Calc.setResultsOnlyMode(oldMode);
