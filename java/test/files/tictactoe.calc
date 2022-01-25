@@ -345,6 +345,24 @@ define pickComputerMove() = {
   displayBoard() @q
 }
 
+/*
+ * Display game conclusion.
+ */
+define conclusion = {
+  if userWon {
+    'Congratulations! You won!'
+  } else {
+    if gameIsDrawn {
+      'This game was a draw.' + EOL +\
+      'Please play again soon!'
+    } else {
+      "So sorry, you've lost to a computer!" + EOL +\
+      'Feel free to play again later 😄' + EOL +\
+      join (FINAL, EOL)
+    }
+  }
+}
+
 :quiet pop
 :resultsonly on
 displayBoard()@q
@@ -359,4 +377,4 @@ displayBoard()@q
 `Count of 'X' in column 0 = ${countInCol(0, X)}`
 `Count of 'O' in row 1 = ${countInRow(1, O)}`
 `Count of 'O' in top-left to bottom-right = ${countInDiag(0, O)}`
-
+conclusion() @q

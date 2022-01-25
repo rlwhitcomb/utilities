@@ -6,6 +6,11 @@
  */
 
 /*
+ * The system-defined line ending.
+ */
+const EOL = info.os.linesep
+
+/*
  * Convert one of our dates to an Excel date serial number
  * where 1/1/1900 is considered day 1 (BUT 1900 is also considered [erroneously] as a leap year).
  * From here: https://docs.microsoft.com/en-us/office/troubleshoot/excel/determine-a-leap-year
