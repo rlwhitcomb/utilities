@@ -22,7 +22,7 @@
  * SOFTWARE.
  *
  *  History:
- *      04-Dec-2020 (rlwhitcomb)
+ *	04-Dec-2020 (rlwhitcomb)
  *	    Initial coding, not complete.
  *	06-Dec-2020 (rlwhitcomb)
  *	    More functionality.
@@ -478,6 +478,7 @@
  *	24-Jan-2022 (rlwhitcomb)
  *	    #103: Start to implement complex number support.
  *	    #223: Implement ":predefined" command.
+ *	    Move "stringToValue" out to CalcUtil.
  */
 package info.rlwhitcomb.calc;
 
@@ -1061,30 +1062,6 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 	}
 
-
-	/**
-	 * Convert a string argument (sourced from the command line) to a possibly better value
-	 * (as in, more accurate of its true value). Tries to convert to a number, a boolean, or
-	 * just leave as an unquoted string.
-	 *
-	 * @param arg	The command line argument as typed by the user.
-	 * @return	The best possible representation of that argument.
-	 * @see #setArgument
-	 * @see #setVariable
-	 */
-	private Object stringToValue(final String arg) {
-	    try {
-		return new BigDecimal(arg);
-	    }
-	    catch (NumberFormatException nfe) {
-		try {
-		    return Boolean.valueOf(CharUtil.getBooleanValue(arg));
-		}
-		catch (IllegalArgumentException iae) {
-		    return CharUtil.stripAnyQuotes(arg, true);
-		}
-	    }
-	}
 
 	/**
 	 * Set one of the global argument variables ({@code $0}, {@code $1}, etc)
@@ -5046,9 +5023,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitStringValue(CalcParser.StringValueContext ctx) {
-	    String value = ctx.STRING().getText();
-
-	    return getRawString(value);
+	    return getRawString(ctx.STRING().getText());
 	}
 
 	@Override
@@ -5058,10 +5033,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitNumberValue(CalcParser.NumberValueContext ctx) {
-	    BigDecimal dValue = new BigDecimal(ctx.NUMBER().getText());
-	    if (dValue.scale() <= 0)
-		return dValue.toBigIntegerExact();
-	    return dValue;
+	    return stringToValue(ctx.NUMBER().getText());
 	}
 
 	@Override

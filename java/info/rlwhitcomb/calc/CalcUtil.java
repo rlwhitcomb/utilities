@@ -38,7 +38,7 @@
  *	    Add BigFraction calculations.
  *	31-Jan-2021 (rlwhitcomb)
  *	    Need to pass around the MathContext for rounding. Reorder some
- * 	    parameters for consistency.
+ *	    parameters for consistency.
  *	02-Feb-2021 (rlwhitcomb)
  *	    Tweak the integer conversions.
  *	17-Feb-2021 (rlwhitcomb)
@@ -119,6 +119,8 @@
  *	    #215: Add "scale" parameter to "formatWithSeparators" to add leading zeros.
  *	24-Jan-2022 (rlwhitcomb)
  *	    #103: Start of complex number support.
+ *	    Move "stringToValue" to here from the visitor. More work with ComplexNumber.
+ *	    Compare ComplexNumber to each other.
  */
 package info.rlwhitcomb.calc;
 
@@ -421,6 +423,35 @@ public final class CalcUtil
 	 */
 	public static BigDecimal fixup(final BigDecimal bd) {
 	    return bd.stripTrailingZeros();
+	}
+
+	/**
+	 * Convert a string argument (sourced from the command line) to a possibly better value
+	 * (as in, more accurate of its true value).
+	 * <p> First try is {@link BigDecimal} which can be converted to {@link BigInteger}
+	 * if there is no fractional part. If that fails, try to get a {@link Boolean} value
+	 * from the string, and failing that just leave the result as an unquoted string.
+	 *
+	 * @param arg	The command line argument as typed by the user.
+	 * @return	The best possible representation of that argument.
+	 * @see CalcObjectVisitor#setArgument
+	 * @see CalcObjectVisitor#setVariable
+	 */
+	public static Object stringToValue(final String arg) {
+	    try {
+		BigDecimal dValue = fixup(new BigDecimal(arg));
+		if (dValue.scale() <= 0)
+		    return dValue.toBigIntegerExact();
+		return dValue;
+	    }
+	    catch (NumberFormatException nfe) {
+		try {
+		    return Boolean.valueOf(CharUtil.getBooleanValue(arg));
+		}
+		catch (IllegalArgumentException iae) {
+		    return CharUtil.stripAnyQuotes(arg, true);
+		}
+	    }
 	}
 
 	/**
@@ -1053,8 +1084,8 @@ public final class CalcUtil
 	    else if (e1 instanceof ComplexNumber || e2 instanceof ComplexNumber) {
 		ComplexNumber c1 = ComplexNumber.valueOf(e1);
 		ComplexNumber c2 = ComplexNumber.valueOf(e2);
-		// TODO: implement Comparable in ComplexNumber
-		/* ?? */return 0;
+
+		return c1.compareTo(c2);
 	    }
 	    else if (e1 instanceof Boolean || e2 instanceof Boolean) {
 		Boolean b1 = toBooleanValue(visitor, e1, ctx1);

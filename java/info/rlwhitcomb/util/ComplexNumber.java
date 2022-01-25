@@ -28,9 +28,11 @@
  *  History:
  *	24-Jan-2022 (rlwhitcomb)
  *	    Created.
+ *	    #103: More work: extend Number, implement Comparable, Serializable.
  */
 package info.rlwhitcomb.util;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.MathContext;
@@ -48,8 +50,10 @@ import java.util.regex.Matcher;
  * <p> TODO: more math operations, conversions, possibly extend Number
  * and implement Comparable and Serializable (see BigFraction).
  */
-public class ComplexNumber
+public class ComplexNumber extends Number implements Serializable, Comparable<ComplexNumber>
 {
+	private static final long serialVersionUID = 1786873163402226934L;
+
 	/** String pattern to recognize INT (same as "INT" in Calc.g4). */
 	private static final String INT = "(0|[1-9][0-9]*)";
 	/** Signed integer string pattern. */
@@ -225,6 +229,40 @@ public class ComplexNumber
 		imaginaryPart = null;
 	}
 
+	/**
+	 * @return Is this a pure real number (imaginary part is zero)?
+	 */
+	public boolean isPureReal() {
+	    return imaginaryPart == null;
+	}
+
+	/**
+	 * @return Is this a pure imaginary number (real part is zero)?
+	 */
+	public boolean isPureImaginary() {
+	    return realPart == null;
+	}
+
+
+	@Override
+	public int compareTo(final ComplexNumber other) {
+	    // Not strictly speaking comparable unless pure real or pure imaginary
+	    if (isPureReal() && other.isPureReal()) {
+		return r().compareTo(other.r());
+	    }
+	    if (isPureImaginary() && other.isPureImaginary()) {
+		return i().compareTo(other.i());
+	    }
+
+	    // Otherwise, ordering makes no sense, but one thing to try is comparing
+	    // magnitudes, or distance from the origin.
+	    // Note: we can't have the MathContext passed in here, so we're going
+	    // to use the default in Calc because it's unlikely we'd ever have
+	    // two unequal values so close that it would make a difference.
+	    MathContext mc = MathContext.DECIMAL128;
+	    return radius(mc).compareTo(other.radius(mc));
+	}
+
 
 	/**
 	 * Calculate the radius of the polar form of this complex number, which
@@ -233,7 +271,7 @@ public class ComplexNumber
 	 * @param mc The rounding context to use for the calculation.
 	 * @return The polar radius of this number.
 	 */
-	public BigDecimal rad(final MathContext mc) {
+	public BigDecimal radius(final MathContext mc) {
 	    BigDecimal rPart = r();	// to get real zeros if null
 	    BigDecimal iPart = i();
 	    BigDecimal rTerm = rPart.multiply(rPart);
@@ -332,8 +370,45 @@ public class ComplexNumber
 	    return new ComplexNumber(rTerm, iTerm);
 	}
 
+	/**
+	 * Compute the complex conjugate of this number, which for
+	 * {@code (real, imag)} is {@code (real, -imag)}.
+	 *
+	 * @return A new complex number which is the conjugate of this one.
+	 */
+	public ComplexNumber conjugate() {
+	    return new ComplexNumber(r(), i().negate());
+	}
+
+	/**
+	 * Divide this complex number by a real number.
+	 * <p> The result is {@code (real/p, imag/p)}.
+	 *
+	 * @param p  The real number to divide by.
+	 * @param mc The rounding mode for the result.
+	 * @return   A new ComplexNumber with the result.
+	 */
+	public ComplexNumber divide(final BigDecimal p, final MathContext mc) {
+	    return new ComplexNumber(r().divide(p, mc), i().divide(p, mc));
+	}
+
+	/**
+	 * Divide this complex number by the other.
+	 * <p> To accomplish this, we actually multiply both by the complex conjugate
+	 * of the denominator (which doesn't change the value, since it is effectively
+	 * a multiply by one). But, the denominator multiplied by its conjugate gives
+	 * a real number, which is divided into the numerator multiplication to yield
+	 * the result.
+	 *
+	 * @param other The number to divide by.
+	 * @param mc    The rounding mode to use for the result.
+	 * @return      This divided by the other.
+	 */
 	public ComplexNumber divide(final ComplexNumber other, final MathContext mc) {
-	    /* ?? */ return this;	// don't know the math yet
+	    ComplexNumber conjugate = other.conjugate();
+	    BigDecimal divisor = other.multiply(conjugate, mc).r();
+
+	    return multiply(conjugate, mc).divide(divisor, mc);
 	}
 
 	/**
@@ -342,10 +417,10 @@ public class ComplexNumber
 	 *
 	 * @param mc The rounding context to use for the result.
 	 * @return   The absolute value of this complex number.
-	 * @see #rad
+	 * @see #radius
 	 */
 	public BigDecimal abs(final MathContext mc) {
-	    return rad(mc);
+	    return radius(mc);
 	}
 
 
@@ -395,6 +470,26 @@ public class ComplexNumber
 	    return new ComplexNumber(rPart, iPart);
 	}
 
+
+	@Override
+	public double doubleValue() {
+	    return r().doubleValue();
+	}
+
+	@Override
+	public float floatValue() {
+	    return r().floatValue();
+	}
+
+	@Override
+	public long longValue() {
+	    return r().longValue();
+	}
+
+	@Override
+	public int intValue() {
+	    return r().intValue();
+	}
 
 	@Override
 	public String toString() {
