@@ -1,4 +1,4 @@
-//** Version: 2.6.3 base: 1.7.6
+//** Version: 2.7.0 base: 1.7.6
 //** The versions above must conform to the latest values in "version.properties" and "build.properties"
 
 /*
@@ -9,6 +9,11 @@
  * The system-defined line ending.
  */
 const EOL = info.os.linesep
+
+/*
+ * Whether we are running on Windows vs. something else.
+ */
+const ON_WINDOWS = info.os.id == 'windows'
 
 /*
  * Convert one of our dates to an Excel date serial number

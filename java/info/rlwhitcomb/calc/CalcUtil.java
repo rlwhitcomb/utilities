@@ -137,7 +137,6 @@ import org.antlr.v4.runtime.tree.*;
 
 import org.padler.natorder.NaturalOrderComparator;
 
-import info.rlwhitcomb.calc.CalcObjectVisitor.Settings;
 import info.rlwhitcomb.util.BigFraction;
 import info.rlwhitcomb.util.CharUtil;
 import static info.rlwhitcomb.util.CharUtil.Justification;

@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2020-2021 Roger L. Whitcomb.
+ * Copyright (c) 2020-2022 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -30,6 +30,8 @@
  *	    #114: Fix final precision of e/pi compared to "phi" (normal precision).
  *	03-Dec-2021 (rlwhitcomb)
  *	    #122: Refactor to reduce duplicated code.
+ *	26-Jan-2022 (rlwhitcomb)
+ *	    Make new Supplier methods for CalcPredefine.
  */
 package info.rlwhitcomb.calc;
 
@@ -38,6 +40,7 @@ import java.math.MathContext;
 import java.util.concurrent.Semaphore;
 import java.util.function.Supplier;
 
+import info.rlwhitcomb.util.BigFraction;
 import info.rlwhitcomb.util.MathUtil;
 import info.rlwhitcomb.util.QueuedThread;
 
@@ -51,6 +54,7 @@ public class CalcPiWorker
 {
 	private MathContext mc;
 	private int precision;
+	private boolean rational;
 
 	private BigDecimal e;
 	private BigDecimal pi;
@@ -169,6 +173,39 @@ public class CalcPiWorker
 	public BigDecimal getPiOver180() {
 	    return getWhenReady(() -> piOver180);
 	}
+
+	/**
+	 * Set the current value of the rational flag for use with the suppliers below.
+	 *
+	 * @param rationalFlag The current value of the rational flag.
+	 */
+	public void setRational(final boolean rationalFlag) {
+	    this.rational = rationalFlag;
+	}
+
+	/**
+	 * Get either the decimal or rational value of <code>pi</code>, depending
+	 * on the {@link #rational} flag.
+	 */
+	public Supplier<Object> piSupplier = () -> {
+	    BigDecimal dValue = getPi();
+	    if (rational)
+		return new BigFraction(dValue);
+	    else
+		return dValue;
+	};
+
+	/**
+	 * Get either the decimal or rational value of <code>e</code>, depending
+	 * on the {@link #rational} flag.
+	 */
+	public Supplier<Object> eSupplier = () -> {
+	    BigDecimal dValue = getE();
+	    if (rational)
+		return new BigFraction(dValue);
+	    else
+		return dValue;
+	};
 
 }
 

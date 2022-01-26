@@ -290,8 +290,6 @@ import de.onyxbits.SemanticVersion;
 
 import info.rlwhitcomb.IntlProvider;
 import info.rlwhitcomb.jarfile.Launcher;
-import info.rlwhitcomb.calc.CalcObjectVisitor.Settings;
-import info.rlwhitcomb.calc.CalcObjectVisitor.TrigMode;
 import info.rlwhitcomb.util.BigFraction;
 import info.rlwhitcomb.util.CharUtil;
 import info.rlwhitcomb.util.ClassUtil;
