@@ -1,7 +1,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2021 Roger L. Whitcomb.
+# Copyright (c) 2021-2022 Roger L. Whitcomb.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -30,6 +30,8 @@
 #	    Add "-maxlinelength" option.
 #	26-Sep-2021 (rlwhitcomb)
 #	    #23 Fix inconsistent options.
+#	25-Jan-2022 (rlwhitcomb)
+#	    Tweak an info message about the initial word(s).
 #
 
 errNegativeIndex	= Negative index (except -1) not allowed.
@@ -55,7 +57,7 @@ errNoValidWords		= Unable to find any valid words!
 infoOneLetterWord	= One letter word %1$s
 infoDictionary		= Dictionary %1$s has %2$,d basic and %3$,d additional words (%4$5.3f secs).
 infoLookup		= (Lookup time %1$,5.3f seconds; %2$,d valid words out of %3$,d tested)
-infoArgValid		= %1$s is valid.
+infoArgValid		= %1$s is valid (%2$d points).
 
 intro.help1	= Usage: wf [ letters ] [ options ]
 intro.help2	= ""

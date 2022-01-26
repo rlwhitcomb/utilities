@@ -88,6 +88,8 @@
  *	    Tweak colors.
  *	21-Jan-2022 (rlwhitcomb)
  *	    #217: Use new Options method to process environment methods.
+ *	25-Jan-2022 (rlwhitcomb)
+ *	    If initial letters are playable as-is, not only announce, but display points.
  */
 package info.rlwhitcomb.wordfind;
 
@@ -960,7 +962,7 @@ public class WordFind implements Application {
             } else {
                 // Lookup each word on the command line to see if it is valid.
                 if (words.contains(word) || (findInAdditional && additionalWords.contains(word))) {
-                    info("wordfind#infoArgValid", arg);
+                    info("wordfind#infoArgValid", arg, addLetterValues(arg));
                 } else {
                     error("wordfind#errArgNotValid", arg);
                 }
@@ -976,7 +978,7 @@ public class WordFind implements Application {
             // See if the letters as entered are a valid word first
             String inputWord = letters.toString();
             if (words.contains(inputWord) || (findInAdditional && additionalWords.contains(inputWord))) {
-                info("wordfind#infoArgValid", inputWord);
+                info("wordfind#infoArgValid", inputWord, addLetterValues(inputWord));
             }
 
             StringBuilder sb = new StringBuilder();
