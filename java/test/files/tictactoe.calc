@@ -357,7 +357,7 @@ define conclusion = {
       'Please play again soon!'
     } else {
       "So sorry, you've lost to a computer!" + EOL +\
-      'Feel free to play again later 😄' + EOL +\
+      'Feel free to play again later ' + (ON_WINDOWS ? ":)" : "😄") + EOL +\
       join (FINAL, EOL)
     }
   }
