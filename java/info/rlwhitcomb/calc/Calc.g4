@@ -342,6 +342,8 @@
  *	    #103: Add "complex" object, and "COMPLEX" function (similar to "FRAC").
  *	    #79: Implement "random" function. Complex value cannot be empty.
  *	    #223: Implement ":predefined" command.
+ *	26-Jan-2022 (rlwhitcomb
+ *	    #227: Add "timethis" statement.
  */
 
 grammar Calc;
@@ -363,6 +365,7 @@ stmtOrExpr
    | ifStmt
    | caseStmt
    | leaveStmt
+   | timeThisStmt
    | emptyStmt
    ;
 
@@ -404,6 +407,10 @@ caseStmt
 
 leaveStmt
    : K_LEAVE expr1 ?
+   ;
+
+timeThisStmt
+   : K_TIMETHIS ( expr ',' ) ? stmtBlock
    ;
 
 stmtBlock
@@ -957,6 +964,8 @@ K_OF       : 'of' | 'OF' | 'Of' ;
 K_DEFAULT  : 'default' | 'DEFAULT' | 'Default' ;
 
 K_LEAVE    : 'leave' | 'LEAVE' | 'Leave' ;
+
+K_TIMETHIS : 'timethis' | 'TIMETHIS' | 'TimeThis' ;
 
 
 /* Note: this needs to be last so that these other "ID" like things

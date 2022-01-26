@@ -992,8 +992,8 @@ or
 <hr id="Statements" class="sectionsep">
   <h2>Statements</h2>
 <div class="cols">
-  In addition to the functions and operators listed above, Calc has five different statements which can be used to do
-     iterative or repeated calculations, and to select between actions based on the value of an expression. These are the <code>LOOP</code>, <code>WHILE</code>, <code>IF</code>, <code>CASE</code> and <code>LEAVE</code> statements.
+  In addition to the functions and operators listed above, Calc has six different statements which can be used to do
+     iterative or repeated calculations, and to select between actions based on the value of an expression. These are the <code>LOOP</code>, <code>WHILE</code>, <code>IF</code>, <code>CASE</code>, <code>LEAVE</code>, and <code>TIMETHIS</code> statements.
      All keywords in these statements have three differently-cased forms: all lower case, all UPPER case, and MixedCase.  For example: <code>loop</code>, <code>LOOP</code>, and <code>Loop</code>.
   <p>The syntax for each is as follows:
   <p class="indent">
@@ -1010,6 +1010,9 @@ or
   </p>
   <p class="indent">
     <code>LEAVE</code>&nbsp;<i>expr</i> ?
+  </p>
+  <p class="indent">
+    <code>TIMETHIS</code>&nbsp;( <i>expr</i> <code>,</code> ) ? <code>{</code> <i>statements or expressions</i> <code>}</code>
   </p>
   <p>In all these statements the <code>{</code> and <code>}</code> are not needed if there is only one statement or expression in the block.
   <p>The <code>LOOP</code> statement will repeatedly execute the block of statements based on several conditions:
@@ -1056,7 +1059,14 @@ or
       <code>Defining function '</code><code style="color:green;">a</code><code>' = </code><code style="color:blue;">{loop $i in 10 {$i}}</code><br>
       <code style="color:blue;">a</code><code style="color:gray;"> &#x21E8; </code><code style="color:green;">10</code>
   </p>
-  There are many more code examples in the <code>test/files</code> directory of the source distribution.
+  <p>The <code>timethis</code> statement is a bit different than the others in that it doesn't affect the order of execution
+     or change the result, but it can be used for debugging to evaluate the execution time of a piece of code. The optional first expression will be evaluated to a string and used to annotate the timing message. Note: the timing message is not
+     affected by the <code>:quiet</code> or <code>:resultsonly</code> settings &mdash; it will always be displayed.
+  <p class="indent">
+    <code>timethis 'atan', { atan(pi/4) }</code><br>
+    <code style="color:blue;">atan (pi / 4)</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">0.6657737500283538</code><br>
+    <code>Elapsed time of "atan" was 0.003862 secs.</code>
+  <p>There are many more code examples in the <code>test/files</code> directory of the source distribution.
 </div>
 <a class="top-link" href="#topofpage">Top</a>
 <hr id="Directives" class="sectionsep">

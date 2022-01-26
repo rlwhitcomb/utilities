@@ -481,6 +481,7 @@
  *	    Move "stringToValue" out to CalcUtil.
  *	26-Jan-2022 (rlwhitcomb)
  *	    #206: Refactor by moving predefined variable init to separate file; also Settings and TrigMode.
+ *	    #227: Add "timethis" statement.
  */
 package info.rlwhitcomb.calc;
 
@@ -700,16 +701,16 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	Supplier<Object> phiSupplier = () -> {
-		if (settings.rationalMode)
-		    return MathUtil.ratphi(mcDivide, false);
-		else
-		    return MathUtil.phi(mcDivide, false);
+	    if (settings.rationalMode)
+		return MathUtil.ratphi(mcDivide, false);
+	    else
+		return MathUtil.phi(mcDivide, false);
 	};
 	Supplier<Object> phi1Supplier = () -> {
-		if (settings.rationalMode)
-		    return MathUtil.ratphi(mcDivide, true);
-		else
-		    return MathUtil.phi(mcDivide, true);
+	    if (settings.rationalMode)
+		return MathUtil.ratphi(mcDivide, true);
+	    else
+		return MathUtil.phi(mcDivide, true);
 	};
 
 
@@ -2267,6 +2268,23 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    else {
 		throw new LeaveException();
 	    }
+	}
+
+	@Override
+	public Object visitTimeThisStmt(CalcParser.TimeThisStmtContext ctx) {
+	    CalcParser.ExprContext descExpr = ctx.expr();
+	    if (descExpr != null) {
+		Object descObj = evaluateFunction(descExpr, visit(descExpr));
+		if (descObj != null) {
+		    String description = descObj.toString();
+		    return Environment.timeThis(description, () -> {
+			return visit(ctx.stmtBlock());
+		    });
+		}
+	    }
+	    return Environment.timeThis( () -> {
+		return visit(ctx.stmtBlock());
+	    });
 	}
 
 	@Override
