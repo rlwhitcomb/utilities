@@ -90,8 +90,8 @@ fib -6
 fib 200
 
 # Trig and log functions
-I = 1; ++I; I;
-J = 2; J++; J;
+J = 1; ++J; J;
+K = 2; K++; K;
 :double
 pi / 2
 asin ( sin ( pi / 2 ) )
