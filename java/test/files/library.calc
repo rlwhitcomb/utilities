@@ -379,3 +379,18 @@ define hashstring($value, $algorithm = 'sha-256', $upper = false) = {
    trim(exec('hsh', '--line', $upper ? '--upper' : '--lower', '--algorithm=' + $algorithm, `${$value@q}`))
 }
 
+/*
+ * Compute the mean and standard deviation of a list of values.
+ *
+ * @param $values
+ * @return { mean: xxx, stddev: sss }
+ */
+define mean_stddev ($values) = {
+  len = length($values)
+  avg = sumof($values) / len
+  var = 0
+  loop over $values { var += ($_ - avg) ** 2 }
+  var /= len
+  { mean: avg, stddev: round(sqrt(var), 3) }
+}
+

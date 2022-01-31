@@ -19,6 +19,7 @@
 >zeta_2n(2) -> 1.644934066848226436472415166646026
 >win_pct(25, 75) -> "25.00%"
 >win_pct(662, 174, 2) -> "79.00%"
+>mean_stddev([1, 2, 3, 4, 5, 6, 7, 8]) -> { mean: 4.5, stddev: 2.291 }
 >help_mort -> 
 >Usage: PMT(P=<present value>,R=<yearly interest rate (%)>,N=<number of years>)
 >    or PMT2(P,r=<monthly interest %>,n=<number of months>)
