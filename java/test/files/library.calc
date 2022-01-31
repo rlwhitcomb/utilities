@@ -195,7 +195,31 @@ define is_perfect($n) = { sumof ( factors ($n) ) - $n == $n }
  * @param $c
  * @return [ x1, x2 ] if solution is real, error if not
  */
-define quad($a, $b, $c) = { _b2 = $b * $b; _2a = 2 * $a; _r = (_b2 - 4 * $a * $c); if _r < 0 { sqrt(_r) } else { [ (-$b + sqrt(_r))/_2a, (-$b - sqrt(_r))/_2a ] } }
+define quad($a, $b, $c) = {
+  _b2 = $b * $b
+  _2a = 2 * $a
+  _r = (_b2 - 4 * $a * $c)
+  if _r < 0 {
+    _r = abs(_r)
+    [ ( -$b/_2a, sqrt(_r)/_2a ), ( -$b/_2a, -sqrt(_r)/_2a ) ]
+  } else {
+    [ (-$b + sqrt(_r))/_2a, (-$b - sqrt(_r))/_2a ]
+  }
+}
+
+/*
+ * Find the value of a quadratic equation at the given point.
+ * y = a*x**2 + b*x + c
+ *
+ * @param $a
+ * @param $b
+ * @param $c
+ * @param $x
+ * @return The value of the equation at the given point.
+ */
+define quad_exp($a, $b, $c, $x) = {
+  $a * $x*$x + $b * $x + $c
+}
 
 /*
  * The Euler-Riemann "zeta" function for positive integer even values.
