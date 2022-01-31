@@ -77,6 +77,9 @@ loop over 16384 { _tests++; if from_excel_col(to_excel_col($_)) != $_ { _mistake
 :quiet pop
 :echo `Number of tests = $_tests, mistakes = $_mistakes`
 
+hash('test/data/Declaration.txt',,true)
+hashstring('Four score and seven years ago')
+
 :separators pop
 :clear
 

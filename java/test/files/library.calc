@@ -1,4 +1,4 @@
-//** Version: 2.7.1 base: 1.7.6
+//** Version: 2.7.1 base: 1.7.7
 //** The versions above must conform to the latest values in "version.properties" and "build.properties"
 
 /*
@@ -336,7 +336,22 @@ define sleep($time) = { trim(exec('sleep', $time)) }
  *
  * @param $filename Name of the file to compute the hash for.
  * @param $algorithm Which hash algorithm to use.
+ * @param $upper Which case to use for the result (default 'false')
  * @return The given hash value (lower case).
  */
-define hash($filename, $algorithm = 'sha-256') = { trim(exec('hsh', '--lower', '--algorithm=' + $algorithm, '--file', $filename)) }
+define hash($filename, $algorithm = 'sha-256', $upper = false) = {
+   trim(exec('hsh', $upper ? '--upper' : '--lower', '--algorithm=' + $algorithm, '--file', $filename))
+}
+
+/*
+ * Hash a string with same parameters as "hash".
+ *
+ * @param $value The string value to hash.
+ * @param $algorithm Which hash algorithm to use.
+ * @param $upper Which case to use for the results (default 'false')
+ * @return The given string's hash value.
+ */
+define hashstring($value, $algorithm = 'sha-256', $upper = false) = {
+   trim(exec('hsh', '--line', $upper ? '--upper' : '--lower', '--algorithm=' + $algorithm, `${$value@q}`))
+}
 

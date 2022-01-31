@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2010-2011,2015,2018-2021 Roger L. Whitcomb.
+ * Copyright (c) 2010-2011,2015,2018-2022 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -50,6 +50,8 @@
  *	    Move to new package; reformat a little.
  *	20-Nov-2021 (rlwhitcomb)
  *	    #90: Rename from MD5 to Hash; make default SHA-256.
+ *	30-Jan-2022 (rlwhitcomb)
+ *	    #43: Allow "-lines" to combine all command line into one line string.
  */
 package info.rlwhitcomb.tools;
 
@@ -290,6 +292,20 @@ public class Hash {
 	    }
 	}
 
+	private static void processString(String line) {
+	    __md.reset();
+	    if (verbose) {
+		byte[] input = line.getBytes(charset);
+		System.out.print("Input bytes: ");
+		printDigest(input, 0);
+		__md.update(input);
+	    }
+	    else {
+		__md.update(line.getBytes(charset));
+	    }
+	    byte[] bytes = __md.digest();
+	    printDigest(bytes);
+	}
 
 	private static String checkOption(String arg) {
 	    if (arg.startsWith("--"))
@@ -385,6 +401,8 @@ public class Hash {
 
 	    // Now scan for the file name argument(s) (if any)
 	    boolean didAnything = false;
+	    StringBuilder line = new StringBuilder();
+
 	    for (String a : args) {
 		if (checkOption(a) == null) {
 		    didAnything = true;
@@ -397,22 +415,24 @@ public class Hash {
 			    System.err.format("Exception while processing file '%1$s':%n%2$s%n", f.getPath(), ioe.getMessage());
 			}
 		    }
+		    else if (doLines) {
+			if (line.length() > 0)
+			    line.append(' ');
+			line.append(a);
+		    }
 		    else {
+			didAnything = true;
 			// Just process the argument as a literal string
-			__md.reset();
-			if (verbose) {
-			    byte[] input = a.getBytes(charset);
-			    System.out.print("Input bytes: ");
-			    printDigest(input, 0);
-			    __md.update(input);
-			}
-			else
-			    __md.update(a.getBytes(charset));
-			byte[] bytes = __md.digest();
-			printDigest(bytes);
+			processString(a);
 		    }
 		}
 	    }
+
+	    if (line.length() > 0) {
+		didAnything = true;
+		processString(line.toString());
+	    }
+
 	    if (!didAnything) {
 		System.err.println("No files or strings given to process!");
 		System.err.println();
