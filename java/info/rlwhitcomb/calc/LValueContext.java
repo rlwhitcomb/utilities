@@ -84,6 +84,8 @@
  *	    #180: Change parameters to "toStringValue".
  *	21-Jan-2022 (rlwhitcomb)
  *	    #135: Add support for constant values.
+ *	30-Jan-2022 (rlwhitcomb)
+ *	    #229: Fix defaulting of missing actual parameters.
  */
  package info.rlwhitcomb.calc;
 
@@ -532,7 +534,7 @@ class LValueContext
 		    throw new CalcExprException(funcVarCtx, "%calc#undefinedFunction", getTreeText(funcVarCtx.var()));
 
 		FunctionDeclaration func = (FunctionDeclaration) funcObj;
-		List<CalcParser.ExprContext> exprs = funcVarCtx.actualParams().expr();
+		List<CalcParser.OptExprContext> exprs = funcVarCtx.actualParams().optExpr();
 
 		return new LValueContext(funcLValue, funcVarCtx, visitor.setupFunctionCall(funcVarCtx, func, exprs));
 	    }

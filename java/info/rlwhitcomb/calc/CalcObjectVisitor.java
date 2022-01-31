@@ -482,6 +482,8 @@
  *	26-Jan-2022 (rlwhitcomb)
  *	    #206: Refactor by moving predefined variable init to separate file; also Settings and TrigMode.
  *	    #227: Add "timethis" statement.
+ *	30-Jan-2022 (rlwhitcomb)
+ *	    #229: Fix calling of functions with missing / defaulted parameters.
  */
 package info.rlwhitcomb.calc;
 
@@ -934,12 +936,16 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	 * @param exprs The actual parameter value list.
 	 * @return      The function scope with the actual values set in the scope.
 	 */
-	FunctionScope setupFunctionCall(final ParserRuleContext ctx, final FunctionDeclaration decl, final List<CalcParser.ExprContext> exprs) {
+	FunctionScope setupFunctionCall(final ParserRuleContext ctx, final FunctionDeclaration decl, final List<CalcParser.OptExprContext> exprs) {
 	    FunctionScope funcScope = new FunctionScope(decl);
 	    int numParams = decl.getNumberOfParameters();
 	    int numActuals = exprs != null ? exprs.size() : 0;
 
 	    if (exprs != null) {
+		// Special case: 0 or variable # params, but one actual, except the actual expr is zero -> zero actuals
+		if (numParams <= 0 && numActuals == 1 && exprs.get(0).expr() == null)
+		    numActuals--;
+
 		if (numParams >= 0 && numActuals > numParams) {
 		    if (numParams == 1)
 			throw new CalcExprException(ctx, "%calc#tooManyForOneValue", numActuals);
@@ -948,7 +954,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		}
 
 		for (int index = 0; index < numActuals; index++) {
-		    funcScope.setParameterValue(this, index, exprs.get(index));
+		    funcScope.setParameterValue(this, index, exprs.get(index).expr());
 		}
 	    }
 

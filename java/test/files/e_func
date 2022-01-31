@@ -42,3 +42,19 @@ def l($a) = {
 }
 
 l(3);l(4)
+
+define array($a=1, $b=2, $c=3) = { [ $a, $b, $c ] }
+array()
+array(7)
+array(,9)
+array(,,11)
+array(7,,11)
+array(7,9)
+
+def arr2($a=1, ...) = { $* }
+arr2()
+arr2(,)
+arr2(,,3)
+arr2(8)
+arr2(9,,11)
+

@@ -344,6 +344,9 @@
  *	    #223: Implement ":predefined" command.
  *	26-Jan-2022 (rlwhitcomb
  *	    #227: Add "timethis" statement.
+ *	30-Jan-2022 (rlwhitcomb)
+ *	    #229: Change grammar for actualParams to allow detection of which params
+ *	    are actually missing, and should be defaulted.
  */
 
 grammar Calc;
@@ -661,8 +664,12 @@ formalParam
    : LOCALVAR ( '=' expr ) ?
    ;
 
+optExpr
+   : expr ?
+   ;
+
 actualParams
-   : '(' expr ? ( ',' expr ? ) * ')'
+   : '(' optExpr ( ',' optExpr ) * ')'
    ;
 
 dropObjs

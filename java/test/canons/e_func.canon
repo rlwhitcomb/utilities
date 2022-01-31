@@ -27,3 +27,16 @@
 >}
 >l(3) -> "odd"
 >l(4) -> "even"
+>Defining function “array($a=1,$b=2,$c=3)” = {[$a, $b, $c]}
+>array() -> [ 1, 2, 3 ]
+>array(7) -> [ 7, 2, 3 ]
+>array(, 9) -> [ 1, 9, 3 ]
+>array(, , 11) -> [ 1, 2, 11 ]
+>array(7, , 11) -> [ 7, 2, 11 ]
+>array(7, 9) -> [ 7, 9, 3 ]
+>Defining function “arr2($a=1,...)” = {$*}
+>arr2() -> [ ]
+>arr2(, ) -> [ 1, <null> ]
+>arr2(, , 3) -> [ 1, <null>, 3 ]
+>arr2(8) -> [ 8 ]
+>arr2(9, , 11) -> [ 9, <null>, 11 ]
