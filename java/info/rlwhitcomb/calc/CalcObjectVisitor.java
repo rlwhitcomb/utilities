@@ -484,6 +484,8 @@
  *	    #227: Add "timethis" statement.
  *	30-Jan-2022 (rlwhitcomb)
  *	    #229: Fix calling of functions with missing / defaulted parameters.
+ *	31-Jan-2022 (rlwhitcomb)
+ *	    #212: Changes to "typeof" to work right with functions.
  */
 package info.rlwhitcomb.calc;
 
@@ -758,7 +760,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 	}
 
-	private void displayActionMessage(final String formatOrKey, final Object... args) {
+	public void displayActionMessage(final String formatOrKey, final Object... args) {
 	    if (initialized && !settings.silent) {
 		String message = Intl.formatKeyString(formatOrKey, args);
 		displayer.displayActionMessage(message);
@@ -3051,7 +3053,16 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitTypeofExpr(CalcParser.TypeofExprContext ctx) {
-	    Object obj = visit(ctx.expr1().expr());
+	    CalcParser.TypeArgContext arg = ctx.typeArg();
+	    Object obj = null;
+
+	    if (arg.var() != null) {
+		LValueContext lValue = getLValue(arg.var());
+		obj = lValue.getContextObject(this);
+	    }
+	    else {
+		obj = visit(arg.expr());
+	    }
 
 	    return typeof(obj).getValue();
 	}
@@ -3073,7 +3084,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    obj = evaluateFunction(expr, visit(expr));
 
 	    try {
-		return cast(this, expr, obj, castType, mc, settings.separatorMode);
+		return castTo(this, expr, obj, castType, mc, settings.separatorMode);
 	    }
 	    catch (IllegalArgumentException iae) {
 		throw new CalcExprException(iae, ctx);

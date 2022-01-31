@@ -827,7 +827,7 @@ or
      can be one of the following (string) values:
   <p class="indent"><code>"null"</code>, <code>"string</code>, <code>"integer"</code>, <code>"float"</code>,
      <code>"fraction"</code>, <code>"complex"</code>, <code>"boolean"</code>, <code>"array"</code>, <code>"object"</code>,
-     or <code>"unknown"</code>.
+     <code>"function"</code>, or <code>"unknown"</code>.
   <p>The <code>round</code> function rounds to the number of places after the decimal, with a negative value rounding to the
      left of the decimal point.  For example: <code>round(1.335577,2) &#x21E8; 1.34</code>, and
      <code>round(1234567.890,-3) &#x21E8; 1235000</code>.

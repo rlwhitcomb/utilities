@@ -28,6 +28,8 @@
  *	    Initial coding.
  *	24-Jan-2022 (rlwhitcomb)
  *	    #103: Add COMPLEX type.
+ *	31-Jan-2022 (rlwhitcomb)
+ *	    #212: Add FUNCTION.
  */
 package info.rlwhitcomb.calc;
 
@@ -83,6 +85,11 @@ enum Typeof
 	 * One of our object/map objects ({@link ObjectScope}).
 	 */
 	OBJECT,
+
+	/**
+	 * A declared function.
+	 */
+	FUNCTION,
 
 	/**
 	 * Something else (somehow we missed a type that we actually use).

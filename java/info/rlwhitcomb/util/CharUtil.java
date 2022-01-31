@@ -2110,7 +2110,7 @@ public final class CharUtil
 	 * <p> Example:  varName =&gt; Var name
 	 *
 	 * @param	input	The Java name (such as a "dscript" variable name).
-	 * @return		The input suitable munged (or just the input if it 
+	 * @return		The input suitably munged (or just the input if it
 	 *			is {@code null} or empty).
 	 */
 	public static String changeJavaNameToWords(final String input) {

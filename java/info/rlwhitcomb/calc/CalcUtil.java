@@ -121,6 +121,8 @@
  *	    #103: Start of complex number support.
  *	    Move "stringToValue" to here from the visitor. More work with ComplexNumber.
  *	    Compare ComplexNumber to each other.
+ *	31-Jan-2022 (rlwhitcomb)
+ *	    #212: type of function and cast to function.
  */
 package info.rlwhitcomb.calc;
 
@@ -1339,6 +1341,8 @@ public final class CalcUtil
 		return Typeof.ARRAY;
 	    if (obj instanceof ObjectScope)
 		return Typeof.OBJECT;
+	    if (obj instanceof FunctionDeclaration)
+		return Typeof.FUNCTION;
 // TODO: "date" or "time" ??
 
 	    return Typeof.UNKNOWN;
@@ -1356,7 +1360,7 @@ public final class CalcUtil
 	 * @param separators Whether to use numeric separators in numeric to string conversions.
 	 * @return Input value converted to the given type.
 	 */
-	public static Object cast(
+	public static Object castTo(
 		final CalcObjectVisitor visitor,
 		final ParserRuleContext ctx,
 		final Object value,
@@ -1405,6 +1409,15 @@ public final class CalcUtil
 			obj.setValue("_", value); // Name??
 			castValue = obj;
 		    }
+		    break;
+		case FUNCTION:
+		    // Well, this is interesting ...
+		    String text = getTreeText(ctx);
+		    String name = "_" + CharUtil.getJSONForm(text);
+		    FunctionDeclaration func = new FunctionDeclaration(name, ctx);
+		    visitor.getVariables().setValue(name, false, func);
+		    visitor.displayActionMessage("%calc#definingFunc", func.getFullFunctionName(), text);
+		    castValue = func;
 		    break;
 		case UNKNOWN:
 		    // Just leave the object as-is, since we don't know what kind it is

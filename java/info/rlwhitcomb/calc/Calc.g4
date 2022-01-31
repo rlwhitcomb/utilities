@@ -347,6 +347,8 @@
  *	30-Jan-2022 (rlwhitcomb)
  *	    #229: Change grammar for actualParams to allow detection of which params
  *	    are actually missing, and should be defaulted.
+ *	31-Jan-2022 (rlwhitcomb)
+ *	    #212: Change grammar for "typeof" so we can recognize functions.
  */
 
 grammar Calc;
@@ -459,7 +461,7 @@ expr
    | K_RANDOM expr1 ?                    # randomExpr
    | K_SIGNUM expr1                      # signumExpr
    | K_ISNULL expr1                      # isNullExpr
-   | K_TYPEOF expr1                      # typeofExpr
+   | K_TYPEOF typeArg                    # typeofExpr
    | K_CAST ( expr2 | expr1 )            # castExpr
    | K_LENGTH ( expr1 | dotRange )       # lengthExpr
    | K_SCALE expr1                       # scaleExpr
@@ -551,6 +553,11 @@ expr3
 exprN
    : '(' exprList ')'
    | exprList
+   ;
+
+typeArg
+   : '(' ( var | expr ) ')'
+   | ( var | expr )
    ;
 
 replaceArgs

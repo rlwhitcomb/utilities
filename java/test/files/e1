@@ -134,6 +134,9 @@ typeof(info.locale.weekdays)
 # Note: these will both be "integer" for now, until we figure out how to differentiate them
 typeof(D'9/11/2001')
 typeof(now)
+def junk_func = { 'junk' }
+typeof(junk_func)
+typeof(junk_func())
 
 cast(null)
 cast(1, 'string')
@@ -146,6 +149,11 @@ cast(3, 'null')
 cast([1,2,3], 'array')
 cast({ a:'123' }, 'object')
 cast(null, 'object')
+:clr junk
+junk=[1,2,3]
+cast(junk[0], 'function')
+typeof(_junk5b05d)
+:var _junk5b05d
 
 :degrees
 sin(45)

@@ -132,6 +132,9 @@
 >typeof (info.locale.weekdays) -> "array"
 >typeof (D'9/11/2001') -> "integer"
 >typeof (now) -> "integer"
+>Defining function “junk_func” = {'junk'}
+>typeof (junk_func) -> "function"
+>typeof (junk_func()) -> "string"
 >cast (null) -> ""
 >cast (1, 'string') -> "1"
 >cast ("23", 'float') -> 23
@@ -143,6 +146,15 @@
 >cast ([1, 2, 3], 'array') -> [ 1, 2, 3 ]
 >cast ({a: '123'}, 'object') -> { a: "123" }
 >cast (null, 'object') -> { _: <null> }
+>Variable 'junk' cleared.
+>junk = [1, 2, 3] -> [ 1, 2, 3 ]
+>Defining function “_junk5b05d” = junk[0]
+>cast (junk[0], 'function') -> 1
+>typeof (_junk5b05d) -> "function"
+>Variables
+>---------
+>_junk5b05d -> junk[0]
+>=========
 >Trig mode is now “DEGREES”.
 >sin (45) -> 0.7071067811865477
 >cos (60) -> 0.4999999999999998
