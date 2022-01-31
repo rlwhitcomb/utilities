@@ -141,6 +141,8 @@ public abstract class InitializationTask<V> implements Callable<V>
 	/**
 	 * Override this method to do whatever initialization task(s) is/are required to be
 	 * done in the background, in order to keep the UI responsive.
+	 *
+	 * @return The result of the task's execution.
 	 */
 	protected abstract V task();
 
@@ -158,6 +160,8 @@ public abstract class InitializationTask<V> implements Callable<V>
 	 * Call this method before every access of resources that are supposed to be
 	 * initialized by the {@link #task} method.  This will ensure that the background
 	 * thread is done with its work before accessing the resources.
+	 *
+	 * @return The result of the task's execution.
 	 */
 	public final V waitUntilFinished() {
 	    V result = null;
