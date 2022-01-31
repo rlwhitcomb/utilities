@@ -29,6 +29,8 @@
  *	24-Jan-2022 (rlwhitcomb)
  *	    Created.
  *	    #103: More work: extend Number, implement Comparable, Serializable.
+ *	30-Jan-2022 (rlwhitcomb)
+ *	    #103: extend aliases of "i" (must match CalcPredefine).
  */
 package info.rlwhitcomb.util;
 
@@ -63,18 +65,18 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 	private static final String NUMBER = INT + "(\\.[0-9]*)?([Ee]" + SIGNED_INT + ")?";
 	/** Signed number string pattern. */
 	private static final String SIGNED_NUMBER = SIGNED_INT + "(\\.[0-9]*)?([Ee]" + SIGNED_INT + ")?";
+	/** Character aliases for "i" (must match CalcPredefine "I_ALIASES"). */
+	private static final String I_ALIASES = "[iI\u0131\u0399\u03B9\u2148]";
 
 	/**
-	 * A pattern to match the string representation of one of these.
+	 * The patterns used in {@link #parse} to recognize valid values.
 	 */
-	private static final Pattern COMPLEX_PATTERN =
-		Pattern.compile("^\\s*\\(\\s*(" + SIGNED_NUMBER + ")\\s*([,])\\s*(" + SIGNED_NUMBER + ")\\s*\\)\\s*$");
-
-	/**
-	 * An alternate pattern for parsing: <code>(&pm; <i>n</i> &pm; <i>n</i> i)</code>.
-	 */
-	private static final Pattern COMPLEX_PATTERN2 =
-		Pattern.compile("^\\s*\\(\\s*(" + SIGNED_NUMBER + ")\\s*([+\\-])\\s*(" + NUMBER + ")\\s*[iI]\\s*\\)\\s*$");
+	private static final Pattern COMPLEX_PATTERNS[] = {
+	    Pattern.compile("^\\s*\\(\\s*(" + SIGNED_NUMBER + ")\\s*([,])\\s*(" + SIGNED_NUMBER + ")\\s*\\)\\s*$"),
+	    Pattern.compile("^\\s*(" + SIGNED_NUMBER + ")\\s*([,])\\s*(" + SIGNED_NUMBER + ")\\s*$"),
+	    Pattern.compile("^\\s*\\(\\s*(" + SIGNED_NUMBER + ")\\s*([+\\-])\\s*(" + NUMBER + ")\\s*" + I_ALIASES + "\\s*\\)\\s*$"),
+	    Pattern.compile("^\\s*(" + SIGNED_NUMBER + ")\\s*([+\\-])\\s*(" + NUMBER + ")\\s*" + I_ALIASES + "\\s*$")
+	};
 
 	/**
 	 * A static value of {@code (1, 0)} (or real {@code 1.0}).
@@ -454,12 +456,14 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 	 * @throws       IllegalArgumentException if it cannot be parsed.
 	 */
 	public static ComplexNumber parse(final String string) {
-	    Matcher m = COMPLEX_PATTERN.matcher(string);
+	    Matcher m = null;
+	    for (int i = 0; i < COMPLEX_PATTERNS.length; i++) {
+		m = COMPLEX_PATTERNS[i].matcher(string);
+		if (m.matches())
+		    break;
+	    }
 	    if (!m.matches()) {
-		m = COMPLEX_PATTERN2.matcher(string);
-		if (!m.matches()) {
-		    throw new Intl.IllegalArgumentException("%util#complex.notRecognized", string);
-		}
+		throw new Intl.IllegalArgumentException("%util#complex.notRecognized", string);
 	    }
 
 	    BigDecimal rPart = new BigDecimal(m.group(1));

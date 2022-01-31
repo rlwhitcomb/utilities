@@ -27,6 +27,8 @@
  *	26-Jan-2022 (rlwhitcomb)
  *	    #206: Moved out of CalcObjectVisitor.
  *	    Added the hardware values out of Environment, and more "os" fields.
+ *	30-Jan-2022 (rlwhitcomb)
+ *	    #103: Extend "I_ALIASES" (must agree with ComplexNumber).
  */
 package info.rlwhitcomb.calc;
 
@@ -92,7 +94,7 @@ class CalcPredefine
 	 * Aliases for "i".
 	 */
 	private static final String[] I_ALIASES = {
-	    "i", "\u0131", "\u0399", "\u03B9", "\u2148"
+	    "i", "I", "\u0131", "\u0399", "\u03B9", "\u2148"
 	};
 
 
