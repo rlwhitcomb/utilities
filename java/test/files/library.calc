@@ -331,3 +331,12 @@ define uuid() = {  trim(exec('uuid')) }
  */
 define sleep($time) = { trim(exec('sleep', $time)) }
 
+/*
+ * Hash a file using the given algorithm (default is "SHA-256" if none given).
+ *
+ * @param $filename Name of the file to compute the hash for.
+ * @param $algorithm Which hash algorithm to use.
+ * @return The given hash value (lower case).
+ */
+define hash($filename, $algorithm = 'sha-256') = { trim(exec('hsh', '--lower', '--algorithm=' + $algorithm, '--file', $filename)) }
+
