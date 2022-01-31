@@ -241,6 +241,8 @@
  *	    #93: Delegate all string coloring to new mechanism in Intl.
  *	21-Jan-2022 (rlwhitcomb)
  *	    #217: Delegate environment options parsing to new Options method.
+ *	30-Jan-2022 (rlwhitcomb)
+ *	    #132: More work on disabling actions.
  */
 package info.rlwhitcomb.calc;
 
@@ -436,6 +438,7 @@ public class Calc
 	private static Charset inputCharset = null;
 
 	private Display display;
+	private PrintStream sysOut;
 
 	@BXML private Window mainWindow;
 	@BXML private TextPane inputTextPane;
@@ -584,6 +587,34 @@ public class Calc
 	}
 
 	private KeyPressListener keyPressListener = new KeyPressListener();
+
+
+	/**
+	 * Listen for characters inserted / removed from the input text area, updating the action enablement.
+	 */
+	private class CharacterListener implements TextPaneCharacterListener
+	{
+		public void enableActions() {
+		    int inputSize = inputTextPane.getCharacterCount();
+		    int outputSize = outputTextArea.getCharacterCount();
+		    // The input almost always has a trailing '\n', so we use 1 as the discriminant
+		    CalcAction.CALCULATE.enable(inputSize > 1);
+		    CalcAction.CLEAR.enable(inputSize > 1 || outputSize > 0);
+		}
+
+		@Override
+		public void charactersInserted(TextPane textPane, int index, int count) {
+		    enableActions();
+		}
+
+		@Override
+		public void charactersRemoved(TextPane textPane, int index, int count) {
+		    enableActions();
+		}
+	}
+
+	private CharacterListener characterListener = new CharacterListener();
+
 
 	private void requestFocus(final Component comp) {
 	    ApplicationContext.scheduleCallback(() -> comp.requestFocus(), 200L);
@@ -774,6 +805,7 @@ public class Calc
 
 		// To implement the displayer, redirect System.out to our TextArea for display
 		PrintStream ps = new TextAreaOutputStream(outputTextArea, StandardCharsets.UTF_8, 16_384).toPrintStream();
+		sysOut = System.out;
 		System.setOut(ps);
 		System.setErr(ps);
 
@@ -802,6 +834,8 @@ public class Calc
 		outputRuler.getStyles().put(Style.font, monospacedFont);
 
 		inputTextPane.getComponentKeyListeners().add(keyPressListener);
+		inputTextPane.getTextPaneCharacterListeners().add(characterListener);
+		characterListener.enableActions();
 
 		KeyStroke versionKey = KeyStroke.decode("Cmd-F1");
 		String key = versionKey.toString();
@@ -875,9 +909,10 @@ public class Calc
 	}
 
 	private void updateOutputSize() {
-	    ApplicationContext.queueCallback(() ->
-		outputSizeLabel.setText(sizeFormat.format(outputTextArea.getCharacterCount()))
-	    );
+	    ApplicationContext.queueCallback(() -> {
+		outputSizeLabel.setText(sizeFormat.format(outputTextArea.getCharacterCount()));
+		characterListener.enableActions();
+	    });
 	}
 
 	@Override
@@ -1127,6 +1162,7 @@ public class Calc
 				currentText = null;
 				inputTextPane.setText(EMPTY_TEXT);
 				enableActions(true);
+				characterListener.enableActions();
 				requestFocus(inputTextPane);
 			    });
 			}
