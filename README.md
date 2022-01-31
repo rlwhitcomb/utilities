@@ -34,8 +34,6 @@ All the "java" directory classes are built into a single "utilities.jar" file, w
 
 Work going on currently includes:
 
-- InitializationTask is all wrong -- need a better paradigm, using existing Java mechanisms (see Issue #8)
-- Make InitializationTask and QueuedThread work seamlessly with "synchronized"
 - Finish converting D.C to Java (include supporting code).
 - New Java-based "tail", and other Linux utilities missing on Windows.
 - Finish -color and -nocolor flags everywhere

@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2014,2020-2021 Roger L. Whitcomb.
+ * Copyright (c) 2014,2020-2022 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  *
- *	A Thread object that can be used for background initialization tasks.
+ *	An abstract object that can be used for background initialization tasks.
  *
  *  History:
  *	27-Feb-2014 (rlwhitcomb)
@@ -39,10 +39,13 @@
  *	    using FutureTask or RunnableFuture, or something like that.
  *	19-Feb-2021 (rlwhitcomb)
  *	    Don't inherit from Thread, but use a thread pool instead to run the tasks.
+ *	29-Jan-2022 (rlwhitcomb)
+ *	    #228: Refactor to be able to return a value by implementing Callable.
  */
 
 package info.rlwhitcomb.util;
 
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ExecutorService;
@@ -59,8 +62,10 @@ import java.util.concurrent.Semaphore;
  * pool where it will be executed in the background.
  * <p> Before accessing any resources in the object that need to be computed in the
  * background, call the {@link #waitUntilFinished} method first.
+ *
+ * @param <V> The type of valuel returned by the background task (can be {@link Void}).
  */
-public abstract class InitializationTask implements Runnable
+public abstract class InitializationTask<V> implements Callable<V>
 {
 	/**
 	 * The logging object.
@@ -87,7 +92,7 @@ public abstract class InitializationTask implements Runnable
 	/**
 	 * The future object that is used to signal when the task is finished.
 	 */
-	private volatile Future<?> future = null;
+	private volatile Future<V> future = null;
 
 
 	/**
@@ -97,19 +102,29 @@ public abstract class InitializationTask implements Runnable
 	}
 
 	/**
-	 * Internal method that executes the overridden {@link #task} method as a background task.
+	 * Method that executes the overridden {@link #task} method as a background task.
 	 */
 	@Override
-	public final void run() {
+	public final V call() {
+	    V result = null;
+
 	    try {
-		logger.debug("In 'run' method: executing 'task()'...");
-		task();
-		logger.debug("In 'run' method: finished 'task()'.");
+		logger.debug("In 'call' method: executing 'task()'...");
+		result = task();
+		logger.debug("In 'call' method: finished 'task()'.");
 	    }
 	    catch (Throwable ex) {
 		logger.except("Caught exception running 'task()'", ex);
+		try {
+		    exceptionOccurred(ex);
+		}
+		catch (Throwable ex2) {
+		    logger.except("Caught exception running 'exceptionOccurred()'", ex2);
+		}
 	    }
-	    logger.debug("Finished in 'run' method.");
+	    logger.debug("Finished in 'call' method.");
+
+	    return result;
 	}
 
 	/**
@@ -127,7 +142,7 @@ public abstract class InitializationTask implements Runnable
 	 * Override this method to do whatever initialization task(s) is/are required to be
 	 * done in the background, in order to keep the UI responsive.
 	 */
-	protected abstract void task();
+	protected abstract V task();
 
 	/**
 	 * Override this method in order to be notified of any exceptions that occur during
@@ -144,7 +159,9 @@ public abstract class InitializationTask implements Runnable
 	 * initialized by the {@link #task} method.  This will ensure that the background
 	 * thread is done with its work before accessing the resources.
 	 */
-	public final void waitUntilFinished() {
+	public final V waitUntilFinished() {
+	    V result = null;
+
 	    logger.debug("Inside 'waitUntilFinished': waiting for semaphore...");
 	    // We will not acquire a permit until the "future" object is available
 	    startSemaphore.acquireUninterruptibly();
@@ -153,7 +170,7 @@ public abstract class InitializationTask implements Runnable
 	    startSemaphore.release();
 	    logger.debug("Inside 'waitUntilFinished: waiting on Future to complete...");
 	    try {
-		future.get();
+		result = future.get();
 	    }
 	    catch (InterruptedException | ExecutionException ex) {
 		// TODO: is there anything we should do here?  The task is (probably) not done,
@@ -161,5 +178,7 @@ public abstract class InitializationTask implements Runnable
 		logger.except("Exception during 'future.get()'", ex);
 	    }
 	    logger.debug("Finished with 'waitUntilFinished' method.");
+
+	    return result;
 	}
 }

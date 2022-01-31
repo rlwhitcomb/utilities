@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2020-2021 Roger L. Whitcomb.
+ * Copyright (c) 2020-2022 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -46,6 +46,8 @@
  *	    For Windows, halve the expected ratio.
  *	28-Dec-2021 (rlwhitcomb)
  *	    #187: Fix ratio if the 2nd time is zero (rounded).
+ *	29-Jan-2022 (rlwhitcomb)
+ *	    #228: Refactor InitializationTask to return a value.
  */
 package info.rlwhitcomb.test;
 
@@ -213,11 +215,10 @@ public class InitTaskTest
 	 * takes some time to run to completion, at which time we can access the results
 	 * safely and correctly.
 	 */
-	private static class InitTask extends InitializationTask
+	private static class InitTask extends InitializationTask<String>
 	{
 		private int digits;
 		private int iters;
-		private String digitString = "";
 		private int times;
 		private double firstTimeSecs  = 1.0d;
 		private double secondTimeSecs = 1.0d;
@@ -233,7 +234,9 @@ public class InitTaskTest
 		}
 
 		@Override
-		public void task() {
+		public String task() {
+		    String digitString = null;
+
 		    logger.debug("Starting 'task()' inside InitTask with %1$d iterations...", iters);
 		    for (int i = 0; i < iters; i++) {
 			logger.debug("Inside 'task()': running the calculation for loop #%1$d...", (i + 1));
@@ -241,6 +244,8 @@ public class InitTaskTest
 			logger.debug("Inside 'task()': finished calculation #%1$d: string length = %2$d", (i + 1), digitString.length());
 		    }
 		    logger.debug("Finished with 'task()'.");
+
+		    return digitString;
 		}
 
 		/**
@@ -253,7 +258,7 @@ public class InitTaskTest
 		    // we wait until the task is complete (some seconds), while
 		    // subsequent accesses complete right away.
 		    long startTime = Environment.highResTimer();
-		    waitUntilFinished();
+		    String digitString = waitUntilFinished();
 		    long endTime   = Environment.highResTimer();
 		    double seconds = Environment.timerValueToSeconds(endTime - startTime);
 
