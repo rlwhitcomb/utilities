@@ -123,6 +123,7 @@
  *	    Compare ComplexNumber to each other.
  *	31-Jan-2022 (rlwhitcomb)
  *	    #212: type of function and cast to function.
+ *	    #103: cast complex to/from map and list
  */
 package info.rlwhitcomb.calc;
 
@@ -1388,7 +1389,18 @@ public final class CalcUtil
 		    break;
 		case COMPLEX:
 		    try {
-			castValue = ComplexNumber.valueOf(value);
+			if (castValue instanceof ArrayScope) {
+			    @SuppressWarnings("unchecked")
+			    ArrayScope<Object> array = (ArrayScope<Object>) castValue;
+			    castValue = array.list();
+			}
+			else if (castValue instanceof ObjectScope) {
+			    @SuppressWarnings("unchecked")
+			    ObjectScope object = (ObjectScope) castValue;
+			    castValue = object.map();
+			}
+
+			castValue = ComplexNumber.valueOf(castValue);
 		    }
 		    catch (ArithmeticException ae) {
 			throw new CalcExprException(ae, ctx);
@@ -1398,13 +1410,21 @@ public final class CalcUtil
 		    castValue = toBooleanValue(visitor, value, ctx);
 		    break;
 		case ARRAY:
-		    if (!(value instanceof ArrayScope)) {
+		    if (value instanceof ComplexNumber) {
+			ComplexNumber c = (ComplexNumber) value;
+			castValue = new ArrayScope<Object>(c.toList());
+		    }
+		    else if (!(value instanceof ArrayScope)) {
 			ArrayScope<Object> array = new ArrayScope<>(value);
 			castValue = array;
 		    }
 		    break;
 		case OBJECT:
-		    if (!(value instanceof ObjectScope)) {
+		    if (value instanceof ComplexNumber) {
+			ComplexNumber c = (ComplexNumber) value;
+			castValue = new ObjectScope(c.toMap());
+		    }
+		    else if (!(value instanceof ObjectScope)) {
 			ObjectScope obj = new ObjectScope();
 			obj.setValue("_", value); // Name??
 			castValue = obj;

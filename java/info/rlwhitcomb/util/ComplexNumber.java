@@ -31,6 +31,8 @@
  *	    #103: More work: extend Number, implement Comparable, Serializable.
  *	30-Jan-2022 (rlwhitcomb)
  *	    #103: extend aliases of "i" (must match CalcPredefine).
+ *	31-Jan-2022 (rlwhitcomb)
+ *	    #103: Create from List and Map; convert to List and Map.
  */
 package info.rlwhitcomb.util;
 
@@ -38,6 +40,10 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.MathContext;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
@@ -77,6 +83,16 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 	    Pattern.compile("^\\s*\\(\\s*(" + SIGNED_NUMBER + ")\\s*([+\\-])\\s*(" + NUMBER + ")\\s*" + I_ALIASES + "\\s*\\)\\s*$"),
 	    Pattern.compile("^\\s*(" + SIGNED_NUMBER + ")\\s*([+\\-])\\s*(" + NUMBER + ")\\s*" + I_ALIASES + "\\s*$")
 	};
+
+	/**
+	 * A map key indicating the real part.
+	 */
+	private static final String REAL_KEY = "r";
+
+	/**
+	 * Map key indicating the imaginary part.
+	 */
+	private static final String IMAG_KEY = "i";
 
 	/**
 	 * A static value of {@code (1, 0)} (or real {@code 1.0}).
@@ -155,6 +171,49 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 	    realPart = BigDecimal.valueOf(r);
 	    imaginaryPart = BigDecimal.valueOf(i);
 	    normalize();
+	}
+
+	/**
+	 * Construct from a list of one or two values.
+	 *
+	 * @param list Any list of one or two values.
+	 * @return     The new complex number, if possible.
+	 * @throws IllegalArgumentException if the number of values is wrong.
+	 */
+	public static ComplexNumber fromList(List<Object> list) {
+	    if (list == null || list.size() == 0)
+		throw new Intl.IllegalArgumentException("%util#complex.noEmptyListMap");
+	    if (list.size() > 2)
+		throw new Intl.IllegalArgumentException("%util#complex.tooManyValues");
+
+	    if (list.size() == 1)
+		return valueOf(list.get(0));
+
+	    // Okay, this is hokey, but hey ... it works
+	    ComplexNumber r = valueOf(list.get(0));
+	    ComplexNumber i = valueOf(list.get(1));
+
+	    return new ComplexNumber(r.r(), i.r());
+	}
+
+	/**
+	 * Construct from a map of one or two values.
+	 *
+	 * @param map Any map with "r" and/or "i" keys.
+	 * @return    The new complex number.
+	 * @throws IllegalArgumentException if the input map is null or empty.
+	 * @see #REAL_KEY
+	 * @see #IMAG_KEY
+	 */
+	public static ComplexNumber fromMap(Map<String, Object> map) {
+	    if (map == null || map.size() == 0)
+		throw new Intl.IllegalArgumentException("%util#complex.noEmptyListMap");
+
+	    // Same hokieness as "fromList", same response ...
+	    ComplexNumber r = valueOf(map.get(REAL_KEY));
+	    ComplexNumber i = valueOf(map.get(IMAG_KEY));
+
+	    return new ComplexNumber(r.r(), i.r());
 	}
 
 	/**
@@ -243,6 +302,35 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 	 */
 	public boolean isPureImaginary() {
 	    return realPart == null;
+	}
+
+
+	/**
+	 * Convert to a list of two values.
+	 *
+	 * @return A list with the real part and imaginary part, in that order.
+	 */
+	public List<Object> toList() {
+	    List<Object> list = new ArrayList<>(2);
+
+	    list.add(r());
+	    list.add(i());
+
+	    return list;
+	}
+
+	/**
+	 * Convert to a map with real and imaginary keys.
+	 *
+	 * @return {@code Map} with {@link #REAL_KEY} and {@link #IMAG_KEY} entries.
+	 */
+	public Map<String, Object> toMap() {
+	    Map<String, Object> map = new LinkedHashMap<>(2);
+
+	    map.put(REAL_KEY, r());
+	    map.put(IMAG_KEY, i());
+
+	    return map;
 	}
 
 
@@ -436,6 +524,7 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 	public static ComplexNumber valueOf(final Object value) {
 	    if (value == null)
 		return null;
+
 	    if (value instanceof ComplexNumber)
 		return (ComplexNumber) value;
 	    if (value instanceof BigDecimal)
@@ -444,6 +533,17 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 		return real((BigInteger) value);
 	    if (value instanceof Number)
 		return real(((Number) value).doubleValue());
+	    if (value instanceof List) {
+		@SuppressWarnings("unchecked")
+		List<Object> list = (List<Object>) value;
+		return fromList(list);
+	    }
+	    if (value instanceof Map) {
+		@SuppressWarnings("unchecked")
+		Map<String, Object> map = (Map<String, Object>) value;
+		return fromMap(map);
+	    }
+
 	    return parse(value.toString());
 	}
 

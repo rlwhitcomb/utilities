@@ -130,6 +130,8 @@
 #	    Add coloring instead of quotes to some messages only in Calc.
 #	24-Jan-2022 (rlwhitcomb)
 #	    #103: New message for ComplexNumber class.
+#	31-Jan-2022 (rlwhitcomb)
+#	    #103: New messages for List/Map conversion of ComplexNumber.
 #
 
 #
@@ -235,6 +237,8 @@ fraction.unknownFracChar	= Unsupported fraction character <y>%1$s<>.
 # From ComplexNumber.java
 #
 complex.notRecognized	= Unable to convert <y>%1$s<> to complex number.
+complex.noEmptyListMap	= Unable to create a complex number from an empty list or map.
+complex.tooManyValues	= Complex number only needs one or two values to define.
 
 #
 # From SecurityUtil.java

@@ -127,6 +127,10 @@ c5 < c7
 
 (6,5) / (3,4)
 
+cast([3,4], "complex")
+cast({r:5, i:7}, "complex")
+cast(c5, "array")
+cast(c6, "object")
 
 // more to come (division, sqrt, **, etc)
 
