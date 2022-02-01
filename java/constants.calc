@@ -1,0 +1,24 @@
+/*
+ * Reads the "MathConstants.java" file, parses out the extant declarations there,
+ * then does a search for .java files containing these values.
+ */
+:quiet on
+:resultsonly on
+const INPUT_FILE = 'info/rlwhitcomb/util/MathConstants.java'
+
+lines = split(trim(read(INPUT_FILE)), '\\r?\\n')
+
+loop $line over lines {
+  trimmed = trim($line)
+  if !index(trimmed, '*') {
+    words = split(trimmed, '\\s+')
+    if words[0] == 'public' && words[1] == 'static' {
+      name = words[4]
+      :quiet pop
+      :echo name
+      exec('./g.sh', name) @q
+      :quiet on
+    }
+  }
+}
+
