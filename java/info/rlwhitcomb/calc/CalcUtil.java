@@ -471,6 +471,15 @@ public final class CalcUtil
 	    return convertToDecimal(value, mc, ctx);
 	}
 
+	/**
+	 * Convert the given object into a {@link BigDecimal} value.
+	 *
+	 * @param value		The value to convert.
+	 * @param mc		Rounding context.
+	 * @param ctx		Parse tree of the current expression (used for error reporting).
+	 * @return		The decimal equivalent of the input (if possible).
+	 * @throws CalcExprException for null input, or other conversion errors.
+	 */
 	public static BigDecimal convertToDecimal(final Object value, final MathContext mc, final ParserRuleContext ctx) {
 	    nullCheck(value, ctx);
 
@@ -509,6 +518,14 @@ public final class CalcUtil
 	    return convertToFraction(value, ctx);
 	}
 
+	/**
+	 * Convert the given object into a {@link BigFraction} value.
+	 *
+	 * @param value		The value to convert.
+	 * @param ctx		Parse tree of the current expression (used for error reporting).
+	 * @return		The fraction equivalent of the input (if possible).
+	 * @throws CalcExprException for null input, or other conversion errors.
+	 */
 	public static BigFraction convertToFraction(final Object value, final ParserRuleContext ctx) {
 	    nullCheck(value, ctx);
 

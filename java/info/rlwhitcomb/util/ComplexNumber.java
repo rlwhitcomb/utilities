@@ -33,6 +33,9 @@
  *	    #103: extend aliases of "i" (must match CalcPredefine).
  *	31-Jan-2022 (rlwhitcomb)
  *	    #103: Create from List and Map; convert to List and Map.
+ *	01-Feb-2022 (rlwhitcomb)
+ *	    #103: Powers of integer and real values, negate, another alias,
+ *	    "toLongString" method, override "equals" and "hashCode".
  */
 package info.rlwhitcomb.util;
 
@@ -72,7 +75,7 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 	/** Signed number string pattern. */
 	private static final String SIGNED_NUMBER = SIGNED_INT + "(\\.[0-9]*)?([Ee]" + SIGNED_INT + ")?";
 	/** Character aliases for "i" (must match CalcPredefine "I_ALIASES"). */
-	private static final String I_ALIASES = "[iI\u0131\u0399\u03B9\u2148]";
+	private static final String I_ALIASES = "[iI\u0131\u0399\u03B9\u2110\u2148]";
 
 	/**
 	 * The patterns used in {@link #parse} to recognize valid values.
@@ -94,6 +97,16 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 	 */
 	private static final String IMAG_KEY = "i";
 
+	/** Decimal -one (for string formatting). */
+	private static final BigDecimal D_MINUS_ONE = BigDecimal.valueOf(-1);
+	/** Decimal two (to detect squares). */
+	private static final BigDecimal D_TWO = BigDecimal.valueOf(2);
+
+	/**
+	 * A static value of {@code (0, 0)} (or a real value of {@code 0.0}).
+	 */
+	public static final ComplexNumber ZERO = new ComplexNumber(0, 0);
+
 	/**
 	 * A static value of {@code (1, 0)} (or real {@code 1.0}).
 	 */
@@ -114,6 +127,7 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 	 * The imaginary part of this complex number.
 	 */
 	private BigDecimal imaginaryPart;
+
 
 	/**
 	 * Construct one, given the real and imaginary values.
@@ -288,6 +302,9 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 		realPart = null;
 	    if (imaginaryPart != null && imaginaryPart.equals(BigDecimal.ZERO))
 		imaginaryPart = null;
+	    // Make sure both parts are not null (zero)
+	    if (realPart == null && imaginaryPart == null)
+		realPart = BigDecimal.ZERO;
 	}
 
 	/**
@@ -471,6 +488,23 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 	}
 
 	/**
+	 * Negate this value.
+	 *
+	 * @return A complex number that is the negative of this one.
+	 */
+	public ComplexNumber negate() {
+	    if (equals(ZERO))
+		return this;
+
+	    if (realPart == null)
+		return new ComplexNumber(realPart, imaginaryPart.negate());
+	    else if (imaginaryPart == null)
+		return new ComplexNumber(realPart.negate(), imaginaryPart);
+	    else
+		return new ComplexNumber(realPart.negate(), imaginaryPart.negate());
+	}
+
+	/**
 	 * Divide this complex number by a real number.
 	 * <p> The result is {@code (real/p, imag/p)}.
 	 *
@@ -513,6 +547,71 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 	    return radius(mc);
 	}
 
+	/**
+	 * Calculate the complex number to the given integer power, using the "squaring"
+	 * technique for efficiency and precision.
+	 *
+	 * @param n  The integer power (can be negative).
+	 * @param mc Rounding mode to use.
+	 * @return   The result of {@code this ** n}.
+	 */
+	public ComplexNumber power(final int n, final MathContext mc) {
+	    if (n < 0)
+		return ONE.divide(this, mc).power(-n, mc);
+
+	    if (n == 0)
+		return ONE;
+	    if (n == 1)
+		return this;
+
+	    ComplexNumber result = this;
+	    ComplexNumber factor = ONE;
+
+	    for (int p = n; p > 1; ) {
+		if (p % 2 == 0) {
+		    p >>= 1;
+		}
+		else {
+		    factor = result.multiply(factor, mc);
+		    p = (p - 1) >> 1;
+		}
+		result = result.multiply(result, mc);
+	    }
+
+	    return result.multiply(factor, mc);
+	}
+
+	/**
+	 * Calculate this complex number to the given real power.
+	 * <p> Do this by applying DeMoivre's theorem such that:
+	 * {@code (a+bi)**n = r**n * (cos(n * theta) + i sin(n * theta))}
+	 *
+	 * @param n  The real power to raise this number to.
+	 * @param mc Rounding context for the result.
+	 * @return  The result of {@code this**n}.
+	 */
+	public ComplexNumber pow(final BigDecimal n, final MathContext mc) {
+	    // Some easy special cases
+	    if (n.scale() <= 0)
+		return power(n.intValueExact(), mc);
+
+	    BigDecimal radius = radius(mc);
+	    BigDecimal theta  = theta(mc);
+	    BigDecimal nTheta = n.multiply(theta);
+
+	    BigDecimal rPower = MathUtil.pow(radius, n.doubleValue(), mc);
+	    BigDecimal cos    = MathUtil.cos(nTheta, mc);
+	    BigDecimal sin    = MathUtil.sin(nTheta, mc);
+
+	    // Note: for negative or fractional powers there are multiple roots, but we're
+	    // going with the principal root, which should match signs with the input
+	    ComplexNumber result = new ComplexNumber(rPower.multiply(cos, mc), rPower.multiply(sin, mc));
+	    if (r().signum() < 0)
+		return result.negate();
+	    else
+		return result;
+	}
+
 
 	/**
 	 * Get the {@code ComplexNumber} equivalent of the input value.
@@ -531,6 +630,8 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 		return real((BigDecimal) value);
 	    if (value instanceof BigInteger)
 		return real((BigInteger) value);
+	    if (value instanceof BigFraction)
+		return real(((BigFraction) value).toDecimal());
 	    if (value instanceof Number)
 		return real(((Number) value).doubleValue());
 	    if (value instanceof List) {
@@ -596,8 +697,53 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 	}
 
 	@Override
+	public boolean equals(Object other) {
+	    if (!(other instanceof ComplexNumber))
+		return false;
+
+	    ComplexNumber c = (ComplexNumber) other;
+	    return r().equals(c.r()) && i().equals(c.i());
+	}
+
+	@Override
+	public int hashCode() {
+	    if (realPart == null)
+		return imaginaryPart.hashCode();
+	    else if (imaginaryPart == null)
+		return realPart.hashCode();
+	    else
+		return realPart.hashCode() ^ imaginaryPart.hashCode();
+	}
+
+	@Override
 	public String toString() {
 	    return String.format("( %1$s, %2$s )", r().toPlainString(), i().toPlainString());
+	}
+
+	public String toLongString(final boolean upperCase) {
+	    char i = upperCase ? '\u2110' : '\u2148';
+
+	    if (realPart == null) {
+		if (imaginaryPart.equals(BigDecimal.ONE))
+		    return String.format("%1$c", i);
+		else if (imaginaryPart.equals(D_MINUS_ONE))
+		    return String.format("-%1$c", i);
+		else
+		    return String.format("%1$s%2$c", imaginaryPart.toPlainString(), i);
+	    }
+	    else if (imaginaryPart == null) {
+		return String.format("%1$s", realPart.toPlainString());
+	    }
+	    else {
+		if (imaginaryPart.signum() < 0)
+		    return String.format("%1$s - %2$s%3$c",
+			realPart.toPlainString(),
+			imaginaryPart.abs().toPlainString(), i);
+		else
+		    return String.format("%1$s + %2$s%3$c",
+			realPart.toPlainString(),
+			imaginaryPart.toPlainString(), i);
+	    }
 	}
 
 }

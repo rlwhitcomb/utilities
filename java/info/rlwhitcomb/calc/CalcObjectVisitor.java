@@ -486,6 +486,7 @@
  *	    #229: Fix calling of functions with missing / defaulted parameters.
  *	31-Jan-2022 (rlwhitcomb)
  *	    #212: Changes to "typeof" to work right with functions.
+ *	    #103: Implement complex number to real powers; complex number roots; '@i' formatting.
  */
 package info.rlwhitcomb.calc;
 
@@ -688,7 +689,19 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	/** Name for global argument count value. */
 	static final String ARG_COUNT = "$#";
 
+	/** Constant value for sqrt (x ** 1/2). */
+	static final BigDecimal ONE_HALF = new BigDecimal("0.5");
 
+	/** Constant value for fort (x ** 1/4). */
+	static final BigDecimal ONE_FOURTH = new BigDecimal("0.25");
+
+
+	/**
+	 * Access the currently active symbol table, whether the globals,
+	 * or the current function, or statement block.
+	 *
+	 * @return The {@link #currentScope}.
+	 */
 	public NestedScope getVariables() {
 	    return currentScope;
 	}
@@ -752,6 +765,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    settings.silenceDirectives = newSilence;
 	    return oldSilence;
 	}
+
 
 	private void displayDirectiveMessage(final String formatOrKey, final Object... args) {
 	    if (initialized && !settings.silent && !settings.silenceDirectives) {
@@ -1740,6 +1754,18 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			valueBuf.append(formatWithSeparators(dValue, separators, scale));
 			break;
 
+		    case 'I':
+		    case 'i':
+			ComplexNumber c = null;
+			if (result instanceof ComplexNumber) {
+			    c = (ComplexNumber) result;
+			}
+			else {
+			    c = ComplexNumber.real(toDecimalValue(this, result, mc, ctx));
+			}
+			valueBuf.append(c.toLongString(formatChar == 'I'));
+			break;
+
 		    // @E = US format: MM/dd/yyyy
 		    // @e = ISO format: yyyy-MM-dd
 		    case 'E':
@@ -2550,7 +2576,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitNegPosExpr(CalcParser.NegPosExprContext ctx) {
 	    ParserRuleContext expr = ctx.expr();
-	    Object e = visit(expr);
+	    Object e = evaluateFunction(expr, visit(expr));
 
 	    String op = ctx.ADD_OP().getText();
 
@@ -2565,6 +2591,21 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    case "\u2212":
 		    case "\u2796":
 			return f.negate();
+		    default:
+			throw new UnknownOpException(op, expr);
+		}
+	    }
+	    else if (e instanceof ComplexNumber) {
+		ComplexNumber c = (ComplexNumber) e;
+
+		switch (op) {
+		    case "+":
+		    case "\u2795":
+			return c;
+		    case "-":
+		    case "\u2212":
+		    case "\u2796":
+			return c.negate();
 		    default:
 			throw new UnknownOpException(op, expr);
 		}
@@ -2604,17 +2645,26 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitPowerExpr(CalcParser.PowerExprContext ctx) {
+	    CalcParser.ExprContext expr = ctx.expr(0);
 	    double exp = getDoubleValue(ctx.expr(1));
 
 	    if (settings.rationalMode) {
 		if (Math.floor(exp) == exp && !Double.isInfinite(exp)) {
-		    BigFraction f = getFractionValue(ctx.expr(0));
-		    return f.pow((int)exp);
+		    BigFraction f = getFractionValue(expr);
+		    return f.pow((int) exp);
 		}
 	    }
 
-	    BigDecimal base = getDecimalValue(ctx.expr(0));
-	    return MathUtil.pow(base, exp, mc);
+	    Object value = evaluateFunction(expr, visit(expr));
+
+	    if (value instanceof ComplexNumber) {
+		ComplexNumber base = (ComplexNumber) value;
+		return base.pow(new BigDecimal(exp), mc);
+	    }
+	    else {
+		BigDecimal base = convertToDecimal(value, mc, expr);
+		return MathUtil.pow(base, exp, mc);
+	    }
 	}
 
 	@Override
@@ -2935,26 +2985,53 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitSqrtExpr(CalcParser.SqrtExprContext ctx) {
-	    try {
-		return MathUtil.sqrt(getDecimalValue(ctx.expr1().expr()), mc);
+	    CalcParser.ExprContext expr = ctx.expr1().expr();
+	    Object value = evaluateFunction(expr, visit(expr));
+
+	    if (value instanceof ComplexNumber) {
+		ComplexNumber cValue = (ComplexNumber) value;
+		return cValue.pow(ONE_HALF, mc);
 	    }
-	    catch (IllegalArgumentException iae) {
-		throw new CalcExprException(iae, ctx);
+	    else {
+		try {
+		    return MathUtil.sqrt(convertToDecimal(value, mc, expr), mc);
+		}
+		catch (IllegalArgumentException iae) {
+		    throw new CalcExprException(iae, ctx);
+		}
 	    }
 	}
 
 	@Override
 	public Object visitCbrtExpr(CalcParser.CbrtExprContext ctx) {
-	    return MathUtil.cbrt(getDecimalValue(ctx.expr1().expr()), mc);
+	    CalcParser.ExprContext expr = ctx.expr1().expr();
+	    Object value = evaluateFunction(expr, visit(expr));
+
+	    if (value instanceof ComplexNumber) {
+		ComplexNumber cValue = (ComplexNumber) value;
+		return cValue.pow(BigDecimal.ONE.divide(BigDecimal.valueOf(3), mcDivide), mc);
+	    }
+	    else {
+		return MathUtil.cbrt(convertToDecimal(value, mc, expr), mc);
+	    }
 	}
 
 	@Override
 	public Object visitFortExpr(CalcParser.FortExprContext ctx) {
-	    try {
-		return MathUtil.sqrt(MathUtil.sqrt(getDecimalValue(ctx.expr1().expr()), mc), mc);
+	    CalcParser.ExprContext expr = ctx.expr1().expr();
+	    Object value = evaluateFunction(expr, visit(expr));
+
+	    if (value instanceof ComplexNumber) {
+		ComplexNumber cValue = (ComplexNumber) value;
+		return cValue.pow(ONE_FOURTH, mc);
 	    }
-	    catch (IllegalArgumentException iae) {
-		throw new CalcExprException(iae, ctx);
+	    else {
+		try {
+		    return MathUtil.sqrt(MathUtil.sqrt(convertToDecimal(value, mc, expr), mc), mc);
+		}
+		catch (IllegalArgumentException iae) {
+		    throw new CalcExprException(iae, ctx);
+		}
 	    }
 	}
 
