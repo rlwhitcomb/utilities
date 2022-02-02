@@ -38,7 +38,9 @@ a<=>b; a<=b; b<a; 1>2; 2>=1;
 :DEFAULT
 1.2+3.4
 1/7
+info.settings.precision
 :decimal 18
+info.settings.precision
 e
 a
 :clear
