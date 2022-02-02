@@ -28,8 +28,13 @@
  *	    Moved out of CalcObjectVisitor.
  *	01-Feb-2022 (rlwhitcomb)
  *	    Add Scriptable annotations.
+ *	02-Feb-2022 (rlwhitcomb)
+ *	    #115: Move "mc" and "mcDivide" into here. New "getPrecision"
+ *	    method which is Scriptable so it will be exposed for viewing.
  */
 package info.rlwhitcomb.calc;
+
+import java.math.MathContext;
 
 import info.rlwhitcomb.annotations.Scriptable;
 import info.rlwhitcomb.util.NumericUtil.RangeMode;
@@ -72,6 +77,16 @@ public class Settings
 	@Scriptable
 	boolean quoteStrings;
 
+	/** The mathematical precision and rounding mode currently in effect. */
+	MathContext mc;
+
+	/**
+	 * The rounding precision used for division (differs from {@link #mc} if the former
+	 * is <code>unlimited</code>).
+	 */
+	MathContext mcDivide;
+
+
 	/**
 	 * Default constructor to supply default, default settings.
 	 */
@@ -113,4 +128,15 @@ public class Settings
 	    this.ignoreNameCase    = otherSettings.ignoreNameCase;
 	    this.quoteStrings      = otherSettings.quoteStrings;
 	}
+
+	/**
+	 * Access the rounding precision in effect.
+	 *
+	 * @return The precision from {@link #mc}.
+	 */
+	@Scriptable
+	public int getPrecision() {
+	    return mc.getPrecision();
+	}
+
 }

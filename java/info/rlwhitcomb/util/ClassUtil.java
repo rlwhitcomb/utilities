@@ -86,6 +86,7 @@
  *	02-Feb-2022 (rlwhitcomb)
  *	    #115: In "getMapFromObject" for the general case put the String value,
  *	    not the object itself.
+ *	    #115: Add methods into the Scriptable processing in "getMapFromObject".
  */
 
 package info.rlwhitcomb.util;
@@ -357,15 +358,34 @@ public final class ClassUtil
 
 
 	/**
+	 * Transform a method name that looks like <code>getValue</code>, <code>setValue</code>, or
+	 * <code>isValue</code> into just <code>"value"</code> for use as a map key.
+	 *
+	 * @param	name	An input method name.
+	 * @return	The transformed name.
+	 */
+	private static String getKeyFromMethodName(final String name) {
+	    if (name.startsWith("get") || name.startsWith("set")) {
+		return Character.toString(Character.toLowerCase(name.charAt(3))) + name.substring(4);
+	    }
+	    else if (name.startsWith("is")) {
+		return Character.toString(Character.toLowerCase(name.charAt(2))) + name.substring(3);
+	    }
+	    return name;
+	}
+
+
+	/**
 	 * Traverse the given object finding the {@link Scriptable} elements, creating a map
 	 * of the name/value pairs.
 	 *
 	 * @param	obj	The input object to be mapped.
-	 * @return	A map of the scriptable fields and their values.
+	 * @return	A map of the <code>@Scriptable</code> fields and methods and their values.
 	 */
 	public static Map<String, Object> getMapFromObject(final Object obj) {
 	    Map<String, Object> map = new LinkedHashMap<>();
 	    Field[] fields = obj.getClass().getDeclaredFields();
+	    Method[] methods = obj.getClass().getDeclaredMethods();
 
 	    for (Field f : fields) {
 		Scriptable annotation = f.getAnnotation(Scriptable.class);
@@ -398,6 +418,26 @@ public final class ClassUtil
 		    }
 		    catch (IllegalAccessException ex) {
 			map.put(key, null);
+		    }
+		}
+	    }
+
+	    for (Method m : methods) {
+		Scriptable annotation = m.getAnnotation(Scriptable.class);
+		if (annotation != null) {
+		    String name = m.getName();
+		    Class<?> cls = m.getReturnType();
+
+		    // For now we're only going to deal with "get" and "is" methods
+		    if (name.startsWith("get") || name.startsWith("is")) {
+			String key = getKeyFromMethodName(m.getName());
+			try {
+			    m.setAccessible(true);
+			    map.put(key, m.invoke(obj));
+			}
+			catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+			    map.put(key, null);
+			}
 		    }
 		}
 	    }
