@@ -41,19 +41,25 @@
 >arr2(8) -> [ 8 ]
 >arr2(9, , 11) -> [ 9, <null>, 11 ]
 >Defining function “ifmany($value)” = {
-> if $value == 0 
+> if $value === 0 
 > 'zero' 
-> else if $value == 1 
+> else if $value === 1 
 > 'one' 
-> else if $value == 2 
+> else if $value === 2 
 > 'two' 
-> else if $value == 3 
+> else if $value === 3 
 > 'three' 
+> else if $value === 3.5 
+> 'three and a half' 
 > else 
 > $value 
 >}
 >ifmany($_) -> "zero"
+>ifmany($_) -> 0.5
 >ifmany($_) -> "one"
+>ifmany($_) -> 1.5
 >ifmany($_) -> "two"
+>ifmany($_) -> 2.5
 >ifmany($_) -> "three"
+>ifmany($_) -> "three and a half"
 >ifmany($_) -> 4

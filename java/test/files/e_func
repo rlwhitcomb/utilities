@@ -59,19 +59,21 @@ arr2(8)
 arr2(9,,11)
 
 define ifmany($value) = {
-  if $value == 0
+  if $value === 0
     'zero'
-  else if $value == 1
+  else if $value === 1
     'one'
-  else if $value == 2
+  else if $value === 2
     'two'
-  else if $value == 3
+  else if $value === 3
     'three'
+  else if $value === 3.5
+    'three and a half'
   else
     $value
 }
 
-loop over 0..4 {
+loop over 0..4,0.5 {
   ifmany($_)
 }
 

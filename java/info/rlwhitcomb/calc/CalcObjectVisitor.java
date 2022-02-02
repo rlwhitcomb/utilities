@@ -492,6 +492,7 @@
  *	02-Feb-2022 (rlwhitcomb)
  *	    #115: Supply a read-only view of the Settings to CalcPredefine for "info.settings".
  *	    #115: Move "mc" and "mcDivide" into Settings.
+ *	    #234: Convert integer loop veriables to BigInteger so that "===" works inside loops against the index var.
  */
 package info.rlwhitcomb.calc;
 
@@ -2012,6 +2013,13 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		}
 	}
 
+	private Number cleanDecimal(final BigDecimal value) {
+	    BigDecimal bd = fixup(value);
+	    if (bd.scale() <= 0)
+		return bd.toBigIntegerExact();
+	    return bd;
+	}
+
 	private Object iterateOverDotRange(
 		final CalcParser.ExprListContext exprList,
 		final CalcParser.DotRangeContext dotRange,
@@ -2108,12 +2116,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			throw new CalcExprException("%calc#infLoopStepZero", dotRange);
 		    else if (step < 0) {
 			for (int loopIndex = start; loopIndex >= stop; loopIndex += step) {
-			    lastValue = visitor.apply(loopIndex);
+			    lastValue = visitor.apply(BigInteger.valueOf(loopIndex));
 			}
 		    }
 		    else {
 			for (int loopIndex = start; loopIndex <= stop; loopIndex += step) {
-			    lastValue = visitor.apply(loopIndex);
+			    lastValue = visitor.apply(BigInteger.valueOf(loopIndex));
 			}
 		    }
 		}
@@ -2124,12 +2132,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			throw new CalcExprException("%calc#infLoopStepZero", dotRange);
 		    else if (sign < 0) {
 			for (BigDecimal loopIndex = dStart; loopIndex.compareTo(dStop) >= 0; loopIndex = loopIndex.add(dStep)) {
-			    lastValue = visitor.apply(loopIndex);
+			    lastValue = visitor.apply(cleanDecimal(loopIndex));
 			}
 		    }
 		    else {
 			for (BigDecimal loopIndex = dStart; loopIndex.compareTo(dStop) <= 0; loopIndex = loopIndex.add(dStep)) {
-			    lastValue = visitor.apply(loopIndex);
+			    lastValue = visitor.apply(cleanDecimal(loopIndex));
 			}
 		    }
 		}
