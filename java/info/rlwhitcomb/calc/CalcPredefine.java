@@ -32,6 +32,9 @@
  *	01-Feb-2022 (rlwhitcomb)
  *	    #103: Another I_ALIAS.
  *	    #231: Use Constants class values instead of where they used to be.
+ *	02-Feb-2022 (rlwhitcomb)
+ *	    #115: Make (for now predefined) "info.settings" for these values.
+ *	    New "makePredefinedMap" method to wrap the map values.
  */
 package info.rlwhitcomb.calc;
 
@@ -47,6 +50,8 @@ import java.time.LocalTime;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.TimeZone;
 import java.util.function.Supplier;
 
@@ -120,13 +125,15 @@ class CalcPredefine
 	 * @param piWorker	Source of pi/e values (background thread).
 	 * @param phiSupplier	Source of values for "phi".
 	 * @param phi1Supplier	Source of values for "PHI" (the reciprocal).
+	 * @param settingsSupplier Source of the {@link Settings} current values.
 	 */
 	public static void define(
 		final GlobalScope globalScope,
 		final ArrayScope<Object> arguments,
 		final CalcPiWorker piWorker,
 		final Supplier<Object> phiSupplier,
-		final Supplier<Object> phi1Supplier)
+		final Supplier<Object> phi1Supplier,
+		final Supplier<Object> settingsSupplier)
 	{
 	    PredefinedValue.define(globalScope, "true", Boolean.TRUE);
 	    PredefinedValue.define(globalScope, "false", Boolean.FALSE);
@@ -276,6 +283,8 @@ class CalcPredefine
 	    PredefinedValue.define(info, "locale",     locale);
 	    PredefinedValue.define(info, "timezone",   tz);
 
+	    PredefinedValue.define(info, "settings",   settingsSupplier);
+
 	    PredefinedValue.define(globalScope, "info", info);
 
 	    PredefinedValue.define(globalScope, "pi", piWorker.piSupplier);
@@ -312,4 +321,18 @@ class CalcPredefine
 	    globalScope.setValue(CalcObjectVisitor.ARG_COUNT, BigInteger.ZERO);
 	}
 
+
+	/**
+	 * Given a map of values, put {@link PredefinedValue} wrappers around each one.
+	 *
+	 * @param map The value map to wrap.
+	 * @return    Another map, but with each value wrapped with the predefined marker.
+	 */
+	public static Map<String, Object> makePredefinedMap(final Map<String, Object> map) {
+	    Map<String, Object> resultMap = new LinkedHashMap<>();
+	    for (Map.Entry<String, Object> entry : map.entrySet()) {
+		PredefinedValue.put(entry, resultMap);
+	    }
+	    return resultMap;
+	}
  }

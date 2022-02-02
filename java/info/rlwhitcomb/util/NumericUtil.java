@@ -156,6 +156,7 @@
  *	    Duration now uses BigInteger, not long (to fix overflow errors).
  *	01-Feb-2022 (rlwhitcomb)
  *	    #231: Use new Constants class values instead of our own.
+ *	    #115: New RangeMode.getFrom method.
  */
 package info.rlwhitcomb.util;
 
@@ -397,11 +398,22 @@ public final class NumericUtil
 	{
 		/** Based on powers of 2 (each one 2**10 = 1024). */
 		BINARY,
+
 		/** Based on powers of 10 (each one 10**3 = 1000). */
 		DECIMAL,
+
 		/** Multiplier Based on powers of 2 (same as {@link #BINARY}),
 		 * but with the decimal name/suffix. */
-		MIXED
+		MIXED;
+
+
+		public static RangeMode getFrom(Object obj) {
+		    if (obj instanceof RangeMode)
+			return (RangeMode) obj;
+
+		    String name = obj.toString();
+		    return valueOf(name.toUpperCase());
+		}
 	}
 
 	/**

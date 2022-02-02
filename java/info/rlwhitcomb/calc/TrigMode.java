@@ -26,6 +26,8 @@
  *  History:
  *	26-Jan-2022 (rlwhitcomb)
  *	    Moved out of CalcObjectVisitor.
+ *	01-Feb-2022 (rlwhitcomb)
+ *	    #115: Add "getFrom" method.
  */
 package info.rlwhitcomb.calc;
 
@@ -42,7 +44,16 @@ public enum TrigMode
 	/**
 	 * Angles are measured / returned in radians (0 - 2𝛑).
 	 */
-	RADIANS
+	RADIANS;
+
+
+	public static TrigMode getFrom(final Object obj) {
+	    if (obj instanceof TrigMode)
+		return (TrigMode) obj;
+
+	    String name = obj.toString();
+	    return valueOf(name.toUpperCase());
+	}
 
 }
 

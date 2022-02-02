@@ -924,10 +924,11 @@ or
      rules are the same as for the input values on the command line. And if the string cannot be interpreted as file names that exist, the
      entire string is just returned as-is as the result. The second (optional) expression is the name of the charset to use (system default
      if not given, or empty/null). The entire contents of the file(s) is returned, with the end-of-line sequences changed to just newline (0x0A or "\n"), and can be assigned to a variable or used in some other way.
-  <p>The <code>info</code> object contains five subobjects:  <code>version</code>, <code>os</code>, <code>java</code>, <code>locale</code>, and <code>timezone</code>. The contents of each are similar to this:
+  <p>The <code>info</code> object contains six subobjects:  <code>version</code>, <code>os</code>, <code>java</code>, <code>locale</code>, <code>timezone</code>, and <code>settings</code>. The contents of each are similar to this:
   <p class="indent">
     <code style="color:blue;">info.version</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">{ major: 2, minor: 3, patch: 0, prerelease: "-debug", build: "+9cce83e" }</code>
   <p>and the standard <code>"library.calc"</code> contains several examples of the use of these fields.
+  <p>The <code>info.settings</code> object is a read-only version of the internal settings which can be changed by the various directives (or the GUI "Settings" dialog), but not directly by attempting to set the various fields in this object (this may change at some point, though).
   <p>The values of <code>phi</code> and <code>PHI</code> (or <code>&#x03C6;</code> and <code>&#x03A6;</code>) (the <a href="https://en.wikipedia.org/wiki/Golden_ratio">&ldquo;Golden Ratio&rdquo;</a> and its inverse) are constructed (due to precision and rounding) such that <code>1 / phi == PHI</code> and also <code>1 / PHI == phi</code>.
      But even though mathematically <code>phi - 1 == PHI</code> and <code>PHI + 1 == phi</code> the values computed here will not match exactly
      ("PHI" will have one more fractional digit of precision than "phi"):

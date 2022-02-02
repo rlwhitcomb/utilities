@@ -83,6 +83,9 @@
  *	    #148: Method to construct map from Scriptable fields. Cleanup.
  *	24-Jan-2022 (rlwhitcomb)
  *	    #79: New method to convert an object to a byte array.
+ *	02-Feb-2022 (rlwhitcomb)
+ *	    #115: In "getMapFromObject" for the general case put the String value,
+ *	    not the object itself.
  */
 
 package info.rlwhitcomb.util;
@@ -390,7 +393,7 @@ public final class ClassUtil
 			    map.put(key, f.getBoolean(obj));
 			}
 			else {
-			    map.put(key, f.get(obj));
+			    map.put(key, f.get(obj).toString());
 			}
 		    }
 		    catch (IllegalAccessException ex) {

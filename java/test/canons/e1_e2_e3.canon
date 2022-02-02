@@ -155,13 +155,16 @@
 >---------
 >_junk5b05d -> junk[0]
 >=========
+>info.settings.trigMode -> "RADIANS"
 >Trig mode is now “DEGREES”.
+>info.settings.trigMode -> "DEGREES"
 >sin (45) -> 0.7071067811865477
 >cos (60) -> 0.4999999999999998
 >asin (sin (50)) -> 50.00000000000001
 >acos (cos (30)) -> 29.99999999999999
 >atan (tan (15)) -> 15
 >Trig mode is now “RADIANS”.
+>info.settings.trigMode -> "RADIANS"
 >Precision is now “60” digits.
 >π -> 3.14159265358979323846264338327950288419716939937510582097494
 >a = sin (π / 4) -> 0.707106781186547524400844362104849039284835937688474036588339

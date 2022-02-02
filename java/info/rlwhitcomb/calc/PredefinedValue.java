@@ -32,9 +32,12 @@
  *	    #135: Changes to allow ConstantValue to derive from this.
  *	24-Jan-2022 (rlwhitcomb)
  *	    #223: New method to decide if the value is a constant or not.
+ *	02-Feb-2022 (rlwhitcomb)
+ *	    #115: New "put" method to wrap values back into a map.
  */
 package info.rlwhitcomb.calc;
 
+import java.util.Map;
 import java.util.function.Supplier;
 
 
@@ -149,6 +152,18 @@ class PredefinedValue extends Scope
 	static void define(final ObjectScope scope, final String name, final Object value) {
 	    PredefinedValue predef = new PredefinedValue(name, value);
 	    scope.setValue(name, predef);
+	}
+
+	/**
+	 * Wrap the given map entry with one of ourselves, and put into the result map.
+	 *
+	 * @param entry		The entry to wrap.
+	 * @param resultMap	The result map to put into.
+	 */
+	static void put(final Map.Entry<String, Object> entry, Map<String, Object> resultMap) {
+	    String name = entry.getKey();
+	    PredefinedValue predef = new PredefinedValue(name, entry.getValue());
+	    resultMap.put(name, predef);
 	}
 
 }

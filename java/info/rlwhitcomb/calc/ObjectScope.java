@@ -40,6 +40,8 @@
  *	    Add another "setValue" without default "ignoreCase" parameter.
  *	18-Jan-2022 (rlwhitcomb)
  *	    Add "getKey" method.
+ *	02-Feb-2022 (rlwhitcomb)
+ *	    #115: Add new constructor that wraps any object that is "Scriptable".
  */
 package info.rlwhitcomb.calc;
 
@@ -50,6 +52,7 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
+import info.rlwhitcomb.util.ClassUtil;
 import info.rlwhitcomb.util.Intl;
 
 
@@ -87,6 +90,16 @@ class ObjectScope extends Scope
 	ObjectScope(final Map<String, Object> map) {
 	    super(Type.OBJECT);
 	    variables = new LinkedHashMap<>(map);
+	}
+
+	/**
+	 * Construct one of these given any old object with fields marked as <code>@Scriptable</code>
+	 *
+	 * @param obj A "Scriptable" object to wrap.
+	 * @see ClassUtil#getMapFromObject
+	 */
+	ObjectScope(final Object obj) {
+	    this(CalcPredefine.makePredefinedMap(ClassUtil.getMapFromObject(obj)));
 	}
 
 

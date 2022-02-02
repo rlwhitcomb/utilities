@@ -155,7 +155,10 @@ cast(junk[0], 'function')
 typeof(_junk5b05d)
 :var _junk5b05d
 
+info.settings.trigMode
 :degrees
+info.settings.trigMode
+
 sin(45)
 cos(60)
 asin(sin(50))
@@ -163,6 +166,7 @@ acos(cos(30))
 atan(tan(15))
 
 :rad
+info.settings.trigMode
 :dec 60
 π
 a = sin(π/4)

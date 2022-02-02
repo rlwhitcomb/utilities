@@ -489,6 +489,8 @@
  *	    #103: Implement complex number to real powers; complex number roots; '@i' formatting.
  *	01-Feb-2022 (rlwhitcomb)
  *	    #231: Move some constants out to Constants class.
+ *	02-Feb-2022 (rlwhitcomb)
+ *	    #115: Supply a read-only view of the Settings to CalcPredefine for "info.settings".
  */
 package info.rlwhitcomb.calc;
 
@@ -726,7 +728,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    else
 		return MathUtil.phi(mcDivide, true);
 	};
-
+	Supplier<Object> settingsSupplier = () -> {
+	    return new ObjectScope(settings);
+	};
 
 
 	public CalcObjectVisitor(
@@ -745,7 +749,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    arguments = new ArrayScope<Object>();
 
 	    pushScope(globals);
-	    CalcPredefine.define(globals, arguments, piWorker, phiSupplier, phi1Supplier);
+	    CalcPredefine.define(globals, arguments, piWorker, phiSupplier, phi1Supplier, settingsSupplier);
 
 	    initialized = true;
 	}
@@ -845,18 +849,18 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    return settings;
 	}
 
-	public String setTrigMode(final TrigMode newTrigMode) {
-	    settings.trigMode = newTrigMode;
+	public String setTrigMode(final Object mode) {
+	    settings.trigMode = TrigMode.getFrom(mode);
 
 	    displayDirectiveMessage("%calc#trigMode", settings.trigMode);
 
 	    return settings.trigMode.toString();
 	}
 
-	public String setUnits(final RangeMode mode) {
-	    settings.units = mode;
+	public String setUnits(final Object mode) {
+	    settings.units = RangeMode.getFrom(mode);
 
-	    switch (mode) {
+	    switch (settings.units) {
 		case BINARY:
 		    displayDirectiveMessage("%calc#unitsBinary");
 		    break;

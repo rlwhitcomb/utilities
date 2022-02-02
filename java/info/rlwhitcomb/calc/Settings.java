@@ -26,9 +26,12 @@
  *  History:
  *	26-Jan-2022 (rlwhitcomb)
  *	    Moved out of CalcObjectVisitor.
+ *	01-Feb-2022 (rlwhitcomb)
+ *	    Add Scriptable annotations.
  */
 package info.rlwhitcomb.calc;
 
+import info.rlwhitcomb.annotations.Scriptable;
 import info.rlwhitcomb.util.NumericUtil.RangeMode;
 
 
@@ -38,20 +41,35 @@ import info.rlwhitcomb.util.NumericUtil.RangeMode;
 public class Settings
 {
 	/** Whether trig inputs are in degrees or radians. */
+	@Scriptable
 	TrigMode trigMode;
+
 	/** The kind of units to use for the "@k" format. */
+	@Scriptable
 	RangeMode units;
+
 	/** Decimal vs. rational/fractional mode ({@code true} for rational); default {@code false}. */
+	@Scriptable
 	boolean rationalMode;
+
 	/** Separators displayed always. */
+	@Scriptable
 	boolean separatorMode;
+
 	/** Silent flag (set to true) while evaluating nested expressions (or via :quiet directive). */
+	@Scriptable
 	boolean silent;
+
 	/** Silence directives flag. */
+	@Scriptable
 	boolean silenceDirectives;
+
 	/** Ignore case when selecting members / variables. */
+	@Scriptable
 	boolean ignoreNameCase;
+
 	/** Quote strings on output. */
+	@Scriptable
 	boolean quoteStrings;
 
 	/**
