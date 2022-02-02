@@ -365,9 +365,9 @@
 >fill (str_b, '=', 25) -> "========================="
 >fill (str_b, '-', 0, 3) -> "---======================"
 >fill (str_b, '-', 22, 3) -> "---===================---"
->format ('%1$s, %2$s!', 'Hello', 'World') -> "Hello, World!"
->format ("Rate is %1$8.6f", 12.34567) -> "Rate is 12.345670"
->format ('Name: %1$-20s, Age: %2$5d', 'Agnes Brown', 97) -> "Name: Agnes Brown         , Age:    97"
+>formatstring ('%1$s, %2$s!', 'Hello', 'World') -> "Hello, World!"
+>formatstring ("Rate is %1$8.6f", 12.34567) -> "Rate is 12.345670"
+>formatstring ('Name: %1$-20s, Age: %2$5d', 'Agnes Brown', 97) -> "Name: Agnes Brown         , Age:    97"
 >arr_m = [10] -> [ 10 ]
 >pad (arr_m, 10, -1) -> [ -1, -1, -1, -1, -1, 10, -1, -1, -1, -1 ]
 >lpad (arr_m, 15, -2) -> [ -2, -2, -2, -2, -2, -1, -1, -1, -1, -1, 10, -1, -1, -1, -1 ]
@@ -589,12 +589,12 @@
 >length r -> 0
 >length s -> 0
 >r == s -> true
->str = 'abcdefg' -> "abcdefg"
->str[1] = 'z' -> "z"
->str[2] = 'y' -> "y"
->str[3] = 'xw' -> "xw"
->str[8] = 'new' -> "new"
->str -> "azyxwfg new"
+>format = 'abcdefg' -> "abcdefg"
+>format[1] = 'z' -> "z"
+>format[2] = 'y' -> "y"
+>format[3] = 'xw' -> "xw"
+>format[8] = 'new' -> "new"
+>format -> "azyxwfg new"
 >b = [[[1, 2], [3, 4], [5, 6]]] -> [ [ [ 1, 2 ], [ 3, 4 ], [ 5, 6 ] ] ]
 >b[0][0][1] = 11 -> 11
 >b[1] = [[7, 9], [0, 1], [3, 4]] -> [ [ 7, 9 ], [ 0, 1 ], [ 3, 4 ] ]

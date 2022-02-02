@@ -349,6 +349,10 @@
  *	    are actually missing, and should be defaulted.
  *	31-Jan-2022 (rlwhitcomb)
  *	    #212: Change grammar for "typeof" so we can recognize functions.
+ *	02-Feb-2022 (rlwhitcomb)
+ *	    We're having trouble with variables and fields named "format", so rename it
+ *	    until we get a better solution to fields with the same names as the predefined
+ *	    functions.
  */
 
 grammar Calc;
@@ -483,7 +487,7 @@ expr
    | K_SLICE ( expr3 | expr2 | expr1 )   # sliceExpr
    | K_SPLICE spliceArgs                 # spliceExpr
    | K_FILL fillArgs                     # fillExpr
-   | K_FORMAT exprN                      # formatExpr
+   | K_FORMATSTRING exprN                # formatExpr
    | K_SORT ( expr2 | expr1 )            # sortExpr
    | K_REVERSE expr1                     # reverseExpr
    | K_TRIM expr1                        # trimExpr
@@ -887,7 +891,7 @@ K_SPLICE   : 'splice' | 'SPLICE' | 'Splice' ;
 
 K_FILL     : 'fill' | 'FILL' | 'Fill' ;
 
-K_FORMAT   : 'format' | 'FORMAT' | 'Format' ;
+K_FORMATSTRING : 'formatstring' | 'FORMATSTRING' | 'FormatString' ;
 
 K_SORT     : 'sort' | 'SORT' | 'Sort' ;
 
