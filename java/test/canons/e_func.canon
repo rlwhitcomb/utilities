@@ -54,12 +54,22 @@
 > else 
 > $value 
 >}
->ifmany($_) -> "zero"
->ifmany($_) -> 0.5
->ifmany($_) -> "one"
->ifmany($_) -> 1.5
->ifmany($_) -> "two"
->ifmany($_) -> 2.5
->ifmany($_) -> "three"
->ifmany($_) -> "three and a half"
->ifmany($_) -> 4
+>"0 = zero"
+>"0.5 = 0.5"
+>"1 = one"
+>"1.5 = 1.5"
+>"2 = two"
+>"2.5 = 2.5"
+>"3 = three"
+>"3.5 = three and a half"
+>"4 = 4"
+>Defining function “type($value)” = `${$value} = ${typeof($value)}`
+>"0 = integer"
+>"0.5 = float"
+>"1 = integer"
+>"1.5 = float"
+>"2 = integer"
+>"2.5 = float"
+>"3 = integer"
+>"3.5 = float"
+>"4 = integer"

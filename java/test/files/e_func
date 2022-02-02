@@ -73,7 +73,13 @@ define ifmany($value) = {
     $value
 }
 
+:results on
 loop over 0..4,0.5 {
-  ifmany($_)
+  `$$_ = ${ifmany($_)}`
 }
+:results pop
+define type($value) = `${$value} = ${typeof($value)}`
+:results on
+loop over 0..4,0.5 type($_)
+:results pop
 
