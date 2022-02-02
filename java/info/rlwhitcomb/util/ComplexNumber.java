@@ -36,6 +36,7 @@
  *	01-Feb-2022 (rlwhitcomb)
  *	    #103: Powers of integer and real values, negate, another alias,
  *	    "toLongString" method, override "equals" and "hashCode".
+ *	    #231: Use new Constants values instead of our own.
  */
 package info.rlwhitcomb.util;
 
@@ -49,6 +50,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
+
+import static info.rlwhitcomb.util.Constants.*;
 
 
 /**
@@ -96,26 +99,6 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 	 * Map key indicating the imaginary part.
 	 */
 	private static final String IMAG_KEY = "i";
-
-	/** Decimal -one (for string formatting). */
-	private static final BigDecimal D_MINUS_ONE = BigDecimal.valueOf(-1);
-	/** Decimal two (to detect squares). */
-	private static final BigDecimal D_TWO = BigDecimal.valueOf(2);
-
-	/**
-	 * A static value of {@code (0, 0)} (or a real value of {@code 0.0}).
-	 */
-	public static final ComplexNumber ZERO = new ComplexNumber(0, 0);
-
-	/**
-	 * A static value of {@code (1, 0)} (or real {@code 1.0}).
-	 */
-	public static final ComplexNumber ONE = new ComplexNumber(1, 0);
-
-	/**
-	 * A static value of {@code (0, 1)} (or {@code i}).
-	 */
-	public static final ComplexNumber I = new ComplexNumber(0, 1);
 
 
 	/**
@@ -493,7 +476,7 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 	 * @return A complex number that is the negative of this one.
 	 */
 	public ComplexNumber negate() {
-	    if (equals(ZERO))
+	    if (equals(C_ZERO))
 		return this;
 
 	    if (realPart == null)
@@ -557,15 +540,15 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 	 */
 	public ComplexNumber power(final int n, final MathContext mc) {
 	    if (n < 0)
-		return ONE.divide(this, mc).power(-n, mc);
+		return C_ONE.divide(this, mc).power(-n, mc);
 
 	    if (n == 0)
-		return ONE;
+		return C_ONE;
 	    if (n == 1)
 		return this;
 
 	    ComplexNumber result = this;
-	    ComplexNumber factor = ONE;
+	    ComplexNumber factor = C_ONE;
 
 	    for (int p = n; p > 1; ) {
 		if (p % 2 == 0) {

@@ -1,10 +1,10 @@
 /*
- * Reads the "MathConstants.java" file, parses out the extant declarations there,
+ * Reads the "Constants.java" file, parses out the extant declarations there,
  * then does a search for .java files containing these values.
  */
 :quiet on
 :resultsonly on
-const INPUT_FILE = 'info/rlwhitcomb/util/MathConstants.java'
+const INPUT_FILE = 'info/rlwhitcomb/util/Constants.java'
 
 lines = split(trim(read(INPUT_FILE)), '\\r?\\n')
 

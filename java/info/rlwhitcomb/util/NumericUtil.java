@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2011,2013-2014,2016-2018,2020-2021 Roger L. Whitcomb.
+ * Copyright (c) 2011,2013-2014,2016-2018,2020-2022 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -154,6 +154,8 @@
  *	    Add a converter method for all the strange Unicode digit/number glyphs.
  *	02-Sep-2021 (rlwhitcomb)
  *	    Duration now uses BigInteger, not long (to fix overflow errors).
+ *	01-Feb-2022 (rlwhitcomb)
+ *	    #231: Use new Constants class values instead of our own.
  */
 package info.rlwhitcomb.util;
 
@@ -171,6 +173,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.*;
+
+import static info.rlwhitcomb.util.Constants.*;
 
 
 /**
@@ -313,16 +317,6 @@ public final class NumericUtil
 	}
 
 
-
-	public static final BigInteger MIN_BYTE  = BigInteger.valueOf(Byte.MIN_VALUE);
-	public static final BigInteger MAX_BYTE  = BigInteger.valueOf(Byte.MAX_VALUE);
-	public static final BigInteger MIN_SHORT = BigInteger.valueOf(Short.MIN_VALUE);
-	public static final BigInteger MAX_SHORT = BigInteger.valueOf(Short.MAX_VALUE);
-	public static final BigInteger MIN_INT   = BigInteger.valueOf(Integer.MIN_VALUE);
-	public static final BigInteger MAX_INT   = BigInteger.valueOf(Integer.MAX_VALUE);
-	public static final BigInteger MIN_LONG  = BigInteger.valueOf(Long.MIN_VALUE);
-	public static final BigInteger MAX_LONG  = BigInteger.valueOf(Long.MAX_VALUE);
-
 	private static final Pattern VALUE_MATCH= Pattern.compile("^([0-9]+)([kKmMgGtTpPeE][iI]?)[bB]?$");
 
 	private static final long MULT_KB = 1000L;
@@ -376,27 +370,8 @@ public final class NumericUtil
 	/** The pattern for recognizing duration values. */
 	private static final Pattern DURATION_PATTERN = Pattern.compile("(-)?([0-9]+([\\.][0-9]*)?)[ \t]*([wWdDhHmMsS])");
 
-	/** Number of nanoseconds in a second. */
-	private static final long NANOSECONDS = 1_000_000_000L;
-	/** Number of nanoseconds in one minute. */
-	private static final long ONE_MINUTE = 60L * NANOSECONDS;
-	/** Number of nanoseconds in one hour. */
-	private static final long ONE_HOUR = 60L * ONE_MINUTE;
-	/** Number of nanoseconds in twelve hours (for AM/PM conversions). */
-	private static final long TWELVE_HOURS = 12L * ONE_HOUR;
-	/** Number of nanoseconds in one day. */
-	private static final long ONE_DAY = TWELVE_HOURS * 2L;
-	/** Number of nanoseconds in one week. */
-	private static final long ONE_WEEK = 7L * ONE_DAY;
-
-	/** Decimal value of {@link #NANOSECONDS}. */
+	/** Decimal value of {@link Constants#NANOSECONDS}. */
 	private static final BigDecimal D_NANOS = BigDecimal.valueOf(NANOSECONDS);
-	/** Decimal value of 7. */
-	private static final BigDecimal D_7 = BigDecimal.valueOf(7L);
-	/** Decimal value of 24. */
-	private static final BigDecimal D_24 = BigDecimal.valueOf(24L);
-	/** Decimal value of 60. */
-	private static final BigDecimal D_60 = BigDecimal.valueOf(60L);
 
 
 	private static final String[] smallWords = {
@@ -1637,7 +1612,7 @@ public final class NumericUtil
 		switch (suffix.charAt(0)) {
 		    case 'w':
 		    case 'W':
-			value = value.multiply(D_7);
+			value = value.multiply(D_SEVEN);
 			// fall through
 		    case 'd':
 		    case 'D':

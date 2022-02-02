@@ -197,6 +197,8 @@
  *	    #208: Fix NPE when testclass is not specified after ":".
  *	21-Jan-2022 (rlwhitcomb)
  *	    #217: Use new Options method to parse environment default options.
+ *	01-Feb-2022 (rlwhitcomb)
+ *	    #231: Move some constants out to Constants class.
  */
 package info.rlwhitcomb.tester;
 
@@ -231,6 +233,7 @@ import name.fraser.neil.plaintext.diff_match_patch;
 
 import info.rlwhitcomb.Testable;
 import info.rlwhitcomb.util.CharUtil;
+import static info.rlwhitcomb.util.Constants.*;
 import info.rlwhitcomb.util.EchoInputStream;
 import info.rlwhitcomb.util.Environment;
 import info.rlwhitcomb.util.ExceptionUtil;
@@ -255,8 +258,6 @@ public class Tester
 {
 	private static final Pattern DESCRIPTION = Pattern.compile("^(\\s*\\{\\s*(\\d+)\\s*\\}\\s*)?([a-zA-Z0-9_/\\-\\\\\\$\\.]+)(,([\\w\\-]+))?\\s*\\:\\s*(.*)$");
 	private static final Pattern DIRECTIVE   = Pattern.compile("^([a-zA-Z]+)(\\s+(.*)\\s*)?$");
-
-	private static final Charset DEFAULT_CHARSET = Charset.defaultCharset();
 
 	private boolean createCanons = false;
 	private boolean verbose = false;

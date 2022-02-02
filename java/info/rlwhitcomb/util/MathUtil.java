@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2021 Roger L. Whitcomb.
+ * Copyright (c) 2021-2022 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -53,6 +53,8 @@
  *	    #95: Add "ratphi" and "fib2" to support it.
  *	29-Dec-2021 (rlwhitcomb)
  *	    #188: Add "ceil" and "floor" methods.
+ *	01-Feb-2022 (rlwhitcomb)
+ *	    #231: Use new Constants class values instead of our own.
  */
 package info.rlwhitcomb.util;
 
@@ -65,6 +67,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static info.rlwhitcomb.util.Constants.*;
+
 
 /**
  * A static class used for trigonometric and logarithmic calculations, as well as
@@ -75,10 +79,6 @@ public final class MathUtil
 {
 	private static final Logging logger = new Logging(MathUtil.class);
 
-	private static final BigInteger I_TWO  = BigInteger.valueOf(2L);
-	private static final BigDecimal D_TWO  = BigDecimal.valueOf(2L);
-	private static final BigDecimal D_FIVE = BigDecimal.valueOf(5L);
-	private static final BigDecimal D_TEN  = BigDecimal.valueOf(10L);
 
 	/**
 	 * A rational approximation of PI good to ~25 decimal digits.

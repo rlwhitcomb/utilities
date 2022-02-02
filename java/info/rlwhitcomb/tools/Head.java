@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2021 Roger L. Whitcomb.
+ * Copyright (c) 2021-2022 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -34,13 +34,14 @@
  *	    Get version and program title from properties file.
  *	27-Sep-2021 (rlwhitcomb)
  *	    Initialize the static variables inside "main" for testing purposes.
+ *	01-Feb-2022 (rlwhitcomb)
+ *	    Use new Constants values instead of our own.
  */
 package info.rlwhitcomb.tools;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.NoSuchFileException;
@@ -49,6 +50,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
+import static info.rlwhitcomb.util.Constants.*;
 import info.rlwhitcomb.util.Environment;
 import info.rlwhitcomb.util.ExceptionUtil;
 
@@ -64,14 +66,6 @@ public class Head
 	/** User can override this default, so this is the current. */
 	private static int linesToDisplay;
 
-	/** The default charset to use. */
-	private static final Charset DEFAULT_CHARSET = Charset.defaultCharset();
-	/** The ISO-8859-1 charset. */
-	private static final Charset ISO_8859_1_CHARSET = Charset.forName("ISO-8859-1");
-	/** The Windows-1252 charset. */
-	private static final Charset WIN_1252_CHARSET = Charset.forName("windows-1252");
-	/** A UTF-8 charset (another popular choice). */
-	private static final Charset UTF_8 = StandardCharsets.UTF_8;
 	/** The charset we will actually use. */
 	private static Charset cs;
 
@@ -99,7 +93,7 @@ public class Head
 		case "utf-8":
 		case "utf8":
 		case "utf":
-		    cs = UTF_8;
+		    cs = UTF_8_CHARSET;
 		    break;
 		case "iso-8859-1":
 		case "iso_8859_1":

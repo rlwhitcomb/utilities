@@ -71,6 +71,8 @@
  *	21-Jan-2021 (rlwhitcomb)
  *	    #217: Allow default options from CSVTEST_OPTIONS environment variable, using new
  *	    Options method.
+ *	01-Feb-2022 (rlwhitcomb)
+ *	    #231: Use new Constants class variables instead of our own.
  */
 package info.rlwhitcomb.test;
 
@@ -92,6 +94,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import info.rlwhitcomb.csv.*;
+import static info.rlwhitcomb.util.Constants.*;
 import info.rlwhitcomb.util.Environment;
 import info.rlwhitcomb.util.FileUtilities;
 import info.rlwhitcomb.util.Intl;
@@ -107,8 +110,6 @@ import info.rlwhitcomb.util.Options;
  */
 public class CSVTest
 {
-	private static final Charset utf8Charset = StandardCharsets.UTF_8;
-
 	private static Character quoteChar = null;
 	private static Quotes quote = null;
 	private static Character delimChar = null;
@@ -351,7 +352,7 @@ public class CSVTest
 	    try {
 		for (String file : fileList) {
 		    Reader reader = useUTF8 ?
-			new InputStreamReader(Files.newInputStream(Paths.get(file)), utf8Charset) :
+			new InputStreamReader(Files.newInputStream(Paths.get(file)), UTF_8_CHARSET) :
 			new FileReader(file);
 		    CSVReader csvr = new CSVReader(reader, format);
 		    int num = 0;
@@ -406,7 +407,7 @@ public class CSVTest
 			int compareErrors = 0;
 			File outputFile = FileUtilities.createTempFile("csvoutput");
 			Writer writer = useUTF8 ? 
-				new OutputStreamWriter(Files.newOutputStream(outputFile.toPath()), utf8Charset) :
+				new OutputStreamWriter(Files.newOutputStream(outputFile.toPath()), UTF_8_CHARSET) :
 				new FileWriter(outputFile);
 			CSVWriter csvw = new CSVWriter(writer, format);
 			for (CSVRecord outrec : recordList) {
@@ -419,7 +420,7 @@ public class CSVTest
 			int recordNumber = 0;
 			Iterator<CSVRecord> itr = recordList.iterator();
 			Reader reader2 = useUTF8 ?
-				new InputStreamReader(Files.newInputStream(outputFile.toPath()), utf8Charset) :
+				new InputStreamReader(Files.newInputStream(outputFile.toPath()), UTF_8_CHARSET) :
 				new FileReader(outputFile);
 			CSVReader csvr2 = new CSVReader(reader2, format);
 			CSVRecord record2 = null;

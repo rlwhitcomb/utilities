@@ -31,6 +31,7 @@
  *	    #103: Extend "I_ALIASES" (must agree with ComplexNumber).
  *	01-Feb-2022 (rlwhitcomb)
  *	    #103: Another I_ALIAS.
+ *	    #231: Use Constants class values instead of where they used to be.
  */
 package info.rlwhitcomb.calc;
 
@@ -52,6 +53,7 @@ import java.util.function.Supplier;
 import de.onyxbits.SemanticVersion;
 
 import info.rlwhitcomb.util.BigFraction;
+import static info.rlwhitcomb.util.Constants.*;
 import info.rlwhitcomb.util.CharUtil;
 import info.rlwhitcomb.util.ComplexNumber;
 import info.rlwhitcomb.util.Environment;
@@ -303,7 +305,7 @@ class CalcPredefine
 		PredefinedValue.define(globalScope, alias, supplier);
 	    }
 	    for (int i = 0; i < I_ALIASES.length; i++) {
-		PredefinedValue.define(globalScope, I_ALIASES[i], ComplexNumber.I);
+		PredefinedValue.define(globalScope, I_ALIASES[i], C_I);
 	    }
 
 	    globalScope.setValue(CalcObjectVisitor.ARG_ARRAY, arguments);

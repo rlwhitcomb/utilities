@@ -487,6 +487,8 @@
  *	31-Jan-2022 (rlwhitcomb)
  *	    #212: Changes to "typeof" to work right with functions.
  *	    #103: Implement complex number to real powers; complex number roots; '@i' formatting.
+ *	01-Feb-2022 (rlwhitcomb)
+ *	    #231: Move some constants out to Constants class.
  */
 package info.rlwhitcomb.calc;
 
@@ -551,8 +553,9 @@ import static info.rlwhitcomb.calc.CalcUtil.*;
 import info.rlwhitcomb.util.CharUtil;
 import static info.rlwhitcomb.util.CharUtil.Justification.*;
 import info.rlwhitcomb.util.ClassUtil;
-import static info.rlwhitcomb.util.ConsoleColor.Code.*;
 import info.rlwhitcomb.util.ComplexNumber;
+import static info.rlwhitcomb.util.ConsoleColor.Code.*;
+import static info.rlwhitcomb.util.Constants.*;
 import info.rlwhitcomb.util.Environment;
 import info.rlwhitcomb.util.ExceptionUtil;
 import info.rlwhitcomb.util.Intl;
@@ -607,12 +610,6 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	/** A BigInteger <code>-1</code> value (for repeated use here). */
 	private static final BigInteger I_MINUS_ONE = BigInteger.ONE.negate();
-
-	/**
-	 * The system-specific default charset to use for ":open" and ":save" when no other
-	 * charset is specified.
-	 */
-	private static final Charset DEFAULT_CHARSET = Charset.defaultCharset();
 
 	/** Whether we are running on Windows or not. */
 	private static final boolean RUNNING_ON_WINDOWS = Environment.isWindows();
@@ -2473,12 +2470,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		switch (op) {
 		    case "++":
 		    case "\u2795\u2795":
-			afterValue = cValue.add(ComplexNumber.ONE);
+			afterValue = cValue.add(C_ONE);
 			break;
 		    case "--":
 		    case "\u2212\u2212":
 		    case "\u2796\u2796":
-			afterValue = cValue.subtract(ComplexNumber.ONE);
+			afterValue = cValue.subtract(C_ONE);
 			break;
 		    default:
 			throw new UnknownOpException(op, ctx);
@@ -2540,12 +2537,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		switch (op) {
 		    case "++":
 		    case "\u2795\u2795":
-			afterValue = cValue.add(ComplexNumber.ONE);
+			afterValue = cValue.add(C_ONE);
 			break;
 		    case "--":
 		    case "\u2212\u2212":
 		    case "\u2796\u2796":
-			afterValue = cValue.subtract(ComplexNumber.ONE);
+			afterValue = cValue.subtract(C_ONE);
 			break;
 		    default:
 			throw new UnknownOpException(op, ctx);
