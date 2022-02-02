@@ -17,7 +17,7 @@
 >Record 5:
 >    1. '789'
 >    2. 'a"b'
->    3. 'd'e'
+>    3. 'd''e'
 >=============================
 >
 >Output file exactly equals original input file "test/data/test_quote.dsv".

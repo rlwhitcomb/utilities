@@ -73,6 +73,7 @@
  *	    Options method.
  *	01-Feb-2022 (rlwhitcomb)
  *	    #231: Use new Constants class variables instead of our own.
+ *	    #156: Properly quote output values.
  */
 package info.rlwhitcomb.test;
 
@@ -95,6 +96,7 @@ import java.util.List;
 
 import info.rlwhitcomb.csv.*;
 import static info.rlwhitcomb.util.Constants.*;
+import info.rlwhitcomb.util.CharUtil;
 import info.rlwhitcomb.util.Environment;
 import info.rlwhitcomb.util.FileUtilities;
 import info.rlwhitcomb.util.Intl;
@@ -362,7 +364,7 @@ public class CSVTest
 			    Intl.outFormat("csv#test.recordNum", ++num);
 			    int fld = 0;
 			    for (Object field : record) {
-				Intl.outFormat("csv#test.record", ++fld, field);
+				Intl.outFormat("csv#test.record", ++fld, CharUtil.addQuotes(field.toString()));
 			    }
 			    // Establish the baseline number of fields from the first record
 			    if (num == 1) {
@@ -383,7 +385,7 @@ public class CSVTest
 			    Intl.outFormat("csv#test.recordNum", ++num);
 			    int fld = 0;
 			    for (Object field : record) {
-				Intl.outFormat("csv#test.record", ++fld, field);
+				Intl.outFormat("csv#test.record", ++fld, CharUtil.addQuotes(field.toString()));
 			    }
 			    // Establish the baseline number of fields from the first record
 			    if (num == 1) {

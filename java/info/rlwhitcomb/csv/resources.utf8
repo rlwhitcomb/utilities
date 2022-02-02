@@ -1,7 +1,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2014-2016,2020-2021 Roger L. Whitcomb.
+# Copyright (c) 2014-2016,2020-2022 Roger L. Whitcomb.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -44,6 +44,8 @@
 #	    New options for CSVTest. Update help (with colors).
 #	15-Dec-2021 (rlwhitcomb)
 #	    #150: Update options for CSVTest. Fix help colors.
+#	01-Feb-2022 (rlwhitcomb)
+#	    #156: Properly quote value strings on output.
 #
 
 #
@@ -119,7 +121,7 @@ test.unknownDelim		= Unknown delimiter option "%1$s"!
 test.unknownSeparator		= Unknown separator option "%1$s"!
 test.noInputFiles		= No input files specified.
 test.recordNum			= Record %1$d:
-test.record			= "%1$5d. '%2$s'"
+test.record			= %1$5d. %2$s
 test.separator			= "============================="
 test.outputNoInput		= Record #%1$d: output record but no input record
 test.lengthMismatch		= Record #%1$d: length mismatch: input len=%2$d, output len=%3$d
