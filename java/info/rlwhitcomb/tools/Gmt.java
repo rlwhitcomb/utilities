@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2021 Roger L. Whitcomb.
+ * Copyright (c) 2021-2022 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -34,6 +34,8 @@
  *	    Move to new package.
  *	19-Dec-2021 (rlwhitcomb)
  *	    #158: Add ISO-8601 format and help.
+ *	01-Feb-2022 (rlwhitcomb)
+ *	    ISO format doesn't need any fixup; add milliseconds there.
  */
 package info.rlwhitcomb.tools;
 
@@ -55,7 +57,7 @@ public class Gmt
 	/** Output format compatible with our {@code Logging} class. */
 	private static final String LOGGING_FORMAT = "MMM dd,yyyy HH:mm:ss.SSS z";
 	/** Output format compatible with ISO-8601 format. */
-	private static final String ISO_8601_FORMAT = "yyyy-MM-dd'T'HH:mm:ss'Z'";
+	private static final String ISO_8601_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
 
 	/** The help text for this program. */
 	private static final String[] HELP = {
@@ -72,7 +74,7 @@ public class Gmt
 	    "\tExamples:",
 	    "\t  -log  -> Dec 20,2021 06:45:49.829 GMT",
 	    "\t  -date -> Mon Dec 20  6:46:19 GMT 2021",
-	    "\t  -iso  -> 2021-12-20T06:46:43Z",
+	    "\t  -iso  -> 2021-12-20T06:46:43.526Z",
 	    "\tdefault -> Mon Dec 20,2021  6:48:22.584 GMT",
 	    ""
 	};
@@ -144,10 +146,6 @@ public class Gmt
 		case DEFAULT_FORMAT:
 		    sub(buf, 8);
 		    sub(buf, 16);
-		    break;
-		case ISO_8601_FORMAT:
-		    sub(buf, 5);
-		    sub(buf, 10);
 		    break;
 	    }
 
