@@ -40,3 +40,20 @@
 >arr2(, , 3) -> [ 1, <null>, 3 ]
 >arr2(8) -> [ 8 ]
 >arr2(9, , 11) -> [ 9, <null>, 11 ]
+>Defining function “ifmany($value)” = {
+> if $value == 0 
+> 'zero' 
+> else if $value == 1 
+> 'one' 
+> else if $value == 2 
+> 'two' 
+> else if $value == 3 
+> 'three' 
+> else 
+> $value 
+>}
+>ifmany($_) -> "zero"
+>ifmany($_) -> "one"
+>ifmany($_) -> "two"
+>ifmany($_) -> "three"
+>ifmany($_) -> 4
