@@ -1103,7 +1103,7 @@ or
     <tr><td><code>:mixed</code></td><td>Unit multiplier based on powers of 2 (same as <code>:binary</code>), but with SI suffix <i>(default)</i></td><td><code>:mix</code></tr>
     <tr><td><code>:clear</code> [ <i>id</i> ( <code>,</code> <i>id</i> ) * ]</td><td>Clear all or only the specified variables (set values to <code>null</code>)</td><td><code>:clr</code></td></tr>
     <tr><td><code>:variables</code> [ <i>id</i> ( <code>,</code> <i>id</i> ) * ]</td><td>Display the values of all or only the specified variables<br>(for a function the definition will be displayed, not the current value)</td><td><code>:variable</code>, <code>:vars</code>, <code>:var</code></td></tr>
-    <tr><td><code>:predefined</code></td><td>Display the current values of all the predefined variables</td><td><code>:predefs</code>, <code>:predef</code></td></tr>
+    <tr><td><code>:predefined</code> [ <i>id</i> ( <code>,</code> <i>id</i> ) * ]</td><td>Display the current values of all the predefined variables</td><td><code>:predefs</code>, <code>:predef</code></td></tr>
     <tr><td><code>:echo</code> <i>expr</i></td><td>Echo the value of the expression to the output</td><td></td></tr>
     <tr><td><code>:include</code> <i>name_expr</i> ( <code>,</code> <i>charset_expr</i> )</td><td>Include the contents of the file(s) named by <i>name_expr</i>,<br>using the optional <i>charset_expr</i> as the charset</td><td><code>:inc</code>, <code>:load</code>, <code>:open</code>, <code>:lib</code>, <code>:library</code><br><code>:libs</code>, <code>:libraries</code></td></tr>
     <tr><td><code>:save</code> <i>name_expr</i> ( <code>,</code> <i>charset_expr</i> )</td><td>Save all variable values and function definitions in the file, using the optional charset</td><td>&nbsp;</td></tr>
@@ -1140,6 +1140,8 @@ or
   <p>If a string constant of any kind is given as the argument to <code>:echo</code> the surrounding quotes will be removed, and any
      embedded quotes will be unescaped before the message is displayed. Obviously, the same is true for the contents of variables
      (since the values are stored this way).
+  <p>The <code>id</code> values for <code>:clear</code>, <code>:variables</code>, and <code>:predefined</code> can be wild-card values, such as
+     <code>t*</code> or <code>?a?</code>. Only values matching these patterns will be displayed or cleared.
   <p>The only effect of debug mode is to display the parse tree (in LISP format) before the expression(s) is/are evaluated.
   <p>Timing mode displays the total parsing and execution time (to nanosecond precision on some systems) after the results are displayed.
 </div>
@@ -1147,11 +1149,15 @@ or
 <hr id="Standard_Libraries_of_Functions" class="sectionsep">
   <h2>Standard Libraries of Functions</h2>
 <div class="cols">
-  <p>There are currently two "standard" libraries available in the <code>test/files</code> directory of the source code:  <code>"library"</code> and
-     <code>"lib_mort"</code>.  Since the contents of these libraries change frequently, you should open the current versions in the GUI window
-     or your favorite text editor to examine the contents before using them.  There is also a "help_mort" function defined in "lib_mort" to explain its use.
+  <p>There is currently a "standard" library available in the <code>test/files</code> directory of the source code:  <code>"library.calc"</code>.
+     Since the contents of this library changes frequently, you should open the current version in the GUI window
+     or your favorite text editor to examine the contents before using any of the functions.  There is also a "help_mort" function defined
+     that explains the finance-related code.
   <p>At a minimum, the "library" has code to convert to/from our date values and the standard Excel&trade; date values, and do other date-related manipulation.
-     The "lib_mort" library has some mortgage-related (or "time value of money") functions defined.
+     There are also some mortgage-related (or "time value of money") functions defined.
+  <p>The "library.calc" file is version-stamped at the beginning, so that this library must match the current version of Calc in order to be loaded. The <code>:save</code> also places the current version stamp into the saved file. This mechanism ensures that an older version of Calc will
+     not be able to load a new library (since it might depend on features not present in the older version).
+  <p>Any file of compatible expressions and directives can be used as a "library". The only requirement is that the name be listed in a <code>-library</code> option on the command line, or included in any other script using <code>:include</code>.
 </div>
 <a class="top-link" href="#topofpage">Top</a>
 <hr id="GUI_Operations" class="sectionsep">
@@ -1168,6 +1174,7 @@ or
   <p>This help page will also be displayed by the <span class="bluebutton">?</span> button (or the <code>F1</code> key).
   <p>Note: colors are not currently used in the GUI display, so using the command-line options <code>-darkbg</code> or <code>-lightbg</code>, or the "Colors" setting in the GUI "Window Settings" tab will have no effect.
   <p>Most of the settings available using Directives can be set in the GUI using the Settings dialog (the <span class="orangebutton">&#x2261;</span> button or <code>F2</code> key).
+  <p>The calculation settings are also available (read-only) by accesssing the fields in the <code>info.settings</code> object.
 </div>
   <div class="center">
   <br><img src="calc_settings.png" alt="GUI Settings screen" width="40%">

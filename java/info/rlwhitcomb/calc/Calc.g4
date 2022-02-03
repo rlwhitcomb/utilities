@@ -353,9 +353,14 @@
  *	    We're having trouble with variables and fields named "format", so rename it
  *	    until we get a better solution to fields with the same names as the predefined
  *	    functions.
+ *	    #230: Allow wildcards on ":variables", ":clear", and ":predefs".
  */
 
 grammar Calc;
+
+@lexer::members {
+boolean allowWild = false;
+}
 
 prog
    : stmt* EOF
@@ -699,8 +704,10 @@ directive
    | D_BINARY                                 # binaryDirective
    | D_SI                                     # siDirective
    | D_MIXED                                  # mixedDirective
-   | D_CLEAR idList ?                         # clearDirective
    | D_ECHO expr ?                            # echoDirective
+   | D_CLEAR wildIdList ?                     # clearDirective
+   | D_VARIABLES wildIdList ?                 # variablesDirective
+   | D_PREDEFINED wildIdList ?                # predefinedDirective
    | D_INCLUDE expr ( ',' expr ) ?            # includeDirective
    | D_SAVE expr ( ',' expr ) ?               # saveDirective
    | D_TIMING modeOption                      # timingDirective
@@ -709,8 +716,6 @@ directive
    | D_RESULTSONLY modeOption                 # resultsOnlyDirective
    | D_QUIET modeOption                       # quietDirective
    | D_SILENCE modeOption                     # silenceDirective
-   | D_VARIABLES idList ?                     # variablesDirective
-   | D_PREDEFINED                             # predefinedDirective
    | D_SEPARATORS modeOption                  # separatorsDirective
    | D_IGNORECASE modeOption                  # ignoreCaseDirective
    | D_QUOTESTRINGS modeOption                # quoteStringsDirective
@@ -730,6 +735,18 @@ idList
 
 id
    : ID
+   | MODES
+   | REPLACE_MODES
+   ;
+
+wildIdList
+   : '[' wildId ( ',' wildId ) * ']'
+   | wildId ( ',' wildId ) *
+   | '[' ']'
+   ;
+
+wildId
+   : WILD_ID
    | MODES
    | REPLACE_MODES
    ;
@@ -986,12 +1003,14 @@ K_LEAVE    : 'leave' | 'LEAVE' | 'Leave' ;
 K_TIMETHIS : 'timethis' | 'TIMETHIS' | 'TimeThis' ;
 
 
+WILD_ID : ( NAME_START_CHAR | '?' | '*' ) ( NAME_CHAR | '?' | '*' ) * {allowWild}?
+        ;
+
 /* Note: this needs to be last so that these other "ID" like things
  * will be recognized first. */
 
 ID     : NAME_START_CHAR NAME_CHAR *
        ;
-
 
 DOTS
        : '...'
@@ -1207,8 +1226,8 @@ D_RATIONAL
    ;
 
 D_CLEAR
-   : DIR  ( 'clear' | 'CLEAR' | 'Clear' )
-   | DIR  ( 'clr'   | 'CLR'   | 'Clr'   )
+   : DIR  ( 'clear' | 'CLEAR' | 'Clear' ) { allowWild = true; }
+   | DIR  ( 'clr'   | 'CLR'   | 'Clr'   ) { allowWild = true; }
    ;
 
 D_ECHO
@@ -1258,16 +1277,16 @@ D_SILENCE
    ;
 
 D_VARIABLES
-   : DIR  ( 'variables' | 'VARIABLES' | 'Variables' )
-   | DIR  ( 'variable'  | 'VARIABLE'  | 'Variable'  )
-   | DIR  ( 'vars'      | 'VARS'      | 'Vars'      )
-   | DIR  ( 'var'       | 'VAR'       | 'Var'       )
+   : DIR  ( 'variables' | 'VARIABLES' | 'Variables' ) { allowWild = true; }
+   | DIR  ( 'variable'  | 'VARIABLE'  | 'Variable'  ) { allowWild = true; }
+   | DIR  ( 'vars'      | 'VARS'      | 'Vars'      ) { allowWild = true; }
+   | DIR  ( 'var'       | 'VAR'       | 'Var'       ) { allowWild = true; }
    ;
 
 D_PREDEFINED
-   : DIR  ( 'predefined' | 'PREDEFINED' | 'Predefined' )
-   | DIR  ( 'predefs'    | 'PREDEFS'    | 'Predefs'    )
-   | DIR  ( 'predef'     | 'PREDEF'     | 'Predef'     )
+   : DIR  ( 'predefined' | 'PREDEFINED' | 'Predefined' ) { allowWild = true; }
+   | DIR  ( 'predefs'    | 'PREDEFS'    | 'Predefs'    ) { allowWild = true; }
+   | DIR  ( 'predef'     | 'PREDEF'     | 'Predef'     ) { allowWild = true; }
    ;
 
 D_SEPARATORS
@@ -1537,10 +1556,10 @@ LINE_ESCAPE
    ;
 
 EOL
-   : NL
+   : NL {allowWild = false;}
    ;
 
 ENDEXPR
-   : ';'
+   : ';' {allowWild = false;}
    ;
 

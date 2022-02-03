@@ -42,6 +42,8 @@
  *	    Add "getKey" method.
  *	02-Feb-2022 (rlwhitcomb)
  *	    #115: Add new constructor that wraps any object that is "Scriptable".
+ *	03-Feb-2022 (rlwhitcomb)
+ *	    #230: Add "getWildValues" for doing wildcard searches.
  */
 package info.rlwhitcomb.calc;
 
@@ -52,6 +54,7 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 
+import info.rlwhitcomb.directory.Match;
 import info.rlwhitcomb.util.ClassUtil;
 import info.rlwhitcomb.util.Intl;
 
@@ -143,6 +146,41 @@ class ObjectScope extends Scope
 	 */
 	Object getValue(final String name, final boolean ignoreCase) {
 	    return getValueImpl(name, ignoreCase);
+	}
+
+	/**
+	 * Get possibly multiple values from a wildcard key search.
+	 *
+	 * @param wildName   The wildcard variable name to search for.
+	 * @param ignoreCase Whether case is important in finding the name(s).
+	 * @return           The entries found (could be empty).
+	 */
+	Map<String, Object> getWildValuesImpl(final String wildName, final boolean ignoreCase) {
+	    // We have to enumerate the entries ourselves, since there are no "normal" mechanisms
+	    // for doing a wildcard match.
+	    Map<String, Object> values = new LinkedHashMap<>();
+
+	    // The names could have been saved either with case-sensitive mode or not,
+	    // so the keys are always case-sensitive, and we need to search the entry set
+	    // and do case-insensitive compares of the keys
+	    for (Map.Entry<String, Object> entry : variables.entrySet()) {
+		String key = entry.getKey();
+		if (Match.stringMatch(key, wildName, !ignoreCase)) {
+		    values.put(key, entry.getValue());
+		}
+	    }
+	    return values;
+	}
+
+	/**
+	 * Get possibly multiple values with a wild-card key search.
+	 *
+	 * @param wildName   The variable name to search for, presumably "wild".
+	 * @param ignoreCase Whether case is important in finding the name.
+	 * @return           The entry map of the actual keys and values found.
+	 */
+	Map<String, Object> getWildValues(final String wildName, final boolean ignoreCase) {
+	    return getWildValuesImpl(wildName, ignoreCase);
 	}
 
 	/**

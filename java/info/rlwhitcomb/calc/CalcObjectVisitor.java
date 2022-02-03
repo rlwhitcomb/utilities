@@ -493,6 +493,8 @@
  *	    #115: Supply a read-only view of the Settings to CalcPredefine for "info.settings".
  *	    #115: Move "mc" and "mcDivide" into Settings.
  *	    #234: Convert integer loop veriables to BigInteger so that "===" works inside loops against the index var.
+ *	03-Feb-2022 (rlwhitcomb)
+ *	    #230: Add id list to ":predefs", allow wildcards in ":vars", ":clear", and now ":predefs" too.
  */
 package info.rlwhitcomb.calc;
 
@@ -552,6 +554,7 @@ import de.onyxbits.SemanticVersion;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
 
+import info.rlwhitcomb.directory.Match;
 import info.rlwhitcomb.util.BigFraction;
 import static info.rlwhitcomb.calc.CalcUtil.*;
 import info.rlwhitcomb.util.CharUtil;
@@ -1202,13 +1205,23 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    return setUnits(RangeMode.MIXED);
 	}
 
+	private int addName(String name, StringBuilder message) {
+	    if (message.length() > 0)
+		message.append(", ");
+
+	    int lastNamePos = message.length();
+	    message.append("'").append(name).append("'");
+
+	    return lastNamePos;
+	}
+
 	@Override
 	public Object visitClearDirective(CalcParser.ClearDirectiveContext ctx) {
-	    CalcParser.IdListContext idList = ctx.idList();
-	    List<CalcParser.IdContext> ids;
+	    CalcParser.WildIdListContext idList = ctx.wildIdList();
+	    List<CalcParser.WildIdContext> ids;
 	    int numberCleared = 0;
 
-	    if (idList == null || (ids = idList.id()).isEmpty()) {
+	    if (idList == null || (ids = idList.wildId()).isEmpty()) {
 		Iterator<Map.Entry<String, Object>> iter = globals.map().entrySet().iterator();
 		while (iter.hasNext()) {
 		    Map.Entry<String, Object> entry = iter.next();
@@ -1224,20 +1237,35 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    else {
 		StringBuilder vars = new StringBuilder();
 		int lastNamePos = 0;
-		for (CalcParser.IdContext node : ids) {
+		for (CalcParser.WildIdContext node : ids) {
 		    String varName = node.getText();
 		    if (varName.equals("<missing ID>"))
 			continue;
-		    Object value = globals.getValue(varName, settings.ignoreNameCase);
-		    if (!(value instanceof ConstantValue) && (value instanceof PredefinedValue))
-			continue;
-		    numberCleared++;
-		    globals.remove(varName, settings.ignoreNameCase);
-		    if (vars.length() > 0)
-			vars.append(", ");
-		    lastNamePos = vars.length();
-		    vars.append("'").append(varName).append("'");
+
+		    if (Match.hasWildCards(varName)) {
+			Map<String, Object> values = globals.getWildValues(varName, settings.ignoreNameCase);
+			for (Map.Entry<String, Object> entry : values.entrySet()) {
+			    Object value = entry.getValue();
+			    if (!(value instanceof ConstantValue) && (value instanceof PredefinedValue))
+				continue;
+
+			    numberCleared++;
+			    String name = entry.getKey();
+			    globals.remove(name, settings.ignoreNameCase);
+			    lastNamePos = addName(name, vars);
+			}
+		    }
+		    else {
+			Object value = globals.getValue(varName, settings.ignoreNameCase);
+			if (!(value instanceof ConstantValue) && (value instanceof PredefinedValue))
+			    continue;
+
+			numberCleared++;
+			globals.remove(varName, settings.ignoreNameCase);
+			lastNamePos = addName(varName, vars);
+		    }
 		}
+
 		if (numberCleared > 0) {
 		    if (numberCleared == 1) {
 			vars.insert(0, Intl.getString("calc#varOneVariable"));
@@ -1258,19 +1286,34 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    return BigInteger.valueOf(numberCleared);
 	}
 
+	private void displayValue(String key, Object value, ParserRuleContext ctx) {
+	    if ((!(value instanceof ConstantValue) && (value instanceof PredefinedValue)) || key.startsWith("$")) {
+		return;
+	    }
+
+	    if (value instanceof FunctionDeclaration) {
+		FunctionDeclaration func = (FunctionDeclaration) value;
+		displayer.displayResult(func.getFullFunctionName(), getTreeText(func.getFunctionBody()));
+	    }
+	    else {
+		displayer.displayResult(key, toStringValue(this, ctx, value, true, settings.separatorMode));
+	    }
+	}
+
 	@Override
 	public Object visitVariablesDirective(CalcParser.VariablesDirectiveContext ctx) {
-	    CalcParser.IdListContext idList = ctx.idList();
-	    List<CalcParser.IdContext> ids;
+	    CalcParser.WildIdListContext idList = ctx.wildIdList();
+	    List<CalcParser.WildIdContext> ids;
 	    Set<String> sortedKeys;
+	    int numberDisplayed = 0;
 
-	    if (idList == null || (ids = idList.id()).isEmpty()) {
+	    if (idList == null || (ids = idList.wildId()).isEmpty()) {
 		sortedKeys = new TreeSet<>(globals.keySet());
 	    }
 	    else {
 		sortedKeys = new TreeSet<>();
-		ids = idList.id();
-		for (CalcParser.IdContext node : ids) {
+		ids = idList.wildId();
+		for (CalcParser.WildIdContext node : ids) {
 		    sortedKeys.add(node.getText());
 		}
 	    }
@@ -1282,31 +1325,67 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		displayActionMessage("%calc#variables");
 		displayActionMessage("%calc#varUnder1");
 	    }
+
 	    for (String key : sortedKeys) {
-		Object value = globals.getValue(key, settings.ignoreNameCase);
-		if ((!(value instanceof ConstantValue) && (value instanceof PredefinedValue)) || key.startsWith("$")) {
-		    continue;
-		}
-		else if (value instanceof FunctionDeclaration) {
-		    FunctionDeclaration func = (FunctionDeclaration) value;
-		    displayer.displayResult(func.getFullFunctionName(), getTreeText(func.getFunctionBody()));
+		if (Match.hasWildCards(key)) {
+		    Map<String, Object> entries = globals.getWildValues(key, settings.ignoreNameCase);
+		    for (Map.Entry<String, Object> entry : entries.entrySet()) {
+			displayValue(entry.getKey(), entry.getValue(), ctx);
+			numberDisplayed++;
+		    }
 		}
 		else {
-		    displayer.displayResult(key, toStringValue(this, ctx, value, true, settings.separatorMode));
+		    Object value = globals.getValue(key, settings.ignoreNameCase);
+		    displayValue(key, value, ctx);
+		    numberDisplayed++;
 		}
 	    }
+
 	    if (!replMode) {
 		displayActionMessage("%calc#varUnder2");
 	    }
 
 	    Calc.setResultsOnlyMode(oldMode);
 
-	    return BigInteger.valueOf(sortedKeys.size());
+	    return BigInteger.valueOf(numberDisplayed);
+	}
+
+	private void displayPredefValue(String key, Object value, ParserRuleContext ctx) {
+	    if ((!(value instanceof ConstantValue) && (value instanceof PredefinedValue)) || key.startsWith("$")) {
+		if (key.startsWith("$")) {
+		    displayer.displayResult(key, toStringValue(this, ctx, value, true, settings.separatorMode));
+		}
+		else {
+		    PredefinedValue predef = (PredefinedValue) value;
+		    if (predef.isConstant()) {
+			displayer.displayResult(key, toStringValue(this, ctx, value, true, settings.separatorMode));
+		    }
+		    else {
+			displayer.displayResult(key, Intl.formatString("calc#predefVariable",
+				toStringValue(this, ctx, value, true, settings.separatorMode)));
+		    }
+		}
+	    }
 	}
 
 	@Override
 	public Object visitPredefinedDirective(CalcParser.PredefinedDirectiveContext ctx) {
-	    Set<String> sortedKeys = new TreeSet<>(globals.keySet());
+	    CalcParser.WildIdListContext idList = ctx.wildIdList();
+	    List<CalcParser.WildIdContext> ids;
+	    Set<String> sortedKeys;
+	    int numberDisplayed = 0;
+
+	    if (idList == null || (ids = idList.wildId()).isEmpty()) {
+		sortedKeys = new TreeSet<>(globals.keySet());
+	    }
+	    else {
+		sortedKeys = new TreeSet<>();
+		ids = idList.wildId();
+		for (CalcParser.WildIdContext node : ids) {
+		    sortedKeys.add(node.getText());
+		}
+	    }
+
 	    boolean oldMode = Calc.setResultsOnlyMode(false);
 	    boolean replMode = Calc.getReplMode();
 
@@ -1314,31 +1393,29 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		displayActionMessage("%calc#predefined");
 		displayActionMessage("%calc#preUnder1");
 	    }
+
 	    for (String key : sortedKeys) {
-		Object value = globals.getValue(key, settings.ignoreNameCase);
-		if ((!(value instanceof ConstantValue) && (value instanceof PredefinedValue)) || key.startsWith("$")) {
-		    if (key.startsWith("$")) {
-			displayer.displayResult(key, toStringValue(this, ctx, value, true, settings.separatorMode));
-		    }
-		    else {
-			PredefinedValue predef = (PredefinedValue) value;
-			if (predef.isConstant()) {
-			    displayer.displayResult(key, toStringValue(this, ctx, value, true, settings.separatorMode));
-			}
-			else {
-			    displayer.displayResult(key, Intl.formatString("calc#predefVariable",
-				toStringValue(this, ctx, value, true, settings.separatorMode)));
-			}
+		if (Match.hasWildCards(key)) {
+		    Map<String, Object> values = globals.getWildValues(key, settings.ignoreNameCase);
+		    for (Map.Entry<String, Object> entry : values.entrySet()) {
+			displayPredefValue(entry.getKey(), entry.getValue(), ctx);
+			numberDisplayed++;
 		    }
 		}
+		else {
+		    Object value = globals.getValue(key, settings.ignoreNameCase);
+		    displayPredefValue(key, value, ctx);
+		    numberDisplayed++;
+		}
 	    }
+
 	    if (!replMode) {
 		displayActionMessage("%calc#preUnder2");
 	    }
 
 	    Calc.setResultsOnlyMode(oldMode);
 
-	    return BigInteger.valueOf(sortedKeys.size());
+	    return BigInteger.valueOf(numberDisplayed);
 	}
 
 	@Override

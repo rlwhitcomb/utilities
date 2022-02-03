@@ -16,4 +16,6 @@ sqrt(2)/2
 sin(𝛑/4)
 √ (𝛑 + ⅚ + 𝜋)
 info.version
-
+greeting = 'Hello'
+name = 'World'
+`$greeting, $name!`

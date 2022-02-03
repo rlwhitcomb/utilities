@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2021 Roger L. Whitcomb.
+ * Copyright (c) 2021-2022 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -32,8 +32,13 @@
  *	    the way "getValue" works so that we get/set things in the proper scope.
  *	19-Oct-2021 (rlwhitcomb)
  *	    Change return value of "remove" to the previous value.
+ *	03-Feb-2022 (rlwhitcomb)
+ *	    Add "getWildValues" here for wild-card search.
  */
 package info.rlwhitcomb.calc;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 
 /**
@@ -94,7 +99,7 @@ class NestedScope extends ObjectScope
 	/**
 	 * Search for a value in this and any enclosing scope(s).
 	 *
-	 * @param name  Name of the variable to search for.
+	 * @param name       Name of the variable to search for.
 	 * @param ignoreCase Whether to ignore case in the search.
 	 * @return           The value of the variable, if found, or {@code null} if not.
 	 */
@@ -108,6 +113,23 @@ class NestedScope extends ObjectScope
 		return scope.getValueImpl(name, ignoreCase);
 
 	    return null;
+	}
+
+	/**
+	 * Get possibly multiple values with a wild-card key search.
+	 *
+	 * @param wildName   The variable name to search for, presumably "wild".
+	 * @param ignoreCase Whether to ignore case in the search.
+	 * @return           The entry map of the actual keys and values found.
+	 */
+	Map<String, Object> getWildValues(final String wildName, final boolean ignoreCase) {
+	    Map<String, Object> allValues = new LinkedHashMap<>();
+
+	    for (NestedScope scope = this; scope != null; scope = scope.enclosingScope) {
+		Map<String, Object> localValues = scope.getWildValuesImpl(wildName, ignoreCase);
+		allValues.putAll(localValues);
+	    }
+	    return allValues;
 	}
 
 	/**

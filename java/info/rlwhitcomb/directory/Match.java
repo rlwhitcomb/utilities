@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2020 Roger L. Whitcomb.
+ * Copyright (c) 2020,2022 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,8 +27,11 @@
  * Change History:
  *    02-Oct-2020 (rlwhitcomb)
  *	Finished conversion from C.
+ *    03-Feb-2022 (rlwhitcomb)
+ *	Add "hasWildCards" method for use with Calc.
  */
 package info.rlwhitcomb.directory;
+
 
 /**
  * String and character matching methods, because we need wildcard and
@@ -40,6 +43,17 @@ package info.rlwhitcomb.directory;
  */
 public class Match
 {
+	/**
+	 * Check if a pattern has any wild card characters in it (because if not, then
+	 * regular matching works fine, without having to use these methods).
+	 *
+	 * @param pattern The pattern to check.
+	 * @return        Whether the pattern has any <code>'?'</code> or <code>'*'</code> in it.
+	 */
+	public static boolean hasWildCards(final String pattern) {
+	    return (pattern.indexOf('?') >= 0 || pattern.indexOf('*') >= 0);
+	}
+
 	/**
 	 * Decide whether or not the given pattern is a string
 	 * of all "*" characters, meaning it should match any input.
@@ -131,7 +145,7 @@ public class Match
 	    int patLen = pattern.length();
 	    int inpLen = input.length();
 
-	    for (pPos = 0; pPos < patLen; pPos += pCount) {
+	    for (pPos = 0; pPos < patLen && iPos < inpLen; pPos += pCount) {
 		int iChar = input.codePointAt(iPos);
 		int pChar = pattern.codePointAt(pPos);
 
@@ -187,5 +201,6 @@ public class Match
 	    // Here we ran out of pattern, so we have a match if we also ran out of input
 	    return (iPos >= inpLen);
 	}
+
 }
 

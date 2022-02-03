@@ -90,6 +90,14 @@ fib -1
 fib -2
 fib -6
 fib 200
+oldPrec = info.settings.precision
+:dec 100
+sum = 0
+:quiet on
+loop $f over 100..200 { sum += fib($f) }
+:quiet pop
+sum
+:dec oldPrec
 
 # Trig and log functions
 J = 1; ++J; J;
