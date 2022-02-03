@@ -684,12 +684,6 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	/** Name for global argument count value. */
 	static final String ARG_COUNT = "$#";
 
-	/** Constant value for sqrt (x ** 1/2). */
-	static final BigDecimal ONE_HALF = new BigDecimal("0.5");
-
-	/** Constant value for fort (x ** 1/4). */
-	static final BigDecimal ONE_FOURTH = new BigDecimal("0.25");
-
 
 	/**
 	 * Access the currently active symbol table, whether the globals,
@@ -2994,7 +2988,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    if (value instanceof ComplexNumber) {
 		ComplexNumber cValue = (ComplexNumber) value;
-		return cValue.pow(ONE_HALF, settings.mc);
+		return cValue.pow(D_ONE_HALF, settings.mc);
 	    }
 	    else {
 		try {
@@ -3013,7 +3007,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    if (value instanceof ComplexNumber) {
 		ComplexNumber cValue = (ComplexNumber) value;
-		return cValue.pow(BigDecimal.ONE.divide(BigDecimal.valueOf(3), settings.mcDivide), settings.mc);
+		return cValue.pow(BigDecimal.ONE.divide(D_THREE, settings.mcDivide), settings.mc);
 	    }
 	    else {
 		return MathUtil.cbrt(convertToDecimal(value, settings.mc, expr), settings.mc);
@@ -3027,7 +3021,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    if (value instanceof ComplexNumber) {
 		ComplexNumber cValue = (ComplexNumber) value;
-		return cValue.pow(ONE_FOURTH, settings.mc);
+		return cValue.pow(D_ONE_FOURTH, settings.mc);
 	    }
 	    else {
 		try {

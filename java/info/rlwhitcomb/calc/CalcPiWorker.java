@@ -41,6 +41,7 @@ import java.util.concurrent.Semaphore;
 import java.util.function.Supplier;
 
 import info.rlwhitcomb.util.BigFraction;
+import static info.rlwhitcomb.util.Constants.*;
 import info.rlwhitcomb.util.MathUtil;
 import info.rlwhitcomb.util.QueuedThread;
 
@@ -59,9 +60,6 @@ public class CalcPiWorker
 	private BigDecimal e;
 	private BigDecimal pi;
 	private BigDecimal piOver180;
-
-	/** Value used to help convert radians back and forth to degrees. */
-	private static final BigDecimal B180 = BigDecimal.valueOf(180L);
 
 	/** The captive thread used to do the background calculations. */
 	private final QueuedThread queuedThread = new QueuedThread();
@@ -117,7 +115,7 @@ public class CalcPiWorker
 	private void calculate() {
 	    e         = MathUtil.e(precision + 1);
 	    pi        = MathUtil.pi(precision + 1);
-	    piOver180 = pi.divide(B180, mc);
+	    piOver180 = pi.divide(D_180, mc);
 
 	    // Release a permit to say the calculation results are now available
 	    readySem.release();

@@ -26,6 +26,8 @@
  *  History:
  *	01-Feb-2022 (rlwhitcomb)
  *	    #231: Created from constants already defined in other places.
+ *	02-Feb-2022 (rlwhitcomb)
+ *	    #231: More values.
  */
 package info.rlwhitcomb.util;
 
@@ -90,8 +92,20 @@ public final class Constants
 	/** A {@link BigDecimal} value of <code>-1</code>. */
 	public static final BigDecimal D_MINUS_ONE = BigDecimal.valueOf(-1);
 
+	/** A {@link BigDecimal} value of <code>0.1</code>. */
+	public static final BigDecimal D_ONE_TENTH = new BigDecimal("0.1");
+
+	/** A {@link BigDecimal} value of <code>0.25</code>. */
+	public static final BigDecimal D_ONE_FOURTH = new BigDecimal("0.25");
+
+	/** A {@link BigDecimal} value of <code>0.5</code>. */
+	public static final BigDecimal D_ONE_HALF = new BigDecimal("0.5");
+
 	/** A {@link BigDecimal} value of <code>2</code>. */
 	public static final BigDecimal D_TWO = BigDecimal.valueOf(2);
+
+	/** A {@link BigDecimal} value of <code>3</code>. */
+	public static final BigDecimal D_THREE = BigDecimal.valueOf(3);
 
 	/** A {@link BigDecimal} value of <code>5</code>. */
 	public static final BigDecimal D_FIVE = BigDecimal.valueOf(5);
@@ -107,6 +121,9 @@ public final class Constants
 
 	/** A {@link BigDecimal} value of <code>60</code>. */
 	public static final BigDecimal D_60 = BigDecimal.valueOf(60);
+
+	/** A {@link BigDecimal} value of <code>180</code>. */
+	public static final BigDecimal D_180 = BigDecimal.valueOf(180);
 
 
 	/** A complex number corresponding to {@code i}. */

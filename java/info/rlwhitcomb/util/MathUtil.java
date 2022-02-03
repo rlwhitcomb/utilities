@@ -656,8 +656,7 @@ public final class MathUtil
 		return BigDecimal.ZERO;
 
 	    BigDecimal result     = xValue;
-	    BigInteger FOUR       = BigInteger.valueOf(4L);
-	    BigInteger twoPower   = FOUR;
+	    BigInteger twoPower   = I_FOUR;
 	    BigDecimal xPower     = xValue;
 	    BigDecimal xSquared   = xValue.multiply(xValue);
 	    BigInteger factTerm   = I_TWO;
@@ -667,7 +666,7 @@ public final class MathUtil
 
 	    // This seems to require (precision/4) * input/0.1 iterations, so for
 	    // precision 20, about 5 * 0.1, for 34 about 8 * 0.1, etc.
-	    int approxRange = (int)Math.floor(xValue.divide(new BigDecimal("0.1"), mc).doubleValue()) + 1;
+	    int approxRange = (int)Math.floor(xValue.divide(D_ONE_TENTH, mc).doubleValue()) + 1;
 	    int loopCountPerRange = (mc.getPrecision() + 3) / 4;
 	    int loops = (approxRange + approxRange / 6) * loopCountPerRange + 3;
 	    logger.debug("tan: precision = %1$d, approx range = %2$d, loops per = %3$d -> loops = %4$d", mc.getPrecision(), approxRange, loopCountPerRange, loops);
@@ -678,7 +677,7 @@ public final class MathUtil
 	    }
 
 	    for (int i = 2; i < loops; i++) {
-		twoPower  = twoPower.multiply(FOUR);
+		twoPower  = twoPower.multiply(I_FOUR);
 		xPower    = xPower.multiply(xSquared);
 		numer     = twoPower.multiply(twoPower.subtract(BigInteger.ONE));
 		factTerm  = factTerm.add(BigInteger.ONE);
@@ -761,7 +760,7 @@ public final class MathUtil
 		BigDecimal x2 = result.multiply(result);
 		BigDecimal x3 = x2.multiply(result);
 		BigDecimal numer = xValue.subtract(x3);
-		BigDecimal denom = x2.multiply(BigDecimal.valueOf(3L));
+		BigDecimal denom = x2.multiply(D_THREE);
 		result = result.add(numer.divide(denom, mc), mc);
 		logger.debug("cbrt: result = %1$s, lastResult = %2$s", result.toPlainString(), lastResult.toPlainString());
 		if (result.equals(lastResult)) {
@@ -1055,7 +1054,7 @@ public final class MathUtil
 	}
 
 
-	private static final BigInteger MAX_PRIME = BigInteger.valueOf(Integer.MAX_VALUE);
+	private static final BigInteger MAX_PRIME = MAX_INT;
 
 	private static BigInteger primeSieve = BigInteger.ZERO;
 	private static int primeSieveMax = -1;
@@ -1217,7 +1216,7 @@ public final class MathUtil
 		factors.add(-intFactor);
 
 	    // For 1, 2, and 3 we are done already
-	    if (posN.compareTo(BigInteger.valueOf(3)) <= 0)
+	    if (posN.compareTo(I_THREE) <= 0)
 		return;
 
 	    BigInteger factor = I_TWO;
@@ -1426,7 +1425,7 @@ public final class MathUtil
 		throw new Intl.IllegalArgumentException("util#numeric.outOfRange");
 
 	    BigDecimal y = BigDecimal.ZERO;
-	    BigDecimal b = new BigDecimal("0.5");
+	    BigDecimal b = D_ONE_HALF;
 	    BigDecimal x = input;
 
 	    // Get the integer number power required to get the input between one and two
