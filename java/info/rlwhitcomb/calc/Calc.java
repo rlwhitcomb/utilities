@@ -243,6 +243,8 @@
  *	    #217: Delegate environment options parsing to new Options method.
  *	30-Jan-2022 (rlwhitcomb)
  *	    #132: More work on disabling actions.
+ *	03-Feb-2022 (rlwhitcomb)
+ *	    #132: Need to enable Calc and Clear after GUI file load.
  */
 package info.rlwhitcomb.calc;
 
@@ -1248,6 +1250,7 @@ public class Calc
 			    Alert.alert(MessageType.ERROR, ExceptionUtil.toString(ioe), ioe.getClass().getSimpleName(), null, mainWindow, null);
 			}
 			inputTextPane.setText(buf.toString());
+			characterListener.enableActions();
 		    });
 		}
 	}
