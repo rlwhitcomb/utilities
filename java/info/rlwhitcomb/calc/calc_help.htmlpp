@@ -55,7 +55,7 @@ h2 {
     border: 1px solid cornflowerblue;
     -webkit-border-radius: 20px;
     border-radius: 20px;
-    font-size: 110%;
+    font-size: 130%;
 }
 
 .toc_title {
