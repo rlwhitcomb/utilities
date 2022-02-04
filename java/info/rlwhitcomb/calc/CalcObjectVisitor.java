@@ -497,6 +497,7 @@
  *	    #230: Add id list to ":predefs", allow wildcards in ":vars", ":clear", and now ":predefs" too.
  *	04-Feb-2022 (rlwhitcomb)
  *	    Refactor a bit and fix bugs with return value of ":clear", ":vars", and ":predefs".
+ *	    #237: Tiny fix to not list duplicates because of "$*" as a predefined value.
  */
 package info.rlwhitcomb.calc;
 
@@ -1229,10 +1230,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	 * @return	Whether or not to consider this key/value as predefined.
 	 */
 	private boolean isPredefined(String key, Object value, boolean includesParams) {
-	    if (includesParams)
-		return (!(value instanceof ConstantValue) && (value instanceof PredefinedValue)) || key.startsWith("$");
-	    else
-		return !(value instanceof ConstantValue) && (value instanceof PredefinedValue);
+	    boolean isPredefinedType = (value instanceof Scope) && ((Scope) value).isPredefined();
+
+	    return isPredefinedType || (includesParams && key.startsWith("$"));
 	}
 
 	@Override
@@ -1397,6 +1397,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    List<CalcParser.WildIdContext> ids;
 	    Set<String> sortedKeys;
 	    int numberDisplayed = 0;
+	    boolean listSpecific = false;
 
 	    if (idList == null || (ids = idList.wildId()).isEmpty()) {
 		sortedKeys = new TreeSet<>(globals.keySet());
@@ -1407,6 +1408,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		for (CalcParser.WildIdContext node : ids) {
 		    sortedKeys.add(node.getText());
 		}
+		listSpecific = true;
 	    }
 
 	    boolean oldMode = Calc.setResultsOnlyMode(false);
@@ -1418,7 +1420,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 
 	    for (String key : sortedKeys) {
-		if (Match.hasWildCards(key)) {
+		if (listSpecific && Match.hasWildCards(key)) {
 		    Map<String, Object> values = globals.getWildValues(key, settings.ignoreNameCase);
 		    for (Map.Entry<String, Object> entry : values.entrySet()) {
 			if (displayPredefValue(entry.getKey(), entry.getValue(), ctx))

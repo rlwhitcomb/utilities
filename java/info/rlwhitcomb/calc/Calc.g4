@@ -354,6 +354,8 @@
  *	    until we get a better solution to fields with the same names as the predefined
  *	    functions.
  *	    #230: Allow wildcards on ":variables", ":clear", and ":predefs".
+ *	04-Feb-2022 (rlwhitcomb)
+ *	    #237: Need to allow WILD_ID to include the "$" and "#" characters.
  */
 
 grammar Calc;
@@ -1003,7 +1005,8 @@ K_LEAVE    : 'leave' | 'LEAVE' | 'Leave' ;
 K_TIMETHIS : 'timethis' | 'TIMETHIS' | 'TimeThis' ;
 
 
-WILD_ID : ( NAME_START_CHAR | '?' | '*' ) ( NAME_CHAR | '?' | '*' ) * {allowWild}?
+/* This has to include the localvar and globalvar variants */
+WILD_ID : ( '$' | NAME_START_CHAR | '?' | '*' ) ( '#' | NAME_CHAR | '?' | '*' ) * {allowWild}?
         ;
 
 /* Note: this needs to be last so that these other "ID" like things

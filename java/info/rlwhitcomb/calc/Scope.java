@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2021 Roger L. Whitcomb.
+ * Copyright (c) 2021-2022 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,8 +29,10 @@
  *	    Initial coding.
  *	26-Oct-2021 (rlwhitcomb)
  *	    Add PREDEFINED type.
- *	21-Jan-2021 (rlwhitcomb)
+ *	21-Jan-2022 (rlwhitcomb)
  *	    #135: Add CONSTANT; refactor "toString()".
+ *	04-Feb-2022 (rlwhitcomb)
+ *	    Add "isPredefined" method.
  */
 package info.rlwhitcomb.calc;
 
@@ -47,22 +49,31 @@ class Scope
 	{
 		/** The global symbol table. */
 		GLOBAL,
+
 		/** A user-defined object (map). */
 		OBJECT,
+
 		/** A user-defined array (list). */
 		ARRAY,
+
 		/** A {@code LOOP} statement block. */
 		LOOP,
+
 		/** An {@code IF} or {@code ELSE} statement block. */
 		IF,
+
 		/** A {@code WHILE} statement block. */
 		WHILE,
+
 		/** A {@code CASE} statement block. */
 		CASE,
+
 		/** A user-defined function, which includes a local symbol table. */
 		FUNCTION,
+
 		/** A predefined variable or function. */
 		PREDEFINED,
+
 		/** A constant value, evaluated once and cached. */
 		CONSTANT
 	}
@@ -90,6 +101,16 @@ class Scope
 	Type getType() {
 	    return this.type;
 	}
+
+	/**
+	 * Is this a predefined value type?
+	 *
+	 * @return Whether or not the type is {@Link Type#PREDEFINED}.
+	 */
+	public boolean isPredefined() {
+	    return this.type == Type.PREDEFINED;
+	}
+
 
 	@Override
 	public String toString() {
