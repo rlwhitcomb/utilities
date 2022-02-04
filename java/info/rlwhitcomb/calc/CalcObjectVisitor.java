@@ -495,6 +495,8 @@
  *	    #234: Convert integer loop veriables to BigInteger so that "===" works inside loops against the index var.
  *	03-Feb-2022 (rlwhitcomb)
  *	    #230: Add id list to ":predefs", allow wildcards in ":vars", ":clear", and now ":predefs" too.
+ *	04-Feb-2022 (rlwhitcomb)
+ *	    Refactor a bit and fix bugs with return value of ":clear", ":vars", and ":predefs".
  */
 package info.rlwhitcomb.calc;
 
@@ -1215,6 +1217,24 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    return lastNamePos;
 	}
 
+	/**
+	 * Is the value a predefined object, which may or may not include any parameters of this scope
+	 * (key starts with "$").
+	 *
+	 * @param key	The object's key (name).
+	 * @param value	Value of the object, which would need to be some form of {@link PredefinedValue}
+	 *		to return true.
+	 * @param includesParams If {@code true} then keys starting with "$" are considered "predefined",
+	 *		but if {@code false} they are not.
+	 * @return	Whether or not to consider this key/value as predefined.
+	 */
+	private boolean isPredefined(String key, Object value, boolean includesParams) {
+	    if (includesParams)
+		return (!(value instanceof ConstantValue) && (value instanceof PredefinedValue)) || key.startsWith("$");
+	    else
+		return !(value instanceof ConstantValue) && (value instanceof PredefinedValue);
+	}
+
 	@Override
 	public Object visitClearDirective(CalcParser.ClearDirectiveContext ctx) {
 	    CalcParser.WildIdListContext idList = ctx.wildIdList();
@@ -1227,7 +1247,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    Map.Entry<String, Object> entry = iter.next();
 		    String key = entry.getKey();
 		    Object value = entry.getValue();
-		    if ((!(value instanceof ConstantValue) && (value instanceof PredefinedValue)) || key.startsWith("$"))
+		    if (isPredefined(key, value, true))
 			continue;
 		    iter.remove();
 		    numberCleared++;
@@ -1245,19 +1265,20 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    if (Match.hasWildCards(varName)) {
 			Map<String, Object> values = globals.getWildValues(varName, settings.ignoreNameCase);
 			for (Map.Entry<String, Object> entry : values.entrySet()) {
+			    String name = entry.getKey();
 			    Object value = entry.getValue();
-			    if (!(value instanceof ConstantValue) && (value instanceof PredefinedValue))
+			    // Explicitly allow clearing a parameter value if named in the list
+			    if (isPredefined(name, value, false))
 				continue;
 
 			    numberCleared++;
-			    String name = entry.getKey();
 			    globals.remove(name, settings.ignoreNameCase);
 			    lastNamePos = addName(name, vars);
 			}
 		    }
 		    else {
 			Object value = globals.getValue(varName, settings.ignoreNameCase);
-			if (!(value instanceof ConstantValue) && (value instanceof PredefinedValue))
+			if (isPredefined(varName, value, false))
 			    continue;
 
 			numberCleared++;
@@ -1286,18 +1307,18 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    return BigInteger.valueOf(numberCleared);
 	}
 
-	private void displayValue(String key, Object value, ParserRuleContext ctx) {
-	    if ((!(value instanceof ConstantValue) && (value instanceof PredefinedValue)) || key.startsWith("$")) {
-		return;
+	private boolean displayValue(String key, Object value, ParserRuleContext ctx) {
+	    if (!isPredefined(key, value, true)) {
+		if (value instanceof FunctionDeclaration) {
+		    FunctionDeclaration func = (FunctionDeclaration) value;
+		    displayer.displayResult(func.getFullFunctionName(), getTreeText(func.getFunctionBody()));
+		}
+		else {
+		    displayer.displayResult(key, toStringValue(this, ctx, value, true, settings.separatorMode));
+		}
+		return true;
 	    }
-
-	    if (value instanceof FunctionDeclaration) {
-		FunctionDeclaration func = (FunctionDeclaration) value;
-		displayer.displayResult(func.getFullFunctionName(), getTreeText(func.getFunctionBody()));
-	    }
-	    else {
-		displayer.displayResult(key, toStringValue(this, ctx, value, true, settings.separatorMode));
-	    }
+	    return false;
 	}
 
 	@Override
@@ -1330,14 +1351,14 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		if (Match.hasWildCards(key)) {
 		    Map<String, Object> entries = globals.getWildValues(key, settings.ignoreNameCase);
 		    for (Map.Entry<String, Object> entry : entries.entrySet()) {
-			displayValue(entry.getKey(), entry.getValue(), ctx);
-			numberDisplayed++;
+			if (displayValue(entry.getKey(), entry.getValue(), ctx))
+			    numberDisplayed++;
 		    }
 		}
 		else {
 		    Object value = globals.getValue(key, settings.ignoreNameCase);
-		    displayValue(key, value, ctx);
-		    numberDisplayed++;
+		    if (displayValue(key, value, ctx))
+			numberDisplayed++;
 		}
 	    }
 
@@ -1350,8 +1371,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    return BigInteger.valueOf(numberDisplayed);
 	}
 
-	private void displayPredefValue(String key, Object value, ParserRuleContext ctx) {
-	    if ((!(value instanceof ConstantValue) && (value instanceof PredefinedValue)) || key.startsWith("$")) {
+	private boolean displayPredefValue(String key, Object value, ParserRuleContext ctx) {
+	    if (isPredefined(key, value, true)) {
 		if (key.startsWith("$")) {
 		    displayer.displayResult(key, toStringValue(this, ctx, value, true, settings.separatorMode));
 		}
@@ -1365,7 +1386,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 				toStringValue(this, ctx, value, true, settings.separatorMode)));
 		    }
 		}
+		return true;
 	    }
+	    return false;
 	}
 
 	@Override
@@ -1398,14 +1421,14 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		if (Match.hasWildCards(key)) {
 		    Map<String, Object> values = globals.getWildValues(key, settings.ignoreNameCase);
 		    for (Map.Entry<String, Object> entry : values.entrySet()) {
-			displayPredefValue(entry.getKey(), entry.getValue(), ctx);
-			numberDisplayed++;
+			if (displayPredefValue(entry.getKey(), entry.getValue(), ctx))
+			    numberDisplayed++;
 		    }
 		}
 		else {
 		    Object value = globals.getValue(key, settings.ignoreNameCase);
-		    displayPredefValue(key, value, ctx);
-		    numberDisplayed++;
+		    if (displayPredefValue(key, value, ctx))
+			numberDisplayed++;
 		}
 	    }
 
