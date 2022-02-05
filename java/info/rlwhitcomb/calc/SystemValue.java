@@ -86,6 +86,7 @@ class SystemValue<V> extends Scope
 	/**
 	 * Define one of these into the given symbol table.
 	 *
+	 * @param <V>    Type of value for this system variable.
 	 * @param scope	 The symbol table in which to define it.
 	 * @param obj    Object where this value resides.
 	 * @param name   Name of the field for this value.

@@ -109,7 +109,7 @@ class Scope
 	/**
 	 * Is this a predefined value type?
 	 *
-	 * @return Whether or not the type is {@Link Type#PREDEFINED}.
+	 * @return Whether or not the type is {@link Type#PREDEFINED}.
 	 */
 	public boolean isPredefined() {
 	    return this.type == Type.PREDEFINED;
