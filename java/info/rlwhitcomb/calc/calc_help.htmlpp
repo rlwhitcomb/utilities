@@ -646,7 +646,7 @@ or
           the current date, comparable to <code>d'2021/11/19'</code><br>
           the current time, comparable to <code>h'11:10 am'</code><br>
           current Calc information (<code>version</code>, <code>os</code>, etc.)<br>
-          the current Calc settings (<code>trigMode</code>, <code>separatorMode</code>, etc.)<br>
+          the current Calc settings (<code>trigMode</code>, <code>silent</code>, etc.)<br>
           that constant value, as in <code>"Hello"</code>, <code>127</code>, or <code>0xA8</code></td><td>N/A</td></tr>
     <tr><td>30</td><td><code>{</code> (&nbsp;<i>key:value pairs</i>&nbsp;) <code>}</code></td><td>define an object</td><td>left to right</td></tr>
     <tr><td>29</td><td><code>[</code> (&nbsp;<i>expr list</i>&nbsp;) <code>]</code><br><i>var</i> <code>[</code> <i>expr</i> <code>]</code> or <i>var</i>&nbsp;<code>&#x2080;</code> .. <code>&#x2089;</code></td><td>define an array,<br>or access elements of an array, string, or object</td><td>left to right</td></tr>
