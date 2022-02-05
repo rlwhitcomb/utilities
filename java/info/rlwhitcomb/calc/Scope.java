@@ -33,6 +33,7 @@
  *	    #135: Add CONSTANT; refactor "toString()".
  *	04-Feb-2022 (rlwhitcomb)
  *	    Add "isPredefined" method.
+ *	    #233: Add SYSTEM_VALUE, used for Settings.
  */
 package info.rlwhitcomb.calc;
 
@@ -75,7 +76,10 @@ class Scope
 		PREDEFINED,
 
 		/** A constant value, evaluated once and cached. */
-		CONSTANT
+		CONSTANT,
+
+		/** A "system" value, set by method, accessed by field. */
+		SYSTEM_VALUE
 	}
 
 	/**

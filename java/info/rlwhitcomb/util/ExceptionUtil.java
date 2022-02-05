@@ -69,6 +69,8 @@
  *	    Add ParseException to the mix.
  *	22-Jan-2022 (rlwhitcomb)
  *	    IllegalFormatException needs name as well as message.
+ *	04-Feb-20222 (rlwhitcomb)
+ *	    NoSuchFieldException needs name also.
  */
 package info.rlwhitcomb.util;
 
@@ -235,7 +237,8 @@ public final class ExceptionUtil
 			  || (next instanceof NumberFormatException)
 			  || (next instanceof StringIndexOutOfBoundsException)
 			  || (next instanceof UnknownFormatConversionException)
-			  || (next instanceof IllegalFormatException)) {
+			  || (next instanceof IllegalFormatException)
+			  || (next instanceof NoSuchFieldException)) {
 			msg = String.format("%1$s \"%2$s\"", exceptionName(next), msg);
 		    }
 		    else if (next instanceof ParseException) {

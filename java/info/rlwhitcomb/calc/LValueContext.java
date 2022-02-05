@@ -86,6 +86,8 @@
  *	    #135: Add support for constant values.
  *	30-Jan-2022 (rlwhitcomb)
  *	    #229: Fix defaulting of missing actual parameters.
+ *	05-Feb-2022 (rlwhitcomb)
+ *	    #233: Implement calling "setValue" for SystemValue.
  */
  package info.rlwhitcomb.calc;
 
@@ -312,6 +314,7 @@ class LValueContext
 	@SuppressWarnings("unchecked")
 	public Object putContextObject(final CalcObjectVisitor visitor, final Object value) {
 	    Object contextObject = context;
+	    Object returnValue = value;
 
 	    if (contextObject instanceof ConstantValue) {
 		ConstantValue constant = (ConstantValue) contextObject;
@@ -359,8 +362,16 @@ class LValueContext
 		    PredefinedValue predef = (PredefinedValue) oldValue;
 		    throw new CalcExprException(varCtx, "%calc#noChangePredefined", predef.getName(), "");
 		}
-
-		map.setValue(name, ignoreCase, value);
+		else if (oldValue instanceof SystemValue) {
+		    SystemValue sysValue = (SystemValue) oldValue;
+		    sysValue.setValue(value);
+		    // Transformation might have happened in the "setValue", so reget the value
+		    // afterward so we know what happened in transit
+		    returnValue = sysValue.getValue();
+		}
+		else {
+		    map.setValue(name, ignoreCase, value);
+		}
 	    }
 	    else if (index >= 0) {
 		if (context instanceof ArrayScope) {
@@ -387,7 +398,7 @@ class LValueContext
 	    }
 
 	    // For convenience for the assignment operators, return the value
-	    return value;
+	    return returnValue;
 	}
 
 	/**

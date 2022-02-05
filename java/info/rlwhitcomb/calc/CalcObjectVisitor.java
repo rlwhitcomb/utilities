@@ -498,6 +498,8 @@
  *	04-Feb-2022 (rlwhitcomb)
  *	    Refactor a bit and fix bugs with return value of ":clear", ":vars", and ":predefs".
  *	    #237: Tiny fix to not list duplicates because of "$*" as a predefined value.
+ *	05-Feb-2022 (rlwhitcomb)
+ *	    #233: Implement SystemValue as a way to set value via the "settings" object.
  */
 package info.rlwhitcomb.calc;
 
@@ -724,9 +726,6 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    else
 		return MathUtil.phi(settings.mcDivide, true);
 	};
-	Supplier<Object> settingsSupplier = () -> {
-	    return new ObjectScope(settings);
-	};
 
 
 	public CalcObjectVisitor(
@@ -739,29 +738,31 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	{
 	    displayer = resultDisplayer;
 	    settings  = new Settings(rational, separators, silence, ignoreCase, quotes);
-	    setMathContext(MathContext.DECIMAL128);
+	    setIntMathContext(MathContext.DECIMAL128);
 
 	    globals   = new GlobalScope();
 	    arguments = new ArrayScope<Object>();
 
 	    pushScope(globals);
-	    CalcPredefine.define(globals, arguments, piWorker, phiSupplier, phi1Supplier, settingsSupplier);
+	    CalcPredefine.define(globals, arguments, piWorker, phiSupplier, phi1Supplier);
+
+	    ObjectScope sets = new ObjectScope();
+	    PredefinedValue.define(globals, "settings", sets);
+
+	    SystemValue.define(sets, settings, "trigMode",          this::setTrigMode         );
+	    SystemValue.define(sets, settings, "units",             this::setUnits            );
+	    SystemValue.define(sets, settings, "rationalMode",      this::setRationalMode     );
+	    SystemValue.define(sets, settings, "separatorMode",     this::setSeparatorMode    );
+	    SystemValue.define(sets, settings, "silent",            Calc::setQuietMode        );
+	    SystemValue.define(sets, settings, "silenceDirectives", Calc::setSilenceMode      );
+	    SystemValue.define(sets, settings, "ignoreNameCase",    this::setIgnoreCaseMode   );
+	    SystemValue.define(sets, settings, "quoteStrings",      this::setQuoteStringsMode );
+	    SystemValue.define(sets, settings, "precision",         this::setPrecision        );
+	    sets.setImmutable(true);
 
 	    initialized = true;
 	}
 
-
-	public boolean setSilent(final boolean newSilent) {
-	    boolean oldSilent = settings.silent;
-	    settings.silent = newSilent;
-	    return oldSilent;
-	}
-
-	public boolean setSilenceDirectives(final boolean newSilence) {
-	    boolean oldSilence = settings.silenceDirectives;
-	    settings.silenceDirectives = newSilence;
-	    return oldSilence;
-	}
 
 
 	private void displayDirectiveMessage(final String formatOrKey, final Object... args) {
@@ -810,6 +811,10 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 
+	public Settings getSettings() {
+	    return settings;
+	}
+
 	public MathContext getMathContext() {
 	    return settings.mc;
 	}
@@ -823,26 +828,38 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 	}
 
-	public BigInteger setMathContext(final MathContext newMathContext) {
-	    int prec    = newMathContext.getPrecision();
-	    settings.mc = newMathContext;
+	public int setMathContext(final MathContext newMathContext) {
+	    settings.mc        = newMathContext;
+	    settings.precision = newMathContext.getPrecision();
 
 	    // Use a limited precision of our max digits in the case of unlimited precision
-	    settings.mcDivide = (prec == 0) ? MC_MAX_DIGITS : newMathContext;
+	    settings.mcDivide = (settings.precision == 0) ? MC_MAX_DIGITS : newMathContext;
 
 	    // Either create the worker object, or trigger a recalculation
 	    triggerPiCalculation();
 
-	    if (prec == 0)
+	    if (settings.precision == 0)
 		displayDirectiveMessage("%calc#precUnlimited");
 	    else
-		displayDirectiveMessage("%calc#precDigits", prec);
+		displayDirectiveMessage("%calc#precDigits", settings.precision);
 
-	    return BigInteger.valueOf(prec);
+	    return settings.precision;
 	}
 
-	public Settings getSettings() {
-	    return settings;
+	public BigInteger setIntMathContext(final MathContext newMathContext) {
+	    return BigInteger.valueOf(setMathContext(newMathContext));
+	}
+
+	public boolean setSilent(final boolean newSilent) {
+	    boolean oldSilent = settings.silent;
+	    settings.silent = newSilent;
+	    return oldSilent;
+	}
+
+	public boolean setSilenceDirectives(final boolean newSilence) {
+	    boolean oldSilence = settings.silenceDirectives;
+	    settings.silenceDirectives = newSilence;
+	    return oldSilence;
 	}
 
 	public String setTrigMode(final Object mode) {
@@ -871,43 +888,43 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    return settings.units.toString();
 	}
 
-	public boolean setSeparatorMode(final boolean mode) {
+	public boolean setSeparatorMode(final Object mode) {
 	    boolean oldMode = settings.separatorMode;
-	    settings.separatorMode = mode;
+	    settings.separatorMode = CharUtil.getBooleanValue(mode);
 
-	    displayDirectiveMessage("%calc#separatorMode", mode);
+	    displayDirectiveMessage("%calc#separatorMode", settings.separatorMode);
 
 	    return oldMode;
 	}
 
-	public boolean setIgnoreCaseMode(final boolean mode) {
+	public boolean setIgnoreCaseMode(final Object mode) {
 	    boolean oldMode = settings.ignoreNameCase;
-	    settings.ignoreNameCase = mode;
-	    currentContext.setIgnoreCase(mode);
+	    settings.ignoreNameCase = CharUtil.getBooleanValue(mode);
+	    currentContext.setIgnoreCase(settings.ignoreNameCase);
 
-	    displayDirectiveMessage("%calc#ignoreCaseMode", mode);
+	    displayDirectiveMessage("%calc#ignoreCaseMode", settings.ignoreNameCase);
 
 	    return oldMode;
 	}
 
-	public boolean setQuoteStringsMode(final boolean mode) {
+	public boolean setQuoteStringsMode(final Object mode) {
 	    boolean oldMode = settings.quoteStrings;
-	    settings.quoteStrings = mode;
+	    settings.quoteStrings = CharUtil.getBooleanValue(mode);
 
-	    displayDirectiveMessage("%calc#quoteStringsMode", mode);
+	    displayDirectiveMessage("%calc#quoteStringsMode", settings.quoteStrings);
 
 	    return oldMode;
 	}
 
-	public boolean setRationalMode(final boolean mode) {
+	public boolean setRationalMode(final Object mode) {
 	    boolean oldMode = settings.rationalMode;
 
-	    settings.rationalMode = mode;
-	    piWorker.setRational(mode);
+	    settings.rationalMode = CharUtil.getBooleanValue(mode);
+	    piWorker.setRational(settings.rationalMode);
 
 	    String msg;
 
-	    if (mode) {
+	    if (settings.rationalMode) {
 		msg = Intl.getString("calc#rational");
 	    }
 	    else {
@@ -1028,6 +1045,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    if (returnValue instanceof PredefinedValue) {
 		returnValue = ((PredefinedValue) returnValue).getValue();
 	    }
+	    if (returnValue instanceof SystemValue) {
+		returnValue = ((SystemValue) returnValue).getValue();
+	    }
 
 	    return returnValue;
 	}
@@ -1141,7 +1161,6 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 
 	    int precision = 0;
-	    BigInteger ret = null;
 
 	    try {
 		precision = dPrecision.intValueExact();
@@ -1150,37 +1169,53 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		throw new CalcExprException(ctx, "%calc#precNotInteger", dPrecision);
 	    }
 
-	    if (precision == 0) {
-		ret = setMathContext(MathContext.UNLIMITED);
-	    }
-	    else if (precision > 1 && precision <= MC_MAX_DIGITS.getPrecision()) {
-		ret = setMathContext(new MathContext(precision));
-	    }
-	    else {
-		throw new CalcExprException(ctx, "%calc#precOutOfRange", precision);
-	    }
-
-	    return ret;
+	    return BigInteger.valueOf(setPrecision(precision));
 	}
 
 	@Override
 	public Object visitDoubleDirective(CalcParser.DoubleDirectiveContext ctx) {
-	    return setMathContext(MathContext.DECIMAL64);
+	    return setIntMathContext(MathContext.DECIMAL64);
 	}
 
 	@Override
 	public Object visitFloatDirective(CalcParser.FloatDirectiveContext ctx) {
-	    return setMathContext(MathContext.DECIMAL32);
+	    return setIntMathContext(MathContext.DECIMAL32);
 	}
 
 	@Override
 	public Object visitDefaultDirective(CalcParser.DefaultDirectiveContext ctx) {
-	    return setMathContext(MathContext.DECIMAL128);
+	    return setIntMathContext(MathContext.DECIMAL128);
 	}
 
 	@Override
 	public Object visitUnlimitedDirective(CalcParser.UnlimitedDirectiveContext ctx) {
-	    return setMathContext(MathContext.UNLIMITED);
+	    return setIntMathContext(MathContext.UNLIMITED);
+	}
+
+	private static final MathContext AVAILABLE_CONTEXTS[] = {
+	    MathContext.DECIMAL32,
+	    MathContext.DECIMAL64,
+	    MathContext.DECIMAL128
+	};
+
+	public int setPrecision(Number prec) {
+	    int precision = prec.intValue();
+
+	    if (precision <= 0) {
+		return setMathContext(MathContext.UNLIMITED);
+	    }
+	    else {
+		for (MathContext mcAvail : AVAILABLE_CONTEXTS) {
+		    if (precision == mcAvail.getPrecision())
+			return setMathContext(mcAvail);
+		}
+	    }
+	    if (precision > 1 && precision <= MC_MAX_DIGITS.getPrecision()) {
+		return setMathContext(new MathContext(precision));
+	    }
+	    else {
+		return setMathContext(MC_MAX_DIGITS);
+	    }
 	}
 
 	@Override

@@ -108,6 +108,9 @@
 #	    #135: New defining message and new error for "const" declarations.
 #	24-Jan-2022 (rlwhitcomb)
 #	    #223: New ":predefined" command messages.
+#	05-Feb-2022 (rlwhitcomb)
+#	    #233: Remove the "precision out of range" message (unused now).
+#	    Also add in the "immutableObject" message for "settings".
 #
 
 #
@@ -182,7 +185,6 @@ decimal		= DECIMAL(%1$s)
 unlimited	= UNLIMITED
 
 precNotInteger		= Decimal precision of <u>%1$s<> must be a 32-bit integer value
-precOutOfRange		= Decimal precision of <u>%1$d<> is out of range
 charOutOfRange		= Integer value of <u>0x%1$08X<> out of range of Unicode characters (0..0x10FFFF)
 ioError			= I/O Error: %1$s
 noConvertInteger	= Unable to convert value of <y>%1$s<> to an integer
@@ -239,7 +241,7 @@ noChangeConstant	= Cannot change constant value <y>%1$s%2$s<>
 unknownOp	= Unknown operator <y>%1$s<>
 
 #
-# From Scope
+# From ArrayScope
 #
 indexOutOfBounds	= Index value of <u>%1$d<> is out of bounds
 
@@ -247,4 +249,9 @@ indexOutOfBounds	= Index value of <u>%1$d<> is out of bounds
 # From FunctionDeclaration
 #
 varargsLast		= Variable argument declaration must be last in the parameter list
+
+#
+# From ObjectScope
+#
+immutableObject		= Cannot add the <y>%1$s<> member to this object
 

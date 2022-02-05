@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  *
- * Class / reflection-related utility methods.
+ *	Class / reflection-related utility methods.
  *
  *  History:
  *	30-Aug-2012 (rlwhitcomb)
@@ -87,6 +87,9 @@
  *	    #115: In "getMapFromObject" for the general case put the String value,
  *	    not the object itself.
  *	    #115: Add methods into the Scriptable processing in "getMapFromObject".
+ *	05-Feb-2022 (rlwhitcomb)
+ *	    #233: Add "getField" method to support the "system value" idea in Calc.
+ *	    And remove "getMapFromObject" which is not being used now.
  */
 
 package info.rlwhitcomb.util;
@@ -376,73 +379,25 @@ public final class ClassUtil
 
 
 	/**
-	 * Traverse the given object finding the {@link Scriptable} elements, creating a map
-	 * of the name/value pairs.
+	 * Do the nasty bits, including trapping exceptions that would never happen,
+	 * around getting a field descriptor given the object it lives in.
+	 * <p> The returned field is guaranteed to be accessible when used.
 	 *
-	 * @param	obj	The input object to be mapped.
-	 * @return	A map of the <code>@Scriptable</code> fields and methods and their values.
+	 * @param obj	The object containing the field.
+	 * @param name	Name of the field to query.
+	 * @return	A field descriptor for it, or {@code null} if it wasn't found
+	 *		or some other error occurred (security violation).
 	 */
-	public static Map<String, Object> getMapFromObject(final Object obj) {
-	    Map<String, Object> map = new LinkedHashMap<>();
-	    Field[] fields = obj.getClass().getDeclaredFields();
-	    Method[] methods = obj.getClass().getDeclaredMethods();
-
-	    for (Field f : fields) {
-		Scriptable annotation = f.getAnnotation(Scriptable.class);
-		if (annotation != null) {
-		    String key = f.getName();
-		    Class<?> cls = f.getType();
-		    try {
-			f.setAccessible(true);
-			if (cls == Long.class || cls == Long.TYPE) {
-			    map.put(key, f.getLong(obj));
-			}
-			else if (cls == Integer.class || cls == Integer.TYPE) {
-			    map.put(key, f.getInt(obj));
-			}
-			else if (cls == Short.class || cls == Short.TYPE) {
-			    map.put(key, f.getShort(obj));
-			}
-			else if (cls == Character.class || cls == Character.TYPE) {
-			    map.put(key, f.getChar(obj));
-			}
-			else if (cls == Byte.class || cls == Byte.TYPE) {
-			    map.put(key, f.getByte(obj));
-			}
-			else if (cls == Boolean.class || cls == Boolean.TYPE) {
-			    map.put(key, f.getBoolean(obj));
-			}
-			else {
-			    map.put(key, f.get(obj).toString());
-			}
-		    }
-		    catch (IllegalAccessException ex) {
-			map.put(key, null);
-		    }
-		}
+	public static Field getField(final Object obj, final String name) {
+	    try {
+		Class<?> cls = obj.getClass();
+		Field f = cls.getDeclaredField(name);
+		f.setAccessible(true);
+		return f;
 	    }
-
-	    for (Method m : methods) {
-		Scriptable annotation = m.getAnnotation(Scriptable.class);
-		if (annotation != null) {
-		    String name = m.getName();
-		    Class<?> cls = m.getReturnType();
-
-		    // For now we're only going to deal with "get" and "is" methods
-		    if (name.startsWith("get") || name.startsWith("is")) {
-			String key = getKeyFromMethodName(m.getName());
-			try {
-			    m.setAccessible(true);
-			    map.put(key, m.invoke(obj));
-			}
-			catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-			    map.put(key, null);
-			}
-		    }
-		}
+	    catch (NoSuchFieldException | SecurityException ex) {
+		return null;
 	    }
-
-	    return map;
 	}
 
 

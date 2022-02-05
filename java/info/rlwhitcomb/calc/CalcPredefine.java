@@ -35,6 +35,8 @@
  *	02-Feb-2022 (rlwhitcomb)
  *	    #115: Make (for now predefined) "info.settings" for these values.
  *	    New "makePredefinedMap" method to wrap the map values.
+ *	05-Feb-2022 (rlwhitcomb)
+ *	    #233: Remove that method as it's not needed now with SystemValue.
  */
 package info.rlwhitcomb.calc;
 
@@ -125,15 +127,13 @@ class CalcPredefine
 	 * @param piWorker	Source of pi/e values (background thread).
 	 * @param phiSupplier	Source of values for "phi".
 	 * @param phi1Supplier	Source of values for "PHI" (the reciprocal).
-	 * @param settingsSupplier Source of the {@link Settings} current values.
 	 */
 	public static void define(
 		final GlobalScope globalScope,
 		final ArrayScope<Object> arguments,
 		final CalcPiWorker piWorker,
 		final Supplier<Object> phiSupplier,
-		final Supplier<Object> phi1Supplier,
-		final Supplier<Object> settingsSupplier)
+		final Supplier<Object> phi1Supplier)
 	{
 	    PredefinedValue.define(globalScope, "true", Boolean.TRUE);
 	    PredefinedValue.define(globalScope, "false", Boolean.FALSE);
@@ -283,8 +283,6 @@ class CalcPredefine
 	    PredefinedValue.define(info, "locale",     locale);
 	    PredefinedValue.define(info, "timezone",   tz);
 
-	    PredefinedValue.define(info, "settings",   settingsSupplier);
-
 	    PredefinedValue.define(globalScope, "info", info);
 
 	    PredefinedValue.define(globalScope, "pi", piWorker.piSupplier);
@@ -322,17 +320,4 @@ class CalcPredefine
 	}
 
 
-	/**
-	 * Given a map of values, put {@link PredefinedValue} wrappers around each one.
-	 *
-	 * @param map The value map to wrap.
-	 * @return    Another map, but with each value wrapped with the predefined marker.
-	 */
-	public static Map<String, Object> makePredefinedMap(final Map<String, Object> map) {
-	    Map<String, Object> resultMap = new LinkedHashMap<>();
-	    for (Map.Entry<String, Object> entry : map.entrySet()) {
-		PredefinedValue.put(entry, resultMap);
-	    }
-	    return resultMap;
-	}
  }

@@ -245,6 +245,9 @@
  *	    #132: More work on disabling actions.
  *	03-Feb-2022 (rlwhitcomb)
  *	    #132: Need to enable Calc and Clear after GUI file load.
+ *	05-Feb-2022 (rlwhitcomb)
+ *	    #233: Change methods called from "settings" setValue to take Objects.
+ *	    Outer-level "catch" of IllegalStateException also.
  */
 package info.rlwhitcomb.calc;
 
@@ -995,16 +998,16 @@ public class Calc
 	    return oldMode;
 	}
 
-	public static boolean setQuietMode(boolean mode) {
+	public static boolean setQuietMode(Object mode) {
 	    boolean oldMode = quiet;
-	    quiet = mode;
+	    quiet = CharUtil.getBooleanValue(mode);
 	    visitor.setSilent(quiet);
 	    return oldMode;
 	}
 
-	public static boolean setSilenceMode(boolean mode) {
+	public static boolean setSilenceMode(Object mode) {
 	    boolean oldMode = silenceDirectives;
-	    silenceDirectives = mode;
+	    silenceDirectives = CharUtil.getBooleanValue(mode);
 	    visitor.setSilenceDirectives(silenceDirectives);
 	    return oldMode;
 	}
@@ -1537,8 +1540,8 @@ public class Calc
 
 		returnValue = visitor.visit(tree);
 	    }
-	    catch (IllegalArgumentException iae) {
-		displayer.displayErrorMessage(Intl.formatString("calc#argError", ExceptionUtil.toString(iae)));
+	    catch (IllegalArgumentException | IllegalStateException ie) {
+		displayer.displayErrorMessage(Intl.formatString("calc#argError", ExceptionUtil.toString(ie)));
 	    }
 	    catch (CalcException ce) {
 		displayer.displayErrorMessage(Intl.formatString("calc#argError", ce.getMessage()), ce.getLine());

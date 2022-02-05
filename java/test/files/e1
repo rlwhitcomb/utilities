@@ -38,9 +38,9 @@ a<=>b; a<=b; b<a; 1>2; 2>=1;
 :DEFAULT
 1.2+3.4
 1/7
-info.settings.precision
+settings.precision
 :decimal 18
-info.settings.precision
+settings.precision
 e
 a
 :clear
@@ -90,8 +90,8 @@ fib -1
 fib -2
 fib -6
 fib 200
-oldPrec = info.settings.precision
-:dec 100
+oldPrec = settings.precision
+settings.precision = 100
 sum = 0
 :quiet on
 loop $f over 100..200 { sum += fib($f) }
@@ -165,9 +165,9 @@ cast(junk[0], 'function')
 typeof(_junk5b05d)
 :var _junk5b05d
 
-info.settings.trigMode
+settings.trigMode
 :degrees
-info.settings.trigMode
+settings.trigMode
 
 sin(45)
 cos(60)
@@ -176,7 +176,7 @@ acos(cos(30))
 atan(tan(15))
 
 :rad
-info.settings.trigMode
+settings.trigMode
 :dec 60
 π
 a = sin(π/4)

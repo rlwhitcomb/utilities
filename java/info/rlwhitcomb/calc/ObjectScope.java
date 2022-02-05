@@ -44,6 +44,8 @@
  *	    #115: Add new constructor that wraps any object that is "Scriptable".
  *	03-Feb-2022 (rlwhitcomb)
  *	    #230: Add "getWildValues" for doing wildcard searches.
+ *	05-Feb-2022 (rlwhitcomb)
+ *	    #233: Add "immutable" flag to prevent additions to "settings" object.
  */
 package info.rlwhitcomb.calc;
 
@@ -70,6 +72,12 @@ class ObjectScope extends Scope
 	 */
 	private final Map<String, Object> variables;
 
+	/**
+	 * Used for the "settings" object which can't be added to or otherwise structurally
+	 * changed after construction.
+	 */
+	private boolean immutable;
+
 
 	ObjectScope() {
 	    this(Type.OBJECT);
@@ -83,6 +91,7 @@ class ObjectScope extends Scope
 	ObjectScope(final Type t) {
 	    super(t);
 	    variables = new LinkedHashMap<>();
+	    immutable = false;
 	}
 
 	/**
@@ -93,18 +102,17 @@ class ObjectScope extends Scope
 	ObjectScope(final Map<String, Object> map) {
 	    super(Type.OBJECT);
 	    variables = new LinkedHashMap<>(map);
+	    immutable = false;
 	}
 
 	/**
-	 * Construct one of these given any old object with fields marked as <code>@Scriptable</code>
+	 * For "settings" (and any future like-minded object), set to immutable after construction.
 	 *
-	 * @param obj A "Scriptable" object to wrap.
-	 * @see ClassUtil#getMapFromObject
+	 * @param value New value for {@link #immutable} flag.
 	 */
-	ObjectScope(final Object obj) {
-	    this(CalcPredefine.makePredefinedMap(ClassUtil.getMapFromObject(obj)));
+	void setImmutable(final boolean value) {
+	    immutable = value;
 	}
-
 
 	/**
 	 * Get the value of one of our variables, explicitly in the current scope, so that
@@ -219,11 +227,17 @@ class ObjectScope extends Scope
 			    return;
 			}
 		    }
+		    if (immutable)
+			throw new Intl.IllegalStateException("calc#immutableObject", name);
+
 		    // If the named entry didn't exist in any case, just set as-is
 		    variables.put(name, value);
 		}
 	    }
 	    else {
+		if (immutable && !variables.containsKey(name))
+		    throw new Intl.IllegalStateException("calc#immutableObject", name);
+
 		variables.put(name, value);
 	    }
 	}

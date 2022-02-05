@@ -36,9 +36,9 @@
 >Precision is now “34” digits.
 >1.2 + 3.4 -> 4.6
 >1 / 7 -> 0.1428571428571428571428571428571429
->info.settings.precision -> 34
+>settings.precision -> 34
 >Precision is now “18” digits.
->info.settings.precision -> 18
+>settings.precision -> 18
 >e -> 2.71828182845904524
 >a -> 1
 >All variables cleared.
@@ -80,8 +80,9 @@
 >fib -2 -> -1
 >fib -6 -> -8
 >fib 200 -> 280571172992510140037611932413038677189525
->oldPrec = info.settings.precision -> 60
+>oldPrec = settings.precision -> 60
 >Precision is now “100” digits.
+>settings.precision = 100 -> 100
 >sum = 0 -> 0
 >sum -> 734544867157818093234335754266435479339250
 >Precision is now “60” digits.
@@ -162,16 +163,16 @@
 >---------
 >_junk5b05d -> junk[0]
 >=========
->info.settings.trigMode -> "RADIANS"
+>settings.trigMode -> "RADIANS"
 >Trig mode is now “DEGREES”.
->info.settings.trigMode -> "DEGREES"
+>settings.trigMode -> "DEGREES"
 >sin (45) -> 0.7071067811865477
 >cos (60) -> 0.4999999999999998
 >asin (sin (50)) -> 50.00000000000001
 >acos (cos (30)) -> 29.99999999999999
 >atan (tan (15)) -> 15
 >Trig mode is now “RADIANS”.
->info.settings.trigMode -> "RADIANS"
+>settings.trigMode -> "RADIANS"
 >Precision is now “60” digits.
 >π -> 3.14159265358979323846264338327950288419716939937510582097494
 >a = sin (π / 4) -> 0.707106781186547524400844362104849039284835937688474036588339

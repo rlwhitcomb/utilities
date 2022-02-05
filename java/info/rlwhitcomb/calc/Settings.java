@@ -31,6 +31,8 @@
  *	02-Feb-2022 (rlwhitcomb)
  *	    #115: Move "mc" and "mcDivide" into here. New "getPrecision"
  *	    method which is Scriptable so it will be exposed for viewing.
+ *	05-Feb-2022 (rlwhitcomb)
+ *	    #233: Take out "getPrecision" in favor of just "precision" value.
  */
 package info.rlwhitcomb.calc;
 
@@ -86,6 +88,12 @@ public class Settings
 	 */
 	MathContext mcDivide;
 
+	/**
+	 * The calculated precision from the current {@link MathContext} in effect.
+	 */
+	@Scriptable
+	int precision;
+
 
 	/**
 	 * Default constructor to supply default, default settings.
@@ -127,16 +135,9 @@ public class Settings
 	    this.silenceDirectives = otherSettings.silenceDirectives;
 	    this.ignoreNameCase    = otherSettings.ignoreNameCase;
 	    this.quoteStrings      = otherSettings.quoteStrings;
-	}
-
-	/**
-	 * Access the rounding precision in effect.
-	 *
-	 * @return The precision from {@link #mc}.
-	 */
-	@Scriptable
-	public int getPrecision() {
-	    return mc.getPrecision();
+	    this.mc                = otherSettings.mc;
+	    this.mcDivide          = otherSettings.mcDivide;
+	    this.precision         = otherSettings.precision;
 	}
 
 }
