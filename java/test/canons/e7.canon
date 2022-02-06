@@ -188,6 +188,8 @@
 >Precision is now “34” digits.
 >settings.precision = old_precision -> 34
 >precision_to_directive -> ":default"
+>test_string = 'abababc' -> "abababc"
+>'match' -> "match"
 >w = {universal: true} -> { universal: true }
 >Defining function “u” = {"universal"}
 >Defining function “v” = {w}

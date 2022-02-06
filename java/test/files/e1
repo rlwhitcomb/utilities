@@ -745,6 +745,14 @@ const two_pi = 2*pi
 sin(two_pi)
 two_pi/pi
 
+#
+# "matches" function
+#
+input_string = 'This is the day'
+matches(input_string, '.+is is.+')
+matches(input_string, '^.+day$')
+matches(input_string, '.*way')
+
 
 :echo
 :echo "End of expression tests (suite 1)."

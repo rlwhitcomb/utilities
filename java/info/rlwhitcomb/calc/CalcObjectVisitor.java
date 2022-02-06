@@ -501,6 +501,7 @@
  *	05-Feb-2022 (rlwhitcomb)
  *	    #233: Implement SystemValue as a way to set value via the "settings" object.
  *	    Fix one-argument "complex".
+ *	    #144: Implement "matches" standalone function and case selector.
  */
 package info.rlwhitcomb.calc;
 
@@ -2464,12 +2465,19 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			if (visitor.matched())
 			    return visitor.lastValue();
 		    }
+		    else if (select.K_MATCHES() != null) {
+			CalcParser.ExprContext expr = select.expr().get(0);
+			String pattern = getStringValue(expr);
+			String input = toStringValue(this, caseExpr, caseValue, false, false);
+			if (matches(input, pattern))
+			    return visitor.execute();
+		    }
 		    else {
 			CalcParser.ExprContext expr = select.expr().get(0);
 			Object value = evaluateFunction(expr, visit(expr));
-			visitor.apply(value);
+			Object returnValue = visitor.apply(value);
 			if (visitor.matched())
-			    return visitor.lastValue();
+			    return returnValue;
 		    }
 		}
 	    }
@@ -4785,6 +4793,22 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    catch (IOException ioe) {
 		throw new CalcExprException(ioe, ctx);
 	    }
+	}
+
+	private boolean matches(String input, String pattern) {
+	    Pattern p = Pattern.compile(pattern);
+	    Matcher m = p.matcher(input);
+
+	    return m.matches();
+	}
+
+	@Override
+	public Object visitMatchesExpr(CalcParser.MatchesExprContext ctx) {
+	    CalcParser.Expr2Context expr2 = ctx.expr2();
+	    String input = getStringValue(expr2.expr(0));
+	    String pattern = getStringValue(expr2.expr(1));
+
+	    return Boolean.valueOf(matches(input, pattern));
 	}
 
 	private class SumOfVisitor implements Function<Object, Object>

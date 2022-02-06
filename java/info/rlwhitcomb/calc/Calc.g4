@@ -358,6 +358,7 @@
  *	    #237: Need to allow WILD_ID to include the "$" and "#" characters.
  *	05-Feb-2022 (rlwhitcomb)
  *	    #219: Add the dot selector to case expressions.
+ *	    #144: Add "matches" function and "matches" case selector.
  */
 
 grammar Calc;
@@ -521,6 +522,7 @@ expr
    | K_DECODE expr1                      # decodeExpr
    | K_ENCODE expr1                      # encodeExpr
    | K_READ ( expr2 | expr1 )            # readExpr
+   | K_MATCHES expr2                     # matchesExpr
    | var INC_OP                          # postIncOpExpr
    |<assoc=right> INC_OP var             # preIncOpExpr
    |<assoc=right> ADD_OP expr            # negPosExpr
@@ -631,6 +633,7 @@ exprList
 caseSelector
    : expr DOTS expr ( ',' expr ) ?
    | expr
+   | K_MATCHES expr
    | K_DEFAULT
    ;
 
@@ -969,6 +972,8 @@ K_DECODE   : 'decode' | 'DECODE' | 'Decode' ;
 K_ENCODE   : 'encode' | 'ENCODE' | 'Encode' ;
 
 K_READ     : 'read' | 'READ' | 'Read' ;
+
+K_MATCHES  : 'matches' | 'MATCHES' | 'Matches' ;
 
 K_SUMOF    : 'sumof' | 'SUMOF' | 'Sumof' | 'SumOf' | '\u2211' ;
 

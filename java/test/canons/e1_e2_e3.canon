@@ -759,6 +759,10 @@
 >Defining constant “two_pi” = 6.283185307179586476925286766559006
 >sin (two_pi) -> 0.0000000000000000000000000000000004
 >two_pi / pi -> 2
+>input_string = 'This is the day' -> "This is the day"
+>matches (input_string, '.+is is.+') -> true
+>matches (input_string, '^.+day$') -> true
+>matches (input_string, '.*way') -> false
 >
 >End of expression tests (suite 1).
 >Tests of nested object / array variables.

@@ -108,6 +108,12 @@ loop over 0..40 { :dec $_; precision_to_directive }
 settings.precision = old_precision
 precision_to_directive
 
+test_string = 'abababc'
+case test_string of {
+  matches '(ab){3}.': 'match',
+  default: 'not a match'
+}
+
 #
 # Using functions for objects
 #
