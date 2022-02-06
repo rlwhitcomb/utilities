@@ -829,17 +829,21 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	public int setMathContext(final MathContext newMathContext) {
+	    int prec = newMathContext.getPrecision();
+
 	    settings.mc        = newMathContext;
-	    settings.precision = newMathContext.getPrecision();
+	    settings.precision = prec;
 
 	    // Use a limited precision of our max digits in the case of unlimited precision
-	    settings.mcDivide = (settings.precision == 0) ? MC_MAX_DIGITS : newMathContext;
+	    settings.mcDivide = (prec == 0) ? MC_MAX_DIGITS : newMathContext;
 
 	    // Either create the worker object, or trigger a recalculation
 	    triggerPiCalculation();
 
 	    if (settings.precision == 0)
 		displayDirectiveMessage("%calc#precUnlimited");
+	    else if (settings.precision == 1)
+		displayDirectiveMessage("%calc#precOneDigit");
 	    else
 		displayDirectiveMessage("%calc#precDigits", settings.precision);
 
@@ -1210,7 +1214,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			return setMathContext(mcAvail);
 		}
 	    }
-	    if (precision > 1 && precision <= MC_MAX_DIGITS.getPrecision()) {
+	    if (precision >= 1 && precision <= MC_MAX_DIGITS.getPrecision()) {
 		return setMathContext(new MathContext(precision));
 	    }
 	    else {
@@ -2152,13 +2156,14 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	private Object iterateOverDotRange(
-		final CalcParser.ExprListContext exprList,
-		final CalcParser.DotRangeContext dotRange,
+		final List<CalcParser.ExprContext> valueExprs,
+		final List<CalcParser.ExprContext> dotExprs,
+		final boolean hasDots,
 		final Function<Object, Object> visitor,
 		final boolean allowSingle)
 	{
-	    List<CalcParser.ExprContext> exprs;
-
+	    List<CalcParser.ExprContext> exprs = null;
+	    CalcParser.ExprContext stepExpr = null;
 	    Iterator<Object> iter = null;
 	    java.util.stream.IntStream codePoints  = null;
 
@@ -2174,13 +2179,13 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    Object lastValue = null;
 
-	    if (exprList != null) {
+	    if (valueExprs != null) {
 		// This is only true if we have "expr , expr (, expr)*"
 		// or more than one separated by commas
-		exprs = exprList.expr();
+		exprs = valueExprs;
 	    }
 	    else {
-		exprs = dotRange.expr();
+		exprs = dotExprs;
 		stepWise = true;
 
 		if (exprs.size() == 0) {
@@ -2217,22 +2222,24 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    }
 		}
 		else if (exprs.size() == 2) {
-		    if (dotRange != null && dotRange.DOTS() != null) {
+		    if (hasDots) {
 			// start .. stop
 			dStart = getDecimalValue(exprs.get(0));
 			dStop  = getDecimalValue(exprs.get(1));
 		    }
 		    else {
 			// stop, step
+			stepExpr = exprs.get(1);
 			dStop = getDecimalValue(exprs.get(0));
-			dStep = getDecimalValue(exprs.get(1));
+			dStep = getDecimalValue(stepExpr);
 		    }
 		}
 		else {
 		    // start .. stop, step
+		    stepExpr = exprs.get(2);
 		    dStart = getDecimalValue(exprs.get(0));
 		    dStop  = getDecimalValue(exprs.get(1));
-		    dStep  = getDecimalValue(exprs.get(2));
+		    dStep  = getDecimalValue(stepExpr);
 		}
 	    }
 
@@ -2244,7 +2251,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    step  = dStep.intValueExact();
 
 		    if (step == 0)
-			throw new CalcExprException("%calc#infLoopStepZero", dotRange);
+			throw new CalcExprException("%calc#infLoopStepZero", stepExpr);
 		    else if (step < 0) {
 			for (int loopIndex = start; loopIndex >= stop; loopIndex += step) {
 			    lastValue = visitor.apply(BigInteger.valueOf(loopIndex));
@@ -2260,7 +2267,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    // This means we stubbornly have fractional values, so use as such
 		    int sign = dStep.signum();
 		    if (sign == 0)
-			throw new CalcExprException("%calc#infLoopStepZero", dotRange);
+			throw new CalcExprException("%calc#infLoopStepZero", stepExpr);
 		    else if (sign < 0) {
 			for (BigDecimal loopIndex = dStart; loopIndex.compareTo(dStop) >= 0; loopIndex = loopIndex.add(dStep)) {
 			    lastValue = visitor.apply(cleanDecimal(loopIndex));
@@ -2313,7 +2320,10 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    Object value = null;
 
 	    try {
-		value = iterateOverDotRange(exprList, dotCtx, visitor, true);
+		if (exprList != null)
+		    value = iterateOverDotRange(exprList.expr(), null, false, visitor, true);
+		else
+		    value = iterateOverDotRange(null, dotCtx.expr(), dotCtx.DOTS() != null, visitor, true);
 	    }
 	    catch (LeaveException lex) {
 		if (lex.hasValue()) {
@@ -2381,48 +2391,91 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    return resultValue;
 	}
 
+	private class CaseVisitor implements Function<Object, Object>
+	{
+		private CalcParser.CaseBlockContext blockCtx;
+		private CalcParser.ExprContext caseExpr;
+		private Object caseValue;
+		private NestedScope caseScope;
+		private Object blockValue = null;
+		private boolean isMatched = false;
+
+		public CaseVisitor(
+			final CalcParser.CaseBlockContext block,
+			final CalcParser.ExprContext expr,
+			final Object value,
+			final NestedScope scope) {
+		    this.blockCtx = block;
+		    this.caseExpr = expr;
+		    this.caseValue = value;
+		    this.caseScope = scope;
+		}
+
+		@Override
+		public Object apply(final Object value) {
+		    if (!isMatched
+		     && CalcUtil.compareValues(CalcObjectVisitor.this, caseExpr, blockCtx, caseValue, value, settings.mc, false, true, false, false) == 0) {
+			blockValue = execute();
+		    }
+		    return blockValue;
+		}
+
+		public Object execute() {
+		    Object returnValue = null;
+		    pushScope(caseScope);
+		    try {
+			returnValue = visit(blockCtx.stmtBlock());
+		    }
+		    finally {
+			popScope();
+			isMatched = true;
+		    }
+		    return returnValue;
+		}
+
+		public boolean matched() {
+		    return isMatched;
+		}
+
+		public Object lastValue() {
+		    return blockValue;
+		}
+	}
+
 	@Override
 	public Object visitCaseStmt(CalcParser.CaseStmtContext ctx) {
-	    Object caseValue = visit(ctx.expr());
+	    CalcParser.ExprContext caseExpr = ctx.expr();
+	    Object caseValue = evaluateFunction(caseExpr, visit(caseExpr));
 	    List<CalcParser.CaseBlockContext> blocks = ctx.caseBlock();
 	    CalcParser.CaseBlockContext defaultCtx = null;
 	    CaseScope scope = new CaseScope();
 
 	    for (CalcParser.CaseBlockContext cbCtx : blocks) {
-		List<CalcParser.ExprListContext> exprLists = cbCtx.caseExprList().exprList();
-		if (cbCtx.caseExprList().K_DEFAULT() != null) {
-		    defaultCtx = cbCtx;
-		}
-		if (exprLists != null) {
-		    for (CalcParser.ExprListContext exprListCtx : exprLists) {
-			for (CalcParser.ExprContext exprCtx : exprListCtx.expr()) {
-			    Object blockValue = visit(exprCtx);
-			    if (CalcUtil.compareValues(this, ctx, cbCtx, caseValue, blockValue, settings.mc, false, true, false, false) == 0) {
-				Object returnValue = null;
-				pushScope(scope);
-				try {
-				    returnValue = visit(cbCtx.stmtBlock());
-				}
-				finally {
-				    popScope();
-				}
-				return returnValue;
-			    }
-			}
+		CaseVisitor visitor = new CaseVisitor(cbCtx, caseExpr, caseValue, scope);
+
+		List<CalcParser.CaseSelectorContext> selectors = cbCtx.caseSelector();
+		for (CalcParser.CaseSelectorContext select : selectors) {
+		    if (select.K_DEFAULT() != null) {
+			defaultCtx = cbCtx;
+		    }
+		    else if (select.DOTS() != null) {
+			iterateOverDotRange(null, select.expr(), true, visitor, true);
+			if (visitor.matched())
+			    return visitor.lastValue();
+		    }
+		    else {
+			CalcParser.ExprContext expr = select.expr().get(0);
+			Object value = evaluateFunction(expr, visit(expr));
+			visitor.apply(value);
+			if (visitor.matched())
+			    return visitor.lastValue();
 		    }
 		}
 	    }
 
 	    if (defaultCtx != null) {
-		Object returnValue = null;
-		pushScope(scope);
-		try {
-		    returnValue = visit(defaultCtx.stmtBlock());
-		}
-		finally {
-		    popScope();
-		}
-		return returnValue;
+		CaseVisitor visitor = new CaseVisitor(defaultCtx, caseExpr, caseValue, scope);
+		return visitor.execute();
 	    }
 
 	    return null;
@@ -3320,7 +3373,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    if (dotRange != null) {
 		LengthVisitor visitor = new LengthVisitor();
-		return iterateOverDotRange(null, dotRange, visitor, false);
+		return iterateOverDotRange(null, dotRange.expr(), dotRange.DOTS() != null, visitor, false);
 	    }
 	    else {
 		Object obj = visit(ctx.expr1().expr());
@@ -4767,7 +4820,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		}
 	    }
 	    else {
-		sum = iterateOverDotRange(null, dotRange, sumVisitor, false);
+		sum = iterateOverDotRange(null, dotRange.expr(), dotRange.DOTS() != null, sumVisitor, false);
 	    }
 
 	    return sum;
@@ -4818,7 +4871,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		}
 	    }
 	    else {
-		product = iterateOverDotRange(null, dotRange, productVisitor, false);
+		product = iterateOverDotRange(null, dotRange.expr(), dotRange.DOTS() != null, productVisitor, false);
 	    }
 
 	    return product;

@@ -111,6 +111,7 @@
 #	05-Feb-2022 (rlwhitcomb)
 #	    #233: Remove the "precision out of range" message (unused now).
 #	    Also add in the "immutableObject" message for "settings".
+#	    New "one digit" precision message.
 #
 
 #
@@ -154,6 +155,7 @@ libVersionDescription	= //** The versions above must conform to the latest value
 # From CalcObjectVisitor
 #
 precUnlimited	= Precision is now <u>UNLIMITED<>.
+precOneDigit	= Precision is now <u>one<> digit.
 precDigits	= Precision is now <u>%1$d<> digits.
 trigMode	= Trig mode is now <u>%1$s<>.
 unitsBinary	= Units in <u>binary<>.

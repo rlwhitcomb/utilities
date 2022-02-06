@@ -356,6 +356,8 @@
  *	    #230: Allow wildcards on ":variables", ":clear", and ":predefs".
  *	04-Feb-2022 (rlwhitcomb)
  *	    #237: Need to allow WILD_ID to include the "$" and "#" characters.
+ *	05-Feb-2022 (rlwhitcomb)
+ *	    #219: Add the dot selector to case expressions.
  */
 
 grammar Calc;
@@ -435,7 +437,7 @@ stmtBlock
    ;
 
 caseBlock
-   : EOL? caseExprList ':' stmtBlock
+   : EOL? caseSelector ( ',' EOL ? caseSelector ) * ':' stmtBlock
    ;
 
 emptyStmt
@@ -626,10 +628,10 @@ exprList
    : expr ( ',' EOL? expr ) *
    ;
 
-caseExprList
-   : exprList ',' EOL? K_DEFAULT ',' EOL? exprList
-   | K_DEFAULT ( ',' EOL? exprList ) ?
-   | exprList ( ',' EOL? K_DEFAULT ) ?
+caseSelector
+   : expr DOTS expr ( ',' expr ) ?
+   | expr
+   | K_DEFAULT
    ;
 
 obj

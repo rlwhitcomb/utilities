@@ -90,6 +90,104 @@
 >fieldType(99) -> "99"
 >'type: ' + fieldType(4) -> "type:  TEXT"
 >Defining function “srt($a1,$a2,$f)” = {$f($a1, $a2) > 0 ? $a1 : $a2}
+>Defining function “precision_to_directive” = {
+> case settings.precision of {
+> 0: ':unlimited', 
+> 1, 2, 3, 4, 5, 6, 
+> 8 ... 15, 1, 
+> 17 .. 33: `:dec ${settings.precision}`, 
+> 7: ':float', 
+> 16: ':double', 
+> 34: ':default', 
+> default: `:decimal(${settings.precision})` 
+>} 
+>}
+>old_precision = settings.precision -> 34
+>Precision is now “UNLIMITED”.
+>precision_to_directive -> ":unlimited"
+>Precision is now “one” digit.
+>precision_to_directive -> ":dec 1"
+>Precision is now “2” digits.
+>precision_to_directive -> ":dec 2"
+>Precision is now “3” digits.
+>precision_to_directive -> ":dec 3"
+>Precision is now “4” digits.
+>precision_to_directive -> ":dec 4"
+>Precision is now “5” digits.
+>precision_to_directive -> ":dec 5"
+>Precision is now “6” digits.
+>precision_to_directive -> ":dec 6"
+>Precision is now “7” digits.
+>precision_to_directive -> ":float"
+>Precision is now “8” digits.
+>precision_to_directive -> ":dec 8"
+>Precision is now “9” digits.
+>precision_to_directive -> ":dec 9"
+>Precision is now “10” digits.
+>precision_to_directive -> ":dec 10"
+>Precision is now “11” digits.
+>precision_to_directive -> ":dec 11"
+>Precision is now “12” digits.
+>precision_to_directive -> ":dec 12"
+>Precision is now “13” digits.
+>precision_to_directive -> ":dec 13"
+>Precision is now “14” digits.
+>precision_to_directive -> ":dec 14"
+>Precision is now “15” digits.
+>precision_to_directive -> ":dec 15"
+>Precision is now “16” digits.
+>precision_to_directive -> ":double"
+>Precision is now “17” digits.
+>precision_to_directive -> ":dec 17"
+>Precision is now “18” digits.
+>precision_to_directive -> ":dec 18"
+>Precision is now “19” digits.
+>precision_to_directive -> ":dec 19"
+>Precision is now “20” digits.
+>precision_to_directive -> ":dec 20"
+>Precision is now “21” digits.
+>precision_to_directive -> ":dec 21"
+>Precision is now “22” digits.
+>precision_to_directive -> ":dec 22"
+>Precision is now “23” digits.
+>precision_to_directive -> ":dec 23"
+>Precision is now “24” digits.
+>precision_to_directive -> ":dec 24"
+>Precision is now “25” digits.
+>precision_to_directive -> ":dec 25"
+>Precision is now “26” digits.
+>precision_to_directive -> ":dec 26"
+>Precision is now “27” digits.
+>precision_to_directive -> ":dec 27"
+>Precision is now “28” digits.
+>precision_to_directive -> ":dec 28"
+>Precision is now “29” digits.
+>precision_to_directive -> ":dec 29"
+>Precision is now “30” digits.
+>precision_to_directive -> ":dec 30"
+>Precision is now “31” digits.
+>precision_to_directive -> ":dec 31"
+>Precision is now “32” digits.
+>precision_to_directive -> ":dec 32"
+>Precision is now “33” digits.
+>precision_to_directive -> ":dec 33"
+>Precision is now “34” digits.
+>precision_to_directive -> ":default"
+>Precision is now “35” digits.
+>precision_to_directive -> ":decimal(35)"
+>Precision is now “36” digits.
+>precision_to_directive -> ":decimal(36)"
+>Precision is now “37” digits.
+>precision_to_directive -> ":decimal(37)"
+>Precision is now “38” digits.
+>precision_to_directive -> ":decimal(38)"
+>Precision is now “39” digits.
+>precision_to_directive -> ":decimal(39)"
+>Precision is now “40” digits.
+>precision_to_directive -> ":decimal(40)"
+>Precision is now “34” digits.
+>settings.precision = old_precision -> 34
+>precision_to_directive -> ":default"
 >w = {universal: true} -> { universal: true }
 >Defining function “u” = {"universal"}
 >Defining function “v” = {w}

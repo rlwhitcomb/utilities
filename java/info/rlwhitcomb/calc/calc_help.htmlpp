@@ -1008,7 +1008,7 @@ or
      All keywords in these statements have three differently-cased forms: all lower case, all UPPER case, and MixedCase.  For example: <code>loop</code>, <code>LOOP</code>, and <code>Loop</code>.
   <p>The syntax for each is as follows:
   <p class="indent">
-     <code>LOOP</code>&nbsp;[ [ <i>loopvar</i> ] ( <code>IN</code> | <code>OVER</code> | <code>&#x2208;</code>) ] <i>expr</i> [ <code>...</code>, <code>..</code>, or <code>&#x2026;</code> <i>expr</i> ] [ <code>,</code> <i>expr</i> ] <code>{</code> <i>statements or expressions</i> <code>}</code>
+     <code>LOOP</code>&nbsp;[ [ <i>loopvar</i> ] ( <code>IN</code> | <code>OVER</code> | <code>&#x2208;</code> ) ] <i>expr</i> [ <code>...</code>, <code>..</code>, or <code>&#x2026;</code> <i>expr</i> ] [ <code>,</code> <i>expr</i> ] <code>{</code> <i>statements or expressions</i> <code>}</code>
   </p>
   <p class="indent">
      <code>WHILE</code>&nbsp;<i>expr</i> <code>{</code> <i>statements or expressions</i> <code>}</code>
@@ -1017,7 +1017,7 @@ or
      <code>IF</code>&nbsp;<i>expr</i>&nbsp;<code>{</code> <i>statements or expressions</i> <code>}</code> [ <code>ELSE {</code> <i>statements or expressions</i> <code>}</code> ]
   </p>
   <p class="indent">
-     <code>CASE</code>&nbsp;<i>expr</i>(&nbsp;<code>OF</code> | <code>IN</code> | <code>&#x2208;</code>&nbsp;) ( ( <i>expr</i> ( <code>,</code> <i>expr</i> ) * | <code>DEFAULT</code> ) <code>: {</code> <i>statements or expressions</i> <code>}</code> ( <code>,</code> ) ? ) *
+     <code>CASE</code>&nbsp;<i>expr</i> (&nbsp;<code>OF</code> | <code>IN</code> | <code>&#x2208;</code>&nbsp;) ( ( <i>expr</i> ( <code>,</code> <i>expr</i> ) * | ( <i>expr</i> <code>...</code> <i>expr</i> [ <code>,</code> <i>expr</i> ] ) | <code>DEFAULT</code> ) <code>: {</code> <i>statements or expressions</i> <code>}</code> ( <code>,</code> ) ? ) *
   </p>
   <p class="indent">
     <code>LEAVE</code>&nbsp;<i>expr</i> ?

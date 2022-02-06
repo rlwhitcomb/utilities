@@ -88,6 +88,27 @@ fieldType(4);fieldType(7);fieldType(23);fieldType(19);fieldType(99)
 def srt($a1, $a2, $f) = { $f($a1, $a2) > 0 ? $a1 : $a2 }
 
 #
+# New "case" syntax
+#
+define precision_to_directive = {
+  case settings.precision of {
+    0 : ':unlimited',
+    1,2,3,4,5,6,
+    8 ... 15,1,
+    17 .. 33 : `:dec ${settings.precision}`,
+    7 : ':float',
+    16: ':double',
+    34: ':default',
+    default: `:decimal(${settings.precision})`
+  }
+}
+
+old_precision = settings.precision
+loop over 0..40 { :dec $_; precision_to_directive }
+settings.precision = old_precision
+precision_to_directive
+
+#
 # Using functions for objects
 #
 w = { universal: true }
