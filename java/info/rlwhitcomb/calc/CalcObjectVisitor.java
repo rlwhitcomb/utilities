@@ -500,6 +500,7 @@
  *	    #237: Tiny fix to not list duplicates because of "$*" as a predefined value.
  *	05-Feb-2022 (rlwhitcomb)
  *	    #233: Implement SystemValue as a way to set value via the "settings" object.
+ *	    Fix one-argument "complex".
  */
 package info.rlwhitcomb.calc;
 
@@ -4481,7 +4482,18 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    CalcParser.ExprContext expr = expr1.expr();
 		    Object e = evaluateFunction(expr, visit(expr));
 
-		    return ComplexNumber.valueOf(e);
+		    if (e instanceof ArrayScope) {
+			@SuppressWarnings("unchecked")
+			ArrayScope<Object> array = (ArrayScope<Object>) e;
+			return ComplexNumber.valueOf(array.list());
+		    }
+		    else if (e instanceof ObjectScope) {
+			ObjectScope obj = (ObjectScope) e;
+			return ComplexNumber.valueOf(obj.map());
+		    }
+		    else {
+			return ComplexNumber.valueOf(e);
+		    }
 		}
 		else {
 		    CalcParser.Expr2Context e2ctx = ctx.expr2();

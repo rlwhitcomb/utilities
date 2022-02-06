@@ -440,7 +440,7 @@ which gives:
     Unicode fraction characters optionally preceded by an integer. Some examples:
   <p class="indent"> <code>f'2&#x00BC;'</code> = <code>2.25</code> or <code>f'1 2/3'</code> = <code>1.66666...</code>
   <p>Complex numbers are constructed as such: <code>(</code>&nbsp;<i>real</i>&nbsp;<code>,</code>&nbsp;<i>imaginary</i>&nbsp;<code>)</code>. There is also the <code>complex</code> function that accepts one or two arguments: either the two value parts or a string convertible to these two parts, or an object with <code>r</code> and <code>i</code> keys, or an array with two values.
-  <p>The string syntax for <code>complex</code> is either <code>"( <i>n</i>, <i>n</i> )"</code> or <code>"( <i>n</i> &pm; <i>n</i> i )"</code>.
+  <p>The string syntax for <code>complex</code> is either <code>"( <i>expr</i> )"</code>, <code>"( <i>n</i>, <i>n</i> )"</code> or <code>"( <i>n</i> &pm; <i>n</i> i )"</code>.
   <p>There is also a constant type used to express values as Roman Numerals. The syntax is <code>R'<i>xxxx</i>'</code>, where the
      digits are the typical Roman values of <code>I</code> (one), <code>V</code> (five), <code>X</code> (ten), and so on (case-insensitive), but also including the Unicode
      values in the range of <code>'\u2160'</code> (<code>&#x2160;</code> or one) to <code>'\u2182'</code> (<code>&#x2182;</code> or ten thousand).
@@ -708,7 +708,7 @@ or
             <tr><td><code>Bn</code>&nbsp;<i>expr</i></td><td>Bernoulli number</td></tr>
             <tr><td><code>DEC</code>&nbsp;<i>expr</i></td><td>convert string or fraction to decimal number</td></tr>
             <tr><td><code>FRAC</code>&nbsp;<i>num</i><code>,</code>&nbsp;<i>den</i><br>or <i>int</i><code>,</code><i>num</i><code>,</code><i>den</i><br>or <i>string</i></td><td>construct a rational fraction</td></tr>
-            <tr><td><code>COMPLEX</code>&nbsp;<i>r</i><code>,</code>&nbsp;<i>i</i><br>or <i>string</i></td><td>construct a complex number</td></tr>
+            <tr><td><code>COMPLEX</code>&nbsp;<i>r</i><code>,</code>&nbsp;<i>i</i><br>or <i>expr</i></td><td>construct a complex number</td></tr>
             <tr><td><code>ROMAN</code>&nbsp;<i>expr</i></td><td>interpret <i>expr</i> as a Roman Numeral</td></tr>
             <tr><td><code>LOWER</code>&nbsp;<i>expr</i></td><td>convert <i>expr</i> to lower case</td></tr>
             <tr><td><code>UPPER</code>&nbsp;<i>expr</i></td><td>convert <i>expr</i> to UPPER case</td></tr>

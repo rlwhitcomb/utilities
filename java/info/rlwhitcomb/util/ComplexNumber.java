@@ -37,6 +37,8 @@
  *	    #103: Powers of integer and real values, negate, another alias,
  *	    "toLongString" method, override "equals" and "hashCode".
  *	    #231: Use new Constants values instead of our own.
+ *	05-Feb-2022 (rlwhitcomb)
+ *	    Fix Intl keys.
  */
 package info.rlwhitcomb.util;
 
@@ -179,9 +181,9 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 	 */
 	public static ComplexNumber fromList(List<Object> list) {
 	    if (list == null || list.size() == 0)
-		throw new Intl.IllegalArgumentException("%util#complex.noEmptyListMap");
+		throw new Intl.IllegalArgumentException("util#complex.noEmptyListMap");
 	    if (list.size() > 2)
-		throw new Intl.IllegalArgumentException("%util#complex.tooManyValues");
+		throw new Intl.IllegalArgumentException("util#complex.tooManyValues");
 
 	    if (list.size() == 1)
 		return valueOf(list.get(0));
@@ -204,7 +206,7 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 	 */
 	public static ComplexNumber fromMap(Map<String, Object> map) {
 	    if (map == null || map.size() == 0)
-		throw new Intl.IllegalArgumentException("%util#complex.noEmptyListMap");
+		throw new Intl.IllegalArgumentException("util#complex.noEmptyListMap");
 
 	    // Same hokieness as "fromList", same response ...
 	    ComplexNumber r = valueOf(map.get(REAL_KEY));
@@ -647,7 +649,7 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 		    break;
 	    }
 	    if (!m.matches()) {
-		throw new Intl.IllegalArgumentException("%util#complex.notRecognized", string);
+		throw new Intl.IllegalArgumentException("util#complex.notRecognized", string);
 	    }
 
 	    BigDecimal rPart = new BigDecimal(m.group(1));
