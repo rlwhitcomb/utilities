@@ -37,6 +37,8 @@
  *	    New "makePredefinedMap" method to wrap the map values.
  *	05-Feb-2022 (rlwhitcomb)
  *	    #233: Remove that method as it's not needed now with SystemValue.
+ *	07-Feb-2022 (rlwhitcomb)
+ *	    Add "specificationversion" to "info.java" in case we ever need it.
  */
 package info.rlwhitcomb.calc;
 
@@ -224,6 +226,8 @@ class CalcPredefine
 
 	    PredefinedValue.define(java, "version", javaVersion);
 	    PredefinedValue.define(java, "model",   Environment.dataModel());
+
+	    PredefinedValue.define(java, "specificationversion", System.getProperty("java.specification.version"));
 
 	    DateFormatSymbols dfs       = new DateFormatSymbols();
 	    DecimalFormatSymbols efs    = new DecimalFormatSymbols();
