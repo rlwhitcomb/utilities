@@ -30,6 +30,7 @@
  *	    #189: Implement colored output.
  *	    #238: Color code the hex as well as ASCII.
  *	    Make the address more readable with yellow.
+ *	    #238: Use different substitute character for control characters.
  */
 package info.rlwhitcomb.tools;
 
@@ -207,6 +208,8 @@ public class HexDump
 			int by = ((int) bytes[i]) & 0xFF;
 			if (by >= 0x20 && by <= 0x7E)
 			    output.appendCodePoint(by);
+			else if ((by >= 0x00 && by <= 0x1F) || (by == 0x7F))
+			    output.append(String.format("%1$s%2$s%3$c%4$s", RESET, RED, '\u25AB', CYAN_BRIGHT));
 			else
 			    output.append(String.format("%1$s%2$s%3$c%4$s", RESET, YELLOW, '\u25E6', CYAN_BRIGHT));
 
