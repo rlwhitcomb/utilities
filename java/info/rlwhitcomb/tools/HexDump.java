@@ -25,9 +25,10 @@
  *
  *  Change History:
  *	06-Feb-2022 (rlwhitcomb)
- *	    Initial implementation.
+ *	    #189: Initial implementation.
  *	07-Feb-2022 (rlwhitcomb)
- *	    Implement colored output.
+ *	    #189: Implement colored output.
+ *	    #238: Color code the hex as well as ASCII.
  */
 package info.rlwhitcomb.tools;
 
@@ -71,8 +72,11 @@ public class HexDump
 	/** Format for offset printout. */
 	private static String offsetFormat;
 
-	/** Format for bytes printout. */
-	private static String byteFormat;
+	/** Format for ASCII bytes printout. */
+	private static String asciiByteFormat;
+
+	/** Format for non-ASCII bytes printout. */
+	private static String otherByteFormat;
 
 	/** The list of files to process. */
 	private static final List<String> files = new ArrayList<>();
@@ -182,7 +186,10 @@ public class HexDump
 		    for (i = 0; i < numberBytesPerLine; i++) {
 			if (i < bytesRead) {
 			    int by = ((int) bytes[i]) & 0xFF;
-			    output.append(String.format(byteFormat, by));
+			    if (by >= 0x20 && by <= 0x7E)
+				output.append(String.format(asciiByteFormat, by));
+			    else
+				output.append(String.format(otherByteFormat, by));
 			}
 			else {
 			    output.append("   ");
@@ -207,6 +214,7 @@ public class HexDump
 			else if (i % 8 == 7)
 			    output.append("  ");
 		    }
+		    output.append(END);
 
 		    out.println(ConsoleColor.color(output.toString(), colored));
 		}
@@ -265,8 +273,9 @@ public class HexDump
 	    final boolean printName = files.size() > 1;
 
 	    char formatChar = lowerCase ? 'x' : 'X';
-	    offsetFormat = String.format(BLACK_BRIGHT + "%%1$08%1$c:  " + RESET + GREEN_BOLD, formatChar);
-	    byteFormat = String.format("%%1$02%1$c ", formatChar);
+	    offsetFormat = String.format(BLACK_BRIGHT + "%%1$08%1$c:  " + RESET, formatChar);
+	    asciiByteFormat = String.format(GREEN_BOLD + "%%1$02%1$c " + RESET, formatChar);
+	    otherByteFormat = String.format(BLACK_BRIGHT + "%%1$02%1$c " + RESET, formatChar);
 
 	    files.forEach(f -> processFile(f, printName));
 	}
