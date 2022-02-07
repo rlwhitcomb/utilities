@@ -29,6 +29,7 @@
  *	07-Feb-2022 (rlwhitcomb)
  *	    #189: Implement colored output.
  *	    #238: Color code the hex as well as ASCII.
+ *	    Make the address more readable with yellow.
  */
 package info.rlwhitcomb.tools;
 
@@ -273,7 +274,7 @@ public class HexDump
 	    final boolean printName = files.size() > 1;
 
 	    char formatChar = lowerCase ? 'x' : 'X';
-	    offsetFormat = String.format(BLACK_BRIGHT + "%%1$08%1$c:  " + RESET, formatChar);
+	    offsetFormat = String.format(YELLOW_BOLD + "%%1$08%1$c:  " + RESET, formatChar);
 	    asciiByteFormat = String.format(GREEN_BOLD + "%%1$02%1$c " + RESET, formatChar);
 	    otherByteFormat = String.format(BLACK_BRIGHT + "%%1$02%1$c " + RESET, formatChar);
 
