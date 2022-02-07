@@ -40,6 +40,8 @@
  *	    Update obsolete Javadoc constructs.
  *	29-Jan-2021 (rlwhitcomb)
  *	    Use new Intl Exception variants for convenience.
+ *	20-Dec-2021 (rlwhitcomb)
+ *	    Better use of CSVFormat methods.
  */
 package info.rlwhitcomb.csv;
 
@@ -52,8 +54,7 @@ import info.rlwhitcomb.util.Intl;
 
 
 /**
- * Class used to write CSV-format files using a given (possibly non-standard)
- * format.
+ * Class used to write CSV-format files using a given (possibly non-standard) format.
  */
 public class CSVWriter
 {
@@ -62,6 +63,9 @@ public class CSVWriter
 
 	/** The {@link CSVFormat} specifying the delimiters, etc. used to format the output. */
 	private CSVFormat format = null;
+
+	/** It is possible for the format to disable quoting of string values even if they need it. */
+	private boolean isQuotingDisabled = false;
 
 	/** The computed left-hand quote character for the beginning of fields that must be delimited. */
 	private char leftQuote;
@@ -75,29 +79,31 @@ public class CSVWriter
 	 * of the latter will be created to wrap the given {@code Writer} (to increase
 	 * performance).
 	 *
-	 * @param	writer	The sink for the data to be written to.
-	 * @param	format	The (optional) format for data to be written.  If {@code null}
+	 * @param	w	The sink for the data to be written to.
+	 * @param	fmt	The (optional) format for data to be written.  If {@code null}
 	 *			then the default options will be used.
 	 *
 	 * @throws	IllegalArgumentException if the writer is {@code null}.
 	 */
-	public CSVWriter(Writer writer, CSVFormat format) {
-	    if (writer == null)
+	public CSVWriter(Writer w, CSVFormat fmt) {
+	    if (w == null)
 		throw new Intl.IllegalArgumentException("csv#writer.writerNotNull");
-	    if (format == null)
-		this.format = new CSVFormat();	// use all defaults
-	    else
-		this.format = format;
 
-	    char defaultQuote = Quotes.DOUBLE.leftChar();
-	    leftQuote = this.format.quoteChar == '\0' ? defaultQuote : this.format.quoteChar;
-	    rightQuote = this.format.handedQuoting ? this.format.rightQuoteChar :
-			    (this.format.quoteChar == '\0' ? defaultQuote : this.format.quoteChar);
-
-	    if (writer instanceof BufferedWriter)
-		this.writer = (BufferedWriter)writer;
+	    if (fmt == null)
+		format = new CSVFormat();	// use all defaults
 	    else
-		this.writer = new BufferedWriter(writer);
+		format = fmt;
+
+	    isQuotingDisabled = format.isQuotingDisabled();
+	    if (!isQuotingDisabled) {
+		leftQuote = format.getLeftQuote();
+		rightQuote = format.getRightQuote();
+	    }
+
+	    if (w instanceof BufferedWriter)
+		writer = (BufferedWriter) w;
+	    else
+		writer = new BufferedWriter(w);
 	}
 
 	/**
@@ -125,12 +131,7 @@ public class CSVWriter
 		    for (Object field : record) {
 			writeNextField(i++, field);
 		    }
-		    if (format.normalLineEnding) {
-			writer.write('\n');
-		    }
-		    else {
-			writer.write(format.recordSep);
-		    }
+		    writer.write(format.recordSep);
 		}
 	    }
 	    catch (IOException ioe) {
@@ -158,10 +159,10 @@ public class CSVWriter
 
 		if (field != null) {
 		    if (field instanceof BigDecimal) {
-			result = ((BigDecimal)field).toPlainString();
+			result = ((BigDecimal) field).toPlainString();
 		    }
 		    else if (field instanceof String) {
-			result = (String)field;
+			result = (String) field;
 			isRealString = true;
 		    }
 		    else {
@@ -180,7 +181,7 @@ public class CSVWriter
 				(format.normalLineEnding && ch == '\r' || ch == '\n') ||
 				(!format.normalLineEnding && ch == format.recordSepChar) ||
 				ch == rightQuote ||
-				Character.isWhitespace(ch)) {
+				Character.isWhitespace(ch) || Character.isISOControl(ch)) {
 				requiresDelimiting = true;
 				break;
 			    }
