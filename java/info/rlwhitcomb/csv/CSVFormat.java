@@ -87,7 +87,11 @@ public class CSVFormat
 	/** The default record separator string (according to RFC 4180). */
 	public static final String DEFAULT_RECORD_SEP = "\r\n";
 
-	/** The default escape character. */
+	/**
+	 * The default escape character. Used primarily to embed the ending quote
+	 * within quoted values. Disable by setting to {@code '\0'}, which will
+	 * enable doubling quotes inside quoted values to embed the quote.
+	 */
 	public static final char DEFAULT_ESCAPE_CHAR = '\\';
 
 	/** Our custom quote character. */
@@ -109,7 +113,7 @@ public class CSVFormat
 	@Scriptable
 	protected String recordSep = DEFAULT_RECORD_SEP;
 
-	/** For one character record separator, that character. */
+	/** For a one character record separator, that character. */
 	protected char recordSepChar = '\n';
 
 	/** Our custom escape character. */
