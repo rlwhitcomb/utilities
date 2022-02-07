@@ -26,6 +26,8 @@
  *  Change History:
  *	06-Feb-2022 (rlwhitcomb)
  *	    Initial implementation.
+ *	07-Feb-2022 (rlwhitcomb)
+ *	    Implement colored output.
  */
 package info.rlwhitcomb.tools;
 
@@ -40,7 +42,8 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-import static info.rlwhitcomb.util.Constants.*;
+import info.rlwhitcomb.util.ConsoleColor;
+import static info.rlwhitcomb.util.ConsoleColor.Code.*;
 import info.rlwhitcomb.util.Environment;
 import info.rlwhitcomb.util.ExceptionUtil;
 
@@ -61,6 +64,9 @@ public class HexDump
 
 	/** Lowercase or uppercase output. */
 	private static boolean lowerCase = false;
+
+	/** Colored output or not? */
+	private static boolean colored = true;
 
 	/** Format for offset printout. */
 	private static String offsetFormat;
@@ -88,16 +94,35 @@ public class HexDump
 	    int code = 0;
 
 	    switch (opt.toLowerCase()) {
+		case "nocolors":
+		case "nocolor":
+		case "nocols":
+		case "nocol":
+		case "noc":
+		case "n":
+		    colored = false;
+		    break;
+
+		case "colors":
+		case "color":
+		case "cols":
+		case "col":
+		case "c":
+		    colored = true;
+		    break;
+
 		case "lower":
 		case "low":
 		case "l":
 		    lowerCase = true;
 		    break;
+
 		case "upper":
 		case "up":
 		case "u":
 		    lowerCase = false;
 		    break;
+
 		case "version":
 		case "vers":
 		case "ver":
@@ -136,47 +161,54 @@ public class HexDump
 		System.err.println("Unable to find the file \"" + file + "\".");
 		return;
 	    }
+
 	    if (printName) {
 		System.out.println(path);
 	    }
+
 	    try (BufferedInputStream bis = new BufferedInputStream(Files.newInputStream(path))) {
 		int offset = 0;
 		int bytesRead = -1;
 		int i;
 		byte[] bytes = new byte[numberBytesPerLine];
+		StringBuilder output = new StringBuilder(numberBytesPerLine * 5 + 20);
 
 		while ((bytesRead = bis.read(bytes)) > 0) {
-		    out.printf(offsetFormat, offset);
+		    output.setLength(0);
+		    output.append(String.format(offsetFormat, offset));
+
 		    offset += bytesRead;
+
 		    for (i = 0; i < numberBytesPerLine; i++) {
 			if (i < bytesRead) {
 			    int by = ((int) bytes[i]) & 0xFF;
-			    out.printf(byteFormat, by);
+			    output.append(String.format(byteFormat, by));
 			}
 			else {
-			    out.print("   ");
+			    output.append("   ");
 			}
 
 			if (i % 8 == 3)
-			    out.print(" ");
+			    output.append(" ");
 			else if (i % 8 == 7)
-			    out.print("  ");
+			    output.append("  ");
 		    }
-		    out.print(" ");
+		    output.append(" " + CYAN_BRIGHT);
 
 		    for (i = 0; i < bytesRead; i++) {
 			int by = ((int) bytes[i]) & 0xFF;
-			if (by < 0x20 || by > 0x7E)
-			    by = 0x25E6;
-			out.printf("%1$c", by);
+			if (by >= 0x20 && by <= 0x7E)
+			    output.appendCodePoint(by);
+			else
+			    output.append(String.format("%1$s%2$s%3$c%4$s", RESET, YELLOW, '\u25E6', CYAN_BRIGHT));
 
 			if (i % 8 == 3)
-			    out.print(" ");
+			    output.append(" ");
 			else if (i % 8 == 7)
-			    out.print("  ");
+			    output.append("  ");
 		    }
 
-		    out.println();
+		    out.println(ConsoleColor.color(output.toString(), colored));
 		}
 	    }
 	    catch (NoSuchFileException nsfe) {
@@ -233,7 +265,7 @@ public class HexDump
 	    final boolean printName = files.size() > 1;
 
 	    char formatChar = lowerCase ? 'x' : 'X';
-	    offsetFormat = String.format("%%1$08%1$c:  ", formatChar);
+	    offsetFormat = String.format(BLACK_BRIGHT + "%%1$08%1$c:  " + RESET + GREEN_BOLD, formatChar);
 	    byteFormat = String.format("%%1$02%1$c ", formatChar);
 
 	    files.forEach(f -> processFile(f, printName));
