@@ -114,6 +114,17 @@ case test_string of {
   default: 'not a match'
 }
 
+def sign($value) = {
+  case $value of {
+    < 0: -1,
+   == 0: 0,
+    > 0: +1
+  }
+}
+sign(-23)
+sign(0.0)
+sign(0.01)
+
 #
 # Using functions for objects
 #

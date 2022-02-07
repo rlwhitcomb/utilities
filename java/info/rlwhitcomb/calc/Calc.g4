@@ -359,6 +359,8 @@
  *	05-Feb-2022 (rlwhitcomb)
  *	    #219: Add the dot selector to case expressions.
  *	    #144: Add "matches" function and "matches" case selector.
+ *	07-Feb-2022 (rlwhitcomb)
+ *	    #239: Add "compareOp expr" as another caseSelector.
  */
 
 grammar Calc;
@@ -634,6 +636,7 @@ caseSelector
    : expr DOTS expr ( ',' expr ) ?
    | expr
    | K_MATCHES expr
+   | compareOp expr
    | K_DEFAULT
    ;
 
@@ -756,6 +759,11 @@ wildId
    : WILD_ID
    | MODES
    | REPLACE_MODES
+   ;
+
+compareOp
+   : COMPARE_OP
+   | EQUAL_OP
    ;
 
 modeOption

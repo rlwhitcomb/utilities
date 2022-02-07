@@ -502,6 +502,8 @@
  *	    #233: Implement SystemValue as a way to set value via the "settings" object.
  *	    Fix one-argument "complex".
  *	    #144: Implement "matches" standalone function and case selector.
+ *	07-Feb-2022 (rlwhitcomb)
+ *	    #239: Add "compareOp expr" as another caseSelector.
  */
 package info.rlwhitcomb.calc;
 
@@ -544,6 +546,7 @@ import java.util.Locale;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import java.util.TimeZone;
@@ -2470,6 +2473,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			String pattern = getStringValue(expr);
 			String input = toStringValue(this, caseExpr, caseValue, false, false);
 			if (matches(input, pattern))
+			    return visitor.execute();
+		    }
+		    else if (select.compareOp() != null) {
+			String op = select.compareOp().getText();
+			CalcParser.ExprContext expr = select.expr().get(0);
+			if (compareOp(caseExpr, expr, Optional.ofNullable(caseValue), op))
 			    return visitor.execute();
 		    }
 		    else {
@@ -4941,64 +4950,77 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		return settings.rationalMode ? BigFraction.ONE : BigInteger.ONE;
 	}
 
-	@Override
-	public Object visitCompareExpr(CalcParser.CompareExprContext ctx) {
-	    ParserRuleContext expr1 = ctx.expr(0);
-	    ParserRuleContext expr2 = ctx.expr(1);
-
-	    int cmp = compareValues(expr1, expr2);
-
+	/**
+	 * The compare operators.
+	 *
+	 * @param expr1   The first expression context.
+	 * @param expr2   The second expression context.
+	 * @param optObj1 For "case", the already-evaluated case expression value,
+	 *                otherwise {@code null} to indicate we need to evaluate {@code expr1}.
+	 * @param op      The textual representation of the operator to execute.
+	 * @return        Result of the comparison.
+	 */
+	private Boolean compareOp(
+		CalcParser.ExprContext expr1,
+		CalcParser.ExprContext expr2,
+		Optional<Object> optObj1,
+		String op)
+	{
+	    int cmp;
 	    boolean result;
 
-	    String op = ctx.COMPARE_OP().getText();
-	    switch (op) {
-		case "<=":
-		case "\u2264":
-		    result = (cmp <= 0);
-		    break;
-		case "<":
-		    result = (cmp < 0);
-		    break;
-		case ">=":
-		case "\u2265":
-		    result = (cmp >= 0);
-		    break;
-		case ">":
-		    result = (cmp > 0);
-		    break;
-		default:
-		    throw new UnknownOpException(op, ctx);
-	    }
-
-	    return Boolean.valueOf(result);
-	}
-
-	@Override
-	public Object visitEqualExpr(CalcParser.EqualExprContext ctx) {
-	    ParserRuleContext expr1 = ctx.expr(0);
-	    ParserRuleContext expr2 = ctx.expr(1);
-
-	    int cmp = 0;
-	    boolean result;
-
-	    String op = ctx.EQUAL_OP().getText();
 	    switch (op) {
 		case "===":
 		case "\u2A76":
 		case "\u2261": // IDENTICAL TO
 		case "!==":
 		case "\u2262": // NOT IDENTICAL
-		    cmp = compareValues(expr1, expr2, true, true);
+		    if (optObj1 != null)
+			cmp = CalcUtil.compareValues(this, expr1, expr2, optObj1.orElse(null), visit(expr2),
+				settings.mc, true, true, false, false);
+		    else
+			cmp = compareValues(expr1, expr2, true, true);
 		    break;
+
 		case "==":
 		case "\u2A75":
 		case "!=":
 		case "\u2260": // NOT EQUAL
-		    cmp = compareValues(expr1, expr2, false, true);
+		    if (optObj1 != null)
+			cmp = CalcUtil.compareValues(this, expr1, expr2, optObj1.orElse(null), visit(expr2),
+				settings.mc, false, true, false, false);
+		    else
+			cmp = compareValues(expr1, expr2, false, true);
+		    break;
+
+		default:
+		    if (optObj1 != null)
+			cmp = CalcUtil.compareValues(this, expr1, expr2, optObj1.orElse(null), visit(expr2),
+				settings.mc, false, false, false, false);
+		    else
+			cmp = compareValues(expr1, expr2);
 		    break;
 	    }
 
 	    switch (op) {
+		case "<=":
+		case "\u2264":
+		    result = (cmp <= 0);
+		    break;
+
+		case "<":
+		    result = (cmp < 0);
+		    break;
+
+		case ">=":
+		case "\u2265":
+		    result = (cmp >= 0);
+		    break;
+
+		case ">":
+		    result = (cmp > 0);
+		    break;
+
 		case "===":
 		case "\u2A76":
 		case "\u2261": // IDENTICAL TO
@@ -5006,17 +5028,39 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		case "\u2A75":
 		    result = (cmp == 0);
 		    break;
+
 		case "!==":
 		case "\u2262": // NOT IDENTICAL
 		case "!=":
 		case "\u2260": // NOT EQUAL
 		    result = (cmp != 0);
 		    break;
+
 		default:
-		    throw new UnknownOpException(op, ctx);
+		    // Note: we will never get here because of the grammar,
+		    // so the context for this error is unimportant.
+		    throw new UnknownOpException(op, expr2);
 	    }
 
 	    return Boolean.valueOf(result);
+	}
+
+	@Override
+	public Object visitCompareExpr(CalcParser.CompareExprContext ctx) {
+	    CalcParser.ExprContext expr1 = ctx.expr(0);
+	    CalcParser.ExprContext expr2 = ctx.expr(1);
+	    String op = ctx.COMPARE_OP().getText();
+
+	    return compareOp(expr1, expr2, null, op);
+	}
+
+	@Override
+	public Object visitEqualExpr(CalcParser.EqualExprContext ctx) {
+	    CalcParser.ExprContext expr1 = ctx.expr(0);
+	    CalcParser.ExprContext expr2 = ctx.expr(1);
+	    String op = ctx.EQUAL_OP().getText();
+
+	    return compareOp(expr1, expr2, null, op);
 	}
 
 	@Override

@@ -3,6 +3,7 @@ if [ -z "$1" ]
 then
    echo Update a test canon file.
    echo Usage: upc test_name [ canon_name ]
+   echo   Note: only works for "e7"
    exit 1
 fi
 test=$1
@@ -13,4 +14,4 @@ else
    canon=$2
 fi
 # Note: these options must match the $defaultOptions in calctest
-c -nocolors -dir test/files -noseps -quotes -sense -utf8 -loc en-US $test | mkcanon > test/canons/${canon//[,;]/_}.canon
+c -nocolors -dir test/files -noseps -quotes -sense -utf8 -loc en-US -- 'abc' «def» 1 2 3 text -- -define verbose=true $test | mkcanon > test/canons/${canon//[,;]/_}.canon

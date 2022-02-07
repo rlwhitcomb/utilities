@@ -1019,8 +1019,16 @@ or
      <code>IF</code>&nbsp;<i>expr</i>&nbsp;<code>{</code> <i>statements or expressions</i> <code>}</code> [ <code>ELSE {</code> <i>statements or expressions</i> <code>}</code> ]
   </p>
   <p class="indent">
-     <code>CASE</code>&nbsp;<i>expr</i> (&nbsp;<code>OF</code> | <code>IN</code> | <code>&#x2208;</code>&nbsp;) ( ( <i>expr</i> ( <code>,</code> <i>expr</i> ) * | ( <i>expr</i> <code>...</code> <i>expr</i> [ <code>,</code> <i>expr</i> ] ) | <code>MATCHES</code> <i>pattern</i> | <code>DEFAULT</code> ) <code>: {</code> <i>statements or expressions</i> <code>}</code> ( <code>,</code> ) ? ) *
+     <code>CASE</code>&nbsp;<i>expr</i> (&nbsp;<code>OF</code> | <code>IN</code> | <code>&#x2208;</code>&nbsp;) <i>selector</i> <code>: {</code> <i>statements or expressions</i> <code>}</code> ( <code>,</code> ) ? ) *
   </p>
+  <p>where <i>selector</i> can be any one of the following:
+  <ul class="indent">
+    <li><i>expr</i> ( <code>,</code> expr ) *</li>
+    <li><i>expr</i> <code>...</code> or <code>..</code> or <code>&#x2026;</code> <i>expr</i> [ <code>,</code> <i>expr</i> ]</li>
+    <li><code>MATCHES</code> <i>pattern</i></li>
+    <li><code>&gt;</code> or <code>&lt;</code>, <code>==</code>, etc. <i>expr</i> (any of the comparison operators)</li>
+    <li><code>DEFAULT</code>
+  </ul>
   <p class="indent">
     <code>LEAVE</code>&nbsp;<i>expr</i> ?
   </p>
@@ -1050,7 +1058,7 @@ or
   <p>The <code>IF</code> statement evaluates the expression and executes the code block only if the expression evaluates to a
      boolean <code>true</code> value. If the optional <code>ELSE</code> block is given and the expression evaluates to
      <code>false</code> that block will be executed instead.
-  <p>The <code>CASE</code> statement evaluates the expression and executes whichever code block has a matching value, or the <code>default</code> block (if given) if nothing else matches. Note: the expression match is made as if by <code>'=='</code> (that is, not a strict comparison), but the individual block values can be any kind of expression or object (including lists, objects, strings, functions, etc.). If the <code>matches</code> selector is used, the expression is a regular expression (just like the <code>MATCHES</code> standalone function) against which the case expression is tested.
+  <p>The <code>CASE</code> statement evaluates the expression (only once) and executes whichever code block has a matching value, or the <code>default</code> block (if given) if nothing else matches. Note: the expression match is made as if by <code>'=='</code> (that is, not a strict comparison), but the individual block values can be any kind of expression or object (including lists, objects, strings, functions, etc.). If a <code>...</code> selector is used, the set of values (with optional step value) will be tested in succession to see if any value matches the case expression. When the <code>matches</code> selector is used, the expression is a regular expression pattern (just like the <code>MATCHES</code> standalone function) against which the case expression is tested. Using a comparison operator with an expression will test the case value against that expression, according to the operator. If the comparison succeeds, the corresponding block will be executed.
   <p>The <code>LEAVE</code> statement will cause early termination of a <code>LOOP</code> or <code>WHILE</code> statement, or a function, with the final value of the statement being the (optional) expression on the <code>LEAVE</code> statement itself, or <code>null</code> if none is given. If a <code>LEAVE</code> statement is executed inside any other block (such as <code>IF</code> or <code>CASE</code>) that containing block is terminated, but the closest containing loop or function is also terminated. If the <code>LEAVE</code> is executed outside any loop or function, the entire script is exited with the optional expression as the final value (and therefore as the process exit code).
   <p>In the normal case, the value of any of these compound statements is the value of the last expression evaluated, inside whatever block is selected, and from the last iteration of that block inside a loop.  But the grammar (for now) does not allow that final value to be used except as the return value from a function.  For instance, consider the following code:
   <p class="indent">

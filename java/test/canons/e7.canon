@@ -190,6 +190,16 @@
 >precision_to_directive -> ":default"
 >test_string = 'abababc' -> "abababc"
 >'match' -> "match"
+>Defining function “sign($value)” = {
+> case $value of {
+> < 0: -1, 
+> == 0: 0, 
+> > 0: + 1 
+>} 
+>}
+>sign(-23) -> -1
+>sign(0.0) -> 0
+>sign(0.01) -> 1
 >w = {universal: true} -> { universal: true }
 >Defining function “u” = {"universal"}
 >Defining function “v” = {w}
