@@ -72,7 +72,7 @@ public class CSVParser
 	private CSVFormat format = null;
 
 	/** The {@link BufferedReader} we will be parsing. */
-	private BufferedReader reader = null;
+	private BufferedReader inputReader = null;
 
 	/** Flag to say we've reached the end of a record, that is, we recognized the record separator. */
 	private boolean endOfRecord = false;
@@ -97,23 +97,23 @@ public class CSVParser
 	 *			bytes to Unicode characters.  A {@link BufferedReader} will
 	 *			be wrapped around it for use (unless, of course, you pass in
 	 *			a {@code BufferedReader} yourself.
-	 * @param	format	The {@link CSVFormat} to use to interpret the data.  If
+	 * @param	fmt	The {@link CSVFormat} to use to interpret the data.  If
 	 *			{@code null} is passed, then a default format will be used.
 	 * @throws	IllegalArgumentException if the {@code reader} is {@code null}.
 	 */
-	public CSVParser(Reader reader, CSVFormat format) {
+	public CSVParser(Reader reader, CSVFormat fmt) {
 	    if (reader == null)
 		throw new Intl.IllegalArgumentException("csv#parser.readerNotNull");
 
 	    if (reader instanceof BufferedReader)
-		this.reader = (BufferedReader)reader;
+		inputReader = (BufferedReader) reader;
 	    else
-		this.reader = new BufferedReader(reader);
+		inputReader = new BufferedReader(reader);
 
-	    if (format == null)
-		this.format = new CSVFormat();
+	    if (fmt == null)
+		format = new CSVFormat();
 	    else
-		this.format = format;
+		format = fmt;
 	}
 
 	/**
@@ -157,7 +157,7 @@ public class CSVParser
 	 *
 	 * @return	-1 at end of file, and will set the {@link #endOfInput}
 	 *		and {@link #endOfRecord} flags in that case also, as
-	 *		well as closing the {@link #reader}.
+	 *		well as closing the {@link #inputReader}.
 	 *
 	 * @throws	IOException on errors reading the input.
 	 */
@@ -165,6 +165,7 @@ public class CSVParser
 		throws IOException
 	{
 	    int nextChar;
+
 	    // Consume the lookahead character if available
 	    if (lastChar != null) {
 		nextChar = lastChar;
@@ -174,14 +175,16 @@ public class CSVParser
 		return -1;
 	    }
 	    else {
-		nextChar = reader.read();
+		nextChar = inputReader.read();
 		inputPos++;
 	    }
+
 	    if (nextChar == -1) {
-		reader.close();
-		reader = null;
+		inputReader.close();
+		inputReader = null;
 		endOfInput = endOfRecord = true;
 	    }
+
 	    return nextChar;
 	}
 
@@ -197,11 +200,12 @@ public class CSVParser
 	{
 	    try {
 		nextToken = null;
-		if (reader != null) {
+		if (inputReader != null) {
 		    endOfRecord = false;
 		    StringBuffer buf = null;
 		    boolean insideQuotes = false;
 		    boolean sawQuotes = false;
+
 		    for (;;) {
 			int nextChar = getNextChar();
 			// Ignore BOM (Byte-Order Mark) wherever it occurs (but typically only as first char of file)
@@ -215,25 +219,27 @@ public class CSVParser
 			else {
 			    if (buf == null)
 				buf = new StringBuffer();
+
 			    if (insideQuotes) {
-				if (!format.disableEscape && (char)nextChar == format.escapeChar) {
+				if (!format.disableEscape && (char) nextChar == format.escapeChar) {
 				    nextChar = getNextChar();
 				    if (nextChar == -1) {
 					throw new CSVException("csv#parser.unexpectedEOF", inputPos);
 				    }
-				    // Interpret the next character literally
-				    buf.append((char)nextChar);
+				    // Interpret the next character literally, as in "\x" -> "x"
+				    buf.append((char) nextChar);
 				}
 				else if (!format.disableQuoting) {
-				    if ((char)nextChar == format.quoteChar && !format.handedQuoting) {
+				    if ((char) nextChar == format.quoteChar && !format.handedQuoting) {
 					nextChar = getNextChar();
 					if (nextChar == -1) {
 					    // Found the end of the quoted string
 					    insideQuotes = false;
 					}
-					else if ((char)nextChar == format.quoteChar) {
+					else if (format.disableEscape && (char) nextChar == format.quoteChar) {
 					    // Doubled quote inserts a single quote, but only if the left and right are the same
-					    buf.append((char)nextChar);
+					    // and we're not escaping anything
+					    buf.append((char) nextChar);
 					}
 					else {
 					    // Found the end of the quoted string
@@ -242,32 +248,32 @@ public class CSVParser
 					    lastChar = nextChar;
 					}
 				    }
-				    else if (format.handedQuoting && (char)nextChar == format.rightQuoteChar) {
+				    else if (format.handedQuoting && (char) nextChar == format.rightQuoteChar) {
 					// Found the end of the quoted string
 					insideQuotes = false;
 				    }
 				    // Support the Quotes "ALL" choice
 				    else if (format.quoteChar == Quotes.Constants.ALL_QUOTE_CHAR &&
-					     Quotes.isValidEnd((char)nextChar)) {
+					     Quotes.isValidEnd((char) nextChar)) {
 					// Found the end of the quoted string
 					insideQuotes = false;
 				    }
 				    else {
-					buf.append((char)nextChar);
+					buf.append((char) nextChar);
 				    }
 				}
 				else {
-				    buf.append((char)nextChar);
+				    buf.append((char) nextChar);
 				}
 			    }
 			    else {
-				if (!format.disableEscape && (char)nextChar == format.escapeChar) {
+				if (!format.disableEscape && (char) nextChar == format.escapeChar) {
 				    nextChar = getNextChar();
 				    if (nextChar == -1) {
 					throw new CSVException("csv#parser.unexpectedEOF", inputPos);
 				    }
 				    // Interpret the next character literally
-				    buf.append((char)nextChar);
+				    buf.append((char) nextChar);
 				    // Tricky bit here also:  if the next character is a normal line ending
 				    // (such as \r or \n) then allow both of them to be escaped as if one
 				    if (nextChar == '\r' || nextChar == '\n') {
@@ -276,7 +282,7 @@ public class CSVParser
 					    break;
 					}
 					if ((ch == '\r' || ch == '\n') && ch != nextChar) {
-					    buf.append((char)ch);
+					    buf.append((char) ch);
 					}
 					else {
 					    lastChar = ch;
@@ -298,33 +304,33 @@ public class CSVParser
 				    }
 				}
 				else {
-				    // Non-normal line endings must only be one character
-				    if ((char)nextChar == format.recordSepChar) {
+				    // Non-normal line endings must be only one character
+				    if ((char) nextChar == format.recordSepChar) {
 					endOfRecord = true;
 					break;
 				    }
 				}
-				if ((char)nextChar == format.fieldSepChar) {
+				if ((char) nextChar == format.fieldSepChar) {
 				    break;
 				}
 				else if (Character.isWhitespace(nextChar)) {
-				    buf.append((char)nextChar);
+				    buf.append((char) nextChar);
 				}
 				else if (!format.disableQuoting) {
-				    if ((char)nextChar == format.quoteChar) {
+				    if ((char) nextChar == format.quoteChar) {
 					insideQuotes = sawQuotes = true;
 				    }
 				    // Support the "ALL" Quotes value
 				    else if (format.quoteChar == Quotes.Constants.ALL_QUOTE_CHAR &&
-					     Quotes.isValidStart((char)nextChar)) {
+					     Quotes.isValidStart((char) nextChar)) {
 					insideQuotes = sawQuotes = true;
 				    }
 				    else {
-					buf.append((char)nextChar);
+					buf.append((char) nextChar);
 				    }
 				}
 				else {
-				    buf.append((char)nextChar);
+				    buf.append((char) nextChar);
 				}
 			    }
 			}
