@@ -32,6 +32,8 @@
  *	    #122: Refactor to reduce duplicated code.
  *	26-Jan-2022 (rlwhitcomb)
  *	    Make new Supplier methods for CalcPredefine.
+ *	06-Feb-2022 (rlwhitcomb)
+ *	    Also calculate pi/2.
  */
 package info.rlwhitcomb.calc;
 
@@ -57,9 +59,23 @@ public class CalcPiWorker
 	private int precision;
 	private boolean rational;
 
+	/**
+	 * Euler's constant (e) or the base of the natural logarithms.
+	 */
 	private BigDecimal e;
+	/**
+	 * The ratio of the circumference to the diameter of a circle (or pi).
+	 */
 	private BigDecimal pi;
+	/**
+	 * One half of {@link #pi}.
+	 */
+	private BigDecimal piOver2;
+	/**
+	 * {@link #pi} divided by 180, or the conversion between degrees and radians.
+	 */
 	private BigDecimal piOver180;
+
 
 	/** The captive thread used to do the background calculations. */
 	private final QueuedThread queuedThread = new QueuedThread();
@@ -69,6 +85,7 @@ public class CalcPiWorker
 	 *  {@code calculate()}.
 	 */
 	private final Semaphore readySem = new Semaphore(1);
+
 
 	/**
 	 * Private since we need a precision to do anything, so not allowed.
@@ -101,7 +118,7 @@ public class CalcPiWorker
 	    mc        = newMC;
 	    precision = mc.getPrecision();
 
-	    queuedThread.submitWork(() -> calculate());
+	    queuedThread.submitWork( () -> calculate() );
 	}
 
 	/**
@@ -115,6 +132,8 @@ public class CalcPiWorker
 	private void calculate() {
 	    e         = MathUtil.e(precision + 1);
 	    pi        = MathUtil.pi(precision + 1);
+
+	    piOver2   = pi.divide(D_TWO, mc);
 	    piOver180 = pi.divide(D_180, mc);
 
 	    // Release a permit to say the calculation results are now available
@@ -147,7 +166,7 @@ public class CalcPiWorker
 	 * @return The value of <code>e</code> to the current precision.
 	 */
 	public BigDecimal getE() {
-	    return getWhenReady(() -> e.round(mc));
+	    return getWhenReady( () -> e.round(mc) );
 	}
 
 	/**
@@ -158,7 +177,18 @@ public class CalcPiWorker
 	 * @return The value of <code>pi</code> to the current precision.
 	 */
 	public BigDecimal getPi() {
-	    return getWhenReady(() -> pi.round(mc));
+	    return getWhenReady( () -> pi.round(mc) );
+	}
+
+	/**
+	 * Get the calculated value of <code>pi / 2</code> to the current number of digits.
+	 * <p> Waits until the background thread is done with the calculation
+	 * if a new precision was just recently specified.
+	 *
+	 * @return The value of <code>pi / 2</code> to the current precision.
+	 */
+	public BigDecimal getPiOver2() {
+	    return getWhenReady( () -> piOver2 );
 	}
 
 	/**
@@ -169,7 +199,7 @@ public class CalcPiWorker
 	 * @return The value of <code>pi / 180</code> to the current precision.
 	 */
 	public BigDecimal getPiOver180() {
-	    return getWhenReady(() -> piOver180);
+	    return getWhenReady( () -> piOver180 );
 	}
 
 	/**
@@ -187,6 +217,7 @@ public class CalcPiWorker
 	 */
 	public Supplier<Object> piSupplier = () -> {
 	    BigDecimal dValue = getPi();
+
 	    if (rational)
 		return new BigFraction(dValue);
 	    else
@@ -199,6 +230,7 @@ public class CalcPiWorker
 	 */
 	public Supplier<Object> eSupplier = () -> {
 	    BigDecimal dValue = getE();
+
 	    if (rational)
 		return new BigFraction(dValue);
 	    else
