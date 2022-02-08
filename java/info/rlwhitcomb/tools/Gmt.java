@@ -45,6 +45,9 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.TimeZone;
 
+import info.rlwhitcomb.util.Intl;
+
+
 /**
  * Display the current GMT time.
  */
@@ -58,26 +61,6 @@ public class Gmt
 	private static final String LOGGING_FORMAT = "MMM dd,yyyy HH:mm:ss.SSS z";
 	/** Output format compatible with ISO-8601 format. */
 	private static final String ISO_8601_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
-
-	/** The help text for this program. */
-	private static final String[] HELP = {
-	    "",
-	    "Usage: gmt [options]",
-	    "",
-	    "\twhere 'options' can be:",
-	    "\t  -log  = display in format compatible with our Logging class",
-	    "\t  -date = display compatible with Linux 'date' command",
-	    "\t  -iso  = display in ISO-8601 format",
-	    "",
-	    "\tNote: options can be with or without '-' or can be just the first character.",
-	    "",
-	    "\tExamples:",
-	    "\t  -log  -> Dec 20,2021 06:45:49.829 GMT",
-	    "\t  -date -> Mon Dec 20  6:46:19 GMT 2021",
-	    "\t  -iso  -> 2021-12-20T06:46:43.526Z",
-	    "\tdefault -> Mon Dec 20,2021  6:48:22.584 GMT",
-	    ""
-	};
 
 
 	private static void sub(StringBuffer buf, int charPos) {
@@ -119,9 +102,7 @@ public class Gmt
 		    case "h":
 		    case "-?":
 		    case "?":
-			for (String helpLine : HELP) {
-			    System.out.println(helpLine);
-			}
+			Intl.printHelp("tools#gmt");
 			return;
 		}
 	    }

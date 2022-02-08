@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2016-2017,2020-2021 Roger L. Whitcomb.
+ * Copyright (c) 2016-2017,2020-2022 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -35,6 +35,8 @@
  *	    Prepare for GitHub; add Javadoc.
  *	29-Mar-2021 (rlwhitcomb)
  *	    Move to new package.
+ *	08-Feb-2022 (rlwhitcomb)
+ *	    Move text out to resources.
  */
 package info.rlwhitcomb.tools;
 
@@ -43,6 +45,8 @@ import java.io.IOException;
 
 import info.rlwhitcomb.util.ExceptionUtil;
 import info.rlwhitcomb.util.FileUtilities;
+import info.rlwhitcomb.util.Intl;
+
 
 /**
  * Compress a list of input files to the same name with ".gz" extension.
@@ -64,12 +68,11 @@ public class GZip
 			FileUtilities.compressFile(f);
 		    }
 		    else {
-			System.err.format("Cannot find or read the input file: \"%1$s\"!%n", arg);
+			Intl.errFormat("tools#gunzip.cannotFindOrRead", arg);
 		    }
 		}
 		catch (IOException ioe) {
-		    System.err.format("Error reading the input or writing the output file (%1$s): %2$s%n",
-			arg, ExceptionUtil.toString(ioe));
+		    Intl.errFormat("tools#gunzip.ioError", arg, ExceptionUtil.toString(ioe));
 		}
 	    }
 	}

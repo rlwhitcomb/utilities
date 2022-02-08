@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2020-2021 Roger L. Whitcomb.
+ * Copyright (c) 2020-2022 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -32,6 +32,8 @@
  *	    Move to new package.
  *	17-Aug-2021 (rlwhitcomb)
  *	    Check for unmatched leading or trailing quotes.
+ *	08-Feb-2022 (rlwhitcomb)
+ *	    Move text to resources.
  */
 package info.rlwhitcomb.tools;
 
@@ -39,6 +41,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
+
+import info.rlwhitcomb.util.ExceptionUtil;
+import info.rlwhitcomb.util.Intl;
 
 
 /**
@@ -101,7 +106,7 @@ public class FixPath
 			    }
 			}
 			catch (IOException ioe) {
-			    System.err.println("Error getting canonical path of \"" + pathDir.getPath() + "\": " + ioe.getMessage());
+			    Intl.errFormat("tools#fixpath.errorCanonicalPath", pathDir.getPath(), ExceptionUtil.toString(ioe));
 			}
 		    }
 		}

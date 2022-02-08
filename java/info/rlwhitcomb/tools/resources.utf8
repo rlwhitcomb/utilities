@@ -1,0 +1,120 @@
+#
+# The MIT License (MIT)
+#
+# Copyright (c) 2022 Roger L. Whitcomb.
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+#
+#       Internationalizable strings for the info.rlwhitcomb.tools code.
+#
+# History:
+#       08-Feb-2022 (rlwhitcomb)
+#           Moved into here from some of the .java files.
+#
+
+#
+# From FixPath.java
+#
+fixpath.errorCanonicalPath	= Error getting canonical path of "%1$s": %2$s
+
+#
+# From GUnzip.java and GZip.java
+#
+gunzip.cannotFindOrRead		= Cannot find or read the input file: "%1$s"!
+gunzip.wrongExtension		= The input file (%1$s) doesn't have the (required) ".gz" extension.
+gunzip.ioError			= Error reading the input or writing the output file (%1$s): %2$s
+
+#
+# From Gmt.java
+#
+gmt.help1	= ""
+gmt.help2	= Usage: gmt [options]
+gmt.help3	= ""
+gmt.help4	= \twhere 'options' can be:
+gmt.help5	= \t  -log  = display in format compatible with our Logging class
+gmt.help6	= \t  -date = display compatible with Linux 'date' command
+gmt.help7	= \t  -iso  = display in ISO-8601 format
+gmt.help8	= ""
+gmt.help9	= \tNote: options can be with or without '-' or can be just the first character.
+gmt.help10	= ""
+gmt.help11	= \tExamples:
+gmt.help12	= \t  -log  -> Dec 20,2021 06:45:49.829 GMT
+gmt.help13	= \t  -date -> Mon Dec 20  6:46:19 GMT 2021
+gmt.help14	= \t  -iso  -> 2021-12-20T06:46:43.526Z
+gmt.help15	= \tdefault -> Mon Dec 20,2021  6:48:22.584 GMT
+gmt.help16	= ""
+
+#
+# From Head.java
+#
+head.invalidLines	= Number of lines must be a valid integer.
+head.invalidPath	= Unable to find the file "%1$s".
+head.ioError		= I/O error: %1$s
+
+#
+# From IsDir.java
+#
+isdir.help1	= ""
+isdir.help2	= "Usage: isdir _path_"
+isdir.help3	= ""
+isdir.help4	= "  Exit code will be 0 if the given _path_ really exists and is a directory"
+isdir.help5	= "                    1 if the _path_ is some other kind of file"
+isdir.help6	= "                    2 if there were either none or too many arguments given"
+isdir.help7	= "                    3 if the _path_ does not exist as typed"
+isdir.help8	= ""
+
+isdir.pathRequired	= Error: one path name is required!
+isdir.tooManyArgs	= Error: too many arguments given!
+isdir.cannotFindPath	= Cannot find the requested path: "%1$s"!
+
+#
+# From HexDump.java
+#
+hexdump.invalidNumberBytes	= Number of bytes must be a valid integer.
+hexdump.invalidPath		= Unable to find the file "%1$s".
+hexdump.ioError			= I/O error: %1$s
+
+#
+# From Uuid.java
+#
+uuid.help1	= ""
+uuid.help2	= "Usage: uuid [-lower][-upper][-string][-bytes][-int][-nn]"
+uuid.help3	= ""
+uuid.help4	= "   Default is lower-case string; default for bytes is upper-case."
+uuid.help5	= "   Aliases for options are:"
+uuid.help6	= "     -lower = -lowercase, -low, -l"
+uuid.help7	= "     -upper = -uppercase, -up, -u"
+uuid.help8	= "     -string = -str, -s"
+uuid.help9	= "     -bytes = -byte, -by, -b"
+uuid.help10	= "     -int = -integer, -i"
+uuid.help11	= "     -nn means output nn unique values (1..99)"
+uuid.help12	= ""
+
+uuid.invalidNumber	= Number of values should be between 1 and 99.
+uuid.unrecognizedOption	= Unrecognized option "%1$s"!
+uuid.unrecognizedArg	= Unrecoznized argument "%1$s"!
+
+#
+# From WordCount.java
+#
+wc.unknownOption	= Unknown option: "%1$s%2$s"; ignoring.
+wc.cannotFindFile	= Unable to find the file "%1$s".
+wc.cannotDecode		= Unable to decode character: %1$s
+wc.ioError		= I/O error: %1$s
+

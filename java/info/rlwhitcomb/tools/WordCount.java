@@ -42,6 +42,8 @@
  *	    And oops! Fix that code.
  *	01-Feb-2022 (rlwhitcomb)
  *	    #231: Use new Constants class values instead of our own.
+ *	08-Feb-2022 (rlwhitcomb)
+ *	    Move text to resources.
  */
 package info.rlwhitcomb.tools;
 
@@ -64,6 +66,7 @@ import java.util.List;
 import static info.rlwhitcomb.util.Constants.*;
 import info.rlwhitcomb.util.Environment;
 import info.rlwhitcomb.util.ExceptionUtil;
+import info.rlwhitcomb.util.Intl;
 
 
 /**
@@ -184,7 +187,7 @@ public class WordCount
 		    code = -1;
 		    break;
 		default:
-		    System.err.format("Unknown option: \"%1$s%2$s\"; ignoring.%n", prefix, opt);
+		    Intl.errFormat("tools#wc.unknownOption", prefix, opt);
 		    break;
 	    }
 
@@ -254,7 +257,7 @@ public class WordCount
 		    path = Paths.get(file);
 		}
 		catch (InvalidPathException ex) {
-		    System.err.println("Unable to find the file \"" + file + "\".");
+		    Intl.errFormat("tools#wc.cannotFindFile", file);
 		    return;
 		}
 	    }
@@ -282,17 +285,17 @@ public class WordCount
 			cb.chars().forEach(ichar -> process(ichar));
 		    }
 		    catch (CharacterCodingException cce) {
-			System.err.println("Unable to decode character: " + ExceptionUtil.toString(cce));
+			Intl.errFormat("tools#wc.cannotDecode", ExceptionUtil.toString(cce));
 			return;
 		    }
 		}
 	    }
 	    catch (NoSuchFileException nsfe) {
-		System.err.println("Unable to find the file \"" + file + "\".");
+		Intl.errFormat("tools#wc.cannotFindFile", file);
 		return;
 	    }
 	    catch (IOException ioe) {
-		System.err.println("I/O error: " + ExceptionUtil.toString(ioe));
+		Intl.errFormat("tools#wc.ioError", ExceptionUtil.toString(ioe));
 		return;
 	    }
 

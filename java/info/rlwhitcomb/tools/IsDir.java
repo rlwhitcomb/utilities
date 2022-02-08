@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2021 Roger L. Whitcomb.
+ * Copyright (c) 2021-2022 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,12 +26,16 @@
  *  Change History:
  *	27-Dec-2021 (rlwhitcomb)
  *	    Coding.
+ *	08-Feb-2022 (rlwhitcomb)
+ *	    Move text out to resources.
  */
 package info.rlwhitcomb.tools;
 
 import java.io.File;
 
 import info.rlwhitcomb.util.ExceptionUtil;
+import info.rlwhitcomb.util.Intl;
+
 
 /**
  * Test if the given (one) argument is a directory or not.
@@ -49,21 +53,9 @@ public class IsDir
 	private static final int ARG_ERROR      = 2;
 	private static final int PATH_NOT_EXIST = 3;
 
-	private static final String[] HELP = {
-	    "",
-	    "Usage: isdir _path_",
-	    "",
-	    "  Exit code will be 0 if the given _path_ really exists and is a directory",
-	    "                    1 if the _path_ is some other kind of file",
-	    "                    2 if there were either none or too many arguments given",
-	    "                    3 if the _path_ does not exist as typed",
-	    ""
-	};
 
 	private static final void usage() {
-	    for (String help : HELP) {
-		System.err.println(help);
-	    }
+	    Intl.printHelp("tools#isdir");
 	}
 
 	/**
@@ -74,12 +66,12 @@ public class IsDir
 	 */
 	public static void main(String[] args) {
 	    if (args.length == 0) {
-		System.err.println("Error: one path name is required!");
+		Intl.errPrintln("tools#isdir.pathRequired");
 		usage();
 		System.exit(ARG_ERROR);
 	    }
 	    else if (args.length > 1) {
-		System.err.println("Error: too many arguments given!");
+		Intl.errPrintln("tools#isdir.tooManyArgs");
 		usage();
 		System.exit(ARG_ERROR);
 	    }
@@ -96,7 +88,7 @@ public class IsDir
 		}
 	    }
 	    else {
-		System.err.format("Cannot find the requested path: \"%1$s\"!%n", arg);
+		Intl.errFormat("tools#isdir.cannotFindPath", arg);
 		System.exit(PATH_NOT_EXIST);
 	    }
 	}

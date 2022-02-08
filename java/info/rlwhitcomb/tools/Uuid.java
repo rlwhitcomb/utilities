@@ -32,6 +32,8 @@
  *	    #80: Add "-int" option.
  *	21-Jan-2022 (rlwhitcomb)
  *	    #217: Allow environment options through new Options method.
+ *	08-Feb-2022 (rlwhitcomb)
+ *	    Move text to resources.
  */
 package info.rlwhitcomb.tools;
 
@@ -40,6 +42,7 @@ import java.util.UUID;
 
 import info.rlwhitcomb.util.CharUtil;
 import info.rlwhitcomb.util.Options;
+import info.rlwhitcomb.util.Intl;
 
 
 /**
@@ -70,28 +73,12 @@ public class Uuid
 	/** Number of iterations, default one. */
 	private static int numberOfValues = 1;
 
-	/** Help/usage message. */
-	private static final String[] USAGE = {
-	    "Usage: uuid [-lower][-upper][-string][-bytes][-int][-nn]",
-	    "",
-	    "   Default is lower-case string; default for bytes is upper-case.",
-	    "   Aliases for options are:",
-	    "     -lower = -lowercase, -low, -l",
-	    "     -upper = -uppercase, -up, -u",
-	    "     -string = -str, -s",
-	    "     -bytes = -byte, -by, -b",
-	    "     -int = -integer, -i",
-	    "     -nn means output nn unique values (1..99)",
-	    ""
-	};
 
 	/**
 	 * Display a message about the usage of this program.
 	 */
 	private static void usage() {
-	    for (String msg : USAGE) {
-		System.out.println(msg);
-	    }
+	    Intl.printHelp("tools#uuid");
 	}
 
 	/**
@@ -164,21 +151,21 @@ public class Uuid
 			try {
 			    int nn = Integer.parseInt(value);
 			    if (nn < 1 || nn > 99) {
-				System.err.println("Number of values should be between 1 and 99.");
+				Intl.errPrintln("tools#uuid.invalidNumber");
 				usage();
 				return false;
 			    }
 			    numberOfValues = nn;
 			}
 			catch (NumberFormatException nfe) {
-			    System.err.println("Unrecognized option \"" + opt + "\"!");
+			    Intl.errFormat("tools#uuid.unrecognizedOption", opt);
 			    usage();
 			    return false;
 			}
 		    }
 		}
 		else {
-		    System.err.println("Unrecognized argument \"" + opt + "\"!");
+		    Intl.errFormat("tools#uuid.unrecognizedArg", opt);
 		    usage();
 		    return false;
 		}

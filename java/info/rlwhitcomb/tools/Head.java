@@ -36,6 +36,8 @@
  *	    Initialize the static variables inside "main" for testing purposes.
  *	01-Feb-2022 (rlwhitcomb)
  *	    Use new Constants values instead of our own.
+ *	08-Feb-2022 (rlwhitcomb)
+ *	    Move text out to resources.
  */
 package info.rlwhitcomb.tools;
 
@@ -53,6 +55,7 @@ import java.util.List;
 import static info.rlwhitcomb.util.Constants.*;
 import info.rlwhitcomb.util.Environment;
 import info.rlwhitcomb.util.ExceptionUtil;
+import info.rlwhitcomb.util.Intl;
 
 
 /**
@@ -125,7 +128,7 @@ public class Head
 			linesToDisplay = Integer.parseInt(opt);
 		    }
 		    catch (NumberFormatException nfe) {
-			System.err.println("Number of lines must be a valid integer.");
+			Intl.errPrintln("tools#head.invalidLines");
 			code = 1;
 		    }
 		    break;
@@ -147,7 +150,7 @@ public class Head
 		path = Paths.get(file);
 	    }
 	    catch (InvalidPathException ex) {
-		System.err.println("Unable to find the file \"" + file + "\".");
+		Intl.errFormat("tools#head.invalidPath", file);
 		return;
 	    }
 	    if (printName) {
@@ -161,10 +164,10 @@ public class Head
 		}
 	    }
 	    catch (NoSuchFileException nsfe) {
-		System.err.println("Unable to find the file \"" + file + "\".");
+		Intl.errFormat("tools#head.invalidPath", file);
 	    }
 	    catch (IOException ioe) {
-		System.err.println("I/O error: " + ExceptionUtil.toString(ioe));
+		Intl.errFormat("tools#head.ioError", ExceptionUtil.toString(ioe));
 	    }
 	    if (printName) {
 		System.out.println();

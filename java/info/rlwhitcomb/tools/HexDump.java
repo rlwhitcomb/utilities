@@ -31,6 +31,8 @@
  *	    #238: Color code the hex as well as ASCII.
  *	    Make the address more readable with yellow.
  *	    #238: Use different substitute character for control characters.
+ *	08-Feb-2022 (rlwhitcomb)
+ *	    #238: Move text to resources.
  */
 package info.rlwhitcomb.tools;
 
@@ -49,6 +51,7 @@ import info.rlwhitcomb.util.ConsoleColor;
 import static info.rlwhitcomb.util.ConsoleColor.Code.*;
 import info.rlwhitcomb.util.Environment;
 import info.rlwhitcomb.util.ExceptionUtil;
+import info.rlwhitcomb.util.Intl;
 
 
 /**
@@ -142,7 +145,7 @@ public class HexDump
 			numberBytesPerLine = Integer.parseInt(opt);
 		    }
 		    catch (NumberFormatException nfe) {
-			System.err.println("Number of bytes must be a valid integer.");
+			Intl.errPrintln("tools#hexdump.invalidNumberBytes");
 			code = 1;
 		    }
 		    break;
@@ -164,7 +167,7 @@ public class HexDump
 		path = Paths.get(file);
 	    }
 	    catch (InvalidPathException ex) {
-		System.err.println("Unable to find the file \"" + file + "\".");
+		Intl.errFormat("tools#hexdump.invalidPath", file);
 		return;
 	    }
 
@@ -224,10 +227,10 @@ public class HexDump
 		}
 	    }
 	    catch (NoSuchFileException nsfe) {
-		System.err.println("Unable to find the file \"" + file + "\".");
+		Intl.errFormat("tools#hexdump.invalidPath", file);
 	    }
 	    catch (IOException ioe) {
-		System.err.println("I/O error: " + ExceptionUtil.toString(ioe));
+		Intl.errFormat("tools#hexdump.ioError", ExceptionUtil.toString(ioe));
 	    }
 	    if (printName) {
 		System.out.println();
