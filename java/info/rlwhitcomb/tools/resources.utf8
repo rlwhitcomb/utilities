@@ -27,6 +27,8 @@
 #       08-Feb-2022 (rlwhitcomb)
 #           Moved into here from some of the .java files.
 #	    Tweak the unknown option string from WordCount.
+#	09-Feb-2022 (rlwhitcomb)
+#	    #238: Add HexDump help.
 #
 
 #
@@ -87,6 +89,21 @@ isdir.cannotFindPath	= Cannot find the requested path: "%1$s"!
 #
 # From HexDump.java
 #
+hexdump.help1		= ""
+hexdump.help2		= Usage: hexd [ options ] file_name(s) | (-version|-vers|-ver|-v) | (-help|-h|-?)
+hexdump.help3		= ""
+hexdump.help4		= "  Where 'options' can be:"
+hexdump.help5		= "\t-nocolors, -nocolor, -nocols, -nocol, -noc, or -n"
+hexdump.help6		= "\t  to output everything in monochrome"
+hexdump.help7		= "\t-colors, -color, -cols, -col, or -c"
+hexdump.help8		= "\t  (default) to color the output"
+hexdump.help9		= "\t-lower, -low, or -l"
+hexdump.help10		= "\t  hex codes are lowercase (as in 'ab')"
+hexdump.help11		= "\t-upper, -up, or -u"
+hexdump.help12		= "\t  (default) hex codes are uppercase (as in 'AB')"
+hexdump.help13		= "\t-nnn to set the number of bytes per line (default 16)"
+hexdump.help14		= ""
+
 hexdump.invalidNumberBytes	= Number of bytes must be a valid integer.
 hexdump.invalidPath		= Unable to find the file "%1$s".
 hexdump.ioError			= I/O error: %1$s

@@ -34,6 +34,8 @@
  *	08-Feb-2022 (rlwhitcomb)
  *	    #238: Move text to resources.
  *	    Use new Options method to process command line.
+ *	09-Feb-2022 (rlwhitcomb)
+ *	    #238: Add help.
  */
 package info.rlwhitcomb.tools;
 
@@ -136,6 +138,13 @@ public class HexDump
 		case "ver":
 		case "v":
 		    Environment.printProgramInfo();
+		    code = -1;
+		    break;
+
+		case "help":
+		case "h":
+		case "?":
+		    Intl.printHelp("tools#hexdump");
 		    code = -1;
 		    break;
 
