@@ -248,6 +248,8 @@
  *	05-Feb-2022 (rlwhitcomb)
  *	    #233: Change methods called from "settings" setValue to take Objects.
  *	    Outer-level "catch" of IllegalStateException also.
+ *	09-Feb-2022 (rlwhitcomb)
+ *	    #240: Display timing during initial library load.
  */
 package info.rlwhitcomb.calc;
 
@@ -431,6 +433,8 @@ public class Calc
 	private static boolean silenceDirectives = false;
 
 	private static boolean useCmdEnter = true;
+
+	private static boolean initialLibraryLoad = false;
 
 	private static Locale  locale  = null;
 
@@ -1555,7 +1559,7 @@ public class Calc
 		visitor.setSilent(oldSilent);
 	    }
 
-	    if (timing && !silent) {
+	    if (timing && (!silent || initialLibraryLoad)) {
 		double parseTime = Environment.timerValueToSeconds(parseEndTime - startTime);
 		double execTime  = Environment.timerValueToSeconds(endTime - execStartTime);
 		double totalTime = Environment.timerValueToSeconds(endTime - startTime);
@@ -1569,8 +1573,14 @@ public class Calc
 		throws IOException
 	{
 	    if (libraryNames != null) {
-		for (String libraryName : libraryNames) {
-		    process(CharStreams.fromString(getFileContents(libraryName, null)), visitor, errorStrategy, true);
+		initialLibraryLoad = true;
+		try {
+		    for (String libraryName : libraryNames) {
+			process(CharStreams.fromString(getFileContents(libraryName, null)), visitor, errorStrategy, true);
+		    }
+		}
+		finally {
+		    initialLibraryLoad = false;
 		}
 	    }
 	}
