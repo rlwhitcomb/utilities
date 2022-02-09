@@ -55,6 +55,8 @@
  *	    #188: Add "ceil" and "floor" methods.
  *	01-Feb-2022 (rlwhitcomb)
  *	    #231: Use new Constants class values instead of our own.
+ *	08-Feb-2022 (rlwhitcomb)
+ *	    #235: Add "atan2" code.
  */
 package info.rlwhitcomb.util;
 
@@ -96,6 +98,8 @@ public final class MathUtil
 	private static BigDecimal MINUS_TWO_PI;
 	private static BigDecimal PI_OVER_TWO;
 	private static BigDecimal MINUS_PI_OVER_TWO;
+	private static BigDecimal PI_OVER_FOUR;
+	private static BigDecimal MINUS_PI_OVER_FOUR;
 
 
 	/**
@@ -705,6 +709,106 @@ public final class MathUtil
 	}
 
 	/**
+	 * Find the <code>arctan(y/x)</code> value, which is the "theta" value when converting complex numbers
+	 * to polar form.
+	 * <p> Relying on the formulas from here:
+	 * <a href="https://proofwiki.org/wiki/Power_Series_Expansion_for_Real_Arctangent_Function">Power Series Expansion for Real Arctangent Function</a>
+	 *
+	 * @param y	The imaginary or y-coordinate of this number.
+	 * @param x	The real or x-coordinate of the number.
+	 * @param mc	The rounding context to use for the result (at least).
+	 * @return	The angle whose tangent is <code>y / x</code>.
+	 * @throws IllegalArgumentException if x and y are both zero.
+	 */
+	public static BigDecimal atan2(final BigDecimal y, final BigDecimal x, final MathContext mc) {
+	    int ySign = y.signum();
+	    int xSign = x.signum();
+
+	    pi(mc.getPrecision());
+
+	    BigDecimal result = null;
+
+	    // If imaginary part (y) is zero, then angle is 0 or pi depending on sign of x
+	    if (ySign == 0) {
+		switch (xSign) {
+		    case 0:
+			// ?? to me, this is undefined, but Math.atan2 returns 0 for this case
+		    case +1:
+			result = BigDecimal.ZERO;
+			break;
+		    case -1:
+			result = CALCULATED_PI;
+			break;
+		}
+	    }
+	    // If real part (x) is zero, then angle is +/- pi/2 depending on sign of y
+	    else if (xSign == 0) {
+		result = ySign < 0 ? MINUS_PI_OVER_TWO : PI_OVER_TWO;
+	    }
+	    // If x and y are the same magnitude the result is +/- pi/4 or 3*pi/4
+	    else if (y.abs().equals(x.abs())) {
+		if (ySign > 0 && xSign > 0)
+		    result = PI_OVER_FOUR;
+		else if (ySign < 0 && xSign > 0)
+		    result = MINUS_PI_OVER_FOUR;
+		else if (ySign > 0 && xSign < 0)
+		    result = PI_OVER_FOUR.multiply(D_THREE);
+		else
+		    result = PI_OVER_FOUR.multiply(D_THREE).negate();
+	    }
+	    if (result != null)
+		return result.round(mc);
+
+	    // Use extra precision to ensure we get as accurate a value as possible
+	    MathContext mc2 = new MathContext(mc.getPrecision() * 2);
+
+	    // Else there is one of three series depending on the size of the value
+	    BigDecimal _x = y.divide(x, mc2);
+
+	    boolean above = _x.compareTo(BigDecimal.ONE) >= 0;
+	    boolean below = _x.compareTo(D_MINUS_ONE) <= 0;
+
+	    BigDecimal term, multTerm, powerTerm = _x;
+	    BigDecimal x_square = _x.multiply(_x);
+	    BigDecimal lastResult = BigDecimal.ZERO;
+	    int sign = -1;
+
+	    // -1 <= x <= 1
+	    if (!above && !below) {
+		result = powerTerm;
+		powerTerm = powerTerm.multiply(x_square, mc2);
+		multTerm = D_THREE;
+	    }
+	    // x >= 1 or x <= -1
+	    else {
+		result = above ? PI_OVER_TWO : MINUS_PI_OVER_TWO;
+		multTerm = BigDecimal.ONE;
+	    }
+
+	    while (result.compareTo(lastResult) != 0) {
+		lastResult = result;
+
+		if (!above && !below) {
+		    term = powerTerm.divide(multTerm, mc2);
+		}
+		else {
+		    term = BigDecimal.ONE.divide(multTerm.multiply(powerTerm), mc2);
+		}
+
+		if (sign < 0)
+		    result = result.subtract(term, mc2);
+		else
+		    result = result.add(term, mc2);
+
+		multTerm = multTerm.add(D_TWO, mc2);
+		powerTerm = powerTerm.multiply(x_square, mc2);
+		sign = -sign;
+	    }
+
+	    return result.round(mc);
+	}
+
+	/**
 	 * Find the positive square root of a number (non-negative).
 	 *
 	 * @param x	The value to find the square root of.
@@ -987,10 +1091,12 @@ public final class MathUtil
 		CALCULATED_PI = new BigDecimal(PI_DIGITS.substring(0, digits + 1)).movePointLeft(digits);
 
 		// Now calculate the related values at the same scale
-		TWO_PI            = CALCULATED_PI.multiply(D_TWO, mc);
-		MINUS_TWO_PI      = TWO_PI.negate();
-		PI_OVER_TWO       = CALCULATED_PI.divide(D_TWO, mc);
-		MINUS_PI_OVER_TWO = PI_OVER_TWO.negate();
+		TWO_PI             = CALCULATED_PI.multiply(D_TWO, mc);
+		MINUS_TWO_PI       = TWO_PI.negate();
+		PI_OVER_TWO        = CALCULATED_PI.divide(D_TWO, mc);
+		MINUS_PI_OVER_TWO  = PI_OVER_TWO.negate();
+		PI_OVER_FOUR       = CALCULATED_PI.divide(D_FOUR, mc);
+		MINUS_PI_OVER_FOUR = PI_OVER_FOUR.negate();
 	    }
 
 	    return CALCULATED_PI;

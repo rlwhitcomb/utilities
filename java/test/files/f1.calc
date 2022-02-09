@@ -150,6 +150,11 @@ i**61 @I
 (1,1)**3 @I
 (0,0) @i
 
+(3,4) @p
+(4,3) @P
+c9 = Complex("{ radius: 5, θ: 0.875 }")
+c9@p
+
 // more to come (to complex powers)
 
 

@@ -28,6 +28,8 @@
  *	    #231: Created from constants already defined in other places.
  *	02-Feb-2022 (rlwhitcomb)
  *	    #231: More values.
+ *	08-Feb-2022 (rlwhitcomb)
+ *	    #235: D_FOUR added.
  */
 package info.rlwhitcomb.util;
 
@@ -106,6 +108,9 @@ public final class Constants
 
 	/** A {@link BigDecimal} value of <code>3</code>. */
 	public static final BigDecimal D_THREE = BigDecimal.valueOf(3);
+
+	/** A {@link BigDecimal} value of <code>4</code>. */
+	public static final BigDecimal D_FOUR = BigDecimal.valueOf(4);
 
 	/** A {@link BigDecimal} value of <code>5</code>. */
 	public static final BigDecimal D_FIVE = BigDecimal.valueOf(5);

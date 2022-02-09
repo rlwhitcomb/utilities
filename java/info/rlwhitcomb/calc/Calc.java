@@ -250,6 +250,7 @@
  *	    Outer-level "catch" of IllegalStateException also.
  *	09-Feb-2022 (rlwhitcomb)
  *	    #240: Display timing during initial library load.
+ *	    Tweak LIB_VERSION to better match library pattern in case of some variation.
  */
 package info.rlwhitcomb.calc;
 
@@ -332,7 +333,7 @@ public class Calc
 
 	private static final String EMPTY_TEXT = "\n";
 
-	private static final Pattern LIB_VERSION = Pattern.compile("//\\*\\* Version\\: (\\d+\\.\\d+\\.\\d+.*) Base\\: (\\d+\\.\\d+\\.\\d+.*)[\\r?\\n]");
+	private static final Pattern LIB_VERSION = Pattern.compile("//\\*\\* [vV]ersion\\: (\\d+\\.\\d+\\.\\d+.*) [bB]ase\\: (\\d+\\.\\d+\\.\\d+.*)[\\r?\\n]");
 
 	/**
 	 * An enumeration of what we expect next on the command line.

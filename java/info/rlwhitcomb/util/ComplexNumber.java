@@ -39,6 +39,9 @@
  *	    #231: Use new Constants values instead of our own.
  *	05-Feb-2022 (rlwhitcomb)
  *	    Fix Intl keys.
+ *	08-Feb-2022 (rlwhitcomb)
+ *	    #235: Use MathUtil.atan2 for "theta" to get full precision.
+ *	    A lot of refactoring, include support for "polar" form.
  */
 package info.rlwhitcomb.util;
 
@@ -81,6 +84,10 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 	private static final String SIGNED_NUMBER = SIGNED_INT + "(\\.[0-9]*)?([Ee]" + SIGNED_INT + ")?";
 	/** Character aliases for "i" (must match CalcPredefine "I_ALIASES"). */
 	private static final String I_ALIASES = "[iI\u0131\u0399\u03B9\u2110\u2148]";
+	/** Aliases for "radius". */
+	private static final String RADIUS_ALIASES = "([rR][aA][dD][iI][uU][sS]|[rR][aA][dD]|[rR])";
+	/** Aliases for "theta". */
+	private static final String THETA_ALIASES = "([tT][hH][eE][tT][aA]|[\u0398]|[\u03B8])";
 
 	/**
 	 * The patterns used in {@link #parse} to recognize valid values.
@@ -89,7 +96,8 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 	    Pattern.compile("^\\s*\\(\\s*(" + SIGNED_NUMBER + ")\\s*([,])\\s*(" + SIGNED_NUMBER + ")\\s*\\)\\s*$"),
 	    Pattern.compile("^\\s*(" + SIGNED_NUMBER + ")\\s*([,])\\s*(" + SIGNED_NUMBER + ")\\s*$"),
 	    Pattern.compile("^\\s*\\(\\s*(" + SIGNED_NUMBER + ")\\s*([+\\-])\\s*(" + NUMBER + ")\\s*" + I_ALIASES + "\\s*\\)\\s*$"),
-	    Pattern.compile("^\\s*(" + SIGNED_NUMBER + ")\\s*([+\\-])\\s*(" + NUMBER + ")\\s*" + I_ALIASES + "\\s*$")
+	    Pattern.compile("^\\s*(" + SIGNED_NUMBER + ")\\s*([+\\-])\\s*(" + NUMBER + ")\\s*" + I_ALIASES + "\\s*$"),
+	    Pattern.compile("^\\s*\\{\\s*" + RADIUS_ALIASES + "\\s*[:]\\s*(" + SIGNED_NUMBER + ")\\s*[,]\\s*" + THETA_ALIASES + "\\s*[:]\\s*(" + SIGNED_NUMBER + ")\\s*\\}\\s*$")
 	};
 
 	/**
@@ -101,6 +109,25 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 	 * Map key indicating the imaginary part.
 	 */
 	private static final String IMAG_KEY = "i";
+
+	/**
+	 * Map keys indicating the radius part.
+	 */
+	private static final String RADIUS_KEYS[] = {
+	    "r",
+	    "rad",
+	    "radius"
+	};
+
+	/**
+	 * Map keys indicating the angle (theta) part.
+	 */
+	private static final String THETA_KEYS[] = {
+	    "\u03B8",
+	    "\u0398",
+	    "theta",
+	    "angle"
+	};
 
 
 	/**
@@ -188,11 +215,10 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 	    if (list.size() == 1)
 		return valueOf(list.get(0));
 
-	    // Okay, this is hokey, but hey ... it works
-	    ComplexNumber r = valueOf(list.get(0));
-	    ComplexNumber i = valueOf(list.get(1));
+	    BigDecimal r = getDecimal(list.get(0));
+	    BigDecimal i = getDecimal(list.get(1));
 
-	    return new ComplexNumber(r.r(), i.r());
+	    return new ComplexNumber(r, i);
 	}
 
 	/**
@@ -208,11 +234,56 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 	    if (map == null || map.size() == 0)
 		throw new Intl.IllegalArgumentException("util#complex.noEmptyListMap");
 
-	    // Same hokieness as "fromList", same response ...
-	    ComplexNumber r = valueOf(map.get(REAL_KEY));
-	    ComplexNumber i = valueOf(map.get(IMAG_KEY));
+	    // Here, we could have "r,i" or "r,theta"
+	    if (map.containsKey(IMAG_KEY)) {
+		BigDecimal r = getDecimal(map.get(REAL_KEY));
+		BigDecimal i = getDecimal(map.get(IMAG_KEY));
 
-	    return new ComplexNumber(r.r(), i.r());
+		return new ComplexNumber(r, i);
+	    }
+	    else {
+		BigDecimal radius = BigDecimal.ZERO;
+		BigDecimal theta = BigDecimal.ZERO;
+
+		for (String key : RADIUS_KEYS) {
+		    if (map.containsKey(key)) {
+			radius = getDecimal(map.get(key));
+			break;
+		    }
+		}
+		for (String key : THETA_KEYS) {
+		    if (map.containsKey(key)) {
+			theta = getDecimal(map.get(key));
+			break;
+		    }
+		}
+
+		return polar(radius, theta, null);
+	    }
+	}
+
+	/**
+	 * Construct from a polar representation (r, theta) by doing the math to convert
+	 * to rectangular form: <code>x = r * cos(theta); y = r * sin(theta)</code>.
+	 *
+	 * @param radius	The "r" value, or distance from the origin.
+	 * @param theta		The "theta" value, or angle from positive X-axis.
+	 * @param mc		Optional (can be <code>null</code>) rounding context; if omitted the
+	 *			value will be calculated from the maximum precision of the input values,
+	 *			but at least {@link MathContext#DECIMAL128} precision.
+	 * @return		New complex number with the (r, theta) converted to (x, y) (real, imaginary).
+	 */
+	public static ComplexNumber polar(final BigDecimal radius, final BigDecimal theta, final MathContext mc) {
+	    MathContext mc2 = mc;
+	    if (mc2 == null) {
+		int precision = Math.max(Math.max(radius.precision(), theta.precision()), MathContext.DECIMAL128.getPrecision());
+		mc2 = new MathContext(precision);
+	    }
+
+	    BigDecimal rPart = radius.multiply(MathUtil.cos(theta, mc2), mc2);
+	    BigDecimal iPart = radius.multiply(MathUtil.sin(theta, mc2), mc2);
+
+	    return new ComplexNumber(rPart, iPart);
 	}
 
 	/**
@@ -374,36 +445,13 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 
 	/**
 	 * Calculate the angle of the polar form of this complex number, which
-	 * is {@code atan2(b, a)} for {@code a > 0}, or {@code atan2(b, a) + pi}
-	 * for {@code a < 0}.
-	 * <p> Note: for now, the calculation is done using {@link Double} precision
-	 * until we have the {@code atan2} calculation for BigDecimal.
+	 * is {@code atan2(i, r)}.
 	 *
 	 * @param mc The rounding context to use for the calculation.
 	 * @return The angle of this complex number in polar form (in radians).
-	 * @throws ArithmeticException for a pure imaginary number ({@code a == 0}).
 	 */
 	public BigDecimal theta(final MathContext mc) {
-	    if (imaginaryPart == null)
-		return BigDecimal.ZERO;
-
-	    double angle;
-
-	    if (realPart == null) {
-		angle = Math.PI / 2.0d;
-		if (imaginaryPart.signum() < 0)
-		    angle = -angle;
-	    }
-	    else {
-		double b = i().doubleValue();
-		double a = r().doubleValue();
-		angle = Math.atan2(b, a);
-
-		if (a < 0.0d)
-		    angle += Math.PI;
-	    }
-
-	    return BigDecimal.valueOf(angle);
+	    return MathUtil.atan2(i(), r(), mc);
 	}
 
 
@@ -580,23 +628,63 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 	    if (n.scale() <= 0)
 		return power(n.intValueExact(), mc);
 
+	    boolean negative = false;
+	    BigDecimal theta;
+
+	    if (r().signum() < 0) {
+		negative = true;
+		theta = negate().theta(mc);
+	    }
+	    else {
+		theta = theta(mc);
+	    }
+
 	    BigDecimal radius = radius(mc);
-	    BigDecimal theta  = theta(mc);
 	    BigDecimal nTheta = n.multiply(theta);
 
 	    BigDecimal rPower = MathUtil.pow(radius, n.doubleValue(), mc);
-	    BigDecimal cos    = MathUtil.cos(nTheta, mc);
-	    BigDecimal sin    = MathUtil.sin(nTheta, mc);
+
+	    ComplexNumber result = polar(rPower, nTheta, mc);
 
 	    // Note: for negative or fractional powers there are multiple roots, but we're
 	    // going with the principal root, which should match signs with the input
-	    ComplexNumber result = new ComplexNumber(rPower.multiply(cos, mc), rPower.multiply(sin, mc));
-	    if (r().signum() < 0)
+	    if (negative)
 		return result.negate();
 	    else
 		return result;
 	}
 
+
+	/**
+	 * Get a {@link BigDecimal} value from an object, using suitable conversions.
+	 *
+	 * @param value	Some arbitrary (hopefully compatible) value.
+	 * @return	{@code BigDecimal} value derived from it, or {@code null} if
+	 *		we can't do the conversion.
+	 */
+	public static BigDecimal getDecimal(final Object value) {
+	    if (value == null)
+		return null;
+
+	    if (value instanceof BigDecimal)
+		return (BigDecimal) value;
+	    if (value instanceof BigInteger)
+		return new BigDecimal((BigInteger) value);
+	    if (value instanceof BigFraction)
+		return ((BigFraction) value).toDecimal();
+	    if (value instanceof Number)
+		return new BigDecimal(((Number) value).doubleValue());
+	    if (value instanceof String) {
+		try {
+		    return new BigDecimal((String) value);
+		}
+		catch (NumberFormatException nfe) {
+		    return null;
+		}
+	    }
+
+	    return null;
+	}
 
 	/**
 	 * Get the {@code ComplexNumber} equivalent of the input value.
@@ -611,14 +699,7 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 
 	    if (value instanceof ComplexNumber)
 		return (ComplexNumber) value;
-	    if (value instanceof BigDecimal)
-		return real((BigDecimal) value);
-	    if (value instanceof BigInteger)
-		return real((BigInteger) value);
-	    if (value instanceof BigFraction)
-		return real(((BigFraction) value).toDecimal());
-	    if (value instanceof Number)
-		return real(((Number) value).doubleValue());
+
 	    if (value instanceof List) {
 		@SuppressWarnings("unchecked")
 		List<Object> list = (List<Object>) value;
@@ -629,6 +710,10 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 		Map<String, Object> map = (Map<String, Object>) value;
 		return fromMap(map);
 	    }
+
+	    BigDecimal dValue = getDecimal(value);
+	    if (dValue != null)
+		return real(dValue);
 
 	    return parse(value.toString());
 	}
@@ -652,12 +737,22 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 		throw new Intl.IllegalArgumentException("util#complex.notRecognized", string);
 	    }
 
-	    BigDecimal rPart = new BigDecimal(m.group(1));
-	    BigDecimal iPart = new BigDecimal(m.group(7));
-	    if (m.group(6) != null && m.group(6).equals("-"))
-		iPart = iPart.negate();
+	    // Different treatment for r/theta version(s)
+	    if (string.indexOf(':') >= 0) {
+		BigDecimal radiusPart = new BigDecimal(m.group(2));
+		BigDecimal thetaPart  = new BigDecimal(m.group(8));
 
-	    return new ComplexNumber(rPart, iPart);
+		return polar(radiusPart, thetaPart, null);
+	    }
+	    else {
+		BigDecimal rPart = new BigDecimal(m.group(1));
+		BigDecimal iPart = new BigDecimal(m.group(7));
+
+		if (m.group(6) != null && m.group(6).equals("-"))
+		    iPart = iPart.negate();
+
+		return new ComplexNumber(rPart, iPart);
+	    }
 	}
 
 
@@ -729,6 +824,12 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 			realPart.toPlainString(),
 			imaginaryPart.toPlainString(), i);
 	    }
+	}
+
+	public String toPolarString(final boolean upperCase, final MathContext mc) {
+	    char theta = upperCase ? '\u0398' : '\u03B8';
+
+	    return String.format("{ r: %1$s, %2$c: %3$s }", radius(mc).toPlainString(), theta, theta(mc).toPlainString());
 	}
 
 }

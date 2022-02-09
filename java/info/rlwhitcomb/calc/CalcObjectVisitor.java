@@ -504,6 +504,8 @@
  *	    #144: Implement "matches" standalone function and case selector.
  *	07-Feb-2022 (rlwhitcomb)
  *	    #239: Add "compareOp expr" as another caseSelector.
+ *	08-Feb-2022 (rlwhitcomb)
+ *	    #235: Implement atan2() ourselves. Add "@p" formatting.
  */
 package info.rlwhitcomb.calc;
 
@@ -1125,6 +1127,15 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    if (settings.trigMode == TrigMode.DEGREES)
 		return radianValue.divide(piWorker.getPiOver180(), MC_DOUBLE);
+
+	    return radianValue;
+	}
+
+	private BigDecimal returnTrigValue(final BigDecimal value) {
+	    BigDecimal radianValue = value;
+
+	    if (settings.trigMode == TrigMode.DEGREES)
+		return radianValue.divide(piWorker.getPiOver180(), settings.mcDivide);
 
 	    return radianValue;
 	}
@@ -1901,6 +1912,18 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			    c = ComplexNumber.real(toDecimalValue(this, result, settings.mc, ctx));
 			}
 			valueBuf.append(c.toLongString(formatChar == 'I'));
+			break;
+
+		    case 'P':
+		    case 'p':
+			ComplexNumber c2 = null;
+			if (result instanceof ComplexNumber) {
+			    c2 = (ComplexNumber) result;
+			}
+			else {
+			    c2 = ComplexNumber.real(toDecimalValue(this, result, settings.mc, ctx));
+			}
+			valueBuf.append(c2.toPolarString(formatChar == 'P', settings.mcDivide));
 			break;
 
 		    // @E = US format: MM/dd/yyyy
@@ -3159,10 +3182,11 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitAtan2Expr(CalcParser.Atan2ExprContext ctx) {
 	    CalcParser.Expr2Context e2ctx = ctx.expr2();
-	    double y = getDoubleValue(e2ctx.expr(0));
-	    double x = getDoubleValue(e2ctx.expr(1));
 
-	    return new BigDecimal(Math.atan2(y, x), MC_DOUBLE);
+	    BigDecimal y = getDecimalValue(e2ctx.expr(0));
+	    BigDecimal x = getDecimalValue(e2ctx.expr(1));
+
+	    return returnTrigValue(MathUtil.atan2(y, x, settings.mcDivide));
 	}
 
 	@Override

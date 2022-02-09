@@ -439,8 +439,8 @@ which gives:
     two, or three integers (optional minus signs), separated by spaces or <code>,</code> or <code>;</code> or <code>/</code>, or one of the
     Unicode fraction characters optionally preceded by an integer. Some examples:
   <p class="indent"> <code>f'2&#x00BC;'</code> = <code>2.25</code> or <code>f'1 2/3'</code> = <code>1.66666...</code>
-  <p>Complex numbers are constructed as such: <code>(</code>&nbsp;<i>real</i>&nbsp;<code>,</code>&nbsp;<i>imaginary</i>&nbsp;<code>)</code>. There is also the <code>complex</code> function that accepts one or two arguments: either the two value parts or a string convertible to these two parts, or an object with <code>r</code> and <code>i</code> keys, or an array with two values.
-  <p>The string syntax for <code>complex</code> is either <code>"( <i>expr</i> )"</code>, <code>"( <i>n</i>, <i>n</i> )"</code> or <code>"( <i>n</i> &pm; <i>n</i> i )"</code>.
+  <p>Complex numbers are constructed as such: <code>(</code>&nbsp;<i>real</i>&nbsp;<code>,</code>&nbsp;<i>imaginary</i>&nbsp;<code>)</code>. There is also the <code>complex</code> function that accepts one or two arguments: either the two value parts or a string convertible to these two parts, or an object with <code>r</code> and <code>i</code> keys, or <code>radius</code> and <code>theta</code> keys, or an array with two values.
+  <p>The string syntax for <code>complex</code> is either <code>"( <i>expr</i> )"</code>, <code>"( <i>n</i>, <i>n</i> )"</code>, or <code>"( <i>n</i> &pm; <i>n</i> i )"</code>, or <code>"{ r: <i>radius</i>, &#x03B8;: <i>theta</i> }</code>.
   <p>There is also a constant type used to express values as Roman Numerals. The syntax is <code>R'<i>xxxx</i>'</code>, where the
      digits are the typical Roman values of <code>I</code> (one), <code>V</code> (five), <code>X</code> (ten), and so on (case-insensitive), but also including the Unicode
      values in the range of <code>'\u2160'</code> (<code>&#x2160;</code> or one) to <code>'\u2182'</code> (<code>&#x2182;</code> or ten thousand).
@@ -584,6 +584,7 @@ or
       <tr><td><code>@F</code></td><td>Format as a proper fraction (with possible integer portion)<br>as in <code style="color:blue;">3.75 @F</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">3 3/4</code></td></tr>
       <tr><td><code>@c</code></td><td>Format an integer (range of 0 .. 0x10FFFF) as a Unicode character<br>as in <code style="color:blue;">120529 @c</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">"&#x1D6D1;"</code></td></tr>
       <tr><td><code>@i</code></td><td>Format the result as a complex number, as in<br><code style="color:blue;">(1,1)**3 @i</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">-2 + 2&#x2148;</code></td></tr>
+      <tr><td><code>@p</code></td><td>Format the result as a complex number<br>in polar form, as in<br><code style="color:blue;">(3,4) @p</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">{ r: 5, &#x03B8;: 0.9272952180016122 }</code></td></tr>
       <tr><td><code>@</code>[[<code>-</code>]<i>nn</i>[<code>.</code><i>mm</i>]][<code>,</code>]<code>j</code></td><td>Format the result as a "pretty printed" JSON result<br>(multiple lines with indents) with<br><code>-</code> to remove initial newline, <i>nn</i> to set initial indent,<br><code>.</code><i>mm</i> to set indent increments, and<br>with optional separators in numeric values</td></tr>
       <tr><td><code>@r</code></td><td>Format the result as a Roman Numeral value<br>as in <code style="color:blue;">2021 @R</code><code style="color:gray;"> &#x21E8; </code><code style="color:green;">R'MMXXI'</code></td></tr>
       <tr><td><code>@x</code></td><td>For integers and strings, format in hexadecimal form<br>as in <code style="color:blue;">456 @x</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">0x1c8</code><br>or <code style="color:blue;">'abc' @x</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">'\u0061\u0062\u0063'</code></td></tr>
@@ -603,7 +604,7 @@ or
 <div class="cols">
   <p>There are a wide variety of arithmetic and logical operators available, as well as a number of common arithmetic functions supported by Calc.
      For the most part, automatic coercions are applied to the operands of functions if necessary (and possible), and the results of operations are
-     automatically widened to support the results. The only exception to this are the trig and log functions which (for the most part) can only be
+     automatically widened to support the results. The only exceptions to this are some of the lesser-used trig and log functions which can only be
      done to "double" precision (currently &mdash; this may change in subsequent versions).
   <p>Names of predefined functions are available in 3 or 4 forms: all lower case, all UPPER case, and one or two MixedCase forms. For example: <code>sin</code>, <code>SIN</code>, or <code>Sin</code>, and <code>sumof</code>, <code>SUMOF</code>, <code>Sumof</code>, or <code>SumOf</code>.
 </div>
