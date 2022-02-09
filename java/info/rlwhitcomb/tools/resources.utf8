@@ -26,6 +26,7 @@
 # History:
 #       08-Feb-2022 (rlwhitcomb)
 #           Moved into here from some of the .java files.
+#	    Tweak the unknown option string from WordCount.
 #
 
 #
@@ -113,7 +114,7 @@ uuid.unrecognizedArg	= Unrecoznized argument "%1$s"!
 #
 # From WordCount.java
 #
-wc.unknownOption	= Unknown option: "%1$s%2$s"; ignoring.
+wc.unknownOption	= Unknown option: "-%1$s"; ignoring.
 wc.cannotFindFile	= Unable to find the file "%1$s".
 wc.cannotDecode		= Unable to decode character: %1$s
 wc.ioError		= I/O error: %1$s

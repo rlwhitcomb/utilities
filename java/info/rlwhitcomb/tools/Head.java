@@ -38,6 +38,7 @@
  *	    Use new Constants values instead of our own.
  *	08-Feb-2022 (rlwhitcomb)
  *	    Move text out to resources.
+ *	    Use new Options method to process command line.
  */
 package info.rlwhitcomb.tools;
 
@@ -56,6 +57,7 @@ import static info.rlwhitcomb.util.Constants.*;
 import info.rlwhitcomb.util.Environment;
 import info.rlwhitcomb.util.ExceptionUtil;
 import info.rlwhitcomb.util.Intl;
+import info.rlwhitcomb.util.Options;
 
 
 /**
@@ -66,14 +68,12 @@ public class Head
 {
 	/** Default number of lines to display. */
 	private static final int DEFAULT_LINES = 10;
+
 	/** User can override this default, so this is the current. */
 	private static int linesToDisplay;
 
 	/** The charset we will actually use. */
 	private static Charset cs;
-
-	/** Whether we are operating in a Windows environment. */
-	private static final boolean ON_WINDOWS = Environment.isWindows();
 
 	/** The list of files to process. */
 	private static final List<String> files = new ArrayList<>();
@@ -187,27 +187,12 @@ public class Head
 	    linesToDisplay = DEFAULT_LINES;
 
 	    // Scan through the options to override the defaults
-	    for (String arg : args) {
-		int code = 0;
+	    int code = Options.process(args, opt -> { return processOption(opt); }, arg -> files.add(arg));
 
-		if (arg.startsWith("--")) {
-		    code = processOption(arg.substring(2));
-		}
-		else if (arg.startsWith("-")) {
-		    code = processOption(arg.substring(1));
-		}
-		else if (ON_WINDOWS && arg.startsWith("/")) {
-		    code = processOption(arg.substring(1));
-		}
-		else {
-		    files.add(arg);
-		}
-
-		if (code != 0) {
-		    if (code < 0)
-			return;
-		    System.exit(code);
-		}
+	    if (code != 0) {
+		if (code < 0)
+		    return;
+		System.exit(code);
 	    }
 
 	    // Silently do nothing if no files were specified

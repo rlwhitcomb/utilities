@@ -33,6 +33,7 @@
  *	    #238: Use different substitute character for control characters.
  *	08-Feb-2022 (rlwhitcomb)
  *	    #238: Move text to resources.
+ *	    Use new Options method to process command line.
  */
 package info.rlwhitcomb.tools;
 
@@ -52,6 +53,7 @@ import static info.rlwhitcomb.util.ConsoleColor.Code.*;
 import info.rlwhitcomb.util.Environment;
 import info.rlwhitcomb.util.ExceptionUtil;
 import info.rlwhitcomb.util.Intl;
+import info.rlwhitcomb.util.Options;
 
 
 /**
@@ -59,9 +61,6 @@ import info.rlwhitcomb.util.Intl;
  */
 public class HexDump
 {
-	/** Whether we're running on Windows operating system. */
-	private static final boolean ON_WINDOWS = Environment.isWindows();
-
 	/** Default number of bytes to display per line of output. */
 	private static final int DEFAULT_BYTES_PER_LINE = 16;
 
@@ -250,27 +249,12 @@ public class HexDump
 	    lowerCase = false;
 
 	    // Scan through the options to override the defaults
-	    for (String arg : args) {
-		int code = 0;
+	    int code = Options.process(args, opt -> { return processOption(opt); }, arg -> files.add(arg));
 
-		if (arg.startsWith("--")) {
-		    code = processOption(arg.substring(2));
-		}
-		else if (arg.startsWith("-")) {
-		    code = processOption(arg.substring(1));
-		}
-		else if (ON_WINDOWS && arg.startsWith("/")) {
-		    code = processOption(arg.substring(1));
-		}
-		else {
-		    files.add(arg);
-		}
-
-		if (code != 0) {
-		    if (code < 0)
-			return;
-		    System.exit(code);
-		}
+	    if (code != 0) {
+		if (code < 0)
+		    return;
+		System.exit(code);
 	    }
 
 	    // Silently do nothing if no files were specified

@@ -72,6 +72,8 @@
  *	    Make "matches" and "matchesIgnoreCase" public for use elsewhere.
  *	21-Jan-2022 (rlwhitcomb)
  *	    #217: Add method to process default options from the environment.
+ *	08-Feb-2022 (rlwhitcomb)
+ *	    #238: New method to iterate over command line arguments.
  */
 package info.rlwhitcomb.util;
 
@@ -83,6 +85,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.function.Consumer;
+import java.util.function.ToIntFunction;
 
 
 /**
@@ -360,6 +363,33 @@ public class Options
 		}
 	    }
 	    return result;
+	}
+
+
+	/**
+	 * Process the given set of command-line options, calling one of two consumers
+	 * depending on whether the argument has our canonical "option" form or not.
+	 *
+	 * @param args		The array of command line arguments.
+	 * @param processOpts	The consumer of option values.
+	 * @param processArgs	The consumer of other values, not option forms.
+	 * @return		Error code (non-zero) returned from <code>processOpt</code>.
+	 */
+	public static int process(String[] args, ToIntFunction<String> processOpts, Consumer<String> processArgs) {
+	    for (String arg : args) {
+		int code = 0;
+
+		String opt = isOption(arg);
+		if (opt != null)
+		    code = processOpts.applyAsInt(opt);
+		else
+		    processArgs.accept(arg);
+
+		if (code != 0)
+		    return code;
+	    }
+
+	    return 0;
 	}
 
 
