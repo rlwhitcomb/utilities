@@ -38,6 +38,9 @@
  *	    #238: Add help.
  *	    Color code the hex the same way the ASCII is coded.
  *	    Implement "-out" and "-charset" parameters.
+ *	10-Feb-2022 (rlwhitcomb)
+ *	    Implement options for spaces or not.
+ *	    Use 0 width (default) to size output according to console width.
  */
 package info.rlwhitcomb.tools;
 
@@ -67,14 +70,20 @@ import info.rlwhitcomb.util.Options;
  */
 public class HexDump
 {
-	/** Default number of bytes to display per line of output. */
-	private static final int DEFAULT_BYTES_PER_LINE = 16;
+	/** Default number of bytes to display per line of output (0 = use console width to calculate). */
+	private static final int DEFAULT_BYTES_PER_LINE = 0;
+
+	/** Maximum number of bytes per line we're going to allow. */
+	private static final int MAX_BYTES_PER_LINE = 999;
 
 	/** Override number of bytes to display. */
 	private static int numberBytesPerLine = DEFAULT_BYTES_PER_LINE;
 
 	/** Lowercase or uppercase output. */
 	private static boolean lowerCase = false;
+
+	/** Whether to enhance the output with spaces. */
+	private static boolean spaces = true;
 
 	/** Colored output or not? */
 	private static boolean colored = true;
@@ -150,6 +159,20 @@ public class HexDump
 		    lowerCase = false;
 		    break;
 
+		case "nospaces":
+		case "nospace":
+		case "nosp":
+		case "nos":
+		    spaces = false;
+		    break;
+
+		case "spaces":
+		case "space":
+		case "sp":
+		case "s":
+		    spaces = true;
+		    break;
+
 		case "output":
 		case "out":
 		case "o":
@@ -181,6 +204,10 @@ public class HexDump
 		default:
 		    try {
 			numberBytesPerLine = Integer.parseInt(opt);
+			if (numberBytesPerLine < 0 || numberBytesPerLine > MAX_BYTES_PER_LINE) {
+			    Intl.errPrintln("tools#hexdump.invalidNumberBytes");
+			    code = -2;
+			}
 		    }
 		    catch (NumberFormatException nfe) {
 			Intl.errPrintln("tools#hexdump.invalidNumberBytes");
@@ -257,12 +284,14 @@ public class HexDump
 			    output.append("   ");
 			}
 
-			if (i % 8 == 3)
-			    output.append(" ");
-			else if (i % 8 == 7)
-			    output.append("  ");
+			if (spaces) {
+			    if (i % 8 == 3)
+				output.append(" ");
+			    else if (i % 8 == 7)
+				output.append("  ");
+			}
 		    }
-		    output.append(" " + CYAN_BRIGHT);
+		    output.append((spaces ? " " : "   ") + CYAN_BRIGHT);
 
 		    for (i = 0; i < bytesRead; i++) {
 			int by = ((int) bytes[i]) & 0xFF;
@@ -273,10 +302,12 @@ public class HexDump
 			else
 			    output.append(String.format("%1$s%2$s%3$c%4$s", RESET, YELLOW, '\u25E6', CYAN_BRIGHT));
 
-			if (i % 8 == 3)
-			    output.append(" ");
-			else if (i % 8 == 7)
-			    output.append("  ");
+			if (spaces) {
+			    if (i % 8 == 3)
+				output.append(" ");
+			    else if (i % 8 == 7)
+				output.append("  ");
+			}
 		    }
 		    output.append(END);
 
@@ -305,6 +336,7 @@ public class HexDump
 	    files.clear();
 	    numberBytesPerLine = DEFAULT_BYTES_PER_LINE;
 	    lowerCase = false;
+	    spaces = true;
 	    nextArgument = -1;
 	    outputFileName = null;
 	    outputFileCharset = null;
@@ -333,6 +365,25 @@ public class HexDump
 	    // Silently do nothing if no files were specified
 	    if (files.isEmpty())
 		return;
+
+	    if (numberBytesPerLine == 0) {
+		int consoleWidth = Environment.consoleWidth();
+		if (spaces) {
+		    int trialNumber = ((consoleWidth - 13) / 4) / 4 * 4;
+		    while (trialNumber * 4 + (trialNumber / 4) + (trialNumber / 8) + 13 > consoleWidth)
+			trialNumber -= 4;
+		    numberBytesPerLine = trialNumber;
+		}
+		else {
+		    numberBytesPerLine = (consoleWidth - 13) / 4;
+		}
+	    }
+	    else {
+		if (spaces && numberBytesPerLine % 4 != 0) {
+		    Intl.errPrintln("tools#hexdump.numberMultipleFour");
+		    System.exit(5);
+		}
+	    }
 
 	    final boolean printName = files.size() > 1;
 
