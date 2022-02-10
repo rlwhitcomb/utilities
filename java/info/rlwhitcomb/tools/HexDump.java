@@ -36,12 +36,16 @@
  *	    Use new Options method to process command line.
  *	09-Feb-2022 (rlwhitcomb)
  *	    #238: Add help.
+ *	    Color code the hex the same way the ASCII is coded.
+ *	    Implement "-out" and "-charset" parameters.
  */
 package info.rlwhitcomb.tools;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.NoSuchFileException;
@@ -81,8 +85,11 @@ public class HexDump
 	/** Format for ASCII bytes printout. */
 	private static String asciiByteFormat;
 
-	/** Format for non-ASCII bytes printout. */
-	private static String otherByteFormat;
+	/** Format for ASCII control character bytes. */
+	private static String controlByteFormat;
+
+	/** Format for high bytes printout. */
+	private static String highByteFormat;
 
 	/** The list of files to process. */
 	private static final List<String> files = new ArrayList<>();
@@ -90,15 +97,25 @@ public class HexDump
 	/** Override output destination. */
 	private static PrintStream out = System.out;
 
+	/** Output file name. */
+	private static String outputFileName;
+
+	/** Output file charset name. */
+	private static String outputFileCharset;
+
+	/** Next expected argument on the command line. */
+	private static int nextArgument;
+
 
 	/**
 	 * Process one command line option.
 	 *
 	 * @param opt The option string, without the leading "-", etc.
-	 * @return    A code indicating an error: {@code < 0} to stop
-	 *	      processing, but it's not an error, {@code 0} for
-	 *	      no problems, {@code > 0} is an error, and also
-	 *	      stop processing.
+	 * @return    A code indicating the outcome: {@code == -1 } to stop
+	 *	      processing, but it's not an error, {@code < -1} for
+	 *	      an actual error, {@code == 0} for no problems,
+	 *	      {@code > 0} is a signal of what to expect next
+	 *	      on the command line..
 	 */
 	private static int processOption(final String opt) {
 	    int code = 0;
@@ -133,6 +150,19 @@ public class HexDump
 		    lowerCase = false;
 		    break;
 
+		case "output":
+		case "out":
+		case "o":
+		    nextArgument = 1;
+		    break;
+
+		case "charset":
+		case "chars":
+		case "char":
+		case "cs":
+		    nextArgument = 2;
+		    break;
+
 		case "version":
 		case "vers":
 		case "ver":
@@ -154,12 +184,29 @@ public class HexDump
 		    }
 		    catch (NumberFormatException nfe) {
 			Intl.errPrintln("tools#hexdump.invalidNumberBytes");
-			code = 1;
+			code = -2;
 		    }
 		    break;
 	    }
 
 	    return code;
+	}
+
+	private static void processNonOption(final String arg) {
+	    switch (nextArgument) {
+		case 1:
+		    outputFileName = arg;
+		    break;
+
+		case 2:
+		    outputFileCharset = arg;
+		    break;
+
+		default:
+		    files.add(arg);
+		    break;
+	    }
+	    nextArgument = -1;
 	}
 
 	/**
@@ -180,7 +227,7 @@ public class HexDump
 	    }
 
 	    if (printName) {
-		System.out.println(path);
+		out.println(path);
 	    }
 
 	    try (BufferedInputStream bis = new BufferedInputStream(Files.newInputStream(path))) {
@@ -201,8 +248,10 @@ public class HexDump
 			    int by = ((int) bytes[i]) & 0xFF;
 			    if (by >= 0x20 && by <= 0x7E)
 				output.append(String.format(asciiByteFormat, by));
+			    else if ((by >= 0x00 && by <= 0x1F) || (by == 0x7F))
+				output.append(String.format(controlByteFormat, by));
 			    else
-				output.append(String.format(otherByteFormat, by));
+				output.append(String.format(highByteFormat, by));
 			}
 			else {
 			    output.append("   ");
@@ -241,7 +290,7 @@ public class HexDump
 		Intl.errFormat("tools#hexdump.ioError", ExceptionUtil.toString(ioe));
 	    }
 	    if (printName) {
-		System.out.println();
+		out.println();
 	    }
 	}
 
@@ -256,14 +305,29 @@ public class HexDump
 	    files.clear();
 	    numberBytesPerLine = DEFAULT_BYTES_PER_LINE;
 	    lowerCase = false;
+	    nextArgument = -1;
+	    outputFileName = null;
+	    outputFileCharset = null;
 
 	    // Scan through the options to override the defaults
-	    int code = Options.process(args, opt -> { return processOption(opt); }, arg -> files.add(arg));
+	    int code = Options.process(args, opt -> { return processOption(opt); }, arg -> processNonOption(arg));
 
 	    if (code != 0) {
-		if (code < 0)
+		if (code == -1)
 		    return;
-		System.exit(code);
+		if (code < -1)
+		    System.exit(-code - 1);
+	    }
+
+	    switch (nextArgument) {
+		case -1:
+		    break;
+		case 1:
+		    Intl.errFormat("tools#hexdump.missingOutputFile");
+		    System.exit(3);
+		case 2:
+		    Intl.errFormat("tools#hexdump.missingOutputCharset");
+		    System.exit(4);
 	    }
 
 	    // Silently do nothing if no files were specified
@@ -273,9 +337,30 @@ public class HexDump
 	    final boolean printName = files.size() > 1;
 
 	    char formatChar = lowerCase ? 'x' : 'X';
-	    offsetFormat = String.format(YELLOW_BOLD + "%%1$08%1$c:  " + RESET, formatChar);
-	    asciiByteFormat = String.format(GREEN_BOLD + "%%1$02%1$c " + RESET, formatChar);
-	    otherByteFormat = String.format(BLACK_BRIGHT + "%%1$02%1$c " + RESET, formatChar);
+	    offsetFormat      = String.format(YELLOW_BOLD  + "%%1$08%1$c:  " + RESET, formatChar);
+	    asciiByteFormat   = String.format(GREEN_BOLD   + "%%1$02%1$c "   + RESET, formatChar);
+	    controlByteFormat = String.format(RED          + "%%1$02%1$c "   + RESET, formatChar);
+	    highByteFormat    = String.format(BLACK_BRIGHT + "%%1$02%1$c "   + RESET, formatChar);
+
+	    if (outputFileName != null) {
+		if (outputFileCharset == null)
+		    outputFileCharset = StandardCharsets.UTF_8.name();;
+
+		Path path = null;
+		try {
+		    path = Paths.get(outputFileName);
+		}
+		catch (InvalidPathException ex) {
+		    Intl.errFormat("tools#hexdump.invalidPath", outputFileName);
+		    System.exit(2);
+		}
+		try {
+		    out = new PrintStream(Files.newOutputStream(path), false, outputFileCharset);
+		}
+		catch (IOException ioe) {
+		    Intl.errFormat("tools#hexdump.ioError", ExceptionUtil.toString(ioe));
+		}
+	    }
 
 	    files.forEach(f -> processFile(f, printName));
 	}

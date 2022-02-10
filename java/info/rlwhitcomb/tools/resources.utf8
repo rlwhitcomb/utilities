@@ -29,6 +29,7 @@
 #	    Tweak the unknown option string from WordCount.
 #	09-Feb-2022 (rlwhitcomb)
 #	    #238: Add HexDump help.
+#	    More HexDump errors and help text.
 #
 
 #
@@ -101,12 +102,18 @@ hexdump.help9		= "\t-lower, -low, or -l"
 hexdump.help10		= "\t  hex codes are lowercase (as in 'ab')"
 hexdump.help11		= "\t-upper, -up, or -u"
 hexdump.help12		= "\t  (default) hex codes are uppercase (as in 'AB')"
-hexdump.help13		= "\t-nnn to set the number of bytes per line (default 16)"
-hexdump.help14		= ""
+hexdump.help13		= "\t-output, -out, or -o  file_name"
+hexdump.help14		= "\t  send output to the given file"
+hexdump.help15		= "\t-charset, -chars, -char, or -cs  charset_name"
+hexdump.help16		= "\t  use given charset for output file (default is 'UTF-8')"
+hexdump.help17		= "\t-nnn to set the number of bytes per line (default 16)"
+hexdump.help18		= ""
 
 hexdump.invalidNumberBytes	= Number of bytes must be a valid integer.
 hexdump.invalidPath		= Unable to find the file "%1$s".
 hexdump.ioError			= I/O error: %1$s
+hexdump.missingOutputFile	= Missing file name for "-out" option.
+hexdump.missingOutputCharset	= Missing charset name for "-charset" option.
 
 #
 # From Uuid.java

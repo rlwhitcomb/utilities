@@ -69,12 +69,15 @@
  *	    Add ParseException to the mix.
  *	22-Jan-2022 (rlwhitcomb)
  *	    IllegalFormatException needs name as well as message.
- *	04-Feb-20222 (rlwhitcomb)
+ *	04-Feb-2022 (rlwhitcomb)
  *	    NoSuchFieldException needs name also.
+ *	09-Feb-2022 (rlwhitcomb)
+ *	    UnsupportedEncodingException also needs name.
  */
 package info.rlwhitcomb.util;
 
 import java.io.FileNotFoundException;
+import java.io.UnsupportedEncodingException;
 import java.net.UnknownHostException;
 import java.nio.charset.CharacterCodingException;
 import java.nio.charset.IllegalCharsetNameException;
@@ -231,6 +234,7 @@ public final class ExceptionUtil
 			  || (next instanceof CharacterCodingException)
 			  || (next instanceof IllegalCharsetNameException)
 			  || (next instanceof UnsupportedCharsetException)
+			  || (next instanceof UnsupportedEncodingException)
 			  || (next instanceof FileNotFoundException)
 			  || (next instanceof NoSuchFileException)
 			  || (next instanceof UnsupportedOperationException)
