@@ -62,5 +62,22 @@
 >Number of tests = 16384, mistakes = 0
 >hash('test/data/Declaration.txt', , true) -> "D424650E3A0F123F4D46D14AF0E2C309184C823021F578B02689802B06B0F674"
 >hashstring('Four score and seven years ago') -> "213742bd59f1d8fe848b6ea94647dd465310b8d816234d5a952dc645fa320707"
+>Calculation mode set to “RATIONAL”.
+>"Tn(1) = 1"
+>"Tn(3) = -2"
+>"Tn(5) = 16"
+>"Tn(7) = -272"
+>"Tn(9) = 7936"
+>"Tn(11) = -353792"
+>"Tn(13) = 22368256"
+>"Tn(15) = -1903757312"
+>"Tn(17) = 209865342976"
+>"Tn(19) = -29088885112832"
+>"Tn(21) = 4951498053124096"
+>"Tn(23) = -1015423886506852352"
+>"Tn(25) = 246921480190207983616"
+>"Tn(27) = -70251601603943959887872"
+>"Tn(29) = 23119184187809597841473536"
+>Calculation mode set to “DECIMAL(34)”.
 >Separator display set to “false”.
 >All variables cleared.

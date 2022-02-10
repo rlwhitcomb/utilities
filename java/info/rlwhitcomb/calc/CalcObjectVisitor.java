@@ -506,6 +506,8 @@
  *	    #239: Add "compareOp expr" as another caseSelector.
  *	08-Feb-2022 (rlwhitcomb)
  *	    #235: Implement atan2() ourselves. Add "@p" formatting.
+ *	10-Feb-2022 (rlwhitcomb)
+ *	    Oops! Implement "modulus" for fractions.
  */
 package info.rlwhitcomb.calc;
 
@@ -3017,8 +3019,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			case "\\":
 			    return f1.divide(f2);
 			case "%":
-			    // ??? I think there is never any remainder dividing a fraction by a fraction
-			    return BigFraction.ZERO;
+			    return f1.modulus(f2);
 			default:
 			    throw new UnknownOpException(op, ctx);
 		    }

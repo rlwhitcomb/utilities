@@ -1,4 +1,4 @@
-//** Version: 2.7.38 Base: 1.8.2
+//** Version: 2.7.39 Base: 1.8.2
 //** The versions above must conform to the latest values in "version.properties" and "build.properties"
 
 /*
@@ -231,6 +231,21 @@ define quad_exp($a, $b, $c, $x) = {
  * Note: no error checking if the parameter is not a positive even integer.
  */
 define zeta_2n($2n) = { ((-1)**($2n / 2 + 1) * Bn($2n) * (2 * pi) ** $2n) / (2 * $2n!) }
+
+/*
+ * Tangent numbers, derived from the Bernoulli numbers. Value is zero for 0
+ * and all even values.
+ * Reference: http://scipp.ucsc.edu/~haber/ph116A/taylor11.pdf pg. 3 eq. 8
+ *
+ * @param $n where we calculate the value for ($n - 1)/2
+ * @return The k-th Tangent number
+ */
+define Tn($n) = {
+  if $n == 0 || $n % 2 == 0 leave 0
+  _2kplus1 = ($n - 1) / 2
+  _2kplus2 = _2kplus1 + 1
+  (2 ** _2kplus2) * (2 ** _2kplus2 - 1) * ( Bn(_2kplus2) / _2kplus2 )
+}
 
 #
 # M = P[r(1+r)^n/((1+r)^n)-1)]

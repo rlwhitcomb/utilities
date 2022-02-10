@@ -76,6 +76,8 @@
  *	    #124: Tweak default display, not proper form.
  *	14-Jan-2022 (rlwhitcomb)
  *	    Some optimizations in "pow()".
+ *	10-Feb-2022 (rlwhitcomb)
+ *	    Oops! Modulus is non-integer part after division (as in @F formatting).
  */
 package info.rlwhitcomb.util;
 
@@ -709,6 +711,22 @@ public class BigFraction extends Number
 	}
 
 	/**
+	 * Return a new fraction which is the result of this fraction divided by the
+	 * given whole number.
+	 *
+	 * @param value	The whole number to divide by.
+	 * @return	The result of {@code this.n / (this.d * value)}.
+	 */
+	public BigFraction divide(final BigInteger value) {
+	    if (value.equals(BigInteger.ZERO))
+		throw new ArithmeticException(Intl.getString("util#fraction.divideByZero"));
+	    else if (value.equals(BigInteger.ONE))
+		return this;
+
+	    return new BigFraction(numer, denom.multiply(value));
+	}
+
+	/**
 	 * Return a new fraction which is the result of this fraction divided by {@code other}.
 	 *
 	 * @param other	The fraction to divide by.
@@ -726,6 +744,78 @@ public class BigFraction extends Number
 		return other.reciprocal();
 
 	    return new BigFraction(numer.multiply(other.denom), denom.multiply(other.numer));
+	}
+
+	/**
+	 * Compute the remainder after division (for the {@code modulus} function).
+	 *
+	 * @param result The result after division.
+	 * @return       What the non-whole-number part is.
+	 */
+	private static BigFraction remainder(final BigFraction result) {
+	    if (result.isWholeNumber())
+		return BigFraction.ZERO;
+	    else if (result.numer.abs().compareTo(result.denom) >= 0) {
+		BigInteger[] results = result.numer.divideAndRemainder(result.denom);
+		if (results[1].equals(BigInteger.ZERO))
+		    return BigFraction.ZERO;
+		else
+		    return new BigFraction(results[1].abs(), result.denom);
+	    }
+	    return result;
+	}
+
+	/**
+	 * Return a new fraction which is the remainder of this fraction divided by the
+	 * given whole number.
+	 *
+	 * @param value	The whole number to divide by.
+	 * @return	The result of {@code this.n % (this.d * value)}.
+	 */
+	public BigFraction modulus(final long value) {
+	    if (value == 0L)
+		throw new ArithmeticException(Intl.getString("util#fraction.divideByZero"));
+	    else if (value == 1L)
+		return this;
+
+	    BigFraction result = new BigFraction(numer, denom.multiply(BigInteger.valueOf(value)));
+	    return remainder(result);
+	}
+
+	/**
+	 * Return a new fraction which is the remainder of this fraction divided by the
+	 * given whole number.
+	 *
+	 * @param value	The whole number to divide by.
+	 * @return	The result of {@code this.n % (this.d * value)}.
+	 */
+	public BigFraction modulus(final BigInteger value) {
+	    if (value.equals(BigInteger.ZERO))
+		throw new ArithmeticException(Intl.getString("util#fraction.divideByZero"));
+	    else if (value.equals(BigInteger.ONE))
+		return this;
+
+	    BigFraction result = new BigFraction(numer, denom.multiply(value));
+	    return remainder(result);
+	}
+
+	/**
+	 * Return a new fraction which is the remainder of this fraction divided by {@code other}.
+	 *
+	 * @param other	The fraction to divide by.
+	 * @return	The result of {@code (this.n/this.d) % (other.n/other.d)}.
+	 */
+	public BigFraction modulus(final BigFraction other) {
+	    if (other.equals(ZERO))
+		throw new ArithmeticException(Intl.getString("util#fraction.divideByZero"));
+	    else if (equals(ZERO))
+		return ZERO;
+	    else if (other.equals(ONE))
+		return this;
+	    else if (equals(ONE))
+		return remainder(other.reciprocal());
+
+	    return remainder(new BigFraction(numer.multiply(other.denom), denom.multiply(other.numer)));
 	}
 
 	/**

@@ -85,6 +85,15 @@ loop over 16384 { _tests++; if from_excel_col(to_excel_col($_)) != $_ { _mistake
 hash('test/data/Declaration.txt',,true)
 hashstring('Four score and seven years ago')
 
+#
+# Tangent numbers
+#
+:rational on
+:resultsonly on
+loop 3..60,4 `Tn(${($_ - 1) / 2@F}) = ${Tn($_)@F}`
+:resultsonly pop
+:rational pop
+
 :separators pop
 :clear
 

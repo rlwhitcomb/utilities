@@ -124,6 +124,9 @@
  *	31-Jan-2022 (rlwhitcomb)
  *	    #212: type of function and cast to function.
  *	    #103: cast complex to/from map and list
+ *	10-Feb-2022 (rlwhitcomb)
+ *	    Rearrange tests inside "compareValues" so that fraction/complex compared to int/decimal
+ *	    will work correctly.
  */
 package info.rlwhitcomb.calc;
 
@@ -1082,18 +1085,6 @@ public final class CalcUtil
 
 		return compareStrings(s1, s2, ignoreCase, naturalOrder);
 	    }
-	    else if (e1 instanceof BigDecimal || e2 instanceof BigDecimal) {
-		BigDecimal d1 = toDecimalValue(visitor, e1, mc, ctx1);
-		BigDecimal d2 = toDecimalValue(visitor, e2, mc, ctx2);
-
-		return d1.compareTo(d2);
-	    }
-	    else if (e1 instanceof BigInteger || e2 instanceof BigInteger) {
-		BigInteger i1 = toIntegerValue(visitor, e1, mc, ctx1);
-		BigInteger i2 = toIntegerValue(visitor, e2, mc, ctx2);
-
-		return i1.compareTo(i2);
-	    }
 	    else if (e1 instanceof BigFraction || e2 instanceof BigFraction) {
 		BigFraction f1 = toFractionValue(visitor, e1, ctx1);
 		BigFraction f2 = toFractionValue(visitor, e2, ctx2);
@@ -1105,6 +1096,18 @@ public final class CalcUtil
 		ComplexNumber c2 = ComplexNumber.valueOf(e2);
 
 		return c1.compareTo(c2);
+	    }
+	    else if (e1 instanceof BigDecimal || e2 instanceof BigDecimal) {
+		BigDecimal d1 = toDecimalValue(visitor, e1, mc, ctx1);
+		BigDecimal d2 = toDecimalValue(visitor, e2, mc, ctx2);
+
+		return d1.compareTo(d2);
+	    }
+	    else if (e1 instanceof BigInteger || e2 instanceof BigInteger) {
+		BigInteger i1 = toIntegerValue(visitor, e1, mc, ctx1);
+		BigInteger i2 = toIntegerValue(visitor, e2, mc, ctx2);
+
+		return i1.compareTo(i2);
 	    }
 	    else if (e1 instanceof Boolean || e2 instanceof Boolean) {
 		Boolean b1 = toBooleanValue(visitor, e1, ctx1);
