@@ -251,6 +251,8 @@
  *	09-Feb-2022 (rlwhitcomb)
  *	    #240: Display timing during initial library load.
  *	    Tweak LIB_VERSION to better match library pattern in case of some variation.
+ *	11-Feb-2022 (rlwhitcomb)
+ *	    #245: Change the way we set quiet mode for libraries, etc. in "process()".
  */
 package info.rlwhitcomb.calc;
 
@@ -1517,7 +1519,7 @@ public class Calc
 		throws IOException
 	{
 	    Object returnValue = null;
-	    boolean oldSilent  = visitor.setSilent(silent);
+	    boolean oldSilent  = setQuietMode(silent);
 	    long startTime     = Environment.highResTimer();
 	    long parseEndTime  = 0L;
 	    long execStartTime = 0L;
@@ -1557,7 +1559,7 @@ public class Calc
 		    parseEndTime = endTime;
 		if (execStartTime == 0L)
 		    execStartTime = endTime;
-		visitor.setSilent(oldSilent);
+		setQuietMode(oldSilent);
 	    }
 
 	    if (timing && (!silent || initialLibraryLoad)) {
