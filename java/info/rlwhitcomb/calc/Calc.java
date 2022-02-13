@@ -253,6 +253,8 @@
  *	    Tweak LIB_VERSION to better match library pattern in case of some variation.
  *	11-Feb-2022 (rlwhitcomb)
  *	    #245: Change the way we set quiet mode for libraries, etc. in "process()".
+ *	13-Feb-2022 (rlwhitcomb)
+ *	    When loading text into the GUI input field, make sure the actions are enabled.
  */
 package info.rlwhitcomb.calc;
 
@@ -847,7 +849,6 @@ public class Calc
 
 		inputTextPane.getComponentKeyListeners().add(keyPressListener);
 		inputTextPane.getTextPaneCharacterListeners().add(characterListener);
-		characterListener.enableActions();
 
 		KeyStroke versionKey = KeyStroke.decode("Cmd-F1");
 		String key = versionKey.toString();
@@ -865,10 +866,8 @@ public class Calc
 		inputTextPane.setDocument(new Document());
 
 		// Prepopulate the text are with any text from the command line or input file
-		if (inputText != null)
-		    inputTextPane.setText(inputText);
-		else
-		    inputTextPane.setText(EMPTY_TEXT);
+		inputTextPane.setText(inputText == null ? EMPTY_TEXT : inputText);
+		characterListener.enableActions();
 
 		decimalPrecisionButton.getButtonGroup().getButtonGroupListeners().add(new ButtonGroupListener() {
 		    @Override
