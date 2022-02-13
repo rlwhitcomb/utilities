@@ -2,6 +2,14 @@
 >All variables cleared.
 >Variables
 >---------
+>$# -> 6
+>$* -> [ "abc", "def", 1, 2, 3, "text" ]
+>$0 -> "abc"
+>$1 -> "def"
+>$2 -> 1
+>$3 -> 2
+>$4 -> 3
+>$5 -> "text"
 >=========
 >Defining function “oddness” = {
 > Case value % 2 Of 
@@ -74,13 +82,13 @@
 >strings -> 3.14
 >value = "zero" -> "zero"
 >strings -> "many"
->Defining function “fieldType($typeid)” = {
-> case $typeid of {
+>Defining function “fieldType(typeid)” = {
+> case typeid of {
 > 4: ' TEXT', 
 > 7: 'LABEL', 
 > 19, 
 > default, 
-> 23: `$$typeid` 
+> 23: `$typeid` 
 >} 
 >}
 >fieldType(4) -> " TEXT"
@@ -89,7 +97,7 @@
 >fieldType(19) -> "19"
 >fieldType(99) -> "99"
 >'type: ' + fieldType(4) -> "type:  TEXT"
->Defining function “srt($a1,$a2,$f)” = {$f($a1, $a2) > 0 ? $a1 : $a2}
+>Defining function “srt(a1,a2,f)” = {f(a1, a2) > 0 ? a1 : a2}
 >Defining function “precision_to_directive” = {
 > case settings.precision of {
 > 0: ':unlimited', 
@@ -190,8 +198,8 @@
 >precision_to_directive -> ":default"
 >test_string = 'abababc' -> "abababc"
 >'match' -> "match"
->Defining function “sign($value)” = {
-> case $value of {
+>Defining function “sign(value)” = {
+> case value of {
 > < 0: -1, 
 > == 0: 0, 
 > > 0: + 1 

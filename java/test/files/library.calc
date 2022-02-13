@@ -1,4 +1,4 @@
-//** Version: 2.7.40 Base: 1.8.2
+//** Version: 2.8.0 Base: 1.8.2
 //** The versions above must conform to the latest values in "version.properties" and "build.properties"
 
 /*
@@ -21,41 +21,41 @@ const ON_WINDOWS = info.os.id == 'windows'
  * From here: https://docs.microsoft.com/en-us/office/troubleshoot/excel/determine-a-leap-year
  * "However, in order to be compatible with other programs, Microsoft Excel treats the year 1900 as a leap year."
  *
- * @param $date The input date value
- * @return      The Excel date serial number, where 1/1/1900 is 1
+ * @param date The input date value
+ * @return     The Excel date serial number, where 1/1/1900 is 1
  */
-def excel_date($date) = { $date < D'3/1/1900' ? $date - D'1/1/1900' + 1 : $date - D'1/1/1900' + 2 }
+def excel_date(date) = { date < D'3/1/1900' ? date - D'1/1/1900' + 1 : date - D'1/1/1900' + 2 }
 
 /*
  * Convert one of our dates to an Excel date serial number using the 1904 system
  * where 1/1/1904 is considered day 0.
  *
- * @param $date The input date value
- * @return      The Excel 1904-system date serial number, where 1/1/1904 is 0
+ * @param date The input date value
+ * @return     The Excel 1904-system date serial number, where 1/1/1904 is 0
  */
-def excel_date_1904($date) = { $date - D'1/1/1904' }
+def excel_date_1904(date) = { date - D'1/1/1904' }
 
 /*
  * Helpers for the Excel column conversion code.
  */
-define to_int($c) = { eval(`${$c@d}`) }
+define to_int(c) = { eval(`${c@d}`) }
 const _A_ = to_int('A')
 const _Z_ = to_int('Z')
 const _BASE_ = _Z_ - _A_ + 1
-define to_alpha($v) = { `${(_A_ + $v)@c}` }
+define to_alpha(v) = { `${(_A_ + v)@c}` }
 
 /*
  * Convert a numeric Excel column index (1..16384) into a regular column name ("A" .. "XFD").
  *
- * @param $index The numeric column index to convert.
- * @return       The column name.
+ * @param index The numeric column index to convert.
+ * @return      The column name.
  *
  * Algorithm taken from example given here:
  * https://stackoverflow.com/questions/181596/how-to-convert-a-column-number-e-g-127-into-an-excel-column-e-g-aa
  */
-define to_excel_col($index) = {
+define to_excel_col(idx) = {
    _col = ''
-   _i = $index - 1
+   _i = idx - 1
    while _i >= 0 {
       _col = to_alpha(_i % _BASE_) + _col
       _i = _i \ _BASE_ - 1
@@ -66,13 +66,13 @@ define to_excel_col($index) = {
 /*
  * Convert an Excel column name ("A" .. "XFD") to a numeric column index (1..16384).
  *
- * @param $col The column name to convert.
- * @return     The numeric index of the column.
+ * @param col The column name to convert.
+ * @return    The numeric index of the column.
  */
-define from_excel_col($col) = {
+define from_excel_col(col) = {
    _col = 0
-   loop $c over chars(upper($col)) {
-      _v = $c - _A_ + 1
+   loop c over chars(upper(col)) {
+      _v = c - _A_ + 1
       _col *= _BASE_
       _col += _v
    }
@@ -81,43 +81,43 @@ define from_excel_col($col) = {
 /*
  * Convert radians to degrees: 2*pi = 360, so radians / pi * 180 = degrees
  *
- * @param $rad The input radians value
- * @return     Computed degrees
+ * @param rad The input radians value
+ * @return    Computed degrees
  */
-def rad_to_deg($rad) = { $rad / pi * 180 }
+def rad_to_deg(rad) = { rad / pi * 180 }
 
 /*
  * Convert degrees to radians: 2*pi = 360, so degrees / 180 * pi = radians
  *
- * @param $deg The input degrees value
- * @return     Computed radians
+ * @param deg The input degrees value
+ * @return    Computed radians
  */
-def deg_to_rad($deg) = { $deg / 180 * pi }
+def deg_to_rad(deg) = { deg / 180 * pi }
 
 /*
  * Get the day of week name for a given date.
  *
- * @param $date The input date value.
- * @return      The day name ("Sunday" .. "Saturday").
+ * @param date The input date value.
+ * @return     The day name ("Sunday" .. "Saturday").
  */
-def dow_name($date) = { info.locale.weekdays [ dow($date) ] }
+def dow_name(date) = { info.locale.weekdays [ dow(date) ] }
 
 /*
  * Get the month name for a given date.
  *
- * @param $date The input date value.
- * @return      The month name ("January" .. "December").
+ * @param date The input date value.
+ * @return     The month name ("January" .. "December").
  */
-def moy_name($date) = { info.locale.months [ moy($date) - 1 ] }
+def moy_name(date) = { info.locale.months [ moy(date) - 1 ] }
 
 /*
  * Get the long form of a date.
  * From D'2/1/1980' -> Friday, February 1, 1980
  *
- * @param $date The input date value, defaults to "today" if omitted.
- * @return      The long string representation of the date.
+ * @param date The input date value, defaults to "today" if omitted.
+ * @return     The long string representation of the date.
  */
-def long_date($date = today) = { `${dow_name($date)}, ${moy_name($date)} ${dom($date)}, ${yod($date)@_d}` }
+def long_date(date = today) = { `${dow_name(date)}, ${moy_name(date)} ${dom(date)}, ${yod(date)@_d}` }
 
 /*
  * For time values, number of ticks (nanoseconds) in a second.
@@ -135,75 +135,75 @@ TICKS_PER_HOUR = TICKS_PER_MINUTE * 60
 /*
  * Get the number of hours in a time value.
  *
- * @param $time The time value (as from "now")
- * @return The integer number of hours.
+ * @param time The time value (as from "now")
+ * @return     The integer number of hours.
  */
-define hot($time) = { $time \ TICKS_PER_HOUR }
+define hot(time) = { time \ TICKS_PER_HOUR }
 
 /*
  * Get the number of minutes in a time value.
  *
- * @param $time The time value (as from "now")
- * @return The integer number of minutes.
+ * @param time The time value (as from "now")
+ * @return     The integer number of minutes.
  */
-define mot($time) = { ($time - (hot($time) * TICKS_PER_HOUR)) \ TICKS_PER_MINUTE }
+define mot(time) = { (time - (hot(time) * TICKS_PER_HOUR)) \ TICKS_PER_MINUTE }
 
 /*
  * Get the number of seconds in a time value.
  *
- * @param $time The time value (as from "now")
- * @return The integer number of seconds.
+ * @param time The time value (as from "now")
+ * @return     The integer number of seconds.
  */
-define sot($time) = { ($time - (hot($time) * TICKS_PER_HOUR) - (mot($time) * TICKS_PER_MINUTE)) \ TICKS_PER_SECOND }
+define sot(time) = { (time - (hot(time) * TICKS_PER_HOUR) - (mot(time) * TICKS_PER_MINUTE)) \ TICKS_PER_SECOND }
 
 /*
  * Get a timestamp from the given date and time in the Linux "date" form.
  *
- * @param $date The desired date.
- * @param $time The desired time.
- * @return      Timestamp in the form of "Mon Dec 20  6:46:19 PST 2021"
+ * @param date The desired date.
+ * @param time The desired time.
+ * @return     Timestamp in the form of "Mon Dec 20  6:46:19 PST 2021"
  */
-def timestamp($date = today, $time = now) = {
-   `${substr(dow_name($date),0,3)} ${substr(moy_name($date),0,3)} ${dom($date)@.2d} ${hot($time)@-2s}:${mot($time)@.2d}:${sot($time)@.2d} ${info.timezone.name} ${yod($date)@_d}`
+def timestamp(date = today, time = now) = {
+   `${substr(dow_name(date),0,3)} ${substr(moy_name(date),0,3)} ${dom(date)@.2d} ${hot(time)@-2s}:${mot(time)@.2d}:${sot(time)@.2d} ${info.timezone.name} ${yod(date)@_d}`
 }
 
 /*
  * Compute the flat map of an array.
  *
- * @param $arr The input array.
- * @return     The flat map of that array.
+ * @param arr The input array.
+ * @return    The flat map of that array.
  */
-def flat_map($arr) = { eval `[${join $arr, ','}]` }
+def flat_map(arr) = { eval `[${join arr, ','}]` }
 
 /*
  * Determine if a given number is a "perfect" number - equal to the sum of
  * all its positive divisors, excluding itself.
  * Note: the first few perfect numbers are: 6, 28, 496, and 8128.
  *
- * @param $n The test value.
- * @return   true/false if the number is perfect.
+ * @param n The test value.
+ * @return  true/false if the number is perfect.
  */
-define is_perfect($n) = { sumof ( factors ($n) ) - $n == $n }
+define is_perfect(n) = { sumof ( factors (n) ) - n == n }
 
 /*
  * Solve the quadratic formula to find the roots of a general
  * quadratic equation: a*x**2 + b*x + c = 0.
  * x = (-b +- sqrt(b**2 - 4 * a * c))/2*a
  *
- * @param $a
- * @param $b
- * @param $c
+ * @param a
+ * @param b
+ * @param c
  * @return [ x1, x2 ] if solution is real, error if not
  */
-define quad($a, $b, $c) = {
-  _b2 = $b * $b
-  _2a = 2 * $a
-  _r = (_b2 - 4 * $a * $c)
+define quad(a, b, c) = {
+  _b2 = b * b
+  _2a = 2 * a
+  _r = (_b2 - 4 * a * c)
   if _r < 0 {
     _r = abs(_r)
-    [ ( -$b/_2a, sqrt(_r)/_2a ), ( -$b/_2a, -sqrt(_r)/_2a ) ]
+    [ ( -b/_2a, sqrt(_r)/_2a ), ( -b/_2a, -sqrt(_r)/_2a ) ]
   } else {
-    [ (-$b + sqrt(_r))/_2a, (-$b - sqrt(_r))/_2a ]
+    [ (-b + sqrt(_r))/_2a, (-b - sqrt(_r))/_2a ]
   }
 }
 
@@ -211,14 +211,14 @@ define quad($a, $b, $c) = {
  * Find the value of a quadratic equation at the given point.
  * y = a*x**2 + b*x + c
  *
- * @param $a
- * @param $b
- * @param $c
- * @param $x
+ * @param a
+ * @param b
+ * @param c
+ * @param x
  * @return The value of the equation at the given point.
  */
-define quad_exp($a, $b, $c, $x) = {
-  $a * $x*$x + $b * $x + $c
+define quad_exp(a, b, c, x) = {
+  a * x*x + b * x + c
 }
 
 /*
@@ -226,23 +226,23 @@ define quad_exp($a, $b, $c, $x) = {
  * Reference:
  * https://en.wikipedia.org/wiki/Riemann_zeta_function
  *
- * @param $2n Positive even integer value
+ * @param _2n Positive even integer value
  * @return    The Euler "zeta" function of that value
  * Note: no error checking if the parameter is not a positive even integer.
  */
-define zeta_2n($2n) = { ((-1)**($2n / 2 + 1) * Bn($2n) * (2 * pi) ** $2n) / (2 * $2n!) }
+define zeta_2n(_2n) = { ((-1)**(_2n / 2 + 1) * Bn(_2n) * (2 * pi) ** _2n) / (2 * _2n!) }
 
 /*
  * Tangent numbers, derived from the Bernoulli numbers. Value is zero for 0
  * and all even values.
  * Reference: http://scipp.ucsc.edu/~haber/ph116A/taylor11.pdf pg. 3 eq. 8
  *
- * @param $n where we calculate the value for ($n - 1)/2
+ * @param n where we calculate the value for (n - 1)/2
  * @return The k-th Tangent number
  */
-define Tn($n) = {
-  if $n == 0 || $n % 2 == 0 leave 0
-  _2kplus1 = ($n - 1) / 2
+define Tn(n) = {
+  if n == 0 || n % 2 == 0 leave 0
+  _2kplus1 = (n - 1) / 2
   _2kplus2 = _2kplus1 + 1
   (2 ** _2kplus2) * (2 ** _2kplus2 - 1) * ( Bn(_2kplus2) / _2kplus2 )
 }
@@ -266,52 +266,52 @@ define Tn($n) = {
 # https://www.bankrate.com/calculators/mortgages/mortgage-calculator.aspx
 
 # The context for the payment calculation is:
-#    $P = full principal amount to be financed
-#    $R = yearly interest rate (%)
-# or $r = monthly interest rate (%/12)
-#    $N = number of years
-# or $n = number of months (N*12)
+#    P = full principal amount to be financed
+#    R = yearly interest rate (%)
+# or r = monthly interest rate (%/12)
+#    N = number of years
+# or n = number of months (N*12)
 # Then the calculated values are:
 #   rate = monthly interest as a decimal value (% / 100 / 12)
 #   num = number of months (years * 12)
-define _pmt_internal_($ctx) = {
-  $ctx.rate = ($ctx.R ? ($ctx.R / 12) : $ctx.r) / 100
-  $ctx.num = ($ctx.N ? ($ctx.N * 12) : $ctx.n)
+define _pmt_internal_(ctx) = {
+  ctx.rate = (ctx.R ? (ctx.R / 12) : ctx.r) / 100
+  ctx.num = (ctx.N ? (ctx.N * 12) : ctx.n)
 
   # Calculate the intermediate values (which are reused)
-  r_n = (1 + $ctx.rate) ** $ctx.num
-  r_r_n = $ctx.rate * r_n
+  r_n = (1 + ctx.rate) ** ctx.num
+  r_r_n = ctx.rate * r_n
   r_n_1 = r_n - 1
 
   # Now the final monthly payment value
-  $ctx.P * (r_r_n / r_n_1)
+  ctx.P * (r_r_n / r_n_1)
 }
 
-define PMT($P,$R,$N) = {
+define PMT(P,R,N) = {
    # Note: the 2nd param is the number of fractional digits (after the decimal point)
    # regardless of the number of whole digits in the result; so "0" will round
    # to a whole dollar, "2" rounds to pennies.
-   round(_pmt_internal_({P:$P, R:$R, N:$N}), 2)
+   round(_pmt_internal_({P:P, R:R, N:N}), 2)
 }
 
-define PMT2($P,$r,$n) = {
-   round(_pmt_internal_({P:$P, r:$r, n:$n}), 2)
+define PMT2(P,r,n) = {
+   round(_pmt_internal_({P:P, r:r, n:n}), 2)
 }
 
-def monthly($P,$R,$N) = { `Full monthly payment is ${PMT($P,$R,$N)@2,$}` }
-def monthly_whole($P,$R,$N) = { `Monthly payment in whole dollars is ${PMT($P,$R,$N)@0,$}` }
+def monthly(P,R,N) = { `Full monthly payment is ${PMT(P,R,N)@2,$}` }
+def monthly_whole(P,R,N) = { `Monthly payment in whole dollars is ${PMT(P,R,N)@0,$}` }
 
 def help_mort = { "\nUsage: PMT(P=<present value>,R=<yearly interest rate (%)>,N=<number of years>)\n    or PMT2(P,r=<monthly interest %>,n=<number of months>)\n   Or use monthly(P,R,N) or monthly_whole(P,R,N) to get the results in different forms." }
 
 /*
  * Compute the winning percentage, given wins, ties, and losses.
  *
- * @param $wins   Number of wins.
- * @param $losses Number of times lost.
- * @param $ties   Number of ties (default 0).
- * @return        Winning percentage.
+ * @param wins   Number of wins.
+ * @param losses Number of times lost.
+ * @param ties   Number of ties (default 0).
+ * @return       Winning percentage.
  */
-def win_pct($wins, $losses, $ties = 0) = { $wins / ($wins + $ties + $losses) @2% }
+def win_pct(wins, losses, ties = 0) = { wins / (wins + ties + losses) @2% }
 
 /*
  * Implementation of a stack data structure. The array of values is kept trimmed, so the current value array length
@@ -322,34 +322,34 @@ def stack = { _values: [] }
 /*
  * Push a new value onto the given stack.
  *
- * @param $s     The stack to use.
- * @param $value The new value to push onto the top of the stack.
+ * @param s     The stack to use.
+ * @param value The new value to push onto the top of the stack.
  */
-def push($s, $value) = { $s._values[length($s._values)] = $value }
+def push(s, value) = { s._values[length(s._values)] = value }
 
 /*
  * Pop the latest value off the given stack.
  *
- * @param $s The stack to use.
- * @return   The latest value pushed into the stack.
+ * @param s The stack to use.
+ * @return  The latest value pushed into the stack.
  */
-def pop($s) = { _v = splice($s._values, -1, 1); _v[0] }
+def pop(s) = { _v = splice(s._values, -1, 1); _v[0] }
 
 /*
  * Is the given stack empty?
  *
- * @param $s The stack to check on.
- * @return   Whether or not the stack is empty.
+ * @param s The stack to check on.
+ * @return  Whether or not the stack is empty.
  */
-def isempty($s) = { length($s._values) == 0 }
+def isempty(s) = { length(s._values) == 0 }
 
 /*
  * Peek at the top value on the stack without popping it.
  *
- * @param $s The stack to use.
+ * @param s The stack to use.
  * @return   The top-most element of the stack, without modifying the stack.
  */
-def peek($s) = { _len = length($s._values) - 1; _len < 0 ? null : $s._values[_len] }
+def peek(s) = { _len = length(s._values) - 1; _len < 0 ? null : s._values[_len] }
 
 /*
  * Construct a nice string form of the version information.
@@ -366,45 +366,45 @@ define uuid() = {  trim(exec('uuid')) }
 /*
  * Execute the "sleep" program for the given time period.
  *
- * @param $time A time period to sleep (could be "n" seconds, or other units such as "2m").
+ * @param time A time period to sleep (could be "n" seconds, or other units such as "2m").
  */
-define sleep($time) = { trim(exec('sleep', $time)) }
+define sleep(time) = { trim(exec('sleep', time)) }
 
 /*
  * Hash a file using the given algorithm (default is "SHA-256" if none given).
  *
- * @param $filename Name of the file to compute the hash for.
- * @param $algorithm Which hash algorithm to use.
- * @param $upper Which case to use for the result (default 'false')
- * @return The given hash value (lower case).
+ * @param filename  Name of the file to compute the hash for.
+ * @param algorithm Which hash algorithm to use.
+ * @param uppercase Which case to use for the result (default 'false')
+ * @return          The given hash value (lower case).
  */
-define hash($filename, $algorithm = 'sha-256', $upper = false) = {
-   trim(exec('hsh', $upper ? '--upper' : '--lower', '--algorithm=' + $algorithm, '--file', $filename))
+define hash(filename, algorithm = 'sha-256', uppercase = false) = {
+   trim(exec('hsh', uppercase ? '--upper' : '--lower', '--algorithm=' + algorithm, '--file', filename))
 }
 
 /*
  * Hash a string with same parameters as "hash".
  *
- * @param $value The string value to hash.
- * @param $algorithm Which hash algorithm to use.
- * @param $upper Which case to use for the results (default 'false')
- * @return The given string's hash value.
+ * @param value     The string value to hash.
+ * @param algorithm Which hash algorithm to use.
+ * @param uppercase Which case to use for the results (default 'false')
+ * @return          The given string's hash value.
  */
-define hashstring($value, $algorithm = 'sha-256', $upper = false) = {
-   trim(exec('hsh', '--line', $upper ? '--upper' : '--lower', '--algorithm=' + $algorithm, `${$value@q}`))
+define hashstring(value, algorithm = 'sha-256', uppercase = false) = {
+   trim(exec('hsh', '--line', uppercase ? '--upper' : '--lower', '--algorithm=' + algorithm, `${value@q}`))
 }
 
 /*
  * Compute the mean and standard deviation of a list of values.
  *
- * @param $values
+ * @param values
  * @return { mean: xxx, stddev: sss }
  */
-define mean_stddev ($values) = {
-  len = length($values)
-  avg = sumof($values) / len
+define mean_stddev (values) = {
+  len = length(values)
+  avg = sumof(values) / len
   var = 0
-  loop over $values { var += ($_ - avg) ** 2 }
+  loop over values { var += (__ - avg) ** 2 }
   var /= len
   { mean: avg, stddev: round(sqrt(var), 3) }
 }

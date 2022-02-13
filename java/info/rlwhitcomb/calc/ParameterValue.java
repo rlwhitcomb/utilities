@@ -24,60 +24,68 @@
  *      Data structure for a constant value.
  *
  *  History:
- *	21-Jan-2022 (rlwhitcomb)
- *	    #135: Initial coding.
  *	12-Feb-2022 (rlwhitcomb)
- *	    #199: Derive from new ValueScope base class, and add back in the constant
- *	    object value and implement the "getValue" method.
+ *	    #199: Initial coding.
  */
 package info.rlwhitcomb.calc;
 
 
-
 /**
- * A read-only (or constant) value defined by the user. So, an alias for a numeric
- * or other value that gives it a meaningful name in the context of the program.
+ * A function or global parameter, including the predefined array and count
+ * values, and varargs values.
  */
-class ConstantValue extends ValueScope
+class ParameterValue extends ValueScope
 {
 	/**
-	 * The constant value of this constant.
+	 * The value of this parameter.
 	 */
-	Object constantValue;
+	private Object paramValue;
 
 
 	/**
-	 * Construct one of these, given its constant value.
+	 * Construct one of these, given its value.
 	 *
-	 * @param nm    Name of this constant value.
-	 * @param value The unchanging value of this constant entity.
+	 * @param nm    Name of this parameter value.
+	 * @param value The unchanging value of this parameter.
 	 */
-	private ConstantValue(final String nm, final Object value) {
+	private ParameterValue(final String nm, final Object value) {
 	    super(nm, Type.CONSTANT);
 
-	    this.constantValue = value;
+	    this.paramValue  = value;
 	}
 
 	/**
-	 * Get the constant value of this constant.
+	 * Get the value of this parameter.
 	 *
-	 * @return The really constant value of this constant.
+	 * @return The current value of this parameter.
 	 */
 	@Override
 	Object getValue() {
-	    return constantValue;
+	    return paramValue;
 	}
 
 	/**
-	 * Define one of these into the given symbol table.
+	 * Define one of these into the given scope.
 	 *
-	 * @param scope	The symbol table in which to define it.
-	 * @param nm	The name of this constant value.
-	 * @param value	The value of it.
+	 * @param scope	The enclosing scope in which to define it.
+	 * @param nm	The name of this parameter value.
+	 * @param value	The current value of it.
 	 */
-	static void define(final ObjectScope scope, final String nm, final Object value) {
-	    ConstantValue constant = new ConstantValue(nm, value);
-	    scope.setValue(nm, constant);
+	static void define(final ParameterizedScope scope, final String nm, final Object value) {
+	    ParameterValue param = new ParameterValue(nm, value);
+	    scope.addParamValue(param);
+	}
+
+	/**
+	 * Set the value of one of these into the given scope.
+	 *
+	 * @param scope	The enclosing scope in which to define it.
+	 * @param nm	The name of this parameter value.
+	 * @param value	The current value of it.
+	 */
+	static void put(final ParameterizedScope scope, final String nm, final Object value) {
+	    ParameterValue param = new ParameterValue(nm, value);
+	    scope.setValue(nm, param);
 	}
 
 }

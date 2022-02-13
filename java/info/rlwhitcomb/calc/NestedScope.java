@@ -34,6 +34,8 @@
  *	    Change return value of "remove" to the previous value.
  *	03-Feb-2022 (rlwhitcomb)
  *	    Add "getWildValues" here for wild-card search.
+ *	13-Feb-2022 (rlwhitcomb)
+ *	    #199: Move GlobalScope out to ParameterizedScope; add LOOP_VAR to LoopScope.
  */
 package info.rlwhitcomb.calc;
 
@@ -52,6 +54,7 @@ class NestedScope extends ObjectScope
 	 */
 	NestedScope enclosingScope;
 
+
 	NestedScope(final Type t) {
 	    super(t);
 	    this.enclosingScope = null;
@@ -61,6 +64,7 @@ class NestedScope extends ObjectScope
 	    super(t);
 	    this.enclosingScope = outer;
 	}
+
 
 	/**
 	 * Access the enclosing scope of this scope.
@@ -170,21 +174,15 @@ class NestedScope extends ObjectScope
 
 }
 
-/**
- * The (singular) global variable scope.
- */
-class GlobalScope extends NestedScope
-{
-	GlobalScope() {
-	    super(Type.GLOBAL);
-	}
-}
 
 /**
  * A local scope used for {@code LOOP} statements in order to define local variables there.
  */
 class LoopScope extends NestedScope
 {
+	public static final String LOOP_VAR = "__";
+
+
 	LoopScope() {
 	    super(Type.LOOP);
 	}

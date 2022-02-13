@@ -34,6 +34,9 @@
  *	    #223: New method to decide if the value is a constant or not.
  *	02-Feb-2022 (rlwhitcomb)
  *	    #115: New "put" method to wrap values back into a map.
+ *	12-Feb-2022 (rlwhitcomb)
+ *	    #199: Derive from ValueScope, so remove common fields / methods.
+ *	    Take out the "put" method which is unused now.
  */
 package info.rlwhitcomb.calc;
 
@@ -46,13 +49,8 @@ import java.util.function.Supplier;
  * which can be computed either as a constant, or from a {@link Supplier} (which is
  * necessary for <code>today</code> (for instance) because it isn't completely constant.
  */
-class PredefinedValue extends Scope
+class PredefinedValue extends ValueScope
 {
-	/**
-	 * Name of this predefined value (for error reporting).
-	 */
-	String name;
-
 	/**
 	 * First choice, the "get value" function used to obtain the value.
 	 */
@@ -63,14 +61,6 @@ class PredefinedValue extends Scope
 	 */
 	Object constantValue;
 
-	/**
-	 * Constructor just given the type.
-	 *
-	 * @param typ The type of this object.
-	 */
-	protected PredefinedValue(Type typ) {
-	    super(typ);
-	}
 
 	/**
 	 * Construct one of these, given a supplier for the (maybe not constant) value.
@@ -79,9 +69,8 @@ class PredefinedValue extends Scope
 	 * @param supplier The supplier function.
 	 */
 	private PredefinedValue(final String nm, final Supplier<Object> supplier) {
-	    this(Type.PREDEFINED);
+	    super(nm, Type.PREDEFINED);
 
-	    this.name          = nm;
 	    this.valueSupplier = supplier;
 	    this.constantValue = null;
 	}
@@ -93,9 +82,8 @@ class PredefinedValue extends Scope
 	 * @param value The unchanging value of this predefined entity.
 	 */
 	private PredefinedValue(final String nm, final Object value) {
-	    this(Type.PREDEFINED);
+	    super(nm, Type.PREDEFINED);
 
-	    this.name          = nm;
 	    this.valueSupplier = null;
 	    this.constantValue = value;
 	}
@@ -105,17 +93,8 @@ class PredefinedValue extends Scope
 	 *
 	 * @return <code>true</code> if the value is always constant.
 	 */
-	public boolean isConstant() {
+	boolean isConstant() {
 	    return this.valueSupplier == null;
-	}
-
-	/**
-	 * Access the name of this object.
-	 *
-	 * @return The name assigned at definition time.
-	 */
-	String getName() {
-	    return name;
 	}
 
 	/**
@@ -123,6 +102,7 @@ class PredefinedValue extends Scope
 	 *
 	 * @return The current value.
 	 */
+	@Override
 	Object getValue() {
 	    if (valueSupplier != null)
 		return valueSupplier.get();
@@ -134,36 +114,24 @@ class PredefinedValue extends Scope
 	 * Define one of these into the given symbol table.
 	 *
 	 * @param scope		The symbol table in which to define it.
-	 * @param name		The name of this predefined value.
+	 * @param nm		The name of this predefined value.
 	 * @param supplier	Supplier for the value.
 	 */
-	static void define(final ObjectScope scope, final String name, final Supplier<Object> supplier) {
-	    PredefinedValue predef = new PredefinedValue(name, supplier);
-	    scope.setValue(name, predef);
+	static void define(final ObjectScope scope, final String nm, final Supplier<Object> supplier) {
+	    PredefinedValue predef = new PredefinedValue(nm, supplier);
+	    scope.setValue(nm, predef);
 	}
 
 	/**
 	 * Define one of these into the given symbol table.
 	 *
 	 * @param scope		The symbol table in which to define it.
-	 * @param name		The name of this predefined value.
+	 * @param nm		The name of this predefined value.
 	 * @param value		The constant value of it.
 	 */
-	static void define(final ObjectScope scope, final String name, final Object value) {
-	    PredefinedValue predef = new PredefinedValue(name, value);
-	    scope.setValue(name, predef);
-	}
-
-	/**
-	 * Wrap the given map entry with one of ourselves, and put into the result map.
-	 *
-	 * @param entry		The entry to wrap.
-	 * @param resultMap	The result map to put into.
-	 */
-	static void put(final Map.Entry<String, Object> entry, Map<String, Object> resultMap) {
-	    String name = entry.getKey();
-	    PredefinedValue predef = new PredefinedValue(name, entry.getValue());
-	    resultMap.put(name, predef);
+	static void define(final ObjectScope scope, final String nm, final Object value) {
+	    PredefinedValue predef = new PredefinedValue(nm, value);
+	    scope.setValue(nm, predef);
 	}
 
 }

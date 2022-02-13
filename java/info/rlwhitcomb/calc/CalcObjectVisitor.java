@@ -510,6 +510,8 @@
  *	    Oops! Implement "modulus" for fractions.
  *	11-Feb-2022 (rlwhitcomb)
  *	    #245: Fix stacking of the "settings" values, plus quiet mode during functions.
+ *	13-Feb-2022 (rlwhitcomb)
+ *	    #199: Refactoring of values to allow arbitrary "id" for loop variables and parameters.
  */
 package info.rlwhitcomb.calc;
 
@@ -651,9 +653,6 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	/** The current topmost scope for variables. */
 	private NestedScope currentScope;
 
-	/** The array object of the command-line arguments. */
-	private ArrayScope<Object> arguments;
-
 	/** The current {@code LValueContext} for variables. */
 	private LValueContext currentContext;
 
@@ -697,12 +696,6 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	/** Stack of previous "silence" mode values. */
 	private final Deque<Boolean> silenceModeStack = new ArrayDeque<>();
-
-	/** Name for global argument array value. */
-	static final String ARG_ARRAY = "$*";
-
-	/** Name for global argument count value. */
-	static final String ARG_COUNT = "$#";
 
 
 	/**
@@ -752,11 +745,10 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    settings  = new Settings(rational, separators, silence, ignoreCase, quotes);
 	    setIntMathContext(MathContext.DECIMAL128);
 
-	    globals   = new GlobalScope();
-	    arguments = new ArrayScope<Object>();
-
+	    globals = new GlobalScope();
 	    pushScope(globals);
-	    CalcPredefine.define(globals, arguments, piWorker, phiSupplier, phi1Supplier);
+
+	    CalcPredefine.define(globals, piWorker, phiSupplier, phi1Supplier);
 
 	    ObjectScope sets = new ObjectScope();
 	    PredefinedValue.define(globals, "settings", sets);
@@ -795,20 +787,18 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	/**
 	 * Set one of the global argument variables ({@code $0}, {@code $1}, etc)
 	 * to the given value.
-	 * <p> Also maintain the {@link #ARG_ARRAY} array and {@link #ARG_COUNT} count variables.
 	 *
 	 * @param index	The zero-based index for the variable.
 	 * @param arg	The argument value, which will be parsed and set as a numeric value
 	 *		if it successfully parses as a {@link BigDecimal}, or a boolean
 	 *		if it fails that, otherwise it will be set as a string.
+	 * @see GlobalScope#GLOBAL_PREFIX
 	 */
 	public void setArgument(final int index, final String arg) {
-	    String argKey = String.format("$%1$d", index);
+	    String argKey = String.format("%1$s%2$d", GlobalScope.GLOBAL_PREFIX, index);
 	    Object value = stringToValue(arg);
 
-	    globals.setValue(argKey, value);
-	    arguments.add(value);
-	    globals.setValue(ARG_COUNT, BigInteger.valueOf(arguments.size()));
+	    ParameterValue.define(globals, argKey, value);
 	}
 
 	/**
@@ -1069,7 +1059,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	 * <li> if the function was defined WITH parameters, then treat the value as a function object
 	 * and just return the value</li>
 	 * </ul>
-	 * <p> Also, if the function return (or the initial value, for that matter) is a {@link PredefinedValue}
+	 * <p> Also, if the function return (or the initial value, for that matter) is a {@link ValueScope}
 	 * then call its {@code getValue()} function to get the real value (which, for the moment at least,
 	 * will never be another function).
 	 *
@@ -1106,11 +1096,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		}
 	    }
 
-	    if (returnValue instanceof PredefinedValue) {
-		returnValue = ((PredefinedValue) returnValue).getValue();
-	    }
-	    if (returnValue instanceof SystemValue) {
-		returnValue = ((SystemValue) returnValue).getValue();
+	    if (returnValue instanceof ValueScope) {
+		returnValue = ((ValueScope) returnValue).getValue();
 	    }
 
 	    return returnValue;
@@ -1327,20 +1314,18 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	/**
-	 * Is the value a predefined object, which may or may not include any parameters of this scope
-	 * (key starts with "$").
+	 * Is the value a predefined object, which may or may not include any parameters of this scope.
 	 *
-	 * @param key	The object's key (name).
 	 * @param value	Value of the object, which would need to be some form of {@link PredefinedValue}
 	 *		to return true.
-	 * @param includesParams If {@code true} then keys starting with "$" are considered "predefined",
+	 * @param includesParams If {@code true} then {@link ParameterValue}s are considered "predefined",
 	 *		but if {@code false} they are not.
-	 * @return	Whether or not to consider this key/value as predefined.
+	 * @return	Whether or not to consider this value as predefined.
 	 */
-	private boolean isPredefined(String key, Object value, boolean includesParams) {
+	private boolean isPredefined(Object value, boolean includesParams) {
 	    boolean isPredefinedType = (value instanceof Scope) && ((Scope) value).isPredefined();
 
-	    return isPredefinedType || (includesParams && key.startsWith("$"));
+	    return isPredefinedType || (includesParams && value instanceof ParameterValue);
 	}
 
 	@Override
@@ -1353,12 +1338,11 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		Iterator<Map.Entry<String, Object>> iter = globals.map().entrySet().iterator();
 		while (iter.hasNext()) {
 		    Map.Entry<String, Object> entry = iter.next();
-		    String key = entry.getKey();
 		    Object value = entry.getValue();
-		    if (isPredefined(key, value, true))
-			continue;
-		    iter.remove();
-		    numberCleared++;
+		    if (!isPredefined(value, true)) {
+			iter.remove();
+			numberCleared++;
+		    }
 		}
 		displayDirectiveMessage("%calc#varsAllCleared");
 	    }
@@ -1375,23 +1359,22 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			for (Map.Entry<String, Object> entry : values.entrySet()) {
 			    String name = entry.getKey();
 			    Object value = entry.getValue();
-			    // Explicitly allow clearing a parameter value if named in the list
-			    if (isPredefined(name, value, false))
-				continue;
 
-			    numberCleared++;
-			    globals.remove(name, settings.ignoreNameCase);
-			    lastNamePos = addName(name, vars);
+			    // Explicitly allow clearing a parameter value if named in the list
+			    if (!isPredefined(value, false)) {
+				numberCleared++;
+				globals.remove(name, settings.ignoreNameCase);
+				lastNamePos = addName(name, vars);
+			    }
 			}
 		    }
 		    else {
 			Object value = globals.getValue(varName, settings.ignoreNameCase);
-			if (isPredefined(varName, value, false))
-			    continue;
-
-			numberCleared++;
-			globals.remove(varName, settings.ignoreNameCase);
-			lastNamePos = addName(varName, vars);
+			if (!isPredefined(value, false)) {
+			    numberCleared++;
+			    globals.remove(varName, settings.ignoreNameCase);
+			    lastNamePos = addName(varName, vars);
+			}
 		    }
 		}
 
@@ -1408,6 +1391,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			vars.insert(lastNamePos, Intl.getString("calc#varAnd"));
 			vars.insert(0, Intl.getString("calc#varVariables"));
 		    }
+
 		    displayDirectiveMessage("%calc#varCleared", vars);
 		}
 	    }
@@ -1416,7 +1400,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	private boolean displayValue(String key, Object value, ParserRuleContext ctx) {
-	    if (!isPredefined(key, value, true)) {
+	    if (!isPredefined(value, false)) {
 		if (value instanceof FunctionDeclaration) {
 		    FunctionDeclaration func = (FunctionDeclaration) value;
 		    displayer.displayResult(func.getFullFunctionName(), getTreeText(func.getFunctionBody()));
@@ -1435,6 +1419,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    List<CalcParser.WildIdContext> ids;
 	    Set<String> sortedKeys;
 	    int numberDisplayed = 0;
+	    boolean listSpecific = false;
 
 	    if (idList == null || (ids = idList.wildId()).isEmpty()) {
 		sortedKeys = new TreeSet<>(globals.keySet());
@@ -1445,6 +1430,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		for (CalcParser.WildIdContext node : ids) {
 		    sortedKeys.add(node.getText());
 		}
+		listSpecific = true;
 	    }
 
 	    boolean oldMode = Calc.setResultsOnlyMode(false);
@@ -1456,7 +1442,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 
 	    for (String key : sortedKeys) {
-		if (Match.hasWildCards(key)) {
+		if (listSpecific && Match.hasWildCards(key)) {
 		    Map<String, Object> entries = globals.getWildValues(key, settings.ignoreNameCase);
 		    for (Map.Entry<String, Object> entry : entries.entrySet()) {
 			if (displayValue(entry.getKey(), entry.getValue(), ctx))
@@ -1480,19 +1466,14 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	private boolean displayPredefValue(String key, Object value, ParserRuleContext ctx) {
-	    if (isPredefined(key, value, true)) {
-		if (key.startsWith("$")) {
+	    if (isPredefined(value, false)) {
+		PredefinedValue predef = (PredefinedValue) value;
+		if (predef.isConstant()) {
 		    displayer.displayResult(key, toStringValue(this, ctx, value, true, settings.separatorMode));
 		}
 		else {
-		    PredefinedValue predef = (PredefinedValue) value;
-		    if (predef.isConstant()) {
-			displayer.displayResult(key, toStringValue(this, ctx, value, true, settings.separatorMode));
-		    }
-		    else {
-			displayer.displayResult(key, Intl.formatString("calc#predefVariable",
-				toStringValue(this, ctx, value, true, settings.separatorMode)));
-		    }
+		    displayer.displayResult(key, Intl.formatString("calc#predefVariable",
+			    toStringValue(this, ctx, value, true, settings.separatorMode)));
 		}
 		return true;
 	    }
@@ -1590,15 +1571,14 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		// must be able to read back the saved file and have the values computed to be the same as they are now.
 		for (String key : globals.keySet()) {
 		    Object value = globals.getValue(key, settings.ignoreNameCase);
-		    if ((!(value instanceof ConstantValue) && (value instanceof PredefinedValue)) || key.startsWith("$")) {
-			continue;
-		    }
-		    else if (value instanceof FunctionDeclaration) {
-			FunctionDeclaration func = (FunctionDeclaration) value;
-			writer.write(String.format("def %1$s = %2$s", func.getFullFunctionName(), getTreeText(func.getFunctionBody())));
-		    }
-		    else {
-			writer.write(String.format("%1$s = %2$s", key, toStringValue(this, ctx, value, true, settings.separatorMode)));
+		    if (!isPredefined(value, true)) {
+			if (value instanceof FunctionDeclaration) {
+			    FunctionDeclaration func = (FunctionDeclaration) value;
+			    writer.write(String.format("def %1$s = %2$s", func.getFullFunctionName(), getTreeText(func.getFunctionBody())));
+			}
+			else {
+			    writer.write(String.format("%1$s = %2$s", key, toStringValue(this, ctx, value, true, settings.separatorMode)));
+			}
 		    }
 		    writer.newLine();
 		}
@@ -2380,13 +2360,13 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitLoopStmt(CalcParser.LoopStmtContext ctx) {
+	    CalcParser.IdContext id             = ctx.id();
 	    CalcParser.LoopCtlContext ctlCtx    = ctx.loopCtl();
 	    CalcParser.StmtBlockContext block   = ctx.stmtBlock();
 	    CalcParser.ExprListContext exprList = ctlCtx.exprList();
 	    CalcParser.DotRangeContext dotCtx   = ctlCtx.dotRange();
 
-	    TerminalNode localVar = ctx.LOCALVAR();
-	    String localVarName   = localVar != null ? localVar.getText() : "$_";
+	    String localVarName = id != null ? id.getText() : LoopScope.LOOP_VAR;
 
 	    pushScope(new LoopScope());
 	    LoopVisitor visitor = new LoopVisitor(block, localVarName);
@@ -2614,18 +2594,24 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitDefineStmt(CalcParser.DefineStmtContext ctx) {
-	    String functionName = ctx.id().getText();
+	    String name = ctx.id().getText();
+
+	    // Can't redefine a predefined value
+	    Object oldValue = currentScope.getValue(name, settings.ignoreNameCase);
+	    if (oldValue != null && isPredefined(oldValue, false)) {
+		throw new CalcExprException(ctx, "%calc#noChangeValue", oldValue.toString(), name, "");
+	    }
 
 	    CalcParser.StmtBlockContext functionBody       = ctx.stmtBlock();
 	    CalcParser.FormalParamListContext formalParams = ctx.formalParamList();
 
 	    String paramString = formalParams == null ? "" : getTreeText(formalParams);
 	    List<CalcParser.FormalParamContext> paramVars = formalParams == null ? null : formalParams.formalParam();
-	    FunctionDeclaration func = new FunctionDeclaration(functionName, functionBody);
+	    FunctionDeclaration func = new FunctionDeclaration(name, functionBody);
 
 	    if (formalParams != null) {
 		for (CalcParser.FormalParamContext paramVar : formalParams.formalParam()) {
-		    String paramName = paramVar.LOCALVAR().getText();
+		    String paramName = paramVar.id().getText();
 		    func.defineParameter(paramVar, paramName, paramVar.expr());
 		}
 		if (formalParams.DOTS() != null) {
@@ -2633,16 +2619,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		}
 	    }
 
-	    // Can't redefine a predefined value
-	    Object oldValue = currentScope.getValue(functionName, settings.ignoreNameCase);
-	    if (oldValue != null && oldValue instanceof PredefinedValue) {
-		if (oldValue instanceof ConstantValue)
-		    throw new CalcExprException(ctx, "%calc#noChangeConstant", functionName, "");
-		else
-		    throw new CalcExprException(ctx, "%calc#noChangePredefined", functionName, "");
-	    }
-
-	    currentScope.setValue(functionName, settings.ignoreNameCase, func);
+	    currentScope.setValue(name, settings.ignoreNameCase, func);
 
 	    displayActionMessage("%calc#definingFunc", func.getFullFunctionName(), getTreeText(functionBody));
 

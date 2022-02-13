@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2021 Roger L. Whitcomb.
+ * Copyright (c) 2021-2022 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -33,6 +33,8 @@
  *	    #69: Implement variable number of parameters.
  *	09-Nov-2021 (rlwhitcomb)
  *	    #74: Add "hasVarargs" method.
+ *	13-Feb-2022 (rlwhitcomb)
+ *	    #199: Rename local parameter values to "_" prefix.
  */
 package info.rlwhitcomb.calc;
 
@@ -139,7 +141,7 @@ class FunctionDeclaration
 	    if ((hasVarargs && index < parameterNames.length - 1) || (!hasVarargs && index < parameterNames.length))
 		return parameterNames[index];
 
-	    return String.format("$%1$d", index);
+	    return String.format("_%1$d", index);
 	}
 
 	/**
@@ -204,8 +206,8 @@ class FunctionDeclaration
 	/**
 	 * Access the number of formal parameters: negative number of formals declared along with
 	 * a varargs indicator, or a positive, fixed number.
-	 * <p> Thus: <code>def f($a, ...)</code> will give <code>-2</code>, while
-	 * <code>def f($a, $b, $c)</code> will give <code>3</code>.
+	 * <p> Thus: <code>def f(a, ...)</code> will give <code>-2</code>, while
+	 * <code>def f(a, b, c)</code> will give <code>3</code>.
 	 *
 	 * @return Number of formal parameters defined.
 	 */

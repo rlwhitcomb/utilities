@@ -88,6 +88,8 @@
  *	    #229: Fix defaulting of missing actual parameters.
  *	05-Feb-2022 (rlwhitcomb)
  *	    #233: Implement calling "setValue" for SystemValue.
+ *	13-Feb-2022 (rlwhitcomb)
+ *	    #199: Redo the local / global variable handling.
  */
  package info.rlwhitcomb.calc;
 
@@ -122,6 +124,12 @@ class LValueContext
 	int index;
 	/** The "ignore case for members" flag. */
 	boolean ignoreCase;
+
+	/** A pattern for global variables - must match Calc.g4 */
+	private static final Pattern GLOBALVAR = Pattern.compile("(\\$([#\\*0]|[1-9][0-9]*))");
+
+	/** A pattern for local variables - must match Calc.g4 */
+	private static final Pattern LOCALVAR = Pattern.compile("(_([_#\\*0]|[1-9][0-9]*))");
 
 
 	/**
@@ -227,14 +235,14 @@ class LValueContext
 	@SuppressWarnings("unchecked")
 	public Object getPredefinedContextObject(final boolean allowUndefined) {
 	    Object contextObject = context;
-	    if (contextObject instanceof PredefinedValue) {
-		contextObject = ((PredefinedValue) contextObject).getValue();
+	    if (contextObject instanceof ValueScope) {
+		contextObject = ((ValueScope) contextObject).getValue();
 	    }
 	    Object result;
 	    if (name != null) {
 		ObjectScope map = (ObjectScope) contextObject;
 		// Special checks for local vars (not defined means we are outside the loop or function)
-		if (name.startsWith("$") && !Pattern.matches("^\\$[0-9#\\*]+$", name)) {
+		if (LOCALVAR.matcher(name).matches()) {
 		    if (!map.isDefined(name, ignoreCase)) {
 			throw new CalcExprException(varCtx, "%calc#localVarNotAvail", name);
 		    }
@@ -291,9 +299,9 @@ class LValueContext
 	    if (result instanceof FunctionScope) {
 		result = visitor.evaluateFunction(varCtx, result);
 	    }
-	    if (result instanceof PredefinedValue) {
-		PredefinedValue predef = (PredefinedValue) result;
-		result = predef.getValue();
+	    if (result instanceof ValueScope) {
+		ValueScope valueObj = (ValueScope) result;
+		result = valueObj.getValue();
 	    }
 
 	    return result;
@@ -316,51 +324,23 @@ class LValueContext
 	    Object contextObject = context;
 	    Object returnValue = value;
 
-	    if (contextObject instanceof ConstantValue) {
-		ConstantValue constant = (ConstantValue) contextObject;
-		throw new CalcExprException(varCtx, "%calc#noChangeConstant", constant.getName(),
-			name != null ? "." + name : "[" + String.valueOf(index) + "]");
-	    }
-	    else if (contextObject instanceof PredefinedValue) {
-		PredefinedValue predef = (PredefinedValue) contextObject;
-		throw new CalcExprException(varCtx, "%calc#noChangePredefined", predef.getName(),
+	    if (contextObject instanceof ValueScope && ((ValueScope) contextObject).isImmutable()) {
+		ValueScope constant = (ValueScope) contextObject;
+		throw new CalcExprException(varCtx, "%calc#noChangeValue", constant.toString(), constant.getName(),
 			name != null ? "." + name : "[" + String.valueOf(index) + "]");
 	    }
 
 	    if (name != null) {
-		if (name.startsWith("$")) {
-		    char nameChar = name.charAt(1);
-		    boolean numberedArg = (nameChar >= '0' && nameChar <= '9');
-		    boolean arrayArg = (nameChar == '*' || nameChar == '#');
-		    boolean global = true;
-		    // $abc are always local
-		    // $* and $# are local inside a function, otherwise global
-		    // $0, $1, ... are global unless this is a function with variable args
-		    if (!numberedArg && !arrayArg)
-			global = false;
-		    else if (context instanceof FunctionScope) {
-			if (arrayArg)
-			    global = false;
-			else {
-			    FunctionDeclaration funcDecl = ((FunctionScope) context).getDeclaration();
-			    if (funcDecl.hasVarargs()) {
-				if (numberedArg)
-				    global = false;
-			    }
-			}
-		    }
-		    throw new CalcExprException(varCtx, global ? "%calc#globalArgNoAssign" : "%calc#localVarNoAssign", name);
-		}
+		if (GLOBALVAR.matcher(name).matches())
+		    throw new CalcExprException(varCtx, "%calc#globalArgNoAssign", name);
+		else if (LOCALVAR.matcher(name).matches())
+		    throw new CalcExprException(varCtx, "%calc#localVarNoAssign", name);
 
 		ObjectScope map = (ObjectScope) context;
 		Object oldValue = map.getValue(name, ignoreCase);
-		if (oldValue instanceof ConstantValue) {
-		    ConstantValue constant = (ConstantValue) oldValue;
-		    throw new CalcExprException(varCtx, "%calc#noChangeConstant", constant.getName(), "");
-		}
-		else if (oldValue instanceof PredefinedValue) {
-		    PredefinedValue predef = (PredefinedValue) oldValue;
-		    throw new CalcExprException(varCtx, "%calc#noChangePredefined", predef.getName(), "");
+		if (oldValue instanceof ValueScope && ((ValueScope) oldValue).isImmutable()) {
+		    ValueScope constant = (ValueScope) oldValue;
+		    throw new CalcExprException(varCtx, "%calc#noChangeValue", constant.toString(), constant.getName(), "");
 		}
 		else if (oldValue instanceof SystemValue) {
 		    SystemValue sysValue = (SystemValue) oldValue;
@@ -449,10 +429,6 @@ class LValueContext
 	    if (ctx instanceof CalcParser.IdVarContext) {
 		CalcParser.IdVarContext idVarCtx = (CalcParser.IdVarContext) ctx;
 		return new LValueContext(lValue, idVarCtx, lValue.getPredefinedContextObject(true), idVarCtx.id().getText());
-	    }
-	    else if (ctx instanceof CalcParser.LocalVarContext) {
-		CalcParser.LocalVarContext localVarCtx = (CalcParser.LocalVarContext) ctx;
-		return new LValueContext(lValue, localVarCtx, lValue.getPredefinedContextObject(true), localVarCtx.LOCALVAR().getText());
 	    }
 	    else if (ctx instanceof CalcParser.GlobalVarContext) {
 		CalcParser.GlobalVarContext globalVarCtx = (CalcParser.GlobalVarContext) ctx;

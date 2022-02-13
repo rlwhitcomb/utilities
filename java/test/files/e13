@@ -2,7 +2,7 @@
 
 :dec 200
 a = []
-i = 0
-loop $i in 10 .. 100, 10 { a[i++] = $i! }
-loop $i in a { b = cbrt $i; b*b*b-$i }
+_i_ = 0
+loop _i in 10 .. 100, 10 { a[_i_++] = _i! }
+loop _i in a { b = cbrt _i; b*b*b-_i }
 

@@ -27,6 +27,8 @@
  *  History:
  *	04-Feb-2022 (rlwhitcomb)
  *	    #233: Initial coding.
+ *	12-Feb-2022 (rlwhitcomb)
+ *	    #199: Derive from ValueScaope.
  */
 package info.rlwhitcomb.calc;
 
@@ -40,13 +42,8 @@ import info.rlwhitcomb.util.ClassUtil;
  * A "system" value set via a method, and queried by a field descriptor.
  * @param <V> Type of the value this wraps.
  */
-class SystemValue<V> extends Scope
+class SystemValue<V> extends ValueScope
 {
-	/**
-	 * Name of this sytem value object, also the field name.
-	 */
-	private String name;
-
 	/**
 	 * The object where this value resides.
 	 */
@@ -62,6 +59,7 @@ class SystemValue<V> extends Scope
 	 */
 	private Consumer<V> setMethod;
 
+
 	/**
 	 * Construct one of these, given its constant value.
 	 *
@@ -71,31 +69,11 @@ class SystemValue<V> extends Scope
 	 * @param method The "set" method for this value.
 	 */
 	private SystemValue(final String nm, final Object obj, final Field field, final Consumer<V> method) {
-	    super(Type.SYSTEM_VALUE);
+	    super(nm, Type.SYSTEM);
 
-	    this.name      = nm;
 	    this.object    = obj;
 	    this.getField  = field;
 	    this.setMethod = method;
-	}
-
-	public String getName() {
-	    return name;
-	}
-
-	/**
-	 * Define one of these into the given symbol table.
-	 *
-	 * @param <V>    Type of value for this system variable.
-	 * @param scope	 The symbol table in which to define it.
-	 * @param obj    Object where this value resides.
-	 * @param name   Name of the field for this value.
-	 * @param method The "set" method for this value.
-	 */
-	static <V> void define(final ObjectScope scope, final Object obj, final String name, final Consumer<V> method) {
-	    Field field = ClassUtil.getField(obj, name);
-	    SystemValue<V> value = new SystemValue<>(name, obj, field, method);
-	    scope.setValue(name, value);
 	}
 
 	/**
@@ -103,7 +81,8 @@ class SystemValue<V> extends Scope
 	 *
 	 * @return	The system value there.
 	 */
-	public Object getValue() {
+	@Override
+	Object getValue() {
 	    try {
 		Object value = getField.get(object);
 		if (value instanceof Enum)
@@ -120,8 +99,24 @@ class SystemValue<V> extends Scope
 	 *
 	 * @param value	The new value for it.
 	 */
-	public void setValue(final V value) {
+	void setValue(final V value) {
 	    setMethod.accept(value);
 	}
+
+	/**
+	 * Define one of these into the given symbol table.
+	 *
+	 * @param <V>    Type of value for this system variable.
+	 * @param scope	 The symbol table in which to define it.
+	 * @param obj    Object where this value resides.
+	 * @param nm     Name of the field for this value.
+	 * @param method The "set" method for this value.
+	 */
+	static <V> void define(final ObjectScope scope, final Object obj, final String nm, final Consumer<V> method) {
+	    Field field = ClassUtil.getField(obj, nm);
+	    SystemValue<V> value = new SystemValue<>(nm, obj, field, method);
+	    scope.setValue(nm, value);
+	}
+
 }
 

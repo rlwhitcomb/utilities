@@ -112,6 +112,8 @@
 #	    #233: Remove the "precision out of range" message (unused now).
 #	    Also add in the "immutableObject" message for "settings".
 #	    New "one digit" precision message.
+#	13-Feb-2022 (rlwhitcomb)
+#	    #199: Change messages for read-only variables.
 #
 
 #
@@ -234,8 +236,7 @@ unknownVarCtx		= ERROR: unknown var context subclass: <y>%1$s<>
 badAssign		= Assignment to <y>%1$s<> without name or index
 tooManyForOneValue	= Too many actual values (%1$d) passed for only one parameter
 tooManyForValues	= Too many actual values (%1$d) passed for only %2$d parameters
-noChangePredefined	= Cannot change predefined value <y>%1$s%2$s<>
-noChangeConstant	= Cannot change constant value <y>%1$s%2$s<>
+noChangeValue		= Cannot change %1$s <y>%2$s%3$s<>
 
 #
 # From UnknownOpException

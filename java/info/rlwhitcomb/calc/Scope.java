@@ -34,6 +34,9 @@
  *	04-Feb-2022 (rlwhitcomb)
  *	    Add "isPredefined" method.
  *	    #233: Add SYSTEM_VALUE, used for Settings.
+ *	12-Feb-2022 (rlwhitcomb)
+ *	    #199: Add PARAMETER; rename SYSTEM_VALUE to just SYSTEM;
+ *	    add "isImmutable" for read-only values.
  */
 package info.rlwhitcomb.calc;
 
@@ -78,8 +81,11 @@ class Scope
 		/** A constant value, evaluated once and cached. */
 		CONSTANT,
 
+		/** A function parameter, including the param array and count values. */
+		PARAMETER,
+
 		/** A "system" value, set by method, accessed by field. */
-		SYSTEM_VALUE
+		SYSTEM
 	}
 
 	/**
@@ -111,19 +117,42 @@ class Scope
 	 *
 	 * @return Whether or not the type is {@link Type#PREDEFINED}.
 	 */
-	public boolean isPredefined() {
+	boolean isPredefined() {
 	    return this.type == Type.PREDEFINED;
 	}
 
+	/**
+	 * Is this an immutable value? These are set initially, probably soon after definition
+	 * but thereafter cannot be changed.
+	 *
+	 * @return Whether this is an immutable value.
+	 */
+	boolean isImmutable() {
+	    switch (type) {
+		case PREDEFINED:
+		case CONSTANT:
+		case PARAMETER:
+		    return true;
+		default:
+		    return false;
+	    }
+	}
+
+	private static String toBookCase(final String upperName) {
+	    return String.format("%1$c%2$s", upperName.charAt(0), upperName.substring(1).toLowerCase());
+	}
 
 	@Override
 	public String toString() {
-	    String name = type.toString().toLowerCase();
+	    String name = toBookCase(type.toString());
+
 	    switch (type) {
 		case FUNCTION:
 		    return String.format("%1$s %2$s scope", name, ((FunctionScope) this).getDeclaration().getFunctionName());
 		case PREDEFINED:
 		case CONSTANT:
+		case PARAMETER:
+		case SYSTEM:
 		    return String.format("%1$s value", name);
 		default:
 		    return String.format("%1$s scope", name);

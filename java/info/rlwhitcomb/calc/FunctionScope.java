@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2021 Roger L. Whitcomb.
+ * Copyright (c) 2021-2022 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -31,6 +31,8 @@
  *	    Add context parameter to "evaluateFunction".
  *	07-Nov-2021 (rlwhitcomb)
  *	    #69: Maintain "$*" and "$#" variables for function parameters.
+ *	13-Feb-2022 (rlwhitcomb)
+ *	    #199: Derive from ParameterizedScope; move common code to there.
  */
 package info.rlwhitcomb.calc;
 
@@ -48,17 +50,18 @@ import static info.rlwhitcomb.calc.CalcUtil.getTreeText;
  * A user-defined function scope, which includes the name, parameter list, function body,
  * as well as the local symbol table.
  */
-class FunctionScope extends NestedScope
+class FunctionScope extends ParameterizedScope
 {
+	/**
+	 * The prefix used for the parameter array values.
+	 */
+	public static final String FUNC_PREFIX = "_";
+
+
 	/**
 	 * Reference to the function declaration, which has the name, parameters, etc.
 	 */
 	private final FunctionDeclaration declaration;
-
-	/**
-	 * An array, addressable by index, of the parameter values in order of declaration.
-	 */
-	private final ArrayScope<Object> parameters;
 
 
 	/**
@@ -67,17 +70,13 @@ class FunctionScope extends NestedScope
 	 * @param decl The complete function declaration.
 	 */
 	FunctionScope(final FunctionDeclaration decl) {
-	    super(Type.FUNCTION);
+	    super(Type.FUNCTION, FUNC_PREFIX);
+
 	    this.declaration = decl;
-	    this.parameters = new ArrayScope<>();
-	    setValue(CalcObjectVisitor.ARG_ARRAY, false, parameters);
-	    setValue(CalcObjectVisitor.ARG_COUNT, false, BigInteger.ZERO);
 	}
 
 	/**
 	 * Set the value of the given parameter number to the given expression.
-	 * <p> Also maintain the {@link CalcObjectVisitor#ARG_ARRAY} and {@link CalcObjectVisitor#ARG_COUNT} variables
-	 * for this function.
 	 *
 	 * @param visitor The visitor class used to evaluate expressions.
 	 * @param index   0-based parameter index.
@@ -86,20 +85,15 @@ class FunctionScope extends NestedScope
 	public void setParameterValue(final CalcObjectVisitor visitor, final int index, final ParserRuleContext expr) {
 	    ParserRuleContext valueExpr = expr;
 	    String paramName = declaration.getParameterName(index);
+	    Object paramValue = null;
 
 	    if (valueExpr == null) {
 		valueExpr = declaration.getParameterExpr(paramName);
 	    }
-	    if (valueExpr == null) {
-		setValue(paramName, false, null);
-		parameters.add(null);
+	    if (valueExpr != null) {
+		paramValue = visitor.evaluateFunction(valueExpr, visitor.visit(valueExpr));
 	    }
-	    else {
-		Object paramValue = visitor.evaluateFunction(valueExpr, visitor.visit(valueExpr));
-		setValue(paramName, false, paramValue);
-		parameters.add(paramValue);
-	    }
-	    setValue(CalcObjectVisitor.ARG_COUNT, false, BigInteger.valueOf(parameters.size()));
+	    ParameterValue.define(this, paramName, paramValue);
 	}
 
 	/**

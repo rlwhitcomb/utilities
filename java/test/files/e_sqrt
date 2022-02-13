@@ -1,6 +1,6 @@
 :dec 100
-loop $x in 10 .. 100, 10 {
-   x = $x!
+loop _x in 10 .. 100, 10 {
+   x = _x!
    trial_root = 10 ** (log( x ) / 2)
    trial_root * trial_root > x ? trial_root /= 2 : trial_root
    result = trial_root

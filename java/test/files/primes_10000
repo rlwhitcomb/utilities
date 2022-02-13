@@ -2,8 +2,8 @@
 :resultsonly on
 primes = [ ]
 loop over 2 … 9997 {
-  if isprime($_) {
-    primes[length(primes)] = $_
+  if isprime(__) {
+    primes[length(primes)] = __
   }
 }
 :quiet pop

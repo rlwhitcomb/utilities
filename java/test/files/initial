@@ -1,5 +1,5 @@
-loop $i in 10 {
-  $i!
+loop _i in 10 {
+  _i!
 }
 sin π/4
 √33

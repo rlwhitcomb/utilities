@@ -1,58 +1,58 @@
->Defining function “f1($a,$b)” = {$a + $b}
->Defining function “f2($a,$b)” = {$a * $b}
->Defining function “f($c)” = {$c ? f1 : f2}
+>Defining function “f1(a,b)” = {a + b}
+>Defining function “f2(a,b)” = {a * b}
+>Defining function “f(c)” = {c ? f1 : f2}
 >f(true)(1, 2) -> 3
 >f(true)(7, 8) -> 15
 >f(false)(3, 4) -> 12
->Defining function “visit($type)” = {case $type of 1: f1, 2: f2}
+>Defining function “visit(type)” = {case type of 1: f1, 2: f2}
 >visit(1)(4, 5) -> 9
 >visit(2)(7, 8) -> 56
->Defining function “g1(...)” = {`number = $$#`}
+>Defining function “g1(...)” = {`number = $_#`}
 >g1(1, 2, 3) -> "number = 3"
->Defining function “g2(...)” = {$*}
+>Defining function “g2(...)” = {_*}
 >g2() -> [ ]
 >g2(1) -> [ 1 ]
 >g2(1, 2) -> [ 1, 2 ]
 >g2(3, 4, 5) -> [ 3, 4, 5 ]
->Defining function “g3($a,...)” = {$a + (isnull ($*[1]) ? '' : ' ' + $*[1])}
+>Defining function “g3(a,...)” = {a + (isnull (_*[1]) ? '' : ' ' + _*[1])}
 >g3(1) -> "1"
 >g3(2, 'days') -> "2 days"
->Defining function “g4($a,...)” = {$a + $1}
+>Defining function “g4(a,...)” = {a + _1}
 >g4(1, 2) -> 3
 >set = {os: {ver: '7.3', major: 7, minor: 3}} -> { os: { ver: "7.3", major: 7, minor: 3 } }
 >Defining function “is” = {set.os}
 >is().ver -> "7.3"
->Defining function “l($a)” = {
-> if $a & 1 {leave 'odd'} else {leave 'even'} 
+>Defining function “l(a)” = {
+> if a & 1 {leave 'odd'} else {leave 'even'} 
 >}
 >l(3) -> "odd"
 >l(4) -> "even"
->Defining function “array($a=1,$b=2,$c=3)” = {[$a, $b, $c]}
+>Defining function “array(a=1,b=2,c=3)” = {[a, b, c]}
 >array() -> [ 1, 2, 3 ]
 >array(7) -> [ 7, 2, 3 ]
 >array(, 9) -> [ 1, 9, 3 ]
 >array(, , 11) -> [ 1, 2, 11 ]
 >array(7, , 11) -> [ 7, 2, 11 ]
 >array(7, 9) -> [ 7, 9, 3 ]
->Defining function “arr2($a=1,...)” = {$*}
+>Defining function “arr2(a=1,...)” = {_*}
 >arr2() -> [ ]
 >arr2(, ) -> [ 1, <null> ]
 >arr2(, , 3) -> [ 1, <null>, 3 ]
 >arr2(8) -> [ 8 ]
 >arr2(9, , 11) -> [ 9, <null>, 11 ]
->Defining function “ifmany($value)” = {
-> if $value === 0 
+>Defining function “ifmany(value)” = {
+> if value === 0 
 > 'zero' 
-> else if $value === 1 
+> else if value === 1 
 > 'one' 
-> else if $value === 2 
+> else if value === 2 
 > 'two' 
-> else if $value === 3 
+> else if value === 3 
 > 'three' 
-> else if $value === 3.5 
+> else if value === 3.5 
 > 'three and a half' 
 > else 
-> $value 
+> value 
 >}
 >"0 = zero"
 >"0.5 = 0.5"
@@ -63,7 +63,7 @@
 >"3 = three"
 >"3.5 = three and a half"
 >"4 = 4"
->Defining function “type($value)” = `${$value} = ${typeof($value)}`
+>Defining function “type(value)” = `${value} = ${typeof(value)}`
 >"0 = integer"
 >"0.5 = float"
 >"1 = integer"

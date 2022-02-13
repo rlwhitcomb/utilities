@@ -127,6 +127,8 @@
  *	10-Feb-2022 (rlwhitcomb)
  *	    Rearrange tests inside "compareValues" so that fraction/complex compared to int/decimal
  *	    will work correctly.
+ *	13-Feb-2022 (rlwhitcomb)
+ *	    #199: Rearrange parameter value testing, and variable detection inside interpolated strings.
  */
 package info.rlwhitcomb.calc;
 
@@ -137,6 +139,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.*;
@@ -375,10 +379,11 @@ public final class CalcUtil
 	 * <p> Corresponds to the grammar for {@code NAME_CHAR}.
 	 *
 	 * @param str	The string we're navigating through
+	 * @param start The starting position of the identifier
 	 * @param pos	Position of the character to examine
 	 * @return	Whether the character is a valid following part of an identifier.
 	 */
-	public static boolean isIdentifierPart(final String str, final int pos) {
+	public static boolean isIdentifierPart(final String str, final int start, final int pos) {
 	    if (isIdentifierStart(str, pos))
 		return true;
 
@@ -388,6 +393,10 @@ public final class CalcUtil
 	     || (ch == '\u00B7')
 	     || (ch >= '\u0300' && ch <= '\u036F')
 	     || (ch >= '\u203F' && ch <= '\u2040'))
+		return true;
+
+	    // Special case for the local (parameter) count array/count variables (not allowed as regular ids)
+	    if (str.charAt(start) == '_' && (pos == start + 1) && (ch == '#' || ch == '*' || ch == '_'))
 		return true;
 
 	    return false;
@@ -1571,15 +1580,13 @@ public final class CalcUtil
 	 * of a local variable name.
 	 *
 	 * @param str	The string we're navigating through
+	 * @param start The starting position of the identifier
 	 * @param pos	Position of the character to examine
 	 * @return	Whether the given character is legal for a local variable name.
 	 */
-	private static boolean isLocalVarPart(final String str, final int pos) {
-	    if (isIdentifierPart(str, pos))
-		return true;
-
+	private static boolean isGlobalVarPart(final String str, final int start, final int pos) {
 	    char ch = str.charAt(pos);
-	    return (ch == '#' || ch == '*');
+	    return ((pos == start + 1) && (ch == '#' || ch == '*')) || (ch >= '0' && ch <= '9');
 	}
 
 	/**
@@ -1598,41 +1605,46 @@ public final class CalcUtil
 
 	    String rawValue = getRawString(value);
 	    int lastPos = -1;
-	    int pos;
+	    int pos, startPos;
 	    StringBuilder output = new StringBuilder(rawValue.length() * 2);
+
+	    // Scan the string looking for the values to interpolate, starting with '$'.
+	    // After that could be a special "global" variable name, a bracketed expression, or
+	    // a normal variable name.
 	    while ((pos = rawValue.indexOf('$', ++lastPos)) >= 0) {
 		output.append(rawValue.substring(lastPos, pos));
 
 		if (pos == rawValue.length() - 1)
 		    throw new CalcExprException("%calc#invalidConstruct", ctx);
 
-		if (rawValue.charAt(pos + 1) == '$') {
-		    // Try to parse out a loop variable name here and substitute if found
-		    // so that $$var would get $var value, but "$$(" would result in "$("
-		    int identPos = pos + 2;
-		    while (identPos < rawValue.length() && isLocalVarPart(rawValue, identPos))
+		startPos = pos + 1;
+		char nextChar = rawValue.charAt(startPos);
+
+		if (nextChar == '$') {
+		    int identPos = startPos + 1;
+		    while (identPos < rawValue.length() && isGlobalVarPart(rawValue, startPos, identPos))
 			identPos++;
-		    if (identPos > pos + 2) {
-			String varName = rawValue.substring(pos + 1, identPos);
+		    if (identPos > startPos + 1) {
+			String varName = rawValue.substring(startPos, identPos);
 			Object varValue = variables.getValue(varName, settings.ignoreNameCase);
-			// But if $var is not defined, then forget it, and just output "$" and go on
+			// But if the special global var is not defined, then output the nextChar and go on
 			if (varValue != null) {
 			    output.append(toStringValue(visitor, ctx, varValue, false, settings.separatorMode));
 			    lastPos = identPos - 1;
 			}
 			else {
-			    output.append('$');
-			    lastPos = pos + 1;
+			    output.append(nextChar);
+			    lastPos = startPos;
 			}
 		    }
 		    else {
-			output.append('$');
-			lastPos = pos + 1;
+			output.append(nextChar);
+			lastPos = startPos;
 		    }
 		}
-		else if (rawValue.charAt(pos + 1) == '{') {
+		else if (nextChar == '{') {
 		    // Get position of matching '}'
-		    int nextPos = findMatching(rawValue, pos + 1);
+		    int nextPos = findMatching(rawValue, startPos);
 
 		    if (pos + 2 >= rawValue.length() || nextPos < 0)
 			throw new CalcExprException("%calc#invalidConst2", ctx);
@@ -1647,11 +1659,11 @@ public final class CalcUtil
 		    output.append(CharUtil.stripDoubleQuotes(stringValue));
 		    lastPos = nextPos;
 		}
-		else if (isIdentifierStart(rawValue, pos + 1)) {
-		    int identPos = pos + 2;
-		    while (identPos < rawValue.length() && isIdentifierPart(rawValue, identPos))
+		else if (isIdentifierStart(rawValue, startPos)) {
+		    int identPos = startPos + 1;
+		    while (identPos < rawValue.length() && isIdentifierPart(rawValue, startPos, identPos))
 			identPos++;
-		    String varName = rawValue.substring(pos + 1, identPos);
+		    String varName = rawValue.substring(startPos, identPos);
 		    output.append(toStringValue(visitor, ctx,
 			variables.getValue(varName, settings.ignoreNameCase), false, settings.separatorMode));
 		    lastPos = identPos - 1;

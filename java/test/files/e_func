@@ -3,33 +3,33 @@
 #
 # The LValue for a function needs to be allowed to be another function
 #
-def f1($a, $b) = { $a + $b }
-def f2($a, $b) = { $a * $b }
-def f($c) = { $c ? f1 : f2 }
+def f1(a, b) = { a + b }
+def f2(a, b) = { a * b }
+def f(c) = { c ? f1 : f2 }
 f(true)(1,2)
 f(true)(7,8)
 f(false)(3,4)
 
-def visit($type) = { case $type of 1: f1, 2: f2 }
+def visit(type) = { case type of 1: f1, 2: f2 }
 visit(1)(4,5)
 visit(2)(7,8)
 
 #
-# Issue #69: varargs, define "$#" and "$*" inside functions
+# Issue #69: varargs, define "_#" and "_*" inside functions
 #
-def g1(...) = { `number = $$#` }
+def g1(...) = { `number = $_#` }
 g1(1, 2, 3)
-def g2(...) = { $* }
+def g2(...) = { _* }
 g2()
 g2(1)
 g2(1, 2)
 g2(3, 4, 5)
 
-def g3($a, ...) = { $a + (isnull($*[1]) ? '' : ' ' + $*[1]) }
+def g3(a, ...) = { a + (isnull(_*[1]) ? '' : ' ' + _*[1]) }
 g3(1)
 g3(2, 'days')
 
-def g4($a, ...) = { $a + $1 }
+def g4(a, ...) = { a + _1 }
 g4(1, 2)
 
 set = { os: { ver: '7.3', major: 7, minor: 3 } }
@@ -37,13 +37,13 @@ set = { os: { ver: '7.3', major: 7, minor: 3 } }
 def is = { set.os }
 is().ver
 
-def l($a) = {
-  if $a & 1 { leave 'odd' } else { leave 'even' }
+def l(a) = {
+  if a & 1 { leave 'odd' } else { leave 'even' }
 }
 
 l(3);l(4)
 
-define array($a=1, $b=2, $c=3) = { [ $a, $b, $c ] }
+define array(a=1, b=2, c=3) = { [ a, b, c ] }
 array()
 array(7)
 array(,9)
@@ -51,35 +51,35 @@ array(,,11)
 array(7,,11)
 array(7,9)
 
-def arr2($a=1, ...) = { $* }
+def arr2(a=1, ...) = { _* }
 arr2()
 arr2(,)
 arr2(,,3)
 arr2(8)
 arr2(9,,11)
 
-define ifmany($value) = {
-  if $value === 0
+define ifmany(value) = {
+  if value === 0
     'zero'
-  else if $value === 1
+  else if value === 1
     'one'
-  else if $value === 2
+  else if value === 2
     'two'
-  else if $value === 3
+  else if value === 3
     'three'
-  else if $value === 3.5
+  else if value === 3.5
     'three and a half'
   else
-    $value
+    value
 }
 
 :results on
 loop over 0..4,0.5 {
-  `$$_ = ${ifmany($_)}`
+  `$__ = ${ifmany(__)}`
 }
 :results pop
-define type($value) = `${$value} = ${typeof($value)}`
+define type(value) = `${value} = ${typeof(value)}`
 :results on
-loop over 0..4,0.5 type($_)
+loop over 0..4,0.5 type(__)
 :results pop
 

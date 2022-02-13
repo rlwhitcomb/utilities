@@ -15,9 +15,9 @@
 value = 1
 array = []
 SIZE = 5
-loop $i in SIZE {
-   loop $j in SIZE {
-      array[$i-1][$j-1] = value++!
+loop _i in SIZE {
+   loop _j in SIZE {
+      array[_i-1][_j-1] = value++!
    }
 }
 :quiet off

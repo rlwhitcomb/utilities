@@ -73,19 +73,19 @@ value='Two'; strings
 value='THREE'; strings
 value="zero"; strings
 
-define fieldType($typeid) = {
-    case $typeid of {
+define fieldType(typeid) = {
+    case typeid of {
 	4: ' TEXT',
 	7: 'LABEL',
 	19,
 	default,
-	23: `$$typeid`
+	23: `$typeid`
     }
 }
 fieldType(4);fieldType(7);fieldType(23);fieldType(19);fieldType(99)
 'type: ' + fieldType(4)
 
-def srt($a1, $a2, $f) = { $f($a1, $a2) > 0 ? $a1 : $a2 }
+def srt(a1, a2, f) = { f(a1, a2) > 0 ? a1 : a2 }
 
 #
 # New "case" syntax
@@ -104,7 +104,7 @@ define precision_to_directive = {
 }
 
 old_precision = settings.precision
-loop over 0..40 { :dec $_; precision_to_directive }
+loop over 0..40 { :dec __; precision_to_directive }
 settings.precision = old_precision
 precision_to_directive
 
@@ -114,8 +114,8 @@ case test_string of {
   default: 'not a match'
 }
 
-def sign($value) = {
-  case $value of {
+def sign(value) = {
+  case value of {
     < 0: -1,
    == 0: 0,
     > 0: +1

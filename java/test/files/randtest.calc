@@ -9,7 +9,7 @@ loop over 10000 { v[length v] = random }
 mean = sumof(v)/length(v)
 
 variance = 0
-loop over v { variance += ($_ - mean)**2 }
+loop over v { variance += (__ - mean)**2 }
 variance /= length v
 stddev = sqrt variance
 

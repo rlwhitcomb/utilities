@@ -94,7 +94,7 @@ oldPrec = settings.precision
 settings.precision = 100
 sum = 0
 :quiet on
-loop $f over 100..200 { sum += fib($f) }
+loop f over 100..200 { sum += fib(f) }
 :quiet pop
 sum
 :dec oldPrec
@@ -190,7 +190,7 @@ round c, 0
 v = 1621.9
 
 :resultonly on
-loop -10 .. 10 { `round to $$_ -> ${round(v, $_)}` }
+loop -10 .. 10 { `round to $__ -> ${round(v, __)}` }
 random(123)
 loop over 20 { random }
 :resultonly pop
@@ -589,7 +589,7 @@ p@j
 length p; scale p;
 :echo "Elements of p:"
 :result on
-loop $p ∈ p { `name: $$p, value: ${p[$p]}` }
+loop _p ∈ p { `name: $_p, value: ${p[_p]}` }
 :result pop
 
 #
@@ -597,8 +597,8 @@ loop $p ∈ p { `name: $$p, value: ${p[$p]}` }
 #
 chars 'abc'
 chars 123
-loop chars(123) {$_}
-loop chars "⅛34" {$_}
+loop chars(123) {__}
+loop chars "⅛34" {__}
 
 #
 # Fractions
@@ -631,7 +631,7 @@ bn 126
 # Tests of functions
 #
 :clear a
-def a={ loop $i in 10 { $i }}
+def a={ loop i in 10 { i }}
 a
 eval a
 
@@ -670,8 +670,8 @@ d'49/01/01'@e
 d'-9999/01/01'@e
 D'01-01--9999'@E
 d'9999/12/31'@e
-_911 = D'9/11/01'
-_911@e;_911@E
+d911 = D'9/11/01'
+d911@e;d911@E
 D'1/1/1999'@e
 _waterloo = d'1815/6/18'
 _waterloo@e;_waterloo@E

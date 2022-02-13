@@ -39,6 +39,9 @@
  *	    #233: Remove that method as it's not needed now with SystemValue.
  *	07-Feb-2022 (rlwhitcomb)
  *	    Add "specificationversion" to "info.java" in case we ever need it.
+ *	12-Feb-2022 (rlwhitcomb)
+ *	    #199: Take out "arguments" and the ARG_ initialization because it moved
+ *	    into ParameterizedScope and GlobalScope.
  */
 package info.rlwhitcomb.calc;
 
@@ -125,14 +128,12 @@ class CalcPredefine
 	 * stuff like that).
 	 *
 	 * @param globalScope	The global symbol table where these need to be defined.
-	 * @param arguments	Array of predefined parameter values from the command line.
 	 * @param piWorker	Source of pi/e values (background thread).
 	 * @param phiSupplier	Source of values for "phi".
 	 * @param phi1Supplier	Source of values for "PHI" (the reciprocal).
 	 */
 	public static void define(
 		final GlobalScope globalScope,
-		final ArrayScope<Object> arguments,
 		final CalcPiWorker piWorker,
 		final Supplier<Object> phiSupplier,
 		final Supplier<Object> phi1Supplier)
@@ -318,9 +319,6 @@ class CalcPredefine
 	    for (int i = 0; i < I_ALIASES.length; i++) {
 		PredefinedValue.define(globalScope, I_ALIASES[i], C_I);
 	    }
-
-	    globalScope.setValue(CalcObjectVisitor.ARG_ARRAY, arguments);
-	    globalScope.setValue(CalcObjectVisitor.ARG_COUNT, BigInteger.ZERO);
 	}
 
 

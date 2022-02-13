@@ -361,6 +361,8 @@
  *	    #144: Add "matches" function and "matches" case selector.
  *	07-Feb-2022 (rlwhitcomb)
  *	    #239: Add "compareOp expr" as another caseSelector.
+ *	11-Feb-2022 (rlwhitcomb)
+ *	    #199: Allow any id for function parameters and loop variables.
  */
 
 grammar Calc;
@@ -410,7 +412,7 @@ constStmt
    ;
 
 loopStmt
-   : K_LOOP ( LOCALVAR ? ( K_IN | K_OVER | SET_IN ) ) ? loopCtl stmtBlock
+   : K_LOOP ( id ? ( K_IN | K_OVER | SET_IN ) ) ? loopCtl stmtBlock
    ;
 
 whileStmt
@@ -661,7 +663,6 @@ var
    | var ( '[' expr ']' | INDEXES )         # arrVar
    | var actualParams                       # functionVar
    | id                                     # idVar
-   | LOCALVAR                               # localVar
    | GLOBALVAR                              # globalVar
    ;
 
@@ -687,7 +688,7 @@ formalParamList
    ;
 
 formalParam
-   : LOCALVAR ( '=' expr ) ?
+   : id ( '=' expr ) ?
    ;
 
 optExpr
@@ -1040,14 +1041,13 @@ DOT
        : '.'
        ;
 
-LOCALVAR
-       : '$' [0-9] ? NAME_START_CHAR NAME_CHAR *
-       ;
-
 GLOBALVAR
        : '$' INT
-       | '$' '#'
-       | '$' '*'
+       | '$#'
+       | '$*'
+       | '_#'
+       | '_*'
+       | '__'
        ;
 
 INC_OP
