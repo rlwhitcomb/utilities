@@ -257,9 +257,12 @@
  *	    When loading text into the GUI input field, make sure the actions are enabled.
  *	14-Feb-2022 (rlwhitcomb)
  *	    #195: Save splitter position per user in the Preferences for this package.
+ *	    Refactor the preferences code to allow for future expansion.
+ *	    #247: Implement light/dark color schemes in GUI.
  */
 package info.rlwhitcomb.calc;
 
+import java.awt.Color;
 import java.awt.Desktop;
 import java.awt.Font;
 import java.io.Console;
@@ -588,6 +591,71 @@ public class Calc
 	    Intl.setColoring(true, useColors ? colorMap : quoteMap);
 	}
 
+	private void setGUIComponentColors(Component comp) {
+	    int bgIndex;
+	    Color fgColor, bgColor;
+
+	    if (darkBackgrounds) {
+		bgIndex = 2;
+		fgColor = Color.WHITE;
+		bgColor = Color.BLACK;
+	    }
+	    else {
+		bgIndex = 11;
+		fgColor = Color.BLACK;
+		bgColor = Color.WHITE;
+	    }
+
+	    if (comp instanceof PushButton) {
+		comp.putStyle(Style.backgroundColor, darkBackgrounds ? 6 : 10);
+	    }
+	    else if (comp instanceof Label) {
+		comp.putStyle(Style.color, fgColor);
+	    }
+	    else if (comp instanceof Border) {
+		comp.putStyle(Style.color, darkBackgrounds ? 10 : 7);
+		comp.putStyle(Style.backgroundColor, bgIndex);
+		if (darkBackgrounds)
+		    comp.putStyle("titleColor", 17);
+	    }
+	    else if (comp instanceof ScrollPane.Corner) {
+		comp.putStyle(Style.backgroundColor, bgIndex);
+	    }
+	    else if (comp instanceof NumberRuler) {
+		String bgName = darkBackgrounds ? "SteelBlue" : "LemonChiffon";
+		String fgName = darkBackgrounds ? "Gold" : "SteelBlue";
+		comp.putStyle(Style.color, fgName);
+		comp.putStyle(Style.backgroundColor, bgName);
+	    }
+	    else if (comp instanceof TextArea || comp instanceof TextPane) {
+		comp.putStyle(Style.color, fgColor);
+		comp.putStyle(Style.backgroundColor, bgIndex);
+	    }
+	    else if (comp instanceof Container) {
+		Color oldBgColor = comp.getStyleColor(Style.backgroundColor);
+		if (oldBgColor != null) {
+		    comp.putStyle(Style.backgroundColor, bgColor);
+		}
+	    }
+	}
+
+	private void setGUIContainerColors(Container container) {
+	    setGUIComponentColors(container);
+	    for (Component comp : container) {
+		if (comp instanceof Container)
+		    setGUIContainerColors((Container) comp);
+		else
+		    setGUIComponentColors(comp);
+	    }
+	}
+
+	/**
+	 * Set the colors for the GUI components, depending on the dark/light settings.
+	 */
+	private void setGUIColors() {
+	    setGUIContainerColors(mainWindow);
+	}
+
 
 	/**
 	 * Listen for key press events inside the input {@link TextPane} and respond.
@@ -804,7 +872,9 @@ public class Calc
 		useCmdEnter = useCmdEnterButton.isSelected();
 
 		darkBackgrounds = darkBackgroundButton.isSelected();
+
 		computeColors(colors);
+		setGUIColors();
 	    }
 
 	    dialog.setAttribute(Attribute.ORIGINAL_SETTINGS, null);
@@ -813,6 +883,41 @@ public class Calc
 
 	    requestFocus(inputTextPane);
 	}
+
+	/**
+	 * Get the main preferences node for this package.
+	 *
+	 * @return The preference node to use for save / load of preference values.
+	 */
+	private Preferences getPrefsNode() {
+	    return Preferences.userNodeForPackage(Calc.class);
+	}
+
+	/**
+	 * Read all our saved value from the current user's preferences for this package.
+	 */
+	private void loadPreferences() {
+	    Preferences node = getPrefsNode();
+
+	    splitPane.setSplitRatio(node.getFloat(SPLIT_RATIO, DEFAULT_SPLIT_RATIO));
+	}
+
+	/**
+	 * Save all the desired values from here to the user's preferences for this package.
+	 */
+	private void savePreferences() {
+	    try {
+		Preferences node = getPrefsNode();
+
+		node.putFloat(SPLIT_RATIO, splitPane.getSplitRatio());
+
+		node.flush();
+	    }
+	    catch (BackingStoreException ex) {
+		// Going to ignore this, as the default(s) will come up next time
+	    }
+	}
+
 
 	@Override
 	public void startup(Display display, Map<String, String> properties) {
@@ -839,6 +944,7 @@ public class Calc
 		// TODO: if we ever support going back from GUI mode to console, we will need to restore
 		// the old "colors" mode at that point
 		computeColors(false);
+		setGUIColors();
 
 		// Increase the maximum output text length in case of humongous calculations
 		outputTextArea.setMaximumLength(20_000_000);
@@ -881,9 +987,7 @@ public class Calc
 		inputTextPane.setText(inputText == null ? EMPTY_TEXT : inputText);
 		characterListener.enableActions();
 
-		// Reset the splitter position to the last setting (if saved)
-		float splitRatio = Preferences.userNodeForPackage(Calc.class).getFloat(SPLIT_RATIO, DEFAULT_SPLIT_RATIO);
-		splitPane.setSplitRatio(splitRatio);
+		loadPreferences();
 
 		decimalPrecisionButton.getButtonGroup().getButtonGroupListeners().add(new ButtonGroupListener() {
 		    @Override
@@ -937,14 +1041,7 @@ public class Calc
 
 	@Override
 	public boolean shutdown(boolean optional) {
-	    try {
-		Preferences calcNode = Preferences.userNodeForPackage(Calc.class);
-		calcNode.putFloat(SPLIT_RATIO, splitPane.getSplitRatio());
-		calcNode.flush();
-	    }
-	    catch (BackingStoreException ex) {
-		// Going to ignore this, as the default(s) will come up next time
-	    }
+	    savePreferences();
 
 	    return false;	// always proceed with shutdown
 	}

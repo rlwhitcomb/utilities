@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2021 Roger L. Whitcomb.
+ * Copyright (c) 2021-2022 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -43,6 +43,8 @@
  *	    #159: Add "Silence Directives" to Settings.
  *	20-Dec-2021 (rlwhitcomb)
  *	    #163: Reword Save tip.
+ *	14-Feb-2022 (rlwhitcomb)
+ *	    #247: Change Window Settings text for background colors.
  */
 {
     title:              'Calc',
@@ -82,8 +84,8 @@
     keyboard:           'Keyboard',
     enterToCalculate:   '%1$s to calculate',
     colors:             'Colors',
-    lightBackground:    'Suitable for light backgrounds',
-    darkBackground:     'Or for dark backgrounds',
+    lightBackground:    'Use light backgrounds and suitable text colors',
+    darkBackground:     'Or dark backgrounds',
 
     saveButton:         'S',
     saveTip:            'Save values to file (F3)',

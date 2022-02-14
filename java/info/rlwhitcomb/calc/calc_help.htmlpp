@@ -1190,7 +1190,8 @@ or
 <div class="cols">
   An expression can be entered on each line, and all will be executed in order when the <span class="redbutton">!</span> button (or the <code>F9</code> key) is pressed, and the results displayed in the "Results" field. The <code>Ctrl+Enter</code> (or <code>&#x2318;Enter</code> on Mac) key will also perform the calculation(s). This behavior can be changed in the Settings dialog to just use the <code>Enter</code> key on any platform.
   <p>This help page will also be displayed by the <span class="bluebutton">?</span> button (or the <code>F1</code> key).
-  <p>Note: colors are not currently used in the GUI display, so using the command-line options <code>-darkbg</code> or <code>-lightbg</code>, or the "Colors" setting in the GUI "Window Settings" tab will have no effect.
+  <p>Note: colors are not currently implemented in the GUI "Results" area, BUT there are dark and light color schemes implemented for the
+     main window, so using the command-line options <code>-darkbg</code> or <code>-lightbg</code>, or the "Colors" setting in the GUI "Window Settings" tab will switch between these color schemes.
   <p>Most of the settings available using Directives can be set in the GUI using the Settings dialog (the <span class="orangebutton">&#x2261;</span> button or <code>F2</code> key).
   <p>The calculation settings are also available (read-only) by accesssing the fields in the <code>info.settings</code> object.
 </div>
