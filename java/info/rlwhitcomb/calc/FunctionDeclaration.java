@@ -35,6 +35,8 @@
  *	    #74: Add "hasVarargs" method.
  *	13-Feb-2022 (rlwhitcomb)
  *	    #199: Rename local parameter values to "_" prefix.
+ *	14-Feb-2022 (rlwhitcomb)
+ *	    #199: Get the "_" prefix from FunctionScope.
  */
 package info.rlwhitcomb.calc;
 
@@ -129,6 +131,7 @@ class FunctionDeclaration
 	 * @return      The declared name of that parameter.
 	 * @throws      IndexOutOfBoundsException if the index is negative or
 	 *              greater than the number of parameters.
+	 * @see FunctionScope#FUNC_PREFIX
 	 */
 	public String getParameterName(final int index) {
 	    if (parameterNames == null) {
@@ -141,7 +144,7 @@ class FunctionDeclaration
 	    if ((hasVarargs && index < parameterNames.length - 1) || (!hasVarargs && index < parameterNames.length))
 		return parameterNames[index];
 
-	    return String.format("_%1$d", index);
+	    return String.format("%1$s%2$d", FunctionScope.FUNC_PREFIX, index);
 	}
 
 	/**

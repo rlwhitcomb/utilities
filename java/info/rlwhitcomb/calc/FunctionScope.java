@@ -33,6 +33,8 @@
  *	    #69: Maintain "$*" and "$#" variables for function parameters.
  *	13-Feb-2022 (rlwhitcomb)
  *	    #199: Derive from ParameterizedScope; move common code to there.
+ *	14-Feb-2022 (rlwhitcomb)
+ *	    #199: Override "toString" here from default in Scope.
  */
 package info.rlwhitcomb.calc;
 
@@ -75,6 +77,7 @@ class FunctionScope extends ParameterizedScope
 	    this.declaration = decl;
 	}
 
+
 	/**
 	 * Set the value of the given parameter number to the given expression.
 	 *
@@ -103,6 +106,14 @@ class FunctionScope extends ParameterizedScope
 	 */
 	public FunctionDeclaration getDeclaration() {
 	    return declaration;
+	}
+
+	/**
+	 * @return An appropriate value for a function.
+	 */
+	@Override
+	public String toString() {
+	    return String.format("%1$s %2$s scope", toBookCase(), declaration.getFunctionName());
 	}
 
 }

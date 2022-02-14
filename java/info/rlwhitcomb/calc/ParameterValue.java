@@ -26,6 +26,8 @@
  *  History:
  *	12-Feb-2022 (rlwhitcomb)
  *	    #199: Initial coding.
+ *	14-Feb-2022 (rlwhitcomb)
+ *	    #199: Add back in the "isImmutable" override method.
  */
 package info.rlwhitcomb.calc;
 
@@ -52,6 +54,15 @@ class ParameterValue extends ValueScope
 	    super(nm, Type.CONSTANT);
 
 	    this.paramValue  = value;
+	}
+
+
+	/**
+	 * @return This is one of the immutable value types.
+	 */
+	@Override
+	protected boolean isImmutable() {
+	    return true;
 	}
 
 	/**

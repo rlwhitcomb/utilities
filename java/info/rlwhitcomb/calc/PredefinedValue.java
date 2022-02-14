@@ -37,6 +37,8 @@
  *	12-Feb-2022 (rlwhitcomb)
  *	    #199: Derive from ValueScope, so remove common fields / methods.
  *	    Take out the "put" method which is unused now.
+ *	14-Feb-2022 (rlwhitcomb)
+ *	    #199: Add in override of "isPredefined" and "isImmutable".
  */
 package info.rlwhitcomb.calc;
 
@@ -95,6 +97,22 @@ class PredefinedValue extends ValueScope
 	 */
 	boolean isConstant() {
 	    return this.valueSupplier == null;
+	}
+
+	/**
+	 * @return This kind of value is the only one that is actually "predefined".
+	 */
+	@Override
+	protected boolean isPredefined() {
+	    return true;
+	}
+
+	/**
+	 * @return This is immutable for all intents and purposes.
+	 */
+	@Override
+	protected boolean isImmutable() {
+	    return true;
 	}
 
 	/**

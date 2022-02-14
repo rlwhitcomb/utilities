@@ -37,6 +37,9 @@
  *	12-Feb-2022 (rlwhitcomb)
  *	    #199: Add PARAMETER; rename SYSTEM_VALUE to just SYSTEM;
  *	    add "isImmutable" for read-only values.
+ *	14-Feb-2022 (rlwhitcomb)
+ *	    #199: Only put the default implementation of "isPredefined", "isImmutable",
+ *	    and "toString" in here, let the appropriate subclasses override.
  */
 package info.rlwhitcomb.calc;
 
@@ -108,55 +111,42 @@ class Scope
 	 *
 	 * @return The type of scope.
 	 */
-	Type getType() {
+	final Type getType() {
 	    return this.type;
 	}
 
 	/**
 	 * Is this a predefined value type?
 	 *
-	 * @return Whether or not the type is {@link Type#PREDEFINED}.
+	 * @return Default implementation is {@code false}.
 	 */
-	boolean isPredefined() {
-	    return this.type == Type.PREDEFINED;
+	protected boolean isPredefined() {
+	    return false;
 	}
 
 	/**
 	 * Is this an immutable value? These are set initially, probably soon after definition
 	 * but thereafter cannot be changed.
 	 *
-	 * @return Whether this is an immutable value.
+	 * @return Default implementation is {@code false}.
 	 */
-	boolean isImmutable() {
-	    switch (type) {
-		case PREDEFINED:
-		case CONSTANT:
-		case PARAMETER:
-		    return true;
-		default:
-		    return false;
-	    }
+	protected boolean isImmutable() {
+	    return false;
 	}
 
-	private static String toBookCase(final String upperName) {
+	/**
+	 * Return the "book case" version of the type.
+	 *
+	 * @return {@code "SYSTEM" -> "System"}.
+	 */
+	String toBookCase() {
+	    String upperName = type.toString();
 	    return String.format("%1$c%2$s", upperName.charAt(0), upperName.substring(1).toLowerCase());
 	}
 
 	@Override
 	public String toString() {
-	    String name = toBookCase(type.toString());
-
-	    switch (type) {
-		case FUNCTION:
-		    return String.format("%1$s %2$s scope", name, ((FunctionScope) this).getDeclaration().getFunctionName());
-		case PREDEFINED:
-		case CONSTANT:
-		case PARAMETER:
-		case SYSTEM:
-		    return String.format("%1$s value", name);
-		default:
-		    return String.format("%1$s scope", name);
-	    }
+	    return String.format("%1$s scope", toBookCase());
 	}
 }
 

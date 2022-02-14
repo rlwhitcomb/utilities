@@ -26,6 +26,8 @@
  *  History:
  *	12-Feb-2022 (rlwhitcomb)
  *	    #199: Abstract from existing code.
+ *	14-Feb-2022 (rlwhitcomb)
+ *	    #199: Override "toString" here.
  */
 package info.rlwhitcomb.calc;
 
@@ -68,6 +70,14 @@ abstract class ValueScope extends Scope
 	 * @return The value of this object.
 	 */
 	abstract Object getValue();
+
+	/**
+	 * @return An appropriate value for one of our values.
+	 */
+	@Override
+	public String toString() {
+	    return String.format("%1$s value", toBookCase());
+	}
 
 }
 

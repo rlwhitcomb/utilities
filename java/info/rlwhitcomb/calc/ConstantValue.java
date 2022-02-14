@@ -29,6 +29,8 @@
  *	12-Feb-2022 (rlwhitcomb)
  *	    #199: Derive from new ValueScope base class, and add back in the constant
  *	    object value and implement the "getValue" method.
+ *	14-Feb-2022 (rlwhitcomb)
+ *	    #199: Add back in "isImmutable" as an override.
  */
 package info.rlwhitcomb.calc;
 
@@ -56,6 +58,15 @@ class ConstantValue extends ValueScope
 	    super(nm, Type.CONSTANT);
 
 	    this.constantValue = value;
+	}
+
+
+	/**
+	 * @return This is one of the immutable value types.
+	 */
+	@Override
+	protected boolean isImmutable() {
+	    return true;
 	}
 
 	/**
