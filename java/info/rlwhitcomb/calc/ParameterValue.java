@@ -28,6 +28,7 @@
  *	    #199: Initial coding.
  *	14-Feb-2022 (rlwhitcomb)
  *	    #199: Add back in the "isImmutable" override method.
+ *	    Now move back to "ValueScope".
  */
 package info.rlwhitcomb.calc;
 
@@ -56,14 +57,6 @@ class ParameterValue extends ValueScope
 	    this.paramValue  = value;
 	}
 
-
-	/**
-	 * @return This is one of the immutable value types.
-	 */
-	@Override
-	protected boolean isImmutable() {
-	    return true;
-	}
 
 	/**
 	 * Get the value of this parameter.

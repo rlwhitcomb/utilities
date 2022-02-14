@@ -28,7 +28,9 @@
  *	04-Feb-2022 (rlwhitcomb)
  *	    #233: Initial coding.
  *	12-Feb-2022 (rlwhitcomb)
- *	    #199: Derive from ValueScaope.
+ *	    #199: Derive from ValueScope.
+ *	14-Feb-2022 (rlwhitcomb)
+ *	    #199: Override "isImmutable" here from default in ValueScope.
  */
 package info.rlwhitcomb.calc;
 
@@ -74,6 +76,15 @@ class SystemValue<V> extends ValueScope
 	    this.object    = obj;
 	    this.getField  = field;
 	    this.setMethod = method;
+	}
+
+
+	/**
+	 * @return One of these is actually mutable.
+	 */
+	@Override
+	protected boolean isImmutable() {
+	    return false;
 	}
 
 	/**

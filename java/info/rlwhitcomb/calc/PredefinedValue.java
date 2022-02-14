@@ -39,6 +39,7 @@
  *	    Take out the "put" method which is unused now.
  *	14-Feb-2022 (rlwhitcomb)
  *	    #199: Add in override of "isPredefined" and "isImmutable".
+ *	    Now move "isImmutable" back to "ValueScope".
  */
 package info.rlwhitcomb.calc;
 
@@ -90,6 +91,7 @@ class PredefinedValue extends ValueScope
 	    this.constantValue = value;
 	}
 
+
 	/**
 	 * Is this a constant value or not (tests the {@link #valueSupplier}).
 	 *
@@ -104,14 +106,6 @@ class PredefinedValue extends ValueScope
 	 */
 	@Override
 	protected boolean isPredefined() {
-	    return true;
-	}
-
-	/**
-	 * @return This is immutable for all intents and purposes.
-	 */
-	@Override
-	protected boolean isImmutable() {
 	    return true;
 	}
 
