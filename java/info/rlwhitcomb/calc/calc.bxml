@@ -2,7 +2,7 @@
 
         The MIT License (MIT)
 
-        Copyright (c) 2020-2021 Roger L. Whitcomb.
+        Copyright (c) 2020-2022 Roger L. Whitcomb.
 
         Permission is hereby granted, free of charge, to any person obtaining a copy
         of this software and associated documentation files (the "Software"), to deal
@@ -82,6 +82,8 @@
 		#159: New "Silence Directives" option.
 	    28-Dec-2021 (rlwhitcomb)
 		#167: Increase spacing under "Display Modes" in Settings.
+	    14-Feb-2022 (rlwhitcomb)
+		#195: Add id for splitter to save the ratio between runs.
 
      ========================================================================== -->
 
@@ -321,7 +323,7 @@
 		</BoxPane>
 	    </TablePane.Row>
 	    <TablePane.Row height="1*">
-		<SplitPane orientation="vertical" splitRatio="0.4">
+		<SplitPane bxml:id="splitPane" orientation="vertical">
 		    <top>
 			<Border title="%resultsBorder" styles="{padding:{top:0,left:10,bottom:4,right:10},font:{size:18,bold:true},cornerRadii:10,backgroundColor:11}">
 			    <ScrollPane horizontalScrollBarPolicy="fill" verticalScrollBarPolicy="fill_to_capacity" >

@@ -255,6 +255,8 @@
  *	    #245: Change the way we set quiet mode for libraries, etc. in "process()".
  *	13-Feb-2022 (rlwhitcomb)
  *	    When loading text into the GUI input field, make sure the actions are enabled.
+ *	14-Feb-2022 (rlwhitcomb)
+ *	    #195: Save splitter position per user in the Preferences for this package.
  */
 package info.rlwhitcomb.calc;
 
@@ -283,6 +285,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.jar.JarFile;
+import java.util.prefs.BackingStoreException;
+import java.util.prefs.Preferences;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -338,6 +342,13 @@ public class Calc
 	private static final String EMPTY_TEXT = "\n";
 
 	private static final Pattern LIB_VERSION = Pattern.compile("//\\*\\* [vV]ersion\\: (\\d+\\.\\d+\\.\\d+.*) [bB]ase\\: (\\d+\\.\\d+\\.\\d+.*)[\\r?\\n]");
+
+	/** Preferences key for the saved split ratio for the main GUI window. */
+	private static final String SPLIT_RATIO = "splitRatio";
+
+	/** Default split ratio. */
+	private static final float DEFAULT_SPLIT_RATIO = 0.4f;
+
 
 	/**
 	 * An enumeration of what we expect next on the command line.
@@ -455,6 +466,7 @@ public class Calc
 	private PrintStream sysOut;
 
 	@BXML private Window mainWindow;
+	@BXML private SplitPane splitPane;
 	@BXML private TextPane inputTextPane;
 	@BXML private TextArea outputTextArea;
 	@BXML private NumberRuler inputRuler;
@@ -869,6 +881,10 @@ public class Calc
 		inputTextPane.setText(inputText == null ? EMPTY_TEXT : inputText);
 		characterListener.enableActions();
 
+		// Reset the splitter position to the last setting (if saved)
+		float splitRatio = Preferences.userNodeForPackage(Calc.class).getFloat(SPLIT_RATIO, DEFAULT_SPLIT_RATIO);
+		splitPane.setSplitRatio(splitRatio);
+
 		decimalPrecisionButton.getButtonGroup().getButtonGroupListeners().add(new ButtonGroupListener() {
 		    @Override
 		    public void selectionChanged(final ButtonGroup buttonGroup, final Button previousSelection) {
@@ -917,6 +933,20 @@ public class Calc
 		else
 		    System.err.println(message);
 	    }
+	}
+
+	@Override
+	public boolean shutdown(boolean optional) {
+	    try {
+		Preferences calcNode = Preferences.userNodeForPackage(Calc.class);
+		calcNode.putFloat(SPLIT_RATIO, splitPane.getSplitRatio());
+		calcNode.flush();
+	    }
+	    catch (BackingStoreException ex) {
+		// Going to ignore this, as the default(s) will come up next time
+	    }
+
+	    return false;	// always proceed with shutdown
 	}
 
 	private void updateOutputSize() {
