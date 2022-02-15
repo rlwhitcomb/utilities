@@ -142,8 +142,9 @@ import java.util.TreeSet;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
-import org.antlr.v4.runtime.*;
-import org.antlr.v4.runtime.tree.*;
+import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.TerminalNode;
 
 import org.padler.natorder.NaturalOrderComparator;
 
