@@ -236,7 +236,7 @@ h2 {
   <p>This list of arguments can be terminated by another <code>"--"</code> option in order to specify other options or expressions.
   <p>Options are case-insensitive, and may be prefixed with either <code>-</code>, <code>--</code>, or on Windows <code>/</code>, as in: <code>--lightbg</code>, <code>-rational</code>,
      or <code>/quiet</code> <i>(Windows only)</i>. Almost all of the options have several aliases (mostly fewer characters) as shown in the table below. Some of these settings, in
-     addition, can be set using Directives from within a script, or from the Settings dialog in the GUI window. See the REPL Commands and Directives sections below for additional discussion, including other aliases that can be used.
+     addition, can be set using Directives from within a script, setting the element values of the built-in <code>"settings"</code> object, or from the Settings dialog in the GUI window. See the REPL Commands and Directives sections below for additional discussion, including other aliases that can be used.
 </div>
   <div class="center">
   <table style="margin-left:auto;margin-right:auto;width:70%;">
@@ -1193,7 +1193,7 @@ or
   <p>Note: colors are not currently implemented in the GUI "Results" area, BUT there are dark and light color schemes implemented for the
      main window, so using the command-line options <code>-darkbg</code> or <code>-lightbg</code>, or the "Colors" setting in the GUI "Window Settings" tab will switch between these color schemes.
   <p>Most of the settings available using Directives can be set in the GUI using the Settings dialog (the <span class="orangebutton">&#x2261;</span> button or <code>F2</code> key).
-  <p>The calculation settings are also available (read-only) by accesssing the fields in the <code>info.settings</code> object.
+  <p>The calculation settings are also available to either read or write by accesssing the fields in the <code>settings</code> object. Setting one of the <code>settings</code> fields has the exact same effect as using the corresponding directive.
 </div>
   <div class="center">
   <br><img src="calc_settings.png" alt="GUI Settings screen" width="40%">
