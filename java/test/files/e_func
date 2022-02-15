@@ -83,3 +83,13 @@ define type(value) = `${value} = ${typeof(value)}`
 loop over 0..4,0.5 type(__)
 :results pop
 
+
+def f1 = 'f1 here'
+def f2(a) = a + ' here'
+def c(f) = f()
+def c1(f, a) = f(a)
+c(f1)
+def c(f) = f
+c(f1)
+c1(f2, 'roger')
+

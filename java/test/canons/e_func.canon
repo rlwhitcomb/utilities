@@ -73,3 +73,11 @@
 >"3 = integer"
 >"3.5 = float"
 >"4 = integer"
+>Defining function “f1” = 'f1 here'
+>Defining function “f2(a)” = a + ' here'
+>Defining function “c(f)” = f()
+>Defining function “c1(f,a)” = f(a)
+>c(f1) -> "f1 here"
+>Defining function “c(f)” = f
+>c(f1) -> "f1 here"
+>c1(f2, 'roger') -> "roger here"

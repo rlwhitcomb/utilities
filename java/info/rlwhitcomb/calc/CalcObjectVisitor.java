@@ -512,6 +512,10 @@
  *	    #245: Fix stacking of the "settings" values, plus quiet mode during functions.
  *	13-Feb-2022 (rlwhitcomb)
  *	    #199: Refactoring of values to allow arbitrary "id" for loop variables and parameters.
+ *	15-Feb-2022 (rlwhitcomb)
+ *	    #169: New version of evaluateFunction with just the one parameter (context).
+ *	    But also create a special flag to NOT do the zero-arg call during parameter evaluation
+ *	    so that we can pass zero-arg functions as parameters successfully.
  */
 package info.rlwhitcomb.calc;
 
@@ -643,6 +647,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	/** Initialization flag -- delays print until constructor is finished.  */
 	private boolean initialized = false;
+
+	/**
+	 * Flag set during {@link FunctionScope#setParameterValue} so that 0-arg functions
+	 * passed as parameters without parens don't get erroneously called prematurely.
+	 */
+	private boolean doNotCallZeroArg = false;
 
 	/** The mode settings for this instantiation of the visitor. */
 	private Settings settings = new Settings();
@@ -815,6 +825,10 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	public Settings getSettings() {
 	    return settings;
+	}
+
+	public void setDoNotCall(final boolean value) {
+	    doNotCallZeroArg = value;
 	}
 
 	public MathContext getMathContext() {
@@ -1052,6 +1066,17 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	/**
+	 * Evaluate a function by calling {@link #evaluateFunction(ParserRuleContext, Object, boolean)}
+	 * by calling {@code visit(ctx)} to get the value.
+	 *
+	 * @param ctx The parsing context to visit to get the value.
+	 * @return Either the value or the result of visiting that function context if it is one.
+	 */
+	Object evaluateFunction(final ParserRuleContext ctx) {
+	    return evaluateFunction(ctx, visit(ctx));
+	}
+
+	/**
 	 * Evaluate a function: basically call {@code visit} on that context if the value itself
 	 * is a function scope (that is, the declaration of a function).
 	 * <p> But also, if the value is a {@link FunctionDeclaration} we have a choice:
@@ -1059,6 +1084,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	 * <li> if the function was defined WITH parameters, then treat the value as a function object
 	 * and just return the value</li>
 	 * </ul>
+	 * <p> BUT, during parameter evaluation, a special flag ({@link #doNotCallZeroArg}) is set
+	 * to (obviously) not call zero-arg functions without parens so it is passed still as a
+	 * function declaration without calling it.
 	 * <p> Also, if the function return (or the initial value, for that matter) is a {@link ValueScope}
 	 * then call its {@code getValue()} function to get the real value (which, for the moment at least,
 	 * will never be another function).
@@ -1072,7 +1100,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    if (returnValue instanceof FunctionDeclaration) {
 		FunctionDeclaration funcDecl = (FunctionDeclaration) returnValue;
-		if (funcDecl.getNumberOfParameters() == 0) {
+		if (funcDecl.getNumberOfParameters() == 0 && !doNotCallZeroArg) {
 		    returnValue = setupFunctionCall(ctx, funcDecl, null);
 		}
 	    }
@@ -1131,7 +1159,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    if (ctx == null && allowNull)
 		return "";
 
-	    Object value = evaluateFunction(ctx, visit(ctx));
+	    Object value = evaluateFunction(ctx);
 
 	    if (!allowNull)
 		nullCheck(value, ctx);
@@ -1789,7 +1817,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitExprStmt(CalcParser.ExprStmtContext ctx) {
 	    CalcParser.ExprContext expr = ctx.expr();
-	    Object result               = evaluateFunction(expr, visit(expr));
+	    Object result               = evaluateFunction(expr);
 	    String resultString         = "";
 
 	    BigInteger iValue = null;
@@ -2499,7 +2527,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitCaseStmt(CalcParser.CaseStmtContext ctx) {
 	    CalcParser.ExprContext caseExpr = ctx.expr();
-	    Object caseValue = evaluateFunction(caseExpr, visit(caseExpr));
+	    Object caseValue = evaluateFunction(caseExpr);
 	    List<CalcParser.CaseBlockContext> blocks = ctx.caseBlock();
 	    CalcParser.CaseBlockContext defaultCtx = null;
 	    CaseScope scope = new CaseScope();
@@ -2532,7 +2560,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    }
 		    else {
 			CalcParser.ExprContext expr = select.expr().get(0);
-			Object value = evaluateFunction(expr, visit(expr));
+			Object value = evaluateFunction(expr);
 			Object returnValue = visitor.apply(value);
 			if (visitor.matched())
 			    return returnValue;
@@ -2563,7 +2591,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public Object visitTimeThisStmt(CalcParser.TimeThisStmtContext ctx) {
 	    CalcParser.ExprContext descExpr = ctx.expr();
 	    if (descExpr != null) {
-		Object descObj = evaluateFunction(descExpr, visit(descExpr));
+		Object descObj = evaluateFunction(descExpr);
 		if (descObj != null) {
 		    String description = descObj.toString();
 		    return Environment.timeThis(description, () -> {
@@ -2630,7 +2658,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public Object visitConstStmt(CalcParser.ConstStmtContext ctx) {
 	    String constantName = ctx.id().getText();
 	    CalcParser.ExprContext expr = ctx.expr();
-	    Object value = evaluateFunction(expr, visit(expr));
+	    Object value = evaluateFunction(expr);
 
 	    ConstantValue.define(currentScope, constantName, value);
 
@@ -2828,7 +2856,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitNegPosExpr(CalcParser.NegPosExprContext ctx) {
 	    ParserRuleContext expr = ctx.expr();
-	    Object e = evaluateFunction(expr, visit(expr));
+	    Object e = evaluateFunction(expr);
 
 	    String op = ctx.ADD_OP().getText();
 
@@ -2907,7 +2935,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		}
 	    }
 
-	    Object value = evaluateFunction(expr, visit(expr));
+	    Object value = evaluateFunction(expr);
 
 	    if (value instanceof ComplexNumber) {
 		ComplexNumber base = (ComplexNumber) value;
@@ -3140,7 +3168,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitAbsExpr(CalcParser.AbsExprContext ctx) {
 	    CalcParser.ExprContext expr = ctx.expr1().expr();
-	    Object value = evaluateFunction(expr, visit(expr));
+	    Object value = evaluateFunction(expr);
 
 	    if (settings.rationalMode) {
 		BigFraction f = toFractionValue(this, value, ctx);
@@ -3238,7 +3266,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitSqrtExpr(CalcParser.SqrtExprContext ctx) {
 	    CalcParser.ExprContext expr = ctx.expr1().expr();
-	    Object value = evaluateFunction(expr, visit(expr));
+	    Object value = evaluateFunction(expr);
 
 	    if (value instanceof ComplexNumber) {
 		ComplexNumber cValue = (ComplexNumber) value;
@@ -3257,7 +3285,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitCbrtExpr(CalcParser.CbrtExprContext ctx) {
 	    CalcParser.ExprContext expr = ctx.expr1().expr();
-	    Object value = evaluateFunction(expr, visit(expr));
+	    Object value = evaluateFunction(expr);
 
 	    if (value instanceof ComplexNumber) {
 		ComplexNumber cValue = (ComplexNumber) value;
@@ -3271,7 +3299,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitFortExpr(CalcParser.FortExprContext ctx) {
 	    CalcParser.ExprContext expr = ctx.expr1().expr();
-	    Object value = evaluateFunction(expr, visit(expr));
+	    Object value = evaluateFunction(expr);
 
 	    if (value instanceof ComplexNumber) {
 		ComplexNumber cValue = (ComplexNumber) value;
@@ -3342,7 +3370,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    if (ctx.expr1() != null) {
 		CalcParser.ExprContext expr = ctx.expr1().expr();
 		if (expr != null) {
-		    Object seed = evaluateFunction(expr, visit(expr));
+		    Object seed = evaluateFunction(expr);
 		    if (seed != null) {
 			byte[] bytes = ClassUtil.getBytes(seed);
 			BigInteger seedInt = new BigInteger(bytes);
@@ -3410,7 +3438,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    else {
 		expr = ctx.expr1().expr();
 	    }
-	    obj = evaluateFunction(expr, visit(expr));
+	    obj = evaluateFunction(expr);
 
 	    try {
 		return castTo(this, expr, obj, castType, settings.mc, settings.separatorMode);
@@ -4007,7 +4035,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		endCtx   = e3ctx.expr(2);
 	    }
 
-	    value = evaluateFunction(valueCtx, visit(valueCtx));
+	    value = evaluateFunction(valueCtx);
 
 	    if (value instanceof ArrayScope) {
 		arrayLen = ((ArrayScope) value).size();
@@ -4095,7 +4123,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    objCtx = exprs.get(0);
 	    }
 
-	    Object source = evaluateFunction(objCtx, visit(objCtx));
+	    Object source = evaluateFunction(objCtx);
 
 	    String sourceClass = source.getClass().getSimpleName();
 
@@ -4136,7 +4164,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    // Now if any elements were given to add/insert, do that starting from "start" also
 		    for (int index = 3; index < exprLen; index++) {
 			CalcParser.ExprContext valueCtx = exprs.get(index);
-			Object value = evaluateFunction(valueCtx, visit(valueCtx));
+			Object value = evaluateFunction(valueCtx);
 			list.add(index - 3 + start, value);
 		    }
 
@@ -4236,7 +4264,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitReverseExpr(CalcParser.ReverseExprContext ctx) {
 	    CalcParser.ExprContext expr = ctx.expr1().expr();
-	    Object value = evaluateFunction(expr, visit(expr));
+	    Object value = evaluateFunction(expr);
 
 	    if (value instanceof ArrayScope) {
 		@SuppressWarnings("unchecked")
@@ -4302,7 +4330,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    if (exprs.size() > 0) {
 		fillExpr = exprs.get(0);
-		fillValue = evaluateFunction(fillExpr, visit(fillExpr));
+		fillValue = evaluateFunction(fillExpr);
 	    }
 	    if (exprs.size() == 2) {
 		length = getIntValue(exprs.get(1));
@@ -4352,7 +4380,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    Object[] args = new Object[exprList.expr().size() - 1];
 	    for (int i = 1; i < exprList.expr().size(); i++) {
 		CalcParser.ExprContext expr = exprList.expr(i);
-		args[i - 1] = evaluateFunction(expr, visit(expr));
+		args[i - 1] = evaluateFunction(expr);
 	    }
 
 	    return String.format(formatString, args);
@@ -4405,7 +4433,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		if (array.size() < posWidth) {
 		    if (exprs.size() > 1) {
 			padExpr = exprs.get(1);
-			padValue = evaluateFunction(padExpr, visit(padExpr));
+			padValue = evaluateFunction(padExpr);
 		    }
 		    else {
 			padValue = BigInteger.ZERO;
@@ -4452,7 +4480,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 		    if (exprs.size() > 1) {
 			padExpr = exprs.get(1);
-			padValue = evaluateFunction(padExpr, visit(padExpr));
+			padValue = evaluateFunction(padExpr);
 			padChar = getCharValue(padExpr, padValue, "Pad", ' ');
 		    }
 
@@ -4510,7 +4538,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		CalcParser.Expr1Context expr1 = ctx.expr1();
 		if (expr1 != null) {
 		    CalcParser.ExprContext expr = expr1.expr();
-		    Object e = evaluateFunction(expr, visit(expr));
+		    Object e = evaluateFunction(expr);
 		    return toFractionValue(this, e, expr);
 		}
 		else {
@@ -4543,7 +4571,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		CalcParser.Expr1Context expr1 = ctx.expr1();
 		if (expr1 != null) {
 		    CalcParser.ExprContext expr = expr1.expr();
-		    Object e = evaluateFunction(expr, visit(expr));
+		    Object e = evaluateFunction(expr);
 
 		    if (e instanceof ArrayScope) {
 			@SuppressWarnings("unchecked")

@@ -35,6 +35,9 @@
  *	    #199: Derive from ParameterizedScope; move common code to there.
  *	14-Feb-2022 (rlwhitcomb)
  *	    #199: Override "toString" here from default in Scope.
+ *	15-Feb-2022 (rlwhitcomb)
+ *	    #169: Set flag not to call zero-arg functions without parens
+ *	    during "setParameterValue".
  */
 package info.rlwhitcomb.calc;
 
@@ -94,7 +97,13 @@ class FunctionScope extends ParameterizedScope
 		valueExpr = declaration.getParameterExpr(paramName);
 	    }
 	    if (valueExpr != null) {
-		paramValue = visitor.evaluateFunction(valueExpr, visitor.visit(valueExpr));
+		visitor.setDoNotCall(true);
+		try {
+		    paramValue = visitor.evaluateFunction(valueExpr);
+		}
+		finally {
+		    visitor.setDoNotCall(false);
+		}
 	    }
 	    ParameterValue.define(this, paramName, paramValue);
 	}
