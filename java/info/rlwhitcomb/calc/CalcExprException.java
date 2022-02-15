@@ -31,7 +31,7 @@
  */
 package info.rlwhitcomb.calc;
 
-import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.ParserRuleContext;
 
 import static info.rlwhitcomb.util.ConsoleColor.Code.*;
 import info.rlwhitcomb.util.Intl;

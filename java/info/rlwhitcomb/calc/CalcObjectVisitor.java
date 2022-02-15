@@ -526,7 +526,6 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.MathContext;
-import java.math.RoundingMode;
 import java.nio.charset.Charset;
 import java.nio.charset.IllegalCharsetNameException;
 import java.nio.charset.StandardCharsets;
@@ -574,12 +573,14 @@ import net.iharder.b64.Base64;
 
 import de.onyxbits.SemanticVersion;
 
-import org.antlr.v4.runtime.*;
-import org.antlr.v4.runtime.tree.*;
+import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.TerminalNode;
 
+import static info.rlwhitcomb.calc.CalcUtil.*;
 import info.rlwhitcomb.directory.Match;
 import info.rlwhitcomb.util.BigFraction;
-import static info.rlwhitcomb.calc.CalcUtil.*;
 import info.rlwhitcomb.util.CharUtil;
 import static info.rlwhitcomb.util.CharUtil.Justification.*;
 import info.rlwhitcomb.util.ClassUtil;
