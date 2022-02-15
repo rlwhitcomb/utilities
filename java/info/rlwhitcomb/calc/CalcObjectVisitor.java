@@ -1066,7 +1066,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	/**
-	 * Evaluate a function by calling {@link #evaluateFunction(ParserRuleContext, Object, boolean)}
+	 * Evaluate a function by calling {@link #evaluateFunction(ParserRuleContext, Object)}
 	 * by calling {@code visit(ctx)} to get the value.
 	 *
 	 * @param ctx The parsing context to visit to get the value.
