@@ -1564,6 +1564,7 @@ public class Calc
 
 	    Dialog textDialog = new Dialog(Intl.getString(titleKey), textDialogContents, true);
 	    textDialog.setMaximumHeight(mainWindow.getHeight() - 200);
+	    textDialog.copyStyle(Style.backgroundColor, contentTextArea);
 	    textDialog.open(owner);
 	    ApplicationContext.scheduleCallback(() -> {
 		contentTextArea.setSelection(0, 0);
