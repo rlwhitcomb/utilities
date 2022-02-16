@@ -90,6 +90,8 @@
  *	05-Feb-2022 (rlwhitcomb)
  *	    #233: Add "getField" method to support the "system value" idea in Calc.
  *	    And remove "getMapFromObject" which is not being used now.
+ *	16-Feb-2022 (rlwhitcomb)
+ *	    Add two flavors of "getResourceAsString" to load text from the .jar file.
  */
 
 package info.rlwhitcomb.util;
@@ -98,13 +100,18 @@ import java.text.*;
 import java.lang.reflect.*;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
+import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.nio.charset.Charset;
 import java.util.*;
-import java.util.regex.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import info.rlwhitcomb.annotations.*;
+
+import static info.rlwhitcomb.util.Constants.*;
 
 
 /**
@@ -608,6 +615,42 @@ public final class ClassUtil
 	    }
 	    // will be empty in case of I/O error
 	    return baos.toByteArray();
+	}
+
+	/**
+	 * Load a resource from this classloader and convert to a String (UTF-8 charset).
+	 *
+	 * @param resourcePath Should be an absolute path (beginning with "/") of the resource
+	 *                     within our .jar file or CLASSPATH.
+	 * @return The contents of the resource converting the bytes to a String using the UTF-8 charset.
+	 */
+	public static String getResourceAsString(final String resourcePath) {
+	    return getResourceAsString(resourcePath, Constants.UTF_8_CHARSET);
+	}
+
+	/**
+	 * Load a resource from this classloader and convert to a String using the given charset.
+	 *
+	 * @param resourcePath Should be an absolute path (beginning with "/") of the resource
+	 *                     within our .jar file or CLASSPATH.
+	 * @param charset      The character set to use to convert the bytes to a String.
+	 * @return The contents of the resource converting the bytes to a String using the given charset.
+	 */
+	public static String getResourceAsString(final String resourcePath, final Charset charset) {
+	    StringBuilder builder = new StringBuilder(CHAR_BUFFER_SIZE);
+	    char[] chars = new char[CHAR_BUFFER_SIZE];
+
+	    try (InputStreamReader isr = new InputStreamReader(ClassUtil.class.getResourceAsStream(resourcePath), charset)) {
+		int read = -1;
+		while ((read = isr.read(chars)) > 0) {
+		    builder.append(chars, 0, read);
+		}
+	    }
+	    catch (IOException ioe) {
+		// Ignore for now
+	    }
+
+	    return builder.toString();
 	}
 
 }

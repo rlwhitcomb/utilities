@@ -259,6 +259,8 @@
  *	    #195: Save splitter position per user in the Preferences for this package.
  *	    Refactor the preferences code to allow for future expansion.
  *	    #247: Implement light/dark color schemes in GUI.
+ *	16-Feb-2022 (rlwhitcomb)
+ *	    #248: Add buttons to Version prompt for the LICENSE and NOTICE files.
  */
 package info.rlwhitcomb.calc;
 
@@ -299,6 +301,7 @@ import org.apache.pivot.collections.Map;
 import org.apache.pivot.collections.Sequence;
 import org.apache.pivot.serialization.SerializationException;
 import org.apache.pivot.util.Resources;
+import org.apache.pivot.util.Vote;
 import org.apache.pivot.wtk.*;
 import org.apache.pivot.wtk.Keyboard.KeyStroke;
 import org.apache.pivot.wtk.text.Document;
@@ -397,7 +400,9 @@ public class Calc
 		OPEN     ("open",      OpenAction.class),
 		CLEAR    ("clear",     ClearAction.class),
 		CALCULATE("calculate", CalculateAction.class),
-		EXIT     ("exit",      ExitAction.class);
+		EXIT     ("exit",      ExitAction.class),
+		LICENSE  ("license",   LicenseAction.class),
+		NOTICE   ("notice",    NoticeAction.class);
 
 		private final String id;
 		private final Class<? extends Action> actionClass;
@@ -428,6 +433,11 @@ public class Calc
 		void enable(final boolean enabled) {
 		    Action.getNamedAction(id).setEnabled(enabled);
 		}
+
+		void perform(Component source) {
+		    Action.getNamedAction(id).perform(source);
+		}
+
 	}
 
 
@@ -1014,6 +1024,27 @@ public class Calc
 
 		versionPrompt.getSheetStateListeners().add(new SheetStateListener() {
 		    @Override
+		    public Vote previewSheetClose(Sheet sheet, boolean result) {
+			int selectedOption = ((Prompt) sheet).getSelectedOptionIndex();
+			if (result) {
+			    switch (selectedOption) {
+				case 0:
+				    CalcAction.LICENSE.perform(sheet);
+				    break;
+				case 1:
+				    CalcAction.NOTICE.perform(sheet);
+				    break;
+				case 2:
+				    return Vote.APPROVE;
+			    }
+			    return Vote.DENY;
+			}
+			else {
+			    return Vote.APPROVE;
+			}
+		    }
+
+		    @Override
 		    public void sheetClosed(final Sheet sheet) {
 			requestFocus(inputTextPane);
 		    }
@@ -1443,6 +1474,23 @@ public class Calc
 		}
 	}
 
+	private class LicenseAction extends Action
+	{
+		@Override
+		public void perform(Component source) {
+		    displayTextDialog("versionLicense", "/META-INF/LICENSE", source);
+		}
+	}
+
+	private class NoticeAction extends Action
+	{
+		@Override
+		public void perform(Component source) {
+		    displayTextDialog("versionNotice", "/META-INF/NOTICE", source);
+		}
+	}
+
+
 	public static void printTitleAndVersion() {
 	    Environment.printProgramInfo(50, colors);
 	}
@@ -1486,7 +1534,42 @@ public class Calc
 	    copyrightText.setText(copyright);
 	    javaText.setText(javaVersion);
 
+	    if (versionPrompt.getOptions().getLength() == 1) {
+		versionPrompt.getOptions().insert(Intl.getString("versionLicense"), 0);
+		versionPrompt.getOptions().insert(Intl.getString("versionNotice"), 1);
+	    }
+
 	    versionPrompt.open(mainWindow);
+	}
+
+	/**
+	 * Display a dialog with the given text resource as the contents.
+	 *
+	 * @param titleKey    Text resource key of the dialog title.
+	 * @param contentPath Resource path of the contents to display.
+	 * @param source      Source component (whose {@code Dialog} ancestor is the owner).
+	 */
+	private void displayTextDialog(String titleKey, String contentPath, Component source) {
+	    Window owner = (Window) source.getAncestor(Window.class);
+	    String contentText = ClassUtil.getResourceAsString(contentPath);
+
+	    FillPane textDialogContents = new FillPane();
+	    ScrollPane scrollPane = new ScrollPane(ScrollPane.ScrollBarPolicy.FILL, ScrollPane.ScrollBarPolicy.FILL_TO_CAPACITY);
+	    TextArea contentTextArea = new TextArea();
+	    contentTextArea.putStyle(Style.font, FontUtilities.decode("MONOSPACED-12"));
+	    contentTextArea.setEditable(false);
+	    contentTextArea.setText(contentText);
+	    scrollPane.setView(contentTextArea);
+	    textDialogContents.add(scrollPane);
+
+	    Dialog textDialog = new Dialog(Intl.getString(titleKey), textDialogContents, true);
+	    textDialog.setMaximumHeight(mainWindow.getHeight() - 200);
+	    textDialog.open(owner);
+	    ApplicationContext.scheduleCallback(() -> {
+		contentTextArea.setSelection(0, 0);
+		scrollPane.setScrollTop(0);
+		contentTextArea.requestFocus();
+	    }, 200L);
 	}
 
 	/**

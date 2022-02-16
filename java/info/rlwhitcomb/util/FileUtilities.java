@@ -100,6 +100,8 @@
  *	Fix "Zip Slip" vulnerability in "unpackFiles".
  *    24-Jan-2022 (rlwhitcomb)
  *	Add "readFileAsLines" (several flavors).
+ *    16-Feb-2022 (rlwhitcomb)
+ *	Move buffer and file size constants out to Constants.
  */
 package info.rlwhitcomb.util;
 
@@ -132,7 +134,10 @@ import java.util.jar.JarFile;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipException;
+
 import net.iharder.b64.Base64;
+
+import static info.rlwhitcomb.util.Constants.*;
 
 
 /**
@@ -142,12 +147,6 @@ public final class FileUtilities
 {
     /** Source of randomness for {@link #getRandomName}. */
     private static SecureRandom random = new SecureRandom();
-
-    /** Buffer size for the file compression method. */
-    private static final int BUFFER_SIZE = 65_536;
-
-    /** Maximum size (2MB) of a file to read into a single string. */
-    private static final long FILE_STRING_SIZE_LIMIT = 2_097_152L;
 
     /**
      * Compressed file (GZIP) extension, made available for callers
@@ -362,7 +361,7 @@ public final class FileUtilities
 		throws IOException
     {
 	try (OutputStream os = Files.newOutputStream(f.toPath())) {
-	    byte[] buffer = new byte[BUFFER_SIZE];
+	    byte[] buffer = new byte[FILE_BUFFER_SIZE];
 	    int len;
 	    while ((len = is.read(buffer)) > 0) {
 		os.write(buffer, 0, len);
@@ -439,9 +438,9 @@ public final class FileUtilities
     {
 	String outputName = inputFile.getPath() + COMPRESS_EXT;
 	try (InputStream fis = Files.newInputStream(inputFile.toPath());
-	     GZIPOutputStream gos = new GZIPOutputStream(Files.newOutputStream(Paths.get(outputName)), BUFFER_SIZE, true))
+	     GZIPOutputStream gos = new GZIPOutputStream(Files.newOutputStream(Paths.get(outputName)), FILE_BUFFER_SIZE, true))
 	{
-	    byte[] buffer = new byte[BUFFER_SIZE];
+	    byte[] buffer = new byte[FILE_BUFFER_SIZE];
 	    int len;
 	    while ((len = fis.read(buffer)) > 0) {
 		gos.write(buffer, 0, len);
@@ -473,10 +472,10 @@ public final class FileUtilities
 	    outputName = inputName.substring(0, inputName.length() - COMPRESS_EXT.length());
 	else
 	    throw new Intl.IllegalArgumentException("util#fileutil.wrongExtension", COMPRESS_EXT);
-	try (GZIPInputStream gis = new GZIPInputStream(Files.newInputStream(inputFile.toPath()), BUFFER_SIZE);
+	try (GZIPInputStream gis = new GZIPInputStream(Files.newInputStream(inputFile.toPath()), FILE_BUFFER_SIZE);
 	     OutputStream fos = Files.newOutputStream(Paths.get(outputName)))
 	{
-	    byte[] buffer = new byte[BUFFER_SIZE];
+	    byte[] buffer = new byte[FILE_BUFFER_SIZE];
 	    int len;
 	    while ((len = gis.read(buffer)) > 0) {
 		fos.write(buffer, 0, len);

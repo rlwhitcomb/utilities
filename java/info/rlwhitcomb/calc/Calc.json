@@ -45,6 +45,8 @@
  *	    #163: Reword Save tip.
  *	14-Feb-2022 (rlwhitcomb)
  *	    #247: Change Window Settings text for background colors.
+ *	16-Feb-2022 (rlwhitcomb)
+ *	    #248: Add text for the two new file buttons for the Version prompt.
  */
 {
     title:              'Calc',
@@ -120,6 +122,8 @@
     versionButton:      'V',
     versionTip:         'Version information (%1$s)',
     versionLabel:       'Version',
+    versionLicense:     'LICENSE',
+    versionNotice:      'NOTICE',
 
     settingsButton:     '\u2261',
     settingsTip:        'Settings dialog (F2)',

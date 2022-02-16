@@ -30,6 +30,8 @@
  *	    #231: More values.
  *	08-Feb-2022 (rlwhitcomb)
  *	    #235: D_FOUR added.
+ *	16-Feb-2022 (rlwhitcomb)
+ *	    Buffer sizes added.
  */
 package info.rlwhitcomb.util;
 
@@ -174,5 +176,19 @@ public final class Constants
 
 	/** The normal Windows character set (windows-1252). */
 	public static final Charset WIN_1252_CHARSET   = Charset.forName("windows-1252");
+
+
+	/** Default buffer size for reading local files. */
+	public static final int FILE_BUFFER_SIZE = 65_536;
+
+	/** Default buffer size for tailing process output. */
+	public static final int PROCESS_BUFFER_SIZE = 8_192;
+
+	/** Default buffer size for byte-to-string operations. */
+	public static final int CHAR_BUFFER_SIZE = 4_096;
+
+
+	/** Maximum size of file we want to read into a string (2MB). */
+	public static final long FILE_STRING_SIZE_LIMIT = 2_097_152L;
 
 }

@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2009-2011,2013-2018,2020-2021 Roger L. Whitcomb.
+ * Copyright (c) 2009-2011,2013-2018,2020-2022 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -59,6 +59,8 @@
  *	Add a "runToCompletion" that writes to a StringBuilder to store the output.
  *  16-Nov-2021 (rlwhitcomb)
  *	#85: Further versions to log exceptions or throw them.
+ *  16-Feb-2022 (rlwhitcomb)
+ *	Use buffer size from Constants.
  */
 package info.rlwhitcomb.util;
 
@@ -73,6 +75,8 @@ import java.io.PrintStream;
 import java.util.List;
 import java.util.Map;
 
+import static info.rlwhitcomb.util.Constants.*;
+
 
 /**
  * Run an external command and capture the output in a {@link BufferedInputStream}.
@@ -82,9 +86,6 @@ import java.util.Map;
  */
 public class RunCommand
 {
-	/** The initial byte array buffer size when writing process output to a string. */
-	private static final int BUFFER_SIZE = 8192;
-
 	/** The exit code from the child process. Integer.MIN_VALUE indicates the process has not yet terminated. */
 	private int errorLevel = Integer.MIN_VALUE;
 	/** The object used to setup the running environment for the child process. */
@@ -343,7 +344,7 @@ public class RunCommand
 	 * @return	return code from the child process
 	 */
 	public int runToCompletion(final StringBuilder buf, final boolean logOrThrow) {
-	    ByteArrayOutputStream os = new ByteArrayOutputStream(BUFFER_SIZE);
+	    ByteArrayOutputStream os = new ByteArrayOutputStream(PROCESS_BUFFER_SIZE);
 	    setEchoStream(new PrintStream(os, true));
 	    int ret = runToCompletion(true, logOrThrow);
 	    buf.append(os.toString());

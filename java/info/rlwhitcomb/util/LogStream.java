@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2008-2010,2014-2015,2020 Roger L. Whitcomb.
+ * Copyright (c) 2008-2010,2014-2015,2020,2022 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -40,10 +40,15 @@
  *	    "close" method to release the buffer.
  *	17-Mar-2020 (rlwhitcomb)
  *	    Rename a method in ClientStatistics, so update the Javadoc here.
+ *	16-Feb-2022 (rlwhitcomb)
+ *	    Use buffer size from Constants.
  */
 package info.rlwhitcomb.util;
 
 import java.io.*;
+
+import static info.rlwhitcomb.util.Constants.*;
+
 
 /**
  * Wraps the {@link Logging} class in a {@link PrintStream}-compatible object for use
@@ -64,8 +69,6 @@ public class LogStream extends PrintStream
 	 * this object is finalized.
 	 */
 	private StringBuffer buf;
-	/** Initial line buffer size to avoid a lot of buffer reallocations. */
-	private static final int BUFFER_SIZE = 1024;
 
 	/**
 	 * Constructor given a logging level to use for this stream.
@@ -79,7 +82,7 @@ public class LogStream extends PrintStream
 	public LogStream(int level) {
 	    super(System.out);
 	    logLevel = level;
-	    buf = new StringBuffer(BUFFER_SIZE);
+	    buf = new StringBuffer(CHAR_BUFFER_SIZE);
 	}
 
 	/**
