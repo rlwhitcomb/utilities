@@ -246,5 +246,30 @@
 >B(56) = -2479392929313226753685415739663229 / 870
 >B(58) = 84483613348880041862046775994036021 / 354
 >B(60) = -1215233140483755572040304994079820246041491 / 56786730
+>hexchars = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'] -> [ "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "A", "B", "C", "D", "E", "F" ]
+>teststring = '-.1234ABCDEFG_' -> "-.1234ABCDEFG_"
+>(__ ∈ hexchars) ? `$__ is hex` : `$__ not hex` -> "- not hex"
+>(__ ∈ hexchars) ? `$__ is hex` : `$__ not hex` -> ". not hex"
+>(__ ∈ hexchars) ? `$__ is hex` : `$__ not hex` -> "1 is hex"
+>(__ ∈ hexchars) ? `$__ is hex` : `$__ not hex` -> "2 is hex"
+>(__ ∈ hexchars) ? `$__ is hex` : `$__ not hex` -> "3 is hex"
+>(__ ∈ hexchars) ? `$__ is hex` : `$__ not hex` -> "4 is hex"
+>(__ ∈ hexchars) ? `$__ is hex` : `$__ not hex` -> "A is hex"
+>(__ ∈ hexchars) ? `$__ is hex` : `$__ not hex` -> "B is hex"
+>(__ ∈ hexchars) ? `$__ is hex` : `$__ not hex` -> "C is hex"
+>(__ ∈ hexchars) ? `$__ is hex` : `$__ not hex` -> "D is hex"
+>(__ ∈ hexchars) ? `$__ is hex` : `$__ not hex` -> "E is hex"
+>(__ ∈ hexchars) ? `$__ is hex` : `$__ not hex` -> "F is hex"
+>(__ ∈ hexchars) ? `$__ is hex` : `$__ not hex` -> "G not hex"
+>(__ ∈ hexchars) ? `$__ is hex` : `$__ not hex` -> "_ not hex"
+>testnumbers = [17, 23, 14, 92, 87, 46, 18, 42] -> [ 17, 23, 14, 92, 87, 46, 18, 42 ]
+>num in 20 .. 50 -> false
+>num in 20 .. 50 -> true
+>num in 20 .. 50 -> false
+>num in 20 .. 50 -> false
+>num in 20 .. 50 -> false
+>num in 20 .. 50 -> true
+>num in 20 .. 50 -> false
+>num in 20 .. 50 -> true
 >
 >Done with LOOP tests.

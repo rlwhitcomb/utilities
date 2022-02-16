@@ -516,6 +516,7 @@
  *	    #169: New version of evaluateFunction with just the one parameter (context).
  *	    But also create a special flag to NOT do the zero-arg call during parameter evaluation
  *	    so that we can pass zero-arg functions as parameters successfully.
+ *	    #249: Add "expr IN loopCtl" as another expression type.
  */
 package info.rlwhitcomb.calc;
 
@@ -5129,6 +5130,55 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    return compareOp(expr1, expr2, null, op);
 	}
 
+	private class InVisitor implements Function<Object, Object>
+	{
+		private CalcParser.ExprContext valueCtx;
+		private CalcParser.LoopCtlContext loopCtx;
+		private Object inValue;
+		private boolean compared = false;
+
+
+		InVisitor(CalcParser.ExprContext ctx1, CalcParser.LoopCtlContext ctx2, Object value) {
+		    this.valueCtx = ctx1;
+		    this.loopCtx  = ctx2;
+		    this.inValue  = value;
+		}
+
+		@Override
+		public Object apply(final Object value) {
+		    int cmp = CalcUtil.compareValues(
+			CalcObjectVisitor.this,
+			valueCtx, loopCtx,
+			inValue, value,
+			settings.mc,
+			false, true, false, false);
+
+		    if (cmp == 0)
+			compared = true;
+
+		    return Boolean.valueOf(compared);
+		}
+	}
+
+	@Override
+	public Object visitInExpr(CalcParser.InExprContext ctx) {
+	    CalcParser.ExprContext expr         = ctx.expr();
+	    CalcParser.LoopCtlContext ctlCtx    = ctx.loopCtl();
+	    CalcParser.ExprListContext exprList = ctlCtx.exprList();
+	    CalcParser.DotRangeContext dotCtx   = ctlCtx.dotRange();
+	    Object value = evaluateFunction(expr);
+	    Object retValue;
+
+	    InVisitor visitor = new InVisitor(expr, ctlCtx, value);
+
+	    if (exprList != null)
+		retValue = iterateOverDotRange(exprList.expr(), null, false, visitor, true);
+	    else
+		retValue = iterateOverDotRange(null, dotCtx.expr(), dotCtx.DOTS() != null, visitor, true);
+
+	    return retValue;
+	}
+
 	@Override
 	public Object visitEqualExpr(CalcParser.EqualExprContext ctx) {
 	    CalcParser.ExprContext expr1 = ctx.expr(0);
@@ -5381,7 +5431,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public Object visitEitherOrExpr(CalcParser.EitherOrExprContext ctx) {
 	    boolean ifExpr = getBooleanValue(ctx.expr(0));
 
-	    return visit(ifExpr ? ctx.expr(1) : ctx.expr(2));
+	    return evaluateFunction(ifExpr ? ctx.expr(1) : ctx.expr(2));
 	}
 
 	@Override

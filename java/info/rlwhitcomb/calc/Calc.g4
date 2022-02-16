@@ -363,6 +363,8 @@
  *	    #239: Add "compareOp expr" as another caseSelector.
  *	11-Feb-2022 (rlwhitcomb)
  *	    #199: Allow any id for function parameters and loop variables.
+ *	15-Feb-2022 (rlwhitcomb)
+ *	    #249: Add "expr IN loopCtl" as another expression type.
  */
 
 grammar Calc;
@@ -540,6 +542,7 @@ expr
    | expr SHIFT_OP expr                  # shiftExpr
    | expr '<=>' expr                     # spaceshipExpr
    | expr COMPARE_OP expr                # compareExpr
+   | expr ( K_OF|K_IN|SET_IN ) loopCtl   # inExpr
    | expr EQUAL_OP expr                  # equalExpr
    | expr BIT_OP expr                    # bitExpr
    | expr BOOL_AND_OP expr               # booleanAndExpr
