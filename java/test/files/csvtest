@@ -1,5 +1,5 @@
 $inputDir test/canons
-$testClass info.rlwhitcomb.test.CSVTest
+# Specified on command line: -testclass:info.rlwhitcomb.test.CSVTest
 
 all_quotes:   -Qall -Dspace -8 test/data/test_all_quotes.dsv
 quote:        test/data/test_quote.dsv -Qangle -Dspace -W

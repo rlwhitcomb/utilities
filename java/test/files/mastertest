@@ -13,13 +13,12 @@
 
 t1: liststest
 t2: -charset:UTF-8 calctest
-t3: csvtest
+t3: -testclass:info.rlwhitcomb.test.CSVTest csvtest
 t4: sqltest
 t5: optiontest
 t6: dynarraytest
 t7: matchestest
 t8: numerictest
-t9: -testclass:info.rlwhitcomb.calc.Calc loremtest
 t10: bidimaptest
 t11: wordfindtest
 t12: wordcounttest
