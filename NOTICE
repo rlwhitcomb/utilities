@@ -53,7 +53,6 @@ DEALINGS IN THE SOFTWARE.
 
 natorder
 ========
-
 Java Natural Order comparator
 
 NaturalOrderComparator.java -- Perform 'natural order' comparisons of strings in Java.
@@ -77,4 +76,3 @@ NaturalOrderComparator.java -- Perform 'natural order' comparisons of strings in
  2. Altered source versions must be plainly marked as such, and must not be
  misrepresented as being the original software.
  3. This notice may not be removed or altered from any source distribution.
-
