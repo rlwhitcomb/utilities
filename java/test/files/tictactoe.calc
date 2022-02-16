@@ -203,9 +203,9 @@ define gameIsOver() = {
   // Check the columns
   loop col over 0..2 { if checkWinner(sumColumn(col)) { leave true } }
   // Check the two diagonals
-  if checkWinner(sumDiagonal(0)) || checkWinner(checkDiagonal(1)) { leave true }
+  if checkWinner(sumDiagonal(0)) || checkWinner(sumDiagonal(1)) { leave true }
   // Lastly, check for a draw
-  if numberOfMoves == 9 { gameIsDrawn = true } else { false }
+  gameIsDrawn = (numberOfMoves == 9)
 }
 
 /*
@@ -366,15 +366,23 @@ define conclusion = {
 :quiet pop
 :resultsonly on
 displayBoard()@q
-/* demo!! */
-:echo '*** Start of Demo ***'
-:echo 'Set up two moves'
-:quiet on
-board[1][0] = X
-board[1][1] = O
-:quiet pop
-displayBoard()@q
-`Count of 'X' in column 0 = ${countInCol(0, X)}`
-`Count of 'O' in row 1 = ${countInRow(1, O)}`
-`Count of 'O' in top-left to bottom-right = ${countInDiag(0, O)}`
-conclusion() @q
+
+/*
+ * Demonstration - enable with "-define demo=true" or "-- demo --"
+ */
+if demo || ($0 != null && matches($0, '[dD][eE][mM][oO]')) {
+  :echo '*** Start of Demo ***'
+  :echo 'Set up two moves'
+  :quiet on
+  board[1][0] = X
+  board[1][1] = O
+  :quiet pop
+  displayBoard()@q
+  :echo 'Testing some of the support functions used for game play...'
+  `Count of 'X' in column 0 = ${countInCol(0, X)}` @q
+  `Count of 'O' in row 1 = ${countInRow(1, O)}` @q
+  `Count of 'O' in top-left to bottom-right = ${countInDiag(0, O)}` @q
+  `Game is over? ${gameIsOver()}` @q
+  conclusion() @q
+  :echo '*** End of Demo ***'
+}
