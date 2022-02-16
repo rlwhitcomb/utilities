@@ -19,6 +19,7 @@ t5: optiontest
 t6: dynarraytest
 t7: matchestest
 t8: numerictest
+t9: -testclass:info.rlwhitcomb.test.FileUtilitiesTest fileutilitiestest
 t10: bidimaptest
 t11: wordfindtest
 t12: wordcounttest

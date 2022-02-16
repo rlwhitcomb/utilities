@@ -98,6 +98,8 @@
  *	Add method to get extension only.
  *    06-Jan-2022 (rlwhitcomb)
  *	Fix "Zip Slip" vulnerability in "unpackFiles".
+ *    24-Jan-2022 (rlwhitcomb)
+ *	Add "readFileAsLines" (several flavors).
  */
 package info.rlwhitcomb.util;
 
@@ -119,8 +121,10 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.PosixFilePermission;
 import java.security.SecureRandom;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.jar.JarEntry;
@@ -750,6 +754,104 @@ public final class FileUtilities
 	}
 
 	return buf.toString();
+    }
+
+    /**
+     * Read the given local file and produce a list of lines from the contents.
+     * <p> Default charset and tab width (8).
+     *
+     * @param	file	The local file to read.
+     * @return		The complete contents of the file as a {@code List<String>}
+     *			with line endings translated to Unix conventions (i.e., only
+     *			{@code \n}).
+     * @throws	IllegalArgumentException if the file size is over 2MB or 2,097,512 bytes
+     *			(arbitrary limit).
+     * @throws	IOException if there is a problem reading the file.
+     */
+    public static List<String> readFileAsLines(File file)
+	throws IOException
+    {
+	return readFileAsLines(file, null, 8);
+    }
+
+    /**
+     * Read the given local file and produce a list of lines from the contents.
+     *
+     * @param	file	The local file to read.
+     * @param	cs	The character set to use to decode the file contents. Can be
+     *			{@code null} in which case the system default is used.
+     * @return		The complete contents of the file as a {@code List<String>}
+     *			with line endings translated to Unix conventions (i.e., only
+     *			{@code \n}).
+     * @throws	IllegalArgumentException if the file size is over 2MB or 2,097,512 bytes
+     *			(arbitrary limit).
+     * @throws	IOException if there is a problem reading the file.
+     */
+    public static List<String> readFileAsLines(File file, Charset cs)
+	throws IOException
+    {
+	return readFileAsLines(file, cs, 8);
+    }
+
+    /**
+     * Read the given local file and produce a list of lines from the contents.
+     *
+     * @param	file	The local file to read.
+     * @param	cs	The character set to use to decode the file contents. Can be
+     *			{@code null} in which case the system default is used.
+     * @param	tabWidth	In order to convert tab characters to spaces, specify
+     *				a non-zero width.
+     * @return		The complete contents of the file as a {@code List<String>}
+     *			with line endings translated to Unix conventions (i.e., only
+     *			{@code \n}).
+     * @throws	IllegalArgumentException if the file size is over 2MB or 2,097,512 bytes
+     *			(arbitrary limit).
+     * @throws	IOException if there is a problem reading the file.
+     */
+    public static List<String> readFileAsLines(File file, Charset cs, int tabWidth)
+	throws IOException
+    {
+	long size = file.length();
+	if (size > FILE_STRING_SIZE_LIMIT) {
+	    throw new Intl.IllegalArgumentException("util#fileutil.fileTooBig", size);
+	}
+	List<String> lines = new ArrayList<>();
+
+	CharsetDecoder decoder = (cs == null ? Charset.defaultCharset() : cs).newDecoder();
+	decoder.onUnmappableCharacter(CodingErrorAction.REPORT);
+	decoder.onMalformedInput(CodingErrorAction.REPORT);
+
+	InputStream fis = Files.newInputStream(file.toPath());
+	InputStreamReader isr = new InputStreamReader(fis, decoder);
+	StringBuilder buf = new StringBuilder(2048);
+
+	try (BufferedReader reader = new BufferedReader(isr))
+	{
+	    String line;
+	    while ((line = reader.readLine()) != null) {
+		if (tabWidth > 0) {
+		    buf.setLength(0);
+		    int ix = 0, tabPos = 0, iy;
+		    while ((iy = line.indexOf('\t', ix)) >= 0) {
+			tabPos += (iy - ix);
+			buf.append(line.substring(ix, iy));
+			int spaces = tabWidth - (tabPos % tabWidth);
+			for (int i = 0; i < spaces; i++) {
+			    buf.append(' ');
+			}
+			tabPos += spaces;
+			ix = iy + 1;
+		    }
+		    buf.append(line.substring(ix));
+		    lines.add(buf.toString());
+		}
+		else {
+		    lines.add(line);
+		}
+	    }
+	}
+
+	return lines;
     }
 
     /**
