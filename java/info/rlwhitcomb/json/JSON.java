@@ -26,6 +26,7 @@
  *  History:
  *      16-Feb-2022 (rlwhitcomb)
  *	    #196: Initial coding.
+ *	    Add option to "toStringValue" to switch line endings.
  */
 package info.rlwhitcomb.json;
 
@@ -143,16 +144,16 @@ public class JSON
 	}
 
 
-	private static void toStringValue(final Object obj, final boolean pretty, final String indent, final StringBuilder buf) {
+	private static void toStringValue(final Object obj, final boolean pretty, final boolean newlines, final String indent, final StringBuilder buf) {
 	    if (obj instanceof List) {
 		@SuppressWarnings("unchecked")
 		List<Object> list = (List<Object>) obj;
-		toStringValue(list, pretty, indent, buf);
+		toStringValue(list, pretty, newlines, indent, buf);
 	    }
 	    else if (obj instanceof Map) {
 		@SuppressWarnings("unchecked")
 		Map<String, Object> map = (Map<String, Object>) obj;
-		toStringValue(map, pretty, indent, buf);
+		toStringValue(map, pretty, newlines, indent, buf);
 	    }
 	    else if (obj instanceof BigDecimal) {
 		buf.append(((BigDecimal) obj).toPlainString());
@@ -172,18 +173,19 @@ public class JSON
 	    }
 	}
 
-	private static void toStringValue(final List<Object> list, final boolean pretty, final String indent, final StringBuilder buf) {
+	private static void toStringValue(final List<Object> list, final boolean pretty, final boolean newlines, final String indent, final StringBuilder buf) {
 	    String nextIndent = indent + "  ";
 	    if (list.size() > 0) {
 		boolean comma = false;
+		String newLine = newlines ? "\n" : NEWLINE;
 		if (pretty)
-		    buf.append("[").append(NEWLINE);
+		    buf.append("[").append(newLine);
 		else
 		    buf.append("[ ");
 		for (Object value : list) {
 		    if (comma) {
 			if (pretty)
-			    buf.append(",").append(NEWLINE);
+			    buf.append(",").append(newLine);
 			else
 			    buf.append(", ");
 		    }
@@ -193,10 +195,10 @@ public class JSON
 		    if (pretty)
 			buf.append(nextIndent);
 
-		    toStringValue(value, pretty, nextIndent, buf);
+		    toStringValue(value, pretty, newlines, nextIndent, buf);
 		}
 		if (pretty)
-		    buf.append(NEWLINE).append(indent).append("]");
+		    buf.append(newLine).append(indent).append("]");
 		else
 		    buf.append(" ]");
 	    }
@@ -205,18 +207,19 @@ public class JSON
 	    }
 	}
 
-	private static void toStringValue(final Map<String, Object> map, final boolean pretty, final String indent, final StringBuilder buf) {
+	private static void toStringValue(final Map<String, Object> map, final boolean pretty, final boolean newlines, final String indent, final StringBuilder buf) {
 	    String nextIndent = indent + "  ";
 	    if (map.size() > 0) {
 		boolean comma = false;
+		String newLine = newlines ? "\n" : NEWLINE;
 		if (pretty)
-		    buf.append("{").append(NEWLINE);
+		    buf.append("{").append(newLine);
 		else
 		    buf.append("{ ");
 		for (Map.Entry<String, Object> entry : map.entrySet()) {
 		    if (comma) {
 			if (pretty)
-			    buf.append(",").append(NEWLINE);
+			    buf.append(",").append(newLine);
 			else
 			    buf.append(", ");
 		    }
@@ -227,10 +230,10 @@ public class JSON
 			buf.append(nextIndent);
 
 		    buf.append(quote(entry.getKey())).append(": ");
-		    toStringValue(entry.getValue(), pretty, nextIndent, buf);
+		    toStringValue(entry.getValue(), pretty, newlines, nextIndent, buf);
 		}
 		if (pretty)
-		    buf.append(NEWLINE).append(indent).append("}");
+		    buf.append(newLine).append(indent).append("}");
 		else
 		    buf.append(" }");
 	    }
@@ -240,7 +243,7 @@ public class JSON
 	}
 
 	/**
-	 * Turn an object into a String for display.
+	 * Turn an object into a String for display, using platform-specific line separator.
 	 *
 	 * @param obj    The object to stringify.
 	 * @param pretty Whether to do indenting, etc.
@@ -249,7 +252,25 @@ public class JSON
 	public static String toStringValue(final Object obj, final boolean pretty) {
 	    StringBuilder buf = new StringBuilder();
 
-	    toStringValue(obj, pretty, "", buf);
+	    toStringValue(obj, pretty, false, "", buf);
+
+	    return buf.toString();
+	}
+
+	/**
+	 * Turn an object into a String for display with option for newlines.
+	 *
+	 * @param obj      The object to stringify.
+	 * @param pretty   Whether to do indenting, etc.
+	 * @param newlines {@code true} to use just {@code '\n'} for line separators,
+	 *                 or {@code false} to use the platform-specific separator
+	 *                 (only applies for pretty-printing).
+	 * @return         The string value of this object.
+	 */
+	public static String toStringValue(final Object obj, final boolean pretty, final boolean newlines) {
+	    StringBuilder buf = new StringBuilder();
+
+	    toStringValue(obj, pretty, newlines, "", buf);
 
 	    return buf.toString();
 	}

@@ -26,6 +26,7 @@
  *  History:
  *      17-Feb-2022 (rlwhitcomb)
  *	    #196: Initial coding.
+ *	    Simplify by eliminating layers.
  */
 package info.rlwhitcomb.json;
 
@@ -70,17 +71,13 @@ public class JSONObjectVisitor extends JSONBaseVisitor<Object>
 
 	@Override
 	public Object visitObj(JSONParser.ObjContext ctx) {
-	    return visit(ctx.pairList());
-	}
-
-	@Override
-	public Object visitPairList(JSONParser.PairListContext ctx) {
+	    JSONParser.PairListContext pairList = ctx.pairList();
 	    Map<String, Object> map = new LinkedHashMap<>();
 
 	    String id;
 	    Object value;
 
-	    for (JSONParser.PairContext pair : ctx.pair()) {
+	    for (JSONParser.PairContext pair : pairList.pair()) {
 		if (pair.id() != null)
 		    id = pair.id().getText();
 		else
@@ -93,22 +90,13 @@ public class JSONObjectVisitor extends JSONBaseVisitor<Object>
 
 	    return map;
 	}
-/*
-	@Override
-	public Object visitPair(JSONParser.PairContext ctx) {
-	    return visitChildren(ctx);
-	}
-*/
+
 	@Override
 	public Object visitArr(JSONParser.ArrContext ctx) {
-	    return visit(ctx.entityList());
-	}
-
-	@Override
-	public Object visitEntityList(JSONParser.EntityListContext ctx) {
+	    JSONParser.EntityListContext entityList = ctx.entityList();
 	    List<Object> list = new ArrayList<>();
 
-	    for (JSONParser.EntityContext entity : ctx.entity()) {
+	    for (JSONParser.EntityContext entity : entityList.entity()) {
 		list.add(visit(entity));
 	    }
 
@@ -199,11 +187,6 @@ public class JSONObjectVisitor extends JSONBaseVisitor<Object>
 
 	    return toInteger(text.substring(2), 16);
 	}
-/*
-	@Override
-	public Object visitId(JSONParser.IdContext ctx) {
-	    return ctx.ID().getText();
-	}
-*/
+
 }
 

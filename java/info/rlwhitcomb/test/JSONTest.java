@@ -68,7 +68,7 @@ public class JSONTest
 		    InputStream is = Files.newInputStream(f.toPath());
 		    System.out.println("===== " + f.getName() + " =====");
 		    Object obj = JSON.readObject(is);
-		    System.out.println(JSON.toStringValue(obj, true));
+		    System.out.println(JSON.toStringValue(obj, true, true));
 		    System.out.println("----- " + f.getName() + " -----");
 		    System.out.println();
 		}
@@ -85,7 +85,7 @@ public class JSONTest
 		    String testName = String.format("String Test #%1$d", stringTest);
 		    System.out.println("===== " + testName + " =====");
 		    Object obj = JSON.readString(test);
-		    System.out.println(JSON.toStringValue(obj, true));
+		    System.out.println(JSON.toStringValue(obj, true, true));
 		    System.out.println("----- " + testName + " -----");
 		    System.out.println();
 		}
