@@ -147,16 +147,19 @@ public final class SemanticVersion implements Comparable<SemanticVersion> {
 	 *           if the version string does not conform to the semver specs.
 	 */
 	public SemanticVersion(final String version) throws ParseException {
-		vParts = new int[3];
+		vParts = new int[5];
 		preParts = new ArrayList<String>(5);
 		metaParts = new ArrayList<String>(5);
 		input = version.toCharArray();
+
 		if (!stateMajor()) { // Start recursive descend
 			throw new ParseException(version, errPos);
 		}
+
 		major = vParts[0];
 		minor = vParts[1];
 		patch = vParts[2];
+
 		preRelease = preParts.toArray(new String[preParts.size()]);
 		buildMeta = metaParts.toArray(new String[metaParts.size()]);
 	}
@@ -295,6 +298,11 @@ public final class SemanticVersion implements Comparable<SemanticVersion> {
 		ret.append(minor);
 		ret.append('.');
 		ret.append(patch);
+		// If we parsed from a string and there were extra version parts, add them now
+		for (int i = 3; i < nextVPart; i++) {
+			ret.append('.');
+			ret.append(vParts[i]);
+		}
 		ret.append(getPreReleaseString());
 		ret.append(getBuildMetaString());
 		return ret.toString();
@@ -407,6 +415,7 @@ public final class SemanticVersion implements Comparable<SemanticVersion> {
 	// Parser implementation below
 
 	private int[] vParts;
+	private int nextVPart;
 	private char metaPrefix;
 	private ArrayList<String> preParts, metaParts;
 	private int errPos;
@@ -424,7 +433,7 @@ public final class SemanticVersion implements Comparable<SemanticVersion> {
 			return false;
 		}
 
-		vParts[0] = Integer.parseInt(new String(input, 0, pos), 10);
+		vParts[nextVPart++] = Integer.parseInt(new String(input, 0, pos), 10);
 
 		if (pos == input.length) { // We have a clean version string
 			return true;
@@ -439,6 +448,7 @@ public final class SemanticVersion implements Comparable<SemanticVersion> {
 		if (input[pos] == '-') { // We have pre release tags -> descend
 			return stateRelease(pos + 1);
 		}
+
 		errPos = pos; // We have junk
 		return false;
 	}
@@ -456,7 +466,8 @@ public final class SemanticVersion implements Comparable<SemanticVersion> {
 			errPos = index;
 			return false;
 		}
-		vParts[1] = Integer.parseInt(new String(input, index, pos - index), 10);
+
+		vParts[nextVPart++] = Integer.parseInt(new String(input, index, pos - index), 10);
 
 		if (input[pos] == '.') {
 			return statePatch(pos + 1);
@@ -467,6 +478,7 @@ public final class SemanticVersion implements Comparable<SemanticVersion> {
 		if (input[pos] == '-') { // We have pre release tags -> descend
 			return stateRelease(pos + 1);
 		}
+
 		errPos = pos;
 		return false;
 	}
@@ -485,18 +497,22 @@ public final class SemanticVersion implements Comparable<SemanticVersion> {
 			return false;
 		}
 
-		vParts[2] = Integer.parseInt(new String(input, index, pos - index), 10);
+		vParts[nextVPart++] = Integer.parseInt(new String(input, index, pos - index), 10);
 
 		if (pos == input.length) { // We have a clean version string
 			return true;
 		}
 
+		if (input[pos] == '.') { // Unusual but we have a fractional patch level
+			return statePatch(pos + 1);
+		}
 		if (input[pos] == '+' || input[pos] == '_') { // We have build meta tags -> descend
 			return stateMeta(pos + 1);
 		}
 		if (input[pos] == '-') { // We have pre release tags -> descend
 			return stateRelease(pos + 1);
 		}
+
 		errPos = pos; // We have junk
 		return false;
 	}
@@ -553,6 +569,7 @@ public final class SemanticVersion implements Comparable<SemanticVersion> {
 		if (input[pos] == '.') { // More parts -> descend
 			return stateMeta(pos + 1);
 		}
+
 		errPos = pos;
 		return false;
 	}
