@@ -88,11 +88,11 @@ hashstring('Four score and seven years ago')
 #
 # Tangent numbers
 #
-:rational on
+:decimal 300
 :resultsonly on
-loop 3..60,4 `Tn(${(__ - 1) / 2@F}) = ${Tn(__)@F}`
+loop k over 0..20 `Tn($k) = ${Tn(k)}` @q
 :resultsonly pop
-:rational pop
+:default
 
 :separators pop
 :clear

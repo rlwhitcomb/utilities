@@ -237,14 +237,17 @@ define zeta_2n(_2n) = { ((-1)**(_2n / 2 + 1) * Bn(_2n) * (2 * pi) ** _2n) / (2 *
  * and all even values.
  * Reference: http://scipp.ucsc.edu/~haber/ph116A/taylor11.pdf pg. 3 eq. 8
  *
- * @param n where we calculate the value for (n - 1)/2
+ * @param k where we calculate the value for (2k+1)
  * @return The k-th Tangent number
  */
-define Tn(n) = {
-  if n == 0 || n % 2 == 0 leave 0
-  _2kplus1 = (n - 1) / 2
-  _2kplus2 = _2kplus1 + 1
-  (2 ** _2kplus2) * (2 ** _2kplus2 - 1) * ( Bn(_2kplus2) / _2kplus2 )
+define Tn(k) = {
+  _2k2 = 2*k + 2
+  _2_2k2 = 2 ** _2k2
+  :rational on
+  _fact = Bn(_2k2) / _2k2
+  _result = _2_2k2 * (_2_2k2 - 1) * _fact
+  :rational pop
+  _result@d
 }
 
 #
