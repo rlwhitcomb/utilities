@@ -12,7 +12,6 @@
 !echo
 
 t1: liststest
-t2: -charset:UTF-8 calctest
 t3: -testclass:info.rlwhitcomb.test.CSVTest csvtest
 t4: sqltest
 t5: optiontest

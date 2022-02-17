@@ -300,6 +300,7 @@
 		New text resources for "tools" directory.
 	    17-Feb-2022 (rlwhitcomb)
 		#196: Text for the "json" directory.
+		Break out "calctest" separately because of frequent failures.
 
      ========================================================================== -->
 
@@ -731,6 +732,7 @@ Test starting on ${build.date} at ${build.time}
 		<java classname="${tester.class}"                     output="${test.log.path}" append="true" failonerror="true">
 			<arg value="-timing"/>
 			<arg value="-dir:test/files"/>
+			<arg value="-charset:UTF-8"/>
 			<arg value="calctest"/>
 		</java>
 		<java classname="${tester.class}"                     output="${test.log.path}" append="true" failonerror="true">
