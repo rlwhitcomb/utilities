@@ -12,6 +12,7 @@
 !echo
 
 t1: liststest
+t2: versiontest
 t3: -testclass:info.rlwhitcomb.test.CSVTest csvtest
 t4: sqltest
 t5: optiontest

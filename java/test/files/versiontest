@@ -1,0 +1,4 @@
+$inputDir test/canons
+$testClass info.rlwhitcomb.test.VersionTest
+
+version :

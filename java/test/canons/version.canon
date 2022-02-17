@@ -1,0 +1,29 @@
+>===== String Test #1 =====
+>input: '11.0.14.1+1' -> '11.0.14.1+1' passed
+>----- String Test #1 -----
+>
+>===== String Test #2 =====
+>input: '11+28' -> '11.0.0+28' passed
+>----- String Test #2 -----
+>
+>===== String Test #3 =====
+>input: '17.0.2+8' -> '17.0.2+8' passed
+>----- String Test #3 -----
+>
+>===== String Test #4 =====
+>input: '1.9.0-debug+8b74297' -> '1.9.0-debug+8b74297' passed
+>----- String Test #4 -----
+>
+>===== String Test #5 =====
+>input: '1.3.1-beta' -> '1.3.1-beta' passed
+>----- String Test #5 -----
+>
+>===== String Test #6 =====
+>input: '1.3.1_01' -> '1.3.1_01' passed
+>----- String Test #6 -----
+>
+>===== String Test #7 =====
+>input: '1.3.1_05-ea-b01' -> '1.3.1_05-ea-b01' passed
+>----- String Test #7 -----
+>
+>VersionTest: number of tests: 7, number succeeded: 7, number failed: 0
