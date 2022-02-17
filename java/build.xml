@@ -731,6 +731,11 @@ Test starting on ${build.date} at ${build.time}
 		<java classname="${tester.class}"                     output="${test.log.path}" append="true" failonerror="true">
 			<arg value="-timing"/>
 			<arg value="-dir:test/files"/>
+			<arg value="calctest"/>
+		</java>
+		<java classname="${tester.class}"                     output="${test.log.path}" append="true" failonerror="true">
+			<arg value="-timing"/>
+			<arg value="-dir:test/files"/>
 			<arg value="mastertest"/>
 		</java>
 		<echo>Verifying the M${mersenne.number} prime (${mersenne.digits} digits)...</echo>
