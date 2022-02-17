@@ -32,6 +32,8 @@
  *	    #235: D_FOUR added.
  *	16-Feb-2022 (rlwhitcomb)
  *	    Buffer sizes added.
+ *	17-Feb-2022 (rlwhitcomb)
+ *	    Double and float limits.
  */
 package info.rlwhitcomb.util;
 
@@ -91,6 +93,12 @@ public final class Constants
 
 	/** A {@link BigInteger} value of the largest long value. */
 	public static final BigInteger MAX_LONG = BigInteger.valueOf(Long.MAX_VALUE);
+
+	/** A {@link BigDecimal} value of the largest float value. */
+	public static final BigDecimal MAX_FLOAT = BigDecimal.valueOf(Float.MAX_VALUE);
+
+	/** A {@link BigDecimal} value of the largest double value. */
+	public static final BigDecimal MAX_DOUBLE = BigDecimal.valueOf(Double.MAX_VALUE);
 
 
 	/** A {@link BigDecimal} value of <code>-1</code>. */

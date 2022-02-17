@@ -24,6 +24,7 @@ t10: bidimaptest
 t11: wordfindtest
 t12: wordcounttest
 t13: headtest
+t14: jsontest
 
 !echo
 !echo Done with all the Tester tests.

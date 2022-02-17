@@ -298,6 +298,8 @@
 		Add "hexd" for HexDump program.
 	    08-Feb-2022 (rlwhitcomb)
 		New text resources for "tools" directory.
+	    17-Feb-2022 (rlwhitcomb)
+		#196: Text for the "json" directory.
 
      ========================================================================== -->
 
@@ -531,6 +533,7 @@
 			<generate-text-resources dir="info/rlwhitcomb/cat" />
 			<generate-text-resources dir="info/rlwhitcomb/compare" />
 			<generate-text-resources dir="info/rlwhitcomb/csv" />
+			<generate-text-resources dir="info/rlwhitcomb/json" />
 			<generate-text-resources dir="info/rlwhitcomb/matches" />
 			<generate-text-resources dir="info/rlwhitcomb/tester" />
 			<generate-text-resources dir="info/rlwhitcomb/tools" />

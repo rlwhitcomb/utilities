@@ -26,6 +26,8 @@
  *  History:
  *      04-Jan-2022 (rlwhitcomb)
  *	    First version (excerpted and revised from Calc.g4)
+ *	17-Feb-2022 (rlwhitcomb)
+ *	    #196: Tweak during implementation.
  */
 
 grammar JSON;
@@ -43,7 +45,6 @@ entity
 obj
    : '{' pairList '}'
    | '{' '}'
-   | pairList
    ;
 
 pairList
@@ -56,13 +57,12 @@ pair
    ;
 
 arr
-   : '[' valueList ']'
+   : '[' entityList ']'
    | '[' ']'
-   | valueList
    ;
 
-valueList
-   : value ( ',' value ) *
+entityList
+   : entity ( ',' entity ) *
    ;
 
 value
@@ -81,11 +81,17 @@ id
 
 /* Lexer rules start here */
 
-/* Note: this needs to be last so that these other "ID" like things
- * will be recognized first. */
+NULL_CONST
+   : 'null'
+   ;
 
-ID     : NAME_START_CHAR NAME_CHAR *
-       ;
+BOOL_CONST
+   : 'true'
+   | 'false'
+   ;
+
+ID : NAME_START_CHAR NAME_CHAR *
+   ;
 
 
 STRING
@@ -130,9 +136,6 @@ fragment SAFECODEPOINT2
    : ~ ['\\\u0000-\u001F]
    ;
 
-//
-// This must match "isIdentifierStart" in CalcUtil
-//
 fragment NAME_START_CHAR
    : 'A'..'Z'
    | 'a'..'z'
@@ -153,9 +156,6 @@ fragment NAME_START_CHAR
    | '\uFF1A'..'\uFFFD'
    ;
 
-//
-// This must match "isIdentifierPart" in CalcUtil
-//
 fragment NAME_CHAR
    : NAME_START_CHAR
    | '0'..'9'
@@ -166,15 +166,6 @@ fragment NAME_CHAR
 
 NUMBER
    : INT ('.' [0-9] +)? EXP?
-   ;
-
-NULL_CONST
-   : 'null'
-   ;
-
-BOOL_CONST
-   : 'true'
-   | 'false'
    ;
 
 BIN_CONST

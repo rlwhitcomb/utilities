@@ -1,0 +1,82 @@
+>===== defunkt.json =====
+>{
+>  "login": "defunkt",
+>  "id": 2,
+>  "node_id": "MDQ6VXNlcjI=",
+>  "avatar_url": "https://avatars.githubusercontent.com/u/2?v=4",
+>  "gravatar_id": "",
+>  "url": "https://api.github.com/users/defunkt",
+>  "html_url": "https://github.com/defunkt",
+>  "followers_url": "https://api.github.com/users/defunkt/followers",
+>  "following_url": "https://api.github.com/users/defunkt/following{/other_user}",
+>  "gists_url": "https://api.github.com/users/defunkt/gists{/gist_id}",
+>  "starred_url": "https://api.github.com/users/defunkt/starred{/owner}{/repo}",
+>  "subscriptions_url": "https://api.github.com/users/defunkt/subscriptions",
+>  "organizations_url": "https://api.github.com/users/defunkt/orgs",
+>  "repos_url": "https://api.github.com/users/defunkt/repos",
+>  "events_url": "https://api.github.com/users/defunkt/events{/privacy}",
+>  "received_events_url": "https://api.github.com/users/defunkt/received_events",
+>  "type": "User",
+>  "site_admin": false,
+>  "name": "Chris Wanstrath",
+>  "company": null,
+>  "blog": "http://chriswanstrath.com/",
+>  "location": null,
+>  "email": null,
+>  "hireable": null,
+>  "bio": "🍔",
+>  "twitter_username": null,
+>  "public_repos": 107,
+>  "public_gists": 273,
+>  "followers": 21383,
+>  "following": 210,
+>  "created_at": "2007-10-20T05:24:19Z",
+>  "updated_at": "2022-02-09T18:00:53Z"
+>}
+>----- defunkt.json -----
+>
+>===== String Test #1 =====
+>{
+>  "a": 1,
+>  "b": 2,
+>  "c": [
+>    "abc",
+>    "def"
+>  ]
+>}
+>----- String Test #1 -----
+>
+>===== String Test #2 =====
+>true
+>----- String Test #2 -----
+>
+>===== String Test #3 =====
+>[
+>  2.5,
+>  3.4,
+>  6.2,
+>  1.7
+>]
+>----- String Test #3 -----
+>
+>===== String Test #4 =====
+>[
+>  [
+>    1,
+>    2,
+>    3
+>  ],
+>  [
+>    4,
+>    5,
+>    6
+>  ],
+>  [
+>    7,
+>    8,
+>    9
+>  ]
+>]
+>----- String Test #4 -----
+>
+>JSONTest: number of tests: 5, number succeeded: 5, number failed: 0
