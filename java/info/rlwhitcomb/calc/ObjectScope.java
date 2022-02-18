@@ -46,6 +46,8 @@
  *	    #230: Add "getWildValues" for doing wildcard searches.
  *	05-Feb-2022 (rlwhitcomb)
  *	    #233: Add "immutable" flag to prevent additions to "settings" object.
+ *	17-Feb-2022 (rlwhitcomb)
+ *	    #252: Rename some methods to be more clear.
  */
 package info.rlwhitcomb.calc;
 
@@ -122,7 +124,7 @@ class ObjectScope extends Scope
 	 * @param ignoreCase Whether case is important in finding the name.
 	 * @return           The value (which could be {@code null} if it hasn't been defined yet.
 	 */
-	Object getValueImpl(final String name, final boolean ignoreCase) {
+	Object getValueLocally(final String name, final boolean ignoreCase) {
 	    if (ignoreCase) {
 		// Many times, even if we're ignoring case, the name works as given
 		if (variables.containsKey(name)) {
@@ -153,7 +155,7 @@ class ObjectScope extends Scope
 	 * @return           The value (which could be {@code null} if it hasn't been defined yet.
 	 */
 	Object getValue(final String name, final boolean ignoreCase) {
-	    return getValueImpl(name, ignoreCase);
+	    return getValueLocally(name, ignoreCase);
 	}
 
 	/**
@@ -163,7 +165,7 @@ class ObjectScope extends Scope
 	 * @param ignoreCase Whether case is important in finding the name(s).
 	 * @return           The entries found (could be empty).
 	 */
-	Map<String, Object> getWildValuesImpl(final String wildName, final boolean ignoreCase) {
+	Map<String, Object> getWildValuesLocally(final String wildName, final boolean ignoreCase) {
 	    // We have to enumerate the entries ourselves, since there are no "normal" mechanisms
 	    // for doing a wildcard match.
 	    Map<String, Object> values = new LinkedHashMap<>();
@@ -188,7 +190,7 @@ class ObjectScope extends Scope
 	 * @return           The entry map of the actual keys and values found.
 	 */
 	Map<String, Object> getWildValues(final String wildName, final boolean ignoreCase) {
-	    return getWildValuesImpl(wildName, ignoreCase);
+	    return getWildValuesLocally(wildName, ignoreCase);
 	}
 
 	/**
@@ -215,7 +217,7 @@ class ObjectScope extends Scope
 	 * @param ignoreCase Whether to ignore case in order to access the variable.
 	 * @param value      The new value for the variable.
 	 */
-	void setValueImpl(final String name, final boolean ignoreCase, final Object value) {
+	void setValueLocally(final String name, final boolean ignoreCase, final Object value) {
 	    if (ignoreCase) {
 		if (variables.containsKey(name)) {
 		    variables.put(name, value);
@@ -249,7 +251,7 @@ class ObjectScope extends Scope
 	 * @param value      The new value for the variable.
 	 */
 	void setValue(final String name, final Object value) {
-	    setValueImpl(name, false, value);
+	    setValueLocally(name, false, value);
 	}
 
 	/**
@@ -260,7 +262,7 @@ class ObjectScope extends Scope
 	 * @param value      The new value for the variable.
 	 */
 	void setValue(final String name, final boolean ignoreCase, final Object value) {
-	    setValueImpl(name, ignoreCase, value);
+	    setValueLocally(name, ignoreCase, value);
 	}
 
 	/**
@@ -271,7 +273,7 @@ class ObjectScope extends Scope
 	 * @param ignoreCase Whether or not to ignore the case of names when searching.
 	 * @return           {@code true} or {@code false} if the scope has such a variable.
 	 */
-	public boolean isDefinedHere(final String name, final boolean ignoreCase) {
+	public boolean isDefinedLocally(final String name, final boolean ignoreCase) {
 	    if (ignoreCase) {
 		if (variables.containsKey(name)) {
 		    return true;
@@ -298,7 +300,7 @@ class ObjectScope extends Scope
 	 * @return           {@code true} or {@code false} if the scope has such a variable.
 	 */
 	public boolean isDefined(final String name, final boolean ignoreCase) {
-	    return isDefinedHere(name, ignoreCase);
+	    return isDefinedLocally(name, ignoreCase);
 	}
 
 	/**

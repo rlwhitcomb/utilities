@@ -29,6 +29,8 @@
  *	14-Feb-2022 (rlwhitcomb)
  *	    #199: Add back in the "isImmutable" override method.
  *	    Now move back to "ValueScope".
+ *	17-Feb-2022 (rlwhitcomb)
+ *	    #252: Make sure to set the parameter in the local scope.
  */
 package info.rlwhitcomb.calc;
 
@@ -52,7 +54,7 @@ class ParameterValue extends ValueScope
 	 * @param value The unchanging value of this parameter.
 	 */
 	private ParameterValue(final String nm, final Object value) {
-	    super(nm, Type.CONSTANT);
+	    super(nm, Type.PARAMETER);
 
 	    this.paramValue  = value;
 	}
@@ -89,7 +91,7 @@ class ParameterValue extends ValueScope
 	 */
 	static void put(final ParameterizedScope scope, final String nm, final Object value) {
 	    ParameterValue param = new ParameterValue(nm, value);
-	    scope.setValue(nm, param);
+	    scope.setValueLocally(nm, false, param);
 	}
 
 }

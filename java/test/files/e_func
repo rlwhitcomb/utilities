@@ -93,3 +93,11 @@ def c(f) = f
 c(f1)
 c1(f2, 'roger')
 
+pp = 5
+def func(pp) = { pp }
+func(21)
+:results on
+`var pp before loop = $pp` @q
+loop pp over 2 { `param pp in loop = $pp` @q }
+`var pp after loop = $pp` @q
+:results pop

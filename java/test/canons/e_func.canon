@@ -81,3 +81,10 @@
 >Defining function “c(f)” = f
 >c(f1) -> "f1 here"
 >c1(f2, 'roger') -> "roger here"
+>pp = 5 -> 5
+>Defining function “func(pp)” = {pp}
+>func(21) -> 21
+>var pp before loop = 5
+>param pp in loop = 1
+>param pp in loop = 2
+>var pp after loop = 5

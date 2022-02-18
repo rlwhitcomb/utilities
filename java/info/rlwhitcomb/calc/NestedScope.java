@@ -36,6 +36,8 @@
  *	    Add "getWildValues" here for wild-card search.
  *	13-Feb-2022 (rlwhitcomb)
  *	    #199: Move GlobalScope out to ParameterizedScope; add LOOP_VAR to LoopScope.
+ *	17-Feb-2022 (rlwhitcomb)
+ *	    #252: Rename some methods to be more clear.
  */
 package info.rlwhitcomb.calc;
 
@@ -93,10 +95,12 @@ class NestedScope extends ObjectScope
 	 */
 	@Override
 	public boolean isDefined(final String name, final boolean ignoreCase) {
-	    if (isDefinedHere(name, ignoreCase))
+	    if (isDefinedLocally(name, ignoreCase))
 		return true;
+
 	    if (enclosingScope != null)
 		return enclosingScope.isDefined(name, ignoreCase);
+
 	    return false;
 	}
 
@@ -110,11 +114,11 @@ class NestedScope extends ObjectScope
 	@Override
 	public Object getValue(final String name, final boolean ignoreCase) {
 	    NestedScope scope = this;
-	    while (scope != null && !scope.isDefinedHere(name, ignoreCase))
+	    while (scope != null && !scope.isDefinedLocally(name, ignoreCase))
 		scope = scope.enclosingScope;
 
 	    if (scope != null)
-		return scope.getValueImpl(name, ignoreCase);
+		return scope.getValueLocally(name, ignoreCase);
 
 	    return null;
 	}
@@ -130,7 +134,7 @@ class NestedScope extends ObjectScope
 	    Map<String, Object> allValues = new LinkedHashMap<>();
 
 	    for (NestedScope scope = this; scope != null; scope = scope.enclosingScope) {
-		Map<String, Object> localValues = scope.getWildValuesImpl(wildName, ignoreCase);
+		Map<String, Object> localValues = scope.getWildValuesLocally(wildName, ignoreCase);
 		allValues.putAll(localValues);
 	    }
 	    return allValues;
@@ -146,13 +150,13 @@ class NestedScope extends ObjectScope
 	@Override
 	public void setValue(final String name, final boolean ignoreCase, final Object value) {
 	    NestedScope scope = this;
-	    while (scope != null && !scope.isDefinedHere(name, ignoreCase))
+	    while (scope != null && !scope.isDefinedLocally(name, ignoreCase))
 		scope = scope.enclosingScope;
 
 	    if (scope != null)
-		scope.setValueImpl(name, ignoreCase, value);
+		scope.setValueLocally(name, ignoreCase, value);
 	    else
-		setValueImpl(name, ignoreCase, value);
+		setValueLocally(name, ignoreCase, value);
 	}
 
 	/**
@@ -165,7 +169,7 @@ class NestedScope extends ObjectScope
 	 */
 	@Override
 	public Object remove(final String name, final boolean ignoreCase) {
-	    if (isDefinedHere(name, ignoreCase))
+	    if (isDefinedLocally(name, ignoreCase))
 		return super.remove(name, ignoreCase);
 	    if (enclosingScope != null)
 		return enclosingScope.remove(name, true);

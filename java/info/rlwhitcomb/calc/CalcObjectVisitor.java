@@ -517,6 +517,8 @@
  *	    But also create a special flag to NOT do the zero-arg call during parameter evaluation
  *	    so that we can pass zero-arg functions as parameters successfully.
  *	    #249: Add "expr IN loopCtl" as another expression type.
+ *	    #252: Predefine the loop control value in the local symbol scope so the visitor
+ *	    will find it during the block execution.
  */
 package info.rlwhitcomb.calc;
 
@@ -2217,12 +2219,15 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		LoopVisitor(final CalcParser.StmtBlockContext blockContext, final String varName) {
 		    this.block        = blockContext;
 		    this.localVarName = varName;
+
+		    // Predefine the loop variable in the local scope so it will definitely
+		    // override a global one
+		    currentScope.setValueLocally(localVarName, settings.ignoreNameCase, null);
 		}
 
 		@Override
 		public Object apply(final Object value) {
-		    if (localVarName != null)
-			currentScope.setValue(localVarName, settings.ignoreNameCase, value);
+		    currentScope.setValue(localVarName, settings.ignoreNameCase, value);
 		    return visit(block);
 		}
 
