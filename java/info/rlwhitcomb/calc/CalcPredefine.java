@@ -69,7 +69,7 @@ import static info.rlwhitcomb.util.Constants.*;
 import info.rlwhitcomb.util.CharUtil;
 import info.rlwhitcomb.util.ComplexNumber;
 import info.rlwhitcomb.util.Environment;
-import info.rlwhitcomb.util.ExceptionUtil;
+import info.rlwhitcomb.util.Exceptions;
 import info.rlwhitcomb.util.MathUtil;
 
 
@@ -222,7 +222,7 @@ class CalcPredefine
 	    }
 	    catch (ParseException pe) {
 		// This is a programmer error and needs to be fixed in SemanticVersion
-		System.err.println("ERROR: Problem with Java version: " + ExceptionUtil.toString(pe));
+		System.err.println("ERROR: Problem with Java version: " + Exceptions.toString(pe));
 	    }
 
 	    PredefinedValue.define(java, "version", javaVersion);

@@ -691,7 +691,7 @@ public final class Intl
 		throw new IllegalArgumentException("util#intl.invalidLocale", tag);
 	    }
 	    catch (MissingResourceException | IllformedLocaleException ex) {
-		throw new IllegalArgumentException("util#intl.localeError", tag, ExceptionUtil.toString(ex));
+		throw new IllegalArgumentException("util#intl.localeError", tag, Exceptions.toString(ex));
 	    }
 	}
 

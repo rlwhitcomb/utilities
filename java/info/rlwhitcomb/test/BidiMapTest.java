@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2013-2014,2016,2020-2021 Roger L. Whitcomb.
+ * Copyright (c) 2013-2014,2016,2020-2022 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -33,6 +33,8 @@
  *	    Add tests for size changes on attempted duplicate adds.
  *	29-Mar-2021 (rlwhitcomb)
  *	    Move to new package.
+ *	18-Feb-2022 (rlwhitcomb)
+ *	    Use Exceptions to get better error messages.
  */
 package info.rlwhitcomb.test;
 
@@ -46,6 +48,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import info.rlwhitcomb.util.BidiMap;
+import info.rlwhitcomb.util.Exceptions;
 import info.rlwhitcomb.util.Options;
 
 
@@ -147,7 +150,7 @@ public class BidiMapTest
 			if (verbose)
 			    System.out.format("Entered %1$d unique words.%n", (i + 1));
 		    } catch (IOException ioe) {
-			System.err.format("Error reading \"%1$.txt\": %2$s%n", name, ioe.getMessage());
+			System.err.format("Error reading \"%1$.txt\": %2$s%n", name, Exceptions.toString(ioe));
 			System.exit(2);
 		    }
 		}

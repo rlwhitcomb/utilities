@@ -66,7 +66,7 @@ import java.util.List;
 
 import static info.rlwhitcomb.util.Constants.*;
 import info.rlwhitcomb.util.Environment;
-import info.rlwhitcomb.util.ExceptionUtil;
+import info.rlwhitcomb.util.Exceptions;
 import info.rlwhitcomb.util.Intl;
 import info.rlwhitcomb.util.Options;
 
@@ -283,7 +283,7 @@ public class WordCount
 			cb.chars().forEach(ichar -> process(ichar));
 		    }
 		    catch (CharacterCodingException cce) {
-			Intl.errFormat("tools#wc.cannotDecode", ExceptionUtil.toString(cce));
+			Intl.errFormat("tools#wc.cannotDecode", Exceptions.toString(cce));
 			return;
 		    }
 		}
@@ -293,7 +293,7 @@ public class WordCount
 		return;
 	    }
 	    catch (IOException ioe) {
-		Intl.errFormat("tools#wc.ioError", ExceptionUtil.toString(ioe));
+		Intl.errFormat("tools#wc.ioError", Exceptions.toString(ioe));
 		return;
 	    }
 

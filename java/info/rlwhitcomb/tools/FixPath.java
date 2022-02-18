@@ -42,7 +42,7 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
-import info.rlwhitcomb.util.ExceptionUtil;
+import info.rlwhitcomb.util.Exceptions;
 import info.rlwhitcomb.util.Intl;
 
 
@@ -106,7 +106,7 @@ public class FixPath
 			    }
 			}
 			catch (IOException ioe) {
-			    Intl.errFormat("tools#fixpath.errorCanonicalPath", pathDir.getPath(), ExceptionUtil.toString(ioe));
+			    Intl.errFormat("tools#fixpath.errorCanonicalPath", pathDir.getPath(), Exceptions.toString(ioe));
 			}
 		    }
 		}

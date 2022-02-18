@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2015,2017,2020-2021 Roger L. Whitcomb.
+ * Copyright (c) 2015,2017,2020-2022 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -43,6 +43,8 @@
  *	    Update obsolete Javadoc constructs.
  *	06-Sep-2021 (rlwhitcomb)
  *	    Final parameters.
+ *	18-Feb-2022 (rlwhitcomb)
+ *	    Use Exceptions to get better error messages.
  */
 package info.rlwhitcomb.util;
 
@@ -84,7 +86,7 @@ public interface LineProcessor extends FileFilter
 	 *		to abort processing for some reason.
 	 */
 	default boolean handleError(final File inputFile, final Throwable error) {
-	    Intl.errFormat("util#line.genericError", inputFile == null ? "<none>" : inputFile.getPath(), error.getMessage());
+	    Intl.errFormat("util#line.genericError", inputFile == null ? "<none>" : inputFile.getPath(), Exceptions.toString(error));
 	    return true;
 	}
 

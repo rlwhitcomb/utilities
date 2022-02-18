@@ -74,6 +74,8 @@
  *	01-Feb-2022 (rlwhitcomb)
  *	    #231: Use new Constants class variables instead of our own.
  *	    #156: Properly quote output values and quote control characters.
+ *	18-Feb-2022 (rlwhitcomb)
+ *	   Use Exceptions for better I/O error messages.
  */
 package info.rlwhitcomb.test;
 
@@ -98,6 +100,7 @@ import info.rlwhitcomb.csv.*;
 import static info.rlwhitcomb.util.Constants.*;
 import info.rlwhitcomb.util.CharUtil;
 import info.rlwhitcomb.util.Environment;
+import info.rlwhitcomb.util.Exceptions;
 import info.rlwhitcomb.util.FileUtilities;
 import info.rlwhitcomb.util.Intl;
 import info.rlwhitcomb.util.Options;
@@ -468,11 +471,8 @@ public class CSVTest
 		    }
 		}
 	    }
-	    catch (IOException ioe) {
-		System.err.println(ioe.getMessage());
-	    }
-	    catch (CSVException csve) {
-		System.err.println(csve.getMessage());
+	    catch (IOException | CSVException ex) {
+		System.err.println(Exceptions.toString(ex));
 	    }
 	}
 

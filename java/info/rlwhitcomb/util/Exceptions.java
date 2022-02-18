@@ -75,6 +75,7 @@
  *	    UnsupportedEncodingException also needs name.
  *	18-Feb-2022 (rlwhitcomb)
  *	    Deal gracefully with UncheckedIOException; tweak "exceptionName".
+ *	    Rename class.
  */
 package info.rlwhitcomb.util;
 
@@ -96,12 +97,12 @@ import java.util.UnknownFormatConversionException;
  * Utility class that has various methods to help with exception handling
  * and display.
  */
-public final class ExceptionUtil
+public final class Exceptions
 {
 	/**
 	 * Private constructor since this is a utility class.
 	 */
-	private ExceptionUtil() {
+	private Exceptions() {
 	}
 
 	/**

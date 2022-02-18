@@ -29,7 +29,7 @@
  */
 package info.rlwhitcomb.json;
 
-import info.rlwhitcomb.util.ExceptionUtil;
+import info.rlwhitcomb.util.Exceptions;
 
 
 /**
@@ -55,7 +55,7 @@ public class JSONException extends RuntimeException
 	}
 
 	public JSONException(final Throwable cause, final int lineNo) {
-	    super(ExceptionUtil.toString(cause), cause);
+	    super(Exceptions.toString(cause), cause);
 	    this.lineNumber = lineNo;
 	}
 

@@ -201,6 +201,7 @@
  *	    #231: Move some constants out to Constants class.
  *	18-Feb-2022 (rlwhitcomb)
  *	    #250: Use NewlineOutputStream on test program output when "$ignorelineendings" is specified.
+ *	    Use Exceptions everywhere to display I/O errors.
  */
 package info.rlwhitcomb.tester;
 
@@ -238,7 +239,7 @@ import info.rlwhitcomb.util.CharUtil;
 import static info.rlwhitcomb.util.Constants.*;
 import info.rlwhitcomb.util.EchoInputStream;
 import info.rlwhitcomb.util.Environment;
-import info.rlwhitcomb.util.ExceptionUtil;
+import info.rlwhitcomb.util.Exceptions;
 import info.rlwhitcomb.util.FileUtilities;
 import info.rlwhitcomb.util.Intl;
 import info.rlwhitcomb.util.NewlineOutputStream;
@@ -451,7 +452,7 @@ public class Tester
 	    }
 	    catch (IOException ioe) {
 		Intl.errFormat("tester#compareError",
-			ioe.getMessage(), canonFile.getPath(), realFile.getPath());
+			Exceptions.toString(ioe), canonFile.getPath(), realFile.getPath());
 		return INPUT_IO_ERROR;
 	    }
 	    return SUCCESS;
@@ -624,21 +625,21 @@ public class Tester
 			    }
 			}
 			catch (NoSuchMethodException nsme) {
-			    origErr.println(Intl.formatString("tester#noMainMethod", ExceptionUtil.toString(nsme)));
+			    origErr.println(Intl.formatString("tester#noMainMethod", Exceptions.toString(nsme)));
 			    return OTHER_ERROR;
 			}
 			catch (IllegalAccessException | IllegalArgumentException | InstantiationException ex) {
-			    origErr.println(Intl.formatString("tester#mainInvokeError", ExceptionUtil.toString(ex)));
+			    origErr.println(Intl.formatString("tester#mainInvokeError", Exceptions.toString(ex)));
 			    return OTHER_ERROR;
 			}
 			catch (InvocationTargetException ite) {
-			    origErr.println(Intl.formatString("tester#abnormalExitString", ExceptionUtil.toString(ite.getTargetException())));
+			    origErr.println(Intl.formatString("tester#abnormalExitString", Exceptions.toString(ite.getTargetException())));
 			    return OTHER_ERROR;
 			}
 		    }
 		}
 		catch (Exception e) {
-		    origErr.println(Intl.formatString("tester#abnormalExitString", ExceptionUtil.toString(e)));
+		    origErr.println(Intl.formatString("tester#abnormalExitString", Exceptions.toString(e)));
 		    exitCode = OTHER_ERROR;
 		}
 		finally {
@@ -703,7 +704,7 @@ public class Tester
 		return ret;
 	    }
 	    catch (IOException ioe) {
-		Intl.errFormat("tester#errTempCreate", ioe.getMessage());
+		Intl.errFormat("tester#errTempCreate", Exceptions.toString(ioe));
 		return OUTPUT_IO_ERROR;
 	    }
 	    finally {
@@ -1081,7 +1082,7 @@ public class Tester
 		}
 	    }
 	    catch (IOException ioe) {
-		Intl.errFormat("tester#errCanonFiles", canonFileName, ioe.getMessage());
+		Intl.errFormat("tester#errCanonFiles", canonFileName, Exceptions.toString(ioe));
 		return 2;
 	    }
 	    finally {
@@ -1163,7 +1164,7 @@ public class Tester
 				testClass = Class.forName(argument);
 			    }
 			    catch (NoClassDefFoundError | ClassNotFoundException | ExceptionInInitializerError ex) {
-				Intl.errFormat("tester#testClassNotFound", argument, ExceptionUtil.toString(ex));
+				Intl.errFormat("tester#testClassNotFound", argument, Exceptions.toString(ex));
 				return false;
 			    }
 			}
@@ -1364,7 +1365,7 @@ public class Tester
 		}
 	    }
 	    catch (IOException ioe) {
-		Intl.errFormat("tester#readError", name, ioe.getMessage());
+		Intl.errFormat("tester#readError", name, Exceptions.toString(ioe));
 	    }
 	}
 
@@ -1476,7 +1477,7 @@ public class Tester
 		    locale = Intl.getValidLocale(localeName);
 		}
 		catch (IllegalArgumentException iae) {
-		    System.err.println(ExceptionUtil.toString(iae));
+		    System.err.println(Exceptions.toString(iae));
 		    System.exit(2);
 		}
 		Locale.setDefault(locale);
@@ -1491,7 +1492,7 @@ public class Tester
 		    currentCharset = charset;
 		}
 		catch (Exception ex) {
-		    System.err.println(ExceptionUtil.toString(ex));
+		    System.err.println(Exceptions.toString(ex));
 		    System.exit(2);
 		}
 	    }
@@ -1501,7 +1502,7 @@ public class Tester
 		    testClass = Class.forName(arg1);
 		}
 		catch (NoClassDefFoundError | ClassNotFoundException | ExceptionInInitializerError ex) {
-		    Intl.errFormat("tester#testClassNotFound", arg1, ExceptionUtil.toString(ex));
+		    Intl.errFormat("tester#testClassNotFound", arg1, Exceptions.toString(ex));
 		    System.exit(2);
 		}
 	    }
@@ -1569,7 +1570,7 @@ public class Tester
 		testDescriptionFiles.forEach(n -> driveTests(n));
 	    }
 	    catch (Exception err) {
-		Intl.errFormat("tester#exception", ExceptionUtil.toString(err));
+		Intl.errFormat("tester#exception", Exceptions.toString(err));
 		return OTHER_ERROR;
 	    }
 	    return numberFailed == 0 ? 0 : NUMBER_OF_ERRORS + numberFailed;

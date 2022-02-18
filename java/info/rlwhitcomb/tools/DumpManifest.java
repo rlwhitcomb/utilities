@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2010-2011,2015,2017-2018,2020-2021 Roger L. Whitcomb.
+ * Copyright (c) 2010-2011,2015,2017-2018,2020-2022 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,12 +27,17 @@
  *	    ... lost in antiquity ...
  *	29-Mar-2021 (rlwhitcomb)
  *	    Move to new "tools" package; add "Change History".
+ *	18-Feb-2022 (rlwhitcomb)
+ *	    Use Exceptions for better exception messages.
  */
 package info.rlwhitcomb.tools;
 
 import java.io.*;
 import java.util.*;
 import java.util.jar.*;
+
+import info.rlwhitcomb.util.Exceptions;
+
 
 /**
  * Dump the .jar file contents, including any manifest that is included.
@@ -117,7 +122,7 @@ public class DumpManifest
 			}
 		    }
 		    catch (IOException ioe) {
-			System.err.format("Unable to open jar file '%1$s', error is: %2$s%n", arg, ioe.getMessage());
+			System.err.format("Unable to open jar file '%1$s', error is: %2$s%n", arg, Exceptions.toString(ioe));
 			return;
 		    }
 		}

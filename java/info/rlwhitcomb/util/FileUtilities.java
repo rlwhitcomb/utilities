@@ -397,7 +397,7 @@ public final class FileUtilities
 	    return true;
 	}
 	catch (Exception ex) {
-	    Logging.Debug("Exception %1$s trying to open file '%2$s' for reading.", ExceptionUtil.toString(ex, true), path);
+	    Logging.Debug("Exception %1$s trying to open file '%2$s' for reading.", Exceptions.toString(ex, true), path);
 	}
 	Logging.Debug("\tsome unexpected exception was thrown trying to read the file, return false");
 	return false;

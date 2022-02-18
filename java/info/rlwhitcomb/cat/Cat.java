@@ -68,7 +68,7 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.stream.Stream;
 import info.rlwhitcomb.util.Environment;
-import info.rlwhitcomb.util.ExceptionUtil;
+import info.rlwhitcomb.util.Exceptions;
 import info.rlwhitcomb.util.Intl;
 import info.rlwhitcomb.util.Options;
 
@@ -228,12 +228,12 @@ public class Cat {
 			Intl.errFormat("cat#decodeError",
 				file.getPath(),
 				currentInputCharset.displayName(),
-				ExceptionUtil.toString(uioe));
+				Exceptions.toString(uioe));
 		    } else {
-			Intl.errFormat("cat#ioError", file.getPath(), ExceptionUtil.toString(uioe));
+			Intl.errFormat("cat#ioError", file.getPath(), Exceptions.toString(uioe));
 		    }
 		} catch (IOException ioe) {
-		    Intl.errFormat("cat#ioError", file.getPath(), ExceptionUtil.toString(ioe));
+		    Intl.errFormat("cat#ioError", file.getPath(), Exceptions.toString(ioe));
 		}
 	    } else {
 		Intl.errFormat("cat#noFileRead", name);
@@ -244,7 +244,7 @@ public class Cat {
 	    try {
 		return Charset.forName(name);
 	    } catch (IllegalCharsetNameException | UnsupportedCharsetException ex) {
-		System.err.println(ExceptionUtil.toString(ex));
+		System.err.println(Exceptions.toString(ex));
 		System.exit(3);
 	    }
 	    return null;
@@ -296,7 +296,7 @@ public class Cat {
 					}
 				    }
 				    catch (IllegalArgumentException iae) {
-					System.err.println(ExceptionUtil.toString(iae));
+					System.err.println(Exceptions.toString(iae));
 					System.exit(3);
 				    }
 				}

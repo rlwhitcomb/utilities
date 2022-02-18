@@ -33,7 +33,7 @@ import java.text.ParseException;
 
 import de.onyxbits.SemanticVersion;
 
-import info.rlwhitcomb.util.ExceptionUtil;
+import info.rlwhitcomb.util.Exceptions;
 import info.rlwhitcomb.util.Options;
 
 
@@ -85,7 +85,7 @@ public class VersionTest
 		    System.out.println();
 		}
 		catch (IllegalArgumentException | ParseException ex) {
-		    System.out.println("input: '" + tests[0] + "' FAILED: " + ExceptionUtil.toString(ex));
+		    System.out.println("input: '" + tests[0] + "' FAILED: " + Exceptions.toString(ex));
 		    numberOfFailures++;
 		}
 	    }

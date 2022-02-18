@@ -60,7 +60,7 @@ import java.util.List;
 import info.rlwhitcomb.util.ConsoleColor;
 import static info.rlwhitcomb.util.ConsoleColor.Code.*;
 import info.rlwhitcomb.util.Environment;
-import info.rlwhitcomb.util.ExceptionUtil;
+import info.rlwhitcomb.util.Exceptions;
 import info.rlwhitcomb.util.Intl;
 import info.rlwhitcomb.util.Options;
 
@@ -318,7 +318,7 @@ public class HexDump
 		Intl.errFormat("tools#hexdump.invalidPath", file);
 	    }
 	    catch (IOException ioe) {
-		Intl.errFormat("tools#hexdump.ioError", ExceptionUtil.toString(ioe));
+		Intl.errFormat("tools#hexdump.ioError", Exceptions.toString(ioe));
 	    }
 	    if (printName) {
 		out.println();
@@ -409,7 +409,7 @@ public class HexDump
 		    out = new PrintStream(Files.newOutputStream(path), false, outputFileCharset);
 		}
 		catch (IOException ioe) {
-		    Intl.errFormat("tools#hexdump.ioError", ExceptionUtil.toString(ioe));
+		    Intl.errFormat("tools#hexdump.ioError", Exceptions.toString(ioe));
 		}
 	    }
 

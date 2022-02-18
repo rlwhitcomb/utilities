@@ -38,7 +38,7 @@ package info.rlwhitcomb.tools;
 import java.io.File;
 import java.io.IOException;
 
-import info.rlwhitcomb.util.ExceptionUtil;
+import info.rlwhitcomb.util.Exceptions;
 import info.rlwhitcomb.util.FileUtilities;
 import info.rlwhitcomb.util.Intl;
 
@@ -71,7 +71,7 @@ public class GUnzip
 		    Intl.errFormat("tools#gunzip.wrongExtension", arg);
 		}
 		catch (IOException ioe) {
-		    Intl.errFormat("tools#gunzip.ioError", arg, ExceptionUtil.toString(ioe));
+		    Intl.errFormat("tools#gunzip.ioError", arg, Exceptions.toString(ioe));
 		}
 	    }
 	}

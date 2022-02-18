@@ -930,9 +930,9 @@ public final class Environment
 		}
 		else {
 		    if (CharUtil.isNullOrEmpty(name))
-			Intl.errFormat("util#env.timeThisError", ExceptionUtil.toString(e));
+			Intl.errFormat("util#env.timeThisError", Exceptions.toString(e));
 		    else
-			Intl.errFormat("util#env.timeThisErrorNamed", name, ExceptionUtil.toString(e));
+			Intl.errFormat("util#env.timeThisErrorNamed", name, Exceptions.toString(e));
 		}
 	    }
 	    finally {
@@ -996,9 +996,9 @@ public final class Environment
 		}
 		else {
 		    if (CharUtil.isNullOrEmpty(name))
-			Intl.errFormat("util#env.timeThisError", ExceptionUtil.toString(e));
+			Intl.errFormat("util#env.timeThisError", Exceptions.toString(e));
 		    else
-			Intl.errFormat("util#env.timeThisErrorNamed", name, ExceptionUtil.toString(e));
+			Intl.errFormat("util#env.timeThisErrorNamed", name, Exceptions.toString(e));
 		}
 	    }
 	    finally {

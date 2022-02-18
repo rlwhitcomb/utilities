@@ -127,7 +127,7 @@ import info.rlwhitcomb.util.CharUtil;
 import info.rlwhitcomb.util.ConsoleColor;
 import static info.rlwhitcomb.util.ConsoleColor.Code.*;
 import info.rlwhitcomb.util.Environment;
-import info.rlwhitcomb.util.ExceptionUtil;
+import info.rlwhitcomb.util.Exceptions;
 import info.rlwhitcomb.util.Intl;
 import info.rlwhitcomb.util.Options;
 
@@ -580,7 +580,7 @@ public class WordFind implements Application {
             mainWindow.open(display);
             lettersInput.requestFocus();
         } catch (Exception ex) {
-            Intl.errFormat("wordfind#exception", ExceptionUtil.toString(ex), ex.getStackTrace()[0].toString());
+            Intl.errFormat("wordfind#exception", Exceptions.toString(ex), ex.getStackTrace()[0].toString());
             ex.printStackTrace();
         }
     }
@@ -938,7 +938,7 @@ public class WordFind implements Application {
                 }
             }
         } catch (IOException ioe) {
-            error("wordfind#errReadingWordFile", quote(wordFile), ExceptionUtil.toString(ioe));
+            error("wordfind#errReadingWordFile", quote(wordFile), Exceptions.toString(ioe));
         }
         long endTime = System.nanoTime();
 

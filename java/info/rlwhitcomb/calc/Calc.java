@@ -142,7 +142,7 @@
  *	22-Apr-2021 (rlwhitcomb)
  *	    Allow line continuations in REPL mode (needs new grammar support to work).
  *	29-Apr-2021 (rlwhitcomb)
- *	    Fix one place that needed ExceptionUtil to get a nicer error message.
+ *	    Fix one place that needed Exceptions to get a nicer error message.
  *	29-Apr-2021 (rlwhitcomb)
  *	    Change the GUI "Version" key label id.
  *	08-May-2021 (rlwhitcomb)
@@ -330,7 +330,7 @@ import info.rlwhitcomb.util.ConsoleColor;
 import static info.rlwhitcomb.util.ConsoleColor.Code;
 import static info.rlwhitcomb.util.ConsoleColor.Code.*;
 import info.rlwhitcomb.util.Environment;
-import info.rlwhitcomb.util.ExceptionUtil;
+import info.rlwhitcomb.util.Exceptions;
 import info.rlwhitcomb.util.FileUtilities;
 import info.rlwhitcomb.util.Intl;
 import info.rlwhitcomb.util.NumericUtil.RangeMode;
@@ -1071,7 +1071,7 @@ public class Calc
 		requestFocus(inputTextPane);
 	    }
 	    catch (Throwable ex) {
-		String message = ExceptionUtil.toString(ex) + ClassUtil.getCallingMethod(1);
+		String message = Exceptions.toString(ex) + ClassUtil.getCallingMethod(1);
 		if (displayer != null)
 		    displayer.displayErrorMessage(message);
 		else
@@ -1378,7 +1378,7 @@ public class Calc
 			    Alert.alert(MessageType.INFO, Intl.formatString("saveSuccess", selectedFile.getPath()), Intl.getString("save"), null, mainWindow, null);
 			}
 			catch (IOException ioe) {
-			    Alert.alert(MessageType.ERROR, ExceptionUtil.toString(ioe), ioe.getClass().getSimpleName(), null, mainWindow, null);
+			    Alert.alert(MessageType.ERROR, Exceptions.toString(ioe), ioe.getClass().getSimpleName(), null, mainWindow, null);
 			}
 		    });
 		}
@@ -1423,7 +1423,7 @@ public class Calc
 			    }
 			}
 			catch (IOException ioe) {
-			    Alert.alert(MessageType.ERROR, ExceptionUtil.toString(ioe), ioe.getClass().getSimpleName(), null, mainWindow, null);
+			    Alert.alert(MessageType.ERROR, Exceptions.toString(ioe), ioe.getClass().getSimpleName(), null, mainWindow, null);
 			}
 			inputTextPane.setText(buf.toString());
 			characterListener.enableActions();
@@ -1513,7 +1513,7 @@ public class Calc
 		Desktop.getDesktop().open(helpFile);
 	    }
 	    catch (IOException ex) {
-		System.err.println(ExceptionUtil.toString(ex));
+		System.err.println(Exceptions.toString(ex));
 	    }
 	}
 
@@ -1729,7 +1729,7 @@ public class Calc
 		return process(CharStreams.fromString(input), visitor, errorStrategy, silent);
 	    }
 	    catch (IOException ioe) {
-		displayer.displayErrorMessage(Intl.formatString("calc#ioError", ExceptionUtil.toString(ioe)));
+		displayer.displayErrorMessage(Intl.formatString("calc#ioError", Exceptions.toString(ioe)));
 	    }
 	    return null;
 	}
@@ -1767,7 +1767,7 @@ public class Calc
 		returnValue = visitor.visit(tree);
 	    }
 	    catch (IllegalArgumentException | IllegalStateException ie) {
-		displayer.displayErrorMessage(Intl.formatString("calc#argError", ExceptionUtil.toString(ie)));
+		displayer.displayErrorMessage(Intl.formatString("calc#argError", Exceptions.toString(ie)));
 	    }
 	    catch (CalcException ce) {
 		displayer.displayErrorMessage(Intl.formatString("calc#argError", ce.getMessage()), ce.getLine());
@@ -2074,7 +2074,7 @@ public class Calc
 				expecting = Expecting.DEFAULT;
 			    }
 			    catch (IllegalArgumentException iae) {
-				Intl.errFormat("calc#errorPeriod", ExceptionUtil.toString(iae));
+				Intl.errFormat("calc#errorPeriod", Exceptions.toString(iae));
 			    }
 			    break;
 			case DIRECTORY:
@@ -2098,7 +2098,7 @@ public class Calc
 				expecting = Expecting.DEFAULT;
 			    }
 			    catch (IllegalCharsetNameException | UnsupportedCharsetException cse) {
-				Intl.errFormat("calc#charsetError", arg, ExceptionUtil.toString(cse));
+				Intl.errFormat("calc#charsetError", arg, Exceptions.toString(cse));
 				expecting = Expecting.QUIT_NOW;
 			    }
 			    break;
@@ -2311,7 +2311,7 @@ public class Calc
 		}
 	    }
 	    catch (IllegalArgumentException iae) {
-		displayer.displayErrorMessage(Intl.formatString("calc#argError", ExceptionUtil.toString(iae)));
+		displayer.displayErrorMessage(Intl.formatString("calc#argError", Exceptions.toString(iae)));
 	    }
 	    catch (LeaveException lex) {
 		if (lex.hasValue()) {
@@ -2319,7 +2319,7 @@ public class Calc
 		}
 	    }
 	    catch (IOException ioe) {
-		Intl.errFormat("calc#inOutError", ExceptionUtil.toString(ioe));
+		Intl.errFormat("calc#inOutError", Exceptions.toString(ioe));
 	    }
 
 	    if (exitValue != null) {

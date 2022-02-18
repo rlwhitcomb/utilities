@@ -33,7 +33,7 @@ package info.rlwhitcomb.tools;
 
 import java.io.File;
 
-import info.rlwhitcomb.util.ExceptionUtil;
+import info.rlwhitcomb.util.Exceptions;
 import info.rlwhitcomb.util.Intl;
 
 

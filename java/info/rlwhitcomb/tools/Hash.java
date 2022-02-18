@@ -52,6 +52,8 @@
  *	    #90: Rename from MD5 to Hash; make default SHA-256.
  *	30-Jan-2022 (rlwhitcomb)
  *	    #43: Allow "-lines" to combine all command line into one line string.
+ *	18-Feb-2022 (rlwhitcomb)
+ *	    Use Exceptions for exception messages.
  */
 package info.rlwhitcomb.tools;
 
@@ -65,6 +67,8 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import info.rlwhitcomb.util.Exceptions;
 
 
 /**
@@ -412,7 +416,8 @@ public class Hash {
 			    processFile(f);
 			}
 			catch (IOException ioe) {
-			    System.err.format("Exception while processing file '%1$s':%n%2$s%n", f.getPath(), ioe.getMessage());
+			    System.err.format("Exception while processing file '%1$s':%n%2$s%n",
+				f.getPath(), Exceptions.toString(ioe));
 			}
 		    }
 		    else if (doLines) {

@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2020-2021 Roger L. Whitcomb.
+ * Copyright (c) 2020-2022 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -53,7 +53,7 @@ import java.util.TreeSet;
 
 import info.rlwhitcomb.util.CharUtil;
 import info.rlwhitcomb.util.Environment;
-import info.rlwhitcomb.util.ExceptionUtil;
+import info.rlwhitcomb.util.Exceptions;
 ;
 
 /**
@@ -592,7 +592,7 @@ System.out.println("size = " + basicAttrs.size() + ", createTime = " + basicAttr
 		    result.add(Attribute.SYSTEM);
 	    }
 	    catch (IOException ioe) {
-		System.err.println("Cannot read DosFileAttributes: " + ExceptionUtil.toString(ioe));
+		System.err.println("Cannot read DosFileAttributes: " + Exceptions.toString(ioe));
 	    }
 
 	    return result;

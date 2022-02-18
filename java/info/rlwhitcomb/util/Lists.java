@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2013-2014,2016-2021 Roger L. Whitcomb.
+ * Copyright (c) 2013-2014,2016-2022 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -80,6 +80,8 @@
  *	    Strip off line continuations ("\" at the end of the line).
  *	03-Dec-2021 (rlwhitcomb)
  *	    Add "-indent" option.
+ *	18-Feb-2022 (rlwhitcomb)
+ *	    Use Exceptions to get better error messages.
  */
 package info.rlwhitcomb.util;
 
@@ -95,6 +97,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import info.rlwhitcomb.Testable;
+import info.rlwhitcomb.util.Exceptions;
 
 
 /**
@@ -440,7 +443,7 @@ public class Lists
 		    output = new PrintStream(outputFileName);
 		}
 		catch (IOException ioe) {
-		    errUsage("Unable to open \"%1$s\" file for writing: %2$s", outputFileName, ioe.getMessage());
+		    errUsage("Unable to open \"%1$s\" file for writing: %2$s", outputFileName, Exceptions.toString(ioe));
 		    return OUTPUT_IO_ERROR;
 		}
 	    }
@@ -611,10 +614,10 @@ public class Lists
 	    }
 	    catch (IOException ioe) {
 		if (readConsole) {
-		    System.err.format("Error reading from the console: %1$s%n", ioe.getMessage());
+		    System.err.format("Error reading from the console: %1$s%n", Exceptions.toString(ioe));
 		}
 		else {
-		    System.err.format("Error accessing the file \"%1$s\": %2$s%n", fileName, ioe.getMessage());
+		    System.err.format("Error accessing the file \"%1$s\": %2$s%n", fileName, Exceptions.toString(ioe));
 		}
 		return INPUT_IO_ERROR;
 	    }

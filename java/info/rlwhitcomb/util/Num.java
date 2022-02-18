@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2008-2010,2014,2020-2021 Roger L. Whitcomb.
+ * Copyright (c) 2008-2010,2014,2020-2022 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -36,6 +36,8 @@
  *	    Cleanup and prepare for GitHub.
  *	09-Jul-2021 (rlwhitcomb)
  *	    Make the class final and constructor private for a utility class.
+ *	18-Feb-2022 (rlwhitcomb)
+ *	    Use Exceptions to get better error messages.
  */
 package info.rlwhitcomb.util;
 
@@ -196,7 +198,7 @@ public final class Num
 		return f1.parse(value).longValue();
 	    }
 	    catch (ParseException pe) {
-		Logging.Error("Parsing error: %1$s", pe.getMessage());
+		Logging.Error("Parsing error: %1$s", Exceptions.toString(pe));
 	    }
 	    return 0L;
 	}
@@ -213,7 +215,7 @@ public final class Num
 		return f2.parse(value).doubleValue();
 	    }
 	    catch (ParseException pe) {
-		Logging.Error("Parsing error: %1$s", pe.getMessage());
+		Logging.Error("Parsing error: %1$s", Exceptions.toString(pe));
 	    }
 	    return 0.0d;
 	}

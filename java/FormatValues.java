@@ -30,7 +30,7 @@
  *	    Move test code to a new package.
  */
 import java.io.*;
-import info.rlwhitcomb.util.ExceptionUtil;
+import info.rlwhitcomb.util.Exceptions;
 import info.rlwhitcomb.util.FileUtilities;
 
 
@@ -72,7 +72,7 @@ public class FormatValues
 		value = value.substring(0, max_digits);
 	    }
 	    catch (IOException ioe) {
-		System.err.println("I/O Error: " + ExceptionUtil.toString(ioe));
+		System.err.println("I/O Error: " + Exceptions.toString(ioe));
 		System.exit(1);
 	    }
 

@@ -55,7 +55,7 @@ import java.util.List;
 
 import static info.rlwhitcomb.util.Constants.*;
 import info.rlwhitcomb.util.Environment;
-import info.rlwhitcomb.util.ExceptionUtil;
+import info.rlwhitcomb.util.Exceptions;
 import info.rlwhitcomb.util.Intl;
 import info.rlwhitcomb.util.Options;
 
@@ -167,7 +167,7 @@ public class Head
 		Intl.errFormat("tools#head.invalidPath", file);
 	    }
 	    catch (IOException ioe) {
-		Intl.errFormat("tools#head.ioError", ExceptionUtil.toString(ioe));
+		Intl.errFormat("tools#head.ioError", Exceptions.toString(ioe));
 	    }
 	    if (printName) {
 		System.out.println();

@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2020-2021 Roger L. Whitcomb.
+ * Copyright (c) 2020-2022 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -48,7 +48,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import info.rlwhitcomb.util.Environment;
-import info.rlwhitcomb.util.ExceptionUtil;
+import info.rlwhitcomb.util.Exceptions;
 import info.rlwhitcomb.util.FileUtilities;
 import info.rlwhitcomb.util.Intl;
 import info.rlwhitcomb.util.Options;
@@ -256,7 +256,7 @@ public class CompareFiles
 		}
 	    }
 	    catch (IOException ioe) {
-		err(Level.QUIET, "errorOnCompare", ExceptionUtil.toString(ioe));
+		err(Level.QUIET, "errorOnCompare", Exceptions.toString(ioe));
 	    }
 	    if (!match) {
 		numberOfMismatches++;

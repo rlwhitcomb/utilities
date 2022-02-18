@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2008-2021 Roger L. Whitcomb.
+ * Copyright (c) 2008-2022 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -132,6 +132,8 @@
  *    Read a default configuration if none has been read previously.
  *  09-Jul-2021 (rlwhitcomb)
  *    Make this class "final" so no one can muck with the functionality.
+ *  18-Feb-2022 (rlwhitcomb)
+ *    Use Exceptions to come up with better exception messages.
  */
 package info.rlwhitcomb.util;
 
@@ -465,12 +467,7 @@ public final class Logging
 	if (loggingLevel >= ERROR) {
 	    lock.lock();
 	    try {
-		String exceptClassName = e.getClass().getName();
-		String exceptMsg = e.getMessage();
-		if (exceptMsg == null)
-		    logError(ERROR, exceptClassName);
-		else
-		    logError(ERROR, "%1$s: %2$s", exceptClassName, exceptMsg);
+		logError(ERROR, Exceptions.toString(e));
 		if (logStrm != null) {
 		    e.printStackTrace(logStrm);
 		}
@@ -495,9 +492,7 @@ public final class Logging
 	if (loggingLevel >= ERROR) {
 	    lock.lock();
 	    try {
-		String exceptClassName = e.getClass().getName();
-		String exceptMsg = e.getMessage();
-		logError(ERROR, "%1$s: %2$s", expl, (exceptMsg == null) ? exceptClassName : exceptMsg);
+		logError(ERROR, "%1$s: %2$s", expl, Exceptions.toString(e));
 		if (logStrm != null) {
 		    e.printStackTrace(logStrm);
 		}
@@ -939,12 +934,7 @@ public final class Logging
     public static void Except(Throwable e) {
 	readDefaultConfigurationIfNeeded();
 	if (loggingLevel >= ERROR) {
-	    String exceptClassName = e.getClass().getName();
-	    String exceptMsg = e.getMessage();
-	    if (exceptMsg == null)
-		LogError(ERROR, exceptClassName);
-	    else
-		LogError(ERROR, "%1$s: %2$s", exceptClassName, exceptMsg);
+	    LogError(ERROR, Exceptions.toString(e));
 	    if (logStrm != null) {
 		synchronized(logStrm) {
 		    e.printStackTrace(logStrm);
@@ -966,9 +956,7 @@ public final class Logging
     public static void Except(String expl, Throwable e) {
 	readDefaultConfigurationIfNeeded();
 	if (loggingLevel >= ERROR) {
-	    String exceptClassName = e.getClass().getName();
-	    String exceptMsg = e.getMessage();
-	    LogError(ERROR, "%1$s: %2$s", expl, (exceptMsg == null) ? exceptClassName : exceptMsg);
+	    LogError(ERROR, "%1$s: %2$s", expl, Exceptions.toString(e));
 	    if (logStrm != null) {
 		synchronized(logStrm) {
 		    e.printStackTrace(logStrm);
@@ -1310,7 +1298,7 @@ public final class Logging
 		    readConfiguration(is, null);
 		}
 		catch (IOException ioe) {
-		    System.err.println("Unexpected I/O error reading default logging configuration: " + ExceptionUtil.toString(ioe));
+		    System.err.println("Unexpected I/O error reading default logging configuration: " + Exceptions.toString(ioe));
 		}
 	    }
 	}

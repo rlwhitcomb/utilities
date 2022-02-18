@@ -591,7 +591,7 @@ import info.rlwhitcomb.util.ComplexNumber;
 import static info.rlwhitcomb.util.ConsoleColor.Code.*;
 import static info.rlwhitcomb.util.Constants.*;
 import info.rlwhitcomb.util.Environment;
-import info.rlwhitcomb.util.ExceptionUtil;
+import info.rlwhitcomb.util.Exceptions;
 import info.rlwhitcomb.util.Intl;
 import info.rlwhitcomb.util.MathUtil;
 import info.rlwhitcomb.util.NumericUtil;
@@ -1226,7 +1226,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		return Charset.forName(charsetName);
 	    }
 	    catch (IllegalCharsetNameException | UnsupportedCharsetException ex) {
-		throw new CalcExprException(ctx, "%calc#charsetError", charsetName, ExceptionUtil.toString(ex));
+		throw new CalcExprException(ctx, "%calc#charsetError", charsetName, Exceptions.toString(ex));
 	    }
 	}
 
@@ -1583,7 +1583,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		return Calc.processString(contents, settings.silent);
 	    }
 	    catch (IOException ioe) {
-		throw new CalcExprException(ctx, "%calc#ioError", ExceptionUtil.toString(ioe));
+		throw new CalcExprException(ctx, "%calc#ioError", Exceptions.toString(ioe));
 	    }
 	}
 
@@ -1626,7 +1626,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		saveVariables(ctx, Paths.get(path), charset);
 	    }
 	    catch (IOException ioe) {
-		throw new CalcExprException(ctx, "%calc#ioError", ExceptionUtil.toString(ioe));
+		throw new CalcExprException(ctx, "%calc#ioError", Exceptions.toString(ioe));
 	    }
 
 	    return BigInteger.valueOf(globals.size());

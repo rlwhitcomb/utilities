@@ -107,7 +107,7 @@ import static info.rlwhitcomb.util.CharUtil.Justification.*;
 import info.rlwhitcomb.util.ConsoleColor;
 import static info.rlwhitcomb.util.ConsoleColor.Code.*;
 import info.rlwhitcomb.util.Environment;
-import info.rlwhitcomb.util.ExceptionUtil;
+import info.rlwhitcomb.util.Exceptions;
 import info.rlwhitcomb.util.FileUtilities;
 import info.rlwhitcomb.util.Intl;
 import info.rlwhitcomb.util.Options;
@@ -549,7 +549,7 @@ public class Tree
 			expectLocale = false;
 		    }
 		    catch (IllegalArgumentException iae) {
-			error("tree#error", ExceptionUtil.toString(iae));
+			error("tree#error", Exceptions.toString(iae));
 		    }
 		}
 		else if (Options.matchesOption(arg, false, "alpha", "ascending", "asc", "a")) {
@@ -676,7 +676,7 @@ public class Tree
 		    try {
 			list(f.getCanonicalFile(), "", "", "", true);
 		    } catch (IOException ioe) {
-			error("tree#errFileName", arg, ExceptionUtil.toString(ioe));
+			error("tree#errFileName", arg, Exceptions.toString(ioe));
 		    }
 		}
 		else {

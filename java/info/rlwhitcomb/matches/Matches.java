@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2020-2021 Roger L. Whitcomb.
+ * Copyright (c) 2020-2022 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,6 +28,8 @@
  *	    Initial checkin.
  *	29-Mar-2021 (rlwhitcomb)
  *	    Move test code to a new package.
+ *	18-Feb-2022 (rlwhitcomb)
+ *	    Use Exceptions to get a better error message.
  */
 package info.rlwhitcomb.matches;
 
@@ -35,7 +37,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
+
+import info.rlwhitcomb.util.Exceptions;
 import info.rlwhitcomb.util.Options;
+
 
 /**
  * Class that basically exposes the Java regex facilities to the command line.
@@ -132,7 +137,7 @@ public class Matches
 			    }
 			}
 			catch (PatternSyntaxException pse) {
-			    System.out.println("Invalid pattern: " + pse.getMessage());
+			    System.out.println("Invalid pattern: " + Exceptions.toString(pse));
 			    hadErrors = true;
 			    break;
 			}
