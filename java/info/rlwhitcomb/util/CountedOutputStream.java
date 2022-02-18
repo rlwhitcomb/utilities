@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2011,2015,2020 Roger L. Whitcomb.
+ * Copyright (c) 2011,2015,2020,2022 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -30,6 +30,8 @@
  *	    Address "lint" issues.
  *	16-Apr-2020 (rlwhitcomb)
  *	    Cleanup and prepare for GitHub.
+ *	18-Feb-2022 (rlwhitcomb)
+ *	    Simplify by inheriting from FilterOutputStream.
  */
 package info.rlwhitcomb.util;
 
@@ -44,64 +46,47 @@ import java.io.*;
  * for all operations, but count the bytes transferred in the
  * associated {@link ClientStatistics} object as they go by.
  */
-public class CountedOutputStream extends OutputStream
+public class CountedOutputStream extends FilterOutputStream
 {
 	/** The object used to accumulate the bytes transferred. */
-	private ClientStatistics statObj;
-	/** The underlying {@link OutputStream} we are wrapping. */
-	private OutputStream os;
+	private final ClientStatistics statObj;
+
 
 	/**
 	 * The only useful constructor.
 	 *
 	 * @param	os	The underlying OutputStream we are wrapping.
-	 * @param	statObj	The object for counting statistics for this session.
+	 * @param	stats	The object for counting statistics for this session.
 	 */
-	public CountedOutputStream(OutputStream os, ClientStatistics statObj) {
-	    super();
-	    this.os = os;
-	    this.statObj = statObj;
+	public CountedOutputStream(final OutputStream os, final ClientStatistics stats) {
+	    super(os);
+	    this.statObj = stats;
 	}
 
-	@Override
-	public void close()
-		throws IOException
-	{
-	    os.close();
-	    os = null;
-	}
 
 	@Override
-	public void flush()
+	public void write(final int b)
 		throws IOException
 	{
-	    os.flush();
-	}
-
-	@Override
-	public void write(int b)
-		throws IOException
-	{
-	    os.write(b);
+	    out.write(b);
 	    statObj.addToBytes(1, false);
 	}
 
 	@Override
-	public void write(byte[] b)
+	public void write(final byte[] b)
 		throws IOException
 	{
-	    os.write(b);
+	    out.write(b);
 	    statObj.addToBytes(b.length, false);
 	}
 
 	@Override
-	public void write(byte[] b, int off, int len)
+	public void write(final byte[] b, final int off, final int len)
 		throws IOException
 	{
-	    os.write(b, off, len);
+	    out.write(b, off, len);
 	    statObj.addToBytes(len, false);
 	}
 
 }
-
 

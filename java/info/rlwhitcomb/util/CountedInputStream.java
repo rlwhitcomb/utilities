@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2011,2015,2020 Roger L. Whitcomb.
+ * Copyright (c) 2011,2015,2020,2022 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -31,6 +31,8 @@
  *	    Address "lint" issues.
  *	16-Apr-2020 (rlwhitcomb)
  *	    Cleanup for GitHub.
+ *	18-Feb-2022 (rlwhitcomb)
+ *	    Simplify by inheriting from FilterInputStream.
  */
 package info.rlwhitcomb.util;
 
@@ -45,45 +47,28 @@ import java.io.*;
  * for all operations, but count the bytes transferred in the
  * associated {@link ClientStatistics} object as they go by.
  */
-public class CountedInputStream extends InputStream
+public class CountedInputStream extends FilterInputStream
 {
 	/** The object used to accumulate the bytes transferred. */
-	private ClientStatistics statObj;
-	/** The underlying {@link InputStream} we are wrapping. */
-	private InputStream is;
+	private final ClientStatistics statObj;
 
 	/**
 	 * The only useful constructor.
 	 *
 	 * @param	is	The underlying InputStream we are wrapping.
-	 * @param	statObj	The object for counting statistics for this session.
+	 * @param	stats	The object for counting statistics for this session.
 	 */
-	public CountedInputStream(InputStream is, ClientStatistics statObj) {
-	    super();
-	    this.is = is;
-	    this.statObj = statObj;
+	public CountedInputStream(final InputStream is, final ClientStatistics stats) {
+	    super(is);
+	    this.statObj = stats;
 	}
 
-	@Override
-	public int available()
-		throws IOException
-	{
-	    return is.available();
-	}
 
 	@Override
-	public void close()
+	public long skip(final long n)
 		throws IOException
 	{
-	    is.close();
-	    is = null;
-	}
-
-	@Override
-	public long skip(long n)
-		throws IOException
-	{
-	    long num = is.skip(n);
+	    long num = in.skip(n);
 	    statObj.addToBytes(num, true);
 	    return num;
 	}
@@ -92,7 +77,7 @@ public class CountedInputStream extends InputStream
 	public int read()
 		throws IOException
 	{
-	    int i = is.read();
+	    int i = in.read();
 	    statObj.addToBytes(1, true);
 	    return i;
 	}
@@ -101,7 +86,7 @@ public class CountedInputStream extends InputStream
 	public int read(byte[] b)
 		throws IOException
 	{
-	    int num = is.read(b);
+	    int num = in.read(b);
 	    if (num != -1)
 		statObj.addToBytes(num, true);
 	    return num;
@@ -111,7 +96,7 @@ public class CountedInputStream extends InputStream
 	public int read(byte[] b, int off, int len)
 		throws IOException
 	{
-	    int num = is.read(b, off, len);
+	    int num = in.read(b, off, len);
 	    if (num != -1)
 		statObj.addToBytes(num, true);
 	    return num;

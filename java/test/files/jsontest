@@ -1,4 +1,5 @@
 $inputDir test/canons
 $testClass info.rlwhitcomb.test.JSONTest
+$ignoreLineEndings
 
 json         :

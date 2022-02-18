@@ -199,6 +199,8 @@
  *	    #217: Use new Options method to parse environment default options.
  *	01-Feb-2022 (rlwhitcomb)
  *	    #231: Move some constants out to Constants class.
+ *	18-Feb-2022 (rlwhitcomb)
+ *	    #250: Use NewlineOutputStream on test program output when "$ignorelineendings" is specified.
  */
 package info.rlwhitcomb.tester;
 
@@ -239,6 +241,7 @@ import info.rlwhitcomb.util.Environment;
 import info.rlwhitcomb.util.ExceptionUtil;
 import info.rlwhitcomb.util.FileUtilities;
 import info.rlwhitcomb.util.Intl;
+import info.rlwhitcomb.util.NewlineOutputStream;
 import info.rlwhitcomb.util.Options;
 
 
@@ -277,6 +280,7 @@ public class Tester
 	private String defaultOptions      = "";
 	private String defaultInputExt     = ".canon";
 	private String defaultCanonCharset = "";
+	private boolean ignoreLineEndings  = false;
 
 	private Class<?> testClass = null;
 
@@ -337,6 +341,12 @@ public class Tester
 		public BufferedWriter outputWriter = null;
 		public BufferedWriter errorWriter = null;
 
+		private boolean ignoreLineEndings;
+
+		public TestFiles(final boolean ignore) {
+		    ignoreLineEndings = ignore;
+		}
+
 		public void createStreams(final Charset cs)
 			throws IOException
 		{
@@ -360,14 +370,20 @@ public class Tester
 			throws IOException
 		{
 		    outputWriter.write(line);
-		    outputWriter.newLine();
+		    if (ignoreLineEndings)
+			outputWriter.write('\n');
+		    else
+			outputWriter.newLine();
 		}
 
 		public void writeErrorLine(final String line)
 			throws IOException
 		{
 		    errorWriter.write(line);
-		    errorWriter.newLine();
+		    if (ignoreLineEndings)
+			errorWriter.write('\n');
+		    else
+			errorWriter.newLine();
 		}
 
 		public void closeStreams()
@@ -500,6 +516,30 @@ public class Tester
 	}
 
 	/**
+	 * Create a new output {@link PrintStream} for use with the class to be tested as "stdout" or "stderr".
+	 * <p> If the {@link #ignoreLineEndings} flag is set we will insert a {@link NewlineOutputStream} into
+	 * the mix to regularize the line endings from the program, to match what we do when writing the canon
+	 * files in {@link TestFiles#writeOutputLine} and {@link TestFiles#writeErrorLine}.
+	 *
+	 * @param out The output file to write to.
+	 * @param cs  Charset to use for the output file.
+	 * @return    A {@link PrintStream} to use for writing, possibly filtered.
+	 * @throws IOException if anything goes wrong
+	 */
+	private PrintStream createPrintStream(final File out, final Charset cs)
+		throws IOException
+	{
+	    if (ignoreLineEndings) {
+		OutputStream os = Files.newOutputStream(out.toPath());
+		NewlineOutputStream nos = new NewlineOutputStream(os);
+		return new PrintStream(nos, false, cs.name());
+	    }
+	    else {
+		return new PrintStream(out, cs.name());
+	    }
+	}
+
+	/**
 	 * Run the test and compare results with the canons or just create the canon files
 	 * from the current output.
 	 *
@@ -546,8 +586,8 @@ public class Tester
 		    newIn = Files.newInputStream(files.inputFile.toPath());
 		}
 		System.setIn(newIn);
-		System.setOut(newOut = new PrintStream(testOut, cs.name()));
-		System.setErr(newErr = new PrintStream(testErr, cs.name()));
+		System.setOut(newOut = createPrintStream(testOut, cs));
+		System.setErr(newErr = createPrintStream(testErr, cs));
 
 		long startTime = Environment.highResTimer();
 
@@ -924,7 +964,7 @@ public class Tester
 
 	    BufferedReader canonReader = null;
 	    BufferedWriter canonWriter = null;
-	    TestFiles files = new TestFiles();
+	    TestFiles files = new TestFiles(ignoreLineEndings);
 
 	    try {
 		// Assume the input file is named "xxx.canon" and is in the input directory (if given)
@@ -1140,6 +1180,10 @@ public class Tester
 			else {
 			    error = true;
 			}
+			break;
+
+		    case "ignorelineendings":
+			ignoreLineEndings = true;
 			break;
 
 		    case "canoncharset":
