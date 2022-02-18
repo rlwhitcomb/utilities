@@ -1,5 +1,6 @@
 $inputDir test/canons
 $testClass info.rlwhitcomb.test.JSONTest
 $ignoreLineEndings
+$canonCharset UTF-8
 
 json         :
