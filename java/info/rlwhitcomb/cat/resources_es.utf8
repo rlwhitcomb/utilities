@@ -1,7 +1,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2020-2021 Roger L. Whitcomb.
+# Copyright (c) 2020-2022 Roger L. Whitcomb.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -30,6 +30,8 @@
 #	    Move product name to build.properties.
 #	24-Aug-2021 (rlwhitcomb)
 #	    Clone and translate to Spanish.
+#	18-Feb-2022 (rlwhitcomb)
+#	    #251: Charset error message.
 #
 
 unrecognized		= ¡Opción "%1$s" no reconocida!
@@ -42,4 +44,5 @@ oneLocale		= ¡Solo se puede especificar un nombre de configuración regional!
 missingOptionValue	= ¡Falta un valor para la opción "--%1$s"!
 outputNameCharset	= ¡Un nombre de archivo de salida debe darse junto con un juego de caracteres!
 noCharsetConsole	= ¡No se puede cambiar juego de caracteres cuando se lee desde la consola!
+decodeError		= Carácter incorrecto en el archivo "%1$s" para juego de caracteres "%2$s": %3$s
 

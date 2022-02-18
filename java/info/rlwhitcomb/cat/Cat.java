@@ -43,6 +43,8 @@
  *	21-Jan-2022 (rlwhitcomb)
  *	    #217: Allow environment default options from CAT_OPTIONS via
  *	    new Options method.
+ *	17-Feb-2022 (rlwhitcomb)
+ *	    #251: Trap charset encoding problems.
  *
  *	    TODO: wildcard directory names on input
  *	    TODO: -nn to limit to first nn lines, +nn to limit to LAST nn lines (hard to do?)
@@ -53,8 +55,13 @@ import java.io.Console;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.io.UncheckedIOException;
 import java.nio.charset.Charset;
+import java.nio.charset.IllegalCharsetNameException;
+import java.nio.charset.MalformedInputException;
 import java.nio.charset.StandardCharsets;
+import java.nio.charset.UnmappableCharacterException;
+import java.nio.charset.UnsupportedCharsetException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Locale;
@@ -155,7 +162,7 @@ public class Cat {
 	    } else if (Options.matchesOption(arg, true, "default", "def", "standard", "d", "s")) {
 		currentInputCharset = Charset.defaultCharset();
 	    } else if (Options.matchesOption(arg, true, "win1252", "win", "w")) {
-		currentInputCharset = Charset.forName("win1252");
+		currentInputCharset = getCharset("win1252");
 	    } else if (Options.matchesOption(arg, true, "iso88591", "iso-8859-1", "iso", "i")) {
 		currentInputCharset = StandardCharsets.ISO_8859_1;
 	    } else if (Options.matchesOption(arg, true, "ascii", "asc", "a")) {
@@ -213,13 +220,34 @@ public class Cat {
 	    File file = new File(name);
 	    if (file.exists() && !file.isDirectory() && file.canRead()) {
 		try {
-		    Files.lines(file.toPath(), currentInputCharset).forEach(line -> outputStream.println(line));
+		    Files.lines(file.toPath(), currentInputCharset).forEach(outputStream::println);
+		} catch (UncheckedIOException uioe) {
+		    Throwable ex = uioe.getCause();
+		    if (ex instanceof UnmappableCharacterException ||
+			ex instanceof MalformedInputException) {
+			Intl.errFormat("cat#decodeError",
+				file.getPath(),
+				currentInputCharset.displayName(),
+				ExceptionUtil.toString(uioe));
+		    } else {
+			Intl.errFormat("cat#ioError", file.getPath(), ExceptionUtil.toString(uioe));
+		    }
 		} catch (IOException ioe) {
 		    Intl.errFormat("cat#ioError", file.getPath(), ExceptionUtil.toString(ioe));
 		}
 	    } else {
 		Intl.errFormat("cat#noFileRead", name);
 	    }
+	}
+
+	private static Charset getCharset(final String name) {
+	    try {
+		return Charset.forName(name);
+	    } catch (IllegalCharsetNameException | UnsupportedCharsetException ex) {
+		System.err.println(ExceptionUtil.toString(ex));
+		System.exit(3);
+	    }
+	    return null;
 	}
 
 	/**
@@ -232,7 +260,7 @@ public class Cat {
 		if (expectedValue.isPresent()) {
 		    switch (expectedValue.get()) {
 			case INPUT_CHARSET:
-			    currentInputCharset = Charset.forName(arg);
+			    currentInputCharset = getCharset(arg);
 			    break;
 			case OUTPUT_CHARSET:
 			    if (pass == 1) {
@@ -240,7 +268,7 @@ public class Cat {
 				    Intl.errPrintln("cat#oneCharset");
 				    System.exit(3);
 				} else {
-				    outputCharset = Charset.forName(arg);
+				    outputCharset = getCharset(arg);
 				}
 			    }
 			    break;

@@ -73,10 +73,13 @@
  *	    NoSuchFieldException needs name also.
  *	09-Feb-2022 (rlwhitcomb)
  *	    UnsupportedEncodingException also needs name.
+ *	18-Feb-2022 (rlwhitcomb)
+ *	    Deal gracefully with UncheckedIOException; tweak "exceptionName".
  */
 package info.rlwhitcomb.util;
 
 import java.io.FileNotFoundException;
+import java.io.UncheckedIOException;
 import java.io.UnsupportedEncodingException;
 import java.net.UnknownHostException;
 import java.nio.charset.CharacterCodingException;
@@ -192,8 +195,9 @@ public final class ExceptionUtil
 	    for (int i = 0; i < nicerName.length(); i++) {
 		char ch = nicerName.charAt(i);
 		if (i > 0 && Character.isUpperCase(ch))
-		    buf.append(' ');
-		buf.append(ch);
+		    buf.append(' ').append(Character.toLowerCase(ch));
+		else
+		    buf.append(ch);
 	    }
 
 	    return buf.toString();
@@ -218,6 +222,10 @@ public final class ExceptionUtil
 	    boolean topLevel = true;
 
 	    for (Throwable next = ex; next != null; ) {
+		if (next instanceof UncheckedIOException) {
+		    next = next.getCause();
+		}
+
 		String msg;
 		if (useToString) {
 		    msg = next.toString();
@@ -243,7 +251,7 @@ public final class ExceptionUtil
 			  || (next instanceof UnknownFormatConversionException)
 			  || (next instanceof IllegalFormatException)
 			  || (next instanceof NoSuchFieldException)) {
-			msg = String.format("%1$s \"%2$s\"", exceptionName(next), msg);
+			msg = String.format("%1$s: \"%2$s\"", exceptionName(next), msg);
 		    }
 		    else if (next instanceof ParseException) {
 			ParseException pe = (ParseException) next;
