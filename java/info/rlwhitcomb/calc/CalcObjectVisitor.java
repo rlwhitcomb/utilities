@@ -519,6 +519,8 @@
  *	    #249: Add "expr IN loopCtl" as another expression type.
  *	    #252: Predefine the loop control value in the local symbol scope so the visitor
  *	    will find it during the block execution.
+ *	18-Feb-2022 (rlwhitcomb)
+ *	    #103: More support for complex numbers; some cleanup of "visit" -> "evaluateFunction".
  */
 package info.rlwhitcomb.calc;
 
@@ -2285,7 +2287,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    // number of times, starting from 1
 		    if (allowSingle) {
 			// or it could be an array, object, or string to iterate over
-			Object obj = visit(exprs.get(0));
+			Object obj = evaluateFunction(exprs.get(0));
 			if (obj instanceof ObjectScope) {
 			    stepWise = false;
 			    @SuppressWarnings("unchecked")
@@ -2587,7 +2589,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public Object visitLeaveStmt(CalcParser.LeaveStmtContext ctx) {
 	    CalcParser.Expr1Context exprCtx = ctx.expr1();
 	    if (exprCtx != null) {
-		throw new LeaveException(visit(exprCtx.expr()));
+		throw new LeaveException(evaluateFunction(exprCtx.expr()));
 	    }
 	    else {
 		throw new LeaveException();
@@ -2683,7 +2685,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			(id != null) ? id.getText()
 		      : (str != null) ? getStringMemberName(str.getText())
 		      : getIStringValue(this, istr, pairCtx);
-		Object value = visit(pairCtx.expr());
+		Object value = evaluateFunction(pairCtx.expr());
 		object.setValue(key, settings.ignoreNameCase, value);
 	    }
 	}
@@ -2704,7 +2706,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	   ArrayScope<Object> list = new ArrayScope<>();
 	   if (exprList != null) {
 		for (CalcParser.ExprContext expr : exprList.expr()) {
-		    Object value = visit(expr);
+		    Object value = evaluateFunction(expr);
 		    list.add(value);
 		}
 	   }
@@ -2954,12 +2956,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 	}
 
-	@Override
-	public Object visitPowerNExpr(CalcParser.PowerNExprContext ctx) {
-	    String power = ctx.POWERS().getText();
-
-	    if (settings.rationalMode) {
-		BigFraction base = getFractionValue(ctx.expr());
+	private int nToPower(String power, ParserRuleContext ctx) {
 		int exp;
 
 		switch (power) {
@@ -2996,49 +2993,30 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    default:
 			throw new UnknownOpException(power, ctx);
 		}
+		return exp;
+	}
+
+	@Override
+	public Object visitPowerNExpr(CalcParser.PowerNExprContext ctx) {
+	    CalcParser.ExprContext expr = ctx.expr();
+	    Object value = evaluateFunction(expr);
+	    String power = ctx.POWERS().getText();
+	    int exp = nToPower(power, ctx);
+
+	    if (settings.rationalMode) {
+		BigFraction base = convertToFraction(value, expr);
 
 		return base.pow(exp);
 	    }
+	    else if (value instanceof ComplexNumber) {
+		ComplexNumber base = (ComplexNumber) value;
+
+		return base.pow(new BigDecimal(exp), settings.mc);
+	    }
 	    else {
-		BigDecimal base = getDecimalValue(ctx.expr());
-		double exp;
+		BigDecimal base = convertToDecimal(value, settings.mc, expr);
 
-		switch (power) {
-		    case "\u2070":
-			exp = 0.0d;
-			break;
-		    case "\u00B9":
-			exp = 1.0d;
-			break;
-		    case "\u00B2":
-			exp = 2.0d;
-			break;
-		    case "\u00B3":
-			exp = 3.0d;
-			break;
-		    case "\u2074":
-			exp = 4.0d;
-			break;
-		    case "\u2075":
-			exp = 5.0d;
-			break;
-		    case "\u2076":
-			exp = 6.0d;
-			break;
-		    case "\u2077":
-			exp = 7.0d;
-			break;
-		    case "\u2078":
-			exp = 8.0d;
-			break;
-		    case "\u2079":
-			exp = 9.0d;
-			break;
-		    default:
-			throw new UnknownOpException(power, ctx);
-		}
-
-		return MathUtil.pow(base, exp, settings.mc);
+		return MathUtil.pow(base, (double) exp, settings.mc);
 	    }
 	}
 
@@ -3396,22 +3374,31 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitSignumExpr(CalcParser.SignumExprContext ctx) {
+	    CalcParser.ExprContext expr = ctx.expr1().expr();
 	    int signum;
 
 	    if (settings.rationalMode) {
-		BigFraction f = getFractionValue(ctx.expr1().expr());
+		BigFraction f = getFractionValue(expr);
 		signum = f.signum();
 	    }
 	    else {
-		BigDecimal e = getDecimalValue(ctx.expr1().expr());
-		signum = e.signum();
+		Object value = evaluateFunction(expr);
+		if (value instanceof ComplexNumber) {
+		    ComplexNumber c = (ComplexNumber) value;
+		    return c.signum(settings.mcDivide);
+		}
+		else {
+		    BigDecimal e = convertToDecimal(value, settings.mc, expr);
+		    signum = e.signum();
+		}
 	    }
+
 	    return BigInteger.valueOf(signum);
 	}
 
 	@Override
 	public Object visitIsNullExpr(CalcParser.IsNullExprContext ctx) {
-	    Object obj = visit(ctx.expr1().expr());
+	    Object obj = evaluateFunction(ctx.expr1().expr());
 	    return Boolean.valueOf(obj == null);
 	}
 
@@ -3425,7 +3412,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		obj = lValue.getContextObject(this);
 	    }
 	    else {
-		obj = visit(arg.expr());
+		obj = evaluateFunction(arg.expr());
 	    }
 
 	    return typeof(obj).getValue();
@@ -3475,7 +3462,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		return iterateOverDotRange(null, dotRange.expr(), dotRange.DOTS() != null, visitor, false);
 	    }
 	    else {
-		Object obj = visit(ctx.expr1().expr());
+		Object obj = evaluateFunction(ctx.expr1().expr());
 
 		// This returns the non-recursive size of objects and arrays
 		// so, use "scale" to calculate the recursive (full) size
@@ -3485,7 +3472,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitScaleExpr(CalcParser.ScaleExprContext ctx) {
-	    Object obj = visit(ctx.expr1().expr());
+	    Object obj = evaluateFunction(ctx.expr1().expr());
 
 	    // This calculates the recursive size of objects and arrays
 	    // so, use "length" to calculate the non-recursive size
@@ -3690,7 +3677,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    List<Object> objects = new ArrayList<>();
 
 	    for (CalcParser.ExprContext eCtx : exprs) {
-		buildFlatMap(eCtx, visit(eCtx), objects, isString, forJoin);
+		buildFlatMap(eCtx, evaluateFunction(eCtx), objects, isString, forJoin);
 	    }
 
 	    return objects;
@@ -3776,7 +3763,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    List<Object> objects = new ArrayList<>();
 
 	    for (CalcParser.ExprContext eCtx : exprs) {
-		buildFlatMap(eCtx, visit(eCtx), objects, true, true);
+		buildFlatMap(eCtx, evaluateFunction(eCtx), objects, true, true);
 	    }
 
 	    StringBuilder buf = new StringBuilder();
@@ -4806,7 +4793,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    List<Object> objects = new ArrayList<>();
 
 	    for (CalcParser.ExprContext exprCtx : exprs) {
-		buildValueList(exprCtx, visit(exprCtx), objects, conversion);
+		buildValueList(exprCtx, evaluateFunction(exprCtx), objects, conversion);
 	    }
 
 	    return objects;
@@ -5625,7 +5612,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitAssignExpr(CalcParser.AssignExprContext ctx) {
-	    Object value = visit(ctx.expr());
+	    Object value = evaluateFunction(ctx.expr());
 
 	    LValueContext lValue = getLValue(ctx.var());
 	    return lValue.putContextObject(this, value);

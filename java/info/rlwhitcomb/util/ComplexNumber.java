@@ -42,6 +42,8 @@
  *	08-Feb-2022 (rlwhitcomb)
  *	    #235: Use MathUtil.atan2 for "theta" to get full precision.
  *	    A lot of refactoring, include support for "polar" form.
+ *	18-Feb-2022 (rlwhitcomb)
+ *	    Add "signum" method.
  */
 package info.rlwhitcomb.util;
 
@@ -578,6 +580,21 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 	 */
 	public BigDecimal abs(final MathContext mc) {
 	    return radius(mc);
+	}
+
+	/**
+	 * Determine the "sign" of this complex number, which is {@code z / |z|}.
+	 *
+	 * @param mc The rounding context to use.
+	 * @return {@code 0, +1, -1} depending if real or zero, or {@code z / |z|}.
+	 */
+	public Object signum(final MathContext mc) {
+	    if (equals(C_ZERO))
+		return BigInteger.ZERO;
+	    if (isPureReal())
+		return BigInteger.valueOf(r().signum());
+
+	    return divide(radius(mc), mc);
 	}
 
 	/**
