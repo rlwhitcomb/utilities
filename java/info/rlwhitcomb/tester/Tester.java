@@ -202,6 +202,10 @@
  *	18-Feb-2022 (rlwhitcomb)
  *	    #250: Use NewlineOutputStream on test program output when "$ignorelineendings" is specified.
  *	    Use Exceptions everywhere to display I/O errors.
+ *	19-Feb-2022 (rlwhitcomb)
+ *	    #241: Directive in canon file to compare different output file. Substitute environment
+ *	    values on command lines and the result file line. Another main description file directive
+ *	    to NOT do substitutions (where the "%" might cause a problem).
  */
 package info.rlwhitcomb.tester;
 
@@ -282,6 +286,7 @@ public class Tester
 	private String defaultInputExt     = ".canon";
 	private String defaultCanonCharset = "";
 	private boolean ignoreLineEndings  = false;
+	private boolean noSubstitutions    = false;
 
 	private Class<?> testClass = null;
 
@@ -341,6 +346,8 @@ public class Tester
 		public BufferedWriter inputWriter = null;
 		public BufferedWriter outputWriter = null;
 		public BufferedWriter errorWriter = null;
+
+		public File resultFile = null;
 
 		private boolean ignoreLineEndings;
 
@@ -681,7 +688,12 @@ public class Tester
 		    }
 		}
 		else {
-		    ret = compareCanons(testName, files.outputFile, testOut, files.errorFile, testErr, cs);
+		    // If an alternate output file was named in the canon file, compare that to the canon
+		    // output instead
+		    if (files.resultFile != null)
+			ret = compareCanons(testName, files.outputFile, files.resultFile, files.errorFile, testErr, cs);
+		    else
+			ret = compareCanons(testName, files.outputFile, testOut, files.errorFile, testErr, cs);
 
 		    if (ret == SUCCESS) {
 			testOut.delete();
@@ -1055,7 +1067,30 @@ public class Tester
 			    continue;
 			}
 			else if (line.startsWith("$")) {
-			    // TODO: process options
+			    String directive = line.substring(1).trim();
+			    Matcher m = DIRECTIVE.matcher(directive);
+			    if (m.matches()) {
+				String command = m.group(1).toLowerCase();
+				String argument = m.group(3);
+				argument = argument == null ? null : CharUtil.stripDoubleQuotes(argument);
+
+				switch (command) {
+				    case "outputfile":
+				    case "resultfile":
+				    case "outfile":
+				    case "output":
+				    case "result":
+					files.resultFile = new File(CharUtil.substituteEnvValues(argument));
+					break;
+				    default:
+					Intl.errFormat("tester#canonBadSyntax", line);
+					return 2;
+				}
+			    }
+			    else {
+				Intl.errFormat("tester#canonBadSyntax", line);
+				return 2;
+			    }
 			}
 			else if (!line.isEmpty()) {
 			    // Default is to treat the line as regular output
@@ -1185,6 +1220,13 @@ public class Tester
 
 		    case "ignorelineendings":
 			ignoreLineEndings = true;
+			break;
+
+		    case "nosubstitute":
+			// This is the behavior from earlier versions, so if there is ever a problem
+			// with the description file syntax and the env value substitution conventions
+			// using this directive should solve it
+			noSubstitutions = true;
 			break;
 
 		    case "canoncharset":
@@ -1330,7 +1372,10 @@ public class Tester
 		    if (m.matches()) {
 			String commandLine;
 
-			commandLine = m.group(6);
+			if (noSubstitutions)
+			    commandLine = m.group(6);
+			else
+			    commandLine = CharUtil.substituteEnvValues(m.group(6));
 
 			if (!CharUtil.isNullOrEmpty(defaultOptions)) {
 			    commandLine = String.format("%1$s %2$s", defaultOptions, commandLine);

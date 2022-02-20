@@ -309,6 +309,8 @@
  *	09-Jan-2022 (rlwhitcomb)
  *	    #200: Redo "quoteControl" and "convertEscapeSequences" to match escape sequences
  *	    in Calc grammar.
+ *	19-Feb-2022 (rlwhitcomb)
+ *	    #241: Alternate form of "substituteEnvValues". FIx bug if no ending "%".
  */
 
 package info.rlwhitcomb.util;
@@ -1992,6 +1994,19 @@ public final class CharUtil
 
 
 	/**
+	 * Substitute any environment variables found in the string. Alternate form without the
+	 * secondary symbol lookup table.
+	 *
+	 * @param   input   Input string needing its substitution tokens replaced from the
+	 *		    environment	(or the	alternate symbol map).
+	 * @return	    The original string with the variable substitutions made.
+	 * @see #substituteEnvValues(String, Map<String,String>)
+	 */
+	public static String substituteEnvValues(final String input) {
+	    return substituteEnvValues(input, null);
+	}
+
+	/**
 	 * Substitute any environment variables found in the string
 	 * of the form <code>%var%</code> with their defined values from the environment or from
 	 * the alternate symbol map.
@@ -2098,6 +2113,10 @@ public final class CharUtil
 			buf.deleteCharAt(iy);
 			buf.deleteCharAt(ix);
 		    }
+		}
+		else {
+		    // No matching "%", so no more substitutions either
+		    break;
 		}
 		ix = buf.indexOf("%");
 	    }

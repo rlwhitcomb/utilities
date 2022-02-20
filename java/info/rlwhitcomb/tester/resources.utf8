@@ -80,6 +80,8 @@
 #	    Change wording slightly.
 #	19-Jan-2022 (rlwhitcomb)
 #	    #208: Change empty value error messages.
+#	18-Feb-2022 (rlwhitcomb)
+#	    #241: New error message for bad canon file directive.
 #
 
 mismatch		= Mismatch on test \"%1$s\":%n  Canon file: %2$s%n Output file: %3$s
@@ -102,6 +104,7 @@ noMainMethod		= Error finding the \"main\" method of the \"$testClass\": %1$s
 mainInvokeError		= Error calling the \"main\" method of the \"$testClass\": %1$s
 badCommand		= Unrecognized command \"%1$s\".
 badSyntax		= Test description line %1$d cannot be parsed:%n\t%2$s
+canonBadSyntax		= Directive in canon file cannot be recognized: "%1$s"
 totalTime		= " (%1$.6f secs total)"
 finalResultOne		= Ran %1$d test: %2$d passed, %3$d failed%4$s.
 finalResults		= Ran %1$d tests: %2$d passed, %3$d failed%4$s.

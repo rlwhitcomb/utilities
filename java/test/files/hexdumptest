@@ -1,0 +1,6 @@
+$testClass info.rlwhitcomb.tools.HexDump
+$canonDir test/canons
+$canonCharset UTF-8
+
+hex_all_quotes: -nocolors -24 test/data/test_all_quotes.dsv -out %TEMP|TMP|TMPDIR|.%/hex_all_quotes.log
+
