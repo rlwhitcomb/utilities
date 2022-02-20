@@ -62,6 +62,10 @@
 >Number of tests = 16384, mistakes = 0
 >hash('test/data/Declaration.txt', , true) -> "D424650E3A0F123F4D46D14AF0E2C309184C823021F578B02689802B06B0F674"
 >hashstring('Four score and seven years ago') -> "213742bd59f1d8fe848b6ea94647dd465310b8d816234d5a952dc645fa320707"
+>cp = 0x1f603 -> 128515
+>surr_pair_to_cp(0xd83d, 0xde03) @c -> "😃"
+>cp_to_high_surr(cp) @x -> 0xd83d
+>cp_to_low_surr(cp) @x -> 0xde03
 >Precision is now “300” digits.
 >Tn(0) = 1
 >Tn(1) = -2

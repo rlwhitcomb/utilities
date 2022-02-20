@@ -86,6 +86,14 @@ hash('test/data/Declaration.txt',,true)
 hashstring('Four score and seven years ago')
 
 #
+# Surrogate pair conversions
+#
+cp = 0x1f603
+surr_pair_to_cp(0xd83d, 0xde03) @c
+cp_to_high_surr(cp) @x
+cp_to_low_surr(cp) @x
+
+#
 # Tangent numbers
 #
 :decimal 300

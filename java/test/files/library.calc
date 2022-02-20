@@ -120,6 +120,30 @@ def moy_name(date) = { info.locale.months [ moy(date) - 1 ] }
 def long_date(date = today) = { `${dow_name(date)}, ${moy_name(date)} ${dom(date)}, ${yod(date)@_d}` }
 
 /*
+ * Convert a surrogate pair to the corresponding Unicode codepoint.
+ *
+ * @param h The high surrogate value.
+ * @param l The low surrogate.
+ */
+define surr_pair_to_cp(h, l) = { (h - 0xD800) * 0x400 + (l - 0xDC00) + 0x10000 }
+
+/*
+ * Extract the high surrogate of a codepoint outside the BMP.
+ *
+ * @param cp The codepoint under dissection.
+ * @return   The high surrogate value for this codepoint.
+ */
+define cp_to_high_surr(cp) = { (cp - 0x10000) \ 0x400 + 0xD800 }
+
+/*
+ * Extract the low surrogate of a codepoint outside the BMP.
+ *
+ * @param cp The codepoint under dissection.
+ * @return   The low surrogate value for this codepoint.
+ */
+define cp_to_low_surr(cp) = { (cp - 0x10000) % 0x400 + 0xDC00 }
+
+/*
  * For time values, number of ticks (nanoseconds) in a second.
  */
 TICKS_PER_SECOND = 1e9
