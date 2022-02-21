@@ -2000,7 +2000,7 @@ public final class CharUtil
 	 * @param   input   Input string needing its substitution tokens replaced from the
 	 *		    environment	(or the	alternate symbol map).
 	 * @return	    The original string with the variable substitutions made.
-	 * @see #substituteEnvValues(String, Map<String,String>)
+	 * @see #substituteEnvValues(String, Map)
 	 */
 	public static String substituteEnvValues(final String input) {
 	    return substituteEnvValues(input, null);
