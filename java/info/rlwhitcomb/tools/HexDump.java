@@ -41,6 +41,8 @@
  *	10-Feb-2022 (rlwhitcomb)
  *	    Implement options for spaces or not.
  *	    Use 0 width (default) to size output according to console width.
+ *	20-Feb-2022 (rlwhitcomb)
+ *	    #253: Fix line width calculations.
  */
 package info.rlwhitcomb.tools;
 
@@ -368,14 +370,16 @@ public class HexDump
 
 	    if (numberBytesPerLine == 0) {
 		int consoleWidth = Environment.consoleWidth();
+		numberBytesPerLine = (consoleWidth - 13) / 4;
+		// Start with a multiple of four
+		numberBytesPerLine -= (numberBytesPerLine % 4);
+
 		if (spaces) {
-		    int trialNumber = ((consoleWidth - 13) / 4) / 4 * 4;
-		    while (trialNumber * 4 + (trialNumber / 4) + (trialNumber / 8) + 13 > consoleWidth)
-			trialNumber -= 4;
-		    numberBytesPerLine = trialNumber;
-		}
-		else {
-		    numberBytesPerLine = (consoleWidth - 13) / 4;
+		    // In the hex display, 1 extra per four and 2 extra for every 8, and the same for the
+		    // character display. Header and blank separator are 13 altogether, each byte
+		    // is 3 in the hex, plus one in the character (or 4 altogether)
+		    while (numberBytesPerLine * 4 + (numberBytesPerLine / 4 * 2) + (numberBytesPerLine / 8 * 2) + 13 > consoleWidth)
+			numberBytesPerLine -= 4;
 		}
 	    }
 	    else {
