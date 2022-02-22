@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2021 Roger L. Whitcomb.
+ * Copyright (c) 2021-2022 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -41,14 +41,19 @@
  *	08-Aug-2021 (rlwhitcomb)
  *	    Use box-drawing characters for the separator lines; implement options
  *	    for colors or not.
+ *	22-Feb-2022 (rlwhitcomb)
+ *	    #254: Options to display LICENSE and NOTICE files.
  */
 package info.rlwhitcomb;
 
 import java.text.ParseException;
 import java.util.List;
+
 import de.onyxbits.SemanticVersion;
+
 import info.rlwhitcomb.util.CharUtil;
 import static info.rlwhitcomb.util.CharUtil.Justification.*;
+import info.rlwhitcomb.util.ClassUtil;
 import static info.rlwhitcomb.util.ConsoleColor.Code.*;
 import info.rlwhitcomb.util.ConsoleColor;
 import info.rlwhitcomb.util.Environment;
@@ -121,6 +126,31 @@ public class Version
 	    output(BLUE_BOLD_BRIGHT + padFunc + "()" + BLACK_BRIGHT + " -> " + GREEN + value + RESET);
 	}
 
+	private static void displayTextFile(String name) {
+	    String contents = ClassUtil.getResourceAsString("/META-INF/" + name);
+	    String[] lines = CharUtil.stringToLines(contents);
+	    int width = CharUtil.maxLength(lines);
+
+	    String header = CharUtil.makeStringOfChars(colors ? '\u2550' : '=', width);
+	    String separator = BLACK_BRIGHT + header + RESET;
+
+	    output(separator);
+	    output();
+	    output(BLUE_BOLD_BRIGHT + CharUtil.padToWidth(name, width, CENTER));
+	    output();
+	    output(separator);
+
+	    for (String line : lines) {
+		output(line);
+	    }
+
+	    String underline = CharUtil.makeStringOfChars(colors ? '\u2500' : '-', width);
+	    separator = BLACK_BRIGHT + underline + RESET;
+
+	    output(separator);
+	    output();
+	}
+
 	/**
 	 * Prints the version to the command line, along with all the available subproject
 	 * version information (contained in the <code>version.properties</code> file).
@@ -128,6 +158,9 @@ public class Version
 	 * @param args The parsed command line arguments (unused).
 	 */
 	public static void main(String[] args) {
+	    boolean displayLicense = false;
+	    boolean displayNotice = false;
+
 	    // Parse the command line options
 	    for (String arg : args) {
 		String option = null;
@@ -151,6 +184,16 @@ public class Version
 			case "c":
 			    colors = true;
 			    break;
+			case "license":
+			case "lic":
+			case "l":
+			    displayLicense = true;
+			    break;
+			case "notice":
+			case "note":
+			case "n":
+			    displayNotice = true;
+			    break;
 			default:
 			    // just ignore (silently)
 			    break;
@@ -160,7 +203,7 @@ public class Version
 
 	    Environment.printProgramInfo(WIDTH, colors);
 
-	    String underline = CharUtil.padToWidth("", WIDTH, colors ? '\u2500' : '-');
+	    String underline = CharUtil.makeStringOfChars(colors ? '\u2500' : '-', WIDTH);
 	    String separator = BLACK_BRIGHT + underline + RESET;
 
 	    printInfo("getVersion",                getVersion());
@@ -192,5 +235,14 @@ public class Version
 		output(separator);
 	    }
 	    output();
+
+	    if (displayLicense) {
+		displayTextFile("LICENSE");
+	    }
+
+	    if (displayNotice) {
+		displayTextFile("NOTICE");
+	    }
+
 	}
 }

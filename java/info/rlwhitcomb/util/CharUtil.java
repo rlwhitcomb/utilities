@@ -311,6 +311,8 @@
  *	    in Calc grammar.
  *	19-Feb-2022 (rlwhitcomb)
  *	    #241: Alternate form of "substituteEnvValues". FIx bug if no ending "%".
+ *	22-Feb-2022 (rlwhitcomb)
+ *	    #254: "stringToLines" function, and "maxLength".
  */
 
 package info.rlwhitcomb.util;
@@ -2982,6 +2984,7 @@ public final class CharUtil
 	    return false;
 	}
 
+
 	/**
 	 * Parse a command line into its separate arguments.
 	 *
@@ -3044,5 +3047,32 @@ public final class CharUtil
 
 	    return args.toArray(new String[0]);
 	}
+
+
+	/**
+	 * Given a string which contains embedded line separators, separate into an array of lines without the separators.
+	 *
+	 * @param input The input string with line separators.
+	 * @return      The array of individual lines without the separators.
+	 */
+	public static String[] stringToLines(final String input) {
+	    return input.split("[\\r?\\n]");
+	}
+
+
+	/**
+	 * Given an array of lines, compute the maximum length of those lines.
+	 *
+	 * @param lines The input lines to consider.
+	 * @return      The maximum length of any of the lines.
+	 */
+	public static int maxLength(final String[] lines) {
+	    int max = 0;
+	    for (String line : lines) {
+		max = Math.max(max, line.length());
+	    }
+	    return max;
+	}
+
 
 }
