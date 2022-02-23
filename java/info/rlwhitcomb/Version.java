@@ -43,6 +43,8 @@
  *	    for colors or not.
  *	22-Feb-2022 (rlwhitcomb)
  *	    #254: Options to display LICENSE and NOTICE files.
+ *	23-Feb-2022 (rlwhitcomb)
+ *	    #254: Help option.
  */
 package info.rlwhitcomb;
 
@@ -58,6 +60,9 @@ import static info.rlwhitcomb.util.ConsoleColor.Code.*;
 import info.rlwhitcomb.util.ConsoleColor;
 import info.rlwhitcomb.util.Environment;
 import static info.rlwhitcomb.util.Environment.ProgramInfo;
+import info.rlwhitcomb.util.Intl;
+import info.rlwhitcomb.util.Options;
+
 
 /**
  * Administrative class to keep track of the version number of the code release.
@@ -163,11 +168,8 @@ public class Version
 
 	    // Parse the command line options
 	    for (String arg : args) {
-		String option = null;
-		if (arg.startsWith("--"))
-		    option = arg.substring(2);
-		else if (arg.startsWith("-") || arg.startsWith("/"))
-		    option = arg.substring(1);
+		String option = Options.isOption(arg);
+
 		if (option != null) {
 		    switch (option) {
 			case "nocolors":
@@ -180,6 +182,7 @@ public class Version
 			    break;
 			case "colors":
 			case "color":
+			case "cols":
 			case "col":
 			case "c":
 			    colors = true;
@@ -194,6 +197,12 @@ public class Version
 			case "n":
 			    displayNotice = true;
 			    break;
+			case "help":
+			case "h":
+			case "?":
+			    Environment.printProgramInfo(WIDTH, colors);
+			    Intl.printHelp("#version");
+			    return;
 			default:
 			    // just ignore (silently)
 			    break;

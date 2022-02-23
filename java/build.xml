@@ -301,6 +301,8 @@
 	    17-Feb-2022 (rlwhitcomb)
 		#196: Text for the "json" directory.
 		Break out "calctest" separately because of frequent failures.
+	    23-Feb-2022 (rlwhitcomb)
+		#254: Add resources to "info.rlwhitcomb" package.
 
      ========================================================================== -->
 
@@ -530,6 +532,7 @@
 
 	<target name="preproc" description="Preprocesses necessary files.">
 		<parallel>
+			<generate-text-resources dir="info/rlwhitcomb" />
 			<generate-text-resources dir="info/rlwhitcomb/calc" />
 			<generate-text-resources dir="info/rlwhitcomb/cat" />
 			<generate-text-resources dir="info/rlwhitcomb/compare" />
