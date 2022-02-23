@@ -45,7 +45,7 @@
  *	    #254: Options to display LICENSE and NOTICE files.
  *	23-Feb-2022 (rlwhitcomb)
  *	    #254: Help option.
- *	    Add coloring to help.
+ *	    Add coloring to help. And coloring to plain text files.
  */
 package info.rlwhitcomb;
 
@@ -132,6 +132,13 @@ public class Version
 	    output(BLUE_BOLD_BRIGHT + padFunc + "()" + BLACK_BRIGHT + " -> " + GREEN + value + RESET);
 	}
 
+	private static void outputLine(String line, Object color) {
+	    if (line.startsWith(" * "))
+		output(" * " + color + line.substring(3) + RESET);
+	    else
+		output(color + line + RESET);
+	}
+
 	private static void displayTextFile(String name) {
 	    String contents = ClassUtil.getResourceAsString("/META-INF/" + name);
 	    String[] lines = CharUtil.stringToLines(contents);
@@ -146,8 +153,26 @@ public class Version
 	    output();
 	    output(separator);
 
-	    for (String line : lines) {
-		output(line);
+	    for (int i = 0; i < lines.length; i++) {
+		String line = lines[i];
+
+		// Do some fancy coloring of this plain text
+		if (i + 1 < lines.length && lines[i+1].startsWith("==="))
+		    output(BLUE_BOLD_BRIGHT + line + RESET);
+		else if (i == 0)
+		    output(CYAN + line + RESET);
+		else if (line.contains("Copyright "))
+		    outputLine(line, GREEN);
+		else if (line.contains("All rights"))
+		    outputLine(line, BLACK_BRIGHT);
+		else if (line.startsWith("==="))
+		    output(BLACK_BRIGHT + line + RESET);
+		else if (line.contains("https://") || line.contains("http://"))
+		    output(BLUE_UNDERLINED_BRIGHT + line + RESET);
+		else if (line.toUpperCase().contentEquals(line) && line.length() > 4)
+		    outputLine(line, MAGENTA_BOLD);
+		else
+		    output(line);
 	    }
 
 	    String underline = CharUtil.makeStringOfChars(colors ? '\u2500' : '-', width);
