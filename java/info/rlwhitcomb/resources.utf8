@@ -24,26 +24,30 @@
 #       Internationalizable strings for the info.rlwhitcomb code.
 #
 # History:
-#       16-Feb-2022 (rlwhitcomb)
+#       23-Feb-2022 (rlwhitcomb)
 #           #254: Initial coding.
+#	    Add coloring.
 #
 
 #
 # From Version
 #
 version.help1	= ""
-version.help2	= Prints version, license, and notice information.
+version.help2	= <Cy>Prints version, license, and notice information.<>
 version.help3	= ""
-version.help4	= \tOptions are:
-version.help5	= \t  -license\tPrint version + license information
-version.help6	= \t\tor -lic, or -l
-version.help7	= \t  -notice\tPrint version + notice information
-version.help8	= \t\tor -note, or -n
-version.help9	= \t  -nocolors\tDisplay all without colors
-version.help10	= \t\tor -nocolor, -nocols, -nocol, -noc, or -nc
-version.help11	= \t  -colors\tDisplay information using colors (default)
-version.help12	= \t\tor -color, -cols, -col, or -c
-version.help13	= \t  -help\t\tDisplay this information
-version.help14	=\t\tor -h, or -?
+version.help4	= "     Available <Gr>options<> are:"
+version.help5	= ""
+version.help6	= \t  <Gr>-license<>\tPrint version + license information
+version.help7	= \t\tor <Gr>-lic<>, or <Gr>-l<>
+version.help8	= \t  <Gr>-notice<>\tPrint version + notice information
+version.help9	= \t\tor <Gr>-note<>, or <Gr>-n<>
+version.help10	= ""
+version.help11	= \t  <Gr>-nocolors<>\tDisplay all without colors
+version.help12	= \t\tor <Gr>-nocolor<>, <Gr>-nocols<>, <Gr>-nocol<>, <Gr>-noc<>, or <Gr>-nc<>
+version.help13	= \t  <Gr>-colors<>\tDisplay information using colors <Yw!>(default)<>
+version.help14	= \t\tor <Gr>-color<>, <Gr>-cols<>, <Gr>-col<>, or <Gr>-c<>
 version.help15	= ""
+version.help16	= \t  <Gr>-help<>\t\tDisplay this information
+version.help17	=\t\tor <Gr>-h<>, or <Gr>-?<>
+version.help18	= ""
 

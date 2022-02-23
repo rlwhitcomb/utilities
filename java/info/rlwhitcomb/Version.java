@@ -45,6 +45,7 @@
  *	    #254: Options to display LICENSE and NOTICE files.
  *	23-Feb-2022 (rlwhitcomb)
  *	    #254: Help option.
+ *	    Add coloring to help.
  */
 package info.rlwhitcomb;
 
@@ -201,7 +202,7 @@ public class Version
 			case "h":
 			case "?":
 			    Environment.printProgramInfo(WIDTH, colors);
-			    Intl.printHelp("#version");
+			    Intl.printHelp("#version", colors);
 			    return;
 			default:
 			    // just ignore (silently)
