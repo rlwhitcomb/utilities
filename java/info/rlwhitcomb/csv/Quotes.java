@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2016-2017,2020-2021 Roger L. Whitcomb.
+ * Copyright (c) 2016-2017,2020-2022 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -40,6 +40,8 @@
  *	    Simplify constructors.
  *	19-Dec-2021 (rlwhitcomb)
  *	    #154: Set back tick as another valid value.
+ *	24-Feb-2022 (rlwhitcomb)
+ *	    General cleanup; add "isBracket" flag for some values.
  */
 package info.rlwhitcomb.csv;
 
@@ -58,15 +60,16 @@ public enum Quotes
 	SINGLE		('\''),
 	DOUBLE		('"'),
 	BACK		('`'),
-	PAREN		('(', ')'),
-	ANGLE		('<', '>'),
-	BRACKET		('[', ']'),
-	BRACE		('{', '}'),
+	PAREN		(true, '(', ')'),
+	ANGLE		(true, '<', '>'),
+	BRACKET		(true, '[', ']'),
+	BRACE		(true, '{', '}'),
 	ARROW		('\u2039', '\u203A'),
 	DOUBLEARROW	('\u00AB', '\u00BB'),
 	SMARTSINGLE	('\u2018', '\u2019'),
 	SMARTDOUBLE	('\u201C', '\u201D'),
 	ALL		(Constants.ALL_QUOTE_CHAR, false);
+
 
 	public static class Constants
 	{
@@ -81,43 +84,73 @@ public enum Quotes
 		private static final Set<Character> rightSet = new HashSet<>();
 	}
 
+
 	private char leftChar;
 	private char rightChar;
 	private boolean allowDoubled;
+	private boolean isBracket;
 
-	/** @return The left quote character for this quote type. */
+
+	/**
+	 * @return The left quote character for this quote type.
+	 */
 	public char leftChar() {
 	    return this.leftChar;
 	}
 
-	/** @return The right quote character for this quote type (could be
-	 * the same as the left, but not always). */
+	/**
+	 * @return The right quote character for this quote type (could be
+	 * the same as the left, but not always).
+	 */
 	public char rightChar() {
 	    return this.rightChar;
 	}
 
-	/** @return Are the left and right delimiters the same so that
-	 * doubled delimiters count as a single and don't end the field. */
+	/**
+	 * @return Are the left and right delimiters the same so that
+	 * doubled delimiters count as a single and don't end the field.
+	 */
 	public boolean allowDoubled() {
 	    return this.allowDoubled;
 	}
 
+	/**
+	 * Some of us have double duty as "quotes" but also as "brackets" around
+	 * phrases or parenthetical constructs. So, differentiate with this flag.
+	 *
+	 * @return Whether ({@code true}) or not ({@code false}) this quote set
+	 * is also a "bracket" set.
+	 */
+	public boolean isBracket() {
+	    return this.isBracket;
+	}
+
+
 	private Quotes(final char quote) {
-	    this(quote, quote, true);
+	    this(quote, quote, true, false);
 	}
 
 	private Quotes(final char quote, final boolean set) {
-	    this(quote, quote, set);
+	    this(quote, quote, set, false);
 	}
 
 	private Quotes(final char left, final char right) {
-	    this(left, right, true);
+	    this(left, right, true, false);
+	}
+
+	private Quotes(final boolean bracket, final char left, final char right) {
+	    this(left, right, true, bracket);
 	}
 
 	private Quotes(final char left, final char right, final boolean set) {
+	    this(left, right, set, false);
+	}
+
+	private Quotes(final char left, final char right, final boolean set, final boolean bracket) {
 	    this.leftChar = left;
 	    this.rightChar = right;
 	    this.allowDoubled = (left == right);
+	    this.isBracket = bracket;
 
 	    Lookup.map.put(this.toString().toUpperCase(), this);
 	    if (set) {
@@ -126,10 +159,21 @@ public enum Quotes
 	    }
 	}
 
+
+	/**
+	 * @param ch The character to check.
+	 * @return   Is the given character a valid start quote (based on the entire
+	 *           set of left quote characters)?
+	 */
 	public static boolean isValidStart(final char ch) {
 	    return Lookup.leftSet.contains(ch);
 	}
 
+	/**
+	 * @param ch The character to check.
+	 * @return   Is the given character a valid end quote (based on the entire
+	 *           set of right quote characters)?
+	 */
 	public static boolean isValidEnd(final char ch) {
 	    return Lookup.rightSet.contains(ch);
 	}

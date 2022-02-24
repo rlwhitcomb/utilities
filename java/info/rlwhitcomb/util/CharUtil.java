@@ -2986,7 +2986,13 @@ public final class CharUtil
 
 
 	/**
-	 * Parse a command line into its separate arguments.
+	 * Parse a command line into its separate arguments. If any arguments are enclosed
+	 * in single or double quotes, the quotes will be stripped in the final result array.
+	 * No escape character is recognized, nor are double quotes honored inside a quote.
+	 * No wildcard expansion is done either (note: this is explicitly different than
+	 * the way Java handles the command line). So, the main difference between this
+	 * method and just splitting the input on whitespace is that quotes around spaces
+	 * here will make the quoted value into a single argument instead of multiple.
 	 *
 	 * @param line	The original command line string.
 	 * @return	The input parsed into pieces.

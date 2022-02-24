@@ -206,6 +206,8 @@
  *	    #241: Directive in canon file to compare different output file. Substitute environment
  *	    values on command lines and the result file line. Another main description file directive
  *	    to NOT do substitutions (where the "%" might cause a problem).
+ *	24-Feb-2022 (rlwhitcomb)
+ *	    Use CharUtil version of "parseCommandLine" for greater control.
  */
 package info.rlwhitcomb.tester;
 
@@ -349,7 +351,13 @@ public class Tester
 
 		public File resultFile = null;
 
+		/**
+		 * If {@code true} line endings are written as plain {@code '\n'}
+		 * regardless of platform, while {@code false} indicates using
+		 * the platform-specific line ending.
+		 */
 		private boolean ignoreLineEndings;
+
 
 		public TestFiles(final boolean ignore) {
 		    ignoreLineEndings = ignore;
@@ -493,17 +501,6 @@ public class Tester
 	}
 
 
-	/**
-	 * Parse the command line into an array of arguments (hopefully the same way Java does it).
-	 *
-	 * @param commandLine	The complete command line string.
-	 * @return		The array of parsed arguments.
-	 */
-	private String[] parseCommandLine(final String commandLine) {
-	    // For now, until we think this through, just split on spaces
-	    return commandLine.split("\\s");
-	}
-
 	private void logTestName(final PrintStream origOut, final String testName, final String altTestName, final String commandLine) {
 	    if (!CharUtil.isNullOrEmpty(altTestName) && !testName.equals(altTestName)) {
 		if (log && verbose)
@@ -613,7 +610,7 @@ public class Tester
 
 				currentVersion = new Version(testableObject.getVersion());
 
-				exitCode = testableObject.setup(parseCommandLine(commandLine));
+				exitCode = testableObject.setup(CharUtil.parseCommandLine(commandLine));
 
 				logTestName(origOut, testName, testableObject.getTestName(), commandLine);
 
@@ -628,7 +625,7 @@ public class Tester
 
 				logTestName(origOut, testName, null, commandLine);
 
-				main.invoke(null, (Object) parseCommandLine(commandLine));
+				main.invoke(null, (Object) CharUtil.parseCommandLine(commandLine));
 			    }
 			}
 			catch (NoSuchMethodException nsme) {
@@ -1457,6 +1454,8 @@ public class Tester
 	    defaultScriptDir = null;
 
 	    testClass = null;
+
+	    currentCharset = null;
 
 	    testDescriptionFiles.clear();
 	}
