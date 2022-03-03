@@ -261,6 +261,8 @@
  *	    #247: Implement light/dark color schemes in GUI.
  *	16-Feb-2022 (rlwhitcomb)
  *	    #248: Add buttons to Version prompt for the LICENSE and NOTICE files.
+ *	28-Feb-2022 (rlwhitcomb)
+ *	    Changed to use QueuedExecutorService for background GUI thread.
  */
 package info.rlwhitcomb.calc;
 
@@ -289,6 +291,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 import java.util.jar.JarFile;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
@@ -335,7 +338,7 @@ import info.rlwhitcomb.util.FileUtilities;
 import info.rlwhitcomb.util.Intl;
 import info.rlwhitcomb.util.NumericUtil.RangeMode;
 import info.rlwhitcomb.util.Options;
-import info.rlwhitcomb.util.QueuedThread;
+import info.rlwhitcomb.util.QueuedExecutorService;
 
 /**
  * Command line calculator, which will also read from {@link System#in} or from one or more files.
@@ -529,7 +532,7 @@ public class Calc
 
 
 	/** The background worker thread to do the calculations in GUI mode. */
-	private QueuedThread queuedThread = new QueuedThread();
+	private QueuedExecutorService execService = new QueuedExecutorService();
 
 	private NumberFormat sizeFormat;
 
@@ -1083,7 +1086,21 @@ public class Calc
 	public boolean shutdown(boolean optional) {
 	    savePreferences();
 
-	    return false;	// always proceed with shutdown
+	    if (optional) {
+		execService.shutdown();
+		try {
+		    execService.awaitTermination(100L, TimeUnit.MILLISECONDS);
+		}
+		catch (InterruptedException ie) {
+		    return true;
+		}
+	    }
+	    else {
+		execService.shutdownNow();
+	    }
+
+	    // Always proceed with shutdown unless optional
+	    return false;
 	}
 
 	private void updateOutputSize() {
@@ -1331,7 +1348,7 @@ public class Calc
 		    currentText = exprText;
 		    enableActions(false);
 
-		    queuedThread.submitWork(() -> {
+		    execService.execute(() -> {
 			try {
 			    processString(exprText, quiet);
 			}

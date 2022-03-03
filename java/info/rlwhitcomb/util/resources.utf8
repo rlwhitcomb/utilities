@@ -132,6 +132,8 @@
 #	    #103: New message for ComplexNumber class.
 #	31-Jan-2022 (rlwhitcomb)
 #	    #103: New messages for List/Map conversion of ComplexNumber.
+#	27-Feb-2022 (rlwhitcomb)
+#	    #204: New message for executor service.
 #
 
 #
@@ -288,4 +290,9 @@ console.noConsole	= There is no System.console to use!
 # From Which.java
 #
 which.unknownOption	= Unknown option "%1$s"
+
+#
+# From QueuedExecutorService.java
+#
+executor.wrongNumber	= Number of threads must be at least one.
 

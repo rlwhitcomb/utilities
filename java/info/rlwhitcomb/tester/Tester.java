@@ -208,6 +208,8 @@
  *	    to NOT do substitutions (where the "%" might cause a problem).
  *	24-Feb-2022 (rlwhitcomb)
  *	    Use CharUtil version of "parseCommandLine" for greater control.
+ *	25-Feb-2022 (rlwhitcomb)
+ *	    #204: Prepare for parallel operation.
  */
 package info.rlwhitcomb.tester;
 
@@ -235,6 +237,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -269,6 +272,8 @@ public class Tester
 	private static final Pattern DESCRIPTION = Pattern.compile("^(\\s*\\{\\s*(\\d+)\\s*\\}\\s*)?([a-zA-Z0-9_/\\-\\\\\\$\\.]+)(,([\\w\\-]+))?\\s*\\:\\s*(.*)$");
 	private static final Pattern DIRECTIVE   = Pattern.compile("^([a-zA-Z]+)(\\s+(.*)\\s*)?$");
 
+	private static final String NEWLINE = Environment.lineSeparator();
+
 	private boolean createCanons = false;
 	private boolean verbose = false;
 	private boolean log = false;
@@ -281,11 +286,11 @@ public class Tester
 	private String currentPlatform;
 	private Version currentVersion;
 
-	private File defaultInputDir  = null;
+	private File defaultCanonDir  = null;
 	private File defaultScriptDir = null;
 
 	private String defaultOptions      = "";
-	private String defaultInputExt     = ".canon";
+	private String defaultCanonExt     = ".canon";
 	private String defaultCanonCharset = "";
 	private boolean ignoreLineEndings  = false;
 	private boolean noSubstitutions    = false;
@@ -300,12 +305,19 @@ public class Tester
 	 */
 	private static class DescriptionFile
 	{
-		public String descriptionFileName;
-		public Charset charset;
+		private DescriptionFile parent;
+		private String descriptionFileName;
+		private Charset charset;
 
-		public DescriptionFile(final String descFile, final Charset cs) {
-		    this.descriptionFileName = descFile;
+
+		public DescriptionFile(final DescriptionFile outer, final String fileName, final Charset cs) {
+		    this.parent = outer;
+		    this.descriptionFileName = fileName;
 		    this.charset = cs;
+		}
+
+		public Charset getCharset() {
+		    return charset;
 		}
 
 		@Override
@@ -378,28 +390,35 @@ public class Tester
 		public void writeInputLine(final String line)
 			throws IOException
 		{
-		    inputWriter.write(line);
-		    inputWriter.newLine();
+		    if (line != null) {
+			inputWriter.write(line);
+			inputWriter.newLine();
+		    }
+		}
+
+		private void write(final BufferedWriter writer, final String line)
+			throws IOException
+		{
+		    if (line != null) {
+			if (!line.isEmpty())
+			    writer.write(line);
+			if (ignoreLineEndings)
+			    writer.write('\n');
+			else
+			    writer.newLine();
+		    }
 		}
 
 		public void writeOutputLine(final String line)
 			throws IOException
 		{
-		    outputWriter.write(line);
-		    if (ignoreLineEndings)
-			outputWriter.write('\n');
-		    else
-			outputWriter.newLine();
+		    write(outputWriter, line);
 		}
 
 		public void writeErrorLine(final String line)
 			throws IOException
 		{
-		    errorWriter.write(line);
-		    if (ignoreLineEndings)
-			errorWriter.write('\n');
-		    else
-			errorWriter.newLine();
+		    write(errorWriter, line);
 		}
 
 		public void closeStreams()
@@ -949,6 +968,7 @@ public class Tester
 	 * directory if specified, or the current directory if not.  Otherwise the canon
 	 * file will be parsed and the results compared to it.
 	 *
+	 * @param desc			The test description file we're currently running in.
 	 * @param canonFileName		The canon file name (which contains input, output and error lines).
 	 * @param canonCharsetName	Charset name for this file (can be {@code null} to use the platform default).
 	 * @param commandLine		The complete command line for the test.
@@ -957,6 +977,7 @@ public class Tester
 	 * @return			Test result (0 = success, or an error code).
 	 */
 	private int runOneTest(
+		final DescriptionFile desc,
 		final String canonFileName,
 		final String canonCharsetName,
 		final String commandLine,
@@ -984,7 +1005,7 @@ public class Tester
 
 		// Get the default file we would like to use: $inputDir + testName + $inputExt
 		// (assuming the "canonFileName" does not have a path and/or extension)
-		canonFile = FileUtilities.decorate(canonFileName, defaultInputDir, defaultInputExt);
+		canonFile = FileUtilities.decorate(canonFileName, defaultCanonDir, defaultCanonExt);
 
 		if (createCanons) {
 		    boolean created = canonFile.createNewFile();
@@ -1012,8 +1033,8 @@ public class Tester
 		    // and the bare name itself
 		    boolean canRead = FileUtilities.canRead(canonFile);
 		    if (!canRead) {
-			if (defaultInputDir != null) {
-			    canonFile = FileUtilities.decorate(canonFileName, defaultInputDir, null);
+			if (defaultCanonDir != null) {
+			    canonFile = FileUtilities.decorate(canonFileName, defaultCanonDir, null);
 			    canRead   = FileUtilities.canRead(canonFile);
 			    if (!canRead) {
 				// One last try with just the name as given
@@ -1022,7 +1043,7 @@ public class Tester
 			    }
 			}
 			else {
-			    canonFile = FileUtilities.decorate(canonFileName, null, defaultInputExt);
+			    canonFile = FileUtilities.decorate(canonFileName, null, defaultCanonExt);
 			    canRead   = FileUtilities.canRead(canonFile);
 			}
 		    }
@@ -1041,21 +1062,15 @@ public class Tester
 		    while ((line = canonReader.readLine()) != null) {
 			if (line.startsWith(">>")) {
 			    String outLine = platformAndVersionCheck(line.substring(2));
-			    if (outLine != null) {
-				files.writeErrorLine(outLine);
-			    }
+			    files.writeErrorLine(outLine);
 			}
 			else if (line.startsWith(">")) {
 			    String outLine = platformAndVersionCheck(line.substring(1));
-			    if (outLine != null) {
-				files.writeOutputLine(outLine);
-			    }
+			    files.writeOutputLine(outLine);
 			}
 			else if (line.startsWith("<")) {
 			    String outLine = platformAndVersionCheck(line.substring(1));
-			    if (outLine != null) {
-				files.writeInputLine(outLine);
-			    }
+			    files.writeInputLine(outLine);
 			}
 			// Comments are allowed (and ignored)
 			else if (line.startsWith("#") ||
@@ -1069,7 +1084,9 @@ public class Tester
 			    if (m.matches()) {
 				String command = m.group(1).toLowerCase();
 				String argument = m.group(3);
-				argument = argument == null ? null : CharUtil.stripDoubleQuotes(argument);
+				if (argument != null) {
+				    argument = CharUtil.stripDoubleQuotes(argument);
+				}
 
 				switch (command) {
 				    case "outputfile":
@@ -1092,9 +1109,7 @@ public class Tester
 			else if (!line.isEmpty()) {
 			    // Default is to treat the line as regular output
 			    String outLine = platformAndVersionCheck(line);
-			    if (outLine != null) {
-				files.writeOutputLine(outLine);
-			    }
+			    files.writeOutputLine(outLine);
 			}
 			else {
 			    files.writeOutputLine("");
@@ -1133,10 +1148,11 @@ public class Tester
 	/**
 	 * Process the description file lines that begin with "$", "!", or ":".
 	 *
+	 * @param desc  Test description file we're processing currently.
 	 * @param line	The internal instruction input line (without the leading "$").
 	 * @return	{@code false} to abort processing of this file (fatal error).
 	 */
-	private boolean processInternalCommand(final String line) {
+	private boolean processInternalCommand(final DescriptionFile desc, final String line) {
 	    boolean error = false;
 	    Matcher m = DIRECTIVE.matcher(line);
 	    if (m.matches()) {
@@ -1163,7 +1179,7 @@ public class Tester
 				return false;
 			    }
 			    else {
-				defaultInputDir = inputDir;
+				defaultCanonDir = inputDir;
 			    }
 			}
 			else {
@@ -1237,8 +1253,9 @@ public class Tester
 			break;
 
 		    case "inputext":
+		    case "canonext":
 			if (!CharUtil.isNullOrEmpty(argument)) {
-			    defaultInputExt = argument;
+			    defaultCanonExt = argument;
 			}
 			else {
 			    error = true;
@@ -1247,7 +1264,7 @@ public class Tester
 
 		    case "include":
 			if (!CharUtil.isNullOrEmpty(argument)) {
-			    driveOneTest(new DescriptionFile(argument, currentCharset));
+			    driveOneTest(new DescriptionFile(desc, argument, currentCharset));
 			}
 			else {
 			    Intl.errFormat("tester#emptyInclude");
@@ -1314,9 +1331,18 @@ public class Tester
 		return Files.newBufferedReader(file.toPath(), cs);
 	}
 
-	private int numberTests = 0;
-	private int numberPassed = 0;
-	private int numberFailed = 0;
+	private boolean isDirective(final String line) {
+	    if (!line.isEmpty()) {
+		char ch = line.charAt(0);
+		return (ch == '$' || ch == '!' || ch == ':');
+	    }
+	    return false;
+	}
+
+
+	private AtomicInteger numberTests = new AtomicInteger();
+	private AtomicInteger numberPassed = new AtomicInteger();
+	private AtomicInteger numberFailed = new AtomicInteger();
 
 	/**
 	 * Read and process one test description file (can be recursive
@@ -1327,6 +1353,7 @@ public class Tester
 	private void driveOneTest(final DescriptionFile desc) {
 	    String name = desc.toString();
 	    File f = new File(name);
+
 	    if (!FileUtilities.canRead(f) && defaultScriptDir != null) {
 		f = FileUtilities.decorate(name, defaultScriptDir, null);
 		if (!FileUtilities.canRead(f)) {
@@ -1334,37 +1361,45 @@ public class Tester
 		    return;
 		}
 	    }
-	    try (BufferedReader reader = fileReader(f, desc.charset))
+
+	    try (BufferedReader reader = fileReader(f, desc.getCharset()))
 	    {
 		String line = null;
 		int lineNo = 0;
+
 		while ((line = reader.readLine()) != null) {
 		    lineNo++;
+		    String remainingLine = line.isEmpty() ? line : line.substring(1);
+
 		    if (outputFileWriter != null) {
-			if (line.equalsIgnoreCase("$endfile") || line.equalsIgnoreCase("!endfile")) {
+			if (isDirective(line) && remainingLine.equalsIgnoreCase("endfile")) {
 			    outputFileWriter.flush();
 			    outputFileWriter.close();
 			    outputFileWriter = null;
 			}
 			else {
 			    outputFileWriter.write(line);
-			    outputFileWriter.write(Environment.lineSeparator());
+			    outputFileWriter.write(NEWLINE);
 			}
 			continue;
 		    }
+
 		    line = line.trim();
 		    if (line.isEmpty() ||
 			line.startsWith("#") ||
 			line.startsWith("--") ||
 			line.startsWith("//"))
 			continue;
-		    if (line.startsWith("$") || line.startsWith("!") || line.startsWith(":")) {
-			if (processInternalCommand(line.substring(1)))
+
+		    if (isDirective(line)) {
+			if (processInternalCommand(desc, remainingLine))
 			    continue;
 			else
 			    break;
 		    }
-		    numberTests++;
+
+		    numberTests.incrementAndGet();
+
 		    Matcher m = DESCRIPTION.matcher(line);
 		    if (m.matches()) {
 			String commandLine;
@@ -1389,19 +1424,21 @@ public class Tester
 			if (charset == null)
 			    charset = defaultCanonCharset;
 
-			int ret = runOneTest(m.group(3), charset, commandLine, expectedExitCode);
+			int ret = runOneTest(desc, m.group(3), charset, commandLine, expectedExitCode);
+
 			if (ret == 0) {
-			    numberPassed++;
+			    numberPassed.incrementAndGet();
 			}
 			else {
-			    numberFailed++;
+			    numberFailed.incrementAndGet();
+
 			    if (abortOnFirstError)
 				break;
 			}
 		    }
 		    else {
 			Intl.errFormat("tester#badSyntax", lineNo, line);
-			numberFailed++;
+			numberFailed.incrementAndGet();
 			break;
 		    }
 		}
@@ -1431,8 +1468,13 @@ public class Tester
 		totalTiming = Intl.formatString("tester#totalTime", elapsedSecs);
 	    }
 	    Intl.outPrintln(timing ? "tester#finalBreakTiming" : "tester#finalBreak");
-	    Intl.outFormat(numberTests == 1 ? "tester#finalResultOne" : "tester#finalResults",
-		    numberTests, numberPassed, numberFailed, totalTiming);
+
+	    int tests = numberTests.intValue();
+	    int passed = numberPassed.intValue();
+	    int failed = numberFailed.intValue();
+
+	    Intl.outFormat(tests == 1 ? "tester#finalResultOne" : "tester#finalResults",
+		    tests, passed, failed, totalTiming);
 	    Intl.outPrintln(timing ? "tester#finalUnderlineTiming" : "tester#finalUnderline");
 	    Intl.outPrintln();
 	}
@@ -1474,7 +1516,7 @@ public class Tester
 	 */
 	private void processOption(final String arg) {
 	    if (Options.isOption(arg) == null) {
-		testDescriptionFiles.add(new DescriptionFile(arg, currentCharset));
+		testDescriptionFiles.add(new DescriptionFile(null, arg, currentCharset));
 		return;
 	    }
 
@@ -1617,7 +1659,9 @@ public class Tester
 		Intl.errFormat("tester#exception", Exceptions.toString(err));
 		return OTHER_ERROR;
 	    }
-	    return numberFailed == 0 ? 0 : NUMBER_OF_ERRORS + numberFailed;
+
+	    int failed = numberFailed.intValue();
+	    return failed == 0 ? 0 : NUMBER_OF_ERRORS + failed;
 	}
 
 	/**
