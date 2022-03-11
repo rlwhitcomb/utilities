@@ -41,6 +41,15 @@
 >peek(s1) -> <null>
 >pop(s1) -> <null>
 >isempty(s1) -> true
+>FtoC(32) -> 0
+>FtoC(212) -> 100
+>CtoF(0) -> 32
+>CtoF(100) -> 212
+>CtoF(23) -> 73.4
+>FtoC(98.6) -> 37
+>CtoF(40) -> 104
+>FtoC(-40) -> -40
+>CtoF(-40) -> -40
 >to_excel_col(1) -> "A"
 >to_excel_col(2) -> "B"
 >to_excel_col(25) -> "Y"

@@ -95,6 +95,22 @@ def rad_to_deg(rad) = { rad / pi * 180 }
 def deg_to_rad(deg) = { deg / 180 * pi }
 
 /*
+ * Convert degrees Fahrenheit to degrees Celsius.
+ *
+ * @param f Degrees in Fahrenheit (32 = freezing point of water)
+ * @return  Equivalent in degrees Celsius.
+ */
+def FtoC(f) = { (f - 32) * 5 / 9 }
+
+/*
+ * Convert degrees Celsius to degrees Fahrenheit.
+ *
+ * @param c Degrees in Celsius (0 = freezing point of water)
+ * @return  Equivalent in degrees Fahrenheit.
+ */
+def CtoF(c) = { (c * 9 / 5) + 32 }
+
+/*
  * Get the day of week name for a given date.
  *
  * @param date The input date value.
