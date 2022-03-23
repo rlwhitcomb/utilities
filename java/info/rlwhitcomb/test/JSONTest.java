@@ -26,16 +26,20 @@
  *  Change History:
  *      17-Feb-2022 (rlwhitcomb)
  *          #196: Initial coding.
+ *	23-Mar-2022 (rlwhitcomb)
+ *	    Additional tests and test data files.
  */
 package info.rlwhitcomb.test;
 
 import java.io.File;
 import java.io.InputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.file.Files;
 
 import info.rlwhitcomb.json.JSON;
 import info.rlwhitcomb.json.JSONException;
+import info.rlwhitcomb.util.FileUtilities;
 import info.rlwhitcomb.util.Options;
 
 
@@ -50,7 +54,8 @@ public class JSONTest
 	private static boolean verbose = false;
 
 	private static final String[] TEST_FILE_NAMES = {
-	    "defunkt.json"
+	    "defunkt.json",
+	    "MOCK_DATA.json"
 	};
 
 	private static final String[] TEST_STRINGS = {
@@ -71,6 +76,33 @@ public class JSONTest
 		    System.out.println(JSON.toStringValue(obj, true, true));
 		    System.out.println("----- " + f.getName() + " -----");
 		    System.out.println();
+		}
+		catch (IOException | JSONException ex) {
+		    numberOfFailures++;
+		}
+	    }
+
+	    for (String fileName : TEST_FILE_NAMES) {
+		numberOfTests++;
+		try {
+		    File f = new File("test/data", fileName);
+		    InputStream is = Files.newInputStream(f.toPath());
+		    Object obj = JSON.readObject(is);
+		    is.close();
+
+		    File f2 = FileUtilities.createTempFile("json", ".txt", true);
+		    OutputStream os = Files.newOutputStream(f2.toPath());
+		    JSON.writeObject(os, obj);
+		    os.flush();
+		    os.close();
+
+		    InputStream is2 = Files.newInputStream(f2.toPath());
+		    Object obj2 = JSON.readObject(is2);
+		    is2.close();
+
+		    if (!obj.equals(obj2)) {
+			numberOfFailures++;
+		    }
 		}
 		catch (IOException | JSONException ex) {
 		    numberOfFailures++;

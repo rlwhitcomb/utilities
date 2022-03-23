@@ -27,11 +27,14 @@
  *      16-Feb-2022 (rlwhitcomb)
  *	    #196: Initial coding.
  *	    Add option to "toStringValue" to switch line endings.
+ *	23-Mar-2022 (rlwhitcomb)
+ *	    New "writeObject" methods.
  */
 package info.rlwhitcomb.json;
 
 import java.io.InputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.Charset;
@@ -54,12 +57,24 @@ import info.rlwhitcomb.util.Environment;
  */
 public class JSON
 {
+	/**
+	 * The current environment's line separator.
+	 */
 	private static final String NEWLINE = Environment.lineSeparator();
 
+	/**
+	 * Custom error strategy for the generated parser.
+	 */
 	private static JSONBailErrorStrategy errorStrategy = new JSONBailErrorStrategy();
 
+	/**
+	 * Custom error listener for the generated parser.
+	 */
 	private static JSONErrorListener errorListener = new JSONErrorListener();
 
+	/**
+	 * The generated parser visitor.
+	 */
 	private static JSONObjectVisitor visitor = new JSONObjectVisitor();
 
 
@@ -98,7 +113,7 @@ public class JSON
 		return parseStream(input);
 	    }
 	    catch (IOException ioe) {
-		throw new JSONException(ioe, 1);
+		throw new JSONException(ioe);
 	    }
 	}
 
@@ -111,10 +126,6 @@ public class JSON
 	 */
 	public static Object readString(final String input) {
 	    return parseStream(CharStreams.fromString(input));
-	}
-
-	private static String quote(final String input) {
-	    return CharUtil.addDoubleQuotes(CharUtil.quoteControl(input));
 	}
 
 	/**
@@ -144,6 +155,31 @@ public class JSON
 	}
 
 
+	/**
+	 * Process and quote a string to make it JSON-compatible for output.
+	 *
+	 * @param input The internal string to process.
+	 * @return      Properly escaped and quoted string, suitable for output.
+	 */
+	private static String quote(final String input) {
+	    return CharUtil.addDoubleQuotes(CharUtil.quoteControl(input));
+	}
+
+	/**
+	 * Convert an arbitrary object to JSON-compatible format for writing. For this to work, the given
+	 * object should have only Java-native {@link List} or {@link Map} objects internally to represent
+	 * JSON arrays or objects. Otherwise, values will be represented by their {@link Object#toString}
+	 * representation.
+	 *
+	 * @param obj      Input object to convert.
+	 * @param pretty   Whether or not to use "pretty" printing in the output, that is, line separators
+	 *                 for new objects, and indentation to successive levels.
+	 * @param newlines Whether or not to use just {@code '\n'} for line separators (only applicable for
+	 *                 "pretty" printing). Use {@code false} to use the current environment's separators.
+	 * @param indent   The cumulative indent to use for pretty printing (should be {@code ""} for the
+	 *                 outermost level, usually).
+	 * @param buf      The buffer to use as the destination for the output.
+	 */
 	private static void toStringValue(final Object obj, final boolean pretty, final boolean newlines, final String indent, final StringBuilder buf) {
 	    if (obj instanceof List) {
 		@SuppressWarnings("unchecked")
@@ -178,10 +214,12 @@ public class JSON
 	    if (list.size() > 0) {
 		boolean comma = false;
 		String newLine = newlines ? "\n" : NEWLINE;
+
 		if (pretty)
 		    buf.append("[").append(newLine);
 		else
 		    buf.append("[ ");
+
 		for (Object value : list) {
 		    if (comma) {
 			if (pretty)
@@ -250,11 +288,7 @@ public class JSON
 	 * @return       The string value of this object.
 	 */
 	public static String toStringValue(final Object obj, final boolean pretty) {
-	    StringBuilder buf = new StringBuilder();
-
-	    toStringValue(obj, pretty, false, "", buf);
-
-	    return buf.toString();
+	    return toStringValue(obj, pretty, false);
 	}
 
 	/**
@@ -273,6 +307,61 @@ public class JSON
 	    toStringValue(obj, pretty, newlines, "", buf);
 
 	    return buf.toString();
+	}
+
+	/**
+	 * Write an object to the given output stream using the UTF-8 character set. Output will be "raw"
+	 * JSON format (that is, with no extra line separators or indentation).
+	 *
+	 * @param os     The output stream to write the object to.
+	 * @param obj    Object to turn into a JSON string to write to the stream.
+	 * @throws JSONException if there was a problem writing to the stream
+	 */
+	public static void writeObject(final OutputStream os, final Object obj)
+		throws JSONException
+	{
+	    writeObject(os, UTF_8_CHARSET, obj, false, false);
+	}
+
+	/**
+	 * Write an object to the given output stream using the UTF-8 character set and the platform-default
+	 * line separator (only applies when pretty printing).
+	 *
+	 * @param os     The output stream to write the object to.
+	 * @param obj    Object to turn into a JSON string to write to the stream.
+	 * @param pretty Whether to do indenting, etc.
+	 * @throws JSONException if there was a problem writing to the stream
+	 */
+	public static void writeObject(final OutputStream os, final Object obj, final boolean pretty)
+		throws JSONException
+	{
+	    writeObject(os, UTF_8_CHARSET, obj, pretty, false);
+	}
+
+	/**
+	 * Write an object to the given output stream using the given character set to
+	 * encode the result. The object will be converted to a string in JSON format, then the
+	 * resulting string will be converted to bytes according to the given charset before writing.
+	 *
+	 * @param os       The output stream to write the object to.
+	 * @param cs       Charset to use to convert the output to bytes for writing to the stream.
+	 * @param obj      Object to turn into a JSON string to write to the stream.
+	 * @param pretty   Whether to do indenting, etc.
+	 * @param newlines {@code true} to use just {@code '\n'} for line separators,
+	 *                 or {@code false} to use the platform-specific separator
+	 *                 (only applies for pretty-printing).
+	 * @throws JSONException if there was a problem writing to the stream
+	 */
+	public static void writeObject(final OutputStream os, final Charset cs, final Object obj,
+		final boolean pretty, final boolean newlines) throws JSONException
+	{
+	    String value = toStringValue(obj, pretty, newlines);
+	    try {
+		os.write(value.getBytes(cs));
+	    }
+	    catch (IOException ioe) {
+		throw new JSONException(ioe);
+	    }
 	}
 
 }

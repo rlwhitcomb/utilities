@@ -26,6 +26,8 @@
 # History:
 #       16-Feb-2022 (rlwhitcomb)
 #           #196: Initial coding.
+#	23-Mar-2022 (rlwhitcomb)
+#	    New error strings for JSONException.
 #
 
 #
@@ -37,4 +39,12 @@ syntaxError	= Syntax error at position %1$d: %2$s
 # From JSONBailErrorStrategy
 #
 errorNoAlt	= Syntax error at position %1$d: no viable alternative at input <y>%2$s<>
+
+#
+# From JSONException
+#
+except.noCauseNoLine	= JSON Error: %1$s
+except.causeNoLine	= JSON Error caused by: %1$s
+except.noCause		= JSON Error at line %1$d
+except.message		= JSON Error at line %1$d: %2$s
 
