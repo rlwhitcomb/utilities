@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2020-2021 Roger L. Whitcomb.
+ * Copyright (c) 2020-2022 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -52,6 +52,8 @@
  *	    Move some methods from NumericUtil to MathUtil.
  *	29-Mar-2021 (rlwhitcomb)
  *	    Move to new package.
+ *	23-Mar-2022 (rlwhitcomb)
+ *	    New tests of BigFraction with '+' signs.
  */
 package info.rlwhitcomb.test;
 
@@ -623,7 +625,7 @@ public class TestNumericUtil
 	    System.out.println("49/5 = " + f5 + " = " + f5.toProperString());
 	    BigFraction f6 = new BigFraction(137, 19);
 	    BigFraction f7 = f6.divide(f6);
-	    System.out.println("137/19 = " + f6 + " = " + f6.toProperString() + "; " + f6 + " / " + f6 + " = " + f7 + " = " + f7.toProperString());
+	    System.out.println("+137/19 = " + f6 + " = " + f6.toProperString() + "; " + f6 + " / " + f6 + " = " + f7 + " = " + f7.toProperString());
 	    BigFraction f8 = new BigFraction(3, 5);
 	    BigFraction f9 = new BigFraction(10, 3);
 	    BigFraction f10 = f8.multiply(f9);
@@ -645,7 +647,7 @@ public class TestNumericUtil
 	    System.out.println(f18 + " * " + f19 + " = " + f20 + " = " + f20.toProperString());
 	    System.out.println(f20 + " = " + f20.toDecimal().toPlainString());
 
-	    String s1 = "1 2/3";
+	    String s1 = "1 +2/3";
 	    BigFraction f21 = BigFraction.valueOf(s1);
 	    System.out.println(s1 + " = " + f21 + ", " + f21.toProperString());
 	    BigFraction f22 = new BigFraction("3", "4", "9");
@@ -657,7 +659,7 @@ public class TestNumericUtil
 	    BigFraction f24 = new BigFraction(d2);
 	    System.out.println(d2.toPlainString() + " = " + f24 + ", " + f24.toProperString());
 	    BigFraction f25 = BigFraction.valueOf("4 / 7");
-	    BigFraction f26 = BigFraction.valueOf("5, 9");
+	    BigFraction f26 = BigFraction.valueOf("+5, +9");
 	    System.out.println(f25 + " cmp " + f26 + " = " + f25.compareTo(f26));
 	    BigFraction f27 = BigFraction.valueOf("3/12");
 	    System.out.println("3 twelfths = " + f27);

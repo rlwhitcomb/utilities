@@ -78,6 +78,8 @@
  *	    Some optimizations in "pow()".
  *	10-Feb-2022 (rlwhitcomb)
  *	    Oops! Modulus is non-integer part after division (as in @F formatting).
+ *	23-Mar-2022 (rlwhitcomb)
+ *	    Allow '+' in "fractionValue" and other input patterns also.
  */
 package info.rlwhitcomb.util;
 
@@ -101,14 +103,21 @@ public class BigFraction extends Number
 {
 	private static final long serialVersionUID = 3889374235914093689L;
 
-	/** The pattern used for two ints, as in "numer [&nbsp;,/;] denom". */
-	private static final Pattern TWO_INTS = Pattern.compile("(-?[0-9]+)(\\s+|\\s*[,/;]\\s*)(-?[0-9]+)");
+	/** A signed integer (subpattern of other patterns). */
+	private static final String SIGNED_INT = "([+\\-]?[0-9]+)";
+	/** Blank or other separator (subpattern of other patterns). */
+	private static final String SEP = "(\\s+|\\s*[,/;]\\s*)";
+	/** A signed fraction (sepcial Unicode characters) (another subpattern). */
+	private static final String SIGNED_FRAC = "([+\\-]?[\u00BC-\u00BE\u2150-\u215E\u2189])";
+
 	/** The pattern for three ints, as in "int [&nbsp;,/;] numer [&nbsp;,/;] denom". */
-	private static final Pattern THREE_INTS = Pattern.compile("(-?[0-9]+)(\\s+|\\s*[,/;]\\s*)(-?[0-9]+)(\\s+|\\s*[,/;]\\s*)(-?[0-9]+)");
+	private static final Pattern THREE_INTS = Pattern.compile(SIGNED_INT + SEP + SIGNED_INT + SEP + SIGNED_INT);
+	/** The pattern used for two ints, as in "numer [&nbsp;,/;] denom". */
+	private static final Pattern TWO_INTS = Pattern.compile(SIGNED_INT + SEP + SIGNED_INT);
 	/** The pattern for an int and a fraction character, as in "int [&nbsp;,/;] frac". */
-	private static final Pattern INT_FRAC = Pattern.compile("(-?[0-9]+)(\\s*[,/;]?\\s*)(-?[\u00BC-\u00BE\u2150-\u215E\u2189])");
-	/** The pattern for a single fraction character. */
-	private static final Pattern FRAC_ONLY = Pattern.compile("-?[\u00BC-\u00BE\u2150-\u215E\u2189]");
+	private static final Pattern INT_FRAC = Pattern.compile(SIGNED_INT + SEP + "?" + SIGNED_FRAC);
+	/** The pattern for a single (signed) fraction character. */
+	private static final Pattern FRAC_ONLY = Pattern.compile(SIGNED_FRAC);
 
 	/** A value of {@code 0/1} (integer 0) as a fraction. */
 	public static final BigFraction ZERO = new BigFraction(BigInteger.ZERO);
@@ -160,10 +169,40 @@ public class BigFraction extends Number
 
 
 	/**
+	 * Normalize a possibly signed value, that is, allow either {@code '+'} or {@code '-'}
+	 * but return only a {@code '-'} and the remaining value if so (strip the leading {@code '+'}
+	 * because other methods don't recognize it).
+	 *
+	 * @param input A string with leading sign character.
+	 * @return      The input with any leading {@code '+'} stripped off.
+	 */
+	private static String normalizeSign(final String input) {
+	    if (!input.isEmpty()) {
+		if (input.charAt(0) == '+') {
+		    return input.substring(1);
+		}
+	    }
+	    return input;
+	}
+
+	/**
+	 * Helper function to normalize the sign of a matched integer value.
+	 *
+	 * @param m      The matcher that matches one of our patterns.
+	 * @param group The group number within the pattern.
+	 * @return      The specified group, with the matched {@code '+'} stripped off
+	 *              (because the {@code BigInteger} constructor won't recognize it).
+	 */
+	private static String groupInt(final Matcher m, final int group) {
+	    return normalizeSign(m.group(group));
+	}
+
+	/**
 	 * Convert a string of <code>- <i>fraction</i></code> to a real fraction value.
 	 *
-	 * @param value A string consisting of an optional minus sign and a single
+	 * @param value A string consisting of an optional sign and a single
 	 *              Unicode fraction character (hopefully I found them all!)
+	 *		(should match Calc.g4 list)
 	 * @return The real fraction value.
 	 * @throws IllegalArgumentException if the character/string is not recognized.
 	 */
@@ -275,18 +314,18 @@ public class BigFraction extends Number
 	public static BigFraction valueOf(final String value) {
 	    Matcher m3 = THREE_INTS.matcher(value);
 	    if (m3.matches()) {
-		return new BigFraction(m3.group(1), m3.group(3), m3.group(5));
+		return new BigFraction(groupInt(m3, 1), groupInt(m3, 3), groupInt(m3, 5));
 	    }
 	    else {
 		Matcher m2 = TWO_INTS.matcher(value);
 		if (m2.matches()) {
-		    return new BigFraction(m2.group(1), m2.group(3));
+		    return new BigFraction(groupInt(m2, 1), groupInt(m2, 3));
 		}
 		else {
 		    Matcher m1 = INT_FRAC.matcher(value);
 		    if (m1.matches()) {
-			BigFraction fraction = fractionValue(m1.group(3));
-			BigInteger integer   = new BigInteger(m1.group(1));
+			BigFraction fraction = fractionValue(groupInt(m1, 3));
+			BigInteger integer   = new BigInteger(groupInt(m1, 1));
 			int fracSgn = fraction.signum();
 			int intSgn  = integer.signum();
 			boolean negative = fracSgn < 0 || intSgn < 0;
@@ -299,11 +338,11 @@ public class BigFraction extends Number
 		    else {
 			Matcher m0 = FRAC_ONLY.matcher(value);
 			if (m0.matches()) {
-			    return fractionValue(value);
+			    return fractionValue(normalizeSign(value));
 			}
 			else {
 			    try {
-				return new BigFraction(new BigInteger(value));
+				return new BigFraction(new BigInteger(normalizeSign(value)));
 			    }
 			    catch (NumberFormatException nfe) {
 				;
