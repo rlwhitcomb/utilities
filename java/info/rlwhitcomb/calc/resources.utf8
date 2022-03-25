@@ -114,6 +114,8 @@
 #	    New "one digit" precision message.
 #	13-Feb-2022 (rlwhitcomb)
 #	    #199: Change messages for read-only variables.
+#	24-Mar-2022 (rlwhitcomb)
+#	    Fix the command listing in the help message.
 #
 
 #
@@ -210,11 +212,12 @@ targetWrongType		= Target of a <y>%1$s<> must be an array or string
 oneCharInt		= %1$s value for a string must be one character or an integer \u2264 65535
 undefinedFunction	= Cannot call undefined function <y>%1$s<>
 
-intro.help1	= "  Enter an expression (or multiple expressions separated by <u>;<>)."
-intro.help2	= "  Use <u>help<> or <u>?<> for a list of supported functions."
-intro.help3	= "  Enter <u>quit<> or <u>exit<> to end."
-intro.help4	= "  Enter <u>gui<> to enter GUI mode."
-intro.help5	= ""
+intro.help1	= "  Enter an arithmetic expression to evaluate, or multiple expressions"
+intro.help2	= "  separated by <u>;<>, followed by <a>Return<> or <a>Enter<>."
+intro.help3	= "  Use <u>:help<> or <u>:?<> to display the help page in your browser."
+intro.help4	= "  Enter <u>:quit<> or <u>:exit<> to end."
+intro.help5	= "  Enter <u>:gui<> to enter GUI mode."
+intro.help6	= ""
 
 #
 # From CalcUtil
