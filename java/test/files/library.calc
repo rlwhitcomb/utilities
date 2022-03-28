@@ -1,4 +1,4 @@
-//** Version: 2.8.10 Base: 1.9.4
+//** Version: 2.8.11 Base: 1.9.5
 //** The versions above must conform to the latest values in "version.properties" and "build.properties"
 
 /*
@@ -258,7 +258,7 @@ define quad(a, b, c) = {
  * @return The value of the equation at the given point.
  */
 define quad_exp(a, b, c, x) = {
-  a * x*x + b * x + c
+  a * x**2 + b * x + c
 }
 
 /*

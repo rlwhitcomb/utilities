@@ -365,6 +365,8 @@
  *	    #199: Allow any id for function parameters and loop variables.
  *	15-Feb-2022 (rlwhitcomb)
  *	    #249: Add "expr IN loopCtl" as another expression type.
+ *	27-Mar-2022 (rlwhitcomb)
+ *	    #190: Support "caret" notation inside strings.
  */
 
 grammar Calc;
@@ -1353,31 +1355,31 @@ ISTRING
    ;
 
 fragment ESC1
-   : ESC ( ["] | ESCAPES | UNICODE )
+   : ESC ( ["] | ESCAPES | UNICODE | CARET )
    ;
 
 fragment ESC2
-   : ESC ( ['] | ESCAPES | UNICODE )
+   : ESC ( ['] | ESCAPES | UNICODE | CARET )
    ;
 
 fragment ESC3
-   : ESC ( '\u2019' | ESCAPES | UNICODE )
+   : ESC ( '\u2019' | ESCAPES | UNICODE | CARET )
    ;
 
 fragment ESC4
-   : ESC ( '\u201D' | ESCAPES | UNICODE )
+   : ESC ( '\u201D' | ESCAPES | UNICODE | CARET )
    ;
 
 fragment ESC5
-   : ESC ( '\u203A' | ESCAPES | UNICODE )
+   : ESC ( '\u203A' | ESCAPES | UNICODE | CARET )
    ;
 
 fragment ESC6
-   : ESC ( '\u00BB' | ESCAPES | UNICODE )
+   : ESC ( '\u00BB' | ESCAPES | UNICODE | CARET )
    ;
 
 fragment ESCI
-   : ESC ( [`] | ESCAPES | UNICODE )
+   : ESC ( [`] | ESCAPES | UNICODE | CARET )
    ;
 
 fragment ESCAPES
@@ -1395,6 +1397,10 @@ fragment UNICODE
    | 'o' '{' OCT + '}'
    | 'B' BIN BIN BIN BIN BIN BIN BIN BIN
    | 'B' '{' BIN + '}'
+   ;
+
+fragment CARET
+   : 'c' [a-zA-Z]
    ;
 
 fragment HEX

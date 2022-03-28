@@ -313,6 +313,9 @@
  *	    #241: Alternate form of "substituteEnvValues". FIx bug if no ending "%".
  *	22-Feb-2022 (rlwhitcomb)
  *	    #254: "stringToLines" function, and "maxLength".
+ *	27-Mar-2022 (rlwhitcomb)
+ *	    Use UTF-8 charset from Constants, not our own.
+ *	    #190: Support "caret" notation for control characters inside strings.
  */
 
 package info.rlwhitcomb.util;
@@ -332,6 +335,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import info.rlwhitcomb.csv.Quotes;
+import static info.rlwhitcomb.util.Constants.*;
 
 
 /**
@@ -362,8 +366,6 @@ public final class CharUtil
 	/** Pattern to recognize a string of zero or more backslashes preceding a doublequote,
 	 *  OR, a string of one or more backslashes preceding the end of the string. */
 	private static Pattern backslashesBeforeDoubleQuotePattern = Pattern.compile("\\\\*\"|\\\\+$");
-	/** The UTF-8 charset. */
-	private static Charset utf8Charset = StandardCharsets.UTF_8;
 	/** The regular expression string used to parse floating-point values according
 	 * to the Java language specification.
 	 */
@@ -746,8 +748,15 @@ public final class CharUtil
 			    buf.append(escapeChar).append('0');
 			    break;
 			default:
-			    buf.append(escapeChar).append('u');
-			    buf.append(String.format("%1$04x", (int) ch));
+			    if (ch <= '\u001A') {
+				int caretCh = ch + ('A' - 1);
+				buf.append(escapeChar).append('c');
+				buf.appendCodePoint(caretCh);
+			    }
+			    else {
+				buf.append(escapeChar).append('u');
+				buf.append(String.format("%1$04x", (int) ch));
+			    }
 			    break;
 		    }
 		}
@@ -1020,6 +1029,23 @@ public final class CharUtil
 				break;
 			    case '0':
 				buf.append('\0');
+				break;
+			    case 'c':
+				if (i + 1 < input.length()) {
+				    char ch3 = input.charAt(++i);
+				    if (ch3 >= 'a' && ch3 <= 'z')
+					buf.appendCodePoint(ch3 - 'a' + 1);
+				    else if (ch3 >= 'A' && ch3 <= 'Z')
+					buf.appendCodePoint(ch3 - 'A' + 1);
+				    else
+					buf.append(ch).append(ch2).append(ch3);
+				}
+				else {
+				    buf.append(ch).append(ch2);
+				}
+				break;
+			    default:
+				buf.append(ch).append(ch2);
 				break;
 			}
 			continue;
@@ -1810,7 +1836,7 @@ public final class CharUtil
 	 *			(or {@code null} if the input is).
 	 */
 	public static byte[] getUtf8Bytes(final String s) {
-	    return s == null ? null : s.getBytes(utf8Charset);
+	    return s == null ? null : s.getBytes(UTF_8_CHARSET);
 	}
 
 
@@ -1822,7 +1848,7 @@ public final class CharUtil
 	 *			{@code null} if the input is {@code null}).
 	 */
 	public static String getUtf8String(final byte[] bytes) {
-	    return bytes == null ? null : new String(bytes, utf8Charset);
+	    return bytes == null ? null : new String(bytes, UTF_8_CHARSET);
 	}
 
 
@@ -2534,15 +2560,6 @@ public final class CharUtil
 	    else {
 		addWords(buf, keyWord, "=", value);
 	    }
-	}
-
-
-	/**
-	 * @return Our UTF-8 character set so we don't have a bunch of
-	 * copies of a fundamental object.
-	 */
-	public static Charset getUTF8Charset() {
-	    return utf8Charset;
 	}
 
 

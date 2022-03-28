@@ -53,6 +53,8 @@ name = 'Roger'
 "This isn't a number"
 'This ' + "isn't" + " a number"
 'This isn\'t either, ' + name
+'\u0000\u0001\u0002\u0003\u0004\u0018\u0019\u001a\u001b\u001c\u001d\u001e\u001f\u0020\u0021'
+'\0\ca\cB\cy\cZ\f\t\b\r\n\\\u007f\u0080\u0081'
 
 # Other operators and functions
 :decimal 60
