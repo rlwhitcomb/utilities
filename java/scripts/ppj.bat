@@ -1,3 +1,3 @@
 @echo off
-call lists -single -post "@j" %* | call c -results -nocolor
+call lists -single -post "@-j" %* | call c -results -nocolor
 
