@@ -521,6 +521,8 @@
  *	    will find it during the block execution.
  *	18-Feb-2022 (rlwhitcomb)
  *	    #103: More support for complex numbers; some cleanup of "visit" -> "evaluateFunction".
+ *	11-Apr-2022 (rlwhitcomb)
+ *	    #267: Add "Elvis" operator.
  */
 package info.rlwhitcomb.calc;
 
@@ -5222,6 +5224,16 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    // Unfortunately, there is no possibility of short-circuit evaluation
 	    // for this operator -- either first value could produce either result
 	    return ((b1 && b2) || (!b1 && !b2)) ? Boolean.FALSE : Boolean.TRUE;
+	}
+
+	@Override
+	public Object visitElvisExpr(CalcParser.ElvisExprContext ctx) {
+	    CalcParser.ExprContext expr0 = ctx.expr(0);
+	    Object v0 = evaluateFunction(expr0);
+	    if (toBooleanValue(this, v0, expr0)) {
+		return v0;
+	    }
+	    return evaluateFunction(ctx.expr(1));
 	}
 
 	@Override

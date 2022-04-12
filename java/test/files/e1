@@ -512,6 +512,12 @@ x = 7; y = 8
 _min = min_plus_1 = x < y ? x + 1 : y + 1
 _min
 
+null ?: 'nothing'
+'' ?: 'empty'
+'a' ?: 'no a'
+0 ?: 1
+true ?: 'not true'
+
 y = x = 7 + 1
 y; x;
 

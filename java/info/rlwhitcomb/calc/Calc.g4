@@ -367,6 +367,8 @@
  *	    #249: Add "expr IN loopCtl" as another expression type.
  *	27-Mar-2022 (rlwhitcomb)
  *	    #190: Support "caret" notation inside strings.
+ *	11-Apr-2022 (rlwhitcomb)
+ *	    #267: Add "Elvis" operator.
  */
 
 grammar Calc;
@@ -550,6 +552,7 @@ expr
    | expr BOOL_AND_OP expr               # booleanAndExpr
    | expr BOOL_OR_OP expr                # booleanOrExpr
    | expr BOOL_XOR_OP expr               # booleanXorExpr
+   | expr '?:' expr                      # elvisExpr
    |<assoc=right> expr '?' expr ':' expr # eitherOrExpr
    |<assoc=right> var ASSIGN expr        # assignExpr
    |<assoc=right> var POW_ASSIGN expr    # powerAssignExpr

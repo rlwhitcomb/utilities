@@ -519,6 +519,11 @@
 >y = 8 -> 8
 >_min = min_plus_1 = x < y ? x + 1 : y + 1 -> 8
 >_min -> 8
+>null ?: 'nothing' -> "nothing"
+>'' ?: 'empty' -> "empty"
+>'a' ?: 'no a' -> "a"
+>0 ?: 1 -> 1
+>true ?: 'not true' -> true
 >y = x = 7 + 1 -> 8
 >y -> 8
 >x -> 8
