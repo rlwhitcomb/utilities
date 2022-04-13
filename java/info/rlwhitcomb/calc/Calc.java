@@ -1511,7 +1511,6 @@ public class Calc
 
 
 	public static void printTitleAndVersion() {
-	    Environment.loadMainProgramInfo();
 	    Environment.printProgramInfo(50, colors);
 	}
 
@@ -1542,8 +1541,6 @@ public class Calc
 	 * <p> Note: this is the same information displayed by {@link Environment#printProgramInfo}.
 	 */
 	private void displayVersion() {
-	    Environment.loadMainProgramInfo();
-
 	    String productName = Environment.getProductName();
 	    String versionInfo = Environment.getProductVersion();
 	    String buildInfo   = Environment.getProductBuildDateTime();
@@ -2165,6 +2162,8 @@ public class Calc
 	}
 
 	public static void main(String[] args) {
+	    Environment.loadMainProgramInfo();
+
 	    // Preload the color values for the initial errors
 	    computeColors(colors);
 
