@@ -210,6 +210,8 @@
  *	    Use CharUtil version of "parseCommandLine" for greater control.
  *	25-Feb-2022 (rlwhitcomb)
  *	    #204: Prepare for parallel operation.
+ *	12-Apr-2022 (rlwhitcomb)
+ *	    #269: New method to load main program info (in Environment).
  */
 package info.rlwhitcomb.tester;
 
@@ -539,6 +541,7 @@ public class Tester
 	    }
 	}
 
+
 	/**
 	 * Create a new output {@link PrintStream} for use with the class to be tested as "stdout" or "stderr".
 	 * <p> If the {@link #ignoreLineEndings} flag is set we will insert a {@link NewlineOutputStream} into
@@ -562,6 +565,7 @@ public class Tester
 		return new PrintStream(out, cs.name());
 	    }
 	}
+
 
 	/**
 	 * Run the test and compare results with the canons or just create the canon files
@@ -1322,6 +1326,7 @@ public class Tester
 	    return true;
 	}
 
+
 	private BufferedReader fileReader(final File file, final Charset cs)
 		throws IOException
 	{
@@ -1330,6 +1335,7 @@ public class Tester
 	    else
 		return Files.newBufferedReader(file.toPath(), cs);
 	}
+
 
 	private boolean isDirective(final String line) {
 	    if (!line.isEmpty()) {
@@ -1343,6 +1349,7 @@ public class Tester
 	private AtomicInteger numberTests = new AtomicInteger();
 	private AtomicInteger numberPassed = new AtomicInteger();
 	private AtomicInteger numberFailed = new AtomicInteger();
+
 
 	/**
 	 * Read and process one test description file (can be recursive
@@ -1480,6 +1487,12 @@ public class Tester
 	}
 
 
+	private void displayProgramInfo() {
+	    Environment.loadMainProgramInfo();
+	    Environment.printProgramInfo();
+	}
+
+
 	/**
 	 * Reset all the options back to default values (used by "-ignoreoptions" command-line argument
 	 * to ignore any TESTER_OPTIONS specified in the environment.
@@ -1502,12 +1515,14 @@ public class Tester
 	    testDescriptionFiles.clear();
 	}
 
+
 	private void checkNullValue(final String arg1, final String optionValue) {
 	    if (CharUtil.isNullOrEmpty(arg1)) {
 		Intl.errFormat("tester#emptyArgFor", optionValue);
 		System.exit(2);
 	    }
 	}
+
 
 	/**
 	 * Process a single command-line option.
@@ -1596,11 +1611,11 @@ public class Tester
 		resetToInitialOptions();
 	    }
 	    else if (Options.matchesOption(opt, true, "version", "vers", "ver")) {
-		Environment.printProgramInfo();
+		displayProgramInfo();
 		System.exit(0);
 	    }
 	    else if (Options.matchesOption(opt, true, "help", "h", "?")) {
-		Environment.printProgramInfo();
+		displayProgramInfo();
 		Intl.printHelp("tester#");
 		System.exit(0);
 	    }
@@ -1610,21 +1625,25 @@ public class Tester
 	    }
 	}
 
+
 	@Override
 	public String getVersion() {
 	    return Environment.getAppVersion();
 	}
+
 
 	@Override
 	public String getTestName() {
 	    return CharUtil.makeFileStringList(testDescriptionFiles);
 	}
 
+
 	private void processArgs(final String[] args) {
 	    for (String arg : args) {
 		processOption(arg);
 	    }
 	}
+
 
 	@Override
 	public int setup(final String[] args) {
@@ -1650,6 +1669,7 @@ public class Tester
 	    return SUCCESS;
 	}
 
+
 	@Override
 	public int execute() {
 	    try {
@@ -1664,11 +1684,13 @@ public class Tester
 	    return failed == 0 ? 0 : NUMBER_OF_ERRORS + failed;
 	}
 
+
 	/**
 	 * Standard no-arg constructor.
 	 */
 	public Tester() {
 	}
+
 
 	/**
 	 * The main class method, meant to be invoked from the command line.
@@ -1687,7 +1709,6 @@ public class Tester
 	 */
 	public static void main(final String[] args) {
 	    Environment.setDesktopApp(true);
-	    Environment.loadProgramInfo(Tester.class);
 
 	    int result = SUCCESS;
 

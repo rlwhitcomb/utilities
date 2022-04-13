@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2016,2020-2021 Roger L. Whitcomb.
+ * Copyright (c) 2016,2020-2022 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -47,6 +47,8 @@
  *	13-Dec-2021 (rlwhitcomb)
  *	    #129: Change "which" method to use varargs for convenience.
  *	    Add "findAll" intermediate method for use by other utilities.
+ *	12-Apr-2022 (rlwhitcomb)
+ *	    #269: New method to load main program info (in Environment).
  */
 package info.rlwhitcomb.util;
 
@@ -370,14 +372,13 @@ public class Which
 	 * @param args	The parsed command line arguments.
 	 */
 	public static void main(String[] args) {
-	    Environment.loadProgramInfo(Which.class);
-
 	    Result result = which(args);
 	    switch (result) {
 		case SUCCESS:
 		case EMPTY:
 		    return;
 		case VERSION:
+		    Environment.loadMainProgramInfo();
 		    Environment.printProgramInfo();
 		    break;
 		case UNKNOWN:

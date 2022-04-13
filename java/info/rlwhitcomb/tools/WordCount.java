@@ -45,6 +45,8 @@
  *	08-Feb-2022 (rlwhitcomb)
  *	    Move text to resources.
  *	    Use new Options method to process command line.
+ *	12-Apr-2022 (rlwhitcomb)
+ *	    #269: New method to load main program info (in Environment).
  */
 package info.rlwhitcomb.tools;
 
@@ -181,6 +183,7 @@ public class WordCount
 		case "vers":
 		case "ver":
 		case "v":
+		    Environment.loadMainProgramInfo();
 		    Environment.printProgramInfo();
 		    code = -1;
 		    break;
@@ -308,8 +311,6 @@ public class WordCount
 	 * @param args The parsed command line argument array.
 	 */
 	public static void main(final String[] args) {
-	    Environment.loadProgramInfo(WordCount.class);
-
 	    // In order to make this class testable, we need to reinitialize our static data
 	    // every time through here, even though in normal operation it won't make any
 	    // difference

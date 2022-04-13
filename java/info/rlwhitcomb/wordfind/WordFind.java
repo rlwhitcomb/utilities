@@ -90,6 +90,8 @@
  *	    #217: Use new Options method to process environment methods.
  *	25-Jan-2022 (rlwhitcomb)
  *	    If initial letters are playable as-is, not only announce, but display points.
+ *	12-Apr-2022 (rlwhitcomb)
+ *	    #269: New method to load main program info (in Environment).
  */
 package info.rlwhitcomb.wordfind;
 
@@ -590,6 +592,11 @@ public class WordFind implements Application {
         return false;
     }
 
+    private static void displayProgramInfo() {
+        Environment.loadMainProgramInfo();
+        Environment.printProgramInfo(50, colored);
+    }
+
     private static String quote(final String input) {
         return String.format("\"%1$s\"", input);
     }
@@ -770,7 +777,7 @@ public class WordFind implements Application {
             if (ignoreOptions)
                 ignored = true;
             else {
-                Environment.printProgramInfo(50, colored);
+                displayProgramInfo();
                 System.exit(0);
             }
         } else if (matches(arg, "help", "h", "?")) {
@@ -1149,7 +1156,7 @@ public class WordFind implements Application {
                     case ":vers":
                     case ":ver":
                     case ":v":
-                        Environment.printProgramInfo(50, colored);
+                        displayProgramInfo();
                         continue replLoop;
                     default:
                         if (cmd.startsWith("#") || cmd.startsWith("!") || cmd.startsWith("//"))
@@ -1173,7 +1180,7 @@ public class WordFind implements Application {
      */
     public static void main(final String[] args) {
         Environment.setDesktopApp(true);
-        Environment.loadProgramInfo(WordFind.class);
+
         Dimension dim = Environment.consoleSize();
         maxLineLength = dim.width;
 

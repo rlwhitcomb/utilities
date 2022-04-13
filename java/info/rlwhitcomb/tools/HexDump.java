@@ -43,6 +43,8 @@
  *	    Use 0 width (default) to size output according to console width.
  *	20-Feb-2022 (rlwhitcomb)
  *	    #253: Fix line width calculations.
+ *	12-Apr-2022 (rlwhitcomb)
+ *	    #269: New method to load main program info (in Environment).
  */
 package info.rlwhitcomb.tools;
 
@@ -192,6 +194,7 @@ public class HexDump
 		case "vers":
 		case "ver":
 		case "v":
+		    Environment.loadMainProgramInfo();
 		    Environment.printProgramInfo();
 		    code = -1;
 		    break;
@@ -331,8 +334,6 @@ public class HexDump
 	 * @param args The parsed command line argument array.
 	 */
 	public static void main(final String[] args) {
-	    Environment.loadProgramInfo(HexDump.class);
-
 	    // In order to be testable, we need to actually initialize the static
 	    // variables here, so it happens for each test run.
 	    files.clear();

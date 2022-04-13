@@ -263,6 +263,8 @@
  *	    #248: Add buttons to Version prompt for the LICENSE and NOTICE files.
  *	28-Feb-2022 (rlwhitcomb)
  *	    Changed to use QueuedExecutorService for background GUI thread.
+ *	12-Apr-2022 (rlwhitcomb)
+ *	    #269: New method to load main program info (in Environment).
  */
 package info.rlwhitcomb.calc;
 
@@ -1509,6 +1511,7 @@ public class Calc
 
 
 	public static void printTitleAndVersion() {
+	    Environment.loadMainProgramInfo();
 	    Environment.printProgramInfo(50, colors);
 	}
 
@@ -1539,6 +1542,8 @@ public class Calc
 	 * <p> Note: this is the same information displayed by {@link Environment#printProgramInfo}.
 	 */
 	private void displayVersion() {
+	    Environment.loadMainProgramInfo();
+
 	    String productName = Environment.getProductName();
 	    String versionInfo = Environment.getProductVersion();
 	    String buildInfo   = Environment.getProductBuildDateTime();
@@ -2160,8 +2165,6 @@ public class Calc
 	}
 
 	public static void main(String[] args) {
-	    Environment.loadProgramInfo(Calc.class);
-
 	    // Preload the color values for the initial errors
 	    computeColors(colors);
 

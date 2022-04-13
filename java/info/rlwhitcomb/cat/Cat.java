@@ -45,6 +45,8 @@
  *	    new Options method.
  *	17-Feb-2022 (rlwhitcomb)
  *	    #251: Trap charset encoding problems.
+ *	12-Apr-2022 (rlwhitcomb)
+ *	    #269: New method to load main program info (in Environment).
  *
  *	    TODO: wildcard directory names on input
  *	    TODO: -nn to limit to first nn lines, +nn to limit to LAST nn lines (hard to do?)
@@ -184,6 +186,7 @@ public class Cat {
 		    readFromConsole();
 		}
 	    } else if (Options.matchesOption(arg, true, "version", "vers", "ver", "v")) {
+		Environment.loadMainProgramInfo();
 		Environment.printProgramInfo();
 		System.exit(0);
 	    } else {
@@ -337,8 +340,6 @@ public class Cat {
 	 * @param args	The parsed command line arguments.
 	 */
 	public static void main(final String[] args) {
-	    Environment.loadProgramInfo(Cat.class);
-
 	    // Process environment options first, under pass 1 rules
 	    pass = 1;
 	    Options.environmentOptions(Cat.class, (options) -> {

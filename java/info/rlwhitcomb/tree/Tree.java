@@ -87,6 +87,8 @@
  *	    Use better method to get a valid Locale.
  *	21-Jan-2022 (rlwhitcomb)
  *	    #217: Use new Options method to process environment options.
+ *	12-Apr-2022 (rlwhitcomb)
+ *	    #269: New method to load main program info (in Environment).
  */
 package info.rlwhitcomb.tree;
 
@@ -608,6 +610,7 @@ public class Tree
 		    showInfoOnly = true;
 		}
 		else if (Options.matchesOption(arg, true, "version", "vers", "ver", "v")) {
+		    Environment.loadMainProgramInfo();
 		    Environment.printProgramInfo();
 		    showInfoOnly = true;
 		}
@@ -632,8 +635,6 @@ public class Tree
 	 */
 	public static void main(String[] args) {
 	    List<String> argList = new ArrayList<>(args.length);
-
-	    Environment.loadProgramInfo(Tree.class);
 
 	    // First, parse the TREE_OPTIONS env variable for predefined options
 	    // (ignoring any non-options, that is directory names, here)

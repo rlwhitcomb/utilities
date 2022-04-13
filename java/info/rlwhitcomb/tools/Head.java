@@ -39,6 +39,8 @@
  *	08-Feb-2022 (rlwhitcomb)
  *	    Move text out to resources.
  *	    Use new Options method to process command line.
+ *	12-Apr-2022 (rlwhitcomb)
+ *	    #269: New method to load main program info (in Environment).
  */
 package info.rlwhitcomb.tools;
 
@@ -120,6 +122,7 @@ public class Head
 		case "vers":
 		case "ver":
 		case "v":
+		    Environment.loadMainProgramInfo();
 		    Environment.printProgramInfo();
 		    code = -1;
 		    break;
@@ -178,8 +181,6 @@ public class Head
 	 * @param args The parsed command line argument array.
 	 */
 	public static void main(final String[] args) {
-	    Environment.loadProgramInfo(Head.class);
-
 	    // In order to be testable, we need to actually initialize the static
 	    // variables here, so it happens for each test run.
 	    files.clear();

@@ -82,6 +82,8 @@
  *	    Add "-indent" option.
  *	18-Feb-2022 (rlwhitcomb)
  *	    Use Exceptions to get better error messages.
+ *	12-Apr-2022 (rlwhitcomb)
+ *	    #269: New method for loading main program info (in Environment).
  */
 package info.rlwhitcomb.util;
 
@@ -271,8 +273,6 @@ public class Lists
 
 	@Override
 	public int setup(String[] args) {
-	    Environment.loadProgramInfo(Lists.class);
-
 	    fileNames = new ArrayList<>();
 
 	    // First parse the command line arguments
@@ -355,6 +355,7 @@ public class Lists
 			return ACTION_DONE;
 		    }
 		    else if (Options.matchesOption(arg, true, "version", "vers", "ver", "v")) {
+			Environment.loadMainProgramInfo();
 			Environment.printProgramInfo(System.err);
 			return ACTION_DONE;
 		    }

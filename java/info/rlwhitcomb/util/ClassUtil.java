@@ -92,6 +92,9 @@
  *	    And remove "getMapFromObject" which is not being used now.
  *	16-Feb-2022 (rlwhitcomb)
  *	    Add two flavors of "getResourceAsString" to load text from the .jar file.
+ *	12-Apr-2022 (rlwhitcomb)
+ *	    #269: Method to parse full module/class.name into parts as well as class
+ *	    to parse and hold the information.
  */
 
 package info.rlwhitcomb.util;
@@ -125,6 +128,80 @@ public final class ClassUtil
 
 	/** A string to describe the situation where caller information is not available. */
 	public static final String UNKNOWN_CALLER = "<unknown caller>";
+
+
+	/**
+	 * Object to contain module and class names.
+	 */
+	public final static class ModuleClass
+	{
+		/** A pattern string to parse module / class names into parts. */
+		private static final String PATH_SPLIT = "\\.";
+
+
+		/**
+		 * The parts of the module name, such as {@code "jdk", "jcmd"}, or an empty
+		 * array if a module name is not given.
+		 */
+		public String[] moduleParts;
+		/**
+		 * The parts of the class name within the module, with the last
+		 * element of the array being the simple name of the class, such as:
+		 * {@code "sun", "tools", "jps", "Jps"}.
+		 */
+		public String[] classParts;
+
+
+		/**
+		 * Construct and fill with empty values.
+		 */
+		public ModuleClass() {
+		    moduleParts = new String[0];
+		    classParts = new String[0];
+		}
+
+		/**
+		 * Construct and parse from an input string.
+		 *
+		 * @param input The input module / class name.
+		 */
+		public ModuleClass(final String input) {
+		    String[] parts = input.split("/");
+
+		    if (parts.length == 2) {
+			moduleParts = parts[0].split(PATH_SPLIT);
+			classParts = parts[1].split(PATH_SPLIT);
+		    }
+		    else {
+			classParts = parts[0].split(PATH_SPLIT);
+		    }
+		}
+
+		/**
+		 * Get the class simple name (last part of the class name).
+		 *
+		 * @return The simple name of the class.
+		 */
+		public String getSimpleClassName() {
+		    return classParts[classParts.length - 1];
+		}
+
+		/**
+		 * Reconstruct the input string from the parsed parts.
+		 *
+		 * @return {@code module/class}.
+		 */
+		@Override
+		public String toString() {
+		    if (moduleParts.length == 0) {
+			return String.join(".", classParts);
+		    }
+		    else {
+			return String.join("/", String.join(".", moduleParts), String.join(".", classParts));
+		    }
+		}
+	}
+
 
 	/**
 	 * Private constructor since this is a utility class.
@@ -651,6 +728,16 @@ public final class ClassUtil
 	    }
 
 	    return builder.toString();
+	}
+
+	/**
+	 * Parse a module / class name into parts.
+	 *
+	 * @param input The module / class name string.
+	 * @return The parts of the input string, separated.
+	 */
+	public static ModuleClass parseModuleClassName(final String input) {
+	    return new ModuleClass(input);
 	}
 
 }

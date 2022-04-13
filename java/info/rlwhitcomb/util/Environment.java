@@ -167,6 +167,8 @@
  *	    #204: Also free memory.
  *	17-Jan-2022 (rlwhitcomb)
  *	    Add variants of "timeThis" with function name / description.
+ *	12-Apr-2022 (rlwhitcomb)
+ *	    #269: Add "getMainClassName" and "loadMainProgramInfo".
  */
 package info.rlwhitcomb.util;
 
@@ -898,6 +900,7 @@ public final class Environment
 	    timeThis(null, func, Optional.empty());
 	}
 
+
 	/**
 	 * Time the named {@link Runnable} (can be a functional interface)
 	 * and display the results on {@link System#out}.
@@ -908,6 +911,7 @@ public final class Environment
 	public static void timeThis(final String name, final Runnable func) {
 	    timeThis(name, func, Optional.empty());
 	}
+
 
 	/**
 	 * Time the passed in {@link Runnable} (can be a functional interface)
@@ -959,6 +963,7 @@ public final class Environment
 	    return timeThis(null, func, Optional.empty());
 	}
 
+
 	/**
 	 * Time the named {@link Callable} (can be a functional interface)
 	 * and display the results on {@link System#out}.
@@ -971,6 +976,7 @@ public final class Environment
 	public static <V> V timeThis(final String name, final Callable<V> func) {
 	    return timeThis(name, func, Optional.empty());
 	}
+
 
 	/**
 	 * Time the passed in {@link Callable} (can be a functional interface)
@@ -1054,6 +1060,50 @@ public final class Environment
 		}
 	    }
 	    return 0L;
+	}
+
+
+	/**
+	 * Returns the main class name (from the JVM command line) used to invoke the application.
+	 * <p> We will run the "jps -l" command and parse the output. The output will look like:
+	 * <pre>65841 info.rlwhitcomb.util.Lists
+	 * 65845 jdk.jcmd/sun.tools.jps.Jps</pre>
+	 * which are parsed into two parts: the process ID and the main class name being run by that
+	 * process. So we will match the process ID against our own value of it (from {@link #getProcessID})
+	 * and return the main class that corresponds to us.
+	 *
+	 * @return	Fully-qualified class name that is the main program of this application.
+	 */
+	public static String getMainClassName() {
+	    try {
+		File f = FileUtilities.createTempFile("class");
+
+		ProcessBuilder pb = new ProcessBuilder("jps", "-l")
+			.inheritIO().redirectOutput(f).redirectErrorStream(true);
+
+		pb.start().waitFor();
+
+		List<String> lines = FileUtilities.readFileAsLines(f);
+
+		if (!f.delete())
+		    f.deleteOnExit();
+
+		long pid = getProcessID();
+
+		for (String line : lines) {
+		    String parts[] = line.split("\\s+");
+		    if (parts.length == 2) {
+			long testPID = Long.parseUnsignedLong(parts[0]);
+			if (pid == testPID) {
+			    return parts[1];
+			}
+		    }
+		}
+	    }
+	    catch (Exception e) {
+	    }
+
+	    return "";
 	}
 
 
@@ -1510,6 +1560,7 @@ public final class Environment
 	    return results;
 	}
 
+
 	/**
 	 * @return The current copyright notice string (from the resources).
 	 */
@@ -1523,6 +1574,16 @@ public final class Environment
 
 	/**
 	 * Load the program information (title/version) from the "version.properties" file
+	 * specified by the main program currently being run (as determined by
+	 * {@link #getMainClassName}).
+	 */
+	public static void loadMainProgramInfo() {
+	    loadProgramInfo(ClassUtil.parseModuleClassName(getMainClassName()).getSimpleClassName());
+	}
+
+
+	/**
+	 * Load the program information (title/version) from the "version.properties" file
 	 * and save for use by {@link #printProgramInfo}.
 	 *
 	 * @param clazz	The main program class.
@@ -1530,6 +1591,7 @@ public final class Environment
 	public static void loadProgramInfo(Class<?> clazz) {
 	    loadProgramInfo(clazz.getSimpleName());
 	}
+
 
 	/**
 	 * Load the program information (title/version) from the "version.properties" file
@@ -1592,6 +1654,7 @@ public final class Environment
 	private static void println(PrintStream ps, boolean colors, String formatKey, Object... args) {
 	    ps.println(ConsoleColor.color(Intl.formatString(formatKey, args), colors));
 	}
+
 
 	/**
 	 * Display a program information banner using things we know about here
@@ -1690,6 +1753,7 @@ public final class Environment
 	    valuesToDisplaySet.forEach(e ->
 		System.out.println(ConsoleColor.color(String.format("<Bk!>%1$s:<> <Gr>%2$s<>", e.getTitle(), e.getSupplier().get()))));
 	}
+
 
 }
 

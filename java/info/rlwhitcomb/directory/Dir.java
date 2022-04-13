@@ -29,6 +29,8 @@
  *	    More work on new version in Java, loosely translated from C.
  *	15-Aug-2021 (rlwhitcomb)
  *	    More coding using Java paradigms.
+ *	12-Apr-2022 (rlwhitcomb)
+ *	    #269: New method to load main program info (in Environment).
  *
  */
 package info.rlwhitcomb.directory;
@@ -869,6 +871,7 @@ System.out.println("size = " + basicAttrs.size() + ", createTime = " + basicAttr
 		case "vers":
 		case "ver":
 		case "v":
+		    Environment.loadMainProgramInfo();
 		    Environment.printProgramInfo(50);
 		    return false;
 		default:
@@ -910,7 +913,6 @@ System.out.println("size = " + basicAttrs.size() + ", createTime = " + basicAttr
 
 
 	public static void main(String[] args) {
-	    Environment.loadProgramInfo(Dir.class);
 	    // TODO: a bunch of Environment and Intl stuff
 	    Dimension d = Environment.consoleSize();
 	    screenRows = d.height;

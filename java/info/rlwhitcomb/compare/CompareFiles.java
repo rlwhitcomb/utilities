@@ -38,6 +38,8 @@
  *	    Tweak the final output.
  *	12-Apr-2021 (rlwhitcomb)
  *	    Tweak error checking.
+ *	12-Apr-2022 (rlwhitcomb)
+ *	    #269: New method to load main program info (in Environment).
  */
 package info.rlwhitcomb.compare;
 
@@ -346,8 +348,6 @@ public class CompareFiles
 	public static void main(String[] args) {
 	    long memoryUseBefore = Runtime.getRuntime().freeMemory();
 
-	    Environment.loadProgramInfo(CompareFiles.class);
-
 	    List<String> pathArgs = new ArrayList<>();
 	    boolean error = false;
 
@@ -369,6 +369,7 @@ public class CompareFiles
 				usage();
 				return;
 			    case VERSION:
+				Environment.loadMainProgramInfo();
 				Environment.printProgramInfo();
 				return;
 			}
