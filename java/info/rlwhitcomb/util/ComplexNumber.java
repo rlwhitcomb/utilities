@@ -44,6 +44,8 @@
  *	    A lot of refactoring, include support for "polar" form.
  *	18-Feb-2022 (rlwhitcomb)
  *	    Add "signum" method.
+ *	14-Apr-2022 (rlwhitcomb)
+ *	    #272: Some (mostly) documentation fixes.
  */
 package info.rlwhitcomb.util;
 
@@ -63,13 +65,12 @@ import static info.rlwhitcomb.util.Constants.*;
 
 /**
  * Storage of and calculations with complex numbers.
- * <p> Values are kept in a normalized form, which means
- * (among other things, TBD) that pure real and pure imaginary
+ * <p> Values are stored as {@link BigDecimal} values and kept in a
+ * normalized form, which means that pure real and pure imaginary
  * numbers have their other component set to {@code null},
  * which also means that {@code 0} values for either are
  * removed, to reduce the number of special cases in the math.
- * <p> TODO: more math operations, conversions, possibly extend Number
- * and implement Comparable and Serializable (see BigFraction).
+ * <p> TODO: more math operations.
  */
 public class ComplexNumber extends Number implements Serializable, Comparable<ComplexNumber>
 {
@@ -89,7 +90,7 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 	/** Aliases for "radius". */
 	private static final String RADIUS_ALIASES = "([rR][aA][dD][iI][uU][sS]|[rR][aA][dD]|[rR])";
 	/** Aliases for "theta". */
-	private static final String THETA_ALIASES = "([tT][hH][eE][tT][aA]|[\u0398]|[\u03B8])";
+	private static final String THETA_ALIASES = "([tT][hH][eE][tT][aA]|[aA][nN][gG][lL][eE]|[\u0398]|[\u03B8])";
 
 	/**
 	 * The patterns used in {@link #parse} to recognize valid values.
@@ -737,7 +738,9 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 
 
 	/**
-	 * Parse out and construct a complex number from the canonical string form.
+	 * Parse out and construct a complex number from any of the string forms.
+	 * <p> Note: this process recognizes the forms produced by both {@link #toLongString}
+	 * and {@link #toPolarString}.
 	 *
 	 * @param string The supposed string form of a complex number.
 	 * @return       The parsed number.
@@ -817,6 +820,14 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 	    return String.format("( %1$s, %2$s )", r().toPlainString(), i().toPlainString());
 	}
 
+	/**
+	 * Format an alternate representation of this complex number that looks (more or less)
+	 * like: {@code r +- ni} with variations for pure real and pure imaginary values.
+	 * <p> Note: this form is recognizable by {@link #parse}.
+	 *
+	 * @param upperCase Casing for the representation of {@code i}.
+	 * @return The alternate string representation of this number.
+	 */
 	public String toLongString(final boolean upperCase) {
 	    char i = upperCase ? '\u2110' : '\u2148';
 
@@ -843,10 +854,20 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 	    }
 	}
 
+	/**
+	 * Convert to a string representation of the polar form, using map notation, and {@code "r"} and {@code "\u0398"}
+	 * (for upper case) or {@code "\u03B8"} (for lower case) map keys.
+	 * <p> Note: this form is recognizable by {@link #parse}.
+	 *
+	 * @param upperCase Case to use for the map keys.
+	 * @param mc        Rounding and precision for the conversion to polar values.
+	 * @return Polar form (r, theta) of this complex number (as a string).
+	 */
 	public String toPolarString(final boolean upperCase, final MathContext mc) {
+	    char r = upperCase ? 'R' : 'r';
 	    char theta = upperCase ? '\u0398' : '\u03B8';
 
-	    return String.format("{ r: %1$s, %2$c: %3$s }", radius(mc).toPlainString(), theta, theta(mc).toPlainString());
+	    return String.format("{ %1$c: %2$s, %3$c: %4$s }", r, radius(mc).toPlainString(), theta, theta(mc).toPlainString());
 	}
 
 }
