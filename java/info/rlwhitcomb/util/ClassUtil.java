@@ -95,6 +95,8 @@
  *	12-Apr-2022 (rlwhitcomb)
  *	    #269: Method to parse full module/class.name into parts as well as class
  *	    to parse and hold the information.
+ *	14-Apr-2022 (rlwhitcomb)
+ *	    #273: Move math-related classes to "math" package.
  */
 
 package info.rlwhitcomb.util;
@@ -115,6 +117,7 @@ import java.util.regex.Pattern;
 import info.rlwhitcomb.annotations.*;
 
 import static info.rlwhitcomb.util.Constants.*;
+import info.rlwhitcomb.math.NumericUtil;
 
 
 /**

@@ -265,6 +265,8 @@
  *	    Changed to use QueuedExecutorService for background GUI thread.
  *	12-Apr-2022 (rlwhitcomb)
  *	    #269: New method to load main program info (in Environment).
+ *	14-Apr-2022 (rlwhitcomb)
+ *	    #273: Move math-related classes to "math" package.
  */
 package info.rlwhitcomb.calc;
 
@@ -328,7 +330,8 @@ import de.onyxbits.SemanticVersion;
 
 import info.rlwhitcomb.IntlProvider;
 import info.rlwhitcomb.jarfile.Launcher;
-import info.rlwhitcomb.util.BigFraction;
+import info.rlwhitcomb.math.BigFraction;
+import info.rlwhitcomb.math.NumericUtil.RangeMode;
 import info.rlwhitcomb.util.CharUtil;
 import info.rlwhitcomb.util.ClassUtil;
 import info.rlwhitcomb.util.ConsoleColor;
@@ -338,7 +341,6 @@ import info.rlwhitcomb.util.Environment;
 import info.rlwhitcomb.util.Exceptions;
 import info.rlwhitcomb.util.FileUtilities;
 import info.rlwhitcomb.util.Intl;
-import info.rlwhitcomb.util.NumericUtil.RangeMode;
 import info.rlwhitcomb.util.Options;
 import info.rlwhitcomb.util.QueuedExecutorService;
 

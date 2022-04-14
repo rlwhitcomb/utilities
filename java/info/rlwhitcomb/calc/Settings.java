@@ -33,13 +33,15 @@
  *	    method which is Scriptable so it will be exposed for viewing.
  *	05-Feb-2022 (rlwhitcomb)
  *	    #233: Take out "getPrecision" in favor of just "precision" value.
+ *	14-Apr-2022 (rlwhitcomb)
+ *	    #273: Move math-related classes to "math" package.
  */
 package info.rlwhitcomb.calc;
 
 import java.math.MathContext;
 
 import info.rlwhitcomb.annotations.Scriptable;
-import info.rlwhitcomb.util.NumericUtil.RangeMode;
+import info.rlwhitcomb.math.NumericUtil.RangeMode;
 
 
 /**

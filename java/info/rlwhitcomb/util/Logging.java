@@ -134,6 +134,8 @@
  *    Make this class "final" so no one can muck with the functionality.
  *  18-Feb-2022 (rlwhitcomb)
  *    Use Exceptions to come up with better exception messages.
+ *  14-Apr-2022 (rlwhitcomb)
+ *    #273: Move math-related classes to "math" package.
  */
 package info.rlwhitcomb.util;
 
@@ -147,6 +149,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.regex.*;
+
+import info.rlwhitcomb.math.NumericUtil;
 
 
 /**

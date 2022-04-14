@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2017,2020-2021 Roger L. Whitcomb.
+ * Copyright (c) 2017,2020-2022 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -48,6 +48,8 @@
  *	    Update obsolete Javadoc constructs.
  *	26-Mar-2021 (rlwhitcomb)
  *	    Move some methods from NumericUtil to MathUtil.
+ *	14-Apr-2022 (rlwhitcomb)
+ *	    #273: Move math-related classes to "math" package.
  */
 package info.rlwhitcomb.util;
 
@@ -57,6 +59,8 @@ import java.io.DataInputStream;
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
+
+import info.rlwhitcomb.math.MathUtil;
 
 
 /**

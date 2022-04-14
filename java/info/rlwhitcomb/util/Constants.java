@@ -34,6 +34,8 @@
  *	    Buffer sizes added.
  *	17-Feb-2022 (rlwhitcomb)
  *	    Double and float limits.
+ *	14-Apr-2022 (rlwhitcomb)
+ *	    #273: Move math-related classes to "math" package.
  */
 package info.rlwhitcomb.util;
 
@@ -42,7 +44,7 @@ import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
-import info.rlwhitcomb.util.ComplexNumber;
+import info.rlwhitcomb.math.ComplexNumber;
 
 
 /**

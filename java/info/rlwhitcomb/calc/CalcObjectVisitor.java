@@ -523,6 +523,8 @@
  *	    #103: More support for complex numbers; some cleanup of "visit" -> "evaluateFunction".
  *	11-Apr-2022 (rlwhitcomb)
  *	    #267: Add "Elvis" operator.
+ *	14-Apr-2022 (rlwhitcomb)
+ *	    #273: Move math-related classes to "math" package.
  */
 package info.rlwhitcomb.calc;
 
@@ -587,19 +589,19 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 
 import static info.rlwhitcomb.calc.CalcUtil.*;
 import info.rlwhitcomb.directory.Match;
-import info.rlwhitcomb.util.BigFraction;
+import info.rlwhitcomb.math.BigFraction;
+import info.rlwhitcomb.math.ComplexNumber;
+import info.rlwhitcomb.math.MathUtil;
+import info.rlwhitcomb.math.NumericUtil;
+import static info.rlwhitcomb.math.NumericUtil.RangeMode;
 import info.rlwhitcomb.util.CharUtil;
 import static info.rlwhitcomb.util.CharUtil.Justification.*;
 import info.rlwhitcomb.util.ClassUtil;
-import info.rlwhitcomb.util.ComplexNumber;
 import static info.rlwhitcomb.util.ConsoleColor.Code.*;
 import static info.rlwhitcomb.util.Constants.*;
 import info.rlwhitcomb.util.Environment;
 import info.rlwhitcomb.util.Exceptions;
 import info.rlwhitcomb.util.Intl;
-import info.rlwhitcomb.util.MathUtil;
-import info.rlwhitcomb.util.NumericUtil;
-import static info.rlwhitcomb.util.NumericUtil.RangeMode;
 import info.rlwhitcomb.util.RunCommand;
 import info.rlwhitcomb.util.Which;
 

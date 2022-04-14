@@ -34,6 +34,8 @@
  *	    Make new Supplier methods for CalcPredefine.
  *	06-Feb-2022 (rlwhitcomb)
  *	    Also calculate pi/2.
+ *	14-Apr-2022 (rlwhitcomb)
+ *	    #273: Move math-related classes to "math" package.
  */
 package info.rlwhitcomb.calc;
 
@@ -42,10 +44,11 @@ import java.math.MathContext;
 import java.util.concurrent.Semaphore;
 import java.util.function.Supplier;
 
-import info.rlwhitcomb.util.BigFraction;
+import info.rlwhitcomb.math.BigFraction;
+import info.rlwhitcomb.math.MathUtil;
 import static info.rlwhitcomb.util.Constants.*;
-import info.rlwhitcomb.util.MathUtil;
 import info.rlwhitcomb.util.QueuedThread;
+
 
 /**
  * Calculates and maintains the value of <code>pi</code> and <code>e</code>

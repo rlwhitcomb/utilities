@@ -157,8 +157,10 @@
  *	01-Feb-2022 (rlwhitcomb)
  *	    #231: Use new Constants class values instead of our own.
  *	    #115: New RangeMode.getFrom method.
+ *	14-Apr-2022 (rlwhitcomb)
+ *	    #273: Move to "math" package.
  */
-package info.rlwhitcomb.util;
+package info.rlwhitcomb.math;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -175,7 +177,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.*;
 
+import info.rlwhitcomb.util.Constants;
 import static info.rlwhitcomb.util.Constants.*;
+import info.rlwhitcomb.util.CharUtil;
+import info.rlwhitcomb.util.Intl;
 
 
 /**

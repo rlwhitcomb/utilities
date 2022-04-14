@@ -80,8 +80,10 @@
  *	    Oops! Modulus is non-integer part after division (as in @F formatting).
  *	23-Mar-2022 (rlwhitcomb)
  *	    Allow '+' in "fractionValue" and other input patterns also.
+ *	14-Apr-2022 (rlwhitcomb)
+ *	    #273: Move to "math" package.
  */
-package info.rlwhitcomb.util;
+package info.rlwhitcomb.math;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -90,6 +92,8 @@ import java.math.MathContext;
 import java.util.Arrays;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
+
+import info.rlwhitcomb.util.Intl;
 
 
 /**

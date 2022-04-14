@@ -129,6 +129,8 @@
  *	    will work correctly.
  *	13-Feb-2022 (rlwhitcomb)
  *	    #199: Rearrange parameter value testing, and variable detection inside interpolated strings.
+ *	14-Apr-2022 (rlwhitcomb)
+ *	    #273: Move math-related classes to "math" package.
  */
 package info.rlwhitcomb.calc;
 
@@ -148,10 +150,10 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 
 import org.padler.natorder.NaturalOrderComparator;
 
-import info.rlwhitcomb.util.BigFraction;
+import info.rlwhitcomb.math.BigFraction;
+import info.rlwhitcomb.math.ComplexNumber;
 import info.rlwhitcomb.util.CharUtil;
 import static info.rlwhitcomb.util.CharUtil.Justification;
-import info.rlwhitcomb.util.ComplexNumber;
 
 
 /**

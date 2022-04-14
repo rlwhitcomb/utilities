@@ -42,6 +42,8 @@
  *	12-Feb-2022 (rlwhitcomb)
  *	    #199: Take out "arguments" and the ARG_ initialization because it moved
  *	    into ParameterizedScope and GlobalScope.
+ *	14-Apr-2022 (rlwhitcomb)
+ *	    #273: Move math-related classes to "math" package.
  */
 package info.rlwhitcomb.calc;
 
@@ -64,13 +66,13 @@ import java.util.function.Supplier;
 
 import de.onyxbits.SemanticVersion;
 
-import info.rlwhitcomb.util.BigFraction;
+import info.rlwhitcomb.math.BigFraction;
+import info.rlwhitcomb.math.ComplexNumber;
+import info.rlwhitcomb.math.MathUtil;
 import static info.rlwhitcomb.util.Constants.*;
 import info.rlwhitcomb.util.CharUtil;
-import info.rlwhitcomb.util.ComplexNumber;
 import info.rlwhitcomb.util.Environment;
 import info.rlwhitcomb.util.Exceptions;
-import info.rlwhitcomb.util.MathUtil;
 
 
 /**

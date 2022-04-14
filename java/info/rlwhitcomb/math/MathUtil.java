@@ -57,8 +57,10 @@
  *	    #231: Use new Constants class values instead of our own.
  *	08-Feb-2022 (rlwhitcomb)
  *	    #235: Add "atan2" code.
+ *	14-Apr-2022 (rlwhitcomb)
+ *	    #273: Move to "math" package.
  */
-package info.rlwhitcomb.util;
+package info.rlwhitcomb.math;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -70,6 +72,9 @@ import java.util.List;
 import java.util.Set;
 
 import static info.rlwhitcomb.util.Constants.*;
+import info.rlwhitcomb.util.DynamicArray;
+import info.rlwhitcomb.util.Intl;
+import info.rlwhitcomb.util.Logging;
 
 
 /**

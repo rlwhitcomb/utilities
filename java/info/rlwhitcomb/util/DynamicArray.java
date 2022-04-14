@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2019,2021 Roger L. Whitcomb.
+ * Copyright (c) 2019,2021-2022 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -37,10 +37,15 @@
  *	13-Dec-2021 (rlwhitcomb)
  *	    #123: Redo this new constructor by reworking "internalClass" as
  *	    "Class<?>" and all users.
+ *	14-Apr-2022 (rlwhitcomb)
+ *	    #273: Move math-related classes to "math" package.
  */
 package info.rlwhitcomb.util;
 
 import java.lang.reflect.Array;
+
+import info.rlwhitcomb.math.MathUtil;
+
 
 /**
  * A class to implement dynamically sized arrays.

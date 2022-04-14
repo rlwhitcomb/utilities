@@ -46,8 +46,9 @@
  *	    Add "signum" method.
  *	14-Apr-2022 (rlwhitcomb)
  *	    #272: Some (mostly) documentation fixes.
+ *	    #273: Move to "math" package.
  */
-package info.rlwhitcomb.util;
+package info.rlwhitcomb.math;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -61,6 +62,7 @@ import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
 import static info.rlwhitcomb.util.Constants.*;
+import info.rlwhitcomb.util.Intl;
 
 
 /**

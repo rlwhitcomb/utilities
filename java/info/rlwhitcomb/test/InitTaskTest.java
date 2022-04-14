@@ -48,13 +48,16 @@
  *	    #187: Fix ratio if the 2nd time is zero (rounded).
  *	29-Jan-2022 (rlwhitcomb)
  *	    #228: Refactor InitializationTask to return a value.
+ *	14-Apr-2022 (rlwhitcomb)
+ *	    #273: Move math-related classes to "math" package.
  */
 package info.rlwhitcomb.test;
 
+import info.rlwhitcomb.math.MathUtil;
 import info.rlwhitcomb.util.Environment;
 import info.rlwhitcomb.util.InitializationTask;
 import info.rlwhitcomb.util.Logging;
-import info.rlwhitcomb.util.MathUtil;
+
 
 /**
  * Do some tests of the InitializationTask class to make sure it functions the way we

@@ -49,6 +49,8 @@
  *	    Add "findAll" intermediate method for use by other utilities.
  *	12-Apr-2022 (rlwhitcomb)
  *	    #269: New method to load main program info (in Environment).
+ *	14-Apr-2022 (rlwhitcomb)
+ *	    #273: Move math-related classes to "math" package.
  */
 package info.rlwhitcomb.util;
 
@@ -57,6 +59,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.io.File;
+
+import info.rlwhitcomb.math.Num;
 
 
 /**

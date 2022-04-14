@@ -38,14 +38,20 @@
  *	    Make the class final and constructor private for a utility class.
  *	18-Feb-2022 (rlwhitcomb)
  *	    Use Exceptions to get better error messages.
+ *	14-Apr-2022 (rlwhitcomb)
+ *	    #273: Move to "math" package.
  */
-package info.rlwhitcomb.util;
+package info.rlwhitcomb.math;
 
 import java.io.*;
 import java.net.*;
 import java.text.*;
 import java.util.*;
 import java.util.regex.*;
+
+import info.rlwhitcomb.util.Exceptions;
+import info.rlwhitcomb.util.Logging;
+
 
 /**
  * Utility class specifically for numeric formatting for the statistics report.

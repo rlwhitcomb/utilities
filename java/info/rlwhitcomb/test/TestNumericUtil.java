@@ -54,6 +54,8 @@
  *	    Move to new package.
  *	23-Mar-2022 (rlwhitcomb)
  *	    New tests of BigFraction with '+' signs.
+ *	14-Apr-2022 (rlwhitcomb)
+ *	    #273: Move math-related classes to "math" package.
  */
 package info.rlwhitcomb.test;
 
@@ -67,10 +69,11 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 
-import info.rlwhitcomb.util.BigFraction;
+import info.rlwhitcomb.math.BigFraction;
+import info.rlwhitcomb.math.MathUtil;
+import info.rlwhitcomb.math.NumericUtil;
 import info.rlwhitcomb.util.FileUtilities;
-import info.rlwhitcomb.util.MathUtil;
-import info.rlwhitcomb.util.NumericUtil;
+
 
 /**
  * Tests of (some of) the {@link NumericUtil} and {@link MathUtil} methods.
