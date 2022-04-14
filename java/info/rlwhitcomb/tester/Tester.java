@@ -212,6 +212,8 @@
  *	    #204: Prepare for parallel operation.
  *	12-Apr-2022 (rlwhitcomb)
  *	    #269: New method to load main program info (in Environment).
+ *	13-Apr-2022 (rlwhitcomb)
+ *	    #269: Call "loadProgramInfo" to set product version explicitly for every main program we test.
  */
 package info.rlwhitcomb.tester;
 
@@ -626,6 +628,10 @@ public class Tester
 		    }
 		    else {
 			try {
+			    // Preload the program's version information because otherwise the "main program"
+			    // will be us instead of them...
+			    Environment.loadProgramInfo(testClass);
+
 			    Constructor<?> constructor = testClass.getDeclaredConstructor();
 			    Object testObject = constructor.newInstance();
 			    if (Testable.class.isInstance(testObject)) {
@@ -644,7 +650,7 @@ public class Tester
 			    else {
 				Method main = testClass.getDeclaredMethod("main", String[].class);
 
-				currentVersion = new Version();
+				currentVersion = new Version(Environment.getAppVersion());
 
 				logTestName(origOut, testName, null, commandLine);
 

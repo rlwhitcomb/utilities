@@ -169,6 +169,9 @@
  *	    Add variants of "timeThis" with function name / description.
  *	12-Apr-2022 (rlwhitcomb)
  *	    #269: Add "getMainClassName" and "loadMainProgramInfo".
+ *	13-Apr-2022 (rlwhitcomb)
+ *	    #269: Only add the default main program info if it hasn't already been set
+ *	    by a prior call to "loadProgramInfo".
  */
 package info.rlwhitcomb.util;
 
@@ -1575,10 +1578,13 @@ public final class Environment
 	/**
 	 * Load the program information (title/version) from the "version.properties" file
 	 * specified by the main program currently being run (as determined by
-	 * {@link #getMainClassName}).
+	 * {@link #getMainClassName}), but only if this info hasn't already been set by
+	 * {@link #setProductName} or {@link #setAppVersion}.
 	 */
 	public static void loadMainProgramInfo() {
-	    loadProgramInfo(ClassUtil.parseModuleClassName(getMainClassName()).getSimpleClassName());
+	    if (overloadedProductName == null && overloadedAppVersion == null) {
+		loadProgramInfo(ClassUtil.parseModuleClassName(getMainClassName()).getSimpleClassName());
+	    }
 	}
 
 
