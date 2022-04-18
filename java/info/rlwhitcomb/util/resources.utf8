@@ -134,6 +134,9 @@
 #	    #103: New messages for List/Map conversion of ComplexNumber.
 #	27-Feb-2022 (rlwhitcomb)
 #	    #204: New message for executor service.
+#	18-Apr-2022 (rlwhitcomb)
+#	    #270: New texts for program info.
+#	    Redo some of the "environ" information.
 #
 
 #
@@ -173,11 +176,15 @@ dyn.indexLessThanZero	= Index %1$d cannot be negative.
 # From Environment.java
 #
 env.copyright		= Copyright (c) 2008-2022 Roger L. Whitcomb.
-env.version		= Version %1$s build %2$s%3$s
+env.version		= Version %1$s
+env.versionBuild	= %1$s build %2$s%3$s
 env.build		= Built on %1$s at %2$s
 env.debug		= " (DEBUG)"
-env.javaVersion		= Java version %1$s (%2$d-bit)
+env.javaVersion		= Java version: %1$s (%2$d-bit)
+env.javaVersionModel	= %1$s (%2$d-bit)
 env.implVersion		= Implementation version %1$s
+env.mainClass		= Main class: %1$s
+env.processID		= Process ID: %1$s
 env.productInfo		= "<Bl*!>%1$s%2$s<>"
 env.versionInfo		= "<Gr>%1$s%2$s<>"
 env.otherInfo		= "<Bk!>%1$s%2$s<>"

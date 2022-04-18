@@ -92,6 +92,8 @@
  *	    If initial letters are playable as-is, not only announce, but display points.
  *	12-Apr-2022 (rlwhitcomb)
  *	    #269: New method to load main program info (in Environment).
+ *	18-Apr-2022 (rlwhitcomb)
+ *	    #270: Make this automatic now.
  */
 package info.rlwhitcomb.wordfind;
 
@@ -593,7 +595,6 @@ public class WordFind implements Application {
     }
 
     private static void displayProgramInfo() {
-        Environment.loadMainProgramInfo();
         Environment.printProgramInfo(50, colored);
     }
 

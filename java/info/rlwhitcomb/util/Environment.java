@@ -172,6 +172,11 @@
  *	13-Apr-2022 (rlwhitcomb)
  *	    #269: Only add the default main program info if it hasn't already been set
  *	    by a prior call to "loadProgramInfo".
+ *	18-Apr-2022 (rlwhitcomb)
+ *	    #270: Call "loadMainProgramInfo" inside the lowest-level of "printProgramInfo".
+ *	    This will eliminate all but one external call to this method (in Calc, for
+ *	    "info.version") and makes it basically automatic now. Cache main class name.
+ *	    Print more info in "printProgramInfo".
  */
 package info.rlwhitcomb.util;
 
@@ -303,6 +308,12 @@ public final class Environment
 	 */
 	private static String overloadedAppVersion = null;
 
+	/**
+	 * Cached main class name.
+	 * @see #getMainClassName
+	 */
+	private static String cachedMainClassName = null;
+
 
 	/**
 	 * Class to hold program information.
@@ -338,11 +349,13 @@ public final class Environment
 		BUILD_TIME	(Environment::getBuildTime, "Build Time", "buildTime", "time", "t"),
 		BUILD_DATE_TIME	(Environment::getProductBuildDateTime, "Build Date/Time", "buildDateTime", "datetime", "dt"),
 		COPYRIGHT	(Environment::getCopyrightNotice, "Copyright", "copyright", "copy", "c"),
-		JAVA_VERSION	(Environment::getJavaVersion, "Java Version", "javaVersion", "javaVer", "java", "jv"),
+		JAVA_VERSION	(Environment::javaVersionModel, "Java Version", "javaVersion", "javaVer", "java", "jv"),
+		MAIN_CLASS	(Environment::getMainClassName, "Main Class", "mainClass", "mainCls", "main", "mc"),
+		PROCESS_ID	(Environment::getProcessID, "Process ID", "processID", "process", "pid"),
 		NATIVE_PATH_VAR	(Environment::getNativePathVar, "Native Code Path Variable", "nativePathVar", "npv"),
 		PRODUCT_NAME	(Environment::getProductName, "Product Name", "productName", "prodName", "name"),
-		PRODUCT_VERSION	(Environment::getProductVersion, "Product Version", "productVersion", "prodVersion", "prodVer", "pv"),
-		IMPL_VERSION	(Environment::getImplementationVersion, "Implementation Version", "implementationVersion", "implVersion", "iv"),
+		PRODUCT_VERSION	(Environment::productVersion, "Product Version", "productVersion", "prodVersion", "prodVer", "pv"),
+		IMPL_VERSION	(Environment::implementationVersionString, "Implementation Version", "implementationVersion", "implVersion", "iv"),
 		HOST_NAME	(Environment::hostName, "Host Name", "hostName", "host", "h"),
 		OS_VERSION	(Environment::osVersion, "O/S Version", "osVersion", "osVer", "ov"),
 		PLATFORM	(Environment::platform, "Platform", "platform", "plat", "p"),
@@ -623,6 +636,16 @@ public final class Environment
 
 
 	/**
+	 * @return Formatted string of the implementation version.
+	 *
+	 * @see #implementationVersion
+	 */
+	public static String implementationVersionString() {
+	    return IMPLEMENTATION_VERSION.toString();
+	}
+
+
+	/**
 	 * Get a formatted string of the implementation version.
 	 *
 	 * @return The formatted implementation version.
@@ -731,6 +754,17 @@ public final class Environment
 	 */
 	public static String javaVersion() {
 	    return JAVA_RUNTIME_VERSION;
+	}
+
+
+	/**
+	 * @return The version and data model of Java we're running under.
+	 *
+	 * @see #javaVersion
+	 * @see #dataModel
+	 */
+	public static String javaVersionModel() {
+	    return Intl.formatString("util#env.javaVersionModel", javaVersion(), dataModel());
 	}
 
 
@@ -1045,24 +1079,35 @@ public final class Environment
 
 	/**
 	 * Returns the process ID of the current process.
-	 * @return	0 if the process ID cannot be determined using the
+	 * @return	"0" if the process ID cannot be determined using the
 	 *		management bean (it does work on all the platforms
 	 *		I have available currently).
 	 * @see <a href="http://stackoverflow.com/questions/35842/how-can-a-java-program-get-its-own-process-id">http://stackoverflow.com/questions/35842/how-can-a-java-program-get-its-own-process-id</a>
 	 */
-	public static long getProcessID() {
+	public static String getProcessID() {
 	    final String jvmName = ManagementFactory.getRuntimeMXBean().getName();
 	    // The format is (always?) pid@host
 	    final int index = jvmName.indexOf('@');
 
 	    if (index > 0) {
 		try {
-		    return Long.parseLong(jvmName.substring(0, index));
+		    return jvmName.substring(0, index);
 		} catch (NumberFormatException e) {
 		    // ignore
 		}
 	    }
-	    return 0L;
+	    return "0";
+	}
+
+
+	/**
+	 * Returns a nicely-formatted version of the process ID value, suitable for presentation.
+	 *
+	 * @return The process ID information.
+	 * @see #getProcessID
+	 */
+	public static String getProcess() {
+	    return Intl.formatString("util#env.processID", getProcessID());
 	}
 
 
@@ -1078,6 +1123,9 @@ public final class Environment
 	 * @return	Fully-qualified class name that is the main program of this application.
 	 */
 	public static String getMainClassName() {
+	    if (cachedMainClassName != null)
+		return cachedMainClassName;
+
 	    try {
 		File f = FileUtilities.createTempFile("class");
 
@@ -1091,14 +1139,14 @@ public final class Environment
 		if (!f.delete())
 		    f.deleteOnExit();
 
-		long pid = getProcessID();
+		String pid = getProcessID();
 
 		for (String line : lines) {
 		    String parts[] = line.split("\\s+");
 		    if (parts.length == 2) {
-			long testPID = Long.parseUnsignedLong(parts[0]);
-			if (pid == testPID) {
-			    return parts[1];
+			if (pid.equals(parts[0])) {
+			    cachedMainClassName = parts[1];
+			    return cachedMainClassName;
 			}
 		    }
 		}
@@ -1107,6 +1155,17 @@ public final class Environment
 	    }
 
 	    return "";
+	}
+
+
+	/**
+	 * Returns a user-readable version of the main class name (with header info, basically).
+	 *
+	 * @return Main class name formatted for presentation.
+	 * @see #getMainClassName
+	 */
+	public static String getMainClass() {
+	    return Intl.formatString("util#env.mainClass", getMainClassName());
 	}
 
 
@@ -1317,15 +1376,25 @@ public final class Environment
 
 
 	/**
-	 * @return The complete product version string.
+	 * @return The product version string.
 	 *
 	 * @see #getAppVersion
 	 * @see #getAppBuild
 	 * @see #isDebugBuild
 	 */
-	public static String getProductVersion() {
+	public static String productVersion() {
 	    String debugInfo = isDebugBuild() ? Intl.getString("util#env.debug") : "";
-	    return Intl.formatString("util#env.version", getAppVersion(), getAppBuild(), debugInfo);
+	    return Intl.formatString("util#env.versionBuild", getAppVersion(), getAppBuild(), debugInfo);
+	}
+
+
+	/**
+	 * @return The complete product version string, formatted for display.
+	 *
+	 * @see #productVersion
+	 */
+	public static String getProductVersion() {
+	    return Intl.formatString("util#env.version", productVersion());
 	}
 
 
@@ -1672,12 +1741,18 @@ public final class Environment
 	 * @param colors	Whether or not to use colors.
 	 */
 	public static void printProgramInfo(PrintStream ps, int centerWidth, boolean colors) {
+	    // If no one has overridden the program info previously, now that we absolutely need it,
+	    // load the default (if possible) before proceeding.
+	    loadMainProgramInfo();
+
 	    String productName = getProductName();
 	    String versionInfo = getProductVersion();
 	    String buildInfo   = getProductBuildDateTime();
 	    String implVersion = getImplementationVersion();
 	    String copyright   = getCopyrightNotice();
 	    String javaVersion = getJavaVersion();
+	    String mainClass   = getMainClass();
+	    String processID   = getProcess();
 
 	    int lineWidth = centerWidth;
 
@@ -1688,6 +1763,9 @@ public final class Environment
 	    lineWidth = Math.max(lineWidth, implVersion.length());
 	    lineWidth = Math.max(lineWidth, copyright.length());
 	    lineWidth = Math.max(lineWidth, javaVersion.length());
+	    lineWidth = Math.max(lineWidth, mainClass.length());
+	    lineWidth = Math.max(lineWidth, processID.length());
+
 	    // If the given width wasn't sufficient for all the text
 	    // then give a little extra to make it look better
 	    if (lineWidth > centerWidth)
@@ -1705,7 +1783,10 @@ public final class Environment
 		println(ps, colors, "util#env.otherInfo", " ", implVersion);
 		println(ps, colors, "util#env.otherInfo", " ", buildInfo);
 		println(ps, colors, "util#env.otherInfo", " ", copyright);
+		ps.println();
 		println(ps, colors, "util#env.otherInfo", " ", javaVersion);
+		println(ps, colors, "util#env.otherInfo", " ", mainClass);
+		println(ps, colors, "util#env.otherInfo", " ", processID);
 	    } 
 	    else {
 		int width = (lineWidth + 1) / 2 * 2;
@@ -1717,6 +1798,8 @@ public final class Environment
 		String build   = CharUtil.padToWidth(buildInfo,   -width, CENTER);
 		String copy    = CharUtil.padToWidth(copyright,   -width, CENTER);
 		String java    = CharUtil.padToWidth(javaVersion, -width, CENTER);
+		String main    = CharUtil.padToWidth(mainClass,   -width, CENTER);
+		String pid     = CharUtil.padToWidth(processID,   -width, CENTER);
 
 		println(ps, colors, "util#env.productInfo", "", product);
 		println(ps, colors, "util#env.versionInfo", "", version);
@@ -1724,7 +1807,10 @@ public final class Environment
 		println(ps, colors, "util#env.otherInfo", "", implVer);
 		println(ps, colors, "util#env.otherInfo", "", build);
 		println(ps, colors, "util#env.otherInfo", "", copy);
+		ps.println();
 		println(ps, colors, "util#env.otherInfo", "", java);
+		println(ps, colors, "util#env.otherInfo", "", main);
+		println(ps, colors, "util#env.otherInfo", "", pid);
 	    }
 	    println(ps, colors, "util#env.otherInfo", "", underline);
 	    ps.println();

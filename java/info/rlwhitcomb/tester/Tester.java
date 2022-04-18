@@ -214,6 +214,8 @@
  *	    #269: New method to load main program info (in Environment).
  *	13-Apr-2022 (rlwhitcomb)
  *	    #269: Call "loadProgramInfo" to set product version explicitly for every main program we test.
+ *	18-Apr-2022 (rlwhitcomb)
+ *	    #270: Make "loadMainProgramInfo" automatic now.
  */
 package info.rlwhitcomb.tester;
 
@@ -1493,12 +1495,6 @@ public class Tester
 	}
 
 
-	private void displayProgramInfo() {
-	    Environment.loadMainProgramInfo();
-	    Environment.printProgramInfo();
-	}
-
-
 	/**
 	 * Reset all the options back to default values (used by "-ignoreoptions" command-line argument
 	 * to ignore any TESTER_OPTIONS specified in the environment.
@@ -1617,11 +1613,11 @@ public class Tester
 		resetToInitialOptions();
 	    }
 	    else if (Options.matchesOption(opt, true, "version", "vers", "ver")) {
-		displayProgramInfo();
+		Environment.printProgramInfo();
 		System.exit(0);
 	    }
 	    else if (Options.matchesOption(opt, true, "help", "h", "?")) {
-		displayProgramInfo();
+		Environment.printProgramInfo();
 		Intl.printHelp("tester#");
 		System.exit(0);
 	    }

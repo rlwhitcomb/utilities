@@ -91,6 +91,8 @@
  *	    #269: New method to load main program info (in Environment).
  *	14-Apr-2022 (rlwhitcomb)
  *	    #274: Add "-depth" parameter.
+ *	18-Apr-2022 (rlwhitcomb)
+ *	    #270: Make "loadMainProgramInfo" automatic.
  */
 package info.rlwhitcomb.tree;
 
@@ -694,7 +696,6 @@ public class Tree
 		    showInfoOnly = true;
 		}
 		else if (Options.matchesOption(arg, true, "version", "vers", "ver", "v")) {
-		    Environment.loadMainProgramInfo();
 		    Environment.printProgramInfo();
 		    showInfoOnly = true;
 		}

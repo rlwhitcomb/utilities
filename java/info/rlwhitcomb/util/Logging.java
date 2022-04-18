@@ -136,6 +136,8 @@
  *    Use Exceptions to come up with better exception messages.
  *  14-Apr-2022 (rlwhitcomb)
  *    #273: Move math-related classes to "math" package.
+ *  18-Apr-2022 (rlwhitcomb)
+ *    #270: Change PID to a String.
  */
 package info.rlwhitcomb.util;
 
@@ -252,7 +254,7 @@ public final class Logging
     private static DateFormat dayfmt = null;
 
     /** Our current process ID.  Captured during static initialization. */
-    private static long PID = 0L;
+    private static String PID;
 
     /** Directory for the log file(s).  Normally set by the {@link #LOG_DIRECTORY} value. */
     protected static String logFileDir = null;
@@ -335,7 +337,7 @@ public final class Logging
 	currentCal = Calendar.getInstance(gmt);
 	fmt.setCalendar(currentCal);
 	dayfmt.setCalendar(currentCal);
-	PID = Environment.getProcessID();
+	PID = String.format(" P(%1$s)", Environment.getProcessID());
 	Runtime.getRuntime().addShutdownHook(new Thread(() -> stopLogging(true)));
     }
 
@@ -797,7 +799,7 @@ public final class Logging
 
 	    // Don't bother formatting if there's no place to put it
 	    if (logConsole || logStrm != null) {
-		buf.append(" P(").append(PID).append(')');
+		buf.append(PID);
 		Thread curThread = Thread.currentThread();
 		buf.append(" T[").append(curThread.getName()).append(']');
 		buf.append('(').append(curThread.getId()).append(')');

@@ -45,6 +45,8 @@
  *	    #253: Fix line width calculations.
  *	12-Apr-2022 (rlwhitcomb)
  *	    #269: New method to load main program info (in Environment).
+ *	18-Apr-2022 (rlwhitcomb)
+ *	    #270: Make this automatic.
  */
 package info.rlwhitcomb.tools;
 
@@ -194,7 +196,6 @@ public class HexDump
 		case "vers":
 		case "ver":
 		case "v":
-		    Environment.loadMainProgramInfo();
 		    Environment.printProgramInfo();
 		    code = -1;
 		    break;

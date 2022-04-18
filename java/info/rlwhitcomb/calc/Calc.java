@@ -267,6 +267,8 @@
  *	    #269: New method to load main program info (in Environment).
  *	14-Apr-2022 (rlwhitcomb)
  *	    #273: Move math-related classes to "math" package.
+ *	18-Apr-2022 (rlwhitcomb)
+ *	    #270: Update Version dialog to latest program info format.
  */
 package info.rlwhitcomb.calc;
 
@@ -505,9 +507,12 @@ public class Calc
 	@BXML private Label versionKeyLabel;
 	@BXML private Prompt versionPrompt;
 	@BXML private Label versionText;
+	@BXML private Label implementationText;
 	@BXML private Label buildText;
 	@BXML private Label copyrightText;
 	@BXML private Label javaText;
+	@BXML private Label mainClassText;
+	@BXML private Label processText;
 	@BXML private Prompt settingsPrompt;
 	@BXML private Form settingsForm;
 	@BXML private RadioButton decimalPrecisionButton;
@@ -1545,15 +1550,21 @@ public class Calc
 	private void displayVersion() {
 	    String productName = Environment.getProductName();
 	    String versionInfo = Environment.getProductVersion();
+	    String implInfo    = Environment.getImplementationVersion();
 	    String buildInfo   = Environment.getProductBuildDateTime();
 	    String copyright   = Environment.getCopyrightNotice().replace("(c)", "\u00A9");;
 	    String javaVersion = Environment.getJavaVersion();
+	    String mainClass   = Environment.getMainClass();
+	    String process     = Environment.getProcess();
 
 	    versionPrompt.setMessage(productName);
 	    versionText.setText(versionInfo);
+	    implementationText.setText(implInfo);
 	    buildText.setText(buildInfo);
 	    copyrightText.setText(copyright);
 	    javaText.setText(javaVersion);
+	    mainClassText.setText(mainClass);
+	    processText.setText(process);
 
 	    if (versionPrompt.getOptions().getLength() == 1) {
 		versionPrompt.getOptions().insert(Intl.getString("versionLicense"), 0);

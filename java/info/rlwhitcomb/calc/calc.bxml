@@ -84,6 +84,8 @@
 		#167: Increase spacing under "Display Modes" in Settings.
 	    14-Feb-2022 (rlwhitcomb)
 		#195: Add id for splitter to save the ratio between runs.
+	    18-Apr-2022 (rlwhitcomb)
+		#270: Update Version dialog to match new Environment.printProgramInfo format.
 
      ========================================================================== -->
 
@@ -114,9 +116,13 @@
 	    <BoxPane orientation="vertical" styles="{horizontalAlignment:'center'}">
 		<Label bxml:id="versionText" text="" styles="{color:'limegreen',font:{size:'110%',bold:true}}"/>
 		<Label text=""/>
+		<Label bxml:id="implementationText" text="" styles="{color:'grey',font:{size:'110%'}}"/>
 		<Label bxml:id="buildText" text="" styles="{color:'grey',font:{size:'110%'}}"/>
 		<Label bxml:id="copyrightText" text="" styles="{color:'grey',font:{size:'110%'}}"/>
+		<Label text=""/>
 		<Label bxml:id="javaText" text="" styles="{color:'grey',font:{size:'110%'}}"/>
+		<Label bxml:id="mainClassText" text="" styles="{color:'grey',font:{size:'110%'}}"/>
+		<Label bxml:id="processText" text="" styles="{color:'grey',font:{size:'110%'}}"/>
 	    </BoxPane>
 	</Prompt>
 

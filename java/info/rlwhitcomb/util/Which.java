@@ -51,6 +51,8 @@
  *	    #269: New method to load main program info (in Environment).
  *	14-Apr-2022 (rlwhitcomb)
  *	    #273: Move math-related classes to "math" package.
+ *	18-Apr-2022 (rlwhitcomb)
+ *	    #270: Make "loadMainProgramInfo" automatic now.
  */
 package info.rlwhitcomb.util;
 
@@ -382,7 +384,6 @@ public class Which
 		case EMPTY:
 		    return;
 		case VERSION:
-		    Environment.loadMainProgramInfo();
 		    Environment.printProgramInfo();
 		    break;
 		case UNKNOWN:

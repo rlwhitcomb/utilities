@@ -47,6 +47,8 @@
  *	    #251: Trap charset encoding problems.
  *	12-Apr-2022 (rlwhitcomb)
  *	    #269: New method to load main program info (in Environment).
+ *	18-Apr-2022 (rlwhitcomb)
+ *	    #270: Now this is automatic inside "printProgramInfo".
  *
  *	    TODO: wildcard directory names on input
  *	    TODO: -nn to limit to first nn lines, +nn to limit to LAST nn lines (hard to do?)
@@ -186,7 +188,6 @@ public class Cat {
 		    readFromConsole();
 		}
 	    } else if (Options.matchesOption(arg, true, "version", "vers", "ver", "v")) {
-		Environment.loadMainProgramInfo();
 		Environment.printProgramInfo();
 		System.exit(0);
 	    } else {

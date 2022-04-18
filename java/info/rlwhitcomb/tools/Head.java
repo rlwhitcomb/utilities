@@ -41,6 +41,8 @@
  *	    Use new Options method to process command line.
  *	12-Apr-2022 (rlwhitcomb)
  *	    #269: New method to load main program info (in Environment).
+ *	18-Apr-2022 (rlwhitcomb)
+ *	    #270: Make this automatic now.
  */
 package info.rlwhitcomb.tools;
 
@@ -122,7 +124,6 @@ public class Head
 		case "vers":
 		case "ver":
 		case "v":
-		    Environment.loadMainProgramInfo();
 		    Environment.printProgramInfo();
 		    code = -1;
 		    break;

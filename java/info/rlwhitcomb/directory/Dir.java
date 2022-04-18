@@ -31,7 +31,8 @@
  *	    More coding using Java paradigms.
  *	12-Apr-2022 (rlwhitcomb)
  *	    #269: New method to load main program info (in Environment).
- *
+ *	18-Apr-2022 (rlwhitcomb)
+ *	    #270: Make this automatic now.
  */
 package info.rlwhitcomb.directory;
 
@@ -871,7 +872,6 @@ System.out.println("size = " + basicAttrs.size() + ", createTime = " + basicAttr
 		case "vers":
 		case "ver":
 		case "v":
-		    Environment.loadMainProgramInfo();
 		    Environment.printProgramInfo(50);
 		    return false;
 		default:

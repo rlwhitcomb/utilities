@@ -84,6 +84,8 @@
  *	    Use Exceptions to get better error messages.
  *	12-Apr-2022 (rlwhitcomb)
  *	    #269: New method for loading main program info (in Environment).
+ *	18-Apr-2022 (rlwhitcomb)
+ *	    #270: Make this automatic.
  */
 package info.rlwhitcomb.util;
 
@@ -355,7 +357,6 @@ public class Lists
 			return ACTION_DONE;
 		    }
 		    else if (Options.matchesOption(arg, true, "version", "vers", "ver", "v")) {
-			Environment.loadMainProgramInfo();
 			Environment.printProgramInfo(System.err);
 			return ACTION_DONE;
 		    }
