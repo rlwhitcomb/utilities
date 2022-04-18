@@ -316,11 +316,17 @@
  *	27-Mar-2022 (rlwhitcomb)
  *	    Use UTF-8 charset from Constants, not our own.
  *	    #190: Support "caret" notation for control characters inside strings.
+ *	17-Apr-2022 (rlwhitcomb)
+ *	    #274: Add "isNumber" method.
  */
 
 package info.rlwhitcomb.util;
 
 import java.io.File;
+import java.math.BigDecimal;
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -328,9 +334,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.nio.charset.Charset;
-import java.nio.charset.CharsetEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -1451,6 +1454,24 @@ public final class CharUtil
 		}
 	    }
 	    return m.matches();
+	}
+
+
+	/**
+	 * Is the input string a valid number? Relies on the system parsing plus
+	 * the {@code '+'} sign.
+	 *
+	 * @param input	The input string to test.
+	 * @return Whether or not the input string is a valid number.
+	 */
+	public static boolean isValidNumber(final String input) {
+	    try {
+		new BigDecimal(input);
+		return true;
+	    } catch (NumberFormatException nfe) {
+		;
+	    }
+	    return false;
 	}
 
 

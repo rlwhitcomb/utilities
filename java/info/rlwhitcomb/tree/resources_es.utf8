@@ -1,7 +1,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2020-2021 Roger L. Whitcomb.
+# Copyright (c) 2020-2022 Roger L. Whitcomb.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -42,6 +42,8 @@
 #	    Finish the color tags.
 #	21-Oct-2021 (rlwhitcomb)
 #	    Generic error message.
+#	15-Apr-2022 (rlwhitcomb)
+#	    #274: New errors and help for "-depth" option.
 #
 
 unavailable	= " <no disponible>"
@@ -51,7 +53,10 @@ warnNoFile	= "<Yw*>ADVERTENCIA: Ignorando archivo inexistente <Bl*>\"%1$s\"<>"
 errNoFilesGiven	= "<Rd*!>ERROR: No hay archivos ni directorios especificados.<>"
 errFileName	= "<Rd*!>ERROR: Incapaz de obtener el nombre canónico para <Bl*>\"%1$s\"<>: %2$s"
 errExpectLocale = "<Rd*!>ERROR: Esperando un valor para <Bl*>\"-locale\"<Rd*!>, no otra opción.<>"
+errExpectDepth  = "<Rd*!>ERROR: Esperando un valor para <Bl*>\"-depth\"<Rd*!>, no otra opción.<>"
 errNoLocale     = "<Rd*!>ERROR: No se ha dado ningún valor para <Bl*>\"-locale\"<Rd*!>.<>"
+errNoDepth      = "<Rd*!>ERROR: No se ha dado ningún valor para <Bl*>\"-depth\"<Rd*!>.<>"
+errDepth        = "Valor no válido para <Bl*>\"-depth\"<>: %1$s
 error		= "<Rd*!>ERROR: %1$s"
 
 usage.help1	= "<Bk!>Uso:<> tre [<Gr>opciones<>] nombres_de_archivos_o_directorios"
@@ -98,21 +103,25 @@ usage.help41	= ""
 usage.help42    = "\t<Gr>-locale<> locale_name   establecer la configuración regional"
 usage.help43    = "\t  (o <Gr>-loc<>, o <Gr>-l<>)"
 usage.help44    = ""
-usage.help45    = "\t<Gr>-help<>  imprime este mensaje"
-usage.help46    = "\t  (o <Gr>-usage<>, <Gr>-h<>, <Gr>-u<>, o <Gr>-?<>)"
-usage.help47    = ""
-usage.help48    = "\t<Gr>-version<>  imprime la información de la versión del programa"
-usage.help49    = "\t  (o <Gr>-vers<>, <Gr>-ver<>, o <Gr>-v<>)"
-usage.help50    = ""
-usage.help51	= " Nota: las opciones se pueden especificar mediante \"<Gr>-opt<>\" o \"<Gr>-opt<>\""
-usage.help52	= "  (o en Windows por \"<Gr>/opt<>\")."
-usage.help53	= ""
-usage.help54	= " Las opciones también se pueden preestablecer enumerándolas en variable"
-usage.help55	= "  entorno TREE_OPTIONS (como <Cy>TREE_OPTIONS=-nocolor<>)"
-usage.help56	= ""
-usage.help57	= " También tenga en cuenta: todas las opciones se analizan antes de que"
-usage.help58	= "  se procese cualquier archivo, por lo que las opciones posteriores"
-usage.help59	= "  anularán las anteriores para toda la salida, y las opciones en la"
-usage.help60	= "  línea de comando anulan las establecidas por TREE_OPTIONS."
-usage.help61    = ""
+usage.help45    = "\t<Gr>-depth<>  depth         establecer la profundidad de la lista"
+usage.help46    = "\t  donde valor puede ser un número, o uno de <Gr>empty<>, <Gr>files<>,"
+usage.help47    = "\t    <Gr>immediates<>, o <Gr>infinity<>"
+usage.help48    = ""
+usage.help49    = "\t<Gr>-help<>  imprime este mensaje"
+usage.help50    = "\t  (o <Gr>-usage<>, <Gr>-h<>, <Gr>-u<>, o <Gr>-?<>)"
+usage.help51    = ""
+usage.help52    = "\t<Gr>-version<>  imprime la información de la versión del programa"
+usage.help53    = "\t  (o <Gr>-vers<>, <Gr>-ver<>, o <Gr>-v<>)"
+usage.help54    = ""
+usage.help55	= " Nota: las opciones se pueden especificar mediante \"<Gr>-opt<>\" o \"<Gr>-opt<>\""
+usage.help56	= "  (o en Windows por \"<Gr>/opt<>\")."
+usage.help57	= ""
+usage.help58	= " Las opciones también se pueden preestablecer enumerándolas en variable"
+usage.help59	= "  entorno TREE_OPTIONS (como <Cy>TREE_OPTIONS=-nocolor<>)"
+usage.help60	= ""
+usage.help61	= " También tenga en cuenta: todas las opciones se analizan antes de que"
+usage.help62	= "  se procese cualquier archivo, por lo que las opciones posteriores"
+usage.help63	= "  anularán las anteriores para toda la salida, y las opciones en la"
+usage.help64	= "  línea de comando anulan las establecidas por TREE_OPTIONS."
+usage.help65    = ""
 

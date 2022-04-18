@@ -89,12 +89,15 @@
  *	    #217: Use new Options method to process environment options.
  *	12-Apr-2022 (rlwhitcomb)
  *	    #269: New method to load main program info (in Environment).
+ *	14-Apr-2022 (rlwhitcomb)
+ *	    #274: Add "-depth" parameter.
  */
 package info.rlwhitcomb.tree;
 
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -170,6 +173,17 @@ public class Tree
 
 	/** Whether to actually descend into subdirectories. */
 	private static boolean recurse = true;
+
+	/** Recursion depth (default "infinite"):
+	 * <ul>
+	 * <li>negative = {@code "infinite"}</li>
+	 * <li>0 = print top-level directory name only ({@code "empty"})</li>
+	 * <li>1 = print only files (if {@code -files} is given) at top level ({@code "files"})</li>
+	 * <li>2 = only files and first-level directories ({@code "immediates"})</li>
+	 * <li>3+ = only to depth n - 1</li>
+	 * </ul>
+	 */
+	private static int maxDepth = -1;
 
 	/** Locale used to format messages, etc. */
 	private static Locale locale = null;
@@ -379,15 +393,19 @@ public class Tree
 	 * @param ancestors	The prefix to display according from grandparents up.
 	 * @param parent	The new prefix for our immediate parent (applied to children)
 	 * @param branch	The branch to display for this entry (according to my parent).
+	 * @param depth		Current depth of the search.
 	 * @param fullPath	Whether to display the full path for root files.
 	 */
-	private static void list(File file, String ancestors, String parent, String branch, boolean fullPath) {
+	private static void list(File file, String ancestors, String parent, String branch, int depth, boolean fullPath) {
 	    String name = fullPath ? file.getPath() : file.getName();
 	    boolean isDirectory = file.isDirectory();
 	    ConsoleColor.Code nameEmphasis = darkBackgrounds ? WHITE_BOLD : BLACK_BOLD;
 	    String type = null, typeDisplay = "";
 
 	    if (isDirectory) {
+		if (depth == 1 && maxDepth == 1) {
+		    return;
+		}
 		if (file.isHidden()) {
 		    nameEmphasis = RED_BOLD;
 		}
@@ -468,6 +486,13 @@ public class Tree
 		output(String.format("%s%s%s%s%s%s%s (%s)", BLACK_BRIGHT, ancestors, branch, nameEmphasis, name, RESET, RESET, typeDisplay));
 	    }
 
+	    if (depth == 0 && maxDepth == 0) {
+		return;
+	    }
+	    if (maxDepth >= 2 && depth >= maxDepth - 1) {
+		return;
+	    }
+
 	    if (isDirectory && (recurse || fullPath)) {
 		File[] files = file.listFiles(filter);
 		if (files != null) {
@@ -478,7 +503,7 @@ public class Tree
 		    for (int i = 0; i < files.length; i++) {
 			boolean last = i == files.length - 1;
 			File f = files[i];
-			list(f, ancestors + parent, parentPrefix(INDENT, !last), branchPrefix(INDENT, !last), false);
+			list(f, ancestors + parent, parentPrefix(INDENT, !last), branchPrefix(INDENT, !last), depth + 1, false);
 		    }
 		}
 	    }
@@ -534,12 +559,54 @@ public class Tree
 	}
 
 
+	/**
+	 * Parse a depth parameter: either an integer (signed) or one of the
+	 * "files", "empty", "immediates", or "infinity" (same as "svn").
+	 * Where:<ul>
+	 * <li>empty = list top-level directory name only</li>
+	 * <li>files = list only files in top-level directory</li>
+	 * <li>immediates = list first-level only files and directories</li>
+	 * <li>infinity = list all files and directories to any depth</li>
+	 * <li>negative number = same as "infinity"</li>
+	 * <li>0 = same as "empty"</li>
+	 * <li>1 = same as "files"</li>
+	 * <li>2 = same as "immediates"</li>
+	 * <li>any other positive integer = same as "immediates" but at depth n - 1</li>
+	 * </ul>
+	 *
+	 * @param arg One of the values above.
+	 * @throws IllegalArgumentException if the value is not recognized.
+	 * @see #maxDepth
+	 */
+	private static void parseDepth(final String arg) {
+	    String depth = arg;
+
+	    if (depth.equalsIgnoreCase("empty") || depth.equalsIgnoreCase("e"))
+		maxDepth = 0;
+	    else if (depth.equalsIgnoreCase("files") || depth.equalsIgnoreCase("f"))
+		maxDepth = 1;
+	    else if (depth.equalsIgnoreCase("immediates") || depth.equalsIgnoreCase("immed") || depth.equalsIgnoreCase("imm"))
+		maxDepth = 2;
+	    else if (depth.equalsIgnoreCase("infinity") || depth.equalsIgnoreCase("inf"))
+		maxDepth = -1;
+	    else {
+		try {
+		    maxDepth = new BigDecimal(arg).intValueExact();
+		}
+		catch (IllegalArgumentException | ArithmeticException ex) {
+		    throw new Intl.IllegalArgumentException("tree#errDepth", arg);
+		}
+	    }
+	}
+
 	private static void parseOptions(final String[] args, final List<String> argList) {
 	    boolean expectLocale = false;
+	    boolean expectDepth = false;
 
 	    for (String arg : args) {
 		if (expectLocale && Options.isOption(arg) != null) {
 		    error("tree#errExpectLocale");
+		    expectLocale = false;
 		}
 		else if (expectLocale) {
 		    try {
@@ -548,11 +615,25 @@ public class Tree
 			    Locale.setDefault(locale);
 			    Intl.initAllPackageResources(locale);
 			}
-			expectLocale = false;
 		    }
 		    catch (IllegalArgumentException iae) {
 			error("tree#error", Exceptions.toString(iae));
 		    }
+		    expectLocale = false;
+		}
+		else if (expectDepth) {
+		    if (CharUtil.isValidNumber(arg) || Options.isOption(arg) == null) {
+			try {
+			    parseDepth(arg);
+			}
+			catch (IllegalArgumentException iae) {
+			    error("tree#error", Exceptions.toString(iae));
+			}
+		    }
+		    else {
+			error("tree#errExpectDepth");
+		    }
+		    expectDepth = false;
 		}
 		else if (Options.matchesOption(arg, false, "alpha", "ascending", "asc", "a")) {
 		    sortByFileName = true;
@@ -605,6 +686,9 @@ public class Tree
 		else if (Options.matchesOption(arg, true, "locale", "loc", "l")) {
 		    expectLocale = true;
 		}
+		else if (Options.matchesOption(arg, true, "depth")) {
+		    expectDepth = true;
+		}
 		else if (Options.matchesOption(arg, true, "help", "usage", "h", "u", "?")) {
 		    usage();
 		    showInfoOnly = true;
@@ -625,6 +709,9 @@ public class Tree
 
 	    if (expectLocale) {
 		error("tree#errNoLocale");
+	    }
+	    if (expectDepth) {
+		error("tree#errNoDepth");
 	    }
 	}
 
@@ -675,7 +762,7 @@ public class Tree
 		File f = new File(arg);
 		if (f.exists()) {
 		    try {
-			list(f.getCanonicalFile(), "", "", "", true);
+			list(f.getCanonicalFile(), "", "", "", 0, true);
 		    } catch (IOException ioe) {
 			error("tree#errFileName", arg, Exceptions.toString(ioe));
 		    }

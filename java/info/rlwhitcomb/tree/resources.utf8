@@ -1,7 +1,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2020-2021 Roger L. Whitcomb.
+# Copyright (c) 2020-2022 Roger L. Whitcomb.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -44,6 +44,8 @@
 #	    Tweaks to help message.
 #	21-Oct-2021 (rlwhitcomb)
 #	    Generic error message.
+#	15-Apr-2022 (rlwhitcomb)
+#	    #274: New errors and help for "-depth" option.
 #
 
 unavailable	= " <unavailable>"
@@ -53,7 +55,10 @@ warnNoFile	= "<Yw*>WARNING: Ignoring non-existent file <Bl*>\"%1$s\"<>"
 errNoFilesGiven	= "<Rd*!>ERROR: No input files or directories specified.<>"
 errFileName	= "<Rd*!>ERROR: Unable to get canonical name for <Bl*>\"%1$s\"<>: %2$s"
 errExpectLocale	= "<Rd*!>ERROR: Expecting a value for <Bl*>\"-locale\"<Rd*!>, not another option.<>"
+errExpectDepth	= "<Rd*!>ERROR: Expecting a value for <Bl*>\"-depth\"<Rd*!>, not another option.<>"
 errNoLocale	= "<Rd*!>ERROR: No value given for <Bl*>\"-locale\"<Rd*!>.<>"
+errNoDepth	= "<Rd*!>ERROR: No value given for <Bl*>\"-depth\"<Rd*!>.<>"
+errDepth	= "Invalid value for <Bl*>\"-depth\"<>: %1$s"
 error		= "<Rd*!>ERROR: %1$s"
 
 usage.help1	= "<Bk!>Usage:<> tre [<Gr>options<>] file_or_directory_name(s)"
@@ -99,20 +104,24 @@ usage.help40	= ""
 usage.help41	= "\t<Gr>-locale<> locale_name   set the locale"
 usage.help42	= "\t  (or <Gr>-loc<>, or <Gr>-l<>)"
 usage.help43	= ""
-usage.help44	= "\t<Gr>-help<>  prints this message"
-usage.help45	= "\t  (or <Gr>-usage<>, <Gr>-h<>, <Gr>-u<>, or <Gr>-?<>)"
-usage.help46	= ""
-usage.help47	= "\t<Gr>-version<>  prints the program version information"
-usage.help48	= "\t  (or <Gr>-vers<>, <Gr>-ver<>, or <Gr>-v<>)"
-usage.help49	= ""
-usage.help50	= " Note: options can be specified by \"<Gr>-opt<>\" or \"<Gr>--opt<>\""
-usage.help51	= "  (or on Windows by \"<Gr>/opt<>\")."
-usage.help52	= ""
-usage.help53	= " Options can also be preset by listing them in the TREE_OPTIONS"
-usage.help54	= "  environment variable (such as <Cy>TREE_OPTIONS=-nocolor<>)"
-usage.help55	= ""
-usage.help56	= " Also note: all options are parsed before any files are processed,"
-usage.help57	= "  so later options will override earlier ones for the entire output,"
-usage.help58	= "  and options on the command line override ones set by TREE_OPTIONS."
+usage.help44	= "\t<Gr>-depth<>  depth         set the depth of the list"
+usage.help45	= "\t  where value can be a number, or one of <Gr>empty<>, <Gr>files<>,"
+usage.help46	= "\t    <Gr>immediates<>, or <Gr>infinity<>"
+usage.help47	= ""
+usage.help48	= "\t<Gr>-help<>  prints this message"
+usage.help49	= "\t  (or <Gr>-usage<>, <Gr>-h<>, <Gr>-u<>, or <Gr>-?<>)"
+usage.help50	= ""
+usage.help51	= "\t<Gr>-version<>  prints the program version information"
+usage.help52	= "\t  (or <Gr>-vers<>, <Gr>-ver<>, or <Gr>-v<>)"
+usage.help53	= ""
+usage.help54	= " Note: options can be specified by \"<Gr>-opt<>\" or \"<Gr>--opt<>\""
+usage.help55	= "  (or on Windows by \"<Gr>/opt<>\")."
+usage.help56	= ""
+usage.help57	= " Options can also be preset by listing them in the TREE_OPTIONS"
+usage.help58	= "  environment variable (such as <Cy>TREE_OPTIONS=-nocolor<>)"
 usage.help59	= ""
+usage.help60	= " Also note: all options are parsed before any files are processed,"
+usage.help61	= "  so later options will override earlier ones for the entire output,"
+usage.help62	= "  and options on the command line override ones set by TREE_OPTIONS."
+usage.help63	= ""
 
