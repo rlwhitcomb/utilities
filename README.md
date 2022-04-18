@@ -1,6 +1,5 @@
 [![Java 8 Build Status](https://github.com/rlwhitcomb/utilities/actions/workflows/ant-jdk8.yml/badge.svg)](https://github.com/rlwhitcomb/utilities/actions/workflows/ant-jdk8.yml)
-[![Java 11 Build Status](https://github.com/rlwhitcomb/utilities/actions/workflows/ant-jdk11.yml/badge.svg)](https://github.com/rlwhitcomb/utilities/actions/workflows/ant-jdk11.yml)
-[![Java 17 Build Status](https://github.com/rlwhitcomb/utilities/actions/workflows/ant-jdk17.yml/badge.svg)](https://github.com/rlwhitcomb/utilities/actions/workflows/ant-jdk17.yml)
+[![Java Build Status](https://github.com/rlwhitcomb/utilities/actions/workflows/ant-jdk.yml/badge.svg)](https://github.com/rlwhitcomb/utilities/actions/workflows/ant-jdk.yml)
 
 # utilities
 Some of my personal utility programs, collected over a number of years. Most were developed to be useful to me in my own programming, and so may be useful to others.
