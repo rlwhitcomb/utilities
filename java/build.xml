@@ -305,6 +305,8 @@
 		#254: Add resources to "info.rlwhitcomb" package.
 	    17-Apr-2022 (rlwhitcomb)
 		Add "fork" to Java tasks to support JDK 18 changes to SecurityManager.
+	    21-Apr-2022 (rlwhitcomb)
+		#273: Need to add new "math" directory in a few places.
 
      ========================================================================== -->
 
@@ -541,6 +543,7 @@
 			<generate-text-resources dir="info/rlwhitcomb/csv" />
 			<generate-text-resources dir="info/rlwhitcomb/json" />
 			<generate-text-resources dir="info/rlwhitcomb/matches" />
+			<generate-text-resources dir="info/rlwhitcomb/math" />
 			<generate-text-resources dir="info/rlwhitcomb/tester" />
 			<generate-text-resources dir="info/rlwhitcomb/tools" />
 			<generate-text-resources dir="info/rlwhitcomb/tree" />
@@ -614,6 +617,7 @@
 			<src path="info/rlwhitcomb/jarfile"/>
 			<src path="info/rlwhitcomb/json"/>
 			<src path="info/rlwhitcomb/matches"/>
+			<src path="info/rlwhitcomb/math"/>
 			<src path="info/rlwhitcomb/test"/>
 			<src path="info/rlwhitcomb/tester"/>
 			<src path="info/rlwhitcomb/tools"/>
@@ -664,6 +668,7 @@
 			<include name="info/rlwhitcomb/jarfile/*.class"/>
 			<include name="info/rlwhitcomb/json/*.class"/>
 			<include name="info/rlwhitcomb/matches/*.class"/>
+			<include name="info/rlwhitcomb/math/*.class"/>
 			<include name="info/rlwhitcomb/tester/*.class"/>
 			<include name="info/rlwhitcomb/tools/*.class"/>
 			<include name="info/rlwhitcomb/tree/*.class"/>
@@ -793,6 +798,7 @@ Test starting on ${build.date} at ${build.time}
 			<fileset dir="info/rlwhitcomb/json" includes="*.class"/>
 			<fileset dir="info/rlwhitcomb/json" includes="*.class,*.interp,*.tokens,JSONParser.java,JSONVisitor.java,JSONLexer.java,JSONBaseVisitor.java"/>
 			<fileset dir="info/rlwhitcomb/matches" includes="*.class"/>
+			<fileset dir="info/rlwhitcomb/math" includes="*.class"/>
 			<fileset dir="info/rlwhitcomb/test" includes="*.class"/>
 			<fileset dir="info/rlwhitcomb/tester" includes="*.class"/>
 			<fileset dir="info/rlwhitcomb/tools" includes="*.class"/>
