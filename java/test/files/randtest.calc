@@ -14,11 +14,11 @@ variance /= length v
 stddev = sqrt variance
 
 :quiet pop
-:resultsonly on
+:resultsonly on {
 
 `Minimum = ${min v}` @q
 `Maximum = ${max v}` @q
 `Average = $mean`    @q
 `Std Dev = $stddev`  @q
 
-:resultsonly pop
+}

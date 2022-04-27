@@ -369,6 +369,8 @@
  *	    #190: Support "caret" notation inside strings.
  *	11-Apr-2022 (rlwhitcomb)
  *	    #267: Add "Elvis" operator.
+ *	26-Apr-2022 (rlwhitcomb)
+ *	    #290: Add optional statement blocks to directives.
  */
 
 grammar Calc;
@@ -440,6 +442,10 @@ leaveStmt
 
 timeThisStmt
    : K_TIMETHIS ( expr ',' ) ? stmtBlock
+   ;
+
+bracketBlock
+   : EOL? '{' EOL? stmt * '}' EOL?
    ;
 
 stmtBlock
@@ -729,15 +735,15 @@ directive
    | D_PREDEFINED wildIdList ?                # predefinedDirective
    | D_INCLUDE expr ( ',' expr ) ?            # includeDirective
    | D_SAVE expr ( ',' expr ) ?               # saveDirective
-   | D_TIMING modeOption                      # timingDirective
-   | D_RATIONAL modeOption                    # rationalDirective
-   | D_DEBUG modeOption                       # debugDirective
-   | D_RESULTSONLY modeOption                 # resultsOnlyDirective
-   | D_QUIET modeOption                       # quietDirective
-   | D_SILENCE modeOption                     # silenceDirective
-   | D_SEPARATORS modeOption                  # separatorsDirective
-   | D_IGNORECASE modeOption                  # ignoreCaseDirective
-   | D_QUOTESTRINGS modeOption                # quoteStringsDirective
+   | D_TIMING modeOption bracketBlock ?       # timingDirective
+   | D_RATIONAL modeOption bracketBlock ?     # rationalDirective
+   | D_DEBUG modeOption bracketBlock ?        # debugDirective
+   | D_RESULTSONLY modeOption bracketBlock ?  # resultsOnlyDirective
+   | D_QUIET modeOption bracketBlock ?        # quietDirective
+   | D_SILENCE modeOption bracketBlock ?      # silenceDirective
+   | D_SEPARATORS modeOption bracketBlock ?   # separatorsDirective
+   | D_IGNORECASE modeOption bracketBlock ?   # ignoreCaseDirective
+   | D_QUOTESTRINGS modeOption bracketBlock ? # quoteStringsDirective
    ;
 
 numberOption

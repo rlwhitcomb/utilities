@@ -1,11 +1,9 @@
-:quiet on
-:resultsonly on
+:quiet on {
 primes = [ ]
 loop over 2 … 9997 {
   if isprime(__) {
     primes[length(primes)] = __
   }
 }
-:quiet pop
-primes @j
-:resultsonly pop
+}
+:resultsonly on { primes @j }

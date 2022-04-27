@@ -525,6 +525,8 @@
  *	    #267: Add "Elvis" operator.
  *	14-Apr-2022 (rlwhitcomb)
  *	    #273: Move math-related classes to "math" package.
+ *	26-Apr-2022 (rlwhitcomb)
+ *	    #290: Implement optional statement blocks for directives with mode options.
  */
 package info.rlwhitcomb.calc;
 
@@ -1639,7 +1641,22 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 
-	private Boolean processModeOption(final CalcParser.ModeOptionContext ctx, final Deque<Boolean> stack, final UnaryOperator<Boolean> setOperator) {
+	/**
+	 * Process the mode option for one of the directives, including visiting the statement block,
+	 * if specified, which then pops the mode at the end.
+	 *
+	 * @param ctx          The expression context for the mode value.
+	 * @param stack        Mode value stack to use with directive.
+	 * @param bracketBlock Optional statement block to be executed with the new mode value.
+	 * @param setOperator  The function used to set the appropriate mode for the directive.
+	 * @return The previous value of the mode, before the value given on the directive.
+	 */
+	private Boolean processModeOption(
+		final CalcParser.ModeOptionContext ctx,
+		final Deque<Boolean> stack,
+		final CalcParser.BracketBlockContext bracketBlock,
+		final UnaryOperator<Boolean> setOperator)
+	{
 	    String option;
 
 	    if (ctx.var() != null) {
@@ -1653,7 +1670,16 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 
 	    try {
-		return processModeOption(option, stack, setOperator);
+		if (bracketBlock != null) {
+		    processModeOption(option, stack, setOperator);
+
+		    visit(bracketBlock);
+
+		    return processModeOption("pop", stack, setOperator);
+		}
+		else {
+		    return processModeOption(option, stack, setOperator);
+		}
 	    }
 	    catch (IllegalArgumentException iae) {
 		throw new CalcExprException(iae, ctx);
@@ -1701,53 +1727,50 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitTimingDirective(CalcParser.TimingDirectiveContext ctx) {
-	    return processModeOption(ctx.modeOption(), timingModeStack, mode -> {
-		return setTimingMode(mode);
-	    });
+	    return processModeOption(ctx.modeOption(), timingModeStack, ctx.bracketBlock(),
+		mode -> { return setTimingMode(mode); });
 	}
 
 	@Override
 	public Object visitDebugDirective(CalcParser.DebugDirectiveContext ctx) {
-	    return processModeOption(ctx.modeOption(), debugModeStack, mode -> {
-		return setDebugMode(mode);
-	    });
+	    return processModeOption(ctx.modeOption(), debugModeStack, ctx.bracketBlock(),
+		mode -> { return setDebugMode(mode); });
 	}
 
 	@Override
 	public Object visitRationalDirective(CalcParser.RationalDirectiveContext ctx) {
-	    return processModeOption(ctx.modeOption(), rationalModeStack, setRationalMode);
+	    return processModeOption(ctx.modeOption(), rationalModeStack, ctx.bracketBlock(), setRationalMode);
 	}
 
 	@Override
 	public Object visitResultsOnlyDirective(CalcParser.ResultsOnlyDirectiveContext ctx) {
-	    return processModeOption(ctx.modeOption(), resultsOnlyModeStack, mode -> {
-		return Calc.setResultsOnlyMode(mode);
-	    });
+	    return processModeOption(ctx.modeOption(), resultsOnlyModeStack, ctx.bracketBlock(),
+		mode -> { return Calc.setResultsOnlyMode(mode); });
 	}
 
 	@Override
 	public Object visitQuietDirective(CalcParser.QuietDirectiveContext ctx) {
-	    return processModeOption(ctx.modeOption(), quietModeStack, setQuietMode);
+	    return processModeOption(ctx.modeOption(), quietModeStack, ctx.bracketBlock(), setQuietMode);
 	}
 
 	@Override
 	public Object visitSilenceDirective(CalcParser.SilenceDirectiveContext ctx) {
-	    return processModeOption(ctx.modeOption(), silenceModeStack, setSilenceMode);
+	    return processModeOption(ctx.modeOption(), silenceModeStack, ctx.bracketBlock(), setSilenceMode);
 	}
 
 	@Override
 	public Object visitSeparatorsDirective(CalcParser.SeparatorsDirectiveContext ctx) {
-	    return processModeOption(ctx.modeOption(), separatorModeStack, setSeparatorMode);
+	    return processModeOption(ctx.modeOption(), separatorModeStack, ctx.bracketBlock(), setSeparatorMode);
 	}
 
 	@Override
 	public Object visitIgnoreCaseDirective(CalcParser.IgnoreCaseDirectiveContext ctx) {
-	    return processModeOption(ctx.modeOption(), ignoreCaseModeStack, setIgnoreCaseMode);
+	    return processModeOption(ctx.modeOption(), ignoreCaseModeStack, ctx.bracketBlock(), setIgnoreCaseMode);
 	}
 
 	@Override
 	public Object visitQuoteStringsDirective(CalcParser.QuoteStringsDirectiveContext ctx) {
-	    return processModeOption(ctx.modeOption(), quoteStringsModeStack, setQuoteStringsMode);
+	    return processModeOption(ctx.modeOption(), quoteStringsModeStack, ctx.bracketBlock(), setQuoteStringsMode);
 	}
 
 

@@ -73,15 +73,15 @@ define ifmany(value) = {
     value
 }
 
-:results on
-loop over 0..4,0.5 {
-  `$__ = ${ifmany(__)}`
+:results on {
+  loop over 0..4,0.5 {
+    `$__ = ${ifmany(__)}`
+  }
 }
-:results pop
 define type(value) = `${value} = ${typeof(value)}`
-:results on
+:results on {
 loop over 0..4,0.5 type(__)
-:results pop
+}
 
 
 def f1 = 'f1 here'
@@ -96,8 +96,8 @@ c1(f2, 'roger')
 pp = 5
 def func(pp) = { pp }
 func(21)
-:results on
+:results on {
 `var pp before loop = $pp` @q
 loop pp over 2 { `param pp in loop = $pp` @q }
 `var pp after loop = $pp` @q
-:results pop
+}

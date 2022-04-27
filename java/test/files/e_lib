@@ -3,9 +3,9 @@
 #
 :clear
 :separators off
-:quiet on
+:quiet on {
 :open 'test/files/library'
-:quiet pop
+}
 
 excel_date(d'2021/10/8')
 excel_date_1904(D'12/7/1941')
@@ -31,13 +31,13 @@ win_pct(662,174,2)
 
 mean_stddev([1, 2, 3, 4, 5, 6, 7, 8])
 
-:silencedirectives on
-:quotestrings off
+:silencedirectives on {
+  :quotestrings off {
 help_mort
 monthly(244000, 3.25, 30)
 PMT2(350000, 0.3, 180)
-:quotestrings pop
-:silencedirectives pop
+  }
+}
 
 s1 = eval stack
 isempty(s1)
@@ -85,11 +85,11 @@ from_excel_col('ZZ')
 from_excel_col('XFD')
 
 :echo 'Checking all columns from 1 - 16384 ...'
-:quiet on
+:quiet on {
 _tests = 0
 _mistakes = 0
 loop over 16384 { _tests++; if from_excel_col(to_excel_col(__)) != __ { _mistakes++ } }
-:quiet pop
+}
 :echo `Number of tests = $_tests, mistakes = $_mistakes`
 
 hash('test/data/Declaration.txt',,true)
@@ -107,9 +107,9 @@ cp_to_low_surr(cp) @x
 # Tangent numbers
 #
 :decimal 300
-:resultsonly on
+:resultsonly on {
 loop k over 0..20 `Tn($k) = ${Tn(k)}` @q
-:resultsonly pop
+}
 :default
 
 :separators pop
