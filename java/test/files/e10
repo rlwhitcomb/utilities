@@ -46,6 +46,18 @@ loop _j in 10.5 {_j}
 loop _k in 5.5, 1.5 {_k}
 loop _m in 0.5 .. -0.5, -0.08 {_m}
 
+:quiet on {
+define test(value) = {
+   if value < 0 "negative"
+   else if value == 0 "zero"
+   else if value == 1 "one"
+   else if value == 2 "two"
+   else "many"
+}
+}
+
+:resultsonly on { loop v over -2 .. 5 `$v -> ${test(v)}`@q }
+
 loop _p ∈ 10...40 { :dec _p; pi }
 :default
 

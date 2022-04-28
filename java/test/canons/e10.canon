@@ -150,6 +150,14 @@
 >_m -> -0.3
 >_m -> -0.38
 >_m -> -0.46
+>-2 -> negative
+>-1 -> negative
+>0 -> zero
+>1 -> one
+>2 -> two
+>3 -> many
+>4 -> many
+>5 -> many
 >Precision is now “10” digits.
 >pi -> 3.141592654
 >Precision is now “11” digits.
