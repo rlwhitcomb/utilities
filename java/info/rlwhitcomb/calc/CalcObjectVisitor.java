@@ -527,6 +527,9 @@
  *	    #273: Move math-related classes to "math" package.
  *	26-Apr-2022 (rlwhitcomb)
  *	    #290: Implement optional statement blocks for directives with mode options.
+ *	03-May-2022 (rlwhitcomb)
+ *	    #68: Reimplement "index" to work correctly with objects and lists, including
+ *	    indexes of objects, and negative indexes.
  */
 package info.rlwhitcomb.calc;
 
@@ -1177,6 +1180,11 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		nullCheck(value, ctx);
 
 	    return value == null ? "" : toStringValue(this, ctx, value, quote, separators);
+	}
+
+	public String toNonNullString(final ParserRuleContext ctx, final Object value) {
+	    nullCheck(value, ctx);
+	    return toStringValue(this, ctx, value, false, settings.separatorMode);
 	}
 
 	private double getDoubleValue(final ParserRuleContext ctx) {
@@ -3884,37 +3892,67 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitIndexExpr(CalcParser.IndexExprContext ctx) {
 	    CalcParser.Expr2Context e2ctx = ctx.expr2();
-	    String stringValue;
-	    String searchValue;
+	    CalcParser.ExprContext e0ctx;
+	    CalcParser.ExprContext e1ctx;
+	    CalcParser.ExprContext indexCtx = null;
+	    Object sourceObj;
+	    Object searchObj;
+	    int start = 0;
+	    int size;
 
 	    int ret = -1;
-	    if (e2ctx != null) {
-		stringValue = getStringValue(e2ctx.expr(0));
-		searchValue = getStringValue(e2ctx.expr(1));
 
-		ret = stringValue.indexOf(searchValue);
-		if (ret < 0)
-		    return null;
+	    if (e2ctx != null) {
+		e0ctx = e2ctx.expr(0);
+		e1ctx = e2ctx.expr(1);
 	    }
 	    else {
-		CalcParser.Expr3Context e3ctx   = ctx.expr3();
-		CalcParser.ExprContext indexCtx = e3ctx.expr(2);
-		stringValue = getStringValue(e3ctx.expr(0));
-		searchValue = getStringValue(e3ctx.expr(1));
-		int index   = indexCtx == null ? 0 : getIntValue(indexCtx);
+		CalcParser.Expr3Context e3ctx = ctx.expr3();
+		e0ctx    = e3ctx.expr(0);
+		e1ctx    = e3ctx.expr(1);
+		indexCtx = e3ctx.expr(2);
+	    }
+	    sourceObj = evaluateFunction(e0ctx);
+	    searchObj = evaluateFunction(e1ctx);
+	    if (indexCtx != null)
+		start = getIntValue(indexCtx);
 
-		if (index < 0) {
-		    int stringLen = stringValue.length();
-		    ret = stringValue.lastIndexOf(searchValue, stringLen + index);
-		    if (ret < 0)
-			return null;
-		    ret -= stringLen;
+	    if (sourceObj instanceof ObjectScope) {
+		// Return value is index of key in the map
+		ObjectScope obj = (ObjectScope) sourceObj;
+		String searchKey = toNonNullString(e1ctx, searchObj);
+		size = obj.size();
+
+		ret = obj.indexOf(searchKey, start, settings.ignoreNameCase);
+	    }
+	    else if (sourceObj instanceof ArrayScope) {
+		@SuppressWarnings("unchecked")
+		ArrayScope<Object> list = (ArrayScope<Object>) sourceObj;
+		size = list.size();
+
+		ret = indexOf(this, e0ctx, e1ctx, list, searchObj, start, settings.mc);
+	    }
+	    else {
+		String sourceString = toNonNullString(e0ctx, sourceObj);
+		String searchString = toNonNullString(e1ctx, searchObj);
+		size = sourceString.length();
+
+		if (start < 0) {
+		    ret = sourceString.lastIndexOf(searchString, size + start);
 		}
 		else {
-		    ret = stringValue.indexOf(searchValue, index);
-		    if (ret < 0)
-			return null;
+		    ret = sourceString.indexOf(searchString, start);
 		}
+	    }
+
+	    if (ret < 0)
+		return null;
+
+	    if (start < 0) {
+		// start was negative, so result should be negative too
+		// ret is 0-based index, so result will be  0,  1,  2
+		// with size = 3                           -3, -2, -1
+		ret -= size;
 	    }
 
 	    return BigInteger.valueOf((long) ret);

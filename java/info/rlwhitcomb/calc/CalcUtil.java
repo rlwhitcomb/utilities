@@ -131,6 +131,8 @@
  *	    #199: Rearrange parameter value testing, and variable detection inside interpolated strings.
  *	14-Apr-2022 (rlwhitcomb)
  *	    #273: Move math-related classes to "math" package.
+ *	29-Apr-2022 (rlwhitcomb)
+ *	    #68: Add "indexOf" method for arrays (complicated because of numeric equivalence messes).
  */
 package info.rlwhitcomb.calc;
 
@@ -1477,6 +1479,56 @@ public final class CalcUtil
 	    }
 
 	    return castValue;
+	}
+
+
+	/**
+	 * Search for an object inside an {@link ArrayScope}. This is not straightforward
+	 * due to (especially with numbers) differences in representation of the array objects
+	 * and the search object.
+	 * <p> We will do the compare using our {@code compareValues} method, which does a lot of
+	 * type conversion.
+	 *
+	 * @param visitor The visitor needed to do the conversions.
+	 * @param ctx1    Parse tree of the source array.
+	 * @param ctx2    And for the search value.
+	 * @param list    The array object containing the values to search.
+	 * @param search  Object to search for in the array.
+	 * @param start   The starting index for the search (zero-based); can be negative to search backwards.
+	 * @param mc      Rounding context in case we need to convert strings to numbers.
+	 * @return        A zero-based index into the array if the value is found, or {@code -1} if not.
+	 */
+	public static int indexOf(
+		CalcObjectVisitor visitor,
+		ParserRuleContext ctx1,
+		ParserRuleContext ctx2,
+		ArrayScope<Object> list,
+		Object search,
+		int start,
+		MathContext mc)
+	{
+	    List<Object> objects = list.list();
+	    int size = objects.size();
+	    int index;
+
+	    if (start < 0) {
+		// Search backwards, but with result always zero-based and positive
+		for (index = size + start; index >= 0; index--) {
+		    Object listObj = objects.get(index);
+		    if (compareValues(visitor, ctx1, ctx2, listObj, search, mc, false, true, false, false) == 0)
+			return index;
+		}
+	    }
+	    else {
+		// Search forwards
+		for (index = start; index < size; index++) {
+		    Object listObj = objects.get(index);
+		    if (compareValues(visitor, ctx1, ctx2, listObj, search, mc, false, true, false, false) == 0)
+			return index;
+		}
+	    }
+
+	    return -1;
 	}
 
 

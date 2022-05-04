@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2021 Roger L. Whitcomb.
+ * Copyright (c) 2021-2022 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -31,6 +31,8 @@
  *	    Use generic data types.
  *	28-Dec-2021 (rlwhitcomb)
  *	    #128: Add "insert" method for "pad".
+ *	02-May-2022 (rlwhitcomb)
+ *	    #68: Allow negative indexing (offset from end of array).
  */
 package info.rlwhitcomb.calc;
 
@@ -96,13 +98,13 @@ class ArrayScope<T> extends Scope
 	 * @throws      IndexOutOfBoundsException if the index is negative.
 	 */
 	public T getValue(final int index) {
-	    if (index < 0)
-		throw new Intl.IndexOutOfBoundsException("calc#indexNegative", index);
+	    int size = values.size();
+	    int pos = index < 0 ? index + size : index;
 
-	    if (values == null || index >= values.size())
-		return null;
+	    if (pos < 0)
+		throw new Intl.IndexOutOfBoundsException("calc#indexNegative", pos);
 
-	    return values.get(index);
+	    return pos < size ? values.get(pos) : null;
 	}
 
 	/**
@@ -113,15 +115,18 @@ class ArrayScope<T> extends Scope
 	 * @throws      IndexOutOfBoundsException if the index is negative.
 	 */
 	public void setValue(final int index, final T value) {
-	    if (index < 0)
-		throw new Intl.IndexOutOfBoundsException("calc#indexNegative", index);
+	    int size = values.size();
+	    int pos = index < 0 ? index + size : index;
+
+	    if (pos < 0)
+		throw new Intl.IndexOutOfBoundsException("calc#indexNegative", pos);
 
 	    // Fill up any intervening values up to the index
-	    for (int i = values.size(); i < index; i++) {
+	    for (int i = size; i < pos; i++) {
 		values.add(null);
 	    }
-	    if (index < values.size()) {
-		values.set(index, value);
+	    if (pos < size) {
+		values.set(pos, value);
 	    }
 	    else {
 		values.add(value);

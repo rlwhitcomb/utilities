@@ -319,6 +319,35 @@
 >index (target, 'junk') -> <null>
 >index (target, 'more junk', -1) -> <null>
 >index 1.2, '2' -> 2
+>st2 = 'abcdefg' -> "abcdefg"
+>index (st2, st2[j], -1) + length (st2) == j -> true
+>index (st2, st2[j], -1) + length (st2) == j -> true
+>index (st2, st2[j], -1) + length (st2) == j -> true
+>index (st2, st2[j], -1) + length (st2) == j -> true
+>index (st2, st2[j], -1) + length (st2) == j -> true
+>index (st2, st2[j], -1) + length (st2) == j -> true
+>index (st2, st2[j], -1) + length (st2) == j -> true
+>ar2 = [1, 2, 3, 4] -> [ 1, 2, 3, 4 ]
+>index (ar2, ar2[j], -1) + length (ar2) == j -> true
+>index (ar2, ar2[j], -1) + length (ar2) == j -> true
+>index (ar2, ar2[j], -1) + length (ar2) == j -> true
+>index (ar2, ar2[j], -1) + length (ar2) == j -> true
+>ob2 = {o1: 2, o2: 'off', o3: false} -> { o1: 2, o2: "off", o3: false }
+>index (ob2, j, -1) + length (ob2) -> 0
+>index (ob2, j, -1) + length (ob2) -> 1
+>index (ob2, j, -1) + length (ob2) -> 2
+>ob2['o2'] -> "off"
+>ob2[2] -> false
+>length (ob2) -> 3
+>ob2[__] -> 2
+>ob2[__] -> "off"
+>ob2[__] -> false
+>ob2[j] -> 2
+>ob2[j] -> "off"
+>ob2[j] -> false
+>index (ob2, key) -> 0
+>index (ob2, key) -> 1
+>index (ob2, key) -> 2
 >one = substr (target, 4) -> " is an \"index\" test."
 >two = substr (target, 11, 18) -> "\"index\""
 >three = substr (target, index (target, 'test', -1)) -> "test."

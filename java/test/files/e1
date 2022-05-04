@@ -302,6 +302,18 @@ three = index target, 'test', -1
 index(target, 'junk')
 index(target, 'more junk', -1)
 index 1.2, '2'
+st2 = 'abcdefg'
+loop j over 0..length(st2)-1 { index(st2, st2[j], -1) + length(st2) == j }
+ar2 = [ 1, 2, 3, 4 ]
+loop j over 0..length(ar2)-1 { index(ar2, ar2[j], -1) + length(ar2) == j }
+ob2 = { o1: 2, o2: 'off', o3: false }
+loop j over ob2 { index(ob2, j, -1) + length(ob2) }
+ob2['o2']
+ob2[2]
+length(ob2)
+loop 0...length(ob2)-1 { ob2[__] }
+loop j over ob2 { ob2[j] }
+loop key over ob2 { index(ob2, key) }
 
 # The "substr" operator
 one = substr(target, 4)

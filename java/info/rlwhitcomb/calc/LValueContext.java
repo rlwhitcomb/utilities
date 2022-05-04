@@ -90,9 +90,13 @@
  *	    #233: Implement calling "setValue" for SystemValue.
  *	13-Feb-2022 (rlwhitcomb)
  *	    #199: Redo the local / global variable handling.
+ *	02-May-2022 (rlwhitcomb)
+ *	    #68: Allow indexing by integer index value (using key list), including
+ *	    negative indexes (offset from length).
  */
- package info.rlwhitcomb.calc;
+package info.rlwhitcomb.calc;
 
+import java.math.MathContext;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -153,7 +157,7 @@ class LValueContext
 	    this.varCtx     = null;
 	    this.context    = obj;
 	    this.name       = null;
-	    this.index      = -1;
+	    this.index      = Integer.MIN_VALUE;
 	    this.ignoreCase = ignoreNameCase;
 	}
 
@@ -170,7 +174,7 @@ class LValueContext
 	    this.varCtx     = ctx;
 	    this.context    = obj;
 	    this.name       = nm;
-	    this.index      = -1;
+	    this.index      = Integer.MIN_VALUE;
 	    this.ignoreCase = p.ignoreCase;
 	}
 
@@ -203,7 +207,7 @@ class LValueContext
 	    this.varCtx     = ctx;
 	    this.context    = obj;
 	    this.name       = null;
-	    this.index      = -1;
+	    this.index      = Integer.MIN_VALUE;
 	    this.ignoreCase = p.ignoreCase;
 	}
 
@@ -216,7 +220,7 @@ class LValueContext
 		else
 		    return parentName + "." + name;
 	    }
-	    else if (index >= 0)
+	    else if (index != Integer.MIN_VALUE)
 		return parentName + "[" + index + "]";
 	    else
 		return "";
@@ -254,15 +258,22 @@ class LValueContext
 		}
 		result = map.getValue(name, ignoreCase);
 	    }
-	    else if (index >= 0) {
+	    else if (index != Integer.MIN_VALUE) {
 		if (contextObject instanceof ArrayScope) {
 		    ArrayScope list = (ArrayScope) contextObject;
 		    result = list.getValue(index);
+		}
+		else if (contextObject instanceof ObjectScope) {
+		    ObjectScope obj = (ObjectScope) contextObject;
+		    return obj.valueAt(index);
 		}
 		else if (contextObject instanceof String) {
 		    String str = (String) contextObject;
 		    if (index >= str.length()) {
 			return null;
+		    }
+		    else if (index < 0) {
+			index += str.length();
 		    }
 		    return str.substring(index, index + 1);
 		}
@@ -317,7 +328,7 @@ class LValueContext
 	 *
 	 * @param visitor The visitor (for function evaluation).
 	 * @param value	  The new value to assign to this context.
-	 * @return	  This value (for convenience in the assign operators.
+	 * @return	  This value (for convenience in the assign operators).
 	 */
 	@SuppressWarnings("unchecked")
 	public Object putContextObject(final CalcObjectVisitor visitor, final Object value) {
@@ -353,23 +364,35 @@ class LValueContext
 		    map.setValue(name, ignoreCase, value);
 		}
 	    }
-	    else if (index >= 0) {
+	    else if (index != Integer.MIN_VALUE) {
 		if (context instanceof ArrayScope) {
 		    ArrayScope list = (ArrayScope) context;
 		    list.setValue(index, value);
 		}
+		else if (context instanceof ObjectScope) {
+		    ObjectScope map = (ObjectScope) context;
+		    map.setValue(index, value);
+		}
 		else if (context instanceof String) {
-		    StringBuilder buf = new StringBuilder((String) context);
+		    String str = (String) context;
+		    StringBuilder buf = new StringBuilder(str);
 		    String newValue = CalcUtil.toStringValue(visitor, varCtx, value, false, false);
 		    int newLen = index + newValue.length();
+		    if (index < 0)
+			newLen += str.length();
+
 		    // Ensure the builder has enough length to do the replacement
 		    while (buf.length() < newLen) {
 			buf.append(' ');
 		    }
-		    buf.replace(index, newLen, newValue);
+		    buf.replace(index < 0 ? index + str.length() : index, newLen, newValue);
 		    this.context = buf.toString();
 		    // Have to update the parent as well with the new string
 		    parent.putContextObject(visitor, this.context);
+		}
+		else {
+		    // Should never happen
+		    throw new Intl.IllegalStateException("calc#badAssign", this);
 		}
 	    }
 	    else {
@@ -442,10 +465,19 @@ class LValueContext
 		// Okay, here the "arrValue" could be null, an array, a string, OR an object (map)
 		if (arrValue != null && arrValue instanceof ObjectScope) {
 		    // The "index" expression should be a string (meaning a member name)
+		    // but it could be a numeric index into the key set (return from "index")
 		    LValueContext objLValue = arrLValue.makeMapLValue(visitor, arrVarCtx, null);
 
-		    String memberName = visitor.getStringValue(arrVarCtx.expr());
-		    return objLValue.makeMapLValue(visitor, arrVarCtx, memberName);
+		    Object indexValue = visitor.evaluateFunction(arrVarCtx.expr());
+
+		    if (indexValue instanceof Number) {
+			int index = CalcUtil.toIntValue(visitor, indexValue, MathContext.DECIMAL128, arrVarCtx.expr());
+			return new LValueContext(objLValue, arrVarCtx, arrValue, index);
+		    }
+		    else {
+			String memberName = visitor.toNonNullString(arrVarCtx.expr(), indexValue);
+			return objLValue.makeMapLValue(visitor, arrVarCtx, memberName);
+		    }
 		}
 
 		// By now, the object must either be null, a list, a string, or a simple value (an error)
@@ -460,9 +492,6 @@ class LValueContext
 		else {
 		    index = visitor.getIntValue(expr);
 		}
-
-		if (index < 0)
-		    throw new CalcExprException(arrVarCtx, "%calc#indexNegative", index);
 
 		ArrayScope list = null;
 		if (arrValue == null) {

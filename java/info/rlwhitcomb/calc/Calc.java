@@ -269,6 +269,9 @@
  *	    #273: Move math-related classes to "math" package.
  *	18-Apr-2022 (rlwhitcomb)
  *	    #270: Update Version dialog to latest program info format.
+ *	03-May-2022 (rlwhitcomb)
+ *	    #68: Catch IndexOutOfBoundsException at the same place as other low-level
+ *	    exceptions thrown from helper methods.
  */
 package info.rlwhitcomb.calc;
 
@@ -1798,8 +1801,8 @@ public class Calc
 
 		returnValue = visitor.visit(tree);
 	    }
-	    catch (IllegalArgumentException | IllegalStateException ie) {
-		displayer.displayErrorMessage(Intl.formatString("calc#argError", Exceptions.toString(ie)));
+	    catch (IllegalArgumentException | IllegalStateException | IndexOutOfBoundsException ex) {
+		displayer.displayErrorMessage(Intl.formatString("calc#argError", Exceptions.toString(ex)));
 	    }
 	    catch (CalcException ce) {
 		displayer.displayErrorMessage(Intl.formatString("calc#argError", ce.getMessage()), ce.getLine());

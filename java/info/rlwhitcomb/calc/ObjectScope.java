@@ -48,15 +48,20 @@
  *	    #233: Add "immutable" flag to prevent additions to "settings" object.
  *	17-Feb-2022 (rlwhitcomb)
  *	    #252: Rename some methods to be more clear.
+ *	02-May-2022 (rlwhitcomb)
+ *	    #68: Add new methods for indexing.
  */
 package info.rlwhitcomb.calc;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiPredicate;
 
 import info.rlwhitcomb.directory.Match;
 import info.rlwhitcomb.util.ClassUtil;
@@ -329,7 +334,91 @@ class ObjectScope extends Scope
 		    return variables.remove(name);
 		}
 	    }
+
 	    return null;
+	}
+
+	/**
+	 * Return the index of the given key in this object/map. Given that the keys are maintained
+	 * in the order of declaration, the index value will be invariant no matter how many entries
+	 * are later added.
+	 *
+	 * @param searchKey  The key name to find in this object.
+	 * @param start      Starting index for the search (can be negative).
+	 * @param ignoreCase Whether to ignore case in matching the key.
+	 * @return           A zero-based index of this key in the object, if found, or {@code -1}
+	 *                   if the key is not a member of this object.
+	 */
+	public int indexOf(final String searchKey, final int start, final boolean ignoreCase) {
+	    List<String> keyList = keyList();
+	    int size = keyList.size();
+	    BiPredicate<String, String> pred = ignoreCase
+			? (t, u) -> { return t.equalsIgnoreCase(u); }
+			: (t, u) -> { return t.equals(u); };
+
+	    if (start < 0) {
+		for (int ix = size + start; ix >= 0; ix--) {
+		    String key = keyList.get(ix);
+		    if (pred.test(key, searchKey))
+			return ix;
+		}
+	    }
+	    else {
+		for (int ix = start; ix < size; ix++) {
+		    String key = keyList.get(ix);
+		    if (pred.test(key, searchKey))
+			return ix;
+		}
+	    }
+
+	    return -1;
+	}
+
+	/**
+	 * Return the value referenced by numeric index, where the index is that returned by {@link #indexOf}.
+	 *
+	 * @param index The zero-based index of the desired value to retrieve.
+	 * @return      The value at that index, or {@code null} if the index is &gt;= number of keys.
+	 * @throws      IndexOutOfBoundsException if the index is less than zero.
+	 */
+	public Object valueAt(final int index) {
+	    List<String> keyList = keyList();
+	    int pos = index < 0 ? index + keyList.size() : index;
+
+	    if (pos < 0)
+		throw new Intl.IndexOutOfBoundsException("calc#indexNegative", pos);
+
+	    if (pos >= keyList.size())
+		return null;
+
+	    return variables.get(keyList.get(pos));
+	}
+
+	/**
+	 * Set a new value at the indexed position in the map.
+	 *
+	 * @param index The zero-based index of the desired value to retrieve.
+	 * @param value New value to place at that index location.
+	 * @throws      IndexOutOfBoundsException if the index is less than zero.
+	 */
+	public void setValue(final int index, final Object value) {
+	    List<String> keyList = keyList();
+	    int size = keyList.size();
+	    int pos = index < 0 ? index + size : index;
+
+	    if (pos < 0)
+		throw new Intl.IndexOutOfBoundsException("calc#indexNegative", pos);
+
+	    // For index values past the current size, fill in the intervening values
+	    // with keys and null values
+	    while (size <= pos) {
+		String key = String.format("#%1$d", size);
+		keyList.add(size, key);
+		variables.put(key, null);
+		size++;
+	    }
+
+	    variables.put(keyList.get(pos), value);
 	}
 
 	/**
@@ -342,16 +431,21 @@ class ObjectScope extends Scope
 	}
 
 	/**
+	 * Access the complete set of variable names as a list (for iteration).
+	 *
+	 * @return The list of variable (key) names.
+	 */
+	public List<String> keyList() {
+	    return new ArrayList<>(variables.keySet());
+	}
+
+	/**
 	 * Access the complete set of variable names as a generic Object set.
 	 *
 	 * @return The key name set as Objects.
 	 */
 	public Set<Object> keyObjectSet() {
-	    Set<Object> set = new LinkedHashSet<>();
-	    for (String key : variables.keySet()) {
-		set.add(key);
-	    }
-	    return set;
+	    return new LinkedHashSet<>(variables.keySet());
 	}
 
 	/**

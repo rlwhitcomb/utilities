@@ -37,6 +37,8 @@
  *	    #199: Rename local parameter values to "_" prefix.
  *	14-Feb-2022 (rlwhitcomb)
  *	    #199: Get the "_" prefix from FunctionScope.
+ *	28-Apr-2022 (rlwhitcomb)
+ *	    #68: Tweak index out of bounds error.
  */
 package info.rlwhitcomb.calc;
 
@@ -139,7 +141,7 @@ class FunctionDeclaration
 	    }
 
 	    if (index < 0 || (!hasVarargs && index >= parameterNames.length))
-		throw new Intl.IndexOutOfBoundsException("calc#indexOutOfBounds", index);
+		throw new Intl.IndexOutOfBoundsException("calc#indexOutOfBounds", index, parameterNames.length - 1);
 
 	    if ((hasVarargs && index < parameterNames.length - 1) || (!hasVarargs && index < parameterNames.length))
 		return parameterNames[index];

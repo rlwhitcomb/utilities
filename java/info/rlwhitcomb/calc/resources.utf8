@@ -116,6 +116,8 @@
 #	    #199: Change messages for read-only variables.
 #	24-Mar-2022 (rlwhitcomb)
 #	    Fix the command listing in the help message.
+#	28-Apr-2022 (rlwhitcomb)
+#	    #68: Tweak indexOutOfBounds and indexNegative errors.
 #
 
 #
@@ -234,7 +236,7 @@ localVarNotAvail	= Local variable <y>%1$s<> is not available
 nonObjectValue		= Variable <y>%1$s<> already has a non-object value
 nonArrayValue		= Variable <y>%1$s<> already has a non-array value
 callNotAFunction	= Cannot make a function call on the non-function value <y>%1$s<>
-indexNegative		= Index value of <u>%1$d<> cannot be negative
+indexNegative		= Effective index value of <u>%1$d<> cannot be negative
 unknownVarCtx		= ERROR: unknown var context subclass: <y>%1$s<>
 badAssign		= Assignment to <y>%1$s<> without name or index
 tooManyForOneValue	= Too many actual values (%1$d) passed for only one parameter
@@ -244,12 +246,12 @@ noChangeValue		= Cannot change %1$s <y>%2$s%3$s<>
 #
 # From UnknownOpException
 #
-unknownOp	= Unknown operator <y>%1$s<>
+unknownOp		= Unknown operator <y>%1$s<>
 
 #
 # From ArrayScope
 #
-indexOutOfBounds	= Index value of <u>%1$d<> is out of bounds
+indexOutOfBounds	= Index value of <u>%1$d<> is out of bounds of <y>0..%2$d<>
 
 #
 # From FunctionDeclaration
