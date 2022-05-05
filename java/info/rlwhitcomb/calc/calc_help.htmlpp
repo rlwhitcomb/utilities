@@ -494,9 +494,12 @@ or
      be homogeneous. And, in fact, the values in an array can be objects as well as simple values. The keys in an object must be
      either identifiers (same rules as variable names), regular strings, or interpolated strings, but the values can be anything
      (even other objects, arrays, or just simple values).
-  <p>To reference values in arrays or objects the following syntax can be used:  <i>variable</i><code>[</code> <i>expr</i> <code>]</code>
-     where the expression must evaluate to an integer value (for arrays) or the name of a key (for objects). Members of an object
-     can also be referenced by <i>variable</i><code>.</code><i>member</i> (where <i>member</i> is the identifier or string referencing
+  <p>To reference values in arrays or objects, or the individual characters in a string, the following syntax can be used:
+     <i>variable</i><code>[</code> <i>expr</i> <code>]</code> where the expression must evaluate to an integer value (for any kind of value) or the name of a key (for objects).
+     Normally the index is in the range of 0 to the length of the object - 1. However, for convenience, negative indices indicate an
+     offset from the end of the list. For example, for an array of 4 values, such as <code>a = [ 1, 2, 3, 4 ]</code>, <code>a[0]</code>
+     or <code>a[-4]</code> both reference the value <code>1</code>, and <code>a[3]</code> and <code>a[-1]</code> reference the value <code>4</code>
+     Members of an object can also be referenced by <i>variable</i><code>.</code><i>member</i> (where <i>member</i> is the identifier or string referencing
      a key of one of the key/value pairs in the object).  All this is consistent with JavaScript, or JSON usage (with the slight
      enhancement that identifiers without quotes or interpolated strings can be used as keys here, while in pure JSON form only simple quoted
      strings are allowed as keys).
@@ -856,11 +859,14 @@ or
   <p>The <code>split</code> function takes one string argument, a second regular expression string, and an optional limit
      value that determines how many splits are returned. See the documentation for the Java <code>String.split</code> method
      for further details on how this parameter works.
-  <p>The arguments to <code>index</code> are the string to search, the search string, and the optional starting index. If the
-     starting index is given, and is negative, the search starts from the end of the string, and the return value will be
-     negative if the search string is found (an offset from the end of the string). Otherwise the search starts from the
-     beginning and returns a non-negative value. If the search string is not found, the function returns <code>null</code>.
-     In addition, the starting index value can also be null, which starts the search at the beginning of the string.
+  <p>The arguments to <code>index</code> are the string, object, or list to search, the value to search for, and the optional starting index. If the
+     starting index is given, and is negative, the search starts from the end of the object, and the return value will be
+     negative if the search value is found (an offset from the end of the string or object). Otherwise the search starts from the
+     beginning and returns a non-negative value. If the search value is not found, the function returns <code>null</code>.
+     In addition, the starting index value can also be null, which starts the search at the beginning of the object. When searching
+     an object, the search object is one of the object keys, while searching a list, the search object is matched against the any
+     of the list values. Since the keys of an object are preserved in the order they are declared, or added to the object, the starting
+     and returned indices are relative to this key list.
   <p>The arguments to <code>substr</code> are the value (converted to a string), and optional starting and ending indices
      for the extraction. If the start/end are negative, they refer to offsets from the end of the string (same as returned
      by <code>index</code>), otherwise they are zero-based indices from the beginning. If the ending value is given, this is
