@@ -237,7 +237,7 @@ ty\=6
 0b0011 ~^ 0b0101 @b
 0x3FF &~ 0xFF0 @X
 
-'abc' != "ABC" && 0 != 1
+'abc' != "ABC" && 0 <> 1
 
 false ^^ false
 false ^^ true

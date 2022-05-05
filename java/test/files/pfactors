@@ -2,6 +2,6 @@
 def prod={ product=1; loop f in facts { product *= f }; product }
 loop _i in 0 .. 100 {
    `prime factors of $_i = ${facts = pfactors _i}`
-   if prod != _i { `$_i failed!` }
+   if prod <> _i { `$_i failed!` }
 }
 }

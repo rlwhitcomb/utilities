@@ -371,6 +371,9 @@
  *	    #267: Add "Elvis" operator.
  *	26-Apr-2022 (rlwhitcomb)
  *	    #290: Add optional statement blocks to directives.
+ *	04-May-2022 (rlwhitcomb)
+ *	    #307: Cleanup.
+ *	    #308: Add "<>" as an alternative for "not equals".
  */
 
 grammar Calc;
@@ -445,16 +448,16 @@ timeThisStmt
    ;
 
 bracketBlock
-   : EOL? '{' EOL? stmt * '}' EOL?
+   : EOL? '{' ( EOL? stmt ) * '}' EOL?
    ;
 
 stmtBlock
-   : EOL? '{' EOL? stmtOrExpr * '}' EOL?
+   : EOL? '{' ( EOL? stmtOrExpr ) * '}' EOL?
    | EOL? stmtOrExpr EOL?
    ;
 
 caseBlock
-   : EOL? caseSelector ( ',' EOL ? caseSelector ) * ':' stmtBlock
+   : EOL? caseSelector ( ',' EOL? caseSelector ) * ':' stmtBlock
    ;
 
 emptyStmt
@@ -1118,6 +1121,13 @@ ADD_ASSIGN
        | ( '-=' | '\u2212=' | '\u2796=' )
        ;
 
+EQUAL_OP
+       : ( '===' | '\u2A76' | '\u2261' )
+       | ( '!==' | '\u2262' )
+       | ( '==' | '\u2A75' )
+       | ( '!=' | '<>' | '\u2260' )
+       ;
+
 SHIFT_ASSIGN
        : '>>>='
        | '>>='
@@ -1135,13 +1145,6 @@ COMPARE_OP
        | '<'
        | ( '>=' | '\u2265' )
        | '>'
-       ;
-
-EQUAL_OP
-       : ( '===' | '\u2A76' | '\u2261' )
-       | ( '!==' | '\u2262' )
-       | ( '==' | '\u2A75' )
-       | ( '!=' | '\u2260' )
        ;
 
 BIT_ASSIGN

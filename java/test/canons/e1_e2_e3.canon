@@ -255,7 +255,7 @@
 >~ 0b0110 @b -> 0b11111001
 >0b0011 ~^ 0b0101 @b -> 0b11111001
 >0x3FF &~ 0xFF0 @X -> 0XF
->'abc' != "ABC" && 0 != 1 -> true
+>'abc' != "ABC" && 0 <> 1 -> true
 >false ^^ false -> false
 >false ^^ true -> true
 >true ^^ false -> true

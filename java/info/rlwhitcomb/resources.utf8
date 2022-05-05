@@ -27,27 +27,29 @@
 #       23-Feb-2022 (rlwhitcomb)
 #           #254: Initial coding.
 #	    Add coloring.
+#	05-May-2022 (rlwhitcomb)
+#	    #308: Change end color tag.
 #
 
 #
 # From Version
 #
 version.help1	= ""
-version.help2	= <Cy>Prints version, license, and notice information.<>
+version.help2	= <Cy>Prints version, license, and notice information.<.>
 version.help3	= ""
-version.help4	= "     Available <Gr>options<> are:"
+version.help4	= "     Available <Gr>options<.> are:"
 version.help5	= ""
-version.help6	= \t  <Gr>-license<>\tPrint version + license information
-version.help7	= \t\tor <Gr>-lic<>, or <Gr>-l<>
-version.help8	= \t  <Gr>-notice<>\tPrint version + notice information
-version.help9	= \t\tor <Gr>-note<>, or <Gr>-n<>
+version.help6	= \t  <Gr>-license<.>\tPrint version + license information
+version.help7	= \t\tor <Gr>-lic<.>, or <Gr>-l<.>
+version.help8	= \t  <Gr>-notice<.>\tPrint version + notice information
+version.help9	= \t\tor <Gr>-note<.>, or <Gr>-n<.>
 version.help10	= ""
-version.help11	= \t  <Gr>-nocolors<>\tDisplay all without colors
-version.help12	= \t\tor <Gr>-nocolor<>, <Gr>-nocols<>, <Gr>-nocol<>, <Gr>-noc<>, or <Gr>-nc<>
-version.help13	= \t  <Gr>-colors<>\tDisplay information using colors <Yw!>(default)<>
-version.help14	= \t\tor <Gr>-color<>, <Gr>-cols<>, <Gr>-col<>, or <Gr>-c<>
+version.help11	= \t  <Gr>-nocolors<.>\tDisplay all without colors
+version.help12	= \t\tor <Gr>-nocolor<.>, <Gr>-nocols<.>, <Gr>-nocol<.>, <Gr>-noc<.>, or <Gr>-nc<.>
+version.help13	= \t  <Gr>-colors<.>\tDisplay information using colors <Yw!>(default)<.>
+version.help14	= \t\tor <Gr>-color<.>, <Gr>-cols<.>, <Gr>-col<.>, or <Gr>-c<.>
 version.help15	= ""
-version.help16	= \t  <Gr>-help<>\t\tDisplay this information
-version.help17	=\t\tor <Gr>-h<>, or <Gr>-?<>
+version.help16	= \t  <Gr>-help<.>\t\tDisplay this information
+version.help17	=\t\tor <Gr>-h<.>, or <Gr>-?<.>
 version.help18	= ""
 

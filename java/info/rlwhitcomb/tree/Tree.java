@@ -93,6 +93,8 @@
  *	    #274: Add "-depth" parameter.
  *	18-Apr-2022 (rlwhitcomb)
  *	    #270: Make "loadMainProgramInfo" automatic.
+ *	05-May-2022 (rlwhitcomb)
+ *	    #308: Change reset color tag.
  */
 package info.rlwhitcomb.tree;
 
@@ -522,12 +524,12 @@ public class Tree
 		    colored = true;
 		}
 		else if (ch == ',') {
-		    buf.append("<>");
+		    buf.append("<.>");
 		    colored = false;
 		}
 		buf.append(ch);
 	    }
-	    buf.append("<>");
+	    buf.append("<.>");
 	    return buf.toString();
 	}
 

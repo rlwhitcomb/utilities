@@ -46,6 +46,8 @@
 #	    #150: Update options for CSVTest. Fix help colors.
 #	01-Feb-2022 (rlwhitcomb)
 #	    #156: Properly quote value strings on output.
+#	05-May-2022 (rlwhitcomb)
+#	    #308: Change reset color tag.
 #
 
 #
@@ -92,13 +94,13 @@ test.help2			= <Bk!>Usage: <Gr>options<--> <Cy>file name(s)<-->
 test.help3			= ""
 test.help4			= Where the possible <Gr>options<--> are:
 test.help5			= \t<Gr>-8<-->   = use the UTF-8 character set to read and write files (default to system charset)
-test.help6			= \t<Gr>-q<Bk!>x<-->  = set the quote character to '<Bk!>x<>' (default is '<Bk!>"<>')
-test.help7			= \t<Gr>-Q<Bk!>xx<--> = set the quote character to a standard value ('<Bk!>single<>', '<Bk!>double<>', etc.)
-test.help8			= \t<Gr>-d<Bk!>x<-->  = set the column delimiter to '<Bk!>x<>' (default is '<Bk!>,<>')
-test.help9			= \t<Gr>-D<Bk!>xx<--> = set the column delimiter to a standard value ('<Bk!>comma<>', '<Bk!>space<>', etc.)
-test.help10			= \t<Gr>-r<Bk!>x<-->  = set the record separator to '<Bk!>x<>' (default is CR,LF)
-test.help11			= \t<Gr>-S<Bk!>xx<--> = set the record separator to a standard value ('<Bk!>newline<>', '<Bk!>semicolon<>', etc.)
-test.help12			= \t<Gr>-e<Bk!>x<-->  = set the escape charater to '<Bk!>x<>' (default is '<Bk!>\\<>')
+test.help6			= \t<Gr>-q<Bk!>x<-->  = set the quote character to '<Bk!>x<.>' (default is '<Bk!>"<.>')
+test.help7			= \t<Gr>-Q<Bk!>xx<--> = set the quote character to a standard value ('<Bk!>single<.>', '<Bk!>double<.>', etc.)
+test.help8			= \t<Gr>-d<Bk!>x<-->  = set the column delimiter to '<Bk!>x<.>' (default is '<Bk!>,<.>')
+test.help9			= \t<Gr>-D<Bk!>xx<--> = set the column delimiter to a standard value ('<Bk!>comma<.>', '<Bk!>space<.>', etc.)
+test.help10			= \t<Gr>-r<Bk!>x<-->  = set the record separator to '<Bk!>x<.>' (default is CR,LF)
+test.help11			= \t<Gr>-S<Bk!>xx<--> = set the record separator to a standard value ('<Bk!>newline<.>', '<Bk!>semicolon<.>', etc.)
+test.help12			= \t<Gr>-e<Bk!>x<-->  = set the escape charater to '<Bk!>x<.>' (default is '<Bk!>\\<.>')
 test.help13			= \t<Gr>-a<-->   = always delimit strings (default is not)
 test.help14			= \t<Gr>-u<-->   = preserve quotes (default is not)
 test.help15			= \t<Gr>-w<-->   = preserve whitespace in unquoted fields (default is not)

@@ -137,6 +137,8 @@
 #	18-Apr-2022 (rlwhitcomb)
 #	    #270: New texts for program info.
 #	    Redo some of the "environ" information.
+#	05-May-2022 (rlwhitcomb)
+#	    #308: Change the reset color tag.
 #
 
 #
@@ -185,9 +187,9 @@ env.javaVersionModel	= %1$s (%2$d-bit)
 env.implVersion		= Implementation version %1$s
 env.mainClass		= Main class: %1$s
 env.processID		= Process ID: %1$s
-env.productInfo		= "<Bl*!>%1$s%2$s<>"
-env.versionInfo		= "<Gr>%1$s%2$s<>"
-env.otherInfo		= "<Bk!>%1$s%2$s<>"
+env.productInfo		= "<Bl*!>%1$s%2$s<.>"
+env.versionInfo		= "<Gr>%1$s%2$s<.>"
+env.otherInfo		= "<Bk!>%1$s%2$s<.>"
 env.timeThis		= Elapsed time %1$8.6f secs.
 env.timeThisNamed	= Elapsed time of "%1$s" was %2$8.6f secs.
 env.timeThisError	= Caught exception during timing: %1$s
@@ -230,22 +232,22 @@ numeric.badNumberSymbol		= Unable to interpret 0x%1$06X ('%2$s')as a number symb
 #
 math.tooManyPiDigits		= The PI digit calculation is only good for about 12,500 digits!
 math.piDigitMismatch		= Calculated digit length is %1$,d, but requested number of digits was %2$,d!
-math.wholeInteger		= The value <y>%1$,g<> is not an integer number.
-math.primeTooBig		= The value <y>%1$,d<> is too big for the prime number calculations.
+math.wholeInteger		= The value <y>%1$,g<.> is not an integer number.
+math.primeTooBig		= The value <y>%1$,d<.> is too big for the prime number calculations.
 math.sqrtNegative		= Square root of a negative number is not real.
 
 #
 # From BigFraction.java
 #
 fraction.noZeroDenominator	= Fractions cannot have zero denominators.
-fraction.unsupportedFormat	= The value <y>%1$s<> cannot be converted to a fraction.
+fraction.unsupportedFormat	= The value <y>%1$s<.> cannot be converted to a fraction.
 fraction.divideByZero		= Divide by zero.
-fraction.unknownFracChar	= Unsupported fraction character <y>%1$s<>.
+fraction.unknownFracChar	= Unsupported fraction character <y>%1$s<.>.
 
 #
 # From ComplexNumber.java
 #
-complex.notRecognized	= Unable to convert <y>%1$s<> to complex number.
+complex.notRecognized	= Unable to convert <y>%1$s<.> to complex number.
 complex.noEmptyListMap	= Unable to create a complex number from an empty list or map.
 complex.tooManyValues	= Complex number only needs one or two values to define.
 

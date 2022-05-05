@@ -66,6 +66,8 @@
  *	#111: Fix the uncolored case in "color(...)".
  *   19-Jan-2022 (rlwhitcomb)
  *	#210: Clear color stack when RESET code is hit.
+ *   05-May-2022 (rlwhitcomb)
+ *	#308: Because of "<>" in Calc being a new operator, change RESET to "<.>"
  */
 package info.rlwhitcomb.util;
 
@@ -268,9 +270,11 @@ public final class ConsoleColor
 		}
 		else {
 		    String tag = input.subSequence(i + 1, endPos).toString();
+		    Code code = Code.fromTag(tag);
 		    String codeStr;
-		    if (tag.isEmpty()) {
-			// Give the map a first chance to set a value for the empty tag
+
+		    if (code == Code.RESET) {
+			// Give the map a first chance to set a value for the RESET tag
 			codeStr = sub(map, tag, false);
 			// Otherwise pop the stack if anything is pushed
 			if (codeStr == null) {
@@ -297,6 +301,7 @@ public final class ConsoleColor
 			    currentStr = codeStr;
 			}
 		    }
+
 		    // Unknown tags should be left alone (for Calc use!)
 		    if (codeStr == null) {
 			buf.append(ch);
@@ -305,7 +310,7 @@ public final class ConsoleColor
 			if (colored) {
 			    buf.append(codeStr);
 			}
-			if (codeStr.equals(Code.RESET.escCode())) {
+			if (code == Code.END) {
 			    colorStack.clear();
 			}
 			i = endPos;
@@ -327,7 +332,7 @@ public final class ConsoleColor
     public enum Code
     {
 	/** End string: reset to default color. */
-	RESET(ConsoleColor.RESET, ""),
+	RESET(ConsoleColor.RESET, "."),
 
 	/**
 	 * Since {@link #RESET} is used in {@link ConsoleColor#color} to pop the color

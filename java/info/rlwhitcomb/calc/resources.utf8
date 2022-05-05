@@ -118,6 +118,8 @@
 #	    Fix the command listing in the help message.
 #	28-Apr-2022 (rlwhitcomb)
 #	    #68: Tweak indexOutOfBounds and indexNegative errors.
+#	05-May-2022 (rlwhitcomb)
+#	    #308: Change reset color tag.
 #
 
 #
@@ -128,7 +130,7 @@
 #	<y> is EXPR_COLOR or left quote
 #       <e> is ERROR_COLOR
 #       <r> is RESET
-#       <>  resets to previous color or right quote
+#       <.> resets to previous color or right quote
 #
 
 #
@@ -142,116 +144,116 @@ message		= <a>%1$s<r>
 errorLine	= <e>%1$s<r> at line %2$d.
 error		= <e>%1$s<r>
 errorPeriod	= <e>%1$s.<r>
-expectNotOption	= <e>Expecting <y>%1$s<> value, not another option.<r>
-expectValue	= <e>Expecting <y>%1$s<> value.<r>
-noOptionValue	= <e>Value for <y>%1$s<> option was not given.<r>
-unknownOption	= Unknown option <u>%1$s<>; ignoring.
-inOutError	= <e>I/O Error: %1$s<>
+expectNotOption	= <e>Expecting <y>%1$s<.> value, not another option.<r>
+expectValue	= <e>Expecting <y>%1$s<.> value.<r>
+noOptionValue	= <e>Value for <y>%1$s<.> option was not given.<r>
+unknownOption	= Unknown option <u>%1$s<.>; ignoring.
+inOutError	= <e>I/O Error: %1$s<.>
 argError	= Error: %1$s
-charsetError	= <e>Problem with character set <y>%1$s<>: %2$s<r>
-declError	= <e>Improper syntax for variable declaration: <y>%1$s<><r>
+charsetError	= <e>Problem with character set <y>%1$s<.>: %2$s<r>
+declError	= <e>Improper syntax for variable declaration: <y>%1$s<.><r>
 timing		= Parse time %1$11.9f secs. Execution time %2$11.9f secs. Total elapsed time %3$11.9f seconds.
 syntaxError	= Syntax error at position %1$d: %2$s
-errorNoAlt	= Syntax error at position %1$d: no viable alternative at input <y>%2$s<>
+errorNoAlt	= Syntax error at position %1$d: no viable alternative at input <y>%2$s<.>
 
-libVersionMismatch	= Library <y>%1$s<> is not compatible with the current program version.
+libVersionMismatch	= Library <y>%1$s<.> is not compatible with the current program version.
 libVersionDescription	= //** The versions above must conform to the latest values in "version.properties" and "build.properties"
 
 #
 # From CalcObjectVisitor
 #
-precUnlimited	= Precision is now <u>UNLIMITED<>.
-precOneDigit	= Precision is now <u>one<> digit.
-precDigits	= Precision is now <u>%1$d<> digits.
-trigMode	= Trig mode is now <u>%1$s<>.
-unitsBinary	= Units in <u>binary<>.
-unitsTen	= Units in <u>SI (base ten)<> form.
-unitsMixed	= Units in <u>mixed<> form.
+precUnlimited	= Precision is now <u>UNLIMITED<.>.
+precOneDigit	= Precision is now <u>one<.> digit.
+precDigits	= Precision is now <u>%1$d<.> digits.
+trigMode	= Trig mode is now <u>%1$s<.>.
+unitsBinary	= Units in <u>binary<.>.
+unitsTen	= Units in <u>SI (base ten)<.> form.
+unitsMixed	= Units in <u>mixed<.> form.
 varsAllCleared	= All variables cleared.
 varOneVariable	= "Variable "
 varVariables	= "Variables "
 varCleared	= %1$s cleared.
 varAnd		= "and "
-timingMode	= Timing mode set to <u>%1$s<>.
-debugMode	= Debug mode set to <u>%1$s<>.
-rationalMode	= Calculation mode set to <u>%1$s<>.
-separatorMode	= Separator display set to <u>%1$s<>.
-ignoreCaseMode  = Ignoring case is now <u>%1$s<>.
-quoteStringsMode= Quoting result strings is now <u>%1$s<>.
-definingFunc	= <r>Defining function <y>%1$s<><r> = <v>%2$s<r>
-definingConst	= <r>Defining constant <y>%1$s<><r> = <v>%2$s<r>
+timingMode	= Timing mode set to <u>%1$s<.>.
+debugMode	= Debug mode set to <u>%1$s<.>.
+rationalMode	= Calculation mode set to <u>%1$s<.>.
+separatorMode	= Separator display set to <u>%1$s<.>.
+ignoreCaseMode  = Ignoring case is now <u>%1$s<.>.
+quoteStringsMode= Quoting result strings is now <u>%1$s<.>.
+definingFunc	= <r>Defining function <y>%1$s<.><r> = <v>%2$s<r>
+definingConst	= <r>Defining constant <y>%1$s<.><r> = <v>%2$s<r>
 variables	= Variables
 varUnder1	= ---------
 varUnder2	= =========
 predefined	= Predefined
 preUnder1	= ----------
 preUnder2	= ==========
-predefVariable	= <a>Varies, currently:<> %1$s
+predefVariable	= <a>Varies, currently:<.> %1$s
 # These two should (probably) not be translated
 rational	= RATIONAL
 decimal		= DECIMAL(%1$s)
 unlimited	= UNLIMITED
 
-precNotInteger		= Decimal precision of <u>%1$s<> must be a 32-bit integer value
-charOutOfRange		= Integer value of <u>0x%1$08X<> out of range of Unicode characters (0..0x10FFFF)
+precNotInteger		= Decimal precision of <u>%1$s<.> must be a 32-bit integer value
+charOutOfRange		= Integer value of <u>0x%1$08X<.> out of range of Unicode characters (0..0x10FFFF)
 ioError			= I/O Error: %1$s
-noConvertInteger	= Unable to convert value of <y>%1$s<> to an integer
-noConvertObjArr		= Cannot convert object or array to <y>%1$c<> format
-noScaleFormat		= Format with scale (<u>.%1$d<>) value not supported in <y>%2$c<> format
-noDupLocalVar		= Duplicate local variable name <y>%1$s<> not allowed
-localVarNoAssign	= The value of the local variable <y>%1$s<> cannot be changed directly
-globalArgNoAssign	= The value of the global argument <y>%1$s<> cannot be changed directly
-mustBeObject		= Source variable type <y>%1$s<> must be an object
-mustBeArray		= Source variable type <y>%1$s<> must be an array
-undefined		= Variable <y>%1$s<> is not defined
+noConvertInteger	= Unable to convert value of <y>%1$s<.> to an integer
+noConvertObjArr		= Cannot convert object or array to <y>%1$c<.> format
+noScaleFormat		= Format with scale (<u>.%1$d<.>) value not supported in <y>%2$c<.> format
+noDupLocalVar		= Duplicate local variable name <y>%1$s<.> not allowed
+localVarNoAssign	= The value of the local variable <y>%1$s<.> cannot be changed directly
+globalArgNoAssign	= The value of the global argument <y>%1$s<.> cannot be changed directly
+mustBeObject		= Source variable type <y>%1$s<.> must be an object
+mustBeArray		= Source variable type <y>%1$s<.> must be an array
+undefined		= Variable <y>%1$s<.> is not defined
 infLoopStepZero		= Infinite loop: step value is zero
-invalidConstruct	= Invalid <y>$<> construct
-invalidConst2		= Invalid <y>${...}<> construct
-modeError		= Mode option <y>%1$s<> not recognized
-replaceOptionError	= Replace option <y>%1$s<> not recognized
-illegalFormat		= Unrecognized format <y>%1$s<>
-targetWrongType		= Target of a <y>%1$s<> must be an array or string
+invalidConstruct	= Invalid <y>$<.> construct
+invalidConst2		= Invalid <y>${...}<.> construct
+modeError		= Mode option <y>%1$s<.> not recognized
+replaceOptionError	= Replace option <y>%1$s<.> not recognized
+illegalFormat		= Unrecognized format <y>%1$s<.>
+targetWrongType		= Target of a <y>%1$s<.> must be an array or string
 oneCharInt		= %1$s value for a string must be one character or an integer \u2264 65535
-undefinedFunction	= Cannot call undefined function <y>%1$s<>
+undefinedFunction	= Cannot call undefined function <y>%1$s<.>
 
 intro.help1	= "  Enter an arithmetic expression to evaluate, or multiple expressions"
-intro.help2	= "  separated by <u>;<>, followed by <a>Return<> or <a>Enter<>."
-intro.help3	= "  Use <u>:help<> or <u>:?<> to display the help page in your browser."
-intro.help4	= "  Enter <u>:quit<> or <u>:exit<> to end."
-intro.help5	= "  Enter <u>:gui<> to enter GUI mode."
+intro.help2	= "  separated by <u>;<.>, followed by <a>Return<.> or <a>Enter<.>."
+intro.help3	= "  Use <u>:help<.> or <u>:?<.> to display the help page in your browser."
+intro.help4	= "  Enter <u>:quit<.> or <u>:exit<.> to end."
+intro.help5	= "  Enter <u>:gui<.> to enter GUI mode."
 intro.help6	= ""
 
 #
 # From CalcUtil
 #
-valueNotNull		= Value of <y>%1$s<> must not be null
-noConvertDecimal	= Unable to convert value of <y>%1$s<> type to decimal number
-noConvertFraction	= Unable to convert value of <y>%1$s<> type to fraction
-unknownType		= Unknown value type: <y>%1$s<>
+valueNotNull		= Value of <y>%1$s<.> must not be null
+noConvertDecimal	= Unable to convert value of <y>%1$s<.> type to decimal number
+noConvertFraction	= Unable to convert value of <y>%1$s<.> type to fraction
+unknownType		= Unknown value type: <y>%1$s<.>
 
 #
 # From LValueContext
 #
-localVarNotAvail	= Local variable <y>%1$s<> is not available
-nonObjectValue		= Variable <y>%1$s<> already has a non-object value
-nonArrayValue		= Variable <y>%1$s<> already has a non-array value
-callNotAFunction	= Cannot make a function call on the non-function value <y>%1$s<>
-indexNegative		= Effective index value of <u>%1$d<> cannot be negative
-unknownVarCtx		= ERROR: unknown var context subclass: <y>%1$s<>
-badAssign		= Assignment to <y>%1$s<> without name or index
+localVarNotAvail	= Local variable <y>%1$s<.> is not available
+nonObjectValue		= Variable <y>%1$s<.> already has a non-object value
+nonArrayValue		= Variable <y>%1$s<.> already has a non-array value
+callNotAFunction	= Cannot make a function call on the non-function value <y>%1$s<.>
+indexNegative		= Effective index value of <u>%1$d<.> cannot be negative
+unknownVarCtx		= ERROR: unknown var context subclass: <y>%1$s<.>
+badAssign		= Assignment to <y>%1$s<.> without name or index
 tooManyForOneValue	= Too many actual values (%1$d) passed for only one parameter
 tooManyForValues	= Too many actual values (%1$d) passed for only %2$d parameters
-noChangeValue		= Cannot change %1$s <y>%2$s%3$s<>
+noChangeValue		= Cannot change %1$s <y>%2$s%3$s<.>
 
 #
 # From UnknownOpException
 #
-unknownOp		= Unknown operator <y>%1$s<>
+unknownOp		= Unknown operator <y>%1$s<.>
 
 #
 # From ArrayScope
 #
-indexOutOfBounds	= Index value of <u>%1$d<> is out of bounds of <y>0..%2$d<>
+indexOutOfBounds	= Index value of <u>%1$d<.> is out of bounds of <y>0..%2$d<.>
 
 #
 # From FunctionDeclaration
@@ -261,5 +263,5 @@ varargsLast		= Variable argument declaration must be last in the parameter list
 #
 # From ObjectScope
 #
-immutableObject		= Cannot add the <y>%1$s<> member to this object
+immutableObject		= Cannot add the <y>%1$s<.> member to this object
 

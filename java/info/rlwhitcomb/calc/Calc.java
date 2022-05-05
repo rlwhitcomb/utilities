@@ -272,6 +272,8 @@
  *	03-May-2022 (rlwhitcomb)
  *	    #68: Catch IndexOutOfBoundsException at the same place as other low-level
  *	    exceptions thrown from helper methods.
+ *	05-May-2022 (rlwhitcomb)
+ *	    #308: Update the reset color tag.
  */
 package info.rlwhitcomb.calc;
 
@@ -603,7 +605,7 @@ public class Calc
 		colorMap.put("u", GREEN_BOLD);
 		colorMap.put("e", RED_BOLD);
 		colorMap.put("r", RESET);
-		colorMap.put("", null);
+		colorMap.put(".", null);
 	    }
 	    colorMap.put("x", (darkBackgrounds ? YELLOW_BRIGHT : BLUE_BOLD));
 	    colorMap.put("y", (darkBackgrounds ? YELLOW_BRIGHT : BLUE_BOLD));
@@ -618,7 +620,7 @@ public class Calc
 		quoteMap.put("u", "\u201C");
 		quoteMap.put("e", "");
 		quoteMap.put("r", "");
-		quoteMap.put("",  "\u201D");
+		quoteMap.put(".", "\u201D");
 	    }
 
 	    colors = useColors;
@@ -1239,10 +1241,10 @@ public class Calc
 			if (count > 2) {
 			    // embedded quotes, replace only the last one with end tag
 			    ix = message.lastIndexOf('\'');
-			    message = message.substring(0, ix) + "<>" + message.substring(ix + 1);
+			    message = message.substring(0, ix) + "<.>" + message.substring(ix + 1);
 			}
 			else {
-			    message = message.replace("'", "<>");
+			    message = message.replace("'", "<.>");
 			}
 		    }
 		    throw new CalcException(Intl.formatString("calc#syntaxError", charPositionInLine, message), line);
@@ -2285,7 +2287,7 @@ public class Calc
 
 			    StringBuilder buf = new StringBuilder();
 			    String line;
-			    String prompt = ConsoleColor.color("<Bk!>> <>");
+			    String prompt = ConsoleColor.color("<Bk!>> <.>");
 			replLoop:
 			    while ((line = console.readLine(prompt)) != null) {
 				boolean scriptInput = false;

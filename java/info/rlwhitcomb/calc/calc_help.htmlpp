@@ -597,7 +597,7 @@ or
       <tr><td><code>@w</code></td><td>Convert the (integer) value to words<br>as in <code style="color:blue;">235 @w</code><code style="color:gray;"> &#x21E8; </code><code style="color:green;">two hundred thirty-five</code></td></tr>
       <tr><td><code>@</code>[[<code>+</code>|<code>-</code>]<i>nn</i>][<code>,</code>|<code>_</code>]<code>%</code></td><td>Format as a percentage, with optional separators, and<br>optionally rounding to <i>nn</i> digits<br>as in <code style="color:blue;">10.08745 @2,%</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">1,008.75%</code></td></tr>
       <tr><td><code>@</code>[[<code>+</code>|<code>-</code>]<i>nn</i>][<code>,</code>|<code>_</code>]<code>$</code></td><td>Format as a currency value with the locale-specific currency symbol,<br>optionally setting separators and number of fraction digits<br>as in <code style="color:blue;">1500 @3,$</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">$1,500.000</code></td></tr>
-      <tr><td><code>@</code>[[<code>+</code>|<code>-</code>]<i>nn</i>]<code>s</code></td><td>Left/right/center justify the string value inside the <i>nn</i> width<br>as in <code style="color:blue;">'abc' @+10s</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">"&nbsp;&nbsp;&nbsp;&nbsp;abc&nbsp;&nbsp;&nbsp;"</code>,<br><code style="color:blue;">'abc' @-10s</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;abc"</code>,<br><code style="color:blue;">'abc' @10s</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">"abc&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"</code></td></tr>
+      <tr><td><code>@</code>[[<code>+</code>|<code>-</code>]<i>nn</i>]<code>s</code></td><td>Left/right/center justify the string value inside the <i>nn</i> width<br>as in <code style="color:blue;">'abc' @+10s</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">"&nbsp;&nbsp;&nbsp;&nbsp;abc&nbsp;&nbsp;&nbsp;"</code>,<br><code style="color:blue;">'abc' @-10s</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;abc"</code>,<br><code style="color:blue;">'abc' @10s</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">"abc&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"</code><br>for objects and lists, simply convert to a string<br><i>nn</i> is ignored, but use <code>-</code> to not add extra space, as in<br><code style="color:blue;">[ 1, 2, 3 ] @-s</code><code style="color:grey;"> &#x21e8; </code><code style="color:green;">"[1,2,3]"</code></td></tr>
     </tbody>
     </table>
   </div>
@@ -767,7 +767,7 @@ or
         <i>expr</i>&nbsp;<code> === </code>or<code> &#x2A76; </code>or<code> &#x2261; </code>&nbsp;<i>expr</i><br>
         <i>expr</i>&nbsp;<code> !== </code>or<code> &#x2262; </code>&nbsp;<i>expr</i><br>
         <i>expr</i>&nbsp;<code> == </code>or<code> &#x2A75; </code>&nbsp;<i>expr</i><br>
-        <i>expr</i>&nbsp;<code> != </code>or<code> &#x2260; </code>&nbsp;<i>expr</i></td>
+        <i>expr</i>&nbsp;<code> != </code>or<code> &lt;&gt; </code>or<code> &#x2260; </code>&nbsp;<i>expr</i></td>
         <td>strict equality<br>strict inequality<br>equality<br>inequality</td><td>left to right</td></tr>
     <tr><td>12</td><td>
         <i>expr</i>&nbsp;<code> &amp; </code>&nbsp;<i>expr</i><br>

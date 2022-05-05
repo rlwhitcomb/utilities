@@ -133,6 +133,8 @@
  *	    #273: Move math-related classes to "math" package.
  *	29-Apr-2022 (rlwhitcomb)
  *	    #68: Add "indexOf" method for arrays (complicated because of numeric equivalence messes).
+ *	04-May-2022 (rlwhitcomb)
+ *	    #300: Extra parameter for fewer spaces in object/list string representations.
  */
 package info.rlwhitcomb.calc;
 
@@ -677,7 +679,7 @@ public final class CalcUtil
 	 * @param quotes	Whether or not to quote strings on output.
 	 * @param separators	Whether or not to use thousands separators when converting numeric values.
 	 * @return		The converted string value.
-	 * @see #toStringValue(CalcObjectVisitor, ParserRuleContext, Object, boolean, boolean, boolean, String, String)
+	 * @see #toStringValue(CalcObjectVisitor, ParserRuleContext, Object, boolean, boolean, boolean, boolean, String, String)
 	 */
 	public static String toStringValue(
 		final CalcObjectVisitor visitor,
@@ -685,7 +687,7 @@ public final class CalcUtil
 		final Object result,
 		final boolean quotes,
 		final boolean separators) {
-	    return toStringValue(visitor, ctx, result, quotes, false, separators, "", null);
+	    return toStringValue(visitor, ctx, result, quotes, false, true, separators, "", null);
 	}
 
 	/**
@@ -698,7 +700,7 @@ public final class CalcUtil
 	 * @param pretty	Whether or not to "pretty" print the contents of an object (map) or list (array).
 	 * @param separators	Whether or not to use thousands separators when converting numeric values.
 	 * @return		The converted string value.
-	 * @see #toStringValue(CalcObjectVisitor, ParserRuleContext, Object, boolean, boolean, boolean, String, String)
+	 * @see #toStringValue(CalcObjectVisitor, ParserRuleContext, Object, boolean, boolean, boolean, boolean, String, String)
 	 */
 	public static String toStringValue(
 		final CalcObjectVisitor visitor,
@@ -707,7 +709,7 @@ public final class CalcUtil
 		final boolean quotes,
 		final boolean pretty,
 		final boolean separators) {
-	    return toStringValue(visitor, ctx, result, quotes, pretty, separators, "", null);
+	    return toStringValue(visitor, ctx, result, quotes, pretty, true, separators, "", null);
 	}
 
 	/**
@@ -719,6 +721,7 @@ public final class CalcUtil
 	 * @param quotes	Whether or not the resulting string should be quoted (double quotes) if
 	 *			the input is an actual string object.
 	 * @param pretty	Whether or not to "pretty" print the contents of an object (map) or list (array).
+	 * @param extraSpace	Whether to add extra space between values for objects and lists.
 	 * @param separators	Should thousands separators be used for numeric values?
 	 * @param indent	The recursive indentation for pretty printing.
 	 * @param increment	The increment for each level of indentation.
@@ -731,6 +734,7 @@ public final class CalcUtil
 		final Object obj,
 		final boolean quotes,
 		final boolean pretty,
+		final boolean extraSpace,
 		final boolean separators,
 		final String indent,
 		final String increment)
@@ -758,15 +762,15 @@ public final class CalcUtil
 	    }
 	    else if (result instanceof BigInteger) {
 		if (separators)
-		    return String.format("%1$,d", (BigInteger)result);
+		    return String.format("%1$,d", (BigInteger) result);
 		else
 		    return result.toString();
 	    }
 	    else if (result instanceof ObjectScope) {
-		return toStringValue(visitor, ctx, ((ObjectScope) result).map(), quotes, pretty, separators, indent, increment);
+		return toStringValue(visitor, ctx, ((ObjectScope) result).map(), quotes, pretty, extraSpace, separators, indent, increment);
 	    }
 	    else if (result instanceof ArrayScope) {
-		return toStringValue(visitor, ctx, ((ArrayScope) result).list(), quotes, pretty, separators, indent, increment);
+		return toStringValue(visitor, ctx, ((ArrayScope) result).list(), quotes, pretty, extraSpace, separators, indent, increment);
 	    }
 
 	    // Any other type, just get the string representation
@@ -781,6 +785,7 @@ public final class CalcUtil
 	 * @param map		The input object (map) to be converted.
 	 * @param quotes	Whether or not actual string objects should be double-quoted in the result.
 	 * @param pretty	Whether or not to "pretty" print the contents of an object (map) or list (array).
+	 * @param extraSpace	Whether to add extra space between values.
 	 * @param separators	Should thousands separators be used for numeric values?
 	 * @param indent	The recursive indentation for pretty printing.
 	 * @param increment	The increment for each level of indentation (<code>null</code> = {@link #DEFAULT_INCREMENT}).
@@ -792,6 +797,7 @@ public final class CalcUtil
 		final Map<String, Object> map,
 		final boolean quotes,
 		final boolean pretty,
+		final boolean extraSpace,
 		final boolean separators,
 		final String indent,
 		final String increment)
@@ -800,20 +806,20 @@ public final class CalcUtil
 	    StringBuilder buf = new StringBuilder();
 	    if (map.size() > 0) {
 		boolean comma = false;
-		buf.append(pretty ? "{\n" : "{ ");
+		buf.append(pretty ? "{\n" : extraSpace ? "{ " : "{");
 		for (Map.Entry<String, Object> entry : map.entrySet()) {
 		    if (comma)
-			buf.append(pretty ? ",\n" : ", ");
+			buf.append(pretty ? ",\n" : extraSpace ? ", " : ",");
 		    else
 			comma = true;
 		    if (pretty) buf.append(myIndent);
-		    buf.append(entry.getKey()).append(": ");
-		    buf.append(toStringValue(visitor, ctx, entry.getValue(), quotes, pretty, separators, myIndent, increment));
+		    buf.append(entry.getKey()).append(extraSpace ? ": " : ":");
+		    buf.append(toStringValue(visitor, ctx, entry.getValue(), quotes, pretty, extraSpace, separators, myIndent, increment));
 		}
-		buf.append(pretty ? "\n" + indent + "}" : " }");
+		buf.append(pretty ? "\n" + indent + "}" : extraSpace ? " }" : "}");
 	    }
 	    else {
-		buf.append("{ }");
+		buf.append(extraSpace ? "{ }" : "{}");
 	    }
 	    return buf.toString();
 	}
@@ -826,6 +832,7 @@ public final class CalcUtil
 	 * @param list		The input list (array) to be converted.
 	 * @param quotes	Whether or not actual string objects should be double-quoted in the result.
 	 * @param pretty	Whether or not to "pretty" print the contents of an object (map) or list (array).
+	 * @param extraSpace	Whether to add extra space between values.
 	 * @param separators	Should thousands separators be used for numeric values?
 	 * @param indent	The recursive indentation for pretty printing.
 	 * @param increment	The increment for each level of indentation.
@@ -837,6 +844,7 @@ public final class CalcUtil
 		final List<Object> list,
 		final boolean quotes,
 		final boolean pretty,
+		final boolean extraSpace,
 		final boolean separators,
 		final String indent,
 		final String increment)
@@ -845,19 +853,19 @@ public final class CalcUtil
 	    StringBuilder buf = new StringBuilder();
 	    if (list.size() > 0) {
 		boolean comma = false;
-		buf.append(pretty ? "[\n" : "[ ");
+		buf.append(pretty ? "[\n" : extraSpace ? "[ " : "[");
 		for (Object value : list) {
 		    if (comma)
-			buf.append(pretty ? ",\n" : ", ");
+			buf.append(pretty ? ",\n" : extraSpace ? ", " : ",");
 		    else
 			comma = true;
 		    if (pretty) buf.append(myIndent);
-		    buf.append(toStringValue(visitor, ctx, value, quotes, pretty, separators, myIndent, increment));
+		    buf.append(toStringValue(visitor, ctx, value, quotes, pretty, extraSpace, separators, myIndent, increment));
 		}
-		buf.append(pretty ? "\n" + indent + "]" : " ]");
+		buf.append(pretty ? "\n" + indent + "]" : extraSpace ? " ]" : "]");
 	    }
 	    else {
-		buf.append("[ ]");
+		buf.append(extraSpace ? "[ ]" : "[]");
 	    }
 	    return buf.toString();
 	}

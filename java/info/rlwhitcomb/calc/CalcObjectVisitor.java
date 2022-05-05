@@ -530,6 +530,9 @@
  *	03-May-2022 (rlwhitcomb)
  *	    #68: Reimplement "index" to work correctly with objects and lists, including
  *	    indexes of objects, and negative indexes.
+ *	04-May-2022 (rlwhitcomb)
+ *	    #300: Allow "@s" for objects and lists.
+ *	    #308: Add "<>" as an alternative for "not equals".
  */
 package info.rlwhitcomb.calc;
 
@@ -1907,7 +1910,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    if (scale != Integer.MIN_VALUE)
 			throw new CalcExprException(ctx, "%calc#noScaleFormat", scale, formatChar);
 		}
-		if (formatTestChar != 'j' && formatTestChar != 'q') {
+		if (formatTestChar != 'j' && formatTestChar != 'q' && formatTestChar != 's') {
 		    if (result instanceof Scope)
 			throw new CalcExprException(ctx, "%calc#noConvertObjArr", formatChar);
 		}
@@ -2068,7 +2071,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			if (scale != Integer.MIN_VALUE)
 			    increment = CharUtil.padToWidth("", scale);
 			valueBuf.append(indent);
-			valueBuf.append(toStringValue(this, ctx, result, true, true, separators, indent, increment));
+			valueBuf.append(toStringValue(this, ctx, result, true, true, true, separators, indent, increment));
 			break;
 
 		    case 'X':
@@ -2204,17 +2207,23 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 		    case 'S':
 		    case 's':
-			String stringValue = toStringValue(this, ctx, result, false, separators);
-			switch (signChar) {
-			    case '+':	/* center - positive width puts extra spaces on left always */
-				CharUtil.padToWidth(valueBuf, stringValue, precision, CENTER);
-				break;
-			    case '-':	/* right-justify (spaces on left) */
-				CharUtil.padToWidth(valueBuf, stringValue, Math.abs(precision), RIGHT);
-				break;
-			    default:	/* left-justify (spaces on right) */
-				CharUtil.padToWidth(valueBuf, stringValue, precision, LEFT);
-				break;
+			if (result instanceof Scope) {
+			    boolean extraSpace = signChar != '-';
+			    valueBuf.append(toStringValue(this, ctx, result, false, false, extraSpace, separators, "", null));
+			}
+			else {
+			    String stringValue = toStringValue(this, ctx, result, false, separators);
+			    switch (signChar) {
+				case '+':	/* center - positive width puts extra spaces on left always */
+				    CharUtil.padToWidth(valueBuf, stringValue, precision, CENTER);
+				    break;
+				case '-':	/* right-justify (spaces on left) */
+				    CharUtil.padToWidth(valueBuf, stringValue, Math.abs(precision), RIGHT);
+				    break;
+				default:	/* left-justify (spaces on right) */
+				    CharUtil.padToWidth(valueBuf, stringValue, precision, LEFT);
+				    break;
+			    }
 			}
 			addQuotes = settings.quoteStrings;
 			break;
@@ -5118,6 +5127,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		case "==":
 		case "\u2A75":
 		case "!=":
+		case "<>":
 		case "\u2260": // NOT EQUAL
 		    if (optObj1 != null)
 			cmp = CalcUtil.compareValues(this, expr1, expr2, optObj1.orElse(null), visit(expr2),
@@ -5165,6 +5175,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		case "!==":
 		case "\u2262": // NOT IDENTICAL
 		case "!=":
+		case "<>":
 		case "\u2260": // NOT EQUAL
 		    result = (cmp != 0);
 		    break;
