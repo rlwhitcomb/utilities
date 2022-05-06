@@ -46,13 +46,14 @@
 #	    #274: New errors and help for "-depth" option.
 #	05-May-2022 (rlwhitcomb)
 #	    #308: Change reset color tag.
+#	06-May-2022 (rlwhitcomb)
+#	    #286: Removed unused error message. Update help.
 #
 
 unavailable	= " <no disponible>"
 
 warnUnknownOpt	= "<Yw*>ADVERTENCIA: Ignorando opción desconocida: <Bl*>\"%1$s\"<.>"
 warnNoFile	= "<Yw*>ADVERTENCIA: Ignorando archivo inexistente <Bl*>\"%1$s\"<.>"
-errNoFilesGiven	= "<Rd*!>ERROR: No hay archivos ni directorios especificados.<.>"
 errFileName	= "<Rd*!>ERROR: Incapaz de obtener el nombre canónico para <Bl*>\"%1$s\"<.>: %2$s"
 errExpectLocale = "<Rd*!>ERROR: Esperando un valor para <Bl*>\"-locale\"<Rd*!>, no otra opción.<.>"
 errExpectDepth  = "<Rd*!>ERROR: Esperando un valor para <Bl*>\"-depth\"<Rd*!>, no otra opción.<.>"
@@ -61,7 +62,7 @@ errNoDepth      = "<Rd*!>ERROR: No se ha dado ningún valor para <Bl*>\"-depth\"
 errDepth        = "Valor no válido para <Bl*>\"-depth\"<.>: %1$s
 error		= "<Rd*!>ERROR: %1$s"
 
-usage.help1	= "<Bk!>Uso:<.> tre [<Gr>opciones<.>] nombres_de_archivos_o_directorios"
+usage.help1	= "<Bk!>Uso:<.> tre [<Gr>opciones<.>] [ nombres_de_archivos_o_directorios ]"
 usage.help2	= ""
 usage.help3	= " Cuando las \"<Gr>opciones<.>\" sean:"
 usage.help4	= "\t<Gr>-ascending<.>  para ordenar por nombre de archivo, alfabéticamente ascendente"
@@ -126,4 +127,5 @@ usage.help62	= "  se procese cualquier archivo, por lo que las opciones posterio
 usage.help63	= "  anularán las anteriores para toda la salida, y las opciones en la"
 usage.help64	= "  línea de comando anulan las establecidas por TREE_OPTIONS."
 usage.help65    = ""
-
+usage.help66	= " Si no se especifican archivos o directorios, se recorre el directorio actual ('.')."
+usage.help67	= ""

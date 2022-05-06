@@ -95,6 +95,8 @@
  *	    #270: Make "loadMainProgramInfo" automatic.
  *	05-May-2022 (rlwhitcomb)
  *	    #308: Change reset color tag.
+ *	06-May-2022 (rlwhitcomb)
+ *	    #284: Default to current directory if nothing specified.
  */
 package info.rlwhitcomb.tree;
 
@@ -741,8 +743,8 @@ public class Tree
 	    }
 
 	    if (argList.isEmpty()) {
-		usage(Intl.getString("tree#errNoFilesGiven"), "");
-		return;
+		// Sensibly default to current directory if nothing specified
+		argList.add(".");
 	    }
 
 	    // Construct a comparator based on the desired sorting options

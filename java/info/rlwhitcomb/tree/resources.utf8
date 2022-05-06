@@ -48,13 +48,14 @@
 #	    #274: New errors and help for "-depth" option.
 #	05-May-2022 (rlwhitcomb)
 #	    #308: Change reset color tag.
+#	06-May-2022 (rlwhitcomb)
+#	    #284: Remove unused error message. Update help.
 #
 
 unavailable	= " <unavailable>"
 
 warnUnknownOpt	= "<Yw*>WARNING: Ignoring unknown option: <Bl*>\"%1$s\"<.>"
 warnNoFile	= "<Yw*>WARNING: Ignoring non-existent file <Bl*>\"%1$s\"<.>"
-errNoFilesGiven	= "<Rd*!>ERROR: No input files or directories specified.<.>"
 errFileName	= "<Rd*!>ERROR: Unable to get canonical name for <Bl*>\"%1$s\"<.>: %2$s"
 errExpectLocale	= "<Rd*!>ERROR: Expecting a value for <Bl*>\"-locale\"<Rd*!>, not another option.<.>"
 errExpectDepth	= "<Rd*!>ERROR: Expecting a value for <Bl*>\"-depth\"<Rd*!>, not another option.<.>"
@@ -63,7 +64,7 @@ errNoDepth	= "<Rd*!>ERROR: No value given for <Bl*>\"-depth\"<Rd*!>.<.>"
 errDepth	= "Invalid value for <Bl*>\"-depth\"<.>: %1$s"
 error		= "<Rd*!>ERROR: %1$s"
 
-usage.help1	= "<Bk!>Usage:<.> tre [<Gr>options<.>] file_or_directory_name(s)"
+usage.help1	= "<Bk!>Usage:<.> tre [<Gr>options<.>] [ file_or_directory_name(s) ]"
 usage.help2	= ""
 usage.help3	= " Where \"<Gr>options<.>\" can be:"
 usage.help4	= "\t<Gr>-ascending<.>  to sort by file name, alphabetically ascending"
@@ -126,4 +127,7 @@ usage.help60	= " Also note: all options are parsed before any files are processe
 usage.help61	= "  so later options will override earlier ones for the entire output,"
 usage.help62	= "  and options on the command line override ones set by TREE_OPTIONS."
 usage.help63	= ""
+usage.help64	= " If no files or directories are specified, the current directory ('.')"
+usage.help65	= "  is traversed."
+usage.help66	= ""
 
