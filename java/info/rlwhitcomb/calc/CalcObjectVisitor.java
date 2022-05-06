@@ -539,6 +539,7 @@
  *	06-May-2022 (rlwhitcomb)
  *	    #305: Change "chars" to "codes" and add new "chars" that separates a string
  *	    into a character array.
+ *	    #287: Allow "define" and "const" at any level.
  */
 package info.rlwhitcomb.calc;
 
@@ -1846,11 +1847,6 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitProg(CalcParser.ProgContext ctx) {
-	    return internalVisitStatements(ctx);
-	}
-
-	@Override
-	public Object visitStmt(CalcParser.StmtContext ctx) {
 	    return internalVisitStatements(ctx);
 	}
 

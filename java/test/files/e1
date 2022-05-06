@@ -785,6 +785,15 @@ matches(input_string, '.+is is.+')
 matches(input_string, '^.+day$')
 matches(input_string, '.*way')
 
+#
+# Defining functions inside blocks
+#
+:default
+loop j over settings.precision {
+  define help(n) = 10 ** -n
+  :decimal j
+  help(j)
+}
 
 :echo
 :echo "End of expression tests (suite 1)."

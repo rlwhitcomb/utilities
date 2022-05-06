@@ -815,6 +815,109 @@
 >matches (input_string, '.+is is.+') -> true
 >matches (input_string, '^.+day$') -> true
 >matches (input_string, '.*way') -> false
+>Precision is now “34” digits.
+>Defining function “help(n)” = 10 ** -n
+>Precision is now “one” digit.
+>help(j) -> 0.1
+>Defining function “help(n)” = 10 ** -n
+>Precision is now “2” digits.
+>help(j) -> 0.01
+>Defining function “help(n)” = 10 ** -n
+>Precision is now “3” digits.
+>help(j) -> 0.001
+>Defining function “help(n)” = 10 ** -n
+>Precision is now “4” digits.
+>help(j) -> 0.0001
+>Defining function “help(n)” = 10 ** -n
+>Precision is now “5” digits.
+>help(j) -> 0.00001
+>Defining function “help(n)” = 10 ** -n
+>Precision is now “6” digits.
+>help(j) -> 0.000001
+>Defining function “help(n)” = 10 ** -n
+>Precision is now “7” digits.
+>help(j) -> 0.0000001
+>Defining function “help(n)” = 10 ** -n
+>Precision is now “8” digits.
+>help(j) -> 0.00000001
+>Defining function “help(n)” = 10 ** -n
+>Precision is now “9” digits.
+>help(j) -> 0.000000001
+>Defining function “help(n)” = 10 ** -n
+>Precision is now “10” digits.
+>help(j) -> 0.0000000001
+>Defining function “help(n)” = 10 ** -n
+>Precision is now “11” digits.
+>help(j) -> 0.00000000001
+>Defining function “help(n)” = 10 ** -n
+>Precision is now “12” digits.
+>help(j) -> 0.000000000001
+>Defining function “help(n)” = 10 ** -n
+>Precision is now “13” digits.
+>help(j) -> 0.0000000000001
+>Defining function “help(n)” = 10 ** -n
+>Precision is now “14” digits.
+>help(j) -> 0.00000000000001
+>Defining function “help(n)” = 10 ** -n
+>Precision is now “15” digits.
+>help(j) -> 0.000000000000001
+>Defining function “help(n)” = 10 ** -n
+>Precision is now “16” digits.
+>help(j) -> 0.0000000000000001
+>Defining function “help(n)” = 10 ** -n
+>Precision is now “17” digits.
+>help(j) -> 0.00000000000000001
+>Defining function “help(n)” = 10 ** -n
+>Precision is now “18” digits.
+>help(j) -> 0.000000000000000001
+>Defining function “help(n)” = 10 ** -n
+>Precision is now “19” digits.
+>help(j) -> 0.0000000000000000001
+>Defining function “help(n)” = 10 ** -n
+>Precision is now “20” digits.
+>help(j) -> 0.00000000000000000001
+>Defining function “help(n)” = 10 ** -n
+>Precision is now “21” digits.
+>help(j) -> 0.000000000000000000001
+>Defining function “help(n)” = 10 ** -n
+>Precision is now “22” digits.
+>help(j) -> 0.0000000000000000000001
+>Defining function “help(n)” = 10 ** -n
+>Precision is now “23” digits.
+>help(j) -> 0.00000000000000000000001
+>Defining function “help(n)” = 10 ** -n
+>Precision is now “24” digits.
+>help(j) -> 0.000000000000000000000001
+>Defining function “help(n)” = 10 ** -n
+>Precision is now “25” digits.
+>help(j) -> 0.0000000000000000000000001
+>Defining function “help(n)” = 10 ** -n
+>Precision is now “26” digits.
+>help(j) -> 0.00000000000000000000000001
+>Defining function “help(n)” = 10 ** -n
+>Precision is now “27” digits.
+>help(j) -> 0.000000000000000000000000001
+>Defining function “help(n)” = 10 ** -n
+>Precision is now “28” digits.
+>help(j) -> 0.0000000000000000000000000001
+>Defining function “help(n)” = 10 ** -n
+>Precision is now “29” digits.
+>help(j) -> 0.00000000000000000000000000001
+>Defining function “help(n)” = 10 ** -n
+>Precision is now “30” digits.
+>help(j) -> 0.000000000000000000000000000001
+>Defining function “help(n)” = 10 ** -n
+>Precision is now “31” digits.
+>help(j) -> 0.0000000000000000000000000000001
+>Defining function “help(n)” = 10 ** -n
+>Precision is now “32” digits.
+>help(j) -> 0.00000000000000000000000000000001
+>Defining function “help(n)” = 10 ** -n
+>Precision is now “33” digits.
+>help(j) -> 0.000000000000000000000000000000001
+>Defining function “help(n)” = 10 ** -n
+>Precision is now “34” digits.
+>help(j) -> 0.0000000000000000000000000000000001
 >
 >End of expression tests (suite 1).
 >Tests of nested object / array variables.

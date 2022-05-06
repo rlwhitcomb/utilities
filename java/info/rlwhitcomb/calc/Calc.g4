@@ -380,6 +380,7 @@
  *	06-May-2022 (rlwhitcomb)
  *	    #305: Change "chars" to "codes" and add new "chars" that separates
  *	    the string into characters.
+ *	    #287: Allow "define" and "const" at any level.
  */
 
 grammar Calc;
@@ -389,17 +390,13 @@ boolean allowWild = false;
 }
 
 prog
-   : stmt* EOF
-   ;
-
-stmt
-   : stmtOrExpr
-   | defineStmt
-   | constStmt
+   : stmtOrExpr* EOF
    ;
 
 stmtOrExpr
    : formattedExprs
+   | defineStmt
+   | constStmt
    | loopStmt
    | whileStmt
    | ifStmt
@@ -454,7 +451,7 @@ timeThisStmt
    ;
 
 bracketBlock
-   : EOL? '{' ( EOL? stmt ) * '}' EOL?
+   : EOL? '{' ( EOL? stmtOrExpr ) * '}' EOL?
    ;
 
 stmtBlock
