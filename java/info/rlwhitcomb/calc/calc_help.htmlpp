@@ -760,7 +760,7 @@ or
         <i>expr</i>&nbsp;<code> &gt; </code>&nbsp;<i>expr</i></td>
         <td>comparison</td><td>left to right</td></tr>
     <tr><td>14</td><td>
-        <i>expr</i>&nbsp;<code>OF</code>, <code>IN</code>, <code>&#x2208;</code>, or <code>&#x220A;</code><br>
+        <i>expr</i>&nbsp;<code>OF</code>, <code>IN</code>, <code>WITHIN</code>, <code>&#x2208;</code>, or <code>&#x220A;</code><br>
         <i>expr</i> [ <code>...</code>,&nbsp;<code>..</code>,&nbsp;or&nbsp;<code>&#x2026;</code>&nbsp;<i>expr</i> ] [ <code>,</code> <i>expr</i> ]</td>
         <td>range match</td><td>left to right</td></tr>
     <tr><td>13</td><td>
@@ -1020,7 +1020,7 @@ or
      All keywords in these statements have three differently-cased forms: all lower case, all UPPER case, and MixedCase.  For example: <code>loop</code>, <code>LOOP</code>, and <code>Loop</code>.
   <p>The syntax for each is as follows:
   <p class="indent">
-     <code>LOOP</code>&nbsp;[ [ <i>loopvar</i> ] ( <code>IN</code> | <code>OVER</code> | <code>&#x2208;</code> | <code>&#x220A;</code>) ] <i>expr</i> [ <code>...</code>,&nbsp;<code>..</code>,&nbsp;or&nbsp;<code>&#x2026;</code>&nbsp;<i>expr</i> ] [ <code>,</code> <i>expr</i> ] <code>{</code> <i>statements or expressions</i> <code>}</code>
+     <code>LOOP</code>&nbsp;[ [ <i>loopvar</i> ] ( <code>IN</code> | <code>WITHIN</code> | <code>OVER</code> | <code>&#x2208;</code> | <code>&#x220A;</code>) ] <i>expr</i> [ <code>...</code>,&nbsp;<code>..</code>,&nbsp;or&nbsp;<code>&#x2026;</code>&nbsp;<i>expr</i> ] [ <code>,</code> <i>expr</i> ] <code>{</code> <i>statements or expressions</i> <code>}</code>
   </p>
   <p class="indent">
      <code>WHILE</code>&nbsp;<i>expr</i> <code>{</code> <i>statements or expressions</i> <code>}</code>
@@ -1048,12 +1048,17 @@ or
   <p>In all these statements the <code>{</code> and <code>}</code> are not needed if there is only one statement or expression in the block.
   <p>The <code>LOOP</code> statement will repeatedly execute the block of statements based on several conditions:
      <ul><li>if only one expression is listed, the loop will be repeated that number of times, starting from one</li>
+         <li>but if the <code>WITHIN</code> keyword is used then the starting value will be zero (and, of course) the end will be that value <code>- 1</code></li>
          <li>if the <i>expr</i> <code>..</code> <i>expr</i> form is used the loop will be repeated starting from the
              first value, until the second value is reached, incrementing by one each time</li>
          <li>if the <code>,</code> <i>expr</i> is given, the loop is repeated starting from either one, or the first expression value, incrementing by this <i>step</i> expression until the value reaches the maximum.
+         <li>and if only the end value and step are given, and if the step is negative, the starting value is <code>-1</code>, and the loop value is decremented each time.</li>
+         <li>and if <code>WITHIN</code> is used, the starting value will be zero and the end will be one smaller (or less negative for a negative step)</li>
+         <li>Note that using <code>within</code> does not change the behavior if the loop control is an object, list, or string.</li>
+         <li>Use of <code>Within</code> does not make sense and gives an error if both a start and end value (with or without a step value) are given.</li>
      </ul>
      In any case, the optional loop variable will be set to the value of the indexing expression for each time through the loop.
-     If no loop variable is given, the default variable <code>__</code> will be used (except this is an error for nested loops without explicit variables).
+     If no loop variable is given, the default variable <code>__</code> (double underscore) will be used (except this is an error for nested loops without explicit variables).
      The loop variable can be referenced inside the statement block, but nowhere else.  A loop variable has the same naming
      rules as a regular variable. Note that inside an interpolated string (inside the loop
      block) the value of a loop variable can be accessed via <code>$<i>var</i></code> or alternatively (and more verbosely) as

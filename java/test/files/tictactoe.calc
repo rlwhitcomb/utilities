@@ -93,10 +93,10 @@ define valueAt(_index) = { board[(_index - 1) \ 3][(_index - 1) % 3] }
  */
 define displayBoard() = {
   display = HDR_LINE + EOL
-  loop row in 0..2 {
-    loop x in 0..2 {
+  loop row within 3 {
+    loop x within 3 {
       line = ' '
-      loop col in 0..2 {
+      loop col within 3 {
         case board[row][col] of {
           X: line += X_BOX[x],
           O: line += O_BOX[x],
@@ -157,7 +157,7 @@ define countValue(row, col, color) = { board[row][col] === color ? 1 : 0 }
  */
 define countInRow(row, color) = {
   count = 0
-  loop col over 0..2 { count += countValue(row, col, color) }
+  loop col within 3 { count += countValue(row, col, color) }
 }
 
 /*
@@ -165,7 +165,7 @@ define countInRow(row, color) = {
  */
 define countInCol(col, color) = {
   count = 0
-  loop row over 0..2 { count += countValue(row, col, color) }
+  loop row within 3 { count += countValue(row, col, color) }
 }
 
 /*
@@ -199,9 +199,9 @@ define cornerIsFilled(color) = {
  */
 define gameIsOver() = {
   // Check the rows
-  loop row over 0..2 { if checkWinner(sumRow(row)) { leave true } }
+  loop row within 3 { if checkWinner(sumRow(row)) { leave true } }
   // Check the columns
-  loop col over 0..2 { if checkWinner(sumColumn(col)) { leave true } }
+  loop col within 3 { if checkWinner(sumColumn(col)) { leave true } }
   // Check the two diagonals
   if checkWinner(sumDiagonal(0)) || checkWinner(sumDiagonal(1)) { leave true }
   // Lastly, check for a draw
@@ -243,7 +243,7 @@ define acceptUserMove() = {
  */
 define findRowMove(row, color, otherColor) = {
   if countInRow(row, color) == 2 && countInRow(row, otherColor) == 0 {
-    loop col over 0..2 { if board[row][col] == EMPTY { leave col } }
+    loop col within 3 { if board[row][col] == EMPTY { leave col } }
   }
   -1
 }
@@ -254,7 +254,7 @@ define findRowMove(row, color, otherColor) = {
  */
 define findColMove(col, color, otherColor) = {
   if countInCol(col, color) == 2 && countInCol(col, otherColor) == 0 {
-    loop row over 0..2 { if board[row][col] == EMPTY { leave row } }
+    loop row within 3 { if board[row][col] == EMPTY { leave row } }
   }
   -1
 }
@@ -278,17 +278,17 @@ define findDiagMove(which, color, otherColor) = {
  */
 define findNecessaryMove(color, otherColor) = {
   // Check rows
-  loop row over 0..2 {
+  loop row within 3 {
     col = findRowMove(row, color, otherColor)
     if col >= 0 { leave toIndex(row, col) }
   }
   // Check columns
-  loop col over 0..2 {
+  loop col within 3 {
     row = findColMove(col, color, otherColor)
     if row >= 0 { leave toIndex(row, col) }
   }
   // Check diagonals
-  loop diag over 0..1 {
+  loop diag within 2 {
     ix = findDiagMove(diag, color, otherColor)
     if ix > 0 { leave ix }
   }

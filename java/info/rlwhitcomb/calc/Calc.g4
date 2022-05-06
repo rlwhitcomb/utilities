@@ -376,6 +376,7 @@
  *	    #308: Add "<>" as an alternative for "not equals".
  *	05-May-2022 (rlwhitcomb)
  *	    #296: Add "notnull" function.
+ *	    #298: Add "within" keyword to "loop" statement and "in" expression.
  */
 
 grammar Calc;
@@ -425,7 +426,7 @@ constStmt
    ;
 
 loopStmt
-   : K_LOOP ( id ? ( K_IN | K_OVER | SET_IN ) ) ? loopCtl stmtBlock
+   : K_LOOP ( id ? ( K_OVER | K_IN | K_WITHIN | SET_IN ) ) ? loopCtl stmtBlock
    ;
 
 whileStmt
@@ -557,7 +558,7 @@ expr
    | expr SHIFT_OP expr                  # shiftExpr
    | expr '<=>' expr                     # spaceshipExpr
    | expr COMPARE_OP expr                # compareExpr
-   | expr ( K_OF|K_IN|SET_IN ) loopCtl   # inExpr
+   | expr ( K_OF|K_IN|K_WITHIN|SET_IN ) loopCtl   # inExpr
    | expr EQUAL_OP expr                  # equalExpr
    | expr BIT_OP expr                    # bitExpr
    | expr BOOL_AND_OP expr               # booleanAndExpr
@@ -1020,6 +1021,8 @@ K_WHILE    : 'while' | 'WHILE' | 'While' ;
 K_IN       : 'in' | 'IN' | 'In' ;
 
 K_OVER     : 'over' | 'OVER' | 'Over' ;
+
+K_WITHIN   : 'within' | 'WITHIN' | 'Within' ;
 
 K_IF       : 'if' | 'IF' | 'If' ;
 

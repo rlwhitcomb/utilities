@@ -535,6 +535,7 @@
  *	    #308: Add "<>" as an alternative for "not equals".
  *	05-May-2022 (rlwhitcomb)
  *	    #296: Add "notnull" function.
+ *	    #298: Add "within" keyword to "loop" statement and "in" expressions.
  */
 package info.rlwhitcomb.calc;
 
@@ -2297,7 +2298,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		final List<CalcParser.ExprContext> dotExprs,
 		final boolean hasDots,
 		final Function<Object, Object> visitor,
-		final boolean allowSingle)
+		final boolean allowSingle,
+		final boolean doingWithin)
 	{
 	    List<CalcParser.ExprContext> exprs = null;
 	    CalcParser.ExprContext stepExpr = null;
@@ -2305,6 +2307,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    java.util.stream.IntStream codePoints  = null;
 
 	    boolean stepWise = false;
+	    boolean allowWithin = false;
 
 	    BigDecimal dStart = BigDecimal.ONE;
 	    BigDecimal dStop  = BigDecimal.ONE;
@@ -2352,10 +2355,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			}
 			else {
 			    dStop = getDecimalValue(exprs.get(0));
+			    allowWithin = true;
 			}
 		    }
 		    else {
 			dStop = getDecimalValue(exprs.get(0));
+			allowWithin = true;
 		    }
 		}
 		else if (exprs.size() == 2) {
@@ -2369,6 +2374,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			stepExpr = exprs.get(1);
 			dStop = getDecimalValue(exprs.get(0));
 			dStep = getDecimalValue(stepExpr);
+			allowWithin = true;
 		    }
 		}
 		else {
@@ -2389,7 +2395,24 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 		    if (step == 0)
 			throw new CalcExprException("%calc#infLoopStepZero", stepExpr);
-		    else if (step < 0) {
+
+		    if (allowWithin) {
+			if (doingWithin) {
+			    start = 0;
+			    if (step < 0)
+				stop++;
+			    else
+				stop--;
+			}
+			else if (step < 0) {
+			    start = -start;
+			}
+		    }
+		    else if (doingWithin) {
+			throw new CalcExprException("%calc#withinNotAllowed", exprs.get(0));
+		    }
+
+		    if (step < 0) {
 			for (int loopIndex = start; loopIndex >= stop; loopIndex += step) {
 			    lastValue = visitor.apply(BigInteger.valueOf(loopIndex));
 			}
@@ -2403,9 +2426,27 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		catch (ArithmeticException ae) {
 		    // This means we stubbornly have fractional values, so use as such
 		    int sign = dStep.signum();
+
 		    if (sign == 0)
 			throw new CalcExprException("%calc#infLoopStepZero", stepExpr);
-		    else if (sign < 0) {
+
+		    if (allowWithin) {
+			if (doingWithin) {
+			    dStart = BigDecimal.ZERO;
+			    if (sign < 0)
+				dStop = dStop.add(BigDecimal.ONE);
+			    else
+				dStop = dStop.subtract(BigDecimal.ONE);
+			}
+			else if (step < 0) {
+			    dStart = dStart.negate();
+			}
+		    }
+		    else if (doingWithin) {
+			throw new CalcExprException("%calc#withinNotAllowed", exprs.get(0));
+		    }
+
+		    if (sign < 0) {
 			for (BigDecimal loopIndex = dStart; loopIndex.compareTo(dStop) >= 0; loopIndex = loopIndex.add(dStep)) {
 			    lastValue = visitor.apply(cleanDecimal(loopIndex));
 			}
@@ -2451,6 +2492,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    String localVarName = id != null ? id.getText() : LoopScope.LOOP_VAR;
 
+	    boolean doingWithin = ctx.K_WITHIN() != null;
+
 	    pushScope(new LoopScope());
 	    LoopVisitor visitor = new LoopVisitor(block, localVarName);
 
@@ -2458,9 +2501,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    try {
 		if (exprList != null)
-		    value = iterateOverDotRange(exprList.expr(), null, false, visitor, true);
+		    value = iterateOverDotRange(exprList.expr(), null, false, visitor, true, doingWithin);
 		else
-		    value = iterateOverDotRange(null, dotCtx.expr(), dotCtx.DOTS() != null, visitor, true);
+		    value = iterateOverDotRange(null, dotCtx.expr(), dotCtx.DOTS() != null, visitor, true, doingWithin);
 	    }
 	    catch (LeaveException lex) {
 		if (lex.hasValue()) {
@@ -2596,7 +2639,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			defaultCtx = cbCtx;
 		    }
 		    else if (select.DOTS() != null) {
-			iterateOverDotRange(null, select.expr(), true, visitor, true);
+			iterateOverDotRange(null, select.expr(), true, visitor, true, false);
 			if (visitor.matched())
 			    return visitor.lastValue();
 		    }
@@ -3510,7 +3553,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    if (dotRange != null) {
 		LengthVisitor visitor = new LengthVisitor();
-		return iterateOverDotRange(null, dotRange.expr(), dotRange.DOTS() != null, visitor, false);
+		return iterateOverDotRange(null, dotRange.expr(), dotRange.DOTS() != null, visitor, false, false);
 	    }
 	    else {
 		Object obj = evaluateFunction(ctx.expr1().expr());
@@ -5014,7 +5057,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		}
 	    }
 	    else {
-		sum = iterateOverDotRange(null, dotRange.expr(), dotRange.DOTS() != null, sumVisitor, false);
+		sum = iterateOverDotRange(null, dotRange.expr(), dotRange.DOTS() != null, sumVisitor, false, false);
 	    }
 
 	    return sum;
@@ -5065,7 +5108,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		}
 	    }
 	    else {
-		product = iterateOverDotRange(null, dotRange.expr(), dotRange.DOTS() != null, productVisitor, false);
+		product = iterateOverDotRange(null, dotRange.expr(), dotRange.DOTS() != null, productVisitor, false, false);
 	    }
 
 	    return product;
@@ -5243,13 +5286,14 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    CalcParser.DotRangeContext dotCtx   = ctlCtx.dotRange();
 	    Object value = evaluateFunction(expr);
 	    Object retValue;
+	    boolean doingWithin = ctx.K_WITHIN() != null;
 
 	    InVisitor visitor = new InVisitor(expr, ctlCtx, value);
 
 	    if (exprList != null)
-		retValue = iterateOverDotRange(exprList.expr(), null, false, visitor, true);
+		retValue = iterateOverDotRange(exprList.expr(), null, false, visitor, true, doingWithin);
 	    else
-		retValue = iterateOverDotRange(null, dotCtx.expr(), dotCtx.DOTS() != null, visitor, true);
+		retValue = iterateOverDotRange(null, dotCtx.expr(), dotCtx.DOTS() != null, visitor, true, doingWithin);
 
 	    return retValue;
 	}
