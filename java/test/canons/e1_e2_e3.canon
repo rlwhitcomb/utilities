@@ -125,10 +125,16 @@
 >2 ** p -> 999999.9999999974
 >isprime 15485863 -> true
 >isnull junk -> true
+>notnull junk -> false
+>notnull h2 -> true
 >j2 = nil -> <null>
 >isnull j2 -> true
+>notnull j2 -> false
+>notnull n -> true
 >j3 = ␀ -> <null>
 >isnull j3 -> true
+>notnull j3 -> false
+>NotNull p -> true
 >typeof "abc" -> "string"
 >typeof null -> "null"
 >typeof PHI -> "float"
@@ -348,6 +354,8 @@
 >index (ob2, key) -> 0
 >index (ob2, key) -> 1
 >index (ob2, key) -> 2
+>t8 = [2, 3, 5, 7, 11, 13, 17, 19, 21, 23, 29, 31] -> [ 2, 3, 5, 7, 11, 13, 17, 19, 21, 23, 29, 31 ]
+>notnull (index (t8, 22 - 1, -1)) -> true
 >one = substr (target, 4) -> " is an \"index\" test."
 >two = substr (target, 11, 18) -> "\"index\""
 >three = substr (target, index (target, 'test', -1)) -> "test."

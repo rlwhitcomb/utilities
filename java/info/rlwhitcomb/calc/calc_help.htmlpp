@@ -363,7 +363,7 @@ h2 {
   <p>The boolean (or "logical") constants are <code>true</code> and <code>false</code>.
   <p>The special null constant, which signifies no value, or a value that hasn't been assigned or defined yet, is simply <code>null</code>.
      Any regular variables, or list or object elements that are not (yet) defined will have the <code>null</code> value. Most operations will result
-     in an error if one or more of the operands are null. There is a special <code>isnull</code> function that can be used to test for this to avoid
+     in an error if one or more of the operands are null. There are special <code>isnull</code> and <code>notnull</code> functions that can be used to test for this to avoid
      errors if desired, as can simply using the equality / inequality operators with the null constant. Null values inserted into interpolated strings
      (see below) will simply insert nothing.
   <p>Values can be assigned names via the <code>const</code> declaration, and then the name used to refer to the value. Such values
@@ -679,7 +679,7 @@ or
             <tr><td><code>TENPOW</code>&nbsp;<i>expr</i></td><td>10 ** <i>expr</i> (anti-log base ten)</td></tr>
             <tr><td><code>RANDOM</code>&nbsp;( <i>expr</i> ) ?&nbsp;</td><td>random number with optional seed value</td></tr>
             <tr><td><code>SIGNUM</code> or <code>SGN</code>&nbsp;<i>expr</i></td><td>sign (&lt; 0 = -1, 0 = 0, &gt; 0 = +1)</td></tr>
-            <tr><td><code>ISNULL</code>&nbsp;<i>expr</i></td><td>is the value null?</td></tr>
+            <tr><td><code>ISNULL</code> or <code>NOTNULL</code>&nbsp;<i>expr</i></td><td>is the value null / not null?</td></tr>
             <tr><td><code>TYPEOF</code>&nbsp;<i>expr</i></td><td>the type of the result<br>as in <code>"string"</code>, <code>"integer"</code>, <code>"boolean"</code>, etc.</td></tr>
             <tr><td><code>CAST</code>&nbsp;<i>expr</i>&nbsp;[ <code>,</code> <i>type_expr</i> ]</td><td>convert the value to the given type<br>(default type is <code>"string"</code>)</td></tr>
             <tr><td><code>LENGTH</code>&nbsp;<i>expr</i><br>or <i>expr</i> [ <code>..</code> or <code>&#x2026;</code> <i>expr</i> [ <code>,</code> <i>expr</i> ] ]</td><td>length of string, array, object, or range</td></tr>

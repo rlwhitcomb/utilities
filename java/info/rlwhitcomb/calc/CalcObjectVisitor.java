@@ -533,6 +533,8 @@
  *	04-May-2022 (rlwhitcomb)
  *	    #300: Allow "@s" for objects and lists.
  *	    #308: Add "<>" as an alternative for "not equals".
+ *	05-May-2022 (rlwhitcomb)
+ *	    #296: Add "notnull" function.
  */
 package info.rlwhitcomb.calc;
 
@@ -3443,7 +3445,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitIsNullExpr(CalcParser.IsNullExprContext ctx) {
 	    Object obj = evaluateFunction(ctx.expr1().expr());
-	    return Boolean.valueOf(obj == null);
+	    if (ctx.K_ISNULL() != null) {
+		return Boolean.valueOf(obj == null);
+	    }
+	    else {
+		return Boolean.valueOf(obj != null);
+	    }
 	}
 
 	@Override

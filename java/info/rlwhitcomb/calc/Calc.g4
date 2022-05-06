@@ -374,6 +374,8 @@
  *	04-May-2022 (rlwhitcomb)
  *	    #307: Cleanup.
  *	    #308: Add "<>" as an alternative for "not equals".
+ *	05-May-2022 (rlwhitcomb)
+ *	    #296: Add "notnull" function.
  */
 
 grammar Calc;
@@ -493,7 +495,7 @@ expr
    | K_TENPOW expr1                      # tenPowerExpr
    | K_RANDOM expr1 ?                    # randomExpr
    | K_SIGNUM expr1                      # signumExpr
-   | K_ISNULL expr1                      # isNullExpr
+   | ( K_ISNULL | K_NOTNULL ) expr1      # isNullExpr
    | K_TYPEOF typeArg                    # typeofExpr
    | K_CAST ( expr2 | expr1 )            # castExpr
    | K_LENGTH ( expr1 | dotRange )       # lengthExpr
@@ -912,6 +914,8 @@ K_FLOOR    : 'floor' | 'FLOOR' | 'Floor' ;
 K_ISPRIME  : 'isprime' | 'ISPRIME' | 'Isprime' | 'IsPrime' ;
 
 K_ISNULL   : 'isnull' | 'ISNULL' | 'Isnull' | 'IsNull' ;
+
+K_NOTNULL  : 'notnull' | 'NOTNULL' | 'Notnull' | 'NotNull' ;
 
 K_TYPEOF   : 'typeof' | 'TYPEOF' | 'Typeof' | 'TypeOf' ;
 

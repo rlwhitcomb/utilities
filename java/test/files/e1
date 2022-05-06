@@ -126,11 +126,18 @@ tenpow(n)
 p = ln2(1000000)
 2**p
 isprime 15485863
+
 isnull junk
+notnull junk
+notnull h2
 j2=nil
 isnull j2
+notnull j2
+notnull n
 j3=␀
 isnull j3
+notnull j3
+NotNull p
 
 typeof "abc"
 typeof null
@@ -314,6 +321,9 @@ length(ob2)
 loop 0...length(ob2)-1 { ob2[__] }
 loop j over ob2 { ob2[j] }
 loop key over ob2 { index(ob2, key) }
+
+t8 = [ 2, 3, 5, 7, 11, 13, 17, 19, 21, 23, 29, 31 ]
+notnull(index(t8, 22-1, -1))
 
 # The "substr" operator
 one = substr(target, 4)
