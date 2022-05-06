@@ -918,6 +918,18 @@
 >Defining function “help(n)” = 10 ** -n
 >Precision is now “34” digits.
 >help(j) -> 0.0000000000000000000000000000000001
+>Defining function “Truth(v)” = {
+> if v "T" else "F" 
+>}
+>Truth({}) -> "F"
+>Truth("") -> "F"
+>Truth([]) -> "F"
+>Truth({d: false}) -> "T"
+>Truth([45]) -> "T"
+>Truth(null) -> "F"
+>Truth("a") -> "T"
+>Truth("false") -> "F"
+>Truth(settings) -> "T"
 >
 >End of expression tests (suite 1).
 >Tests of nested object / array variables.

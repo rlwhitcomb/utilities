@@ -135,6 +135,8 @@
  *	    #68: Add "indexOf" method for arrays (complicated because of numeric equivalence messes).
  *	04-May-2022 (rlwhitcomb)
  *	    #300: Extra parameter for fewer spaces in object/list string representations.
+ *	06-May-2022 (rlwhitcomb)
+ *	    #286: Truthy value for empty objects and arrays should be false.
  */
 package info.rlwhitcomb.calc;
 
@@ -653,8 +655,15 @@ public final class CalcUtil
 	    if (CharUtil.isNullOrEmpty(value))
 		return Boolean.FALSE;
 
-	    if (value instanceof Scope)
-		return Boolean.TRUE;
+	    if (value instanceof ArrayScope) {
+		return Boolean.valueOf(((ArrayScope) value).size() != 0);
+	    }
+	    else if (value instanceof ObjectScope) {
+		return Boolean.valueOf(((ObjectScope) value).size() != 0);
+	    }
+	    else if (value instanceof ValueScope) {
+		value = ((ValueScope) value).getValue();
+	    }
 
 	    try {
 		boolean boolValue = CharUtil.getBooleanValue(value);

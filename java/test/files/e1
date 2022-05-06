@@ -795,6 +795,20 @@ loop j over settings.precision {
   help(j)
 }
 
+define Truth(v) = {
+  if v "T" else "F"
+}
+
+Truth({})
+Truth("")
+Truth([])
+Truth({ d: false })
+Truth([ 45 ])
+Truth(null)
+Truth("a")
+Truth("false")
+Truth(settings)
+
 :echo
 :echo "End of expression tests (suite 1)."
 
