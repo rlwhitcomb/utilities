@@ -1,4 +1,4 @@
-//** Version: 2.9.4 Base: 1.9.10
+//** Version: 2.9.5 Base: 1.9.10
 //** The versions above must conform to the latest values in "version.properties" and "build.properties"
 
 /*
@@ -71,7 +71,7 @@ define to_excel_col(idx) = {
  */
 define from_excel_col(col) = {
    _col = 0
-   loop c over chars(upper(col)) {
+   loop c over codes(upper(col)) {
       _v = c - _A_ + 1
       _col *= _BASE_
       _col += _v

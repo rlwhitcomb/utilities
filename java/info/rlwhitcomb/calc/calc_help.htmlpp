@@ -724,7 +724,8 @@ or
             <tr><td><code>MATCHES</code>&nbsp;<i>expr</i>&nbsp;<code>,</code>&nbsp;<i>pattern_expr</i></td><td>match the expression string against<br>the regular expression pattern</td></tr>
             <tr><td><code>FACTORS</code>&nbsp;<i>expr</i></td><td>calculate all the factors of the number</td></tr>
             <tr><td><code>PFACTORS</code>&nbsp;<i>expr</i></td><td>calculate the prime factors of the number</td></tr>
-            <tr><td><code>CHARS</code>&nbsp;<i>expr</i></td><td>convert a string into an array of its codepoint values</td></tr>
+            <tr><td><code>CHARS</code>&nbsp;<i>expr</i></td><td>convert a string into an array of its individual character values</td></tr>
+            <tr><td><code>CODES</code>&nbsp;<i>expr</i></td><td>convert a string into an integer array of its codepoint values</td></tr>
             <tr><td><code>DOW</code>&nbsp;<i>expr</i></td><td>day of the week of a date (integer)<br>(0=Sunday to 6=Saturday)</td></tr>
             <tr><td><code>DOM</code>&nbsp;<i>expr</i></td><td>day of the month of a date (integer)<br>(1 .. 31)</td></tr>
             <tr><td><code>DOY</code>&nbsp;<i>expr</i></td><td>day of the year of a date (integer)<br>(1 .. 365/366)</td></tr>
@@ -902,6 +903,12 @@ or
      set to the <code>nul</code> character. The fill value for a string can only be one character, or an integer
      (in the range of 0..65535) that is converted to a char value (NOT a codepoint value!). If the 3<sup>rd</sup> value is missing,
      the existing array or string's length is used (that is, the entire existing value is overwritten).
+  <p>The <code>chars</code> and <code>codes</code> function perform identically, iterating through the string argument by codepoint values, but the results
+     are different. For <code>CHARS</code> the individual array elements are themselves strings, each containing a single "character" value from the original.
+     If the character is outside the Unicode BMP, the constituent string with have a length of 2, consisting of the two 16-bit codes (a surrogate pair). For
+     <code>CODES</code> the same element in the returned array will have the single integer value of that codepoint. So, for the same input value, the length
+     of the returned arrays will be the same, regardless of the individual character values of the input. Does that make sense? If not, please read up on
+     how Java deals with Unicode characters starting here: <a href="https://docs.oracle.com/javase/tutorial/i18n/text/unicode.html">Unicode and Java</a>.
   <p>The <code>formatstring</code> function works exactly like <code>String.format</code> in Java, or <code>sprintf</code> in C/C++, meaning the format string
      will (optionally) have replaceable parameters, which are replaced by the values of the respective arguments in the expression list. The completed
      string with all the values replaced will be the result. For example:

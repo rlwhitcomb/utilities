@@ -377,6 +377,9 @@
  *	05-May-2022 (rlwhitcomb)
  *	    #296: Add "notnull" function.
  *	    #298: Add "within" keyword to "loop" statement and "in" expression.
+ *	06-May-2022 (rlwhitcomb)
+ *	    #305: Change "chars" to "codes" and add new "chars" that separates
+ *	    the string into characters.
  */
 
 grammar Calc;
@@ -534,6 +537,7 @@ expr
    | K_FACTORS expr1                     # factorsExpr
    | K_PFACTORS expr1                    # primeFactorsExpr
    | K_CHARS expr1                       # charsExpr
+   | K_CODES expr1                       # codesExpr
    | K_DOW expr1                         # dayOfWeekExpr
    | K_DOM expr1                         # dayOfMonthExpr
    | K_DOY expr1                         # dayOfYearExpr
@@ -983,6 +987,8 @@ K_FACTORS  : 'factors' | 'FACTORS' | 'Factors' ;
 K_PFACTORS : 'pfactors' | 'PFACTORS' | 'Pfactors' | 'PFactors' ;
 
 K_CHARS    : 'chars' | 'CHARS' | 'Chars' ;
+
+K_CODES    : 'codes' | 'CODES' | 'Codes' ;
 
 K_DOW      : 'dow' | 'DOW' | 'DoW' ;
 

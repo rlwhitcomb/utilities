@@ -536,6 +536,9 @@
  *	05-May-2022 (rlwhitcomb)
  *	    #296: Add "notnull" function.
  *	    #298: Add "within" keyword to "loop" statement and "in" expressions.
+ *	06-May-2022 (rlwhitcomb)
+ *	    #305: Change "chars" to "codes" and add new "chars" that separates a string
+ *	    into a character array.
  */
 package info.rlwhitcomb.calc;
 
@@ -4764,6 +4767,16 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitCharsExpr(CalcParser.CharsExprContext ctx) {
+	    final ArrayScope<String> result = new ArrayScope<>();
+	    String string = getStringValue(ctx.expr1().expr());
+
+	    string.codePoints().forEachOrdered(cp -> result.list().add(String.valueOf(Character.toChars(cp))));
+
+	    return result;
+	}
+
+	@Override
+	public Object visitCodesExpr(CalcParser.CodesExprContext ctx) {
 	    final ArrayScope<Integer> result = new ArrayScope<>();
 	    String string = getStringValue(ctx.expr1().expr());
 

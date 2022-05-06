@@ -72,7 +72,7 @@ loop b in 2 .. 60, 2 { `B($b) = ${bn b}` }
   }
 }
 
-hexchars = split '0123456789ABCDEF', ''
+hexchars = chars '0123456789ABCDEF'
 teststring = '-.1234ABCDEFG_'
 loop over teststring { (__ ∈ hexchars) ? `$__ is hex` : `$__ not hex` }
 
