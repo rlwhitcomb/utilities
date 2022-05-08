@@ -1,4 +1,4 @@
-:Require '2.10-alpha', Base '1.9.10-alpha'
+:Require '2.10-alpha', Base '1.9.15-alpha'
 // The versions above must conform to the latest values in "version.properties" and "build.properties"
 
 /*
