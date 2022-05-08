@@ -543,6 +543,8 @@
  *	07-May-2022 (rlwhitcomb)
  *	    #292: Add ":require" directive. Tweak saved file format to use it.
  *	    Turn off separator mode during ":save".
+ *	    Use try/finally to make sure the "pop" happens during bracket block for
+ *	    mode options.
  */
 package info.rlwhitcomb.calc;
 
@@ -1698,11 +1700,16 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    try {
 		if (bracketBlock != null) {
+		    Boolean ret = null;
+
 		    processModeOption(option, stack, setOperator);
-
-		    visit(bracketBlock);
-
-		    return processModeOption("pop", stack, setOperator);
+		    try {
+			visit(bracketBlock);
+		    }
+		    finally {
+			ret = processModeOption("pop", stack, setOperator);
+		    }
+		    return ret;
 		}
 		else {
 		    return processModeOption(option, stack, setOperator);
