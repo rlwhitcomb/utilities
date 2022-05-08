@@ -276,6 +276,10 @@ public final class Environment
 	 */
 	private static String APP_VERSION = null;
 	/**
+	 * The parsed structure from {@link #APP_VERSION}.
+	 */
+	private static SemanticVersion BUILD_VERSION = null;
+	/**
 	 * Current build number -- read from the "build.number" file.
 	 */
 	private static String APP_BUILD = null;
@@ -1063,15 +1067,15 @@ public final class Environment
 	 *
 	 * @param cls	The class to interrogate.
 	 * @return	The implementation version of the class (except in the case of error, in which case
-	 *		the version will be a default (0.0.0) version).
+	 *		the version will be retrieved from {@link #getBuildVersion}.
 	 */
 	public static SemanticVersion getVersion(final Class<?> cls) {
 	    SemanticVersion semVer;
 	    try {
 		semVer = new SemanticVersion(cls);
 	    }
-	    catch (ParseException | NullPointerException ex) {
-		semVer = new SemanticVersion();
+	    catch (ParseException ex) {
+		semVer = getBuildVersion();
 	    }
 	    return semVer;
 	}
@@ -1399,6 +1403,15 @@ public final class Environment
 
 
 	/**
+	 * @return The unadulterated base application version.
+	 */
+	public static SemanticVersion getBuildVersion() {
+	    readBuildProperties();
+	    return BUILD_VERSION;
+	}
+
+
+	/**
 	 * @return The date the application was built (set externally in the "build.number" file)
 	 * in <code>yyyy-MM-dd</code> format.
 	 */
@@ -1565,6 +1578,13 @@ public final class Environment
 		APP_BUILD      = buildProperties.getProperty("build.number");
 		BUILD_DATE     = buildProperties.getProperty("build.date");
 		BUILD_TIME     = buildProperties.getProperty("build.time");
+
+		try {
+		    BUILD_VERSION = new SemanticVersion(APP_VERSION);
+		}
+		catch (ParseException pe) {
+		    BUILD_VERSION = new SemanticVersion();
+		}
 
 		String debugBuild   = buildProperties.getProperty("debug.build");
 		String releaseBuild = buildProperties.getProperty("release.build");

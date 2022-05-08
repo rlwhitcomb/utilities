@@ -35,6 +35,11 @@ import java.util.regex.Pattern;
 public final class SemanticVersion implements Comparable<SemanticVersion> {
 
 	/**
+	 * Default (all zeroes) version.
+	 */
+	public final static SemanticVersion ZERO = new SemanticVersion();
+
+	/**
 	 * Major version number
 	 */
 	public final int major;
@@ -150,6 +155,11 @@ public final class SemanticVersion implements Comparable<SemanticVersion> {
 		vParts = new int[5];
 		preParts = new ArrayList<String>(5);
 		metaParts = new ArrayList<String>(5);
+
+		if (version == null) {
+			throw new ParseException("null input", 0);
+		}
+
 		input = version.toCharArray();
 
 		if (!stateMajor()) { // Start recursive descend
