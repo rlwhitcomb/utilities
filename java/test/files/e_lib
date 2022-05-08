@@ -8,6 +8,7 @@
 }
 info.version
 :Require '2.10-alpha', Base '1.9.10-alpha'
+:echo 'Required version available'
 
 excel_date(d'2021/10/8')
 excel_date_1904(D'12/7/1941')
