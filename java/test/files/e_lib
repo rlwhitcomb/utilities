@@ -3,13 +3,12 @@
 #
 :clear
 :separators off
-silent = settings.silent
-:echo `quiet mode: $silent`
 :quiet on {
 :open 'test/files/library'
 }
 silent = settings.silent
 :echo `quiet mode: $silent`
+:vars
 
 excel_date(d'2021/10/8')
 excel_date_1904(D'12/7/1941')
