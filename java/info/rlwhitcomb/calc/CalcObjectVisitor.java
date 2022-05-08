@@ -1856,14 +1856,14 @@ System.out.println(":require directive - after parsing only required version");
 	    }
 System.out.println(":require directive - now checking version compliance");
 	    if (requireVersion != null) {
-System.out.println(":require directive - comparing required version");
 		SemanticVersion progVersion = Environment.programVersion();
+System.out.println(":require directive - comparing required version " + requireVersion + " against " + progVersion);
 		if (progVersion.compareTo(requireVersion) < 0)
 		    throw new Intl.IllegalArgumentException("calc#libVersionMismatch", requireVersion, progVersion);
 	    }
 	    if (requireBaseVersion != null) {
-System.out.println(":require directive - comparing required base version");
 		SemanticVersion baseVersion = Environment.implementationVersion();
+System.out.println(":require directive - comparing required base version " + requireBaseVersion + " against base " + baseVersion);
 		if (baseVersion.compareTo(requireBaseVersion) < 0)
 		    throw new Intl.IllegalArgumentException("calc#libVersionMismatch", requireBaseVersion, baseVersion);
 	    }
