@@ -274,6 +274,8 @@
  *	    exceptions thrown from helper methods.
  *	05-May-2022 (rlwhitcomb)
  *	    #308: Update the reset color tag.
+ *	07-May-2022 (rlwhitcomb)
+ *	    #292: Don't do the library version check here; use new ":require" directive instead.
  */
 package info.rlwhitcomb.calc;
 
@@ -369,8 +371,6 @@ public class Calc
 	private static final String LINESEP = System.lineSeparator();
 
 	private static final String EMPTY_TEXT = "\n";
-
-	private static final Pattern LIB_VERSION = Pattern.compile("//\\*\\* [vV]ersion\\: (\\d+\\.\\d+\\.\\d+.*) [bB]ase\\: (\\d+\\.\\d+\\.\\d+.*)[\\r?\\n]");
 
 	/** Preferences key for the saved split ratio for the main GUI window. */
 	private static final String SPLIT_RATIO = "splitRatio";
@@ -1669,29 +1669,6 @@ public class Calc
 		catch (IOException ioe) {
 		    // We're gonna bet the problem is the charset
 		    fileText = FileUtilities.readFileAsString(f, StandardCharsets.UTF_8);
-		}
-
-		// Do a version check for library files
-		Matcher m = LIB_VERSION.matcher(fileText);
-		if (m.lookingAt()) {
-		    String version = m.group(1);
-		    String base = m.group(2);
-		    try {
-			SemanticVersion lib_version = new SemanticVersion(version);
-			SemanticVersion lib_base = new SemanticVersion(base);
-			SemanticVersion prog_version = Environment.programVersion();
-			SemanticVersion prog_base = Environment.implementationVersion();
-
-			int ret = lib_version.compareTo(prog_version);
-			if (ret < 0)
-			    throw new Intl.IllegalArgumentException("calc#libVersionMismatch", f.getPath());
-			ret = lib_base.compareTo(prog_base);
-			if (ret < 0)
-			    throw new Intl.IllegalArgumentException("calc#libVersionMismatch", f.getPath());
-		    }
-		    catch (ParseException pe) {
-			throw new Intl.IllegalArgumentException("calc#libVersionMismatch", f.getPath());
-		    }
 		}
 
 		inputBuf.append(fileText).append(LINESEP);

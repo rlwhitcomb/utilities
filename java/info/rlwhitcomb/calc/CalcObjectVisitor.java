@@ -540,6 +540,9 @@
  *	    #305: Change "chars" to "codes" and add new "chars" that separates a string
  *	    into a character array.
  *	    #287: Allow "define" and "const" at any level.
+ *	07-May-2022 (rlwhitcomb)
+ *	    #292: Add ":require" directive. Tweak saved file format to use it.
+ *	    Turn off separator mode during ":save".
  */
 package info.rlwhitcomb.calc;
 
@@ -627,8 +630,8 @@ import info.rlwhitcomb.util.Which;
  */
 public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 {
-	/** Version identifier for library (saved) files; compatible with <code>LIB_VERSION</code> in Calc. */
-	private static final String LIB_FORMAT = "//** Version: %1$s Base: %2$s";
+	/** Version identifier for library (saved) files. */
+	private static final String LIB_FORMAT = ":Require '%1$s', Base '%2$s'";
 
 	/** Pattern for format specifiers. */
 	private static final Pattern FORMAT_PATTERN = Pattern.compile("\\s*@([\\-+])?([0-9]+)?([\\.]([0-9]+))?([a-zA-Z,_])?([a-zA-Z%$])");
@@ -1620,7 +1623,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		// Write out the current version
 		SemanticVersion prog_version = Environment.programVersion();
 		SemanticVersion prog_base = Environment.implementationVersion();
-		writer.write(String.format(LIB_FORMAT, prog_version.toSimpleString(), prog_base.toSimpleString()));
+		writer.write(String.format(LIB_FORMAT, prog_version.toPreReleaseString(), prog_base.toPreReleaseString()));
 		writer.newLine();
 		writer.write(Intl.getString("calc#libVersionDescription"));
 		writer.newLine();
@@ -1637,8 +1640,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			else {
 			    writer.write(String.format("%1$s = %2$s", key, toStringValue(this, ctx, value, true, settings.separatorMode)));
 			}
+			writer.newLine();
 		    }
-		    writer.newLine();
 		}
 	    }
 	}
@@ -1648,11 +1651,17 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    String path = getStringValue(ctx.expr(0), false, false, false);
 	    Charset charset = getCharsetValue(ctx.expr(1), true);
 
+	    // For now, separators are not compatible with the input grammar, so don't do it
+	    boolean oldSeparatorMode = settings.separatorMode;
+	    settings.separatorMode = false;
 	    try {
 		saveVariables(ctx, Paths.get(path), charset);
 	    }
 	    catch (IOException ioe) {
 		throw new CalcExprException(ctx, "%calc#ioError", Exceptions.toString(ioe));
+	    }
+	    finally {
+		settings.separatorMode = oldSeparatorMode;
 	    }
 
 	    return BigInteger.valueOf(globals.size());
@@ -1789,6 +1798,58 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitQuoteStringsDirective(CalcParser.QuoteStringsDirectiveContext ctx) {
 	    return processModeOption(ctx.modeOption(), quoteStringsModeStack, ctx.bracketBlock(), setQuoteStringsMode);
+	}
+
+	private String versionText(CalcParser.VersionNumberContext versionCtx) {
+	    if (versionCtx.STRING() != null)
+		return getRawString(versionCtx.STRING().getText());
+	    else if (versionCtx.ISTRING() != null)
+		return getIStringValue(this, versionCtx.ISTRING(), versionCtx);
+	    else if (versionCtx.NUMBER() != null)
+		return versionCtx.NUMBER().getText();
+	    else
+		return versionCtx.VERSION().getText();
+	}
+
+	@Override
+	public Object visitRequireDirective(CalcParser.RequireDirectiveContext ctx) {
+	    CalcParser.RequireOptionsContext optCtx = ctx.requireOptions();
+	    List<CalcParser.VersionNumberContext> versionNumbers = optCtx.versionNumber();
+	    SemanticVersion requireVersion = null;
+	    SemanticVersion requireBaseVersion = null;
+
+	    try {
+		if (optCtx.BASE() != null) {
+		    if (versionNumbers.size() == 1) {
+			// Just a base version
+			requireBaseVersion = new SemanticVersion(versionText(versionNumbers.get(0)));
+		    }
+		    else {
+			// version + base version
+			requireVersion = new SemanticVersion(versionText(versionNumbers.get(0)));
+			requireBaseVersion = new SemanticVersion(versionText(versionNumbers.get(1)));
+		    }
+		}
+		else {
+		    // Just a regular version
+		    requireVersion = new SemanticVersion(versionText(versionNumbers.get(0)));
+		}
+	    }
+	    catch (ParseException pe) {
+		throw new CalcExprException(optCtx, "%calc#versionParseError", Exceptions.toString(pe));
+	    }
+
+	    if (requireVersion != null) {
+		SemanticVersion progVersion = Environment.programVersion();
+		if (progVersion.compareTo(requireVersion) < 0)
+		    throw new Intl.IllegalArgumentException("calc#libVersionMismatch", requireVersion, progVersion);
+	    }
+	    if (requireBaseVersion != null) {
+		SemanticVersion baseVersion = Environment.implementationVersion();
+		if (baseVersion.compareTo(requireBaseVersion) < 0)
+		    throw new Intl.IllegalArgumentException("calc#libVersionMismatch", requireBaseVersion, baseVersion);
+	    }
+	    return Boolean.TRUE;
 	}
 
 

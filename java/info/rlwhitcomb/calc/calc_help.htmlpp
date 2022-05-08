@@ -1152,6 +1152,7 @@ or
     <tr><td><code>:separators</code> <i>mode_option</i> [ <i>statements</i> ]</td><td>Set whether to display thousands separators always<br><i>(default is <code>off</code> or value on command line)</i></td><td><code>:separator</code>, <code>:seps</code>, <code>:sep</code><br>or <code>settings.separatorMode=</code><i>expr</i></td></tr>
     <tr><td><code>:ignorecase</code> <i>mode_option</i> [ <i>statements</i> ]</td><td>Set whether to ignore case of variable and member names<br><i>(default is <code>off</code> or value on command line)</i></td><td><code>:caseinsensitive</code>, <code>:insensitive</code>,<br><code>:ignore</code>, <code>:case</code>, <code>:ign</code>, <code>:ins</code><br>or <code>settings.ignoreNameCase=</code><i>expr</i></td></tr>
     <tr><td><code>:quotestrings</code> <i>mode_option</i> [ <i>statements</i> ]</td><td>Set whether to quote string results<br>(default is <code>on</code> or value on command line)</td><td><code>:quotestring</code>, <code>:quotes</code>, <code>:quote</code><br>or <code>settings.quoteStrings=</code><i>expr</i></td></tr>
+    <tr><td><code>:require</code> [ <i>version</i> ] [<code>,</code>] [ <code>base</code> <i>version</i> ]</td><td>Establish minimum program and/or base versions required to run</td><td>N/A</td></tr>
     <tr><td><code>:timing</code> <i>mode_option</i> [ <i>statements</i> ]</td><td>Set the timing mode (same <i>mode_option</i> choices as for <code>:rational</code>)<br><i>(default is <code>off</code> or the value set on the command line)</i></td><td><code>:time</code></td></tr>
     <tr><td><code>:debug</code> <i>mode_option</i> [ <i>statements</i> ]</td><td>Set the debug mode (same <i>mode_option</i> choices as for <code>:rational</code>)<br><i>(default is <code>off</code> or the value set on the command line)</i></td><td><code>:deb</code>, <code>:dbg</code></td></tr>
     <tr><td><code>:resultsonly</code> <i>mode_option</i> [ <i>statements</i> ]</td><td>Set the results-only mode<br><i>(default is <code>off</code> or value on command line)</i></td><td><code>:resultonly</code>, <code>:results</code>, <code>:result</code>, <code>:res</code></td></tr>
@@ -1186,6 +1187,7 @@ or
   <p>The <code>id</code> values for <code>:clear</code>, <code>:variables</code>, and <code>:predefined</code> can be wild-card values, such as
      <code>t*</code> or <code>?a?</code>. Only values matching these patterns will be displayed or cleared.
   <p>The only effect of debug mode is to display the parse tree (in LISP format) before the expression(s) is/are evaluated.
+  <p>The <i>version</i> values for the <code>:require</code> directive can be strings (in the <a href="https://semver.org">Semantic Version</a> format, including a possible pre-release string), or one, two, or three integers separated by periods. The current version numbers are available by running the <code>c -version</code> or <code>version</code> commands.
   <p>Timing mode displays the total parsing and execution time (to nanosecond precision on some systems) after the results are displayed.
 </div>
 <a class="top-link" href="#topofpage">Top</a>
@@ -1198,9 +1200,9 @@ or
      that explains the finance-related code.
   <p>At a minimum, the "library" has code to convert to/from our date values and the standard Excel&trade; date values, and do other date-related manipulation.
      There are also some mortgage-related (or "time value of money") functions defined.
-  <p>The "library.calc" file is version-stamped at the beginning, so that this library must match the current version of Calc in order to be loaded. The <code>:save</code> also places the current version stamp into the saved file. This mechanism ensures that an older version of Calc will
-     not be able to load a new library (since it might depend on features not present in the older version).
-  <p>Any file of compatible expressions and directives can be used as a "library". The only requirement is that the name be listed in a <code>-library</code> option on the command line, or included in any other script using <code>:include</code>.
+  <p>The "library.calc" file is version-stamped at the beginning, using the <code>:require</code> directive, so that this library must match the current version of Calc in order to be loaded. The <code>:save</code> directive also places a <code>:require</code> directive with the current version strings into the saved file. This mechanism ensures that an older version of Calc will
+     not be able to load a new library (since it might depend on features not present in the older version). Also, a saved file will ignore the <code>:separators</code> mode while writing, since numbers with separators are not (yet) supported on input.
+  <p>Any file of compatible expressions and directives can be used as a "library". In order to use such a library, list its name with a <code>-library</code> option on the command line, or use the <code>:include</code> directive inside any other script.
 </div>
 <a class="top-link" href="#topofpage">Top</a>
 <hr id="GUI_Operations" class="sectionsep">

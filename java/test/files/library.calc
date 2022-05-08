@@ -1,5 +1,5 @@
-//** Version: 2.9.9 Base: 1.9.10
-//** The versions above must conform to the latest values in "version.properties" and "build.properties"
+:Require '2.10-alpha', Base '1.9.10-alpha'
+// The versions above must conform to the latest values in "version.properties" and "build.properties"
 
 /*
  * A series of functions that provide some added value to Calculator.

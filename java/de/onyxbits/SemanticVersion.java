@@ -308,6 +308,22 @@ public final class SemanticVersion implements Comparable<SemanticVersion> {
 		return ret.toString();
 	}
 
+	public String toPreReleaseString() {
+		StringBuilder ret = new StringBuilder();
+		ret.append(major);
+		ret.append('.');
+		ret.append(minor);
+		ret.append('.');
+		ret.append(patch);
+		// If we parsed from a string and there were extra version parts, add them now
+		for (int i = 3; i < nextVPart; i++) {
+			ret.append('.');
+			ret.append(vParts[i]);
+		}
+		ret.append(getPreReleaseString());
+		return ret.toString();
+	}
+
 	public String toSimpleString() {
 		StringBuilder ret = new StringBuilder();
 		ret.append(major);
@@ -468,6 +484,10 @@ public final class SemanticVersion implements Comparable<SemanticVersion> {
 		}
 
 		vParts[nextVPart++] = Integer.parseInt(new String(input, index, pos - index), 10);
+
+		if (pos == input.length) { // We have a clean version string
+			return true;
+		}
 
 		if (input[pos] == '.') {
 			return statePatch(pos + 1);

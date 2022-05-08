@@ -381,6 +381,8 @@
  *	    #305: Change "chars" to "codes" and add new "chars" that separates
  *	    the string into characters.
  *	    #287: Allow "define" and "const" at any level.
+ *	07-May-2022 (rlwhitcomb)
+ *	    #292: Add ":require" directive for version checking.
  */
 
 grammar Calc;
@@ -751,6 +753,7 @@ directive
    | D_SEPARATORS modeOption bracketBlock ?   # separatorsDirective
    | D_IGNORECASE modeOption bracketBlock ?   # ignoreCaseDirective
    | D_QUOTESTRINGS modeOption bracketBlock ? # quoteStringsDirective
+   | D_REQUIRE requireOptions                 # requireDirective
    ;
 
 numberOption
@@ -793,10 +796,23 @@ modeOption
    | var
    ;
 
+requireOptions
+   : versionNumber ( ',' BASE versionNumber ) ?
+   | BASE versionNumber
+   ;
+
 replaceOption
    : REPLACE_MODES
    | var
    ;
+
+versionNumber
+   : STRING
+   | ISTRING
+   | NUMBER
+   | VERSION
+   ;
+
 
 /* Lexer rules start here */
 
@@ -819,6 +835,9 @@ MODES
          | 'pop'   | 'previous' | 'prev'
          | 'POP'   | 'PREVIOUS' | 'PREV'
          | 'Pop'   | 'Previous' | 'Prev'
+         ;
+
+BASE     : 'base' | 'BASE' | 'Base'
          ;
 
 REPLACE_MODES
@@ -1358,6 +1377,10 @@ D_QUOTESTRINGS
    | DIR  ( 'quote'        | 'QUOTE'        | 'Quote'        )
    ;
 
+D_REQUIRE
+   : DIR  ( 'require' | 'REQUIRE' | 'Require' )
+   ;
+
 
 FORMAT
    : '@' [\-+] ? INT ? ( '.' INT ) ? [a-zA-Z,_] ? [a-zA-Z%$]
@@ -1524,6 +1547,10 @@ fragment PI_VALUES
 
 NUMBER
    : INT ('.' [0-9] +)? EXP?
+   ;
+
+VERSION
+   : INT '.' INT '.' INT
    ;
 
 NUM_CONST

@@ -121,6 +121,8 @@
 #	05-May-2022 (rlwhitcomb)
 #	    #308: Change reset color tag.
 #	    #298: Add "within" to "loop" statements and "in" expressions.
+#	07-May-2022 (rlwhitcomb)
+#	    #292: Revise version check errors.
 #
 
 #
@@ -157,8 +159,9 @@ timing		= Parse time %1$11.9f secs. Execution time %2$11.9f secs. Total elapsed 
 syntaxError	= Syntax error at position %1$d: %2$s
 errorNoAlt	= Syntax error at position %1$d: no viable alternative at input <y>%2$s<.>
 
-libVersionMismatch	= Library <y>%1$s<.> is not compatible with the current program version.
-libVersionDescription	= //** The versions above must conform to the latest values in "version.properties" and "build.properties"
+libVersionMismatch	= The required version <y>%1$s<.> is not compatible with the current version <y>%2$s<.>.
+versionParseError	= Problem with the required version number: %1$s
+libVersionDescription	= // The versions above must conform to the latest values in "version.properties" and "build.properties"
 
 #
 # From CalcObjectVisitor
