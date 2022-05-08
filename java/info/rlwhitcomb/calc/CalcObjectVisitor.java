@@ -1825,37 +1825,49 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    SemanticVersion requireVersion = null;
 	    SemanticVersion requireBaseVersion = null;
 
+System.out.println(":require directive - before try");
 	    try {
 		if (optCtx.BASE() != null) {
+System.out.println(":require directive - 'base' is not null");
 		    if (versionNumbers.size() == 1) {
+System.out.println(":require directive - only one version to check");
 			// Just a base version
 			requireBaseVersion = new SemanticVersion(versionText(versionNumbers.get(0)));
+System.out.println(":require directive - after parsing required base version");
 		    }
 		    else {
+System.out.println(":require directive - two versions to check");
 			// version + base version
 			requireVersion = new SemanticVersion(versionText(versionNumbers.get(0)));
+System.out.println(":require directive - after parsing required version");
 			requireBaseVersion = new SemanticVersion(versionText(versionNumbers.get(1)));
+System.out.println(":require directive - after parsing required base version");
 		    }
 		}
 		else {
+System.out.println(":require directive - no base version given");
 		    // Just a regular version
 		    requireVersion = new SemanticVersion(versionText(versionNumbers.get(0)));
+System.out.println(":require directive - after parsing only required version");
 		}
 	    }
 	    catch (ParseException pe) {
 		throw new CalcExprException(optCtx, "%calc#versionParseError", Exceptions.toString(pe));
 	    }
-
+System.out.println(":require directive - now checking version compliance");
 	    if (requireVersion != null) {
+System.out.println(":require directive - comparing required version");
 		SemanticVersion progVersion = Environment.programVersion();
 		if (progVersion.compareTo(requireVersion) < 0)
 		    throw new Intl.IllegalArgumentException("calc#libVersionMismatch", requireVersion, progVersion);
 	    }
 	    if (requireBaseVersion != null) {
+System.out.println(":require directive - comparing required base version");
 		SemanticVersion baseVersion = Environment.implementationVersion();
 		if (baseVersion.compareTo(requireBaseVersion) < 0)
 		    throw new Intl.IllegalArgumentException("calc#libVersionMismatch", requireBaseVersion, baseVersion);
 	    }
+System.out.println(":require directive - done with version checks");
 	    return Boolean.TRUE;
 	}
 
