@@ -318,6 +318,8 @@
  *	    #190: Support "caret" notation for control characters inside strings.
  *	17-Apr-2022 (rlwhitcomb)
  *	    #274: Add "isNumber" method.
+ *	10-May-2022 (rlwhitcomb)
+ *	    #317: Support "/" as a valid escape.
  */
 
 package info.rlwhitcomb.util;
@@ -1032,6 +1034,9 @@ public final class CharUtil
 				break;
 			    case '0':
 				buf.append('\0');
+				break;
+			    case '/':
+				buf.append(ch2);
 				break;
 			    case 'c':
 				if (i + 1 < input.length()) {

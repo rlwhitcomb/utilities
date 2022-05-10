@@ -383,6 +383,8 @@
  *	    #287: Allow "define" and "const" at any level.
  *	07-May-2022 (rlwhitcomb)
  *	    #292: Add ":require" directive for version checking.
+ *	10-May-2022 (rlwhitcomb)
+ *	    #317: Support "/" escape.
  */
 
 grammar Calc;
@@ -1428,7 +1430,7 @@ fragment ESCI
    ;
 
 fragment ESCAPES
-   : [\\bfnrt0]
+   : [\\bfnrt0/]
    ;
 
 fragment ESC
