@@ -1,4 +1,4 @@
-:Require '2.10-alpha', Base '1.9.15-alpha'
+:Require '2.10.5-alpha', Base '1.9.15-alpha'
 // The versions above must conform to the latest values in "version.properties" and "build.properties"
 
 /*
@@ -368,7 +368,7 @@ def stack = { _values: [] }
  * @param s     The stack to use.
  * @param value The new value to push onto the top of the stack.
  */
-def push(s, value) = { s._values[length(s._values)] = value }
+def push(s, value) = { s._values += value }
 
 /*
  * Pop the latest value off the given stack.

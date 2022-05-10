@@ -50,6 +50,8 @@
  *	    #252: Rename some methods to be more clear.
  *	02-May-2022 (rlwhitcomb)
  *	    #68: Add new methods for indexing.
+ *	09-May-2022 (rlwhitcomb)
+ *	    #315: Add "putAll" method from another map.
  */
 package info.rlwhitcomb.calc;
 
@@ -462,6 +464,15 @@ class ObjectScope extends Scope
 	 */
 	public Map<String, Object> map() {
 	    return variables;
+	}
+
+	/**
+	 * Add all the values from another map to this object.
+	 *
+	 * @param m  Another map of key:value to add.
+	 */
+	public void putAll(final Map<String, Object> m) {
+	    variables.putAll(m);
 	}
 
 	/**

@@ -137,6 +137,8 @@
  *	    #300: Extra parameter for fewer spaces in object/list string representations.
  *	06-May-2022 (rlwhitcomb)
  *	    #286: Truthy value for empty objects and arrays should be false.
+ *	10-May-2022 (rlwhitcomb)
+ *	    #315: Implement object concatenation in "addOp".
  */
 package info.rlwhitcomb.calc;
 
@@ -1224,11 +1226,70 @@ public final class CalcUtil
 	    throw new CalcExprException(ctx1, "%calc#unknownType", e1.getClass().getSimpleName());
 	}
 
+	private static boolean isObject(final Object obj) {
+	    return obj instanceof ObjectScope || obj instanceof ArrayScope;
+	}
+
+	private static Object concatObjects(final Object obj1, final Object obj2) {
+	    Object ret = null;
+
+	    if (obj1 instanceof ArrayScope) {
+		@SuppressWarnings("unchecked")
+		ArrayScope<Object> arr1 = (ArrayScope<Object>) obj1;
+		ArrayScope<Object> result = new ArrayScope<>(arr1.list());
+
+		if (obj2 instanceof ArrayScope) {
+		    @SuppressWarnings("unchecked")
+		    ArrayScope<Object> arr2 = (ArrayScope<Object>) obj2;
+
+		    result.addAll(arr2.list());
+		}
+		else if (obj2 instanceof ObjectScope) {
+		    ObjectScope map2 = (ObjectScope) obj2;
+
+		    result.addAll(map2.values());
+		}
+		else {
+		    result.add(obj2);
+		}
+
+		ret = result;
+	    }
+	    else if (obj1 instanceof ObjectScope) {
+		ObjectScope map1 = (ObjectScope) obj1;
+		ObjectScope result = new ObjectScope(map1.map());
+
+		if (obj2 instanceof ObjectScope) {
+		    ObjectScope map2 = (ObjectScope) obj2;
+
+		    result.putAll(map2.map());
+		}
+		else if (obj2 instanceof ArrayScope) {
+		    @SuppressWarnings("unchecked")
+		    ArrayScope<Object> arr2 = (ArrayScope<Object>) obj2;
+
+		    int index = result.size();
+		    for (Object value : arr2.list()) {
+			result.setValue(index++, value);
+		    }
+		}
+		else {
+		    result.setValue(result.size(), obj2);
+		}
+
+		ret = result;
+	    }
+
+	    return ret;
+	}
+
 	/**
 	 * Returns the result of the "add" operation on the two values.
+	 * <p> If the first value is an object or list, then concatenate the values.
 	 * <p> If either object is a string, do string concatenation.
-	 * <p> Else convert to {@link BigDecimal} or {@link BigFraction}
-	 * and do the addition.
+	 * <p> Else if we're doing rational calculations, convert to
+	 * {@link BigFraction}, otherwise deal with them either as
+	 * {@link ComplexNumber} or {@link BigDecimal} and do the addition.
 	 *
 	 * @param visitor  The visitor (for function evaluation).
 	 * @param e1       The LHS operand.
@@ -1242,12 +1303,18 @@ public final class CalcUtil
 	public static Object addOp(final CalcObjectVisitor visitor,
 		final Object e1, final Object e2,
 		final ParserRuleContext ctx1, final ParserRuleContext ctx2,
-		final MathContext mc, final boolean rational) {
+		final MathContext mc, final boolean rational)
+	{
 	    if (e1 == null && e2 == null)
 		return null;
 
 	    Object v1 = visitor.evaluateFunction(ctx1, e1);
 	    Object v2 = visitor.evaluateFunction(ctx2, e2);
+
+	    // Concatenate objects if the first is an object
+	    if (isObject(v1)) {
+		return concatObjects(v1, v2);
+	    }
 
 	    // Do string concatenation if either expr is a string
 	    if (v1 instanceof String || v2 instanceof String) {

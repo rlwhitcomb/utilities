@@ -29,9 +29,9 @@
 >s1 = eval stack -> { _values: [ ] }
 >isempty(s1) -> true
 >peek(s1) -> <null>
->push(s1, 'abc') -> "abc"
+>push(s1, 'abc') -> [ "abc" ]
 >isempty(s1) -> false
->push(s1, 'def') -> "def"
+>push(s1, 'def') -> [ "abc", "def" ]
 >peek(s1) -> "def"
 >s1 -> { _values: [ "abc", "def" ] }
 >pop(s1) -> "def"

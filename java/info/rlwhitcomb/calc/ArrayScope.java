@@ -33,10 +33,13 @@
  *	    #128: Add "insert" method for "pad".
  *	02-May-2022 (rlwhitcomb)
  *	    #68: Allow negative indexing (offset from end of array).
+ *	08-May-2022 (rlwhitcomb)
+ *	    #315: Add "addAll" method.
  */
 package info.rlwhitcomb.calc;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import info.rlwhitcomb.util.Intl;
@@ -151,6 +154,16 @@ class ArrayScope<T> extends Scope
 	 */
 	public void add(final T value) {
 	    values.add(value);
+	}
+
+	/**
+	 * Add all the values from the given collection to the list.
+	 *
+	 * @param c The collection to add to this list.
+	 * @return  Whether the list changed as a result of this operation.
+	 */
+	public boolean addAll(final Collection<? extends T> c) {
+	    return values.addAll(c);
 	}
 
 	/**
