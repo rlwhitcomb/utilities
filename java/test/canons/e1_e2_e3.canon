@@ -561,6 +561,11 @@
 >'a' ?: 'no a' -> "a"
 >0 ?: 1 -> 1
 >true ?: 'not true' -> true
+>desc = 'heading' -> "heading"
+>desc ?! `${desc @20s}` -> "heading             "
+>'' ?! 'funny' -> ""
+>true ?! 'TRUTH' -> "TRUTH"
+>false ?! 'oops! true' -> false
 >y = x = 7 + 1 -> 8
 >y -> 8
 >x -> 8

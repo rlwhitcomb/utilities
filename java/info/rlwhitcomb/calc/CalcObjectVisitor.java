@@ -545,6 +545,8 @@
  *	    Turn off separator mode during ":save".
  *	    Use try/finally to make sure the "pop" happens during bracket block for
  *	    mode options.
+ *	10-May-2022 (rlwhitcomb)
+ *	    #316: Add reverse "Elvis" operator.
  */
 package info.rlwhitcomb.calc;
 
@@ -5432,11 +5434,23 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitElvisExpr(CalcParser.ElvisExprContext ctx) {
 	    CalcParser.ExprContext expr0 = ctx.expr(0);
+	    CalcParser.ExprContext expr1 = ctx.expr(1);
+	    String op = ctx.ELVIS_OP().getText();
+
 	    Object v0 = evaluateFunction(expr0);
-	    if (toBooleanValue(this, v0, expr0)) {
-		return v0;
+	    switch (op) {
+		case "?:":
+		    if (toBooleanValue(this, v0, expr0)) {
+			return v0;
+		    }
+		    break;
+		case "?!":
+		    if (!toBooleanValue(this, v0, expr0)) {
+			return v0;
+		    }
+		    break;
 	    }
-	    return evaluateFunction(ctx.expr(1));
+	    return evaluateFunction(expr1);
 	}
 
 	@Override

@@ -385,6 +385,7 @@
  *	    #292: Add ":require" directive for version checking.
  *	10-May-2022 (rlwhitcomb)
  *	    #317: Support "/" escape.
+ *	    #316: Add reverse "Elvis" operator.
  */
 
 grammar Calc;
@@ -569,7 +570,7 @@ expr
    | expr BOOL_AND_OP expr               # booleanAndExpr
    | expr BOOL_OR_OP expr                # booleanOrExpr
    | expr BOOL_XOR_OP expr               # booleanXorExpr
-   | expr '?:' expr                      # elvisExpr
+   | expr ELVIS_OP expr                  # elvisExpr
    |<assoc=right> expr '?' expr ':' expr # eitherOrExpr
    |<assoc=right> var ASSIGN expr        # assignExpr
    |<assoc=right> var POW_ASSIGN expr    # powerAssignExpr
@@ -1198,6 +1199,11 @@ BOOL_OR_OP
 
 BOOL_XOR_OP
        : ( '^^' | '\u22BB' )
+       ;
+
+ELVIS_OP
+       : '?:'
+       | '?!'
        ;
 
 BIT_OP
