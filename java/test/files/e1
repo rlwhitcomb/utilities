@@ -7,7 +7,7 @@
 # Simple version check ...
 # version 2.3.0 was first version where these checks would work, and 2.4.11 is where versioninfo -> info.version
 info.version.major > 2 || (info.version.major == 2 && info.version.minor > 4) || (info.version.major == 2 && info.version.minor == 4 && info.version.patch >= 11)
-:require '2.10.7-alpha', base '1.9.15-alpha'
+:require '2.10.8-alpha', base '1.9.15-alpha'
 
 # Various simple expressions
 :decimal(50)
@@ -137,6 +137,14 @@ j3=␀
 isnull j3
 notnull j3
 NotNull p
+
+upper typeof p
+g1 = 'A strong message'
+upper g1
+lower g1
+g2=['abc', 'Def', "gHI"]; upper(g2); lower g2
+g3 = { b: 'This', c: 'is', d: 'crazy' }; upper(g3); lower(g3)
+:ignore on { upper g3; lower g3 }
 
 typeof "abc"
 typeof null

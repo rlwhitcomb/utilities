@@ -135,6 +135,20 @@
 >isnull j3 -> true
 >notnull j3 -> false
 >NotNull p -> true
+>upper typeof p -> "FLOAT"
+>g1 = 'A strong message' -> "A strong message"
+>upper g1 -> "A STRONG MESSAGE"
+>lower g1 -> "a strong message"
+>g2 = ['abc', 'Def', "gHI"] -> [ "abc", "Def", "gHI" ]
+>upper (g2) -> [ "ABC", "DEF", "GHI" ]
+>lower g2 -> [ "abc", "def", "ghi" ]
+>g3 = {b: 'This', c: 'is', d: 'crazy'} -> { b: "This", c: "is", d: "crazy" }
+>upper (g3) -> { B: "THIS", C: "IS", D: "CRAZY" }
+>lower (g3) -> { b: "this", c: "is", d: "crazy" }
+>Ignoring case is now “true”.
+>upper g3 -> { b: "THIS", c: "IS", d: "CRAZY" }
+>lower g3 -> { b: "this", c: "is", d: "crazy" }
+>Ignoring case is now “false”.
 >typeof "abc" -> "string"
 >typeof null -> "null"
 >typeof PHI -> "float"

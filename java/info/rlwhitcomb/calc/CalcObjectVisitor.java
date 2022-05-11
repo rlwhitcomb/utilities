@@ -547,6 +547,8 @@
  *	    mode options.
  *	10-May-2022 (rlwhitcomb)
  *	    #316: Add reverse "Elvis" operator.
+ *	11-May-2022 (rlwhitcomb)
+ *	    #64: Separately operate on objects and lists in the case convert expression.
  */
 package info.rlwhitcomb.calc;
 
@@ -4799,17 +4801,49 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 	}
 
+	private Object convertCase(final Object input, final boolean upper) {
+	    if (input instanceof String) {
+		String value = (String) input;
+		if (upper)
+		    return value.toUpperCase();
+		else
+		    return value.toLowerCase();
+	    }
+	    return input;
+	}
+
 	@Override
 	public Object visitCaseConvertExpr(CalcParser.CaseConvertExprContext ctx) {
-	    TerminalNode upper = ctx.K_UPPER();
-	    String exprString  = getStringValue(ctx.expr1().expr());
+	    boolean upper = ctx.K_UPPER() != null;
+	    Object obj = evaluateFunction(ctx.expr1().expr());
 
-	    if (upper != null) {
-		return exprString == null ? exprString : exprString.toUpperCase();
+	    if (obj instanceof ObjectScope) {
+		ObjectScope map = (ObjectScope) obj;
+		ObjectScope result = new ObjectScope();
+		for (Map.Entry<String, Object> entry : map.map().entrySet()) {
+		    String key = entry.getKey();
+		    Object newValue = convertCase(entry.getValue(), upper);
+		    if (settings.ignoreNameCase) {
+			result.setValue(key, newValue);
+		    }
+		    else {
+			result.setValue((String) convertCase(key, upper), newValue);
+		    }
+		}
+		return result;
 	    }
-	    else {
-		return exprString == null ? exprString : exprString.toLowerCase();
+	    else if (obj instanceof ArrayScope) {
+		@SuppressWarnings("unchecked")
+		ArrayScope<Object> list = (ArrayScope<Object>) obj;
+		ArrayScope<Object> result = new ArrayScope<>();
+		for (Object value : list.list()) {
+		    result.add(convertCase(value, upper));
+		}
+		return result;
 	    }
+
+	    String exprString = toStringValue(this, ctx, obj, false, settings.separatorMode);
+	    return convertCase(exprString, upper);
 	}
 
 	@Override

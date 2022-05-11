@@ -939,6 +939,13 @@ or<br>
      a fractional constant, such as <code>frac('1 &#x215c;')</code>, except that any of the Unicode fraction values can
      be expressed for this function as Unicode escape sequences in the string, as in <code>frac('2 \u215c')</code>
      while for an <code>f'...'</code> constant the real fraction character(s) must be used.
+  <p>For most values the <code>upper</code> and <code>lower</code> functions simply convert the value to a string and do the case conversion on that string.
+     But, for objects and lists the results are more subtle. For a list, the result is another list with all the values suitably
+     case shifted. For an object, if <code>:ignorecase</code> is on the resulting object has only the values converted, while for
+     <code>:ignorecase off</code> (the default) BOTH the keys and the values are case-converted. For example:
+<p class="indent"><code style="color:blue;">g3 = {b: 'This', c: 'is', d: 'crazy' }</code><br>
+     <code style="color:blue;">upper g3</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">{ B: 'THIS', C: 'IS', D: 'CRAZY' }</code><br>
+     <code style="color:blue;">:ignorecase on { upper g3 }</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">{ b: 'THIS', c: 'IS', d: 'CRAZY' }</code>
   <p>The <code>FACTORS</code> and <code>PFACTORS</code> functions only accept integer values, and produce arrays of the
      desired values.<br>Examples: <code>factors(123) &#x21E8; [ 1, 3, 41, 123 ]</code>, while <code>pfactors 123 &#x21E8; [ 3, 41 ]</code>.
   <p>The <code>EXEC</code> function will execute the operating system program given by the first (string) expression, using the remaining
