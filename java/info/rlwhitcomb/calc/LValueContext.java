@@ -93,6 +93,8 @@
  *	02-May-2022 (rlwhitcomb)
  *	    #68: Allow indexing by integer index value (using key list), including
  *	    negative indexes (offset from length).
+ *	11-May-2022 (rlwhitcomb)
+ *	    #318: Rename "evaluateFunction" to "evaluate".
  */
 package info.rlwhitcomb.calc;
 
@@ -308,7 +310,7 @@ class LValueContext
 	    Object result = getPredefinedContextObject(allowUndefined);
 
 	    if (result instanceof FunctionScope) {
-		result = visitor.evaluateFunction(varCtx, result);
+		result = visitor.evaluate(varCtx, result);
 	    }
 	    if (result instanceof ValueScope) {
 		ValueScope valueObj = (ValueScope) result;
@@ -468,7 +470,7 @@ class LValueContext
 		    // but it could be a numeric index into the key set (return from "index")
 		    LValueContext objLValue = arrLValue.makeMapLValue(visitor, arrVarCtx, null);
 
-		    Object indexValue = visitor.evaluateFunction(arrVarCtx.expr());
+		    Object indexValue = visitor.evaluate(arrVarCtx.expr());
 
 		    if (indexValue instanceof Number) {
 			int index = CalcUtil.toIntValue(visitor, indexValue, MathContext.DECIMAL128, arrVarCtx.expr());
@@ -543,7 +545,7 @@ class LValueContext
 		if (funcObj instanceof FunctionScope) {
 		    // We are already setup to make the function call with this FunctionScope, so just do it
 		    // and hope the return value is itself the function object we need to call...
-		    funcObj = visitor.evaluateFunction(funcVarCtx, funcObj);
+		    funcObj = visitor.evaluate(funcVarCtx, funcObj);
 		}
 
 		if (funcObj == null || !(funcObj instanceof FunctionDeclaration))

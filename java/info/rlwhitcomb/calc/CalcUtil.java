@@ -139,6 +139,8 @@
  *	    #286: Truthy value for empty objects and arrays should be false.
  *	10-May-2022 (rlwhitcomb)
  *	    #315: Implement object concatenation in "addOp".
+ *	11-May-2022 (rlwhitcomb)
+ *	    #318: Rename "evaluateFunction" to just "evaluate".
  */
 package info.rlwhitcomb.calc;
 
@@ -490,7 +492,7 @@ public final class CalcUtil
 	 * @throws CalcExprException for null input values, or other errors in conversion.
 	 */
 	public static BigDecimal toDecimalValue(final CalcObjectVisitor visitor, final Object obj, final MathContext mc, final ParserRuleContext ctx) {
-	    Object value = visitor.evaluateFunction(ctx, obj);
+	    Object value = visitor.evaluate(ctx, obj);
 	    return convertToDecimal(value, mc, ctx);
 	}
 
@@ -537,7 +539,7 @@ public final class CalcUtil
 	 * @throws CalcExprException for null inputs, or other errors from conversion.
 	 */
 	public static BigFraction toFractionValue(final CalcObjectVisitor visitor, final Object obj, final ParserRuleContext ctx) {
-	    Object value = visitor.evaluateFunction(ctx, obj);
+	    Object value = visitor.evaluate(ctx, obj);
 	    return convertToFraction(value, ctx);
 	}
 
@@ -651,7 +653,7 @@ public final class CalcUtil
 	 * @throws CalcExprException if there was a problem (for instance, in evaluating an expression).
 	 */
 	public static Boolean toBooleanValue(final CalcObjectVisitor visitor, final Object obj, final ParserRuleContext ctx) {
-	    Object value = visitor.evaluateFunction(ctx, obj);
+	    Object value = visitor.evaluate(ctx, obj);
 
 	    // Compatibility with JavaScript here...
 	    if (CharUtil.isNullOrEmpty(value))
@@ -750,7 +752,7 @@ public final class CalcUtil
 		final String indent,
 		final String increment)
 	{
-	    Object result = visitor.evaluateFunction(ctx, obj);
+	    Object result = visitor.evaluate(ctx, obj);
 
 	    if (result == null) {
 		return quotes ? "<null>" : "";
@@ -901,7 +903,7 @@ public final class CalcUtil
 	 * @return		The "length" according to the above rules.
 	 */
 	public static int length(final CalcObjectVisitor visitor, final Object valueObj, final ParserRuleContext ctx, final boolean recursive) {
-	    Object obj = visitor.evaluateFunction(ctx, valueObj);
+	    Object obj = visitor.evaluate(ctx, valueObj);
 
 	    if (obj == null)
 		return 0;
@@ -980,7 +982,7 @@ public final class CalcUtil
 	 * @return		The scale of the object.
 	 */
 	public static int scale(final CalcObjectVisitor visitor, final Object valueObj, final ParserRuleContext ctx) {
-	    Object obj = visitor.evaluateFunction(ctx, valueObj);
+	    Object obj = visitor.evaluate(ctx, valueObj);
 
 	    if (obj instanceof BigDecimal)
 		return ((BigDecimal) obj).scale();
@@ -1091,8 +1093,8 @@ public final class CalcUtil
 		final Object obj1, final Object obj2,
 		final MathContext mc, final boolean strict, final boolean allowNulls,
 		final boolean ignoreCase, final boolean naturalOrder) {
-	    Object e1 = visitor.evaluateFunction(ctx1, obj1);
-	    Object e2 = visitor.evaluateFunction(ctx2, obj2);
+	    Object e1 = visitor.evaluate(ctx1, obj1);
+	    Object e2 = visitor.evaluate(ctx2, obj2);
 
 	    if (allowNulls) {
 		if (e1 == null && e2 == null)
@@ -1308,8 +1310,8 @@ public final class CalcUtil
 	    if (e1 == null && e2 == null)
 		return null;
 
-	    Object v1 = visitor.evaluateFunction(ctx1, e1);
-	    Object v2 = visitor.evaluateFunction(ctx2, e2);
+	    Object v1 = visitor.evaluate(ctx1, e1);
+	    Object v2 = visitor.evaluate(ctx2, e2);
 
 	    // Concatenate objects if the first is an object
 	    if (isObject(v1)) {

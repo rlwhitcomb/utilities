@@ -38,6 +38,8 @@
  *	15-Feb-2022 (rlwhitcomb)
  *	    #169: Set flag not to call zero-arg functions without parens
  *	    during "setParameterValue".
+ *	11-May-2022 (rlwhitcomb)
+ *	    #318: Rename "evaluateFunction" to just "evaluate".
  */
 package info.rlwhitcomb.calc;
 
@@ -99,7 +101,7 @@ class FunctionScope extends ParameterizedScope
 	    if (valueExpr != null) {
 		visitor.setDoNotCall(true);
 		try {
-		    paramValue = visitor.evaluateFunction(valueExpr);
+		    paramValue = visitor.evaluate(valueExpr);
 		}
 		finally {
 		    visitor.setDoNotCall(false);
