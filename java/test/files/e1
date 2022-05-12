@@ -440,6 +440,13 @@ sort [[3,9], [4, 7], [1, 2], [10, 8]]
 a
 ! (a == null)
 
+# "to boolean" operator
+!! null
+!! ''
+!! 0
+!! 1
+!! 'abc'
+
 # JavaScript compatible string -> boolean operations
 
 !foundset.username

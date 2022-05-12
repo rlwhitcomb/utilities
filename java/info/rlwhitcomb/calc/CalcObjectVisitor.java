@@ -551,6 +551,7 @@
  *	    #64: Separately operate on objects and lists in the case convert expression.
  *	    #318: Fix evaluation of ValueScope within the convertCase function. Rename
  *	    "evaluateFunction" to just "evaluate".
+ *	    #319: Implement "!!" operator.
  */
 package info.rlwhitcomb.calc;
 
@@ -3086,6 +3087,11 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    BigInteger iValue = getIntegerValue(ctx.expr());
 
 	    return iValue.not();
+	}
+
+	@Override
+	public Object visitToBooleanExpr(CalcParser.ToBooleanExprContext ctx) {
+	    return getBooleanValue(ctx.expr());
 	}
 
 	@Override

@@ -463,12 +463,17 @@
 >! true -> false
 >a -> 0.707106781186547524400844362104849039284835937688474036588339
 >! (a == null) -> true
+>!! null -> false
+>!! '' -> false
+>!! 0 -> false
+>!! 1 -> true
+>!! 'abc' -> true
 >! foundset.username -> true
 >foundset.username = '' -> ""
 >! foundset.username -> true
 >foundset.username = 'Don' -> "Don"
 >! foundset.username -> false
->! ! foundset.username -> true
+>!! foundset.username -> true
 >Precision is now “200” digits.
 >1 / 7 -> 0.14285714285714285714285714285714285714285714285714285714285714285714285714285714285714285714285714285714285714285714285714285714285714285714285714285714285714285714285714285714285714285714285714285714
 >Precision is now “30” digits.

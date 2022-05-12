@@ -386,6 +386,8 @@
  *	10-May-2022 (rlwhitcomb)
  *	    #317: Support "/" escape.
  *	    #316: Add reverse "Elvis" operator.
+ *	11-May-2022 (rlwhitcomb)
+ *	    #319: Add "!!" operator (explicitly).
  */
 
 grammar Calc;
@@ -554,6 +556,7 @@ expr
    | var INC_OP                          # postIncOpExpr
    |<assoc=right> INC_OP var             # preIncOpExpr
    |<assoc=right> ADD_OP expr            # negPosExpr
+   |<assoc=right> '!!' expr              # toBooleanExpr
    |<assoc=right> ('!'|'\u00AC') expr    # booleanNotExpr
    |<assoc=right> '~' expr               # bitNotExpr
    | expr '!'                            # factorialExpr
