@@ -388,6 +388,8 @@
  *	    #316: Add reverse "Elvis" operator.
  *	11-May-2022 (rlwhitcomb)
  *	    #319: Add "!!" operator (explicitly).
+ *	12-May-2022 (rlwhitcomb)
+ *	    #321: Allow ":requires" spelling for new directive.
  */
 
 grammar Calc;
@@ -1389,7 +1391,8 @@ D_QUOTESTRINGS
    ;
 
 D_REQUIRE
-   : DIR  ( 'require' | 'REQUIRE' | 'Require' )
+   : DIR  ( 'requires' | 'REQUIRES' | 'Requires' )
+   | DIR  ( 'require'  | 'REQUIRE'  | 'Require' )
    ;
 
 
