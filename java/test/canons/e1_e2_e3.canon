@@ -149,6 +149,11 @@
 >upper g3 -> { b: "THIS", c: "IS", d: "CRAZY" }
 >lower g3 -> { b: "this", c: "is", d: "crazy" }
 >Ignoring case is now “false”.
+>g4 = {b: "abc", c: ["an", "Upper", "way"], d: {c: "over", f: "One"}} -> { b: "abc", c: [ "an", "Upper", "way" ], d: { c: "over", f: "One" } }
+>upper g4 -> { B: "ABC", C: [ "AN", "UPPER", "WAY" ], D: { C: "OVER", F: "ONE" } }
+>Ignoring case is now “true”.
+>upper g4 -> { b: "ABC", c: [ "AN", "UPPER", "WAY" ], d: { c: "OVER", f: "ONE" } }
+>Ignoring case is now “false”.
 >typeof "abc" -> "string"
 >typeof null -> "null"
 >typeof PHI -> "float"

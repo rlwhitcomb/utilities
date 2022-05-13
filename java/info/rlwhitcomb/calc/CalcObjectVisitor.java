@@ -552,6 +552,8 @@
  *	    #318: Fix evaluation of ValueScope within the convertCase function. Rename
  *	    "evaluateFunction" to just "evaluate".
  *	    #319: Implement "!!" operator.
+ *	12-May-2022 (rlwhitcomb)
+ *	    #320: Implement case conversion with a new recursive method and a Transformer.
  */
 package info.rlwhitcomb.calc;
 
@@ -4809,46 +4811,80 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 	}
 
-	private Object convertCase(final CalcParser.ExprContext ctx, final Object input, final boolean upper) {
-	    if (input == null)
-		return input;
+	/**
+	 * A transformer for doing case conversion.
+	 */
+	private class ConvertCaseTransformer implements Transformer
+	{
+	    private ParserRuleContext ctx;
+	    private boolean toUpper;
+	    private boolean ignoreCase;
 
-	    Object value = evaluate(ctx, input);
-	    if (value == null)
-		return value;
-
-	    if (value instanceof String) {
-		String string = (String) value;
-		if (upper)
-		    return string.toUpperCase();
-		else
-		    return string.toLowerCase();
+	    ConvertCaseTransformer(final ParserRuleContext exprCtx, final boolean upper, final boolean ignore) {
+		ctx = exprCtx;
+		toUpper = upper;
+		ignoreCase = ignore;
 	    }
 
-	    return value;
+	    @Override
+	    public Object apply(final Object input) {
+		if (input == null)
+		    return input;
+
+		Object value = evaluate(ctx, input);
+		if (value == null)
+		    return value;
+
+		if (value instanceof String) {
+		    String string = (String) value;
+		    if (toUpper)
+			return string.toUpperCase();
+		    else
+			return string.toLowerCase();
+		}
+
+		return value;
+	    }
+
+	    @Override
+	    public boolean forKeys() {
+		return !ignoreCase;
+	    }
 	}
 
-	@Override
-	public Object visitCaseConvertExpr(CalcParser.CaseConvertExprContext ctx) {
-	    boolean upper = ctx.K_UPPER() != null;
-	    CalcParser.ExprContext exprCtx = ctx.expr1().expr();
-	    Object obj = evaluate(exprCtx);
-
-	    // #320: This needs to be recursive for nested objects/lists
-	    // and should be done in terms of a functional interface to do
-	    // the case mapping. That way the recursive function can also
-	    // be used for other transformations (such as "replace", "trim", etc.)
-	    if (obj instanceof ObjectScope) {
+	/**
+	 * A recursive procedure to do a deep copy of any object and apply the given transform to any
+	 * of the strings within the the objects.
+	 *
+	 * @param ctx    The expression context for the object being copied.
+	 * @param obj    The object to copy.
+	 * @param mapper Transformation to apply to all the strings within the object.
+	 * @return       The deep copy of the original object with the transformer applied to all strings.
+	 */
+	private Object copyAndTransform(final ParserRuleContext ctx, final Object obj, final Transformer mapper) {
+	    if (obj == null) {
+		return null;
+	    }
+	    else if (obj instanceof ObjectScope) {
 		ObjectScope map = (ObjectScope) obj;
 		ObjectScope result = new ObjectScope();
 		for (Map.Entry<String, Object> entry : map.map().entrySet()) {
 		    String key = entry.getKey();
-		    Object newValue = convertCase(exprCtx, entry.getValue(), upper);
-		    if (settings.ignoreNameCase) {
-			result.setValue(key, newValue);
-		    }
-		    else {
-			result.setValue((String) convertCase(exprCtx, key, upper), newValue);
+		    Object value = entry.getValue();
+		    Object newValue = null;
+		    if (value != null) {
+			if (value instanceof ObjectScope || value instanceof ArrayScope) {
+			    newValue = copyAndTransform(ctx, value, mapper);
+			}
+			else {
+			    newValue = mapper.apply(entry.getValue());
+			}
+			if (mapper.forKeys()) {
+			    result.setValue((String) mapper.apply(key), newValue);
+			}
+			else {
+			    result.setValue(key, newValue);
+			}
 		    }
 		}
 		return result;
@@ -4858,16 +4894,32 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		ArrayScope<Object> list = (ArrayScope<Object>) obj;
 		ArrayScope<Object> result = new ArrayScope<>();
 		for (Object value : list.list()) {
-		    result.add(convertCase(exprCtx, value, upper));
+		    Object newValue = null;
+		    if (value != null) {
+			if (value instanceof ObjectScope || value instanceof ArrayScope) {
+			    newValue = copyAndTransform(ctx, value, mapper);
+			}
+			else {
+			    newValue = mapper.apply(value);
+			}
+		    }
+		    result.add(newValue);
 		}
 		return result;
 	    }
 
-	    if (obj == null)
-		return null;
+	    // For all other scalar values, just get the string value and apply the transform
+	    String exprString = toStringValue(this, ctx, obj, false, settings.separatorMode);
+	    return mapper.apply(exprString);
+	}
 
-	    String exprString = toStringValue(this, exprCtx, obj, false, settings.separatorMode);
-	    return convertCase(exprCtx, exprString, upper);
+	@Override
+	public Object visitCaseConvertExpr(CalcParser.CaseConvertExprContext ctx) {
+	    CalcParser.ExprContext exprCtx = ctx.expr1().expr();
+	    boolean upper = ctx.K_UPPER() != null;
+
+	    return copyAndTransform(exprCtx, evaluate(exprCtx),
+		new ConvertCaseTransformer(exprCtx, upper, settings.ignoreNameCase));
 	}
 
 	@Override
