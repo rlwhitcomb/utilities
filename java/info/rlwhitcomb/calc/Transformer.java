@@ -24,6 +24,8 @@
  *  History:
  *      12-May-2022 (rlwhitcomb)
  *	    Initial coding.
+ *	13-May-2022 (rlwhitcomb)
+ *	    #320: Make "forKeys" into default function.
  */
 package info.rlwhitcomb.calc;
 
@@ -48,6 +50,8 @@ public interface Transformer extends Function<Object, Object>
 	 *
 	 * @return {@code true} if map keys can be transformed.
 	 */
-	boolean forKeys();
+	default boolean forKeys() {
+	    return true;
+	}
 }
 

@@ -556,6 +556,7 @@
  *	    #320: Implement case conversion with a new recursive method and a Transformer.
  *	13-May-2022 (rlwhitcomb)
  *	    #320: Need to rearrange code between Transformer and "copyAndTransform".
+ *	    #320: Rework "trim" using Transformer.
  */
 package info.rlwhitcomb.calc;
 
@@ -4588,30 +4589,55 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    return String.format(formatString, args);
 	}
 
+	/**
+	 * A transformer for doing string trimming.
+	 */
+	private class TrimTransformer implements Transformer
+	{
+	    private String op;
+
+	    TrimTransformer(final String oper) {
+		op = oper;
+	    }
+
+	    @Override
+	    public Object apply(final Object value) {
+		if (value instanceof String) {
+		    String string = (String) value;
+
+		    switch (op) {
+			case "trim":
+			    return string.trim();
+
+			case "ltrim":
+			    return CharUtil.ltrim(string);
+
+			case "rtrim":
+			    return CharUtil.rtrim(string);
+
+			default:
+			    break;
+		    }
+		}
+		return value;
+	    }
+	}
+
 	@Override
 	public Object visitTrimExpr(CalcParser.TrimExprContext ctx) {
-	    String stringValue = getStringValue(ctx.expr1().expr());
-	    String op          = ctx.K_TRIM().getText().toLowerCase();
-	    String result;
+	    String op = ctx.K_TRIM().getText().toLowerCase();
+	    CalcParser.ExprContext exprCtx = ctx.expr1().expr();
+	    Object value = evaluate(exprCtx);
 
 	    switch (op) {
 		case "trim":
-		    result = stringValue.trim();
-		    break;
-
 		case "ltrim":
-		    result = CharUtil.ltrim(stringValue);
-		    break;
-
 		case "rtrim":
-		    result = CharUtil.rtrim(stringValue);
-		    break;
+		    return copyAndTransform(exprCtx, value, new TrimTransformer(op));
 
 		default:
 		    throw new UnknownOpException(op, ctx);
 	    }
-
-	    return result;
 	}
 
 	@Override

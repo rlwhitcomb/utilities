@@ -421,6 +421,14 @@
 >ltrim funny_string -> "345  \f  \t \r\n  "
 >rtrim funny_string -> " \t\f  \r\n   345"
 >trim (1.2 + " ") -> "1.2"
+>t1 = [" abc", " def  ", "ghi   "] -> [ " abc", " def  ", "ghi   " ]
+>t2 = {a: "  a b c ", b: '   def', c: 'ghi   ', d: t1} -> { a: "  a b c ", b: "   def", c: "ghi   ", d: [ " abc", " def  ", "ghi   " ] }
+>trim t1 -> [ "abc", "def", "ghi" ]
+>ltrim t1 -> [ "abc", "def  ", "ghi   " ]
+>rtrim t1 -> [ " abc", " def", "ghi" ]
+>trim t2 -> { a: "a b c", b: "def", c: "ghi", d: [ "abc", "def", "ghi" ] }
+>ltrim t2 -> { a: "a b c ", b: "def", c: "ghi   ", d: [ "abc", "def  ", "ghi   " ] }
+>rtrim t2 -> { a: "  a b c", b: "   def", c: "ghi", d: [ " abc", " def", "ghi" ] }
 >arr_n = [] -> [ ]
 >fill arr_n, 0, 10 -> [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
 >fill arr_n, 1, 2, 3 -> [ 0, 0, 1, 1, 1, 0, 0, 0, 0, 0 ]
