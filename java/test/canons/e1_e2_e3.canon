@@ -386,6 +386,8 @@
 >replace tl, 't..l', 'test', first -> "test teal tail teel toil tool toll"
 >replace tl, 't..l', 'test', last -> "tell teal tail teel toil tool test"
 >replace tl, 't', 'b' -> "bell beal bail beel boil bool boll"
+>r1 = ['tell', 'teal', 'tail', 'teel', 'toil', 'tool', 'toll'] -> [ "tell", "teal", "tail", "teel", "toil", "tool", "toll" ]
+>replace (r1, 't(..)l', "t$1b", all) -> [ "telb", "teab", "taib", "teeb", "toib", "toob", "tolb" ]
 >all = 1 -> 1
 >first = 2 -> 2
 >last = 7 -> 7

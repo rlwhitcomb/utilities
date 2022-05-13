@@ -7,7 +7,7 @@
 # Simple version check ...
 # version 2.3.0 was first version where these checks would work, and 2.4.11 is where versioninfo -> info.version
 info.version.major > 2 || (info.version.major == 2 && info.version.minor > 4) || (info.version.major == 2 && info.version.minor == 4 && info.version.patch >= 11)
-:require '2.10.11-alpha', base '1.9.15-alpha'
+:requires '2.10.14-alpha', base '1.9.15-alpha'
 
 # Various simple expressions
 :decimal(50)
@@ -349,6 +349,8 @@ replace(tl, 't(..)l', 't$1b', all)
 replace tl, 't..l', 'test', first
 replace tl, 't..l', 'test', last
 replace tl, 't', 'b'
+r1 = [ 'tell', 'teal', 'tail', 'teel', 'toil', 'tool', 'toll' ]
+replace(r1, 't(..)l', "t$1b", all)
 
 # Make sure the option keywords still work as variable names
 all = 1; first = 2; last=7; all+first-last

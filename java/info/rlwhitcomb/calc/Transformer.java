@@ -26,6 +26,7 @@
  *	    Initial coding.
  *	13-May-2022 (rlwhitcomb)
  *	    #320: Make "forKeys" into default function.
+ *	    #320: Default is now false ("trim" and "replace" shouldn't).
  */
 package info.rlwhitcomb.calc;
 
@@ -48,10 +49,10 @@ public interface Transformer extends Function<Object, Object>
 	/**
 	 * Does this transformation apply to map keys as well as values?
 	 *
-	 * @return {@code true} if map keys can be transformed.
+	 * @return {@code true} if map keys can be transformed, default is {@code false}.
 	 */
 	default boolean forKeys() {
-	    return true;
+	    return false;
 	}
 }
 

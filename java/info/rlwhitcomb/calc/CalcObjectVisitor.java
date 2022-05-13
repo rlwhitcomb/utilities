@@ -557,6 +557,7 @@
  *	13-May-2022 (rlwhitcomb)
  *	    #320: Need to rearrange code between Transformer and "copyAndTransform".
  *	    #320: Rework "trim" using Transformer.
+ *	    #320: Rework "replace" also.
  */
 package info.rlwhitcomb.calc;
 
@@ -4163,15 +4164,125 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    return substring(ctx.expr1(), ctx.expr2(), ctx.expr3());
 	}
 
+	/**
+	 * A recursive procedure to do a deep copy of any object and apply the given transform to any
+	 * of the strings within the the objects.
+	 *
+	 * @param ctx    The expression context for the object being copied.
+	 * @param obj    The object to copy.
+	 * @param mapper Transformation to apply to all the strings within the object.
+	 * @return       The deep copy of the original object with the transformer applied to all strings.
+	 */
+	private Object copyAndTransform(final ParserRuleContext ctx, final Object obj, final Transformer mapper) {
+	    if (obj == null) {
+		return null;
+	    }
+	    else if (obj instanceof ObjectScope) {
+		ObjectScope map = (ObjectScope) obj;
+		ObjectScope result = new ObjectScope();
+		for (Map.Entry<String, Object> entry : map.map().entrySet()) {
+		    String key = entry.getKey();
+		    Object value = entry.getValue();
+		    Object newValue = null;
+
+		    if (value != null) {
+			value = evaluate(ctx, value);
+
+			if (value instanceof ObjectScope || value instanceof ArrayScope) {
+			    newValue = copyAndTransform(ctx, value, mapper);
+			}
+			else {
+			    newValue = mapper.apply(value);
+			}
+		    }
+
+		    if (mapper.forKeys()) {
+			result.setValue((String) mapper.apply(key), newValue);
+		    }
+		    else {
+			result.setValue(key, newValue);
+		    }
+		}
+		return result;
+	    }
+	    else if (obj instanceof ArrayScope) {
+		@SuppressWarnings("unchecked")
+		ArrayScope<Object> list = (ArrayScope<Object>) obj;
+		ArrayScope<Object> result = new ArrayScope<>();
+		for (Object value : list.list()) {
+		    Object newValue = null;
+		    if (value != null) {
+			value = evaluate(ctx, value);
+
+			if (value instanceof ObjectScope || value instanceof ArrayScope) {
+			    newValue = copyAndTransform(ctx, value, mapper);
+			}
+			else {
+			    newValue = mapper.apply(value);
+			}
+		    }
+		    result.add(newValue);
+		}
+		return result;
+	    }
+
+	    // For all other scalar values, just get the string value and apply the transform
+	    String exprString = toStringValue(this, ctx, obj, false, settings.separatorMode);
+	    return mapper.apply(exprString);
+	}
+
+	/**
+	 * Transformer for the "replace" option.
+	 */
+	private class ReplaceTransformer implements Transformer
+	{
+		private String pattern;
+		private String replace;
+		private String option;
+
+		ReplaceTransformer(final String searchPattern, final String replaceValue, final String replaceOption) {
+		    pattern = searchPattern;
+		    replace = replaceValue;
+		    option = replaceOption;
+		}
+
+		@Override
+		public Object apply(final Object value) {
+		    if (value instanceof String) {
+			String original = (String) value;
+
+			switch (option) {
+			    case "":
+				// Regular replace using the pattern as a literal
+				return original.replace(pattern, replace);
+			    case "all":
+				// Use pattern as a regex and replace all matching values
+				return original.replaceAll(pattern, replace);
+			    case "first":
+				// Again, pattern is a regex, but only replace the first match
+				return original.replaceFirst(pattern, replace);
+			    case "last":
+				// New functionality, pattern is a regex, but only replace the last match
+				return original.replaceFirst("(?s)(.*)" + pattern, "$1" + replace);
+			    default:
+				break;
+			}
+		    }
+		    return value;
+		}
+	}
+
 	@Override
 	public Object visitReplaceExpr(CalcParser.ReplaceExprContext ctx) {
 	    CalcParser.ReplaceArgsContext args = ctx.replaceArgs();
-	    String option = "";
+	    CalcParser.ExprContext exprCtx = args.expr(0);
 
-	    String original = getStringValue(args.expr(0));
-	    String pattern  = getStringValue(args.expr(1));
-	    String replace  = getStringValue(args.expr(2));
-	    String result   = original;
+	    Object originalObj = evaluate(exprCtx);
+	    String pattern     = getStringValue(args.expr(1));
+	    String replace     = getStringValue(args.expr(2));
+
+	    Object result = originalObj;
+	    String option = "";
 
 	    if (args.replaceOption() != null) {
 		if (args.replaceOption().var() != null) {
@@ -4183,32 +4294,24 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		else {
 		    option = args.replaceOption().getText();
 		}
-	    }
+		option = option.toLowerCase();
 
-	    try {
 		switch (option) {
 		    case "":
-			// Regular replace using the pattern as a literal
-			result = original.replace(pattern, replace);
-			break;
 		    case "all":
-			// Use pattern as a regex and replace all matching values
-			result = original.replaceAll(pattern, replace);
-			break;
 		    case "first":
-			// Again, pattern is a regex, but only replace the first match
-			result = original.replaceFirst(pattern, replace);
-			break;
 		    case "last":
-			// New functionality, pattern is a regex, but only replace the last match
-			result = original.replaceFirst("(?s)(.*)" + pattern, "$1" + replace);
 			break;
 		    default:
 			throw new CalcExprException(args.replaceOption(), "%calc#replaceOptionError", option);
 		}
 	    }
+
+	    try {
+		result = copyAndTransform(exprCtx, originalObj, new ReplaceTransformer(pattern, replace, option));
+	    }
 	    catch (Exception ex) {
-		throw new CalcExprException(ex, ctx);
+		throw new CalcExprException(ex, exprCtx);
 	    }
 
 	    return result;
@@ -4594,33 +4697,33 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	 */
 	private class TrimTransformer implements Transformer
 	{
-	    private String op;
+		private String op;
 
-	    TrimTransformer(final String oper) {
-		op = oper;
-	    }
-
-	    @Override
-	    public Object apply(final Object value) {
-		if (value instanceof String) {
-		    String string = (String) value;
-
-		    switch (op) {
-			case "trim":
-			    return string.trim();
-
-			case "ltrim":
-			    return CharUtil.ltrim(string);
-
-			case "rtrim":
-			    return CharUtil.rtrim(string);
-
-			default:
-			    break;
-		    }
+		TrimTransformer(final String oper) {
+		    op = oper;
 		}
-		return value;
-	    }
+
+		@Override
+		public Object apply(final Object value) {
+		    if (value instanceof String) {
+			String string = (String) value;
+
+			switch (op) {
+			    case "trim":
+				return string.trim();
+
+			    case "ltrim":
+				return CharUtil.ltrim(string);
+
+			    case "rtrim":
+				return CharUtil.rtrim(string);
+
+			    default:
+				break;
+			}
+		    }
+		    return value;
+		}
 	}
 
 	@Override
@@ -4844,97 +4947,30 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	 */
 	private class ConvertCaseTransformer implements Transformer
 	{
-	    private boolean toUpper;
-	    private boolean ignoreCase;
+		private boolean toUpper;
+		private boolean ignoreCase;
 
-	    ConvertCaseTransformer(final boolean upper, final boolean ignore) {
-		toUpper = upper;
-		ignoreCase = ignore;
-	    }
-
-	    @Override
-	    public Object apply(final Object value) {
-		if (value instanceof String) {
-		    String string = (String) value;
-		    if (toUpper)
-			return string.toUpperCase();
-		    else
-			return string.toLowerCase();
+		ConvertCaseTransformer(final boolean upper, final boolean ignore) {
+		    toUpper = upper;
+		    ignoreCase = ignore;
 		}
-		return value;
-	    }
 
-	    @Override
-	    public boolean forKeys() {
-		return !ignoreCase;
-	    }
-	}
-
-	/**
-	 * A recursive procedure to do a deep copy of any object and apply the given transform to any
-	 * of the strings within the the objects.
-	 *
-	 * @param ctx    The expression context for the object being copied.
-	 * @param obj    The object to copy.
-	 * @param mapper Transformation to apply to all the strings within the object.
-	 * @return       The deep copy of the original object with the transformer applied to all strings.
-	 */
-	private Object copyAndTransform(final ParserRuleContext ctx, final Object obj, final Transformer mapper) {
-	    if (obj == null) {
-		return null;
-	    }
-	    else if (obj instanceof ObjectScope) {
-		ObjectScope map = (ObjectScope) obj;
-		ObjectScope result = new ObjectScope();
-		for (Map.Entry<String, Object> entry : map.map().entrySet()) {
-		    String key = entry.getKey();
-		    Object value = entry.getValue();
-		    Object newValue = null;
-
-		    if (value != null) {
-			value = evaluate(ctx, value);
-
-			if (value instanceof ObjectScope || value instanceof ArrayScope) {
-			    newValue = copyAndTransform(ctx, value, mapper);
-			}
-			else {
-			    newValue = mapper.apply(value);
-			}
+		@Override
+		public Object apply(final Object value) {
+		    if (value instanceof String) {
+			String string = (String) value;
+			if (toUpper)
+			    return string.toUpperCase();
+			else
+			    return string.toLowerCase();
 		    }
-
-		    if (mapper.forKeys()) {
-			result.setValue((String) mapper.apply(key), newValue);
-		    }
-		    else {
-			result.setValue(key, newValue);
-		    }
+		    return value;
 		}
-		return result;
-	    }
-	    else if (obj instanceof ArrayScope) {
-		@SuppressWarnings("unchecked")
-		ArrayScope<Object> list = (ArrayScope<Object>) obj;
-		ArrayScope<Object> result = new ArrayScope<>();
-		for (Object value : list.list()) {
-		    Object newValue = null;
-		    if (value != null) {
-			value = evaluate(ctx, value);
 
-			if (value instanceof ObjectScope || value instanceof ArrayScope) {
-			    newValue = copyAndTransform(ctx, value, mapper);
-			}
-			else {
-			    newValue = mapper.apply(value);
-			}
-		    }
-		    result.add(newValue);
+		@Override
+		public boolean forKeys() {
+		    return !ignoreCase;
 		}
-		return result;
-	    }
-
-	    // For all other scalar values, just get the string value and apply the transform
-	    String exprString = toStringValue(this, ctx, obj, false, settings.separatorMode);
-	    return mapper.apply(exprString);
 	}
 
 	@Override
