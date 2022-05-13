@@ -554,6 +554,8 @@
  *	    #319: Implement "!!" operator.
  *	12-May-2022 (rlwhitcomb)
  *	    #320: Implement case conversion with a new recursive method and a Transformer.
+ *	13-May-2022 (rlwhitcomb)
+ *	    #320: Need to rearrange code between Transformer and "copyAndTransform".
  */
 package info.rlwhitcomb.calc;
 
@@ -4816,25 +4818,16 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	 */
 	private class ConvertCaseTransformer implements Transformer
 	{
-	    private ParserRuleContext ctx;
 	    private boolean toUpper;
 	    private boolean ignoreCase;
 
-	    ConvertCaseTransformer(final ParserRuleContext exprCtx, final boolean upper, final boolean ignore) {
-		ctx = exprCtx;
+	    ConvertCaseTransformer(final boolean upper, final boolean ignore) {
 		toUpper = upper;
 		ignoreCase = ignore;
 	    }
 
 	    @Override
-	    public Object apply(final Object input) {
-		if (input == null)
-		    return input;
-
-		Object value = evaluate(ctx, input);
-		if (value == null)
-		    return value;
-
+	    public Object apply(final Object value) {
 		if (value instanceof String) {
 		    String string = (String) value;
 		    if (toUpper)
@@ -4842,7 +4835,6 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    else
 			return string.toLowerCase();
 		}
-
 		return value;
 	    }
 
@@ -4872,19 +4864,23 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    String key = entry.getKey();
 		    Object value = entry.getValue();
 		    Object newValue = null;
+
 		    if (value != null) {
+			value = evaluate(ctx, value);
+
 			if (value instanceof ObjectScope || value instanceof ArrayScope) {
 			    newValue = copyAndTransform(ctx, value, mapper);
 			}
 			else {
-			    newValue = mapper.apply(entry.getValue());
+			    newValue = mapper.apply(value);
 			}
-			if (mapper.forKeys()) {
-			    result.setValue((String) mapper.apply(key), newValue);
-			}
-			else {
-			    result.setValue(key, newValue);
-			}
+		    }
+
+		    if (mapper.forKeys()) {
+			result.setValue((String) mapper.apply(key), newValue);
+		    }
+		    else {
+			result.setValue(key, newValue);
 		    }
 		}
 		return result;
@@ -4896,6 +4892,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		for (Object value : list.list()) {
 		    Object newValue = null;
 		    if (value != null) {
+			value = evaluate(ctx, value);
+
 			if (value instanceof ObjectScope || value instanceof ArrayScope) {
 			    newValue = copyAndTransform(ctx, value, mapper);
 			}
@@ -4918,8 +4916,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    CalcParser.ExprContext exprCtx = ctx.expr1().expr();
 	    boolean upper = ctx.K_UPPER() != null;
 
-	    return copyAndTransform(exprCtx, evaluate(exprCtx),
-		new ConvertCaseTransformer(exprCtx, upper, settings.ignoreNameCase));
+	    return copyAndTransform(exprCtx, evaluate(exprCtx), new ConvertCaseTransformer(upper, settings.ignoreNameCase));
 	}
 
 	@Override
