@@ -799,7 +799,7 @@ or<br>
         <i>expr</i>&nbsp;<code> || </code>or<code> &#x2228; </code>&nbsp;<i>expr</i></td><td>logical OR</td><td>left to right</td></tr>
     <tr><td>9</td><td>
         <i>expr</i>&nbsp;<code> ^^ </code>or<code> &#x22BB; </code>&nbsp;<i>expr</i></td><td>logical exclusive OR</td><td>left to right</td></tr>
-    <tr><td>8</td><td><i>expr</i>&nbsp;<code> ?: </code>&nbsp;<i>expr</i><br><i>expr</i>&nbsp;<code> ?! </code><i>expr</i></td><td>select alternate value for "false" value<br>or select an alternate value for "true" value</td><td>left to right</td></tr>
+    <tr><td>8</td><td><i>expr</i>&nbsp;<code> ?: </code>&nbsp;<i>expr</i><br><i>expr</i>&nbsp;<code> ?! </code><i>expr</i></td><td>select alternate for <code><i>false</i></code> value<br>or select an alternate for <code><i>true</i></code> value</td><td>left to right</td></tr>
     <tr><td>7</td><td><i>expr</i>&nbsp;<code> ? </code>&nbsp;<i>expr</i>&nbsp;<code> : </code>&nbsp;<i>expr</i></td><td>select one or the other value</td><td>right to left</td></tr>
     <tr><td>6</td><td><i>var</i>&nbsp;<code> = </code>&nbsp;<i>expr</i></td><td>assign <i>expr</i> value to variable</td><td>right to left</td></tr>
     <tr><td>5</td><td><i>var</i>&nbsp;<code> **=</code>,<code> &times;&times;=</code>,<code> &#x2217;&#x2217;=</code>,<code> &#x2715;&#x2715;=</code>, or<code> &#x2716;&#x2716;= </code>&nbsp;<i>expr</i></td><td><i>var</i> to <i>expr</i> power, assign to <i>var</i></td><td>right to left</td></tr>
