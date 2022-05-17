@@ -2022,6 +2022,7 @@ public class Calc
 		case "cleararguments":
 		case "clearargs":
 		case "clear":
+		case "clr":
 		    argValues.clear();
 		    break;
 		case "variable":
