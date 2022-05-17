@@ -7,7 +7,7 @@
 # Simple version check ...
 # version 2.3.0 was first version where these checks would work, and 2.4.11 is where versioninfo -> info.version
 info.version.major > 2 || (info.version.major == 2 && info.version.minor > 4) || (info.version.major == 2 && info.version.minor == 4 && info.version.patch >= 11)
-:requires '2.10.14-alpha', base '1.9.15-alpha'
+:requires '2.10.18-alpha', base '1.9.15-alpha'
 
 # Various simple expressions
 :decimal(50)

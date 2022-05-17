@@ -52,6 +52,8 @@
  *	    #68: Add new methods for indexing.
  *	09-May-2022 (rlwhitcomb)
  *	    #315: Add "putAll" method from another map.
+ *	16-May-2022 (rlwhitcomb)
+ *	    #315: Change "putAll" to another ObjectScope, add copy constructor.
  */
 package info.rlwhitcomb.calc;
 
@@ -101,6 +103,15 @@ class ObjectScope extends Scope
 	    super(t);
 	    variables = new LinkedHashMap<>();
 	    immutable = false;
+	}
+
+	/**
+	 * "Copy" constructor to create a new object from an existing one.
+	 *
+	 * @param obj The existing object to copy.
+	 */
+	ObjectScope(final ObjectScope obj) {
+	    this(obj.variables);
 	}
 
 	/**
@@ -467,12 +478,12 @@ class ObjectScope extends Scope
 	}
 
 	/**
-	 * Add all the values from another map to this object.
+	 * Add all the values from another object to this one.
 	 *
-	 * @param m  Another map of key:value to add.
+	 * @param obj Another {@link ObjectScope} to add.
 	 */
-	public void putAll(final Map<String, Object> m) {
-	    variables.putAll(m);
+	public void putAll(final ObjectScope obj) {
+	    variables.putAll(obj.variables);
 	}
 
 	/**

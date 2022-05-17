@@ -141,6 +141,8 @@
  *	    #315: Implement object concatenation in "addOp".
  *	11-May-2022 (rlwhitcomb)
  *	    #318: Rename "evaluateFunction" to just "evaluate".
+ *	17-May-2022 (rlwhitcomb)
+ *	    #315: Change "putAll" on ObjectScope to accept the whole object.
  */
 package info.rlwhitcomb.calc;
 
@@ -1264,7 +1266,7 @@ public final class CalcUtil
 		if (obj2 instanceof ObjectScope) {
 		    ObjectScope map2 = (ObjectScope) obj2;
 
-		    result.putAll(map2.map());
+		    result.putAll(map2);
 		}
 		else if (obj2 instanceof ArrayScope) {
 		    @SuppressWarnings("unchecked")

@@ -99,12 +99,35 @@ s1
   3
 ]
 
+[
+
+]
+
 {
   a : 10,
   b : true,
   c : 'ABC'
 }
 
+# pre- and post- operations on lists and objects
+a1 = [ 1, 2, 3, 4 ]
+o1 = { b: false, c:'def', d: 1.2 }
+
+++a1
+a1++
+a1
+
+a1--
+--a1
+a1
+
+++o1
+o1++
+o1
+
+o1--
+--o1
+o1
 // Tests of extended identifier characters
 :clear p8, p9
 p9 = { '\u{1D71B}': pi }

@@ -558,6 +558,8 @@
  *	    #320: Need to rearrange code between Transformer and "copyAndTransform".
  *	    #320: Rework "trim" using Transformer.
  *	    #320: Rework "replace" also.
+ *	15-May-2022 (rlwhitcomb)
+ *	    #315: Implement pre- and post-inc/dec operators for objects and lists.
  */
 package info.rlwhitcomb.calc;
 
@@ -2904,62 +2906,75 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    LValueContext lValue = getLValue(var);
 	    Object value = evaluate(var, lValue.getContextObject(this));
 	    String op = ctx.INC_OP().getText();
+	    boolean incr = false;
 	    Object beforeValue;
 	    Object afterValue;
 
-	    if (settings.rationalMode) {
+	    switch (op) {
+		case "++":
+		case "\u2795\u2795":
+		    incr = true;
+		    break;
+		case "--":
+		case "\u2212\u2212":
+		case "\u2796\u2796":
+		    break;
+		default:
+		    throw new UnknownOpException(op, ctx);
+	    }
+
+	    if (value instanceof ArrayScope) {
+		@SuppressWarnings("unchecked")
+		ArrayScope<Object> list = (ArrayScope<Object>) value;
+		beforeValue = new ArrayScope<Object>(list);
+
+		if (incr)
+		    list.add(null);
+		else
+		    list.remove(list.size() - 1);
+
+		afterValue = list;
+	    }
+	    else if (value instanceof ObjectScope) {
+		ObjectScope obj = (ObjectScope) value;
+		beforeValue = new ObjectScope(obj);
+
+		if (incr) {
+		    obj.setValue(obj.size(), null);
+		}
+		else {
+		    List<String> keys = obj.keyList();
+		    obj.remove(keys.get(obj.size() - 1), settings.ignoreNameCase);
+		}
+
+		afterValue = obj;
+	    }
+	    else if (settings.rationalMode) {
 		BigFraction fValue = toFractionValue(this, value, var);
 		beforeValue = fValue;
 
-		switch (op) {
-		    case "++":
-		    case "\u2795\u2795":
-			afterValue = fValue.add(BigFraction.ONE);
-			break;
-		    case "--":
-		    case "\u2212\u2212":
-		    case "\u2796\u2796":
-			afterValue = fValue.subtract(BigFraction.ONE);
-			break;
-		    default:
-			throw new UnknownOpException(op, ctx);
-		}
+		if (incr)
+		    afterValue = fValue.add(BigFraction.ONE);
+		else
+		    afterValue = fValue.subtract(BigFraction.ONE);
 	    }
 	    else if (value instanceof ComplexNumber) {
 		ComplexNumber cValue = (ComplexNumber) value;
 		beforeValue = cValue;
 
-		switch (op) {
-		    case "++":
-		    case "\u2795\u2795":
-			afterValue = cValue.add(C_ONE);
-			break;
-		    case "--":
-		    case "\u2212\u2212":
-		    case "\u2796\u2796":
-			afterValue = cValue.subtract(C_ONE);
-			break;
-		    default:
-			throw new UnknownOpException(op, ctx);
-		}
+		if (incr)
+		    afterValue = cValue.add(C_ONE);
+		else
+		    afterValue = cValue.subtract(C_ONE);
 	    }
 	    else {
 		BigDecimal dValue = toDecimalValue(this, value, settings.mc, var);
 		beforeValue = dValue;
 
-		switch (op) {
-		    case "++":
-		    case "\u2795\u2795":
-			afterValue = dValue.add(BigDecimal.ONE);
-			break;
-		    case "--":
-		    case "\u2212\u2212":
-		    case "\u2796\u2796":
-			afterValue = dValue.subtract(BigDecimal.ONE);
-			break;
-		    default:
-			throw new UnknownOpException(op, ctx);
-		}
+		if (incr)
+		    afterValue = dValue.add(BigDecimal.ONE);
+		else
+		    afterValue = dValue.subtract(BigDecimal.ONE);
 	    }
 
 	    lValue.putContextObject(this, afterValue);
@@ -2974,58 +2989,76 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    LValueContext lValue = getLValue(var);
 	    Object value = evaluate(var, lValue.getContextObject(this));
 	    String op = ctx.INC_OP().getText();
+	    boolean incr = false;
 	    Object afterValue;
 
-	    if (settings.rationalMode) {
+	    switch (op) {
+		case "++":
+		case "\u2795\u2795":
+		    incr = true;
+		    break;
+		case "--":
+		case "\u2212\u2212":
+		case "\u2796\u2796":
+		    break;
+		default:
+		    throw new UnknownOpException(op, ctx);
+	    }
+
+	    if (value instanceof ArrayScope) {
+		@SuppressWarnings("unchecked")
+		ArrayScope<Object> list = (ArrayScope<Object>) value;
+
+		if (incr)
+		    list.insert(0, null);
+		else
+		    list.remove(0);
+
+		afterValue = list;
+	    }
+	    else if (value instanceof ObjectScope) {
+		ObjectScope obj = (ObjectScope) value;
+
+		if (incr) {
+		    // It is impossible to rearrange the objects once they've been inserted the first time
+		    // so we have to make a new object with the blank first value and then copy the original
+		    // values in after that.
+		    ObjectScope newObj = new ObjectScope();
+		    newObj.setValue(0, null);
+		    newObj.putAll(obj);
+
+		    afterValue = newObj;
+		}
+		else {
+		    List<String> keys = obj.keyList();
+		    obj.remove(keys.get(0), settings.ignoreNameCase);
+
+		    afterValue = obj;
+		}
+	    }
+	    else if (settings.rationalMode) {
 		BigFraction fValue = toFractionValue(this, value, var);
 
-		switch (op) {
-		    case "++":
-		    case "\u2795\u2795":
-			afterValue = fValue.add(BigFraction.ONE);
-			break;
-		    case "--":
-		    case "\u2212\u2212":
-		    case "\u2796\u2796":
-			afterValue = fValue.subtract(BigFraction.ONE);
-			break;
-		    default:
-			throw new UnknownOpException(op, ctx);
-		}
+		if (incr)
+		    afterValue = fValue.add(BigFraction.ONE);
+		else
+		    afterValue = fValue.subtract(BigFraction.ONE);
 	    }
 	    else if (value instanceof ComplexNumber) {
 		ComplexNumber cValue = (ComplexNumber) value;
 
-		switch (op) {
-		    case "++":
-		    case "\u2795\u2795":
-			afterValue = cValue.add(C_ONE);
-			break;
-		    case "--":
-		    case "\u2212\u2212":
-		    case "\u2796\u2796":
-			afterValue = cValue.subtract(C_ONE);
-			break;
-		    default:
-			throw new UnknownOpException(op, ctx);
-		}
+		if (incr)
+		    afterValue = cValue.add(C_ONE);
+		else
+		    afterValue = cValue.subtract(C_ONE);
 	    }
 	    else {
 		BigDecimal dValue = toDecimalValue(this, value, settings.mc, var);
 
-		switch (op) {
-		    case "++":
-		    case "\u2795\u2795":
-			afterValue = dValue.add(BigDecimal.ONE);
-			break;
-		    case "--":
-		    case "\u2212\u2212":
-		    case "\u2796\u2796":
-			afterValue = dValue.subtract(BigDecimal.ONE);
-			break;
-		    default:
-			throw new UnknownOpException(op, ctx);
-		}
+		if (incr)
+		    afterValue = dValue.add(BigDecimal.ONE);
+		else
+		    afterValue = dValue.subtract(BigDecimal.ONE);
 	    }
 
 	    // pre operation, return the modified value
@@ -4509,7 +4542,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    }
 		    else {
 			// With no drop list, we need to clear out and return everything
-			removed.map().putAll(object.map());
+			removed.putAll(object);
 			object.clear();
 		    }
 

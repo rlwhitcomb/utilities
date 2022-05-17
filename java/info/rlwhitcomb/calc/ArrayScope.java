@@ -35,6 +35,8 @@
  *	    #68: Allow negative indexing (offset from end of array).
  *	08-May-2022 (rlwhitcomb)
  *	    #315: Add "addAll" method.
+ *	15-May-2022 (rlwhitcomb)
+ *	    #315: Add "remove" method, and copy constructor.
  */
 package info.rlwhitcomb.calc;
 
@@ -78,6 +80,15 @@ class ArrayScope<T> extends Scope
 	    for (T value : initialValues) {
 		values.add(value);
 	    }
+	}
+
+	/**
+	 * Construct given another list.
+	 *
+	 * @param list The other list to copy.
+	 */
+	ArrayScope(final ArrayScope<T> list) {
+	    this(list.values);
 	}
 
 	/**
@@ -164,6 +175,16 @@ class ArrayScope<T> extends Scope
 	 */
 	public boolean addAll(final Collection<? extends T> c) {
 	    return values.addAll(c);
+	}
+
+	/**
+	 * Remove the specified element from the list and return it.
+	 *
+	 * @param index Index of the element to remove.
+	 * @return      The previous element at that position.
+	 */
+	public T remove(final int index) {
+	    return values.remove(index);
 	}
 
 	/**
