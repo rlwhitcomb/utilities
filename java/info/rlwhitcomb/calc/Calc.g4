@@ -390,6 +390,8 @@
  *	    #319: Add "!!" operator (explicitly).
  *	12-May-2022 (rlwhitcomb)
  *	    #321: Allow ":requires" spelling for new directive.
+ *	16-May-2022 (rlwhitcomb)
+ *	    #325: Change EOL? to EOL* everywhere to allow more variety of empty objects.
  */
 
 grammar Calc;
@@ -417,9 +419,9 @@ stmtOrExpr
 
 formattedExprs
    : exprStmt
-   | exprStmt (EOL | ENDEXPR) stmtOrExpr
+   | exprStmt (EOL | ENDEXPR)+ stmtOrExpr
    | directive
-   | directive (EOL | ENDEXPR) stmtOrExpr
+   | directive (EOL | ENDEXPR)+ stmtOrExpr
    ;
 
 exprStmt
@@ -443,7 +445,7 @@ whileStmt
    ;
 
 ifStmt
-   : K_IF expr stmtBlock ( EOL? K_ELSE stmtBlock ) ?
+   : K_IF expr stmtBlock ( EOL* K_ELSE stmtBlock ) ?
    ;
 
 caseStmt
@@ -460,16 +462,16 @@ timeThisStmt
    ;
 
 bracketBlock
-   : EOL? '{' ( EOL? stmtOrExpr ) * '}' EOL?
+   : EOL* '{' ( EOL* stmtOrExpr ) * '}' EOL*
    ;
 
 stmtBlock
-   : EOL? '{' ( EOL? stmtOrExpr ) * '}' EOL?
-   | EOL? stmtOrExpr EOL?
+   : EOL* '{' ( EOL* stmtOrExpr ) * '}' EOL*
+   | EOL* stmtOrExpr EOL*
    ;
 
 caseBlock
-   : EOL? caseSelector ( ',' EOL? caseSelector ) * ':' stmtBlock
+   : EOL* caseSelector ( ',' EOL* caseSelector ) * ':' stmtBlock
    ;
 
 emptyStmt
@@ -657,12 +659,12 @@ loopCtl
    ;
 
 arr
-   : '[' EOL? exprList EOL? ']'
-   | '[' EOL? ']'
+   : '[' EOL* exprList EOL* ']'
+   | '[' EOL* ']'
    ;
 
 exprList
-   : expr ( ',' EOL? expr ) *
+   : expr ( ',' EOL* expr ) *
    ;
 
 caseSelector
@@ -674,8 +676,8 @@ caseSelector
    ;
 
 obj
-   : '{' EOL? pair ( ',' EOL? pair ) * EOL? '}'
-   | '{' EOL? '}'
+   : '{' EOL* pair ( ',' EOL* pair ) * EOL* '}'
+   | '{' EOL* '}'
    | EMPTY_SET
    ;
 
