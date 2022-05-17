@@ -69,6 +69,8 @@
  *	    #209: Add international currency symbol (same as Calc "info.locale").
  *	21-Jan-2022 (rlwhitcomb)
  *	    #217: Use new Options method to process an environment variable for default options.
+ *	16-May-2022 (rlwhitcomb)
+ *	    #326: Fix color end value sequences after changes for Calc "<>" operator.
  */
 package info.rlwhitcomb.tools;
 
@@ -454,7 +456,7 @@ public class OS
 	    List<String> props = new ArrayList<>(sortedNames.size());
 	    for (String propertyName: sortedNames) {
 		String value = sysProperties.getProperty(propertyName);
-		props.add(String.format("<Bk!>%1$s<> = <Gr>%2$s<>", propertyName, value));
+		props.add(String.format("<Bk!>%1$s<.> = <Gr>%2$s<.>", propertyName, value));
 	    }
 
 	    display("System Properties", props);
@@ -468,7 +470,7 @@ public class OS
 
 	    List<String> envs = new ArrayList<>(env.size());
 	    for (Map.Entry<String, String> entry : env.entrySet()) {
-		envs.add(String.format("<Bk!>%1$s<> = <Gr>%2$s<>", entry.getKey(), entry.getValue()));
+		envs.add(String.format("<Bk!>%1$s<.> = <Gr>%2$s<.>", entry.getKey(), entry.getValue()));
 	    }
 
 	    display("Environment", envs);
@@ -484,8 +486,8 @@ public class OS
 
 	    List<String> sets = new ArrayList<>(charsets.size());
 	    for (Map.Entry<String, Charset> entry : charsets.entrySet()) {
-		String prefix = (entry.getValue().equals(defaultCharset)) ? "<Rd!>*<> " : "  ";
-		sets.add(String.format("%1$s<Gr>%2$s<>", prefix, entry.getKey()));
+		String prefix = (entry.getValue().equals(defaultCharset)) ? "<Rd!>*<.> " : "  ";
+		sets.add(String.format("%1$s<Gr>%2$s<.>", prefix, entry.getKey()));
 	    }
 
 	    display("Character Sets", sets);
@@ -544,11 +546,11 @@ public class OS
 
 		DecimalFormatSymbols symbols = DecimalFormatSymbols.getInstance(loc);
 
-		String prefix = (loc.equals(defaultLocale)) ? "<Rd!>*<>" : "";
+		String prefix = (loc.equals(defaultLocale)) ? "<Rd!>*<.>" : "";
 		String message = "";
 		if (verbose) {
 		    message = String.format(
-			"%1$1s<Cy>%2$15s<>  <Gr>%3$s<-->%n" +
+			"%1$1s<Cy>%2$15s<.>  <Gr>%3$s<-->%n" +
 			"\t\t<Bk!>language: <Gr>%4$s<Bk!>  country: <Gr>%5$s<Bk!>  variant: <Gr>%6$s<-->%n" +
 			"\t\t<Bk!>currency: <Gr>%7$s<Bk!>  symbol: <Gr>%8$s<-->%n" +
 			"\t\t<Bk!>minus: <Gr>%9$c<Bk!>  decimal: <Gr>%10$c<Bk!>  grouping: <Gr>%11$c<Bk!>  exponent: <Gr>%12$s<-->%n" +
@@ -563,7 +565,7 @@ public class OS
 		}
 		else {
 		    message = String.format(
-			"%1$1s<Cy>%2$15s<>  <Gr>%3$s<-->",
+			"%1$1s<Cy>%2$15s<.>  <Gr>%3$s<-->",
 			prefix, tag, loc.getDisplayName());
 		}
 		locs.add(message);
@@ -605,7 +607,7 @@ public class OS
 	    Arrays.sort(providers, OS::compareProviders);
 
 	    final List<String> provs = new ArrayList<>(providers.length);
-	    Arrays.stream(providers).forEach(p -> provs.add(String.format("<Bk!>%1$12s<>: <Gr>%2$s<>", p.getName(), p.getInfo())));
+	    Arrays.stream(providers).forEach(p -> provs.add(String.format("<Bk!>%1$12s<.>: <Gr>%2$s<.>", p.getName(), p.getInfo())));
 
 	    display("Security Providers", provs);
 	}
@@ -663,7 +665,7 @@ public class OS
 	 * @return		A formatted string suitable for display.
 	 */
 	private static String tzDisplayName(TimeZone tz, boolean daylight) {
-	    return String.format("<Gr>%1$s<>: <Bk!>%2$s<> <Bl!>(%3$s)<> <Cy>[%4$s]<>",
+	    return String.format("<Gr>%1$s<.>: <Bk!>%2$s<.> <Bl!>(%3$s)<.> <Cy>[%4$s]<.>",
 		tz.getID(),
 		tz.getDisplayName(daylight, TimeZone.LONG),
 		tz.getDisplayName(daylight, TimeZone.SHORT),
@@ -690,11 +692,11 @@ public class OS
 
 	    Arrays.stream(availableZones).forEach(tz -> {
 		boolean isDefault = tz.equals(defaultZone);
-		String defMarker = isDefault ? "<Rd!>*<> " : "  ";
+		String defMarker = isDefault ? "<Rd!>*<.> " : "  ";
 		zones.add(String.format("%1$s%2$s", defMarker, tzDisplayName(tz, false)));
 
 		if (tz.observesDaylightTime()) {
-		    defMarker = isDefault && tz.inDaylightTime(now) ? "<Rd!>+<> " : "  ";
+		    defMarker = isDefault && tz.inDaylightTime(now) ? "<Rd!>+<.> " : "  ";
 		    zones.add(String.format("%1$s%2$s", defMarker, tzDisplayName(tz, true)));
 		}
 	    });
@@ -703,10 +705,10 @@ public class OS
 
 	    if (!sawDefault) {
 		printTitle("Default Time Zone");
-		String value = String.format("<Rd!>*<> %1$s", tzDisplayName(defaultZone, false));
+		String value = String.format("<Rd!>*<.> %1$s", tzDisplayName(defaultZone, false));
 		System.out.println(ConsoleColor.color(value, colors));
 		if (defaultZone.observesDaylightTime()) {
-		    value = String.format("<Rd!>+<> %1$s", tzDisplayName(defaultZone, true));
+		    value = String.format("<Rd!>+<.> %1$s", tzDisplayName(defaultZone, true));
 		    System.out.println(ConsoleColor.color(value, colors));
 		}
 		printFooter();
