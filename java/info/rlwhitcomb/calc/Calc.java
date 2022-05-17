@@ -276,6 +276,8 @@
  *	    #308: Update the reset color tag.
  *	07-May-2022 (rlwhitcomb)
  *	    #292: Don't do the library version check here; use new ":require" directive instead.
+ *	16-May-2022 (rlwhitcomb)
+ *	    #328: Implement "-clear" command line option.
  */
 package info.rlwhitcomb.calc;
 
@@ -2016,6 +2018,11 @@ public class Calc
 		case "nolibs":
 		case "nolib":
 		    libraryNames = null;
+		    break;
+		case "cleararguments":
+		case "clearargs":
+		case "clear":
+		    argValues.clear();
 		    break;
 		case "variable":
 		case "define":

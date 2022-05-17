@@ -279,6 +279,7 @@ h2 {
     <tr><td><code>-inputdir</code> <i>directory</i></td><td>Specify a default directory location to find files to be processed</td><td><code>-input</code>, <code>-dir</code></td><td></td></tr>
     <tr><td><code>-library</code> <i>library_name(s)</i></td><td>Specify one or more libraries to load to begin with</td><td><code>-libraries</code>, <code>-libs</code>, <code>-lib</code></td><td><code>:include</code>, <code>:load</code>, or <code>:open</code><br>(also see the <code>:save</code> directive)</td></tr>
     <tr><td><code>-ignorelibraries</code></td><td>Ignore previous libraries<br>(from <code>CALC_OPTIONS</code> for instance)</td><td><code>-nolibraries</code>, <code>-nolibrary</code>,<br><code>-nolibs</code>, <code>-nolib</code></td><td></td></tr>
+    <tr><td><code>-clear</code></td><td>Clear any variables defined by <code>CALC_OPTIONS</code>.</td><td><code>-cleararguments</code>, <code>-clearargs</code></td><td></td></tr>
     <tr><td><code>-cmdenter</code></td><td>Use <code>Ctrl+Enter</code> (or <code>&#x2318;Enter</code> on Mac)<br>to calculate in the GUI input field <i>(default)</i></td><td><code>-cmd</code></td><td></td></tr>
     <tr><td><code>-enter</code></td><td>Use just <code>Enter</code> to calculate in GUI input field</td><td><code>-e</code></td><td></td></tr>
     <tr><td><code>-utf8</code></td><td>Decode all input files using the UTF-8 charset</td><td><code>-utf</code>, <code>-u</code></td><td></td></tr>
