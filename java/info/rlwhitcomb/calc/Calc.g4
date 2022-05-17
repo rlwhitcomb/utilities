@@ -392,6 +392,7 @@
  *	    #321: Allow ":requires" spelling for new directive.
  *	16-May-2022 (rlwhitcomb)
  *	    #325: Change EOL? to EOL* everywhere to allow more variety of empty objects.
+ *	    And backout one change because it results in an infinite loop always.
  */
 
 grammar Calc;
@@ -419,9 +420,9 @@ stmtOrExpr
 
 formattedExprs
    : exprStmt
-   | exprStmt (EOL | ENDEXPR)+ stmtOrExpr
+   | exprStmt (EOL | ENDEXPR) stmtOrExpr
    | directive
-   | directive (EOL | ENDEXPR)+ stmtOrExpr
+   | directive (EOL | ENDEXPR) stmtOrExpr
    ;
 
 exprStmt
