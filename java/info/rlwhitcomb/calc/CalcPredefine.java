@@ -44,6 +44,8 @@
  *	    into ParameterizedScope and GlobalScope.
  *	14-Apr-2022 (rlwhitcomb)
  *	    #273: Move math-related classes to "math" package.
+ *	17-May-2022 (rlwhitcomb)
+ *	    #323: Add "env" variables as predefined.
  */
 package info.rlwhitcomb.calc;
 
@@ -62,6 +64,7 @@ import java.util.Locale;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.TimeZone;
+import java.util.TreeMap;
 import java.util.function.Supplier;
 
 import de.onyxbits.SemanticVersion;
@@ -291,6 +294,15 @@ class CalcPredefine
 	    PredefinedValue.define(info, "timezone",   tz);
 
 	    PredefinedValue.define(globalScope, "info", info);
+
+	    ObjectScope env = new ObjectScope();
+
+	    TreeMap<String, String> envMap = new TreeMap<>(System.getenv());
+	    for (Map.Entry<String, String> entry : envMap.entrySet()) {
+		PredefinedValue.define(env, entry.getKey(), entry.getValue());
+	    }
+
+	    PredefinedValue.define(globalScope, "env", env);
 
 	    PredefinedValue.define(globalScope, "pi", piWorker.piSupplier);
 	    for (int i = 0; i < PI_ALIASES.length; i++) {
