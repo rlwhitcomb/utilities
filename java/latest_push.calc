@@ -1,0 +1,21 @@
+/*
+ * Cull out the latest push id from a github public events record.
+ *
+ * Retrieve the payload using "curl" and the URL: https://api.github.com/users/<username>/events/public
+ * Read and evaluate the result as a JSON object
+ * Loop through the outer array looking for ."type" == "PushEvent"
+ * Retrieve the "payload"."head" value and pull the first 7 characters
+ *
+ * $0 = name of file retrieved by "curl"
+ */
+:quiet on {
+    j = eval(read($0))
+}
+:results on {
+    loop event within j {
+        if event."type" == "PushEvent" {
+           `${substr(event."payload"."head", 0, 7)}` @q
+           leave
+        }
+    }
+}
