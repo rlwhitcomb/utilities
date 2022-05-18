@@ -307,6 +307,8 @@
 		Add "fork" to Java tasks to support JDK 18 changes to SecurityManager.
 	    21-Apr-2022 (rlwhitcomb)
 		#273: Need to add new "math" directory in a few places.
+	    18-May-2022 (rlwhitcomb)
+		#330: Add "Main-Class" attribute to .jar file.
 
      ========================================================================== -->
 
@@ -637,6 +639,7 @@
 	<target name="jar" depends="compile" description="Jar up the compiled class files (into ${result.jar}).">
 		<delete file="MANIFEST.MF"/>
 		<manifest file="MANIFEST.MF">
+			<attribute name="Main-Class" value="info.rlwhitcomb.Version"/>
 			<attribute name="Built-By" value="${user.name}"/>
 			<attribute name="Implementation-Title" value="${product.name}"/>
 			<attribute name="Implementation-Version" value="${build.version}${debug.flag}+${build.lastrev}"/>
