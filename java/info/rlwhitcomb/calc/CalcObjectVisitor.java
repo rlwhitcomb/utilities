@@ -560,6 +560,8 @@
  *	    #320: Rework "replace" also.
  *	15-May-2022 (rlwhitcomb)
  *	    #315: Implement pre- and post-inc/dec operators for objects and lists.
+ *	17-May-2022 (rlwhitcomb)
+ *	    #334: Fix the extra processing of ":echo" messages.
  */
 package info.rlwhitcomb.calc;
 
@@ -1614,7 +1616,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public Object visitEchoDirective(CalcParser.EchoDirectiveContext ctx) {
 	    String msg = getStringValue(ctx.expr(), true, false, settings.separatorMode);
 
-	    displayer.displayMessage(getRawString(msg));
+	    displayer.displayMessage(msg);
 
 	    return msg;
 	}
