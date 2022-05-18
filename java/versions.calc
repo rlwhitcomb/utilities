@@ -1,4 +1,4 @@
-:quiet on { :include 'VersionRef.json' }
+:quiet on { versions = eval(read('VersionRef.json')) }
 :resultsonly on {
     loop v over versions {
         `${v.version}: ${v.comment}` @q

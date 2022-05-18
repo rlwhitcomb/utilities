@@ -2,7 +2,7 @@
 // Calc Version History
 //======================
 
-versions = [
+[
     { version: '2.10.22', date: d'2022-05-18',
       issues: [ 315 ],
       comment: 'Fix bug with obj + list or list + obj concatenation'
@@ -48,4 +48,3 @@ versions = [
       comment: 'Rework "upper" and "lower" to properly process objects and lists.'
     }
 ]
-
