@@ -34,6 +34,18 @@ versions = [
     { version: '2.10.14', date: d'2022-05-13',
       issues: [ 320 ],
       comment: 'Rework "replace" to do deep inspection of objects and lists.'
+    },
+    { version: '2.10.13', date: d'2022-05-13',
+      issues: [ 320 ],
+      comment: 'Rework the "trim" functions to work with objects and lists.'
+    },
+    { version: '2.10.12', date: d'2022-05-13',
+      issues: [ 320 ],
+      comment: 'Internal code changes for "upper" and "lower" operation.'
+    },
+    { version: '2.10.11', date: d'2022-05-13',
+      issues: [ 320 ],
+      comment: 'Rework "upper" and "lower" to properly process objects and lists.'
     }
 ]
 
