@@ -95,6 +95,8 @@
  *	    negative indexes (offset from length).
  *	11-May-2022 (rlwhitcomb)
  *	    #318: Rename "evaluateFunction" to "evaluate".
+ *	17-May-2022 (rlwhitcomb)
+ *	    #333: Redo awkward error message.
  */
 package info.rlwhitcomb.calc;
 
@@ -110,6 +112,7 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import static info.rlwhitcomb.calc.CalcUtil.getIStringValue;
 import static info.rlwhitcomb.calc.CalcUtil.getStringMemberName;
 import static info.rlwhitcomb.calc.CalcUtil.getTreeText;
+import static info.rlwhitcomb.calc.CalcUtil.typeof;
 import info.rlwhitcomb.util.Intl;
 
 
@@ -430,7 +433,7 @@ class LValueContext
 		}
 	    }
 	    else {
-		throw new CalcExprException(ctx, "%calc#nonObjectValue", this);
+		throw new CalcExprException(ctx, "%calc#nonObjectValue", this, typeof(objValue));
 	    }
 
 	    if (memberName != null) {
@@ -507,7 +510,7 @@ class LValueContext
 		    return new LValueContext(arrLValue, arrVarCtx, arrValue, index);
 		}
 		else {
-		    throw new CalcExprException(arrVarCtx, "%calc#nonArrayValue", arrLValue);
+		    throw new CalcExprException(arrVarCtx, "%calc#nonArrayValue", arrLValue, typeof(arrValue));
 		}
 
 		return new LValueContext(arrLValue, arrVarCtx, list, index);

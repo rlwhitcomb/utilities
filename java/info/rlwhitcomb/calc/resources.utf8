@@ -123,6 +123,8 @@
 #	    #298: Add "within" to "loop" statements and "in" expressions.
 #	07-May-2022 (rlwhitcomb)
 #	    #292: Revise version check errors.
+#	17-May-2022 (rlwhitcomb)
+#	    #333: Reword awkward error message.
 #
 
 #
@@ -240,8 +242,8 @@ unknownType		= Unknown value type: <y>%1$s<.>
 # From LValueContext
 #
 localVarNotAvail	= Local variable <y>%1$s<.> is not available
-nonObjectValue		= Variable <y>%1$s<.> already has a non-object value
-nonArrayValue		= Variable <y>%1$s<.> already has a non-array value
+nonObjectValue		= Cannot access a member of variable <y>%1$s<.> which is type %2$s
+nonArrayValue		= Cannot index into variable <y>%1$s<.> which is type %2$s
 callNotAFunction	= Cannot make a function call on the non-function value <y>%1$s<.>
 indexNegative		= Effective index value of <u>%1$d<.> cannot be negative
 unknownVarCtx		= ERROR: unknown var context subclass: <y>%1$s<.>
