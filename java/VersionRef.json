@@ -1,0 +1,39 @@
+//======================
+// Calc Version History
+//======================
+
+versions = [
+    { version: '2.10.22', date: d'2022-05-18',
+      issues: [ 315 ],
+      comment: 'Fix bug with obj + list or list + obj concatenation'
+    },
+    { version: '2.10.21', date: d'2022-05-17',
+      issues: [ 333 ],
+      comment: 'Reword "non-object" and "non-array" messages.'
+    },
+    { version: '2.10.20', date: d'2022-05-17',
+      issues: [ 334 ],
+      comment: 'Fix extra string processing for ":echo".'
+    },
+    { version: '2.10.19', date: d'2022-05-17',
+      issues: [ 323 ],
+      comment: 'Add "env" predefined value.'
+    },
+    { version: '2.10.18', date: d'2022-05-17',
+      issues: [ 315 ],
+      comment: 'Implement object concatenation.'
+    },
+    { version: '2.10.16', date: d'2022-05-16',
+      issues: [ 328 ],
+      comment: 'Implement "-clear" option on command line.'
+    },
+    { version: '2.10.15', date: d'2022-05-16',
+      issues: [ 325 ],
+      comment: 'Allow multiple newlines wherever one is allowed.'
+    },
+    { version: '2.10.14', date: d'2022-05-13',
+      issues: [ 320 ],
+      comment: 'Rework "replace" to do deep inspection of objects and lists.'
+    }
+]
+

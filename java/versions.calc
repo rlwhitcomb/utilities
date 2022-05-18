@@ -1,0 +1,6 @@
+:quiet on { :include 'VersionRef.json' }
+:resultsonly on {
+    loop v over versions {
+        `${v.version}: ${v.comment}` @q
+    }
+}
