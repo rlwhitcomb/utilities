@@ -94,6 +94,18 @@ hash('test/data/Declaration.txt',,true)
 hashstring('Four score and seven years ago')
 
 #
+# Date format checks
+#
+dt1 = d'2021-8-5'
+dateformat(dt1, 'MMM d, yyyy')
+dateformat(dt1, 'mm/dd/yyyy')
+dateformat(dt1, 'd M yyyy')
+dateformat(dt1, 'yyyy-dd-mm')
+dateformat(dt1)
+dateformat(dt1, 'm/d/yy')
+dateformat(dt1, 'mm/dd/yy')
+
+#
 # Surrogate pair conversions
 #
 cp = 0x1f603

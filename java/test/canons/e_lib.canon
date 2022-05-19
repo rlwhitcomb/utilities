@@ -71,6 +71,14 @@
 >Number of tests = 16384, mistakes = 0
 >hash('test/data/Declaration.txt', , true) -> "D424650E3A0F123F4D46D14AF0E2C309184C823021F578B02689802B06B0F674"
 >hashstring('Four score and seven years ago') -> "213742bd59f1d8fe848b6ea94647dd465310b8d816234d5a952dc645fa320707"
+>dt1 = d'2021-8-5' -> 18844
+>dateformat(dt1, 'MMM d, yyyy') -> "August 5, 2021"
+>dateformat(dt1, 'mm/dd/yyyy') -> "08/05/2021"
+>dateformat(dt1, 'd M yyyy') -> "5 Aug 2021"
+>dateformat(dt1, 'yyyy-dd-mm') -> "2021-05-08"
+>dateformat(dt1) -> "08/05/2021"
+>dateformat(dt1, 'm/d/yy') -> "8/5/21"
+>dateformat(dt1, 'mm/dd/yy') -> "08/05/21"
 >cp = 0x1f603 -> 128515
 >surr_pair_to_cp(0xd83d, 0xde03) @c -> "😃"
 >cp_to_high_surr(cp) @x -> 0xd83d

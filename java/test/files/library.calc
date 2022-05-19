@@ -209,6 +209,48 @@ def timestamp(date = today, time = now) = {
 }
 
 /*
+ * Format a date according to the given format.
+ *
+ * @param d  The date value.
+ * @param f  Format for the date, such as "mm/dd/yyyy" (default pattern).
+ * @return   The date formatted according to the pattern.
+ */
+define dateformat(d, f = 'mm/dd/yyyy') = {
+    define d2(n) = { n < 10 ? '0' + n : '' + n }
+    define dg(n) = { '' + n }
+    define finishRun(ch) = {
+        len = length(runOf)
+        if len {
+            if ch == runOf[0] leave
+            case runOf[0] of {
+                'd': result += (len == 1 ? dg(dom(d)) : d2(dom(d))),
+                'y': result += (len <= 2 ? d2(yod(d) % 100) : dg(yod(d))),
+                'm': result += (len == 1 ? dg(moy(d)) : d2(moy(d))),
+                'M': result += (len <= 2 ? substr(moy_name(d), 0, 3) : moy_name(d))
+            }
+        }
+        runOf = ''
+    }
+
+    result = ''
+    runOf = ''
+    loop fch over f {
+        case fch of {
+            'd', 'm', 'M', 'y': {
+                finishRun(fch)
+                runOf += fch
+            },
+            default: {
+                finishRun(fch)
+                result += fch
+            }
+        }
+    }
+    finishRun('')
+    result
+}
+
+/*
  * Compute the flat map of an array.
  *
  * @param arr The input array.
