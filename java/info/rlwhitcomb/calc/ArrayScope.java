@@ -37,6 +37,8 @@
  *	    #315: Add "addAll" method.
  *	15-May-2022 (rlwhitcomb)
  *	    #315: Add "remove" method, and copy constructor.
+ *	18-May-2022 (rlwhitcomb)
+ *	    #315: Add "isEmpty" method.
  */
 package info.rlwhitcomb.calc;
 
@@ -203,6 +205,15 @@ class ArrayScope<T> extends Scope
 	 */
 	public int size() {
 	    return values.size();
+	}
+
+	/**
+	 * Is the list empty?
+	 *
+	 * @return {@code true} for an empty list
+	 */
+	public boolean isEmpty() {
+	    return values.isEmpty();
 	}
 
 }

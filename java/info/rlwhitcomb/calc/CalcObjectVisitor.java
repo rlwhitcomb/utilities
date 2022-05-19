@@ -562,6 +562,8 @@
  *	    #315: Implement pre- and post-inc/dec operators for objects and lists.
  *	17-May-2022 (rlwhitcomb)
  *	    #334: Fix the extra processing of ":echo" messages.
+ *	18-May-2022 (rlwhitcomb)
+ *	    #315: Protect "--" on empty lists and objects.
  */
 package info.rlwhitcomb.calc;
 
@@ -2930,10 +2932,14 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		ArrayScope<Object> list = (ArrayScope<Object>) value;
 		beforeValue = new ArrayScope<Object>(list);
 
-		if (incr)
+		if (incr) {
 		    list.add(null);
-		else
-		    list.remove(list.size() - 1);
+		}
+		else {
+		    if (!list.isEmpty()) {
+			list.remove(list.size() - 1);
+		    }
+		}
 
 		afterValue = list;
 	    }
@@ -2945,8 +2951,10 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    obj.setValue(obj.size(), null);
 		}
 		else {
-		    List<String> keys = obj.keyList();
-		    obj.remove(keys.get(obj.size() - 1), settings.ignoreNameCase);
+		    if (!obj.isEmpty()) {
+			List<String> keys = obj.keyList();
+			obj.remove(keys.get(obj.size() - 1), settings.ignoreNameCase);
+		    }
 		}
 
 		afterValue = obj;
@@ -3011,10 +3019,14 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		@SuppressWarnings("unchecked")
 		ArrayScope<Object> list = (ArrayScope<Object>) value;
 
-		if (incr)
+		if (incr) {
 		    list.insert(0, null);
-		else
-		    list.remove(0);
+		}
+		else {
+		    if (!list.isEmpty()) {
+			list.remove(0);
+		    }
+		}
 
 		afterValue = list;
 	    }
@@ -3032,8 +3044,10 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    afterValue = newObj;
 		}
 		else {
-		    List<String> keys = obj.keyList();
-		    obj.remove(keys.get(0), settings.ignoreNameCase);
+		    if (!obj.isEmpty()) {
+			List<String> keys = obj.keyList();
+			obj.remove(keys.get(0), settings.ignoreNameCase);
+		    }
 
 		    afterValue = obj;
 		}

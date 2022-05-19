@@ -54,6 +54,8 @@
  *	    #315: Add "putAll" method from another map.
  *	16-May-2022 (rlwhitcomb)
  *	    #315: Change "putAll" to another ObjectScope, add copy constructor.
+ *	18-May-2022 (rlwhitcomb)
+ *	    #315: Add "isEmpty" method.
  */
 package info.rlwhitcomb.calc;
 
@@ -502,6 +504,15 @@ class ObjectScope extends Scope
 	 */
 	public int size() {
 	    return variables.size();
+	}
+
+	/**
+	 * Is this object empty?
+	 *
+	 * @return {@code true} if the object is empty.
+	 */
+	public boolean isEmpty() {
+	    return variables.isEmpty();
 	}
 
 }
