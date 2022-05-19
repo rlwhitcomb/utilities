@@ -8,9 +8,14 @@ if "%CLASSPATH%" == "" (
    set FULL_CLASSPATH=%JAR_PATH%;%CLASSPATH%
 )
 for %%F in (%~dp0*.jar) do call :addclass %%F
-java -cp %FULL_CLASSPATH% %JVM_ARGS% %CLASS_NAME% %CMD_ARGS% %*
+if "%CLASS_NAME%" == "" (
+   java -jar %JAR_PATH% %JVM_ARGS% %CMD_ARGS% %*
+) else (
+   java -cp %FULL_CLASSPATH% %JVM_ARGS% %CLASS_NAME% %CMD_ARGS% %*
+)
 exit /b %errorlevel%
 
 :addclass
 if not "%1" == "%JAR_PATH%" set FULL_CLASSPATH=%FULL_CLASSPATH%;%1
 exit /b
+

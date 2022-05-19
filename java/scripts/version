@@ -1,3 +1,2 @@
 #!/bin/bash
-CLASS_NAME=info.rlwhitcomb.Version
 source _find_and_run_class
