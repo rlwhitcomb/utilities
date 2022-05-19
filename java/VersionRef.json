@@ -3,9 +3,13 @@
 //======================
 
 [
+    { version: '2.10.23', date: d'2022-05-18',
+      issues: [ 335 ],
+      comment: 'Allow "base" as id again.'
+    },
     { version: '2.10.22', date: d'2022-05-18',
       issues: [ 315 ],
-      comment: 'Fix bug with obj + list or list + obj concatenation'
+      comment: 'Fix bug with obj + list or list + obj concatenation.'
     },
     { version: '2.10.21', date: d'2022-05-17',
       issues: [ 333 ],
@@ -45,6 +49,66 @@
     },
     { version: '2.10.11', date: d'2022-05-13',
       issues: [ 320 ],
-      comment: 'Rework "upper" and "lower" to properly process objects and lists.'
+      comment: 'Rework "upper" and "lower" to properly process nested objects and lists.'
+    },
+    { version: '2.10.10', date: d'2022-05-12',
+      issues: [ 321 ],
+      comment: 'Allow ":requires" spelling for new directive.'
+    },
+    { version: '2.10.9', date: d'2022-05-11',
+      issues: [ 318 ],
+      comment: 'Fix the operation of "upper" and "lower" for objects and lists.'
+    },
+    { version: '2.10.8', date: d'2022-05-11',
+      issues: [ 64 ],
+      comment: 'Implement "upper" and "lower" to properly deal with objects and lists.'
+    },
+    { version: '2.10.7', date: d'2022-05-11',
+      issues: [ 316 ],
+      comment: 'Implement reverse Elvis ("?!") operator.'
+    },
+    { version: '2.10.6', date: d'2022-05-10',
+      issues: [ 317 ],
+      comment: 'Allow "\/" as a valid escape.'
+    },
+    { version: '2.10.5', date: d'2022-05-10',
+      issues: [ 315 ],
+      comment: 'Implement "+" on objects and lists.'
+    },
+    { version: '2.10.5', base: '1.9.15', date: d'2022-05-07',
+      issues: [ 292 ],
+      comment: 'Clean up debugging messages.'
+    },
+    { version: '2.10', date: d'2022-05-07',
+      issues: [ 292 ],
+      comment: 'Add ":require" directive.'
+    },
+    { version: '2.9.9', date: d'2022-05-06',
+      issues: [ 286 ],
+      comment: 'Fix "truth" values of empty objects and lists.'
+    },
+    { version: '2.9.8', date: d'2022-05-06',
+      issues: [ 287 ],
+      comment: 'Allow "define" and "const" at any block level.'
+    },
+    { version: '2.9.5', date: d'2022-05-06',
+      issues: [ 305 ],
+      comment: 'Change "chars" to "codes" and add new "chars" function.'
+    },
+    { version: '2.9.4', date: d'2022-05-06',
+      issues: [ 298 ],
+      comment: 'Implement "within" functionality for loops and "in" expressions.'
+    },
+    { version: '2.9.3', date: d'2022-05-05',
+      issues: [ 296 ],
+      comment: 'Add "notnull" function.'
+    },
+    { version: '2.9.2', base: '1.9.10', date: d'2022-05-05',
+      issues: [ 300, 307, 308 ],
+      comment: 'Allow "@s" for lists and objects; add "<>" (not equal) operator; change color codes (internal).'
+    },
+    { version: '2.9.0', date: d'2022-05-04',
+      issues: [ 68 ],
+      comment: 'Help changes for "index" changes; implement "index" for objects; allow negative indices.'
     }
 ]

@@ -1,6 +1,12 @@
 :quiet on { versions = eval(read('VersionRef.json')) }
 :resultsonly on {
+    :quotestrings off
+    `Current ${versionstring}`
+    ''
+    'Version  Comment'
+    '-------  ----------------------------------------------'
     loop v over versions {
-        `${v.version}: ${v.comment}` @q
+        if v.base { `B${v.base@6s}  ${v.comment}`   }
+        else      { `${v.version@7s}  ${v.comment}` }
     }
 }
