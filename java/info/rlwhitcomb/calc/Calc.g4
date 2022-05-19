@@ -393,6 +393,8 @@
  *	16-May-2022 (rlwhitcomb)
  *	    #325: Change EOL? to EOL* everywhere to allow more variety of empty objects.
  *	    And backout one change because it results in an infinite loop always.
+ *	18-May-2022 (rlwhitcomb)
+ *	    #335: "BASE" needs to be a valid ID also.
  */
 
 grammar Calc;
@@ -783,6 +785,7 @@ id
    : ID
    | MODES
    | REPLACE_MODES
+   | BASE
    ;
 
 wildIdList
@@ -795,6 +798,7 @@ wildId
    : WILD_ID
    | MODES
    | REPLACE_MODES
+   | BASE
    ;
 
 compareOp
