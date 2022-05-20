@@ -145,6 +145,8 @@
  *	    #315: Change "putAll" on ObjectScope to accept the whole object.
  *	18-May-2022 (rlwhitcomb)
  *	    #315: Oops! Concat list + obj or obj + list shouldn't do anything special.
+ *	    #334: Move "findMatching" to CharUtil. New flavor of "getRawString" that skips
+ *	    embedded expressions.
  */
 package info.rlwhitcomb.calc;
 
@@ -1662,51 +1664,6 @@ public final class CalcUtil
 	}
 
 	/**
-	 * Find the matching end bracket/brace/paren/quote for the start character
-	 * at the given position.
-	 *
-	 * @param value	The string to search.
-	 * @param pos   Position of the starting character to match.
-	 * @return      -1 if the end character is not found in the string, otherwise
-	 *              the position of the ending character that matches the beginning.
-	 */
-	private static int findMatching(final String value, final int pos) {
-	    char start = value.charAt(pos);
-	    char end = start;
-
-	    switch (start) {
-		case '{':
-		    end = '}';
-		    break;
-		case '(':
-		    end = ')';
-		    break;
-		case '[':
-		    end = ']';
-		    break;
-		case '`':
-		case '"':
-		case '\'':
-		    end = start;
-		    break;
-	    }
-
-	    int depth = 0;
-	    for (int ix = pos; ix < value.length(); ix++) {
-		char ch = value.charAt(ix);
-		if (ch == start) {
-		    depth++;
-		}
-		else if (ch == end) {
-		    if (--depth == 0)
-			return ix;
-		}
-	    }
-
-	    return -1;
-	}
-
-	/**
 	 * Is the given character a "part" (that is, legal for after the start char)
 	 * of a local variable name.
 	 *
@@ -1734,7 +1691,7 @@ public final class CalcUtil
 	    NestedScope variables = visitor.getVariables();
 	    Settings settings = visitor.getSettings();
 
-	    String rawValue = getRawString(value);
+	    String rawValue = getRawString(value, true);
 	    int lastPos = -1;
 	    int pos, startPos;
 	    StringBuilder output = new StringBuilder(rawValue.length() * 2);
@@ -1775,7 +1732,7 @@ public final class CalcUtil
 		}
 		else if (nextChar == '{') {
 		    // Get position of matching '}'
-		    int nextPos = findMatching(rawValue, startPos);
+		    int nextPos = CharUtil.findMatching(rawValue, startPos);
 
 		    if (pos + 2 >= rawValue.length() || nextPos < 0)
 			throw new CalcExprException("%calc#invalidConst2", ctx);
@@ -1815,9 +1772,23 @@ public final class CalcUtil
 	 *
 	 * @param escapedForm	The input string value.
 	 * @return		The raw string data, with all quotes removed and escape sequences converted.
+	 * @see #getRawString(String)
 	 */
 	public static String getRawString(final String escapedForm) {
-	    return CharUtil.convertEscapeSequences(CharUtil.stripAnyQuotes(escapedForm, true));
+	    return CharUtil.convertEscapeSequences(CharUtil.stripAnyQuotes(escapedForm, true), false);
+	}
+
+	/**
+	 * Given the escaped form of a string (that is, what appears in the script as the user
+	 * typed it), remove the outer quotes, convert any escape sequences, and return the
+	 * raw string ready to be further processed.
+	 *
+	 * @param escapedForm	The input string value.
+	 * @param skipExprs	For interpolated strings, don't convert escape seqs in expressions.
+	 * @return		The raw string data, with all quotes removed and escape sequences converted.
+	 */
+	public static String getRawString(final String escapedForm, final boolean skipExprs) {
+	    return CharUtil.convertEscapeSequences(CharUtil.stripAnyQuotes(escapedForm, true), skipExprs);
 	}
 
 	/**

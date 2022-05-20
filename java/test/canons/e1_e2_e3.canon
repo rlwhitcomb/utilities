@@ -336,6 +336,8 @@
 >split (target, 'o', -2) -> [ "b", "", ":and:f", "", "" ]
 >split target, 'o' -> [ "b", "", ":and:f" ]
 >split 1.2, '\\.' -> [ "1", "2" ]
+>c9 = " a   b d   c   e   f " -> " a   b d   c   e   f "
+>pieces = [ "a", "b", "d", "c", "e", "f" ]
 >Variables 'target', 'one', 'two', and 'three' cleared.
 >target = 'This is an "index" test.' -> "This is an \"index\" test."
 >one = index target, 'is' -> 2

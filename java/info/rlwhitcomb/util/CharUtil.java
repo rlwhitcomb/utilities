@@ -320,6 +320,9 @@
  *	    #274: Add "isNumber" method.
  *	10-May-2022 (rlwhitcomb)
  *	    #317: Support "/" as a valid escape.
+ *	17-May-2022 (rlwhitcomb)
+ *	    #334: Add another flavor of "convertEscapeSequences" for Calc interpolated strings
+ *	    that skips "$" expressions and variables. Move "findMatching" into here from CalcUtil.
  */
 
 package info.rlwhitcomb.util;
@@ -980,6 +983,62 @@ public final class CharUtil
 	}
 
 	/**
+	 * Find the matching end bracket/brace/paren/quote for the start character
+	 * at the given position.
+	 *
+	 * @param value The char sequence to search.
+	 * @param pos   Position of the starting character to match.
+	 * @return      -1 if the end character is not found in the string, otherwise
+	 *              the position of the ending character that matches the beginning.
+	 */
+	public static int findMatching(final CharSequence value, final int pos) {
+	    char start = value.charAt(pos);
+	    char end = start;
+
+	    switch (start) {
+		case '{':
+		    end = '}';
+		    break;
+		case '(':
+		    end = ')';
+		    break;
+		case '[':
+		    end = ']';
+		    break;
+		case '`':
+		case '"':
+		case '\'':
+		    break;
+	    }
+
+	    int depth = 0;
+	    for (int ix = pos; ix < value.length(); ix++) {
+		char ch = value.charAt(ix);
+		if (ch == start) {
+		    depth++;
+		}
+		else if (ch == end) {
+		    if (--depth == 0)
+			return ix;
+		}
+	    }
+
+	    return -1;
+	}
+
+	/**
+	 * Unescape the escape sequences in a string literal.
+	 *
+	 * @param input	    The input string with embedded escape sequences.
+	 * @return	    The string with the embedded escape sequences converted to their
+	 *		    literal character equivalents.
+	 * @see #convertEscapeSequences(String, boolean)
+	 */
+	public static String convertEscapeSequences(final String input) {
+	    return convertEscapeSequences(input, false);
+	}
+
+	/**
 	 * Unescape the escape sequences in a string literal.
 	 * <p> Deals with things like {@code \\} to {@code \} and {@code \\uXXXX} to
 	 * its equivalent Unicode character.
@@ -989,16 +1048,18 @@ public final class CharUtil
 	 * <p> Handles either <code>&bsol;uXXXX</code> or <code>&bsol;u{XXXXXX}</code> Unicode escapes.
 	 * <p> This should match the grammar in Calc.g4 (ESCAPES and UNICODE).
 	 *
-	 * @param input	The input string with embedded escape sequences.
-	 * @return	The string with the embedded escape sequences converted to their
-	 *		literal character equivalents.
+	 * @param input	    The input string with embedded escape sequences.
+	 * @param skipExprs Whether to skip <code>${expr}</code> sequences.
+	 * @return	    The string with the embedded escape sequences converted to their
+	 *		    literal character equivalents.
 	 */
-	public static String convertEscapeSequences(final String input) {
+	public static String convertEscapeSequences(final String input, final boolean skipExprs) {
 	    if (input == null || input.isEmpty())
 		return input;
 
 
 	    StringBuilder buf = new StringBuilder(input.length());
+
 	    for (int i = 0; i < input.length(); i++) {
 		char ch = input.charAt(i);
 		if (ch == STD_ESCAPE_CHAR) {
@@ -1059,6 +1120,19 @@ public final class CharUtil
 			continue;
 		    }
 		}
+		else if (skipExprs) {
+		    if (ch == '$' && i + 1 < input.length() && input.charAt(i + 1) == '{') {
+			// For embedded "${...}" pieces, just copy them as-is
+			// to the output, instead of interpreting escape sequences
+			// within... (they will be parsed once this embedded
+			// expression is itself executed)
+			int e = CharUtil.findMatching(input, i + 1);
+			buf.append(input, i, e + 1);
+			i = e;
+			continue;
+		    }
+		}
+		// If nothing else special should happen, just copy input char to the output
 		buf.append(ch);
 	    }
 

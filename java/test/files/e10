@@ -10,9 +10,9 @@ value = 1
 array = []
 SIZE = 5
 :resultsonly on {
-  loop _i in SIZE {
-    loop _j in SIZE {
-      array[_i-1][_j-1] = value++!
+  loop i in SIZE {
+    loop j in SIZE {
+      array[i-1][j-1] = value++!
     }
   }
 }
@@ -25,11 +25,11 @@ start = 2; end = 102;
 }
 length(primes); primes;
 
-loop _i in -10 .. -2, -2 { _i }
-loop _i in -2 .. -10, -2 { _i }
-loop _i in 10 .. 2, -1 { _i }
-loop _i in 10 .. 20, -1 { _i }
-loop _i in -2 .. -10 { _i }
+loop i in -10 .. -2, -2 { i }
+loop i in -2 .. -10, -2 { i }
+loop i in 10 .. 2, -1 { i }
+loop i in 10 .. 20, -1 { i }
+loop i in -2 .. -10 { i }
 
 loop ( 'This', 'is', 'a', 'test', 'of', 'the', 'Emergency', "Broadcast", "System" ) { __ }
 
@@ -39,7 +39,7 @@ loop _i in map { `map.$_i = ${map[_i]}` }
 
 :clear list
 list = [ 'Once', 'upon', 'a', 'time', 'there', 'lived', 'a', 'princess', '...' ]
-loop _i in list {_i}
+loop i in list {i}
 
 loop _i in 0.1 .. 0.9, 0.1 { _i }
 loop _j in 10.5 {_j}
@@ -58,7 +58,7 @@ define test(value) = {
 
 :resultsonly on { loop v over -2 .. 5 `$v -> ${test(v)}`@q }
 
-loop _p ∈ 10...40 { :dec _p; pi }
+loop p ∈ 10...40 { :dec p; pi }
 :default
 
 :echo "Bernoulli Numbers 0 to 60"

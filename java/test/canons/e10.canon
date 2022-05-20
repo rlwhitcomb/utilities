@@ -73,20 +73,20 @@
 >end = 102 -> 102
 >length (primes) -> 26
 >primes -> [ 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97, 101 ]
->_i -> -2
->_i -> -4
->_i -> -6
->_i -> -8
->_i -> -10
->_i -> 10
->_i -> 9
->_i -> 8
->_i -> 7
->_i -> 6
->_i -> 5
->_i -> 4
->_i -> 3
->_i -> 2
+>i -> -2
+>i -> -4
+>i -> -6
+>i -> -8
+>i -> -10
+>i -> 10
+>i -> 9
+>i -> 8
+>i -> 7
+>i -> 6
+>i -> 5
+>i -> 4
+>i -> 3
+>i -> 2
 >__ -> "This"
 >__ -> "is"
 >__ -> "a"
@@ -105,15 +105,15 @@
 >`map.$_i = ${map[_i]}` -> "map.f = 42"
 >Variable 'list' cleared.
 >list = ['Once', 'upon', 'a', 'time', 'there', 'lived', 'a', 'princess', '...'] -> [ "Once", "upon", "a", "time", "there", "lived", "a", "princess", "..." ]
->_i -> "Once"
->_i -> "upon"
->_i -> "a"
->_i -> "time"
->_i -> "there"
->_i -> "lived"
->_i -> "a"
->_i -> "princess"
->_i -> "..."
+>i -> "Once"
+>i -> "upon"
+>i -> "a"
+>i -> "time"
+>i -> "there"
+>i -> "lived"
+>i -> "a"
+>i -> "princess"
+>i -> "..."
 >_i -> 0.1
 >_i -> 0.2
 >_i -> 0.3

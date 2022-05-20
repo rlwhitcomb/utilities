@@ -309,6 +309,8 @@ split(target, 'o', 5)
 split(target, 'o', -2)
 split target, 'o'
 split 1.2, '\\.'
+c9 = " a   b d   c   e   f "
+:echo `pieces = ${split(trim(c9), '\\s+') @Q}`
 
 # The "index" operator
 :clear target, one, two, three
