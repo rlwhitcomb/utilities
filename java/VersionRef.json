@@ -3,6 +3,10 @@
 //======================
 
 [
+    { version: '2.10.27', date: d'2022-05-20',
+      issues: [ 334 ],
+      comment: 'Changes for "@Q" formatting.'
+    },
     { version: '2.10.26', date: d'2022-05-20',
       issues: [ 334 ],
       comment: 'More fixes for "\\" chars in string results.'

@@ -566,6 +566,7 @@
  *	    #315: Protect "--" on empty lists and objects.
  *	20-May-2022 (rlwhitcomb)
  *	    #334: Part of "addQuotes" in formatting is "quoteControl" also.
+ *	    #334: Maybe "@Q" shouldn't double the quotes.
  */
 package info.rlwhitcomb.calc;
 
@@ -2048,12 +2049,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			break;
 
 		    case 'Q':
-			valueBuf.append(toStringValue(this, ctx, result, true, settings.separatorMode));
-			addQuotes = true;	// double quote the result
-			break;
-
 		    case 'q':
-			valueBuf.append(toStringValue(this, ctx, result, false, settings.separatorMode));
+			valueBuf.append(toStringValue(this, ctx, result, formatChar == 'Q', settings.separatorMode));
 			break;
 
 		    case 'C':
