@@ -147,6 +147,8 @@
  *	    #315: Oops! Concat list + obj or obj + list shouldn't do anything special.
  *	    #334: Move "findMatching" to CharUtil. New flavor of "getRawString" that skips
  *	    embedded expressions.
+ *	20-May-2022 (rlwhitcomb)
+ *	    #339: Add "fixupToInteger" (from "cleanDecimal" in CalcObjectVisitor).
  */
 package info.rlwhitcomb.calc;
 
@@ -459,6 +461,19 @@ public final class CalcUtil
 	}
 
 	/**
+	 * Fixup a {@link BigDecimal} value and convert to {@link BigInteger} if possible.
+	 *
+	 * @param bd	The candidate value.
+	 * @return	The numerically equivalent value, integer if possible.
+	 */
+	public static Number fixupToInteger(final BigDecimal bd) {
+	    BigDecimal dValue = bd.stripTrailingZeros();
+	    if (dValue.scale() <= 0)
+		return dValue.toBigIntegerExact();
+	    return dValue;
+	}
+
+	/**
 	 * Convert a string argument (sourced from the command line) to a possibly better value
 	 * (as in, more accurate of its true value).
 	 * <p> First try is {@link BigDecimal} which can be converted to {@link BigInteger}
@@ -472,10 +487,7 @@ public final class CalcUtil
 	 */
 	public static Object stringToValue(final String arg) {
 	    try {
-		BigDecimal dValue = fixup(new BigDecimal(arg));
-		if (dValue.scale() <= 0)
-		    return dValue.toBigIntegerExact();
-		return dValue;
+		return fixupToInteger(new BigDecimal(arg));
 	    }
 	    catch (NumberFormatException nfe) {
 		try {
@@ -1339,7 +1351,7 @@ public final class CalcUtil
 		    BigDecimal d1 = convertToDecimal(v1, mc, ctx1);
 		    BigDecimal d2 = convertToDecimal(v2, mc, ctx2);
 
-		    return d1.add(d2, mc);
+		    return fixupToInteger(d1.add(d2, mc));
 		}
 	    }
 	}

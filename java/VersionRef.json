@@ -3,6 +3,10 @@
 //======================
 
 [
+    { version: '2.10.28', date: d'2022-05-20',
+      issues: [ 339 ],
+      comment: 'Small tweaks to ensure integers stay integers after math ops.'
+    },
     { version: '2.10.27', date: d'2022-05-20',
       issues: [ 334 ],
       comment: 'Changes for "@Q" formatting.'

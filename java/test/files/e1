@@ -7,7 +7,7 @@
 # Simple version check ...
 # version 2.3.0 was first version where these checks would work, and 2.4.11 is where versioninfo -> info.version
 info.version.major > 2 || (info.version.major == 2 && info.version.minor > 4) || (info.version.major == 2 && info.version.minor == 4 && info.version.patch >= 11)
-:requires '2.10.18-alpha', base '1.9.15-alpha'
+:requires '2.10.28-alpha', base '1.9.15-alpha'
 
 # Various simple expressions
 :decimal(50)
@@ -403,6 +403,7 @@ fill(str_b, '-', 22, 3)
 formatstring('%1$s, %2$s!', 'Hello', 'World')
 formatstring("Rate is %1$8.6f", 12.34567)
 formatstring('Name: %1$-20s, Age: %2$5d', 'Agnes Brown', 97)
+formatstring("%02d", yod(d'2022-05-20') % 100)
 
 # The "pad" functions
 arr_m = [ 10 ]

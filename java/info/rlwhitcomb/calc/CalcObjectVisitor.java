@@ -567,6 +567,7 @@
  *	20-May-2022 (rlwhitcomb)
  *	    #334: Part of "addQuotes" in formatting is "quoteControl" also.
  *	    #334: Maybe "@Q" shouldn't double the quotes.
+ *	    #339: Move "cleanDecimal" to "fixupToInteger" and use it more places.
  */
 package info.rlwhitcomb.calc;
 
@@ -2372,13 +2373,6 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		}
 	}
 
-	private Number cleanDecimal(final BigDecimal value) {
-	    BigDecimal bd = fixup(value);
-	    if (bd.scale() <= 0)
-		return bd.toBigIntegerExact();
-	    return bd;
-	}
-
 	private Object iterateOverDotRange(
 		final List<CalcParser.ExprContext> valueExprs,
 		final List<CalcParser.ExprContext> dotExprs,
@@ -2534,12 +2528,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 		    if (sign < 0) {
 			for (BigDecimal loopIndex = dStart; loopIndex.compareTo(dStop) >= 0; loopIndex = loopIndex.add(dStep)) {
-			    lastValue = visitor.apply(cleanDecimal(loopIndex));
+			    lastValue = visitor.apply(fixupToInteger(loopIndex));
 			}
 		    }
 		    else {
 			for (BigDecimal loopIndex = dStart; loopIndex.compareTo(dStop) <= 0; loopIndex = loopIndex.add(dStep)) {
-			    lastValue = visitor.apply(cleanDecimal(loopIndex));
+			    lastValue = visitor.apply(fixupToInteger(loopIndex));
 			}
 		    }
 		}
@@ -3125,11 +3119,11 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    case "\u2795":
 			// Interestingly, this operation can change the value, if the previous
 			// value was not to the specified precision.
-			return fixup(d.plus(settings.mc));
+			return fixupToInteger(d.plus(settings.mc));
 		    case "-":
 		    case "\u2212":
 		    case "\u2796":
-			return fixup(d.negate());
+			return fixupToInteger(d.negate());
 		    default:
 			throw new UnknownOpException(op, expr);
 		}
@@ -3315,16 +3309,16 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			case "\u2217":
 			case "\u2715":
 			case "\u2716":
-			    return fixup(d1.multiply(d2, settings.mc));
+			    return fixupToInteger(d1.multiply(d2, settings.mc));
 			case "/":
 			case "\u00F7":
 			case "\u2215":
 			case "\u2797":
-			    return fixup(d1.divide(d2, settings.mcDivide));
+			    return fixupToInteger(d1.divide(d2, settings.mcDivide));
 			case "\\":
-			    return fixup(d1.divideToIntegralValue(d2, settings.mcDivide));
+			    return fixupToInteger(d1.divideToIntegralValue(d2, settings.mcDivide));
 			case "%":
-			    return fixup(d1.remainder(d2, settings.mcDivide));
+			    return fixupToInteger(d1.remainder(d2, settings.mcDivide));
 			default:
 			    throw new UnknownOpException(op, ctx);
 		    }
@@ -3366,7 +3360,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			BigDecimal d1 = toDecimalValue(this, e1, settings.mc, ctx1);
 			BigDecimal d2 = toDecimalValue(this, e2, settings.mc, ctx2);
 
-			return fixup(d1.subtract(d2, settings.mc));
+			return fixupToInteger(d1.subtract(d2, settings.mc));
 		    }
 		default:
 		    throw new UnknownOpException(op, ctx);
