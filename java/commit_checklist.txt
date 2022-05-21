@@ -1,0 +1,13 @@
+Checklist of things to do before a commit/push
+----------------------------------------------
+
+1. "git pull" - make sure base level or branch is up-to-date with GitHub
+2. Changes that must be integrated are "git stash pop" or others to ignore to "git stash push"
+3. "version.properties" and/or "build.properties" have been changed as appropriate
+4. All relevant changes are "git add"
+5. All new files are also "git add"
+6. "ant clean update doc test" completes cleanly
+7. Check online version of Calc help to make sure the markup is right
+8. VersionRef.json is up-to-date and "c versions" shows correctly
+9. "version" shows correct versions
+
