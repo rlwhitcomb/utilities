@@ -564,6 +564,8 @@
  *	    #334: Fix the extra processing of ":echo" messages.
  *	18-May-2022 (rlwhitcomb)
  *	    #315: Protect "--" on empty lists and objects.
+ *	20-May-2022 (rlwhitcomb)
+ *	    #334: Part of "addQuotes" in formatting is "quoteControl" also.
  */
 package info.rlwhitcomb.calc;
 
@@ -2329,7 +2331,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		else if (toLowerCase)
 		    resultString = resultString.toLowerCase();
 		else if (addQuotes)
-		    resultString = CharUtil.addDoubleQuotes(resultString);
+		    resultString = CharUtil.addDoubleQuotes(CharUtil.quoteControl(resultString));
 
 		// Set the "result" for the case of interpolated strings with formats
 		result = resultString;

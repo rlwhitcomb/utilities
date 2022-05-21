@@ -323,6 +323,8 @@
  *	17-May-2022 (rlwhitcomb)
  *	    #334: Add another flavor of "convertEscapeSequences" for Calc interpolated strings
  *	    that skips "$" expressions and variables. Move "findMatching" into here from CalcUtil.
+ *	20-May-2022 (rlwhitcomb)
+ *	    #334 (again): In "quoteControl" we have to double the escape char also... doh!
  */
 
 package info.rlwhitcomb.util;
@@ -767,6 +769,10 @@ public final class CharUtil
 			    }
 			    break;
 		    }
+		}
+		else if (ch == escapeChar) {
+		    // We have to double the actual escape character also, or this whole mess doesn't work
+		    buf.append(ch).append(ch);
 		}
 		else {
 		    buf.append(ch);

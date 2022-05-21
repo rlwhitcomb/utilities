@@ -275,9 +275,11 @@ A==1&&A==2||B==1
 ~ 0x7FFF @b
 255 @o
 123 @b
+:quotestrings off {
 f1 = `${'def' @o}`
 f2 = `${'abc' @b}`
 f3 = `${'Hello' @X}`
+}
 eval f1;eval f2;eval f3
 
 t1=5.9

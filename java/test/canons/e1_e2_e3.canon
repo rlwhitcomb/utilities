@@ -52,7 +52,7 @@
 >'This ' + "isn't" + " a number" -> "This isn't a number"
 >'This isn\'t either, ' + name -> "This isn't either, Roger"
 >'\u0000\u0001\u0002\u0003\u0004\u0018\u0019\u001a\u001b\u001c\u001d\u001e\u001f\u0020\u0021' -> "\0\cA\cB\cC\cD\cX\cY\cZ\u001b\u001c\u001d\u001e\u001f !"
->'\0\ca\cB\cy\cZ\f\t\b\r\n\\\u007f\u0080\u0081' -> "\0\cA\cB\cY\cZ\f\t\b\r\n\\u007f\u0080\u0081"
+>'\0\ca\cB\cy\cZ\f\t\b\r\n\\\u007f\u0080\u0081' -> "\0\cA\cB\cY\cZ\f\t\b\r\n\\\u007f\u0080\u0081"
 >Precision is now “60” digits.
 >s = sqrt (17) -> 4.12310562561766054982140985597407702514719922537362043439864
 >t = s * s -> 17.0000000000000000000000000000000000000000000000000000000001
@@ -299,9 +299,11 @@
 >~ 0x7FFF @b -> 0b1000000000000000
 >255 @o -> 0377
 >123 @b -> 0b1111011
->f1 = `${'def' @o}` -> "'\o144\o145\o146'"
->f2 = `${'abc' @b}` -> "'\B01100001\B01100010\B01100011'"
->f3 = `${'Hello' @X}` -> "'\u0048\u0065\u006C\u006C\u006F'"
+>Quoting result strings is now “false”.
+>f1 = `${'def' @o}` -> '\o144\o145\o146'
+>f2 = `${'abc' @b}` -> '\B01100001\B01100010\B01100011'
+>f3 = `${'Hello' @X}` -> '\u0048\u0065\u006C\u006C\u006F'
+>Quoting result strings is now “true”.
 >eval f1 -> "def"
 >eval f2 -> "abc"
 >eval f3 -> "Hello"

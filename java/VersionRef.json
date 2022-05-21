@@ -3,9 +3,13 @@
 //======================
 
 [
+    { version: '2.10.26', date: d'2022-05-20',
+      issues: [ 334 ],
+      comment: 'More fixes for "\\" chars in string results.'
+    },
     { version: '2.10.25', date: d'2022-05-20',
       issues: [ 315, 334 ],
-      comment: 'Fix parsing of strings inside embedded expressions in interpolated strings. Protect against errors using "--" on empty lists.'
+      comment: 'Fix parsing of strings inside embedded expressions in interpolated strings.\n\t Protect against errors using "--" on empty lists.'
     },
     { version: '2.10.23', date: d'2022-05-18',
       issues: [ 335 ],
