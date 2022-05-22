@@ -464,6 +464,10 @@
 >arr_m = [1, 2, 3, 4, 5, 6, 7, 8, 9] -> [ 1, 2, 3, 4, 5, 6, 7, 8, 9 ]
 >reverse arr_m -> [ 9, 8, 7, 6, 5, 4, 3, 2, 1 ]
 >arr_m -> [ 9, 8, 7, 6, 5, 4, 3, 2, 1 ]
+>u1 = "aaabbaacceeeffccdd" -> "aaabbaacceeeffccdd"
+>unique u1 -> "abcefd"
+>u2 = chars u1 -> [ "a", "a", "a", "b", "b", "a", "a", "c", "c", "e", "e", "e", "f", "f", "c", "c", "d", "d" ]
+>unique u2 -> [ "a", "b", "c", "e", "f", "d" ]
 >a1 = [4, 3, 1, 2, -1, 5, -10] -> [ 4, 3, 1, 2, -1, 5, -10 ]
 >a2 = ["abc", "Abc", "aBc", "abC"] -> [ "abc", "Abc", "aBc", "abC" ]
 >a3 = ["abc", "DEF", "Abc", "def", "1.1.0", "1.10.0", "1.2.0"] -> [ "abc", "DEF", "Abc", "def", "1.1.0", "1.10.0", "1.2.0" ]

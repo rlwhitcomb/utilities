@@ -7,7 +7,7 @@
 # Simple version check ...
 # version 2.3.0 was first version where these checks would work, and 2.4.11 is where versioninfo -> info.version
 info.version.major > 2 || (info.version.major == 2 && info.version.minor > 4) || (info.version.major == 2 && info.version.minor == 4 && info.version.patch >= 11)
-:requires '2.10.28-alpha', base '1.9.15-alpha'
+:requires '2.10.29-alpha', base '1.9.15-alpha'
 
 # Various simple expressions
 :decimal(50)
@@ -426,6 +426,12 @@ reverse(palin)
 arr_m = [ 1, 2, 3, 4, 5, 6, 7, 8, 9 ]
 reverse arr_m
 arr_m
+
+# The "unique" function
+u1 = "aaabbaacceeeffccdd"
+unique u1
+u2 = chars u1
+unique u2
 
 # The "sort" function
 a1 = [ 4, 3, 1, 2, -1, 5, -10 ]

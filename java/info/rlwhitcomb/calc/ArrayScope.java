@@ -39,6 +39,8 @@
  *	    #315: Add "remove" method, and copy constructor.
  *	18-May-2022 (rlwhitcomb)
  *	    #315: Add "isEmpty" method.
+ *	21-May-2022 (rlwhitcomb)
+ *	    #327: Convert "List" constructor to Collection.
  */
 package info.rlwhitcomb.calc;
 
@@ -96,14 +98,11 @@ class ArrayScope<T> extends Scope
 	/**
 	 * Construct given the initial value list.
 	 *
-	 * @param initialValueList List of initial values.
+	 * @param initialValues Collection of initial values.
 	 */
-	ArrayScope(final List<T> initialValueList) {
+	ArrayScope(final Collection<? extends T> initialValues) {
 	    super(Type.ARRAY);
-	    this.values = new ArrayList<>(initialValueList.size());
-	    for (T value : initialValueList) {
-		values.add(value);
-	    }
+	    this.values = new ArrayList<>(initialValues);
 	}
 
 	/**

@@ -395,6 +395,8 @@
  *	    And backout one change because it results in an infinite loop always.
  *	18-May-2022 (rlwhitcomb)
  *	    #335: "BASE" needs to be a valid ID also.
+ *	21-May-2022 (rlwhitcomb)
+ *	    #327: Add "unique" function.
  */
 
 grammar Calc;
@@ -536,6 +538,7 @@ expr
    | K_FORMATSTRING exprN                # formatExpr
    | K_SORT ( expr2 | expr1 )            # sortExpr
    | K_REVERSE expr1                     # reverseExpr
+   | K_UNIQUE expr1                      # uniqueExpr
    | K_TRIM expr1                        # trimExpr
    | K_PAD padArgs                       # padExpr
    | K_FIB expr1                         # fibExpr
@@ -986,6 +989,8 @@ K_FORMATSTRING : 'formatstring' | 'FORMATSTRING' | 'FormatString' ;
 K_SORT     : 'sort' | 'SORT' | 'Sort' ;
 
 K_REVERSE  : 'reverse' | 'REVERSE' | 'Reverse' ;
+
+K_UNIQUE   : 'unique' | 'UNIQUE' | 'Unique' ;
 
 K_TRIM     : 'trim'  | 'TRIM'  | 'Trim'
            | 'ltrim' | 'LTRIM' | 'Ltrim' | 'LTrim'

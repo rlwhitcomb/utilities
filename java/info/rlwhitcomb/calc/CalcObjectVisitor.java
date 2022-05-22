@@ -568,6 +568,8 @@
  *	    #334: Part of "addQuotes" in formatting is "quoteControl" also.
  *	    #334: Maybe "@Q" shouldn't double the quotes.
  *	    #339: Move "cleanDecimal" to "fixupToInteger" and use it more places.
+ *	21-May-2022 (rlwhitcomb)
+ *	    #327: Add "unique" function.
  */
 package info.rlwhitcomb.calc;
 
@@ -605,6 +607,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.Deque;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.Locale;
 import java.util.Iterator;
 import java.util.List;
@@ -4628,6 +4631,36 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    string = toStringValue(this, expr, value, false, false);
 		StringBuilder buf = new StringBuilder(string);
 		return buf.reverse().toString();
+	    }
+	}
+
+	@Override
+	public Object visitUniqueExpr(CalcParser.UniqueExprContext ctx) {
+	    CalcParser.ExprContext expr = ctx.expr1().expr();
+	    Object value = evaluate(expr);
+
+	    if (value instanceof ArrayScope) {
+		@SuppressWarnings("unchecked")
+		ArrayScope<Object> list = (ArrayScope<Object>) value;
+		LinkedHashSet<Object> set = new LinkedHashSet<>(list.list());
+		return new ArrayScope<Object>(set);
+	    }
+	    else if (value instanceof ObjectScope) {
+		// Well, this is embarrassing - the keys already have to be unique
+		// so there is no point to this
+		return value;
+	    }
+	    else {
+		String string;
+		if (value instanceof String)
+		    string = (String) value;
+		else
+		    string = toStringValue(this, expr, value, false, false);
+
+		StringBuilder result = new StringBuilder(string.length());
+		string.codePoints().distinct().forEach(cp -> result.appendCodePoint(cp));
+
+		return result.toString();
 	    }
 	}
 

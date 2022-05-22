@@ -3,6 +3,10 @@
 //======================
 
 [
+    { version: '2.10.29', date: d'2022-05-21',
+      issues: [ 327 ],
+      comment: 'Add "unique" function for arrays and strings.'
+    },
     { version: '2.10.28', date: d'2022-05-20',
       issues: [ 339 ],
       comment: 'Small tweaks to ensure integers stay integers after math ops.'
