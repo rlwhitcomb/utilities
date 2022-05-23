@@ -1,16 +1,42 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project name="utilities" default="unzip" basedir=".">
+<project name="utilities" default="all" basedir=".">
 
-        <property name="source.file" value="utilities-master.zip"/>
+	<property environment="env"/>
+	<property name="source.dir" value="utilities-master"/>
+	<property name="source.file" value="${source.dir}.zip"/>
 
-        <target name="move" description="Move the '${source.file}' from the download location.">
-                <move file="${user.home}/Downloads/${source.file}" todir="." failonerror="true" verbose="true"/>
-        </target>
+	<target name="all">
+		<echo message="Getting the latest events from our repository..."/>
+		<get src="https://api.github.com/users/rlwhitcomb/events/public" dest="github.json"/>
 
-        <target name="unzip" depends="move" description="Unzip the '${source.file}' file into the proper location.">
-                <unzip src="utilities-master.zip" dest="." overwrite="true"/>
-        </target>
+		<echo message="Extracting the latest commit / push ID..."/>
+		<java classname="info.rlwhitcomb.calc.Calc" classpath="${env.CLASSPATH}" dir="${source.dir}/java" fork="true" outputproperty="commit.id">
+			<arg file="${source.dir}/java/latest_push.calc"/>
+			<arg value="-cleararguments"/>
+			<arg value="-ignorelibraries"/>
+			<arg value="-nocolors"/>
+			<arg value="--"/>
+			<arg value="../../github.json"/>
+		</java>
+		<delete file="github.json"/>
+		<echo message="Latest commit/push ID = ${commit.id}"/>
+
+		<echo message="Downloading source code package..."/>
+		<get src="https://github.com/rlwhitcomb/utilities/zipball/master" dest="${source.file}"/>
+
+		<echo message="Unzip and move into place..."/>
+		<unzip src="${source.file}" dest="." overwrite="true"/>
+		<move todir="${source.dir}" overwrite="true">
+			<fileset dir="rlwhitcomb-utilities-${commit.id}">
+				<include name="**"/>
+				<include name=".gitignore"/>
+			</fileset>
+		</move>
+
+		<ant dir="${source.dir}/java" target="fixup">
+			<property name="commit" value="${commit.id}"/>
+		</ant>
+	</target>
 
 </project>
-
