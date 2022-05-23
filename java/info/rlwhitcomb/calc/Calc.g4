@@ -397,6 +397,8 @@
  *	    #335: "BASE" needs to be a valid ID also.
  *	21-May-2022 (rlwhitcomb)
  *	    #327: Add "unique" function.
+ *	22-May-2022 (rlwhitcomb)
+ *	    Refactor because parsing had gotten way too slow.
  */
 
 grammar Calc;
@@ -406,11 +408,12 @@ boolean allowWild = false;
 }
 
 prog
-   : stmtOrExpr* EOF
+   : stmtOrExpr * EOF
    ;
 
 stmtOrExpr
-   : formattedExprs
+   : exprStmt
+   | directive
    | defineStmt
    | constStmt
    | loopStmt
@@ -420,13 +423,6 @@ stmtOrExpr
    | leaveStmt
    | timeThisStmt
    | emptyStmt
-   ;
-
-formattedExprs
-   : exprStmt
-   | exprStmt (EOL | ENDEXPR) stmtOrExpr
-   | directive
-   | directive (EOL | ENDEXPR) stmtOrExpr
    ;
 
 exprStmt

@@ -3,6 +3,10 @@
 //======================
 
 [
+    { version: '2.11.0', date: d'2022-05-22',
+      issues: [ ],
+      comment: 'Simplify the grammar to get rid of the slowdown.'
+    },
     { version: '2.10.29', date: d'2022-05-21',
       issues: [ 327 ],
       comment: 'Add "unique" function for arrays and strings.'

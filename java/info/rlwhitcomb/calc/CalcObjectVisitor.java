@@ -570,6 +570,8 @@
  *	    #339: Move "cleanDecimal" to "fixupToInteger" and use it more places.
  *	21-May-2022 (rlwhitcomb)
  *	    #327: Add "unique" function.
+ *	22-May-2022 (rlwhitcomb)
+ *	    Simplify the grammar which gets rid of the slowdown from several versions ago.
  */
 package info.rlwhitcomb.calc;
 
@@ -1947,11 +1949,6 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitStmtOrExpr(CalcParser.StmtOrExprContext ctx) {
-	    return internalVisitStatements(ctx);
-	}
-
-	@Override
-	public Object visitFormattedExprs(CalcParser.FormattedExprsContext ctx) {
 	    return internalVisitStatements(ctx);
 	}
 
