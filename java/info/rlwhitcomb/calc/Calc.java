@@ -278,6 +278,8 @@
  *	    #292: Don't do the library version check here; use new ":require" directive instead.
  *	16-May-2022 (rlwhitcomb)
  *	    #328: Implement "-clear" command line option.
+ *	23-May-2022 (rlwhitcomb)
+ *	    Reword an error message to display more information.
  */
 package info.rlwhitcomb.calc;
 
@@ -1823,6 +1825,13 @@ public class Calc
 	    }
 	}
 
+	/**
+	 * Process one command line option.
+	 *
+	 * @param arg    The complete argument, including leading characters.
+	 * @param option Only the word part after the initial "-", "--", or "/".
+	 * @return       For options that require a value, which value to expect.
+	 */
 	private static Expecting processOption(String arg, String option) {
 	    if (option.isEmpty() && arg.equals("--")) {
 		if (expecting == Expecting.ARGUMENTS)
@@ -1838,7 +1847,7 @@ public class Calc
 	    }
 
 	    if (expecting != Expecting.DEFAULT) {
-		Intl.errFormat("calc#expectNotOption", expecting);
+		Intl.errFormat("calc#expectNotOption", expecting, arg);
 		return Expecting.QUIT_NOW;
 	    }
 

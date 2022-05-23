@@ -125,6 +125,8 @@
 #	    #292: Revise version check errors.
 #	17-May-2022 (rlwhitcomb)
 #	    #333: Reword awkward error message.
+#	23-May-2022 (rlwhitcomb)
+#	    Rework the "expectNotOption" message.
 #
 
 #
@@ -149,7 +151,7 @@ message		= <a>%1$s<r>
 errorLine	= <e>%1$s<r> at line %2$d.
 error		= <e>%1$s<r>
 errorPeriod	= <e>%1$s.<r>
-expectNotOption	= <e>Expecting <y>%1$s<.> value, not another option.<r>
+expectNotOption	= <e>Expecting <y>%1$s<.> value, not the <v>%2$s<.> option.<r>
 expectValue	= <e>Expecting <y>%1$s<.> value.<r>
 noOptionValue	= <e>Value for <y>%1$s<.> option was not given.<r>
 unknownOption	= Unknown option <u>%1$s<.>; ignoring.
