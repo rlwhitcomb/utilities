@@ -572,6 +572,7 @@
  *	    #327: Add "unique" function.
  *	22-May-2022 (rlwhitcomb)
  *	    Simplify the grammar which gets rid of the slowdown from several versions ago.
+ *	    #340: Use "Which.find" in "exec".
  */
 package info.rlwhitcomb.calc;
 
@@ -5252,15 +5253,10 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    // As a convenience, if we're on Windows and the target is a ".bat" or ".cmd" file
 	    // then prepend "cmd /c" before running it.
 	    if (RUNNING_ON_WINDOWS) {
-		List<String> names = new ArrayList<>();
-		names.add(objects.get(0).toString());
-		List<File> files = Which.findAll(names, false);
-		if (!files.isEmpty()) {
-		    String name = files.get(0).getName().toLowerCase();
-		    if (name.endsWith(".bat") || name.endsWith(".cmd")) {
-			objects.add(0, "cmd");
-			objects.add(1, "/c");
-		    }
+		File f = Which.find(objects.get(0).toString());
+		if (f != null && Which.isWindowsBatch(f)) {
+		    objects.add(0, "cmd");
+		    objects.add(1, "/c");
 		}
 	    }
 

@@ -53,6 +53,8 @@
  *	    #273: Move math-related classes to "math" package.
  *	18-Apr-2022 (rlwhitcomb)
  *	    #270: Make "loadMainProgramInfo" automatic now.
+ *	22-May-2022 (rlwhitcomb)
+ *	    #340: Add utility "find" method; and "isWindowsBatch" helper.
  */
 package info.rlwhitcomb.util;
 
@@ -313,6 +315,39 @@ public class Which
 
 	    return files;
 	}
+
+	/**
+	 * Find the location of the executable given.
+	 *
+	 * @param name The executable name to search for.
+	 * @return     File location found, if it is found, or {@code null} if not.
+	 * @see #findAll
+	 */
+	public static File find(final String name) {
+	    List<String> names = new ArrayList<>(1);
+	    names.add(name);
+
+	    List<File> files = findAll(names, false);
+	    return files.isEmpty() ? null : files.get(0);
+	}
+
+	/**
+	 * Helper method to determine if the given file (found by {@link #find} or
+	 * {@link #findAll}) is a Windows batch file.
+	 *
+	 * @param exeFile The executable file to examine.
+	 * @return        Whether or not the executable is a ".bat" or ".cmd" file
+	 *                and we're running on Windows.
+	 */
+	public static boolean isWindowsBatch(final File exeFile) {
+	    if (ON_WINDOWS) {
+		String lowerName = exeFile.getName().toLowerCase();
+		return (lowerName.endsWith(".cmd") || lowerName.endsWith(".bat"));
+	    }
+
+	    return false;
+	}
+
 
 	/**
 	 * The main body of the "which" algorithm: process the command line arguments

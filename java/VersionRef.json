@@ -3,6 +3,10 @@
 //======================
 
 [
+    { version: '2.11.1', date: d'2022-05-22',
+      issues: [ 340 ],
+      comment: 'Use new "Which" methods for "exec".'
+    },
     { version: '2.11.0', date: d'2022-05-22',
       issues: [ ],
       comment: 'Simplify the grammar to get rid of the slowdown.'

@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2021 Roger L. Whitcomb.
+ * Copyright (c) 2021-2022 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,8 +27,15 @@
  * History:
  *	30-Aug-2021 (rlwhitcomb)
  *	    Initial coding.
+ *	22-May-2022 (rlwhitcomb)
+ *	    #340: Add "cmd /c" for Windows ".bat" and ".cmd" files.
  */
 package info.rlwhitcomb.util;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 
 /**
@@ -44,17 +51,29 @@ public class TimeThis
 	 */
 	private static class CommandRunnable implements Runnable
 	{
-		private String[] args;
+		private List<String> args;
 		private int retCode;
 
 
-		public CommandRunnable(String[] cmdArgs) {
-		    this.args = cmdArgs;
-		    this.retCode = -1;
+		public CommandRunnable(final String[] cmdArgs) {
+		    args = Arrays.asList(cmdArgs);
+		    retCode = -1;
 		}
 
 		@Override
 		public void run() {
+		    if (Environment.isWindows()) {
+			String exe = args.get(0);
+			File f = Which.find(exe);
+			if (f != null && Which.isWindowsBatch(f)) {
+			    List<String> newArgs = new ArrayList<>(args.size() + 2);
+			    newArgs.add("cmd");
+			    newArgs.add("/c");
+			    newArgs.addAll(args);
+			    args = newArgs;
+			}
+		    }
+
 		    RunCommand cmd = new RunCommand(args);
 		    retCode = cmd.runToCompletion();
 		}
@@ -72,7 +91,7 @@ public class TimeThis
 	 *
 	 * @param args	The parsed command line arguments.
 	 */
-	public static void main(String[] args) {
+	public static void main(final String[] args) {
 	    CommandRunnable cmd = new CommandRunnable(args);
 	    Environment.timeThis(cmd);
 	    int ret = cmd.getRetCode();

@@ -61,6 +61,8 @@
  *	#85: Further versions to log exceptions or throw them.
  *  16-Feb-2022 (rlwhitcomb)
  *	Use buffer size from Constants.
+ *  22-May-2022 (rlwhitcomb)
+ *	#340: Refactor to use List<String> at the base level.
  */
 package info.rlwhitcomb.util;
 
@@ -72,6 +74,7 @@ import java.io.InputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -98,6 +101,7 @@ public class RunCommand
 	private BufferedOutputStream stdOutput = null;
 	/** The {@link PrintStream} to use to echo the command output. */
 	private PrintStream out = System.out;
+
 
 	/**
 	 * Return the process exit code.
@@ -135,6 +139,7 @@ public class RunCommand
 	    return stdOutput;
 	}
 
+
 	/**
 	 * Constructor given the command and its arguments to run.
 	 *
@@ -146,6 +151,16 @@ public class RunCommand
 	}
 
 	/**
+	 * Constructor given the command and its arguments to run.
+	 *
+	 * @param	command	variable number of command arguments --
+	 *			the first one of which must be the executable name
+	 */
+	public RunCommand(final List<String> command) {
+	    init(command);
+	}
+
+	/**
 	 * Convenience constructor given a command and a list (as opposed
 	 * to an array) of arguments.
 	 *
@@ -153,13 +168,15 @@ public class RunCommand
 	 * @param	args	The list of arguments (could be empty).
 	 */
 	public RunCommand(final String command, final List<String> args) {
-	    String[] allArgs = new String[args.size() + 1];
-	    allArgs[0] = command;
-	    int i = 1;
-	    for (String arg : args) {
-		allArgs[i++] = arg;
-	    }
+	    List<String> allArgs = new ArrayList<>(args.size() + 1);
+	    allArgs.add(command);
+	    allArgs.addAll(args);
 	    init(allArgs);
+	}
+
+	private void init(final List<String> command) {
+	    pb = new ProcessBuilder(command);
+	    pb.redirectErrorStream(true);
 	}
 
 	private void init(final String... command) {
