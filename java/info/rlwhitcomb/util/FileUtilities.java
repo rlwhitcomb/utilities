@@ -102,6 +102,9 @@
  *	Add "readFileAsLines" (several flavors).
  *    16-Feb-2022 (rlwhitcomb)
  *	Move buffer and file size constants out to Constants.
+ *    23-May-2022 (rlwhitcomb)
+ *	Provide a default list of executable extensions for Windows
+ *	in case "PATHEXT" is not present (for some unknown reason).
  */
 package info.rlwhitcomb.util;
 
@@ -158,6 +161,11 @@ public final class FileUtilities
      * The list of allowed executable file extensions (Windows only).
      */
     private static String[] EXECUTABLE_EXTENSIONS;
+
+    /**
+     * Default list of executable extensions (in case "PATHEXT" is not found in the environment.
+     */
+    private static final String DEFAULT_EXECUTABLES = ".COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC";
 
 
     /**
@@ -639,6 +647,9 @@ public final class FileUtilities
 		String ext = name.substring(dotPos).toUpperCase();
 		if (EXECUTABLE_EXTENSIONS == null) {
 		    String exts = System.getenv("PATHEXT");
+		    if (exts == null) {
+			exts = DEFAULT_EXECUTABLES;
+		    }
 		    EXECUTABLE_EXTENSIONS = exts.split(Environment.pathSeparator());
 		    Arrays.sort(EXECUTABLE_EXTENSIONS);
 		}

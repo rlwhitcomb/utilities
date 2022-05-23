@@ -3,6 +3,10 @@
 //======================
 
 [
+    { base: '1.9.21', date: d'2022-05-23',
+      issues: [ ],
+      comment: 'Provide a default value on Windows if PATHEXT is not present.'
+    },
     { version: '2.11.2', date: d'2022-05-23',
       issues: [ ],
       comment: 'Reword an error message to give more information.'
