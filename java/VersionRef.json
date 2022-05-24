@@ -3,6 +3,10 @@
 //======================
 
 [
+    { version: '2.11.5', date: d'2022-05-23',
+      issues: [ 341 ],
+      comment: 'Add "~~" operator (convert to number).'
+    },
     { base: '1.9.21', date: d'2022-05-23',
       issues: [ ],
       comment: 'Provide a default value on Windows if PATHEXT is not present.'

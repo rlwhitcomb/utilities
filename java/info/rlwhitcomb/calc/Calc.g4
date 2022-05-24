@@ -399,6 +399,8 @@
  *	    #327: Add "unique" function.
  *	22-May-2022 (rlwhitcomb)
  *	    Refactor because parsing had gotten way too slow.
+ *	23-May-2022 (rlwhitcomb)
+ *	    #341: Add "~~" operator ("to number").
  */
 
 grammar Calc;
@@ -564,6 +566,7 @@ expr
    |<assoc=right> ADD_OP expr            # negPosExpr
    |<assoc=right> '!!' expr              # toBooleanExpr
    |<assoc=right> ('!'|'\u00AC') expr    # booleanNotExpr
+   |<assoc=right> '~~' expr              # toNumberExpr
    |<assoc=right> '~' expr               # bitNotExpr
    | expr '!'                            # factorialExpr
    |<assoc=right> expr POW_OP expr       # powerExpr

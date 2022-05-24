@@ -573,6 +573,8 @@
  *	22-May-2022 (rlwhitcomb)
  *	    Simplify the grammar which gets rid of the slowdown from several versions ago.
  *	    #340: Use "Which.find" in "exec".
+ *	23-May-2022 (rlwhitcomb)
+ *	    #341: Add "~~" ("to number") operator.
  */
 package info.rlwhitcomb.calc;
 
@@ -3129,6 +3131,20 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			throw new UnknownOpException(op, expr);
 		}
 	    }
+	}
+
+	@Override
+	public Object visitToNumberExpr(CalcParser.ToNumberExprContext ctx) {
+	    CalcParser.ExprContext expr = ctx.expr();
+	    Object value = evaluate(expr);
+
+	    if (settings.rationalMode) {
+		return convertToFraction(value, ctx);
+	    }
+	    else if (value instanceof ComplexNumber) {
+		return value;
+	    }
+	    return fixupToInteger(toDecimalValue(this, value, settings.mc, ctx));
 	}
 
 	@Override
