@@ -656,7 +656,7 @@ or<br>
       <td>the fundamental constants <code>&#x1D6D1;</code> and <code>e</code><br>
           the fundamental Golden Ratio constant <code>&#x03C6;</code> or <code>phi</code><br>
           <code>(1 / &#x03C6;)</code> which is also <code>(&#x03C6; - 1)</code><br>
-          <code><i>i</i></code> or &#x221A;-1 (the root of the imaginary numbers)<br>
+          <code><i>i</i></code> or <code>&#x221A;-1</code> (the root of the imaginary numbers)<br>
           the <code>boolean</code> values<br>
           the <code>null</code> (empty) value<br>
           the empty object / set (same as <code>{ }</code>)<br>
