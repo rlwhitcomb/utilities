@@ -81,6 +81,11 @@
 >Defining function “c(f)” = f
 >c(f1) -> "f1 here"
 >c1(f2, 'roger') -> "roger here"
+>Defining function “f(op,v1,v2)” = {op(v1, v2)}
+>Defining function “add(o1,o2)” = o1 + o2
+>Defining function “mul(o1,o2)” = o1 * o2
+>f(add, 1, 2) -> 3
+>f(mul, 3, 4) -> 12
 >pp = 5 -> 5
 >Defining function “func(pp)” = {pp}
 >func(21) -> 21

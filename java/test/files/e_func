@@ -93,6 +93,12 @@ def c(f) = f
 c(f1)
 c1(f2, 'roger')
 
+define f(op, v1, v2) = { op(v1,v2) }
+define add(o1, o2) = o1 + o2
+define mul(o1, o2) = o1 * o2
+f(add, 1, 2)
+f(mul, 3, 4)
+
 pp = 5
 def func(pp) = { pp }
 func(21)
