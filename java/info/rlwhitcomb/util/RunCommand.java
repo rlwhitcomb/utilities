@@ -63,6 +63,10 @@
  *	Use buffer size from Constants.
  *  22-May-2022 (rlwhitcomb)
  *	#340: Refactor to use List<String> at the base level.
+ *  25-May-2022 (rlwhitcomb)
+ *	#346: Add "removeStdEnv" to deal gracefully with environment variables
+ *	that shouldn't be shared with subprocesses because they are used in our
+ *	invocation scripts.
  */
 package info.rlwhitcomb.util;
 
@@ -101,6 +105,11 @@ public class RunCommand
 	private BufferedOutputStream stdOutput = null;
 	/** The {@link PrintStream} to use to echo the command output. */
 	private PrintStream out = System.out;
+
+	/** The "standard" environment variables set/used by our invocation scripts (see "_find_and_run_class.bat"). */
+	private static final String[] STD_VARS = {
+	    "JAR_FILE", "JAR_PATH", "FULL_CLASSPATH", "CLASS_NAME", "JVM_ARGS", "CMD_ARGS"
+	};
 
 
 	/**
@@ -189,6 +198,23 @@ public class RunCommand
 	 */
 	public Map<String, String> environment() {
 	    return pb.environment();
+	}
+
+	/**
+	 * Remove from the child process' environment the variables used in our
+	 * invocation scripts (see "_find_and_run_class.bat"). Note: only a problem
+	 * on Windows.
+	 *
+	 * @return Ourselves (as in "builder" pattern).
+	 */
+	public RunCommand removeStdEnv() {
+	    if (Environment.isWindows()) {
+		Map<String, String> ourEnv = pb.environment();
+		for (String varName : STD_VARS) {
+		    ourEnv.remove(varName);
+		}
+	    }
+	    return this;
 	}
 
 	/**

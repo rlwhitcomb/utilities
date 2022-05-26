@@ -5306,7 +5306,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 
 	    try {
-		RunCommand cmd = new RunCommand(args);
+		RunCommand cmd = new RunCommand(args).removeStdEnv();
 		StringBuilder result = new StringBuilder();
 		int retCode = cmd.runToCompletion(result, true);
 
