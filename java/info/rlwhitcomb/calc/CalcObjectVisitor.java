@@ -577,6 +577,7 @@
  *	    #341: Add "~~" ("to number") operator.
  *	25-May-2022 (rlwhitcomb)
  *	    #348: Add "var" statement and clear local vars on each loop/while iteration.
+ *	    #349: Fix "buildValueList" for sort; add context for error message.
  */
 package info.rlwhitcomb.calc;
 
@@ -5211,29 +5212,39 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	 *			is a list or map.
 	 * @param objectList	The complete list of values to be built.
 	 * @param conversion	Type of conversion to do on the values.
+	 * @param level		Level of recursion.
 	 */
 	private void buildValueList(
 		final ParserRuleContext ctx,
 		final Object obj,
 		final List<Object> objectList,
-		final Conversion conversion)
+		final Conversion conversion,
+		final int level)
 	{
 	    Object value = evaluate(ctx, obj);
 
-	    nullCheck(value, ctx);
-
 	    if (value instanceof ArrayScope) {
-		@SuppressWarnings("unchecked")
-		ArrayScope array = (ArrayScope) value;
-		for (Object listObj : array.list()) {
-		    buildValueList(ctx, listObj, objectList, conversion);
+		if (conversion == Conversion.UNCHANGED && level > 0) {
+		    objectList.add(value);
+		}
+		else {
+		    @SuppressWarnings("unchecked")
+		    ArrayScope array = (ArrayScope) value;
+		    for (Object listObj : array.list()) {
+			buildValueList(ctx, listObj, objectList, conversion, level + 1);
+		    }
 		}
 	    }
 	    else if (value instanceof ObjectScope) {
-		@SuppressWarnings("unchecked")
-		ObjectScope map = (ObjectScope) value;
-		for (Object mapObj : map.values()) {
-		    buildValueList(ctx, mapObj, objectList, conversion);
+		if (conversion == Conversion.UNCHANGED && level > 0) {
+		    objectList.add(value);
+		}
+		else {
+		    @SuppressWarnings("unchecked")
+		    ObjectScope map = (ObjectScope) value;
+		    for (Object mapObj : map.values()) {
+			buildValueList(ctx, mapObj, objectList, conversion, level + 1);
+		    }
 		}
 	    }
 	    else {
@@ -5242,9 +5253,11 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			objectList.add(toStringValue(this, ctx, value, false, false));
 			break;
 		    case DECIMAL:
+			nullCheck(value, ctx);
 			objectList.add(toDecimalValue(this, value, settings.mc, ctx));
 			break;
 		    case FRACTION:
+			nullCheck(value, ctx);
 			objectList.add(toFractionValue(this, value, ctx));
 			break;
 		    case UNCHANGED:
@@ -5266,7 +5279,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    List<Object> objects = new ArrayList<>();
 
 	    for (CalcParser.ExprContext exprCtx : exprs) {
-		buildValueList(exprCtx, evaluate(exprCtx), objects, conversion);
+		buildValueList(exprCtx, evaluate(exprCtx), objects, conversion, 0);
 	    }
 
 	    return objects;

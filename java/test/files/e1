@@ -7,7 +7,7 @@
 # Simple version check ...
 # version 2.3.0 was first version where these checks would work, and 2.4.11 is where versioninfo -> info.version
 info.version.major > 2 || (info.version.major == 2 && info.version.minor > 4) || (info.version.major == 2 && info.version.minor == 4 && info.version.patch >= 11)
-:requires '2.11.5-alpha', base '1.9.15-alpha'
+:requires '2.12.1-alpha', base '1.9.15-alpha'
 
 # Various simple expressions
 :decimal(50)
@@ -437,6 +437,7 @@ unique u2
 a1 = [ 4, 3, 1, 2, -1, 5, -10 ]
 a2 = [ "abc", "Abc", "aBc", "abC" ]
 a3 = [ "abc", "DEF", "Abc", "def", "1.1.0", "1.10.0", "1.2.0" ]
+a4 = [ { b: 20}, {b: 10}, {b:0}, {b:1}, {b:100}, {b:-1} ]
 a1 = sort a1
 a1
 sort(a2)
@@ -445,8 +446,7 @@ sort(a2, true)
 sort a3
 sort a3, true
 sort a3, false
-
-sort [[3,9], [4, 7], [1, 2], [10, 8]]
+sort a4
 
 # Precedence of compare / equal operators
 1 < 2 == 3 > 4
