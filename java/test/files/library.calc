@@ -489,9 +489,9 @@ define hashstring(value, algorithm = 'sha-256', uppercase = false) = {
 define mean_stddev (values) = {
   len = length(values)
   avg = sumof(values) / len
-  var = 0
-  loop over values { var += (__ - avg) ** 2 }
-  var /= len
-  { mean: avg, stddev: round(sqrt(var), 3) }
+  variance = 0
+  loop v over values { variance += (v - avg) ** 2 }
+  variance /= len
+  { mean: avg, stddev: round(sqrt(variance), 3) }
 }
 

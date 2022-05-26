@@ -38,6 +38,9 @@
  *	    #199: Move GlobalScope out to ParameterizedScope; add LOOP_VAR to LoopScope.
  *	17-Feb-2022 (rlwhitcomb)
  *	    #252: Rename some methods to be more clear.
+ *	25-May-2022 (rlwhitcomb)
+ *	    #348: Return the new value from "setValue" methods.
+ *	    Make all methods package private.
  */
 package info.rlwhitcomb.calc;
 
@@ -73,7 +76,7 @@ class NestedScope extends ObjectScope
 	 *
 	 * @return The enclosing scope.
 	 */
-	public NestedScope getEnclosingScope() {
+	NestedScope getEnclosingScope() {
 	    return enclosingScope;
 	}
 
@@ -82,7 +85,7 @@ class NestedScope extends ObjectScope
 	 *
 	 * @param outer The current outer scope.
 	 */
-	public void setEnclosingScope(final NestedScope outer) {
+	void setEnclosingScope(final NestedScope outer) {
 	    this.enclosingScope = outer;
 	}
 
@@ -94,7 +97,7 @@ class NestedScope extends ObjectScope
 	 * @return           Does this name exist anywhere?
 	 */
 	@Override
-	public boolean isDefined(final String name, final boolean ignoreCase) {
+	boolean isDefined(final String name, final boolean ignoreCase) {
 	    if (isDefinedLocally(name, ignoreCase))
 		return true;
 
@@ -112,7 +115,7 @@ class NestedScope extends ObjectScope
 	 * @return           The value of the variable, if found, or {@code null} if not.
 	 */
 	@Override
-	public Object getValue(final String name, final boolean ignoreCase) {
+	Object getValue(final String name, final boolean ignoreCase) {
 	    NestedScope scope = this;
 	    while (scope != null && !scope.isDefinedLocally(name, ignoreCase))
 		scope = scope.enclosingScope;
@@ -146,17 +149,18 @@ class NestedScope extends ObjectScope
 	 * @param name       Name of the variable to set.
 	 * @param ignoreCase Whether or not to ignore the case of name in finding it.
 	 * @param value      The new value for the variable.
+	 * @return           That new value (for convenience).
 	 */
 	@Override
-	public void setValue(final String name, final boolean ignoreCase, final Object value) {
+	Object setValue(final String name, final boolean ignoreCase, final Object value) {
 	    NestedScope scope = this;
 	    while (scope != null && !scope.isDefinedLocally(name, ignoreCase))
 		scope = scope.enclosingScope;
 
 	    if (scope != null)
-		scope.setValueLocally(name, ignoreCase, value);
+		return scope.setValueLocally(name, ignoreCase, value);
 	    else
-		setValueLocally(name, ignoreCase, value);
+		return setValueLocally(name, ignoreCase, value);
 	}
 
 	/**
@@ -168,7 +172,7 @@ class NestedScope extends ObjectScope
 	 * @return           The previous value mapped to the variable.
 	 */
 	@Override
-	public Object remove(final String name, final boolean ignoreCase) {
+	Object remove(final String name, final boolean ignoreCase) {
 	    if (isDefinedLocally(name, ignoreCase))
 		return super.remove(name, ignoreCase);
 	    if (enclosingScope != null)
@@ -184,7 +188,7 @@ class NestedScope extends ObjectScope
  */
 class LoopScope extends NestedScope
 {
-	public static final String LOOP_VAR = "__";
+	static final String LOOP_VAR = "__";
 
 
 	LoopScope() {

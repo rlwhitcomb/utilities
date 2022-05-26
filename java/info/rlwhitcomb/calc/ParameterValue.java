@@ -31,6 +31,8 @@
  *	    Now move back to "ValueScope".
  *	17-Feb-2022 (rlwhitcomb)
  *	    #252: Make sure to set the parameter in the local scope.
+ *	25-May-2022 (rlwhitcomb)
+ *	    #348: Just call "setValue" which defaults to locally.
  */
 package info.rlwhitcomb.calc;
 
@@ -91,7 +93,7 @@ class ParameterValue extends ValueScope
 	 */
 	static void put(final ParameterizedScope scope, final String nm, final Object value) {
 	    ParameterValue param = new ParameterValue(nm, value);
-	    scope.setValueLocally(nm, false, param);
+	    scope.setValue(nm, param);
 	}
 
 }

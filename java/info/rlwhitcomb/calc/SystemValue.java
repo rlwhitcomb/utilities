@@ -31,6 +31,8 @@
  *	    #199: Derive from ValueScope.
  *	14-Feb-2022 (rlwhitcomb)
  *	    #199: Override "isImmutable" here from default in ValueScope.
+ *	25-May-2022 (rlwhitcomb)
+ *	    #348: Return new value from "setValue" methods.
  */
 package info.rlwhitcomb.calc;
 
@@ -110,8 +112,10 @@ class SystemValue<V> extends ValueScope
 	 *
 	 * @param value	The new value for it.
 	 */
-	void setValue(final V value) {
+	V setValue(final V value) {
 	    setMethod.accept(value);
+
+	    return value;
 	}
 
 	/**

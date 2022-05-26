@@ -401,6 +401,9 @@
  *	    Refactor because parsing had gotten way too slow.
  *	23-May-2022 (rlwhitcomb)
  *	    #341: Add "~~" operator ("to number").
+ *	25-May-2022 (rlwhitcomb)
+ *	    #348: Add "var" statement.
+ *	    Allow EOL after colon in object declarations.
  */
 
 grammar Calc;
@@ -418,6 +421,7 @@ stmtOrExpr
    | directive
    | defineStmt
    | constStmt
+   | varStmt
    | loopStmt
    | whileStmt
    | ifStmt
@@ -437,6 +441,10 @@ defineStmt
 
 constStmt
    : K_CONST id '=' expr
+   ;
+
+varStmt
+   : K_VAR id '=' expr
    ;
 
 loopStmt
@@ -687,9 +695,9 @@ obj
    ;
 
 pair
-   : id ':' expr
-   | STRING ':' expr
-   | ISTRING ':' expr
+   : id ':' EOL* expr
+   | STRING ':' EOL* expr
+   | ISTRING ':' EOL* expr
    ;
 
 complex
@@ -1074,6 +1082,9 @@ K_DEFINE   : 'define' | 'DEFINE' | 'Define'
 
 K_CONST    : 'constant' | 'CONSTANT' | 'Constant'
            | 'const' | 'CONST' | 'Const' ;
+
+K_VAR      : 'variable' | 'VARIABLE' | 'Variable'
+           | 'var' | 'VAR' | 'Var' ;
 
 K_CASE     : 'case' | 'CASE' | 'Case' ;
 

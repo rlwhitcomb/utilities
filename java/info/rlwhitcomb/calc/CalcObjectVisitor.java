@@ -575,6 +575,8 @@
  *	    #340: Use "Which.find" in "exec".
  *	23-May-2022 (rlwhitcomb)
  *	    #341: Add "~~" ("to number") operator.
+ *	25-May-2022 (rlwhitcomb)
+ *	    #348: Add "var" statement and clear local vars on each loop/while iteration.
  */
 package info.rlwhitcomb.calc;
 
@@ -2358,15 +2360,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		LoopVisitor(final CalcParser.StmtBlockContext blockContext, final String varName) {
 		    this.block        = blockContext;
 		    this.localVarName = varName;
-
-		    // Predefine the loop variable in the local scope so it will definitely
-		    // override a global one
-		    currentScope.setValueLocally(localVarName, settings.ignoreNameCase, null);
 		}
 
 		@Override
 		public Object apply(final Object value) {
-		    currentScope.setValue(localVarName, settings.ignoreNameCase, value);
+		    currentScope.clear();
+		    currentScope.setValue(localVarName, value);
 		    return visit(block);
 		}
 
@@ -2613,6 +2612,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    pushScope(new WhileScope());
 	    try {
 		while (exprResult) {
+		    currentScope.clear();
 		    lastValue = visit(block);
 		    exprResult = getBooleanValue(exprCtx);
 		}
@@ -2846,6 +2846,17 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    displayActionMessage("%calc#definingConst", constantName, value);
 
 	    return value;
+	}
+
+	@Override
+	public Object visitVarStmt(CalcParser.VarStmtContext ctx) {
+	    String varName = ctx.id().getText();
+	    Object value = evaluate(ctx.expr());
+
+	    if (currentScope.isDefinedLocally(varName, settings.ignoreNameCase))
+		throw new CalcExprException(ctx, "%calc#noDupLocalVar", varName);
+
+	    return currentScope.setValueLocally(varName, settings.ignoreNameCase, value);
 	}
 
 	private void addPairsToObject(CalcParser.ObjContext objCtx, ObjectScope object) {

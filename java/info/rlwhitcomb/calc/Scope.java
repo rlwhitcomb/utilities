@@ -40,6 +40,8 @@
  *	14-Feb-2022 (rlwhitcomb)
  *	    #199: Only put the default implementation of "isPredefined", "isImmutable",
  *	    and "toString" in here, let the appropriate subclasses override.
+ *	25-May-2022 (rlwhitcomb)
+ *	    #348: Make the enum package private.
  */
 package info.rlwhitcomb.calc;
 
@@ -52,7 +54,7 @@ class Scope
 	/**
 	 * The various types of entities that we represent.
 	 */
-	public static enum Type
+	static enum Type
 	{
 		/** The global symbol table. */
 		GLOBAL,

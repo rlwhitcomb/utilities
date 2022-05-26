@@ -27,6 +27,8 @@
  *  History:
  *	12-Feb-2022 (rlwhitcomb)
  *	    #199: Initial coding, abstracted out of other code.
+ *	25-May-2022 (rlwhitcomb)
+ *	    #348: Make all methods package private.
  */
 package info.rlwhitcomb.calc;
 
@@ -96,7 +98,7 @@ class ParameterizedScope extends NestedScope
 class GlobalScope extends ParameterizedScope
 {
 	/** Prefix for the global (command-line) arguments. */
-	public static final String GLOBAL_PREFIX = "$";
+	static final String GLOBAL_PREFIX = "$";
 
 
 	GlobalScope() {

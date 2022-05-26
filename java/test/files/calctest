@@ -36,6 +36,7 @@ e_func        : e_func
 e_s           : e_s
 e_sort        : e_sort -clear -- e10 e1 e11 e12 e20 e2 e3 e5 e30 e31
 e_lorem       : e_lorem -expressions
+check         : -nolib test/files/check -clear -- test/data/cake.json test/data/cake.json
 
 # Notice there is no ".canon" file here because we must prove that the program
 # produces itself exactly as the output.

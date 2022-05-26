@@ -371,6 +371,12 @@ h2 {
      are fixed to their value at the time of the <code>const</code> declaration being evaluated. The syntax is:
   <p class="indent"><code>const</code>&nbsp;<i>id</i><code> = </code><i>expr</i>
   <p>Such constants are typically (per convention) given UPPER case names, but this is not required in Calc.
+  <p>Sometimes, especially within loops or other code blocks, local variables are needed for intermediate calculations. In order to
+     ensure that such values are local to the block they reside in (and aren't accidentally overriding or interfering with other
+     variables of the same name), the <code>var</code> keyword can be used, as in:
+  <p class="indent"><code>var</code>&nbsp;<i>id</i><code> = </code><i>expr</i>
+  <p>Such a declaration has no other effect than to guarantee the variable is local to the closest enclosing block (usually enclosed
+     by <code>{</code> ... <code>}</code>).
   <p>Numeric values can also be specified using "kilobyte" notation in one of two forms: multipliers of 1000, or multipliers of 1024 (2**10).
      These multipliers are simply appended to the number to automatically multiply by the given amount. The allowed suffixes are:
      <code>Kb</code>, <code>Mb</code>, <code>Tb</code>, <code>Pb</code>, and <code>Eb</code> which all multiply by their respective

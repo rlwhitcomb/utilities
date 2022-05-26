@@ -41,6 +41,8 @@
  *	    #315: Add "isEmpty" method.
  *	21-May-2022 (rlwhitcomb)
  *	    #327: Convert "List" constructor to Collection.
+ *	25-May-2022 (rlwhitcomb)
+ *	    #348: Make all methods package private.
  */
 package info.rlwhitcomb.calc;
 
@@ -112,7 +114,7 @@ class ArrayScope<T> extends Scope
 	 * @return      The value at that index, which could be {@code null} if no value has been assigned yet.
 	 * @throws      IndexOutOfBoundsException if the index is negative.
 	 */
-	public T getValue(final int index) {
+	T getValue(final int index) {
 	    int size = values.size();
 	    int pos = index < 0 ? index + size : index;
 
@@ -129,7 +131,7 @@ class ArrayScope<T> extends Scope
 	 * @param value The value to put there.
 	 * @throws      IndexOutOfBoundsException if the index is negative.
 	 */
-	public void setValue(final int index, final T value) {
+	void setValue(final int index, final T value) {
 	    int size = values.size();
 	    int pos = index < 0 ? index + size : index;
 
@@ -155,7 +157,7 @@ class ArrayScope<T> extends Scope
 	 *              will move to positions index + 1, index + 2, etc.
 	 * @param value The new value to insert at position index.
 	 */
-	public void insert(final int index, final T value) {
+	void insert(final int index, final T value) {
 	    values.add(index, value);
 	}
 
@@ -164,7 +166,7 @@ class ArrayScope<T> extends Scope
 	 *
 	 * @param value The next value to add to the end of the list.
 	 */
-	public void add(final T value) {
+	void add(final T value) {
 	    values.add(value);
 	}
 
@@ -174,7 +176,7 @@ class ArrayScope<T> extends Scope
 	 * @param c The collection to add to this list.
 	 * @return  Whether the list changed as a result of this operation.
 	 */
-	public boolean addAll(final Collection<? extends T> c) {
+	boolean addAll(final Collection<? extends T> c) {
 	    return values.addAll(c);
 	}
 
@@ -184,7 +186,7 @@ class ArrayScope<T> extends Scope
 	 * @param index Index of the element to remove.
 	 * @return      The previous element at that position.
 	 */
-	public T remove(final int index) {
+	T remove(final int index) {
 	    return values.remove(index);
 	}
 
@@ -193,7 +195,7 @@ class ArrayScope<T> extends Scope
 	 *
 	 * @return The underlying list we are wrapping.
 	 */
-	public List<T> list() {
+	List<T> list() {
 	    return values;
 	}
 
@@ -202,7 +204,7 @@ class ArrayScope<T> extends Scope
 	 *
 	 * @return Size of the underlying list.
 	 */
-	public int size() {
+	int size() {
 	    return values.size();
 	}
 
@@ -211,7 +213,7 @@ class ArrayScope<T> extends Scope
 	 *
 	 * @return {@code true} for an empty list
 	 */
-	public boolean isEmpty() {
+	boolean isEmpty() {
 	    return values.isEmpty();
 	}
 

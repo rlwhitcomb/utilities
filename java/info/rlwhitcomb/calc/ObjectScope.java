@@ -56,6 +56,9 @@
  *	    #315: Change "putAll" to another ObjectScope, add copy constructor.
  *	18-May-2022 (rlwhitcomb)
  *	    #315: Add "isEmpty" method.
+ *	25-May-2022 (rlwhitcomb)
+ *	    #348: Return value from "setValue" methods.
+ *	    Make all methods package private.
  */
 package info.rlwhitcomb.calc;
 
@@ -236,8 +239,9 @@ class ObjectScope extends Scope
 	 * @param name       Name of the variable to set.
 	 * @param ignoreCase Whether to ignore case in order to access the variable.
 	 * @param value      The new value for the variable.
+	 * @return           That new value (for convenience).
 	 */
-	void setValueLocally(final String name, final boolean ignoreCase, final Object value) {
+	Object setValueLocally(final String name, final boolean ignoreCase, final Object value) {
 	    if (ignoreCase) {
 		if (variables.containsKey(name)) {
 		    variables.put(name, value);
@@ -246,7 +250,7 @@ class ObjectScope extends Scope
 		    for (Map.Entry<String, Object> entry : variables.entrySet()) {
 			if (entry.getKey().equalsIgnoreCase(name)) {
 			    entry.setValue(value);
-			    return;
+			    return value;
 			}
 		    }
 		    if (immutable)
@@ -262,27 +266,31 @@ class ObjectScope extends Scope
 
 		variables.put(name, value);
 	    }
+
+	    return value;
 	}
 
 	/**
-	 * Set the value of one of our variables, case-sensitive (used for predefined values).
+	 * Set the value of one of our variables locally, case-sensitive (used for predefined values).
 	 *
 	 * @param name       Name of the variable to set.
 	 * @param value      The new value for the variable.
+	 * @return           That new value (for convenience).
 	 */
-	void setValue(final String name, final Object value) {
-	    setValueLocally(name, false, value);
+	Object setValue(final String name, final Object value) {
+	    return setValueLocally(name, false, value);
 	}
 
 	/**
-	 * Set the value of one of our variables.
+	 * Set the value of one of our variables locally.
 	 *
 	 * @param name       Name of the variable to set.
 	 * @param ignoreCase Whether to ignore case in order to access the variable.
 	 * @param value      The new value for the variable.
+	 * @return           That new value (for convenience).
 	 */
-	void setValue(final String name, final boolean ignoreCase, final Object value) {
-	    setValueLocally(name, ignoreCase, value);
+	Object setValue(final String name, final boolean ignoreCase, final Object value) {
+	    return setValueLocally(name, ignoreCase, value);
 	}
 
 	/**
@@ -293,7 +301,7 @@ class ObjectScope extends Scope
 	 * @param ignoreCase Whether or not to ignore the case of names when searching.
 	 * @return           {@code true} or {@code false} if the scope has such a variable.
 	 */
-	public boolean isDefinedLocally(final String name, final boolean ignoreCase) {
+	boolean isDefinedLocally(final String name, final boolean ignoreCase) {
 	    if (ignoreCase) {
 		if (variables.containsKey(name)) {
 		    return true;
@@ -319,7 +327,7 @@ class ObjectScope extends Scope
 	 * @param ignoreCase Whether or not to ignore the case of names when searching.
 	 * @return           {@code true} or {@code false} if the scope has such a variable.
 	 */
-	public boolean isDefined(final String name, final boolean ignoreCase) {
+	boolean isDefined(final String name, final boolean ignoreCase) {
 	    return isDefinedLocally(name, ignoreCase);
 	}
 
@@ -331,7 +339,7 @@ class ObjectScope extends Scope
 	 * @return           The previous value of the variable, if any, or {@code null} if the entry was not found.
 	 *		     The value {@code null} could also be returned if the previous value of the entry was {@code null}.
 	 */
-	public Object remove(final String name, final boolean ignoreCase) {
+	Object remove(final String name, final boolean ignoreCase) {
 	    if (ignoreCase) {
 		if (variables.containsKey(name)) {
 		    return variables.remove(name);
@@ -364,7 +372,7 @@ class ObjectScope extends Scope
 	 * @return           A zero-based index of this key in the object, if found, or {@code -1}
 	 *                   if the key is not a member of this object.
 	 */
-	public int indexOf(final String searchKey, final int start, final boolean ignoreCase) {
+	int indexOf(final String searchKey, final int start, final boolean ignoreCase) {
 	    List<String> keyList = keyList();
 	    int size = keyList.size();
 	    BiPredicate<String, String> pred = ignoreCase
@@ -396,7 +404,7 @@ class ObjectScope extends Scope
 	 * @return      The value at that index, or {@code null} if the index is &gt;= number of keys.
 	 * @throws      IndexOutOfBoundsException if the index is less than zero.
 	 */
-	public Object valueAt(final int index) {
+	Object valueAt(final int index) {
 	    List<String> keyList = keyList();
 	    int pos = index < 0 ? index + keyList.size() : index;
 
@@ -414,9 +422,10 @@ class ObjectScope extends Scope
 	 *
 	 * @param index The zero-based index of the desired value to retrieve.
 	 * @param value New value to place at that index location.
+	 * @return      That new value (for convenience).
 	 * @throws      IndexOutOfBoundsException if the index is less than zero.
 	 */
-	public void setValue(final int index, final Object value) {
+	Object setValue(final int index, final Object value) {
 	    List<String> keyList = keyList();
 	    int size = keyList.size();
 	    int pos = index < 0 ? index + size : index;
@@ -434,6 +443,8 @@ class ObjectScope extends Scope
 	    }
 
 	    variables.put(keyList.get(pos), value);
+
+	    return value;
 	}
 
 	/**
@@ -441,7 +452,7 @@ class ObjectScope extends Scope
 	 *
 	 * @return The variable key (name) set.
 	 */
-	public Set<String> keySet() {
+	Set<String> keySet() {
 	    return variables.keySet();
 	}
 
@@ -450,7 +461,7 @@ class ObjectScope extends Scope
 	 *
 	 * @return The list of variable (key) names.
 	 */
-	public List<String> keyList() {
+	List<String> keyList() {
 	    return new ArrayList<>(variables.keySet());
 	}
 
@@ -459,14 +470,14 @@ class ObjectScope extends Scope
 	 *
 	 * @return The key name set as Objects.
 	 */
-	public Set<Object> keyObjectSet() {
+	Set<Object> keyObjectSet() {
 	    return new LinkedHashSet<>(variables.keySet());
 	}
 
 	/**
 	 * Completely clear all the variables in this scope.
 	 */
-	public void clear() {
+	void clear() {
 	    variables.clear();
 	}
 
@@ -475,7 +486,7 @@ class ObjectScope extends Scope
 	 *
 	 * @return The map we are wrapping.
 	 */
-	public Map<String, Object> map() {
+	Map<String, Object> map() {
 	    return variables;
 	}
 
@@ -484,7 +495,7 @@ class ObjectScope extends Scope
 	 *
 	 * @param obj Another {@link ObjectScope} to add.
 	 */
-	public void putAll(final ObjectScope obj) {
+	void putAll(final ObjectScope obj) {
 	    variables.putAll(obj.variables);
 	}
 
@@ -493,7 +504,7 @@ class ObjectScope extends Scope
 	 *
 	 * @return The values set we are wrapping.
 	 */
-	public Collection<Object> values() {
+	Collection<Object> values() {
 	    return variables.values();
 	}
 
@@ -502,7 +513,7 @@ class ObjectScope extends Scope
 	 *
 	 * @return The size of the variables map.
 	 */
-	public int size() {
+	int size() {
 	    return variables.size();
 	}
 
@@ -511,7 +522,7 @@ class ObjectScope extends Scope
 	 *
 	 * @return {@code true} if the object is empty.
 	 */
-	public boolean isEmpty() {
+	boolean isEmpty() {
 	    return variables.isEmpty();
 	}
 

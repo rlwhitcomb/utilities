@@ -40,6 +40,8 @@
  *	    during "setParameterValue".
  *	11-May-2022 (rlwhitcomb)
  *	    #318: Rename "evaluateFunction" to just "evaluate".
+ *	25-May-2022 (rlwhitcomb)
+ *	    #348: Make all methods package private.
  */
 package info.rlwhitcomb.calc;
 
@@ -62,7 +64,7 @@ class FunctionScope extends ParameterizedScope
 	/**
 	 * The prefix used for the parameter array values.
 	 */
-	public static final String FUNC_PREFIX = "_";
+	static final String FUNC_PREFIX = "_";
 
 
 	/**
@@ -90,7 +92,7 @@ class FunctionScope extends ParameterizedScope
 	 * @param index   0-based parameter index.
 	 * @param expr    The expression value (could be {@code null}) to be assigned.
 	 */
-	public void setParameterValue(final CalcObjectVisitor visitor, final int index, final ParserRuleContext expr) {
+	void setParameterValue(final CalcObjectVisitor visitor, final int index, final ParserRuleContext expr) {
 	    ParserRuleContext valueExpr = expr;
 	    String paramName = declaration.getParameterName(index);
 	    Object paramValue = null;
@@ -115,7 +117,7 @@ class FunctionScope extends ParameterizedScope
 	 *
 	 * @return The complete function declaration set at construction time.
 	 */
-	public FunctionDeclaration getDeclaration() {
+	FunctionDeclaration getDeclaration() {
 	    return declaration;
 	}
 
