@@ -3,6 +3,10 @@
 //======================
 
 [
+    { version: '2.12.6', date: d'2022-05-27',
+      issues: [ 320 ],
+      comment: 'Rework "Transformer"-based functions that use filtering (such as "matches").'
+    },
     { version: '2.12.5', date: d'2022-05-26',
       issues: [ 320 ],
       comment: 'Rework "matches" to select fields and elements in compound objects.'

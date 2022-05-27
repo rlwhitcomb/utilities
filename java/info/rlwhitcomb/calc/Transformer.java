@@ -43,6 +43,7 @@ import java.util.function.Function;
  * <p> Other than the pure functional interface method, we add several other
  * methods specifically for dealing with these conversions on maps and lists.
  */
+@FunctionalInterface
 public interface Transformer extends Function<Object, Object>
 {
 	@Override
@@ -55,6 +56,18 @@ public interface Transformer extends Function<Object, Object>
 	 */
 	default boolean forKeys() {
 	    return false;
+	}
+
+	/**
+	 * Should a copy be done for {@code null} values (useful when the transform is a
+	 * filter to include / exclude certain values)?
+	 *
+	 * @return {@code true} to copy all values, including {@code null}, default is {@code true};
+	 * return {@code false} to use a {@code null} return from {@link #apply} or {@link #applyToMap} to
+	 * filter out those values.
+	 */
+	default boolean copyNull() {
+	    return true;
 	}
 
 	/**

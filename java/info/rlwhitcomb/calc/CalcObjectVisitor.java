@@ -581,6 +581,8 @@
  *	26-May-2022 (rlwhitcomb)
  *	    #320: Redo "matches" for arrays and objects to return similar objects whose
  *	    keys / values are matching.
+ *	27-May-2022 (rlwhitcomb)
+ *	    #320: Refactor the "copyNull" handling for Transformers.
  */
 package info.rlwhitcomb.calc;
 
@@ -4252,10 +4254,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	 * @param ctx      The expression context for the object being copied.
 	 * @param obj      The object to copy.
 	 * @param mapper   Transformation to apply to all the strings within the object.
-	 * @param copyNull Whether to copy null transformed values to the new result.
 	 * @return         The deep copy of the original object with the transformer applied to all strings.
 	 */
-	private Object copyAndTransform(final ParserRuleContext ctx, final Object obj, final Transformer mapper, final boolean copyNull) {
+	private Object copyAndTransform(final ParserRuleContext ctx, final Object obj, final Transformer mapper) {
 	    if (obj == null) {
 		return null;
 	    }
@@ -4272,17 +4273,17 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			value = evaluate(ctx, value);
 
 			if (value instanceof ObjectScope || value instanceof ArrayScope) {
-			    newValue = copyAndTransform(ctx, value, mapper, copyNull);
+			    newValue = copyAndTransform(ctx, value, mapper);
 			}
 			else {
 			    newValue = mapper.applyToMap(value, false);
 			}
 		    }
 
-		    if (newValue != null || copyNull) {
+		    if (newValue != null || mapper.copyNull()) {
 			if (mapper.forKeys()) {
 			    String newKey = (String) mapper.applyToMap(key, true);
-			    if (newKey != null || copyNull) {
+			    if (newKey != null || mapper.copyNull()) {
 				result.setValue(newKey, newValue);
 			    }
 			}
@@ -4305,14 +4306,14 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			value = evaluate(ctx, value);
 
 			if (value instanceof ObjectScope || value instanceof ArrayScope) {
-			    newValue = copyAndTransform(ctx, value, mapper, copyNull);
+			    newValue = copyAndTransform(ctx, value, mapper);
 			}
 			else {
 			    newValue = mapper.apply(value);
 			}
 		    }
 
-		    if (newValue != null || copyNull) {
+		    if (newValue != null || mapper.copyNull()) {
 			result.add(newValue);
 		    }
 		}
@@ -4402,7 +4403,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 
 	    try {
-		result = copyAndTransform(exprCtx, originalObj, new ReplaceTransformer(pattern, replace, option), true);
+		result = copyAndTransform(exprCtx, originalObj, new ReplaceTransformer(pattern, replace, option));
 	    }
 	    catch (Exception ex) {
 		throw new CalcExprException(ex, exprCtx);
@@ -4860,7 +4861,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		case "trim":
 		case "ltrim":
 		case "rtrim":
-		    return copyAndTransform(exprCtx, value, new TrimTransformer(op), true);
+		    return copyAndTransform(exprCtx, value, new TrimTransformer(op));
 
 		default:
 		    throw new UnknownOpException(op, ctx);
@@ -5102,7 +5103,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    CalcParser.ExprContext exprCtx = ctx.expr1().expr();
 	    boolean upper = ctx.K_UPPER() != null;
 
-	    return copyAndTransform(exprCtx, evaluate(exprCtx), new ConvertCaseTransformer(upper, settings.ignoreNameCase), true);
+	    return copyAndTransform(exprCtx, evaluate(exprCtx), new ConvertCaseTransformer(upper, settings.ignoreNameCase));
 	}
 
 	@Override
@@ -5396,6 +5397,11 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		}
 
 		@Override
+		public boolean copyNull() {
+		    return false;
+		}
+
+		@Override
 		public Object apply(final Object value) {
 		    String string = toNonNullString(exprCtx, value);
 		    return pattern.matcher(string).matches() ? value : null;
@@ -5423,7 +5429,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    // For lists and objects, return a similar object with only the matching keys or values
 	    if (input instanceof ObjectScope || input instanceof ArrayScope) {
-		return copyAndTransform(inputExpr, input, new MatchesTransformer(inputExpr, p), false);
+		return copyAndTransform(inputExpr, input, new MatchesTransformer(inputExpr, p));
 	    }
 	    else {
 		// For ordinary objects, just return a boolean if the string representation matches the pattern
