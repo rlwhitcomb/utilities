@@ -3,6 +3,10 @@
 //======================
 
 [
+    { version: '2.12.5', date: d'2022-05-26',
+      issues: [ 320 ],
+      comment: 'Rework "matches" to select fields and elements in compound objects.'
+    },
     { version: '2.12.2', date: d'2022-05-26',
       issues: [ 346 ],
       comment: 'Fix problems with "uuid" in Windows Calc GUI.'

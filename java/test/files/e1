@@ -7,7 +7,7 @@
 # Simple version check ...
 # version 2.3.0 was first version where these checks would work, and 2.4.11 is where versioninfo -> info.version
 info.version.major > 2 || (info.version.major == 2 && info.version.minor > 4) || (info.version.major == 2 && info.version.minor == 4 && info.version.patch >= 11)
-:requires '2.12.1-alpha', base '1.9.15-alpha'
+:requires '2.12.5-alpha', base '1.9.15-alpha'
 
 # Various simple expressions
 :decimal(50)
@@ -834,6 +834,14 @@ input_string = 'This is the day'
 matches(input_string, '.+is is.+')
 matches(input_string, '^.+day$')
 matches(input_string, '.*way')
+input_array = ["ab", "aba", "baa", "cab", "dab", "ghi", "jkl", "abab"]
+matches(input_array, '.*ab.*')
+input_object = [
+  { fname: 'John', mname: 'L', lname: 'Smith', addr1: '123 Main St', addr2: '', city: 'Anytown', state: 'OH' },
+  { fname: 'Mary', mname: 'S', lname: 'Jones', addr1: '1515 Elm Ave', addr2: '', city: 'Maytown', state: 'MD' },
+  { fname: 'Cecile', mname: 'R', lname: 'Mayshawn', addr1: '14235 Sierra Rd', addr2: 'Rte 17 Box 12', city: 'Rural', state: 'OR' }
+]
+matches(input_object, '.+name')@j
 
 #
 # Defining functions inside blocks

@@ -27,6 +27,8 @@
  *	13-May-2022 (rlwhitcomb)
  *	    #320: Make "forKeys" into default function.
  *	    #320: Default is now false ("trim" and "replace" shouldn't).
+ *	26-May-2022 (rlwhitcomb)
+ *	    #320: Add default "applyToMap" method (can be overridden).
  */
 package info.rlwhitcomb.calc;
 
@@ -54,5 +56,20 @@ public interface Transformer extends Function<Object, Object>
 	default boolean forKeys() {
 	    return false;
 	}
+
+	/**
+	 * Apply the transform for map keys or values.
+	 * <p> If {@link #forKeys} returns <code>true</code> then this method will be
+	 * called twice for each map entry.
+	 * <p> Default implementation is simply to call {@link #apply} on all values.
+	 *
+	 * @param value The key or map value to transform.
+	 * @param key   Whether this call is for the key (<code>true</code>) or the value.
+	 * @return      The transformed value.
+	 */
+	default Object applyToMap(final Object value, final boolean key) {
+	    return apply(value);
+	}
+
 }
 

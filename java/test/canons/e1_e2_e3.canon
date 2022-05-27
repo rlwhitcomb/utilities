@@ -870,6 +870,31 @@
 >matches (input_string, '.+is is.+') -> true
 >matches (input_string, '^.+day$') -> true
 >matches (input_string, '.*way') -> false
+>input_array = ["ab", "aba", "baa", "cab", "dab", "ghi", "jkl", "abab"] -> [ "ab", "aba", "baa", "cab", "dab", "ghi", "jkl", "abab" ]
+>matches (input_array, '.*ab.*') -> [ "ab", "aba", "cab", "dab", "abab" ]
+>input_object = [
+> {fname: 'John', mname: 'L', lname: 'Smith', addr1: '123 Main St', addr2: '', city: 'Anytown', state: 'OH'}, 
+> {fname: 'Mary', mname: 'S', lname: 'Jones', addr1: '1515 Elm Ave', addr2: '', city: 'Maytown', state: 'MD'}, 
+> {fname: 'Cecile', mname: 'R', lname: 'Mayshawn', addr1: '14235 Sierra Rd', addr2: 'Rte 17 Box 12', city: 'Rural', state: 'OR'} 
+>] -> [ { fname: "John", mname: "L", lname: "Smith", addr1: "123 Main St", addr2: "", city: "Anytown", state: "OH" }, { fname: "Mary", mname: "S", lname: "Jones", addr1: "1515 Elm Ave", addr2: "", city: "Maytown", state: "MD" }, { fname: "Cecile", mname: "R", lname: "Mayshawn", addr1: "14235 Sierra Rd", addr2: "Rte 17 Box 12", city: "Rural", state: "OR" } ]
+>matches (input_object, '.+name') @j -> 
+>[
+>  {
+>    fname: "John",
+>    mname: "L",
+>    lname: "Smith"
+>  },
+>  {
+>    fname: "Mary",
+>    mname: "S",
+>    lname: "Jones"
+>  },
+>  {
+>    fname: "Cecile",
+>    mname: "R",
+>    lname: "Mayshawn"
+>  }
+>]
 >Precision is now “34” digits.
 >Defining function “help(n)” = 10 ** -n
 >Precision is now “one” digit.

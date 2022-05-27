@@ -978,7 +978,10 @@ or<br>
      rules are the same as for the input values on the command line. And if the string cannot be interpreted as file names that exist, the
      entire string is just returned as-is as the result. The second (optional) expression is the name of the charset to use (system default
      if not given, or empty/null). The entire contents of the file(s) is returned, with the end-of-line sequences changed to just newline (0x0A or "\n"), and can be assigned to a variable or used in some other way.
-  <p>The pattern expression for <code>matches</code> follows Java regular expression conventions. The input expression is converted to a string and matched against the regex, returning a boolean.
+  <p>The pattern expression for <code>matches</code> follows Java regular expression conventions. For objects the return value is
+     another object containing only those keys that match the regex. For arrays, the returned array contains only those elements
+     that match. For all other values, the input expression is converted to a string and matched against the regex,
+     returning a <code>true</code> / <code>false</code> value.
   <p>The <code>info</code> object contains five read-only subobjects:  <code>version</code>, 
      <code>os</code>, <code>java</code>, <code>locale</code>, and <code>timezone</code>.
      The contents of each are similar to this:

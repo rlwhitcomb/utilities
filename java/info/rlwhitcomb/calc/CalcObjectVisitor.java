@@ -578,6 +578,9 @@
  *	25-May-2022 (rlwhitcomb)
  *	    #348: Add "var" statement and clear local vars on each loop/while iteration.
  *	    #349: Fix "buildValueList" for sort; add context for error message.
+ *	26-May-2022 (rlwhitcomb)
+ *	    #320: Redo "matches" for arrays and objects to return similar objects whose
+ *	    keys / values are matching.
  */
 package info.rlwhitcomb.calc;
 
@@ -2706,6 +2709,13 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		}
 	}
 
+	private boolean matches(String input, String pattern) {
+	    Pattern p = Pattern.compile(pattern);
+	    Matcher m = p.matcher(input);
+
+	    return m.matches();
+	}
+
 	@Override
 	public Object visitCaseStmt(CalcParser.CaseStmtContext ctx) {
 	    CalcParser.ExprContext caseExpr = ctx.expr();
@@ -4239,18 +4249,20 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	 * A recursive procedure to do a deep copy of any object and apply the given transform to any
 	 * of the strings within the the objects.
 	 *
-	 * @param ctx    The expression context for the object being copied.
-	 * @param obj    The object to copy.
-	 * @param mapper Transformation to apply to all the strings within the object.
-	 * @return       The deep copy of the original object with the transformer applied to all strings.
+	 * @param ctx      The expression context for the object being copied.
+	 * @param obj      The object to copy.
+	 * @param mapper   Transformation to apply to all the strings within the object.
+	 * @param copyNull Whether to copy null transformed values to the new result.
+	 * @return         The deep copy of the original object with the transformer applied to all strings.
 	 */
-	private Object copyAndTransform(final ParserRuleContext ctx, final Object obj, final Transformer mapper) {
+	private Object copyAndTransform(final ParserRuleContext ctx, final Object obj, final Transformer mapper, final boolean copyNull) {
 	    if (obj == null) {
 		return null;
 	    }
 	    else if (obj instanceof ObjectScope) {
 		ObjectScope map = (ObjectScope) obj;
 		ObjectScope result = new ObjectScope();
+
 		for (Map.Entry<String, Object> entry : map.map().entrySet()) {
 		    String key = entry.getKey();
 		    Object value = entry.getValue();
@@ -4260,40 +4272,51 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			value = evaluate(ctx, value);
 
 			if (value instanceof ObjectScope || value instanceof ArrayScope) {
-			    newValue = copyAndTransform(ctx, value, mapper);
+			    newValue = copyAndTransform(ctx, value, mapper, copyNull);
 			}
 			else {
-			    newValue = mapper.apply(value);
+			    newValue = mapper.applyToMap(value, false);
 			}
 		    }
 
-		    if (mapper.forKeys()) {
-			result.setValue((String) mapper.apply(key), newValue);
-		    }
-		    else {
-			result.setValue(key, newValue);
+		    if (newValue != null || copyNull) {
+			if (mapper.forKeys()) {
+			    String newKey = (String) mapper.applyToMap(key, true);
+			    if (newKey != null || copyNull) {
+				result.setValue(newKey, newValue);
+			    }
+			}
+			else {
+			    result.setValue(key, newValue);
+			}
 		    }
 		}
+
 		return result;
 	    }
 	    else if (obj instanceof ArrayScope) {
 		@SuppressWarnings("unchecked")
 		ArrayScope<Object> list = (ArrayScope<Object>) obj;
 		ArrayScope<Object> result = new ArrayScope<>();
+
 		for (Object value : list.list()) {
 		    Object newValue = null;
 		    if (value != null) {
 			value = evaluate(ctx, value);
 
 			if (value instanceof ObjectScope || value instanceof ArrayScope) {
-			    newValue = copyAndTransform(ctx, value, mapper);
+			    newValue = copyAndTransform(ctx, value, mapper, copyNull);
 			}
 			else {
 			    newValue = mapper.apply(value);
 			}
 		    }
-		    result.add(newValue);
+
+		    if (newValue != null || copyNull) {
+			result.add(newValue);
+		    }
 		}
+
 		return result;
 	    }
 
@@ -4379,7 +4402,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 
 	    try {
-		result = copyAndTransform(exprCtx, originalObj, new ReplaceTransformer(pattern, replace, option));
+		result = copyAndTransform(exprCtx, originalObj, new ReplaceTransformer(pattern, replace, option), true);
 	    }
 	    catch (Exception ex) {
 		throw new CalcExprException(ex, exprCtx);
@@ -4837,7 +4860,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		case "trim":
 		case "ltrim":
 		case "rtrim":
-		    return copyAndTransform(exprCtx, value, new TrimTransformer(op));
+		    return copyAndTransform(exprCtx, value, new TrimTransformer(op), true);
 
 		default:
 		    throw new UnknownOpException(op, ctx);
@@ -5079,7 +5102,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    CalcParser.ExprContext exprCtx = ctx.expr1().expr();
 	    boolean upper = ctx.K_UPPER() != null;
 
-	    return copyAndTransform(exprCtx, evaluate(exprCtx), new ConvertCaseTransformer(upper, settings.ignoreNameCase));
+	    return copyAndTransform(exprCtx, evaluate(exprCtx), new ConvertCaseTransformer(upper, settings.ignoreNameCase), true);
 	}
 
 	@Override
@@ -5353,20 +5376,60 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 	}
 
-	private boolean matches(String input, String pattern) {
-	    Pattern p = Pattern.compile(pattern);
-	    Matcher m = p.matcher(input);
 
-	    return m.matches();
+	/**
+	 * Transformer for the "matches" function.
+	 */
+	private class MatchesTransformer implements Transformer
+	{
+		private ParserRuleContext exprCtx;
+		private Pattern pattern;
+
+		MatchesTransformer(final ParserRuleContext ctx, final Pattern p) {
+		    this.exprCtx = ctx;
+		    this.pattern = p;
+		}
+
+		@Override
+		public boolean forKeys() {
+		    return true;
+		}
+
+		@Override
+		public Object apply(final Object value) {
+		    String string = toNonNullString(exprCtx, value);
+		    return pattern.matcher(string).matches() ? value : null;
+		}
+
+		@Override
+		public Object applyToMap(final Object value, final boolean key) {
+		    // Only apply the transform on keys
+		    if (key) {
+			return apply(value);
+		    }
+		    else {
+			return value;
+		    }
+		}
 	}
 
 	@Override
 	public Object visitMatchesExpr(CalcParser.MatchesExprContext ctx) {
 	    CalcParser.Expr2Context expr2 = ctx.expr2();
-	    String input = getStringValue(expr2.expr(0));
+	    CalcParser.ExprContext inputExpr = expr2.expr(0);
+	    Object input = evaluate(inputExpr);
 	    String pattern = getStringValue(expr2.expr(1));
+	    Pattern p = Pattern.compile(pattern);
 
-	    return Boolean.valueOf(matches(input, pattern));
+	    // For lists and objects, return a similar object with only the matching keys or values
+	    if (input instanceof ObjectScope || input instanceof ArrayScope) {
+		return copyAndTransform(inputExpr, input, new MatchesTransformer(inputExpr, p), false);
+	    }
+	    else {
+		// For ordinary objects, just return a boolean if the string representation matches the pattern
+		String inputString = toNonNullString(inputExpr, input);
+		return Boolean.valueOf(p.matcher(inputString).matches());
+	    }
 	}
 
 	private class SumOfVisitor implements Function<Object, Object>
