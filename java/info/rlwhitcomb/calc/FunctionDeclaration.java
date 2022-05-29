@@ -41,6 +41,8 @@
  *	    #68: Tweak index out of bounds error.
  *	27-May-2022 (rlwhitcomb)
  *	    Move "setupFunctionCall" into here from CalcObjectVisitor.
+ *	28-May-2022 (rlwhitcomb)
+ *	    #355: Define "_funcname" constant for functions.
  */
 package info.rlwhitcomb.calc;
 
@@ -59,6 +61,11 @@ import static info.rlwhitcomb.calc.CalcUtil.getTreeText;
  */
 class FunctionDeclaration
 {
+	/**
+	 * Name of predefined (local) constant that has the function name as the value.
+	 */
+	public static final String FUNCNAME = "_funcname";
+
 	/**
 	 * Name of this function.
 	 */
@@ -268,6 +275,9 @@ class FunctionDeclaration
 	    for (int index = numActuals; index < numParams; index++) {
 		funcScope.setParameterValue(visitor, index, null);
 	    }
+
+	    // Finally, set the "_funcname" value to the function's name
+	    ConstantValue.define(funcScope, FUNCNAME, functionName);
 
 	    return funcScope;
 	}

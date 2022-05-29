@@ -93,3 +93,8 @@
 >param pp in loop = 1
 >param pp in loop = 2
 >var pp after loop = 5
+>Defining function “testing(v)” = {`$_funcname(v=$v)`}
+>Defining function “finished” = {`Function '$_funcname()' called.`}
+>testing(1) -> "testing(v=1)"
+>testing('abc') -> "testing(v=abc)"
+>finished -> "Function 'finished()' called."

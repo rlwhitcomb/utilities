@@ -1022,16 +1022,18 @@ or<br>
   <p>The parameter values are assigned when the function is called, and there can be fewer actual values given than are declared; the remaining values
      will be assigned <code>null</code> unless there is a default expression given in the declaration, in which case that expression is evaluated.
      The parentheses are optional on the function call if there are no parameters being sent.
-  <p>Similarly to the <code>$#</code> and <code>$*</code> variables maintained for the command line arguments, local variables named the
-     same are maintained for each function call. Thus the number of actual parameters passed to the function is available as
+  <p>Similarly to the <code>$#</code> and <code>$*</code> variables maintained for the command line arguments, local variables named <code>_#</code> and <code>_*</code>
+     are maintained for each function call. Thus the number of actual parameters passed to the function is available as
      <code>_#</code> inside the function, the first parameter is available through <code>_*[0]</code> or <code>_0</code>, etc. and the whole array of
      parameters is available via <code>_*</code>.
+  <p>Inside a function, the function name can be accessed via the <code>_funcname</code> constant value.
   <p>A function can declare any number (including zero) of fixed parameters, and use <code>...</code> or <code>..</code> or <code>&#x2026;</code>
      at the end of the parameter list to signify any number of variable parameters after the fixed ones. These variable parameters can be
      accessed using the <code>_*[</code><i>nn</i><code>]</code> parameter array, or using <code>_</code><i>nn</i> where <i>nn</i> is the
      parameter index, starting from zero. For instance, <code>def g(a, ...) = { a + _1 }</code> and calling with <code>g(1, 2)</code>
      will assign <code>a = 1</code> and <code>_1 = 2</code>, and therefore  <code>a == _*[0]</code>, <code>_*[1] == _1</code>, and etc.
-  <p>Any variables referenced inside the function, including the parameters, are local to the function, unless they had been defined outside the function previously.
+  <p>Any variables referenced inside the function, including the parameters, are local to the function, unless they had been defined outside the function previously. But defining the variable using <code>var</code> <i>id</i> guarantees the variable will be defined locally, regardless of
+whether it has previously been used/defined.
   <p class="indent">
     <code>def win_pct(wins, losses, ties = 0) = { wins / (wins + ties + losses) @2% }</code>
   </p>

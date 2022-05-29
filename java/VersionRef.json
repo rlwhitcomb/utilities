@@ -3,6 +3,10 @@
 //======================
 
 [
+    { version: '2.12.8', date: d'2022-05-28',
+      issues: [ 355 ],
+      comment: 'Define "_funcname" constant inside functions.'
+    },
     { version: '2.12.7', date: d'2022-05-28',
       issues: [ ],
       comment: 'General refactoring to correct file sizes.'
