@@ -47,6 +47,8 @@
  *	    #247: Change Window Settings text for background colors.
  *	16-Feb-2022 (rlwhitcomb)
  *	    #248: Add text for the two new file buttons for the Version prompt.
+ *	28-May-2022 (rlwhitcomb)
+ *	    #354: Change text for "Clear" button.
  */
 {
     title:              'Calc',
@@ -101,7 +103,7 @@
 
     clearButton:        'C',
     clearTip:           'Clear Expressions and Results (F6)',
-    clearLabel:         'Clear Results',
+    clearLabel:         'Clear Fields',
     clearKeyLabel:      'F6',
 
     calculateButton:    '!',
