@@ -97,6 +97,9 @@
  *	    #318: Rename "evaluateFunction" to "evaluate".
  *	17-May-2022 (rlwhitcomb)
  *	    #333: Redo awkward error message.
+ *	27-May-2022 (rlwhitcomb)
+ *	    Move "setupFunctionCall" to FunctionDeclaration.
+ *	    Make parameters final.
  */
 package info.rlwhitcomb.calc;
 
@@ -146,7 +149,7 @@ class LValueContext
 	 *
 	 * @param ignoreNameCase The new global "ignore case" value.
 	 */
-	void setIgnoreCase(boolean ignoreNameCase) {
+	void setIgnoreCase(final boolean ignoreNameCase) {
 	    this.ignoreCase = ignoreNameCase;
 	}
 
@@ -157,7 +160,7 @@ class LValueContext
 	 * @param obj            The context object (base variables map).
 	 * @param ignoreNameCase The global "ignore case" value.
 	 */
-	LValueContext(Object obj, boolean ignoreNameCase) {
+	LValueContext(final Object obj, final boolean ignoreNameCase) {
 	    this.parent     = null;
 	    this.varCtx     = null;
 	    this.context    = obj;
@@ -174,7 +177,7 @@ class LValueContext
 	 * @param obj	The map object we're referencing into.
 	 * @param nm	The name of the map member to reference.
 	 */
-	LValueContext(LValueContext p, CalcParser.VarContext ctx, Object obj, String nm) {
+	LValueContext(final LValueContext p, final CalcParser.VarContext ctx, final Object obj, final String nm) {
 	    this.parent     = p;
 	    this.varCtx     = ctx;
 	    this.context    = obj;
@@ -191,7 +194,7 @@ class LValueContext
 	 * @param obj	The array (or string) object we're referencing into.
 	 * @param idx	The index into the object.
 	 */
-	LValueContext(LValueContext p, CalcParser.VarContext ctx, Object obj, int idx) {
+	LValueContext(final LValueContext p, final CalcParser.VarContext ctx, final Object obj, final int idx) {
 	    this.parent     = p;
 	    this.varCtx     = ctx;
 	    this.context    = obj;
@@ -207,7 +210,7 @@ class LValueContext
 	 * @param ctx	The parser context we're working in.
 	 * @param obj	The new function scope.
 	 */
-	LValueContext(LValueContext p, CalcParser.VarContext ctx, Object obj) {
+	LValueContext(final LValueContext p, final CalcParser.VarContext ctx, final Object obj) {
 	    this.parent     = p;
 	    this.varCtx     = ctx;
 	    this.context    = obj;
@@ -453,7 +456,7 @@ class LValueContext
 	 * @return		The next level of <code>lValue</code> as determined by the new <code>ctx</code> type.
 	 */
 	@SuppressWarnings("unchecked")
-	public static LValueContext getLValue(CalcObjectVisitor visitor, CalcParser.VarContext ctx, LValueContext lValue) {
+	public static LValueContext getLValue(final CalcObjectVisitor visitor, final CalcParser.VarContext ctx, final LValueContext lValue) {
 	    if (ctx instanceof CalcParser.IdVarContext) {
 		CalcParser.IdVarContext idVarCtx = (CalcParser.IdVarContext) ctx;
 		return new LValueContext(lValue, idVarCtx, lValue.getPredefinedContextObject(true), idVarCtx.id().getText());
@@ -557,7 +560,7 @@ class LValueContext
 		FunctionDeclaration func = (FunctionDeclaration) funcObj;
 		List<CalcParser.OptExprContext> exprs = funcVarCtx.actualParams().optExpr();
 
-		return new LValueContext(funcLValue, funcVarCtx, visitor.setupFunctionCall(funcVarCtx, func, exprs));
+		return new LValueContext(funcLValue, funcVarCtx, func.setupFunctionCall(funcVarCtx, visitor, exprs));
 	    }
 	    else {
 		throw new CalcExprException(ctx, "%calc#unknownVarCtx", ctx.getClass().getName());

@@ -42,6 +42,8 @@
  *	    #318: Rename "evaluateFunction" to just "evaluate".
  *	25-May-2022 (rlwhitcomb)
  *	    #348: Make all methods package private.
+ *	27-May-2022 (rlwhitcomb)
+ *	    Change "getDeclaration" into "getFunctionBody".
  */
 package info.rlwhitcomb.calc;
 
@@ -101,24 +103,18 @@ class FunctionScope extends ParameterizedScope
 		valueExpr = declaration.getParameterExpr(paramName);
 	    }
 	    if (valueExpr != null) {
-		visitor.setDoNotCall(true);
-		try {
-		    paramValue = visitor.evaluate(valueExpr);
-		}
-		finally {
-		    visitor.setDoNotCall(false);
-		}
+		paramValue = visitor.evaluateParameter(valueExpr);
 	    }
 	    ParameterValue.define(this, paramName, paramValue);
 	}
 
 	/**
-	 * Access the function's declaration.
+	 * Access the function declaration's function body.
 	 *
-	 * @return The complete function declaration set at construction time.
+	 * @return The complete function body, set at construction time.
 	 */
-	FunctionDeclaration getDeclaration() {
-	    return declaration;
+	ParserRuleContext getFunctionBody() {
+	    return declaration.getFunctionBody();
 	}
 
 	/**

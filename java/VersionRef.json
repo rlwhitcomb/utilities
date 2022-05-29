@@ -3,6 +3,10 @@
 //======================
 
 [
+    { version: '2.12.7', date: d'2022-05-28',
+      issues: [ ],
+      comment: 'General refactoring to correct file sizes.'
+    },
     { version: '2.12.6', date: d'2022-05-27',
       issues: [ 320 ],
       comment: 'Rework "Transformer"-based functions that use filtering (such as "matches").'

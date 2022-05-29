@@ -583,11 +583,13 @@
  *	    keys / values are matching.
  *	27-May-2022 (rlwhitcomb)
  *	    #320: Refactor the "copyNull" handling for Transformers.
+ *	    Move "setupFunctionCall" out to FunctionDeclaration. More refactoring around
+ *	    "evaluate" during parameter evaluation. Move "isPredefined", "saveVariables",
+ *	    "copyAndTransform", and "buildValueList" out to CalcUtil.
  */
 package info.rlwhitcomb.calc;
 
 import java.awt.Dimension;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -597,8 +599,6 @@ import java.nio.charset.Charset;
 import java.nio.charset.IllegalCharsetNameException;
 import java.nio.charset.StandardCharsets;
 import java.nio.charset.UnsupportedCharsetException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.SecureRandom;
 import java.text.DateFormatSymbols;
@@ -671,30 +671,8 @@ import info.rlwhitcomb.util.Which;
  */
 public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 {
-	/** Version identifier for library (saved) files. */
-	private static final String LIB_FORMAT = ":Require '%1$s', Base '%2$s'";
-
 	/** Pattern for format specifiers. */
 	private static final Pattern FORMAT_PATTERN = Pattern.compile("\\s*@([\\-+])?([0-9]+)?([\\.]([0-9]+))?([a-zA-Z,_])?([a-zA-Z%$])");
-
-
-	/**
-	 * Conversion mode for "buildValueList".
-	 */
-	public static enum Conversion
-	{
-		/** Convert all values to strings (for "exec"). */
-		STRING,
-		/** Convert all values to decimal (for "sumof" or "productof" in decimal mode). */
-		DECIMAL,
-		/** Convert to fractions (rational mode). */
-		FRACTION,
-		/** Convert to complex numbers. */
-		COMPLEX,
-		/** Leave values as they are (for "sort"). */
-		UNCHANGED
-	}
-
 
 	/** Scale for double operations. */
 	private static final MathContext MC_DOUBLE = MathContext.DECIMAL64;
@@ -718,10 +696,10 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	private boolean initialized = false;
 
 	/**
-	 * Flag set during {@link FunctionScope#setParameterValue} so that 0-arg functions
+	 * Flag set during {@link FunctionScope#setParameterValue} so that zero-arg functions
 	 * passed as parameters without parens don't get erroneously called prematurely.
 	 */
-	private boolean doNotCallZeroArg = false;
+	private boolean doNotCallZeroArgFunctions = false;
 
 	/** The mode settings for this instantiation of the visitor. */
 	private Settings settings = new Settings();
@@ -894,10 +872,6 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	public Settings getSettings() {
 	    return settings;
-	}
-
-	public void setDoNotCall(final boolean value) {
-	    doNotCallZeroArg = value;
 	}
 
 	public MathContext getMathContext() {
@@ -1095,43 +1069,22 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 
 	/**
-	 * Setup a {@link FunctionScope} given a {@link FunctionDeclaration} and the
-	 * list of actual parameter values.
+	 * Evaluate a parameter value, doing {@link #evaluate(ParserRuleContext)} but without
+	 * calling any functions encountered (that is, passing the function reference itself).
 	 *
-	 * @param ctx   The function call context.
-	 * @param decl  The function declaration.
-	 * @param exprs The actual parameter value list.
-	 * @return      The function scope with the actual values set in the scope.
+	 * @param ctx The parsing context to visit to get the value.
+	 * @return    Either the value or the result of visiting that function context if it is one.
 	 */
-	FunctionScope setupFunctionCall(final ParserRuleContext ctx, final FunctionDeclaration decl, final List<CalcParser.OptExprContext> exprs) {
-	    FunctionScope funcScope = new FunctionScope(decl);
-	    int numParams = decl.getNumberOfParameters();
-	    int numActuals = exprs != null ? exprs.size() : 0;
-
-	    if (exprs != null) {
-		// Special case: 0 or variable # params, but one actual, except the actual expr is zero -> zero actuals
-		if (numParams <= 0 && numActuals == 1 && exprs.get(0).expr() == null)
-		    numActuals--;
-
-		if (numParams >= 0 && numActuals > numParams) {
-		    if (numParams == 1)
-			throw new CalcExprException(ctx, "%calc#tooManyForOneValue", numActuals);
-		    else
-			throw new CalcExprException(ctx, "%calc#tooManyForValues", numActuals, numParams);
-		}
-
-		for (int index = 0; index < numActuals; index++) {
-		    funcScope.setParameterValue(this, index, exprs.get(index).expr());
-		}
+	Object evaluateParameter(final ParserRuleContext ctx) {
+	    // Note: this has to be set for any recursive calls made during the evaluation
+	    // and restored regardless of any exceptions thrown
+	    doNotCallZeroArgFunctions = true;
+	    try {
+		return evaluate(ctx, visit(ctx));
 	    }
-
-	    // In case there were fewer actuals passed than declared, explicitly set the remaining values
-	    // to null so that their parameter names are present in the symbol table
-	    for (int index = numActuals; index < numParams; index++) {
-		funcScope.setParameterValue(this, index, null);
+	    finally {
+		doNotCallZeroArgFunctions = false;
 	    }
-
-	    return funcScope;
 	}
 
 	/**
@@ -1139,7 +1092,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	 * by calling {@code visit(ctx)} to get the value.
 	 *
 	 * @param ctx The parsing context to visit to get the value.
-	 * @return Either the value or the result of visiting that function context if it is one.
+	 * @return    Either the value or the result of visiting that function context if it is one.
 	 */
 	Object evaluate(final ParserRuleContext ctx) {
 	    return evaluate(ctx, visit(ctx));
@@ -1153,7 +1106,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	 * <li> if the function was defined WITH parameters, then treat the value as a function object
 	 * and just return the value</li>
 	 * </ul>
-	 * <p> BUT, during parameter evaluation, a special flag ({@link #doNotCallZeroArg}) is set
+	 * <p> BUT, during parameter evaluation, the {@link #doNotCallZeroArgFunctions} flag is set
 	 * to (obviously) not call zero-arg functions without parens so it is passed still as a
 	 * function declaration without calling it.
 	 * <p> Also, if the function return (or the initial value, for that matter) is a {@link ValueScope}
@@ -1162,15 +1115,15 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	 *
 	 * @param ctx   The parsing context (for error reporting).
 	 * @param value The result of an expression, which could be a reference to a function call.
-	 * @return Either the value or the result of visiting that function context if it is one.
+	 * @return      Either the value or the result of visiting that function context if it is one.
 	 */
 	Object evaluate(final ParserRuleContext ctx, final Object value) {
 	    Object returnValue = value;
 
 	    if (returnValue instanceof FunctionDeclaration) {
 		FunctionDeclaration funcDecl = (FunctionDeclaration) returnValue;
-		if (funcDecl.getNumberOfParameters() == 0 && !doNotCallZeroArg) {
-		    returnValue = setupFunctionCall(ctx, funcDecl, null);
+		if (funcDecl.getNumberOfParameters() == 0 && !doNotCallZeroArgFunctions) {
+		    returnValue = funcDecl.setupFunctionCall(ctx, this, null);
 		}
 	    }
 
@@ -1180,7 +1133,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		pushQuietMode.accept(true);
 		pushScope(func);
 		try {
-		    returnValue = visit(func.getDeclaration().getFunctionBody());
+		    returnValue = visit(func.getFunctionBody());
 		}
 		catch (LeaveException lex) {
 		    if (lex.hasValue()) {
@@ -1415,21 +1368,6 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    return lastNamePos;
 	}
 
-	/**
-	 * Is the value a predefined object, which may or may not include any parameters of this scope.
-	 *
-	 * @param value	Value of the object, which would need to be some form of {@link PredefinedValue}
-	 *		to return true.
-	 * @param includesParams If {@code true} then {@link ParameterValue}s are considered "predefined",
-	 *		but if {@code false} they are not.
-	 * @return	Whether or not to consider this value as predefined.
-	 */
-	private boolean isPredefined(Object value, boolean includesParams) {
-	    boolean isPredefinedType = (value instanceof Scope) && ((Scope) value).isPredefined();
-
-	    return isPredefinedType || (includesParams && value instanceof ParameterValue);
-	}
-
 	@Override
 	public Object visitClearDirective(CalcParser.ClearDirectiveContext ctx) {
 	    CalcParser.WildIdListContext idList = ctx.wildIdList();
@@ -1657,52 +1595,16 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 	}
 
-	public void saveVariables(final ParserRuleContext ctx, final Path path, final Charset charset)
-		throws IOException
-	{
-	    try (BufferedWriter writer = Files.newBufferedWriter(path, charset == null ? DEFAULT_CHARSET : charset)) {
-		// Write out the current version
-		SemanticVersion prog_version = Environment.programVersion();
-		SemanticVersion prog_base = Environment.implementationVersion();
-		writer.write(String.format(LIB_FORMAT, prog_version.toPreReleaseString(), prog_base.toPreReleaseString()));
-		writer.newLine();
-		writer.write(Intl.getString("calc#libVersionDescription"));
-		writer.newLine();
-
-		// Note: the keySet returned from ObjectScope is in order of declaration, which is important here, since we
-		// must be able to read back the saved file and have the values computed to be the same as they are now.
-		for (String key : globals.keySet()) {
-		    Object value = globals.getValue(key, settings.ignoreNameCase);
-		    if (!isPredefined(value, true)) {
-			if (value instanceof FunctionDeclaration) {
-			    FunctionDeclaration func = (FunctionDeclaration) value;
-			    writer.write(String.format("def %1$s = %2$s", func.getFullFunctionName(), getTreeText(func.getFunctionBody())));
-			}
-			else {
-			    writer.write(String.format("%1$s = %2$s", key, toStringValue(this, ctx, value, true, settings.separatorMode)));
-			}
-			writer.newLine();
-		    }
-		}
-	    }
-	}
-
 	@Override
 	public Object visitSaveDirective(CalcParser.SaveDirectiveContext ctx) {
 	    String path = getStringValue(ctx.expr(0), false, false, false);
 	    Charset charset = getCharsetValue(ctx.expr(1), true);
 
-	    // For now, separators are not compatible with the input grammar, so don't do it
-	    boolean oldSeparatorMode = settings.separatorMode;
-	    settings.separatorMode = false;
 	    try {
-		saveVariables(ctx, Paths.get(path), charset);
+		saveVariables(this, ctx, globals, Paths.get(path), charset);
 	    }
 	    catch (IOException ioe) {
 		throw new CalcExprException(ctx, "%calc#ioError", Exceptions.toString(ioe));
-	    }
-	    finally {
-		settings.separatorMode = oldSeparatorMode;
 	    }
 
 	    return BigInteger.valueOf(globals.size());
@@ -4248,85 +4150,6 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	/**
-	 * A recursive procedure to do a deep copy of any object and apply the given transform to any
-	 * of the strings within the the objects.
-	 *
-	 * @param ctx      The expression context for the object being copied.
-	 * @param obj      The object to copy.
-	 * @param mapper   Transformation to apply to all the strings within the object.
-	 * @return         The deep copy of the original object with the transformer applied to all strings.
-	 */
-	private Object copyAndTransform(final ParserRuleContext ctx, final Object obj, final Transformer mapper) {
-	    if (obj == null) {
-		return null;
-	    }
-	    else if (obj instanceof ObjectScope) {
-		ObjectScope map = (ObjectScope) obj;
-		ObjectScope result = new ObjectScope();
-
-		for (Map.Entry<String, Object> entry : map.map().entrySet()) {
-		    String key = entry.getKey();
-		    Object value = entry.getValue();
-		    Object newValue = null;
-
-		    if (value != null) {
-			value = evaluate(ctx, value);
-
-			if (value instanceof ObjectScope || value instanceof ArrayScope) {
-			    newValue = copyAndTransform(ctx, value, mapper);
-			}
-			else {
-			    newValue = mapper.applyToMap(value, false);
-			}
-		    }
-
-		    if (newValue != null || mapper.copyNull()) {
-			if (mapper.forKeys()) {
-			    String newKey = (String) mapper.applyToMap(key, true);
-			    if (newKey != null || mapper.copyNull()) {
-				result.setValue(newKey, newValue);
-			    }
-			}
-			else {
-			    result.setValue(key, newValue);
-			}
-		    }
-		}
-
-		return result;
-	    }
-	    else if (obj instanceof ArrayScope) {
-		@SuppressWarnings("unchecked")
-		ArrayScope<Object> list = (ArrayScope<Object>) obj;
-		ArrayScope<Object> result = new ArrayScope<>();
-
-		for (Object value : list.list()) {
-		    Object newValue = null;
-		    if (value != null) {
-			value = evaluate(ctx, value);
-
-			if (value instanceof ObjectScope || value instanceof ArrayScope) {
-			    newValue = copyAndTransform(ctx, value, mapper);
-			}
-			else {
-			    newValue = mapper.apply(value);
-			}
-		    }
-
-		    if (newValue != null || mapper.copyNull()) {
-			result.add(newValue);
-		    }
-		}
-
-		return result;
-	    }
-
-	    // For all other scalar values, just get the string value and apply the transform
-	    String exprString = toStringValue(this, ctx, obj, false, settings.separatorMode);
-	    return mapper.apply(exprString);
-	}
-
-	/**
 	 * Transformer for the "replace" option.
 	 */
 	private class ReplaceTransformer implements Transformer
@@ -4403,7 +4226,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 
 	    try {
-		result = copyAndTransform(exprCtx, originalObj, new ReplaceTransformer(pattern, replace, option));
+		result = copyAndTransform(this, exprCtx, originalObj, new ReplaceTransformer(pattern, replace, option));
 	    }
 	    catch (Exception ex) {
 		throw new CalcExprException(ex, exprCtx);
@@ -4655,7 +4478,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    List<CalcParser.ExprContext> exprs = new ArrayList<>();
 	    exprs.add(arrCtx);
-	    List<Object> values = buildValueList(exprs, Conversion.UNCHANGED);
+	    List<Object> values = buildValueList(this, exprs, Conversion.UNCHANGED);
 
 	    Collections.sort(values, new ObjectComparator(this, arrCtx, caseInsensitive));
 
@@ -4861,7 +4684,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		case "trim":
 		case "ltrim":
 		case "rtrim":
-		    return copyAndTransform(exprCtx, value, new TrimTransformer(op));
+		    return copyAndTransform(this, exprCtx, value, new TrimTransformer(op));
 
 		default:
 		    throw new UnknownOpException(op, ctx);
@@ -5103,7 +4926,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    CalcParser.ExprContext exprCtx = ctx.expr1().expr();
 	    boolean upper = ctx.K_UPPER() != null;
 
-	    return copyAndTransform(exprCtx, evaluate(exprCtx), new ConvertCaseTransformer(upper, settings.ignoreNameCase));
+	    return copyAndTransform(this, exprCtx, evaluate(exprCtx), new ConvertCaseTransformer(upper, settings.ignoreNameCase));
 	}
 
 	@Override
@@ -5226,93 +5049,10 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 
-	/**
-	 * Do a "flat map" of values for the "sumof", "productof", "sort", and "exec" functions.  Since each
-	 * value to be processed could be an array or map, we need to traverse these objects
-	 * as well as the simple values in order to get the full list to process.
-	 *
-	 * @param ctx		The overall parser context for the function (for error messages).
-	 * @param obj		The object to be added to the list, or recursed into when the object
-	 *			is a list or map.
-	 * @param objectList	The complete list of values to be built.
-	 * @param conversion	Type of conversion to do on the values.
-	 * @param level		Level of recursion.
-	 */
-	private void buildValueList(
-		final ParserRuleContext ctx,
-		final Object obj,
-		final List<Object> objectList,
-		final Conversion conversion,
-		final int level)
-	{
-	    Object value = evaluate(ctx, obj);
-
-	    if (value instanceof ArrayScope) {
-		if (conversion == Conversion.UNCHANGED && level > 0) {
-		    objectList.add(value);
-		}
-		else {
-		    @SuppressWarnings("unchecked")
-		    ArrayScope array = (ArrayScope) value;
-		    for (Object listObj : array.list()) {
-			buildValueList(ctx, listObj, objectList, conversion, level + 1);
-		    }
-		}
-	    }
-	    else if (value instanceof ObjectScope) {
-		if (conversion == Conversion.UNCHANGED && level > 0) {
-		    objectList.add(value);
-		}
-		else {
-		    @SuppressWarnings("unchecked")
-		    ObjectScope map = (ObjectScope) value;
-		    for (Object mapObj : map.values()) {
-			buildValueList(ctx, mapObj, objectList, conversion, level + 1);
-		    }
-		}
-	    }
-	    else {
-		switch (conversion) {
-		    case STRING:
-			objectList.add(toStringValue(this, ctx, value, false, false));
-			break;
-		    case DECIMAL:
-			nullCheck(value, ctx);
-			objectList.add(toDecimalValue(this, value, settings.mc, ctx));
-			break;
-		    case FRACTION:
-			nullCheck(value, ctx);
-			objectList.add(toFractionValue(this, value, ctx));
-			break;
-		    case UNCHANGED:
-			objectList.add(value);
-			break;
-		}
-	    }
-	}
-
-	/**
-	 * Traverse the expression list for the "sumof", "productof", and "sort" functions and
-	 * build the complete list of values to be processed.
-	 *
-	 * @param exprs	     The parsed list of expression contexts.
-	 * @param conversion How or whether to convert the values for the final list.
-	 * @return	     The completely built "flat map" of values.
-	 */
-	private List<Object> buildValueList(final List<CalcParser.ExprContext> exprs, final Conversion conversion) {
-	    List<Object> objects = new ArrayList<>();
-
-	    for (CalcParser.ExprContext exprCtx : exprs) {
-		buildValueList(exprCtx, evaluate(exprCtx), objects, conversion, 0);
-	    }
-
-	    return objects;
-	}
-
 	@Override
 	public Object visitExecExpr(CalcParser.ExecExprContext ctx) {
 	    List<CalcParser.ExprContext> exprs = ctx.exprN().exprList().expr();
-	    List<Object> objects = buildValueList(exprs, Conversion.STRING);
+	    List<Object> objects = buildValueList(this, exprs, Conversion.STRING);
 
 	    // As a convenience, if we're on Windows and the target is a ".bat" or ".cmd" file
 	    // then prepend "cmd /c" before running it.
@@ -5429,7 +5169,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    // For lists and objects, return a similar object with only the matching keys or values
 	    if (input instanceof ObjectScope || input instanceof ArrayScope) {
-		return copyAndTransform(inputExpr, input, new MatchesTransformer(inputExpr, p));
+		return copyAndTransform(this, inputExpr, input, new MatchesTransformer(inputExpr, p));
 	    }
 	    else {
 		// For ordinary objects, just return a boolean if the string representation matches the pattern
@@ -5475,7 +5215,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    CalcParser.DotRangeContext dotRange = ctx.dotRange();
 	    if (dotRange == null) {
 		List<CalcParser.ExprContext> exprs = ctx.exprN().exprList().expr();
-		List<Object> objects = buildValueList(exprs,
+		List<Object> objects = buildValueList(this, exprs,
 			settings.rationalMode ? Conversion.FRACTION : Conversion.DECIMAL);
 
 		for (Object obj : objects) {
@@ -5526,7 +5266,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    CalcParser.DotRangeContext dotRange = ctx.dotRange();
 	    if (dotRange == null) {
 		List<CalcParser.ExprContext> exprs = ctx.exprN().exprList().expr();
-		List<Object> objects = buildValueList(exprs,
+		List<Object> objects = buildValueList(this, exprs,
 			settings.rationalMode ? Conversion.FRACTION : Conversion.DECIMAL);
 
 		for (Object obj : objects) {

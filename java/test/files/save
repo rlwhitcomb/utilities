@@ -3,7 +3,9 @@
 # as the initial definitions (important).
 #
 :clear
+:separators on
 b = 27
+c = 12345
 def a={ b**3 }
 def Z={ cbrt(a) }
 def A={ Z==b }
@@ -13,5 +15,5 @@ a;Z;A
 
 :clear
 :open 'savetest'
-b;a;Z;A
-
+b;c;a;Z;A
+:separators pop

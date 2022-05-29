@@ -149,18 +149,29 @@
  *	    embedded expressions.
  *	20-May-2022 (rlwhitcomb)
  *	    #339: Add "fixupToInteger" (from "cleanDecimal" in CalcObjectVisitor).
+ *	27-May-2022 (rlwhitcomb)
+ *	    Move "isPredefined", "saveVariables", "copyAndTransform", and "buildValueList"  out of
+ *	    CalcObjectVisitor into here.
  */
 package info.rlwhitcomb.calc;
 
+import java.io.BufferedWriter;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.MathContext;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
+
+import de.onyxbits.SemanticVersion;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -172,6 +183,9 @@ import info.rlwhitcomb.math.BigFraction;
 import info.rlwhitcomb.math.ComplexNumber;
 import info.rlwhitcomb.util.CharUtil;
 import static info.rlwhitcomb.util.CharUtil.Justification;
+import static info.rlwhitcomb.util.Constants.*;
+import info.rlwhitcomb.util.Environment;
+import info.rlwhitcomb.util.Intl;
 
 
 /**
@@ -188,6 +202,9 @@ public final class CalcUtil
 
 	/** Default indent increment for JSON display. */
 	private static final String DEFAULT_INCREMENT = "  ";
+
+	/** Version identifier for library (saved) files. */
+	private static final String LIB_FORMAT = ":Requires '%1$s', Base '%2$s'";
 
 
 	/** Private constructor since this is a static class. */
@@ -421,6 +438,21 @@ public final class CalcUtil
 		return true;
 
 	    return false;
+	}
+
+	/**
+	 * Is the value a predefined object, which may or may not include any parameters of this scope?
+	 *
+	 * @param value Value of the object, which would need to be some form of {@link PredefinedValue}
+	 *              to return true.
+	 * @param includesParams If {@code true} then {@link ParameterValue}s are considered "predefined",
+	 *              but if {@code false} they are not.
+	 * @return      Whether or not to consider this value as predefined.
+	 */
+	public static boolean isPredefined(final Object value, final boolean includesParams) {
+	    boolean isPredefinedType = (value instanceof Scope) && ((Scope) value).isPredefined();
+
+	    return isPredefinedType || (includesParams && value instanceof ParameterValue);
 	}
 
 	/**
@@ -1816,6 +1848,223 @@ public final class CalcUtil
 	    char leftQuote = constantText.charAt(0);
 	    char rightQuote = constantText.charAt(constantText.length() - 1);
 	    return CharUtil.addQuotes(getRawString(constantText), leftQuote, rightQuote);
+	}
+
+	/**
+	 * Save the given set of variables to the file path given (with given charset).
+	 *
+	 * @param visitor   The visitor used for calculating expressions.
+	 * @param ctx       Parsing context (for error reporting).
+	 * @param variables The set of variables to save.
+	 * @param path      Path of file to save to.
+	 * @param charset   The character set to use when writing.
+	 * @throws IOException if there was a problem writing the output file.
+	 */
+	public static void saveVariables(
+		final CalcObjectVisitor visitor,
+		final ParserRuleContext ctx,
+		final ObjectScope variables,
+		final Path path,
+		final Charset charset)
+			throws IOException
+	{
+	    try (BufferedWriter writer = Files.newBufferedWriter(path, charset == null ? DEFAULT_CHARSET : charset)) {
+		// Write out the current version as a ":requires" directive
+		SemanticVersion prog_version = Environment.programVersion();
+		SemanticVersion prog_base = Environment.implementationVersion();
+		writer.write(String.format(LIB_FORMAT, prog_version.toPreReleaseString(), prog_base.toPreReleaseString()));
+		writer.newLine();
+		writer.write(Intl.getString("calc#libVersionDescription"));
+		writer.newLine();
+
+		// Note: the keySet returned from ObjectScope is in order of declaration, which is important here, since we
+		// must be able to read back the saved file and have the values computed to be the same as they are now.
+		for (String key : variables.keySet()) {
+		    Object value = variables.getValue(key, false);
+		    if (!isPredefined(value, true)) {
+			if (value instanceof FunctionDeclaration) {
+			    FunctionDeclaration func = (FunctionDeclaration) value;
+			    writer.write(String.format("def %1$s = %2$s", func.getFullFunctionName(), getTreeText(func.getFunctionBody())));
+			}
+			else {
+			    // Note: cannot use separators on output here because the input grammar won't recognize them
+			    writer.write(String.format("%1$s = %2$s", key, toStringValue(visitor, ctx, value, true, false)));
+			}
+			writer.newLine();
+		    }
+		}
+	    }
+	}
+
+	/**
+	 * A recursive procedure to do a deep copy of any object and apply the given transform to any
+	 * of the strings within the the objects.
+	 *
+	 * @param visitor  Visitor used to calculate expressions.
+	 * @param ctx      The expression context for the object being copied.
+	 * @param obj      The object to copy.
+	 * @param mapper   Transformation to apply to all the strings within the object.
+	 * @return         The deep copy of the original object with the transformer applied to all strings.
+	 */
+	public static Object copyAndTransform(
+		final CalcObjectVisitor visitor,
+		final ParserRuleContext ctx,
+		final Object obj,
+		final Transformer mapper)
+	{
+	    if (obj == null) {
+		return null;
+	    }
+	    else if (obj instanceof ObjectScope) {
+		ObjectScope map = (ObjectScope) obj;
+		ObjectScope result = new ObjectScope();
+
+		for (Map.Entry<String, Object> entry : map.map().entrySet()) {
+		    String key = entry.getKey();
+		    Object value = entry.getValue();
+		    Object newValue = null;
+
+		    if (value != null) {
+			value = visitor.evaluate(ctx, value);
+
+			if (value instanceof ObjectScope || value instanceof ArrayScope) {
+			    newValue = copyAndTransform(visitor, ctx, value, mapper);
+			}
+			else {
+			    newValue = mapper.applyToMap(value, false);
+			}
+		    }
+
+		    if (newValue != null || mapper.copyNull()) {
+			if (mapper.forKeys()) {
+			    String newKey = (String) mapper.applyToMap(key, true);
+			    if (newKey != null || mapper.copyNull()) {
+				result.setValue(newKey, newValue);
+			    }
+			}
+			else {
+			    result.setValue(key, newValue);
+			}
+		    }
+		}
+
+		return result;
+	    }
+	    else if (obj instanceof ArrayScope) {
+		@SuppressWarnings("unchecked")
+		ArrayScope<Object> list = (ArrayScope<Object>) obj;
+		ArrayScope<Object> result = new ArrayScope<>();
+
+		for (Object value : list.list()) {
+		    Object newValue = null;
+		    if (value != null) {
+			value = visitor.evaluate(ctx, value);
+
+			if (value instanceof ObjectScope || value instanceof ArrayScope) {
+			    newValue = copyAndTransform(visitor, ctx, value, mapper);
+			}
+			else {
+			    newValue = mapper.apply(value);
+			}
+		    }
+
+		    if (newValue != null || mapper.copyNull()) {
+			result.add(newValue);
+		    }
+		}
+
+		return result;
+	    }
+
+	    // For all other scalar values, just get the string value and apply the transform
+	    String exprString = toStringValue(visitor, ctx, obj, false, visitor.getSettings().separatorMode);
+	    return mapper.apply(exprString);
+	}
+
+	/**
+	 * Do a "flat map" of values for the "sumof", "productof", "sort", and "exec" functions.  Since each
+	 * value to be processed could be an array or map, we need to traverse these objects
+	 * as well as the simple values in order to get the full list to process.
+	 *
+	 * @param visitor       Visitor used to evaluate expressions.
+	 * @param ctx		The overall parser context for the function (for error messages).
+	 * @param obj		The object to be added to the list, or recursed into when the object
+	 *			is a list or map.
+	 * @param objectList	The complete list of values to be built.
+	 * @param conversion	Type of conversion to do on the values.
+	 * @param level		Level of recursion.
+	 */
+	private static void buildValueList(
+		final CalcObjectVisitor visitor,
+		final ParserRuleContext ctx,
+		final Object obj,
+		final List<Object> objectList,
+		final Conversion conversion,
+		final int level)
+	{
+	    Object value = visitor.evaluate(ctx, obj);
+
+	    if (value instanceof ArrayScope) {
+		if (conversion == Conversion.UNCHANGED && level > 0) {
+		    objectList.add(value);
+		}
+		else {
+		    @SuppressWarnings("unchecked")
+		    ArrayScope array = (ArrayScope) value;
+		    for (Object listObj : array.list()) {
+			buildValueList(visitor, ctx, listObj, objectList, conversion, level + 1);
+		    }
+		}
+	    }
+	    else if (value instanceof ObjectScope) {
+		if (conversion == Conversion.UNCHANGED && level > 0) {
+		    objectList.add(value);
+		}
+		else {
+		    @SuppressWarnings("unchecked")
+		    ObjectScope map = (ObjectScope) value;
+		    for (Object mapObj : map.values()) {
+			buildValueList(visitor, ctx, mapObj, objectList, conversion, level + 1);
+		    }
+		}
+	    }
+	    else {
+		switch (conversion) {
+		    case STRING:
+			objectList.add(toStringValue(visitor, ctx, value, false, false));
+			break;
+		    case DECIMAL:
+			nullCheck(value, ctx);
+			objectList.add(toDecimalValue(visitor, value, visitor.getSettings().mc, ctx));
+			break;
+		    case FRACTION:
+			nullCheck(value, ctx);
+			objectList.add(toFractionValue(visitor, value, ctx));
+			break;
+		    case UNCHANGED:
+			objectList.add(value);
+			break;
+		}
+	    }
+	}
+
+	/**
+	 * Traverse the expression list for the "sumof", "productof", and "sort" functions and
+	 * build the complete list of values to be processed.
+	 *
+	 * @param visitor    Visitor used to evaluate expressions.
+	 * @param exprs	     The parsed list of expression contexts.
+	 * @param conversion How or whether to convert the values for the final list.
+	 * @return	     The completely built "flat map" of values.
+	 */
+	public static List<Object> buildValueList(final CalcObjectVisitor visitor, final List<CalcParser.ExprContext> exprs, final Conversion conversion) {
+	    List<Object> objects = new ArrayList<>();
+
+	    for (CalcParser.ExprContext exprCtx : exprs) {
+		buildValueList(visitor, exprCtx, visitor.evaluate(exprCtx), objects, conversion, 0);
+	    }
+
+	    return objects;
 	}
 
 }

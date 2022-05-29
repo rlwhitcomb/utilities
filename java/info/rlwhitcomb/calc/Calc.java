@@ -280,6 +280,8 @@
  *	    #328: Implement "-clear" command line option.
  *	23-May-2022 (rlwhitcomb)
  *	    Reword an error message to display more information.
+ *	27-May-2022 (rlwhitcomb)
+ *	    Move "saveVariables" to CalcUtil.
  */
 package info.rlwhitcomb.calc;
 
@@ -1409,7 +1411,7 @@ public class Calc
 			File selectedFile = browser.getSelectedFile();
 			rootDirectory = browser.getRootDirectory();
 			try {
-			    visitor.saveVariables(null, selectedFile.toPath(), null);
+			    CalcUtil.saveVariables(visitor, null, visitor.getVariables(), selectedFile.toPath(), null);
 			    Alert.alert(MessageType.INFO, Intl.formatString("saveSuccess", selectedFile.getPath()), Intl.getString("save"), null, mainWindow, null);
 			}
 			catch (IOException ioe) {

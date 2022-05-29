@@ -39,10 +39,13 @@
  *	    #199: Get the "_" prefix from FunctionScope.
  *	28-Apr-2022 (rlwhitcomb)
  *	    #68: Tweak index out of bounds error.
+ *	27-May-2022 (rlwhitcomb)
+ *	    Move "setupFunctionCall" into here from CalcObjectVisitor.
  */
 package info.rlwhitcomb.calc;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -229,5 +232,44 @@ class FunctionDeclaration
 	    return functionBody;
 	}
 
+	/**
+	 * Setup a {@link FunctionScope} given this declaration and the list of actual
+	 * parameter values.
+	 *
+	 * @param ctx     The function call context (parse tree).
+	 * @param visitor The visitor needed to calculate expressions.
+	 * @param exprs   The actual parameter value list.
+	 * @return        Function scope with the actual values set in it.
+	 */
+	public FunctionScope setupFunctionCall(final ParserRuleContext ctx, final CalcObjectVisitor visitor, final List<CalcParser.OptExprContext> exprs) {
+	    FunctionScope funcScope = new FunctionScope(this);
+	    int numParams = getNumberOfParameters();
+	    int numActuals = exprs != null ? exprs.size() : 0;
+
+	    if (exprs != null) {
+		// Special case: 0 or variable # params, but one actual, except the actual expr is zero -> zero actuals
+		if (numParams <= 0 && numActuals == 1 && exprs.get(0).expr() == null)
+		    numActuals--;
+
+		if (numParams >= 0 && numActuals > numParams) {
+		    if (numParams == 1)
+			throw new CalcExprException(ctx, "%calc#tooManyForOneValue", numActuals);
+		    else
+			throw new CalcExprException(ctx, "%calc%tooManyForValues", numActuals, numParams);
+		}
+
+		for (int index = 0; index < numActuals; index++) {
+		    funcScope.setParameterValue(visitor, index, exprs.get(index).expr());
+		}
+	    }
+
+	    // In case there were fewer actuals passed than declared, explicitly set the remaining values
+	    // to null so that their parameter names are present in the symbol table.
+	    for (int index = numActuals; index < numParams; index++) {
+		funcScope.setParameterValue(visitor, index, null);
+	    }
+
+	    return funcScope;
+	}
 }
 
