@@ -3,6 +3,10 @@
 //======================
 
 [
+    { version: '2.12.10', date: d'2022-05-28',
+      issues: [ 344 ],
+      comment: 'Quote "env" map keys that aren\'t valid identifiers.'
+    },
     { version: '2.12.9', date: d'2022-05-28',
       issues: [ 354 ],
       comment: 'Change "Clear" button text in GUI.'

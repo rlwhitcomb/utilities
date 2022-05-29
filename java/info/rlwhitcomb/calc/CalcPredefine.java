@@ -46,6 +46,8 @@
  *	    #273: Move math-related classes to "math" package.
  *	17-May-2022 (rlwhitcomb)
  *	    #323: Add "env" variables as predefined.
+ *	28-May-2022 (rlwhitcomb)
+ *	    #344: Quote map keys for "env" that aren't valid identifiers.
  */
 package info.rlwhitcomb.calc;
 
@@ -299,7 +301,11 @@ class CalcPredefine
 
 	    TreeMap<String, String> envMap = new TreeMap<>(System.getenv());
 	    for (Map.Entry<String, String> entry : envMap.entrySet()) {
-		PredefinedValue.define(env, entry.getKey(), entry.getValue());
+		String key = entry.getKey();
+		if (!CalcUtil.isValidIdentifier(key)) {
+		    key = CharUtil.addDoubleQuotes(key);
+		}
+		PredefinedValue.define(env, key, entry.getValue());
 	    }
 
 	    PredefinedValue.define(globalScope, "env", env);

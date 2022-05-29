@@ -152,6 +152,8 @@
  *	27-May-2022 (rlwhitcomb)
  *	    Move "isPredefined", "saveVariables", "copyAndTransform", and "buildValueList"  out of
  *	    CalcObjectVisitor into here.
+ *	28-May-2022 (rlwhitcomb)
+ *	    #344: Add "isValidIdentifier" method.
  */
 package info.rlwhitcomb.calc;
 
@@ -437,6 +439,23 @@ public final class CalcUtil
 	    if (str.charAt(start) == '_' && (pos == start + 1) && (ch == '#' || ch == '*' || ch == '_'))
 		return true;
 
+	    return false;
+	}
+
+	/**
+	 * Is this string a valid identifier?
+	 *
+	 * @param str The string to check.
+	 * @return    Whether or not the input string is a valid identifier.
+	 */
+	public static boolean isValidIdentifier(final String str) {
+	    if (isIdentifierStart(str, 0)) {
+		for (int i = 1; i < str.length(); i++) {
+		    if (!isIdentifierPart(str, 0, i))
+			return false;
+		}
+		return true;
+	    }
 	    return false;
 	}
 
