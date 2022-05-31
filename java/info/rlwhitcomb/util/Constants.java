@@ -36,6 +36,8 @@
  *	    Double and float limits.
  *	14-Apr-2022 (rlwhitcomb)
  *	    #273: Move math-related classes to "math" package.
+ *	29-May-2022 (rlwhitcomb)
+ *	    #301: Add values used for "convertToWords" (BigInteger).
  */
 package info.rlwhitcomb.util;
 
@@ -70,6 +72,21 @@ public final class Constants
 
 	/** A {@link BigInteger} value of seven. */
 	public static final BigInteger I_SEVEN = BigInteger.valueOf(7);
+
+	/** A {@link BigInteger} value of ten. */
+	public static final BigInteger I_TEN = BigInteger.valueOf(10);
+
+	/** A {@link BigInteger} value of twenty. */
+	public static final BigInteger I_TWENTY = BigInteger.valueOf(20);
+
+	/** A {@link BigInteger} value of one hundred. */
+	public static final BigInteger I_HUNDRED = BigInteger.valueOf(100);
+
+	/** A {@link BigInteger} value of one thousand. */
+	public static final BigInteger I_THOUSAND = BigInteger.valueOf(1_000L);
+
+	/** A {@link BigInteger} value of one million. */
+	public static final BigInteger I_MILLION = BigInteger.valueOf(1_000_000L);
 
 
 	/** A {@link BigInteger} value of the smallest byte value. */

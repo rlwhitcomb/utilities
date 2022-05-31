@@ -586,6 +586,9 @@
  *	    Move "setupFunctionCall" out to FunctionDeclaration. More refactoring around
  *	    "evaluate" during parameter evaluation. Move "isPredefined", "saveVariables",
  *	    "copyAndTransform", and "buildValueList" out to CalcUtil.
+ *	30-May-2022 (rlwhitcomb)
+ *	    More places need to call "fixupToInteger".
+ *	    #301: "convertToWords" accepts BigInteger.
  */
 package info.rlwhitcomb.calc;
 
@@ -2169,8 +2172,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    case 'w':
 			iValue = toIntegerValue(this, result, settings.mc, ctx);
 			try {
-			    long lValue = iValue.longValueExact();
-			    NumericUtil.convertToWords(lValue, valueBuf);
+			    NumericUtil.convertToWords(iValue, valueBuf);
 			}
 			catch (IllegalArgumentException iae) {
 			    throw new CalcExprException(iae, ctx);
@@ -2904,9 +2906,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		beforeValue = dValue;
 
 		if (incr)
-		    afterValue = dValue.add(BigDecimal.ONE);
+		    afterValue = fixupToInteger(dValue.add(BigDecimal.ONE));
 		else
-		    afterValue = dValue.subtract(BigDecimal.ONE);
+		    afterValue = fixupToInteger(dValue.subtract(BigDecimal.ONE));
 	    }
 
 	    lValue.putContextObject(this, afterValue);
@@ -2994,9 +2996,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		BigDecimal dValue = toDecimalValue(this, value, settings.mc, var);
 
 		if (incr)
-		    afterValue = dValue.add(BigDecimal.ONE);
+		    afterValue = fixupToInteger(dValue.add(BigDecimal.ONE));
 		else
-		    afterValue = dValue.subtract(BigDecimal.ONE);
+		    afterValue = fixupToInteger(dValue.subtract(BigDecimal.ONE));
 	    }
 
 	    // pre operation, return the modified value
@@ -5777,7 +5779,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			BigDecimal d1 = toDecimalValue(this, e1, settings.mc, varCtx);
 			BigDecimal d2 = toDecimalValue(this, e2, settings.mc, exprCtx);
 
-			result = d1.subtract(d2, settings.mc);
+			result = fixupToInteger(d1.subtract(d2, settings.mc));
 		    }
 		    break;
 		default:
@@ -5871,19 +5873,19 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			case "\u2217=":
 			case "\u2715=":
 			case "\u2716=":
-			    result = d1.multiply(d2, settings.mc);
+			    result = fixupToInteger(d1.multiply(d2, settings.mc));
 			    break;
 			case "/=":
 			case "\u00F7=":
 			case "\u2215=":
 			case "\u2797=":
-			    result = d1.divide(d2, settings.mcDivide);
+			    result = fixupToInteger(d1.divide(d2, settings.mcDivide));
 			    break;
 			case "\\=":
-			    result = d1.divideToIntegralValue(d2, settings.mcDivide);
+			    result = fixupToInteger(d1.divideToIntegralValue(d2, settings.mcDivide));
 			    break;
 			case "%=":
-			    result = d1.remainder(d2, settings.mcDivide);
+			    result = fixupToInteger(d1.remainder(d2, settings.mcDivide));
 			    break;
 			default:
 			    throw new UnknownOpException(op, ctx);

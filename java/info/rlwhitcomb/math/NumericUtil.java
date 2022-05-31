@@ -159,6 +159,8 @@
  *	    #115: New RangeMode.getFrom method.
  *	14-Apr-2022 (rlwhitcomb)
  *	    #273: Move to "math" package.
+ *	29-May-2022 (rlwhitcomb)
+ *	    #301: Rework "convertToWords" for unlimited BigInteger range.
  */
 package info.rlwhitcomb.math;
 
@@ -379,21 +381,34 @@ public final class NumericUtil
 	/** Decimal value of {@link Constants#NANOSECONDS}. */
 	private static final BigDecimal D_NANOS = BigDecimal.valueOf(NANOSECONDS);
 
+	/** Number of bits required for each successive power of ten (value of <code>ln2(10)</code>). */
+	private static final double BITS_PER_POWER = 3.32192809488736234787031942948939d;
 
-	private static final String[] smallWords = {
+
+	private static final String[] SMALL_WORDS = {
 		"zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine",
 		"ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen",
 		"eighteen", "nineteen"
 	};
-	private static final String[] tensWords = {
+	private static final String[] TENS_WORDS = {
 		"twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"
 	};
-	private static final long[] rangeValues = {
-		 99L,  999L,  999999L,  999999999L,  999999999999L,  999999999999999L,  999999999999999999L, Long.MAX_VALUE
+	private static final String SMALL_TABLE[] = {
+	    "ni", "mi", "bi", "tri", "quadri", "quinti", "sexti", "septi", "octi", "noni"
 	};
-	private static final String[] rangeWords = {
-		"hundred", "thousand", "million", "billion", "trillion", "quadrillion", "quintillion"
+	private static final String UNITS_TABLE[] = {
+	    // This follows the table in "The Book of Numbers" on page 15 EXCEPT they have "quin" as "quinqua"
+	    // which doesn't agree with common usage (as in "quindecillion"), nor with the Wikipedia example table.
+	    "un", "duo", "tre", "quattuor", "quin", "se", "septe", "octo", "nove"
 	};
+	private static final String TENS_TABLE[] = {
+	    "deci", "viginti", "triginta", "quadraginta", "quinquaginta", "sexaginta", "septuaginta", "octoginta", "nonaginta"
+	};
+	private static final String HUNDREDS_TABLE[] = {
+	    "centi", "ducenti", "trecenti", "quadringenti", "quingenti", "sescenti", "septingenti", "octingenti", "nongenti"
+	};
+
+
 	private static final String minus = "minus";
 
 	/**
@@ -707,6 +722,98 @@ public final class NumericUtil
 
 
 	/**
+	 * Create the appropriate "zillion" name for the given power of ten base.
+	 * <p> This is taken from a proposal by Conway &amp; Guy in "The Book of Numbers"
+	 * chapter pp 14-15 and referenced from here:
+	 * <a href="https://en.wikipedia.org/wiki/Names_of_large_numbers">https://en.wikipedia.org/wiki/Names_of_large_numbers</a>
+	 * <p> Given a power of ten which is <code>3 * N + 3</code> we need a name for the
+	 * base N, which we derive here.
+	 * <p> This algorithm extends to infinity using the Wechsler proposal given in the book, except as a practical note
+	 * we are only allowing a base up to 2**32-1, so ...
+	 *
+	 * @param base       The power of ten base to derive a name for.
+	 * @param useNillion For recursive use beyond N = 1000, use "nillion" for zero values.
+	 * @return           The appropriate name, given the convention, such as <code>29 -&gt; "novemvigintillion"</code>.
+	 */
+	public static String getZillionName(final int base, final boolean useNillion) {
+	    StringBuilder buf = new StringBuilder(50);
+
+	    if ((base == 0 && useNillion) || (base >= 1 && base <= 9)) {
+		buf.append(SMALL_TABLE[base]);
+	    }
+	    else if (base >= 1000) {
+		// TODO: recurse with 1,000,000X + 1,000Y + Z names (useNillion = true)
+		throw new Intl.IllegalArgumentException("util#numeric.outOfRange");
+	    }
+	    else {
+		int _100s = base / 100;
+		int _10s = (base % 100) / 10;
+		int _1s = base % 10;
+
+		if (_1s != 0)
+		    buf.append(UNITS_TABLE[_1s - 1]);
+
+		char combine = ' ';
+		switch (_1s) {
+		    case 3: combine = 's'; break;
+		    case 6: combine = 'x'; break;
+		    case 7:
+		    case 9: combine = 'n'; break;
+		}
+
+		if (_10s != 0) {
+		    switch (_10s) {
+			case 1:
+			case 6:
+			case 7: if (combine == 'n') buf.append(combine);
+				break;
+			case 2: if (combine == 'n') buf.append('m');
+				else if (combine == 's' || combine == 'x') buf.append('s');
+				break;
+			case 3:
+			case 4:
+			case 5: if (combine == 'n') buf.append(combine);
+				else if (combine == 's' || combine == 'x') buf.append('s');
+				break;
+			case 8: if (combine == 'n') buf.append('m');
+				else if (combine == 's' || combine == 'x') buf.append(combine);
+				break;
+		    }
+		    combine = ' ';
+		    buf.append(TENS_TABLE[_10s - 1]);
+		}
+
+		if (_100s != 0) {
+		    switch (_100s) {
+			case 1: if (combine == 'n' || combine == 's' || combine == 'x') buf.append(combine);
+				break;
+			case 2:
+			case 6:
+			case 7: if (combine == 'n') buf.append(combine);
+				break;
+			case 3:
+			case 4:
+			case 5: if (combine == 'n') buf.append(combine);
+				else if (combine == 's' || combine == 'x') buf.append('s');
+				break;
+			case 8: if (combine == 'n') buf.append('m');
+				else if (combine == 's' || combine == 'x') buf.append(combine);
+				break;
+		    }
+		    buf.append(HUNDREDS_TABLE[_100s - 1]);
+		}
+	    }
+
+	    // Replace last vowel with "illion"
+	    int len = buf.length();
+	    if (len > 0) {
+		buf.replace(len - 1, len, "illion");
+	    }
+
+	    return buf.toString();
+	}
+
+	/**
 	 * The "long" range name will be something like "Kilobytes", or "Megabytes".
 	 *
 	 * @param	value	The input value to test for range.
@@ -729,50 +836,79 @@ public final class NumericUtil
 	 * @param	value	The value to convert.
 	 * @return		The value written out as its English name.
 	 */
-	public static String convertToWords(final long value) {
+	public static String convertToWords(final BigInteger value) {
 	    StringBuilder buf = new StringBuilder();
 	    convertToWords(value, buf);
 	    return buf.toString();
 	}
 
-	public static void convertToWords(final long inputValue, final StringBuilder buf) {
-	    long value = inputValue;
-	    if (value < 0L) {
-		if (value == Long.MIN_VALUE) {
-		    throw new Intl.IllegalArgumentException("util#numeric.outOfRange");
-		}
+	public static void convertToWords(final BigInteger iValue, final StringBuilder buf) {
+	    BigInteger value = iValue;
+	    int sign = value.signum();
+	    int bits = value.bitLength();
+
+	    if (sign < 0) {
 		buf.append(minus).append(' ');
-		value = -value;
+		value = value.negate();
 	    }
-	    if (value < 20L) {
-		buf.append(smallWords[(int)value]);
+	    if (value.compareTo(I_TWENTY) < 0) {
+		buf.append(SMALL_WORDS[value.intValue()]);
 	    }
-	    else if (value < 100L) {
-		int decade = (int)(value / 10L);
-		int residual = (int)(value % 10L);
-		buf.append(tensWords[decade - 2]);
+	    else if (value.compareTo(I_HUNDRED) < 0) {
+		int ivalue = value.intValue();
+		int decade = ivalue / 10;
+		int residual = ivalue % 10;
+		buf.append(TENS_WORDS[decade - 2]);
 		if (residual != 0) {
 		    buf.append('-');
-		    buf.append(smallWords[residual]);
+		    buf.append(SMALL_WORDS[residual]);
+		}
+	    }
+	    else if (value.compareTo(I_THOUSAND) < 0) {
+		int ivalue = value.intValue();
+		int chiliad = ivalue / 100;
+		int residual = ivalue % 100;
+		buf.append(SMALL_WORDS[chiliad]).append(" hundred");
+		if (residual != 0) {
+		    buf.append(' ');
+		    convertToWords(BigInteger.valueOf(residual), buf);
+		}
+	    }
+	    else if (value.compareTo(I_MILLION) < 0) {
+		int ivalue = value.intValue();
+		int milliad = ivalue / 1000;
+		int residual = ivalue % 1000;
+		convertToWords(BigInteger.valueOf(milliad), buf);
+		buf.append(" thousand");
+		if (residual != 0) {
+		    buf.append(", ");
+		    convertToWords(BigInteger.valueOf(residual), buf);
 		}
 	    }
 	    else {
-		for (int i = 1; i < rangeValues.length; i++) {
-		    if (value <= rangeValues[i]) {
-			long scale = rangeValues[i - 1] + 1L;
-			long prefix = value / scale;
-			long residual = value % scale;
-			convertToWords(prefix, buf);
-			buf.append(' ').append(rangeWords[i - 1]);
-			if (residual != 0L) {
-			    if (i > 1)
-				buf.append(", ");
-			    else
-				buf.append(' ');
-			    convertToWords(residual, buf);
-			}
-			break;
-		    }
+		// Underestimate a bit of the power of ten we're dealing with based on the number of bits
+		// used to store the value.
+		int tenpow = ((int) Math.floor((double) bits / BITS_PER_POWER) / 3 - 1) * 3;
+		BigInteger scale = I_TEN.pow(tenpow);
+		BigInteger oldScale = scale;
+
+		while (value.compareTo(scale) >= 0) {
+		    tenpow += 3;
+		    oldScale = scale;
+		    scale = scale.multiply(I_THOUSAND);
+		}
+		// Once we've found the proper scale for the value, back off to the previous
+		// 10**3 range
+		scale = oldScale;
+		tenpow -= 3;
+
+		BigInteger[] parts = value.divideAndRemainder(scale);
+		convertToWords(parts[0], buf);
+		buf.append(' ').append(getZillionName((tenpow - 3) / 3, false));
+		BigInteger residual = parts[1];
+		if (residual.signum() != 0) {
+		    buf.append(", ");
+		    convertToWords(residual, buf);
 		}
 	    }
 	}

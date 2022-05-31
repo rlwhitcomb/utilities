@@ -154,6 +154,8 @@
  *	    CalcObjectVisitor into here.
  *	28-May-2022 (rlwhitcomb)
  *	    #344: Add "isValidIdentifier" method.
+ *	30-May-2022 (rlwhitcomb)
+ *	    #301: Fix "toIntegerValue" for BigDecimal input.
  */
 package info.rlwhitcomb.calc;
 
@@ -656,7 +658,10 @@ public final class CalcUtil
 	 */
 	public static BigInteger toIntegerValue(final CalcObjectVisitor visitor, final Object value, final MathContext mc, final ParserRuleContext ctx) {
 	    try {
-		if (value instanceof BigInteger) {
+		if (value instanceof BigDecimal) {
+		    return ((BigDecimal) value).toBigIntegerExact();
+		}
+		else if (value instanceof BigInteger) {
 		    return (BigInteger) value;
 		}
 		else if (value instanceof BigFraction) {

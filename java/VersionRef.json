@@ -3,6 +3,10 @@
 //======================
 
 [
+    { version: '2.12.12', date: d'2022-05-30',
+      issues: [ 301 ],
+      comment: 'Extend range of "@w" conversions out to 10**3000 or so.'
+    },
     { version: '2.12.10', date: d'2022-05-28',
       issues: [ 344 ],
       comment: 'Quote "env" map keys that aren\'t valid identifiers.'

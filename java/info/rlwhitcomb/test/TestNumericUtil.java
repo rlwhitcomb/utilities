@@ -64,6 +64,7 @@ import java.io.DataOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.math.MathContext;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -476,7 +477,8 @@ public class TestNumericUtil
 	    999_999_999L,
 	    100_000_000_000L,
 	    19_889L,
-	    100_100L
+	    100_100L,
+	    9_223_372_036_854_775_807L
 	};
 	private static final String wordValues[] = {
 	    "one million",
@@ -492,7 +494,8 @@ public class TestNumericUtil
 	    "nine hundred ninety-nine million, nine hundred ninety-nine thousand, nine hundred ninety-nine",
 	    "one hundred billion",
 	    "nineteen thousand, eight hundred eighty-nine",
-	    "one hundred thousand, one hundred"
+	    "one hundred thousand, one hundred",
+	    "nine quintillion, two hundred twenty-three quadrillion, three hundred seventy-two trillion, thirty-six billion, eight hundred fifty-four million, seven hundred seventy-five thousand, eight hundred seven"
 	};
 	private static final String romanInputs[] = {
 	    "MMXXI", "I", "II", "III", "IV", "V", "VI", "VII", "viii", "IX", "X",
@@ -507,6 +510,35 @@ public class TestNumericUtil
 	    41, 44, 45, 46, 48, 50, 52, 88, 89, 90, 91, 94, 96,
 	    99, 100, 101, 217, 299, 400, 500, 545, 609, 899, 1000, 1001,
 	    1967, 2000, 2001, 3999
+	};
+	private static final int zillionBases[] = {
+	    1, 2, 3, 4, 5, 6, 7, 8,
+	    9, 10, 11, 12, 13, 14, 15,
+	    16, 17, 18, 19, 20, 21,
+	    22, 23, 24, 25, 26,
+	    27, 28, 29, 30, 31,
+	    32, 33, 34, 35, 36,
+	    37, 38, 39, 40, 50,
+	    60, 70, 80, 90, 100, 101,
+	    110, 111, 120, 121, 130,
+	    140, 150, 160, 170,
+	    180, 190, 200, 300, 400,
+	    500, 600, 700, 800, 900, 999
+	};
+	private static final String zillionNames[] = {
+	    "million", "billion", "trillion", "quadrillion", "quintillion", "sextillion", "septillion", "octillion",
+	    "nonillion", "decillion", "undecillion", "duodecillion", "tredecillion", "quattuordecillion", "quindecillion",
+	    "sedecillion", "septendecillion", "octodecillion", "novendecillion", "vigintillion", "unvigintillion",
+	    "duovigintillion", "tresvigintillion", "quattuorvigintillion", "quinvigintillion", "sesvigintillion",
+	    "septemvigintillion", "octovigintillion", "novemvigintillion", "trigintillion", "untrigintillion",
+	    "duotrigintillion", "trestrigintillion", "quattuortrigintillion", "quintrigintillion", "sestrigintillion",
+	    "septentrigintillion", "octotrigintillion", "noventrigintillion", "quadragintillion", "quinquagintillion",
+	    "sexagintillion", "septuagintillion", "octogintillion", "nonagintillion", "centillion", "uncentillion",
+	    "decicentillion", "undecicentillion", "viginticentillion", "unviginticentillion", "trigintacentillion",
+	    "quadragintacentillion", "quinquagintacentillion", "sexagintacentillion", "septuagintacentillion",
+	    "octogintacentillion", "nonagintacentillion", "ducentillion", "trecentillion", "quadringentillion",
+	    "quingentillion", "sescentillion", "septingentillion", "octingentillion", "nongentillion",
+	    "novenonagintanongentillion"
 	};
 
 
@@ -547,6 +579,22 @@ public class TestNumericUtil
 
 	    System.out.println("Done with PI and E tests.");
 
+	    // Tests of "Zillion" words
+	    // Tests taken from values given at: https://en.wikipedia.org/wiki/Names_of_large_numbers
+	    System.out.println("Testing 'Zillion' words...");
+
+	    for (int i = 0; i < zillionBases.length; i++) {
+		numberOfTests++;
+		String name = NumericUtil.getZillionName(zillionBases[i], false);
+		String expectedName = zillionNames[i];
+		if (!name.equals(expectedName)) {
+		    System.out.println("Base " + zillionBases[i] + " expected '" + expectedName + "', got '" + name + "'");
+		    numberOfFailures++;
+		}
+	    }
+
+	    System.out.println("Done with 'Zillion' words tests.");
+
 	    System.out.println("Testing 'convertToWords' function...");
 
 	    numberOfTests++;
@@ -557,7 +605,7 @@ public class TestNumericUtil
 	    else {
 		for (int i = 0; i < numberValues.length; i++) {
 		    numberOfTests++;
-		    String result = NumericUtil.convertToWords(numberValues[i]);
+		    String result = NumericUtil.convertToWords(BigInteger.valueOf(numberValues[i]));
 		    if (!result.equals(wordValues[i])) {
 			System.err.println("Result of 'convertToWords' for " + numberValues[i] + " = '" + result + "'");
 			System.err.println("  did not equal expected result of '" + wordValues[i] + "'");
