@@ -56,6 +56,8 @@
  *	    New tests of BigFraction with '+' signs.
  *	14-Apr-2022 (rlwhitcomb)
  *	    #273: Move math-related classes to "math" package.
+ *	31-May-2022 (rlwhitcomb)
+ *	    #301: Tests of "getZillionNames".
  */
 package info.rlwhitcomb.test;
 
@@ -523,7 +525,10 @@ public class TestNumericUtil
 	    110, 111, 120, 121, 130,
 	    140, 150, 160, 170,
 	    180, 190, 200, 300, 400,
-	    500, 600, 700, 800, 900, 999
+	    307, 432, 590,
+	    500, 600, 700, 800, 900,
+	    999, 1_000, 5_432,
+	    30_000, 1_000_003
 	};
 	private static final String zillionNames[] = {
 	    "million", "billion", "trillion", "quadrillion", "quintillion", "sextillion", "septillion", "octillion",
@@ -537,8 +542,10 @@ public class TestNumericUtil
 	    "decicentillion", "undecicentillion", "viginticentillion", "unviginticentillion", "trigintacentillion",
 	    "quadragintacentillion", "quinquagintacentillion", "sexagintacentillion", "septuagintacentillion",
 	    "octogintacentillion", "nonagintacentillion", "ducentillion", "trecentillion", "quadringentillion",
+	    "septentrecentillion", "duotrigintaquadringentillion", "nonagintaquingentillion",
 	    "quingentillion", "sescentillion", "septingentillion", "octingentillion", "nongentillion",
-	    "novenonagintanongentillion"
+	    "novenonagintanongentillion", "millinillion", "quintilliduotrigintaquadringentillion",
+	    "trigintillinillion", "millinillitrillion"
 	};
 
 
@@ -585,7 +592,7 @@ public class TestNumericUtil
 
 	    for (int i = 0; i < zillionBases.length; i++) {
 		numberOfTests++;
-		String name = NumericUtil.getZillionName(zillionBases[i], false);
+		String name = NumericUtil.getZillionName(zillionBases[i]);
 		String expectedName = zillionNames[i];
 		if (!name.equals(expectedName)) {
 		    System.out.println("Base " + zillionBases[i] + " expected '" + expectedName + "', got '" + name + "'");

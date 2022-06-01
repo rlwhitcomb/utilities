@@ -157,6 +157,7 @@ h2 {
     <li><a href="#Values_Constants_and_Variables">Values, Constants, and Variables</a>
     <li><a href="#Modes_and_Precision">Modes and Precision</a>
     <li><a href="#Formats">Formats</a>
+    <li><a href="#Notes_on_Formats">Notes on Formats</a>
     <li><a href="#Available_Operators_and_Predefined_Functions">Available Operators and Predefined Functions</a>
     <li><a href="#Notes_on_Functions">Notes on Functions</a>
     <li><a href="#User_Defined_Functions">User-Defined Functions</a>
@@ -621,6 +622,16 @@ or<br>
     </tbody>
     </table>
   </div>
+<a class="top-link" href="#topofpage">Top</a>
+<hr id="Notes_on_Formats" class="sectionsep">
+  <h2>Notes on Formats</h2>
+<div class="cols">
+  <p>The <code>@w</code> (and <code>@W</code>) formats use the Conway-Guy-Wechsler (from "The Book of Numbers" [1996]) proposal,
+     as explained here: <a href="https://en.wikipedia.org/wiki/Names_of_large_numbers">Names of large numbers</a>. We always use
+     the US, Canada, and modern British (short scale) form, regardless of the locale used. The implementation here will work up to a
+     value of around 10<sup>3,000,000,000</sup>.
+  <p>While thousands separators are supported on output (the <code>d</code>, <code>j</code>, <code>%</code>, and <code>$</code> formats), they are not supported on input. For this reason, the separators setting is ignored for <code>:save</code>, and should be avoided if the output is meant to read on input by Calc.
+</div>
 <a class="top-link" href="#topofpage">Top</a>
 <hr id="Available_Operators_and_Predefined_Functions" class="sectionsep">
   <h2>Available Operators and Predefined Functions</h2>

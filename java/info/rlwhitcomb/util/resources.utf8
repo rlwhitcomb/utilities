@@ -139,6 +139,8 @@
 #	    Redo some of the "environ" information.
 #	05-May-2022 (rlwhitcomb)
 #	    #308: Change the reset color tag.
+#	31-May-2022 (rlwhitcomb)
+#	    #301: New error message for NumericUtil.getZillionName.
 #
 
 #
@@ -216,6 +218,7 @@ intl.providerNotFound	= Unable to find resource provider for "%1$s" package.
 #
 numeric.badKMGFormat		= Improper input format: suffix must be one of [K,M,G,T,P, or E].
 numeric.outOfRange		= Value is out of range.
+numeric.outOfRangeWords		= Value out of range for "@w" conversions.
 numeric.badRomanFormat		= Unable to convert Roman numeral: '%1$s'.
 numeric.outOfRomanRange		= Value %1$,d is out of range for conversion to a Roman numeral.
 numeric.badDataType		= Data type %1$s is not supported in binary files.

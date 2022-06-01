@@ -161,6 +161,8 @@
  *	    #273: Move to "math" package.
  *	29-May-2022 (rlwhitcomb)
  *	    #301: Rework "convertToWords" for unlimited BigInteger range.
+ *	31-May-2022 (rlwhitcomb)
+ *	    #301: Next step of Conway-Guy-Wechsler algorithm for large exponent naming.
  */
 package info.rlwhitcomb.math;
 
@@ -723,6 +725,17 @@ public final class NumericUtil
 
 	/**
 	 * Create the appropriate "zillion" name for the given power of ten base.
+	 *
+	 * @param base The power of ten base to derive a name for.
+	 * @return     The appropriate name.
+	 * @see #getZillionName(int, boolean, boolean)
+	 */
+	public static String getZillionName(final int base) {
+	    return getZillionName(base, false, true);
+	}
+
+	/**
+	 * Create the appropriate "zillion" name for the given power of ten base.
 	 * <p> This is taken from a proposal by Conway &amp; Guy in "The Book of Numbers"
 	 * chapter pp 14-15 and referenced from here:
 	 * <a href="https://en.wikipedia.org/wiki/Names_of_large_numbers">https://en.wikipedia.org/wiki/Names_of_large_numbers</a>
@@ -733,17 +746,37 @@ public final class NumericUtil
 	 *
 	 * @param base       The power of ten base to derive a name for.
 	 * @param useNillion For recursive use beyond N = 1000, use "nillion" for zero values.
+	 * @param addSuffix  Also for recursive use, whether to add the "illion", or "illi" suffix.
 	 * @return           The appropriate name, given the convention, such as <code>29 -&gt; "novemvigintillion"</code>.
 	 */
-	public static String getZillionName(final int base, final boolean useNillion) {
-	    StringBuilder buf = new StringBuilder(50);
+	public static String getZillionName(final int base, final boolean useNillion, final boolean addSuffix) {
+	    StringBuilder buf = new StringBuilder(60);
 
 	    if ((base == 0 && useNillion) || (base >= 1 && base <= 9)) {
 		buf.append(SMALL_TABLE[base]);
 	    }
-	    else if (base >= 1000) {
-		// TODO: recurse with 1,000,000X + 1,000Y + Z names (useNillion = true)
-		throw new Intl.IllegalArgumentException("util#numeric.outOfRange");
+	    else if (base >= 1_000) {
+		if (base >= 1_000_000_000) {
+		    // Note: this can go on indefinitely toward infinity, but this will suffice for
+		    // all our needs, since we top out around a power of 12,000 anyway.
+		    throw new Intl.IllegalArgumentException("util#numeric.outOfRangeWords");
+		}
+		if (base >= 1_000_000) {
+		    int millis = base / 1_000_000;
+		    int thous  = (base % 1_000_000) / 1_000;
+		    int ones   = base % 1_000;
+
+		    buf.append(getZillionName(millis, true, true));
+		    buf.append(getZillionName(thous, true, true));
+		    buf.append(getZillionName(ones, true, false));
+		}
+		else {
+		    int thous = base / 1_000;
+		    int ones  = base % 1_000;
+
+		    buf.append(getZillionName(thous, true, true));
+		    buf.append(getZillionName(ones, true, false));
+		}
 	    }
 	    else {
 		int _100s = base / 100;
@@ -806,8 +839,8 @@ public final class NumericUtil
 
 	    // Replace last vowel with "illion"
 	    int len = buf.length();
-	    if (len > 0) {
-		buf.replace(len - 1, len, "illion");
+	    if (addSuffix && len > 0 && "aeiou".indexOf(buf.charAt(len - 1)) >= 0) {
+		buf.replace(len - 1, len, useNillion ? "illi" : "illion");
 	    }
 
 	    return buf.toString();
@@ -904,7 +937,7 @@ public final class NumericUtil
 
 		BigInteger[] parts = value.divideAndRemainder(scale);
 		convertToWords(parts[0], buf);
-		buf.append(' ').append(getZillionName((tenpow - 3) / 3, false));
+		buf.append(' ').append(getZillionName((tenpow - 3) / 3));
 		BigInteger residual = parts[1];
 		if (residual.signum() != 0) {
 		    buf.append(", ");
