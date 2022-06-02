@@ -589,6 +589,8 @@
  *	30-May-2022 (rlwhitcomb)
  *	    More places need to call "fixupToInteger".
  *	    #301: "convertToWords" accepts BigInteger.
+ *	01-Jun-2022 (rlwhitcomb)
+ *	    #45: Add "write" function.
  */
 package info.rlwhitcomb.calc;
 
@@ -663,6 +665,7 @@ import static info.rlwhitcomb.util.ConsoleColor.Code.*;
 import static info.rlwhitcomb.util.Constants.*;
 import info.rlwhitcomb.util.Environment;
 import info.rlwhitcomb.util.Exceptions;
+import info.rlwhitcomb.util.FileUtilities;
 import info.rlwhitcomb.util.Intl;
 import info.rlwhitcomb.util.RunCommand;
 import info.rlwhitcomb.util.Which;
@@ -5112,7 +5115,58 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 
 	    try {
-		return Calc.getFileContents(fileName, cs);
+		return FileUtilities.readRawText(new File(fileName), cs);
+	    }
+	    catch (IOException ioe) {
+		throw new CalcExprException(ioe, ctx);
+	    }
+	}
+
+	@Override
+	public Object visitWriteExpr(CalcParser.WriteExprContext ctx) {
+	    CalcParser.Expr2Context e2ctx = ctx.expr2();
+	    CalcParser.Expr3Context e3ctx = ctx.expr3();
+	    CalcParser.ExprContext expr;
+	    String fileName = "";
+	    Charset cs = null;
+	    Object outputObj =  null;
+	    CharSequence seq = null;
+
+	    if (e3ctx != null) {
+		expr = e3ctx.expr(0);
+		outputObj = evaluate(expr);
+		fileName = getStringValue(e3ctx.expr(1));
+		cs = getCharsetValue(e3ctx.expr(2), false);
+	    }
+	    else {
+		expr = e2ctx.expr(0);
+		outputObj = evaluate(expr);
+		fileName = getStringValue(e2ctx.expr(1));
+	    }
+
+	    try {
+		if (outputObj != null) {
+		    if (outputObj instanceof ArrayScope) {
+			String eol = Environment.lineSeparator();
+			@SuppressWarnings("unchecked")
+			ArrayScope<Object> array = (ArrayScope<Object>) outputObj;
+			StringBuilder buf = new StringBuilder();
+			for (Object obj : array.list()) {
+			    buf.append(toNonNullString(expr, obj)).append(eol);
+			}
+			seq = buf;
+		    }
+		    else if (outputObj instanceof ObjectScope) {
+			ObjectScope obj = (ObjectScope) outputObj;
+			// For now (maybe always?) write out a JSON object
+			seq = toStringValue(this, expr, obj.map(), true, false, false, false, "", "");
+		    }
+		    else {
+			seq = toNonNullString(expr, outputObj);
+		    }
+		    return BigInteger.valueOf(FileUtilities.writeRawText(seq, new File(fileName), cs));
+		}
+		return BigInteger.ZERO;
 	    }
 	    catch (IOException ioe) {
 		throw new CalcExprException(ioe, ctx);

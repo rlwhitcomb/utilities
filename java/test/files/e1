@@ -7,7 +7,7 @@
 # Simple version check ...
 # version 2.3.0 was first version where these checks would work, and 2.4.11 is where versioninfo -> info.version
 info.version.major > 2 || (info.version.major == 2 && info.version.minor > 4) || (info.version.major == 2 && info.version.minor == 4 && info.version.patch >= 11)
-:requires '2.12.5-alpha', base '1.9.15-alpha'
+:requires '2.12.15-alpha', base '1.9.22-alpha'
 
 # Various simple expressions
 :decimal(50)
@@ -869,6 +869,17 @@ Truth(null)
 Truth("a")
 Truth("false")
 Truth(settings)
+
+#
+# Test read/write, especially of Unicode data
+#
+const UTF_8 = 'utf-8'
+:quiet on {
+   uni1 = read('test/data/unicode.txt', UTF_8)
+   write(uni1, 'uni2', UTF_8)
+   uni2 = read('uni2', UTF_8)
+}
+`Test of read/write/read of Unicode data = ${uni1 === uni2}`
 
 :echo
 :echo "End of expression tests (suite 1)."

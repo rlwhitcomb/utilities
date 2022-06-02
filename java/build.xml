@@ -309,6 +309,8 @@
 		#273: Need to add new "math" directory in a few places.
 	    18-May-2022 (rlwhitcomb)
 		#330: Add "Main-Class" attribute to .jar file.
+	    01-Jun-2022 (rlwhitcomb)
+		#45: Delete the new test result file.
 
      ========================================================================== -->
 
@@ -771,7 +773,7 @@ Test starting on ${build.date} at ${build.time}
 			<arg value="check_sorted.bat"/>
 		</exec>
 		<delete>
-			<fileset dir="." includes="savetest"/>
+			<fileset dir="." includes="savetest,uni2"/>
 		</delete>
 		<echo unless:true="${ci.build}">Done with unit tests. Successful. Results in "${test.log.path}" file.</echo>
 		<echo if:true="${ci.build}">Done with unit tests. Successful.</echo>
@@ -784,6 +786,7 @@ Test starting on ${build.date} at ${build.time}
 		<delete>
 			<fileset dir="." includes="${result.jar}"/>
 			<fileset dir="." includes="*.class"/>
+			<fileset dir="." includes="savetest,uni2"/>
 			<fileset dir="test/data" includes="*.class"/>
 			<fileset dir="de/onyxbits" includes="*.class"/>
 			<fileset dir="name/fraser/neil/plaintext" includes="*.class"/>

@@ -404,6 +404,8 @@
  *	25-May-2022 (rlwhitcomb)
  *	    #348: Add "var" statement.
  *	    Allow EOL after colon in object declarations.
+ *	01-Jun-2022 (rlwhitcomb)
+ *	    #45: Add "write" function.
  */
 
 grammar Calc;
@@ -568,6 +570,7 @@ expr
    | K_DECODE expr1                      # decodeExpr
    | K_ENCODE expr1                      # encodeExpr
    | K_READ ( expr2 | expr1 )            # readExpr
+   | K_WRITE ( expr3 | expr2 )           # writeExpr
    | K_MATCHES expr2                     # matchesExpr
    | var INC_OP                          # postIncOpExpr
    |<assoc=right> INC_OP var             # preIncOpExpr
@@ -1052,6 +1055,8 @@ K_DECODE   : 'decode' | 'DECODE' | 'Decode' ;
 K_ENCODE   : 'encode' | 'ENCODE' | 'Encode' ;
 
 K_READ     : 'read' | 'READ' | 'Read' ;
+
+K_WRITE    : 'write' | 'WRITE' | 'Write' ;
 
 K_MATCHES  : 'matches' | 'MATCHES' | 'Matches' ;
 

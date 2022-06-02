@@ -3,6 +3,10 @@
 //======================
 
 [
+    { version: '2.12.15', date: d'2022-06-01',
+      issues: [ 45 ],
+      comment: 'Update "read" to read file exactly; implement "write".'
+    },
     { base: '1.9.22', version: '2.12.13', date: d'2022-05-31',
       issues: [ 301 ],
       comment: 'Further extend "@w" range out to 10^1_000_000_000.'

@@ -1013,6 +1013,8 @@
 >Truth("a") -> "T"
 >Truth("false") -> "F"
 >Truth(settings) -> "T"
+>Defining constant “UTF_8” = utf-8
+>`Test of read/write/read of Unicode data = ${uni1 === uni2}` -> "Test of read/write/read of Unicode data = true"
 >
 >End of expression tests (suite 1).
 >Tests of nested object / array variables.

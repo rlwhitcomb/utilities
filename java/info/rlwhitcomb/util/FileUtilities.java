@@ -105,10 +105,14 @@
  *    23-May-2022 (rlwhitcomb)
  *	Provide a default list of executable extensions for Windows
  *	in case "PATHEXT" is not present (for some unknown reason).
+ *    01-Jun-2022 (rlwhitcomb)
+ *	#45: New "readRawText" and "writeRawText" methods; separate out "getFileReader".
+ *	make parameters final.
  */
 package info.rlwhitcomb.util;
 
 import java.io.BufferedReader;
+import java.io.Console;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -116,8 +120,13 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.io.Reader;
+import java.io.Writer;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
+import java.nio.charset.CharsetEncoder;
 import java.nio.charset.CodingErrorAction;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
@@ -181,7 +190,7 @@ public final class FileUtilities
      * @return Only the name portion of the given file, without the path
      * or the extension (if any).
      */
-    public static String nameOnly(File f) {
+    public static String nameOnly(final File f) {
 	String name = f.getName();
 	int dotPos  = name.lastIndexOf('.');
 	if (dotPos < 0)
@@ -196,7 +205,7 @@ public final class FileUtilities
      * @param f The file to examine.
      * @return Only the extension portion of the given file name.
      */
-    public static String extOnly(File f) {
+    public static String extOnly(final File f) {
 	String name = f.getName();
 	int dotPos  = name.lastIndexOf('.');
 	if (dotPos < 0)
@@ -214,7 +223,7 @@ public final class FileUtilities
      * @return		A new {@code File} object with the given path and extension
      *			(unless the input already has a path and/or extension).
      */
-    public static File decorate(String name, File dir, String ext) {
+    public static File decorate(final String name, final File dir, final String ext) {
 	String fullName = name;
 	int dotPos = fullName.lastIndexOf('.');
 	if (dotPos < 0 && ext != null) {
@@ -240,7 +249,7 @@ public final class FileUtilities
      * @throws FileNotFoundException if the original file could
      * not be found.
      */
-    public static void copyFile(File in, File out)
+    public static void copyFile(final File in, final File out)
 		throws IOException, FileNotFoundException
     {
 	Files.copy(in.toPath(), out.toPath(),
@@ -258,7 +267,7 @@ public final class FileUtilities
      *		or {@code false} if not.
      * @throws IOException if something went wrong.
      */
-    public static boolean compareFiles(File file1, File file2)
+    public static boolean compareFiles(final File file1, final File file2)
 	throws IOException
     {
 	Path path1 = file1.toPath();
@@ -277,7 +286,7 @@ public final class FileUtilities
      *			if there is a leading ".").
      * @return The new random file name.
      */
-    public static String getRandomName(String prefix, String suffix) {
+    public static String getRandomName(final String prefix, final String suffix) {
 	byte bytes[] = new byte[20];
 	random.nextBytes(bytes);
 	return String.format("%1$s%2$s%3$s",
@@ -298,7 +307,7 @@ public final class FileUtilities
      * @return	The file object.
      * @throws	IOException if there was disk operation error.
      */
-    public static File createTempFile(String prefix, String suffix, boolean deleteOnExit)
+    public static File createTempFile(final String prefix, final String suffix, final boolean deleteOnExit)
 		throws IOException
     {
 	File tempFile = File.createTempFile(prefix, suffix == null || suffix.startsWith(".") ? suffix : "." + suffix);
@@ -317,7 +326,7 @@ public final class FileUtilities
      * @throws	IOException if there was disk operation error.
      * @see	#createTempFile(String, String, boolean)
      */
-    public static File createTempFile(String prefix, boolean deleteOnExit)
+    public static File createTempFile(final String prefix, final boolean deleteOnExit)
 		throws IOException
     {
 	return createTempFile(prefix, null, deleteOnExit);
@@ -332,7 +341,7 @@ public final class FileUtilities
      * @throws	IOException if there was disk operation error.
      * @see	#createTempFile(String, String, boolean)
      */
-    public static File createTempFile(String prefix)
+    public static File createTempFile(final String prefix)
 		throws IOException
     {
 	return createTempFile(prefix, null, false);
@@ -350,7 +359,7 @@ public final class FileUtilities
      * @throws	IOException if there was a error reading or writing.
      * @see	#createTempFile(String, String, boolean)
      */
-    public static File writeToTempFile(InputStream is, String prefix, String suffix, boolean deleteOnExit)
+    public static File writeToTempFile(final InputStream is, final String prefix, final String suffix, final boolean deleteOnExit)
 		throws IOException
     {
 	File tempFile = createTempFile(prefix, suffix, deleteOnExit);
@@ -365,7 +374,7 @@ public final class FileUtilities
      * @param f		The output file to write to.
      * @throws 	IOException if anything goes wrong.
      */
-    public static void writeStreamToFile(InputStream is, File f)
+    public static void writeStreamToFile(final InputStream is, final File f)
 		throws IOException
     {
 	try (OutputStream os = Files.newOutputStream(f.toPath())) {
@@ -386,7 +395,7 @@ public final class FileUtilities
      * @return		Whether the given path is readable by
      *			simply trying to read from it.
      */
-    public static boolean pathIsReadable(String path) {
+    public static boolean pathIsReadable(final String path) {
 	File f = new File(path);
 	Logging.Debug("FileUtilities.pathIsReadable(String path='%1$s', Path='%2$s')", path, f.getPath());
 	if (!f.exists() || !f.canRead()) {
@@ -419,7 +428,7 @@ public final class FileUtilities
      * @return	The count of the number of lines in the file.
      * @throws	IOException if the file couldn't be read.
      */
-    public static int countLines(File f)
+    public static int countLines(final File f)
 	    throws IOException
     {
 	try (BufferedReader r = new BufferedReader(new FileReader(f))) {
@@ -441,7 +450,7 @@ public final class FileUtilities
      * @param	inputFile	The input file (in the proper directory).
      * @throws	IOException if something happened during the compression.
      */
-    public static void compressFile(File inputFile)
+    public static void compressFile(final File inputFile)
 	    throws IOException
     {
 	String outputName = inputFile.getPath() + COMPRESS_EXT;
@@ -471,7 +480,7 @@ public final class FileUtilities
      * @throws	IllegalArgumentException (with no message) if the input
      *		file name doesn't end with {@link #COMPRESS_EXT}.
      */
-    public static void uncompressFile(File inputFile)
+    public static void uncompressFile(final File inputFile)
 	    throws IOException
     {
 	String inputName = inputFile.getPath();
@@ -501,7 +510,7 @@ public final class FileUtilities
      * @param	newName		New file name (relative to source directory).
      * @throws	IOException if the rename doesn't succeed.
      */
-    public static void renameFile(File currentFile, String newName)
+    public static void renameFile(final File currentFile, final String newName)
 	    throws IOException
     {
 	Path source = currentFile.toPath();
@@ -516,7 +525,7 @@ public final class FileUtilities
      *			and the permissions include read access.
      * @see	#canReadPath
      */
-    public static boolean canRead(File file) {
+    public static boolean canRead(final File file) {
 	try {
 	    return canReadPath(file.toPath(), false);
 	}
@@ -533,7 +542,7 @@ public final class FileUtilities
      *			directory, and the permissions include read access.
      * @see	#canReadPath
      */
-    public static boolean canReadDir(File dir) {
+    public static boolean canReadDir(final File dir) {
 	try {
 	    return canReadPath(dir.toPath(), true);
 	}
@@ -556,7 +565,7 @@ public final class FileUtilities
      * @return		Whether or not the path exists, is the kind of file/directory
      *			we're expecting, and the permissions include read access.
      */
-    private static boolean canReadPath(Path path, boolean asDir) {
+    private static boolean canReadPath(final Path path, final boolean asDir) {
 	if (!Files.exists(path))
 	    return false;
 
@@ -599,7 +608,7 @@ public final class FileUtilities
      * @param	file	The local file to test.
      * @return		Whether or not the file permissions include write access for this file.
      */
-    public static boolean canWrite(File file) {
+    public static boolean canWrite(final File file) {
 	try {
 	    Path path = file.toPath();
 	    if (Environment.isWindows()) {
@@ -635,7 +644,7 @@ public final class FileUtilities
      * @param path	The path to the file in question.
      * @return		Whether or not the file is an "executable".
      */
-    public static boolean canExecute(File path) {
+    public static boolean canExecute(final File path) {
 	// An obvious first check...
 	if (!path.exists())
 	    return false;
@@ -669,6 +678,86 @@ public final class FileUtilities
     }
 
     /**
+     * Construct a file reader for the given file and charset.
+     * <p> If the file name is <code>"@"</code> or <code>"-"</code>, read the system standard input.
+     *
+     * @param	file	The local file to start reading.
+     * @param	cs	The charset to use (can be {@code null} to use the platform default).
+     * @return		A buffered reader suitable for reading the file.
+     * @throws	IllegalArgumentException if the file cannot be found, is not readable,
+     *			or is larger than our internal limit.
+     * @throws	IOException if there is a problem starting to read the file
+     */
+    private static BufferedReader getFileReader(final File file, final Charset cs)
+		throws IOException
+    {
+	InputStream in;
+
+	String filePath = file.getPath();
+	if (filePath.equals("@") || filePath.equals("-")) {
+	    in = System.in;
+	}
+	else {
+	    if (!file.exists() || !canRead(file)) {
+		throw new Intl.IllegalArgumentException("util#fileutil.fileNotFound", file.getPath());
+	    }
+
+	    long size = file.length();
+	    if (size > FILE_STRING_SIZE_LIMIT) {
+		throw new Intl.IllegalArgumentException("util#fileutil.fileTooBig", size);
+	    }
+
+	    in = Files.newInputStream(file.toPath());
+	}
+
+	CharsetDecoder decoder = (cs == null ? Charset.defaultCharset() : cs).newDecoder();
+	decoder.onUnmappableCharacter(CodingErrorAction.REPORT);
+	decoder.onMalformedInput(CodingErrorAction.REPORT);
+
+	return new BufferedReader(new InputStreamReader(in, decoder));
+    }
+
+    /**
+     * Construct a file writer for the given file and charset.
+     * <p> If the file name is <code>"@"</code> or <code>"-"</code>, write to the standard output.
+     *
+     * @param	file	Name of the local file to write to.
+     * @param	cs	The charset to use for encoding the text (can be {@code null} to use
+     *			the platform default).
+     * @return		A buffered writer suitable for writing the file.
+     * @throws	IOException if there is a problem starting to write the file.
+     */
+    private static PrintWriter getFileWriter(final File file, final Charset cs)
+		throws IOException
+    {
+	PrintWriter out;
+
+	String filePath = file.getPath();
+	if (filePath.equals("@") || filePath.equals("-")) {
+	    if (cs != null && !cs.equals(Charset.defaultCharset())) {
+		throw new Intl.IllegalArgumentException("util#fileutil.noCSStdOutput");
+	    }
+	    Console console = System.console();
+	    if (console == null) {
+		throw new Intl.IllegalArgumentException("util#fileutil.noConsole");
+	    }
+	    out = console.writer();
+	}
+	else {
+	    CharsetEncoder encoder = (cs == null ? Charset.defaultCharset() : cs).newEncoder();
+	    encoder.onUnmappableCharacter(CodingErrorAction.REPORT);
+	    encoder.onMalformedInput(CodingErrorAction.REPORT);
+
+	    OutputStream fos = Files.newOutputStream(file.toPath());
+	    OutputStreamWriter osw = new OutputStreamWriter(fos, encoder);
+
+	    out = new PrintWriter(osw);
+	}
+
+	return out;
+    }
+
+    /**
      * Read the given local file and produce a single string from the contents.
      * <p> Default charset and tab width (8).
      *
@@ -680,7 +769,7 @@ public final class FileUtilities
      *			(arbitrary limit).
      * @throws	IOException if there is a problem reading the file.
      */
-    public static String readFileAsString(File file)
+    public static String readFileAsString(final File file)
 	throws IOException
     {
 	return readFileAsString(file, null, 8);
@@ -699,7 +788,7 @@ public final class FileUtilities
      *			(arbitrary limit).
      * @throws	IOException if there is a problem reading the file.
      */
-    public static String readFileAsString(File file, Charset cs)
+    public static String readFileAsString(final File file, final Charset cs)
 	throws IOException
     {
 	return readFileAsString(file, cs, 8);
@@ -720,24 +809,12 @@ public final class FileUtilities
      *			(arbitrary limit).
      * @throws	IOException if there is a problem reading the file.
      */
-    public static String readFileAsString(File file, Charset cs, int tabWidth)
+    public static String readFileAsString(final File file, final Charset cs, final int tabWidth)
 	throws IOException
     {
-	long size = file.length();
-	if (size > FILE_STRING_SIZE_LIMIT) {
-	    throw new Intl.IllegalArgumentException("util#fileutil.fileTooBig", size);
-	}
-	StringBuilder buf = new StringBuilder((int)size);
-
-	CharsetDecoder decoder = (cs == null ? Charset.defaultCharset() : cs).newDecoder();
-	decoder.onUnmappableCharacter(CodingErrorAction.REPORT);
-	decoder.onMalformedInput(CodingErrorAction.REPORT);
-
-	InputStream fis = Files.newInputStream(file.toPath());
-	InputStreamReader isr = new InputStreamReader(fis, decoder);
-
-	try (BufferedReader reader = new BufferedReader(isr))
+	try (BufferedReader reader = getFileReader(file, cs))
 	{
+	    StringBuilder buf = new StringBuilder((int) file.length());
 	    String line;
 	    while ((line = reader.readLine()) != null) {
 		if (tabWidth > 0) {
@@ -761,9 +838,8 @@ public final class FileUtilities
 		}
 		buf.append('\n');
 	    }
+	    return buf.toString();
 	}
-
-	return buf.toString();
     }
 
     /**
@@ -778,7 +854,7 @@ public final class FileUtilities
      *			(arbitrary limit).
      * @throws	IOException if there is a problem reading the file.
      */
-    public static List<String> readFileAsLines(File file)
+    public static List<String> readFileAsLines(final File file)
 	throws IOException
     {
 	return readFileAsLines(file, null, 8);
@@ -797,7 +873,7 @@ public final class FileUtilities
      *			(arbitrary limit).
      * @throws	IOException if there is a problem reading the file.
      */
-    public static List<String> readFileAsLines(File file, Charset cs)
+    public static List<String> readFileAsLines(final File file, final Charset cs)
 	throws IOException
     {
 	return readFileAsLines(file, cs, 8);
@@ -818,25 +894,14 @@ public final class FileUtilities
      *			(arbitrary limit).
      * @throws	IOException if there is a problem reading the file.
      */
-    public static List<String> readFileAsLines(File file, Charset cs, int tabWidth)
+    public static List<String> readFileAsLines(final File file, final Charset cs, final int tabWidth)
 	throws IOException
     {
-	long size = file.length();
-	if (size > FILE_STRING_SIZE_LIMIT) {
-	    throw new Intl.IllegalArgumentException("util#fileutil.fileTooBig", size);
-	}
 	List<String> lines = new ArrayList<>();
 
-	CharsetDecoder decoder = (cs == null ? Charset.defaultCharset() : cs).newDecoder();
-	decoder.onUnmappableCharacter(CodingErrorAction.REPORT);
-	decoder.onMalformedInput(CodingErrorAction.REPORT);
-
-	InputStream fis = Files.newInputStream(file.toPath());
-	InputStreamReader isr = new InputStreamReader(fis, decoder);
-	StringBuilder buf = new StringBuilder(2048);
-
-	try (BufferedReader reader = new BufferedReader(isr))
+	try (BufferedReader reader = getFileReader(file, cs))
 	{
+	    StringBuilder buf = new StringBuilder(2048);
 	    String line;
 	    while ((line = reader.readLine()) != null) {
 		if (tabWidth > 0) {
@@ -865,6 +930,58 @@ public final class FileUtilities
     }
 
     /**
+     * Read a text file without any other interpretations except charset.
+     *
+     * @param	file	The local file to read.
+     * @param	cs	The character set to use to decode the file contents. Can be
+     *			{@code null} in which case the system default is used.
+     * @return	A string with the raw file contents if it can be read.
+     * @throws	IllegalArgumentException if the file is bigger than our limit.
+     * @throws	IOException if there was a problem reading the file or interpreting
+     *		the character set.
+     */
+    public static String readRawText(final File file, final Charset cs)
+		throws IOException
+    {
+	try (Reader reader = getFileReader(file, cs))
+	{
+	    StringBuilder buf = new StringBuilder((int) file.length());
+	    int ret = -1;
+	    char[] chars = new char[FILE_BUFFER_SIZE];
+
+	    while ((ret = reader.read(chars)) != -1) {
+		buf.append(chars, 0, ret);
+	    }
+
+	    return buf.toString();
+	}
+    }
+
+    /**
+     * Write a text file using the given data.
+     *
+     * @param	chars	The output text to write.
+     * @param	file	File to write to.
+     * @param	cs	The character set to use to encode the file contents. Can be
+     *			{@code null} in which case the system default is used.
+     * @return	Count of bytes written.
+     * @throws	IOException if there is a problem writing to the file.
+     */
+    public static int writeRawText(final CharSequence chars, final File file, final Charset cs)
+		throws IOException
+    {
+	try (PrintWriter writer = getFileWriter(file, cs))
+	{
+	    int len = chars.length();
+
+	    writer.append(chars);
+	    writer.flush();
+
+	    return len;
+	}
+    }
+
+    /**
      * Unpack some number of files from the .jar file into a temp directory,
      * and return the temp directory object.
      *
@@ -877,7 +994,7 @@ public final class FileUtilities
      * @return 	The temp directory name (inside the TEMP or TMP location).
      * @throws	IOException if there are problems doing any of this.
      */
-    public static File unpackFiles(JarFile jarFile, String dirName, String exts, String prefix, boolean deleteOnExit)
+    public static File unpackFiles(final JarFile jarFile, final String dirName, final String exts, final String prefix, final boolean deleteOnExit)
 		throws IOException
     {
 	Path tempDirPath = Files.createTempDirectory(prefix);
@@ -929,7 +1046,7 @@ public final class FileUtilities
      * @param	args	The command line arguments, which should be the
      *			single path to test.
      */
-    public static void main(String args[]) {
+    public static void main(final String args[]) {
 	if (args.length == 1) {
 	    if (pathIsReadable(args[0])) {
 		System.out.println("true");
