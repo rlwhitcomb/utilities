@@ -251,6 +251,14 @@ define dateformat(d, f = 'mm/dd/yyyy') = {
 }
 
 /*
+ * Complement to built-in "now" function, this returns the current time,
+ * but in the GMT timezone.
+ *
+ * @return Current time at GMT (use "@h" to format as a time).
+ */
+def gmtnow = { now - eval(info.timezone.offset) }
+
+/*
  * Compute the flat map of an array.
  *
  * @param arr The input array.
