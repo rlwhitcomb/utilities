@@ -173,8 +173,8 @@ h2 {
 <hr id="Introduction" class="sectionsep">
   <h2>Introduction</h2>
 <div class="cols">
-  A calculator of arithmetic "expressions" (such as <code style="color:blue;">1 + 1</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">2</code>) that combines (nearly) unlimited precision decimal arithmetic with a rich assortment
-       of operators and functions to give the ability to calculate nearly any arithmetic expression.
+  The "Calc" program is a calculator of arithmetic "expressions" (such as <code style="color:blue;">1 + 1</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">2</code>)
+  that combines (nearly) unlimited precision decimal arithmetic with a rich assortment of operators and functions to give the ability to calculate nearly any arithmetic expression.
   <p>As input, the calculator operates on either an expression given on the command line (may need to be
        quoted for certain operator characters), or in <a href="https://en.wikipedia.org/wiki/Read-eval-print_loop">REPL</a> mode
        (<span class="underline">R</span>ead, <span class="underline">E</span>val, <span class="underline">P</span>rint
@@ -183,18 +183,19 @@ h2 {
   <p><em><strong>Why would I want this calculator when there are so many already available (handheld, apps on your phone, default apps on your computer)?</strong></em>
       <ul>
         <li>All arithmetic is done to (essentially) unlimited precision.</li>
-        <li>More operators and functions are available than in most (all?) other calculators.</li>
+        <li>More operators and functions are available than in almost all other calculators, and more are being added all the time.</li>
         <li>Custom function definitions for calculations beyond the list of predefined functions.</li>
         <li>Variables can be used for storage of values for later use.</li>
         <li>Object and array structures for storage of multiple values.</li>
         <li>Therefore, JSON objects are a native part of the language.</li>
         <li>String functions for doing text manipulation, including <a href="https://en.wikipedia.org/wiki/String_interpolation">string interpolation</a>.</li>
         <li>The ability to do calculations straight from the command line, from a text file, in a convenient REPL mode, or in a GUI window.</li>
+        <li>Data or scripts can be read from the standard input channel, and values and results can be written to the standard output channel, so Calc can be used as a filter in a longer chain of batch processing.</li>
         <li>The ability to define libraries of functions available using the "<code>-library</code>" command line option or the "<code>:include</code>" directive.</li>
         <li>Calculations can be edited (using backspace, etc.) to reduce the chance of keyboard errors.</li>
         <li>Looping and conditional statements to do pretty much any kind of calculation.</li>
         <li>Therefore, the language is <a href="https://en.wikipedia.org/wiki/Turing_completeness">&ldquo;Turing Complete&rdquo;</a>.</li>
-        <li>Current, active development and maintenance, meaning features and fixes are constantly being added.</li>
+        <li>Currently (as of mid-2022 at least), it is being actively developed and maintained, meaning features and fixes are constantly being added.</li>
         <li>This is <a href="https://opensource.com/resources/what-open-source">Open-Source Software</a> so the code can be examined, and modified (if desired) for your own use.</li>
       </ul>
 </div>
@@ -207,9 +208,10 @@ h2 {
   <code>-inputdir</code> option), that file is read, the contents parsed, and all the expressions evaluated. That single argument can also be a
   list of file names separated by commas or semicolons, which are each treated as just described.
   <p>Otherwise, if there is more than one argument on the command line, or the single argument does not name one or more existing files,
-  the command line is taken as a single expression to be parsed and evaluated.
+     the command line is taken as a single expression to be parsed and evaluated.
   <p>If Calc is invoked by piping or redirecting input from somewhere, that input stream is immediately read and evaluated, and Calc will exit.
-  <p>If there is a single <code>@</code> name given on the command line, or there are no non-option arguments given, Calc will enter REPL mode.
+  <p>Giving a single <code>@</code> argument signals Calc to read from the console (until Ctrl-D or Ctrl-Z on Windows is entered).
+  <p>Otherwise if there are no non-option arguments given, Calc will enter <a href="#Read_Eval_Print_loop_Commands">REPL</a> mode.
   <p>Also, if the input argument looks like <code>@<i>file_name</i></code> the <code>@</code> is discarded and the <i>file_name</i> is read.
   <p>Files are found by first trying to locate the file just as it is named. If not found, the latest input directory is used as a prefix
      (either the directory of the last file found, or the value of <code>-inputdir</code> if set). This same process is used anytime a file is read
@@ -218,7 +220,6 @@ h2 {
      of default file name extensions are appended to the bare name to try to find it. These extensions are: <code>".calc"</code>, <code>".expr"</code>,
      <code>".ca"</code>, and <code>".ex"</code> (in that order). Once all this searching fails to find the file, then the supposed file name(s) are
      treated as if they were a set of expressions to evaluate.
-  <p>Variables can also be defined on the command line using the syntax: <code>-variable <i>name</i>=<i>value</i></code>.
 </div>
 <a class="top-link" href="#topofpage">Top</a>
 <hr id="Command_Line_Options" class="sectionsep">
@@ -233,11 +234,15 @@ h2 {
   always defined, even if there are no arguments given (in which case the array will be empty and the count set to zero).
   Any enclosing quotes on non-numeric values will be stripped off before being assigned to these values.
   If there are any of these arguments specified by <code>CALC_OPTIONS</code> they will be added in before any arguments specified on the
-  actual command line.
-  <p>This list of arguments can be terminated by another <code>"--"</code> option in order to specify other options or expressions.
+  actual command line. Use the <code>-clear</code> option on the command line to throw away any arguments specified by <code>CALC_OPTIONS</code> (must specify the option before the
+  <code>--</code> needed to add more global variables).
+  <p>This list of arguments can be terminated by another <code>"--"</code> option in order to specify other options or expressions. The <code>--</code> option can be specified multiple times to add further arguments to the script. Examples:
+  <p class="indent"><code style="color:black;">&gt; </code><code style="color:blue;">c -- abc 1 2 -- -noc -quote -- 4 5 def --</code><br>
+     <code style="color:grey;">&gt; </code><code style="color:blue;">$*</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">[ "abc", 1, 2, 4, 5, "def" ]</code>
   <p>Options are case-insensitive, and may be prefixed with either <code>-</code>, <code>--</code>, or on Windows <code>/</code>, as in: <code>--lightbg</code>, <code>-rational</code>,
      or <code>/quiet</code> <i>(Windows only)</i>. Almost all of the options have several aliases (mostly fewer characters) as shown in the table below. Some of these settings, in
-     addition, can be set using Directives from within a script, setting the element values of the built-in <code>"settings"</code> object, or from the Settings dialog in the GUI window. See the REPL Commands and Directives sections below for additional discussion, including other aliases that can be used.
+     addition, can be set using Directives from within a script, by setting the element values of the built-in <code>"settings"</code> object, or from the Settings dialog in the GUI window. See the
+     <a href="#Read_Eval_Print_loop_Commands">REPL Commands</a> and <a href="#Directives">Directives</a> sections below for additional discussion, including other aliases that can be used.
 </div>
   <div class="center">
   <table style="margin-left:auto;margin-right:auto;width:70%;">
@@ -354,7 +359,7 @@ h2 {
   <h2>Values, Constants, and Variables</h2>
 <div class="cols">
   The basic building blocks of the expressions implemented here are the basic value types: numbers (either integer or real
-     numbers with a fractional part), strings, rational fractions, boolean values, and the <code>null</code> value.
+     numbers with a fractional part), complex numbers, strings, rational fractions, boolean values, and the <code>null</code> value.
      Numbers can be of arbitrary precision, up to a maximum of 2**32-1 (4,294,967,295) digits (although see the discussion under
      "Modes and Precision" below for further details). Strings can also be of any length up to the same number of characters (subject to
      system memory constraints of course).
@@ -362,11 +367,13 @@ h2 {
      decimal numbers (as in <code>23.47</code>), or floating point constants in scientific notation (as in <code>1.2e-20</code>). Note that a number
      of the special Unicode number-like symbols are also interpreted as single numbers (see the "Operators, Functions, and Precedence" table below), such as:
      <code>&#x2473;</code> = <code>20</code>, <code>&#x247D;</code> = <code>10</code>, or <code>&#xFF19;</code> = <code>9</code>.
+  <p>Complex numbers are specified by a <i>real</i> <code>,</code> <i>imaginary</i> pair as in <code>(</code> <i>real</i> <code>,</code> <i>imaginary</i> <code>)</code>, the <code><i>i</i></code> constant, or the result of the <code>complex</code> function. All the simple and some more complicated arithmetic functions are supported for complex numbers.
+  <p>Just as an aside, Calc does not support <code>NaN</code> or <code>Infinity</code> values. Operations that might result in such values generally cause errors instead.
   <p>The boolean (or "logical") constants are <code>true</code> and <code>false</code>.
   <p>The special null constant, which signifies no value, or a value that hasn't been assigned or defined yet, is simply <code>null</code>.
      Any regular variables, or list or object elements that are not (yet) defined will have the <code>null</code> value. Most operations will result
      in an error if one or more of the operands are null. There are special <code>isnull</code> and <code>notnull</code> functions that can be used to test for this to avoid
-     errors if desired, as can simply using the equality / inequality operators with the null constant. Null values inserted into interpolated strings
+     errors if desired, as can simply using the equality / inequality operators with the <code>null</code> constant. Null values inserted into interpolated strings
      (see below) will simply insert nothing.
   <p>Values can be assigned names via the <code>const</code> declaration, and then the name used to refer to the value. Such values
      are fixed to their value at the time of the <code>const</code> declaration being evaluated. The syntax is:
@@ -404,17 +411,21 @@ h2 {
      interpolated into the final string value. These are
      formed using the back-tick character: <code>`</code> ... <code>`</code>. Interpolation of values is done using either
      <code>$<i>variable</i></code> or <code>${<i>expression</i>}</code>. To embed a back-tick character in the string, use
-     <code>\`</code>. Similarly, to embed a backslash, use <code>\\</code>. To embed a dollar sign in the string, use <code>$$</code>
-     (but see the note about loop variables below).
-   <p>For any kind of string, the normal C/Java escapes such as <code>\t</code> or <code>\n</code> are also available.
+     <code>\`</code>. Similarly, to embed a backslash, use <code>\\</code>. To embed a dollar sign in the string, use <code>$$</code>.
+     The simple <code>$<i>variable</i></code> form can be used as long as the <i>variable</i> part can be unambiguously interpreted as a variable name. If the value
+     is a member or array index, or any kind of expression, the <code>${...}</code> form must be used. Also note that the expression inside the <code>{ }</code>
+     pair is interpreted exactly as typed (in other words, escape sequences don't have to be doubly escaped to work correctly). For example:
+     <code>`pieces = ${split(trim(c9), '\\s+') @Q}`</code>.
+  <p>For any kind of string, the normal C/Java escapes such as <code>\t</code> or <code>\n</code> are also available.
      To embed any Unicode codepoint, use <code>\u<i>NNNN</i></code> where <code><i>N</i></code> is a hexadecimal digit, for values up
      to 0xFFFF, or <code>\u{<i>NNNNNN</i>}</code> for codepoints beyond the Unicode BMP (Basic Multilingual Plane) (that is, above
      65536 or 0xFFFF). Arbitrary byte values can be embedded in any strings using either octal or binary escapes, such as <code>\o345</code>
-     or <code>\B00110010</code>, as in:
+     or <code>\B00110010</code>, or "caret" notation, such as <code>\cZ</code>, as in:
    <p class="indent">
 &gt;<code style="color:blue;">'\B01100001\B01100010\B01100011'</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">"abc"</code><br>
 &gt;<code style="color:blue;">'\o144\o145\o146'</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">"def"</code><br>
-&gt;<code style="color:blue;">'\u0048\u0065\u006C\u006C\u006F'</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">"Hello"</code>
+&gt;<code style="color:blue;">'\u0048\u0065\u006C\u006C\u006F'</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">"Hello"</code><br>
+&gt;<code style="color:blue;">'\cA\cB' @x</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">'\u0001\u0002'</code>
    <p>Several types of "smart" quotes can also be used to delimit strings, such as <code>&#x00AB;This is a test&#x00BB;</code>,
      <code>&ldquo;Another test&rdquo;</code>, or <code>&lsaquo;Testing&rsaquo;</code>. The ending quote can be included in the string by escaping it.
      When interpolating values into an interpolated string, the string representation of the value is used. If the value to be interpolated is
@@ -437,8 +448,11 @@ which gives:
      with the values pieced into it. String values are stored in variables without any surrounding quotes, and the escaped
      characters are interpreted and stored as their actual codepoints. This means that string values inserted into interpolated
      strings will be inserted as they are stored (without quotes, etc.).
-  <p>Calc reserves the names <code>pi</code>, <code>e</code>, and <code>i</code> for these three fundamental constants. All the various Unicode characters
-     for <code>&#x1D6D1;</code> are supported, as well as Unicode alternatives for <code>e</code> and <code>i</code> (see the "Operators, Functions, and Precedence"
+  <p>But, string results can be displayed without quotes using the <code>@q</code> format,
+     or by using the <code>:quotestrings off</code> directive, or the <code>-noquotestrings</code> command line option. Also the <code>@Q</code> format can be
+     used to force quoting of string results, regardless of the state of the <code>:quotestrings</code> mode.
+  <p>Calc reserves the names <code>pi</code>, <code>e</code>, <code>phi</code>, and <code>i</code> for these four fundamental constants. All the various Unicode characters
+     for <code>&#x1D6D1;</code> are supported, as well as Unicode alternatives for <code>e</code> and <code>i</code> (see the <a href="#Available_Operators_and_Predefined_Functions">"Operators, Functions, and Precedence"</a>
      table below).
 <p class="indent"> <code>&#x1D6D1;</code> = <code>3.14159265358979323846264338327950288...</code> <br> <code>e</code> = <code>2.71828182845904523536028747135266249...</code> <br> <code>i = ( 0, 1 )</code> </p>
   <p>The Unicode fraction characters also represent their respective values, as in:
@@ -448,7 +462,7 @@ which gives:
     Unicode fraction characters optionally preceded by an integer. Some examples:
   <p class="indent"> <code>f'2&#x00BC;'</code> = <code>2.25</code> or <code>f'1 2/3'</code> = <code>1.66666...</code>
   <p>Complex numbers are constructed as such: <code>(</code>&nbsp;<i>real</i>&nbsp;<code>,</code>&nbsp;<i>imaginary</i>&nbsp;<code>)</code>. There is also the <code>complex</code> function that accepts one or two arguments: either the two value parts or a string convertible to these two parts, or an object with <code>r</code> and <code>i</code> keys, or <code>radius</code> and <code>theta</code> keys, or an array with two values.
-  <p>The string syntax for <code>complex</code> is either <code>"( <i>expr</i> )"</code>, <code>"( <i>n</i>, <i>n</i> )"</code>, or <code>"( <i>n</i> &pm; <i>n</i> i )"</code>, or <code>"{ r: <i>radius</i>, &#x03B8;: <i>theta</i> }</code>.
+  <p>The string syntax for <code>complex</code> is either <code>"( <i>expr</i> )"</code>, <code>"( <i>n</i>, <i>n</i> )"</code>, or <code>"( <i>n</i> &pm; <i>n</i> i )"</code>, or <code>"{ r: <i>radius</i>, &#x03B8;: <i>theta</i> }"</code>.
   <p>There is also a constant type used to express values as Roman Numerals. The syntax is <code>R'<i>xxxx</i>'</code>, where the
      digits are the typical Roman values of <code>I</code> (one), <code>V</code> (five), <code>X</code> (ten), and so on (case-insensitive), but also including the Unicode
      values in the range of <code>'\u2160'</code> (<code>&#x2160;</code> or one) to <code>'\u2182'</code> (<code>&#x2182;</code> or ten thousand).
@@ -458,7 +472,7 @@ which gives:
 <p class="indent"> <code>h'<i>hh</i>:<i>mm</i>:<i>ss</i>.<i>nnnnnnnnn</i></code>&nbsp;[<code>a</code>|<code>p</code>|<code>am</code>|<code>pm</code>]<code>'</code> ("hour" or time-of-day value)</p>
 or
 <p class="indent"> <code>t'<i>nn.nn</i>&nbsp;w</code>|<code>d</code>|<code>h</code>|<code>m</code>|<code>s'</code> ("amount of time" or duration value)</p>
-     These values are computed and stored as decimal seconds, with midnight (<code>12:00:00.0 am</code>) as zero for time-of-day, and they can be used
+     These values are computed and stored as integer nanoseconds (so that 1,000,000,000 equals one second), with midnight (<code>12:00:00.0 am</code>) as zero for time-of-day. They can be used
      in any other kind of operation, or formatted again as an <i>hour:minute:second</i> time or a duration (in weeks, down to seconds) using the <code>@h</code> or <code>@t</code> formats. See the Formats section below for more details.
      For example:
 <p class="indent"> <code><span style="color:blue;">t'27h' + t'13m' + t'27.9s' @h</span><span style="color:grey;"> &#x21E8; </span><span style="color:green;">h'27:13:27.9'</span></code> </p>
@@ -688,7 +702,7 @@ or<br>
     <tr><td>34</td><td><code>{</code> (&nbsp;<i>key:value pairs</i>&nbsp;) <code>}</code></td><td>define an object</td><td>left to right</td></tr>
     <tr><td>33</td><td><code>[</code> (&nbsp;<i>expr list</i>&nbsp;) <code>]</code><br><i>var</i> <code>[</code> <i>expr</i> <code>]</code> or <i>var</i>&nbsp;<code>&#x2080;</code> .. <code>&#x2089;</code></td><td>define an array,<br>or access elements of an array, string, or object</td><td>left to right</td></tr>
     <tr><td>32</td><td><code>(</code> <i>expr</i> <code>,</code> <i>expr</i> <code>)</code></td><td>define a complex number</td><td>left to right</td></tr>
-    <tr><td>31</td><td><code>.</code></td><td>access an object member</td><td>left to right</td></tr>
+    <tr><td>31</td><td><i>object</i> <code>.</code> <i>member</i></td><td>access an object member</td><td>left to right</td></tr>
     <tr><td>30</td><td><code>( </code><i>expr</i><code> )</code></td><td>group an expression</td><td>N/A</td></tr>
     <tr><td rowspan="75">29</td>
             <td><code>ABS</code>&nbsp;<i>expr</i></td><td>absolute value</td><td rowspan="75">left to right</td></tr>
@@ -769,7 +783,7 @@ or<br>
     <tr><td>28</td><td><i>expr</i>&nbsp;<code>++</code> or <code>&#x2795;&#x2795;</code><br><i>expr</i>&nbsp;<code>--</code> or <code>&#x2212;&#x2212;</code> or <code>&#x2796;&#x2796;</code></td><td>post increment/decrement</td><td>N/A</td></tr>
     <tr><td>27</td><td><code>++</code> or <code>&#x2795;&#x2795;</code>&nbsp;<i>expr</i><br><code>--</code> or <code>&#x2212;&#x2212;</code> or <code>&#x2796;&#x2796;</code>&nbsp;<i>expr</i></td><td>pre increment/decrement</td><td>right to left</td></tr>
     <tr><td>26</td><td><code>+</code> or <code>&#x2795;</code>&nbsp;<i>expr</i><br><code>-</code> or <code>&#x2212;</code> or <code>&#x2796;</code>&nbsp;<i>expr</i></td><td>posate/negate a value</td><td>right to left</td></tr>
-    <tr><td>25</td><td><code>!!</code>&nbsp;<i>expr</i></td><td>convert any value to a <i>true</i> boolean<br><code>true</code> if set, non-empty, or non-zero,<br> or <code>false</code> if null, empty, or 0</td><td>right to left</td></tr>
+    <tr><td>25</td><td><code>!!</code>&nbsp;<i>expr</i></td><td>convert any value to a <i>true</i> boolean<br><code>true</code> if set, non-empty, or non-zero,<br> or <code>false</code> if null, empty, or zero</td><td>right to left</td></tr>
     <tr><td>24</td><td><code>!</code> or <code>&#x00AC;</code>&nbsp;<i>expr</i></td><td>boolean NOT</td><td>right to left</td></tr>
     <tr><td>23</td><td><code>~~</code>&nbsp;<i>expr</i></td><td>convert to number</td><td>right to left</td></tr>
     <tr><td>22</td><td><code>~</code>&nbsp;<i>expr</i></td><td>bitwise NOT</td><td>right to left</td></tr>
@@ -943,7 +957,7 @@ or<br>
      the existing array or string's length is used (that is, the entire existing value is overwritten).
   <p>The <code>chars</code> and <code>codes</code> function perform identically, iterating through the string argument by codepoint values, but the results
      are different. For <code>CHARS</code> the individual array elements are themselves strings, each containing a single "character" value from the original.
-     If the character is outside the Unicode BMP, the constituent string with have a length of 2, consisting of the two 16-bit codes (a surrogate pair). For
+     If the character is outside the Unicode BMP, the constituent string will have a length of 2, consisting of the two 16-bit codes (a surrogate pair). For
      <code>CODES</code> the same element in the returned array will have the single integer value of that codepoint. So, for the same input value, the length
      of the returned arrays will be the same, regardless of the individual character values of the input. Does that make sense? If not, please read up on
      how Java deals with Unicode characters starting here: <a href="https://docs.oracle.com/javase/tutorial/i18n/text/unicode.html">Unicode and Java</a>.
@@ -990,6 +1004,8 @@ or<br>
   <p>The first expression for <code>read</code> is a single file path, which can be <code>"@"</code> or <code>"-"</code> to read the standard input.
      The second (optional) expression is the name of the charset to use (system default if not given, or empty/null). The entire contents of the file
      is returned, unchanged, including end-of-line sequences. The value returned can be assigned to a variable or used in some other way.
+  <p>Also, unlike scripts read from a file, the <code>read</code> function will only use the charset specified or the platform default if none is given: there is no fallback attempt to
+     read using "UTF-8" if the original charset returns a decoding error.
   <p>The complementary <code>write</code> function will write to a file, or to the standard output stream (with <code>"@"</code>
      or <code>"-"</code>). For a regular file the charset can also be specified, although standard output will always use the system default. If the first expression result for <code>write</code> is an array, the output will be a series of lines using the system
      default line separator, with each array value written to a separate line. For an object the output will be in JSON format, and for all other values
@@ -1010,6 +1026,8 @@ or<br>
   <p class="indent"><code style="color:blue;">:decimal 60</code> is the same as
     <code style="color:blue;">settings.precision = 60</code>.
   <p>See the <a href="#Directives">Directives</a> section below for the complete list of equivalents.
+  <p>The <code>env</code> object contains entries for all the current variables defined in the process environment. If any of the variable names do not conform to the syntax
+     for an <i>id</i> they name will be enclosed in double quotes (as in <code>"=C:"</code> on Windows, for instance).
   <p>The values of <code>phi</code> and <code>PHI</code> (or <code>&#x03C6;</code> and <code>&#x03A6;</code>) (the <a href="https://en.wikipedia.org/wiki/Golden_ratio">&ldquo;Golden Ratio&rdquo;</a> and its inverse) are constructed (due to precision and rounding) such that <code>1 / phi == PHI</code> and also <code>1 / PHI == phi</code>.
      But even though mathematically <code>phi - 1 == PHI</code> and <code>PHI + 1 == phi</code> the values computed here will not match exactly
      ("PHI" will have one more fractional digit of precision than "phi"):
@@ -1123,8 +1141,9 @@ whether it has previously been used/defined.
      rules as a regular variable. Note that inside an interpolated string (inside the loop
      block) the value of a loop variable can be accessed via <code>$<i>var</i></code> or alternatively (and more verbosely) as
      <code>${<i>var</i>}</code>.
-     Note that the loop can go in reverse if the step value is negative, and that the start and end values can also be negative
-     in this case.
+     Note that the loop can go in reverse if the step value is negative. Note that either of the start or end values can be negative, but it must be that
+     <i>start</i> <code>&lt;=</code> <i>end</i> if the step value is positive, or <i>start</i> <code>&gt;=</code> <i>end</i> if the step value is negative,
+     or else the statement block will never be executed. Note that it is an error if the step value is zero.
   <p>The <code>WHILE</code> statement will execute the block of statements as long as the <i>expr</i> evaluates to
      <code>true</code> (or the result can be converted to a boolean <code>true</code> value).
      This means the block might not be executed at all if the expression evaluates initially to <code>false</code>.
@@ -1133,9 +1152,22 @@ whether it has previously been used/defined.
   <p>The <code>IF</code> statement evaluates the expression and executes the code block only if the expression evaluates to a
      boolean <code>true</code> value. If the optional <code>ELSE</code> block is given and the expression evaluates to
      <code>false</code> that block will be executed instead.
-  <p>The <code>CASE</code> statement evaluates the expression (only once) and executes whichever code block has a matching value, or the <code>default</code> block (if given) if nothing else matches. Note: the expression match is made as if by <code>'=='</code> (that is, not a strict comparison), but the individual block values can be any kind of expression or object (including lists, objects, strings, functions, etc.). If a <code>...</code> selector is used, the set of values (with optional step value) will be tested in succession to see if any value matches the case expression. When the <code>matches</code> selector is used, the expression is a regular expression pattern (just like the <code>MATCHES</code> standalone function) against which the case expression is tested. Using a comparison operator with an expression will test the case value against that expression, according to the operator. If the comparison succeeds, the corresponding block will be executed.
-  <p>The <code>LEAVE</code> statement will cause early termination of a <code>LOOP</code> or <code>WHILE</code> statement, or a function, with the final value of the statement being the (optional) expression on the <code>LEAVE</code> statement itself, or <code>null</code> if none is given. If a <code>LEAVE</code> statement is executed inside any other block (such as <code>IF</code> or <code>CASE</code>) that containing block is terminated, but the closest containing loop or function is also terminated. If the <code>LEAVE</code> is executed outside any loop or function, the entire script is exited with the optional expression as the final value (and therefore as the process exit code).
-  <p>In the normal case, the value of any of these compound statements is the value of the last expression evaluated, inside whatever block is selected, and from the last iteration of that block inside a loop.  But the grammar (for now) does not allow that final value to be used except as the return value from a function.  For instance, consider the following code:
+  <p>The <code>CASE</code> statement evaluates the expression (only once), then proceeds to obtain a match against the values or expressions in the order they are declared.
+     The first time a match is made, the corresponding statement block is executed and the value of the whole <code>case</code> statement is the last value of that statement block.
+     Note that the only selector expressions that are evaluated are those up until the point that a match is made, hence none after that point are evaluated. If the <code>default</code> block is executed, all the other expressions will have been evaluated prior to that point.
+     If no match is made and there is a <code>default</code> block specified, that block is executed. Note: the expression match is made as if by <code>'=='</code> (that is, not a strict comparison),
+     but the individual block values can be any kind of expression or object (including lists, objects, strings, functions, etc.). If a <code>...</code> selector is used, the set of values
+     (with optional step value) will be tested in succession to see if any value matches the case expression. When the <code>matches</code> selector is used, the expression is a regular
+     expression pattern (just like the <code>MATCHES</code> standalone function) against which the case expression is tested. Using a comparison operator with an expression will test the
+     case value against that expression, according to the operator. If the comparison succeeds, the corresponding block will be executed. Note that the idea of <i>"fall-through"</i> between
+     statement blocks makes no sense here: multiple selectors can select for a single code block, but that block stands alone and will never "bleed" into another block. If such fall-through
+     behavior is desired, it will be necessary to either duplicate code, make a separate parameterized function, or otherwise rearrange the logic.
+  <p>The <code>LEAVE</code> statement will cause early termination of a <code>LOOP</code> or <code>WHILE</code> statement, or a function, with the final value of the statement being the
+     (optional) expression on the <code>LEAVE</code> statement itself, or <code>null</code> if none is given. If a <code>LEAVE</code> statement is executed inside any other block (such as
+     <code>IF</code> or <code>CASE</code>) that containing block is terminated, but the closest containing loop or function is also terminated. If the <code>LEAVE</code> is executed
+     outside any loop or function, the entire script is exited with the optional expression as the final value (and therefore as the process exit code).
+  <p>In the normal case, the value of any of these compound statements is the value of the last expression evaluated, inside whatever block is selected, and from the last iteration of that
+     block inside a loop.  But the grammar (for now) does not allow that final value to be used except as the return value from a function.  For instance, consider the following code:
   <p class="indent">
       <code>define strings = { case upper(value) of "ONE": { 1 }, "TWO": { 2 }, "THREE" : { 3.14 }, default: { "many" } }</code><br>
       <code>value='one'; strings</code>
@@ -1195,9 +1227,9 @@ whether it has previously been used/defined.
     <tr><td><code>:binary</code></td><td>Display units in terms of multiples of 1024</td><td><code>:bin</code><br>or <code>settings.units='binary'</code></td></tr>
     <tr><td><code>:si</code></td><td>Display units in terms of multiples of 1000</td><td><code>:ten</code><br>or <code>settings.units='DECIMAL'</code></td></tr>
     <tr><td><code>:mixed</code></td><td>Unit multiplier based on powers of 2 (same as <code>:binary</code>), but with SI suffix <i>(default)</i></td><td><code>:mix</code><br>or <code>settings.units="Mixed"</code></tr>
-    <tr><td><code>:clear</code> [ <i>id</i> ( <code>,</code> <i>id</i> ) * ]</td><td>Clear all or only the specified variables (set values to <code>null</code>)</td><td><code>:clr</code></td></tr>
-    <tr><td><code>:variables</code> [ <i>id</i> ( <code>,</code> <i>id</i> ) * ]</td><td>Display the values of all or only the specified variables<br>(for a function the definition will be displayed, not the current value)</td><td><code>:variable</code>, <code>:vars</code>, <code>:var</code></td></tr>
-    <tr><td><code>:predefined</code> [ <i>id</i> ( <code>,</code> <i>id</i> ) * ]</td><td>Display the current values of all or some of the predefined variables</td><td><code>:predefs</code>, <code>:predef</code></td></tr>
+    <tr><td><code>:clear</code> [ <i>wild_id</i> ( <code>,</code> <i>wild_id</i> ) * ]</td><td>Clear all or only the specified variables (set values to <code>null</code>)</td><td><code>:clr</code></td></tr>
+    <tr><td><code>:variables</code> [ <i>wild_id</i> ( <code>,</code> <i>wild_id</i> ) * ]</td><td>Display the values of all or only the specified variables<br>(for a function the definition will be displayed, not the current value)</td><td><code>:variable</code>, <code>:vars</code>, <code>:var</code></td></tr>
+    <tr><td><code>:predefined</code> [ <i>wild_id</i> ( <code>,</code> <i>wild_id</i> ) * ]</td><td>Display the current values of all or some of the predefined variables</td><td><code>:predefs</code>, <code>:predef</code></td></tr>
     <tr><td><code>:echo</code> <i>expr</i></td><td>Echo the value of the expression to the output</td><td></td></tr>
     <tr><td><code>:include</code> <i>name_expr</i> ( <code>,</code> <i>charset_expr</i> )</td><td>Include the contents of the file(s) named by <i>name_expr</i>,<br>using the optional <i>charset_expr</i> as the charset</td><td><code>:inc</code>, <code>:load</code>, <code>:open</code>, <code>:lib</code>, <code>:library</code><br><code>:libs</code>, <code>:libraries</code></td></tr>
     <tr><td><code>:save</code> <i>name_expr</i> ( <code>,</code> <i>charset_expr</i> )</td><td>Save all variable values and function definitions in the file, using the optional charset</td><td>&nbsp;</td></tr>
@@ -1237,10 +1269,20 @@ whether it has previously been used/defined.
   <p>If a string constant of any kind is given as the argument to <code>:echo</code> the surrounding quotes will be removed, and any
      embedded quotes will be unescaped before the message is displayed. Obviously, the same is true for the contents of variables
      (since the values are stored this way).
-  <p>The <code>id</code> values for <code>:clear</code>, <code>:variables</code>, and <code>:predefined</code> can be wild-card values, such as
-     <code>t*</code> or <code>?a?</code>. Only values matching these patterns will be displayed or cleared.
+  <p>The <code>wild_id</code> values for <code>:clear</code>, <code>:variables</code>, and <code>:predefined</code> can be wild-card values, such as
+     <code>t*</code> or <code>?a?</code>. A <code>?</code> matches any one character, and <code>*</code> matches any string (including empty) of characters up until the trailing sequence. Only values matching these patterns will be displayed or cleared.
   <p>The only effect of debug mode is to display the parse tree (in LISP format) before the expression(s) is/are evaluated.
-  <p>The <i>version</i> values for the <code>:require</code> directive can be strings (in the <a href="https://semver.org">Semantic Version</a> format, including a possible pre-release string), or one, two, or three integers separated by periods. The current version numbers are available by running the <code>c -version</code> or <code>version</code> commands.
+  <p>The <i>version</i> values for the <code>:require</code> directive can be strings (in the <a href="https://semver.org">Semantic Version</a> format, including a possible pre-release string),
+     or one, two, or three integers separated by periods. The current version numbers are available by running <code>c -version</code> (from the command line) or using the
+     <code>:version</code> command in REPL mode, or from the <code>info.version</code> predefined variable. There is also a standard library function named <code>"versionstring"</code> that
+     formats a "long" version string out of the bare values. Examples of valid version values (note: the quotes are significant):
+     <ul><li><code style="color:blue;">15</code></li>
+         <li><code style="color:blue;">0.9</code></li>
+         <li><code style="color:blue;">1.2</code></li>
+         <li><code style="color:blue;">2.12.15</code></li>
+         <li><code style="color:blue;">"3.4.5-debug"</code></li>
+         <li><code style="color:blue;">"1.9.22-debug+5e7f77e"</code></li>
+    </ul>
   <p>Timing mode displays the total parsing and execution time (to nanosecond precision on some systems) after the results are displayed.
 </div>
 <a class="top-link" href="#topofpage">Top</a>
@@ -1256,6 +1298,64 @@ whether it has previously been used/defined.
   <p>The "library.calc" file is version-stamped at the beginning, using the <code>:require</code> directive, so that this library must match the current version of Calc in order to be loaded. The <code>:save</code> directive also places a <code>:require</code> directive with the current version strings into the saved file. This mechanism ensures that an older version of Calc will
      not be able to load a new library (since it might depend on features not present in the older version). Also, a saved file will ignore the <code>:separators</code> mode while writing, since numbers with separators are not (yet) supported on input.
   <p>Any file of compatible expressions and directives can be used as a "library". In order to use such a library, list its name with a <code>-library</code> option on the command line, or use the <code>:include</code> directive inside any other script.
+  <p>The standard library (as of version 2.12.15) contains the following functions (partial listing):
+</div>
+<div class="center">
+  <table style="margin-left:auto;margin-right:auto;width:65%;">
+    <caption class="tablecap">Standard Library Contents</caption>
+    <thead>
+    <tr>
+      <th style="width:20%;">Name</th>
+      <th style="width:20%;">Parameters</th>
+      <th style="width:60%;">Description</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr><td><code>EOL</code></td><td/><td>Alias for <code>info.os.linesep</code> (platform-specific line separator)</td></tr>
+    <tr><td><code>ON_WINDOWS</code></td><td/><td>Alias for <code>info.os.id == 'windows'</code></td></tr>
+    <tr><td><code>excel_date</code></td><td><code>date</code></td><td>Convert one of our date values to an Excel&trade; date</td></tr>
+    <tr><td><code>excel_date_1904</code></td><td><code>date</code></td><td>Convert one of our date values to an Excel&trade; "1904" date<br>(where 1/1/1904 is day 0)</td></tr>
+    <tr><td><code>to_excel_col</code></td><td><code>idx</code></td><td>Translate a numeric column index (1-based) to an Excel column name ("A" to "XFD")</td></tr>
+    <tr><td><code>from_excel_col</code></td><td><code>col</code></td><td>Translate an Excel column name ("A" to "XFD") to a numeric column index (1-based)</td></tr>
+    <tr><td><code>rad_to_deg</code></td><td><code>rad</code></td><td>Convert from numeric degrees to radians</td></tr>
+    <tr><td><code>deg_to_rad</code></td><td><code>deg</code></td><td>Convert from radians to numeric degrees</td></tr>
+    <tr><td><code>FtoC</code></td><td><code>f</code></td><td>Convert temperature in Fahrenheit to Celsius</td></tr>
+    <tr><td><code>CtoF</code></td><td><code>c</code></td><td>Convert temperature in Celsius to Fahrenheit</td></tr>
+    <tr><td><code>dow_name</code></td><td><code>date</code></td><td>Get the day of week name for a given date</td></tr>
+    <tr><td><code>moy_name</code></td><td><code>date</code></td><td>Get the month name for a given date</td></tr>
+    <tr><td><code>long_date</code></td><td><code>date</code> (default <i>today</i>)</td><td>Get the long form of a date</td></tr>
+    <tr><td><code>surr_pair_to_cp</code></td><td><code>h</code>, <code>l</code></td><td>Convert a surrogate pair to Unicode codepoint</td></tr>
+    <tr><td><code>cp_to_low_surr</code></td><td><code>cp</code></td><td>Extract the high surrogate from a codepoint</td></tr>
+    <tr><td><code>cp_to_high_surr</code></td><td><code>cp</code></td><td>Extract the low surrogate from a codepoint</td></tr>
+    <tr><td><code>TICKS_PER_SECOND</code></td><td/><td>Number of time value ticks in a second</td></tr>
+    <tr><td><code>TICKS_PER_MINUTE</code></td><td/><td>Number of time value ticks in a minute</td></tr>
+    <tr><td><code>TICKS_PER_HOUR</code></td><td/><td>Number of time value ticks in an hour</td></tr>
+    <tr><td><code>hot</code></td><td><code>time</code></td><td>Number of hours in a time value</td></tr>
+    <tr><td><code>mot</code></td><td><code>time</code></td><td>Number of minutes in a time value</td></tr>
+    <tr><td><code>sot</code></td><td><code>time</code></td><td>Number of seconds in a time value</td></tr>
+    <tr><td><code>timestamp</code></td><td><code>date</code> (default <i>today</i>),<br><code>time</code> (default <i>now</i>)</td><td>Timestamp from given date, time in Linux "date" format</td></tr>
+    <tr><td><code>dateformat</code></td><td><code>d</code>,<br><code>f</code> (default <code>"mm/dd/yyyy"</code>)</td><td>Format the date according to the custom format string</td></tr>
+    <tr><td><code>gmtnow</code></td><td/><td>Current time in the GMT time zone</td></tr>
+    <tr><td><code>flat_map</code></td><td><code>arr</code></td><td>Compute the flat map of an array</td></tr>
+    <tr><td><code>is_perfect</code></td><td><code>n</code></td><td>Determine if the given number is a "perfect" number</td></tr>
+    <tr><td><code>versionstring</code></td><td/><td>Complete current version information</td></tr>
+    <tr><td><code>quad</code></td><td><code>a</code>, <code>b</code>, <code>c</code></td><td>Solve the quadratic formula for the equation <code>a<i>x</i><sup>2</sup> + b<i>x</i> + c = 0</code></td></tr>
+    <tr><td><code>quad_exp</code></td><td><code>a</code>, <code>b</code>, <code>c</code>, <code>x</code></td><td>Find the <i>y</i> value of the quadratic equation <code>a<i>x</i><sup>2</sup> + b<i>x</i> + c</code></td></tr>
+    <tr><td><code>zeta_2n</code></td><td><code>_2n</code></td><td>The Euler-Riemann "zeta" function for positive even integers</td></tr>
+    <tr><td><code>Tn</code></td><td><code>k</code></td><td>Tangent number for <code>2k + 1</code></td></tr>
+    <tr><td><code>PMT</code></td><td><code>P</code>, <code>R</code>, <code>N</code></td><td>Calculate the monthly payment for<br>a present value of <code>P</code>, yearly percentage <code>R</code>, and number of years <code>N</code></td></tr>
+    <tr><td><code>monthly</code></td><td><code>P</code>, <code>R</code>, <code>N</code></td><td>Display a nice message with the monthly payment on a mortgage<br>(see <code>PMT(P,R,N)</code></td></tr>
+    <tr><td><code>help_mort</code></td><td/><td>Usage message for the mortgage functions</td></tr>
+    <tr><td><code>stack</code></td><td/><td>Definition of a <i>stack</i> data structure<br>use <code>s = eval(stack)</code></td></tr>
+    <tr><td><code>push</code></td><td><code>s</code>, <code>value</code></td><td>Push the value onto an existing stack</td></tr>
+    <tr><td><code>pop</code></td><td><code>s</code></td><td>Pop the last value off the given stack</td></tr>
+    <tr><td><code>peek</code></td><td><code>s</code></td><td>Examine the top stack value without popping it</td></tr>
+    <tr><td><code>isempty</code></td><td><code>s</code></td><td>Is the stack empty?</td></tr>
+    <tr><td><code>mean_stddev</code></td><td><code>values</code></td><td>Compute the mean and standard deviation of a list of values<br>returns <code>{ mean: <i>xxx</i>, stddev: <i>yyy</i> }</code></td></tr>
+    <tr><td><code>uuid</code></td><td/><td>Get a unique identifier (string)</td></tr>
+    <tr><td>More TBD</td><td/><td>Consult the source code of <code>library.calc</code> to see the complete list</td></tr>
+    </tbody>
+  </table>
 </div>
 <a class="top-link" href="#topofpage">Top</a>
 <hr id="GUI_Operations" class="sectionsep">
@@ -1284,10 +1384,6 @@ whether it has previously been used/defined.
   <h2>TODO Items for This Document</h2>
 <div class="cols">
   <ul>
-    <li>Discussion on NaN, and Infinity</li>
-    <li>Expand on GUI operation, including examples</li>
-    <li>Document GUI Settings dialog</li>
-    <li>List of example programs and the standard library, include examples in this document</li>
     <li>Interactions with Tester (use "mkcanon" and "-nocolors")</li>
     <li>Explain "silent" operation WRT "eval", "loop", interpolated strings, functions</li>
     <li>Notes on colors and the changes with dark and light backgrounds</li>
