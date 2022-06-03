@@ -737,12 +737,11 @@ public final class NumericUtil
 	/**
 	 * Create the appropriate "zillion" name for the given power of ten base.
 	 * <p> This is taken from a proposal by Conway &amp; Guy in "The Book of Numbers"
-	 * chapter pp 14-15 and referenced from here:
+	 * chapter one, pp 14-15 and referenced from here:
 	 * <a href="https://en.wikipedia.org/wiki/Names_of_large_numbers">https://en.wikipedia.org/wiki/Names_of_large_numbers</a>
-	 * <p> Given a power of ten which is <code>3 * N + 3</code> we need a name for the
-	 * base N, which we derive here.
+	 * <p> Given a power of ten which is <code>3 * N + 3</code> we need a name for the base N, which we derive here.
 	 * <p> This algorithm extends to infinity using the Wechsler proposal given in the book, except as a practical note
-	 * we are only allowing a base up to 2**32-1, so ...
+	 * we are only allowing a base up to less than 1,000,000,000.
 	 *
 	 * @param base       The power of ten base to derive a name for.
 	 * @param useNillion For recursive use beyond N = 1000, use "nillion" for zero values.
@@ -757,8 +756,7 @@ public final class NumericUtil
 	    }
 	    else if (base >= 1_000) {
 		if (base >= 1_000_000_000) {
-		    // Note: this can go on indefinitely toward infinity, but this will suffice for
-		    // all our needs, since we top out around a power of 12,000 anyway.
+		    // Note: this can go on indefinitely toward infinity, but this will suffice for all our needs
 		    throw new Intl.IllegalArgumentException("util#numeric.outOfRangeWords");
 		}
 		if (base >= 1_000_000) {
