@@ -44,6 +44,8 @@
  *	    #348: Make all methods package private.
  *	27-May-2022 (rlwhitcomb)
  *	    Change "getDeclaration" into "getFunctionBody".
+ *	04-Jun-2022 (rlwhitcomb)
+ *	    #361: Add "getFunctionName".
  */
 package info.rlwhitcomb.calc;
 
@@ -106,6 +108,15 @@ class FunctionScope extends ParameterizedScope
 		paramValue = visitor.evaluateParameter(valueExpr);
 	    }
 	    ParameterValue.define(this, paramName, paramValue);
+	}
+
+	/**
+	 * Access the function's name.
+	 *
+	 * @return The simple function name (no parameters).
+	 */
+	String getFunctionName() {
+	    return declaration.getFunctionName();
 	}
 
 	/**

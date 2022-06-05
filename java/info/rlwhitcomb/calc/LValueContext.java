@@ -100,6 +100,8 @@
  *	27-May-2022 (rlwhitcomb)
  *	    Move "setupFunctionCall" to FunctionDeclaration.
  *	    Make parameters final.
+ *	04-Jun-2022 (rlwhitcomb)
+ *	    #361: Don't access the LHS of an array object twice during dereference.
  */
 package info.rlwhitcomb.calc;
 
@@ -420,10 +422,22 @@ class LValueContext
 	 * @param memberName	The (quoted) member name to use at this level.
 	 * @return		The new context for the <code>map."member"</code>.
 	 */
-	@SuppressWarnings("unchecked")
 	private LValueContext makeMapLValue(final CalcObjectVisitor visitor, final CalcParser.VarContext ctx, final String memberName) {
+	    return makeMapLValue(visitor, ctx, getContextObject(visitor), memberName);
+	}
+
+	/**
+	 * An intermediate step used for maps with members as a string (as in <code>map."field"</code>).
+	 *
+	 * @param visitor	The visitor object (for function evaluation).
+	 * @param ctx		The parser context we are working in.
+	 * @param contextObj	The context object.
+	 * @param memberName	The (quoted) member name to use at this level.
+	 * @return		The new context for the <code>map."member"</code>.
+	 */
+	private LValueContext makeMapLValue(final CalcObjectVisitor visitor, final CalcParser.VarContext ctx, final Object contextObj, final String memberName) {
 	    ObjectScope map = null;
-	    Object objValue = getContextObject(visitor);
+	    Object objValue = contextObj;
 
 	    if (objValue == null) {
 		map = new ObjectScope();
@@ -474,17 +488,15 @@ class LValueContext
 		if (arrValue != null && arrValue instanceof ObjectScope) {
 		    // The "index" expression should be a string (meaning a member name)
 		    // but it could be a numeric index into the key set (return from "index")
-		    LValueContext objLValue = arrLValue.makeMapLValue(visitor, arrVarCtx, null);
-
 		    Object indexValue = visitor.evaluate(arrVarCtx.expr());
 
 		    if (indexValue instanceof Number) {
 			int index = CalcUtil.toIntValue(visitor, indexValue, MathContext.DECIMAL128, arrVarCtx.expr());
-			return new LValueContext(objLValue, arrVarCtx, arrValue, index);
+			return new LValueContext(arrLValue, arrVarCtx, arrValue, index);
 		    }
 		    else {
 			String memberName = visitor.toNonNullString(arrVarCtx.expr(), indexValue);
-			return objLValue.makeMapLValue(visitor, arrVarCtx, memberName);
+			return arrLValue.makeMapLValue(visitor, arrVarCtx, arrValue, memberName);
 		    }
 		}
 

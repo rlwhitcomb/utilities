@@ -3,6 +3,10 @@
 //======================
 
 [
+    { version: '2.12.16', date: d'2022-06-04',
+      issues: [ 361 ],
+      comment: 'Fix a bug referencing an object returned by a function.'
+    },
     { version: '2.12.15', date: d'2022-06-01',
       issues: [ 45 ],
       comment: 'Update "read" to read file exactly; implement "write".'

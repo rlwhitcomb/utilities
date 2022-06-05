@@ -98,3 +98,9 @@
 >testing(1) -> "testing(v=1)"
 >testing('abc') -> "testing(v=abc)"
 >finished -> "Function 'finished()' called."
+>calls = 0 -> 0
+>Defining function “valueFunc(n)” = {calls ++ ; {value: n}}
+>valueFunc(1) -> { value: 1 }
+>calls -> 1
+>valueFunc(3) -> { value: 3 }
+>calls -> 2

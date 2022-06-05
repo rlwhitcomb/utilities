@@ -111,3 +111,10 @@ loop pp over 2 { `param pp in loop = $pp` @q }
 define testing(v) = { `$_funcname(v=$v)` }
 define finished() = { `Function '$_funcname()' called.` }
 testing(1); testing('abc'); finished
+
+calls = 0
+define valueFunc(n) = { calls++; { value: n } }
+valueFunc(1)
+calls
+valueFunc(3)
+calls
