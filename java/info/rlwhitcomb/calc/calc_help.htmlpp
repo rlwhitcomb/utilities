@@ -1311,8 +1311,8 @@ whether it has previously been used/defined.
     </tr>
     </thead>
     <tbody>
-    <tr><td><code>EOL</code></td><td/><td>Alias for <code>info.os.linesep</code> (platform-specific line separator)</td></tr>
-    <tr><td><code>ON_WINDOWS</code></td><td/><td>Alias for <code>info.os.id == 'windows'</code></td></tr>
+    <tr><td><code>EOL</code></td><td></td><td>Alias for <code>info.os.linesep</code> (platform-specific line separator)</td></tr>
+    <tr><td><code>ON_WINDOWS</code></td><td></td><td>Alias for <code>info.os.id == 'windows'</code></td></tr>
     <tr><td><code>excel_date</code></td><td><code>date</code></td><td>Convert one of our date values to an Excel&trade; date</td></tr>
     <tr><td><code>excel_date_1904</code></td><td><code>date</code></td><td>Convert one of our date values to an Excel&trade; "1904" date<br>(where 1/1/1904 is day 0)</td></tr>
     <tr><td><code>to_excel_col</code></td><td><code>idx</code></td><td>Translate a numeric column index (1-based) to an Excel column name ("A" to "XFD")</td></tr>
@@ -1327,33 +1327,33 @@ whether it has previously been used/defined.
     <tr><td><code>surr_pair_to_cp</code></td><td><code>h</code>, <code>l</code></td><td>Convert a surrogate pair to Unicode codepoint</td></tr>
     <tr><td><code>cp_to_low_surr</code></td><td><code>cp</code></td><td>Extract the high surrogate from a codepoint</td></tr>
     <tr><td><code>cp_to_high_surr</code></td><td><code>cp</code></td><td>Extract the low surrogate from a codepoint</td></tr>
-    <tr><td><code>TICKS_PER_SECOND</code></td><td/><td>Number of time value ticks in a second</td></tr>
-    <tr><td><code>TICKS_PER_MINUTE</code></td><td/><td>Number of time value ticks in a minute</td></tr>
-    <tr><td><code>TICKS_PER_HOUR</code></td><td/><td>Number of time value ticks in an hour</td></tr>
+    <tr><td><code>TICKS_PER_SECOND</code></td><td></td><td>Number of time value ticks in a second</td></tr>
+    <tr><td><code>TICKS_PER_MINUTE</code></td><td></td><td>Number of time value ticks in a minute</td></tr>
+    <tr><td><code>TICKS_PER_HOUR</code></td><td></td><td>Number of time value ticks in an hour</td></tr>
     <tr><td><code>hot</code></td><td><code>time</code></td><td>Number of hours in a time value</td></tr>
     <tr><td><code>mot</code></td><td><code>time</code></td><td>Number of minutes in a time value</td></tr>
     <tr><td><code>sot</code></td><td><code>time</code></td><td>Number of seconds in a time value</td></tr>
     <tr><td><code>timestamp</code></td><td><code>date</code> (default <i>today</i>),<br><code>time</code> (default <i>now</i>)</td><td>Timestamp from given date, time in Linux "date" format</td></tr>
     <tr><td><code>dateformat</code></td><td><code>d</code>,<br><code>f</code> (default <code>"mm/dd/yyyy"</code>)</td><td>Format the date according to the custom format string</td></tr>
-    <tr><td><code>gmtnow</code></td><td/><td>Current time in the GMT time zone</td></tr>
+    <tr><td><code>gmtnow</code></td><td></td><td>Current time in the GMT time zone</td></tr>
     <tr><td><code>flat_map</code></td><td><code>arr</code></td><td>Compute the flat map of an array</td></tr>
     <tr><td><code>is_perfect</code></td><td><code>n</code></td><td>Determine if the given number is a "perfect" number</td></tr>
-    <tr><td><code>versionstring</code></td><td/><td>Complete current version information</td></tr>
+    <tr><td><code>versionstring</code></td><td></td><td>Complete current version information</td></tr>
     <tr><td><code>quad</code></td><td><code>a</code>, <code>b</code>, <code>c</code></td><td>Solve the quadratic formula for the equation <code>a<i>x</i><sup>2</sup> + b<i>x</i> + c = 0</code></td></tr>
     <tr><td><code>quad_exp</code></td><td><code>a</code>, <code>b</code>, <code>c</code>, <code>x</code></td><td>Find the <i>y</i> value of the quadratic equation <code>a<i>x</i><sup>2</sup> + b<i>x</i> + c</code></td></tr>
     <tr><td><code>zeta_2n</code></td><td><code>_2n</code></td><td>The Euler-Riemann "zeta" function for positive even integers</td></tr>
     <tr><td><code>Tn</code></td><td><code>k</code></td><td>Tangent number for <code>2k + 1</code></td></tr>
     <tr><td><code>PMT</code></td><td><code>P</code>, <code>R</code>, <code>N</code></td><td>Calculate the monthly payment for<br>a present value of <code>P</code>, yearly percentage <code>R</code>, and number of years <code>N</code></td></tr>
     <tr><td><code>monthly</code></td><td><code>P</code>, <code>R</code>, <code>N</code></td><td>Display a nice message with the monthly payment on a mortgage<br>(see <code>PMT(P,R,N)</code></td></tr>
-    <tr><td><code>help_mort</code></td><td/><td>Usage message for the mortgage functions</td></tr>
-    <tr><td><code>stack</code></td><td/><td>Definition of a <i>stack</i> data structure<br>use <code>s = eval(stack)</code></td></tr>
+    <tr><td><code>help_mort</code></td><td></td><td>Usage message for the mortgage functions</td></tr>
+    <tr><td><code>stack</code></td><td></td><td>Definition of a <i>stack</i> data structure<br>use <code>s = eval(stack)</code></td></tr>
     <tr><td><code>push</code></td><td><code>s</code>, <code>value</code></td><td>Push the value onto an existing stack</td></tr>
     <tr><td><code>pop</code></td><td><code>s</code></td><td>Pop the last value off the given stack</td></tr>
     <tr><td><code>peek</code></td><td><code>s</code></td><td>Examine the top stack value without popping it</td></tr>
     <tr><td><code>isempty</code></td><td><code>s</code></td><td>Is the stack empty?</td></tr>
     <tr><td><code>mean_stddev</code></td><td><code>values</code></td><td>Compute the mean and standard deviation of a list of values<br>returns <code>{ mean: <i>xxx</i>, stddev: <i>yyy</i> }</code></td></tr>
-    <tr><td><code>uuid</code></td><td/><td>Get a unique identifier (string)</td></tr>
-    <tr><td>More TBD</td><td/><td>Consult the source code of <code>library.calc</code> to see the complete list</td></tr>
+    <tr><td><code>uuid</code></td><td></td><td>Get a unique identifier (string)</td></tr>
+    <tr><td>More TBD</td><td></td><td>Consult the source code of <code>library.calc</code> to see the complete list</td></tr>
     </tbody>
   </table>
 </div>
