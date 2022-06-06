@@ -156,6 +156,8 @@
  *	    #344: Add "isValidIdentifier" method.
  *	30-May-2022 (rlwhitcomb)
  *	    #301: Fix "toIntegerValue" for BigDecimal input.
+ *	04-Jun-2022 (rlwhitcomb)
+ *	    #351: Change spacing of "{ }" in statement blocks.
  */
 package info.rlwhitcomb.calc;
 
@@ -226,8 +228,10 @@ public final class CalcUtil
 		boolean spaceMinus = true;
 		/** {@code false} means {@code "["}, while {@code true} means {@code " ["} */
 		boolean spaceOpenBracket = true;
-		/** {@code false} means {@code "("}, while {@code true} means ({@code " ("} */
+		/** {@code false} means {@code "("}, while {@code true} means {@code " ("} */
 		boolean spaceOpenParen = true;
+		/** {@code false} means <code>"{...}"</code>, while {@code true} means <code>"{ ... }"</code> */
+		boolean spaceBraces = false;
 
 
 		TreeTextOptions() {
@@ -238,6 +242,7 @@ public final class CalcUtil
 		    this.spaceMinus = other.spaceMinus;
 		    this.spaceOpenBracket = other.spaceOpenBracket;
 		    this.spaceOpenParen = other.spaceOpenParen;
+		    this.spaceBraces = other.spaceBraces;
 		}
 	}
 
@@ -260,6 +265,11 @@ public final class CalcUtil
 	    buf.setLength(len);
 
 	    return buf.toString();
+	}
+
+	private static char prevChar(final StringBuilder buf, final int offset) {
+	    int len = buf.length();
+	    return len >= offset ? buf.charAt(len - offset) : '\0';
 	}
 
 	/**
@@ -295,6 +305,10 @@ public final class CalcUtil
 		localOptions = new TreeTextOptions(options);
 		localOptions.spaceOpenParen = false;
 	    }
+	    else if (ctx instanceof CalcParser.StmtBlockContext) {
+		localOptions = new TreeTextOptions(options);
+		localOptions.spaceBraces = true;
+	    }
 
 	    for (int i = 0; i < ctx.getChildCount(); i++) {
 		ParseTree child = ctx.getChild(i);
@@ -304,6 +318,8 @@ public final class CalcUtil
 		else {
 		    boolean replace = false;
 		    boolean space = true;
+		    char firstChar = '\0';
+		    char prevChar = prevChar(buf, 2);
 		    String childText = child.getText();
 
 		    switch (childText) {
@@ -313,7 +329,7 @@ public final class CalcUtil
 				replace = true;
 			     break;
 			case "{":
-			     space = false;
+			     space = localOptions.spaceBraces;
 			     break;
 			case "[":
 			     space = false;
@@ -323,8 +339,10 @@ public final class CalcUtil
 			case ",":
 			case ")":
 			case "]":
-			case "}":
 			    replace = true;
+			    break;
+			case "}":
+			    replace = !localOptions.spaceBraces || (prevChar == '\r' || prevChar == '\n');
 			    break;
 			case ":":
 			    if (!localOptions.spaceColon)
@@ -339,12 +357,17 @@ public final class CalcUtil
 			    space = false;
 			    break;
 			default:
+			    if (childText.length() > 0)
+				firstChar = childText.charAt(0);
 			    break;
 		    }
 
+		    if (!replace && (firstChar == '\n' || firstChar == '\r'))
+			replace = true;
+
 		    if (replace) {
 			int len = buf.length();
-			if (buf.charAt(len - 1) == ' ')
+			if (len > 0 && buf.charAt(len - 1) == ' ')
 			    buf.replace(len - 1, len, childText);
 			else
 			    buf.append(childText);

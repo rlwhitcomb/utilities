@@ -167,7 +167,7 @@
 >typeof (info.locale.weekdays) -> "array"
 >typeof (D'9/11/2001') -> "integer"
 >typeof (now) -> "integer"
->Defining function “junk_func” = {'junk'}
+>Defining function “junk_func” = { 'junk' }
 >typeof (junk_func) -> "function"
 >typeof (junk_func()) -> "string"
 >cast (null) -> ""
@@ -791,7 +791,7 @@
 >bn 126 -> 5556330281949274850616324408918951380525567307126747246796782304333594286400508981287241419934529638692081513802696639 / 4357878
 >Calculation mode set to “DECIMAL(34)”.
 >Variable 'a' cleared.
->Defining function “a” = {loop i in 10 {i}}
+>Defining function “a” = { loop i in 10 { i } }
 >a -> 10
 >eval a -> 10
 >r = R'MCMLXII' -> 1962
@@ -876,9 +876,9 @@
 >input_array = ["ab", "aba", "baa", "cab", "dab", "ghi", "jkl", "abab"] -> [ "ab", "aba", "baa", "cab", "dab", "ghi", "jkl", "abab" ]
 >matches (input_array, '.*ab.*') -> [ "ab", "aba", "cab", "dab", "abab" ]
 >input_object = [
-> {fname: 'John', mname: 'L', lname: 'Smith', addr1: '123 Main St', addr2: '', city: 'Anytown', state: 'OH'}, 
-> {fname: 'Mary', mname: 'S', lname: 'Jones', addr1: '1515 Elm Ave', addr2: '', city: 'Maytown', state: 'MD'}, 
-> {fname: 'Cecile', mname: 'R', lname: 'Mayshawn', addr1: '14235 Sierra Rd', addr2: 'Rte 17 Box 12', city: 'Rural', state: 'OR'} 
+> {fname: 'John', mname: 'L', lname: 'Smith', addr1: '123 Main St', addr2: '', city: 'Anytown', state: 'OH'},
+> {fname: 'Mary', mname: 'S', lname: 'Jones', addr1: '1515 Elm Ave', addr2: '', city: 'Maytown', state: 'MD'},
+> {fname: 'Cecile', mname: 'R', lname: 'Mayshawn', addr1: '14235 Sierra Rd', addr2: 'Rte 17 Box 12', city: 'Rural', state: 'OR'}
 >] -> [ { fname: "John", mname: "L", lname: "Smith", addr1: "123 Main St", addr2: "", city: "Anytown", state: "OH" }, { fname: "Mary", mname: "S", lname: "Jones", addr1: "1515 Elm Ave", addr2: "", city: "Maytown", state: "MD" }, { fname: "Cecile", mname: "R", lname: "Mayshawn", addr1: "14235 Sierra Rd", addr2: "Rte 17 Box 12", city: "Rural", state: "OR" } ]
 >matches (input_object, '.+name') @j -> 
 >[
@@ -1002,7 +1002,7 @@
 >Precision is now “34” digits.
 >help(j) -> 0.0000000000000000000000000000000001
 >Defining function “Truth(v)” = {
-> if v "T" else "F" 
+> if v "T" else "F"
 >}
 >Truth({}) -> "F"
 >Truth("") -> "F"
@@ -1155,9 +1155,9 @@
 >m2 = "'h'" -> "'h'"
 >a.c.g.`$m1`.`$m2` = 3.45 -> 3.45
 >a -> { b: true, c: { d: "123", f: "fghi", g: { r: 6, s: 5, "e": "E", "f": { "g": 23, "h": { "i": 28, j: 16 }, 'h': 3.45 } } } }
->Defining function “stack” = {_len: 0, _arr: []}
->Defining function “push(s,v)” = {s._arr[s._len ++] = v}
->Defining function “pop(s)” = {_v = splice (s._arr, -- s._len, 1) ; _v[0]}
+>Defining function “stack” = { _len: 0, _arr: [] }
+>Defining function “push(s,v)” = { s._arr[s._len ++] = v }
+>Defining function “pop(s)” = { _v = splice (s._arr, -- s._len, 1) ; _v[0] }
 >s1 = eval stack -> { _len: 0, _arr: [ ] }
 >push(s1, 19) -> 19
 >push(s1, 20) -> 20
@@ -1167,17 +1167,17 @@
 >pop(s1) -> 20
 >s1 -> { _len: 1, _arr: [ 19 ] }
 >[
-> 1, 
-> 2, 
-> 3 
+> 1,
+> 2,
+> 3
 >] -> [ 1, 2, 3 ]
 >[
-> 
+>
 >] -> [ ]
 >{
-> a: 10, 
-> b: true, 
-> c: 'ABC' 
+> a: 10,
+> b: true,
+> c: 'ABC'
 >} -> { a: 10, b: true, c: "ABC" }
 >a1 = [1, 2, 3, 4] -> [ 1, 2, 3, 4 ]
 >o1 = {b: false, c: 'def', d: 1.2} -> { b: false, c: "def", d: 1.2 }

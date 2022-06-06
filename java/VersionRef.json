@@ -3,6 +3,10 @@
 //======================
 
 [
+    { version: '2.12.17', date: d'2022-06-05',
+      issues: [ 351 ],
+      comment: 'Change display of statement blocks.'
+    },
     { version: '2.12.16', date: d'2022-06-04',
       issues: [ 361 ],
       comment: 'Fix a bug referencing an object returned by a function.'

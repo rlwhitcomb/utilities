@@ -12,10 +12,10 @@
 >$5 -> "text"
 >=========
 >Defining function “oddness” = {
-> Case value % 2 Of 
-> 0: 'even', 
-> 1: 'odd', 
-> Default: 'NOT POSSIBLE!' 
+> Case value % 2 Of
+> 0: 'even',
+> 1: 'odd',
+> Default: 'NOT POSSIBLE!'
 >}
 >value = 27 -> 27
 >oddness -> "odd"
@@ -24,10 +24,10 @@
 >value = -1 -> -1
 >oddness -> "NOT POSSIBLE!"
 >Defining function “oddness_if” = {
-> IF Abs (value % 2) == 0 
-> 'even' 
-> ELSE 
-> 'odd' 
+> IF Abs (value % 2) == 0
+> 'even'
+> ELSE
+> 'odd'
 >}
 >value = 23 -> 23
 >oddness_if -> "odd"
@@ -37,10 +37,10 @@
 >oddness_if -> "odd"
 >Defining function “multiples” = 
 > {
-> case value of 
-> Default: {'some other value'}, 
-> 7, 14, 21: {'multiple of 7'}, 
-> 6, 12, 18: {'multiple of 6'} 
+> case value of
+> Default: { 'some other value' },
+> 7, 14, 21: { 'multiple of 7' },
+> 6, 12, 18: { 'multiple of 6' }
 >}
 >value = 14 -> 14
 >multiples -> "multiple of 7"
@@ -51,15 +51,15 @@
 >Defining function “match_arrays” = {
 > case value of {
 > []: {
-> 'empty array' 
->}, 
+> 'empty array'
+>},
 > [1, 2]: {
-> "one and two" 
->}, 
+> "one and two"
+>},
 > default: {
-> 'some other array' 
->} 
->} 
+> 'some other array'
+>}
+>}
 >}
 >value = [] -> [ ]
 >match_arrays -> "empty array"
@@ -68,11 +68,11 @@
 >value = [3, 4, 5] -> [ 3, 4, 5 ]
 >match_arrays -> "some other array"
 >Defining function “strings” = {
-> case upper (value) of 
-> "ONE": 1, 
-> "TWO": 2, 
-> "THREE": 3.14, 
-> default: "many" 
+> case upper (value) of
+> "ONE": 1,
+> "TWO": 2,
+> "THREE": 3.14,
+> default: "many"
 >}
 >value = 'one' -> "one"
 >strings -> 1
@@ -84,12 +84,12 @@
 >strings -> "many"
 >Defining function “fieldType(typeid)” = {
 > case typeid of {
-> 4: ' TEXT', 
-> 7: 'LABEL', 
-> 19, 
-> default, 
-> 23: `$typeid` 
->} 
+> 4: ' TEXT',
+> 7: 'LABEL',
+> 19,
+> default,
+> 23: `$typeid`
+>}
 >}
 >fieldType(4) -> " TEXT"
 >fieldType(7) -> "LABEL"
@@ -97,18 +97,18 @@
 >fieldType(19) -> "19"
 >fieldType(99) -> "99"
 >'type: ' + fieldType(4) -> "type:  TEXT"
->Defining function “srt(a1,a2,f)” = {f(a1, a2) > 0 ? a1 : a2}
+>Defining function “srt(a1,a2,f)” = { f(a1, a2) > 0 ? a1 : a2 }
 >Defining function “precision_to_directive” = {
 > case settings.precision of {
-> 0: ':unlimited', 
-> 1, 2, 3, 4, 5, 6, 
-> 8 ... 15, 1, 
-> 17 .. 33: `:dec ${settings.precision}`, 
-> 7: ':float', 
-> 16: ':double', 
-> 34: ':default', 
-> default: `:decimal(${settings.precision})` 
->} 
+> 0: ':unlimited',
+> 1, 2, 3, 4, 5, 6,
+> 8 ... 15, 1,
+> 17 .. 33: `:dec ${settings.precision}`,
+> 7: ':float',
+> 16: ':double',
+> 34: ':default',
+> default: `:decimal(${settings.precision})`
+>}
 >}
 >old_precision = settings.precision -> 34
 >Precision is now “UNLIMITED”.
@@ -200,17 +200,17 @@
 >'match' -> "match"
 >Defining function “sign(value)” = {
 > case value of {
-> < 0: -1, 
-> == 0: 0, 
-> > 0: + 1 
->} 
+> < 0: -1,
+> == 0: 0,
+> > 0: + 1
+>}
 >}
 >sign(-23) -> -1
 >sign(0.0) -> 0
 >sign(0.01) -> 1
 >w = {universal: true} -> { universal: true }
->Defining function “u” = {"universal"}
->Defining function “v” = {w}
+>Defining function “u” = { "universal" }
+>Defining function “v” = { w }
 >v().`$u` -> true
 >v().`$u` = 127 -> 127
 >v() -> { universal: 127 }

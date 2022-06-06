@@ -2,18 +2,18 @@
 >Separator display set to “true”.
 >b = 27 -> 27
 >c = 12345 -> 12,345
->Defining function “a” = {b ** 3}
->Defining function “Z” = {cbrt (a)}
->Defining function “A” = {Z == b}
+>Defining function “a” = { b ** 3 }
+>Defining function “Z” = { cbrt (a) }
+>Defining function “A” = { Z == b }
 >a -> 19,683
 >Z -> 27
 >A -> true
 >All variables cleared.
 >b = 27 -> 27
 >c = 12345 -> 12,345
->Defining function “a” = {b ** 3}
->Defining function “Z” = {cbrt (a)}
->Defining function “A” = {Z == b}
+>Defining function “a” = { b ** 3 }
+>Defining function “Z” = { cbrt (a) }
+>Defining function “A” = { Z == b }
 >b -> 27
 >c -> 12,345
 >a -> 19,683
