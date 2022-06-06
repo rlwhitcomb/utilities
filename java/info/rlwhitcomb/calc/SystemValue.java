@@ -111,6 +111,7 @@ class SystemValue<V> extends ValueScope
 	 * Set this sytem value using its defined "set" method.
 	 *
 	 * @param value	The new value for it.
+	 * @return      That same value (for convenience).
 	 */
 	V setValue(final V value) {
 	    setMethod.accept(value);
