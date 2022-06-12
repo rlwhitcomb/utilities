@@ -3,6 +3,10 @@
 //======================
 
 [
+    { version: '2.12.18', date: d'2022-06-11',
+      issues: [ 363 ],
+      comment: 'Set process exit code on errors in non-REPL mode.'
+    },
     { version: '2.12.17', date: d'2022-06-05',
       issues: [ 351 ],
       comment: 'Change display of statement blocks.'

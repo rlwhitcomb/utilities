@@ -220,6 +220,10 @@ h2 {
      of default file name extensions are appended to the bare name to try to find it. These extensions are: <code>".calc"</code>, <code>".expr"</code>,
      <code>".ca"</code>, and <code>".ex"</code> (in that order). Once all this searching fails to find the file, then the supposed file name(s) are
      treated as if they were a set of expressions to evaluate.
+  <p>When Calc tries to evaluate an expression from a file or given on the command line and any kind of error is encountered, the
+     process exit code will be set to a value from 96 to 99 depending on the type of error (99 = parsing error, 98 = execution
+     error, 97 = index or state exception, 96 = I/O error). The <code>leave</code> <i>expr</i> statement can also be used
+     outside of a loop or function to set a custom exit code if desired.
 </div>
 <a class="top-link" href="#topofpage">Top</a>
 <hr id="Command_Line_Options" class="sectionsep">

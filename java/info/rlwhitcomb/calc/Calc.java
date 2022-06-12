@@ -282,6 +282,8 @@
  *	    Reword an error message to display more information.
  *	27-May-2022 (rlwhitcomb)
  *	    Move "saveVariables" to CalcUtil.
+ *	11-Jun-2022 (rlwhitcomb)
+ *	    #363: Set process exit code on errors in non-REPL mode.
  */
 package info.rlwhitcomb.calc;
 
@@ -1746,7 +1748,7 @@ public class Calc
 	public static Object processString(String inputText, boolean silent) {
 	    try {
 		String input = inputText.endsWith(LINESEP) ? inputText : inputText + LINESEP;
-		return process(CharStreams.fromString(input), visitor, errorStrategy, silent);
+		return process(CharStreams.fromString(input), visitor, errorStrategy, silent, false);
 	    }
 	    catch (IOException ioe) {
 		displayer.displayErrorMessage(Intl.formatString("calc#ioError", Exceptions.toString(ioe)));
@@ -1754,7 +1756,7 @@ public class Calc
 	    return null;
 	}
 
-	private static Object process(CharStream input, CalcObjectVisitor visitor, BailErrorStrategy errorStrategy, boolean silent)
+	private static Object process(CharStream input, CalcObjectVisitor visitor, BailErrorStrategy errorStrategy, boolean silent, boolean throwError)
 		throws IOException
 	{
 	    Object returnValue = null;
@@ -1787,10 +1789,16 @@ public class Calc
 		returnValue = visitor.visit(tree);
 	    }
 	    catch (IllegalArgumentException | IllegalStateException | IndexOutOfBoundsException ex) {
-		displayer.displayErrorMessage(Intl.formatString("calc#argError", Exceptions.toString(ex)));
+		if (throwError)
+		    throw ex;
+		else
+		    displayer.displayErrorMessage(Intl.formatString("calc#argError", Exceptions.toString(ex)));
 	    }
 	    catch (CalcException ce) {
-		displayer.displayErrorMessage(Intl.formatString("calc#argError", ce.getMessage()), ce.getLine());
+		if (throwError)
+		    throw ce;
+		else
+		    displayer.displayErrorMessage(Intl.formatString("calc#argError", ce.getMessage()), ce.getLine());
 	    }
 	    finally {
 		endTime = Environment.highResTimer();
@@ -1818,7 +1826,7 @@ public class Calc
 		initialLibraryLoad = true;
 		try {
 		    for (String libraryName : libraryNames) {
-			process(CharStreams.fromString(getFileContents(libraryName, null)), visitor, errorStrategy, true);
+			process(CharStreams.fromString(getFileContents(libraryName, null)), visitor, errorStrategy, true, false);
 		    }
 		}
 		finally {
@@ -2272,7 +2280,7 @@ public class Calc
 		    // a line at a time from the console and processing
 		    if (input == null) {
 			if (console == null || System.in.available() > 0) {
-			    process(CharStreams.fromStream(System.in), visitor, errorStrategy, quiet);
+			    process(CharStreams.fromStream(System.in), visitor, errorStrategy, quiet, true);
 			}
 			else {
 			    if (!noIntro) {
@@ -2326,7 +2334,7 @@ public class Calc
 				if (scriptInput) {
 				    buf.append(line).append(LINESEP);
 				    if (!line.endsWith("\\")) {
-					process(CharStreams.fromString(buf.toString()), visitor, errorStrategy, quiet);
+					process(CharStreams.fromString(buf.toString()), visitor, errorStrategy, quiet, false);
 					buf.setLength(0);
 				    }
 				}
@@ -2339,12 +2347,21 @@ public class Calc
 			}
 		    }
 		    else {
-			process(input, visitor, errorStrategy, quiet);
+			process(input, visitor, errorStrategy, quiet, true);
 		    }
 		}
 	    }
-	    catch (IllegalArgumentException iae) {
-		displayer.displayErrorMessage(Intl.formatString("calc#argError", Exceptions.toString(iae)));
+	    catch (CalcExprException cee) {
+		displayer.displayErrorMessage(Intl.formatString("calc#argError", cee.getMessage()), cee.getLine());
+		exitValue = "98";
+	    }
+	    catch (CalcException ce) {
+		displayer.displayErrorMessage(Intl.formatString("calc#argError", ce.getMessage()), ce.getLine());
+		exitValue = "99";
+	    }
+	    catch (IllegalArgumentException | IllegalStateException | IndexOutOfBoundsException ex) {
+		displayer.displayErrorMessage(Intl.formatString("calc#argError", Exceptions.toString(ex)));
+		exitValue = "97";
 	    }
 	    catch (LeaveException lex) {
 		if (lex.hasValue()) {
@@ -2353,6 +2370,7 @@ public class Calc
 	    }
 	    catch (IOException ioe) {
 		Intl.errFormat("calc#inOutError", Exceptions.toString(ioe));
+		exitValue = "96";
 	    }
 
 	    if (exitValue != null) {
