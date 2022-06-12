@@ -43,6 +43,8 @@
  *	    #327: Convert "List" constructor to Collection.
  *	25-May-2022 (rlwhitcomb)
  *	    #348: Make all methods package private.
+ *	11-Jun-2022 (rlwhitcomb)
+ *	    #365: Add "immutable" flag and checks.
  */
 package info.rlwhitcomb.calc;
 
@@ -65,13 +67,19 @@ class ArrayScope<T> extends Scope
 	 */
 	private List<T> values;
 
+	/**
+	 * Flag to indicate the object should not be modified (after initial construction).
+	 */
+	private boolean immutable;
+
 
 	/**
 	 * Default constructor, giving an initially empty list.
 	 */
 	ArrayScope() {
 	    super(Type.ARRAY);
-	    this.values = new ArrayList<>();
+	    values = new ArrayList<>();
+	    immutable = false;
 	}
 
 	/**
@@ -82,10 +90,11 @@ class ArrayScope<T> extends Scope
 	@SuppressWarnings("unchecked")
 	ArrayScope(final T... initialValues) {
 	    super(Type.ARRAY);
-	    this.values = new ArrayList<>(initialValues.length);
+	    values = new ArrayList<>(initialValues.length);
 	    for (T value : initialValues) {
 		values.add(value);
 	    }
+	    immutable = false;
 	}
 
 	/**
@@ -104,7 +113,28 @@ class ArrayScope<T> extends Scope
 	 */
 	ArrayScope(final Collection<? extends T> initialValues) {
 	    super(Type.ARRAY);
-	    this.values = new ArrayList<>(initialValues);
+	    values = new ArrayList<>(initialValues);
+	    immutable = false;
+	}
+
+	/**
+	 * Sets the flag to make this object immutable (or not).
+	 *
+	 * @param value New value for the {@link #immutable} flag.
+	 */
+	void setImmutable(final boolean value) {
+	    immutable = value;
+	}
+
+	/**
+	 * Check if this array is immutable, and throw if so. Called from every operation
+	 * that might modify the contents.
+	 *
+	 * @throws IllegalStateException if the array is marked immumtable.
+	 */
+	void checkImmutable() {
+	    if (immutable)
+		throw new Intl.IllegalStateException("calc#immutableArray");
 	}
 
 	/**
@@ -132,6 +162,8 @@ class ArrayScope<T> extends Scope
 	 * @throws      IndexOutOfBoundsException if the index is negative.
 	 */
 	void setValue(final int index, final T value) {
+	    checkImmutable();
+
 	    int size = values.size();
 	    int pos = index < 0 ? index + size : index;
 
@@ -158,6 +190,8 @@ class ArrayScope<T> extends Scope
 	 * @param value The new value to insert at position index.
 	 */
 	void insert(final int index, final T value) {
+	    checkImmutable();
+
 	    values.add(index, value);
 	}
 
@@ -167,6 +201,8 @@ class ArrayScope<T> extends Scope
 	 * @param value The next value to add to the end of the list.
 	 */
 	void add(final T value) {
+	    checkImmutable();
+
 	    values.add(value);
 	}
 
@@ -177,6 +213,8 @@ class ArrayScope<T> extends Scope
 	 * @return  Whether the list changed as a result of this operation.
 	 */
 	boolean addAll(final Collection<? extends T> c) {
+	    checkImmutable();
+
 	    return values.addAll(c);
 	}
 
@@ -187,6 +225,8 @@ class ArrayScope<T> extends Scope
 	 * @return      The previous element at that position.
 	 */
 	T remove(final int index) {
+	    checkImmutable();
+
 	    return values.remove(index);
 	}
 

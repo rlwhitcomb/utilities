@@ -48,6 +48,8 @@
  *	    #323: Add "env" variables as predefined.
  *	28-May-2022 (rlwhitcomb)
  *	    #344: Quote map keys for "env" that aren't valid identifiers.
+ *	11-Jun-2022 (rlwhitcomb)
+ *	    #365: Mark the outer objects as immutable.
  */
 package info.rlwhitcomb.calc;
 
@@ -168,6 +170,7 @@ class CalcPredefine
 	    PredefinedValue.define(version, "patch",      v.patch);
 	    PredefinedValue.define(version, "prerelease", v.getPreReleaseString());
 	    PredefinedValue.define(version, "build",      v.getBuildMetaString());
+	    version.setImmutable(true);
 
 	    SemanticVersion lib = Environment.implementationVersion();
 	    ObjectScope libVersion = new ObjectScope();
@@ -177,6 +180,7 @@ class CalcPredefine
 	    PredefinedValue.define(libVersion, "patch",      lib.patch);
 	    PredefinedValue.define(libVersion, "prerelease", lib.getPreReleaseString());
 	    PredefinedValue.define(libVersion, "build",      lib.getBuildMetaString());
+	    libVersion.setImmutable(true);
 
 	    ObjectScope cpu = new ObjectScope();
 
@@ -184,6 +188,7 @@ class CalcPredefine
 	    PredefinedValue.define(cpu, "maxmemory",   BigInteger.valueOf(Environment.maximumMemorySize()));
 	    PredefinedValue.define(cpu, "freememory",  BigInteger.valueOf(Environment.freeMemorySize()));
 	    PredefinedValue.define(cpu, "totalmemory", BigInteger.valueOf(Environment.totalMemorySize()));
+	    cpu.setImmutable(true);
 
 	    ObjectScope os = new ObjectScope();
 
@@ -206,6 +211,7 @@ class CalcPredefine
 		Dimension consoleSize = Environment.consoleSize();
 		return BigInteger.valueOf(consoleSize.width);
 	    });
+	    os.setImmutable(true);
 
 	    ObjectScope java = new ObjectScope();
 	    int javaMajor = Environment.javaMajorVersion();
@@ -236,6 +242,7 @@ class CalcPredefine
 	    PredefinedValue.define(java, "model",   Environment.dataModel());
 
 	    PredefinedValue.define(java, "specificationversion", System.getProperty("java.specification.version"));
+	    java.setImmutable(true);
 
 	    DateFormatSymbols dfs       = new DateFormatSymbols();
 	    DecimalFormatSymbols efs    = new DecimalFormatSymbols();
@@ -254,7 +261,11 @@ class CalcPredefine
 	    ArrayScope<String> months   = new ArrayScope<>(
 		monthNames[0], monthNames[1], monthNames[2], monthNames[3], monthNames[4], monthNames[5],
 		monthNames[6], monthNames[7], monthNames[8], monthNames[9], monthNames[10], monthNames[11]);
-	    Locale currentLocale        = Locale.getDefault();
+	    amPm.setImmutable(true);
+	    weekDays.setImmutable(true);
+	    months.setImmutable(true);
+
+	    Locale currentLocale = Locale.getDefault();
 
 	    PredefinedValue.define(locale, "name",      currentLocale.getDisplayName());
 	    PredefinedValue.define(locale, "tag",       currentLocale.toLanguageTag());
@@ -272,6 +283,7 @@ class CalcPredefine
 	    PredefinedValue.define(locale, "ampm",      amPm);
 	    PredefinedValue.define(locale, "weekdays",  weekDays);
 	    PredefinedValue.define(locale, "months",    months);
+	    locale.setImmutable(true);
 
 	    ObjectScope tz   = new ObjectScope();
 	    TimeZone zone    = TimeZone.getDefault();
@@ -284,6 +296,7 @@ class CalcPredefine
 	    PredefinedValue.define(tz, "longname", zone.getDisplayName(daylight, TimeZone.LONG));
 	    PredefinedValue.define(tz, "name",     zone.getDisplayName(daylight, TimeZone.SHORT));
 	    PredefinedValue.define(tz, "offset",   tzOffset(offset));
+	    tz.setImmutable(true);
 
 	    ObjectScope info = new ObjectScope();
 
@@ -294,6 +307,7 @@ class CalcPredefine
 	    PredefinedValue.define(info, "java",       java);
 	    PredefinedValue.define(info, "locale",     locale);
 	    PredefinedValue.define(info, "timezone",   tz);
+	    info.setImmutable(true);
 
 	    PredefinedValue.define(globalScope, "info", info);
 
@@ -307,6 +321,7 @@ class CalcPredefine
 		}
 		PredefinedValue.define(env, key, entry.getValue());
 	    }
+	    env.setImmutable(true);
 
 	    PredefinedValue.define(globalScope, "env", env);
 

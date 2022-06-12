@@ -591,6 +591,8 @@
  *	    #301: "convertToWords" accepts BigInteger.
  *	01-Jun-2022 (rlwhitcomb)
  *	    #45: Add "write" function.
+ *	11-Jun-2022 (rlwhitcomb)
+ *	    #365: Check for immutable arrays.
  */
 package info.rlwhitcomb.calc;
 
@@ -4385,16 +4387,15 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			count = arrayLen - start;
 
 		    // Remove the specified number of elements beginning from "start" and add to the result array
-		    List<Object> list = array.list();
 		    for (int index = 0; index < count; index++) {
-			removed.list().add(list.remove(start));
+			removed.add(array.remove(start));
 		    }
 
 		    // Now if any elements were given to add/insert, do that starting from "start" also
 		    for (int index = 3; index < exprLen; index++) {
 			CalcParser.ExprContext valueCtx = exprs.get(index);
 			Object value = evaluate(valueCtx);
-			list.add(index - 3 + start, value);
+			array.insert(index - 3 + start, value);
 		    }
 
 		    return removed;
@@ -4498,6 +4499,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    if (value instanceof ArrayScope) {
 		@SuppressWarnings("unchecked")
 		ArrayScope<Object> array = (ArrayScope<Object>) value;
+		array.checkImmutable();
 		Collections.reverse(array.list());
 		return array;
 	    }
@@ -4959,7 +4961,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    final ArrayScope<String> result = new ArrayScope<>();
 	    String string = getStringValue(ctx.expr1().expr());
 
-	    string.codePoints().forEachOrdered(cp -> result.list().add(String.valueOf(Character.toChars(cp))));
+	    string.codePoints().forEachOrdered(cp -> result.add(String.valueOf(Character.toChars(cp))));
 
 	    return result;
 	}
@@ -4969,7 +4971,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    final ArrayScope<Integer> result = new ArrayScope<>();
 	    String string = getStringValue(ctx.expr1().expr());
 
-	    string.codePoints().forEachOrdered(cp -> result.list().add(cp));
+	    string.codePoints().forEachOrdered(cp -> result.add(cp));
 
 	    return result;
 	}

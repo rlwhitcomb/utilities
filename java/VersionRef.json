@@ -3,6 +3,10 @@
 //======================
 
 [
+    { version: '2.12.19', date: d'2022-06-11',
+      issues: [ 365 ],
+      comment: 'Mark all predefined objects and arrays as immutable.'
+    },
     { version: '2.12.18', date: d'2022-06-11',
       issues: [ 363 ],
       comment: 'Set process exit code on errors in non-REPL mode.'

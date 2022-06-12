@@ -127,6 +127,8 @@
 #	    #333: Reword awkward error message.
 #	23-May-2022 (rlwhitcomb)
 #	    Rework the "expectNotOption" message.
+#	11-Jun-2022 (rlwhitcomb)
+#	    #365: New message for immutable array.
 #
 
 #
@@ -263,6 +265,7 @@ unknownOp		= Unknown operator <y>%1$s<.>
 # From ArrayScope
 #
 indexOutOfBounds	= Index value of <u>%1$d<.> is out of bounds of <y>0..%2$d<.>
+immutableArray		= Cannot change any values in this array
 
 #
 # From FunctionDeclaration
