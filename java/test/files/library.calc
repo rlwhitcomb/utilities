@@ -408,6 +408,15 @@ def help_mort = { "\nUsage: PMT(P=<present value>,R=<yearly interest rate (%)>,N
 def win_pct(wins, losses, ties = 0) = { wins / (wins + ties + losses) @2% }
 
 /*
+ * Calculate percent increase from old to new value.
+ *
+ * @param old   Previous value.
+ * @param new   New value.
+ * @return      (new - previous) / previous as a percentage
+ */
+def pct_inc(old, new) = { `${( new - old ) / old * 100 @2d}%` }
+
+/*
  * Implementation of a stack data structure. The array of values is kept trimmed, so the current value array length
  * is also the current depth.
  */
