@@ -593,6 +593,8 @@
  *	    #45: Add "write" function.
  *	11-Jun-2022 (rlwhitcomb)
  *	    #365: Check for immutable arrays.
+ *	15-Jun-2022 (rlwhitcomb)
+ *	    #365: For constant objects display the string value of the object, not the "toString" value.
  */
 package info.rlwhitcomb.calc;
 
@@ -2765,7 +2767,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    ConstantValue.define(currentScope, constantName, value);
 
-	    displayActionMessage("%calc#definingConst", constantName, value);
+	    displayActionMessage("%calc#definingConst", constantName,
+		toStringValue(this, ctx, value, false, settings.separatorMode));
 
 	    return value;
 	}
