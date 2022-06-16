@@ -595,6 +595,7 @@
  *	    #365: Check for immutable arrays.
  *	15-Jun-2022 (rlwhitcomb)
  *	    #365: For constant objects display the string value of the object, not the "toString" value.
+ *	    #191: Change "reverse" to return a new (modified) array as the result.
  */
 package info.rlwhitcomb.calc;
 
@@ -4502,9 +4503,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    if (value instanceof ArrayScope) {
 		@SuppressWarnings("unchecked")
 		ArrayScope<Object> array = (ArrayScope<Object>) value;
-		array.checkImmutable();
-		Collections.reverse(array.list());
-		return array;
+		ArrayScope<Object> result = new ArrayScope<>(array);
+		Collections.reverse(result.list());
+		return result;
 	    }
 	    else {
 		String string;
