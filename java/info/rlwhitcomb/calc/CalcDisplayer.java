@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2020 Roger L. Whitcomb.
+ * Copyright (c) 2020,2022 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,6 +28,8 @@
  *          Inital coding.
  *	16-Dec-2020 (rlwhitcomb)
  *	    New interface method for "$echo".
+ *	20-Jun-2022 (rlwhitcomb)
+ *	    #364: Add parameter and enum to "displayMessage" for output destination.
  */
 package info.rlwhitcomb.calc;
 
@@ -37,6 +39,50 @@ package info.rlwhitcomb.calc;
  */
 public interface CalcDisplayer
 {
+	/**
+	 * Output destinations for {@link #displayMessage}.
+	 */
+	enum Output
+	{
+		OUTPUT,
+		ERROR,
+		BOTH;
+
+		/**
+		 * Decode one of these values from an input string.
+		 *
+		 * @param input A numeric value or (case-insensitive) version
+		 * of one of these values.
+		 * @return The decoded value, or {@link #OUTPUT} by default.
+		 */
+		public static Output fromString(final String input) {
+		    if (input != null && !input.isEmpty()) {
+			try {
+			    return valueOf(input.toUpperCase());
+			}
+			catch (IllegalArgumentException iae) {
+			    try {
+				switch (Integer.parseInt(input)) {
+				    case 0:
+					return OUTPUT;
+				    case 1:
+					return ERROR;
+				    case 2:
+					return BOTH;
+				    default:
+					break;
+				}
+			    }
+			    catch (NumberFormatException nfe) {
+				;
+			    }
+			}
+		    }
+		    return OUTPUT;
+		}
+	}
+
+
 	/**
 	 * Display normal calculation results for one expression.
 	 *
@@ -57,8 +103,9 @@ public interface CalcDisplayer
 	 * Display a general message (such as from "$echo").
 	 *
 	 * @param message	The message to display.
+	 * @param output	The destination for the output: {@link Output}.
 	 */
-	void displayMessage(String message);
+	void displayMessage(String message, Output output);
 
 	/**
 	 * Display an error message, possibly in a message box, in a special

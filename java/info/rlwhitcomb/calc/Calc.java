@@ -284,6 +284,8 @@
  *	    Move "saveVariables" to CalcUtil.
  *	11-Jun-2022 (rlwhitcomb)
  *	    #363: Set process exit code on errors in non-REPL mode.
+ *	20-Jun-2022 (rlwhitcomb)
+ *	    #364: Allow echoing to stderr.
  */
 package info.rlwhitcomb.calc;
 
@@ -1150,9 +1152,40 @@ public class Calc
 	    }
 	}
 
+	private static void output(String message, CalcDisplayer.Output output) {
+	    if (message == null || message.isEmpty()) {
+		switch (output) {
+		    case OUTPUT:
+			Intl.outPrintln();
+			break;
+		    case ERROR:
+			Intl.errPrintln();
+			break;
+		    case BOTH:
+			Intl.outPrintln();
+			Intl.errPrintln();
+			break;
+		}
+	    }
+	    else {
+		switch (output) {
+		    case OUTPUT:
+			Intl.outFormat("calc#message", message);
+			break;
+		    case ERROR:
+			Intl.errFormat("calc#message", message);
+			break;
+		    case BOTH:
+			Intl.outFormat("calc#message", message);
+			Intl.errFormat("calc#message", message);
+			break;
+		}
+	    }
+	}
+
 	@Override
-	public void displayMessage(String message) {
-	    Intl.outFormat("calc#message", message);
+	public void displayMessage(String message, CalcDisplayer.Output output) {
+	    output(message, output);
 	    updateOutputSize();
 	}
 
@@ -1326,11 +1359,8 @@ public class Calc
 		}
 
 		@Override
-		public void displayMessage(String message) {
-		    if (message == null || message.isEmpty())
-			Intl.outPrintln();
-		    else
-			Intl.outFormat("calc#message", message);
+		public void displayMessage(String message, CalcDisplayer.Output output) {
+		    output(message, output);
 		}
 
 		@Override
@@ -1782,7 +1812,7 @@ public class Calc
 		parseEndTime = Environment.highResTimer();
 
 		if (debug) {
-		    displayer.displayMessage(tree.toStringTree(parser));
+		    displayer.displayMessage(tree.toStringTree(parser), CalcDisplayer.Output.OUTPUT);
 		}
 
 		execStartTime = Environment.highResTimer();
@@ -1814,7 +1844,7 @@ public class Calc
 		double parseTime = Environment.timerValueToSeconds(parseEndTime - startTime);
 		double execTime  = Environment.timerValueToSeconds(endTime - execStartTime);
 		double totalTime = Environment.timerValueToSeconds(endTime - startTime);
-		displayer.displayMessage(Intl.formatString("calc#timing", parseTime, execTime, totalTime));
+		displayer.displayMessage(Intl.formatString("calc#timing", parseTime, execTime, totalTime), CalcDisplayer.Output.OUTPUT);
 	    }
 
 	    return returnValue;

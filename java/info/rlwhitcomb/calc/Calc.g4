@@ -406,6 +406,8 @@
  *	    Allow EOL after colon in object declarations.
  *	01-Jun-2022 (rlwhitcomb)
  *	    #45: Add "write" function.
+ *	20-Jun-2022 (rlwhitcomb)
+ *	    #364: Add optional flag to ":echo" to set output destination.
  */
 
 grammar Calc;
@@ -764,7 +766,7 @@ directive
    | D_BINARY                                 # binaryDirective
    | D_SI                                     # siDirective
    | D_MIXED                                  # mixedDirective
-   | D_ECHO expr ?                            # echoDirective
+   | D_ECHO ( expr ( ',' expr ) ? ) ?         # echoDirective
    | D_CLEAR wildIdList ?                     # clearDirective
    | D_VARIABLES wildIdList ?                 # variablesDirective
    | D_PREDEFINED wildIdList ?                # predefinedDirective

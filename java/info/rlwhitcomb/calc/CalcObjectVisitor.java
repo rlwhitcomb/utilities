@@ -596,6 +596,8 @@
  *	15-Jun-2022 (rlwhitcomb)
  *	    #365: For constant objects display the string value of the object, not the "toString" value.
  *	    #191: Change "reverse" to return a new (modified) array as the result.
+ *	20-Jun-2022 (rlwhitcomb)
+ *	    #364: Allow ":echo" to output different places.
  */
 package info.rlwhitcomb.calc;
 
@@ -1585,9 +1587,11 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitEchoDirective(CalcParser.EchoDirectiveContext ctx) {
-	    String msg = getStringValue(ctx.expr(), true, false, settings.separatorMode);
+	    String msg = getStringValue(ctx.expr(0), true, false, settings.separatorMode);
+	    String out = getStringValue(ctx.expr(1), true, false, false);
+	    CalcDisplayer.Output output = CalcDisplayer.Output.fromString(out);
 
-	    displayer.displayMessage(msg);
+	    displayer.displayMessage(msg, output);
 
 	    return msg;
 	}

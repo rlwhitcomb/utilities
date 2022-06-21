@@ -3,6 +3,10 @@
 //======================
 
 [
+    { version: '2.12.25', date: d'2022-06-20',
+      issues: [ 364 ],
+      comment: 'Allow ":echo" to output different places.'
+    },
     { version: '2.12.22', date: d'2022-06-20',
       issues: [ 365 ],
       comment: 'Actually implement "const" objects and lists.'
