@@ -311,6 +311,8 @@
 		#330: Add "Main-Class" attribute to .jar file.
 	    01-Jun-2022 (rlwhitcomb)
 		#45: Delete the new test result file.
+	    20-Jun-2022 (rlwhitcomb)
+		#366: Change "doclint" to "-missing" for later Java versions.
 
      ========================================================================== -->
 
@@ -697,6 +699,7 @@
 			<arg value="--frames" if:true="${html4.output}"/>
 			<arg line="--release 8" if:true="${new.java.version}"/>
 			<arg line="-Xdoclint:none" if:true="${doclint.off}"/>
+			<arg line="-Xdoclint:-missing" unless:true="${doclint.off}"/>
 			<link href="https://docs.oracle.com/javase/8/docs/api/"/>
 			<link href="https://pivot.apache.org/2.0.5/docs/api/"/>
 			<link href="https://www.antlr.org/api/Java/"/>
