@@ -265,7 +265,7 @@ unknownOp		= Unknown operator <y>%1$s<.>
 # From ArrayScope
 #
 indexOutOfBounds	= Index value of <u>%1$d<.> is out of bounds of <y>0..%2$d<.>
-immutableArray		= Cannot change any values in this array
+immutableArray		= Cannot change values in a constant array.
 
 #
 # From FunctionDeclaration
@@ -275,5 +275,5 @@ varargsLast		= Variable argument declaration must be last in the parameter list
 #
 # From ObjectScope
 #
-immutableObject		= Cannot add the <y>%1$s<.> member to this object
+immutableObject		= Cannot add or update the <y>%1$s<.> member in this constant object.
 

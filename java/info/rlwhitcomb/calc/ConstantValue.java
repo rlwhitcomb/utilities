@@ -32,6 +32,8 @@
  *	14-Feb-2022 (rlwhitcomb)
  *	    #199: Add back in "isImmutable" as an override.
  *	    Now move back to "ValueScope".
+ *	20-Jun-2022 (rlwhitcomb)
+ *	    #365: Recursively set "immutable" flag in objects and lists as part of "define".
  */
 package info.rlwhitcomb.calc;
 
@@ -58,7 +60,7 @@ class ConstantValue extends ValueScope
 	private ConstantValue(final String nm, final Object value) {
 	    super(nm, Type.CONSTANT);
 
-	    this.constantValue = value;
+	    constantValue = value;
 	}
 
 
@@ -73,6 +75,31 @@ class ConstantValue extends ValueScope
 	}
 
 	/**
+	 * Recursively make an object immutable as part of a "const" object.
+	 *
+	 * @param value The value to set as immutable.
+	 */
+	static private void setImmutable(final Object value) {
+	    if (value instanceof ObjectScope) {
+		ObjectScope map = (ObjectScope) value;
+		map.setImmutable(true);
+
+		for (String key : map.keySet()) {
+		    define(map, key, map.getValueLocally(key, false));
+		}
+	    }
+	    else if (value instanceof ArrayScope) {
+		@SuppressWarnings("unchecked")
+		ArrayScope<Object> list = (ArrayScope<Object>) value;
+		list.setImmutable(true);
+
+		for (int index = 0; index < list.size(); index++) {
+		    setImmutable(list.getValue(index));
+		}
+	    }
+	}
+
+	/**
 	 * Define one of these into the given symbol table.
 	 *
 	 * @param scope	The symbol table in which to define it.
@@ -82,6 +109,10 @@ class ConstantValue extends ValueScope
 	static void define(final ObjectScope scope, final String nm, final Object value) {
 	    ConstantValue constant = new ConstantValue(nm, value);
 	    scope.setValue(nm, constant);
+
+	    if (value instanceof ObjectScope || value instanceof ArrayScope) {
+		setImmutable(value);
+	    }
 	}
 
 }

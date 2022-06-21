@@ -3,6 +3,10 @@
 //======================
 
 [
+    { version: '2.12.22', date: d'2022-06-20',
+      issues: [ 365 ],
+      comment: 'Actually implement "const" objects and lists.'
+    },
     { version: '2.12.21', date: d'2022-06-15',
       issues: [ 191 ],
       comment: 'Change "reverse" to return a new array instead of changing inline.'
