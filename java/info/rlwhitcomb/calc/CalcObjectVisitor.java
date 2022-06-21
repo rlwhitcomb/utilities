@@ -2276,8 +2276,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		private String localVarName;
 
 		LoopVisitor(final CalcParser.StmtBlockContext blockContext, final String varName) {
-		    this.block        = blockContext;
-		    this.localVarName = varName;
+		    block        = blockContext;
+		    localVarName = varName;
 		}
 
 		@Override
@@ -2586,10 +2586,10 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			final CalcParser.ExprContext expr,
 			final Object value,
 			final NestedScope scope) {
-		    this.blockCtx = block;
-		    this.caseExpr = expr;
-		    this.caseValue = value;
-		    this.caseScope = scope;
+		    blockCtx  = block;
+		    caseExpr  = expr;
+		    caseValue = value;
+		    caseScope = scope;
 		}
 
 		@Override
@@ -4460,9 +4460,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		private boolean ignoreCase;
 
 		ObjectComparator(CalcObjectVisitor v, ParserRuleContext c, boolean ignore) {
-		    this.visitor    = v;
-		    this.ctx        = c;
-		    this.ignoreCase = ignore;
+		    visitor    = v;
+		    ctx        = c;
+		    ignoreCase = ignore;
 		}
 
 		@Override
@@ -5189,8 +5189,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		private Pattern pattern;
 
 		MatchesTransformer(final ParserRuleContext ctx, final Pattern p) {
-		    this.exprCtx = ctx;
-		    this.pattern = p;
+		    exprCtx = ctx;
+		    pattern = p;
 		}
 
 		@Override
@@ -5247,7 +5247,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		private ParserRuleContext ctx;
 
 		public SumOfVisitor(final ParserRuleContext context) {
-		    this.ctx = context;
+		    ctx = context;
 		}
 
 		@Override
@@ -5298,7 +5298,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		private ParserRuleContext ctx;
 
 		public ProductOfVisitor(final ParserRuleContext context) {
-		    this.ctx = context;
+		    ctx = context;
 		}
 
 		@Override
@@ -5485,9 +5485,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 
 		InVisitor(CalcParser.ExprContext ctx1, CalcParser.LoopCtlContext ctx2, Object value) {
-		    this.valueCtx = ctx1;
-		    this.loopCtx  = ctx2;
-		    this.inValue  = value;
+		    valueCtx = ctx1;
+		    loopCtx  = ctx2;
+		    inValue  = value;
 		}
 
 		@Override

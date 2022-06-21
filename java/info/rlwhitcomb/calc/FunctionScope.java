@@ -85,7 +85,7 @@ class FunctionScope extends ParameterizedScope
 	FunctionScope(final FunctionDeclaration decl) {
 	    super(Type.FUNCTION, FUNC_PREFIX);
 
-	    this.declaration = decl;
+	    declaration = decl;
 	}
 
 

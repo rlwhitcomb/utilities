@@ -211,7 +211,7 @@ public class CalcPiWorker
 	 * @param rationalFlag The current value of the rational flag.
 	 */
 	public void setRational(final boolean rationalFlag) {
-	    this.rational = rationalFlag;
+	    rational = rationalFlag;
 	}
 
 	/**

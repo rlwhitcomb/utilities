@@ -53,7 +53,7 @@ abstract class ValueScope extends Scope
 	ValueScope(final String nm, final Type t) {
 	    super(t);
 
-	    this.name = nm;
+	    name = nm;
 	}
 
 	/**

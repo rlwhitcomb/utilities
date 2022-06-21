@@ -238,11 +238,11 @@ public final class CalcUtil
 		}
 
 		TreeTextOptions(final TreeTextOptions other) {
-		    this.spaceColon = other.spaceColon;
-		    this.spaceMinus = other.spaceMinus;
-		    this.spaceOpenBracket = other.spaceOpenBracket;
-		    this.spaceOpenParen = other.spaceOpenParen;
-		    this.spaceBraces = other.spaceBraces;
+		    spaceColon       = other.spaceColon;
+		    spaceMinus       = other.spaceMinus;
+		    spaceOpenBracket = other.spaceOpenBracket;
+		    spaceOpenParen   = other.spaceOpenParen;
+		    spaceBraces      = other.spaceBraces;
 		}
 	}
 

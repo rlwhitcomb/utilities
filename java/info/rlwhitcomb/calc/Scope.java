@@ -105,7 +105,7 @@ class Scope
 	 * @param currentType The type enumeration for this scope.
 	 */
 	Scope(final Type currentType) {
-	    this.type = currentType;
+	    type = currentType;
 	}
 
 	/**
@@ -114,7 +114,7 @@ class Scope
 	 * @return The type of scope.
 	 */
 	final Type getType() {
-	    return this.type;
+	    return type;
 	}
 
 	/**

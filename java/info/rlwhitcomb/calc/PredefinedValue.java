@@ -74,8 +74,8 @@ class PredefinedValue extends ValueScope
 	private PredefinedValue(final String nm, final Supplier<Object> supplier) {
 	    super(nm, Type.PREDEFINED);
 
-	    this.valueSupplier = supplier;
-	    this.constantValue = null;
+	    valueSupplier = supplier;
+	    constantValue = null;
 	}
 
 	/**
@@ -87,8 +87,8 @@ class PredefinedValue extends ValueScope
 	private PredefinedValue(final String nm, final Object value) {
 	    super(nm, Type.PREDEFINED);
 
-	    this.valueSupplier = null;
-	    this.constantValue = value;
+	    valueSupplier = null;
+	    constantValue = value;
 	}
 
 
@@ -98,7 +98,7 @@ class PredefinedValue extends ValueScope
 	 * @return <code>true</code> if the value is always constant.
 	 */
 	boolean isConstant() {
-	    return this.valueSupplier == null;
+	    return valueSupplier == null;
 	}
 
 	/**

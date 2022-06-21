@@ -126,20 +126,20 @@ public class Settings
 	/**
 	 * Copy constructor - make a copy of another {@code Settings} object.
 	 *
-	 * @param otherSettings The object to copy.
+	 * @param other The object to copy.
 	 */
-	public Settings(Settings otherSettings) {
-	    this.trigMode          = otherSettings.trigMode;
-	    this.units             = otherSettings.units;
-	    this.rationalMode      = otherSettings.rationalMode;
-	    this.separatorMode     = otherSettings.separatorMode;
-	    this.silent            = otherSettings.silent;
-	    this.silenceDirectives = otherSettings.silenceDirectives;
-	    this.ignoreNameCase    = otherSettings.ignoreNameCase;
-	    this.quoteStrings      = otherSettings.quoteStrings;
-	    this.mc                = otherSettings.mc;
-	    this.mcDivide          = otherSettings.mcDivide;
-	    this.precision         = otherSettings.precision;
+	public Settings(Settings other) {
+	    trigMode          = other.trigMode;
+	    units             = other.units;
+	    rationalMode      = other.rationalMode;
+	    separatorMode     = other.separatorMode;
+	    silent            = other.silent;
+	    silenceDirectives = other.silenceDirectives;
+	    ignoreNameCase    = other.ignoreNameCase;
+	    quoteStrings      = other.quoteStrings;
+	    mc                = other.mc;
+	    mcDivide          = other.mcDivide;
+	    precision         = other.precision;
 	}
 
 }

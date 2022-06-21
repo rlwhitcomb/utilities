@@ -75,9 +75,9 @@ class SystemValue<V> extends ValueScope
 	private SystemValue(final String nm, final Object obj, final Field field, final Consumer<V> method) {
 	    super(nm, Type.SYSTEM);
 
-	    this.object    = obj;
-	    this.getField  = field;
-	    this.setMethod = method;
+	    object    = obj;
+	    getField  = field;
+	    setMethod = method;
 	}
 
 

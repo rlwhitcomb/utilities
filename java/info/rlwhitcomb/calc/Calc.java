@@ -964,8 +964,8 @@ public class Calc
 
 
 	@Override
-	public void startup(Display display, Map<String, String> properties) {
-	    this.display = display;
+	public void startup(Display displayValue, Map<String, String> properties) {
+	    display = displayValue;
 
 	    try {
 		for (CalcAction action : CalcAction.values()) {
@@ -974,6 +974,7 @@ public class Calc
 
 		IntlProvider provider = new IntlProvider(getClass());
 		Intl.initResources(provider);
+
 		serializer = new BXMLSerializer();
 		serializer.readObject(getClass().getResource("calc.bxml"), provider.getResources());
 		serializer.bind(this);

@@ -42,17 +42,17 @@ public class CalcException extends RuntimeException
 
 	public CalcException(String message, Throwable cause, int lineNo) {
 	    super(message, cause);
-	    this.lineNumber = lineNo;
+	    lineNumber = lineNo;
 	}
 
 	public CalcException(String message, int lineNo) {
 	    super(message);
-	    this.lineNumber = lineNo;
+	    lineNumber = lineNo;
 	}
 
 	public CalcException(Throwable cause, int lineNo) {
 	    super(Exceptions.toString(cause), cause);
-	    this.lineNumber = lineNo;
+	    lineNumber = lineNo;
 	}
 
 	/**

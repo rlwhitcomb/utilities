@@ -66,10 +66,10 @@ class ParameterizedScope extends NestedScope
 	ParameterizedScope(final Type t, final String prefix) {
 	    super(t);
 
-	    this.parameters = new ArrayScope<>();
+	    parameters = new ArrayScope<>();
 
-	    this.arrayName = String.format("%1$s*", prefix);
-	    this.countName = String.format("%1$s#", prefix);
+	    arrayName = String.format("%1$s*", prefix);
+	    countName = String.format("%1$s#", prefix);
 
 	    ParameterValue.put(this, arrayName, parameters);
 	    ParameterValue.put(this, countName, BigInteger.ZERO);

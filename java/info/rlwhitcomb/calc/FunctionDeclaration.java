@@ -105,11 +105,11 @@ class FunctionDeclaration
 	 * @param body The complete parse tree of its declaration.
 	 */
 	FunctionDeclaration(final String name, final ParserRuleContext body) {
-	    this.functionName   = name;
-	    this.functionBody   = body;
-	    this.parameters     = new LinkedHashMap<>();
-	    this.parameterNames = null;
-	    this.hasVarargs     = false;
+	    functionName   = name;
+	    functionBody   = body;
+	    parameters     = new LinkedHashMap<>();
+	    parameterNames = null;
+	    hasVarargs     = false;
 	}
 
 	/**

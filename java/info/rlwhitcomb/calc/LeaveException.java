@@ -49,8 +49,8 @@ public class LeaveException extends RuntimeException
 
 	public LeaveException(final Object value) {
 	    super();
-	    this.leftValue = value;
-	    this.valueIncluded = true;
+	    leftValue = value;
+	    valueIncluded = true;
 	}
 
 	/**

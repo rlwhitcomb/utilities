@@ -62,12 +62,12 @@ class NestedScope extends ObjectScope
 
 	NestedScope(final Type t) {
 	    super(t);
-	    this.enclosingScope = null;
+	    enclosingScope = null;
 	}
 
 	NestedScope(final Type t, final NestedScope outer) {
 	    super(t);
-	    this.enclosingScope = outer;
+	    enclosingScope = outer;
 	}
 
 
@@ -86,7 +86,7 @@ class NestedScope extends ObjectScope
 	 * @param outer The current outer scope.
 	 */
 	void setEnclosingScope(final NestedScope outer) {
-	    this.enclosingScope = outer;
+	    enclosingScope = outer;
 	}
 
 	/**

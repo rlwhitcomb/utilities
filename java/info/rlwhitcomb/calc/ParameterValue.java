@@ -58,7 +58,7 @@ class ParameterValue extends ValueScope
 	private ParameterValue(final String nm, final Object value) {
 	    super(nm, Type.PARAMETER);
 
-	    this.paramValue  = value;
+	    paramValue  = value;
 	}
 
 

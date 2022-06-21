@@ -152,7 +152,7 @@ class LValueContext
 	 * @param ignoreNameCase The new global "ignore case" value.
 	 */
 	void setIgnoreCase(final boolean ignoreNameCase) {
-	    this.ignoreCase = ignoreNameCase;
+	    ignoreCase = ignoreNameCase;
 	}
 
 
@@ -163,12 +163,12 @@ class LValueContext
 	 * @param ignoreNameCase The global "ignore case" value.
 	 */
 	LValueContext(final Object obj, final boolean ignoreNameCase) {
-	    this.parent     = null;
-	    this.varCtx     = null;
-	    this.context    = obj;
-	    this.name       = null;
-	    this.index      = Integer.MIN_VALUE;
-	    this.ignoreCase = ignoreNameCase;
+	    parent     = null;
+	    varCtx     = null;
+	    context    = obj;
+	    name       = null;
+	    index      = Integer.MIN_VALUE;
+	    ignoreCase = ignoreNameCase;
 	}
 
 	/**
@@ -180,12 +180,12 @@ class LValueContext
 	 * @param nm	The name of the map member to reference.
 	 */
 	LValueContext(final LValueContext p, final CalcParser.VarContext ctx, final Object obj, final String nm) {
-	    this.parent     = p;
-	    this.varCtx     = ctx;
-	    this.context    = obj;
-	    this.name       = nm;
-	    this.index      = Integer.MIN_VALUE;
-	    this.ignoreCase = p.ignoreCase;
+	    parent     = p;
+	    varCtx     = ctx;
+	    context    = obj;
+	    name       = nm;
+	    index      = Integer.MIN_VALUE;
+	    ignoreCase = p.ignoreCase;
 	}
 
 	/**
@@ -197,12 +197,12 @@ class LValueContext
 	 * @param idx	The index into the object.
 	 */
 	LValueContext(final LValueContext p, final CalcParser.VarContext ctx, final Object obj, final int idx) {
-	    this.parent     = p;
-	    this.varCtx     = ctx;
-	    this.context    = obj;
-	    this.name       = null;
-	    this.index      = idx;
-	    this.ignoreCase = p.ignoreCase;
+	    parent     = p;
+	    varCtx     = ctx;
+	    context    = obj;
+	    name       = null;
+	    index      = idx;
+	    ignoreCase = p.ignoreCase;
 	}
 
 	/**
@@ -213,12 +213,12 @@ class LValueContext
 	 * @param obj	The new function scope.
 	 */
 	LValueContext(final LValueContext p, final CalcParser.VarContext ctx, final Object obj) {
-	    this.parent     = p;
-	    this.varCtx     = ctx;
-	    this.context    = obj;
-	    this.name       = null;
-	    this.index      = Integer.MIN_VALUE;
-	    this.ignoreCase = p.ignoreCase;
+	    parent     = p;
+	    varCtx     = ctx;
+	    context    = obj;
+	    name       = null;
+	    index      = Integer.MIN_VALUE;
+	    ignoreCase = p.ignoreCase;
 	}
 
 	@Override
@@ -396,9 +396,9 @@ class LValueContext
 			buf.append(' ');
 		    }
 		    buf.replace(index < 0 ? index + str.length() : index, newLen, newValue);
-		    this.context = buf.toString();
+		    context = buf.toString();
 		    // Have to update the parent as well with the new string
-		    parent.putContextObject(visitor, this.context);
+		    parent.putContextObject(visitor, context);
 		}
 		else {
 		    // Should never happen
