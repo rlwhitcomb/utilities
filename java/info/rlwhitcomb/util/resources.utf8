@@ -143,6 +143,8 @@
 #	    #301: New error message for NumericUtil.getZillionName.
 #	01-Jun-2022 (rlwhitcomb)
 #	    #45: New FileUtilities errors for read/write.
+#	24-Jun-2022 (rlwhitcomb)
+#	    #372: Add coloring to more messages.
 #
 
 #
@@ -285,10 +287,10 @@ dir.notExistNotDir	= Directory "%1$s" does not exist, is not a directory, or can
 #
 # From FileUtilities.java
 #
-fileutil.fileTooBig	= The file's size of %1$,d bytes is too big to read.
-fileutil.fileNotFound	= The file "%1$s" cannot be found or cannot be read.
-fileutil.wrongExtension	= The file does not have the expected "%1$s" extension.
-fileutil.outsideDir	= The zip entry '%1$s' is outside the destination directory bounds!
+fileutil.fileTooBig	= The file's size of <x>%1$,d<.> bytes is too big to read.
+fileutil.fileNotFound	= The file <u>%1$s<.> cannot be found or cannot be read.
+fileutil.wrongExtension	= The file does not have the expected <u>%1$s<.> extension.
+fileutil.outsideDir	= The zip entry <u>%1$s<.> is outside the destination directory bounds!
 fileutil.noCSStdOutput	= Standard output always uses the default charset.
 fileutil.noConsole	= Standard output is not available to write to.
 
