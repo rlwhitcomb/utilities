@@ -30,6 +30,8 @@
  *	    #103: Add COMPLEX type.
  *	31-Jan-2022 (rlwhitcomb)
  *	    #212: Add FUNCTION.
+ *	21-Jun-2022 (rlwhitcomb)
+ *	    #314: Add SET.
  */
 package info.rlwhitcomb.calc;
 
@@ -85,6 +87,16 @@ enum Typeof
 	 * One of our object/map objects ({@link ObjectScope}).
 	 */
 	OBJECT,
+
+	/**
+	 * One of our set objects ({@link SetScope}).
+	 */
+	SET,
+
+	/**
+	 * The generic "collection" object (actually only the empty collection).
+	 */
+	COLLECTION,
 
 	/**
 	 * A declared function.

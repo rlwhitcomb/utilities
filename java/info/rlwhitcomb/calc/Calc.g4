@@ -408,6 +408,8 @@
  *	    #45: Add "write" function.
  *	20-Jun-2022 (rlwhitcomb)
  *	    #364: Add optional flag to ":echo" to set output destination.
+ *	21-Jun-2022 (rlwhitcomb)
+ *	    #314: Add syntax for set object.
  */
 
 grammar Calc;
@@ -498,6 +500,7 @@ expr
    : value                               # valueExpr
    | obj                                 # objExpr
    | arr                                 # arrExpr
+   | set                                 # setExpr
    | complex                             # complexValueExpr
    | var                                 # varExpr
    | '(' expr ')'                        # parenExpr
@@ -695,14 +698,16 @@ caseSelector
 
 obj
    : '{' EOL* pair ( ',' EOL* pair ) * EOL* '}'
-   | '{' EOL* '}'
-   | EMPTY_SET
    ;
 
 pair
    : id ':' EOL* expr
    | STRING ':' EOL* expr
    | ISTRING ':' EOL* expr
+   ;
+
+set
+   : '{' EOL* exprList EOL* '}'
    ;
 
 complex
@@ -718,18 +723,19 @@ var
    ;
 
 value
-   : STRING                      # stringValue
-   | ISTRING                     # iStringValue
-   | NUMBER                      # numberValue
-   | NUM_CONST                   # numberConstValue
-   | BIN_CONST                   # binaryValue
-   | OCT_CONST                   # octalValue
-   | HEX_CONST                   # hexValue
-   | KB_CONST                    # kbValue
-   | FRAC_CONST                  # fracValue
-   | ROMAN_CONST                 # romanValue
-   | TIME_CONST                  # timeValue
-   | DATE_CONST                  # dateValue
+   : STRING                       # stringValue
+   | ISTRING                      # iStringValue
+   | NUMBER                       # numberValue
+   | NUM_CONST                    # numberConstValue
+   | BIN_CONST                    # binaryValue
+   | OCT_CONST                    # octalValue
+   | HEX_CONST                    # hexValue
+   | KB_CONST                     # kbValue
+   | FRAC_CONST                   # fracValue
+   | ROMAN_CONST                  # romanValue
+   | TIME_CONST                   # timeValue
+   | DATE_CONST                   # dateValue
+   | ( '{' EOL* '}' | EMPTY_SET ) # emptyObjValue
    ;
 
 formalParamList

@@ -47,6 +47,8 @@
  *	14-Apr-2022 (rlwhitcomb)
  *	    #272: Some (mostly) documentation fixes.
  *	    #273: Move to "math" package.
+ *	21-Jun-2022 (rlwhitcomb)
+ *	    #314: Add SetScope to the mix: conversions to/from sets.
  */
 package info.rlwhitcomb.math;
 
@@ -55,9 +57,12 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.MathContext;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
@@ -268,6 +273,36 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 	}
 
 	/**
+	 * Construct from a set of one or two values.
+	 * <p> With one value, being a set of unique values, this must mean the real
+	 * and imaginary values are the same. With two values, and being a linked set
+	 * (the implementation here) the first value will be the real, and the second
+	 * the imaginary one.
+	 *
+	 * @param set Any set of one or two values.
+	 * @return    The new complex number, if possible.
+	 * @throws IllegalArgumentException if the number of values is wrong.
+	 */
+	public static ComplexNumber fromSet(Set<Object> set) {
+	    if (set == null || set.size() == 0)
+		throw new Intl.IllegalArgumentException("util#complex.noEmptyListMap");
+	    if (set.size() > 2)
+		throw new Intl.IllegalArgumentException("util#complex.tooManyValues");
+
+	    Iterator<Object> iter = set.iterator();
+
+	    if (set.size() == 1) {
+		BigDecimal v = getDecimal(iter.next());
+		return new ComplexNumber(v, v);
+	    }
+
+	    BigDecimal r = getDecimal(iter.next());
+	    BigDecimal i = getDecimal(iter.next());
+
+	    return new ComplexNumber(r, i);
+	}
+
+	/**
 	 * Construct from a polar representation (r, theta) by doing the math to convert
 	 * to rectangular form: <code>x = r * cos(theta); y = r * sin(theta)</code>.
 	 *
@@ -409,6 +444,24 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 	    map.put(IMAG_KEY, i());
 
 	    return map;
+	}
+
+	/**
+	 * Convert to a set with two values.
+	 * TODO: what if the values are the same? There would be only one value
+	 * but what does that mean? It means we take the one value as both the real
+	 * and imaginary value.
+	 *
+	 * @return {@code Set} with either one value (for both real and imaginary)
+	 * or two values.
+	 */
+	public Set<Object> toSet() {
+	    Set<Object> set = new LinkedHashSet<>(2);
+
+	    set.add(r());
+	    set.add(i());
+
+	    return set;
 	}
 
 
@@ -729,6 +782,11 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 		@SuppressWarnings("unchecked")
 		Map<String, Object> map = (Map<String, Object>) value;
 		return fromMap(map);
+	    }
+	    if (value instanceof Set) {
+		@SuppressWarnings("unchecked")
+		Set<Object> set = (Set<Object>) value;
+		return fromSet(set);
 	    }
 
 	    BigDecimal dValue = getDecimal(value);

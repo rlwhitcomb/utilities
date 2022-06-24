@@ -158,6 +158,8 @@
  *	    #301: Fix "toIntegerValue" for BigDecimal input.
  *	04-Jun-2022 (rlwhitcomb)
  *	    #351: Change spacing of "{ }" in statement blocks.
+ *	21-Jun-2022 (rlwhitcomb)
+ *	    #314: Add processing of SetScope in all applicable places.
  */
 package info.rlwhitcomb.calc;
 
@@ -170,6 +172,8 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -518,6 +522,10 @@ public final class CalcUtil
 		name = "object";
 	    else if (value instanceof ArrayScope)
 		name = "array";
+	    else if (value instanceof SetScope)
+		name = "set";
+	    else if (value instanceof CollectionScope)
+		name = "collection";
 
 	    return name;
 	}
@@ -762,6 +770,13 @@ public final class CalcUtil
 	    else if (value instanceof ObjectScope) {
 		return Boolean.valueOf(((ObjectScope) value).size() != 0);
 	    }
+	    else if (value instanceof SetScope) {
+		return Boolean.valueOf(((SetScope) value).size() != 0);
+	    }
+	    else if (value instanceof CollectionScope) {
+		// This is always the empty collection
+		return Boolean.FALSE;
+	    }
 	    else if (value instanceof ValueScope) {
 		value = ((ValueScope) value).getValue();
 	    }
@@ -882,6 +897,12 @@ public final class CalcUtil
 	    else if (result instanceof ArrayScope) {
 		return toStringValue(visitor, ctx, ((ArrayScope) result).list(), quotes, pretty, extraSpace, separators, indent, increment);
 	    }
+	    else if (result instanceof SetScope) {
+		return toStringValue(visitor, ctx, ((SetScope) result).set(), quotes, pretty, extraSpace, separators, indent, increment);
+	    }
+	    else if (result instanceof CollectionScope) {
+		return extraSpace ? "{ }" : "{}";
+	    }
 
 	    // Any other type, just get the string representation
 	    return result.toString();
@@ -981,6 +1002,52 @@ public final class CalcUtil
 	}
 
 	/**
+	 * The recursive method used to convert a set to a string.
+	 *
+	 * @param visitor	The outermost visitor object that is being used to calculate everything.
+	 * @param ctx		The parsing context, for error reporting.
+	 * @param set		The input set to be converted.
+	 * @param quotes	Whether or not actual string objects should be double-quoted in the result.
+	 * @param pretty	Whether or not to "pretty" print the contents of an object (map) or list (array).
+	 * @param extraSpace	Whether to add extra space between values.
+	 * @param separators	Should thousands separators be used for numeric values?
+	 * @param indent	The recursive indentation for pretty printing.
+	 * @param increment	The increment for each level of indentation.
+	 * @return		The formatted string representation of the input list.
+	 */
+	public static String toStringValue(
+		final CalcObjectVisitor visitor,
+		final ParserRuleContext ctx,
+		final Set<Object> set,
+		final boolean quotes,
+		final boolean pretty,
+		final boolean extraSpace,
+		final boolean separators,
+		final String indent,
+		final String increment)
+	{
+	    String myIndent = indent + (increment == null ? DEFAULT_INCREMENT : increment);
+	    StringBuilder buf = new StringBuilder();
+	    if (set.size() > 0) {
+		boolean comma = false;
+		buf.append(pretty ? "{\n" : extraSpace ? "{ " : "{");
+		for (Object value : set) {
+		    if (comma)
+			buf.append(pretty ? ",\n" : extraSpace ? ", " : ",");
+		    else
+			comma = true;
+		    if (pretty) buf.append(myIndent);
+		    buf.append(toStringValue(visitor, ctx, value, quotes, pretty, extraSpace, separators, myIndent, increment));
+		}
+		buf.append(pretty ? "\n" + indent + "}" : extraSpace ? " }" : "}");
+	    }
+	    else {
+		buf.append(extraSpace ? "{ }" : "{}");
+	    }
+	    return buf.toString();
+	}
+
+	/**
 	 * Compute the "length" of something.
 	 * <p> Differs depending on the object:
 	 * <ul><li>{@code Object} = (possibly recursive) number of entries</li>
@@ -1029,7 +1096,7 @@ public final class CalcUtil
 	    }
 	    if (obj instanceof ArrayScope) {
 		@SuppressWarnings("unchecked")
-		ArrayScope array = (ArrayScope) obj;
+		ArrayScope<Object> array = (ArrayScope<Object>) obj;
 		if (recursive) {
 		    int len = 0;
 		    for (Object listObj : array.list()) {
@@ -1040,9 +1107,7 @@ public final class CalcUtil
 		    }
 		    return len;
 		}
-		else {
-		    return array.size();
-		}
+		return array.size();
 	    }
 	    if (obj instanceof ObjectScope) {
 		@SuppressWarnings("unchecked")
@@ -1057,9 +1122,25 @@ public final class CalcUtil
 		    }
 		    return len;
 		}
-		else {
-		    return map.size();
+		return map.size();
+	    }
+	    if (obj instanceof SetScope) {
+		@SuppressWarnings("unchecked")
+		SetScope<Object> set = (SetScope<Object>) obj;
+		if (recursive) {
+		    int len = 0;
+		    for (Object setObj : set.set()) {
+			if (setObj instanceof Scope)
+			    len += length(visitor, setObj, ctx, recursive);
+			else
+			    len++;	// Note: this will count null values as one
+		    }
+		    return len;
 		}
+		return set.size();
+	    }
+	    if (obj instanceof CollectionScope) {
+		return 0;
 	    }
 
 	    throw new CalcExprException(ctx, "%calc#unknownType", obj.getClass().getSimpleName());
@@ -1146,6 +1227,49 @@ public final class CalcUtil
 			: s1.compareTo(s2));
 	}
 
+
+	/**
+	 * A comparator that uses {@code compareValues} to do the comparison.
+	 */
+	private static class ObjectComparator implements Comparator<Object>
+	{
+		private CalcObjectVisitor visitor;
+		private ParserRuleContext ctx;
+		private MathContext mc;
+		private boolean ignoreCase;
+
+		ObjectComparator(
+			final CalcObjectVisitor v,
+			final ParserRuleContext c,
+			final MathContext m,
+			final boolean ignore)
+		{
+		    visitor = v;
+		    ctx = c;
+		    mc = m;
+		    ignoreCase = ignore;
+		}
+
+		@Override
+		public int compare(final Object o1, final Object o2) {
+		    return compareValues(visitor, ctx, ctx, o1, o2, mc, false, true, ignoreCase, true);
+		}
+	}
+
+
+	/**
+	 * Sort a list according to our {@code compareValues} method.
+	 *
+	 * @param visitor	The visitor used to evaluate expressions.
+	 * @param list		The list that will be sorted (in place).
+	 * @param ctx		The parse tree (source) of the list.
+	 * @param mc		Math context used to round decimal values.
+	 * @param ignore	Whether the string comparison is case-sensitive or not.
+	 */
+	public static void sort(final CalcObjectVisitor visitor, final List<Object> list,
+		final ParserRuleContext ctx, final MathContext mc, final boolean ignore) {
+	    Collections.sort(list, new ObjectComparator(visitor, ctx, mc, ignore));
+	}
 
 	/**
 	 * Compare two objects of possibly differing types.
@@ -1261,9 +1385,9 @@ public final class CalcUtil
 	    }
 	    else if (e1 instanceof ArrayScope && e2 instanceof ArrayScope) {
 		@SuppressWarnings("unchecked")
-		ArrayScope list1 = (ArrayScope) e1;
+		ArrayScope<Object> list1 = (ArrayScope<Object>) e1;
 		@SuppressWarnings("unchecked")
-		ArrayScope list2 = (ArrayScope) e2;
+		ArrayScope<Object> list2 = (ArrayScope<Object>) e2;
 		int size1 = list1.size();
 		int size2 = list2.size();
 
@@ -1321,12 +1445,38 @@ public final class CalcUtil
 		// Finally, if no differences were found, the maps are the same
 		return 0;
 	    }
+	    else if (e1 instanceof SetScope && e2 instanceof SetScope) {
+		@SuppressWarnings("unchecked")
+		SetScope<Object> set1 = (SetScope<Object>) e1;
+		@SuppressWarnings("unchecked")
+		SetScope<Object> set2 = (SetScope<Object>) e2;
+		int size1 = set1.size();
+		int size2 = set2.size();
+
+		if (size1 != size2)
+		    return Integer.signum(size1 - size2);
+
+		// Sort the two sets and compare the values in sorted order
+		List<Object> list1 = new ArrayList<Object>(set1.set());
+		List<Object> list2 = new ArrayList<Object>(set2.set());
+
+		sort(visitor, list1, ctx1, mc, ignoreCase);
+		sort(visitor, list2, ctx2, mc, ignoreCase);
+
+		// Iterate through the set and compare the values in order
+		for (int i = 0; i < list1.size(); i++) {
+		    int ret = compareValues(visitor, ctx1, ctx2, list1.get(i), list2.get(i), mc, strict, allowNulls, ignoreCase, naturalOrder);
+		    if (ret != 0)
+			return ret;
+		}
+
+		return 0;
+	    }
+	    else if (e1 instanceof CollectionScope && e2 instanceof CollectionScope) {
+		return 0;
+	    }
 
 	    throw new CalcExprException(ctx1, "%calc#unknownType", e1.getClass().getSimpleName());
-	}
-
-	private static boolean isObject(final Object obj) {
-	    return obj instanceof ObjectScope || obj instanceof ArrayScope;
 	}
 
 	private static Object concatObjects(final Object obj1, final Object obj2) {
@@ -1343,6 +1493,9 @@ public final class CalcUtil
 
 		    result.addAll(arr2.list());
 		}
+		else if (obj2.equals(CollectionScope.EMPTY)) {
+		    ;
+		}
 		else {
 		    result.add(obj2);
 		}
@@ -1358,11 +1511,38 @@ public final class CalcUtil
 
 		    result.putAll(map2);
 		}
+		else if (obj2.equals(CollectionScope.EMPTY)) {
+		    ;
+		}
 		else {
 		    result.setValue(result.size(), obj2);
 		}
 
 		ret = result;
+	    }
+	    else if (obj1 instanceof SetScope) {
+		@SuppressWarnings("unchecked")
+		SetScope<Object> set1 = (SetScope<Object>) obj1;
+		SetScope<Object> result = new SetScope<>(set1);
+
+		if (obj2 instanceof SetScope) {
+		    @SuppressWarnings("unchecked")
+		    SetScope<Object> set2 = (SetScope<Object>) obj2;
+
+		    result.addAll(set2);
+		}
+		else if (obj2.equals(CollectionScope.EMPTY)) {
+		    ;
+		}
+		else {
+		    result.add(obj2);
+		}
+
+		ret = result;
+	    }
+	    else if (obj1 instanceof CollectionScope) {
+		// This has to be the EMPTY object
+		ret = obj2;
 	    }
 
 	    return ret;
@@ -1397,7 +1577,7 @@ public final class CalcUtil
 	    Object v2 = visitor.evaluate(ctx2, e2);
 
 	    // Concatenate objects if the first is an object
-	    if (isObject(v1)) {
+	    if (v1 instanceof CollectionScope) {
 		return concatObjects(v1, v2);
 	    }
 
@@ -1545,6 +1725,10 @@ public final class CalcUtil
 		return Typeof.ARRAY;
 	    if (obj instanceof ObjectScope)
 		return Typeof.OBJECT;
+	    if (obj instanceof SetScope)
+		return Typeof.SET;
+	    if (obj instanceof CollectionScope)
+		return Typeof.COLLECTION;
 	    if (obj instanceof FunctionDeclaration)
 		return Typeof.FUNCTION;
 // TODO: "date" or "time" ??
@@ -1602,6 +1786,11 @@ public final class CalcUtil
 			    ObjectScope object = (ObjectScope) castValue;
 			    castValue = object.map();
 			}
+			else if (castValue instanceof SetScope) {
+			    @SuppressWarnings("unchecked")
+			    SetScope<Object> set = (SetScope<Object>) castValue;
+			    castValue = set.set();
+			}
 
 			castValue = ComplexNumber.valueOf(castValue);
 		    }
@@ -1631,6 +1820,16 @@ public final class CalcUtil
 			ObjectScope obj = new ObjectScope();
 			obj.setValue("_", value); // Name??
 			castValue = obj;
+		    }
+		    break;
+		case SET:
+		    if (value instanceof ComplexNumber) {
+			ComplexNumber c = (ComplexNumber) value;
+			castValue = new SetScope<Object>(c.toSet());
+		    }
+		    else if (!(value instanceof SetScope)) {
+			SetScope<Object> set = new SetScope<>(value);
+			castValue = set;
 		    }
 		    break;
 		case FUNCTION:
@@ -1974,7 +2173,7 @@ public final class CalcUtil
 		    if (value != null) {
 			value = visitor.evaluate(ctx, value);
 
-			if (value instanceof ObjectScope || value instanceof ArrayScope) {
+			if (value instanceof CollectionScope) {
 			    newValue = copyAndTransform(visitor, ctx, value, mapper);
 			}
 			else {
@@ -2007,7 +2206,7 @@ public final class CalcUtil
 		    if (value != null) {
 			value = visitor.evaluate(ctx, value);
 
-			if (value instanceof ObjectScope || value instanceof ArrayScope) {
+			if (value instanceof CollectionScope) {
 			    newValue = copyAndTransform(visitor, ctx, value, mapper);
 			}
 			else {
@@ -2021,6 +2220,34 @@ public final class CalcUtil
 		}
 
 		return result;
+	    }
+	    else if (obj instanceof SetScope) {
+		@SuppressWarnings("unchecked")
+		SetScope<Object> set = (SetScope<Object>) obj;
+		SetScope<Object> result = new SetScope<>();
+
+		for (Object value : set.set()) {
+		    Object newValue = null;
+		    if (value != null) {
+			value = visitor.evaluate(ctx, value);
+
+			if (value instanceof CollectionScope) {
+			    newValue = copyAndTransform(visitor, ctx, value, mapper);
+			}
+			else {
+			    newValue = mapper.apply(value);
+			}
+		    }
+
+		    if (newValue != null || mapper.copyNull()) {
+			result.add(newValue);
+		    }
+		}
+
+		return result;
+	    }
+	    else if (obj instanceof CollectionScope) {
+		return obj;
 	    }
 
 	    // For all other scalar values, just get the string value and apply the transform
@@ -2057,7 +2284,7 @@ public final class CalcUtil
 		}
 		else {
 		    @SuppressWarnings("unchecked")
-		    ArrayScope array = (ArrayScope) value;
+		    ArrayScope<Object> array = (ArrayScope<Object>) value;
 		    for (Object listObj : array.list()) {
 			buildValueList(visitor, ctx, listObj, objectList, conversion, level + 1);
 		    }
@@ -2074,6 +2301,21 @@ public final class CalcUtil
 			buildValueList(visitor, ctx, mapObj, objectList, conversion, level + 1);
 		    }
 		}
+	    }
+	    else if (value instanceof SetScope) {
+		if (conversion == Conversion.UNCHANGED && level > 0) {
+		    objectList.add(value);
+		}
+		else {
+		    @SuppressWarnings("unchecked")
+		    SetScope<Object> set = (SetScope<Object>) value;
+		    for (Object setObj : set.set()) {
+			buildValueList(visitor, ctx, setObj, objectList, conversion, level + 1);
+		    }
+		}
+	    }
+	    else if (value instanceof CollectionScope) {
+		// This is always an empty object, so nothing to do here
 	    }
 	    else {
 		switch (conversion) {

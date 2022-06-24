@@ -598,6 +598,8 @@
  *	    #191: Change "reverse" to return a new (modified) array as the result.
  *	20-Jun-2022 (rlwhitcomb)
  *	    #364: Allow ":echo" to output different places.
+ *	23-Jun-2022 (rlwhitcomb)
+ *	    #314: Add processing for sets.
  */
 package info.rlwhitcomb.calc;
 
@@ -2265,7 +2267,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		// For large numbers it takes a significant amount of time just to convert
 		// to a string, so don't even try if we don't need to for display
 		if (!settings.silent)
-		    resultString = toStringValue(this, ctx, result, settings.quoteStrings, separators);
+		    resultString = toStringValue(this, expr, result, settings.quoteStrings, separators);
 	    }
 
 	    if (!settings.silent) displayer.displayResult(exprString, resultString);
@@ -2352,6 +2354,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			    @SuppressWarnings("unchecked")
 			    ArrayScope<Object> array = (ArrayScope<Object>) obj;
 			    iter = array.list().iterator();
+			}
+			else if (obj instanceof SetScope) {
+			    stepWise = false;
+			    @SuppressWarnings("unchecked")
+			    SetScope<Object> set = (SetScope<Object>) obj;
+			    iter = set.set().iterator();
 			}
 			else if (obj instanceof String) {
 			    stepWise = false;
@@ -2824,6 +2832,19 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		}
 	   }
 	   return list;
+	}
+
+	@Override
+	public Object visitSetExpr(CalcParser.SetExprContext ctx) {
+	    CalcParser.ExprListContext exprList = ctx.set().exprList();
+	    SetScope<Object> set = new SetScope<>();
+	    if (exprList != null) {
+		for (CalcParser.ExprContext expr : exprList.expr()) {
+		    Object value = evaluate(expr);
+		    set.add(value);
+		}
+	    }
+	    return set;
 	}
 
 	@Override
@@ -3765,13 +3786,19 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    if (!forJoin) {
 		if (value instanceof ArrayScope) {
 		    @SuppressWarnings("unchecked")
-		    ArrayScope list = (ArrayScope) value;
+		    ArrayScope<Object> list = (ArrayScope<Object>) value;
 		    return list.size() > 0 ? getFirstValue(eCtx, list.getValue(0), forJoin) : null;
 		}
 		else if (value instanceof ObjectScope) {
 		    @SuppressWarnings("unchecked")
 		    ObjectScope map = (ObjectScope) value;
 		    Iterator<Object> iter = map.values().iterator();
+		    return iter.hasNext() ? getFirstValue(eCtx, iter.next(), forJoin) : null;
+		}
+		else if (value instanceof SetScope) {
+		    @SuppressWarnings("unchecked")
+		    SetScope<Object> set = (SetScope<Object>) value;
+		    Iterator<Object> iter = set.set().iterator();
 		    return iter.hasNext() ? getFirstValue(eCtx, iter.next(), forJoin) : null;
 		}
 	    }
@@ -3804,7 +3831,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    if (value instanceof ArrayScope) {
 		@SuppressWarnings("unchecked")
-		ArrayScope array = (ArrayScope) value;
+		ArrayScope<Object> array = (ArrayScope<Object>) value;
 		if (forJoin) {
 		    objectList.add(array);
 		}
@@ -3823,6 +3850,18 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		else {
 		    for (Object mapObj : object.values()) {
 			buildFlatMap(ctx, mapObj, objectList, isString, forJoin);
+		    }
+		}
+	    }
+	    else if (value instanceof SetScope) {
+		@SuppressWarnings("unchecked")
+		SetScope<Object> set = (SetScope<Object>) value;
+		if (forJoin) {
+		    objectList.add(set);
+		}
+		else {
+		    for (Object setObj : set.set()) {
+			buildFlatMap(ctx, setObj, objectList, isString, forJoin);
 		    }
 		}
 	    }
@@ -3955,8 +3994,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    // three or more, the first N - 1 are joined by the Nth (string) value
 	    if (length == 1) {
 		Object obj0 = objects.get(0);
-		// One map or list => concatenate all objects in it
-		if (obj0 instanceof ArrayScope || obj0 instanceof ObjectScope) {
+		// One map, list, or set => concatenate all objects in it
+		if (obj0 instanceof CollectionScope) {
 		    objects.clear();
 		    buildFlatMap(ctx, obj0, objects, true, false);
 		    for (Object obj : objects) {
@@ -3969,8 +4008,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    else if (length == 2) {
 		Object obj0 = objects.get(0);
 		Object obj1 = objects.get(1);
-		if (obj0 instanceof ArrayScope || obj0 instanceof ObjectScope) {
-		    // One map or list, plus a join expression
+		if (obj0 instanceof CollectionScope) {
+		    // One map, list, or set, plus a join expression
 		    objects.clear();
 		    buildFlatMap(ctx, obj0, objects, true, false);
 		    for (int i = 0; i < objects.size(); i++) {
@@ -4076,6 +4115,17 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		size = list.size();
 
 		ret = indexOf(this, e0ctx, e1ctx, list, searchObj, start, settings.mc);
+	    }
+	    else if (sourceObj instanceof SetScope) {
+		@SuppressWarnings("unchecked")
+		SetScope<Object> set = (SetScope<Object>) sourceObj;
+
+		boolean contains = set.set().contains(searchObj);
+		if (!contains)
+		    return null;
+
+		// This is different: for a set we return null or one
+		return BigInteger.ONE;
 	    }
 	    else {
 		String sourceString = toNonNullString(e0ctx, sourceObj);
@@ -4282,6 +4332,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    else if (value instanceof ObjectScope) {
 		arrayLen = ((ObjectScope) value).size();
 	    }
+	    else if (value instanceof SetScope) {
+		arrayLen = ((SetScope) value).size();
+	    }
 	    else {
 		// Any simple object behaves the same way as "substr"
 		return substring(value, valueCtx, e2ctx, e3ctx);
@@ -4313,8 +4366,15 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    result.add(val);
 		}
 	    }
-	    else {
+	    else if (value instanceof ObjectScope) {
 		Object[] valueArray = ((ObjectScope) value).values().toArray();
+		for (int index = beginIndex; index < endIndex; index++) {
+		    Object val = valueArray[index];
+		    result.add(val);
+		}
+	    }
+	    else {
+		Object[] valueArray = ((SetScope) value).set().toArray();
 		for (int index = beginIndex; index < endIndex; index++) {
 		    Object val = valueArray[index];
 		    result.add(val);
@@ -4457,24 +4517,6 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 	}
 
-	private class ObjectComparator implements Comparator<Object>
-	{
-		private CalcObjectVisitor visitor;
-		private ParserRuleContext ctx;
-		private boolean ignoreCase;
-
-		ObjectComparator(CalcObjectVisitor v, ParserRuleContext c, boolean ignore) {
-		    visitor    = v;
-		    ctx        = c;
-		    ignoreCase = ignore;
-		}
-
-		@Override
-		public int compare(Object o1, Object o2) {
-		    return CalcUtil.compareValues(visitor, ctx, ctx, o1, o2, settings.mc, false, true, ignoreCase, true);
-		}
-	}
-
 	@Override
 	public Object visitSortExpr(CalcParser.SortExprContext ctx) {
 	    CalcParser.Expr1Context e1ctx = ctx.expr1();
@@ -4494,7 +4536,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    exprs.add(arrCtx);
 	    List<Object> values = buildValueList(this, exprs, Conversion.UNCHANGED);
 
-	    Collections.sort(values, new ObjectComparator(this, arrCtx, caseInsensitive));
+	    sort(this, values, arrCtx, settings.mc, caseInsensitive);
 
 	    return new ArrayScope<Object>(values);
 	}
@@ -4533,8 +4575,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		LinkedHashSet<Object> set = new LinkedHashSet<>(list.list());
 		return new ArrayScope<Object>(set);
 	    }
-	    else if (value instanceof ObjectScope) {
-		// Well, this is embarrassing - the keys already have to be unique
+	    else if (value instanceof ObjectScope || value instanceof SetScope) {
+		// Well, this is embarrassing - the keys or set values already have to be unique
 		// so there is no point to this
 		return value;
 	    }
@@ -4876,6 +4918,11 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			ObjectScope obj = (ObjectScope) e;
 			return ComplexNumber.valueOf(obj.map());
 		    }
+		    else if (e instanceof SetScope) {
+			@SuppressWarnings("unchecked")
+			SetScope<Object> set = (SetScope<Object>) e;
+			return ComplexNumber.valueOf(set.set());
+		    }
 		    else {
 			return ComplexNumber.valueOf(e);
 		    }
@@ -5156,12 +5203,22 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    try {
 		if (outputObj != null) {
+		    String eol = Environment.lineSeparator();
+
 		    if (outputObj instanceof ArrayScope) {
-			String eol = Environment.lineSeparator();
 			@SuppressWarnings("unchecked")
 			ArrayScope<Object> array = (ArrayScope<Object>) outputObj;
 			StringBuilder buf = new StringBuilder();
 			for (Object obj : array.list()) {
+			    buf.append(toNonNullString(expr, obj)).append(eol);
+			}
+			seq = buf;
+		    }
+		    else if (outputObj instanceof SetScope) {
+			@SuppressWarnings("unchecked")
+			SetScope<Object> set = (SetScope<Object>) outputObj;
+			StringBuilder buf = new StringBuilder();
+			for (Object obj : set.set()) {
 			    buf.append(toNonNullString(expr, obj)).append(eol);
 			}
 			seq = buf;
@@ -5233,8 +5290,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    String pattern = getStringValue(expr2.expr(1));
 	    Pattern p = Pattern.compile(pattern);
 
-	    // For lists and objects, return a similar object with only the matching keys or values
-	    if (input instanceof ObjectScope || input instanceof ArrayScope) {
+	    // For lists, objects, and sets, return a similar object with only the matching keys or values
+	    if (input instanceof CollectionScope) {
 		return copyAndTransform(this, inputExpr, input, new MatchesTransformer(inputExpr, p));
 	    }
 	    else {
@@ -5798,6 +5855,11 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    catch (DateTimeParseException | NumberFormatException ex) {
 		throw new CalcExprException(ex, ctx);
 	    }
+	}
+
+	@Override
+	public Object visitEmptyObjValue(CalcParser.EmptyObjValueContext ctx) {
+	    return CollectionScope.EMPTY;
 	}
 
 	@Override

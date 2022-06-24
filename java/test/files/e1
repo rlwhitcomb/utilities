@@ -686,6 +686,22 @@ loop codes "⅛34" __
 loop chars "⅛34" {__}
 
 #
+# Sets
+#
+set1 = {}
+typeof set1
+set1 += { 2 }
+typeof set1
+set1 += 2
+set1 += { 3 }
+set1 += { 1, 2 }
+length set1
+scale set1
+3 within set1
+0 in set1
+index(set1, 2)
+
+#
 # Fractions
 #
 :rational on
@@ -845,6 +861,10 @@ input_object = [
   { fname: 'Cecile', mname: 'R', lname: 'Mayshawn', addr1: '14235 Sierra Rd', addr2: 'Rte 17 Box 12', city: 'Rural', state: 'OR' }
 ]
 matches(input_object, '.+name')@j
+input_set = { "John Smith", "Mary Smith", "Jane Smith", "Bob Smith", "Fred Jones", "Alicia Jones" }
+matches(input_set, '.+Smith')
+set_name = 'Jane Smith'
+set_name in input_set
 
 #
 # Defining functions inside blocks

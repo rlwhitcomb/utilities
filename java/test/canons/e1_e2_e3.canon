@@ -771,6 +771,18 @@
 >__ -> "⅛"
 >__ -> "3"
 >__ -> "4"
+>set1 = {} -> { }
+>typeof set1 -> "collection"
+>set1 += {2} -> { 2 }
+>typeof set1 -> "set"
+>set1 += 2 -> { 2 }
+>set1 += {3} -> { 2, 3 }
+>set1 += {1, 2} -> { 2, 3, 1 }
+>length set1 -> 3
+>scale set1 -> 3
+>3 within set1 -> true
+>0 in set1 -> false
+>index (set1, 2) -> 1
 >Calculation mode set to “RATIONAL”.
 >4 / 5 < 7 / 9 -> false
 >1 / 3 * 4 / 5 @F -> 4 / 15
@@ -898,6 +910,10 @@
 >    lname: "Mayshawn"
 >  }
 >]
+>input_set = {"John Smith", "Mary Smith", "Jane Smith", "Bob Smith", "Fred Jones", "Alicia Jones"} -> { "John Smith", "Mary Smith", "Jane Smith", "Bob Smith", "Fred Jones", "Alicia Jones" }
+>matches (input_set, '.+Smith') -> { "John Smith", "Mary Smith", "Jane Smith", "Bob Smith" }
+>set_name = 'Jane Smith' -> "Jane Smith"
+>set_name in input_set -> true
 >Precision is now “34” digits.
 >Defining function “help(n)” = 10 ** -n
 >Precision is now “one” digit.

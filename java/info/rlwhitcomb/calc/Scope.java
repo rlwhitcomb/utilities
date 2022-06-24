@@ -42,6 +42,8 @@
  *	    and "toString" in here, let the appropriate subclasses override.
  *	25-May-2022 (rlwhitcomb)
  *	    #348: Make the enum package private.
+ *	21-Jun-2022 (rlwhitcomb)
+ *	    #314: Add SET type.
  */
 package info.rlwhitcomb.calc;
 
@@ -59,11 +61,17 @@ class Scope
 		/** The global symbol table. */
 		GLOBAL,
 
+		/** Generic collection. */
+		COLLECTION,
+
 		/** A user-defined object (map). */
 		OBJECT,
 
 		/** A user-defined array (list). */
 		ARRAY,
+
+		/** A user-defined set. */
+		SET,
 
 		/** A {@code LOOP} statement block. */
 		LOOP,

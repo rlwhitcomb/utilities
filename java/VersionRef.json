@@ -3,6 +3,10 @@
 //======================
 
 [
+    { version: '2.13.0', date: d'2022-06-22',
+      issues: [ 314 ],
+      comment: 'Add "set" as a basic type.'
+    },
     { version: '2.12.25', date: d'2022-06-20',
       issues: [ 364 ],
       comment: 'Allow ":echo" to output different places.'

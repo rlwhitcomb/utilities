@@ -45,6 +45,8 @@
  *	    #348: Make all methods package private.
  *	11-Jun-2022 (rlwhitcomb)
  *	    #365: Add "immutable" flag and checks.
+ *	21-Jun-2022 (rlwhitcomb)
+ *	    #314: Derive from CollectionScope.
  */
 package info.rlwhitcomb.calc;
 
@@ -60,17 +62,12 @@ import info.rlwhitcomb.util.Intl;
  *
  * @param <T> Type of value stored in the array.
  */
-class ArrayScope<T> extends Scope
+class ArrayScope<T> extends CollectionScope
 {
 	/**
 	 * The list / array of values contained in this scope, accessible by index value.
 	 */
 	private List<T> values;
-
-	/**
-	 * Flag to indicate the object should not be modified (after initial construction).
-	 */
-	private boolean immutable;
 
 
 	/**
@@ -79,7 +76,6 @@ class ArrayScope<T> extends Scope
 	ArrayScope() {
 	    super(Type.ARRAY);
 	    values = new ArrayList<>();
-	    immutable = false;
 	}
 
 	/**
@@ -94,7 +90,6 @@ class ArrayScope<T> extends Scope
 	    for (T value : initialValues) {
 		values.add(value);
 	    }
-	    immutable = false;
 	}
 
 	/**
@@ -114,16 +109,6 @@ class ArrayScope<T> extends Scope
 	ArrayScope(final Collection<? extends T> initialValues) {
 	    super(Type.ARRAY);
 	    values = new ArrayList<>(initialValues);
-	    immutable = false;
-	}
-
-	/**
-	 * Sets the flag to make this object immutable (or not).
-	 *
-	 * @param value New value for the {@link #immutable} flag.
-	 */
-	void setImmutable(final boolean value) {
-	    immutable = value;
 	}
 
 	/**
@@ -133,7 +118,7 @@ class ArrayScope<T> extends Scope
 	 * @throws IllegalStateException if the array is marked immumtable.
 	 */
 	void checkImmutable() {
-	    if (immutable)
+	    if (isImmutable())
 		throw new Intl.IllegalStateException("calc#immutableArray");
 	}
 

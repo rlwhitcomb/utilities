@@ -34,6 +34,8 @@
  *	    Now move back to "ValueScope".
  *	20-Jun-2022 (rlwhitcomb)
  *	    #365: Recursively set "immutable" flag in objects and lists as part of "define".
+ *	23-Jun-2022 (rlwhitcomb)
+ *	    #314: Set processing.
  */
 package info.rlwhitcomb.calc;
 
@@ -97,6 +99,15 @@ class ConstantValue extends ValueScope
 		    setImmutable(list.getValue(index));
 		}
 	    }
+	    else if (value instanceof SetScope) {
+		@SuppressWarnings("unchecked")
+		SetScope<Object> set = (SetScope<Object>) value;
+		set.setImmutable(true);
+
+		for (Object obj : set.set()) {
+		    setImmutable(obj);
+		}
+	    }
 	}
 
 	/**
@@ -110,7 +121,7 @@ class ConstantValue extends ValueScope
 	    ConstantValue constant = new ConstantValue(nm, value);
 	    scope.setValue(nm, constant);
 
-	    if (value instanceof ObjectScope || value instanceof ArrayScope) {
+	    if (value instanceof CollectionScope) {
 		setImmutable(value);
 	    }
 	}

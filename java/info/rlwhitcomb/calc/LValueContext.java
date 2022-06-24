@@ -102,6 +102,8 @@
  *	    Make parameters final.
  *	04-Jun-2022 (rlwhitcomb)
  *	    #361: Don't access the LHS of an array object twice during dereference.
+ *	23-Jun-2022 (rlwhitcomb)
+ *	    #314: Turn the empty collection into an ObjectScope when necessary.
  */
 package info.rlwhitcomb.calc;
 
@@ -484,25 +486,32 @@ class LValueContext
 		LValueContext arrLValue = getLValue(visitor, arrVarCtx.var(), lValue);
 		Object arrValue = arrLValue.getContextObject(visitor);
 
+		if (arrValue != null && arrValue.equals(CollectionScope.EMPTY)) {
+		    // a = {}; a[x] = y; So, convert the empty object to a map
+		    arrValue = new ObjectScope();
+		    arrLValue.putContextObject(visitor, arrValue);
+		}
+
+		CalcParser.ExprContext expr = arrVarCtx.expr();
+
 		// Okay, here the "arrValue" could be null, an array, a string, OR an object (map)
 		if (arrValue != null && arrValue instanceof ObjectScope) {
 		    // The "index" expression should be a string (meaning a member name)
 		    // but it could be a numeric index into the key set (return from "index")
-		    Object indexValue = visitor.evaluate(arrVarCtx.expr());
+		    Object indexValue = visitor.evaluate(expr);
 
 		    if (indexValue instanceof Number) {
-			int index = CalcUtil.toIntValue(visitor, indexValue, MathContext.DECIMAL128, arrVarCtx.expr());
+			int index = CalcUtil.toIntValue(visitor, indexValue, MathContext.DECIMAL128, expr);
 			return new LValueContext(arrLValue, arrVarCtx, arrValue, index);
 		    }
 		    else {
-			String memberName = visitor.toNonNullString(arrVarCtx.expr(), indexValue);
+			String memberName = visitor.toNonNullString(expr, indexValue);
 			return arrLValue.makeMapLValue(visitor, arrVarCtx, arrValue, memberName);
 		    }
 		}
 
 		// By now, the object must either be null, a list, a string, or a simple value (an error)
 		// but we should be able to safely evaluate the index expression as an integer
-		CalcParser.ExprContext expr = arrVarCtx.expr();
 		int index;
 
 		if (expr == null) {

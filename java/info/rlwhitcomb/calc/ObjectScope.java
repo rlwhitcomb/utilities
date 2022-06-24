@@ -59,6 +59,8 @@
  *	25-May-2022 (rlwhitcomb)
  *	    #348: Return value from "setValue" methods.
  *	    Make all methods package private.
+ *	21-Jun-2022 (rlwhitcomb)
+ *	    #314: Derive from CollectionScope.
  */
 package info.rlwhitcomb.calc;
 
@@ -80,19 +82,13 @@ import info.rlwhitcomb.util.Intl;
 /**
  * Base class of scopes that have variables or members with values.
  */
-class ObjectScope extends Scope
+class ObjectScope extends CollectionScope
 {
 	/**
 	 * The symbol table for this object (global or local), kept in order of declaration
 	 * for such things as ":save" where order is important.
 	 */
 	private final Map<String, Object> variables;
-
-	/**
-	 * Used for the "settings" object which can't be added to or otherwise structurally
-	 * changed after construction.
-	 */
-	private boolean immutable;
 
 
 	ObjectScope() {
@@ -107,7 +103,6 @@ class ObjectScope extends Scope
 	ObjectScope(final Type t) {
 	    super(t);
 	    variables = new LinkedHashMap<>();
-	    immutable = false;
 	}
 
 	/**
@@ -127,16 +122,6 @@ class ObjectScope extends Scope
 	ObjectScope(final Map<String, Object> map) {
 	    super(Type.OBJECT);
 	    variables = new LinkedHashMap<>(map);
-	    immutable = false;
-	}
-
-	/**
-	 * For "settings" (and any future like-minded object), set to immutable after construction.
-	 *
-	 * @param value New value for {@link #immutable} flag.
-	 */
-	void setImmutable(final boolean value) {
-	    immutable = value;
 	}
 
 	/**
@@ -253,7 +238,7 @@ class ObjectScope extends Scope
 			    return value;
 			}
 		    }
-		    if (immutable)
+		    if (isImmutable())
 			throw new Intl.IllegalStateException("calc#immutableObject", name);
 
 		    // If the named entry didn't exist in any case, just set as-is
@@ -261,7 +246,7 @@ class ObjectScope extends Scope
 		}
 	    }
 	    else {
-		if (immutable && !variables.containsKey(name))
+		if (isImmutable() && !variables.containsKey(name))
 		    throw new Intl.IllegalStateException("calc#immutableObject", name);
 
 		variables.put(name, value);
