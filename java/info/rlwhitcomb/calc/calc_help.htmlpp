@@ -186,7 +186,7 @@ h2 {
         <li>More operators and functions are available than in almost all other calculators, and more are being added all the time.</li>
         <li>Custom function definitions for calculations beyond the list of predefined functions.</li>
         <li>Variables can be used for storage of values for later use.</li>
-        <li>Object and array structures for storage of multiple values.</li>
+        <li>Object, array, and set structures for storage of multiple values.</li>
         <li>Therefore, JSON objects are a native part of the language.</li>
         <li>String functions for doing text manipulation, including <a href="https://en.wikipedia.org/wiki/String_interpolation">string interpolation</a>.</li>
         <li>The ability to do calculations straight from the command line, from a text file, in a convenient REPL mode, or in a GUI window.</li>
@@ -375,7 +375,7 @@ h2 {
   <p>Just as an aside, Calc does not support <code>NaN</code> or <code>Infinity</code> values. Operations that might result in such values generally cause errors instead.
   <p>The boolean (or "logical") constants are <code>true</code> and <code>false</code>.
   <p>The special null constant, which signifies no value, or a value that hasn't been assigned or defined yet, is simply <code>null</code>.
-     Any regular variables, or list or object elements that are not (yet) defined will have the <code>null</code> value. Most operations will result
+     Any regular variables, or array or object elements that are not (yet) defined will have the <code>null</code> value. Most operations will result
      in an error if one or more of the operands are null. There are special <code>isnull</code> and <code>notnull</code> functions that can be used to test for this to avoid
      errors if desired, as can simply using the equality / inequality operators with the <code>null</code> constant. Null values inserted into interpolated strings
      (see below) will simply insert nothing.
@@ -473,9 +473,9 @@ which gives:
      You can use the <code>@r</code> or <code>@R</code> formats to display positive integer values in this form as well.
      Note that the range of possible values for these formats are the integers from 1 to 39,999.
   <p>Time and duration values (to nanosecond precision) can be entered as:
-<p class="indent"> <code>h'<i>hh</i>:<i>mm</i>:<i>ss</i>.<i>nnnnnnnnn</i></code>&nbsp;[<code>a</code>|<code>p</code>|<code>am</code>|<code>pm</code>]<code>'</code> ("hour" or time-of-day value)</p>
+<p class="indent"> <code>h'<i>hh</i>:<i>mm</i>:<i>ss</i>.<i>nnnnnnnnn</i></code>&nbsp;[ <code>a</code> | <code>p</code> | <code>am</code> | <code>pm</code> ]<code>'</code> ("hour" or time-of-day value)</p>
 or
-<p class="indent"> <code>t'<i>nn.nn</i>&nbsp;w</code>|<code>d</code>|<code>h</code>|<code>m</code>|<code>s'</code> ("amount of time" or duration value)</p>
+<p class="indent"> <code>t'<i>nn.nn</i>&nbsp;w</code> | <code>d</code> | <code>h</code> | <code>m</code> | <code>s'</code> ("amount of time" or duration value)</p>
      These values are computed and stored as integer nanoseconds (so that 1,000,000,000 equals one second), with midnight (<code>12:00:00.0 am</code>) as zero for time-of-day. They can be used
      in any other kind of operation, or formatted again as an <i>hour:minute:second</i> time or a duration (in weeks, down to seconds) using the <code>@h</code> or <code>@t</code> formats. See the Formats section below for more details.
      For example:
@@ -515,11 +515,13 @@ or
      can be cased however you like in case-insensitive mode. Variables remain defined with the
      same casing as they were found in a script, but the "ignore case" mode simply changes how they are looked up in the variable dictionary. Therefore, changing
      the mode option will not "undefine" any variables from the way they were originally declared / used.
-  <p>Values can be grouped into lists of values (an <i>array</i>), or into sets of key/value pairs (an <i>object</i>). Arrays can
-     be multi-dimensional. The inside dimensions do not have to be all the same length. The types of values in an array need not
-     be homogeneous. And, in fact, the values in an array can be objects as well as simple values. The keys in an object must be
+  <p>Values can be grouped into lists of values (an <i>array</i>), into sets of key/value pairs (an <i>object</i>), or into sets of unique values
+     (a <i>set</i>). Arrays can be multi-dimensional. The inside dimensions do not have to be all the same length. The types of values in an array need not
+     be homogeneous. And, in fact, the values in an array can be objects and sets as well as simple values. The keys in an object must be
      either identifiers (same rules as variable names), regular strings, or interpolated strings, but the values can be anything
-     (even other objects, arrays, or just simple values).
+     (even other objects, arrays, sets, or just simple values). Sets usually contain simple values, but can contain objects, or arrays as well.
+     Attempting to add one set to another will simply combine the sets into one (set "union"). Similarly "adding" two arrays or objects will simply
+     combine them into one collection of the same type.
   <p>To reference values in arrays or objects, or the individual characters in a string, the following syntax can be used:
      <i>variable</i><code>[</code> <i>expr</i> <code>]</code> where the expression must evaluate to an integer value (for any kind of value) or the name of a key (for objects).
      Normally the index is in the range of 0 to the length of the object - 1. However, for convenience, negative indices indicate an
@@ -534,31 +536,35 @@ or
      when regular strings are used as member names, the exact quotes will be used as part of the name (so, for instance <code>'h'</code> is a different
      member than <code>"h"</code>, or than <code>h</code>). When using interpolated strings to reference these <i>"string"</i> name members, the quotes
      must be explicit. Here is an (extreme) example: <code>a."f".'h'</code> can be referenced using <code>m1='"f"';m2="'h'";a.`$m1`.`$m2`</code>.
-  <p>Array or object constants can be expressed using this JSON notation, as in:
+  <p>Array, object, or set constants can be expressed using this JSON notation. Note: the <i>set</i> is a Calc extension that does not exist in regular JSON,
+     so be aware of this if data generated in Calc is to be shared with other applications. For example:
 <p class="indent"> <code style="color:green;">{ a: 1, b:2, c:'abc', d:[ 1,3,4 ] }</code> </p>
-or
 <p class="indent"> <code style="color:green;">[ 1, 3, 5, { a:false, b:true }, 15, 17 ]</code> </p>
-or
 <p class="indent"> <code style="color:green;">[ [ 1, 3, 5 ], [ 2, 4, 6 ] ]</code> </p>
-or
 <p class="indent"> <code style="color:green;">{ first: { "flag": true, "message": 'Testing' }, second: { "flag":true, "message": 'Working' } }</code> </p>
+<p class="indent"> <code style="color:green;">{ "Red", "Green", "Yellow", "Blue", "Gold" }</code> </p>
      Note that string object keys (as in <code>"key"</code>) do NOT reference the same element as an identifier key (as in
      <code>key</code>).  Therefore, this is legal:
 <p class="indent"> <code style="color:green;">value = { "flag": true, flag: 'Red' }</code> </p>
    and the elements are accessed as <code>value."flag"</code> and <code>value.flag</code>.
-  <p>Objects and lists can be combined (concatenated) using the <code>+</code> and <code>+=</code> operators.  If the first operand is a list, the result of
-     the operation will also be a list. Conversely if the first operand is an object, the result will be also. If a list is added to an existing object, the
-     keys for the list values will be generated in the same way (as in <code>#<i>n</i></code>) as using an index to set the value. For example:
+  <p>Objects, arrays, and sets can be combined (concatenated) using the <code>+</code> and <code>+=</code> operators.  If the first operand is an array, the result of
+     the operation will also be an array. Similarly if the first operand is an object or set, the result will be also. If an array is added to an object
+     the whole array will be added as one value, with the key generated in the same way (as in <code>#<i>n</i></code>) as using an index to set the value.
+     Similarly for an object or set added to an array. This way, composite objects (arrays of sets, or sets of objects) can be easily build up.
+     For example:
 <p class="indent"> <code>&gt;</code><code style="color:blue;">a = [ 1, 2, 3 ]</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">[ 1, 2, 3 ]</code><br>
     <code>&gt;</code><code style="color:blue;">b = { c: 5, d: 'def' }</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">{ c: 5, d: 'def' }</code><br><br>
-    <code>&gt;</code><code style="color:blue;">a + b</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">[ 1, 2, 3, 5, 'def' ]</code><br>
+    <code>&gt;</code><code style="color:blue;">a + b</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">[ 1, 2, 3, { c: 5, d: 'def' } ]</code><br>
 or<br>
-    <code>&gt;</code><code style="color:blue;">b + a</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">{ c: 5, d: 'def', #2: 1, #3: 2, #4: 3 }</code><br>
+    <code>&gt;</code><code style="color:blue;">b + a</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">{ c: 5, d: 'def', #2: [ 1, 2, 3 ] }</code><br>
 or<br>
     <code>&gt;</code><code style="color:blue;">a + a</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">[ 1, 2, 3, 1, 2, 3 ]</code><br>
 or<br>
-    <code>&gt;</code><code style="color:blue;">a += 'abc'</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">[ 1, 2, 3, 'abc' ]</code>
-    <p>Note that using <code>+=</code> to add values to a list is the equivalent of doing a "push" operation on a stack or queue.
+    <code>&gt;</code><code style="color:blue;">a += 'abc'</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">[ 1, 2, 3, 'abc' ]</code><br><br>
+    <code>&gt;</code><code style="color:blue;">s = { "sunny", "cloudy", "rain" }</code><br>
+    <code>&gt;</code><code style="color:blue;">t = { 'snow', 'ice', 'rain' }</code><br>
+    <code>&gt;</code><code style="color:blue;">s + t</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">{ "sunny", "cloudy", "rain", "snow", "ice" }</code>
+    <p>Note that using <code>+=</code> to add values to an array is the equivalent of doing a "push" operation on a stack or queue.
 </div>
 <a class="top-link" href="#topofpage">Top</a>
 <hr id="Modes_and_Precision" class="sectionsep">
@@ -636,7 +642,7 @@ or<br>
       <tr><td><code>@w</code></td><td>Convert the (integer) value to words<br>as in <code style="color:blue;">235 @w</code><code style="color:gray;"> &#x21E8; </code><code style="color:green;">two hundred thirty-five</code></td></tr>
       <tr><td><code>@</code>[[<code>+</code>|<code>-</code>]<i>nn</i>][<code>,</code>|<code>_</code>]<code>%</code></td><td>Format as a percentage, with optional separators, and<br>optionally rounding to <i>nn</i> digits<br>as in <code style="color:blue;">10.08745 @2,%</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">1,008.75%</code></td></tr>
       <tr><td><code>@</code>[[<code>+</code>|<code>-</code>]<i>nn</i>][<code>,</code>|<code>_</code>]<code>$</code></td><td>Format as a currency value with the locale-specific currency symbol,<br>optionally setting separators and number of fraction digits<br>as in <code style="color:blue;">1500 @3,$</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">$1,500.000</code></td></tr>
-      <tr><td><code>@</code>[[<code>+</code>|<code>-</code>]<i>nn</i>]<code>s</code></td><td>Left/right/center justify the string value inside the <i>nn</i> width<br>as in <code style="color:blue;">'abc' @+10s</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">"&nbsp;&nbsp;&nbsp;&nbsp;abc&nbsp;&nbsp;&nbsp;"</code>,<br><code style="color:blue;">'abc' @-10s</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;abc"</code>,<br><code style="color:blue;">'abc' @10s</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">"abc&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"</code><br>for objects and lists, simply convert to a string<br><i>nn</i> is ignored, but use <code>-</code> to not add extra space, as in<br><code style="color:blue;">[ 1, 2, 3 ] @-s</code><code style="color:grey;"> &#x21e8; </code><code style="color:green;">"[1,2,3]"</code></td></tr>
+      <tr><td><code>@</code>[[<code>+</code>|<code>-</code>]<i>nn</i>]<code>s</code></td><td>Left/right/center justify the string value inside the <i>nn</i> width<br>as in <code style="color:blue;">'abc' @+10s</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">"&nbsp;&nbsp;&nbsp;&nbsp;abc&nbsp;&nbsp;&nbsp;"</code>,<br><code style="color:blue;">'abc' @-10s</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;abc"</code>,<br><code style="color:blue;">'abc' @10s</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">"abc&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"</code><br>for objects, arrays, and sets, simply convert to a string<br><i>nn</i> is ignored, but use <code>-</code> to not add extra space, as in<br><code style="color:blue;">[ 1, 2, 3 ] @-s</code><code style="color:grey;"> &#x21e8; </code><code style="color:green;">"[1,2,3]"</code></td></tr>
     </tbody>
     </table>
   </div>
@@ -672,7 +678,7 @@ or<br>
     </tr>
     </thead>
     <tbody>
-    <tr><td>35</td>
+    <tr><td>36</td>
       <td><code>pi</code>, <code>&#x1D6D1;</code>, <code>e</code>, <code>&#x2107;</code>, or <code>&#x2147;</code><br>
           <code>phi</code>, <code>&#x03C6;</code>, <code>&#x03D5;</code><br>
           <code>PHI</code>, <code>&#x03A6;</code><br>
@@ -703,8 +709,9 @@ or<br>
           all the current environment variables (such as <code>PATH</code>)<br>
           the current Calc settings (<code>trigMode</code>, <code>silent</code>, etc.)<br>
           that constant value, as in <code>"Hello"</code>, <code>127</code>, or <code>0xA8</code></td><td>N/A</td></tr>
-    <tr><td>34</td><td><code>{</code> (&nbsp;<i>key:value pairs</i>&nbsp;) <code>}</code></td><td>define an object</td><td>left to right</td></tr>
-    <tr><td>33</td><td><code>[</code> (&nbsp;<i>expr list</i>&nbsp;) <code>]</code><br><i>var</i> <code>[</code> <i>expr</i> <code>]</code> or <i>var</i>&nbsp;<code>&#x2080;</code> .. <code>&#x2089;</code></td><td>define an array,<br>or access elements of an array, string, or object</td><td>left to right</td></tr>
+    <tr><td>35</td><td><code>{</code> (&nbsp;<i>key:value pairs</i>&nbsp;) <code>}</code></td><td>define an object</td><td>left to right</td></tr>
+    <tr><td>34</td><td><code>[</code> (&nbsp;<i>expr list</i>&nbsp;) <code>]</code><br><i>var</i> <code>[</code> <i>expr</i> <code>]</code> or <i>var</i>&nbsp;<code>&#x2080;</code> .. <code>&#x2089;</code></td><td>define an array,<br>or access elements of an array, string, or object</td><td>left to right</td></tr>
+    <tr><td>33</td><td><code>{</code> (&nbsp;<i>expr list</i>&nbsp;) <code>}</code></td><td>define a set</td><td>left to right</td></tr>
     <tr><td>32</td><td><code>(</code> <i>expr</i> <code>,</code> <i>expr</i> <code>)</code></td><td>define a complex number</td><td>left to right</td></tr>
     <tr><td>31</td><td><i>object</i> <code>.</code> <i>member</i></td><td>access an object member</td><td>left to right</td></tr>
     <tr><td>30</td><td><code>( </code><i>expr</i><code> )</code></td><td>group an expression</td><td>N/A</td></tr>
@@ -796,9 +803,9 @@ or<br>
     <tr><td>19</td><td>
         <i>expr</i>&nbsp;&nbsp;<code>*</code>, <code>&times;</code>, <code>&#x2217;</code>, <code>&#x2715;</code>, or <code>&#x2716;</code>&nbsp;&nbsp;<i>expr</i><br>
         <i>expr</i>&nbsp;&nbsp;<code>/</code>, <code>&divide;</code>, <code>&#x2215;</code>, or <code>&#x2797;</code>&nbsp;&nbsp;<i>expr</i><br>
-        <i>expr</i>&nbsp;&nbsp;<code>\</code>&nbsp;&nbsp;<i>expr</i><br>
+        <i>expr</i>&nbsp;&nbsp;<code>\</code>, or <code>&#x2216;</code>&nbsp;&nbsp;<i>expr</i><br>
         <i>expr</i>&nbsp;<code> % </code>&nbsp;<i>expr</i></td>
-        <td>multiply<br>divide<br>integer divide<br>remainder</td><td>left to right</td></tr>
+        <td>multiply<br>divide<br>integer divide or set difference<br>remainder</td><td>left to right</td></tr>
     <tr><td>18</td><td>
         <i>expr</i>&nbsp;&nbsp;<code>+</code> or <code>&#x2795;</code>&nbsp;&nbsp;<i>expr</i><br>
         <i>expr</i>&nbsp;&nbsp;<code>-</code>,  <code>&#x2212;</code>, or <code>&#x2796;</code>&nbsp;&nbsp;<i>expr</i></td>
@@ -847,7 +854,7 @@ or<br>
     <tr><td>4</td><td>
         <i>var</i>&nbsp;<code> *=</code>,<code> &times;=</code>,<code> &#x2217;=</code>,<code> &#x2715;=</code>, or<code> &#x2716;= </code>&nbsp;<i>expr</i><br>
         <i>var</i>&nbsp;<code> /=</code>,<code> &divide;=</code>,<code> &#x2215;=</code>, or<code> &#x2797;= </code>&nbsp;<i>expr</i><br>
-        <i>var</i>&nbsp;<code> \= </code>&nbsp;<i>expr</i><br>
+        <i>var</i>&nbsp;<code> \= </code>, or<code> &#x2216;= </code>&nbsp;<i>expr</i><br>
         <i>var</i>&nbsp;<code> %= </code>&nbsp;<i>expr</i></td>
         <td>perform the operation, reassign to variable</td><td>right to left</td></tr>
     <tr><td>3</td><td>
@@ -923,6 +930,8 @@ or<br>
      an object, the search object is one of the object keys, while searching a list, the search object is matched against the any
      of the list values. Since the keys of an object are preserved in the order they are declared, or added to the object, the starting
      and returned indices are relative to this key list.
+  <p>For a <i>set</i> passed to the <code>index</code> function, the starting index value is ignored, and the return value is either <code>1</code>
+     if the search object is a member of the set, or <code>null</code> if the object is not a member.
   <p>The arguments to <code>substr</code> are the value (converted to a string), and optional starting and ending indices
      for the extraction. If the start/end are negative, they refer to offsets from the end of the string (same as returned
      by <code>index</code>), otherwise they are zero-based indices from the beginning. If the ending value is given, this is
