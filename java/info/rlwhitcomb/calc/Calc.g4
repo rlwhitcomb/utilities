@@ -410,6 +410,7 @@
  *	    #364: Add optional flag to ":echo" to set output destination.
  *	21-Jun-2022 (rlwhitcomb)
  *	    #314: Add syntax for set object.
+ *	    Add "set minus" symbol.
  */
 
 grammar Calc;
@@ -1173,7 +1174,7 @@ POW_OP
 MULT_OP
        : ( '*' | '\u00D7' | '\u2217' | '\u2715' | '\u2716' )
        | ( '/' | '\u00F7' | '\u2215' | '\u2797' )
-       | '\\'
+       | ( '\\' | '\u2216' )
        | '%'
        ;
 
@@ -1184,7 +1185,7 @@ POW_ASSIGN
 MULT_ASSIGN
        : ( '*=' | '\u00D7=' | '\u2217=' | '\u2715=' | '\u2716=' )
        | ( '/=' | '\u00F7=' | '\u2215=' | '\u2797=' )
-       | '\\='
+       | ( '\\=' | '\u2216=' )
        | '%='
        ;
 

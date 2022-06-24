@@ -600,6 +600,7 @@
  *	    #364: Allow ":echo" to output different places.
  *	23-Jun-2022 (rlwhitcomb)
  *	    #314: Add processing for sets.
+ *	    Add recognition of "set minus" symbol.
  */
 package info.rlwhitcomb.calc;
 
@@ -3247,6 +3248,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			case "\u2215":
 			case "\u2797":
 			case "\\":
+			case "\u2216":
 			    return f1.divide(f2);
 			case "%":
 			    return f1.modulus(f2);
@@ -3271,9 +3273,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			case "\u2797":
 			    return c1.divide(c2, settings.mcDivide);
 			case "\\":
-			    throw new UnknownOpException(op, ctx); // ?? what to do here?
+			case "\u2216":
 			case "%":
-			    throw new UnknownOpException(op, ctx); // ?? I don't know the math yet!!
 			default:
 			    throw new UnknownOpException(op, ctx);
 		    }
@@ -3295,6 +3296,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			case "\u2797":
 			    return fixupToInteger(d1.divide(d2, settings.mcDivide));
 			case "\\":
+			case "\u2216":
 			    return fixupToInteger(d1.divideToIntegralValue(d2, settings.mcDivide));
 			case "%":
 			    return fixupToInteger(d1.remainder(d2, settings.mcDivide));
@@ -5955,6 +5957,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			case "\u2215=":
 			case "\u2797=":
 			case "\\=":
+			case "\u2216=":
 			    result = f1.divide(f2);
 			    break;
 			case "%=":
@@ -5982,9 +5985,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			case "\u2797=":
 			    result = c1.divide(c2, settings.mcDivide);
 			case "\\=":
-			    throw new UnknownOpException(op, ctx); // ?? what to do here?
+			case "\u2216=":
 			case "%=":
-			    throw new UnknownOpException(op, ctx); // ?? I don't know the math yet!!
 			default:
 			    throw new UnknownOpException(op, ctx);
 		    }
@@ -6008,6 +6010,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			    result = fixupToInteger(d1.divide(d2, settings.mcDivide));
 			    break;
 			case "\\=":
+			case "\u2216=":
 			    result = fixupToInteger(d1.divideToIntegralValue(d2, settings.mcDivide));
 			    break;
 			case "%=":
