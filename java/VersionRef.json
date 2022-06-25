@@ -3,6 +3,10 @@
 //======================
 
 [
+    { version: '2.13.2', date: d'2022-06-24',
+      issues: [ 373 ],
+      comment: 'Add "exists" function for files and directories.'
+    },
     { version: '2.13.0', date: d'2022-06-22',
       issues: [ 314 ],
       comment: 'Add "set" as a basic type.'

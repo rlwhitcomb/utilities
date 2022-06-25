@@ -411,6 +411,8 @@
  *	21-Jun-2022 (rlwhitcomb)
  *	    #314: Add syntax for set object.
  *	    Add "set minus" symbol.
+ *	24-Jun-2022 (rlwhitcomb)
+ *	    #373: Add "exists" function.
  */
 
 grammar Calc;
@@ -575,6 +577,7 @@ expr
    | K_EXEC exprN                        # execExpr
    | K_DECODE expr1                      # decodeExpr
    | K_ENCODE expr1                      # encodeExpr
+   | K_EXISTS ( expr2 | expr1 )          # existsExpr
    | K_READ ( expr2 | expr1 )            # readExpr
    | K_WRITE ( expr3 | expr2 )           # writeExpr
    | K_MATCHES expr2                     # matchesExpr
@@ -1062,6 +1065,8 @@ K_EXEC     : 'exec' | 'EXEC' | 'Exec' ;
 K_DECODE   : 'decode' | 'DECODE' | 'Decode' ;
 
 K_ENCODE   : 'encode' | 'ENCODE' | 'Encode' ;
+
+K_EXISTS   : 'exists' | 'EXISTS' | 'Exists' ;
 
 K_READ     : 'read' | 'READ' | 'Read' ;
 

@@ -601,6 +601,8 @@
  *	23-Jun-2022 (rlwhitcomb)
  *	    #314: Add processing for sets.
  *	    Add recognition of "set minus" symbol.
+ *	24-Jun-2022 (rlwhitcomb)
+ *	    #373: Add "exists" function for files/directories.
  */
 package info.rlwhitcomb.calc;
 
@@ -5156,6 +5158,85 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public Object visitEncodeExpr(CalcParser.EncodeExprContext ctx) {
 	    String source = getStringValue(ctx.expr1().expr());
 	    return Base64.encodeUTF8(source);
+	}
+
+	@Override
+	public Object visitExistsExpr(CalcParser.ExistsExprContext ctx) {
+	    CalcParser.Expr1Context e1ctx = ctx.expr1();
+	    CalcParser.Expr2Context e2ctx = ctx.expr2();
+	    CalcParser.ExprContext flagExpr = null;
+	    String path = "";
+	    String flags = "fr";
+
+	    if (e1ctx != null) {
+		path = getStringValue(e1ctx.expr());
+	    }
+	    else {
+		path = getStringValue(e2ctx.expr(0));
+		flagExpr = e2ctx.expr(1);
+		flags = getStringValue(flagExpr).trim();
+	    }
+
+	    // The only combinations that make sense are: "d", "f", "fr", "fw", "fx"
+	    // Empty means "fr"
+	    if (flags.isEmpty())
+		flags = "fr";
+
+	    boolean ret = false;
+	    File f = new File(path);
+
+	    switch (flags.charAt(0)) {
+		case 'd':
+		case 'D':
+		    if (flags.length() == 1) {
+			ret = f.exists() && f.isDirectory();
+		    }
+		    else if (flags.length() == 2) {
+			switch (flags.charAt(1)) {
+			    case 'r':
+			    case 'R':
+				ret = FileUtilities.canReadDir(f);
+				break;
+			    default:
+				throw new CalcExprException(flagExpr, "%calc#invalidFlags", flags);
+			}
+		    }
+		    else {
+			throw new CalcExprException(flagExpr, "%calc#invalidFlags", flags);
+		    }
+		    break;
+		case 'f':
+		case 'F':
+		    if (flags.length() == 1) {
+			ret = f.exists() && f.isFile();
+		    }
+		    else if (flags.length() == 2) {
+			switch (flags.charAt(1)) {
+			    case 'r':
+			    case 'R':
+				ret = FileUtilities.canRead(f);
+				break;
+			    case 'w':
+			    case 'W':
+				ret = FileUtilities.canWrite(f);
+				break;
+			    case 'x':
+			    case 'X':
+				ret = FileUtilities.canExecute(f);
+				break;
+			    default:
+				throw new CalcExprException(flagExpr, "%calc#invalidFlags", flags);
+			}
+		    }
+		    else {
+			throw new CalcExprException(flagExpr, "%calc#invalidFlags", flags);
+		    }
+		    break;
+		default:
+		    throw new CalcExprException(flagExpr, "%calc#invalidFlags", flags);
+	    }
+
+	    return Boolean.valueOf(ret);
 	}
 
 	@Override

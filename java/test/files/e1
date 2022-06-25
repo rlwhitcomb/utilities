@@ -901,6 +901,14 @@ const UTF_8 = 'utf-8'
 }
 `Test of read/write/read of Unicode data = ${uni1 === uni2}`
 
+#
+# "exists" function
+#
+exists('VersionRef.json')
+exists('test/files', 'd')
+exists('junk', 'fw')
+info.os.id == "windows" ? exists('verify_calc.bat', "fx") : exists('verify_calc', "fx")
+
 :echo
 :echo "End of expression tests (suite 1)."
 

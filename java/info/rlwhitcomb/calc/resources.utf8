@@ -131,6 +131,8 @@
 #	    #365: New message for immutable array.
 #	23-Jun-2022 (rlwhitcomb)
 #	    #314: Message for immutable set.
+#	24-Jun-2022 (rlwhitcomb)
+#	    #373: Error for "exists" function.
 #
 
 #
@@ -228,6 +230,7 @@ targetWrongType		= Target of a <y>%1$s<.> must be an array or string
 oneCharInt		= %1$s value for a string must be one character or an integer \u2264 65535
 undefinedFunction	= Cannot call undefined function <y>%1$s<.>
 withinNotAllowed	= Specifying <y>within<.> is only allowed with an end value with implied start
+invalidFlags		= Flags value <y>%1$s<.> not recognized
 
 intro.help1	= "  Enter an arithmetic expression to evaluate, or multiple expressions"
 intro.help2	= "  separated by <u>;<.>, followed by <a>Return<.> or <a>Enter<.>."
