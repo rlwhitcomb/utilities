@@ -27,6 +27,8 @@
  *  History:
  *	21-Jun-2021 (rlwhitcomb)
  *	    Initial coding.
+ *	25-Jun-2022 (rlwhitcomb)
+ *	    #314: Add "diff".
  */
 package info.rlwhitcomb.calc;
 
@@ -144,6 +146,36 @@ class SetScope<T> extends CollectionScope
 	    checkImmutable();
 
 	    values.remove(value);
+	}
+
+	/**
+	 * Compute the difference between this set and the other collection.
+	 *
+	 * @param c Another collection to compute the difference of.
+	 * @return  The difference between this set and the other collection.
+	 */
+	SetScope<T> diff(final CollectionScope c) {
+	    if (c.equals(CollectionScope.EMPTY))
+		return this;
+
+	    SetScope<T> result = new SetScope<T>(values);
+
+	    if (c instanceof ArrayScope) {
+		@SuppressWarnings("unchecked")
+		ArrayScope<Object> array = (ArrayScope<Object>) c;
+		result.values.removeAll(array.list());
+	    }
+	    else if (c instanceof ObjectScope) {
+		ObjectScope map = (ObjectScope) c;
+		result.values.removeAll(map.values());
+	    }
+	    else if (c instanceof SetScope) {
+		@SuppressWarnings("unchecked")
+		SetScope<Object> set = (SetScope<Object>) c;
+		result.values.removeAll(set.set());
+	    }
+
+	    return result;
 	}
 
 	/**

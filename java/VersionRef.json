@@ -3,6 +3,10 @@
 //======================
 
 [
+    { version: '2.13.3', date: d'2022-06-25',
+      issues: [ 314 ],
+      comment: 'Add set difference.'
+    },
     { version: '2.13.2', date: d'2022-06-24',
       issues: [ 373 ],
       comment: 'Add "exists" function for files and directories.'

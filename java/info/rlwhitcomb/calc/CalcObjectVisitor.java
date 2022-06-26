@@ -603,6 +603,8 @@
  *	    Add recognition of "set minus" symbol.
  *	24-Jun-2022 (rlwhitcomb)
  *	    #373: Add "exists" function for files/directories.
+ *	25-Jun-2022 (rlwhitcomb)
+ *	    #314: Add set difference.
  */
 package info.rlwhitcomb.calc;
 
@@ -3281,6 +3283,19 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			    throw new UnknownOpException(op, ctx);
 		    }
 		}
+		else if (e1 instanceof SetScope && e2 instanceof CollectionScope) {
+		    @SuppressWarnings("unchecked")
+		    SetScope<Object> set = (SetScope<Object>) e1;
+		    CollectionScope c = (CollectionScope) e2;
+
+		    switch (op) {
+			case "\\":
+			case "\u2216":
+			     return set.diff(c);
+			default:
+			    throw new UnknownOpException(op, ctx);
+		    }
+		}
 		else {
 		    BigDecimal d1 = toDecimalValue(this, e1, settings.mc, ctx1);
 		    BigDecimal d2 = toDecimalValue(this, e2, settings.mc, ctx2);
@@ -3338,6 +3353,13 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			ComplexNumber c2 = ComplexNumber.valueOf(e2);
 
 			return c1.subtract(c2);
+		    }
+		    else if (e1 instanceof SetScope && e2 instanceof CollectionScope) {
+			@SuppressWarnings("unchecked")
+			SetScope<Object> set = (SetScope<Object>) e1;
+			CollectionScope c = (CollectionScope) e2;
+
+			return set.diff(c);
 		    }
 		    else {
 			BigDecimal d1 = toDecimalValue(this, e1, settings.mc, ctx1);
