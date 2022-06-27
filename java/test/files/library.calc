@@ -17,6 +17,88 @@ const EOL = info.os.linesep
 const ON_WINDOWS = info.os.id == 'windows'
 
 /*
+ * Color codes
+ */
+const ESC = '\o033'
+const NORM = `$ESC[0`
+const BOLD = `$ESC[1`
+const UNDL = `$ESC[4`
+
+const RESET   = `$ESC[0m`
+
+const BLACK   = `$NORM;30m`
+const RED     = `$NORM;31m`
+const GREEN   = `$NORM;32m`
+const YELLOW  = `$NORM;33m`
+const BLUE    = `$NORM;34m`
+const MAGENTA = `$NORM;35m`
+const CYAN    = `$NORM;36m`
+const WHITE   = `$NORM;37m`
+
+const BLACK_BOLD   = `$BOLD;30m`
+const RED_BOLD     = `$BOLD;31m`
+const GREEN_BOLD   = `$BOLD;32m`
+const YELLOW_BOLD  = `$BOLD;33m`
+const BLUE_BOLD    = `$BOLD;34m`
+const MAGENTA_BOLD = `$BOLD;35m`
+const CYAN_BOLD    = `$BOLD;36m`
+const WHITE_BOLD   = `$BOLD;37m`
+
+const BLACK_UNDER   = `$UNDL;30m`
+const RED_UNDER     = `$UNDL;31m`
+const GREEN_UNDER   = `$UNDL;32m`
+const YELLOW_UNDER  = `$UNDL;33m`
+const BLUE_UNDER    = `$UNDL;34m`
+const MAGENTA_UNDER = `$UNDL;35m`
+const CYAN_UNDER    = `$UNDL;36m`
+const WHITE_UNDER   = `$UNDL;37m`
+
+const BLACK_BKGND   = `$ESC[40m`
+const RED_BKGND     = `$ESC[41m`
+const GREEN_BKGND   = `$ESC[42m`
+const YELLOW_BKGND  = `$ESC[43m`
+const BLUE_BKGND    = `$ESC[44m`
+const MAGENTA_BKGND = `$ESC[45m`
+const CYAN_BKGND    = `$ESC[46m`
+const WHITE_BKGND   = `$ESC[47m`
+
+const BLACK_BRIGHT   = `$NORM;90m`
+const RED_BRIGHT     = `$NORM;91m`
+const GREEN_BRIGHT   = `$NORM;92m`
+const YELLOW_BRIGHT  = `$NORM;93m`
+const BLUE_BRIGHT    = `$NORM;94m`
+const MAGENTA_BRIGHT = `$NORM;95m`
+const CYAN_BRIGHT    = `$NORM;96m`
+const WHITE_BRIGHT   = `$NORM;97m`
+
+const BLACK_BOLD_BRIGHT   = `$BOLD;90m`
+const RED_BOLD_BRIGHT     = `$BOLD;91m`
+const GREEN_BOLD_BRIGHT   = `$BOLD;92m`
+const YELLOW_BOLD_BRIGHT  = `$BOLD;93m`
+const BLUE_BOLD_BRIGHT    = `$BOLD;94m`
+const MAGENTA_BOLD_BRIGHT = `$BOLD;95m`
+const CYAN_BOLD_BRIGHT    = `$BOLD;96m`
+const WHITE_BOLD_BRIGHT   = `$BOLD;97m`
+
+const BLACK_UNDER_BRIGHT   = `$UNDL;90m`
+const RED_UNDER_BRIGHT     = `$UNDL;91m`
+const GREEN_UNDER_BRIGHT   = `$UNDL;92m`
+const YELLOW_UNDER_BRIGHT  = `$UNDL;93m`
+const BLUE_UNDER_BRIGHT    = `$UNDL;94m`
+const MAGENTA_UNDER_BRIGHT = `$UNDL;95m`
+const CYAN_UNDER_BRIGHT    = `$UNDL;96m`
+const WHITE_UNDER_BRIGHT   = `$UNDL;97m`
+
+const BLACK_BKGND_BRIGHT   = `$NORM;100m`
+const RED_BKGND_BRIGHT     = `$NORM;101m`
+const GREEN_BKGND_BRIGHT   = `$NORM;102m`
+const YELLOW_BKGND_BRIGHT  = `$NORM;103m`
+const BLUE_BKGND_BRIGHT    = `$NORM;104m`
+const MAGENTA_BKGND_BRIGHT = `$NORM;105m`
+const CYAN_BKGND_BRIGHT    = `$NORM;106m`
+const WHITE_BKGND_BRIGHT   = `$NORM;107m`
+
+/*
  * Convert one of our dates to an Excel date serial number
  * where 1/1/1900 is considered day 1 (BUT 1900 is also considered [erroneously] as a leap year).
  * From here: https://docs.microsoft.com/en-us/office/troubleshoot/excel/determine-a-leap-year
