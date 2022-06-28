@@ -605,6 +605,8 @@
  *	    #373: Add "exists" function for files/directories.
  *	25-Jun-2022 (rlwhitcomb)
  *	    #314: Add set difference.
+ *	27-Jun-2022 (rlwhitcomb)
+ *	    #376: Move "exists" code to FileUtilities; add check for proper name case.
  */
 package info.rlwhitcomb.calc;
 
@@ -618,6 +620,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.IllegalCharsetNameException;
 import java.nio.charset.StandardCharsets;
 import java.nio.charset.UnsupportedCharsetException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.SecureRandom;
 import java.text.DateFormatSymbols;
@@ -5188,7 +5191,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    CalcParser.Expr2Context e2ctx = ctx.expr2();
 	    CalcParser.ExprContext flagExpr = null;
 	    String path = "";
-	    String flags = "fr";
+	    String flags = "";
 
 	    if (e1ctx != null) {
 		path = getStringValue(e1ctx.expr());
@@ -5200,65 +5203,25 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 
 	    // The only combinations that make sense are: "d", "f", "fr", "fw", "fx"
-	    // Empty means "fr"
 	    if (flags.isEmpty())
 		flags = "fr";
 
-	    boolean ret = false;
 	    File f = new File(path);
 
-	    switch (flags.charAt(0)) {
-		case 'd':
-		case 'D':
-		    if (flags.length() == 1) {
-			ret = f.exists() && f.isDirectory();
-		    }
-		    else if (flags.length() == 2) {
-			switch (flags.charAt(1)) {
-			    case 'r':
-			    case 'R':
-				ret = FileUtilities.canReadDir(f);
-				break;
-			    default:
-				throw new CalcExprException(flagExpr, "%calc#invalidFlags", flags);
-			}
-		    }
-		    else {
-			throw new CalcExprException(flagExpr, "%calc#invalidFlags", flags);
-		    }
-		    break;
-		case 'f':
-		case 'F':
-		    if (flags.length() == 1) {
-			ret = f.exists() && f.isFile();
-		    }
-		    else if (flags.length() == 2) {
-			switch (flags.charAt(1)) {
-			    case 'r':
-			    case 'R':
-				ret = FileUtilities.canRead(f);
-				break;
-			    case 'w':
-			    case 'W':
-				ret = FileUtilities.canWrite(f);
-				break;
-			    case 'x':
-			    case 'X':
-				ret = FileUtilities.canExecute(f);
-				break;
-			    default:
-				throw new CalcExprException(flagExpr, "%calc#invalidFlags", flags);
-			}
-		    }
-		    else {
-			throw new CalcExprException(flagExpr, "%calc#invalidFlags", flags);
-		    }
-		    break;
-		default:
-		    throw new CalcExprException(flagExpr, "%calc#invalidFlags", flags);
+	    // Special "+" flag modifier that will check that the case of the name
+	    // exactly matches what is on the disk
+	    if (flags.endsWith("+")) {
+		if (!FileUtilities.checkNameCase(f))
+		    return Boolean.FALSE;
+		flags = flags.replace("+", "");
 	    }
 
-	    return Boolean.valueOf(ret);
+	    try {
+		return Boolean.valueOf(FileUtilities.exists(f, flags));
+	    }
+	    catch (IllegalArgumentException iae) {
+		throw new CalcExprException(iae, flagExpr);
+	    }
 	}
 
 	@Override

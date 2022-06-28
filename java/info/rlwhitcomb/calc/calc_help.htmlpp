@@ -1018,7 +1018,9 @@ or<br>
   <p>The <code>exists</code> function takes a potential file or directory path and optional flags. Valid flag values are:<br>
      <code>"d"</code> (directory exists), <code>"dr"</code> (directory for read),<br>
      <code>"f"</code> (file exists), <code>"fr"</code> (file for read, default if not given),<br>
-     <code>"fw"</code> (file for write), or <code>"fx"</code> (file for execute).
+     <code>"fw"</code> (file for write), or <code>"fx"</code> (file for execute).<br>
+     An optional <code>"+"</code> can be added to any other flag value which will also test the file name for exact case (for use with file systems that
+     support case-insensitive file searching).
   <p>The first expression for <code>read</code> is a single file path, which can be <code>"@"</code> or <code>"-"</code> to read the standard input.
      The second (optional) expression is the name of the charset to use (system default if not given, or empty/null). The entire contents of the file
      is returned, unchanged, including end-of-line sequences. The value returned can be assigned to a variable or used in some other way.

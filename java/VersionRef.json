@@ -3,6 +3,10 @@
 //======================
 
 [
+    { version: '2.13.4', date: d'2022-06-27',
+      issues: [ 376 ],
+      comment: 'New exact case flag for "exists".'
+    },
     { version: '2.13.3', date: d'2022-06-25',
       issues: [ 314 ],
       comment: 'Add set difference.'

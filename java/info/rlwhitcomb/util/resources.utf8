@@ -145,6 +145,8 @@
 #	    #45: New FileUtilities errors for read/write.
 #	24-Jun-2022 (rlwhitcomb)
 #	    #372: Add coloring to more messages.
+#	27-Jun-2022 (rlwhitcomb)
+#	    #376: New error for "exists" function.
 #
 
 #
@@ -293,6 +295,7 @@ fileutil.wrongExtension	= The file does not have the expected <u>%1$s<.> extensi
 fileutil.outsideDir	= The zip entry <u>%1$s<.> is outside the destination directory bounds!
 fileutil.noCSStdOutput	= Standard output always uses the default charset.
 fileutil.noConsole	= Standard output is not available to write to.
+fileutil.invalidFlags	= Flags value <y>%1$s<.> not recognized.
 
 #
 # From ClassUtil.java

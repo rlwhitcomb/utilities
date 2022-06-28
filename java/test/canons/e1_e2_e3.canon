@@ -1047,7 +1047,10 @@
 >exists ('VersionRef.json') -> true
 >exists ('test/files', 'd') -> true
 >exists ('junk', 'fw') -> false
->info.os.id == "windows" ? exists ('verify_calc.bat', "fx") : exists ('verify_calc', "fx") -> true
+>info.os.id == "windows" ? exists ('verify_calc.bat', "fx+") : exists ('verify_calc', "fx+") -> true
+>path = '../Java' -> "../Java"
+>exists (path, 'd+') -> false
+>info.os.id == "linux" ? exists (lower (path), 'd') : exists (path, 'd') -> true
 >
 >End of expression tests (suite 1).
 >Tests of nested object / array variables.

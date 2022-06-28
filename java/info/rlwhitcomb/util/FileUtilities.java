@@ -108,6 +108,8 @@
  *    01-Jun-2022 (rlwhitcomb)
  *	#45: New "readRawText" and "writeRawText" methods; separate out "getFileReader".
  *	make parameters final.
+ *    27-Jun-2022 (rlwhitcomb)
+ *	#376: Add "checkNameCase" and "exists" methods.
  */
 package info.rlwhitcomb.util;
 
@@ -143,6 +145,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.regex.Matcher;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipException;
@@ -515,6 +518,111 @@ public final class FileUtilities
     {
 	Path source = currentFile.toPath();
 	Files.move(source, source.resolveSibling(newName), StandardCopyOption.ATOMIC_MOVE);
+    }
+
+    /**
+     * Check if the name is the same casing as the file on the disk.
+     *
+     * @param	f	Candidate abstract file name.
+     * @return	Whether or not the name as given is the same case as the name on disk.
+     *		Will also return {@code false} if the fully-resolved name does not
+     *		name an existing file.
+     */
+    public static boolean checkNameCase(final File f) {
+	try {
+	    String splitString = Matcher.quoteReplacement(Environment.fileSeparator());
+	    Path realPath = f.toPath().toRealPath();
+	    String realPathString = realPath.toString();
+	    String fixedPath = f.getPath().replaceAll("[\\\\/]", splitString);
+	    String[] realParts = realPathString.split(splitString);
+	    String[] fixedParts = fixedPath.split(splitString);
+	    for (int i = fixedParts.length - 1, j = realParts.length - 1; i>= 0 && j >= 0; i--) {
+		if (fixedParts[i].equals("."))
+		    continue;
+		if (fixedParts[i].equals("..")) {
+		    i--;
+		    continue;
+		}
+		if (!fixedParts[i].equals(realParts[j]))
+		    return false;
+		j--;
+	    }
+	}
+	catch (IOException ioe) {
+	    return false;
+	}
+	return true;
+    }
+
+    /**
+     * Check the existence and permissions of the given file.
+     *
+     * @param	f	Candidate file name.
+     * @param	flags	Permissions flags to check.
+     * @return	Whether the file exists and has the given permissions:
+     *		{@code "d", "D", "dr", "DR", "f", "F", "fr", "FR", "fw", "FW", "fx", "FX" }.
+     * @throws IllegalArgumentException if the flags value is not legal.
+     */
+    public static boolean exists(final File f, final String flags) {
+	if (flags == null || flags.isEmpty())
+	    throw new Intl.IllegalArgumentException("util#fileutil.invalidFlags", flags);
+
+	boolean ret = false;
+
+	switch (flags.charAt(0)) {
+	    case 'd':
+	    case 'D':
+		if (flags.length() == 1) {
+		    ret = f.exists() && f.isDirectory();
+		}
+		else if (flags.length() == 2) {
+		    switch (flags.charAt(1)) {
+			case 'r':
+			case 'R':
+			    ret = canReadDir(f);
+			    break;
+			default:
+			    throw new Intl.IllegalArgumentException("util#fileutil.invalidFlags", flags);
+		    }
+		}
+		else {
+		    throw new Intl.IllegalArgumentException("util#fileutil.invalidFlags", flags);
+		}
+		break;
+
+	    case 'f':
+	    case 'F':
+		if (flags.length() == 1) {
+		    ret = f.exists() && f.isFile();
+		}
+		else if (flags.length() == 2) {
+		    switch (flags.charAt(1)) {
+			case 'r':
+			case 'R':
+			    ret = canRead(f);
+			    break;
+			case 'w':
+			case 'W':
+			    ret = canWrite(f);
+			    break;
+			case 'x':
+			case 'X':
+			    ret = canExecute(f);
+			    break;
+			default:
+			    throw new Intl.IllegalArgumentException("util#fileutil.invalidFlags", flags);
+		    }
+		}
+		else {
+		    throw new Intl.IllegalArgumentException("util#fileutil.invalidFlags", flags);
+		}
+		break;
+
+	    default:
+		throw new Intl.IllegalArgumentException("util#fileutil.invalidFlags", flags);
+	}
+
+	return ret;
     }
 
     /**
