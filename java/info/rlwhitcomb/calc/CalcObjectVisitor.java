@@ -609,6 +609,7 @@
  *	    #376: Move "exists" code to FileUtilities; add check for proper name case.
  *	29-Jun-2022 (rlwhitcomb)
  *	    #383: Display action message for "var" statement.
+ *	    #381: Revamp sort completely to work nicely with maps and sets (including sort map by key or value).
  */
 package info.rlwhitcomb.calc;
 
@@ -696,6 +697,12 @@ import info.rlwhitcomb.util.Which;
  */
 public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 {
+	/** Flag for case-insensitive sort. */
+	private static final int FLAG_CASE_INSENSITIVE = 0x0001;
+	/** Flag for sort of keys vs values in maps. */
+	private static final int FLAG_SORT_KEYS = 0x0002;
+
+
 	/** Pattern for format specifiers. */
 	private static final Pattern FORMAT_PATTERN = Pattern.compile("\\s*@([\\-+])?([0-9]+)?([\\.]([0-9]+))?([a-zA-Z,_])?([a-zA-Z%$])");
 
@@ -4557,24 +4564,44 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public Object visitSortExpr(CalcParser.SortExprContext ctx) {
 	    CalcParser.Expr1Context e1ctx = ctx.expr1();
 	    CalcParser.Expr2Context e2ctx = ctx.expr2();
-	    CalcParser.ExprContext arrCtx;
+	    CalcParser.ExprContext objCtx;
 	    boolean caseInsensitive = false;
+	    boolean sortKeys = false;
 
 	    if (e1ctx != null) {
-		arrCtx = e1ctx.expr();
+		objCtx = e1ctx.expr();
 	    }
 	    else {
-		arrCtx = e2ctx.expr(0);
-		caseInsensitive = getBooleanValue(e2ctx.expr(1));
+		objCtx = e2ctx.expr(0);
+		int flags = getIntValue(e2ctx.expr(1));
+		caseInsensitive = (flags & FLAG_CASE_INSENSITIVE) == FLAG_CASE_INSENSITIVE;
+		sortKeys        = (flags & FLAG_SORT_KEYS)        == FLAG_SORT_KEYS;
 	    }
 
-	    List<CalcParser.ExprContext> exprs = new ArrayList<>();
-	    exprs.add(arrCtx);
-	    List<Object> values = buildValueList(this, exprs, Conversion.UNCHANGED);
-
-	    sort(this, values, arrCtx, settings.mc, caseInsensitive);
-
-	    return new ArrayScope<Object>(values);
+	    Object obj = evaluate(objCtx);
+	    if (obj instanceof ObjectScope) {
+		ObjectScope map = (ObjectScope) obj;
+		return sortMap(this, map, objCtx, settings.mc, caseInsensitive, sortKeys);
+	    }
+	    else if (obj instanceof ArrayScope) {
+		@SuppressWarnings("unchecked")
+		ArrayScope<Object> array = (ArrayScope<Object>) obj;
+		ArrayScope<Object> result = new ArrayScope<>(array);
+		sort(this, result.list(), objCtx, settings.mc, caseInsensitive);
+		return result;
+	    }
+	    else if (obj instanceof SetScope) {
+		@SuppressWarnings("unchecked")
+		SetScope<Object> set = (SetScope<Object>) obj;
+		List<Object> list = new ArrayList<Object>(set.set());
+		sort(this, list, objCtx, settings.mc, caseInsensitive);
+		return new SetScope<Object>(list);
+	    }
+	    else if (obj instanceof CollectionScope) {
+		return obj;
+	    }
+	    // A scalar object, just return it unchanged
+	    return obj;
 	}
 
 	@Override

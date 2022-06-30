@@ -3,6 +3,10 @@
 //======================
 
 [
+    { version: '2.13.10', date: d'2022-06-29',
+      issues: [ 381 ],
+      comment: 'Revamp sort completely, and make it work for maps (either key or value).'
+    },
     { base: '1.9.23', version: '2.13.6', date: d'2022-06-29',
       issues: [ 380 ],
       comment: 'Increase file size readable as one string.'

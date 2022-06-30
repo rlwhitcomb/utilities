@@ -764,7 +764,7 @@ or<br>
             <tr><td><code>SPLICE</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <code>[</code> <i>id or string list</i> <code>]</code>&nbsp;)<br>(&nbsp;<code>,</code> <code>{</code> <i>key:value pairs</i> <code>}</code>&nbsp;)</td><td>modify an object by deleting and/or adding elements</td></tr>
             <tr><td><code>FILL</code>&nbsp;<i>var</i>&nbsp;( <code>,</code> <i>expr</i>&nbsp;( <code>,</code> <i>expr</i>&nbsp;( <code>,</code><i>expr</i> ) ) )</td><td>fill an array or string</td></tr>
             <tr><td><code>FORMATSTRING</code>&nbsp;<i>format_expr</i>&nbsp;( <code>,</code> <i>expr</i> ) *</td><td>use the expressions to replace<br>the parameter args in the format string</td></tr>
-            <tr><td><code>SORT</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>case_expr</i>&nbsp;)</td><td>sort the array expression, optionally ignoring case,<br>returning the array of sorted values</td></tr>
+            <tr><td><code>SORT</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>flags_expr</i>&nbsp;)</td><td>sort the object, array, or set, optionally ignoring case,<br>or sorting objects by key instead of value,<br>returning a new sorted object</td></tr>
             <tr><td><code>TRIM</code> or <code>LTRIM</code> or <code>RTRIM</code> <i>expr</i></td><td>trim all, leading, or trailing whitespace</td></tr>
             <tr><td><code>PAD</code> or <code>LPAD</code> or <code>RPAD</code>&nbsp;<i>var</i>&nbsp;<code>,</code> <i>expr</i>&nbsp;( <code>,</code><i>expr</i> )</td><td>pad an array or string to the given width<br>with 0 or space (default) or the given value/character</td></tr>
             <tr><td><code>FIB</code>&nbsp;<i>expr</i></td><td>Fibonacci number</td></tr>
@@ -979,14 +979,15 @@ or<br>
      will (optionally) have replaceable parameters, which are replaced by the values of the respective arguments in the expression list. The completed
      string with all the values replaced will be the result. For example:
   <p class="indent"><code style="color:blue;">formatstring("%1$s, %2$s!", "Hello", "World")</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">"Hello, World!"</code>
-  <p>The <code>sort</code> function will do a "flat map" of the values in a list or object, sort them, and return the sorted list.
-     Because of the "flat" mapping, the original values are left as-is. So in order to sort a list in place, you must reassign
+  <p>The <code>sort</code> function will do a single-level sort of the given object, array, or set, returning a new sorted object of the same type.
+     The original object is left as-is. So in order to sort a list in place, you must reassign
      the result of the sort back to the original variable, as in <code>arr = sort arr</code>. This also allows you to create
      a sorted list from an unsorted array constant in one step, by doing <code>arr = sort [ 3,2,5,0,4 ] &#x21E8; [ 0, 2, 3, 4, 5 ]</code>.
      Note that (as of version 2.3.6 or higher) the sort is done in a "natural ordering" that sorts numeric values within strings
      as in "1", "2", "3", ... "10", "11", .... Future versions may include an option for this. The optional second argument to <code>sort</code>
-     determines whether the sort is done ignoring the case of strings or not. <code>true</code> to ignore, <code>false</code> (or missing)
-     to respect the case.
+     actually can hold two flags:  a value of <code>1</code> (or <code>true</code>) will do the sort in a case-insensitive way for strings,
+     while a value of <code>2</code> will sort objects by key instead of value.  Using <code>3</code> (or <code>2|1</code> or <code>2+1</code>)
+     will sort by the keys, ignoring case differences. Sorting arrays or sets ignores the <code>2</code> flag value.
   <p>The <code>FRAC</code> function constructs a fraction value from a numerator and denominator, from an integer along with
      a numerator and denominator, or a single expression which is converted to a string and parsed in the same manner as
      a fractional constant, such as <code>frac('1 &#x215c;')</code>, except that any of the Unicode fraction values can

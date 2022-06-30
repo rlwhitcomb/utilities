@@ -16,3 +16,19 @@ sort(a)
 min(a)
 max(a)
 
+map = { a: 4, b:2, c:3, d: 1 }
+sort map
+sort map, 2
+
+set = { 3, 4, 1, 2 }
+sort set
+
+map2 = { a: "Abc", f: "aBc", D: "abC", B: "ABC", c: "abc" }
+sort map2
+sort map2, 2
+sort map2, 1
+sort map2, 1|2
+
+a9 = [ { name: 'joe' }, { name: 'benny' }, { name: 'abby' }, { name: 'diedre' } ]
+sort a9
+

@@ -160,6 +160,8 @@
  *	    #351: Change spacing of "{ }" in statement blocks.
  *	21-Jun-2022 (rlwhitcomb)
  *	    #314: Add processing of SetScope in all applicable places.
+ *	29-Jun-2022 (rlwhitcomb)
+ *	    #381: Add "sortMap".
  */
 package info.rlwhitcomb.calc;
 
@@ -1271,6 +1273,66 @@ public final class CalcUtil
 	    Collections.sort(list, new ObjectComparator(visitor, ctx, mc, ignore));
 	}
 
+
+	/**
+	 * A comparator of map entries that can either sort by key or value, using the {@code compareValues}
+	 * method in either case to do the comparison.
+	 */
+	private static class MapEntryComparator implements Comparator<Map.Entry<String, Object>>
+	{
+		private CalcObjectVisitor visitor;
+		private ParserRuleContext ctx;
+		private MathContext mc;
+		private boolean ignoreCase;
+		private boolean sortByKey;
+
+		MapEntryComparator(final CalcObjectVisitor v, final ParserRuleContext c,
+			final MathContext m, final boolean ign, final boolean sortKey) {
+		    visitor = v;
+		    ctx = c;
+		    mc = m;
+		    ignoreCase = ign;
+		    sortByKey = sortKey;
+		}
+
+		@Override
+		public int compare(final Map.Entry<String, Object> e1, final Map.Entry<String, Object> e2) {
+		    if (sortByKey) {
+			return compareValues(visitor, ctx, ctx, e1.getKey(), e2.getKey(), mc, false, true, ignoreCase, true);
+		    }
+		    else {
+			return compareValues(visitor, ctx, ctx, e1.getValue(), e2.getValue(), mc, false, true, ignoreCase, true);
+		    }
+		}
+	}
+
+
+	/**
+	 * Sort a map, either by key or value, according to our {@code compareValues} method.
+	 *
+	 * @param visitor	The visitor used to evaluate expressions.
+	 * @param map		The input map to be sorted.
+	 * @param ctx		The parse tree (source) of the map.
+	 * @param mc		Math context used to round decimal values.
+	 * @param ignore	Whether the string comparison is case-sensitive or not.
+	 * @param sortByKey	{@code true} to sort by keys, or {@code false} by value.
+	 * @return		The (new) sorted map.
+	 */
+	public static ObjectScope sortMap(final CalcObjectVisitor visitor, final ObjectScope map,
+		final ParserRuleContext ctx, final MathContext mc, final boolean ignore,
+		final boolean sortByKey) {
+	    Comparator<Map.Entry<String, Object>> comparator =
+		new MapEntryComparator(visitor, ctx, mc, ignore, sortByKey);
+	    List<Map.Entry<String, Object>> sortedList = new ArrayList<>(map.map().entrySet());
+	    Collections.sort(sortedList, comparator);
+	    ObjectScope sortedMap = new ObjectScope();
+	    for (Map.Entry<String, Object> entry : sortedList) {
+		sortedMap.setValue(entry.getKey(), entry.getValue());
+	    }
+	    return sortedMap;
+	}
+
+
 	/**
 	 * Compare two objects of possibly differing types.
 	 *
@@ -2256,7 +2318,7 @@ public final class CalcUtil
 	}
 
 	/**
-	 * Do a "flat map" of values for the "sumof", "productof", "sort", and "exec" functions.  Since each
+	 * Do a "flat map" of values for the "sumof", "productof", and "exec" functions.  Since each
 	 * value to be processed could be an array or map, we need to traverse these objects
 	 * as well as the simple values in order to get the full list to process.
 	 *

@@ -7,3 +7,15 @@
 >sort (a) -> [ "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "20", "21", "26", "30", "31", "32", "33", "35", "39", "40", "41", "42" ]
 >min (a) -> "1"
 >max (a) -> "42"
+>map = {a: 4, b: 2, c: 3, d: 1} -> { a: 4, b: 2, c: 3, d: 1 }
+>sort map -> { d: 1, b: 2, c: 3, a: 4 }
+>sort map, 2 -> { a: 4, b: 2, c: 3, d: 1 }
+>set = {3, 4, 1, 2} -> { 3, 4, 1, 2 }
+>sort set -> { 1, 2, 3, 4 }
+>map2 = {a: "Abc", f: "aBc", D: "abC", B: "ABC", c: "abc"} -> { a: "Abc", f: "aBc", D: "abC", B: "ABC", c: "abc" }
+>sort map2 -> { B: "ABC", a: "Abc", f: "aBc", D: "abC", c: "abc" }
+>sort map2, 2 -> { B: "ABC", D: "abC", a: "Abc", c: "abc", f: "aBc" }
+>sort map2, 1 -> { a: "Abc", f: "aBc", D: "abC", B: "ABC", c: "abc" }
+>sort map2, 1 | 2 -> { a: "Abc", B: "ABC", c: "abc", D: "abC", f: "aBc" }
+>a9 = [{name: 'joe'}, {name: 'benny'}, {name: 'abby'}, {name: 'diedre'}] -> [ { name: "joe" }, { name: "benny" }, { name: "abby" }, { name: "diedre" } ]
+>sort a9 -> [ { name: "abby" }, { name: "benny" }, { name: "diedre" }, { name: "joe" } ]
