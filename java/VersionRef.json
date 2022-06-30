@@ -3,6 +3,10 @@
 //======================
 
 [
+    { version: '2.13.5', date: d'2022-06-29',
+      issues: [ 384 ],
+      comment: 'Disallow the exotic "truth" values such as "T"/"F", "yes"/"no", etc.'
+    },
     { version: '2.13.4', date: d'2022-06-27',
       issues: [ 376 ],
       comment: 'New exact case flag for "exists".'

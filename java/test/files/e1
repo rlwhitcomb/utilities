@@ -904,6 +904,9 @@ Truth([ 45 ])
 Truth(null)
 Truth("a")
 Truth("false")
+Truth("F")
+Truth("no")
+Truth("off")
 Truth(settings)
 
 #

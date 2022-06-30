@@ -325,6 +325,10 @@
  *	    that skips "$" expressions and variables. Move "findMatching" into here from CalcUtil.
  *	20-May-2022 (rlwhitcomb)
  *	    #334 (again): In "quoteControl" we have to double the escape char also... doh!
+ *	29-Jun-2022 (rlwhitcomb)
+ *	    #384: Make a new version of "getBooleanValue" with a flag whether to do the extended
+ *	    string conversions (which are pretty risky in Calc, and actually unused in all other
+ *	    current scenarios).
  */
 
 package info.rlwhitcomb.util;
@@ -2706,14 +2710,32 @@ public final class CharUtil
 
 	/**
 	 * Determine the boolean value from the given object.
-	 * <p> Accepts values such as "Yes", "No", "T", "F", "On", and "Off"
-	 * (case-insensitive), numeric values (true == non-zero) in addition
-	 * to just plain "true" and "false".
+	 * <p> This version only translates true booleans, strings that directly
+	 * convert to boolean, or numbers (or numeric strings) that convert to
+	 * zero/non-zero values.
+	 *
 	 * @param	value	The candidate value.
 	 * @return		If possible, the boolean value that corresponds.
 	 * @throws	IllegalArgumentException for bad string values or bad types.
+	 * @see	#getBooleanValue(Object, boolean)
 	 */
 	public static boolean getBooleanValue(final Object value) {
+	    return getBooleanValue(value, false);
+	}
+
+	/**
+	 * Determine the boolean value from the given object.
+	 * <p> Accepts values such as "Yes", "No", "T", "F", "On", and "Off"
+	 * (case-insensitive), numeric values (true == non-zero) in addition
+	 * to just plain "true" and "false", but only if {@code extended} is {@code true}.
+	 *
+	 * @param	value		The candidate value.
+	 * @param	extended	Whether to use the extended string conversions
+	 *				(like "T"/"F", "yes"/"no", etc.)
+	 * @return			If possible, the boolean value that corresponds.
+	 * @throws	IllegalArgumentException for bad string values or bad types.
+	 */
+	public static boolean getBooleanValue(final Object value, final boolean extended) {
 	    if (value instanceof Boolean) {
 		return ((Boolean)value).booleanValue();
 	    }
@@ -2732,25 +2754,30 @@ public final class CharUtil
 		    return bool;
 		if (stringValue.equalsIgnoreCase("false"))
 		    return false;
-		// Now, get the internationalized version of other strings
-		// that we will accept
-		try {
-		    String trueChoiceList = Intl.getString("util#char.validTrueStrings");
-		    for (String choice : trueChoiceList.split(",\\s*")) {
-			if (stringValue.equalsIgnoreCase(choice)) {
-			    return true;
+
+		// The extended string translations, which can be used in some situations (such as
+		// database fields, or user input).
+		if (extended) {
+		    // Now, get the internationalized version of other strings that we will accept
+		    try {
+			String trueChoiceList = Intl.getString("util#char.validTrueStrings");
+			for (String choice : trueChoiceList.split(",\\s*")) {
+			    if (stringValue.equalsIgnoreCase(choice)) {
+				return true;
+			    }
+			}
+			String falseChoiceList = Intl.getString("util#char.validFalseStrings");
+			for (String choice : falseChoiceList.split(",\\s*")) {
+			    if (stringValue.equalsIgnoreCase(choice)) {
+				return false;
+			    }
 			}
 		    }
-		    String falseChoiceList = Intl.getString("util#char.validFalseStrings");
-		    for (String choice : falseChoiceList.split(",\\s*")) {
-			if (stringValue.equalsIgnoreCase(choice)) {
-			    return false;
-			}
+		    catch (IllegalArgumentException iae) {
+			// This would be because we couldn't load the Intl string(s), so no matter...
 		    }
 		}
-		catch (IllegalArgumentException iae) {
-		    // This would be because we couldn't load the Intl string(s), so no matter...
-		}
+
 		// One last attempt: try to convert string to a number and check zero/non-zero
 		try {
 		    return Long.parseLong(stringValue) != 0L;

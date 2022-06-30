@@ -1041,6 +1041,9 @@
 >Truth(null) -> "F"
 >Truth("a") -> "T"
 >Truth("false") -> "F"
+>Truth("F") -> "T"
+>Truth("no") -> "T"
+>Truth("off") -> "T"
 >Truth(settings) -> "T"
 >Defining constant “UTF_8” = utf-8
 >`Test of read/write/read of Unicode data = ${uni1 === uni2}` -> "Test of read/write/read of Unicode data = true"
