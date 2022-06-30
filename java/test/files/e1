@@ -928,6 +928,12 @@ const UTF_8 = 'utf-8'
    uni2 = read('uni2', UTF_8)
 }
 `Test of read/write/read of Unicode data = ${uni1 === uni2}`
+:quiet on {
+   exec('gunz', 'test/data/ExportCSV.csv.gz')
+   data = read('test/data/ExportCSV.csv')
+   exec('gz', 'test/data/ExportCSV.csv')
+}
+`Test of read of large file: length = ${length(data)@,d}`
 
 #
 # "exists" function

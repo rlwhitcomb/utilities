@@ -38,6 +38,8 @@
  *	    #273: Move math-related classes to "math" package.
  *	29-May-2022 (rlwhitcomb)
  *	    #301: Add values used for "convertToWords" (BigInteger).
+ *	29-Jun-2022 (rlwhitcomb)
+ *	    #380: Increase string file size for FileUtilities.
  */
 package info.rlwhitcomb.util;
 
@@ -216,6 +218,6 @@ public final class Constants
 
 
 	/** Maximum size of file we want to read into a string (2MB). */
-	public static final long FILE_STRING_SIZE_LIMIT = 2_097_152L;
+	public static final long FILE_STRING_SIZE_LIMIT = 10_485_760L;
 
 }

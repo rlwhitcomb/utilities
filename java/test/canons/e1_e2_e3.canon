@@ -1052,6 +1052,7 @@
 >Truth(settings) -> "T"
 >Defining constant “UTF_8” = utf-8
 >`Test of read/write/read of Unicode data = ${uni1 === uni2}` -> "Test of read/write/read of Unicode data = true"
+>`Test of read of large file: length = ${length(data)@,d}` -> "Test of read of large file: length = 6,326,439"
 >exists ('VersionRef.json') -> true
 >exists ('test/files', 'd') -> true
 >exists ('junk', 'fw') -> false

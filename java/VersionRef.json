@@ -3,6 +3,10 @@
 //======================
 
 [
+    { base: '1.9.23', version: '2.13.6', date: d'2022-06-29',
+      issues: [ 380 ],
+      comment: 'Increase file size readable as one string.'
+    },
     { version: '2.13.6', date: d'2022-06-29',
       issues: [ 383 ],
       comment: 'Display action message for "var" statement.'
