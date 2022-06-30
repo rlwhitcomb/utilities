@@ -607,6 +607,8 @@
  *	    #314: Add set difference.
  *	27-Jun-2022 (rlwhitcomb)
  *	    #376: Move "exists" code to FileUtilities; add check for proper name case.
+ *	29-Jun-2022 (rlwhitcomb)
+ *	    #383: Display action message for "var" statement.
  */
 package info.rlwhitcomb.calc;
 
@@ -2802,7 +2804,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    if (currentScope.isDefinedLocally(varName, settings.ignoreNameCase))
 		throw new CalcExprException(ctx, "%calc#noDupLocalVar", varName);
 
-	    return currentScope.setValueLocally(varName, settings.ignoreNameCase, value);
+	    currentScope.setValueLocally(varName, settings.ignoreNameCase, value);
+
+	    displayActionMessage("%calc#definingVar", varName,
+		toStringValue(this, ctx, value, false, settings.separatorMode));
+
+	    return value;
 	}
 
 	private void addPairsToObject(CalcParser.ObjContext objCtx, ObjectScope object) {

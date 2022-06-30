@@ -863,6 +863,15 @@ sin(two_pi)
 two_pi/pi
 
 #
+# "var" declarations (non-local)
+#
+var v1 = 10
+v1**5
+v1 = 20
+v1**6
+:clear v1
+
+#
 # "matches" function
 #
 input_string = 'This is the day'

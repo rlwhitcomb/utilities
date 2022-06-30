@@ -894,6 +894,11 @@
 >Defining constant “two_pi” = 6.283185307179586476925286766559006
 >sin (two_pi) -> 0.0000000000000000000000000000000004
 >two_pi / pi -> 2
+>Defining variable “v1” = 10
+>v1 ** 5 -> 100000
+>v1 = 20 -> 20
+>v1 ** 6 -> 64000000
+>Variable 'v1' cleared.
 >input_string = 'This is the day' -> "This is the day"
 >matches (input_string, '.+is is.+') -> true
 >matches (input_string, '^.+day$') -> true

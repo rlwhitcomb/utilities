@@ -3,6 +3,10 @@
 //======================
 
 [
+    { version: '2.13.6', date: d'2022-06-29',
+      issues: [ 383 ],
+      comment: 'Display action message for "var" statement.'
+    },
     { version: '2.13.5', date: d'2022-06-29',
       issues: [ 384 ],
       comment: 'Disallow the exotic "truth" values such as "T"/"F", "yes"/"no", etc.'
