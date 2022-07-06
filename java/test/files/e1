@@ -6,8 +6,10 @@
 
 # Simple version check ...
 # version 2.3.0 was first version where these checks would work, and 2.4.11 is where versioninfo -> info.version
-info.version.major > 2 || (info.version.major == 2 && info.version.minor > 4) || (info.version.major == 2 && info.version.minor == 4 && info.version.patch >= 11)
-:requires '2.13.12-alpha', base '1.9.23-alpha'
+info.version.major > 2 ||
+    (info.version.major == 2 && info.version.minor > 4) ||
+    (info.version.major == 2 && info.version.minor == 4 && info.version.patch >= 11)
+:requires '2.13.14-alpha', base '1.9.23-alpha'
 
 # Various simple expressions
 :decimal(50)
@@ -573,8 +575,11 @@ f = { coords: [1, 1, 4, 5], name: "box" }
 f@0.4j
 
 # The ternary operator
-1 == 2 ? 'impossible' : 'correct'
-2! < 2**2 ? 'true' : 'not likely'
+1 == 2 ? 'impossible'
+       : 'correct'
+2! < 2**2
+   ? 'true'
+   : 'not likely'
 x = 7; y = 8
 _min = min_plus_1 = x < y ? x + 1 : y + 1
 _min

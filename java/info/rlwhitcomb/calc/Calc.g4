@@ -415,6 +415,8 @@
  *	    #373: Add "exists" function.
  *	05-Jul-2022 (rlwhitcomb)
  *	    #291: Add optional flags to "matches" function.
+ *	06-Jul-2022 (rlwhitcomb)
+ *	    #375: Allow end of line in more places where long expressions might be common.
  */
 
 grammar Calc;
@@ -601,11 +603,11 @@ expr
    | expr ( K_OF|K_IN|K_WITHIN|SET_IN ) loopCtl   # inExpr
    | expr EQUAL_OP expr                  # equalExpr
    | expr BIT_OP expr                    # bitExpr
-   | expr BOOL_AND_OP expr               # booleanAndExpr
-   | expr BOOL_OR_OP expr                # booleanOrExpr
-   | expr BOOL_XOR_OP expr               # booleanXorExpr
-   | expr ELVIS_OP expr                  # elvisExpr
-   |<assoc=right> expr '?' expr ':' expr # eitherOrExpr
+   | expr EOL* BOOL_AND_OP EOL* expr     # booleanAndExpr
+   | expr EOL* BOOL_OR_OP EOL* expr      # booleanOrExpr
+   | expr EOL* BOOL_XOR_OP EOL* expr     # booleanXorExpr
+   | expr EOL* ELVIS_OP EOL* expr        # elvisExpr
+   |<assoc=right> expr EOL* '?' EOL* expr EOL* ':' EOL* expr # eitherOrExpr
    |<assoc=right> var ASSIGN expr        # assignExpr
    |<assoc=right> var POW_ASSIGN expr    # powerAssignExpr
    |<assoc=right> var MULT_ASSIGN expr   # multAssignExpr
