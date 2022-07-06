@@ -413,6 +413,8 @@
  *	    Add "set minus" symbol.
  *	24-Jun-2022 (rlwhitcomb)
  *	    #373: Add "exists" function.
+ *	05-Jul-2022 (rlwhitcomb)
+ *	    #291: Add optional flags to "matches" function.
  */
 
 grammar Calc;
@@ -580,7 +582,7 @@ expr
    | K_EXISTS ( expr2 | expr1 )          # existsExpr
    | K_READ ( expr2 | expr1 )            # readExpr
    | K_WRITE ( expr3 | expr2 )           # writeExpr
-   | K_MATCHES expr2                     # matchesExpr
+   | K_MATCHES ( expr3 | expr2 )         # matchesExpr
    | var INC_OP                          # postIncOpExpr
    |<assoc=right> INC_OP var             # preIncOpExpr
    |<assoc=right> ADD_OP expr            # negPosExpr

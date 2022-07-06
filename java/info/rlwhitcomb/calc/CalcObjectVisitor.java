@@ -610,6 +610,8 @@
  *	29-Jun-2022 (rlwhitcomb)
  *	    #383: Display action message for "var" statement.
  *	    #381: Revamp sort completely to work nicely with maps and sets (including sort map by key or value).
+ *	05-Jul-2022 (rlwhitcomb)
+ *	    #291: Add optional flags to "matches".
  */
 package info.rlwhitcomb.calc;
 
@@ -698,9 +700,22 @@ import info.rlwhitcomb.util.Which;
 public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 {
 	/** Flag for case-insensitive sort. */
-	private static final int FLAG_CASE_INSENSITIVE = 0x0001;
+	private static final int SORT_CASE_INSENSITIVE = 0x0001;
 	/** Flag for sort of keys vs values in maps. */
-	private static final int FLAG_SORT_KEYS = 0x0002;
+	private static final int SORT_SORT_KEYS = 0x0002;
+
+	/** Flag for case-insensitive matches. */
+	private static final int MATCH_CASE_INSENSITIVE = 0x0001;
+	/** Flag for "dotall" matches. */
+	private static final int MATCH_DOTALL = 0x0002;
+	/** Flag for Unicode-case match. */
+	private static final int MATCH_UNICODE_CASE = 0x0004;
+	/** Flag for literal match. */
+	private static final int MATCH_LITERAL = 0x0008;
+	/** Flag for multi-line match. */
+	private static final int MATCH_MULTILINE = 0x0010;
+	/** Flag for Unix lines mode. */
+	private static final int MATCH_UNIX_LINES = 0x0020;
 
 
 	/** Pattern for format specifiers. */
@@ -4574,8 +4589,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    else {
 		objCtx = e2ctx.expr(0);
 		int flags = getIntValue(e2ctx.expr(1));
-		caseInsensitive = (flags & FLAG_CASE_INSENSITIVE) == FLAG_CASE_INSENSITIVE;
-		sortKeys        = (flags & FLAG_SORT_KEYS)        == FLAG_SORT_KEYS;
+		caseInsensitive = (flags & SORT_CASE_INSENSITIVE) != 0;
+		sortKeys        = (flags & SORT_SORT_KEYS)        != 0;
 	    }
 
 	    Object obj = evaluate(objCtx);
@@ -5387,10 +5402,39 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitMatchesExpr(CalcParser.MatchesExprContext ctx) {
 	    CalcParser.Expr2Context expr2 = ctx.expr2();
-	    CalcParser.ExprContext inputExpr = expr2.expr(0);
+	    CalcParser.ExprContext inputExpr;
+	    CalcParser.ExprContext patternExpr;
+	    int flags = 0x0000;
+	    int matchFlags = 0;
+
+	    if (expr2 != null) {
+		inputExpr = expr2.expr(0);
+		patternExpr = expr2.expr(1);
+	    }
+	    else {
+		CalcParser.Expr3Context expr3 = ctx.expr3();
+		inputExpr = expr3.expr(0);
+		patternExpr = expr3.expr(1);
+		flags = getIntValue(expr3.expr(2));
+	    }
+
 	    Object input = evaluate(inputExpr);
-	    String pattern = getStringValue(expr2.expr(1));
-	    Pattern p = Pattern.compile(pattern);
+	    String pattern = getStringValue(patternExpr);
+
+	    if ((flags & MATCH_CASE_INSENSITIVE) != 0)
+		matchFlags |= Pattern.CASE_INSENSITIVE;
+	    if ((flags & MATCH_DOTALL) != 0)
+		matchFlags |= Pattern.DOTALL;
+	    if ((flags & MATCH_UNICODE_CASE) != 0)
+		matchFlags |= Pattern.UNICODE_CASE;
+	    if ((flags & MATCH_LITERAL) != 0)
+		matchFlags |= Pattern.LITERAL;
+	    if ((flags & MATCH_MULTILINE) != 0)
+		matchFlags |= Pattern.MULTILINE;
+	    if ((flags & MATCH_UNIX_LINES) != 0)
+		matchFlags |= Pattern.UNIX_LINES;
+
+	    Pattern p = Pattern.compile(pattern, matchFlags);
 
 	    // For lists, objects, and sets, return a similar object with only the matching keys or values
 	    if (input instanceof CollectionScope) {

@@ -3,6 +3,10 @@
 //======================
 
 [
+    { version: '2.13.12', date: d'2022-07-05',
+      issues: [ 291 ],
+      comment: 'Add optional pattern matching flags to "matches" function;\n\t add flag constants to "library".'
+    },
     { version: '2.13.10', date: d'2022-06-29',
       issues: [ 381 ],
       comment: 'Revamp sort completely, and make it work for maps (either key or value).'

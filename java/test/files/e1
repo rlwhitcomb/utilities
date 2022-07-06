@@ -7,7 +7,7 @@
 # Simple version check ...
 # version 2.3.0 was first version where these checks would work, and 2.4.11 is where versioninfo -> info.version
 info.version.major > 2 || (info.version.major == 2 && info.version.minor > 4) || (info.version.major == 2 && info.version.minor == 4 && info.version.patch >= 11)
-:requires '2.12.15-alpha', base '1.9.22-alpha'
+:requires '2.13.12-alpha', base '1.9.23-alpha'
 
 # Various simple expressions
 :decimal(50)
@@ -44,7 +44,7 @@ settings.precision
 settings.precision
 e
 a
-:clear
+:clear a,b
 a
 a = b = c = 27; a+b; b+c
 e
@@ -444,7 +444,7 @@ sort(a2)
 a2
 sort(a2, true)
 sort a3
-sort a3, true
+sort a3, SORT_CASE_INSENSITIVE
 sort a3, false
 sort a4
 
@@ -887,9 +887,11 @@ input_object = [
 ]
 matches(input_object, '.+name')@j
 input_set = { "John Smith", "Mary Smith", "Jane Smith", "Bob Smith", "Fred Jones", "Alicia Jones" }
-matches(input_set, '.+Smith')
+matches(input_set, '.+smith', MATCH_CASE_INSENSITIVE)
 set_name = 'Jane Smith'
 set_name in input_set
+matches('abc\ndef', 'abc.def', MATCH_DOTALL)
+matches('abcdef', 'abc.ef', MATCH_LITERAL)
 
 #
 # Defining functions inside blocks

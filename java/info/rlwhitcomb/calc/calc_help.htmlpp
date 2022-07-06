@@ -782,7 +782,7 @@ or<br>
             <tr><td><code>EXISTS</code>&nbsp;<i>expr</i>&nbsp;( <code>,</code>&nbsp;<i>flag_expr</i>&nbsp;)</td><td>check the existence/permissions of file or directory</td></tr>
             <tr><td><code>READ</code>&nbsp;<i>expr</i>&nbsp;( <code>,</code>&nbsp;<i>charset_expr</i>&nbsp;)</td><td>read the file (or files) using the optional charset</td></tr>
             <tr><td><code>WRITE</code>&nbsp;<i>expr</i>&nbsp; <code>,</code>&nbsp;<i>file name</i>&nbsp;( <code>,</code>&nbsp;<i>charset_expr</i>&nbsp;)</td><td>write the value to the file using the optional charset</td></tr>
-            <tr><td><code>MATCHES</code>&nbsp;<i>expr</i>&nbsp;<code>,</code>&nbsp;<i>pattern_expr</i></td><td>match the expression string against<br>the regular expression pattern</td></tr>
+            <tr><td><code>MATCHES</code>&nbsp;<i>expr</i>&nbsp;<code>,</code>&nbsp;<i>pattern_expr</i>&nbsp;( <code>,</code> <i>flags_expr</i> )</td><td>match the expression string against<br>the regular expression pattern with possible flags</td></tr>
             <tr><td><code>FACTORS</code>&nbsp;<i>expr</i></td><td>calculate all the factors of the number</td></tr>
             <tr><td><code>PFACTORS</code>&nbsp;<i>expr</i></td><td>calculate the prime factors of the number</td></tr>
             <tr><td><code>CHARS</code>&nbsp;<i>expr</i></td><td>convert a string into an array of its individual character values</td></tr>
@@ -1035,6 +1035,14 @@ or<br>
      another object containing only those keys that match the regex. For arrays, the returned array contains only those elements
      that match. For all other values, the input expression is converted to a string and matched against the regex,
      returning a <code>true</code> / <code>false</code> value.
+     The optional third flags value can be one or more of the following:
+     <ul><li><code>0x0001</code> = case insensitive</li>
+         <li><code>0x0002</code> = dotall (the <code>'.'</code> pattern matches line endings)</li>
+         <li><code>0x0004</code> = Unicode case folding</li>
+         <li><code>0x0008</code> = patterns are all literal</li>
+         <li><code>0x0010</code> = match multiline patterns</li>
+         <li><code>0x0020</code> = only Unix line endings recognized</li>
+     </ul>
   <p>The <code>info</code> object contains five read-only subobjects:  <code>version</code>, 
      <code>os</code>, <code>java</code>, <code>locale</code>, and <code>timezone</code>.
      The contents of each are similar to this:
