@@ -49,6 +49,8 @@
  *	    #269: New method to load main program info (in Environment).
  *	18-Apr-2022 (rlwhitcomb)
  *	    #270: Now this is automatic inside "printProgramInfo".
+ *	05-Jul-2022 (rlwhitcomb)
+ *	    #386: Fix "-win1252" charset name.
  *
  *	    TODO: wildcard directory names on input
  *	    TODO: -nn to limit to first nn lines, +nn to limit to LAST nn lines (hard to do?)
@@ -166,7 +168,7 @@ public class Cat {
 	    } else if (Options.matchesOption(arg, true, "default", "def", "standard", "d", "s")) {
 		currentInputCharset = Charset.defaultCharset();
 	    } else if (Options.matchesOption(arg, true, "win1252", "win", "w")) {
-		currentInputCharset = getCharset("win1252");
+		currentInputCharset = getCharset("windows-1252");
 	    } else if (Options.matchesOption(arg, true, "iso88591", "iso-8859-1", "iso", "i")) {
 		currentInputCharset = StandardCharsets.ISO_8859_1;
 	    } else if (Options.matchesOption(arg, true, "ascii", "asc", "a")) {
