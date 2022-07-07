@@ -417,6 +417,7 @@
  *	    #291: Add optional flags to "matches" function.
  *	06-Jul-2022 (rlwhitcomb)
  *	    #375: Allow end of line in more places where long expressions might be common.
+ *	    #388: Add optional flags value to case's "matches" selector (same as "matches" function).
  */
 
 grammar Calc;
@@ -697,9 +698,9 @@ exprList
    ;
 
 caseSelector
-   : expr DOTS expr ( ',' expr ) ?
+   : K_MATCHES ( expr2 | expr1 )
+   | expr DOTS expr ( ',' expr ) ?
    | expr
-   | K_MATCHES expr
    | compareOp expr
    | K_DEFAULT
    ;

@@ -612,6 +612,8 @@
  *	    #381: Revamp sort completely to work nicely with maps and sets (including sort map by key or value).
  *	05-Jul-2022 (rlwhitcomb)
  *	    #291: Add optional flags to "matches".
+ *	06-Jul-2022 (rlwhitcomb)
+ *	    #388: Add same optional flags to case "matches" selector.
  */
 package info.rlwhitcomb.calc;
 
@@ -2667,8 +2669,27 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		}
 	}
 
-	private boolean matches(String input, String pattern) {
-	    Pattern p = Pattern.compile(pattern);
+	private int patternFlags(int flags) {
+	    int matchFlags = 0;
+
+	    if ((flags & MATCH_CASE_INSENSITIVE) != 0)
+		matchFlags |= Pattern.CASE_INSENSITIVE;
+	    if ((flags & MATCH_DOTALL) != 0)
+		matchFlags |= Pattern.DOTALL;
+	    if ((flags & MATCH_UNICODE_CASE) != 0)
+		matchFlags |= Pattern.UNICODE_CASE;
+	    if ((flags & MATCH_LITERAL) != 0)
+		matchFlags |= Pattern.LITERAL;
+	    if ((flags & MATCH_MULTILINE) != 0)
+		matchFlags |= Pattern.MULTILINE;
+	    if ((flags & MATCH_UNIX_LINES) != 0)
+		matchFlags |= Pattern.UNIX_LINES;
+
+	    return matchFlags;
+	}
+
+	private boolean matches(String input, String pattern, int flags) {
+	    Pattern p = Pattern.compile(pattern, patternFlags(flags));
 	    Matcher m = p.matcher(input);
 
 	    return m.matches();
@@ -2696,10 +2717,21 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			    return visitor.lastValue();
 		    }
 		    else if (select.K_MATCHES() != null) {
-			CalcParser.ExprContext expr = select.expr().get(0);
-			String pattern = getStringValue(expr);
+			CalcParser.Expr2Context e2ctx = select.expr2();
+			String pattern;
+			int flags = 0x0000;
+
+			if (e2ctx != null) {
+			    pattern = getStringValue(e2ctx.expr(0));
+			    flags = getIntValue(e2ctx.expr(1));
+			}
+			else {
+			    CalcParser.Expr1Context e1ctx = select.expr1();
+			    pattern = getStringValue(e1ctx.expr());
+			}
+
 			String input = toStringValue(this, caseExpr, caseValue, false, false);
-			if (matches(input, pattern))
+			if (matches(input, pattern, flags))
 			    return visitor.execute();
 		    }
 		    else if (select.compareOp() != null) {
@@ -5405,7 +5437,6 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    CalcParser.ExprContext inputExpr;
 	    CalcParser.ExprContext patternExpr;
 	    int flags = 0x0000;
-	    int matchFlags = 0;
 
 	    if (expr2 != null) {
 		inputExpr = expr2.expr(0);
@@ -5421,20 +5452,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    Object input = evaluate(inputExpr);
 	    String pattern = getStringValue(patternExpr);
 
-	    if ((flags & MATCH_CASE_INSENSITIVE) != 0)
-		matchFlags |= Pattern.CASE_INSENSITIVE;
-	    if ((flags & MATCH_DOTALL) != 0)
-		matchFlags |= Pattern.DOTALL;
-	    if ((flags & MATCH_UNICODE_CASE) != 0)
-		matchFlags |= Pattern.UNICODE_CASE;
-	    if ((flags & MATCH_LITERAL) != 0)
-		matchFlags |= Pattern.LITERAL;
-	    if ((flags & MATCH_MULTILINE) != 0)
-		matchFlags |= Pattern.MULTILINE;
-	    if ((flags & MATCH_UNIX_LINES) != 0)
-		matchFlags |= Pattern.UNIX_LINES;
-
-	    Pattern p = Pattern.compile(pattern, matchFlags);
+	    Pattern p = Pattern.compile(pattern, patternFlags(flags));
 
 	    // For lists, objects, and sets, return a similar object with only the matching keys or values
 	    if (input instanceof CollectionScope) {

@@ -125,6 +125,19 @@ sign(-23)
 sign(0.0)
 sign(0.01)
 
+def m(v) = {
+   case v of {
+      matches "abc", 1: 'this is abc',
+      matches "def", 1: 'and def',
+      default: 'something else!'
+   }
+}
+m("ABC")
+m("abc")
+m("Def")
+m("def")
+m("junk")
+
 #
 # Using functions for objects
 #

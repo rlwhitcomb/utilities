@@ -1142,7 +1142,7 @@ whether it has previously been used/defined.
   <ul class="indent">
     <li><i>expr</i> ( <code>,</code> expr ) *</li>
     <li><i>expr</i> <code>...</code>,&nbsp;<code>..</code>,&nbsp;or&nbsp;<code>&#x2026;</code>&nbsp;<i>expr</i> [ <code>,</code> <i>expr</i> ]</li>
-    <li><code>MATCHES</code> <i>pattern</i></li>
+    <li><code>MATCHES</code> <i>pattern</i> ( ',' <i>flags</i> )</li>
     <li><code>&gt;</code> or <code>&lt;</code>, <code>==</code>, etc. <i>expr</i> (any of the comparison operators)</li>
     <li><code>DEFAULT</code>
   </ul>
@@ -1187,7 +1187,7 @@ whether it has previously been used/defined.
      If no match is made and there is a <code>default</code> block specified, that block is executed. Note: the expression match is made as if by <code>'=='</code> (that is, not a strict comparison),
      but the individual block values can be any kind of expression or object (including lists, objects, strings, functions, etc.). If a <code>...</code> selector is used, the set of values
      (with optional step value) will be tested in succession to see if any value matches the case expression. When the <code>matches</code> selector is used, the expression is a regular
-     expression pattern (just like the <code>MATCHES</code> standalone function) against which the case expression is tested. Using a comparison operator with an expression will test the
+     expression pattern (just like the <code>MATCHES</code> standalone function) against which the case expression is tested. The optional flags are identical to the optional flags in the <code>matches(...)</code> function. Using a comparison operator with an expression will test the
      case value against that expression, according to the operator. If the comparison succeeds, the corresponding block will be executed. Note that the idea of <i>"fall-through"</i> between
      statement blocks makes no sense here: multiple selectors can select for a single code block, but that block stands alone and will never "bleed" into another block. If such fall-through
      behavior is desired, it will be necessary to either duplicate code, make a separate parameterized function, or otherwise rearrange the logic.

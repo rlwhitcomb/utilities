@@ -208,6 +208,18 @@
 >sign(-23) -> -1
 >sign(0.0) -> 0
 >sign(0.01) -> 1
+>Defining function “m(v)” = {
+> case v of {
+> matches "abc", 1: 'this is abc',
+> matches "def", 1: 'and def',
+> default: 'something else!'
+>}
+>}
+>m("ABC") -> "this is abc"
+>m("abc") -> "this is abc"
+>m("Def") -> "and def"
+>m("def") -> "and def"
+>m("junk") -> "something else!"
 >w = {universal: true} -> { universal: true }
 >Defining function “u” = { "universal" }
 >Defining function “v” = { w }

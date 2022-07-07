@@ -2,7 +2,7 @@
 if [ -z "$1" ]
 then
    echo Update a test canon file.
-   echo Usage: upc test_name [ canon_name ]
+   echo Usage: upc7 test_name [ canon_name ]
    echo   Note: only works for "e7"
    exit 1
 fi

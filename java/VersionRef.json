@@ -3,6 +3,10 @@
 //======================
 
 [
+    { version: '2.13.16', date: d'2022-07-06',
+      issues: [ 388 ],
+      comment: 'Add "matches" flags to case statement\'s "matches" selector.'
+    },
     { version: '2.13.14', date: d'2022-07-06',
       issues: [ 375 ],
       comment: 'Allow more newlines in potentially long logical expressions.'
