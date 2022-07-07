@@ -899,11 +899,18 @@
 >Defining constant “two_pi” = 6.283185307179586476925286766559006
 >sin (two_pi) -> 0.0000000000000000000000000000000004
 >two_pi / pi -> 2
+>Defining constant “NULLISH” = <null>
+>NULLISH -> <null>
 >Defining variable “v1” = 10
 >v1 ** 5 -> 100000
 >v1 = 20 -> 20
 >v1 ** 6 -> 64000000
->Variable 'v1' cleared.
+>Defining variable “v2”
+>v2 -> <null>
+>v2 = 'three sheets' -> "three sheets"
+>v2 += ' to the wind' -> "three sheets to the wind"
+>v2 -> "three sheets to the wind"
+>Variables 'v1' and 'v2' cleared.
 >input_string = 'This is the day' -> "This is the day"
 >matches (input_string, '.+is is.+') -> true
 >matches (input_string, '^.+day$') -> true
@@ -1057,7 +1064,7 @@
 >Truth("no") -> "T"
 >Truth("off") -> "T"
 >Truth(settings) -> "T"
->Defining constant “UTF_8” = utf-8
+>Defining constant “UTF_8” = "utf-8"
 >`Test of read/write/read of Unicode data = ${uni1 === uni2}` -> "Test of read/write/read of Unicode data = true"
 >`Test of read of large file: length = ${length(data)@,d}` -> "Test of read of large file: length = 6,326,439"
 >exists ('VersionRef.json') -> true

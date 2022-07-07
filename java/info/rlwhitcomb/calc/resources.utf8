@@ -137,6 +137,8 @@
 #	    #376: Move "exists" flags error.
 #	29-Jun-2022 (rlwhitcomb)
 #	    #383: New action message for "var" definition.
+#	07-Jul-2022 (rlwhitcomb)
+#	    #389: New message when "var" has no initial value.
 #
 
 #
@@ -201,6 +203,7 @@ quoteStringsMode= Quoting result strings is now <u>%1$s<.>.
 definingFunc	= <r>Defining function <y>%1$s<.><r> = <v>%2$s<r>
 definingConst	= <r>Defining constant <y>%1$s<.><r> = <v>%2$s<r>
 definingVar	= <r>Defining variable <y>%1$s<.><r> = <v>%2$s<r>
+definingVarOnly	= <r>Defining variable <y>%1$s<.><r>
 variables	= Variables
 varUnder1	= ---------
 varUnder2	= =========

@@ -614,6 +614,9 @@
  *	    #291: Add optional flags to "matches".
  *	06-Jul-2022 (rlwhitcomb)
  *	    #388: Add same optional flags to case "matches" selector.
+ *	07-Jul-2022 (rlwhitcomb)
+ *	    #389: A "var id" declaration doesn't need an initial value expression. Fix the value quoting
+ *	    on the action messages for both "const" and "var".
  */
 package info.rlwhitcomb.calc;
 
@@ -2845,7 +2848,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    ConstantValue.define(currentScope, constantName, value);
 
 	    displayActionMessage("%calc#definingConst", constantName,
-		toStringValue(this, ctx, value, false, settings.separatorMode));
+		toStringValue(this, ctx, value, settings.quoteStrings, settings.separatorMode));
 
 	    return value;
 	}
@@ -2853,17 +2856,27 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitVarStmt(CalcParser.VarStmtContext ctx) {
 	    String varName = ctx.id().getText();
-	    Object value = evaluate(ctx.expr());
+	    CalcParser.ExprContext expr = ctx.expr();
 
 	    if (currentScope.isDefinedLocally(varName, settings.ignoreNameCase))
 		throw new CalcExprException(ctx, "%calc#noDupLocalVar", varName);
 
-	    currentScope.setValueLocally(varName, settings.ignoreNameCase, value);
+	    if (expr != null) {
+		Object value = evaluate(expr);
+		currentScope.setValueLocally(varName, settings.ignoreNameCase, value);
 
-	    displayActionMessage("%calc#definingVar", varName,
-		toStringValue(this, ctx, value, false, settings.separatorMode));
+		displayActionMessage("%calc#definingVar", varName,
+			toStringValue(this, ctx, value, settings.quoteStrings, settings.separatorMode));
 
-	    return value;
+		return value;
+	    }
+	    else {
+		currentScope.setValueLocally(varName, settings.ignoreNameCase, null);
+
+		displayActionMessage("%calc#definingVarOnly", varName);
+
+		return null;
+	    }
 	}
 
 	private void addPairsToObject(CalcParser.ObjContext objCtx, ObjectScope object) {

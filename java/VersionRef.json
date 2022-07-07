@@ -3,6 +3,10 @@
 //======================
 
 [
+    { version: '2.13.17', date: d'2022-07-07',
+      issues: [ 389 ],
+      comment: 'The "var" statement doesn\'t require an initial value.'
+    },
     { version: '2.13.16', date: d'2022-07-06',
       issues: [ 388 ],
       comment: 'Add "matches" flags to case statement\'s "matches" selector.'
