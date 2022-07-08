@@ -5,8 +5,14 @@
 	<property environment="env"/>
 	<property name="source.dir" value="utilities-master"/>
 	<property name="source.file" value="${source.dir}.zip"/>
+	<condition property="commit.id" value="${commit}">
+		<isset property="commit"/>
+	</condition>
 
-	<target name="all">
+
+	<target name="all" description="Download, unzip, and fixup the latest build." depends="latest,download,unzip,fixup"/>
+
+	<target name="latest" description="Get the latest commit id; override with '-Dcommit=xxxxxxx'." unless="commit.id">
 		<echo message="Getting the latest events from our repository..."/>
 		<get src="https://api.github.com/users/rlwhitcomb/events/public" dest="github.json"/>
 
@@ -21,10 +27,14 @@
 		</java>
 		<delete file="github.json"/>
 		<echo message="Latest commit/push ID = ${commit.id}"/>
+	</target>
 
+	<target name="download" description="Download the latest (current) source .zip file.">
 		<echo message="Downloading source code package..."/>
 		<get src="https://github.com/rlwhitcomb/utilities/zipball/master" dest="${source.file}"/>
+	</target>
 
+	<target name="unzip" description="Unzip the source package and move into place.">
 		<echo message="Unzip and move into place..."/>
 		<unzip src="${source.file}" dest="." overwrite="true"/>
 		<move todir="${source.dir}" overwrite="true">
@@ -33,7 +43,9 @@
 				<include name=".gitignore"/>
 			</fileset>
 		</move>
+	</target>
 
+	<target name="fixup" description="Update the build properties with the current commit id.">
 		<ant dir="${source.dir}/java" target="fixup">
 			<property name="commit" value="${commit.id}"/>
 		</ant>
