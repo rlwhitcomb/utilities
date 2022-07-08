@@ -1,0 +1,31 @@
+#!/bin/bash
+help() {
+   echo
+   echo Usage: update \( -Dcommit=xxxxxxx \)
+   echo
+   echo \ \ Downloads the latest source .zip from github, unzips, and does the complete build.
+   echo
+}
+
+if [[ $1 == "-?" || $1 == "-help" || $1 == "?" ]]
+then
+   help
+   exit 0
+fi
+
+ant -f update.xml $*
+if [ $? -ne 0 ]
+then
+   exit $?
+fi
+
+cd utilities-master/java
+echo Doing full build with latest code...
+ant all-install
+if [ $? -ne 0 ]
+then
+   exit $?
+fi
+
+echo Done.
+exit 0

@@ -16,5 +16,5 @@ exit /b 0
 echo.
 echo Usage: %~n0 ( -Dcommit=xxxxxxx )
 echo.
-echo ^ ^ Downloads the latest source .zip from github, unzip, and do the complete build.
+echo ^ ^ Downloads the latest source .zip from github, unzips, and does the complete build.
 echo.
