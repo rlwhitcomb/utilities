@@ -94,46 +94,25 @@
  *	    #269: New method to load main program info (in Environment).
  *	18-Apr-2022 (rlwhitcomb)
  *	    #270: Make this automatic now.
+ *	09-Jul-2022 (rlwhitcomb)
+ *	    #393: Cleanup imports.
  */
 package info.rlwhitcomb.wordfind;
+
+import info.rlwhitcomb.util.*;
+import org.apache.pivot.beans.BXML;
+import org.apache.pivot.beans.BXMLSerializer;
+import org.apache.pivot.wtk.Window;
+import org.apache.pivot.wtk.*;
 
 import java.awt.Dimension;
 import java.awt.Font;
 import java.io.*;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.function.Function;
 
-import org.apache.pivot.beans.BXML;
-import org.apache.pivot.beans.BXMLSerializer;
-import org.apache.pivot.text.CharSpan;
-import org.apache.pivot.wtk.Application;
-import org.apache.pivot.wtk.DesktopApplicationContext;
-import org.apache.pivot.wtk.Display;
-import org.apache.pivot.wtk.PushButton;
-import org.apache.pivot.wtk.Style;
-import org.apache.pivot.wtk.TextInput;
-import org.apache.pivot.wtk.TextPane;
-import org.apache.pivot.wtk.Window;
-
-import info.rlwhitcomb.util.CharUtil;
-import info.rlwhitcomb.util.ConsoleColor;
 import static info.rlwhitcomb.util.ConsoleColor.Code.*;
-import info.rlwhitcomb.util.Environment;
-import info.rlwhitcomb.util.Exceptions;
-import info.rlwhitcomb.util.Intl;
-import info.rlwhitcomb.util.Options;
 
 
 /**

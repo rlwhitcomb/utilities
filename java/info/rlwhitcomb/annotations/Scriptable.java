@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2012-2013,2020 Roger L. Whitcomb.
+ * Copyright (c) 2012-2013,2020,2022 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,14 +28,12 @@
  *	    Not that we use it, but change default to "true".
  *	10-Mar-2020 (rlwhitcomb)
  *	    Prepare for GitHub.
+ *	09-Jul-2022 (rlwhitcomb)
+ *	    #393: Cleanup imports.
  */
 package info.rlwhitcomb.annotations;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 
 /**
  * A marker annotation to a property that means it can be specified in the script language

@@ -26,11 +26,11 @@
  */
 package info.rlwhitcomb.ant;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
-
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.taskdefs.condition.Condition;
+
+import java.math.BigDecimal;
+import java.math.BigInteger;
 
 
 /**

@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2011,2020 Roger L. Whitcomb.
+ * Copyright (c) 2011,2020,2022 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,14 +29,17 @@
  *	Initial coding from the Tutorial examples.
  *    09-Jan-2020 (rlwhitcomb)
  *	Update package, add license.
+ *    09-Jul-2022 (rlwhitcomb)
+ *	#393: Cleanup imports.
  */
 package info.rlwhitcomb.ant;
 
-import java.io.File;
-import java.util.Vector;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Task;
 import org.apache.tools.ant.types.Path;
+
+import java.io.File;
+import java.util.Vector;
 
 
 /**
