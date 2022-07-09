@@ -313,6 +313,9 @@
 		#45: Delete the new test result file.
 	    20-Jun-2022 (rlwhitcomb)
 		#366: Change "doclint" to "-missing" for later Java versions.
+	    09-Jul-2022 (rlwhitcomb)
+		#398: Unset the "uptodate" properties before setting again. This allows
+		the property to be reset after generation.
 
      ========================================================================== -->
 
@@ -322,6 +325,8 @@
 >
 	<property environment="env"/>
 	<property file="build.properties"/>
+
+	<property name="antlr.complete.jar" value="external-files/antlr-${antlr.version}-complete.jar"/>
 
 	<!-- Fail on minimum Ant version and min Java version -->
 	<fail>
@@ -519,6 +524,7 @@
 	<echo message="Beginning build..."/>
 
 	<taskdef name="preproc" classname="info.rlwhitcomb.preproc.JavaPreProc" classpath="${ant.tasks.jar}"/>
+	<taskdef name="var" classname="net.sf.antcontrib.property.Variable" classpath="external-files/ant-contrib.jar"/>
 
 	<macrodef name="generate-text-resources">
 		<attribute name="dir"/>
@@ -569,29 +575,33 @@
 	</target>
 
 	<target name="check-grammars-uptodate">
+		<var name="calc.grammar.uptodate" unset="true"/>
 		<condition property="calc.grammar.uptodate" value="true" else="false">
 			<uptodate srcfile="info/rlwhitcomb/calc/Calc.g4" targetfile="info/rlwhitcomb/calc/CalcParser.java"/>
 		</condition>
+		<var name="json.grammar.uptodate" unset="true"/>
 		<condition property="json.grammar.uptodate" value="true" else="false">
 			<uptodate srcfile="info/rlwhitcomb/json/JSON.g4" targetfile="info/rlwhitcomb/json/JSONParser.java"/>
 		</condition>
 	</target>
 
 	<target name="process-grammars" depends="check-grammars-uptodate" description="Process the Antlr grammars to generate parsers.">
-		<echo message="Generating Calc parser" unless:true="${calc.grammar.uptodate}"/>
-		<java jar="external-files/antlr-${antlr.version}-complete.jar" fork="true" unless:true="${calc.grammar.uptodate}" failonerror="true">
+		<echo message="Generating Calc parser ..." unless:true="${calc.grammar.uptodate}"/>
+		<java jar="${antlr.complete.jar}" fork="true" unless:true="${calc.grammar.uptodate}" failonerror="true">
 			<arg file="info/rlwhitcomb/calc/Calc.g4"/>
 			<arg value="-visitor"/>
 			<arg value="-no-listener"/>
 			<arg line="-package info.rlwhitcomb.calc"/>
 		</java>
-		<echo message="Generating JSON parser" unless:true="${json.grammar.uptodate}"/>
-		<java jar="external-files/antlr-${antlr.version}-complete.jar" fork="true" unless:true="${json.grammar.uptodate}" failonerror="true">
+		<echo message="Done generating Calc parser." unless:true="${calc.grammar.uptodate}"/>
+		<echo message="Generating JSON parser ..." unless:true="${json.grammar.uptodate}"/>
+		<java jar="${antlr.complete.jar}" fork="true" unless:true="${json.grammar.uptodate}" failonerror="true">
 			<arg file="info/rlwhitcomb/json/JSON.g4"/>
 			<arg value="-visitor"/>
 			<arg value="-no-listener"/>
 			<arg line="-package info.rlwhitcomb.json"/>
 		</java>
+		<echo message="Done generating JSON parser." unless:true="${json.grammar.uptodate}"/>
 	</target>
 
 	<target name="touch" description="Touch files that should be preprocessed anew during 'update'.">
