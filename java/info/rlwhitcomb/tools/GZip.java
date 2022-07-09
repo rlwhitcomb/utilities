@@ -37,15 +37,17 @@
  *	    Move to new package.
  *	08-Feb-2022 (rlwhitcomb)
  *	    Move text out to resources.
+ *	09-Jul-2022 (rlwhitcomb)
+ *	    #393: Cleanup imports.
  */
 package info.rlwhitcomb.tools;
-
-import java.io.File;
-import java.io.IOException;
 
 import info.rlwhitcomb.util.Exceptions;
 import info.rlwhitcomb.util.FileUtilities;
 import info.rlwhitcomb.util.Intl;
+
+import java.io.File;
+import java.io.IOException;
 
 
 /**

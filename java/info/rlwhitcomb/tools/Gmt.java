@@ -36,16 +36,18 @@
  *	    #158: Add ISO-8601 format and help.
  *	01-Feb-2022 (rlwhitcomb)
  *	    ISO format doesn't need any fixup; add milliseconds there.
+ *	09-Jul-2022 (rlwhitcomb)
+ *	    #393: Cleanup imports.
  */
 package info.rlwhitcomb.tools;
+
+import info.rlwhitcomb.util.Intl;
 
 import java.text.DateFormat;
 import java.text.FieldPosition;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.TimeZone;
-
-import info.rlwhitcomb.util.Intl;
 
 
 /**

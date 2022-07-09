@@ -29,14 +29,19 @@
  *	    Move to new "tools" package; add "Change History".
  *	18-Feb-2022 (rlwhitcomb)
  *	    Use Exceptions for better exception messages.
+ *	09-Jul-2022 (rlwhitcomb)
+ *	    #393: Cleanup imports.
  */
 package info.rlwhitcomb.tools;
 
-import java.io.*;
-import java.util.*;
-import java.util.jar.*;
-
 import info.rlwhitcomb.util.Exceptions;
+
+import java.io.IOException;
+import java.util.*;
+import java.util.jar.Attributes;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
+import java.util.jar.Manifest;
 
 
 /**

@@ -34,16 +34,18 @@
  *	    Check for unmatched leading or trailing quotes.
  *	08-Feb-2022 (rlwhitcomb)
  *	    Move text to resources.
+ *	09-Jul-2022 (rlwhitcomb)
+ *	    #393: Cleanup imports.
  */
 package info.rlwhitcomb.tools;
+
+import info.rlwhitcomb.util.Exceptions;
+import info.rlwhitcomb.util.Intl;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
-
-import info.rlwhitcomb.util.Exceptions;
-import info.rlwhitcomb.util.Intl;
 
 
 /**

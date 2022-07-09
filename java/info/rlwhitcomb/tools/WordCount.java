@@ -49,30 +49,29 @@
  *	    #269: New method to load main program info (in Environment).
  *	18-Apr-2022 (rlwhitcomb)
  *	    #270: Make this automatic.
+ *	09-Jul-2022 (rlwhitcomb)
+ *	    #393: Cleanup imports.
  */
 package info.rlwhitcomb.tools;
 
+import info.rlwhitcomb.util.Environment;
+import info.rlwhitcomb.util.Exceptions;
+import info.rlwhitcomb.util.Intl;
+import info.rlwhitcomb.util.Options;
+
 import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.CharacterCodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
-import java.nio.file.Files;
-import java.nio.file.InvalidPathException;
-import java.nio.file.NoSuchFileException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.List;
 
 import static info.rlwhitcomb.util.Constants.*;
-import info.rlwhitcomb.util.Environment;
-import info.rlwhitcomb.util.Exceptions;
-import info.rlwhitcomb.util.Intl;
-import info.rlwhitcomb.util.Options;
 
 
 /**

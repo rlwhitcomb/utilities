@@ -34,15 +34,17 @@
  *	    #217: Allow environment options through new Options method.
  *	08-Feb-2022 (rlwhitcomb)
  *	    Move text to resources.
+ *	09-Jul-2022 (rlwhitcomb)
+ *	    #393: Cleanup imports.
  */
 package info.rlwhitcomb.tools;
 
+import info.rlwhitcomb.util.CharUtil;
+import info.rlwhitcomb.util.Intl;
+import info.rlwhitcomb.util.Options;
+
 import java.math.BigInteger;
 import java.util.UUID;
-
-import info.rlwhitcomb.util.CharUtil;
-import info.rlwhitcomb.util.Options;
-import info.rlwhitcomb.util.Intl;
 
 
 /**

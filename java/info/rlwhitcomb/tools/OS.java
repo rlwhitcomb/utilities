@@ -71,8 +71,14 @@
  *	    #217: Use new Options method to process an environment variable for default options.
  *	16-May-2022 (rlwhitcomb)
  *	    #326: Fix color end value sequences after changes for Calc "<>" operator.
+ *	09-Jul-2022 (rlwhitcomb)
+ *	    #393: Cleanup imports.
  */
 package info.rlwhitcomb.tools;
+
+import info.rlwhitcomb.util.ConsoleColor;
+import info.rlwhitcomb.util.Environment;
+import info.rlwhitcomb.util.Options;
 
 import java.awt.GraphicsEnvironment;
 import java.io.PrintStream;
@@ -81,24 +87,8 @@ import java.security.Provider;
 import java.security.Security;
 import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.EnumSet;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.MissingResourceException;
-import java.util.Properties;
-import java.util.Set;
-import java.util.TimeZone;
-import java.util.TreeMap;
-import java.util.TreeSet;
-
-import info.rlwhitcomb.util.ConsoleColor;
-import info.rlwhitcomb.util.Environment;
-import info.rlwhitcomb.util.Options;
+import java.util.*;
 
 
 /**

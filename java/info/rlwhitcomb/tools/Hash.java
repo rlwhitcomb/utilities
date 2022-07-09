@@ -54,21 +54,23 @@
  *	    #43: Allow "-lines" to combine all command line into one line string.
  *	18-Feb-2022 (rlwhitcomb)
  *	    Use Exceptions for exception messages.
+ *	09-Jul-2022 (rlwhitcomb)
+ *	    #393: Cleanup imports.
  */
 package info.rlwhitcomb.tools;
 
+import info.rlwhitcomb.util.Exceptions;
+
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import info.rlwhitcomb.util.Exceptions;
 
 
 /**
