@@ -27,10 +27,14 @@
  * History:
  *	18-Feb-2022 (rlwhitcomb)
  *	    Initial coding for use with Tester.
+ *	09-Jul-2022 (rlwhitcomb)
+ *	    #393: Cleanup imports.
  */
 package info.rlwhitcomb.util;
 
-import java.io.*;
+import java.io.FilterOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 
 
 /**

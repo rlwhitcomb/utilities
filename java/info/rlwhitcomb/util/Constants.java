@@ -40,15 +40,17 @@
  *	    #301: Add values used for "convertToWords" (BigInteger).
  *	29-Jun-2022 (rlwhitcomb)
  *	    #380: Increase string file size for FileUtilities.
+ *	09-Jul-2022 (rlwhitcomb)
+ *	    #393: Cleanup imports.
  */
 package info.rlwhitcomb.util;
+
+import info.rlwhitcomb.math.ComplexNumber;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-
-import info.rlwhitcomb.math.ComplexNumber;
 
 
 /**

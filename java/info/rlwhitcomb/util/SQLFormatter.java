@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2016,2020 Roger L. Whitcomb.
+ * Copyright (c) 2016,2020,2022 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -50,17 +50,13 @@
  *	    line.
  *	16-Apr-2020 (rlwhitcomb)
  *	    Cleanup and prepare for GitHub.
+ *	09-Jul-2022 (rlwhitcomb)
+ *	    #393: Cleanup imports.
  */
 package info.rlwhitcomb.util;
 
+import java.util.*;
 
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Queue;
-import java.util.Set;
-import java.util.StringTokenizer;
 
 /**
  * Very basic formatter / pretty printer for SQL. It was initially limited to handling the "CREATE TABLE"

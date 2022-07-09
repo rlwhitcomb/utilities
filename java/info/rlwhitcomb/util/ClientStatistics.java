@@ -64,13 +64,17 @@
  *	Update obsolete Javadoc constructs.
  *    14-Apr-2022 (rlwhitcomb)
  *	#273: Move math-related classes to "math" package.
+ *    09-Jul-2022 (rlwhitcomb)
+ *	#393: Cleanup imports.
  */
 package info.rlwhitcomb.util;
 
-import java.io.*;
-import java.util.*;
-
 import info.rlwhitcomb.math.Num;
+
+import java.io.PrintStream;
+import java.util.HashMap;
+import java.util.Map;
+
 import static info.rlwhitcomb.util.CharUtil.Justification;
 
 /**

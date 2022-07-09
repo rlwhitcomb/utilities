@@ -152,32 +152,23 @@
  *	    easily take advantage of it.
  *	24-Jan-2022 (rlwhitcomb)
  *	    #103: Add Intl.ArithmeticException for some occasions that need it.
+ *	09-Jul-2022 (rlwhitcomb)
+ *	    #393: Cleanup imports.
  */
 package info.rlwhitcomb.util;
+
+import info.rlwhitcomb.jarfile.Launcher;
 
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.Enumeration;
-import java.util.IllformedLocaleException;
-import java.util.LinkedHashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.MissingResourceException;
-import java.util.ResourceBundle;
-import java.util.jar.Attributes;
+import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
-import java.util.jar.Manifest;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import info.rlwhitcomb.jarfile.Launcher;
-import info.rlwhitcomb.util.ConsoleColor.Code;
 
 
 /**

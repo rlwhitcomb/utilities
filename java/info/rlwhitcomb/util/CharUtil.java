@@ -329,26 +329,21 @@
  *	    #384: Make a new version of "getBooleanValue" with a flag whether to do the extended
  *	    string conversions (which are pretty risky in Calc, and actually unused in all other
  *	    current scenarios).
+ *	09-Jul-2022 (rlwhitcomb)
+ *	    #393: Cleanup imports.
  */
-
 package info.rlwhitcomb.util;
+
+import info.rlwhitcomb.csv.Quotes;
 
 import java.io.File;
 import java.math.BigDecimal;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import info.rlwhitcomb.csv.Quotes;
 import static info.rlwhitcomb.util.Constants.*;
 
 

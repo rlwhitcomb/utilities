@@ -138,21 +138,26 @@
  *    #273: Move math-related classes to "math" package.
  *  18-Apr-2022 (rlwhitcomb)
  *    #270: Change PID to a String.
+ *  09-Jul-2022 (rlwhitcomb)
+ *    #393: Cleanup imports.
  */
 package info.rlwhitcomb.util;
+
+import info.rlwhitcomb.math.NumericUtil;
 
 import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.file.*;
-import java.text.*;
+import java.text.DateFormat;
+import java.text.FieldPosition;
+import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.regex.*;
-
-import info.rlwhitcomb.math.NumericUtil;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 /**

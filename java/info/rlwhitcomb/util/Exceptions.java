@@ -76,6 +76,8 @@
  *	18-Feb-2022 (rlwhitcomb)
  *	    Deal gracefully with UncheckedIOException; tweak "exceptionName".
  *	    Rename class.
+ *	09-Jul-2022 (rlwhitcomb)
+ *	    #393: Cleanup imports.
  */
 package info.rlwhitcomb.util;
 
@@ -89,7 +91,6 @@ import java.nio.charset.UnsupportedCharsetException;
 import java.nio.file.NoSuchFileException;
 import java.text.ParseException;
 import java.util.IllegalFormatException;
-import java.util.Map;
 import java.util.UnknownFormatConversionException;
 
 

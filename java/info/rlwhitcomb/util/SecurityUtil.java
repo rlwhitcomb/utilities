@@ -49,16 +49,19 @@
  *	    Use new Intl Exception variants for convenience.
  *	07-Jul-2021 (rlwhitcomb)
  *	    Make class final and constructor private.
+ *	09-Jul-2022 (rlwhitcomb)
+ *	    #393: Cleanup imports.
  */
 package info.rlwhitcomb.util;
 
+import net.iharder.b64.Base64;
+
 import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.MessageDigest;
 import java.util.Arrays;
-import net.iharder.b64.Base64;
 
 
 /**

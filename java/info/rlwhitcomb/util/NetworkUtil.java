@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2012-2018,2020-2021 Roger L. Whitcomb.
+ * Copyright (c) 2012-2018,2020-2022 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -74,19 +74,15 @@
  *	    Update obsolete Javadoc constructs.
  *	07-Jul-2021 (rlwhitcomb)
  *	    Make the class final and the constructor private.
+ *	09-Jul-2022 (rlwhitcomb)
+ *	    #393: Cleanup imports.
  */
 package info.rlwhitcomb.util;
 
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.net.SocketAddress;
-import java.net.SocketException;
-import java.net.UnknownHostException;
-import java.util.regex.Pattern;
-
 import org.apache.commons.validator.routines.InetAddressValidator;
+
+import java.io.IOException;
+import java.net.*;
 
 
 /**

@@ -37,13 +37,15 @@
  *	    Refactor a bit more.
  *	21-Jan-2022 (rlwhitcomb)
  *	    Use new Options method to process environment options.
+ *	09-Jul-2022 (rlwhitcomb)
+ *	    #393: Cleanup imports.
  */
 package info.rlwhitcomb.util;
 
 import java.util.Optional;
 import java.util.OptionalDouble;
-import java.util.regex.Pattern;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 /**

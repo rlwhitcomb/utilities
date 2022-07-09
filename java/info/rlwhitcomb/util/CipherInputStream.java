@@ -50,17 +50,19 @@
  *	    Move some methods from NumericUtil to MathUtil.
  *	14-Apr-2022 (rlwhitcomb)
  *	    #273: Move math-related classes to "math" package.
+ *	09-Jul-2022 (rlwhitcomb)
+ *	    #393: Cleanup imports.
  */
 package info.rlwhitcomb.util;
 
-import java.io.FilterInputStream;
-import java.io.IOException;
-import java.io.DataInputStream;
+import info.rlwhitcomb.math.MathUtil;
+
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
-
-import info.rlwhitcomb.math.MathUtil;
+import java.io.DataInputStream;
+import java.io.FilterInputStream;
+import java.io.IOException;
 
 
 /**

@@ -97,27 +97,24 @@
  *	    to parse and hold the information.
  *	14-Apr-2022 (rlwhitcomb)
  *	    #273: Move math-related classes to "math" package.
+ *	09-Jul-2022 (rlwhitcomb)
+ *	    #393: Cleanup imports.
  */
-
 package info.rlwhitcomb.util;
 
-import java.text.*;
+import info.rlwhitcomb.annotations.*;
+import info.rlwhitcomb.math.NumericUtil;
+
+import java.io.*;
 import java.lang.reflect.*;
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
-import java.io.InputStreamReader;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
 import java.nio.charset.Charset;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.EnumSet;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import info.rlwhitcomb.annotations.*;
-
 import static info.rlwhitcomb.util.Constants.*;
-import info.rlwhitcomb.math.NumericUtil;
 
 
 /**

@@ -41,16 +41,13 @@
  *	    Don't inherit from Thread, but use a thread pool instead to run the tasks.
  *	29-Jan-2022 (rlwhitcomb)
  *	    #228: Refactor to be able to return a value by implementing Callable.
+ *	09-Jul-2022 (rlwhitcomb)
+ *	    #393: Cleanup imports.
  */
 
 package info.rlwhitcomb.util;
 
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
-import java.util.concurrent.Semaphore;
+import java.util.concurrent.*;
 
 
 /**

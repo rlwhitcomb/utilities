@@ -74,16 +74,12 @@
  *	    #217: Add method to process default options from the environment.
  *	08-Feb-2022 (rlwhitcomb)
  *	    #238: New method to iterate over command line arguments.
+ *	09-Jul-2022 (rlwhitcomb)
+ *	    #393: Cleanup imports.
  */
 package info.rlwhitcomb.util;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.ToIntFunction;
 

@@ -39,12 +39,14 @@
  *	    "Class<?>" and all users.
  *	14-Apr-2022 (rlwhitcomb)
  *	    #273: Move math-related classes to "math" package.
+ *	09-Jul-2022 (rlwhitcomb)
+ *	    #393: Cleanup imports.
  */
 package info.rlwhitcomb.util;
 
-import java.lang.reflect.Array;
-
 import info.rlwhitcomb.math.MathUtil;
+
+import java.lang.reflect.Array;
 
 
 /**

@@ -55,16 +55,18 @@
  *	    #270: Make "loadMainProgramInfo" automatic now.
  *	22-May-2022 (rlwhitcomb)
  *	    #340: Add utility "find" method; and "isWindowsBatch" helper.
+ *	09-Jul-2022 (rlwhitcomb)
+ *	    #393: Cleanup imports.
  */
 package info.rlwhitcomb.util;
 
+import info.rlwhitcomb.math.Num;
+
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.io.File;
-
-import info.rlwhitcomb.math.Num;
 
 
 /**

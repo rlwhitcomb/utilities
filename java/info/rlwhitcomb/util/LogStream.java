@@ -42,10 +42,12 @@
  *	    Rename a method in ClientStatistics, so update the Javadoc here.
  *	16-Feb-2022 (rlwhitcomb)
  *	    Use buffer size from Constants.
+ *	09-Jul-2022 (rlwhitcomb)
+ *	    #393: Cleanup imports.
  */
 package info.rlwhitcomb.util;
 
-import java.io.*;
+import java.io.PrintStream;
 
 import static info.rlwhitcomb.util.Constants.*;
 

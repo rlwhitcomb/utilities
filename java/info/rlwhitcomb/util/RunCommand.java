@@ -67,17 +67,12 @@
  *	#346: Add "removeStdEnv" to deal gracefully with environment variables
  *	that shouldn't be shared with subprocesses because they are used in our
  *	invocation scripts.
+ *  09-Jul-2022 (rlwhitcomb)
+ *	#393: Cleanup imports.
  */
 package info.rlwhitcomb.util;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.InputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintStream;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
