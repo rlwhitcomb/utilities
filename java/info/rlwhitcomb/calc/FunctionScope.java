@@ -46,17 +46,12 @@
  *	    Change "getDeclaration" into "getFunctionBody".
  *	04-Jun-2022 (rlwhitcomb)
  *	    #361: Add "getFunctionName".
+ *	08-Jul-2022 (rlwhitcomb)
+ *	    #393: Cleanup imports.
  */
 package info.rlwhitcomb.calc;
 
-import java.math.BigInteger;
-import java.util.LinkedHashMap;
-import java.util.Map;
-
 import org.antlr.v4.runtime.ParserRuleContext;
-
-import info.rlwhitcomb.util.Intl;
-import static info.rlwhitcomb.calc.CalcUtil.getTreeText;
 
 
 /**

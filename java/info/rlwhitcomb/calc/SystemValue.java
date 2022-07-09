@@ -33,13 +33,15 @@
  *	    #199: Override "isImmutable" here from default in ValueScope.
  *	25-May-2022 (rlwhitcomb)
  *	    #348: Return new value from "setValue" methods.
+ *	08-Jul-2022 (rlwhitcomb)
+ *	    #393: Cleanup imports.
  */
 package info.rlwhitcomb.calc;
 
+import info.rlwhitcomb.util.ClassUtil;
+
 import java.lang.reflect.Field;
 import java.util.function.Consumer;
-
-import info.rlwhitcomb.util.ClassUtil;
 
 
 /**

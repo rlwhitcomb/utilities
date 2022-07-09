@@ -29,14 +29,16 @@
  *	    Initial coding.
  *	25-Jun-2022 (rlwhitcomb)
  *	    #314: Add "diff".
+ *	08-Jul-2022 (rlwhitcomb)
+ *	    #393: Cleanup imports.
  */
 package info.rlwhitcomb.calc;
+
+import info.rlwhitcomb.util.Intl;
 
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Set;
-
-import info.rlwhitcomb.util.Intl;
 
 
 /**

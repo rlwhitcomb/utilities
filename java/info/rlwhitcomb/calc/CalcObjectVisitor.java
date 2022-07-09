@@ -617,10 +617,24 @@
  *	07-Jul-2022 (rlwhitcomb)
  *	    #389: A "var id" declaration doesn't need an initial value expression. Fix the value quoting
  *	    on the action messages for both "const" and "var".
+ *	08-Jul-2022 (rlwhitcomb)
+ *	    #393: Cleanup imports.
  */
 package info.rlwhitcomb.calc;
 
-import java.awt.Dimension;
+import de.onyxbits.SemanticVersion;
+import info.rlwhitcomb.directory.Match;
+import info.rlwhitcomb.math.BigFraction;
+import info.rlwhitcomb.math.ComplexNumber;
+import info.rlwhitcomb.math.MathUtil;
+import info.rlwhitcomb.math.NumericUtil;
+import info.rlwhitcomb.util.*;
+import net.iharder.b64.Base64;
+import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.TerminalNode;
+
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -630,38 +644,15 @@ import java.nio.charset.Charset;
 import java.nio.charset.IllegalCharsetNameException;
 import java.nio.charset.StandardCharsets;
 import java.nio.charset.UnsupportedCharsetException;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.SecureRandom;
-import java.text.DateFormatSymbols;
-import java.text.DecimalFormatSymbols;
 import java.text.FieldPosition;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.time.format.DateTimeParseException;
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.Deque;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.Locale;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Random;
-import java.util.Set;
-import java.util.TimeZone;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -669,33 +660,11 @@ import java.util.function.UnaryOperator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import net.iharder.b64.Base64;
-
-import de.onyxbits.SemanticVersion;
-
-import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.Token;
-import org.antlr.v4.runtime.tree.ParseTree;
-import org.antlr.v4.runtime.tree.TerminalNode;
-
 import static info.rlwhitcomb.calc.CalcUtil.*;
-import info.rlwhitcomb.directory.Match;
-import info.rlwhitcomb.math.BigFraction;
-import info.rlwhitcomb.math.ComplexNumber;
-import info.rlwhitcomb.math.MathUtil;
-import info.rlwhitcomb.math.NumericUtil;
 import static info.rlwhitcomb.math.NumericUtil.RangeMode;
-import info.rlwhitcomb.util.CharUtil;
 import static info.rlwhitcomb.util.CharUtil.Justification.*;
-import info.rlwhitcomb.util.ClassUtil;
 import static info.rlwhitcomb.util.ConsoleColor.Code.*;
 import static info.rlwhitcomb.util.Constants.*;
-import info.rlwhitcomb.util.Environment;
-import info.rlwhitcomb.util.Exceptions;
-import info.rlwhitcomb.util.FileUtilities;
-import info.rlwhitcomb.util.Intl;
-import info.rlwhitcomb.util.RunCommand;
-import info.rlwhitcomb.util.Which;
 
 
 /**

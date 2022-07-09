@@ -36,18 +36,21 @@
  *	    Also calculate pi/2.
  *	14-Apr-2022 (rlwhitcomb)
  *	    #273: Move math-related classes to "math" package.
+ *	08-Jul-2022 (rlwhitcomb)
+ *	    #393: Cleanup imports.
  */
 package info.rlwhitcomb.calc;
+
+import info.rlwhitcomb.math.BigFraction;
+import info.rlwhitcomb.math.MathUtil;
+import info.rlwhitcomb.util.QueuedThread;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.concurrent.Semaphore;
 import java.util.function.Supplier;
 
-import info.rlwhitcomb.math.BigFraction;
-import info.rlwhitcomb.math.MathUtil;
 import static info.rlwhitcomb.util.Constants.*;
-import info.rlwhitcomb.util.QueuedThread;
 
 
 /**

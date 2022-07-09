@@ -27,15 +27,10 @@
  *  History:
  *	21-Jun-2022 (rlwhitcomb)
  *	    Initial coding.
+ *	08-Jul-2022 (rlwhitcomb)
+ *	    #393: Cleanup imports.
  */
 package info.rlwhitcomb.calc;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
-import info.rlwhitcomb.util.Intl;
-
 
 /**
  * Parent scope for all the composite (collection) objects.

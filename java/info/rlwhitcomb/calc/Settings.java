@@ -35,13 +35,15 @@
  *	    #233: Take out "getPrecision" in favor of just "precision" value.
  *	14-Apr-2022 (rlwhitcomb)
  *	    #273: Move math-related classes to "math" package.
+ *	08-Jul-2022 (rlwhitcomb)
+ *	    #393: Cleanup imports.
  */
 package info.rlwhitcomb.calc;
 
-import java.math.MathContext;
-
 import info.rlwhitcomb.annotations.Scriptable;
 import info.rlwhitcomb.math.NumericUtil.RangeMode;
+
+import java.math.MathContext;
 
 
 /**

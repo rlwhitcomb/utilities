@@ -61,22 +61,16 @@
  *	    Make all methods package private.
  *	21-Jun-2022 (rlwhitcomb)
  *	    #314: Derive from CollectionScope.
+ *	08-Jul-2022 (rlwhitcomb)
+ *	    #393: Cleanup imports.
  */
 package info.rlwhitcomb.calc;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.BiPredicate;
-
 import info.rlwhitcomb.directory.Match;
-import info.rlwhitcomb.util.ClassUtil;
 import info.rlwhitcomb.util.Intl;
+
+import java.util.*;
+import java.util.function.BiPredicate;
 
 
 /**

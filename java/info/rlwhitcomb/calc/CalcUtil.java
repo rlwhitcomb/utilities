@@ -162,8 +162,21 @@
  *	    #314: Add processing of SetScope in all applicable places.
  *	29-Jun-2022 (rlwhitcomb)
  *	    #381: Add "sortMap".
+ *	08-Jul-2022 (rlwhitcomb)
+ *	    #393: Cleanup imports.
  */
 package info.rlwhitcomb.calc;
+
+import de.onyxbits.SemanticVersion;
+import info.rlwhitcomb.math.BigFraction;
+import info.rlwhitcomb.math.ComplexNumber;
+import info.rlwhitcomb.util.CharUtil;
+import info.rlwhitcomb.util.Environment;
+import info.rlwhitcomb.util.Intl;
+import org.antlr.v4.runtime.ParserRuleContext;
+import org.antlr.v4.runtime.tree.ParseTree;
+import org.antlr.v4.runtime.tree.TerminalNode;
+import org.padler.natorder.NaturalOrderComparator;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -173,31 +186,10 @@ import java.math.MathContext;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
+import java.util.*;
 
-import de.onyxbits.SemanticVersion;
-
-import org.antlr.v4.runtime.ParserRuleContext;
-import org.antlr.v4.runtime.tree.ParseTree;
-import org.antlr.v4.runtime.tree.TerminalNode;
-
-import org.padler.natorder.NaturalOrderComparator;
-
-import info.rlwhitcomb.math.BigFraction;
-import info.rlwhitcomb.math.ComplexNumber;
-import info.rlwhitcomb.util.CharUtil;
 import static info.rlwhitcomb.util.CharUtil.Justification;
 import static info.rlwhitcomb.util.Constants.*;
-import info.rlwhitcomb.util.Environment;
-import info.rlwhitcomb.util.Intl;
 
 
 /**

@@ -286,16 +286,33 @@
  *	    #363: Set process exit code on errors in non-REPL mode.
  *	20-Jun-2022 (rlwhitcomb)
  *	    #364: Allow echoing to stderr.
+ *	08-Jul-2022 (rlwhitcomb)
+ *	    #393: Cleanup imports.
  */
 package info.rlwhitcomb.calc;
+
+import info.rlwhitcomb.IntlProvider;
+import info.rlwhitcomb.jarfile.Launcher;
+import info.rlwhitcomb.math.BigFraction;
+import info.rlwhitcomb.math.NumericUtil.RangeMode;
+import info.rlwhitcomb.util.*;
+import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.tree.ParseTree;
+import org.apache.pivot.beans.BXML;
+import org.apache.pivot.beans.BXMLSerializer;
+import org.apache.pivot.collections.Map;
+import org.apache.pivot.collections.Sequence;
+import org.apache.pivot.util.Vote;
+import org.apache.pivot.wtk.*;
+import org.apache.pivot.wtk.Keyboard.KeyStroke;
+import org.apache.pivot.wtk.text.Document;
+import org.apache.pivot.wtk.util.TextAreaOutputStream;
 
 import java.awt.Color;
 import java.awt.Desktop;
 import java.awt.Font;
 import java.io.Console;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.reflect.Constructor;
@@ -306,11 +323,8 @@ import java.nio.charset.Charset;
 import java.nio.charset.IllegalCharsetNameException;
 import java.nio.charset.StandardCharsets;
 import java.nio.charset.UnsupportedCharsetException;
-import java.nio.file.Files;
 import java.text.NumberFormat;
-import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -318,50 +332,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.jar.JarFile;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-import org.apache.pivot.beans.BXML;
-import org.apache.pivot.beans.BXMLSerializer;
-import org.apache.pivot.collections.Map;
-import org.apache.pivot.collections.Sequence;
-import org.apache.pivot.serialization.SerializationException;
-import org.apache.pivot.util.Resources;
-import org.apache.pivot.util.Vote;
-import org.apache.pivot.wtk.*;
-import org.apache.pivot.wtk.Keyboard.KeyStroke;
-import org.apache.pivot.wtk.text.Document;
-import org.apache.pivot.wtk.util.TextAreaOutputStream;
-
-import org.antlr.v4.runtime.BaseErrorListener;
-import org.antlr.v4.runtime.CharStream;
-import org.antlr.v4.runtime.CharStreams;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.DefaultErrorStrategy;
-import org.antlr.v4.runtime.LexerNoViableAltException;
-import org.antlr.v4.runtime.Parser;
-import org.antlr.v4.runtime.RecognitionException;
-import org.antlr.v4.runtime.Recognizer;
-import org.antlr.v4.runtime.Token;
-import org.antlr.v4.runtime.tree.ParseTree;
-
-import de.onyxbits.SemanticVersion;
-
-import info.rlwhitcomb.IntlProvider;
-import info.rlwhitcomb.jarfile.Launcher;
-import info.rlwhitcomb.math.BigFraction;
-import info.rlwhitcomb.math.NumericUtil.RangeMode;
-import info.rlwhitcomb.util.CharUtil;
-import info.rlwhitcomb.util.ClassUtil;
-import info.rlwhitcomb.util.ConsoleColor;
-import static info.rlwhitcomb.util.ConsoleColor.Code;
 import static info.rlwhitcomb.util.ConsoleColor.Code.*;
-import info.rlwhitcomb.util.Environment;
-import info.rlwhitcomb.util.Exceptions;
-import info.rlwhitcomb.util.FileUtilities;
-import info.rlwhitcomb.util.Intl;
-import info.rlwhitcomb.util.Options;
-import info.rlwhitcomb.util.QueuedExecutorService;
 
 /**
  * Command line calculator, which will also read from {@link System#in} or from one or more files.

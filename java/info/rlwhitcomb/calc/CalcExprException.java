@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2020-2021 Roger L. Whitcomb.
+ * Copyright (c) 2020-2022 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,13 +28,15 @@
  *	    Alternate constructors for convenience formatting messages.
  *	18-Jan-2021 (rlwhitcomb)
  *	    Use Intl to lookup strings.
+ *	08-Jul-2022 (rlwhitcomb)
+ *	    #393: Cleanup imports.
  */
 package info.rlwhitcomb.calc;
 
+import info.rlwhitcomb.util.Intl;
 import org.antlr.v4.runtime.ParserRuleContext;
 
 import static info.rlwhitcomb.util.ConsoleColor.Code.*;
-import info.rlwhitcomb.util.Intl;
 
 
 /**

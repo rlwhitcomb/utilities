@@ -50,36 +50,27 @@
  *	    #344: Quote map keys for "env" that aren't valid identifiers.
  *	11-Jun-2022 (rlwhitcomb)
  *	    #365: Mark the outer objects as immutable.
+ *	08-Jul-2022 (rlwhitcomb)
+ *	    #393: Cleanup imports.
  */
 package info.rlwhitcomb.calc;
 
+import de.onyxbits.SemanticVersion;
+import info.rlwhitcomb.util.CharUtil;
+import info.rlwhitcomb.util.Environment;
+import info.rlwhitcomb.util.Exceptions;
+
 import java.awt.Dimension;
-import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.math.MathContext;
 import java.text.DateFormatSymbols;
 import java.text.DecimalFormatSymbols;
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Locale;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.TimeZone;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.function.Supplier;
 
-import de.onyxbits.SemanticVersion;
-
-import info.rlwhitcomb.math.BigFraction;
-import info.rlwhitcomb.math.ComplexNumber;
-import info.rlwhitcomb.math.MathUtil;
 import static info.rlwhitcomb.util.Constants.*;
-import info.rlwhitcomb.util.CharUtil;
-import info.rlwhitcomb.util.Environment;
-import info.rlwhitcomb.util.Exceptions;
 
 
 /**

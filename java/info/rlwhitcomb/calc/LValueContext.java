@@ -104,23 +104,19 @@
  *	    #361: Don't access the LHS of an array object twice during dereference.
  *	23-Jun-2022 (rlwhitcomb)
  *	    #314: Turn the empty collection into an ObjectScope when necessary.
+ *	08-Jul-2022 (rlwhitcomb)
+ *	    #393: Cleanup imports.
  */
 package info.rlwhitcomb.calc;
 
-import java.math.MathContext;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Pattern;
-
+import info.rlwhitcomb.util.Intl;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
-import static info.rlwhitcomb.calc.CalcUtil.getIStringValue;
-import static info.rlwhitcomb.calc.CalcUtil.getStringMemberName;
-import static info.rlwhitcomb.calc.CalcUtil.getTreeText;
-import static info.rlwhitcomb.calc.CalcUtil.typeof;
-import info.rlwhitcomb.util.Intl;
+import java.math.MathContext;
+import java.util.List;
+import java.util.regex.Pattern;
+
+import static info.rlwhitcomb.calc.CalcUtil.*;
 
 
 /**

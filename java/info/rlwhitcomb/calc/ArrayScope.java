@@ -47,14 +47,16 @@
  *	    #365: Add "immutable" flag and checks.
  *	21-Jun-2022 (rlwhitcomb)
  *	    #314: Derive from CollectionScope.
+ *	08-Jul-2022 (rlwhitcomb)
+ *	    #393: Cleanup imports.
  */
 package info.rlwhitcomb.calc;
+
+import info.rlwhitcomb.util.Intl;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-
-import info.rlwhitcomb.util.Intl;
 
 
 /**

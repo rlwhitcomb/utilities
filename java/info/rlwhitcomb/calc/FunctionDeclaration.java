@@ -43,16 +43,18 @@
  *	    Move "setupFunctionCall" into here from CalcObjectVisitor.
  *	28-May-2022 (rlwhitcomb)
  *	    #355: Define "_funcname" constant for functions.
+ *	08-Jul-2022 (rlwhitcomb)
+ *	    #393: Cleanup imports.
  */
 package info.rlwhitcomb.calc;
+
+import info.rlwhitcomb.util.Intl;
+import org.antlr.v4.runtime.ParserRuleContext;
 
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.antlr.v4.runtime.ParserRuleContext;
-
-import info.rlwhitcomb.util.Intl;
 import static info.rlwhitcomb.calc.CalcUtil.getTreeText;
 
 
