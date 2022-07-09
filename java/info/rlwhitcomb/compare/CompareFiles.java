@@ -42,20 +42,18 @@
  *	    #269: New method to load main program info (in Environment).
  *	18-Apr-2022 (rlwhitcomb)
  *	    #270: Make this automatic now.
+ *	08-Jul-2022 (rlwhitcomb)
+ *	    #393: Cleanup imports.
  */
 package info.rlwhitcomb.compare;
+
+import info.rlwhitcomb.util.*;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import info.rlwhitcomb.util.Environment;
-import info.rlwhitcomb.util.Exceptions;
-import info.rlwhitcomb.util.FileUtilities;
-import info.rlwhitcomb.util.Intl;
-import info.rlwhitcomb.util.Options;
 
 
 /**

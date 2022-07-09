@@ -49,25 +49,22 @@
  *	    #273: Move to "math" package.
  *	21-Jun-2022 (rlwhitcomb)
  *	    #314: Add SetScope to the mix: conversions to/from sets.
+ *	08-Jul-2022 (rlwhitcomb)
+ *	    #393: Cleanup imports.
  */
 package info.rlwhitcomb.math;
+
+import info.rlwhitcomb.util.Intl;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.MathContext;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.regex.Pattern;
+import java.util.*;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static info.rlwhitcomb.util.Constants.*;
-import info.rlwhitcomb.util.Intl;
 
 
 /**

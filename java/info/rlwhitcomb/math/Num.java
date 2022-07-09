@@ -40,17 +40,18 @@
  *	    Use Exceptions to get better error messages.
  *	14-Apr-2022 (rlwhitcomb)
  *	    #273: Move to "math" package.
+ *	08-Jul-2022 (rlwhitcomb)
+ *	    #393: Cleanup imports.
  */
 package info.rlwhitcomb.math;
 
-import java.io.*;
-import java.net.*;
-import java.text.*;
-import java.util.*;
-import java.util.regex.*;
-
 import info.rlwhitcomb.util.Exceptions;
 import info.rlwhitcomb.util.Logging;
+
+import java.text.DecimalFormat;
+import java.text.FieldPosition;
+import java.text.NumberFormat;
+import java.text.ParseException;
 
 
 /**

@@ -30,16 +30,18 @@
  *	    Move test code to a new package.
  *	18-Feb-2022 (rlwhitcomb)
  *	    Use Exceptions to get a better error message.
+ *	08-Jul-2022 (rlwhitcomb)
+ *	    #393: Cleanup imports.
  */
 package info.rlwhitcomb.matches;
+
+import info.rlwhitcomb.util.Exceptions;
+import info.rlwhitcomb.util.Options;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
-
-import info.rlwhitcomb.util.Exceptions;
-import info.rlwhitcomb.util.Options;
 
 
 /**

@@ -51,32 +51,24 @@
  *	    #270: Now this is automatic inside "printProgramInfo".
  *	05-Jul-2022 (rlwhitcomb)
  *	    #386: Fix "-win1252" charset name.
+ *	08-Jul-2022 (rlwhitcomb)
+ *	    #393: Cleanup imports.
  *
  *	    TODO: wildcard directory names on input
  *	    TODO: -nn to limit to first nn lines, +nn to limit to LAST nn lines (hard to do?)
  */
 package info.rlwhitcomb.cat;
 
-import java.io.Console;
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.io.UncheckedIOException;
-import java.nio.charset.Charset;
-import java.nio.charset.IllegalCharsetNameException;
-import java.nio.charset.MalformedInputException;
-import java.nio.charset.StandardCharsets;
-import java.nio.charset.UnmappableCharacterException;
-import java.nio.charset.UnsupportedCharsetException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Locale;
-import java.util.Optional;
-import java.util.stream.Stream;
 import info.rlwhitcomb.util.Environment;
 import info.rlwhitcomb.util.Exceptions;
 import info.rlwhitcomb.util.Intl;
 import info.rlwhitcomb.util.Options;
+
+import java.io.*;
+import java.nio.charset.*;
+import java.nio.file.Files;
+import java.util.Locale;
+import java.util.Optional;
 
 /**
  * Java implementation of the *nix "cat" command.

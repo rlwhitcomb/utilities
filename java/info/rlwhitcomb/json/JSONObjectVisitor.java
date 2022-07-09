@@ -27,8 +27,13 @@
  *      17-Feb-2022 (rlwhitcomb)
  *	    #196: Initial coding.
  *	    Simplify by eliminating layers.
+ *	08-Jul-2022 (rlwhitcomb)
+ *	    #393: Cleanup imports.
  */
 package info.rlwhitcomb.json;
+
+import info.rlwhitcomb.util.CharUtil;
+import org.antlr.v4.runtime.ParserRuleContext;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -37,9 +42,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.antlr.v4.runtime.ParserRuleContext;
-
-import info.rlwhitcomb.util.CharUtil;
 import static info.rlwhitcomb.util.Constants.*;
 
 

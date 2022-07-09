@@ -43,14 +43,15 @@
  *	    Use new Exception variants using Intl for convenience.
  *	02-Mar-2021 (rlwhitcomb)
  *	    Implement new "hasHeaderRow" logic.
+ *	08-Jul-2022 (rlwhitcomb)
+ *	    #393: Cleanup imports.
  */
 package info.rlwhitcomb.csv;
 
+import info.rlwhitcomb.util.Intl;
+
 import java.io.Reader;
 import java.util.Iterator;
-import java.util.NoSuchElementException;
-
-import info.rlwhitcomb.util.Intl;
 
 
 /**

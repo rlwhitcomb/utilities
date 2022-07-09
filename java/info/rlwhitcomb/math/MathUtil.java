@@ -59,8 +59,14 @@
  *	    #235: Add "atan2" code.
  *	14-Apr-2022 (rlwhitcomb)
  *	    #273: Move to "math" package.
+ *	08-Jul-2022 (rlwhitcomb)
+ *	    #393: Cleanup imports.
  */
 package info.rlwhitcomb.math;
+
+import info.rlwhitcomb.util.DynamicArray;
+import info.rlwhitcomb.util.Intl;
+import info.rlwhitcomb.util.Logging;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -72,9 +78,6 @@ import java.util.List;
 import java.util.Set;
 
 import static info.rlwhitcomb.util.Constants.*;
-import info.rlwhitcomb.util.DynamicArray;
-import info.rlwhitcomb.util.Intl;
-import info.rlwhitcomb.util.Logging;
 
 
 /**

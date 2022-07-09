@@ -26,15 +26,16 @@
  *  History:
  *      16-Feb-2022 (rlwhitcomb)
  *	    #196: Initial coding from other packages.
+ *	08-Jul-2022 (rlwhitcomb)
+ *	    #393: Cleanup imports.
  */
 package info.rlwhitcomb.json;
 
+import info.rlwhitcomb.util.Intl;
 import org.antlr.v4.runtime.DefaultErrorStrategy;
 import org.antlr.v4.runtime.Parser;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Token;
-
-import info.rlwhitcomb.util.Intl;
 
 
 /**

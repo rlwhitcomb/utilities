@@ -82,18 +82,20 @@
  *	    Allow '+' in "fractionValue" and other input patterns also.
  *	14-Apr-2022 (rlwhitcomb)
  *	    #273: Move to "math" package.
+ *	08-Jul-2022 (rlwhitcomb)
+ *	    #393: Cleanup imports.
  */
 package info.rlwhitcomb.math;
+
+import info.rlwhitcomb.util.Intl;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.MathContext;
 import java.util.Arrays;
-import java.util.regex.Pattern;
 import java.util.regex.Matcher;
-
-import info.rlwhitcomb.util.Intl;
+import java.util.regex.Pattern;
 
 
 /**

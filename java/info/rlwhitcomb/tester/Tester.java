@@ -216,49 +216,30 @@
  *	    #269: Call "loadProgramInfo" to set product version explicitly for every main program we test.
  *	18-Apr-2022 (rlwhitcomb)
  *	    #270: Make "loadMainProgramInfo" automatic now.
+ *	08-Jul-2022 (rlwhitcomb)
+ *	    #393: Cleanup imports.
  */
 package info.rlwhitcomb.tester;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.InputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintStream;
-import java.lang.reflect.InvocationTargetException;
+import info.rlwhitcomb.Testable;
+import info.rlwhitcomb.util.*;
+import name.fraser.neil.plaintext.diff_match_patch;
+
+import java.io.*;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.net.URL;
-import java.net.MalformedURLException;
-import java.net.URLClassLoader;
 import java.nio.charset.Charset;
 import java.nio.charset.UnsupportedCharsetException;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import name.fraser.neil.plaintext.diff_match_patch;
-
-import info.rlwhitcomb.Testable;
-import info.rlwhitcomb.util.CharUtil;
 import static info.rlwhitcomb.util.Constants.*;
-import info.rlwhitcomb.util.EchoInputStream;
-import info.rlwhitcomb.util.Environment;
-import info.rlwhitcomb.util.Exceptions;
-import info.rlwhitcomb.util.FileUtilities;
-import info.rlwhitcomb.util.Intl;
-import info.rlwhitcomb.util.NewlineOutputStream;
-import info.rlwhitcomb.util.Options;
 
 
 /**

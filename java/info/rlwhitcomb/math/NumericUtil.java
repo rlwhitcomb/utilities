@@ -163,14 +163,16 @@
  *	    #301: Rework "convertToWords" for unlimited BigInteger range.
  *	31-May-2022 (rlwhitcomb)
  *	    #301: Next step of Conway-Guy-Wechsler algorithm for large exponent naming.
+ *	08-Jul-2022 (rlwhitcomb)
+ *	    #393: Cleanup imports.
  */
 package info.rlwhitcomb.math;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.EOFException;
-import java.io.IOException;
+import info.rlwhitcomb.util.CharUtil;
+import info.rlwhitcomb.util.Constants;
+import info.rlwhitcomb.util.Intl;
+
+import java.io.*;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.MathContext;
@@ -179,12 +181,10 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.regex.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import info.rlwhitcomb.util.Constants;
 import static info.rlwhitcomb.util.Constants.*;
-import info.rlwhitcomb.util.CharUtil;
-import info.rlwhitcomb.util.Intl;
 
 
 /**

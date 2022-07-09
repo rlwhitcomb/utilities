@@ -29,11 +29,20 @@
  *	    Add option to "toStringValue" to switch line endings.
  *	23-Mar-2022 (rlwhitcomb)
  *	    New "writeObject" methods.
+ *	08-Jul-2022 (rlwhitcomb)
+ *	    #393: Cleanup imports.
  */
 package info.rlwhitcomb.json;
 
-import java.io.InputStream;
+import info.rlwhitcomb.util.CharUtil;
+import info.rlwhitcomb.util.Environment;
+import org.antlr.v4.runtime.CharStream;
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.tree.ParseTree;
+
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -41,15 +50,7 @@ import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
 
-import org.antlr.v4.runtime.CharStream;
-import org.antlr.v4.runtime.CharStreams;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.Parser;
-import org.antlr.v4.runtime.tree.ParseTree;
-
-import info.rlwhitcomb.util.CharUtil;
 import static info.rlwhitcomb.util.Constants.*;
-import info.rlwhitcomb.util.Environment;
 
 
 /**

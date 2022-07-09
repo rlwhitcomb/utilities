@@ -42,15 +42,17 @@
  *	    Use new Intl Exception variants for convenience.
  *	20-Dec-2021 (rlwhitcomb)
  *	    Better use of CSVFormat methods.
+ *	08-Jul-2022 (rlwhitcomb)
+ *	    #393: Cleanup imports.
  */
 package info.rlwhitcomb.csv;
+
+import info.rlwhitcomb.util.Intl;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.math.BigDecimal;
-
-import info.rlwhitcomb.util.Intl;
 
 
 /**

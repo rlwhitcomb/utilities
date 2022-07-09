@@ -50,15 +50,17 @@
  *	02-Mar-2021 (rlwhitcomb)
  *	    Make header keys into an array of Objects; update "getHeaderKey"
  *	    to handle this change.
+ *	08-Jul-2022 (rlwhitcomb)
+ *	    #393: Cleanup imports.
  */
 package info.rlwhitcomb.csv;
+
+import info.rlwhitcomb.util.Intl;
 
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.NoSuchElementException;
-
-import info.rlwhitcomb.util.Intl;
 
 
 /**

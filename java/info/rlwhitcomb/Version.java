@@ -46,23 +46,20 @@
  *	23-Feb-2022 (rlwhitcomb)
  *	    #254: Help option.
  *	    Add coloring to help. And coloring to plain text files.
+ *	08-Jul-2022 (rlwhitcomb)
+ *	    #393: Cleanup imports.
  */
 package info.rlwhitcomb;
+
+import de.onyxbits.SemanticVersion;
+import info.rlwhitcomb.util.*;
 
 import java.text.ParseException;
 import java.util.List;
 
-import de.onyxbits.SemanticVersion;
-
-import info.rlwhitcomb.util.CharUtil;
 import static info.rlwhitcomb.util.CharUtil.Justification.*;
-import info.rlwhitcomb.util.ClassUtil;
 import static info.rlwhitcomb.util.ConsoleColor.Code.*;
-import info.rlwhitcomb.util.ConsoleColor;
-import info.rlwhitcomb.util.Environment;
 import static info.rlwhitcomb.util.Environment.ProgramInfo;
-import info.rlwhitcomb.util.Intl;
-import info.rlwhitcomb.util.Options;
 
 
 /**

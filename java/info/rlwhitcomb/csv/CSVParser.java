@@ -52,14 +52,16 @@
  *	29-Jan-2021 (rlwhitcomb)
  *	    Use the new Intl exception subclasses and extended CSVException
  *	    for convenience.
+ *	08-Jul-2022 (rlwhitcomb)
+ *	    #393: Cleanup imports.
  */
 package info.rlwhitcomb.csv;
 
-import java.io.Reader;
+import info.rlwhitcomb.util.Intl;
+
 import java.io.BufferedReader;
 import java.io.IOException;
-
-import info.rlwhitcomb.util.Intl;
+import java.io.Reader;
 
 
 /**

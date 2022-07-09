@@ -97,31 +97,22 @@
  *	    #308: Change reset color tag.
  *	06-May-2022 (rlwhitcomb)
  *	    #284: Default to current directory if nothing specified.
+ *	08-Jul-2022 (rlwhitcomb)
+ *	    #393: Cleanup imports.
  */
 package info.rlwhitcomb.tree;
+
+import info.rlwhitcomb.util.*;
 
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 
-import info.rlwhitcomb.util.CharUtil;
 import static info.rlwhitcomb.util.CharUtil.Justification.*;
-import info.rlwhitcomb.util.ConsoleColor;
 import static info.rlwhitcomb.util.ConsoleColor.Code.*;
-import info.rlwhitcomb.util.Environment;
-import info.rlwhitcomb.util.Exceptions;
-import info.rlwhitcomb.util.FileUtilities;
-import info.rlwhitcomb.util.Intl;
-import info.rlwhitcomb.util.Options;
 
 /**
  * Draw a directory tree on the console.
