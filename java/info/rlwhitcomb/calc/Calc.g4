@@ -420,6 +420,8 @@
  *	    #388: Add optional flags value to case's "matches" selector (same as "matches" function).
  *	07-Jul-2022 (rlwhitcomb)
  *	    #389: "var id" shouldn't need an initial expression value (unlike "const").
+ *	08-Jul-2022 (rlwhitcomb)
+ *	    #394: More allowed EOL* in assignment statements.
  */
 
 grammar Calc;
@@ -598,25 +600,25 @@ expr
    | expr '!'                            # factorialExpr
    |<assoc=right> expr POW_OP expr       # powerExpr
    |<assoc=right> expr POWERS            # powerNExpr
-   | expr MULT_OP expr                   # multiplyExpr
-   | expr ADD_OP expr                    # addExpr
-   | expr SHIFT_OP expr                  # shiftExpr
-   | expr '<=>' expr                     # spaceshipExpr
-   | expr COMPARE_OP expr                # compareExpr
+   | expr MULT_OP expr                            # multiplyExpr
+   | expr ADD_OP expr                             # addExpr
+   | expr SHIFT_OP expr                           # shiftExpr
+   | expr '<=>' expr                              # spaceshipExpr
+   | expr COMPARE_OP expr                         # compareExpr
    | expr ( K_OF|K_IN|K_WITHIN|SET_IN ) loopCtl   # inExpr
-   | expr EQUAL_OP expr                  # equalExpr
-   | expr BIT_OP expr                    # bitExpr
-   | expr EOL* BOOL_AND_OP EOL* expr     # booleanAndExpr
-   | expr EOL* BOOL_OR_OP EOL* expr      # booleanOrExpr
-   | expr EOL* BOOL_XOR_OP EOL* expr     # booleanXorExpr
-   | expr EOL* ELVIS_OP EOL* expr        # elvisExpr
+   | expr EQUAL_OP expr                           # equalExpr
+   | expr BIT_OP expr                             # bitExpr
+   | expr EOL* BOOL_AND_OP EOL* expr              # booleanAndExpr
+   | expr EOL* BOOL_OR_OP EOL* expr               # booleanOrExpr
+   | expr EOL* BOOL_XOR_OP EOL* expr              # booleanXorExpr
+   | expr EOL* ELVIS_OP EOL* expr                 # elvisExpr
    |<assoc=right> expr EOL* '?' EOL* expr EOL* ':' EOL* expr # eitherOrExpr
-   |<assoc=right> var ASSIGN expr        # assignExpr
-   |<assoc=right> var POW_ASSIGN expr    # powerAssignExpr
-   |<assoc=right> var MULT_ASSIGN expr   # multAssignExpr
-   |<assoc=right> var ADD_ASSIGN expr    # addAssignExpr
-   |<assoc=right> var SHIFT_ASSIGN expr  # shiftAssignExpr
-   |<assoc=right> var BIT_ASSIGN expr    # bitAssignExpr
+   |<assoc=right> var EOL* ASSIGN EOL* expr       # assignExpr
+   |<assoc=right> var EOL* POW_ASSIGN EOL* expr   # powerAssignExpr
+   |<assoc=right> var EOL* MULT_ASSIGN EOL* expr  # multAssignExpr
+   |<assoc=right> var EOL* ADD_ASSIGN EOL* expr   # addAssignExpr
+   |<assoc=right> var EOL* SHIFT_ASSIGN EOL* expr # shiftAssignExpr
+   |<assoc=right> var EOL* BIT_ASSIGN EOL* expr   # bitAssignExpr
    ;
 
 expr1

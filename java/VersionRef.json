@@ -3,6 +3,10 @@
 //======================
 
 [
+    { version: '2.13.18', date: d'2022-07-08',
+      issues: [ 394 ],
+      comment: 'Allow end of lines around assignment operators.'
+    },
     { version: '2.13.17', date: d'2022-07-07',
       issues: [ 389 ],
       comment: 'The "var" statement doesn\'t require an initial value.'

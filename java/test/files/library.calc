@@ -1,5 +1,5 @@
-:Require '2.10.10-alpha'
-:Requires '2.10.10-alpha', Base '1.9.15-alpha'
+:Require '2.13.18-alpha'
+:Requires '2.13.18-alpha', Base '1.9.15-alpha'
 // The versions above must conform to the latest values in "version.properties" and "build.properties"
 
 /*
@@ -321,10 +321,14 @@ define dateformat(d, f = 'mm/dd/yyyy') = {
         if len {
             if ch == runOf[0] leave
             case runOf[0] of {
-                'd': result += (len == 1 ? dg(dom(d)) : d2(dom(d))),
-                'y': result += (len <= 2 ? d2(yod(d) % 100) : dg(yod(d))),
-                'm': result += (len == 1 ? dg(moy(d)) : d2(moy(d))),
-                'M': result += (len <= 2 ? substr(moy_name(d), 0, 3) : moy_name(d))
+                'd': result +=
+                        (len == 1 ? dg(dom(d)) : d2(dom(d))),
+                'y': result +=
+                        (len <= 2 ? d2(yod(d) % 100) : dg(yod(d))),
+                'm': result +=
+                        (len == 1 ? dg(moy(d)) : d2(moy(d))),
+                'M': result +=
+                        (len <= 2 ? substr(moy_name(d), 0, 3) : moy_name(d))
             }
         }
         runOf = ''
@@ -432,10 +436,10 @@ define zeta_2n(_2n) = { ((-1)**(_2n / 2 + 1) * Bn(_2n) * (2 * pi) ** _2n) / (2 *
 define Tn(k) = {
   _2k2 = 2*k + 2
   _2_2k2 = 2 ** _2k2
-  :rational on
-  _fact = Bn(_2k2) / _2k2
-  _result = _2_2k2 * (_2_2k2 - 1) * _fact
-  :rational pop
+  :rational on {
+    _fact = Bn(_2k2) / _2k2
+    _result = _2_2k2 * (_2_2k2 - 1) * _fact
+  }
   _result@d
 }
 
