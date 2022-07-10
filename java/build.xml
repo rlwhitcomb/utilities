@@ -316,6 +316,8 @@
 	    09-Jul-2022 (rlwhitcomb)
 		#398: Unset the "uptodate" properties before setting again. This allows
 		the property to be reset after generation.
+	    10-Jul-2022 (rlwhitcomb)
+		#400: Rename "mastertest" to "maintest"... ...
 
      ========================================================================== -->
 
@@ -766,7 +768,7 @@ Test starting on ${build.date} at ${build.time}
 		<java classname="${tester.class}"                     output="${test.log.path}" append="true" failonerror="true" fork="true">
 			<arg value="-timing"/>
 			<arg value="-dir:test/files"/>
-			<arg value="mastertest"/>
+			<arg value="maintest"/>
 		</java>
 		<echo>Verifying the M${mersenne.number} prime (${mersenne.digits} digits)...</echo>
 		<echo>GIMPS Milestones: October 6, 2021: All tests below M(57 885 161) verified, confirming its place as the 48th Mersenne prime.</echo>
