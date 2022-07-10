@@ -331,6 +331,7 @@
  *	    current scenarios).
  *	09-Jul-2022 (rlwhitcomb)
  *	    #393: Cleanup imports.
+ *	    #397: Add multiline string constant support in "internalStripQuotes".
  */
 package info.rlwhitcomb.util;
 
@@ -552,6 +553,14 @@ public final class CharUtil
 	}
 
 
+	private static void stripQuotesFromEnds(final StringBuilder buf, final char startQuote, final char endQuote) {
+	    int len = buf.length();
+	    if (len >= 2 && buf.charAt(0) == startQuote && buf.charAt(len - 1) == endQuote) {
+		buf.deleteCharAt(len - 1);
+		buf.deleteCharAt(0);
+	    }
+	}
+
 	private static String internalStripQuotes(
 		final String value,
 		final String startQuote,
@@ -565,9 +574,15 @@ public final class CharUtil
 	    }
 
 	    StringBuilder buf = new StringBuilder(trimmedValue);
+
 	    // Strip the leading/trailing quotes
-	    buf.deleteCharAt(0);
-	    buf.deleteCharAt(buf.length() - 1);
+	    char start = startQuote.charAt(0);
+	    char end   = endQuote.charAt(0);
+	    stripQuotesFromEnds(buf, start, end);
+
+	    // Variations have the leading/trailing quotes tripled, so strip those also
+	    stripQuotesFromEnds(buf, start, end);
+	    stripQuotesFromEnds(buf, start, end);
 
 	    // Unescape any embedded quotes
 	    int ix = buf.indexOf(escapedQuote);

@@ -288,6 +288,8 @@
  *	    #364: Allow echoing to stderr.
  *	08-Jul-2022 (rlwhitcomb)
  *	    #393: Cleanup imports.
+ *	10-Jul-2022 (rlwhitcomb)
+ *	    #397: Change the way we process line continuations in REPL mode.
  */
 package info.rlwhitcomb.calc;
 
@@ -2335,8 +2337,11 @@ public class Calc
 				}
 
 				if (scriptInput) {
-				    buf.append(line).append(LINESEP);
-				    if (!line.endsWith("\\")) {
+				    if (line.endsWith("\\")) {
+					buf.append(line.substring(0, line.length() - 1)).append(LINESEP);
+				    }
+				    else {
+					buf.append(line);
 					process(CharStreams.fromString(buf.toString()), visitor, errorStrategy, quiet, false);
 					buf.setLength(0);
 				    }

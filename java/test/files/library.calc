@@ -1,5 +1,5 @@
-:Require '2.13.18-alpha'
-:Requires '2.13.18-alpha', Base '1.9.15-alpha'
+:Require '2.13.20-alpha'
+:Requires '2.13.20-alpha', Base '1.9.15-alpha'
 // The versions above must conform to the latest values in "version.properties" and "build.properties"
 
 /*
@@ -497,7 +497,13 @@ define PMT2(P,r,n) = {
 def monthly(P,R,N) = { `Full monthly payment is ${PMT(P,R,N)@2,$}` }
 def monthly_whole(P,R,N) = { `Monthly payment in whole dollars is ${PMT(P,R,N)@0,$}` }
 
-def help_mort = { "\nUsage: PMT(P=<present value>,R=<yearly interest rate (%)>,N=<number of years>)\n    or PMT2(P,r=<monthly interest %>,n=<number of months>)\n   Or use monthly(P,R,N) or monthly_whole(P,R,N) to get the results in different forms." }
+def help_mort = {
+"""
+Usage: PMT (P = present value, R = yearly interest rate (%), N = number of years)
+   or PMT2 (P = present value, r = monthly interest (%), n = number of months)
+   Or use monthly(P,R,N) or monthly_whole(P,R,N) to get the results in different forms.
+"""
+}
 
 /*
  * Compute the winning percentage, given wins, ties, and losses.

@@ -8,8 +8,8 @@ const INPUT_FILE = 'info/rlwhitcomb/util/Constants.java'
 
 lines = split(trim(read(INPUT_FILE)), '\\r?\\n')
 
-loop $line over lines {
-  trimmed = trim($line)
+loop line over lines {
+  trimmed = trim(line)
   if !index(trimmed, '*') {
     words = split(trimmed, '\\s+')
     if words[0] == 'public' && words[1] == 'static' {

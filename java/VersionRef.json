@@ -3,6 +3,10 @@
 //======================
 
 [
+    { version: '2.13.20', date: d'2022-07-09',
+      issues: [ 397 ],
+      comment: 'Add multiline string support with """...""".'
+    },
     { version: '2.13.18', date: d'2022-07-08',
       issues: [ 394 ],
       comment: 'Allow end of lines around assignment operators.'
@@ -21,7 +25,8 @@
     },
     { version: '2.13.12', date: d'2022-07-05',
       issues: [ 291 ],
-      comment: 'Add optional pattern matching flags to "matches" function;\n\t add flag constants to "library".'
+      comment: '''Add optional pattern matching flags to "matches" function;
+\t add flag constants to "library".'''
     },
     { version: '2.13.10', date: d'2022-06-29',
       issues: [ 381 ],
@@ -169,7 +174,8 @@
     },
     { version: '2.10.25', date: d'2022-05-20',
       issues: [ 315, 334 ],
-      comment: 'Fix parsing of strings inside embedded expressions in interpolated strings.\n\t Protect against errors using "--" on empty lists.'
+      comment: '''Fix parsing of strings inside embedded expressions in interpolated strings.
+\t Protect against errors using "--" on empty lists.'''
     },
     { version: '2.10.23', date: d'2022-05-18',
       issues: [ 335 ],

@@ -422,6 +422,8 @@
  *	    #389: "var id" shouldn't need an initial expression value (unlike "const").
  *	08-Jul-2022 (rlwhitcomb)
  *	    #394: More allowed EOL* in assignment statements.
+ *	09-Jul-2022 (rlwhitcomb)
+ *	    #397: Add multiline string constant.
  */
 
 grammar Calc;
@@ -1451,12 +1453,19 @@ FORMAT
    ;
 
 STRING
-   : '"'      ( ESC1 | SAFECODEPOINT1 ) * '"'
-   | '\''     ( ESC2 | SAFECODEPOINT2 ) * '\''
+   :      '"' ( ESC1 | SAFECODEPOINT1 ) * '"'
+   |     '\'' ( ESC2 | SAFECODEPOINT2 ) * '\''
    | '\u2018' ( ESC3 | SAFECODEPOINT3 ) * '\u2019'
    | '\u201C' ( ESC4 | SAFECODEPOINT4 ) * '\u201D'
    | '\u2039' ( ESC5 | SAFECODEPOINT5 ) * '\u203A'
    | '\u00AB' ( ESC6 | SAFECODEPOINT6 ) * '\u00BB'
+// multiline strings
+   |                '"""' ( ESC1 | SAFECODEPOINT7 ) * '"""'
+   |             '\'\'\'' ( ESC2 | SAFECODEPOINT8 ) * '\'\'\''
+   | '\u2018\u2018\u2018' ( ESC3 | SAFECODEPOINT9 ) * '\u2019\u2019\u2019'
+   | '\u201C\u201C\u201C' ( ESC4 | SAFECODEPOINTA ) * '\u201D\u201D\u201D'
+   | '\u2039\u2039\u2039' ( ESC5 | SAFECODEPOINTB ) * '\u203A\u203A\u203A'
+   | '\u00AB\u00AB\u00AB' ( ESC6 | SAFECODEPOINTC ) * '\u00BB\u00BB\u00BB'
    ;
 
 ISTRING
@@ -1546,6 +1555,30 @@ fragment SAFECODEPOINT5
 
 fragment SAFECODEPOINT6
    : ~ [\\\u0000-\u001F\u00BB]
+   ;
+
+fragment SAFECODEPOINT7
+   : ~ ["\\\u0000-\u0009\u000b\u000c\u000e-\u001F]
+   ;
+
+fragment SAFECODEPOINT8
+   : ~ ['\\\u0000-\u0009\u000b\u000c\u000e-\u001F]
+   ;
+
+fragment SAFECODEPOINT9
+   : ~ [\\\u0000-\u0009\u000b\u000c\u000e-\u001F\u2019]
+   ;
+
+fragment SAFECODEPOINTA
+   : ~ [\\\u0000-\u0009\u000b\u000c\u000e-\u001F\u201D]
+   ;
+
+fragment SAFECODEPOINTB
+   : ~ [\\\u0000-\u0009\u000b\u000c\u000e-\u001F\u203A]
+   ;
+
+fragment SAFECODEPOINTC
+   : ~ [\\\u0000-\u0009\u000b\u000c\u000e-\u001F\u00BB]
    ;
 
 fragment SAFECODEPOINTI

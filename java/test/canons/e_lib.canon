@@ -22,9 +22,10 @@
 >win_pct(662, 174, 2) -> "79.00%"
 >mean_stddev([1, 2, 3, 4, 5, 6, 7, 8]) -> { mean: 4.5, stddev: 2.291 }
 >help_mort -> 
->Usage: PMT(P=<present value>,R=<yearly interest rate (%)>,N=<number of years>)
->    or PMT2(P,r=<monthly interest %>,n=<number of months>)
+>Usage: PMT (P = present value, R = yearly interest rate (%), N = number of years)
+>   or PMT2 (P = present value, r = monthly interest (%), n = number of months)
 >   Or use monthly(P,R,N) or monthly_whole(P,R,N) to get the results in different forms.
+>
 >monthly(244000, 3.25, 30) -> Full monthly payment is $1,061.90
 >PMT2(350000, 0.3, 180) -> 2519.31
 >s1 = eval stack -> { _values: [ ] }
