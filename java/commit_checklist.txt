@@ -1,23 +1,27 @@
-Checklist of things to do before a commit/push
-----------------------------------------------
+------------------------------------------------
+ Checklist of things to do before a commit/push
+------------------------------------------------
 
-1. An issue has been created for actual bugs or enhancements.
+1. One or more issues have been created for actual bugs or enhancements.
 2. "git pull" - make sure base level or branch is up-to-date with GitHub.
 3. Changes that must be integrated are "git stash pop" or others to ignore to "git stash push".
 4. "version.properties" and/or "build.properties" have been changed as appropriate.
-5. All relevant changes are "git add".
-6. All new files are also "git add".
-7. Check online version of Calc help to make sure the markup is right.
-8. VersionRef.json is up-to-date and "c versions" shows correctly.
-9. "version" shows correct versions
-10. All relevant source files have version history, referencing correct bug.
-11. Unit tests of basic features, and edge cases.
-12. "ant clean update doc test" completes cleanly.
-13. Commit message created, referencing correct bug(s).
-14. "git commit -F xxx.msg"
-15. "git push"
-16. Wait for CI actions to complete successfully.
-17. Check timing of builds to make sure we haven't introduced massive slowdowns.
-18. Repeat as necessary in case of CI build problems.
-19. "ant update doc" locally to reference new commit ID.
-20. "update" as necessary on other (non-git) machines.
+5. Remove all trailing whitespace and unnecessary whitespace (i.e., spaces before tabs)
+   ("git diff" will color highlight these).
+6. All relevant changes are "git add".
+7. All new files are also "git add".
+8. "ant clean update doc test" locally.
+9. Check local version of Calc help ("calc_help.html") to make sure the markup is right.
+10. VersionRef.json is up-to-date and "c versions" displays correctly.
+11. "version" shows correct versions.
+12. All relevant source files have version history, referencing correct bug.
+13. Unit tests of basic features, and edge cases.
+14. "ant clean update doc test" completes cleanly.
+15. Commit message file ("xxx.msg") created, referencing correct bug(s).
+16. "git commit -F xxx.msg"
+17. "git push"
+18. Wait for CI actions to complete successfully.
+19. Check timing of builds to make sure we haven't introduced massive slowdowns.
+20. Repeat as necessary in case of CI build problems.
+21. "ant update doc" locally to reference new commit ID.
+22. "update" as necessary on other (non-git) machines.
