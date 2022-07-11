@@ -290,6 +290,7 @@
  *	    #393: Cleanup imports.
  *	10-Jul-2022 (rlwhitcomb)
  *	    #397: Change the way we process line continuations in REPL mode.
+ *	    #392: Option to sort by keys.
  */
 package info.rlwhitcomb.calc;
 
@@ -466,6 +467,7 @@ public class Calc
 	private static boolean separators        = false;
 	private static boolean ignoreCase        = false;
 	private static boolean quotes            = true;
+	private static boolean sortKeys          = false;
 	private static boolean silenceDirectives = false;
 
 	private static boolean useCmdEnter = true;
@@ -523,6 +525,7 @@ public class Calc
 	@BXML private Checkbox resultsCheck;
 	@BXML private Checkbox separatorCheck;
 	@BXML private Checkbox quoteStringsCheck;
+	@BXML private Checkbox sortKeysCheck;
 	@BXML private RadioButton useEnterButton;
 	@BXML private RadioButton useCmdEnterButton;
 	@BXML private RadioButton lightBackgroundButton;
@@ -820,6 +823,7 @@ public class Calc
 	    resultsCheck.setSelected(resultsOnly);
 	    separatorCheck.setSelected(settings.separatorMode);
 	    quoteStringsCheck.setSelected(settings.quoteStrings);
+	    sortKeysCheck.setSelected(settings.sortKeys);
 
 	    if (useCmdEnter)
 		useCmdEnterButton.setSelected(true);
@@ -888,6 +892,10 @@ public class Calc
 		boolean newQuoteStrings = quoteStringsCheck.isSelected();
 		if (newQuoteStrings != originalSettings.quoteStrings)
 		    visitor.setQuoteStringsMode(newQuoteStrings);
+
+		boolean newSortKeys = sortKeysCheck.isSelected();
+		if (newSortKeys != originalSettings.sortKeys)
+		    visitor.setSortKeysMode(newSortKeys);
 
 		useCmdEnter = useCmdEnterButton.isSelected();
 
@@ -1053,7 +1061,7 @@ public class Calc
 		});
 
 		displayer = this;
-		visitor = new CalcObjectVisitor(displayer, rational, separators, silenceDirectives, ignoreCase, quotes);
+		visitor = new CalcObjectVisitor(displayer, rational, separators, silenceDirectives, ignoreCase, quotes, sortKeys);
 
 		// Set the command-line arguments into the symbol table as $nn
 		int index = 0;
@@ -2010,6 +2018,18 @@ public class Calc
 		case "noq":
 		    quotes = false;
 		    break;
+		case "sortobjects":
+		case "sortobject":
+		case "sortkeys":
+		case "sortkey":
+		    sortKeys = true;
+		    break;
+		case "nosortobjects":
+		case "nosortobject":
+		case "nosortkeys":
+		case "nosortkey":
+		    sortKeys = false;
+		    break;
 		case "silencedirectives":
 		case "silentdirectives":
 		case "silencedir":
@@ -2262,7 +2282,7 @@ public class Calc
 		}
 		else {
 		    displayer = new ConsoleDisplayer();
-		    visitor = new CalcObjectVisitor(displayer, rational, separators, silenceDirectives, ignoreCase, quotes);
+		    visitor = new CalcObjectVisitor(displayer, rational, separators, silenceDirectives, ignoreCase, quotes, sortKeys);
 
 		    // Set the command-line arguments into the symbol table as $nn
 		    int index = 0;

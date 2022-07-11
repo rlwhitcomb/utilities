@@ -424,6 +424,8 @@
  *	    #394: More allowed EOL* in assignment statements.
  *	09-Jul-2022 (rlwhitcomb)
  *	    #397: Add multiline string constant.
+ *	10-Jul-2022 (rlwhitcomb)
+ *	    #392: Directive to keep objects sorted by keys.
  */
 
 grammar Calc;
@@ -802,6 +804,7 @@ directive
    | D_SEPARATORS modeOption bracketBlock ?   # separatorsDirective
    | D_IGNORECASE modeOption bracketBlock ?   # ignoreCaseDirective
    | D_QUOTESTRINGS modeOption bracketBlock ? # quoteStringsDirective
+   | D_SORTOBJECTS modeOption bracketBlock ?  # sortObjectsDirective
    | D_REQUIRE requireOptions                 # requireDirective
    ;
 
@@ -1440,6 +1443,13 @@ D_QUOTESTRINGS
    | DIR  ( 'quotestring'  | 'QUOTESTRING'  | 'Quotestring'  | 'QuoteString'  )
    | DIR  ( 'quotes'       | 'QUOTES'       | 'Quotes'       )
    | DIR  ( 'quote'        | 'QUOTE'        | 'Quote'        )
+   ;
+
+D_SORTOBJECTS
+   : DIR  ( 'sortobjects' | 'SORTOBJECTS' | 'Sortobjects' | 'SortObjects' )
+   | DIR  ( 'sortobject'  | 'SORTOBJECT'  | 'Sortobject'  | 'SortObject'  )
+   | DIR  ( 'sortkeys'    | 'SORTKEYS'    | 'Sortkeys'    | 'SortKeys'    )
+   | DIR  ( 'sortkey'     | 'SORTKEY'     | 'Sortkey'     | 'SortKey'     )
    ;
 
 D_REQUIRE

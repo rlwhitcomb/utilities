@@ -106,6 +106,9 @@
  *	    #314: Turn the empty collection into an ObjectScope when necessary.
  *	08-Jul-2022 (rlwhitcomb)
  *	    #393: Cleanup imports.
+ *	10-Jul-2022 (rlwhitcomb)
+ *	    #392: Create objects with proper sorting of keys; allow "a['ten'] = 20" to
+ *	    create an object based on the non-numeric index value.
  */
 package info.rlwhitcomb.calc;
 
@@ -438,7 +441,7 @@ class LValueContext
 	    Object objValue = contextObj;
 
 	    if (objValue == null) {
-		map = new ObjectScope();
+		map = new ObjectScope(visitor.getSettings().sortKeys);
 		putContextObject(visitor, map);
 	    }
 	    else if (objValue instanceof ObjectScope) {
@@ -484,7 +487,7 @@ class LValueContext
 
 		if (arrValue != null && arrValue.equals(CollectionScope.EMPTY)) {
 		    // a = {}; a[x] = y; So, convert the empty object to a map
-		    arrValue = new ObjectScope();
+		    arrValue = new ObjectScope(visitor.getSettings().sortKeys);
 		    arrLValue.putContextObject(visitor, arrValue);
 		}
 
@@ -507,21 +510,38 @@ class LValueContext
 		}
 
 		// By now, the object must either be null, a list, a string, or a simple value (an error)
-		// but we should be able to safely evaluate the index expression as an integer
-		int index;
+		// so we need to decide if the index is a string or a number to decide if a null value
+		// should create and object or an array.
+		int index = Integer.MIN_VALUE;
+		String memberName = null;
 
 		if (expr == null) {
 		    String indexString = arrVarCtx.INDEXES().getText();
 		    index = (int) indexString.charAt(0) - 0x2080;
 		}
 		else {
-		    index = visitor.getIntValue(expr);
+		    Object indexValue = visitor.evaluate(expr);
+
+		    if (indexValue instanceof Number) {
+			index = CalcUtil.toIntValue(visitor, indexValue, visitor.getSettings().mc, expr);
+		    }
+		    else {
+			memberName = visitor.toNonNullString(expr, indexValue);
+		    }
 		}
 
 		ArrayScope list = null;
+		ObjectScope map = null;
+
 		if (arrValue == null) {
-		    list = new ArrayScope();
-		    arrLValue.putContextObject(visitor, list);
+		    if (memberName != null) {
+			map = new ObjectScope(visitor.getSettings().sortKeys);
+			arrLValue.putContextObject(visitor, map);
+		    }
+		    else {
+			list = new ArrayScope();
+			arrLValue.putContextObject(visitor, list);
+		    }
 		}
 		else if (arrValue instanceof ArrayScope) {
 		    list = (ArrayScope) arrValue;
@@ -533,7 +553,12 @@ class LValueContext
 		    throw new CalcExprException(arrVarCtx, "%calc#nonArrayValue", arrLValue, typeof(arrValue));
 		}
 
-		return new LValueContext(arrLValue, arrVarCtx, list, index);
+		if (list != null) {
+		    return new LValueContext(arrLValue, arrVarCtx, list, index);
+		}
+		else {
+		    return arrLValue.makeMapLValue(visitor, arrVarCtx, map, memberName);
+		}
 	    }
 	    else if (ctx instanceof CalcParser.ObjVarContext) {
 		CalcParser.ObjVarContext objVarCtx = (CalcParser.ObjVarContext) ctx;

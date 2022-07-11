@@ -86,6 +86,8 @@
 		#195: Add id for splitter to save the ratio between runs.
 	    18-Apr-2022 (rlwhitcomb)
 		#270: Update Version dialog to match new Environment.printProgramInfo format.
+	    10-Jul-2022 (rlwhitcomb)
+		#392: Settings option to sort objects by key.
 
      ========================================================================== -->
 
@@ -215,7 +217,7 @@
 			<GridPane.Row>
 			    <Checkbox bxml:id="separatorCheck" buttonData="%separators"/>
 			    <Checkbox bxml:id="quoteStringsCheck" buttonData="%quoteStrings"/>
-			    <Label text="" enabled="false"/>
+			    <Checkbox bxml:id="sortKeysCheck" buttonData="%sortKeys"/>
 			</GridPane.Row>
 		    </GridPane>
 		</Form.Section>

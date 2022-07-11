@@ -3,6 +3,10 @@
 //======================
 
 [
+    { version: '2.13.30', date: d'2022-07-10',
+      issues: [ 392 ],
+      comment: 'New options and directives to create objects sorted by key.'
+    },
     { version: '2.13.20', date: d'2022-07-09',
       issues: [ 397 ],
       comment: 'Add multiline string support with """...""".'

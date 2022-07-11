@@ -619,6 +619,8 @@
  *	    on the action messages for both "const" and "var".
  *	08-Jul-2022 (rlwhitcomb)
  *	    #393: Cleanup imports.
+ *	10-Jul-2022 (rlwhitcomb)
+ *	    #392: Option to sort objects by keys.
  */
 package info.rlwhitcomb.calc;
 
@@ -766,6 +768,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	/** Stack of previous "quote strings" mode values. */
 	private final Deque<Boolean> quoteStringsModeStack = new ArrayDeque<>();
 
+	/** Stack of previous "sort keys" mode values. */
+	private final Deque<Boolean> sortKeysModeStack = new ArrayDeque<>();
+
 	/** Stack of previous "resultsOnly" mode values. */
 	private final Deque<Boolean> resultsOnlyModeStack = new ArrayDeque<>();
 
@@ -817,10 +822,11 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		final boolean separators,
 		final boolean silence,
 		final boolean ignoreCase,
-		final boolean quotes)
+		final boolean quotes,
+		final boolean sortKeys)
 	{
 	    displayer = resultDisplayer;
-	    settings  = new Settings(rational, separators, silence, ignoreCase, quotes);
+	    settings  = new Settings(rational, separators, silence, ignoreCase, quotes, sortKeys);
 	    setIntMathContext(MathContext.DECIMAL128);
 
 	    globals = new GlobalScope();
@@ -839,6 +845,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    SystemValue.define(sets, settings, "silenceDirectives", pushSilenceMode      );
 	    SystemValue.define(sets, settings, "ignoreNameCase",    pushIgnoreCaseMode   );
 	    SystemValue.define(sets, settings, "quoteStrings",      pushQuoteStringsMode );
+	    SystemValue.define(sets, settings, "sortKeys",          pushSortKeysMode     );
 	    SystemValue.define(sets, settings, "precision",         this::setPrecision   );
 	    sets.setImmutable(true);
 
@@ -1038,6 +1045,23 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	private Consumer<Object> pushQuoteStringsMode = mode -> {
 	    processModeOption(mode, quoteStringsModeStack, setQuoteStringsMode);
+	};
+
+	public boolean setSortKeysMode(final Object mode) {
+	    boolean oldMode = settings.sortKeys;
+	    settings.sortKeys = CharUtil.getBooleanValue(mode);
+
+	    displayDirectiveMessage("%calc#sortKeysMode", settings.sortKeys);
+
+	    return oldMode;
+	}
+
+	private UnaryOperator<Boolean> setSortKeysMode = mode -> {
+	    return setSortKeysMode(mode);
+	};
+
+	private Consumer<Object> pushSortKeysMode = mode -> {
+	    processModeOption(mode, sortKeysModeStack, setSortKeysMode);
 	};
 
 	public boolean setRationalMode(final Object mode) {
@@ -1769,6 +1793,11 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitQuoteStringsDirective(CalcParser.QuoteStringsDirectiveContext ctx) {
 	    return processModeOption(ctx.modeOption(), quoteStringsModeStack, ctx.bracketBlock(), setQuoteStringsMode);
+	}
+
+	@Override
+	public Object visitSortObjectsDirective(CalcParser.SortObjectsDirectiveContext ctx) {
+	    return processModeOption(ctx.modeOption(), sortKeysModeStack, ctx.bracketBlock(), setSortKeysMode);
 	}
 
 	private String versionText(CalcParser.VersionNumberContext versionCtx) {
@@ -2865,7 +2894,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitObjExpr(CalcParser.ObjExprContext ctx) {
 	    CalcParser.ObjContext objCtx = ctx.obj();
-	    ObjectScope obj = new ObjectScope();
+	    ObjectScope obj = new ObjectScope(settings.sortKeys);
 
 	    addPairsToObject(objCtx, obj);
 
@@ -3046,7 +3075,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    // It is impossible to rearrange the objects once they've been inserted the first time
 		    // so we have to make a new object with the blank first value and then copy the original
 		    // values in after that.
-		    ObjectScope newObj = new ObjectScope();
+		    ObjectScope newObj = new ObjectScope(settings.sortKeys);
 		    newObj.setValue(0, null);
 		    newObj.putAll(obj);
 
@@ -3384,7 +3413,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    switch (op) {
 		case "+":
 		case "\u2795":
-		    return addOp(this, e1, e2, ctx1, ctx2, settings.mc, settings.rationalMode);
+		    return addOp(this, e1, e2, ctx1, ctx2, settings.mc, settings.rationalMode, settings.sortKeys);
 		case "-":
 		case "\u2212":
 		case "\u2796":
@@ -3708,7 +3737,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    obj = evaluate(expr);
 
 	    try {
-		return castTo(this, expr, obj, castType, settings.mc, settings.separatorMode);
+		return castTo(this, expr, obj, castType, settings.mc, settings.separatorMode, settings.sortKeys);
 	    }
 	    catch (IllegalArgumentException iae) {
 		throw new CalcExprException(iae, ctx);
@@ -4363,7 +4392,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 
 	    try {
-		result = copyAndTransform(this, exprCtx, originalObj, new ReplaceTransformer(pattern, replace, option));
+		result = copyAndTransform(this, exprCtx, originalObj, settings.sortKeys,
+			new ReplaceTransformer(pattern, replace, option));
 	    }
 	    catch (Exception ex) {
 		throw new CalcExprException(ex, exprCtx);
@@ -4833,7 +4863,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		case "trim":
 		case "ltrim":
 		case "rtrim":
-		    return copyAndTransform(this, exprCtx, value, new TrimTransformer(op));
+		    return copyAndTransform(this, exprCtx, value, settings.sortKeys,
+			    new TrimTransformer(op));
 
 		default:
 		    throw new UnknownOpException(op, ctx);
@@ -5080,7 +5111,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    CalcParser.ExprContext exprCtx = ctx.expr1().expr();
 	    boolean upper = ctx.K_UPPER() != null;
 
-	    return copyAndTransform(this, exprCtx, evaluate(exprCtx), new ConvertCaseTransformer(upper, settings.ignoreNameCase));
+	    return copyAndTransform(this, exprCtx, evaluate(exprCtx), settings.sortKeys,
+		    new ConvertCaseTransformer(upper, settings.ignoreNameCase));
 	}
 
 	@Override
@@ -5438,7 +5470,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    // For lists, objects, and sets, return a similar object with only the matching keys or values
 	    if (input instanceof CollectionScope) {
-		return copyAndTransform(this, inputExpr, input, new MatchesTransformer(inputExpr, p));
+		return copyAndTransform(this, inputExpr, input, settings.sortKeys,
+			new MatchesTransformer(inputExpr, p));
 	    }
 	    else {
 		// For ordinary objects, just return a boolean if the string representation matches the pattern
@@ -6030,7 +6063,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    switch (op) {
 		case "+=":
 		case "\u2795=":
-		    result = addOp(this, e1, e2, varCtx, exprCtx, settings.mc, settings.rationalMode);
+		    result = addOp(this, e1, e2, varCtx, exprCtx, settings.mc, settings.rationalMode, settings.sortKeys);
 		    break;
 		case "-=":
 		case "\u2212=":

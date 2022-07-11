@@ -37,6 +37,8 @@
  *	    #273: Move math-related classes to "math" package.
  *	08-Jul-2022 (rlwhitcomb)
  *	    #393: Cleanup imports.
+ *	10-Jul-2022 (rlwhitcomb)
+ *	    #392: New option to sort objects by key.
  */
 package info.rlwhitcomb.calc;
 
@@ -83,6 +85,10 @@ public class Settings
 	@Scriptable
 	boolean quoteStrings;
 
+	/** Sort object by key (instead of by order of entry). */
+	@Scriptable
+	boolean sortKeys;
+
 	/** The mathematical precision and rounding mode currently in effect. */
 	MathContext mc;
 
@@ -113,8 +119,9 @@ public class Settings
 	 * @param silence    Whether to silence directives.
 	 * @param ignoreCase Whether to ignore case on variable / member names.
 	 * @param quotes     Whether to quote string values on output.
+	 * @param sortObjs   Whether to sort objects by keys.
 	 */
-	public Settings(boolean rational, boolean separators, boolean silence, boolean ignoreCase, boolean quotes) {
+	public Settings(boolean rational, boolean separators, boolean silence, boolean ignoreCase, boolean quotes, boolean sortObjs) {
 	    trigMode          = TrigMode.RADIANS;
 	    units             = RangeMode.MIXED;
 	    rationalMode      = rational;
@@ -123,6 +130,7 @@ public class Settings
 	    silenceDirectives = silence;
 	    ignoreNameCase    = ignoreCase;
 	    quoteStrings      = quotes;
+	    sortKeys          = sortObjs;
 	}
 
 	/**
@@ -139,6 +147,7 @@ public class Settings
 	    silenceDirectives = other.silenceDirectives;
 	    ignoreNameCase    = other.ignoreNameCase;
 	    quoteStrings      = other.quoteStrings;
+	    sortKeys          = other.sortKeys;
 	    mc                = other.mc;
 	    mcDivide          = other.mcDivide;
 	    precision         = other.precision;

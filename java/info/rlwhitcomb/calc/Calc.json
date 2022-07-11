@@ -49,6 +49,8 @@
  *	    #248: Add text for the two new file buttons for the Version prompt.
  *	28-May-2022 (rlwhitcomb)
  *	    #354: Change text for "Clear" button.
+ *	10-Jul-2022 (rlwhitcomb)
+ *	    #392: Settings option to sort objects by key.
  */
 {
     title:              'Calc',
@@ -83,6 +85,7 @@
     resultsOnly:        'Results only?',
     separators:         'Thousands separators?',
     quoteStrings:       'Quote string results?',
+    sortKeys:           'Sort objects by key?',
 
     guiSettings:        'Window Settings',
     keyboard:           'Keyboard',

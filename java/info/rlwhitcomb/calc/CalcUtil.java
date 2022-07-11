@@ -164,6 +164,8 @@
  *	    #381: Add "sortMap".
  *	08-Jul-2022 (rlwhitcomb)
  *	    #393: Cleanup imports.
+ *	10-Jul-2022 (rlwhitcomb)
+ *	    #392: Code to sort keys in objects.
  */
 package info.rlwhitcomb.calc;
 
@@ -1533,7 +1535,15 @@ public final class CalcUtil
 	    throw new CalcExprException(ctx1, "%calc#unknownType", e1.getClass().getSimpleName());
 	}
 
-	private static Object concatObjects(final Object obj1, final Object obj2) {
+	/**
+	 * Adjunct to {@link #addOp} to do object "addition" or concatenation.
+	 *
+	 * @param obj1     The first object, to which the second object will be added.
+	 * @param obj2     The object to add to the first.
+	 * @param sortKeys How the result object (map) is to be constructed.
+	 * @return         The concatenated object.
+	 */
+	private static Object concatObjects(final Object obj1, final Object obj2, final boolean sortKeys) {
 	    Object ret = null;
 
 	    if (obj1 instanceof ArrayScope) {
@@ -1558,7 +1568,7 @@ public final class CalcUtil
 	    }
 	    else if (obj1 instanceof ObjectScope) {
 		ObjectScope map1 = (ObjectScope) obj1;
-		ObjectScope result = new ObjectScope(map1);
+		ObjectScope result = new ObjectScope(map1, sortKeys);
 
 		if (obj2 instanceof ObjectScope) {
 		    ObjectScope map2 = (ObjectScope) obj2;
@@ -1617,12 +1627,14 @@ public final class CalcUtil
 	 * @param ctx2     The Rule context for the second operand.
 	 * @param mc       The {@code MathContext} to use in rounding the result.
 	 * @param rational Whether we're doing rational ({@code true}) or decimal arithmetic.
+	 * @param sortKeys How to add values to objects.
 	 * @return {@code e1 + e2}
 	 */
 	public static Object addOp(final CalcObjectVisitor visitor,
 		final Object e1, final Object e2,
 		final ParserRuleContext ctx1, final ParserRuleContext ctx2,
-		final MathContext mc, final boolean rational)
+		final MathContext mc,
+		final boolean rational, final boolean sortKeys)
 	{
 	    if (e1 == null && e2 == null)
 		return null;
@@ -1632,7 +1644,7 @@ public final class CalcUtil
 
 	    // Concatenate objects if the first is an object
 	    if (v1 instanceof CollectionScope) {
-		return concatObjects(v1, v2);
+		return concatObjects(v1, v2, sortKeys);
 	    }
 
 	    // Do string concatenation if either expr is a string
@@ -1794,12 +1806,13 @@ public final class CalcUtil
 	/**
 	 * Convert the input object to the cast type.
 	 *
-	 * @param visitor The calculation engine for conversions.
-	 * @param ctx     The parse tree position (for error reporting).
-	 * @param value   The value to convert.
-	 * @param cast    The type to convert to (if possible).
-	 * @param mc      The math context to use for rounding (if necessary).
+	 * @param visitor    The calculation engine for conversions.
+	 * @param ctx        The parse tree position (for error reporting).
+	 * @param value      The value to convert.
+	 * @param cast       The type to convert to (if possible).
+	 * @param mc         The math context to use for rounding (if necessary).
 	 * @param separators Whether to use numeric separators in numeric to string conversions.
+	 * @param sortKeys   How to construct any new map.
 	 * @return Input value converted to the given type.
 	 */
 	public static Object castTo(
@@ -1808,7 +1821,8 @@ public final class CalcUtil
 		final Object value,
 		final Typeof cast,
 		final MathContext mc,
-		final boolean separators)
+		final boolean separators,
+		final boolean sortKeys)
 	{
 	    Object castValue = value;
 
@@ -1868,10 +1882,10 @@ public final class CalcUtil
 		case OBJECT:
 		    if (value instanceof ComplexNumber) {
 			ComplexNumber c = (ComplexNumber) value;
-			castValue = new ObjectScope(c.toMap());
+			castValue = new ObjectScope(c.toMap(), sortKeys);
 		    }
 		    else if (!(value instanceof ObjectScope)) {
-			ObjectScope obj = new ObjectScope();
+			ObjectScope obj = new ObjectScope(sortKeys);
 			obj.setValue("_", value); // Name??
 			castValue = obj;
 		    }
@@ -2203,6 +2217,7 @@ public final class CalcUtil
 	 * @param visitor  Visitor used to calculate expressions.
 	 * @param ctx      The expression context for the object being copied.
 	 * @param obj      The object to copy.
+	 * @param sortKeys How to create new objects.
 	 * @param mapper   Transformation to apply to all the strings within the object.
 	 * @return         The deep copy of the original object with the transformer applied to all strings.
 	 */
@@ -2210,6 +2225,7 @@ public final class CalcUtil
 		final CalcObjectVisitor visitor,
 		final ParserRuleContext ctx,
 		final Object obj,
+		final boolean sortKeys,
 		final Transformer mapper)
 	{
 	    if (obj == null) {
@@ -2217,7 +2233,7 @@ public final class CalcUtil
 	    }
 	    else if (obj instanceof ObjectScope) {
 		ObjectScope map = (ObjectScope) obj;
-		ObjectScope result = new ObjectScope();
+		ObjectScope result = new ObjectScope(sortKeys);
 
 		for (Map.Entry<String, Object> entry : map.map().entrySet()) {
 		    String key = entry.getKey();
@@ -2228,7 +2244,7 @@ public final class CalcUtil
 			value = visitor.evaluate(ctx, value);
 
 			if (value instanceof CollectionScope) {
-			    newValue = copyAndTransform(visitor, ctx, value, mapper);
+			    newValue = copyAndTransform(visitor, ctx, value, sortKeys, mapper);
 			}
 			else {
 			    newValue = mapper.applyToMap(value, false);
@@ -2261,7 +2277,7 @@ public final class CalcUtil
 			value = visitor.evaluate(ctx, value);
 
 			if (value instanceof CollectionScope) {
-			    newValue = copyAndTransform(visitor, ctx, value, mapper);
+			    newValue = copyAndTransform(visitor, ctx, value, sortKeys, mapper);
 			}
 			else {
 			    newValue = mapper.apply(value);
@@ -2286,7 +2302,7 @@ public final class CalcUtil
 			value = visitor.evaluate(ctx, value);
 
 			if (value instanceof CollectionScope) {
-			    newValue = copyAndTransform(visitor, ctx, value, mapper);
+			    newValue = copyAndTransform(visitor, ctx, value, sortKeys, mapper);
 			}
 			else {
 			    newValue = mapper.apply(value);

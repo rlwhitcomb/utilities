@@ -63,6 +63,8 @@
  *	    #314: Derive from CollectionScope.
  *	08-Jul-2022 (rlwhitcomb)
  *	    #393: Cleanup imports.
+ *	10-Jul-2022 (rlwhitcomb)
+ *	    #392: New constructors and option to sort keys.
  */
 package info.rlwhitcomb.calc;
 
@@ -89,6 +91,10 @@ class ObjectScope extends CollectionScope
 	    this(Type.OBJECT);
 	}
 
+	ObjectScope(final boolean sortKeys) {
+	    this(Type.OBJECT, sortKeys);
+	}
+
 	/**
 	 * Construct one of our subclass types given the type value.
 	 *
@@ -97,6 +103,17 @@ class ObjectScope extends CollectionScope
 	ObjectScope(final Type t) {
 	    super(t);
 	    variables = new LinkedHashMap<>();
+	}
+
+	/**
+	 * Construct one of our subclass types given the type value.
+	 *
+	 * @param t        The subclass type.
+	 * @param sortKeys Whether to construct sorting by keys.
+	 */
+	ObjectScope(final Type t, final boolean sortKeys) {
+	    super(t);
+	    variables = sortKeys ? new TreeMap<>() : new LinkedHashMap<>();
 	}
 
 	/**
@@ -109,13 +126,33 @@ class ObjectScope extends CollectionScope
 	}
 
 	/**
+	 * "Copy" constructor to create a new object from an existing one.
+	 *
+	 * @param obj The existing object to copy.
+	 * @param sortKeys How to organize the new map.
+	 */
+	ObjectScope(final ObjectScope obj, final boolean sortKeys) {
+	    this(obj.variables, sortKeys);
+	}
+
+	/**
 	 * Construct one of these given an already existing map of key/value pairs.
 	 *
 	 * @param map An existing map of values.
 	 */
 	ObjectScope(final Map<String, Object> map) {
+	    this(map, false);
+	}
+
+	/**
+	 * Construct one of these given an already existing map of key/value pairs.
+	 *
+	 * @param map An existing map of values.
+	 * @param sortKeys How to organize the new map.
+	 */
+	ObjectScope(final Map<String, Object> map, final boolean sortKeys) {
 	    super(Type.OBJECT);
-	    variables = new LinkedHashMap<>(map);
+	    variables = sortKeys ? new TreeMap<>(map) : new LinkedHashMap<>(map);
 	}
 
 	/**
