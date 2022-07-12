@@ -624,6 +624,7 @@
  *	11-Jul-2022 (rlwhitcomb)
  *	    #404: Fix wrong value for "quotes" in "@s" formatting.
  *	    #401: Return result of bracket block (if present) in "processModeOption".
+ *	    Refactor some of the lexical tokens in the grammar to help with coding "isEmptyStmt".
  */
 package info.rlwhitcomb.calc;
 
@@ -1949,14 +1950,20 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	private boolean isEmptyStmt(final ParseTree root) {
 	    ParseTree node = root;
 	    while (node != null) {
-		// Four cases: the "emptyStmt" from the grammar, the EOF token, the EOL token, or a "}"
 		if (node instanceof CalcParser.EmptyStmtContext)
 		    return true;
+
 		if (node instanceof TerminalNode) {
 		    TerminalNode terminal = (TerminalNode) node;
 		    int type = terminal.getSymbol().getType();
-		    if (type == Token.EOF || type == CalcParser.EOL || type == CalcParser.T__2)
-			return true;
+		    switch (type) {
+			case Token.EOF:
+			case CalcParser.EOL:
+			case CalcParser.RPAREN:
+			case CalcParser.RBRACE:
+			case CalcParser.RBRACK:
+			    return true;
+		    }
 		}
 
 		if (node instanceof ParserRuleContext)

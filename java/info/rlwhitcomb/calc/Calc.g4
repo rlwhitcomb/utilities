@@ -429,6 +429,9 @@
  *	11-Jul-2022 (rlwhitcomb)
  *	    #403: Introduce raw string format.
  *	    #401, #290: Add bracket block processing to the other (non-mode-option) directives.
+ *	    Change some lexical fragments in the grammar into explicit lexical tokens to keep
+ *	    some of the code from breaking if things are reordered here (see "isEmptyStmt()"
+ *	    for example).
  */
 
 grammar Calc;
@@ -461,15 +464,15 @@ exprStmt
    ;
 
 defineStmt
-   : K_DEFINE id formalParamList ? '=' stmtBlock
+   : K_DEFINE id formalParamList ? ASSIGN stmtBlock
    ;
 
 constStmt
-   : K_CONST id '=' expr
+   : K_CONST id ASSIGN expr
    ;
 
 varStmt
-   : K_VAR id ( '=' expr ) ?
+   : K_VAR id ( ASSIGN expr ) ?
    ;
 
 loopStmt
@@ -485,8 +488,8 @@ ifStmt
    ;
 
 caseStmt
-   : K_CASE expr ( K_OF | K_IN | SET_IN ) '{' caseBlock ( ',' caseBlock ) * '}'
-   | K_CASE expr ( K_OF | K_IN | SET_IN ) caseBlock ( ',' caseBlock ) *
+   : K_CASE expr ( K_OF | K_IN | SET_IN ) LBRACE caseBlock ( COMMA caseBlock ) * RBRACE
+   | K_CASE expr ( K_OF | K_IN | SET_IN ) caseBlock ( COMMA caseBlock ) *
    ;
 
 leaveStmt
@@ -494,20 +497,20 @@ leaveStmt
    ;
 
 timeThisStmt
-   : K_TIMETHIS ( expr ',' ) ? stmtBlock
+   : K_TIMETHIS ( expr COMMA ) ? stmtBlock
    ;
 
 bracketBlock
-   : EOL* '{' ( EOL* stmtOrExpr ) * '}' EOL*
+   : EOL* LBRACE ( EOL* stmtOrExpr ) * RBRACE EOL*
    ;
 
 stmtBlock
-   : EOL* '{' ( EOL* stmtOrExpr ) * '}' EOL*
+   : EOL* LBRACE ( EOL* stmtOrExpr ) * RBRACE EOL*
    | EOL* stmtOrExpr EOL*
    ;
 
 caseBlock
-   : EOL* caseSelector ( ',' EOL* caseSelector ) * ':' stmtBlock
+   : EOL* caseSelector ( COMMA EOL* caseSelector ) * COLON stmtBlock
    ;
 
 emptyStmt
@@ -522,7 +525,7 @@ expr
    | set                                 # setExpr
    | complex                             # complexValueExpr
    | var                                 # varExpr
-   | '(' expr ')'                        # parenExpr
+   | LPAREN expr RPAREN                  # parenExpr
    | K_ABS expr1                         # absExpr
    | K_SIN expr1                         # sinExpr
    | K_COS expr1                         # cosExpr
@@ -602,15 +605,15 @@ expr
    |<assoc=right> ADD_OP expr            # negPosExpr
    |<assoc=right> '!!' expr              # toBooleanExpr
    |<assoc=right> ('!'|'\u00AC') expr    # booleanNotExpr
-   |<assoc=right> '~~' expr              # toNumberExpr
-   |<assoc=right> '~' expr               # bitNotExpr
+   |<assoc=right> TO_NUM_OP expr         # toNumberExpr
+   |<assoc=right> BIT_NOT_OP expr        # bitNotExpr
    | expr '!'                            # factorialExpr
    |<assoc=right> expr POW_OP expr       # powerExpr
    |<assoc=right> expr POWERS            # powerNExpr
    | expr MULT_OP expr                            # multiplyExpr
    | expr ADD_OP expr                             # addExpr
    | expr SHIFT_OP expr                           # shiftExpr
-   | expr '<=>' expr                              # spaceshipExpr
+   | expr SPACE_OP expr                           # spaceshipExpr
    | expr COMPARE_OP expr                         # compareExpr
    | expr ( K_OF|K_IN|K_WITHIN|SET_IN ) loopCtl   # inExpr
    | expr EQUAL_OP expr                           # equalExpr
@@ -619,7 +622,7 @@ expr
    | expr EOL* BOOL_OR_OP EOL* expr               # booleanOrExpr
    | expr EOL* BOOL_XOR_OP EOL* expr              # booleanXorExpr
    | expr EOL* ELVIS_OP EOL* expr                 # elvisExpr
-   |<assoc=right> expr EOL* '?' EOL* expr EOL* ':' EOL* expr # eitherOrExpr
+   |<assoc=right> expr EOL* QUEST EOL* expr EOL* COLON EOL* expr # eitherOrExpr
    |<assoc=right> var EOL* ASSIGN EOL* expr       # assignExpr
    |<assoc=right> var EOL* POW_ASSIGN EOL* expr   # powerAssignExpr
    |<assoc=right> var EOL* MULT_ASSIGN EOL* expr  # multAssignExpr
@@ -629,42 +632,42 @@ expr
    ;
 
 expr1
-   : '(' expr ')'
+   : LPAREN expr RPAREN
    | expr
    ;
 
 expr2
-   : '(' expr ',' expr ')'
-   | expr ',' expr
+   : LPAREN expr COMMA expr RPAREN
+   | expr COMMA expr
    ;
 
 expr3
-   : '(' expr ',' expr ',' expr ')'
-   | expr ',' expr ',' expr
+   : LPAREN expr COMMA expr COMMA expr RPAREN
+   | expr COMMA expr COMMA expr
    ;
 
 exprN
-   : '(' exprList ')'
+   : LPAREN exprList RPAREN
    | exprList
    ;
 
 typeArg
-   : '(' ( var | expr ) ')'
+   : LPAREN ( var | expr ) RPAREN
    | ( var | expr )
    ;
 
 replaceArgs
-   : '(' expr ',' expr ',' expr ( ',' replaceOption ) ? ')'
-   | expr ',' expr ',' expr ( ',' replaceOption ) ?
+   : LPAREN expr COMMA expr COMMA expr ( COMMA replaceOption ) ? RPAREN
+   | expr COMMA expr COMMA expr ( COMMA replaceOption ) ?
    ;
 
 spliceArgs
-   : '(' expr ',' dropObjs ',' obj ')'
-   | '(' expr ',' dropObjs ')'
-   | '(' expr ',' obj ')'
-   | expr ',' dropObjs ',' obj
-   | expr ',' dropObjs
-   | expr ',' obj
+   : LPAREN expr COMMA dropObjs COMMA obj RPAREN
+   | LPAREN expr COMMA dropObjs RPAREN
+   | LPAREN expr COMMA obj RPAREN
+   | expr COMMA dropObjs COMMA obj
+   | expr COMMA dropObjs
+   | expr COMMA obj
    | exprN
    | expr3
    | expr2
@@ -672,100 +675,100 @@ spliceArgs
    ;
 
 fillArgs
-   : '(' var ',' expr ',' expr ',' expr ')'
-   | '(' var ',' expr ',' expr ')'
-   | '(' var ',' expr ')'
-   | '(' var ')'
-   | var ',' expr ',' expr ',' expr
-   | var ',' expr ',' expr
-   | var ',' expr
+   : LPAREN var COMMA expr COMMA expr COMMA expr RPAREN
+   | LPAREN var COMMA expr COMMA expr RPAREN
+   | LPAREN var COMMA expr RPAREN
+   | LPAREN var RPAREN
+   | var COMMA expr COMMA expr COMMA expr
+   | var COMMA expr COMMA expr
+   | var COMMA expr
    | var
    ;
 
 padArgs
-   : '(' var ',' expr ',' expr ')'
-   | '(' var ',' expr ')'
-   | var ',' expr ',' expr
-   | var ',' expr
+   : LPAREN var COMMA expr COMMA expr RPAREN
+   | LPAREN var COMMA expr RPAREN
+   | var COMMA expr COMMA expr
+   | var COMMA expr
    ;
 
 dotRange
-   : ( expr DOTS ) ? expr ( ',' expr ) ?
+   : ( expr DOTS ) ? expr ( COMMA expr ) ?
    ;
 
 loopCtl
    : dotRange
-   | '(' exprList ')'
-   | '(' ')'
+   | LPAREN exprList RPAREN
+   | LPAREN RPAREN
    ;
 
 arr
-   : '[' EOL* exprList EOL* ']'
-   | '[' EOL* ']'
+   : LBRACK EOL* exprList EOL* RBRACK
+   | LBRACK EOL* RBRACK
    ;
 
 exprList
-   : expr ( ',' EOL* expr ) *
+   : expr ( COMMA EOL* expr ) *
    ;
 
 caseSelector
    : K_MATCHES ( expr2 | expr1 )
-   | expr DOTS expr ( ',' expr ) ?
+   | expr DOTS expr ( COMMA expr ) ?
    | expr
    | compareOp expr
    | K_DEFAULT
    ;
 
 obj
-   : '{' EOL* pair ( ',' EOL* pair ) * EOL* '}'
+   : LBRACE EOL* pair ( COMMA EOL* pair ) * EOL* RBRACE
    ;
 
 pair
-   : id ':' EOL* expr
-   | STRING ':' EOL* expr
-   | ISTRING ':' EOL* expr
+   : id COLON EOL* expr
+   | STRING COLON EOL* expr
+   | ISTRING COLON EOL* expr
    ;
 
 set
-   : '{' EOL* exprList EOL* '}'
+   : LBRACE EOL* exprList EOL* RBRACE
    ;
 
 complex
-   : '(' expr ',' expr ')'
+   : LPAREN expr COMMA expr RPAREN
    ;
 
 var
    : var ( DOT ( var | STRING | ISTRING ) ) # objVar
-   | var ( '[' expr ']' | INDEXES )         # arrVar
+   | var ( LBRACK expr RBRACK | INDEXES )   # arrVar
    | var actualParams                       # functionVar
    | id                                     # idVar
    | GLOBALVAR                              # globalVar
    ;
 
 value
-   : STRING                       # stringValue
-   | ISTRING                      # iStringValue
-   | NUMBER                       # numberValue
-   | NUM_CONST                    # numberConstValue
-   | BIN_CONST                    # binaryValue
-   | OCT_CONST                    # octalValue
-   | HEX_CONST                    # hexValue
-   | KB_CONST                     # kbValue
-   | FRAC_CONST                   # fracValue
-   | ROMAN_CONST                  # romanValue
-   | TIME_CONST                   # timeValue
-   | DATE_CONST                   # dateValue
-   | ( '{' EOL* '}' | EMPTY_SET ) # emptyObjValue
+   : STRING                             # stringValue
+   | ISTRING                            # iStringValue
+   | NUMBER                             # numberValue
+   | NUM_CONST                          # numberConstValue
+   | BIN_CONST                          # binaryValue
+   | OCT_CONST                          # octalValue
+   | HEX_CONST                          # hexValue
+   | KB_CONST                           # kbValue
+   | FRAC_CONST                         # fracValue
+   | ROMAN_CONST                        # romanValue
+   | TIME_CONST                         # timeValue
+   | DATE_CONST                         # dateValue
+   | ( LBRACE EOL* RBRACE | EMPTY_SET ) # emptyObjValue
    ;
 
 formalParamList
-   : '(' formalParam ( ',' formalParam ) * ( ',' DOTS ) ? ')'
-   | '(' DOTS ')'
-   | '(' ')'
+   : LPAREN formalParam ( COMMA formalParam ) * ( COMMA DOTS ) ? RPAREN
+   | LPAREN DOTS RPAREN
+   | LPAREN RPAREN
    ;
 
 formalParam
-   : id ( '=' expr ) ?
+   : id ( ASSIGN expr ) ?
    ;
 
 optExpr
@@ -773,12 +776,12 @@ optExpr
    ;
 
 actualParams
-   : '(' optExpr ( ',' optExpr ) * ')'
+   : LPAREN optExpr ( COMMA optExpr ) * RPAREN
    ;
 
 dropObjs
-   : '[' ( id | STRING | ISTRING ) ( ',' ( id | STRING | ISTRING ) ) * ']'
-   | '[' ']'
+   : LBRACK ( id | STRING | ISTRING ) ( COMMA ( id | STRING | ISTRING ) ) * RBRACK
+   | LBRACK RBRACK
    ;
 
 directive
@@ -793,12 +796,12 @@ directive
    | D_BINARY bracketBlock ?                  # binaryDirective
    | D_SI bracketBlock ?                      # siDirective
    | D_MIXED bracketBlock ?                   # mixedDirective
-   | D_ECHO ( expr ( ',' expr ) ? ) ?         # echoDirective
+   | D_ECHO ( expr ( COMMA expr ) ? ) ?       # echoDirective
    | D_CLEAR wildIdList ?                     # clearDirective
    | D_VARIABLES wildIdList ?                 # variablesDirective
    | D_PREDEFINED wildIdList ?                # predefinedDirective
-   | D_INCLUDE expr ( ',' expr ) ?            # includeDirective
-   | D_SAVE expr ( ',' expr ) ?               # saveDirective
+   | D_INCLUDE expr ( COMMA expr ) ?          # includeDirective
+   | D_SAVE expr ( COMMA expr ) ?             # saveDirective
    | D_TIMING modeOption bracketBlock ?       # timingDirective
    | D_RATIONAL modeOption bracketBlock ?     # rationalDirective
    | D_DEBUG modeOption bracketBlock ?        # debugDirective
@@ -813,15 +816,15 @@ directive
    ;
 
 numberOption
-   : '(' NUMBER ')'
+   : LPAREN NUMBER RPAREN
    | NUMBER
    | var
    ;
 
 idList
-   : '[' id ( ',' id ) * ']'
-   | id ( ',' id ) *
-   | '[' ']'
+   : LBRACK id ( COMMA id ) * RBRACK
+   | id ( COMMA id ) *
+   | LBRACK RBRACK
    ;
 
 id
@@ -832,9 +835,9 @@ id
    ;
 
 wildIdList
-   : '[' wildId ( ',' wildId ) * ']'
-   | wildId ( ',' wildId ) *
-   | '[' ']'
+   : LBRACK wildId ( COMMA wildId ) * RBRACK
+   | wildId ( COMMA wildId ) *
+   | LBRACK RBRACK
    ;
 
 wildId
@@ -855,7 +858,7 @@ modeOption
    ;
 
 requireOptions
-   : versionNumber ( ',' BASE versionNumber ) ?
+   : versionNumber ( COMMA BASE versionNumber ) ?
    | BASE versionNumber
    ;
 
@@ -914,7 +917,7 @@ fragment DURATIONS
          ;
 
 TIME_CONST
-         : [Hh] '\'' '-' ? DIG ? DIG ( ':' DIG DIG ( ':' DIG DIG ( DOT DIG+ ) ? ) ? ) ? ( [ \t] * AM_PM ) ? '\''
+         : [Hh] '\'' '-' ? DIG ? DIG ( COLON DIG DIG ( COLON DIG DIG ( DOT DIG+ ) ? ) ? ) ? ( [ \t] * AM_PM ) ? '\''
          | [Tt] '\'' '-' ? DIG + ( DOT DIG * ) ? [ \t] * DURATIONS '\''
          ;
 
@@ -1150,9 +1153,16 @@ DOTS
        | '\u2026'
        ;
 
-DOT
-       : '.'
-       ;
+DOT    : '.' ;
+LPAREN : '(' ;
+RPAREN : ')' ;
+LBRACE : '{' ;
+RBRACE : '}' ;
+LBRACK : '[' ;
+RBRACK : ']' ;
+COMMA  : ',' ;
+COLON  : ':' ;
+QUEST  : '?' ;
 
 GLOBALVAR
        : '$' INT
@@ -1161,6 +1171,14 @@ GLOBALVAR
        | '_#'
        | '_*'
        | '__'
+       ;
+
+TO_NUM_OP
+       : '~~'
+       ;
+
+BIT_NOT_OP
+       : '~'
        ;
 
 INC_OP
@@ -1222,6 +1240,10 @@ EQUAL_OP
        | ( '!==' | '\u2262' )
        | ( '==' | '\u2A75' )
        | ( '!=' | '<>' | '\u2260' )
+       ;
+
+SPACE_OP
+       : '<=>'
        ;
 
 SHIFT_ASSIGN
