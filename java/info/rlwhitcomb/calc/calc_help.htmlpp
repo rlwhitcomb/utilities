@@ -428,7 +428,7 @@ h2 {
      inside the <code>{ }</code> pair is interpreted exactly as typed (in other words, escape sequences don't have to be doubly escaped to work correctly).
      For example:
      <code>`pieces = ${split(trim(c9), '\\s+') @Q}`</code>.
-  <p>For any kind of string, the normal C/Java escapes such as <code>\t</code> or <code>\n</code> are also available.
+  <p>For any kind of string, except raw, the normal C/Java escapes such as <code>\t</code> or <code>\n</code> are also available.
      To embed any Unicode codepoint, use <code>\u<i>NNNN</i></code> where <code><i>N</i></code> is a hexadecimal digit, for values up
      to 0xFFFF, or <code>\u{<i>NNNNNN</i>}</code> for codepoints beyond the Unicode BMP (Basic Multilingual Plane) (that is, above
      65536 or 0xFFFF). Arbitrary byte values can be embedded in any strings using either octal or binary escapes, such as <code>\o345</code>
