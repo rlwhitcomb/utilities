@@ -413,11 +413,13 @@ h2 {
 <span style="color:grey;">&gt;</span> 2000@k<br>
 <span style="color:blue;">2000 @k</span><span style="color:grey;"> &#x21E8; </span><span style="color:green;">1.95 Kibytes</span>
 </code>
-  <p>String constants are of three types: <i>simple</i> strings, constructed using either single- or double-quotes (or "smart"
-     quotes: see below), <i>multiline</i> strings, constructed using a triple set of any quotes, as in <code>"""</code>...<code>"""</code>
-     or <code>&#x201C;&#x201C;&#x201C;</code>...<code>&#x201D;&#x201D;&#x201D;</code>, which may span
-     multiple lines (and which will contain the embedded line separators), or <i>interpolated</i> strings, which allow the value of expressions
-     (or simple variables) to be interpolated into the final string value. These are
+  <p>String constants are of four types: <i>simple</i> strings, constructed using either single- or double-quotes (or "smart"
+     quotes: see below), <i>multiline</i> strings, constructed using a triple set of any quotes, as in
+     <code>"""</code>...<code>"""</code> or <code>&#x201C;&#x201C;&#x201C;</code>...<code>&#x201D;&#x201D;&#x201D;</code>,
+     which may span multiple lines (and which will contain the embedded line separators), <i>raw</i> strings, specified by
+     <code>s"</code>...<code>"</code> (can be any set of the supported quote pairs) which cannot contain any escape
+     sequences, but only the exact raw characters enclosed by the quotes, or <i>interpolated</i> strings,
+     which allow the value of expressions (or simple variables) to be interpolated into the final string value. These are
      formed using the back-tick character: <code>`</code> ... <code>`</code>. Interpolation of values is done using either
      <code>$<i>variable</i></code> or <code>${<i>expression</i>}</code>. To embed a back-tick character in the string, use
      <code>\`</code>. Similarly, to embed a backslash, use <code>\\</code>. To embed a dollar sign in the string, use <code>$$</code>.

@@ -291,6 +291,8 @@
  *	10-Jul-2022 (rlwhitcomb)
  *	    #397: Change the way we process line continuations in REPL mode.
  *	    #392: Option to sort by keys.
+ *	    #403: For raw string support, don't expand tabs on input files unless
+ *	    running as GUI (because the text field can't support tabs).
  */
 package info.rlwhitcomb.calc;
 
@@ -1676,20 +1678,21 @@ public class Calc
 	    if (FileUtilities.canRead(f)) {
 		inputDirectory = f.getCanonicalFile().getParentFile();
 		String fileText = "";
+		int tabWidth = guiMode ? 8 : 0;
 		try {
 		    if (charset != null) {
-			fileText = FileUtilities.readFileAsString(f, charset);
+			fileText = FileUtilities.readFileAsString(f, charset, tabWidth);
 		    }
 		    else if (inputCharset != null) {
-			fileText = FileUtilities.readFileAsString(f, inputCharset);
+			fileText = FileUtilities.readFileAsString(f, inputCharset, tabWidth);
 		    }
 		    else {
-			fileText = FileUtilities.readFileAsString(f);
+			fileText = FileUtilities.readFileAsString(f, null, tabWidth);
 		    }
 		}
 		catch (IOException ioe) {
 		    // We're gonna bet the problem is the charset
-		    fileText = FileUtilities.readFileAsString(f, StandardCharsets.UTF_8);
+		    fileText = FileUtilities.readFileAsString(f, StandardCharsets.UTF_8, tabWidth);
 		}
 
 		inputBuf.append(fileText).append(LINESEP);

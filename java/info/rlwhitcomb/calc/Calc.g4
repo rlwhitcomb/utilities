@@ -426,6 +426,8 @@
  *	    #397: Add multiline string constant.
  *	10-Jul-2022 (rlwhitcomb)
  *	    #392: Directive to keep objects sorted by keys.
+ *	11-Jul-2022 (rlwhitcomb)
+ *	    #403: Introduce raw string format.
  */
 
 grammar Calc;
@@ -1476,6 +1478,13 @@ STRING
    | '\u201C\u201C\u201C' ( ESC4 | SAFECODEPOINTA ) * '\u201D\u201D\u201D'
    | '\u2039\u2039\u2039' ( ESC5 | SAFECODEPOINTB ) * '\u203A\u203A\u203A'
    | '\u00AB\u00AB\u00AB' ( ESC6 | SAFECODEPOINTC ) * '\u00BB\u00BB\u00BB'
+// raw strings
+   | 's"' (~'"') * '"'
+   | 's\'' (~'\'') * '\''
+   | 's\u2018' (~'\u2019') * '\u2019'
+   | 's\u201C' (~'\u201D') * '\u201D'
+   | 's\u2039' (~'\u203A') * '\u203A'
+   | 's\u00AB' (~'\u00BB') * '\u00BB'
    ;
 
 ISTRING

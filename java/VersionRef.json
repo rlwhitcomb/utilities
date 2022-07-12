@@ -3,6 +3,10 @@
 //======================
 
 [
+    { version: '2.13.36', date: d'2022-07-11',
+      issues: [ 403 ],
+      comment: 'Add raw string support with s"...".'
+    },
     { version: '2.13.35', date: d'2022-07-11',
       issues: [ 401 ],
       comment: 'Fix returning the enclosed scope\'s value for bracket blocks on directives.'

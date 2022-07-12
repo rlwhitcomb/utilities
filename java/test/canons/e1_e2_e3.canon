@@ -55,6 +55,11 @@
 >'This isn\'t either, ' + name -> "This isn't either, Roger"
 >'\u0000\u0001\u0002\u0003\u0004\u0018\u0019\u001a\u001b\u001c\u001d\u001e\u001f\u0020\u0021' -> "\0\cA\cB\cC\cD\cX\cY\cZ\u001b\u001c\u001d\u001e\u001f !"
 >'\0\ca\cB\cy\cZ\f\t\b\r\n\\\u007f\u0080\u0081' -> "\0\cA\cB\cY\cZ\f\t\b\r\n\\\u007f\u0080\u0081"
+>raw = s"abc
+>	def
+>		ghi
+>" -> "abc\n\tdef\n\t\tghi\n"
+>codes (raw) -> [ 97, 98, 99, 10, 9, 100, 101, 102, 10, 9, 9, 103, 104, 105, 10 ]
 >Precision is now “60” digits.
 >s = sqrt (17) -> 4.12310562561766054982140985597407702514719922537362043439864
 >t = s * s -> 17.0000000000000000000000000000000000000000000000000000000001

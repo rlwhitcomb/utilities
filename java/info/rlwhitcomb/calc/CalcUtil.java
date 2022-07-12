@@ -166,6 +166,8 @@
  *	    #393: Cleanup imports.
  *	10-Jul-2022 (rlwhitcomb)
  *	    #392: Code to sort keys in objects.
+ *	11-Jul-2022 (rlwhitcomb)
+ *	    #403: Add raw string support.
  */
 package info.rlwhitcomb.calc;
 
@@ -2133,7 +2135,12 @@ public final class CalcUtil
 	 * @see #getRawString(String)
 	 */
 	public static String getRawString(final String escapedForm) {
-	    return CharUtil.convertEscapeSequences(CharUtil.stripAnyQuotes(escapedForm, true), false);
+	    if (escapedForm.charAt(0) == 's') {
+		return CharUtil.stripAnyQuotes(escapedForm.substring(1), true);
+	    }
+	    else {
+		return CharUtil.convertEscapeSequences(CharUtil.stripAnyQuotes(escapedForm, true), false);
+	    }
 	}
 
 	/**
