@@ -3,6 +3,10 @@
 //======================
 
 [
+    { version: '2.13.40', date: d'2022-07-11',
+      issues: [ 401, 290 ],
+      comment: 'Finish bracket block support for all mode directives.'
+    },
     { version: '2.13.36', date: d'2022-07-11',
       issues: [ 403 ],
       comment: 'Add raw string support with s"...".'

@@ -1254,16 +1254,16 @@ whether it has previously been used/defined.
     </tr>
     </thead>
     <tbody>
-    <tr><td><code>:decimal</code> <i>number_option</i></td><td>Set the precision of all decimal calculations,<br>where <i>number_option</i> can be <code>(</code><i>number</i><code>)</code>, or <i>number</i>, or <i>variable</i><br>to specify the number of decimal digits of precision</td><td><code>:dec</code>, <code>:precision</code>, <code>:prec</code><br>or <code>settings.precision=</code><i>expr</i></td></tr>
-    <tr><td><code>:default</code></td><td>Set the default decimal precision (~34 digits) <i>(default)</i></td><td><code>:def</code><br>or <code>settings.precision=34</code></td></tr>
-    <tr><td><code>:double</code></td><td>Select the "double" decimal precision (~16 digits)</td><td><code>:dbl</code><br>or <code>settings.precision=16</code></td></tr>
-    <tr><td><code>:float</code></td><td>Select "float" decimal precision (~7 digits)</td><td><code>:flt</code><br>or <code>settings.precision=7</code></td></tr>
-    <tr><td><code>:unlimited</code></td><td>Set to unlimited decimal precision<br>(some calculations will still limit the precision to avoid<br>"non-terminating decimal expansion" errors)</td><td><code>:unl</code><br>or <code>settings.precision=0</code></td></tr>
-    <tr><td><code>:degrees</code></td><td>Do all trigonometric calculations assuming the inputs are in degrees</td><td><code>:deg</code><br>or <code>settings.trigMode='degrees'</code></td></tr>
-    <tr><td><code>:radians</code></td><td>Do all calculations assuming inputs are radians <i>(default)</i></td><td><code>:rad</code><br>or <code>settings.trigMode="RADIANS"</code></td></tr>
-    <tr><td><code>:binary</code></td><td>Display units in terms of multiples of 1024</td><td><code>:bin</code><br>or <code>settings.units='binary'</code></td></tr>
-    <tr><td><code>:si</code></td><td>Display units in terms of multiples of 1000</td><td><code>:ten</code><br>or <code>settings.units='DECIMAL'</code></td></tr>
-    <tr><td><code>:mixed</code></td><td>Unit multiplier based on powers of 2 (same as <code>:binary</code>), but with SI suffix <i>(default)</i></td><td><code>:mix</code><br>or <code>settings.units="Mixed"</code></tr>
+    <tr><td><code>:decimal</code> <i>number_option</i> [ <i>statements</i> ]</td><td>Set the precision of all decimal calculations,<br>where <i>number_option</i> can be <code>(</code><i>number</i><code>)</code>, or <i>number</i>, or <i>variable</i><br>to specify the number of decimal digits of precision</td><td><code>:dec</code>, <code>:precision</code>, <code>:prec</code><br>or <code>settings.precision=</code><i>expr</i></td></tr>
+    <tr><td><code>:default</code> [ <i>statements</i> ]</td><td>Set the default decimal precision (~34 digits) <i>(default)</i></td><td><code>:def</code><br>or <code>settings.precision=34</code></td></tr>
+    <tr><td><code>:double</code> [ <i>statements</i> ]</td><td>Select the "double" decimal precision (~16 digits)</td><td><code>:dbl</code><br>or <code>settings.precision=16</code></td></tr>
+    <tr><td><code>:float</code> [ <i>statements</i> ]</td><td>Select "float" decimal precision (~7 digits)</td><td><code>:flt</code><br>or <code>settings.precision=7</code></td></tr>
+    <tr><td><code>:unlimited</code> [ <i>statements</i> ]</td><td>Set to unlimited decimal precision<br>(some calculations will still limit the precision to avoid<br>"non-terminating decimal expansion" errors)</td><td><code>:unl</code><br>or <code>settings.precision=0</code></td></tr>
+    <tr><td><code>:degrees</code> [ <i>statements</i> ]</td><td>Do all trigonometric calculations assuming the inputs are in degrees</td><td><code>:deg</code><br>or <code>settings.trigMode='degrees'</code></td></tr>
+    <tr><td><code>:radians</code> [ <i>statements</i> ]</td><td>Do all calculations assuming inputs are radians <i>(default)</i></td><td><code>:rad</code><br>or <code>settings.trigMode="RADIANS"</code></td></tr>
+    <tr><td><code>:binary</code> [ <i>statements</i> ]</td><td>Display units in terms of multiples of 1024</td><td><code>:bin</code><br>or <code>settings.units='binary'</code></td></tr>
+    <tr><td><code>:si</code> [ <i>statements</i> ]</td><td>Display units in terms of multiples of 1000</td><td><code>:ten</code><br>or <code>settings.units='DECIMAL'</code></td></tr>
+    <tr><td><code>:mixed</code> [ <i>statements</i> ]</td><td>Unit multiplier based on powers of 2 (same as <code>:binary</code>), but with SI suffix <i>(default)</i></td><td><code>:mix</code><br>or <code>settings.units="Mixed"</code></tr>
     <tr><td><code>:clear</code> [ <i>wild_id</i> ( <code>,</code> <i>wild_id</i> ) * ]</td><td>Clear all or only the specified variables (set values to <code>null</code>)</td><td><code>:clr</code></td></tr>
     <tr><td><code>:variables</code> [ <i>wild_id</i> ( <code>,</code> <i>wild_id</i> ) * ]</td><td>Display the values of all or only the specified variables<br>(for a function the definition will be displayed, not the current value)</td><td><code>:variable</code>, <code>:vars</code>, <code>:var</code></td></tr>
     <tr><td><code>:predefined</code> [ <i>wild_id</i> ( <code>,</code> <i>wild_id</i> ) * ]</td><td>Display the current values of all or some of the predefined variables</td><td><code>:predefs</code>, <code>:predef</code></td></tr>
@@ -1303,10 +1303,17 @@ whether it has previously been used/defined.
      the corresponding command-line option. If there are no more entries in the stack when the <code>pop</code> option is given
      the value will be set to <code><i>off</i></code>.
   <p>If the optional statement block is given, the mode is set to the given value, the statements are executed, then the mode is
-     "popped" back to the original value, as if the statement block was ended by <code>:<i>directive</i> pop</code>. The <i>statements</i> can be a single statement, or multiple statements, but must be enclosed by brackets, as in <code>{ ... }</code> in either case.
+     "popped" back to the original value, as if the statement block was ended by <code>:<i>directive</i> pop</code> (or the equivalent setting
+     for the "non-mode-option" directives such as <code>:mixed</code>). For example:
+  <p class="indent"><code style="color:black;">&gt; </code><code style="color:blue;">:results on { "This is true." }</code><br>
+     <code style="color:green;">"This is true."</code>
+  <p class="indent"><code style="color:black;">&gt; </code><code style="color:blue;">:binary { settings.units }</code><br>
+     <code style="color:blue;">Units in </code><code style="color:green;">binary</code><code>.</code><br>
+     <code style="color:blue;">settings.units</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">"BINARY"</code><br>
+     <code style="color:blue;">Units in </code><code style="color:green;">mixed</code><code style="color:blue;"> form.</code>
+  <p>The <i>statements</i> can be a single statement, or multiple statements, but must be enclosed by brackets, as in <code>{ ... }</code> in any case.
   <p>If a string constant of any kind is given as the argument to <code>:echo</code> the surrounding quotes will be removed, and any
-     embedded quotes will be unescaped before the message is displayed. Obviously, the same is true for the contents of variables
-     (since the values are stored this way).
+     embedded quotes will be unescaped before the message is displayed. This is the equivalent of using the <code>@q</code> format.
   <p>The <code>wild_id</code> values for <code>:clear</code>, <code>:variables</code>, and <code>:predefined</code> can be wild-card values, such as
      <code>t*</code> or <code>?a?</code>. A <code>?</code> matches any one character, and <code>*</code> matches any string (including empty) of characters up until the trailing sequence. Only values matching these patterns will be displayed or cleared.
   <p>The only effect of debug mode is to display the parse tree (in LISP format) before the expression(s) is/are evaluated.

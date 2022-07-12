@@ -1214,7 +1214,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	private BigInteger getIntegerValue(final ParserRuleContext ctx) {
-	    return toIntegerValue(this, visit(ctx), settings.mc, ctx);
+	    return toIntegerValue(this, evaluate(ctx), settings.mc, ctx);
 	}
 
 	private Boolean getBooleanValue(final ParserRuleContext ctx) {
@@ -1249,7 +1249,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	protected int getIntValue(final ParserRuleContext ctx) {
-	    return toIntValue(this, visit(ctx), settings.mc, ctx);
+	    return toIntValue(this, evaluate(ctx), settings.mc, ctx);
 	}
 
 	private BigDecimal getDecimalTrigValue(final ParserRuleContext ctx) {
@@ -1310,10 +1310,51 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 
+	private Object directiveMathContextBlock(CalcParser.BracketBlockContext blockCtx, Object defValue, MathContext oldContext) {
+	    if (blockCtx != null) {
+		try {
+		    return evaluate(blockCtx);
+		}
+		finally {
+		    setMathContext(oldContext);
+		}
+	    }
+
+	    return defValue;
+	}
+
+	private Object directiveTrigModeBlock(CalcParser.BracketBlockContext blockCtx, Object defValue, TrigMode oldMode) {
+	    if (blockCtx != null) {
+		try {
+		    return evaluate(blockCtx);
+		}
+		finally {
+		    setTrigMode(oldMode);
+		}
+	    }
+
+	    return defValue;
+	}
+
+	private Object directiveRangeModeBlock(CalcParser.BracketBlockContext blockCtx, Object defValue, RangeMode oldMode) {
+	    if (blockCtx != null) {
+		try {
+		    return evaluate(blockCtx);
+		}
+		finally {
+		    setUnits(oldMode);
+		}
+	    }
+
+	    return defValue;
+	}
+
 	@Override
 	public Object visitDecimalDirective(CalcParser.DecimalDirectiveContext ctx) {
 	    CalcParser.NumberOptionContext opt = ctx.numberOption();
+	    CalcParser.BracketBlockContext blockCtx = ctx.bracketBlock();
 	    BigDecimal dPrecision;
+	    MathContext oldMc = settings.mc;
 
 	    if (opt.NUMBER() != null) {
 		dPrecision = new BigDecimal(opt.NUMBER().getText());
@@ -1324,7 +1365,6 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 
 	    int precision = 0;
-
 	    try {
 		precision = dPrecision.intValueExact();
 	    }
@@ -1332,27 +1372,49 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		throw new CalcExprException(ctx, "%calc#precNotInteger", dPrecision);
 	    }
 
-	    return BigInteger.valueOf(setPrecision(precision));
+	    BigInteger intValue = BigInteger.valueOf(setPrecision(precision));
+
+	    return directiveMathContextBlock(blockCtx, intValue, oldMc);
 	}
 
 	@Override
 	public Object visitDoubleDirective(CalcParser.DoubleDirectiveContext ctx) {
-	    return setIntMathContext(MathContext.DECIMAL64);
+	    CalcParser.BracketBlockContext blockCtx = ctx.bracketBlock();
+	    MathContext oldMc = settings.mc;
+
+	    BigInteger intValue = setIntMathContext(MathContext.DECIMAL64);
+
+	    return directiveMathContextBlock(blockCtx, intValue, oldMc);
 	}
 
 	@Override
 	public Object visitFloatDirective(CalcParser.FloatDirectiveContext ctx) {
-	    return setIntMathContext(MathContext.DECIMAL32);
+	    CalcParser.BracketBlockContext blockCtx = ctx.bracketBlock();
+	    MathContext oldMc = settings.mc;
+
+	    BigInteger intValue = setIntMathContext(MathContext.DECIMAL32);
+
+	    return directiveMathContextBlock(blockCtx, intValue, oldMc);
 	}
 
 	@Override
 	public Object visitDefaultDirective(CalcParser.DefaultDirectiveContext ctx) {
-	    return setIntMathContext(MathContext.DECIMAL128);
+	    CalcParser.BracketBlockContext blockCtx = ctx.bracketBlock();
+	    MathContext oldMc = settings.mc;
+
+	    BigInteger intValue = setIntMathContext(MathContext.DECIMAL128);
+
+	    return directiveMathContextBlock(blockCtx, intValue, oldMc);
 	}
 
 	@Override
 	public Object visitUnlimitedDirective(CalcParser.UnlimitedDirectiveContext ctx) {
-	    return setIntMathContext(MathContext.UNLIMITED);
+	    CalcParser.BracketBlockContext blockCtx = ctx.bracketBlock();
+	    MathContext oldMc = settings.mc;
+
+	    BigInteger intValue = setIntMathContext(MathContext.UNLIMITED);
+
+	    return directiveMathContextBlock(blockCtx, intValue, oldMc);
 	}
 
 	private static final MathContext AVAILABLE_CONTEXTS[] = {
@@ -1383,27 +1445,52 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitDegreesDirective(CalcParser.DegreesDirectiveContext ctx) {
-	    return setTrigMode(TrigMode.DEGREES);
+	    CalcParser.BracketBlockContext blockCtx = ctx.bracketBlock();
+	    TrigMode oldMode = settings.trigMode;
+
+	    String value = setTrigMode(TrigMode.DEGREES);
+
+	    return directiveTrigModeBlock(blockCtx, value, oldMode);
 	}
 
 	@Override
 	public Object visitRadiansDirective(CalcParser.RadiansDirectiveContext ctx) {
-	    return setTrigMode(TrigMode.RADIANS);
+	    CalcParser.BracketBlockContext blockCtx = ctx.bracketBlock();
+	    TrigMode oldMode = settings.trigMode;
+
+	    String value = setTrigMode(TrigMode.RADIANS);
+
+	    return directiveTrigModeBlock(blockCtx, value, oldMode);
 	}
 
 	@Override
 	public Object visitBinaryDirective(CalcParser.BinaryDirectiveContext ctx) {
-	    return setUnits(RangeMode.BINARY);
+	    CalcParser.BracketBlockContext blockCtx = ctx.bracketBlock();
+	    RangeMode oldUnits = settings.units;
+
+	    String value = setUnits(RangeMode.BINARY);
+
+	    return directiveRangeModeBlock(blockCtx, value, oldUnits);
 	}
 
 	@Override
 	public Object visitSiDirective(CalcParser.SiDirectiveContext ctx) {
-	    return setUnits(RangeMode.DECIMAL);
+	    CalcParser.BracketBlockContext blockCtx = ctx.bracketBlock();
+	    RangeMode oldUnits = settings.units;
+
+	    String value = setUnits(RangeMode.DECIMAL);
+
+	    return directiveRangeModeBlock(blockCtx, value, oldUnits);
 	}
 
 	@Override
 	public Object visitMixedDirective(CalcParser.MixedDirectiveContext ctx) {
-	    return setUnits(RangeMode.MIXED);
+	    CalcParser.BracketBlockContext blockCtx = ctx.bracketBlock();
+	    RangeMode oldUnits = settings.units;
+
+	    String value = setUnits(RangeMode.MIXED);
+
+	    return directiveRangeModeBlock(blockCtx, value, oldUnits);
 	}
 
 	private int addName(String name, StringBuilder message) {
@@ -1696,7 +1783,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		if (bracketBlock != null) {
 		    processModeOption(option, stack, setOperator);
 		    try {
-			ret = visit(bracketBlock);
+			ret = evaluate(bracketBlock);
 		    }
 		    finally {
 			processModeOption("pop", stack, setOperator);
@@ -2315,7 +2402,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		public Object apply(final Object value) {
 		    currentScope.clear();
 		    currentScope.setValue(localVarName, value);
-		    return visit(block);
+		    return evaluate(block);
 		}
 
 		public void finish() {
@@ -2512,7 +2599,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 	    else {
 		for (CalcParser.ExprContext expr : exprs) {
-		    lastValue = visitor.apply(visit(expr));
+		    lastValue = visitor.apply(evaluate(expr));
 		}
 	    }
 
@@ -2568,7 +2655,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    try {
 		while (exprResult) {
 		    currentScope.clear();
-		    lastValue = visit(block);
+		    lastValue = evaluate(block);
 		    exprResult = getBooleanValue(exprCtx);
 		}
 	    }
@@ -2596,10 +2683,10 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    pushScope(new IfScope());
 	    try {
 		if (controlValue) {
-		    resultValue = visit(thenBlock);
+		    resultValue = evaluate(thenBlock);
 		}
 		else if (elseBlock != null) {
-		    resultValue = visit(elseBlock);
+		    resultValue = evaluate(elseBlock);
 		}
 	    }
 	    finally {
@@ -2642,7 +2729,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    Object returnValue = null;
 		    pushScope(caseScope);
 		    try {
-			returnValue = visit(blockCtx.stmtBlock());
+			returnValue = evaluate(blockCtx.stmtBlock());
 		    }
 		    finally {
 			popScope();
@@ -2768,12 +2855,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		if (descObj != null) {
 		    String description = descObj.toString();
 		    return Environment.timeThis(description, () -> {
-			return visit(ctx.stmtBlock());
+			return evaluate(ctx.stmtBlock());
 		    });
 		}
 	    }
 	    return Environment.timeThis( () -> {
-		return visit(ctx.stmtBlock());
+		return evaluate(ctx.stmtBlock());
 	    });
 	}
 
@@ -3277,15 +3364,15 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitParenExpr(CalcParser.ParenExprContext ctx) {
-	    return visit(ctx.expr());
+	    return evaluate(ctx.expr());
 	}
 
 	@Override
 	public Object visitMultiplyExpr(CalcParser.MultiplyExprContext ctx) {
 	    CalcParser.ExprContext ctx1 = ctx.expr(0);
 	    CalcParser.ExprContext ctx2 = ctx.expr(1);
-	    Object e1 = visit(ctx1);
-	    Object e2 = visit(ctx2);
+	    Object e1 = evaluate(ctx1);
+	    Object e2 = evaluate(ctx2);
 
 	    String op = ctx.MULT_OP().getText();
 
@@ -3385,8 +3472,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public Object visitAddExpr(CalcParser.AddExprContext ctx) {
 	    CalcParser.ExprContext ctx1 = ctx.expr(0);
 	    CalcParser.ExprContext ctx2 = ctx.expr(1);
-	    Object e1 = visit(ctx1);
-	    Object e2 = visit(ctx2);
+	    Object e1 = evaluate(ctx1);
+	    Object e2 = evaluate(ctx2);
 
 	    String op = ctx.ADD_OP().getText();
 	    switch (op) {
@@ -3971,7 +4058,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	private List<Object> buildFlatMap(final List<CalcParser.ExprContext> exprs, final boolean forJoin) {
 	    // Do a "peek" inside any lists or maps to get the first value
 	    CalcParser.ExprContext firstCtx = exprs.get(0);
-	    boolean isString = getFirstValue(firstCtx, visit(firstCtx), forJoin) instanceof String;
+	    boolean isString = getFirstValue(firstCtx, evaluate(firstCtx), forJoin) instanceof String;
 
 	    List<Object> objects = new ArrayList<>();
 

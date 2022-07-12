@@ -428,6 +428,7 @@
  *	    #392: Directive to keep objects sorted by keys.
  *	11-Jul-2022 (rlwhitcomb)
  *	    #403: Introduce raw string format.
+ *	    #401, #290: Add bracket block processing to the other (non-mode-option) directives.
  */
 
 grammar Calc;
@@ -781,16 +782,17 @@ dropObjs
    ;
 
 directive
-   : ( D_DECIMAL | D_PRECISION ) numberOption # decimalDirective
-   | D_DEFAULT                                # defaultDirective
-   | D_DOUBLE                                 # doubleDirective
-   | D_FLOAT                                  # floatDirective
-   | D_UNLIMITED                              # unlimitedDirective
-   | D_DEGREES                                # degreesDirective
-   | D_RADIANS                                # radiansDirective
-   | D_BINARY                                 # binaryDirective
-   | D_SI                                     # siDirective
-   | D_MIXED                                  # mixedDirective
+   : ( D_DECIMAL | D_PRECISION ) numberOption
+                               bracketBlock ? # decimalDirective
+   | D_DEFAULT bracketBlock ?                 # defaultDirective
+   | D_DOUBLE bracketBlock ?                  # doubleDirective
+   | D_FLOAT bracketBlock ?                   # floatDirective
+   | D_UNLIMITED bracketBlock ?               # unlimitedDirective
+   | D_DEGREES bracketBlock ?                 # degreesDirective
+   | D_RADIANS bracketBlock ?                 # radiansDirective
+   | D_BINARY bracketBlock ?                  # binaryDirective
+   | D_SI bracketBlock ?                      # siDirective
+   | D_MIXED bracketBlock ?                   # mixedDirective
    | D_ECHO ( expr ( ',' expr ) ? ) ?         # echoDirective
    | D_CLEAR wildIdList ?                     # clearDirective
    | D_VARIABLES wildIdList ?                 # variablesDirective
