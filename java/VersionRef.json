@@ -3,6 +3,10 @@
 //======================
 
 [
+    { version: '2.13.32', date: d'2022-07-11',
+      issues: [ 404 ],
+      comment: 'Fix bug in "@s" formatting of objects, sets, and arrays.'
+    },
     { version: '2.13.30', date: d'2022-07-10',
       issues: [ 392 ],
       comment: 'New options and directives to create objects sorted by key.'

@@ -621,6 +621,8 @@
  *	    #393: Cleanup imports.
  *	10-Jul-2022 (rlwhitcomb)
  *	    #392: Option to sort objects by keys.
+ *	11-Jul-2022 (rlwhitcomb)
+ *	    #404: Fix wrong value for "quotes" in "@s" formatting.
  */
 package info.rlwhitcomb.calc;
 
@@ -2263,7 +2265,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    case 's':
 			if (result instanceof Scope) {
 			    boolean extraSpace = signChar != '-';
-			    valueBuf.append(toStringValue(this, ctx, result, false, false, extraSpace, separators, "", null));
+			    valueBuf.append(toStringValue(this, ctx, result, true, false, extraSpace, separators, "", null));
 			}
 			else {
 			    String stringValue = toStringValue(this, ctx, result, false, separators);
