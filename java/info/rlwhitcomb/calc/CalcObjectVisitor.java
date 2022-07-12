@@ -623,6 +623,7 @@
  *	    #392: Option to sort objects by keys.
  *	11-Jul-2022 (rlwhitcomb)
  *	    #404: Fix wrong value for "quotes" in "@s" formatting.
+ *	    #401: Return result of bracket block (if present) in "processModeOption".
  */
 package info.rlwhitcomb.calc;
 
@@ -1668,9 +1669,10 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	 * @param stack        Mode value stack to use with directive.
 	 * @param bracketBlock Optional statement block to be executed with the new mode value.
 	 * @param setOperator  The function used to set the appropriate mode for the directive.
-	 * @return The previous value of the mode, before the value given on the directive.
+	 * @return The previous value of the mode, before the value given on the directive if there
+	 *         is no block of code to execute, otherwise we return the result of the code block.
 	 */
-	private Boolean processModeOption(
+	private Object processModeOption(
 		final CalcParser.ModeOptionContext ctx,
 		final Deque<Boolean> stack,
 		final CalcParser.BracketBlockContext bracketBlock,
@@ -1689,21 +1691,22 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 
 	    try {
-		if (bracketBlock != null) {
-		    Boolean ret = null;
+		Object ret = null;
 
+		if (bracketBlock != null) {
 		    processModeOption(option, stack, setOperator);
 		    try {
-			visit(bracketBlock);
+			ret = visit(bracketBlock);
 		    }
 		    finally {
-			ret = processModeOption("pop", stack, setOperator);
+			processModeOption("pop", stack, setOperator);
 		    }
-		    return ret;
 		}
 		else {
-		    return processModeOption(option, stack, setOperator);
+		    ret = processModeOption(option, stack, setOperator);
 		}
+
+		return ret;
 	    }
 	    catch (IllegalArgumentException iae) {
 		throw new CalcExprException(iae, ctx);
@@ -1859,35 +1862,15 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	private boolean isEmptyStmt(final ParseTree root) {
 	    ParseTree node = root;
 	    while (node != null) {
-		// Two cases: the "emptyStmt" from the grammar and the EOF token
+		// Four cases: the "emptyStmt" from the grammar, the EOF token, the EOL token, or a "}"
 		if (node instanceof CalcParser.EmptyStmtContext)
 		    return true;
 		if (node instanceof TerminalNode) {
 		    TerminalNode terminal = (TerminalNode) node;
-		    if (terminal.getSymbol().getType() == Token.EOF)
+		    int type = terminal.getSymbol().getType();
+		    if (type == Token.EOF || type == CalcParser.EOL || type == CalcParser.T__2)
 			return true;
 		}
-
-		if (node instanceof ParserRuleContext)
-		    node = ((ParserRuleContext) node).children.get(0);
-		else
-		    node = null;
-	    }
-	    return false;
-	}
-
-	/**
-	 * Given the root of a parse tree (branch), is the leaf node of this branch
-	 * a directive (that is, the class name contains "Directive").
-	 *
-	 * @param root The parse tree to examine.
-	 * @return     Whether the leftmost leaf node is a "directive" or not.
-	 */
-	private boolean isDirective(final ParseTree root) {
-	    ParseTree node = root;
-	    while (node != null) {
-		if (node.getClass().getSimpleName().indexOf("Directive") >= 0)
-		    return true;
 
 		if (node instanceof ParserRuleContext)
 		    node = ((ParserRuleContext) node).children.get(0);
@@ -1916,6 +1899,11 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitStmtOrExpr(CalcParser.StmtOrExprContext ctx) {
+	    return internalVisitStatements(ctx);
+	}
+
+	@Override
+	public Object visitBracketBlock(CalcParser.BracketBlockContext ctx) {
 	    return internalVisitStatements(ctx);
 	}
 
@@ -2791,18 +2779,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitStmtBlock(CalcParser.StmtBlockContext ctx) {
-	    Object returnValue = null;
-
-	    for (CalcParser.StmtOrExprContext child : ctx.stmtOrExpr()) {
-		if (child.emptyStmt() == null) {
-		    if (isDirective(child))
-			visit(child);
-		    else
-			returnValue = visit(child);
-		}
-	    }
-
-	    return returnValue;
+	    return internalVisitStatements(ctx);
 	}
 
 	@Override

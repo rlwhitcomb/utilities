@@ -12,3 +12,14 @@ b@u
 `${b}`
 `${b@u}`
 `${b@+40s}`
+
+:quiet on {
+define readJSON(fileName) = {
+   :sortkeys on {
+      eval(read(fileName, 'UTF-8'))
+   }
+}
+
+   j = readJSON('test/data/cake.json')
+}
+j @-s
