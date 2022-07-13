@@ -168,6 +168,8 @@
  *	    #392: Code to sort keys in objects.
  *	11-Jul-2022 (rlwhitcomb)
  *	    #403: Add raw string support.
+ *	13-Jul-2022 (rlwhitcomb)
+ *	    #403: Fix second flavor of "getRawString".
  */
 package info.rlwhitcomb.calc;
 
@@ -2135,12 +2137,7 @@ public final class CalcUtil
 	 * @see #getRawString(String)
 	 */
 	public static String getRawString(final String escapedForm) {
-	    if (escapedForm.charAt(0) == 's') {
-		return CharUtil.stripAnyQuotes(escapedForm.substring(1), true);
-	    }
-	    else {
-		return CharUtil.convertEscapeSequences(CharUtil.stripAnyQuotes(escapedForm, true), false);
-	    }
+	    return getRawString(escapedForm, false);
 	}
 
 	/**
@@ -2153,7 +2150,12 @@ public final class CalcUtil
 	 * @return		The raw string data, with all quotes removed and escape sequences converted.
 	 */
 	public static String getRawString(final String escapedForm, final boolean skipExprs) {
-	    return CharUtil.convertEscapeSequences(CharUtil.stripAnyQuotes(escapedForm, true), skipExprs);
+	    if (escapedForm.charAt(0) == 's') {
+		return CharUtil.stripAnyQuotes(escapedForm.substring(1), true);
+	    }
+	    else {
+		return CharUtil.convertEscapeSequences(CharUtil.stripAnyQuotes(escapedForm, true), skipExprs);
+	    }
 	}
 
 	/**
