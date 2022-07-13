@@ -19,18 +19,18 @@ const ON_WINDOWS = info.os.id == 'windows'
 /*
  * Flag values for "sort"
  */
-const SORT_CASE_INSENSITIVE = 0x0001;
-const SORT_SORT_KEYS        = 0x0002;
+const SORT_CASE_INSENSITIVE = 0x0001
+const SORT_SORT_KEYS        = 0x0002
 
 /*
  * Flag values for "matches"
  */
-const MATCH_CASE_INSENSITIVE = 0x0001;
-const MATCH_DOTALL           = 0x0002;
-const MATCH_UNICODE_CASE     = 0x0004;
-const MATCH_LITERAL          = 0x0008;
-const MATCH_MULTILINE        = 0x0010;
-const MATCH_UNIX_LINES       = 0x0020;
+const MATCH_CASE_INSENSITIVE = 0x0001
+const MATCH_DOTALL           = 0x0002
+const MATCH_UNICODE_CASE     = 0x0004
+const MATCH_LITERAL          = 0x0008
+const MATCH_MULTILINE        = 0x0010
+const MATCH_UNIX_LINES       = 0x0020
 
 /*
  * Color codes
