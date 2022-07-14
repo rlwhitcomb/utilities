@@ -2134,7 +2134,7 @@ public final class CalcUtil
 	 *
 	 * @param escapedForm	The input string value.
 	 * @return		The raw string data, with all quotes removed and escape sequences converted.
-	 * @see #getRawString(String)
+	 * @see #getRawString(String, boolean)
 	 */
 	public static String getRawString(final String escapedForm) {
 	    return getRawString(escapedForm, false);
