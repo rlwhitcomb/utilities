@@ -1290,10 +1290,10 @@
 >a1 -- -> [ <null>, 1, 2, 3, 4, <null> ]
 >-- a1 -> [ 1, 2, 3, 4 ]
 >a1 -> [ 1, 2, 3, 4 ]
->++ o1 -> { #0: <null>, b: false, c: "def", d: 1.2 }
->o1 ++ -> { #0: <null>, b: false, c: "def", d: 1.2 }
->o1 -> { #0: <null>, b: false, c: "def", d: 1.2, #4: <null> }
->o1 -- -> { #0: <null>, b: false, c: "def", d: 1.2, #4: <null> }
+>++ o1 -> { _0: <null>, b: false, c: "def", d: 1.2 }
+>o1 ++ -> { _0: <null>, b: false, c: "def", d: 1.2 }
+>o1 -> { _0: <null>, b: false, c: "def", d: 1.2, _4: <null> }
+>o1 -- -> { _0: <null>, b: false, c: "def", d: 1.2, _4: <null> }
 >-- o1 -> { b: false, c: "def", d: 1.2 }
 >o1 -> { b: false, c: "def", d: 1.2 }
 >Variables 'p8' and 'p9' cleared.
