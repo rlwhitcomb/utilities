@@ -1277,6 +1277,11 @@
 > b: true,
 > c: 'ABC'
 >} -> { a: 10, b: true, c: "ABC" }
+>m2 = {} -> { }
+>m2.first = 'Rupert' -> "Rupert"
+>m2.last = 'James' -> "James"
+>m2.minitial = 'P' -> "P"
+>m2 -> { first: "Rupert", last: "James", minitial: "P" }
 >a1 = [1, 2, 3, 4] -> [ 1, 2, 3, 4 ]
 >o1 = {b: false, c: 'def', d: 1.2} -> { b: false, c: "def", d: 1.2 }
 >++ a1 -> [ <null>, 1, 2, 3, 4 ]

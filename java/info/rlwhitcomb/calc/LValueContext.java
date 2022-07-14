@@ -109,6 +109,8 @@
  *	10-Jul-2022 (rlwhitcomb)
  *	    #392: Create objects with proper sorting of keys; allow "a['ten'] = 20" to
  *	    create an object based on the non-numeric index value.
+ *	13-Jul-2022 (rlwhitcomb)
+ *	    #407: Another case where we need to promote the empty CollectionScope to a real map.
  */
 package info.rlwhitcomb.calc;
 
@@ -449,6 +451,10 @@ class LValueContext
 		if (memberName == null) {
 		    return new LValueContext(this, ctx, map, null);
 		}
+	    }
+	    else if (objValue.equals(CollectionScope.EMPTY)) {
+		map = new ObjectScope(visitor.getSettings().sortKeys);
+		putContextObject(visitor, map);
 	    }
 	    else {
 		throw new CalcExprException(ctx, "%calc#nonObjectValue", this, typeof(objValue));

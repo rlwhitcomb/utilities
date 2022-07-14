@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.13.42', date: d'2022-07-13',
+      issues: [ 407 ],
+      comment: 'Fix bug not being able to set initial map member using ".member" notation.'
+    },
     { version: '2.13.40', date: d'2022-07-11',
       issues: [ 401, 290 ],
       comment: 'Finish bracket block support for all mode directives.'
