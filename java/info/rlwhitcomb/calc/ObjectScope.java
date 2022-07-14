@@ -34,7 +34,7 @@
  *	    scopes when nested. Fix "keyObjectSet".
  *	19-Oct-2021 (rlwhitcomb)
  *	    Return last value from "remove" instead of boolean.
- *	18-Dec=2021 (rlwhitcomb)
+ *	18-Dec-2021 (rlwhitcomb)
  *	    #148: Add constructor from regular Map.
  *	24-Dec-2021 (rlwhitcomb)
  *	    Add another "setValue" without default "ignoreCase" parameter.
@@ -65,6 +65,8 @@
  *	    #393: Cleanup imports.
  *	10-Jul-2022 (rlwhitcomb)
  *	    #392: New constructors and option to sort keys.
+ *	14-Jul-2022 (rlwhitcomb)
+ *	    #408: Change dummy key generator to make legal names.
  */
 package info.rlwhitcomb.calc;
 
@@ -452,7 +454,7 @@ class ObjectScope extends CollectionScope
 	    // For index values past the current size, fill in the intervening values
 	    // with keys and null values
 	    while (size <= pos) {
-		String key = String.format("#%1$d", size);
+		String key = String.format("_%1$d", size);
 		keyList.add(size, key);
 		variables.put(key, null);
 		size++;
