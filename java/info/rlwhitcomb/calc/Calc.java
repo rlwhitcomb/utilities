@@ -293,6 +293,8 @@
  *	    #392: Option to sort by keys.
  *	    #403: For raw string support, don't expand tabs on input files unless
  *	    running as GUI (because the text field can't support tabs).
+ *	19-Jul-2022 (rlwhitcomb)
+ *	    #417: Throw error if file is not found on ":include".
  */
 package info.rlwhitcomb.calc;
 
@@ -318,6 +320,7 @@ import java.awt.Desktop;
 import java.awt.Font;
 import java.io.Console;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.reflect.Constructor;
@@ -1719,15 +1722,37 @@ public class Calc
 	 *
 	 * @param paths	A possible list of file names/paths separated by either
 	 *		comma or semicolon.
-	 * @param charset The charset to use for decoding the files (could be {@code null}
-	 *		in which case the logic in {@link #readFile} is used instead).
 	 * @return	Either the contents of all the files listed, if found,
 	 *		or the <code>paths</code> string itself as an expression.
 	 * @throws	IOException if there was an error trying to read the files
 	 *		that exist (obviously if the files do not exist this is
-	 *		not an "error" condition per se).
+	 *		not an "error" condition per se, unless {@code throwError} is true).
 	 */
-	public static String getFileContents(String paths, Charset charset)
+	public static String getFileContents(String paths)
+		throws IOException
+	{
+	    return getFileContents(paths, null, false);
+	}
+
+	/**
+	 * Take the input as a delimited string of file names/paths and try to
+	 * read all of them in. If the path does not exist as given, then try to
+	 * find it using the latest {@link #inputDirectory} value. But, if any
+	 * of the potential files cannot be found, then take the entire input
+	 * string as a single expression and return that instead.
+	 *
+	 * @param paths	A possible list of file names/paths separated by either
+	 *		comma or semicolon.
+	 * @param charset The charset to use for decoding the files (could be {@code null}
+	 *		in which case the logic in {@link #readFile} is used instead).
+	 * @param throwError Whether to throw on error, or just treat the input as expressions.
+	 * @return	Either the contents of all the files listed, if found,
+	 *		or the <code>paths</code> string itself as an expression.
+	 * @throws	IOException if there was an error trying to read the files
+	 *		that exist (obviously if the files do not exist this is
+	 *		not an "error" condition per se, unless {@code throwError} is true).
+	 */
+	public static String getFileContents(String paths, Charset charset, boolean throwError)
 		throws IOException
 	{
 	    /* We must be able to read all the files listed, or else the input
@@ -1744,18 +1769,22 @@ public class Calc
 			f = new File(inputDirectory, file);
 			if (!readFile(f, inputBuf, charset)) {
 			    unableToRead = true;
-			    break;
 			}
 		    }
 		    else {
 			unableToRead = true;
+		    }
+		}
+		if (unableToRead) {
+		    if (throwError) {
+			throw new FileNotFoundException(file);
+		    }
+		    else {
+			inputBuf.setLength(0);
+			inputBuf.append(paths).append(LINESEP);
 			break;
 		    }
 		}
-	    }
-	    if (unableToRead) {
-		inputBuf.setLength(0);
-		inputBuf.append(paths).append(LINESEP);
 	    }
 
 	    return inputBuf.toString();
@@ -1842,7 +1871,7 @@ public class Calc
 		initialLibraryLoad = true;
 		try {
 		    for (String libraryName : libraryNames) {
-			process(CharStreams.fromString(getFileContents(libraryName, null)), visitor, errorStrategy, true, false);
+			process(CharStreams.fromString(getFileContents(libraryName)), visitor, errorStrategy, true, false);
 		    }
 		}
 		finally {
@@ -2266,11 +2295,11 @@ public class Calc
 			    input = CharStreams.fromStream(System.in);
 			}
 			else {
-			    input = CharStreams.fromString(getFileContents(args[0].substring(1), null));
+			    input = CharStreams.fromString(getFileContents(args[0].substring(1)));
 			}
 		    }
 		    else {
-			input = CharStreams.fromString(getFileContents(args[0], null));
+			input = CharStreams.fromString(getFileContents(args[0]));
 		    }
 		}
 		else if (args.length > 0) {

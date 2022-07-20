@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.13.46', date: d'2022-07-19',
+      issues: [ 417 ],
+      comment: 'Throw error on ":include" if the file cannot be found.'
+    },
     { version: '2.13.45', date: d'2022-07-19',
       issues: [ 420 ],
       comment: 'Recognize more complex number forms in "complex" function.'

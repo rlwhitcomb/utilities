@@ -629,6 +629,8 @@
  *	    #412: Refactor parameters to "toStringValue".
  *	13-Jul-2022 (rlwhitcomb)
  *	    #314, #315: Actually, ++/-- of empty objects doesn't work.
+ *	19-Jul-2022 (rlwhitcomb)
+ *	    #417: Throw error on ":include" if the file is not found.
  */
 package info.rlwhitcomb.calc;
 
@@ -1731,7 +1733,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    Charset charset = getCharsetValue(ctx.expr(1), false);
 
 	    try {
-		String contents = Calc.getFileContents(paths, charset);
+		String contents = Calc.getFileContents(paths, charset, true);
 		return Calc.processString(contents, settings.silent);
 	    }
 	    catch (IOException ioe) {
