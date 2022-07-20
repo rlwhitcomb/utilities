@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.13.43', date: d'2022-07-14',
+      issues: [ 408 ],
+      comment: 'Change dummy map key names to legal ones (as in "_nn").'
+    },
     { version: '2.13.42', date: d'2022-07-13',
       issues: [ 407 ],
       comment: 'Fix bug not being able to set initial map member using ".member" notation.'
