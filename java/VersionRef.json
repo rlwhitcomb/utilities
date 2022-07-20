@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.13.45', date: d'2022-07-19',
+      issues: [ 420 ],
+      comment: 'Recognize more complex number forms in "complex" function.'
+    },
     { version: '2.13.43', date: d'2022-07-14',
       issues: [ 408 ],
       comment: 'Change dummy map key names to legal ones (as in "_nn").'

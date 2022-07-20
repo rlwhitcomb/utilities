@@ -155,6 +155,11 @@ i**61 @I
 c9 = Complex("{ radius: 5, θ: 0.875 }")
 c9@p
 
+complex('1.2')
+complex('(4.739)')
+complex('-4.7i')
+complex('(2i)')**2
+
 // more to come (to complex powers)
 
 

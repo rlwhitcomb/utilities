@@ -51,6 +51,8 @@
  *	    #314: Add SetScope to the mix: conversions to/from sets.
  *	08-Jul-2022 (rlwhitcomb)
  *	    #393: Cleanup imports.
+ *	19-Jul-2022 (rlwhitcomb)
+ *	    #420: Add new formats for "parse". Add "imaginary" constructors.
  */
 package info.rlwhitcomb.math;
 
@@ -104,6 +106,10 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 	    Pattern.compile("^\\s*(" + SIGNED_NUMBER + ")\\s*([,])\\s*(" + SIGNED_NUMBER + ")\\s*$"),
 	    Pattern.compile("^\\s*\\(\\s*(" + SIGNED_NUMBER + ")\\s*([+\\-])\\s*(" + NUMBER + ")\\s*" + I_ALIASES + "\\s*\\)\\s*$"),
 	    Pattern.compile("^\\s*(" + SIGNED_NUMBER + ")\\s*([+\\-])\\s*(" + NUMBER + ")\\s*" + I_ALIASES + "\\s*$"),
+	    Pattern.compile("^\\s*\\(\\s*(" + SIGNED_NUMBER + ")\\s*\\)\\s*$"),
+	    Pattern.compile("^\\s*(" + SIGNED_NUMBER + ")\\s*$"),
+	    Pattern.compile("^\\s*\\(\\s*(" + SIGNED_NUMBER + ")\\s*(" + I_ALIASES + ")\\s*\\)\\s*$"),
+	    Pattern.compile("^\\s*(" + SIGNED_NUMBER + ")\\s*(" + I_ALIASES + ")\\s*$"),
 	    Pattern.compile("^\\s*\\{\\s*" + RADIUS_ALIASES + "\\s*[:]\\s*(" + SIGNED_NUMBER + ")\\s*[,]\\s*" + THETA_ALIASES + "\\s*[:]\\s*(" + SIGNED_NUMBER + ")\\s*\\}\\s*$")
 	};
 
@@ -361,6 +367,46 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 	 */
 	public static ComplexNumber real(final long r) {
 	    return new ComplexNumber(BigDecimal.valueOf(r), null);
+	}
+
+	/**
+	 * Construct one of these from a pure imaginary number.
+	 *
+	 * @param i The pure imaginary value.
+	 * @return  A new complex number with no real part.
+	 */
+	public static ComplexNumber imaginary(final BigDecimal i) {
+	    return new ComplexNumber(null, i);
+	}
+
+	/**
+	 * Construct one of these from a pure imaginary number.
+	 *
+	 * @param i The pure imaginary value.
+	 * @return  A new complex number with no real part.
+	 */
+	public static ComplexNumber imaginary(final BigInteger i) {
+	    return new ComplexNumber(null, i);
+	}
+
+	/**
+	 * Alternate pure imaginary "constructor".
+	 *
+	 * @param i The pure imaginary value.
+	 * @return  A new complex number with no real part.
+	 */
+	public static ComplexNumber imaginary(final double i) {
+	    return new ComplexNumber(null, BigDecimal.valueOf(i));
+	}
+
+	/**
+	 * Alternate pure imaginary "constructor".
+	 *
+	 * @param i The pure imaginary value.
+	 * @return  A new complex number with no real part.
+	 */
+	public static ComplexNumber imaginary(final long i) {
+	    return new ComplexNumber(null, BigDecimal.valueOf(i));
 	}
 
 
@@ -822,13 +868,23 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 		return polar(radiusPart, thetaPart, null);
 	    }
 	    else {
-		BigDecimal rPart = new BigDecimal(m.group(1));
-		BigDecimal iPart = new BigDecimal(m.group(7));
+		if (m.groupCount() == 5) {
+		    // Pure real number
+		    return real(new BigDecimal(m.group(1)));
+		}
+		else if (m.groupCount() == 6) {
+		    // Pure imaginary number
+		    return imaginary(new BigDecimal(m.group(1)));
+		}
+		else {
+		    BigDecimal rPart = new BigDecimal(m.group(1));
+		    BigDecimal iPart = new BigDecimal(m.group(7));
 
-		if (m.group(6) != null && m.group(6).equals("-"))
-		    iPart = iPart.negate();
+		    if (m.group(6) != null && m.group(6).equals("-"))
+			iPart = iPart.negate();
 
-		return new ComplexNumber(rPart, iPart);
+		    return new ComplexNumber(rPart, iPart);
+		}
 	    }
 	}
 
