@@ -805,7 +805,7 @@ public final class CalcUtil
 	 * @param result	The input value to be converted.
 	 * @param format	Formatting parameters.
 	 * @return		The converted string value.
-	 * @see #toStringValue(CalcObjectVisitor, ParserRuleContext, Object, boolean, boolean, boolean, boolean, String, String)
+	 * @see #toStringValue(CalcObjectVisitor, ParserRuleContext, Object, StringFormat, String, int)
 	 */
 	public static String toStringValue(
 		final CalcObjectVisitor visitor,
