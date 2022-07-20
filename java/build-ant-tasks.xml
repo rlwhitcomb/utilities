@@ -61,7 +61,11 @@
 	</target>
 
 	<target name="compile" depends="process-grammars" description="Compiles the java source">
-		<javac srcdir="." includeAntRuntime="true">
+		<javac
+		    srcdir="."
+		    includeAntRuntime="true"
+		    source="${compiler.source}"
+		    target="${compiler.target}">
 			<include name="info/rlwhitcomb/ant/*.java"/>
 			<include name="info/rlwhitcomb/preproc/*.java"/>
 			<exclude name="**/package-info.java"/>
