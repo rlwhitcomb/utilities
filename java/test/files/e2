@@ -115,6 +115,8 @@ m2.first = 'Rupert'
 m2.last = 'James'
 m2.minitial = 'P'
 m2
+m3={}
+++m3
 
 # pre- and post- operations on lists and objects
 a1 = [ 1, 2, 3, 4 ]

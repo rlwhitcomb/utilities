@@ -1282,6 +1282,8 @@
 >m2.last = 'James' -> "James"
 >m2.minitial = 'P' -> "P"
 >m2 -> { first: "Rupert", last: "James", minitial: "P" }
+>m3 = {} -> { }
+>++ m3 -> { _0: <null> }
 >a1 = [1, 2, 3, 4] -> [ 1, 2, 3, 4 ]
 >o1 = {b: false, c: 'def', d: 1.2} -> { b: false, c: "def", d: 1.2 }
 >++ a1 -> [ <null>, 1, 2, 3, 4 ]

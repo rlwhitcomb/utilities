@@ -627,6 +627,8 @@
  *	    Refactor some of the lexical tokens in the grammar to help with coding "isEmptyStmt".
  *	19-Jul-2022 (rlwhitcomb)
  *	    #412: Refactor parameters to "toStringValue".
+ *	13-Jul-2022 (rlwhitcomb)
+ *	    #314, #315: Actually, ++/-- of empty objects doesn't work.
  */
 package info.rlwhitcomb.calc;
 
@@ -3061,9 +3063,16 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 		afterValue = list;
 	    }
-	    else if (value instanceof ObjectScope) {
-		ObjectScope obj = (ObjectScope) value;
-		beforeValue = new ObjectScope(obj);
+	    else if (value instanceof ObjectScope || value.equals(CollectionScope.EMPTY)) {
+		ObjectScope obj;
+		if (value instanceof ObjectScope) {
+		    obj = (ObjectScope) value;
+		    beforeValue = new ObjectScope(obj);
+		}
+		else {
+		    obj = new ObjectScope();
+		    beforeValue = value;
+		}
 
 		if (incr) {
 		    obj.setValue(obj.size(), null);
@@ -3133,22 +3142,10 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    throw new UnknownOpException(op, ctx);
 	    }
 
-	    if (value instanceof ArrayScope) {
-		@SuppressWarnings("unchecked")
-		ArrayScope<Object> list = (ArrayScope<Object>) value;
-
-		if (incr) {
-		    list.insert(0, null);
-		}
-		else {
-		    if (!list.isEmpty()) {
-			list.remove(0);
-		    }
-		}
-
-		afterValue = list;
+	    if (value.equals(CollectionScope.EMPTY)) {
+		value = new ObjectScope();
 	    }
-	    else if (value instanceof ObjectScope) {
+	    if (value instanceof ObjectScope) {
 		ObjectScope obj = (ObjectScope) value;
 
 		if (incr) {
@@ -3169,6 +3166,21 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 		    afterValue = obj;
 		}
+	    }
+	    else if (value instanceof ArrayScope) {
+		@SuppressWarnings("unchecked")
+		ArrayScope<Object> list = (ArrayScope<Object>) value;
+
+		if (incr) {
+		    list.insert(0, null);
+		}
+		else {
+		    if (!list.isEmpty()) {
+			list.remove(0);
+		    }
+		}
+
+		afterValue = list;
 	    }
 	    else if (settings.rationalMode) {
 		BigFraction fValue = toFractionValue(this, value, var);
