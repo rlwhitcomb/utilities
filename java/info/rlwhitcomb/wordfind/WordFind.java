@@ -96,6 +96,8 @@
  *	    #270: Make this automatic now.
  *	09-Jul-2022 (rlwhitcomb)
  *	    #393: Cleanup imports.
+ *	15-Jul-2022 (rlwhitcomb)
+ *	    #411: Move dictionary handling out to separate class.
  */
 package info.rlwhitcomb.wordfind;
 
@@ -121,21 +123,9 @@ import static info.rlwhitcomb.util.ConsoleColor.Code.*;
  */
 public class WordFind implements Application {
     /**
-     * Name of the default master word file. Sourced from:
-     * <a href="https://scrabutility.com/TWL06.txt">TWL06.txt</a>
-     * with some additions and optional words as found using
-     * Words With Friends.
+     * The dictionary where we keep all the valid words.
      */
-    private static final String WORD_FILE_DEFAULT = "TWL06a.txt";
-    /**
-     * The original master word file without any changes or additions.
-     */
-    private static final String WORD_FILE_ORIGINAL = "TWL06.txt";
-    /**
-     * The original, original word file that others were derived from
-     * (all in upper case to be consistent with the others).
-     */
-    private static final String WORD_FILE_ANTIQUE = "ENABLE1U.txt";
+    private static final Dictionary dictionary = new Dictionary();
 
     /**
      * The default number of maximum iterations looking for valid words.
@@ -146,22 +136,14 @@ public class WordFind implements Application {
      */
     private static final float DEFAULT_MAX_TIME = 10.0f;
 
-    /** The lookup set of known words. */
-    private static final Set<String> words = new HashSet<>(200_000);
-    /**
-     * Additional words that appear in our dictionary but not valid
-     * (apparently) on Words With Friends (noted by trailing "?"
-     * in the word file).
-     */
-    private static final Set<String> additionalWords = new HashSet<>(1000);
-    /** Should we look in the {@link #additionalWords} set?  */
+    /** Should we look in the additional words list? */
     private static boolean findInAdditional = false;
     /** For option processing, whether we are running on a Windows OS. */
     private static final boolean ON_WINDOWS = System.getProperty("os.name").startsWith("Windows");
     /** Big switch whether to run as a console app or a GUI app. */
     private static boolean runningOnConsole = true;
     /** Which word file to load (defaults to our custom one). */
-    private static String wordFile = WORD_FILE_DEFAULT;
+    private static WordFile wordFile = WordFile.DEFAULT;
     /** Default column width for output. */
     private static final int DEFAULT_COLUMN_WIDTH = 10;
     /** The (possibly configurable) line length for output. */
@@ -500,8 +482,7 @@ public class WordFind implements Application {
                 if (wordUnadorned.length() < 2)
                     break;
 
-                if (words.contains(wordUnadorned)
-                || (findInAdditional && additionalWords.contains(wordUnadorned))) {
+                if (dictionary.contains(wordUnadorned, findInAdditional)) {
                     int index = wordUnadorned.length() - 1;
                     validWords[index].add(bufAdorned.toString());
                 }
@@ -742,17 +723,17 @@ public class WordFind implements Application {
             if (ignoreOptions)
                 ignored = true;
             else
-                wordFile = WORD_FILE_DEFAULT;
+                wordFile = WordFile.DEFAULT;
         } else if (matches(arg, "original", "twl06", "orig", "o")) {
             if (ignoreOptions)
                 ignored = true;
             else
-                wordFile = WORD_FILE_ORIGINAL;
+                wordFile = WordFile.ORIGINAL;
         } else if (matches(arg, "antique", "enable1", "enable", "ant", "en")) {
             if (ignoreOptions)
                 ignored = true;
             else
-                wordFile = WORD_FILE_ANTIQUE;
+                wordFile = WordFile.ANTIQUE;
         } else if (matches(arg, "version", "vers", "ver")) {
             if (ignoreOptions)
                 ignored = true;
@@ -887,54 +868,6 @@ public class WordFind implements Application {
         return totalInputSize;
     }
 
-    /**
-     * Read in the dictionary file, and populate the basic and additional word
-     * sets for later use.
-     * Allows blank lines and comments ("# form" or "// form" or "-- form").
-     *
-     * @param wordFile Name of the dictionary word file.
-     * @param wordSet The basic word set to populate.
-     * @param addlSet The additional word set.
-     */
-    private static void readDictionary(final String wordFile, final Set<String> wordSet,
-        final Set<String> addlSet) {
-        long startTime = System.nanoTime();
-
-        InputStream is = WordFind.class.getResourceAsStream(wordFile);
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
-            String line;
-            while ((line = reader.readLine()) != null) {
-                // Just for safety's sake, trim excess blanks
-                line = line.trim();
-                if (line.length() == 0
-                 || line.startsWith("#")
-                 || line.startsWith("//")
-                 || line.startsWith("--")) {
-                    continue;
-                }
-                if (line.length() == 1) {
-                    info("wordfind#infoOneLetterWord", quote(line));
-                    continue;
-                }
-                // Assume the input word file is all in UPPER case...
-                String word = lowerCase ? line.toLowerCase() : line;
-                if (word.endsWith("?")) {
-                    addlSet.add(word.substring(0, word.length() - 1));
-                } else {
-                    wordSet.add(word);
-                }
-            }
-        } catch (IOException ioe) {
-            error("wordfind#errReadingWordFile", quote(wordFile), Exceptions.toString(ioe));
-        }
-        long endTime = System.nanoTime();
-
-        if (timings) {
-            float secs = (float)(endTime - startTime) / 1.0e9f;
-            info("wordfind#infoDictionary", quote(wordFile), wordSet.size(), addlSet.size(), secs);
-        }
-    }
-
     private static void process(final List<String> argWords, final int totalInputSize) {
         StringBuilder letters = new StringBuilder(totalInputSize);
 
@@ -948,7 +881,7 @@ public class WordFind implements Application {
                 letters.append(word);
             } else {
                 // Lookup each word on the command line to see if it is valid.
-                if (words.contains(word) || (findInAdditional && additionalWords.contains(word))) {
+                if (dictionary.contains(word, findInAdditional)) {
                     info("wordfind#infoArgValid", arg, addLetterValues(arg));
                 } else {
                     error("wordfind#errArgNotValid", arg);
@@ -964,7 +897,7 @@ public class WordFind implements Application {
         if (n > 0) {
             // See if the letters as entered are a valid word first
             String inputWord = letters.toString();
-            if (words.contains(inputWord) || (findInAdditional && additionalWords.contains(inputWord))) {
+            if (dictionary.contains(inputWord, findInAdditional)) {
                 info("wordfind#infoArgValid", inputWord, addLetterValues(inputWord));
             }
 
@@ -1114,7 +1047,7 @@ public class WordFind implements Application {
             }
 
             String line;
-            String prompt = ConsoleColor.color("<Bk!>> <>");
+            String prompt = ConsoleColor.color("<Bk!>> <.>");
         replLoop:
             while ((line = console.readLine(prompt)) != null) {
                 if (line.isEmpty())
@@ -1176,7 +1109,20 @@ public class WordFind implements Application {
         int totalInputSize = processCommandLine(args, argWords, false);
 
         // Next read in the preferred dictionary/word file
-        readDictionary(wordFile, words, additionalWords);
+        long startTime = System.nanoTime();
+	try {
+            dictionary.read(wordFile, lowerCase);
+        }
+        catch (IOException ioe) {
+            error("wordfind#errReadingWordFile", quote(wordFile.getFileName()), Exceptions.toString(ioe));
+        }
+        long endTime = System.nanoTime();
+
+        if (timings) {
+            float secs = (float)(endTime - startTime) / 1.0e9f;
+            info("wordfind#infoDictionary", quote(wordFile.getFileName()),
+		dictionary.getNumberWords(), dictionary.getNumberAddlWords(), secs);
+        }
 
         // BIG switch here for GUI vs console operation
         if (!runningOnConsole) {
