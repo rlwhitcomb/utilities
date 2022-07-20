@@ -133,7 +133,7 @@ class StringFormat
 	 * @param p   Whether to do pretty printing.
 	 * @param es  Whether extra spaces should be added.
 	 * @param sep Use numeric separators?
-	 * @param inc Amount of space to increment at each level ({@code null} &#x21E8; {@link DEFAULT_INCREMENT}).
+	 * @param inc Amount of space to increment at each level ({@code null} &#x21E8; {@link #DEFAULT_INCREMENT}).
 	 */
 	StringFormat(final boolean q, final boolean p, final boolean es, final boolean sep, final String inc) {
 	    quotes = q;
