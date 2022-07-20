@@ -111,6 +111,8 @@
  *	    create an object based on the non-numeric index value.
  *	13-Jul-2022 (rlwhitcomb)
  *	    #407: Another case where we need to promote the empty CollectionScope to a real map.
+ *	19-Jul-2022 (rlwhitcomb)
+ *	    #412: Refactor parameter to "toStringValue" using "StringFormat" structure.
  */
 package info.rlwhitcomb.calc;
 
@@ -389,7 +391,7 @@ class LValueContext
 		else if (context instanceof String) {
 		    String str = (String) context;
 		    StringBuilder buf = new StringBuilder(str);
-		    String newValue = CalcUtil.toStringValue(visitor, varCtx, value, false, false);
+		    String newValue = CalcUtil.toStringValue(visitor, varCtx, value, new StringFormat(false, false));
 		    int newLen = index + newValue.length();
 		    if (index < 0)
 			newLen += str.length();

@@ -625,6 +625,8 @@
  *	    #404: Fix wrong value for "quotes" in "@s" formatting.
  *	    #401: Return result of bracket block (if present) in "processModeOption".
  *	    Refactor some of the lexical tokens in the grammar to help with coding "isEmptyStmt".
+ *	19-Jul-2022 (rlwhitcomb)
+ *	    #412: Refactor parameters to "toStringValue".
  */
 package info.rlwhitcomb.calc;
 
@@ -1235,12 +1237,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    if (!allowNull)
 		nullCheck(value, ctx);
 
-	    return value == null ? "" : toStringValue(this, ctx, value, quote, separators);
+	    return value == null ? "" : toStringValue(this, ctx, value, new StringFormat(quote, separators));
 	}
 
 	public String toNonNullString(final ParserRuleContext ctx, final Object value) {
 	    nullCheck(value, ctx);
-	    return toStringValue(this, ctx, value, false, settings.separatorMode);
+	    return toStringValue(this, ctx, value, new StringFormat(false, settings));
 	}
 
 	private double getDoubleValue(final ParserRuleContext ctx) {
@@ -1582,7 +1584,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    displayer.displayResult(func.getFullFunctionName(), getTreeText(func.getFunctionBody()));
 		}
 		else {
-		    displayer.displayResult(key, toStringValue(this, ctx, value, true, settings.separatorMode));
+		    displayer.displayResult(key, toStringValue(this, ctx, value, new StringFormat(true, settings)));
 		}
 		return true;
 	    }
@@ -1642,14 +1644,16 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	private boolean displayPredefValue(String key, Object value, ParserRuleContext ctx) {
+	    StringFormat format = new StringFormat(true, settings);
+
 	    if (isPredefined(value, false)) {
 		PredefinedValue predef = (PredefinedValue) value;
 		if (predef.isConstant()) {
-		    displayer.displayResult(key, toStringValue(this, ctx, value, true, settings.separatorMode));
+		    displayer.displayResult(key, toStringValue(this, ctx, value, format));
 		}
 		else {
 		    displayer.displayResult(key, Intl.formatString("calc#predefVariable",
-			    toStringValue(this, ctx, value, true, settings.separatorMode)));
+			    toStringValue(this, ctx, value, format)));
 		}
 		return true;
 	    }
@@ -1772,7 +1776,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		CalcParser.VarContext var = ctx.var();
 		LValueContext lValue = getLValue(var);
 		Object modeObject = evaluate(ctx, lValue.getContextObject(this, false));
-		option = toStringValue(this, var, modeObject, false, false);
+		option = toStringValue(this, var, modeObject, new StringFormat(false, false));
 	    }
 	    else {
 		option = ctx.getText();
@@ -2090,17 +2094,17 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    case 'U':
 		    case 'u':
 			toUpperCase = true;
-			valueBuf.append(toStringValue(this, ctx, result, settings.quoteStrings, settings.separatorMode));
+			valueBuf.append(toStringValue(this, ctx, result, new StringFormat(settings)));
 			break;
 		    case 'L':
 		    case 'l':
 			toLowerCase = true;
-			valueBuf.append(toStringValue(this, ctx, result, settings.quoteStrings, settings.separatorMode));
+			valueBuf.append(toStringValue(this, ctx, result, new StringFormat(settings)));
 			break;
 
 		    case 'Q':
 		    case 'q':
-			valueBuf.append(toStringValue(this, ctx, result, formatChar == 'Q', settings.separatorMode));
+			valueBuf.append(toStringValue(this, ctx, result, new StringFormat(formatChar == 'Q', settings)));
 			break;
 
 		    case 'C':
@@ -2210,7 +2214,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			if (scale != Integer.MIN_VALUE)
 			    increment = CharUtil.padToWidth("", scale);
 			valueBuf.append(indent);
-			valueBuf.append(toStringValue(this, ctx, result, true, true, true, separators, indent, increment));
+			valueBuf.append(toStringValue(this, ctx, result,
+				new StringFormat(true, true, true, separators, increment),
+				indent, 0));
 			break;
 
 		    case 'X':
@@ -2347,10 +2353,11 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    case 's':
 			if (result instanceof Scope) {
 			    boolean extraSpace = signChar != '-';
-			    valueBuf.append(toStringValue(this, ctx, result, true, false, extraSpace, separators, "", null));
+			    valueBuf.append(toStringValue(this, ctx, result,
+				new StringFormat(true, false, extraSpace, separators, null), "", 0));
 			}
 			else {
-			    String stringValue = toStringValue(this, ctx, result, false, separators);
+			    String stringValue = toStringValue(this, ctx, result, new StringFormat(false, separators));
 			    switch (signChar) {
 				case '+':	/* center - positive width puts extra spaces on left always */
 				    CharUtil.padToWidth(valueBuf, stringValue, precision, CENTER);
@@ -2386,7 +2393,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		// For large numbers it takes a significant amount of time just to convert
 		// to a string, so don't even try if we don't need to for display
 		if (!settings.silent)
-		    resultString = toStringValue(this, expr, result, settings.quoteStrings, separators);
+		    resultString = toStringValue(this, expr, result, new StringFormat(settings, separators));
 	    }
 
 	    if (!settings.silent) displayer.displayResult(exprString, resultString);
@@ -2815,7 +2822,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			    pattern = getStringValue(e1ctx.expr());
 			}
 
-			String input = toStringValue(this, caseExpr, caseValue, false, false);
+			String input = toStringValue(this, caseExpr, caseValue, new StringFormat(false, false));
 			if (matches(input, pattern, flags))
 			    return visitor.execute();
 		    }
@@ -2919,7 +2926,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    ConstantValue.define(currentScope, constantName, value);
 
 	    displayActionMessage("%calc#definingConst", constantName,
-		toStringValue(this, ctx, value, settings.quoteStrings, settings.separatorMode));
+		toStringValue(this, ctx, value, new StringFormat(settings)));
 
 	    return value;
 	}
@@ -2937,7 +2944,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		currentScope.setValueLocally(varName, settings.ignoreNameCase, value);
 
 		displayActionMessage("%calc#definingVar", varName,
-			toStringValue(this, ctx, value, settings.quoteStrings, settings.separatorMode));
+			toStringValue(this, ctx, value, new StringFormat(settings)));
 
 		return value;
 	    }
@@ -4338,7 +4345,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		endCtx   = e3ctx.expr(2);
 	    }
 
-	    String stringValue = toStringValue(this, ctx, value, false, settings.separatorMode);
+	    String stringValue = toStringValue(this, ctx, value, new StringFormat(false, settings));
 
 	    if (beginCtx == null) {
 		return stringValue;
@@ -4446,7 +4453,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    CalcParser.VarContext var = args.replaceOption().var();
 		    LValueContext lValue = getLValue(var);
 		    Object optionObject = lValue.getContextObject(this, false);
-		    option = optionObject == null ? "" : toStringValue(this, var, optionObject, true, false);
+		    option = optionObject == null ? "" : toStringValue(this, var, optionObject, new StringFormat(true, false));
 		}
 		else {
 		    option = args.replaceOption().getText();
@@ -4753,7 +4760,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		if (value instanceof String)
 		    string = (String) value;
 		else
-		    string = toStringValue(this, expr, value, false, false);
+		    string = toStringValue(this, expr, value, new StringFormat(false, false));
 		StringBuilder buf = new StringBuilder(string);
 		return buf.reverse().toString();
 	    }
@@ -4780,7 +4787,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		if (value instanceof String)
 		    string = (String) value;
 		else
-		    string = toStringValue(this, expr, value, false, false);
+		    string = toStringValue(this, expr, value, new StringFormat(false, false));
 
 		StringBuilder result = new StringBuilder(string.length());
 		string.codePoints().distinct().forEach(cp -> result.appendCodePoint(cp));
@@ -5004,7 +5011,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		}
 	    }
 	    else if (!(value instanceof ObjectScope)) {
-		String input = toStringValue(this, varCtx, value, false, settings.separatorMode);
+		String input = toStringValue(this, varCtx, value, new StringFormat(false, settings));
 		if (input.length() < posWidth) {
 		    StringBuilder buf = new StringBuilder(width);
 		    CharUtil.Justification just;
@@ -5462,7 +5469,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    else if (outputObj instanceof ObjectScope) {
 			ObjectScope obj = (ObjectScope) outputObj;
 			// For now (maybe always?) write out a JSON object
-			seq = toStringValue(this, expr, obj.map(), true, false, false, false, "", "");
+			seq = toStringValue(this, expr, obj.map(), new StringFormat(true, false, false, false, ""), "", 0);
 		    }
 		    else {
 			seq = toNonNullString(expr, outputObj);
