@@ -13,7 +13,7 @@ export CLASSPATH
 
 # Aliases for frequent use
 alias rv="git rev-parse --short head"
-alias antlr4="java -jar `pwd`/java/external-files/antlr-4.9-complete.jar"
+alias antlr4="java -jar `pwd`/java/external-files/antlr-4.10.1-complete.jar"
 alias grun="java org.antlr.v4.gui.TestRig"
 
 #
