@@ -1,7 +1,7 @@
 #!/bin/bash
 . ci-setenv
 echo Start of "ci-build.sh", current directory: `pwd`
-cd /home/runner/work/utilities/utilities/java
+cd java
 ant -DCI_BUILD=true clean update doc test
 if [[ $? -ne 0 ]]
 then
