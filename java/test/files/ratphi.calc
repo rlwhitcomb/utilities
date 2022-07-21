@@ -1,14 +1,12 @@
 :quiet on
 define ratphi(n) = { fib(n+1) / fib(n) }
 PHI_VALUES = [ ]
-loop over 2..400 {
-  :dec __
-  loop n in __ * 4 {
+loop precision over 2..400 {
+  settings.precision = precision
+  loop n in precision * 4 {
     if (ratphi(n) == phi) {
-      if isnull(PHI_VALUES[__]) {
-        PHI_VALUES[__] = n
-        leave n
-      }
+      PHI_VALUES[precision] = n
+      leave
     }
   }
 }
