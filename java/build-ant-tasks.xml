@@ -4,7 +4,7 @@
 
 	The MIT License (MIT)
 
-	Copyright (c) 2010-2011,2020-2021 Roger L. Whitcomb.
+	Copyright (c) 2010-2011,2020-2022 Roger L. Whitcomb.
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -34,6 +34,8 @@
 		    Rename "external-jars" to "external-files".
 		18-Nov-2021 (rlwhitcomb)
 		    Put Antlr version into build.properties
+		21-Jul-2022 (rlwhitcomb)
+		    Use built-in Ant library directory value.
 
      ========================================================================== -->
 
@@ -60,7 +62,7 @@
 		</java>
 	</target>
 
-	<target name="compile" depends="process-grammars" description="Compiles the java source">
+	<target name="compile" depends="process-grammars" description="Compiles the java source.">
 		<javac
 		    srcdir="."
 		    includeAntRuntime="true"
@@ -72,20 +74,20 @@
 		</javac>
 	</target>
 
-	<target name="jar" description="jar up the compiled class files">
+	<target name="jar" description="Jar up the compiled class files.">
 		<jar basedir="." destfile="${ant.tasks.jar}">
 			<include name="info/rlwhitcomb/ant/*.class" />
 			<include name="info/rlwhitcomb/preproc/*.class" />
 		</jar>
 	</target>
 
-	<target name="all" depends="compile,jar" description="Builds and jars everything"/>
+	<target name="all" depends="compile,jar" description="Builds and jars everything."/>
 
-	<target name="install" depends="all" description="Installs the tasks into Ant runtime location">
-		<copy file="${ant.tasks.jar}" todir="${env.ANT_HOME}/lib"/>
+	<target name="install" depends="all" description="Installs the tasks into Ant runtime library location.">
+		<copy file="${ant.tasks.jar}" todir="${ant.library.dir}"/>
 	</target>
 
-	<target name="clean" description="cleans all generated files">
+	<target name="clean" description="Cleans all generated files.">
 		<delete>
 			<fileset dir="." includes="anttasks.jar" />
 			<fileset dir="info/rlwhitcomb/ant" includes="*.class" />
