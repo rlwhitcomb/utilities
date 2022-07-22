@@ -12,5 +12,5 @@ echo CLASSPATH=%CLASSPATH%
 exit /b 0
 
 :addclass
-set CLASSPATH=%CLASSPATH%;%%J
+set CLASSPATH=%CLASSPATH%;%1
 exit /b
