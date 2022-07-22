@@ -1,5 +1,7 @@
 [![Java 8 Build Status](https://github.com/rlwhitcomb/utilities/actions/workflows/ant-jdk8.yml/badge.svg)](https://github.com/rlwhitcomb/utilities/actions/workflows/ant-jdk8.yml)
 [![Java Build Status](https://github.com/rlwhitcomb/utilities/actions/workflows/ant-jdk.yml/badge.svg)](https://github.com/rlwhitcomb/utilities/actions/workflows/ant-jdk.yml)
+[![Java 8 Windows Status](https://github.com/rlwhitcomb/utilities/actions/workflows/ant-windows8.yml/badge.svg)](https://github.com/rlwhitcomb/utilities/actions/workflows/ant-windows8.yml)
+[![Java Windows Status](https://github.com/rlwhitcomb/utilities/actions/workflows/ant-windows.yml/badge.svg)](https://github.com/rlwhitcomb/utilities/actions/workflows/ant-windows.yml)
 [![Java 8 MacOS Status](https://github.com/rlwhitcomb/utilities/actions/workflows/ant-macos8.yml/badge.svg)](https://github.com/rlwhitcomb/utilities/actions/workflows/ant-macos8.yml)
 [![Java MacOS Status](https://github.com/rlwhitcomb/utilities/actions/workflows/ant-macos.yml/badge.svg)](https://github.com/rlwhitcomb/utilities/actions/workflows/ant-macos.yml)
 
