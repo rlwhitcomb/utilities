@@ -6,5 +6,11 @@ set PATH=%PATH%;%UTILITIES_HOME%
 
 :: Setup the CLASSPATH with everything we will need
 set CLASSPATH=.;%PROJECT_HOME%\java
-for %%J in (%PROJECT_HOME%\java\external-files\*.jar) do set CLASSPATH=%CLASSPATH%;%%J
+dir %PROJECT_HOME%\java\external-files\*.jar
+for %%J in (%PROJECT_HOME%\java\external-files\*.jar) do call :addclass %%J
 echo CLASSPATH=%CLASSPATH%
+exit /b 0
+
+:addclass
+set CLASSPATH=%CLASSPATH%;%%J
+exit /b
