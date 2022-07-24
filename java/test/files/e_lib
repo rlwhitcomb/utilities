@@ -91,15 +91,7 @@ loop over 16384 { _tests++; if from_excel_col(to_excel_col(__)) != __ { _mistake
 }
 :echo `Number of tests = $_tests, mistakes = $_mistakes`
 
-# Depending on line endings, this result could be different on Windows vs. others
-# So, read the file, do the substitution and write back out to test
-#hash('test/data/Declaration.txt',,true)
-:quiet on {
-  hashfile = read('test/data/Declaration.txt')
-  hashfile = replace(hashfile, '\r?\n', '\n', all)
-  write(hashfile, 'decl.txt')
-}
-hash('decl.txt',,true)
+hash('test/data/Declaration.txt',,true)
 hashstring('Four score and seven years ago')
 
 #

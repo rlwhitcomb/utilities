@@ -71,7 +71,7 @@
 >from_excel_col('XFD') -> 16384
 >Checking all columns from 1 - 16384 ...
 >Number of tests = 16384, mistakes = 0
->hash('decl.txt', , true) -> "D424650E3A0F123F4D46D14AF0E2C309184C823021F578B02689802B06B0F674"
+>hash('test/data/Declaration.txt', , true) -> "D424650E3A0F123F4D46D14AF0E2C309184C823021F578B02689802B06B0F674"
 >hashstring('Four score and seven years ago') -> "213742bd59f1d8fe848b6ea94647dd465310b8d816234d5a952dc645fa320707"
 >dt1 = d'2021-8-5' -> 18844
 >dateformat(dt1, 'MMM d, yyyy') -> "August 5, 2021"
