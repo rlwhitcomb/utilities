@@ -1,0 +1,10 @@
+# Default behavior: decide what line endings to use based on OS
+* text=auto
+
+# These files are used in unit tests and need LF endings always
+*.csv text eol=lf
+*.dsv text eol=lf
+
+*.txt text eol=lf
+
+
