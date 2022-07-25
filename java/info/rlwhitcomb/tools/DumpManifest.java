@@ -31,9 +31,13 @@
  *	    Use Exceptions for better exception messages.
  *	09-Jul-2022 (rlwhitcomb)
  *	    #393: Cleanup imports.
+ *	25-Jul-2022 (rlwhitcomb)
+ *	    Change messages to use double quotes around file names
+ *	    so they can be copy/pasted and used directly (on Windows).
  */
 package info.rlwhitcomb.tools;
 
+import info.rlwhitcomb.util.Environment;
 import info.rlwhitcomb.util.Exceptions;
 
 import java.io.IOException;
@@ -54,7 +58,7 @@ import java.util.jar.Manifest;
  */
 public class DumpManifest
 {
-	private static final boolean onWindows = System.getProperty("os.name").toLowerCase(Locale.ENGLISH).startsWith("windows");
+	private static final boolean onWindows = Environment.isWindows();
 	private static boolean unsorted = false;
 	private static Comparator<Object> attributeNameComparator = new Comparator<Object>() {
 		@Override
@@ -86,7 +90,7 @@ public class DumpManifest
 		else {
 		    try {
 			JarFile jar = new JarFile(arg);
-			System.out.format("---- Jarfile Entries for '%1$s' ----%n", arg);
+			System.out.format("---- Jarfile Entries for \"%1$s\" ----%n", arg);
 			for (Enumeration<JarEntry> e = jar.entries(); e.hasMoreElements(); ) {
 			    JarEntry entry = e.nextElement();
 			    if (entry.isDirectory()) {
@@ -102,13 +106,13 @@ public class DumpManifest
 			Manifest man = jar.getManifest();
 			Attributes att = man.getMainAttributes();
 			if (unsorted) {
-			    System.out.format("%n---- Main attributes (%1$d) (raw) for '%2$s' ----%n", att.size(), arg);
+			    System.out.format("%n---- Main attributes (%1$d) (raw) for \"%2$s\" ----%n", att.size(), arg);
 			    for (Object o : att.keySet()) {
 				System.out.format("%1$s : %2$s%n", o.toString(), att.getValue(o.toString()));
 			    }
 			}
 			else {
-			    System.out.format("%n---- Main attributes (%1$d) (sorted) for '%2$s' ----%n", att.size(), arg);
+			    System.out.format("%n---- Main attributes (%1$d) (sorted) for \"%2$s\" ----%n", att.size(), arg);
 			    TreeSet<Object> sortedSet = new TreeSet<>(attributeNameComparator);
 			    sortedSet.addAll(att.keySet());
 			    for (Object o : sortedSet) {
@@ -117,7 +121,7 @@ public class DumpManifest
 			}
 
 			Map<String,Attributes> attrMap = man.getEntries();
-			System.out.format("%n---- Manifest entries (%1$d) for '%2$s' ----%n", attrMap.size(), arg);
+			System.out.format("%n---- Manifest entries (%1$d) for \"%2$s\" ----%n", attrMap.size(), arg);
 			for (String key : attrMap.keySet()) {
 			    Attributes attrs = attrMap.get(key);
 			    System.out.format("Attributes for \"%1$s\":%n", key);
@@ -127,7 +131,7 @@ public class DumpManifest
 			}
 		    }
 		    catch (IOException ioe) {
-			System.err.format("Unable to open jar file '%1$s', error is: %2$s%n", arg, Exceptions.toString(ioe));
+			System.err.format("Unable to open jar file \"%1$s\", error is: %2$s%n", arg, Exceptions.toString(ioe));
 			return;
 		    }
 		}
