@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.13.50', date: d'2022-07-24',
+      issues: [ 412 ],
+      comment: 'Add format specifier for levels to skip on "@j" format.'
+    },
     { version: '2.13.46', date: d'2022-07-19',
       issues: [ 417 ],
       comment: 'Throw error on ":include" if the file cannot be found.'

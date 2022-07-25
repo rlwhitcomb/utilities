@@ -631,6 +631,8 @@
  *	    #314, #315: Actually, ++/-- of empty objects doesn't work.
  *	19-Jul-2022 (rlwhitcomb)
  *	    #417: Throw error on ":include" if the file is not found.
+ *	24-Jul-2022 (rlwhitcomb)
+ *	    #412: Add "skipLevels" to StringFormat.
  */
 package info.rlwhitcomb.calc;
 
@@ -705,7 +707,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 
 	/** Pattern for format specifiers. */
-	private static final Pattern FORMAT_PATTERN = Pattern.compile("\\s*@([\\-+])?([0-9]+)?([\\.]([0-9]+))?([a-zA-Z,_])?([a-zA-Z%$])");
+	private static final Pattern FORMAT_PATTERN =
+		Pattern.compile("\\s*@([\\-+])?([0-9]+)?([\\.](([0-9]+)?([\\.]([0-9]+))?))?([a-zA-Z,_])?([a-zA-Z%$])");
 
 	/** Scale for double operations. */
 	private static final MathContext MC_DOUBLE = MathContext.DECIMAL64;
@@ -2020,6 +2023,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    int precision = Integer.MIN_VALUE;
 	    int scale     = Integer.MIN_VALUE;
+	    int levels    = Integer.MIN_VALUE;
 	    boolean separators = false;
 	    boolean addQuotes  = false;
 	    char signChar      = ' ';
@@ -2037,9 +2041,10 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		if (m.matches()) {
 		    String signStr  = m.group(1);
 		    String precStr  = m.group(2);
-		    String scaleStr = m.group(4);
-		    String modStr   = m.group(5);
-		    String formStr  = m.group(6);
+		    String scaleStr = m.group(5);
+		    String levelStr = m.group(7);
+		    String modStr   = m.group(8);
+		    String formStr  = m.group(9);
 
 		    if (signStr != null)
 			signChar = signStr.charAt(0);
@@ -2047,6 +2052,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			precision = Integer.parseInt(precStr);
 		    if (scaleStr != null)
 			scale = Integer.parseInt(scaleStr);
+		    if (levelStr != null)
+			levels = Integer.parseInt(levelStr);
 		    if (modStr != null)
 			modifierChar = modStr.charAt(0);
 		    formatChar = formStr.charAt(0);
@@ -2211,15 +2218,20 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    case 'j':
 			if (signChar != '-')
 			    valueBuf.append('\n');
+
 			String indent = "";
 			String increment = null;
+			int skip = 0;
+
 			if (precision != Integer.MIN_VALUE)
 			    indent = CharUtil.padToWidth("", Math.abs(precision));
 			if (scale != Integer.MIN_VALUE)
 			    increment = CharUtil.padToWidth("", scale);
+			if (levels != Integer.MIN_VALUE)
+			    skip = levels;
 			valueBuf.append(indent);
 			valueBuf.append(toStringValue(this, ctx, result,
-				new StringFormat(true, true, true, separators, increment),
+				new StringFormat(true, true, true, separators, increment, skip),
 				indent, 0));
 			break;
 
@@ -2358,7 +2370,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			if (result instanceof Scope) {
 			    boolean extraSpace = signChar != '-';
 			    valueBuf.append(toStringValue(this, ctx, result,
-				new StringFormat(true, false, extraSpace, separators, null), "", 0));
+				new StringFormat(true, false, extraSpace, separators, null, 0), "", 0));
 			}
 			else {
 			    String stringValue = toStringValue(this, ctx, result, new StringFormat(false, separators));
@@ -5483,7 +5495,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    else if (outputObj instanceof ObjectScope) {
 			ObjectScope obj = (ObjectScope) outputObj;
 			// For now (maybe always?) write out a JSON object
-			seq = toStringValue(this, expr, obj.map(), new StringFormat(true, false, false, false, ""), "", 0);
+			seq = toStringValue(this, expr, obj.map(), new StringFormat(true, false, false, false, "", 0), "", 0);
 		    }
 		    else {
 			seq = toNonNullString(expr, outputObj);

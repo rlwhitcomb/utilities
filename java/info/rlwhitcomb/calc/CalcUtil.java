@@ -172,6 +172,8 @@
  *	    #403: Fix second flavor of "getRawString".
  *	19-Jul-2022 (rlwhitcomb)
  *	    #412: Refactor parameters of "toStringValue".
+ *	24-Jul-2022 (rlwhitcomb)
+ *	    #412: Add "skipLevels" functionality to "toStringValue".
  */
 package info.rlwhitcomb.calc;
 
@@ -837,46 +839,54 @@ public final class CalcUtil
 	{
 	    Object result = visitor.evaluate(ctx, obj);
 
-	    if (result == null) {
-		return format.quotes ? "<null>" : "";
+	    if (result instanceof CollectionScope) {
+		if (result instanceof ObjectScope) {
+		    return toStringValue(visitor, ctx, ((ObjectScope) result).map(), format, indent, level);
+		}
+		else if (result instanceof ArrayScope) {
+		    return toStringValue(visitor, ctx, ((ArrayScope) result).list(), format, indent, level);
+		}
+		else if (result instanceof SetScope) {
+		    return toStringValue(visitor, ctx, ((SetScope) result).set(), format, indent, level);
+		}
+		else if (result instanceof CollectionScope) {
+		    return format.extraSpace ? "{ }" : "{}";
+		}
 	    }
-	    else if (result instanceof Character) {
-		String charString = Character.toString((Character) result);
-		if (format.quotes)
-		    return CharUtil.addDoubleQuotes(CharUtil.quoteControl(charString));
-		else
-		    return charString;
-	    }
-	    else if (result instanceof String) {
-		if (format.quotes)
-		    return CharUtil.addDoubleQuotes(CharUtil.quoteControl((String) result));
-		else
-		    return (String) result;
-	    }
-	    else if (result instanceof BigDecimal) {
-		return formatWithSeparators(((BigDecimal) result), format.separators, Integer.MIN_VALUE);
-	    }
-	    else if (result instanceof BigInteger) {
-		if (format.separators)
-		    return String.format("%1$,d", (BigInteger) result);
-		else
+	    else {
+		if (level >= format.skipLevels) {
+		    if (result == null) {
+			return format.quotes ? "<null>" : "";
+		    }
+		    else if (result instanceof Character) {
+			String charString = Character.toString((Character) result);
+			if (format.quotes)
+			    return CharUtil.addDoubleQuotes(CharUtil.quoteControl(charString));
+			else
+			    return charString;
+		    }
+		    else if (result instanceof String) {
+			if (format.quotes)
+			    return CharUtil.addDoubleQuotes(CharUtil.quoteControl((String) result));
+			else
+			    return (String) result;
+		    }
+		    else if (result instanceof BigDecimal) {
+			return formatWithSeparators(((BigDecimal) result), format.separators, Integer.MIN_VALUE);
+		    }
+		    else if (result instanceof BigInteger) {
+			if (format.separators)
+			    return String.format("%1$,d", (BigInteger) result);
+			else
+			    return result.toString();
+		    }
+
+		    // Any other type, just get the string representation
 		    return result.toString();
-	    }
-	    else if (result instanceof ObjectScope) {
-		return toStringValue(visitor, ctx, ((ObjectScope) result).map(), format, indent, level);
-	    }
-	    else if (result instanceof ArrayScope) {
-		return toStringValue(visitor, ctx, ((ArrayScope) result).list(), format, indent, level);
-	    }
-	    else if (result instanceof SetScope) {
-		return toStringValue(visitor, ctx, ((SetScope) result).set(), format, indent, level);
-	    }
-	    else if (result instanceof CollectionScope) {
-		return format.extraSpace ? "{ }" : "{}";
+		}
 	    }
 
-	    // Any other type, just get the string representation
-	    return result.toString();
+	    return "";
 	}
 
 	/**
@@ -898,24 +908,40 @@ public final class CalcUtil
 		final String indent,
 		final int level)
 	{
-	    String myIndent = indent + format.increment;
 	    StringBuilder buf = new StringBuilder();
+	    String myIndent = indent + format.increment;
 
 	    if (map.size() > 0) {
 		boolean comma = false;
-		buf.append(format.pretty ? "{\n" : format.extraSpace ? "{ " : "{");
-		for (Map.Entry<String, Object> entry : map.entrySet()) {
-		    if (comma)
-			buf.append(format.pretty ? ",\n" : format.extraSpace ? ", " : ",");
-		    else
-			comma = true;
-		    if (format.pretty) buf.append(myIndent);
-		    buf.append(entry.getKey()).append(format.extraSpace ? ": " : ":");
-		    buf.append(toStringValue(visitor, ctx, entry.getValue(), format, myIndent, level + 1));
+		if (level >= format.skipLevels) {
+		    buf.append(format.pretty ? "{\n" : format.extraSpace ? "{ " : "{");
+		    for (Map.Entry<String, Object> entry : map.entrySet()) {
+			if (comma)
+			    buf.append(format.pretty ? ",\n" : format.extraSpace ? ", " : ",");
+			else
+			    comma = true;
+			if (format.pretty) buf.append(myIndent);
+			buf.append(entry.getKey()).append(format.extraSpace ? ": " : ":");
+			buf.append(toStringValue(visitor, ctx, entry.getValue(), format, myIndent, level + 1));
+		    }
+		    buf.append(format.pretty ? "\n" + indent + "}" : format.extraSpace ? " }" : "}");
 		}
-		buf.append(format.pretty ? "\n" + indent + "}" : format.extraSpace ? " }" : "}");
+		else {
+		    for (Map.Entry<String, Object> entry : map.entrySet()) {
+			if (comma)
+			    buf.append(format.pretty ? ",\n" : format.extraSpace ? ", " : ",");
+			if (level + 1 >= format.skipLevels) {
+			    if (format.pretty) buf.append(indent);
+			    buf.append(entry.getKey()).append(format.extraSpace ? ": " : ":");
+			}
+			String children = toStringValue(visitor, ctx, entry.getValue(), format,
+				(level >= format.skipLevels ? myIndent : indent), level + 1);
+			comma = !children.isEmpty();
+			buf.append(children);
+		    }
+		}
 	    }
-	    else {
+	    else if (level >= format.skipLevels) {
 		buf.append(format.extraSpace ? "{ }" : "{}");
 	    }
 
@@ -941,23 +967,38 @@ public final class CalcUtil
 		final String indent,
 		final int level)
 	{
-	    String myIndent = indent + format.increment;
 	    StringBuilder buf = new StringBuilder();
+	    String myIndent = indent + format.increment;
 
 	    if (list.size() > 0) {
 		boolean comma = false;
-		buf.append(format.pretty ? "[\n" : format.extraSpace ? "[ " : "[");
-		for (Object value : list) {
-		    if (comma)
-			buf.append(format.pretty ? ",\n" : format.extraSpace ? ", " : ",");
-		    else
-			comma = true;
-		    if (format.pretty) buf.append(myIndent);
-		    buf.append(toStringValue(visitor, ctx, value, format, myIndent, level + 1));
+		if (level >= format.skipLevels) {
+		    buf.append(format.pretty ? "[\n" : format.extraSpace ? "[ " : "[");
+		    for (Object value : list) {
+			if (comma)
+			    buf.append(format.pretty ? ",\n" : format.extraSpace ? ", " : ",");
+			else
+			    comma = true;
+			if (format.pretty) buf.append(myIndent);
+			buf.append(toStringValue(visitor, ctx, value, format, myIndent, level + 1));
+		    }
+		    buf.append(format.pretty ? "\n" + indent + "]" : format.extraSpace ? " ]" : "]");
 		}
-		buf.append(format.pretty ? "\n" + indent + "]" : format.extraSpace ? " ]" : "]");
+		else {
+		    for (Object value : list) {
+			if (comma)
+			    buf.append(format.pretty ? ",\n" : format.extraSpace ? ", " : ",");
+			if (level + 1 >= format.skipLevels) {
+			    if (format.pretty) buf.append(indent);
+			}
+			String children = toStringValue(visitor, ctx, value, format,
+				(level >= format.skipLevels ? myIndent : indent), level + 1);
+			comma = !children.isEmpty();
+			buf.append(children);
+		    }
+		}
 	    }
-	    else {
+	    else if (level >= format.skipLevels) {
 		buf.append(format.extraSpace ? "[ ]" : "[]");
 	    }
 
@@ -983,23 +1024,38 @@ public final class CalcUtil
 		final String indent,
 		final int level)
 	{
-	    String myIndent = indent + format.increment;
 	    StringBuilder buf = new StringBuilder();
+	    String myIndent = indent + format.increment;
 
 	    if (set.size() > 0) {
 		boolean comma = false;
-		buf.append(format.pretty ? "{\n" : format.extraSpace ? "{ " : "{");
-		for (Object value : set) {
-		    if (comma)
-			buf.append(format.pretty ? ",\n" : format.extraSpace ? ", " : ",");
-		    else
-			comma = true;
-		    if (format.pretty) buf.append(myIndent);
-		    buf.append(toStringValue(visitor, ctx, value, format, myIndent, level + 1));
+		if (level >= format.skipLevels) {
+		    buf.append(format.pretty ? "{\n" : format.extraSpace ? "{ " : "{");
+		    for (Object value : set) {
+			if (comma)
+			    buf.append(format.pretty ? ",\n" : format.extraSpace ? ", " : ",");
+			else
+			    comma = true;
+			if (format.pretty) buf.append(myIndent);
+			buf.append(toStringValue(visitor, ctx, value, format, myIndent, level + 1));
+		    }
+		    buf.append(format.pretty ? "\n" + indent + "}" : format.extraSpace ? " }" : "}");
 		}
-		buf.append(format.pretty ? "\n" + indent + "}" : format.extraSpace ? " }" : "}");
+		else {
+		    for (Object value : set) {
+			if (comma)
+			    buf.append(format.pretty ? ",\n" : format.extraSpace ? ", " : ",");
+			if (level + 1 >= format.skipLevels) {
+			    if (format.pretty) buf.append(indent);
+			}
+			String children = toStringValue(visitor, ctx, value, format,
+				(level >= format.skipLevels ? myIndent : indent), level + 1);
+			comma = !children.isEmpty();
+			buf.append(children);
+		    }
+		}
 	    }
-	    else {
+	    else if (level >= format.skipLevels) {
 		buf.append(format.extraSpace ? "{ }" : "{}");
 	    }
 

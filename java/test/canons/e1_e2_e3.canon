@@ -1319,12 +1319,10 @@
 >Back to first level include.
 >Back to main file.
 >msg -> "This is a test of the :include directive."
->poem @j -> 
->[
->  "Twas the night before Christmas",
->  "and all through the house",
->  "not a creature was stirring",
->  "not even a mouse."
->]
+>poem @..1j -> 
+>"Twas the night before Christmas",
+>"and all through the house",
+>"not a creature was stirring",
+>"not even a mouse."
 >
 >Done with :include tests.

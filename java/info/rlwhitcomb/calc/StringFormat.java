@@ -27,6 +27,8 @@
  *  Change History:
  *	14-Jul-2022 (rlwhitcomb)
  *	    #412: Initial coding.
+ *	24-Jul-2022 (rlwhitcomb)
+ *	    #412: Add "skipLevels" value.
  */
 package info.rlwhitcomb.calc;
 
@@ -55,6 +57,9 @@ class StringFormat
 	/** The amount of space to increment each level of indentation. */
 	String increment;
 
+	/** The number of outer levels to skip before printing/displaying (0 = print all levels). */
+	int skipLevels;
+
 
 	/**
 	 * Construct and set the defaults, used by most cases.
@@ -67,6 +72,7 @@ class StringFormat
 	    extraSpace = true;
 	    separators = settings.separatorMode;
 	    increment = DEFAULT_INCREMENT;
+	    skipLevels = 0;
 	}
 
 	/**
@@ -81,6 +87,7 @@ class StringFormat
 	    extraSpace = true;
 	    separators = sep;
 	    increment = DEFAULT_INCREMENT;
+	    skipLevels = 0;
 	}
 
 	/**
@@ -95,6 +102,7 @@ class StringFormat
 	    extraSpace = true;
 	    separators = settings.separatorMode;
 	    increment = DEFAULT_INCREMENT;
+	    skipLevels = 0;
 	}
 
 	/**
@@ -109,6 +117,7 @@ class StringFormat
 	    extraSpace = true;
 	    separators = sep;
 	    increment = DEFAULT_INCREMENT;
+	    skipLevels = 0;
 	}
 
 	/**
@@ -124,23 +133,26 @@ class StringFormat
 	    extraSpace = true;
 	    separators = sep;
 	    increment = DEFAULT_INCREMENT;
+	    skipLevels = 0;
 	}
 
 	/**
 	 * Construct and set all the values individually.
 	 *
-	 * @param q   Value for quoting strings.
-	 * @param p   Whether to do pretty printing.
-	 * @param es  Whether extra spaces should be added.
-	 * @param sep Use numeric separators?
-	 * @param inc Amount of space to increment at each level ({@code null} &#x21E8; {@link #DEFAULT_INCREMENT}).
+	 * @param q    Value for quoting strings.
+	 * @param p    Whether to do pretty printing.
+	 * @param es   Whether extra spaces should be added.
+	 * @param sep  Use numeric separators?
+	 * @param inc  Amount of space to increment at each level ({@code null} &#x21E8; {@link #DEFAULT_INCREMENT}).
+	 * @param skip Number of outer levels to skip before printing.
 	 */
-	StringFormat(final boolean q, final boolean p, final boolean es, final boolean sep, final String inc) {
+	StringFormat(final boolean q, final boolean p, final boolean es, final boolean sep, final String inc, final int skip) {
 	    quotes = q;
 	    pretty = p;
 	    extraSpace = es;
 	    separators = sep;
 	    increment = (inc == null) ? DEFAULT_INCREMENT : inc;
+	    skipLevels = skip <= 0 ? 0 : skip;
 	}
 
 }

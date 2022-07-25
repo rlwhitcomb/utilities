@@ -432,6 +432,8 @@
  *	    Change some lexical fragments in the grammar into explicit lexical tokens to keep
  *	    some of the code from breaking if things are reordered here (see "isEmptyStmt()"
  *	    for example).
+ *	24-Jul-2022 (rlwhitcomb)
+ *	    #412: Add optional skip level element to "@j" formatting.
  */
 
 grammar Calc;
@@ -1485,7 +1487,7 @@ D_REQUIRE
 
 
 FORMAT
-   : '@' [\-+] ? INT ? ( '.' INT ) ? [a-zA-Z,_] ? [a-zA-Z%$]
+   : '@' [\-+] ? INT ? ( '.' INT ? ( '.' INT ) ? ) ? [a-zA-Z,_] ? [a-zA-Z%$]
    ;
 
 STRING
