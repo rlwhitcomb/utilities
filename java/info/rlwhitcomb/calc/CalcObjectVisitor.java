@@ -633,6 +633,8 @@
  *	    #417: Throw error on ":include" if the file is not found.
  *	24-Jul-2022 (rlwhitcomb)
  *	    #412: Add "skipLevels" to StringFormat.
+ *	25-Jul-2022 (rlwhitcomb)
+ *	    #412: Fix problem of duplicate initial indent with skip level > 0.
  */
 package info.rlwhitcomb.calc;
 
@@ -2229,7 +2231,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			    increment = CharUtil.padToWidth("", scale);
 			if (levels != Integer.MIN_VALUE)
 			    skip = levels;
-			valueBuf.append(indent);
+			if (skip == 0)
+			    valueBuf.append(indent);
 			valueBuf.append(toStringValue(this, ctx, result,
 				new StringFormat(true, true, true, separators, increment, skip),
 				indent, 0));
