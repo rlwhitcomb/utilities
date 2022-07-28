@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.13.52', date: d'2022-07-28',
+      issues: [ 429 ],
+      comment: 'Make "info.cpu" memory values dynamic; add "usedmemory" value.'
+    },
     { version: '2.13.50', date: d'2022-07-24',
       issues: [ 412 ],
       comment: 'Add format specifier for levels to skip on "@j" format.'
