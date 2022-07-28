@@ -174,7 +174,12 @@
 >typeof (tenpow (5)) -> "integer"
 >typeof (false) -> "boolean"
 >typeof (info) -> "object"
+>typeof info.version -> "object"
+>typeof info.version.major -> "integer"
+>typeof (info.version.prerelease) -> "string"
 >typeof (info.locale.weekdays) -> "array"
+>typeof (info.timezone) -> "object"
+>typeof (info.cpu.maxmemory) -> "integer"
 >typeof (D'9/11/2001') -> "integer"
 >typeof (now) -> "integer"
 >Defining function “junk_func” = { 'junk' }

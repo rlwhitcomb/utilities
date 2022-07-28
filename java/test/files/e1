@@ -170,7 +170,12 @@ typeof(½)
 typeof(tenpow(5))
 typeof(false)
 typeof(info)
+typeof info.version
+typeof info.version.major
+typeof(info.version.prerelease)
 typeof(info.locale.weekdays)
+typeof(info.timezone)
+typeof(info.cpu.maxmemory)
 # Note: these will both be "integer" for now, until we figure out how to differentiate them
 typeof(D'9/11/2001')
 typeof(now)
