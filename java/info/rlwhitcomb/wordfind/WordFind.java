@@ -98,6 +98,8 @@
  *	    #393: Cleanup imports.
  *	15-Jul-2022 (rlwhitcomb)
  *	    #411: Move dictionary handling out to separate class.
+ *	27-Jul-2022 (rlwhitcomb)
+ *	    REPL command and command-line option to display dictionary statistics.
  */
 package info.rlwhitcomb.wordfind;
 
@@ -748,6 +750,14 @@ public class WordFind implements Application {
                 displayHelp(true);
                 System.exit(0);
             }
+        } else if (matches(arg, "statistics", "stats", "stat", "st")) {
+            if (ignoreOptions)
+                ignored = true;
+            else {
+                readDictionary();
+                dictionary.displayStatistics(System.out);
+                System.exit(0);
+            }
         } else {
             error("wordfind#errUnknownOption", quote(prefix + arg));
         }
@@ -1071,6 +1081,12 @@ public class WordFind implements Application {
                     case ":v":
                         displayProgramInfo();
                         continue replLoop;
+		    case ":statistics":
+		    case ":stats":
+		    case ":stat":
+		    case ":s":
+			dictionary.displayStatistics(System.out);
+			continue replLoop;
                     default:
                         if (cmd.startsWith("#") || cmd.startsWith("!") || cmd.startsWith("//"))
                             continue replLoop;
@@ -1084,6 +1100,23 @@ public class WordFind implements Application {
             System.out.println();
         } else {
             process(argWords, totalInputSize);
+        }
+    }
+
+    private static void readDictionary() {
+        long startTime = System.nanoTime();
+	try {
+            dictionary.read(wordFile, lowerCase);
+        }
+        catch (IOException ioe) {
+            error("wordfind#errReadingWordFile", quote(wordFile.getFileName()), Exceptions.toString(ioe));
+        }
+        long endTime = System.nanoTime();
+
+        if (timings) {
+            float secs = (float)(endTime - startTime) / 1.0e9f;
+            info("wordfind#infoDictionary", quote(wordFile.getFileName()),
+		dictionary.getNumberWords(), dictionary.getNumberAddlWords(), secs);
         }
     }
 
@@ -1109,20 +1142,7 @@ public class WordFind implements Application {
         int totalInputSize = processCommandLine(args, argWords, false);
 
         // Next read in the preferred dictionary/word file
-        long startTime = System.nanoTime();
-	try {
-            dictionary.read(wordFile, lowerCase);
-        }
-        catch (IOException ioe) {
-            error("wordfind#errReadingWordFile", quote(wordFile.getFileName()), Exceptions.toString(ioe));
-        }
-        long endTime = System.nanoTime();
-
-        if (timings) {
-            float secs = (float)(endTime - startTime) / 1.0e9f;
-            info("wordfind#infoDictionary", quote(wordFile.getFileName()),
-		dictionary.getNumberWords(), dictionary.getNumberAddlWords(), secs);
-        }
+        readDictionary();
 
         // BIG switch here for GUI vs console operation
         if (!runningOnConsole) {

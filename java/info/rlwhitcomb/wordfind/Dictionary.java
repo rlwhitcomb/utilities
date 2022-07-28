@@ -27,14 +27,22 @@
  *  Change History:
  *	19-Jul-2022 (rlwhitcomb)
  *	    #411: Abstracted out of WordFind for use with other programs.
+ *	27-Jul-2022 (rlwhitcomb)
+ *	    Add indexed access, and random word selection.
+ *	    New "displayStatistics" method.
  */
 package info.rlwhitcomb.wordfind;
+
+import info.rlwhitcomb.util.CharUtil;
+import info.rlwhitcomb.util.Intl;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -44,6 +52,11 @@ import java.util.List;
  */
 public class Dictionary
 {
+	/**
+	 * Enumeration of which dictionary file is currently loaded (if any).
+	 */
+	private WordFile currentFile = null;
+
 	/**
 	 * Regular word list, arranged alphabetically.
 	 */
@@ -63,6 +76,11 @@ public class Dictionary
 	 * Depending on the case the first character in the index table.
 	 */
 	private char firstChar;
+
+	/**
+	 * From initial read of the dictionary, the maximum word length found.
+	 */
+	private int maxWordLength = 0;
 
 	/**
 	 * Indexes into the word list for each letter.
@@ -94,6 +112,8 @@ public class Dictionary
 		newLast = startChar;
 	    }
 
+	    maxWordLength = Math.max(maxWordLength, word.length());
+
 	    list.add(word);
 
 	    return newLast;
@@ -114,6 +134,11 @@ public class Dictionary
 	    char lastAddlStart = '\0';
 	    lowerWords = lowerCase;
 	    firstChar = lowerCase ? 'a' : 'A';
+
+	    if (wordFile == currentFile) {
+		return startingRegularIndex[26] + startingAddlIndex[26];
+	    }
+	    currentFile = wordFile;
 
 	    InputStream is = this.getClass().getResourceAsStream(wordFile.getFileName());
 	    try (BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
@@ -139,7 +164,15 @@ public class Dictionary
 		startingAddlIndex[26] = additionalWords.size();;
 	    }
 
-	    return regularWords.size() + additionalWords.size();
+	    // Fix up index table in case there were letters not used (for statistics display)
+	    for (int i = 1; i < 26; i++) {
+		if (startingRegularIndex[i] == 0)
+		    startingRegularIndex[i] = startingRegularIndex[i + 1];
+		if (startingAddlIndex[i] == 0)
+		    startingAddlIndex[i] = startingAddlIndex[i + 1];
+	    }
+
+	    return startingRegularIndex[26] + startingAddlIndex[26];
 	}
 
 
@@ -159,6 +192,20 @@ public class Dictionary
 	 */
 	public int getNumberAddlWords() {
 	    return additionalWords.size();
+	}
+
+	/**
+	 * Get the indexed word in the regular words list.
+	 *
+	 * @param index Index into the regular words list.
+	 * @return      The regular word at that index.
+	 * @throws      IndexOutOfBoundsException if that applies.
+	 */
+	public String getWord(final int index) {
+	    if (index < 0 || index >= regularWords.size())
+		throw new Intl.IndexOutOfBoundsException("%wordfind#errIndexOutOfBounds", index, regularWords.size());
+
+	    return regularWords.get(index);
 	}
 
 	/**
@@ -190,6 +237,100 @@ public class Dictionary
 
 	    return contained(searchWord, regularWords, startingRegularIndex) ||
 		(findInAdditional && contained(searchWord, additionalWords, startingAddlIndex));
+	}
+
+	/**
+	 * Get a random word from this dictionary of a maximum size.
+	 *
+	 * @param maxWordSize Sometimes getting ridiculously long words doesn't make sense,
+	 * so limit it (but 0 = no limit).
+	 * @return A random word from the loaded dictionary within the given size range.
+	 */
+	public String getRandomWord(final int maxWordSize) {
+	    int maxSize = getNumberWords();
+	    String randomWord = "";
+
+	    do {
+		int randomInt = (int) ((double) maxSize * Math.random());
+		randomWord = getWord(randomInt);
+	    } while (maxWordSize >= 0 && randomWord.length() > maxWordSize);
+
+	    return randomWord;
+	}
+
+	private void displayNumbers(final PrintStream ps, final int[] indexes, final String which) {
+	    String title = "Number of " + which + " words beginning with:";
+	    String under1 = CharUtil.makeStringOfChars('-', title.length());
+	    String under2 = CharUtil.makeStringOfChars('=', title.length());
+
+	    ps.println(title);
+	    ps.println(under1);
+	    for (int i = 0; i < 26; i++) {
+		int count = indexes[i + 1] - indexes[i];
+		char letter = (char) ((int) firstChar + i);
+		ps.format("%1$5c. %2$,7d%n", letter, count);
+	    }
+	    ps.format("Total: %1$,7d%n", indexes[26]);
+	    ps.println(under2);
+	}
+
+	private void displaySizes(final PrintStream ps, final int[] counts, final String which) {
+	    String title = "Number of " + which + " words with size:";
+	    String under1 = CharUtil.makeStringOfChars('-', title.length());
+	    String under2 = CharUtil.makeStringOfChars('=', title.length());
+
+	    ps.println(title);
+	    ps.println(under1);
+
+	    int numberChars = 0;
+	    int numberWords = 0;
+
+	    // We have no zero or one character words!
+	    for (int i = 2; i < counts.length; i++) {
+		if (counts[i] != 0) {
+		    ps.format("%1$7d: %2$,7d%n", i, counts[i]);
+		    numberWords += counts[i];
+		    numberChars += (counts[i] * i);
+		}
+	    }
+	    ps.format("Average: %1$7.2f%n", (float) numberChars / (float) numberWords);
+	    ps.println(under2);
+	}
+
+	/**
+	 * Display statistics about the current dictionary.
+	 *
+	 * @param ps The {@link PrintStream} to display to (usually {@link System#out}).
+	 */
+	public void displayStatistics(final PrintStream ps) {
+	    String title = "Statistics for " + currentFile.getFileName() + " dictionary";
+	    String under = CharUtil.makeStringOfChars('=', title.length());
+
+	    ps.println(under);
+	    ps.println(title);
+	    ps.println(under);
+	    ps.println();
+
+	    displayNumbers(ps, startingRegularIndex, "Regular");
+	    displayNumbers(ps, startingAddlIndex, "Additional");
+
+	    int regularSizeCounts[] = new int[maxWordLength + 1];
+	    int addlSizeCounts[] = new int[maxWordLength + 1];
+
+	    Arrays.fill(regularSizeCounts, 0);
+	    Arrays.fill(addlSizeCounts, 0);
+
+	    for (String word : regularWords) {
+		int len = word.length();
+		regularSizeCounts[len]++;
+	    }
+	    for (String word : additionalWords) {
+		int len = word.length();
+		addlSizeCounts[len]++;
+	    }
+
+	    displaySizes(ps, regularSizeCounts, "Regular");
+	    displaySizes(ps, addlSizeCounts, "Additional");
 	}
 
 }
