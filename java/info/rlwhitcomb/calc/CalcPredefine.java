@@ -52,6 +52,8 @@
  *	    #365: Mark the outer objects as immutable.
  *	08-Jul-2022 (rlwhitcomb)
  *	    #393: Cleanup imports.
+ *	28-Jul-2022 (rlwhitcomb)
+ *	    #429: Make "cpu" memory values into dynamic suppliers; add "usedmemory".
  */
 package info.rlwhitcomb.calc;
 
@@ -176,9 +178,18 @@ class CalcPredefine
 	    ObjectScope cpu = new ObjectScope();
 
 	    PredefinedValue.define(cpu, "cores",       Environment.numberOfProcessors());
-	    PredefinedValue.define(cpu, "maxmemory",   BigInteger.valueOf(Environment.maximumMemorySize()));
-	    PredefinedValue.define(cpu, "freememory",  BigInteger.valueOf(Environment.freeMemorySize()));
-	    PredefinedValue.define(cpu, "totalmemory", BigInteger.valueOf(Environment.totalMemorySize()));
+	    PredefinedValue.define(cpu, "maxmemory",   () -> {
+		return BigInteger.valueOf(Environment.maximumMemorySize());
+	    });
+	    PredefinedValue.define(cpu, "freememory",  () -> {
+		return BigInteger.valueOf(Environment.freeMemorySize());
+	    });
+	    PredefinedValue.define(cpu, "totalmemory", () -> {
+		return BigInteger.valueOf(Environment.totalMemorySize());
+	    });
+	    PredefinedValue.define(cpu, "usedmemory",  () -> {
+		return BigInteger.valueOf(Environment.totalMemorySize() - Environment.freeMemorySize());
+	    });
 	    cpu.setImmutable(true);
 
 	    ObjectScope os = new ObjectScope();
