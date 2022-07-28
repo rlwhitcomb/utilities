@@ -30,6 +30,8 @@
  *	27-Jul-2022 (rlwhitcomb)
  *	    Add indexed access, and random word selection.
  *	    New "displayStatistics" method.
+ *	    Omit additional word list statistics if there are none (some of
+ *	    the dictionaries don't have any).
  */
 package info.rlwhitcomb.wordfind;
 
@@ -259,6 +261,9 @@ public class Dictionary
 	}
 
 	private void displayNumbers(final PrintStream ps, final int[] indexes, final String which) {
+	    if (indexes[26] == 0)
+		return;
+
 	    String title = "Number of " + which + " words beginning with:";
 	    String under1 = CharUtil.makeStringOfChars('-', title.length());
 	    String under2 = CharUtil.makeStringOfChars('=', title.length());
@@ -330,7 +335,8 @@ public class Dictionary
 	    }
 
 	    displaySizes(ps, regularSizeCounts, "Regular");
-	    displaySizes(ps, addlSizeCounts, "Additional");
+	    if (startingAddlIndex[26] != 0)
+		displaySizes(ps, addlSizeCounts, "Additional");
 	}
 
 }
