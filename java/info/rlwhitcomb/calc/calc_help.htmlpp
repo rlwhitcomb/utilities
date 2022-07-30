@@ -289,8 +289,10 @@ h2 {
     <tr><td><code>-sortobjects</code></td><td>Sort user objects by keys, instead of by order of declaration</td><td><code>-sortobject</code>, <code>-sortkeys</code>,<br><code>-sortkey</code></td><td><code>:sortobjects on</code></td></tr>
     <tr><td><code>-nosortobjects</code></td><td>Sort objects by order of declaration (default)</td><td><code>-nosortobject</code>, <code>-nosortkeys</code>,<br><code>-nosortkey</code></td><td><code>:sortobjects off</code></td></tr>
     <tr><td><code>-inputdir</code> <i>directory</i></td><td>Specify a default directory location to find files to be processed</td><td><code>-input</code>, <code>-dir</code></td><td></td></tr>
-    <tr><td><code>-library</code> <i>library_name(s)</i></td><td>Specify one or more libraries to load to begin with</td><td><code>-libraries</code>, <code>-libs</code>, <code>-lib</code></td><td><code>:include</code>, <code>:load</code>, or <code>:open</code><br>(also see the <code>:save</code> directive)</td></tr>
+    <tr><td><code>-library</code> <i>library_name(s)</i></td><td>Specify one or more libraries to load to begin with</td><td><code>-libraries</code>, <code>-libs</code>, <code>-lib</code></td><td><code>:include</code>, <code>:load</code>,<br> or <code>:open</code><br>(also see the <code>:save</code> directive)</td></tr>
     <tr><td><code>-ignorelibraries</code></td><td>Ignore previous libraries<br>(from <code>CALC_OPTIONS</code> for instance)</td><td><code>-nolibraries</code>, <code>-nolibrary</code>,<br><code>-nolibs</code>, <code>-nolib</code></td><td></td></tr>
+    <tr><td><code>-requires</code>&nbsp;<i>version</i></td><td>Set a required program version</td><td><code>-requiresversion</code>,<br><code>-requireversion</code>,<br><code>-require</code>, or <code>-req</code></td><td><code>:require</code> directive</td></tr>
+    <tr><td><code>-base</code>&nbsp;<i>version</i></td><td>Set a required base version</td><td><code>-requiresbaseversion</code>,<br><code>-requirebaseversion</code>,<br>or <code>-baseversion</code></td><td><code>:require</code> ... <code>base</code> directive</td></tr>
     <tr><td><code>-clear</code></td><td>Clear any variables defined by <code>CALC_OPTIONS</code>.</td><td><code>-cleararguments</code>,<br><code>-clearargs</code>, <code>-clr</code></td><td></td></tr>
     <tr><td><code>-cmdenter</code></td><td>Use <code>Ctrl+Enter</code> (or <code>&#x2318;Enter</code> on Mac)<br>to calculate in the GUI input field <i>(default)</i></td><td><code>-cmd</code></td><td></td></tr>
     <tr><td><code>-enter</code></td><td>Use just <code>Enter</code> to calculate in GUI input field</td><td><code>-e</code></td><td></td></tr>
@@ -325,6 +327,7 @@ h2 {
   <li>Some errors (such as syntax errors within the library code) will be output as errors prior to the REPL prompt, however.
   <li>This help page (of course) is an HTML document, and so depends on a browser being installed to display it. Note that this help is also included
      as part of the Javadoc for the <code style="font-size:100%;">info.rlwhitcomb.calc</code> package.
+  <li>The format for version strings for the <code>-requires</code> or <code>-baseversion</code> options is described in the <a href="#Notes_on_Directives">Notes on Directives</a> section.
   </ul>
   </div>
 <a class="top-link" href="#topofpage">Top</a>
@@ -1317,7 +1320,7 @@ whether it has previously been used/defined.
   <p>The <code>wild_id</code> values for <code>:clear</code>, <code>:variables</code>, and <code>:predefined</code> can be wild-card values, such as
      <code>t*</code> or <code>?a?</code>. A <code>?</code> matches any one character, and <code>*</code> matches any string (including empty) of characters up until the trailing sequence. Only values matching these patterns will be displayed or cleared.
   <p>The only effect of debug mode is to display the parse tree (in LISP format) before the expression(s) is/are evaluated.
-  <p>The <i>version</i> values for the <code>:require</code> directive can be strings (in the <a href="https://semver.org">Semantic Version</a> format, including a possible pre-release string),
+  <p>The <i>version</i> values for the <code>:require</code> directive, or <code>-requires</code> command line option, can be strings (in the <a href="https://semver.org">Semantic Version</a> format, including a possible pre-release string),
      or one, two, or three integers separated by periods. The current version numbers are available by running <code>c -version</code> (from the command line) or using the
      <code>:version</code> command in REPL mode, or from the <code>info.version</code> predefined variable. There is also a standard library function named <code>"versionstring"</code> that
      formats a "long" version string out of the bare values. Examples of valid version values (note: the quotes are significant):

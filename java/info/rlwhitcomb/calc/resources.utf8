@@ -141,6 +141,8 @@
 #	    #389: New message when "var" has no initial value.
 #	10-Jul-2022 (rlwhitcomb)
 #	    #392: Option to sort objects by keys.
+#	29-Jul-2022 (rlwhitcomb)
+#	    #402: New base lib version error message.
 #
 
 #
@@ -178,6 +180,7 @@ syntaxError	= Syntax error at position %1$d: %2$s
 errorNoAlt	= Syntax error at position %1$d: no viable alternative at input <y>%2$s<.>
 
 libVersionMismatch	= The required version <y>%1$s<.> is not compatible with the current version <y>%2$s<.>.
+baseVersionMismatch	= The required base version <y>%1$s<.> is not compatible with the current version <y>%2$s<.>.
 versionParseError	= Problem with the required version number: %1$s
 libVersionDescription	= // The versions above must conform to the latest values in "version.properties" and "build.properties"
 

@@ -295,6 +295,8 @@
  *	    running as GUI (because the text field can't support tabs).
  *	19-Jul-2022 (rlwhitcomb)
  *	    #417: Throw error if file is not found on ":include".
+ *	29-Jul-2022 (rlwhitcomb)
+ *	    #402: New "-requires" options on command line.
  */
 package info.rlwhitcomb.calc;
 
@@ -341,6 +343,7 @@ import java.util.jar.JarFile;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 
+import static info.rlwhitcomb.calc.CalcUtil.checkRequiredVersions;
 import static info.rlwhitcomb.util.ConsoleColor.Code.*;
 
 /**
@@ -389,7 +392,11 @@ public class Calc
 		/** A charset to use for reading files. */
 		CHARSET,
 		/** A named variable declaration. */
-		VARIABLE
+		VARIABLE,
+		/** A version string. */
+		VERSION,
+		/** A base version string. */
+		BASE_VERSION
 	}
 
 	/**
@@ -480,6 +487,9 @@ public class Calc
 	private static boolean initialLibraryLoad = false;
 
 	private static Locale  locale  = null;
+
+	private static String  requiredVersion = null;
+	private static String  baseRequiredVersion = null;
 
 	private BXMLSerializer serializer = null;
 
@@ -2075,6 +2085,17 @@ public class Calc
 		case "display":
 		    silenceDirectives = false;
 		    break;
+		case "requiresversion":
+		case "requireversion":
+		case "requires":
+		case "require":
+		case "req":
+		    return Expecting.VERSION;
+		case "requiresbaseversion":
+		case "requirebaseversion":
+		case "baseversion":
+		case "base":
+		    return Expecting.BASE_VERSION;
 		case "locale":
 		case "loc":
 		case "l":
@@ -2217,6 +2238,14 @@ public class Calc
 				expecting = Expecting.QUIT_NOW;
 			    }
 			    break;
+			case VERSION:
+			    requiredVersion = arg;
+			    expecting = Expecting.DEFAULT;
+			    break;
+			case BASE_VERSION:
+			    baseRequiredVersion = arg;
+			    expecting = Expecting.DEFAULT;
+			    break;
 			default:
 			    Intl.errFormat("calc#expectValue", expecting);
 			    expecting = Expecting.QUIT_NOW;
@@ -2315,6 +2344,13 @@ public class Calc
 		else {
 		    displayer = new ConsoleDisplayer();
 		    visitor = new CalcObjectVisitor(displayer, rational, separators, silenceDirectives, ignoreCase, quotes, sortKeys);
+
+		    // In case there are version requirements for libraries or variables,
+		    // check the values set by "-requires", etc.
+		    // The check method will throw if there is a problem.
+		    if (requiredVersion != null || baseRequiredVersion != null) {
+			checkRequiredVersions(requiredVersion, baseRequiredVersion);
+		    }
 
 		    // Set the command-line arguments into the symbol table as $nn
 		    int index = 0;

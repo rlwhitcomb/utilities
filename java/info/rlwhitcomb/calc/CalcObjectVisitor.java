@@ -635,6 +635,9 @@
  *	    #412: Add "skipLevels" to StringFormat.
  *	25-Jul-2022 (rlwhitcomb)
  *	    #412: Fix problem of duplicate initial indent with skip level > 0.
+ *	29-Jul-2022 (rlwhitcomb)
+ *	    #402: Move version check out to separate method in CalcUtil (for use on
+ *	    command line).
  */
 package info.rlwhitcomb.calc;
 
@@ -664,7 +667,6 @@ import java.nio.file.Paths;
 import java.security.SecureRandom;
 import java.text.FieldPosition;
 import java.text.NumberFormat;
-import java.text.ParseException;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
@@ -1907,7 +1909,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	private String versionText(CalcParser.VersionNumberContext versionCtx) {
-	    if (versionCtx.STRING() != null)
+	    if (versionCtx == null)
+		return null;
+	    else if (versionCtx.STRING() != null)
 		return getRawString(versionCtx.STRING().getText());
 	    else if (versionCtx.ISTRING() != null)
 		return getIStringValue(this, versionCtx.ISTRING(), versionCtx);
@@ -1917,43 +1921,28 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		return versionCtx.VERSION().getText();
 	}
 
+	private void checkVersionText(CalcParser.VersionNumberContext requireCtx, CalcParser.VersionNumberContext baseCtx) {
+	    checkRequiredVersions(versionText(requireCtx), versionText(baseCtx));
+	}
+
 	@Override
 	public Object visitRequireDirective(CalcParser.RequireDirectiveContext ctx) {
 	    CalcParser.RequireOptionsContext optCtx = ctx.requireOptions();
 	    List<CalcParser.VersionNumberContext> versionNumbers = optCtx.versionNumber();
-	    SemanticVersion requireVersion = null;
-	    SemanticVersion requireBaseVersion = null;
 
-	    try {
-		if (optCtx.BASE() != null) {
-		    if (versionNumbers.size() == 1) {
-			// Just a base version
-			requireBaseVersion = new SemanticVersion(versionText(versionNumbers.get(0)));
-		    }
-		    else {
-			// version + base version
-			requireVersion = new SemanticVersion(versionText(versionNumbers.get(0)));
-			requireBaseVersion = new SemanticVersion(versionText(versionNumbers.get(1)));
-		    }
+	    if (optCtx.BASE() != null) {
+		if (versionNumbers.size() == 1) {
+		    // Just a base version
+		    checkVersionText(null, versionNumbers.get(0));
 		}
 		else {
-		    // Just a regular version
-		    requireVersion = new SemanticVersion(versionText(versionNumbers.get(0)));
+		    // version + base version
+		    checkVersionText(versionNumbers.get(0), versionNumbers.get(1));
 		}
 	    }
-	    catch (ParseException pe) {
-		throw new CalcExprException(optCtx, "%calc#versionParseError", Exceptions.toString(pe));
-	    }
-
-	    if (requireVersion != null) {
-		SemanticVersion progVersion = Environment.programVersion();
-		if (progVersion.compareTo(requireVersion) < 0)
-		    throw new Intl.IllegalArgumentException("calc#libVersionMismatch", requireVersion, progVersion);
-	    }
-	    if (requireBaseVersion != null) {
-		SemanticVersion baseVersion = Environment.implementationVersion();
-		if (baseVersion.compareTo(requireBaseVersion) < 0)
-		    throw new Intl.IllegalArgumentException("calc#libVersionMismatch", requireBaseVersion, baseVersion);
+	    else {
+		// Just a regular version
+		checkVersionText(versionNumbers.get(0), null);
 	    }
 
 	    return Boolean.TRUE;

@@ -174,6 +174,9 @@
  *	    #412: Refactor parameters of "toStringValue".
  *	24-Jul-2022 (rlwhitcomb)
  *	    #412: Add "skipLevels" functionality to "toStringValue".
+ *	29-Jul-2022 (rlwhitcomb)
+ *	    #402: New "checkRequiredVersions" method (from CalcObjectVisitor for use
+ *	    on command line also).
  */
 package info.rlwhitcomb.calc;
 
@@ -182,6 +185,7 @@ import info.rlwhitcomb.math.BigFraction;
 import info.rlwhitcomb.math.ComplexNumber;
 import info.rlwhitcomb.util.CharUtil;
 import info.rlwhitcomb.util.Environment;
+import info.rlwhitcomb.util.Exceptions;
 import info.rlwhitcomb.util.Intl;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -196,6 +200,7 @@ import java.math.MathContext;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.text.ParseException;
 import java.util.*;
 
 import static info.rlwhitcomb.util.CharUtil.Justification;
@@ -2451,5 +2456,46 @@ public final class CalcUtil
 	    return objects;
 	}
 
+	/**
+	 * Check required base and / or regular versions and throw if not compatible.
+	 *
+	 * @param required	The regular version text (or {@code null}).
+	 * @param baseRequired	Base version text (or {@code null}).
+	 * @throws IllegalArgumentException if there is a version mismatch or parsing error.
+	 */
+	public static void checkRequiredVersions(final String required, final String baseRequired) {
+	    SemanticVersion requireVersion = null;
+	    SemanticVersion requireBaseVersion = null;
+
+	    try {
+		if (required == null && baseRequired != null) {
+		    // Just a base version
+		    requireBaseVersion = new SemanticVersion(baseRequired);
+		}
+		else if (required != null && baseRequired != null) {
+		    // version + base version
+		    requireVersion = new SemanticVersion(required);
+		    requireBaseVersion = new SemanticVersion(baseRequired);
+		}
+		else {
+		    // Just a regular version
+		    requireVersion = new SemanticVersion(required);
+		}
+	    }
+	    catch (ParseException pe) {
+		throw new Intl.IllegalArgumentException("calc#versionParseError", Exceptions.toString(pe));
+	    }
+
+	    if (requireVersion != null) {
+		SemanticVersion progVersion = Environment.programVersion();
+		if (progVersion.compareTo(requireVersion) < 0)
+		    throw new Intl.IllegalArgumentException("calc#libVersionMismatch", requireVersion, progVersion);
+	    }
+	    if (requireBaseVersion != null) {
+		SemanticVersion baseVersion = Environment.implementationVersion();
+		if (baseVersion.compareTo(requireBaseVersion) < 0)
+		    throw new Intl.IllegalArgumentException("calc#baseVersionMismatch", requireBaseVersion, baseVersion);
+	    }
+	}
 }
 
