@@ -434,6 +434,9 @@
  *	    for example).
  *	24-Jul-2022 (rlwhitcomb)
  *	    #412: Add optional skip level element to "@j" formatting.
+ *	29-Jul-2022 (rlwhitcomb)
+ *	    #390: Move "case" down to expressions instead of statements to allow the return
+ *	    value to be assigned, etc.
  */
 
 grammar Calc;
@@ -455,7 +458,6 @@ stmtOrExpr
    | loopStmt
    | whileStmt
    | ifStmt
-   | caseStmt
    | leaveStmt
    | timeThisStmt
    | emptyStmt
@@ -631,6 +633,7 @@ expr
    |<assoc=right> var EOL* ADD_ASSIGN EOL* expr   # addAssignExpr
    |<assoc=right> var EOL* SHIFT_ASSIGN EOL* expr # shiftAssignExpr
    |<assoc=right> var EOL* BIT_ASSIGN EOL* expr   # bitAssignExpr
+   | caseStmt                            # caseExpr
    ;
 
 expr1

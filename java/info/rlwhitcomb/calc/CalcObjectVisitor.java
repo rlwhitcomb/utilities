@@ -638,6 +638,8 @@
  *	29-Jul-2022 (rlwhitcomb)
  *	    #402: Move version check out to separate method in CalcUtil (for use on
  *	    command line).
+ *	    #390: Turn on "quiet" mode inside CaseVisitor (same as for function evaluation)
+ *	    so we only see the final "case" result.
  */
 package info.rlwhitcomb.calc;
 
@@ -2749,12 +2751,14 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 		public Object execute() {
 		    Object returnValue = null;
+		    pushQuietMode.accept(true);
 		    pushScope(caseScope);
 		    try {
 			returnValue = evaluate(blockCtx.stmtBlock());
 		    }
 		    finally {
 			popScope();
+			pushQuietMode.accept("pop");
 			isMatched = true;
 		    }
 		    return returnValue;

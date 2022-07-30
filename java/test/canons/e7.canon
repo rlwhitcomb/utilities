@@ -197,7 +197,10 @@
 >settings.precision = old_precision -> 34
 >precision_to_directive -> ":default"
 >test_string = 'abababc' -> "abababc"
->'match' -> "match"
+>case test_string of {
+> matches '(ab){3}.': 'match',
+> default: 'not a match'
+>} -> "match"
 >Defining function “sign(value)” = {
 > case value of {
 > < 0: -1,
@@ -206,8 +209,11 @@
 >}
 >}
 >sign(-23) -> -1
+>signum (-23) -> -1
 >sign(0.0) -> 0
+>signum (0.0) -> 0
 >sign(0.01) -> 1
+>signum (0.01) -> 1
 >Defining function “m(v)” = {
 > case v of {
 > matches "abc", 1: 'this is abc',

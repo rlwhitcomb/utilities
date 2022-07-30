@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.13.55', date: d'2022-07-30',
+      issues: [ 390 ],
+      comment: 'Allow "case" as an expression.'
+    },
     { version: '2.13.54', date: d'2022-07-29',
       issues: [ 402 ],
       comment: 'Add "-requires" (and/or "-base") options to command line.'

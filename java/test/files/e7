@@ -122,8 +122,11 @@ def sign(value) = {
   }
 }
 sign(-23)
+signum(-23)
 sign(0.0)
+signum(0.0)
 sign(0.01)
+signum(0.01)
 
 def m(v) = {
    case v of {

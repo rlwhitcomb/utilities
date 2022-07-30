@@ -1207,7 +1207,8 @@ whether it has previously been used/defined.
      <code>IF</code> or <code>CASE</code>) that containing block is terminated, but the closest containing loop or function is also terminated. If the <code>LEAVE</code> is executed
      outside any loop or function, the entire script is exited with the optional expression as the final value (and therefore as the process exit code).
   <p>In the normal case, the value of any of these compound statements is the value of the last expression evaluated, inside whatever block is selected, and from the last iteration of that
-     block inside a loop.  But the grammar (for now) does not allow that final value to be used except as the return value from a function.  For instance, consider the following code:
+     block inside a loop. But the only time this value can be used is for the return value of a function, or for
+     <code>"case"</code> inside any other expression. For instance, consider the following code:
   <p class="indent">
       <code>define strings = { case upper(value) of "ONE": { 1 }, "TWO": { 2 }, "THREE" : { 3.14 }, default: { "many" } }</code><br>
       <code>value='one'; strings</code>
