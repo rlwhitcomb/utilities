@@ -9,7 +9,7 @@
  * $0 = name of file retrieved by "curl"
  */
 :quiet on {
-    j = eval(read($0))
+    j = eval(read($0, 'UTF-8'))
 }
 :results on {
     loop event within j {
