@@ -318,6 +318,8 @@
 		the property to be reset after generation.
 	    10-Jul-2022 (rlwhitcomb)
 		#400: Rename "mastertest" to "maintest"... ...
+	    31-Jul-2022 (rlwhitcomb)
+		Tweak build version construction.
 
      ========================================================================== -->
 
@@ -433,6 +435,7 @@
 	<condition property="test.log.path" value="../dist/${test.log.file.name}" else="${test.log.file.name}">
 		<istrue value="${ci.build}"/>
 	</condition>
+	<property name="full.build" value="${build.version}${debug.flag}+${build.lastrev}"/>
 
 	<patternset id="wrapper-files">
 		<include name="_find_and_run_class"     unless:true="${on.windows}"/>
@@ -654,11 +657,12 @@
 
 	<target name="jar" depends="compile" description="Jar up the compiled class files (into ${result.jar}).">
 		<delete file="MANIFEST.MF"/>
+		<echo message="Creating ${result.jar} file manifest for new version ${full.build} ..."/>
 		<manifest file="MANIFEST.MF">
 			<attribute name="Main-Class" value="info.rlwhitcomb.Version"/>
 			<attribute name="Built-By" value="${user.name}"/>
 			<attribute name="Implementation-Title" value="${product.name}"/>
-			<attribute name="Implementation-Version" value="${build.version}${debug.flag}+${build.lastrev}"/>
+			<attribute name="Implementation-Version" value="${full.build}"/>
 		</manifest>
 		<jar basedir="." destfile="${result.jar}" manifest="MANIFEST.MF">
 			<metainf dir="..">
