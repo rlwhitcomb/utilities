@@ -297,6 +297,8 @@
  *	    #417: Throw error if file is not found on ":include".
  *	29-Jul-2022 (rlwhitcomb)
  *	    #402: New "-requires" options on command line.
+ *	08-Aug-2022 (rlwhitcomb)
+ *	    #432: In preparation for new flag, call "getFileContents" even on command line.
  */
 package info.rlwhitcomb.calc;
 
@@ -1766,12 +1768,11 @@ public class Calc
 		throws IOException
 	{
 	    /* We must be able to read all the files listed, or else the input
-	     * is treated as a single expression.
-	     */
+	     * is treated as a single expression. */
 	    boolean unableToRead = false;
 	    StringBuilder inputBuf = new StringBuilder();
 
-	    String[] files = paths.split("[,;]");
+	    String[] files = paths.split(ON_WINDOWS ? "[,;]|\\s+" : "[,;:]|\\s+");
 	    for (String file : files) {
 		File f = new File(file);
 		if (!readFile(f, inputBuf, charset)) {
@@ -2333,7 +2334,7 @@ public class Calc
 		}
 		else if (args.length > 0) {
 		    String commandLine = concatArgs(args);
-		    input = CharStreams.fromString(commandLine);
+		    input = CharStreams.fromString(getFileContents(commandLine));
 		}
 
 		if (guiMode) {
