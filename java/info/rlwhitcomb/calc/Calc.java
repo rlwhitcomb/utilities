@@ -299,6 +299,7 @@
  *	    #402: New "-requires" options on command line.
  *	08-Aug-2022 (rlwhitcomb)
  *	    #432: In preparation for new flag, call "getFileContents" even on command line.
+ *	    And don't need LINESEP to signal end of input.
  */
 package info.rlwhitcomb.calc;
 
@@ -1668,9 +1669,10 @@ public class Calc
 	private static String concatArgs(String[] args) {
 	    StringBuilder buf = new StringBuilder();
 	    for (String arg : args) {
-		buf.append(arg).append(' ');
+		if (buf.length() > 0)
+		    buf.append(' ');
+		buf.append(arg);
 	    }
-	    buf.append(LINESEP);
 	    return buf.toString();
 	}
 
@@ -1710,7 +1712,7 @@ public class Calc
 		    fileText = FileUtilities.readFileAsString(f, StandardCharsets.UTF_8, tabWidth);
 		}
 
-		inputBuf.append(fileText).append(LINESEP);
+		inputBuf.append(fileText);
 		return true;
 	    }
 	    else {
@@ -1774,6 +1776,9 @@ public class Calc
 
 	    String[] files = paths.split(ON_WINDOWS ? "[,;]|\\s+" : "[,;:]|\\s+");
 	    for (String file : files) {
+		if (inputBuf.length() > 0)
+		    inputBuf.append(LINESEP);
+
 		File f = new File(file);
 		if (!readFile(f, inputBuf, charset)) {
 		    if (inputDirectory != null) {
@@ -1792,7 +1797,7 @@ public class Calc
 		    }
 		    else {
 			inputBuf.setLength(0);
-			inputBuf.append(paths).append(LINESEP);
+			inputBuf.append(paths);
 			break;
 		    }
 		}
@@ -1803,8 +1808,7 @@ public class Calc
 
 	public static Object processString(String inputText, boolean silent) {
 	    try {
-		String input = inputText.endsWith(LINESEP) ? inputText : inputText + LINESEP;
-		return process(CharStreams.fromString(input), visitor, errorStrategy, silent, false);
+		return process(CharStreams.fromString(inputText), visitor, errorStrategy, silent, false);
 	    }
 	    catch (IOException ioe) {
 		displayer.displayErrorMessage(Intl.formatString("calc#ioError", Exceptions.toString(ioe)));
