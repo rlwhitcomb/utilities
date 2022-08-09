@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.13.56', date: d'2022-08-08',
+      issues: [ 432 ],
+      comment: 'Add "-text", "-file", and "-filetext"  options.'
+    },
     { version: '2.13.55', date: d'2022-07-30',
       issues: [ 390 ],
       comment: 'Allow "case" as an expression.'

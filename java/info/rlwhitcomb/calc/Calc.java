@@ -300,6 +300,7 @@
  *	08-Aug-2022 (rlwhitcomb)
  *	    #432: In preparation for new flag, call "getFileContents" even on command line.
  *	    And don't need LINESEP to signal end of input.
+ *	    #432: Add flags ("-file", "-text", and "-filetext") as well as input handling for this.
  */
 package info.rlwhitcomb.calc;
 
@@ -484,6 +485,9 @@ public class Calc
 	private static boolean quotes            = true;
 	private static boolean sortKeys          = false;
 	private static boolean silenceDirectives = false;
+
+	private static boolean treatAsText = false;
+	private static boolean treatAsFile = false;
 
 	private static boolean useCmdEnter = true;
 
@@ -1779,20 +1783,32 @@ public class Calc
 		if (inputBuf.length() > 0)
 		    inputBuf.append(LINESEP);
 
-		File f = new File(file);
-		if (!readFile(f, inputBuf, charset)) {
-		    if (inputDirectory != null) {
-			f = new File(inputDirectory, file);
-			if (!readFile(f, inputBuf, charset)) {
+		// From the ":include" directive (throwError == false)
+		// or if neither option is given (treatAsFile and treatAsText both false)
+		// or the "-file" directive is given
+
+		if (initialLibraryLoad || throwError || treatAsFile || !treatAsText) {
+		    File f = new File(file);
+		    if (!readFile(f, inputBuf, charset)) {
+			if (inputDirectory != null) {
+			    f = new File(inputDirectory, file);
+			    if (!readFile(f, inputBuf, charset)) {
+				unableToRead = true;
+			    }
+			}
+			else {
 			    unableToRead = true;
 			}
 		    }
-		    else {
-			unableToRead = true;
-		    }
 		}
+
+		// If the "-text" option is given
+		else if (treatAsText) {
+		    unableToRead = true;
+		}
+
 		if (unableToRead) {
-		    if (throwError) {
+		    if (throwError || treatAsFile) {
 			throw new FileNotFoundException(file);
 		    }
 		    else {
@@ -2120,6 +2136,21 @@ public class Calc
 		case "nolibs":
 		case "nolib":
 		    libraryNames = null;
+		    break;
+		case "files":
+		case "file":
+		case "f":
+		    treatAsFile = true;
+		    treatAsText = false;
+		    break;
+		case "text":
+		case "txt":
+		case "tx":
+		    treatAsText = true;
+		    treatAsFile = false;
+		    break;
+		case "filetext":
+		    treatAsText = treatAsFile = false;
 		    break;
 		case "cleararguments":
 		case "clearargs":
