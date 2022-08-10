@@ -143,6 +143,8 @@
 #	    #392: Option to sort objects by keys.
 #	29-Jul-2022 (rlwhitcomb)
 #	    #402: New base lib version error message.
+#	09-Aug-2022 (rlwhitcomb)
+#	    #436: Remove unused predef message, add key messages.
 #
 
 #
@@ -167,6 +169,9 @@ message		= <a>%1$s<r>
 errorLine	= <e>%1$s<r> at line %2$d.
 error		= <e>%1$s<r>
 errorPeriod	= <e>%1$s.<r>
+defineKey	= <a>define<x> %1$s
+constKey	= <a>const<x> %1$s
+varKey		= <a>var<x> %1$s
 expectNotOption	= <e>Expecting <y>%1$s<.> value, not the <v>%2$s<.> option.<r>
 expectValue	= <e>Expecting <y>%1$s<.> value.<r>
 noOptionValue	= <e>Value for <y>%1$s<.> option was not given.<r>
@@ -216,7 +221,6 @@ varUnder2	= =========
 predefined	= Predefined
 preUnder1	= ----------
 preUnder2	= ==========
-predefVariable	= <a>Varies, currently:<.> %1$s
 # These two should (probably) not be translated
 rational	= RATIONAL
 decimal		= DECIMAL(%1$s)

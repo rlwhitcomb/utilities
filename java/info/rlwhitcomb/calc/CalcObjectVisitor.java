@@ -640,6 +640,8 @@
  *	    command line).
  *	    #390: Turn on "quiet" mode inside CaseVisitor (same as for function evaluation)
  *	    so we only see the final "case" result.
+ *	09-Aug-2022 (rlwhitcomb)
+ *	    #436: Put out "define", "const", and "var" on :vars and :predefs.
  */
 package info.rlwhitcomb.calc;
 
@@ -1592,12 +1594,19 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	private boolean displayValue(String key, Object value, ParserRuleContext ctx) {
 	    if (!isPredefined(value, false)) {
+		String fullKey = key;
+
 		if (value instanceof FunctionDeclaration) {
 		    FunctionDeclaration func = (FunctionDeclaration) value;
-		    displayer.displayResult(func.getFullFunctionName(), getTreeText(func.getFunctionBody()));
+		    fullKey = Intl.formatString("calc#defineKey", func.getFullFunctionName());
+		    displayer.displayResult(fullKey, getTreeText(func.getFunctionBody()));
 		}
 		else {
-		    displayer.displayResult(key, toStringValue(this, ctx, value, new StringFormat(true, settings)));
+		    if (value instanceof ConstantValue)
+			fullKey = Intl.formatString("calc#constKey", key);
+		    else if (!(value instanceof ParameterValue))
+			fullKey = Intl.formatString("calc#varKey", key);
+		    displayer.displayResult(fullKey, toStringValue(this, ctx, value, new StringFormat(true, settings)));
 		}
 		return true;
 	    }
@@ -1661,13 +1670,16 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    if (isPredefined(value, false)) {
 		PredefinedValue predef = (PredefinedValue) value;
+		String fullKey;
+
 		if (predef.isConstant()) {
-		    displayer.displayResult(key, toStringValue(this, ctx, value, format));
+		    fullKey = Intl.formatString("calc#constKey", key);
 		}
 		else {
-		    displayer.displayResult(key, Intl.formatString("calc#predefVariable",
-			    toStringValue(this, ctx, value, format)));
+		    fullKey = Intl.formatString("calc#varKey", key);
 		}
+		displayer.displayResult(fullKey, toStringValue(this, ctx, value, format));
+
 		return true;
 	    }
 	    return false;
