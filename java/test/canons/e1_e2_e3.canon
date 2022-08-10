@@ -203,7 +203,7 @@
 >typeof (_junk5b05d) -> "function"
 >Variables
 >---------
->_junk5b05d -> junk[0]
+>define _junk5b05d -> junk[0]
 >=========
 >settings.trigMode -> "RADIANS"
 >Trig mode is now “DEGREES”.
