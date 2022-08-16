@@ -113,13 +113,14 @@
  *	    #407: Another case where we need to promote the empty CollectionScope to a real map.
  *	19-Jul-2022 (rlwhitcomb)
  *	    #412: Refactor parameter to "toStringValue" using "StringFormat" structure.
+ *	15-Aug-2022 (rlwhitcomb)
+ *	    #440: Use correct math context for index conversion.
  */
 package info.rlwhitcomb.calc;
 
 import info.rlwhitcomb.util.Intl;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
-import java.math.MathContext;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -508,7 +509,7 @@ class LValueContext
 		    Object indexValue = visitor.evaluate(expr);
 
 		    if (indexValue instanceof Number) {
-			int index = CalcUtil.toIntValue(visitor, indexValue, MathContext.DECIMAL128, expr);
+			int index = CalcUtil.toIntValue(visitor, indexValue, visitor.getSettings().mc, expr);
 			return new LValueContext(arrLValue, arrVarCtx, arrValue, index);
 		    }
 		    else {

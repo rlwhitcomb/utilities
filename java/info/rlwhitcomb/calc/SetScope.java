@@ -31,6 +31,8 @@
  *	    #314: Add "diff".
  *	08-Jul-2022 (rlwhitcomb)
  *	    #393: Cleanup imports.
+ *	15-Aug-2022 (rlwhitcomb)
+ *	    #440: Move "size()" up to CollectionScope.
  */
 package info.rlwhitcomb.calc;
 
@@ -194,7 +196,8 @@ class SetScope<T> extends CollectionScope
 	 *
 	 * @return Size of the underlying list.
 	 */
-	int size() {
+	@Override
+	protected int size() {
 	    return values.size();
 	}
 

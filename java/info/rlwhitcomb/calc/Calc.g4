@@ -437,6 +437,8 @@
  *	29-Jul-2022 (rlwhitcomb)
  *	    #390: Move "case" down to expressions instead of statements to allow the return
  *	    value to be assigned, etc.
+ *	15-Aug-2022 (rlwhitcomb)
+ *	    #440: Implement "has" operator.
  */
 
 grammar Calc;
@@ -529,6 +531,7 @@ expr
    | set                                 # setExpr
    | complex                             # complexValueExpr
    | var                                 # varExpr
+   | expr K_HAS ( id | STRING | ISTRING | ( LBRACK expr RBRACK ) ) # hasExpr
    | LPAREN expr RPAREN                  # parenExpr
    | K_ABS expr1                         # absExpr
    | K_SIN expr1                         # sinExpr
@@ -941,6 +944,8 @@ DATE_CONST
 /*
  * Predefined function names
  */
+
+K_HAS      : 'has' | 'HAS' | 'Has' ;
 
 K_ABS      : 'abs' | 'ABS' | 'Abs' ;
 

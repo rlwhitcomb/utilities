@@ -690,7 +690,7 @@ or<br>
     </tr>
     </thead>
     <tbody>
-    <tr><td>36</td>
+    <tr><td>37</td>
       <td><code>pi</code>, <code>&#x1D6D1;</code>, <code>e</code>, <code>&#x2107;</code>, or <code>&#x2147;</code><br>
           <code>phi</code>, <code>&#x03C6;</code>, <code>&#x03D5;</code><br>
           <code>PHI</code>, <code>&#x03A6;</code><br>
@@ -721,11 +721,12 @@ or<br>
           all the current environment variables (such as <code>PATH</code>)<br>
           the current Calc settings (<code>trigMode</code>, <code>silent</code>, etc.)<br>
           that constant value, as in <code>"Hello"</code>, <code>127</code>, or <code>0xA8</code></td><td>N/A</td></tr>
-    <tr><td>35</td><td><code>{</code> (&nbsp;<i>key:value pairs</i>&nbsp;) <code>}</code></td><td>define an object</td><td>left to right</td></tr>
-    <tr><td>34</td><td><code>[</code> (&nbsp;<i>expr list</i>&nbsp;) <code>]</code><br><i>var</i> <code>[</code> <i>expr</i> <code>]</code> or <i>var</i>&nbsp;<code>&#x2080;</code> .. <code>&#x2089;</code></td><td>define an array,<br>or access elements of an array, string, or object</td><td>left to right</td></tr>
-    <tr><td>33</td><td><code>{</code> (&nbsp;<i>expr list</i>&nbsp;) <code>}</code></td><td>define a set</td><td>left to right</td></tr>
-    <tr><td>32</td><td><code>(</code> <i>expr</i> <code>,</code> <i>expr</i> <code>)</code></td><td>define a complex number</td><td>left to right</td></tr>
-    <tr><td>31</td><td><i>object</i> <code>.</code> <i>member</i></td><td>access an object member</td><td>left to right</td></tr>
+    <tr><td>36</td><td><code>{</code> (&nbsp;<i>key:value pairs</i>&nbsp;) <code>}</code></td><td>define an object</td><td>left to right</td></tr>
+    <tr><td>35</td><td><code>[</code> (&nbsp;<i>expr list</i>&nbsp;) <code>]</code><br><i>var</i> <code>[</code> <i>expr</i> <code>]</code> or <i>var</i>&nbsp;<code>&#x2080;</code> .. <code>&#x2089;</code></td><td>define an array,<br>or access elements of an array, string, or object</td><td>left to right</td></tr>
+    <tr><td>34</td><td><code>{</code> (&nbsp;<i>expr list</i>&nbsp;) <code>}</code></td><td>define a set</td><td>left to right</td></tr>
+    <tr><td>33</td><td><code>(</code> <i>expr</i> <code>,</code> <i>expr</i> <code>)</code></td><td>define a complex number</td><td>left to right</td></tr>
+    <tr><td>32</td><td><i>object</i> <code>.</code> <i>member</i></td><td>access an object member</td><td>left to right</td></tr>
+    <tr><td>31</td><td><i>expr</i> <code>HAS</code> ( <i>id</i> | <i>string</i> | <code>[</code> <i>expr</i> <code>]</code> )</td><td>safely check for member or index</td><td>left to right</td></tr>
     <tr><td>30</td><td><code>( </code><i>expr</i><code> )</code></td><td>group an expression</td><td>N/A</td></tr>
     <tr><td rowspan="76">29</td>
             <td><code>ABS</code>&nbsp;<i>expr</i></td><td>absolute value</td><td rowspan="76">left to right</td></tr>

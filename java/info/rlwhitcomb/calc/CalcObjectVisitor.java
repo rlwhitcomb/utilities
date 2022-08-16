@@ -3047,6 +3047,47 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	@Override
+	public Object visitHasExpr(CalcParser.HasExprContext ctx) {
+	    Object source = evaluate(ctx.expr(0));
+	    CalcParser.ExprContext indexExpr = null;
+	    Object indexValue = null;
+	    String key;
+
+	    if (!(source instanceof CollectionScope))
+		return Boolean.FALSE;
+
+	    if (ctx.LBRACK() != null) {
+		indexExpr = ctx.expr(1);
+		indexValue = evaluate(indexExpr);
+		if (indexValue instanceof Number) {
+		    CollectionScope collection = (CollectionScope) source;
+
+		    int index = toIntValue(this, indexValue, settings.mc, indexExpr);
+		    int size = collection.size();
+		    if (index < 0)
+			index += size;
+
+		    return Boolean.valueOf(index >= 0 && index < size);
+		}
+	    }
+
+	    if (!(source instanceof ObjectScope))
+		return Boolean.FALSE;
+
+	    CalcParser.IdContext id = ctx.id();
+	    TerminalNode str  = ctx.STRING();
+	    TerminalNode istr = ctx.ISTRING();
+	    key = (id != null) ? id.getText()
+		: (str != null) ? getStringMemberName(str.getText())
+		: (istr != null) ? getIStringValue(this, istr, ctx)
+		: toNonNullString(indexExpr, indexValue);
+
+	    ObjectScope obj = (ObjectScope) source;
+
+	    return Boolean.valueOf(obj.isDefinedLocally(key, settings.ignoreNameCase));
+	}
+
+	@Override
 	public Object visitPostIncOpExpr(CalcParser.PostIncOpExprContext ctx) {
 	    CalcParser.VarContext var = ctx.var();
 	    LValueContext lValue = getLValue(var);

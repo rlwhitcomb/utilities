@@ -29,6 +29,8 @@
  *	    Initial coding.
  *	08-Jul-2022 (rlwhitcomb)
  *	    #393: Cleanup imports.
+ *	15-Aug-2022 (rlwhitcomb)
+ *	    #440: Move "size()" up to here.
  */
 package info.rlwhitcomb.calc;
 
@@ -81,6 +83,15 @@ class CollectionScope extends Scope
 	 */
 	void setImmutable(final boolean value) {
 	    immutable = value;
+	}
+
+	/**
+	 * Get the size (number of first-level elements) in this collection.
+	 *
+	 * @return The collection's size.
+	 */
+	protected int size() {
+	    return 0;
 	}
 
 }

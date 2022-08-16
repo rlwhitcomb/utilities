@@ -1108,6 +1108,21 @@
 >Truth("no") -> "T"
 >Truth("off") -> "T"
 >Truth(settings) -> "T"
+>emptyset = {} -> { }
+>emptyset has [0] -> false
+>emptyset has [-1] -> false
+>info has cpu -> true
+>info has ["os"] -> true
+>list = [1, 2, 3] -> [ 1, 2, 3 ]
+>list has [2] -> true
+>list has [3] -> false
+>list has [-2] -> true
+>{a: 23, b: 4, c: 19} has c -> true
+>[] has [0] -> false
+>[] has [-1] -> false
+>'duck' in {'duck', 'duck', 'goose'} -> true
+>{'duck', 'duck', 'goose'} has [1] -> true
+>{'duck', 'duck', 'goose'} has [2] -> false
 >Defining constant “UTF_8” = "utf-8"
 >`Test of read/write/read of Unicode data = ${uni1 === uni2}` -> "Test of read/write/read of Unicode data = true"
 >`Test of read of large file: length = ${length(data)@,d}` -> "Test of read of large file: length = 6,326,439"

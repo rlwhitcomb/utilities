@@ -67,6 +67,8 @@
  *	    #392: New constructors and option to sort keys.
  *	14-Jul-2022 (rlwhitcomb)
  *	    #408: Change dummy key generator to make legal names.
+ *	15-Aug-2022 (rlwhitcomb)
+ *	    #440: Move "size()" up to CollectionScope.
  */
 package info.rlwhitcomb.calc;
 
@@ -531,7 +533,8 @@ class ObjectScope extends CollectionScope
 	 *
 	 * @return The size of the variables map.
 	 */
-	int size() {
+	@Override
+	protected int size() {
 	    return variables.size();
 	}
 
