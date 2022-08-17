@@ -2,7 +2,7 @@
 ::
 :: The MIT License (MIT)
 ::
-:: Copyright (c) 2020 Roger L. Whitcomb.
+:: Copyright (c) 2020,2022 Roger L. Whitcomb.
 ::
 :: Permission is hereby granted, free of charge, to any person obtaining a copy
 :: of this software and associated documentation files (the "Software"), to deal
@@ -71,7 +71,19 @@ if /I "%COMMAND%" EQU "cd" (
 :add_subdir
 shift
 if "%1" EQU "" goto check_dir
-set DEST=%DEST%\%1
+if "%1" EQU "-" (
+   set DEST=%DEST%\..
+) else (
+   if "%1" EQU "--" (
+      set DEST=%DEST%\..\..
+   ) else (
+      if "%1" EQU "---" (
+         set DEST=%DEST%\..\..\..
+      ) else (
+         set DEST=%DEST%\%1
+      )
+   )
+)
 goto add_subdir
 :check_dir
 if exist "%DEST%" goto doit
