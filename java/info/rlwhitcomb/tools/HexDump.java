@@ -49,6 +49,8 @@
  *	    #270: Make this automatic.
  *	09-Jul-2022 (rlwhitcomb)
  *	    #393: Cleanup imports.
+ *	17-Aug-2022 (rlwhitcomb)
+ *	    #443: Use Unicode chars for control chars in right column.
  */
 package info.rlwhitcomb.tools;
 
@@ -297,8 +299,10 @@ public class HexDump
 			int by = ((int) bytes[i]) & 0xFF;
 			if (by >= 0x20 && by <= 0x7E)
 			    output.appendCodePoint(by);
-			else if ((by >= 0x00 && by <= 0x1F) || (by == 0x7F))
-			    output.append(String.format("%1$s%2$s%3$c%4$s", RESET, RED, '\u25AB', CYAN_BRIGHT));
+			else if (by >= 0x00 && by <= 0x1F)
+			    output.append(String.format("%1$s%2$s%3$c%4$s", RESET, RED, (char) ('\u2400' + by), CYAN_BRIGHT));
+			else if (by == 0x7F)
+			    output.append(String.format("%1$s%2$s%3$c%4$s", RESET, RED, '\u2421', CYAN_BRIGHT));
 			else
 			    output.append(String.format("%1$s%2$s%3$c%4$s", RESET, YELLOW, '\u25E6', CYAN_BRIGHT));
 
