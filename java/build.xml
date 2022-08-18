@@ -320,6 +320,8 @@
 		#400: Rename "mastertest" to "maintest"... ...
 	    31-Jul-2022 (rlwhitcomb)
 		Tweak build version construction.
+	    19-Aug-2022 (rlwhitcomb)
+		Quiet down the Javadoc output.
 
      ========================================================================== -->
 
@@ -716,6 +718,7 @@
 			<arg line="--release 8" if:true="${new.java.version}"/>
 			<arg line="-Xdoclint:none" if:true="${doclint.off}"/>
 			<arg line="-Xdoclint:-missing" unless:true="${doclint.off}"/>
+			<arg value="-quiet"/>
 			<link href="https://docs.oracle.com/javase/8/docs/api/"/>
 			<link href="https://pivot.apache.org/2.0.5/docs/api/"/>
 			<link href="https://www.antlr.org/api/Java/"/>
