@@ -48,6 +48,8 @@
  *	18-Aug-2022 (rlwhitcomb)
  *	    #445: Add banner for multiple files with colors. Add color flags.
  *	    Add "-numbers" options.
+ *	19-Aug-2022 (rlwhitcomb)
+ *	    #445: Add "-header" and "-noheader" flags for multiple files.
  */
 package info.rlwhitcomb.tools;
 
@@ -84,6 +86,9 @@ public class Head
 
 	/** Whether to add line numbers. */
 	private static boolean numbers = false;
+
+	/** Whether to output headers for multiple files or not. */
+	private static boolean headers = true;
 
 	/** The charset we will actually use. */
 	private static Charset cs = null;
@@ -155,6 +160,21 @@ public class Head
 		case "no":
 		    numbers = false;
 		    break;
+		case "headers":
+		case "header":
+		case "hdr":
+		case "hd":
+		case "h":
+		    headers = true;
+		    break;
+		case "noheaders":
+		case "noheader":
+		case "nohdr":
+		case "nohd":
+		case "noh":
+		case "nh":
+		    headers = false;
+		    break;
 		case "version":
 		case "vers":
 		case "ver":
@@ -182,6 +202,7 @@ public class Head
 	 * @param file      Name of the file to process.
 	 * @param printName Whether or not we are processing multiple files, so each one
 	 *                  should be identified.
+	 * @see #headers
 	 */
 	private static void processFile(final String file, final boolean printName) {
 	    Path path = null;
@@ -192,7 +213,7 @@ public class Head
 		Intl.errFormat("tools#head.invalidPath", file);
 		return;
 	    }
-	    if (printName) {
+	    if (printName && headers) {
 		Intl.outFormat("tools#head.fileHeader", path);
 	    }
 	    try (BufferedReader rdr = Files.newBufferedReader(path, cs)) {
@@ -211,7 +232,7 @@ public class Head
 	    catch (IOException ioe) {
 		Intl.errFormat("tools#head.ioError", Exceptions.toString(ioe));
 	    }
-	    if (printName) {
+	    if (printName && headers) {
 		System.out.println();
 	    }
 	}
