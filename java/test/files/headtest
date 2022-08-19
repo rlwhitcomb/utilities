@@ -10,7 +10,7 @@ $echo
 hd1: test/data/Declaration.txt
 hd2: -5 test/data/Declaration.txt
 hd3: -3 test/data/Gettysburg.txt
-hd4: test/data/Psalm23.txt
+hd4: -numbers -nocolors test/data/Psalm23.txt
 
 $echo
 $echo End of Head test.

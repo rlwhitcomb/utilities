@@ -179,6 +179,8 @@
  *	    Print more info in "printProgramInfo".
  *	09-Jul-2022 (rlwhitcomb)
  *	    #393: Cleanup imports.
+ *	18-Aug-2022 (rlwhitcomb)
+ *	    #445: New flavor of "printProgramInfo" with just colored flag.
  */
 package info.rlwhitcomb.util;
 
@@ -1713,6 +1715,17 @@ public final class Environment
 	*/
 	public static void printProgramInfo(PrintStream ps) {
 	    printProgramInfo(ps, -1, true);
+	}
+
+
+	/**
+	 * Display a possibly colored program information banner using things we know about here
+	 * to {@link System#out}, using the longest string to center on.
+	 *
+	 * @param colors	Whether to use colors.
+	 */
+	public static void printProgramInfo(boolean colors) {
+	    printProgramInfo(System.out, -1, colors);
 	}
 
 

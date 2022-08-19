@@ -154,6 +154,8 @@
  *	    #103: Add Intl.ArithmeticException for some occasions that need it.
  *	09-Jul-2022 (rlwhitcomb)
  *	    #393: Cleanup imports.
+ *	18-Aug-2022 (rlwhitcomb)
+ *	    #445: New flavor of "setColoring" with just the flag and no map.
  */
 package info.rlwhitcomb.util;
 
@@ -747,6 +749,15 @@ public final class Intl
 	    }
 	}
 
+
+	/**
+	 * Set the flag for coloring of strings.
+	 *
+	 * @param	useColors	Whether or not to honor the color codes in strings.
+	 */
+	public static void setColoring(final boolean useColors) {
+	    setColoring(useColors, null);
+	}
 
 	/**
 	 * Set the flag for coloring of strings, along with the map to use for converting

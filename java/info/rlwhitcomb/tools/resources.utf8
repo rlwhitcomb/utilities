@@ -32,6 +32,8 @@
 #	    More HexDump errors and help text.
 #	10-Feb-2022 (rlwhitcomb)
 #	    #238: More HexDump options.
+#	18-Aug-2022 (rlwhitcomb)
+#	    #445: New strings for Head.
 #
 
 #
@@ -72,6 +74,8 @@ gmt.help16	= ""
 head.invalidLines	= Number of lines must be a valid integer.
 head.invalidPath	= Unable to find the file "%1$s".
 head.ioError		= I/O error: %1$s
+head.fileHeader		= <Cy>======== <Gr*!>%1$s<.> ========<-->
+head.number		= <Yw!>%1$3d: <-->
 
 #
 # From IsDir.java

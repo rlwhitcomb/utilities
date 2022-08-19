@@ -45,9 +45,13 @@
  *	    #270: Make this automatic now.
  *	09-Jul-2022 (rlwhitcomb)
  *	    #393: Cleanup imports.
+ *	18-Aug-2022 (rlwhitcomb)
+ *	    #445: Add banner for multiple files with colors. Add color flags.
+ *	    Add "-numbers" options.
  */
 package info.rlwhitcomb.tools;
 
+import info.rlwhitcomb.util.ConsoleColor;
 import info.rlwhitcomb.util.Environment;
 import info.rlwhitcomb.util.Exceptions;
 import info.rlwhitcomb.util.Intl;
@@ -75,8 +79,14 @@ public class Head
 	/** User can override this default, so this is the current. */
 	private static int linesToDisplay;
 
+	/** Whether to color the output. */
+	private static boolean colored = true;
+
+	/** Whether to add line numbers. */
+	private static boolean numbers = false;
+
 	/** The charset we will actually use. */
-	private static Charset cs;
+	private static Charset cs = null;
 
 	/** The list of files to process. */
 	private static final List<String> files = new ArrayList<>();
@@ -119,11 +129,37 @@ public class Head
 		case "def":
 		    cs = DEFAULT_CHARSET;
 		    break;
+		case "colors":
+		case "color":
+		case "clr":
+		case "c":
+		    colored = true;
+		    break;
+		case "nocolors":
+		case "nocolor":
+		case "noclr":
+		case "noc":
+		case "nc":
+		    colored = false;
+		    break;
+		case "numbers":
+		case "number":
+		case "num":
+		case "n":
+		     numbers = true;
+		     break;
+		case "nonumbers":
+		case "nonumber":
+		case "nonum":
+		case "non":
+		case "no":
+		    numbers = false;
+		    break;
 		case "version":
 		case "vers":
 		case "ver":
 		case "v":
-		    Environment.printProgramInfo();
+		    Environment.printProgramInfo(colored);
 		    code = -1;
 		    break;
 		default:
@@ -157,12 +193,15 @@ public class Head
 		return;
 	    }
 	    if (printName) {
-		System.out.println(path);
+		Intl.outFormat("tools#head.fileHeader", path);
 	    }
 	    try (BufferedReader rdr = Files.newBufferedReader(path, cs)) {
 		String line;
 		int lineNo = 0;
 		while ((line = rdr.readLine()) != null && lineNo++ < linesToDisplay) {
+		    if (numbers) {
+			System.out.print(ConsoleColor.color(Intl.formatString("tools#head.number", lineNo), colored));
+		    }
 		    System.out.println(line);
 		}
 	    }
@@ -200,6 +239,7 @@ public class Head
 	    if (files.isEmpty())
 		return;
 
+	    Intl.setColoring(colored);
 	    final boolean printName = files.size() > 1;
 
 	    files.forEach(f -> processFile(f, printName));
