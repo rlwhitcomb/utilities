@@ -201,6 +201,66 @@
 > matches '(ab){3}.': 'match',
 > default: 'not a match'
 >} -> "match"
+>Defining function “test(a)” = {
+> case a of {
+> 0: 'zero',
+> 1: 'one',
+> 3: 'three',
+> default: next,
+> 4: 'even'
+>}
+>}
+>test(v) -> "zero"
+>test(v) -> "one"
+>test(v) -> "even"
+>test(v) -> "three"
+>test(v) -> "even"
+>Defining function “power(n)” = {
+> var result = 1 ;
+> case n of {
+> 20: { result *= n ; next },
+> 19: { result *= n ; next },
+> 18: { result *= n ; next },
+> 17: { result *= n ; next },
+> 16: { result *= n ; next },
+> 15: { result *= n ; next },
+> 14: { result *= n ; next },
+> 13: { result *= n ; next },
+> 12: { result *= n ; next },
+> 11: { result *= n ; next },
+> 10: { result *= n ; next },
+> 9: { result *= n ; next },
+> 8: { result *= n ; next },
+> 7: { result *= n ; next },
+> 6: { result *= n ; next },
+> 5: { result *= n ; next },
+> 4: { result *= n ; next },
+> 3: { result *= n ; next },
+> 2: { result *= n ; next },
+> 1: { result *= n ; next }
+>}
+> result
+>}
+>power(f) -> 1
+>power(f) -> 4
+>power(f) -> 27
+>power(f) -> 256
+>power(f) -> 3125
+>power(f) -> 46656
+>power(f) -> 823543
+>power(f) -> 16777216
+>power(f) -> 387420489
+>power(f) -> 10000000000
+>power(f) -> 285311670611
+>power(f) -> 8916100448256
+>power(f) -> 302875106592253
+>power(f) -> 11112006825558016
+>power(f) -> 437893890380859375
+>power(f) -> 18446744073709551616
+>power(f) -> 827240261886336764177
+>power(f) -> 39346408075296537575424
+>power(f) -> 1978419655660313589123979
+>power(f) -> 104857600000000000000000000
 >Defining function “sign(value)” = {
 > case value of {
 > < 0: -1,

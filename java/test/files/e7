@@ -114,6 +114,47 @@ case test_string of {
   default: 'not a match'
 }
 
+define test(a) = {
+  case a of {
+    0: 'zero',
+    1: 'one',
+    3: 'three',
+    default: next,
+    4: 'even'
+  }
+}
+
+loop v within 5 { test(v) }
+
+define power(n) = {
+  var result = 1;
+  case n of {
+    20: { result *= n; next },
+    19: { result *= n; next },
+    18: { result *= n; next },
+    17: { result *= n; next },
+    16: { result *= n; next },
+    15: { result *= n; next },
+    14: { result *= n; next },
+    13: { result *= n; next },
+    12: { result *= n; next },
+    11: { result *= n; next },
+    10: { result *= n; next },
+     9: { result *= n; next },
+     8: { result *= n; next },
+     7: { result *= n; next },
+     6: { result *= n; next },
+     5: { result *= n; next },
+     4: { result *= n; next },
+     3: { result *= n; next },
+     2: { result *= n; next },
+     1: { result *= n; next }
+  }
+  result
+}
+
+loop f over 20 { power(f) }
+
 def sign(value) = {
   case value of {
     < 0: -1,

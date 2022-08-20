@@ -79,6 +79,14 @@ loop over teststring { (__ ∈ hexchars) ? `$__ is hex` : `$__ not hex` }
 testnumbers = [ 17, 23, 14, 92, 87, 46, 18, 42 ]
 loop num over testnumbers { num in 20..50 }
 
+loop aft within 20 { if aft > 10 && aft < 15 next; aft }
+
+var t23 = 3
+while t23++ < 13 {
+   if t23 % 2 == 0 next
+   `odd t23 = $t23`
+}
+
 :echo
 :echo "Done with LOOP tests."
 

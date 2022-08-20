@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2021-2022 Roger L. Whitcomb.
+ * Copyright (c) 2022 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -22,58 +22,25 @@
  * SOFTWARE.
  *
  *  History:
- *      02-Dec-2021 (rlwhitcomb)
- *	    Initial coding.
- *	15-Aug-2022 (rlwhitcomb)
- *	    Add static singleton instance for the no-value case.
+ *      16-Aug-2022 (rlwhitcomb)
+ *	    #439: Initial coding.
  */
 package info.rlwhitcomb.calc;
 
 
 /**
- * An exception thrown from the "leave [expr]" statement.
+ * An exception thrown to implement the "next" statement.
  */
-public class LeaveException extends RuntimeException
+public class NextException extends RuntimeException
 {
 	/**
-	 * The singleton instance to throw if there is no value needed.
+	 * The only instance of this exception needed.
 	 */
-	public static final LeaveException INSTANCE = new LeaveException();
+	public static final NextException INSTANCE = new NextException();
 
 
-	/** The (optional) expression included with the statement. */
-	private Object leftValue = null;
-
-	/**
-	 * Flag to say whether or not the value was included (separate so that
-	 * the value itself can be null, but still be "included").
-	 */
-	private boolean valueIncluded = false;
-
-
-	public LeaveException() {
+	private NextException() {
 	    super();
-	}
-
-	public LeaveException(final Object value) {
-	    super();
-	    leftValue = value;
-	    valueIncluded = true;
-	}
-
-	/**
-	 * @return Whether or not the value was included (does not depend on the
-	 * value being non-null).
-	 */
-	public boolean hasValue() {
-	    return valueIncluded;
-	}
-
-	/**
-	 * @return The value given on the {@code "leave"} statement (if any).
-	 */
-	public Object getValue() {
-	    return leftValue;
 	}
 }
 

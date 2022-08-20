@@ -301,6 +301,8 @@
  *	    #432: In preparation for new flag, call "getFileContents" even on command line.
  *	    And don't need LINESEP to signal end of input.
  *	    #432: Add flags ("-file", "-text", and "-filetext") as well as input handling for this.
+ *	16-Aug-2022 (rlwhitcomb)
+ *	    #439: Implement fallback processing of "next" statement.
  */
 package info.rlwhitcomb.calc;
 
@@ -1863,6 +1865,12 @@ public class Calc
 		execStartTime = Environment.highResTimer();
 
 		returnValue = visitor.visit(tree);
+	    }
+	    catch (NextException next) {
+		if (throwError)
+		    throw next;
+		else
+		    displayer.displayErrorMessage(Intl.formatString("calc#nextError"));
 	    }
 	    catch (IllegalArgumentException | IllegalStateException | IndexOutOfBoundsException ex) {
 		if (throwError)

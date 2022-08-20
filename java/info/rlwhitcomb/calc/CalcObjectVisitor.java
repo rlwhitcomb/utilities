@@ -642,6 +642,8 @@
  *	    so we only see the final "case" result.
  *	09-Aug-2022 (rlwhitcomb)
  *	    #436: Put out "define", "const", and "var" on :vars and :predefs.
+ *	19-Aug-2022 (rlwhitcomb)
+ *	    #439: Implement "next" statement in loop, while, and case.
  */
 package info.rlwhitcomb.calc;
 
@@ -2428,6 +2430,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	{
 		private CalcParser.StmtBlockContext block;
 		private String localVarName;
+		private Object lastValue = null;
 
 		LoopVisitor(final CalcParser.StmtBlockContext blockContext, final String varName) {
 		    block        = blockContext;
@@ -2438,7 +2441,13 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		public Object apply(final Object value) {
 		    currentScope.clear();
 		    currentScope.setValue(localVarName, value);
-		    return evaluate(block);
+		    try {
+			lastValue = evaluate(block);
+		    }
+		    catch (NextException next) {
+			// Note: don't update lastValue in this case
+		    }
+		    return lastValue;
 		}
 
 		public void finish() {
@@ -2691,7 +2700,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    try {
 		while (exprResult) {
 		    currentScope.clear();
-		    lastValue = evaluate(block);
+		    try {
+			lastValue = evaluate(block);
+		    }
+		    catch (NextException next) {
+			// Note: lastValue should not be updated here
+		    }
 		    exprResult = getBooleanValue(exprCtx);
 		}
 	    }
@@ -2740,16 +2754,19 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		private NestedScope caseScope;
 		private Object blockValue = null;
 		private boolean isMatched = false;
+		private boolean fallThrough = false;
 
 		public CaseVisitor(
-			final CalcParser.CaseBlockContext block,
 			final CalcParser.ExprContext expr,
 			final Object value,
 			final NestedScope scope) {
-		    blockCtx  = block;
 		    caseExpr  = expr;
 		    caseValue = value;
 		    caseScope = scope;
+		}
+
+		public void setBlock(final CalcParser.CaseBlockContext block) {
+		    blockCtx = block;
 		}
 
 		@Override
@@ -2768,6 +2785,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    try {
 			returnValue = evaluate(blockCtx.stmtBlock());
 		    }
+		    catch (NextException next) {
+			fallThrough = true;
+		    }
 		    finally {
 			popScope();
 			pushQuietMode.accept("pop");
@@ -2776,12 +2796,16 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    return returnValue;
 		}
 
+		public Object lastValue() {
+		    return blockValue;
+		}
+
 		public boolean matched() {
 		    return isMatched;
 		}
 
-		public Object lastValue() {
-		    return blockValue;
+		public boolean fallIntoNext() {
+		    return fallThrough;
 		}
 	}
 
@@ -2818,19 +2842,36 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    List<CalcParser.CaseBlockContext> blocks = ctx.caseBlock();
 	    CalcParser.CaseBlockContext defaultCtx = null;
 	    CaseScope scope = new CaseScope();
+	    CaseVisitor visitor = new CaseVisitor(caseExpr, caseValue, scope);
+	    boolean fallThrough = false;
+	    Object returnValue = null;
 
 	    for (CalcParser.CaseBlockContext cbCtx : blocks) {
-		CaseVisitor visitor = new CaseVisitor(cbCtx, caseExpr, caseValue, scope);
+		visitor.setBlock(cbCtx);
 
-		List<CalcParser.CaseSelectorContext> selectors = cbCtx.caseSelector();
-		for (CalcParser.CaseSelectorContext select : selectors) {
+		if (fallThrough) {
+		    returnValue = visitor.execute();
+		    fallThrough = visitor.fallIntoNext();
+		    if (fallThrough)
+			continue;
+
+		    return returnValue;
+		}
+
+	      selectors:
+		for (CalcParser.CaseSelectorContext select : cbCtx.caseSelector()) {
 		    if (select.K_DEFAULT() != null) {
 			defaultCtx = cbCtx;
 		    }
 		    else if (select.DOTS() != null) {
 			iterateOverDotRange(null, select.expr(), true, visitor, true, false);
-			if (visitor.matched())
+			if (visitor.fallIntoNext()) {
+			    fallThrough = true;
+			    break selectors;
+			}
+			else if (visitor.matched()) {
 			    return visitor.lastValue();
+			}
 		    }
 		    else if (select.K_MATCHES() != null) {
 			CalcParser.Expr2Context e2ctx = select.expr2();
@@ -2847,31 +2888,73 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			}
 
 			String input = toStringValue(this, caseExpr, caseValue, new StringFormat(false, false));
-			if (matches(input, pattern, flags))
-			    return visitor.execute();
+			if (matches(input, pattern, flags)) {
+			    returnValue = visitor.execute();
+			    fallThrough = visitor.fallIntoNext();
+			    if (fallThrough)
+				break selectors;
+
+			    return returnValue;
+			}
 		    }
 		    else if (select.compareOp() != null) {
 			String op = select.compareOp().getText();
 			CalcParser.ExprContext expr = select.expr().get(0);
-			if (compareOp(caseExpr, expr, Optional.ofNullable(caseValue), op))
-			    return visitor.execute();
+			if (compareOp(caseExpr, expr, Optional.ofNullable(caseValue), op)) {
+			    returnValue = visitor.execute();
+			    fallThrough = visitor.fallIntoNext();
+			    if (fallThrough)
+				break selectors;
+
+			    return returnValue;
+			}
 		    }
 		    else {
 			CalcParser.ExprContext expr = select.expr().get(0);
 			Object value = evaluate(expr);
-			Object returnValue = visitor.apply(value);
-			if (visitor.matched())
+			returnValue = visitor.apply(value);
+			if (visitor.fallIntoNext()) {
+			    fallThrough = true;
+			    break selectors;
+			}
+			else if (visitor.matched()) {
 			    return returnValue;
+			}
 		    }
 		}
 	    }
 
 	    if (defaultCtx != null) {
-		CaseVisitor visitor = new CaseVisitor(defaultCtx, caseExpr, caseValue, scope);
-		return visitor.execute();
+		visitor.setBlock(defaultCtx);
+		returnValue = visitor.execute();
+		fallThrough = visitor.fallIntoNext();
+		if (!fallThrough)
+		    return returnValue;
+
+		// Hmmm, we need to find the selector after the default...
+		boolean seenDefault = false;
+
+	      blocks:
+		for (CalcParser.CaseBlockContext cbCtx : blocks) {
+		    if (seenDefault) {
+			visitor.setBlock(cbCtx);
+			returnValue = visitor.execute();
+			if (!visitor.fallIntoNext())
+			    return returnValue;
+
+			continue blocks;
+		    }
+
+		    for (CalcParser.CaseSelectorContext select : cbCtx.caseSelector()) {
+			if (select.K_DEFAULT() != null) {
+			    seenDefault = true;
+			    continue blocks;
+			}
+		    }
+		}
 	    }
 
-	    return null;
+	    return returnValue;
 	}
 
 	@Override
@@ -2881,8 +2964,13 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		throw new LeaveException(evaluate(exprCtx.expr()));
 	    }
 	    else {
-		throw new LeaveException();
+		throw LeaveException.INSTANCE;
 	    }
+	}
+
+	@Override
+	public Object visitNextStmt(CalcParser.NextStmtContext ctx) {
+	    throw NextException.INSTANCE;
 	}
 
 	@Override

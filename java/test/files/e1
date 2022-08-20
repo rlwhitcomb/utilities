@@ -9,7 +9,7 @@
 info.version.major > 2 ||
     (info.version.major == 2 && info.version.minor > 4) ||
     (info.version.major == 2 && info.version.minor == 4 && info.version.patch >= 11)
-:requires '2.13.58-alpha', base '1.9.23-alpha'
+:requires '2.14.0-alpha', base '1.9.23-alpha'
 
 # Various simple expressions
 :decimal(50)

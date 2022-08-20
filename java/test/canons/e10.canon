@@ -279,5 +279,27 @@
 >num in 20 .. 50 -> true
 >num in 20 .. 50 -> false
 >num in 20 .. 50 -> true
+>aft -> 0
+>aft -> 1
+>aft -> 2
+>aft -> 3
+>aft -> 4
+>aft -> 5
+>aft -> 6
+>aft -> 7
+>aft -> 8
+>aft -> 9
+>aft -> 10
+>aft -> 15
+>aft -> 16
+>aft -> 17
+>aft -> 18
+>aft -> 19
+>Defining variable “t23” = 3
+>`odd t23 = $t23` -> "odd t23 = 5"
+>`odd t23 = $t23` -> "odd t23 = 7"
+>`odd t23 = $t23` -> "odd t23 = 9"
+>`odd t23 = $t23` -> "odd t23 = 11"
+>`odd t23 = $t23` -> "odd t23 = 13"
 >
 >Done with LOOP tests.

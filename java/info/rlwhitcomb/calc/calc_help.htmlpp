@@ -1163,6 +1163,9 @@ whether it has previously been used/defined.
     <code>LEAVE</code>&nbsp;<i>expr</i> ?
   </p>
   <p class="indent">
+    <code>NEXT</code>
+  </p>
+  <p class="indent">
     <code>TIMETHIS</code>&nbsp;( <i>expr</i> <code>,</code> ) ? <code>{</code> <i>statements or expressions</i> <code>}</code>
   </p>
   <p>In all these statements the <code>{</code> and <code>}</code> are not needed if there is only one statement or expression in the block.
@@ -1208,6 +1211,10 @@ whether it has previously been used/defined.
      (optional) expression on the <code>LEAVE</code> statement itself, or <code>null</code> if none is given. If a <code>LEAVE</code> statement is executed inside any other block (such as
      <code>IF</code> or <code>CASE</code>) that containing block is terminated, but the closest containing loop or function is also terminated. If the <code>LEAVE</code> is executed
      outside any loop or function, the entire script is exited with the optional expression as the final value (and therefore as the process exit code).
+  <p>The <code>NEXT</code> statement is only available inside a <code>LOOP</code>, <code>WHILE</code>, or <code>CASE</code> statement, where it transfers control to the next
+     iteration of the loop or while, or to the next block in the case statement (without regard to the selector). This will obviously affect the final value of the statement.
+     Note that in the absence of a <code>next</code> statement, execution does NOT fall through from one code block to the next inside a <code>CASE</code> statement.
+     Also note that if control is transferred via the <code>next</code> statement to the next loop/while iteration, any expressions placed after the <code>next</code> are not executed on that iteration of the loop or while.
   <p>In the normal case, the value of any of these compound statements is the value of the last expression evaluated, inside whatever block is selected, and from the last iteration of that
      block inside a loop. But the only time this value can be used is for the return value of a function, or for
      <code>"case"</code> inside any other expression. For instance, consider the following code:

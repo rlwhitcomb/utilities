@@ -145,6 +145,8 @@
 #	    #402: New base lib version error message.
 #	09-Aug-2022 (rlwhitcomb)
 #	    #436: Remove unused predef message, add key messages.
+#	16-Aug-2022 (rlwhitcomb)
+#	    #439: New error for "next" in the wrong context.
 #
 
 #
@@ -183,6 +185,7 @@ declError	= <e>Improper syntax for variable declaration: <y>%1$s<.><r>
 timing		= Parse time %1$11.9f secs. Execution time %2$11.9f secs. Total elapsed time %3$11.9f seconds.
 syntaxError	= Syntax error at position %1$d: %2$s
 errorNoAlt	= Syntax error at position %1$d: no viable alternative at input <y>%2$s<.>
+nextError	= The <y>next<.> statement is only allowed inside <y>loop<.> or <y>while<.>.
 
 libVersionMismatch	= The required version <y>%1$s<.> is not compatible with the current version <y>%2$s<.>.
 baseVersionMismatch	= The required base version <y>%1$s<.> is not compatible with the current version <y>%2$s<.>.

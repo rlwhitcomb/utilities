@@ -439,6 +439,8 @@
  *	    value to be assigned, etc.
  *	15-Aug-2022 (rlwhitcomb)
  *	    #440: Implement "has" operator.
+ *	16-Aug-2022 (rlwhitcomb)
+ *	    #439: Implement "next" statement.
  */
 
 grammar Calc;
@@ -461,6 +463,7 @@ stmtOrExpr
    | whileStmt
    | ifStmt
    | leaveStmt
+   | nextStmt
    | timeThisStmt
    | emptyStmt
    ;
@@ -500,6 +503,10 @@ caseStmt
 
 leaveStmt
    : K_LEAVE expr1 ?
+   ;
+
+nextStmt
+   : K_NEXT
    ;
 
 timeThisStmt
@@ -1143,6 +1150,8 @@ K_OF       : 'of' | 'OF' | 'Of' ;
 K_DEFAULT  : 'default' | 'DEFAULT' | 'Default' ;
 
 K_LEAVE    : 'leave' | 'LEAVE' | 'Leave' ;
+
+K_NEXT     : 'next' | 'NEXT' | 'Next' ;
 
 K_TIMETHIS : 'timethis' | 'TIMETHIS' | 'TimeThis' ;
 

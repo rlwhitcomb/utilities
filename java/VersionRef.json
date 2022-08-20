@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.14.0', date: d'2022-08-19',
+      issues: [ 439 ],
+      comment: 'Add "next" statement for loop, while, and case.'
+    },
     { version: '2.13.58', date: d'2022-08-15',
       issues: [ 440 ],
       comment: 'Implement "has" operator.'
