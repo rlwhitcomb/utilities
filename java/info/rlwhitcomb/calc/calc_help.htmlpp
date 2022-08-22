@@ -1136,7 +1136,7 @@ whether it has previously been used/defined.
   <h2>Statements</h2>
 <div class="cols">
   In addition to the functions and operators listed above, Calc has six different statements which can be used to do
-     iterative or repeated calculations, and to select between actions based on the value of an expression. These are the <code>LOOP</code>, <code>WHILE</code>, <code>IF</code>, <code>CASE</code>, <code>LEAVE</code>, and <code>TIMETHIS</code> statements.
+     iterative or repeated calculations, and to select between actions based on the value of an expression. These are the <code>LOOP</code>, <code>WHILE</code>, <code>IF</code>, <code>CASE</code>, <code>LEAVE</code>, <code>NEXT</code>, and <code>TIMETHIS</code> statements.
      All keywords in these statements have three differently-cased forms: all lower case, all UPPER case, and MixedCase.  For example: <code>loop</code>, <code>LOOP</code>, and <code>Loop</code>.
   <p>The syntax for each is as follows:
   <p class="indent">
