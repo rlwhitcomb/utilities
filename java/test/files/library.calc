@@ -12,6 +12,11 @@
 const EOL = info.os.linesep
 
 /*
+ * Pattern for splitting lines no matter the line ending.
+ */
+const LINESEP = '\r?\n'
+
+/*
  * Whether we are running on Windows vs. something else.
  */
 const ON_WINDOWS = info.os.id == 'windows'
