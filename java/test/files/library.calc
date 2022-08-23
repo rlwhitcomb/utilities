@@ -158,8 +158,8 @@ define to_alpha(v) = { `${(_A_ + v)@c}` }
  * https://stackoverflow.com/questions/181596/how-to-convert-a-column-number-e-g-127-into-an-excel-column-e-g-aa
  */
 define to_excel_col(idx) = {
-   _col = ''
-   _i = idx - 1
+   var _col = ''
+   var _i = idx - 1
    while _i >= 0 {
       _col = to_alpha(_i % _BASE_) + _col
       _i = _i \ _BASE_ - 1
@@ -174,9 +174,9 @@ define to_excel_col(idx) = {
  * @return    The numeric index of the column.
  */
 define from_excel_col(col) = {
-   _col = 0
+   var _col = 0
    loop c over codes(upper(col)) {
-      _v = c - _A_ + 1
+      var _v = c - _A_ + 1
       _col *= _BASE_
       _col += _v
    }
@@ -394,9 +394,9 @@ define is_perfect(n) = { sumof ( factors (n) ) - n == n }
  * @return [ x1, x2 ] if solution is real, error if not
  */
 define quad(a, b, c) = {
-  _b2 = b * b
-  _2a = 2 * a
-  _r = (_b2 - 4 * a * c)
+  var _b2 = b * b
+  var _2a = 2 * a
+  var _r = (_b2 - 4 * a * c)
   if _r < 0 {
     _r = abs(_r)
     [ ( -b/_2a, sqrt(_r)/_2a ), ( -b/_2a, -sqrt(_r)/_2a ) ]
@@ -439,11 +439,11 @@ define zeta_2n(_2n) = { ((-1)**(_2n / 2 + 1) * Bn(_2n) * (2 * pi) ** _2n) / (2 *
  * @return The k-th Tangent number
  */
 define Tn(k) = {
-  _2k2 = 2*k + 2
-  _2_2k2 = 2 ** _2k2
+  var _2k2 = 2*k + 2
+  var _2_2k2 = 2 ** _2k2
   :rational on {
-    _fact = Bn(_2k2) / _2k2
-    _result = _2_2k2 * (_2_2k2 - 1) * _fact
+    var _fact = Bn(_2k2) / _2k2
+    var _result = _2_2k2 * (_2_2k2 - 1) * _fact
   }
   _result@d
 }
@@ -480,9 +480,9 @@ define _pmt_internal_(ctx) = {
   ctx.num = (ctx.N ? (ctx.N * 12) : ctx.n)
 
   # Calculate the intermediate values (which are reused)
-  r_n = (1 + ctx.rate) ** ctx.num
-  r_r_n = ctx.rate * r_n
-  r_n_1 = r_n - 1
+  var r_n = (1 + ctx.rate) ** ctx.num
+  var r_r_n = ctx.rate * r_n
+  var r_n_1 = r_n - 1
 
   # Now the final monthly payment value
   ctx.P * (r_r_n / r_n_1)
@@ -617,9 +617,9 @@ define hashstring(value, algorithm = 'sha-256', uppercase = false) = {
  * @return { mean: xxx, stddev: sss }
  */
 define mean_stddev (values) = {
-  len = length(values)
-  avg = sumof(values) / len
-  variance = 0
+  var len = length(values)
+  var avg = sumof(values) / len
+  var variance = 0
   loop v over values { variance += (v - avg) ** 2 }
   variance /= len
   { mean: avg, stddev: round(sqrt(variance), 3) }
