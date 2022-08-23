@@ -644,6 +644,8 @@
  *	    #436: Put out "define", "const", and "var" on :vars and :predefs.
  *	19-Aug-2022 (rlwhitcomb)
  *	    #439: Implement "next" statement in loop, while, and case.
+ *	23-Aug-2022 (rlwhitcomb)
+ *	    #452: Fix weird error due to "leave" not setting return value from function.
  */
 package info.rlwhitcomb.calc;
 
@@ -1204,9 +1206,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    returnValue = visit(func.getFunctionBody());
 		}
 		catch (LeaveException lex) {
-		    if (lex.hasValue()) {
-			returnValue = lex.getValue();
-		    }
+		    returnValue = lex.hasValue() ? lex.getValue() : null;
 		}
 		finally {
 		    popScope();

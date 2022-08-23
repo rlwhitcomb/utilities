@@ -322,7 +322,7 @@ define dateformat(d, f = 'mm/dd/yyyy') = {
     define d2(n) = { n < 10 ? '0' + n : '' + n }
     define dg(n) = { '' + n }
     define finishRun(ch) = {
-        len = length(runOf)
+        var len = length(runOf)
         if len {
             if ch == runOf[0] leave
             case runOf[0] of {
@@ -339,8 +339,8 @@ define dateformat(d, f = 'mm/dd/yyyy') = {
         runOf = ''
     }
 
-    result = ''
-    runOf = ''
+    var result = ''
+    var runOf = ''
     loop fch over f {
         case fch of {
             'd', 'm', 'M', 'y': {

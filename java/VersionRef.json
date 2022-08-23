@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.14.1', date: d'2022-08-23',
+      issues: [ 452 ],
+      comment: 'Fix bug resulting from "leave" without value returning from function.'
+    },
     { version: '2.14.0', date: d'2022-08-19',
       issues: [ 439 ],
       comment: 'Add "next" statement for loop, while, and case.'
