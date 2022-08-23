@@ -199,6 +199,38 @@ def rad_to_deg(rad) = { rad / pi * 180 }
 def deg_to_rad(deg) = { deg / 180 * pi }
 
 /*
+ * Convert radians to gradians (centesimal degrees): 2*pi = 400, so radians / pi * 200 = gradians
+ *
+ * @param rad The input radians value
+ * @return    Computed gradians
+ */
+def rad_to_grad(rad) = { rad / pi * 200 }
+
+/*
+ * Convert gradians to radians: 2*pi = 400, so gradians / 200 * pi = radians
+ *
+ * @param grad The input gradians value
+ * @return     Computed radians
+ */
+def grad_to_rad(grad) = { grad / 200 * pi }
+
+/*
+ * Convert gradians to degrees: 400 = 360, so gradians / 10 * 9 = degrees
+ *
+ * @param grad The input gradians value
+ * @return     Computed degrees
+ */
+def grad_to_deg(grad) = { grad / 10 * 9 }
+
+/*
+ * Convert degrees to gradians: 360 = 400, so degrees / 9 * 10 = gradians
+ *
+ * @param deg The input degrees value
+ * @return    Computed gradians
+ */
+def deg_to_grad(deg) = { deg / 9 * 10 }
+
+/*
  * Convert degrees Fahrenheit to degrees Celsius.
  *
  * @param f Degrees in Fahrenheit (32 = freezing point of water)
