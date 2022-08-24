@@ -646,6 +646,7 @@
  *	    #439: Implement "next" statement in loop, while, and case.
  *	23-Aug-2022 (rlwhitcomb)
  *	    #452: Fix weird error due to "leave" not setting return value from function.
+ *	    #455: Change "chars" and "codes" to deal differently depending on input value.
  */
 package info.rlwhitcomb.calc;
 
@@ -5380,22 +5381,81 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitCharsExpr(CalcParser.CharsExprContext ctx) {
-	    final ArrayScope<String> result = new ArrayScope<>();
-	    String string = getStringValue(ctx.expr1().expr());
+	    CalcParser.ExprContext expr = ctx.expr1().expr();
+	    Object value = evaluate(expr);
 
-	    string.codePoints().forEachOrdered(cp -> result.add(String.valueOf(Character.toChars(cp))));
+	    if (value instanceof String) {
+		String string = (String) value;
+		final ArrayScope<String> result = new ArrayScope<>();
 
-	    return result;
+		string.codePoints().forEachOrdered(cp -> result.add(String.valueOf(Character.toChars(cp))));
+
+		return result;
+	    }
+	    else if (value instanceof Number) {
+		int cp = toIntValue(this, value, settings.mc, expr);
+		char[] chars = Character.toChars(cp);
+
+		return new String(chars);
+	    }
+	    else if (value instanceof ArrayScope) {
+		final ArrayScope<String> result = new ArrayScope<>();
+		// Needs to be array of integer codepoints
+		@SuppressWarnings("unchecked")
+		ArrayScope<Object> array = (ArrayScope<Object>) value;
+		for (Object obj : array.list()) {
+		    int cp = toIntValue(this, obj, settings.mc, expr);
+		    char[] chars = Character.toChars(cp);
+		    result.add(new String(chars));
+		}
+
+		return result;
+	    }
+	    else {
+		throw new CalcExprException(expr, "%calc#illegalArgument", typeof(value).toString(), "chars");
+	    }
 	}
 
 	@Override
 	public Object visitCodesExpr(CalcParser.CodesExprContext ctx) {
-	    final ArrayScope<Integer> result = new ArrayScope<>();
-	    String string = getStringValue(ctx.expr1().expr());
+	    CalcParser.ExprContext expr = ctx.expr1().expr();
+	    Object value = evaluate(expr);
+	    String string;
 
-	    string.codePoints().forEachOrdered(cp -> result.add(cp));
+	    if (value instanceof ArrayScope) {
+		final ArrayScope<Integer> result = new ArrayScope<>();
+		// Needs to be array of strings
+		@SuppressWarnings("unchecked")
+		ArrayScope<Object> array = (ArrayScope<Object>) value;
+		for (Object obj : array.list()) {
+		    if (obj instanceof String || obj instanceof Number) {
+			string = toNonNullString(expr, obj);
+			string.codePoints().forEachOrdered(cp -> result.add(cp));
+		    }
+		    else {
+			throw new CalcExprException(expr, "%calc#illegalArgument", typeof(value).toString(), "codes");
+		    }
+		}
 
-	    return result;
+		return result;
+	    }
+	    else if (value instanceof String || value instanceof Number) {
+		string = toNonNullString(expr, value);
+	    }
+	    else {
+		throw new CalcExprException(expr, "%calc#illegalArgument", typeof(value).toString(), "codes");
+	    }
+
+	    if (Character.codePointCount(string, 0, string.length()) == 1) {
+		return BigInteger.valueOf(Character.codePointAt(string, 0));
+	    }
+	    else {
+		final ArrayScope<Integer> result = new ArrayScope<>();
+
+		string.codePoints().forEachOrdered(cp -> result.add(cp));
+
+		return result;
+	    }
 	}
 
 	@Override

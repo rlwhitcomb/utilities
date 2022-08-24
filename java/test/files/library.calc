@@ -142,11 +142,10 @@ def excel_date_1904(date) = { date - D'1/1/1904' }
 /*
  * Helpers for the Excel column conversion code.
  */
-define to_int(c) = { eval(`${c@d}`) }
-const _A_ = to_int('A')
-const _Z_ = to_int('Z')
+const _A_ = codes('A')
+const _Z_ = codes('Z')
 const _BASE_ = _Z_ - _A_ + 1
-define to_alpha(v) = { `${(_A_ + v)@c}` }
+define to_alpha(v) = { chars(_A_ + v) }
 
 /*
  * Convert a numeric Excel column index (1..16384) into a regular column name ("A" .. "XFD").
@@ -174,11 +173,14 @@ define to_excel_col(idx) = {
  * @return    The numeric index of the column.
  */
 define from_excel_col(col) = {
-   var _col = 0
-   loop c over codes(upper(col)) {
-      var _v = c - _A_ + 1
-      _col *= _BASE_
-      _col += _v
+   if length(col) == 1 {
+      codes(upper(col)) - _A_ + 1
+   }
+   else {
+      var idx = 0
+      loop c over codes(upper(col)) {
+         idx = idx * _BASE_ + (c - _A_ + 1)
+      }
    }
 }
 

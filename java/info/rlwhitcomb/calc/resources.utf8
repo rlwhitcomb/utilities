@@ -147,6 +147,8 @@
 #	    #436: Remove unused predef message, add key messages.
 #	16-Aug-2022 (rlwhitcomb)
 #	    #439: New error for "next" in the wrong context.
+#	23-Aug-2022 (rlwhitcomb)
+#	    #455: New error for bad argument to "chars" or "codes".
 #
 
 #
@@ -251,6 +253,7 @@ targetWrongType		= Target of a <y>%1$s<.> must be an array or string
 oneCharInt		= %1$s value for a string must be one character or an integer \u2264 65535
 undefinedFunction	= Cannot call undefined function <y>%1$s<.>
 withinNotAllowed	= Specifying <y>within<.> is only allowed with an end value with implied start
+illegalArgument		= <u>%1$s<.> value is not suitable for <y>%2$s<.> function
 
 intro.help1	= "  Enter an arithmetic expression to evaluate, or multiple expressions"
 intro.help2	= "  separated by <u>;<.>, followed by <a>Return<.> or <a>Enter<.>."

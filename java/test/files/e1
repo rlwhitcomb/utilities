@@ -716,9 +716,9 @@ loop _p ∈ p { `name: $_p, value: ${p[_p]}` }
 codes 'abc'
 chars 'abc'
 codes 123
-chars 123
+chars '123'
 loop codes(123) __
-loop chars(123) {__}
+loop chars('123') {__}
 loop codes "⅛34" __
 loop chars "⅛34" {__}
 
