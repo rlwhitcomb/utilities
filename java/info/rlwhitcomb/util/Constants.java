@@ -42,6 +42,8 @@
  *	    #380: Increase string file size for FileUtilities.
  *	09-Jul-2022 (rlwhitcomb)
  *	    #393: Cleanup imports.
+ *	24-Aug-2022 (rlwhitcomb)
+ *	    #447: Add "D_200" value.
  */
 package info.rlwhitcomb.util;
 
@@ -162,6 +164,9 @@ public final class Constants
 
 	/** A {@link BigDecimal} value of <code>180</code>. */
 	public static final BigDecimal D_180 = BigDecimal.valueOf(180);
+
+	/** A {@link BigDecimal} value of <code>200</code>. */
+	public static final BigDecimal D_200 = BigDecimal.valueOf(200);
 
 
 	/** A complex number corresponding to {@code i}. */

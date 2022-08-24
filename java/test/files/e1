@@ -222,6 +222,14 @@ round(a, 10)
 round a, -2
 round c, 0
 
+:grad
+settings.trigMode
+cos(100)
+sin(300)
+asin(0.5)
+
+:radians
+
 v = 1621.9
 
 :resultonly on {

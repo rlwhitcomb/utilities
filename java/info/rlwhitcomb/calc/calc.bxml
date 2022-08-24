@@ -91,6 +91,7 @@
 	    24-Aug-2022 (rlwhitcomb)
 		#454: Settings option for colored output; always disabled for now until we implement
 		coloring of the results in the GUI.
+		#447: New grads trig mode.
 
      ========================================================================== -->
 
@@ -188,7 +189,7 @@
 			<GridPane.Row>
 			    <RadioButton bxml:id="degreesModeButton" buttonGroup="$trigGroup" buttonData="%degrees"/>
 			    <RadioButton bxml:id="radiansModeButton" buttonGroup="$trigGroup" buttonData="%radians"/>
-			    <Label text="" enabled="false"/>
+			    <RadioButton bxml:id="gradsModeButton" buttonGroup="$trigGroup" buttonData="%grads"/>
 			</GridPane.Row>
 		    </GridPane>
 		</Form.Section>

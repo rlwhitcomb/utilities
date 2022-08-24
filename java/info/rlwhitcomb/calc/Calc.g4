@@ -445,6 +445,7 @@
  *	    #459: Implement "@@" (to string) operator.
  *	24-Aug-2022 (rlwhitcomb)
  *	    #454: Implement ":colors" directive.
+ *	    #447: Implement "grads" mode for trig operations.
  */
 
 grammar Calc;
@@ -813,6 +814,7 @@ directive
    | D_UNLIMITED bracketBlock ?               # unlimitedDirective
    | D_DEGREES bracketBlock ?                 # degreesDirective
    | D_RADIANS bracketBlock ?                 # radiansDirective
+   | D_GRADS bracketBlock ?                   # gradsDirective
    | D_BINARY bracketBlock ?                  # binaryDirective
    | D_SI bracketBlock ?                      # siDirective
    | D_MIXED bracketBlock ?                   # mixedDirective
@@ -1382,6 +1384,12 @@ D_DEGREES
 D_RADIANS
    : DIR  ( 'radians' | 'RADIANS' | 'Radians' )
    | DIR  ( 'rad'     | 'RAD'     | 'Rad'     )
+   ;
+
+D_GRADS
+   : DIR  ( 'gradians' | 'GRADIANS' | 'Gradians' )
+   | DIR  ( 'grads'    | 'GRADS'    | 'Grads'    )
+   | DIR  ( 'grad'     | 'GRAD'     | 'Grad'     )
    ;
 
 D_BINARY

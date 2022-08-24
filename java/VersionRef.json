@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.14.10', date: d'2022-08-24',
+      issues: [ 447 ],
+      comment: 'Implement "grads" trig mode.'
+    },
     { version: '2.14.8', date: d'2022-08-24',
       issues: [ 454 ],
       comment: 'Add ":colors" directive.'

@@ -598,7 +598,7 @@ or<br>
   <p>As another side note, the Bernoulli numbers are best calculated in rational mode, since they are defined as the ratio of integer values.
      Of course, in decimal mode the fractions will be divided and the results returned as a decimal value up the specified precision.
   <p>Trigonometric calculations are, by default, done in radians, but this can be changed to use degrees using the <code>:degrees</code> directive,
-     or back using the <code>:radians</code> directive.
+     changed to use gradians or grads using the <code>:grads</code> directive, or back using the <code>:radians</code> directive.
   <p>Dates have a valid range of <code>d'-9999/01/01'</code> to <code>d'9999/12/31'</code>, or a total range of 7,304,484 days. Significantly, dates
      use the <a href="https://www.dictionary.com/browse/proleptic">proleptic</a> values of the Gregorian calendar extended indefinitely to the past
      and future, such that date results prior to the adoption of the Gregorian calendar (in roughly 1582 AD) <strong>will not correspond</strong>
@@ -1274,6 +1274,7 @@ whether it has previously been used/defined.
     <tr><td><code>:unlimited</code> [ <i>statements</i> ]</td><td>Set to unlimited decimal precision<br>(some calculations will still limit the precision to avoid<br>"non-terminating decimal expansion" errors)</td><td><code>:unl</code><br>or <code>settings.precision=0</code></td></tr>
     <tr><td><code>:degrees</code> [ <i>statements</i> ]</td><td>Do all trigonometric calculations assuming the inputs are in degrees</td><td><code>:deg</code><br>or <code>settings.trigMode='degrees'</code></td></tr>
     <tr><td><code>:radians</code> [ <i>statements</i> ]</td><td>Do all calculations assuming inputs are radians <i>(default)</i></td><td><code>:rad</code><br>or <code>settings.trigMode="RADIANS"</code></td></tr>
+    <tr><td><code>:grads</code> [ <i>statements</i> ]</td><td>Do all calculations assuming values are gradians or grads</td><td><code>:gradians</code><br>or <code>settings.trigMode="GRADS"</code></td></tr>
     <tr><td><code>:binary</code> [ <i>statements</i> ]</td><td>Display units in terms of multiples of 1024</td><td><code>:bin</code><br>or <code>settings.units='binary'</code></td></tr>
     <tr><td><code>:si</code> [ <i>statements</i> ]</td><td>Display units in terms of multiples of 1000</td><td><code>:ten</code><br>or <code>settings.units='DECIMAL'</code></td></tr>
     <tr><td><code>:mixed</code> [ <i>statements</i> ]</td><td>Unit multiplier based on powers of 2 (same as <code>:binary</code>), but with SI suffix <i>(default)</i></td><td><code>:mix</code><br>or <code>settings.units="Mixed"</code></tr>
@@ -1347,6 +1348,7 @@ whether it has previously been used/defined.
   <p>If no arguments are given to <code>:echo</code>, an empty line is displayed. In the GUI frame, the <code>stdout</code> and <code>stderr</code> streams are merged, so the output value is essentially meaningless, but specifying <code>"both"</code> will still display the message twice.
   <p>The effect of <code>:sortobjects on</code> is to override the way <i>key</i><code>:</code><i>value</i> pairs are added to objects. By default they are
      added in the order of declaration. With this option on, the keys are sorted alphabetically and kept sorted this way as elements are added and removed.
+  <p>Gradian mode is used to do trignometric calculations assuming a circle has 400 grads (also called "gons" -- see <a href="https://en.wikipedia.org/wiki/Gradian">"Gradian"</a> for further explanation).
 </div>
 <a class="top-link" href="#topofpage">Top</a>
 <hr id="Standard_Libraries_of_Functions" class="sectionsep">
@@ -1382,6 +1384,10 @@ whether it has previously been used/defined.
     <tr><td><code>from_excel_col</code></td><td><code>col</code></td><td>Translate an Excel column name ("A" to "XFD") to a numeric column index (1-based)</td></tr>
     <tr><td><code>rad_to_deg</code></td><td><code>rad</code></td><td>Convert from numeric degrees to radians</td></tr>
     <tr><td><code>deg_to_rad</code></td><td><code>deg</code></td><td>Convert from radians to numeric degrees</td></tr>
+    <tr><td><code>rad_to_grad></code></td><td><code>rad</code></td><td>Convert from radians to centesimal degrees or gradians</td></tr>
+    <tr><td><code>grad_to_rad</code></td><td><code>grad</code></td><td>Convert gradians/grads to radians</td></tr>
+    <tr><td><code>deg_to_grad</code></td><td><code>deg</code></td><td>Convert numeric degrees to gradians/grads</td></tr>
+    <tr><td><code>grad_to_deg</code></td><td><code>grad</code></td><td>Convert grads to numeric degress</td></tr>
     <tr><td><code>FtoC</code></td><td><code>f</code></td><td>Convert temperature in Fahrenheit to Celsius</td></tr>
     <tr><td><code>CtoF</code></td><td><code>c</code></td><td>Convert temperature in Celsius to Fahrenheit</td></tr>
     <tr><td><code>dow_name</code></td><td><code>date</code></td><td>Get the day of week name for a given date</td></tr>

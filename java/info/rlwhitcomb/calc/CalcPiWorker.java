@@ -38,6 +38,8 @@
  *	    #273: Move math-related classes to "math" package.
  *	08-Jul-2022 (rlwhitcomb)
  *	    #393: Cleanup imports.
+ *	24-Aug-2022 (rlwhitcomb)
+ *	    #447: Add constant for pi/200 for gradian/grad conversion.
  */
 package info.rlwhitcomb.calc;
 
@@ -81,6 +83,10 @@ public class CalcPiWorker
 	 * {@link #pi} divided by 180, or the conversion between degrees and radians.
 	 */
 	private BigDecimal piOver180;
+	/**
+	 * {@link #pi} divided by 200, or the conversion between grads and radians.
+	 */
+	private BigDecimal piOver200;
 
 
 	/** The captive thread used to do the background calculations. */
@@ -141,6 +147,7 @@ public class CalcPiWorker
 
 	    piOver2   = pi.divide(D_TWO, mc);
 	    piOver180 = pi.divide(D_180, mc);
+	    piOver200 = pi.divide(D_200, mc);
 
 	    // Release a permit to say the calculation results are now available
 	    readySem.release();
@@ -206,6 +213,17 @@ public class CalcPiWorker
 	 */
 	public BigDecimal getPiOver180() {
 	    return getWhenReady( () -> piOver180 );
+	}
+
+	/**
+	 * Get the calculated value of <code>pi / 200</code> to the current number of digits.
+	 * <p> Waits until the background thread is done with the calculation
+	 * if a new precision was just recently specified.
+	 *
+	 * @return The value of <code>pi / 200</code> to the current precision.
+	 */
+	public BigDecimal getPiOver200() {
+	    return getWhenReady( () -> piOver200 );
 	}
 
 	/**

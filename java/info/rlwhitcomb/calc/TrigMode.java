@@ -28,6 +28,8 @@
  *	    Moved out of CalcObjectVisitor.
  *	01-Feb-2022 (rlwhitcomb)
  *	    #115: Add "getFrom" method.
+ *	24-Aug-2022 (rlwhitcomb)
+ *	    #447: Add "GRADS" mode.
  */
 package info.rlwhitcomb.calc;
 
@@ -44,7 +46,12 @@ public enum TrigMode
 	/**
 	 * Angles are measured / returned in radians (0 - 2𝛑).
 	 */
-	RADIANS;
+	RADIANS,
+
+	/**
+	 * Angles are measured / returned in gradians (0 - 400).
+	 */
+	GRADS;
 
 
 	public static TrigMode getFrom(final Object obj) {

@@ -650,6 +650,7 @@
  *	    #459: Add "@@" (to string) operator.
  *	24-Aug-2022 (rlwhitcomb)
  *	    #454: Implement ":colors" directive.
+ *	    #447: Add "grads" mode for trig calculations.
  */
 package info.rlwhitcomb.calc;
 
@@ -1299,6 +1300,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    if (settings.trigMode == TrigMode.DEGREES)
 		value = value.multiply(piWorker.getPiOver180(), settings.mc);
+	    else if (settings.trigMode == TrigMode.GRADS)
+		value = value.multiply(piWorker.getPiOver200(), settings.mc);
 
 	    return value;
 	}
@@ -1312,6 +1315,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    if (settings.trigMode == TrigMode.DEGREES)
 		return radianValue.divide(piWorker.getPiOver180(), MC_DOUBLE);
+	    else if (settings.trigMode == TrigMode.GRADS)
+		return radianValue.divide(piWorker.getPiOver200(), MC_DOUBLE);
 
 	    return radianValue;
 	}
@@ -1321,6 +1326,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    if (settings.trigMode == TrigMode.DEGREES)
 		return radianValue.divide(piWorker.getPiOver180(), settings.mcDivide);
+	    else if (settings.trigMode == TrigMode.GRADS)
+		return radianValue.divide(piWorker.getPiOver200(), settings.mcDivide);
 
 	    return radianValue;
 	}
@@ -1501,6 +1508,16 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    TrigMode oldMode = settings.trigMode;
 
 	    String value = setTrigMode(TrigMode.RADIANS);
+
+	    return directiveTrigModeBlock(blockCtx, value, oldMode);
+	}
+
+	@Override
+	public Object visitGradsDirective(CalcParser.GradsDirectiveContext ctx) {
+	    CalcParser.BracketBlockContext blockCtx = ctx.bracketBlock();
+	    TrigMode oldMode = settings.trigMode;
+
+	    String value = setTrigMode(TrigMode.GRADS);
 
 	    return directiveTrigModeBlock(blockCtx, value, oldMode);
 	}

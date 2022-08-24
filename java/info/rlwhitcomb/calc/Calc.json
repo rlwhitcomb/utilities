@@ -53,6 +53,7 @@
  *	    #392: Settings option to sort objects by key.
  *	24-Aug-2022 (rlwhitcomb)
  *	    #454: New settings option to color the output.
+ *	    #447: New "grads" trig mode.
  */
 {
     title:              'Calc',
@@ -73,6 +74,7 @@
     trigHeader:         'Trig Mode',
     degrees:            'Degrees',
     radians:            'Radians',
+    grads:              'Grads',
     unitsHeader:        'Units Setting',
     binaryUnits:        'Binary',
     siUnits:            'SI (base 10)',

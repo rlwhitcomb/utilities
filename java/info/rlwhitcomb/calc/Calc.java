@@ -305,6 +305,7 @@
  *	    #439: Implement fallback processing of "next" statement.
  *	24-Aug-2022 (rlwhitcomb)
  *	    #454: Process new colored option in Settings dialog; allow setting colored mode from visitor.
+ *	    #447: New grads trig mode.
  */
 package info.rlwhitcomb.calc;
 
@@ -541,6 +542,7 @@ public class Calc
 	@BXML private TextInput decimalDigitsInput;
 	@BXML private RadioButton degreesModeButton;
 	@BXML private RadioButton radiansModeButton;
+	@BXML private RadioButton gradsModeButton;
 	@BXML private RadioButton binaryModeButton;
 	@BXML private RadioButton siModeButton;
 	@BXML private RadioButton mixedModeButton;
@@ -825,6 +827,9 @@ public class Calc
 		case RADIANS:
 		    radiansModeButton.setSelected(true);
 		    break;
+		case GRADS:
+		    gradsModeButton.setSelected(true);
+		    break;
 	    }
 
 	    switch (settings.units) {
@@ -877,6 +882,8 @@ public class Calc
 		TrigMode newTrigMode = TrigMode.RADIANS;
 		if (degreesModeButton.isSelected())
 		    newTrigMode = TrigMode.DEGREES;
+		else if (gradsModeButton.isSelected())
+		    newTrigMode = TrigMode.GRADS;
 		if (newTrigMode != originalSettings.trigMode)
 		    visitor.setTrigMode(newTrigMode);
 
