@@ -647,6 +647,7 @@
  *	23-Aug-2022 (rlwhitcomb)
  *	    #452: Fix weird error due to "leave" not setting return value from function.
  *	    #455: Change "chars" and "codes" to deal differently depending on input value.
+ *	    #459: Add "@@" (to string) operator.
  */
 package info.rlwhitcomb.calc;
 
@@ -3417,6 +3418,11 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			throw new UnknownOpException(op, expr);
 		}
 	    }
+	}
+
+	@Override
+	public Object visitToStringExpr(CalcParser.ToStringExprContext ctx) {
+	    return getStringValue(ctx.expr(), true, false, settings.separatorMode);
 	}
 
 	@Override

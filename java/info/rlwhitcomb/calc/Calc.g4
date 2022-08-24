@@ -441,6 +441,8 @@
  *	    #440: Implement "has" operator.
  *	16-Aug-2022 (rlwhitcomb)
  *	    #439: Implement "next" statement.
+ *	23-Aug-2022 (rlwhitcomb)
+ *	    #459: Implement "@@" (to string) operator.
  */
 
 grammar Calc;
@@ -619,6 +621,7 @@ expr
    |<assoc=right> ADD_OP expr            # negPosExpr
    |<assoc=right> '!!' expr              # toBooleanExpr
    |<assoc=right> ('!'|'\u00AC') expr    # booleanNotExpr
+   |<assoc=right> TO_STRING_OP expr      # toStringExpr
    |<assoc=right> TO_NUM_OP expr         # toNumberExpr
    |<assoc=right> BIT_NOT_OP expr        # bitNotExpr
    | expr '!'                            # factorialExpr
@@ -1190,6 +1193,10 @@ GLOBALVAR
        | '_#'
        | '_*'
        | '__'
+       ;
+
+TO_STRING_OP
+       : '@@'
        ;
 
 TO_NUM_OP

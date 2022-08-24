@@ -145,7 +145,6 @@ def excel_date_1904(date) = { date - D'1/1/1904' }
 const _A_ = codes('A')
 const _Z_ = codes('Z')
 const _BASE_ = _Z_ - _A_ + 1
-define to_alpha(v) = { chars(_A_ + v) }
 
 /*
  * Convert a numeric Excel column index (1..16384) into a regular column name ("A" .. "XFD").
@@ -157,13 +156,13 @@ define to_alpha(v) = { chars(_A_ + v) }
  * https://stackoverflow.com/questions/181596/how-to-convert-a-column-number-e-g-127-into-an-excel-column-e-g-aa
  */
 define to_excel_col(idx) = {
-   var _col = ''
-   var _i = idx - 1
-   while _i >= 0 {
-      _col = to_alpha(_i % _BASE_) + _col
-      _i = _i \ _BASE_ - 1
+   var col = ''
+   var ix = idx - 1
+   while ix >= 0 {
+      col = chars(_A_ + ix % _BASE_) + col
+      ix = ix \ _BASE_ - 1
    }
-   _col
+   col
 }
 
 /*
