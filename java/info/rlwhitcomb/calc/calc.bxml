@@ -88,6 +88,9 @@
 		#270: Update Version dialog to match new Environment.printProgramInfo format.
 	    10-Jul-2022 (rlwhitcomb)
 		#392: Settings option to sort objects by key.
+	    24-Aug-2022 (rlwhitcomb)
+		#454: Settings option for colored output; always disabled for now until we implement
+		coloring of the results in the GUI.
 
      ========================================================================== -->
 
@@ -218,6 +221,11 @@
 			    <Checkbox bxml:id="separatorCheck" buttonData="%separators"/>
 			    <Checkbox bxml:id="quoteStringsCheck" buttonData="%quoteStrings"/>
 			    <Checkbox bxml:id="sortKeysCheck" buttonData="%sortKeys"/>
+			</GridPane.Row>
+			<GridPane.Row>
+			    <Checkbox bxml:id="coloredCheck" buttonData="%coloredResults" enabled="false"/>
+			    <GridPane.Filler/>
+			    <GridPane.Filler/>
 			</GridPane.Row>
 		    </GridPane>
 		</Form.Section>

@@ -303,6 +303,8 @@
  *	    #432: Add flags ("-file", "-text", and "-filetext") as well as input handling for this.
  *	16-Aug-2022 (rlwhitcomb)
  *	    #439: Implement fallback processing of "next" statement.
+ *	24-Aug-2022 (rlwhitcomb)
+ *	    #454: Process new colored option in Settings dialog; allow setting colored mode from visitor.
  */
 package info.rlwhitcomb.calc;
 
@@ -469,7 +471,8 @@ public class Calc
 	{
 		ORIGINAL_SETTINGS,
 		ORIGINAL_MATH_CONTEXT,
-		NEW_MATH_CONTEXT
+		NEW_MATH_CONTEXT,
+		ORIGINAL_COLORED
 	}
 
 
@@ -550,6 +553,7 @@ public class Calc
 	@BXML private Checkbox separatorCheck;
 	@BXML private Checkbox quoteStringsCheck;
 	@BXML private Checkbox sortKeysCheck;
+	@BXML private Checkbox coloredCheck;
 	@BXML private RadioButton useEnterButton;
 	@BXML private RadioButton useCmdEnterButton;
 	@BXML private RadioButton lightBackgroundButton;
@@ -622,7 +626,6 @@ public class Calc
 	    colorMap.put("y", (darkBackgrounds ? YELLOW_BRIGHT : BLUE_BOLD));
 	    colorMap.put("a", (darkBackgrounds ? WHITE : BLACK_BRIGHT));
 
-
 	    if (quoteMap.isEmpty()) {
 		quoteMap.put("x", "");
 		quoteMap.put("y", "\u201C");
@@ -686,6 +689,9 @@ public class Calc
 	    }
 	}
 
+	/**
+	 * Set the colors for the GUI components, depending on the dark/light settings.
+	 */
 	private void setGUIContainerColors(Container container) {
 	    setGUIComponentColors(container);
 	    for (Component comp : container) {
@@ -694,13 +700,6 @@ public class Calc
 		else
 		    setGUIComponentColors(comp);
 	    }
-	}
-
-	/**
-	 * Set the colors for the GUI components, depending on the dark/light settings.
-	 */
-	private void setGUIColors() {
-	    setGUIContainerColors(mainWindow);
 	}
 
 
@@ -791,6 +790,7 @@ public class Calc
 	    MathContext mc = visitor.getMathContext();
 	    Settings settings = visitor.getSettings();
 	    Settings oldSettings = new Settings(settings);
+	    boolean oldColored = colors;
 	    Component focusComponent = settingsForm;
 
 	    // TODO: we really should do this view load/store and data bind mappings
@@ -798,6 +798,7 @@ public class Calc
 	    dialog.setAttribute(Attribute.ORIGINAL_SETTINGS, oldSettings);
 	    dialog.setAttribute(Attribute.ORIGINAL_MATH_CONTEXT, mc);
 	    dialog.setAttribute(Attribute.NEW_MATH_CONTEXT, mc);
+	    dialog.setAttribute(Attribute.ORIGINAL_COLORED, oldColored);
 
 	    decimalDigitsInput.setText(String.valueOf(mc.getPrecision()));
 	    decimalDigitsInput.setEnabled(false);
@@ -848,6 +849,7 @@ public class Calc
 	    separatorCheck.setSelected(settings.separatorMode);
 	    quoteStringsCheck.setSelected(settings.quoteStrings);
 	    sortKeysCheck.setSelected(settings.sortKeys);
+	    coloredCheck.setSelected(colors);
 
 	    if (useCmdEnter)
 		useCmdEnterButton.setSelected(true);
@@ -870,6 +872,7 @@ public class Calc
 		    visitor.setMathContext(newMathContext);
 
 		Settings originalSettings = (Settings) dialog.getAttribute(Attribute.ORIGINAL_SETTINGS);
+		boolean originalColored = (Boolean) dialog.getAttribute(Attribute.ORIGINAL_COLORED);
 
 		TrigMode newTrigMode = TrigMode.RADIANS;
 		if (degreesModeButton.isSelected())
@@ -921,17 +924,22 @@ public class Calc
 		if (newSortKeys != originalSettings.sortKeys)
 		    visitor.setSortKeysMode(newSortKeys);
 
+		boolean newColored = coloredCheck.isSelected();
+		if (newColored != originalColored)
+		    visitor.setColoredMode(newColored);
+
 		useCmdEnter = useCmdEnterButton.isSelected();
 
 		darkBackgrounds = darkBackgroundButton.isSelected();
 
 		computeColors(colors);
-		setGUIColors();
+		setGUIContainerColors(mainWindow);
 	    }
 
 	    dialog.setAttribute(Attribute.ORIGINAL_SETTINGS, null);
 	    dialog.setAttribute(Attribute.ORIGINAL_MATH_CONTEXT, null);
 	    dialog.setAttribute(Attribute.NEW_MATH_CONTEXT, null);
+	    dialog.setAttribute(Attribute.ORIGINAL_COLORED, null);
 
 	    requestFocus(inputTextPane);
 	}
@@ -994,10 +1002,8 @@ public class Calc
 		System.setErr(ps);
 
 		// For now, we won't support colors in the GUI display
-		// TODO: if we ever support going back from GUI mode to console, we will need to restore
-		// the old "colors" mode at that point
 		computeColors(false);
-		setGUIColors();
+		setGUIContainerColors(mainWindow);
 
 		// Increase the maximum output text length in case of humongous calculations
 		outputTextArea.setMaximumLength(20_000_000);
@@ -1262,6 +1268,14 @@ public class Calc
 	    silenceDirectives = CharUtil.getBooleanValue(mode);
 	    visitor.setSilenceDirectives(silenceDirectives);
 	    return oldMode;
+	}
+
+	public static boolean getColoredMode() {
+	    return colors;
+	}
+
+	public static void setColoredMode(final boolean colored) {
+	    computeColors(colored && !guiMode);
 	}
 
 

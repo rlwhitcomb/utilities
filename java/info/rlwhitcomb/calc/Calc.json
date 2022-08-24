@@ -51,6 +51,8 @@
  *	    #354: Change text for "Clear" button.
  *	10-Jul-2022 (rlwhitcomb)
  *	    #392: Settings option to sort objects by key.
+ *	24-Aug-2022 (rlwhitcomb)
+ *	    #454: New settings option to color the output.
  */
 {
     title:              'Calc',
@@ -86,6 +88,7 @@
     separators:         'Thousands separators?',
     quoteStrings:       'Quote string results?',
     sortKeys:           'Sort objects by key?',
+    coloredResults:     'Color the results?',
 
     guiSettings:        'Window Settings',
     keyboard:           'Keyboard',

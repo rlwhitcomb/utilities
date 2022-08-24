@@ -266,8 +266,8 @@ h2 {
     <tr><td><code>-console</code></td><td>Start instead in console mode <i>(default)</i></td><td><code>-cons</code>, <code>-con</code>, <code>-c</code></td><td></td></tr>
     <tr><td><code>-debug</code></td><td>Display a debug printout of the syntax tree for every input</td><td><code>-deb</code>, <code>-d</code></td><td><code>:debug on</code></td></tr>
     <tr><td><code>-nodebug</code></td><td>Don't display the syntax tree for debugging <i>(default)</i></td><td><code>-nodeb</code>, <code>-no</code></td><td><code>:debug off</code></td></tr>
-    <tr><td><code>-colors</code></td><td>Use coloring (on the console) for results and messages <i>(default)</i></td><td><code>-color</code>, <code>-col</code></td><td></td></tr>
-    <tr><td><code>-nocolors</code></td><td>Do not use coloring in the console</td><td><code>-nocolor</code>, <code>-nocol</code>, <code>-noc</code></td><td></td></tr>
+    <tr><td><code>-colors</code></td><td>Use coloring (on the console) for results and messages <i>(default)</i></td><td><code>-color</code>, <code>-col</code></td><td><code>:colors on</code></td></tr>
+    <tr><td><code>-nocolors</code></td><td>Do not use coloring in the console</td><td><code>-nocolor</code>, <code>-nocol</code>, <code>-noc</code></td><td><code>:colors off</code></td></tr>
     <tr><td><code>-darkbackgrounds</code></td><td>Use colors suitable for a dark console background<br><i>(default for Windows)</i></td><td><code>-darkbackground</code>, <code>-darkback</code>,<br><code>-darkbg</code>, <code>-dark</code>, <code>-dk</code></td><td></td></tr>
     <tr><td><code>-lightbackgrounds</code></td><td>Use colors suitable for a light (white) console background<br><i>(default for non-Windows platforms)</i></td><td><code>-lightbackground</code>,<br><code>-lightback</code>, <code>-lightbg</code>,<br><code>-light</code>, <code>-lt</code></td><td></td></tr>
     <tr><td><code>-timing</code></td><td>Display timing after each input</td><td><code>-time</code>, <code>-t</code></td><td><code>:timing on</code></td></tr>
@@ -1288,6 +1288,7 @@ whether it has previously been used/defined.
     <tr><td><code>:ignorecase</code> <i>mode_option</i> [ <i>statements</i> ]</td><td>Set whether to ignore case of variable and member names<br><i>(default is <code>off</code> or value on command line)</i></td><td><code>:caseinsensitive</code>, <code>:insensitive</code>,<br><code>:ignore</code>, <code>:case</code>, <code>:ign</code>, <code>:ins</code><br>or <code>settings.ignoreNameCase=</code><i>expr</i></td></tr>
     <tr><td><code>:quotestrings</code> <i>mode_option</i> [ <i>statements</i> ]</td><td>Set whether to quote string results<br>(default is <code>on</code> or value on command line)</td><td><code>:quotestring</code>, <code>:quotes</code>, <code>:quote</code><br>or <code>settings.quoteStrings=</code><i>expr</i></td></tr>
     <tr><td><code>:sortobjects</code> <i>mode_option</i> [ <i>statements</i> ]</td><td>Whether object keys are sorted<br>(default is <code>off</code> or value on command line)</td><td><code>:sortobject</code>, <code>:sortkeys</code>, <code>:sortkey</code><br>or <code>settings.sortKeys=</code><i>expr</i></td></tr>
+    <tr><td><code>:colors</code> <i>mode_option</i> [ <i>statements</i> ]</td><td>Whether to use colors for subsequent output<br>(default is <code>on</code> or the command line value)</td><td><code>:color</code></td></tr>
     <tr><td><code>:require</code> [ <i>version</i> ] [<code>,</code>] [ <code>base</code> <i>version</i> ]</td><td>Establish minimum program and/or base versions required to run</td><td><code>:requires</code></td></tr>
     <tr><td><code>:timing</code> <i>mode_option</i> [ <i>statements</i> ]</td><td>Set the timing mode (same <i>mode_option</i> choices as for <code>:rational</code>)<br><i>(default is <code>off</code> or the value set on the command line)</i></td><td><code>:time</code></td></tr>
     <tr><td><code>:debug</code> <i>mode_option</i> [ <i>statements</i> ]</td><td>Set the debug mode (same <i>mode_option</i> choices as for <code>:rational</code>)<br><i>(default is <code>off</code> or the value set on the command line)</i></td><td><code>:deb</code>, <code>:dbg</code></td></tr>
@@ -1345,7 +1346,7 @@ whether it has previously been used/defined.
   <p>The optional second expression to the <code>:echo</code> directive tells where the output should go: default, <code>0</code> or <code>"output"</code> goes to <code>stdout</code>, <code>1</code> or <code>'ERROR'</code> (case does not matter) for <code>stderr</code>, or <code>2</code> or <code>"Both"</code> does, well... both.
   <p>If no arguments are given to <code>:echo</code>, an empty line is displayed. In the GUI frame, the <code>stdout</code> and <code>stderr</code> streams are merged, so the output value is essentially meaningless, but specifying <code>"both"</code> will still display the message twice.
   <p>The effect of <code>:sortobjects on</code> is to override the way <i>key</i><code>:</code><i>value</i> pairs are added to objects. By default they are
-     added in the order of declaration. With the option on, the keys are sorted alphabetically and kept sorted as elements are added and removed.
+     added in the order of declaration. With this option on, the keys are sorted alphabetically and kept sorted this way as elements are added and removed.
 </div>
 <a class="top-link" href="#topofpage">Top</a>
 <hr id="Standard_Libraries_of_Functions" class="sectionsep">
@@ -1436,6 +1437,7 @@ whether it has previously been used/defined.
      main window, so using the command-line options <code>-darkbg</code> or <code>-lightbg</code>, or the "Colors" setting in the GUI "Window Settings" tab will switch between these color schemes.
   <p>Most of the settings available using Directives can be set in the GUI using the Settings dialog (the <span class="orangebutton">&#x2261;</span> button or <code>F2</code> key).
   <p>The calculation settings are also available to either read or write by accesssing the fields in the <code>settings</code> object. Setting one of the <code>settings</code> fields has the exact same effect as using the corresponding directive.
+  <p>Although the option for "Color the results?" is visible in the Settings dialog, it is always disabled (and the <code>:colors on</code> directive has no effect) since coloring is not implemented in the GUI Results field.
 </div>
   <div class="center">
   <br><img src="calc_settings.png" alt="GUI Settings screen" width="40%">

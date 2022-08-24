@@ -443,6 +443,8 @@
  *	    #439: Implement "next" statement.
  *	23-Aug-2022 (rlwhitcomb)
  *	    #459: Implement "@@" (to string) operator.
+ *	24-Aug-2022 (rlwhitcomb)
+ *	    #454: Implement ":colors" directive.
  */
 
 grammar Calc;
@@ -830,6 +832,7 @@ directive
    | D_IGNORECASE modeOption bracketBlock ?   # ignoreCaseDirective
    | D_QUOTESTRINGS modeOption bracketBlock ? # quoteStringsDirective
    | D_SORTOBJECTS modeOption bracketBlock ?  # sortObjectsDirective
+   | D_COLORS modeOption bracketBlock ?       # colorsDirective
    | D_REQUIRE requireOptions                 # requireDirective
    ;
 
@@ -1502,6 +1505,11 @@ D_SORTOBJECTS
    | DIR  ( 'sortobject'  | 'SORTOBJECT'  | 'Sortobject'  | 'SortObject'  )
    | DIR  ( 'sortkeys'    | 'SORTKEYS'    | 'Sortkeys'    | 'SortKeys'    )
    | DIR  ( 'sortkey'     | 'SORTKEY'     | 'Sortkey'     | 'SortKey'     )
+   ;
+
+D_COLORS
+   : DIR  ( 'colors' | 'COLORS' | 'Colors' )
+   | DIR  ( 'color'  | 'COLOR'  | 'Color'  )
    ;
 
 D_REQUIRE

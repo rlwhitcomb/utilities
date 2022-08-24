@@ -648,6 +648,8 @@
  *	    #452: Fix weird error due to "leave" not setting return value from function.
  *	    #455: Change "chars" and "codes" to deal differently depending on input value.
  *	    #459: Add "@@" (to string) operator.
+ *	24-Aug-2022 (rlwhitcomb)
+ *	    #454: Implement ":colors" directive.
  */
 package info.rlwhitcomb.calc;
 
@@ -797,6 +799,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	/** Stack of previous "sort keys" mode values. */
 	private final Deque<Boolean> sortKeysModeStack = new ArrayDeque<>();
+
+	/** Stack of previous "colored" mode values. */
+	private final Deque<Boolean> coloredModeStack = new ArrayDeque<>();
 
 	/** Stack of previous "resultsOnly" mode values. */
 	private final Deque<Boolean> resultsOnlyModeStack = new ArrayDeque<>();
@@ -1089,6 +1094,21 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	private Consumer<Object> pushSortKeysMode = mode -> {
 	    processModeOption(mode, sortKeysModeStack, setSortKeysMode);
+	};
+
+	public boolean setColoredMode(final Object mode) {
+	    boolean oldMode = Calc.getColoredMode();
+	    Calc.setColoredMode(CharUtil.getBooleanValue(mode));
+
+	    return oldMode;
+	}
+
+	private UnaryOperator<Boolean> setColoredMode = mode -> {
+	    return setColoredMode(mode);
+	};
+
+	private Consumer<Object> pushColoredMode = mode -> {
+	    processModeOption(mode, coloredModeStack, setColoredMode);
 	};
 
 	public boolean setRationalMode(final Object mode) {
@@ -1925,6 +1945,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public Object visitSortObjectsDirective(CalcParser.SortObjectsDirectiveContext ctx) {
 	    return processModeOption(ctx.modeOption(), sortKeysModeStack, ctx.bracketBlock(), setSortKeysMode);
 	}
+
+	@Override
+	public Object visitColorsDirective(CalcParser.ColorsDirectiveContext ctx) {
+	    return processModeOption(ctx.modeOption(), coloredModeStack, ctx.bracketBlock(), setColoredMode);
+	}
+
 
 	private String versionText(CalcParser.VersionNumberContext versionCtx) {
 	    if (versionCtx == null)
