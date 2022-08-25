@@ -653,6 +653,7 @@
  *	    #447: Add "grads" mode for trig calculations.
  *	    Move "I_MINUS_ONE" out to Constants.
  *	    Simplify date constant parsing.
+ *	    Factor out conversion to LocalDate into a helper method.
  */
 package info.rlwhitcomb.calc;
 
@@ -1257,6 +1258,16 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	private BigInteger getIntegerValue(final ParserRuleContext ctx) {
 	    return toIntegerValue(this, evaluate(ctx), settings.mc, ctx);
+	}
+
+	private LocalDate getDateValue(final ParserRuleContext ctx) {
+	    try {
+		BigInteger iValue = toIntegerValue(this, evaluate(ctx), settings.mc, ctx);
+		return LocalDate.ofEpochDay(iValue.longValueExact());
+	    }
+	    catch (ArithmeticException ae) {
+		throw new CalcExprException(ae, ctx);
+	    }
 	}
 
 	private Boolean getBooleanValue(final ParserRuleContext ctx) {
@@ -5508,74 +5519,44 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitDayOfWeekExpr(CalcParser.DayOfWeekExprContext ctx) {
-	    BigInteger iValue = getIntegerValue(ctx.expr1().expr());
-	    try {
-		LocalDate date = LocalDate.ofEpochDay(iValue.longValueExact());
-		DayOfWeek dow = date.getDayOfWeek();
-		// Adjust the return b/c I didn't like their ordering
-		// theirs = 1 (Monday) to 7 (Sunday) while we have defined
-		// ours = 0 (Sunday) to 6 (Saturday)
-		int adjustedDow = dow.getValue() % 7;
-		return BigInteger.valueOf((long) adjustedDow);
-	    }
-	    catch (ArithmeticException ae) {
-		throw new CalcExprException(ae, ctx);
-	    }
+	    LocalDate date = getDateValue(ctx.expr1().expr());
+	    DayOfWeek dow = date.getDayOfWeek();
+	    // Adjust the return b/c I didn't like their ordering
+	    // theirs = 1 (Monday) to 7 (Sunday) while we have defined
+	    // ours = 0 (Sunday) to 6 (Saturday)
+	    int adjustedDow = dow.getValue() % 7;
+	    return BigInteger.valueOf((long) adjustedDow);
 	}
 
 	@Override
 	public Object visitDayOfMonthExpr(CalcParser.DayOfMonthExprContext ctx) {
-	    BigInteger iValue = getIntegerValue(ctx.expr1().expr());
-	    try {
-		LocalDate date = LocalDate.ofEpochDay(iValue.longValueExact());
-		int dom = date.getDayOfMonth();
-		// Theirs matches ours: 1 .. n value
-		return BigInteger.valueOf((long) dom);
-	    }
-	    catch (ArithmeticException ae) {
-		throw new CalcExprException(ae, ctx);
-	    }
+	    LocalDate date = getDateValue(ctx.expr1().expr());
+	    int dom = date.getDayOfMonth();
+	    // Theirs matches ours: 1 .. n value
+	    return BigInteger.valueOf((long) dom);
 	}
 
 	@Override
 	public Object visitDayOfYearExpr(CalcParser.DayOfYearExprContext ctx) {
-	    BigInteger iValue = getIntegerValue(ctx.expr1().expr());
-	    try {
-		LocalDate date = LocalDate.ofEpochDay(iValue.longValueExact());
-		int doy = date.getDayOfYear();
-		// Theirs matches ours: 1 .. 365/366 value
-		return BigInteger.valueOf((long) doy);
-	    }
-	    catch (ArithmeticException ae) {
-		throw new CalcExprException(ae, ctx);
-	    }
+	    LocalDate date = getDateValue(ctx.expr1().expr());
+	    int doy = date.getDayOfYear();
+	    // Theirs matches ours: 1 .. 365/366 value
+	    return BigInteger.valueOf((long) doy);
 	}
 
 	@Override
 	public Object visitMonthOfYearExpr(CalcParser.MonthOfYearExprContext ctx) {
-	    BigInteger iValue = getIntegerValue(ctx.expr1().expr());
-	    try {
-		LocalDate date = LocalDate.ofEpochDay(iValue.longValueExact());
-		int moy = date.getMonthValue();
-		// Theirs matches ours: 1 .. 12 value
-		return BigInteger.valueOf((long) moy);
-	    }
-	    catch (ArithmeticException ae) {
-		throw new CalcExprException(ae, ctx);
-	    }
+	    LocalDate date = getDateValue(ctx.expr1().expr());
+	    int moy = date.getMonthValue();
+	    // Theirs matches ours: 1 .. 12 value
+	    return BigInteger.valueOf((long) moy);
 	}
 
 	@Override
 	public Object visitYearOfDateExpr(CalcParser.YearOfDateExprContext ctx) {
-	    BigInteger iValue = getIntegerValue(ctx.expr1().expr());
-	    try {
-		LocalDate date = LocalDate.ofEpochDay(iValue.longValueExact());
-		int yod = date.getYear();
-		return BigInteger.valueOf((long) yod);
-	    }
-	    catch (ArithmeticException ae) {
-		throw new CalcExprException(ae, ctx);
-	    }
+	    LocalDate date = getDateValue(ctx.expr1().expr());
+	    int yod = date.getYear();
+	    return BigInteger.valueOf((long) yod);
 	}
 
 	@Override
@@ -6295,7 +6276,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 	}
 
-	/** Strict ISO-8601 format for dates, suitable for parsing into a LocalDate value. */
+	/** Strict ISO-8601 format for dates, suitable for parsing into a {@link LocalDate} value. */
 	private static final String ISO_8601_DATE = "%1$04d-%2$02d-%3$02d";
 
 	@Override
