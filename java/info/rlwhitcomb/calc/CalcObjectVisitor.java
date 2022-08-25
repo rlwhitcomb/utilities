@@ -652,6 +652,7 @@
  *	    #454: Implement ":colors" directive.
  *	    #447: Add "grads" mode for trig calculations.
  *	    Move "I_MINUS_ONE" out to Constants.
+ *	    Simplify date constant parsing.
  */
 package info.rlwhitcomb.calc;
 
@@ -6294,8 +6295,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 	}
 
-	static final long ZERO_DAY = -719528; // d'0000-01-01'
-	static final long Y10K_DAY = 2932897; // d'10000-01-01'
+	/** Strict ISO-8601 format for dates, suitable for parsing into a LocalDate value. */
+	private static final String ISO_8601_DATE = "%1$04d-%2$02d-%3$02d";
 
 	@Override
 	public Object visitDateValue(CalcParser.DateValueContext ctx) {
@@ -6363,21 +6364,10 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			year += 1900;
 		}
 
-		if (negate) {
-		    // Use year 10,000 as a base to figure out how negative from d'0000-01-01'
-		    // we need to go (since LocalDate won't handle negative years in parsing)
-		    // since year 10,000 and ff. share the same leap year calculations as year 0000
-		    String y10kDateString = String.format("%1$04d-%2$02d-%3$02d", 10000 - year, month, day);
-		    LocalDate y10kDateDate = LocalDate.parse(y10kDateString);
-		    long offset = y10kDateDate.toEpochDay() - Y10K_DAY;
-		    epochDate = ZERO_DAY + offset;
-		}
-		else {
-		    // Get a value in strict ISO-8601 format for parsing
-		    value = String.format("%1$04d-%2$02d-%3$02d", year, month, day);
-		    LocalDate date = LocalDate.parse(value);
-		    epochDate = date.toEpochDay();
-		}
+		// Get a value in strict ISO-8601 format for parsing
+		value = String.format(negate ? "-" + ISO_8601_DATE : ISO_8601_DATE, year, month, day);
+		LocalDate date = LocalDate.parse(value);
+		epochDate = date.toEpochDay();
 
 		return BigInteger.valueOf(epochDate);
 	    }
