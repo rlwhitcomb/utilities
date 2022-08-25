@@ -23,27 +23,18 @@
  *
  *	A collection of math-related constant values that are used in multiple places.
  *
- *  History:
- *	01-Feb-2022 (rlwhitcomb)
- *	    #231: Created from constants already defined in other places.
- *	02-Feb-2022 (rlwhitcomb)
- *	    #231: More values.
- *	08-Feb-2022 (rlwhitcomb)
- *	    #235: D_FOUR added.
- *	16-Feb-2022 (rlwhitcomb)
- *	    Buffer sizes added.
- *	17-Feb-2022 (rlwhitcomb)
- *	    Double and float limits.
- *	14-Apr-2022 (rlwhitcomb)
- *	    #273: Move math-related classes to "math" package.
- *	29-May-2022 (rlwhitcomb)
- *	    #301: Add values used for "convertToWords" (BigInteger).
- *	29-Jun-2022 (rlwhitcomb)
- *	    #380: Increase string file size for FileUtilities.
- *	09-Jul-2022 (rlwhitcomb)
- *	    #393: Cleanup imports.
- *	24-Aug-2022 (rlwhitcomb)
- *	    #447: Add "D_200" value.
+ * History:
+ *  01-Feb-22 rlw #231: Created from constants already defined in other places.
+ *  02-Feb-22 rlw #231: More values.
+ *  08-Feb-22 rlw #235: D_FOUR added.
+ *  16-Feb-22 rlw       Buffer sizes added.
+ *  17-Feb-22 rlw       Double and float limits.
+ *  14-Apr-22 rlw #273: Move math-related classes to "math" package.
+ *  29-May-22 rlw #301: Add values used for "convertToWords" (BigInteger).
+ *  29-Jun-22 rlw #380: Increase string file size for FileUtilities.
+ *  09-Jul-22 rlw #393: Cleanup imports.
+ *  24-Aug-22 rlw #447: Add "D_200" value.
+ *                      Move I_MINUS_ONE into here from Calc.
  */
 package info.rlwhitcomb.util;
 
@@ -66,6 +57,10 @@ public final class Constants
 	 */
 	private Constants() {
 	}
+
+
+	/** A {@link BigInteger} value of <code>-1</code>. */
+	public static final BigInteger I_MINUS_ONE = BigInteger.valueOf(-1);
 
 	/** A {@link BigInteger} value of two. */
 	public static final BigInteger I_TWO = BigInteger.valueOf(2);

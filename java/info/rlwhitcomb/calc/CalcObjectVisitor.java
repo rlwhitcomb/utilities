@@ -651,6 +651,7 @@
  *	24-Aug-2022 (rlwhitcomb)
  *	    #454: Implement ":colors" directive.
  *	    #447: Add "grads" mode for trig calculations.
+ *	    Move "I_MINUS_ONE" out to Constants.
  */
 package info.rlwhitcomb.calc;
 
@@ -737,9 +738,6 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	 * where often an exception would be thrown due to infinite repeating digits.
 	 */
 	private static final MathContext MC_MAX_DIGITS = new MathContext(12000);
-
-	/** A BigInteger <code>-1</code> value (for repeated use here). */
-	private static final BigInteger I_MINUS_ONE = BigInteger.ONE.negate();
 
 	/** Whether we are running on Windows or not. */
 	private static final boolean RUNNING_ON_WINDOWS = Environment.isWindows();
