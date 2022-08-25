@@ -1,0 +1,9 @@
+{
+  cssPosition: "89,-1,-1,120,70,20",
+  customProperties: "design:{ otherElements:\"'help,exit,search'\", extraInfoElementName:\"'lblHelpNo'\", lookupName:\"'HelpCode'\" }",
+  dataProviderID: "prevNo",
+  name: "txtHelpNo",
+  onDataChangeMethodID: "723EF460-707D-439E-8709-EEB73DFCDBAF",
+  typeid: 4,
+  uuid: "964EB2B4-BE4C-4B88-9365-1128265BD3B1"
+}

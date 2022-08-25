@@ -1,0 +1,22 @@
+/*
+ * The idea here is to read in a JSON file with strange (but legal) quoting, and write
+ * the object out again exactly as it was originally. Issue #406.
+ */
+:requires 2.14.8 // ":colors" directive
+:quiet on
+:colors off
+
+const INPUT = 'test/data/406.json'
+
+json = eval(read(INPUT))
+
+def q(s) = s@Q
+
+lines = []
+loop key over json {
+   lines += `  $key: ` + q(json[key])
+}
+
+:echo '{'
+:echo join(lines, ',\r\n')
+:echo '}'
