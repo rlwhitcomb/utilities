@@ -99,6 +99,8 @@
  *	    #273: Move math-related classes to "math" package.
  *	09-Jul-2022 (rlwhitcomb)
  *	    #393: Cleanup imports.
+ *	24-Aug-2022 (rlwhitcomb)
+ *	    Handle null input to "defaultToString()".
  */
 package info.rlwhitcomb.util;
 
@@ -668,6 +670,9 @@ public final class ClassUtil
 	 *		superclass implementations of the <code>toString()</code> method.
 	 */
 	public static String defaultToString(final Object obj) {
+	    if (obj == null)
+		return "null";
+
 	    return String.format("%1$s@%2$s",
 		obj.getClass().getSimpleName(),
 		Integer.toHexString(System.identityHashCode(obj)));
