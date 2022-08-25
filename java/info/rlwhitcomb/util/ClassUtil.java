@@ -101,6 +101,8 @@
  *	    #393: Cleanup imports.
  *	24-Aug-2022 (rlwhitcomb)
  *	    Handle null input to "defaultToString()".
+ *	25-Aug-2022 (rlwhitcomb)
+ *	    Another tweak to "defaultToString()" for null input.
  */
 package info.rlwhitcomb.util;
 
@@ -665,16 +667,14 @@ public final class ClassUtil
 	/**
 	 * Get the default value of {@link Object#toString} for the given object.
 	 *
-	 * @param obj	The object in question.
+	 * @param obj	The object in question, which can be {@code null}.
 	 * @return	What {@link Object#toString} would return if there were no intervening
-	 *		superclass implementations of the <code>toString()</code> method.
+	 *		superclass implementations of the <code>toString()</code> method, or
+	 *		"null@0" for a null input.
 	 */
 	public static String defaultToString(final Object obj) {
-	    if (obj == null)
-		return "null";
-
 	    return String.format("%1$s@%2$s",
-		obj.getClass().getSimpleName(),
+		obj == null ? "null" : obj.getClass().getSimpleName(),
 		Integer.toHexString(System.identityHashCode(obj)));
 	}
 
