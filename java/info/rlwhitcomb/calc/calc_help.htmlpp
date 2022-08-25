@@ -195,9 +195,35 @@ h2 {
         <li>Calculations can be edited (using backspace, etc.) to reduce the chance of keyboard errors.</li>
         <li>Looping and conditional statements to do pretty much any kind of calculation.</li>
         <li>Therefore, the language is <a href="https://en.wikipedia.org/wiki/Turing_completeness">&ldquo;Turing Complete&rdquo;</a>.</li>
-        <li>Currently (as of mid-2022 at least), it is being actively developed and maintained, meaning features and fixes are constantly being added.</li>
+        <li>Currently (as of early fall-2022 at least), it is being actively developed and maintained, meaning features and fixes are constantly being added.</li>
         <li>This is <a href="https://opensource.com/resources/what-open-source">Open-Source Software</a> so the code can be examined, and modified (if desired) for your own use.</li>
       </ul>
+  <p>"Calc" started out as an exercise in learning the <a href="https://www.antlr.org/">Antlr</a> parser generator, by combining the simple expression grammar from the introductory book
+     with the JSON grammar in another chapter of the book. Once that was working, adding more operators and then built-in functions, and then user-defined functions, and on and on,
+     was fairly easy. And now, 2&frac12; years later, and a lot of head-scratching work, we have what we have here.
+  <p>The language is built around the idea of an expression evaluator. So, everything in the language (with the exception of <a href="#Directives">Directives</a>) is basically an expression.
+     And since each piece of data basically describes itself (by its Java class) we can get away with being dynamically typed, and doing "appropriate" conversions as needed.
+     Even the <a href="#Statements">Statements</a> in the language actually return a value, so it is not a stretch for the result of anything to simply be the last expression value
+     in the "anything". Et voil&aacute;, a "functional" language is born. Most pieces of data are immutable, although arrays, objects, and sets are meant to be updated.
+     Many, if not most, of the features of the language have come about by actual need or desire to be able to accomplish something but lacking the tools. And it turns out that
+     having JSON objects as "native" data types is pretty darn useful. And, of course, many features and ideas have come from JavaScript, the most (mis-)used dynamically typed
+     language in general use today. Other features have come from the functional programming arena, with ideas from <a href="https://www.scala-lang.org/">Scala</a> and elsewhere.
+  <p>Having a scripting language / calculation engine that can run as a command line filter, or as a REPL-based quick calculation tool (&agrave; la <a href="https://www.python.org/">Python</a>), or as a GUI calculator application, all in one package, is
+     unprecedented (AFAIK) right now. Adding high-end features such as graphing of tables and equations, along with a popup operator and function "keyboard" would make this even
+     more useful and unique. And the list of desired enhancements at <a href="https://github.com/rlwhitcomb/utilities/issues">Utilities Issues</a> continues to grow faster than
+     they can be implemented.
+  <p>Many features are found nowhere else, or only at great cost in commercial applications:
+     <ul><li>Arithmetic to thousands of digits precision</li>
+         <li>More powerful <code>case</code> statement selectors than I have seen</li>
+	 <li>All the latest operators from many languages</li>
+	 <li>Rational fractions and complex numbers as native data types, along with objects, arrays, and sets as standard data collections</li>
+	 <li>Many Unicode symbols available for use as they were intended (that is, in the appropriate mathematical sense)</li>
+	 <li>All the latest multi-line, raw, interpolated, and standard string constant forms available</li>
+	 <li>Dynamic code generation and execution, via the <code>eval</code> function</li>
+	 <li>Equally adept at string, numeric, and object manipulation (with matrices, file manipulation, and other enhancements still coming)</li>
+	 <li>Native support for delimited files is also coming soon, with virtually unlimited support for delimiters, quoting and escaping, etc.</li>
+	 <li>Gosh, even Roman numerals are supported natively!</li>
+     </ul>
 </div>
 <a class="top-link" href="#topofpage">Top</a>
 <hr id="Command_Line" class="sectionsep">
