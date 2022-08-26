@@ -24,23 +24,16 @@
  *      Data structures for Calc to hold user-defined function definitions,
  *      local symbol tables, etc.
  *
- *  History:
- *	06-Oct-2021 (rlwhitcomb)
- *	    Initial coding.
- *	07-Oct-2021 (rlwhitcomb)
- *	    Override "remove". Also override "isDefined" and "setValue", and tweak
- *	    the way "getValue" works so that we get/set things in the proper scope.
- *	19-Oct-2021 (rlwhitcomb)
- *	    Change return value of "remove" to the previous value.
- *	03-Feb-2022 (rlwhitcomb)
- *	    Add "getWildValues" here for wild-card search.
- *	13-Feb-2022 (rlwhitcomb)
- *	    #199: Move GlobalScope out to ParameterizedScope; add LOOP_VAR to LoopScope.
- *	17-Feb-2022 (rlwhitcomb)
- *	    #252: Rename some methods to be more clear.
- *	25-May-2022 (rlwhitcomb)
- *	    #348: Return the new value from "setValue" methods.
- *	    Make all methods package private.
+ * History:
+ *  06-Oct-21 rlw  ---  Initial coding.
+ *  07-Oct-21 rlw  ---  Override "remove". Also override "isDefined" and "setValue", and tweak
+ *			the way "getValue" works so that we get/set things in the proper scope.
+ *  19-Oct-21 rlw  ---  Change return value of "remove" to the previous value.
+ *  03-Feb-22 rlw  ---  Add "getWildValues" here for wild-card search.
+ *  13-Feb-22 rlw #199: Move GlobalScope out to ParameterizedScope; add LOOP_VAR to LoopScope.
+ *  17-Feb-22 rlw #252: Rename some methods to be more clear.
+ *  25-May-22 rlw #348: Return the new value from "setValue" methods.
+ *			Make all methods package private.
  */
 package info.rlwhitcomb.calc;
 

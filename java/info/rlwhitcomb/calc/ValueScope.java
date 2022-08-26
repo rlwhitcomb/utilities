@@ -23,12 +23,10 @@
  *
  *      Base scope for various kinds of values.
  *
- *  History:
- *	12-Feb-2022 (rlwhitcomb)
- *	    #199: Abstract from existing code.
- *	14-Feb-2022 (rlwhitcomb)
- *	    #199: Override "toString" here.
- *	    Override "isImmutable" here too.
+ * History:
+ *  12-Feb-22 rlw #199: Abstract from existing code.
+ *  14-Feb-22 rlw #199: Override "toString" here.
+ *			Override "isImmutable" here too.
  */
 package info.rlwhitcomb.calc;
 

@@ -24,13 +24,10 @@
  *	Parent structure for all the composite (collection) objects in Calc,
  *	such as Object, Array, and Set.
  *
- *  History:
- *	21-Jun-2022 (rlwhitcomb)
- *	    Initial coding.
- *	08-Jul-2022 (rlwhitcomb)
- *	    #393: Cleanup imports.
- *	15-Aug-2022 (rlwhitcomb)
- *	    #440: Move "size()" up to here.
+ * History:
+ *  21-Jun-22 rlw  ---  Initial coding.
+ *  08-Jul-22 rlw #393: Cleanup imports.
+ *  15-Aug-22 rlw #440: Move "size()" up to here.
  */
 package info.rlwhitcomb.calc;
 

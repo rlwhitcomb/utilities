@@ -24,15 +24,11 @@
  *	Data structure for Calc to hold a set of unique values, with operations
  *	such as intersection, union, etc.
  *
- *  History:
- *	21-Jun-2021 (rlwhitcomb)
- *	    Initial coding.
- *	25-Jun-2022 (rlwhitcomb)
- *	    #314: Add "diff".
- *	08-Jul-2022 (rlwhitcomb)
- *	    #393: Cleanup imports.
- *	15-Aug-2022 (rlwhitcomb)
- *	    #440: Move "size()" up to CollectionScope.
+ * History:
+ *  21-Jun-21 rlw  ---  Initial coding.
+ *  25-Jun-22 rlw #314: Add "diff".
+ *  08-Jul-22 rlw #393: Cleanup imports.
+ *  15-Aug-22 rlw #440: Move "size()" up to CollectionScope.
  */
 package info.rlwhitcomb.calc;
 

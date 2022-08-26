@@ -24,26 +24,18 @@
  *      Data structures for Calc to hold user-defined function definitions,
  *      local symbol tables, etc.
  *
- *  History:
- *	06-Oct-2021 (rlwhitcomb)
- *	    Initial coding.
- *	26-Oct-2021 (rlwhitcomb)
- *	    Add PREDEFINED type.
- *	21-Jan-2022 (rlwhitcomb)
- *	    #135: Add CONSTANT; refactor "toString()".
- *	04-Feb-2022 (rlwhitcomb)
- *	    Add "isPredefined" method.
- *	    #233: Add SYSTEM_VALUE, used for Settings.
- *	12-Feb-2022 (rlwhitcomb)
- *	    #199: Add PARAMETER; rename SYSTEM_VALUE to just SYSTEM;
- *	    add "isImmutable" for read-only values.
- *	14-Feb-2022 (rlwhitcomb)
- *	    #199: Only put the default implementation of "isPredefined", "isImmutable",
- *	    and "toString" in here, let the appropriate subclasses override.
- *	25-May-2022 (rlwhitcomb)
- *	    #348: Make the enum package private.
- *	21-Jun-2022 (rlwhitcomb)
- *	    #314: Add SET type.
+ * History:
+ *  06-Oct-21 rlw  ---  Initial coding.
+ *  26-Oct-21 rlw  ---  Add PREDEFINED type.
+ *  21-Jan-22 rlw #135: Add CONSTANT; refactor "toString()".
+ *  04-Feb-22 rlw  ---  Add "isPredefined" method.
+ *		  #233: Add SYSTEM_VALUE, used for Settings.
+ *  12-Feb-22 rlw #199: Add PARAMETER; rename SYSTEM_VALUE to just SYSTEM;
+ *			add "isImmutable" for read-only values.
+ *  14-Feb-22 rlw #199: Only put the default implementation of "isPredefined", "isImmutable",
+ *			and "toString" in here, let the appropriate subclasses override.
+ *  25-May-22 rlw #348: Make the enum package private.
+ *  21-Jun-22 rlw #314: Add SET type.
  */
 package info.rlwhitcomb.calc;
 

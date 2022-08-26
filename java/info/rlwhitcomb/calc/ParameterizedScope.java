@@ -24,11 +24,9 @@
  *      Subclass of NestedScope that also contains a list of parameters.
  *      Includes the GlobalScope and FunctionScope.
  *
- *  History:
- *	12-Feb-2022 (rlwhitcomb)
- *	    #199: Initial coding, abstracted out of other code.
- *	25-May-2022 (rlwhitcomb)
- *	    #348: Make all methods package private.
+ * History:
+ *  12-Feb-22 rlw #199: Initial coding, abstracted out of other code.
+ *  25-May-22 rlw #348: Make all methods package private.
  */
 package info.rlwhitcomb.calc;
 
