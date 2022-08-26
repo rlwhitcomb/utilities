@@ -328,6 +328,9 @@
 >eval f1 -> "def"
 >eval f2 -> "abc"
 >eval f3 -> "Hello"
+>eval ('def fu1(n) = n') -> "Defined function “fu1(n)”"
+>eval ('const co1 = 2') -> "Defined constant “co1”"
+>eval ('var va1 = 3') -> "Defined variable “va1”"
 >t1 = 5.9 -> 5.9
 >t2 = -6.2 -> -6.2
 >ceil (t1) -> 6

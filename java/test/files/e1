@@ -306,6 +306,10 @@ f3 = `${'Hello' @X}`
 }
 eval f1;eval f2;eval f3
 
+eval('def fu1(n) = n')
+eval('const co1 = 2')
+eval('var va1 = 3')
+
 t1=5.9
 t2=-6.2
 ceil(t1);ceil(t2)

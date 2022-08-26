@@ -654,6 +654,9 @@
  *	    Move "I_MINUS_ONE" out to Constants.
  *	    Simplify date constant parsing.
  *	    Factor out conversion to LocalDate into a helper method.
+ *	25-Aug-2022 (rlwhitcomb)
+ *	    #466: Make normally ignored return values from "definition" statements more readable
+ *	    (as return value from "eval").
  */
 package info.rlwhitcomb.calc;
 
@@ -3052,12 +3055,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitDefineStmt(CalcParser.DefineStmtContext ctx) {
-	    String name = ctx.id().getText();
+	    String funcName = ctx.id().getText();
 
 	    // Can't redefine a predefined value
-	    Object oldValue = currentScope.getValue(name, settings.ignoreNameCase);
+	    Object oldValue = currentScope.getValue(funcName, settings.ignoreNameCase);
 	    if (oldValue != null && isPredefined(oldValue, false)) {
-		throw new CalcExprException(ctx, "%calc#noChangeValue", oldValue.toString(), name, "");
+		throw new CalcExprException(ctx, "%calc#noChangeValue", oldValue.toString(), funcName, "");
 	    }
 
 	    CalcParser.StmtBlockContext functionBody       = ctx.stmtBlock();
@@ -3065,7 +3068,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    String paramString = formalParams == null ? "" : getTreeText(formalParams);
 	    List<CalcParser.FormalParamContext> paramVars = formalParams == null ? null : formalParams.formalParam();
-	    FunctionDeclaration func = new FunctionDeclaration(name, functionBody);
+	    FunctionDeclaration func = new FunctionDeclaration(funcName, functionBody);
 
 	    if (formalParams != null) {
 		for (CalcParser.FormalParamContext paramVar : formalParams.formalParam()) {
@@ -3077,11 +3080,11 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		}
 	    }
 
-	    currentScope.setValue(name, settings.ignoreNameCase, func);
+	    currentScope.setValue(funcName, settings.ignoreNameCase, func);
 
 	    displayActionMessage("%calc#definingFunc", func.getFullFunctionName(), getTreeText(functionBody));
 
-	    return functionBody;
+	    return Intl.formatString("calc#definedFunc", func.getFullFunctionName());
 	}
 
 	@Override
@@ -3095,7 +3098,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    displayActionMessage("%calc#definingConst", constantName,
 		toStringValue(this, ctx, value, new StringFormat(settings)));
 
-	    return value;
+	    return Intl.formatString("calc#definedConst", constantName);
 	}
 
 	@Override
@@ -3113,7 +3116,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		displayActionMessage("%calc#definingVar", varName,
 			toStringValue(this, ctx, value, new StringFormat(settings)));
 
-		return value;
+		return Intl.formatString("calc#definedVar", varName);
 	    }
 	    else {
 		currentScope.setValueLocally(varName, settings.ignoreNameCase, null);

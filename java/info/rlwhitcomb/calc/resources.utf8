@@ -149,6 +149,8 @@
 #	    #439: New error for "next" in the wrong context.
 #	23-Aug-2022 (rlwhitcomb)
 #	    #455: New error for bad argument to "chars" or "codes".
+#	25-Aug-2022 (rlwhitcomb)
+#	    #466: "Defined" messages as return values (for "eval" purposes).
 #
 
 #
@@ -220,6 +222,9 @@ definingFunc	= <r>Defining function <y>%1$s<.><r> = <v>%2$s<r>
 definingConst	= <r>Defining constant <y>%1$s<.><r> = <v>%2$s<r>
 definingVar	= <r>Defining variable <y>%1$s<.><r> = <v>%2$s<r>
 definingVarOnly	= <r>Defining variable <y>%1$s<.><r>
+definedFunc	= Defined function <y>%1$s<.>
+definedConst	= Defined constant <y>%1$s<.>
+definedVar	= Defined variable <y>%1$s<.>
 variables	= Variables
 varUnder1	= ---------
 varUnder2	= =========
