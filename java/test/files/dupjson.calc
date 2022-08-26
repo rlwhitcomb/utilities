@@ -1,12 +1,14 @@
 /*
  * The idea here is to read in a JSON file with strange (but legal) quoting, and write
  * the object out again exactly as it was originally. Issue #406.
+ *
+ * @param $0 Input file path
  */
 :requires 2.14.8 // ":colors" directive
 :quiet on
 :colors off
 
-const INPUT = 'test/data/406.json'
+const INPUT = $0
 
 json = eval(read(INPUT))
 
