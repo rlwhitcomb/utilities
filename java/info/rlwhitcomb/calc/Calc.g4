@@ -448,6 +448,8 @@
  *	    #447: Implement "grads" mode for trig operations.
  *	25-Aug-2022 (rlwhitcomb)
  *	    #465: Add "delete" and "rename" file operations.
+ *	26-Aug-2022 (rlwhitcomb)
+ *	    #458: Add optional "parallel" keyword to function declaration, and "wait" statement.
  */
 
 grammar Calc;
@@ -471,6 +473,7 @@ stmtOrExpr
    | ifStmt
    | leaveStmt
    | nextStmt
+   | waitStmt
    | timeThisStmt
    | emptyStmt
    ;
@@ -480,7 +483,7 @@ exprStmt
    ;
 
 defineStmt
-   : K_DEFINE id formalParamList ? ASSIGN stmtBlock
+   : K_DEFINE K_PARALLEL ? id formalParamList ? ASSIGN stmtBlock
    ;
 
 constStmt
@@ -514,6 +517,10 @@ leaveStmt
 
 nextStmt
    : K_NEXT
+   ;
+
+waitStmt
+   : K_WAIT
    ;
 
 timeThisStmt
@@ -1153,6 +1160,9 @@ K_ELSE     : 'else' | 'ELSE' | 'Else' ;
 K_DEFINE   : 'define' | 'DEFINE' | 'Define'
            | 'def' | 'DEF' | 'Def' ;
 
+K_PARALLEL : 'parallel' | 'PARALLEL' | 'Parallel'
+           ;
+
 K_CONST    : 'constant' | 'CONSTANT' | 'Constant'
            | 'const' | 'CONST' | 'Const' ;
 
@@ -1168,6 +1178,8 @@ K_DEFAULT  : 'default' | 'DEFAULT' | 'Default' ;
 K_LEAVE    : 'leave' | 'LEAVE' | 'Leave' ;
 
 K_NEXT     : 'next' | 'NEXT' | 'Next' ;
+
+K_WAIT     : 'wait' | 'WAIT' | 'Wait' ;
 
 K_TIMETHIS : 'timethis' | 'TIMETHIS' | 'TimeThis' ;
 

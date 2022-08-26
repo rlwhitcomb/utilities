@@ -177,6 +177,8 @@
  *	29-Jul-2022 (rlwhitcomb)
  *	    #402: New "checkRequiredVersions" method (from CalcObjectVisitor for use
  *	    on command line also).
+ *	26-Aug-2022 (rlwhitcomb)
+ *	    #458: New parameter to FunctionDeclaration.
  */
 package info.rlwhitcomb.calc;
 
@@ -1928,7 +1930,7 @@ public final class CalcUtil
 		    // Well, this is interesting ...
 		    String text = getTreeText(ctx);
 		    String name = "_" + CharUtil.getJSONForm(text);
-		    FunctionDeclaration func = new FunctionDeclaration(name, ctx);
+		    FunctionDeclaration func = new FunctionDeclaration(name, ctx, false);
 		    visitor.getVariables().setValue(name, false, func);
 		    visitor.displayActionMessage("%calc#definingFunc", func.getFullFunctionName(), text);
 		    castValue = func;

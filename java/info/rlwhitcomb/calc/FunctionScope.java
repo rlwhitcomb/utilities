@@ -48,6 +48,8 @@
  *	    #361: Add "getFunctionName".
  *	08-Jul-2022 (rlwhitcomb)
  *	    #393: Cleanup imports.
+ *	26-Aug-2022 (rlwhitcomb)
+ *	    #458: Add "isParallel" and "isNestedInvocation" methods.
  */
 package info.rlwhitcomb.calc;
 
@@ -121,6 +123,39 @@ class FunctionScope extends ParameterizedScope
 	 */
 	ParserRuleContext getFunctionBody() {
 	    return declaration.getFunctionBody();
+	}
+
+	/**
+	 * Is our referenced function declared to be "parallel"?
+	 *
+	 * @return The "parallel" flag of the function's declaration.
+	 */
+	boolean isParallel() {
+	    return declaration.isParallel();
+	}
+
+	/**
+	 * Search the current thread's scope stack to see if this function (presumably a "parallel" one)
+	 * has already been invoked. In which case we want to execute it serially instead of submitting
+	 * to a new thread to run in parallel.
+	 *
+	 * @param currentScope The top/inner-most scope in play in this thread.
+	 * @return Whether this scope's function declaration shows up in the scope stack for this thread.
+	 */
+	boolean isNestedInvocation(final NestedScope currentScope) {
+	    FunctionDeclaration currentFunc = declaration;
+	    NestedScope scope = currentScope;
+
+	    while (scope != null) {
+		if (scope instanceof FunctionScope) {
+		    FunctionScope func = (FunctionScope) scope;
+		    if (func.declaration.equals(currentFunc))
+			return true;
+		}
+		scope = scope.getEnclosingScope();
+	    }
+
+	    return false;
 	}
 
 	/**

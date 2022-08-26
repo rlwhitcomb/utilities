@@ -1,0 +1,11 @@
+define parallel process(n) = {
+   trim(exec('sleep', n))
+   n
+}
+
+values = [ 6, 2, 9, 5, -3, 18, 12 ]
+
+loop v over values { process(v) }
+:quiet off
+wait
+

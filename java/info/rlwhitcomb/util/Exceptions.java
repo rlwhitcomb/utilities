@@ -80,6 +80,8 @@
  *	    #393: Cleanup imports.
  *	25-Aug-2022 (rlwhitcomb)
  *	    #465: Add "DirectoryNotEmptyException" and "FileAlreadyExistsException".
+ *	26-Aug-2022 (rlwhitcomb)
+ *	    #458: Add "getCause" call for "ExecutionException", which is just a wrapper.
  */
 package info.rlwhitcomb.util;
 
@@ -96,6 +98,7 @@ import java.nio.file.NoSuchFileException;
 import java.text.ParseException;
 import java.util.IllegalFormatException;
 import java.util.UnknownFormatConversionException;
+import java.util.concurrent.ExecutionException;
 
 
 /**
@@ -228,7 +231,7 @@ public final class Exceptions
 	    boolean topLevel = true;
 
 	    for (Throwable next = ex; next != null; ) {
-		if (next instanceof UncheckedIOException) {
+		if (next instanceof UncheckedIOException || next instanceof ExecutionException) {
 		    next = next.getCause();
 		}
 

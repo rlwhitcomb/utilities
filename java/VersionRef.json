@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '3.0.0', date: d'2022-08-26',
+      issues: [ 458 ],
+      comment: 'Implement multi-threaded "parallel" processing.'
+    },
     { version: '2.14.15', date: d'2022-08-25',
       issues: [ 465 ],
       comment: 'Implement "delete" and "rename" (file) functions.'

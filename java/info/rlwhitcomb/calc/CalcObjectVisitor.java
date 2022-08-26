@@ -658,6 +658,8 @@
  *	    #466: Make normally ignored return values from "definition" statements more readable
  *	    (as return value from "eval").
  *	    #465: Add "delete" and "rename" functions.
+ *	26-Aug-2022 (rlwhitcomb)
+ *	    #458: Process "parallel" keyword on function declaration.
  */
 package info.rlwhitcomb.calc;
 
@@ -695,6 +697,10 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.*;
+import java.util.concurrent.CompletionService;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorCompletionService;
+import java.util.concurrent.ForkJoinPool;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -768,11 +774,20 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	/** Global symbol table for variables. */
 	private final GlobalScope globals;
 
-	/** The current topmost scope for variables. */
-	private NestedScope currentScope;
+	/** The current topmost scope for variables (thread local for parallel computations). */
+	private ThreadLocal<NestedScope> threadCurrentScope = new ThreadLocal<>();
 
-	/** The current {@code LValueContext} for variables. */
-	private LValueContext currentContext;
+	/** The current {@code LValueContext} for variables (thread local for parallel computations). */
+	private ThreadLocal<LValueContext> threadCurrentContext = new ThreadLocal<>();
+
+	/** The executor for running parallel computations. */
+	private ForkJoinPool executor = ForkJoinPool.commonPool();
+
+	/** Completion service for parallel execution. */
+	private CompletionService<Object> cs = new ExecutorCompletionService<>(executor);
+
+	/** The number of currently submitted parallel jobs waiting for completion. */
+	private int numberOfParallelJobs = 0;
 
 	/** {@link CalcDisplayer} object so we can output results to either the console or GUI window. */
 	private final CalcDisplayer displayer;
@@ -825,22 +840,26 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	/**
 	 * Access the currently active symbol table, whether the globals,
 	 * or the current function, or statement block.
+	 * <p>Note: this is a {@link ThreadLocal} variable, so this should be
+	 * the only access point.
 	 *
-	 * @return The {@link #currentScope}.
+	 * @return The current {@link NestedScope}, which is the innermost scope
+	 *         currently in view.
 	 */
 	public NestedScope getVariables() {
-	    return currentScope;
+	    return threadCurrentScope.get();
 	}
 
 	public void pushScope(final NestedScope newScope) {
-	    newScope.setEnclosingScope(currentScope);
-	    currentScope = newScope;
-	    currentContext = new LValueContext(currentScope, settings.ignoreNameCase);
+	    newScope.setEnclosingScope(getVariables());
+	    threadCurrentScope.set(newScope);
+	    threadCurrentContext.set(new LValueContext(newScope, settings.ignoreNameCase));
 	}
 
 	public void popScope() {
-	    currentScope = currentScope.getEnclosingScope();
-	    currentContext = new LValueContext(currentScope, settings.ignoreNameCase);
+	    NestedScope enclosingScope = getVariables().getEnclosingScope();
+	    threadCurrentScope.set(enclosingScope);
+	    threadCurrentContext.set(new LValueContext(enclosingScope, settings.ignoreNameCase));
 	}
 
 	Supplier<Object> phiSupplier = () -> {
@@ -1056,7 +1075,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public boolean setIgnoreCaseMode(final Object mode) {
 	    boolean oldMode = settings.ignoreNameCase;
 	    settings.ignoreNameCase = CharUtil.getBooleanValue(mode);
-	    currentContext.setIgnoreCase(settings.ignoreNameCase);
+	    threadCurrentContext.get().setIgnoreCase(settings.ignoreNameCase);
 
 	    displayDirectiveMessage("%calc#ignoreCaseMode", settings.ignoreNameCase);
 
@@ -1170,6 +1189,32 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 
 	/**
+	 * Execute the given function, either on a parallel thread, or the main one.
+	 *
+	 * @param func The new scope of the function to execute.
+	 * @return     Return value from tha function execution.
+	 */
+	Object executeFunction(final FunctionScope func) {
+	    Object returnValue = null;
+
+	    // Note: this quiet mode setting is going to be weird with multiple threads
+	    pushQuietMode.accept(true);
+	    pushScope(func);
+	    try {
+		returnValue = visit(func.getFunctionBody());
+	    }
+	    catch (LeaveException lex) {
+		returnValue = lex.hasValue() ? lex.getValue() : null;
+	    }
+	    finally {
+		popScope();
+		pushQuietMode.accept("pop");
+	    }
+
+	    return returnValue;
+	}
+
+	/**
 	 * Evaluate a parameter value, doing {@link #evaluate(ParserRuleContext)} but without
 	 * calling any functions encountered (that is, passing the function reference itself).
 	 *
@@ -1229,19 +1274,16 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 
 	    if (returnValue != null && returnValue instanceof FunctionScope) {
-		FunctionScope func = (FunctionScope) returnValue;
+		final FunctionScope func = (FunctionScope) returnValue;
 
-		pushQuietMode.accept(true);
-		pushScope(func);
-		try {
-		    returnValue = visit(func.getFunctionBody());
+		if (func.isParallel() && !func.isNestedInvocation(getVariables())) {
+		    numberOfParallelJobs++;
+System.out.println("submitting '" + func.getFunctionName() + "' -> # jobs is now " + numberOfParallelJobs);
+		    cs.submit(() -> { return executeFunction(func); });
+		    returnValue = null;
 		}
-		catch (LeaveException lex) {
-		    returnValue = lex.hasValue() ? lex.getValue() : null;
-		}
-		finally {
-		    popScope();
-		    pushQuietMode.accept("pop");
+		else {
+		    returnValue = executeFunction(func);
 		}
 	    }
 
@@ -1253,7 +1295,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	private LValueContext getLValue(CalcParser.VarContext var) {
-	    return LValueContext.getLValue(this, var, currentContext);
+	    return LValueContext.getLValue(this, var, threadCurrentContext.get());
 	}
 
 	private BigDecimal getDecimalValue(final ParserRuleContext ctx) {
@@ -2502,8 +2544,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 		@Override
 		public Object apply(final Object value) {
-		    currentScope.clear();
-		    currentScope.setValue(localVarName, value);
+		    getVariables().clear();
+		    getVariables().setValue(localVarName, value);
 		    try {
 			lastValue = evaluate(block);
 		    }
@@ -2515,7 +2557,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 		public void finish() {
 		    // Make sure the local loop var gets removed, even on exceptions
-		    currentScope.remove(localVarName, settings.ignoreNameCase);
+		    getVariables().remove(localVarName, settings.ignoreNameCase);
 		}
 	}
 
@@ -2762,7 +2804,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    pushScope(new WhileScope());
 	    try {
 		while (exprResult) {
-		    currentScope.clear();
+		    getVariables().clear();
 		    try {
 			lastValue = evaluate(block);
 		    }
@@ -3037,6 +3079,30 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	@Override
+	public Object visitWaitStmt(CalcParser.WaitStmtContext ctx) {
+	    ArrayScope<Object> returnValues = new ArrayScope<>();
+
+System.out.println("at 'wait', number of jobs is " + numberOfParallelJobs);
+	    for (int i = 0; i < numberOfParallelJobs; i++) {
+		try {
+		    Object result = cs.take().get();
+System.out.println("i = " + i + ", result = " + result);
+		    returnValues.add(result);
+		}
+		catch (InterruptedException ie) {
+		    // Not sure what (if anything) to do here, so just continue
+		}
+		catch (ExecutionException ee) {
+		    throw new CalcExprException(ee, ctx);
+		}
+	    }
+
+	    numberOfParallelJobs = 0;
+
+	    return returnValues;
+	}
+
+	@Override
 	public Object visitTimeThisStmt(CalcParser.TimeThisStmtContext ctx) {
 	    CalcParser.ExprContext descExpr = ctx.expr();
 	    if (descExpr != null) {
@@ -3061,9 +3127,10 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitDefineStmt(CalcParser.DefineStmtContext ctx) {
 	    String funcName = ctx.id().getText();
+	    boolean parallel = ctx.K_PARALLEL() != null;
 
 	    // Can't redefine a predefined value
-	    Object oldValue = currentScope.getValue(funcName, settings.ignoreNameCase);
+	    Object oldValue = getVariables().getValue(funcName, settings.ignoreNameCase);
 	    if (oldValue != null && isPredefined(oldValue, false)) {
 		throw new CalcExprException(ctx, "%calc#noChangeValue", oldValue.toString(), funcName, "");
 	    }
@@ -3073,7 +3140,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    String paramString = formalParams == null ? "" : getTreeText(formalParams);
 	    List<CalcParser.FormalParamContext> paramVars = formalParams == null ? null : formalParams.formalParam();
-	    FunctionDeclaration func = new FunctionDeclaration(funcName, functionBody);
+	    FunctionDeclaration func = new FunctionDeclaration(funcName, functionBody, parallel);
 
 	    if (formalParams != null) {
 		for (CalcParser.FormalParamContext paramVar : formalParams.formalParam()) {
@@ -3085,7 +3152,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		}
 	    }
 
-	    currentScope.setValue(funcName, settings.ignoreNameCase, func);
+	    getVariables().setValue(funcName, settings.ignoreNameCase, func);
 
 	    displayActionMessage("%calc#definingFunc", func.getFullFunctionName(), getTreeText(functionBody));
 
@@ -3098,7 +3165,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    CalcParser.ExprContext expr = ctx.expr();
 	    Object value = evaluate(expr);
 
-	    ConstantValue.define(currentScope, constantName, value);
+	    ConstantValue.define(getVariables(), constantName, value);
 
 	    displayActionMessage("%calc#definingConst", constantName,
 		toStringValue(this, ctx, value, new StringFormat(settings)));
@@ -3111,12 +3178,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    String varName = ctx.id().getText();
 	    CalcParser.ExprContext expr = ctx.expr();
 
-	    if (currentScope.isDefinedLocally(varName, settings.ignoreNameCase))
+	    if (getVariables().isDefinedLocally(varName, settings.ignoreNameCase))
 		throw new CalcExprException(ctx, "%calc#noDupLocalVar", varName);
 
 	    if (expr != null) {
 		Object value = evaluate(expr);
-		currentScope.setValueLocally(varName, settings.ignoreNameCase, value);
+		getVariables().setValueLocally(varName, settings.ignoreNameCase, value);
 
 		displayActionMessage("%calc#definingVar", varName,
 			toStringValue(this, ctx, value, new StringFormat(settings)));
@@ -3124,7 +3191,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		return Intl.formatString("calc#definedVar", varName);
 	    }
 	    else {
-		currentScope.setValueLocally(varName, settings.ignoreNameCase, null);
+		getVariables().setValueLocally(varName, settings.ignoreNameCase, null);
 
 		displayActionMessage("%calc#definingVarOnly", varName);
 

@@ -45,6 +45,8 @@
  *	    #355: Define "_funcname" constant for functions.
  *	08-Jul-2022 (rlwhitcomb)
  *	    #393: Cleanup imports.
+ *	26-Aug-2022 (rlwhitcomb)
+ *	    #458: Add "parallel" flag parameter to constructor.
  */
 package info.rlwhitcomb.calc;
 
@@ -79,6 +81,11 @@ class FunctionDeclaration
 	private final ParserRuleContext functionBody;
 
 	/**
+	 * Whether this function is marked for parallel execution.
+	 */
+	private final boolean parallel;
+
+	/**
 	 * The defined parameters, along with their default value expressions.
 	 */
 	private final LinkedHashMap<String, ParserRuleContext> parameters;
@@ -103,15 +110,26 @@ class FunctionDeclaration
 	/**
 	 * Constructor given the function name and its declaration (body).
 	 *
-	 * @param name Name of this function.
-	 * @param body The complete parse tree of its declaration.
+	 * @param name      Name of this function.
+	 * @param body      The complete parse tree of its declaration.
+	 * @param isParallel Whether or not the function is declared as "parallel" capable.
 	 */
-	FunctionDeclaration(final String name, final ParserRuleContext body) {
+	FunctionDeclaration(final String name, final ParserRuleContext body, final boolean isParallel) {
 	    functionName   = name;
 	    functionBody   = body;
+	    parallel       = isParallel;
 	    parameters     = new LinkedHashMap<>();
 	    parameterNames = null;
 	    hasVarargs     = false;
+	}
+
+	/**
+	 * Whether or not this function is marked for parallel execution.
+	 *
+	 * @return Is this a parallel function?
+	 */
+	boolean isParallel() {
+	    return parallel;
 	}
 
 	/**
