@@ -754,8 +754,8 @@ or<br>
     <tr><td>33</td><td><i>object</i> <code>.</code> <i>member</i></td><td>access an object member</td><td>left to right</td></tr>
     <tr><td>32</td><td><i>expr</i> <code>HAS</code> ( <i>id</i> | <i>string</i> | <code>[</code> <i>expr</i> <code>]</code> )</td><td>safely check for member or index</td><td>left to right</td></tr>
     <tr><td>31</td><td><code>( </code><i>expr</i><code> )</code></td><td>group an expression</td><td>N/A</td></tr>
-    <tr><td rowspan="76">30</td>
-            <td><code>ABS</code>&nbsp;<i>expr</i></td><td>absolute value</td><td rowspan="76">left to right</td></tr>
+    <tr><td rowspan="78">30</td>
+            <td><code>ABS</code>&nbsp;<i>expr</i></td><td>absolute value</td><td rowspan="78">left to right</td></tr>
             <tr><td><code>SIN</code>&nbsp;<i>expr</i></td><td>sine</td></tr>
             <tr><td><code>COS</code>&nbsp;<i>expr</i></td><td>cosine</td></tr>
             <tr><td><code>TAN</code>&nbsp;<i>expr</i></td><td>tangent</td></tr>
@@ -820,7 +820,9 @@ or<br>
             <tr><td><code>ENCODE</code>&nbsp;<i>expr</i></td><td>encode a string into its base64 form</td></tr>
             <tr><td><code>EXISTS</code>&nbsp;<i>expr</i>&nbsp;( <code>,</code>&nbsp;<i>flag_expr</i>&nbsp;)</td><td>check the existence/permissions of file or directory</td></tr>
             <tr><td><code>READ</code>&nbsp;<i>expr</i>&nbsp;( <code>,</code>&nbsp;<i>charset_expr</i>&nbsp;)</td><td>read the file (or files) using the optional charset</td></tr>
-            <tr><td><code>WRITE</code>&nbsp;<i>expr</i>&nbsp; <code>,</code>&nbsp;<i>file name</i>&nbsp;( <code>,</code>&nbsp;<i>charset_expr</i>&nbsp;)</td><td>write the value to the file using the optional charset</td></tr>
+            <tr><td><code>WRITE</code>&nbsp;<i>expr</i> <code>,</code>&nbsp;<i>file name</i>&nbsp;( <code>,</code>&nbsp;<i>charset_expr</i>&nbsp;)</td><td>write the value to the file using the optional charset</td></tr>
+            <tr><td><code>DELETE</code>&nbsp;<i>expr</i>&nbsp;( <code>,</code>&nbsp;<i>expr</i> ) *</td><td>delete one or more files</td></tr>
+            <tr><td><code>RENAME</code>&nbsp;<i>expr<sub>1</sub></i> <code>,</code> <i>expr<sub>2</sub></i></td><td>rename or move file<sub>1</sub> to file<sub>2</sub></td></tr>
             <tr><td><code>MATCHES</code>&nbsp;<i>expr</i>&nbsp;<code>,</code>&nbsp;<i>pattern_expr</i>&nbsp;( <code>,</code> <i>flags_expr</i> )</td><td>match the expression string against<br>the regular expression pattern with possible flags</td></tr>
             <tr><td><code>FACTORS</code>&nbsp;<i>expr</i></td><td>calculate all the factors of the number</td></tr>
             <tr><td><code>PFACTORS</code>&nbsp;<i>expr</i></td><td>calculate the prime factors of the number</td></tr>
@@ -1070,6 +1072,10 @@ or<br>
      or <code>"-"</code>). For a regular file the charset can also be specified, although standard output will always use the system default. If the first expression result for <code>write</code> is an array, the output will be a series of lines using the system
      default line separator, with each array value written to a separate line. For an object the output will be in JSON format, and for all other values
      the result will be written as the string equivalent. Immediately writing the result of a read will produce an identical file.
+  <p>The return value from <code>delete</code> will be <code>true</code> if all the files are successfully deleted, <code>false</code> otherwise. While the return value from <code>rename</code> will be the full path of the destination file (that is, the new file name after the move).
+     For <code>delete</code>, if the file does not exist the return will be <code>false</code> but no error is thrown. Other obvious problems,
+     such as trying to delete a non-empty directory, will throw errors. Likewise <code>rename</code> will throw any errors that prevent the
+     move or rename from happening.
   <p>The pattern expression for <code>matches</code> follows Java regular expression conventions. For objects the return value is
      another object containing only those keys that match the regex. For arrays, the returned array contains only those elements
      that match. For all other values, the input expression is converted to a string and matched against the regex,

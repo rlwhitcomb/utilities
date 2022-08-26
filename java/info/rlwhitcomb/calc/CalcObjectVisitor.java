@@ -657,6 +657,7 @@
  *	25-Aug-2022 (rlwhitcomb)
  *	    #466: Make normally ignored return values from "definition" statements more readable
  *	    (as return value from "eval").
+ *	    #465: Add "delete" and "rename" functions.
  */
 package info.rlwhitcomb.calc;
 
@@ -682,6 +683,10 @@ import java.nio.charset.Charset;
 import java.nio.charset.IllegalCharsetNameException;
 import java.nio.charset.StandardCharsets;
 import java.nio.charset.UnsupportedCharsetException;
+import java.nio.file.DirectoryNotEmptyException;
+import java.nio.file.FileAlreadyExistsException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.SecureRandom;
 import java.text.FieldPosition;
@@ -5732,6 +5737,47 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    return BigInteger.valueOf(FileUtilities.writeRawText(seq, new File(fileName), cs));
 		}
 		return BigInteger.ZERO;
+	    }
+	    catch (IOException ioe) {
+		throw new CalcExprException(ioe, ctx);
+	    }
+	}
+
+	@Override
+	public Object visitDeleteExpr(CalcParser.DeleteExprContext ctx) {
+	    CalcParser.ExprNContext exprN = ctx.exprN();
+	    List<CalcParser.ExprContext> exprs = exprN.exprList().expr();
+	    boolean result = true;
+
+	    for (CalcParser.ExprContext expr : exprs) {
+		Path path = new File(getStringValue(expr)).toPath();
+		try {
+		    if (!Files.deleteIfExists(path))
+			result = false;
+		}
+		catch (DirectoryNotEmptyException dnee) {
+		    throw new CalcExprException(dnee, ctx);
+		}
+		catch (IOException ioe) {
+		    throw new CalcExprException(ioe, ctx);
+		}
+	    }
+
+	    return Boolean.valueOf(result);
+	}
+
+	@Override
+	public Object visitRenameExpr(CalcParser.RenameExprContext ctx) {
+	    CalcParser.Expr2Context expr2 = ctx.expr2();
+	    Path p1 = new File(getStringValue(expr2.expr(0))).toPath();
+	    Path p2 = new File(getStringValue(expr2.expr(1))).toPath();
+
+	    try {
+		Path newPath = Files.move(p1, p2);
+		return newPath.toRealPath().toString();
+	    }
+	    catch (FileAlreadyExistsException faee) {
+		throw new CalcExprException(faee, ctx);
 	    }
 	    catch (IOException ioe) {
 		throw new CalcExprException(ioe, ctx);

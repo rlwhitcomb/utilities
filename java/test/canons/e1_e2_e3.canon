@@ -1149,6 +1149,12 @@
 >path = '../Java' -> "../Java"
 >exists (path, 'd+') -> false
 >info.os.id == "linux" ? exists (lower (path), 'd') : exists (path, 'd') -> true
+>delete 'alpha.beta', 'delta.gamma', 'alpha.omega' -> false
+>Defining constant “FILE1” = "_ftest_.beta"
+>Defining constant “FILE2” = "_gtest_.zeta"
+>write ('test data', FILE1) -> 9
+>read (FILE2) -> "test data"
+>delete (FILE2) -> true
 >
 >End of expression tests (suite 1).
 >Tests of nested object / array variables.

@@ -78,6 +78,8 @@
  *	    Rename class.
  *	09-Jul-2022 (rlwhitcomb)
  *	    #393: Cleanup imports.
+ *	25-Aug-2022 (rlwhitcomb)
+ *	    #465: Add "DirectoryNotEmptyException" and "FileAlreadyExistsException".
  */
 package info.rlwhitcomb.util;
 
@@ -88,6 +90,8 @@ import java.net.UnknownHostException;
 import java.nio.charset.CharacterCodingException;
 import java.nio.charset.IllegalCharsetNameException;
 import java.nio.charset.UnsupportedCharsetException;
+import java.nio.file.DirectoryNotEmptyException;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.NoSuchFileException;
 import java.text.ParseException;
 import java.util.IllegalFormatException;
@@ -247,6 +251,8 @@ public final class Exceptions
 			  || (next instanceof UnsupportedEncodingException)
 			  || (next instanceof FileNotFoundException)
 			  || (next instanceof NoSuchFileException)
+			  || (next instanceof DirectoryNotEmptyException)
+			  || (next instanceof FileAlreadyExistsException)
 			  || (next instanceof UnsupportedOperationException)
 			  || (next instanceof NumberFormatException)
 			  || (next instanceof StringIndexOutOfBoundsException)

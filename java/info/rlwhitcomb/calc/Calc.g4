@@ -446,6 +446,8 @@
  *	24-Aug-2022 (rlwhitcomb)
  *	    #454: Implement ":colors" directive.
  *	    #447: Implement "grads" mode for trig operations.
+ *	25-Aug-2022 (rlwhitcomb)
+ *	    #465: Add "delete" and "rename" file operations.
  */
 
 grammar Calc;
@@ -618,6 +620,8 @@ expr
    | K_EXISTS ( expr2 | expr1 )          # existsExpr
    | K_READ ( expr2 | expr1 )            # readExpr
    | K_WRITE ( expr3 | expr2 )           # writeExpr
+   | K_DELETE exprN                      # deleteExpr
+   | K_RENAME expr2                      # renameExpr
    | K_MATCHES ( expr3 | expr2 )         # matchesExpr
    | var INC_OP                          # postIncOpExpr
    |<assoc=right> INC_OP var             # preIncOpExpr
@@ -1117,6 +1121,10 @@ K_EXISTS   : 'exists' | 'EXISTS' | 'Exists' ;
 K_READ     : 'read' | 'READ' | 'Read' ;
 
 K_WRITE    : 'write' | 'WRITE' | 'Write' ;
+
+K_DELETE   : 'delete' | 'DELETE' | 'Delete' ;
+
+K_RENAME   : 'rename' | 'RENAME' | 'Rename' ;
 
 K_MATCHES  : 'matches' | 'MATCHES' | 'Matches' ;
 

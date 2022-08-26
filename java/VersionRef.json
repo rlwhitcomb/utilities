@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.14.15', date: d'2022-08-25',
+      issues: [ 465 ],
+      comment: 'Implement "delete" and "rename" (file) functions.'
+    },
     { version: '2.14.11', date: d'2022-08-25',
       issues: [ 466 ],
       comment: 'Pretty up the return value from "defining" statements, for "eval".'
