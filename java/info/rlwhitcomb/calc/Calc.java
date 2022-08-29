@@ -306,6 +306,8 @@
  *	24-Aug-2022 (rlwhitcomb)
  *	    #454: Process new colored option in Settings dialog; allow setting colored mode from visitor.
  *	    #447: New grads trig mode.
+ *	28-Aug-2022 (rlwhitcomb)
+ *	    #464: Add "-output" and associated options to redirect streams to files.
  */
 package info.rlwhitcomb.calc;
 
@@ -334,6 +336,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Constructor;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -405,7 +408,13 @@ public class Calc
 		/** A version string. */
 		VERSION,
 		/** A base version string. */
-		BASE_VERSION
+		BASE_VERSION,
+		/** Output file path. */
+		OUTPUT_FILE,
+		/** Error output file path. */
+		ERROR_FILE,
+		/** Output file charset. */
+		OUTPUT_CHARSET
 	}
 
 	/**
@@ -510,10 +519,13 @@ public class Calc
 	private static File rootDirectory = null;
 	private static List<String> libraryNames = null;
 
+	private static File outputFile = null;
+	private static File errorFile = null;
+
 	private static Charset inputCharset = null;
+	private static String outputCharsetName = null;
 
 	private Display display;
-	private PrintStream sysOut;
 
 	@BXML private Window mainWindow;
 	@BXML private SplitPane splitPane;
@@ -1004,7 +1016,6 @@ public class Calc
 
 		// To implement the displayer, redirect System.out to our TextArea for display
 		PrintStream ps = new TextAreaOutputStream(outputTextArea, StandardCharsets.UTF_8, 16_384).toPrintStream();
-		sysOut = System.out;
 		System.setOut(ps);
 		System.setErr(ps);
 
@@ -1408,6 +1419,26 @@ public class Calc
 			Intl.errFormat("calc#errorLine", regularMessage, lineNumber);
 		}
 	}
+
+
+	/**
+	 * Displayer that outputs to redirected files, possibly with different charset.
+	 * <p> The only difference from the {@link ConsoleDisplayer} is the setup where
+	 * we redirect the standard streams to files.
+	 */
+	private static class FileDisplayer extends ConsoleDisplayer
+	{
+		FileDisplayer(File output, File error, String csName)
+			throws FileNotFoundException, UnsupportedEncodingException
+		{
+		    if (output != null)
+			System.setOut(CharUtil.isNullOrEmpty(csName) ? new PrintStream(output) : new PrintStream(output, csName));
+
+		    if (error != null)
+			System.setErr(CharUtil.isNullOrEmpty(csName) ? new PrintStream(error) : new PrintStream(error, csName));
+		}
+	}
+
 
 	private void enableActions(boolean enable) {
 	    CalcAction.SETTINGS.enable(enable);
@@ -2213,6 +2244,19 @@ public class Calc
 		case "char":
 		case "cs":
 		    return Expecting.CHARSET;
+		case "output":
+		case "out":
+		case "o":
+		    return Expecting.OUTPUT_FILE;
+		case "error":
+		case "err":
+		    return Expecting.ERROR_FILE;
+		case "outputcharset":
+		case "outputcs":
+		case "outchar":
+		case "outcs":
+		case "ocs":
+		    return Expecting.OUTPUT_CHARSET;
 		case "default":
 		case "def":
 		    inputCharset = null;
@@ -2279,6 +2323,25 @@ public class Calc
 			case CHARSET:
 			    try {
 				inputCharset = Charset.forName(arg);
+				expecting = Expecting.DEFAULT;
+			    }
+			    catch (IllegalCharsetNameException | UnsupportedCharsetException cse) {
+				Intl.errFormat("calc#charsetError", arg, Exceptions.toString(cse));
+				expecting = Expecting.QUIT_NOW;
+			    }
+			    break;
+			case OUTPUT_FILE:
+			    outputFile = new File(arg);
+			    expecting = Expecting.DEFAULT;
+			    break;
+			case ERROR_FILE:
+			    errorFile = new File(arg);
+			    expecting = Expecting.DEFAULT;
+			    break;
+			case OUTPUT_CHARSET:
+			    try {
+				Charset cs = Charset.forName(arg);
+				outputCharsetName = cs.name();
 				expecting = Expecting.DEFAULT;
 			    }
 			    catch (IllegalCharsetNameException | UnsupportedCharsetException cse) {
@@ -2402,12 +2465,23 @@ public class Calc
 		}
 
 		if (guiMode) {
-		    if (input != null)
-			inputText = input.toString();
-		    DesktopApplicationContext.main(Calc.class, new String[0]);
+		    if (outputFile != null || errorFile != null || outputCharsetName != null) {
+			Intl.errPrintln("calc#noOutputGuiMode");
+			exitValue = "95";
+		    }
+		    else {
+			if (input != null)
+			    inputText = input.toString();
+
+			DesktopApplicationContext.main(Calc.class, new String[0]);
+		    }
 		}
 		else {
-		    displayer = new ConsoleDisplayer();
+		    if (outputFile != null || errorFile != null)
+			displayer = new FileDisplayer(outputFile, errorFile, outputCharsetName);
+		    else
+			displayer = new ConsoleDisplayer();
+
 		    visitor = new CalcObjectVisitor(displayer, rational, separators, silenceDirectives, ignoreCase, quotes, sortKeys);
 
 		    // In case there are version requirements for libraries or variables,
