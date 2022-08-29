@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.14.20', date: d'2022-08-28',
+      issues: [ 464 ],
+      comment: 'Add "-output", "-error", and "-outcs" options for output redirection.'
+    },
     { version: '2.14.15', date: d'2022-08-25',
       issues: [ 465 ],
       comment: 'Implement "delete" and "rename" (file) functions.'
