@@ -358,6 +358,9 @@ h2 {
   <li>This help page (of course) is an HTML document, and so depends on a browser being installed to display it. Note that this help is also included
      as part of the Javadoc for the <code style="font-size:100%;">info.rlwhitcomb.calc</code> package.
   <li>The format for version strings for the <code>-requires</code> or <code>-baseversion</code> options is described in the <a href="#Notes_on_Directives">Notes on Directives</a> section.
+  <li>Using the <code>--</code> option to set the parameter values (<code>$0</code>, <code>$1</code>, &mldr;) will append these values to any that are specified by the
+      <code>CALC_OPTIONS</code> environment variable. The <code>-clear</code> option can be used to remove the environment values, to make sure (for instance) that the first
+      value on the actual command line becomes <code>$0</code>.
   </ul>
   </div>
 <a class="top-link" href="#topofpage">Top</a>
@@ -373,6 +376,8 @@ h2 {
      not actually exit after switching modes until the GUI window is closed. This also applies to using the <code>-gui</code> option on the command line.
   <p>Also note that using the command line options (such as <code>c -version</code>) will do the operation and immediately exit, while using the
      equivalent REPL command will do the operation and return to the REPL prompt to accept further work.
+  <p>Note: there is currently an open issue (<a href="https://github.com/rlwhitcomb/utilities/issues/450">#450</a>) trying to read input from the console (using <code>read('@')</code>)
+     while in REPL mode, so this should only be used in a batch process until the issue is resolved.
   </div>
   <div class="center">
   <table style="margin-left:auto;margin-right:auto;">
@@ -498,7 +503,8 @@ which gives:
      used to force quoting of string results, regardless of the state of the <code>:quotestrings</code> mode.
   <p>Calc reserves the names <code>pi</code>, <code>e</code>, <code>phi</code>, and <code>i</code> for these four fundamental constants. All the various Unicode characters
      for <code>&#x1D6D1;</code> are supported, as well as Unicode alternatives for <code>e</code> and <code>i</code> (see the <a href="#Available_Operators_and_Predefined_Functions">"Operators, Functions, and Precedence"</a>
-     table below).
+     table below). But note that these names CAN be used for local variables inside loops, and functions (and any other local code blocks), but which will override the predefined
+     values in that local context (there are examples in the <code>test/files</code> directory of the source).
 <p class="indent"> <code>&#x1D6D1;</code> = <code>3.14159265358979323846264338327950288...</code> <br> <code>e</code> = <code>2.71828182845904523536028747135266249...</code> <br> <code>i = ( 0, 1 )</code> </p>
   <p>The Unicode fraction characters also represent their respective values, as in:
 <p class="indent"> <code>&#x00BC;</code> = <code>1/4</code> or <code>0.25</code> <br> <code>&#x215A;</code> = <code>5/6</code> or <code>0.8333...</code>
@@ -506,7 +512,8 @@ which gives:
     two, or three integers (optional minus signs), separated by spaces or <code>,</code> or <code>;</code> or <code>/</code>, or one of the
     Unicode fraction characters optionally preceded by an integer. Some examples:
   <p class="indent"> <code>f'2&#x00BC;'</code> = <code>2.25</code> or <code>f'1 2/3'</code> = <code>1.66666...</code>
-  <p>Complex numbers are constructed as such: <code>(</code>&nbsp;<i>real</i>&nbsp;<code>,</code>&nbsp;<i>imaginary</i>&nbsp;<code>)</code>. There is also the <code>complex</code> function that accepts one or two arguments: either the two value parts or a string convertible to these two parts, or an object with <code>r</code> and <code>i</code> keys, or <code>radius</code> and <code>theta</code> keys, or an array with two values.
+  <p>Complex numbers are constructed as such: <code>(</code>&nbsp;<i>real</i>&nbsp;<code>,</code>&nbsp;<i>imaginary</i>&nbsp;<code>)</code>. There is also the <code>complex</code> function that accepts one or two arguments:
+     either the two value parts or a string convertible to these two parts, or an object with <code>r</code> and <code>i</code> keys, or <code>radius</code> and <code>theta</code> keys, or an array with two values.
   <p>The string syntax for <code>complex</code> is either <code>"( <i>expr</i> )"</code>, <code>"( <i>n</i>, <i>n</i> )"</code>, or <code>"( <i>n</i> &pm; <i>n</i> i )"</code>, or <code>"{ r: <i>radius</i>, &#x03B8;: <i>theta</i> }"</code>.
   <p>There is also a constant type used to express values as Roman Numerals. The syntax is <code>R'<i>xxxx</i>'</code>, where the
      digits are the typical Roman values of <code>I</code> (one), <code>V</code> (five), <code>X</code> (ten), and so on (case-insensitive), but also including the Unicode
@@ -871,7 +878,7 @@ or<br>
     <tr><td>14</td><td>
         <i>expr</i>&nbsp;<code>OF</code>, <code>IN</code>, <code>WITHIN</code>, <code>&#x2208;</code>, or <code>&#x220A;</code><br>
         <i>expr</i> [ <code>...</code>,&nbsp;<code>..</code>,&nbsp;or&nbsp;<code>&#x2026;</code>&nbsp;<i>expr</i> ] [ <code>,</code> <i>expr</i> ]</td>
-        <td>range match</td><td>left to right</td></tr>
+        <td>test set membership, or match a value within a range</td><td>left to right</td></tr>
     <tr><td>13</td><td>
         <i>expr</i>&nbsp;<code> === </code>or<code> &#x2A76; </code>or<code> &#x2261; </code>&nbsp;<i>expr</i><br>
         <i>expr</i>&nbsp;<code> !== </code>or<code> &#x2262; </code>&nbsp;<i>expr</i><br>
@@ -1091,12 +1098,13 @@ or<br>
          <li><code>0x0010</code> = match multiline patterns</li>
          <li><code>0x0020</code> = only Unix line endings recognized</li>
      </ul>
-  <p>The <code>info</code> object contains five read-only subobjects:  <code>version</code>, 
-     <code>os</code>, <code>java</code>, <code>locale</code>, and <code>timezone</code>.
-     The contents of each are similar to this:
+  <p>The <code>info</code> object contains seven read-only subobjects:  <code>version</code>, <code>libversion</code>,
+     <code>cpu</code>, <code>os</code>, <code>java</code>, <code>locale</code>, and <code>timezone</code>.
+     The contents of each are objects (<i>key</i>:<i>value</i> pairs) similar to this:
   <p class="indent">
     <code style="color:blue;">info.version</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">{ major: 2, minor: 3, patch: 0, prerelease: "-debug", build: "+9cce83e" }</code>
-  <p>and the standard <code>"library.calc"</code> contains several examples of the use of these fields.
+  <p>and the standard <code>"library.calc"</code> contains several examples of the use of these fields. Note that the memory values of the <code>info.cpu</code> object are dynamic
+     in that they are the current values from the Java system at the time the expression is evaluated. All the other values, however, are set statically at startup.
   <p>The <code>settings</code> object contains the settable values of many of the directives, such
      as: <code>trigMode</code>, <code>separatorMode</code>, <code>precision</code>, etc. The values
      can be queried, or set, which has exactly the same effect as using the directives, as in:
@@ -1114,6 +1122,8 @@ or<br>
   <p>This value is also available from the standard <code>library.calc</code> (as the first solution to the quadratic equation &xscr;&sup2; - &xscr; - 1 = 0) via:
   <p class="indent">
      <code style="color:blue;">quad(1, -1, -1)[0] </code><code style="color:grey;">&#x21E8;</code><code style="color:green;"> 1.618033988749894848204586834365638</code>
+  <p>The result of the "spaceship" operator (<code>&lt;=&gt;</code>) (for instance <code>a &lt;=&gt; b</code>) is the same as <code>signum(a - b)</code>, in other words,
+     <code>-1</code> if <code>a &lt; b</code>, <code>0</code> if <code>a == b</code>, or <code>+1</code> if <code>a &gt; b</code>.
 </div>
 <a class="top-link" href="#topofpage">Top</a>
 <hr id="User_Defined_Functions" class="sectionsep">
