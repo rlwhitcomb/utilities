@@ -660,6 +660,8 @@
  *	    #465: Add "delete" and "rename" functions.
  *	26-Aug-2022 (rlwhitcomb)
  *	    #458: Process "parallel" keyword on function declaration.
+ *	29-Aug-2022 (rlwhitcomb)
+ *	    #469: Update "has" function to search objects recursively.
  */
 package info.rlwhitcomb.calc;
 
@@ -3302,7 +3304,7 @@ System.out.println("i = " + i + ", result = " + result);
 
 	    ObjectScope obj = (ObjectScope) source;
 
-	    return Boolean.valueOf(obj.isDefinedLocally(key, settings.ignoreNameCase));
+	    return Boolean.valueOf(isDefinedRecursively(obj, key, settings.ignoreNameCase));
 	}
 
 	@Override
