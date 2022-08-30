@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.14.22', date: d'2022-08-29',
+      issues: [ 469 ],
+      comment: 'The "has" operator will now search objects recursively.'
+    },
     { version: '2.14.20', date: d'2022-08-28',
       issues: [ 464 ],
       comment: 'Add "-output", "-error", and "-outcs" options for output redirection.'

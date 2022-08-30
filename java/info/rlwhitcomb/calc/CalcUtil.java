@@ -177,6 +177,8 @@
  *	29-Jul-2022 (rlwhitcomb)
  *	    #402: New "checkRequiredVersions" method (from CalcObjectVisitor for use
  *	    on command line also).
+ *	29-Aug-2022 (rlwhitcomb)
+ *	    #469: New method to search ObjectScope recursively for "has"-ness.
  */
 package info.rlwhitcomb.calc;
 
@@ -2497,5 +2499,32 @@ public final class CalcUtil
 		    throw new Intl.IllegalArgumentException("calc#baseVersionMismatch", requireBaseVersion, baseVersion);
 	    }
 	}
+
+	/**
+	 * Check recursively for the given key name in an object.
+	 *
+	 * @param obj	The top-most object to start the search in.
+	 * @param key	Name of a member to search for.
+	 * @param ignoreCase	Whether to ignore the case of names.
+	 * @return	Whether or not the key was found anywhere in the object hierarchy.
+	 */
+	public static boolean isDefinedRecursively(final ObjectScope obj, final String key, final boolean ignoreCase) {
+	    if (obj.isDefinedLocally(key, ignoreCase))
+		return true;
+
+	    for (String name : obj.keySet()) {
+		Object value = obj.getValueLocally(name, ignoreCase);
+		if (value instanceof ValueScope) {
+		    value = ((ValueScope) value).getValue();
+		}
+		if (value instanceof ObjectScope) {
+		    if (isDefinedRecursively((ObjectScope) value, key, ignoreCase))
+			return true;
+		}
+	    }
+
+	    return false;
+	}
+
 }
 
