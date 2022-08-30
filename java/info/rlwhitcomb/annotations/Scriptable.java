@@ -30,6 +30,8 @@
  *	    Prepare for GitHub.
  *	09-Jul-2022 (rlwhitcomb)
  *	    #393: Cleanup imports.
+ *	29-Aug-2022 (rlwhitcomb)
+ *	    #453: Add "order" attribute.
  */
 package info.rlwhitcomb.annotations;
 
@@ -45,4 +47,5 @@ import java.lang.annotation.*;
 public @interface Scriptable
 {
     boolean value() default true;
+    int order() default -1;
 }

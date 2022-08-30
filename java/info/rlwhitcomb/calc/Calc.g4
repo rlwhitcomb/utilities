@@ -448,6 +448,8 @@
  *	    #447: Implement "grads" mode for trig operations.
  *	25-Aug-2022 (rlwhitcomb)
  *	    #465: Add "delete" and "rename" file operations.
+ *	29-Aug-2022 (rlwhitcomb)
+ *	    #453: Add "fileinfo" function.
  */
 
 grammar Calc;
@@ -618,6 +620,7 @@ expr
    | K_DECODE expr1                      # decodeExpr
    | K_ENCODE expr1                      # encodeExpr
    | K_EXISTS ( expr2 | expr1 )          # existsExpr
+   | K_FILEINFO expr1                    # fileInfoExpr
    | K_READ ( expr2 | expr1 )            # readExpr
    | K_WRITE ( expr3 | expr2 )           # writeExpr
    | K_DELETE exprN                      # deleteExpr
@@ -1117,6 +1120,8 @@ K_DECODE   : 'decode' | 'DECODE' | 'Decode' ;
 K_ENCODE   : 'encode' | 'ENCODE' | 'Encode' ;
 
 K_EXISTS   : 'exists' | 'EXISTS' | 'Exists' ;
+
+K_FILEINFO : 'fileinfo' | 'FILEINFO' | 'FileInfo' ;
 
 K_READ     : 'read' | 'READ' | 'Read' ;
 
