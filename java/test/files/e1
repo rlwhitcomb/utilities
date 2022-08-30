@@ -1005,6 +1005,25 @@ list has [-2]
 { 'duck', 'duck', 'goose' } has [2]
 
 #
+# difference between "has" and "in"
+#
+c12 = { a:1, b:{d:23, "e": 2.718, f: { g:true, h:'def' } } }
+c12 has a
+c12 has b
+c12 has d
+c12 has "e"
+c12 has f
+c12 has g
+c12 has h
+"a" in c12
+"b" in c12
+'"e"' in c12
+'"e"' in c12.b
+"g" in c12
+"g" in c12.b.f
+
+
+#
 # Test read/write, especially of Unicode data
 #
 const UTF_8 = 'utf-8'

@@ -1127,6 +1127,11 @@ or<br>
      <code style="color:blue;">quad(1, -1, -1)[0] </code><code style="color:grey;">&#x21E8;</code><code style="color:green;"> 1.618033988749894848204586834365638</code>
   <p>The result of the "spaceship" operator (<code>&lt;=&gt;</code>) (for instance <code>a &lt;=&gt; b</code>) is the same as <code>signum(a - b)</code>, in other words,
      <code>-1</code> if <code>a &lt; b</code>, <code>0</code> if <code>a == b</code>, or <code>+1</code> if <code>a &gt; b</code>.
+  <p>Both the <code>IN</code> operator and the <code>HAS</code> operator will search for a member within an object, but <code>has</code> will search recursively to find
+     the member. For instance (and notice how member names must be quoted for <code>IN</code> but not for <code>HAS</code>):
+  <p class="indent">
+    <code style="color:blue;">info has maxmemory </code><code style="color:grey;">&#x21E8;</code><code style="color:green;"> true</code><br>
+    <code style="color:blue;">"maxmemory" in info </code><code style="color:grey;">&#x21E8;</code><code style="color:green;"> false</code><br>
 </div>
 <a class="top-link" href="#topofpage">Top</a>
 <hr id="User_Defined_Functions" class="sectionsep">

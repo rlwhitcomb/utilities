@@ -1139,6 +1139,20 @@
 >'duck' in {'duck', 'duck', 'goose'} -> true
 >{'duck', 'duck', 'goose'} has [1] -> true
 >{'duck', 'duck', 'goose'} has [2] -> false
+>c12 = {a: 1, b: {d: 23, "e": 2.718, f: {g: true, h: 'def'}}} -> { a: 1, b: { d: 23, "e": 2.718, f: { g: true, h: "def" } } }
+>c12 has a -> true
+>c12 has b -> true
+>c12 has d -> true
+>c12 has "e" -> true
+>c12 has f -> true
+>c12 has g -> true
+>c12 has h -> true
+>"a" in c12 -> true
+>"b" in c12 -> true
+>'"e"' in c12 -> false
+>'"e"' in c12.b -> true
+>"g" in c12 -> false
+>"g" in c12.b.f -> true
 >Defining constant “UTF_8” = "utf-8"
 >`Test of read/write/read of Unicode data = ${uni1 === uni2}` -> "Test of read/write/read of Unicode data = true"
 >`Test of read of large file: length = ${length(data)@,d}` -> "Test of read of large file: length = 6,326,439"

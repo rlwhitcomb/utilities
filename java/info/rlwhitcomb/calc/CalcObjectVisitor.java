@@ -660,6 +660,7 @@
  *	    #465: Add "delete" and "rename" functions.
  *	29-Aug-2022 (rlwhitcomb)
  *	    #453: Add "fileinfo" function.
+ *	    #469: Update "has" function to search objects recursively.
  */
 package info.rlwhitcomb.calc;
 
@@ -3238,7 +3239,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    ObjectScope obj = (ObjectScope) source;
 
-	    return Boolean.valueOf(obj.isDefinedLocally(key, settings.ignoreNameCase));
+	    return Boolean.valueOf(isDefinedRecursively(obj, key, settings.ignoreNameCase));
 	}
 
 	@Override
