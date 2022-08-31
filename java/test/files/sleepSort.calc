@@ -3,7 +3,7 @@ define parallel process(n) = {
    n
 }
 
-values = [ 6, 2, 9, 5, -3, 18, 12 ]
+values = [ 6, 2, 9, 5, 1, 4, 7 ]
 
 loop v over values { process(v) }
 :quiet off

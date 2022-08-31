@@ -1280,7 +1280,6 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 		if (func.isParallel() && !func.isNestedInvocation(getVariables())) {
 		    numberOfParallelJobs++;
-System.out.println("submitting '" + func.getFunctionName() + "' -> # jobs is now " + numberOfParallelJobs);
 		    cs.submit(() -> { return executeFunction(func); });
 		    returnValue = null;
 		}
@@ -3085,21 +3084,22 @@ System.out.println("submitting '" + func.getFunctionName() + "' -> # jobs is now
 	    ArrayScope<Object> returnValues = new ArrayScope<>();
 
 System.out.println("at 'wait', number of jobs is " + numberOfParallelJobs);
-	    for (int i = 0; i < numberOfParallelJobs; i++) {
-		try {
+	    try {
+		for (int i = 0; i < numberOfParallelJobs; i++) {
 		    Object result = cs.take().get();
 System.out.println("i = " + i + ", result = " + result);
 		    returnValues.add(result);
 		}
-		catch (InterruptedException ie) {
-		    // Not sure what (if anything) to do here, so just continue
-		}
-		catch (ExecutionException ee) {
-		    throw new CalcExprException(ee, ctx);
-		}
 	    }
-
-	    numberOfParallelJobs = 0;
+	    catch (InterruptedException ie) {
+		// Not sure what (if anything) to do here, so just continue
+	    }
+	    catch (ExecutionException ee) {
+		throw new CalcExprException(ee, ctx);
+	    }
+	    finally {
+		numberOfParallelJobs = 0;
+	    }
 
 	    return returnValues;
 	}
