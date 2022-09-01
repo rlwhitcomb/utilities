@@ -1774,7 +1774,7 @@ public class Calc
 		return true;
 	    }
 	    else {
-		if (FileUtilities.extOnly(f).isEmpty()) {
+		if (!FileUtilities.dotName(f.getName()) && FileUtilities.extOnly(f).isEmpty()) {
 		    for (String ext : DEFAULT_EXTS) {
 			File newFile = FileUtilities.decorate(f.getName(), f.getParentFile(), ext);
 			if (readFile(newFile, inputBuf, charset))

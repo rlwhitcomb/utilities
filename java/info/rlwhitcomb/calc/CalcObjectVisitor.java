@@ -659,11 +659,15 @@
  *	    (as return value from "eval").
  *	    #465: Add "delete" and "rename" functions.
  *	29-Aug-2022 (rlwhitcomb)
+ *	    #453: Add "fileinfo" function.
  *	    #469: Update "has" function to search objects recursively.
+ *	31-Aug-2022 (rlwhitcomb)
+ *	    #453: Return empty object for FileInfo if it doesn't exist.
  */
 package info.rlwhitcomb.calc;
 
 import de.onyxbits.SemanticVersion;
+import info.rlwhitcomb.directory.FileInfo;
 import info.rlwhitcomb.directory.Match;
 import info.rlwhitcomb.math.BigFraction;
 import info.rlwhitcomb.math.ComplexNumber;
@@ -5659,6 +5663,18 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    catch (IllegalArgumentException iae) {
 		throw new CalcExprException(iae, flagExpr);
 	    }
+	}
+
+	@Override
+	public Object visitFileInfoExpr(CalcParser.FileInfoExprContext ctx) {
+	    String fileName = getStringValue(ctx.expr1().expr());
+
+	    FileInfo finfo = new FileInfo(fileName);
+	    if (finfo.exists()) {
+		Map<String, Object> map = ClassUtil.getMapFromObject(finfo);
+		return new ObjectScope(map);
+	    }
+	    return CollectionScope.EMPTY;
 	}
 
 	@Override

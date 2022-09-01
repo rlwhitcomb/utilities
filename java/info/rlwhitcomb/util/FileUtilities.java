@@ -112,6 +112,8 @@
  *	#376: Add "checkNameCase" and "exists" methods.
  *    09-Jul-2022 (rlwhitcomb)
  *	#393: Cleanup imports.
+ *    31-Aug-2022 (rlwhitcomb)
+ *	#453: Modifications for "dot" names.
  */
 package info.rlwhitcomb.util;
 
@@ -168,6 +170,16 @@ public final class FileUtilities
     }
 
     /**
+     * Is this a "dot" name, namely {@code "."}, {@code ".."}, {@code ".config"}, and so on.
+     *
+     * @param name The file name to check.
+     * @return     Whether this name is one of the above names.
+     */
+    public static boolean dotName(final String name) {
+	return name.startsWith(".");
+    }
+
+    /**
      * Compute the bare name part of the file.
      *
      * @param f The file to examine.
@@ -176,6 +188,8 @@ public final class FileUtilities
      */
     public static String nameOnly(final File f) {
 	String name = f.getName();
+	if (dotName(name))
+	    return name;
 	int dotPos  = name.lastIndexOf('.');
 	if (dotPos < 0)
 	    return name;
@@ -191,6 +205,8 @@ public final class FileUtilities
      */
     public static String extOnly(final File f) {
 	String name = f.getName();
+	if (dotName(name))
+	    return "";
 	int dotPos  = name.lastIndexOf('.');
 	if (dotPos < 0)
 	    return "";
