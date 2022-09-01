@@ -661,6 +661,8 @@
  *	29-Aug-2022 (rlwhitcomb)
  *	    #453: Add "fileinfo" function.
  *	    #469: Update "has" function to search objects recursively.
+ *	31-Aug-2022 (rlwhitcomb)
+ *	    #453: Return empty object for FileInfo if it doesn't exist.
  */
 package info.rlwhitcomb.calc;
 
@@ -5668,9 +5670,11 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    String fileName = getStringValue(ctx.expr1().expr());
 
 	    FileInfo finfo = new FileInfo(fileName);
-	    Map<String, Object> map = ClassUtil.getMapFromObject(finfo);
-
-	    return new ObjectScope(map);
+	    if (finfo.exists()) {
+		Map<String, Object> map = ClassUtil.getMapFromObject(finfo);
+		return new ObjectScope(map);
+	    }
+	    return CollectionScope.EMPTY;
 	}
 
 	@Override

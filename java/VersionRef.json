@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.14.24', date: d'2022-08-31',
+      issues: [ 453 ],
+      comment: 'Add "FileInfo" predefined function.'
+    },
     { version: '2.14.22', date: d'2022-08-29',
       issues: [ 469 ],
       comment: 'The "has" operator will now search objects recursively.'

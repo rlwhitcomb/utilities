@@ -26,6 +26,7 @@
  *
  * History:
  *  29-Aug-22 rlw #453: Initial coding.
+ *  31-Aug-22		More attributes.
  */
 package info.rlwhitcomb.directory;
 
@@ -89,6 +90,16 @@ public final class FileInfo
 
 
 	/**
+	 * Whether this file even exists.
+	 *
+	 * @return The existence of this file.
+	 */
+	public boolean exists() {
+	    return file.exists();
+	}
+
+
+	/**
 	 * Access the complete, canonical, path of this file.
 	 *
 	 * @return The complete path name of this file.
@@ -144,7 +155,7 @@ public final class FileInfo
 	/**
 	 * Decide if this file is some other kind of file.
 	 *
-	 * @param Is this another kind of file?
+	 * @return Is this another kind of file?
 	 */
 	@Scriptable(order = 6)
 	public boolean isOther() {
@@ -152,11 +163,51 @@ public final class FileInfo
 	}
 
 	/**
+	 * Decide if this file is hidden.
+	 *
+	 * @return Is this file hidden?
+	 */
+	@Scriptable(order = 7)
+	public boolean isHidden() {
+	    return file.isHidden();
+	}
+
+	/**
+	 * Whether this file is readable.
+	 *
+	 * @return The readable status of the file.
+	 */
+	@Scriptable(order = 8)
+	public boolean isReadable() {
+	    return isDirectory() ? FileUtilities.canReadDir(file) : FileUtilities.canRead(file);
+	}
+
+	/**
+	 * Whether this file is writable.
+	 *
+	 * @return The writable status of the file.
+	 */
+	@Scriptable(order = 9)
+	public boolean isWritable() {
+	    return FileUtilities.canWrite(file);
+	}
+
+	/**
+	 * Whether this file is executable.
+	 *
+	 * @return The executable status of the file.
+	 */
+	@Scriptable(order = 10)
+	public boolean isExecutable() {
+	    return FileUtilities.canExecute(file);
+	}
+
+	/**
 	 * Access the file length.
 	 *
 	 * @return The file's length (or size).
 	 */
-	@Scriptable(order = 7)
+	@Scriptable(order = 11)
 	public long getLength() {
 	    return file.length();
 	}
@@ -166,7 +217,7 @@ public final class FileInfo
 	 *
 	 * @return The bare name of the file, without the extension.
 	 */
-	@Scriptable(order = 8)
+	@Scriptable(order = 12)
 	public String getNameOnly() {
 	    return FileUtilities.nameOnly(file);
 	}
@@ -176,7 +227,7 @@ public final class FileInfo
 	 *
 	 * @return The file extension, if any, starting with ".", or {@code ""} if none.
 	 */
-	@Scriptable(order = 9)
+	@Scriptable(order = 13)
 	public String getExtension() {
 	    return FileUtilities.extOnly(file);
 	}
@@ -186,7 +237,7 @@ public final class FileInfo
 	 *
 	 * @return Date and time of file creation.
 	 */
-	@Scriptable(order = 10)
+	@Scriptable(order = 14)
 	public FileTime getCreationTime() {
 	    return basic != null ? basic.creationTime() : FileTime.fromMillis(0L);
 	}
@@ -196,7 +247,7 @@ public final class FileInfo
 	 *
 	 * @return Date and time of last access to this file.
 	 */
-	@Scriptable(order = 11)
+	@Scriptable(order = 15)
 	public FileTime getLastAccessTime() {
 	    return basic != null ? basic.lastAccessTime() : FileTime.fromMillis(0L);
 	}
@@ -206,7 +257,7 @@ public final class FileInfo
 	 *
 	 * @return Date and time of last modification to this file.
 	 */
-	@Scriptable(order = 12)
+	@Scriptable(order = 16)
 	public FileTime getLastModifiedTime() {
 	    return basic != null ? basic.lastModifiedTime() : FileTime.fromMillis(0L);
 	}

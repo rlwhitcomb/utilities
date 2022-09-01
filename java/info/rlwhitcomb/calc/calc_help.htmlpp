@@ -1076,6 +1076,7 @@ or<br>
      support case-insensitive file searching).
   <p><code>FileInfo</code> takes a single file name / path parameter and returns an object containing various pieces of information about the file:
   <p class="indent"><code style="color:blue;">fileinfo "doc" </code><code style="color:grey;">&#x21E8;</code> <code style="color:green;">{ name: "doc", file: false, directory: true, link: false, other: false, size: 0, &mldr; }</code>
+  <p>If the named file does not exist the return value is an empty object (<code style="color:green;">{ }</code>).
   <p>The first expression for <code>read</code> is a single file path, which can be <code>"@"</code> or <code>"-"</code> to read the standard input.
      The second (optional) expression is the name of the charset to use (system default if not given, or empty/null). The entire contents of the file
      is returned, unchanged, including end-of-line sequences. The value returned can be assigned to a variable or used in some other way.
