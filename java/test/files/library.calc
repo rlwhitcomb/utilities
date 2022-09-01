@@ -308,6 +308,10 @@ TICKS_PER_MINUTE = TICKS_PER_SECOND * 60
  * For time values, the number of ticks in an hour.
  */
 TICKS_PER_HOUR = TICKS_PER_MINUTE * 60
+/*
+ * For time values, the number of ticks in a day.
+ */
+TICKS_PER_DAY = TICKS_PER_HOUR * 24
 
 /*
  * Get the number of hours in a time value.
