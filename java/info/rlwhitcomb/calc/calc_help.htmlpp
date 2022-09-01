@@ -321,7 +321,7 @@ h2 {
     <tr><td><code>-base</code>&nbsp;<i>version</i></td><td>Set a required base version</td><td><code>-requiresbaseversion</code>,<br><code>-requirebaseversion</code>,<br><code>-baseversion</code></td><td><code>:require</code> ... <code>base</code> directive</td></tr>
     <tr><td><code>-clear</code></td><td>Clear any variables defined by <code>CALC_OPTIONS</code>.</td><td><code>-cleararguments</code>,<br><code>-clearargs</code>, <code>-clr</code></td><td></td></tr>
     <tr><td><code>-file</code>, <code>-text</code>,<br>or <code>-filetext</code></td><td>How to treat values on the command line:<br>as file names, as expression text,<br>or as files (if found) otherwise text (default)</td><td><code>-files</code>, <code>-f</code>,<br><code>-txt</code>, <code>-tx</code></td><td></td></tr>
-    <tr><td><code>-cmdenter</code></td><td>Use <code>Ctrl+Enter</code> (or <code>&#x2318;Enter</code> on Mac)<br>to calculate in the GUI input field <i>(default)</i></td><td><code>-cmd</code></td><td></td></tr>
+    <tr><td><code>-ctrlenter</code></td><td>Use <code>Ctrl+Enter</code> (or <code>&#x2318;Enter</code> on Mac)<br>to calculate in the GUI input field <i>(default)</i></td><td><code>-cmdenter</code>, <code>-ctrl</code>, <code>-cmd</code></td><td></td></tr>
     <tr><td><code>-enter</code></td><td>Use just <code>Enter</code> to calculate in GUI input field</td><td><code>-e</code></td><td></td></tr>
     <tr><td><code>-utf8</code></td><td>Decode all input files using the UTF-8 charset</td><td><code>-utf</code>, <code>-u</code></td><td></td></tr>
     <tr><td><code>-win1252</code></td><td>Use Windows-1252 as the input charset</td><td><code>-win</code>, <code>-w</code></td><td></td></tr>
