@@ -22,6 +22,11 @@ const LINESEP = '\r?\n'
 const ON_WINDOWS = info.os.id == 'windows'
 
 /*
+ * The local timezone offset from GMT (nanoseconds).
+ */
+const TZ_OFFSET = eval(info.timezone.offset)
+
+/*
  * Flag values for "sort"
  */
 const SORT_CASE_INSENSITIVE = 0x0001
@@ -400,7 +405,24 @@ define dateformat(d, f = 'mm/dd/yyyy') = {
  *
  * @return Current time at GMT (use "@h" to format as a time).
  */
-def gmtnow = { now - eval(info.timezone.offset) }
+def gmtnow = { now - TZ_OFFSET }
+
+/*
+ * Format a FILETIME value (from "FileInfo") to a more readable local time string.
+ *
+ * @param ft One of the "fileinfo" time strings.
+ * @return   A nicer local date/time string.
+ */
+define ft2time(ft) = {
+    define date(d) = { substr(`${d@E}`, 2, -1) }
+    define time(t) = { var v = substr(`${t@h}`, 2, -1); lpad(v, 8, '0') }
+
+    var dt = eval(`d'${substr(ft, 0, 10)}'`)
+    var tm = eval(`h'${substr(ft, 11, 19)}'`)
+    tm += TZ_OFFSET
+    if tm < 0 { dt--; tm += TICKS_PER_DAY }
+    `${date(dt)}  ${time(tm)}`
+}
 
 /*
  * Compute the flat map of an array.
