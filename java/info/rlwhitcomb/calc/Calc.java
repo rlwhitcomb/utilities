@@ -308,6 +308,8 @@
  *	    #447: New grads trig mode.
  *	28-Aug-2022 (rlwhitcomb)
  *	    #464: Add "-output" and associated options to redirect streams to files.
+ *	31-Aug-2022 (rlwhitcomb)
+ *	    #471: Add "-ctrlenter" and "-ctrl" command line options.
  */
 package info.rlwhitcomb.calc;
 
@@ -1774,7 +1776,7 @@ public class Calc
 		return true;
 	    }
 	    else {
-		if (FileUtilities.extOnly(f).isEmpty()) {
+		if (!FileUtilities.dotName(f.getName()) && FileUtilities.extOnly(f).isEmpty()) {
 		    for (String ext : DEFAULT_EXTS) {
 			File newFile = FileUtilities.decorate(f.getName(), f.getParentFile(), ext);
 			if (readFile(newFile, inputBuf, charset))
@@ -2222,7 +2224,9 @@ public class Calc
 		case "define":
 		case "var":
 		    return Expecting.VARIABLE;
+		case "ctrlenter":
 		case "cmdenter":
+		case "ctrl":
 		case "cmd":
 		    useCmdEnter = true;
 		    break;

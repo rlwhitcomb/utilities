@@ -103,6 +103,8 @@
  *	    Handle null input to "defaultToString()".
  *	25-Aug-2022 (rlwhitcomb)
  *	    Another tweak to "defaultToString()" for null input.
+ *	29-Aug-2022 (rlwhitcomb)
+ *	    #453: Add back "getMapFromObject" method.
  */
 package info.rlwhitcomb.util;
 
@@ -113,8 +115,11 @@ import java.io.*;
 import java.lang.reflect.*;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.EnumSet;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -448,21 +453,139 @@ public final class ClassUtil
 	}
 
 
+	private static String getFieldFromMethodName(final String methodName) {
+	    String fieldName;
+
+	    if (methodName.startsWith("get")) {
+		fieldName = methodName.substring(3);
+	    }
+	    else if (methodName.startsWith("is")) {
+		fieldName = methodName.substring(2);
+	    }
+	    else {
+		return null;
+	    }
+
+	    return fieldName.substring(0, 1).toLowerCase() + fieldName.substring(1);
+	}
+
+
 	/**
-	 * Transform a method name that looks like <code>getValue</code>, <code>setValue</code>, or
-	 * <code>isValue</code> into just <code>"value"</code> for use as a map key.
-	 *
-	 * @param	name	An input method name.
-	 * @return	The transformed name.
+	 * Tuple object to sort {@link Scriptable} fields and methods by their declared order.
 	 */
-	private static String getKeyFromMethodName(final String name) {
-	    if (name.startsWith("get") || name.startsWith("set")) {
-		return Character.toString(Character.toLowerCase(name.charAt(3))) + name.substring(4);
+	private static class ScriptableObject implements Comparable<ScriptableObject>
+	{
+		int order;
+		Object fieldOrMethod;
+		String name;
+
+		ScriptableObject(int ord, Object fOrM, String nm) {
+		    order = ord;
+		    fieldOrMethod = fOrM;
+		    name = nm;
+		}
+
+		@Override
+		public int compareTo(ScriptableObject o) {
+		    if (order >= 0 && o.order >= 0) {
+			return Integer.signum(order - o.order);
+		    }
+
+		    return name.compareTo(o.name);
+		}
+	}
+
+
+	/**
+	 * Traverse the given object, finding the {@link Scriptable} elements, creating a map
+	 * of the name/value pairs.
+	 *
+	 * @param	obj	The input object to be mapped.
+	 * @return	A map of the scriptable fields and their values.
+	 */
+	public static Map<String, Object> getMapFromObject(final Object obj) {
+	    Map<String, Object> map = new LinkedHashMap<>();
+	    Field[] fields = obj.getClass().getDeclaredFields();
+	    Method[] methods = obj.getClass().getDeclaredMethods();
+	    Scriptable annotation;
+	    int order;
+	    String key;
+	    Class<?> cls;
+
+	    List<ScriptableObject> objs = new ArrayList<>();
+
+	    for (Field f : fields) {
+		annotation = f.getAnnotation(Scriptable.class);
+		if (annotation != null) {
+		    order = annotation.order();
+		    key = f.getName();
+		    objs.add(new ScriptableObject(order, f, key));
+		}
 	    }
-	    else if (name.startsWith("is")) {
-		return Character.toString(Character.toLowerCase(name.charAt(2))) + name.substring(3);
+
+	    for (Method m : methods) {
+		annotation = m.getAnnotation(Scriptable.class);
+		if (annotation != null) {
+		    key = getFieldFromMethodName(m.getName());
+		    if (key == null)
+			continue;
+
+		    order = annotation.order();
+		    objs.add(new ScriptableObject(order, m, key));
+		}
 	    }
-	    return name;
+
+	    Collections.sort(objs);
+
+	    for (ScriptableObject so : objs) {
+		key = so.name;
+
+		if (so.fieldOrMethod instanceof Field) {
+		    Field f = (Field) so.fieldOrMethod;
+		    cls = f.getType();
+
+		    try {
+			f.setAccessible(true);
+			if (cls == Long.class || cls == Long.TYPE) {
+			    map.put(key, f.getLong(obj));
+			}
+			else if (cls == Integer.class || cls == Integer.TYPE) {
+			    map.put(key, f.getInt(obj));
+			}
+			else if (cls == Short.class || cls == Short.TYPE) {
+			    map.put(key, f.getShort(obj));
+			}
+			else if (cls == Byte.class || cls == Byte.TYPE) {
+			    map.put(key, f.getByte(obj));
+			}
+			else if (cls == Character.class || cls == Character.TYPE) {
+			    map.put(key, f.getChar(obj));
+			}
+			else if (cls == Boolean.class || cls == Boolean.TYPE) {
+			    map.put(key, f.getBoolean(obj));
+			}
+			else {
+			    map.put(key, f.get(obj));
+			}
+		    }
+		    catch (IllegalAccessException ex) {
+			map.put(key, null);
+		    }
+		}
+		else {
+		    Method m = (Method) so.fieldOrMethod;
+
+		    try {
+			Object value = m.invoke(obj);
+			map.put(key, value);
+		    }
+		    catch (IllegalAccessException | InvocationTargetException ex) {
+			map.put(key, null);
+		    }
+		}
+	    }
+
+	    return map;
 	}
 
 

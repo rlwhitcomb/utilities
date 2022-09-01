@@ -321,7 +321,7 @@ h2 {
     <tr><td><code>-base</code>&nbsp;<i>version</i></td><td>Set a required base version</td><td><code>-requiresbaseversion</code>,<br><code>-requirebaseversion</code>,<br><code>-baseversion</code></td><td><code>:require</code> ... <code>base</code> directive</td></tr>
     <tr><td><code>-clear</code></td><td>Clear any variables defined by <code>CALC_OPTIONS</code>.</td><td><code>-cleararguments</code>,<br><code>-clearargs</code>, <code>-clr</code></td><td></td></tr>
     <tr><td><code>-file</code>, <code>-text</code>,<br>or <code>-filetext</code></td><td>How to treat values on the command line:<br>as file names, as expression text,<br>or as files (if found) otherwise text (default)</td><td><code>-files</code>, <code>-f</code>,<br><code>-txt</code>, <code>-tx</code></td><td></td></tr>
-    <tr><td><code>-cmdenter</code></td><td>Use <code>Ctrl+Enter</code> (or <code>&#x2318;Enter</code> on Mac)<br>to calculate in the GUI input field <i>(default)</i></td><td><code>-cmd</code></td><td></td></tr>
+    <tr><td><code>-ctrlenter</code></td><td>Use <code>Ctrl+Enter</code> (or <code>&#x2318;Enter</code> on Mac)<br>to calculate in the GUI input field <i>(default)</i></td><td><code>-cmdenter</code>, <code>-ctrl</code>, <code>-cmd</code></td><td></td></tr>
     <tr><td><code>-enter</code></td><td>Use just <code>Enter</code> to calculate in GUI input field</td><td><code>-e</code></td><td></td></tr>
     <tr><td><code>-utf8</code></td><td>Decode all input files using the UTF-8 charset</td><td><code>-utf</code>, <code>-u</code></td><td></td></tr>
     <tr><td><code>-win1252</code></td><td>Use Windows-1252 as the input charset</td><td><code>-win</code>, <code>-w</code></td><td></td></tr>
@@ -829,6 +829,7 @@ or<br>
             <tr><td><code>DECODE</code>&nbsp;<i>expr</i></td><td>decode a base64 string into the original string value</td></tr>
             <tr><td><code>ENCODE</code>&nbsp;<i>expr</i></td><td>encode a string into its base64 form</td></tr>
             <tr><td><code>EXISTS</code>&nbsp;<i>expr</i>&nbsp;( <code>,</code>&nbsp;<i>flag_expr</i>&nbsp;)</td><td>check the existence/permissions of file or directory</td></tr>
+            <tr><td><code>FILEINFO</code>&nbsp;<i>expr</i></td><td>get information about a given file</td></tr>
             <tr><td><code>READ</code>&nbsp;<i>expr</i>&nbsp;( <code>,</code>&nbsp;<i>charset_expr</i>&nbsp;)</td><td>read the file (or files) using the optional charset</td></tr>
             <tr><td><code>WRITE</code>&nbsp;<i>expr</i> <code>,</code>&nbsp;<i>file name</i>&nbsp;( <code>,</code>&nbsp;<i>charset_expr</i>&nbsp;)</td><td>write the value to the file using the optional charset</td></tr>
             <tr><td><code>DELETE</code>&nbsp;<i>expr</i>&nbsp;( <code>,</code>&nbsp;<i>expr</i> ) *</td><td>delete one or more files</td></tr>
@@ -1073,6 +1074,9 @@ or<br>
      <code>"fw"</code> (file for write), or <code>"fx"</code> (file for execute).<br>
      An optional <code>"+"</code> can be added to any other flag value which will also test the file name for exact case (for use with file systems that
      support case-insensitive file searching).
+  <p><code>FileInfo</code> takes a single file name / path parameter and returns an object containing various pieces of information about the file:
+  <p class="indent"><code style="color:blue;">fileinfo "doc" </code><code style="color:grey;">&#x21E8;</code> <code style="color:green;">{ name: "doc", file: false, directory: true, link: false, other: false, size: 0, &mldr; }</code>
+  <p>If the named file does not exist the return value is an empty object (<code style="color:green;">{ }</code>).
   <p>The first expression for <code>read</code> is a single file path, which can be <code>"@"</code> or <code>"-"</code> to read the standard input.
      The second (optional) expression is the name of the charset to use (system default if not given, or empty/null). The entire contents of the file
      is returned, unchanged, including end-of-line sequences. The value returned can be assigned to a variable or used in some other way.

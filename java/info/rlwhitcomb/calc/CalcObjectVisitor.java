@@ -661,11 +661,15 @@
  *	26-Aug-2022 (rlwhitcomb)
  *	    #458: Process "parallel" keyword on function declaration.
  *	29-Aug-2022 (rlwhitcomb)
+ *	    #453: Add "fileinfo" function.
  *	    #469: Update "has" function to search objects recursively.
+ *	31-Aug-2022 (rlwhitcomb)
+ *	    #453: Return empty object for FileInfo if it doesn't exist.
  */
 package info.rlwhitcomb.calc;
 
 import de.onyxbits.SemanticVersion;
+import info.rlwhitcomb.directory.FileInfo;
 import info.rlwhitcomb.directory.Match;
 import info.rlwhitcomb.math.BigFraction;
 import info.rlwhitcomb.math.ComplexNumber;
@@ -5726,6 +5730,18 @@ System.out.println("i = " + i + ", result = " + result);
 	    catch (IllegalArgumentException iae) {
 		throw new CalcExprException(iae, flagExpr);
 	    }
+	}
+
+	@Override
+	public Object visitFileInfoExpr(CalcParser.FileInfoExprContext ctx) {
+	    String fileName = getStringValue(ctx.expr1().expr());
+
+	    FileInfo finfo = new FileInfo(fileName);
+	    if (finfo.exists()) {
+		Map<String, Object> map = ClassUtil.getMapFromObject(finfo);
+		return new ObjectScope(map);
+	    }
+	    return CollectionScope.EMPTY;
 	}
 
 	@Override
