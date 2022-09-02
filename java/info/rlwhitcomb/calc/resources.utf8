@@ -153,6 +153,8 @@
 #	    #466: "Defined" messages as return values (for "eval" purposes).
 #	28-Aug-2022 (rlwhitcomb)
 #	    #464: New error for "-output" in GUI mode. Tweak I/O error message.
+#	01-Sep-2022 (rlwhitcomb)
+#	    Tweak two error messages.
 #
 
 #
@@ -288,8 +290,8 @@ callNotAFunction	= Cannot make a function call on the non-function value <y>%1$s
 indexNegative		= Effective index value of <u>%1$d<.> cannot be negative
 unknownVarCtx		= ERROR: unknown var context subclass: <y>%1$s<.>
 badAssign		= Assignment to <y>%1$s<.> without name or index
-tooManyForOneValue	= Too many actual values (%1$d) passed for only one parameter
-tooManyForValues	= Too many actual values (%1$d) passed for only %2$d parameters
+tooManyForOneValue	= Too many actual values (%1$d) passed for only one parameter declared
+tooManyForValues	= Too many actual values (%1$d) passed for only %2$d parameters declared
 noChangeValue		= Cannot change %1$s <y>%2$s%3$s<.>
 
 #
