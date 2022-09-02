@@ -68,6 +68,8 @@
  *	#210: Clear color stack when RESET code is hit.
  *   05-May-2022 (rlwhitcomb)
  *	#308: Because of "<>" in Calc being a new operator, change RESET to "<.>"
+ *   01-Sep-2022 (rlwhitcomb)
+ *	#446: Expand header Javadoc with explanations of how to use.
  */
 package info.rlwhitcomb.util;
 
@@ -83,6 +85,45 @@ import java.util.Map;
  * <p> Various constants and simple formatting methods are provided, as
  * well as a static enum with all the possible combinations already
  * constructed.
+ * <p> The basic method for coloring output using this facility is to do a static import
+ * of all the {@link ConsoleColor.Code} values. The {@code toString()} method for each enum
+ * value will return a tag in the form {@code <CCmm>} where {@code CC} is one of the
+ * abbreviated color names, and {@code mm} are zero or more modifiers (for attributes such
+ * as bold, underlined, or bright). Once the final string is constructed with these embedded
+ * tags, use the {@link ConsoleColor#color} method to replace the color tags with their actual
+ * escape sequences, and simply output that final string to the console.
+ * <p>Alternatively, these tags can be manually inserted into your messages.
+ * <p>A third method is available which makes use of tag maps which map custom tags into their
+ * desired color values.
+ * <p> The standard color abbreviations are:
+ * <ul><li>{@code <Bk>} = black</li>
+ *     <li>{@code <Rd>} = red</li>
+ *     <li>{@code <Gr>} = green</li>
+ *     <li>{@code <Yw>} = yellow</li>
+ *     <li>{@code <Bl>} = blue</li>
+ *     <li>{@code <Mg>} = magenta</li>
+ *     <li>{@code <Cy>} = cyan</li>
+ * </ul>
+ * And the modifier codes (not all combinations are supported) are:
+ * <ul><li>{@code *} = bold</li>
+ *     <li>{@code !} = bright</li>
+ *     <li>{@code _} = underlined</li>
+ *     <li>{@code .} = background</li>
+ * </ul>
+ * <p>The order of modifiers when combined with a main color value is not important. For instance, the
+ * {@code RED_BOLD_BRIGHT} code value has a tag of {@code <Rd*!>}, but it could be coded (manually) as
+ * {@code <Rd!*>}.
+ * <p>Any of the four modifiers are allowed singly with any base color, plus {@code BRIGHT} can be used
+ * along any of the other three, but no other combinations are supported.
+ * <p>When processing a string, the color should always be reset to the default at the end of
+ * a line using the {@code <-->} (or {@code END} enum). When colors change, the previous color is saved
+ * and then restored when a {@code RESET} (or {@code <.>}) tag is found. Using tag maps, things can also
+ * be arranged such that these kind of color markers can be turned into quotes for "non-colored" output.
+ * <p>One way to effect coloring is simply to insert or append the {@link ConsoleColor.Code} enum values
+ * as part of your strings, such as {@code RED + "Error: ..." + END}. Another way is to hard-code the
+ * tag values, as in {@code "<Yw*>WARNING: ... <-->"}. Passing either of these strings to {@link ConsoleColor#color}
+ * will replace the tags with their proper escape sequences. The {@link Intl} class also supports strings
+ * "colored" this way in the resource files.
  */
 public final class ConsoleColor
 {

@@ -24,29 +24,18 @@
  *      Data structures for Calc to hold user-defined function definitions,
  *      local symbol tables, etc.
  *
- *  History:
- *	06-Oct-2021 (rlwhitcomb)
- *	    Initial coding.
- *	30-Oct-2021 (rlwhitcomb)
- *	    Implement "toString()".
- *	07-Nov-2021 (rlwhitcomb)
- *	    #69: Implement variable number of parameters.
- *	09-Nov-2021 (rlwhitcomb)
- *	    #74: Add "hasVarargs" method.
- *	13-Feb-2022 (rlwhitcomb)
- *	    #199: Rename local parameter values to "_" prefix.
- *	14-Feb-2022 (rlwhitcomb)
- *	    #199: Get the "_" prefix from FunctionScope.
- *	28-Apr-2022 (rlwhitcomb)
- *	    #68: Tweak index out of bounds error.
- *	27-May-2022 (rlwhitcomb)
- *	    Move "setupFunctionCall" into here from CalcObjectVisitor.
- *	28-May-2022 (rlwhitcomb)
- *	    #355: Define "_funcname" constant for functions.
- *	08-Jul-2022 (rlwhitcomb)
- *	    #393: Cleanup imports.
- *	26-Aug-2022 (rlwhitcomb)
- *	    #458: Add "parallel" flag parameter to constructor.
+ * History:
+ *  06-Oct-21 rlw	Initial coding.
+ *  30-Oct-21 rlw	Implement "toString()".
+ *  07-Nov-21 rlw #69:	Implement variable number of parameters.
+ *  09-Nov-21 rlw #74:	Add "hasVarargs" method.
+ *  13-Feb-22 rlw #199:	Rename local parameter values to "_" prefix.
+ *  14-Feb-22 rlw #199:	Get the "_" prefix from FunctionScope.
+ *  28-Apr-22 rlw #68:	Tweak index out of bounds error.
+ *  27-May-22 rlw	Move "setupFunctionCall" into here from CalcObjectVisitor.
+ *  28-May-22 rlw #355:	Define "_funcname" constant for functions.
+ *  08-Jul-22 rlw #393:	Cleanup imports.
+ *  01-Sep-22 rlw	Fix typo in error message key.
  */
 package info.rlwhitcomb.calc;
 
@@ -282,7 +271,7 @@ class FunctionDeclaration
 		    if (numParams == 1)
 			throw new CalcExprException(ctx, "%calc#tooManyForOneValue", numActuals);
 		    else
-			throw new CalcExprException(ctx, "%calc%tooManyForValues", numActuals, numParams);
+			throw new CalcExprException(ctx, "%calc#tooManyForValues", numActuals, numParams);
 		}
 
 		for (int index = 0; index < numActuals; index++) {
