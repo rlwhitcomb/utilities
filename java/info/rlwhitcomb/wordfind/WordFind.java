@@ -82,24 +82,26 @@
  *          Allow some more directives in REPL mode.
  *          Move all the text to resources file.
  *          Add "-maxlinelength" option for automated testing.
- *	26-Sep-2021 (rlwhitcomb)
- *	    #23 Fix inconsistent options.
- *	04-Oct-2021 (rlwhitcomb)
- *	    Tweak colors.
- *	21-Jan-2022 (rlwhitcomb)
- *	    #217: Use new Options method to process environment methods.
- *	25-Jan-2022 (rlwhitcomb)
- *	    If initial letters are playable as-is, not only announce, but display points.
- *	12-Apr-2022 (rlwhitcomb)
- *	    #269: New method to load main program info (in Environment).
- *	18-Apr-2022 (rlwhitcomb)
- *	    #270: Make this automatic now.
- *	09-Jul-2022 (rlwhitcomb)
- *	    #393: Cleanup imports.
- *	15-Jul-2022 (rlwhitcomb)
- *	    #411: Move dictionary handling out to separate class.
- *	27-Jul-2022 (rlwhitcomb)
- *	    REPL command and command-line option to display dictionary statistics.
+ *      26-Sep-2021 (rlwhitcomb)
+ *          #23 Fix inconsistent options.
+ *      04-Oct-2021 (rlwhitcomb)
+ *          Tweak colors.
+ *      21-Jan-2022 (rlwhitcomb)
+ *          #217: Use new Options method to process environment methods.
+ *      25-Jan-2022 (rlwhitcomb)
+ *          If initial letters are playable as-is, not only announce, but display points.
+ *      12-Apr-2022 (rlwhitcomb)
+ *          #269: New method to load main program info (in Environment).
+ *      18-Apr-2022 (rlwhitcomb)
+ *          #270: Make this automatic now.
+ *      09-Jul-2022 (rlwhitcomb)
+ *          #393: Cleanup imports.
+ *      15-Jul-2022 (rlwhitcomb)
+ *          #411: Move dictionary handling out to separate class.
+ *      27-Jul-2022 (rlwhitcomb)
+ *          REPL command and command-line option to display dictionary statistics.
+ *      04-Sep-2022 (rlwhitcomb)
+ *          #29: Test code for the new dictionary "validWords" lookup.
  */
 package info.rlwhitcomb.wordfind;
 
@@ -509,7 +511,7 @@ public class WordFind implements Application {
             }
 
             // Deal with wildcard letter (blank)
-            if (ch == ' ' || ch == '?' || ch == '.') {
+            if (Dictionary.isWild(ch)) {
                 for (int j = 0; j < 26; j++) {
                     char ch2 = (char) (alphaStart + j);
                     // Make an annotated string with the blank location marked with "_"
@@ -766,6 +768,66 @@ public class WordFind implements Application {
         }
     }
 
+    private static int sortValidWords(final List<String> words, final Set<String>[] validWords) {
+        int largest = 0;
+        for (String word : words) {
+            int len = word.length();
+            largest = Math.max(largest, len);
+            Set<String> wordSet = validWords[len - 1];
+            wordSet.add(word);
+        }
+        return largest;
+    }
+
+    private static int reportResults(final Set<String>[] validWords, final int largest) {
+        int numberOfWordsFound = 0;
+
+        for (int index = largest - 1; index >= 0; index--) {
+            Set<String> wordSet = validWords[index];
+            int size = wordSet.size();
+            if (size > 0) {
+                numberOfWordsFound += size;
+                section(Intl.formatString("wordfind#section", (index + 1), size));
+
+                if (minWordSizeToReport > 1 && (index + 1) < minWordSizeToReport) {
+                    outputln(DOTS);
+                    continue;
+                }
+                System.out.println();
+
+                int columnWidth = index + 5;
+                int lineLength = 0;
+                int wordsSoFarInSet = 0;
+
+                for (String word : wordSet) {
+                    wordsSoFarInSet++;
+                    if (maxNumberOfWords > 0 && wordsSoFarInSet > maxNumberOfWords) {
+                        outputln(DOTS);
+                        break;
+                    }
+
+                    if (lineLength + columnWidth + 6 > maxLineLength) {
+                        System.out.println();
+                        lineLength = 0;
+                    }
+                    /*
+                     * This is tricky because we need to highlight blank substitutions here,
+                     * but also right-justify within the column width, which cannot count
+                     * the escape sequences as part of the word length.
+                     */
+                    String lettersOnly = getLettersOnly(word);
+                    int excessSpace = columnWidth - lettersOnly.length();
+                    String leftPadding = excessSpace == 0 ? "" : CharUtil.makeStringOfChars(' ', excessSpace);
+                    int value = addLetterValues(word);
+                    output(String.format(WORD_FORMAT, leftPadding, highlightWord(word), value));
+                    lineLength += columnWidth + 6;
+                }
+                System.out.println();
+            }
+        }
+        return numberOfWordsFound;
+    }
+
     /**
      * Process all command line arguments, calling {@link #processOption} for options and
      * saving the rest in the input list.
@@ -940,7 +1002,7 @@ public class WordFind implements Application {
             int numberOfBlanks = 0;
             for (int i = 0; i < n; i++) {
                 char ch = letters.charAt(i);
-                if (ch == ' ' || ch == '?' || ch == '.')
+                if (Dictionary.isWild(ch))
                     numberOfBlanks++;
                 else
                     letterSubset.append(ch);
@@ -982,51 +1044,7 @@ public class WordFind implements Application {
                     break;
             }
 
-            int numberOfWordsFound = 0;
-
-            for (int index = n + cn - 1; index >= 0; index--) {
-                Set<String> wordSet = validWords[index];
-                int size = wordSet.size();
-                if (size > 0) {
-                    numberOfWordsFound += size;
-                    section(Intl.formatString("wordfind#section", (index + 1), size));
-
-                    if (minWordSizeToReport > 1 && (index + 1) < minWordSizeToReport) {
-                        outputln(DOTS);
-                        continue;
-                    }
-                    System.out.println();
-
-                    int columnWidth = index + 5;
-                    int lineLength = 0;
-                    int wordsSoFarInSet = 0;
-
-                    for (String word : wordSet) {
-                        wordsSoFarInSet++;
-                        if (maxNumberOfWords > 0 && wordsSoFarInSet > maxNumberOfWords) {
-                            outputln(DOTS);
-                            break;
-                        }
-
-                        if (lineLength + columnWidth + 6 > maxLineLength) {
-                            System.out.println();
-                            lineLength = 0;
-                        }
-                        /*
-                         * This is tricky because we need to highlight blank substitutions here,
-                         * but also right-justify within the column width, which cannot count
-                         * the escape sequences as part of the word length.
-                         */
-                        String lettersOnly = getLettersOnly(word);
-                        int excessSpace = columnWidth - lettersOnly.length();
-                        String leftPadding = excessSpace == 0 ? "" : CharUtil.makeStringOfChars(' ', excessSpace);
-                        int value = addLetterValues(word);
-                        output(String.format(WORD_FORMAT, leftPadding, highlightWord(word), value));
-                        lineLength += columnWidth + 6;
-                    }
-                    System.out.println();
-                }
-            }
+            int numberOfWordsFound = reportResults(validWords, n + cn);
 
             if (numberOfWordsFound == 0)
                 error("wordfind#errNoValidWords");
@@ -1070,31 +1088,43 @@ public class WordFind implements Application {
                     case ":q":
                     case ":x":
                         break replLoop;
+
                     case ":help":
                     case ":h":
                     case ":?":
                         displayHelp(false);
                         continue replLoop;
+
                     case ":version":
                     case ":vers":
                     case ":ver":
                     case ":v":
                         displayProgramInfo();
                         continue replLoop;
-		    case ":test":
-			String randomWord = dictionary.getRandomWord(dictionary.getMaxWordLength());
-			List<String> words = dictionary.validWords(randomWord, false);
-			System.out.println("random word = " + randomWord);
-			for (String word : words) {
-			    System.out.println(word);
-			}
-			continue replLoop;
-		    case ":statistics":
-		    case ":stats":
-		    case ":stat":
-		    case ":s":
-			dictionary.displayStatistics(System.out);
-			continue replLoop;
+
+                    case ":test":
+                        String randomWord = dictionary.getRandomWord(dictionary.getMaxWordLength());
+                        int largest = randomWord.length();
+                        List<String> words = dictionary.validWords(randomWord, false);
+
+                        @SuppressWarnings("unchecked")
+                        Set<String>[] validWords = new Set[largest];
+                        for (int i = 0; i < largest; i++) {
+                            validWords[i] = new TreeSet<>(valueComparator);
+                        }
+
+                        largest = sortValidWords(words, validWords);
+                        reportResults(validWords, largest);
+
+                        continue replLoop;
+
+                    case ":statistics":
+                    case ":stats":
+                    case ":stat":
+                    case ":s":
+                        dictionary.displayStatistics(System.out);
+                        continue replLoop;
+
                     default:
                         if (cmd.startsWith("#") || cmd.startsWith("!") || cmd.startsWith("//"))
                             continue replLoop;
@@ -1113,7 +1143,7 @@ public class WordFind implements Application {
 
     private static void readDictionary() {
         long startTime = System.nanoTime();
-	try {
+        try {
             dictionary.read(wordFile, lowerCase);
         }
         catch (IOException ioe) {
@@ -1124,7 +1154,7 @@ public class WordFind implements Application {
         if (timings) {
             float secs = (float)(endTime - startTime) / 1.0e9f;
             info("wordfind#infoDictionary", quote(wordFile.getFileName()),
-		dictionary.getNumberWords(), dictionary.getNumberAddlWords(), secs);
+                dictionary.getNumberWords(), dictionary.getNumberAddlWords(), secs);
         }
     }
 
@@ -1141,7 +1171,7 @@ public class WordFind implements Application {
         // Set default colors before options so there is a setting for error messages right away
         setColors(!ON_WINDOWS);
 
-	Options.environmentOptions(WordFind.class, (options) -> {
+        Options.environmentOptions(WordFind.class, (options) -> {
             processCommandLine(options, null, false);
         });
 
