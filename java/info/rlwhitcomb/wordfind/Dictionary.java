@@ -24,14 +24,14 @@
  *	Utility methods associated with reading and accessing a word file (or
  *	dictionary).
  *
- *  Change History:
- *	19-Jul-2022 (rlwhitcomb)
- *	    #411: Abstracted out of WordFind for use with other programs.
- *	27-Jul-2022 (rlwhitcomb)
- *	    Add indexed access, and random word selection.
- *	    New "displayStatistics" method.
- *	    Omit additional word list statistics if there are none (some of
- *	    the dictionaries don't have any).
+ * History:
+ *  19-Jul-22 rlw #411: Abstracted out of WordFind for use with other programs.
+ *  27-Jul-22 rlw  ---  Add indexed access, and random word selection.
+ *			New "displayStatistics" method.
+ *			Omit additional word list statistics if there are none (some of
+ *			the dictionaries don't have any).
+ *  04-Sep-22 rlw #29:	Save a dictionary entry for each word.
+ *			Search for valid words using the letter counts.
  */
 package info.rlwhitcomb.wordfind;
 
@@ -55,6 +55,95 @@ import java.util.List;
 public class Dictionary
 {
 	/**
+	 * A dictionary entry, consisting of the word, along with the letter
+	 * frequency count, first letter and length (for convenience).
+	 */
+	public static class Entry implements Comparable<Entry>
+	{
+		String word;
+		char   firstLetter;
+		int    index;
+		int    length;
+		int[]  letters;
+
+		Entry(final String w, final boolean lower) {
+		    word = lower ? w.toLowerCase() : w.toUpperCase();
+		    firstLetter = word.charAt(0);
+		    index = (int) firstLetter - (lower ? 'a' : 'A');
+		    length = word.length();
+		    letters = countLetters(word);
+		}
+
+		@Override
+		public int compareTo(Entry o) {
+		    return word.compareTo(o.word);
+		}
+
+		/**
+		 * Determine if this entry could be spelled by the given set of letters.
+		 *
+		 * @param letters Candidate list of letters.
+		 * @return        Whether these letters could spell this entry.
+		 */
+		public boolean contains(final String letterList) {
+		    int[] letterCounts = countLetters(letterList);
+
+		    for (int i = 0; i < 26; i++) {
+			// If this word requires more of this one letter than the list of
+			// letters contains, then we can't do it.
+			if (letters[i] > letterCounts[i])
+			    return false;
+		    }
+
+		    return true;
+		}
+	}
+
+
+	/**
+	 * Is the given character a "wild card" character, that is, one of
+	 * {@code ' '}, {@code '?'}, or {@code '.'}.
+	 *
+	 * @param ch The given character to check.
+	 * @return   Whether it is "wild"?
+	 */
+	public static boolean isWild(final char ch) {
+	    return (ch == ' ') || (ch == '?') || (ch == '.');
+	}
+
+
+	/**
+	 * Count the frequency of each letter in the given word.
+	 * <p> If the letter is a "wild card" ({@code '?'}, {@code ' '}, or {@code '.'})
+	 * then the count of every letter is incremented.
+	 *
+	 * @param word  The word to count, all upper- or lower-case.
+	 * @return      Letter frequency array.
+	 */
+	public static int[] countLetters(final String word) {
+	    int[] letters = new int[26];
+	    Arrays.fill(letters, 0);
+
+	    int base = (int) (Character.isLowerCase(word.charAt(0)) ? 'a' : 'A');
+
+	    for (int i = 0; i < word.length(); i++) {
+		char letter = word.charAt(i);
+		if (isWild(letter)) {
+		    for (int j = 0; j < 26; j++) {
+			letters[j]++;
+		    }
+		}
+		else {
+		    int index = (int) letter - base;
+		    letters[index]++;
+		}
+	    }
+
+	    return letters;
+	}
+
+
+	/**
 	 * Enumeration of which dictionary file is currently loaded (if any).
 	 */
 	private WordFile currentFile = null;
@@ -62,12 +151,12 @@ public class Dictionary
 	/**
 	 * Regular word list, arranged alphabetically.
 	 */
-	private final List<String> regularWords = new ArrayList<>(200_000);
+	private final List<Entry> regularWords = new ArrayList<>(200_000);
 
 	/**
 	 * Additional word list, also alphabetical.
 	 */
-	private final List<String> additionalWords = new ArrayList<>(500);
+	private final List<Entry> additionalWords = new ArrayList<>(500);
 
 	/**
 	 * Whether the dictionary is kept in UPPER- or lower-case.
@@ -96,6 +185,14 @@ public class Dictionary
 
 
 	/**
+	 * @return The maximum word size of this dictionary.
+	 */
+	public int getMaxWordLength() {
+	    return maxWordLength;
+	}
+
+
+	/**
 	 * Add the new word to the appropriate list and update the starting indexes.
 	 *
 	 * @param word      Word to add.
@@ -104,19 +201,20 @@ public class Dictionary
 	 * @param lastStart Previous starting character.
 	 * @return          Updated starting character, if it changed.
 	 */
-	private char addWord(final String word, final List<String> list, final int[] indexes, final char lastStart) {
-	    char startChar = word.charAt(0);
+	private char addWord(final String word, final List<Entry> list, final int[] indexes, final char lastStart) {
+	    Entry entry = new Entry(word, lowerWords);
+
+	    char startChar = entry.firstLetter;
 	    char newLast = lastStart;
 
 	    if (startChar != lastStart) {
-		int index = (int) (startChar - firstChar);
-		indexes[index] = list.size();
+		indexes[entry.index] = list.size();
 		newLast = startChar;
 	    }
 
-	    maxWordLength = Math.max(maxWordLength, word.length());
+	    maxWordLength = Math.max(maxWordLength, entry.length);
 
-	    list.add(word);
+	    list.add(entry);
 
 	    return newLast;
 	}
@@ -153,7 +251,7 @@ public class Dictionary
 		     || line.startsWith("--")) {
 			continue;
 		    }
-		    String word = lowerCase ? line.toLowerCase() : line.toUpperCase();
+		    String word = line;
 		    if (word.endsWith("?")) {
 			word = word.substring(0, word.length() - 1);
 			lastAddlStart = addWord(word, additionalWords, startingAddlIndex, lastAddlStart);
@@ -207,7 +305,7 @@ public class Dictionary
 	    if (index < 0 || index >= regularWords.size())
 		throw new Intl.IndexOutOfBoundsException("%wordfind#errIndexOutOfBounds", index, regularWords.size());
 
-	    return regularWords.get(index);
+	    return regularWords.get(index).word;
 	}
 
 	/**
@@ -217,13 +315,14 @@ public class Dictionary
 	 * @param list    The list to search in.
 	 * @param indexes Indexes into the list based on starting letter.
 	 */
-	private boolean contained(final String word, final List<String> list, final int[] indexes) {
+	private boolean contained(final String word, final List<Entry> list, final int[] indexes) {
 	    char startChar = word.charAt(0);
 	    int charIndex = (int) (startChar - firstChar);
 	    int startIndex = indexes[charIndex];
 	    int endIndex = indexes[charIndex + 1];
+	    Entry wordEntry = new Entry(word, lowerWords);
 
-	    return Collections.binarySearch(list.subList(startIndex, endIndex), word) >= 0;
+	    return Collections.binarySearch(list.subList(startIndex, endIndex), wordEntry) >= 0;
 	}
 
 	/**
@@ -239,6 +338,40 @@ public class Dictionary
 
 	    return contained(searchWord, regularWords, startingRegularIndex) ||
 		(findInAdditional && contained(searchWord, additionalWords, startingAddlIndex));
+	}
+
+	private void findValid(final String letters, final List<Entry> words, final List<String> result) {
+	    int numLetters = letters.length();
+
+	    for (Entry entry : words) {
+		if (entry.length <= numLetters) {
+		    if (entry.contains(letters)) {
+			result.add(entry.word);
+		    }
+		}
+	    }
+	}
+
+	/**
+	 * Get a list of words from this dictionary that can be made by the given string of letters.
+	 * <p> Compare the words with not more than the length of the target letters in length, and
+	 * compile the words that can be made from these letters, by their frequency (determined at
+	 * construction time for the dictionary).
+	 *
+	 * @param letters The string of letters to check.
+	 * @param addl    Whether to (also) check the additional words list.
+	 * @return        List of words that can be made from these letters (empty if none found).
+	 */
+	public List<String> validWords(final String letters, final boolean addl) {
+	    List<String> result = new ArrayList<>();
+
+	    findValid(letters, regularWords, result);
+
+	    if (addl) {
+		findValid(letters, additionalWords, result);
+	    }
+
+	    return result;
 	}
 
 	/**
@@ -325,12 +458,12 @@ public class Dictionary
 	    Arrays.fill(regularSizeCounts, 0);
 	    Arrays.fill(addlSizeCounts, 0);
 
-	    for (String word : regularWords) {
-		int len = word.length();
+	    for (Entry entry: regularWords) {
+		int len = entry.length;
 		regularSizeCounts[len]++;
 	    }
-	    for (String word : additionalWords) {
-		int len = word.length();
+	    for (Entry entry : additionalWords) {
+		int len = entry.length;
 		addlSizeCounts[len]++;
 	    }
 

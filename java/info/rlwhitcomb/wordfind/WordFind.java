@@ -1081,6 +1081,14 @@ public class WordFind implements Application {
                     case ":v":
                         displayProgramInfo();
                         continue replLoop;
+		    case ":test":
+			String randomWord = dictionary.getRandomWord(dictionary.getMaxWordLength());
+			List<String> words = dictionary.validWords(randomWord, false);
+			System.out.println("random word = " + randomWord);
+			for (String word : words) {
+			    System.out.println(word);
+			}
+			continue replLoop;
 		    case ":statistics":
 		    case ":stats":
 		    case ":stat":
