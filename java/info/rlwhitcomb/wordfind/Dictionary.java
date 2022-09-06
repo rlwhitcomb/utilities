@@ -34,6 +34,7 @@
  *			Search for valid words using the letter counts.
  *			Further refactoring.
  *  05-Sep-22		Properly deal with wild card letters.
+ *  06-Sep-22           Slight optimization if there are no wildcards.
  */
 package info.rlwhitcomb.wordfind;
 
@@ -390,14 +391,19 @@ public class Dictionary
 
 	    for (Entry entry : words) {
 		if (entry.couldBeSpelledBy(letterEntry, wildChars, lowerWords)) {
-		    StringBuilder adornedWord = new StringBuilder(entry.word);
-		    for (int i = 0; i < wildChars.length(); i++) {
-			String wildStr = wildChars.substring(i, i + 1);
-			int ix = adornedWord.lastIndexOf(wildStr);
-			adornedWord.insert(ix, '_');
-			adornedWord.insert(ix + 2, '_');
+		    if (wildChars.length() > 0) {
+			StringBuilder adornedWord = new StringBuilder(entry.word);
+			for (int i = 0; i < wildChars.length(); i++) {
+			    String wildStr = wildChars.substring(i, i + 1);
+			    int ix = adornedWord.lastIndexOf(wildStr);
+			    adornedWord.insert(ix, '_');
+			    adornedWord.insert(ix + 2, '_');
+			}
+			result.add(adornedWord.toString());
 		    }
-		    result.add(adornedWord.toString());
+		    else {
+			result.add(entry.word);
+		    }
 		    maxLength = Math.max(maxLength, entry.length);
 		}
 	    }
