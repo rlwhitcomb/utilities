@@ -768,15 +768,40 @@ public class WordFind implements Application {
         }
     }
 
-    private static int sortValidWords(final List<String> words, final Set<String>[] validWords) {
-        int largest = 0;
-        for (String word : words) {
+    /**
+     * Sort all the valid words found, by length, eliminating all that do not conform
+     * to the required "begins", "ends", or "contains" constraints.
+     *
+     * @param words      The full list of valid words found.
+     * @param validWords The array of word sets, arranged by length.
+     */
+    private static void sortValidWords(final List<String> words, final Set<String>[] validWords) {
+        for (String adornedWord : words) {
+	    String word = getLettersOnly(adornedWord);
+
+            // Here's where we check beginning, ending, and contains clauses
+            if (beginningValue.isPresent()) {
+                String beginsString = beginningValue.get();
+                if (!word.startsWith(beginsString))
+                    continue;
+            }
+            if (containsValue.isPresent()) {
+                String containsString = containsValue.get();
+                if (word.indexOf(containsString) < 0)
+                    continue;
+            }
+            if (endingValue.isPresent()) {
+                String endsString = endingValue.get();
+                if (!word.endsWith(endsString))
+                    continue;
+            }
+
+            // If we got here, the word satisfies all the specified criteria, so sort it into
+            // the appropriate set, given its length.
             int len = word.length();
-            largest = Math.max(largest, len);
             Set<String> wordSet = validWords[len - 1];
-            wordSet.add(word);
+            wordSet.add(adornedWord);
         }
-        return largest;
     }
 
     private static int reportResults(final Set<String>[] validWords, final int largest) {
@@ -790,7 +815,7 @@ public class WordFind implements Application {
                 section(Intl.formatString("wordfind#section", (index + 1), size));
 
                 if (minWordSizeToReport > 1 && (index + 1) < minWordSizeToReport) {
-                    outputln(DOTS);
+                    output(DOTS);
                     continue;
                 }
                 System.out.println();
@@ -802,7 +827,7 @@ public class WordFind implements Application {
                 for (String word : wordSet) {
                     wordsSoFarInSet++;
                     if (maxNumberOfWords > 0 && wordsSoFarInSet > maxNumberOfWords) {
-                        outputln(DOTS);
+                        output(DOTS);
                         break;
                     }
 
@@ -965,7 +990,6 @@ public class WordFind implements Application {
 
         // Okay, we might have a set of letters to process (the "--letters" mode).
         int n = letters.length();
-        int cn = 0;
         if (n > 0) {
             // See if the letters as entered are a valid word first
             String inputWord = letters.toString();
@@ -980,21 +1004,23 @@ public class WordFind implements Application {
                 beginningValue = beginningValue.map(caseMapper);
                 String beginsString = beginningValue.get();
                 sb.append(Intl.getString("wordfind#beginningWith")).append(quote(beginsString));
-                cn = beginsString.length();
+                letters.append(beginsString);
             }
             if (containsValue.isPresent()) {
                 containsValue = containsValue.map(caseMapper);
                 String containsString = containsValue.get();
                 sb.append(Intl.getString("wordfind#containing")).append(quote(containsString));
-                cn = containsString.length();
+                letters.append(containsString);
             }
             if (endingValue.isPresent()) {
                 endingValue = endingValue.map(caseMapper);
                 String endsString = endingValue.get();
                 sb.append(Intl.getString("wordfind#endingWith")).append(quote(endsString));
-                cn = endsString.length();
+                letters.append(endsString);
             }
             heading(sb.toString());
+
+            n = letters.length();
 
             // Shuffle the blanks to the end to ensure that words made either with or without
             // blanks will find the "without" version first.
@@ -1013,47 +1039,27 @@ public class WordFind implements Application {
                 letters.append(CharUtil.makeStringOfChars('?', numberOfBlanks));
             }
 
+            List<String> results = new ArrayList<>();
+            int largest = dictionary.findAllValidWords(results, letters.toString(), findInAdditional);
+
             @SuppressWarnings("unchecked")
-            Set<String>[] validWords = new Set[n + cn];
-            for (int i = 0; i < n + cn; i++) {
+            Set<String>[] validWords = new Set[largest];
+            for (int i = 0; i < largest; i++) {
                 validWords[i] = new TreeSet<>(valueComparator);
             }
 
-            // This is the set used to avoid duplicate permutations
-            Set<String> permutationSet = new TreeSet<>();
+            sortValidWords(results, validWords);
 
-            /*
-             * Find all subsets of the given set of letters by running through the values
-             * of all the binary numbers from 0 to 2^n - 1 where n is the number of letters.
-             * Algorithm taken from https://www.geeksforgeeks.org/finding-all-subsets-of-a-given-set-in-java/
-             * (assumes n <= 32)
-             */
-            int twoPowN = 1 << n;
-            for (int i = 0; i < twoPowN; i++) {
-                letterSubset.setLength(0);
-                for (int j = 0, bitMask = 1; j < n; j++, bitMask <<= 1) {
-                    // bitMask is a number with jth bit set to one,
-                    // so when we 'and' that with the subset number
-                    // we get which letters are present in ths subset
-                    // and which are not.
-                    if ((i & bitMask) != 0) {
-                        letterSubset.append(letters.charAt(j));
-                    }
-                }
-                if (!findValidPermutations("", letterSubset.toString(), permutationSet, validWords))
-                    break;
-            }
+            long endTime = System.nanoTime();
 
-            int numberOfWordsFound = reportResults(validWords, n + cn);
+            int numberOfWordsFound = reportResults(validWords, largest);
 
             if (numberOfWordsFound == 0)
                 error("wordfind#errNoValidWords");
 
-            long endTime = System.nanoTime();
-
             if (timings) {
                 float secs = (float)(endTime - startTime) / 1.0e9f;
-                int wordsChecked = permutationSet.size() * (containsValue.isPresent() ? n : 1);
+                int wordsChecked = dictionary.getNumberWords() + (findInAdditional ? dictionary.getNumberAddlWords() : 0);
                 info("wordfind#infoLookup", secs, numberOfWordsFound, wordsChecked);
             }
         }
@@ -1104,8 +1110,8 @@ public class WordFind implements Application {
 
                     case ":test":
                         String randomWord = dictionary.getRandomWord(dictionary.getMaxWordLength());
-                        int largest = randomWord.length();
-                        List<String> words = dictionary.validWords(randomWord, false);
+                        List<String> results = new ArrayList<>();
+                        int largest = dictionary.findAllValidWords(results, randomWord, false);
 
                         @SuppressWarnings("unchecked")
                         Set<String>[] validWords = new Set[largest];
@@ -1113,7 +1119,7 @@ public class WordFind implements Application {
                             validWords[i] = new TreeSet<>(valueComparator);
                         }
 
-                        largest = sortValidWords(words, validWords);
+                        sortValidWords(results, validWords);
                         reportResults(validWords, largest);
 
                         continue replLoop;
@@ -1141,6 +1147,9 @@ public class WordFind implements Application {
         }
     }
 
+    /**
+     * Read the chosen dictionary file from disk and index the words into a searchable form.
+     */
     private static void readDictionary() {
         long startTime = System.nanoTime();
         try {

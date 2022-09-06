@@ -32,6 +32,8 @@
  *			the dictionaries don't have any).
  *  04-Sep-22 rlw #29:	Save a dictionary entry for each word.
  *			Search for valid words using the letter counts.
+ *			Further refactoring.
+ *  05-Sep-22		Properly deal with wild card letters.
  */
 package info.rlwhitcomb.wordfind;
 
@@ -54,6 +56,9 @@ import java.util.List;
  */
 public class Dictionary
 {
+	/** Where to keep the count of wildcard letters in the "letters" array. */
+	static final int WILD_INDEX = 26;
+
 	/**
 	 * A dictionary entry, consisting of the word, along with the letter
 	 * frequency count, first letter and length (for convenience).
@@ -64,8 +69,15 @@ public class Dictionary
 		char   firstLetter;
 		int    index;
 		int    length;
+		int    numberWild;
 		int[]  letters;
 
+		/**
+		 * Construct an entry from the given word, converting case as needed.
+		 *
+		 * @param w     The word to construct this entry from.
+		 * @param lower Whether to convert to lower or upper case.
+		 */
 		Entry(final String w, final boolean lower) {
 		    word = lower ? w.toLowerCase() : w.toUpperCase();
 		    firstLetter = word.charAt(0);
@@ -82,20 +94,46 @@ public class Dictionary
 		/**
 		 * Determine if this entry could be spelled by the given set of letters.
 		 *
-		 * @param letters Candidate list of letters.
-		 * @return        Whether these letters could spell this entry.
+		 * @param letters   Candidate list of letters.
+		 * @param wildChars If any wildcard letters were used, what are they?
+		 * @param lowerCase Whether the dictionary is lowercased or not.
+		 * @return          Whether these letters could spell this entry.
 		 */
-		public boolean contains(final String letterList) {
-		    int[] letterCounts = countLetters(letterList);
+		public boolean couldBeSpelledBy(final Entry letterEntry, final StringBuilder wildChars, final boolean lowerCase) {
+		    // If there are not enough letters in the candidate entry, then no.
+		    if (letterEntry.length < length)
+			return false;
 
-		    for (int i = 0; i < 26; i++) {
+		    int wildCount = letterEntry.letters[WILD_INDEX];
+		    wildChars.setLength(0);
+
+		    for (int i = 0; i < WILD_INDEX; i++) {
 			// If this word requires more of this one letter than the list of
-			// letters contains, then we can't do it.
-			if (letters[i] > letterCounts[i])
-			    return false;
+			// letters contains, check for available wildcards.
+			if (letters[i] > letterEntry.letters[i]) {
+			    if (letters[i] > (letterEntry.letters[i] + wildCount))
+				return false;
+
+			    wildCount -= (letters[i] - letterEntry.letters[i]);
+			    wildChars.append((char) ((lowerCase ? 'a' : 'A') + i));
+			}
 		    }
 
 		    return true;
+		}
+
+		@Override
+		public String toString() {
+		    StringBuilder buf = new StringBuilder(length + 84);
+		    buf.append(word).append(": [ ");
+		    for (int i = 0; i < letters.length; i++) {
+			buf.append(String.format("%1$2d", letters[i]));
+			if (i < letters.length - 1)
+			    buf.append(',');
+		    }
+		    buf.append(" ]");
+
+		    return buf.toString();
 		}
 	}
 
@@ -121,7 +159,7 @@ public class Dictionary
 	 * @return      Letter frequency array.
 	 */
 	public static int[] countLetters(final String word) {
-	    int[] letters = new int[26];
+	    int[] letters = new int[WILD_INDEX + 1];
 	    Arrays.fill(letters, 0);
 
 	    int base = (int) (Character.isLowerCase(word.charAt(0)) ? 'a' : 'A');
@@ -129,9 +167,7 @@ public class Dictionary
 	    for (int i = 0; i < word.length(); i++) {
 		char letter = word.charAt(i);
 		if (isWild(letter)) {
-		    for (int j = 0; j < 26; j++) {
-			letters[j]++;
-		    }
+		    letters[WILD_INDEX]++;
 		}
 		else {
 		    int index = (int) letter - base;
@@ -340,16 +376,33 @@ public class Dictionary
 		(findInAdditional && contained(searchWord, additionalWords, startingAddlIndex));
 	}
 
-	private void findValid(final String letters, final List<Entry> words, final List<String> result) {
-	    int numLetters = letters.length();
+	/**
+	 * Find all the valid words for the given string of letters in the word list.
+	 *
+	 * @param letterEntry Entry with the letters to search for.
+	 * @param words       List of words to check against.
+	 * @param result      The result list to build.
+	 * @return            The maximum length of the valid words found.
+	 */
+	private int findValid(final Entry letterEntry, final List<Entry> words, final List<String> result) {
+	    int maxLength = 0;
+	    StringBuilder wildChars = new StringBuilder(maxWordLength);
 
 	    for (Entry entry : words) {
-		if (entry.length <= numLetters) {
-		    if (entry.contains(letters)) {
-			result.add(entry.word);
+		if (entry.couldBeSpelledBy(letterEntry, wildChars, lowerWords)) {
+		    StringBuilder adornedWord = new StringBuilder(entry.word);
+		    for (int i = 0; i < wildChars.length(); i++) {
+			String wildStr = wildChars.substring(i, i + 1);
+			int ix = adornedWord.lastIndexOf(wildStr);
+			adornedWord.insert(ix, '_');
+			adornedWord.insert(ix + 2, '_');
 		    }
+		    result.add(adornedWord.toString());
+		    maxLength = Math.max(maxLength, entry.length);
 		}
 	    }
+
+	    return maxLength;
 	}
 
 	/**
@@ -358,20 +411,22 @@ public class Dictionary
 	 * compile the words that can be made from these letters, by their frequency (determined at
 	 * construction time for the dictionary).
 	 *
+	 * @param result  The list of valid words to populate
 	 * @param letters The string of letters to check.
 	 * @param addl    Whether to (also) check the additional words list.
-	 * @return        List of words that can be made from these letters (empty if none found).
+	 * @return        Maximum length of all the words found (0 if none).
 	 */
-	public List<String> validWords(final String letters, final boolean addl) {
-	    List<String> result = new ArrayList<>();
+	public int findAllValidWords(List<String> result, final String letters, final boolean addl) {
+	    Entry letterEntry = new Entry(letters, lowerWords);
+	    int maxLength;
 
-	    findValid(letters, regularWords, result);
+	    maxLength = findValid(letterEntry, regularWords, result);
 
 	    if (addl) {
-		findValid(letters, additionalWords, result);
+		maxLength = Math.max(maxLength, findValid(letterEntry, additionalWords, result));
 	    }
 
-	    return result;
+	    return maxLength;
 	}
 
 	/**
