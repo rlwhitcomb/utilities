@@ -12,10 +12,12 @@
 
 	<target name="all" description="Download, unzip, and fixup the latest build." depends="latest,download,unzip,fixup"/>
 
-	<target name="latest" description="Get the latest commit id; override with '-Dcommit=xxxxxxx'." unless="commit.id">
+	<target name="get" description="Get the latest events list from github." unless="commit.id">
 		<echo message="Getting the latest events from our repository..."/>
 		<get src="https://api.github.com/users/rlwhitcomb/events/public" dest="github.json"/>
+	</target>
 
+	<target name="latest" depends="get" description="Get the latest commit id; override with '-Dcommit=xxxxxxx'." unless="commit.id">
 		<echo message="Extracting the latest commit / push ID..."/>
 		<java classname="info.rlwhitcomb.calc.Calc" classpath="${env.CLASSPATH}" dir="${source.dir}/java" fork="true" outputproperty="commit.id">
 			<arg file="${source.dir}/java/latest_push.calc"/>
