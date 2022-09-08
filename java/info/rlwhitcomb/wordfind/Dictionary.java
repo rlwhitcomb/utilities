@@ -95,10 +95,10 @@ public class Dictionary
 		/**
 		 * Determine if this entry could be spelled by the given set of letters.
 		 *
-		 * @param letters   Candidate list of letters.
-		 * @param wildChars If any wildcard letters were used, what are they?
-		 * @param lowerCase Whether the dictionary is lowercased or not.
-		 * @return          Whether these letters could spell this entry.
+		 * @param letterEntry The set of letters we have in hand to spell with.
+		 * @param wildChars   If any wildcard letters were used, what are they?
+		 * @param lowerCase   Whether the dictionary is lowercased or not.
+		 * @return            Whether these letters could spell this entry.
 		 */
 		public boolean couldBeSpelledBy(final Entry letterEntry, final StringBuilder wildChars, final boolean lowerCase) {
 		    // If there are not enough letters in the candidate entry, then no.
@@ -396,8 +396,8 @@ public class Dictionary
 			for (int i = 0; i < wildChars.length(); i++) {
 			    String wildStr = wildChars.substring(i, i + 1);
 			    int ix = adornedWord.lastIndexOf(wildStr);
-			    adornedWord.insert(ix, '_');
-			    adornedWord.insert(ix + 2, '_');
+			    adornedWord.insert(ix, WordFind.BLANK_MARKER);
+			    adornedWord.insert(ix + 2, WordFind.BLANK_MARKER);
 			}
 			result.add(adornedWord.toString());
 		    }
