@@ -82,24 +82,29 @@
  *          Allow some more directives in REPL mode.
  *          Move all the text to resources file.
  *          Add "-maxlinelength" option for automated testing.
- *	26-Sep-2021 (rlwhitcomb)
- *	    #23 Fix inconsistent options.
- *	04-Oct-2021 (rlwhitcomb)
- *	    Tweak colors.
- *	21-Jan-2022 (rlwhitcomb)
- *	    #217: Use new Options method to process environment methods.
- *	25-Jan-2022 (rlwhitcomb)
- *	    If initial letters are playable as-is, not only announce, but display points.
- *	12-Apr-2022 (rlwhitcomb)
- *	    #269: New method to load main program info (in Environment).
- *	18-Apr-2022 (rlwhitcomb)
- *	    #270: Make this automatic now.
- *	09-Jul-2022 (rlwhitcomb)
- *	    #393: Cleanup imports.
- *	15-Jul-2022 (rlwhitcomb)
- *	    #411: Move dictionary handling out to separate class.
- *	27-Jul-2022 (rlwhitcomb)
- *	    REPL command and command-line option to display dictionary statistics.
+ *      26-Sep-2021 (rlwhitcomb)
+ *          #23 Fix inconsistent options.
+ *      04-Oct-2021 (rlwhitcomb)
+ *          Tweak colors.
+ *      21-Jan-2022 (rlwhitcomb)
+ *          #217: Use new Options method to process environment methods.
+ *      25-Jan-2022 (rlwhitcomb)
+ *          If initial letters are playable as-is, not only announce, but display points.
+ *      12-Apr-2022 (rlwhitcomb)
+ *          #269: New method to load main program info (in Environment).
+ *      18-Apr-2022 (rlwhitcomb)
+ *          #270: Make this automatic now.
+ *      09-Jul-2022 (rlwhitcomb)
+ *          #393: Cleanup imports.
+ *      15-Jul-2022 (rlwhitcomb)
+ *          #411: Move dictionary handling out to separate class.
+ *      27-Jul-2022 (rlwhitcomb)
+ *          REPL command and command-line option to display dictionary statistics.
+ *      04-Sep-2022 (rlwhitcomb)
+ *          #29: Test code for the new dictionary "validWords" lookup.
+ *      06-Sep-2022 (rlwhitcomb)
+ *          #29: Switch to new lookup implemented in Dictionary class; remove old code;
+ *          remove unnecessary options and errors.
  */
 package info.rlwhitcomb.wordfind;
 
@@ -123,109 +128,115 @@ import static info.rlwhitcomb.util.ConsoleColor.Code.*;
  * A utility program to make sense out of random letter tiles
  * (such as for the "Scrabble" &trade; or "Word With Friends" &trade; games).
  */
-public class WordFind implements Application {
+public class WordFind implements Application
+{
+    /** Default column width for output. */
+    private static final int DEFAULT_COLUMN_WIDTH = 10;
+
+    /** For option processing, whether we are running on a Windows OS. */
+    private static final boolean ON_WINDOWS = Environment.isWindows();
+
+    /** The "blank" marker character (surrounds the character the blank represents). */
+    public static final char BLANK_MARKER = '_';
+
+    /** The "contains" marker character (also used for "begins" and "ends"). */
+    public static final char CONTAINS_MARKER = '-';
+
+
     /**
      * The dictionary where we keep all the valid words.
      */
     private static final Dictionary dictionary = new Dictionary();
 
-    /**
-     * The default number of maximum iterations looking for valid words.
-     */
-    private static final long DEFAULT_MAX_ITERATIONS = 10_000_000L;
-    /**
-     * The default amount of time (seconds) to spend iterating.
-     */
-    private static final float DEFAULT_MAX_TIME = 10.0f;
-
     /** Should we look in the additional words list? */
     private static boolean findInAdditional = false;
-    /** For option processing, whether we are running on a Windows OS. */
-    private static final boolean ON_WINDOWS = System.getProperty("os.name").startsWith("Windows");
+
     /** Big switch whether to run as a console app or a GUI app. */
     private static boolean runningOnConsole = true;
+
     /** Which word file to load (defaults to our custom one). */
     private static WordFile wordFile = WordFile.DEFAULT;
-    /** Default column width for output. */
-    private static final int DEFAULT_COLUMN_WIDTH = 10;
+
     /** The (possibly configurable) line length for output. */
     private static int maxLineLength;
+
     /** Whether to use colors for the output. */
     private static boolean colored = true;
+
     /** Whether to report timings or not. */
     private static boolean timings = true;
+
     /** Whether to interpret the command line words as letters or whole words. */
     private static boolean letter = true;
+
     /** Whether to deal with input and output as all lower case or UPPER case. */
     private static boolean lowerCase = false;
+
     /** The beginning value of the alphabet, which depends on lower or UPPER case flag. */
     private static char alphaStart;
+
     /** Whether next value is supposed to be a "Begins With" value. */
     private static boolean beginsWith = false;
+
     /** Optional "Begins With" value. */
     private static Optional<String> beginningValue = Optional.empty();
+
     /** Whether next value is supposed to be a "Contains" value. */
     private static boolean contains = false;
+
     /** Optional "Contains" value. */
     private static Optional<String> containsValue = Optional.empty();
+
     /** Whether next value is supposed to be an "Ends With" value. */
     private static boolean endsWith = false;
+
     /** Optional "Ends With" value. */
     private static Optional<String> endingValue = Optional.empty();
-    /** Whether next value is supposed to be a max size value. */
-    private static boolean needMaxSize = false;
-    /** Maximum number of iterations to perform. */
-    private static long maxIterations = DEFAULT_MAX_ITERATIONS;
-    /** Whether next value is supposed to be a max time value. */
-    private static boolean needMaxTime = false;
-    /** Maximum number of seconds to spend looking for values. */
-    private static float maxSeconds = DEFAULT_MAX_TIME;
+
     /** Whether next value is supposed to be a min word size value. */
     private static boolean needMinWordSize = false;
+
     /** Minimum word length to report on (normally everything: {@code <= 0}). */
     private static int minWordSizeToReport = 0;
+
     /** Whether or not the next value is supposed to be the max number of words. */
     private static boolean needMaxNumber = false;
+
     /** Maximum numbers of words of each size to report (normally all: {@code <= 0}). */
     private static int maxNumberOfWords = 0;
+
     /** Whether or not the next value is supposed to be the max line length. */
     private static boolean needMaxLineLength = false;
+
+    /**
+     * Sort alphabetically?
+     */
+    private static boolean sortAlphabetically = false;
+
     /** The format string for final output of the words. */
     private static final String WORD_FORMAT = "%1$s%2$s " + BLACK_BRIGHT + "(%3$3d)" + RESET;
+
     /** Continuation. */
     private static final String DOTS = " " + BLACK_BRIGHT + "..." + RESET;
+
     /** Heading color. */
     private static ConsoleColor.Code headingColor = null;
+
     /** Info message color. */
     private static ConsoleColor.Code infoColor = null;
+
     /** Error message color. */
     private static ConsoleColor.Code errorColor = null;
+
     /** Wildcard highlight color. */
     private static ConsoleColor.Code wildcardColor = null;
+
     /** Containing highlight color. */
     private static ConsoleColor.Code containsColor = null;
 
     /** The current start time of the calculation. */
     private static long startTime;
 
-    /** The display object for the GUI. */
-    private Display display;
-
-    @BXML private Window mainWindow;
-    @BXML private TextInput lettersInput;
-    @BXML private TextInput containsInput;
-    @BXML private TextInput startsWithInput;
-    @BXML private TextInput endsWithInput;
-    @BXML private PushButton clearLettersButton;
-    @BXML private PushButton clearContainsButton;
-    @BXML private PushButton clearStartsWithButton;
-    @BXML private PushButton clearEndsWithButton;
-    @BXML private TextPane outputArea;
-
-    /**
-     * Sort alphabetically?
-     */
-    private static boolean sortAlphabetically = false;
     /**
      * Letter point values for sorting purposes.
      */
@@ -259,6 +270,12 @@ public class WordFind implements Application {
     };
 
     /**
+     * A mapping function to convert the case of words, depending on the command line option {@link #lowerCase}.
+     */
+    private static final Function<String, String> caseMapper = s -> lowerCase ? s.toLowerCase() : s.toUpperCase();
+
+
+    /**
      * Calculate the total point value for the given word, taking into account
      * blanks which are delimited with "_", and the "contained" markers ("-").
      *
@@ -267,15 +284,17 @@ public class WordFind implements Application {
      */
     private static int addLetterValues(final String word) {
         int pointValue = 0;
+
         for (int i = 0; i < word.length(); i++) {
             char ch = word.charAt(i);
-            if (ch == '_')
+            if (ch == BLANK_MARKER)
                 i += 2; // skip "_X_" which is how a blank is marked
-            else if (ch == '-')
-                continue;    // skip the "contained" marker
+            else if (ch == CONTAINS_MARKER)
+                continue;    // skip the "contained" markers (-XY-)
             else
                 pointValue += POINT_VALUES[ch - alphaStart];
         }
+
         return pointValue;
     }
 
@@ -285,34 +304,38 @@ public class WordFind implements Application {
      * @param delimitedWord The input with "_" or "-" markers included.
      */
     private static String getLettersOnly(final String delimitedWord) {
-        return delimitedWord.replace("_", "").replace("-", "");
+        return delimitedWord.replace(Character.toString(BLANK_MARKER), "")
+                            .replace(Character.toString(CONTAINS_MARKER), "");
     }
 
     /**
      * Highlight a word making special emphasis on the blank substitutions and the
      * "contained" values.
-     * @param adornedWord The word to highlight with the "_" and "-" markers.
+     * @param adornedWord The word to highlight with the {@link #BLANK_MARKER} and
+     *                    {@link #CONTAINS_MARKER} markers.
      * @return The input with the markers replaced with the actual color codes.
      */
     private static String highlightWord(final String adornedWord) {
         int wordLen = adornedWord.length();
         StringBuilder buf = new StringBuilder(wordLen);
+
         // Note: we assume that the markers are mutually exclusive and not nested
         boolean insideMarkers = false;
         for (int i = 0; i < wordLen; i++) {
             char ch = adornedWord.charAt(i);
-            if (ch == '_' || ch == '-') {
+            if (ch == BLANK_MARKER || ch == CONTAINS_MARKER) {
                 if (insideMarkers) {
                     buf.append(RESET);
                     insideMarkers = false;
                 } else {
-                    buf.append(ch == '_' ? wildcardColor : containsColor);
+                    buf.append(ch == BLANK_MARKER ? wildcardColor : containsColor);
                     insideMarkers = true;
                 }
             } else {
                 buf.append(ch);
             }
         }
+
         return buf.toString();
     }
 
@@ -342,50 +365,48 @@ public class WordFind implements Application {
     };
 
     /**
-     * Insert a string into either an adorned or unadorned string at the given index.
+     * Mark around a string in the adorned word buffer, starting at the given index (into the
+     * unadorned string), using the {@link #CONTAINS_MARKER}.
      *
      * @param buf   The buffer to edit.
-     * @param index The position at which to insert the string (-1 is append to end).
-     * @param str   The string to insert.
-     * @return      The input buffer.
+     * @param index The position at which to insert the string (negative from end of string).
+     * @param str   The string to mark around.
      */
-    private static final StringBuilder insert(final StringBuilder buf, final int index, final String str) {
+    private static final void mark(final StringBuilder buf, final int index, final String str) {
+        int len = str.length();
         int pos;
 
-        // Don't need to do anything if the insert string is nothing
-        if (str == null || str.isEmpty())
-            return buf;
-
-        if (index == 0) {
-            return buf.insert(0, str);
-        }
-        else if (index == -1) {
-            return buf.append(str);
-        }
-        else if (index < 0) {
-            throw new Intl.IllegalArgumentException("wordfind#errNegativeIndex");
-        }
-        else {
+        if (index >= 0)
             pos = index;
-        }
+        else
+            pos = buf.length() + index;
 
         // Move from 0 past the adornments to the desired position
+        // charPos is the index into the buffer
+        // pos is the index into the unadorned string (relates to "index")
         int charPos = 0;
-        for (int ix = 0; ix < pos; ix++) {
+        for (int i = 0; i < pos; i++) {
             if (charPos >= buf.length())
                 break;
+
             char ch = buf.charAt(charPos);
-            if (ch == '_')
+            if (ch == BLANK_MARKER)
                 charPos += 3;
-            else if (ch == '-')
+            else if (ch == CONTAINS_MARKER)
                 charPos += 2;
             else
                 charPos++;
         }
 
-        return buf.insert(charPos, str);
+        buf.insert(charPos, CONTAINS_MARKER);
+        buf.insert(charPos + len + 1, CONTAINS_MARKER);
     }
 
+    /**
+     * Setup the colors according to the light/dark background setting.
+     *
+     * @param light Whether to select colors for light background.
+     */
     private static void setColors(final boolean light) {
         if (light) {
             headingColor = GREEN_UNDERLINED;
@@ -402,136 +423,20 @@ public class WordFind implements Application {
         }
     }
 
-    private static final String adorn(final String unadorned) {
-        return String.format("-%1$s-", unadorned);
-    }
 
-    /**
-     * A mapping function to convert the case of words, depending on the command line option {@link #lowerCase}.
-     */
-    private static final Function<String, String> caseMapper = s -> lowerCase ? s.toLowerCase() : s.toUpperCase();
+    /** The display object for the GUI. */
+    private Display display;
 
-    /**
-     * Find all the valid possible permutations of the input string (recursive call).
-     * <p> Algorithm taken from: https://www.geeksforgeeks.org/print-all-permutations-of-a-string-in-java/
-     * @param prefix         The prefix we've checked so far.
-     * @param str            The rest of the string to check.
-     * @param permutationSet The set of permuted arrangements already made.
-     * @param validWords     The final output set of valid words to add to.
-     * @return               {@code false} to abort (time or space constraints), {@code true} to continue
-     */
-    private static boolean findValidPermutations(
-        final String prefix,
-        final String str,
-        final Set<String> permutationSet,
-        final Set<String>[] validWords)
-    {
-        if (str.isEmpty()) {
-            // Sometimes we use the letters only, but at the end we need to leave the blank markers alone
-            String word = getLettersOnly(prefix);
-
-            // Early check for words less than two characters without additions
-            if (word.length() < 2 && !containsValue.isPresent() && !beginningValue.isPresent() && !endingValue.isPresent())
-                return true;
-
-            // If this is a word with blanks, but the word without blanks is already there, then
-            // don't bother working on this version. This simpler test only works because we put
-            // the blanks at the end of the sequence, so we find the better choices first.
-            if (!prefix.equals(word)) {
-                if (permutationSet.contains(word))
-                    return true;
-            }
-
-            // If the permutation was already checked, then just leave without doing any more
-            // (distinguish between the same word but using a blank vs. with regular letters)
-            if (!permutationSet.add(prefix))
-                return true;
-
-            if (maxIterations > 0L && permutationSet.size() >= maxIterations) {
-                Intl.errFormat("wordfind#maxIterationsReached", maxIterations);
-                return false;
-            }
-            long currentTime = System.nanoTime();
-            float secs = (float)(currentTime - startTime) / 1.0e9f;
-            if (maxSeconds > 0.0f && secs >= maxSeconds) {
-                Intl.errFormat("wordfind#maxTimeReached", secs);
-                return false;
-            }
-
-            // Now start mucking with the valid word and "begins with", "ends with", "contains" tests
-            // (and we need two copies, one with the blank markers and one without for word lookup)
-            final StringBuilder bufAdorned   = new StringBuilder();
-            final StringBuilder bufUnadorned = new StringBuilder();
-            int containsEnd = containsValue.isPresent() ? word.length() : 0;
-
-            // For "containing", loop through each position of the input, inserting the "containing" string
-            // at each position; after that insert the "beginning" and "ending" values.
-            for (int containsIndex = 0; containsIndex <= containsEnd; containsIndex++) {
-                bufAdorned.setLength(0);   bufAdorned.append(prefix);
-                bufUnadorned.setLength(0); bufUnadorned.append(word);
-
-                if (containsValue.isPresent()) {
-                    String contains        = containsValue.get();
-                    String containsAdorned = adorn(contains);
-                    insert(bufAdorned,   containsIndex, containsAdorned);
-                    insert(bufUnadorned, containsIndex, contains);
-                }
-                beginningValue.ifPresent(v -> { insert(bufAdorned, 0, adorn(v));  insert(bufUnadorned, 0, v);  });
-                endingValue.ifPresent   (v -> { insert(bufAdorned, -1, adorn(v)); insert(bufUnadorned, -1, v); });
-
-                final String wordUnadorned = bufUnadorned.toString();
-                // There are no valid one letter (or blank) words
-                if (wordUnadorned.length() < 2)
-                    break;
-
-                if (dictionary.contains(wordUnadorned, findInAdditional)) {
-                    int index = wordUnadorned.length() - 1;
-                    validWords[index].add(bufAdorned.toString());
-                }
-            }
-            return true;
-        }
-
-        // The intermediate stages where we are permuting the input for all possibilities
-        for (int i = 0; i < str.length(); i++) {
-            String restOfString;
-            String newPrefix;
-            char ch;
-
-            // Special case handling of the delimited substitutions
-            ch = str.charAt(i);
-            if (ch == '_') {
-                restOfString = str.substring(0, i) + str.substring(i + 3);
-            } else if (ch == '-') {
-                restOfString = str.substring(0, i) + str.substring(i + 2);
-            } else {
-                restOfString = str.substring(0, i) + str.substring(i + 1);
-            }
-
-            // Deal with wildcard letter (blank)
-            if (ch == ' ' || ch == '?' || ch == '.') {
-                for (int j = 0; j < 26; j++) {
-                    char ch2 = (char) (alphaStart + j);
-                    // Make an annotated string with the blank location marked with "_"
-                    newPrefix = prefix + "_" + ch2 + "_";
-
-                    if (!findValidPermutations(newPrefix, restOfString, permutationSet, validWords))
-                        return false;
-                }
-            } else {
-                if (ch == '_')
-                    newPrefix = prefix + str.substring(i, i + 3);
-                else if (ch == '-')
-                    newPrefix = prefix + str.substring(i, i + 2);
-                else
-                    newPrefix = prefix + ch;
-
-                if (!findValidPermutations(newPrefix, restOfString, permutationSet, validWords))
-                    return false;
-            }
-        }
-        return true;
-    }
+    @BXML private Window mainWindow;
+    @BXML private TextInput lettersInput;
+    @BXML private TextInput containsInput;
+    @BXML private TextInput startsWithInput;
+    @BXML private TextInput endsWithInput;
+    @BXML private PushButton clearLettersButton;
+    @BXML private PushButton clearContainsButton;
+    @BXML private PushButton clearStartsWithButton;
+    @BXML private PushButton clearEndsWithButton;
+    @BXML private TextPane outputArea;
 
 
     @Override
@@ -701,10 +606,6 @@ public class WordFind implements Application {
             timings = false;
         } else if (matches(arg, "timings", "timing", "verbose", "time", "t", "v")) {
             timings = true;
-        } else if (matches(arg, "maxsize", "size", "max")) {
-            needMaxSize = true;
-        } else if (matches(arg, "maxtime", "maxseconds", "maxsecs", "maxt", "seconds", "secs")) {
-            needMaxTime = true;
         } else if (matches(arg, "minwordsize", "minword", "minsize", "min")) {
             needMinWordSize = true;
         } else if (matches(arg, "maxnumberwords", "maxnumber", "maxwords")) {
@@ -767,9 +668,105 @@ public class WordFind implements Application {
     }
 
     /**
+     * Sort all the valid words found, by length, eliminating all that do not conform
+     * to the required "begins", "ends", or "contains" constraints.
+     *
+     * @param words      The full list of valid words found.
+     * @param validWords The array of word sets, arranged by length.
+     */
+    private static void sortValidWords(final List<String> words, final Set<String>[] validWords) {
+        for (String validWord : words) {
+            StringBuilder adornedWord = new StringBuilder(validWord);
+            String word = getLettersOnly(validWord);
+
+            // Here's where we check beginning, ending, and contains clauses
+            if (beginningValue.isPresent()) {
+                String beginsString = beginningValue.get();
+                if (!word.startsWith(beginsString))
+                    continue;
+                mark(adornedWord, 0, beginsString);
+            }
+            if (containsValue.isPresent()) {
+                String containsString = containsValue.get();
+                int containsIndex = word.indexOf(containsString);
+                if (containsIndex < 0)
+                    continue;
+                mark(adornedWord, containsIndex, containsString);
+            }
+            if (endingValue.isPresent()) {
+                String endsString = endingValue.get();
+                if (!word.endsWith(endsString))
+                    continue;
+                mark(adornedWord, -endsString.length(), endsString);
+            }
+
+            // If we got here, the word satisfies all the specified criteria, so sort it into
+            // the appropriate set, given its length.
+            int len = word.length();
+            Set<String> wordSet = validWords[len - 1];
+            wordSet.add(adornedWord.toString());
+        }
+    }
+
+    /**
+     * Report the results of words found in the dictionary search.
+     *
+     * @param validWords The list of valid words sorted into sets by length.
+     * @param largest    Largest word length found.
+     * @return           Total number of words.
+     */
+    private static int reportResults(final Set<String>[] validWords, final int largest) {
+        int numberOfWordsFound = 0;
+
+        for (int index = largest - 1; index >= 0; index--) {
+            Set<String> wordSet = validWords[index];
+            int size = wordSet.size();
+            if (size > 0) {
+                numberOfWordsFound += size;
+                section(Intl.formatString("wordfind#section", (index + 1), size));
+
+                if (minWordSizeToReport > 1 && (index + 1) < minWordSizeToReport) {
+                    output(DOTS);
+                    continue;
+                }
+                System.out.println();
+
+                int columnWidth = index + 5;
+                int lineLength = 0;
+                int wordsSoFarInSet = 0;
+
+                for (String word : wordSet) {
+                    wordsSoFarInSet++;
+                    if (maxNumberOfWords > 0 && wordsSoFarInSet > maxNumberOfWords) {
+                        output(DOTS);
+                        break;
+                    }
+
+                    if (lineLength + columnWidth + 6 > maxLineLength) {
+                        System.out.println();
+                        lineLength = 0;
+                    }
+                    /*
+                     * This is tricky because we need to highlight blank substitutions here,
+                     * but also right-justify within the column width, which cannot count
+                     * the escape sequences as part of the word length.
+                     */
+                    String lettersOnly = getLettersOnly(word);
+                    int excessSpace = columnWidth - lettersOnly.length();
+                    String leftPadding = excessSpace == 0 ? "" : CharUtil.makeStringOfChars(' ', excessSpace);
+                    int value = addLetterValues(word);
+                    output(String.format(WORD_FORMAT, leftPadding, highlightWord(word), value));
+                    lineLength += columnWidth + 6;
+                }
+                System.out.println();
+            }
+        }
+
+        return numberOfWordsFound;
+    }
+
+    /**
      * Process all command line arguments, calling {@link #processOption} for options and
-     * saving the rest in the input list.
-     * @param args The command line arguments.
      * @param nonOptions The list to fill up with all the non-option arguments (can be
      * {@code null} to not collect any).
      * @param ignoreOptions For REPL mode, don't process some options on input lines.
@@ -786,8 +783,6 @@ public class WordFind implements Application {
         containsValue = Optional.empty();
         endsWith = false;
         endingValue = Optional.empty();
-        needMaxSize = false;
-        needMaxTime = false;
         needMinWordSize = false;
         needMaxNumber = false;
         needMaxLineLength = false;
@@ -809,20 +804,6 @@ public class WordFind implements Application {
             } else if (endsWith) {
                 endingValue = Optional.of(arg);
                 endsWith = false;
-            } else if (needMaxSize) {
-                try {
-                    maxIterations = Long.parseLong(arg);
-                } catch (NumberFormatException nfe) {
-                    error("wordfind#errBadOptionValue", "maxsize", arg);
-                }
-                needMaxSize = false;
-            } else if (needMaxTime) {
-                try {
-                    maxSeconds = Float.parseFloat(arg);
-                } catch (NumberFormatException nfe) {
-                    error("wordfind#errBadOptionValue", "maxtime", arg);
-                }
-                needMaxTime = false;
             } else if (needMinWordSize) {
                 try {
                     minWordSizeToReport = Integer.parseInt(arg);
@@ -861,10 +842,6 @@ public class WordFind implements Application {
             errorMissingValue("contains");
         if (endsWith)
             errorMissingValue("ends");
-        if (needMaxSize)
-            errorMissingValue("maxsize");
-        if (needMaxTime)
-            errorMissingValue("maxtime");
         if (needMinWordSize)
             errorMissingValue("minwordsize");
         if (needMaxNumber)
@@ -903,10 +880,9 @@ public class WordFind implements Application {
 
         // Okay, we might have a set of letters to process (the "--letters" mode).
         int n = letters.length();
-        int cn = 0;
         if (n > 0) {
             // See if the letters as entered are a valid word first
-            String inputWord = letters.toString();
+            String inputWord = caseMapper.apply(letters.toString());
             if (dictionary.contains(inputWord, findInAdditional)) {
                 info("wordfind#infoArgValid", inputWord, addLetterValues(inputWord));
             }
@@ -918,21 +894,23 @@ public class WordFind implements Application {
                 beginningValue = beginningValue.map(caseMapper);
                 String beginsString = beginningValue.get();
                 sb.append(Intl.getString("wordfind#beginningWith")).append(quote(beginsString));
-                cn = beginsString.length();
+                letters.append(beginsString);
             }
             if (containsValue.isPresent()) {
                 containsValue = containsValue.map(caseMapper);
                 String containsString = containsValue.get();
                 sb.append(Intl.getString("wordfind#containing")).append(quote(containsString));
-                cn = containsString.length();
+                letters.append(containsString);
             }
             if (endingValue.isPresent()) {
                 endingValue = endingValue.map(caseMapper);
                 String endsString = endingValue.get();
                 sb.append(Intl.getString("wordfind#endingWith")).append(quote(endsString));
-                cn = endsString.length();
+                letters.append(endsString);
             }
             heading(sb.toString());
+
+            n = letters.length();
 
             // Shuffle the blanks to the end to ensure that words made either with or without
             // blanks will find the "without" version first.
@@ -940,7 +918,7 @@ public class WordFind implements Application {
             int numberOfBlanks = 0;
             for (int i = 0; i < n; i++) {
                 char ch = letters.charAt(i);
-                if (ch == ' ' || ch == '?' || ch == '.')
+                if (Dictionary.isWild(ch))
                     numberOfBlanks++;
                 else
                     letterSubset.append(ch);
@@ -951,96 +929,40 @@ public class WordFind implements Application {
                 letters.append(CharUtil.makeStringOfChars('?', numberOfBlanks));
             }
 
+            List<String> results = new ArrayList<>();
+            int largest = dictionary.findAllValidWords(results, letters.toString(), findInAdditional);
+
             @SuppressWarnings("unchecked")
-            Set<String>[] validWords = new Set[n + cn];
-            for (int i = 0; i < n + cn; i++) {
+            Set<String>[] validWords = new Set[largest];
+            for (int i = 0; i < largest; i++) {
                 validWords[i] = new TreeSet<>(valueComparator);
             }
 
-            // This is the set used to avoid duplicate permutations
-            Set<String> permutationSet = new TreeSet<>();
+            sortValidWords(results, validWords);
 
-            /*
-             * Find all subsets of the given set of letters by running through the values
-             * of all the binary numbers from 0 to 2^n - 1 where n is the number of letters.
-             * Algorithm taken from https://www.geeksforgeeks.org/finding-all-subsets-of-a-given-set-in-java/
-             * (assumes n <= 32)
-             */
-            int twoPowN = 1 << n;
-            for (int i = 0; i < twoPowN; i++) {
-                letterSubset.setLength(0);
-                for (int j = 0, bitMask = 1; j < n; j++, bitMask <<= 1) {
-                    // bitMask is a number with jth bit set to one,
-                    // so when we 'and' that with the subset number
-                    // we get which letters are present in ths subset
-                    // and which are not.
-                    if ((i & bitMask) != 0) {
-                        letterSubset.append(letters.charAt(j));
-                    }
-                }
-                if (!findValidPermutations("", letterSubset.toString(), permutationSet, validWords))
-                    break;
-            }
+            long endTime = System.nanoTime();
 
-            int numberOfWordsFound = 0;
-
-            for (int index = n + cn - 1; index >= 0; index--) {
-                Set<String> wordSet = validWords[index];
-                int size = wordSet.size();
-                if (size > 0) {
-                    numberOfWordsFound += size;
-                    section(Intl.formatString("wordfind#section", (index + 1), size));
-
-                    if (minWordSizeToReport > 1 && (index + 1) < minWordSizeToReport) {
-                        outputln(DOTS);
-                        continue;
-                    }
-                    System.out.println();
-
-                    int columnWidth = index + 5;
-                    int lineLength = 0;
-                    int wordsSoFarInSet = 0;
-
-                    for (String word : wordSet) {
-                        wordsSoFarInSet++;
-                        if (maxNumberOfWords > 0 && wordsSoFarInSet > maxNumberOfWords) {
-                            outputln(DOTS);
-                            break;
-                        }
-
-                        if (lineLength + columnWidth + 6 > maxLineLength) {
-                            System.out.println();
-                            lineLength = 0;
-                        }
-                        /*
-                         * This is tricky because we need to highlight blank substitutions here,
-                         * but also right-justify within the column width, which cannot count
-                         * the escape sequences as part of the word length.
-                         */
-                        String lettersOnly = getLettersOnly(word);
-                        int excessSpace = columnWidth - lettersOnly.length();
-                        String leftPadding = excessSpace == 0 ? "" : CharUtil.makeStringOfChars(' ', excessSpace);
-                        int value = addLetterValues(word);
-                        output(String.format(WORD_FORMAT, leftPadding, highlightWord(word), value));
-                        lineLength += columnWidth + 6;
-                    }
-                    System.out.println();
-                }
-            }
+            int numberOfWordsFound = reportResults(validWords, largest);
 
             if (numberOfWordsFound == 0)
                 error("wordfind#errNoValidWords");
 
-            long endTime = System.nanoTime();
-
             if (timings) {
                 float secs = (float)(endTime - startTime) / 1.0e9f;
-                int wordsChecked = permutationSet.size() * (containsValue.isPresent() ? n : 1);
+                int wordsChecked = dictionary.getNumberWords() + (findInAdditional ? dictionary.getNumberAddlWords() : 0);
                 info("wordfind#infoLookup", secs, numberOfWordsFound, wordsChecked);
             }
         }
     }
 
+    /**
+     * Run "console" mode, where we prompt for input and process each line, in a loop,
+     * provided there is no input from the command line (or the single argument is {@code "@"}).
+     *
+     * @param argWords       The list arguments "words" (which could be just letters),
+     *                       from the command line.
+     * @param totalInputSize The total length of the input.
+     */
     private static void consoleMode(final List<String> argWords, final int totalInputSize) {
         boolean replMode = false;
 
@@ -1058,6 +980,7 @@ public class WordFind implements Application {
 
             String line;
             String prompt = ConsoleColor.color("<Bk!>> <.>");
+
         replLoop:
             while ((line = console.readLine(prompt)) != null) {
                 if (line.isEmpty())
@@ -1070,23 +993,27 @@ public class WordFind implements Application {
                     case ":q":
                     case ":x":
                         break replLoop;
+
                     case ":help":
                     case ":h":
                     case ":?":
                         displayHelp(false);
                         continue replLoop;
+
                     case ":version":
                     case ":vers":
                     case ":ver":
                     case ":v":
                         displayProgramInfo();
                         continue replLoop;
-		    case ":statistics":
-		    case ":stats":
-		    case ":stat":
-		    case ":s":
-			dictionary.displayStatistics(System.out);
-			continue replLoop;
+
+                    case ":statistics":
+                    case ":stats":
+                    case ":stat":
+                    case ":s":
+                        dictionary.displayStatistics(System.out);
+                        continue replLoop;
+
                     default:
                         if (cmd.startsWith("#") || cmd.startsWith("!") || cmd.startsWith("//"))
                             continue replLoop;
@@ -1097,15 +1024,19 @@ public class WordFind implements Application {
                 int inputSize = processCommandLine(args, argWords, true);
                 process(argWords, inputSize);
             }
+
             System.out.println();
         } else {
             process(argWords, totalInputSize);
         }
     }
 
+    /**
+     * Read the chosen dictionary file from disk and index the words into a searchable form.
+     */
     private static void readDictionary() {
         long startTime = System.nanoTime();
-	try {
+        try {
             dictionary.read(wordFile, lowerCase);
         }
         catch (IOException ioe) {
@@ -1116,7 +1047,7 @@ public class WordFind implements Application {
         if (timings) {
             float secs = (float)(endTime - startTime) / 1.0e9f;
             info("wordfind#infoDictionary", quote(wordFile.getFileName()),
-		dictionary.getNumberWords(), dictionary.getNumberAddlWords(), secs);
+                dictionary.getNumberWords(), dictionary.getNumberAddlWords(), secs);
         }
     }
 
@@ -1133,7 +1064,7 @@ public class WordFind implements Application {
         // Set default colors before options so there is a setting for error messages right away
         setColors(!ON_WINDOWS);
 
-	Options.environmentOptions(WordFind.class, (options) -> {
+        Options.environmentOptions(WordFind.class, (options) -> {
             processCommandLine(options, null, false);
         });
 

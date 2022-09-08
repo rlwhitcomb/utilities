@@ -1,7 +1,7 @@
 :testClass info.rlwhitcomb.wordfind.WordFind
 
 :inputDir test/canons
-:defaultOptions -nocolor -maxtime 0 -notimings -maxwords 0 -maxsize 0 -maxwidth 100
+:defaultOptions -nocolor -notimings -maxwords 0 -maxwidth 100
 
 :echo Tests of WordFind functionality...
 :echo
@@ -15,6 +15,18 @@ phalangeal: phalangeal
 tottery: tty.rot
 dacted: dacted. -c e
 bigyuvi: bigyuvi.
+
+abecedarians: abecedarians
+absorbabilities: absorbabilities
+facultatively: facultatively
+gadzookeries: gadzookeries
+hairsplittings: hairsplittings
+laggardnesses: laggardnesses
+oxyphenbutazone: oxyphenbutazone
+radiochemically: radiochemically
+zygodactylous: zygodactylous
+
+abcdefghijklmnop: abcdefghijklmno..
 
 :echo
 :echo Done with WordFind tests.
