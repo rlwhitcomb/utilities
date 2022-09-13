@@ -663,6 +663,8 @@
  *	    #469: Update "has" function to search objects recursively.
  *	31-Aug-2022 (rlwhitcomb)
  *	    #453: Return empty object for FileInfo if it doesn't exist.
+ *	08-Sep-2022 (rlwhitcomb)
+ *	    #475: Add "caller(n)" function for doing stack tracing.
  */
 package info.rlwhitcomb.calc;
 
@@ -5879,6 +5881,35 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 	}
 
+	@Override
+	public Object visitCallersExpr(CalcParser.CallersExprContext ctx) {
+	    CalcParser.ExprContext expr = ctx.optExpr().expr();
+
+	    List<FunctionScope> funcStack = FunctionScope.getCallers(currentScope);
+
+	    if (expr != null) {
+		int level = getIntValue(expr);
+
+		if (level < 0 || level >= funcStack.size())
+		    return null;
+
+		return funcStack.get(level).getFullFunctionName();
+	    }
+	    else {
+		ArrayScope<String> callers = new ArrayScope<>();
+
+		for (FunctionScope func : funcStack) {
+		    callers.add(func.getFullFunctionName());
+		}
+
+		return callers;
+	    }
+	}
+
+
+	/**
+	 * Visitor for the {@code SumOf} function, to do the actual summing during iteration.
+	 */
 	private class SumOfVisitor implements Function<Object, Object>
 	{
 		private BigFraction sumFrac = BigFraction.ZERO;

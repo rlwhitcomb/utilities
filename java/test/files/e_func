@@ -118,3 +118,14 @@ valueFunc(1)
 calls
 valueFunc(3)
 calls
+
+def n1(n) = {
+   if n == 2 { :echo callers() }
+   if n == 0 { 0 }
+   else if n == 1 { :echo callers(1); 1 }
+   else { n + n1(n - 1) }
+}
+
+n1(0)
+n1(3)
+

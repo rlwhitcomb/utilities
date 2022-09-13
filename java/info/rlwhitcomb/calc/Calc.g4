@@ -450,6 +450,8 @@
  *	    #465: Add "delete" and "rename" file operations.
  *	29-Aug-2022 (rlwhitcomb)
  *	    #453: Add "fileinfo" function.
+ *	08-Sep-2022 (rlwhitcomb)
+ *	    #475: New "callers" function.
  */
 
 grammar Calc;
@@ -626,6 +628,7 @@ expr
    | K_DELETE exprN                      # deleteExpr
    | K_RENAME expr2                      # renameExpr
    | K_MATCHES ( expr3 | expr2 )         # matchesExpr
+   | K_CALLERS LPAREN optExpr RPAREN     # callersExpr
    | var INC_OP                          # postIncOpExpr
    |<assoc=right> INC_OP var             # preIncOpExpr
    |<assoc=right> ADD_OP expr            # negPosExpr
@@ -1132,6 +1135,8 @@ K_DELETE   : 'delete' | 'DELETE' | 'Delete' ;
 K_RENAME   : 'rename' | 'RENAME' | 'Rename' ;
 
 K_MATCHES  : 'matches' | 'MATCHES' | 'Matches' ;
+
+K_CALLERS  : 'callers' | 'CALLERS' | 'Callers' ;
 
 K_SUMOF    : 'sumof' | 'SUMOF' | 'Sumof' | 'SumOf' | '\u2211' ;
 
