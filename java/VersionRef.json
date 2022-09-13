@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.14.26', date: d'2022-09-08',
+      issues: [ 475 ],
+      comment: 'Add "callers" function.'
+    },
     { version: '2.14.25', date: d'2022-08-31',
       issues: [ 471 ],
       comment: 'Allow "-ctrlenter" and "-ctrl" command line options.'
