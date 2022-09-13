@@ -218,6 +218,9 @@
  *	    #270: Make "loadMainProgramInfo" automatic now.
  *	08-Jul-2022 (rlwhitcomb)
  *	    #393: Cleanup imports.
+ *	12-Sep-2022 (rlwhitcomb)
+ *	    #443: Move charset and version checks in front of the stream markers; change the marker characters
+ *	    to "[. .]" and "{. .}".
  */
 package info.rlwhitcomb.tester;
 
@@ -842,13 +845,14 @@ public class Tester
 	 *		tests, and thus the line should be part of the test.
 	 */
 	private String platformAndVersionCheck(final String input) {
-	    if (input.startsWith("{")) {
-		int end = input.indexOf("}");
+	    if (input.startsWith("{.")) {
+		// {.version.}
+		int end = input.indexOf(".}");
 		if (end > 0) {
-		    String spec = input.substring(1, end);
+		    String spec = input.substring(2, end);
 		    if (spec.isEmpty())
 			return input;
-		    String canonLine = input.substring(end + 1);
+		    String canonLine = input.substring(end + 2);
 		    String[] parts = spec.split("\\,");
 		    if (parts.length == 1) {
 			// platform only
@@ -915,14 +919,14 @@ public class Tester
 		// Not a valid spec -- should this be an error?
 		return input;
 	    }
-	    else if (input.startsWith("[")) {
-		// [charset]...
-		int end = input.indexOf("]");
+	    else if (input.startsWith("[.")) {
+		// [.charset.]
+		int end = input.indexOf(".]");
 		if (end > 0) {
-		    String charsetName = input.substring(1, end);
+		    String charsetName = input.substring(2, end);
 		    if (charsetName.isEmpty())
 			return input;
-		    String canonLine = input.substring(end + 1);
+		    String canonLine = input.substring(end + 2);
 		    // "*" means any/all charsets (not necessary, but for annotation if desired)
 		    if (charsetName.equals("*")) {
 			return platformAndVersionCheck(canonLine);
@@ -1053,22 +1057,10 @@ public class Tester
 		    // and write the respective stream files
 		    String line = null;
 		    while ((line = canonReader.readLine()) != null) {
-			if (line.startsWith(">>")) {
-			    String outLine = platformAndVersionCheck(line.substring(2));
-			    files.writeErrorLine(outLine);
-			}
-			else if (line.startsWith(">")) {
-			    String outLine = platformAndVersionCheck(line.substring(1));
-			    files.writeOutputLine(outLine);
-			}
-			else if (line.startsWith("<")) {
-			    String outLine = platformAndVersionCheck(line.substring(1));
-			    files.writeInputLine(outLine);
-			}
 			// Comments are allowed (and ignored)
-			else if (line.startsWith("#") ||
-				 line.startsWith("!") ||
-				 line.startsWith("//")) {
+			if (line.startsWith("#") ||
+			    line.startsWith("!") ||
+			    line.startsWith("//")) {
 			    continue;
 			}
 			else if (line.startsWith("$")) {
@@ -1100,9 +1092,22 @@ public class Tester
 			    }
 			}
 			else if (!line.isEmpty()) {
-			    // Default is to treat the line as regular output
 			    String outLine = platformAndVersionCheck(line);
-			    files.writeOutputLine(outLine);
+			    if (outLine != null) {
+				if (outLine.startsWith(">>")) {
+				    files.writeErrorLine(outLine.substring(2));
+				}
+				else if (outLine.startsWith(">")) {
+				    files.writeOutputLine(outLine.substring(1));
+				}
+				else if (outLine.startsWith("<")) {
+				    files.writeInputLine(outLine.substring(1));
+				}
+				else {
+				    // Default is to write to standard output
+				    files.writeOutputLine(outLine);
+				}
+			    }
 			}
 			else {
 			    files.writeOutputLine("");
