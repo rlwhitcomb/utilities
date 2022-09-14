@@ -140,6 +140,8 @@
  *    #270: Change PID to a String.
  *  09-Jul-2022 (rlwhitcomb)
  *    #393: Cleanup imports.
+ *  12-Sep-2022 (rlwhitcomb)
+ *    #480: Change KMG conversion routine to return BigInteger.
  */
 package info.rlwhitcomb.util;
 
@@ -1371,7 +1373,7 @@ public final class Logging
 					valid = setLogFileMaxSize(Long.parseLong(value));
 				    }
 				    catch (NumberFormatException nfe) {
-					valid = setLogFileMaxSize(NumericUtil.convertKMGValue(value));
+					valid = setLogFileMaxSize(NumericUtil.convertKMGValue(value).longValue());
 				    }
 				}
 				else if (name.equalsIgnoreCase(LOG_FILE_KEEP)) {

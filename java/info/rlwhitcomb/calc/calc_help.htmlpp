@@ -432,11 +432,11 @@ h2 {
      If the value expression is omitted the value is initially set to <code>null</code>, but (obviously) can be changed later.
   <p>Numeric values can also be specified using "kilobyte" notation in one of two forms: multipliers of 1000, or multipliers of 1024 (2**10).
      These multipliers are simply appended to the number to automatically multiply by the given amount. The allowed suffixes are:
-     <code>Kb</code>, <code>Mb</code>, <code>Tb</code>, <code>Pb</code>, and <code>Eb</code> which all multiply by their respective
+     <code>Kb</code>, <code>Mb</code>, <code>Tb</code>, <code>Pb</code>, <code>Eb</code>, <code>Zb</code>, <code>Yb</code>, and <code>Bb</code>, which all multiply by their respective
      powers of 1000, while <code>Kib</code>, <code>Mib</code>, etc. multiply by the successive multiples of 1024. Note that these
      multiplier suffixes are case-insensitive.
   <p>For example:  <code>2Kb = 2000</code>, or <code>4Kib = 4096</code>. Any integer results can be formatted as these type of
-     values using the <code>@k</code> or <code>@K</code> formats (the latter giving all upper case results), and depending on the
+     values using the <code>@k</code> or <code>@K</code> formats (the latter giving long name suffixes), and depending on the
      <code>:SI</code>, <code>:BINARY</code>, or <code>:MIXED</code> mode directives in effect. These modes function as illustrated here:<br>
 <code><span style="color:grey;">&gt;</span> :mixed<br>
 <span style="color:green;">Units in mixed form.</span><br>
@@ -448,8 +448,8 @@ h2 {
 <span style="color:blue;">2000 @k</span><span style="color:grey;"> &#x21E8; </span><span style="color:green;">2.00 Kbytes</span><br>
 <span style="color:grey;">&gt;</span> :bin<br>
 <span style="color:green;">Units in binary.</span><br>
-<span style="color:grey;">&gt;</span> 2000@k<br>
-<span style="color:blue;">2000 @k</span><span style="color:grey;"> &#x21E8; </span><span style="color:green;">1.95 Kibytes</span>
+<span style="color:grey;">&gt;</span> 2000@K<br>
+<span style="color:blue;">2000 @K</span><span style="color:grey;"> &#x21E8; </span><span style="color:green;">1.95 Kibibytes</span>
 </code>
   <p>String constants are of four types: <i>simple</i> strings, constructed using either single- or double-quotes (or "smart"
      quotes: see below), <i>multiline</i> strings, constructed using a triple set of any quotes, as in
@@ -653,8 +653,8 @@ or<br>
      value as a date in ISO-8601 form (<code><i>yyyy</i>-<i>mm</i>-<i>dd</i></code>), while <code>@E</code> puts the value in U.S.
      format (<code><i>mm</i>/<i>dd</i>/<i>yyyy</i></code>), <code>@f</code> which formats the
      result as a fraction, while <code>@F</code> formats the result as a proper fraction (as in <code>15/8@F = 1 7/8</code>),
-     <code>@O</code> or <code>@D</code> which would make no difference in the outputs, and <code>@J</code> which doesn't make sense
-     given the output could have strings which shouldn't be case-shifted.
+     <code>@O</code> or <code>@D</code> which would make no difference in the outputs, <code>@J</code> which doesn't make sense
+     given the output could have strings which shouldn't be case-shifted, and <code>@K</code> which uses the long-format names instead of the short form.
 </div>
   <div class="center">
     <table style="margin-left:auto;margin-right:auto;">
@@ -686,7 +686,7 @@ or<br>
       <tr><td><code>@x</code></td><td>For integers and strings, format in hexadecimal form<br>as in <code style="color:blue;">456 @x</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">0x1c8</code><br>or <code style="color:blue;">'abc' @x</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">'\u0061\u0062\u0063'</code></td></tr>
       <tr><td><code>@o</code></td><td>For integers and strings, format in octal form<br>as in <code style="color:blue;">345 @o</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">0531</code><br>or <code style="color:blue;">'abc' @o</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">'\o141\o142\o143'</code></td></tr>
       <tr><td><code>@b</code></td><td>For integers and strings, format in binary form<br>as in <code style="color:blue;">231 @b</code><code style="grey;"> &#x21E8; </code><code style="color:green;">0b11100111</code><br>or <code style="color:blue;">'abc' @b</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">'\B01100001\B01100010\B01100011'</code></td></tr>
-      <tr><td><code>@k</code></td><td>Use kilobyte, megabyte, etc. notation for the value<br>(depending on the SI / BINARY mode)<br>as in <code style="color:blue;">2000 @k</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">1.95 Kibytes</code> (binary)<br>or <code style="color:blue;">2000 @k</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">2.00 Kbytes</code> (SI)</td></tr>
+      <tr><td><code>@k</code></td><td>Use kilobyte, megabyte, etc. notation for the value<br>(depending on the SI / BINARY mode)<br>as in <code style="color:blue;">2000 @k</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">1.95 Kibytes</code> (binary)<br>or <code style="color:blue;">2000 @k</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">2.00 Kbytes</code> (SI)<br>or <code style="color:blue;">2000 @K</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">2.00 Kilobytes</code> (SI)</td></tr>
       <tr><td><code>@w</code></td><td>Convert the (integer) value to words<br>as in <code style="color:blue;">235 @w</code><code style="color:gray;"> &#x21E8; </code><code style="color:green;">two hundred thirty-five</code></td></tr>
       <tr><td><code>@</code>[[<code>+</code>|<code>-</code>]<i>nn</i>][<code>,</code>|<code>_</code>]<code>%</code></td><td>Format as a percentage, with optional separators, and<br>optionally rounding to <i>nn</i> digits<br>as in <code style="color:blue;">10.08745 @2,%</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">1,008.75%</code></td></tr>
       <tr><td><code>@</code>[[<code>+</code>|<code>-</code>]<i>nn</i>][<code>,</code>|<code>_</code>]<code>$</code></td><td>Format as a currency value with the locale-specific currency symbol,<br>optionally setting separators and number of fraction digits<br>as in <code style="color:blue;">1500 @3,$</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">$1,500.000</code></td></tr>

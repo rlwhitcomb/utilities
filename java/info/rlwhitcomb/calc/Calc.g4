@@ -452,6 +452,8 @@
  *	    #453: Add "fileinfo" function.
  *	08-Sep-2022 (rlwhitcomb)
  *	    #475: New "callers" function.
+ *	13-Sep-2022 (rlwhitcomb)
+ *	    #480: Additional KB suffixes.
  */
 
 grammar Calc;
@@ -1784,7 +1786,7 @@ HEX_CONST
    ;
 
 KB_CONST
-   : INT ( [Kk] | [Mm] | [Gg] | [Tt] | [Pp] | [Ee] ) [Ii]? [Bb]?
+   : INT ( [Kk] | [Mm] | [Gg] | [Tt] | [Pp] | [Ee] | [Zz] | [Yy] | [Bb] ) ( [Ii] ? [Bb] ) ?
    ;
 
 // no leading zeros

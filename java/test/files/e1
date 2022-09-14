@@ -539,6 +539,7 @@ foundset.username='Don'
 1000**4@k
 :mixed
 1024**3@k
+2000**10@K
 
 100MB
 2EB
@@ -546,6 +547,7 @@ foundset.username='Don'
 900KB@k
 300PB
 450PiB
+320Yb @K
 
 :binary { settings.units }
 :si { settings.units }

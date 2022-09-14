@@ -35,6 +35,7 @@
  *  09-Jul-22 rlw #393: Cleanup imports.
  *  24-Aug-22 rlw #447: Add "D_200" value.
  *                 ---  Move I_MINUS_ONE into here from Calc.
+ *  12-Sep-22 rlw #480: Add "I_800" for range conversions.
  */
 package info.rlwhitcomb.util;
 
@@ -82,6 +83,9 @@ public final class Constants
 
 	/** A {@link BigInteger} value of one hundred. */
 	public static final BigInteger I_HUNDRED = BigInteger.valueOf(100);
+
+	/** A {@link BigInteger} value of 800. */
+	public static final BigInteger I_800 = BigInteger.valueOf(800);
 
 	/** A {@link BigInteger} value of one thousand. */
 	public static final BigInteger I_THOUSAND = BigInteger.valueOf(1_000L);

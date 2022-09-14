@@ -3,6 +3,11 @@
 /*======================*/
 
 [
+    { version: '2.14.28', date: d'2022-09-13',
+      issues: [ 480 ],
+      comment: '''Extend the range of "KB" notation out to the currently defined limits;
+\t change "@K" to use long form suffix.'''
+    },
     { version: '2.14.26', date: d'2022-09-08',
       issues: [ 475 ],
       comment: 'Add "callers" function.'

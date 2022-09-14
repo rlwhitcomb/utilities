@@ -665,6 +665,9 @@
  *	    #453: Return empty object for FileInfo if it doesn't exist.
  *	08-Sep-2022 (rlwhitcomb)
  *	    #475: Add "caller(n)" function for doing stack tracing.
+ *	12-Sep-2022 (rlwhitcomb)
+ *	    #480: Update KB constant range to beyond exabytes (and extend to BigInteger).
+ *	    Change '@K' to format using long names.
  */
 package info.rlwhitcomb.calc;
 
@@ -2387,17 +2390,11 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			break;
 
 		    case 'K':
-			toUpperCase = true;
-			// fall through
 		    case 'k':
 			iValue = toIntegerValue(this, result, settings.mc, ctx);
-			try {
-			    long lValue = iValue.longValueExact();
-			    valueBuf.append(NumericUtil.formatToRange(lValue, settings.units));
-			}
-			catch (ArithmeticException ae) {
-			    throw new CalcExprException(ae, ctx);
-			}
+			valueBuf.append(formatChar == 'K'
+			  ? NumericUtil.formatToRangeLong(iValue, settings.units)
+			  : NumericUtil.formatToRange(iValue, settings.units));
 			break;
 
 		    case 'W':
@@ -6313,7 +6310,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitKbValue(CalcParser.KbValueContext ctx) {
 	    String value = ctx.KB_CONST().getText();
-	    return BigInteger.valueOf(NumericUtil.convertKMGValue(value));
+	    return NumericUtil.convertKMGValue(value);
 	}
 
 	@Override

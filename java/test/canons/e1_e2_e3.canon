@@ -559,12 +559,14 @@
 >1000 ** 4 @k -> 1.00 Tbytes
 >Units in “mixed” form.
 >1024 ** 3 @k -> 1.00 Gbytes
+>2000 ** 10 @K -> 827181 Brontobytes
 >100MB -> 100000000
 >2EB -> 2000000000000000000
 >2EiB -> 2305843009213693952
 >900KB @k -> 0.86 Mbytes
 >300PB -> 300000000000000000
 >450PiB -> 506654958079180800
+>320Yb @K -> 265 Yottabytes
 >Units in “binary”.
 >settings.units -> "BINARY"
 >Units in “mixed” form.
