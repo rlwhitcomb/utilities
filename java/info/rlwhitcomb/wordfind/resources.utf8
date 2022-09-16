@@ -37,6 +37,8 @@
 #	    New help messages for "-statistics".
 #	06-Sep-2022 (rlwhitcomb)
 #	    #29: Remove unnecessary error messages, and obsolete help.
+#	09-Sep-2022 (rlwhitcomb)
+#	    #478: New message for "contains" pattern.
 #
 
 exception		= Error: %1$s from %2$s%n
@@ -45,6 +47,7 @@ validWords		= Valid words for: %1$s%2$s
 additional		= " (including additional)"
 beginningWith		= " beginning with "
 containing		= " containing "
+containingPattern	= " containing pattern "
 endingWith		= " ending with "
 section			= %1$d letter words (%2$d):
 

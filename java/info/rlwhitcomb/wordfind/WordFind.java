@@ -105,6 +105,8 @@
  *      06-Sep-2022 (rlwhitcomb)
  *          #29: Switch to new lookup implemented in Dictionary class; remove old code;
  *          remove unnecessary options and errors.
+ *      09-Sep-2022 (rlwhitcomb)
+ *          #478: Implement patterns for "-contains" value.
  */
 package info.rlwhitcomb.wordfind;
 
@@ -120,6 +122,8 @@ import java.io.*;
 import java.util.List;
 import java.util.*;
 import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static info.rlwhitcomb.util.ConsoleColor.Code.*;
 
@@ -141,6 +145,9 @@ public class WordFind implements Application
 
     /** The "contains" marker character (also used for "begins" and "ends"). */
     public static final char CONTAINS_MARKER = '-';
+
+    /** A pattern to recognize (and replace) all "wild" characters. */
+    private static final String WILD_PATTERN = "[ \\._\\?]";
 
 
     /**
@@ -186,6 +193,9 @@ public class WordFind implements Application
 
     /** Optional "Contains" value. */
     private static Optional<String> containsValue = Optional.empty();
+
+    /** The "contains" pattern (if any). */
+    private static Pattern containsPattern;
 
     /** Whether next value is supposed to be an "Ends With" value. */
     private static boolean endsWith = false;
@@ -309,6 +319,26 @@ public class WordFind implements Application
     }
 
     /**
+     * Convert a "wild" input string ({@link #BLANK_MARKER} for wild chars) to a regex pattern.
+     *
+     * @param input The input "wild" string.
+     * @return      A pattern derived from it.
+     */
+    private static Pattern convertToPattern(final String input) {
+        StringBuilder buf = new StringBuilder(input.length());
+
+        for (int i = 0; i < input.length(); i++) {
+            char ch = input.charAt(i);
+            if (ch == BLANK_MARKER)
+                buf.append('.');
+            else
+                buf.append(ch);
+        }
+
+        return Pattern.compile(buf.toString());
+    }
+
+    /**
      * Highlight a word making special emphasis on the blank substitutions and the
      * "contained" values.
      * @param adornedWord The word to highlight with the {@link #BLANK_MARKER} and
@@ -364,9 +394,10 @@ public class WordFind implements Application
         return v2 - v1;
     };
 
+
     /**
      * Mark around a string in the adorned word buffer, starting at the given index (into the
-     * unadorned string), using the {@link #CONTAINS_MARKER}.
+     * unadorned string), using the {@link #CONTAINS_MARKER}, or {@link #BLANK_MARKER}.
      *
      * @param buf   The buffer to edit.
      * @param index The position at which to insert the string (negative from end of string).
@@ -376,30 +407,59 @@ public class WordFind implements Application
         int len = str.length();
         int pos;
 
+        // Normalize a negative starting index to the beginning of the string
         if (index >= 0)
             pos = index;
         else
             pos = buf.length() + index;
 
-        // Move from 0 past the adornments to the desired position
-        // charPos is the index into the buffer
-        // pos is the index into the unadorned string (relates to "index")
-        int charPos = 0;
-        for (int i = 0; i < pos; i++) {
-            if (charPos >= buf.length())
-                break;
-
-            char ch = buf.charAt(charPos);
-            if (ch == BLANK_MARKER)
-                charPos += 3;
-            else if (ch == CONTAINS_MARKER)
-                charPos += 2;
-            else
-                charPos++;
+        // "Adorn" the whole string so moving through it is easy
+        for (int i = 0; i < buf.length(); i += 3) {
+            char ch = buf.charAt(i);
+            if (ch != CONTAINS_MARKER && ch != BLANK_MARKER) {
+                buf.insert(i, '.');
+                buf.insert(i + 2, '.');
+            }
         }
 
-        buf.insert(charPos, CONTAINS_MARKER);
-        buf.insert(charPos + len + 1, CONTAINS_MARKER);
+        int charPos = pos * 3;
+
+        // Now we march along the "contains" string in "str" and correctly mark the results
+        // according to whether they match a letter ("contains") or a blank
+        // Cases:
+        // 1. letter in str and nothing in buf  -> mark buf as "contains"
+        // 2. letter in str and blank in buf    -> leave as "blank"
+        // 3. letter in str and contains in buf -> leave as "contains"
+        // 4. blank in str and nothing in buf   -> leave as nothing
+        // 5. blank in str and blank in buf     -> leave as "blank"
+        // 6. blank in str and contains in buf  -> leave as "contains"
+
+        for (int i = 0; i < len; i++) {
+            char pat = str.charAt(i);
+            char chr = buf.charAt(charPos);
+            if (pat != BLANK_MARKER && chr == '.') {
+                buf.setCharAt(charPos, CONTAINS_MARKER);
+                buf.setCharAt(charPos + 2, CONTAINS_MARKER);
+            }
+            charPos += 3;
+        }
+
+        // Now go back and remove the "nothing" adornments, and any duplicated ones
+        // (indicating a run of the same type)
+        for (int i = 0; i < buf.length(); i++) {
+            char ch = buf.charAt(i);
+            if (ch == '.') {
+                buf.deleteCharAt(i);
+                buf.deleteCharAt(i + 1);
+            }
+            else if (ch == BLANK_MARKER || ch == CONTAINS_MARKER) {
+                if (i < buf.length() - 1 && buf.charAt(i + 1) == ch) {
+                    buf.deleteCharAt(i);
+                    buf.deleteCharAt(i);
+                    i--;
+                }
+            }
+        }
     }
 
     /**
@@ -409,15 +469,15 @@ public class WordFind implements Application
      */
     private static void setColors(final boolean light) {
         if (light) {
-            headingColor = GREEN_UNDERLINED;
-            infoColor = CYAN_BOLD;
-            errorColor = RED_UNDERLINED;
+            headingColor  = GREEN_UNDERLINED;
+            infoColor     = CYAN_BOLD;
+            errorColor    = RED_UNDERLINED;
             wildcardColor = RED_BRIGHT;
             containsColor = GREEN_BOLD;
         } else {
-            headingColor = GREEN_UNDERLINED_BRIGHT;
-            infoColor = CYAN;
-            errorColor = RED_UNDERLINED_BRIGHT;
+            headingColor  = GREEN_UNDERLINED_BRIGHT;
+            infoColor     = CYAN;
+            errorColor    = RED_UNDERLINED_BRIGHT;
             wildcardColor = RED_BOLD;
             containsColor = YELLOW_BOLD;
         }
@@ -688,9 +748,18 @@ public class WordFind implements Application
             }
             if (containsValue.isPresent()) {
                 String containsString = containsValue.get();
-                int containsIndex = word.indexOf(containsString);
-                if (containsIndex < 0)
-                    continue;
+                int containsIndex;
+                if (containsPattern != null) {
+                    Matcher m = containsPattern.matcher(word);
+                    if (!m.find())
+                        continue;
+                    containsIndex = m.start();
+                }
+                else {
+                    containsIndex = word.indexOf(containsString);
+                    if (containsIndex < 0)
+                        continue;
+                }
                 mark(adornedWord, containsIndex, containsString);
             }
             if (endingValue.isPresent()) {
@@ -781,6 +850,7 @@ public class WordFind implements Application
         beginningValue = Optional.empty();
         contains = false;
         containsValue = Optional.empty();
+        containsPattern = null;
         endsWith = false;
         endingValue = Optional.empty();
         needMinWordSize = false;
@@ -796,13 +866,13 @@ public class WordFind implements Application
             } else if (arg.startsWith("/")) {
                 processOption("/", arg.substring(1), ignoreOptions);
             } else if (beginsWith) {
-                beginningValue = Optional.of(arg);
+                beginningValue = Optional.of(arg.replaceAll(WILD_PATTERN, ""));
                 beginsWith = false;
             } else if (contains) {
-                containsValue = Optional.of(arg);
+                containsValue = Optional.of(arg.replaceAll(WILD_PATTERN, Character.toString(BLANK_MARKER)));
                 contains = false;
             } else if (endsWith) {
-                endingValue = Optional.of(arg);
+                endingValue = Optional.of(arg.replaceAll(WILD_PATTERN, ""));
                 endsWith = false;
             } else if (needMinWordSize) {
                 try {
@@ -862,7 +932,7 @@ public class WordFind implements Application
         // to see if they are valid.  But for one letter "words" just buffer them and process
         // as a set of letters.
         for (String arg : argWords) {
-            String word = lowerCase ? arg.toLowerCase() : arg.toUpperCase();
+            String word = (lowerCase ? arg.toLowerCase() : arg.toUpperCase()).replaceAll(WILD_PATTERN, Character.toString(BLANK_MARKER));
             // For one-letter case (--letter or word has length one), buffer to the end
             if (letter || word.length() == 1) {
                 letters.append(word);
@@ -899,8 +969,15 @@ public class WordFind implements Application
             if (containsValue.isPresent()) {
                 containsValue = containsValue.map(caseMapper);
                 String containsString = containsValue.get();
-                sb.append(Intl.getString("wordfind#containing")).append(quote(containsString));
-                letters.append(containsString);
+                if (containsString.indexOf(BLANK_MARKER) >= 0) {
+                    sb.append(Intl.getString("wordfind#containingPattern")).append(quote(containsString));
+                    containsPattern = convertToPattern(containsString);
+                    letters.append(getLettersOnly(containsString));
+                }
+                else {
+                    sb.append(Intl.getString("wordfind#containing")).append(quote(containsString));
+                    letters.append(containsString);
+                }
             }
             if (endingValue.isPresent()) {
                 endingValue = endingValue.map(caseMapper);

@@ -34,7 +34,8 @@
  *			Search for valid words using the letter counts.
  *			Further refactoring.
  *  05-Sep-22		Properly deal with wild card letters.
- *  06-Sep-22           Slight optimization if there are no wildcards.
+ *  06-Sep-22		Slight optimization if there are no wildcards.
+ *  15-Sep-22 rlw #478:	Also allow '_' as wild character.
  */
 package info.rlwhitcomb.wordfind;
 
@@ -147,7 +148,7 @@ public class Dictionary
 	 * @return   Whether it is "wild"?
 	 */
 	public static boolean isWild(final char ch) {
-	    return (ch == ' ') || (ch == '?') || (ch == '.');
+	    return (ch == ' ') || (ch == '?') || (ch == '.') || (ch == '_');
 	}
 
 
