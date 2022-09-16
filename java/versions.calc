@@ -9,8 +9,8 @@
     :echo 'Version  Comment'
     '-------  ----------------------------------------------'
     loop v over versions {
-        if v.base { `B${v.base@6s}  ${v.comment}`   }
-        else      { `${v.version@7s}  ${v.comment}` }
+        if v.base { `${CYAN_BRIGHT}B${v.base@6s}$RESET  ${v.comment}`   }
+        else      { `${YELLOW_BRIGHT}${v.version@7s}$RESET  ${v.comment}` }
     }
     '-------  ----------------------------------------------'
 }
