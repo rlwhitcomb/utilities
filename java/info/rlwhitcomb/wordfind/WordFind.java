@@ -107,6 +107,8 @@
  *          remove unnecessary options and errors.
  *      09-Sep-2022 (rlwhitcomb)
  *          #478: Implement patterns for "-contains" value.
+ *      15-Sep-2022 (rlwhitcomb)
+ *          #479: Allow ":option" for options in REPL mode.
  */
 package info.rlwhitcomb.wordfind;
 
@@ -865,6 +867,8 @@ public class WordFind implements Application
                 processOption("-", arg.substring(1), ignoreOptions);
             } else if (arg.startsWith("/")) {
                 processOption("/", arg.substring(1), ignoreOptions);
+            } else if (ignoreOptions && arg.startsWith(":")) {
+                processOption(":", arg.substring(1), ignoreOptions);
             } else if (beginsWith) {
                 beginningValue = Optional.of(arg.replaceAll(WILD_PATTERN, ""));
                 beginsWith = false;
