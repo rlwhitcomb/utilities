@@ -454,6 +454,8 @@
  *	    #475: New "callers" function.
  *	13-Sep-2022 (rlwhitcomb)
  *	    #480: Additional KB suffixes.
+ *	14-Sep-2022 (rlwhitcomb)
+ *	    #485: Add "mod" operator (multiply operator).
  */
 
 grammar Calc;
@@ -642,7 +644,7 @@ expr
    | expr '!'                            # factorialExpr
    |<assoc=right> expr POW_OP expr       # powerExpr
    |<assoc=right> expr POWERS            # powerNExpr
-   | expr MULT_OP expr                            # multiplyExpr
+   | expr ( MULT_OP | K_MOD ) expr                # multiplyExpr
    | expr ADD_OP expr                             # addExpr
    | expr SHIFT_OP expr                           # shiftExpr
    | expr SPACE_OP expr                           # spaceshipExpr
@@ -971,6 +973,8 @@ DATE_CONST
 /*
  * Predefined function names
  */
+
+K_MOD      : 'mod' | 'MOD' | 'Mod' ;
 
 K_HAS      : 'has' | 'HAS' | 'Has' ;
 

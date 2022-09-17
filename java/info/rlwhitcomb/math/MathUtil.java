@@ -61,6 +61,8 @@
  *	    #273: Move to "math" package.
  *	08-Jul-2022 (rlwhitcomb)
  *	    #393: Cleanup imports.
+ *	15-Sep-2022 (rlwhitcomb)
+ *	    #485: Add "modulus" function.
  */
 package info.rlwhitcomb.math;
 
@@ -1599,6 +1601,24 @@ public final class MathUtil
 	 */
 	public static BigInteger floor(final BigDecimal value) {
 	    return value.setScale(0, RoundingMode.FLOOR).unscaledValue();
+	}
+
+	/**
+	 * Calculate the value of {@code x mod y := x - y * floor(x / y)} for given
+	 * decimal x and y values. By definition, to avoid division by zero, the
+	 * value of {@code x mod 0 := x}.
+	 *
+	 * @param x   As above, the value to be operated on.
+	 * @param y   The modulus value.
+	 * @param mc  The precision to use.
+	 * @return    The value of {@code x mod y}.
+	 */
+	public static BigDecimal modulus(final BigDecimal x, final BigDecimal y, final MathContext mc) {
+	    if (y.equals(BigDecimal.ZERO))
+		return x;
+
+	    BigDecimal floorValue = x.divide(y, mc).setScale(0, RoundingMode.FLOOR);
+	    return x.subtract(y.multiply(floorValue));
 	}
 
 }

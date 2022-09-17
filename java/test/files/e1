@@ -266,6 +266,29 @@ ty\=6
 10\3
 5\6
 
+# "mod" and remainder operators
+21 % 4
+21 mod 4
+-21 % 4
+-21 mod 4
+-21 % -4
+-21 mod -4
+21 % -4
+21 mod -4
+
+:frac on {
+g1 = 2/3
+g2 = 9/7
+g1 % g2
+g1 mod g2
+-g1 % g2
+-g1 mod g2
+g1 % -g2
+g1 mod -g2
+-g1 % -g2
+-g1 mod -g2
+}
+
 # Bit and logical operators
 127 | 128
 15 & 7

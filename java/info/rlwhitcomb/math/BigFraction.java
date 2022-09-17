@@ -84,6 +84,9 @@
  *	    #273: Move to "math" package.
  *	08-Jul-2022 (rlwhitcomb)
  *	    #393: Cleanup imports.
+ *	15-Sep-2022 (rlwhitcomb)
+ *	    #485: Make the "remainder" function public.
+ *	    #485: Add "floor" and "ceil" functions.
  */
 package info.rlwhitcomb.math;
 
@@ -792,12 +795,12 @@ public class BigFraction extends Number
 	}
 
 	/**
-	 * Compute the remainder after division (for the {@code modulus} function).
+	 * Compute the remainder after division (for the {@code remainder} function).
 	 *
 	 * @param result The result after division.
 	 * @return       What the non-whole-number part is.
 	 */
-	private static BigFraction remainder(final BigFraction result) {
+	private static BigFraction getRemainder(final BigFraction result) {
 	    if (result.isWholeNumber())
 		return BigFraction.ZERO;
 	    else if (result.numer.abs().compareTo(result.denom) >= 0) {
@@ -817,14 +820,14 @@ public class BigFraction extends Number
 	 * @param value	The whole number to divide by.
 	 * @return	The result of {@code this.n % (this.d * value)}.
 	 */
-	public BigFraction modulus(final long value) {
+	public BigFraction remainder(final long value) {
 	    if (value == 0L)
 		throw new ArithmeticException(Intl.getString("util#fraction.divideByZero"));
 	    else if (value == 1L)
 		return this;
 
 	    BigFraction result = new BigFraction(numer, denom.multiply(BigInteger.valueOf(value)));
-	    return remainder(result);
+	    return getRemainder(result);
 	}
 
 	/**
@@ -834,14 +837,14 @@ public class BigFraction extends Number
 	 * @param value	The whole number to divide by.
 	 * @return	The result of {@code this.n % (this.d * value)}.
 	 */
-	public BigFraction modulus(final BigInteger value) {
+	public BigFraction remainder(final BigInteger value) {
 	    if (value.equals(BigInteger.ZERO))
 		throw new ArithmeticException(Intl.getString("util#fraction.divideByZero"));
 	    else if (value.equals(BigInteger.ONE))
 		return this;
 
 	    BigFraction result = new BigFraction(numer, denom.multiply(value));
-	    return remainder(result);
+	    return getRemainder(result);
 	}
 
 	/**
@@ -850,7 +853,7 @@ public class BigFraction extends Number
 	 * @param other	The fraction to divide by.
 	 * @return	The result of {@code (this.n/this.d) % (other.n/other.d)}.
 	 */
-	public BigFraction modulus(final BigFraction other) {
+	public BigFraction remainder(final BigFraction other) {
 	    if (other.equals(ZERO))
 		throw new ArithmeticException(Intl.getString("util#fraction.divideByZero"));
 	    else if (equals(ZERO))
@@ -858,9 +861,19 @@ public class BigFraction extends Number
 	    else if (other.equals(ONE))
 		return this;
 	    else if (equals(ONE))
-		return remainder(other.reciprocal());
+		return getRemainder(other.reciprocal());
 
-	    return remainder(new BigFraction(numer.multiply(other.denom), denom.multiply(other.numer)));
+	    return getRemainder(new BigFraction(numer.multiply(other.denom), denom.multiply(other.numer)));
+	}
+
+	/**
+	 * Compute the modulus of two fractions, which is {@code x mod y := x - y * floor(x / y)}.
+	 *
+	 * @param y  Fraction of the modulus value.
+	 * @return   Result of {@code x mod y}.
+	 */
+	public BigFraction modulus(final BigFraction y) {
+	    return subtract(y.multiply(divide(y).floor()));
 	}
 
 	/**
@@ -908,6 +921,24 @@ public class BigFraction extends Number
 	 */
 	public BigFraction abs() {
 	    return (numer.signum() < 0) ? negate() : this;
+	}
+
+	/**
+	 * "Floor" function, which will be the largest integer &le; this value.
+	 *
+	 * @return An integral fraction &le; this value.
+	 */
+	public BigFraction floor() {
+	    return isWholeNumber() ? this : new BigFraction(MathUtil.floor(toDecimal()));
+	}
+
+	/**
+	 * "Ceiling" function, which will be the smallest integer &ge; this value.
+	 *
+	 * @return An integral fraction &ge; this value.
+	 */
+	public BigFraction ceil() {
+	    return isWholeNumber() ? this : new BigFraction(MathUtil.ceil(toDecimal()));
 	}
 
 	/**

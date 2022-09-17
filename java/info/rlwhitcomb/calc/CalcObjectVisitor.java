@@ -668,6 +668,9 @@
  *	12-Sep-2022 (rlwhitcomb)
  *	    #480: Update KB constant range to beyond exabytes (and extend to BigInteger).
  *	    Change '@K' to format using long names.
+ *	14-Sep-2022 (rlwhitcomb)
+ *	    #485: Add "mod" operator to multiply operator.
+ *	    Implement "ceil" and "floor" for fractions.
  */
 package info.rlwhitcomb.calc;
 
@@ -3624,7 +3627,11 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    Object e1 = evaluate(ctx1);
 	    Object e2 = evaluate(ctx2);
 
-	    String op = ctx.MULT_OP().getText();
+	    String op;
+	    if (ctx.K_MOD() == null)
+		op = ctx.MULT_OP().getText();
+	    else
+		op = "mod";
 
 	    try {
 		if (settings.rationalMode) {
@@ -3646,6 +3653,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			case "\u2216":
 			    return f1.divide(f2);
 			case "%":
+			    return f1.remainder(f2);
+			case "mod":
 			    return f1.modulus(f2);
 			default:
 			    throw new UnknownOpException(op, ctx);
@@ -3670,6 +3679,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			case "\\":
 			case "\u2216":
 			case "%":
+			case "mod":
+			    // This one in particular potentially could be done with the same definition as for reals
 			default:
 			    throw new UnknownOpException(op, ctx);
 		    }
@@ -3708,6 +3719,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			    return fixupToInteger(d1.divideToIntegralValue(d2, settings.mcDivide));
 			case "%":
 			    return fixupToInteger(d1.remainder(d2, settings.mcDivide));
+			case "mod":
+			    return fixupToInteger(MathUtil.modulus(d1, d2, settings.mcDivide));
 			default:
 			    throw new UnknownOpException(op, ctx);
 		    }
@@ -4109,16 +4122,30 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitCeilExpr(CalcParser.CeilExprContext ctx) {
-	    BigDecimal e = getDecimalValue(ctx.expr1().expr());
+	    if (settings.rationalMode) {
+		BigFraction f = getFractionValue(ctx.expr1().expr());
 
-	    return MathUtil.ceil(e);
+		return f.ceil();
+	    }
+	    else {
+		BigDecimal e = getDecimalValue(ctx.expr1().expr());
+
+		return MathUtil.ceil(e);
+	    }
 	}
 
 	@Override
 	public Object visitFloorExpr(CalcParser.FloorExprContext ctx) {
-	    BigDecimal e = getDecimalValue(ctx.expr1().expr());
+	    if (settings.rationalMode) {
+		BigFraction f = getFractionValue(ctx.expr1().expr());
 
-	    return MathUtil.floor(e);
+		return f.floor();
+	    }
+	    else {
+		BigDecimal e = getDecimalValue(ctx.expr1().expr());
+
+		return MathUtil.floor(e);
+	    }
 	}
 
 	@Override
@@ -6554,8 +6581,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			    result = f1.divide(f2);
 			    break;
 			case "%=":
-			    // ??? remainder of fraction / fraction is always 0
-			    result = BigFraction.ZERO;
+			    result = f1.remainder(f2);
 			    break;
 			default:
 			    throw new UnknownOpException(op, ctx);
