@@ -3,7 +3,7 @@
 /*======================*/
 
 [
-    { version: '2.14.30', date: d'2022-09-1r7,
+    { version: '2.14.30', date: d'2022-09-17',
       issues: [ 485 ],
       comment: 'Add "mod" operator; fix "%" to be consistently "remainder"; implement "floor" and "ceil" for fractions.'
     },
