@@ -36,15 +36,11 @@ import java.io.FilenameFilter;
 
 
 /**
- * Some test programs generate different line endings on different
- * platforms, complicating the creation of simple "canon" files for
- * comparison. This class helps to deal with that by converting all
- * output to a Unix/Linux standard of just using linefeed (0x0A)
- * characters as the line terminators.
- * <p> The logic is all in the {@link #write(int)} method which
- * maintains a flag such that any CRs seen set the flag, which
- * will output the next char if it is a linefeed, otherwise it
- * will output a linefeed instead. Either way the flag is reset.
+ * A {@link FileFilter} and {@link FilenameFilter} for normal wildcard file
+ * name strings (containing {@code '*'} or {@code '?'} characters).
+ * <p> Currently, wildcards are only supported in file names, not
+ * directory names. This may change in the future, or can be worked
+ * around in the calling code.
  */
 public class WildcardFilter implements FileFilter, FilenameFilter
 {
