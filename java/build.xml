@@ -322,6 +322,8 @@
 		Tweak build version construction.
 	    19-Aug-2022 (rlwhitcomb)
 		Quiet down the Javadoc output.
+	    22-Sep-2022 (rlwhitcomb)
+		#486: Add "sha1" scripts.
 
      ========================================================================== -->
 
@@ -498,6 +500,8 @@
 		<include name="os.bat"                      if:true="${on.windows}"/>
 		<include name="ppj"                     unless:true="${on.windows}"/>
 		<include name="ppj.bat"                     if:true="${on.windows}"/>
+		<include name="sha1"                    unless:true="${on.windows}"/>
+		<include name="sha1.bat"                    if:true="${on.windows}"/>
 		<include name="sha256"                  unless:true="${on.windows}"/>
 		<include name="sha256.bat"                  if:true="${on.windows}"/>
 		<include name="sha512"                  unless:true="${on.windows}"/>
