@@ -1,7 +1,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2020-2021 Roger L. Whitcomb.
+# Copyright (c) 2020-2022 Roger L. Whitcomb.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -38,12 +38,15 @@
 #	    Tweak final messages.
 #	12-Apr-2021 (rlwhitcomb)
 #	    Add messages.
+#	23-Sep-2022 (rlwhitcomb)
+#	    #52: New messages.
 #
 
 #
 # From CompareFiles.java
 #
 compare.unknownOption		= Unknown option: "%1$s"!
+compare.notEnoughArguments	= There should be at least two arguments given!
 
 compare.comparingTwo		= Comparing "%1$s" to "%2$s" ...
 compare.doesNotCompare		= File "%1$s" does not compare to "%2$s"!
@@ -54,51 +57,60 @@ compare.sourceNotFile		= Source file "%1$s" is not a regular file!
 compare.sourceNotExist		= Source file "%1$s" does not exist!
 compare.targetNotFile		= Target file "%1$s" is not a regular file!
 compare.targetNotExist		= Target file "%1$s" does not exist!
+compare.inputNotReadable	= Input file "%1$s" cannot be read!
+compare.ioError			= Error reading file "%1$s": %2$s
+compare.consoleNotAvailable	= The system console is not available to read from!
 compare.addingPath		= Adding path "%1$s" ...
 compare.noFilesCompared		= No files compared.
 compare.oneFileCompared		= One file compared, no mismatch.
-compare.filesCompared		= %1$,d files compared, no mismatches.
-compare.oneMismatch		= One file compared, not a match.
-compare.filesOneMismatch	= %1$,d files compared, one mismatch.
-compare.mismatches		= %1$,d files compared, %2$,d mismatches.
+compare.filesCompared		= %1$s (%2$,d) files compared, no mismatches.
+compare.oneMismatch		= One file compared, NOT a match.
+compare.filesOneMismatch	= %1$s (%2$,d) files compared, one mismatch.
+compare.mismatches		= %1$s (%2$,d) files compared, %3$s (%4$,d) mismatches.
 compare.memoryUse		= %1$,d bytes of memory used.
 
-compare.help1			= Usage: java CompareFiles [options] source target
-compare.help2			= ""
-compare.help3			= "  where 'options' can be:"
-compare.help4			= \t-sync\tdo a two-way compare of directories to check
-compare.help5			= \t\tfor missing/extra files on both sides
-compare.help6			= \t  or -sync_mode, -sync-mode, -syncmode, or -syn
-compare.help7			= \t  (default)
-compare.help8			= \t-copy\tdo a simple compare of source to target, which
-compare.help9			= \t\tmeans files in the target that are not in the source
-compare.help10			= \t\twill not be noted (source and target should be copies)
-compare.help11			= \t  or -copy_mode, -copy-mode, -copymode, or -c
-compare.help12			= ""
-compare.help13			= \t-super\tset 'super verbose' level of output
-compare.help14			= \t  or -super_verbose, -super-verbose, -superverbose, or -sup
-compare.help15			= \t-verbose\tset 'verbose' level of output
-compare.help16			= \t  or -verb, or -v
-compare.help17			= \t-normal\tset 'normal' level of output (default)
-compare.help18			= \t  or -norm, or -n
-compare.help19			= \t-quiet\tset 'quiet' level of output
-compare.help20			= \t  or -q
-compare.help21			= \t-silent\tset 'silent' level of output (nothing)
-compare.help22			= \t  or -s
-compare.help23			= \t-debug\tset 'debug' level of output (maximum)
-compare.help24			= \t  or -deb, or -d
-compare.help25			= \t-recurse\tdescend into subdirectories
-compare.help26			= \t  or -recursive, -rec, or -r
-compare.help27			= \t-continue\tcontinue processing files even when a mismatch
-compare.help28			= \t\toccurs (default)
-compare.help29			= \t  or -continue_after_error, -continue-after-error,
-compare.help30			= \t     -continueaftererror, -cont, or -con
-compare.help31			= \t-break\tstop processing files on the first mismatch
-compare.help32			= \t  or -break_on_error, -break-on-error, -breakonerror,
-compare.help33			= \t     -brk, -br, or -b
-compare.help34			= \t-help\tdisplay this message
-compare.help35			= \t  or -h, or -?
-compare.help36			= \t-version\tdisplay program version/copyright information
-compare.help37			= \t  or -vers, or -ver
-compare.help38			= ""
+compare.help1			= Usage: java CompareFiles [options] source+ target
+compare.help2			= "   or: java CompareFiles [options] @file"
+compare.help3			= "   or: java CompareFiles [options] @"
+compare.help4			= ""
+compare.help5			= "  where 'source' can be a wildcard file spec or multiple"
+compare.help6			= \tfiles or directories to compare against the
+compare.help7			= \tsame files or directories in the target location.
+compare.help8			= ""
+compare.help9			= "  and where 'options' can be:"
+compare.help10			= \t-sync\tdo a two-way compare of directories to check
+compare.help11			= \t\tfor missing/extra files on both sides
+compare.help12			= \t  or -sync_mode, -sync-mode, -syncmode, or -syn
+compare.help13			= \t  (default)
+compare.help14			= \t-copy\tdo a simple compare of source to target, which
+compare.help15			= \t\tmeans files in the target that are not in the source
+compare.help16			= \t\twill not be noted (source and target should be copies)
+compare.help17			= \t  or -copy_mode, -copy-mode, -copymode, or -c
+compare.help18			= ""
+compare.help19			= \t-super\tset 'super verbose' level of output
+compare.help20			= \t  or -super_verbose, -super-verbose, -superverbose, or -sup
+compare.help21			= \t-verbose\tset 'verbose' level of output
+compare.help22			= \t  or -verb, or -v
+compare.help23			= \t-normal\tset 'normal' level of output (default)
+compare.help24			= \t  or -norm, or -n
+compare.help25			= \t-quiet\tset 'quiet' level of output
+compare.help26			= \t  or -q
+compare.help27			= \t-silent\tset 'silent' level of output (nothing)
+compare.help28			= \t  or -s
+compare.help29			= \t-debug\tset 'debug' level of output (maximum)
+compare.help30			= \t  or -deb, or -d
+compare.help31			= \t-recurse\tdescend into subdirectories
+compare.help32			= \t  or -recursive, -rec, or -r
+compare.help33			= \t-continue\tcontinue processing files even when a mismatch
+compare.help34			= \t\toccurs (default)
+compare.help35			= \t  or -continue_after_error, -continue-after-error,
+compare.help36			= \t     -continueaftererror, -cont, or -con
+compare.help37			= \t-break\tstop processing files on the first mismatch
+compare.help38			= \t  or -break_on_error, -break-on-error, -breakonerror,
+compare.help39			= \t     -brk, -br, or -b
+compare.help40			= \t-help\tdisplay this message
+compare.help41			= \t  or -h, or -?
+compare.help42			= \t-version\tdisplay program version/copyright information
+compare.help43			= \t  or -vers, or -ver
+compare.help44			= ""
 

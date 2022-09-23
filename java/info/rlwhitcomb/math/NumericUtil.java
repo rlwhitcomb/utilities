@@ -167,6 +167,8 @@
  *	    #393: Cleanup imports.
  *	11-Sep-2022 (rlwhitcomb)
  *	    #480: Extend range of byte values; switch to BigInteger. Add "formatToRangeLong".
+ *	23-Sep-2022 (rlwhitcomb)
+ *	    #52: Add overload of "convertToWords" for long values.
  */
 package info.rlwhitcomb.math;
 
@@ -886,6 +888,17 @@ public final class NumericUtil
 	    return buf.toString();
 	}
 
+
+	/**
+	 * Convert a long number to words.
+	 *
+	 * @param	value	The value to convert.
+	 * @return		The value converted to its English name.
+	 * @see	#convertToWords(BigInteger)
+	 */
+	public static String convertToWords(final long value) {
+	    return convertToWords(BigInteger.valueOf(value));
+	}
 
 	/**
 	 * Convert a BigInteger number to words.

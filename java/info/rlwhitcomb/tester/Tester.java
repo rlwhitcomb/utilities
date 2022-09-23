@@ -225,6 +225,8 @@
  *	    #448: Add support for wildcard specs on test command lines.
  *	22-Sep-2022 (rlwhitcomb)
  *	    #448: Sort the results of the wildcard file filter.
+ *	23-Sep-2022 (rlwhitcomb)
+ *	    #448: Move the wildcard processing code into a separate class (CommandLine) for reuse.
  */
 package info.rlwhitcomb.tester;
 
@@ -562,67 +564,6 @@ public class Tester
 
 
 	/**
-	 * A {@link LineProcessor} that simply adds the file path to the ongoing list
-	 * of command line arguments.
-	 */
-	private static class ListFilesProcessor implements LineProcessor
-	{
-		private List<String> list;
-
-		public ListFilesProcessor() {
-		    list = new ArrayList<>();
-		}
-
-		@Override
-		public boolean preProcess(final File inputFile) {
-		    list.add(inputFile.getPath());
-		    return true;
-		}
-
-		public List<String> fileList() {
-		    Collections.sort(list);
-		    return list;
-		}
-	}
-
-
-	/**
-	 * Parse the command line and expand any wildcard specs on it.
-	 *
-	 * @param line	The command line for the test.
-	 * @return	Parsed into strings, with any wildcard specifications expanded to
-	 *		all the matching file names.
-	 */
-	private String[] parseCommandLine(final String line) {
-	    String[] args = CharUtil.parseCommandLine(line);
-	    List<String> result = new ArrayList<>();
-
-	    for (String arg : args) {
-		if (Match.hasWildCards(arg)) {
-		    File f = new File(arg);
-		    File dir = f.getParentFile();
-		    if (dir == null) {
-			if (defaultScriptDir != null)
-			    dir = defaultScriptDir;
-			else
-			    dir = Environment.currentDirectory();
-		    }
-		    ListFilesProcessor lp = new ListFilesProcessor();
-		    new DirectoryProcessor(dir, lp)
-			.setNameOnlyMode(true)
-			.setWildcardFilter(f.getName())
-			.processDirectory();
-		    result.addAll(lp.fileList());
-		}
-		else {
-		    result.add(arg);
-		}
-	    }
-
-	    return result.toArray(new String[0]);
-	}
-
-	/**
 	 * Run the test and compare results with the canons or just create the canon files
 	 * from the current output.
 	 *
@@ -692,7 +633,7 @@ public class Tester
 
 				currentVersion = new Version(testableObject.getVersion());
 
-				exitCode = testableObject.setup(parseCommandLine(commandLine));
+				exitCode = testableObject.setup(CommandLine.parse(commandLine, defaultScriptDir));
 
 				logTestName(origOut, testName, testableObject.getTestName(), commandLine);
 
@@ -707,7 +648,7 @@ public class Tester
 
 				logTestName(origOut, testName, null, commandLine);
 
-				main.invoke(null, (Object) parseCommandLine(commandLine));
+				main.invoke(null, (Object) CommandLine.parse(commandLine, defaultScriptDir));
 			    }
 			}
 			catch (NoSuchMethodException nsme) {

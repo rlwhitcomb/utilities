@@ -23,32 +23,26 @@
  *
  *	Compare folders or multiple files.
  *
- *  Change History:
- *	14-Oct-2020 (rlwhitcomb)
- *	    First coding.
- *	14-Oct-2020 (rlwhitcomb)
- *	    Add "-version" command.
- *	15-Oct-2020 (rlwhitcomb)
- *	    Fix the process exit code.
- *	06-Nov-2020 (rlwhitcomb)
- *	    Use new Options processing to help.
- *	11-Dec-2020 (rlwhitcomb)
- *	    Use new program info mechanism.
- *	04-Jan-2021 (rlwhitcomb)
- *	    Tweak the final output.
- *	12-Apr-2021 (rlwhitcomb)
- *	    Tweak error checking.
- *	12-Apr-2022 (rlwhitcomb)
- *	    #269: New method to load main program info (in Environment).
- *	18-Apr-2022 (rlwhitcomb)
- *	    #270: Make this automatic now.
- *	08-Jul-2022 (rlwhitcomb)
- *	    #393: Cleanup imports.
+ * History:
+ *  14-Oct-20 rlw  ---	First coding.
+ *  14-Oct-20 rlw  ---	Add "-version" command.
+ *  15-Oct-20 rlw  ---	Fix the process exit code.
+ *  06-Nov-20 rlw  ---	Use new Options processing to help.
+ *  11-Dec-20 rlw  ---	Use new program info mechanism.
+ *  04-Jan-21 rlw  ---	Tweak the final output.
+ *  12-Apr-21 rlw  ---	Tweak error checking.
+ *  12-Apr-22 rlw #269:	New method to load main program info (in Environment).
+ *  18-Apr-22 rlw #270:	Make this automatic now.
+ *  08-Jul-22 rlw #393:	Cleanup imports.
+ *  23-Sep-22 rlw #52:	Support multiple source files (from wildcard on command line)
+ *			to single directory target. Support "@file" as input.
  */
 package info.rlwhitcomb.compare;
 
+import info.rlwhitcomb.math.NumericUtil;
 import info.rlwhitcomb.util.*;
 
+import java.io.Console;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -58,8 +52,6 @@ import java.util.Optional;
 
 /**
  * Compare sets of files.
- *
- * TODO: explicit wildcard support (using filenamefilter)
  */
 public class CompareFiles
 {
@@ -193,10 +185,16 @@ public class CompareFiles
 
 	/** What level of output to use. */
 	private static Level verbosity = Level.NORMAL;
-	/** Count of files compared. */
-	private static int numberOfFiles = 0;
-	/** Count of mismatched files. */
-	private static int numberOfMismatches = 0;
+
+	/** Total count of files compared. */
+	private static int totalNumberOfFiles = 0;
+	/** Total count of mismatched files. */
+	private static int totalNumberOfMismatches = 0;
+
+	/** Count of files compared for the current patterns. */
+	private static int numberOfFiles;
+	/** Count of mismatched files for the current inputs. */
+	private static int numberOfMismatches;
 
 	/** Prefix for Intl strings. */
 	private static final String INTL_PREFIX = "compare#compare.";
@@ -341,13 +339,107 @@ public class CompareFiles
 	}
 
 	/**
-	 * Main program -- process the command line arguments.
+	 * Do the compare of the file/path arguments given.
+	 * <p> There are two modes: a) Exactly two inputs: assume they are either
+	 * file or directory names, and compare as such; b) N inputs: assume the
+	 * first N - 1 are file or directory names, and the last is a target
+	 * directory where they are to be compared to.
 	 *
-	 * @param args	The parsed command line arguments.
+	 * @param pathArgs	The argument list to compare.
 	 */
-	public static void main(String[] args) {
-	    long memoryUseBefore = Runtime.getRuntime().freeMemory();
+	private static void processCompare(final List<String> pathArgs) {
+	    // Initialize statistics for this bunch of compares
+	    // Note: this won't work if we ever allow recursion of "@file" processing
+	    numberOfFiles = 0;
+	    numberOfMismatches = 0;
 
+	    int size = pathArgs.size();
+	    if (size == 2) {
+		File f1 = new File(pathArgs.get(0));
+		File f2 = new File(pathArgs.get(1));
+
+		recursiveCompare(f1, f2, false);
+
+		if (Opts.SYNC_MODE.isSet()) {
+		    recursiveCompare(f2, f1, true);
+		}
+	    }
+	    else {
+		// Assume args 0..size-2 are files/directories to compare
+		// against arg size-1 (directory)
+		File targetDir = new File(pathArgs.get(size - 1));
+
+		if (!targetDir.isDirectory()) {
+		    err(Level.NORMAL, "notDirectory", targetDir.getPath());
+		    System.exit(1);
+		}
+
+		for (int i = 0; i < size - 1; i++) {
+		    String fileName = pathArgs.get(i);
+		    File sourceFile = new File(fileName);
+		    File targetFile = new File(targetDir, sourceFile.getName());
+
+		    recursiveCompare(sourceFile, targetFile, false);
+
+		    if (Opts.SYNC_MODE.isSet()) {
+			recursiveCompare(targetFile, sourceFile, true);
+		    }
+		}
+	    }
+
+	    totalNumberOfFiles += numberOfFiles;
+	    totalNumberOfMismatches += numberOfMismatches;
+	}
+
+	/**
+	 * Convert a number to words and capitalize (for the beginning of a sentence).
+	 *
+	 * @param value	The value to convert.
+	 * @return	Capitalized word form of the value.
+	 */
+	private static String word(final int value) {
+	    return CharUtil.capitalizeFirst(NumericUtil.convertToWords(value));
+	}
+
+	/**
+	 * Display statistics, either for a single batch of compares, or for the grand total.
+	 *
+	 * @param numFiles	The number of files processed.
+	 * @param numMismatches	The number of files that did NOT match of the number found.
+	 */
+	private static void displayStats(final int numFiles, final int numMismatches) {
+	    if (verbosity.meetsOrExceeds(Level.NORMAL)) {
+		if (numMismatches == 0) {
+		    if (numFiles == 0)
+			Intl.outPrintln("compare#compare.noFilesCompared");
+		    else if (numFiles == 1)
+			Intl.outPrintln("compare#compare.oneFileCompared");
+		    else
+			Intl.outFormat("compare#compare.filesCompared", word(numFiles), numFiles);
+		}
+		else if (numMismatches == 1) {
+		    if (numFiles == 1)
+			Intl.outPrintln("compare#compare.oneMismatch");
+		    else
+			Intl.outFormat("compare#compare.filesOneMismatch", word(numFiles), numFiles);
+		}
+		else {
+		    Intl.outFormat("compare#compare.mismatches",
+			word(numFiles), numFiles, word(numMismatches), numMismatches);
+		}
+	    }
+	}
+
+	/**
+	 * Process the command line arguments, which could be options and/or files and directories
+	 * to compare. This is recursive, in the case of an input "@file", containing lines of
+	 * options and files.
+	 *
+	 * @param args		The command line arguments to process.
+	 * @param mainProgram	Whether or not this is the outermost invocation (that is, from the
+	 *			main program); affects whether HELP and VERSION options are processed.
+	 */
+	private static void process(final String[] args, final boolean mainProgram) {
 	    List<String> pathArgs = new ArrayList<>();
 	    boolean error = false;
 
@@ -364,13 +456,16 @@ public class CompareFiles
 		    // Next, try the regular program options
 		    Optional<Opts> opt = Opts.match(option);
 		    if (opt.isPresent()) {
-			switch (opt.get()) {
-			    case HELP:
-				usage();
-				return;
-			    case VERSION:
-				Environment.printProgramInfo();
-				return;
+			// Only do Help and Version at the top-most level of the program
+			if (mainProgram) {
+			    switch (opt.get()) {
+				case HELP:
+				    usage();
+				    return;
+				case VERSION:
+				    Environment.printProgramInfo();
+				    return;
+			    }
 			}
 		    }
 	    // TODO option process (-caseinsensitive)
@@ -385,8 +480,59 @@ public class CompareFiles
 		}
 	    }
 
-	    if (pathArgs.size() != 2) {
-		error = true;
+	    // Special case of one argument on main command line which is "@file"
+	    if (!error && mainProgram && pathArgs.size() == 1 && pathArgs.get(0).startsWith("@")) {
+		String inputFileName = pathArgs.get(0).substring(1);
+		if (inputFileName.isEmpty()) {
+		    // REPL loop on the console
+		    Console console = System.console();
+		    if (!mainProgram || console == null) {
+			err(Level.NORMAL, "consoleNotAvailable");
+			error = true;
+		    }
+		    else {
+			while (true) {
+			    String line = console.readLine("> ");
+			    if (CharUtil.isNullOrEmpty(line))
+				break;
+			    String[] lineArgs = CommandLine.parse(line, null);
+			    process(lineArgs, false);
+			    displayStats(numberOfFiles, numberOfMismatches);
+			}
+		    }
+		}
+		else {
+		    File inputFile = new File(inputFileName);
+		    if (FileUtilities.canRead(inputFile)) {
+			try {
+			    List<String> lines = FileUtilities.readFileAsLines(inputFile);
+			    for (String line : lines) {
+				if (CharUtil.isNullOrEmpty(line)) {
+				    continue;
+				}
+				String[] inputArgs = CommandLine.parse(line, null);
+				process(inputArgs, false);
+			    }
+			}
+			catch (IOException ioe) {
+			    err(Level.NORMAL, "ioError", inputFileName, Exceptions.toString(ioe));
+			    error = true;
+			}
+		    }
+		    else {
+			err(Level.NORMAL, "inputNotReadable", inputFileName);
+			error = true;
+		    }
+		}
+		if (!error) {
+		    return;
+		}
+	    }
+	    else {
+		if (pathArgs.size() < 2) {
+		    err(Level.NORMAL, "notEnoughArguments");
+		    error = true;
+		}
 	    }
 
 	    if (error) {
@@ -396,44 +542,30 @@ public class CompareFiles
 		System.exit(1);
 	    }
 
-	    File f1 = new File(pathArgs.get(0));
-	    File f2 = new File(pathArgs.get(1));
+	    processCompare(pathArgs);
+	}
 
-	    recursiveCompare(f1, f2, false);
+	/**
+	 * Main program -- process the command line arguments.
+	 *
+	 * @param args	The parsed command line arguments.
+	 */
+	public static void main(final String[] args) {
+	    long memoryUseBefore = Runtime.getRuntime().freeMemory();
 
-	    if (Opts.SYNC_MODE.isSet()) {
-		recursiveCompare(f2, f1, true);
-	    }
+	    // Do all the option and comparison processing on the command line arguments
+	    process(args, true);
 
-	    // Display the final statistics
-	    if (verbosity.meetsOrExceeds(Level.NORMAL)) {
-		if (numberOfMismatches == 0) {
-		    if (numberOfFiles == 0)
-			Intl.outPrintln("compare#compare.noFilesCompared");
-		    else if (numberOfFiles == 1)
-			Intl.outPrintln("compare#compare.oneFileCompared");
-		    else
-			Intl.outFormat("compare#compare.filesCompared", numberOfFiles);
-		}
-		else if (numberOfMismatches == 1) {
-		    if (numberOfFiles == 1)
-			Intl.outPrintln("compare#compare.oneMismatch");
-		    else
-			Intl.outFormat("compare#compare.filesOneMismatch", numberOfFiles);
-		}
-		else {
-		    Intl.outFormat("compare#compare.mismatches", numberOfFiles, numberOfMismatches);
-		}
+	    displayStats(totalNumberOfFiles, totalNumberOfMismatches);
 
-		if (verbosity.meetsOrExceeds(Level.VERBOSE)) {
-		    long memoryUseAfter = Runtime.getRuntime().freeMemory();
-		    Intl.outFormat("compare#compare.memoryUse", memoryUseBefore - memoryUseAfter);
-		}
+	    if (verbosity.meetsOrExceeds(Level.VERBOSE)) {
+		long memoryUseAfter = Runtime.getRuntime().freeMemory();
+		Intl.outFormat("compare#compare.memoryUse", memoryUseBefore - memoryUseAfter);
 	    }
 
 	    // The process exit code needs to reflect whether there were any mismatches or not.
-	    if (numberOfMismatches > 0) {
-		System.exit(numberOfMismatches > 255 ? 255 : numberOfMismatches);
+	    if (totalNumberOfMismatches > 0) {
+		System.exit(totalNumberOfMismatches > 255 ? 255 : totalNumberOfMismatches);
 	    }
 	}
 }
