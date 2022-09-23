@@ -223,6 +223,8 @@
  *	    to "[. .]" and "{. .}".
  *	21-Sep-2022 (rlwhitcomb)
  *	    #448: Add support for wildcard specs on test command lines.
+ *	22-Sep-2022 (rlwhitcomb)
+ *	    #448: Sort the results of the wildcard file filter.
  */
 package info.rlwhitcomb.tester;
 
@@ -239,6 +241,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.UnsupportedCharsetException;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -566,14 +569,19 @@ public class Tester
 	{
 		private List<String> list;
 
-		public ListFilesProcessor(final List<String> result) {
-		    list = result;
+		public ListFilesProcessor() {
+		    list = new ArrayList<>();
 		}
 
 		@Override
 		public boolean preProcess(final File inputFile) {
 		    list.add(inputFile.getPath());
 		    return true;
+		}
+
+		public List<String> fileList() {
+		    Collections.sort(list);
+		    return list;
 		}
 	}
 
@@ -599,10 +607,12 @@ public class Tester
 			else
 			    dir = Environment.currentDirectory();
 		    }
-		    DirectoryProcessor dp = new DirectoryProcessor(dir, new ListFilesProcessor(result))
+		    ListFilesProcessor lp = new ListFilesProcessor();
+		    new DirectoryProcessor(dir, lp)
 			.setNameOnlyMode(true)
 			.setWildcardFilter(f.getName())
 			.processDirectory();
+		    result.addAll(lp.fileList());
 		}
 		else {
 		    result.add(arg);
