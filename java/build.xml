@@ -326,6 +326,8 @@
 		#486: Add "sha1" scripts.
 	    25-Sep-2022 (rlwhitcomb)
 		#488: Add "-memory" switch for Tester.
+	    26-Sep-2022 (rlwhitcomb)
+		#490: Display some environment information at the start of testing.
 
      ========================================================================== -->
 
@@ -751,6 +753,13 @@
 Test starting on ${build.date} at ${build.time}
 -----------------------------------------------
 </echo>
+		<java classname="info.rlwhitcomb.tools.OS"            output="${test.log.path}" append="true" failonerror="true" fork="true">
+			<arg value="properties"/>
+			<arg value="environment"/>
+		</java>
+		<java classname="info.rlwhitcomb.calc.Calc"           output="${test.log.path}" append="true" failonerror="true" fork="true">
+			<arg value="info@j"/>
+		</java>
 		<echo>Test JavaPreProc...</echo>
 		<delete>
 			<fileset dir="test/data" includes="TestPP.java,TestPP.log"/>
