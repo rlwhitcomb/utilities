@@ -456,6 +456,10 @@
  *	    #480: Additional KB suffixes.
  *	14-Sep-2022 (rlwhitcomb)
  *	    #485: Add "mod" operator (multiply operator).
+ *	17-Sep-2022 (rlwhitcomb)
+ *	    #426: "todate" function with 1, 2, or 3 arguments.
+ *	    Add other aliases for function names that are two words (such as 'sumOf').
+ *	    Adjust DATE_CONST pattern for negative years.
  */
 
 grammar Calc;
@@ -608,6 +612,7 @@ expr
    | K_FIB expr1                         # fibExpr
    | K_BN expr1                          # bernExpr
    | K_DEC expr1                         # decExpr
+   | K_TODATE ( expr3 | expr2 | expr1 )  # dateExpr
    | K_FRAC ( expr3 | expr2 | expr1 )    # fracExpr
    | K_COMPLEX ( expr2 | expr1 )         # complexFuncExpr
    | K_ROMAN expr1                       # romanExpr
@@ -964,9 +969,9 @@ DATE_CONST
          | 'd' '\'' '-' ? DIG DIG DIG DIG DIG DIG DIG DIG '\''
          | 'd' '\'' '-' ? DIG DIG DIG DIG DIG DIG '\''
 /* US format (MM/dd/yyyy or MM/dd/yy or MMddyyyy or MMddyy) */
-         | 'D' '\'' '-' ? DIG ? DIG DTSEP DIG ? DIG DTSEP '-' ? ( DIG DIG | DIG DIG DIG DIG ) '\''
-         | 'D' '\'' '-' ? DIG DIG DIG DIG DIG DIG DIG DIG '\''
-         | 'D' '\'' '-' ? DIG DIG DIG DIG DIG DIG '\''
+         | 'D' '\'' DIG ? DIG DTSEP DIG ? DIG DTSEP '-' ? ( DIG DIG | DIG DIG DIG DIG ) '\''
+         | 'D' '\'' DIG DIG DIG DIG '-' ? DIG DIG DIG DIG '\''
+         | 'D' '\'' DIG DIG DIG DIG '-' ? DIG DIG '\''
          ;
 
 
@@ -980,25 +985,25 @@ K_HAS      : 'has' | 'HAS' | 'Has' ;
 
 K_ABS      : 'abs' | 'ABS' | 'Abs' ;
 
-K_SINH     : 'sinh' | 'SINH' | 'Sinh' | 'SinH' ;
+K_SINH     : 'sinh' | 'SINH' | 'Sinh' | 'SinH' | 'sinH' ;
 
 K_SIN      : 'sin' | 'SIN' | 'Sin' ;
 
-K_COSH     : 'cosh' | 'COSH' | 'Cosh' | 'CosH' ;
+K_COSH     : 'cosh' | 'COSH' | 'Cosh' | 'CosH' | 'cosH' ;
 
 K_COS      : 'cos' | 'COS' | 'Cos' ;
 
-K_TANH     : 'tanh' | 'TANH' | 'Tanh' | 'TanH' ;
+K_TANH     : 'tanh' | 'TANH' | 'Tanh' | 'TanH' | 'tanH' ;
 
 K_TAN      : 'tan' | 'TAN' | 'Tan' ;
 
-K_ASIN     : 'asin' | 'ASIN' | 'Asin' | 'ASin' ;
+K_ASIN     : 'asin' | 'ASIN' | 'Asin' | 'ASin' | 'aSin' ;
 
-K_ACOS     : 'acos' | 'ACOS' | 'Acos' | 'ACos' ;
+K_ACOS     : 'acos' | 'ACOS' | 'Acos' | 'ACos' | 'aCos' ;
 
-K_ATAN2    : 'atan2' | 'ATAN2' | 'Atan2' | 'ATan2' ;
+K_ATAN2    : 'atan2' | 'ATAN2' | 'Atan2' | 'ATan2' | 'aTan2' ;
 
-K_ATAN     : 'atan' | 'ATAN' | 'Atan' | 'ATan' ;
+K_ATAN     : 'atan' | 'ATAN' | 'Atan' | 'ATan' | 'aTan' ;
 
 K_SQRT     : 'sqrt' | 'SQRT' | 'Sqrt' | '\u221A' ;
 
@@ -1012,16 +1017,16 @@ K_LN       : 'ln' | 'LN' | 'Ln' ;
 
 K_LN2      : 'ln2' | 'LN2' | 'Ln2' ;
 
-K_EPOW     : 'epow' | 'EPOW' | 'Epow' | 'EPow' ;
+K_EPOW     : 'epow' | 'EPOW' | 'Epow' | 'EPow' | 'ePow' ;
 
-K_TENPOW   : 'tenpow' | 'TENPOW' | 'Tenpow' | 'TenPow' ;
+K_TENPOW   : 'tenpow' | 'TENPOW' | 'Tenpow' | 'TenPow' | 'tenPow' ;
 
 K_RANDOM   : 'random' | 'RANDOM' | 'Random'
            | 'rand'   | 'RAND'   | 'Rand'
            ;
 
-K_SIGNUM   : 'signum' | 'SIGNUM' | 'Signum' | 'SigNum'
-           | 'sgn' | 'SGN' | 'Sgn' | 'SgN'
+K_SIGNUM   : 'signum' | 'SIGNUM' | 'Signum' | 'SigNum' | 'sigNum'
+           | 'sgn' | 'SGN' | 'Sgn' | 'SgN' | 'sgN'
            ;
 
 K_LENGTH   : 'length' | 'LENGTH' | 'Length' ;
@@ -1034,13 +1039,13 @@ K_CEIL     : 'ceil' | 'CEIL' | 'Ceil' ;
 
 K_FLOOR    : 'floor' | 'FLOOR' | 'Floor' ;
 
-K_ISPRIME  : 'isprime' | 'ISPRIME' | 'Isprime' | 'IsPrime' ;
+K_ISPRIME  : 'isprime' | 'ISPRIME' | 'Isprime' | 'IsPrime' | 'isPrime' ;
 
-K_ISNULL   : 'isnull' | 'ISNULL' | 'Isnull' | 'IsNull' ;
+K_ISNULL   : 'isnull' | 'ISNULL' | 'Isnull' | 'IsNull' | 'isNull' ;
 
-K_NOTNULL  : 'notnull' | 'NOTNULL' | 'Notnull' | 'NotNull' ;
+K_NOTNULL  : 'notnull' | 'NOTNULL' | 'Notnull' | 'NotNull' | 'notNull' ;
 
-K_TYPEOF   : 'typeof' | 'TYPEOF' | 'Typeof' | 'TypeOf' ;
+K_TYPEOF   : 'typeof' | 'TYPEOF' | 'Typeof' | 'TypeOf' | 'typeOf' ;
 
 K_CAST     : 'cast' | 'CAST' | 'Cast' ;
 
@@ -1058,7 +1063,7 @@ K_SPLIT    : 'split' | 'SPLIT' | 'Split' ;
 
 K_INDEX    : 'index' | 'INDEX' | 'Index' ;
 
-K_SUBSTR   : 'substr' | 'SUBSTR' | 'Substr' | 'SubStr' ;
+K_SUBSTR   : 'substr' | 'SUBSTR' | 'Substr' | 'SubStr' | 'subStr' ;
 
 K_REPLACE  : 'replace' | 'REPLACE' | 'Replace' ;
 
@@ -1068,7 +1073,7 @@ K_SPLICE   : 'splice' | 'SPLICE' | 'Splice' ;
 
 K_FILL     : 'fill' | 'FILL' | 'Fill' ;
 
-K_FORMATSTRING : 'formatstring' | 'FORMATSTRING' | 'FormatString' ;
+K_FORMATSTRING : 'formatstring' | 'FORMATSTRING' | 'FormatString' | 'Formatstring' | 'formatString' ;
 
 K_SORT     : 'sort' | 'SORT' | 'Sort' ;
 
@@ -1077,13 +1082,13 @@ K_REVERSE  : 'reverse' | 'REVERSE' | 'Reverse' ;
 K_UNIQUE   : 'unique' | 'UNIQUE' | 'Unique' ;
 
 K_TRIM     : 'trim'  | 'TRIM'  | 'Trim'
-           | 'ltrim' | 'LTRIM' | 'Ltrim' | 'LTrim'
-           | 'rtrim' | 'RTRIM' | 'Rtrim' | 'RTrim'
+           | 'ltrim' | 'LTRIM' | 'Ltrim' | 'LTrim' | 'lTrim'
+           | 'rtrim' | 'RTRIM' | 'Rtrim' | 'RTrim' | 'rTrim'
            ;
 
 K_PAD      : 'pad'  | 'PAD'  | 'Pad'
-           | 'lpad' | 'LPAD' | 'Lpad' | 'LPad'
-           | 'rpad' | 'RPAD' | 'Rpad' | 'RPad'
+           | 'lpad' | 'LPAD' | 'Lpad' | 'LPad' | 'lPad'
+           | 'rpad' | 'RPAD' | 'Rpad' | 'RPad' | 'rPad'
            ;
 
 K_FIB      : 'fib' | 'FIB' | 'Fib' ;
@@ -1091,6 +1096,8 @@ K_FIB      : 'fib' | 'FIB' | 'Fib' ;
 K_BN       : 'bn' | 'BN' | 'Bn' ;
 
 K_DEC      : 'dec' | 'DEC' | 'Dec' ;
+
+K_TODATE   : 'todate' | 'TODATE' | 'ToDate' | 'Todate' | 'toDate' ;
 
 K_FRAC     : 'frac' | 'FRAC' | 'Frac' ;
 
@@ -1104,7 +1111,7 @@ K_LOWER    : 'lower' | 'LOWER' | 'Lower' ;
 
 K_FACTORS  : 'factors' | 'FACTORS' | 'Factors' ;
 
-K_PFACTORS : 'pfactors' | 'PFACTORS' | 'Pfactors' | 'PFactors' ;
+K_PFACTORS : 'pfactors' | 'PFACTORS' | 'Pfactors' | 'PFactors' | 'pFactors' ;
 
 K_CHARS    : 'chars' | 'CHARS' | 'Chars' ;
 
@@ -1130,7 +1137,7 @@ K_ENCODE   : 'encode' | 'ENCODE' | 'Encode' ;
 
 K_EXISTS   : 'exists' | 'EXISTS' | 'Exists' ;
 
-K_FILEINFO : 'fileinfo' | 'FILEINFO' | 'FileInfo' ;
+K_FILEINFO : 'fileinfo' | 'FILEINFO' | 'FileInfo' | 'fileInfo' ;
 
 K_READ     : 'read' | 'READ' | 'Read' ;
 
@@ -1144,9 +1151,9 @@ K_MATCHES  : 'matches' | 'MATCHES' | 'Matches' ;
 
 K_CALLERS  : 'callers' | 'CALLERS' | 'Callers' ;
 
-K_SUMOF    : 'sumof' | 'SUMOF' | 'Sumof' | 'SumOf' | '\u2211' ;
+K_SUMOF    : 'sumof' | 'SUMOF' | 'Sumof' | 'SumOf' | 'sumOf' | '\u2211' ;
 
-K_PRODUCTOF: 'productof' | 'PRODUCTOF' | 'Productof' | 'ProductOf' | '\u220F' ;
+K_PRODUCTOF: 'productof' | 'PRODUCTOF' | 'Productof' | 'ProductOf' | 'productOf' | '\u220F' ;
 
 /*
  * Statement keywords
@@ -1185,7 +1192,7 @@ K_LEAVE    : 'leave' | 'LEAVE' | 'Leave' ;
 
 K_NEXT     : 'next' | 'NEXT' | 'Next' ;
 
-K_TIMETHIS : 'timethis' | 'TIMETHIS' | 'TimeThis' ;
+K_TIMETHIS : 'timethis' | 'TIMETHIS' | 'TimeThis' | 'Timethis' | 'timeThis' ;
 
 
 /* This has to include the localvar and globalvar variants */

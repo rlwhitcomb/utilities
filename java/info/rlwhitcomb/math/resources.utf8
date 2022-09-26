@@ -1,7 +1,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2020-2022 Roger L. Whitcomb.
+# Copyright (c) 2022 Roger L. Whitcomb.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -21,45 +21,17 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 #
-# Individual titles and version numbers
+#       Internationalizable strings for the info.rlwhitcomb.math code.
+#
+# History:
+#  19-Sep-22 rlw #426:	Original version for "DateUtil".
 #
 
-Calc.title		= Expression Calculator
-Calc.version		= 2.14.35
-
-Cat.title		= File ConCATenation Utility
-Cat.version		= 1.1.10
-
-CompareFiles.title	= File/Directory Compare Utility
-CompareFiles.version	= 2.0.0
-
-CURL.title		= cURL Utility
-CURL.version		= 1.3.1
-
-Dir.title		= Directory Utility
-Dir.version		= 0.5.2
-
-Head.title		= Head
-Head.version		= 1.2.1
-
-HexDump.title		= Hex File Dump Utility
-HexDump.version		= 1.1.9
-
-Lists.title		= Lists Management Program
-Lists.version		= 2.3.8
-
-Tester.title		= Tester Utility
-Tester.version		= 1.3.7
-
-Tree.title		= Directory Tree Utility
-Tree.version		= 1.3.3
-
-Which.title		= Which
-Which.version		= 1.4.3
-
-WordCount.title		= Word Count
-WordCount.version	= 1.2.3
-
-WordFind.title		= Word Finder
-WordFind.version	= 2.1.2+a
+#
+# From DateUtil
+#
+date.monthOutOfRange	= Month value <u>%1$d<.> is out of range of <y>1..12<.>
+date.dayOutOfRange	= Day value <u>%1$d<.> is out of range
+date.yearOutOfRange	= Year value <u>%1$d<.> is illegal or out of range
+date.badFormatString	= Bad form for the date format string: <u>%1$s<.>
 

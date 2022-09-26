@@ -764,8 +764,8 @@ or<br>
     <tr><td>33</td><td><i>object</i> <code>.</code> <i>member</i></td><td>access an object member</td><td>left to right</td></tr>
     <tr><td>32</td><td><i>expr</i> <code>HAS</code> ( <i>id</i> | <i>string</i> | <code>[</code> <i>expr</i> <code>]</code> )</td><td>safely check for member or index</td><td>left to right</td></tr>
     <tr><td>31</td><td><code>( </code><i>expr</i><code> )</code></td><td>group an expression</td><td>N/A</td></tr>
-    <tr><td rowspan="80">30</td>
-            <td><code>ABS</code>&nbsp;<i>expr</i></td><td>absolute value</td><td rowspan="80">left to right</td></tr>
+    <tr><td rowspan="81">30</td>
+            <td><code>ABS</code>&nbsp;<i>expr</i></td><td>absolute value</td><td rowspan="81">left to right</td></tr>
             <tr><td><code>SIN</code>&nbsp;<i>expr</i></td><td>sine</td></tr>
             <tr><td><code>COS</code>&nbsp;<i>expr</i></td><td>cosine</td></tr>
             <tr><td><code>TAN</code>&nbsp;<i>expr</i></td><td>tangent</td></tr>
@@ -822,6 +822,7 @@ or<br>
             <tr><td><code>FRAC</code>&nbsp;<i>num</i><code>,</code>&nbsp;<i>den</i><br>or <i>int</i><code>,</code><i>num</i><code>,</code><i>den</i><br>or <i>string</i></td><td>construct a rational fraction</td></tr>
             <tr><td><code>COMPLEX</code>&nbsp;<i>r</i><code>,</code>&nbsp;<i>i</i><br>or <i>expr</i></td><td>construct a complex number</td></tr>
             <tr><td><code>ROMAN</code>&nbsp;<i>expr</i></td><td>interpret <i>expr</i> as a Roman Numeral</td></tr>
+            <tr><td><code>TODATE</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;)&nbsp;)</td><td>convert expression(s) to a date value</td></tr>
             <tr><td><code>LOWER</code>&nbsp;<i>expr</i></td><td>convert <i>expr</i> to lower case</td></tr>
             <tr><td><code>UPPER</code>&nbsp;<i>expr</i></td><td>convert <i>expr</i> to UPPER case</td></tr>
             <tr><td><code>EVAL</code>&nbsp;<i>expr</i></td><td>evaluate the string result of <i>expr</i></td></tr>
@@ -1017,17 +1018,22 @@ or<br>
      Also, for an object, if the drop list is omitted, the object is cleared of all values, but specifying an empty list
      will not clear any values, so be careful. For an array, specifying a start value and a count of zero will clear nothing.
   <p>The <code>fill</code> function requires a variable as the first argument. The contents of the variable are replaced or
-     set to the second argument value (or <code>null</code> or <code>'\0'</code> if missing), depending on the optional third and fourth parameters. If only the third argument is
+     set to the second argument value (or <code>null</code> or <code>'\0'</code> if missing), depending on the optional
+     third and fourth parameters. If only the third argument is
      given this is taken as the length, and the array or string is filled to that length with the value. If both the
      3<sup>rd</sup> and 4<sup>th</sup> arguments are given, these are taken as the starting offset and a length.
      If a string is filled and the starting offset is past the end of the existing string, the intervening characters are
      set to the <code>nul</code> character. The fill value for a string can only be one character, or an integer
      (in the range of 0..65535) that is converted to a char value (NOT a codepoint value!). If the 3<sup>rd</sup> value is missing,
      the existing array or string's length is used (that is, the entire existing value is overwritten).
-  <p>The <code>chars</code> and <code>codes</code> functions perform similarly, depending on their input arguments. For single character (for <code>codes</code>) or single integer (<code>chars</code>) values, the output will be the obverse value. For array inputs the outputs will be the corresponding array results. <code>Codes</code> always produces code points (values from 0 to 0x10FFFF). For multi-character string inputs, the outputs will be arrays of characters or integer codepoints.
-     If any character is outside the Unicode BMP, the resulting string will have a length of 2, consisting of the two 16-bit codes (a surrogate pair). For
-     <code>CODES</code> the same element in the returned array will have the single integer value of that codepoint. So, for the same input value, the length
-     of the returned arrays will be the same, regardless of the individual character values of the input. Does that make sense? If not, please read up on
+  <p>The <code>chars</code> and <code>codes</code> functions perform similarly, depending on their input arguments.
+     For single character (for <code>codes</code>) or single integer (<code>chars</code>) values, the output will be the obverse value.
+     For array inputs the outputs will be the corresponding array results. <code>Codes</code> always produces code points
+     (values from 0 to 0x10FFFF). For multi-character string inputs, the outputs will be arrays of characters or integer codepoints.
+     If any character is outside the Unicode BMP, the resulting string will have a length of 2, consisting of the two 16-bit codes
+     (a surrogate pair). For <code>CODES</code> the same element in the returned array will have the single integer value of that
+     codepoint. So, for the same input value, the length of the returned arrays will be the same, regardless of the individual
+     character values of the input. Does that make sense? If not, please read up on
      how Java deals with Unicode characters starting here: <a href="https://docs.oracle.com/javase/tutorial/i18n/text/unicode.html">Unicode and Java</a>.
   <p>The <code>formatstring</code> function works exactly like <code>String.format</code> in Java, or <code>sprintf</code> in C/C++, meaning the format string
      will (optionally) have replaceable parameters, which are replaced by the values of the respective arguments in the expression list. The completed
@@ -1047,6 +1053,18 @@ or<br>
      a fractional constant, such as <code>frac('1 &#x215c;')</code>, except that any of the Unicode fraction values can
      be expressed for this function as Unicode escape sequences in the string, as in <code>frac('2 \u215c')</code>
      while for an <code>f'...'</code> constant the real fraction character(s) must be used.
+  <p>In addition to date constants, the <code>ToDate</code> function can be used to convert many kinds of expressions to dates. Internally,
+     dates are simply signed integer values, so calling <code>todate</code> with a single integer value will produce a date value. Similarly
+     any string value in the same format as a date constant (without the leading <code>d</code> or <code>D</code> character) can be passed
+     as the single expression input. Using two values, the first should be a valid date constant string, while the second should be a date
+     format string, such as <code>"YYYY-MM-DD"</code>. If three values are given to <code>toDate</code>, they shoud be integer values of
+     month, day, and year (in that order), such as:
+     <code style="color:blue;">todate(9,8,2020)@e</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">d'2020-09-08'</code>.
+     If a single string is given, or one string with a null or empty format, the default ISO 8601 format ("YYYY-MM-DD")
+     is assumed. Not all invalid formats will produce an error, nor all mismatches of input and format. There should
+     always be either two or four <code>Y</code> values in the format. Single <code>M</code> or <code>D</code> values
+     in the format can only be used with delimiters. Pretty much any delimiters (non-digit characters) will be matched
+     by a <code>"-"</code> in the format string.
   <p>For most values the <code>upper</code> and <code>lower</code> functions simply convert the value to a string and do the case conversion on that string.
      But, for objects and lists the results are more subtle. For a list, the result is another list with all the values suitably
      case shifted. For an object, if <code>:ignorecase</code> is on the resulting object has only the values converted, while for
@@ -1088,7 +1106,9 @@ or<br>
      or <code>"-"</code>). For a regular file the charset can also be specified, although standard output will always use the system default. If the first expression result for <code>write</code> is an array, the output will be a series of lines using the system
      default line separator, with each array value written to a separate line. For an object the output will be in JSON format, and for all other values
      the result will be written as the string equivalent. Immediately writing the result of a read will produce an identical file.
-  <p>The return value from <code>delete</code> will be <code>true</code> if all the files are successfully deleted, <code>false</code> otherwise. While the return value from <code>rename</code> will be the full path of the destination file (that is, the new file name after the move).
+  <p>The return value from <code>delete</code> will be <code>true</code> if all the files are successfully deleted, <code>false</code>
+     otherwise. While the return value from <code>rename</code> will be the full path of the destination file (that is, the new file name
+     after the move).
      For <code>delete</code>, if the file does not exist the return will be <code>false</code> but no error is thrown. Other obvious problems,
      such as trying to delete a non-empty directory, will throw errors. Likewise <code>rename</code> will throw any errors that prevent the
      move or rename from happening.
@@ -1104,9 +1124,11 @@ or<br>
          <li><code>0x0010</code> = match multiline patterns</li>
          <li><code>0x0020</code> = only Unix line endings recognized</li>
      </ul>
-  <p>The <code>callers()</code> function returns either the name of the specified function caller (with a numeric parameter), or a list of all callers (no parameter). The "name" is the full function name (including the parameter names). When called with a single integer parameter to
-     retrieve the caller at the specified level, <code>0</code> means the current function (so, the return is equivalent to the <code>_funcname</code> predefined value), while any higher number is the full function name of the next outer calling function. If there are not that many nested
-     function calls, the value returned is <code>null</code>.
+  <p>The <code>callers()</code> function returns either the name of the specified function caller (with a numeric parameter), or a list
+     of all callers (no parameter). The "name" is the full function name (including the parameter names). When called with a single
+     integer parameter to retrieve the caller at the specified level, <code>0</code> means the current function (so, the return is
+     equivalent to the <code>_funcname</code> predefined value), while any higher number is the full function name of the next outer
+     calling function. If there are not that many nested function calls, the value returned is <code>null</code>.
   <p>The <code>info</code> object contains seven read-only subobjects:  <code>version</code>, <code>libversion</code>,
      <code>cpu</code>, <code>os</code>, <code>java</code>, <code>locale</code>, and <code>timezone</code>.
      The contents of each are objects (<i>key</i>:<i>value</i> pairs) similar to this:

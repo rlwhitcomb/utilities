@@ -876,7 +876,18 @@ D'1/1/1999'@e
 _waterloo = d'1815/6/18'
 _waterloo@e;_waterloo@E
 
-
+toDate('2022-7-2', 'yyyy-m-d')
+ToDate('2022-07-02', 'yyyy-m-d')
+todate('2022-07-02', 'yyyy-mm-dd')
+TODATE('20220702', 'yyyymmdd')
+todate('220702', 'yymmdd')
+ToDate('7/2/-22', 'd-m-yy')
+TODATE('7-2--2022', 'd-m-yyyy')
+todate('-1100-02-03', "")
+todate(17802)@E
+ToDate(join(['2018', '09', '28'], '-'))@e
+todate(6,30,2020)
+toDate(12,31,1999)
 
 #
 # Play around with "," formatting

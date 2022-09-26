@@ -671,6 +671,8 @@
  *	14-Sep-2022 (rlwhitcomb)
  *	    #485: Add "mod" operator to multiply operator.
  *	    Implement "ceil" and "floor" for fractions.
+ *	25-Sep-2022 (rlwhitcomb)
+ *	    #426: Add "toDate" function.
  */
 package info.rlwhitcomb.calc;
 
@@ -679,6 +681,7 @@ import info.rlwhitcomb.directory.FileInfo;
 import info.rlwhitcomb.directory.Match;
 import info.rlwhitcomb.math.BigFraction;
 import info.rlwhitcomb.math.ComplexNumber;
+import info.rlwhitcomb.math.DateUtil;
 import info.rlwhitcomb.math.MathUtil;
 import info.rlwhitcomb.math.NumericUtil;
 import info.rlwhitcomb.util.*;
@@ -1312,7 +1315,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    return value == null ? "" : toStringValue(this, ctx, value, new StringFormat(quote, separators));
 	}
 
-	public String toNonNullString(final ParserRuleContext ctx, final Object value) {
+	public String getNonNullString(final ParserRuleContext ctx, final Object value) {
 	    nullCheck(value, ctx);
 	    return toStringValue(this, ctx, value, new StringFormat(false, settings));
 	}
@@ -3239,7 +3242,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    key = (id != null) ? id.getText()
 		: (str != null) ? getStringMemberName(str.getText())
 		: (istr != null) ? getIStringValue(this, istr, ctx)
-		: toNonNullString(indexExpr, indexValue);
+		: getNonNullString(indexExpr, indexValue);
 
 	    ObjectScope obj = (ObjectScope) source;
 
@@ -4548,7 +4551,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    if (sourceObj instanceof ObjectScope) {
 		// Return value is index of key in the map
 		ObjectScope obj = (ObjectScope) sourceObj;
-		String searchKey = toNonNullString(e1ctx, searchObj);
+		String searchKey = getNonNullString(e1ctx, searchObj);
 		size = obj.size();
 
 		ret = obj.indexOf(searchKey, start, settings.ignoreNameCase);
@@ -4572,8 +4575,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		return BigInteger.ONE;
 	    }
 	    else {
-		String sourceString = toNonNullString(e0ctx, sourceObj);
-		String searchString = toNonNullString(e1ctx, searchObj);
+		String sourceString = getNonNullString(e0ctx, sourceObj);
+		String searchString = getNonNullString(e1ctx, searchObj);
 		size = sourceString.length();
 
 		if (start < 0) {
@@ -5335,6 +5338,35 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	@Override
+	public Object visitDateExpr(CalcParser.DateExprContext ctx) {
+	    CalcParser.Expr1Context e1ctx = ctx.expr1();
+	    if (e1ctx != null) {
+		CalcParser.ExprContext expr = e1ctx.expr();
+		Object obj = evaluate(expr);
+		return DateUtil.valueOf(obj, "");
+	    }
+	    else {
+		CalcParser.Expr2Context e2ctx = ctx.expr2();
+		if (e2ctx != null) {
+		    CalcParser.ExprContext expr1 = e2ctx.expr(0);
+		    CalcParser.ExprContext expr2 = e2ctx.expr(1);
+		    String s = getNonNullString(expr1, evaluate(expr1));
+		    String f = getNonNullString(expr2, evaluate(expr2));
+
+		    return DateUtil.valueOf(s, f);
+		}
+		else {
+		    CalcParser.Expr3Context e3ctx = ctx.expr3();
+		    int m = getIntValue(e3ctx.expr(0));
+		    int d = getIntValue(e3ctx.expr(1));
+		    int y = getIntValue(e3ctx.expr(2));
+
+		    return DateUtil.date(m, d, y);
+		}
+	    }
+	}
+
+	@Override
 	public Object visitFracExpr(CalcParser.FracExprContext ctx) {
 	    try {
 		CalcParser.Expr1Context expr1 = ctx.expr1();
@@ -5528,7 +5560,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		ArrayScope<Object> array = (ArrayScope<Object>) value;
 		for (Object obj : array.list()) {
 		    if (obj instanceof String || obj instanceof Number) {
-			string = toNonNullString(expr, obj);
+			string = getNonNullString(expr, obj);
 			string.codePoints().forEachOrdered(cp -> result.add(cp));
 		    }
 		    else {
@@ -5539,7 +5571,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		return result;
 	    }
 	    else if (value instanceof String || value instanceof Number) {
-		string = toNonNullString(expr, value);
+		string = getNonNullString(expr, value);
 	    }
 	    else {
 		throw new CalcExprException(expr, "%calc#illegalArgument", typeof(value).toString(), "codes");
@@ -5757,7 +5789,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			ArrayScope<Object> array = (ArrayScope<Object>) outputObj;
 			StringBuilder buf = new StringBuilder();
 			for (Object obj : array.list()) {
-			    buf.append(toNonNullString(expr, obj)).append(eol);
+			    buf.append(getNonNullString(expr, obj)).append(eol);
 			}
 			seq = buf;
 		    }
@@ -5766,7 +5798,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			SetScope<Object> set = (SetScope<Object>) outputObj;
 			StringBuilder buf = new StringBuilder();
 			for (Object obj : set.set()) {
-			    buf.append(toNonNullString(expr, obj)).append(eol);
+			    buf.append(getNonNullString(expr, obj)).append(eol);
 			}
 			seq = buf;
 		    }
@@ -5776,7 +5808,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			seq = toStringValue(this, expr, obj.map(), new StringFormat(true, false, false, false, "", 0), "", 0);
 		    }
 		    else {
-			seq = toNonNullString(expr, outputObj);
+			seq = getNonNullString(expr, outputObj);
 		    }
 		    return BigInteger.valueOf(FileUtilities.writeRawText(seq, new File(fileName), cs));
 		}
@@ -5854,7 +5886,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 		@Override
 		public Object apply(final Object value) {
-		    String string = toNonNullString(exprCtx, value);
+		    String string = getNonNullString(exprCtx, value);
 		    return pattern.matcher(string).matches() ? value : null;
 		}
 
@@ -5900,7 +5932,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 	    else {
 		// For ordinary objects, just return a boolean if the string representation matches the pattern
-		String inputString = toNonNullString(inputExpr, input);
+		String inputString = getNonNullString(inputExpr, input);
 		return Boolean.valueOf(p.matcher(inputString).matches());
 	    }
 	}
@@ -6398,9 +6430,6 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 	}
 
-	/** Strict ISO-8601 format for dates, suitable for parsing into a {@link LocalDate} value. */
-	private static final String ISO_8601_DATE = "%1$04d-%2$02d-%3$02d";
-
 	@Override
 	public Object visitDateValue(CalcParser.DateValueContext ctx) {
 	    String constant   = ctx.DATE_CONST().getText();
@@ -6467,12 +6496,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			year += 1900;
 		}
 
-		// Get a value in strict ISO-8601 format for parsing
-		value = String.format(negate ? "-" + ISO_8601_DATE : ISO_8601_DATE, year, month, day);
-		LocalDate date = LocalDate.parse(value);
-		epochDate = date.toEpochDay();
-
-		return BigInteger.valueOf(epochDate);
+		return DateUtil.date(month, day, negate ? -year : year);
 	    }
 	    catch (DateTimeParseException | NumberFormatException ex) {
 		throw new CalcExprException(ex, ctx);
