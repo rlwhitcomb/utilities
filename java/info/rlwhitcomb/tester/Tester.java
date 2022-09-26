@@ -227,11 +227,14 @@
  *	    #448: Sort the results of the wildcard file filter.
  *	23-Sep-2022 (rlwhitcomb)
  *	    #448: Move the wildcard processing code into a separate class (CommandLine) for reuse.
+ *	25-Sep-2022 (rlwhitcomb)
+ *	    #488: Options to report memory usage; hopefully to debug Windows unit test failures.
  */
 package info.rlwhitcomb.tester;
 
 import info.rlwhitcomb.Testable;
 import info.rlwhitcomb.directory.Match;
+import info.rlwhitcomb.math.NumericUtil;
 import info.rlwhitcomb.util.*;
 import name.fraser.neil.plaintext.diff_match_patch;
 
@@ -239,6 +242,7 @@ import java.io.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.nio.charset.UnsupportedCharsetException;
 import java.nio.file.Files;
@@ -276,6 +280,7 @@ public class Tester
 	private boolean verbose = false;
 	private boolean log = false;
 	private boolean timing = false;
+	private boolean memory = false;
 	private boolean abortOnFirstError = false;
 	private boolean defaultAbortOnFirstError = false;
 
@@ -517,6 +522,13 @@ public class Tester
 	    return compareFiles(testName, canonErr, realErr, cs);
 	}
 
+	private long usedMemory() {
+	    return Environment.totalMemorySize() - Environment.freeMemorySize();
+	}
+
+	private String memory(final long used) {
+	    return NumericUtil.formatToRange(BigInteger.valueOf(used), NumericUtil.RangeMode.MIXED);
+	}
 
 	private void logTestName(final PrintStream origOut, final String testName, final String altTestName, final String commandLine) {
 	    if (!CharUtil.isNullOrEmpty(altTestName) && !testName.equals(altTestName)) {
@@ -594,6 +606,7 @@ public class Tester
 	    PrintStream newErr = null;
 
 	    long elapsedTime;
+	    long initialMemoryUsed = usedMemory();
 
 	    int exitCode = SUCCESS;
 
@@ -722,12 +735,24 @@ public class Tester
 		}
 
 		double elapsedSecs = (double)elapsedTime / (double)Environment.highResTimerResolution();
+		long usedMemory = usedMemory() - initialMemoryUsed;
+
 		if (log && !verbose) {
 		    String status = (ret == SUCCESS) ? "tester#statusPassed" : "tester#statusFailed";
-		    if (!timing)
-			Intl.outPrintln(status);
-		    else
+		    if (memory && timing)
+			Intl.outFormat("tester#statusTimingMemory", Intl.getString(status), elapsedSecs, memory(usedMemory));
+		    else if (memory)
+			Intl.outFormat("tester#statusAndMemory", Intl.getString(status), memory(usedMemory));
+		    else if (timing)
 			Intl.outFormat("tester#statusAndTiming", Intl.getString(status), elapsedSecs);
+		    else
+			Intl.outPrintln(status);
+		}
+		else if (memory && timing) {
+		    Intl.outFormat("tester#timingMemory", elapsedSecs, memory(usedMemory));
+		}
+		else if (memory) {
+		    Intl.outFormat("tester#memory", memory(usedMemory));
 		}
 		else if (timing) {
 		    Intl.outFormat("tester#timing", elapsedSecs);
@@ -1348,7 +1373,7 @@ public class Tester
 	}
 
 
-	private AtomicInteger numberTests = new AtomicInteger();
+	private AtomicInteger numberTested = new AtomicInteger();
 	private AtomicInteger numberPassed = new AtomicInteger();
 	private AtomicInteger numberFailed = new AtomicInteger();
 
@@ -1407,7 +1432,7 @@ public class Tester
 			    break;
 		    }
 
-		    numberTests.incrementAndGet();
+		    numberTested.incrementAndGet();
 
 		    Matcher m = DESCRIPTION.matcher(line);
 		    if (m.matches()) {
@@ -1464,10 +1489,23 @@ public class Tester
 	 * @param desc	The test description file attributes.
 	 */
 	private void driveTests(final DescriptionFile desc) {
-	    Intl.outPrintln(timing ? "tester#finalUnderlineTiming" : "tester#finalUnderline");
+	    long initialMemory = usedMemory();
+
+	    if (memory && timing)
+		Intl.outPrintln("tester#finalUnderlineBoth");
+	    else if (memory || timing)
+		Intl.outPrintln("tester#finalUnderlineTiming");
+	    else
+		Intl.outPrintln("tester#finalUnderline");
+
 	    Intl.outFormat("tester#initialFile", desc.toString());
-	    if (timing || verbose || log)
-		Intl.outPrintln(timing ? "tester#finalBreakTiming" : "tester#finalBreak");
+
+	    if (memory && timing)
+		Intl.outPrintln("tester#finalBreakBoth");
+	    else if (memory || timing)
+		Intl.outPrintln("tester#finalBreakTiming");
+	    else if (verbose || log)
+		Intl.outPrintln("tester#finalBreak");
 
 	    driveOneTest(desc);
 
@@ -1476,15 +1514,33 @@ public class Tester
 		double elapsedSecs = (double)totalElapsedTime / (double)Environment.highResTimerResolution();
 		totalTiming = Intl.formatString("tester#totalTime", elapsedSecs);
 	    }
-	    Intl.outPrintln(timing ? "tester#finalBreakTiming" : "tester#finalBreak");
+	    String totalMemory = "";
+	    if (memory) {
+		long finalMemory = usedMemory();
+		totalMemory = Intl.formatString("tester#totalMemory", memory(finalMemory - initialMemory));
+	    }
 
-	    int tests = numberTests.intValue();
+	    if (memory && timing)
+		Intl.outPrintln("tester#finalBreakBoth");
+	    else if (memory || timing)
+		Intl.outPrintln("tester#finalBreakTiming");
+	    else
+		Intl.outPrintln("tester#finalBreak");
+
+	    int tested = numberTested.intValue();
 	    int passed = numberPassed.intValue();
 	    int failed = numberFailed.intValue();
 
-	    Intl.outFormat(tests == 1 ? "tester#finalResultOne" : "tester#finalResults",
-		    tests, passed, failed, totalTiming);
-	    Intl.outPrintln(timing ? "tester#finalUnderlineTiming" : "tester#finalUnderline");
+	    Intl.outFormat(tested == 1 ? "tester#finalResultOne" : "tester#finalResults",
+		    tested, passed, failed, totalTiming, totalMemory);
+
+	    if (memory && timing)
+		Intl.outPrintln("tester#finalUnderlineBoth");
+	    else if (memory || timing)
+		Intl.outPrintln("tester#finalUnderlineTiming");
+	    else
+		Intl.outPrintln("tester#finalUnderline");
+
 	    Intl.outPrintln();
 	}
 
@@ -1549,6 +1605,8 @@ public class Tester
 		log = true;
 	    else if (Options.matchesOption(opt, true, "timing", "time", "t"))
 		timing = log = true;
+	    else if (Options.matchesOption(opt, true, "memory", "mem", "m"))
+		memory = log = true;
 	    else if (Options.matchesOption(opt, true, "createcanons", "create", "c"))
 		createCanons = true;
 	    else if (Options.matchesOption(opt, true, ABORT_OPTIONS))

@@ -324,6 +324,8 @@
 		Quiet down the Javadoc output.
 	    22-Sep-2022 (rlwhitcomb)
 		#486: Add "sha1" scripts.
+	    25-Sep-2022 (rlwhitcomb)
+		#488: Add "-memory" switch for Tester.
 
      ========================================================================== -->
 
@@ -772,12 +774,14 @@ Test starting on ${build.date} at ${build.time}
 		<echo>Running various tests through the Tester...</echo>
 		<java classname="${tester.class}"                     output="${test.log.path}" append="true" failonerror="true" fork="true">
 			<arg value="-timing"/>
+			<arg value="-memory"/>
 			<arg value="-dir:test/files"/>
 			<arg value="-charset:UTF-8"/>
 			<arg value="calctest"/>
 		</java>
 		<java classname="${tester.class}"                     output="${test.log.path}" append="true" failonerror="true" fork="true">
 			<arg value="-timing"/>
+			<arg value="-memory"/>
 			<arg value="-dir:test/files"/>
 			<arg value="maintest"/>
 		</java>
