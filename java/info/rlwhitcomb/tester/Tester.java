@@ -229,6 +229,8 @@
  *	    #448: Move the wildcard processing code into a separate class (CommandLine) for reuse.
  *	25-Sep-2022 (rlwhitcomb)
  *	    #488: Options to report memory usage; hopefully to debug Windows unit test failures.
+ *	26-Sep-2022 (rlwhitcomb)
+ *	    #490: Debug printout of the command line.
  */
 package info.rlwhitcomb.tester;
 
@@ -281,6 +283,7 @@ public class Tester
 	private boolean log = false;
 	private boolean timing = false;
 	private boolean memory = false;
+	private boolean debug = false;
 	private boolean abortOnFirstError = false;
 	private boolean defaultAbortOnFirstError = false;
 
@@ -635,6 +638,11 @@ public class Tester
 		    }
 		    else {
 			try {
+			    String[] args = CommandLine.parse(commandLine, defaultScriptDir);
+			    if (debug) {
+				origOut.println("Command line = " + CharUtil.makeStringList(args));
+			    }
+
 			    // Preload the program's version information because otherwise the "main program"
 			    // will be us instead of them...
 			    Environment.loadProgramInfo(testClass);
@@ -646,7 +654,7 @@ public class Tester
 
 				currentVersion = new Version(testableObject.getVersion());
 
-				exitCode = testableObject.setup(CommandLine.parse(commandLine, defaultScriptDir));
+				exitCode = testableObject.setup(args);
 
 				logTestName(origOut, testName, testableObject.getTestName(), commandLine);
 
@@ -661,7 +669,7 @@ public class Tester
 
 				logTestName(origOut, testName, null, commandLine);
 
-				main.invoke(null, (Object) CommandLine.parse(commandLine, defaultScriptDir));
+				main.invoke(null, (Object) args);
 			    }
 			}
 			catch (NoSuchMethodException nsme) {
@@ -1555,6 +1563,8 @@ public class Tester
 	    verbose = false;
 	    log     = false;
 	    timing  = false;
+	    memory  = false;
+	    debug   = false;
 
 	    abortOnFirstError = defaultAbortOnFirstError = false;
 
@@ -1609,6 +1619,8 @@ public class Tester
 		memory = log = true;
 	    else if (Options.matchesOption(opt, true, "createcanons", "create", "c"))
 		createCanons = true;
+	    else if (Options.matchesOption(opt, true, "debug"))
+		debug = true;
 	    else if (Options.matchesOption(opt, true, ABORT_OPTIONS))
 		abortOnFirstError = defaultAbortOnFirstError = true;
 	    else if (Options.matchesOption(opt, true, NO_ABORT_OPTIONS))
