@@ -25,6 +25,7 @@
  *
  * History:
  *  23-Sep-22 rlw #448,#52:	Initial commit from code in Tester.
+ *  26-Sep-22 rlw #490:		Fix "~" replacement for shortened paths in Windows.
  */
 package info.rlwhitcomb.util;
 
@@ -50,13 +51,14 @@ public class CommandLine
 
 
 	/**
-	 * Substitute the user's home directory for any occurrence of {@code "~"}.
+	 * Substitute the user's home directory for occurrence of {@code "~"} at the
+	 * beginning of the path.
 	 *
 	 * @param path	A file path.
-	 * @return	That path with the {@code "~"} character replaced.
+	 * @return	That path with the starting {@code "~"} character replaced.
 	 */
 	private static String sub(final String path) {
-	    return path.replace("~", Environment.userHomeDirString());
+	    return path.replaceAll("^~", Environment.userHomeDirString());
 	}
 
 	/**
