@@ -792,6 +792,7 @@ Test starting on ${build.date} at ${build.time}
 		<java classname="${tester.class}"                     output="${test.log.path}" append="true" failonerror="true" fork="true">
 			<arg value="-timing"/>
 			<arg value="-memory"/>
+			<arg value="-debug"/>
 			<arg value="-dir:test/files"/>
 			<arg value="hexdumptest"/>
 		</java>
