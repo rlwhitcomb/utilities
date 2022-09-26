@@ -329,6 +329,7 @@
 	    26-Sep-2022 (rlwhitcomb)
 		#490: Display some environment information at the start of testing.
 		#490: Try "hexdumptest" by itself to analyze failure better.
+		#490: Undo the extra test once we've fixed the problem.
 
      ========================================================================== -->
 
@@ -784,21 +785,12 @@ Test starting on ${build.date} at ${build.time}
 		<echo>Running various tests through the Tester...</echo>
 		<java classname="${tester.class}"                     output="${test.log.path}" append="true" failonerror="true" fork="true">
 			<arg value="-timing"/>
-			<arg value="-memory"/>
 			<arg value="-dir:test/files"/>
 			<arg value="-charset:UTF-8"/>
 			<arg value="calctest"/>
 		</java>
 		<java classname="${tester.class}"                     output="${test.log.path}" append="true" failonerror="true" fork="true">
 			<arg value="-timing"/>
-			<arg value="-memory"/>
-			<arg value="-debug"/>
-			<arg value="-dir:test/files"/>
-			<arg value="hexdumptest"/>
-		</java>
-		<java classname="${tester.class}"                     output="${test.log.path}" append="true" failonerror="true" fork="true">
-			<arg value="-timing"/>
-			<arg value="-memory"/>
 			<arg value="-dir:test/files"/>
 			<arg value="maintest"/>
 		</java>
