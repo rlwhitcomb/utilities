@@ -111,7 +111,7 @@ public final class DateUtil
 	 * @param d Day value (1-31).
 	 * @param y Year value (4-digit value, -9999 to 9999).
 	 * @return Integer epoch day value.
-	 * @throw IllegalArgumentException if the values are out of range.
+	 * @throws IllegalArgumentException if the values are out of range.
 	 */
 	private static BigInteger mdyValue(final int m, final int d, final int y) {
 	    int year = y;
