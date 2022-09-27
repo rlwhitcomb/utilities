@@ -119,7 +119,7 @@ public class BigFraction extends Number
 	/** Blank or other separator (subpattern of other patterns). */
 	private static final String SEP = "(\\s+|\\s*[,/;]\\s*)";
 	/** A signed fraction (special Unicode characters) (another subpattern). */
-	private static final String SIGNED_FRAC = "([+\\-]?[\xBC-\xBE\u2189[\u2150-\u215E]])";
+	private static final String SIGNED_FRAC = "([+\\-]?[\\xBC-\\xBE\\u2189[\\u2150-\\u215E]])";
 
 	/** The pattern for three ints, as in "int [&nbsp;,/;] numer [&nbsp;,/;] denom". */
 	private static final Pattern THREE_INTS = Pattern.compile(SIGNED_INT + SEP + SIGNED_INT + SEP + SIGNED_INT);
