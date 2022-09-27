@@ -231,6 +231,7 @@
  *	    #488: Options to report memory usage; hopefully to debug Windows unit test failures.
  *	26-Sep-2022 (rlwhitcomb)
  *	    #490: Debug printout of the command line.
+ *	    #489: Change exit status codes to the standard Testable ones.
  */
 package info.rlwhitcomb.tester;
 
@@ -1581,7 +1582,7 @@ public class Tester
 	private void checkNullValue(final String arg1, final String optionValue) {
 	    if (CharUtil.isNullOrEmpty(arg1)) {
 		Intl.errFormat("tester#emptyArgFor", optionValue);
-		System.exit(2);
+		System.exit(MISSING_OPTION);
 	    }
 	}
 
@@ -1633,7 +1634,7 @@ public class Tester
 		}
 		else {
 		    Intl.errFormat("tester#badInputDirArg", arg1);
-		    System.exit(2);
+		    System.exit(BAD_DIRECTORY);
 		}
 	    }
 	    else if (Options.matchesOption(opt, "locale", "loc")) {
@@ -1645,7 +1646,7 @@ public class Tester
 		}
 		catch (IllegalArgumentException iae) {
 		    System.err.println(Exceptions.toString(iae));
-		    System.exit(2);
+		    System.exit(BAD_LOCALE);
 		}
 		Locale.setDefault(locale);
 		Intl.initAllPackageResources(locale);
@@ -1660,7 +1661,7 @@ public class Tester
 		}
 		catch (Exception ex) {
 		    System.err.println(Exceptions.toString(ex));
-		    System.exit(2);
+		    System.exit(BAD_CHARSET);
 		}
 	    }
 	    else if (Options.matchesOption(opt, true, "testclass", "class", "test")) {
@@ -1670,7 +1671,7 @@ public class Tester
 		}
 		catch (NoClassDefFoundError | ClassNotFoundException | ExceptionInInitializerError ex) {
 		    Intl.errFormat("tester#testClassNotFound", arg1, Exceptions.toString(ex));
-		    System.exit(2);
+		    System.exit(CLASS_NOT_FOUND);
 		}
 	    }
 	    else if (Options.matchesOption(opt, true, "ignoreoptions", "ignoreopt", "ignore", "ign", "i")) {
@@ -1678,16 +1679,16 @@ public class Tester
 	    }
 	    else if (Options.matchesOption(opt, true, "version", "vers", "ver")) {
 		Environment.printProgramInfo();
-		System.exit(0);
+		System.exit(ACTION_DONE);
 	    }
 	    else if (Options.matchesOption(opt, true, "help", "h", "?")) {
 		Environment.printProgramInfo();
 		Intl.printHelp("tester#");
-		System.exit(0);
+		System.exit(ACTION_DONE);
 	    }
 	    else {
 		Intl.errFormat("tester#badOption", opt);
-		System.exit(2);
+		System.exit(BAD_ARGUMENT);
 	    }
 	}
 
