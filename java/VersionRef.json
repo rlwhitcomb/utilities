@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { base: '1.9.32', date: d'2022-09-27',
+      issues: [ 491 ],
+      comment: 'Correct the setting of Java major version for versions <= 8.'
+    },
     { version: '2.14.35', date: d'2022-09-25',
       issues: [ 426 ],
       comment: 'The "ToDate" function with 1, 2, or 3 parameters; additional function name aliases.'

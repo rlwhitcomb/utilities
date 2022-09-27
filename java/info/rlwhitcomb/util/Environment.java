@@ -181,6 +181,8 @@
  *	    #393: Cleanup imports.
  *	18-Aug-2022 (rlwhitcomb)
  *	    #445: New flavor of "printProgramInfo" with just colored flag.
+ *	27-Sep-2022 (rlwhitcomb)
+ *	    #491: Correct the setting of Java major version.
  */
 package info.rlwhitcomb.util;
 
@@ -407,8 +409,8 @@ public final class Environment
 
 
 	static {
-	    String[] parts = JAVA_RUNTIME_VERSION.split("[\\.+-]");
-	    if (parts[0] == "1" && parts.length > 1)
+	    String[] parts = JAVA_RUNTIME_VERSION.split("[\\.+\\-_]");
+	    if (parts[0].equals("1") && parts.length > 1)
 		javaMajorVersion = Integer.parseInt(parts[1]);
 	    else
 		javaMajorVersion = Integer.parseInt(parts[0]);
