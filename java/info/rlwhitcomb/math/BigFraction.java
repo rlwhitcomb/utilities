@@ -87,6 +87,8 @@
  *	15-Sep-2022 (rlwhitcomb)
  *	    #485: Make the "remainder" function public.
  *	    #485: Add "floor" and "ceil" functions.
+ *	27-Sep-2022 (rlwhitcomb)
+ *	    #494: Fix code scanning issue with the special fraction characters.
  */
 package info.rlwhitcomb.math;
 
@@ -116,8 +118,8 @@ public class BigFraction extends Number
 	private static final String SIGNED_INT = "([+\\-]?[0-9]+)";
 	/** Blank or other separator (subpattern of other patterns). */
 	private static final String SEP = "(\\s+|\\s*[,/;]\\s*)";
-	/** A signed fraction (sepcial Unicode characters) (another subpattern). */
-	private static final String SIGNED_FRAC = "([+\\-]?[\u00BC-\u00BE\u2150-\u215E\u2189])";
+	/** A signed fraction (special Unicode characters) (another subpattern). */
+	private static final String SIGNED_FRAC = "([+\\-]?[\xBC-\xBE\u2189[\u2150-\u215E]])";
 
 	/** The pattern for three ints, as in "int [&nbsp;,/;] numer [&nbsp;,/;] denom". */
 	private static final Pattern THREE_INTS = Pattern.compile(SIGNED_INT + SEP + SIGNED_INT + SEP + SIGNED_INT);
