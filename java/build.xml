@@ -331,6 +331,8 @@
 		#490: Try "hexdumptest" by itself to analyze failure better.
 		#490: Undo the extra test once we've fixed the problem.
 		#491: Add back "calc info.java@j" to the tests to identify the bug.
+	    27-Sep-2022 (rlwhitcomb)
+		#491: Remove extra debug info during "test".
 
      ========================================================================== -->
 
@@ -756,9 +758,6 @@
 Test starting on ${build.date} at ${build.time}
 -----------------------------------------------
 </echo>
-		<java classname="info.rlwhitcomb.tools.OS"            output="${test.log.path}" append="true" failonerror="true" fork="true">
-			<arg value="properties"/>
-		</java>
 		<java classname="info.rlwhitcomb.calc.Calc"           output="${test.log.path}" append="true" failonerror="true" fork="true">
 			<arg value="info.java@j"/>
 		</java>
