@@ -756,7 +756,7 @@
 Test starting on ${build.date} at ${build.time}
 -----------------------------------------------
 </echo>
-		<java classname="info.rlwhitcomb.test.OS"             output="${test.log.path}" append="true" failonerror="true" fork="true">
+		<java classname="info.rlwhitcomb.tools.OS"            output="${test.log.path}" append="true" failonerror="true" fork="true">
 			<arg value="properties"/>
 		</java>
 		<java classname="info.rlwhitcomb.calc.Calc"           output="${test.log.path}" append="true" failonerror="true" fork="true">
