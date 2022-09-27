@@ -330,6 +330,7 @@
 		#490: Display some environment information at the start of testing.
 		#490: Try "hexdumptest" by itself to analyze failure better.
 		#490: Undo the extra test once we've fixed the problem.
+		#491: Add back "calc info.java@j" to the tests to identify the bug.
 
      ========================================================================== -->
 
@@ -755,6 +756,12 @@
 Test starting on ${build.date} at ${build.time}
 -----------------------------------------------
 </echo>
+		<java classname="info.rlwhitcomb.test.OS"             output="${test.log.path}" append="true" failonerror="true" fork="true">
+			<arg value="properties"/>
+		</java>
+		<java classname="info.rlwhitcomb.calc.Calc"           output="${test.log.path}" append="true" failonerror="true" fork="true">
+			<arg value="info.java@j"/>
+		</java>
 		<echo>Test JavaPreProc...</echo>
 		<delete>
 			<fileset dir="test/data" includes="TestPP.java,TestPP.log"/>

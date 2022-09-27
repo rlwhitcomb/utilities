@@ -23,9 +23,9 @@
  *
  *      Test program for the SemanticVersion parsing and display.
  *
- *  Change History:
- *      17-Feb-2022 (rlwhitcomb)
- *          Initial coding.
+ * History:
+ *  17-Feb-22 rlw  ---	Initial coding.
+ *  26-Sep-22 rlw #491:	New test of "failing" Java 8 version string.
  */
 package info.rlwhitcomb.test;
 
@@ -58,8 +58,8 @@ public class VersionTest
 	    { "1.9.0-debug+8b74297",  "1.9.0-debug+8b74297" },
 	    { "1.3.1-beta",           "1.3.1-beta"          },
 	    { "1.3.1_01",             "1.3.1_01"            },
-/*	    { "001.002.003.004",      "1.2.3.4"             }, */
-	    { "1.3.1_05-ea-b01",      "1.3.1_05-ea-b01"     }
+	    { "1.3.1_05-ea-b01",      "1.3.1_05-ea-b01"     },
+	    { "1.8.0_345-b01",        "1.8.0_345-b01"       }
 	};
 
 	private static void runTests() {
