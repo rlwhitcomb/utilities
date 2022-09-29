@@ -232,6 +232,8 @@
  *	26-Sep-2022 (rlwhitcomb)
  *	    #490: Debug printout of the command line.
  *	    #489: Change exit status codes to the standard Testable ones.
+ *	27-Sep-2022 (rlwhitcomb)
+ *	    #488: Also report free memory size.
  */
 package info.rlwhitcomb.tester;
 
@@ -526,12 +528,16 @@ public class Tester
 	    return compareFiles(testName, canonErr, realErr, cs);
 	}
 
-	private long usedMemory() {
-	    return Environment.totalMemorySize() - Environment.freeMemorySize();
+	private long freeMemory() {
+	    return Environment.freeMemorySize();
 	}
 
-	private String memory(final long used) {
-	    return NumericUtil.formatToRange(BigInteger.valueOf(used), NumericUtil.RangeMode.MIXED);
+	private long usedMemory() {
+	    return Environment.totalMemorySize() - freeMemory();
+	}
+
+	private String memory(final long value) {
+	    return NumericUtil.formatToRange(BigInteger.valueOf(value), NumericUtil.RangeMode.MIXED);
 	}
 
 	private void logTestName(final PrintStream origOut, final String testName, final String altTestName, final String commandLine) {
@@ -745,23 +751,26 @@ public class Tester
 
 		double elapsedSecs = (double)elapsedTime / (double)Environment.highResTimerResolution();
 		long usedMemory = usedMemory() - initialMemoryUsed;
+		long freeMemory = freeMemory();
 
 		if (log && !verbose) {
 		    String status = (ret == SUCCESS) ? "tester#statusPassed" : "tester#statusFailed";
 		    if (memory && timing)
-			Intl.outFormat("tester#statusTimingMemory", Intl.getString(status), elapsedSecs, memory(usedMemory));
+			Intl.outFormat("tester#statusTimingMemory",
+				Intl.getString(status), elapsedSecs, memory(usedMemory), memory(freeMemory));
 		    else if (memory)
-			Intl.outFormat("tester#statusAndMemory", Intl.getString(status), memory(usedMemory));
+			Intl.outFormat("tester#statusAndMemory",
+				Intl.getString(status), memory(usedMemory), memory(freeMemory));
 		    else if (timing)
 			Intl.outFormat("tester#statusAndTiming", Intl.getString(status), elapsedSecs);
 		    else
 			Intl.outPrintln(status);
 		}
 		else if (memory && timing) {
-		    Intl.outFormat("tester#timingMemory", elapsedSecs, memory(usedMemory));
+		    Intl.outFormat("tester#timingMemory", elapsedSecs, memory(usedMemory), memory(freeMemory));
 		}
 		else if (memory) {
-		    Intl.outFormat("tester#memory", memory(usedMemory));
+		    Intl.outFormat("tester#memory", memory(usedMemory), memory(freeMemory));
 		}
 		else if (timing) {
 		    Intl.outFormat("tester#timing", elapsedSecs);
@@ -1492,6 +1501,18 @@ public class Tester
 	}
 
 
+	private void header(final String key, final boolean last) {
+	    if (memory && timing)
+		Intl.outPrintln("tester#" + key + "Both");
+	    else if (memory)
+		Intl.outPrintln("tester#" + key + "Memory");
+	    else if (timing)
+		Intl.outPrintln("tester#" + key + "Timing");
+	    else if (last)
+		Intl.outPrintln("tester#" + key);
+	}
+
+
 	/**
 	 * Drive all the tests from the given test description file.
 	 *
@@ -1500,21 +1521,11 @@ public class Tester
 	private void driveTests(final DescriptionFile desc) {
 	    long initialMemory = usedMemory();
 
-	    if (memory && timing)
-		Intl.outPrintln("tester#finalUnderlineBoth");
-	    else if (memory || timing)
-		Intl.outPrintln("tester#finalUnderlineTiming");
-	    else
-		Intl.outPrintln("tester#finalUnderline");
+	    header("finalUnderline", true);
 
 	    Intl.outFormat("tester#initialFile", desc.toString());
 
-	    if (memory && timing)
-		Intl.outPrintln("tester#finalBreakBoth");
-	    else if (memory || timing)
-		Intl.outPrintln("tester#finalBreakTiming");
-	    else if (verbose || log)
-		Intl.outPrintln("tester#finalBreak");
+	    header("finalBreak", verbose || log);
 
 	    driveOneTest(desc);
 
@@ -1526,15 +1537,11 @@ public class Tester
 	    String totalMemory = "";
 	    if (memory) {
 		long finalMemory = usedMemory();
-		totalMemory = Intl.formatString("tester#totalMemory", memory(finalMemory - initialMemory));
+		long freeMemory  = freeMemory();
+		totalMemory = Intl.formatString("tester#totalMemory", memory(finalMemory - initialMemory), memory(freeMemory));
 	    }
 
-	    if (memory && timing)
-		Intl.outPrintln("tester#finalBreakBoth");
-	    else if (memory || timing)
-		Intl.outPrintln("tester#finalBreakTiming");
-	    else
-		Intl.outPrintln("tester#finalBreak");
+	    header("finalBreak", true);
 
 	    int tested = numberTested.intValue();
 	    int passed = numberPassed.intValue();
@@ -1543,12 +1550,7 @@ public class Tester
 	    Intl.outFormat(tested == 1 ? "tester#finalResultOne" : "tester#finalResults",
 		    tested, passed, failed, totalTiming, totalMemory);
 
-	    if (memory && timing)
-		Intl.outPrintln("tester#finalUnderlineBoth");
-	    else if (memory || timing)
-		Intl.outPrintln("tester#finalUnderlineTiming");
-	    else
-		Intl.outPrintln("tester#finalUnderline");
+	    header("finalUnderline", true);
 
 	    Intl.outPrintln();
 	}

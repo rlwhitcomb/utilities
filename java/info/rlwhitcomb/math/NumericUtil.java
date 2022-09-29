@@ -169,6 +169,9 @@
  *	    #480: Extend range of byte values; switch to BigInteger. Add "formatToRangeLong".
  *	23-Sep-2022 (rlwhitcomb)
  *	    #52: Add overload of "convertToWords" for long values.
+ *	28-Sep-2022 (rlwhitcomb)
+ *	    #488: Add overloads for long values on the "formatToRange" methods. Refactor the
+ *	    base method to reduce code duplication.
  */
 package info.rlwhitcomb.math;
 
@@ -331,7 +334,7 @@ public final class NumericUtil
 	}
 
 
-	private static final Pattern VALUE_MATCH= Pattern.compile("^([0-9]+)([kKmMgGtTpPeEzZyYbB][iI]?)[bB]?$");
+	private static final Pattern VALUE_MATCH= Pattern.compile("^([0-9]+)([kKmMgGtTpPeEzZyYbB][iI]?[bB]?)$");
 
 
 	private static final String _T = "\u2182";
@@ -434,17 +437,17 @@ public final class NumericUtil
 	 */
 	public static enum Range
 	{
-		/* Range,   mult (10),mult (2),suffixes, short name,           long name                   */
-		BYTES	    (0,       0,       "",  "",   "bytes",  "bytes",   "Bytes",       "Bytes"      ),
-		KILOBYTES   (3,       10,      "K", "Ki", "Kbytes", "Kibytes", "Kilobytes",   "Kibibytes"  ),
-		MEGABYTES   (6,       20,      "M", "Mi", "Mbytes", "Mibytes", "Megabytes",   "Mebibytes"  ),
-		GIGABYTES   (9,       30,      "G", "Gi", "Gbytes", "Gibytes", "Gigabytes",   "Gibibytes"  ),
-		TERABYTES   (12,      40,      "T", "Ti", "Tbytes", "Tibytes", "Terabytes",   "Tebibytes"  ),
-		PETABYTES   (15,      50,      "P", "Pi", "Pbytes", "Pibytes", "Petabytes",   "Pebibytes"  ),
-		EXABYTES    (18,      60,      "E", "Ei", "Ebytes", "Eibytes", "Exabytes",    "Exbibytes"  ),
-		ZETTABYTES  (21,      70,      "Z", "Zi", "Zbytes", "Zibytes", "Zettabytes",  "Zebibytes"  ),
-		YOTTABYTES  (24,      80,      "Y", "Yi", "Ybytes", "Yibytes", "Yottabytes",  "Yobibytes"  ),
-		BRONTOBYTES (27,      90,      "B", "Bi", "Bbytes", "Bibytes", "Brontobytes", "Brobibytes" );
+		/* Range,   mult (10),mult (2),suffixes,    short name,          long name                   */
+		BYTES	    (0,       0,       "B",  "B",   "bytes",  "bytes",   "Bytes",       "Bytes"      ),
+		KILOBYTES   (3,       10,      "KB", "KiB", "Kbytes", "Kibytes", "Kilobytes",   "Kibibytes"  ),
+		MEGABYTES   (6,       20,      "MB", "MiB", "Mbytes", "Mibytes", "Megabytes",   "Mebibytes"  ),
+		GIGABYTES   (9,       30,      "GB", "GiB", "Gbytes", "Gibytes", "Gigabytes",   "Gibibytes"  ),
+		TERABYTES   (12,      40,      "TB", "TiB", "Tbytes", "Tibytes", "Terabytes",   "Tebibytes"  ),
+		PETABYTES   (15,      50,      "PB", "PiB", "Pbytes", "Pibytes", "Petabytes",   "Pebibytes"  ),
+		EXABYTES    (18,      60,      "EB", "EiB", "Ebytes", "Eibytes", "Exabytes",    "Exbibytes"  ),
+		ZETTABYTES  (21,      70,      "ZB", "ZiB", "Zbytes", "Zibytes", "Zettabytes",  "Zebibytes"  ),
+		YOTTABYTES  (24,      80,      "YB", "YiB", "Ybytes", "Yibytes", "Yottabytes",  "Yobibytes"  ),
+		BRONTOBYTES (27,      90,      "BB", "BiB", "Bbytes", "Bibytes", "Brontobytes", "Brobibytes" );
 
 		private int tenPower;
 		private int twoPower;
@@ -593,7 +596,20 @@ public final class NumericUtil
 		    // Well beyond the range of our largest, but use it anyway
 		    return Range.BRONTOBYTES;
 		}
+	}
 
+
+	/**
+	 * Which name format to use?
+	 */
+	public static enum NameFormat
+	{
+		/** Just a suffix, such as {@code B}, {@code KB}, {@code MB}, etc. */
+		SUFFIX,
+		/** The short name, such as {@code KBytes}, {@code MBytes}, etc. */
+		SHORT,
+		/** The long name, such as {@code Kilobytes}, {@code Megabytes}, etc. */
+		LONG
 	}
 
 
@@ -622,7 +638,8 @@ public final class NumericUtil
 		String suffix = m.group(2);
 		Range range = Range.getRangeBySuffix(suffix);
 		if (range != null) {
-		    if (suffix.toUpperCase().endsWith("I"))
+		    String end = suffix.toUpperCase();
+		    if (end.endsWith("IB") || end.endsWith("I"))
 			value = value.multiply(range.getMultiplier(RangeMode.BINARY));
 		    else
 			value = value.multiply(range.getMultiplier(RangeMode.DECIMAL));
@@ -641,9 +658,22 @@ public final class NumericUtil
 	 * @param	value	The input value to format.
 	 * @return		The value formatted to an appropriate range.
 	 */
-	public static String formatToRange(final BigInteger value) {
-	    return formatToRange(value, RangeMode.MIXED);
+	public static String formatToRange(final long value) {
+	    return internalFormatToRange(BigInteger.valueOf(value), RangeMode.MIXED, NameFormat.SHORT);
 	}
+
+
+	/**
+	 * Format a value using the {@link Range} enum to put into a readable range,
+	 * using mixed-mode units.
+	 *
+	 * @param	value	The input value to format.
+	 * @return		The value formatted to an appropriate range.
+	 */
+	public static String formatToRange(final BigInteger value) {
+	    return internalFormatToRange(value, RangeMode.MIXED, NameFormat.SHORT);
+	}
+
 
 	/**
 	 * Format a value using the {@link Range} enum to put into a readable range,
@@ -653,20 +683,33 @@ public final class NumericUtil
 	 * @param	mode	Decide which value to use.
 	 * @return		The value formatted to an appropriate range.
 	 */
-	 public static String formatToRange(final BigInteger value, final RangeMode mode) {
-	    Range r = Range.getRangeOfValue(value, mode);
-	    if (r == Range.BYTES)
-		return String.format("%1$s %2$s", value.toString(), r.getShortName(mode));
-	    else {
-		double scaledValue = value.doubleValue() / r.getMultiplier(mode).doubleValue();
-		String name = r.getShortName(mode);
-		if (scaledValue < 10.0d)
-		    return String.format("%1$3.2f %2$s", scaledValue, name);
-		else if (scaledValue < 100.0d)
-		    return String.format("%1$3.1f %2$s", scaledValue, name);
-		else
-		    return String.format("%1$3.0f %2$s", scaledValue, name);
-	    }
+	public static String formatToRange(final long value, final RangeMode mode) {
+	    return internalFormatToRange(BigInteger.valueOf(value), mode, NameFormat.SHORT);
+	}
+
+
+	/**
+	 * Format a value using the {@link Range} enum to put into a readable range,
+	 * using either Binary or SI-based units.
+	 *
+	 * @param	value	The input value to format.
+	 * @param	mode	Decide which value to use.
+	 * @return		The value formatted to an appropriate range.
+	 */
+	public static String formatToRange(final BigInteger value, final RangeMode mode) {
+	    return internalFormatToRange(value, mode, NameFormat.SHORT);
+	}
+
+
+	/**
+	 * Format a value using the {@link Range} enum to put into a readable range,
+	 * but use just the suffix (to save space).
+	 *
+	 * @param	value	The input value to format.
+	 * @return		The value formatted (short form) to an appropriate range.
+	 */
+	public static String formatToRangeShort(final long value) {
+	    return internalFormatToRange(BigInteger.valueOf(value), RangeMode.MIXED, NameFormat.SUFFIX);
 	}
 
 
@@ -678,7 +721,20 @@ public final class NumericUtil
 	 * @return		The value formatted (short form) to an appropriate range.
 	 */
 	public static String formatToRangeShort(final BigInteger value) {
-	    return formatToRangeShort(value, RangeMode.MIXED);
+	    return internalFormatToRange(value, RangeMode.MIXED, NameFormat.SUFFIX);
+	}
+
+
+	/**
+	 * Format a value using the {@link Range} enum to put into a readable range,
+	 * but use just the suffix (to save space).
+	 *
+	 * @param	value	The input value to format.
+	 * @param	mode	Whether to use binary or SI units.
+	 * @return		The value formatted (short form) to an appropriate range.
+	 */
+	public static String formatToRangeShort(final long value, final RangeMode mode) {
+	    return internalFormatToRange(BigInteger.valueOf(value), mode, NameFormat.SUFFIX);
 	}
 
 
@@ -691,19 +747,19 @@ public final class NumericUtil
 	 * @return		The value formatted (short form) to an appropriate range.
 	 */
 	public static String formatToRangeShort(final BigInteger value, final RangeMode mode) {
-	    Range r = Range.getRangeOfValue(value, mode);
-	    if (r == Range.BYTES)
-		return String.format("%1$s B", value.toString());
-	    else {
-		double scaledValue = value.doubleValue() / r.getMultiplier(mode).doubleValue();
-		String suffix = r.getSuffix(mode);
-		if (scaledValue < 10.0d)
-		    return String.format("%1$3.2f %2$sB", scaledValue, suffix);
-		else if (scaledValue < 100.0d)
-		    return String.format("%1$3.1f %2$sB", scaledValue, suffix);
-		else
-		    return String.format("%1$3.0f %2$sB", scaledValue, suffix);
-	    }
+	    return internalFormatToRange(value, mode, NameFormat.SUFFIX);
+	}
+
+
+	/**
+	 * Format a value using the {@link Range} enum to put into a readable range,
+	 * but use the long name (such as "Kilobytes").
+	 *
+	 * @param	value	The input value to format.
+	 * @return		The value formatted (long form) to an appropriate range.
+	 */
+	public static String formatToRangeLong(final long value) {
+	    return internalFormatToRange(BigInteger.valueOf(value), RangeMode.MIXED, NameFormat.LONG);
 	}
 
 
@@ -715,7 +771,20 @@ public final class NumericUtil
 	 * @return		The value formatted (long form) to an appropriate range.
 	 */
 	public static String formatToRangeLong(final BigInteger value) {
-	    return formatToRangeLong(value, RangeMode.MIXED);
+	    return internalFormatToRange(value, RangeMode.MIXED, NameFormat.LONG);
+	}
+
+
+	/**
+	 * Format a value using the {@link Range} enum to put into a readable range,
+	 * but use the long name (such as "Kilobytes").
+	 *
+	 * @param	value	The input value to format.
+	 * @param	mode	Whether to use binary or SI units.
+	 * @return		The value formatted (long form) to an appropriate range.
+	 */
+	public static String formatToRangeLong(final long value, final RangeMode mode) {
+	    return internalFormatToRange(BigInteger.valueOf(value), mode, NameFormat.LONG);
 	}
 
 
@@ -728,18 +797,69 @@ public final class NumericUtil
 	 * @return		The value formatted (long form) to an appropriate range.
 	 */
 	public static String formatToRangeLong(final BigInteger value, final RangeMode mode) {
+	    return internalFormatToRange(value, mode, NameFormat.LONG);
+	}
+
+
+	/**
+	 * Format a value using the {@link Range} enum to put into a readable range,
+	 * using the specified name format (suffix, short, or long).
+	 *
+	 * @param	value	The input value to format.
+	 * @param	mode	Whether to use binary or SI units.
+	 * @param	name	Format of unit name to use.
+	 * @return		The value formatted (name form) to an appropriate range.
+	 */
+	public static String formatToRange(final long value, final RangeMode mode, final NameFormat name) {
+	    return internalFormatToRange(BigInteger.valueOf(value), mode, name);
+	}
+
+
+	/**
+	 * Format a value using the {@link Range} enum to put into a readable range,
+	 * using the specified name format (suffix, short, or long).
+	 *
+	 * @param	value	The input value to format.
+	 * @param	mode	Whether to use binary or SI units.
+	 * @param	name	Format of unit name to use.
+	 * @return		The value formatted (name form) to an appropriate range.
+	 */
+	public static String formatToRange(final BigInteger value, final RangeMode mode, final NameFormat name) {
+	    return internalFormatToRange(value, mode, name);
+	}
+
+
+	/**
+	 * Format a value using the {@link Range} enum to put into a readable range,
+	 * using the specified name format (suffix, short, or long).
+	 *
+	 * @param	value	The input value to format.
+	 * @param	mode	Whether to use binary or SI units.
+	 * @param	name	Format of unit name to use.
+	 * @return		The value formatted (name form) to an appropriate range.
+	 */
+	private static String internalFormatToRange(final BigInteger value, final RangeMode mode, final NameFormat name) {
+	    String units = "";
+
 	    Range r = Range.getRangeOfValue(value, mode);
-	    if (r == Range.BYTES)
-		return String.format("%1$s Bytes", value.toString());
-	    else {
+
+	    switch (name) {
+		case SUFFIX: units = r.getSuffix(mode);    break;
+		case SHORT:  units = r.getShortName(mode); break;
+		case LONG:   units = r.getLongName(mode);  break;
+	    }
+
+	    if (r == Range.BYTES) {
+		return String.format("%1$s %2$s", value.toString(), units);
+	    } else {
 		double scaledValue = value.doubleValue() / r.getMultiplier(mode).doubleValue();
-		String suffix = r.getLongName(mode);
+
 		if (scaledValue < 10.0d)
-		    return String.format("%1$3.2f %2$s", scaledValue, suffix);
+		    return String.format("%1$3.2f %2$s", scaledValue, units);
 		else if (scaledValue < 100.0d)
-		    return String.format("%1$3.1f %2$s", scaledValue, suffix);
+		    return String.format("%1$3.1f %2$s", scaledValue, units);
 		else
-		    return String.format("%1$3.0f %2$s", scaledValue, suffix);
+		    return String.format("%1$3.0f %2$s", scaledValue, units);
 	    }
 	}
 
@@ -777,6 +897,7 @@ public final class NumericUtil
 	public static String getZillionName(final int base) {
 	    return getZillionName(base, false, true);
 	}
+
 
 	/**
 	 * Create the appropriate "zillion" name for the given power of ten base.
@@ -900,6 +1021,7 @@ public final class NumericUtil
 	    return convertToWords(BigInteger.valueOf(value));
 	}
 
+
 	/**
 	 * Convert a BigInteger number to words.
 	 * <p>Examples:
@@ -917,6 +1039,18 @@ public final class NumericUtil
 	    return buf.toString();
 	}
 
+
+	/**
+	 * Convert a BigInteger number to words.
+	 * <p>Examples:
+	 * <ul><li>10 -&gt; ten
+	 * <li>27 -&gt; twenty-seven
+	 * <li>493 -&gt; four hundred ninety-three
+	 * </ul>
+	 *
+	 * @param	iValue	The value to convert.
+	 * @param	buf	Buffer to append the value to.
+	 */
 	public static void convertToWords(final BigInteger iValue, final StringBuilder buf) {
 	    BigInteger value = iValue;
 	    int sign = value.signum();
