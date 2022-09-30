@@ -6008,7 +6008,7 @@ System.out.println("i = " + i + ", result = " + result);
 	public Object visitCallersExpr(CalcParser.CallersExprContext ctx) {
 	    CalcParser.ExprContext expr = ctx.optExpr().expr();
 
-	    List<FunctionScope> funcStack = FunctionScope.getCallers(currentScope);
+	    List<FunctionScope> funcStack = FunctionScope.getCallers(getVariables());
 
 	    if (expr != null) {
 		int level = getIntValue(expr);
