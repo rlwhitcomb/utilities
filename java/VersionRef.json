@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.14.36', date: d'2022-09-30',
+      issues: [ 496 ],
+      comment: 'Commas in "@w" format are determined by ",_" modifiers and/or "separators" mode.'
+    },
     { base: '1.9.32', date: d'2022-09-27',
       issues: [ 491 ],
       comment: 'Correct the setting of Java major version for versions <= 8.'

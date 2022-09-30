@@ -673,6 +673,8 @@
  *	    Implement "ceil" and "floor" for fractions.
  *	25-Sep-2022 (rlwhitcomb)
  *	    #426: Add "toDate" function.
+ *	30-Sep-2022 (rlwhitcomb)
+ *	    #496: Optional commas in "@w" format.
  */
 package info.rlwhitcomb.calc;
 
@@ -2409,7 +2411,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    case 'w':
 			iValue = toIntegerValue(this, result, settings.mc, ctx);
 			try {
-			    NumericUtil.convertToWords(iValue, valueBuf);
+			    NumericUtil.convertToWords(iValue, valueBuf, separators);
 			}
 			catch (IllegalArgumentException iae) {
 			    throw new CalcExprException(iae, ctx);

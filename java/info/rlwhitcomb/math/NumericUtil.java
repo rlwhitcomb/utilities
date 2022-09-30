@@ -172,6 +172,8 @@
  *	28-Sep-2022 (rlwhitcomb)
  *	    #488: Add overloads for long values on the "formatToRange" methods. Refactor the
  *	    base method to reduce code duplication.
+ *	30-Sep-2022 (rlwhitcomb)
+ *	    #496: New parameter to "convertToWords" to add/eliminate commas.
  */
 package info.rlwhitcomb.math;
 
@@ -1023,6 +1025,19 @@ public final class NumericUtil
 
 
 	/**
+	 * Convert a long number to words, with optional comma separators..
+	 *
+	 * @param	value	The value to convert.
+	 * @param	commas	Whether to use commas to separate 10**3 blocks.
+	 * @return		The value converted to its English name.
+	 * @see	#convertToWords(BigInteger, boolean)
+	 */
+	public static String convertToWords(final long value, final boolean commas) {
+	    return convertToWords(BigInteger.valueOf(value), commas);
+	}
+
+
+	/**
 	 * Convert a BigInteger number to words.
 	 * <p>Examples:
 	 * <ul><li>10 -&gt; ten
@@ -1032,10 +1047,11 @@ public final class NumericUtil
 	 *
 	 * @param	value	The value to convert.
 	 * @return		The value written out as its English name.
+	 * @see #convertToWords(BigInteger, StringBuilder, boolean)
 	 */
 	public static String convertToWords(final BigInteger value) {
 	    StringBuilder buf = new StringBuilder();
-	    convertToWords(value, buf);
+	    convertToWords(value, buf, false);
 	    return buf.toString();
 	}
 
@@ -1048,10 +1064,31 @@ public final class NumericUtil
 	 * <li>493 -&gt; four hundred ninety-three
 	 * </ul>
 	 *
+	 * @param	value	The value to convert.
+	 * @param	commas	Whether to use commas to separate 10**3 blocks.
+	 * @return		The value written out as its English name.
+	 * @see #convertToWords(BigInteger, StringBuilder, boolean)
+	 */
+	public static String convertToWords(final BigInteger value, final boolean commas) {
+	    StringBuilder buf = new StringBuilder();
+	    convertToWords(value, buf, commas);
+	    return buf.toString();
+	}
+
+
+	/**
+	 * Convert a BigInteger number to words, with optional comma separators.
+	 * <p>Examples:
+	 * <ul><li>10 -&gt; ten
+	 * <li>27 -&gt; twenty-seven
+	 * <li>493 -&gt; four hundred ninety-three
+	 * </ul>
+	 *
 	 * @param	iValue	The value to convert.
 	 * @param	buf	Buffer to append the value to.
+	 * @param	commas	Whether to use commas to separate 10**3 blocks.
 	 */
-	public static void convertToWords(final BigInteger iValue, final StringBuilder buf) {
+	public static void convertToWords(final BigInteger iValue, final StringBuilder buf, final boolean commas) {
 	    BigInteger value = iValue;
 	    int sign = value.signum();
 	    int bits = value.bitLength();
@@ -1080,18 +1117,18 @@ public final class NumericUtil
 		buf.append(SMALL_WORDS[chiliad]).append(" hundred");
 		if (residual != 0) {
 		    buf.append(' ');
-		    convertToWords(BigInteger.valueOf(residual), buf);
+		    convertToWords(BigInteger.valueOf(residual), buf, commas);
 		}
 	    }
 	    else if (value.compareTo(I_MILLION) < 0) {
 		int ivalue = value.intValue();
 		int milliad = ivalue / 1000;
 		int residual = ivalue % 1000;
-		convertToWords(BigInteger.valueOf(milliad), buf);
+		convertToWords(BigInteger.valueOf(milliad), buf, commas);
 		buf.append(" thousand");
 		if (residual != 0) {
-		    buf.append(", ");
-		    convertToWords(BigInteger.valueOf(residual), buf);
+		    buf.append(commas ? ", " : " ");
+		    convertToWords(BigInteger.valueOf(residual), buf, commas);
 		}
 	    }
 	    else {
@@ -1112,12 +1149,12 @@ public final class NumericUtil
 		tenpow -= 3;
 
 		BigInteger[] parts = value.divideAndRemainder(scale);
-		convertToWords(parts[0], buf);
+		convertToWords(parts[0], buf, commas);
 		buf.append(' ').append(getZillionName((tenpow - 3) / 3));
 		BigInteger residual = parts[1];
 		if (residual.signum() != 0) {
-		    buf.append(", ");
-		    convertToWords(residual, buf);
+		    buf.append(commas ? ", " : " ");
+		    convertToWords(residual, buf, commas);
 		}
 	    }
 	}
