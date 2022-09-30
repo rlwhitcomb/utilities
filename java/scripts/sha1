@@ -1,0 +1,4 @@
+#!/bin/bash
+CLASS_NAME=info.rlwhitcomb.tools.Hash
+CMD_ARGS=--algorithm=SHA-1
+source _find_and_run_class

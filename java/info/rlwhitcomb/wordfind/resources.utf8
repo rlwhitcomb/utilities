@@ -35,17 +35,19 @@
 #	27-Jul-2022 (rlwhitcomb)
 #	    New error for "getWord" in Dictionary.
 #	    New help messages for "-statistics".
+#	06-Sep-2022 (rlwhitcomb)
+#	    #29: Remove unnecessary error messages, and obsolete help.
+#	09-Sep-2022 (rlwhitcomb)
+#	    #478: New message for "contains" pattern.
 #
 
-errNegativeIndex	= Negative index (except -1) not allowed.
-maxIterationsReached	= Aborting after %1$,d possible words checked!%n
-maxTimeReached		= Aborting after maximum time of %1$5.3f seconds!%n
 exception		= Error: %1$s from %2$s%n
 
 validWords		= Valid words for: %1$s%2$s
 additional		= " (including additional)"
 beginningWith		= " beginning with "
 containing		= " containing "
+containingPattern	= " containing pattern "
 endingWith		= " ending with "
 section			= %1$d letter words (%2$d):
 
@@ -95,18 +97,16 @@ repl.help19	= "  -lightbackground, -lightback, -lightbg, -light\tuse colors for 
 repl.help20	= "  -darkbackground, -darkback, -darkbg, -dark\t\tuse colors for a dark window background"
 repl.help21	= "  -timings, -timing, -verbose, -time, -t, -v\tshow lookup timing"
 repl.help22	= "  -notimings, -notiming, -quiet, -not, -q\tdon't show the timings"
-repl.help23	= "  -maxsize, -size, -max\t\t\t\tset the maximum number of combinations to check\n\t\t\t\t\t\t  before stopping the search"
-repl.help24	= "  -maxtime, -maxseconds, -maxsecs, -maxt, -seconds, -secs\n\t\t\t\t\t\tset the maximum amount of time to use for the search"
-repl.help25	= "  -minwordsize, -minword, -minsize, -min\tset the minimum length of word to display in the results"
-repl.help26	= "  -maxnumberwords, -maxnumber, -maxwords\tset the maximum number of words of each length to display"
-repl.help27	= "  -maxlinelength, -maxwidth, -width, -wid\tset the maximum line width for wrapping the display"
-repl.help28	= ""
-repl.help29	= There are also a few commands available in this mode:
-repl.help30	= "  :help, :h, :?\t\t\t\tdisplay this help text"
-repl.help31	= "  :version, :vers, :ver, :v\t\tdisplay the program version information"
-repl.help32	= "  :statistics, :stats, :stat, :s\tdisplay dictionary statistics"
-repl.help33	= "  :quit, :exit, :q, :x\t\t\tleave the program"
-repl.help34	= ""
+repl.help23	= "  -minwordsize, -minword, -minsize, -min\tset the minimum length of word to display in the results"
+repl.help24	= "  -maxnumberwords, -maxnumber, -maxwords\tset the maximum number of words of each length to display"
+repl.help25	= "  -maxlinelength, -maxwidth, -width, -wid\tset the maximum line width for wrapping the display"
+repl.help26	= ""
+repl.help27	= There are also a few commands available in this mode:
+repl.help28	= "  :help, :h, :?\t\t\t\tdisplay this help text"
+repl.help29	= "  :version, :vers, :ver, :v\t\tdisplay the program version information"
+repl.help30	= "  :statistics, :stats, :stat, :s\tdisplay dictionary statistics"
+repl.help31	= "  :quit, :exit, :q, :x\t\t\tleave the program"
+repl.help32	= ""
 
 addl.help1	= Additional options available only on the command line:
 addl.help2	= ""

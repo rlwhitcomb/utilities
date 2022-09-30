@@ -432,11 +432,11 @@ h2 {
      If the value expression is omitted the value is initially set to <code>null</code>, but (obviously) can be changed later.
   <p>Numeric values can also be specified using "kilobyte" notation in one of two forms: multipliers of 1000, or multipliers of 1024 (2**10).
      These multipliers are simply appended to the number to automatically multiply by the given amount. The allowed suffixes are:
-     <code>Kb</code>, <code>Mb</code>, <code>Tb</code>, <code>Pb</code>, and <code>Eb</code> which all multiply by their respective
+     <code>Kb</code>, <code>Mb</code>, <code>Tb</code>, <code>Pb</code>, <code>Eb</code>, <code>Zb</code>, <code>Yb</code>, and <code>Bb</code>, which all multiply by their respective
      powers of 1000, while <code>Kib</code>, <code>Mib</code>, etc. multiply by the successive multiples of 1024. Note that these
      multiplier suffixes are case-insensitive.
   <p>For example:  <code>2Kb = 2000</code>, or <code>4Kib = 4096</code>. Any integer results can be formatted as these type of
-     values using the <code>@k</code> or <code>@K</code> formats (the latter giving all upper case results), and depending on the
+     values using the <code>@k</code> or <code>@K</code> formats (the latter giving long name suffixes), and depending on the
      <code>:SI</code>, <code>:BINARY</code>, or <code>:MIXED</code> mode directives in effect. These modes function as illustrated here:<br>
 <code><span style="color:grey;">&gt;</span> :mixed<br>
 <span style="color:green;">Units in mixed form.</span><br>
@@ -448,8 +448,8 @@ h2 {
 <span style="color:blue;">2000 @k</span><span style="color:grey;"> &#x21E8; </span><span style="color:green;">2.00 Kbytes</span><br>
 <span style="color:grey;">&gt;</span> :bin<br>
 <span style="color:green;">Units in binary.</span><br>
-<span style="color:grey;">&gt;</span> 2000@k<br>
-<span style="color:blue;">2000 @k</span><span style="color:grey;"> &#x21E8; </span><span style="color:green;">1.95 Kibytes</span>
+<span style="color:grey;">&gt;</span> 2000@K<br>
+<span style="color:blue;">2000 @K</span><span style="color:grey;"> &#x21E8; </span><span style="color:green;">1.95 Kibibytes</span>
 </code>
   <p>String constants are of four types: <i>simple</i> strings, constructed using either single- or double-quotes (or "smart"
      quotes: see below), <i>multiline</i> strings, constructed using a triple set of any quotes, as in
@@ -653,8 +653,8 @@ or<br>
      value as a date in ISO-8601 form (<code><i>yyyy</i>-<i>mm</i>-<i>dd</i></code>), while <code>@E</code> puts the value in U.S.
      format (<code><i>mm</i>/<i>dd</i>/<i>yyyy</i></code>), <code>@f</code> which formats the
      result as a fraction, while <code>@F</code> formats the result as a proper fraction (as in <code>15/8@F = 1 7/8</code>),
-     <code>@O</code> or <code>@D</code> which would make no difference in the outputs, and <code>@J</code> which doesn't make sense
-     given the output could have strings which shouldn't be case-shifted.
+     <code>@O</code> or <code>@D</code> which would make no difference in the outputs, <code>@J</code> which doesn't make sense
+     given the output could have strings which shouldn't be case-shifted, and <code>@K</code> which uses the long-format names instead of the short form.
 </div>
   <div class="center">
     <table style="margin-left:auto;margin-right:auto;">
@@ -686,7 +686,7 @@ or<br>
       <tr><td><code>@x</code></td><td>For integers and strings, format in hexadecimal form<br>as in <code style="color:blue;">456 @x</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">0x1c8</code><br>or <code style="color:blue;">'abc' @x</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">'\u0061\u0062\u0063'</code></td></tr>
       <tr><td><code>@o</code></td><td>For integers and strings, format in octal form<br>as in <code style="color:blue;">345 @o</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">0531</code><br>or <code style="color:blue;">'abc' @o</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">'\o141\o142\o143'</code></td></tr>
       <tr><td><code>@b</code></td><td>For integers and strings, format in binary form<br>as in <code style="color:blue;">231 @b</code><code style="grey;"> &#x21E8; </code><code style="color:green;">0b11100111</code><br>or <code style="color:blue;">'abc' @b</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">'\B01100001\B01100010\B01100011'</code></td></tr>
-      <tr><td><code>@k</code></td><td>Use kilobyte, megabyte, etc. notation for the value<br>(depending on the SI / BINARY mode)<br>as in <code style="color:blue;">2000 @k</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">1.95 Kibytes</code> (binary)<br>or <code style="color:blue;">2000 @k</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">2.00 Kbytes</code> (SI)</td></tr>
+      <tr><td><code>@k</code></td><td>Use kilobyte, megabyte, etc. notation for the value<br>(depending on the SI / BINARY mode)<br>as in <code style="color:blue;">2000 @k</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">1.95 Kibytes</code> (binary)<br>or <code style="color:blue;">2000 @k</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">2.00 Kbytes</code> (SI)<br>or <code style="color:blue;">2000 @K</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">2.00 Kilobytes</code> (SI)</td></tr>
       <tr><td><code>@w</code></td><td>Convert the (integer) value to words<br>as in <code style="color:blue;">235 @w</code><code style="color:gray;"> &#x21E8; </code><code style="color:green;">two hundred thirty-five</code></td></tr>
       <tr><td><code>@</code>[[<code>+</code>|<code>-</code>]<i>nn</i>][<code>,</code>|<code>_</code>]<code>%</code></td><td>Format as a percentage, with optional separators, and<br>optionally rounding to <i>nn</i> digits<br>as in <code style="color:blue;">10.08745 @2,%</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">1,008.75%</code></td></tr>
       <tr><td><code>@</code>[[<code>+</code>|<code>-</code>]<i>nn</i>][<code>,</code>|<code>_</code>]<code>$</code></td><td>Format as a currency value with the locale-specific currency symbol,<br>optionally setting separators and number of fraction digits<br>as in <code style="color:blue;">1500 @3,$</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">$1,500.000</code></td></tr>
@@ -764,8 +764,8 @@ or<br>
     <tr><td>33</td><td><i>object</i> <code>.</code> <i>member</i></td><td>access an object member</td><td>left to right</td></tr>
     <tr><td>32</td><td><i>expr</i> <code>HAS</code> ( <i>id</i> | <i>string</i> | <code>[</code> <i>expr</i> <code>]</code> )</td><td>safely check for member or index</td><td>left to right</td></tr>
     <tr><td>31</td><td><code>( </code><i>expr</i><code> )</code></td><td>group an expression</td><td>N/A</td></tr>
-    <tr><td rowspan="78">30</td>
-            <td><code>ABS</code>&nbsp;<i>expr</i></td><td>absolute value</td><td rowspan="78">left to right</td></tr>
+    <tr><td rowspan="81">30</td>
+            <td><code>ABS</code>&nbsp;<i>expr</i></td><td>absolute value</td><td rowspan="81">left to right</td></tr>
             <tr><td><code>SIN</code>&nbsp;<i>expr</i></td><td>sine</td></tr>
             <tr><td><code>COS</code>&nbsp;<i>expr</i></td><td>cosine</td></tr>
             <tr><td><code>TAN</code>&nbsp;<i>expr</i></td><td>tangent</td></tr>
@@ -822,6 +822,7 @@ or<br>
             <tr><td><code>FRAC</code>&nbsp;<i>num</i><code>,</code>&nbsp;<i>den</i><br>or <i>int</i><code>,</code><i>num</i><code>,</code><i>den</i><br>or <i>string</i></td><td>construct a rational fraction</td></tr>
             <tr><td><code>COMPLEX</code>&nbsp;<i>r</i><code>,</code>&nbsp;<i>i</i><br>or <i>expr</i></td><td>construct a complex number</td></tr>
             <tr><td><code>ROMAN</code>&nbsp;<i>expr</i></td><td>interpret <i>expr</i> as a Roman Numeral</td></tr>
+            <tr><td><code>TODATE</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;)&nbsp;)</td><td>convert expression(s) to a date value</td></tr>
             <tr><td><code>LOWER</code>&nbsp;<i>expr</i></td><td>convert <i>expr</i> to lower case</td></tr>
             <tr><td><code>UPPER</code>&nbsp;<i>expr</i></td><td>convert <i>expr</i> to UPPER case</td></tr>
             <tr><td><code>EVAL</code>&nbsp;<i>expr</i></td><td>evaluate the string result of <i>expr</i></td></tr>
@@ -835,6 +836,7 @@ or<br>
             <tr><td><code>DELETE</code>&nbsp;<i>expr</i>&nbsp;( <code>,</code>&nbsp;<i>expr</i> ) *</td><td>delete one or more files</td></tr>
             <tr><td><code>RENAME</code>&nbsp;<i>expr<sub>1</sub></i> <code>,</code> <i>expr<sub>2</sub></i></td><td>rename or move file<sub>1</sub> to file<sub>2</sub></td></tr>
             <tr><td><code>MATCHES</code>&nbsp;<i>expr</i>&nbsp;<code>,</code>&nbsp;<i>pattern_expr</i>&nbsp;( <code>,</code> <i>flags_expr</i> )</td><td>match the expression string against<br>the regular expression pattern with possible flags</td></tr>
+            <tr><td><code>CALLERS</code>&nbsp;<i>expr</i> ?</td><td>get all or one of the callers of the current function</td></tr>
             <tr><td><code>FACTORS</code>&nbsp;<i>expr</i></td><td>calculate all the factors of the number</td></tr>
             <tr><td><code>PFACTORS</code>&nbsp;<i>expr</i></td><td>calculate the prime factors of the number</td></tr>
             <tr><td><code>CHARS</code>&nbsp;<i>expr</i></td><td>break apart a string or an array of strings into separate characters<br>or convert a number to a single character</td></tr>
@@ -858,8 +860,9 @@ or<br>
         <i>expr</i>&nbsp;&nbsp;<code>*</code>, <code>&times;</code>, <code>&#x2217;</code>, <code>&#x2715;</code>, or <code>&#x2716;</code>&nbsp;&nbsp;<i>expr</i><br>
         <i>expr</i>&nbsp;&nbsp;<code>/</code>, <code>&divide;</code>, <code>&#x2215;</code>, or <code>&#x2797;</code>&nbsp;&nbsp;<i>expr</i><br>
         <i>expr</i>&nbsp;&nbsp;<code>\</code>, or <code>&#x2216;</code>&nbsp;&nbsp;<i>expr</i><br>
-        <i>expr</i>&nbsp;<code> % </code>&nbsp;<i>expr</i></td>
-        <td>multiply<br>divide<br>integer divide or set difference<br>remainder</td><td>left to right</td></tr>
+        <i>expr</i>&nbsp;<code> % </code>&nbsp;<i>expr</i><br>
+        <i>expr</i>&nbsp;<code> mod </code>&nbsp;<i>expr</i></td>
+        <td>multiply<br>divide<br>integer divide or set difference<br>remainder<br>modulus</td><td>left to right</td></tr>
     <tr><td>18</td><td>
         <i>expr</i>&nbsp;&nbsp;<code>+</code> or <code>&#x2795;</code>&nbsp;&nbsp;<i>expr</i><br>
         <i>expr</i>&nbsp;&nbsp;<code>-</code>,  <code>&#x2212;</code>, or <code>&#x2796;</code>&nbsp;&nbsp;<i>expr</i></td>
@@ -1015,17 +1018,22 @@ or<br>
      Also, for an object, if the drop list is omitted, the object is cleared of all values, but specifying an empty list
      will not clear any values, so be careful. For an array, specifying a start value and a count of zero will clear nothing.
   <p>The <code>fill</code> function requires a variable as the first argument. The contents of the variable are replaced or
-     set to the second argument value (or <code>null</code> or <code>'\0'</code> if missing), depending on the optional third and fourth parameters. If only the third argument is
+     set to the second argument value (or <code>null</code> or <code>'\0'</code> if missing), depending on the optional
+     third and fourth parameters. If only the third argument is
      given this is taken as the length, and the array or string is filled to that length with the value. If both the
      3<sup>rd</sup> and 4<sup>th</sup> arguments are given, these are taken as the starting offset and a length.
      If a string is filled and the starting offset is past the end of the existing string, the intervening characters are
      set to the <code>nul</code> character. The fill value for a string can only be one character, or an integer
      (in the range of 0..65535) that is converted to a char value (NOT a codepoint value!). If the 3<sup>rd</sup> value is missing,
      the existing array or string's length is used (that is, the entire existing value is overwritten).
-  <p>The <code>chars</code> and <code>codes</code> functions perform similarly, depending on their input arguments. For single character (for <code>codes</code>) or single integer (<code>chars</code>) values, the output will be the obverse value. For array inputs the outputs will be the corresponding array results. <code>Codes</code> always produces code points (values from 0 to 0x10FFFF). For multi-character string inputs, the outputs will be arrays of characters or integer codepoints.
-     If any character is outside the Unicode BMP, the resulting string will have a length of 2, consisting of the two 16-bit codes (a surrogate pair). For
-     <code>CODES</code> the same element in the returned array will have the single integer value of that codepoint. So, for the same input value, the length
-     of the returned arrays will be the same, regardless of the individual character values of the input. Does that make sense? If not, please read up on
+  <p>The <code>chars</code> and <code>codes</code> functions perform similarly, depending on their input arguments.
+     For single character (for <code>codes</code>) or single integer (<code>chars</code>) values, the output will be the obverse value.
+     For array inputs the outputs will be the corresponding array results. <code>Codes</code> always produces code points
+     (values from 0 to 0x10FFFF). For multi-character string inputs, the outputs will be arrays of characters or integer codepoints.
+     If any character is outside the Unicode BMP, the resulting string will have a length of 2, consisting of the two 16-bit codes
+     (a surrogate pair). For <code>CODES</code> the same element in the returned array will have the single integer value of that
+     codepoint. So, for the same input value, the length of the returned arrays will be the same, regardless of the individual
+     character values of the input. Does that make sense? If not, please read up on
      how Java deals with Unicode characters starting here: <a href="https://docs.oracle.com/javase/tutorial/i18n/text/unicode.html">Unicode and Java</a>.
   <p>The <code>formatstring</code> function works exactly like <code>String.format</code> in Java, or <code>sprintf</code> in C/C++, meaning the format string
      will (optionally) have replaceable parameters, which are replaced by the values of the respective arguments in the expression list. The completed
@@ -1045,6 +1053,18 @@ or<br>
      a fractional constant, such as <code>frac('1 &#x215c;')</code>, except that any of the Unicode fraction values can
      be expressed for this function as Unicode escape sequences in the string, as in <code>frac('2 \u215c')</code>
      while for an <code>f'...'</code> constant the real fraction character(s) must be used.
+  <p>In addition to date constants, the <code>ToDate</code> function can be used to convert many kinds of expressions to dates. Internally,
+     dates are simply signed integer values, so calling <code>todate</code> with a single integer value will produce a date value. Similarly
+     any string value in the same format as a date constant (without the leading <code>d</code> or <code>D</code> character) can be passed
+     as the single expression input. Using two values, the first should be a valid date constant string, while the second should be a date
+     format string, such as <code>"YYYY-MM-DD"</code>. If three values are given to <code>toDate</code>, they shoud be integer values of
+     month, day, and year (in that order), such as:
+     <code style="color:blue;">todate(9,8,2020)@e</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">d'2020-09-08'</code>.
+     If a single string is given, or one string with a null or empty format, the default ISO 8601 format ("YYYY-MM-DD")
+     is assumed. Not all invalid formats will produce an error, nor all mismatches of input and format. There should
+     always be either two or four <code>Y</code> values in the format. Single <code>M</code> or <code>D</code> values
+     in the format can only be used with delimiters. Pretty much any delimiters (non-digit characters) will be matched
+     by a <code>"-"</code> in the format string.
   <p>For most values the <code>upper</code> and <code>lower</code> functions simply convert the value to a string and do the case conversion on that string.
      But, for objects and lists the results are more subtle. For a list, the result is another list with all the values suitably
      case shifted. For an object, if <code>:ignorecase</code> is on the resulting object has only the values converted, while for
@@ -1086,7 +1106,9 @@ or<br>
      or <code>"-"</code>). For a regular file the charset can also be specified, although standard output will always use the system default. If the first expression result for <code>write</code> is an array, the output will be a series of lines using the system
      default line separator, with each array value written to a separate line. For an object the output will be in JSON format, and for all other values
      the result will be written as the string equivalent. Immediately writing the result of a read will produce an identical file.
-  <p>The return value from <code>delete</code> will be <code>true</code> if all the files are successfully deleted, <code>false</code> otherwise. While the return value from <code>rename</code> will be the full path of the destination file (that is, the new file name after the move).
+  <p>The return value from <code>delete</code> will be <code>true</code> if all the files are successfully deleted, <code>false</code>
+     otherwise. While the return value from <code>rename</code> will be the full path of the destination file (that is, the new file name
+     after the move).
      For <code>delete</code>, if the file does not exist the return will be <code>false</code> but no error is thrown. Other obvious problems,
      such as trying to delete a non-empty directory, will throw errors. Likewise <code>rename</code> will throw any errors that prevent the
      move or rename from happening.
@@ -1102,6 +1124,11 @@ or<br>
          <li><code>0x0010</code> = match multiline patterns</li>
          <li><code>0x0020</code> = only Unix line endings recognized</li>
      </ul>
+  <p>The <code>callers()</code> function returns either the name of the specified function caller (with a numeric parameter), or a list
+     of all callers (no parameter). The "name" is the full function name (including the parameter names). When called with a single
+     integer parameter to retrieve the caller at the specified level, <code>0</code> means the current function (so, the return is
+     equivalent to the <code>_funcname</code> predefined value), while any higher number is the full function name of the next outer
+     calling function. If there are not that many nested function calls, the value returned is <code>null</code>.
   <p>The <code>info</code> object contains seven read-only subobjects:  <code>version</code>, <code>libversion</code>,
      <code>cpu</code>, <code>os</code>, <code>java</code>, <code>locale</code>, and <code>timezone</code>.
      The contents of each are objects (<i>key</i>:<i>value</i> pairs) similar to this:

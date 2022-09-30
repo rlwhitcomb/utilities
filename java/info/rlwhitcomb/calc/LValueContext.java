@@ -115,6 +115,8 @@
  *	    #412: Refactor parameter to "toStringValue" using "StringFormat" structure.
  *	15-Aug-2022 (rlwhitcomb)
  *	    #440: Use correct math context for index conversion.
+ *	25-Sep-2022 (rlwhitcomb)
+ *	    Rename "toNonNullString" to "getNonNullString".
  */
 package info.rlwhitcomb.calc;
 
@@ -513,7 +515,7 @@ class LValueContext
 			return new LValueContext(arrLValue, arrVarCtx, arrValue, index);
 		    }
 		    else {
-			String memberName = visitor.toNonNullString(expr, indexValue);
+			String memberName = visitor.getNonNullString(expr, indexValue);
 			return arrLValue.makeMapLValue(visitor, arrVarCtx, arrValue, memberName);
 		    }
 		}
@@ -535,7 +537,7 @@ class LValueContext
 			index = CalcUtil.toIntValue(visitor, indexValue, visitor.getSettings().mc, expr);
 		    }
 		    else {
-			memberName = visitor.toNonNullString(expr, indexValue);
+			memberName = visitor.getNonNullString(expr, indexValue);
 		    }
 		}
 

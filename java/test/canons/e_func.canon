@@ -104,3 +104,13 @@
 >calls -> 1
 >valueFunc(3) -> { value: 3 }
 >calls -> 2
+>Defining function “n1(n)” = {
+> if n == 2 { :echo callers () }
+> if n == 0 { 0 }
+> else if n == 1 { :echo callers (1) ; 1 }
+> else { n + n1(n - 1) }
+>}
+>n1(0) -> 0
+>[ n1(n), n1(n) ]
+>n1(n)
+>n1(3) -> 6

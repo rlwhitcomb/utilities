@@ -82,6 +82,10 @@
 #	    #208: Change empty value error messages.
 #	18-Feb-2022 (rlwhitcomb)
 #	    #241: New error message for bad canon file directive.
+#	25-Sep-2022 (rlwhitcomb)
+#	    #488: New messages for memory reporting.
+#	28-Sep-2022 (rlwhitcomb)
+#	    #488: Also report free memory.
 #
 
 mismatch		= Mismatch on test \"%1$s\":%n  Canon file: %2$s%n Output file: %3$s
@@ -106,12 +110,17 @@ badCommand		= Unrecognized command \"%1$s\".
 badSyntax		= Test description line %1$d cannot be parsed:%n\t%2$s
 canonBadSyntax		= Directive in canon file cannot be recognized: "%1$s"
 totalTime		= " (%1$.6f secs total)"
-finalResultOne		= Ran %1$d test: %2$d passed, %3$d failed%4$s.
-finalResults		= Ran %1$d tests: %2$d passed, %3$d failed%4$s.
+totalMemory		= " (%1$s used, %2$s free)"
+finalResultOne		= Ran %1$d test: %2$d passed, %3$d failed%4$s%5$s.
+finalResults		= Ran %1$d tests: %2$d passed, %3$d failed%4$s%5$s.
 finalBreak		= "------------------------------------"
 finalBreakTiming	= "-----------------------------------------------------------"
+finalBreakMemory	= "---------------------------------------------------------------------"
+finalBreakBoth		= "--------------------------------------------------------------------------------------------"
 finalUnderline		= "===================================="
 finalUnderlineTiming	= "==========================================================="
+finalUnderlineMemory	= "====================================================================="
+finalUnderlineBoth	= "============================================================================================"
 initialFile		= Running %1$s...
 cannotOpenFile		= The '%1$s' file is either not found, not readable, or is not a regular file.
 readError		= Error reading '%1$s' file: %2$s
@@ -122,8 +131,12 @@ exception		= Exception thrown during testing: %1$s
 compareFiles		= compare files(\"%1$s\",%2$s,%3$s)
 statusPassed		= Passed
 statusFailed		= Failed
+statusTimingMemory	= %1$s (%2$.6f secs) (%3$s used, %4$s free)
 statusAndTiming		= %1$s (%2$.6f secs)
+statusAndMemory		= %1$s (%2$s used, %3$s free)
+timingMemory		= (%1$.6f secs) (%2$s used, %3$s free)
 timing			= (%1$.6f secs)
+memory			= (%1$s used, %2$s free)
 # Note: these next strings must preserve the trailing %n (if present)
 logVerbose		= Test '%1$s': command \"%2$s\"%n
 log			= "Test '%1$s': "

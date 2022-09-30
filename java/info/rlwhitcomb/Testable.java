@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2021 Roger L. Whitcomb.
+ * Copyright (c) 2021-2022 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,10 +24,9 @@
  *      An interface to assist with unit testing.
  *
  * History:
- *      22-Jan-2021 (rlwhitcomb)
- *          Initial coding.
- *	15-Mar-2021 (rlwhitcomb)
- *	    Add another return code.
+ *  22-Jan-21 rlw  ---	Initial coding.
+ *  15-Mar-21 rlw  ---	Add another return code.
+ *  26-Sep-22 rlw #489:	More return codes.
  */
 package info.rlwhitcomb;
 
@@ -60,6 +59,16 @@ public interface Testable
 
 	/** Test class not found. */
 	public static final int CLASS_NOT_FOUND = 7;
+
+	/** Directory argument is invalid. */
+	public static final int BAD_DIRECTORY   = 8;
+
+	/** Locale argument is invalid. */
+	public static final int BAD_LOCALE      = 9;
+
+	/** Charset argument is invalid. */
+	public static final int BAD_CHARSET     = 10;
+
 
 	/** Action completed -- return from setup for "help" (for instance). */
 	public static final int ACTION_DONE     = 98;

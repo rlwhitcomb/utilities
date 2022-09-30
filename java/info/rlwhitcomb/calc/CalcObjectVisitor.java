@@ -665,6 +665,16 @@
  *	    #469: Update "has" function to search objects recursively.
  *	31-Aug-2022 (rlwhitcomb)
  *	    #453: Return empty object for FileInfo if it doesn't exist.
+ *	08-Sep-2022 (rlwhitcomb)
+ *	    #475: Add "caller(n)" function for doing stack tracing.
+ *	12-Sep-2022 (rlwhitcomb)
+ *	    #480: Update KB constant range to beyond exabytes (and extend to BigInteger).
+ *	    Change '@K' to format using long names.
+ *	14-Sep-2022 (rlwhitcomb)
+ *	    #485: Add "mod" operator to multiply operator.
+ *	    Implement "ceil" and "floor" for fractions.
+ *	25-Sep-2022 (rlwhitcomb)
+ *	    #426: Add "toDate" function.
  */
 package info.rlwhitcomb.calc;
 
@@ -673,6 +683,7 @@ import info.rlwhitcomb.directory.FileInfo;
 import info.rlwhitcomb.directory.Match;
 import info.rlwhitcomb.math.BigFraction;
 import info.rlwhitcomb.math.ComplexNumber;
+import info.rlwhitcomb.math.DateUtil;
 import info.rlwhitcomb.math.MathUtil;
 import info.rlwhitcomb.math.NumericUtil;
 import info.rlwhitcomb.util.*;
@@ -1345,7 +1356,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    return value == null ? "" : toStringValue(this, ctx, value, new StringFormat(quote, separators));
 	}
 
-	public String toNonNullString(final ParserRuleContext ctx, final Object value) {
+	public String getNonNullString(final ParserRuleContext ctx, final Object value) {
 	    nullCheck(value, ctx);
 	    return toStringValue(this, ctx, value, new StringFormat(false, settings));
 	}
@@ -2426,17 +2437,11 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			break;
 
 		    case 'K':
-			toUpperCase = true;
-			// fall through
 		    case 'k':
 			iValue = toIntegerValue(this, result, settings.mc, ctx);
-			try {
-			    long lValue = iValue.longValueExact();
-			    valueBuf.append(NumericUtil.formatToRange(lValue, settings.units));
-			}
-			catch (ArithmeticException ae) {
-			    throw new CalcExprException(ae, ctx);
-			}
+			valueBuf.append(formatChar == 'K'
+			  ? NumericUtil.formatToRangeLong(iValue, settings.units)
+			  : NumericUtil.formatToRange(iValue, settings.units));
 			break;
 
 		    case 'W':
@@ -3304,7 +3309,7 @@ System.out.println("i = " + i + ", result = " + result);
 	    key = (id != null) ? id.getText()
 		: (str != null) ? getStringMemberName(str.getText())
 		: (istr != null) ? getIStringValue(this, istr, ctx)
-		: toNonNullString(indexExpr, indexValue);
+		: getNonNullString(indexExpr, indexValue);
 
 	    ObjectScope obj = (ObjectScope) source;
 
@@ -3692,7 +3697,11 @@ System.out.println("i = " + i + ", result = " + result);
 	    Object e1 = evaluate(ctx1);
 	    Object e2 = evaluate(ctx2);
 
-	    String op = ctx.MULT_OP().getText();
+	    String op;
+	    if (ctx.K_MOD() == null)
+		op = ctx.MULT_OP().getText();
+	    else
+		op = "mod";
 
 	    try {
 		if (settings.rationalMode) {
@@ -3714,6 +3723,8 @@ System.out.println("i = " + i + ", result = " + result);
 			case "\u2216":
 			    return f1.divide(f2);
 			case "%":
+			    return f1.remainder(f2);
+			case "mod":
 			    return f1.modulus(f2);
 			default:
 			    throw new UnknownOpException(op, ctx);
@@ -3738,6 +3749,8 @@ System.out.println("i = " + i + ", result = " + result);
 			case "\\":
 			case "\u2216":
 			case "%":
+			case "mod":
+			    // This one in particular potentially could be done with the same definition as for reals
 			default:
 			    throw new UnknownOpException(op, ctx);
 		    }
@@ -3776,6 +3789,8 @@ System.out.println("i = " + i + ", result = " + result);
 			    return fixupToInteger(d1.divideToIntegralValue(d2, settings.mcDivide));
 			case "%":
 			    return fixupToInteger(d1.remainder(d2, settings.mcDivide));
+			case "mod":
+			    return fixupToInteger(MathUtil.modulus(d1, d2, settings.mcDivide));
 			default:
 			    throw new UnknownOpException(op, ctx);
 		    }
@@ -4177,16 +4192,30 @@ System.out.println("i = " + i + ", result = " + result);
 
 	@Override
 	public Object visitCeilExpr(CalcParser.CeilExprContext ctx) {
-	    BigDecimal e = getDecimalValue(ctx.expr1().expr());
+	    if (settings.rationalMode) {
+		BigFraction f = getFractionValue(ctx.expr1().expr());
 
-	    return MathUtil.ceil(e);
+		return f.ceil();
+	    }
+	    else {
+		BigDecimal e = getDecimalValue(ctx.expr1().expr());
+
+		return MathUtil.ceil(e);
+	    }
 	}
 
 	@Override
 	public Object visitFloorExpr(CalcParser.FloorExprContext ctx) {
-	    BigDecimal e = getDecimalValue(ctx.expr1().expr());
+	    if (settings.rationalMode) {
+		BigFraction f = getFractionValue(ctx.expr1().expr());
 
-	    return MathUtil.floor(e);
+		return f.floor();
+	    }
+	    else {
+		BigDecimal e = getDecimalValue(ctx.expr1().expr());
+
+		return MathUtil.floor(e);
+	    }
 	}
 
 	@Override
@@ -4589,7 +4618,7 @@ System.out.println("i = " + i + ", result = " + result);
 	    if (sourceObj instanceof ObjectScope) {
 		// Return value is index of key in the map
 		ObjectScope obj = (ObjectScope) sourceObj;
-		String searchKey = toNonNullString(e1ctx, searchObj);
+		String searchKey = getNonNullString(e1ctx, searchObj);
 		size = obj.size();
 
 		ret = obj.indexOf(searchKey, start, settings.ignoreNameCase);
@@ -4613,8 +4642,8 @@ System.out.println("i = " + i + ", result = " + result);
 		return BigInteger.ONE;
 	    }
 	    else {
-		String sourceString = toNonNullString(e0ctx, sourceObj);
-		String searchString = toNonNullString(e1ctx, searchObj);
+		String sourceString = getNonNullString(e0ctx, sourceObj);
+		String searchString = getNonNullString(e1ctx, searchObj);
 		size = sourceString.length();
 
 		if (start < 0) {
@@ -5376,6 +5405,35 @@ System.out.println("i = " + i + ", result = " + result);
 	}
 
 	@Override
+	public Object visitDateExpr(CalcParser.DateExprContext ctx) {
+	    CalcParser.Expr1Context e1ctx = ctx.expr1();
+	    if (e1ctx != null) {
+		CalcParser.ExprContext expr = e1ctx.expr();
+		Object obj = evaluate(expr);
+		return DateUtil.valueOf(obj, "");
+	    }
+	    else {
+		CalcParser.Expr2Context e2ctx = ctx.expr2();
+		if (e2ctx != null) {
+		    CalcParser.ExprContext expr1 = e2ctx.expr(0);
+		    CalcParser.ExprContext expr2 = e2ctx.expr(1);
+		    String s = getNonNullString(expr1, evaluate(expr1));
+		    String f = getNonNullString(expr2, evaluate(expr2));
+
+		    return DateUtil.valueOf(s, f);
+		}
+		else {
+		    CalcParser.Expr3Context e3ctx = ctx.expr3();
+		    int m = getIntValue(e3ctx.expr(0));
+		    int d = getIntValue(e3ctx.expr(1));
+		    int y = getIntValue(e3ctx.expr(2));
+
+		    return DateUtil.date(m, d, y);
+		}
+	    }
+	}
+
+	@Override
 	public Object visitFracExpr(CalcParser.FracExprContext ctx) {
 	    try {
 		CalcParser.Expr1Context expr1 = ctx.expr1();
@@ -5569,7 +5627,7 @@ System.out.println("i = " + i + ", result = " + result);
 		ArrayScope<Object> array = (ArrayScope<Object>) value;
 		for (Object obj : array.list()) {
 		    if (obj instanceof String || obj instanceof Number) {
-			string = toNonNullString(expr, obj);
+			string = getNonNullString(expr, obj);
 			string.codePoints().forEachOrdered(cp -> result.add(cp));
 		    }
 		    else {
@@ -5580,7 +5638,7 @@ System.out.println("i = " + i + ", result = " + result);
 		return result;
 	    }
 	    else if (value instanceof String || value instanceof Number) {
-		string = toNonNullString(expr, value);
+		string = getNonNullString(expr, value);
 	    }
 	    else {
 		throw new CalcExprException(expr, "%calc#illegalArgument", typeof(value).toString(), "codes");
@@ -5798,7 +5856,7 @@ System.out.println("i = " + i + ", result = " + result);
 			ArrayScope<Object> array = (ArrayScope<Object>) outputObj;
 			StringBuilder buf = new StringBuilder();
 			for (Object obj : array.list()) {
-			    buf.append(toNonNullString(expr, obj)).append(eol);
+			    buf.append(getNonNullString(expr, obj)).append(eol);
 			}
 			seq = buf;
 		    }
@@ -5807,7 +5865,7 @@ System.out.println("i = " + i + ", result = " + result);
 			SetScope<Object> set = (SetScope<Object>) outputObj;
 			StringBuilder buf = new StringBuilder();
 			for (Object obj : set.set()) {
-			    buf.append(toNonNullString(expr, obj)).append(eol);
+			    buf.append(getNonNullString(expr, obj)).append(eol);
 			}
 			seq = buf;
 		    }
@@ -5817,7 +5875,7 @@ System.out.println("i = " + i + ", result = " + result);
 			seq = toStringValue(this, expr, obj.map(), new StringFormat(true, false, false, false, "", 0), "", 0);
 		    }
 		    else {
-			seq = toNonNullString(expr, outputObj);
+			seq = getNonNullString(expr, outputObj);
 		    }
 		    return BigInteger.valueOf(FileUtilities.writeRawText(seq, new File(fileName), cs));
 		}
@@ -5895,7 +5953,7 @@ System.out.println("i = " + i + ", result = " + result);
 
 		@Override
 		public Object apply(final Object value) {
-		    String string = toNonNullString(exprCtx, value);
+		    String string = getNonNullString(exprCtx, value);
 		    return pattern.matcher(string).matches() ? value : null;
 		}
 
@@ -5941,11 +5999,40 @@ System.out.println("i = " + i + ", result = " + result);
 	    }
 	    else {
 		// For ordinary objects, just return a boolean if the string representation matches the pattern
-		String inputString = toNonNullString(inputExpr, input);
+		String inputString = getNonNullString(inputExpr, input);
 		return Boolean.valueOf(p.matcher(inputString).matches());
 	    }
 	}
 
+	@Override
+	public Object visitCallersExpr(CalcParser.CallersExprContext ctx) {
+	    CalcParser.ExprContext expr = ctx.optExpr().expr();
+
+	    List<FunctionScope> funcStack = FunctionScope.getCallers(currentScope);
+
+	    if (expr != null) {
+		int level = getIntValue(expr);
+
+		if (level < 0 || level >= funcStack.size())
+		    return null;
+
+		return funcStack.get(level).getFullFunctionName();
+	    }
+	    else {
+		ArrayScope<String> callers = new ArrayScope<>();
+
+		for (FunctionScope func : funcStack) {
+		    callers.add(func.getFullFunctionName());
+		}
+
+		return callers;
+	    }
+	}
+
+
+	/**
+	 * Visitor for the {@code SumOf} function, to do the actual summing during iteration.
+	 */
 	private class SumOfVisitor implements Function<Object, Object>
 	{
 		private BigFraction sumFrac = BigFraction.ZERO;
@@ -6349,7 +6436,7 @@ System.out.println("i = " + i + ", result = " + result);
 	@Override
 	public Object visitKbValue(CalcParser.KbValueContext ctx) {
 	    String value = ctx.KB_CONST().getText();
-	    return BigInteger.valueOf(NumericUtil.convertKMGValue(value));
+	    return NumericUtil.convertKMGValue(value);
 	}
 
 	@Override
@@ -6409,9 +6496,6 @@ System.out.println("i = " + i + ", result = " + result);
 		throw new CalcExprException(iae, ctx);
 	    }
 	}
-
-	/** Strict ISO-8601 format for dates, suitable for parsing into a {@link LocalDate} value. */
-	private static final String ISO_8601_DATE = "%1$04d-%2$02d-%3$02d";
 
 	@Override
 	public Object visitDateValue(CalcParser.DateValueContext ctx) {
@@ -6479,12 +6563,7 @@ System.out.println("i = " + i + ", result = " + result);
 			year += 1900;
 		}
 
-		// Get a value in strict ISO-8601 format for parsing
-		value = String.format(negate ? "-" + ISO_8601_DATE : ISO_8601_DATE, year, month, day);
-		LocalDate date = LocalDate.parse(value);
-		epochDate = date.toEpochDay();
-
-		return BigInteger.valueOf(epochDate);
+		return DateUtil.date(month, day, negate ? -year : year);
 	    }
 	    catch (DateTimeParseException | NumberFormatException ex) {
 		throw new CalcExprException(ex, ctx);
@@ -6593,8 +6672,7 @@ System.out.println("i = " + i + ", result = " + result);
 			    result = f1.divide(f2);
 			    break;
 			case "%=":
-			    // ??? remainder of fraction / fraction is always 0
-			    result = BigFraction.ZERO;
+			    result = f1.remainder(f2);
 			    break;
 			default:
 			    throw new UnknownOpException(op, ctx);

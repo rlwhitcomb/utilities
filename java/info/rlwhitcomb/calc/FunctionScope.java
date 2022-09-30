@@ -50,10 +50,15 @@
  *	    #393: Cleanup imports.
  *	26-Aug-2022 (rlwhitcomb)
  *	    #458: Add "isParallel" and "isNestedInvocation" methods.
+ *	08-Sep-2022 (rlwhitcomb)
+ *	    #475: Add calls for getting function stack, and full function name.
  */
 package info.rlwhitcomb.calc;
 
 import org.antlr.v4.runtime.ParserRuleContext;
+
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -117,6 +122,15 @@ class FunctionScope extends ParameterizedScope
 	}
 
 	/**
+	 * Access the full function name (name + parameters).
+	 *
+	 * @return The function's full name.
+	 */
+	String getFullFunctionName() {
+	    return declaration.getFullFunctionName();
+	}
+
+	/**
 	 * Access the function declaration's function body.
 	 *
 	 * @return The complete function body, set at construction time.
@@ -164,6 +178,24 @@ class FunctionScope extends ParameterizedScope
 	@Override
 	public String toString() {
 	    return String.format("%1$s %2$s scope", toBookCase(), declaration.getFunctionName());
+	}
+
+	/**
+	 * Return a list of the current function stack, starting from the top.
+	 *
+	 * @param currentScope The top of the current (nested) scope list.
+	 * @return             The complete stack of functions, down to the global scope.
+	 */
+	public static List<FunctionScope> getCallers(final NestedScope currentScope) {
+	    List<FunctionScope> callers = new ArrayList<>();
+
+	    for (NestedScope scope = currentScope; scope != null; scope = scope.getEnclosingScope()) {
+		if (scope instanceof FunctionScope) {
+		    callers.add((FunctionScope) scope);
+		}
+	    }
+
+	    return callers;
 	}
 
 }

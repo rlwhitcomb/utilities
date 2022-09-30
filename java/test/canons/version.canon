@@ -26,4 +26,8 @@
 >input: '1.3.1_05-ea-b01' -> '1.3.1_05-ea-b01' passed
 >----- String Test #7 -----
 >
->VersionTest: number of tests: 7, number succeeded: 7, number failed: 0
+>===== String Test #8 =====
+>input: '1.8.0_345-b01' -> '1.8.0_345-b01' passed
+>----- String Test #8 -----
+>
+>VersionTest: number of tests: 8, number succeeded: 8, number failed: 0

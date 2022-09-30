@@ -218,10 +218,28 @@
  *	    #270: Make "loadMainProgramInfo" automatic now.
  *	08-Jul-2022 (rlwhitcomb)
  *	    #393: Cleanup imports.
+ *	12-Sep-2022 (rlwhitcomb)
+ *	    #443: Move charset and version checks in front of the stream markers; change the marker characters
+ *	    to "[. .]" and "{. .}".
+ *	21-Sep-2022 (rlwhitcomb)
+ *	    #448: Add support for wildcard specs on test command lines.
+ *	22-Sep-2022 (rlwhitcomb)
+ *	    #448: Sort the results of the wildcard file filter.
+ *	23-Sep-2022 (rlwhitcomb)
+ *	    #448: Move the wildcard processing code into a separate class (CommandLine) for reuse.
+ *	25-Sep-2022 (rlwhitcomb)
+ *	    #488: Options to report memory usage; hopefully to debug Windows unit test failures.
+ *	26-Sep-2022 (rlwhitcomb)
+ *	    #490: Debug printout of the command line.
+ *	    #489: Change exit status codes to the standard Testable ones.
+ *	27-Sep-2022 (rlwhitcomb)
+ *	    #488: Also report free memory size.
  */
 package info.rlwhitcomb.tester;
 
 import info.rlwhitcomb.Testable;
+import info.rlwhitcomb.directory.Match;
+import info.rlwhitcomb.math.NumericUtil;
 import info.rlwhitcomb.util.*;
 import name.fraser.neil.plaintext.diff_match_patch;
 
@@ -229,10 +247,12 @@ import java.io.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.nio.charset.UnsupportedCharsetException;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -265,6 +285,8 @@ public class Tester
 	private boolean verbose = false;
 	private boolean log = false;
 	private boolean timing = false;
+	private boolean memory = false;
+	private boolean debug = false;
 	private boolean abortOnFirstError = false;
 	private boolean defaultAbortOnFirstError = false;
 
@@ -506,6 +528,17 @@ public class Tester
 	    return compareFiles(testName, canonErr, realErr, cs);
 	}
 
+	private long freeMemory() {
+	    return Environment.freeMemorySize();
+	}
+
+	private long usedMemory() {
+	    return Environment.totalMemorySize() - freeMemory();
+	}
+
+	private String memory(final long value) {
+	    return NumericUtil.formatToRange(BigInteger.valueOf(value), NumericUtil.RangeMode.MIXED);
+	}
 
 	private void logTestName(final PrintStream origOut, final String testName, final String altTestName, final String commandLine) {
 	    if (!CharUtil.isNullOrEmpty(altTestName) && !testName.equals(altTestName)) {
@@ -583,6 +616,7 @@ public class Tester
 	    PrintStream newErr = null;
 
 	    long elapsedTime;
+	    long initialMemoryUsed = usedMemory();
 
 	    int exitCode = SUCCESS;
 
@@ -611,6 +645,11 @@ public class Tester
 		    }
 		    else {
 			try {
+			    String[] args = CommandLine.parse(commandLine, defaultScriptDir);
+			    if (debug) {
+				origOut.println("Command line = " + CharUtil.makeStringList(args));
+			    }
+
 			    // Preload the program's version information because otherwise the "main program"
 			    // will be us instead of them...
 			    Environment.loadProgramInfo(testClass);
@@ -622,7 +661,7 @@ public class Tester
 
 				currentVersion = new Version(testableObject.getVersion());
 
-				exitCode = testableObject.setup(CharUtil.parseCommandLine(commandLine));
+				exitCode = testableObject.setup(args);
 
 				logTestName(origOut, testName, testableObject.getTestName(), commandLine);
 
@@ -637,7 +676,7 @@ public class Tester
 
 				logTestName(origOut, testName, null, commandLine);
 
-				main.invoke(null, (Object) CharUtil.parseCommandLine(commandLine));
+				main.invoke(null, (Object) args);
 			    }
 			}
 			catch (NoSuchMethodException nsme) {
@@ -711,12 +750,27 @@ public class Tester
 		}
 
 		double elapsedSecs = (double)elapsedTime / (double)Environment.highResTimerResolution();
+		long usedMemory = usedMemory() - initialMemoryUsed;
+		long freeMemory = freeMemory();
+
 		if (log && !verbose) {
 		    String status = (ret == SUCCESS) ? "tester#statusPassed" : "tester#statusFailed";
-		    if (!timing)
-			Intl.outPrintln(status);
-		    else
+		    if (memory && timing)
+			Intl.outFormat("tester#statusTimingMemory",
+				Intl.getString(status), elapsedSecs, memory(usedMemory), memory(freeMemory));
+		    else if (memory)
+			Intl.outFormat("tester#statusAndMemory",
+				Intl.getString(status), memory(usedMemory), memory(freeMemory));
+		    else if (timing)
 			Intl.outFormat("tester#statusAndTiming", Intl.getString(status), elapsedSecs);
+		    else
+			Intl.outPrintln(status);
+		}
+		else if (memory && timing) {
+		    Intl.outFormat("tester#timingMemory", elapsedSecs, memory(usedMemory), memory(freeMemory));
+		}
+		else if (memory) {
+		    Intl.outFormat("tester#memory", memory(usedMemory), memory(freeMemory));
 		}
 		else if (timing) {
 		    Intl.outFormat("tester#timing", elapsedSecs);
@@ -842,13 +896,14 @@ public class Tester
 	 *		tests, and thus the line should be part of the test.
 	 */
 	private String platformAndVersionCheck(final String input) {
-	    if (input.startsWith("{")) {
-		int end = input.indexOf("}");
+	    if (input.startsWith("{.")) {
+		// {.version.}
+		int end = input.indexOf(".}");
 		if (end > 0) {
-		    String spec = input.substring(1, end);
+		    String spec = input.substring(2, end);
 		    if (spec.isEmpty())
 			return input;
-		    String canonLine = input.substring(end + 1);
+		    String canonLine = input.substring(end + 2);
 		    String[] parts = spec.split("\\,");
 		    if (parts.length == 1) {
 			// platform only
@@ -915,14 +970,14 @@ public class Tester
 		// Not a valid spec -- should this be an error?
 		return input;
 	    }
-	    else if (input.startsWith("[")) {
-		// [charset]...
-		int end = input.indexOf("]");
+	    else if (input.startsWith("[.")) {
+		// [.charset.]
+		int end = input.indexOf(".]");
 		if (end > 0) {
-		    String charsetName = input.substring(1, end);
+		    String charsetName = input.substring(2, end);
 		    if (charsetName.isEmpty())
 			return input;
-		    String canonLine = input.substring(end + 1);
+		    String canonLine = input.substring(end + 2);
 		    // "*" means any/all charsets (not necessary, but for annotation if desired)
 		    if (charsetName.equals("*")) {
 			return platformAndVersionCheck(canonLine);
@@ -1053,22 +1108,10 @@ public class Tester
 		    // and write the respective stream files
 		    String line = null;
 		    while ((line = canonReader.readLine()) != null) {
-			if (line.startsWith(">>")) {
-			    String outLine = platformAndVersionCheck(line.substring(2));
-			    files.writeErrorLine(outLine);
-			}
-			else if (line.startsWith(">")) {
-			    String outLine = platformAndVersionCheck(line.substring(1));
-			    files.writeOutputLine(outLine);
-			}
-			else if (line.startsWith("<")) {
-			    String outLine = platformAndVersionCheck(line.substring(1));
-			    files.writeInputLine(outLine);
-			}
 			// Comments are allowed (and ignored)
-			else if (line.startsWith("#") ||
-				 line.startsWith("!") ||
-				 line.startsWith("//")) {
+			if (line.startsWith("#") ||
+			    line.startsWith("!") ||
+			    line.startsWith("//")) {
 			    continue;
 			}
 			else if (line.startsWith("$")) {
@@ -1100,9 +1143,22 @@ public class Tester
 			    }
 			}
 			else if (!line.isEmpty()) {
-			    // Default is to treat the line as regular output
 			    String outLine = platformAndVersionCheck(line);
-			    files.writeOutputLine(outLine);
+			    if (outLine != null) {
+				if (outLine.startsWith(">>")) {
+				    files.writeErrorLine(outLine.substring(2));
+				}
+				else if (outLine.startsWith(">")) {
+				    files.writeOutputLine(outLine.substring(1));
+				}
+				else if (outLine.startsWith("<")) {
+				    files.writeInputLine(outLine.substring(1));
+				}
+				else {
+				    // Default is to write to standard output
+				    files.writeOutputLine(outLine);
+				}
+			    }
 			}
 			else {
 			    files.writeOutputLine("");
@@ -1335,7 +1391,7 @@ public class Tester
 	}
 
 
-	private AtomicInteger numberTests = new AtomicInteger();
+	private AtomicInteger numberTested = new AtomicInteger();
 	private AtomicInteger numberPassed = new AtomicInteger();
 	private AtomicInteger numberFailed = new AtomicInteger();
 
@@ -1394,7 +1450,7 @@ public class Tester
 			    break;
 		    }
 
-		    numberTests.incrementAndGet();
+		    numberTested.incrementAndGet();
 
 		    Matcher m = DESCRIPTION.matcher(line);
 		    if (m.matches()) {
@@ -1445,16 +1501,31 @@ public class Tester
 	}
 
 
+	private void header(final String key, final boolean last) {
+	    if (memory && timing)
+		Intl.outPrintln("tester#" + key + "Both");
+	    else if (memory)
+		Intl.outPrintln("tester#" + key + "Memory");
+	    else if (timing)
+		Intl.outPrintln("tester#" + key + "Timing");
+	    else if (last)
+		Intl.outPrintln("tester#" + key);
+	}
+
+
 	/**
 	 * Drive all the tests from the given test description file.
 	 *
 	 * @param desc	The test description file attributes.
 	 */
 	private void driveTests(final DescriptionFile desc) {
-	    Intl.outPrintln(timing ? "tester#finalUnderlineTiming" : "tester#finalUnderline");
+	    long initialMemory = usedMemory();
+
+	    header("finalUnderline", true);
+
 	    Intl.outFormat("tester#initialFile", desc.toString());
-	    if (timing || verbose || log)
-		Intl.outPrintln(timing ? "tester#finalBreakTiming" : "tester#finalBreak");
+
+	    header("finalBreak", verbose || log);
 
 	    driveOneTest(desc);
 
@@ -1463,15 +1534,24 @@ public class Tester
 		double elapsedSecs = (double)totalElapsedTime / (double)Environment.highResTimerResolution();
 		totalTiming = Intl.formatString("tester#totalTime", elapsedSecs);
 	    }
-	    Intl.outPrintln(timing ? "tester#finalBreakTiming" : "tester#finalBreak");
+	    String totalMemory = "";
+	    if (memory) {
+		long finalMemory = usedMemory();
+		long freeMemory  = freeMemory();
+		totalMemory = Intl.formatString("tester#totalMemory", memory(finalMemory - initialMemory), memory(freeMemory));
+	    }
 
-	    int tests = numberTests.intValue();
+	    header("finalBreak", true);
+
+	    int tested = numberTested.intValue();
 	    int passed = numberPassed.intValue();
 	    int failed = numberFailed.intValue();
 
-	    Intl.outFormat(tests == 1 ? "tester#finalResultOne" : "tester#finalResults",
-		    tests, passed, failed, totalTiming);
-	    Intl.outPrintln(timing ? "tester#finalUnderlineTiming" : "tester#finalUnderline");
+	    Intl.outFormat(tested == 1 ? "tester#finalResultOne" : "tester#finalResults",
+		    tested, passed, failed, totalTiming, totalMemory);
+
+	    header("finalUnderline", true);
+
 	    Intl.outPrintln();
 	}
 
@@ -1486,6 +1566,8 @@ public class Tester
 	    verbose = false;
 	    log     = false;
 	    timing  = false;
+	    memory  = false;
+	    debug   = false;
 
 	    abortOnFirstError = defaultAbortOnFirstError = false;
 
@@ -1502,7 +1584,7 @@ public class Tester
 	private void checkNullValue(final String arg1, final String optionValue) {
 	    if (CharUtil.isNullOrEmpty(arg1)) {
 		Intl.errFormat("tester#emptyArgFor", optionValue);
-		System.exit(2);
+		System.exit(MISSING_OPTION);
 	    }
 	}
 
@@ -1536,8 +1618,12 @@ public class Tester
 		log = true;
 	    else if (Options.matchesOption(opt, true, "timing", "time", "t"))
 		timing = log = true;
+	    else if (Options.matchesOption(opt, true, "memory", "mem", "m"))
+		memory = log = true;
 	    else if (Options.matchesOption(opt, true, "createcanons", "create", "c"))
 		createCanons = true;
+	    else if (Options.matchesOption(opt, true, "debug"))
+		debug = true;
 	    else if (Options.matchesOption(opt, true, ABORT_OPTIONS))
 		abortOnFirstError = defaultAbortOnFirstError = true;
 	    else if (Options.matchesOption(opt, true, NO_ABORT_OPTIONS))
@@ -1550,7 +1636,7 @@ public class Tester
 		}
 		else {
 		    Intl.errFormat("tester#badInputDirArg", arg1);
-		    System.exit(2);
+		    System.exit(BAD_DIRECTORY);
 		}
 	    }
 	    else if (Options.matchesOption(opt, "locale", "loc")) {
@@ -1562,7 +1648,7 @@ public class Tester
 		}
 		catch (IllegalArgumentException iae) {
 		    System.err.println(Exceptions.toString(iae));
-		    System.exit(2);
+		    System.exit(BAD_LOCALE);
 		}
 		Locale.setDefault(locale);
 		Intl.initAllPackageResources(locale);
@@ -1577,7 +1663,7 @@ public class Tester
 		}
 		catch (Exception ex) {
 		    System.err.println(Exceptions.toString(ex));
-		    System.exit(2);
+		    System.exit(BAD_CHARSET);
 		}
 	    }
 	    else if (Options.matchesOption(opt, true, "testclass", "class", "test")) {
@@ -1587,7 +1673,7 @@ public class Tester
 		}
 		catch (NoClassDefFoundError | ClassNotFoundException | ExceptionInInitializerError ex) {
 		    Intl.errFormat("tester#testClassNotFound", arg1, Exceptions.toString(ex));
-		    System.exit(2);
+		    System.exit(CLASS_NOT_FOUND);
 		}
 	    }
 	    else if (Options.matchesOption(opt, true, "ignoreoptions", "ignoreopt", "ignore", "ign", "i")) {
@@ -1595,16 +1681,16 @@ public class Tester
 	    }
 	    else if (Options.matchesOption(opt, true, "version", "vers", "ver")) {
 		Environment.printProgramInfo();
-		System.exit(0);
+		System.exit(ACTION_DONE);
 	    }
 	    else if (Options.matchesOption(opt, true, "help", "h", "?")) {
 		Environment.printProgramInfo();
 		Intl.printHelp("tester#");
-		System.exit(0);
+		System.exit(ACTION_DONE);
 	    }
 	    else {
 		Intl.errFormat("tester#badOption", opt);
-		System.exit(2);
+		System.exit(BAD_ARGUMENT);
 	    }
 	}
 

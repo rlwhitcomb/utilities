@@ -21,37 +21,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  *
- *	An interface for text file processors that examines one
- *	line at a time.
+ *	An interface for text file processors that examines one line at a time.
  *
- *  History:
- *	06-Jan-2015 (rlwhitcomb)
- *	    Created.
- *	27-Jan-2015 (rlwhitcomb)
- *	    Add "enterDirectory" method.
- *	31-Aug-2015 (rlwhitcomb)
- *	    Cleanup Javadoc (found by Java 8).
- *	16-Jun-2017 (rlwhitcomb)
- *	    Code cleanup.  Change return value from "handleError" to indicate
- *	    whether to terminate processing of the file/directory.
- *	18-Feb-2020 (rlwhitcomb)
- *	    Eliminate the Adapter class in favor of default methods; use StandardCharsets
- *	    for the UTF-8 charset; add "exitDirectory" method (for use with parallel processing).
- *	10-Mar-2020 (rlwhitcomb)
- *	    Prepare for GitHub.
- *	21-Dec-2020 (rlwhitcomb)
- *	    Update obsolete Javadoc constructs.
- *	06-Sep-2021 (rlwhitcomb)
- *	    Final parameters.
- *	18-Feb-2022 (rlwhitcomb)
- *	    Use Exceptions to get better error messages.
+ * History:
+ *  06-Jan-15 rlw  ---	Created.
+ *  27-Jan-15 rlw  ---	Add "enterDirectory" method.
+ *  31-Aug-15 rlw  ---	Cleanup Javadoc (found by Java 8).
+ *  16-Jun-17 rlw  ---	Code cleanup.  Change return value from "handleError" to indicate
+ *			whether to terminate processing of the file/directory.
+ *  18-Feb-20 rlw  ---	Eliminate the Adapter class in favor of default methods; use StandardCharsets
+ *			for the UTF-8 charset; add "exitDirectory" method (for use with parallel processing).
+ *  10-Mar-20 rlw  ---	Prepare for GitHub.
+ *  21-Dec-20 rlw  ---	Update obsolete Javadoc constructs.
+ *  06-Sep-21 rlw  ---	Final parameters.
+ *  18-Feb-22 rlw  ---	Use Exceptions to get better error messages.
+ *  19-Sep-22 rlw #448:	Change "exitDirectory" default return value.
  */
 package info.rlwhitcomb.util;
+
+import info.rlwhitcomb.util.Constants;
 
 import java.io.File;
 import java.io.FileFilter;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 
 
 /**
@@ -73,7 +65,7 @@ public interface LineProcessor extends FileFilter
 	 *		to use the platform default character set.
 	 */
 	default Charset getCharset() {
-	    return StandardCharsets.UTF_8;
+	    return Constants.UTF_8_CHARSET;
 	}
 
 	/**
@@ -123,7 +115,7 @@ public interface LineProcessor extends FileFilter
 	 * @return	{@code true} to continue processing, {@code false} to stop.
 	 */
 	default boolean exitDirectory(final File directory, final int level, final boolean error) {
-	    return true;
+	    return !error;
 	}
 
 	/**

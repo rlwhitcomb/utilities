@@ -266,6 +266,29 @@ ty\=6
 10\3
 5\6
 
+# "mod" and remainder operators
+21 % 4
+21 mod 4
+-21 % 4
+-21 mod 4
+-21 % -4
+-21 mod -4
+21 % -4
+21 mod -4
+
+:frac on {
+g1 = 2/3
+g2 = 9/7
+g1 % g2
+g1 mod g2
+-g1 % g2
+-g1 mod g2
+g1 % -g2
+g1 mod -g2
+-g1 % -g2
+-g1 mod -g2
+}
+
 # Bit and logical operators
 127 | 128
 15 & 7
@@ -539,6 +562,7 @@ foundset.username='Don'
 1000**4@k
 :mixed
 1024**3@k
+2000**10@K
 
 100MB
 2EB
@@ -546,6 +570,7 @@ foundset.username='Don'
 900KB@k
 300PB
 450PiB
+320Yb @K
 
 :binary { settings.units }
 :si { settings.units }
@@ -851,7 +876,18 @@ D'1/1/1999'@e
 _waterloo = d'1815/6/18'
 _waterloo@e;_waterloo@E
 
-
+toDate('2022-7-2', 'yyyy-m-d')
+ToDate('2022-07-02', 'yyyy-m-d')
+todate('2022-07-02', 'yyyy-mm-dd')
+TODATE('20220702', 'yyyymmdd')
+todate('220702', 'yymmdd')
+ToDate('7/2/-22', 'd-m-yy')
+TODATE('7-2--2022', 'd-m-yyyy')
+todate('-1100-02-03', "")
+todate(17802)@E
+ToDate(join(['2018', '09', '28'], '-'))@e
+todate(6,30,2020)
+toDate(12,31,1999)
 
 #
 # Play around with "," formatting

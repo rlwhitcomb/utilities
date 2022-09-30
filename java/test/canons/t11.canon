@@ -12,9 +12,19 @@
 >Test 'tottery': Passed
 >Test 'dacted': Passed
 >Test 'bigyuvi': Passed
+>Test 'abecedarians': Passed
+>Test 'absorbabilities': Passed
+>Test 'facultatively': Passed
+>Test 'gadzookeries': Passed
+>Test 'hairsplittings': Passed
+>Test 'laggardnesses': Passed
+>Test 'oxyphenbutazone': Passed
+>Test 'radiochemically': Passed
+>Test 'zygodactylous': Passed
+>Test 'abcdefghijklmnop': Passed
 >
 >Done with WordFind tests.
 >------------------------------------
->Ran 9 tests: 9 passed, 0 failed.
+>Ran 19 tests: 19 passed, 0 failed.
 >====================================
 >
