@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.14.38', date: d'2022-09-30',
+      issues: [ 288 ],
+      comment: 'Provide the best rational approximations of PI up to 26 digits; expand rational PHI values.'
+    },
     { version: '2.14.36', date: d'2022-09-30',
       issues: [ 496 ],
       comment: 'Commas in "@w" format are determined by ",_" modifiers and/or "separators" mode.'
