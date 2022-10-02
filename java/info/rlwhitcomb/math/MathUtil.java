@@ -66,6 +66,8 @@
  *	30-Sep-2022 (rlwhitcomb)
  *	    Enlarge the "ratphi" table up to precision of 1,000.
  *	    #288: Add a method to return rational values of pi up to a certain precision.
+ *	01-Oct-2022 (rlwhitcomb)
+ *	    #288: Add source links to the PI_VALUES table, rename "piFraction" to "ratpi".
  */
 package info.rlwhitcomb.math;
 
@@ -402,6 +404,10 @@ public final class MathUtil
 
 	/**
 	 * The best rational approximations of pi for each precision (number of significant digits).
+	 * <p> Taken from these tables:
+	 * <a href="http://oeis.org/A002485">http://oeis.org/A002485</a> and
+	 * <a href="http://oeis.org/A002486">http://oeis.org/A002486</a>, with
+	 * the last numerator interpolated from the last denominator (by multiplying by pi).
 	 */
 	private static final long[][] PI_VALUES = {
 		{               3L,              1L },
@@ -443,7 +449,7 @@ public final class MathUtil
 	 *			precision falls outside our table of values.
 	 * @see #PI_VALUES
 	 */
-	public static BigFraction piFraction(final int precision) {
+	public static BigFraction ratpi(final int precision) {
 	    if (precision > 0 && precision <= PI_VALUES.length) {
 		return new BigFraction(PI_VALUES[precision - 1][0], PI_VALUES[precision - 1][1]);
 	    }

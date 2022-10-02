@@ -24,11 +24,27 @@ phi
 1/PHI == phi
 PHI+1 == phi
 :rational on {
-phi
-PHI
-phi@d
+  phi
+  PHI
+  phi@d
 }
 
+:decimal 989 {
+  :rational on {
+    pf = phi
+  }
+  pd = phi
+  pd - ~~pf
+}
+
+# Tests of rational pi
+loop pre over 1..26 {
+   :decimal pre
+   :rational on { ratpi = pi }
+   ~~ratpi == pi
+}
+
+:decimal(50)
 sin(pi/3)
 4 & 7
 true && false
