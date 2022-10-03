@@ -1,0 +1,438 @@
+/*======================*/
+/* Calc Version History */
+/*======================*/
+
+[
+    { version: '2.14.40', date: d'2022-10-03',
+      issues: [ 499 ],
+      comment: 'Set rational mode for PI values right away (from command line argument).'
+    },
+    { version: '2.14.38', date: d'2022-09-30',
+      issues: [ 288 ],
+      comment: 'Provide the best rational approximations of PI up to 26 digits; expand rational PHI values.'
+    },
+    { version: '2.14.36', date: d'2022-09-30',
+      issues: [ 496 ],
+      comment: 'Commas in "@w" format are determined by ",_" modifiers and/or "separators" mode.'
+    },
+    { base: '1.9.32', date: d'2022-09-27',
+      issues: [ 491 ],
+      comment: 'Correct the setting of Java major version for versions <= 8.'
+    },
+    { version: '2.14.35', date: d'2022-09-25',
+      issues: [ 426 ],
+      comment: 'The "ToDate" function with 1, 2, or 3 parameters; additional function name aliases.'
+    },
+    { base: '1.9.30', date: d'2022-09-21',
+      issues: [ 448 ],
+      comment: 'Add wildcard support on Tester test command lines.'
+    },
+    { version: '2.14.30', date: d'2022-09-17',
+      issues: [ 485 ],
+      comment: '''Add "mod" operator; fix "%" to be consistently "remainder"; implement
+\t "floor" and "ceil" for fractions.'''
+    },
+    { version: '2.14.28', date: d'2022-09-13',
+      issues: [ 480 ],
+      comment: '''Extend the range of "KB" notation out to the currently defined limits;
+\t change "@K" to use long form suffix.'''
+    },
+    { version: '2.14.26', date: d'2022-09-08',
+      issues: [ 475 ],
+      comment: 'Add "callers" function.'
+    },
+    { version: '2.14.25', date: d'2022-08-31',
+      issues: [ 471 ],
+      comment: 'Allow "-ctrlenter" and "-ctrl" command line options.'
+    },
+    { version: '2.14.24', date: d'2022-08-31',
+      issues: [ 453 ],
+      comment: 'Add "FileInfo" predefined function.'
+    },
+    { version: '2.14.22', date: d'2022-08-29',
+      issues: [ 469 ],
+      comment: 'The "has" operator will now search objects recursively.'
+    },
+    { version: '2.14.20', date: d'2022-08-28',
+      issues: [ 464 ],
+      comment: 'Add "-output", "-error", and "-outcs" options for output redirection.'
+    },
+    { version: '2.14.15', date: d'2022-08-25',
+      issues: [ 465 ],
+      comment: 'Implement "delete" and "rename" (file) functions.'
+    },
+    { version: '2.14.11', date: d'2022-08-25',
+      issues: [ 466 ],
+      comment: 'Pretty up the return value from "defining" statements, for "eval".'
+    },
+    { version: '2.14.10', date: d'2022-08-24',
+      issues: [ 447 ],
+      comment: 'Implement "grads" trig mode.'
+    },
+    { version: '2.14.8', date: d'2022-08-24',
+      issues: [ 454 ],
+      comment: 'Add ":colors" directive.'
+    },
+    { version: '2.14.6', date: d'2022-08-23',
+      issues: [ 459 ],
+      comment: 'Implement "@@" (to string) operator.'
+    },
+    { version: '2.14.5', date: d'2022-08-23',
+      issues: [ 455 ],
+      comment: 'Change the way "chars" and "codes" work for different input values.'
+    },
+    { version: '2.14.1', date: d'2022-08-23',
+      issues: [ 452 ],
+      comment: 'Fix bug resulting from "leave" without value returning from function.'
+    },
+    { version: '2.14.0', date: d'2022-08-19',
+      issues: [ 439 ],
+      comment: 'Add "next" statement for loop, while, and case.'
+    },
+    { version: '2.13.58', date: d'2022-08-15',
+      issues: [ 440 ],
+      comment: 'Implement "has" operator.'
+    },
+    { version: '2.13.57', date: d'2022-08-09',
+      issues: [ 436 ],
+      comment: 'Change display of ":vars" and ":predefs" to show "var", "const", or "define".'
+    },
+    { version: '2.13.56', date: d'2022-08-08',
+      issues: [ 432 ],
+      comment: 'Add "-text", "-file", and "-filetext"  options.'
+    },
+    { version: '2.13.55', date: d'2022-07-30',
+      issues: [ 390 ],
+      comment: 'Allow "case" as an expression.'
+    },
+    { version: '2.13.54', date: d'2022-07-29',
+      issues: [ 402 ],
+      comment: 'Add "-requires" (and/or "-base") options to command line.'
+    },
+    { version: '2.13.52', date: d'2022-07-28',
+      issues: [ 429 ],
+      comment: 'Make "info.cpu" memory values dynamic; add "usedmemory" value.'
+    },
+    { version: '2.13.50', date: d'2022-07-24',
+      issues: [ 412 ],
+      comment: 'Add format specifier for levels to skip on "@j" format.'
+    },
+    { version: '2.13.46', date: d'2022-07-19',
+      issues: [ 417 ],
+      comment: 'Throw error on ":include" if the file cannot be found.'
+    },
+    { version: '2.13.45', date: d'2022-07-19',
+      issues: [ 420 ],
+      comment: 'Recognize more complex number forms in "complex" function.'
+    },
+    { version: '2.13.43', date: d'2022-07-14',
+      issues: [ 408 ],
+      comment: 'Change dummy map key names to legal ones (as in "_nn").'
+    },
+    { version: '2.13.42', date: d'2022-07-13',
+      issues: [ 407 ],
+      comment: 'Fix bug not being able to set initial map member using ".member" notation.'
+    },
+    { version: '2.13.40', date: d'2022-07-11',
+      issues: [ 401, 290 ],
+      comment: 'Finish bracket block support for all mode directives.'
+    },
+    { version: '2.13.36', date: d'2022-07-11',
+      issues: [ 403 ],
+      comment: 'Add raw string support with s"...".'
+    },
+    { version: '2.13.35', date: d'2022-07-11',
+      issues: [ 401 ],
+      comment: 'Fix returning the enclosed scope\'s value for bracket blocks on directives.'
+    },
+    { version: '2.13.32', date: d'2022-07-11',
+      issues: [ 404 ],
+      comment: 'Fix bug in "@s" formatting of objects, sets, and arrays.'
+    },
+    { version: '2.13.30', date: d'2022-07-10',
+      issues: [ 392 ],
+      comment: 'New options and directives to create objects sorted by key.'
+    },
+    { version: '2.13.20', date: d'2022-07-09',
+      issues: [ 397 ],
+      comment: 'Add multiline string support with """...""".'
+    },
+    { version: '2.13.18', date: d'2022-07-08',
+      issues: [ 394 ],
+      comment: 'Allow end of lines around assignment operators.'
+    },
+    { version: '2.13.17', date: d'2022-07-07',
+      issues: [ 389 ],
+      comment: 'The "var" statement doesn\'t require an initial value.'
+    },
+    { version: '2.13.16', date: d'2022-07-06',
+      issues: [ 388 ],
+      comment: 'Add "matches" flags to case statement\'s "matches" selector.'
+    },
+    { version: '2.13.14', date: d'2022-07-06',
+      issues: [ 375 ],
+      comment: 'Allow more newlines in potentially long logical expressions.'
+    },
+    { version: '2.13.12', date: d'2022-07-05',
+      issues: [ 291 ],
+      comment: '''Add optional pattern matching flags to "matches" function;
+\t add flag constants to "library".'''
+    },
+    { version: '2.13.10', date: d'2022-06-29',
+      issues: [ 381 ],
+      comment: 'Revamp sort completely, and make it work for maps (either key or value).'
+    },
+    { base: '1.9.23', version: '2.13.6', date: d'2022-06-29',
+      issues: [ 380 ],
+      comment: 'Increase file size readable as one string.'
+    },
+    { version: '2.13.6', date: d'2022-06-29',
+      issues: [ 383 ],
+      comment: 'Display action message for "var" statement.'
+    },
+    { version: '2.13.5', date: d'2022-06-29',
+      issues: [ 384 ],
+      comment: 'Disallow the exotic "truth" values such as "T"/"F", "yes"/"no", etc.'
+    },
+    { version: '2.13.4', date: d'2022-06-27',
+      issues: [ 376 ],
+      comment: 'New exact case flag for "exists".'
+    },
+    { version: '2.13.3', date: d'2022-06-25',
+      issues: [ 314 ],
+      comment: 'Add set difference.'
+    },
+    { version: '2.13.2', date: d'2022-06-24',
+      issues: [ 373 ],
+      comment: 'Add "exists" function for files and directories.'
+    },
+    { version: '2.13.0', date: d'2022-06-22',
+      issues: [ 314 ],
+      comment: 'Add "set" as a basic type.'
+    },
+    { version: '2.12.25', date: d'2022-06-20',
+      issues: [ 364 ],
+      comment: 'Allow ":echo" to output different places.'
+    },
+    { version: '2.12.22', date: d'2022-06-20',
+      issues: [ 365 ],
+      comment: 'Actually implement "const" objects and lists.'
+    },
+    { version: '2.12.21', date: d'2022-06-15',
+      issues: [ 191 ],
+      comment: 'Change "reverse" to return a new array instead of changing inline.'
+    },
+    { version: '2.12.19', date: d'2022-06-11',
+      issues: [ 365 ],
+      comment: 'Mark all predefined objects and arrays as immutable.'
+    },
+    { version: '2.12.18', date: d'2022-06-11',
+      issues: [ 363 ],
+      comment: 'Set process exit code on errors in non-REPL mode.'
+    },
+    { version: '2.12.17', date: d'2022-06-05',
+      issues: [ 351 ],
+      comment: 'Change display of statement blocks.'
+    },
+    { version: '2.12.16', date: d'2022-06-04',
+      issues: [ 361 ],
+      comment: 'Fix a bug referencing an object returned by a function.'
+    },
+    { version: '2.12.15', date: d'2022-06-01',
+      issues: [ 45 ],
+      comment: 'Update "read" to read file exactly; implement "write".'
+    },
+    { base: '1.9.22', version: '2.12.13', date: d'2022-05-31',
+      issues: [ 301 ],
+      comment: 'Further extend "@w" range out to 10^1_000_000_000.'
+    },
+    { version: '2.12.12', date: d'2022-05-30',
+      issues: [ 301 ],
+      comment: 'Extend range of "@w" conversions out to 10^3000 or so.'
+    },
+    { version: '2.12.10', date: d'2022-05-28',
+      issues: [ 344 ],
+      comment: 'Quote "env" map keys that aren\'t valid identifiers.'
+    },
+    { version: '2.12.9', date: d'2022-05-28',
+      issues: [ 354 ],
+      comment: 'Change "Clear" button text in GUI.'
+    },
+    { version: '2.12.8', date: d'2022-05-28',
+      issues: [ 355 ],
+      comment: 'Define "_funcname" constant inside functions.'
+    },
+    { version: '2.12.7', date: d'2022-05-28',
+      issues: [ ],
+      comment: 'General refactoring to correct file sizes.'
+    },
+    { version: '2.12.6', date: d'2022-05-27',
+      issues: [ 320 ],
+      comment: 'Rework "Transformer"-based functions that use filtering (such as "matches").'
+    },
+    { version: '2.12.5', date: d'2022-05-26',
+      issues: [ 320 ],
+      comment: 'Rework "matches" to select fields and elements in compound objects.'
+    },
+    { version: '2.12.2', date: d'2022-05-26',
+      issues: [ 346 ],
+      comment: 'Fix problems with "uuid" in Windows Calc GUI.'
+    },
+    { version: '2.12.1', date: d'2022-05-25',
+      issues: [ 349 ],
+      comment: 'Fix sort on multi-level arrays and objects.'
+    },
+    { version: '2.12.0', date: d'2022-05-25',
+      issues: [ 348 ],
+      comment: 'Add "var" statement; fix errors setting local variables.'
+    },
+    { version: '2.11.5', date: d'2022-05-23',
+      issues: [ 341 ],
+      comment: 'Add "~~" operator (convert to number).'
+    },
+    { base: '1.9.21', date: d'2022-05-23',
+      issues: [ ],
+      comment: 'Provide a default value on Windows if PATHEXT is not present.'
+    },
+    { version: '2.11.2', date: d'2022-05-23',
+      issues: [ ],
+      comment: 'Reword an error message to give more information.'
+    },
+    { version: '2.11.1', date: d'2022-05-22',
+      issues: [ 340 ],
+      comment: 'Use new "Which" methods for "exec".'
+    },
+    { version: '2.11.0', date: d'2022-05-22',
+      issues: [ ],
+      comment: 'Simplify the grammar to get rid of the slowdown.'
+    },
+    { version: '2.10.29', date: d'2022-05-21',
+      issues: [ 327 ],
+      comment: 'Add "unique" function for arrays and strings.'
+    },
+    { version: '2.10.28', date: d'2022-05-20',
+      issues: [ 339 ],
+      comment: 'Small tweaks to ensure integers stay integers after math ops.'
+    },
+    { version: '2.10.27', date: d'2022-05-20',
+      issues: [ 334 ],
+      comment: 'Changes for "@Q" formatting.'
+    },
+    { version: '2.10.26', date: d'2022-05-20',
+      issues: [ 334 ],
+      comment: 'More fixes for "\\" chars in string results.'
+    },
+    { version: '2.10.25', date: d'2022-05-20',
+      issues: [ 315, 334 ],
+      comment: '''Fix parsing of strings inside embedded expressions in interpolated strings.
+\t Protect against errors using "--" on empty lists.'''
+    },
+    { version: '2.10.23', date: d'2022-05-18',
+      issues: [ 335 ],
+      comment: 'Allow "base" as id again.'
+    },
+    { version: '2.10.22', date: d'2022-05-18',
+      issues: [ 315 ],
+      comment: 'Fix bug with obj + list or list + obj concatenation.'
+    },
+    { version: '2.10.21', date: d'2022-05-17',
+      issues: [ 333 ],
+      comment: 'Reword "non-object" and "non-array" messages.'
+    },
+    { version: '2.10.20', date: d'2022-05-17',
+      issues: [ 334 ],
+      comment: 'Fix extra string processing for ":echo".'
+    },
+    { version: '2.10.19', date: d'2022-05-17',
+      issues: [ 323 ],
+      comment: 'Add "env" predefined value.'
+    },
+    { version: '2.10.18', date: d'2022-05-17',
+      issues: [ 315 ],
+      comment: 'Implement object concatenation.'
+    },
+    { version: '2.10.16', date: d'2022-05-16',
+      issues: [ 328 ],
+      comment: 'Implement "-clear" option on command line.'
+    },
+    { version: '2.10.15', date: d'2022-05-16',
+      issues: [ 325 ],
+      comment: 'Allow multiple newlines wherever one is allowed.'
+    },
+    { version: '2.10.14', date: d'2022-05-13',
+      issues: [ 320 ],
+      comment: 'Rework "replace" to do deep inspection of objects and lists.'
+    },
+    { version: '2.10.13', date: d'2022-05-13',
+      issues: [ 320 ],
+      comment: 'Rework the "trim" functions to work with objects and lists.'
+    },
+    { version: '2.10.12', date: d'2022-05-13',
+      issues: [ 320 ],
+      comment: 'Internal code changes for "upper" and "lower" operation.'
+    },
+    { version: '2.10.11', date: d'2022-05-13',
+      issues: [ 320 ],
+      comment: 'Rework "upper" and "lower" to properly process nested objects and lists.'
+    },
+    { version: '2.10.10', date: d'2022-05-12',
+      issues: [ 321 ],
+      comment: 'Allow ":requires" spelling for new directive.'
+    },
+    { version: '2.10.9', date: d'2022-05-11',
+      issues: [ 318 ],
+      comment: 'Fix the operation of "upper" and "lower" for objects and lists.'
+    },
+    { version: '2.10.8', date: d'2022-05-11',
+      issues: [ 64 ],
+      comment: 'Implement "upper" and "lower" to properly deal with objects and lists.'
+    },
+    { version: '2.10.7', date: d'2022-05-11',
+      issues: [ 316 ],
+      comment: 'Implement reverse Elvis ("?!") operator.'
+    },
+    { version: '2.10.6', date: d'2022-05-10',
+      issues: [ 317 ],
+      comment: 'Allow "\/" as a valid escape.'
+    },
+    { version: '2.10.5', date: d'2022-05-10',
+      issues: [ 315 ],
+      comment: 'Implement "+" on objects and lists.'
+    },
+    { version: '2.10.5', base: '1.9.15', date: d'2022-05-07',
+      issues: [ 292 ],
+      comment: 'Clean up debugging messages.'
+    },
+    { version: '2.10', date: d'2022-05-07',
+      issues: [ 292 ],
+      comment: 'Add ":require" directive.'
+    },
+    { version: '2.9.9', date: d'2022-05-06',
+      issues: [ 286 ],
+      comment: 'Fix "truth" values of empty objects and lists.'
+    },
+    { version: '2.9.8', date: d'2022-05-06',
+      issues: [ 287 ],
+      comment: 'Allow "define" and "const" at any block level.'
+    },
+    { version: '2.9.5', date: d'2022-05-06',
+      issues: [ 305 ],
+      comment: 'Change "chars" to "codes" and add new "chars" function.'
+    },
+    { version: '2.9.4', date: d'2022-05-06',
+      issues: [ 298 ],
+      comment: 'Implement "within" functionality for loops and "in" expressions.'
+    },
+    { version: '2.9.3', date: d'2022-05-05',
+      issues: [ 296 ],
+      comment: 'Add "notnull" function.'
+    },
+    { version: '2.9.2', base: '1.9.10', date: d'2022-05-05',
+      issues: [ 300, 307, 308 ],
+      comment: 'Allow "@s" for lists and objects; add "<>" (not equal) operator; change color codes (internal).'
+    },
+    { version: '2.9.0', date: d'2022-05-04',
+      issues: [ 68 ],
+      comment: 'Help changes for "index" changes; implement "index" for objects; allow negative indices.'
+    }
+]
