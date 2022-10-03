@@ -675,6 +675,8 @@
  *	    #426: Add "toDate" function.
  *	30-Sep-2022 (rlwhitcomb)
  *	    #496: Optional commas in "@w" format.
+ *	03-Oct-2022 (rlwhitcomb)
+ *	    #499: Set rational mode in CalcPiWorker right away during initialization.
  */
 package info.rlwhitcomb.calc;
 
@@ -969,6 +971,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	private void triggerPiCalculation() {
 	    if (piWorker == null) {
 		piWorker = new CalcPiWorker(settings.mcDivide);
+		piWorker.setRational(settings.rationalMode);
 	    }
 	    else {
 		piWorker.calculate(settings.mcDivide);
