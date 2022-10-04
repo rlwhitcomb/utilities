@@ -333,6 +333,8 @@
 		#491: Add back "calc info.java@j" to the tests to identify the bug.
 	    27-Sep-2022 (rlwhitcomb)
 		#491: Remove extra debug info during "test".
+	    04-Oct-2022 (rlwhitcomb)
+		#491: No colors needed on the "info.java" report.
 
      ========================================================================== -->
 
@@ -759,6 +761,7 @@ Test starting on ${build.date} at ${build.time}
 -----------------------------------------------
 </echo>
 		<java classname="info.rlwhitcomb.calc.Calc"           output="${test.log.path}" append="true" failonerror="true" fork="true">
+			<arg value="-nocolors"/>
 			<arg value="info.java@j"/>
 		</java>
 		<echo>Test JavaPreProc...</echo>
