@@ -629,8 +629,10 @@ or<br>
       operations will be automatically limited to our (arbitrary) 12,500 digits even in "unlimited" mode if the result is an infinitely repeating
       value (such as the result of <code>1/7 = 0.142857142857...</code>).
   <p>Some operators (such as factorial) do not respect the precision setting, and do their calculations to their exact value regardless of the setting
-     (not sure if this is wise or not, but it seems weird to restrict the precision in such cases in a rather arbitrary and unintuitive way). Also, in
-     rational mode the precision setting does not apply to the numerator or denominator values of the fractions.
+     (not sure if this is wise or not, but it seems weird to restrict the precision in such cases in a rather arbitrary and unintuitive way).
+     In most division operations with a dividend of this size (that is, larger than the 12,500 limit), the precision for the result is the
+     larger of the precision of the dividend or the preassigned limit.
+     Also, in rational mode the precision setting does not apply to the numerator or denominator values of the fractions.
   <p>As another side note, the Bernoulli numbers are best calculated in rational mode, since they are defined as the ratio of integer values.
      Of course, in decimal mode the fractions will be divided and the results returned as a decimal value up the specified precision.
   <p>Trigonometric calculations are, by default, done in radians, but this can be changed to use degrees using the <code>:degrees</code> directive,

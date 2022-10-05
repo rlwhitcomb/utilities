@@ -677,6 +677,8 @@
  *	    #496: Optional commas in "@w" format.
  *	03-Oct-2022 (rlwhitcomb)
  *	    #499: Set rational mode in CalcPiWorker right away during initialization.
+ *	03-Oct-2022 (rlwhitcomb)
+ *	    #497: Use new "divideContext" method to get working context for divisions.
  */
 package info.rlwhitcomb.calc;
 
@@ -1364,10 +1366,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	private BigDecimal returnTrigValue(final BigDecimal value) {
 	    BigDecimal radianValue = value;
 
+	    MathContext mcDivide = MathUtil.divideContext(radianValue, settings.mcDivide);
+
 	    if (settings.trigMode == TrigMode.DEGREES)
-		return radianValue.divide(piWorker.getPiOver180(), settings.mcDivide);
+		return radianValue.divide(piWorker.getPiOver180(), mcDivide);
 	    else if (settings.trigMode == TrigMode.GRADS)
-		return radianValue.divide(piWorker.getPiOver200(), settings.mcDivide);
+		return radianValue.divide(piWorker.getPiOver200(), mcDivide);
 
 	    return radianValue;
 	}
@@ -2237,8 +2241,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			}
 
 			// This is the default handling for all other cases
-			if (dValue == null)
+			if (dValue == null) {
 			    dValue = toDecimalValue(this, result, settings.mc, ctx);
+			}
 
 			if (precision != Integer.MIN_VALUE) {
 			    dValue = MathUtil.round(dValue, precision);
@@ -2267,7 +2272,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			else {
 			    c2 = ComplexNumber.real(toDecimalValue(this, result, settings.mc, ctx));
 			}
-			valueBuf.append(c2.toPolarString(formatChar == 'P', settings.mcDivide));
+			valueBuf.append(c2.toPolarString(formatChar == 'P', MathUtil.divideContext(c2, settings.mcDivide)));
 			break;
 
 		    // @E = US format: MM/dd/yyyy
@@ -3683,7 +3688,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			case "\u00F7":
 			case "\u2215":
 			case "\u2797":
-			    return c1.divide(c2, settings.mcDivide);
+			    return c1.divide(c2, MathUtil.divideContext(c1, settings.mcDivide));
 			case "\\":
 			case "\u2216":
 			case "%":
@@ -3710,6 +3715,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    BigDecimal d1 = toDecimalValue(this, e1, settings.mc, ctx1);
 		    BigDecimal d2 = toDecimalValue(this, e2, settings.mc, ctx2);
 
+		    MathContext mcDivide = MathUtil.divideContext(d1, settings.mcDivide);
+
 		    switch (op) {
 			case "*":
 			case "\u00D7":
@@ -3721,14 +3728,14 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			case "\u00F7":
 			case "\u2215":
 			case "\u2797":
-			    return fixupToInteger(d1.divide(d2, settings.mcDivide));
+			    return fixupToInteger(d1.divide(d2, mcDivide));
 			case "\\":
 			case "\u2216":
-			    return fixupToInteger(d1.divideToIntegralValue(d2, settings.mcDivide));
+			    return fixupToInteger(d1.divideToIntegralValue(d2, mcDivide));
 			case "%":
-			    return fixupToInteger(d1.remainder(d2, settings.mcDivide));
+			    return fixupToInteger(d1.remainder(d2, mcDivide));
 			case "mod":
-			    return fixupToInteger(MathUtil.modulus(d1, d2, settings.mcDivide));
+			    return fixupToInteger(MathUtil.modulus(d1, d2, mcDivide));
 			default:
 			    throw new UnknownOpException(op, ctx);
 		    }
@@ -3855,7 +3862,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    BigDecimal y = getDecimalValue(e2ctx.expr(0));
 	    BigDecimal x = getDecimalValue(e2ctx.expr(1));
 
-	    return returnTrigValue(MathUtil.atan2(y, x, settings.mcDivide));
+	    return returnTrigValue(MathUtil.atan2(y, x, MathUtil.divideContext(y, settings.mcDivide)));
 	}
 
 	@Override
@@ -3908,7 +3915,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    if (value instanceof ComplexNumber) {
 		ComplexNumber cValue = (ComplexNumber) value;
-		return cValue.pow(BigDecimal.ONE.divide(D_THREE, settings.mcDivide), settings.mc);
+		return cValue.pow(BigDecimal.ONE.divide(D_THREE, MathUtil.divideContext(cValue, settings.mcDivide)), settings.mc);
 	    }
 	    else {
 		return MathUtil.cbrt(convertToDecimal(value, settings.mc, expr), settings.mc);
@@ -4019,7 +4026,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		Object value = evaluate(expr);
 		if (value instanceof ComplexNumber) {
 		    ComplexNumber c = (ComplexNumber) value;
-		    return c.signum(settings.mcDivide);
+		    return c.signum(MathUtil.divideContext(c, settings.mcDivide));
 		}
 		else {
 		    BigDecimal e = convertToDecimal(value, settings.mc, expr);
@@ -6631,7 +6638,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			case "\u00F7=":
 			case "\u2215=":
 			case "\u2797=":
-			    result = c1.divide(c2, settings.mcDivide);
+			    result = c1.divide(c2, MathUtil.divideContext(c1, settings.mcDivide));
 			case "\\=":
 			case "\u2216=":
 			case "%=":
@@ -6642,6 +6649,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		else {
 		    BigDecimal d1 = toDecimalValue(this, e1, settings.mc, varCtx);
 		    BigDecimal d2 = toDecimalValue(this, e2, settings.mc, exprCtx);
+
+		    MathContext mcDivide = MathUtil.divideContext(d1, settings.mcDivide);
 
 		    switch (op) {
 			case "*=":
@@ -6655,14 +6664,14 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			case "\u00F7=":
 			case "\u2215=":
 			case "\u2797=":
-			    result = fixupToInteger(d1.divide(d2, settings.mcDivide));
+			    result = fixupToInteger(d1.divide(d2, mcDivide));
 			    break;
 			case "\\=":
 			case "\u2216=":
-			    result = fixupToInteger(d1.divideToIntegralValue(d2, settings.mcDivide));
+			    result = fixupToInteger(d1.divideToIntegralValue(d2, mcDivide));
 			    break;
 			case "%=":
-			    result = fixupToInteger(d1.remainder(d2, settings.mcDivide));
+			    result = fixupToInteger(d1.remainder(d2, mcDivide));
 			    break;
 			default:
 			    throw new UnknownOpException(op, ctx);

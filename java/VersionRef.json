@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.14.42', date: d'2022-10-03',
+      issues: [ 497 ],
+      comment: 'More properly set divide precision for properly large dividends.'
+    },
     { version: '2.14.40', date: d'2022-10-03',
       issues: [ 499 ],
       comment: 'Set rational mode for PI values right away (from command line argument).'

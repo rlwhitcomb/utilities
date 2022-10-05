@@ -53,6 +53,8 @@
  *	    #393: Cleanup imports.
  *	19-Jul-2022 (rlwhitcomb)
  *	    #420: Add new formats for "parse". Add "imaginary" constructors.
+ *	01-Oct-2022 (rlwhitcomb)
+ *	    #497: New method for precision.
  */
 package info.rlwhitcomb.math;
 
@@ -428,6 +430,23 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 	 */
 	public BigDecimal i() {
 	    return imaginaryPart == null ? BigDecimal.ZERO : imaginaryPart;
+	}
+
+
+	/**
+	 * Get the precision, which is the maximum precision of both parts.
+	 *
+	 * @return Maximum precision of the two parts.
+	 */
+	public int precision() {
+	    int prec = BigDecimal.ZERO.precision();
+
+	    if (realPart != null)
+		prec = Math.max(prec, realPart.precision());
+	    if (imaginaryPart != null)
+		prec = Math.max(prec, imaginaryPart.precision());
+
+	    return prec;
 	}
 
 

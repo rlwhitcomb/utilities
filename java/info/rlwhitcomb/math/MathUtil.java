@@ -23,51 +23,31 @@
  *
  *	Various static methods for trig, log, and other mathematical calculations.
  *
- *  History:
- *	26-Mar-2021 (rlwhitcomb)
- *	    Moved out of NumericUtil into this separate class.
- *	27-Mar-2021 (rlwhitcomb)
- *	    Add "ePower" method (which is e**x, or anti-logarithm).
- *	27-Mar-2021 (rlwhitcomb)
- *	    Clean up code in "pow()"
- *	29-Mar-2021 (rlwhitcomb)
- *	    Implement simpler, faster "ln2" function.
- *	    Rename the resource strings.
- *	30-Mar-2021 (rlwhitcomb)
- *	    Implement Taylor series for "ln" function. Clean up "pow" and "ePower".
- *	08-Apr-2021 (rlwhitcomb)
- *	    Move the "round" function from Calc into here.
- *	26-Apr-2021 (rlwhitcomb)
- *	    Tweak some error messages.
- *	07-Jul-2021 (rlwhitcomb)
- *	    Make the class final.
- *	20-Sep-2021 (rlwhitcomb)
- *	    Add 'tenPower' method (like 'ePower').
- *	05-Oct-2021 (rlwhitcomb)
- *	    Make "fixup" method that does "round" and "stripTrailingZeros".
- *	07-Oct-2021 (rlwhitcomb)
- *	    Fix operation of "round" when rounding to more precision than the original.
- *	18-Nov-2021 (rlwhitcomb)
- *	    #95: Add calculation of "phi".
- *	01-Dec-2021 (rlwhitcomb)
- *	    #95: Add "ratphi" and "fib2" to support it.
- *	29-Dec-2021 (rlwhitcomb)
- *	    #188: Add "ceil" and "floor" methods.
- *	01-Feb-2022 (rlwhitcomb)
- *	    #231: Use new Constants class values instead of our own.
- *	08-Feb-2022 (rlwhitcomb)
- *	    #235: Add "atan2" code.
- *	14-Apr-2022 (rlwhitcomb)
- *	    #273: Move to "math" package.
- *	08-Jul-2022 (rlwhitcomb)
- *	    #393: Cleanup imports.
- *	15-Sep-2022 (rlwhitcomb)
- *	    #485: Add "modulus" function.
- *	30-Sep-2022 (rlwhitcomb)
- *	    Enlarge the "ratphi" table up to precision of 1,000.
- *	    #288: Add a method to return rational values of pi up to a certain precision.
- *	01-Oct-2022 (rlwhitcomb)
- *	    #288: Add source links to the PI_VALUES table, rename "piFraction" to "ratpi".
+ * History:
+ *  26-Mar-21 rlw  ---	Moved out of NumericUtil into this separate class.
+ *  27-Mar-21 rlw  ---	Add "ePower" method (which is e**x, or anti-logarithm).
+ *  27-Mar-21 rlw  ---	Clean up code in "pow()"
+ *  29-Mar-21 rlw  ---	Implement simpler, faster "ln2" function.
+ *			Rename the resource strings.
+ *  30-Mar-21 rlw  ---	Implement Taylor series for "ln" function. Clean up "pow" and "ePower".
+ *  08-Apr-21 rlw  ---	Move the "round" function from Calc into here.
+ *  26-Apr-21 rlw  ---	Tweak some error messages.
+ *  07-Jul-21 rlw  ---	Make the class final.
+ *  20-Sep-21 rlw  ---	Add 'tenPower' method (like 'ePower').
+ *  05-Oct-21 rlw  ---	Make "fixup" method that does "round" and "stripTrailingZeros".
+ *  07-Oct-21 rlw  ---	Fix operation of "round" when rounding to more precision than the original.
+ *  18-Nov-21 rlw #95:	Add calculation of "phi".
+ *  01-Dec-21 rlw #95:	Add "ratphi" and "fib2" to support it.
+ *  29-Dec-21 rlw #188:	Add "ceil" and "floor" methods.
+ *  01-Feb-22 rlw #231:	Use new Constants class values instead of our own.
+ *  08-Feb-22 rlw #235:	Add "atan2" code.
+ *  14-Apr-22 rlw #273:	Move to "math" package.
+ *  08-Jul-22 rlw #393:	Cleanup imports.
+ *  15-Sep-22 rlw #485:	Add "modulus" function.
+ *  30-Sep-22 rlw  ---	Enlarge the "ratphi" table up to precision of 1,000.
+ *		  #288:	Add a method to return rational values of pi up to a certain precision.
+ *  01-Oct-22 rlw #288:	Add source links to the PI_VALUES table, rename "piFraction" to "ratpi".
+ *  03-Oct-22 rlw #497:	Methods to get a MathContext for division particularly for large dividends.
  */
 package info.rlwhitcomb.math;
 
@@ -173,6 +153,32 @@ public final class MathUtil
 	    return (roundPrec > prec)
 		? value.setScale(scale + (roundPrec - prec))
 		: value.round(new MathContext(roundPrec));
+	}
+
+
+	/**
+	 * From the given "divide" precision and the precision of the dividend, get the "best"
+	 * actual precision to use for the division.
+	 *
+	 * @param dividend	The numerator of a division operation.
+	 * @param mc		Probably limited precision context.
+	 * @return		The max of the dividend's precision and the context precision.
+	 */
+	public static MathContext divideContext(final BigDecimal dividend, final MathContext mc) {
+	    return new MathContext(Math.max(dividend.precision(), mc.getPrecision()), mc.getRoundingMode());
+	}
+
+
+	/**
+	 * From the given "divide" precision and the precision of the dividend, get the "best"
+	 * actual precision to use for the division.
+	 *
+	 * @param dividend	The numerator of a complex division operation.
+	 * @param mc		Probably limited precision context.
+	 * @return		The max of the dividend's precision and the context precision.
+	 */
+	public static MathContext divideContext(final ComplexNumber dividend, final MathContext mc) {
+	    return new MathContext(Math.max(dividend.precision(), mc.getPrecision()), mc.getRoundingMode());
 	}
 
 
