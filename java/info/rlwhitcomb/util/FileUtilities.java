@@ -118,6 +118,7 @@
  *	#498: Add overload compress/uncompress methods with "outputName" and "delete" parameters.
  *    06-Oct-2022 (rlwhitcomb)
  *	#505: New "compareFileLines" method that ignores line ending differences.
+ *	#505: Close the readers in "compareFileLines".
  */
 package info.rlwhitcomb.util;
 
@@ -302,19 +303,20 @@ public final class FileUtilities
 	// We use the 8859-1 charset because all 256 byte values are legal here, so we are
 	// (basically) guaranteed not to get a character encoding exception reading any
 	// kind of text encoding.
-	BufferedReader rdr1 = Files.newBufferedReader(path1, ISO_8859_1_CHARSET);
-	BufferedReader rdr2 = Files.newBufferedReader(path2, ISO_8859_1_CHARSET);
+	try (BufferedReader rdr1 = Files.newBufferedReader(path1, ISO_8859_1_CHARSET);
+	     BufferedReader rdr2 = Files.newBufferedReader(path2, ISO_8859_1_CHARSET)) {
 
-	String line1, line2;
-	while ((line1 = rdr1.readLine()) != null) {
+	    String line1, line2;
+	    while ((line1 = rdr1.readLine()) != null) {
+		line2 = rdr2.readLine();
+		if (line2 == null)
+		    return false;
+		if (!line1.equals(line2))
+		    return false;
+	    }
 	    line2 = rdr2.readLine();
-	    if (line2 == null)
-		return false;
-	    if (!line1.equals(line2))
-		return false;
+	    return (line2 == null);
 	}
-	line2 = rdr2.readLine();
-	return (line2 == null);
     }
 
     /**
