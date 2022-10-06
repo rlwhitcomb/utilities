@@ -116,6 +116,8 @@
  *	#453: Modifications for "dot" names.
  *    02-Oct-2022 (rlwhitcomb)
  *	#498: Add overload compress/uncompress methods with "outputName" and "delete" parameters.
+ *    06-Oct-2022 (rlwhitcomb)
+ *	#505: New "compareFileLines" method that ignores line ending differences.
  */
 package info.rlwhitcomb.util;
 
@@ -259,7 +261,7 @@ public final class FileUtilities
     }
 
     /**
-     * Compare two file byte-by-byte.
+     * Compare two files byte-by-byte.
      * <p> NOTE: this is only meant to compare two "small-ish" files
      * because it reads the entire contents into memory.
      * @see Files#readAllBytes
@@ -277,6 +279,42 @@ public final class FileUtilities
 	byte[] bytes1 = Files.readAllBytes(path1);
 	byte[] bytes2 = Files.readAllBytes(path2);
 	return Arrays.equals(bytes1, bytes2);
+    }
+
+    /**
+     * Compare two files line-by-line.
+     * <p> This is meant to compare files, ignoring line ending differences,
+     * because it uses the {@link BufferedReader#readLine} method to read
+     * through the file.
+     *
+     * @param file1	The first file to compare.
+     * @param file2	The second file to compare.
+     * @return	{@code true} if the two files compare byte-for-byte,
+     *		or {@code false} if not.
+     * @throws IOException if something went wrong.
+     */
+    public static boolean compareFileLines(final File file1, final File file2)
+	throws IOException
+    {
+	Path path1 = file1.toPath();
+	Path path2 = file2.toPath();
+
+	// We use the 8859-1 charset because all 256 byte values are legal here, so we are
+	// (basically) guaranteed not to get a character encoding exception reading any
+	// kind of text encoding.
+	BufferedReader rdr1 = Files.newBufferedReader(path1, ISO_8859_1_CHARSET);
+	BufferedReader rdr2 = Files.newBufferedReader(path2, ISO_8859_1_CHARSET);
+
+	String line1, line2;
+	while ((line1 = rdr1.readLine()) != null) {
+	    line2 = rdr2.readLine();
+	    if (line2 == null)
+		return false;
+	    if (!line1.equals(line2))
+		return false;
+	}
+	line2 = rdr2.readLine();
+	return (line2 == null);
     }
 
     /**

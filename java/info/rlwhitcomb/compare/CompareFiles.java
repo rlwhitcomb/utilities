@@ -36,6 +36,7 @@
  *  08-Jul-22 rlw #393:	Cleanup imports.
  *  23-Sep-22 rlw #52:	Support multiple source files (from wildcard on command line)
  *			to single directory target. Support "@file" as input.
+ *  06-Oct-22 rlw #505:	Mode to compare, ignoring line ending diffs.
  */
 package info.rlwhitcomb.compare;
 
@@ -124,6 +125,9 @@ public class CompareFiles
 		/** Whether to descend into subdirectories. */
 		RECURSIVE		(false,
 					 "recursive", "recurse", "rec", "r"),
+		/** Whether to ignore line ending differences. */
+		IGNORE_LINE_ENDINGS	(false,
+					 "IgnoreLineEndings", "lines", "l"),
 		/** Whether to compare directories/files both directions. */
 		SYNC_MODE		(true,
 					 "SyncMode", "sync", "syn"),
@@ -250,7 +254,12 @@ public class CompareFiles
 	    msg(Level.VERBOSE, "comparingTwo", file1.getPath(), file2.getPath());
 
 	    try {
-		match = FileUtilities.compareFiles(file1, file2);
+		if (Opts.IGNORE_LINE_ENDINGS.isSet()) {
+		    match = FileUtilities.compareFileLines(file1, file2);
+		}
+		else {
+		    match = FileUtilities.compareFiles(file1, file2);
+		}
 		if (!match) {
 		    err(Level.QUIET, "doesNotCompare", file1.getPath(), file2.getPath());
 		}

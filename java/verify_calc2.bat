@@ -3,7 +3,7 @@
 set NUMBER=13699727
 if exist test\data\M%NUMBER%.txt.gz call gunz -keep -out m.txt test\data\M%NUMBER%.txt.gz
 call c test\files\m.calc >m2.txt
-call cmp -c -b -q m.txt m2.txt
+call cmp -c -b -q --ignore-line-endings m.txt m2.txt
 if errorlevel 1 (
    echo Differences found!
    echo Reference value in "m.txt", calculated value in "m2.txt"
