@@ -114,6 +114,8 @@
  *	#393: Cleanup imports.
  *    31-Aug-2022 (rlwhitcomb)
  *	#453: Modifications for "dot" names.
+ *    02-Oct-2022 (rlwhitcomb)
+ *	#498: Add overload compress/uncompress methods with "outputName" and "delete" parameters.
  */
 package info.rlwhitcomb.util;
 
@@ -449,13 +451,32 @@ public final class FileUtilities
      *
      * @param	inputFile	The input file (in the proper directory).
      * @throws	IOException if something happened during the compression.
+     * @see #compressFile(File, String, boolean)
      */
     public static void compressFile(final File inputFile)
 	    throws IOException
     {
-	String outputName = inputFile.getPath() + COMPRESS_EXT;
+	compressFile(inputFile, "", true);
+    }
+
+    /**
+     * Compress the given file to <code>"<i>name</i>.gz"</code> and optionally remove the original.
+     *
+     * @param	inputFile	The input file (in the proper directory).
+     * @param	outputName	Possible output file name (can be empty or null for default).
+     * @param	delete		Whether to delete the original file once compressed.
+     * @throws	IOException if something happened during the compression.
+     * @see #compressFile(File)
+     */
+    public static void compressFile(final File inputFile, final String outputName, final boolean delete)
+	    throws IOException
+    {
+	String outName = CharUtil.isNullOrEmpty(outputName)
+		? inputFile.getPath() + COMPRESS_EXT
+		: decorate(outputName, null, COMPRESS_EXT).getPath();
+
 	try (InputStream fis = Files.newInputStream(inputFile.toPath());
-	     GZIPOutputStream gos = new GZIPOutputStream(Files.newOutputStream(Paths.get(outputName)), FILE_BUFFER_SIZE, true))
+	     GZIPOutputStream gos = new GZIPOutputStream(Files.newOutputStream(Paths.get(outName)), FILE_BUFFER_SIZE, true))
 	{
 	    byte[] buffer = new byte[FILE_BUFFER_SIZE];
 	    int len;
@@ -464,8 +485,11 @@ public final class FileUtilities
 	    }
 	    gos.flush();
 	}
-	// Now remove the original file (if possible)
-	inputFile.delete();
+
+	// Now remove the original file (if requested, and possible)
+	if (delete) {
+	    inputFile.delete();
+	}
     }
 
     /**
@@ -479,18 +503,44 @@ public final class FileUtilities
      * @throws	IOException if something happened during the decompression.
      * @throws	IllegalArgumentException (with no message) if the input
      *		file name doesn't end with {@link #COMPRESS_EXT}.
+     * @see #uncompressFile(File, String, boolean)
      */
     public static void uncompressFile(final File inputFile)
 	    throws IOException
     {
+	uncompressFile(inputFile, "", true);
+    }
+
+    /**
+     * Uncompress the given file from <code>"<i>name</i>.gz"</code> to just <code>"<i>name</i>"</code>
+     * and optionally remove the original compressed file.
+     *
+     * @param	inputFile	The input file (in the proper directory).
+     * @param	outputName	Possible output file name (can be empty or null for default).
+     * @param	delete		Whether to delete the original file once uncompressed.
+     * @throws	IOException if something happened during the decompression.
+     * @throws	IllegalArgumentException (with no message) if the input
+     *		file name doesn't end with {@link #COMPRESS_EXT}.
+     * @see #uncompressFile(File)
+     */
+    public static void uncompressFile(final File inputFile, final String outputName, final boolean delete)
+	    throws IOException
+    {
 	String inputName = inputFile.getPath();
-	String outputName;
-	if (inputName.endsWith(COMPRESS_EXT))
-	    outputName = inputName.substring(0, inputName.length() - COMPRESS_EXT.length());
-	else
+	String outName;
+
+	if (inputName.endsWith(COMPRESS_EXT)) {
+	    if (CharUtil.isNullOrEmpty(outputName))
+		outName = inputName.substring(0, inputName.length() - COMPRESS_EXT.length());
+	    else
+		outName = outputName;
+	}
+	else {
 	    throw new Intl.IllegalArgumentException("util#fileutil.wrongExtension", COMPRESS_EXT);
+	}
+
 	try (GZIPInputStream gis = new GZIPInputStream(Files.newInputStream(inputFile.toPath()), FILE_BUFFER_SIZE);
-	     OutputStream fos = Files.newOutputStream(Paths.get(outputName)))
+	     OutputStream fos = Files.newOutputStream(Paths.get(outName)))
 	{
 	    byte[] buffer = new byte[FILE_BUFFER_SIZE];
 	    int len;
@@ -499,8 +549,11 @@ public final class FileUtilities
 	    }
 	    fos.flush();
 	}
-	// Now remove the original file (if possible)
-	inputFile.delete();
+
+	// Now remove the original file (if requested and possible)
+	if (delete) {
+	    inputFile.delete();
+	}
     }
 
     /**

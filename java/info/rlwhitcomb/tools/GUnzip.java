@@ -34,15 +34,20 @@
  *	    Put text out into resources.
  *	09-Jul-2022 (rlwhitcomb)
  *	    #393: Cleanup imports.
+ *	05-Oct-2022 (rlwhitcomb)
+ *	    #498: Options to delete or not the original file, and rename the
+ *	    output file.
  */
 package info.rlwhitcomb.tools;
 
 import info.rlwhitcomb.util.Exceptions;
 import info.rlwhitcomb.util.FileUtilities;
 import info.rlwhitcomb.util.Intl;
+import info.rlwhitcomb.util.Options;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Optional;
 
 
 /**
@@ -52,29 +57,108 @@ import java.io.IOException;
 public class GUnzip
 {
 	/**
+	 * Enum of other command line options to set.
+	 */
+	private static enum Need
+	{
+		INPUT_NAME,
+		OUTPUT_NAME
+	}
+
+
+	/**
+	 * What we need to see next on the command line.
+	 */
+	private static Need need = Need.INPUT_NAME;
+
+	/**
+	 * Possible non-standard output name.
+	 */
+	private static String outputName = null;
+
+	/**
+	 * Whether to delete the input file once it has been compressed.
+	 */
+	private static boolean delete = true;
+
+
+	/**
+	 * Process one option.
+	 *
+	 * @param option The option string.
+	 */
+	private static void processOption(final String option) {
+	    switch (option.toLowerCase()) {
+		case "delete":
+		case "del":
+		case "d":
+		    delete = true;
+		    break;
+		case "keep":
+		case "k":
+		    delete = false;
+		    break;
+		case "output":
+		case "out":
+		case "o":
+		    need = Need.OUTPUT_NAME;
+		    break;
+		default:
+		    Intl.errFormat("tools#gunzip.badOption", option);
+		    System.exit(1);
+	    }
+	}
+
+	/**
 	 * Input is a list of input file names.  The program will produce
 	 * the corresponding uncompressed output files without ".gz" extension
 	 * present.
 	 *
 	 * @param args The parsed command line argument array.
 	 */
-	public static void main(String[] args) {
+	public static void main(final String[] args) {
+	    boolean anyFiles = false;
+
 	    for (String arg : args) {
-		try {
-		    File f = new File(arg);
-		    if (f.exists() && f.isFile() && f.canRead()) {
-			FileUtilities.uncompressFile(f);
+		Optional<String> option = Options.checkOption(arg);
+		if (option.isPresent()) {
+		    if (need != Need.INPUT_NAME) {
+			Intl.errFormat("tools#gunzip.missingOutputName");
 		    }
 		    else {
-			Intl.errFormat("tools#gunzip.cannotFindOrRead", arg);
+			processOption(option.get());
 		    }
 		}
-		catch (IllegalArgumentException iae) {
-		    Intl.errFormat("tools#gunzip.wrongExtension", arg);
+		else if (need == Need.OUTPUT_NAME) {
+		    outputName = arg;
+		    need = Need.INPUT_NAME;
 		}
-		catch (IOException ioe) {
-		    Intl.errFormat("tools#gunzip.ioError", arg, Exceptions.toString(ioe));
+		else {
+		    try {
+			anyFiles = true;
+
+			File f = new File(arg);
+			if (FileUtilities.canRead(f)) {
+			    FileUtilities.uncompressFile(f, outputName, delete);
+			}
+			else {
+			    Intl.errFormat("tools#gunzip.cannotFindOrRead", arg);
+			}
+		    }
+		    catch (IllegalArgumentException iae) {
+			Intl.errFormat("tools#gunzip.wrongExtension", arg);
+		    }
+		    catch (IOException ioe) {
+			Intl.errFormat("tools#gunzip.ioError", arg, Exceptions.toString(ioe));
+		    }
 		}
+	    }
+
+	    if (need != Need.INPUT_NAME) {
+		Intl.errFormat("tools#gunzip.missingOutputName");
+	    }
+	    if (!anyFiles) {
+		Intl.outFormat("tools#gunzip.noFiles");
 	    }
 	}
 }

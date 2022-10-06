@@ -34,6 +34,8 @@
 #	    #238: More HexDump options.
 #	18-Aug-2022 (rlwhitcomb)
 #	    #445: New strings for Head.
+#	05-Oct-2022 (rlwhitcomb)
+#	    #498: New errors for GZip and GUnzip.
 #
 
 #
@@ -44,6 +46,9 @@ fixpath.errorCanonicalPath	= Error getting canonical path of "%1$s": %2$s
 #
 # From GUnzip.java and GZip.java
 #
+gunzip.badOption		= Unknown option: "-%1$s"!
+gunzip.missingOutputName	= The "-output" option requires a file name argument!
+gunzip.noFiles			= No files processed.
 gunzip.cannotFindOrRead		= Cannot find or read the input file: "%1$s"!
 gunzip.wrongExtension		= The input file (%1$s) doesn't have the (required) ".gz" extension.
 gunzip.ioError			= Error reading the input or writing the output file (%1$s): %2$s
