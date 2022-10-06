@@ -335,6 +335,8 @@
 		#491: Remove extra debug info during "test".
 	    04-Oct-2022 (rlwhitcomb)
 		#491: No colors needed on the "info.java" report.
+	    05-Oct-2022 (rlwhitcomb)
+		#497: Add test for divide precision.
 
      ========================================================================== -->
 
@@ -807,6 +809,12 @@ Test starting on ${build.date} at ${build.time}
 			<arg value="verify_calc.bat"/>
 			<arg value="${mersenne.number}"/>
 			<arg value="${mersenne.digits}"/>
+		</exec>
+		<echo>Verifying that M13699727 is divisible by 3067752467657...</echo>
+		<exec executable="./verify_calc2" dir="."             output="${test.log.path}" append="true" unless:true="${on.windows}" failonerror="true"/>
+		<exec executable="cmd"            dir="."             output="${test.log.path}" append="true" if:true="${on.windows}" failonerror="true">
+			<arg value="/c"/>
+			<arg value="verify_calc2.bat"/>
 		</exec>
 		<exec executable="./check_sorted" dir="."             output="${test.log.path}" append="true" unless:true="${on.windows}" failonerror="true"/>
 		<exec executable="cmd"            dir="."             output="${test.log.path}" append="true" if:true="${on.windows}" failonerror="true">

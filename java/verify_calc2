@@ -1,0 +1,16 @@
+#!/bin/bash
+NUMBER=13699727
+if [ -e test/data/M$NUMBER.txt.gz ]; then
+   gunz -keep -out m.txt test/data/M$NUMBER.txt.gz
+fi
+c test/files/m.calc >m2.txt
+diff m.txt m2.txt
+if [[ $? -eq 0 ]]; then
+  echo No differences for M$NUMBER / 3067752467657! Calculation is correct.
+  rm m.txt m2.txt
+  exit 0
+else
+  echo Differences found!
+  echo Reference value in "m.txt", calculated value in "m2.txt"
+  exit 1
+fi

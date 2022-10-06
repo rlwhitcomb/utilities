@@ -2,8 +2,7 @@
 NUMBER=$1
 DIGITS=$2
 if [ -e test/data/M$NUMBER.txt.gz ]; then
-   cp test/data/M$NUMBER.txt.gz .
-   gunz M$NUMBER.txt.gz
+   gunz -keep -out M$NUMBER.txt test/data/M$NUMBER.txt.gz
 fi
 lists -single M$NUMBER.txt >ref.txt
 c -nocolor -noseps -sense -r ":unl;(2**$NUMBER)-1" >calc.txt
