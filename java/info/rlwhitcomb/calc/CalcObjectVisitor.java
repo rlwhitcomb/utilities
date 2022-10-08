@@ -679,6 +679,8 @@
  *	    #499: Set rational mode in CalcPiWorker right away during initialization.
  *	03-Oct-2022 (rlwhitcomb)
  *	    #497: Use new "divideContext" method to get working context for divisions.
+ *	06-Oct-2022 (rlwhitcomb)
+ *	    #501: Add "tobase" function.
  */
 package info.rlwhitcomb.calc;
 
@@ -5375,6 +5377,27 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 		    return DateUtil.date(m, d, y);
 		}
+	    }
+	}
+
+	@Override
+	public Object visitBaseExpr(CalcParser.BaseExprContext ctx) {
+	    CalcParser.Expr2Context e2ctx = ctx.expr2();
+	    CalcParser.ExprContext vExpr = e2ctx.expr(0);
+	    CalcParser.ExprContext rExpr = e2ctx.expr(1);
+
+	    Object valueObj = evaluate(vExpr);
+	    int radix = toIntValue(this, evaluate(rExpr), settings.mc, rExpr);
+
+	    if (radix < Character.MIN_RADIX || radix > Character.MAX_RADIX)
+		throw new CalcExprException(rExpr, "%calc#radixOutOfRange", radix, Character.MIN_RADIX, Character.MAX_RADIX);
+
+	    if (valueObj instanceof BigInteger) {
+		return ((BigInteger) valueObj).toString(radix);
+	    }
+	    else {
+		BigDecimal dValue = toDecimalValue(this, valueObj, settings.mc, vExpr);
+		return MathUtil.toString(dValue, radix, settings.mcDivide);
 	    }
 	}
 

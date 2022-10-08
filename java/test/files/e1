@@ -907,6 +907,10 @@ ToDate(join(['2018', '09', '28'], '-'))@e
 todate(6,30,2020)
 toDate(12,31,1999)
 
+toBase(1.2, 4)
+ToBase(1/7, 6)
+tobase(27!, 36)
+
 #
 # Play around with "," formatting
 #

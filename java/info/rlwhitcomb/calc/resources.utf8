@@ -264,6 +264,7 @@ oneCharInt		= %1$s value for a string must be one character or an integer \u2264
 undefinedFunction	= Cannot call undefined function <y>%1$s<.>
 withinNotAllowed	= Specifying <y>within<.> is only allowed with an end value with implied start
 illegalArgument		= <u>%1$s<.> value is not suitable for <y>%2$s<.> function
+radixOutOfRange		= Radix value of <u>%1$d<.> is out of range of <y>%2$d..%3$d<.>
 
 intro.help1	= "  Enter an arithmetic expression to evaluate, or multiple expressions"
 intro.help2	= "  separated by <u>;<.>, followed by <a>Return<.> or <a>Enter<.>."

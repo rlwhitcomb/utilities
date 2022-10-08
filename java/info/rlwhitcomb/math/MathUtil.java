@@ -48,6 +48,7 @@
  *		  #288:	Add a method to return rational values of pi up to a certain precision.
  *  01-Oct-22 rlw #288:	Add source links to the PI_VALUES table, rename "piFraction" to "ratpi".
  *  03-Oct-22 rlw #497:	Methods to get a MathContext for division particularly for large dividends.
+ *  06-Oct-22 rlw #501:	BigDecimal to radix conversion.
  */
 package info.rlwhitcomb.math;
 
@@ -1721,6 +1722,36 @@ public final class MathUtil
 
 	    BigDecimal floorValue = x.divide(y, mc).setScale(0, RoundingMode.FLOOR);
 	    return x.subtract(y.multiply(floorValue));
+	}
+
+	/**
+	 * Convert {@link BigDecimal} to string in the given radix.
+	 *
+	 * @param value	The value to convert.
+	 * @param radix	The base to convert to.
+	 * @param mc	Rounding context for conversion of the fraction.
+	 * @return	Value converted to the base.
+	 */
+	public static String toString(final BigDecimal value, final int radix, final MathContext mc) {
+	    StringBuilder buf = new StringBuilder(value.precision() * 2);
+	    BigDecimal scale = new BigDecimal(radix);
+	    BigInteger intPart = floor(value);
+	    buf.append(intPart.toString(radix));
+
+	    BigDecimal fracPart = value.subtract(new BigDecimal(intPart));
+	    if (!fracPart.equals(BigDecimal.ZERO)) {
+		int digits = buf.length();
+		buf.append('.');
+		while (!fracPart.equals(BigDecimal.ZERO) && digits < mc.getPrecision()) {
+		    fracPart = fracPart.multiply(scale, mc);
+		    intPart = floor(fracPart);
+		    fracPart = fracPart.subtract(new BigDecimal(intPart));
+		    buf.append(intPart.toString());
+		    digits = buf.length();
+		}
+	    }
+
+	    return buf.toString();
 	}
 
 }
