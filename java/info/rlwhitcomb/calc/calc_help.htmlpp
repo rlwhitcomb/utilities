@@ -330,6 +330,8 @@ h2 {
     <tr><td><code>-output</code> <i>output_file</i></td><td>Redirect standard output to the given file</td><td><code>-out</code>, <code>-o</code></td><td></td></tr>
     <tr><td><code>-error</code> <i>error_file</i></td><td>Redirect standard error stream to file</td><td><code>-err</code></td><td></td></tr>
     <tr><td><code>-outputcs</code> <i>charset_name</i></td><td>Use the charset to encode output/error files</td><td><code>-outputcharset</code>,<br><code>-outchar</code>, <code>-outcs</code>, <code>-ocs</code></td><td></td></tr>
+    <tr><td><code>-linefeed</code></td><td>Use only line feed as line separator on output</td><td><code>-lfonly</code>, <code>-lf</code></td><td></td></tr>
+    <tr><td><code>-lineend</code></td><td>Use the system line separators on output (default)</td><td><code>-lineending</code>, <code>-ln</code></td><td></td></tr>
     <tr><td><code>-variable</code><br><i>name</i><code>=</code><i>value</i><br>or <i>name</i><code>:</code><i>value</i></td><td>Set the value of a variable</td><td><code>-define</code>, <code>-var</code></td><td><i>name</i>&nbsp;<code>=</code>&nbsp;<i>value</i></td></tr>
     <tr><td><code>--</code> <i>parameter_values</i><br>[ <code>--</code> ]</td><td>Provide values for the <code>$0</code>, <code>$1</code>, etc. parameters<br>
             (every value between the <code>--</code> markers<br>is taken as a parameter value)</td><td></td><td></td></tr>

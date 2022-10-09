@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.14.48', date: d'2022-10-08',
+      issues: [ 506 ],
+      comment: 'New "-ln" and "-lf" options for line separators on output.'
+    },
     { version: '2.14.47', date: d'2022-10-08',
       issues: [ 504 ],
       comment: 'Allow single "y" in date format for "toDate" function.'

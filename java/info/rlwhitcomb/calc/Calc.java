@@ -310,6 +310,8 @@
  *	    #464: Add "-output" and associated options to redirect streams to files.
  *	31-Aug-2022 (rlwhitcomb)
  *	    #471: Add "-ctrlenter" and "-ctrl" command line options.
+ *	08-Oct-2022 (rlwhitcomb)
+ *	    #506: Command-line options to only print LF line endings, or use system default.
  */
 package info.rlwhitcomb.calc;
 
@@ -1134,8 +1136,10 @@ public class Calc
 		String message = Exceptions.toString(ex) + ClassUtil.getCallingMethod(1);
 		if (displayer != null)
 		    displayer.displayErrorMessage(message);
-		else
-		    System.err.println(message);
+		else {
+		    System.err.print(message);
+		    Intl.println(System.err);
+		}
 	    }
 	}
 
@@ -1643,7 +1647,8 @@ public class Calc
 		Desktop.getDesktop().open(helpFile);
 	    }
 	    catch (IOException ex) {
-		System.err.println(Exceptions.toString(ex));
+		System.err.print(Exceptions.toString(ex));
+		Intl.println(System.err);
 	    }
 	}
 
@@ -2264,6 +2269,16 @@ public class Calc
 		case "default":
 		case "def":
 		    inputCharset = null;
+		    break;
+		case "linefeed":
+		case "lfonly":
+		case "lf":
+		    Intl.setLfLineEnding(true);
+		    break;
+		case "lineending":
+		case "lineend":
+		case "ln":
+		    Intl.setLfLineEnding(false);
 		    break;
 		case "help":
 		case "h":
