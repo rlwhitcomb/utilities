@@ -907,9 +907,22 @@ ToDate(join(['2018', '09', '28'], '-'))@e
 todate(6,30,2020)
 toDate(12,31,1999)
 
-toBase(1.2, 4)
-ToBase(1/7, 6)
-tobase(27!, 36)
+b1 = 1.2
+b2 = 1/7
+b3 = pi
+b4 = 19!
+b1a = toBase(b1, 4)
+b2a = ToBase(b2, 6)
+b3a = TOBASE(b3, 27)
+b4a = tobase(b4, 36)
+b1b = fromBase(b1a, 4)
+b2b = fromBase(b2a, 6)
+b3b = FromBase(b3a, 27)
+b4b = FROMBASE(b4a, 36)
+b1b-b1
+b2b-b2
+b3b-b3
+b4b-b4
 
 #
 # Play around with "," formatting

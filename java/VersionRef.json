@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.14.46', date: d'2022-10-08',
+      issues: [ 501 ],
+      comment: 'Add "fromBase" function.'
+    },
     { version: '2.14.44', date: d'2022-10-08',
       issues: [ 501 ],
       comment: 'Add "tobase" function.'

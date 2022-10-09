@@ -49,6 +49,7 @@
  *  01-Oct-22 rlw #288:	Add source links to the PI_VALUES table, rename "piFraction" to "ratpi".
  *  03-Oct-22 rlw #497:	Methods to get a MathContext for division particularly for large dividends.
  *  06-Oct-22 rlw #501:	BigDecimal to radix conversion.
+ *  08-Oct-22 rlw #501:	Radix back to BigDecimal conversion.
  */
 package info.rlwhitcomb.math;
 
@@ -96,6 +97,9 @@ public final class MathUtil
 	private static BigDecimal MINUS_PI_OVER_TWO;
 	private static BigDecimal PI_OVER_FOUR;
 	private static BigDecimal MINUS_PI_OVER_FOUR;
+
+	/** A rounding context to round up to the next highest integer. */
+	private static final MathContext MC_ONE = new MathContext(1);
 
 
 	/**
@@ -1740,18 +1744,59 @@ public final class MathUtil
 
 	    BigDecimal fracPart = value.subtract(new BigDecimal(intPart));
 	    if (!fracPart.equals(BigDecimal.ZERO)) {
+		int adjPrec = (int) ((double) mc.getPrecision() * Math.log(10) / Math.log(radix) + 0.5d);
 		int digits = buf.length();
 		buf.append('.');
-		while (!fracPart.equals(BigDecimal.ZERO) && digits < mc.getPrecision()) {
+		while (!fracPart.equals(BigDecimal.ZERO) && digits < adjPrec) {
 		    fracPart = fracPart.multiply(scale, mc);
 		    intPart = floor(fracPart);
 		    fracPart = fracPart.subtract(new BigDecimal(intPart));
-		    buf.append(intPart.toString());
+		    buf.append(intPart.toString(radix));
 		    digits = buf.length();
 		}
+		// Last digit needs to be rounded
+		fracPart = fracPart.multiply(scale, mc);
+		intPart = floor(fracPart.round(MC_ONE));
+		buf.append(intPart.toString(radix));
+
+		// Remove trailing zeros
+		int len = buf.length();
+		while (len > 0 && buf.charAt(len - 1) == '0') {
+		    len--;
+		}
+		buf.setLength(len);
 	    }
 
 	    return buf.toString();
+	}
+
+	/**
+	 * Convert string in base N form back to numeric form.
+	 *
+	 * @param value	The value to convert back to a number.
+	 * @param radix	The base to convert from.
+	 * @param mc	Rounding context for the result.
+	 * @return	The number represented in the given base by the input.
+	 */
+	public static BigDecimal fromString(final String value, final int radix, final MathContext mc) {
+	    int pointPos = value.indexOf('.');
+	    String intPart = pointPos < 0 ? value : value.substring(0, pointPos);
+	    BigInteger integer = new BigInteger(intPart, radix);
+	    BigDecimal fraction = BigDecimal.ZERO;
+	    BigDecimal divisor = new BigDecimal(radix);
+	    BigDecimal mult = new BigDecimal(radix);
+	    MathContext mcDivide = new MathContext(mc.getPrecision() * 2, mc.getRoundingMode());
+
+	    if (pointPos > 0) {
+		for (int pos = pointPos + 1; pos < value.length(); pos++) {
+		    String digit = value.substring(pos, pos + 1);
+		    BigDecimal place = new BigDecimal(new BigInteger(digit, radix));
+		    fraction = fraction.add(place.divide(divisor, mcDivide));
+		    divisor = divisor.multiply(mult);
+		}
+	    }
+
+	    return new BigDecimal(integer).add(fraction, mc);
 	}
 
 }
