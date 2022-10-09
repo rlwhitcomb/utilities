@@ -906,6 +906,9 @@ todate(17802)@E
 ToDate(join(['2018', '09', '28'], '-'))@e
 todate(6,30,2020)
 toDate(12,31,1999)
+dt9 = '01-02-22'
+ToDate(dt9, 'm-d-y')@e
+ToDate(dt9, 'm-d-yy')@e
 
 b1 = 1.2
 b2 = 1/7
