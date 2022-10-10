@@ -119,6 +119,8 @@
  *    06-Oct-2022 (rlwhitcomb)
  *	#505: New "compareFileLines" method that ignores line ending differences.
  *	#505: Close the readers in "compareFileLines".
+ *    10-Oct-2022 (rlwhitcomb)
+ *	#481: New "writeStringToFile" method.
  */
 package info.rlwhitcomb.util;
 
@@ -426,6 +428,23 @@ public final class FileUtilities
 		os.write(buffer, 0, len);
 	    }
 	    os.flush();
+	}
+    }
+
+    /**
+     * Write a string to the given file.
+     *
+     * @param string	The string to write.
+     * @param f		The output file to write to.
+     * @param cs	Character set to use in translating chars to bytes.
+     * @throws 	IOException if anything goes wrong.
+     */
+    public static void writeStringToFile(final String string, final File f, final Charset cs)
+		throws IOException
+    {
+	try (BufferedWriter writer = Files.newBufferedWriter(f.toPath(), cs)) {
+	    writer.write(string);
+	    writer.flush();
 	}
     }
 

@@ -337,6 +337,8 @@
 		#491: No colors needed on the "info.java" report.
 	    05-Oct-2022 (rlwhitcomb)
 		#497: Add test for divide precision.
+	    08-Oct-2022 (rlwhitcomb)
+		#481: New "b64" wrappers.
 
      ========================================================================== -->
 
@@ -461,6 +463,8 @@
 		<include name="`.bat"                       if:true="${on.windows}"/>
 		<include name="``"                      unless:true="${on.windows}"/>
 		<include name="``.bat"                      if:true="${on.windows}"/>
+		<include name="b64"                     unless:true="${on.windows}"/>
+		<include name="b64.bat"                     if:true="${on.windows}"/>
 		<include name="c"                       unless:true="${on.windows}"/>
 		<include name="c.bat"                       if:true="${on.windows}"/>
 		<include name="calc"                    unless:true="${on.windows}"/>

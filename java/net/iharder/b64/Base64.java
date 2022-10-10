@@ -23,6 +23,8 @@ package net.iharder.b64;
  * Change Log:
  * </p>
  * <ul>
+ *  <li>v2.2.6 - Add global "debug" flag to suppress stack traces and save the exception
+ *   for handling by callers.
  *  <li>v2.2.5 - Update obsolete Javadoc constructs. 21-Dec-2020
  *  <li>v2.2.4 - Use Files methods to get file input/output streams to fix GC issues
  *   having to do with finalize() being implemented in these classes. Requires Java 7+.
@@ -89,7 +91,7 @@ package net.iharder.b64;
  *
  * @author Robert Harder
  * @author rob@iharder.net
- * @version 2.2.4
+ * @version 2.2.6
  */
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -161,6 +163,13 @@ public class Base64
     private final static byte EQUALS_SIGN_ENC = -1; // Indicates equals sign in encoding
 	
 	
+    /** Whether to print stack traces in high-level methods on errors. */
+    private static boolean debug = false;
+
+    /** The exception caught and NOT printed if not in debug mode. */
+    private static Throwable caughtException = null;
+
+
 /* ********  S T A N D A R D   B A S E 6 4   A L P H A B E T  ******** */	
     
     /** The 64 valid Base64 values. */
@@ -434,7 +443,32 @@ public class Base64
         System.err.println( "Usage: java Base64 -e|-d inputfile outputfile" );
     }   // end usage
     
-    
+    /**
+     * Set the debug flag, which enables stack traces, and disables saving
+     * the caught exceptions.
+     *
+     * @param flag Whether to enable debug mode.
+     */
+    public final static void setDebug( boolean flag )
+    {
+	debug = flag;
+    }
+
+    /**
+     * Retrieve the exception caught during high-level methods. Also resets the
+     * caught exception holder in preparation for the next time.
+     *
+     * @return The exception caught during "file-to-file" methods.
+     */
+    public final static Throwable getCaughtException()
+    {
+	Throwable result = caughtException;
+	caughtException = null;
+
+	return result;
+    }
+
+
 /* ********  E N C O D I N G   M E T H O D S  ******** */    
     
     
@@ -680,7 +714,11 @@ public class Base64
         }   // end try
         catch( java.io.IOException e )
         {
-            e.printStackTrace();
+            if( debug )
+                e.printStackTrace();
+            else
+                caughtException = e;
+
             return null;
         }   // end catch
         finally
@@ -865,7 +903,11 @@ public class Base64
             }   // end try
             catch( java.io.IOException e )
             {
-                e.printStackTrace();
+                if( debug )
+                    e.printStackTrace();
+                else
+                    caughtException = e;
+
                 return null;
             }   // end catch
             finally
@@ -1199,12 +1241,20 @@ public class Base64
         }   // end try
         catch( java.io.IOException e )
         {
-            e.printStackTrace();
+            if( debug )
+                e.printStackTrace();
+            else
+                caughtException = e;
+
             obj = null;
         }   // end catch
         catch( java.lang.ClassNotFoundException e )
         {
-            e.printStackTrace();
+            if( debug )
+                e.printStackTrace();
+            else
+                caughtException = e;
+
             obj = null;
         }   // end catch
         finally
@@ -1419,7 +1469,10 @@ public class Base64
             }   // end while: through file
             success = true;
         } catch( java.io.IOException exc ){
-            exc.printStackTrace();
+            if( debug )
+                exc.printStackTrace();
+            else
+                caughtException = exc;
         } finally{
             try{ in.close();  } catch( Exception exc ){}
             try{ out.close(); } catch( Exception exc ){}
@@ -1456,7 +1509,10 @@ public class Base64
             }   // end while: through file
             success = true;
         } catch( java.io.IOException exc ){
-            exc.printStackTrace();
+            if( debug )
+                exc.printStackTrace();
+            else
+                caughtException = exc;
         } finally{
             try{ in.close();  } catch( Exception exc ){}
             try{ out.close(); } catch( Exception exc ){}

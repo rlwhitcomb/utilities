@@ -36,7 +36,27 @@
 #	    #445: New strings for Head.
 #	05-Oct-2022 (rlwhitcomb)
 #	    #498: New errors for GZip and GUnzip.
+#	10-Oct-2022 (rlwhitcomb)
+#	    #481: Errors for base64 tool; rudimentary help.
 #
+
+#
+# From B64.java
+#
+base64.onlyOneOutput	= Only one "-output" value allowed.
+base64.onlyOneCharset	= Only one "-charset" value allowed.
+base64.missingOutput	= Missing file name for "-output" option.
+base64.missingCharset	= Missing character set for "-charset" option.
+base64.noInput		= Nothing to do; no input given to process.
+base64.unknownOption	= Unknown option: "%1$s"!
+base64.cannotReadInput	= Unable to find or read input file "%1$s"!
+base64.encodeFileError	= Unable to encode file "%1$s" to output file "%2$s": %3$s
+base64.decodeFileError	= Unable to decode file "%1$s" to output file "%2$s": %3$s
+
+base64.help1	= Usage: b64 [-encode|-decode] [-string|-file] [-out filename] [-charset cs] input
+base64.help2	= ""
+base64.help3	= Default is "-encode", try "-file" (if found) then "-string", output to console.
+base64.help4	= ""
 
 #
 # From FixPath.java

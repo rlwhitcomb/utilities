@@ -27,6 +27,7 @@
  *  22-Jan-21 rlw  ---	Initial coding.
  *  15-Mar-21 rlw  ---	Add another return code.
  *  26-Sep-22 rlw #489:	More return codes.
+ *  08-Oct-22 rlw #481:	Add NO_INPUTS return code.
  */
 package info.rlwhitcomb;
 
@@ -68,6 +69,9 @@ public interface Testable
 
 	/** Charset argument is invalid. */
 	public static final int BAD_CHARSET     = 10;
+
+	/** Nothing to do, no inputs. */
+	public static final int NO_INPUTS	= 11;
 
 
 	/** Action completed -- return from setup for "help" (for instance). */
