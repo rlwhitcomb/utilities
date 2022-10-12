@@ -174,6 +174,8 @@
  *	    base method to reduce code duplication.
  *	30-Sep-2022 (rlwhitcomb)
  *	    #496: New parameter to "convertToWords" to add/eliminate commas.
+ *	12-Oct-2022 (rlwhitcomb)
+ *	    #514: Move resource text from "util" package to here.
  */
 package info.rlwhitcomb.math;
 
@@ -247,14 +249,14 @@ public final class NumericUtil
 			return NUL;
 		    DataType type = map.get(value.getClass());
 		    if (type == null) {
-			throw new Intl.IllegalArgumentException("util#numeric.badDataType", value.getClass().getName());
+			throw new Intl.IllegalArgumentException("math#numeric.badDataType", value.getClass().getName());
 		    }
 		    return type;
 		}
 
 		static DataType fromCode(final int code) {
 		    if (code < 0 || code > numValues) {
-			throw new Intl.IllegalArgumentException("util#numeric.badDataTypeCode", code);
+			throw new Intl.IllegalArgumentException("math#numeric.badDataTypeCode", code);
 		    }
 		    return codeMap[code];
 		}
@@ -304,7 +306,7 @@ public final class NumericUtil
 			    return order;
 			}
 		    }
-		    throw new Intl.IllegalArgumentException("util#numeric.unknownByteOrder", value);
+		    throw new Intl.IllegalArgumentException("math#numeric.unknownByteOrder", value);
 		}
 	}
 
@@ -331,7 +333,7 @@ public final class NumericUtil
 			    return length;
 			}
 		    }
-		    throw new Intl.IllegalArgumentException("util#numeric.unknownStringLength", value);
+		    throw new Intl.IllegalArgumentException("math#numeric.unknownStringLength", value);
 		}
 	}
 
@@ -649,7 +651,7 @@ public final class NumericUtil
 		return value;
 	    }
 	    else
-		throw new NumberFormatException(Intl.getString("util#numeric.badKMGFormat"));
+		throw new NumberFormatException(Intl.getString("math#numeric.badKMGFormat"));
 	}
 
 
@@ -924,7 +926,7 @@ public final class NumericUtil
 	    else if (base >= 1_000) {
 		if (base >= 1_000_000_000) {
 		    // Note: this can go on indefinitely toward infinity, but this will suffice for all our needs
-		    throw new Intl.IllegalArgumentException("util#numeric.outOfRangeWords");
+		    throw new Intl.IllegalArgumentException("math#numeric.outOfRangeWords");
 		}
 		if (base >= 1_000_000) {
 		    int millis = base / 1_000_000;
@@ -1504,14 +1506,14 @@ public final class NumericUtil
 		case PREFIX1:
 		    // Need a range of 0..255 here
 		    if (byteLen > 255)
-			throw new Intl.IndexOutOfBoundsException("util#numeric.stringLengthTooBig", byteLen, 255);
+			throw new Intl.IndexOutOfBoundsException("math#numeric.stringLengthTooBig", byteLen, 255);
 		    dos.write(byteLen);
 		    dos.write(bytes);
 		    break;
 		case PREFIX2:
 		    // Need a range of 0..65535 here
 		    if (byteLen > 65535)
-			throw new Intl.IndexOutOfBoundsException("util#numeric.stringLengthTooBig", byteLen, 65_535);
+			throw new Intl.IndexOutOfBoundsException("math#numeric.stringLengthTooBig", byteLen, 65_535);
 		    writeShort(dos, (short)byteLen, byteOrder);
 		    dos.write(bytes);
 		    break;
@@ -1673,7 +1675,7 @@ public final class NumericUtil
 		case "String":
 		    writeString(dos, (String)value, charset, byteOrder, stringLength, length); break;
 		default:
-		    throw new Intl.IllegalArgumentException("util#numeric.badDataType", className);
+		    throw new Intl.IllegalArgumentException("math#numeric.badDataType", className);
 	    }
 	}
 
@@ -1761,7 +1763,7 @@ public final class NumericUtil
 		return result;
 	    }
 	    else {
-		throw new Intl.IllegalArgumentException("util#numeric.badRomanFormat", input);
+		throw new Intl.IllegalArgumentException("math#numeric.badRomanFormat", input);
 	    }
 	}
 
@@ -1809,7 +1811,7 @@ public final class NumericUtil
 	 */
 	public static String convertToRoman(final int value, final boolean upper) {
 	    if (value < 1 || value > ROMAN_MAX_VALUE) {
-		throw new Intl.IllegalArgumentException("util#numeric.outOfRomanRange", value);
+		throw new Intl.IllegalArgumentException("math#numeric.outOfRomanRange", value);
 	    }
 
 	    StringBuilder buf = new StringBuilder(30);
@@ -1909,7 +1911,7 @@ public final class NumericUtil
 		return nanosecs;
 	    }
 	    else {
-		throw new Intl.IllegalArgumentException("util#numeric.badTimeValue", timeString);
+		throw new Intl.IllegalArgumentException("math#numeric.badTimeValue", timeString);
 	    }
 	}
 
@@ -2035,7 +2037,7 @@ public final class NumericUtil
 		    return value.toBigInteger();
 	    }
 	    else {
-		throw new Intl.IllegalArgumentException("util#numeric.badDuration", durString);
+		throw new Intl.IllegalArgumentException("math#numeric.badDuration", durString);
 	    }
 	}
 
@@ -2166,7 +2168,7 @@ public final class NumericUtil
 	    }
 	    // If the value wasn't matched, then we have an error
 	    String value = new String(Character.toChars(input));
-	    throw new Intl.IllegalArgumentException("util#numeric.badNumberSymbol", input, value);
+	    throw new Intl.IllegalArgumentException("math#numeric.badNumberSymbol", input, value);
 	}
 
 }

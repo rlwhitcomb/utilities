@@ -25,6 +25,7 @@
 #
 # History:
 #  19-Sep-22 rlw #426:	Original version for "DateUtil".
+#  12-Oct-22 rlw #514:	Move applicable resources from "util" package to here.
 #
 
 #
@@ -34,4 +35,45 @@ date.monthOutOfRange	= Month value <u>%1$d<.> is out of range of <y>1..12<.>
 date.dayOutOfRange	= Day value <u>%1$d<.> is out of range
 date.yearOutOfRange	= Year value <u>%1$d<.> is illegal or out of range
 date.badFormatString	= Bad form for the date format string: <u>%1$s<.>
+
+#
+# From NumericUtil.java
+#
+numeric.badKMGFormat		= Improper input format: suffix must be one of [K,M,G,T,P, or E].
+numeric.outOfRange		= Value is out of range.
+numeric.outOfRangeWords		= Value out of range for "@w" conversions.
+numeric.badRomanFormat		= Unable to convert Roman numeral: '%1$s'.
+numeric.outOfRomanRange		= Value %1$,d is out of range for conversion to a Roman numeral.
+numeric.badDataType		= Data type %1$s is not supported in binary files.
+numeric.badDataTypeCode		= Data type code %1$d is not recognized.
+numeric.unknownByteOrder	= "%1$s" is not a valid byte order (should be LSB or MSB).
+numeric.unknownStringLength	= "%1$s" is not a valid string length designation.
+numeric.stringLengthTooBig	= String length of %1$,d exceds limit of %2$,d.
+numeric.badTimeValue		= Unable to interpret '%1$s' as a time value.
+numeric.badDuration		= Unable to interpret '%1$s' as a duration value.
+numeric.badNumberSymbol		= Unable to interpret 0x%1$06X ('%2$s')as a number symbol.
+
+#
+# From MathUtil.java
+#
+math.tooManyPiDigits		= The PI digit calculation is only good for about 12,500 digits!
+math.piDigitMismatch		= Calculated digit length is %1$,d, but requested number of digits was %2$,d!
+math.wholeInteger		= The value <y>%1$,g<.> is not an integer number.
+math.primeTooBig		= The value <y>%1$,d<.> is too big for the prime number calculations.
+math.sqrtNegative		= Square root of a negative number is not real.
+
+#
+# From BigFraction.java
+#
+fraction.noZeroDenominator	= Fractions cannot have zero denominators.
+fraction.unsupportedFormat	= The value <y>%1$s<.> cannot be converted to a fraction.
+fraction.divideByZero		= Divide by zero.
+fraction.unknownFracChar	= Unsupported fraction character <y>%1$s<.>.
+
+#
+# From ComplexNumber.java
+#
+complex.notRecognized	= Unable to convert <y>%1$s<.> to complex number.
+complex.noEmptyListMap	= Unable to create a complex number from an empty list or map.
+complex.tooManyValues	= Complex number only needs one or two values to define.
 

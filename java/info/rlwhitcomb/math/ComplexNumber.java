@@ -55,6 +55,8 @@
  *	    #420: Add new formats for "parse". Add "imaginary" constructors.
  *	01-Oct-2022 (rlwhitcomb)
  *	    #497: New method for precision.
+ *	12-Oct-2022 (rlwhitcomb)
+ *	    #514: Move resource text from "util" to "math" package.
  */
 package info.rlwhitcomb.math;
 
@@ -223,9 +225,9 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 	 */
 	public static ComplexNumber fromList(List<Object> list) {
 	    if (list == null || list.size() == 0)
-		throw new Intl.IllegalArgumentException("util#complex.noEmptyListMap");
+		throw new Intl.IllegalArgumentException("math#complex.noEmptyListMap");
 	    if (list.size() > 2)
-		throw new Intl.IllegalArgumentException("util#complex.tooManyValues");
+		throw new Intl.IllegalArgumentException("math#complex.tooManyValues");
 
 	    if (list.size() == 1)
 		return valueOf(list.get(0));
@@ -247,7 +249,7 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 	 */
 	public static ComplexNumber fromMap(Map<String, Object> map) {
 	    if (map == null || map.size() == 0)
-		throw new Intl.IllegalArgumentException("util#complex.noEmptyListMap");
+		throw new Intl.IllegalArgumentException("math#complex.noEmptyListMap");
 
 	    // Here, we could have "r,i" or "r,theta"
 	    if (map.containsKey(IMAG_KEY)) {
@@ -290,9 +292,9 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 	 */
 	public static ComplexNumber fromSet(Set<Object> set) {
 	    if (set == null || set.size() == 0)
-		throw new Intl.IllegalArgumentException("util#complex.noEmptyListMap");
+		throw new Intl.IllegalArgumentException("math#complex.noEmptyListMap");
 	    if (set.size() > 2)
-		throw new Intl.IllegalArgumentException("util#complex.tooManyValues");
+		throw new Intl.IllegalArgumentException("math#complex.tooManyValues");
 
 	    Iterator<Object> iter = set.iterator();
 
@@ -876,7 +878,7 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 		    break;
 	    }
 	    if (!m.matches()) {
-		throw new Intl.IllegalArgumentException("util#complex.notRecognized", string);
+		throw new Intl.IllegalArgumentException("math#complex.notRecognized", string);
 	    }
 
 	    // Different treatment for r/theta version(s)

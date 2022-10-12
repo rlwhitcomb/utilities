@@ -51,6 +51,7 @@
  *  06-Oct-22 rlw #501:	BigDecimal to radix conversion.
  *  08-Oct-22 rlw #501:	Radix back to BigDecimal conversion.
  *  12-Oct-22 rlw #513:	Move Logging to new package.
+ *                #514:	Move text resources out of "util" package to here.
  */
 package info.rlwhitcomb.math;
 
@@ -211,7 +212,7 @@ public final class MathUtil
 	public static BigDecimal pow(final BigDecimal base, final double inputExp, final MathContext mc) {
 	    double exp = inputExp;
 	    if (Double.isNaN(exp) || Double.isInfinite(exp))
-		throw new Intl.IllegalArgumentException("util#numeric.outOfRange");
+		throw new Intl.IllegalArgumentException("math#numeric.outOfRange");
 
 	    if (exp == 0.0d)
 		return BigDecimal.ONE;
@@ -264,7 +265,7 @@ public final class MathUtil
 	 */
 	public static Number pow(final BigInteger base, final double exp, final MathContext mc) {
 	    if (Double.isNaN(exp) || Double.isInfinite(exp))
-		throw new Intl.IllegalArgumentException("util#numeric.outOfRange");
+		throw new Intl.IllegalArgumentException("math#numeric.outOfRange");
 	    if (exp == 0.0d)
 		return BigInteger.ONE;
 
@@ -308,7 +309,7 @@ public final class MathUtil
 	    double baseFloor  = Math.floor(baseDouble);
 
 	    if (baseFloor != baseDouble)
-		throw new Intl.IllegalArgumentException("util#math.wholeInteger", baseDouble);
+		throw new Intl.IllegalArgumentException("math#math.wholeInteger", baseDouble);
 
 	    long loops = base.longValue();
 
@@ -351,7 +352,7 @@ public final class MathUtil
 	    double nInt    = Math.rint(nDouble);
 
 	    if (nInt != nDouble)
-		throw new Intl.IllegalArgumentException("util#math.wholeInteger", nDouble);
+		throw new Intl.IllegalArgumentException("math#math.wholeInteger", nDouble);
 
 	    long loops        = Math.abs(n.longValue());
 	    boolean negative  = nInt < 0.0d;
@@ -935,7 +936,7 @@ public final class MathUtil
 	 */
 	public static BigDecimal sqrt(final BigDecimal x, final MathContext mc) {
 	    if (x.signum() < 0)
-		throw new Intl.IllegalArgumentException("util#math.sqrtNegative");
+		throw new Intl.IllegalArgumentException("math#math.sqrtNegative");
 	    if (x.equals(BigDecimal.ZERO) || x.equals(BigDecimal.ONE))
 		return x;
 
@@ -1012,7 +1013,7 @@ public final class MathUtil
 	    // According to the original documentation, the given SCALE and ARRINIT
 	    // values work up to approx. 12,500 digits, so error out if we're over that
 	    if (digits > 12_500)
-		throw new Intl.IllegalArgumentException("util#math.tooManyPiDigits");
+		throw new Intl.IllegalArgumentException("math#math.tooManyPiDigits");
 
 	    // Since each loop reduces the count by 14 while only providing 4 digits
 	    // of output, in order to produce the required number of digits we must
@@ -1043,7 +1044,7 @@ public final class MathUtil
 	    // the result to the exact digit count requested. Exception thrown if we
 	    // calculated wrong.
 	    if (pi.length() < digits)
-		throw new Intl.IllegalStateException("util#math.piDigitMismatch",
+		throw new Intl.IllegalStateException("math#math.piDigitMismatch",
 			pi.length(), digits);
 	    else if (pi.length() > digits)
 		pi.setLength(digits);
@@ -1356,7 +1357,7 @@ public final class MathUtil
 	    BigInteger posN = n.abs();
 
 	    if (posN.compareTo(MAX_PRIME) > 0)
-		throw new Intl.IllegalArgumentException("util#math.primeTooBig", posN);
+		throw new Intl.IllegalArgumentException("math#math.primeTooBig", posN);
 
 	    // Easy decisions here: zero and one are not prime
 	    if (posN.compareTo(BigInteger.ONE) <= 0)
@@ -1420,7 +1421,7 @@ public final class MathUtil
 	    BigInteger posN = (sign < 0) ? n.negate() : n;
 
 	    if (posN.compareTo(MAX_PRIME) > 0)
-		throw new Intl.IllegalArgumentException("util#math.primeTooBig", posN);
+		throw new Intl.IllegalArgumentException("math#math.primeTooBig", posN);
 
 	    // Zero has no factors
 	    if (posN.equals(BigInteger.ZERO))
@@ -1512,7 +1513,7 @@ public final class MathUtil
 	    BigInteger posN = (sign < 0) ? n.negate() : n;
 
 	    if (posN.compareTo(MAX_PRIME) > 0)
-		throw new Intl.IllegalArgumentException("util#math.primeTooBig", posN);
+		throw new Intl.IllegalArgumentException("math#math.primeTooBig", posN);
 
 	    // Zero has no factors
 	    if (posN.equals(BigInteger.ZERO))
@@ -1581,7 +1582,7 @@ public final class MathUtil
 	 */
 	public static BigDecimal ln(final BigDecimal input, final MathContext mc) {
 	    if (input.compareTo(BigDecimal.ZERO) <= 0)
-		throw new Intl.IllegalArgumentException("util#numeric.outOfRange");
+		throw new Intl.IllegalArgumentException("math#numeric.outOfRange");
 
 	    // Calculate a sufficient number of loops for the value to converge nicely
 	    int loops = mc.getPrecision() * 15;	// TODO: find out a good value
@@ -1646,7 +1647,7 @@ public final class MathUtil
 	 */
 	public static BigDecimal ln2(final BigDecimal input, final MathContext mc) {
 	    if (input.compareTo(BigDecimal.ZERO) <= 0)
-		throw new Intl.IllegalArgumentException("util#numeric.outOfRange");
+		throw new Intl.IllegalArgumentException("math#numeric.outOfRange");
 
 	    BigDecimal y = BigDecimal.ZERO;
 	    BigDecimal b = D_ONE_HALF;

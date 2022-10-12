@@ -89,6 +89,8 @@
  *	    #485: Add "floor" and "ceil" functions.
  *	27-Sep-2022 (rlwhitcomb)
  *	    #494: Fix code scanning issue with the special fraction characters.
+ *	12-Oct-2022 (rlwhitcomb)
+ *	    #514: Update text resource package.
  */
 package info.rlwhitcomb.math;
 
@@ -246,7 +248,7 @@ public class BigFraction extends Number
 		case "\u215D": index = 17; break; /* 5/8  */
 		case "\u215E": index = 18; break; /* 7/8  */
 		default:
-		    throw new Intl.IllegalArgumentException("util#fraction.unknownFracChar", frac);
+		    throw new Intl.IllegalArgumentException("math#fraction.unknownFracChar", frac);
 	    }
 
 	    if (negative)
@@ -362,7 +364,7 @@ public class BigFraction extends Number
 		    }
 		}
 	    }
-	    throw new Intl.IllegalArgumentException("util#fraction.unsupportedFormat", value);
+	    throw new Intl.IllegalArgumentException("math#fraction.unsupportedFormat", value);
 	}
 
 	/**
@@ -458,7 +460,7 @@ public class BigFraction extends Number
 
 	    // For now (at least), we cannot handle infinite values (divide by zero)
 	    if (signDen == 0)
-		throw new ArithmeticException(Intl.getString("util#fraction.noZeroDenominator"));
+		throw new ArithmeticException(Intl.getString("math#fraction.noZeroDenominator"));
 
 	    // Normalize zero to "0/1"
 	    if (signNum == 0) {
@@ -753,7 +755,7 @@ public class BigFraction extends Number
 	 */
 	public BigFraction divide(final long value) {
 	    if (value == 0L)
-		throw new ArithmeticException(Intl.getString("util#fraction.divideByZero"));
+		throw new ArithmeticException(Intl.getString("math#fraction.divideByZero"));
 	    else if (value == 1L)
 		return this;
 
@@ -769,7 +771,7 @@ public class BigFraction extends Number
 	 */
 	public BigFraction divide(final BigInteger value) {
 	    if (value.equals(BigInteger.ZERO))
-		throw new ArithmeticException(Intl.getString("util#fraction.divideByZero"));
+		throw new ArithmeticException(Intl.getString("math#fraction.divideByZero"));
 	    else if (value.equals(BigInteger.ONE))
 		return this;
 
@@ -785,7 +787,7 @@ public class BigFraction extends Number
 	 */
 	public BigFraction divide(final BigFraction other) {
 	    if (other.equals(ZERO))
-		throw new ArithmeticException(Intl.getString("util#fraction.divideByZero"));
+		throw new ArithmeticException(Intl.getString("math#fraction.divideByZero"));
 	    else if (equals(ZERO))
 		return ZERO;
 	    else if (other.equals(ONE))
@@ -824,7 +826,7 @@ public class BigFraction extends Number
 	 */
 	public BigFraction remainder(final long value) {
 	    if (value == 0L)
-		throw new ArithmeticException(Intl.getString("util#fraction.divideByZero"));
+		throw new ArithmeticException(Intl.getString("math#fraction.divideByZero"));
 	    else if (value == 1L)
 		return this;
 
@@ -841,7 +843,7 @@ public class BigFraction extends Number
 	 */
 	public BigFraction remainder(final BigInteger value) {
 	    if (value.equals(BigInteger.ZERO))
-		throw new ArithmeticException(Intl.getString("util#fraction.divideByZero"));
+		throw new ArithmeticException(Intl.getString("math#fraction.divideByZero"));
 	    else if (value.equals(BigInteger.ONE))
 		return this;
 
@@ -857,7 +859,7 @@ public class BigFraction extends Number
 	 */
 	public BigFraction remainder(final BigFraction other) {
 	    if (other.equals(ZERO))
-		throw new ArithmeticException(Intl.getString("util#fraction.divideByZero"));
+		throw new ArithmeticException(Intl.getString("math#fraction.divideByZero"));
 	    else if (equals(ZERO))
 		return ZERO;
 	    else if (other.equals(ONE))
@@ -967,7 +969,7 @@ public class BigFraction extends Number
 	    BigInteger gcd = a.gcd(b);
 
 	    if (gcd.equals(BigInteger.ZERO))
-		throw new ArithmeticException(Intl.getString("util#fraction.divideByZero"));
+		throw new ArithmeticException(Intl.getString("math#fraction.divideByZero"));
 
 	    return a.multiply(b).divide(gcd);
 	}
