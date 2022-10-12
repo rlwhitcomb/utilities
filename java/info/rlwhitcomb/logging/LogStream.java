@@ -49,6 +49,8 @@
  */
 package info.rlwhitcomb.logging;
 
+import info.rlwhitcomb.util.ClientStatistics;
+
 import java.io.PrintStream;
 
 import static info.rlwhitcomb.util.Constants.*;
