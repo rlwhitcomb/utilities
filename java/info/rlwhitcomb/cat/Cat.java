@@ -24,35 +24,22 @@
  *	Concatenate one or more files (equivalent the *nix "cat" program).
  *
  * History:
- *	16-Jul-2020 (rlwhitcomb)
- *	    First coding in Java.
- *	22-Jul-2020 (rlwhitcomb)
- *	    Recast the options now that Options.java has more capability.
- *	31-Jul-2020 (rlwhitcomb)
- *	    Add option to display product information; set program name.
- *	08-Oct-2020 (rlwhitcomb)
- *	    Use flavor of "printProgramInfo" with defaults.
- *	14-Oct-2020 (rlwhitcomb)
- *	    Move text to resources.
- *	11-Dec-2020 (rlwhitcomb)
- *	    Use new product information mechanism.
- *	24-Aug-2021 (rlwhitcomb)
- *	    Add "-locale" option (and Spanish translation).
- *	21-Oct-2021 (rlwhitcomb)
- *	    Use better method to get a valid Locale.
- *	21-Jan-2022 (rlwhitcomb)
- *	    #217: Allow environment default options from CAT_OPTIONS via
- *	    new Options method.
- *	17-Feb-2022 (rlwhitcomb)
- *	    #251: Trap charset encoding problems.
- *	12-Apr-2022 (rlwhitcomb)
- *	    #269: New method to load main program info (in Environment).
- *	18-Apr-2022 (rlwhitcomb)
- *	    #270: Now this is automatic inside "printProgramInfo".
- *	05-Jul-2022 (rlwhitcomb)
- *	    #386: Fix "-win1252" charset name.
- *	08-Jul-2022 (rlwhitcomb)
- *	    #393: Cleanup imports.
+ *  16-Jul-20 rlw  ---	First coding in Java.
+ *  22-Jul-20 rlw  ---	Recast the options now that Options.java has more capability.
+ *  31-Jul-20 rlw  ---	Add option to display product information; set program name.
+ *  08-Oct-20 rlw  ---	Use flavor of "printProgramInfo" with defaults.
+ *  14-Oct-20 rlw  ---	Move text to resources.
+ *  11-Dec-20 rlw  ---	Use new product information mechanism.
+ *  24-Aug-21 rlw  ---	Add "-locale" option (and Spanish translation).
+ *  21-Oct-21 rlw  ---	Use better method to get a valid Locale.
+ *  21-Jan-22 rlw #217:	Allow environment default options from CAT_OPTIONS via
+ *			new Options method.
+ *  17-Feb-22 rlw #251:	Trap charset encoding problems.
+ *  12-Apr-22 rlw #269:	New method to load main program info (in Environment).
+ *  18-Apr-22 rlw #270:	Now this is automatic inside "printProgramInfo".
+ *  05-Jul-22 rlw #386:	Fix "-win1252" charset name.
+ *  08-Jul-22 rlw #393:	Cleanup imports.
+ *  11-Oct-22 rlw #2:	Add "-help". Remove stupid "nomoreoptions" option.
  *
  *	    TODO: wildcard directory names on input
  *	    TODO: -nn to limit to first nn lines, +nn to limit to LAST nn lines (hard to do?)
@@ -72,6 +59,9 @@ import java.util.Optional;
 
 /**
  * Java implementation of the *nix "cat" command.
+ * <p> No guarantees that the options or option names are equivalent
+ * here to the *nix command. This is <i>roughly</i> similar in operation,
+ * and for most practical purposes does the same things.
  */
 public class Cat {
 	/**
@@ -131,12 +121,6 @@ public class Cat {
 	 */
 	private static Optional<Expected> expectedValue = Optional.empty();
 
-	/**
-	 * Flag to indicate that there will be no more options, so that all the remaining
-	 * command-line values will be file names (or stdin designators).
-	 */
-	private static boolean noMoreOptions = false;
-
 
 	/**
 	 * Process one of our options.
@@ -172,15 +156,15 @@ public class Cat {
 		expectedValue = Optional.of(Expected.OUTPUT_FILE);
 	    } else if (Options.matchesOption(arg, true, "locale", "loc", "l")) {
 		expectedValue = Optional.of(Expected.LOCALE);
-	    } else if (Options.matchesOption(arg, true, "NoMoreOptions", "NoOptions", "NoOption",
-			"NoMore", "NoOpt", "no", "n")) {
-		noMoreOptions = true;
 	    } else if (Options.matchesOption(arg, true, "stdin", "std", "in")) {
 		if (pass == 1) {
 		    numberOfInputFiles++;
 		} else {
 		    readFromConsole();
 		}
+	    } else if (Options.matchesOption(arg, true, "help", "h", "?")) {
+		Intl.printHelp("cat#");
+		System.exit(0);
 	    } else if (Options.matchesOption(arg, true, "version", "vers", "ver", "v")) {
 		Environment.printProgramInfo();
 		System.exit(0);
@@ -304,7 +288,7 @@ public class Cat {
 		    expectedValue = Optional.empty();
 		} else {
 		    Optional<String> option = Options.checkOption(arg);
-		    if (!noMoreOptions && option.isPresent()) {
+		    if (option.isPresent()) {
 			processOption(arg);
 		    } else {
 			if (pass == 1) {
@@ -378,8 +362,6 @@ public class Cat {
 
 	    // Second pass: process all the other options and the input files specified
 	    pass = 2;
-	    // Reset this positional flag so it works correctly on the second pass
-	    noMoreOptions = false;
 	    processArguments(args);
 
 	    // If no input files (or "-stdin" arguments) specified, then loop reading from console

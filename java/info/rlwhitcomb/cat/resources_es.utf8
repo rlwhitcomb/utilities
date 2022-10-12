@@ -24,25 +24,72 @@
 #       Internationalizable strings for the info.rlwhitcomb.cat code.
 #
 # History:
-#       14-Oct-2020 (rlwhitcomb)
-#           Moved into here from the .java file.
-#	11-Dec-2020 (rlwhitcomb)
-#	    Move product name to build.properties.
-#	24-Aug-2021 (rlwhitcomb)
-#	    Clone and translate to Spanish.
-#	18-Feb-2022 (rlwhitcomb)
-#	    #251: Charset error message.
+#  14-Oct-20 rlw  ---	Moved into here from the .java file.
+#  11-Dec-20 rlw  ---	Move product name to build.properties.
+#  24-Aug-21 rlw  ---	Clone and translate to Spanish.
+#  18-Feb-22 rlw #251:	Charset error message.
+#  11-Oct-22 rlw #2:	Add help.
+#			Correct some misspellings.
 #
 
 unrecognized		= ¡Opción "%1$s" no reconocida!
 noConsole		= ¡No hay consola disponible para leer!
 ioError			= Error al procesar el archivo de entrada "%1$s": %2$s
 noFileRead		= ¡El archivo especificado "%1$s" no existe o no se puede leer!
-oneCharset		= ¡Solo se puede especificar un juego de caracteres para el archivo de salida!
-oneOutputFile		= ¡Solo se puede especificar un nombre de archivo de salida!
-oneLocale		= ¡Solo se puede especificar un nombre de configuración regional!
+oneCharset		= ¡Sólo se puede especificar un juego de caracteres para el archivo de salida!
+oneOutputFile		= ¡Sólo se puede especificar un nombre de archivo de salida!
+oneLocale		= ¡Sólo se puede especificar un nombre de configuración regional!
 missingOptionValue	= ¡Falta un valor para la opción "--%1$s"!
 outputNameCharset	= ¡Un nombre de archivo de salida debe darse junto con un juego de caracteres!
 noCharsetConsole	= ¡No se puede cambiar juego de caracteres cuando se lee desde la consola!
 decodeError		= Carácter incorrecto en el archivo "%1$s" para juego de caracteres "%2$s": %3$s
 
+help1	= Uso: cat [ opciones ] [ nombres_de_archivos | - | -- | @ ]
+help2	= "  o: cat [ -version | -vers | -ver | -v | -help | -h | -? ]"
+help3	= ""
+help4	= " Las opciones son posicionales y se aplican a los siguientes archivos"
+help5	= "   de entrada hasta que otros lo cambien, excepto que solo un archivo"
+help6	= "   de salida (y juego de caracteres) se puede dar."
+help7	= ""
+help8	= " Y las "opciones" son (sin distinción entre mayúsculas y minúsculas):"
+help9	= \t-charset CS\tespecificar el juego de caracteres para los archivos
+help10	= \t\t\tde entrada (no la consola)
+help11	= \t\t\to -cs, o -c
+help12	= ""
+help13	= "    Los siguientes son atajos para valores comunes de '-charset':"
+help14	= \t-utf8\t\tuse 'UTF-8' para el juego de caracteres de entrada
+help15	= \t\t\to -utf-8, -utf_8, -u, o -8
+help16	= \t-utf16\t\tuse 'UTF-16' para el juego de caracteres de entrada
+help17	= \t\t\to -utf-16, -utf_16, o -16
+help18	= \t-utf16be\tuse 'UTF-16BE' para el juego de caracteres
+help19	= \t\t\to -utf-16be, -utf_16be, -16be, o -be
+help20	= \t-utf16le\tuse 'UTF-16LE' para el juego de caracteres
+help21	= \t\t\to -utf-16le, -utf_16le, -16le, o -le
+help22	= \t-default\tuse el juego de caracteres predeterminado específico de la plataforma
+help23	= \t\t\to -def, -standard, -d, o -s
+help24	= \t-win1252\tuse el juego de caracteres 'windows-1252'
+help25	= \t\t\to -win, o -w
+help26	= \t-iso88591\tuse el juego de caracteres 'ISO-8859-1' para leer la entrada
+help27	= \t\t\to -iso-8859-1, -iso, o -i
+help28	= \t-ascii\t\tuse el juego de caracteres 'ASCII' para los siguientes archivos
+help29	= \t\t\to -asc, o -a
+help30	= ""
+help31	= "    Estos se pueden dar una sola vez:"
+help32	= \t-outputcharset CS  especificar el juego de caracteres del archivo de salida
+help33	= \t\t\to -output-charset, -output_charset, -outputcs, -output-cs, -output_cs,
+help34	= \t\t\t  -outcharset, -out-charset, -out_charset, -outcs, -out-cs, -out_cs, o -ocs
+help35	= \t-outputfile FILE  especificar el nombre del archivo de salida
+help36	= \t\t\to -output-file, -output_file, -outfile, -out-file, -out_file, -out, o -o
+help37	= ""
+help38	= \t-locale LOCALE  use la configuración regional dada para mensajes de error y ayuda
+help39	= \t\t\to -loc, o -l
+help40	= ""
+help41	= "    Se puede dar cualquier número de archivos de entrada, o cualquier número de estas opciones:"
+help42	= \t-stdin\t\tread input from the console
+help43	= \t\t\to -std, -in, --, -, o @
+help44	= ""
+help45	= Cada archivo de entrada (o conjunto de líneas de consola) se leerá de acuerdo
+help46	= "  con el juego de caracteres vigente en ese momento, luego todo el conjunto"
+help47	= "  de entrada se escribirá en la consola o en el archivo de salida especificado"
+help48	= "  (según el juego de caracteres de salida)."
+help49	= ""
