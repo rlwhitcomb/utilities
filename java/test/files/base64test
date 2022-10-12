@@ -1,0 +1,11 @@
+$testClass info.rlwhitcomb.tools.B64
+$canonDir test/canons
+$canonCharset UTF-8
+
+# Encode a binary file and compare to the canon
+back: -e images/backspace_32.png -o %TEMP|TMP|TMPDIR|.%/back.b64
+
+# Here we verify that the decoded value is the same as the original (binary) file
+# TODO: this won't work until we get binary canon file support into Tester (#510)
+#images/backspace_32.png,binary: -d %TEMP|TMP|TMPDIR|.%/back.b64
+
