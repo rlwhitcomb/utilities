@@ -121,9 +121,12 @@
  *	#505: Close the readers in "compareFileLines".
  *    10-Oct-2022 (rlwhitcomb)
  *	#481: New "writeStringToFile" method.
+ *    12-Oct-2022 (rlwhitcomb)
+ *	#513: Move Logging to new package.
  */
 package info.rlwhitcomb.util;
 
+import info.rlwhitcomb.logging.Logging;
 import net.iharder.b64.Base64;
 
 import java.io.*;

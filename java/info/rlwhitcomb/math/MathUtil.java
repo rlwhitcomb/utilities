@@ -50,12 +50,13 @@
  *  03-Oct-22 rlw #497:	Methods to get a MathContext for division particularly for large dividends.
  *  06-Oct-22 rlw #501:	BigDecimal to radix conversion.
  *  08-Oct-22 rlw #501:	Radix back to BigDecimal conversion.
+ *  12-Oct-22 rlw #513:	Move Logging to new package.
  */
 package info.rlwhitcomb.math;
 
+import info.rlwhitcomb.logging.Logging;
 import info.rlwhitcomb.util.DynamicArray;
 import info.rlwhitcomb.util.Intl;
-import info.rlwhitcomb.util.Logging;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;

@@ -158,10 +158,13 @@
  *	    #445: New flavor of "setColoring" with just the flag and no map.
  *	08-Oct-2022 (rlwhitcomb)
  *	    #506: Flag to only print LF line endings on any platform.
+ *	12-Oct-2022 (rlwhitcomb)
+ *	    #513: Move Logging to new package.
  */
 package info.rlwhitcomb.util;
 
 import info.rlwhitcomb.jarfile.Launcher;
+import info.rlwhitcomb.logging.Logging;
 
 import java.io.File;
 import java.io.FileFilter;

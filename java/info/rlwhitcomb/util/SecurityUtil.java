@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2010,2013-2014,2016,2020-2021 Roger L. Whitcomb.
+ * Copyright (c) 2010,2013-2014,2016,2020-2022 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -51,8 +51,13 @@
  *	    Make class final and constructor private.
  *	09-Jul-2022 (rlwhitcomb)
  *	    #393: Cleanup imports.
+ *	12-Oct-2022 (rlwhitcomb)
+ *	    #513: Move Logging to new package.
+ *	    Some code cleanup. Update hash algorithm to "SHA-512".
  */
 package info.rlwhitcomb.util;
+
+import info.rlwhitcomb.logging.Logging;
 
 import net.iharder.b64.Base64;
 
@@ -78,12 +83,12 @@ public final class SecurityUtil
 	public static final String __HASH = "SHS:";
 
 	/** Used to hex encode various binary values. */
-	private static final char[] hexChars =
+	private static final char[] HEX_CHARS =
 		{ '0', '1', '2', '3', '4', '5', '6', '7',
 		  '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
 
 	/** Use to decode hex strings into binary values. */
-	private static final String hexCharString = new String(hexChars);
+	private static final String hexCharString = new String(HEX_CHARS);
 
 	/** Our hashing function. */
 	private static MessageDigest __md = null;
@@ -93,7 +98,7 @@ public final class SecurityUtil
 	 */
 	static {
 	    try {
-		__md = MessageDigest.getInstance("SHA-384");
+		__md = MessageDigest.getInstance("SHA-512");
 
 	    } catch( Exception e ) {
 		Logging.Except("MessageDigest init", e);
@@ -110,7 +115,7 @@ public final class SecurityUtil
 
 	/**
 	 * Encodes a byte array into hex (base 16) notation.
-	 * <p> Uses the {@link #hexChars} array to encode each nybble of the input.
+	 * <p> Uses the {@link #HEX_CHARS} array to encode each nybble of the input.
 	 *
 	 * @param	input	an array of bytes to be encoded
 	 * @return		The encoded string.
@@ -118,8 +123,8 @@ public final class SecurityUtil
 	public static String hexEncode(byte[] input) {
 	    StringBuilder buf = new StringBuilder(input.length * 2);
 	    for (byte b : input) {
-		buf.append(hexChars[(b>>>4)&0xF]);
-		buf.append(hexChars[b&0xF]);
+		buf.append(HEX_CHARS[(b>>>4)&0xF]);
+		buf.append(HEX_CHARS[b&0xF]);
 	    }
 	    return buf.toString();
 	}

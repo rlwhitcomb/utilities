@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2012,2014-2015,2021 Roger L. Whitcomb.
+ * Copyright (c) 2012,2014-2015,2021-2022 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -38,6 +38,8 @@
  *	    Alternate constructors. Add "getResources()".
  *	22-Apr-2021 (rlwhitcomb)
  *	    Another alternate constructor.
+ *	12-Oct-2022 (rlwhitcomb)
+ *	    #513: Move Logging to a new package.
  */
 package info.rlwhitcomb;
 
@@ -49,9 +51,9 @@ import org.apache.pivot.json.JSON;
 import org.apache.pivot.serialization.SerializationException;
 import org.apache.pivot.util.Resources;
 
+import info.rlwhitcomb.logging.Logging;
 import info.rlwhitcomb.util.ClassUtil;
 import info.rlwhitcomb.util.Intl;
-import info.rlwhitcomb.util.Logging;
 
 
 /**

@@ -53,8 +53,12 @@
  *	19-Feb-2021 (rlwhitcomb)
  *	    It is not appropriate to call "start()" in the constructor, so do it
  *	    inside "submitWork" if necessary (that is, if someone else hasn't done so).
+ *	12-Oct-2022 (rlwhitcomb)
+ *	    #513: Move Logging to new package.
  */
 package info.rlwhitcomb.util;
+
+import info.rlwhitcomb.logging.Logging;
 
 import java.util.Queue;
 import java.util.concurrent.LinkedTransferQueue;

@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  *
- * Numeric Utility Library
+ *	Numeric Utility Library
  *
  * History:
  *	11-Nov-2008 (rlwhitcomb)
@@ -42,11 +42,13 @@
  *	    #273: Move to "math" package.
  *	08-Jul-2022 (rlwhitcomb)
  *	    #393: Cleanup imports.
+ *	12-Oct-2022 (rlwhitcomb)
+ *	    #513: Move Logging to new package.
  */
 package info.rlwhitcomb.math;
 
+import info.rlwhitcomb.logging.Logging;
 import info.rlwhitcomb.util.Exceptions;
-import info.rlwhitcomb.util.Logging;
 
 import java.text.DecimalFormat;
 import java.text.FieldPosition;

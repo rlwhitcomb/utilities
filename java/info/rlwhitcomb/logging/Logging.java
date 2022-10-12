@@ -142,10 +142,16 @@
  *    #393: Cleanup imports.
  *  12-Sep-2022 (rlwhitcomb)
  *    #480: Change KMG conversion routine to return BigInteger.
+ *  12-Oct-2022 (rlwhitcomb)
+ *    #513: Move to "logging" package.
  */
-package info.rlwhitcomb.util;
+package info.rlwhitcomb.logging;
 
 import info.rlwhitcomb.math.NumericUtil;
+import info.rlwhitcomb.util.CharUtil;
+import info.rlwhitcomb.util.Environment;
+import info.rlwhitcomb.util.Exceptions;
+import info.rlwhitcomb.util.FileUtilities;
 
 import java.io.*;
 import java.nio.charset.Charset;
@@ -177,7 +183,7 @@ import java.util.regex.Pattern;
  * But experience has shown that having client logs directly comparable to server logs is a good
  * thing.
  */
-public final class Logging
+public class Logging
 {
     /** Highest logging level that produces the most verbose output.  Useful for debugging purposes. */
     public static final int DEBUG = 5;

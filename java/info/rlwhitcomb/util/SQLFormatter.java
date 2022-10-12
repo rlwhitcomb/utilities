@@ -52,8 +52,12 @@
  *	    Cleanup and prepare for GitHub.
  *	09-Jul-2022 (rlwhitcomb)
  *	    #393: Cleanup imports.
+ *	12-Oct-2022 (rlwhitcomb)
+ *	    #513: Move Logging to new package.
  */
 package info.rlwhitcomb.util;
+
+import info.rlwhitcomb.logging.Logging;
 
 import java.util.*;
 

@@ -50,13 +50,15 @@
  *	    #228: Refactor InitializationTask to return a value.
  *	14-Apr-2022 (rlwhitcomb)
  *	    #273: Move math-related classes to "math" package.
+ *	12-Oct-2022 (rlwhitcomb)
+ *	    #513: Move Logging to new package.
  */
 package info.rlwhitcomb.test;
 
+import info.rlwhitcomb.logging.Logging;
 import info.rlwhitcomb.math.MathUtil;
 import info.rlwhitcomb.util.Environment;
 import info.rlwhitcomb.util.InitializationTask;
-import info.rlwhitcomb.util.Logging;
 
 
 /**

@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2014-2015,2020-2021 Roger L. Whitcomb.
+ * Copyright (c) 2014-2015,2020-2022 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -37,15 +37,17 @@
  *	    Update obsolete Javadoc constructs.
  *	29-Jan-2021 (rlwhitcomb)
  *	    Use Intl methods for all messages.
+ *	12-Oct-2022 (rlwhitcomb)
+ *	    #513: Move Logging to new package.
  */
 package info.rlwhitcomb.csv;
 
+import info.rlwhitcomb.logging.Logging;
 import info.rlwhitcomb.util.Intl;
-import info.rlwhitcomb.util.Logging;
 
 
 /**
- * An exception occurring in the CSV package.
+ * A checked exception occurring in the CSV package.
  */
 public class CSVException extends Exception
 {
