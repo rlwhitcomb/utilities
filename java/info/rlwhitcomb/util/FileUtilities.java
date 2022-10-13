@@ -123,6 +123,8 @@
  *	#481: New "writeStringToFile" method.
  *    12-Oct-2022 (rlwhitcomb)
  *	#513: Move Logging to new package.
+ *    13-Oct-2022 (rlwhitcomb)
+ *	#481: Make "getFileReader" and "getFileWriter" public.
  */
 package info.rlwhitcomb.util;
 
@@ -908,7 +910,7 @@ public final class FileUtilities
      *			or is larger than our internal limit.
      * @throws	IOException if there is a problem starting to read the file
      */
-    private static BufferedReader getFileReader(final File file, final Charset cs)
+    public static BufferedReader getFileReader(final File file, final Charset cs)
 		throws IOException
     {
 	InputStream in;
@@ -947,7 +949,7 @@ public final class FileUtilities
      * @return		A buffered writer suitable for writing the file.
      * @throws	IOException if there is a problem starting to write the file.
      */
-    private static PrintWriter getFileWriter(final File file, final Charset cs)
+    public static PrintWriter getFileWriter(final File file, final Charset cs)
 		throws IOException
     {
 	PrintWriter out;

@@ -25,11 +25,14 @@
  *
  * History:
  *  10-Oct-22 rlw #481:	Initial implementation.
+ *  13-Oct-22 rlw #481: New -format option to reformat an encoded file to the
+ *			76-char line length. Add "-version" command.
  */
 package info.rlwhitcomb.tools;
 
 import info.rlwhitcomb.Testable;
 import info.rlwhitcomb.util.Constants;
+import info.rlwhitcomb.util.Environment;
 import info.rlwhitcomb.util.Exceptions;
 import info.rlwhitcomb.util.FileUtilities;
 import info.rlwhitcomb.util.Intl;
@@ -40,6 +43,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.nio.charset.*;
 
 
@@ -59,6 +63,11 @@ public class B64
 	private static boolean decode = false;
 
 	/**
+	 * Or are we just reformatting a file?
+	 */
+	private static boolean format = false;
+
+	/**
 	 * Is the input from a file?
 	 */
 	private static boolean file = false;
@@ -74,7 +83,14 @@ public class B64
 	private static StringBuilder input = new StringBuilder();
 
 	/**
-	 * For file input, the character set to use when reading it.
+	 * For file input, the character set to use when reading it, or
+	 * for file output, the character set for writing.
+	 * <p> Note: Base64 encoded data is all well withing the ASCII
+	 * character range, so the charset is not needed for this, only
+	 * for the original data (for encoding) or the final data (for
+	 * decoding) (assuming it is not binary in the first place)
+	 * (and assuming that it doesn't conform to the platform default
+	 * charset either).
 	 */
 	private static Charset charset = null;
 
@@ -82,6 +98,29 @@ public class B64
 	 * The (optional) output file name.
 	 */
 	private static String output = null;
+
+
+	/**
+	 * Reformat an already encoded string into max line length bits.
+	 *
+	 * @param input  The already encoded string.
+	 * @param output The output file name (if null, then write to console).
+	 */
+	private static void writeFormatted(final String input, final String output)
+		throws IOException
+	{
+	    String result = input.replaceAll("[\\r?\\n]", "");
+	    File f = new File(output == null ? "@" : output);
+	    try (PrintWriter writer = FileUtilities.getFileWriter(f, null)) {
+		int endPos = 0;
+		int length = result.length();
+		for (int pos = 0; pos < length; pos = endPos) {
+		    endPos = Math.min(pos + Base64.MAX_LINE_LENGTH, length);
+		    writer.println(result.substring(pos, endPos));
+		}
+		writer.flush();
+	    }
+	}
 
 
 	/**
@@ -97,10 +136,17 @@ public class B64
 		    if (Options.matchesIgnoreCase(option, "encode", "enc", "e")) {
 			encode = true;
 			decode = false;
+			format = false;
 		    }
 		    else if (Options.matchesIgnoreCase(option, "decode", "dec", "d")) {
 			decode = true;
 			encode = false;
+			format = false;
+		    }
+		    else if (Options.matchesIgnoreCase(option, "format", "form", "frm")) {
+			decode = false;
+			encode = false;
+			format = true;
 		    }
 		    else if (Options.matchesIgnoreCase(option, "file", "f")) {
 			file = true;
@@ -112,6 +158,10 @@ public class B64
 		    }
 		    else if (Options.matchesIgnoreCase(option, "output", "out", "o")) {
 			needOutput = true;
+		    }
+		    else if (Options.matchesIgnoreCase(option, "version", "vers", "ver", "v")) {
+			Environment.printProgramInfo();
+			System.exit(Testable.SUCCESS);
 		    }
 		    else if (Options.matchesIgnoreCase(option, "help", "h", "?")) {
 			Intl.printHelp("tools#base64");
@@ -207,7 +257,7 @@ public class B64
 				}
 			    }
 			}
-			else {
+			else if (decode) {
 			    if (output == null) {
 				bytes = Base64.decodeFromFile(inputValue);
 				result = new String(bytes, charset);
@@ -220,6 +270,9 @@ public class B64
 				    System.exit(Testable.OUTPUT_IO_ERROR);
 				}
 			    }
+			}
+			else /* format */ {
+			    writeFormatted(FileUtilities.readFileAsString(inputFile), output);
 			}
 		    }
 		    else {
@@ -238,7 +291,7 @@ public class B64
 			    FileUtilities.writeStringToFile(result, new File(output), charset);
 			}
 		    }
-		    else {
+		    else if (decode) {
 			bytes = Base64.decode(inputValue);
 			if (output == null) {
 			    result = new String(bytes, charset);
@@ -247,6 +300,9 @@ public class B64
 			else {
 			    FileUtilities.writeStreamToFile(new ByteArrayInputStream(bytes), new File(output));
 			}
+		    }
+		    else /* format */ {
+			writeFormatted(inputValue, output);
 		    }
 		}
 	    }

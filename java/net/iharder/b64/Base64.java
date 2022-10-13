@@ -23,6 +23,7 @@ package net.iharder.b64;
  * Change Log:
  * </p>
  * <ul>
+ *  <li>v2.2.7 - Make the MAX_LINE_LENGTH variable public.
  *  <li>v2.2.6 - Add global "debug" flag to suppress stack traces and save the exception
  *   for handling by callers.
  *  <li>v2.2.5 - Update obsolete Javadoc constructs. 21-Dec-2020
@@ -91,7 +92,7 @@ package net.iharder.b64;
  *
  * @author Robert Harder
  * @author rob@iharder.net
- * @version 2.2.6
+ * @version 2.2.7
  */
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -138,11 +139,11 @@ public class Base64
 	 public final static int ORDERED = 32;
     
     
-/* ********  P R I V A T E   F I E L D S  ******** */  
-    
-    
     /** Maximum line length (76) of Base64 output. */
-    private final static int MAX_LINE_LENGTH = 76;
+    public final static int MAX_LINE_LENGTH = 76;
+    
+    
+/* ********  P R I V A T E   F I E L D S  ******** */  
     
     
     /** The equals sign (=) as a byte. */
