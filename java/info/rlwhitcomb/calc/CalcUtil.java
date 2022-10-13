@@ -179,6 +179,9 @@
  *	    on command line also).
  *	29-Aug-2022 (rlwhitcomb)
  *	    #469: New method to search ObjectScope recursively for "has"-ness.
+ *	12-Oct-2022 (rlwhitcomb)
+ *	    #103: Add "equality" parameter to "compareValues" for the strange case of
+ *	    ComplexNumber comparisons.
  */
 package info.rlwhitcomb.calc;
 
@@ -1274,7 +1277,7 @@ public final class CalcUtil
 
 		@Override
 		public int compare(final Object o1, final Object o2) {
-		    return compareValues(visitor, ctx, ctx, o1, o2, mc, false, true, ignoreCase, true);
+		    return compareValues(visitor, ctx, ctx, o1, o2, mc, false, true, ignoreCase, true, false);
 		}
 	}
 
@@ -1318,10 +1321,10 @@ public final class CalcUtil
 		@Override
 		public int compare(final Map.Entry<String, Object> e1, final Map.Entry<String, Object> e2) {
 		    if (sortByKey) {
-			return compareValues(visitor, ctx, ctx, e1.getKey(), e2.getKey(), mc, false, true, ignoreCase, true);
+			return compareValues(visitor, ctx, ctx, e1.getKey(), e2.getKey(), mc, false, true, ignoreCase, true, false);
 		    }
 		    else {
-			return compareValues(visitor, ctx, ctx, e1.getValue(), e2.getValue(), mc, false, true, ignoreCase, true);
+			return compareValues(visitor, ctx, ctx, e1.getValue(), e2.getValue(), mc, false, true, ignoreCase, true, false);
 		    }
 		}
 	}
@@ -1368,9 +1371,10 @@ public final class CalcUtil
 	 */
 	public static int compareValues(final CalcObjectVisitor visitor,
 		final ParserRuleContext ctx1, final ParserRuleContext ctx2,
-		final MathContext mc, final boolean strict, final boolean allowNulls) {
+		final MathContext mc, final boolean strict, final boolean allowNulls,
+		final boolean equality) {
 	    return compareValues(visitor, ctx1, ctx2, visitor.visit(ctx1), visitor.visit(ctx2),
-		mc, strict, allowNulls, false, false);
+		mc, strict, allowNulls, false, false, equality);
 	}
 
 	/**
@@ -1387,6 +1391,7 @@ public final class CalcUtil
 	 * @param allowNulls   Some comparisons (strings) can be compared even if one or both operands are null.
 	 * @param ignoreCase   For strings, whether to ignore case or not.
 	 * @param naturalOrder For strings, whether to use natural ordering or normal string ordering.
+	 * @param equality     The operator is something like "==" or "!=" (an "equality" operator).
 	 * @return {@code -1} if the first object is "less than" the second,
 	 *         {@code 0} if the objects are "equal",
 	 *         {@code +1} if the first object is "greater than" the second.
@@ -1395,7 +1400,7 @@ public final class CalcUtil
 		final ParserRuleContext ctx1, final ParserRuleContext ctx2,
 		final Object obj1, final Object obj2,
 		final MathContext mc, final boolean strict, final boolean allowNulls,
-		final boolean ignoreCase, final boolean naturalOrder) {
+		final boolean ignoreCase, final boolean naturalOrder, final boolean equality) {
 	    Object e1 = visitor.evaluate(ctx1, obj1);
 	    Object e2 = visitor.evaluate(ctx2, obj2);
 
@@ -1432,6 +1437,10 @@ public final class CalcUtil
 	    else if (e1 instanceof ComplexNumber || e2 instanceof ComplexNumber) {
 		ComplexNumber c1 = ComplexNumber.valueOf(e1);
 		ComplexNumber c2 = ComplexNumber.valueOf(e2);
+
+		if (equality) {
+		    return c1.equals(c2) ? 0 : -1;
+		}
 
 		return c1.compareTo(c2);
 	    }
@@ -1480,7 +1489,7 @@ public final class CalcUtil
 		    Object o1 = list1.getValue(i);
 		    Object o2 = list2.getValue(i);
 
-		    int ret = compareValues(visitor, ctx1, ctx2, o1, o2, mc, strict, allowNulls, ignoreCase, naturalOrder);
+		    int ret = compareValues(visitor, ctx1, ctx2, o1, o2, mc, strict, allowNulls, ignoreCase, naturalOrder, equality);
 		    if (ret != 0)
 			return ret;
 		}
@@ -1519,7 +1528,7 @@ public final class CalcUtil
 		    Object value1 = map1.getValue(key, false);
 		    Object value2 = map2.getValue(key, false);
 
-		    int ret = compareValues(visitor, ctx1, ctx2, value1, value2, mc, strict, allowNulls, ignoreCase, naturalOrder);
+		    int ret = compareValues(visitor, ctx1, ctx2, value1, value2, mc, strict, allowNulls, ignoreCase, naturalOrder, equality);
 		    if (ret != 0)
 			return ret;
 		}
@@ -1547,7 +1556,7 @@ public final class CalcUtil
 
 		// Iterate through the set and compare the values in order
 		for (int i = 0; i < list1.size(); i++) {
-		    int ret = compareValues(visitor, ctx1, ctx2, list1.get(i), list2.get(i), mc, strict, allowNulls, ignoreCase, naturalOrder);
+		    int ret = compareValues(visitor, ctx1, ctx2, list1.get(i), list2.get(i), mc, strict, allowNulls, ignoreCase, naturalOrder, equality);
 		    if (ret != 0)
 			return ret;
 		}
@@ -1977,7 +1986,7 @@ public final class CalcUtil
 		// Search backwards, but with result always zero-based and positive
 		for (index = size + start; index >= 0; index--) {
 		    Object listObj = objects.get(index);
-		    if (compareValues(visitor, ctx1, ctx2, listObj, search, mc, false, true, false, false) == 0)
+		    if (compareValues(visitor, ctx1, ctx2, listObj, search, mc, false, true, false, false, true) == 0)
 			return index;
 		}
 	    }
@@ -1985,7 +1994,7 @@ public final class CalcUtil
 		// Search forwards
 		for (index = start; index < size; index++) {
 		    Object listObj = objects.get(index);
-		    if (compareValues(visitor, ctx1, ctx2, listObj, search, mc, false, true, false, false) == 0)
+		    if (compareValues(visitor, ctx1, ctx2, listObj, search, mc, false, true, false, false, true) == 0)
 			return index;
 		}
 	    }

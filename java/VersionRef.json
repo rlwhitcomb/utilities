@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.14.50', date: d'2022-10-12',
+      issues: [ 103 ],
+      comment: 'Fix equality testing of complex numbers.'
+    },
     { version: '2.14.48', date: d'2022-10-08',
       issues: [ 506 ],
       comment: 'New "-ln" and "-lf" options for line separators on output.'

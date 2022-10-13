@@ -683,6 +683,8 @@
  *	    #501: Add "tobase" function.
  *	08-Oct-2022 (rlwhitcomb)
  *	    #501: Add "frombase" function.
+ *	12-Oct-2022 (rlwhitcomb)
+ *	    #103: Add extra param to "compareValues" for equality checks.
  */
 package info.rlwhitcomb.calc;
 
@@ -1399,11 +1401,11 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	private int compareValues(final ParserRuleContext ctx1, final ParserRuleContext ctx2) {
-	    return compareValues(ctx1, ctx2, false, false);
+	    return compareValues(ctx1, ctx2, false, false, false);
 	}
 
-	private int compareValues(final ParserRuleContext ctx1, final ParserRuleContext ctx2, final boolean strict, final boolean allowNulls) {
-	    return CalcUtil.compareValues(this, ctx1, ctx2, settings.mc, strict, allowNulls);
+	private int compareValues(final ParserRuleContext ctx1, final ParserRuleContext ctx2, final boolean strict, final boolean allowNulls, final boolean equality) {
+	    return CalcUtil.compareValues(this, ctx1, ctx2, settings.mc, strict, allowNulls, equality);
 	}
 
 
@@ -2860,7 +2862,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		@Override
 		public Object apply(final Object value) {
 		    if (!isMatched
-		     && CalcUtil.compareValues(CalcObjectVisitor.this, caseExpr, blockCtx, caseValue, value, settings.mc, false, true, false, false) == 0) {
+		     && CalcUtil.compareValues(CalcObjectVisitor.this, caseExpr, blockCtx, caseValue, value, settings.mc, false, true, false, false, true) == 0) {
 			blockValue = execute();
 		    }
 		    return blockValue;
@@ -6138,7 +6140,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitSpaceshipExpr(CalcParser.SpaceshipExprContext ctx) {
-	    int ret = compareValues(ctx.expr(0), ctx.expr(1), false, true);
+	    int ret = compareValues(ctx.expr(0), ctx.expr(1), false, true, false);
 
 	    if (ret < 0)
 		return settings.rationalMode ? BigFraction.MINUS_ONE : I_MINUS_ONE;
@@ -6175,9 +6177,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		case "\u2262": // NOT IDENTICAL
 		    if (optObj1 != null)
 			cmp = CalcUtil.compareValues(this, expr1, expr2, optObj1.orElse(null), visit(expr2),
-				settings.mc, true, true, false, false);
+				settings.mc, true, true, false, false, true);
 		    else
-			cmp = compareValues(expr1, expr2, true, true);
+			cmp = compareValues(expr1, expr2, true, true, true);
 		    break;
 
 		case "==":
@@ -6187,15 +6189,15 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		case "\u2260": // NOT EQUAL
 		    if (optObj1 != null)
 			cmp = CalcUtil.compareValues(this, expr1, expr2, optObj1.orElse(null), visit(expr2),
-				settings.mc, false, true, false, false);
+				settings.mc, false, true, false, false, true);
 		    else
-			cmp = compareValues(expr1, expr2, false, true);
+			cmp = compareValues(expr1, expr2, false, true, true);
 		    break;
 
 		default:
 		    if (optObj1 != null)
 			cmp = CalcUtil.compareValues(this, expr1, expr2, optObj1.orElse(null), visit(expr2),
-				settings.mc, false, false, false, false);
+				settings.mc, false, false, false, false, false);
 		    else
 			cmp = compareValues(expr1, expr2);
 		    break;
@@ -6275,7 +6277,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			valueCtx, loopCtx,
 			inValue, value,
 			settings.mc,
-			false, true, false, false);
+			false, true, false, false, true);
 
 		    if (cmp == 0)
 			compared = true;

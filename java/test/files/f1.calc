@@ -160,6 +160,11 @@ complex('(4.739)')
 complex('-4.7i')
 complex('(2i)')**2
 
+(1,0) == (0,1)
+(1,0) === (0,1)
+(1,1) == (2,2)
+(2,2) > (1,1)
+
 // more to come (to complex powers)
 
 
