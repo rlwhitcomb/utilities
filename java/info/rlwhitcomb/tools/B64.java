@@ -27,10 +27,12 @@
  *  10-Oct-22 rlw #481:	Initial implementation.
  *  13-Oct-22 rlw #481: New -format option to reformat an encoded file to the
  *			76-char line length. Add "-version" command.
+ *		  #481: Read from console. Fixes to do proper init for Tester.
  */
 package info.rlwhitcomb.tools;
 
 import info.rlwhitcomb.Testable;
+import info.rlwhitcomb.logging.Logging;
 import info.rlwhitcomb.util.Constants;
 import info.rlwhitcomb.util.Environment;
 import info.rlwhitcomb.util.Exceptions;
@@ -39,9 +41,13 @@ import info.rlwhitcomb.util.Intl;
 import info.rlwhitcomb.util.Options;
 import net.iharder.b64.Base64;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.Console;
 import java.io.File;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.charset.*;
@@ -53,29 +59,39 @@ import java.nio.charset.*;
 public class B64
 {
 	/**
+	 * The system-specific line separator.
+	 */
+	private static final String LF = Environment.lineSeparator();
+
+	/**
 	 * Should we encode (raw to base64) (default)?
 	 */
-	private static boolean encode = true;
+	private static boolean encode;
 
 	/**
 	 * Or should we decode (base64 back to raw)?
 	 */
-	private static boolean decode = false;
+	private static boolean decode;
 
 	/**
 	 * Or are we just reformatting a file?
 	 */
-	private static boolean format = false;
+	private static boolean format;
+
+	/**
+	 * Is the input from the console?
+	 */
+	private static boolean console;
 
 	/**
 	 * Is the input from a file?
 	 */
-	private static boolean file = false;
+	private static boolean file;
 
 	/**
 	 * Is the input just a string on the command line?
 	 */
-	private static boolean string = false;
+	private static boolean string;
 
 	/**
 	 * The input argument (could be a string or a file name).
@@ -92,12 +108,12 @@ public class B64
 	 * (and assuming that it doesn't conform to the platform default
 	 * charset either).
 	 */
-	private static Charset charset = null;
+	private static Charset charset;
 
 	/**
 	 * The (optional) output file name.
 	 */
-	private static String output = null;
+	private static String output;
 
 
 	/**
@@ -127,6 +143,20 @@ public class B64
 	 * @param args The parsed command line argument array.
 	 */
 	public static void main(final String[] args) {
+	    // Reset static variables each time (for testing)
+	    encode = true;
+	    decode = false;
+	    format = false;
+
+	    console = false;
+	    file = false;
+	    string = false;
+
+	    input.setLength(0);
+
+	    charset = null;
+	    output = null;
+
 	    boolean needOutput = false;
 	    boolean needCharset = false;
 
@@ -147,6 +177,9 @@ public class B64
 			decode = false;
 			encode = false;
 			format = true;
+		    }
+		    else if (Options.matchesIgnoreCase(option, "stdin", "in")) {
+			console = true;
 		    }
 		    else if (Options.matchesIgnoreCase(option, "file", "f")) {
 			file = true;
@@ -171,6 +204,9 @@ public class B64
 			Intl.errFormat("tools#base64.unknownOption", arg);
 			System.exit(Testable.BAD_ARGUMENT);
 		    }
+		}
+		else if (arg.equals("@") || arg.equals("--") || arg.equals("-")) {
+		    console = true;
 		}
 		else if (needOutput) {
 		    if (output != null) {
@@ -209,11 +245,6 @@ public class B64
 		}
 	    }
 
-	    if (input.length() == 0) {
-		Intl.errFormat("tools#base64.noInput");
-		System.exit(Testable.NO_INPUTS);
-	    }
-
 	    if (needOutput) {
 		Intl.errFormat("tools#base64.missingOutput");
 		System.exit(Testable.MISSING_OPTION);
@@ -224,20 +255,67 @@ public class B64
 		System.exit(Testable.MISSING_OPTION);
 	    }
 
-	    String inputValue = input.toString();
+	    if (charset == null) {
+		charset = Constants.UTF_8_CHARSET;
+	    }
+
 	    String result = null;
 	    byte[] bytes = null;
 
-	    if (!file && !string) {
+	    if (console) {
+		try {
+		    Console console = System.console();
+		    if (System.in.available() > 0) {
+			if (encode) {
+			    // The input could be redirected from a binary file, so read bytes, not chars
+			    ByteArrayOutputStream baos = new ByteArrayOutputStream(Constants.PROCESS_BUFFER_SIZE);
+			    byte[] inputBuf = new byte[Constants.PROCESS_BUFFER_SIZE];
+			    int ret = 0;
+			    while ((ret = System.in.read(inputBuf)) > 0) {
+				baos.write(inputBuf, 0, ret);
+			    }
+			    bytes = baos.toByteArray();
+			}
+			else {
+			    BufferedReader reader = new BufferedReader(new InputStreamReader(System.in, charset));
+			    while ((result = reader.readLine()) != null) {
+				input.append(result).append(LF);
+			    }
+			}
+		    }
+		    else if (console != null) {
+			while ((result = console.readLine()) != null) {
+			    input.append(result).append(LF);
+			}
+		    }
+		    else {
+			Intl.errPrintln("tools#base64.noConsole");
+			System.exit(Testable.BAD_ARGUMENT);
+		    }
+		}
+		catch (IOException ioe) {
+		    Intl.errFormat("tools#base64.consoleIOError", Exceptions.toString(ioe));
+		    System.exit(Testable.INPUT_IO_ERROR);
+		}
+	    }
+
+	    if (input.length() == 0 && bytes == null) {
+		Intl.errFormat("tools#base64.noInput");
+		System.exit(Testable.NO_INPUTS);
+	    }
+
+	    String inputValue = input.toString();
+
+	    if (console) {
+		string = true;
+		file = false;
+	    }
+	    else if (!file && !string) {
 		// If neither input source mentioned, try file first, then if not found count as string
 		if (FileUtilities.canRead(new File(inputValue)))
 		    file = true;
 		else
 		    string = true;
-	    }
-
-	    if (charset == null) {
-		charset = Constants.UTF_8_CHARSET;
 	    }
 
 	    try {
@@ -247,6 +325,10 @@ public class B64
 			if (encode) {
 			    if (output == null) {
 				result = Base64.encodeFromFile(inputValue);
+				if (result == null) {
+				    Intl.errFormat("tools#base64.encodeError", inputValue);
+				    System.exit(Testable.OUTPUT_IO_ERROR);
+				}
 				System.out.println(result);
 			    }
 			    else {
@@ -260,6 +342,10 @@ public class B64
 			else if (decode) {
 			    if (output == null) {
 				bytes = Base64.decodeFromFile(inputValue);
+				if (bytes == null) {
+				    Intl.errFormat("tools#base64.decodeError", inputValue);
+				    System.exit(Testable.OUTPUT_IO_ERROR);
+				}
 				result = new String(bytes, charset);
 				System.out.println(result);
 			    }
@@ -280,9 +366,11 @@ public class B64
 			System.exit(Testable.FILE_NOT_FOUND);
 		    }
 		}
-		else {
+		else /* string */ {
 		    if (encode) {
-			bytes = inputValue.getBytes(charset);
+			if (bytes == null) {
+			    bytes = inputValue.getBytes(charset);
+			}
 			result = Base64.encodeBytes(bytes);
 			if (output == null) {
 			    System.out.println(result);

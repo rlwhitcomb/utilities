@@ -9,3 +9,8 @@ back: -e images/backspace_32.png -o %TEMP|TMP|TMPDIR|.%/back.b64
 # TODO: this won't work until we get binary canon file support into Tester (#510)
 #images/backspace_32.png,binary: -d %TEMP|TMP|TMPDIR|.%/back.b64
 
+b64test1: -s This is a test
+b64test2: -d VGhpcyBpcyBhIHRlc3Q=
+b64test3: -s @
+b64test4: -d --
+

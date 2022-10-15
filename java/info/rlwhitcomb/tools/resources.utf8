@@ -38,6 +38,8 @@
 #	    #498: New errors for GZip and GUnzip.
 #	10-Oct-2022 (rlwhitcomb)
 #	    #481: Errors for base64 tool; rudimentary help.
+#	13-Oct-2022 (rlwhitcomb)
+#	    #481: More base64 errors.
 #
 
 #
@@ -48,8 +50,11 @@ base64.onlyOneCharset	= Only one "-charset" value allowed.
 base64.missingOutput	= Missing file name for "-output" option.
 base64.missingCharset	= Missing character set for "-charset" option.
 base64.noInput		= Nothing to do; no input given to process.
+base64.noConsole	= Console is not available to read from!
 base64.unknownOption	= Unknown option: "%1$s"!
 base64.cannotReadInput	= Unable to find or read input file "%1$s"!
+base64.encodeError	= Unable to encode file "%1$s"!
+base64.decodeError	= Unable to decode file "%1$s" (invalid input data).
 base64.encodeFileError	= Unable to encode file "%1$s" to output file "%2$s": %3$s
 base64.decodeFileError	= Unable to decode file "%1$s" to output file "%2$s": %3$s
 
