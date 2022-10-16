@@ -2,7 +2,11 @@
 >Running base64test...
 >------------------------------------
 >Test 'back': Passed
+>Test 'b64test1': Passed
+>Test 'b64test2': Passed
+>Test 'b64test3': Passed
+>Test 'b64test4': Passed
 >------------------------------------
->Ran 1 test: 1 passed, 0 failed.
+>Ran 5 tests: 5 passed, 0 failed.
 >====================================
 >
