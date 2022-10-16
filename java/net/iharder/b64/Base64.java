@@ -1234,7 +1234,7 @@ public class Base64
      * Object within. Returns {@code null} if there was an error.
      *
      * @param encodedObject The Base64 data to decode
-     * @param option Options for the decoding
+     * @param options Options for the decoding
      * @return The decoded and deserialized object
      * @since 2.2.8
      */
