@@ -23,6 +23,7 @@ package net.iharder.b64;
  * Change Log:
  * </p>
  * <ul>
+ *  <li>v2.2.8 - Make versions of the high-level methods with "options" parameter. 14-Oct-22
  *  <li>v2.2.7 - Make the MAX_LINE_LENGTH variable public.
  *  <li>v2.2.6 - Add global "debug" flag to suppress stack traces and save the exception
  *   for handling by callers.
@@ -92,7 +93,7 @@ package net.iharder.b64;
  *
  * @author Robert Harder
  * @author rob@iharder.net
- * @version 2.2.7
+ * @version 2.2.8
  */
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -947,7 +948,7 @@ public class Base64
                     e++;
                     lineLength = 0;
                 }   // end if: end of line
-            }   // en dfor: each piece of array
+            }   // end for: each piece of array
 
             if( d < len )
             {
@@ -1171,7 +1172,6 @@ public class Base64
         // GZIP Magic Two-Byte Number: 0x8b1f (35615)
         if( bytes != null && bytes.length >= 4 )
         {
-            
             int head = ((int)bytes[0] & 0xff) | ((bytes[1] << 8) & 0xff00);       
             if( java.util.zip.GZIPInputStream.GZIP_MAGIC == head ) 
             {
@@ -1226,8 +1226,23 @@ public class Base64
      */
     public static Object decodeToObject( String encodedObject )
     {
+	return decodeToObject( encodedObject, NO_OPTIONS );
+    }
+
+    /**
+     * Attempts to decode Base64 data and deserialize a Java
+     * Object within. Returns {@code null} if there was an error.
+     *
+     * @param encodedObject The Base64 data to decode
+     * @param option Options for the decoding
+     * @return The decoded and deserialized object
+     * @since 2.2.8
+     */
+    public static Object decodeToObject( String encodedObject, int options )
+    {
+	int opt = options & ~( ENCODE | DECODE );
         // Decode and gunzip if necessary
-        byte[] objBytes = decode( encodedObject );
+        byte[] objBytes = decode( encodedObject, opt );
         
         java.io.ByteArrayInputStream  bais = null;
         java.io.ObjectInputStream     ois  = null;
@@ -1280,18 +1295,33 @@ public class Base64
      */
     public static boolean encodeToFile( byte[] dataToEncode, String filename )
     {
+	return encodeToFile( dataToEncode, filename, NO_OPTIONS );
+    }
+
+    /**
+     * Convenience method for encoding data to a file.
+     *
+     * @param dataToEncode byte array of data to encode in base64 form
+     * @param filename Filename for saving encoded data
+     * @param options Options for the encoding process
+     * @return {@code true} if successful, {@code false} otherwise
+     *
+     * @since 2.2.8
+     */
+    public static boolean encodeToFile( byte[] dataToEncode, String filename, int options )
+    {
+	int opt = options & ~( ENCODE | DECODE );
         boolean success = false;
         Base64.OutputStream bos = null;
         try
         {
             bos = new Base64.OutputStream( 
-                      Files.newOutputStream( Paths.get(filename) ), Base64.ENCODE );
+                      Files.newOutputStream( Paths.get(filename) ), ENCODE | opt );
             bos.write( dataToEncode );
             success = true;
         }   // end try
         catch( java.io.IOException e )
         {
-            
             success = false;
         }   // end catch: IOException
         finally
@@ -1314,12 +1344,28 @@ public class Base64
      */
     public static boolean decodeToFile( String dataToDecode, String filename )
     {
+	return decodeToFile( dataToDecode, filename, NO_OPTIONS );
+    }
+
+    /**
+     * Convenience method for decoding data to a file.
+     *
+     * @param dataToDecode Base64-encoded data as a string
+     * @param filename Filename for saving decoded data
+     * @param options Options for the decoding process
+     * @return {@code true} if successful, {@code false} otherwise
+     *
+     * @since 2.2.8
+     */
+    public static boolean decodeToFile( String dataToDecode, String filename, int options )
+    {
+	int opt = options & ~( ENCODE | DECODE );
         boolean success = false;
         Base64.OutputStream bos = null;
         try
         {
                 bos = new Base64.OutputStream( 
-                          Files.newOutputStream( Paths.get(filename) ), Base64.DECODE );
+                          Files.newOutputStream( Paths.get(filename) ), DECODE | opt );
                 bos.write( dataToDecode.getBytes( PREFERRED_ENCODING ) );
                 success = true;
         }   // end try
@@ -1349,6 +1395,22 @@ public class Base64
      */
     public static byte[] decodeFromFile( String filename )
     {
+	return decodeFromFile( filename, NO_OPTIONS );
+    }
+
+    /**
+     * Convenience method for reading a base64-encoded
+     * file and decoding it.
+     *
+     * @param filename Filename for reading encoded data
+     * @param options Options for the decoding
+     * @return decoded byte array or null if unsuccessful
+     *
+     * @since 2.2.8
+     */
+    public static byte[] decodeFromFile( String filename, int options )
+    {
+	int opt = options & ~( ENCODE | DECODE );
         byte[] decodedData = null;
         Base64.InputStream bis = null;
         try
@@ -1370,7 +1432,7 @@ public class Base64
             // Open a stream
             bis = new Base64.InputStream( 
                       new java.io.BufferedInputStream( 
-                      Files.newInputStream( file.toPath() ) ), Base64.DECODE );
+                      Files.newInputStream( file.toPath() ) ), DECODE | opt );
             
             // Read until done
             while( ( numBytes = bis.read( buffer, length, 4096 ) ) >= 0 )
@@ -1394,7 +1456,7 @@ public class Base64
     }   // end decodeFromFile
     
     
-    
+
     /**
      * Convenience method for reading a binary file
      * and base64-encoding it.
@@ -1406,6 +1468,22 @@ public class Base64
      */
     public static String encodeFromFile( String filename )
     {
+	return encodeFromFile( filename, NO_OPTIONS );
+    }
+
+    /**
+     * Convenience method for reading a binary file
+     * and base64-encoding it.
+     *
+     * @param filename Filename for reading binary data
+     * @param options Options for the encoding process.
+     * @return base64-encoded string or null if unsuccessful
+     *
+     * @since 2.2.8
+     */
+    public static String encodeFromFile( String filename, int options )
+    {
+	int opt = options & ~( ENCODE | DECODE );
         String encodedData = null;
         Base64.InputStream bis = null;
         try
@@ -1419,7 +1497,7 @@ public class Base64
             // Open a stream
             bis = new Base64.InputStream( 
                       new java.io.BufferedInputStream( 
-                      Files.newInputStream( file.toPath() ) ), Base64.ENCODE );
+                      Files.newInputStream( file.toPath() ) ), ENCODE | opt );
             
             // Read until done
             while( ( numBytes = bis.read( buffer, length, 4096 ) ) >= 0 )
@@ -1454,6 +1532,21 @@ public class Base64
      */
     public static boolean encodeFileToFile( String infile, String outfile )
     {
+	return encodeFileToFile( infile, outfile, NO_OPTIONS );
+    }
+
+    /**
+     * Reads <code>infile</code> and encodes it to <code>outfile</code>.
+     *
+     * @param infile Input file
+     * @param outfile Output file
+     * @param options Options for the encoding process
+     * @return true if the operation is successful
+     * @since 2.2.8
+     */
+    public static boolean encodeFileToFile( String infile, String outfile, int options )
+    {
+	int opt = options & ~( ENCODE | DECODE );
         boolean success = false;
         java.io.InputStream in = null;
         java.io.OutputStream out = null;
@@ -1461,7 +1554,7 @@ public class Base64
             in  = new Base64.InputStream( 
                       new java.io.BufferedInputStream( 
                       Files.newInputStream( Paths.get(infile) ) ), 
-                      Base64.ENCODE );
+                      ENCODE | opt );
             out = new java.io.BufferedOutputStream( Files.newOutputStream( Paths.get(outfile) ) );
             byte[] buffer = new byte[65536]; // 64K
             int read = -1;
@@ -1494,6 +1587,21 @@ public class Base64
      */
     public static boolean decodeFileToFile( String infile, String outfile )
     {
+	return decodeFileToFile( infile, outfile, NO_OPTIONS );
+    }
+
+    /**
+     * Reads <code>infile</code> and decodes it to <code>outfile</code>.
+     *
+     * @param infile Input file
+     * @param outfile Output file
+     * @param options Options for the deocde operation
+     * @return true if the operation is successful
+     * @since 2.2.8
+     */
+    public static boolean decodeFileToFile( String infile, String outfile, int options )
+    {
+	int opt = options & ~( ENCODE | DECODE );
         boolean success = false;
         java.io.InputStream in = null;
         java.io.OutputStream out = null;
@@ -1501,7 +1609,7 @@ public class Base64
             in  = new Base64.InputStream( 
                       new java.io.BufferedInputStream( 
                       Files.newInputStream( Paths.get(infile) ) ), 
-                      Base64.DECODE );
+                      DECODE | opt );
             out = new java.io.BufferedOutputStream( Files.newOutputStream( Paths.get(outfile) ) );
             byte[] buffer = new byte[65536]; // 64K
             int read = -1;

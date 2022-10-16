@@ -28,6 +28,7 @@
  *  13-Oct-22 rlw #481: New -format option to reformat an encoded file to the
  *			76-char line length. Add "-version" command.
  *		  #481: Read from console. Fixes to do proper init for Tester.
+ *  14-Oct-22 rlw #518:	Add option for "URL_SAFE" encoding and decoding.
  */
 package info.rlwhitcomb.tools;
 
@@ -94,6 +95,11 @@ public class B64
 	private static boolean string;
 
 	/**
+	 * Use the "URL_SAFE" encoding / decoding.
+	 */
+	private static boolean urlSafe;
+
+	/**
 	 * The input argument (could be a string or a file name).
 	 */
 	private static StringBuilder input = new StringBuilder();
@@ -151,6 +157,7 @@ public class B64
 	    console = false;
 	    file = false;
 	    string = false;
+	    urlSafe = false;
 
 	    input.setLength(0);
 
@@ -177,6 +184,9 @@ public class B64
 			decode = false;
 			encode = false;
 			format = true;
+		    }
+		    else if (Options.matchesIgnoreCase(option, "urlsafe", "url", "u")) {
+			urlSafe = true;
 		    }
 		    else if (Options.matchesIgnoreCase(option, "stdin", "in")) {
 			console = true;
@@ -318,13 +328,15 @@ public class B64
 		    string = true;
 	    }
 
+	    int options = urlSafe ? Base64.URL_SAFE : Base64.NO_OPTIONS;
+
 	    try {
 		if (file) {
 		    File inputFile = new File(inputValue);
 		    if (FileUtilities.canRead(inputFile)) {
 			if (encode) {
 			    if (output == null) {
-				result = Base64.encodeFromFile(inputValue);
+				result = Base64.encodeFromFile(inputValue, options);
 				if (result == null) {
 				    Intl.errFormat("tools#base64.encodeError", inputValue);
 				    System.exit(Testable.OUTPUT_IO_ERROR);
@@ -332,7 +344,7 @@ public class B64
 				System.out.println(result);
 			    }
 			    else {
-				if (!Base64.encodeFileToFile(inputValue, output)) {
+				if (!Base64.encodeFileToFile(inputValue, output, options)) {
 				    Intl.errFormat("tools#base64.encodeFileError",
 					inputValue, output, Exceptions.toString(Base64.getCaughtException()));
 				    System.exit(Testable.OUTPUT_IO_ERROR);
@@ -341,7 +353,7 @@ public class B64
 			}
 			else if (decode) {
 			    if (output == null) {
-				bytes = Base64.decodeFromFile(inputValue);
+				bytes = Base64.decodeFromFile(inputValue, options);
 				if (bytes == null) {
 				    Intl.errFormat("tools#base64.decodeError", inputValue);
 				    System.exit(Testable.OUTPUT_IO_ERROR);
@@ -350,7 +362,7 @@ public class B64
 				System.out.println(result);
 			    }
 			    else {
-				if (!Base64.decodeFileToFile(inputValue, output)) {
+				if (!Base64.decodeFileToFile(inputValue, output, options)) {
 				    Intl.errFormat("tools#base64.decodeFileError",
 					inputValue, output, Exceptions.toString(Base64.getCaughtException()));
 				    System.exit(Testable.OUTPUT_IO_ERROR);
@@ -371,7 +383,7 @@ public class B64
 			if (bytes == null) {
 			    bytes = inputValue.getBytes(charset);
 			}
-			result = Base64.encodeBytes(bytes);
+			result = Base64.encodeBytes(bytes, options);
 			if (output == null) {
 			    System.out.println(result);
 			}
@@ -380,7 +392,7 @@ public class B64
 			}
 		    }
 		    else if (decode) {
-			bytes = Base64.decode(inputValue);
+			bytes = Base64.decode(inputValue, options);
 			if (output == null) {
 			    result = new String(bytes, charset);
 			    System.out.println(result);

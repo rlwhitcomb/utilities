@@ -40,6 +40,8 @@
 #	    #481: Errors for base64 tool; rudimentary help.
 #	13-Oct-2022 (rlwhitcomb)
 #	    #481: More base64 errors.
+#	14-Oct-2022 (rlwhitcomb)
+#	    #518: Add base64 help for "-urlsafe" option.
 #
 
 #
@@ -58,7 +60,7 @@ base64.decodeError	= Unable to decode file "%1$s" (invalid input data).
 base64.encodeFileError	= Unable to encode file "%1$s" to output file "%2$s": %3$s
 base64.decodeFileError	= Unable to decode file "%1$s" to output file "%2$s": %3$s
 
-base64.help1	= Usage: b64 [-encode|-decode|-format] [-string|-file] [-out filename] [-charset cs] input
+base64.help1	= Usage: b64 [-encode|-decode|-format] [-string|-file] [-urlsafe] [-out filename] [-charset cs] input
 base64.help2	= ""
 base64.help3	= Default is "-encode", try "-file" (if found) then "-string", output to console.
 base64.help4	= ""
