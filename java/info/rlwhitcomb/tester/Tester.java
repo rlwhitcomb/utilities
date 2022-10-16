@@ -234,6 +234,8 @@
  *	    #489: Change exit status codes to the standard Testable ones.
  *	27-Sep-2022 (rlwhitcomb)
  *	    #488: Also report free memory size.
+ *	16-Oct-2022 (rlwhitcomb)
+ *	    #443: Update Javadoc with the new marker conventions.
  */
 package info.rlwhitcomb.tester;
 
@@ -880,13 +882,13 @@ public class Tester
 
 	/**
 	 * Check a potential canon line for platform, version and charset values
-	 * specified as <code>{<i>platform</i>}</code> or <code>{,<i>major</i>.<i>minor</i>}</code> or <code>{<i>platform</i>,<i>major</i>.<i>minor</i>}</code>.
-	 * <p>Platform can be <code>"windows"</code>, <code>"linux"</code>, <code>"unix"</code>, or <code>"osx"</code>. Also, <code>"^platform"</code> will match any
+	 * specified as <code>{.<i>platform</i>.}</code> or <code>{.,<i>major</i>.<i>minor</i>.}</code> or <code>{.<i>platform</i>,<i>major</i>.<i>minor</i>.}</code>.
+	 * <p>Platform can be <code>"windows"</code>, <code>"linux"</code>, <code>"unix"</code>, or <code>"osx"</code>. Also, <code>"^<i>platform</i>"</code> will match any
 	 * platform EXCEPT the given one.
 	 * <p>Version can also be <code><i>major</i></code>, <code><i>major</i>.<i>x</i></code> or <code><i>major</i>.*</code> or any of these
 	 * followed by <code>+</code> or <code><i>major</i></code>[<code>.<i>minor</i></code>]<code>-<i>major</i></code>[<code>.<i>minor</i></code>] with either one omitted.
-	 * <p>Charset is specified by <code>[charset]</code>, and can be given as <code>[*]</code> to match any character set (same as leaving out the check),
-	 * or by <code>[^name]</code> which matches any charset BUT the given one.
+	 * <p>Charset is specified by <code>[.<i>charset</i>.]</code>, and can be given as <code>[.*.]</code> to match any character set (same as leaving out the check),
+	 * or by <code>[.^<i>name</i>.]</code> which matches any charset BUT the given one.
 	 * <p>Either a platform/version or charset check can be given (or both, in either order) and all the given checks must pass for the canon
 	 * line to be included in the final canon test file.
 	 *
