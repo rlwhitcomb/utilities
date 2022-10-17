@@ -24,11 +24,12 @@
  *	Base64 encoding/decoding tool.
  *
  * History:
- *  10-Oct-22 rlw #481:	Initial implementation.
+ *  10-Oct-22 rlw #481: Initial implementation.
  *  13-Oct-22 rlw #481: New -format option to reformat an encoded file to the
- *			76-char line length. Add "-version" command.
- *		  #481: Read from console. Fixes to do proper init for Tester.
- *  14-Oct-22 rlw #518:	Add option for "URL_SAFE" encoding and decoding.
+ *                      76-char line length. Add "-version" command.
+ *                #481: Read from console. Fixes to do proper init for Tester.
+ *  14-Oct-22 rlw #518: Add option for "URL_SAFE" encoding and decoding.
+ *  17-Oct-22 rlw #518: Add "-jwt" option; more error checking from Base64 results.
  */
 package info.rlwhitcomb.tools;
 
@@ -42,6 +43,7 @@ import info.rlwhitcomb.util.Intl;
 import info.rlwhitcomb.util.Options;
 import net.iharder.b64.Base64;
 
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -52,6 +54,8 @@ import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.charset.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 
 /**
@@ -98,6 +102,11 @@ public class B64
 	 * Use the "URL_SAFE" encoding / decoding.
 	 */
 	private static boolean urlSafe;
+
+	/**
+	 * Input is a JWT (Java Web Token).
+	 */
+	private static boolean jwt;
 
 	/**
 	 * The input argument (could be a string or a file name).
@@ -158,6 +167,7 @@ public class B64
 	    file = false;
 	    string = false;
 	    urlSafe = false;
+	    jwt = false;
 
 	    input.setLength(0);
 
@@ -187,6 +197,11 @@ public class B64
 		    }
 		    else if (Options.matchesIgnoreCase(option, "urlsafe", "url", "u")) {
 			urlSafe = true;
+		    }
+		    else if (Options.matchesIgnoreCase(option, "jwtoken", "jwt", "j")) {
+			jwt = true;
+			urlSafe = true;
+			decode = true;
 		    }
 		    else if (Options.matchesIgnoreCase(option, "stdin", "in")) {
 			console = true;
@@ -338,7 +353,7 @@ public class B64
 			    if (output == null) {
 				result = Base64.encodeFromFile(inputValue, options);
 				if (result == null) {
-				    Intl.errFormat("tools#base64.encodeError", inputValue);
+				    Intl.errFormat("tools#base64.encodeError", inputValue, Exceptions.toString(Base64.getCaughtException()));
 				    System.exit(Testable.OUTPUT_IO_ERROR);
 				}
 				System.out.println(result);
@@ -352,20 +367,52 @@ public class B64
 			    }
 			}
 			else if (decode) {
-			    if (output == null) {
-				bytes = Base64.decodeFromFile(inputValue, options);
-				if (bytes == null) {
-				    Intl.errFormat("tools#base64.decodeError", inputValue);
-				    System.exit(Testable.OUTPUT_IO_ERROR);
+			    if (jwt) {
+				String token = FileUtilities.readFileAsString(inputFile).replaceAll("\\r?\\n", "");
+				BufferedOutputStream bos = null;
+				if (output != null)
+				    bos = new BufferedOutputStream(Files.newOutputStream(Paths.get(output)));
+				String[] parts = token.split("\\.");
+				for (int i = 0; i < parts.length; i++) {
+				    bytes = Base64.decode(parts[i], options);
+				    if (bytes == null) {
+					Intl.errFormat("tools#base64.decodeInputError", Exceptions.toString(Base64.getCaughtException()));
+					System.exit(Testable.INPUT_IO_ERROR);
+				    }
+				    if (output == null) {
+					if (i > 0)
+					    System.out.println(".");
+					result = new String(bytes, charset);
+					System.out.println(result);
+				    }
+				    else {
+					if (i > 0)
+					    bos.write('.');
+					bos.write(bytes);
+				    }
 				}
-				result = new String(bytes, charset);
-				System.out.println(result);
+				if (bos != null) {
+				    bos.flush();
+				    bos.close();
+				}
 			    }
 			    else {
-				if (!Base64.decodeFileToFile(inputValue, output, options)) {
-				    Intl.errFormat("tools#base64.decodeFileError",
-					inputValue, output, Exceptions.toString(Base64.getCaughtException()));
-				    System.exit(Testable.OUTPUT_IO_ERROR);
+				// file, decode, non-JWT
+				if (output == null) {
+				    bytes = Base64.decodeFromFile(inputValue, options);
+				    if (bytes == null) {
+					Intl.errFormat("tools#base64.decodeError", inputValue, Exceptions.toString(Base64.getCaughtException()));
+					System.exit(Testable.OUTPUT_IO_ERROR);
+				    }
+				    result = new String(bytes, charset);
+				    System.out.println(result);
+				}
+				else {
+				    if (!Base64.decodeFileToFile(inputValue, output, options)) {
+					Intl.errFormat("tools#base64.decodeFileError",
+					    inputValue, output, Exceptions.toString(Base64.getCaughtException()));
+					System.exit(Testable.OUTPUT_IO_ERROR);
+				    }
 				}
 			    }
 			}
@@ -392,13 +439,49 @@ public class B64
 			}
 		    }
 		    else if (decode) {
-			bytes = Base64.decode(inputValue, options);
-			if (output == null) {
-			    result = new String(bytes, charset);
-			    System.out.println(result);
+			if (jwt) {
+			    inputValue = inputValue.replaceAll("\\r?\\n", "");
+			    String[] parts = inputValue.split("\\.");
+			    BufferedOutputStream bos = null;
+			    if (output != null)
+				bos = new BufferedOutputStream(Files.newOutputStream(Paths.get(output)));
+			    for (int i = 0; i < parts.length; i++) {
+				bytes = Base64.decode(parts[i], options);
+				if (bytes == null) {
+				    Intl.errFormat("tools#base64.decodeInputError", Exceptions.toString(Base64.getCaughtException()));
+				    System.exit(Testable.INPUT_IO_ERROR);
+				}
+				if (output == null) {
+				    if (i > 0)
+					System.out.println(".");
+				    result = new String(bytes, charset);
+				    System.out.println(result);
+				}
+				else {
+				    if (i > 0)
+					bos.write('.');
+				    bos.write(bytes);
+				}
+			    }
+			    if (bos != null) {
+				bos.flush();
+				bos.close();
+			    }
 			}
 			else {
-			    FileUtilities.writeStreamToFile(new ByteArrayInputStream(bytes), new File(output));
+			    // string, decode, non-JWT
+			    bytes = Base64.decode(inputValue, options);
+			    if (bytes == null) {
+				Intl.errFormat("tools#base64.decodeInputError", Exceptions.toString(Base64.getCaughtException()));
+				System.exit(Testable.INPUT_IO_ERROR);
+			    }
+			    if (output == null) {
+				result = new String(bytes, charset);
+				System.out.println(result);
+			    }
+			    else {
+				FileUtilities.writeStreamToFile(new ByteArrayInputStream(bytes), new File(output));
+			    }
 			}
 		    }
 		    else /* format */ {
