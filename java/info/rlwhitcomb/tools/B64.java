@@ -30,6 +30,7 @@
  *                #481: Read from console. Fixes to do proper init for Tester.
  *  14-Oct-22 rlw #518: Add option for "URL_SAFE" encoding and decoding.
  *  17-Oct-22 rlw #518: Add "-jwt" option; more error checking from Base64 results.
+ *                      The "-jwt" option also needs to set "encode" and "format" to false.
  */
 package info.rlwhitcomb.tools;
 
@@ -186,13 +187,13 @@ public class B64
 			format = false;
 		    }
 		    else if (Options.matchesIgnoreCase(option, "decode", "dec", "d")) {
-			decode = true;
 			encode = false;
+			decode = true;
 			format = false;
 		    }
 		    else if (Options.matchesIgnoreCase(option, "format", "form", "frm")) {
-			decode = false;
 			encode = false;
+			decode = false;
 			format = true;
 		    }
 		    else if (Options.matchesIgnoreCase(option, "urlsafe", "url", "u")) {
@@ -201,7 +202,9 @@ public class B64
 		    else if (Options.matchesIgnoreCase(option, "jwtoken", "jwt", "j")) {
 			jwt = true;
 			urlSafe = true;
+			encode = false;
 			decode = true;
+			format = false;
 		    }
 		    else if (Options.matchesIgnoreCase(option, "stdin", "in")) {
 			console = true;
