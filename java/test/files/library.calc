@@ -304,19 +304,24 @@ define cp_to_low_surr(cp) = { (cp - 0x10000) % 0x400 + 0xDC00 }
 /*
  * For time values, number of ticks (nanoseconds) in a second.
  */
-TICKS_PER_SECOND = 1e9
+const TICKS_PER_SECOND = 1e9
 /*
  * For time values, the number of ticks in a minute.
  */
-TICKS_PER_MINUTE = TICKS_PER_SECOND * 60
+const TICKS_PER_MINUTE = TICKS_PER_SECOND * 60
 /*
  * For time values, the number of ticks in an hour.
  */
-TICKS_PER_HOUR = TICKS_PER_MINUTE * 60
+const TICKS_PER_HOUR = TICKS_PER_MINUTE * 60
 /*
  * For time values, the number of ticks in a day.
  */
-TICKS_PER_DAY = TICKS_PER_HOUR * 24
+const TICKS_PER_DAY = TICKS_PER_HOUR * 24
+/*
+ * Number of seconds in a standard day.
+ */
+const SECS_PER_DAY = 60 * 60 * 24
+
 
 /*
  * Get the number of hours in a time value.
@@ -422,6 +427,20 @@ define ft2time(ft) = {
     tm += TZ_OFFSET
     if tm < 0 { dt--; tm += TICKS_PER_DAY }
     `${date(dt)}  ${time(tm)}`
+}
+
+/*
+ * Convert a number of seconds since the epoch to a date and time value.
+ *
+ * @param secs Number of seconds since the epoch (1970-01-01 00:00:00)
+ * @return Date / time string
+ */
+define epoch_secs_to_datetime(secs) = {
+   var days = secs \ SECS_PER_DAY
+   var ticks = (secs % SECS_PER_DAY) * TICKS_PER_SECOND
+   var date = substr(`${days@e}`, 2, -1)
+   var time = substr(`${ticks@h}`, 2, -1)
+   `$date $time`
 }
 
 /*
