@@ -236,6 +236,8 @@
  *	    #488: Also report free memory size.
  *	16-Oct-2022 (rlwhitcomb)
  *	    #443: Update Javadoc with the new marker conventions.
+ *	17-Oct-2022 (rlwhitcomb)
+ *	    #443: Change markers (again) to "{{ }}" for version and "[< >]" for charset.
  */
 package info.rlwhitcomb.tester;
 
@@ -882,13 +884,13 @@ public class Tester
 
 	/**
 	 * Check a potential canon line for platform, version and charset values
-	 * specified as <code>{.<i>platform</i>.}</code> or <code>{.,<i>major</i>.<i>minor</i>.}</code> or <code>{.<i>platform</i>,<i>major</i>.<i>minor</i>.}</code>.
+	 * specified as <code>{{ <i>platform</i> }}</code> or <code>{{ ,<i>major</i>.<i>minor</i> }}</code> or <code>{{ <i>platform</i>,<i>major</i>.<i>minor</i> }}</code>.
 	 * <p>Platform can be <code>"windows"</code>, <code>"linux"</code>, <code>"unix"</code>, or <code>"osx"</code>. Also, <code>"^<i>platform</i>"</code> will match any
 	 * platform EXCEPT the given one.
 	 * <p>Version can also be <code><i>major</i></code>, <code><i>major</i>.<i>x</i></code> or <code><i>major</i>.*</code> or any of these
 	 * followed by <code>+</code> or <code><i>major</i></code>[<code>.<i>minor</i></code>]<code>-<i>major</i></code>[<code>.<i>minor</i></code>] with either one omitted.
-	 * <p>Charset is specified by <code>[.<i>charset</i>.]</code>, and can be given as <code>[.*.]</code> to match any character set (same as leaving out the check),
-	 * or by <code>[.^<i>name</i>.]</code> which matches any charset BUT the given one.
+	 * <p>Charset is specified by <code>[&lt; <i>charset</i> &gt;]</code>, and can be given as <code>[&lt;*&gt;]</code> to match any character set (same as leaving out the check),
+	 * or by <code>[&lt;^<i>name</i>&gt;]</code> which matches any charset BUT the given one.
 	 * <p>Either a platform/version or charset check can be given (or both, in either order) and all the given checks must pass for the canon
 	 * line to be included in the final canon test file.
 	 *
@@ -898,11 +900,11 @@ public class Tester
 	 *		tests, and thus the line should be part of the test.
 	 */
 	private String platformAndVersionCheck(final String input) {
-	    if (input.startsWith("{.")) {
-		// {.version.}
-		int end = input.indexOf(".}");
+	    if (input.startsWith("{{")) {
+		// {{ version }}
+		int end = input.indexOf("}}");
 		if (end > 0) {
-		    String spec = input.substring(2, end);
+		    String spec = input.substring(2, end).trim();
 		    if (spec.isEmpty())
 			return input;
 		    String canonLine = input.substring(end + 2);
@@ -972,11 +974,11 @@ public class Tester
 		// Not a valid spec -- should this be an error?
 		return input;
 	    }
-	    else if (input.startsWith("[.")) {
-		// [.charset.]
-		int end = input.indexOf(".]");
+	    else if (input.startsWith("[<")) {
+		// [< charset >]
+		int end = input.indexOf(">]");
 		if (end > 0) {
-		    String charsetName = input.substring(2, end);
+		    String charsetName = input.substring(2, end).trim();
 		    if (charsetName.isEmpty())
 			return input;
 		    String canonLine = input.substring(end + 2);
