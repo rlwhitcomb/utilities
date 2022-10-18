@@ -1124,7 +1124,7 @@ public class Base64
             }   // end if: white space, equals sign or better
             else
             {
-                caughtException = new java.io.IOException( "Bad Base64 input character at " + i + ": " + source[i] + "(decimal)" );
+                caughtException = new java.io.IOException( "Bad Base64 input character at offset " + i + ": '" + Character.toString((char) source[i]) + "' (" + source[i] + " decimal) '");
                 return null;
             }   // end else:
         }   // each input character
