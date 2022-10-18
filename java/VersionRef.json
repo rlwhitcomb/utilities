@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.14.52', date: d'2022-10-17',
+      issues: [ 522 ],
+      comment: 'Implement "-" format option for "@h", "@t", "@r", and "@e" to omit type and quotes.'
+    },
     { version: '2.14.50', date: d'2022-10-12',
       issues: [ 103 ],
       comment: 'Fix equality testing of complex numbers.'

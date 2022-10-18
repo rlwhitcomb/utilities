@@ -492,7 +492,8 @@
  *	02-Feb-2022 (rlwhitcomb)
  *	    #115: Supply a read-only view of the Settings to CalcPredefine for "info.settings".
  *	    #115: Move "mc" and "mcDivide" into Settings.
- *	    #234: Convert integer loop veriables to BigInteger so that "===" works inside loops against the index var.
+ *	    #234: Convert integer loop veriables to BigInteger so that "===" works inside loops
+ *		  against the index var.
  *	03-Feb-2022 (rlwhitcomb)
  *	    #230: Add id list to ":predefs", allow wildcards in ":vars", ":clear", and now ":predefs" too.
  *	04-Feb-2022 (rlwhitcomb)
@@ -685,6 +686,8 @@
  *	    #501: Add "frombase" function.
  *	12-Oct-2022 (rlwhitcomb)
  *	    #103: Add extra param to "compareValues" for equality checks.
+ *	17-Oct-2022 (rlwhitcomb)
+ *	    #522: Implement "-" qualifiers for several "@" formats.
  */
 package info.rlwhitcomb.calc;
 
@@ -2114,6 +2117,31 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    return internalVisitStatements(ctx);
 	}
 
+	/**
+	 * Produce a constant string in the form of <code>X'xxxx'</code>, unless
+	 * the sign modifier is <code>'-'</code> in which case only the inner value
+	 * is used (but double quoted).
+	 *
+	 * @param buf    The buffer to add the constant to.
+	 * @param sign   Either a space ({@code ' '}) or minus ({@code '-'}).
+	 * @param type   The constant type character.
+	 * @param value  The actual constant value.
+	 */
+	private void constant(StringBuilder buf, char sign, char type, String value) {
+	    boolean quote = (sign == ' ');
+	    if (quote)
+		buf.append(type).append('\'');
+	    else if (settings.quoteStrings)
+		buf.append('"');
+
+	    buf.append(value);
+
+	    if (quote)
+		buf.append('\'');
+	    else if (settings.quoteStrings)
+		buf.append('"');
+	}
+
 	@Override
 	public Object visitExprStmt(CalcParser.ExprStmtContext ctx) {
 	    CalcParser.ExprContext expr = ctx.expr();
@@ -2187,10 +2215,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    case 'h':
 			char meridianFlag = modifierChar;
 			// Value will be nanoseconds since midnight
-			valueBuf.append("h'");
 			iValue = toIntegerValue(this, result, settings.mc, ctx);
-			valueBuf.append(NumericUtil.convertToTime(iValue.longValue(), meridianFlag));
-			valueBuf.append('\'');
+			constant(valueBuf, signChar, 'h',
+				NumericUtil.convertToTime(iValue.longValue(), meridianFlag));
 			break;
 		    case 'T':
 			toUpperCase = true;
@@ -2198,10 +2225,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    case 't':
 			char durationUnit = modifierChar;
 			// Value will be nanoseconds
-			valueBuf.append("t'");
 			iValue = toIntegerValue(this, result, settings.mc, ctx);
-			valueBuf.append(NumericUtil.convertToDuration(iValue, durationUnit, settings.mcDivide, precision));
-			valueBuf.append('\'');
+			constant(valueBuf, signChar, 't',
+				NumericUtil.convertToDuration(iValue, durationUnit, settings.mcDivide, precision));
 			break;
 
 		    case 'U':
@@ -2286,7 +2312,6 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    case 'E':
 		    case 'e':
 			char dateChar = (formatChar == 'E') ? 'D' : 'd';
-			valueBuf.append(dateChar).append('\'');
 			iValue = toIntegerValue(this, result, settings.mc, ctx);
 			LocalDate date = LocalDate.ofEpochDay(iValue.longValue());
 			int year = date.getYear();
@@ -2307,7 +2332,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 				dateStr = String.format("%1$04d-%2$02d-%3$02d",
 				    year, date.getMonthValue(), date.getDayOfMonth());
 			}
-			valueBuf.append(dateStr).append('\'');
+			constant(valueBuf, signChar, dateChar, dateStr);
 			break;
 
 		    case 'f':
@@ -2402,9 +2427,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			iValue = toIntegerValue(this, result, settings.mc, ctx);
 			try {
 			    int intValue = iValue.intValueExact();
-			    valueBuf.append("r'");
-			    valueBuf.append(NumericUtil.convertToRoman(intValue, false));
-			    valueBuf.append("'");
+			    constant(valueBuf, signChar, 'r', NumericUtil.convertToRoman(intValue, false));
 			}
 			catch (ArithmeticException | IllegalArgumentException ex) {
 			    throw new CalcExprException(ex, ctx);

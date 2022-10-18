@@ -1,5 +1,5 @@
-:Require '2.13.20-alpha'
-:Requires '2.13.20-alpha', Base '1.9.15-alpha'
+:Require '2.14.52-alpha'
+:Requires '2.14.52-alpha', Base '1.9.15-alpha'
 // The versions above must conform to the latest values in "version.properties" and "build.properties"
 
 /*
@@ -419,8 +419,8 @@ def gmtnow = { now - TZ_OFFSET }
  * @return   A nicer local date/time string.
  */
 define ft2time(ft) = {
-    define date(d) = { substr(`${d@E}`, 2, -1) }
-    define time(t) = { var v = substr(`${t@h}`, 2, -1); lpad(v, 8, '0') }
+    define date(d) = { `${d@-E}` }
+    define time(t) = { var v = `${t@-h}`; lpad(v, 8, '0') }
 
     var dt = eval(`d'${substr(ft, 0, 10)}'`)
     var tm = eval(`h'${substr(ft, 11, 19)}'`)
@@ -438,8 +438,8 @@ define ft2time(ft) = {
 define epoch_secs_to_datetime(secs) = {
    var days = secs \ SECS_PER_DAY
    var ticks = (secs % SECS_PER_DAY) * TICKS_PER_SECOND
-   var date = substr(`${days@e}`, 2, -1)
-   var time = substr(`${ticks@h}`, 2, -1)
+   var date = `${days@-e}`
+   var time = `${ticks@-h}`
    `$date $time`
 }
 

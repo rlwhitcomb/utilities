@@ -860,6 +860,7 @@ r = R'MCMLXII'
 s = r'ⅿⅽⅿⅼⅹⅶ'
 
 1962 @R
+1954 @-r
 
 roman('xx' + 'ii')
 
@@ -869,8 +870,8 @@ roman('xx' + 'ii')
 t'27h' + t'13m' + t'27.9s' @h
 h'12:30 pm' - h'11:45 am' @mt
 h'8:30 am' + t'1h' + t'37m' @h
-t'3.0002s' @5mt
-h'12:10am' - t'20m' @ah
+t'3.0002s' @-5mt
+h'12:10am' - t'20m' @-ah
 
 #
 # Date calculations
@@ -892,7 +893,7 @@ d911 = D'9/11/01'
 d911@e;d911@E
 D'1/1/1999'@e
 _waterloo = d'1815/6/18'
-_waterloo@e;_waterloo@E
+_waterloo@e;_waterloo@-E
 
 toDate('2022-7-2', 'yyyy-m-d')
 ToDate('2022-07-02', 'yyyy-m-d')
@@ -903,7 +904,7 @@ ToDate('7/2/-22', 'd-m-yy')
 TODATE('7-2--2022', 'd-m-yyyy')
 todate('-1100-02-03', "")
 todate(17802)@E
-ToDate(join(['2018', '09', '28'], '-'))@e
+ToDate(join(['2018', '09', '28'], '-'))@-e
 todate(6,30,2020)
 toDate(12,31,1999)
 dt9 = '01-02-22'
