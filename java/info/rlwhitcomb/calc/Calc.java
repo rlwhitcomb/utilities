@@ -312,6 +312,8 @@
  *	    #471: Add "-ctrlenter" and "-ctrl" command line options.
  *	08-Oct-2022 (rlwhitcomb)
  *	    #506: Command-line options to only print LF line endings, or use system default.
+ *	18-Oct-2022 (rlwhitcomb)
+ *	    #527: Fix processing of ":include" with embedded spaces.
  */
 package info.rlwhitcomb.calc;
 
@@ -1839,8 +1841,11 @@ public class Calc
 	    boolean unableToRead = false;
 	    StringBuilder inputBuf = new StringBuilder();
 
-	    String[] files = paths.split(ON_WINDOWS ? "[,;]|\\s+" : "[,;:]|\\s+");
+	    String[] files = paths.split(ON_WINDOWS ? "\\s*[,;]\\s*|\\s+" : "\\s*[,;:]\\s*|\\s+");
 	    for (String file : files) {
+		if (CharUtil.isNullOrEmpty(file))
+		    continue;
+
 		if (inputBuf.length() > 0)
 		    inputBuf.append(LINESEP);
 
