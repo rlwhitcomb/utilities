@@ -462,6 +462,10 @@
  *	    #426: "todate" function with 1, 2, or 3 arguments.
  *	    Add other aliases for function names that are two words (such as 'sumOf').
  *	    Adjust DATE_CONST pattern for negative years.
+ *	06-Oct-2022 (rlwhitcomb)
+ *	    #501: Add "tobase" function.
+ *	08-Oct-2022 (rlwhitcomb)
+ *	    #501: Add "frombase" function.
  */
 
 grammar Calc;
@@ -620,6 +624,8 @@ expr
    | K_BN expr1                          # bernExpr
    | K_DEC expr1                         # decExpr
    | K_TODATE ( expr3 | expr2 | expr1 )  # dateExpr
+   | K_TOBASE expr2                      # toBaseExpr
+   | K_FROMBASE expr2                    # fromBaseExpr
    | K_FRAC ( expr3 | expr2 | expr1 )    # fracExpr
    | K_COMPLEX ( expr2 | expr1 )         # complexFuncExpr
    | K_ROMAN expr1                       # romanExpr
@@ -1105,6 +1111,10 @@ K_BN       : 'bn' | 'BN' | 'Bn' ;
 K_DEC      : 'dec' | 'DEC' | 'Dec' ;
 
 K_TODATE   : 'todate' | 'TODATE' | 'ToDate' | 'Todate' | 'toDate' ;
+
+K_TOBASE   : 'tobase' | 'TOBASE' | 'ToBase' | 'Tobase' | 'toBase' ;
+
+K_FROMBASE : 'frombase' | 'FROMBASE' | 'FromBase' | 'Frombase' | 'fromBase' ;
 
 K_FRAC     : 'frac' | 'FRAC' | 'Frac' ;
 

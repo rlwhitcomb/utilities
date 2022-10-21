@@ -43,9 +43,13 @@
  *	    #228: Refactor to be able to return a value by implementing Callable.
  *	09-Jul-2022 (rlwhitcomb)
  *	    #393: Cleanup imports.
+ *	12-Oct-2022 (rlwhitcomb)
+ *	    #513: Move Logging to new package.
  */
 
 package info.rlwhitcomb.util;
+
+import info.rlwhitcomb.logging.Logging;
 
 import java.util.concurrent.*;
 

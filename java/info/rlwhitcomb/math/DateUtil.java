@@ -26,6 +26,7 @@
  * History:
  *  24-Sep-22 rlw #426:	Initial coding from existing code in CalcObjectVisitor
  *			plus new code for "date()" function.
+ *  08-Oct-22 rlw #504:	Allow "y-m-d" form (one "y" only); fix bad resource keys.
  */
 package info.rlwhitcomb.math;
 
@@ -73,6 +74,8 @@ public final class DateUtil
 	 */
 	private static enum Fmt
 	{
+		/** Year of any number of digits. */
+		YR,
 		/** Year of exactly 4 digits. */
 		Y4,
 		/** Year of exactly 2 digits. */
@@ -178,6 +181,7 @@ public final class DateUtil
 	    // yyyymmdd or yymmdd
 	    // m?m-d?d-yy or m?m-d?d-yyyy
 	    // yyyymmdd or yymmdd
+	    // y-m-d
 
 	    for (int i = 1; i < f.length(); i++) {
 		char ch = f.charAt(i);
@@ -194,12 +198,14 @@ public final class DateUtil
 			    ret[ix++] = (len == 1 && ch == '-') ? Fmt.MN : Fmt.M2;
 			    break;
 			case 'Y':
-			    ret[ix++] = len <= 2 ? Fmt.Y2 : Fmt.Y4;
+			    if (len == 1 && ch != '-')
+				throw new Intl.IllegalArgumentException("math#date.badFormatString", format);
+			    ret[ix++] = (len == 1 && ch == '-') ? Fmt.YR : len == 2 ? Fmt.Y2 : Fmt.Y4;
 			    break;
 			case '-':
 			    break;
 			default:
-			    throw new Intl.IllegalArgumentException("util#badFormatString", format);
+			    throw new Intl.IllegalArgumentException("math#date.badFormatString", format);
 		    }
 
 		    last = ch;
@@ -215,10 +221,10 @@ public final class DateUtil
 		    ret[ix] = len == 1 ? Fmt.MN : Fmt.M2;
 		    break;
 		case 'Y':
-		    ret[ix] = len <= 2 ? Fmt.Y2 : Fmt.Y4;
+		    ret[ix] = len == 1 ? Fmt.YR : len == 2 ? Fmt.Y2 : Fmt.Y4;
 		    break;
 		default:
-		    throw new Intl.IllegalArgumentException("util#badFormatString", format);
+		    throw new Intl.IllegalArgumentException("math#date.badFormatString", format);
 	    }
 
 	    return ret;
@@ -303,6 +309,14 @@ public final class DateUtil
 		Fmt f = fmt[ix];
 
 		switch (f) {
+		    case YR:
+			endPos = charPos;
+			if (string.charAt(endPos) == '-')
+			    endPos++;
+			while (endPos < string.length() && string.charAt(endPos) >= '0' && string.charAt(endPos) <= '9')
+			    endPos++;
+			y = Integer.parseInt(string.substring(charPos, endPos));
+			break;
 		    case Y4:
 			endPos = string.charAt(charPos) == '-' ? charPos + 5 : charPos + 4;
 			y = Integer.parseInt(string.substring(charPos, endPos));
@@ -329,6 +343,7 @@ public final class DateUtil
 			break;
 		}
 
+		// Skip the separator, if any
 		charPos = endPos;
 		if (charPos < string.length()) {
 		    char ch = string.charAt(charPos);

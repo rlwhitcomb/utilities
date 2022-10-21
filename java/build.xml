@@ -333,6 +333,16 @@
 		#491: Add back "calc info.java@j" to the tests to identify the bug.
 	    27-Sep-2022 (rlwhitcomb)
 		#491: Remove extra debug info during "test".
+	    04-Oct-2022 (rlwhitcomb)
+		#491: No colors needed on the "info.java" report.
+	    05-Oct-2022 (rlwhitcomb)
+		#497: Add test for divide precision.
+	    08-Oct-2022 (rlwhitcomb)
+		#481: New "b64" wrappers.
+	    11-Oct-2022 (rlwhitcomb)
+		#481: Separate tests of "b64".
+	    17-Oct-2022 (rlwhitcomb)
+		#513: Add "info.rlwhitcomb.logging" (new) package.
 
      ========================================================================== -->
 
@@ -457,6 +467,8 @@
 		<include name="`.bat"                       if:true="${on.windows}"/>
 		<include name="``"                      unless:true="${on.windows}"/>
 		<include name="``.bat"                      if:true="${on.windows}"/>
+		<include name="b64"                     unless:true="${on.windows}"/>
+		<include name="b64.bat"                     if:true="${on.windows}"/>
 		<include name="c"                       unless:true="${on.windows}"/>
 		<include name="c.bat"                       if:true="${on.windows}"/>
 		<include name="calc"                    unless:true="${on.windows}"/>
@@ -539,9 +551,9 @@
 
 	<property name="tester.class" value="info.rlwhitcomb.tester.Tester"/>
 
-	<echo message="Build the custom Ant tasks if necessary..."/>
+	<echo message="Build the custom Ant tasks if necessary ..."/>
 	<ant antfile="build-ant-tasks.xml" target="install"/>
-	<echo message="Beginning build..."/>
+	<echo message="Beginning build ..."/>
 
 	<taskdef name="preproc" classname="info.rlwhitcomb.preproc.JavaPreProc" classpath="${ant.tasks.jar}"/>
 	<taskdef name="var" classname="net.sf.antcontrib.property.Variable" classpath="external-files/ant-contrib.jar"/>
@@ -652,6 +664,7 @@
 			<src path="info/rlwhitcomb/heart"/>
 			<src path="info/rlwhitcomb/jarfile"/>
 			<src path="info/rlwhitcomb/json"/>
+			<src path="info/rlwhitcomb/logging"/>
 			<src path="info/rlwhitcomb/matches"/>
 			<src path="info/rlwhitcomb/math"/>
 			<src path="info/rlwhitcomb/test"/>
@@ -705,6 +718,7 @@
 			<include name="info/rlwhitcomb/heart/*.class"/>
 			<include name="info/rlwhitcomb/jarfile/*.class"/>
 			<include name="info/rlwhitcomb/json/*.class"/>
+			<include name="info/rlwhitcomb/logging/*.class"/>
 			<include name="info/rlwhitcomb/matches/*.class"/>
 			<include name="info/rlwhitcomb/math/*.class"/>
 			<include name="info/rlwhitcomb/tester/*.class"/>
@@ -759,9 +773,10 @@ Test starting on ${build.date} at ${build.time}
 -----------------------------------------------
 </echo>
 		<java classname="info.rlwhitcomb.calc.Calc"           output="${test.log.path}" append="true" failonerror="true" fork="true">
+			<arg value="-nocolors"/>
 			<arg value="info.java@j"/>
 		</java>
-		<echo>Test JavaPreProc...</echo>
+		<echo>Test JavaPreProc ...</echo>
 		<delete>
 			<fileset dir="test/data" includes="TestPP.java,TestPP.log"/>
 		</delete>
@@ -779,9 +794,9 @@ Test starting on ${build.date} at ${build.time}
 		</fail>
 		<echo file="${test.log.path}" append="true">JavaPreProc: Preprocessing results and log match.
 </echo>
-		<echo>Test of InitializationTask...</echo>
+		<echo>Test of InitializationTask ...</echo>
 		<java classname="info.rlwhitcomb.test.InitTaskTest"   output="${test.log.path}" append="true" failonerror="true" fork="true"/>
-		<echo>Running various tests through the Tester...</echo>
+		<echo>Running various tests through the Tester ...</echo>
 		<java classname="${tester.class}"                     output="${test.log.path}" append="true" failonerror="true" fork="true">
 			<arg value="-timing"/>
 			<arg value="-dir:test/files"/>
@@ -793,7 +808,13 @@ Test starting on ${build.date} at ${build.time}
 			<arg value="-dir:test/files"/>
 			<arg value="maintest"/>
 		</java>
-		<echo>Verifying the M${mersenne.number} prime (${mersenne.digits} digits)...</echo>
+		<echo>Basic tests of Base64 utility ...</echo>
+		<exec executable="./verify_b64"   dir="."             output="${test.log.path}" append="true" unless:true="${on.windows}" failonerror="true"/>
+		<exec executable="cmd"            dir="."             output="${test.log.path}" append="true" if:true="${on.windows}" failonerror="true">
+			<arg value="/c"/>
+			<arg value="verify_b64.bat"/>
+		</exec>
+		<echo>Verifying the M${mersenne.number} prime (${mersenne.digits} digits) ...</echo>
 		<echo>GIMPS Milestones: October 6, 2021: All tests below M(57 885 161) verified, confirming its place as the 48th Mersenne prime.</echo>
 		<exec executable="./verify_calc"  dir="."             output="${test.log.path}" append="true" unless:true="${on.windows}" failonerror="true">
 			<arg value="${mersenne.number}"/>
@@ -805,6 +826,13 @@ Test starting on ${build.date} at ${build.time}
 			<arg value="${mersenne.number}"/>
 			<arg value="${mersenne.digits}"/>
 		</exec>
+		<echo>Verifying that M13699727 is divisible by 3067752467657 ...</echo>
+		<exec executable="./verify_calc2" dir="."             output="${test.log.path}" append="true" unless:true="${on.windows}" failonerror="true"/>
+		<exec executable="cmd"            dir="."             output="${test.log.path}" append="true" if:true="${on.windows}" failonerror="true">
+			<arg value="/c"/>
+			<arg value="verify_calc2.bat"/>
+		</exec>
+		<echo>Checking sort order of WordFind dictionaries ...</echo>
 		<exec executable="./check_sorted" dir="."             output="${test.log.path}" append="true" unless:true="${on.windows}" failonerror="true"/>
 		<exec executable="cmd"            dir="."             output="${test.log.path}" append="true" if:true="${on.windows}" failonerror="true">
 			<arg value="/c"/>
@@ -841,6 +869,7 @@ Test starting on ${build.date} at ${build.time}
 			<fileset dir="info/rlwhitcomb/jarfile" includes="*.class"/>
 			<fileset dir="info/rlwhitcomb/json" includes="*.class"/>
 			<fileset dir="info/rlwhitcomb/json" includes="*.class,*.interp,*.tokens,JSONParser.java,JSONVisitor.java,JSONLexer.java,JSONBaseVisitor.java"/>
+			<fileset dir="info/rlwhitcomb/logging" includes="*.class"/>
 			<fileset dir="info/rlwhitcomb/matches" includes="*.class"/>
 			<fileset dir="info/rlwhitcomb/math" includes="*.class"/>
 			<fileset dir="info/rlwhitcomb/test" includes="*.class"/>
@@ -902,7 +931,7 @@ Test starting on ${build.date} at ${build.time}
 		<tstamp>
 			<format property="last.two.weeks" pattern="MM/dd/yyyy hh:mm aa" locale="en,US" offset="-2" unit="week"/>
 		</tstamp>
-		<echo message="Purging log and temporary files from before ${last.two.weeks}..."/>
+		<echo message="Purging log and temporary files from before ${last.two.weeks} ..."/>
 		<delete>
 			<fileset dir="." includes="test*.log,utilities*.log">
 				<date datetime="${last.two.weeks}" when="before"/>

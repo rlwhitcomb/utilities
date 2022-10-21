@@ -58,6 +58,8 @@
  *	    #273: Move math-related classes to "math" package.
  *	31-May-2022 (rlwhitcomb)
  *	    #301: Tests of "getZillionNames".
+ *	30-Sep-2022 (rlwhitcomb)
+ *	    #496: Change comma settings.
  */
 package info.rlwhitcomb.test;
 
@@ -484,7 +486,7 @@ public class TestNumericUtil
 	};
 	private static final String wordValues[] = {
 	    "one million",
-	    "two million, four hundred fifty-eight thousand, nine hundred sixty-seven",
+	    "two million four hundred fifty-eight thousand nine hundred sixty-seven",
 	    "zero",
 	    "one",
 	    "ten",
@@ -492,12 +494,12 @@ public class TestNumericUtil
 	    "ninety-nine",
 	    "one hundred one",
 	    "nine hundred ninety-nine",
-	    "one thousand, one",
-	    "nine hundred ninety-nine million, nine hundred ninety-nine thousand, nine hundred ninety-nine",
+	    "one thousand one",
+	    "nine hundred ninety-nine million nine hundred ninety-nine thousand nine hundred ninety-nine",
 	    "one hundred billion",
-	    "nineteen thousand, eight hundred eighty-nine",
-	    "one hundred thousand, one hundred",
-	    "nine quintillion, two hundred twenty-three quadrillion, three hundred seventy-two trillion, thirty-six billion, eight hundred fifty-four million, seven hundred seventy-five thousand, eight hundred seven"
+	    "nineteen thousand eight hundred eighty-nine",
+	    "one hundred thousand one hundred",
+	    "nine quintillion two hundred twenty-three quadrillion three hundred seventy-two trillion thirty-six billion eight hundred fifty-four million seven hundred seventy-five thousand eight hundred seven"
 	};
 	private static final String romanInputs[] = {
 	    "MMXXI", "I", "II", "III", "IV", "V", "VI", "VII", "viii", "IX", "X",

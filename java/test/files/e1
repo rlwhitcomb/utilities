@@ -24,11 +24,27 @@ phi
 1/PHI == phi
 PHI+1 == phi
 :rational on {
-phi
-PHI
-phi@d
+  phi
+  PHI
+  phi@d
 }
 
+:decimal 989 {
+  :rational on {
+    pf = phi
+  }
+  pd = phi
+  pd - ~~pf
+}
+
+# Tests of rational pi
+loop pre over 1..26 {
+   :decimal pre
+   :rational on { ratpi = pi }
+   ~~ratpi == pi
+}
+
+:decimal(50)
 sin(pi/3)
 4 & 7
 true && false
@@ -586,6 +602,8 @@ foundset.username='Don'
 2**128@w
 10**3000@w
 10**12012@W
+1492@,w
+100101@_w
 
 0.125@2%
 0.1234567@4%
@@ -842,6 +860,7 @@ r = R'MCMLXII'
 s = r'ⅿⅽⅿⅼⅹⅶ'
 
 1962 @R
+1954 @-r
 
 roman('xx' + 'ii')
 
@@ -851,8 +870,8 @@ roman('xx' + 'ii')
 t'27h' + t'13m' + t'27.9s' @h
 h'12:30 pm' - h'11:45 am' @mt
 h'8:30 am' + t'1h' + t'37m' @h
-t'3.0002s' @5mt
-h'12:10am' - t'20m' @ah
+t'3.0002s' @-5mt
+h'12:10am' - t'20m' @-ah
 
 #
 # Date calculations
@@ -874,7 +893,7 @@ d911 = D'9/11/01'
 d911@e;d911@E
 D'1/1/1999'@e
 _waterloo = d'1815/6/18'
-_waterloo@e;_waterloo@E
+_waterloo@e;_waterloo@-E
 
 toDate('2022-7-2', 'yyyy-m-d')
 ToDate('2022-07-02', 'yyyy-m-d')
@@ -885,9 +904,29 @@ ToDate('7/2/-22', 'd-m-yy')
 TODATE('7-2--2022', 'd-m-yyyy')
 todate('-1100-02-03', "")
 todate(17802)@E
-ToDate(join(['2018', '09', '28'], '-'))@e
+ToDate(join(['2018', '09', '28'], '-'))@-e
 todate(6,30,2020)
 toDate(12,31,1999)
+dt9 = '01-02-22'
+ToDate(dt9, 'm-d-y')@e
+ToDate(dt9, 'm-d-yy')@e
+
+b1 = 1.2
+b2 = 1/7
+b3 = pi
+b4 = 19!
+b1a = toBase(b1, 4)
+b2a = ToBase(b2, 6)
+b3a = TOBASE(b3, 27)
+b4a = tobase(b4, 36)
+b1b = fromBase(b1a, 4)
+b2b = fromBase(b2a, 6)
+b3b = FromBase(b3a, 27)
+b4b = FROMBASE(b4a, 36)
+b1b-b1
+b2b-b2
+b3b-b3
+b4b-b4
 
 #
 # Play around with "," formatting

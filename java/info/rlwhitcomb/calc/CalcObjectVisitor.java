@@ -492,7 +492,8 @@
  *	02-Feb-2022 (rlwhitcomb)
  *	    #115: Supply a read-only view of the Settings to CalcPredefine for "info.settings".
  *	    #115: Move "mc" and "mcDivide" into Settings.
- *	    #234: Convert integer loop veriables to BigInteger so that "===" works inside loops against the index var.
+ *	    #234: Convert integer loop veriables to BigInteger so that "===" works inside loops
+ *		  against the index var.
  *	03-Feb-2022 (rlwhitcomb)
  *	    #230: Add id list to ":predefs", allow wildcards in ":vars", ":clear", and now ":predefs" too.
  *	04-Feb-2022 (rlwhitcomb)
@@ -675,6 +676,20 @@
  *	    Implement "ceil" and "floor" for fractions.
  *	25-Sep-2022 (rlwhitcomb)
  *	    #426: Add "toDate" function.
+ *	30-Sep-2022 (rlwhitcomb)
+ *	    #496: Optional commas in "@w" format.
+ *	03-Oct-2022 (rlwhitcomb)
+ *	    #499: Set rational mode in CalcPiWorker right away during initialization.
+ *	03-Oct-2022 (rlwhitcomb)
+ *	    #497: Use new "divideContext" method to get working context for divisions.
+ *	06-Oct-2022 (rlwhitcomb)
+ *	    #501: Add "tobase" function.
+ *	08-Oct-2022 (rlwhitcomb)
+ *	    #501: Add "frombase" function.
+ *	12-Oct-2022 (rlwhitcomb)
+ *	    #103: Add extra param to "compareValues" for equality checks.
+ *	17-Oct-2022 (rlwhitcomb)
+ *	    #522: Implement "-" qualifiers for several "@" formats.
  */
 package info.rlwhitcomb.calc;
 
@@ -986,6 +1001,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	private void triggerPiCalculation() {
 	    if (piWorker == null) {
 		piWorker = new CalcPiWorker(settings.mcDivide);
+		piWorker.setRational(settings.rationalMode);
 	    }
 	    else {
 		piWorker.calculate(settings.mcDivide);
@@ -1400,10 +1416,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	private BigDecimal returnTrigValue(final BigDecimal value) {
 	    BigDecimal radianValue = value;
 
+	    MathContext mcDivide = MathUtil.divideContext(radianValue, settings.mcDivide);
+
 	    if (settings.trigMode == TrigMode.DEGREES)
-		return radianValue.divide(piWorker.getPiOver180(), settings.mcDivide);
+		return radianValue.divide(piWorker.getPiOver180(), mcDivide);
 	    else if (settings.trigMode == TrigMode.GRADS)
-		return radianValue.divide(piWorker.getPiOver200(), settings.mcDivide);
+		return radianValue.divide(piWorker.getPiOver200(), mcDivide);
 
 	    return radianValue;
 	}
@@ -1427,11 +1445,11 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	private int compareValues(final ParserRuleContext ctx1, final ParserRuleContext ctx2) {
-	    return compareValues(ctx1, ctx2, false, false);
+	    return compareValues(ctx1, ctx2, false, false, false);
 	}
 
-	private int compareValues(final ParserRuleContext ctx1, final ParserRuleContext ctx2, final boolean strict, final boolean allowNulls) {
-	    return CalcUtil.compareValues(this, ctx1, ctx2, settings.mc, strict, allowNulls);
+	private int compareValues(final ParserRuleContext ctx1, final ParserRuleContext ctx2, final boolean strict, final boolean allowNulls, final boolean equality) {
+	    return CalcUtil.compareValues(this, ctx1, ctx2, settings.mc, strict, allowNulls, equality);
 	}
 
 
@@ -2140,6 +2158,31 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    return internalVisitStatements(ctx);
 	}
 
+	/**
+	 * Produce a constant string in the form of <code>X'xxxx'</code>, unless
+	 * the sign modifier is <code>'-'</code> in which case only the inner value
+	 * is used (but double quoted).
+	 *
+	 * @param buf    The buffer to add the constant to.
+	 * @param sign   Either a space ({@code ' '}) or minus ({@code '-'}).
+	 * @param type   The constant type character.
+	 * @param value  The actual constant value.
+	 */
+	private void constant(StringBuilder buf, char sign, char type, String value) {
+	    boolean quote = (sign == ' ');
+	    if (quote)
+		buf.append(type).append('\'');
+	    else if (settings.quoteStrings)
+		buf.append('"');
+
+	    buf.append(value);
+
+	    if (quote)
+		buf.append('\'');
+	    else if (settings.quoteStrings)
+		buf.append('"');
+	}
+
 	@Override
 	public Object visitExprStmt(CalcParser.ExprStmtContext ctx) {
 	    CalcParser.ExprContext expr = ctx.expr();
@@ -2213,10 +2256,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    case 'h':
 			char meridianFlag = modifierChar;
 			// Value will be nanoseconds since midnight
-			valueBuf.append("h'");
 			iValue = toIntegerValue(this, result, settings.mc, ctx);
-			valueBuf.append(NumericUtil.convertToTime(iValue.longValue(), meridianFlag));
-			valueBuf.append('\'');
+			constant(valueBuf, signChar, 'h',
+				NumericUtil.convertToTime(iValue.longValue(), meridianFlag));
 			break;
 		    case 'T':
 			toUpperCase = true;
@@ -2224,10 +2266,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    case 't':
 			char durationUnit = modifierChar;
 			// Value will be nanoseconds
-			valueBuf.append("t'");
 			iValue = toIntegerValue(this, result, settings.mc, ctx);
-			valueBuf.append(NumericUtil.convertToDuration(iValue, durationUnit, settings.mcDivide, precision));
-			valueBuf.append('\'');
+			constant(valueBuf, signChar, 't',
+				NumericUtil.convertToDuration(iValue, durationUnit, settings.mcDivide, precision));
 			break;
 
 		    case 'U':
@@ -2273,8 +2314,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			}
 
 			// This is the default handling for all other cases
-			if (dValue == null)
+			if (dValue == null) {
 			    dValue = toDecimalValue(this, result, settings.mc, ctx);
+			}
 
 			if (precision != Integer.MIN_VALUE) {
 			    dValue = MathUtil.round(dValue, precision);
@@ -2303,7 +2345,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			else {
 			    c2 = ComplexNumber.real(toDecimalValue(this, result, settings.mc, ctx));
 			}
-			valueBuf.append(c2.toPolarString(formatChar == 'P', settings.mcDivide));
+			valueBuf.append(c2.toPolarString(formatChar == 'P', MathUtil.divideContext(c2, settings.mcDivide)));
 			break;
 
 		    // @E = US format: MM/dd/yyyy
@@ -2311,7 +2353,6 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    case 'E':
 		    case 'e':
 			char dateChar = (formatChar == 'E') ? 'D' : 'd';
-			valueBuf.append(dateChar).append('\'');
 			iValue = toIntegerValue(this, result, settings.mc, ctx);
 			LocalDate date = LocalDate.ofEpochDay(iValue.longValue());
 			int year = date.getYear();
@@ -2332,7 +2373,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 				dateStr = String.format("%1$04d-%2$02d-%3$02d",
 				    year, date.getMonthValue(), date.getDayOfMonth());
 			}
-			valueBuf.append(dateStr).append('\'');
+			constant(valueBuf, signChar, dateChar, dateStr);
 			break;
 
 		    case 'f':
@@ -2427,9 +2468,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			iValue = toIntegerValue(this, result, settings.mc, ctx);
 			try {
 			    int intValue = iValue.intValueExact();
-			    valueBuf.append("r'");
-			    valueBuf.append(NumericUtil.convertToRoman(intValue, false));
-			    valueBuf.append("'");
+			    constant(valueBuf, signChar, 'r', NumericUtil.convertToRoman(intValue, false));
 			}
 			catch (ArithmeticException | IllegalArgumentException ex) {
 			    throw new CalcExprException(ex, ctx);
@@ -2450,7 +2489,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    case 'w':
 			iValue = toIntegerValue(this, result, settings.mc, ctx);
 			try {
-			    NumericUtil.convertToWords(iValue, valueBuf);
+			    NumericUtil.convertToWords(iValue, valueBuf, separators);
 			}
 			catch (IllegalArgumentException iae) {
 			    throw new CalcExprException(iae, ctx);
@@ -2887,7 +2926,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		@Override
 		public Object apply(final Object value) {
 		    if (!isMatched
-		     && CalcUtil.compareValues(CalcObjectVisitor.this, caseExpr, blockCtx, caseValue, value, settings.mc, false, true, false, false) == 0) {
+		     && CalcUtil.compareValues(CalcObjectVisitor.this, caseExpr, blockCtx, caseValue, value, settings.mc, false, true, false, false, true) == 0) {
 			blockValue = execute();
 		    }
 		    return blockValue;
@@ -3745,7 +3784,7 @@ System.out.println("i = " + i + ", result = " + result);
 			case "\u00F7":
 			case "\u2215":
 			case "\u2797":
-			    return c1.divide(c2, settings.mcDivide);
+			    return c1.divide(c2, MathUtil.divideContext(c1, settings.mcDivide));
 			case "\\":
 			case "\u2216":
 			case "%":
@@ -3772,6 +3811,8 @@ System.out.println("i = " + i + ", result = " + result);
 		    BigDecimal d1 = toDecimalValue(this, e1, settings.mc, ctx1);
 		    BigDecimal d2 = toDecimalValue(this, e2, settings.mc, ctx2);
 
+		    MathContext mcDivide = MathUtil.divideContext(d1, settings.mcDivide);
+
 		    switch (op) {
 			case "*":
 			case "\u00D7":
@@ -3783,14 +3824,14 @@ System.out.println("i = " + i + ", result = " + result);
 			case "\u00F7":
 			case "\u2215":
 			case "\u2797":
-			    return fixupToInteger(d1.divide(d2, settings.mcDivide));
+			    return fixupToInteger(d1.divide(d2, mcDivide));
 			case "\\":
 			case "\u2216":
-			    return fixupToInteger(d1.divideToIntegralValue(d2, settings.mcDivide));
+			    return fixupToInteger(d1.divideToIntegralValue(d2, mcDivide));
 			case "%":
-			    return fixupToInteger(d1.remainder(d2, settings.mcDivide));
+			    return fixupToInteger(d1.remainder(d2, mcDivide));
 			case "mod":
-			    return fixupToInteger(MathUtil.modulus(d1, d2, settings.mcDivide));
+			    return fixupToInteger(MathUtil.modulus(d1, d2, mcDivide));
 			default:
 			    throw new UnknownOpException(op, ctx);
 		    }
@@ -3917,7 +3958,7 @@ System.out.println("i = " + i + ", result = " + result);
 	    BigDecimal y = getDecimalValue(e2ctx.expr(0));
 	    BigDecimal x = getDecimalValue(e2ctx.expr(1));
 
-	    return returnTrigValue(MathUtil.atan2(y, x, settings.mcDivide));
+	    return returnTrigValue(MathUtil.atan2(y, x, MathUtil.divideContext(y, settings.mcDivide)));
 	}
 
 	@Override
@@ -3970,7 +4011,7 @@ System.out.println("i = " + i + ", result = " + result);
 
 	    if (value instanceof ComplexNumber) {
 		ComplexNumber cValue = (ComplexNumber) value;
-		return cValue.pow(BigDecimal.ONE.divide(D_THREE, settings.mcDivide), settings.mc);
+		return cValue.pow(BigDecimal.ONE.divide(D_THREE, MathUtil.divideContext(cValue, settings.mcDivide)), settings.mc);
 	    }
 	    else {
 		return MathUtil.cbrt(convertToDecimal(value, settings.mc, expr), settings.mc);
@@ -4081,7 +4122,7 @@ System.out.println("i = " + i + ", result = " + result);
 		Object value = evaluate(expr);
 		if (value instanceof ComplexNumber) {
 		    ComplexNumber c = (ComplexNumber) value;
-		    return c.signum(settings.mcDivide);
+		    return c.signum(MathUtil.divideContext(c, settings.mcDivide));
 		}
 		else {
 		    BigDecimal e = convertToDecimal(value, settings.mc, expr);
@@ -5434,6 +5475,42 @@ System.out.println("i = " + i + ", result = " + result);
 	}
 
 	@Override
+	public Object visitToBaseExpr(CalcParser.ToBaseExprContext ctx) {
+	    CalcParser.Expr2Context e2ctx = ctx.expr2();
+	    CalcParser.ExprContext vExpr = e2ctx.expr(0);
+	    CalcParser.ExprContext rExpr = e2ctx.expr(1);
+
+	    Object valueObj = evaluate(vExpr);
+	    int radix = getIntValue(rExpr);
+
+	    if (radix < Character.MIN_RADIX || radix > Character.MAX_RADIX)
+		throw new CalcExprException(rExpr, "%calc#radixOutOfRange", radix, Character.MIN_RADIX, Character.MAX_RADIX);
+
+	    if (valueObj instanceof BigInteger) {
+		return ((BigInteger) valueObj).toString(radix);
+	    }
+	    else {
+		BigDecimal dValue = toDecimalValue(this, valueObj, settings.mc, vExpr);
+		return MathUtil.toString(dValue, radix, settings.mcDivide);
+	    }
+	}
+
+	@Override
+	public Object visitFromBaseExpr(CalcParser.FromBaseExprContext ctx) {
+	    CalcParser.Expr2Context e2ctx = ctx.expr2();
+	    CalcParser.ExprContext vExpr = e2ctx.expr(0);
+	    CalcParser.ExprContext rExpr = e2ctx.expr(1);
+
+	    String value = getStringValue(vExpr);
+	    int radix = getIntValue(rExpr);
+
+	    if (radix < Character.MIN_RADIX || radix > Character.MAX_RADIX)
+		throw new CalcExprException(rExpr, "%calc#radixOutOfRange", radix, Character.MIN_RADIX, Character.MAX_RADIX);
+
+	    return MathUtil.fromString(value, radix, settings.mcDivide);
+	}
+
+	@Override
 	public Object visitFracExpr(CalcParser.FracExprContext ctx) {
 	    try {
 		CalcParser.Expr1Context expr1 = ctx.expr1();
@@ -6153,7 +6230,7 @@ System.out.println("i = " + i + ", result = " + result);
 
 	@Override
 	public Object visitSpaceshipExpr(CalcParser.SpaceshipExprContext ctx) {
-	    int ret = compareValues(ctx.expr(0), ctx.expr(1), false, true);
+	    int ret = compareValues(ctx.expr(0), ctx.expr(1), false, true, false);
 
 	    if (ret < 0)
 		return settings.rationalMode ? BigFraction.MINUS_ONE : I_MINUS_ONE;
@@ -6190,9 +6267,9 @@ System.out.println("i = " + i + ", result = " + result);
 		case "\u2262": // NOT IDENTICAL
 		    if (optObj1 != null)
 			cmp = CalcUtil.compareValues(this, expr1, expr2, optObj1.orElse(null), visit(expr2),
-				settings.mc, true, true, false, false);
+				settings.mc, true, true, false, false, true);
 		    else
-			cmp = compareValues(expr1, expr2, true, true);
+			cmp = compareValues(expr1, expr2, true, true, true);
 		    break;
 
 		case "==":
@@ -6202,15 +6279,15 @@ System.out.println("i = " + i + ", result = " + result);
 		case "\u2260": // NOT EQUAL
 		    if (optObj1 != null)
 			cmp = CalcUtil.compareValues(this, expr1, expr2, optObj1.orElse(null), visit(expr2),
-				settings.mc, false, true, false, false);
+				settings.mc, false, true, false, false, true);
 		    else
-			cmp = compareValues(expr1, expr2, false, true);
+			cmp = compareValues(expr1, expr2, false, true, true);
 		    break;
 
 		default:
 		    if (optObj1 != null)
 			cmp = CalcUtil.compareValues(this, expr1, expr2, optObj1.orElse(null), visit(expr2),
-				settings.mc, false, false, false, false);
+				settings.mc, false, false, false, false, false);
 		    else
 			cmp = compareValues(expr1, expr2);
 		    break;
@@ -6290,7 +6367,7 @@ System.out.println("i = " + i + ", result = " + result);
 			valueCtx, loopCtx,
 			inValue, value,
 			settings.mc,
-			false, true, false, false);
+			false, true, false, false, true);
 
 		    if (cmp == 0)
 			compared = true;
@@ -6693,7 +6770,7 @@ System.out.println("i = " + i + ", result = " + result);
 			case "\u00F7=":
 			case "\u2215=":
 			case "\u2797=":
-			    result = c1.divide(c2, settings.mcDivide);
+			    result = c1.divide(c2, MathUtil.divideContext(c1, settings.mcDivide));
 			case "\\=":
 			case "\u2216=":
 			case "%=":
@@ -6704,6 +6781,8 @@ System.out.println("i = " + i + ", result = " + result);
 		else {
 		    BigDecimal d1 = toDecimalValue(this, e1, settings.mc, varCtx);
 		    BigDecimal d2 = toDecimalValue(this, e2, settings.mc, exprCtx);
+
+		    MathContext mcDivide = MathUtil.divideContext(d1, settings.mcDivide);
 
 		    switch (op) {
 			case "*=":
@@ -6717,14 +6796,14 @@ System.out.println("i = " + i + ", result = " + result);
 			case "\u00F7=":
 			case "\u2215=":
 			case "\u2797=":
-			    result = fixupToInteger(d1.divide(d2, settings.mcDivide));
+			    result = fixupToInteger(d1.divide(d2, mcDivide));
 			    break;
 			case "\\=":
 			case "\u2216=":
-			    result = fixupToInteger(d1.divideToIntegralValue(d2, settings.mcDivide));
+			    result = fixupToInteger(d1.divideToIntegralValue(d2, mcDivide));
 			    break;
 			case "%=":
-			    result = fixupToInteger(d1.remainder(d2, settings.mcDivide));
+			    result = fixupToInteger(d1.remainder(d2, mcDivide));
 			    break;
 			default:
 			    throw new UnknownOpException(op, ctx);

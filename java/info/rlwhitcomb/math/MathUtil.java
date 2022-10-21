@@ -23,52 +23,41 @@
  *
  *	Various static methods for trig, log, and other mathematical calculations.
  *
- *  History:
- *	26-Mar-2021 (rlwhitcomb)
- *	    Moved out of NumericUtil into this separate class.
- *	27-Mar-2021 (rlwhitcomb)
- *	    Add "ePower" method (which is e**x, or anti-logarithm).
- *	27-Mar-2021 (rlwhitcomb)
- *	    Clean up code in "pow()"
- *	29-Mar-2021 (rlwhitcomb)
- *	    Implement simpler, faster "ln2" function.
- *	    Rename the resource strings.
- *	30-Mar-2021 (rlwhitcomb)
- *	    Implement Taylor series for "ln" function. Clean up "pow" and "ePower".
- *	08-Apr-2021 (rlwhitcomb)
- *	    Move the "round" function from Calc into here.
- *	26-Apr-2021 (rlwhitcomb)
- *	    Tweak some error messages.
- *	07-Jul-2021 (rlwhitcomb)
- *	    Make the class final.
- *	20-Sep-2021 (rlwhitcomb)
- *	    Add 'tenPower' method (like 'ePower').
- *	05-Oct-2021 (rlwhitcomb)
- *	    Make "fixup" method that does "round" and "stripTrailingZeros".
- *	07-Oct-2021 (rlwhitcomb)
- *	    Fix operation of "round" when rounding to more precision than the original.
- *	18-Nov-2021 (rlwhitcomb)
- *	    #95: Add calculation of "phi".
- *	01-Dec-2021 (rlwhitcomb)
- *	    #95: Add "ratphi" and "fib2" to support it.
- *	29-Dec-2021 (rlwhitcomb)
- *	    #188: Add "ceil" and "floor" methods.
- *	01-Feb-2022 (rlwhitcomb)
- *	    #231: Use new Constants class values instead of our own.
- *	08-Feb-2022 (rlwhitcomb)
- *	    #235: Add "atan2" code.
- *	14-Apr-2022 (rlwhitcomb)
- *	    #273: Move to "math" package.
- *	08-Jul-2022 (rlwhitcomb)
- *	    #393: Cleanup imports.
- *	15-Sep-2022 (rlwhitcomb)
- *	    #485: Add "modulus" function.
+ * History:
+ *  26-Mar-21 rlw  ---	Moved out of NumericUtil into this separate class.
+ *  27-Mar-21 rlw  ---	Add "ePower" method (which is e**x, or anti-logarithm).
+ *  27-Mar-21 rlw  ---	Clean up code in "pow()"
+ *  29-Mar-21 rlw  ---	Implement simpler, faster "ln2" function.
+ *			Rename the resource strings.
+ *  30-Mar-21 rlw  ---	Implement Taylor series for "ln" function. Clean up "pow" and "ePower".
+ *  08-Apr-21 rlw  ---	Move the "round" function from Calc into here.
+ *  26-Apr-21 rlw  ---	Tweak some error messages.
+ *  07-Jul-21 rlw  ---	Make the class final.
+ *  20-Sep-21 rlw  ---	Add 'tenPower' method (like 'ePower').
+ *  05-Oct-21 rlw  ---	Make "fixup" method that does "round" and "stripTrailingZeros".
+ *  07-Oct-21 rlw  ---	Fix operation of "round" when rounding to more precision than the original.
+ *  18-Nov-21 rlw #95:	Add calculation of "phi".
+ *  01-Dec-21 rlw #95:	Add "ratphi" and "fib2" to support it.
+ *  29-Dec-21 rlw #188:	Add "ceil" and "floor" methods.
+ *  01-Feb-22 rlw #231:	Use new Constants class values instead of our own.
+ *  08-Feb-22 rlw #235:	Add "atan2" code.
+ *  14-Apr-22 rlw #273:	Move to "math" package.
+ *  08-Jul-22 rlw #393:	Cleanup imports.
+ *  15-Sep-22 rlw #485:	Add "modulus" function.
+ *  30-Sep-22 rlw  ---	Enlarge the "ratphi" table up to precision of 1,000.
+ *		  #288:	Add a method to return rational values of pi up to a certain precision.
+ *  01-Oct-22 rlw #288:	Add source links to the PI_VALUES table, rename "piFraction" to "ratpi".
+ *  03-Oct-22 rlw #497:	Methods to get a MathContext for division particularly for large dividends.
+ *  06-Oct-22 rlw #501:	BigDecimal to radix conversion.
+ *  08-Oct-22 rlw #501:	Radix back to BigDecimal conversion.
+ *  12-Oct-22 rlw #513:	Move Logging to new package.
+ *                #514:	Move text resources out of "util" package to here.
  */
 package info.rlwhitcomb.math;
 
+import info.rlwhitcomb.logging.Logging;
 import info.rlwhitcomb.util.DynamicArray;
 import info.rlwhitcomb.util.Intl;
-import info.rlwhitcomb.util.Logging;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -110,6 +99,9 @@ public final class MathUtil
 	private static BigDecimal MINUS_PI_OVER_TWO;
 	private static BigDecimal PI_OVER_FOUR;
 	private static BigDecimal MINUS_PI_OVER_FOUR;
+
+	/** A rounding context to round up to the next highest integer. */
+	private static final MathContext MC_ONE = new MathContext(1);
 
 
 	/**
@@ -172,6 +164,32 @@ public final class MathUtil
 
 
 	/**
+	 * From the given "divide" precision and the precision of the dividend, get the "best"
+	 * actual precision to use for the division.
+	 *
+	 * @param dividend	The numerator of a division operation.
+	 * @param mc		Probably limited precision context.
+	 * @return		The max of the dividend's precision and the context precision.
+	 */
+	public static MathContext divideContext(final BigDecimal dividend, final MathContext mc) {
+	    return new MathContext(Math.max(dividend.precision(), mc.getPrecision()), mc.getRoundingMode());
+	}
+
+
+	/**
+	 * From the given "divide" precision and the precision of the dividend, get the "best"
+	 * actual precision to use for the division.
+	 *
+	 * @param dividend	The numerator of a complex division operation.
+	 * @param mc		Probably limited precision context.
+	 * @return		The max of the dividend's precision and the context precision.
+	 */
+	public static MathContext divideContext(final ComplexNumber dividend, final MathContext mc) {
+	    return new MathContext(Math.max(dividend.precision(), mc.getPrecision()), mc.getRoundingMode());
+	}
+
+
+	/**
 	 * Round the final value to the given precision and strip trailing zeros.
 	 *
 	 * @param result The final result of a calculation, ready to be fixed up and returned to caller.
@@ -194,7 +212,7 @@ public final class MathUtil
 	public static BigDecimal pow(final BigDecimal base, final double inputExp, final MathContext mc) {
 	    double exp = inputExp;
 	    if (Double.isNaN(exp) || Double.isInfinite(exp))
-		throw new Intl.IllegalArgumentException("util#numeric.outOfRange");
+		throw new Intl.IllegalArgumentException("math#numeric.outOfRange");
 
 	    if (exp == 0.0d)
 		return BigDecimal.ONE;
@@ -247,7 +265,7 @@ public final class MathUtil
 	 */
 	public static Number pow(final BigInteger base, final double exp, final MathContext mc) {
 	    if (Double.isNaN(exp) || Double.isInfinite(exp))
-		throw new Intl.IllegalArgumentException("util#numeric.outOfRange");
+		throw new Intl.IllegalArgumentException("math#numeric.outOfRange");
 	    if (exp == 0.0d)
 		return BigInteger.ONE;
 
@@ -291,7 +309,7 @@ public final class MathUtil
 	    double baseFloor  = Math.floor(baseDouble);
 
 	    if (baseFloor != baseDouble)
-		throw new Intl.IllegalArgumentException("util#math.wholeInteger", baseDouble);
+		throw new Intl.IllegalArgumentException("math#math.wholeInteger", baseDouble);
 
 	    long loops = base.longValue();
 
@@ -334,7 +352,7 @@ public final class MathUtil
 	    double nInt    = Math.rint(nDouble);
 
 	    if (nInt != nDouble)
-		throw new Intl.IllegalArgumentException("util#math.wholeInteger", nDouble);
+		throw new Intl.IllegalArgumentException("math#math.wholeInteger", nDouble);
 
 	    long loops        = Math.abs(n.longValue());
 	    boolean negative  = nInt < 0.0d;
@@ -398,6 +416,60 @@ public final class MathUtil
 
 
 	/**
+	 * The best rational approximations of pi for each precision (number of significant digits).
+	 * <p> Taken from these tables:
+	 * <a href="http://oeis.org/A002485">http://oeis.org/A002485</a> and
+	 * <a href="http://oeis.org/A002486">http://oeis.org/A002486</a>, with
+	 * the last numerator interpolated from the last denominator (by multiplying by pi).
+	 */
+	private static final long[][] PI_VALUES = {
+		{               3L,              1L },
+		{              22L,              7L },
+		{             333L,            106L },
+		{             355L,            113L },
+		{          103993L,          33102L },
+		{          104348L,          33215L },
+		{          208341L,          66317L },
+		{          312689L,          99532L },
+		{          833719L,         265381L },
+		{         1146408L,         364913L },
+		{         4272943L,        1360120L },
+		{         5419351L,        1725033L },
+		{        80143857L,       25510582L },
+		{       165707065L,       52746197L },
+		{       245850922L,       78256779L },
+		{       411557987L,      131002976L },
+		{      1068966896L,      340262731L },
+		{      2549491779L,      811528438L },
+		{      6167950454L,     1963319607L },
+		{     14885392687L,     4738167652L },
+		{     21053343141L,     6701487259L },
+		{   1783366216531L,   567663097408L },
+		{   3587785776203L,  1142027682075L },
+		{   5371151992734L,  1709690779483L },
+		{   8958937768937L,  2851718461558L },
+		{ 139755218526789L, 44485467702853L }
+	};
+
+	/**
+	 * Return the best fractional (rational) approximation of pi for the given precision.
+	 *
+	 * @param precision	The number of decimal digits of precision required for the value
+	 *			(1 .. the length of the {@link #PI_VALUES} table).
+	 * @return		A fraction that is the best approximation to that precision, and
+	 *			in fact, whose decimal expansion is exactly the same as the computed
+	 *			decimal value by our other method, or {@code null} if the given
+	 *			precision falls outside our table of values.
+	 * @see #PI_VALUES
+	 */
+	public static BigFraction ratpi(final int precision) {
+	    if (precision > 0 && precision <= PI_VALUES.length) {
+		return new BigFraction(PI_VALUES[precision - 1][0], PI_VALUES[precision - 1][1]);
+	    }
+	    return null;
+	}
+
+	/**
 	 * Table of empirically-derived closest approximations of rational value of "phi" constructed from the ratio
 	 * of consecutive Fibonacci numbers. Index is number of digits of precision required, starting at 2.
 	 * Values are {@code n} where {@code fib(n + 1) / fib(n) == phi}.
@@ -405,10 +477,10 @@ public final class MathUtil
 	 * <pre> :quiet on
 	 * define ratphi($n) = { fib($n+1) / fib($n) }
 	 * PHI_VALUES = [ ]
-	 * loop over 2..400 { :dec $_; loop $n in $_ * 4 { if (ratphi($n) == phi) { if isnull(PHI_VALUES[$_]) { PHI_VALUES[$_] = $n } } } }
+	 * loop over 2..1000 { :dec $_; loop $n in $_ * 4 { if (ratphi($n) == phi) { if isnull(PHI_VALUES[$_]) { PHI_VALUES[$_] = $n } } } }
 	 * :quiet pop
 	 * PHI_VALUES@j</pre>
-	 * <p> Also note that 6 of these values had no "solution" (such as prec = 97, 117, 122, 137, etc.) so the
+	 * <p> Also note that a number of these values had no "solution" (such as prec = 97, 117, 122, 137, etc.) so the
 	 * value here is roughly interpolated from the surrounding values. The values should be +/- one LSD.
 	 */
 	private static final int[] PHI_VALUES = {
@@ -432,7 +504,44 @@ public final class MathUtil
 	    792, 794, 796, 798, 801, 804, 806, 809, 811, 813, 816, 818, 820, 822, 825, 828, 830, 832, 834,
 	    836, 838, 842, 844, 846, 849, 852, 854, 856, 858, 860, 864, 866, 868, 871, 873, 874, 878, 880,
 	    882, 884, 888, 890, 892, 894, 897, 899, 902, 904, 906, 909, 910, 914, 916, 919, 920, 924, 926,
-	    928, 930, 932, 935, 938, 940, 942, 944, 948, 950, 952, 954, 956
+	    928, 930, 932, 935, 938, 940, 942, 944, 948, 950, 952, 954, 956, 958, 962, 964 /* ? */, 966, 968, 970,
+	    974, 976, 978, 980, 983, 986, 988, 990, 992, 995, 998, 1000, 1002, 1004, 1006, 1009, 1012, 1014,
+	    1016, 1019, 1020, 1024, 1026, 1028, 1031, 1033, 1036, 1038, 1040, 1042, 1044, 1047 /* ? */, 1050, 1052,
+	    1055, 1057, 1060 /* ? */, 1062, 1064, 1066, 1070, 1071, 1074, 1076, 1078, 1080, 1084, 1086 /* ? */, 1088, 1090,
+	    1092, 1095, 1098, 1100, 1102, 1106, 1107, 1110, 1112, 1114, 1116, 1120, 1122, 1124, 1126, 1128,
+	    1132, 1134, 1136, 1138, 1141, 1144, 1146, 1148, 1150, 1152, 1156, 1158 /* ? */, 1160, 1162, 1164, 1167,
+	    1169, 1172, 1174, 1177, 1179, 1182, 1184, 1186, 1189, 1192, 1193, 1196, 1198, 1200, 1202, 1206,
+	    1208, 1210, 1212, 1214, 1218, 1220, 1222, 1224, 1226, 1230, 1232, 1234, 1236, 1239, 1242, 1244,
+	    1246, 1248, 1250, 1252, 1256, 1258, 1260, 1263, 1266, 1268, 1270, 1273, 1274, 1276, 1280, 1282,
+	    1284, 1286, 1290, 1292, 1294, 1296, 1298, 1300, 1304, 1306, 1308, 1310, 1312, 1316, 1318, 1320,
+	    1322, 1324, 1328, 1330, 1332, 1334, 1336, 1340, 1342, 1345, 1347, 1349, 1351, 1354, 1356, 1358,
+	    1360, 1363, 1366, 1368, 1371, 1372, 1376, 1378, 1380, 1382, 1384, 1388, 1390 /* ? */, 1392, 1394, 1397,
+	    1398, 1402, 1404, 1406, 1408, 1410, 1414, 1416, 1418, 1420, 1422, 1426, 1428, 1430, 1432, 1434,
+	    1438, 1440, 1443, 1445, 1446, 1450, 1452, 1454, 1456, 1458, 1461 /* ? */, 1464, 1466, 1468, 1470, 1473,
+	    1476, 1478, 1480, 1482, 1484, 1488, 1490, 1492, 1496, 1498, 1500, 1502, 1504, 1507, 1508, 1512,
+	    1514, 1516, 1518, 1521, 1524 /* ? */, 1526, 1528, 1530, 1532, 1536, 1538, 1541, 1543, 1545, 1548 /* ? */, 1550,
+	    1552, 1554, 1557, 1560, 1562 /* ? */, 1564, 1566, 1568, 1572, 1574, 1576, 1578, 1580, 1582, 1586, 1588,
+	    1591, 1592, 1596, 1598, 1600, 1603, 1604, 1606, 1609 /* ? */, 1612, 1614, 1616, 1620, 1622, 1624, 1626,
+	    1628, 1632, 1634, 1636, 1638, 1640, 1642, 1646, 1648, 1650, 1652, 1656, 1658, 1660, 1662, 1665,
+	    1667, 1670 /* ? */, 1672, 1674, 1676, 1678, 1682, 1684, 1686, 1688, 1690, 1694, 1696, 1698, 1700, 1703,
+	    1706, 1708, 1710, 1713, 1714, 1718, 1720, 1722, 1725, 1727, 1729, 1732, 1734, 1737, 1738, 1742,
+	    1744, 1746, 1748, 1750, 1752, 1755 /* ? */, 1758, 1760, 1763, 1765, 1768, 1770, 1772, 1774, 1778, 1779,
+	    1782, 1784, 1787, 1790, 1792, 1794, 1797, 1798, 1802, 1804, 1806, 1808, 1810, 1813, 1816, 1818,
+	    1820, 1822, 1824, 1828, 1830, 1832, 1835, 1836, 1840, 1842, 1844, 1847, 1849, 1852, 1854, 1856,
+	    1858, 1861, 1863, 1866, 1868, 1870, 1872, 1875, 1878, 1880, 1882, 1885, 1886, 1890, 1892, 1894,
+	    1897, 1899, 1902, 1904, 1906, 1908, 1912, 1914, 1916, 1918, 1920, 1924, 1926, 1928, 1930, 1933,
+	    1934, 1938, 1940, 1942, 1944, 1946, 1950, 1952, 1954, 1957, 1958, 1962, 1964 /* ? */, 1966, 1968, 1970,
+	    1974, 1976, 1978, 1980, 1982, 1985 /* ? */, 1988, 1990, 1992, 1995, 1996, 2000, 2002, 2004, 2007, 2010,
+	    2012, 2014, 2016, 2018, 2020, 2024, 2026, 2029, 2031, 2032, 2036, 2038, 2040, 2043, 2044, 2048,
+	    2050, 2052, 2054, 2056, 2059 /* ? */, 2062, 2064, 2066, 2068, 2072, 2074, 2076, 2078, 2082, 2083, 2086,
+	    2088, 2090, 2092, 2096, 2098, 2100, 2102, 2104, 2107, 2110, 2112, 2114, 2117, 2120, 2122, 2124,
+	    2126, 2129, 2132, 2134 /* ? */, 2136, 2139, 2140, 2144, 2146, 2148, 2150, 2152, 2156, 2158, 2160, 2162,
+	    2165, 2166, 2170, 2172, 2174, 2177, 2179, 2182 /* ? */, 2184, 2186, 2189, 2191, 2194 /* ? */, 2196, 2199, 2200,
+	    2204, 2206, 2208, 2210, 2212, 2215, 2218, 2220, 2222, 2224, 2226, 2230, 2232, 2234, 2236, 2239,
+	    2242, 2244, 2246, 2248, 2250, 2254, 2256, 2258, 2260, 2263, 2264, 2267 /* ? */, 2270, 2273, 2275, 2278,
+	    2280, 2282, 2285, 2287, 2290, 2292, 2294, 2296, 2299, 2302, 2304, 2306, 2308, 2310, 2312, 2316,
+	    2318, 2320, 2322, 2326, 2328, 2330, 2332, 2334, 2338, 2339, 2342, 2344, 2346, 2348, 2352, 2354,
+	    2356, 2358, 2362, 2364, 2366 /* ? */, 2368, 2370, 2372, 2376, 2378, 2380, 2382, 2385, 2388, 2390, 2392
 	};
 
 
@@ -827,7 +936,7 @@ public final class MathUtil
 	 */
 	public static BigDecimal sqrt(final BigDecimal x, final MathContext mc) {
 	    if (x.signum() < 0)
-		throw new Intl.IllegalArgumentException("util#math.sqrtNegative");
+		throw new Intl.IllegalArgumentException("math#math.sqrtNegative");
 	    if (x.equals(BigDecimal.ZERO) || x.equals(BigDecimal.ONE))
 		return x;
 
@@ -904,7 +1013,7 @@ public final class MathUtil
 	    // According to the original documentation, the given SCALE and ARRINIT
 	    // values work up to approx. 12,500 digits, so error out if we're over that
 	    if (digits > 12_500)
-		throw new Intl.IllegalArgumentException("util#math.tooManyPiDigits");
+		throw new Intl.IllegalArgumentException("math#math.tooManyPiDigits");
 
 	    // Since each loop reduces the count by 14 while only providing 4 digits
 	    // of output, in order to produce the required number of digits we must
@@ -935,7 +1044,7 @@ public final class MathUtil
 	    // the result to the exact digit count requested. Exception thrown if we
 	    // calculated wrong.
 	    if (pi.length() < digits)
-		throw new Intl.IllegalStateException("util#math.piDigitMismatch",
+		throw new Intl.IllegalStateException("math#math.piDigitMismatch",
 			pi.length(), digits);
 	    else if (pi.length() > digits)
 		pi.setLength(digits);
@@ -1248,7 +1357,7 @@ public final class MathUtil
 	    BigInteger posN = n.abs();
 
 	    if (posN.compareTo(MAX_PRIME) > 0)
-		throw new Intl.IllegalArgumentException("util#math.primeTooBig", posN);
+		throw new Intl.IllegalArgumentException("math#math.primeTooBig", posN);
 
 	    // Easy decisions here: zero and one are not prime
 	    if (posN.compareTo(BigInteger.ONE) <= 0)
@@ -1312,7 +1421,7 @@ public final class MathUtil
 	    BigInteger posN = (sign < 0) ? n.negate() : n;
 
 	    if (posN.compareTo(MAX_PRIME) > 0)
-		throw new Intl.IllegalArgumentException("util#math.primeTooBig", posN);
+		throw new Intl.IllegalArgumentException("math#math.primeTooBig", posN);
 
 	    // Zero has no factors
 	    if (posN.equals(BigInteger.ZERO))
@@ -1404,7 +1513,7 @@ public final class MathUtil
 	    BigInteger posN = (sign < 0) ? n.negate() : n;
 
 	    if (posN.compareTo(MAX_PRIME) > 0)
-		throw new Intl.IllegalArgumentException("util#math.primeTooBig", posN);
+		throw new Intl.IllegalArgumentException("math#math.primeTooBig", posN);
 
 	    // Zero has no factors
 	    if (posN.equals(BigInteger.ZERO))
@@ -1473,7 +1582,7 @@ public final class MathUtil
 	 */
 	public static BigDecimal ln(final BigDecimal input, final MathContext mc) {
 	    if (input.compareTo(BigDecimal.ZERO) <= 0)
-		throw new Intl.IllegalArgumentException("util#numeric.outOfRange");
+		throw new Intl.IllegalArgumentException("math#numeric.outOfRange");
 
 	    // Calculate a sufficient number of loops for the value to converge nicely
 	    int loops = mc.getPrecision() * 15;	// TODO: find out a good value
@@ -1538,7 +1647,7 @@ public final class MathUtil
 	 */
 	public static BigDecimal ln2(final BigDecimal input, final MathContext mc) {
 	    if (input.compareTo(BigDecimal.ZERO) <= 0)
-		throw new Intl.IllegalArgumentException("util#numeric.outOfRange");
+		throw new Intl.IllegalArgumentException("math#numeric.outOfRange");
 
 	    BigDecimal y = BigDecimal.ZERO;
 	    BigDecimal b = D_ONE_HALF;
@@ -1619,6 +1728,77 @@ public final class MathUtil
 
 	    BigDecimal floorValue = x.divide(y, mc).setScale(0, RoundingMode.FLOOR);
 	    return x.subtract(y.multiply(floorValue));
+	}
+
+	/**
+	 * Convert {@link BigDecimal} to string in the given radix.
+	 *
+	 * @param value	The value to convert.
+	 * @param radix	The base to convert to.
+	 * @param mc	Rounding context for conversion of the fraction.
+	 * @return	Value converted to the base.
+	 */
+	public static String toString(final BigDecimal value, final int radix, final MathContext mc) {
+	    StringBuilder buf = new StringBuilder(value.precision() * 2);
+	    BigDecimal scale = new BigDecimal(radix);
+	    BigInteger intPart = floor(value);
+	    buf.append(intPart.toString(radix));
+
+	    BigDecimal fracPart = value.subtract(new BigDecimal(intPart));
+	    if (!fracPart.equals(BigDecimal.ZERO)) {
+		int adjPrec = (int) ((double) mc.getPrecision() * Math.log(10) / Math.log(radix) + 0.5d);
+		int digits = buf.length();
+		buf.append('.');
+		while (!fracPart.equals(BigDecimal.ZERO) && digits < adjPrec) {
+		    fracPart = fracPart.multiply(scale, mc);
+		    intPart = floor(fracPart);
+		    fracPart = fracPart.subtract(new BigDecimal(intPart));
+		    buf.append(intPart.toString(radix));
+		    digits = buf.length();
+		}
+		// Last digit needs to be rounded
+		fracPart = fracPart.multiply(scale, mc);
+		intPart = floor(fracPart.round(MC_ONE));
+		buf.append(intPart.toString(radix));
+
+		// Remove trailing zeros
+		int len = buf.length();
+		while (len > 0 && buf.charAt(len - 1) == '0') {
+		    len--;
+		}
+		buf.setLength(len);
+	    }
+
+	    return buf.toString();
+	}
+
+	/**
+	 * Convert string in base N form back to numeric form.
+	 *
+	 * @param value	The value to convert back to a number.
+	 * @param radix	The base to convert from.
+	 * @param mc	Rounding context for the result.
+	 * @return	The number represented in the given base by the input.
+	 */
+	public static BigDecimal fromString(final String value, final int radix, final MathContext mc) {
+	    int pointPos = value.indexOf('.');
+	    String intPart = pointPos < 0 ? value : value.substring(0, pointPos);
+	    BigInteger integer = new BigInteger(intPart, radix);
+	    BigDecimal fraction = BigDecimal.ZERO;
+	    BigDecimal divisor = new BigDecimal(radix);
+	    BigDecimal mult = new BigDecimal(radix);
+	    MathContext mcDivide = new MathContext(mc.getPrecision() * 2, mc.getRoundingMode());
+
+	    if (pointPos > 0) {
+		for (int pos = pointPos + 1; pos < value.length(); pos++) {
+		    String digit = value.substring(pos, pos + 1);
+		    BigDecimal place = new BigDecimal(new BigInteger(digit, radix));
+		    fraction = fraction.add(place.divide(divisor, mcDivide));
+		    divisor = divisor.multiply(mult);
+		}
+	    }
+
+	    return new BigDecimal(integer).add(fraction, mc);
 	}
 
 }

@@ -1,9 +1,10 @@
 :quiet on
 define ratphi(n) = { fib(n+1) / fib(n) }
 PHI_VALUES = [ ]
-loop precision over 2..400 {
+loop precision over 380..1000 {
+  :echo 'Precision ' + precision
   settings.precision = precision
-  loop n in precision * 4 {
+  loop n in precision * 3 {
     if (ratphi(n) == phi) {
       PHI_VALUES[precision] = n
       leave

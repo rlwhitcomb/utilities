@@ -114,9 +114,21 @@
  *	#393: Cleanup imports.
  *    31-Aug-2022 (rlwhitcomb)
  *	#453: Modifications for "dot" names.
+ *    02-Oct-2022 (rlwhitcomb)
+ *	#498: Add overload compress/uncompress methods with "outputName" and "delete" parameters.
+ *    06-Oct-2022 (rlwhitcomb)
+ *	#505: New "compareFileLines" method that ignores line ending differences.
+ *	#505: Close the readers in "compareFileLines".
+ *    10-Oct-2022 (rlwhitcomb)
+ *	#481: New "writeStringToFile" method.
+ *    12-Oct-2022 (rlwhitcomb)
+ *	#513: Move Logging to new package.
+ *    13-Oct-2022 (rlwhitcomb)
+ *	#481: Make "getFileReader" and "getFileWriter" public.
  */
 package info.rlwhitcomb.util;
 
+import info.rlwhitcomb.logging.Logging;
 import net.iharder.b64.Base64;
 
 import java.io.*;
@@ -257,7 +269,7 @@ public final class FileUtilities
     }
 
     /**
-     * Compare two file byte-by-byte.
+     * Compare two files byte-by-byte.
      * <p> NOTE: this is only meant to compare two "small-ish" files
      * because it reads the entire contents into memory.
      * @see Files#readAllBytes
@@ -275,6 +287,43 @@ public final class FileUtilities
 	byte[] bytes1 = Files.readAllBytes(path1);
 	byte[] bytes2 = Files.readAllBytes(path2);
 	return Arrays.equals(bytes1, bytes2);
+    }
+
+    /**
+     * Compare two files line-by-line.
+     * <p> This is meant to compare files, ignoring line ending differences,
+     * because it uses the {@link BufferedReader#readLine} method to read
+     * through the file.
+     *
+     * @param file1	The first file to compare.
+     * @param file2	The second file to compare.
+     * @return	{@code true} if the two files compare byte-for-byte,
+     *		or {@code false} if not.
+     * @throws IOException if something went wrong.
+     */
+    public static boolean compareFileLines(final File file1, final File file2)
+	throws IOException
+    {
+	Path path1 = file1.toPath();
+	Path path2 = file2.toPath();
+
+	// We use the 8859-1 charset because all 256 byte values are legal here, so we are
+	// (basically) guaranteed not to get a character encoding exception reading any
+	// kind of text encoding.
+	try (BufferedReader rdr1 = Files.newBufferedReader(path1, ISO_8859_1_CHARSET);
+	     BufferedReader rdr2 = Files.newBufferedReader(path2, ISO_8859_1_CHARSET)) {
+
+	    String line1, line2;
+	    while ((line1 = rdr1.readLine()) != null) {
+		line2 = rdr2.readLine();
+		if (line2 == null)
+		    return false;
+		if (!line1.equals(line2))
+		    return false;
+	    }
+	    line2 = rdr2.readLine();
+	    return (line2 == null);
+	}
     }
 
     /**
@@ -388,6 +437,23 @@ public final class FileUtilities
     }
 
     /**
+     * Write a string to the given file.
+     *
+     * @param string	The string to write.
+     * @param f		The output file to write to.
+     * @param cs	Character set to use in translating chars to bytes.
+     * @throws 	IOException if anything goes wrong.
+     */
+    public static void writeStringToFile(final String string, final File f, final Charset cs)
+		throws IOException
+    {
+	try (BufferedWriter writer = Files.newBufferedWriter(f.toPath(), cs)) {
+	    writer.write(string);
+	    writer.flush();
+	}
+    }
+
+    /**
      * Check if the given file or directory is readable by the
      * current user (process owner).
      *
@@ -449,13 +515,32 @@ public final class FileUtilities
      *
      * @param	inputFile	The input file (in the proper directory).
      * @throws	IOException if something happened during the compression.
+     * @see #compressFile(File, String, boolean)
      */
     public static void compressFile(final File inputFile)
 	    throws IOException
     {
-	String outputName = inputFile.getPath() + COMPRESS_EXT;
+	compressFile(inputFile, "", true);
+    }
+
+    /**
+     * Compress the given file to <code>"<i>name</i>.gz"</code> and optionally remove the original.
+     *
+     * @param	inputFile	The input file (in the proper directory).
+     * @param	outputName	Possible output file name (can be empty or null for default).
+     * @param	delete		Whether to delete the original file once compressed.
+     * @throws	IOException if something happened during the compression.
+     * @see #compressFile(File)
+     */
+    public static void compressFile(final File inputFile, final String outputName, final boolean delete)
+	    throws IOException
+    {
+	String outName = CharUtil.isNullOrEmpty(outputName)
+		? inputFile.getPath() + COMPRESS_EXT
+		: decorate(outputName, null, COMPRESS_EXT).getPath();
+
 	try (InputStream fis = Files.newInputStream(inputFile.toPath());
-	     GZIPOutputStream gos = new GZIPOutputStream(Files.newOutputStream(Paths.get(outputName)), FILE_BUFFER_SIZE, true))
+	     GZIPOutputStream gos = new GZIPOutputStream(Files.newOutputStream(Paths.get(outName)), FILE_BUFFER_SIZE, true))
 	{
 	    byte[] buffer = new byte[FILE_BUFFER_SIZE];
 	    int len;
@@ -464,8 +549,11 @@ public final class FileUtilities
 	    }
 	    gos.flush();
 	}
-	// Now remove the original file (if possible)
-	inputFile.delete();
+
+	// Now remove the original file (if requested, and possible)
+	if (delete) {
+	    inputFile.delete();
+	}
     }
 
     /**
@@ -479,18 +567,44 @@ public final class FileUtilities
      * @throws	IOException if something happened during the decompression.
      * @throws	IllegalArgumentException (with no message) if the input
      *		file name doesn't end with {@link #COMPRESS_EXT}.
+     * @see #uncompressFile(File, String, boolean)
      */
     public static void uncompressFile(final File inputFile)
 	    throws IOException
     {
+	uncompressFile(inputFile, "", true);
+    }
+
+    /**
+     * Uncompress the given file from <code>"<i>name</i>.gz"</code> to just <code>"<i>name</i>"</code>
+     * and optionally remove the original compressed file.
+     *
+     * @param	inputFile	The input file (in the proper directory).
+     * @param	outputName	Possible output file name (can be empty or null for default).
+     * @param	delete		Whether to delete the original file once uncompressed.
+     * @throws	IOException if something happened during the decompression.
+     * @throws	IllegalArgumentException (with no message) if the input
+     *		file name doesn't end with {@link #COMPRESS_EXT}.
+     * @see #uncompressFile(File)
+     */
+    public static void uncompressFile(final File inputFile, final String outputName, final boolean delete)
+	    throws IOException
+    {
 	String inputName = inputFile.getPath();
-	String outputName;
-	if (inputName.endsWith(COMPRESS_EXT))
-	    outputName = inputName.substring(0, inputName.length() - COMPRESS_EXT.length());
-	else
+	String outName;
+
+	if (inputName.endsWith(COMPRESS_EXT)) {
+	    if (CharUtil.isNullOrEmpty(outputName))
+		outName = inputName.substring(0, inputName.length() - COMPRESS_EXT.length());
+	    else
+		outName = outputName;
+	}
+	else {
 	    throw new Intl.IllegalArgumentException("util#fileutil.wrongExtension", COMPRESS_EXT);
+	}
+
 	try (GZIPInputStream gis = new GZIPInputStream(Files.newInputStream(inputFile.toPath()), FILE_BUFFER_SIZE);
-	     OutputStream fos = Files.newOutputStream(Paths.get(outputName)))
+	     OutputStream fos = Files.newOutputStream(Paths.get(outName)))
 	{
 	    byte[] buffer = new byte[FILE_BUFFER_SIZE];
 	    int len;
@@ -499,8 +613,11 @@ public final class FileUtilities
 	    }
 	    fos.flush();
 	}
-	// Now remove the original file (if possible)
-	inputFile.delete();
+
+	// Now remove the original file (if requested and possible)
+	if (delete) {
+	    inputFile.delete();
+	}
     }
 
     /**
@@ -793,7 +910,7 @@ public final class FileUtilities
      *			or is larger than our internal limit.
      * @throws	IOException if there is a problem starting to read the file
      */
-    private static BufferedReader getFileReader(final File file, final Charset cs)
+    public static BufferedReader getFileReader(final File file, final Charset cs)
 		throws IOException
     {
 	InputStream in;
@@ -832,7 +949,7 @@ public final class FileUtilities
      * @return		A buffered writer suitable for writing the file.
      * @throws	IOException if there is a problem starting to write the file.
      */
-    private static PrintWriter getFileWriter(final File file, final Charset cs)
+    public static PrintWriter getFileWriter(final File file, final Charset cs)
 		throws IOException
     {
 	PrintWriter out;

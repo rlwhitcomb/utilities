@@ -330,6 +330,8 @@ h2 {
     <tr><td><code>-output</code> <i>output_file</i></td><td>Redirect standard output to the given file</td><td><code>-out</code>, <code>-o</code></td><td></td></tr>
     <tr><td><code>-error</code> <i>error_file</i></td><td>Redirect standard error stream to file</td><td><code>-err</code></td><td></td></tr>
     <tr><td><code>-outputcs</code> <i>charset_name</i></td><td>Use the charset to encode output/error files</td><td><code>-outputcharset</code>,<br><code>-outchar</code>, <code>-outcs</code>, <code>-ocs</code></td><td></td></tr>
+    <tr><td><code>-linefeed</code></td><td>Use only line feed as line separator on output</td><td><code>-lfonly</code>, <code>-lf</code></td><td></td></tr>
+    <tr><td><code>-lineend</code></td><td>Use the system line separators on output (default)</td><td><code>-lineending</code>, <code>-ln</code></td><td></td></tr>
     <tr><td><code>-variable</code><br><i>name</i><code>=</code><i>value</i><br>or <i>name</i><code>:</code><i>value</i></td><td>Set the value of a variable</td><td><code>-define</code>, <code>-var</code></td><td><i>name</i>&nbsp;<code>=</code>&nbsp;<i>value</i></td></tr>
     <tr><td><code>--</code> <i>parameter_values</i><br>[ <code>--</code> ]</td><td>Provide values for the <code>$0</code>, <code>$1</code>, etc. parameters<br>
             (every value between the <code>--</code> markers<br>is taken as a parameter value)</td><td></td><td></td></tr>
@@ -629,8 +631,10 @@ or<br>
       operations will be automatically limited to our (arbitrary) 12,500 digits even in "unlimited" mode if the result is an infinitely repeating
       value (such as the result of <code>1/7 = 0.142857142857...</code>).
   <p>Some operators (such as factorial) do not respect the precision setting, and do their calculations to their exact value regardless of the setting
-     (not sure if this is wise or not, but it seems weird to restrict the precision in such cases in a rather arbitrary and unintuitive way). Also, in
-     rational mode the precision setting does not apply to the numerator or denominator values of the fractions.
+     (not sure if this is wise or not, but it seems weird to restrict the precision in such cases in a rather arbitrary and unintuitive way).
+     In most division operations with a dividend of this size (that is, larger than the 12,500 limit), the precision for the result is the
+     larger of the precision of the dividend or the preassigned limit.
+     Also, in rational mode the precision setting does not apply to the numerator or denominator values of the fractions.
   <p>As another side note, the Bernoulli numbers are best calculated in rational mode, since they are defined as the ratio of integer values.
      Of course, in decimal mode the fractions will be divided and the results returned as a decimal value up the specified precision.
   <p>Trigonometric calculations are, by default, done in radians, but this can be changed to use degrees using the <code>:degrees</code> directive,
@@ -666,28 +670,28 @@ or<br>
       </tr>
       </thead>
       <tbody>
-      <tr><td><code>@h</code></td><td>Display as a time value (hours:minutes:seconds.nanos)<br>as in <code style="color:blue;">98007900000000 @h</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">h'27:13:27.9'</code></td></tr>
-      <tr><td><code>@</code>[[<code>+</code>|<code>-</code>]<i>nn</i>][<code>w</code>|<code>d</code>|<code>h</code>|<code>m</code>|<code>s</code>]<code>t</code></td><td>Format as a time (duration), optional rounding<br>as in <code style="color:blue;">98007900000000 @2ht</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">t'27.22h'</code></td></tr>
+      <tr><td><code>@</code>[<code>-</code>]<code>h</code></td><td>Display as a time value (hours:minutes:seconds.nanos)<br>as in <code style="color:blue;">98007900000000 @h</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">h'27:13:27.9'</code></td></tr>
+      <tr><td><code>@</code>[<code>-</code>][<i>nn</i>][<code>w</code>|<code>d</code>|<code>h</code>|<code>m</code>|<code>s</code>]<code>t</code></td><td>Format as a time (duration), optional rounding<br>as in <code style="color:blue;">98007900000000 @2ht</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">t'27.22h'</code></td></tr>
       <tr><td><code>@l</code></td><td>Format result string in lower case<br>as in <code style="color:blue;">'Hello, World!' @l</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">"hello, world!"</code></td></tr>
       <tr><td><code>@u</code></td><td>Format result string in UPPER case<br>as in <code style="color:blue;">'Hello, Everyone!' @u</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">"HELLO, EVERYONE!"</code></td></tr>
       <tr><td><code>@q</code></td><td>Remove quotes from the result<br>as in <code style="color:blue;">"abc" @q</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">abc</code></td></tr>
       <tr><td><code>@Q</code></td><td>Add extra quotes around the result<br>as in <code style="color:blue;">"abc" @Q</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">"\"abc\""</code></td></tr>
       <tr><td><code>@</code>[[<code>+</code>|<code>-</code>]<i>n</i>[<code>.</code><i>m</i>]][<code>,</code>|<code>_</code>]<code>d</code></td>
           <td>Primarily for rational mode: format the result as a decimal value,<br>with optional separators, and optionally rounding to scale of <code>+</code>|<code>-</code> <i>n</i> digits<br>and where <i>m</i> is 0 padding width<br><code>,</code> adds thousands separators regardless of settings<br>and <code>_</code> removes them always<br>as in <code style="color:blue;">1234.567 @2,d</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">1,234.57</code><br>and <code style="color:blue;">2.345e9 @.12_d</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">002345000000</code><br>(prints codepoint for single character<br>as in <code style="color:blue;">"&#x1D6D1;" @d</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">120529</code>)</td></tr>
-      <tr><td><code>@e</code></td><td>Format an integer as a date (yyyy-mm-dd) (ISO-8601 format)<br>as in <code style="color:blue;">18908 @e</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">d'2021-10-08'</code></td></tr>
-      <tr><td><code>@E</code></td><td>Format an integer as a date (mm/dd/yyyy) (U.S. format)<br> as in <code style="color:blue;">-10252 @E</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">D'12/07/1941'</code></td></tr>
+      <tr><td><code>@</code>[<code>-</code>]<code>e</code></td><td>Format an integer as a date (yyyy-mm-dd) (ISO-8601 format)<br>as in <code style="color:blue;">18908 @e</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">d'2021-10-08'</code></td></tr>
+      <tr><td><code>@</code>[<code>-</code>]<code>E</code></td><td>Format an integer as a date (mm/dd/yyyy) (U.S. format)<br> as in <code style="color:blue;">-10252 @E</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">D'12/07/1941'</code></td></tr>
       <tr><td><code>@f</code></td><td>For decimal mode, format the result as a rational fraction<br>as in <code style="color:blue;">5.125 @f</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">41/8</code></td></tr>
       <tr><td><code>@F</code></td><td>Format as a proper fraction (with possible integer portion)<br>as in <code style="color:blue;">3.75 @F</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">3 3/4</code></td></tr>
       <tr><td><code>@c</code></td><td>Format an integer (range of 0 .. 0x10FFFF) as a Unicode character<br>as in <code style="color:blue;">120529 @c</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">"&#x1D6D1;"</code></td></tr>
       <tr><td><code>@i</code></td><td>Format the result as a complex number, as in<br><code style="color:blue;">(1,1)**3 @i</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">-2 + 2&#x2148;</code></td></tr>
       <tr><td><code>@p</code></td><td>Format the result as a complex number<br>in polar form, as in<br><code style="color:blue;">(3,4) @p</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">{ r: 5, &#x03B8;: 0.9272952180016122 }</code></td></tr>
       <tr><td><code>@</code>[[<code>-</code>]<i>n</i>[<code>.</code><i>m</i>[<code>.</code><i>p</i>]]][<code>,</code>|<code>_</code>]<code>j</code></td><td>Format the result as a "pretty printed" JSON result<br>(multiple lines with indents) with<br><code>-</code> to remove initial newline, <i>n</i> to set initial indent,<br><code>.</code><i>m</i> to set indent increments,<br><code>.</code><i>p</i> to skip outer levels, and<br>with optional separators in numeric values</td></tr>
-      <tr><td><code>@r</code></td><td>Format the result as a Roman Numeral value<br>as in <code style="color:blue;">2021 @R</code><code style="color:gray;"> &#x21E8; </code><code style="color:green;">R'MMXXI'</code></td></tr>
+      <tr><td><code>@</code>[<code>-</code>]<code>r</code></td><td>Format the result as a Roman Numeral value<br>as in <code style="color:blue;">2021 @R</code><code style="color:gray;"> &#x21E8; </code><code style="color:green;">R'MMXXI'</code></td></tr>
       <tr><td><code>@x</code></td><td>For integers and strings, format in hexadecimal form<br>as in <code style="color:blue;">456 @x</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">0x1c8</code><br>or <code style="color:blue;">'abc' @x</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">'\u0061\u0062\u0063'</code></td></tr>
       <tr><td><code>@o</code></td><td>For integers and strings, format in octal form<br>as in <code style="color:blue;">345 @o</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">0531</code><br>or <code style="color:blue;">'abc' @o</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">'\o141\o142\o143'</code></td></tr>
       <tr><td><code>@b</code></td><td>For integers and strings, format in binary form<br>as in <code style="color:blue;">231 @b</code><code style="grey;"> &#x21E8; </code><code style="color:green;">0b11100111</code><br>or <code style="color:blue;">'abc' @b</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">'\B01100001\B01100010\B01100011'</code></td></tr>
       <tr><td><code>@k</code></td><td>Use kilobyte, megabyte, etc. notation for the value<br>(depending on the SI / BINARY mode)<br>as in <code style="color:blue;">2000 @k</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">1.95 Kibytes</code> (binary)<br>or <code style="color:blue;">2000 @k</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">2.00 Kbytes</code> (SI)<br>or <code style="color:blue;">2000 @K</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">2.00 Kilobytes</code> (SI)</td></tr>
-      <tr><td><code>@w</code></td><td>Convert the (integer) value to words<br>as in <code style="color:blue;">235 @w</code><code style="color:gray;"> &#x21E8; </code><code style="color:green;">two hundred thirty-five</code></td></tr>
+      <tr><td><code>@</code>[<code>,</code>|<code>_</code>]w</code></td><td>Convert the (integer) value to words<br>with optional separators, as in<br><code style="color:blue;">235 @w</code><code style="color:gray;"> &#x21E8; </code><code style="color:green;">two hundred thirty-five</code></td></tr>
       <tr><td><code>@</code>[[<code>+</code>|<code>-</code>]<i>nn</i>][<code>,</code>|<code>_</code>]<code>%</code></td><td>Format as a percentage, with optional separators, and<br>optionally rounding to <i>nn</i> digits<br>as in <code style="color:blue;">10.08745 @2,%</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">1,008.75%</code></td></tr>
       <tr><td><code>@</code>[[<code>+</code>|<code>-</code>]<i>nn</i>][<code>,</code>|<code>_</code>]<code>$</code></td><td>Format as a currency value with the locale-specific currency symbol,<br>optionally setting separators and number of fraction digits<br>as in <code style="color:blue;">1500 @3,$</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">$1,500.000</code></td></tr>
       <tr><td><code>@</code>[[<code>+</code>|<code>-</code>]<i>nn</i>]<code>s</code></td><td>Left/right/center justify the string value inside the <i>nn</i> width<br>as in <code style="color:blue;">'abc' @+10s</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">"&nbsp;&nbsp;&nbsp;&nbsp;abc&nbsp;&nbsp;&nbsp;"</code>,<br><code style="color:blue;">'abc' @-10s</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;abc"</code>,<br><code style="color:blue;">'abc' @10s</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">"abc&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"</code><br>for objects, arrays, and sets, simply convert to a string<br><i>nn</i> is ignored, but use <code>-</code> to not add extra space, as in<br><code style="color:blue;">[ 1, 2, 3 ] @-s</code><code style="color:grey;"> &#x21e8; </code><code style="color:green;">"[1,2,3]"</code></td></tr>
@@ -703,6 +707,10 @@ or<br>
      the US, Canada, and modern British (short scale) form, regardless of the locale used. The implementation here will work up to a
      value of around 10<sup>3,000,000,000</sup>.
   <p>While thousands separators are supported on output (the <code>d</code>, <code>j</code>, <code>%</code>, and <code>$</code> formats), they are not supported on input. For this reason, the separators setting is ignored for <code>:save</code>, and should be avoided if the output is meant to be read as input by Calc.
+  <p>The optional <code>-</code> modifier for <code>@h</code>, <code>@t</code>, <code>@e</code>, and <code>@r</code> will remove the constant formatting
+     and treat the value as a simple quoted string. This simplifies using these values inside interpolated strings (for instance), as in:&nbsp;
+  <code style="color:blue;">today@-e</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">"2022-10-17"</code> while
+  <code style="color:blue;">today@e</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">d'2022-10-17'</code>
 </div>
 <a class="top-link" href="#topofpage">Top</a>
 <hr id="Available_Operators_and_Predefined_Functions" class="sectionsep">
@@ -764,8 +772,8 @@ or<br>
     <tr><td>33</td><td><i>object</i> <code>.</code> <i>member</i></td><td>access an object member</td><td>left to right</td></tr>
     <tr><td>32</td><td><i>expr</i> <code>HAS</code> ( <i>id</i> | <i>string</i> | <code>[</code> <i>expr</i> <code>]</code> )</td><td>safely check for member or index</td><td>left to right</td></tr>
     <tr><td>31</td><td><code>( </code><i>expr</i><code> )</code></td><td>group an expression</td><td>N/A</td></tr>
-    <tr><td rowspan="81">30</td>
-            <td><code>ABS</code>&nbsp;<i>expr</i></td><td>absolute value</td><td rowspan="81">left to right</td></tr>
+    <tr><td rowspan="83">30</td>
+            <td><code>ABS</code>&nbsp;<i>expr</i></td><td>absolute value</td><td rowspan="83">left to right</td></tr>
             <tr><td><code>SIN</code>&nbsp;<i>expr</i></td><td>sine</td></tr>
             <tr><td><code>COS</code>&nbsp;<i>expr</i></td><td>cosine</td></tr>
             <tr><td><code>TAN</code>&nbsp;<i>expr</i></td><td>tangent</td></tr>
@@ -823,6 +831,8 @@ or<br>
             <tr><td><code>COMPLEX</code>&nbsp;<i>r</i><code>,</code>&nbsp;<i>i</i><br>or <i>expr</i></td><td>construct a complex number</td></tr>
             <tr><td><code>ROMAN</code>&nbsp;<i>expr</i></td><td>interpret <i>expr</i> as a Roman Numeral</td></tr>
             <tr><td><code>TODATE</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;)&nbsp;)</td><td>convert expression(s) to a date value</td></tr>
+            <tr><td><code>TOBASE</code>&nbsp;<i>expr</i> , <i>base_expr</i></td><td>convert number to the given base (radix)</td></tr>
+            <tr><td><code>FROMBASE</code>&nbsp;<i>expr</i> , <i>base_expr</i></td><td>convert value in given base back to a number</td></tr>
             <tr><td><code>LOWER</code>&nbsp;<i>expr</i></td><td>convert <i>expr</i> to lower case</td></tr>
             <tr><td><code>UPPER</code>&nbsp;<i>expr</i></td><td>convert <i>expr</i> to UPPER case</td></tr>
             <tr><td><code>EVAL</code>&nbsp;<i>expr</i></td><td>evaluate the string result of <i>expr</i></td></tr>

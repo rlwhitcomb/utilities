@@ -3,9 +3,49 @@
 /*======================*/
 
 [
-    { version: '3.0.0', date: d'2022-08-26',
+    { version: '3.0.0', date: d'2022-10-19',
       issues: [ 458 ],
       comment: 'Implement multi-threaded "parallel" processing.'
+    },
+    { version: '2.14.52', date: d'2022-10-17',
+      issues: [ 522 ],
+      comment: 'Implement "-" format option for "@h", "@t", "@r", and "@e" to omit type and quotes.'
+    },
+    { version: '2.14.50', date: d'2022-10-12',
+      issues: [ 103 ],
+      comment: 'Fix equality testing of complex numbers.'
+    },
+    { version: '2.14.48', date: d'2022-10-08',
+      issues: [ 506 ],
+      comment: 'New "-ln" and "-lf" options for line separators on output.'
+    },
+    { version: '2.14.47', date: d'2022-10-08',
+      issues: [ 504 ],
+      comment: 'Allow single "y" in date format for "toDate" function.'
+    },
+    { version: '2.14.46', date: d'2022-10-08',
+      issues: [ 501 ],
+      comment: 'Add "fromBase" function.'
+    },
+    { version: '2.14.44', date: d'2022-10-08',
+      issues: [ 501 ],
+      comment: 'Add "tobase" function.'
+    },
+    { version: '2.14.42', date: d'2022-10-03',
+      issues: [ 497 ],
+      comment: 'More properly set divide precision for properly large dividends.'
+    },
+    { version: '2.14.40', date: d'2022-10-03',
+      issues: [ 499 ],
+      comment: 'Set rational mode for PI values right away (from command line argument).'
+    },
+    { version: '2.14.38', date: d'2022-09-30',
+      issues: [ 288 ],
+      comment: 'Provide the best rational approximations of PI up to 26 digits; expand rational PHI values.'
+    },
+    { version: '2.14.36', date: d'2022-09-30',
+      issues: [ 496 ],
+      comment: 'Commas in "@w" format are determined by ",_" modifiers and/or "separators" mode.'
     },
     { base: '1.9.32', date: d'2022-09-27',
       issues: [ 491 ],

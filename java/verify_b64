@@ -1,0 +1,13 @@
+#!/bin/bash
+b64 -e images/backspace_32.png -o back.b64
+b64 -d back.b64 -o back.png
+cmp back.png images/backspace_32.png
+if [[ $? -eq 0 ]]; then
+  rm back.b64 back.png
+  exit 0
+else
+  echo Round trip of B64 doesn\'t compare!
+  echo Original data is "images/backspace_32.png", results in "back.b64" and "back.png".
+  exit 1
+fi
+

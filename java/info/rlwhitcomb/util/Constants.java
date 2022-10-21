@@ -223,7 +223,7 @@ public final class Constants
 	public static final int CHAR_BUFFER_SIZE = 4_096;
 
 
-	/** Maximum size of file we want to read into a string (2MB). */
+	/** Maximum size of file we want to read into a string (10MB). */
 	public static final long FILE_STRING_SIZE_LIMIT = 10_485_760L;
 
 }

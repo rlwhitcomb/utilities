@@ -156,10 +156,15 @@
  *	    #393: Cleanup imports.
  *	18-Aug-2022 (rlwhitcomb)
  *	    #445: New flavor of "setColoring" with just the flag and no map.
+ *	08-Oct-2022 (rlwhitcomb)
+ *	    #506: Flag to only print LF line endings on any platform.
+ *	12-Oct-2022 (rlwhitcomb)
+ *	    #513: Move Logging to new package.
  */
 package info.rlwhitcomb.util;
 
 import info.rlwhitcomb.jarfile.Launcher;
+import info.rlwhitcomb.logging.Logging;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -599,6 +604,12 @@ public final class Intl
 	 */
 	private static Map<String, Object> colorCodeMap = null;
 
+	/**
+	 * Only produce LF line endings, instead of the platform default.
+	 */
+	private static boolean useLfOnly = false;
+
+
 
 	/**
 	 * Initialize all of our resource bundles automatically with the default locale
@@ -769,6 +780,16 @@ public final class Intl
 	public static void setColoring(final boolean useColors, final Map<String, Object> colorMapToUse) {
 	    colorByDefault = useColors;
 	    colorCodeMap = colorMapToUse;
+	}
+
+
+	/**
+	 * Set the flag to only print LF line endings, regardless of the platform line separator.
+	 *
+	 * @param	lfOnly	Whether to use LF (0x0A) only for line endings.
+	 */
+	public static void setLfLineEnding(final boolean lfOnly) {
+	    useLfOnly = lfOnly;
 	}
 
 
@@ -1113,10 +1134,22 @@ public final class Intl
 
 
 	/**
+	 * Print a line separator to the given stream, either the platform default or LF only.
+	 *
+	 * @param	ps	PrintStream (either {@link System#out} or {@link System#err}.
+	 */
+	public static void println(final PrintStream ps) {
+	    if (useLfOnly)
+		ps.print('\n');
+	    else
+		ps.println();
+	}
+
+	/**
 	 * Print a blank line to {@link System#out} (convenience for {@link #outPrintln(String)}).
 	 */
 	public static void outPrintln() {
-	    System.out.println();
+	    println(System.out);
 	}
 
 
@@ -1125,7 +1158,8 @@ public final class Intl
 	 * @param	key	Key value passed to {@link #getString(String)}.
 	 */
 	public static void outPrintln(final String key) {
-	    System.out.println(ConsoleColor.color(getString(key), colorByDefault, colorCodeMap));
+	    System.out.print(ConsoleColor.color(getString(key), colorByDefault, colorCodeMap));
+	    println(System.out);
 	}
 
 
@@ -1133,7 +1167,7 @@ public final class Intl
 	 * Print a blank line to {@link System#err} (convenience for {@link #errPrintln(String)}).
 	 */
 	public static void errPrintln() {
-	    System.err.println();
+	    println(System.err);
 	}
 
 
@@ -1142,7 +1176,8 @@ public final class Intl
 	 * @param	key	Key value passed to {@link #getString(String)}.
 	 */
 	public static void errPrintln(final String key) {
-	    System.err.println(ConsoleColor.color(getString(key), colorByDefault, colorCodeMap));
+	    System.err.print(ConsoleColor.color(getString(key), colorByDefault, colorCodeMap));
+	    println(System.err);
 	}
 
 
@@ -1158,7 +1193,8 @@ public final class Intl
 	 	Launcher.startupError(errorMsg);
 	    }
 	    catch (UnsatisfiedLinkError ule) {
-		System.err.println(ERROR + errorMsg);
+		System.err.print(ERROR + errorMsg);
+		println(System.err);
 	    }
 	}
 
@@ -1170,7 +1206,8 @@ public final class Intl
 	 * @param args The (possibly empty) list of arguments used to format the message.
 	 */
 	public static void outFormat(final String formatKey, final Object... args) {
-	    System.out.println(ConsoleColor.color(formatString(formatKey, args), colorByDefault, colorCodeMap));
+	    System.out.print(ConsoleColor.color(formatString(formatKey, args), colorByDefault, colorCodeMap));
+	    println(System.out);
 	}
 
 
@@ -1182,7 +1219,8 @@ public final class Intl
 	 * @param args The (possibly empty) list of arguments used to format the message.
 	 */
 	public static void outKeyFormat(final String formatOrKey, final Object... args) {
-	    System.out.println(ConsoleColor.color(formatKeyString(formatOrKey, args), colorByDefault, colorCodeMap));
+	    System.out.print(ConsoleColor.color(formatKeyString(formatOrKey, args), colorByDefault, colorCodeMap));
+	    println(System.out);
 	}
 
 
@@ -1192,7 +1230,8 @@ public final class Intl
 	 * @param args The (possibly empty) list of arguments used to format the message.
 	 */
 	public static void errFormat(final String formatKey, final Object... args) {
-	    System.err.println(ConsoleColor.color(formatString(formatKey, args), colorByDefault, colorCodeMap));
+	    System.err.print(ConsoleColor.color(formatString(formatKey, args), colorByDefault, colorCodeMap));
+	    println(System.err);
 	}
 
 
@@ -1204,7 +1243,8 @@ public final class Intl
 	 * @param args The (possibly empty) list of arguments used to format the message.
 	 */
 	public static void errKeyFormat(final String formatOrKey, final Object... args) {
-	    System.err.println(ConsoleColor.color(formatKeyString(formatOrKey, args), colorByDefault, colorCodeMap));
+	    System.err.print(ConsoleColor.color(formatKeyString(formatOrKey, args), colorByDefault, colorCodeMap));
+	    println(System.err);
 	}
 
 
@@ -1221,7 +1261,8 @@ public final class Intl
 		Launcher.startupError(errorMsg);
 	    }
 	    catch (UnsatisfiedLinkError ule) {
-		System.err.println(ERROR + errorMsg);
+		System.err.print(ERROR + errorMsg);
+		println(System.err);
 	    }
 	}
 
@@ -1381,15 +1422,17 @@ public final class Intl
 		    String helpLine = getOptionalString(helpKey(prefix, lineNo++));
 		    if (helpLine == null)
 			break;
-		    System.out.println(
+		    System.out.print(
 			ConsoleColor.color(CharUtil.substituteEnvValues(helpLine, symbols), colors, colorCodeMap));
+		    println(System.out);
 		}
 	    }
 	    else {
 		while (lineNo <= numLines) {
 		    String helpLine = getString(helpKey(prefix, lineNo++));
-		    System.out.println(
+		    System.out.print(
 			ConsoleColor.color(CharUtil.substituteEnvValues(helpLine, symbols), colors, colorCodeMap));
+		    println(System.out);
 		}
 	    }
 	}

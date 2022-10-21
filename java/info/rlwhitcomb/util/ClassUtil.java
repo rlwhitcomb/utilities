@@ -105,10 +105,13 @@
  *	    Another tweak to "defaultToString()" for null input.
  *	29-Aug-2022 (rlwhitcomb)
  *	    #453: Add back "getMapFromObject" method.
+ *	12-Oct-2022 (rlwhitcomb)
+ *	    #513: Move Logging to a new package.
  */
 package info.rlwhitcomb.util;
 
 import info.rlwhitcomb.annotations.*;
+import info.rlwhitcomb.logging.Logging;
 import info.rlwhitcomb.math.NumericUtil;
 
 import java.io.*;

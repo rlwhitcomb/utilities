@@ -40,6 +40,10 @@
  *	    #393: Cleanup imports.
  *	24-Aug-2022 (rlwhitcomb)
  *	    #447: Add constant for pi/200 for gradian/grad conversion.
+ *	30-Sep-2022 (rlwhitcomb)
+ *	    #288: Return best fractional values for PI in rational mode.
+ *	01-Oct-2022 (rlwhitcomb)
+ *	    #288: Rename "piFraction" to "ratpi".
  */
 package info.rlwhitcomb.calc;
 
@@ -240,12 +244,15 @@ public class CalcPiWorker
 	 * on the {@link #rational} flag.
 	 */
 	public Supplier<Object> piSupplier = () -> {
-	    BigDecimal dValue = getPi();
+	    if (rational) {
+		BigFraction value = MathUtil.ratpi(precision);
+		if (value != null) {
+		    return value;
+		}
+	    }
 
-	    if (rational)
-		return new BigFraction(dValue);
-	    else
-		return dValue;
+	    BigDecimal value = getPi();
+	    return rational ? new BigFraction(value) : value;
 	};
 
 	/**

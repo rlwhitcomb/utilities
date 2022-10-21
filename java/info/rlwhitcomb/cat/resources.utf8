@@ -24,14 +24,11 @@
 #       Internationalizable strings for the info.rlwhitcomb.cat code.
 #
 # History:
-#       14-Oct-2020 (rlwhitcomb)
-#           Moved into here from the .java file.
-#	11-Dec-2020 (rlwhitcomb)
-#	    Move product name to build.properties.
-#	24-Aug-2021 (rlwhitcomb)
-#	    One more error for the locale option.
-#	17-Feb-2022 (rlwhitcomb)
-#	    #251: Charset error message.
+#  14-Oct-20 rlw  ---	Moved into here from the .java file.
+#  11-Dec-20 rlw  ---	Move product name to build.properties.
+#  24-Aug-21 rlw  ---	One more error for the locale option.
+#  17-Feb-22 rlw #251:	Charset error message.
+#  11-Oct-22 rlw #2:	Add help.
 #
 
 unrecognized		= Unrecognized option: "%1$s"!
@@ -46,3 +43,50 @@ outputNameCharset	= An output file name must be given along with an output chars
 noCharsetConsole	= Unable to change charset when reading from the console!
 decodeError		= Bad character in file "%1$s" for charset "%2$s": %3$s
 
+help1	= Usage: cat [ options ] [ file_names | - | -- | @ ]
+help2	= "   or: cat [ -version | -vers | -ver | -v | -help | -h | -? ]"
+help3	= ""
+help4	= " Where the options are positional and apply to the following input files"
+help5	= "   until changed by others, except that only one output file (and charset)"
+help6	= "   can be given."
+help7	= ""
+help8	= " And where the "options" are (case-insensitive):"
+help9	= \t-charset CS\tspecify the charset for input files (not the console)
+help10	= \t\t\tor -cs, or -c
+help11	= ""
+help12	= "    The following are shortcuts for common values of '-charset':"
+help13	= \t-utf8\t\tuse 'UTF-8' for the input charset
+help14	= \t\t\tor -utf-8, -utf_8, -u, or -8
+help15	= \t-utf16\t\tuse 'UTF-16' for the input charset
+help16	= \t\t\tor -utf-16, -utf_16, or -16
+help17	= \t-utf16be\tuse 'UTF-16BE' for the input charset
+help18	= \t\t\tor -utf-16be, -utf_16be, -16be, or -be
+help19	= \t-utf16le\tuse 'UTF-16LE' charset for the input file(s)
+help20	= \t\t\tor -utf-16le, -utf_16le, -16le, or -le
+help21	= \t-default\tuse the platform-specific default charset (default)
+help22	= \t\t\tor -def, -standard, -d, or -s
+help23	= \t-win1252\tuse the 'windows-1252' charset
+help24	= \t\t\tor -win, or -w
+help25	= \t-iso88591\tuse the 'ISO-8859-1' charset to read the input
+help26	= \t\t\tor -iso-8859-1, -iso, or -i
+help27	= \t-ascii\t\tuse the 'ASCII' charset for the following file(s)
+help28	= \t\t\tor -asc, or -a
+help29	= ""
+help30	= "    These may be given only once:"
+help31	= \t-outputcharset CS  specify the output file charset
+help32	= \t\t\tor -output-charset, -output_charset, -outputcs, -output-cs, -output_cs,
+help33	= \t\t\t   -outcharset, -out-charset, -out_charset, -outcs, -out-cs, -out_cs, or -ocs
+help34	= \t-outputfile FILE  specify the output file name
+help35	= \t\t\tor -output-file, -output_file, -outfile, -out-file, -out_file, -out, or -o
+help36	= ""
+help37	= \t-locale LOCALE  use the given locale for error messages and help
+help38	= \t\t\tor -loc, or -l
+help39	= ""
+help40	= "    Any number of input files, or any number of these options may be given:"
+help41	= \t-stdin\t\tread input from the console
+help42	= \t\t\tor -std, -in, --, -, or @
+help43	= ""
+help44	= Each input file (or set of console lines) will be read according to the charset
+help45	= "  in effect at the time, then the entire set of input will be written to the"
+help46	= "  console, or to the specified output file (according to the output charset)."
+help47	= ""

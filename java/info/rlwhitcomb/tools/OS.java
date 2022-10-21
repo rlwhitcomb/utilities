@@ -73,11 +73,16 @@
  *	    #326: Fix color end value sequences after changes for Calc "<>" operator.
  *	09-Jul-2022 (rlwhitcomb)
  *	    #393: Cleanup imports.
+ *	18-Oct-2022 (rlwhitcomb)
+ *	    #530: Move help and error text to resource file; color it all.
+ *	    Implement wildcard filter tags.
  */
 package info.rlwhitcomb.tools;
 
+import info.rlwhitcomb.directory.Match;
 import info.rlwhitcomb.util.ConsoleColor;
 import info.rlwhitcomb.util.Environment;
+import info.rlwhitcomb.util.Intl;
 import info.rlwhitcomb.util.Options;
 
 import java.awt.GraphicsEnvironment;
@@ -192,7 +197,7 @@ public class OS
 		static void displayAliases(final PrintStream ps, final String indent, final int width) {
 		    Arrays.stream(values())
 				.forEach(
-			c -> ps.format("%1$s,%n", makeArrayString(c.aliasNames, indent, width)));
+			c -> ps.println(ConsoleColor.color(String.format("%1$s,", makeArrayString(c.aliasNames, indent, width)), colors)));
 		}
 	}
 
@@ -217,7 +222,7 @@ public class OS
 		    output.append('\n').append(indent).append(indent);
 		    printWidth = indentWidth * 2;
 		}
-		output.append('"').append(value).append('"');
+		output.append("\"<Gr>").append(value).append("<.>\"");
 		printWidth += valueWidth;
 	    }
 
@@ -277,23 +282,17 @@ public class OS
 	 * @param ps	The stream to output to.
 	 */
 	private static void usage(final PrintStream ps) {
-	    ps.println("Usage: java OS [choice]* [options]");
-	    ps.println();
-	    ps.println("Valid choices are:");
-	    Choice.displayAliases(ps, "    ", 72);
-	    ps.println();
-	    ps.println(" or \"all\" (default is \"properties\"),");
-	    ps.println(" or \"help\", \"h\", or \"?\" to display this message.");
-	    ps.println();
-	    ps.println("Options can include:");
-	    ps.println(" -verbose = print more detail for some choices");
-	    ps.println(" -single  = display values in a single (vs. multi) column");
-	    ps.println(" -notitle = display only values without header / footer");
-	    ps.println(" -nocolor = no colors on display");
-	    ps.println();
-	    ps.println(" -width:nn   = force screen width for multi-column display");
-	    ps.println(" -filter:xxx = filter locale tags");
-	    ps.println();
+	    int lineNo = 1;
+	    do {
+		String key = String.format("tools#os.help%1$d", lineNo++);
+		String help = Intl.getOptionalString(key);
+		if (help == null)
+		    break;
+		if (help.equals("**** PLACEHOLDER FOR OPTIONS - DO NOT TRANSLATE ****"))
+		    Choice.displayAliases(ps, "    ", 72);
+		else
+		    ps.println(ConsoleColor.color(help, colors));
+	    } while(true);
 	}
 
 	/**
@@ -339,6 +338,7 @@ public class OS
 		}
 		else if (matches(opt, "nocolors", "nocolor", "noc")) {
 		    colors = false;
+		    Intl.setColoring(colors);
 		}
 		else if (matches(opt, "verbose", "v")) {
 		    verbose = true;
@@ -347,12 +347,13 @@ public class OS
 		    if (parts != null) {
 			try {
 			    screenWidth = Integer.parseInt(parts[0]);
-			    continue;
+			    if (screenWidth >= 60 && screenWidth <= 1000)
+				continue;
 			}
 			catch (NumberFormatException nfe) {
 			}
 		    }
-		    System.err.println("Invalid screen width setting: \"" + arg + "\"");
+		    Intl.errFormat("tools#os.invalidWidth", arg);
 		    return false;
 		}
 		else if (matches(opt, "filter", "filt")) {
@@ -360,8 +361,9 @@ public class OS
 			for (String part : parts) {
 			    filterValues.add(part);
 			}
+			continue;
 		    }
-		    System.err.println("Invalid filter settings: \"" + arg + "\"");
+		    Intl.errFormat("tools#os.invalidFilter", arg);
 		    return false;
 		}
 		else if (matches(opt, "help", "h", "?")) {
@@ -369,8 +371,7 @@ public class OS
 		    return false;
 		}
 		else {
-		    System.err.println("Unknown choice value of \"" + arg + "\"!");
-		    System.err.println();
+		    Intl.errFormat("tools#os.unknownChoice", arg);
 		    usage(System.err);
 		    return false;
 		}
@@ -522,13 +523,34 @@ public class OS
 	    }
 
 	    List<String> locs = new ArrayList<>(sortedLocales.size());
+	  locales:
 	    for (Map.Entry<String, Locale> entry : sortedLocales.entrySet()) {
 		String tag = entry.getKey();
 		Locale loc = entry.getValue();
 
 		// We will use the tag to do the filtering
-		if (!filterValues.isEmpty() && !filterValues.contains(tag))
-		    continue;
+		boolean matchesFilter = false;
+		if (!filterValues.isEmpty()) {
+		  filters:
+		    for (String filter : filterValues) {
+			if (Match.hasWildCards(filter)) {
+			    if (Match.stringMatch(tag, filter, false)) {
+				matchesFilter = true;
+				break filters;
+			    }
+			}
+			else if (filter.equalsIgnoreCase(tag)) {
+			    matchesFilter = true;
+			    break filters;
+			}
+		    }
+		}
+		else {
+		    matchesFilter = true;
+		}
+
+		if (!matchesFilter)
+		    continue locales;
 
 		NumberFormat format   = NumberFormat.getInstance(loc);
 		NumberFormat currency = NumberFormat.getCurrencyInstance(loc);
@@ -714,6 +736,7 @@ public class OS
 	 */
 	public static void main(String[] args) {
 	    screenWidth = Environment.consoleWidth();
+	    Intl.setColoring(colors);
 
 	    Options.environmentOptions(OS.class, (options) -> {
 		if (!parseArgs(options))

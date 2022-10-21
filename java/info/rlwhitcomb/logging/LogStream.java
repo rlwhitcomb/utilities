@@ -44,8 +44,12 @@
  *	    Use buffer size from Constants.
  *	09-Jul-2022 (rlwhitcomb)
  *	    #393: Cleanup imports.
+ *	12-Oct-2022 (rlwhitcomb)
+ *	    #513: Move to "logging" package.
  */
-package info.rlwhitcomb.util;
+package info.rlwhitcomb.logging;
+
+import info.rlwhitcomb.util.ClientStatistics;
 
 import java.io.PrintStream;
 

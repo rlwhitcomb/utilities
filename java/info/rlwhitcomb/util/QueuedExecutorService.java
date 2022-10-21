@@ -42,8 +42,12 @@
  *	    Call "start()" on our thread ourselves.
  *	26-Feb-2022 (rlwhitcomb)
  *	    #204: Allow multiple thread setup.
+ *	12-Oct-2022 (rlwhitcomb)
+ *	    #513: Move Logging to new package.
  */
 package info.rlwhitcomb.util;
+
+import info.rlwhitcomb.logging.Logging;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;

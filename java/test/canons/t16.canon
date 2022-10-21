@@ -1,0 +1,16 @@
+>====================================
+>Running base64test...
+>------------------------------------
+>Test 'back': Passed
+>Test 'b64test1': Passed
+>Test 'b64test2': Passed
+>Test 'b64test3': Passed
+>Test 'b64test4': Passed
+>Test 'b64test5': Passed
+>Test 'b64test6': Passed
+>Test 'b64test7': Passed
+>Test 'b64test7': Passed
+>------------------------------------
+>Ran 9 tests: 9 passed, 0 failed.
+>====================================
+>

@@ -66,9 +66,13 @@
  *	#273: Move math-related classes to "math" package.
  *    09-Jul-2022 (rlwhitcomb)
  *	#393: Cleanup imports.
+ *    12-Oct-2022 (rlwhitcomb)
+ *	#513: Move Logging and LogStream to new package.
  */
 package info.rlwhitcomb.util;
 
+import info.rlwhitcomb.logging.Logging;
+import info.rlwhitcomb.logging.LogStream;
 import info.rlwhitcomb.math.Num;
 
 import java.io.PrintStream;

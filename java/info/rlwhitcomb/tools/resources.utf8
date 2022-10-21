@@ -34,7 +34,41 @@
 #	    #238: More HexDump options.
 #	18-Aug-2022 (rlwhitcomb)
 #	    #445: New strings for Head.
+#	05-Oct-2022 (rlwhitcomb)
+#	    #498: New errors for GZip and GUnzip.
+#	10-Oct-2022 (rlwhitcomb)
+#	    #481: Errors for base64 tool; rudimentary help.
+#	13-Oct-2022 (rlwhitcomb)
+#	    #481: More base64 errors.
+#	14-Oct-2022 (rlwhitcomb)
+#	    #518: Add base64 help for "-urlsafe" option.
+#	18-Oct-2022 (rlwhitcomb)
+#	    #518: Fix changed base64 error messages.
+#	    #530: Move "OS" help and error messages into here.
 #
+
+#
+# From B64.java
+#
+base64.onlyOneOutput	= Only one "-output" value allowed.
+base64.onlyOneCharset	= Only one "-charset" value allowed.
+base64.missingOutput	= Missing file name for "-output" option.
+base64.missingCharset	= Missing character set for "-charset" option.
+base64.noInput		= Nothing to do; no input given to process.
+base64.noConsole	= Console is not available to read from!
+base64.unknownOption	= Unknown option: "%1$s"!
+base64.cannotReadInput	= Unable to find or read input file "%1$s"!
+base64.encodeError	= Unable to encode file "%1$s": %2$s
+base64.decodeError	= Unable to decode file "%1$s": %2$s
+base64.decodeInputError	= Unable to decode input: %1$s
+base64.encodeFileError	= Unable to encode file "%1$s" to output file "%2$s": %3$s
+base64.decodeFileError	= Unable to decode file "%1$s" to output file "%2$s": %3$s
+base64.ioError		= Error during input or output: %1$s
+
+base64.help1	= Usage: b64 [-encode|-decode|-format] [-string|-file] [-urlsafe] [-out filename] [-charset cs] input
+base64.help2	= ""
+base64.help3	= Default is "-encode", try "-file" (if found) then "-string", output to console.
+base64.help4	= ""
 
 #
 # From FixPath.java
@@ -44,6 +78,9 @@ fixpath.errorCanonicalPath	= Error getting canonical path of "%1$s": %2$s
 #
 # From GUnzip.java and GZip.java
 #
+gunzip.badOption		= Unknown option: "-%1$s"!
+gunzip.missingOutputName	= The "-output" option requires a file name argument!
+gunzip.noFiles			= No files processed.
 gunzip.cannotFindOrRead		= Cannot find or read the input file: "%1$s"!
 gunzip.wrongExtension		= The input file (%1$s) doesn't have the (required) ".gz" extension.
 gunzip.ioError			= Error reading the input or writing the output file (%1$s): %2$s
@@ -126,6 +163,33 @@ hexdump.invalidPath		= Unable to find the file "%1$s".
 hexdump.ioError			= I/O error: %1$s
 hexdump.missingOutputFile	= Missing file name for "-out" option.
 hexdump.missingOutputCharset	= Missing charset name for "-charset" option.
+
+#
+# From OS.java
+#
+os.invalidWidth	= <Rd>Invalid screen width setting: <Yw!>"%1$s"<-->
+os.invalidFilter= <Rd>Invalid filter settings: <Yw!>"%1$s"<-->
+os.unknownChoice= <Rd>Unknown choice value of <Yw!>"%1$s"<.>!<-->
+
+os.help1	= ""
+os.help2	= "<Bk!>Usage:<.> os <Bk!>[<.> <Gr>choice<.> <Bk!>]*<.> <Bk!>[<.> <Yw!>options<.> <Bk!>]<.>"
+os.help3	= ""
+os.help4	= "Valid <Gr>choices<.> are:"
+os.help5	= "**** PLACEHOLDER FOR OPTIONS - DO NOT TRANSLATE ****"
+os.help6	= ""
+os.help7	= " or \"<Gr>all<.>\" (default is \"<Gr>properties<.>\"),"
+os.help8	= " or \"<Gr>help<.>\", \"<Gr>h<.>\", or \"<Gr>?<.>\" to display this message."
+os.help9	= ""
+os.help10	= "The <Yw!>options<.> can include:"
+os.help11	= " <Yw!>-verbose<.> = print more detail for some choices"
+os.help12	= " <Yw!>-single<.>  = display values in a single (vs. multi) column"
+os.help13	= " <Yw!>-notitle<.> = display only values without header / footer"
+os.help14	= " <Yw!>-nocolor<.> = no colors on display"
+os.help15	= ""
+os.help16	= " <Yw!>-width<.>:<Bk!>nn<.>   = force screen width for multi-column display"
+os.help17	= " <Yw!>-filter<.>:<Bk!>xxx<.> = filter locale tags, where <Bk!>xxx<.> is one or more"
+os.help18	= "               locale tags to match (can be wild)"
+os.help19	= ""
 
 #
 # From Uuid.java
