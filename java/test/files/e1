@@ -1097,6 +1097,32 @@ c12 has h
 "g" in c12
 "g" in c12.b.f
 
+#
+# Tests of "in" with loops
+#
+12 in 1..12
+12 in 1..10
+12 in 1..20, 2
+12 in 0..20, 2
+-12 in 0..-20, -2
+-12 in -1..-20, -2
+-12.0 in 0.0 .. -20.0, -2.0
+-12.0 in -1.0 .. -20.0, -2.0
+
+#
+# Tests of "sumof" and "productof"
+#
+SumOf [ 4, 5, 6, 7, 8, 9, 10 ]
+sumOf 4..10
+4+5+6+7+8+9+10
+sumof 4..10,2
+4+6+8+10
+ProductOf 10
+ProductOf 2..10
+2*3*4*5*6*7*8*9*10
+productOf 9..10
+productof [ 3, 5, 7, 9, 11 ]
+ProductOf 3..11,2
 
 #
 # Test read/write, especially of Unicode data

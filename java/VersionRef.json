@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.14.55', date: d'2022-10-21',
+      issues: [ 470 ],
+      comment: 'Optimizations with "dot" ranges in all scenarios.'
+    },
     { version: '2.14.52', date: d'2022-10-17',
       issues: [ 522 ],
       comment: 'Implement "-" format option for "@h", "@t", "@r", and "@e" to omit type and quotes.'

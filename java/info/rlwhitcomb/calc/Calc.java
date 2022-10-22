@@ -314,6 +314,8 @@
  *	    #506: Command-line options to only print LF line endings, or use system default.
  *	18-Oct-2022 (rlwhitcomb)
  *	    #527: Fix processing of ":include" with embedded spaces.
+ *	19-Oct-2022 (rlwhitcomb)
+ *	    Add some Javadoc and move some methods out to CharUtil.
  */
 package info.rlwhitcomb.calc;
 
@@ -392,6 +394,8 @@ public class Calc
 
 	/**
 	 * An enumeration of what we expect next on the command line.
+	 * <p> Each command-line option that needs an additional argument value
+	 * has an entry here.
 	 */
 	private enum Expecting
 	{
@@ -661,6 +665,11 @@ public class Calc
 	    Intl.setColoring(true, useColors ? colorMap : quoteMap);
 	}
 
+	/**
+	 * From the {@link #darkBackgrounds} flag, set the appropriate colors on the given component.
+	 *
+	 * @param comp The individual component to set colors on.
+	 */
 	private void setGUIComponentColors(Component comp) {
 	    int bgIndex;
 	    Color fgColor, bgColor;
@@ -711,6 +720,9 @@ public class Calc
 
 	/**
 	 * Set the colors for the GUI components, depending on the dark/light settings.
+	 *
+	 * @param container The main (or other parent) container component to color.
+	 * @see #setGUIComponentColors
 	 */
 	private void setGUIContainerColors(Container container) {
 	    setGUIComponentColors(container);
@@ -746,6 +758,10 @@ public class Calc
 		}
 	}
 
+	/**
+	 * The key press listener used to implement automatic calculation from either {@code Enter}
+	 * or {@code Cmd-Enter} pressed in the expressions window.
+	 */
 	private KeyPressListener keyPressListener = new KeyPressListener();
 
 
@@ -773,9 +789,20 @@ public class Calc
 		}
 	}
 
+	/**
+	 * Listener to enable/disable actions based on whether the input and output fields
+	 * have any content.
+	 */
 	private CharacterListener characterListener = new CharacterListener();
 
 
+	/**
+	 * Simple method to request focus on the given component.
+	 * <p> The reason we have to do this is that this always requires a small delay
+	 * (for repaint or other chained events to be queued first).
+	 *
+	 * @param comp The component that should be given focus.
+	 */
 	private void requestFocus(final Component comp) {
 	    ApplicationContext.scheduleCallback(() -> comp.requestFocus(), 200L);
 	}
@@ -1190,6 +1217,12 @@ public class Calc
 	    }
 	}
 
+	/**
+	 * The main output routine that handles output selection.
+	 *
+	 * @param message The already formatted message to output.
+	 * @param output  Output selection choice (either "stdout", "stderr", or both).
+	 */
 	private static void output(String message, CalcDisplayer.Output output) {
 	    if (message == null || message.isEmpty()) {
 		switch (output) {
@@ -1227,17 +1260,15 @@ public class Calc
 	    updateOutputSize();
 	}
 
-	private String stripLineEndings(String message) {
-	    int endPos = message.length();
-	    char ch;
-	    while (--endPos > 0 && ((ch = message.charAt(endPos)) == '\n' || ch == '\r'))
-		;
-	    return message.substring(0, ++endPos);
-	}
-
+	/**
+	 * Used to display error messages along with an indicator of where in the line the error was found.
+	 *
+	 * @see #currentText
+	 * @see #currentIndicator
+	 */
 	private void displayInputTextAndIndicator() {
 	    if (currentText != null) {
-		Intl.outFormat("calc#resultOnly", stripLineEndings(currentText));
+		Intl.outFormat("calc#resultOnly", CharUtil.stripLineEndings(currentText));
 	    }
 	    if (currentIndicator != null) {
 		Intl.outFormat("calc#resultOnly", currentIndicator);
@@ -1733,16 +1764,6 @@ public class Calc
 		System.exit(0);
 	}
 
-	private static String concatArgs(String[] args) {
-	    StringBuilder buf = new StringBuilder();
-	    for (String arg : args) {
-		if (buf.length() > 0)
-		    buf.append(' ');
-		buf.append(arg);
-	    }
-	    return buf.toString();
-	}
-
 	/**
 	 * Read the contents of one file and append to the buffer, if the file
 	 * can be found as given, and is readable. If a charset is specified, use
@@ -1888,6 +1909,15 @@ public class Calc
 	    return inputBuf.toString();
 	}
 
+	/**
+	 * Take an expression string and process it, optionally silent (that is, not outputting anything).
+	 * <p> Called from the main loop, and also from inside interpolated strings.
+	 * <p> Traps any {@link IOException}s thrown by {@link #process}.
+	 *
+	 * @param inputText The text to parse and evaluate.
+	 * @param silent    Whether to output anything to the displayer.
+	 * @return          The last value returned from the evaluated expression text.
+	 */
 	public static Object processString(String inputText, boolean silent) {
 	    try {
 		return process(CharStreams.fromString(inputText), visitor, errorStrategy, silent, false);
@@ -1898,6 +1928,19 @@ public class Calc
 	    return null;
 	}
 
+	/**
+	 * Instantiate a new lexer and parser, and process the input stream through them to produce the last result.
+	 * <p> Implements the display for the {@code "-timing"} directive.
+	 *
+	 * @param input         The input character stream.
+	 * @param visitor       Tree visitor which traverses the parsed expression tree to produce the result.
+	 * @param errorStrategy Error handler which implements our error reporting strategy.
+	 * @param silent        Set {@code true} from inside interpolated strings, otherwise set by the global setting
+	 *                      value and/or the command-line option.
+	 * @param throwError    If {@code true} then trapped exceptions are re-thrown, otherwise reported to the displayer.
+	 * @return              The last object produced by the visitor from the parsed input.
+	 * @throws IOException if there is a problem readng the input stream.
+	 */
 	private static Object process(CharStream input, CalcObjectVisitor visitor, BailErrorStrategy errorStrategy, boolean silent, boolean throwError)
 		throws IOException
 	{
@@ -2484,7 +2527,7 @@ public class Calc
 		    }
 		}
 		else if (args.length > 0) {
-		    String commandLine = concatArgs(args);
+		    String commandLine = CharUtil.makeSimpleStringList(args, ' ');
 		    input = CharStreams.fromString(getFileContents(commandLine));
 		}
 

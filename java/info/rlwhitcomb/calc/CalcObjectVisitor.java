@@ -688,6 +688,9 @@
  *	    #103: Add extra param to "compareValues" for equality checks.
  *	17-Oct-2022 (rlwhitcomb)
  *	    #522: Implement "-" qualifiers for several "@" formats.
+ *	21-Oct-2022 (rlwhitcomb)
+ *	    #470: Several optimizations of "iterateOverDotRange" depending on the operation
+ *	    to be performed.
  */
 package info.rlwhitcomb.calc;
 
@@ -747,10 +750,141 @@ import static info.rlwhitcomb.util.Constants.*;
  */
 public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 {
+	/**
+	 * Enumeration of possible optimization strategies for {@link #iterateOverDotRange},
+	 * depending on what we're really trying to do during the iteration.
+	 */
+	private enum Purpose
+	{
+		/** We need to visit all the values (as for {@code loop}). */
+		ALL,
+		/** We only need to match one (or a small number of) values, as for {@code case}, or {@code in}. */
+		SELECT,
+		/** We're trying to calculate a sum (as for {@code sumof}). */
+		SUM,
+		/** We're trying to calculate a product (as for {@code productof}). */
+		PRODUCT,
+		/** The length (or number of values) in the range is all we need (as for {@code length}). */
+		LENGTH
+	}
+
+	/**
+	 * Interface for the {@link #iterateOverDotRange} method, which is either called for each value
+	 * in the range, or is used to optimally calculate the result without having to do the entire
+	 * iteration.
+	 * <p> We use the {@link Purpose} to partially decide if the optimization will apply. For instance,
+	 * for the {@code loop} statement, no optimization is possible because the whole purpose is to
+	 * do something with every value in the range. This is only a partial determination, also depending
+	 * on the type of object(s) passed to the statement.
+	 */
+	private interface IterationVisitor extends Function<Object, Object>
+	{
+		/**
+		 * Supply the overarching function we're working on, in order to suggest
+		 * possible short-circuit optimizations (as in {@code sumof n}).
+		 *
+		 * @return The type of calculation we're doing with this range.
+		 */
+		default Purpose getPurpose() {
+		    return Purpose.ALL;
+		}
+
+		@Override
+		Object apply(Object value);
+
+		/**
+		 * Given the "dot" range values, compute the short-circuit "final" value.
+		 * <p>Note: this is only called for a visitor whose purpose is not {@link Purpose#ALL}.
+		 *
+		 * @param start The beginning value.
+		 * @param stop  Ending value of the range.
+		 * @param step  The step value through the range.
+		 * @return      The final value, computed from the range.
+		 * @throws IllegalArgumentException if for some reason the given values aren't amenable
+		 *         to calculating the final value all at once (so, we have to go back to every value).
+		 */
+		default Object finalValue(Number start, Number stop, Number step)
+			throws IllegalArgumentException
+		{
+		    return null;
+		}
+
+		/**
+		 * Find the length of the arithmetic sequence, which is {@code (stop - start) / step}.
+		 *
+		 * @param start  Starting value of the sequence.
+		 * @param stop   Ending value of the sequence.
+		 * @param step   Difference between successive terms.
+		 * @return       Number of terms in the sequence.
+		 */
+		static Number length(Number start, Number stop, Number step) {
+		    if (start instanceof Integer) {
+			int iStart = (Integer) start;
+			int iStop  = (Integer) stop;
+			int iStep  = (Integer) step;
+
+			return (iStop - iStart) / iStep + 1;
+		    }
+		    else {
+			BigDecimal dStart = (BigDecimal) start;
+			BigDecimal dStop  = (BigDecimal) stop;
+			BigDecimal dStep  = (BigDecimal) step;
+
+			return fixup(dStop.subtract(dStart).divide(dStep).add(BigDecimal.ONE));
+		    }
+		}
+
+		/**
+		 * Given range values, and a target value, determine if the target is contained in the range.
+		 *
+		 * @param visitor The visitor used to calculate values.
+		 * @param value   The target expression value to match (can be any kind of value).
+		 * @param start   Starting value (either integer or decimal) for the range, can be negative.
+		 * @param stop    Ending value of the range.
+		 * @param step    Step value through the range, again this can be negative.
+		 * @param ctx     The value context (for error reporting).
+		 * @return        Whether or not the target value is exactly contained in the range.
+		 */
+		static boolean containedIn(CalcObjectVisitor visitor, Object value, Number start, Number stop, Number step, ParserRuleContext ctx) {
+		    // The range values will either be all integers or all decimal values
+		    if (start instanceof Integer) {
+			int iValue = toIntValue(visitor, value, visitor.settings.mc, ctx);
+			int iStart = (Integer) start;
+			int iStop  = (Integer) stop;
+			int iStep  = (Integer) step;
+
+			if (iStep < 0) {
+			    return (iValue >= iStop && iValue <= iStart) && ((iValue + iStart) % iStep == 0);
+			}
+			else {
+			    return (iValue >= iStart && iValue <= iStop) && ((iValue - iStart) % iStep == 0);
+			}
+		    }
+		    else {
+			BigDecimal dValue = toDecimalValue(visitor, value, visitor.settings.mc, ctx);
+			BigDecimal dStart = (BigDecimal) start;
+			BigDecimal dStop  = (BigDecimal) stop;
+			BigDecimal dStep  = (BigDecimal) step;
+
+			if (dStep.signum() < 0) {
+			    return (dValue.compareTo(dStop) >= 0 && dValue.compareTo(dStart) <= 0) &&
+				fixup(dValue.add(dStart).remainder(dStep)).equals(BigDecimal.ZERO);
+			}
+			else {
+			    return (dValue.compareTo(dStart) >= 0 && dValue.compareTo(dStop) <= 0) &&
+				fixup(dValue.subtract(dStart).remainder(dStep)).equals(BigDecimal.ZERO);
+			}
+		    }
+		}
+	}
+
 	/** Flag for case-insensitive sort. */
 	private static final int SORT_CASE_INSENSITIVE = 0x0001;
 	/** Flag for sort of keys vs values in maps. */
 	private static final int SORT_SORT_KEYS = 0x0002;
+	/** The set of all the valid sort flags we support. */
+	private static final int SORT_ALL_FLAGS =
+	    ( SORT_CASE_INSENSITIVE | SORT_SORT_KEYS );
 
 	/** Flag for case-insensitive matches. */
 	private static final int MATCH_CASE_INSENSITIVE = 0x0001;
@@ -764,6 +898,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	private static final int MATCH_MULTILINE = 0x0010;
 	/** Flag for Unix lines mode. */
 	private static final int MATCH_UNIX_LINES = 0x0020;
+	/** The set of all the valid flags we support. */
+	private static final int MATCH_ALL_FLAGS =
+	    ( MATCH_CASE_INSENSITIVE | MATCH_DOTALL | MATCH_UNICODE_CASE | MATCH_LITERAL | MATCH_MULTILINE | MATCH_UNIX_LINES );
 
 
 	/** Pattern for format specifiers. */
@@ -1951,7 +2088,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    push = false;
 		    break;
 		default:
-		    throw new Intl.IllegalArgumentException("%calc#modeError", option);
+		    throw new Intl.IllegalArgumentException("calc#modeError", option);
 	    }
 
 	    // Run the process to actually set the new mode
@@ -2539,7 +2676,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	}
 
-	private class LoopVisitor implements Function<Object, Object>
+	private class LoopVisitor implements IterationVisitor
 	{
 		private CalcParser.StmtBlockContext block;
 		private String localVarName;
@@ -2569,11 +2706,32 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		}
 	}
 
+	/**
+	 * Iterate over a range given by {@code [ x .. ] y [ , n ]} for various purposes,
+	 * like: <ul>
+	 * <li>"case" selector
+	 * <li>"sumof" operation
+	 * <li>"productof" operation
+	 * <li>"loop" statement
+	 * </ul>
+	 *
+	 * @param valueExprs  A list of values to iterate over.
+	 * @param dotExprs    Or the "dot" expressions, only one of which is required.
+	 * @param hasDots     Whether we have the ".." part or not.
+	 * @param visitor     The piece that acts on each value in the range or list.
+	 * @param allowSingle If {@code true} then the expression is allowed to be a single
+	 *                    array or object which we will iterate through.
+	 * @param doingWithin Indicator of the "within" keyword, which subtly changes the
+	 *                    meaning of a single-valued expression (that is, "23" using "in"
+	 *                    means "1..23" while "within" means "0..22").
+	 * @return Whatever the "last" value is as determined by the visitor (could be a sum,
+	 *         a product, the result of the selected block in a case statement, etc.)
+	 */
 	private Object iterateOverDotRange(
 		final List<CalcParser.ExprContext> valueExprs,
 		final List<CalcParser.ExprContext> dotExprs,
 		final boolean hasDots,
-		final Function<Object, Object> visitor,
+		final IterationVisitor visitor,
 		final boolean allowSingle,
 		final boolean doingWithin)
 	{
@@ -2694,14 +2852,28 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			throw new CalcExprException("%calc#withinNotAllowed", exprs.get(0));
 		    }
 
-		    if (step < 0) {
-			for (int loopIndex = start; loopIndex >= stop; loopIndex += step) {
-			    lastValue = visitor.apply(BigInteger.valueOf(loopIndex));
+		    // Try to apply optimization if possible to avoid stupidly running through
+		    // all the values if we don't need to
+		    boolean skipLoop = false;
+		    if (visitor.getPurpose() != Purpose.ALL) {
+			try {
+			    lastValue = visitor.finalValue(start, stop, step);
+			    skipLoop = true;
+			}
+			catch (IllegalArgumentException iae) {
+			    ;
 			}
 		    }
-		    else {
-			for (int loopIndex = start; loopIndex <= stop; loopIndex += step) {
-			    lastValue = visitor.apply(BigInteger.valueOf(loopIndex));
+		    if (!skipLoop) {
+			if (step < 0) {
+			    for (int loopIndex = start; loopIndex >= stop; loopIndex += step) {
+				lastValue = visitor.apply(BigInteger.valueOf(loopIndex));
+			    }
+			}
+			else {
+			    for (int loopIndex = start; loopIndex <= stop; loopIndex += step) {
+				lastValue = visitor.apply(BigInteger.valueOf(loopIndex));
+			    }
 			}
 		    }
 		}
@@ -2728,14 +2900,28 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			throw new CalcExprException("%calc#withinNotAllowed", exprs.get(0));
 		    }
 
-		    if (sign < 0) {
-			for (BigDecimal loopIndex = dStart; loopIndex.compareTo(dStop) >= 0; loopIndex = loopIndex.add(dStep)) {
-			    lastValue = visitor.apply(fixupToInteger(loopIndex));
+		    // Try to apply an optimization if possible to avoid running through all the values if
+		    // we can get the result some other way (such as for "sumof").
+		    boolean skipLoop = false;
+		    if (visitor.getPurpose() != Purpose.ALL) {
+			try {
+			    lastValue = visitor.finalValue(dStart, dStop, dStep);
+			    skipLoop = true;
+			}
+			catch (IllegalArgumentException iae) {
+			    ;
 			}
 		    }
-		    else {
-			for (BigDecimal loopIndex = dStart; loopIndex.compareTo(dStop) <= 0; loopIndex = loopIndex.add(dStep)) {
-			    lastValue = visitor.apply(fixupToInteger(loopIndex));
+		    if (!skipLoop) {
+			if (sign < 0) {
+			    for (BigDecimal loopIndex = dStart; loopIndex.compareTo(dStop) >= 0; loopIndex = loopIndex.add(dStep)) {
+				lastValue = visitor.apply(fixupToInteger(loopIndex));
+			    }
+			}
+			else {
+			    for (BigDecimal loopIndex = dStart; loopIndex.compareTo(dStop) <= 0; loopIndex = loopIndex.add(dStep)) {
+				lastValue = visitor.apply(fixupToInteger(loopIndex));
+			    }
 			}
 		    }
 		}
@@ -2859,7 +3045,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    return resultValue;
 	}
 
-	private class CaseVisitor implements Function<Object, Object>
+	private class CaseVisitor implements IterationVisitor
 	{
 		private CalcParser.CaseBlockContext blockCtx;
 		private CalcParser.ExprContext caseExpr;
@@ -2883,9 +3069,23 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		}
 
 		@Override
+		public Purpose getPurpose() {
+		    return Purpose.SELECT;
+		}
+
+		@Override
 		public Object apply(final Object value) {
 		    if (!isMatched
 		     && CalcUtil.compareValues(CalcObjectVisitor.this, caseExpr, blockCtx, caseValue, value, settings.mc, false, true, false, false, true) == 0) {
+			blockValue = execute();
+		    }
+		    return blockValue;
+		}
+
+		@Override
+		public Object finalValue(final Number start, final Number stop, final Number step) {
+		    isMatched = IterationVisitor.containedIn(CalcObjectVisitor.this, caseValue, start, stop, step, caseExpr);
+		    if (isMatched) {
 			blockValue = execute();
 		    }
 		    return blockValue;
@@ -2922,8 +3122,19 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		}
 	}
 
+	/**
+	 * Convert our set of pattern flags (such as {@link #MATCH_CASE_INSENSITIVE}, or
+	 * {@link #MATCH_DOTALL}) to the flags defined in {@link Pattern}.
+	 *
+	 * @param flags The set of our flags, set by the script.
+	 * @return      Set of flags used by the regex code.
+	 * @throws IllegalArgumentException if invalid flags are set.
+	 */
 	private int patternFlags(int flags) {
 	    int matchFlags = 0;
+
+	    if ((flags & ~MATCH_ALL_FLAGS) != 0)
+		throw new Intl.IllegalArgumentException("calc#illegalFlagValuess", flags);
 
 	    if ((flags & MATCH_CASE_INSENSITIVE) != 0)
 		matchFlags |= Pattern.CASE_INSENSITIVE;
@@ -4117,14 +4328,37 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 	}
 
-	private class LengthVisitor implements Function<Object, Object>
+	private class LengthVisitor implements IterationVisitor
 	{
 		private BigInteger count = BigInteger.ZERO;
+
+		@Override
+		public Purpose getPurpose() {
+		    return Purpose.ALL;
+		}
 
 		@Override
 		public Object apply(final Object value) {
 		    count = count.add(BigInteger.ONE);
 		    return count;
+		}
+
+		@Override
+		public Object finalValue(final Number start, final Number stop, final Number step) {
+		    if (start instanceof Integer) {
+			int iStart = (Integer) start;
+			int iStop  = (Integer) stop;
+			int iStep  = (Integer) step;
+
+			return (iStop - iStart) / iStep + 1;
+		    }
+		    else {
+			BigDecimal dStart = (BigDecimal) start;
+			BigDecimal dStop  = (BigDecimal) stop;
+			BigDecimal dStep  = (BigDecimal) step;
+
+			return fixup(dStop.subtract(dStart).divide(dStep, settings.mcDivide).add(BigDecimal.ONE));
+		    }
 		}
 	}
 
@@ -5020,6 +5254,10 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    else {
 		objCtx = e2ctx.expr(0);
 		int flags = getIntValue(e2ctx.expr(1));
+
+		if ((flags & ~SORT_ALL_FLAGS) != 0)
+		    throw new Intl.IllegalArgumentException("calc#illegalFlagValues", flags);
+
 		caseInsensitive = (flags & SORT_CASE_INSENSITIVE) != 0;
 		sortKeys        = (flags & SORT_SORT_KEYS)        != 0;
 	    }
@@ -6043,7 +6281,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	/**
 	 * Visitor for the {@code SumOf} function, to do the actual summing during iteration.
 	 */
-	private class SumOfVisitor implements Function<Object, Object>
+	private class SumOfVisitor implements IterationVisitor
 	{
 		private BigFraction sumFrac = BigFraction.ZERO;
 		private BigDecimal sum = BigDecimal.ZERO;
@@ -6051,6 +6289,11 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 		public SumOfVisitor(final ParserRuleContext context) {
 		    ctx = context;
+		}
+
+		@Override
+		public Purpose getPurpose() {
+		    return Purpose.SUM;
 		}
 
 		@Override
@@ -6068,6 +6311,37 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 				: toDecimalValue(CalcObjectVisitor.this, value, settings.mc, ctx);
 			sum = sum.add(dec, settings.mc);
 			return sum;
+		    }
+		}
+
+		@Override
+		public Object finalValue(final Number start, final Number stop, final Number step) {
+		    // Sum of arithmetic progression: n * ((a1 + an) / 2)
+
+		    Number len = IterationVisitor.length(start, stop, step);
+
+		    if (settings.rationalMode) {
+			BigFraction fStart = BigFraction.valueOf(start);
+			BigFraction fStop  = BigFraction.valueOf(stop);
+			BigFraction fLen   = BigFraction.valueOf(len);
+
+			return fLen.multiply(fStart.add(fStop).divide(BigFraction.TWO));
+		    }
+		    else {
+			if (start instanceof Integer) {
+			    int iStart = (Integer) start;
+			    int iStop  = (Integer) stop;
+			    int iLen   = (Integer) len;
+
+			    return iLen * ((iStart + iStop) / 2);
+			}
+			else {
+			    BigDecimal dStart = (BigDecimal) start;
+			    BigDecimal dStop  = (BigDecimal) stop;
+			    BigDecimal dLen   = (BigDecimal) len;
+
+			    return dLen.multiply(dStart.add(dStop).divide(D_TWO));
+			}
 		    }
 		}
 	}
@@ -6094,7 +6368,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    return sum;
 	}
 
-	private class ProductOfVisitor implements Function<Object, Object>
+	private class ProductOfVisitor implements IterationVisitor
 	{
 		private BigFraction productFrac = BigFraction.ONE;
 		private BigDecimal product = BigDecimal.ONE;
@@ -6102,6 +6376,11 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 		public ProductOfVisitor(final ParserRuleContext context) {
 		    ctx = context;
+		}
+
+		@Override
+		public Purpose getPurpose() {
+		    return Purpose.PRODUCT;
 		}
 
 		@Override
@@ -6120,6 +6399,38 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			product = product.multiply(dec, settings.mc);
 			return product;
 		    }
+		}
+
+		@Override
+		public Object finalValue(final Number start, final Number stop, final Number step) {
+		    // Product of arithmetic progression:
+		    // product over k=0..n-1 of (a1 + k*d) => d**n * ( gamma(a1 / d + n) / gamma(a1 / d) )
+		    // where gamma(n) for real n = (n - 1)!
+
+		    Number len = IterationVisitor.length(start, stop, step);
+
+		    if (start instanceof Integer) {
+			// First special case: 0 is contained in the sequence
+			if (IterationVisitor.containedIn(CalcObjectVisitor.this, 0, start, stop, step, ctx))
+			    return 0;
+
+			int iStart = (Integer) start;
+			int iStop  = (Integer) stop;
+			int iStep  = (Integer) step;
+			int iLen   = (Integer) len;
+
+			// Second special case: 1..n,1 = n!
+			if (iStart == 1 && iStep == 1)
+			    return MathUtil.factorial(stop, settings.mc);
+
+			// Third case: m..n,1 = n! / (m-1)!
+			if (iStep == 1)
+			    return MathUtil.factorial(stop, settings.mc).divide(MathUtil.factorial(iStart - 1, settings.mc));
+		    }
+
+		    // Otherwise this is too complicated for the effort, so just punt to
+		    // stepping through all the values.
+		    throw new IllegalArgumentException();
 		}
 	}
 
@@ -6279,7 +6590,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    return compareOp(expr1, expr2, null, op);
 	}
 
-	private class InVisitor implements Function<Object, Object>
+	private class InVisitor implements IterationVisitor
 	{
 		private CalcParser.ExprContext valueCtx;
 		private CalcParser.LoopCtlContext loopCtx;
@@ -6291,6 +6602,11 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    valueCtx = ctx1;
 		    loopCtx  = ctx2;
 		    inValue  = value;
+		}
+
+		@Override
+		public Purpose getPurpose() {
+		    return Purpose.SELECT;
 		}
 
 		@Override
@@ -6306,6 +6622,11 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			compared = true;
 
 		    return Boolean.valueOf(compared);
+		}
+
+		@Override
+		public Object finalValue(Number start, Number stop, Number step) {
+		    return IterationVisitor.containedIn(CalcObjectVisitor.this, inValue, start, stop, step, valueCtx);
 		}
 	}
 

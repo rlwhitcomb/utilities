@@ -91,6 +91,8 @@
  *	    #494: Fix code scanning issue with the special fraction characters.
  *	12-Oct-2022 (rlwhitcomb)
  *	    #514: Update text resource package.
+ *	20-Oct-2022 (rlwhitcomb)
+ *	    Add "valueOf(Number)" method.
  */
 package info.rlwhitcomb.math;
 
@@ -365,6 +367,30 @@ public class BigFraction extends Number
 		}
 	    }
 	    throw new Intl.IllegalArgumentException("math#fraction.unsupportedFormat", value);
+	}
+
+	/**
+	 * Construct a fraction value given another {@link Number} value.
+	 *
+	 * @param num	The given number to convert.
+	 * @return	The equivalent fraction value.
+	 */
+	public static BigFraction valueOf(final Number num) {
+	    if (num instanceof BigFraction) {
+		return (BigFraction) num;
+	    }
+	    else if (num instanceof BigDecimal) {
+		return new BigFraction((BigDecimal) num);
+	    }
+	    else if (num instanceof BigInteger) {
+		return new BigFraction((BigInteger) num);
+	    }
+	    else if (num instanceof Double || num instanceof Float) {
+		return new BigFraction(new BigDecimal(num.doubleValue(), MathContext.DECIMAL128));
+	    }
+	    else {
+		return new BigFraction(num.longValue());
+	    }
 	}
 
 	/**

@@ -332,6 +332,8 @@
  *	09-Jul-2022 (rlwhitcomb)
  *	    #393: Cleanup imports.
  *	    #397: Add multiline string constant support in "internalStripQuotes".
+ *	19-Oct-2022 (rlwhitcomb)
+ *	    Move "stripLineEndings" from Calc to here.
  */
 package info.rlwhitcomb.util;
 
@@ -2357,6 +2359,20 @@ public final class CharUtil
 		}
 	    }
 	    return count;
+	}
+
+	/**
+	 * Strip line endings from the end of the given message.
+	 *
+	 * @param message A message to be output on a single line, thus the need to strip additional line endings.
+	 * @return        The input message, with any trailing CR or LF removed.
+	 */
+	public static String stripLineEndings(final String message) {
+	    int endPos = message.length();
+	    char ch;
+	    while (--endPos > 0 && ((ch = message.charAt(endPos)) == '\n' || ch == '\r'))
+		;
+	    return message.substring(0, ++endPos);
 	}
 
 	/**
