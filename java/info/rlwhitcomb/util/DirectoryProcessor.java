@@ -42,6 +42,7 @@
  *  06-Sep-21 rlw  ---	Use FileUtilities.canRead everywhere. Final parameters.
  *  19-Sep-22 rlw #448:	Change default "exitDirectory" return value; add optional
  *			wildcard pattern matcher, and "name only" mode.
+ *  21-Oct-22 rlw #473:	New wildcard filter + flags method.
  */
 package info.rlwhitcomb.util;
 
@@ -138,6 +139,18 @@ public class DirectoryProcessor
 	 */
 	public DirectoryProcessor setWildcardFilter(final String filterString) {
 	    filter = new WildcardFilter(filterString);
+	    return this;
+	}
+
+	/**
+	 * Set the wildcard plus flags filter for this processor.
+	 *
+	 * @param filterString	The wildcard spec used to match the files to be processed.
+	 * @param filterFlags	Flags for matching the file type.
+	 * @return		This object (for chained operations).
+	 */
+	public DirectoryProcessor setWildcardFilter(final String filterString, final String filterFlags) {
+	    filter = new WildcardFilter(filterString, filterFlags);
 	    return this;
 	}
 

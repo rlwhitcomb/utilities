@@ -1376,6 +1376,9 @@
 >path = '../Java' -> "../Java"
 >exists (path, 'd+') -> false
 >info.os.id == "linux" ? exists (lower (path), 'd') : exists (path, 'd') -> true
+{{ ^windows }}>FindFiles ('.', 'latest*', 'fx') -> [ "latest_push", "latest_test" ]
+{{ windows }}>FindFiles ('.', 'latest*', 'fx') -> [ "latest_push.bat", "latest_test.bat" ]
+>findFiles ('.', '*.java') -> [ "CheckCopyrights.java", "ComputeE.java", "FormatValues.java" ]
 >delete 'alpha.beta', 'delta.gamma', 'alpha.omega' -> false
 >Defining constant “FILE1” = "_ftest_.beta"
 >Defining constant “FILE2” = "_gtest_.zeta"

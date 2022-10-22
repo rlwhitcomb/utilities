@@ -24,7 +24,8 @@
  *	Both a FileFilter and a FilenameFilter based on a wildcard pattern.
  *
  * History:
- *  20-Sep-22 rlw #448:	Initial coding.
+ *  20-Sep-22 rlw #448: Initial coding.
+ *  21-Oct-22 rlw #473: Add flags value to the mix.
  */
 package info.rlwhitcomb.util;
 
@@ -33,6 +34,7 @@ import info.rlwhitcomb.directory.Match;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FilenameFilter;
+import java.util.Optional;
 
 
 /**
@@ -52,6 +54,10 @@ public class WildcardFilter implements FileFilter, FilenameFilter
 	 * Whether this pattern actually has any wildcard characters.
 	 */
 	private boolean anyWild;
+	/**
+	 * The flags ({@code "d", "dr", "f", "fr", "fw", "fx"}).
+	 */
+	private Optional<String> flags;
 
 
 	/**
@@ -62,20 +68,41 @@ public class WildcardFilter implements FileFilter, FilenameFilter
 	public WildcardFilter(final String spec) {
 	    wildcardSpec = spec;
 	    anyWild = Match.hasWildCards(wildcardSpec);
+	    flags = Optional.empty();
 	}
 
 	/**
-	 * Does the given name match the pattern.
+	 * Construct using the given wildcard file specification, as well as
+	 * flags value.
 	 *
-	 * @param name	File name to match.
-	 * @return	Whether the name matches the pattern.
+	 * @param spec	A wildcard file specification, used to match the file name.
+	 * @param flag	One of a possible set of flags to further qualify the file
+	 *		to be matched by name.
 	 */
-	private boolean matches(final String name) {
+	public WildcardFilter(final String spec, final String flag) {
+	    wildcardSpec = spec;
+	    anyWild = Match.hasWildCards(wildcardSpec);
+	    flags = Optional.of(flag);
+	}
+
+	/**
+	 * Does the given name match the pattern?
+	 *
+	 * @param file	File to match (by name and flags).
+	 * @return	Whether the name matches the pattern, and flags (if any).
+	 */
+	private boolean matches(final File file) {
+	    boolean nameMatch;
+	    String name = file.getName();
 	    if (anyWild) {
-		return Match.stringMatch(name, wildcardSpec, true);
+		nameMatch = Match.stringMatch(name, wildcardSpec, true);
 	    } else {
-		return name.equals(wildcardSpec);
+		nameMatch = name.equals(wildcardSpec);
 	    }
+	    if (nameMatch && flags.isPresent()) {
+		return FileUtilities.exists(file, flags.get());
+	    }
+	    return nameMatch;
 	}
 
 	/**
@@ -83,7 +110,7 @@ public class WildcardFilter implements FileFilter, FilenameFilter
 	 */
 	@Override
 	public boolean accept(final File dir, final String name) {
-	    return matches(name);
+	    return matches(new File(dir, name));
 	}
 
 	/**
@@ -91,7 +118,7 @@ public class WildcardFilter implements FileFilter, FilenameFilter
 	 */
 	@Override
 	public boolean accept(final File pathname) {
-	    return matches(pathname.getName());
+	    return matches(pathname);
 	}
 
 }

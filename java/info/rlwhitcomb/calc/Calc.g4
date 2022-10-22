@@ -464,6 +464,8 @@
  *	    #501: Add "tobase" function.
  *	08-Oct-2022 (rlwhitcomb)
  *	    #501: Add "frombase" function.
+ *	21-Oct-2022 (rlwhitcomb)
+ *	    #473: Add "findfiles" function.
  */
 
 grammar Calc;
@@ -638,6 +640,7 @@ expr
    | K_ENCODE expr1                      # encodeExpr
    | K_EXISTS ( expr2 | expr1 )          # existsExpr
    | K_FILEINFO expr1                    # fileInfoExpr
+   | K_FINDFILES ( expr3 | expr2 )       # findFilesExpr
    | K_READ ( expr2 | expr1 )            # readExpr
    | K_WRITE ( expr3 | expr2 )           # writeExpr
    | K_DELETE exprN                      # deleteExpr
@@ -1148,6 +1151,8 @@ K_ENCODE   : 'encode' | 'ENCODE' | 'Encode' ;
 K_EXISTS   : 'exists' | 'EXISTS' | 'Exists' ;
 
 K_FILEINFO : 'fileinfo' | 'FILEINFO' | 'FileInfo' | 'fileInfo' ;
+
+K_FINDFILES: 'findfiles' | 'FINDFILES' | 'FindFiles' | 'findFiles' ;
 
 K_READ     : 'read' | 'READ' | 'Read' ;
 

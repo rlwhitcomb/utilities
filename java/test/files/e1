@@ -1152,6 +1152,12 @@ path = '../Java'
 exists(path, 'd+')
 info.os.id == "linux" ? exists(lower(path), 'd') : exists(path, 'd')
 
+#
+# "findfiles" function
+#
+FindFiles('.', 'latest*', 'fx')
+findFiles('.', '*.java')
+
 # "delete" function
 delete 'alpha.beta', 'delta.gamma', 'alpha.omega'
 

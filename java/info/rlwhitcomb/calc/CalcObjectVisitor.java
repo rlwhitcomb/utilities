@@ -691,6 +691,7 @@
  *	21-Oct-2022 (rlwhitcomb)
  *	    #470: Several optimizations of "iterateOverDotRange" depending on the operation
  *	    to be performed.
+ *	    #473: Add flags into FileUtilities.exists(). Add "findfiles" function.
  */
 package info.rlwhitcomb.calc;
 
@@ -6020,18 +6021,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    if (flags.isEmpty())
 		flags = "fr";
 
-	    File f = new File(path);
-
-	    // Special "+" flag modifier that will check that the case of the name
-	    // exactly matches what is on the disk
-	    if (flags.endsWith("+")) {
-		if (!FileUtilities.checkNameCase(f))
-		    return Boolean.FALSE;
-		flags = flags.replace("+", "");
-	    }
-
 	    try {
-		return Boolean.valueOf(FileUtilities.exists(f, flags));
+		return Boolean.valueOf(FileUtilities.exists(new File(path), flags));
 	    }
 	    catch (IllegalArgumentException iae) {
 		throw new CalcExprException(iae, flagExpr);
@@ -6048,6 +6039,63 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		return new ObjectScope(map);
 	    }
 	    return CollectionScope.EMPTY;
+	}
+
+	/**
+	 * A line processor for collecting matching files.
+	 */
+	private class FindFilesProcessor implements LineProcessor
+	{
+		private ArrayScope<String> result;
+
+		FindFilesProcessor(ArrayScope<String> res) {
+		    result = res;
+		}
+
+		@Override
+		public boolean preProcess(final File inputFile) {
+		    result.add(inputFile.getName());
+		    return true;
+		}
+	}
+
+	@Override
+	public Object visitFindFilesExpr(CalcParser.FindFilesExprContext ctx) {
+	    CalcParser.Expr2Context e2ctx = ctx.expr2();
+	    CalcParser.Expr3Context e3ctx = ctx.expr3();
+	    CalcParser.ExprContext flagExpr = null;
+	    String dir     = "";
+	    String pattern = "";
+	    String flags   = null;
+	    ArrayScope<String> result = new ArrayScope<>();
+
+	    if (e2ctx != null) {
+		dir = getStringValue(e2ctx.expr(0));
+		pattern = getStringValue(e2ctx.expr(1));
+	    }
+	    else {
+		dir = getStringValue(e3ctx.expr(0));
+		pattern = getStringValue(e3ctx.expr(1));
+		flagExpr = e3ctx.expr(2);
+		flags = getStringValue(flagExpr).trim();
+	    }
+
+	    try {
+		FindFilesProcessor fp = new FindFilesProcessor(result);
+		DirectoryProcessor dp = new DirectoryProcessor(dir, fp);
+		if (flags == null)
+		    dp.setWildcardFilter(pattern);
+		else
+		    dp.setWildcardFilter(pattern, flags);
+		dp.setNameOnlyMode(true).processDirectory(false);
+
+		Collections.sort(result.list());
+
+		return result;
+	    }
+	    catch (IllegalArgumentException iae) {
+		throw new CalcExprException(iae, flagExpr);
+	    }
 	}
 
 	@Override
