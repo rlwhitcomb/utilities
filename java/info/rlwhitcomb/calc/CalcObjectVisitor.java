@@ -6094,7 +6094,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		return result;
 	    }
 	    catch (IllegalArgumentException iae) {
-		throw new CalcExprException(iae, flagExpr);
+		throw new CalcExprException(iae, ctx);
 	    }
 	}
 
