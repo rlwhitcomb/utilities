@@ -680,7 +680,7 @@
 			<exclude name="**/ant/*"/>
 			<classpath>
 				<pathelement path="."/>
-				<fileset dir="external-files" includes="*.jar"/>
+				<fileset dir="external-files" includes="*.jar" excludes="antlr-runtime-*.jar"/>
 			</classpath>
 		</javac>
 	</target>
@@ -762,7 +762,7 @@
 			</fileset>
 			<classpath>
 				<pathelement path="."/>
-				<fileset dir="external-files" includes="*.jar"/>
+				<fileset dir="external-files" includes="*.jar" excludes="antlr-*-complete.jar"/>
 				<fileset dir="${ant.library.dir}" includes="*.jar"/>
 			</classpath>
 		</javadoc>
@@ -813,10 +813,6 @@ Test starting on ${build.date} at ${build.time}
 			<arg value="-timing"/>
 			<arg value="-dir:test/files"/>
 			<arg value="maintest"/>
-			<classpath>
-				<fileset dir="." includes="utilities.jar"/>
-				<fileset dir="external-files" includes="*.jar" excludes="antlr-*-complete.jar"/>
-			</classpath>
 		</java>
 		<echo>Basic tests of Base64 utility ...</echo>
 		<exec executable="./verify_b64"   dir="."             output="${test.log.path}" append="true" unless:true="${on.windows}" failonerror="true"/>
@@ -916,13 +912,8 @@ Test starting on ${build.date} at ${build.time}
 			<fileset dir="./scripts">
 				<patternset refid="wrapper-files"/>
 			</fileset>
-			<fileset dir="./external-files">
-				<include name="*.jar"/>
-				<exclude name="antlr-*-complete.jar"/>
-			</fileset>
-			<fileset dir="./test/files">
-				<include name="lib*"/>
-			</fileset>
+			<fileset dir="external-files" includes="*.jar" excludes="antlr-*-complete.jar"/>
+			<fileset dir="test/files" includes="lib*"/>
 		</copy>
 		<chmod dir="${env.UTILITIES_HOME}" perm="+x" if:true="${utilities.available}">
 			<patternset refid="wrapper-files"/>
