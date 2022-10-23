@@ -343,6 +343,8 @@
 		#481: Separate tests of "b64".
 	    17-Oct-2022 (rlwhitcomb)
 		#513: Add "info.rlwhitcomb.logging" (new) package.
+	    22-Oct-2022 (rlwhitcomb)
+		#521: Update classpath for "test" to uncover .jar packaging issues.
 
      ========================================================================== -->
 
@@ -802,11 +804,19 @@ Test starting on ${build.date} at ${build.time}
 			<arg value="-dir:test/files"/>
 			<arg value="-charset:UTF-8"/>
 			<arg value="calctest"/>
+			<classpath>
+				<fileset dir="." includes="utilities.jar"/>
+				<fileset dir="external-files" includes="*.jar" excludes="antlr-*-complete.jar"/>
+			</classpath>
 		</java>
 		<java classname="${tester.class}"                     output="${test.log.path}" append="true" failonerror="true" fork="true">
 			<arg value="-timing"/>
 			<arg value="-dir:test/files"/>
 			<arg value="maintest"/>
+			<classpath>
+				<fileset dir="." includes="utilities.jar"/>
+				<fileset dir="external-files" includes="*.jar" excludes="antlr-*-complete.jar"/>
+			</classpath>
 		</java>
 		<echo>Basic tests of Base64 utility ...</echo>
 		<exec executable="./verify_b64"   dir="."             output="${test.log.path}" append="true" unless:true="${on.windows}" failonerror="true"/>
