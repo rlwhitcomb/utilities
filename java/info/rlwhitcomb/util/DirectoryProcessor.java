@@ -248,6 +248,11 @@ public class DirectoryProcessor
 			}
 		    }
 		}
+		else if (recurse && FileUtilities.canReadDir(f)) {
+		    if (!processFiles(f, recurse, level + 1, stopOnError) && stopOnError) {
+			return lp.exitDirectory(dir, level, false);
+		    }
+		}
 	    }
 
 	    return lp.exitDirectory(dir, level, true);
