@@ -43,6 +43,8 @@
  *  19-Sep-22 rlw #448:	Change default "exitDirectory" return value; add optional
  *			wildcard pattern matcher, and "name only" mode.
  *  21-Oct-22 rlw #473:	New wildcard filter + flags method.
+ *  24-Oct-22 rlw #473:	Need to call "preProcess" and "postProcess" on directories in "nameOnly" mode.
+ *			Another "setFilter" method with "ignoreCase" parameter.
  */
 package info.rlwhitcomb.util;
 
@@ -155,6 +157,19 @@ public class DirectoryProcessor
 	}
 
 	/**
+	 * Set the wildcard plus flags and ignoreCase filter for this processor.
+	 *
+	 * @param filterString	The wildcard spec used to match the files to be processed.
+	 * @param filterFlags	Flags for matching the file type.
+	 * @param ignoreCase	Whether to also ignore case of file names when matching.
+	 * @return		This object (for chained operations).
+	 */
+	public DirectoryProcessor setWildcardFilter(final String filterString, final String filterFlags, final boolean ignoreCase) {
+	    filter = new WildcardFilter(filterString, filterFlags, ignoreCase);
+	    return this;
+	}
+
+	/**
 	 * If a filter is present, check it to see if the given file should be processed.
 	 *
 	 * @param f	The file to check against the filter (if present).
@@ -197,29 +212,45 @@ public class DirectoryProcessor
 	    }
 
 	    for (File f : files) {
-		if (checkFilter(f) && FileUtilities.canReadDir(f)) {
-		    if (recurse) {
-			if (!processFiles(f, recurse, level + 1, stopOnError) && stopOnError) {
-			    return lp.exitDirectory(dir, level, false);
+		if (checkFilter(f)) {
+		    if (FileUtilities.canReadDir(f)) {
+			if (nameOnly) {
+			    if (!lp.preProcess(f) && stopOnError) {
+				return lp.exitDirectory(dir, level, false);
+			    }
+			}
+			if (recurse) {
+			    if (!processFiles(f, recurse, level + 1, stopOnError) && stopOnError) {
+				return lp.exitDirectory(dir, level, false);
+			    }
+			}
+			if (nameOnly) {
+			    if (!lp.postProcess(f) && stopOnError) {
+				return lp.exitDirectory(dir, level, false);
+			    }
 			}
 		    }
-		    // Else just continue to the next file in the current directory
+		    else if (FileUtilities.canRead(f)) {
+			if (nameOnly) {
+			    if (!lp.preProcess(f) && stopOnError) {
+				return lp.exitDirectory(dir, level, false);
+			    }
+			    if (!lp.postProcess(f) && stopOnError) {
+				return lp.exitDirectory(dir, level, false);
+			    }
+			}
+			else {
+			    FileProcessor fp = new FileProcessor(f, lp);
+			    if (!fp.processFile() && stopOnError) {
+				return lp.exitDirectory(dir, level, false);
+			    }
+			    fp = null;
+			}
+		    }
 		}
-		else if (checkFilter(f) && FileUtilities.canRead(f)) {
-		    if (nameOnly) {
-			if (!lp.preProcess(f) && stopOnError) {
-			    return lp.exitDirectory(dir, level, false);
-			}
-			if (!lp.postProcess(f) && stopOnError) {
-			    return lp.exitDirectory(dir, level, false);
-			}
-		    }
-		    else {
-			FileProcessor fp = new FileProcessor(f, lp);
-			if (!fp.processFile() && stopOnError) {
-			    return lp.exitDirectory(dir, level, false);
-			}
-			fp = null;
+		else if (recurse && FileUtilities.canReadDir(f)) {
+		    if (!processFiles(f, recurse, level + 1, stopOnError) && stopOnError) {
+			return lp.exitDirectory(dir, level, false);
 		    }
 		}
 	    }
