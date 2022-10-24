@@ -692,6 +692,9 @@
  *	    #470: Several optimizations of "iterateOverDotRange" depending on the operation
  *	    to be performed.
  *	    #473: Add flags into FileUtilities.exists(). Add "findfiles" function.
+ *	24-Oct-2022 (rlwhitcomb)
+ *	    #473: Additional flags for "findfiles" to search recursively, provide full paths,
+ *	    and to ignore case of file names when matching.
  */
 package info.rlwhitcomb.calc;
 
@@ -6047,14 +6050,22 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	private class FindFilesProcessor implements LineProcessor
 	{
 		private ArrayScope<String> result;
+		private boolean fullPaths;
 
-		FindFilesProcessor(ArrayScope<String> res) {
+		FindFilesProcessor(ArrayScope<String> res, boolean paths) {
 		    result = res;
+		    fullPaths = paths;
 		}
 
 		@Override
 		public boolean preProcess(final File inputFile) {
-		    result.add(inputFile.getName());
+		    try {
+			result.add(fullPaths ? inputFile.getCanonicalPath() : inputFile.getName());
+		    }
+		    catch (IOException ioe) {
+			// This will be from "getCanonicalPath", so just use the name
+			result.add(inputFile.getName());
+		    }
 		    return true;
 		}
 	}
@@ -6067,6 +6078,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    String dir     = "";
 	    String pattern = "";
 	    String flags   = null;
+	    boolean recursive  = false;
+	    boolean fullPaths  = false;
+	    boolean ignoreCase = false;
 	    ArrayScope<String> result = new ArrayScope<>();
 
 	    if (e2ctx != null) {
@@ -6078,16 +6092,25 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		pattern = getStringValue(e3ctx.expr(1));
 		flagExpr = e3ctx.expr(2);
 		flags = getStringValue(flagExpr).trim();
+		if (flags.contains("*")) {
+		    recursive = true;
+		    flags = flags.replace("*", "");
+		}
+		if (flags.contains("!")) {
+		    fullPaths = true;
+		    flags = flags.replace("!", "");
+		}
+		if (flags.contains("~")) {
+		    ignoreCase = true;
+		    flags = flags.replace("~", "");
+		}
 	    }
 
 	    try {
-		FindFilesProcessor fp = new FindFilesProcessor(result);
-		DirectoryProcessor dp = new DirectoryProcessor(dir, fp);
-		if (flags == null)
-		    dp.setWildcardFilter(pattern);
-		else
-		    dp.setWildcardFilter(pattern, flags);
-		dp.setNameOnlyMode(true).processDirectory(false);
+		new DirectoryProcessor(dir, new FindFilesProcessor(result, fullPaths))
+			.setWildcardFilter(pattern, CharUtil.getNullForEmpty(flags), ignoreCase)
+			.setNameOnlyMode(true)
+			.processDirectory(recursive);
 
 		Collections.sort(result.list());
 
