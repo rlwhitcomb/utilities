@@ -26,6 +26,7 @@
  * History:
  *  20-Sep-22 rlw #448: Initial coding.
  *  21-Oct-22 rlw #473: Add flags value to the mix.
+ *  24-Oct-22 rlw #473: Tiny bit of refactoring. Add "ignoreCase" flag.
  */
 package info.rlwhitcomb.util;
 
@@ -58,31 +59,48 @@ public class WildcardFilter implements FileFilter, FilenameFilter
 	 * The flags ({@code "d", "dr", "f", "fr", "fw", "fx"}).
 	 */
 	private Optional<String> flags;
+	/**
+	 * Whether to ignore case when matching names.
+	 */
+	private boolean ignoreCase;
 
 
 	/**
-	 * Construct using the given wildcard file specification.
+	 * Construct using the given wildcard file specification, and case-sensitive
+	 * name comparison.
 	 *
 	 * @param spec	The wildcard pattern of files (or directories) to accept.
 	 */
 	public WildcardFilter(final String spec) {
-	    wildcardSpec = spec;
-	    anyWild = Match.hasWildCards(wildcardSpec);
-	    flags = Optional.empty();
+	    this(spec, null, false);
 	}
 
 	/**
 	 * Construct using the given wildcard file specification, as well as
-	 * flags value.
+	 * flags value, and case-sensitive comparison.
 	 *
 	 * @param spec	A wildcard file specification, used to match the file name.
 	 * @param flag	One of a possible set of flags to further qualify the file
 	 *		to be matched by name.
 	 */
 	public WildcardFilter(final String spec, final String flag) {
+	    this(spec, flag, false);
+	}
+
+	/**
+	 * Construct using the given wildcard file specification, as well as
+	 * flags value, with option to ignore case of names.
+	 *
+	 * @param spec		A wildcard file specification, used to match the file name.
+	 * @param flag		One of a possible set of flags to further qualify the file
+	 *			to be matched by name.
+	 * @param ignore	Whether to ignore name case when matching.
+	 */
+	public WildcardFilter(final String spec, final String flag, final boolean ignore) {
 	    wildcardSpec = spec;
 	    anyWild = Match.hasWildCards(wildcardSpec);
-	    flags = Optional.of(flag);
+	    flags = Optional.ofNullable(flag);
+	    ignoreCase = ignore;
 	}
 
 	/**
@@ -92,17 +110,17 @@ public class WildcardFilter implements FileFilter, FilenameFilter
 	 * @return	Whether the name matches the pattern, and flags (if any).
 	 */
 	private boolean matches(final File file) {
-	    boolean nameMatch;
+	    boolean matched;
 	    String name = file.getName();
 	    if (anyWild) {
-		nameMatch = Match.stringMatch(name, wildcardSpec, true);
+		matched = Match.stringMatch(name, wildcardSpec, !ignoreCase);
 	    } else {
-		nameMatch = name.equals(wildcardSpec);
+		matched = ignoreCase ? name.equalsIgnoreCase(wildcardSpec) : name.equals(wildcardSpec);
 	    }
-	    if (nameMatch && flags.isPresent()) {
-		return FileUtilities.exists(file, flags.get());
+	    if (matched && flags.isPresent()) {
+		matched = FileUtilities.exists(file, flags.get());
 	    }
-	    return nameMatch;
+	    return matched;
 	}
 
 	/**
