@@ -334,6 +334,8 @@
  *	    #397: Add multiline string constant support in "internalStripQuotes".
  *	19-Oct-2022 (rlwhitcomb)
  *	    Move "stripLineEndings" from Calc to here.
+ *	25-Oct-2022 (rlwhitcomb)
+ *	    #18: Add "isValidSignedInt" method.
  */
 package info.rlwhitcomb.util;
 
@@ -3110,7 +3112,24 @@ public final class CharUtil
 	 */
 	public static boolean isValidInt(final String input) {
 	    try {
-		int value = Integer.parseUnsignedInt(input);
+		Integer.parseUnsignedInt(input);
+	    }
+	    catch (NumberFormatException nfe) {
+		return false;
+	    }
+	    return true;
+	}
+
+
+	/**
+	 * Is the given string a valid signed integer value (as defined by {@link Integer#parseInt} method)?
+	 *
+	 * @param input The input string to test.
+	 * @return {@code true} or {@code false} depending on whether the input represents a valid signed integer value.
+	 */
+	public static boolean isValidSignedInt(final String input) {
+	    try {
+		Integer.parseInt(input);
 	    }
 	    catch (NumberFormatException nfe) {
 		return false;

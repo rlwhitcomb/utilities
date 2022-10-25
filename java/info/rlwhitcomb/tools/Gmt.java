@@ -38,9 +38,12 @@
  *	    ISO format doesn't need any fixup; add milliseconds there.
  *	09-Jul-2022 (rlwhitcomb)
  *	    #393: Cleanup imports.
+ *	25-Oct-2022 (rlwhitcomb)
+ *	    #18: Allow +/-nn on command line to get offset from GMT.
  */
 package info.rlwhitcomb.tools;
 
+import info.rlwhitcomb.util.CharUtil;
 import info.rlwhitcomb.util.Intl;
 
 import java.text.DateFormat;
@@ -64,6 +67,24 @@ public class Gmt
 	/** Output format compatible with ISO-8601 format. */
 	private static final String ISO_8601_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
 
+	/** Parsed timezone offset from GMT to use. */
+	private static int tzOffset = 0;
+
+
+	/**
+	 * Get a timezone ID with the given (hours) offset from GMT.
+	 *
+	 * @param offset The number of hours difference from GMT.
+	 * @return       An "Etc/GMT..." zone with that offset (but negative gives "+").
+	 */
+	private static String getZone(int offset) {
+	    if (offset == 0)
+		return "Etc/GMT";
+	    else if (offset < 0)
+		return String.format("Etc/GMT+%1$d", -offset);
+	    else
+		return String.format("Etc/GMT-%1$d", offset);
+	}
 
 	private static void sub(StringBuffer buf, int charPos) {
 	    if (buf.charAt(charPos) == '0')
@@ -106,20 +127,28 @@ public class Gmt
 		    case "?":
 			Intl.printHelp("tools#gmt");
 			return;
+		    default:
+			// Could be a signed tz offset from GMT
+			if (CharUtil.isValidSignedInt(format)) {
+			    tzOffset = Integer.parseInt(format);
+			    if (tzOffset < -12 || tzOffset > 14) {
+				Intl.errFormat("tools#gmt.badZoneOffset", tzOffset);
+				System.exit(2);
+			    }
+			    break;
+			}
+			Intl.errFormat("tools#gmt.badOption", format);
+			System.exit(1);
 		}
 	    }
 
 	    SimpleDateFormat fmt = new SimpleDateFormat(dateFormat);
-	    TimeZone gmt = TimeZone.getTimeZone("Etc/GMT");
+	    TimeZone gmt = TimeZone.getTimeZone(getZone(tzOffset));
 	    Calendar now = Calendar.getInstance(gmt);
 	    fmt.setCalendar(now);
 
 	    StringBuffer buf = new StringBuffer();
 	    fmt.format(now.getTime(), buf, new FieldPosition(DateFormat.DATE_FIELD));
-	    int size = buf.length() - 6;
-	    if (buf.charAt(size) == '+') {
-		buf.setLength(size);
-	    }
 
 	    switch (dateFormat) {
 		case DATE_FORMAT:
