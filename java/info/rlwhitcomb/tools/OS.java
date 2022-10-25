@@ -591,8 +591,8 @@ public class OS
 	/**
 	 * A comparator of {@link Currency} objects, sorting by display name.
 	 *
-	 * @param p1	The first object to compare.
-	 * @param p2	The second object to compare to the first.
+	 * @param c1	The first object to compare.
+	 * @param c2	The second object to compare to the first.
 	 * @return	&lt; 0 if the name of the first is less than the
 	 *		name of the second, = 0 if the names are equal,
 	 *		and &gt; 0 if the name of the first is greater
