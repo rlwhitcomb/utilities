@@ -41,6 +41,7 @@
  *	25-Oct-2022 (rlwhitcomb)
  *	    #18: Allow +/-nn on command line to get offset from GMT.
  *	    Tweak the date formats.
+ *	    Allow arbitrary timezone selection.
  */
 package info.rlwhitcomb.tools;
 
@@ -70,6 +71,8 @@ public class Gmt
 
 	/** Parsed timezone offset from GMT to use. */
 	private static int tzOffset = 0;
+	/** Or a timezone selected by ID to use. */
+	private static TimeZone selectedZone = null;
 
 
 	/**
@@ -138,13 +141,24 @@ public class Gmt
 			    }
 			    break;
 			}
-			Intl.errFormat("tools#gmt.badOption", arg);
-			System.exit(1);
+			else {
+			    String[] zones = TimeZone.getAvailableIDs();
+			    for (String zone : zones) {
+				if (arg.equalsIgnoreCase(zone)) {
+				    selectedZone = TimeZone.getTimeZone(zone);
+				    break;
+				}
+			    }
+			    if (selectedZone == null) {
+				Intl.errFormat("tools#gmt.badOption", arg);
+				System.exit(1);
+			    }
+			}
 		}
 	    }
 
 	    SimpleDateFormat fmt = new SimpleDateFormat(dateFormat);
-	    TimeZone gmt = TimeZone.getTimeZone(getZone(tzOffset));
+	    TimeZone gmt = selectedZone == null ? TimeZone.getTimeZone(getZone(tzOffset)) : selectedZone;
 	    Calendar now = Calendar.getInstance(gmt);
 	    fmt.setCalendar(now);
 
