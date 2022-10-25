@@ -157,6 +157,8 @@
 #	    Tweak two error messages.
 #	20-Oct-2022 (rlwhitcomb)
 #	    New error message for undefined flags.
+#	25-Oct-2022 (rlwhitcomb)
+#	    #534: New error for duplicate constant.
 #
 
 #
@@ -250,6 +252,7 @@ noConvertInteger	= Unable to convert value of <y>%1$s<.> to an integer
 noConvertObjArr		= Cannot convert object or array to <y>%1$c<.> format
 noScaleFormat		= Format with scale (<u>.%1$d<.>) value not supported in <y>%2$c<.> format
 noDupLocalVar		= Duplicate local variable name <y>%1$s<.> not allowed
+noDupConstant		= Duplicate constant name <y>%1$s<.> not allowed
 localVarNoAssign	= The value of the local variable <y>%1$s<.> cannot be changed directly
 globalArgNoAssign	= The value of the global argument <y>%1$s<.> cannot be changed directly
 mustBeObject		= Source variable type <y>%1$s<.> must be an object

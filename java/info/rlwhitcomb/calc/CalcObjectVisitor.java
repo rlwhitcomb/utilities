@@ -695,6 +695,8 @@
  *	24-Oct-2022 (rlwhitcomb)
  *	    #473: Additional flags for "findfiles" to search recursively, provide full paths,
  *	    and to ignore case of file names when matching.
+ *	25-Oct-2022 (rlwhitcomb)
+ *	    #534: Error on duplicate "const" declaration.
  */
 package info.rlwhitcomb.calc;
 
@@ -3361,6 +3363,10 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public Object visitConstStmt(CalcParser.ConstStmtContext ctx) {
 	    String constantName = ctx.id().getText();
 	    CalcParser.ExprContext expr = ctx.expr();
+
+	    if (currentScope.isDefinedLocally(constantName, settings.ignoreNameCase))
+		throw new CalcExprException(ctx, "%calc#noDupConstant", constantName);
+
 	    Object value = evaluate(expr);
 
 	    ConstantValue.define(currentScope, constantName, value);
