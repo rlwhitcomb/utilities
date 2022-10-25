@@ -40,6 +40,7 @@
  *	    #393: Cleanup imports.
  *	25-Oct-2022 (rlwhitcomb)
  *	    #18: Allow +/-nn on command line to get offset from GMT.
+ *	    Tweak the date formats.
  */
 package info.rlwhitcomb.tools;
 
@@ -59,13 +60,13 @@ import java.util.TimeZone;
 public class Gmt
 {
 	/** Output format compatible with *nix "date" command. */
-	private static final String DATE_FORMAT    = "E MMM dd HH:mm:ss z yyyy";
+	private static final String DATE_FORMAT    = "E dd MMM yyyy hh:mm:ss a z";
 	/** Default output format. */
 	private static final String DEFAULT_FORMAT = "E MMM dd,yyyy HH:mm:ss.SSS z";
 	/** Output format compatible with our {@code Logging} class. */
 	private static final String LOGGING_FORMAT = "MMM dd,yyyy HH:mm:ss.SSS z";
 	/** Output format compatible with ISO-8601 format. */
-	private static final String ISO_8601_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
+	private static final String ISO_8601_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSX";
 
 	/** Parsed timezone offset from GMT to use. */
 	private static int tzOffset = 0;
@@ -97,8 +98,8 @@ public class Gmt
 	public static void main(String[] args) {
 	    String dateFormat = DEFAULT_FORMAT;
 
-	    if (args.length > 0) {
-		String format = args[0];
+	    for (String arg : args) {
+		String format = arg;
 
 		switch (format.toLowerCase()) {
 		    case "-log":
@@ -129,15 +130,15 @@ public class Gmt
 			return;
 		    default:
 			// Could be a signed tz offset from GMT
-			if (CharUtil.isValidSignedInt(format)) {
-			    tzOffset = Integer.parseInt(format);
+			if (CharUtil.isValidSignedInt(arg)) {
+			    tzOffset = Integer.parseInt(arg);
 			    if (tzOffset < -12 || tzOffset > 14) {
 				Intl.errFormat("tools#gmt.badZoneOffset", tzOffset);
 				System.exit(2);
 			    }
 			    break;
 			}
-			Intl.errFormat("tools#gmt.badOption", format);
+			Intl.errFormat("tools#gmt.badOption", arg);
 			System.exit(1);
 		}
 	    }
@@ -152,8 +153,7 @@ public class Gmt
 
 	    switch (dateFormat) {
 		case DATE_FORMAT:
-		    sub(buf, 8);
-		    sub(buf, 11);
+		    sub(buf, 4);
 		    break;
 		case DEFAULT_FORMAT:
 		    sub(buf, 8);
