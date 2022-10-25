@@ -76,10 +76,14 @@
  *	18-Oct-2022 (rlwhitcomb)
  *	    #530: Move help and error text to resource file; color it all.
  *	    Implement wildcard filter tags.
+ *	25-Oct-2022 (rlwhitcomb)
+ *	    #39: Option to list all the currencies available. List more Locale information
+ *	    in verbose mode.
  */
 package info.rlwhitcomb.tools;
 
 import info.rlwhitcomb.directory.Match;
+import info.rlwhitcomb.util.CharUtil;
 import info.rlwhitcomb.util.ConsoleColor;
 import info.rlwhitcomb.util.Environment;
 import info.rlwhitcomb.util.Intl;
@@ -92,7 +96,6 @@ import java.security.Provider;
 import java.security.Security;
 import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
-import java.util.List;
 import java.util.*;
 
 
@@ -149,6 +152,8 @@ public class OS
 				 "charsets", "charset", "chars", "char", "ch", "cs", "c"),
 		LOCALES		(OS::displayLocales,
 				 "locales", "locale", "locs", "loc", "l"),
+		CURRENCIES	(OS::displayCurrencies,
+				 "currencies", "currency", "curr", "cur", "cr"),
 		DIGESTS		(OS::displayDigests,
 				 "message-digests", "message_digests", "messagedigests",
 				 "digests", "digest", "digs", "dig", "md", "d", "m"),
@@ -552,38 +557,72 @@ public class OS
 		if (!matchesFilter)
 		    continue locales;
 
-		NumberFormat format   = NumberFormat.getInstance(loc);
-		NumberFormat currency = NumberFormat.getCurrencyInstance(loc);
-		NumberFormat percent  = NumberFormat.getPercentInstance(loc);
-
 		DecimalFormatSymbols symbols = DecimalFormatSymbols.getInstance(loc);
 
 		String prefix = (loc.equals(defaultLocale)) ? "<Rd!>*<.>" : "";
 		String message = "";
 		if (verbose) {
 		    message = String.format(
-			"%1$1s<Cy>%2$15s<.>  <Gr>%3$s<-->%n" +
-			"\t\t<Bk!>language: <Gr>%4$s<Bk!>  country: <Gr>%5$s<Bk!>  variant: <Gr>%6$s<-->%n" +
-			"\t\t<Bk!>currency: <Gr>%7$s<Bk!>  symbol: <Gr>%8$s<-->%n" +
-			"\t\t<Bk!>minus: <Gr>%9$c<Bk!>  decimal: <Gr>%10$c<Bk!>  grouping: <Gr>%11$c<Bk!>  exponent: <Gr>%12$s<-->%n" +
-			"\t\t<Bk!>Infinity: <Gr>%13$s<Bk!>  NaN: <Gr>%14$s<Bk!>  percent: <Gr>%15$c<-->",
-			prefix, tag, loc.getDisplayName(),
+			"%1$1s<Cy>%2$15s<.>  <Gr>%3$s<.>  <Yw!>%4$s<-->%n" +
+			"\t\t<Bk!>Country: <Gr>%5$s  <Yw!>%6$s<-->%n" +
+			"\t\t<Bk!>language: <Gr>%7$s<Bk!>  country: <Gr>%8$s<Bk!>  variant: <Gr>%9$s<-->%n" +
+			"\t\t<Bk!>currency: <Gr>%10$s<Bk!>  symbol: <Gr>%11$s<-->%n" +
+			"\t\t<Bk!>minus: <Gr>%12$c<Bk!>  decimal: <Gr>%13$c<Bk!>  grouping: <Gr>%14$c<Bk!>  exponent: <Gr>%15$s<-->%n" +
+			"\t\t<Bk!>Infinity: <Gr>%16$s<Bk!>  NaN: <Gr>%17$s<Bk!>  percent: <Gr>%18$c<-->",
+			prefix, tag, loc.getDisplayName(), loc.getDisplayName(loc),
+			loc.getDisplayCountry(), loc.getDisplayCountry(loc),
 			languageCode(loc), countryCode(loc), variant(loc),
 			symbols.getCurrencySymbol(), symbols.getInternationalCurrencySymbol(),
 			symbols.getMinusSign(), symbols.getDecimalSeparator(),
 			symbols.getGroupingSeparator(), symbols.getExponentSeparator(),
-			symbols.getInfinity(), symbols.getNaN(), symbols.getPercent()
-			);
+			symbols.getInfinity(), symbols.getNaN(), symbols.getPercent());
 		}
 		else {
 		    message = String.format(
-			"%1$1s<Cy>%2$15s<.>  <Gr>%3$s<-->",
-			prefix, tag, loc.getDisplayName());
+			"%1$1s<Cy>%2$15s<.>  <Gr>%3$s<.>  <Yw!>%4$s<-->",
+			prefix, tag, loc.getDisplayName(), loc.getDisplayName(loc));
 		}
 		locs.add(message);
 	    }
 
 	    display("Locales", locs);
+	}
+
+	/**
+	 * A comparator of {@link Currency} objects, sorting by display name.
+	 *
+	 * @param p1	The first object to compare.
+	 * @param p2	The second object to compare to the first.
+	 * @return	&lt; 0 if the name of the first is less than the
+	 *		name of the second, = 0 if the names are equal,
+	 *		and &gt; 0 if the name of the first is greater
+	 *		than the name of the second.
+	 */
+	private static int compareCurrencies(Currency c1, Currency c2) {
+	    return c1.getDisplayName().compareTo(c2.getDisplayName());
+	}
+
+	/**
+	 * Display the available currencies, sorted by name.
+	 */
+	private static void displayCurrencies() {
+	    Set<Currency> availableCurrencies = Currency.getAvailableCurrencies();
+	    Set<Currency> sortedCurrencies    = new TreeSet<>(OS::compareCurrencies);
+	    List<String> currencies           = new ArrayList<>(availableCurrencies.size());
+
+	    for (Currency c : availableCurrencies) {
+		sortedCurrencies.add(c);
+	    }
+
+	    for (Currency c : sortedCurrencies) {
+		String message = String.format("<Cy>%1$45s<.> (<Gr>%2$s<.>) (<Yw!>%3$3d<.>)  <Bk!>symbol: <Bl>%4$-7s<.> <Bk!>digits: <Bl>%5$d<-->",
+			c.getDisplayName(), c.getCurrencyCode(), c.getNumericCode(),
+			CharUtil.addDoubleQuotes(c.getSymbol()), c.getDefaultFractionDigits());
+
+		currencies.add(message);
+	    }
+
+	    display("Currencies", currencies);
 	}
 
 	/**
