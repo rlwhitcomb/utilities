@@ -76,6 +76,8 @@
  *	    #238: New method to iterate over command line arguments.
  *	09-Jul-2022 (rlwhitcomb)
  *	    #393: Cleanup imports.
+ *	25-Oct-2022 (rlwhitcomb)
+ *	    #536: Don't process environment variable with options if we're doing testing.
  */
 package info.rlwhitcomb.util;
 
@@ -524,6 +526,10 @@ public class Options
 	 * @param processor The class-specific handler to process the option(s).
 	 */
 	public static void environmentOptions(final Class<?> clazz, final Consumer<String[]> processor) {
+	    // During testing, ignore settings in the environment variables
+	    if (Environment.inTesting())
+		return;
+
 	    String optionsVariableName = clazz.getSimpleName().toUpperCase() + "_OPTIONS";
 	    String optionsString = System.getenv(optionsVariableName);
 

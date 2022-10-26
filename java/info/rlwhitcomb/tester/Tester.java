@@ -1782,6 +1782,7 @@ public class Tester
 	 */
 	public static void main(final String[] args) {
 	    Environment.setDesktopApp(true);
+	    Environment.setInTesting();
 
 	    int result = SUCCESS;
 

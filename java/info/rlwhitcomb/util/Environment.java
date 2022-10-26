@@ -183,6 +183,8 @@
  *	    #445: New flavor of "printProgramInfo" with just colored flag.
  *	27-Sep-2022 (rlwhitcomb)
  *	    #491: Correct the setting of Java major version.
+ *	25-Oct-2022 (rlwhitcomb)
+ *	    #536: Methods to set and test the system property for testing.
  */
 package info.rlwhitcomb.util;
 
@@ -250,6 +252,12 @@ public final class Environment
 	private static TimeUnit timeUnit = osIsLinux ? TimeUnit.MILLISECONDS : TimeUnit.NANOSECONDS;
 
 	private static String copyrightNotice = null;
+
+	/**
+	 * The system property that is set during testing, that could be used to influence behavior,
+	 * such as not processing environment variables that could wreck the testing.
+	 */
+	private static final String IN_TESTING_PROPERTY = "info.rlwhitcomb.Testing";
 
 	/**
 	 * The set of properties read from various files: "build.properties", "build.number",
@@ -1518,6 +1526,25 @@ public final class Environment
 	 */
 	public static String totalMemory() {
 	    return longFormat.format(totalMemorySize());
+	}
+
+
+	/**
+	 * Sets the system property to indicate that we're doing testing.
+	 */
+	public static void setInTesting() {
+	    System.setProperty(IN_TESTING_PROPERTY , Boolean.TRUE.toString());
+	}
+
+
+	/**
+	 * Is the system in the midst of testing?
+	 *
+	 * @return The state of the system property indicating we're doing testing.
+	 */
+	public static boolean inTesting() {
+	    String value = System.getProperty(IN_TESTING_PROPERTY, Boolean.FALSE.toString());
+	    return Boolean.valueOf(value);
 	}
 
 
