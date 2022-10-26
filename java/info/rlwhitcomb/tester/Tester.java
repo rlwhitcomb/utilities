@@ -238,6 +238,9 @@
  *	    #443: Update Javadoc with the new marker conventions.
  *	17-Oct-2022 (rlwhitcomb)
  *	    #443: Change markers (again) to "{{ }}" for version and "[< >]" for charset.
+ *	25-Oct-2022 (rlwhitcomb)
+ *	    #536: Set system property to indicate testing in progress; but after we process
+ *	    our own options.
  */
 package info.rlwhitcomb.tester;
 
@@ -1739,6 +1742,8 @@ public class Tester
 	    // Setup the canonical platform string
 	    currentPlatform = Environment.platformIdentifier();
 
+	    Environment.setInTesting();
+
 	    return SUCCESS;
 	}
 
@@ -1782,7 +1787,6 @@ public class Tester
 	 */
 	public static void main(final String[] args) {
 	    Environment.setDesktopApp(true);
-	    Environment.setInTesting();
 
 	    int result = SUCCESS;
 
