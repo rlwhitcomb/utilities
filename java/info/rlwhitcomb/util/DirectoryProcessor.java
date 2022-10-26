@@ -45,6 +45,7 @@
  *  21-Oct-22 rlw #473:	New wildcard filter + flags method.
  *  24-Oct-22 rlw #473:	Need to call "preProcess" and "postProcess" on directories in "nameOnly" mode.
  *			Another "setFilter" method with "ignoreCase" parameter.
+ *  25-Oct-22 rlw #532:	Simplify; move pre/post processing entirely into here from FileProcessor.
  */
 package info.rlwhitcomb.util;
 
@@ -206,56 +207,62 @@ public class DirectoryProcessor
 		return true;
 	    }
 
+	    boolean ret = false;
+
 	    File[] files = dir.listFiles(lp);
 	    if (files == null) {
 		return lp.exitDirectory(dir, level, true);
 	    }
 
-	    for (File f : files) {
-		if (checkFilter(f)) {
-		    if (FileUtilities.canReadDir(f)) {
-			if (nameOnly) {
-			    if (!lp.preProcess(f) && stopOnError) {
-				return lp.exitDirectory(dir, level, false);
+	    for (File file : files) {
+		try {
+		    if (checkFilter(file)) {
+			if (FileUtilities.canReadDir(file)) {
+			    if (nameOnly && !lp.preProcess(file) && stopOnError) {
+				break;
+			    }
+			    if (recurse) {
+				if (!processFiles(file, recurse, level + 1, stopOnError) && stopOnError) {
+				    break;
+				}
+			    }
+			    if (nameOnly && !lp.postProcess(file) && stopOnError) {
+				break;
 			    }
 			}
-			if (recurse) {
-			    if (!processFiles(f, recurse, level + 1, stopOnError) && stopOnError) {
-				return lp.exitDirectory(dir, level, false);
+			else if (FileUtilities.canRead(file)) {
+			    if (!lp.preProcess(file) && stopOnError) {
+				break;
 			    }
-			}
-			if (nameOnly) {
-			    if (!lp.postProcess(f) && stopOnError) {
-				return lp.exitDirectory(dir, level, false);
+			    if (!nameOnly) {
+				FileProcessor fp = new FileProcessor(file, lp);
+
+				if (!fp.processFile() && stopOnError) {
+				    break;
+				}
+
+				fp = null;
 			    }
-			}
-		    }
-		    else if (FileUtilities.canRead(f)) {
-			if (nameOnly) {
-			    if (!lp.preProcess(f) && stopOnError) {
-				return lp.exitDirectory(dir, level, false);
+			    if (!lp.postProcess(file) && stopOnError) {
+				break;
 			    }
-			    if (!lp.postProcess(f) && stopOnError) {
-				return lp.exitDirectory(dir, level, false);
-			    }
-			}
-			else {
-			    FileProcessor fp = new FileProcessor(f, lp);
-			    if (!fp.processFile() && stopOnError) {
-				return lp.exitDirectory(dir, level, false);
-			    }
-			    fp = null;
 			}
 		    }
+		    else if (recurse && FileUtilities.canReadDir(file)) {
+			if (!processFiles(file, recurse, level + 1, stopOnError) && stopOnError) {
+			    break;
+			}
+		    }
+		    ret = true;
 		}
-		else if (recurse && FileUtilities.canReadDir(f)) {
-		    if (!processFiles(f, recurse, level + 1, stopOnError) && stopOnError) {
-			return lp.exitDirectory(dir, level, false);
+		catch (Throwable ex) {
+		    if (lp.handleError(file, ex)) {
+			ret = true;
 		    }
 		}
 	    }
 
-	    return lp.exitDirectory(dir, level, true);
+	    return lp.exitDirectory(dir, level, ret);
 	}
 
 	/**

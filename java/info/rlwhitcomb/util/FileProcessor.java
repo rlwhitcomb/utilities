@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2015,2017,2019-2021 Roger L. Whitcomb.
+ * Copyright (c) 2015,2017,2019-2022 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,22 +24,16 @@
  *	A generic text file processor that can adapt to many different
  *	processing tasks that can deal with one line at a time.
  *
- *  History:
- *	06-Jan-2015 (rlwhitcomb)
- *	    Created.
- *	16-Jun-2017 (rlwhitcomb)
- *	    Code cleanup.
- *	15-Mar-2019 (rlwhitcomb)
- *	    Don't use FileInputStream/FileOutputStream due to GC problems b/c of the finalize
- *	    method in these classes.
- *	10-Mar-2020 (rlwhitcomb)
- *	    Prepare for GitHub.
- *	21-Dec-2020 (rlwhitcomb)
- *	    Update obsolete Javadoc constructs.
- *	29-Jan-2021 (rlwhitcomb)
- *	    Use new Intl Exception variants for convenience.
- *	06-Sep-2021 (rlwhitcomb)
- *	    Final parameters.
+ * History:
+ *  06-Jan-15 rlw  ---	Created.
+ *  16-Jun-17 rlw  ---	Code cleanup.
+ *  15-Mar-19 rlw  ---	Don't use FileInputStream/FileOutputStream due to GC problems b/c of the finalize
+ *			method in these classes.
+ *  10-Mar-20 rlw  ---	Prepare for GitHub.
+ *  21-Dec-20 rlw  ---	Update obsolete Javadoc constructs.
+ *  29-Jan-21 rlw  ---	Use new Intl Exception variants for convenience.
+ *  06-Sep-21 rlw  ---	Final parameters.
+ *  25-Oct-22 rlw #532:	Simplify; move pre/post processing out to DirectoryProcessor.
  */
 package info.rlwhitcomb.util;
 
@@ -123,20 +117,13 @@ public class FileProcessor
 	 *		{@code LineProcessor} methods.
 	 */
 	public boolean processFile() {
-	    BufferedReader reader = null;
-	    try {
-		if (!lp.preProcess(inputFile)) {
-		    return false;
-		}
+	    Charset charset = lp.getCharset();
+	    if (charset == null) {
+		// Don't treat this as an error, just use the default
+		charset = Charset.defaultCharset();
+	    }
 
-		Charset charset = lp.getCharset();
-		if (charset == null) {
-		    // Don't treat this as an error, just use the default
-		    charset = Charset.defaultCharset();
-		}
-
-		reader = Files.newBufferedReader(inputFile.toPath(), charset);
-
+	    try (BufferedReader reader = Files.newBufferedReader(inputFile.toPath(), charset)) {
 		String inputLine;
 		while ((inputLine = reader.readLine()) != null) {
 		    if (!lp.processLine(inputLine)) {
@@ -147,27 +134,6 @@ public class FileProcessor
 	    catch (Throwable ex) {
 		if (!lp.handleError(inputFile, ex)) {
 		    return false;
-		}
-	    }
-	    finally {
-		if (reader != null) {
-		    try {
-			reader.close();
-		    }
-		    catch (IOException ioe) {
-		    }
-		}
-		reader = null;
-
-		try {
-		    if (!lp.postProcess(inputFile)) {
-			return false;
-		    }
-		}
-		catch (Throwable ex2) {
-		    if (!lp.handleError(inputFile, ex2)) {
-			return false;
-		    }
 		}
 	    }
 	    return true;
