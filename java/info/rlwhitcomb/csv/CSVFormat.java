@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2014-2017,2019-2021 Roger L. Whitcomb.
+ * Copyright (c) 2014-2017,2019-2022 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -53,7 +53,7 @@
  *	17-Feb-2021 (rlwhitcomb)
  *	    Add new "hasHeaderRow" and "preserveQuotes" flags; new
  *	    "getLeftQuote" and "getRightQuote" methods.
- *	15-Dec=2021 (rlwhitcomb)
+ *	15-Dec-2021 (rlwhitcomb)
  *	    #146: Additional methods to expose new flags and such.
  *	    Okay, okay, this isn't a true Java Bean because the get/set methods
  *	    are not symmetric (partly due to the "Builder" pattern and partly
