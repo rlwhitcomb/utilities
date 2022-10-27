@@ -1,0 +1,171 @@
+{
+  /*
+   * Template for the required license in each file.
+   */
+  licenseTemplate : [
+    "The MIT License (MIT)",
+    "",
+    "Copyright (c) 2008-2022 Roger L. Whitcomb.",
+    "",
+    "Permission is hereby granted, free of charge, to any person obtaining a copy",
+    "of this software and associated documentation files (the \"Software\"), to deal",
+    "in the Software without restriction, including without limitation the rights",
+    "to use, copy, modify, merge, publish, distribute, sublicense, and/or sell",
+    "copies of the Software, and to permit persons to whom the Software is",
+    "furnished to do so, subject to the following conditions:",
+    "",
+    "The above copyright notice and this permission notice shall be included in all",
+    "copies or substantial portions of the Software.",
+    "",
+    "THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR",
+    "IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,",
+    "FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE",
+    "AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER",
+    "LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,",
+    "OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE",
+    "SOFTWARE."
+  ],
+
+  /*
+   * A list of file extensions that we will ignore entirely (mostly binary files).
+   */
+  ignoredExtensions : [
+    ".class",
+    ".bin",
+    ".cmd",
+    ".gz",
+    ".zip",
+    ".gif",
+    ".bmp",
+    ".png",
+    ".ico",
+    ".ai",
+    ".dll",
+    ".dylib",
+    ".so",
+    ".jar",
+    ".pdf",
+    ".doc",
+    ".docx",
+    ".vsd",
+    ".csv",
+    ".canon",
+    ".rss",
+    ".psd",
+    ".MF",
+    ".MFpp",
+    ".manifest",
+    ".log",
+    ".bat",
+    ".sql",
+    ".dsv",
+    ".tab",
+    ".txt",
+    ".pom",
+    ".html",
+    ".htmlpp",
+    ".py",
+    ".jnlp",
+    ".C",     /* the old 'C' files don't have proper copyright yet */
+    ".c",
+    ".H"
+  ],
+
+  /*
+   * A list of specific file names that we know will not (and should not) contain
+   * a copyright notice, so we can safely ignore them in the reporting.
+   */
+  ignoredNames : [
+    ".gitignore", ".gitattributes",
+    "numeric-conditions.properties",
+    "version.properties",
+    "logging_default.properties",
+    "VersionRef.json",
+    "copyrights.json",  /* this is us! */
+    "LICENSE",
+    "NOTICE",
+    "README.md",
+    "MANIFEST.MF",
+    "build-ant-tasks.xml",
+    "build.number",
+    "build.properties",
+    "update.xml",
+    "TerraTheme_old.json",
+    "setenv", "ci-setenv",
+    "ci-build.sh", "ci-build8-first.sh", "ci-build8-second.sh",
+    "commit_checklist.txt",
+    "constants.calc", "cp.calc", "versions.calc",
+    "g.sh",
+    "mkcanon", "mkcanon.bat",
+    "latest_push", "latest_push.bat", "latest_push.calc",
+    "latest_test", "latest_test.bat",
+    "upc", "upc7", "upw",
+    "verify", "verify_b64", "verify_b64.bat", "verify_calc", "verify_calc.bat", "verify_calc2", "verify_calc2.bat"
+  ],
+
+  /*
+   * A list of specific directory names (starting from the root) that we know will not
+   * (and should not) contain our code, so we can safely ignore all the files in them.
+   */
+  ignoredDirectories : [
+    ".git",
+    ".github",
+    "java/doc",
+    "java/doc-files",
+    "java/external-files",
+    "java/images",
+    "java/name",
+    "java/net",
+    "java/de",
+    "java/scripts",
+    "java/test"
+  ],
+
+  /*
+   * Specific file names that could contain a copyright, so we should check for a
+   * correct one, but don't have to contain it, so don't complain if we don't find it.
+   */
+  optionalNames : [
+    "package-info.java"
+  ],
+
+  /*
+   * For some files that predate our source control history, and/or were moved at some
+   * point, so we can't track the initial date, override that initial date from source
+   * control and assume these years for verification purposes.
+   */
+  overrideStartingYears : [
+    { file: "cat/resources_es.utf8",       year: 2020 },
+    { file: "tree/resources_es.utf8",      year: 2020 },
+    { file: "java/CheckCopyrights.java",   year: 2020 },
+    { file: "tools/FixPath.java",          year: 2020 },
+    { file: "tools/GZip.java",             year: 2020 },
+    { file: "tools/GUnzip.java",           year: 2020 },
+    { file: "tools/Hash.java",             year: 2020 },
+    { file: "tools/DumpManifest.java",     year: 2020 },
+    { file: "tools/OS.java",               year: 2020 },
+    { file: "test/CSVTest.java",           year: 2020 },
+    { file: "test/TestNumericUtil.java",   year: 2020 },
+    { file: "test/DynArrayTest.java",      year: 2020 },
+    { file: "test/MatchesTest.java",       year: 2020 },
+    { file: "test/TestSQLFormatter.java",  year: 2020 },
+    { file: "test/InitTaskTest.java",      year: 2020 },
+    { file: "test/BidiMapTest.java",       year: 2020 },
+    { file: "test/OptionsTest.java",       year: 2020 },
+    { file: "util/Lists.java",             year: 2020 },
+    { file: "util/Exceptions.java",        year: 2020 },
+    { file: "util/Sleep.java",             year: 2020 },
+    { file: "directory/Match.java",        year: 2020 },
+    { file: "directory/Dir.java",          year: 2020 },
+    { file: "math/BigFraction.java",       year: 2021 },
+    { file: "math/Num.java",               year: 2020 },
+    { file: "math/NumericUtil.java",       year: 2020 },
+    { file: "math/MathUtil.java",          year: 2021 },
+    { file: "tester/Tester.java",          year: 2020 },
+    { file: "tester/resources.utf8",       year: 2020 },
+    { file: "logging/LogStream.java",      year: 2020 },
+    { file: "logging/Logging.java",        year: 2020 }
+  ]
+
+}
+
