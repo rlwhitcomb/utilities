@@ -33,7 +33,7 @@
 
 	<target name="download" description="Download the latest (current) source .zip file.">
 		<echo message="Downloading source code package..."/>
-		<get src="https://github.com/rlwhitcomb/utilities/zipball/master" dest="${source.file}"/>
+		<get src="https://codeload.github.com/rlwhitcomb/utilities/legacy.zip/refs/heads/master" dest="${source.file}"/>
 	</target>
 
 	<target name="unzip" description="Unzip the source package and move into place.">
