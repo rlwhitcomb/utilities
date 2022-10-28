@@ -185,6 +185,9 @@
  *	    #491: Correct the setting of Java major version.
  *	25-Oct-2022 (rlwhitcomb)
  *	    #536: Methods to set and test the system property for testing.
+ *	27-Oct-2022 (rlwhitcomb)
+ *	    #538: New method to return the current CLASSPATH as an array of URLs,
+ *	    suitable for use with a URLClassLoader.
  */
 package info.rlwhitcomb.util;
 
@@ -196,6 +199,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.lang.management.ManagementFactory;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.List;
@@ -324,6 +329,11 @@ public final class Environment
 	 * @see #getMainClassName
 	 */
 	private static String cachedMainClassName = null;
+
+	/**
+	 * Cached version of the current CLASSPATH, as an array of URLs.
+	 */
+	private static URL[] urlClassPath = null;
 
 
 	/**
@@ -1276,6 +1286,32 @@ public final class Environment
 	public static String getScreenSize() {
 	    Dimension size = consoleSize();
 	    return Intl.formatString("util#env.screenSize", size.width, size.height);
+	}
+
+
+	/**
+	 * Get the current {@var CLASSPATH} as an array of URLs, suitable for use with
+	 * {@link java.net.URLClassLoader}.
+	 *
+	 * @return The CLASSPATH in URL form.
+	 */
+	public static URL[] getURLClassPath() {
+	    if (urlClassPath == null) {
+		String classPath = System.getenv("CLASSPATH");
+		String[] paths = classPath.split(PATH_SEPARATOR);
+		urlClassPath = new URL[paths.length];
+		int i = 0;
+		for (String path : paths) {
+		    File f = new File(path);
+		    try {
+			urlClassPath[i++] = f.toURI().toURL();
+		    }
+		    catch (MalformedURLException mue) {
+			; // Oops!
+		    }
+		}
+	    }
+	    return urlClassPath;
 	}
 
 
