@@ -347,6 +347,7 @@
 		#521: Update classpath for "test" to uncover .jar packaging issues.
 	    30-Oct-2022 (rlwhitcomb)
 		#541: Add the security manager arg for Tester.
+		And only set for Java 17+.
 
      ========================================================================== -->
 
@@ -423,6 +424,9 @@
 
 	<condition property="new.java.version" value="true" else="false" >
 		<javaversion atleast="9"/>
+	</condition>
+	<condition property="java.17plus.version" value="true" else="false" >
+		<javaversion atleast="17"/>
 	</condition>
 	<condition property="html4.output" value="true" else="false">
 		<and>
@@ -802,7 +806,7 @@ Test starting on ${build.date} at ${build.time}
 		<java classname="info.rlwhitcomb.test.InitTaskTest"   output="${test.log.path}" append="true" failonerror="true" fork="true"/>
 		<echo>Running various tests through the Tester ...</echo>
 		<java classname="${tester.class}"                     output="${test.log.path}" append="true" failonerror="true" fork="true">
-			<jvmarg value="-Djava.security.manager=allow"/>
+			<jvmarg value="-Djava.security.manager=allow" if:true="${java.17plus.version}"/>
 			<arg value="-timing"/>
 			<arg value="-dir:test/files"/>
 			<arg value="-charset:UTF-8"/>
@@ -813,7 +817,7 @@ Test starting on ${build.date} at ${build.time}
 			</classpath>
 		</java>
 		<java classname="${tester.class}"                     output="${test.log.path}" append="true" failonerror="true" fork="true">
-			<jvmarg value="-Djava.security.manager=allow"/>
+			<jvmarg value="-Djava.security.manager=allow" if:true="${java.17plus.version}"/>
 			<arg value="-timing"/>
 			<arg value="-dir:test/files"/>
 			<arg value="maintest"/>
