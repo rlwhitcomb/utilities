@@ -1,3 +1,4 @@
 #!/bin/bash
 CLASS_NAME=info.rlwhitcomb.tester.Tester
+JVM_ARGS=-Djava.security.manager=allow
 source _find_and_run_class
