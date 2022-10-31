@@ -345,6 +345,8 @@
 		#513: Add "info.rlwhitcomb.logging" (new) package.
 	    22-Oct-2022 (rlwhitcomb)
 		#521: Update classpath for "test" to uncover .jar packaging issues.
+	    30-Oct-2022 (rlwhitcomb)
+		#541: Add the security manager arg for Tester.
 
      ========================================================================== -->
 
@@ -800,6 +802,7 @@ Test starting on ${build.date} at ${build.time}
 		<java classname="info.rlwhitcomb.test.InitTaskTest"   output="${test.log.path}" append="true" failonerror="true" fork="true"/>
 		<echo>Running various tests through the Tester ...</echo>
 		<java classname="${tester.class}"                     output="${test.log.path}" append="true" failonerror="true" fork="true">
+			<jvmarg value="-Djava.security.manager=allow"/>
 			<arg value="-timing"/>
 			<arg value="-dir:test/files"/>
 			<arg value="-charset:UTF-8"/>
@@ -810,6 +813,7 @@ Test starting on ${build.date} at ${build.time}
 			</classpath>
 		</java>
 		<java classname="${tester.class}"                     output="${test.log.path}" append="true" failonerror="true" fork="true">
+			<jvmarg value="-Djava.security.manager=allow"/>
 			<arg value="-timing"/>
 			<arg value="-dir:test/files"/>
 			<arg value="maintest"/>
