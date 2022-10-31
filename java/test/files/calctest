@@ -38,6 +38,7 @@ e_s           : e_s
 e_sort        : e_sort -clear -- e10 e1 e11 e12 e20 e2 e3 e5 e30 e31
 e_lorem       : e_lorem -expressions
 check         : -nolib test/files/check -clear -- test/data/cake.json test/data/cake.json
+{42}err2      : -nolib err2
 
 test/data/406.json : -nolibs dupjson.calc -clear -- test/data/406.json
 

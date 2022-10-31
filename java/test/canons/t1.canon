@@ -5,9 +5,10 @@
 >
 >Test 'primes': Passed
 >Test 'Psalm23': Passed
+>Test 'listerr': Passed
 >
 >Done with Lists tests.
 >------------------------------------
->Ran 2 tests: 2 passed, 0 failed.
+>Ran 3 tests: 3 passed, 0 failed.
 >====================================
 >

@@ -244,6 +244,8 @@
  *	26-Oct-2022 (rlwhitcomb)
  *	    #540: Move TestFiles and Version out to separate class file. Significant refactoring here.
  *	    #538: Use new ClassLoader for each test class loaded.
+ *	29-Oct-2022 (rlwhitcomb)
+ *	    #541: Install SecurityManager to capture System.exit from tested classes.
  */
 package info.rlwhitcomb.tester;
 
@@ -263,6 +265,7 @@ import java.net.URLClassLoader;
 import java.nio.charset.Charset;
 import java.nio.charset.UnsupportedCharsetException;
 import java.nio.file.Files;
+import java.security.Permission;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -322,6 +325,37 @@ public class Tester
 
 
 	/**
+	 * Custom {@link SecurityManager} that selectively enables/disables {@link System#exit}.
+	 */
+	private static class ExitSecurityManager extends SecurityManager
+	{
+		private boolean exitAllowed;
+
+		public ExitSecurityManager() {
+		    exitAllowed = false;
+		}
+
+		public void setAllowed(final boolean allowed) {
+		    exitAllowed = allowed;
+		}
+
+		@Override
+		public void checkPermission(Permission perm) {
+		}
+
+		@Override
+		public void checkExit(int status) {
+		    if (exitAllowed) {
+			super.checkExit(status);
+		    }
+		    else {
+			throw new SecurityException(Integer.toString(status));
+		    }
+		}
+	}
+
+
+	/**
 	 * Consists of a file name and character set to use to read it.
 	 */
 	private static class DescriptionFile
@@ -347,8 +381,9 @@ public class Tester
 		}
 	}
 
+	private ExitSecurityManager exitSecurityManager = new ExitSecurityManager();
 
-	List<DescriptionFile> testDescriptionFiles = null;
+	private List<DescriptionFile> testDescriptionFiles = null;
 
 	private FileWriter outputFileWriter = null;
 
@@ -513,6 +548,10 @@ public class Tester
 	{
 	    ClassLoader cl = null;
 	    Class<?> testClass = null;
+	    Constructor<?> constructor = null;
+	    Object testObject = null;
+	    Testable testableObject = null;
+	    Method main = null;
 
 	    int exitCode = SUCCESS;
 
@@ -531,11 +570,11 @@ public class Tester
 		// will be us instead of them...
 		Environment.loadProgramInfo(testClass);
 
-		Constructor<?> constructor = testClass.getDeclaredConstructor();
-		Object testObject = constructor.newInstance();
+		constructor = testClass.getDeclaredConstructor();
+		testObject = constructor.newInstance();
 
 		if (Testable.class.isInstance(testObject)) {
-		    Testable testableObject = (Testable) testObject;
+		    testableObject = (Testable) testObject;
 
 		    setCurrentVersion(new Version(testableObject.getVersion()));
 
@@ -547,23 +586,16 @@ public class Tester
 			exitCode = testableObject.execute();
 		    }
 
-		    testableObject = null;
 		}
 		else {
-		    Method main = testClass.getDeclaredMethod("main", String[].class);
+		    main = testClass.getDeclaredMethod("main", String[].class);
 
 		    setCurrentVersion(new Version(Environment.getAppVersion()));
 
 		    logTestName(out, testName, null, commandLine);
 
 		    main.invoke(null, (Object) args);
-
-		    main = null;
 		}
-
-		setCurrentVersion(null);
-		constructor = null;
-		testObject = null;
 	    }
 	    catch (NoClassDefFoundError | ClassNotFoundException | ExceptionInInitializerError ex) {
 		err.println(Intl.formatString("tester#testClassNotFound", className, Exceptions.toString(ex)));
@@ -578,14 +610,32 @@ public class Tester
 		exitCode = OTHER_ERROR;
 	    }
 	    catch (InvocationTargetException ite) {
-		err.println(Intl.formatString("tester#abnormalExitString", Exceptions.toString(ite.getTargetException())));
-		exitCode = OTHER_ERROR;
+		Throwable target = ite.getTargetException();
+		if (target instanceof SecurityException) {
+		    // Thrown by a System.exit(code)
+		    String exitString = target.getMessage();
+		    exitCode = Integer.parseInt(exitString);
+		}
+		else {
+		    err.println(Intl.formatString("tester#abnormalExitString", Exceptions.toString(ite.getTargetException())));
+		    exitCode = OTHER_ERROR;
+		}
+	    }
+	    catch (SecurityException se) {
+		// Thrown by a System.exit(code)
+		String exitString = se.getMessage();
+		exitCode = Integer.parseInt(exitString);
 	    }
 	    catch (Throwable e) {
 		err.println(Intl.formatString("tester#abnormalExitString", Exceptions.toString(e)));
 		exitCode = OTHER_ERROR;
 	    }
 	    finally {
+		main = null;
+		setCurrentVersion(null);
+		constructor = null;
+		testableObject = null;
+		testObject = null;
 		testClass = null;
 		cl = null;
 	    }
@@ -1632,7 +1682,10 @@ public class Tester
 	    // Setup the canonical platform string
 	    currentPlatform = Environment.platformIdentifier();
 
-	    Environment.setInTesting();
+	    if (!Environment.inTesting()) {
+		Environment.setInTesting();
+		System.setSecurityManager(exitSecurityManager);
+	    }
 
 	    return SUCCESS;
 	}
@@ -1647,6 +1700,8 @@ public class Tester
 		Intl.errFormat("tester#exception", Exceptions.toString(err));
 		return OTHER_ERROR;
 	    }
+
+	    exitSecurityManager.setAllowed(true);
 
 	    int failed = numberFailed.intValue();
 	    return failed == 0 ? 0 : NUMBER_OF_ERRORS + failed;
