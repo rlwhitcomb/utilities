@@ -78,6 +78,8 @@
  *	    #393: Cleanup imports.
  *	25-Oct-2022 (rlwhitcomb)
  *	    #536: Don't process environment variable with options if we're doing testing.
+ *	30-Oct-2022 (rlwhitcomb)
+ *	    #536: Rename and repurpose the environment variable method.
  */
 package info.rlwhitcomb.util;
 
@@ -527,7 +529,7 @@ public class Options
 	 */
 	public static void environmentOptions(final Class<?> clazz, final Consumer<String[]> processor) {
 	    // During testing, ignore settings in the environment variables
-	    if (Environment.inTesting())
+	    if (!Environment.allowEnvOptions())
 		return;
 
 	    String optionsVariableName = clazz.getSimpleName().toUpperCase() + "_OPTIONS";

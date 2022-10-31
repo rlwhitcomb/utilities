@@ -246,6 +246,8 @@
  *	    #538: Use new ClassLoader for each test class loaded.
  *	29-Oct-2022 (rlwhitcomb)
  *	    #541: Install SecurityManager to capture System.exit from tested classes.
+ *	30-Oct-2022 (rlwhitcomb)
+ *	    #538: Implement "$noenv" and "$envopt" directives.
  */
 package info.rlwhitcomb.tester;
 
@@ -318,6 +320,7 @@ public class Tester
 	private String defaultCanonCharset = "";
 	private boolean ignoreLineEndings  = false;
 	private boolean noSubstitutions    = false;
+	private boolean allowEnvOptions    = false;
 
 	private String testClassName = null;
 
@@ -327,6 +330,7 @@ public class Tester
 	/**
 	 * Custom {@link SecurityManager} that selectively enables/disables {@link System#exit}.
 	 */
+	@SuppressWarnings("removal")
 	private static class ExitSecurityManager extends SecurityManager
 	{
 		private boolean exitAllowed;
@@ -1244,6 +1248,16 @@ public class Tester
 			noSubstitutions = true;
 			break;
 
+		    case "noenvoptions":
+		    case "noenv":
+			allowEnvOptions = false;
+			break;
+
+		    case "envoptions":
+		    case "envopt":
+			allowEnvOptions = true;
+			break;
+
 		    case "canoncharset":
 		    case "canoncs":
 			if (!CharUtil.isNullOrEmpty(argument)) {
@@ -1425,11 +1439,15 @@ public class Tester
 			    expectedExitCode = Integer.parseInt(exit);
 			}
 
+			Environment.setAllowEnvOptions(allowEnvOptions);
+
 			String charset = m.group(5);
 			if (charset == null)
 			    charset = defaultCanonCharset;
 
 			int ret = runOneTest(desc, m.group(3), charset, commandLine, expectedExitCode);
+
+			Environment.setAllowEnvOptions(true);
 
 			if (ret == 0) {
 			    numberPassed.incrementAndGet();
@@ -1662,6 +1680,7 @@ public class Tester
 
 
 	@Override
+	@SuppressWarnings("removal")
 	public int setup(final String[] args) {
 	    testDescriptionFiles = new ArrayList<>(args.length);
 
@@ -1682,10 +1701,7 @@ public class Tester
 	    // Setup the canonical platform string
 	    currentPlatform = Environment.platformIdentifier();
 
-	    if (!Environment.inTesting()) {
-		Environment.setInTesting();
-		System.setSecurityManager(exitSecurityManager);
-	    }
+	    System.setSecurityManager(exitSecurityManager);
 
 	    return SUCCESS;
 	}

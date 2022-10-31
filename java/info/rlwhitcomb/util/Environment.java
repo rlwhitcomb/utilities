@@ -188,6 +188,8 @@
  *	27-Oct-2022 (rlwhitcomb)
  *	    #538: New method to return the current CLASSPATH as an array of URLs,
  *	    suitable for use with a URLClassLoader.
+ *	30-Oct-2022 (rlwhitcomb)
+ *	    #536: Rename and repurpose the "in testing" property and methods.
  */
 package info.rlwhitcomb.util;
 
@@ -259,10 +261,10 @@ public final class Environment
 	private static String copyrightNotice = null;
 
 	/**
-	 * The system property that is set during testing, that could be used to influence behavior,
-	 * such as not processing environment variables that could wreck the testing.
+	 * The system property, mostly used during testing, to allow or not the processing
+	 * of options from an environment variable at startup.
 	 */
-	private static final String IN_TESTING_PROPERTY = "info.rlwhitcomb.Testing";
+	private static final String ALLOW_ENV_OPTIONS_PROPERTY = "info.rlwhitcomb.EnvOptions";
 
 	/**
 	 * The set of properties read from various files: "build.properties", "build.number",
@@ -1566,20 +1568,28 @@ public final class Environment
 
 
 	/**
-	 * Sets the system property to indicate that we're doing testing.
+	 * Sets the system property to allow getting options from the environment (not allowed
+	 * usually during testing to ensure a consistent environment).
+	 *
+	 * @param allow Whether to allow {@code xxx_OPTIONS} environment variable to set options.
+	 * @see #allowEnvOptions
 	 */
-	public static void setInTesting() {
-	    System.setProperty(IN_TESTING_PROPERTY , Boolean.TRUE.toString());
+	public static void setAllowEnvOptions(boolean allow) {
+	    // Default if the property is not set will be true
+	    if (allow)
+		System.clearProperty(ALLOW_ENV_OPTIONS_PROPERTY);
+	    else
+		System.setProperty(ALLOW_ENV_OPTIONS_PROPERTY, Boolean.FALSE.toString());
 	}
 
 
 	/**
-	 * Is the system in the midst of testing?
+	 * Are we allowing environment variables to preset program options?
 	 *
-	 * @return The state of the system property indicating we're doing testing.
+	 * @return The state of the system property set during testing.
 	 */
-	public static boolean inTesting() {
-	    String value = System.getProperty(IN_TESTING_PROPERTY, Boolean.FALSE.toString());
+	public static boolean allowEnvOptions() {
+	    String value = System.getProperty(ALLOW_ENV_OPTIONS_PROPERTY, Boolean.TRUE.toString());
 	    return Boolean.valueOf(value);
 	}
 
