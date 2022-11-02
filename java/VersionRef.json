@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.14.62', date: d'2022-11-01',
+      issues: [ 543 ],
+      comment: 'Trap and report date/time exceptions.'
+    },
     { version: '2.14.60', date: d'2022-11-01',
       issues: [ 544 ],
       comment: 'Respect '-' flag and ":quotestrings" setting in "@j" format.'

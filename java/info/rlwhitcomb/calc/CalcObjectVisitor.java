@@ -700,6 +700,7 @@
  *	01-Nov-2022 (rlwhitcomb)
  *	    #544: Respect the "quotestrings" setting for "@j" formatting; turn off
  *	    "extraSpace" with the "-" flag.
+ *	    #543: Trap DateTimeException and wrap with CalcExprException.
  */
 package info.rlwhitcomb.calc;
 
@@ -735,6 +736,7 @@ import java.nio.file.Paths;
 import java.security.SecureRandom;
 import java.text.FieldPosition;
 import java.text.NumberFormat;
+import java.time.DateTimeException;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
@@ -1452,8 +1454,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		BigInteger iValue = toIntegerValue(this, evaluate(ctx), settings.mc, ctx);
 		return LocalDate.ofEpochDay(iValue.longValueExact());
 	    }
-	    catch (ArithmeticException ae) {
-		throw new CalcExprException(ae, ctx);
+	    catch (ArithmeticException | DateTimeException ex) {
+		throw new CalcExprException(ex, ctx);
 	    }
 	}
 
@@ -2459,26 +2461,31 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    case 'e':
 			char dateChar = (formatChar == 'E') ? 'D' : 'd';
 			iValue = toIntegerValue(this, result, settings.mc, ctx);
-			LocalDate date = LocalDate.ofEpochDay(iValue.longValue());
-			int year = date.getYear();
-			String dateStr;
-			if (formatChar == 'E') {
-			    if (year < 0)
-				dateStr = String.format("%1$02d/%2$02d/-%3$04d",
-				    date.getMonthValue(), date.getDayOfMonth(), -year);
-			    else
-				dateStr = String.format("%1$02d/%2$02d/%3$04d",
-				    date.getMonthValue(), date.getDayOfMonth(), year);
+			try {
+			    LocalDate date = LocalDate.ofEpochDay(iValue.longValue());
+			    int year = date.getYear();
+			    String dateStr;
+			    if (formatChar == 'E') {
+				if (year < 0)
+				    dateStr = String.format("%1$02d/%2$02d/-%3$04d",
+					date.getMonthValue(), date.getDayOfMonth(), -year);
+				else
+				    dateStr = String.format("%1$02d/%2$02d/%3$04d",
+					date.getMonthValue(), date.getDayOfMonth(), year);
+			    }
+			    else {
+				if (year < 0)
+				    dateStr = String.format("-%1$04d-%2$02d-%3$02d",
+					-year, date.getMonthValue(), date.getDayOfMonth());
+				else
+				    dateStr = String.format("%1$04d-%2$02d-%3$02d",
+					year, date.getMonthValue(), date.getDayOfMonth());
+			    }
+			    constant(valueBuf, signChar, dateChar, dateStr);
 			}
-			else {
-			    if (year < 0)
-				dateStr = String.format("-%1$04d-%2$02d-%3$02d",
-				    -year, date.getMonthValue(), date.getDayOfMonth());
-			    else
-				dateStr = String.format("%1$04d-%2$02d-%3$02d",
-				    year, date.getMonthValue(), date.getDayOfMonth());
+			catch (DateTimeException ex) {
+			    throw new CalcExprException(ex, ctx);
 			}
-			constant(valueBuf, signChar, dateChar, dateStr);
 			break;
 
 		    case 'f':
