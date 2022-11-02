@@ -697,6 +697,9 @@
  *	    and to ignore case of file names when matching.
  *	25-Oct-2022 (rlwhitcomb)
  *	    #534: Error on duplicate "const" declaration.
+ *	01-Nov-2022 (rlwhitcomb)
+ *	    #544: Respect the "quotestrings" setting for "@j" formatting; turn off
+ *	    "extraSpace" with the "-" flag.
  */
 package info.rlwhitcomb.calc;
 
@@ -2503,8 +2506,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			if (skip == 0)
 			    valueBuf.append(indent);
 			valueBuf.append(toStringValue(this, ctx, result,
-				new StringFormat(true, true, true, separators, increment, skip),
-				indent, 0));
+				new StringFormat(settings.quoteStrings, true, (signChar != '-'),
+					separators, increment, skip), indent, 0));
 			break;
 
 		    case 'X':
