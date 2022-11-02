@@ -812,6 +812,20 @@
 >]
 >length d -> 4
 >scale d -> 6
+>Quoting result strings is now “false”.
+>d @-j -> [
+>  2,
+>  {
+>    start:3,
+>    end:2
+>  },
+>  {
+>    px:0,
+>    py:4
+>  },
+>  Bounding Area
+>]
+>Quoting result strings is now “true”.
 >f = {coords: [1, 1, 4, 5], name: "box"} -> { coords: [ 1, 1, 4, 5 ], name: "box" }
 >f @0.4j -> 
 >{
@@ -1377,7 +1391,7 @@
 >exists (path, 'd+') -> false
 >info.os.id == "linux" ? exists (lower (path), 'd') : exists (path, 'd') -> true
 {{ ^windows }}>FindFiles ('.', 'latest*', 'fx') -> [ "latest_push", "latest_test" ]
-{{ windows }}>FindFiles ('.', 'latest*', 'fx') -> [ "latest_push.bat", "latest_test.bat" ]
+{{  windows }}>FindFiles ('.', 'latest*', 'fx') -> [ "latest_push.bat", "latest_test.bat" ]
 >findFiles ('.', '*.java') -> [ "CheckCopyrights.java", "FormatValues.java" ]
 >delete 'alpha.beta', 'delta.gamma', 'alpha.omega' -> false
 >Defining constant “FILE1” = "_ftest_.beta"
