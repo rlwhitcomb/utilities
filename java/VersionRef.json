@@ -9,7 +9,7 @@
     },
     { version: '2.14.60', date: d'2022-11-01',
       issues: [ 544 ],
-      comment: 'Respect '-' flag and ":quotestrings" setting in "@j" format.'
+      comment: 'Respect "-" flag and ":quotestrings" setting in "@j" format.'
     },
     { version: '2.14.59', date: d'2022-10-25',
       issues: [ 534 ],
