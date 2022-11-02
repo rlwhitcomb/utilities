@@ -1393,6 +1393,7 @@
 {{ ^windows }}>FindFiles ('.', 'latest*', 'fx') -> [ "latest_push", "latest_test" ]
 {{  windows }}>FindFiles ('.', 'latest*', 'fx') -> [ "latest_push.bat", "latest_test.bat" ]
 >findFiles ('.', '*.java') -> [ "CheckCopyrights.java", "FormatValues.java" ]
+>findfiles ('test', 'd*', 'fr*~') -> [ "Declaration.txt", "dacted.canon", "defunkt.json", "demo", "dupjson.calc", "dynarray.canon", "dynarraytest" ]
 >delete 'alpha.beta', 'delta.gamma', 'alpha.omega' -> false
 >Defining constant “FILE1” = "_ftest_.beta"
 >Defining constant “FILE2” = "_gtest_.zeta"

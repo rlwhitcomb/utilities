@@ -1158,6 +1158,7 @@ info.os.id == "linux" ? exists(lower(path), 'd') : exists(path, 'd')
 #
 FindFiles('.', 'latest*', 'fx')
 findFiles('.', '*.java')
+findfiles('test', 'd*', 'fr*~')
 
 # "delete" function
 delete 'alpha.beta', 'delta.gamma', 'alpha.omega'
