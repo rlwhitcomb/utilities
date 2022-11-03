@@ -28,6 +28,7 @@
  *  29-Aug-22 rlw #453: Initial coding.
  *  31-Aug-22		More attributes.
  *  02-Nov-22 rlw #48:	"attributes" method.
+ *			Make "attributes" scriptable.
  */
 package info.rlwhitcomb.directory;
 
@@ -121,28 +122,6 @@ public final class FileInfo
 	 */
 	public boolean exists() {
 	    return file.exists();
-	}
-
-
-	/**
-	 * Get the string of file attributes, depending on the operating system.
-	 *
-	 * @return EIther {@code "drwxrwxrwx"} for Posix, or {@code "RHSA"} or {@code "<DIR>"}
-	 * for Windows.
-	 */
-	public String attributes() {
-	    StringBuilder buf = new StringBuilder();
-	    if (IS_WINDOWS) {
-		buf.append(dos.isReadOnly() ? 'R' : ' ');
-		buf.append(dos.isHidden()   ? 'H' : ' ');
-		buf.append(dos.isSystem()   ? 'S' : ' ');
-		buf.append(dos.isArchive()  ? 'A' : ' ');
-	    }
-	    else {
-		buf.append(posix.isDirectory() ? 'd' : '-');
-		buf.append(PosixFilePermissions.toString(posix.permissions()));
-	    }
-	    return buf.toString();
 	}
 
 
@@ -250,11 +229,33 @@ public final class FileInfo
 	}
 
 	/**
+	 * Get the string of file attributes, depending on the operating system.
+	 *
+	 * @return EIther {@code "drwxrwxrwx"} for Posix, or {@code "RHSA"} or {@code "<DIR>"}
+	 * for Windows.
+	 */
+	@Scriptable(order = 11)
+	public String getAttributes() {
+	    StringBuilder buf = new StringBuilder();
+	    if (IS_WINDOWS) {
+		buf.append(dos.isReadOnly() ? 'R' : ' ');
+		buf.append(dos.isHidden()   ? 'H' : ' ');
+		buf.append(dos.isSystem()   ? 'S' : ' ');
+		buf.append(dos.isArchive()  ? 'A' : ' ');
+	    }
+	    else {
+		buf.append(posix.isDirectory() ? 'd' : '-');
+		buf.append(PosixFilePermissions.toString(posix.permissions()));
+	    }
+	    return buf.toString();
+	}
+
+	/**
 	 * Access the file length.
 	 *
 	 * @return The file's length (or size).
 	 */
-	@Scriptable(order = 11)
+	@Scriptable(order = 12)
 	public long getLength() {
 	    return file.length();
 	}
@@ -264,7 +265,7 @@ public final class FileInfo
 	 *
 	 * @return The bare name of the file, without the extension.
 	 */
-	@Scriptable(order = 12)
+	@Scriptable(order = 13)
 	public String getNameOnly() {
 	    return FileUtilities.nameOnly(file);
 	}
@@ -274,7 +275,7 @@ public final class FileInfo
 	 *
 	 * @return The file extension, if any, starting with ".", or {@code ""} if none.
 	 */
-	@Scriptable(order = 13)
+	@Scriptable(order = 14)
 	public String getExtension() {
 	    return FileUtilities.extOnly(file);
 	}
@@ -284,7 +285,7 @@ public final class FileInfo
 	 *
 	 * @return Date and time of file creation.
 	 */
-	@Scriptable(order = 14)
+	@Scriptable(order = 15)
 	public FileTime getCreationTime() {
 	    return basic != null ? basic.creationTime() : FileTime.fromMillis(0L);
 	}
@@ -294,7 +295,7 @@ public final class FileInfo
 	 *
 	 * @return Date and time of last access to this file.
 	 */
-	@Scriptable(order = 15)
+	@Scriptable(order = 16)
 	public FileTime getLastAccessTime() {
 	    return basic != null ? basic.lastAccessTime() : FileTime.fromMillis(0L);
 	}
@@ -304,7 +305,7 @@ public final class FileInfo
 	 *
 	 * @return Date and time of last modification to this file.
 	 */
-	@Scriptable(order = 16)
+	@Scriptable(order = 17)
 	public FileTime getLastModifiedTime() {
 	    return basic != null ? basic.lastModifiedTime() : FileTime.fromMillis(0L);
 	}

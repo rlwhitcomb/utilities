@@ -917,12 +917,12 @@ System.out.println("wildcard spec " + spec);
 		    File[] files = f.listFiles();
 		    for (File file : files) {
 			FileInfo info = new FileInfo(file);
-			System.out.println(info.attributes() + "  " + info.getFullPath());
+			System.out.println(info.getAttributes() + "  " + info.getFullPath());
 		    }
 		}
 		else {
 		    FileInfo info = new FileInfo(f);
-		    System.out.println(info.attributes() + "  " + info.getFullPath());
+		    System.out.println(info.getAttributes() + "  " + info.getFullPath());
 		}
 	    }
 	}
