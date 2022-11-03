@@ -23,22 +23,16 @@
  *
  *	Calc operational settings.
  *
- *  History:
- *	26-Jan-2022 (rlwhitcomb)
- *	    Moved out of CalcObjectVisitor.
- *	01-Feb-2022 (rlwhitcomb)
- *	    Add Scriptable annotations.
- *	02-Feb-2022 (rlwhitcomb)
- *	    #115: Move "mc" and "mcDivide" into here. New "getPrecision"
- *	    method which is Scriptable so it will be exposed for viewing.
- *	05-Feb-2022 (rlwhitcomb)
- *	    #233: Take out "getPrecision" in favor of just "precision" value.
- *	14-Apr-2022 (rlwhitcomb)
- *	    #273: Move math-related classes to "math" package.
- *	08-Jul-2022 (rlwhitcomb)
- *	    #393: Cleanup imports.
- *	10-Jul-2022 (rlwhitcomb)
- *	    #392: New option to sort objects by key.
+ * History:
+ *  26-Jan-22 rlw  ---	Moved out of CalcObjectVisitor.
+ *  01-Feb-22 rlw  ---	Add Scriptable annotations.
+ *  02-Feb-22 rlw #115:	Move "mc" and "mcDivide" into here. New "getPrecision"
+ *			method which is Scriptable so it will be exposed for viewing.
+ *  05-Feb-22 rlw #233:	Take out "getPrecision" in favor of just "precision" value.
+ *  14-Apr-22 rlw #273:	Move math-related classes to "math" package.
+ *  08-Jul-22 rlw #393:	Cleanup imports.
+ *  10-Jul-22 rlw #392:	New option to sort objects by key.
+ *  02-Nov-22 rlw #458:	Private default constructor; redo History.
  */
 package info.rlwhitcomb.calc;
 
@@ -106,9 +100,9 @@ public class Settings
 
 
 	/**
-	 * Default constructor to supply default, default settings.
+	 * Default (private) constructor so we make sure all settings get actually set.
 	 */
-	public Settings() {
+	private Settings() {
 	}
 
 	/**

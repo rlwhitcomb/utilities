@@ -316,6 +316,9 @@
  *	    #527: Fix processing of ":include" with embedded spaces.
  *	19-Oct-2022 (rlwhitcomb)
  *	    Add some Javadoc and move some methods out to CharUtil.
+ *	02-Nov-2022 (rlwhitcomb)
+ *	    #458: Synchronize output inside ConsoleDisplayer for parallel operations.
+ *	    Rename "replMode" to "consoleMode".
  */
 package info.rlwhitcomb.calc;
 
@@ -498,7 +501,7 @@ public class Calc
 
 	private static boolean noIntro           = false;
 	private static boolean guiMode           = false;
-	private static boolean replMode          = false;
+	private static boolean consoleMode       = false;
 	private static boolean debug             = false;
 	private static boolean colors            = true;
 	private static boolean timing            = false;
@@ -1142,7 +1145,8 @@ public class Calc
 		});
 
 		displayer = this;
-		visitor = new CalcObjectVisitor(displayer, rational, separators, silenceDirectives, ignoreCase, quotes, sortKeys);
+		visitor = new CalcObjectVisitor(displayer,
+			new Settings(rational, separators, silenceDirectives, ignoreCase, quotes, sortKeys));
 
 		// Set the command-line arguments into the symbol table as $nn
 		int index = 0;
@@ -1291,8 +1295,8 @@ public class Calc
 	}
 
 
-	public static boolean getReplMode() {
-	    return replMode;
+	public static boolean getConsoleMode() {
+	    return consoleMode;
 	}
 
 	public static boolean setTimingMode(boolean mode) {
@@ -1349,7 +1353,7 @@ public class Calc
 			RecognitionException e) {
 		    int width = guiMode ? charPositionInLine + 1 : charPositionInLine + 3;
 		    currentIndicator = CharUtil.padToWidth("^", width, CharUtil.Justification.RIGHT);
-		    if (replMode) {
+		    if (consoleMode) {
 			Intl.outFormat("calc#error", currentIndicator);
 		    }
 		    int ix = message.indexOf("at input '");
@@ -1381,7 +1385,7 @@ public class Calc
 		    int charPos = t.getCharPositionInLine();
 		    int width = guiMode ? charPos + 1 : charPos + 3;
 		    currentIndicator = CharUtil.padToWidth("^", width, CharUtil.Justification.RIGHT);
-		    if (replMode) {
+		    if (consoleMode) {
 			Intl.outFormat("calc#error", currentIndicator);
 		    }
 		    throw new CalcException(Intl.formatString("calc#errorNoAlt", charPos, t.getText()), t.getLine());
@@ -1423,26 +1427,35 @@ public class Calc
 	{
 		@Override
 		public void displayResult(String exprString, String resultString) {
-		    if (resultsOnly)
-			Intl.outFormat("calc#resultOnly", resultString);
-		    else
-			Intl.outFormat("calc#result", exprString, resultString);
+		    synchronized(this) {
+			if (resultsOnly)
+			    Intl.outFormat("calc#resultOnly", resultString);
+			else
+			    Intl.outFormat("calc#result", exprString, resultString);
+		    }
 		}
 
 		@Override
 		public void displayActionMessage(String message) {
-		    if (!resultsOnly)
-			Intl.outFormat("calc#action", message);
+		    if (!resultsOnly) {
+			synchronized(this) {
+			    Intl.outFormat("calc#action", message);
+			}
+		    }
 		}
 
 		@Override
 		public void displayMessage(String message, CalcDisplayer.Output output) {
-		    output(message, output);
+		    synchronized(this) {
+			output(message, output);
+		    }
 		}
 
 		@Override
 		public void displayErrorMessage(String message) {
-		    Intl.errFormat("calc#error", message);
+		    synchronized(this) {
+			Intl.errFormat("calc#error", message);
+		    }
 		}
 
 		@Override
@@ -1452,10 +1465,12 @@ public class Calc
 		    String regularMessage = (message.endsWith(".") ?
 			message.substring(0, message.length() - 1) : message);
 
-		    if (replMode)
-			Intl.errFormat("calc#errorPeriod", regularMessage);
-		    else
-			Intl.errFormat("calc#errorLine", regularMessage, lineNumber);
+		    synchronized(this) {
+			if (consoleMode)
+			    Intl.errFormat("calc#errorPeriod", regularMessage);
+			else
+			    Intl.errFormat("calc#errorLine", regularMessage, lineNumber);
+		    }
 		}
 	}
 
@@ -2549,7 +2564,8 @@ public class Calc
 		    else
 			displayer = new ConsoleDisplayer();
 
-		    visitor = new CalcObjectVisitor(displayer, rational, separators, silenceDirectives, ignoreCase, quotes, sortKeys);
+		    visitor = new CalcObjectVisitor(displayer,
+			new Settings(rational, separators, silenceDirectives, ignoreCase, quotes, sortKeys));
 
 		    // In case there are version requirements for libraries or variables,
 		    // check the values set by "-requires", etc.
@@ -2586,12 +2602,12 @@ public class Calc
 				printIntro();
 			    }
 
-			    replMode = true;
+			    consoleMode = true;
 
 			    StringBuilder buf = new StringBuilder();
 			    String line;
 			    String prompt = ConsoleColor.color("<Bk!>> <.>");
-			replLoop:
+			consoleLoop:
 			    while ((line = console.readLine(prompt)) != null) {
 				boolean scriptInput = false;
 				if (buf.length() == 0) {
@@ -2620,7 +2636,7 @@ public class Calc
 					case ":gui":
 					case ":g":
 					    DesktopApplicationContext.main(Calc.class, args);
-					    break replLoop;
+					    break consoleLoop;
 					default:
 					    scriptInput = true;
 					    break;
@@ -2645,7 +2661,7 @@ public class Calc
 			    if (line == null)
 				System.out.println();
 
-			    replMode = false;
+			    consoleMode = false;
 			}
 		    }
 		    else {

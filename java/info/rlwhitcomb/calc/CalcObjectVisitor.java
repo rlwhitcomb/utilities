@@ -703,6 +703,8 @@
  *	    #544: Respect the "quotestrings" setting for "@j" formatting; turn off
  *	    "extraSpace" with the "-" flag.
  *	    #543: Trap DateTimeException and wrap with CalcExprException.
+ *	02-Nov-2022 (rlwhitcomb)
+ *	    #458: Use InheritableThreadLocal for scope and context (more are needed).
  */
 package info.rlwhitcomb.calc;
 
@@ -949,16 +951,16 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	private boolean doNotCallZeroArgFunctions = false;
 
 	/** The mode settings for this instantiation of the visitor. */
-	private Settings settings = new Settings();
+	private Settings settings;
 
 	/** Global symbol table for variables. */
 	private final GlobalScope globals;
 
 	/** The current topmost scope for variables (thread local for parallel computations). */
-	private ThreadLocal<NestedScope> threadCurrentScope = new ThreadLocal<>();
+	private InheritableThreadLocal<NestedScope> threadCurrentScope = new InheritableThreadLocal<>();
 
 	/** The current {@code LValueContext} for variables (thread local for parallel computations). */
-	private ThreadLocal<LValueContext> threadCurrentContext = new ThreadLocal<>();
+	private InheritableThreadLocal<LValueContext> threadCurrentContext = new InheritableThreadLocal<>();
 
 	/** The executor for running parallel computations. */
 	private ForkJoinPool executor = ForkJoinPool.commonPool();
@@ -1056,17 +1058,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	};
 
 
-	public CalcObjectVisitor(
-		final CalcDisplayer resultDisplayer,
-		final boolean rational,
-		final boolean separators,
-		final boolean silence,
-		final boolean ignoreCase,
-		final boolean quotes,
-		final boolean sortKeys)
-	{
+	public CalcObjectVisitor(final CalcDisplayer resultDisplayer, final Settings originalSettings) {
 	    displayer = resultDisplayer;
-	    settings  = new Settings(rational, separators, silence, ignoreCase, quotes, sortKeys);
+	    settings  = originalSettings;
 	    setIntMathContext(MathContext.DECIMAL128);
 
 	    globals = new GlobalScope();
@@ -1917,9 +1911,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 
 	    boolean oldMode = Calc.setResultsOnlyMode(false);
-	    boolean replMode = Calc.getReplMode();
+	    boolean consoleMode = Calc.getConsoleMode();
 
-	    if (!replMode) {
+	    if (!consoleMode) {
 		displayActionMessage("%calc#variables");
 		displayActionMessage("%calc#varUnder1");
 	    }
@@ -1939,7 +1933,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		}
 	    }
 
-	    if (!replMode) {
+	    if (!consoleMode) {
 		displayActionMessage("%calc#varUnder2");
 	    }
 
@@ -1989,9 +1983,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 
 	    boolean oldMode = Calc.setResultsOnlyMode(false);
-	    boolean replMode = Calc.getReplMode();
+	    boolean consoleMode = Calc.getConsoleMode();
 
-	    if (!replMode) {
+	    if (!consoleMode) {
 		displayActionMessage("%calc#predefined");
 		displayActionMessage("%calc#preUnder1");
 	    }
@@ -2011,7 +2005,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		}
 	    }
 
-	    if (!replMode) {
+	    if (!consoleMode) {
 		displayActionMessage("%calc#preUnder2");
 	    }
 
@@ -3441,7 +3435,7 @@ System.out.println("i = " + i + ", result = " + result);
 	    String constantName = ctx.id().getText();
 	    CalcParser.ExprContext expr = ctx.expr();
 
-	    if (currentScope.isDefinedLocally(constantName, settings.ignoreNameCase))
+	    if (getVariables().isDefinedLocally(constantName, settings.ignoreNameCase))
 		throw new CalcExprException(ctx, "%calc#noDupConstant", constantName);
 
 	    Object value = evaluate(expr);
