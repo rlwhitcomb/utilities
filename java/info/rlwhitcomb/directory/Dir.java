@@ -24,17 +24,20 @@
  *	Based on a DOS program "D.C" written in antiquity
  *	to be a better/simpler version of the "dir" command.
  *
- *  Change History:
- *	20-Nov-2020 (rlwhitcomb)
- *	    More work on new version in Java, loosely translated from C.
- *	15-Aug-2021 (rlwhitcomb)
- *	    More coding using Java paradigms.
- *	12-Apr-2022 (rlwhitcomb)
- *	    #269: New method to load main program info (in Environment).
- *	18-Apr-2022 (rlwhitcomb)
- *	    #270: Make this automatic now.
+ * History:
+ *  20-Nov-20 rlw  ---	More work on new version in Java, loosely translated from C.
+ *  15-Aug-21 rlw  ---	More coding using Java paradigms.
+ *  12-Apr-22 rlw #269:	New method to load main program info (in Environment).
+ *  18-Apr-22 rlw #270:	Make this automatic now.
+ *  02-Nov-22 rlw #48:	More coding in the higher level methods.
  */
 package info.rlwhitcomb.directory;
+
+import info.rlwhitcomb.util.CharUtil;
+import info.rlwhitcomb.util.Environment;
+import info.rlwhitcomb.util.Exceptions;
+import info.rlwhitcomb.util.FileUtilities;
+import info.rlwhitcomb.util.Options;
 
 import java.awt.Dimension;
 import java.io.File;
@@ -54,10 +57,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-import info.rlwhitcomb.util.CharUtil;
-import info.rlwhitcomb.util.Environment;
-import info.rlwhitcomb.util.Exceptions;
-;
 
 /**
  * Replacement for Windows "dir" command with similar but slightly more
@@ -909,6 +908,23 @@ System.out.println("size = " + basicAttrs.size() + ", createTime = " + basicAttr
 	    // depending on how we arrange the options: such as "-dir basedir spec1, spec2 ..."
 // This method will do whatever is called for on one directory / name / file name, possibly saving
 // the file information for sorting and later display
+	    if (Match.hasWildCards(spec)) {
+System.out.println("wildcard spec " + spec);
+	    }
+	    else {
+		File f = new File(spec);
+		if (FileUtilities.canReadDir(f)) {
+		    File[] files = f.listFiles();
+		    for (File file : files) {
+			FileInfo info = new FileInfo(file);
+			System.out.println(info.attributes() + "  " + info.getFullPath());
+		    }
+		}
+		else {
+		    FileInfo info = new FileInfo(f);
+		    System.out.println(info.attributes() + "  " + info.getFullPath());
+		}
+	    }
 	}
 
 
@@ -920,8 +936,16 @@ System.out.println("size = " + basicAttrs.size() + ", createTime = " + basicAttr
 
 	    currentDriveIndex = getDriveIndex(getDrive(Environment.currentDirectory()));
 
+	    final List<String> specs = new ArrayList<>();
+
+	    Options.environmentOptions(Dir.class, a -> {
+		for (String arg : a) {
+		    if (!processOption(arg, specs))
+			return;
+		}
+	    });
+
 	    // Process command line options
-	    List<String> specs = new ArrayList<>();
 	    for (String arg : args) {
 		if (!processOption(arg, specs))
 		    return;
