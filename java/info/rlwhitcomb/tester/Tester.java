@@ -238,6 +238,16 @@
  *	    #443: Update Javadoc with the new marker conventions.
  *	17-Oct-2022 (rlwhitcomb)
  *	    #443: Change markers (again) to "{{ }}" for version and "[< >]" for charset.
+ *	25-Oct-2022 (rlwhitcomb)
+ *	    #536: Set system property to indicate testing in progress; but after we process
+ *	    our own options.
+ *	26-Oct-2022 (rlwhitcomb)
+ *	    #540: Move TestFiles and Version out to separate class file. Significant refactoring here.
+ *	    #538: Use new ClassLoader for each test class loaded.
+ *	29-Oct-2022 (rlwhitcomb)
+ *	    #541: Install SecurityManager to capture System.exit from tested classes.
+ *	30-Oct-2022 (rlwhitcomb)
+ *	    #538: Implement "$noenv" and "$envopt" directives.
  */
 package info.rlwhitcomb.tester;
 
@@ -252,9 +262,12 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigInteger;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.nio.charset.Charset;
 import java.nio.charset.UnsupportedCharsetException;
 import java.nio.file.Files;
+import java.security.Permission;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -307,10 +320,43 @@ public class Tester
 	private String defaultCanonCharset = "";
 	private boolean ignoreLineEndings  = false;
 	private boolean noSubstitutions    = false;
+	private boolean allowEnvOptions    = false;
 
-	private Class<?> testClass = null;
+	private String testClassName = null;
 
 	private Charset currentCharset = null;
+
+
+	/**
+	 * Custom {@link SecurityManager} that selectively enables/disables {@link System#exit}.
+	 */
+	@SuppressWarnings("removal")
+	private static class ExitSecurityManager extends SecurityManager
+	{
+		private boolean exitAllowed;
+
+		public ExitSecurityManager() {
+		    exitAllowed = false;
+		}
+
+		public void setAllowed(final boolean allowed) {
+		    exitAllowed = allowed;
+		}
+
+		@Override
+		public void checkPermission(Permission perm) {
+		}
+
+		@Override
+		public void checkExit(int status) {
+		    if (exitAllowed) {
+			super.checkExit(status);
+		    }
+		    else {
+			throw new SecurityException(Integer.toString(status));
+		    }
+		}
+	}
 
 
 	/**
@@ -339,8 +385,9 @@ public class Tester
 		}
 	}
 
+	private ExitSecurityManager exitSecurityManager = new ExitSecurityManager();
 
-	List<DescriptionFile> testDescriptionFiles = null;
+	private List<DescriptionFile> testDescriptionFiles = null;
 
 	private FileWriter outputFileWriter = null;
 
@@ -361,112 +408,6 @@ public class Tester
 	};
 
 
-	/**
-	 * An object to hold the multiple file-related objects that need to be passed around
-	 * during operation.
-	 */
-	private static class TestFiles
-	{
-		public File inputFile = null;
-		public File outputFile = null;
-		public File errorFile = null;
-		public BufferedWriter inputWriter = null;
-		public BufferedWriter outputWriter = null;
-		public BufferedWriter errorWriter = null;
-
-		public File resultFile = null;
-
-		/**
-		 * If {@code true} line endings are written as plain {@code '\n'}
-		 * regardless of platform, while {@code false} indicates using
-		 * the platform-specific line ending.
-		 */
-		private boolean ignoreLineEndings;
-
-
-		public TestFiles(final boolean ignore) {
-		    ignoreLineEndings = ignore;
-		}
-
-		public void createStreams(final Charset cs)
-			throws IOException
-		{
-		    inputFile = FileUtilities.createTempFile("canoninput");
-		    outputFile = FileUtilities.createTempFile("canonoutput");
-		    errorFile = FileUtilities.createTempFile("canonerror");
-
-		    inputWriter = Files.newBufferedWriter(inputFile.toPath(), cs);
-		    outputWriter = Files.newBufferedWriter(outputFile.toPath(), cs);
-		    errorWriter = Files.newBufferedWriter(errorFile.toPath(), cs);
-		}
-
-		public void writeInputLine(final String line)
-			throws IOException
-		{
-		    if (line != null) {
-			inputWriter.write(line);
-			inputWriter.newLine();
-		    }
-		}
-
-		private void write(final BufferedWriter writer, final String line)
-			throws IOException
-		{
-		    if (line != null) {
-			if (!line.isEmpty())
-			    writer.write(line);
-			if (ignoreLineEndings)
-			    writer.write('\n');
-			else
-			    writer.newLine();
-		    }
-		}
-
-		public void writeOutputLine(final String line)
-			throws IOException
-		{
-		    write(outputWriter, line);
-		}
-
-		public void writeErrorLine(final String line)
-			throws IOException
-		{
-		    write(errorWriter, line);
-		}
-
-		public void closeStreams()
-			throws IOException
-		{
-		    inputWriter.flush();
-		    inputWriter.close();
-		    inputWriter = null;
-		    outputWriter.flush();
-		    outputWriter.close();
-		    outputWriter = null;
-		    errorWriter.flush();
-		    errorWriter.close();
-		    errorWriter = null;
-		}
-
-		public void abort()
-			throws IOException
-		{
-		    if (inputWriter != null)
-			inputWriter.close();
-		    if (outputWriter != null)
-			outputWriter.close();
-		    if (errorWriter != null)
-			errorWriter.close();
-		}
-
-		public void deleteFiles()
-			throws IOException
-		{
-		    inputFile.delete();
-		    outputFile.delete();
-		    errorFile.delete();
-		}
-	}
 
 
 	/**
@@ -588,11 +529,130 @@ public class Tester
 	    }
 	}
 
+	private void setCurrentVersion(final Version current) {
+	    currentVersion = current;
+	}
+
+	/**
+	 * Execute the given test class with the given command line.
+	 *
+	 * @param className   Fully-qualified class name to invoke.
+	 * @param commandLine Single command line for the test class to execute.
+	 * @param testName    Name for this test (reporting purposes).
+	 * @param out         Output stream for debug messages.
+	 * @param err         Error output stream for error messages.
+	 * @return One of the defined exit codes.
+	 */
+	private int executeClass(
+		final String className,
+		final String commandLine,
+		final String testName,
+		final PrintStream out,
+		final PrintStream err)
+	{
+	    ClassLoader cl = null;
+	    Class<?> testClass = null;
+	    Constructor<?> constructor = null;
+	    Object testObject = null;
+	    Testable testableObject = null;
+	    Method main = null;
+
+	    int exitCode = SUCCESS;
+
+	    try {
+		URL[] urls = Environment.getURLClassPath();
+		cl = new URLClassLoader(urls);
+
+		testClass = Class.forName(className, true, cl);
+
+		String[] args = CommandLine.parse(commandLine, defaultScriptDir);
+		if (debug) {
+		    out.println("Command line = " + CharUtil.makeStringList(args));
+		}
+
+		// Preload the program's version information because otherwise the "main program"
+		// will be us instead of them...
+		Environment.loadProgramInfo(testClass);
+
+		constructor = testClass.getDeclaredConstructor();
+		testObject = constructor.newInstance();
+
+		if (Testable.class.isInstance(testObject)) {
+		    testableObject = (Testable) testObject;
+
+		    setCurrentVersion(new Version(testableObject.getVersion()));
+
+		    exitCode = testableObject.setup(args);
+
+		    logTestName(out, testName, testableObject.getTestName(), commandLine);
+
+		    if (exitCode == SUCCESS) {
+			exitCode = testableObject.execute();
+		    }
+
+		}
+		else {
+		    main = testClass.getDeclaredMethod("main", String[].class);
+
+		    setCurrentVersion(new Version(Environment.getAppVersion()));
+
+		    logTestName(out, testName, null, commandLine);
+
+		    main.invoke(null, (Object) args);
+		}
+	    }
+	    catch (NoClassDefFoundError | ClassNotFoundException | ExceptionInInitializerError ex) {
+		err.println(Intl.formatString("tester#testClassNotFound", className, Exceptions.toString(ex)));
+		exitCode = CLASS_NOT_FOUND;
+	    }
+	    catch (NoSuchMethodException nsme) {
+		err.println(Intl.formatString("tester#noMainMethod", Exceptions.toString(nsme)));
+		exitCode = OTHER_ERROR;
+	    }
+	    catch (IllegalAccessException | IllegalArgumentException | InstantiationException ex) {
+		err.println(Intl.formatString("tester#mainInvokeError", Exceptions.toString(ex)));
+		exitCode = OTHER_ERROR;
+	    }
+	    catch (InvocationTargetException ite) {
+		Throwable target = ite.getTargetException();
+		if (target instanceof SecurityException) {
+		    // Thrown by a System.exit(code)
+		    String exitString = target.getMessage();
+		    exitCode = Integer.parseInt(exitString);
+		}
+		else {
+		    err.println(Intl.formatString("tester#abnormalExitString", Exceptions.toString(ite.getTargetException())));
+		    exitCode = OTHER_ERROR;
+		}
+	    }
+	    catch (SecurityException se) {
+		// Thrown by a System.exit(code)
+		String exitString = se.getMessage();
+		exitCode = Integer.parseInt(exitString);
+	    }
+	    catch (Throwable e) {
+		err.println(Intl.formatString("tester#abnormalExitString", Exceptions.toString(e)));
+		exitCode = OTHER_ERROR;
+	    }
+	    finally {
+		main = null;
+		setCurrentVersion(null);
+		constructor = null;
+		testableObject = null;
+		testObject = null;
+		testClass = null;
+		cl = null;
+	    }
+
+	    return exitCode;
+	}
+
 
 	/**
 	 * Run the test and compare results with the canons or just create the canon files
 	 * from the current output.
 	 *
+	 * @param className	Test class name.
 	 * @param testName	The name of this particular test.
 	 * @param files		Object containing the file-related objects to pass around.
 	 * @param cs		The charset to use for input, output, and error files.
@@ -602,12 +662,18 @@ public class Tester
 	 *			(or zero for {@link #createCanons} mode).
 	 */
 	private int runTestAndCompareOrCreateCanons(
+		final String className,
 		final String testName,
 		final TestFiles files,
 		final Charset cs,
 		final String commandLine,
 		final int expectedExitCode)
 	{
+	    if (CharUtil.isNullOrEmpty(className)) {
+		Intl.outPrintln("tester#noTestClass");
+		return CLASS_NOT_FOUND;
+	    }
+
 	    InputStream origIn = System.in;
 	    PrintStream origOut = System.out;
 	    PrintStream origErr = System.err;
@@ -619,87 +685,32 @@ public class Tester
 	    PrintStream newOut = null;
 	    PrintStream newErr = null;
 
+	    long startTime = 0L;
 	    long elapsedTime;
 	    long initialMemoryUsed = usedMemory();
 
 	    int exitCode = SUCCESS;
 
 	    try {
-		testOut = FileUtilities.createTempFile("testoutput");
-		testErr = FileUtilities.createTempFile("testerror");
-
-		// Note: significant problems with charsets here on input!!
-		if (createCanons) {
-		    testIn = FileUtilities.createTempFile("testinput");
-		    newIn = new EchoInputStream(origIn, Files.newOutputStream(testIn.toPath()));
-		}
-		else {
-		    newIn = Files.newInputStream(files.inputFile.toPath());
-		}
-		System.setIn(newIn);
-		System.setOut(newOut = createPrintStream(testOut, cs));
-		System.setErr(newErr = createPrintStream(testErr, cs));
-
-		long startTime = Environment.highResTimer();
-
 		try {
-		    if (testClass == null) {
-			origErr.println(Intl.getString("tester#noTestClass"));
-			return CLASS_NOT_FOUND;
+		    testOut = FileUtilities.createTempFile("testoutput");
+		    testErr = FileUtilities.createTempFile("testerror");
+
+		    // Note: significant problems with charsets here on input!!
+		    if (createCanons) {
+			testIn = FileUtilities.createTempFile("testinput");
+			newIn = new EchoInputStream(origIn, Files.newOutputStream(testIn.toPath()));
 		    }
 		    else {
-			try {
-			    String[] args = CommandLine.parse(commandLine, defaultScriptDir);
-			    if (debug) {
-				origOut.println("Command line = " + CharUtil.makeStringList(args));
-			    }
-
-			    // Preload the program's version information because otherwise the "main program"
-			    // will be us instead of them...
-			    Environment.loadProgramInfo(testClass);
-
-			    Constructor<?> constructor = testClass.getDeclaredConstructor();
-			    Object testObject = constructor.newInstance();
-			    if (Testable.class.isInstance(testObject)) {
-				Testable testableObject = (Testable) testObject;
-
-				currentVersion = new Version(testableObject.getVersion());
-
-				exitCode = testableObject.setup(args);
-
-				logTestName(origOut, testName, testableObject.getTestName(), commandLine);
-
-				if (exitCode == SUCCESS) {
-				    exitCode = testableObject.execute();
-				}
-			    }
-			    else {
-				Method main = testClass.getDeclaredMethod("main", String[].class);
-
-				currentVersion = new Version(Environment.getAppVersion());
-
-				logTestName(origOut, testName, null, commandLine);
-
-				main.invoke(null, (Object) args);
-			    }
-			}
-			catch (NoSuchMethodException nsme) {
-			    origErr.println(Intl.formatString("tester#noMainMethod", Exceptions.toString(nsme)));
-			    return OTHER_ERROR;
-			}
-			catch (IllegalAccessException | IllegalArgumentException | InstantiationException ex) {
-			    origErr.println(Intl.formatString("tester#mainInvokeError", Exceptions.toString(ex)));
-			    return OTHER_ERROR;
-			}
-			catch (InvocationTargetException ite) {
-			    origErr.println(Intl.formatString("tester#abnormalExitString", Exceptions.toString(ite.getTargetException())));
-			    return OTHER_ERROR;
-			}
+			newIn = Files.newInputStream(files.inputFile.toPath());
 		    }
-		}
-		catch (Exception e) {
-		    origErr.println(Intl.formatString("tester#abnormalExitString", Exceptions.toString(e)));
-		    exitCode = OTHER_ERROR;
+		    System.setIn(newIn);
+		    System.setOut(newOut = createPrintStream(testOut, cs));
+		    System.setErr(newErr = createPrintStream(testErr, cs));
+
+		    startTime = Environment.highResTimer();
+
+		    exitCode = executeClass(className, commandLine, testName, origOut, origErr);
 		}
 		finally {
 		    elapsedTime = Environment.highResTimer() - startTime;
@@ -740,8 +751,7 @@ public class Tester
 		    }
 		}
 		else {
-		    // If an alternate output file was named in the canon file, compare that to the canon
-		    // output instead
+		    // If an alternate output file was named in the canon file, compare that to the canon output instead
 		    if (files.resultFile != null)
 			ret = compareCanons(testName, files.outputFile, files.resultFile, files.errorFile, testErr, cs);
 		    else
@@ -806,61 +816,6 @@ public class Tester
 	}
 
 
-	private class Version implements Comparable<Version>
-	{
-		/** Major version (or -1 if empty) */
-		int major;
-		/** Minor version (or -1 if empty or equal "x" or "*") */
-		int minor;
-
-		public Version() {
-		    this(-1, -1);
-		}
-
-		public Version(final int maj, final int min) {
-		    major = maj;
-		    minor = min;
-		}
-
-		public Version(final String input) {
-		    String vers[] = input.split("\\.");
-		    if (vers[0].isEmpty())
-			major = -1;
-		    else
-			major = Integer.parseInt(vers[0]);
-		    if (vers.length > 1) {
-			if (vers[1].equalsIgnoreCase("x") ||
-			    vers[1].equals("*"))
-			    minor = -1;
-			else
-			    minor = Integer.parseInt(vers[1]);
-		    }
-		    else {
-			minor = -1;
-		    }
-		}
-
-		/**
-		 * @param other The other version to compare to.
-		 * @return -1 if version is &lt; other
-		 *         0 if versions are equal
-		 *         +1 if version is &gt; other
-		 *         will return 0 if major is -1 or major is equal and minor is -1
-		 */
-		@Override
-		public int compareTo(final Version other) {
-		    if (major == -1)
-			return 0;
-		    if (major != other.major) {
-			return Integer.signum(major - other.major);
-		    }
-		    if (minor == -1)
-			return 0;
-		    return Integer.signum(minor - other.minor);
-		}
-	}
-
-
 	private boolean platformCheck(final String platformCheck) {
 	    if (!platformCheck.isEmpty()) {
 		if (platformCheck.startsWith("^")) {
@@ -884,15 +839,19 @@ public class Tester
 
 	/**
 	 * Check a potential canon line for platform, version and charset values
-	 * specified as <code>{{ <i>platform</i> }}</code> or <code>{{ ,<i>major</i>.<i>minor</i> }}</code> or <code>{{ <i>platform</i>,<i>major</i>.<i>minor</i> }}</code>.
-	 * <p>Platform can be <code>"windows"</code>, <code>"linux"</code>, <code>"unix"</code>, or <code>"osx"</code>. Also, <code>"^<i>platform</i>"</code> will match any
-	 * platform EXCEPT the given one.
-	 * <p>Version can also be <code><i>major</i></code>, <code><i>major</i>.<i>x</i></code> or <code><i>major</i>.*</code> or any of these
-	 * followed by <code>+</code> or <code><i>major</i></code>[<code>.<i>minor</i></code>]<code>-<i>major</i></code>[<code>.<i>minor</i></code>] with either one omitted.
-	 * <p>Charset is specified by <code>[&lt; <i>charset</i> &gt;]</code>, and can be given as <code>[&lt;*&gt;]</code> to match any character set (same as leaving out the check),
+	 * specified as <code>{{ <i>platform</i> }}</code> or <code>{{ ,<i>major</i>.<i>minor</i> }}</code>
+	 * or <code>{{ <i>platform</i>,<i>major</i>.<i>minor</i> }}</code>.
+	 * <p>Platform can be <code>"windows"</code>, <code>"linux"</code>, <code>"unix"</code>, or
+	 * <code>"osx"</code>. Also, <code>"^<i>platform</i>"</code> will match any platform EXCEPT the given one.
+	 * <p>Version can also be <code><i>major</i></code>, <code><i>major</i>.<i>x</i></code> or
+	 * <code><i>major</i>.*</code> or any of these followed by <code>+</code> or
+	 * <code><i>major</i></code>[<code>.<i>minor</i></code>]<code>-<i>major</i></code>[<code>.<i>minor</i></code>]
+	 * with either one omitted.
+	 * <p>Charset is specified by <code>[&lt; <i>charset</i> &gt;]</code>, and can be given as
+	 * <code>[&lt;*&gt;]</code> to match any character set (same as leaving out the check),
 	 * or by <code>[&lt;^<i>name</i>&gt;]</code> which matches any charset BUT the given one.
-	 * <p>Either a platform/version or charset check can be given (or both, in either order) and all the given checks must pass for the canon
-	 * line to be included in the final canon test file.
+	 * <p>Either a platform/version or charset check can be given (or both, in either order) and all the
+	 * given checks must pass for the canon line to be included in the final canon test file.
 	 *
 	 * @param input	The input line, with a potential platform/version or charset specification.
 	 * @return	{@code null} if the platform/version or charset spec exists and we don't pass the test, or the
@@ -1072,7 +1031,7 @@ public class Tester
 		    files.createStreams(cs);
 
 		    // TODO: pass in canonWriter somehow for this case
-		    int ret = runTestAndCompareOrCreateCanons(testName, files, cs, commandLine, expectedExitCode);
+		    int ret = runTestAndCompareOrCreateCanons(testClassName, testName, files, cs, commandLine, expectedExitCode);
 
 		    if (ret == 0) {
 			files.deleteFiles();
@@ -1172,7 +1131,7 @@ public class Tester
 		    canonReader = null;
 		    files.closeStreams();
 
-		    int ret = runTestAndCompareOrCreateCanons(testName, files, cs, commandLine, expectedExitCode);
+		    int ret = runTestAndCompareOrCreateCanons(testClassName, testName, files, cs, commandLine, expectedExitCode);
 
 		    if (ret == 0) {
 			files.deleteFiles();
@@ -1261,13 +1220,7 @@ public class Tester
 
 		    case "testclass":
 			if (!CharUtil.isNullOrEmpty(argument)) {
-			    try {
-				testClass = Class.forName(argument);
-			    }
-			    catch (NoClassDefFoundError | ClassNotFoundException | ExceptionInInitializerError ex) {
-				Intl.errFormat("tester#testClassNotFound", argument, Exceptions.toString(ex));
-				return false;
-			    }
+			    testClassName = argument;
 			}
 			else {
 			    Intl.errFormat("tester#emptyTestClass");
@@ -1293,6 +1246,16 @@ public class Tester
 			// with the description file syntax and the env value substitution conventions
 			// using this directive should solve it
 			noSubstitutions = true;
+			break;
+
+		    case "noenvoptions":
+		    case "noenv":
+			allowEnvOptions = false;
+			break;
+
+		    case "envoptions":
+		    case "envopt":
+			allowEnvOptions = true;
 			break;
 
 		    case "canoncharset":
@@ -1476,11 +1439,15 @@ public class Tester
 			    expectedExitCode = Integer.parseInt(exit);
 			}
 
+			Environment.setAllowEnvOptions(allowEnvOptions);
+
 			String charset = m.group(5);
 			if (charset == null)
 			    charset = defaultCanonCharset;
 
 			int ret = runOneTest(desc, m.group(3), charset, commandLine, expectedExitCode);
+
+			Environment.setAllowEnvOptions(true);
 
 			if (ret == 0) {
 			    numberPassed.incrementAndGet();
@@ -1577,7 +1544,7 @@ public class Tester
 
 	    defaultScriptDir = null;
 
-	    testClass = null;
+	    testClassName = null;
 
 	    currentCharset = null;
 
@@ -1672,13 +1639,7 @@ public class Tester
 	    }
 	    else if (Options.matchesOption(opt, true, "testclass", "class", "test")) {
 		checkNullValue(arg1, opt);
-		try {
-		    testClass = Class.forName(arg1);
-		}
-		catch (NoClassDefFoundError | ClassNotFoundException | ExceptionInInitializerError ex) {
-		    Intl.errFormat("tester#testClassNotFound", arg1, Exceptions.toString(ex));
-		    System.exit(CLASS_NOT_FOUND);
-		}
+		testClassName = arg1;
 	    }
 	    else if (Options.matchesOption(opt, true, "ignoreoptions", "ignoreopt", "ignore", "ign", "i")) {
 		resetToInitialOptions();
@@ -1719,6 +1680,7 @@ public class Tester
 
 
 	@Override
+	@SuppressWarnings("removal")
 	public int setup(final String[] args) {
 	    testDescriptionFiles = new ArrayList<>(args.length);
 
@@ -1739,6 +1701,8 @@ public class Tester
 	    // Setup the canonical platform string
 	    currentPlatform = Environment.platformIdentifier();
 
+	    System.setSecurityManager(exitSecurityManager);
+
 	    return SUCCESS;
 	}
 
@@ -1752,6 +1716,8 @@ public class Tester
 		Intl.errFormat("tester#exception", Exceptions.toString(err));
 		return OTHER_ERROR;
 	    }
+
+	    exitSecurityManager.setAllowed(true);
 
 	    int failed = numberFailed.intValue();
 	    return failed == 0 ? 0 : NUMBER_OF_ERRORS + failed;

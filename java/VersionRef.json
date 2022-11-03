@@ -7,6 +7,30 @@
       issues: [ 458 ],
       comment: 'Implement multi-threaded "parallel" processing.'
     },
+    { version: '2.14.62', date: d'2022-11-01',
+      issues: [ 543 ],
+      comment: 'Trap and report date/time exceptions.'
+    },
+    { version: '2.14.60', date: d'2022-11-01',
+      issues: [ 544 ],
+      comment: 'Respect "-" flag and ":quotestrings" setting in "@j" format.'
+    },
+    { version: '2.14.59', date: d'2022-10-25',
+      issues: [ 534 ],
+      comment: 'Error on duplicate constant definition.'
+    },
+    { version: '2.14.58', date: d'2022-10-24',
+      issues: [ 473 ],
+      comment: 'Additional flags for "findfiles" function.'
+    },
+    { version: '2.14.56', date: d'2022-10-21',
+      issues: [ 473 ],
+      comment: 'Add "findfiles" function.'
+    },
+    { version: '2.14.55', date: d'2022-10-21',
+      issues: [ 470 ],
+      comment: 'Optimizations with "dot" ranges in all scenarios.'
+    },
     { version: '2.14.52', date: d'2022-10-17',
       issues: [ 522 ],
       comment: 'Implement "-" format option for "@h", "@t", "@r", and "@e" to omit type and quotes.'

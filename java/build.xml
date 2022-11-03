@@ -343,6 +343,12 @@
 		#481: Separate tests of "b64".
 	    17-Oct-2022 (rlwhitcomb)
 		#513: Add "info.rlwhitcomb.logging" (new) package.
+	    22-Oct-2022 (rlwhitcomb)
+		#521: Update classpath for "test" to uncover .jar packaging issues.
+	    30-Oct-2022 (rlwhitcomb)
+		#541: Add the security manager arg for Tester.
+		And only set for Java 17+.
+		Only set the security manager arg in wrapper scripts for Java 17+ also.
 
      ========================================================================== -->
 
@@ -419,6 +425,12 @@
 
 	<condition property="new.java.version" value="true" else="false" >
 		<javaversion atleast="9"/>
+	</condition>
+	<condition property="java.17plus.version" value="true" else="false" >
+		<javaversion atleast="17"/>
+	</condition>
+	<condition property="jvm17.args" value="-Djava.security.manager=allow" else="" >
+		<istrue value="${java.17plus.version}"/>
 	</condition>
 	<condition property="html4.output" value="true" else="false">
 		<and>
@@ -678,7 +690,7 @@
 			<exclude name="**/ant/*"/>
 			<classpath>
 				<pathelement path="."/>
-				<fileset dir="external-files" includes="*.jar"/>
+				<fileset dir="external-files" includes="*.jar" excludes="antlr-runtime-*.jar"/>
 			</classpath>
 		</javac>
 	</target>
@@ -760,7 +772,7 @@
 			</fileset>
 			<classpath>
 				<pathelement path="."/>
-				<fileset dir="external-files" includes="*.jar"/>
+				<fileset dir="external-files" includes="*.jar" excludes="antlr-*-complete.jar"/>
 				<fileset dir="${ant.library.dir}" includes="*.jar"/>
 			</classpath>
 		</javadoc>
@@ -798,12 +810,18 @@ Test starting on ${build.date} at ${build.time}
 		<java classname="info.rlwhitcomb.test.InitTaskTest"   output="${test.log.path}" append="true" failonerror="true" fork="true"/>
 		<echo>Running various tests through the Tester ...</echo>
 		<java classname="${tester.class}"                     output="${test.log.path}" append="true" failonerror="true" fork="true">
+			<jvmarg value="${jvm17.args}" if:true="${java.17plus.version}"/>
 			<arg value="-timing"/>
 			<arg value="-dir:test/files"/>
 			<arg value="-charset:UTF-8"/>
 			<arg value="calctest"/>
+			<classpath>
+				<fileset dir="." includes="utilities.jar"/>
+				<fileset dir="external-files" includes="*.jar" excludes="antlr-*-complete.jar"/>
+			</classpath>
 		</java>
 		<java classname="${tester.class}"                     output="${test.log.path}" append="true" failonerror="true" fork="true">
+			<jvmarg value="${jvm17.args}" if:true="${java.17plus.version}"/>
 			<arg value="-timing"/>
 			<arg value="-dir:test/files"/>
 			<arg value="maintest"/>
@@ -906,13 +924,8 @@ Test starting on ${build.date} at ${build.time}
 			<fileset dir="./scripts">
 				<patternset refid="wrapper-files"/>
 			</fileset>
-			<fileset dir="./external-files">
-				<include name="*.jar"/>
-				<exclude name="antlr-*-complete.jar"/>
-			</fileset>
-			<fileset dir="./test/files">
-				<include name="lib*"/>
-			</fileset>
+			<fileset dir="external-files" includes="*.jar" excludes="antlr-*-complete.jar"/>
+			<fileset dir="test/files" includes="lib*"/>
 		</copy>
 		<chmod dir="${env.UTILITIES_HOME}" perm="+x" if:true="${utilities.available}">
 			<patternset refid="wrapper-files"/>
@@ -920,6 +933,9 @@ Test starting on ${build.date} at ${build.time}
 		<fixcrlf srcdir="${env.UTILITIES_HOME}" if:true="${utilities.available}">
 			<patternset refid="wrapper-files"/>
 		</fixcrlf>
+		<replace dir="${env.UTILITIES_HOME}" token="@@@JVM17+@@@" value="${jvm17.args}" summary="yes">
+			<patternset refid="wrapper-files"/>
+		</replace>
 		<echo message="Variable UTILITIES_HOME is not set in the environment!" unless:true="${utilities.available}"/>
 	</target>
 

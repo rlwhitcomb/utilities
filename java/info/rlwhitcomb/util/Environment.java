@@ -183,6 +183,13 @@
  *	    #445: New flavor of "printProgramInfo" with just colored flag.
  *	27-Sep-2022 (rlwhitcomb)
  *	    #491: Correct the setting of Java major version.
+ *	25-Oct-2022 (rlwhitcomb)
+ *	    #536: Methods to set and test the system property for testing.
+ *	27-Oct-2022 (rlwhitcomb)
+ *	    #538: New method to return the current CLASSPATH as an array of URLs,
+ *	    suitable for use with a URLClassLoader.
+ *	30-Oct-2022 (rlwhitcomb)
+ *	    #536: Rename and repurpose the "in testing" property and methods.
  */
 package info.rlwhitcomb.util;
 
@@ -194,6 +201,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.lang.management.ManagementFactory;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.List;
@@ -250,6 +259,12 @@ public final class Environment
 	private static TimeUnit timeUnit = osIsLinux ? TimeUnit.MILLISECONDS : TimeUnit.NANOSECONDS;
 
 	private static String copyrightNotice = null;
+
+	/**
+	 * The system property, mostly used during testing, to allow or not the processing
+	 * of options from an environment variable at startup.
+	 */
+	private static final String ALLOW_ENV_OPTIONS_PROPERTY = "info.rlwhitcomb.EnvOptions";
 
 	/**
 	 * The set of properties read from various files: "build.properties", "build.number",
@@ -316,6 +331,11 @@ public final class Environment
 	 * @see #getMainClassName
 	 */
 	private static String cachedMainClassName = null;
+
+	/**
+	 * Cached version of the current CLASSPATH, as an array of URLs.
+	 */
+	private static URL[] urlClassPath = null;
 
 
 	/**
@@ -1272,6 +1292,32 @@ public final class Environment
 
 
 	/**
+	 * Get the current {@var CLASSPATH} as an array of URLs, suitable for use with
+	 * {@link java.net.URLClassLoader}.
+	 *
+	 * @return The CLASSPATH in URL form.
+	 */
+	public static URL[] getURLClassPath() {
+	    if (urlClassPath == null) {
+		String classPath = System.getenv("CLASSPATH");
+		String[] paths = classPath.split(PATH_SEPARATOR);
+		urlClassPath = new URL[paths.length];
+		int i = 0;
+		for (String path : paths) {
+		    File f = new File(path);
+		    try {
+			urlClassPath[i++] = f.toURI().toURL();
+		    }
+		    catch (MalformedURLException mue) {
+			; // Oops!
+		    }
+		}
+	    }
+	    return urlClassPath;
+	}
+
+
+	/**
 	 * Get the (system-dependent) name of the current temporary directory
 	 * for the current user.
 	 *
@@ -1518,6 +1564,33 @@ public final class Environment
 	 */
 	public static String totalMemory() {
 	    return longFormat.format(totalMemorySize());
+	}
+
+
+	/**
+	 * Sets the system property to allow getting options from the environment (not allowed
+	 * usually during testing to ensure a consistent environment).
+	 *
+	 * @param allow Whether to allow {@code xxx_OPTIONS} environment variable to set options.
+	 * @see #allowEnvOptions
+	 */
+	public static void setAllowEnvOptions(boolean allow) {
+	    // Default if the property is not set will be true
+	    if (allow)
+		System.clearProperty(ALLOW_ENV_OPTIONS_PROPERTY);
+	    else
+		System.setProperty(ALLOW_ENV_OPTIONS_PROPERTY, Boolean.FALSE.toString());
+	}
+
+
+	/**
+	 * Are we allowing environment variables to preset program options?
+	 *
+	 * @return The state of the system property set during testing.
+	 */
+	public static boolean allowEnvOptions() {
+	    String value = System.getProperty(ALLOW_ENV_OPTIONS_PROPERTY, Boolean.TRUE.toString());
+	    return Boolean.valueOf(value);
 	}
 
 

@@ -332,6 +332,10 @@
  *	09-Jul-2022 (rlwhitcomb)
  *	    #393: Cleanup imports.
  *	    #397: Add multiline string constant support in "internalStripQuotes".
+ *	19-Oct-2022 (rlwhitcomb)
+ *	    Move "stripLineEndings" from Calc to here.
+ *	25-Oct-2022 (rlwhitcomb)
+ *	    #18: Add "isValidSignedInt" method.
  */
 package info.rlwhitcomb.util;
 
@@ -2360,6 +2364,20 @@ public final class CharUtil
 	}
 
 	/**
+	 * Strip line endings from the end of the given message.
+	 *
+	 * @param message A message to be output on a single line, thus the need to strip additional line endings.
+	 * @return        The input message, with any trailing CR or LF removed.
+	 */
+	public static String stripLineEndings(final String message) {
+	    int endPos = message.length();
+	    char ch;
+	    while (--endPos > 0 && ((ch = message.charAt(endPos)) == '\n' || ch == '\r'))
+		;
+	    return message.substring(0, ++endPos);
+	}
+
+	/**
 	* Attempts to obtain a valid DBMS identifier from an arbitrary string.
 	*
 	* @param str The input string.
@@ -3094,7 +3112,24 @@ public final class CharUtil
 	 */
 	public static boolean isValidInt(final String input) {
 	    try {
-		int value = Integer.parseUnsignedInt(input);
+		Integer.parseUnsignedInt(input);
+	    }
+	    catch (NumberFormatException nfe) {
+		return false;
+	    }
+	    return true;
+	}
+
+
+	/**
+	 * Is the given string a valid signed integer value (as defined by {@link Integer#parseInt} method)?
+	 *
+	 * @param input The input string to test.
+	 * @return {@code true} or {@code false} depending on whether the input represents a valid signed integer value.
+	 */
+	public static boolean isValidSignedInt(final String input) {
+	    try {
+		Integer.parseInt(input);
 	    }
 	    catch (NumberFormatException nfe) {
 		return false;

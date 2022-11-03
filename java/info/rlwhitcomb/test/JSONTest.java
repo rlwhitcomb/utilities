@@ -28,6 +28,8 @@
  *          #196: Initial coding.
  *	23-Mar-2022 (rlwhitcomb)
  *	    Additional tests and test data files.
+ *	26-Oct-2022 (rlwhitcomb)
+ *	    #196: Rename a method.
  */
 package info.rlwhitcomb.test;
 
@@ -116,7 +118,7 @@ public class JSONTest
 		try {
 		    String testName = String.format("String Test #%1$d", stringTest);
 		    System.out.println("===== " + testName + " =====");
-		    Object obj = JSON.readString(test);
+		    Object obj = JSON.readFromString(test);
 		    System.out.println(JSON.toStringValue(obj, true, true));
 		    System.out.println("----- " + testName + " -----");
 		    System.out.println();

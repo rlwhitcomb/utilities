@@ -45,6 +45,8 @@
 #	18-Oct-2022 (rlwhitcomb)
 #	    #518: Fix changed base64 error messages.
 #	    #530: Move "OS" help and error messages into here.
+#	25-Oct-2022 (rlwhitcomb)
+#	    #18: New errors for Gmt for tz offset.
 #
 
 #
@@ -96,14 +98,19 @@ gmt.help5	= \t  -log  = display in format compatible with our Logging class
 gmt.help6	= \t  -date = display compatible with Linux 'date' command
 gmt.help7	= \t  -iso  = display in ISO-8601 format
 gmt.help8	= ""
-gmt.help9	= \tNote: options can be with or without '-' or can be just the first character.
+gmt.help9	= \t or an hourly offset from GMT (range of -12 .. 14)
 gmt.help10	= ""
-gmt.help11	= \tExamples:
-gmt.help12	= \t  -log  -> Dec 20,2021 06:45:49.829 GMT
-gmt.help13	= \t  -date -> Mon Dec 20  6:46:19 GMT 2021
-gmt.help14	= \t  -iso  -> 2021-12-20T06:46:43.526Z
-gmt.help15	= \tdefault -> Mon Dec 20,2021  6:48:22.584 GMT
-gmt.help16	= ""
+gmt.help11	= \tNote: options can be with or without '-' or can be just the first character.
+gmt.help12	= ""
+gmt.help13	= \tExamples:
+gmt.help14	= \t  -log  -> Dec 20,2021 06:45:49.829 GMT
+gmt.help15	= \t  -date -> Mon Dec 20  6:46:19 GMT 2021
+gmt.help16	= \t  -iso  -> 2021-12-20T06:46:43.526Z
+gmt.help17	= \tdefault -> Mon Dec 20,2021  6:48:22.584 GMT
+gmt.help18	= ""
+
+gmt.badOption		= Unknown option: "%1$s"!
+gmt.badZoneOffset	= The timezone offset %1$d is out of range of -12 .. 14.
 
 #
 # From Head.java

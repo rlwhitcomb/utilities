@@ -125,6 +125,8 @@
  *	#513: Move Logging to new package.
  *    13-Oct-2022 (rlwhitcomb)
  *	#481: Make "getFileReader" and "getFileWriter" public.
+ *    21-Oct-2022 (rlwhitcomb)
+ *	#473: Add "+" processing to "exists" function.
  */
 package info.rlwhitcomb.util;
 
@@ -682,15 +684,23 @@ public final class FileUtilities
 	    throw new Intl.IllegalArgumentException("util#fileutil.invalidFlags", flags);
 
 	boolean ret = false;
+	String flag = flags;
 
-	switch (flags.charAt(0)) {
+	if (flag.length() > 1 && flag.charAt(flag.length() - 1) == '+') {
+	    if (checkNameCase(f))
+		flag = flag.replace("+", "");
+	    else
+		return ret;
+	}
+
+	switch (flag.charAt(0)) {
 	    case 'd':
 	    case 'D':
-		if (flags.length() == 1) {
+		if (flag.length() == 1) {
 		    ret = f.exists() && f.isDirectory();
 		}
-		else if (flags.length() == 2) {
-		    switch (flags.charAt(1)) {
+		else if (flag.length() == 2) {
+		    switch (flag.charAt(1)) {
 			case 'r':
 			case 'R':
 			    ret = canReadDir(f);
@@ -706,11 +716,11 @@ public final class FileUtilities
 
 	    case 'f':
 	    case 'F':
-		if (flags.length() == 1) {
+		if (flag.length() == 1) {
 		    ret = f.exists() && f.isFile();
 		}
-		else if (flags.length() == 2) {
-		    switch (flags.charAt(1)) {
+		else if (flag.length() == 2) {
+		    switch (flag.charAt(1)) {
 			case 'r':
 			case 'R':
 			    ret = canRead(f);

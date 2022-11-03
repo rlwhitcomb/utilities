@@ -38,9 +38,14 @@
  *	    ISO format doesn't need any fixup; add milliseconds there.
  *	09-Jul-2022 (rlwhitcomb)
  *	    #393: Cleanup imports.
+ *	25-Oct-2022 (rlwhitcomb)
+ *	    #18: Allow +/-nn on command line to get offset from GMT.
+ *	    Tweak the date formats.
+ *	    Allow arbitrary timezone selection.
  */
 package info.rlwhitcomb.tools;
 
+import info.rlwhitcomb.util.CharUtil;
 import info.rlwhitcomb.util.Intl;
 
 import java.text.DateFormat;
@@ -56,14 +61,34 @@ import java.util.TimeZone;
 public class Gmt
 {
 	/** Output format compatible with *nix "date" command. */
-	private static final String DATE_FORMAT    = "E MMM dd HH:mm:ss z yyyy";
+	private static final String DATE_FORMAT    = "E dd MMM yyyy hh:mm:ss a z";
 	/** Default output format. */
 	private static final String DEFAULT_FORMAT = "E MMM dd,yyyy HH:mm:ss.SSS z";
 	/** Output format compatible with our {@code Logging} class. */
 	private static final String LOGGING_FORMAT = "MMM dd,yyyy HH:mm:ss.SSS z";
 	/** Output format compatible with ISO-8601 format. */
-	private static final String ISO_8601_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
+	private static final String ISO_8601_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSX";
 
+	/** Parsed timezone offset from GMT to use. */
+	private static int tzOffset = 0;
+	/** Or a timezone selected by ID to use. */
+	private static TimeZone selectedZone = null;
+
+
+	/**
+	 * Get a timezone ID with the given (hours) offset from GMT.
+	 *
+	 * @param offset The number of hours difference from GMT.
+	 * @return       An "Etc/GMT..." zone with that offset (but negative gives "+").
+	 */
+	private static String getZone(int offset) {
+	    if (offset == 0)
+		return "Etc/GMT";
+	    else if (offset < 0)
+		return String.format("Etc/GMT+%1$d", -offset);
+	    else
+		return String.format("Etc/GMT-%1$d", offset);
+	}
 
 	private static void sub(StringBuffer buf, int charPos) {
 	    if (buf.charAt(charPos) == '0')
@@ -76,8 +101,8 @@ public class Gmt
 	public static void main(String[] args) {
 	    String dateFormat = DEFAULT_FORMAT;
 
-	    if (args.length > 0) {
-		String format = args[0];
+	    for (String arg : args) {
+		String format = arg;
 
 		switch (format.toLowerCase()) {
 		    case "-log":
@@ -106,25 +131,43 @@ public class Gmt
 		    case "?":
 			Intl.printHelp("tools#gmt");
 			return;
+		    default:
+			// Could be a signed tz offset from GMT
+			if (CharUtil.isValidSignedInt(arg)) {
+			    tzOffset = Integer.parseInt(arg);
+			    if (tzOffset < -12 || tzOffset > 14) {
+				Intl.errFormat("tools#gmt.badZoneOffset", tzOffset);
+				System.exit(2);
+			    }
+			    break;
+			}
+			else {
+			    String[] zones = TimeZone.getAvailableIDs();
+			    for (String zone : zones) {
+				if (arg.equalsIgnoreCase(zone)) {
+				    selectedZone = TimeZone.getTimeZone(zone);
+				    break;
+				}
+			    }
+			    if (selectedZone == null) {
+				Intl.errFormat("tools#gmt.badOption", arg);
+				System.exit(1);
+			    }
+			}
 		}
 	    }
 
 	    SimpleDateFormat fmt = new SimpleDateFormat(dateFormat);
-	    TimeZone gmt = TimeZone.getTimeZone("Etc/GMT");
+	    TimeZone gmt = selectedZone == null ? TimeZone.getTimeZone(getZone(tzOffset)) : selectedZone;
 	    Calendar now = Calendar.getInstance(gmt);
 	    fmt.setCalendar(now);
 
 	    StringBuffer buf = new StringBuffer();
 	    fmt.format(now.getTime(), buf, new FieldPosition(DateFormat.DATE_FIELD));
-	    int size = buf.length() - 6;
-	    if (buf.charAt(size) == '+') {
-		buf.setLength(size);
-	    }
 
 	    switch (dateFormat) {
 		case DATE_FORMAT:
-		    sub(buf, 8);
-		    sub(buf, 11);
+		    sub(buf, 4);
 		    break;
 		case DEFAULT_FORMAT:
 		    sub(buf, 8);

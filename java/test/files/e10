@@ -46,6 +46,15 @@ loop _j in 10.5 {_j}
 loop _k in 5.5, 1.5 {_k}
 loop _m in 0.5 .. -0.5, -0.08 {_m}
 
+def t(n) = { case n of 1..5: 'one to five', 6..10: 'six to ten', default: 'other' }
+loop x over 0..12 { `$x: ${t(x)}` }
+def t2(d) = { case d of 0 .. 3.5, 0.5: 'halves under 3.5', 4.0 .. 4.5, 0.1: 'tenths of 4', default: 'other' }
+loop x over -1.0 .. 4.8, 0.1 { `$x: ${t2(x)}` }
+define tn(n) = { case n of 5..1,-1: 'five down to one', -1..-5,-1: 'negative 5 to 1', default: 'other' }
+loop x over 6..-6,-1 { `$x: ${tn(x)}` }
+define tm(d) = { case d of -2.0 .. -2.5, -0.1: 'minus 2.5', 3.1 .. 2.8, -0.1: 'around three', default: 'other' }
+loop x over -3.0 .. 3.3, 0.1 { `$x: ${tm(x)}` }
+
 :quiet on {
 define test(value) = {
    if value < 0 "negative"

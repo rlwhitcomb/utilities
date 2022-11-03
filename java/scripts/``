@@ -1,4 +1,4 @@
 #!/bin/bash
 CLASS_NAME=info.rlwhitcomb.calc.Calc
-CMD_ARGS=-g
+CMD_ARGS=-g -nolibraries
 source _find_and_run_class

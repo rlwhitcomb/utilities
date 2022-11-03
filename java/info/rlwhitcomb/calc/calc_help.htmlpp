@@ -772,8 +772,8 @@ or<br>
     <tr><td>33</td><td><i>object</i> <code>.</code> <i>member</i></td><td>access an object member</td><td>left to right</td></tr>
     <tr><td>32</td><td><i>expr</i> <code>HAS</code> ( <i>id</i> | <i>string</i> | <code>[</code> <i>expr</i> <code>]</code> )</td><td>safely check for member or index</td><td>left to right</td></tr>
     <tr><td>31</td><td><code>( </code><i>expr</i><code> )</code></td><td>group an expression</td><td>N/A</td></tr>
-    <tr><td rowspan="83">30</td>
-            <td><code>ABS</code>&nbsp;<i>expr</i></td><td>absolute value</td><td rowspan="83">left to right</td></tr>
+    <tr><td rowspan="84">30</td>
+            <td><code>ABS</code>&nbsp;<i>expr</i></td><td>absolute value</td><td rowspan="84">left to right</td></tr>
             <tr><td><code>SIN</code>&nbsp;<i>expr</i></td><td>sine</td></tr>
             <tr><td><code>COS</code>&nbsp;<i>expr</i></td><td>cosine</td></tr>
             <tr><td><code>TAN</code>&nbsp;<i>expr</i></td><td>tangent</td></tr>
@@ -841,6 +841,7 @@ or<br>
             <tr><td><code>ENCODE</code>&nbsp;<i>expr</i></td><td>encode a string into its base64 form</td></tr>
             <tr><td><code>EXISTS</code>&nbsp;<i>expr</i>&nbsp;( <code>,</code>&nbsp;<i>flag_expr</i>&nbsp;)</td><td>check the existence/permissions of file or directory</td></tr>
             <tr><td><code>FILEINFO</code>&nbsp;<i>expr</i></td><td>get information about a given file</td></tr>
+            <tr><td><code>FINDFILES</code>&nbsp;<i>dir</i><code>,</code> <i>pattern</i> [ <code>,</code> <i>flags</i> ]</td><td>list files in the given directory<br>matching the pattern and optional flags</td></tr> 
             <tr><td><code>READ</code>&nbsp;<i>expr</i>&nbsp;( <code>,</code>&nbsp;<i>charset_expr</i>&nbsp;)</td><td>read the file (or files) using the optional charset</td></tr>
             <tr><td><code>WRITE</code>&nbsp;<i>expr</i> <code>,</code>&nbsp;<i>file name</i>&nbsp;( <code>,</code>&nbsp;<i>charset_expr</i>&nbsp;)</td><td>write the value to the file using the optional charset</td></tr>
             <tr><td><code>DELETE</code>&nbsp;<i>expr</i>&nbsp;( <code>,</code>&nbsp;<i>expr</i> ) *</td><td>delete one or more files</td></tr>
@@ -1107,6 +1108,11 @@ or<br>
   <p><code>FileInfo</code> takes a single file name / path parameter and returns an object containing various pieces of information about the file:
   <p class="indent"><code style="color:blue;">fileinfo "doc" </code><code style="color:grey;">&#x21E8;</code> <code style="color:green;">{ name: "doc", file: false, directory: true, link: false, other: false, size: 0, &mldr; }</code>
   <p>If the named file does not exist the return value is an empty object (<code style="color:green;">{ }</code>).
+  <p>For <code>findfiles</code> the pattern is a normal file-system wildcard pattern, and the flags (if given) are the same as for <code>exists</code> with some additions.
+     If the flags contains <code>'*'</code> then the search will continue down subdirectories of the parent directory. If <code>'!'</code> is added to the flags,
+     full paths are returned in the list instead of just the file names. And if <code>'~'</code> is included, the file name matching will ignore the case of the name.
+     If the flags are omitted, the files are found regardless of type (only matching the name pattern, with case-sensitive compare).
+     The array of files will always come back in sorted order, with the names matching the case on the file system.
   <p>The first expression for <code>read</code> is a single file path, which can be <code>"@"</code> or <code>"-"</code> to read the standard input.
      The second (optional) expression is the name of the charset to use (system default if not given, or empty/null). The entire contents of the file
      is returned, unchanged, including end-of-line sequences. The value returned can be assigned to a variable or used in some other way.

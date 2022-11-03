@@ -31,6 +31,8 @@
  *	    New "writeObject" methods.
  *	08-Jul-2022 (rlwhitcomb)
  *	    #393: Cleanup imports.
+ *	25-Oct-2022 (rlwhitcomb)
+ *	    #196: Add convenience methods to read straight from a File.
  */
 package info.rlwhitcomb.json;
 
@@ -41,12 +43,15 @@ import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 
@@ -87,6 +92,62 @@ public class JSON
 
 
 	/**
+	 * Read a JSON file, given the name,  and turn it into regular Java objects using the
+	 * default (UTF-8) charset.
+	 *
+	 * @param fileName Name of the file to read the object(s) from.
+	 * @return         {@code List}s and {@code Map}s parsed from the input.
+	 * @throws JSONException if there are errors reading the file or parsing the JSON syntax.
+	 */
+	public static Object readObject(final String fileName)
+		throws JSONException
+	{
+	    try (InputStream is = Files.newInputStream(Paths.get(fileName))) {
+		return readObject(is, UTF_8_CHARSET);
+	    }
+	    catch (IOException ioe) {
+		throw new JSONException(ioe);
+	    }
+	}
+
+	/**
+	 * Read a JSON file and turn it into regular Java objects using the default (UTF-8) charset.
+	 *
+	 * @param inputFile The file to read the object(s) from.
+	 * @return          {@code List}s and {@code Map}s parsed from the input.
+	 * @throws JSONException if there are errors reading the file or parsing the JSON syntax.
+	 */
+	public static Object readObject(final File inputFile)
+		throws JSONException
+	{
+	    try (InputStream is = Files.newInputStream(inputFile.toPath())) {
+		return readObject(is, UTF_8_CHARSET);
+	    }
+	    catch (IOException ioe) {
+		throw new JSONException(ioe);
+	    }
+	}
+
+	/**
+	 * Read a JSON file and turn it into regular Java objects using the supplied charset.
+	 *
+	 * @param inputFile The file to read the object(s) from.
+	 * @param charset   Charset that decodes the file ({@code null} means system default).
+	 * @return          {@code List}s and {@code Map}s parsed from the input.
+	 * @throws JSONException if there are errors reading the file or parsing the JSON syntax.
+	 */
+	public static Object readObject(final File inputFile, final Charset charset)
+		throws JSONException
+	{
+	    try (InputStream is = Files.newInputStream(inputFile.toPath())) {
+		return readObject(is, charset == null ? Charset.defaultCharset() : charset);
+	    }
+	    catch (IOException ioe) {
+		throw new JSONException(ioe);
+	    }
+	}
+
+	/**
 	 * Read a JSON stream and turn it into regular Java objects using the default (UTF-8) charset.
 	 *
 	 * @param inputStream The stream to read the object(s) from.
@@ -125,7 +186,7 @@ public class JSON
 	 * @return      The {@code List}s and {@code Map}s parsed from the input.
 	 * @throws JSONException if there were parsing errors.
 	 */
-	public static Object readString(final String input) {
+	public static Object readFromString(final String input) {
 	    return parseStream(CharStreams.fromString(input));
 	}
 

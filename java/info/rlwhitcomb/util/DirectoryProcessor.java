@@ -42,6 +42,10 @@
  *  06-Sep-21 rlw  ---	Use FileUtilities.canRead everywhere. Final parameters.
  *  19-Sep-22 rlw #448:	Change default "exitDirectory" return value; add optional
  *			wildcard pattern matcher, and "name only" mode.
+ *  21-Oct-22 rlw #473:	New wildcard filter + flags method.
+ *  24-Oct-22 rlw #473:	Need to call "preProcess" and "postProcess" on directories in "nameOnly" mode.
+ *			Another "setFilter" method with "ignoreCase" parameter.
+ *  25-Oct-22 rlw #532:	Simplify; move pre/post processing entirely into here from FileProcessor.
  */
 package info.rlwhitcomb.util;
 
@@ -142,6 +146,31 @@ public class DirectoryProcessor
 	}
 
 	/**
+	 * Set the wildcard plus flags filter for this processor.
+	 *
+	 * @param filterString	The wildcard spec used to match the files to be processed.
+	 * @param filterFlags	Flags for matching the file type.
+	 * @return		This object (for chained operations).
+	 */
+	public DirectoryProcessor setWildcardFilter(final String filterString, final String filterFlags) {
+	    filter = new WildcardFilter(filterString, filterFlags);
+	    return this;
+	}
+
+	/**
+	 * Set the wildcard plus flags and ignoreCase filter for this processor.
+	 *
+	 * @param filterString	The wildcard spec used to match the files to be processed.
+	 * @param filterFlags	Flags for matching the file type.
+	 * @param ignoreCase	Whether to also ignore case of file names when matching.
+	 * @return		This object (for chained operations).
+	 */
+	public DirectoryProcessor setWildcardFilter(final String filterString, final String filterFlags, final boolean ignoreCase) {
+	    filter = new WildcardFilter(filterString, filterFlags, ignoreCase);
+	    return this;
+	}
+
+	/**
 	 * If a filter is present, check it to see if the given file should be processed.
 	 *
 	 * @param f	The file to check against the filter (if present).
@@ -178,40 +207,62 @@ public class DirectoryProcessor
 		return true;
 	    }
 
+	    boolean ret = false;
+
 	    File[] files = dir.listFiles(lp);
 	    if (files == null) {
 		return lp.exitDirectory(dir, level, true);
 	    }
 
-	    for (File f : files) {
-		if (checkFilter(f) && FileUtilities.canReadDir(f)) {
-		    if (recurse) {
-			if (!processFiles(f, recurse, level + 1, stopOnError) && stopOnError) {
-			    return lp.exitDirectory(dir, level, false);
+	    for (File file : files) {
+		try {
+		    if (checkFilter(file)) {
+			if (FileUtilities.canReadDir(file)) {
+			    if (nameOnly && !lp.preProcess(file) && stopOnError) {
+				break;
+			    }
+			    if (recurse) {
+				if (!processFiles(file, recurse, level + 1, stopOnError) && stopOnError) {
+				    break;
+				}
+			    }
+			    if (nameOnly && !lp.postProcess(file) && stopOnError) {
+				break;
+			    }
+			}
+			else if (FileUtilities.canRead(file)) {
+			    if (!lp.preProcess(file) && stopOnError) {
+				break;
+			    }
+			    if (!nameOnly) {
+				FileProcessor fp = new FileProcessor(file, lp);
+
+				if (!fp.processFile() && stopOnError) {
+				    break;
+				}
+
+				fp = null;
+			    }
+			    if (!lp.postProcess(file) && stopOnError) {
+				break;
+			    }
 			}
 		    }
-		    // Else just continue to the next file in the current directory
+		    else if (recurse && FileUtilities.canReadDir(file)) {
+			if (!processFiles(file, recurse, level + 1, stopOnError) && stopOnError) {
+			    break;
+			}
+		    }
+		    ret = true;
 		}
-		else if (checkFilter(f) && FileUtilities.canRead(f)) {
-		    if (nameOnly) {
-			if (!lp.preProcess(f) && stopOnError) {
-			    return lp.exitDirectory(dir, level, false);
-			}
-			if (!lp.postProcess(f) && stopOnError) {
-			    return lp.exitDirectory(dir, level, false);
-			}
-		    }
-		    else {
-			FileProcessor fp = new FileProcessor(f, lp);
-			if (!fp.processFile() && stopOnError) {
-			    return lp.exitDirectory(dir, level, false);
-			}
-			fp = null;
+		catch (Throwable ex) {
+		    if (lp.handleError(file, ex)) {
+			ret = true;
 		    }
 		}
 	    }
 
-	    return lp.exitDirectory(dir, level, true);
+	    return lp.exitDirectory(dir, level, ret);
 	}
 
 	/**

@@ -1,0 +1,15 @@
+:quiet on {
+   :colors off
+   cp = []
+   jars = findfiles ('external-files', '*.jar')
+   loop jar over jars {
+      if !matches(jar, 'antlr-.*-complete.jar') {
+         cp += `${env.PWD}${info.os.filesep}$jar`
+      }
+   }
+}
+:results on {
+   :quotestrings off {
+      `CLASSPATH=${join cp, info.os.pathsep}`
+   }
+}

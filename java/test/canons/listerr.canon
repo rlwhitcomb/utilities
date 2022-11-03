@@ -1,0 +1,58 @@
+>>Width value (300) must be between 1 and 255.
+>>
+>>Usage: java Lists [-c] [-j] [-b] [-n] [-l] [-nnn] [-w] [-e prefix_text] [-f postfix_text] [-x nn]
+>>                  [-lower] [-upper] [-o output_file] [-i nn] [list_file_name+ | @]
+>>
+>>  Aliases: -c | -concat | -concatenate; -j | -join; -b | -blank | -blanks; -n | -count | -counting
+>>           -l | -line | -lines | -newlines; -w | -white | -whitespace; -e | -pre | -prefix
+>>           -f | -post | -postfix; -x | -cut | -cutting; -s | -single; -u | -unchanged
+>>           -lower | -low; -upper | -up; -o | -out | -output; -i | -in | -indent
+>>
+>>  If you specify the "-c" flag the output will have all the lines
+>>    of the file concatenated (using commas) into a single line.
+>>
+>>  The "-j" flag is similar except the lines will be joined by a
+>>    single space between each into a single line.
+>>
+>>  Without either of these options, the input file will be deconstructed
+>>    into one element per line and the commas (if any) will be removed.
+>>
+>>  The "-x nn" option will cut the nn number of characters (if present)
+>>    from the start of each input line (useful for "svn st" output).
+>>
+>>  Using "-b" without "-c" will print a blank line between
+>>    each output value, while with "-c" will put a blank after
+>>    each comma.
+>>
+>>  Using "-l" will print newlines after each entry, even with "-c"
+>>
+>>  The "-nnn" option (where "nnn" is a number from 1 to 255) specifies
+>>    a maximum line width for the "-c" output mode.
+>>
+>>  The "-n" option simply counts the number of entries in the input
+>>    using the rules from the other options and outputs the number of entries.
+>>
+>>  The "-w" option will recognize input files where the input
+>>    values are separated by whitespace instead of ",".
+>>
+>>  The "-e prefix_text" and "-f postfix_text" options will add this text
+>>    before (after) the single line or each line of the output.
+>>
+>>  The "-s" option will join the whole file into a single string without
+>>    changing anything else.
+>>
+>>  The "-u" option will do nothing to the input except do any cutting specified,
+>>    and add the prefix or postfix text to each line.
+>>
+>>  The "-i nn" option will indent each line by nn tab/space characters.
+>>
+>>  Using "@" or nothing for the list_file_name will read from stdin.
+>>  Multiple file names are allowed as well as mixing "@" with regular
+>>    file names, which will simply read and concatenate everything together.
+>>
+>>  Unless the "-o output_file" option is given, all output will be sent to
+>>    stdout. This output file option is preferable when reading from the console.
+>>
+>>  Use "-help" (or "-h" or "-?") to display this help text.
+>>  Use "-version" (or "-vers", "-ver", or "-v" to display version information.)
+>>
