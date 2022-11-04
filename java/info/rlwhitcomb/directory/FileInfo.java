@@ -29,6 +29,7 @@
  *  31-Aug-22		More attributes.
  *  02-Nov-22 rlw #48:	"attributes" method.
  *			Make "attributes" scriptable.
+ *  03-Nov-22		Add "links" to the attributes.
  */
 package info.rlwhitcomb.directory;
 
@@ -238,13 +239,14 @@ public final class FileInfo
 	public String getAttributes() {
 	    StringBuilder buf = new StringBuilder();
 	    if (IS_WINDOWS) {
-		buf.append(dos.isReadOnly() ? 'R' : ' ');
-		buf.append(dos.isHidden()   ? 'H' : ' ');
-		buf.append(dos.isSystem()   ? 'S' : ' ');
-		buf.append(dos.isArchive()  ? 'A' : ' ');
+		buf.append(dos.isSymbolicLink() ? 'L' : ' ');
+		buf.append(dos.isReadOnly()     ? 'R' : ' ');
+		buf.append(dos.isHidden()       ? 'H' : ' ');
+		buf.append(dos.isSystem()       ? 'S' : ' ');
+		buf.append(dos.isArchive()      ? 'A' : ' ');
 	    }
 	    else {
-		buf.append(posix.isDirectory() ? 'd' : '-');
+		buf.append(posix.isDirectory() ? 'd' : (posix.isSymbolicLink() ? 'l' : '-'));
 		buf.append(PosixFilePermissions.toString(posix.permissions()));
 	    }
 	    return buf.toString();

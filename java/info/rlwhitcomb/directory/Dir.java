@@ -30,14 +30,20 @@
  *  12-Apr-22 rlw #269:	New method to load main program info (in Environment).
  *  18-Apr-22 rlw #270:	Make this automatic now.
  *  02-Nov-22 rlw #48:	More coding in the higher level methods.
+ *  04-Nov-22		Process indirect files, process wildcards, begin real
+ *			display code, add "link" to the attributes, process
+ *			more command-line options.
  */
 package info.rlwhitcomb.directory;
 
+import info.rlwhitcomb.math.NumericUtil;
 import info.rlwhitcomb.util.CharUtil;
 import info.rlwhitcomb.util.Environment;
 import info.rlwhitcomb.util.Exceptions;
 import info.rlwhitcomb.util.FileUtilities;
+import info.rlwhitcomb.util.Intl;
 import info.rlwhitcomb.util.Options;
+import info.rlwhitcomb.util.WildcardFilter;
 
 import java.awt.Dimension;
 import java.io.File;
@@ -66,6 +72,21 @@ import java.util.TreeSet;
  */
 public class Dir
 {
+	/**
+	 * Possible exit codes from the process.
+	 */
+	private static enum ExitCode
+	{
+		SUCCESS,
+		CANNOT_FIND,
+		READ_ERROR;
+
+		public int getCode() {
+		    return this.ordinal();
+		}
+	}
+
+
 	/**
 	 * Enumeration of the sorting options.
 	 */
@@ -433,6 +454,7 @@ public class Dir
 	private static boolean quoted              = false;
 	private static boolean totalsOnly          = false;
 	private static boolean unadorned           = false;
+	private static boolean exactSize           = false;
 	private static int limitRecursion          = 0;
 	private static boolean errorLimitRecursion = false;
 	private static int widestNameLen           = 0;
@@ -866,15 +888,40 @@ System.out.println("size = " + basicAttrs.size() + ", createTime = " + basicAttr
 
 
 	private static boolean processOneOption(String option) {
+	    // Some options are case-sensitive, others not
+	    switch (option) {
+		case "full":
+		case "F":
+		    fullName = true;
+		    return true;
+
+		case "X":
+		    exactSize = true;
+		    return true;
+	    }
+
 	    switch (option.toLowerCase()) {
+		case "brief":
+		case "br":
+		case "b":
+		    brief = true;
+		    break;
+
+		case "exactsize":
+		case "exact":
+		case "ex":
+		    exactSize = true;
+		    break;
+
 		case "version":
 		case "vers":
 		case "ver":
 		case "v":
 		    Environment.printProgramInfo(50);
 		    return false;
+
 		default:
-		    System.err.format("Error: unknown option '%1$s', ignoring!%n", option);
+		    Intl.errFormat("directory#unknownOption", option);
 		    break;
 	    }
 	    return true;
@@ -902,27 +949,92 @@ System.out.println("size = " + basicAttrs.size() + ", createTime = " + basicAttr
 	}
 
 
+	private static void exit(ExitCode code) {
+	    System.exit(code.getCode());
+	}
+
+	private static void processInputFile(final String inputFileName) {
+	    File inputFile = new File(inputFileName);
+	    if (FileUtilities.canRead(inputFile)) {
+		try {
+		    List<String> lines = FileUtilities.readFileAsLines(inputFile);
+		    for (String line : lines) {
+			String[] args = CharUtil.parseCommandLine(line);
+			List<String> specs = new ArrayList<>();
+			for (String arg : args) {
+			    if (!processOption(arg, specs))
+				return;
+			}
+			for (String spec : specs) {
+			    processSpec(spec);
+			}
+		    }
+		}
+		catch (IOException ioe) {
+		    Intl.errFormat("directory#readError", inputFileName, Exceptions.toString(ioe));
+		    exit(ExitCode.READ_ERROR);
+		}
+	    }
+	    else {
+		Intl.errFormat("directory#cannotFindOrRead", inputFileName);
+		exit(ExitCode.CANNOT_FIND);
+	    }
+	}
+
+	private static void display(File file) {
+	    StringBuilder buf = new StringBuilder();
+	    FileInfo info = new FileInfo(file);
+
+	    if (!brief) {
+		buf.append(info.getAttributes()).append(' ');
+		if (exactSize)
+		    buf.append(String.format("%1$,10d ", info.getLength()));
+		else
+		    buf.append(String.format("%1$8s ", NumericUtil.formatToRangeTiny(info.getLength())));
+	    }
+	    if (fullName) {
+		buf.append(info.getFullPath());
+	    }
+	    else {
+		buf.append(info.getName());
+	    }
+
+	    System.out.println(buf.toString());
+	}
+
+	private static void processDirectory(File dir, FileFilter filter) {
+	    if (FileUtilities.canReadDir(dir)) {
+		File[] files = filter == null ? dir.listFiles() : dir.listFiles(filter);
+		for (File file : files) {
+		    display(file);
+		}
+	    }
+	}
+
 	private static void processSpec(String spec) {
 	    // This could be a directory name, a wildcard file spec, or just a file name
 	    // Note: Java actually processes some wildcard things already, but may not,
 	    // depending on how we arrange the options: such as "-dir basedir spec1, spec2 ..."
-// This method will do whatever is called for on one directory / name / file name, possibly saving
-// the file information for sorting and later display
+
+	    File f = new File(spec);
 	    if (Match.hasWildCards(spec)) {
-System.out.println("wildcard spec " + spec);
+		File parentDir = f.getParentFile();
+		if (parentDir == null)
+		    parentDir = Environment.userDirectory();
+
+		WildcardFilter filter = new WildcardFilter(f.getName());	// TODO: case-sensitive flag based on O/S
+		processDirectory(parentDir, filter);
 	    }
 	    else {
-		File f = new File(spec);
 		if (FileUtilities.canReadDir(f)) {
-		    File[] files = f.listFiles();
-		    for (File file : files) {
-			FileInfo info = new FileInfo(file);
-			System.out.println(info.getAttributes() + "  " + info.getFullPath());
-		    }
+		    processDirectory(f, null);
+		}
+		else if (FileUtilities.canRead(f)) {
+		    display(f);
 		}
 		else {
-		    FileInfo info = new FileInfo(f);
-		    System.out.println(info.getAttributes() + "  " + info.getFullPath());
+		    Intl.outFormat("directory#cannotFindOrRead", spec);
+		    exit(ExitCode.CANNOT_FIND);
 		}
 	    }
 	}
@@ -956,7 +1068,14 @@ System.out.println("wildcard spec " + spec);
 		specs.add(".");
 
 	    for (String spec : specs) {
-		processSpec(spec);
+		if (spec.startsWith("@")) {
+		    if (spec.length() > 1) {
+			processInputFile(spec.substring(1));
+		    }
+		}
+		else {
+		    processSpec(spec);
+		}
 	    }
 
 	    // TODO: for sorted outputs, need to display the saved/sorted values
