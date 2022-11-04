@@ -23,30 +23,25 @@
  *
  *	Display the time in GMT.
  *
- *  Change History:
- *	23-Feb-2021 (rlwhitcomb)
- *	    Initial implementation.
- *	23-Feb-2021 (rlwhitcomb)
- *	    Add options.
- *	03-Mar-2021 (rlwhitcomb)
- *	    Tweak the output so it matches what we're emulating better.
- *	29-Mar-2021 (rlwhitcomb)
- *	    Move to new package.
- *	19-Dec-2021 (rlwhitcomb)
- *	    #158: Add ISO-8601 format and help.
- *	01-Feb-2022 (rlwhitcomb)
- *	    ISO format doesn't need any fixup; add milliseconds there.
- *	09-Jul-2022 (rlwhitcomb)
- *	    #393: Cleanup imports.
- *	25-Oct-2022 (rlwhitcomb)
- *	    #18: Allow +/-nn on command line to get offset from GMT.
- *	    Tweak the date formats.
- *	    Allow arbitrary timezone selection.
+ * History:
+ *  23-Feb-21 rlw  ---	Initial implementation.
+ *  23-Feb-21 rlw  ---	Add options.
+ *  03-Mar-21 rlw  ---	Tweak the output so it matches what we're emulating better.
+ *  29-Mar-21 rlw  ---	Move to new package.
+ *  19-Dec-21 rlw #158:	Add ISO-8601 format and help.
+ *  01-Feb-22 rlw  ---	ISO format doesn't need any fixup; add milliseconds there.
+ *  09-Jul-22 rlw #393:	Cleanup imports.
+ *  25-Oct-22 rlw #18:	Allow +/-nn on command line to get offset from GMT.
+ *			Tweak the date formats.
+ *			Allow arbitrary timezone selection.
+ *  02-Nov-22 rlw #545:	Get default options from the environment; add "-default" option;
+ *			straighten out error handling on timezone selection.
  */
 package info.rlwhitcomb.tools;
 
 import info.rlwhitcomb.util.CharUtil;
 import info.rlwhitcomb.util.Intl;
+import info.rlwhitcomb.util.Options;
 
 import java.text.DateFormat;
 import java.text.FieldPosition;
@@ -69,6 +64,8 @@ public class Gmt
 	/** Output format compatible with ISO-8601 format. */
 	private static final String ISO_8601_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSX";
 
+	/** Date format to use for display. */
+	private static String dateFormat = DEFAULT_FORMAT;
 	/** Parsed timezone offset from GMT to use. */
 	private static int tzOffset = 0;
 	/** Or a timezone selected by ID to use. */
@@ -96,11 +93,12 @@ public class Gmt
 	}
 
 	/**
-	 * @param args The parsed command line argument array.
+	 * Process the command-line arguments.
+	 *
+	 * @param args The arguments parsed either from the environment options,
+	 * or the command line.
 	 */
-	public static void main(String[] args) {
-	    String dateFormat = DEFAULT_FORMAT;
-
+	private static void processArgs(String[] args) {
 	    for (String arg : args) {
 		String format = arg;
 
@@ -123,6 +121,12 @@ public class Gmt
 		    case "i":
 			dateFormat = ISO_8601_FORMAT;
 			break;
+		    case "-default":
+		    case "default":
+		    case "-def":
+		    case "def":
+			dateFormat = DEFAULT_FORMAT;
+			break;
 		    case "-help":
 		    case "help":
 		    case "-h":
@@ -130,7 +134,7 @@ public class Gmt
 		    case "-?":
 		    case "?":
 			Intl.printHelp("tools#gmt");
-			return;
+			System.exit(0);
 		    default:
 			// Could be a signed tz offset from GMT
 			if (CharUtil.isValidSignedInt(arg)) {
@@ -139,13 +143,15 @@ public class Gmt
 				Intl.errFormat("tools#gmt.badZoneOffset", tzOffset);
 				System.exit(2);
 			    }
-			    break;
+			    selectedZone = null;
 			}
 			else {
 			    String[] zones = TimeZone.getAvailableIDs();
+			    selectedZone = null;
 			    for (String zone : zones) {
 				if (arg.equalsIgnoreCase(zone)) {
 				    selectedZone = TimeZone.getTimeZone(zone);
+				    tzOffset = 0;
 				    break;
 				}
 			    }
@@ -154,8 +160,18 @@ public class Gmt
 				System.exit(1);
 			    }
 			}
+			break;
 		}
 	    }
+	}
+
+	/**
+	 * @param args The parsed command line argument array.
+	 */
+	public static void main(String[] args) {
+	    Options.environmentOptions(Gmt.class, a -> processArgs(a));
+
+	    processArgs(args);
 
 	    SimpleDateFormat fmt = new SimpleDateFormat(dateFormat);
 	    TimeZone gmt = selectedZone == null ? TimeZone.getTimeZone(getZone(tzOffset)) : selectedZone;

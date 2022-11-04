@@ -818,7 +818,7 @@ public final class FileUtilities
 	    try {
 		Map<String, Object> attrs = Files.readAttributes(path, "posix:permissions");
 		@SuppressWarnings("unchecked")
-		Set<PosixFilePermission> permissions = (Set<PosixFilePermission>)attrs.get("permissions");
+		Set<PosixFilePermission> permissions = (Set<PosixFilePermission>) attrs.get("permissions");
 		return permissions.contains(PosixFilePermission.OTHERS_READ)
 		    || permissions.contains(PosixFilePermission.GROUP_READ)
 		    || permissions.contains(PosixFilePermission.OWNER_READ);
@@ -851,7 +851,7 @@ public final class FileUtilities
 		try {
 		    Map<String, Object> attrs = Files.readAttributes(path, "posix:permissions");
 		    @SuppressWarnings("unchecked")
-		    Set<PosixFilePermission> permissions = (Set<PosixFilePermission>)attrs.get("permissions");
+		    Set<PosixFilePermission> permissions = (Set<PosixFilePermission>) attrs.get("permissions");
 		    return permissions.contains(PosixFilePermission.OTHERS_WRITE)
 			|| permissions.contains(PosixFilePermission.GROUP_WRITE)
 			|| permissions.contains(PosixFilePermission.OWNER_WRITE);
