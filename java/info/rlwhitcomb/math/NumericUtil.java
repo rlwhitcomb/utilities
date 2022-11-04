@@ -176,6 +176,8 @@
  *	    #496: New parameter to "convertToWords" to add/eliminate commas.
  *	12-Oct-2022 (rlwhitcomb)
  *	    #514: Move resource text from "util" package to here.
+ *	04-Nov-2022 (rlwhitcomb)
+ *	    #48: Introduce TINY format for names (for "Dir" utility).
  */
 package info.rlwhitcomb.math;
 
@@ -495,6 +497,16 @@ public final class NumericUtil
 		    }
 		}
 
+		/** @return The mixed-mode (1000-based) tiny format name. */
+		public String getTiny() {
+		    String suffix = getSuffix();
+		    if (suffix.equals("B"))
+			suffix = " ";
+		    else
+			suffix = suffix.substring(0, 1);
+		    return suffix;
+		}
+
 		/** @return The mixed-mode (1000-based) suffix for this range. */
 		public String getSuffix() {
 		    return getSuffix(RangeMode.MIXED);
@@ -608,6 +620,8 @@ public final class NumericUtil
 	 */
 	public static enum NameFormat
 	{
+		/** Tiny, with no suffix for bytes, and just {@code K} for multiples. */
+		TINY,
 		/** Just a suffix, such as {@code B}, {@code KB}, {@code MB}, etc. */
 		SUFFIX,
 		/** The short name, such as {@code KBytes}, {@code MBytes}, etc. */
@@ -702,6 +716,56 @@ public final class NumericUtil
 	 */
 	public static String formatToRange(final BigInteger value, final RangeMode mode) {
 	    return internalFormatToRange(value, mode, NameFormat.SHORT);
+	}
+
+
+	/**
+	 * Format a value using the {@link Range} enum to put into a readable range,
+	 * but use just the tiny format (to save space).
+	 *
+	 * @param	value	The input value to format.
+	 * @return		The value formatted (tiny form) to an appropriate range.
+	 */
+	public static String formatToRangeTiny(final long value) {
+	    return internalFormatToRange(BigInteger.valueOf(value), RangeMode.MIXED, NameFormat.TINY);
+	}
+
+
+	/**
+	 * Format a value using the {@link Range} enum to put into a readable range,
+	 * but use just the tiny format (to save space).
+	 *
+	 * @param	value	The input value to format.
+	 * @return		The value formatted (tiny form) to an appropriate range.
+	 */
+	public static String formatToRangeTiny(final BigInteger value) {
+	    return internalFormatToRange(value, RangeMode.MIXED, NameFormat.TINY);
+	}
+
+
+	/**
+	 * Format a value using the {@link Range} enum to put into a readable range,
+	 * but use just the tiny format (to save space).
+	 *
+	 * @param	value	The input value to format.
+	 * @param	mode	Whether to use binary or SI units.
+	 * @return		The value formatted (tiny form) to an appropriate range.
+	 */
+	public static String formatToRangeTiny(final long value, final RangeMode mode) {
+	    return internalFormatToRange(BigInteger.valueOf(value), mode, NameFormat.TINY);
+	}
+
+
+	/**
+	 * Format a value using the {@link Range} enum to put into a readable range,
+	 * but use just the tiny format (to save space).
+	 *
+	 * @param	value	The input value to format.
+	 * @param	mode	Whether to use binary or SI units.
+	 * @return		The value formatted (tiny form) to an appropriate range.
+	 */
+	public static String formatToRangeTiny(final BigInteger value, final RangeMode mode) {
+	    return internalFormatToRange(value, mode, NameFormat.TINY);
 	}
 
 
@@ -848,22 +912,38 @@ public final class NumericUtil
 	    Range r = Range.getRangeOfValue(value, mode);
 
 	    switch (name) {
+		case TINY:   units = r.getTiny();          break;
 		case SUFFIX: units = r.getSuffix(mode);    break;
 		case SHORT:  units = r.getShortName(mode); break;
 		case LONG:   units = r.getLongName(mode);  break;
 	    }
 
 	    if (r == Range.BYTES) {
-		return String.format("%1$s %2$s", value.toString(), units);
+		if (name == NameFormat.TINY)
+		    return value.toString();
+		else
+		    return String.format("%1$s %2$s", value.toString(), units);
 	    } else {
 		double scaledValue = value.doubleValue() / r.getMultiplier(mode).doubleValue();
 
-		if (scaledValue < 10.0d)
-		    return String.format("%1$3.2f %2$s", scaledValue, units);
-		else if (scaledValue < 100.0d)
-		    return String.format("%1$3.1f %2$s", scaledValue, units);
-		else
-		    return String.format("%1$3.0f %2$s", scaledValue, units);
+		if (scaledValue < 10.0d) {
+		    if (name == NameFormat.TINY)
+			return String.format("%1$3.2f%2$s", scaledValue, units);
+		    else
+			return String.format("%1$3.2f %2$s", scaledValue, units);
+		}
+		else if (scaledValue < 100.0d) {
+		    if (name == NameFormat.TINY)
+			return String.format("%1$3.1f%2$s", scaledValue, units);
+		    else
+			return String.format("%1$3.1f %2$s", scaledValue, units);
+		}
+		else {
+		    if (name == NameFormat.TINY)
+			return String.format("%1$3.0f%2$s", scaledValue, units);
+		    else
+			return String.format("%1$3.0f %2$s", scaledValue, units);
+		}
 	    }
 	}
 

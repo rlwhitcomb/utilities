@@ -349,6 +349,8 @@
 		#541: Add the security manager arg for Tester.
 		And only set for Java 17+.
 		Only set the security manager arg in wrapper scripts for Java 17+ also.
+	    04-Nov-2022 (rlwhitcomb)
+		#48: Add "directory" text resources.
 
      ========================================================================== -->
 
@@ -597,6 +599,7 @@
 			<generate-text-resources dir="info/rlwhitcomb/cat" />
 			<generate-text-resources dir="info/rlwhitcomb/compare" />
 			<generate-text-resources dir="info/rlwhitcomb/csv" />
+			<generate-text-resources dir="info/rlwhitcomb/directory" />
 			<generate-text-resources dir="info/rlwhitcomb/json" />
 			<generate-text-resources dir="info/rlwhitcomb/matches" />
 			<generate-text-resources dir="info/rlwhitcomb/math" />
