@@ -33,6 +33,7 @@
  *  04-Nov-22		Process indirect files, process wildcards, begin real
  *			display code, add "link" to the attributes, process
  *			more command-line options.
+ *			Add dates to the file display; sort files.
  */
 package info.rlwhitcomb.directory;
 
@@ -54,7 +55,11 @@ import java.nio.file.Files;
 import java.nio.file.FileSystem;
 import java.nio.file.Path;
 import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -454,6 +459,7 @@ public class Dir
 	private static boolean quoted              = false;
 	private static boolean totalsOnly          = false;
 	private static boolean unadorned           = false;
+	private static boolean fullDate            = false;
 	private static boolean exactSize           = false;
 	private static int limitRecursion          = 0;
 	private static boolean errorLimitRecursion = false;
@@ -895,6 +901,10 @@ System.out.println("size = " + basicAttrs.size() + ", createTime = " + basicAttr
 		    fullName = true;
 		    return true;
 
+		case "D":
+		    fullDate = true;
+		    return true;
+
 		case "X":
 		    exactSize = true;
 		    return true;
@@ -981,6 +991,10 @@ System.out.println("size = " + basicAttrs.size() + ", createTime = " + basicAttr
 	    }
 	}
 
+	static SimpleDateFormat FULL_DATE_FORMAT = new SimpleDateFormat("MMM dd yyyy HH:mm:ss");
+	static SimpleDateFormat DATE_ONLY_FORMAT = new SimpleDateFormat("MMM dd  yyyy");
+	static SimpleDateFormat DAY_TIME_FORMAT  = new SimpleDateFormat("MMM dd HH:mm");
+
 	private static void display(File file) {
 	    StringBuilder buf = new StringBuilder();
 	    FileInfo info = new FileInfo(file);
@@ -991,6 +1005,22 @@ System.out.println("size = " + basicAttrs.size() + ", createTime = " + basicAttr
 		    buf.append(String.format("%1$,10d ", info.getLength()));
 		else
 		    buf.append(String.format("%1$8s ", NumericUtil.formatToRangeTiny(info.getLength())));
+
+		FileTime ft = info.getLastModifiedTime();
+		Instant fti = ft.toInstant();
+		Instant sixMonths = Instant.now().minus(180L, ChronoUnit.DAYS);
+		Date date = Date.from(fti);
+		DateFormat format;
+
+		if (fullDate)
+		    format = FULL_DATE_FORMAT;
+		else
+		    format = fti.isBefore(sixMonths) ? DATE_ONLY_FORMAT : DAY_TIME_FORMAT;
+
+		int length = buf.length();
+		buf.append(format.format(date)).append(' ');
+		if (buf.charAt(length + 4) == '0')
+		    buf.setCharAt(length + 4, ' ');
 	    }
 	    if (fullName) {
 		buf.append(info.getFullPath());
@@ -1005,6 +1035,7 @@ System.out.println("size = " + basicAttrs.size() + ", createTime = " + basicAttr
 	private static void processDirectory(File dir, FileFilter filter) {
 	    if (FileUtilities.canReadDir(dir)) {
 		File[] files = filter == null ? dir.listFiles() : dir.listFiles(filter);
+		Arrays.sort(files);
 		for (File file : files) {
 		    display(file);
 		}
