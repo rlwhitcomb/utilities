@@ -34,6 +34,9 @@
  *			display code, add "link" to the attributes, process
  *			more command-line options.
  *			Add dates to the file display; sort files.
+ *  05-Nov-22 rlw #48:	Add owner and group names.
+ *  06-Nov-22		Pad owner and group to standard width. Get rid of some
+ *			unused code.
  */
 package info.rlwhitcomb.directory;
 
@@ -320,39 +323,6 @@ public class Dir
 
 
 	/**
-	 * For sorting purposes, we need to save the entries as we read them,
-	 * sort the by the criteria, then traverse the sorted list for display.
-	 * This is the storage used for that purpose.
-	 */
-	private static class SaveListEntry
-	{
-		File dir;
-		String name;
-		Set<Attribute> attrib;
-		long date;
-		long size;
-
-		SaveListEntry(final File directory, final String fileName,
-			 final Set<Attribute> attrs, final long fileDate, final long fileSize) {
-		    this.dir    = directory;
-		    this.name   = fileName;
-		    this.attrib = attrs;
-		    this.date   = fileDate;
-		    this.size   = fileSize;
-		}
-
-		public File getFile() {
-		    return new File(dir, name);
-		}
-
-		@Override
-		public String toString() {
-		    return String.format("%1$s%2$s%3$s", dir, fileSeparator, name);
-		}
-	}
-
-
-	/**
 	 * A {@link FileFilter} that applies all the given filter criteria to the given file
 	 * to determine if it should be included or not.
 	 */
@@ -432,7 +402,7 @@ public class Dir
 	private static Set<File> directorySet = new TreeSet<>();
 	private static File lastDirectory     = null;
 
-	private static List<SaveListEntry> saveList = new ArrayList<>();
+	private static List<File> saveList = new ArrayList<>();
 
 	private static long totalSize        = 0L;
 	private static long totalClusterSize = 0L;
@@ -451,7 +421,7 @@ public class Dir
 
 	private static boolean brief               = false;
 	private static boolean wide                = false;
-	private static boolean saveWide            = false;
+	private static boolean saving              = false;
 	private static boolean bareName            = false;
 	private static boolean withoutExt          = false;
 	private static boolean fullName            = false;
@@ -461,6 +431,7 @@ public class Dir
 	private static boolean unadorned           = false;
 	private static boolean fullDate            = false;
 	private static boolean exactSize           = false;
+	private static boolean skipDots            = false;
 	private static int limitRecursion          = 0;
 	private static boolean errorLimitRecursion = false;
 	private static int widestNameLen           = 0;
@@ -476,6 +447,9 @@ public class Dir
 
 	/** The list of filtering criteria specified. */
 	private static List<FilterCrit> filterCritList = new ArrayList<>();
+
+	/** Comparator for all sorting operations (on {@link File}). */
+	private static Comparator<File> fileComparator = null;
 
 	private static int currentRow              = 0;
 
@@ -734,165 +708,6 @@ System.out.println("size = " + basicAttrs.size() + ", createTime = " + basicAttr
 	}
 
 
-	private static void setSortCriteria(final SortCrit newCriterion) {
-	    // TODO: need to check existing criteria to see if this new one fits
-	    // and if so, add to the list; might need to sort the criteria by
-	    // most important first, or primary/secondary, something like that
-	    // TODO: maybe need a return value to indicate success or an error message/flag
-	}
-
-	private static SaveListEntry listAlloc(final File path, Set<Attribute> attrs, long date, long size) {
-	    SaveListEntry newList;
-	    File directory;
-	    String name;
-
-	    directory = dirListFind(path);
-	    name = path.getName();
-	    newList = new SaveListEntry(directory, name, attrs, date, size);
-
-	    /* Do the "widest name" calculation for "-w" display. */
-	    if (saveWide) {
-		String displayName = getName(path, attrs);
-		widestNameLen = Math.max(widestNameLen, displayName.length());
-	    }
-
-	    return newList;
-	}
-
-
-	private static class SaveListComparator implements Comparator<SaveListEntry>
-	{
-		private int test(final SortCrit crit, final File f1, final File f2) {
-		    int comp = 0;
-
-		    switch (crit.field) {
-			case NAME:
-			    comp = getFullName(f1).compareTo(getFullName(f2));
-			    break;
-			case FNAM:
-			    comp = getFileName(f1).compareTo(getFileName(f2));
-			    break;
-			case EXTN:
-			    comp = getFileExtn(f1).compareTo(getFileExtn(f2));
-			    break;
-// TODO: need to get all the attributes (incl. times) at savelist creation time
-// to minimize object allocation and re-allocation (esp. File)
-		    }
-
-		    return comp;
-		}
-
-		@Override
-		public int compare(final SaveListEntry e1, final SaveListEntry e2) {
-		    int comp = 0;
-
-		    for (SortCrit crit : sortCritList) {
-			comp = test(crit, e1.getFile(), e2.getFile());
-			if (comp != 0)
-			    break;
-		    }
-
-		    return comp;
-		}
-
-/*		    switch (sortCrit) {
-			case NAME:
-			    comp = compareFullNames(e1, e2);
-			    break;
-
-			case FNAM:
-			case EXTN:
-			    comp = compareFileNames(e1.name, e2.name, sortCrit);
-			    break;
-
-			case DATE:
-			    if (e1.date > e2.date)
-				comp = 1;
-			    else if (e1.date < e2.date)
-				comp = -1;
-			    else
-				comp = compareFullNames(e1, e2);
-			    break;
-
-			case SIZE:
-			    if (e1.size > e2.size)
-				comp = 1;
-			    else if (e1.size < e2.size)
-				comp = -1;
-			    else
-				comp = compareFullNames(e1, e2);
-			    break;
-
-			case ATTR:
-			    int e1Attr = Attribute.value(e1.attrib);
-			    int e2Attr = Attribute.value(e2.attrib);
-			    if (e1Attr > e2Attr)
-				comp = 1;
-			    else if (e1Attr < e2Attr)
-				comp = -1;
-			    else
-				comp = compareFullNames(e1, e2);
-			    break;
-
-			default:
-			    comp = 0;
-			    break;
-		    }
-
-//		    if (sortDir == Direction.DESCEND)
-//			comp = -comp;
-
-		    return comp;
-		} */
-	}
-
-	private static final SaveListComparator saveListComparator = new SaveListComparator();
-
-
-	private static void listInsert(SaveListEntry newListEntry) {
-	    int insertIndex = Collections.binarySearch(saveList, newListEntry, saveListComparator);
-	    if (insertIndex < 0) {
-		// If no "equal" element found, insert a the correct point to maintain sorted order
-		insertIndex = -(insertIndex + 1);
-	    } else {
-		// If an "equal" element was found, insert the new one after it
-		insertIndex++;
-	    }
-	    saveList.add(insertIndex, newListEntry);
-	}
-
-
-	/**
-	 * Callback for each file processed -- this does all the work.
-	 *
-	 * @param path		The file name (could have path or just name).
-	 * @param attrs		The set of file attributes.
-	 * @param date		File date/time.
-	 * @param size		The file size.
-	 * @return		The result of processing this file.
-	 */
-	private static int process(final String path, final Set<Attribute> attrs,
-		final long date, final long size) {
-	    SaveListEntry entry;
-
-	    /* TODO: use a FileFilter to Check filtering criteria one after the other. */
-
-	    return 0; // ??
-	}
-
-
-	private static void processSaveList() {
-	    for (SaveListEntry list : saveList) {
-		String name;
-		if (list.dir == null)
-		    name = list.name;
-		else
-		    name = String.format("%1$s%2$s", list.dir, list.name);
-		process(name, list.attrib, list.date, list.size);
-	    }
-	}
-
-
 	private static boolean processOneOption(String option) {
 	    // Some options are case-sensitive, others not
 	    switch (option) {
@@ -921,6 +736,21 @@ System.out.println("size = " + basicAttrs.size() + ", createTime = " + basicAttr
 		case "exact":
 		case "ex":
 		    exactSize = true;
+		    break;
+
+		case "quoted":
+		case "quote":
+		case "q":
+		    quoted = true;
+		    break;
+
+		case "wide":
+		case "w":
+		    wide = true;
+		    break;
+
+		case "/":
+		    useForwardSlashes = true;
 		    break;
 
 		case "version":
@@ -998,6 +828,7 @@ System.out.println("size = " + basicAttrs.size() + ", createTime = " + basicAttr
 	private static void display(File file) {
 	    StringBuilder buf = new StringBuilder();
 	    FileInfo info = new FileInfo(file);
+	    String name;
 
 	    if (!brief) {
 		buf.append(info.getAttributes()).append(' ');
@@ -1005,6 +836,14 @@ System.out.println("size = " + basicAttrs.size() + ", createTime = " + basicAttr
 		    buf.append(String.format("%1$,10d ", info.getLength()));
 		else
 		    buf.append(String.format("%1$8s ", NumericUtil.formatToRangeTiny(info.getLength())));
+
+		String owner = info.getOwnerName();
+		if (!owner.isEmpty())
+		    CharUtil.padToWidth(buf, owner, 7);
+
+		String group = info.getGroupName();
+		if (!group.isEmpty())
+		    CharUtil.padToWidth(buf, group, 7);
 
 		FileTime ft = info.getLastModifiedTime();
 		Instant fti = ft.toInstant();
@@ -1022,22 +861,58 @@ System.out.println("size = " + basicAttrs.size() + ", createTime = " + basicAttr
 		if (buf.charAt(length + 4) == '0')
 		    buf.setCharAt(length + 4, ' ');
 	    }
+
 	    if (fullName) {
-		buf.append(info.getFullPath());
+		name = convertSlashes(info.getFullPath());
+		if (quoted)
+		    buf.append(quoteName(name));
+		else
+		    buf.append(name);
 	    }
 	    else {
-		buf.append(info.getName());
+		name = convertSlashes(info.getName());
+		if (quoted)
+		    buf.append(quoteName(name));
+		else
+		    buf.append(name);
 	    }
 
 	    System.out.println(buf.toString());
 	}
 
+	private static void sort(File[] files) {
+	    if (sortCritList.isEmpty()) {
+		Arrays.sort(files);
+	    }
+	    else {
+		Arrays.sort(files, fileComparator);
+	    }
+	}
+
 	private static void processDirectory(File dir, FileFilter filter) {
 	    if (FileUtilities.canReadDir(dir)) {
 		File[] files = filter == null ? dir.listFiles() : dir.listFiles(filter);
-		Arrays.sort(files);
+		sort(files);
+
+		if (!skipDots) {
+		    File dot = new File(dir, ".");
+		    File dotDot = new File(dir, "..");
+
+		    if (saving) {
+			saveList.add(dot);
+			saveList.add(dotDot);
+		    }
+		    else {
+			display(dot);
+			display(dotDot);
+		    }
+		}
+
 		for (File file : files) {
-		    display(file);
+		    if (saving)
+			saveList.add(file);
+		    else
+			display(file);
 		}
 	    }
 	}
@@ -1061,7 +936,10 @@ System.out.println("size = " + basicAttrs.size() + ", createTime = " + basicAttr
 		    processDirectory(f, null);
 		}
 		else if (FileUtilities.canRead(f)) {
-		    display(f);
+		    if (saving)
+			saveList.add(f);
+		    else
+			display(f);
 		}
 		else {
 		    Intl.outFormat("directory#cannotFindOrRead", spec);
@@ -1098,6 +976,9 @@ System.out.println("size = " + basicAttrs.size() + ", createTime = " + basicAttr
 	    if (specs.isEmpty())
 		specs.add(".");
 
+	    if (wide)
+		saving = true;
+
 	    for (String spec : specs) {
 		if (spec.startsWith("@")) {
 		    if (spec.length() > 1) {
@@ -1109,7 +990,11 @@ System.out.println("size = " + basicAttrs.size() + ", createTime = " + basicAttr
 		}
 	    }
 
-	    // TODO: for sorted outputs, need to display the saved/sorted values
+	    saving = false;
+
+	    for (File file : saveList) {
+		display(file);
+	    }
 	}
 
 }
