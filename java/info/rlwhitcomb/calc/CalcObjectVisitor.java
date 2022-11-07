@@ -6260,7 +6260,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		Properties p = new Properties();
 		p.load(r);
 		ObjectScope obj = new ObjectScope();
-		for (String key : p.stringPropertyNames()) {
+		Set<String> sortedNames = new TreeSet<>(p.stringPropertyNames());
+		for (String key : sortedNames) {
 		    obj.setValue(key, p.getProperty(key));
 		}
 		return obj;

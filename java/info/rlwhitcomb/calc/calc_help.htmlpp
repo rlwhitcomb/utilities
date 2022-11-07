@@ -1124,7 +1124,7 @@ or<br>
      or <code>"-"</code>). For a regular file the charset can also be specified, although standard output will always use the system default. If the first expression result for <code>write</code> is an array, the output will be a series of lines using the system
      default line separator, with each array value written to a separate line. For an object the output will be in JSON format, and for all other values
      the result will be written as the string equivalent. Immediately writing the result of a read will produce an identical file.
-  <p>The <code>readProperties</code> and <code>writeProperties</code> functions have the same parameters as <code>read</code> and <code>write</code> (except reading from <code>stdin</code> is not supported), but the files read and written are in the ".properties" format with each line being <code><i>key</i> = <i>value</i></code>.
+  <p>The <code>readProperties</code> and <code>writeProperties</code> functions have the same parameters as <code>read</code> and <code>write</code> (except reading from <code>stdin</code> is not supported), but the files read and written are in the ".properties" format with each line being <code><i>key</i> = <i>value</i></code>. The object returned by <code>ReadProperties</code> will always have the keys in sorted order.
   <p>The return value from <code>delete</code> will be <code>true</code> if all the files are successfully deleted, <code>false</code>
      otherwise. While the return value from <code>rename</code> will be the full path of the destination file (that is, the new file name
      after the move).
