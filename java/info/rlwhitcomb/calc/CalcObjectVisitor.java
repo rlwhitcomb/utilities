@@ -704,6 +704,8 @@
  *	06-Nov-2022 (rlwhitcomb)
  *	    #476: New "readProperties" and "writeProperties" functions.
  *	    Use "natural order" comparator for properties keys.
+ *	07-Nov-2022 (rlwhitcomb)
+ *	    #549: Fix Intl tag for a message that moved.
  */
 package info.rlwhitcomb.calc;
 
@@ -4211,7 +4213,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    double logValue = Math.log10(d);
 	    if (Double.isInfinite(logValue) || Double.isNaN(logValue))
-		throw new CalcExprException("%util#numeric.outOfRange", ctx);
+		throw new CalcExprException("%math#numeric.outOfRange", ctx);
 
 	    return new BigDecimal(logValue, MC_DOUBLE);
 	}
