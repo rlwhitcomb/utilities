@@ -703,6 +703,7 @@
  *	    #543: Trap DateTimeException and wrap with CalcExprException.
  *	06-Nov-2022 (rlwhitcomb)
  *	    #476: New "readProperties" and "writeProperties" functions.
+ *	    Use "natural order" comparator for properties keys.
  */
 package info.rlwhitcomb.calc;
 
@@ -1863,15 +1864,14 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public Object visitVariablesDirective(CalcParser.VariablesDirectiveContext ctx) {
 	    CalcParser.WildIdListContext idList = ctx.wildIdList();
 	    List<CalcParser.WildIdContext> ids;
-	    Set<String> sortedKeys;
+	    Set<String> sortedKeys = new TreeSet<>();
 	    int numberDisplayed = 0;
 	    boolean listSpecific = false;
 
 	    if (idList == null || (ids = idList.wildId()).isEmpty()) {
-		sortedKeys = new TreeSet<>(globals.keySet());
+		sortedKeys.addAll(globals.keySet());
 	    }
 	    else {
-		sortedKeys = new TreeSet<>();
 		ids = idList.wildId();
 		for (CalcParser.WildIdContext node : ids) {
 		    sortedKeys.add(node.getText());
@@ -1935,15 +1935,14 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public Object visitPredefinedDirective(CalcParser.PredefinedDirectiveContext ctx) {
 	    CalcParser.WildIdListContext idList = ctx.wildIdList();
 	    List<CalcParser.WildIdContext> ids;
-	    Set<String> sortedKeys;
+	    Set<String> sortedKeys = new TreeSet<>();
 	    int numberDisplayed = 0;
 	    boolean listSpecific = false;
 
 	    if (idList == null || (ids = idList.wildId()).isEmpty()) {
-		sortedKeys = new TreeSet<>(globals.keySet());
+		sortedKeys.addAll(globals.keySet());
 	    }
 	    else {
-		sortedKeys = new TreeSet<>();
 		ids = idList.wildId();
 		for (CalcParser.WildIdContext node : ids) {
 		    sortedKeys.add(node.getText());
@@ -6260,7 +6259,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		Properties p = new Properties();
 		p.load(r);
 		ObjectScope obj = new ObjectScope();
-		Set<String> sortedNames = new TreeSet<>(p.stringPropertyNames());
+		Set<String> sortedNames = new TreeSet<>(NATURAL_SENSITIVE_COMPARATOR);
+		sortedNames.addAll(p.stringPropertyNames());
 		for (String key : sortedNames) {
 		    obj.setValue(key, p.getProperty(key));
 		}
