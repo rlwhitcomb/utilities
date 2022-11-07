@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.14.70', date: d'2022-11-06',
+      issues: [ 476 ],
+      comment: 'New "readProperties" and "writeProperties" functions.'
+    },
     { version: '2.14.63', date: d'2022-11-02',
       issues: [ ],
       comment: 'Add "attributes" to "fileinfo" members.'

@@ -466,6 +466,8 @@
  *	    #501: Add "frombase" function.
  *	21-Oct-2022 (rlwhitcomb)
  *	    #473: Add "findfiles" function.
+ *	06-Nov-2022 (rlwhitcomb)
+ *	    #476: New "readProperties" and "writeProperties" functions.
  */
 
 grammar Calc;
@@ -643,6 +645,8 @@ expr
    | K_FINDFILES ( expr3 | expr2 )       # findFilesExpr
    | K_READ ( expr2 | expr1 )            # readExpr
    | K_WRITE ( expr3 | expr2 )           # writeExpr
+   | K_READPROPERTIES ( expr2 | expr1 )  # readPropExpr
+   | K_WRITEPROPERTIES ( expr3 | expr2 ) # writePropExpr
    | K_DELETE exprN                      # deleteExpr
    | K_RENAME expr2                      # renameExpr
    | K_MATCHES ( expr3 | expr2 )         # matchesExpr
@@ -1157,6 +1161,12 @@ K_FINDFILES: 'findfiles' | 'FINDFILES' | 'FindFiles' | 'findFiles' ;
 K_READ     : 'read' | 'READ' | 'Read' ;
 
 K_WRITE    : 'write' | 'WRITE' | 'Write' ;
+
+K_READPROPERTIES
+           : 'readproperties' | 'READPROPERTIES' | 'ReadProperties' | 'readProperties' ;
+
+K_WRITEPROPERTIES
+           : 'writeproperties' | 'WRITEPROPERTIES' | 'WriteProperties' | 'writeProperties' ;
 
 K_DELETE   : 'delete' | 'DELETE' | 'Delete' ;
 

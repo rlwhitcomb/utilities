@@ -701,6 +701,8 @@
  *	    #544: Respect the "quotestrings" setting for "@j" formatting; turn off
  *	    "extraSpace" with the "-" flag.
  *	    #543: Trap DateTimeException and wrap with CalcExprException.
+ *	06-Nov-2022 (rlwhitcomb)
+ *	    #476: New "readProperties" and "writeProperties" functions.
  */
 package info.rlwhitcomb.calc;
 
@@ -721,6 +723,8 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Reader;
+import java.io.Writer;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.MathContext;
@@ -6213,6 +6217,115 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			seq = getNonNullString(expr, outputObj);
 		    }
 		    return BigInteger.valueOf(FileUtilities.writeRawText(seq, new File(fileName), cs));
+		}
+		return BigInteger.ZERO;
+	    }
+	    catch (IOException ioe) {
+		throw new CalcExprException(ioe, ctx);
+	    }
+	}
+
+	private Reader newReader(final String fileName, final Charset cs) throws IOException {
+	    Path path = Paths.get(fileName);
+	    if (cs == null)
+		return Files.newBufferedReader(path);
+	    else
+		return Files.newBufferedReader(path, cs);
+	}
+
+	private Writer newWriter(final String fileName, final Charset cs) throws IOException {
+	    Path path = Paths.get(fileName);
+	    if (cs == null)
+		return Files.newBufferedWriter(path);
+	    else
+		return Files.newBufferedWriter(path, cs);
+	}
+
+	@Override
+	public Object visitReadPropExpr(CalcParser.ReadPropExprContext ctx) {
+	    CalcParser.Expr1Context e1ctx = ctx.expr1();
+	    CalcParser.Expr2Context e2ctx = ctx.expr2();
+	    String fileName = "";
+	    Charset cs = null;
+
+	    if (e1ctx != null) {
+		fileName = getStringValue(e1ctx.expr());
+	    }
+	    else {
+		fileName = getStringValue(e2ctx.expr(0));
+		cs = getCharsetValue(e2ctx.expr(1), false);
+	    }
+
+	    try (Reader r = newReader(fileName, cs)) {
+		Properties p = new Properties();
+		p.load(r);
+		ObjectScope obj = new ObjectScope();
+		for (String key : p.stringPropertyNames()) {
+		    obj.setValue(key, p.getProperty(key));
+		}
+		return obj;
+	    }
+	    catch (IOException ioe) {
+		throw new CalcExprException(ioe, ctx);
+	    }
+	}
+
+	@Override
+	public Object visitWritePropExpr(CalcParser.WritePropExprContext ctx) {
+	    CalcParser.Expr2Context e2ctx = ctx.expr2();
+	    CalcParser.Expr3Context e3ctx = ctx.expr3();
+	    CalcParser.ExprContext expr;
+	    String fileName = "";
+	    Charset cs = null;
+	    Object outputObj =  null;
+	    Properties p = new Properties();
+
+	    if (e3ctx != null) {
+		expr = e3ctx.expr(0);
+		outputObj = evaluate(expr);
+		fileName = getStringValue(e3ctx.expr(1));
+		cs = getCharsetValue(e3ctx.expr(2), false);
+	    }
+	    else {
+		expr = e2ctx.expr(0);
+		outputObj = evaluate(expr);
+		fileName = getStringValue(e2ctx.expr(1));
+	    }
+
+	    try {
+		if (outputObj != null) {
+		    if (outputObj instanceof ArrayScope) {
+			@SuppressWarnings("unchecked")
+			ArrayScope<Object> array = (ArrayScope<Object>) outputObj;
+			int seq = 0;
+			for (Object obj : array.list()) {
+			    String key = String.format("_%1$d", seq++);
+			    p.setProperty(key, getNonNullString(expr, obj));
+			}
+		    }
+		    else if (outputObj instanceof SetScope) {
+			@SuppressWarnings("unchecked")
+			SetScope<Object> set = (SetScope<Object>) outputObj;
+			int seq = 0;
+			for (Object obj : set.set()) {
+			    String key = String.format("_%1$d", seq++);
+			    p.setProperty(key, getNonNullString(expr, obj));
+			}
+		    }
+		    else if (outputObj instanceof ObjectScope) {
+			ObjectScope obj = (ObjectScope) outputObj;
+			for (String key : obj.keyList()) {
+			    p.setProperty(key, getNonNullString(expr, obj.getValue(key, false)));
+			}
+		    }
+		    else {
+			p.setProperty("_0", getNonNullString(expr, outputObj));
+		    }
+
+		    try (Writer w = newWriter(fileName, cs)) {
+			p.store(w, String.format("Calc %1$s", Environment.getProductVersion()));
+		    }
+		    return BigInteger.valueOf(p.size());
 		}
 		return BigInteger.ZERO;
 	    }

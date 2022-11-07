@@ -1174,6 +1174,15 @@ read(FILE2)
 
 delete(FILE2)
 
+const PROPS = 'test.properties'
+props = { a:false, b:123, c:"def" }
+writeProperties(props, PROPS)
+pr2 = readproperties(PROPS);
+pr2 == props
+pr2 === props
+
+delete(PROPS)
+
 :echo
 :echo "End of expression tests (suite 1)."
 
