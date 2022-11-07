@@ -36,6 +36,7 @@
  *  06-Sep-21 rlw  ---	Final parameters.
  *  18-Feb-22 rlw  ---	Use Exceptions to get better error messages.
  *  19-Sep-22 rlw #448:	Change "exitDirectory" default return value.
+ *  07-Nov-22 rlw #48:	Implement FileVisitor interface here.
  */
 package info.rlwhitcomb.util;
 
@@ -43,7 +44,12 @@ import info.rlwhitcomb.util.Constants;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.file.FileVisitor;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Path;
+import java.nio.file.attribute.BasicFileAttributes;
 
 
 /**
@@ -57,7 +63,7 @@ import java.nio.charset.Charset;
  * for subclassing if not all methods of the interface are needed.
  * <p> Specifies the <code>UTF-8</code> character set for the input file.
  */
-public interface LineProcessor extends FileFilter
+public interface LineProcessor extends FileFilter, FileVisitor<Path>
 {
 	/**
 	 * Specifies the {@link Charset} that the input file is encoded with.
@@ -147,6 +153,26 @@ public interface LineProcessor extends FileFilter
 	 */
 	default boolean postProcess(final File inputFile) {
 	    return true;
+	}
+
+	@Override
+	default FileVisitResult preVisitDirectory(final Path dir, BasicFileAttributes attrs) {
+	    return enterDirectory(dir.toFile(), 0) ? FileVisitResult.CONTINUE : FileVisitResult.SKIP_SUBTREE;
+	}
+
+	@Override
+	default FileVisitResult postVisitDirectory(final Path dir, final IOException exc) {
+	    return exitDirectory(dir.toFile(), 0, exc == null ? false : true) ? FileVisitResult.CONTINUE : FileVisitResult.SKIP_SUBTREE;
+	}
+
+	@Override
+	default FileVisitResult visitFile(final Path file, final BasicFileAttributes attrs) {
+	    return FileVisitResult.CONTINUE;
+	}
+
+	@Override
+	default FileVisitResult visitFileFailed(final Path file, final IOException exc) {
+	    return FileVisitResult.CONTINUE;
 	}
 
 }
