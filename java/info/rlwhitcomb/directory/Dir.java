@@ -37,6 +37,7 @@
  *  05-Nov-22 rlw #48:	Add owner and group names.
  *  06-Nov-22		Pad owner and group to standard width. Get rid of some
  *			unused code.
+ *  07-Nov-22		Fix spacing with long owner names; fix Javadoc warning.
  */
 package info.rlwhitcomb.directory;
 
@@ -183,7 +184,6 @@ public class Dir
 	 * One instance of a sort criteria, having the field to sort by and the direction of the sort.
 	 * <p> Multiple sort criteria are possible, but some don't make sense, while others only apply
 	 * in certain cases.
-	 * @see #setSortCriteria for the necessary error checking
 	 */
 	private class SortCrit
 	{
@@ -838,12 +838,16 @@ System.out.println("size = " + basicAttrs.size() + ", createTime = " + basicAttr
 		    buf.append(String.format("%1$8s ", NumericUtil.formatToRangeTiny(info.getLength())));
 
 		String owner = info.getOwnerName();
-		if (!owner.isEmpty())
-		    CharUtil.padToWidth(buf, owner, 7);
+		if (!owner.isEmpty()) {
+		    CharUtil.padToWidth(buf, owner, 6);
+		    buf.append(' ');
+		}
 
 		String group = info.getGroupName();
-		if (!group.isEmpty())
-		    CharUtil.padToWidth(buf, group, 7);
+		if (!group.isEmpty()) {
+		    CharUtil.padToWidth(buf, group, 6);
+		    buf.append(' ');
+		}
 
 		FileTime ft = info.getLastModifiedTime();
 		Instant fti = ft.toInstant();
