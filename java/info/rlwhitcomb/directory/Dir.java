@@ -38,6 +38,7 @@
  *  06-Nov-22		Pad owner and group to standard width. Get rid of some
  *			unused code.
  *  07-Nov-22		Fix spacing with long owner names; fix Javadoc warning.
+ *  08-Nov-22 rlw #48:	Blank out leading '0' in hours value.
  */
 package info.rlwhitcomb.directory;
 
@@ -864,6 +865,8 @@ System.out.println("size = " + basicAttrs.size() + ", createTime = " + basicAttr
 		buf.append(format.format(date)).append(' ');
 		if (buf.charAt(length + 4) == '0')
 		    buf.setCharAt(length + 4, ' ');
+		if (buf.charAt(length + 7) == '0')
+		    buf.setCharAt(length + 7, ' ');
 	    }
 
 	    if (fullName) {
