@@ -1,0 +1,63 @@
+/****************************************/
+/*  Program to generate wrapper scripts */
+/****************************************/
+:quiet on
+
+data = {
+/* Windows .bat file template */
+bat: [
+    "@echo off",
+    "setlocal",
+    "set CLASS_NAME=${class}",
+    "set CMD_ARGS=${args}",
+    "set JVM_ARGS=${jvm}",
+    "call %~dp0_find_and_run_class %*",
+    "endlocal",
+    "exit /b %errorlevel%"
+],
+
+/* Non-Windows script file template */
+bash: [
+    "#!/bin/bash",
+    "CLASS_NAME=${class}",
+    "CMD_ARGS=${args}",
+    "JVM_ARGS=${jvm}",
+    "source _find_and_run_class"
+],
+
+settings: [
+    { name: '`',      class: 'info.rlwhitcomb.calc.Calc', args: '-nolibraries'    },
+    { name: '``',     class: 'info.rlwhitcomb.calc.Calc', args: '-g -nolibraries' }
+    /* TODO: Need the rest of the data here */
+]
+}
+
+loop set in data.settings {
+    var file = []
+    var outputFile
+    var template
+
+    if ON_WINDOWS {
+        outputFile = `${set.name}.bat`
+        template = data.bat
+    }
+    else {
+        outputFile = `${set.name}`
+        template = data.bash
+    }
+
+    :echo `Generating "$outputFile" ...`
+    loop line over template {
+        case line in {
+            matches s'.+\$\{class\}': file += replace(line, '${class}', set.class),
+            matches s'.+\$\{args\}' : if set.args { file += replace(line, '${args}', set.args)},
+            matches s'.+\$\{jvm\}'  : if set.jvm  { file += replace(line, '${jvm}', set.jvm)},
+            default: file += line
+        }
+    }
+    write(file, outputFile)
+    if !ON_WINDOWS {
+        exec('chmod', '+x', outputFile)
+    }
+    /* TODO: also generate a .properties file with all the data for the "exec" function to consume */
+}
