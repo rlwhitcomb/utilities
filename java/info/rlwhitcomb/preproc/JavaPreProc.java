@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2010-2011,2014-2016,2019-2021 Roger L. Whitcomb.
+ * Copyright (c) 2010-2011,2014-2016,2019-2022 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,119 +21,89 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  *
- *  Java language Pre-processor
+ *	Java language Pre-processor
  *
  * History:
- *    19-May-2010 (rlwhitcomb)
- *	First version after not finding anything
- *	useful via Google.
- *    24-May-2010 (rlwhitcomb)
- *	Correct backwards test of return values from
- *	processing functions: true means error, false
- *	is success.
- *    25-May-2010 (rlwhitcomb)
- *	Because of problems reporting undefined var
- *	errors even with #if defined(abc) && $(abc)...
- *	as well as possible problems recognizing 'and'
- *	as an operator instead of text :( we need to
- *	tokenize the input before passing to evaluate();
- *	this requires a complete rewrite of the parser.
- *    28-May-2010 (rlwhitcomb)
- *	Add some predefined symbols for use:
- *	__DATE__, __TIME__, __FILE__, __LINE__
- *	__JAVA_VERSION__, __JAVA_PP_VERSION__
- *    28-May-2010 (rlwhitcomb)
- *	Fix problems that give spurious errors on #endif
- *	if there were previous #endif errors.
- *    23-Jul-2010 (rlwhitcomb)
- *	Only allow '/' to start options on Windows; added
- *	"usage()" and "signOnBanner()" in response to "-?".
- *    02-Aug-2010 (rlwhitcomb)
- *	Output an error message when an input file cannot be found;
- *	implement "nologo" command-line option.
- *    04-Aug-2010 (rlwhitcomb)
- *	Implement "-p path" command-line option for searching for
- *	included files; renamed enum "Tokens" to "Token" to be better
- *	English; more descriptive Javadoc to improve documentation.
- *    06-Aug-2010 (rlwhitcomb)
- *	Implement "-C" option to specify a different directive
- *	character (for files that use "#" as a comment indicator).
- *    13-Aug-2010 (rlwhitcomb)
- *	Implement checks for input and output files already existing
- *	and output file newer than input.  This will reduce the unnecessary
- *	preprocessing of files that didn't change.  But, adding a "-A" (always)
- *	switch to force things (if, for instance, environment variables have
- *	changed).
- *    16-Aug-2010 (rlwhitcomb)
- *	Small coding change in the use of the "defines" map; made distinction
- *	between "-r" and "-R" switches and added recursive directory searching
- *	for "-R"; cleaned up setting of input and output extensions and set by
- *	default for single files from the names (if extension is present);
- *	cleaned up problems with highly nested parentheses; allow macro
- *	symbols to stand for themselves inside #ifxxx directives (that is,
- *	$(macro) is not necessary in expressions (it is supported but not
- *	required); fixed other problems with expression parsing uncovered by
- *	testing with Microsoft C headers; implemented #error <msg> directive;
- *	allow #define VAR without a value (value becomes empty string);
- *	standardized the syntax for a variable name as "[_A-Za-z]\\w*".
- *    20-Aug-2010 (rlwhitcomb)
- *	Cleaned up output a little bit by not writing Line/Directive header
- *	until we actually get a directive to display.
- *    24-Aug-2010 (rlwhitcomb)
- *	Fix parsing problems with a version string like "1.5.1"; fix error
- *	reporting position for macro substitutions; do substitutions inside
- *	quoted strings; strip quotes before doing string compares.
- *	Made the leap to make this into an Ant task -- still will execute
- *	from the command line also.
- *    06-Sep-2010 (rlwhitcomb)
- *	Silently allow an empty value for the "define=" property within Ant.
- *	Necessary because of the DEBUG setting which will be undefined unless
- *	set and there is no way to not define something with the <condition>
- *	tasks.  So, just ignore empty values.
- *    22-Sep-2010 (rlwhitcomb)
- *	Make output a little less verbose in the "skipping" case.
- *    06-Oct-2010 (rlwhitcomb)
- *	Fix subtle bugs with "!" and "||" operators; add "plus" verbose mode.
- *    20-Oct-2010 (rlwhitcomb)
- *	Fix bug with #elif; added "#elseif" as an alternative spelling.
- *    04-Nov-2010 (rlwhitcomb)
- *	Allow multiple defines or undefines (comma or semicolon delimited)
- *	on the -D or define= attribute (necessary for use inside Ant);
- *	handle VARREF at the "otherFactor" and "stringFactor" levels;
- *	add "Error: " prefix to all System.err messages.
- *    19-May-2011 (rlwhitcomb)
- *	Add ability to pass through #directives if specified as
- *	##directive.
- *    31-Aug-2011 (rlwhitcomb)
- *	Oops!  Updated COPYRIGHT_YEAR to be the correct value.
- *    05-May-2014 (rlwhitcomb)
- *	Trace the output line after doing variable substitution.
- *	Update version and copyright year.
- *    31-Aug-2015 (rlwhitcomb)
- *	Javadoc cleanup (found by Java 8).
- *    23-Feb-2016 (rlwhitcomb)
- *	Well, there are more Javadoc fixes to be made...
- *    15-Mar-2019 (rlwhitcomb)
- *	Don't use FileInputStream/FileOutputStream due to GC problems b/c of the finalize
- *	method in these classes. Fix wildcard imports. Use StandardCharsets.
- *    21-May-2019 (rlwhitcomb)
- *	Add Timezone to __TIME__ display; update copyright year string.
- *	Reformat to current tab specs.  Bump version.
- *    09-Jan-2020 (rlwhitcomb)
- *	Change package, bump version, update copyright year.
- *    21-Dec-2020 (rlwhitcomb)
- *	Update Javadoc to latest conventions.
- *    21-Jan-2021 (rlwhitcomb)
- *	Add "-L" (log file) and "-W" parameters. Recognize "${macro}" format also.
- *    27-Jan-2021 (rlwhitcomb)
- *	Fix a bug with flags when setting "recurseDirectories"; some tiny cleanup.
- *    10-Feb-2021 (rlwhitcomb)
- *	Read "build.properties", "build.number", and "version.properties" and define
- *	variables with everything we find in there. Implement #echo directive.
- *	Macro variable names can now have "." in them. Reset the date and time
- *	variables for each file processed.
- *    22-Feb-2021 (rlwhitcomb)
- *	Align "exceptMessage" with our own ExceptionUtil code.
+ *  19-May-10 rlw  ---	First version after not finding anything useful via Google.
+ *  24-May-10 rlw  ---	Correct backwards test of return values from processing
+ *			functions: true means error, false is success.
+ *  25-May-10 rlw  ---	Because of problems reporting undefined var errors even
+ *			with #if defined(abc) && $(abc)... as well as possible
+ *			problems recognizing 'and' as an operator instead of
+ *			text :( we need to tokenize the input before passing to
+ *			evaluate(); this requires a complete rewrite of the parser.
+ *  28-May-10 rlw  ---	Add some predefined symbols for use:
+ *			__DATE__, __TIME__, __FILE__, __LINE__
+ *			__JAVA_VERSION__, __JAVA_PP_VERSION__
+ *  28-May-10 rlw  ---	Fix problems that give spurious errors on #endif if there
+ *			were previous #endif errors.
+ *  23-Jul-10 rlw  ---	Only allow '/' to start options on Windows; added "usage()"
+ *			and "signOnBanner()" in response to "-?".
+ *  02-Aug-10 rlw  ---	Output an error message when an input file cannot be found;
+ *			implement "nologo" command-line option.
+ *  04-Aug-10 rlw  ---	Implement "-p path" command-line option for searching for
+ *			included files; renamed enum "Tokens" to "Token" to be better
+ *			English; more descriptive Javadoc to improve documentation.
+ *  06-Aug-10 rlw  ---	Implement "-C" option to specify a different directive
+ *			character (for files that use "#" as a comment indicator).
+ *  13-Aug-10 rlw  ---	Implement checks for input and output files already existing
+ *			and output file newer than input.  This will reduce the
+ *			unnecessary preprocessing of files that didn't change.
+ *			But, adding a "-A" (always) switch to force things (if,
+ *			for instance, environment variables have changed).
+ *  16-Aug-10 rlw  ---	Small coding change in the use of the "defines" map; made
+ *			distinction between "-r" and "-R" switches and added recursive
+ *			directory searching for "-R"; cleaned up setting of input and
+ *			output extensions and set by default for single files from the
+ *			names (if extension is present); cleaned up problems with highly
+ *			nested parentheses; allow macro symbols to stand for themselves
+ *			inside #ifxxx directives (that is, $(macro) is not necessary in
+ *			expressions (it is supported but not required); fixed other problems
+ *			with expression parsing uncovered by testing with Microsoft C headers;
+ *			implemented #error <msg> directive; allow #define VAR without a
+ *			value (value becomes empty string); standardized the syntax for a
+ *			variable name as "[_A-Za-z]\\w*".
+ *  20-Aug-10 rlw  ---	Cleaned up output a little bit by not writing Line/Directive
+ *			header until we actually get a directive to display.
+ *  24-Aug-10 rlw  ---	Fix parsing problems with a version string like "1.5.1"; fix
+ *			error reporting position for macro substitutions; do substitutions
+ *			inside quoted strings; strip quotes before doing string compares.
+ *			Made the leap to make this into an Ant task -- still will execute
+ *			from the command line also.
+ *  06-Sep-10 rlw  ---	Silently allow an empty value for the "define=" property within
+ *			Ant. Necessary because of the DEBUG setting which will be undefined
+ *			unless set and there is no way to not define something with the
+ *			<condition> tasks.  So, just ignore empty values.
+ *  22-Sep-10 rlw  ---	Make output a little less verbose in the "skipping" case.
+ *  06-Oct-10 rlw  ---	Fix subtle bugs with "!" and "||" operators; add "plus" verbose mode.
+ *  20-Oct-10 rlw  ---	Fix bug with #elif; added "#elseif" as an alternative spelling.
+ *  04-Nov-10 rlw  ---	Allow multiple defines or undefines (comma or semicolon delimited)
+ *			on the -D or define= attribute (necessary for use inside Ant);
+ *			handle VARREF at the "otherFactor" and "stringFactor" levels;
+ *			add "Error: " prefix to all System.err messages.
+ *  19-May-11 rlw  ---	Add ability to pass through #directives if specified as
+ *			##directive.
+ *  31-Aug-11 rlw  ---	Oops!  Updated COPYRIGHT_YEAR to be the correct value.
+ *  05-May-14 rlw  ---	Trace the output line after doing variable substitution.
+ *			Update version and copyright year.
+ *  31-Aug-15 rlw  ---	Javadoc cleanup (found by Java 8).
+ *  23-Feb-16 rlw  ---	Well, there are more Javadoc fixes to be made...
+ *  15-Mar-19 rlw  ---	Don't use FileInputStream/FileOutputStream due to GC problems b/c of
+ *			the finalize method in these classes. Fix wildcard imports.
+ *			Use StandardCharsets.
+ *  21-May-19 rlw  ---	Add Timezone to __TIME__ display; update copyright year string.
+ *			Reformat to current tab specs.  Bump version.
+ *  09-Jan-20 rlw  ---	Change package, bump version, update copyright year.
+ *  21-Dec-20 rlw  ---	Update Javadoc to latest conventions.
+ *  21-Jan-21 rlw  ---	Add "-L" (log file) and "-W" parameters. Recognize "${macro}" format
+ *			also.
+ *  27-Jan-21 rlw  ---	Fix a bug with flags when setting "recurseDirectories"; some tiny cleanup.
+ *  10-Feb-21 rlw  ---	Read "build.properties", "build.number", and "version.properties" and
+ *			define variables with everything we find in there. Implement #echo
+ *			directive. Macro variable names can now have "." in them. Reset the
+ *			date and time variables for each file processed.
+ *  22-Feb-21 rlw  ---	Align "exceptMessage" with our own ExceptionUtil code.
+ *  07-Nov-22 rlw  ---	More exceptions to process specially.
  */
 package info.rlwhitcomb.preproc;
 
@@ -149,10 +119,14 @@ import java.io.InputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
 import java.net.UnknownHostException;
 import java.nio.charset.CharacterCodingException;
+import java.nio.charset.IllegalCharsetNameException;
 import java.nio.charset.StandardCharsets;
 import java.nio.charset.UnsupportedCharsetException;
+import java.nio.file.DirectoryNotEmptyException;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Paths;
@@ -165,9 +139,11 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.IllegalFormatException;
 import java.util.LinkedList;
 import java.util.Properties;
 import java.util.TimeZone;
+import java.util.UnknownFormatConversionException;
 import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -437,9 +413,9 @@ public class JavaPreProc extends Task
 	private static DateFormat timeFmt = null;
 
 	/** The current version of this software. */
-	private static final String VERSION = "1.1.9";
+	private static final String VERSION = "1.1.10";
 	/** The current copyright year. */
-	private static final String COPYRIGHT_YEAR = "2010-2011,2014-2016,2019-2021";
+	private static final String COPYRIGHT_YEAR = "2010-2011,2014-2016,2019-2022";
 
 
 	/**
@@ -705,11 +681,19 @@ public class JavaPreProc extends Task
 		  || ex instanceof ClassNotFoundException
 		  || ex instanceof NullPointerException
 		  || ex instanceof CharacterCodingException
+		  || ex instanceof IllegalCharsetNameException
 		  || ex instanceof UnsupportedCharsetException
+		  || ex instanceof UnsupportedEncodingException
 		  || ex instanceof FileNotFoundException
 		  || ex instanceof NoSuchFileException
+		  || ex instanceof DirectoryNotEmptyException
+		  || ex instanceof FileAlreadyExistsException
 		  || ex instanceof UnsupportedOperationException
-		  || ex instanceof NumberFormatException)
+		  || ex instanceof NumberFormatException
+		  || ex instanceof StringIndexOutOfBoundsException
+		  || ex instanceof UnknownFormatConversionException
+		  || ex instanceof IllegalFormatException
+		  || ex instanceof NoSuchFieldException)
 		message = String.format("%1$s: %2$s", className, message);
 
 	    return message;
