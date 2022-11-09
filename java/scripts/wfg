@@ -1,4 +1,0 @@
-#!/bin/bash
-CLASS_NAME=info.rlwhitcomb.wordfind.WordFind
-CMD_ARGS=-gui
-source _find_and_run_class

@@ -1,3 +1,0 @@
-#!/bin/bash
-CLASS_NAME=info.rlwhitcomb.tools.B64
-source _find_and_run_class

@@ -1,3 +1,0 @@
-#!/bin/bash
-CLASS_NAME=info.rlwhitcomb.tree.Tree
-source _find_and_run_class

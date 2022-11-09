@@ -1,3 +1,0 @@
-#!/bin/bash
-CLASS_NAME=info.rlwhitcomb.matches.Matches
-source _find_and_run_class

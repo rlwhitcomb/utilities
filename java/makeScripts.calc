@@ -2,8 +2,14 @@
 /*  Program to generate wrapper scripts */
 /****************************************/
 :quiet on
+//
+// $0 = output directory
+// $1 = token/replacement
+//
+const outdir = fixpath($0)
+const tokenreplacement = $1
 
-data = {
+const data = {
 /* Windows .bat file template */
 bat: [
     "@echo off",
@@ -26,16 +32,57 @@ bash: [
 ],
 
 settings: [
-    { name: '`',      class: 'info.rlwhitcomb.calc.Calc', args: '-nolibraries'    },
-    { name: '``',     class: 'info.rlwhitcomb.calc.Calc', args: '-g -nolibraries' }
-    /* TODO: Need the rest of the data here */
+    { name: '`',        class: '$calc.Calc',           args: '-nolibraries'        },
+    { name: '``',       class: '$calc.Calc',           args: '-g -nolibraries'     },
+    { name: 'b64',      class: '$tools.B64'                                        },
+    { name: 'c',        class: '$calc.Calc'                                        },
+    { name: 'calc',     class: '$calc.Calc'                                        },
+    { name: 'cat',      class: '$cat.Cat'                                          },
+    { name: 'cg',       class: '$calc.Calc',           args: '-g'                  },
+    { name: 'cmp',      class: '$compare.CompareFiles'                             },
+    { name: 'crl',      class: '$curl.CURL'                                        },
+    { name: 'csv',      class: '$test.CSVTest'                                     },
+    { name: 'd',        class: '$directory.Dir'                                    },
+    { name: 'decode',   class: 'net.iharder.b64.Base64', args: '-d'                },
+    { name: 'encode',   class: 'net.iharder.b64.Base64', args: '-e'                },
+    { name: 'environ',  class: '$util.Environment'                                 },
+    { name: 'gmt',      class: '$tools.Gmt'                                        },
+    { name: 'gunz',     class: '$tools.GUnzip'                                     },
+    { name: 'gz',       class: '$tools.GZip'                                       },
+    { name: 'hd',       class: '$tools.Head'                                       },
+    { name: 'hexd',     class: '$tools.HexDump'                                    },
+    { name: 'hsh',      class: '$tools.Hash'                                       },
+    { name: 'isdir',    class: '$tools.IsDir'                                      },
+    { name: 'lists',    class: '$util.Lists'                                       },
+    { name: 'manifest', class: '$tools.DumpManifest'                               },
+    { name: 'matches',  class: '$matches.Matches'                                  },
+    { name: 'md5',      class: '$tools.Hash',          args: '--algorithm=MD5'     },
+    { name: 'os',       class: '$tools.OS'                                         },
+    { name: 'sha1',     class: '$tools.Hash',          args: '--algorithm=SHA-1'   },
+    { name: 'sha256',   class: '$tools.Hash'                                       },
+    { name: 'sha512',   class: '$tools.Hash',          args: '--algorithm=SHA-512' },
+    { name: 'sleep',    class: '$util.Sleep'                                       },
+    { name: 'tester',   class: '$tester.Tester',       jvm: '@@@JVM17+@@@'         },
+    { name: 'timethis', class: '$util.TimeThis'                                    },
+    { name: 'tre',      class: '$tree.Tree'                                        },
+    { name: 'uuid',     class: '$tools.Uuid'                                       },
+    { name: 'version'                                                              },
+    { name: 'wc',       class: '$tools.WordCount'                                  },
+    { name: 'wf',       class: '$wordfind.WordFind'                                },
+    { name: 'wfg',      class: '$wordfind.WordFind', args: '-gui'                  },
+    { name: 'which',    class: '$util.Which'                                       }
 ]
 }
+var splits = split(tokenreplacement, '/')
+var token = splits[0]
+var replacement = splits[1] ?: ""
 
 loop set in data.settings {
     var file = []
     var outputFile
     var template
+    const class = set.class ?! replace(set.class, '$', 'info.rlwhitcomb.')
+    const jvm   = set.jvm   ?! replace(set.jvm, token, replacement)
 
     if ON_WINDOWS {
         outputFile = `${set.name}.bat`
@@ -45,13 +92,14 @@ loop set in data.settings {
         outputFile = `${set.name}`
         template = data.bash
     }
+    outputFile = outdir + outputFile
 
     :echo `Generating "$outputFile" ...`
     loop line over template {
         case line in {
-            matches s'.+\$\{class\}': file += replace(line, '${class}', set.class),
+            matches s'.+\$\{class\}': if class    { file += replace(line, '${class}', class)  },
             matches s'.+\$\{args\}' : if set.args { file += replace(line, '${args}', set.args)},
-            matches s'.+\$\{jvm\}'  : if set.jvm  { file += replace(line, '${jvm}', set.jvm)},
+            matches s'.+\$\{jvm\}'  : if jvm      { file += replace(line, '${jvm}', jvm)      },
             default: file += line
         }
     }

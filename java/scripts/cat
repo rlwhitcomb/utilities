@@ -1,3 +1,0 @@
-#!/bin/bash
-CLASS_NAME=info.rlwhitcomb.cat.Cat
-source _find_and_run_class
