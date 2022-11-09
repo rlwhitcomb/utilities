@@ -1294,7 +1294,7 @@ public final class Environment
 
 
 	/**
-	 * Get the current {@var CLASSPATH} as an array of URLs, suitable for use with
+	 * Get the current {@code CLASSPATH} as an array of URLs, suitable for use with
 	 * {@link java.net.URLClassLoader}.
 	 *
 	 * @return The CLASSPATH in URL form.
