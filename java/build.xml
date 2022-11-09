@@ -858,7 +858,7 @@ Test starting on ${build.date} at ${build.time}
 		<fixcrlf srcdir="${env.UTILITIES_HOME}" if:true="${utilities.available}">
 			<patternset refid="wrapper-files"/>
 		</fixcrlf>
-		<java classname="info.rlwhitcomb.calc.Calc" failonerror="true" fork="true">
+		<java classname="info.rlwhitcomb.calc.Calc" failonerror="true" fork="true" if:true="${utilities.available}">
 			<arg value="-nocolor"/>
 			<arg value="-nolibs"/>
 			<arg value="-library"/>
