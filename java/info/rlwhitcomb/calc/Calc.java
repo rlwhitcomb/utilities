@@ -316,6 +316,8 @@
  *	    #527: Fix processing of ":include" with embedded spaces.
  *	19-Oct-2022 (rlwhitcomb)
  *	    Add some Javadoc and move some methods out to CharUtil.
+ *	09-Nov-2022 (rlwhitcomb)
+ *	    #550: Catch AssertException at the highest levels.
  */
 package info.rlwhitcomb.calc;
 
@@ -1991,6 +1993,12 @@ public class Calc
 		else
 		    displayer.displayErrorMessage(Intl.formatString("calc#argError", ce.getMessage()), ce.getLine());
 	    }
+	    catch (AssertException ae) {
+		if (throwError)
+		    throw ae;
+		else
+		    displayer.displayErrorMessage(Intl.formatString("calc#argError", ae.getMessage()), ae.getContext().getStart().getLine());
+	    }
 	    finally {
 		endTime = Environment.highResTimer();
 		if (parseEndTime == 0L)
@@ -2673,6 +2681,10 @@ public class Calc
 	    catch (IOException ioe) {
 		Intl.errFormat("calc#inOutError", Exceptions.toString(ioe));
 		exitValue = "96";
+	    }
+	    catch (AssertException ae) {
+		displayer.displayErrorMessage(Intl.formatString("calc#argError", ae.getMessage()), ae.getContext().getStart().getLine());
+		exitValue = "95";
 	    }
 
 	    if (exitValue != null) {

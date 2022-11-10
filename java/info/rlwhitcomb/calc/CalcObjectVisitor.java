@@ -706,6 +706,8 @@
  *	    Use "natural order" comparator for properties keys.
  *	07-Nov-2022 (rlwhitcomb)
  *	    #549: Fix Intl tag for a message that moved.
+ *	09-Nov-2022 (rlwhitcomb)
+ *	    #550: ":assert" directive.
  */
 package info.rlwhitcomb.calc;
 
@@ -2212,6 +2214,24 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		checkVersionText(versionNumbers.get(0), null);
 	    }
 
+	    return Boolean.TRUE;
+	}
+
+	@Override
+	public Object visitAssertDirective(CalcParser.AssertDirectiveContext ctx) {
+	    CalcParser.ExprContext expr1 = ctx.expr(0);
+	    CalcParser.ExprContext expr2 = ctx.expr(1);
+	    String assertMessage = "";
+
+	    // expr1 is the asserted expression
+	    // expr2 is the optional message, which doesn't need to be evaluated until and unless
+	    // the assert fails
+	    boolean value = getBooleanValue(expr1);
+	    if (!value) {
+		assertMessage = Intl.formatString("calc#assertFailure",
+			expr2 != null ? getStringValue(expr2) : getTreeText(expr1));
+		throw new AssertException(assertMessage, ctx);
+	    }
 	    return Boolean.TRUE;
 	}
 

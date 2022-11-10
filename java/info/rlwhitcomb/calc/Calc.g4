@@ -468,6 +468,8 @@
  *	    #473: Add "findfiles" function.
  *	06-Nov-2022 (rlwhitcomb)
  *	    #476: New "readProperties" and "writeProperties" functions.
+ *	09-Nov-2022 (rlwhitcomb)
+ *	    #550: ":assert" directive.
  */
 
 grammar Calc;
@@ -868,6 +870,7 @@ directive
    | D_SORTOBJECTS modeOption bracketBlock ?  # sortObjectsDirective
    | D_COLORS modeOption bracketBlock ?       # colorsDirective
    | D_REQUIRE requireOptions                 # requireDirective
+   | D_ASSERT expr ( COMMA expr ) ?           # assertDirective
    ;
 
 numberOption
@@ -1579,6 +1582,10 @@ D_COLORS
 D_REQUIRE
    : DIR  ( 'requires' | 'REQUIRES' | 'Requires' )
    | DIR  ( 'require'  | 'REQUIRE'  | 'Require' )
+   ;
+
+D_ASSERT
+   : DIR  ( 'assert' | 'ASSERT' | 'Assert' )
    ;
 
 

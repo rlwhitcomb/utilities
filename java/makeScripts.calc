@@ -6,6 +6,8 @@
 // $0 = output directory
 // $1 = token/replacement
 //
+:assert $# == 2, "Two arguments required: output directory, and token/replacement value."
+
 const outdir = fixpath($0)
 const tokenreplacement = $1
 

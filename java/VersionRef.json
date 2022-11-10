@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.14.74', date: d'2022-11-09',
+      issues: [ 550 ],
+      comment: '":assert" directive added.'
+    },
     { version: '2.14.70', date: d'2022-11-06',
       issues: [ 476 ],
       comment: 'New "readProperties" and "writeProperties" functions.'
