@@ -129,3 +129,10 @@ def n1(n) = {
 n1(0)
 n1(3)
 
+#
+# Issue #554: allow default param exprs reference earlier params
+#
+define fun(a, b=a, c=b) = { [ a, b, c ] }
+fun(1)
+fun(1,2)
+fun(1,2,3)
