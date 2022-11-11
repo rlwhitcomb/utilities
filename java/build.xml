@@ -353,6 +353,8 @@
 		#48: Add "directory" text resources.
 	    08-Nov-2022 (rlwhitcomb)
 		#537: Use "makeScripts" to generate wrapper scripts; remove hard-coded ones.
+	    10-Nov-2022 (rlwhitcomb)
+		#537: Generate properties for wrapper scripts.
 
      ========================================================================== -->
 
@@ -629,6 +631,18 @@
 			<attribute name="Implementation-Title" value="${product.name}"/>
 			<attribute name="Implementation-Version" value="${full.build}"/>
 		</manifest>
+		<java classname="info.rlwhitcomb.calc.Calc" failonerror="true" fork="true">
+			<arg value="-nocolor"/>
+			<arg value="-nolibs"/>
+			<arg value="-library"/>
+			<arg value="test/files/library"/>
+			<arg value="-clear"/>
+			<arg value="makeScripts"/>
+			<arg value="--"/>
+			<arg value="properties"/>
+			<arg value="info/rlwhitcomb/calc"/>
+			<arg value="@@@JVM17+@@@/${jvm17.args}"/>
+		</java>
 		<jar basedir="." destfile="${result.jar}" manifest="MANIFEST.MF">
 			<metainf dir="..">
 				<include name="LICENSE"/>
@@ -646,6 +660,7 @@
 			<include name="info/rlwhitcomb/calc/*.html"/>
 			<include name="info/rlwhitcomb/calc/*.json"/>
 			<include name="info/rlwhitcomb/calc/*.png"/>
+			<include name="info/rlwhitcomb/calc/calc*.properties"/>
 			<include name="info/rlwhitcomb/cat/*.class"/>
 			<include name="info/rlwhitcomb/compare/*.class"/>
 			<include name="info/rlwhitcomb/csv/*.class"/>
@@ -802,7 +817,7 @@ Test starting on ${build.date} at ${build.time}
 			<fileset dir="net/iharder/b64" includes="*.class"/>
 			<fileset dir="info/rlwhitcomb" includes="*.class"/>
 			<fileset dir="info/rlwhitcomb/annotations" includes="*.class"/>
-			<fileset dir="info/rlwhitcomb/calc" includes="*.class,*.interp,*.tokens,CalcParser.java,CalcVisitor.java,CalcLexer.java,CalcBaseVisitor.java"/>
+			<fileset dir="info/rlwhitcomb/calc" includes="*.class,*.interp,*.tokens,CalcParser.java,CalcVisitor.java,CalcLexer.java,CalcBaseVisitor.java,calc*.properties"/>
 			<fileset dir="info/rlwhitcomb/cat" includes="*.class"/>
 			<fileset dir="info/rlwhitcomb/compare" includes="*.class"/>
 			<fileset dir="info/rlwhitcomb/csv" includes="*.class"/>
@@ -866,6 +881,7 @@ Test starting on ${build.date} at ${build.time}
 			<arg value="-clear"/>
 			<arg value="makeScripts"/>
 			<arg value="--"/>
+			<arg value="scripts"/>
 			<arg value="${env.UTILITIES_HOME}"/>
 			<arg value="@@@JVM17+@@@/${jvm17.args}"/>
 		</java>

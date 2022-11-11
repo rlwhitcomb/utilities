@@ -3,13 +3,15 @@
 /****************************************/
 :quiet on
 //
-// $0 = output directory
-// $1 = token/replacement
+// $0 = operation: "scripts" or "properties"
+// $1 = output directory
+// $2 = token/replacement
 //
-:assert $# == 2, "Two arguments required: output directory, and token/replacement value."
+:assert $# == 3, "Three arguments required: operation, output directory, and token/replacement value."
 
-const outdir = fixpath($0)
-const tokenreplacement = $1
+const operation = lower($0)
+const outdir = fixpath($1)
+const tokenreplacement = $2
 
 const data = {
 /* Windows .bat file template */
@@ -79,35 +81,60 @@ var splits = split(tokenreplacement, '/')
 var token = splits[0]
 var replacement = splits[1] ?: ""
 
-loop set in data.settings {
+
+define properties() = {
     var file = []
-    var outputFile
-    var template
-    const class = set.class ?! replace(set.class, '$', 'info.rlwhitcomb.')
-    const jvm   = set.jvm   ?! replace(set.jvm, token, replacement)
-
-    if ON_WINDOWS {
-        outputFile = `${set.name}.bat`
-        template = data.bat
-    }
-    else {
-        outputFile = `${set.name}`
-        template = data.bash
-    }
-    outputFile = outdir + outputFile
-
+    const outputFile = outdir + 'calcscripts.properties'
     :echo `Generating "$outputFile" ...`
-    loop line over template {
-        case line in {
-            matches s'.+\$\{class\}': if class    { file += replace(line, '${class}', class)  },
-            matches s'.+\$\{args\}' : if set.args { file += replace(line, '${args}', set.args)},
-            matches s'.+\$\{jvm\}'  : if jvm      { file += replace(line, '${jvm}', jvm)      },
-            default: file += line
-        }
+
+    loop set in data.settings {
+        var name = set.name
+        rpad(name, 12)
+        const class = set.class ?! replace(set.class, '$', 'info.rlwhitcomb.')
+        const jvm   = set.jvm   ?! replace(set.jvm, token, replacement)
+
+        file += `$name= $class,${set.args},$jvm`
     }
     write(file, outputFile)
-    if !ON_WINDOWS {
-        exec('chmod', '+x', outputFile)
-    }
-    /* TODO: also generate a .properties file with all the data for the "exec" function to consume */
 }
+
+define scripts() = {
+    loop set in data.settings {
+        var file = []
+        var outputFile
+        var template
+        const class = set.class ?! replace(set.class, '$', 'info.rlwhitcomb.')
+        const jvm   = set.jvm   ?! replace(set.jvm, token, replacement)
+
+        if ON_WINDOWS {
+            outputFile = `${set.name}.bat`
+            template = data.bat
+        }
+        else {
+            outputFile = `${set.name}`
+            template = data.bash
+        }
+        outputFile = outdir + outputFile
+
+        :echo `Generating "$outputFile" ...`
+        loop line over template {
+            case line in {
+                matches s'.+\$\{class\}': if class    { file += replace(line, '${class}', class)  },
+                matches s'.+\$\{args\}' : if set.args { file += replace(line, '${args}', set.args)},
+                matches s'.+\$\{jvm\}'  : if jvm      { file += replace(line, '${jvm}', jvm)      },
+                default: file += line
+            }
+        }
+        write(file, outputFile)
+        if !ON_WINDOWS {
+            exec('chmod', '+x', outputFile)
+        }
+    }
+}
+
+case operation of {
+    "scripts":    scripts(),
+    "properties": properties(),
+    default:      :assert false, `Undefined operation "$operation"!`
+}
+
