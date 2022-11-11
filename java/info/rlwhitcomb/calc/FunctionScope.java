@@ -50,6 +50,8 @@
  *	    #393: Cleanup imports.
  *	08-Sep-2022 (rlwhitcomb)
  *	    #475: Add calls for getting function stack, and full function name.
+ *	11-Nov-2022 (rlwhitcomb)
+ *	    #554: Spiff up the "toString" value with quoted full function name.
  */
 package info.rlwhitcomb.calc;
 
@@ -142,7 +144,7 @@ class FunctionScope extends ParameterizedScope
 	 */
 	@Override
 	public String toString() {
-	    return String.format("%1$s %2$s scope", toBookCase(), declaration.getFunctionName());
+	    return String.format("%1$s \"%2$s\" scope", toBookCase(), declaration.getFullFunctionName());
 	}
 
 	/**

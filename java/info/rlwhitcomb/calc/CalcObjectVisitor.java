@@ -711,6 +711,8 @@
  *	10-Nov-2022 (rlwhitcomb)
  *	    #554: Don't reallocate the LValueContext during popScope,
  *	    but cache it in the NestedScope.
+ *	11-Nov-2022 (rlwhitcomb)
+ *	    #554: Don't do the extra pop/push of function scope.
  */
 package info.rlwhitcomb.calc;
 
@@ -1470,7 +1472,6 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		FunctionScope func = (FunctionScope) returnValue;
 
 		pushQuietMode.accept(true);
-		pushScope(func);
 		try {
 		    returnValue = visit(func.getFunctionBody());
 		}

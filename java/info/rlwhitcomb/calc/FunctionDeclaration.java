@@ -38,6 +38,8 @@
  *  01-Sep-22 rlw	Fix typo in error message key.
  *  10-Nov-22 rlw #554:	Push and pop our scope during parameter evaluation so any
  *			default expressions can reference previous parameter values.
+ *  11-Nov-22 rlw #554:	Make "setupFunctionCall" THE place to push the scope, while
+ *			"evaluate" is THE place to pop it.
  */
 package info.rlwhitcomb.calc;
 
@@ -248,7 +250,9 @@ class FunctionDeclaration
 	    int numParams = getNumberOfParameters();
 	    int numActuals = exprs != null ? exprs.size() : 0;
 
-	    // Temporarily hoist our scope so we can have parameters depend on earlier parameters if necessary
+	    // First, make this function the current symbol table scope so we can define the parameter values in it, and so they
+	    // can refer to previous parameters if desired. This scope won't be popped until the function call is over
+	    // (in CalcObjectVisitor.evaluate).
 	    visitor.pushScope(funcScope);
 
 	    // And so firstly, set the "_funcname" value to the function's name, so it can be used by param default expressions too
@@ -276,9 +280,6 @@ class FunctionDeclaration
 	    for (int index = numActuals; index < numParams; index++) {
 		funcScope.setParameterValue(visitor, index, null);
 	    }
-
-	    // And also temporarily, pop the scope until the "real" function call is made
-	    visitor.popScope();
 
 	    return funcScope;
 	}
