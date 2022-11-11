@@ -708,6 +708,9 @@
  *	    #549: Fix Intl tag for a message that moved.
  *	09-Nov-2022 (rlwhitcomb)
  *	    #550: ":assert" directive.
+ *	10-Nov-2022 (rlwhitcomb)
+ *	    #554: Don't reallocate the LValueContext during popScope,
+ *	    but cache it in the NestedScope.
  */
 package info.rlwhitcomb.calc;
 
@@ -1021,16 +1024,49 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    return currentScope;
 	}
 
+	/**
+	 * Set the given symbol table scope as the topmost (current) context.
+	 * <p> Also set {@link #currentContext} for symbol table lookup.
+	 *
+	 * @param newScope The new symbol table scope to be the current one.
+	 */
 	public void pushScope(final NestedScope newScope) {
 	    newScope.setEnclosingScope(currentScope);
 	    currentScope = newScope;
-	    currentContext = new LValueContext(currentScope, settings.ignoreNameCase);
+
+	    LValueContext context = currentScope.getContext();
+	    if (context == null) {
+		context = new LValueContext(currentScope, settings.ignoreNameCase);
+		currentScope.setContext(context);
+	    }
+	    else {
+		context.setIgnoreCase(settings.ignoreNameCase);
+	    }
+	    currentContext = context;
 	}
 
+	/**
+	 * Pop the topmost symbol table scope off the stack, making the previous (parent)
+	 * scope as the current one. Also pops the {@link #currentContext} for correct
+	 * symbol lookup.
+	 */
 	public void popScope() {
 	    currentScope = currentScope.getEnclosingScope();
-	    currentContext = new LValueContext(currentScope, settings.ignoreNameCase);
+
+	    currentContext = currentScope.getContext();
+	    currentContext.setIgnoreCase(settings.ignoreNameCase);
 	}
+
+	/**
+	 * Get the symbol table context for the given variable.
+	 *
+	 * @param var The parsing context to construct the lookup context for.
+	 * @return    A variable lookup context for this variable.
+	 */
+	private LValueContext getLValue(CalcParser.VarContext var) {
+	    return LValueContext.getLValue(this, var, currentContext);
+	}
+
 
 	Supplier<Object> phiSupplier = () -> {
 	    if (settings.rationalMode)
@@ -1046,6 +1082,18 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	};
 
 
+	/**
+	 * Construct the visitor, with the given displayer for results, and the settings
+	 * from the command-line options.
+	 *
+	 * @param resultDisplayer Where to display the results.
+	 * @param rational        The initial rational flag setting.
+	 * @param separators      Setting for numeric separators.
+	 * @param silence         Flag for "quiet" mode.
+	 * @param ignoreCase      Whether to ignore variable name case.
+	 * @param quotes          Setting for quoting strings on output.
+	 * @param sortKeys        Whether to sort map keys or leave them in declared order.
+	 */
 	public CalcObjectVisitor(
 		final CalcDisplayer resultDisplayer,
 		final boolean rational,
@@ -1440,10 +1488,6 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 
 	    return returnValue;
-	}
-
-	private LValueContext getLValue(CalcParser.VarContext var) {
-	    return LValueContext.getLValue(this, var, currentContext);
 	}
 
 	private BigDecimal getDecimalValue(final ParserRuleContext ctx) {
