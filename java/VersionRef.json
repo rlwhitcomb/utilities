@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.14.77', date: d'2022-11-11',
+      issues: [ 420 ],
+      comment: 'Fix recognition of "1-i" forms for "complex" function.'
+    },
     { version: '2.14.76', date: d'2022-11-10',
       issues: [ 554 ],
       comment: 'Fix incorrect evaluation of default parameter expressions that depend on other parameters.'
