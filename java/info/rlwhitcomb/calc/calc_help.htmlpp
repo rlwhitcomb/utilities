@@ -1486,7 +1486,7 @@ whether it has previously been used/defined.
     <tr><td><code>from_excel_col</code></td><td><code>col</code></td><td>Translate an Excel column name ("A" to "XFD") to a numeric column index (1-based)</td></tr>
     <tr><td><code>rad_to_deg</code></td><td><code>rad</code></td><td>Convert from numeric degrees to radians</td></tr>
     <tr><td><code>deg_to_rad</code></td><td><code>deg</code></td><td>Convert from radians to numeric degrees</td></tr>
-    <tr><td><code>rad_to_grad></code></td><td><code>rad</code></td><td>Convert from radians to centesimal degrees or gradians</td></tr>
+    <tr><td><code>rad_to_grad</code></td><td><code>rad</code></td><td>Convert from radians to centesimal degrees or gradians</td></tr>
     <tr><td><code>grad_to_rad</code></td><td><code>grad</code></td><td>Convert gradians/grads to radians</td></tr>
     <tr><td><code>deg_to_grad</code></td><td><code>deg</code></td><td>Convert numeric degrees to gradians/grads</td></tr>
     <tr><td><code>grad_to_deg</code></td><td><code>grad</code></td><td>Convert grads to numeric degress</td></tr>
