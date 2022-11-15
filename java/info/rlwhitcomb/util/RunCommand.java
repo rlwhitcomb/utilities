@@ -24,53 +24,33 @@
  *	Class to facilitate running an external program from within Java,
  *	and capturing its output.
  *
- * Change history:
- *  20-Mar-2009 (rlwhitcomb)
- *	Initial coding.
- *  27-Mar-2009 (rlwhitcomb)
- *	Added ability to echo to any arbitray PrintStream (such as LogStream)
- *  06-Oct-2010 (rlwhitcomb)
- *	Branch and move to "info.rlwhitcomb.util" package.
- *  17-May-2013 (rlwhitcomb)
- *	Change logging level check.
- *  15-Sep-2013 (rlwhitcomb)
- *	Add method to allow writing to subprocess' stdin stream.
- *  29-Jul-2014 (rlwhitcomb)
- *	Add accessor for subprocess environment.
- *  31-Jul-2014 (rlwhitcomb)
- *	Add method to get the command line (for debugging, logging, etc.)
- *  25-Jun-2015 (rlwhitcomb)
- *	In order to better deal with strange issues related to mixed line
- *	endings, change from using BufferedReader to just BufferedInputStream
- *	and let callers deal with translation issues.
- *  07-Jan-2016 (rlwhitcomb)
- *	Fix Javadoc warnings found by Java 8.
- *  30-Mar-2017 (rlwhitcomb)
- *	An additional flavor of constructor for convenience with variable
- *	number of command line arguments.
- *  10-Apr-2018 (rlwhitcomb)
- *	Simplify and fix the "commandLine" method.
- *  10-Mar-2020 (rlwhitcomb)
- *	Prepare for GitHub.
- *  21-Dec-2020 (rlwhitcomb)
- *	Update obsolete Javadoc constructs.
- *  07-Apr-2021 (rlwhitcomb)
- *	Tighten up the code and comments.
- *	Add a "runToCompletion" that writes to a StringBuilder to store the output.
- *  16-Nov-2021 (rlwhitcomb)
- *	#85: Further versions to log exceptions or throw them.
- *  16-Feb-2022 (rlwhitcomb)
- *	Use buffer size from Constants.
- *  22-May-2022 (rlwhitcomb)
- *	#340: Refactor to use List<String> at the base level.
- *  25-May-2022 (rlwhitcomb)
- *	#346: Add "removeStdEnv" to deal gracefully with environment variables
- *	that shouldn't be shared with subprocesses because they are used in our
- *	invocation scripts.
- *  09-Jul-2022 (rlwhitcomb)
- *	#393: Cleanup imports.
- *  12-Oct-2022 (rlwhitcomb)
- *	#513: Move Logging to new package.
+ * History:
+ *  20-Mar-09 rlw  ---	Initial coding.
+ *  27-Mar-09 rlw  ---	Added ability to echo to any arbitray PrintStream (such as LogStream)
+ *  06-Oct-10 rlw  ---	Branch and move to "info.rlwhitcomb.util" package.
+ *  17-May-13 rlw  ---	Change logging level check.
+ *  15-Sep-13 rlw  ---	Add method to allow writing to subprocess' stdin stream.
+ *  29-Jul-14 rlw  ---	Add accessor for subprocess environment.
+ *  31-Jul-14 rlw  ---	Add method to get the command line (for debugging, logging, etc.)
+ *  25-Jun-15 rlw  ---	In order to better deal with strange issues related to mixed line
+ *			endings, change from using BufferedReader to just BufferedInputStream
+ *			and let callers deal with translation issues.
+ *  07-Jan-16 rlw  ---	Fix Javadoc warnings found by Java 8.
+ *  30-Mar-17 rlw  ---	An additional flavor of constructor for convenience with variable
+ *			number of command line arguments.
+ *  10-Apr-18 rlw  ---	Simplify and fix the "commandLine" method.
+ *  10-Mar-20 rlw  ---	Prepare for GitHub.
+ *  21-Dec-20 rlw  ---	Update obsolete Javadoc constructs.
+ *  07-Apr-21 rlw  ---	Tighten up the code and comments.
+ *			Add a "runToCompletion" that writes to a StringBuilder to store the output.
+ *  16-Nov-21 rlw #85:	Further versions to log exceptions or throw them.
+ *  16-Feb-22 rlw  ---	Use buffer size from Constants.
+ *  22-May-22 rlw #340:	Refactor to use List<String> at the base level.
+ *  25-May-22 rlw #346:	Add "removeStdEnv" to deal gracefully with environment variables
+ *			that shouldn't be shared with subprocesses because they are used in our
+ *			invocation scripts.
+ *  09-Jul-22 rlw #393:	Cleanup imports.
+ *  12-Oct-22 rlw #513:	Move Logging to new package.
  */
 package info.rlwhitcomb.util;
 
@@ -107,7 +87,7 @@ public class RunCommand
 
 	/** The "standard" environment variables set/used by our invocation scripts (see "_find_and_run_class.bat"). */
 	private static final String[] STD_VARS = {
-	    "JAR_FILE", "JAR_PATH", "FULL_CLASSPATH", "CLASS_NAME", "JVM_ARGS", "CMD_ARGS"
+	    "CLASS_NAME", "CMD_ARGS", "JVM_ARGS", "JAR_FILE", "JAR_PATH", "FULL_CLASSPATH"
 	};
 
 
