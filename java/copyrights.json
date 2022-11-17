@@ -94,7 +94,7 @@
     "setenv", "ci-setenv",
     "ci-build.sh", "ci-build8-first.sh", "ci-build8-second.sh",
     "commit_checklist.txt",
-    "constants.calc", "cp.calc", "versions.calc",
+    "constants.calc", "cp.calc", "versions.calc", "makeScripts.calc",
     "g.sh",
     "mkcanon", "mkcanon.bat",
     "latest_push", "latest_push.bat", "latest_push.calc",
