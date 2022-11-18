@@ -1,0 +1,140 @@
+/****************************************/
+/*  Program to generate wrapper scripts */
+/****************************************/
+:quiet on
+//
+// $0 = operation: "scripts" or "properties"
+// $1 = output directory
+// $2 = token/replacement
+//
+:assert $# == 3, "Three arguments required: operation, output directory, and token/replacement value."
+
+const operation = lower($0)
+const outdir = fixpath($1)
+const tokenreplacement = $2
+
+const data = {
+/* Windows .bat file template */
+bat: [
+    "@echo off",
+    "setlocal",
+    "set CLASS_NAME=${class}",
+    "set CMD_ARGS=${args}",
+    "set JVM_ARGS=${jvm}",
+    "call %~dp0_find_and_run_class %*",
+    "endlocal",
+    "exit /b %errorlevel%"
+],
+
+/* Non-Windows script file template */
+bash: [
+    "#!/bin/bash",
+    "CLASS_NAME=${class}",
+    "CMD_ARGS=${args}",
+    "JVM_ARGS=${jvm}",
+    "source _find_and_run_class"
+],
+
+settings: [
+    { name: '`',        class: '$calc.Calc',           args: '-nolibraries'        },
+    { name: '``',       class: '$calc.Calc',           args: '-g -nolibraries'     },
+    { name: 'b64',      class: '$tools.B64'                                        },
+    { name: 'c',        class: '$calc.Calc'                                        },
+    { name: 'calc',     class: '$calc.Calc'                                        },
+    { name: 'cat',      class: '$cat.Cat'                                          },
+    { name: 'cg',       class: '$calc.Calc',           args: '-g'                  },
+    { name: 'cmp',      class: '$compare.CompareFiles'                             },
+    { name: 'crl',      class: '$curl.CURL'                                        },
+    { name: 'csv',      class: '$test.CSVTest'                                     },
+    { name: 'd',        class: '$directory.Dir'                                    },
+    { name: 'decode',   class: 'net.iharder.b64.Base64', args: '-d'                },
+    { name: 'encode',   class: 'net.iharder.b64.Base64', args: '-e'                },
+    { name: 'environ',  class: '$util.Environment'                                 },
+    { name: 'gmt',      class: '$tools.Gmt'                                        },
+    { name: 'gunz',     class: '$tools.GUnzip'                                     },
+    { name: 'gz',       class: '$tools.GZip'                                       },
+    { name: 'hd',       class: '$tools.Head'                                       },
+    { name: 'hexd',     class: '$tools.HexDump'                                    },
+    { name: 'hsh',      class: '$tools.Hash'                                       },
+    { name: 'isdir',    class: '$tools.IsDir'                                      },
+    { name: 'lists',    class: '$util.Lists'                                       },
+    { name: 'manifest', class: '$tools.DumpManifest'                               },
+    { name: 'matches',  class: '$matches.Matches'                                  },
+    { name: 'md5',      class: '$tools.Hash',          args: '--algorithm=MD5'     },
+    { name: 'os',       class: '$tools.OS'                                         },
+    { name: 'sha1',     class: '$tools.Hash',          args: '--algorithm=SHA-1'   },
+    { name: 'sha256',   class: '$tools.Hash'                                       },
+    { name: 'sha512',   class: '$tools.Hash',          args: '--algorithm=SHA-512' },
+    { name: 'sleep',    class: '$util.Sleep'                                       },
+    { name: 'tester',   class: '$tester.Tester',       jvm: '@@@JVM17+@@@'         },
+    { name: 'timethis', class: '$util.TimeThis'                                    },
+    { name: 'tre',      class: '$tree.Tree'                                        },
+    { name: 'uuid',     class: '$tools.Uuid'                                       },
+    { name: 'version'                                                              },
+    { name: 'wc',       class: '$tools.WordCount'                                  },
+    { name: 'wf',       class: '$wordfind.WordFind'                                },
+    { name: 'wfg',      class: '$wordfind.WordFind', args: '-gui'                  },
+    { name: 'which',    class: '$util.Which'                                       }
+]
+}
+var splits = split(tokenreplacement, '/')
+var token = splits[0]
+var replacement = splits[1] ?: ""
+
+
+define properties() = {
+    var file = []
+    const outputFile = outdir + 'calcscripts.properties'
+    :echo `Generating "$outputFile" ...`
+
+    loop set in data.settings {
+        var name = set.name
+        rpad(name, 12)
+        const class = set.class ?! replace(set.class, '$', 'info.rlwhitcomb.')
+        const jvm   = set.jvm   ?! replace(set.jvm, token, replacement)
+
+        file += `$name= $class,${set.args},$jvm`
+    }
+    write(file, outputFile)
+}
+
+define scripts() = {
+    loop set in data.settings {
+        var file = []
+        var outputFile
+        var template
+        const class = set.class ?! replace(set.class, '$', 'info.rlwhitcomb.')
+        const jvm   = set.jvm   ?! replace(set.jvm, token, replacement)
+
+        if ON_WINDOWS {
+            outputFile = `${set.name}.bat`
+            template = data.bat
+        }
+        else {
+            outputFile = `${set.name}`
+            template = data.bash
+        }
+        outputFile = outdir + outputFile
+
+        :echo `Generating "$outputFile" ...`
+        loop line over template {
+            case line in {
+                matches s'.+\$\{class\}': if class    { file += replace(line, '${class}', class)  },
+                matches s'.+\$\{args\}' : if set.args { file += replace(line, '${args}', set.args)},
+                matches s'.+\$\{jvm\}'  : if jvm      { file += replace(line, '${jvm}', jvm)      },
+                default: file += line
+            }
+        }
+        write(file, outputFile)
+        if !ON_WINDOWS {
+            exec('chmod', '+x', outputFile)
+        }
+    }
+}
+
+case operation of {
+    "scripts":    scripts(),
+    "properties": properties(),
+    default:      :assert false, `Undefined operation "$operation"!`
+}
+

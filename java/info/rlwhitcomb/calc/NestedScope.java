@@ -34,6 +34,7 @@
  *  17-Feb-22 rlw #252: Rename some methods to be more clear.
  *  25-May-22 rlw #348: Return the new value from "setValue" methods.
  *			Make all methods package private.
+ *  10-Nov-22 rlw #554:	Add field and access methods for LValueContext.
  */
 package info.rlwhitcomb.calc;
 
@@ -52,15 +53,22 @@ class NestedScope extends ObjectScope
 	 */
 	NestedScope enclosingScope;
 
+	/**
+	 * Reference to the {@link LValueContext} needed for symbol table lookups.
+	 */
+	LValueContext lValue;
+
 
 	NestedScope(final Type t) {
 	    super(t);
 	    enclosingScope = null;
+	    lValue = null;
 	}
 
 	NestedScope(final Type t, final NestedScope outer) {
 	    super(t);
 	    enclosingScope = outer;
+	    lValue = null;
 	}
 
 
@@ -80,6 +88,24 @@ class NestedScope extends ObjectScope
 	 */
 	void setEnclosingScope(final NestedScope outer) {
 	    enclosingScope = outer;
+	}
+
+	/**
+	 * Access the cached symbol table context.
+	 *
+	 * @return The symbol table context.
+	 */
+	LValueContext getContext() {
+	    return lValue;
+	}
+
+	/**
+	 * Set the cached symbol table context.
+	 *
+	 * @param context The symbol table context.
+	 */
+	void setContext(final LValueContext context) {
+	    lValue = context;
 	}
 
 	/**

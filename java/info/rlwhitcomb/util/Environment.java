@@ -190,6 +190,8 @@
  *	    suitable for use with a URLClassLoader.
  *	30-Oct-2022 (rlwhitcomb)
  *	    #536: Rename and repurpose the "in testing" property and methods.
+ *	06-Nov-2022 (rlwhitcomb)
+ *	    Fix wrong end-of-color tag.
  */
 package info.rlwhitcomb.util;
 
@@ -1292,7 +1294,7 @@ public final class Environment
 
 
 	/**
-	 * Get the current {@var CLASSPATH} as an array of URLs, suitable for use with
+	 * Get the current {@code CLASSPATH} as an array of URLs, suitable for use with
 	 * {@link java.net.URLClassLoader}.
 	 *
 	 * @return The CLASSPATH in URL form.
@@ -1946,7 +1948,7 @@ public final class Environment
 		valuesToDisplaySet.addAll(Env.all());
 
 	    valuesToDisplaySet.forEach(e ->
-		System.out.println(ConsoleColor.color(String.format("<Bk!>%1$s:<> <Gr>%2$s<>", e.getTitle(), e.getSupplier().get()))));
+		System.out.println(ConsoleColor.color(String.format("<Bk!>%1$s:<.> <Gr>%2$s<.>", e.getTitle(), e.getSupplier().get()))));
 	}
 
 

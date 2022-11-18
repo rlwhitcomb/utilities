@@ -247,8 +247,8 @@ h2 {
      <code>".ca"</code>, and <code>".ex"</code> (in that order). Once all this searching fails to find the file, then the supposed file name(s) are
      treated as if they were a set of expressions to evaluate.
   <p>When Calc tries to evaluate an expression from a file or given on the command line and any kind of error is encountered, the
-     process exit code will be set to a value from 96 to 99 depending on the type of error (99 = parsing error, 98 = execution
-     error, 97 = index or state exception, 96 = I/O error). The <code>leave</code> <i>expr</i> statement can also be used
+     process exit code will be set to a value from 95 to 99 depending on the type of error (99 = parsing error, 98 = execution
+     error, 97 = index or state exception, 96 = I/O error, 95 = ":assert" failure). The <code>leave</code> <i>expr</i> statement can also be used
      outside of a loop or function to set a custom exit code if desired.
 </div>
 <a class="top-link" href="#topofpage">Top</a>
@@ -772,8 +772,8 @@ or<br>
     <tr><td>33</td><td><i>object</i> <code>.</code> <i>member</i></td><td>access an object member</td><td>left to right</td></tr>
     <tr><td>32</td><td><i>expr</i> <code>HAS</code> ( <i>id</i> | <i>string</i> | <code>[</code> <i>expr</i> <code>]</code> )</td><td>safely check for member or index</td><td>left to right</td></tr>
     <tr><td>31</td><td><code>( </code><i>expr</i><code> )</code></td><td>group an expression</td><td>N/A</td></tr>
-    <tr><td rowspan="84">30</td>
-            <td><code>ABS</code>&nbsp;<i>expr</i></td><td>absolute value</td><td rowspan="84">left to right</td></tr>
+    <tr><td rowspan="86">30</td>
+            <td><code>ABS</code>&nbsp;<i>expr</i></td><td>absolute value</td><td rowspan="86">left to right</td></tr>
             <tr><td><code>SIN</code>&nbsp;<i>expr</i></td><td>sine</td></tr>
             <tr><td><code>COS</code>&nbsp;<i>expr</i></td><td>cosine</td></tr>
             <tr><td><code>TAN</code>&nbsp;<i>expr</i></td><td>tangent</td></tr>
@@ -844,6 +844,8 @@ or<br>
             <tr><td><code>FINDFILES</code>&nbsp;<i>dir</i><code>,</code> <i>pattern</i> [ <code>,</code> <i>flags</i> ]</td><td>list files in the given directory<br>matching the pattern and optional flags</td></tr> 
             <tr><td><code>READ</code>&nbsp;<i>expr</i>&nbsp;( <code>,</code>&nbsp;<i>charset_expr</i>&nbsp;)</td><td>read the file (or files) using the optional charset</td></tr>
             <tr><td><code>WRITE</code>&nbsp;<i>expr</i> <code>,</code>&nbsp;<i>file name</i>&nbsp;( <code>,</code>&nbsp;<i>charset_expr</i>&nbsp;)</td><td>write the value to the file using the optional charset</td></tr>
+            <tr><td><code>READPROPERTIES</code>&nbsp;<i>expr</i>&nbsp;( <code>,</code>&nbsp;<i>charset_expr</i>&nbsp;)</td><td>read the properties file using the optional charset</td></tr>
+            <tr><td><code>WRITEPROPERTIES</code>&nbsp;<i>expr</i> <code>,</code>&nbsp;<i>file name</i>&nbsp;( <code>,</code>&nbsp;<i>charset_expr</i>&nbsp;)</td><td>write the value to the properties file using the optional charset</td></tr>
             <tr><td><code>DELETE</code>&nbsp;<i>expr</i>&nbsp;( <code>,</code>&nbsp;<i>expr</i> ) *</td><td>delete one or more files</td></tr>
             <tr><td><code>RENAME</code>&nbsp;<i>expr<sub>1</sub></i> <code>,</code> <i>expr<sub>2</sub></i></td><td>rename or move file<sub>1</sub> to file<sub>2</sub></td></tr>
             <tr><td><code>MATCHES</code>&nbsp;<i>expr</i>&nbsp;<code>,</code>&nbsp;<i>pattern_expr</i>&nbsp;( <code>,</code> <i>flags_expr</i> )</td><td>match the expression string against<br>the regular expression pattern with possible flags</td></tr>
@@ -1122,6 +1124,7 @@ or<br>
      or <code>"-"</code>). For a regular file the charset can also be specified, although standard output will always use the system default. If the first expression result for <code>write</code> is an array, the output will be a series of lines using the system
      default line separator, with each array value written to a separate line. For an object the output will be in JSON format, and for all other values
      the result will be written as the string equivalent. Immediately writing the result of a read will produce an identical file.
+  <p>The <code>readProperties</code> and <code>writeProperties</code> functions have the same parameters as <code>read</code> and <code>write</code> (except reading from <code>stdin</code> is not supported), but the files read and written are in the ".properties" format with each line being <code><i>key</i> = <i>value</i></code>. The object returned by <code>ReadProperties</code> will always have the keys in sorted order.
   <p>The return value from <code>delete</code> will be <code>true</code> if all the files are successfully deleted, <code>false</code>
      otherwise. While the return value from <code>rename</code> will be the full path of the destination file (that is, the new file name
      after the move).
@@ -1388,6 +1391,7 @@ whether it has previously been used/defined.
     <tr><td><code>:sortobjects</code> <i>mode_option</i> [ <i>statements</i> ]</td><td>Whether object keys are sorted<br>(default is <code>off</code> or value on command line)</td><td><code>:sortobject</code>, <code>:sortkeys</code>, <code>:sortkey</code><br>or <code>settings.sortKeys=</code><i>expr</i></td></tr>
     <tr><td><code>:colors</code> <i>mode_option</i> [ <i>statements</i> ]</td><td>Whether to use colors for subsequent output<br>(default is <code>on</code> or the command line value)</td><td><code>:color</code></td></tr>
     <tr><td><code>:require</code> [ <i>version</i> ] [<code>,</code>] [ <code>base</code> <i>version</i> ]</td><td>Establish minimum program and/or base versions required to run</td><td><code>:requires</code></td></tr>
+    <tr><td><code>:assert</code> <i>expr</i> [ <code>,</code> <i>message</i> ]</td><td>Assert that a certain value is true, otherwise halt and display message</td><td></td></tr>
     <tr><td><code>:timing</code> <i>mode_option</i> [ <i>statements</i> ]</td><td>Set the timing mode (same <i>mode_option</i> choices as for <code>:rational</code>)<br><i>(default is <code>off</code> or the value set on the command line)</i></td><td><code>:time</code></td></tr>
     <tr><td><code>:debug</code> <i>mode_option</i> [ <i>statements</i> ]</td><td>Set the debug mode (same <i>mode_option</i> choices as for <code>:rational</code>)<br><i>(default is <code>off</code> or the value set on the command line)</i></td><td><code>:deb</code>, <code>:dbg</code></td></tr>
     <tr><td><code>:resultsonly</code> <i>mode_option</i> [ <i>statements</i> ]</td><td>Set the results-only mode<br><i>(default is <code>off</code> or value on command line)</i></td><td><code>:resultonly</code>, <code>:results</code>, <code>:result</code>, <code>:res</code></td></tr>
@@ -1446,6 +1450,7 @@ whether it has previously been used/defined.
   <p>The effect of <code>:sortobjects on</code> is to override the way <i>key</i><code>:</code><i>value</i> pairs are added to objects. By default they are
      added in the order of declaration. With this option on, the keys are sorted alphabetically and kept sorted this way as elements are added and removed.
   <p>Gradian mode is used to do trignometric calculations assuming a circle has 400 grads (also called "gons" -- see <a href="https://en.wikipedia.org/wiki/Gradian">"Gradian"</a> for further explanation).
+  <p>The <code>:assert</code> directive is used to guarantee that certain conditions are met before proceeding. The required expression is evaluated, and if it does not evaluate to <code>true</code> an error is thrown, execution stops, and either the message (if given), or the text of the failing expression, is displayed. If the expression does evaluate <code>true</code> execution continues to the next expression.
 </div>
 <a class="top-link" href="#topofpage">Top</a>
 <hr id="Standard_Libraries_of_Functions" class="sectionsep">

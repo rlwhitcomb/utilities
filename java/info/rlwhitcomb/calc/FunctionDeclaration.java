@@ -36,6 +36,10 @@
  *  28-May-22 rlw #355:	Define "_funcname" constant for functions.
  *  08-Jul-22 rlw #393:	Cleanup imports.
  *  01-Sep-22 rlw	Fix typo in error message key.
+ *  10-Nov-22 rlw #554:	Push and pop our scope during parameter evaluation so any
+ *			default expressions can reference previous parameter values.
+ *  11-Nov-22 rlw #554:	Make "setupFunctionCall" THE place to push the scope, while
+ *			"evaluate" is THE place to pop it.
  */
 package info.rlwhitcomb.calc;
 
@@ -262,6 +266,14 @@ class FunctionDeclaration
 	    int numParams = getNumberOfParameters();
 	    int numActuals = exprs != null ? exprs.size() : 0;
 
+	    // First, make this function the current symbol table scope so we can define the parameter values in it, and so they
+	    // can refer to previous parameters if desired. This scope won't be popped until the function call is over
+	    // (in CalcObjectVisitor.evaluate).
+	    visitor.pushScope(funcScope);
+
+	    // And so firstly, set the "_funcname" value to the function's name, so it can be used by param default expressions too
+	    ConstantValue.define(funcScope, FUNCNAME, functionName);
+
 	    if (exprs != null) {
 		// Special case: 0 or variable # params, but one actual, except the actual expr is zero -> zero actuals
 		if (numParams <= 0 && numActuals == 1 && exprs.get(0).expr() == null)
@@ -284,9 +296,6 @@ class FunctionDeclaration
 	    for (int index = numActuals; index < numParams; index++) {
 		funcScope.setParameterValue(visitor, index, null);
 	    }
-
-	    // Finally, set the "_funcname" value to the function's name
-	    ConstantValue.define(funcScope, FUNCNAME, functionName);
 
 	    return funcScope;
 	}

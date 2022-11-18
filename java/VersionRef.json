@@ -7,6 +7,18 @@
       issues: [ 458 ],
       comment: 'Implement multi-threaded "parallel" processing.'
     },
+    { version: '2.14.76', date: d'2022-11-10',
+      issues: [ 554 ],
+      comment: 'Fix incorrect evaluation of default parameter expressions that depend on other parameters.'
+    },
+    { version: '2.14.74', date: d'2022-11-09',
+      issues: [ 550 ],
+      comment: '":assert" directive added.'
+    },
+    { version: '2.14.70', date: d'2022-11-06',
+      issues: [ 476 ],
+      comment: 'New "readProperties" and "writeProperties" functions.'
+    },
     { version: '2.14.63', date: d'2022-11-02',
       issues: [ ],
       comment: 'Add "attributes" to "fileinfo" members.'

@@ -30,6 +30,8 @@
  *  02-Nov-22 rlw #48:	"attributes" method.
  *			Make "attributes" scriptable.
  *  03-Nov-22		Add "links" to the attributes.
+ *  05-Nov-22		Add owner name and group name properties.
+ *  06-Nov-22		Default attributes.
  */
 package info.rlwhitcomb.directory;
 
@@ -43,9 +45,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.DosFileAttributes;
+import java.nio.file.attribute.FileTime;
+import java.nio.file.attribute.GroupPrincipal;
 import java.nio.file.attribute.PosixFileAttributes;
 import java.nio.file.attribute.PosixFilePermissions;
-import java.nio.file.attribute.FileTime;
+import java.nio.file.attribute.UserPrincipal;
 
 
 /**
@@ -238,18 +242,54 @@ public final class FileInfo
 	@Scriptable(order = 11)
 	public String getAttributes() {
 	    StringBuilder buf = new StringBuilder();
-	    if (IS_WINDOWS) {
+	    if (dos != null) {
 		buf.append(dos.isSymbolicLink() ? 'L' : ' ');
 		buf.append(dos.isReadOnly()     ? 'R' : ' ');
 		buf.append(dos.isHidden()       ? 'H' : ' ');
 		buf.append(dos.isSystem()       ? 'S' : ' ');
 		buf.append(dos.isArchive()      ? 'A' : ' ');
 	    }
-	    else {
-		buf.append(posix.isDirectory() ? 'd' : (posix.isSymbolicLink() ? 'l' : '-'));
+	    else if (posix != null) {
+		buf.append(posix.isSymbolicLink() ? 'l' : (posix.isDirectory() ? 'd' : '-'));
 		buf.append(PosixFilePermissions.toString(posix.permissions()));
 	    }
+	    else if (IS_WINDOWS) {
+		buf.append("     ");
+	    }
+	    else {
+		buf.append("----------");
+	    }
 	    return buf.toString();
+	}
+
+	/**
+	 * Get the file's owner name.
+	 *
+	 * @return The owner name, or {@code ""} if not supported by the file system.
+	 */
+	@Scriptable(order = 12)
+	public String getOwnerName() {
+	    try {
+		UserPrincipal user = Files.getOwner(file.toPath());
+		return user.getName();
+	    }
+	    catch (UnsupportedOperationException | IOException ex) {
+		return "";
+	    }
+	}
+
+	/**
+	 * Get the file's group name.
+	 *
+	 * @return The group name, of {@code ""} if not supported by the file system.
+	 */
+	@Scriptable(order = 13)
+	public String getGroupName() {
+	    if (posix != null) {
+		GroupPrincipal group = posix.group();
+		return group.getName();
+	    }
+	    return "";
 	}
 
 	/**
@@ -257,7 +297,7 @@ public final class FileInfo
 	 *
 	 * @return The file's length (or size).
 	 */
-	@Scriptable(order = 12)
+	@Scriptable(order = 14)
 	public long getLength() {
 	    return file.length();
 	}
@@ -267,7 +307,7 @@ public final class FileInfo
 	 *
 	 * @return The bare name of the file, without the extension.
 	 */
-	@Scriptable(order = 13)
+	@Scriptable(order = 15)
 	public String getNameOnly() {
 	    return FileUtilities.nameOnly(file);
 	}
@@ -277,7 +317,7 @@ public final class FileInfo
 	 *
 	 * @return The file extension, if any, starting with ".", or {@code ""} if none.
 	 */
-	@Scriptable(order = 14)
+	@Scriptable(order = 16)
 	public String getExtension() {
 	    return FileUtilities.extOnly(file);
 	}
@@ -287,7 +327,7 @@ public final class FileInfo
 	 *
 	 * @return Date and time of file creation.
 	 */
-	@Scriptable(order = 15)
+	@Scriptable(order = 17)
 	public FileTime getCreationTime() {
 	    return basic != null ? basic.creationTime() : FileTime.fromMillis(0L);
 	}
@@ -297,7 +337,7 @@ public final class FileInfo
 	 *
 	 * @return Date and time of last access to this file.
 	 */
-	@Scriptable(order = 16)
+	@Scriptable(order = 18)
 	public FileTime getLastAccessTime() {
 	    return basic != null ? basic.lastAccessTime() : FileTime.fromMillis(0L);
 	}
@@ -307,7 +347,7 @@ public final class FileInfo
 	 *
 	 * @return Date and time of last modification to this file.
 	 */
-	@Scriptable(order = 17)
+	@Scriptable(order = 19)
 	public FileTime getLastModifiedTime() {
 	    return basic != null ? basic.lastModifiedTime() : FileTime.fromMillis(0L);
 	}

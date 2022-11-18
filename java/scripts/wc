@@ -1,3 +1,0 @@
-#!/bin/bash
-CLASS_NAME=info.rlwhitcomb.tools.WordCount
-source _find_and_run_class

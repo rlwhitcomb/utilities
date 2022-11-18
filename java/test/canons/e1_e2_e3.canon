@@ -1400,6 +1400,13 @@
 >write ('test data', FILE1) -> 9
 >read (FILE2) -> "test data"
 >delete (FILE2) -> true
+>Defining constant “PROPS” = "test.properties"
+>props = {a: false, b: 123, c: "def"} -> { a: false, b: 123, c: "def" }
+>writeProperties (props, PROPS) -> 3
+>pr2 = readproperties (PROPS) -> { a: "false", b: "123", c: "def" }
+>pr2 == props -> true
+>pr2 === props -> false
+>delete (PROPS) -> true
 >
 >End of expression tests (suite 1).
 >Tests of nested object / array variables.

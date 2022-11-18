@@ -413,6 +413,19 @@ define dateformat(d, f = 'mm/dd/yyyy') = {
 def gmtnow = { now - TZ_OFFSET }
 
 /*
+ * Fix a directory name so it ends with the file separator, suitable for
+ * constructing a path with a file name.
+ *
+ * @param path The path to regularize.
+ * @return     Input path guaranteed to end with the system file separator.
+ */
+define fixpath(path) = {
+    var newpath=path
+    if !matches(newpath, s'^.*[\/]$') { newpath += info.os.filesep }
+    replace(newpath, s'[/\]', info.os.filesep)
+}
+
+/*
  * Format a FILETIME value (from "FileInfo") to a more readable local time string.
  *
  * @param ft One of the "fileinfo" time strings.

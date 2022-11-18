@@ -159,6 +159,8 @@
 #	    New error message for undefined flags.
 #	25-Oct-2022 (rlwhitcomb)
 #	    #534: New error for duplicate constant.
+#	09-Nov-2022 (rlwhitcomb)
+#	    #550: New "assert failure" message.
 #
 
 #
@@ -271,6 +273,7 @@ withinNotAllowed	= Specifying <y>within<.> is only allowed with an end value wit
 illegalArgument		= <u>%1$s<.> value is not suitable for <y>%2$s<.> function
 radixOutOfRange		= Radix value of <u>%1$d<.> is out of range of <y>%2$d..%3$d<.>
 illegalFlagValues	= One or more flag values in <u>0x%1$04X<.> (<u>%1$d<.>) is not valid.
+assertFailure		= Assertion failed: %1$s
 
 intro.help1	= "  Enter an arithmetic expression to evaluate, or multiple expressions"
 intro.help2	= "  separated by <u>;<.>, followed by <a>Return<.> or <a>Enter<.>."

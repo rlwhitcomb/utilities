@@ -703,7 +703,19 @@
  *	    #544: Respect the "quotestrings" setting for "@j" formatting; turn off
  *	    "extraSpace" with the "-" flag.
  *	    #543: Trap DateTimeException and wrap with CalcExprException.
- *	02-Nov-2022 (rlwhitcomb)
+ *	06-Nov-2022 (rlwhitcomb)
+ *	    #476: New "readProperties" and "writeProperties" functions.
+ *	    Use "natural order" comparator for properties keys.
+ *	07-Nov-2022 (rlwhitcomb)
+ *	    #549: Fix Intl tag for a message that moved.
+ *	09-Nov-2022 (rlwhitcomb)
+ *	    #550: ":assert" directive.
+ *	10-Nov-2022 (rlwhitcomb)
+ *	    #554: Don't reallocate the LValueContext during popScope,
+ *	    but cache it in the NestedScope.
+ *	11-Nov-2022 (rlwhitcomb)
+ *	    #554: Don't do the extra pop/push of function scope.
+ *	11-Nov-2022 (rlwhitcomb)
  *	    #458: Use InheritableThreadLocal for scope and context (more are needed).
  */
 package info.rlwhitcomb.calc;
@@ -725,6 +737,8 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Reader;
+import java.io.Writer;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.MathContext;
@@ -1032,17 +1046,51 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    return threadCurrentScope.get();
 	}
 
+	/**
+	 * Set the given symbol table scope as the topmost (current) context.
+	 * <p> Also set {@link #threadCurrentContext} for symbol table lookup.
+	 *
+	 * @param newScope The new symbol table scope to be the current one.
+	 */
 	public void pushScope(final NestedScope newScope) {
 	    newScope.setEnclosingScope(getVariables());
 	    threadCurrentScope.set(newScope);
-	    threadCurrentContext.set(new LValueContext(newScope, settings.ignoreNameCase));
+
+	    LValueContext context = newScope.getContext();
+	    if (context == null) {
+		context = new LValueContext(newScope, settings.ignoreNameCase);
+		newScope.setContext(context);
+	    }
+	    else {
+		context.setIgnoreCase(settings.ignoreNameCase);
+	    }
+	    threadCurrentContext.set(context);
 	}
 
+	/**
+	 * Pop the topmost symbol table scope off the stack, making the previous (parent)
+	 * scope as the current one. Also pops the {@link #threadCurrentContext} for correct
+	 * symbol lookup.
+	 */
 	public void popScope() {
 	    NestedScope enclosingScope = getVariables().getEnclosingScope();
 	    threadCurrentScope.set(enclosingScope);
-	    threadCurrentContext.set(new LValueContext(enclosingScope, settings.ignoreNameCase));
+
+	    LValueContext context = enclosingScope.getContext();
+	    context.setIgnoreCase(settings.ignoreNameCase);
+	    threadCurrentContext.set(context);
 	}
+
+	/**
+	 * Get the symbol table context for the given variable.
+	 *
+	 * @param var The parsing context to construct the lookup context for.
+	 * @return    A variable lookup context for this variable.
+	 */
+	private LValueContext getLValue(CalcParser.VarContext var) {
+	    return LValueContext.getLValue(this, var, threadCurrentContext.get());
+	}
+
 
 	Supplier<Object> phiSupplier = () -> {
 	    if (settings.rationalMode)
@@ -1058,6 +1106,13 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	};
 
 
+	/**
+	 * Construct the visitor, with the given displayer for results, and the settings
+	 * from the command-line options.
+	 *
+	 * @param resultDisplayer  Where to display the results.
+	 * @param originalSettings The settings gleaned from the command line options.
+	 */
 	public CalcObjectVisitor(final CalcDisplayer resultDisplayer, final Settings originalSettings) {
 	    displayer = resultDisplayer;
 	    settings  = originalSettings;
@@ -1374,7 +1429,6 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    // Note: this quiet mode setting is going to be weird with multiple threads
 	    pushQuietMode.accept(true);
-	    pushScope(func);
 	    try {
 		returnValue = visit(func.getFunctionBody());
 	    }
@@ -1466,10 +1520,6 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 
 	    return returnValue;
-	}
-
-	private LValueContext getLValue(CalcParser.VarContext var) {
-	    return LValueContext.getLValue(this, var, threadCurrentContext.get());
 	}
 
 	private BigDecimal getDecimalValue(final ParserRuleContext ctx) {
@@ -1894,15 +1944,14 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public Object visitVariablesDirective(CalcParser.VariablesDirectiveContext ctx) {
 	    CalcParser.WildIdListContext idList = ctx.wildIdList();
 	    List<CalcParser.WildIdContext> ids;
-	    Set<String> sortedKeys;
+	    Set<String> sortedKeys = new TreeSet<>();
 	    int numberDisplayed = 0;
 	    boolean listSpecific = false;
 
 	    if (idList == null || (ids = idList.wildId()).isEmpty()) {
-		sortedKeys = new TreeSet<>(globals.keySet());
+		sortedKeys.addAll(globals.keySet());
 	    }
 	    else {
-		sortedKeys = new TreeSet<>();
 		ids = idList.wildId();
 		for (CalcParser.WildIdContext node : ids) {
 		    sortedKeys.add(node.getText());
@@ -1966,15 +2015,14 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public Object visitPredefinedDirective(CalcParser.PredefinedDirectiveContext ctx) {
 	    CalcParser.WildIdListContext idList = ctx.wildIdList();
 	    List<CalcParser.WildIdContext> ids;
-	    Set<String> sortedKeys;
+	    Set<String> sortedKeys = new TreeSet<>();
 	    int numberDisplayed = 0;
 	    boolean listSpecific = false;
 
 	    if (idList == null || (ids = idList.wildId()).isEmpty()) {
-		sortedKeys = new TreeSet<>(globals.keySet());
+		sortedKeys.addAll(globals.keySet());
 	    }
 	    else {
-		sortedKeys = new TreeSet<>();
 		ids = idList.wildId();
 		for (CalcParser.WildIdContext node : ids) {
 		    sortedKeys.add(node.getText());
@@ -2242,6 +2290,24 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		checkVersionText(versionNumbers.get(0), null);
 	    }
 
+	    return Boolean.TRUE;
+	}
+
+	@Override
+	public Object visitAssertDirective(CalcParser.AssertDirectiveContext ctx) {
+	    CalcParser.ExprContext expr1 = ctx.expr(0);
+	    CalcParser.ExprContext expr2 = ctx.expr(1);
+	    String assertMessage = "";
+
+	    // expr1 is the asserted expression
+	    // expr2 is the optional message, which doesn't need to be evaluated until and unless
+	    // the assert fails
+	    boolean value = getBooleanValue(expr1);
+	    if (!value) {
+		assertMessage = Intl.formatString("calc#assertFailure",
+			expr2 != null ? getStringValue(expr2) : getTreeText(expr1));
+		throw new AssertException(assertMessage, ctx);
+	    }
 	    return Boolean.TRUE;
 	}
 
@@ -4269,7 +4335,7 @@ System.out.println("i = " + i + ", result = " + result);
 
 	    double logValue = Math.log10(d);
 	    if (Double.isInfinite(logValue) || Double.isNaN(logValue))
-		throw new CalcExprException("%util#numeric.outOfRange", ctx);
+		throw new CalcExprException("%math#numeric.outOfRange", ctx);
 
 	    return new BigDecimal(logValue, MC_DOUBLE);
 	}
@@ -6274,6 +6340,117 @@ System.out.println("i = " + i + ", result = " + result);
 			seq = getNonNullString(expr, outputObj);
 		    }
 		    return BigInteger.valueOf(FileUtilities.writeRawText(seq, new File(fileName), cs));
+		}
+		return BigInteger.ZERO;
+	    }
+	    catch (IOException ioe) {
+		throw new CalcExprException(ioe, ctx);
+	    }
+	}
+
+	private Reader newReader(final String fileName, final Charset cs) throws IOException {
+	    Path path = Paths.get(fileName);
+	    if (cs == null)
+		return Files.newBufferedReader(path);
+	    else
+		return Files.newBufferedReader(path, cs);
+	}
+
+	private Writer newWriter(final String fileName, final Charset cs) throws IOException {
+	    Path path = Paths.get(fileName);
+	    if (cs == null)
+		return Files.newBufferedWriter(path);
+	    else
+		return Files.newBufferedWriter(path, cs);
+	}
+
+	@Override
+	public Object visitReadPropExpr(CalcParser.ReadPropExprContext ctx) {
+	    CalcParser.Expr1Context e1ctx = ctx.expr1();
+	    CalcParser.Expr2Context e2ctx = ctx.expr2();
+	    String fileName = "";
+	    Charset cs = null;
+
+	    if (e1ctx != null) {
+		fileName = getStringValue(e1ctx.expr());
+	    }
+	    else {
+		fileName = getStringValue(e2ctx.expr(0));
+		cs = getCharsetValue(e2ctx.expr(1), false);
+	    }
+
+	    try (Reader r = newReader(fileName, cs)) {
+		Properties p = new Properties();
+		p.load(r);
+		ObjectScope obj = new ObjectScope();
+		Set<String> sortedNames = new TreeSet<>(NATURAL_SENSITIVE_COMPARATOR);
+		sortedNames.addAll(p.stringPropertyNames());
+		for (String key : sortedNames) {
+		    obj.setValue(key, p.getProperty(key));
+		}
+		return obj;
+	    }
+	    catch (IOException ioe) {
+		throw new CalcExprException(ioe, ctx);
+	    }
+	}
+
+	@Override
+	public Object visitWritePropExpr(CalcParser.WritePropExprContext ctx) {
+	    CalcParser.Expr2Context e2ctx = ctx.expr2();
+	    CalcParser.Expr3Context e3ctx = ctx.expr3();
+	    CalcParser.ExprContext expr;
+	    String fileName = "";
+	    Charset cs = null;
+	    Object outputObj =  null;
+	    Properties p = new Properties();
+
+	    if (e3ctx != null) {
+		expr = e3ctx.expr(0);
+		outputObj = evaluate(expr);
+		fileName = getStringValue(e3ctx.expr(1));
+		cs = getCharsetValue(e3ctx.expr(2), false);
+	    }
+	    else {
+		expr = e2ctx.expr(0);
+		outputObj = evaluate(expr);
+		fileName = getStringValue(e2ctx.expr(1));
+	    }
+
+	    try {
+		if (outputObj != null) {
+		    if (outputObj instanceof ArrayScope) {
+			@SuppressWarnings("unchecked")
+			ArrayScope<Object> array = (ArrayScope<Object>) outputObj;
+			int seq = 0;
+			for (Object obj : array.list()) {
+			    String key = String.format("_%1$d", seq++);
+			    p.setProperty(key, getNonNullString(expr, obj));
+			}
+		    }
+		    else if (outputObj instanceof SetScope) {
+			@SuppressWarnings("unchecked")
+			SetScope<Object> set = (SetScope<Object>) outputObj;
+			int seq = 0;
+			for (Object obj : set.set()) {
+			    String key = String.format("_%1$d", seq++);
+			    p.setProperty(key, getNonNullString(expr, obj));
+			}
+		    }
+		    else if (outputObj instanceof ObjectScope) {
+			ObjectScope obj = (ObjectScope) outputObj;
+			for (String key : obj.keyList()) {
+			    p.setProperty(key, getNonNullString(expr, obj.getValue(key, false)));
+			}
+		    }
+		    else {
+			p.setProperty("_0", getNonNullString(expr, outputObj));
+		    }
+
+		    try (Writer w = newWriter(fileName, cs)) {
+			p.store(w, String.format("Calc %1$s", Environment.getProductVersion()));
+		    }
+		    return BigInteger.valueOf(p.size());
 		}
 		return BigInteger.ZERO;
 	    }

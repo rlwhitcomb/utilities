@@ -184,6 +184,8 @@
  *	12-Oct-2022 (rlwhitcomb)
  *	    #103: Add "equality" parameter to "compareValues" for the strange case of
  *	    ComplexNumber comparisons.
+ *	06-Nov-2022 (rlwhitcomb)
+ *	    #476: Make the NaturalOrderComparator instances public for use elsewhere.
  */
 package info.rlwhitcomb.calc;
 
@@ -221,10 +223,10 @@ import static info.rlwhitcomb.util.Constants.*;
 public final class CalcUtil
 {
 	/** Natural order comparator, case-sensitive. */
-	private static final NaturalOrderComparator NATURAL_SENSITIVE_COMPARATOR = new NaturalOrderComparator(true);
+	public static final NaturalOrderComparator NATURAL_SENSITIVE_COMPARATOR = new NaturalOrderComparator(true);
 
 	/** Natural order comparator, case-insensitive. */
-	private static final NaturalOrderComparator NATURAL_INSENSITIVE_COMPARATOR = new NaturalOrderComparator(false);
+	public static final NaturalOrderComparator NATURAL_INSENSITIVE_COMPARATOR = new NaturalOrderComparator(false);
 
 	/** Default indent increment for JSON display. */
 	private static final String DEFAULT_INCREMENT = "  ";
