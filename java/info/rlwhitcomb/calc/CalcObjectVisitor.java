@@ -715,6 +715,8 @@
  *	    #554: Don't do the extra pop/push of function scope.
  *	28-Nov-2022 (rlwhitcomb)
  *	    #557: Call the coloring routine without the map inside ":echo".
+ *	29-Nov-2022 (rlwhitcomb)
+ *	    #564: Add "color" function.
  */
 package info.rlwhitcomb.calc;
 
@@ -6077,6 +6079,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		// These will wrap other checked exceptions, so unwrap first
 		throw new CalcExprException(ctx, rex.getCause().getLocalizedMessage());
 	    }
+	}
+
+	@Override
+	public Object visitColorExpr(CalcParser.ColorExprContext ctx) {
+	    String value = getStringValue(ctx.expr1().expr());
+	    return ConsoleColor.color(value, Calc.getColoredMode());
 	}
 
 	@Override

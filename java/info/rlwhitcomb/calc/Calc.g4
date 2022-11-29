@@ -470,6 +470,8 @@
  *	    #476: New "readProperties" and "writeProperties" functions.
  *	09-Nov-2022 (rlwhitcomb)
  *	    #550: ":assert" directive.
+ *	29-Nov-2022 (rlwhitcomb)
+ *	    #564: Implement "color" function.
  */
 
 grammar Calc;
@@ -640,6 +642,7 @@ expr
    | K_YOD expr1                         # yearOfDateExpr
    | K_EVAL expr1                        # evalExpr
    | K_EXEC exprN                        # execExpr
+   | K_COLOR expr1                       # colorExpr
    | K_DECODE expr1                      # decodeExpr
    | K_ENCODE expr1                      # encodeExpr
    | K_EXISTS ( expr2 | expr1 )          # existsExpr
@@ -1150,6 +1153,8 @@ K_YOD      : 'yod' | 'YOD' | 'YoD' ;
 K_EVAL     : 'eval' | 'EVAL' | 'Eval' ;
 
 K_EXEC     : 'exec' | 'EXEC' | 'Exec' ;
+
+K_COLOR    : 'color' | 'COLOR' | 'Color' ;
 
 K_DECODE   : 'decode' | 'DECODE' | 'Decode' ;
 
