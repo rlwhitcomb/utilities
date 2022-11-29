@@ -1,5 +1,5 @@
-:Require '2.14.52-alpha'
-:Requires '2.14.52-alpha', Base '1.9.15-alpha'
+:Require '2.14.78-alpha'
+:Requires '2.14.78-alpha', Base '1.9.15-alpha'
 // The versions above must conform to the latest values in "version.properties" and "build.properties"
 
 /*
@@ -43,86 +43,82 @@ const MATCH_MULTILINE        = 0x0010
 const MATCH_UNIX_LINES       = 0x0020
 
 /*
- * Color codes
+ * Color tags
  */
-const ESC = '\o033'
-const NORM = `$ESC[0`
-const BOLD = `$ESC[1`
-const UNDL = `$ESC[4`
+const RESET   = "<.>"
+const END     = "<-->"
 
-const RESET   = `$ESC[0m`
+const BLACK   = "<Bk>"
+const RED     = "<Rd>"
+const GREEN   = "<Gr>"
+const YELLOW  = "<Yw>"
+const BLUE    = "<Bl>"
+const MAGENTA = "<Mg>"
+const CYAN    = "<Cy>"
+const WHITE   = "<Wh>"
 
-const BLACK   = `$NORM;30m`
-const RED     = `$NORM;31m`
-const GREEN   = `$NORM;32m`
-const YELLOW  = `$NORM;33m`
-const BLUE    = `$NORM;34m`
-const MAGENTA = `$NORM;35m`
-const CYAN    = `$NORM;36m`
-const WHITE   = `$NORM;37m`
+const BLACK_BOLD   = "<Bk*>"
+const RED_BOLD     = "<Rd*>"
+const GREEN_BOLD   = "<Gr*>"
+const YELLOW_BOLD  = "<Yw*>"
+const BLUE_BOLD    = "<Bl*>"
+const MAGENTA_BOLD = "<Mg*>"
+const CYAN_BOLD    = "<Cy*>"
+const WHITE_BOLD   = "<Wh*>"
 
-const BLACK_BOLD   = `$BOLD;30m`
-const RED_BOLD     = `$BOLD;31m`
-const GREEN_BOLD   = `$BOLD;32m`
-const YELLOW_BOLD  = `$BOLD;33m`
-const BLUE_BOLD    = `$BOLD;34m`
-const MAGENTA_BOLD = `$BOLD;35m`
-const CYAN_BOLD    = `$BOLD;36m`
-const WHITE_BOLD   = `$BOLD;37m`
+const BLACK_UNDER   = "<Bk_>"
+const RED_UNDER     = "<Rd_>"
+const GREEN_UNDER   = "<Gr_>"
+const YELLOW_UNDER  = "<Yw_>"
+const BLUE_UNDER    = "<Bl_>"
+const MAGENTA_UNDER = "<Mg_>"
+const CYAN_UNDER    = "<Cy_>"
+const WHITE_UNDER   = "<Wh_>"
 
-const BLACK_UNDER   = `$UNDL;30m`
-const RED_UNDER     = `$UNDL;31m`
-const GREEN_UNDER   = `$UNDL;32m`
-const YELLOW_UNDER  = `$UNDL;33m`
-const BLUE_UNDER    = `$UNDL;34m`
-const MAGENTA_UNDER = `$UNDL;35m`
-const CYAN_UNDER    = `$UNDL;36m`
-const WHITE_UNDER   = `$UNDL;37m`
+const BLACK_BKGND   = "<Bk.>"
+const RED_BKGND     = "<Rd.>"
+const GREEN_BKGND   = "<Gr.>"
+const YELLOW_BKGND  = "<Yw.>"
+const BLUE_BKGND    = "<Bl.>"
+const MAGENTA_BKGND = "<Mg.>"
+const CYAN_BKGND    = "<Cy.>"
+const WHITE_BKGND   = "<Wh.>"
 
-const BLACK_BKGND   = `$ESC[40m`
-const RED_BKGND     = `$ESC[41m`
-const GREEN_BKGND   = `$ESC[42m`
-const YELLOW_BKGND  = `$ESC[43m`
-const BLUE_BKGND    = `$ESC[44m`
-const MAGENTA_BKGND = `$ESC[45m`
-const CYAN_BKGND    = `$ESC[46m`
-const WHITE_BKGND   = `$ESC[47m`
+const BLACK_BRIGHT   = "<Bk!>"
+const RED_BRIGHT     = "<Rd!>"
+const GREEN_BRIGHT   = "<Gr!>"
+const YELLOW_BRIGHT  = "<Yw!>"
+const BLUE_BRIGHT    = "<Bl!>"
+const MAGENTA_BRIGHT = "<Mg!>"
+const CYAN_BRIGHT    = "<Cy!>"
+const WHITE_BRIGHT   = "<Wh!>"
 
-const BLACK_BRIGHT   = `$NORM;90m`
-const RED_BRIGHT     = `$NORM;91m`
-const GREEN_BRIGHT   = `$NORM;92m`
-const YELLOW_BRIGHT  = `$NORM;93m`
-const BLUE_BRIGHT    = `$NORM;94m`
-const MAGENTA_BRIGHT = `$NORM;95m`
-const CYAN_BRIGHT    = `$NORM;96m`
-const WHITE_BRIGHT   = `$NORM;97m`
+const BLACK_BOLD_BRIGHT   = "<Bk*!>"
+const RED_BOLD_BRIGHT     = "<Rd*!>"
+const GREEN_BOLD_BRIGHT   = "<Gr*!>"
+const YELLOW_BOLD_BRIGHT  = "<Yw*!>"
+const BLUE_BOLD_BRIGHT    = "<Bl*!>"
+const MAGENTA_BOLD_BRIGHT = "<Mg*!>"
+const CYAN_BOLD_BRIGHT    = "<Cy*!>"
+const WHITE_BOLD_BRIGHT   = "<Wh*!>"
 
-const BLACK_BOLD_BRIGHT   = `$BOLD;90m`
-const RED_BOLD_BRIGHT     = `$BOLD;91m`
-const GREEN_BOLD_BRIGHT   = `$BOLD;92m`
-const YELLOW_BOLD_BRIGHT  = `$BOLD;93m`
-const BLUE_BOLD_BRIGHT    = `$BOLD;94m`
-const MAGENTA_BOLD_BRIGHT = `$BOLD;95m`
-const CYAN_BOLD_BRIGHT    = `$BOLD;96m`
-const WHITE_BOLD_BRIGHT   = `$BOLD;97m`
+const BLACK_UNDER_BRIGHT   = "<Bk_!>"
+const RED_UNDER_BRIGHT     = "<Rd_!>"
+const GREEN_UNDER_BRIGHT   = "<Gr_!>"
+const YELLOW_UNDER_BRIGHT  = "<Yw_!>"
+const BLUE_UNDER_BRIGHT    = "<Bl_!>"
+const MAGENTA_UNDER_BRIGHT = "<Mg_!>"
+const CYAN_UNDER_BRIGHT    = "<Cy_!>"
+const WHITE_UNDER_BRIGHT   = "<Wh_!>"
 
-const BLACK_UNDER_BRIGHT   = `$UNDL;90m`
-const RED_UNDER_BRIGHT     = `$UNDL;91m`
-const GREEN_UNDER_BRIGHT   = `$UNDL;92m`
-const YELLOW_UNDER_BRIGHT  = `$UNDL;93m`
-const BLUE_UNDER_BRIGHT    = `$UNDL;94m`
-const MAGENTA_UNDER_BRIGHT = `$UNDL;95m`
-const CYAN_UNDER_BRIGHT    = `$UNDL;96m`
-const WHITE_UNDER_BRIGHT   = `$UNDL;97m`
-
-const BLACK_BKGND_BRIGHT   = `$NORM;100m`
-const RED_BKGND_BRIGHT     = `$NORM;101m`
-const GREEN_BKGND_BRIGHT   = `$NORM;102m`
-const YELLOW_BKGND_BRIGHT  = `$NORM;103m`
-const BLUE_BKGND_BRIGHT    = `$NORM;104m`
-const MAGENTA_BKGND_BRIGHT = `$NORM;105m`
-const CYAN_BKGND_BRIGHT    = `$NORM;106m`
-const WHITE_BKGND_BRIGHT   = `$NORM;107m`
+const BLACK_BKGND_BRIGHT   = "<Bk.!>"
+const RED_BKGND_BRIGHT     = "<Rd.!>"
+const GREEN_BKGND_BRIGHT   = "<Gr.!>"
+const YELLOW_BKGND_BRIGHT  = "<Yw.!>"
+const BLUE_BKGND_BRIGHT    = "<Bl.!>"
+const MAGENTA_BKGND_BRIGHT = "<Mg.!>"
+const CYAN_BKGND_BRIGHT    = "<Cy.!>"
+const WHITE_BKGND_BRIGHT   = "<Wh.!>"
 
 /*
  * Convert one of our dates to an Excel date serial number

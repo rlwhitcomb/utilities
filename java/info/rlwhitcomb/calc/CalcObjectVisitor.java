@@ -713,6 +713,8 @@
  *	    but cache it in the NestedScope.
  *	11-Nov-2022 (rlwhitcomb)
  *	    #554: Don't do the extra pop/push of function scope.
+ *	28-Nov-2022 (rlwhitcomb)
+ *	    #557: Call the coloring routine without the map inside ":echo".
  */
 package info.rlwhitcomb.calc;
 
@@ -2037,7 +2039,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    String out = getStringValue(ctx.expr(1), true, false, false);
 	    CalcDisplayer.Output output = CalcDisplayer.Output.fromString(out);
 
-	    displayer.displayMessage(msg, output);
+	    displayer.displayMessage(ConsoleColor.color(msg, Calc.getColoredMode()), output);
 
 	    return msg;
 	}

@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.14.78', date: d'2022-11-28',
+      issues: [ 557 ],
+      comment: 'Respect "-nocolors" flag with color constants inside ":echo".'
+    },
     { version: '2.14.77', date: d'2022-11-11',
       issues: [ 420 ],
       comment: 'Fix recognition of "1-i" forms for "complex" function.'
