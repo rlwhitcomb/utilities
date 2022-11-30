@@ -184,6 +184,8 @@
  *	    ComplexNumber comparisons.
  *	06-Nov-2022 (rlwhitcomb)
  *	    #476: Make the NaturalOrderComparator instances public for use elsewhere.
+ *	29-Nov-2022 (rlwhitcomb)
+ *	    #567: Sort in descending order.
  */
 package info.rlwhitcomb.calc;
 
@@ -1264,22 +1266,26 @@ public final class CalcUtil
 		private ParserRuleContext ctx;
 		private MathContext mc;
 		private boolean ignoreCase;
+		private boolean descending;
 
 		ObjectComparator(
 			final CalcObjectVisitor v,
 			final ParserRuleContext c,
 			final MathContext m,
-			final boolean ignore)
+			final boolean ignore,
+			final boolean descend)
 		{
 		    visitor = v;
 		    ctx = c;
 		    mc = m;
 		    ignoreCase = ignore;
+		    descending = descend;
 		}
 
 		@Override
 		public int compare(final Object o1, final Object o2) {
-		    return compareValues(visitor, ctx, ctx, o1, o2, mc, false, true, ignoreCase, true, false);
+		    int ret = compareValues(visitor, ctx, ctx, o1, o2, mc, false, true, ignoreCase, true, false);
+		    return descending ? -ret : ret;
 		}
 	}
 
@@ -1292,10 +1298,12 @@ public final class CalcUtil
 	 * @param ctx		The parse tree (source) of the list.
 	 * @param mc		Math context used to round decimal values.
 	 * @param ignore	Whether the string comparison is case-sensitive or not.
+	 * @param descending	Do the sort in descending order.
 	 */
 	public static void sort(final CalcObjectVisitor visitor, final List<Object> list,
-		final ParserRuleContext ctx, final MathContext mc, final boolean ignore) {
-	    Collections.sort(list, new ObjectComparator(visitor, ctx, mc, ignore));
+		final ParserRuleContext ctx, final MathContext mc, final boolean ignore,
+		final boolean descending) {
+	    Collections.sort(list, new ObjectComparator(visitor, ctx, mc, ignore, descending));
 	}
 
 
@@ -1310,24 +1318,28 @@ public final class CalcUtil
 		private MathContext mc;
 		private boolean ignoreCase;
 		private boolean sortByKey;
+		private boolean sortDescending;
 
 		MapEntryComparator(final CalcObjectVisitor v, final ParserRuleContext c,
-			final MathContext m, final boolean ign, final boolean sortKey) {
+			final MathContext m, final boolean ign, final boolean sortKey, final boolean descend) {
 		    visitor = v;
 		    ctx = c;
 		    mc = m;
 		    ignoreCase = ign;
 		    sortByKey = sortKey;
+		    sortDescending = descend;
 		}
 
 		@Override
 		public int compare(final Map.Entry<String, Object> e1, final Map.Entry<String, Object> e2) {
+		    int ret = 0;
 		    if (sortByKey) {
-			return compareValues(visitor, ctx, ctx, e1.getKey(), e2.getKey(), mc, false, true, ignoreCase, true, false);
+			ret = compareValues(visitor, ctx, ctx, e1.getKey(), e2.getKey(), mc, false, true, ignoreCase, true, false);
 		    }
 		    else {
-			return compareValues(visitor, ctx, ctx, e1.getValue(), e2.getValue(), mc, false, true, ignoreCase, true, false);
+			ret = compareValues(visitor, ctx, ctx, e1.getValue(), e2.getValue(), mc, false, true, ignoreCase, true, false);
 		    }
+		    return sortDescending ? -ret : ret;
 		}
 	}
 
@@ -1341,19 +1353,23 @@ public final class CalcUtil
 	 * @param mc		Math context used to round decimal values.
 	 * @param ignore	Whether the string comparison is case-sensitive or not.
 	 * @param sortByKey	{@code true} to sort by keys, or {@code false} by value.
+	 * @param descending	Whether to reverse the sort order.
 	 * @return		The (new) sorted map.
 	 */
 	public static ObjectScope sortMap(final CalcObjectVisitor visitor, final ObjectScope map,
 		final ParserRuleContext ctx, final MathContext mc, final boolean ignore,
-		final boolean sortByKey) {
+		final boolean sortByKey, final boolean descending) {
 	    Comparator<Map.Entry<String, Object>> comparator =
-		new MapEntryComparator(visitor, ctx, mc, ignore, sortByKey);
+		new MapEntryComparator(visitor, ctx, mc, ignore, sortByKey, descending);
+
 	    List<Map.Entry<String, Object>> sortedList = new ArrayList<>(map.map().entrySet());
 	    Collections.sort(sortedList, comparator);
+
 	    ObjectScope sortedMap = new ObjectScope();
 	    for (Map.Entry<String, Object> entry : sortedList) {
 		sortedMap.setValue(entry.getKey(), entry.getValue());
 	    }
+
 	    return sortedMap;
 	}
 
@@ -1550,11 +1566,11 @@ public final class CalcUtil
 		    return Integer.signum(size1 - size2);
 
 		// Sort the two sets and compare the values in sorted order
-		List<Object> list1 = new ArrayList<Object>(set1.set());
-		List<Object> list2 = new ArrayList<Object>(set2.set());
+		List<Object> list1 = new ArrayList<>(set1.set());
+		List<Object> list2 = new ArrayList<>(set2.set());
 
-		sort(visitor, list1, ctx1, mc, ignoreCase);
-		sort(visitor, list2, ctx2, mc, ignoreCase);
+		sort(visitor, list1, ctx1, mc, ignoreCase, false);
+		sort(visitor, list2, ctx2, mc, ignoreCase, false);
 
 		// Iterate through the set and compare the values in order
 		for (int i = 0; i < list1.size(); i++) {

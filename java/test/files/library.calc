@@ -1,5 +1,5 @@
-:Require '2.14.78-alpha'
-:Requires '2.14.78-alpha', Base '1.9.15-alpha'
+:Require '2.14.80-alpha'
+:Requires '2.14.80-alpha', Base '1.9.15-alpha'
 // The versions above must conform to the latest values in "version.properties" and "build.properties"
 
 /*
@@ -31,6 +31,7 @@ const TZ_OFFSET = eval(info.timezone.offset)
  */
 const SORT_CASE_INSENSITIVE = 0x0001
 const SORT_SORT_KEYS        = 0x0002
+const SORT_DESCENDING       = 0x0004
 
 /*
  * Flag values for "matches"

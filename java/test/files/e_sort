@@ -13,6 +13,7 @@ loop over values { a[length(a)] = `$__` }
 :quiet pop
 a
 sort(a)
+sort(a, 4)
 min(a)
 max(a)
 
@@ -28,6 +29,7 @@ sort map2
 sort map2, 2
 sort map2, 1
 sort map2, 1|2
+sort map2, 4
 
 a9 = [ { name: 'joe' }, { name: 'benny' }, { name: 'abby' }, { name: 'diedre' } ]
 sort a9
