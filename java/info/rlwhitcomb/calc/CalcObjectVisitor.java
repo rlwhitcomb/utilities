@@ -717,6 +717,8 @@
  *	    #557: Call the coloring routine without the map inside ":echo".
  *	29-Nov-2022 (rlwhitcomb)
  *	    #564: Add "color" function.
+ *	29-Nov-2022 (rlwhitcomb)
+ *	    #567: Add "descending" flag to sort.
  */
 package info.rlwhitcomb.calc;
 
@@ -910,10 +912,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	/** Flag for case-insensitive sort. */
 	private static final int SORT_CASE_INSENSITIVE = 0x0001;
 	/** Flag for sort of keys vs values in maps. */
-	private static final int SORT_SORT_KEYS = 0x0002;
+	private static final int SORT_SORT_KEYS        = 0x0002;
+	/** Flag for sort in descending order. */
+	private static final int SORT_DESCENDING       = 0x0004;
 	/** The set of all the valid sort flags we support. */
 	private static final int SORT_ALL_FLAGS =
-	    ( SORT_CASE_INSENSITIVE | SORT_SORT_KEYS );
+	    ( SORT_CASE_INSENSITIVE | SORT_SORT_KEYS | SORT_DESCENDING );
 
 	/** Flag for case-insensitive matches. */
 	private static final int MATCH_CASE_INSENSITIVE = 0x0001;
@@ -5339,8 +5343,10 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    CalcParser.Expr1Context e1ctx = ctx.expr1();
 	    CalcParser.Expr2Context e2ctx = ctx.expr2();
 	    CalcParser.ExprContext objCtx;
+
 	    boolean caseInsensitive = false;
-	    boolean sortKeys = false;
+	    boolean sortKeys        = false;
+	    boolean sortDescending  = false;
 
 	    if (e1ctx != null) {
 		objCtx = e1ctx.expr();
@@ -5354,30 +5360,33 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 		caseInsensitive = (flags & SORT_CASE_INSENSITIVE) != 0;
 		sortKeys        = (flags & SORT_SORT_KEYS)        != 0;
+		sortDescending  = (flags & SORT_DESCENDING)       != 0;
 	    }
 
 	    Object obj = evaluate(objCtx);
+
 	    if (obj instanceof ObjectScope) {
 		ObjectScope map = (ObjectScope) obj;
-		return sortMap(this, map, objCtx, settings.mc, caseInsensitive, sortKeys);
+		return sortMap(this, map, objCtx, settings.mc, caseInsensitive, sortKeys, sortDescending);
 	    }
 	    else if (obj instanceof ArrayScope) {
 		@SuppressWarnings("unchecked")
 		ArrayScope<Object> array = (ArrayScope<Object>) obj;
 		ArrayScope<Object> result = new ArrayScope<>(array);
-		sort(this, result.list(), objCtx, settings.mc, caseInsensitive);
+		sort(this, result.list(), objCtx, settings.mc, caseInsensitive, sortDescending);
 		return result;
 	    }
 	    else if (obj instanceof SetScope) {
 		@SuppressWarnings("unchecked")
 		SetScope<Object> set = (SetScope<Object>) obj;
 		List<Object> list = new ArrayList<Object>(set.set());
-		sort(this, list, objCtx, settings.mc, caseInsensitive);
+		sort(this, list, objCtx, settings.mc, caseInsensitive, sortDescending);
 		return new SetScope<Object>(list);
 	    }
 	    else if (obj instanceof CollectionScope) {
 		return obj;
 	    }
+
 	    // A scalar object, just return it unchanged
 	    return obj;
 	}

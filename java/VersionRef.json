@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.14.80', date: d'2022-11-29',
+      issues: [ 567 ],
+      comment: 'Add descending option to "sort".'
+    },
     { version: '2.14.79', date: d'2022-11-29',
       issues: [ 564 ],
       comment: 'Add "color" function.'
