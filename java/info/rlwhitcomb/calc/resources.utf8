@@ -161,6 +161,8 @@
 #	    #534: New error for duplicate constant.
 #	09-Nov-2022 (rlwhitcomb)
 #	    #550: New "assert failure" message.
+#	30-Nov-2022 (rlwhitcomb)
+#	    #566: New messages for multiple constants and variables.
 #
 
 #
@@ -235,7 +237,9 @@ definingVar	= <r>Defining variable <y>%1$s<.><r> = <v>%2$s<r>
 definingVarOnly	= <r>Defining variable <y>%1$s<.><r>
 definedFunc	= Defined function <y>%1$s<.>
 definedConst	= Defined constant <y>%1$s<.>
+definedConsts	= Defined constants <y>%1$s<.>
 definedVar	= Defined variable <y>%1$s<.>
+definedVars	= Defined variables <y>%1$s<.>
 variables	= Variables
 varUnder1	= ---------
 varUnder2	= =========

@@ -719,6 +719,8 @@
  *	    #564: Add "color" function.
  *	29-Nov-2022 (rlwhitcomb)
  *	    #567: Add "descending" flag to sort.
+ *	30-Nov-2022 (rlwhitcomb)
+ *	    #566: Multiple declarations on "const" and "var".
  */
 package info.rlwhitcomb.calc;
 
@@ -3449,46 +3451,61 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitConstStmt(CalcParser.ConstStmtContext ctx) {
-	    String constantName = ctx.id().getText();
-	    CalcParser.ExprContext expr = ctx.expr();
+	    List<CalcParser.IdContext>   ids   = ctx.id();
+	    List<CalcParser.ExprContext> exprs = ctx.expr();
+	    List<String> constNames = new ArrayList<>();
 
-	    if (currentScope.isDefinedLocally(constantName, settings.ignoreNameCase))
-		throw new CalcExprException(ctx, "%calc#noDupConstant", constantName);
+	    for (int i = 0; i < ids.size(); i++) {
+		String constantName         = ids.get(i).getText();
+		CalcParser.ExprContext expr = exprs.get(i);
 
-	    Object value = evaluate(expr);
+		if (currentScope.isDefinedLocally(constantName, settings.ignoreNameCase))
+		    throw new CalcExprException(ctx, "%calc#noDupConstant", constantName);
 
-	    ConstantValue.define(currentScope, constantName, value);
+		Object value = evaluate(expr);
 
-	    displayActionMessage("%calc#definingConst", constantName,
-		toStringValue(this, ctx, value, new StringFormat(settings)));
+		ConstantValue.define(currentScope, constantName, value);
 
-	    return Intl.formatString("calc#definedConst", constantName);
+		displayActionMessage("%calc#definingConst", constantName,
+		    toStringValue(this, ctx, value, new StringFormat(settings)));
+
+		constNames.add(constantName);
+	    }
+
+	    return constNames.size() == 1 ? Intl.formatString("calc#definedConst", constNames.get(0))
+					  : Intl.formatString("calc#definedConsts", CharUtil.makeSimpleStringList(constNames));
 	}
 
 	@Override
 	public Object visitVarStmt(CalcParser.VarStmtContext ctx) {
-	    String varName = ctx.id().getText();
-	    CalcParser.ExprContext expr = ctx.expr();
+	    List<CalcParser.VarAssignContext> assigns = ctx.varAssign();
+	    List<String> varNames = new ArrayList<>();
 
-	    if (currentScope.isDefinedLocally(varName, settings.ignoreNameCase))
-		throw new CalcExprException(ctx, "%calc#noDupLocalVar", varName);
+	    for (int i = 0; i < assigns.size(); i++) {
+		String varName              = assigns.get(i).id().getText();
+		CalcParser.ExprContext expr = assigns.get(i).expr();
 
-	    if (expr != null) {
-		Object value = evaluate(expr);
+		if (currentScope.isDefinedLocally(varName, settings.ignoreNameCase))
+		    throw new CalcExprException(ctx, "%calc#noDupLocalVar", varName);
+
+		Object value = null;
+
+		if (expr != null) {
+		    value = evaluate(expr);
+
+		    displayActionMessage("%calc#definingVar", varName,
+			    toStringValue(this, ctx, value, new StringFormat(settings)));
+		}
+		else {
+		    displayActionMessage("%calc#definingVarOnly", varName);
+		}
+
 		currentScope.setValueLocally(varName, settings.ignoreNameCase, value);
-
-		displayActionMessage("%calc#definingVar", varName,
-			toStringValue(this, ctx, value, new StringFormat(settings)));
-
-		return Intl.formatString("calc#definedVar", varName);
+		varNames.add(varName);
 	    }
-	    else {
-		currentScope.setValueLocally(varName, settings.ignoreNameCase, null);
 
-		displayActionMessage("%calc#definingVarOnly", varName);
-
-		return null;
-	    }
+	    return varNames.size() == 1 ? Intl.formatString("calc#definedVar", varNames.get(0))
+					: Intl.formatString("calc#definedVars", CharUtil.makeSimpleStringList(varNames));
 	}
 
 	private void addPairsToObject(CalcParser.ObjContext objCtx, ObjectScope object) {

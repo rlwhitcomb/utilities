@@ -1183,6 +1183,16 @@ pr2 === props
 
 delete(PROPS)
 
+define y3 = { const t71=71 }
+y3()
+define y4 = { const t27 = 27, t38 = 38 }
+y4()
+define z22 = { var h18, h29, b32 }
+z22()
+define z09 = { var b22 }
+z09()
+var a27, a38 = 7!, a92
+
 :echo
 :echo "End of expression tests (suite 1)."
 

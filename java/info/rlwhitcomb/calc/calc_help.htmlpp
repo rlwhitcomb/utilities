@@ -423,8 +423,9 @@ h2 {
      (see below) will simply insert nothing.
   <p>Values can be assigned names via the <code>const</code> declaration, and then the name used to refer to the value. Such values
      are fixed to their value at the time of the <code>const</code> declaration being evaluated. The syntax is:
-  <p class="indent"><code>const</code>&nbsp;<i>id</i><code> = </code><i>expr</i>
-  <p>Such constants are typically (per convention) given UPPER case names, but this is not required in Calc.
+  <p class="indent"><code>const</code>&nbsp;<i>id</i><code> = </code><i>expr</i>&nbsp;( <code>,</code> <i>id</i><code> = </code><i>expr</i> ) *
+  <p>Such constants are typically (per convention) given UPPER case names, but this is not required. One <code>const</code> statement may be
+     used to define one or many constant values, simply by listing their equivalences.
   <p>Sometimes, especially within loops or other code blocks, local variables are needed for intermediate calculations. In order to
      ensure that such values are local to the block they reside in (and aren't accidentally overriding or interfering with other
      variables of the same name), the <code>var</code> keyword can be used, as in:
@@ -432,6 +433,9 @@ h2 {
   <p>Such a declaration has no other effect than to guarantee the variable is local to the closest enclosing block (indicated
      by <code>{</code> ... <code>}</code>).
      If the value expression is omitted the value is initially set to <code>null</code>, but (obviously) can be changed later.
+     As with the <code>const</code> declaration, one <code>var</code> statement can also declare multiple variables, with or without their
+     initial values, as in:
+  <p class="indent"><code>var</code>&nbsp;<i>pos</i><code> = </code><i>27</i><code>, </code><i>start</i><code> = </code><i>0</i><code>,</code> <i>end</i><code>, </code><i>found</i>
   <p>Numeric values can also be specified using "kilobyte" notation in one of two forms: multipliers of 1000, or multipliers of 1024 (2**10).
      These multipliers are simply appended to the number to automatically multiply by the given amount. The allowed suffixes are:
      <code>Kb</code>, <code>Mb</code>, <code>Tb</code>, <code>Pb</code>, <code>Eb</code>, <code>Zb</code>, <code>Yb</code>, and <code>Bb</code>, which all multiply by their respective
