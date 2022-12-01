@@ -721,6 +721,8 @@
  *	    #567: Add "descending" flag to sort.
  *	30-Nov-2022 (rlwhitcomb)
  *	    #566: Multiple declarations on "const" and "var".
+ *	01-Dec-2022 (rlwhitcomb)
+ *	    Add "nullCheck" for pre- and postInc operators.
  */
 package info.rlwhitcomb.calc;
 
@@ -3624,6 +3626,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    Object beforeValue;
 	    Object afterValue;
 
+	    nullCheck(value, var);
+
 	    switch (op) {
 		case "++":
 		case "\u2795\u2795":
@@ -3718,6 +3722,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    String op = ctx.INC_OP().getText();
 	    boolean incr = false;
 	    Object afterValue;
+
+	    nullCheck(value, var);
 
 	    switch (op) {
 		case "++":
