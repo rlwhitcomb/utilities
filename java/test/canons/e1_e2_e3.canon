@@ -1407,6 +1407,17 @@
 >pr2 == props -> true
 >pr2 === props -> false
 >delete (PROPS) -> true
+>Defining function “y3” = { const t71 = 71 }
+>y3() -> "Defined constant “t71”"
+>Defining function “y4” = { const t27 = 27, t38 = 38 }
+>y4() -> "Defined constants “t27,t38”"
+>Defining function “z22” = { var h18, h29, b32 }
+>z22() -> "Defined variables “h18,h29,b32”"
+>Defining function “z09” = { var b22 }
+>z09() -> "Defined variable “b22”"
+>Defining variable “a27”
+>Defining variable “a38” = 5040
+>Defining variable “a92”
 >
 >End of expression tests (suite 1).
 >Tests of nested object / array variables.

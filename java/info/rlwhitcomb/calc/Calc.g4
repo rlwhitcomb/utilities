@@ -472,6 +472,7 @@
  *	    #550: ":assert" directive.
  *	29-Nov-2022 (rlwhitcomb)
  *	    #564: Implement "color" function.
+ *	    #566: Allow multiple declarations for "const" or "var".
  */
 
 grammar Calc;
@@ -508,11 +509,15 @@ defineStmt
    ;
 
 constStmt
-   : K_CONST id ASSIGN expr
+   : K_CONST id ASSIGN expr ( COMMA id ASSIGN expr ) *
+   ;
+
+varAssign
+   : id ( ASSIGN expr ) ?
    ;
 
 varStmt
-   : K_VAR id ( ASSIGN expr ) ?
+   : K_VAR varAssign ( COMMA varAssign ) *
    ;
 
 loopStmt
