@@ -723,6 +723,7 @@
  *	    #566: Multiple declarations on "const" and "var".
  *	01-Dec-2022 (rlwhitcomb)
  *	    Add "nullCheck" for pre- and postInc operators.
+ *	    Reverse ".equals" test with empty collection to avoid NPEs.
  */
 package info.rlwhitcomb.calc;
 
@@ -3657,7 +3658,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 		afterValue = list;
 	    }
-	    else if (value instanceof ObjectScope || value.equals(CollectionScope.EMPTY)) {
+	    else if (value instanceof ObjectScope || CollectionScope.EMPTY.equals(value)) {
 		ObjectScope obj;
 		if (value instanceof ObjectScope) {
 		    obj = (ObjectScope) value;
@@ -3738,7 +3739,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    throw new UnknownOpException(op, ctx);
 	    }
 
-	    if (value.equals(CollectionScope.EMPTY)) {
+	    if (CollectionScope.EMPTY.equals(value)) {
 		value = new ObjectScope();
 	    }
 	    if (value instanceof ObjectScope) {
