@@ -96,6 +96,25 @@ while t23++ < 13 {
    `odd t23 = $t23`
 }
 
+// Tests of Kaprekar's constant
+const KAPREKAR = 6174
+const START = 3752
+var num = START
+var iterations = 0
+var k, k1, k2, num1, num2
+:separators off {
+while num != KAPREKAR {
+   k = chars(@@num)
+   k1 = sort(k)
+   k2 = sort(k, SORT_DESCENDING)
+   num1 = ~~join(k1)
+   num2 = ~~join(k2)
+   num = num1 > num2 ? num1 - num2 : num2 - num1
+   ++iterations
+}
+:echo `Starting from $START, sequence converged to Kaprekar's constant ($KAPREKAR) in $iterations iterations.`
+}
+
 :echo
 :echo "Done with LOOP tests."
 
