@@ -724,6 +724,8 @@
  *	01-Dec-2022 (rlwhitcomb)
  *	    Add "nullCheck" for pre- and postInc operators.
  *	    Reverse ".equals" test with empty collection to avoid NPEs.
+ *	02-Dec-2022 (rlwhitcomb)
+ *	    #564: Use new ConsoleColor codes to expose color codes for "@Q" format.
  */
 package info.rlwhitcomb.calc;
 
@@ -2378,6 +2380,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    CalcParser.ExprContext expr = ctx.expr();
 	    Object result               = evaluate(expr);
 	    String resultString         = "";
+	    String stringValue;
 
 	    BigInteger iValue = null;
 	    BigDecimal dValue = null;
@@ -2474,7 +2477,11 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 		    case 'Q':
 		    case 'q':
-			valueBuf.append(toStringValue(this, ctx, result, new StringFormat(formatChar == 'Q', settings)));
+			stringValue = toStringValue(this, ctx, result, new StringFormat(formatChar == 'Q', settings));
+			if (formatChar == 'Q')
+			    valueBuf.append(ConsoleColor.uncolor(stringValue));
+			else
+			    valueBuf.append(stringValue);
 			break;
 
 		    case 'C':
@@ -2495,7 +2502,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    case 'd':
 			// special case for a one character string -> codepoint
 			if (result instanceof String) {
-			    String stringValue = (String) result;
+			    stringValue = (String) result;
 			    int count = Character.codePointCount(stringValue, 0, stringValue.length());
 			    if (count == 1) {
 				int cp = Character.codePointAt(stringValue, 0);
@@ -2730,7 +2737,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 				new StringFormat(true, false, extraSpace, separators, null, 0), "", 0));
 			}
 			else {
-			    String stringValue = toStringValue(this, ctx, result, new StringFormat(false, separators));
+			    stringValue = toStringValue(this, ctx, result, new StringFormat(false, separators));
 			    switch (signChar) {
 				case '+':	/* center - positive width puts extra spaces on left always */
 				    CharUtil.padToWidth(valueBuf, stringValue, precision, CENTER);

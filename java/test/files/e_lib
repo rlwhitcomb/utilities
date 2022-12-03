@@ -127,6 +127,9 @@ loop k over 0..20 `Tn($k) = ${Tn(k)}` @q
 }
 :default
 
+colored = `$RED_BOLD_BRIGHT red $RESET`
+colored@Q
+
 :separators pop
 :clear
 

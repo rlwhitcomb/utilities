@@ -70,6 +70,8 @@
  *	#308: Because of "<>" in Calc being a new operator, change RESET to "<.>"
  *   01-Sep-2022 (rlwhitcomb)
  *	#446: Expand header Javadoc with explanations of how to use.
+ *   02-Dec-2022 (rlwhitcomb)
+ *	#564: Special codes to suspend and resume coloring.
  */
 package info.rlwhitcomb.util;
 
@@ -169,6 +171,11 @@ public final class ConsoleColor
     private static final String UN = "_";
     private static final String BG = ".";
     private static final String BR = "!";
+
+    /** Code to suspend coloring. */
+    public static final String SUSPEND = "@@";
+    /** Code to resume coloring again. */
+    public static final String RESUME  = "@";
 
 
     /**
@@ -300,6 +307,7 @@ public final class ConsoleColor
     public static final String color(final CharSequence input, final boolean colored, final Map<String, Object> map) {
 	Deque<String> colorStack = new ArrayDeque<>();
 	String currentStr = colored ? Code.RESET.escCode() : "";
+	boolean suspended = false;
 
 	StringBuilder buf = new StringBuilder(input.length() * 3);
 	for (int i = 0; i < input.length(); i++) {
@@ -311,6 +319,22 @@ public final class ConsoleColor
 		}
 		else {
 		    String tag = input.subSequence(i + 1, endPos).toString();
+
+		    if (suspended && tag.equals(RESUME)) {
+			suspended = false;
+			i = endPos;
+			continue;
+		    }
+		    else if (!suspended && tag.equals(SUSPEND)) {
+			suspended = true;
+			i = endPos;
+			continue;
+		    }
+		    else if (suspended) {
+			buf.append(ch);
+			continue;
+		    }
+
 		    Code code = Code.fromTag(tag);
 		    String codeStr;
 

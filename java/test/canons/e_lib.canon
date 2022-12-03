@@ -112,5 +112,7 @@
 >Tn(19) = -583203324917310043943191641625494290432
 >Tn(20) = 387635983772083031828014624002175135645696
 >Precision is now “34” digits.
+>colored = `$RED_BOLD_BRIGHT red $RESET` -> "[1;91m red ”"
+>colored @Q -> "<Rd*!> red <.>"
 >Separator display set to “false”.
 >All variables cleared.

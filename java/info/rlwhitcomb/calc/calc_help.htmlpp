@@ -715,6 +715,8 @@ or<br>
      and treat the value as a simple quoted string. This simplifies using these values inside interpolated strings (for instance), as in:&nbsp;
   <code style="color:blue;">today@-e</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">"2022-10-17"</code> while
   <code style="color:blue;">today@e</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">d'2022-10-17'</code>
+  <p>For strings that contain the standard color codes (such as <code style="color:blue;">BLUE_BOLD</code> from <code>library.calc</code>) the
+     <code>@Q</code> format will expose those codes instead of using them to color the result.
 </div>
 <a class="top-link" href="#topofpage">Top</a>
 <hr id="Available_Operators_and_Predefined_Functions" class="sectionsep">
