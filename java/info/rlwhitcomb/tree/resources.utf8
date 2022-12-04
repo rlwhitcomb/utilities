@@ -50,6 +50,8 @@
 #	    #308: Change reset color tag.
 #	06-May-2022 (rlwhitcomb)
 #	    #284: Remove unused error message. Update help.
+#	03-Dec-2022 (rlwhitcomb)
+#	    Tweak some colors.
 #
 
 unavailable	= " <unavailable>"
@@ -64,7 +66,7 @@ errNoDepth	= "<Rd*!>ERROR: No value given for <Bl*>\"-depth\"<Rd*!>.<.>"
 errDepth	= "Invalid value for <Bl*>\"-depth\"<.>: %1$s"
 error		= "<Rd*!>ERROR: %1$s"
 
-usage.help1	= "<Bk!>Usage:<.> tre [<Gr>options<.>] [ file_or_directory_name(s) ]"
+usage.help1	= "<Bk!>Usage:<.> tre <Bk!>[ <Gr>options<.> ] [ <Cy>file_or_directory_name(s)<.> ]<-->"
 usage.help2	= ""
 usage.help3	= " Where \"<Gr>options<.>\" can be:"
 usage.help4	= "\t<Gr>-ascending<.>  to sort by file name, alphabetically ascending"
@@ -125,7 +127,7 @@ usage.help58	= "  environment variable (such as <Cy>TREE_OPTIONS=-nocolor<.>)"
 usage.help59	= ""
 usage.help60	= " Also note: all options are parsed before any files are processed,"
 usage.help61	= "  so later options will override earlier ones for the entire output,"
-usage.help62	= "  and options on the command line override ones set by TREE_OPTIONS."
+usage.help62	= "  and options on the command line override ones set by <Cy>TREE_OPTIONS<.>."
 usage.help63	= ""
 usage.help64	= " If no files or directories are specified, the current directory ('.')"
 usage.help65	= "  is traversed."
