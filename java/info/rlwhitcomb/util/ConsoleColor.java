@@ -71,7 +71,7 @@
  *   01-Sep-2022 (rlwhitcomb)
  *	#446: Expand header Javadoc with explanations of how to use.
  *   02-Dec-2022 (rlwhitcomb)
- *	#564: Special codes to suspend and resume coloring.
+ *	#564: Special codes and "uncolor()" method to suspend and resume coloring.
  */
 package info.rlwhitcomb.util;
 
@@ -388,6 +388,18 @@ public final class ConsoleColor
 	}
 	return buf.toString();
     }
+
+    /**
+     * Add special tags around the given string so that it will not be colored.
+     *
+     * @param string The value to be "color quoted".
+     * @return       Given value with the {@link #SUSPEND} and {@link #RESUME} tags
+     *               around it.
+     */
+    public static String uncolor(final String string) {
+	return String.format("<%1$s>%2$s<%3$s>", SUSPEND, string, RESUME);
+    }
+
 
 
     /**
