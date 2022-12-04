@@ -21,78 +21,53 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  *
- *  History:
- *      29-Jan-2021 (rlwhitcomb)
- *          Initial coding, not complete.
- *	29-Jan-2021 (rlwhitcomb)
- *	    Continued coding and documenting.
- *	29-Jan-2021 (rlwhitcomb)
- *	    Add a constructor from two integer strings.
- *	30-Jan-2021 (rlwhitcomb)
- *	    Add "compareTo" and "hashCode" methods; implement Comparable and
- *	    Serializable. Add methods to construct from strings. Add
- *	    BigDecimal constructor. Add ZERO and ONE constants.
- *	30-Jan-2021 (rlwhitcomb)
- *	    Normalize to keep sign always in the numerator. Add "abs",
- *	    "signum", and "equals"  methods.
- *	31-Jan-2021 (rlwhitcomb)
- *	    More methods dealing with whole number operands.
- *	    Divide by long was also missing.
- *	01-Feb-2021 (rlwhitcomb)
- *	    Tweaks to "normalize".
- *	01-Feb-2021 (rlwhitcomb)
- *	    Make this a subclass of Number; implement the required methods.
- *	02-Feb-2021 (rlwhitcomb)
- *	    Implement GCD and LCM.
- *	    Add "isWholeNumber", and "toInteger". Rework "longValue()" and
- *	    "intValue()" in terms of "toInteger" now. Add "intValueExact()"
- *	    and "longValueExact()" as well. Add "increment()" and "decrement()",
- *	    as well as two more constant values.
- *	03-Feb-2021 (rlwhitcomb)
- *	    General cleanup.
- *	    Tweak the two patterns and their doc.
- *	    More tweaking.
- *	09-Mar-2021 (rlwhitcomb)
- *	    The two and three string patterns are still not right...
- *	26-Mar-2021 (rlwhitcomb)
- *	    Move some methods from NumericUtil to MathUtil.
- *	29-Mar-2021 (rlwhitcomb)
- *	    Add a flag to signal this fraction should always be represented
- *	    as a proper fraction (helps with @F formatting in Calc).
- *	27-Jul-2021 (rlwhitcomb)
- *	    Add "pow" function.
- *	27-Jul-2021 (rlwhitcomb)
- *	    Negative powers and special cases for 0 and 1. Add "reciprocal".
- *	28-Jul-2021 (rlwhitcomb)
- *	    Beef up the "valueOf" with treatment of the Unicode fraction chars.
- *	06-Aug-2021 (rlwhitcomb)
- *	    And ... finish that work.
- *	25-Aug-2021 (rlwhitcomb)
- *	    Correct a typo in the INT_FRAC regex.
- *	    Display the input value in the "unsupportedFormat" exception.
- *	05-Oct-2021 (rlwhitcomb)
- *	    Strip trailing zeros in "toDecimal".
- *	02-Dec-2021 (rlwhitcomb)
- *	    #124: Tweak default display, not proper form.
- *	14-Jan-2022 (rlwhitcomb)
- *	    Some optimizations in "pow()".
- *	10-Feb-2022 (rlwhitcomb)
- *	    Oops! Modulus is non-integer part after division (as in @F formatting).
- *	23-Mar-2022 (rlwhitcomb)
- *	    Allow '+' in "fractionValue" and other input patterns also.
- *	14-Apr-2022 (rlwhitcomb)
- *	    #273: Move to "math" package.
- *	08-Jul-2022 (rlwhitcomb)
- *	    #393: Cleanup imports.
- *	15-Sep-2022 (rlwhitcomb)
- *	    #485: Make the "remainder" function public.
- *	    #485: Add "floor" and "ceil" functions.
- *	27-Sep-2022 (rlwhitcomb)
- *	    #494: Fix code scanning issue with the special fraction characters.
- *	12-Oct-2022 (rlwhitcomb)
- *	    #514: Update text resource package.
- *	20-Oct-2022 (rlwhitcomb)
- *	    Add "valueOf(Number)" method.
+ *	Class implementing rational fractions, including many arithmetic functions.
+ *
+ * History:
+ *  29-Jan-21 rlw  ---	Initial coding, not complete.
+ *  29-Jan-21 rlw  ---	Continued coding and documenting.
+ *  29-Jan-21 rlw  ---	Add a constructor from two integer strings.
+ *  30-Jan-21 rlw  ---	Add "compareTo" and "hashCode" methods; implement Comparable and
+ *			Serializable. Add methods to construct from strings. Add
+ *			BigDecimal constructor. Add ZERO and ONE constants.
+ *  30-Jan-21 rlw  ---	Normalize to keep sign always in the numerator. Add "abs",
+ *			"signum", and "equals"  methods.
+ *  31-Jan-21 rlw  ---	More methods dealing with whole number operands.
+ *			Divide by long was also missing.
+ *  01-Feb-21 rlw  ---	Tweaks to "normalize".
+ *  01-Feb-21 rlw  ---	Make this a subclass of Number; implement the required methods.
+ *  02-Feb-21 rlw  ---	Implement GCD and LCM.
+ *			Add "isWholeNumber", and "toInteger". Rework "longValue()" and
+ *			"intValue()" in terms of "toInteger" now. Add "intValueExact()"
+ *			and "longValueExact()" as well. Add "increment()" and "decrement()",
+ *			as well as two more constant values.
+ *  03-Feb-21 rlw  ---	General cleanup.
+ *			Tweak the two patterns and their doc.
+ *			More tweaking.
+ *  09-Mar-21 rlw  ---	The two and three string patterns are still not right...
+ *  26-Mar-21 rlw  ---	Move some methods from NumericUtil to MathUtil.
+ *  29-Mar-21 rlw  ---	Add a flag to signal this fraction should always be represented
+ *			as a proper fraction (helps with @F formatting in Calc).
+ *  27-Jul-21 rlw  ---	Add "pow" function.
+ *  27-Jul-21 rlw  ---	Negative powers and special cases for 0 and 1. Add "reciprocal".
+ *  28-Jul-21 rlw  ---	Beef up the "valueOf" with treatment of the Unicode fraction chars.
+ *  06-Aug-21 rlw  ---	And ... finish that work.
+ *  25-Aug-21 rlw  ---	Correct a typo in the INT_FRAC regex.
+ *			Display the input value in the "unsupportedFormat" exception.
+ *  05-Oct-21 rlw  ---	Strip trailing zeros in "toDecimal".
+ *  02-Dec-21 rlw #124:	Tweak default display, not proper form.
+ *  14-Jan-22 rlw  ---	Some optimizations in "pow()".
+ *  10-Feb-22 rlw  ---	Oops! Modulus is non-integer part after division (as in @F formatting).
+ *  23-Mar-22 rlw  ---	Allow '+' in "fractionValue" and other input patterns also.
+ *  14-Apr-22 rlw #273:	Move to "math" package.
+ *  08-Jul-22 rlw #393:	Cleanup imports.
+ *  15-Sep-22 rlw #485:	Make the "remainder" function public.
+ *		  #485:	Add "floor" and "ceil" functions.
+ *  27-Sep-22 rlw #494:	Fix code scanning issue with the special fraction characters.
+ *  12-Oct-22 rlw #514:	Update text resource package.
+ *  20-Oct-22 rlw  ---	Add "valueOf(Number)" method.
+ *  26-Nov-22 rlw #559:	Add "isZero" and "precision" for help with complex rational calculations.
+ *			Some other optimizations.
  */
 package info.rlwhitcomb.math;
 
@@ -513,6 +488,19 @@ public class BigFraction extends Number
 	}
 
 	/**
+	 * Is this fraction actually zero? That is, the numerator is zero.
+	 * <p> This assumes our values are kept normalized.
+	 * <p> This is also equivalent to a comparison with {@link #ZERO}.
+	 *
+	 * @return {@code true} if the numerator is zero, without regard to
+	 * the denominator (although it should always be one, from the
+	 * normalization process).
+	 */
+	public boolean isZero() {
+	    return numer.equals(BigInteger.ZERO);
+	}
+
+	/**
 	 * Is this fraction actually a whole number? That is,
 	 * the denominator is one.
 	 * <p> This does really assume that our values are kept normalized
@@ -524,6 +512,30 @@ public class BigFraction extends Number
 	 */
 	public boolean isWholeNumber() {
 	    return denom.equals(BigInteger.ONE);
+	}
+
+	/**
+	 * Get the precision of a {@link BigInteger}.
+	 *
+	 * @param iValue The integer value to test.
+	 * @return       Number of digits of the unsigned integer value.
+	 */
+	private int iPrecision(final BigInteger iValue) {
+	    String string = iValue.toString();
+	    int length = string.length();
+
+	    return string.charAt(0) == '-' ? length - 1 : length;
+	}
+
+	/**
+	 * Get the precision of this fraction, which is the maximum of the numerator
+	 * precision and the denominator precision. Precision of integers is the
+	 * number of digits (not including sign).
+	 *
+	 * @return The precision of the fraction.
+	 */
+	public int precision() {
+	    return Math.max(iPrecision(numer), iPrecision(denom));
 	}
 
 	/**
@@ -665,30 +677,33 @@ public class BigFraction extends Number
 	 */
 	public BigFraction add(final BigFraction other) {
 	    // Adding zero to any number yields the same number
-	    if (other.numer.equals(BigInteger.ZERO))
+	    if (other.isZero())
 		return this;
 
 	    // On the other hand, if we are zero, then return the other
-	    if (this.numer.equals(BigInteger.ZERO))
+	    if (this.isZero())
 		return other;
 
-	    BigInteger num;
-	    BigInteger den;
+	    BigInteger num = this.numer;
+	    BigInteger den = this.denom;
 
-	    // If the fractions have the same denominator, simply add the numerators
-	    if (other.denom.equals(this.denom)) {
-		num = this.numer.add(other.numer);
-		den = this.denom;
+	    boolean sameDenom = den.equals(other.denom);
+
+	    if (sameDenom) {
+		// If the fractions have the same denominator, simply add the numerators
+		num = num.add(other.numer);
 	    }
 	    else {
-		// General algorithm: putting on a common denominator and adding the resulting
-		// numerators
-		num = this.numer.multiply(other.denom).add(other.numer.multiply(this.denom));
-		den = this.denom.multiply(other.denom);
+		// General algorithm: putting on a common denominator and adding the resulting numerators
+		num = num.multiply(other.denom).add(other.numer.multiply(den));
 	    }
 
 	    if (num.equals(BigInteger.ZERO))
 		return ZERO;
+
+	    if (!sameDenom) {
+		den = den.multiply(other.denom);
+	    }
 
 	    return new BigFraction(num, den);
 	}
@@ -714,26 +729,33 @@ public class BigFraction extends Number
 	 */
 	public BigFraction subtract(final BigFraction other) {
 	    // Subtracting zero from any number yields the same number
-	    if (other.numer.equals(BigInteger.ZERO))
+	    if (other.isZero())
 		return this;
 
-	    if (this.numer.equals(BigInteger.ZERO))
+	    // Subtracting any number from zero yields the negative
+	    if (this.isZero())
 		return other.negate();
 
-	    BigInteger num;
-	    BigInteger den;
+	    BigInteger num = this.numer;
+	    BigInteger den = this.denom;
 
-	    if (other.denom.equals(this.denom)) {
-		num = this.numer.subtract(other.numer);
-		den = this.denom;
+	    boolean sameDenom = den.equals(other.denom);
+
+	    if (sameDenom) {
+		// Same denominator, simply subtract the numerators
+		num = num.subtract(other.numer);
 	    }
 	    else {
-		num = this.numer.multiply(other.denom).subtract(other.numer.multiply(this.denom));
-		den = this.denom.multiply(other.denom);
+		// Otherwise, general algorithm: put over a common denominator
+		num = num.multiply(other.denom).subtract(other.numer.multiply(den));
 	    }
 
 	    if (num.equals(BigInteger.ZERO))
 		return ZERO;
+
+	    if (!sameDenom) {
+		den = den.multiply(other.denom);
+	    }
 
 	    return new BigFraction(num, den);
 	}
@@ -747,10 +769,12 @@ public class BigFraction extends Number
 	 * @return	The result of multiplying this fraction by the given whole number.
 	 */
 	public BigFraction multiply(final long value) {
-	    if (value == 0L)
+	    if (isZero() || value == 0L)
 		return ZERO;
 	    else if (value == 1L)
 		return this;
+	    else if (this.equals(ONE))
+		return new BigFraction(value);
 
 	    return multiply(new BigFraction(value));
 	}
@@ -764,10 +788,12 @@ public class BigFraction extends Number
 	 * @return	The result of multiplying this fraction by the other one.
 	 */
 	public BigFraction multiply(final BigFraction other) {
-	    if (other.equals(ZERO) || equals(ZERO))
+	    if (isZero() || other.isZero())
 		return ZERO;
 	    else if (other.equals(ONE))
 		return this;
+	    else if (this.equals(ONE))
+		return other;
 
 	    return new BigFraction(numer.multiply(other.numer), denom.multiply(other.denom));
 	}
@@ -800,6 +826,8 @@ public class BigFraction extends Number
 		throw new ArithmeticException(Intl.getString("math#fraction.divideByZero"));
 	    else if (value.equals(BigInteger.ONE))
 		return this;
+	    else if (this.equals(ONE))
+		return new BigFraction(BigInteger.ONE, value);
 
 	    return new BigFraction(numer, denom.multiply(value));
 	}
@@ -812,15 +840,16 @@ public class BigFraction extends Number
 	 *		the same as {@code (this.n * other.d), (this.d * other.n)}.
 	 */
 	public BigFraction divide(final BigFraction other) {
-	    if (other.equals(ZERO))
+	    if (other.isZero())
 		throw new ArithmeticException(Intl.getString("math#fraction.divideByZero"));
-	    else if (equals(ZERO))
+	    else if (isZero())
 		return ZERO;
 	    else if (other.equals(ONE))
 		return this;
-	    else if (equals(ONE))
+	    else if (this.equals(ONE))
 		return other.reciprocal();
 
+	    // Invert other and multiply
 	    return new BigFraction(numer.multiply(other.denom), denom.multiply(other.numer));
 	}
 
@@ -884,13 +913,13 @@ public class BigFraction extends Number
 	 * @return	The result of {@code (this.n/this.d) % (other.n/other.d)}.
 	 */
 	public BigFraction remainder(final BigFraction other) {
-	    if (other.equals(ZERO))
+	    if (other.isZero())
 		throw new ArithmeticException(Intl.getString("math#fraction.divideByZero"));
-	    else if (equals(ZERO))
+	    else if (isZero())
 		return ZERO;
 	    else if (other.equals(ONE))
 		return this;
-	    else if (equals(ONE))
+	    else if (this.equals(ONE))
 		return getRemainder(other.reciprocal());
 
 	    return getRemainder(new BigFraction(numer.multiply(other.denom), denom.multiply(other.numer)));
@@ -930,7 +959,7 @@ public class BigFraction extends Number
 		return this;
 
 	    // Trivial cases to avoid meaningless calculations
-	    if (equals(ZERO) || equals(ONE))
+	    if (isZero() || equals(ONE))
 		return this;
 
 	    // Some easy optimizations for numerator or denominator of one
