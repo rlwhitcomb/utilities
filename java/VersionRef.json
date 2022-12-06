@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.15.1', date: d'2022-12-06',
+      issues: [ 573 ],
+      comment: 'Fix some "scan" format bugs.'
+    },
     { version: '2.15.0', date: d'2022-12-05',
       issues: [ 573 ],
       comment: '"scan" function for parsing data.'

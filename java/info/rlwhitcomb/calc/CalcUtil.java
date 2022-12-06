@@ -188,6 +188,8 @@
  *	    #567: Sort in descending order.
  *	05-Dec-2022 (rlwhitcomb)
  *	    #573: New "scanIntoVars" method.
+ *	06-Dec-2022 (rlwhitcomb)
+ *	    #573: Fix some "scan" delimiter issues.
  */
 package info.rlwhitcomb.calc;
 
@@ -213,6 +215,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.ParseException;
 import java.util.*;
+import java.util.regex.Pattern;
 
 import static info.rlwhitcomb.util.CharUtil.Justification;
 import static info.rlwhitcomb.util.Constants.*;
@@ -2571,7 +2574,9 @@ public final class CalcUtil
 
 	    StringBuilder pattern = new StringBuilder();
 	    int varIndex = 0;
+	    Pattern defaultDelimiter = scanner.delimiter();
 
+	formatLoop:
 	    for (int i = 0; i < format.length(); i++) {
 		char ch = format.charAt(i);
 		if (ch == '%') {
@@ -2585,11 +2590,18 @@ public final class CalcUtil
 		    if (i + 1 < format.length()) {
 			Object value = null;
 			char formatCh = format.charAt(++i);
+			if (formatCh == 'c')
+			    scanner.useDelimiter("");
+			else if (i + 1 < format.length())
+			    scanner.useDelimiter(format.substring(i + 1, i + 2));
+			else
+			    scanner.useDelimiter(defaultDelimiter);
+
 			try {
 			    switch (formatCh) {
 				case '%':
-				    value = scanner.next("%");
-				    break;
+				    pattern.append(formatCh);
+				    continue formatLoop;
 				case 'd':
 				    value = scanner.nextBigDecimal();
 				    break;
@@ -2600,10 +2612,10 @@ public final class CalcUtil
 				    value = scanner.nextBoolean();
 				    break;
 				case 'n':
-				    value = scanner.next("\\r?\\n");
-				    break;
+				    pattern.append("\\r?\\n");
+				    continue formatLoop;
 				case 'c':
-				    value = scanner.next("?");
+				    value = scanner.next();
 				    break;
 				case 's':
 				    value = scanner.nextLine();
