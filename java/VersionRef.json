@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.15.0', date: d'2022-12-05',
+      issues: [ 573 ],
+      comment: '"scan" function for parsing data.'
+    },
     { version: '2.14.83', date: d'2022-12-02',
       issues: [ 564 ],
       comment: 'Allow "@Q" to expose the color codes.'

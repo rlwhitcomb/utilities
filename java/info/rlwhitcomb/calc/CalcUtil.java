@@ -186,6 +186,8 @@
  *	    #476: Make the NaturalOrderComparator instances public for use elsewhere.
  *	29-Nov-2022 (rlwhitcomb)
  *	    #567: Sort in descending order.
+ *	05-Dec-2022 (rlwhitcomb)
+ *	    #573: New "scanIntoVars" method.
  */
 package info.rlwhitcomb.calc;
 
@@ -2551,6 +2553,87 @@ public final class CalcUtil
 	    }
 
 	    return false;
+	}
+
+	/**
+	 * Scan a source string, according to the given format, into a set of variables.
+	 *
+	 * @param visitor The calculation object, used to resolve expressions.
+	 * @param source  The source to scan.
+	 * @param format  Format of the source information.
+	 * @param vars    List of variables to hold the scanned values.
+	 * @return        ??
+	 * @throws IllegalArgumentException if the source can't be interpreted according to the format.
+	 */
+	public static Object scanIntoVars(final CalcObjectVisitor visitor, final String source, final String format, final List<LValueContext> vars) {
+	    Scanner scanner = new Scanner(source);
+	    Object lastValue = null;
+
+	    StringBuilder pattern = new StringBuilder();
+	    int varIndex = 0;
+
+	    for (int i = 0; i < format.length(); i++) {
+		char ch = format.charAt(i);
+		if (ch == '%') {
+		    if (pattern.length() > 0) {
+			String pat = pattern.toString();
+			if (scanner.findWithinHorizon(pat, pat.length()) == null) {
+			    throw new Intl.IllegalArgumentException("calc#scanPatternError", pat);
+			}
+			pattern.setLength(0);
+		    }
+		    if (i + 1 < format.length()) {
+			Object value = null;
+			char formatCh = format.charAt(++i);
+			try {
+			    switch (formatCh) {
+				case '%':
+				    value = scanner.next("%");
+				    break;
+				case 'd':
+				    value = scanner.nextBigDecimal();
+				    break;
+				case 'i':
+				    value = scanner.nextBigInteger();
+				    break;
+				case 'b':
+				    value = scanner.nextBoolean();
+				    break;
+				case 'n':
+				    value = scanner.next("\\r?\\n");
+				    break;
+				case 'c':
+				    value = scanner.next("?");
+				    break;
+				case 's':
+				    value = scanner.nextLine();
+				    break;
+				default:
+				    throw new Intl.IllegalArgumentException("calc#illegalScanType", formatCh);
+			    }
+			}
+			catch (NoSuchElementException ex) {
+			    throw new Intl.IllegalArgumentException("calc#scanPatternError", String.format("%%%1$c", formatCh));
+			}
+			LValueContext lValue = vars.get(varIndex++);
+			lValue.putContextObject(visitor, value);
+			lastValue = value;
+		    }
+		    else {
+			throw new Intl.IllegalArgumentException("calc#badScanPattern", format);
+		    }
+		}
+		else {
+		    pattern.append(ch);
+		}
+	    }
+	    if (pattern.length() > 0) {
+		String pat = pattern.toString();
+		if (scanner.findWithinHorizon(pat, pat.length()) == null) {
+		    throw new Intl.IllegalArgumentException("calc#scanPatternError", pat);
+		}
+	    }
+	    return lastValue;
 	}
 
 }

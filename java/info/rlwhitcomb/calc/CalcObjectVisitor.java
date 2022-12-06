@@ -31,7 +31,7 @@
  *	07-Dec-2020 (rlwhitcomb)
  *	    Degrees and radians directives.
  *	07-Dec-2020 (rlwhitcomb)
- *	    Cache e value when precision changes.
+ *	    Cache "e" value when precision changes.
  *	08-Dec-2020 (rlwhitcomb)
  *	    Use new NumericUtil.sin method; add "round" evaluation.
  *	11-Dec-2020 (rlwhitcomb)
@@ -726,6 +726,8 @@
  *	    Reverse ".equals" test with empty collection to avoid NPEs.
  *	02-Dec-2022 (rlwhitcomb)
  *	    #564: Use new ConsoleColor codes to expose color codes for "@Q" format.
+ *	05-Dec-2022 (rlwhitcomb)
+ *	    #573: New "scan" function.
  */
 package info.rlwhitcomb.calc;
 
@@ -807,7 +809,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	/**
-	 * Interface for the {@link #iterateOverDotRange} method, which is either called for each value
+	 * Interface for the {@link #iterateOverDotRange iterateOverDotRange(...)} method, which is either called for each value
 	 * in the range, or is used to optimally calculate the result without having to do the entire
 	 * iteration.
 	 * <p> We use the {@link Purpose} to partially decide if the optimization will apply. For instance,
@@ -5576,6 +5578,22 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 
 	    return String.format(formatString, args);
+	}
+
+	@Override
+	public Object visitScanExpr(CalcParser.ScanExprContext ctx) {
+	    CalcParser.ExprVarsContext exprVars = ctx.exprVars();
+	    CalcParser.ExprContext sourceExpr   = exprVars.expr(0);
+	    CalcParser.ExprContext formatExpr   = exprVars.expr(1);
+	    String sourceString = getStringValue(sourceExpr);
+	    String formatString = getStringValue(formatExpr);
+
+	    List<LValueContext> varList = new ArrayList<>(exprVars.var().size());
+	    for (CalcParser.VarContext var : exprVars.var()) {
+		varList.add(getLValue(var));
+	    }
+
+	    return scanIntoVars(this, sourceString, formatString, varList);
 	}
 
 	/**

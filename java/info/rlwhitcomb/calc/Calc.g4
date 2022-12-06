@@ -473,6 +473,8 @@
  *	29-Nov-2022 (rlwhitcomb)
  *	    #564: Implement "color" function.
  *	    #566: Allow multiple declarations for "const" or "var".
+ *	05-Dec-2022 (rlwhitcomb)
+ *	    #573: Add "scan" method.
  */
 
 grammar Calc;
@@ -621,6 +623,7 @@ expr
    | K_SPLICE spliceArgs                 # spliceExpr
    | K_FILL fillArgs                     # fillExpr
    | K_FORMATSTRING exprN                # formatExpr
+   | K_SCAN exprVars                     # scanExpr
    | K_SORT ( expr2 | expr1 )            # sortExpr
    | K_REVERSE expr1                     # reverseExpr
    | K_UNIQUE expr1                      # uniqueExpr
@@ -753,6 +756,11 @@ padArgs
    | LPAREN var COMMA expr RPAREN
    | var COMMA expr COMMA expr
    | var COMMA expr
+   ;
+
+exprVars
+   : LPAREN expr COMMA expr COMMA var ( COMMA var ) * RPAREN
+   | expr COMMA expr COMMA var ( COMMA var ) *
    ;
 
 dotRange
@@ -1098,6 +1106,8 @@ K_SPLICE   : 'splice' | 'SPLICE' | 'Splice' ;
 K_FILL     : 'fill' | 'FILL' | 'Fill' ;
 
 K_FORMATSTRING : 'formatstring' | 'FORMATSTRING' | 'FormatString' | 'Formatstring' | 'formatString' ;
+
+K_SCAN     : 'scan' | 'SCAN' | 'Scan' ;
 
 K_SORT     : 'sort' | 'SORT' | 'Sort' ;
 

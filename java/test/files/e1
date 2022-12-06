@@ -477,6 +477,20 @@ formatstring("Rate is %1$8.6f", 12.34567)
 formatstring('Name: %1$-20s, Age: %2$5d', 'Agnes Brown', 97)
 formatstring("%02d", yod(d'2022-05-20') % 100)
 
+# "scan" function
+str12 = "Latest version: 23"
+var num
+scan(str12, 'Latest version: %i', num)
+num
+str22 = '1 2 3'
+var a1, a2, a3
+scan(str22, '%d %d %d', a1, a2, a3)
+a1;a2;a3
+str47 = "Author: John Doe"
+var auth = ''
+scan(str47, "Author: %s", auth)
+auth
+
 # The "pad" functions
 arr_m = [ 10 ]
 pad(arr_m, 10, -1)
