@@ -503,6 +503,8 @@ ch1;ch2;ch3
 str22='a\nb\nd'
 scan(str22, '%c%n%c%n%c', ch1,ch2,ch3)
 ch1;ch2;ch3
+str42='(52)'
+scan(str42, '(%d)', disc)
 
 # The "pad" functions
 arr_m = [ 10 ]

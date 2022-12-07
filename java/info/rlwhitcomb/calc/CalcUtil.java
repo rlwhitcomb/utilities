@@ -192,6 +192,7 @@
  *	    #573: Fix some "scan" delimiter issues.
  *	06-Dec-2022 (rlwhitcomb)
  *	    #573: Quote literal patterns in "scan".
+ *	    #573: More work quoting patterns, including "%n".
  */
 package info.rlwhitcomb.calc;
 
@@ -2583,9 +2584,9 @@ public final class CalcUtil
 		char ch = format.charAt(i);
 		if (ch == '%') {
 		    if (pattern.length() > 0) {
-			String pat = Pattern.quote(pattern.toString());
-			if (scanner.findWithinHorizon(pat, pat.length()) == null) {
-			    throw new Intl.IllegalArgumentException("calc#scanPatternError", pat);
+			String pat = CharUtil.quoteRegEx(pattern.toString());
+			if (scanner.findWithinHorizon(pat, pattern.length()) == null) {
+			    throw new Intl.IllegalArgumentException("calc#scanPatternError", pattern.toString());
 			}
 			pattern.setLength(0);
 		    }
@@ -2595,7 +2596,7 @@ public final class CalcUtil
 			if (formatCh == 'c')
 			    scanner.useDelimiter("");
 			else if (i + 1 < format.length())
-			    scanner.useDelimiter(format.substring(i + 1, i + 2));
+			    scanner.useDelimiter(Pattern.quote(format.substring(i + 1, i + 2)));
 			else
 			    scanner.useDelimiter(defaultDelimiter);
 
@@ -2614,7 +2615,7 @@ public final class CalcUtil
 				    value = scanner.nextBoolean();
 				    break;
 				case 'n':
-				    pattern.append("\\r?\\n");
+				    pattern.append("\\R");
 				    continue formatLoop;
 				case 'c':
 				    value = scanner.next();
@@ -2642,9 +2643,9 @@ public final class CalcUtil
 		}
 	    }
 	    if (pattern.length() > 0) {
-		String pat = Pattern.quote(pattern.toString());
-		if (scanner.findWithinHorizon(pat, pat.length()) == null) {
-		    throw new Intl.IllegalArgumentException("calc#scanPatternError", pat);
+		String pat = CharUtil.quoteRegEx(pattern.toString());
+		if (scanner.findWithinHorizon(pat, pattern.length()) == null) {
+		    throw new Intl.IllegalArgumentException("calc#scanPatternError", pattern.toString());
 		}
 	    }
 	    return lastValue;
