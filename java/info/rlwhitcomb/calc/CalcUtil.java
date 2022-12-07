@@ -190,6 +190,8 @@
  *	    #573: New "scanIntoVars" method.
  *	06-Dec-2022 (rlwhitcomb)
  *	    #573: Fix some "scan" delimiter issues.
+ *	06-Dec-2022 (rlwhitcomb)
+ *	    #573: Quote literal patterns in "scan".
  */
 package info.rlwhitcomb.calc;
 
@@ -2581,7 +2583,7 @@ public final class CalcUtil
 		char ch = format.charAt(i);
 		if (ch == '%') {
 		    if (pattern.length() > 0) {
-			String pat = pattern.toString();
+			String pat = Pattern.quote(pattern.toString());
 			if (scanner.findWithinHorizon(pat, pat.length()) == null) {
 			    throw new Intl.IllegalArgumentException("calc#scanPatternError", pat);
 			}
@@ -2640,7 +2642,7 @@ public final class CalcUtil
 		}
 	    }
 	    if (pattern.length() > 0) {
-		String pat = pattern.toString();
+		String pat = Pattern.quote(pattern.toString());
 		if (scanner.findWithinHorizon(pat, pat.length()) == null) {
 		    throw new Intl.IllegalArgumentException("calc#scanPatternError", pat);
 		}
