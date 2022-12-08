@@ -44,6 +44,8 @@
  *	    #204: Allow multiple thread setup.
  *	12-Oct-2022 (rlwhitcomb)
  *	    #513: Move Logging to new package.
+ *	07-Dec-2022 (rlwhitcomb)
+ *	    Correct typos in logging messages.
  */
 package info.rlwhitcomb.util;
 
@@ -200,13 +202,13 @@ public class QueuedExecutorService extends AbstractExecutorService
 
 	@Override
 	public void shutdown() {
-	    logger.info("shutdown() called for %1%d threads.", queuedThreads.size());
+	    logger.info("shutdown() called for %1$d thread(s).", queuedThreads.size());
 	    terminate(true);
 	}
 
 	@Override
 	public List<Runnable> shutdownNow() {
-	    logger.info("shutdownNow() called for %1%d threads.", queuedThreads.size());
+	    logger.info("shutdownNow() called for %1$d thread(s).", queuedThreads.size());
 	    terminate(false);
 	    return new ArrayList<Runnable>();
 	}

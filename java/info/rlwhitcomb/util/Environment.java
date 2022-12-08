@@ -192,6 +192,8 @@
  *	    #536: Rename and repurpose the "in testing" property and methods.
  *	06-Nov-2022 (rlwhitcomb)
  *	    Fix wrong end-of-color tag.
+ *	07-Dec-2022 (rlwhitcomb)
+ *	    #552: Provide wrapper method, depending on Java version, for current thread id.
  */
 package info.rlwhitcomb.util;
 
@@ -203,6 +205,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.lang.management.ManagementFactory;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.NumberFormat;
@@ -279,6 +283,12 @@ public final class Environment
 	 * Number format for grouping thousands (for memory size, etc.)
 	 */
 	private static NumberFormat longFormat = null;
+
+	/**
+	 * Address deprecation issue with {@link Thread#getId} on newer (greater than 18)
+	 * versions of Java.
+	 */
+	private static Method THREAD_ID_METHOD;
 
 	/**
 	 * Default product name -- read from the "build.properties" file,
@@ -436,6 +446,19 @@ public final class Environment
 		javaMajorVersion = Integer.parseInt(parts[1]);
 	    else
 		javaMajorVersion = Integer.parseInt(parts[0]);
+
+	    try {
+		if (javaMajorVersion >= 19) {
+		    THREAD_ID_METHOD = Thread.class.getMethod("threadId");
+		}
+		else {
+		    THREAD_ID_METHOD = Thread.class.getMethod("getId");
+		}
+	    }
+	    catch (NoSuchMethodException nsme) {
+		System.err.println("Fatal error: " + Exceptions.toString(nsme));
+		System.exit(99);
+	    }
 
 	    IMPLEMENTATION_VERSION = getVersion(Environment.class);
 
@@ -1342,6 +1365,27 @@ public final class Environment
 		}
 	    }
 	    return name;
+	}
+
+
+	/**
+	 * Get the current thread id, using the latest and greatest method, depending on
+	 * the Java version we're running on.
+	 *
+	 * @param thread The thread (usually the current one) to get the id of.
+	 * @return The current thread's id value.
+	 * @see #THREAD_ID_METHOD
+	 */
+	public static long threadId(final Thread thread) {
+	    try {
+		return (long) THREAD_ID_METHOD.invoke(thread);
+	    }
+	    catch (IllegalAccessException | InvocationTargetException ex) {
+		System.err.println("Fatal error: " + Exceptions.toString(ex));
+		System.exit(99);
+	    }
+	    // Will never get here!
+	    return -1L;
 	}
 
 
