@@ -37,6 +37,7 @@
  *  23-Sep-22 rlw #52:	Support multiple source files (from wildcard on command line)
  *			to single directory target. Support "@file" as input.
  *  06-Oct-22 rlw #505:	Mode to compare, ignoring line ending diffs.
+ *  07-Dec-22 rlw #563:	Add "color/nocolor" options.
  */
 package info.rlwhitcomb.compare;
 
@@ -133,6 +134,11 @@ public class CompareFiles
 					 "SyncMode", "sync", "syn"),
 		COPY_MODE		(SYNC_MODE,
 					 "CopyMode", "copy", "c"),
+		/** Whether to use colors or not. */
+		COLORED			(true,
+					 "colored", "colors", "color", "col"),
+		UNCOLORED		(COLORED,
+					 "uncolored", "nocolors", "nocolor", "noc"),
 		/** Option to print the help message. */
 		HELP			("help", "h", "?"),
 		/** Option to print the version information. */
@@ -344,7 +350,7 @@ public class CompareFiles
 	 */
 	private static void usage() {
 	    System.out.println();
-	    Intl.printHelp("compare#compare");
+	    Intl.printHelp("compare#compare", Opts.COLORED.isSet());
 	}
 
 	/**
@@ -468,6 +474,10 @@ public class CompareFiles
 			// Only do Help and Version at the top-most level of the program
 			if (mainProgram) {
 			    switch (opt.get()) {
+				case COLORED:
+				case UNCOLORED:
+				    Intl.setColoring(Opts.COLORED.isSet());
+				    break;
 				case HELP:
 				    usage();
 				    return;
@@ -561,6 +571,9 @@ public class CompareFiles
 	 */
 	public static void main(final String[] args) {
 	    long memoryUseBefore = Runtime.getRuntime().freeMemory();
+
+	    // Set the colored mode prior to any options
+	    Intl.setColoring(Opts.COLORED.isSet());
 
 	    // Do all the option and comparison processing on the command line arguments
 	    process(args, true);
