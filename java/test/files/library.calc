@@ -260,9 +260,40 @@ const MM_PER_INCH = 25.4
 const GM_PER_OZ = 28.349523125
 
 /*
+ * Exact volume conversion from cubic inches to cubic cm.
+ */
+const IN3_PER_CM3 = (MM_PER_INCH / 10) ** 3
+
+/*
+ * Exact value of cubic inches per gallon.
+ */
+const IN3_PER_GAL = 231
+
+/*
+ * Derived constant for feet / m conversions.
+ */
+const MM_PER_FOOT = MM_PER_INCH * 12
+
+/*
  * Derived constant for mile / km conversions.
  */
-const MM_PER_MILE = MM_PER_INCH * 12 * 5280
+const MM_PER_MILE = MM_PER_FOOT * 5280
+
+/*
+ * Convert meters to feet.
+ *
+ * @param m Number of meters to convert.
+ * @return  Equivalent number of feet.
+ */
+define m_to_ft(m) = { (m * 1e3) / MM_PER_FOOT }
+
+/*
+ * Convert feet to meters.
+ *
+ * @param ft Number of feet to convert.
+ * @return   Equivalent number of meters.
+ */
+define ft_to_m(ft) = { (ft * MM_PER_FOOT) / 1e3 }
 
 /*
  * Convert kilometers to miles.
@@ -311,6 +342,22 @@ define kg_to_lb(kg) = { (kg * 1000) / (GM_PER_OZ * 16) }
  * @return   Equivalent mass in kilograms.
  */
 define lb_to_kg(lb) = { (lb * 16 * GM_PER_OZ) / 1000 }
+
+/*
+ * Convert milliliters to pints (US fluid).
+ *
+ * @param ml Number of milliliters (cm^3) to convert.
+ * @return   Equivalent volume in US fluid pints.
+ */
+define ml_to_pt(ml) = { (ml * 8) / (IN3_PER_CM3 * IN3_PER_GAL) }
+
+/*
+ * Convert US fluid pints to milliliters.
+ *
+ * @param pt Number of pints to convert.
+ * @return   Equivalant volume in millliters (ml).
+ */
+define pt_to_ml(pt) = { (pt * IN3_PER_GAL * IN3_PER_CM3) / 8 }
 
 /*
  * Get the day of week name for a given date.
