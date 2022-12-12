@@ -357,6 +357,8 @@
 		#537: Generate properties for wrapper scripts.
 	    08-Dec-2022 (rlwhitcomb)
 		Add "verifyhash.bat" to the list of Windows wrapper files.
+	    12-Dec-2022 (rlwhitcomb)
+		#577: Add "_find_and_run_class_gui.bat" to the mix for Windows GUI programs.
 
      ========================================================================== -->
 
@@ -483,6 +485,7 @@
 	<patternset id="wrapper-files">
 		<include name="_find_and_run_class"     unless:true="${on.windows}"/>
 		<include name="_find_and_run_class.bat"     if:true="${on.windows}"/>
+		<include name="_find_and_run_class_gui.bat" if:true="${on.windows}"/>
 		<include name="fixpath"                 unless:true="${on.windows}"/>
 		<include name="fixpath.bat"                 if:true="${on.windows}"/>
 		<include name="ppj"                     unless:true="${on.windows}"/>

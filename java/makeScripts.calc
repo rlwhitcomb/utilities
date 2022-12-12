@@ -21,7 +21,7 @@ bat: [
     "set CLASS_NAME=${class}",
     "set CMD_ARGS=${args}",
     "set JVM_ARGS=${jvm}",
-    "call %~dp0_find_and_run_class %*",
+    "call %~dp0_find_and_run_class${find} %*",
     "endlocal",
     "exit /b %errorlevel%"
 ],
@@ -36,15 +36,15 @@ bash: [
 ],
 
 settings: [
-    { name: '`',        class: '$calc.Calc',           args: '-nolibraries'        },
-    { name: '``',       class: '$calc.Calc',           args: '-g -nolibraries'     },
+    { name: '`',        class: '$calc.Calc', args: '-nolibraries'                  },
+    { name: '``',       class: '$calc.Calc', args: '-g -nolibraries', find: '_gui' },
     { name: 'b64',      class: '$tools.B64'                                        },
     { name: 'c',        class: '$calc.Calc'                                        },
     { name: 'calc',     class: '$calc.Calc'                                        },
     { name: 'cat',      class: '$cat.Cat'                                          },
-    { name: 'cg',       class: '$calc.Calc',           args: '-g'                  },
+    { name: 'cg',       class: '$calc.Calc',           args: '-g',    find: '_gui' },
     { name: 'cmp',      class: '$compare.CompareFiles'                             },
-    { name: 'crl',      class: '$curl.CURL'                                        },
+    { name: 'crl',      class: '$curl.CURL',                          find: '_gui' },
     { name: 'csv',      class: '$test.CSVTest'                                     },
     { name: 'd',        class: '$directory.Dir'                                    },
     { name: 'decode',   class: 'net.iharder.b64.Base64', args: '-d'                },
@@ -73,7 +73,7 @@ settings: [
     { name: 'version'                                                              },
     { name: 'wc',       class: '$tools.WordCount'                                  },
     { name: 'wf',       class: '$wordfind.WordFind'                                },
-    { name: 'wfg',      class: '$wordfind.WordFind', args: '-gui'                  },
+    { name: 'wfg',      class: '$wordfind.WordFind',   args: '-gui',  find: '_gui' },
     { name: 'which',    class: '$util.Which'                                       }
 ]
 }
@@ -105,6 +105,7 @@ define scripts() = {
         var template
         const class = set.class ?! replace(set.class, '$', 'info.rlwhitcomb.')
         const jvm   = set.jvm   ?! replace(set.jvm, token, replacement)
+        const find  = set.find  ?: ''
 
         if ON_WINDOWS {
             outputFile = set.name + ".bat"
@@ -119,9 +120,10 @@ define scripts() = {
         :echo `Generating "$outputFile" ...`
         loop line over template {
             case line in {
-                matches s'.+\$\{class\}': if class    { file += replace(line, '${class}', class)  },
-                matches s'.+\$\{args\}' : if set.args { file += replace(line, '${args}', set.args)},
-                matches s'.+\$\{jvm\}'  : if jvm      { file += replace(line, '${jvm}', jvm)      },
+                matches s'.+\$\{class\}'  : if class    { file += replace(line, '${class}', class)   },
+                matches s'.+\$\{args\}'   : if set.args { file += replace(line, '${args}',  set.args)},
+                matches s'.+\$\{jvm\}'    : if jvm      { file += replace(line, '${jvm}',   jvm)     },
+                matches s'.+\$\{find\}.*' :               file += replace(line, '${find}',  find),
                 default: file += line
             }
         }
