@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.15.3', date: d'2022-12-12',
+      issues: [ 577 ],
+      comment: 'Update "cg" and "``" wrappers.'
+    },
     { version: '2.15.2', date: d'2022-12-06',
       issues: [ 573 ],
       comment: 'Fix quoting of literal patterns for "scan".'
