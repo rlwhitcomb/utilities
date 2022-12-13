@@ -1408,6 +1408,9 @@
 >-12 in -1 .. -20, -2 -> false
 >-12.0 in 0.0 .. -20.0, -2.0 -> true
 >-12.0 in -1.0 .. -20.0, -2.0 -> false
+>sumof 1 .. 30 -> 465
+>Defining variable “sumoftest” = 0
+>sumoftest -> 465
 >SumOf [4, 5, 6, 7, 8, 9, 10] -> 49
 >sumOf 4 .. 10 -> 49
 >4 + 5 + 6 + 7 + 8 + 9 + 10 -> 49
