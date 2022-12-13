@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.15.4', date: d'2022-12-13',
+      issues: [ 580 ],
+      comment: 'Fix bug with "sumof" over integer range.'
+    },
     { version: '2.15.3', date: d'2022-12-12',
       issues: [ 577 ],
       comment: 'Update "cg" and "``" wrappers.'
