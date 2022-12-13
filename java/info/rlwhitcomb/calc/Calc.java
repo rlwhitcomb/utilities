@@ -318,6 +318,8 @@
  *	    Add some Javadoc and move some methods out to CharUtil.
  *	09-Nov-2022 (rlwhitcomb)
  *	    #550: Catch AssertException at the highest levels.
+ *	13-Dec-2022 (rlwhitcomb)
+ *	    #582: Add ".clc" and ".xpr" as supported file extensions.
  */
 package info.rlwhitcomb.calc;
 
@@ -626,6 +628,8 @@ public class Calc
 	private static final String[] DEFAULT_EXTS = {
 		".calc",
 		".expr",
+		".clc",
+		".xpr",
 		".ca",
 		".ex"
 	};
