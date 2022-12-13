@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.15.5', date: d'2022-12-13',
+      issues: [ 582 ],
+      comment: 'Add supported file extensions of ".clc" and ".xpr" also.'
+    },
     { version: '2.15.4', date: d'2022-12-13',
       issues: [ 580 ],
       comment: 'Fix bug with "sumof" over integer range.'

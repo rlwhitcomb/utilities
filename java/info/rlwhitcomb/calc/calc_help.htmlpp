@@ -244,12 +244,13 @@ h2 {
      (such as with <code>:include</code>, or from the command line).
   <p>If a file name is given without any extension (such as <code>e_trig</code>) and the file cannot be found via the process just described, then a series
      of default file name extensions are appended to the bare name to try to find it. These extensions are: <code>".calc"</code>, <code>".expr"</code>,
-     <code>".ca"</code>, and <code>".ex"</code> (in that order). Once all this searching fails to find the file, then the supposed file name(s) are
-     treated as if they were a set of expressions to evaluate.
+     <code>".clc"</code>, <code>".xpr"</code>, <code>".ca"</code>, and <code>".ex"</code> (in that order). If no file is found using the input plus these
+     extensions, and if a default input directory is given, then the search is repeated in that directory. Once all this searching fails to find any file
+     the supposed file name(s) are treated as if they were a set of expressions to evaluate.
   <p>When Calc tries to evaluate an expression from a file or given on the command line and any kind of error is encountered, the
      process exit code will be set to a value from 95 to 99 depending on the type of error (99 = parsing error, 98 = execution
      error, 97 = index or state exception, 96 = I/O error, 95 = ":assert" failure). The <code>leave</code> <i>expr</i> statement can also be used
-     outside of a loop or function to set a custom exit code if desired.
+     outside of a loop or function to set a custom exit code if desired (in the range of 0 to 255).
 </div>
 <a class="top-link" href="#topofpage">Top</a>
 <hr id="Command_Line_Options" class="sectionsep">
