@@ -728,6 +728,8 @@
  *	    #564: Use new ConsoleColor codes to expose color codes for "@Q" format.
  *	05-Dec-2022 (rlwhitcomb)
  *	    #573: New "scan" function.
+ *	13-Dec-2022 (rlwhitcomb)
+ *	    #580: Fix "sumof" bug with integer values.
  */
 package info.rlwhitcomb.calc;
 
@@ -6669,7 +6671,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			    int iStop  = (Integer) stop;
 			    int iLen   = (Integer) len;
 
-			    return iLen * ((iStart + iStop) / 2);
+			    // Do the division last so we don't lose the .5 fraction for odd values
+			    return (iLen * (iStart + iStop)) / 2;
 			}
 			else {
 			    BigDecimal dStart = (BigDecimal) start;
