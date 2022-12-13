@@ -1142,6 +1142,10 @@ c12 has h
 #
 # Tests of "sumof" and "productof"
 #
+sumof 1..30
+var sumoftest = 0
+:quiet on { loop over 1..30 sumoftest += __ }
+sumoftest
 SumOf [ 4, 5, 6, 7, 8, 9, 10 ]
 sumOf 4..10
 4+5+6+7+8+9+10
