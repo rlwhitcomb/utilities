@@ -70,7 +70,7 @@ settings: [
     { name: 'timethis', class: '$util.TimeThis'                                    },
     { name: 'tre',      class: '$tree.Tree'                                        },
     { name: 'uuid',     class: '$tools.Uuid'                                       },
-    { name: 'version'                                                              },
+    { name: 'uversion'                                                             },
     { name: 'wc',       class: '$tools.WordCount'                                  },
     { name: 'wf',       class: '$wordfind.WordFind'                                },
     { name: 'wfg',      class: '$wordfind.WordFind',   args: '-gui',  find: '_gui' },
