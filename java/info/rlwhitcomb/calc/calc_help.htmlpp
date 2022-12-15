@@ -423,8 +423,9 @@ h2 {
      (see below) will simply insert nothing.
   <p>Values can be assigned names via the <code>const</code> declaration, and then the name used to refer to the value. Such values
      are fixed to their value at the time of the <code>const</code> declaration being evaluated. The syntax is:
-  <p class="indent"><code>const</code>&nbsp;<i>id</i><code> = </code><i>expr</i>
-  <p>Such constants are typically (per convention) given UPPER case names, but this is not required in Calc.
+  <p class="indent"><code>const</code>&nbsp;<i>id</i><code> = </code><i>expr</i>&nbsp;( <code>,</code> <i>id</i><code> = </code><i>expr</i> ) *
+  <p>Such constants are typically (per convention) given UPPER case names, but this is not required. One <code>const</code> statement may be
+     used to define one or many constant values, simply by listing their equivalences.
   <p>Sometimes, especially within loops or other code blocks, local variables are needed for intermediate calculations. In order to
      ensure that such values are local to the block they reside in (and aren't accidentally overriding or interfering with other
      variables of the same name), the <code>var</code> keyword can be used, as in:
@@ -432,6 +433,9 @@ h2 {
   <p>Such a declaration has no other effect than to guarantee the variable is local to the closest enclosing block (indicated
      by <code>{</code> ... <code>}</code>).
      If the value expression is omitted the value is initially set to <code>null</code>, but (obviously) can be changed later.
+     As with the <code>const</code> declaration, one <code>var</code> statement can also declare multiple variables, with or without their
+     initial values, as in:
+  <p class="indent"><code>var</code>&nbsp;<i>pos</i><code> = </code><i>27</i><code>, </code><i>start</i><code> = </code><i>0</i><code>,</code> <i>end</i><code>, </code><i>found</i>
   <p>Numeric values can also be specified using "kilobyte" notation in one of two forms: multipliers of 1000, or multipliers of 1024 (2**10).
      These multipliers are simply appended to the number to automatically multiply by the given amount. The allowed suffixes are:
      <code>Kb</code>, <code>Mb</code>, <code>Tb</code>, <code>Pb</code>, <code>Eb</code>, <code>Zb</code>, <code>Yb</code>, and <code>Bb</code>, which all multiply by their respective
@@ -711,6 +715,8 @@ or<br>
      and treat the value as a simple quoted string. This simplifies using these values inside interpolated strings (for instance), as in:&nbsp;
   <code style="color:blue;">today@-e</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">"2022-10-17"</code> while
   <code style="color:blue;">today@e</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">d'2022-10-17'</code>
+  <p>For strings that contain the standard color codes (such as <code style="color:blue;">BLUE_BOLD</code> from <code>library.calc</code>) the
+     <code>@Q</code> format will expose those codes instead of using them to color the result.
 </div>
 <a class="top-link" href="#topofpage">Top</a>
 <hr id="Available_Operators_and_Predefined_Functions" class="sectionsep">
@@ -772,8 +778,8 @@ or<br>
     <tr><td>33</td><td><i>object</i> <code>.</code> <i>member</i></td><td>access an object member</td><td>left to right</td></tr>
     <tr><td>32</td><td><i>expr</i> <code>HAS</code> ( <i>id</i> | <i>string</i> | <code>[</code> <i>expr</i> <code>]</code> )</td><td>safely check for member or index</td><td>left to right</td></tr>
     <tr><td>31</td><td><code>( </code><i>expr</i><code> )</code></td><td>group an expression</td><td>N/A</td></tr>
-    <tr><td rowspan="86">30</td>
-            <td><code>ABS</code>&nbsp;<i>expr</i></td><td>absolute value</td><td rowspan="86">left to right</td></tr>
+    <tr><td rowspan="88">30</td>
+            <td><code>ABS</code>&nbsp;<i>expr</i></td><td>absolute value</td><td rowspan="88">left to right</td></tr>
             <tr><td><code>SIN</code>&nbsp;<i>expr</i></td><td>sine</td></tr>
             <tr><td><code>COS</code>&nbsp;<i>expr</i></td><td>cosine</td></tr>
             <tr><td><code>TAN</code>&nbsp;<i>expr</i></td><td>tangent</td></tr>
@@ -821,6 +827,7 @@ or<br>
             <tr><td><code>SPLICE</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <code>[</code> <i>id or string list</i> <code>]</code>&nbsp;)<br>(&nbsp;<code>,</code> <code>{</code> <i>key:value pairs</i> <code>}</code>&nbsp;)</td><td>modify an object by deleting and/or adding elements</td></tr>
             <tr><td><code>FILL</code>&nbsp;<i>var</i>&nbsp;( <code>,</code> <i>expr</i>&nbsp;( <code>,</code> <i>expr</i>&nbsp;( <code>,</code><i>expr</i> ) ) )</td><td>fill an array or string</td></tr>
             <tr><td><code>FORMATSTRING</code>&nbsp;<i>format_expr</i>&nbsp;( <code>,</code> <i>expr</i> ) *</td><td>use the expressions to replace<br>the parameter args in the format string</td></tr>
+            <tr><td><code>SCAN</code>&nbsp;<i>source</i> <code>,</code> <i>format</i> <code>,</code> ( <i>var</i> ) +</td><td>parse the source according to the format<br>into the corresponding variables</td></tr>
             <tr><td><code>SORT</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>flags_expr</i>&nbsp;)</td><td>sort the object, array, or set, optionally ignoring case,<br>or sorting objects by key instead of value,<br>returning a new sorted object</td></tr>
             <tr><td><code>TRIM</code> or <code>LTRIM</code> or <code>RTRIM</code> <i>expr</i></td><td>trim all, leading, or trailing whitespace</td></tr>
             <tr><td><code>PAD</code> or <code>LPAD</code> or <code>RPAD</code>&nbsp;<i>var</i>&nbsp;<code>,</code> <i>expr</i>&nbsp;( <code>,</code><i>expr</i> )</td><td>pad an array or string to the given width<br>with 0 or space (default) or the given value/character</td></tr>
@@ -837,6 +844,7 @@ or<br>
             <tr><td><code>UPPER</code>&nbsp;<i>expr</i></td><td>convert <i>expr</i> to UPPER case</td></tr>
             <tr><td><code>EVAL</code>&nbsp;<i>expr</i></td><td>evaluate the string result of <i>expr</i></td></tr>
             <tr><td><code>EXEC</code>&nbsp;<i>expr</i>&nbsp;( <code>,</code>&nbsp;<i>expr</i>&nbsp;) *</td><td>execute the given O/S command<br>(with arguments)<br>and return the output as a string</td></tr>
+            <tr><td><code>COLOR</code>&nbsp;<i>expr</i></td><td>translate color tags to escape codes or remove (depending on mode)</td></tr>
             <tr><td><code>DECODE</code>&nbsp;<i>expr</i></td><td>decode a base64 string into the original string value</td></tr>
             <tr><td><code>ENCODE</code>&nbsp;<i>expr</i></td><td>encode a string into its base64 form</td></tr>
             <tr><td><code>EXISTS</code>&nbsp;<i>expr</i>&nbsp;( <code>,</code>&nbsp;<i>flag_expr</i>&nbsp;)</td><td>check the existence/permissions of file or directory</td></tr>
@@ -968,7 +976,9 @@ or<br>
      to the right of the decimal point, negative is the number of extra zeros after the significant digits and to the left of
      the decimal point.  Some examples: <code>scale(1.2) &#x21E8; 1</code>, <code>scale 10e4 &#x21E8; -4</code>, while
      <code>scale 10000 &#x21E8; 0</code>.
-  <p>The <code>random</code> function will generate a random value, of the current decimal precision, with a value between 0 and 1 (exclusive). If a seed expression is given, the bytes of that value will be used to seed the random number generator, which will produce a predictable value every time the same seed is used (useful for testing purposes), otherwise a different value will be returned every time (without the seed value).
+  <p>The <code>random</code> function will generate a random value, of the current decimal precision, with a value between 0 and 1 (exclusive).
+     If a seed expression is given, the bytes of that value will be used to seed the random number generator, which will produce a predictable
+     value every time the same seed is used (useful for testing purposes), otherwise a different value will be returned every time (without the seed value).
   <p>The <i>type</i> value returned from <code>typeof</code>, which can be the optional second parameter to <code>cast</code>
      can be one of the following (string) values:
   <p class="indent"><code>"null"</code>, <code>"string</code>, <code>"integer"</code>, <code>"float"</code>,
@@ -1052,6 +1062,9 @@ or<br>
      will (optionally) have replaceable parameters, which are replaced by the values of the respective arguments in the expression list. The completed
      string with all the values replaced will be the result. For example:
   <p class="indent"><code style="color:blue;">formatstring("%1$s, %2$s!", "Hello", "World")</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">"Hello, World!"</code>
+  <p>The <code>scan</code> function takes a source string, a formatting specification, and a list of variables to parse into. The available formats
+     are: <code>%i</code> (for integers), <code>%d</code> (for decimal values), <code>%b</code> (for <i>true/false</i> [boolean] values), <code>%c</code> (chararacters), <code>%s</code> (for strings), and <code>%n</code> (for line separators). Any other characters are taken as literal character
+     sequences to be matched against the source. For examples, see the "test/files/e1" test code.
   <p>The <code>sort</code> function will do a single-level sort of the given object, array, or set, returning a new sorted object of the same type.
      The original object is left as-is. So in order to sort a list in place, you must reassign
      the result of the sort back to the original variable, as in <code>arr = sort arr</code>. This also allows you to create
@@ -1093,6 +1106,9 @@ or<br>
      prepended to the command. For instance, one of our standard build tests involves this expression:
      <p class="indent"><code>split(exec('wc', 'calc.txt'), '\\s+')</code></p>
      which will invoke the <code>wc</code> executable on Linux or MacOS, but will also run <code>cmd /c wc.bat</code> on Windows.
+  <p>When using the color tag values from <code>"library.calc"</code> inside a string, it may be necessary (such as for writing to a file)
+     when the tags need translation to the real console escape codes. The <code>COLOR</code> function does this, but according to the <code>:colors</code>
+     setting currently in effect.
   <p>For now, the <code>encode</code> and <code>decode</code> functions only work on string objects (or other values / objects converted
      to their string representations). So, in order to reconstruct an array (for instance) from its encoded form you would need to do:
      <code>eval(decode '</code>...<code>')</code>.
@@ -1486,7 +1502,7 @@ whether it has previously been used/defined.
     <tr><td><code>from_excel_col</code></td><td><code>col</code></td><td>Translate an Excel column name ("A" to "XFD") to a numeric column index (1-based)</td></tr>
     <tr><td><code>rad_to_deg</code></td><td><code>rad</code></td><td>Convert from numeric degrees to radians</td></tr>
     <tr><td><code>deg_to_rad</code></td><td><code>deg</code></td><td>Convert from radians to numeric degrees</td></tr>
-    <tr><td><code>rad_to_grad></code></td><td><code>rad</code></td><td>Convert from radians to centesimal degrees or gradians</td></tr>
+    <tr><td><code>rad_to_grad</code></td><td><code>rad</code></td><td>Convert from radians to centesimal degrees or gradians</td></tr>
     <tr><td><code>grad_to_rad</code></td><td><code>grad</code></td><td>Convert gradians/grads to radians</td></tr>
     <tr><td><code>deg_to_grad</code></td><td><code>deg</code></td><td>Convert numeric degrees to gradians/grads</td></tr>
     <tr><td><code>grad_to_deg</code></td><td><code>grad</code></td><td>Convert grads to numeric degress</td></tr>

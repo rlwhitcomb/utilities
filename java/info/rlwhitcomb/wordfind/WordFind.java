@@ -109,6 +109,9 @@
  *          #478: Implement patterns for "-contains" value.
  *      15-Sep-2022 (rlwhitcomb)
  *          #479: Allow ":option" for options in REPL mode.
+ *	01-Dec-2022 (rlwhitcomb)
+ *	    #571: Fix buffer index exception during "mark()". Report the initial word being
+ *	    valid only after the heading is displayed.
  */
 package info.rlwhitcomb.wordfind;
 
@@ -407,13 +410,7 @@ public class WordFind implements Application
      */
     private static final void mark(final StringBuilder buf, final int index, final String str) {
         int len = str.length();
-        int pos;
-
-        // Normalize a negative starting index to the beginning of the string
-        if (index >= 0)
-            pos = index;
-        else
-            pos = buf.length() + index;
+        int charPos;
 
         // "Adorn" the whole string so moving through it is easy
         for (int i = 0; i < buf.length(); i += 3) {
@@ -424,7 +421,12 @@ public class WordFind implements Application
             }
         }
 
-        int charPos = pos * 3;
+        // Normalize a negative starting index to the beginning of the string, but do it based
+	// on the fully adorned string, otherwise with some markers present we could get really confused
+        if (index >= 0)
+            charPos = index * 3;
+        else
+            charPos = buf.length() + (index * 3);
 
         // Now we march along the "contains" string in "str" and correctly mark the results
         // according to whether they match a letter ("contains") or a blank
@@ -955,11 +957,7 @@ public class WordFind implements Application
         // Okay, we might have a set of letters to process (the "--letters" mode).
         int n = letters.length();
         if (n > 0) {
-            // See if the letters as entered are a valid word first
             String inputWord = caseMapper.apply(letters.toString());
-            if (dictionary.contains(inputWord, findInAdditional)) {
-                info("wordfind#infoArgValid", inputWord, addLetterValues(inputWord));
-            }
 
             StringBuilder sb = new StringBuilder();
             sb.append(Intl.formatString("wordfind#validWords", quote(letters.toString()),
@@ -990,6 +988,11 @@ public class WordFind implements Application
                 letters.append(endsString);
             }
             heading(sb.toString());
+
+            // See if the letters as entered are a valid word first
+            if (dictionary.contains(inputWord, findInAdditional)) {
+                info("wordfind#infoArgValid", inputWord, addLetterValues(inputWord));
+            }
 
             n = letters.length();
 

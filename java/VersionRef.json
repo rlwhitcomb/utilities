@@ -7,6 +7,42 @@
       issues: [ 458 ],
       comment: 'Implement multi-threaded "parallel" processing.'
     },
+    { version: '2.15.2', date: d'2022-12-06',
+      issues: [ 573 ],
+      comment: 'Fix quoting of literal patterns for "scan".'
+    },
+    { version: '2.15.1', date: d'2022-12-06',
+      issues: [ 573 ],
+      comment: 'Fix some "scan" format bugs.'
+    },
+    { version: '2.15.0', date: d'2022-12-05',
+      issues: [ 573 ],
+      comment: '"scan" function for parsing data.'
+    },
+    { version: '2.14.83', date: d'2022-12-02',
+      issues: [ 564 ],
+      comment: 'Allow "@Q" to expose the color codes.'
+    },
+    { version: '2.14.82', date: d'2022-11-30',
+      issues: [ 566 ],
+      comment: 'Allow multiple declarations on "const" and "var".'
+    },
+    { version: '2.14.80', date: d'2022-11-29',
+      issues: [ 567 ],
+      comment: 'Add descending option to "sort".'
+    },
+    { version: '2.14.79', date: d'2022-11-29',
+      issues: [ 564 ],
+      comment: 'Add "color" function.'
+    },
+    { version: '2.14.78', date: d'2022-11-28',
+      issues: [ 557 ],
+      comment: 'Respect "-nocolors" flag with color constants inside ":echo".'
+    },
+    { version: '2.14.77', date: d'2022-11-11',
+      issues: [ 420 ],
+      comment: 'Fix recognition of "1-i" forms for "complex" function.'
+    },
     { version: '2.14.76', date: d'2022-11-10',
       issues: [ 554 ],
       comment: 'Fix incorrect evaluation of default parameter expressions that depend on other parameters.'

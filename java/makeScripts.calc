@@ -107,11 +107,11 @@ define scripts() = {
         const jvm   = set.jvm   ?! replace(set.jvm, token, replacement)
 
         if ON_WINDOWS {
-            outputFile = `${set.name}.bat`
+            outputFile = set.name + ".bat"
             template = data.bat
         }
         else {
-            outputFile = `${set.name}`
+            outputFile = set.name
             template = data.bash
         }
         outputFile = outdir + outputFile

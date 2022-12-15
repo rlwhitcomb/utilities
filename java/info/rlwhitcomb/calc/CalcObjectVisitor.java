@@ -31,7 +31,7 @@
  *	07-Dec-2020 (rlwhitcomb)
  *	    Degrees and radians directives.
  *	07-Dec-2020 (rlwhitcomb)
- *	    Cache e value when precision changes.
+ *	    Cache "e" value when precision changes.
  *	08-Dec-2020 (rlwhitcomb)
  *	    Use new NumericUtil.sin method; add "round" evaluation.
  *	11-Dec-2020 (rlwhitcomb)
@@ -717,6 +717,21 @@
  *	    #554: Don't do the extra pop/push of function scope.
  *	11-Nov-2022 (rlwhitcomb)
  *	    #458: Use InheritableThreadLocal for scope and context (more are needed).
+ *	28-Nov-2022 (rlwhitcomb)
+ *	    #557: Call the coloring routine without the map inside ":echo".
+ *	29-Nov-2022 (rlwhitcomb)
+ *	    #564: Add "color" function.
+ *	29-Nov-2022 (rlwhitcomb)
+ *	    #567: Add "descending" flag to sort.
+ *	30-Nov-2022 (rlwhitcomb)
+ *	    #566: Multiple declarations on "const" and "var".
+ *	01-Dec-2022 (rlwhitcomb)
+ *	    Add "nullCheck" for pre- and postInc operators.
+ *	    Reverse ".equals" test with empty collection to avoid NPEs.
+ *	02-Dec-2022 (rlwhitcomb)
+ *	    #564: Use new ConsoleColor codes to expose color codes for "@Q" format.
+ *	05-Dec-2022 (rlwhitcomb)
+ *	    #573: New "scan" function.
  */
 package info.rlwhitcomb.calc;
 
@@ -802,7 +817,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	/**
-	 * Interface for the {@link #iterateOverDotRange} method, which is either called for each value
+	 * Interface for the {@link #iterateOverDotRange iterateOverDotRange(...)} method, which is either called for each value
 	 * in the range, or is used to optimally calculate the result without having to do the entire
 	 * iteration.
 	 * <p> We use the {@link Purpose} to partially decide if the optimization will apply. For instance,
@@ -914,10 +929,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	/** Flag for case-insensitive sort. */
 	private static final int SORT_CASE_INSENSITIVE = 0x0001;
 	/** Flag for sort of keys vs values in maps. */
-	private static final int SORT_SORT_KEYS = 0x0002;
+	private static final int SORT_SORT_KEYS        = 0x0002;
+	/** Flag for sort in descending order. */
+	private static final int SORT_DESCENDING       = 0x0004;
 	/** The set of all the valid sort flags we support. */
 	private static final int SORT_ALL_FLAGS =
-	    ( SORT_CASE_INSENSITIVE | SORT_SORT_KEYS );
+	    ( SORT_CASE_INSENSITIVE | SORT_SORT_KEYS | SORT_DESCENDING );
 
 	/** Flag for case-insensitive matches. */
 	private static final int MATCH_CASE_INSENSITIVE = 0x0001;
@@ -2068,7 +2085,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    String out = getStringValue(ctx.expr(1), true, false, false);
 	    CalcDisplayer.Output output = CalcDisplayer.Output.fromString(out);
 
-	    displayer.displayMessage(msg, output);
+	    displayer.displayMessage(ConsoleColor.color(msg, Calc.getColoredMode()), output);
 
 	    return msg;
 	}
@@ -2396,6 +2413,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    CalcParser.ExprContext expr = ctx.expr();
 	    Object result               = evaluate(expr);
 	    String resultString         = "";
+	    String stringValue;
 
 	    BigInteger iValue = null;
 	    BigDecimal dValue = null;
@@ -2492,7 +2510,11 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 		    case 'Q':
 		    case 'q':
-			valueBuf.append(toStringValue(this, ctx, result, new StringFormat(formatChar == 'Q', settings)));
+			stringValue = toStringValue(this, ctx, result, new StringFormat(formatChar == 'Q', settings));
+			if (formatChar == 'Q')
+			    valueBuf.append(ConsoleColor.uncolor(stringValue));
+			else
+			    valueBuf.append(stringValue);
 			break;
 
 		    case 'C':
@@ -2513,7 +2535,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    case 'd':
 			// special case for a one character string -> codepoint
 			if (result instanceof String) {
-			    String stringValue = (String) result;
+			    stringValue = (String) result;
 			    int count = Character.codePointCount(stringValue, 0, stringValue.length());
 			    if (count == 1) {
 				int cp = Character.codePointAt(stringValue, 0);
@@ -2748,7 +2770,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 				new StringFormat(true, false, extraSpace, separators, null, 0), "", 0));
 			}
 			else {
-			    String stringValue = toStringValue(this, ctx, result, new StringFormat(false, separators));
+			    stringValue = toStringValue(this, ctx, result, new StringFormat(false, separators));
 			    switch (signChar) {
 				case '+':	/* center - positive width puts extra spaces on left always */
 				    CharUtil.padToWidth(valueBuf, stringValue, precision, CENTER);
@@ -3498,46 +3520,61 @@ System.out.println("i = " + i + ", result = " + result);
 
 	@Override
 	public Object visitConstStmt(CalcParser.ConstStmtContext ctx) {
-	    String constantName = ctx.id().getText();
-	    CalcParser.ExprContext expr = ctx.expr();
+	    List<CalcParser.IdContext>   ids   = ctx.id();
+	    List<CalcParser.ExprContext> exprs = ctx.expr();
+	    List<String> constNames = new ArrayList<>();
 
-	    if (getVariables().isDefinedLocally(constantName, settings.ignoreNameCase))
-		throw new CalcExprException(ctx, "%calc#noDupConstant", constantName);
+	    for (int i = 0; i < ids.size(); i++) {
+		String constantName         = ids.get(i).getText();
+		CalcParser.ExprContext expr = exprs.get(i);
 
-	    Object value = evaluate(expr);
+		if (getVariables().isDefinedLocally(constantName, settings.ignoreNameCase))
+		    throw new CalcExprException(ctx, "%calc#noDupConstant", constantName);
 
-	    ConstantValue.define(getVariables(), constantName, value);
+		Object value = evaluate(expr);
 
-	    displayActionMessage("%calc#definingConst", constantName,
-		toStringValue(this, ctx, value, new StringFormat(settings)));
+		ConstantValue.define(getVariables(), constantName, value);
 
-	    return Intl.formatString("calc#definedConst", constantName);
+		displayActionMessage("%calc#definingConst", constantName,
+		    toStringValue(this, ctx, value, new StringFormat(settings)));
+
+		constNames.add(constantName);
+	    }
+
+	    return constNames.size() == 1 ? Intl.formatString("calc#definedConst", constNames.get(0))
+					  : Intl.formatString("calc#definedConsts", CharUtil.makeSimpleStringList(constNames));
 	}
 
 	@Override
 	public Object visitVarStmt(CalcParser.VarStmtContext ctx) {
-	    String varName = ctx.id().getText();
-	    CalcParser.ExprContext expr = ctx.expr();
+	    List<CalcParser.VarAssignContext> assigns = ctx.varAssign();
+	    List<String> varNames = new ArrayList<>();
 
-	    if (getVariables().isDefinedLocally(varName, settings.ignoreNameCase))
-		throw new CalcExprException(ctx, "%calc#noDupLocalVar", varName);
+	    for (int i = 0; i < assigns.size(); i++) {
+		String varName              = assigns.get(i).id().getText();
+		CalcParser.ExprContext expr = assigns.get(i).expr();
 
-	    if (expr != null) {
-		Object value = evaluate(expr);
+		if (getVariables().isDefinedLocally(varName, settings.ignoreNameCase))
+		    throw new CalcExprException(ctx, "%calc#noDupLocalVar", varName);
+
+		Object value = null;
+
+		if (expr != null) {
+		    value = evaluate(expr);
+
+		    displayActionMessage("%calc#definingVar", varName,
+			    toStringValue(this, ctx, value, new StringFormat(settings)));
+		}
+		else {
+		    displayActionMessage("%calc#definingVarOnly", varName);
+		}
+
 		getVariables().setValueLocally(varName, settings.ignoreNameCase, value);
-
-		displayActionMessage("%calc#definingVar", varName,
-			toStringValue(this, ctx, value, new StringFormat(settings)));
-
-		return Intl.formatString("calc#definedVar", varName);
+		varNames.add(varName);
 	    }
-	    else {
-		getVariables().setValueLocally(varName, settings.ignoreNameCase, null);
 
-		displayActionMessage("%calc#definingVarOnly", varName);
-
-		return null;
-	    }
+	    return varNames.size() == 1 ? Intl.formatString("calc#definedVar", varNames.get(0))
+					: Intl.formatString("calc#definedVars", CharUtil.makeSimpleStringList(varNames));
 	}
 
 	private void addPairsToObject(CalcParser.ObjContext objCtx, ObjectScope object) {
@@ -3656,6 +3693,8 @@ System.out.println("i = " + i + ", result = " + result);
 	    Object beforeValue;
 	    Object afterValue;
 
+	    nullCheck(value, var);
+
 	    switch (op) {
 		case "++":
 		case "\u2795\u2795":
@@ -3685,7 +3724,7 @@ System.out.println("i = " + i + ", result = " + result);
 
 		afterValue = list;
 	    }
-	    else if (value instanceof ObjectScope || value.equals(CollectionScope.EMPTY)) {
+	    else if (value instanceof ObjectScope || CollectionScope.EMPTY.equals(value)) {
 		ObjectScope obj;
 		if (value instanceof ObjectScope) {
 		    obj = (ObjectScope) value;
@@ -3751,6 +3790,8 @@ System.out.println("i = " + i + ", result = " + result);
 	    boolean incr = false;
 	    Object afterValue;
 
+	    nullCheck(value, var);
+
 	    switch (op) {
 		case "++":
 		case "\u2795\u2795":
@@ -3764,7 +3805,7 @@ System.out.println("i = " + i + ", result = " + result);
 		    throw new UnknownOpException(op, ctx);
 	    }
 
-	    if (value.equals(CollectionScope.EMPTY)) {
+	    if (CollectionScope.EMPTY.equals(value)) {
 		value = new ObjectScope();
 	    }
 	    if (value instanceof ObjectScope) {
@@ -5392,8 +5433,10 @@ System.out.println("i = " + i + ", result = " + result);
 	    CalcParser.Expr1Context e1ctx = ctx.expr1();
 	    CalcParser.Expr2Context e2ctx = ctx.expr2();
 	    CalcParser.ExprContext objCtx;
+
 	    boolean caseInsensitive = false;
-	    boolean sortKeys = false;
+	    boolean sortKeys        = false;
+	    boolean sortDescending  = false;
 
 	    if (e1ctx != null) {
 		objCtx = e1ctx.expr();
@@ -5407,30 +5450,33 @@ System.out.println("i = " + i + ", result = " + result);
 
 		caseInsensitive = (flags & SORT_CASE_INSENSITIVE) != 0;
 		sortKeys        = (flags & SORT_SORT_KEYS)        != 0;
+		sortDescending  = (flags & SORT_DESCENDING)       != 0;
 	    }
 
 	    Object obj = evaluate(objCtx);
+
 	    if (obj instanceof ObjectScope) {
 		ObjectScope map = (ObjectScope) obj;
-		return sortMap(this, map, objCtx, settings.mc, caseInsensitive, sortKeys);
+		return sortMap(this, map, objCtx, settings.mc, caseInsensitive, sortKeys, sortDescending);
 	    }
 	    else if (obj instanceof ArrayScope) {
 		@SuppressWarnings("unchecked")
 		ArrayScope<Object> array = (ArrayScope<Object>) obj;
 		ArrayScope<Object> result = new ArrayScope<>(array);
-		sort(this, result.list(), objCtx, settings.mc, caseInsensitive);
+		sort(this, result.list(), objCtx, settings.mc, caseInsensitive, sortDescending);
 		return result;
 	    }
 	    else if (obj instanceof SetScope) {
 		@SuppressWarnings("unchecked")
 		SetScope<Object> set = (SetScope<Object>) obj;
 		List<Object> list = new ArrayList<Object>(set.set());
-		sort(this, list, objCtx, settings.mc, caseInsensitive);
+		sort(this, list, objCtx, settings.mc, caseInsensitive, sortDescending);
 		return new SetScope<Object>(list);
 	    }
 	    else if (obj instanceof CollectionScope) {
 		return obj;
 	    }
+
 	    // A scalar object, just return it unchanged
 	    return obj;
 	}
@@ -5589,6 +5635,22 @@ System.out.println("i = " + i + ", result = " + result);
 	    }
 
 	    return String.format(formatString, args);
+	}
+
+	@Override
+	public Object visitScanExpr(CalcParser.ScanExprContext ctx) {
+	    CalcParser.ExprVarsContext exprVars = ctx.exprVars();
+	    CalcParser.ExprContext sourceExpr   = exprVars.expr(0);
+	    CalcParser.ExprContext formatExpr   = exprVars.expr(1);
+	    String sourceString = getStringValue(sourceExpr);
+	    String formatString = getStringValue(formatExpr);
+
+	    List<LValueContext> varList = new ArrayList<>(exprVars.var().size());
+	    for (CalcParser.VarContext var : exprVars.var()) {
+		varList.add(getLValue(var));
+	    }
+
+	    return scanIntoVars(this, sourceString, formatString, varList);
 	}
 
 	/**
@@ -6132,6 +6194,12 @@ System.out.println("i = " + i + ", result = " + result);
 		// These will wrap other checked exceptions, so unwrap first
 		throw new CalcExprException(ctx, rex.getCause().getLocalizedMessage());
 	    }
+	}
+
+	@Override
+	public Object visitColorExpr(CalcParser.ColorExprContext ctx) {
+	    String value = getStringValue(ctx.expr1().expr());
+	    return ConsoleColor.color(value, Calc.getColoredMode());
 	}
 
 	@Override

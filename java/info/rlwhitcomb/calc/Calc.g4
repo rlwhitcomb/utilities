@@ -472,6 +472,11 @@
  *	    #476: New "readProperties" and "writeProperties" functions.
  *	09-Nov-2022 (rlwhitcomb)
  *	    #550: ":assert" directive.
+ *	29-Nov-2022 (rlwhitcomb)
+ *	    #564: Implement "color" function.
+ *	    #566: Allow multiple declarations for "const" or "var".
+ *	05-Dec-2022 (rlwhitcomb)
+ *	    #573: Add "scan" method.
  */
 
 grammar Calc;
@@ -509,11 +514,15 @@ defineStmt
    ;
 
 constStmt
-   : K_CONST id ASSIGN expr
+   : K_CONST id ASSIGN expr ( COMMA id ASSIGN expr ) *
+   ;
+
+varAssign
+   : id ( ASSIGN expr ) ?
    ;
 
 varStmt
-   : K_VAR id ( ASSIGN expr ) ?
+   : K_VAR varAssign ( COMMA varAssign ) *
    ;
 
 loopStmt
@@ -621,6 +630,7 @@ expr
    | K_SPLICE spliceArgs                 # spliceExpr
    | K_FILL fillArgs                     # fillExpr
    | K_FORMATSTRING exprN                # formatExpr
+   | K_SCAN exprVars                     # scanExpr
    | K_SORT ( expr2 | expr1 )            # sortExpr
    | K_REVERSE expr1                     # reverseExpr
    | K_UNIQUE expr1                      # uniqueExpr
@@ -647,6 +657,7 @@ expr
    | K_YOD expr1                         # yearOfDateExpr
    | K_EVAL expr1                        # evalExpr
    | K_EXEC exprN                        # execExpr
+   | K_COLOR expr1                       # colorExpr
    | K_DECODE expr1                      # decodeExpr
    | K_ENCODE expr1                      # encodeExpr
    | K_EXISTS ( expr2 | expr1 )          # existsExpr
@@ -752,6 +763,11 @@ padArgs
    | LPAREN var COMMA expr RPAREN
    | var COMMA expr COMMA expr
    | var COMMA expr
+   ;
+
+exprVars
+   : LPAREN expr COMMA expr COMMA var ( COMMA var ) * RPAREN
+   | expr COMMA expr COMMA var ( COMMA var ) *
    ;
 
 dotRange
@@ -1098,6 +1114,8 @@ K_FILL     : 'fill' | 'FILL' | 'Fill' ;
 
 K_FORMATSTRING : 'formatstring' | 'FORMATSTRING' | 'FormatString' | 'Formatstring' | 'formatString' ;
 
+K_SCAN     : 'scan' | 'SCAN' | 'Scan' ;
+
 K_SORT     : 'sort' | 'SORT' | 'Sort' ;
 
 K_REVERSE  : 'reverse' | 'REVERSE' | 'Reverse' ;
@@ -1157,6 +1175,8 @@ K_YOD      : 'yod' | 'YOD' | 'YoD' ;
 K_EVAL     : 'eval' | 'EVAL' | 'Eval' ;
 
 K_EXEC     : 'exec' | 'EXEC' | 'Exec' ;
+
+K_COLOR    : 'color' | 'COLOR' | 'Color' ;
 
 K_DECODE   : 'decode' | 'DECODE' | 'Decode' ;
 

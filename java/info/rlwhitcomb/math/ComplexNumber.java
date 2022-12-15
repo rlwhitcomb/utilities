@@ -57,6 +57,8 @@
  *	    #497: New method for precision.
  *	12-Oct-2022 (rlwhitcomb)
  *	    #514: Move resource text from "util" to "math" package.
+ *	11-Nov-2022 (rlwhitcomb)
+ *	    #420: Adjust COMPLEX_PATTERNS to recognize '1+i' (for instance).
  */
 package info.rlwhitcomb.math;
 
@@ -108,8 +110,8 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 	private static final Pattern COMPLEX_PATTERNS[] = {
 	    Pattern.compile("^\\s*\\(\\s*(" + SIGNED_NUMBER + ")\\s*([,])\\s*(" + SIGNED_NUMBER + ")\\s*\\)\\s*$"),
 	    Pattern.compile("^\\s*(" + SIGNED_NUMBER + ")\\s*([,])\\s*(" + SIGNED_NUMBER + ")\\s*$"),
-	    Pattern.compile("^\\s*\\(\\s*(" + SIGNED_NUMBER + ")\\s*([+\\-])\\s*(" + NUMBER + ")\\s*" + I_ALIASES + "\\s*\\)\\s*$"),
-	    Pattern.compile("^\\s*(" + SIGNED_NUMBER + ")\\s*([+\\-])\\s*(" + NUMBER + ")\\s*" + I_ALIASES + "\\s*$"),
+	    Pattern.compile("^\\s*\\(\\s*(" + SIGNED_NUMBER + ")\\s*([+\\-])\\s*(" + NUMBER + ")?\\s*" + I_ALIASES + "\\s*\\)\\s*$"),
+	    Pattern.compile("^\\s*(" + SIGNED_NUMBER + ")\\s*([+\\-])\\s*(" + NUMBER + ")?\\s*" + I_ALIASES + "\\s*$"),
 	    Pattern.compile("^\\s*\\(\\s*(" + SIGNED_NUMBER + ")\\s*\\)\\s*$"),
 	    Pattern.compile("^\\s*(" + SIGNED_NUMBER + ")\\s*$"),
 	    Pattern.compile("^\\s*\\(\\s*(" + SIGNED_NUMBER + ")\\s*(" + I_ALIASES + ")\\s*\\)\\s*$"),
@@ -899,7 +901,8 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 		}
 		else {
 		    BigDecimal rPart = new BigDecimal(m.group(1));
-		    BigDecimal iPart = new BigDecimal(m.group(7));
+		    String iMult = m.group(7);
+		    BigDecimal iPart = (iMult != null) ? new BigDecimal(iMult) : BigDecimal.ONE;
 
 		    if (m.group(6) != null && m.group(6).equals("-"))
 			iPart = iPart.negate();

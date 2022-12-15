@@ -634,6 +634,45 @@
 >formatstring ("Rate is %1$8.6f", 12.34567) -> "Rate is 12.345670"
 >formatstring ('Name: %1$-20s, Age: %2$5d', 'Agnes Brown', 97) -> "Name: Agnes Brown         , Age:    97"
 >formatstring ("%02d", yod (d'2022-05-20') % 100) -> "22"
+>str12 = "Latest version: 23" -> "Latest version: 23"
+>Defining variable “num”
+>scan (str12, 'Latest version: %i', num) -> 23
+>num -> 23
+>str22 = '1 2 3' -> "1 2 3"
+>Defining variable “a1”
+>Defining variable “a2”
+>Defining variable “a3”
+>scan (str22, '%d %d %d', a1, a2, a3) -> 3
+>a1 -> 1
+>a2 -> 2
+>a3 -> 3
+>str47 = "Author: John Doe" -> "Author: John Doe"
+>Defining variable “auth” = ""
+>scan (str47, "Author: %s", auth) -> "John Doe"
+>auth -> "John Doe"
+>str33 = 'a,b,c' -> "a,b,c"
+>Defining variable “ch1”
+>Defining variable “ch2”
+>Defining variable “ch3”
+>scan (str33, '%c,%c,%c', ch1, ch2, ch3) -> "c"
+>ch1 -> "a"
+>ch2 -> "b"
+>ch3 -> "c"
+>str34 = '25.2% discount' -> "25.2% discount"
+>Defining variable “disc”
+>scan (str34, '%d%% discount', disc) -> 25.2
+>str15 = 'first\nsecond\nthird' -> "first\nsecond\nthird"
+>scan (str15, '%s%s%s', ch1, ch2, ch3) -> "third"
+>ch1 -> "first"
+>ch2 -> "second"
+>ch3 -> "third"
+>str22 = 'a\nb\nd' -> "a\nb\nd"
+>scan (str22, '%c%n%c%n%c', ch1, ch2, ch3) -> "d"
+>ch1 -> "a"
+>ch2 -> "b"
+>ch3 -> "d"
+>str42 = '(52)' -> "(52)"
+>scan (str42, '(%d)', disc) -> 52
 >arr_m = [10] -> [ 10 ]
 >pad (arr_m, 10, -1) -> [ -1, -1, -1, -1, -1, 10, -1, -1, -1, -1 ]
 >lpad (arr_m, 15, -2) -> [ -2, -2, -2, -2, -2, -1, -1, -1, -1, -1, 10, -1, -1, -1, -1 ]
@@ -1407,6 +1446,17 @@
 >pr2 == props -> true
 >pr2 === props -> false
 >delete (PROPS) -> true
+>Defining function “y3” = { const t71 = 71 }
+>y3() -> "Defined constant “t71”"
+>Defining function “y4” = { const t27 = 27, t38 = 38 }
+>y4() -> "Defined constants “t27,t38”"
+>Defining function “z22” = { var h18, h29, b32 }
+>z22() -> "Defined variables “h18,h29,b32”"
+>Defining function “z09” = { var b22 }
+>z09() -> "Defined variable “b22”"
+>Defining variable “a27”
+>Defining variable “a38” = 5040
+>Defining variable “a92”
 >
 >End of expression tests (suite 1).
 >Tests of nested object / array variables.

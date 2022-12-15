@@ -24,93 +24,85 @@
 #	Internationalizable strings for the info.rlwhitcomb.compare stuff.
 #
 # History:
-#	14-Oct-2020 (rlwhitcomb)
-#	    Initial coding.
-#	14-Oct-2020 (rlwhitcomb)
-#	    Add product name.
-#	06-Nov-2020 (rlwhitcomb)
-#	    Typo.
-#	06-Nov-2020 (rlwhitcomb)
-#	    Another edit to the help; add -version help
-#	11-Dec-2020 (rlwhitcomb)
-#	    Move program name to build.properties.
-#	04-Jan-2021 (rlwhitcomb)
-#	    Tweak final messages.
-#	12-Apr-2021 (rlwhitcomb)
-#	    Add messages.
-#	23-Sep-2022 (rlwhitcomb)
-#	    #52: New messages.
+#  14-Oct-20 rlw   ---	Initial coding.
+#  14-Oct-20 rlw   ---	Add product name.
+#  06-Nov-20 rlw   ---	Typo.
+#  06-Nov-20 rlw   ---	Another edit to the help; add -version help
+#  11-Dec-20 rlw   ---	Move program name to build.properties.
+#  04-Jan-21 rlw   ---	Tweak final messages.
+#  12-Apr-21 rlw   ---	Add messages.
+#  23-Sep-22 rlw  #52:	New messages.
+#  07-Dec-22 rlw  #563:	Color codes.
 #
 
 #
 # From CompareFiles.java
 #
-compare.unknownOption		= Unknown option: "%1$s"!
-compare.notEnoughArguments	= There should be at least two arguments given!
+compare.unknownOption		= <Rd*!>Unknown option: <Bk!>"<Gr>%1$s<.>"<.>!<-->
+compare.notEnoughArguments	= <Rd*!>There should be at least two arguments given!<-->
 
-compare.comparingTwo		= Comparing "%1$s" to "%2$s" ...
-compare.doesNotCompare		= File "%1$s" does not compare to "%2$s"!
-compare.errorOnCompare		= Error trying to compare files: %1$s
-compare.notDirectory		= "%1$s" is not a directory!
-compare.comparingFiles		= Comparing files in "%1$s" directory with "%2$s" ...
-compare.sourceNotFile		= Source file "%1$s" is not a regular file!
-compare.sourceNotExist		= Source file "%1$s" does not exist!
-compare.targetNotFile		= Target file "%1$s" is not a regular file!
-compare.targetNotExist		= Target file "%1$s" does not exist!
-compare.inputNotReadable	= Input file "%1$s" cannot be read!
-compare.ioError			= Error reading file "%1$s": %2$s
-compare.consoleNotAvailable	= The system console is not available to read from!
+compare.comparingTwo		= <Bk!>Comparing "<Cy>%1$s<.>" to "<Cy>%2$s<.>" ...
+compare.doesNotCompare		= <Rd*!>File <Bk!>"<Gr>%1$s<.>"<.> does not compare to <Bk!>"<Gr>%2$s<.>"<.>!<-->
+compare.errorOnCompare		= <Rd*!>Error trying to compare files:<.> %1$s
+compare.notDirectory		= <Bk!>"<Gr>%1$s<.>"<Rd*!> is not a directory!<-->
+compare.comparingFiles		= Comparing files in <Bk!>"<Gr>%1$s<.>"<.> directory with <Bk!>"<Gr>%2$s<.>"<--> ...
+compare.sourceNotFile		= <Rd*!>Source file <Bk!>"<Gr>%1$s<.>"<.> is not a regular file!<-->
+compare.sourceNotExist		= <Rd*!>Source file <Bk!>"<Gr>%1$s<.>"<.> does not exist!<-->
+compare.targetNotFile		= <Rd*!>Target file <Bk!>"<Gr>%1$s<.>"<.> is not a regular file!<-->
+compare.targetNotExist		= <Rd*!>Target file <Bk!>"<Gr>%1$s<.>"<.> does not exist!<-->
+compare.inputNotReadable	= <Rd*!>Input file <Bk!>"<Gr>%1$s<.>"<.> cannot be read!<-->
+compare.ioError			= <Rd*!>Error reading file <Bk!>"<Gr>%1$s<.>"<.>: %2$s<-->
+compare.consoleNotAvailable	= <Rd*!>The system console is not available to read from!<-->
 compare.addingPath		= Adding path "%1$s" ...
-compare.noFilesCompared		= No files compared.
-compare.oneFileCompared		= One file compared, no mismatch.
-compare.filesCompared		= %1$s (%2$,d) files compared, no mismatches.
-compare.oneMismatch		= One file compared, NOT a match.
-compare.filesOneMismatch	= %1$s (%2$,d) files compared, one mismatch.
-compare.mismatches		= %1$s (%2$,d) files compared, %3$s (%4$,d) mismatches.
+compare.noFilesCompared		= <Cy>No files compared.<-->
+compare.oneFileCompared		= <Gr>One file compared, no mismatch.<-->
+compare.filesCompared		= <Gr>%1$s <Bk!>(<Yw!>%2$,d<.>)<.> files compared, no mismatches.<-->
+compare.oneMismatch		= <Cy>One file compared, <Rd*!>NOT a match.<-->
+compare.filesOneMismatch	= <Cy>%1$s <Bk!>(<Yw!>%2$,d<.>)<.> files compared, <Rd*!>one mismatch.<-->
+compare.mismatches		= <Cy>%1$s <Bk!>(<Yw!>%2$,d<.>)<.> files compared, <Rd*!>%3$s <Bk!>(<Yw!>%4$,d<.>)<.> mismatches.<-->
 compare.memoryUse		= %1$,d bytes of memory used.
 
-compare.help1			= Usage: java CompareFiles [options] source+ target
-compare.help2			= "   or: java CompareFiles [options] @file"
-compare.help3			= "   or: java CompareFiles [options] @"
+compare.help1			= <Bk!>Usage:<.> cmp <Bk!>[ <Gr>options<.> ] <Cy>source+ target<.>
+compare.help2			= "   <Bk!>or:<.> cmp <Bk!>[ <Gr>options<.> ] <Cy>@<Gr>file<.>"
+compare.help3			= "   <Bk!>or:<.> cmp <Bk!>[ <Gr>options<.> ] <Cy>@<-->"
 compare.help4			= ""
-compare.help5			= "  where 'source' can be a wildcard file spec or multiple"
+compare.help5			= "  where '<Cy>source<.>' can be a wildcard file spec or multiple"
 compare.help6			= \tfiles or directories to compare against the
 compare.help7			= \tsame files or directories in the target location.
 compare.help8			= ""
-compare.help9			= "  and where 'options' can be:"
-compare.help10			= \t-sync\tdo a two-way compare of directories to check
+compare.help9			= "  and where '<Gr>options<.>' can be:"
+compare.help10			= \t<Gr>-sync<.>\tdo a two-way compare of directories to check
 compare.help11			= \t\tfor missing/extra files on both sides
-compare.help12			= \t  or -sync_mode, -sync-mode, -syncmode, or -syn
-compare.help13			= \t  (default)
-compare.help14			= \t-copy\tdo a simple compare of source to target, which
-compare.help15			= \t\tmeans files in the target that are not in the source
-compare.help16			= \t\twill not be noted (source and target should be copies)
-compare.help17			= \t  or -copy_mode, -copy-mode, -copymode, or -c
-compare.help18			= ""
-compare.help19			= \t-super\tset 'super verbose' level of output
-compare.help20			= \t  or -super_verbose, -super-verbose, -superverbose, or -sup
-compare.help21			= \t-verbose\tset 'verbose' level of output
-compare.help22			= \t  or -verb, or -v
-compare.help23			= \t-normal\tset 'normal' level of output (default)
-compare.help24			= \t  or -norm, or -n
-compare.help25			= \t-quiet\tset 'quiet' level of output
-compare.help26			= \t  or -q
-compare.help27			= \t-silent\tset 'silent' level of output (nothing)
-compare.help28			= \t  or -s
-compare.help29			= \t-debug\tset 'debug' level of output (maximum)
-compare.help30			= \t  or -deb, or -d
-compare.help31			= \t-recurse\tdescend into subdirectories
-compare.help32			= \t  or -recursive, -rec, or -r
-compare.help33			= \t-continue\tcontinue processing files even when a mismatch
-compare.help34			= \t\toccurs (default)
-compare.help35			= \t  or -continue_after_error, -continue-after-error,
-compare.help36			= \t     -continueaftererror, -cont, or -con
-compare.help37			= \t-break\tstop processing files on the first mismatch
-compare.help38			= \t  or -break_on_error, -break-on-error, -breakonerror,
-compare.help39			= \t     -brk, -br, or -b
-compare.help40			= \t-help\tdisplay this message
-compare.help41			= \t  or -h, or -?
-compare.help42			= \t-version\tdisplay program version/copyright information
-compare.help43			= \t  or -vers, or -ver
-compare.help44			= ""
+compare.help12			= \t  or <Gr>-sync_mode<.>, <Gr>-sync-mode<.>, <Gr>-syncmode<.>, or <Gr>-syn<.> <Yw!>(default)<.>
+compare.help13			= \t<Gr>-copy<.>\tdo a simple compare of source to target, which
+compare.help14			= \t\tmeans files in the target that are not in the source
+compare.help15			= \t\twill not be noted (source and target should be copies)
+compare.help16			= \t  or <Gr>-copy_mode<.>, <Gr>-copy-mode<.>, <Gr>-copymode<.>, or <Gr>-c<.>
+compare.help17			= ""
+compare.help18			= \t<Gr>-super<.>\tset <Bk!>'<Cy>super verbose<.>'<.> level of output
+compare.help19			= \t  or <Gr>-super_verbose<.>, <Gr>-super-verbose<.>, <Gr>-superverbose<.>, or <Gr>-sup<.>
+compare.help20			= \t<Gr>-verbose<.>\tset <Bk!>'<Cy>verbose<.>'<.> level of output
+compare.help21			= \t  or <Gr>-verb<.>, or <Gr>-v<.>
+compare.help22			= \t<Gr>-normal<.>\tset <Bk!>'<Cy>normal<.>'<.> level of output <Yw!>(default)<.>
+compare.help23			= \t  or <Gr>-norm<.>, or <Gr>-n<.>
+compare.help24			= \t<Gr>-quiet<.>\tset <Bk!>'<Cy>quiet<.>'<.> level of output
+compare.help25			= \t  or <Gr>-q<.>
+compare.help26			= \t<Gr>-silent<.>\tset <Bk!>'<Cy>silent<.>'<.> level of output (nothing)
+compare.help27			= \t  or <Gr>-s<.>
+compare.help28			= \t<Gr>-debug<.>\tset <Bk!>'<Cy>debug<.>'<.> level of output (maximum)
+compare.help29			= \t  or <Gr>-deb<.>, or <Gr>-d<.>
+compare.help30			= \t<Gr>-recurse<.>\tdescend into subdirectories
+compare.help31			= \t  or <Gr>-recursive<.>, <Gr>-rec<.>, or <Gr>-r<.>
+compare.help32			= \t<Gr>-continue<.>\tcontinue processing files even when a mismatch
+compare.help33			= \t\toccurs <Yw!>(default)<.>
+compare.help34			= \t  or <Gr>-continue_after_error<.>, <Gr>-continue-after-error<.>,
+compare.help35			= \t     <Gr>-continueaftererror<.>, <Gr>-cont<.>, or <Gr>-con<.>
+compare.help36			= \t<Gr>-break<.>\tstop processing files on the first mismatch
+compare.help37			= \t  or <Gr>-break_on_error<.>, <Gr>-break-on-error<.>, <Gr>-breakonerror<.>,
+compare.help38			= \t     <Gr>-brk<.>, <Gr>-br<.>, or <Gr>-b<.>
+compare.help39			= \t<Gr>-help<.>\tdisplay this message
+compare.help40			= \t  or <Gr>-h<.>, or <Gr>-?<.>
+compare.help41			= \t<Gr>-version<.>\tdisplay program version/copyright information
+compare.help42			= \t  or <Gr>-vers<.>, or <Gr>-ver<.>
+compare.help43			= "<-->"
 

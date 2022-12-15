@@ -186,6 +186,15 @@
  *	    ComplexNumber comparisons.
  *	06-Nov-2022 (rlwhitcomb)
  *	    #476: Make the NaturalOrderComparator instances public for use elsewhere.
+ *	29-Nov-2022 (rlwhitcomb)
+ *	    #567: Sort in descending order.
+ *	05-Dec-2022 (rlwhitcomb)
+ *	    #573: New "scanIntoVars" method.
+ *	06-Dec-2022 (rlwhitcomb)
+ *	    #573: Fix some "scan" delimiter issues.
+ *	06-Dec-2022 (rlwhitcomb)
+ *	    #573: Quote literal patterns in "scan".
+ *	    #573: More work quoting patterns, including "%n".
  */
 package info.rlwhitcomb.calc;
 
@@ -211,6 +220,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.ParseException;
 import java.util.*;
+import java.util.regex.Pattern;
 
 import static info.rlwhitcomb.util.CharUtil.Justification;
 import static info.rlwhitcomb.util.Constants.*;
@@ -1266,22 +1276,26 @@ public final class CalcUtil
 		private ParserRuleContext ctx;
 		private MathContext mc;
 		private boolean ignoreCase;
+		private boolean descending;
 
 		ObjectComparator(
 			final CalcObjectVisitor v,
 			final ParserRuleContext c,
 			final MathContext m,
-			final boolean ignore)
+			final boolean ignore,
+			final boolean descend)
 		{
 		    visitor = v;
 		    ctx = c;
 		    mc = m;
 		    ignoreCase = ignore;
+		    descending = descend;
 		}
 
 		@Override
 		public int compare(final Object o1, final Object o2) {
-		    return compareValues(visitor, ctx, ctx, o1, o2, mc, false, true, ignoreCase, true, false);
+		    int ret = compareValues(visitor, ctx, ctx, o1, o2, mc, false, true, ignoreCase, true, false);
+		    return descending ? -ret : ret;
 		}
 	}
 
@@ -1294,10 +1308,12 @@ public final class CalcUtil
 	 * @param ctx		The parse tree (source) of the list.
 	 * @param mc		Math context used to round decimal values.
 	 * @param ignore	Whether the string comparison is case-sensitive or not.
+	 * @param descending	Do the sort in descending order.
 	 */
 	public static void sort(final CalcObjectVisitor visitor, final List<Object> list,
-		final ParserRuleContext ctx, final MathContext mc, final boolean ignore) {
-	    Collections.sort(list, new ObjectComparator(visitor, ctx, mc, ignore));
+		final ParserRuleContext ctx, final MathContext mc, final boolean ignore,
+		final boolean descending) {
+	    Collections.sort(list, new ObjectComparator(visitor, ctx, mc, ignore, descending));
 	}
 
 
@@ -1312,24 +1328,28 @@ public final class CalcUtil
 		private MathContext mc;
 		private boolean ignoreCase;
 		private boolean sortByKey;
+		private boolean sortDescending;
 
 		MapEntryComparator(final CalcObjectVisitor v, final ParserRuleContext c,
-			final MathContext m, final boolean ign, final boolean sortKey) {
+			final MathContext m, final boolean ign, final boolean sortKey, final boolean descend) {
 		    visitor = v;
 		    ctx = c;
 		    mc = m;
 		    ignoreCase = ign;
 		    sortByKey = sortKey;
+		    sortDescending = descend;
 		}
 
 		@Override
 		public int compare(final Map.Entry<String, Object> e1, final Map.Entry<String, Object> e2) {
+		    int ret = 0;
 		    if (sortByKey) {
-			return compareValues(visitor, ctx, ctx, e1.getKey(), e2.getKey(), mc, false, true, ignoreCase, true, false);
+			ret = compareValues(visitor, ctx, ctx, e1.getKey(), e2.getKey(), mc, false, true, ignoreCase, true, false);
 		    }
 		    else {
-			return compareValues(visitor, ctx, ctx, e1.getValue(), e2.getValue(), mc, false, true, ignoreCase, true, false);
+			ret = compareValues(visitor, ctx, ctx, e1.getValue(), e2.getValue(), mc, false, true, ignoreCase, true, false);
 		    }
+		    return sortDescending ? -ret : ret;
 		}
 	}
 
@@ -1343,19 +1363,23 @@ public final class CalcUtil
 	 * @param mc		Math context used to round decimal values.
 	 * @param ignore	Whether the string comparison is case-sensitive or not.
 	 * @param sortByKey	{@code true} to sort by keys, or {@code false} by value.
+	 * @param descending	Whether to reverse the sort order.
 	 * @return		The (new) sorted map.
 	 */
 	public static ObjectScope sortMap(final CalcObjectVisitor visitor, final ObjectScope map,
 		final ParserRuleContext ctx, final MathContext mc, final boolean ignore,
-		final boolean sortByKey) {
+		final boolean sortByKey, final boolean descending) {
 	    Comparator<Map.Entry<String, Object>> comparator =
-		new MapEntryComparator(visitor, ctx, mc, ignore, sortByKey);
+		new MapEntryComparator(visitor, ctx, mc, ignore, sortByKey, descending);
+
 	    List<Map.Entry<String, Object>> sortedList = new ArrayList<>(map.map().entrySet());
 	    Collections.sort(sortedList, comparator);
+
 	    ObjectScope sortedMap = new ObjectScope();
 	    for (Map.Entry<String, Object> entry : sortedList) {
 		sortedMap.setValue(entry.getKey(), entry.getValue());
 	    }
+
 	    return sortedMap;
 	}
 
@@ -1552,11 +1576,11 @@ public final class CalcUtil
 		    return Integer.signum(size1 - size2);
 
 		// Sort the two sets and compare the values in sorted order
-		List<Object> list1 = new ArrayList<Object>(set1.set());
-		List<Object> list2 = new ArrayList<Object>(set2.set());
+		List<Object> list1 = new ArrayList<>(set1.set());
+		List<Object> list2 = new ArrayList<>(set2.set());
 
-		sort(visitor, list1, ctx1, mc, ignoreCase);
-		sort(visitor, list2, ctx2, mc, ignoreCase);
+		sort(visitor, list1, ctx1, mc, ignoreCase, false);
+		sort(visitor, list2, ctx2, mc, ignoreCase, false);
 
 		// Iterate through the set and compare the values in order
 		for (int i = 0; i < list1.size(); i++) {
@@ -2537,6 +2561,96 @@ public final class CalcUtil
 	    }
 
 	    return false;
+	}
+
+	/**
+	 * Scan a source string, according to the given format, into a set of variables.
+	 *
+	 * @param visitor The calculation object, used to resolve expressions.
+	 * @param source  The source to scan.
+	 * @param format  Format of the source information.
+	 * @param vars    List of variables to hold the scanned values.
+	 * @return        ??
+	 * @throws IllegalArgumentException if the source can't be interpreted according to the format.
+	 */
+	public static Object scanIntoVars(final CalcObjectVisitor visitor, final String source, final String format, final List<LValueContext> vars) {
+	    Scanner scanner = new Scanner(source);
+	    Object lastValue = null;
+
+	    StringBuilder pattern = new StringBuilder();
+	    int varIndex = 0;
+	    Pattern defaultDelimiter = scanner.delimiter();
+
+	formatLoop:
+	    for (int i = 0; i < format.length(); i++) {
+		char ch = format.charAt(i);
+		if (ch == '%') {
+		    if (pattern.length() > 0) {
+			String pat = CharUtil.quoteRegEx(pattern.toString());
+			if (scanner.findWithinHorizon(pat, pattern.length()) == null) {
+			    throw new Intl.IllegalArgumentException("calc#scanPatternError", pattern.toString());
+			}
+			pattern.setLength(0);
+		    }
+		    if (i + 1 < format.length()) {
+			Object value = null;
+			char formatCh = format.charAt(++i);
+			if (formatCh == 'c')
+			    scanner.useDelimiter("");
+			else if (i + 1 < format.length())
+			    scanner.useDelimiter(Pattern.quote(format.substring(i + 1, i + 2)));
+			else
+			    scanner.useDelimiter(defaultDelimiter);
+
+			try {
+			    switch (formatCh) {
+				case '%':
+				    pattern.append(formatCh);
+				    continue formatLoop;
+				case 'd':
+				    value = scanner.nextBigDecimal();
+				    break;
+				case 'i':
+				    value = scanner.nextBigInteger();
+				    break;
+				case 'b':
+				    value = scanner.nextBoolean();
+				    break;
+				case 'n':
+				    pattern.append("\\R");
+				    continue formatLoop;
+				case 'c':
+				    value = scanner.next();
+				    break;
+				case 's':
+				    value = scanner.nextLine();
+				    break;
+				default:
+				    throw new Intl.IllegalArgumentException("calc#illegalScanType", formatCh);
+			    }
+			}
+			catch (NoSuchElementException ex) {
+			    throw new Intl.IllegalArgumentException("calc#scanPatternError", String.format("%%%1$c", formatCh));
+			}
+			LValueContext lValue = vars.get(varIndex++);
+			lValue.putContextObject(visitor, value);
+			lastValue = value;
+		    }
+		    else {
+			throw new Intl.IllegalArgumentException("calc#badScanPattern", format);
+		    }
+		}
+		else {
+		    pattern.append(ch);
+		}
+	    }
+	    if (pattern.length() > 0) {
+		String pat = CharUtil.quoteRegEx(pattern.toString());
+		if (scanner.findWithinHorizon(pat, pattern.length()) == null) {
+		    throw new Intl.IllegalArgumentException("calc#scanPatternError", pattern.toString());
+		}
+	    }
+	    return lastValue;
 	}
 
 }

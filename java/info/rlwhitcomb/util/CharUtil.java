@@ -336,6 +336,8 @@
  *	    Move "stripLineEndings" from Calc to here.
  *	25-Oct-2022 (rlwhitcomb)
  *	    #18: Add "isValidSignedInt" method.
+ *	06-Dec-2022 (rlwhitcomb)
+ *	    #573: New "quoteRegEx" method.
  */
 package info.rlwhitcomb.util;
 
@@ -3177,6 +3179,37 @@ public final class CharUtil
 	    }
 
 	    return false;
+	}
+
+
+	/**
+	 * Quote a literal string to become a pattern to match. Recognizes the special
+	 * "line break" matcher ({@code \R}) and doesn't quote that.
+	 *
+	 * @param raw A raw string to become a pattern.
+	 * @return    The raw string suitably quoted for pattern matching.
+	 */
+	public static String quoteRegEx(final String raw) {
+	    int ix = 0, iy;
+	    if ((iy = raw.indexOf("\\R")) < 0) {
+		return Pattern.quote(raw);
+	    }
+
+	    // Okay, the string has one or more line break matchers in it, so quote
+	    // the stuff other than these
+	    StringBuilder buf = new StringBuilder();
+	    while (iy >= 0) {
+		if (iy > ix)
+		    buf.append(Pattern.quote(raw.substring(ix, iy)));
+		buf.append(raw.substring(iy, iy+2));
+		ix = iy + 2;
+		iy = raw.indexOf("\\R", ix);
+	    }
+	    if (ix < raw.length()) {
+		buf.append(Pattern.quote(raw.substring(ix)));
+	    }
+
+	    return buf.toString();
 	}
 
 

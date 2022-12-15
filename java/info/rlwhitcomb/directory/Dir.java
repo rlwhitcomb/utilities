@@ -39,6 +39,8 @@
  *			unused code.
  *  07-Nov-22		Fix spacing with long owner names; fix Javadoc warning.
  *  08-Nov-22 rlw #48:	Blank out leading '0' in hours value.
+ *  17-Nov-22		Process ".ext" as "*.ext". Flags to enable/disable owner
+ *			and group name display.
  */
 package info.rlwhitcomb.directory;
 
@@ -433,6 +435,7 @@ public class Dir
 	private static boolean fullDate            = false;
 	private static boolean exactSize           = false;
 	private static boolean skipDots            = false;
+	private static boolean skipOwner           = runningOnWindows;
 	private static int limitRecursion          = 0;
 	private static boolean errorLimitRecursion = false;
 	private static int widestNameLen           = 0;
@@ -709,7 +712,7 @@ System.out.println("size = " + basicAttrs.size() + ", createTime = " + basicAttr
 	}
 
 
-	private static boolean processOneOption(String option) {
+	private static boolean processOneOption(final String prefix, final String option) {
 	    // Some options are case-sensitive, others not
 	    switch (option) {
 		case "full":
@@ -720,6 +723,10 @@ System.out.println("size = " + basicAttrs.size() + ", createTime = " + basicAttr
 		case "D":
 		    fullDate = true;
 		    return true;
+
+		case "O":
+		    skipOwner = !prefix.equals("+");
+		    break;
 
 		case "X":
 		    exactSize = true;
@@ -743,6 +750,16 @@ System.out.println("size = " + basicAttrs.size() + ", createTime = " + basicAttr
 		case "quote":
 		case "q":
 		    quoted = true;
+		    break;
+
+		case "owner":
+		case "own":
+		    skipOwner = !prefix.equals("+");
+		    break;
+
+		case "noowner":
+		case "noown":
+		    skipOwner = true;
 		    break;
 
 		case "wide":
@@ -771,15 +788,19 @@ System.out.println("size = " + basicAttrs.size() + ", createTime = " + basicAttr
 
 	private static boolean processOption(String option, List<String> specs) {
 	    if (option.startsWith("--")) {
-		if (!processOneOption(option.substring(2)))
+		if (!processOneOption("--", option.substring(2)))
 		    return false;
 	    }
 	    else if (option.startsWith("-")) {
-		if (!processOneOption(option.substring(1)))
+		if (!processOneOption("-", option.substring(1)))
+		    return false;
+	    }
+	    else if (option.startsWith("+")) {
+		if (!processOneOption("+", option.substring(1)))
 		    return false;
 	    }
 	    else if (runningOnWindows && option.startsWith("/")) {
-		if (!processOneOption(option.substring(1)))
+		if (!processOneOption("/", option.substring(1)))
 		    return false;
 	    }
 	    else {
@@ -838,16 +859,18 @@ System.out.println("size = " + basicAttrs.size() + ", createTime = " + basicAttr
 		else
 		    buf.append(String.format("%1$8s ", NumericUtil.formatToRangeTiny(info.getLength())));
 
-		String owner = info.getOwnerName();
-		if (!owner.isEmpty()) {
-		    CharUtil.padToWidth(buf, owner, 6);
-		    buf.append(' ');
-		}
+		if (!skipOwner) {
+		    String owner = info.getOwnerName();
+		    if (!owner.isEmpty()) {
+			CharUtil.padToWidth(buf, owner, 6);
+			buf.append(' ');
+		    }
 
-		String group = info.getGroupName();
-		if (!group.isEmpty()) {
-		    CharUtil.padToWidth(buf, group, 6);
-		    buf.append(' ');
+		    String group = info.getGroupName();
+		    if (!group.isEmpty()) {
+			CharUtil.padToWidth(buf, group, 6);
+			buf.append(' ');
+		    }
 		}
 
 		FileTime ft = info.getLastModifiedTime();
@@ -896,6 +919,13 @@ System.out.println("size = " + basicAttrs.size() + ", createTime = " + basicAttr
 	    }
 	}
 
+	private static void saveOrDisplay(File f) {
+	    if (saving)
+		saveList.add(f);
+	    else
+		display(f);
+	}
+
 	private static void processDirectory(File dir, FileFilter filter) {
 	    if (FileUtilities.canReadDir(dir)) {
 		File[] files = filter == null ? dir.listFiles() : dir.listFiles(filter);
@@ -903,23 +933,16 @@ System.out.println("size = " + basicAttrs.size() + ", createTime = " + basicAttr
 
 		if (!skipDots) {
 		    File dot = new File(dir, ".");
-		    File dotDot = new File(dir, "..");
+		    if (filter == null || filter.accept(dot))
+			saveOrDisplay(dot);
 
-		    if (saving) {
-			saveList.add(dot);
-			saveList.add(dotDot);
-		    }
-		    else {
-			display(dot);
-			display(dotDot);
-		    }
+		    File dotDot = new File(dir, "..");
+		    if (filter == null || filter.accept(dotDot))
+			saveOrDisplay(dotDot);
 		}
 
 		for (File file : files) {
-		    if (saving)
-			saveList.add(file);
-		    else
-			display(file);
+		    saveOrDisplay(file);
 		}
 	    }
 	}
@@ -929,8 +952,9 @@ System.out.println("size = " + basicAttrs.size() + ", createTime = " + basicAttr
 	    // Note: Java actually processes some wildcard things already, but may not,
 	    // depending on how we arrange the options: such as "-dir basedir spec1, spec2 ..."
 
-	    File f = new File(spec);
 	    if (Match.hasWildCards(spec)) {
+		File f = new File(spec);
+
 		File parentDir = f.getParentFile();
 		if (parentDir == null)
 		    parentDir = Environment.userDirectory();
@@ -939,18 +963,22 @@ System.out.println("size = " + basicAttrs.size() + ", createTime = " + basicAttr
 		processDirectory(parentDir, filter);
 	    }
 	    else {
+		File f = new File(spec);
+
 		if (FileUtilities.canReadDir(f)) {
 		    processDirectory(f, null);
 		}
 		else if (FileUtilities.canRead(f)) {
-		    if (saving)
-			saveList.add(f);
-		    else
-			display(f);
+		    saveOrDisplay(f);
 		}
 		else {
-		    Intl.outFormat("directory#cannotFindOrRead", spec);
-		    exit(ExitCode.CANNOT_FIND);
+		    if (spec.startsWith(".")) {
+			processSpec("*" + spec);
+		    }
+		    else {
+			Intl.outFormat("directory#cannotFindOrRead", spec);
+			exit(ExitCode.CANNOT_FIND);
+		    }
 		}
 	    }
 	}

@@ -144,6 +144,8 @@
  *    #480: Change KMG conversion routine to return BigInteger.
  *  12-Oct-2022 (rlwhitcomb)
  *    #513: Move to "logging" package.
+ *  07-Dec-2022 (rlwhitcomb)
+ *    #552: Get thread id from Environment (wrapper method based on Java version).
  */
 package info.rlwhitcomb.logging;
 
@@ -815,7 +817,7 @@ public class Logging
 		buf.append(PID);
 		Thread curThread = Thread.currentThread();
 		buf.append(" T[").append(curThread.getName()).append(']');
-		buf.append('(').append(curThread.getId()).append(')');
+		buf.append('(').append(Environment.threadId(curThread)).append(')');
 		if (level >= OFF && level <= DEBUG)
 		    buf.append(' ').append(getLoggingLevel(level));
 		if (prefix != null && !prefix.isEmpty())

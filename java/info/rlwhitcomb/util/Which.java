@@ -57,12 +57,15 @@
  *	    #340: Add utility "find" method; and "isWindowsBatch" helper.
  *	09-Jul-2022 (rlwhitcomb)
  *	    #393: Cleanup imports.
+ *	14-Nov-2022 (rlwhitcomb)
+ *	    #556: Print out the canonical path at the end.
  */
 package info.rlwhitcomb.util;
 
 import info.rlwhitcomb.math.Num;
 
 import java.io.File;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -277,7 +280,12 @@ public class Which
 	private static void showFileInfo(String name, File f, boolean showTarget, boolean showMore) {
 	    if (showTarget)
 		System.out.print(name + " -> ");
-	    System.out.println(f.getPath());
+	    try {
+		System.out.println(f.getCanonicalPath());
+	    }
+	    catch (IOException ioe) {
+		System.out.println(f.getPath());
+	    }
 	    if (showMore) {
 		System.out.format("\t%1$s  %2$s%n", Num.fmt1(f.length(), 10), getFileTimeString(f));
 	    }
