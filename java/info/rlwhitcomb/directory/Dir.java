@@ -41,6 +41,7 @@
  *  08-Nov-22 rlw #48:	Blank out leading '0' in hours value.
  *  17-Nov-22		Process ".ext" as "*.ext". Flags to enable/disable owner
  *			and group name display.
+ *  15-Dec-22		Put brackets around directory names.
  */
 package info.rlwhitcomb.directory;
 
@@ -894,17 +895,37 @@ System.out.println("size = " + basicAttrs.size() + ", createTime = " + basicAttr
 
 	    if (fullName) {
 		name = convertSlashes(info.getFullPath());
-		if (quoted)
-		    buf.append(quoteName(name));
-		else
-		    buf.append(name);
+		if (info.isDirectory()) {
+		    buf.append('[');
+		    if (quoted)
+			buf.append(quoteName(name));
+		    else
+			buf.append(name);
+		    buf.append(']');
+		}
+		else {
+		    if (quoted)
+			buf.append(quoteName(name));
+		    else
+			buf.append(name);
+		}
 	    }
 	    else {
 		name = convertSlashes(info.getName());
-		if (quoted)
-		    buf.append(quoteName(name));
-		else
-		    buf.append(name);
+		if (info.isDirectory()) {
+		    buf.append('[');
+		    if (quoted)
+			buf.append(quoteName(name));
+		    else
+			buf.append(name);
+		    buf.append(']');
+		}
+		else {
+		    if (quoted)
+			buf.append(quoteName(name));
+		    else
+			buf.append(name);
+		}
 	    }
 
 	    System.out.println(buf.toString());
