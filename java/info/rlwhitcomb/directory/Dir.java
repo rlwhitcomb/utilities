@@ -844,6 +844,21 @@ System.out.println("size = " + basicAttrs.size() + ", createTime = " + basicAttr
 	    }
 	}
 
+	private static void addFileName(final StringBuilder buf, final String path, final boolean isDir) {
+	    String name = convertSlashes(path);
+	    if (quoted)
+		name = quoteName(name);
+
+	    if (isDir) {
+		buf.append('[');
+		buf.append(name);
+		buf.append(']');
+	    }
+	    else {
+		buf.append(name);
+	    }
+	}
+
 	static SimpleDateFormat FULL_DATE_FORMAT = new SimpleDateFormat("MMM dd yyyy HH:mm:ss");
 	static SimpleDateFormat DATE_ONLY_FORMAT = new SimpleDateFormat("MMM dd  yyyy");
 	static SimpleDateFormat DAY_TIME_FORMAT  = new SimpleDateFormat("MMM dd HH:mm");
@@ -893,40 +908,7 @@ System.out.println("size = " + basicAttrs.size() + ", createTime = " + basicAttr
 		    buf.setCharAt(length + 7, ' ');
 	    }
 
-	    if (fullName) {
-		name = convertSlashes(info.getFullPath());
-		if (info.isDirectory()) {
-		    buf.append('[');
-		    if (quoted)
-			buf.append(quoteName(name));
-		    else
-			buf.append(name);
-		    buf.append(']');
-		}
-		else {
-		    if (quoted)
-			buf.append(quoteName(name));
-		    else
-			buf.append(name);
-		}
-	    }
-	    else {
-		name = convertSlashes(info.getName());
-		if (info.isDirectory()) {
-		    buf.append('[');
-		    if (quoted)
-			buf.append(quoteName(name));
-		    else
-			buf.append(name);
-		    buf.append(']');
-		}
-		else {
-		    if (quoted)
-			buf.append(quoteName(name));
-		    else
-			buf.append(name);
-		}
-	    }
+	    addFileName(buf, fullName ? info.getFullPath() : info.getName(), info.isDirectory());
 
 	    System.out.println(buf.toString());
 	}
