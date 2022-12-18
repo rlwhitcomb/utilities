@@ -117,6 +117,8 @@
  *	    #440: Use correct math context for index conversion.
  *	25-Sep-2022 (rlwhitcomb)
  *	    Rename "toNonNullString" to "getNonNullString".
+ *	17-Dec-2022 (rlwhitcomb)
+ *	    #572: Regularize member name access.
  */
 package info.rlwhitcomb.calc;
 
@@ -573,28 +575,10 @@ class LValueContext
 	    }
 	    else if (ctx instanceof CalcParser.ObjVarContext) {
 		CalcParser.ObjVarContext objVarCtx = (CalcParser.ObjVarContext) ctx;
-		LValueContext objLValue = getLValue(visitor, objVarCtx.var(0), lValue);
+		LValueContext objLValue = getLValue(visitor, objVarCtx.var(), lValue);
 
-		objLValue = objLValue.makeMapLValue(visitor, objVarCtx, null);
-
-		TerminalNode string = objVarCtx.STRING();
-		if (string != null) {
-		    objLValue = objLValue.makeMapLValue(visitor, objVarCtx, getStringMemberName(string.getText()));
-		}
-		string = objVarCtx.ISTRING();
-		if (string != null) {
-		    objLValue = objLValue.makeMapLValue(visitor, objVarCtx, getIStringValue(visitor, string, objVarCtx));
-		}
-
-		CalcParser.VarContext rhsVarCtx = objVarCtx.var(1);
-		if (rhsVarCtx != null) {
-		    if (string != null)
-			objLValue = objLValue.makeMapLValue(visitor, objVarCtx, null);
-
-		    return getLValue(visitor, rhsVarCtx, objLValue);
-		}
-		else
-		    return objLValue;
+		String memberName = getMemberName(visitor, objVarCtx.member());
+		return objLValue.makeMapLValue(visitor, objVarCtx, memberName);
 	    }
 	    else if (ctx instanceof CalcParser.FunctionVarContext) {
 		CalcParser.FunctionVarContext funcVarCtx = (CalcParser.FunctionVarContext) ctx;

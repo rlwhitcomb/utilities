@@ -475,6 +475,9 @@
  *	    #566: Allow multiple declarations for "const" or "var".
  *	05-Dec-2022 (rlwhitcomb)
  *	    #573: Add "scan" method.
+ *	16-Dec-2022 (rlwhitcomb)
+ *	    #572: Regularize member names into "member" element, simplify "objVar"
+ *	    to just reference this "member".
  */
 
 grammar Calc;
@@ -569,6 +572,12 @@ emptyStmt
    | ENDEXPR
    ;
 
+member
+   : id
+   | STRING
+   | ISTRING
+   ;
+
 expr
    : value                               # valueExpr
    | obj                                 # objExpr
@@ -576,7 +585,7 @@ expr
    | set                                 # setExpr
    | complex                             # complexValueExpr
    | var                                 # varExpr
-   | expr K_HAS ( id | STRING | ISTRING | ( LBRACK expr RBRACK ) ) # hasExpr
+   | expr K_HAS ( member | ( LBRACK expr RBRACK ) ) # hasExpr
    | LPAREN expr RPAREN                  # parenExpr
    | K_ABS expr1                         # absExpr
    | K_SIN expr1                         # sinExpr
@@ -795,9 +804,7 @@ obj
    ;
 
 pair
-   : id COLON EOL* expr
-   | STRING COLON EOL* expr
-   | ISTRING COLON EOL* expr
+   : member COLON EOL* expr
    ;
 
 set
@@ -809,11 +816,11 @@ complex
    ;
 
 var
-   : var ( DOT ( var | STRING | ISTRING ) ) # objVar
-   | var ( LBRACK expr RBRACK | INDEXES )   # arrVar
-   | var actualParams                       # functionVar
-   | id                                     # idVar
-   | GLOBALVAR                              # globalVar
+   : id                                   # idVar
+   | var DOT member                       # objVar
+   | var ( LBRACK expr RBRACK | INDEXES ) # arrVar
+   | var actualParams                     # functionVar
+   | GLOBALVAR                            # globalVar
    ;
 
 value
@@ -851,7 +858,7 @@ actualParams
    ;
 
 dropObjs
-   : LBRACK ( id | STRING | ISTRING ) ( COMMA ( id | STRING | ISTRING ) ) * RBRACK
+   : LBRACK member ( COMMA member ) * RBRACK
    | LBRACK RBRACK
    ;
 

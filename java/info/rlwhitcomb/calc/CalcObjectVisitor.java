@@ -730,6 +730,8 @@
  *	    #573: New "scan" function.
  *	13-Dec-2022 (rlwhitcomb)
  *	    #580: Fix "sumof" bug with integer values.
+ *	17-Dec-2022 (rlwhitcomb)
+ *	    #572: Regularize member naming conventions.
  */
 package info.rlwhitcomb.calc;
 
@@ -3524,13 +3526,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	private void addPairsToObject(CalcParser.ObjContext objCtx, ObjectScope object) {
 	    for (CalcParser.PairContext pairCtx : objCtx.pair()) {
-		CalcParser.IdContext id = pairCtx.id();
-		TerminalNode str  = pairCtx.STRING();
-		TerminalNode istr = pairCtx.ISTRING();
-		String key =
-			(id != null) ? id.getText()
-		      : (str != null) ? getStringMemberName(str.getText())
-		      : getIStringValue(this, istr, pairCtx);
+		String key = getMemberName(this, pairCtx.member());
 		Object value = evaluate(pairCtx.expr());
 		object.setValue(key, settings.ignoreNameCase, value);
 	    }
@@ -3592,7 +3588,6 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    Object source = evaluate(ctx.expr(0));
 	    CalcParser.ExprContext indexExpr = null;
 	    Object indexValue = null;
-	    String key;
 
 	    if (!(source instanceof CollectionScope))
 		return Boolean.FALSE;
@@ -3615,13 +3610,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    if (!(source instanceof ObjectScope))
 		return Boolean.FALSE;
 
-	    CalcParser.IdContext id = ctx.id();
-	    TerminalNode str  = ctx.STRING();
-	    TerminalNode istr = ctx.ISTRING();
-	    key = (id != null) ? id.getText()
-		: (str != null) ? getStringMemberName(str.getText())
-		: (istr != null) ? getIStringValue(this, istr, ctx)
-		: getNonNullString(indexExpr, indexValue);
+	    String key = getMemberName(this, ctx.member());
+	    if (key == null)
+		key = getNonNullString(indexExpr, indexValue);
 
 	    ObjectScope obj = (ObjectScope) source;
 
@@ -5336,22 +5327,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    CalcParser.ObjContext addObjs = args.obj();
 
 		    if (dropObjs != null) {
-			String key;
-			Object value;
-
-			for (CalcParser.IdContext id : dropObjs.id()) {
-			    key = id.getText();
-			    value = object.remove(key, settings.ignoreNameCase);
-			    removed.map().put(key, value);
-			}
-			for (TerminalNode string : dropObjs.STRING()) {
-			    key = string.getText();
-			    value = object.remove(key, settings.ignoreNameCase);
-			    removed.map().put(key, value);
-			}
-			for (TerminalNode istring : dropObjs.ISTRING()) {
-			    key = getIStringValue(this, istring, addObjs);
-			    value = object.remove(key, settings.ignoreNameCase);
+			for (CalcParser.MemberContext member : dropObjs.member()) {
+			    String key = getMemberName(this, member);
+			    Object value = object.remove(key, settings.ignoreNameCase);
 			    removed.map().put(key, value);
 			}
 		    }

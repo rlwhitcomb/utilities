@@ -796,7 +796,7 @@ length b; scale b; length b[1];
 }
 
 :def
-p = {b:2, c: { d:true }, "e":e }
+p = {b:2, c: { d:true }, `"e"`:e }
 p@j
 length p; scale p;
 :echo "Elements of p:"
@@ -1112,11 +1112,11 @@ list has [-2]
 #
 # difference between "has" and "in"
 #
-c12 = { a:1, b:{d:23, "e": 2.718, f: { g:true, h:'def' } } }
+c12 = { a:1, b:{d:23, '"e"': 2.718, f: { g:true, h:'def' } } }
 c12 has a
 c12 has b
 c12 has d
-c12 has "e"
+c12 has '"e"'
 c12 has f
 c12 has g
 c12 has h

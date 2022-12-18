@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.16.0', date: d'2022-12-17',
+      issues: [ 572 ],
+      comment: 'Change quoted object members to be the same as unquoted.'
+    },
     { version: '2.15.5', date: d'2022-12-13',
       issues: [ 582 ],
       comment: 'Add supported file extensions of ".clc" and ".xpr" also.'

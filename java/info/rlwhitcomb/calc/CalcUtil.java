@@ -193,6 +193,8 @@
  *	06-Dec-2022 (rlwhitcomb)
  *	    #573: Quote literal patterns in "scan".
  *	    #573: More work quoting patterns, including "%n".
+ *	17-Dec-2022 (rlwhitcomb)
+ *	    #572: New method to regularize member name processing.
  */
 package info.rlwhitcomb.calc;
 
@@ -2216,18 +2218,28 @@ public final class CalcUtil
 	}
 
 	/**
-	 * A string constant can be used as a member name, but it needs quotes around it.
-	 * This method gets the raw string value (with Unicode escapes decoded, and etc.) and
-	 * adds the required quotes (whichever quotes it started with, which could be "handed"
-	 * quotes as in <code>&#x00AB;</code> and <code>&#x00BB;</code>).
+	 * From the parser "member" context, extract just the proper member name.
 	 *
-	 * @param constantText	The text as it appears in the script.
-	 * @return		The properly decoded and quoted member name from it.
+	 * @param visitor The visitor used to calculate expressions.
+	 * @param ctx     The "member" context.
+	 * @return        Just the member name from the context.
 	 */
-	public static String getStringMemberName(final String constantText) {
-	    char leftQuote = constantText.charAt(0);
-	    char rightQuote = constantText.charAt(constantText.length() - 1);
-	    return CharUtil.addQuotes(getRawString(constantText), leftQuote, rightQuote);
+	public static String getMemberName(final CalcObjectVisitor visitor, final CalcParser.MemberContext ctx) {
+	    if (ctx != null) {
+		CalcParser.IdContext idCtx = ctx.id();
+		if (idCtx != null) {
+		    return idCtx.getText();
+		}
+		TerminalNode string = ctx.STRING();
+		if (string != null) {
+		    return getRawString(string.getText());
+		}
+		string = ctx.ISTRING();
+		if (string != null) {
+		    return getIStringValue(visitor, string, ctx);
+		}
+	    }
+	    return null;
 	}
 
 	/**
