@@ -478,6 +478,8 @@
  *	16-Dec-2022 (rlwhitcomb)
  *	    #572: Regularize member names into "member" element, simplify "objVar"
  *	    to just reference this "member".
+ *	19-Dec-2022 (rlwhitcomb)
+ *	    #79: Allow just "( )" on "random".
  */
 
 grammar Calc;
@@ -606,7 +608,7 @@ expr
    | K_LN expr1                          # lnExpr
    | K_EPOW expr1                        # ePowerExpr
    | K_TENPOW expr1                      # tenPowerExpr
-   | K_RANDOM expr1 ?                    # randomExpr
+   | K_RANDOM ( expr1? | LPAREN RPAREN ) # randomExpr
    | K_SIGNUM expr1                      # signumExpr
    | ( K_ISNULL | K_NOTNULL ) expr1      # isNullExpr
    | K_TYPEOF typeArg                    # typeofExpr
