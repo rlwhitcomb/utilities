@@ -732,6 +732,8 @@
  *	    #580: Fix "sumof" bug with integer values.
  *	17-Dec-2022 (rlwhitcomb)
  *	    #572: Regularize member naming conventions.
+ *	19-Dec-2022 (rlwhitcomb)
+ *	    #79: Move "random" function out to MathUtil.
  */
 package info.rlwhitcomb.calc;
 
@@ -766,7 +768,6 @@ import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.SecureRandom;
 import java.text.FieldPosition;
 import java.text.NumberFormat;
 import java.time.DateTimeException;
@@ -997,11 +998,6 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	 * in a background thread.
 	 */
 	private CalcPiWorker piWorker = null;
-
-	/**
-	 * Our provider of random values.
-	 */
-	private Random random = null;
 
 	/** Stack of previous "timing" mode values. */
 	private final Deque<Boolean> timingModeStack = new ArrayDeque<>();
@@ -4357,24 +4353,15 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitRandomExpr(CalcParser.RandomExprContext ctx) {
+	    Object seed = null;
+
 	    if (ctx.expr1() != null) {
 		CalcParser.ExprContext expr = ctx.expr1().expr();
 		if (expr != null) {
-		    Object seed = evaluate(expr);
-		    if (seed != null) {
-			byte[] bytes = ClassUtil.getBytes(seed);
-			BigInteger seedInt = new BigInteger(bytes);
-			random = new Random(seedInt.longValue());
-		    }
+		    seed = evaluate(expr);
 		}
 	    }
-	    if (random == null) {
-		random = new SecureRandom();
-	    }
-	    int precision = settings.mc.getPrecision();
-	    BigInteger randomBits = new BigInteger(precision * 6, random);
-	    BigDecimal dValue = new BigDecimal(randomBits, settings.mcDivide);
-	    return dValue.scaleByPowerOfTen(dValue.scale() - precision);
+	    return MathUtil.random(seed, settings.mc.getPrecision(), settings.mcDivide);
 	}
 
 	@Override

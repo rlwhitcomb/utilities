@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.16.1', date: d'2022-12-19',
+      issues: [ 79 ],
+      comment: 'Update the "random" algorithm to have better distribution of values.'
+    },
     { version: '2.16.0', date: d'2022-12-17',
       issues: [ 572 ],
       comment: 'Change quoted object members to be the same as unquoted.'
