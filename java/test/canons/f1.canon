@@ -127,3 +127,22 @@
 >(1, 0) === (0, 1) -> false
 >(1, 1) == (2, 2) -> false
 >(2, 2) > (1, 1) -> true
+>ca1 = (1 / 2, 3 / 4) -> ( 0.5, 0.75 )
+>s1 = cast (ca1, "set") -> { 0.5, 0.75 }
+>complex (s1) -> ( 0.5, 0.75 )
+>o1 = cast (ca1, "object") -> { r: 0.5, i: 0.75 }
+>complex (o1) -> ( 0.5, 0.75 )
+>li1 = cast (ca1, "array") -> [ 0.5, 0.75 ]
+>ca1 === complex (li1) -> true
+>cb1 = complex ('2/3+5/6i') -> ( 2 / 3, 5 / 6 )
+>Calculation mode set to “RATIONAL”.
+>cb2 = (3 / 4, 7 / 9) -> ( 3 / 4, 7 / 9 )
+>Calculation mode set to “DECIMAL(34)”.
+>cb1 + cb2 -> ( 17 / 12, 29 / 18 )
+>cb3 = (frac (1, 2), frac (7, 8)) -> ( 1 / 2, 7 / 8 )
+>bf1 = cb1 / cb3 -> ( 68 / 65, -32 / 195 )
+>bf1 * cb3 -> ( 2 / 3, 5 / 6 )
+>++ cb3 -> ( 3 / 2, 7 / 8 )
+>cb4 = complex ('1/2') -> ( 1 / 2, 0 / 1 )
+>++ cb4 -> ( 3 / 2, 0 / 1 )
+>cb4 ** 2 -> ( 9 / 4, 0 / 1 )

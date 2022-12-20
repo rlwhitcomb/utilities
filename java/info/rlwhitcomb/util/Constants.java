@@ -36,9 +36,11 @@
  *  24-Aug-22 rlw #447: Add "D_200" value.
  *                 ---  Move I_MINUS_ONE into here from Calc.
  *  12-Sep-22 rlw #480: Add "I_800" for range conversions.
+ *  19-Dec-22 rlw #559:	New rational complex values.
  */
 package info.rlwhitcomb.util;
 
+import info.rlwhitcomb.math.BigFraction;
 import info.rlwhitcomb.math.ComplexNumber;
 
 import java.math.BigDecimal;
@@ -179,6 +181,9 @@ public final class Constants
 
 	/** A complex number corresponding to a real value of {@code 1}. */
 	public static final ComplexNumber C_ONE = new ComplexNumber(1, 0);
+
+	/** A rational complex number corresponding to a rational value of {@code 1/1}. */
+	public static final ComplexNumber CR_ONE = ComplexNumber.real(new BigFraction(1));
 
 
 	/** Number of nanoseconds in a second. */

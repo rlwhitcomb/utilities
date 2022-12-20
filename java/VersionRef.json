@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.17.0', date: d'2022-12-19',
+      issues: [ 559 ],
+      comment: 'Rational mode for complex numbers.'
+    },
     { version: '2.16.2', date: d'2022-12-19',
       issues: [ 588 ],
       comment: 'New case selector with combined compare operations.'
