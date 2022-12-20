@@ -1281,6 +1281,7 @@ whether it has previously been used/defined.
     <li><i>expr</i> <code>...</code>,&nbsp;<code>..</code>,&nbsp;or&nbsp;<code>&#x2026;</code>&nbsp;<i>expr</i> [ <code>,</code> <i>expr</i> ]</li>
     <li><code>MATCHES</code> <i>pattern</i> ( ',' <i>flags</i> )</li>
     <li><code>&gt;</code> or <code>&lt;</code>, <code>==</code>, etc. <i>expr</i> (any of the comparison operators)</li>
+    <li><code>&gt;</code>, etc. <i>expr</i> ( <code>&amp;&amp;</code> or <code>||</code> or <code>^^</code> ) <code>&gt;</code>, etc. <i>expr</i></li>
     <li><code>DEFAULT</code>
   </ul>
   <p class="indent">
@@ -1328,9 +1329,11 @@ whether it has previously been used/defined.
      but the individual block values can be any kind of expression or object (including lists, objects, strings, functions, etc.). If a <code>...</code> selector is used, the set of values
      (with optional step value) will be tested in succession to see if any value matches the case expression. When the <code>matches</code> selector is used, the expression is a regular
      expression pattern (just like the <code>MATCHES</code> standalone function) against which the case expression is tested. The optional flags are identical to the optional flags in the <code>matches(...)</code> function. Using a comparison operator with an expression will test the
-     case value against that expression, according to the operator. If the comparison succeeds, the corresponding block will be executed. Note that the idea of <i>"fall-through"</i> between
-     statement blocks makes no sense here: multiple selectors can select for a single code block, but that block stands alone and will never "bleed" into another block. If such fall-through
-     behavior is desired, it will be necessary to either duplicate code, make a separate parameterized function, or otherwise rearrange the logic.
+     case value against that expression, according to the operator. If the comparison succeeds, the corresponding block will be executed. If the selector has two comparison operators joined by one of
+     the boolean operators, the comparisons must succeed according to the boolean operator for the block to be executed. An example of a proper comparison would be: <code>&gt; 2.0 &amp;&amp; &lt; 3.0</code> which would be true for
+     any value between 2.0 and 3.0 (exclusive).
+     Note that the idea of <i>"fall-through"</i> between statement blocks does not happen automatically (as in many other languages); in order to "fall through" the <code>next</code> statement
+     must be coded as the last statement inside the block. 
   <p>The <code>LEAVE</code> statement will cause early termination of a <code>LOOP</code> or <code>WHILE</code> statement, or a function, with the final value of the statement being the
      (optional) expression on the <code>LEAVE</code> statement itself, or <code>null</code> if none is given. If a <code>LEAVE</code> statement is executed inside any other block (such as
      <code>IF</code> or <code>CASE</code>) that containing block is terminated, but the closest containing loop or function is also terminated. If the <code>LEAVE</code> is executed
