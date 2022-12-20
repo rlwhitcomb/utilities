@@ -734,6 +734,7 @@
  *	    #572: Regularize member naming conventions.
  *	19-Dec-2022 (rlwhitcomb)
  *	    #79: Move "random" function out to MathUtil.
+ *	    #588: Another flavor of case selector with two compare ops.
  */
 package info.rlwhitcomb.calc;
 
@@ -3329,10 +3330,53 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			    return returnValue;
 			}
 		    }
-		    else if (select.compareOp() != null) {
-			String op = select.compareOp().getText();
-			CalcParser.ExprContext expr = select.expr().get(0);
-			if (compareOp(caseExpr, expr, Optional.ofNullable(caseValue), op)) {
+		    else if (!select.compareOp().isEmpty()) {
+			String op = select.compareOp(0).getText();
+			CalcParser.ExprContext expr = select.expr(0);
+
+			boolean first = compareOp(caseExpr, expr, Optional.ofNullable(caseValue), op);
+			boolean matched = false;
+
+			if (select.boolOp() == null) {
+			    matched = first;
+			}
+			else {
+			    String boolOp = select.boolOp().getText();
+
+			    // Some combinations can be solved with just the first result
+			    switch (boolOp) {
+				case "&&":
+				case "\u2227":
+				    if (!first)
+					continue selectors;
+				    break;
+				case "||":
+				case "\u2228":
+				    if (first)
+					matched = true;
+				    break;
+			    }
+			    if (!matched) {
+				op = select.compareOp(1).getText();
+				expr = select.expr(1);
+				boolean second = compareOp(caseExpr, expr, Optional.ofNullable(caseValue), op);
+
+				switch (boolOp) {
+				    case "&&":
+				    case "\u2227":
+				    case "||":
+				    case "\u2228":
+					if (second)
+					    matched = true;
+					break;
+				    default:
+					// XOR - both must be equal
+					matched = (first == second);
+					break;
+				}
+			    }
+			}
+			if (matched) {
 			    returnValue = visitor.execute();
 			    fallThrough = visitor.fallIntoNext();
 			    if (fallThrough)
@@ -6798,7 +6842,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	 * @param op      The textual representation of the operator to execute.
 	 * @return        Result of the comparison.
 	 */
-	private Boolean compareOp(
+	private boolean compareOp(
 		CalcParser.ExprContext expr1,
 		CalcParser.ExprContext expr2,
 		Optional<Object> optObj1,
@@ -6882,7 +6926,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    throw new UnknownOpException(op, expr2);
 	    }
 
-	    return Boolean.valueOf(result);
+	    return result;
 	}
 
 	@Override
@@ -6891,7 +6935,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    CalcParser.ExprContext expr2 = ctx.expr(1);
 	    String op = ctx.COMPARE_OP().getText();
 
-	    return compareOp(expr1, expr2, null, op);
+	    return Boolean.valueOf(compareOp(expr1, expr2, null, op));
 	}
 
 	private class InVisitor implements IterationVisitor
@@ -6960,7 +7004,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    CalcParser.ExprContext expr2 = ctx.expr(1);
 	    String op = ctx.EQUAL_OP().getText();
 
-	    return compareOp(expr1, expr2, null, op);
+	    return Boolean.valueOf(compareOp(expr1, expr2, null, op));
 	}
 
 	@Override
