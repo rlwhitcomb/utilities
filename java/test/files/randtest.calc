@@ -34,14 +34,15 @@ loop over v {
   b = bucket(__)
   freq[b]++
 }
+:assert sumof(freq) == length(v)
 
 chisq = 0
 const expected = length(v) / length(freq)
 loop f over freq {
   chisq += ((f - expected) ** 2) / expected
 }
-b = 0
 
+b = 0
 :quiet pop
 :resultsonly on {
 
@@ -54,6 +55,6 @@ b = 0
 :echo 'Bucket distribution'
 :echo '-------------------'
 loop f over freq {
-  :echo `${++b}. $f`
+  :echo `${b++}. $f`
 }
 }
