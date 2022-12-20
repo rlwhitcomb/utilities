@@ -480,6 +480,7 @@
  *	    to just reference this "member".
  *	19-Dec-2022 (rlwhitcomb)
  *	    #79: Allow just "( )" on "random".
+ *	    #588: New case selector that combines "compareOp" with a "boolOp" for range selection.
  */
 
 grammar Calc;
@@ -797,7 +798,7 @@ caseSelector
    : K_MATCHES ( expr2 | expr1 )
    | expr DOTS expr ( COMMA expr ) ?
    | expr
-   | compareOp expr
+   | compareOp expr ( boolOp compareOp expr ) ?
    | K_DEFAULT
    ;
 
@@ -933,6 +934,12 @@ wildId
 compareOp
    : COMPARE_OP
    | EQUAL_OP
+   ;
+
+boolOp
+   : BOOL_AND_OP
+   | BOOL_OR_OP
+   | BOOL_XOR_OP
    ;
 
 modeOption
