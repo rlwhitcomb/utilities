@@ -735,6 +735,7 @@
  *	19-Dec-2022 (rlwhitcomb)
  *	    #79: Move "random" function out to MathUtil.
  *	    #588: Another flavor of case selector with two compare ops.
+ *	    #559: Changes for rational complex numbers.
  *	20-Dec-2022 (rlwhitcomb)
  *	    #588: Fix incorrect evaluation of XOR in double compare op selector.
  */
@@ -3613,10 +3614,23 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitComplexValueExpr(CalcParser.ComplexValueExprContext ctx) {
 	    CalcParser.ComplexContext complex = ctx.complex();
-	    BigDecimal r = getDecimalValue(complex.expr(0));
-	    BigDecimal i = getDecimalValue(complex.expr(1));
+	    CalcParser.ExprContext expr1 = complex.expr(0);
+	    CalcParser.ExprContext expr2 = complex.expr(1);
+	    Object o1 = evaluate(expr1);
+	    Object o2 = evaluate(expr2);
 
-	    return new ComplexNumber(r, i);
+	    if (settings.rationalMode || (o1 instanceof BigFraction && o2 instanceof BigFraction)) {
+		BigFraction rFrac = toFractionValue(this, o1, expr1);
+		BigFraction iFrac = toFractionValue(this, o2, expr2);
+
+		return new ComplexNumber(rFrac, iFrac);
+	    }
+	    else {
+		BigDecimal r = toDecimalValue(this, o1, settings.mc, expr1);
+		BigDecimal i = toDecimalValue(this, o2, settings.mc, expr2);
+
+		return new ComplexNumber(r, i);
+	    }
 	}
 
 	@Override
@@ -3725,7 +3739,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 		afterValue = obj;
 	    }
-	    else if (settings.rationalMode) {
+	    else if (settings.rationalMode || value instanceof BigFraction) {
 		BigFraction fValue = toFractionValue(this, value, var);
 		beforeValue = fValue;
 
@@ -3738,10 +3752,18 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		ComplexNumber cValue = (ComplexNumber) value;
 		beforeValue = cValue;
 
-		if (incr)
-		    afterValue = cValue.add(C_ONE);
-		else
-		    afterValue = cValue.subtract(C_ONE);
+		if (cValue.isRational()) {
+		    if (incr)
+			afterValue = cValue.add(CR_ONE);
+		    else
+			afterValue = cValue.subtract(CR_ONE);
+		}
+		else {
+		    if (incr)
+			afterValue = cValue.add(C_ONE);
+		    else
+			afterValue = cValue.subtract(C_ONE);
+		}
 	    }
 	    else {
 		BigDecimal dValue = toDecimalValue(this, value, settings.mc, var);
@@ -3823,7 +3845,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 		afterValue = list;
 	    }
-	    else if (settings.rationalMode) {
+	    else if (settings.rationalMode || value instanceof BigFraction) {
 		BigFraction fValue = toFractionValue(this, value, var);
 
 		if (incr)
@@ -3834,10 +3856,18 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    else if (value instanceof ComplexNumber) {
 		ComplexNumber cValue = (ComplexNumber) value;
 
-		if (incr)
-		    afterValue = cValue.add(C_ONE);
-		else
-		    afterValue = cValue.subtract(C_ONE);
+		if (cValue.isRational()) {
+		    if (incr)
+			afterValue = cValue.add(CR_ONE);
+		    else
+			afterValue = cValue.subtract(CR_ONE);
+		}
+		else {
+		    if (incr)
+			afterValue = cValue.add(C_ONE);
+		    else
+			afterValue = cValue.subtract(C_ONE);
+		}
 	    }
 	    else {
 		BigDecimal dValue = toDecimalValue(this, value, settings.mc, var);
@@ -3859,7 +3889,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    String op = ctx.ADD_OP().getText();
 
-	    if (settings.rationalMode) {
+	    if (settings.rationalMode || e instanceof BigFraction) {
 		BigFraction f = toFractionValue(this, e, expr);
 
 		switch (op) {
@@ -5882,9 +5912,10 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitComplexFuncExpr(CalcParser.ComplexFuncExprContext ctx) {
 	    try {
-		CalcParser.Expr1Context expr1 = ctx.expr1();
-		if (expr1 != null) {
-		    CalcParser.ExprContext expr = expr1.expr();
+		CalcParser.Expr1Context e1ctx = ctx.expr1();
+
+		if (e1ctx != null) {
+		    CalcParser.ExprContext expr = e1ctx.expr();
 		    Object e = evaluate(expr);
 
 		    if (e instanceof ArrayScope) {
@@ -5907,10 +5938,24 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		}
 		else {
 		    CalcParser.Expr2Context e2ctx = ctx.expr2();
-		    BigDecimal r = getDecimalValue(e2ctx.expr(0));
-		    BigDecimal i = getDecimalValue(e2ctx.expr(1));
 
-		    return new ComplexNumber(r, i);
+		    CalcParser.ExprContext expr1 = e2ctx.expr(0);
+		    CalcParser.ExprContext expr2 = e2ctx.expr(1);
+		    Object o1 = evaluate(expr1);
+		    Object o2 = evaluate(expr2);
+
+		    if (settings.rationalMode || (o1 instanceof BigFraction && o2 instanceof BigFraction)) {
+			BigFraction rFrac = toFractionValue(this, o1, expr1);
+			BigFraction iFrac = toFractionValue(this, o2, expr2);
+
+			return new ComplexNumber(rFrac, iFrac);
+		    }
+		    else {
+			BigDecimal r = toDecimalValue(this, o1, settings.mc, expr1);
+			BigDecimal i = toDecimalValue(this, o2, settings.mc, expr2);
+
+			return new ComplexNumber(r, i);
+		    }
 		}
 	    }
 	    catch (Exception ex) {
@@ -7283,7 +7328,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		case "-=":
 		case "\u2212=":
 		case "\u2796=":
-		    if (settings.rationalMode) {
+		    if (settings.rationalMode || (e1 instanceof BigFraction && e2 instanceof BigFraction)) {
 			BigFraction f1 = toFractionValue(this, e1, varCtx);
 			BigFraction f2 = toFractionValue(this, e2, exprCtx);
 
@@ -7332,7 +7377,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    Object e2 = visit(exprCtx);
 
 	    try {
-		if (settings.rationalMode) {
+		if (settings.rationalMode || (e1 instanceof BigFraction && e2 instanceof BigFraction)) {
 		    BigFraction f1 = toFractionValue(this, e1, varCtx);
 		    BigFraction f2 = toFractionValue(this, e2, exprCtx);
 
