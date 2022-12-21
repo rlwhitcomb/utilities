@@ -61,6 +61,8 @@
  *	    #420: Adjust COMPLEX_PATTERNS to recognize '1+i' (for instance).
  *	19-Dec-2022 (rlwhitcomb)
  *	    #559: Implement rational mode.
+ *	20-Dec-2022 (rlwhitcomb)
+ *	    #559: More fractional forms; always represents fractions as "proper".
  */
 package info.rlwhitcomb.math;
 
@@ -130,12 +132,20 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 	    Pattern.compile("^\\s*(" + SIGNED_NUMBER + ")\\s*(" + I_ALIASES + ")\\s*$"),
 	    Pattern.compile("^\\s*\\{\\s*" + RADIUS_ALIASES + "\\s*[:]\\s*(" + SIGNED_NUMBER + ")\\s*[,]\\s*" + THETA_ALIASES + "\\s*[:]\\s*(" + SIGNED_NUMBER + ")\\s*\\}\\s*$")
 	};
-// I don't think this is going to work, exactly, because of the SEP pattern in BigFraction, which includes ',' which will probably mess up things here
+
 	private static final Pattern COMPLEX_FRACTION_PATTERNS[] = {
 	    Pattern.compile("^\\s*\\(\\s*(" + FRACTION + ")\\s*([,])\\s*(" + FRACTION + ")\\s*\\)\\s*$"),
+	    Pattern.compile("^\\s*\\(\\s*(" + SIGNED_NUMBER + ")\\s*([,])\\s*(" + FRACTION + ")\\s*\\)\\s*$"),
+	    Pattern.compile("^\\s*\\(\\s*(" + FRACTION + ")\\s*([,])\\s*(" + SIGNED_NUMBER + ")\\s*\\)\\s*$"),
 	    Pattern.compile("^\\s*(" + FRACTION + ")\\s*([,])\\s*(" + FRACTION + ")\\s*$"),
+	    Pattern.compile("^\\s*(" + SIGNED_NUMBER + ")\\s*([,])\\s*(" + FRACTION + ")\\s*$"),
+	    Pattern.compile("^\\s*(" + FRACTION + ")\\s*([,])\\s*(" + SIGNED_NUMBER + ")\\s*$"),
 	    Pattern.compile("^\\s*\\(\\s*(" + FRACTION + ")\\s*([+\\-])\\s*(" + FRACTION + ")?\\s*" + I_ALIASES + "\\s*\\)\\s*$"),
+	    Pattern.compile("^\\s*\\(\\s*(" + SIGNED_NUMBER + ")\\s*([+\\-])\\s*(" + FRACTION + ")?\\s*" + I_ALIASES + "\\s*\\)\\s*$"),
+	    Pattern.compile("^\\s*\\(\\s*(" + FRACTION + ")\\s*([+\\-])\\s*(" + NUMBER + ")?\\s*" + I_ALIASES + "\\s*\\)\\s*$"),
 	    Pattern.compile("^\\s*(" + FRACTION + ")\\s*([+\\-])\\s*(" + FRACTION + ")?\\s*" + I_ALIASES + "\\s*$"),
+	    Pattern.compile("^\\s*(" + SIGNED_NUMBER + ")\\s*([+\\-])\\s*(" + FRACTION + ")?\\s*" + I_ALIASES + "\\s*$"),
+	    Pattern.compile("^\\s*(" + FRACTION + ")\\s*([+\\-])\\s*(" + NUMBER + ")?\\s*" + I_ALIASES + "\\s*$"),
 	    Pattern.compile("^\\s*\\(\\s*(" + FRACTION + ")\\s*\\)\\s*$"),
 	    Pattern.compile("^\\s*(" + FRACTION + ")\\s*$"),
 	    Pattern.compile("^\\s*\\(\\s*(" + FRACTION + ")\\s*(" + I_ALIASES + ")\\s*\\)\\s*$"),
@@ -175,6 +185,11 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 	    "theta",
 	    "angle"
 	};
+
+	/**
+	 * A fraction value of zero, with "alwaysProper" set.
+	 */
+	private static final BigFraction F_ZERO = BigFraction.properFraction(0);
 
 
 	/**
@@ -622,9 +637,9 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 	 */
 	public BigFraction rFrac() {
 	    if (rational)
-		return realFrac == null ? BigFraction.ZERO : realFrac;
+		return realFrac == null ? F_ZERO : realFrac;
 	    else
-		return realPart == null ? BigFraction.ZERO : new BigFraction(realPart);
+		return realPart == null ? F_ZERO : BigFraction.properFraction(realPart);
 	}
 
 	/**
@@ -635,9 +650,9 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 	 */
 	public BigFraction iFrac() {
 	    if (rational)
-		return imaginaryFrac == null ? BigFraction.ZERO : imaginaryFrac;
+		return imaginaryFrac == null ? F_ZERO : imaginaryFrac;
 	    else
-		return imaginaryPart == null ? BigFraction.ZERO : new BigFraction(imaginaryPart);
+		return imaginaryPart == null ? F_ZERO : BigFraction.properFraction(imaginaryPart);
 	}
 
 
@@ -650,7 +665,7 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 	    int prec = 0;
 
 	    if (rational) {
-		prec = BigFraction.ZERO.precision();
+		prec = F_ZERO.precision();
 
 		if (realFrac != null)
 		    prec = Math.max(prec, realFrac.precision());
@@ -683,7 +698,12 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 		    imaginaryFrac = null;
 
 		if (realFrac == null && imaginaryFrac == null)
-		    realFrac = BigFraction.ZERO;
+		    realFrac = F_ZERO;
+
+		if (realFrac != null)
+		    realFrac.setAlwaysProper(true);
+		if (imaginaryFrac != null)
+		    imaginaryFrac.setAlwaysProper(true);
 	    }
 	    else {
 		if (realPart != null && realPart.equals(BigDecimal.ZERO))
@@ -981,7 +1001,7 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 	 */
 	public ComplexNumber divide(final BigDecimal p, final MathContext mc) {
 	    if (rational) {
-		BigFraction pFrac = new BigFraction(p);
+		BigFraction pFrac = BigFraction.properFraction(p);
 		return new ComplexNumber(rFrac().divide(pFrac), iFrac().divide(pFrac));
 	    }
 	    else {
@@ -1021,9 +1041,16 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 	 */
 	public ComplexNumber divide(final ComplexNumber other, final MathContext mc) {
 	    ComplexNumber conjugate = other.conjugate();
-	    BigDecimal divisor = other.multiply(conjugate, mc).r();
+	    if (rational) {
+		BigFraction divisor = other.multiply(conjugate, mc).rFrac();
 
-	    return multiply(conjugate, mc).divide(divisor, mc);
+		return multiply(conjugate, mc).divide(divisor, mc);
+	    }
+	    else {
+		BigDecimal divisor = other.multiply(conjugate, mc).r();
+
+		return multiply(conjugate, mc).divide(divisor, mc);
+	    }
 	}
 
 	/**
@@ -1190,6 +1217,10 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 		@SuppressWarnings("unchecked")
 		Set<Object> set = (Set<Object>) value;
 		return fromSet(set);
+	    }
+
+	    if (value instanceof BigFraction) {
+		return real((BigFraction) value);
 	    }
 
 	    BigDecimal dValue = getDecimal(value);

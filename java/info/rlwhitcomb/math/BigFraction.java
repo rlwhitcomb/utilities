@@ -70,6 +70,7 @@
  *			Some other optimizations.
  *  17-Dec-22 rlw #559:	New "valueOf(Object)" method.
  *  20-Dec-22 rlw #559:	Address negative scale errors in BigDecimal constructor.
+ *			Numerous tweaks, including new "properFraction" static method.
  */
 package info.rlwhitcomb.math;
 
@@ -254,7 +255,7 @@ public class BigFraction extends Number
 	 * Default constructor -- a value of one.
 	 */
 	public BigFraction() {
-	    this(BigInteger.ONE, BigInteger.ONE);
+	    this(1L);
 	}
 
 	/**
@@ -299,7 +300,7 @@ public class BigFraction extends Number
 	    int pow = Math.max(value.scale(), 0);
 	    BigDecimal whole = value.scaleByPowerOfTen(pow);
 
-	    normalize(new BigInteger(whole.toPlainString()), MathUtil.tenPower(pow));
+	    normalize(whole.toBigIntegerExact(), MathUtil.tenPower(pow));
 	}
 
 	/**
@@ -480,6 +481,36 @@ public class BigFraction extends Number
 	 */
 	public BigFraction(final BigInteger numerator, final BigInteger denominator) {
 	    normalize(numerator, denominator);
+	}
+
+	/**
+	 * Construct a "proper" fraction.
+	 *
+	 * @param value A long value to convert.
+	 * @return      The equivalent fraction, marked as "always proper".
+	 */
+	public static BigFraction properFraction(final long value) {
+	    return new BigFraction(value).setAlwaysProper(true);
+	}
+
+	/**
+	 * Construct a "proper" fraction.
+	 *
+	 * @param value An integer value to convert.
+	 * @return      The equivalent fraction, marked as "always proper".
+	 */
+	public static BigFraction properFraction(final BigInteger value) {
+	    return new BigFraction(value).setAlwaysProper(true);
+	}
+
+	/**
+	 * Construct a "proper" fraction.
+	 *
+	 * @param value A decimal value to convert.
+	 * @return      The equivalent fraction, marked as "always proper".
+	 */
+	public static BigFraction properFraction(final BigDecimal value) {
+	    return new BigFraction(value).setAlwaysProper(true);
 	}
 
 	/**
