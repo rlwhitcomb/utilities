@@ -69,6 +69,7 @@
  *  26-Nov-22 rlw #559:	Add "isZero" and "precision" for help with complex rational calculations.
  *			Some other optimizations.
  *  17-Dec-22 rlw #559:	New "valueOf(Object)" method.
+ *  20-Dec-22 rlw #559:	Address negative scale errors in BigDecimal constructor.
  */
 package info.rlwhitcomb.math;
 
@@ -295,8 +296,7 @@ public class BigFraction extends Number
 	 * @param value	A decimal value to convert.
 	 */
 	public BigFraction(final BigDecimal value) {
-	    int pow = value.scale();
-// TODO: what about negative scale?
+	    int pow = Math.max(value.scale(), 0);
 	    BigDecimal whole = value.scaleByPowerOfTen(pow);
 
 	    normalize(new BigInteger(whole.toPlainString()), MathUtil.tenPower(pow));
