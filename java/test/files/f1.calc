@@ -187,7 +187,7 @@ cb4 = complex('1/2')
 ++cb4
 cb4**2
 
-cf1 = complex(frac(7))
+cf1 = complex('7/1i')
 cf2 = complex(frac(7), frac(9))
 cf3 = cf1/cf2
 cf3 * cf2
