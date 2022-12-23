@@ -191,6 +191,8 @@ cf1 = complex('7/1i')
 cf2 = complex(frac(7), frac(9))
 cf3 = cf1/cf2
 cf3 * cf2
+cf4 = complex(0, frac(7))
+cf1==cf4
 
 // more to come (to complex powers)
 

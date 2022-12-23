@@ -150,3 +150,5 @@
 >cf2 = complex (frac (7), frac (9)) -> ( 7, 9 )
 >cf3 = cf1 / cf2 -> ( 63 / 130, 49 / 130 )
 >cf3 * cf2 -> ( 0, 7 )
+>cf4 = complex (0, frac (7)) -> ( 0, 7 )
+>cf1 == cf4 -> true

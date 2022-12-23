@@ -738,6 +738,9 @@
  *	    #559: Changes for rational complex numbers.
  *	20-Dec-2022 (rlwhitcomb)
  *	    #588: Fix incorrect evaluation of XOR in double compare op selector.
+ *	22-Dec-2022 (rlwhitcomb)
+ *	    #559: Don't insist that both values be fractions before doing fraction
+ *	    calculations; either one will do.
  */
 package info.rlwhitcomb.calc;
 
@@ -3619,7 +3622,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    Object o1 = evaluate(expr1);
 	    Object o2 = evaluate(expr2);
 
-	    if (settings.rationalMode || (o1 instanceof BigFraction && o2 instanceof BigFraction)) {
+	    if (settings.rationalMode || (o1 instanceof BigFraction || o2 instanceof BigFraction)) {
 		BigFraction rFrac = toFractionValue(this, o1, expr1);
 		BigFraction iFrac = toFractionValue(this, o2, expr2);
 
@@ -5944,7 +5947,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    Object o1 = evaluate(expr1);
 		    Object o2 = evaluate(expr2);
 
-		    if (settings.rationalMode || (o1 instanceof BigFraction && o2 instanceof BigFraction)) {
+		    if (settings.rationalMode || (o1 instanceof BigFraction || o2 instanceof BigFraction)) {
 			BigFraction rFrac = toFractionValue(this, o1, expr1);
 			BigFraction iFrac = toFractionValue(this, o2, expr2);
 
@@ -7328,7 +7331,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		case "-=":
 		case "\u2212=":
 		case "\u2796=":
-		    if (settings.rationalMode || (e1 instanceof BigFraction && e2 instanceof BigFraction)) {
+		    if (settings.rationalMode || (e1 instanceof BigFraction || e2 instanceof BigFraction)) {
 			BigFraction f1 = toFractionValue(this, e1, varCtx);
 			BigFraction f2 = toFractionValue(this, e2, exprCtx);
 
@@ -7377,7 +7380,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    Object e2 = visit(exprCtx);
 
 	    try {
-		if (settings.rationalMode || (e1 instanceof BigFraction && e2 instanceof BigFraction)) {
+		if (settings.rationalMode || (e1 instanceof BigFraction || e2 instanceof BigFraction)) {
 		    BigFraction f1 = toFractionValue(this, e1, varCtx);
 		    BigFraction f2 = toFractionValue(this, e2, exprCtx);
 
