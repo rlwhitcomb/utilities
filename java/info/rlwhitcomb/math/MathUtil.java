@@ -53,6 +53,7 @@
  *  12-Oct-22 rlw #513:	Move Logging to new package.
  *                #514:	Move text resources out of "util" package to here.
  *  19-Dec-22 rlw #79:	Move BigDecimal "random" function into here.
+ *  22-Dec-22 rlw #79:	More work on fixing the distribution of random numbers.
  */
 package info.rlwhitcomb.math;
 
@@ -109,8 +110,6 @@ public final class MathUtil
 
 	/** Number of bits per base-ten digit. */
 	private static final double BITS_PER_DIGIT = Math.log(10.0) / Math.log(2.0);
-	/** A multiplier for random values that gets us closer to mean of 0.50 */
-	private static final BigDecimal RANDOM_FACTOR = new BigDecimal("1.73");
 
 	/**
 	 * Our provider of random values.
@@ -1833,10 +1832,9 @@ public final class MathUtil
 	    if (random == null) {
 		random = new SecureRandom();
 	    }
-	    BigInteger randomBits = new BigInteger((int) (prec * BITS_PER_DIGIT), random);
-	    BigDecimal dValue = new BigDecimal(randomBits, mc).multiply(RANDOM_FACTOR);
-	    if (dValue.compareTo(BigDecimal.ONE) >= 0)
-		dValue = dValue.subtract(BigDecimal.ONE, mc);
+	    int bits = (int) (prec * BITS_PER_DIGIT) + 1;
+	    BigInteger randomBits = new BigInteger(bits, random);
+	    BigDecimal dValue = new BigDecimal(randomBits, mc);
 	    return dValue.scaleByPowerOfTen(dValue.scale() - prec);
 	}
 }

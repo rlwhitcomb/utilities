@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.17.2', date: d'2022-12-22',
+      issues: [ 79 ],
+      comment: 'Improve random number distribution.'
+    },
     { version: '2.17.1', date: d'2022-12-22',
       issues: [ 559 ],
       comment: 'Tweaks for rational complex numbers.'
