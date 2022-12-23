@@ -359,6 +359,8 @@
 		Add "verifyhash.bat" to the list of Windows wrapper files.
 	    12-Dec-2022 (rlwhitcomb)
 		#577: Add "_find_and_run_class_gui.bat" to the mix for Windows GUI programs.
+	    22-Dec-2022 (rlwhitcomb)
+		#590: Add the "ci.build" property to the "build.number" properties.
 
      ========================================================================== -->
 
@@ -412,15 +414,16 @@
 		<format property="test.log.file.name" pattern="'test'.yyyy-MM-dd_HH-mm.'log'" locale="en,US"/>
 	</tstamp>
 
+	<condition property="ci.build" value="true" else="false">
+		<isset property="CI_BUILD"/>
+	</condition>
+
 	<propertyfile file="build.number" comment="Utilities Build Values">
 		<entry key="build.number" value="${build.lastrev}"/>
 		<entry key="build.date"   value="${build.date}"/>
 		<entry key="build.time"   value="${build.time}"/>
+		<entry key="build.ci"     value="${ci.build}"/>
 	</propertyfile>
-
-	<condition property="ci.build" value="true" else="false">
-		<isset property="CI_BUILD"/>
-	</condition>
 
 	<echo message="======================================================================"/>
 	<echo message=""/>

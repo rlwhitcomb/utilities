@@ -194,6 +194,8 @@
  *	    Fix wrong end-of-color tag.
  *	07-Dec-2022 (rlwhitcomb)
  *	    #552: Provide wrapper method, depending on Java version, for current thread id.
+ *	22-Dec-2022 (rlwhitcomb)
+ *	    #590: Add "CI" build information.
  */
 package info.rlwhitcomb.util;
 
@@ -321,6 +323,10 @@ public final class Environment
 	 * Whether this is a DEBUG build or not.
 	 */
 	private static boolean IS_DEBUG_BUILD = false;
+	/**
+	 * Whether this is a CI (Continuous Integration) build or not.
+	 */
+	private static boolean IS_CI_BUILD = false;
 
 	/**
 	 * Overloaded product name.
@@ -711,9 +717,10 @@ public final class Environment
 	 */
 	public static SemanticVersion programVersion() {
 	    // First build a version string compatible with the semantic versioning spec
-	    String versionSpec = String.format("%1$s%2$s+%3$s",
+	    String versionSpec = String.format("%1$s%2$s%3$s+%4$s",
 		getAppVersion(),
 		isDebugBuild() ? "-debug" : "",
+		isCIBuild() ? "-ci" : "",
 		getAppBuild());
 	    try {
 		return new SemanticVersion(versionSpec);
@@ -1471,15 +1478,26 @@ public final class Environment
 
 
 	/**
+	 * @return Whether or not this is a CI (Continuous Integration) build (set in the "build.number" file).
+	 */
+	public static boolean isCIBuild() {
+	    readBuildProperties();
+	    return IS_CI_BUILD;
+	}
+
+
+	/**
 	 * @return The product version string.
 	 *
 	 * @see #getAppVersion
 	 * @see #getAppBuild
 	 * @see #isDebugBuild
+	 * @see #isCIBuild
 	 */
 	public static String productVersion() {
 	    String debugInfo = isDebugBuild() ? Intl.getString("util#env.debug") : "";
-	    return Intl.formatString("util#env.versionBuild", getAppVersion(), getAppBuild(), debugInfo);
+	    String ciInfo    = isCIBuild()    ? Intl.getString("util#env.ci")    : "";
+	    return Intl.formatString("util#env.versionBuild", getAppVersion(), getAppBuild(), debugInfo, ciInfo);
 	}
 
 
@@ -1712,6 +1730,12 @@ public final class Environment
 		    IS_DEBUG_BUILD = !CharUtil.getBooleanValue(releaseBuild);
 		else
 		    IS_DEBUG_BUILD = false;
+
+		String ciBuild = buildProperties.getProperty("build.ci");
+		if (ciBuild != null)
+		    IS_CI_BUILD = CharUtil.getBooleanValue(ciBuild);
+		else
+		    IS_CI_BUILD = false;
 	    }
 	}
 
