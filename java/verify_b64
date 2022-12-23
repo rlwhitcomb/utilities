@@ -1,7 +1,7 @@
 #!/bin/bash
 b64 -e images/backspace_32.png -o back.b64
 b64 -d back.b64 -o back.png
-cmp back.png images/backspace_32.png
+cmp -noc back.png images/backspace_32.png
 if [[ $? -eq 0 ]]; then
   rm back.b64 back.png
   exit 0
