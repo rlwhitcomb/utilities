@@ -343,6 +343,11 @@
 >---------
 >define _junk5b05d -> junk[0]
 >=========
+>info.version.major is integer -> true
+>info.locale.name is "string" -> true
+>info.cpu.cores is "integer" -> true
+>info.version is object -> true
+>info.locale.weekdays is `array` -> true
 >settings.trigMode -> "RADIANS"
 >Trig mode is now “DEGREES”.
 >settings.trigMode -> "DEGREES"

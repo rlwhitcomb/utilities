@@ -481,6 +481,8 @@
  *	19-Dec-2022 (rlwhitcomb)
  *	    #79: Allow just "( )" on "random".
  *	    #588: New case selector that combines "compareOp" with a "boolOp" for range selection.
+ *	23-Dec-2022 (rlwhitcomb)
+ *	    #441: Grammar changes for "is" operator.
  */
 
 grammar Calc;
@@ -589,6 +591,7 @@ expr
    | complex                             # complexValueExpr
    | var                                 # varExpr
    | expr K_HAS ( member | ( LBRACK expr RBRACK ) ) # hasExpr
+   | expr K_IS ( STRING | ISTRING | TYPES ) # isExpr
    | LPAREN expr RPAREN                  # parenExpr
    | K_ABS expr1                         # absExpr
    | K_SIN expr1                         # sinExpr
@@ -915,6 +918,7 @@ id
    : ID
    | MODES
    | REPLACE_MODES
+   | TYPES
    | BASE
    ;
 
@@ -928,6 +932,7 @@ wildId
    : WILD_ID
    | MODES
    | REPLACE_MODES
+   | TYPES
    | BASE
    ;
 
@@ -1030,6 +1035,8 @@ DATE_CONST
 K_MOD      : 'mod' | 'MOD' | 'Mod' ;
 
 K_HAS      : 'has' | 'HAS' | 'Has' ;
+
+K_IS       : 'is'  | 'IS'  | 'Is' ;
 
 K_ABS      : 'abs' | 'ABS' | 'Abs' ;
 
@@ -1258,6 +1265,20 @@ K_NEXT     : 'next' | 'NEXT' | 'Next' ;
 
 K_TIMETHIS : 'timethis' | 'TIMETHIS' | 'TimeThis' | 'Timethis' | 'timeThis' ;
 
+TYPES    : 'null'       | 'NULL'       | 'Null'
+         | 'string'     | 'STRING'     | 'String'
+         | 'integer'    | 'INTEGER'    | 'Integer'
+         | 'float'      | 'FLOAT'      | 'Float'
+         | 'fraction'   | 'FRACTION'   | 'Fraction'
+         | K_COMPLEX
+         | 'boolean'    | 'BOOLEAN'    | 'Boolean'
+         | 'array'      | 'ARRAY'      | 'Array'
+         | 'object'     | 'OBJECT'     | 'Object'
+         | 'set'        | 'SET'        | 'Set'
+         | 'collection' | 'COLLECTION' | 'Collection'
+         | 'function'   | 'FUNCTION'   | 'Function'
+         | 'unknown'    | 'UNKNOWN'    | 'Unknown'
+         ;
 
 /* This has to include the localvar and globalvar variants */
 WILD_ID : ( '$' | NAME_START_CHAR | '?' | '*' ) ( '#' | NAME_CHAR | '?' | '*' ) * {allowWild}?

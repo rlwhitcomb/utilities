@@ -741,6 +741,8 @@
  *	22-Dec-2022 (rlwhitcomb)
  *	    #559: Don't insist that both values be fractions before doing fraction
  *	    calculations; either one will do.
+ *	24-Dec-2022 (rlwhitcomb)
+ *	    #441: Implement "is" operator.
  */
 package info.rlwhitcomb.calc;
 
@@ -3676,6 +3678,28 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    ObjectScope obj = (ObjectScope) source;
 
 	    return Boolean.valueOf(isDefinedRecursively(obj, key, settings.ignoreNameCase));
+	}
+
+	@Override
+	public Object visitIsExpr(CalcParser.IsExprContext ctx) {
+	    boolean ret = false;
+	    Object value = evaluate(ctx.expr());
+	    Typeof type = typeof(value);
+	    String valueType;
+	    TerminalNode string  = ctx.STRING();
+	    TerminalNode istring = ctx.ISTRING();
+	    TerminalNode types   = ctx.TYPES();
+
+	    if (string != null)
+		valueType = getRawString(string.getText());
+	    else if (istring != null)
+		valueType = getIStringValue(this, istring, ctx);
+	    else
+		valueType = types.getText();
+
+	    ret = type.toString().equalsIgnoreCase(valueType);
+
+	    return Boolean.valueOf(ret);
 	}
 
 	@Override

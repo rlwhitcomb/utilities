@@ -216,6 +216,12 @@ cast(junk[0], 'function')
 typeof(_junk5b05d)
 :var _junk5b05d
 
+info.version.major is integer
+info.locale.name is "string"
+info.cpu.cores is "integer"
+info.version is object
+info.locale.weekdays is `array`
+
 settings.trigMode
 :degrees
 settings.trigMode

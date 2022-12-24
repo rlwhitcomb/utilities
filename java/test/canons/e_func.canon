@@ -20,8 +20,8 @@
 >Defining function “g4(a,...)” = { a + _1 }
 >g4(1, 2) -> 3
 >set = {os: {ver: '7.3', major: 7, minor: 3}} -> { os: { ver: "7.3", major: 7, minor: 3 } }
->Defining function “is” = { set.os }
->is().ver -> "7.3"
+>Defining function “iss” = { set.os }
+>iss().ver -> "7.3"
 >Defining function “l(a)” = {
 > if a & 1 { leave 'odd' } else { leave 'even' }
 >}

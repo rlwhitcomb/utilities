@@ -748,7 +748,7 @@ or<br>
     </tr>
     </thead>
     <tbody>
-    <tr><td>38</td>
+    <tr><td>39</td>
       <td><code>pi</code>, <code>&#x1D6D1;</code>, <code>e</code>, <code>&#x2107;</code>, or <code>&#x2147;</code><br>
           <code>phi</code>, <code>&#x03C6;</code>, <code>&#x03D5;</code><br>
           <code>PHI</code>, <code>&#x03A6;</code><br>
@@ -779,12 +779,13 @@ or<br>
           all the current environment variables (such as <code>PATH</code>)<br>
           the current Calc settings (<code>trigMode</code>, <code>silent</code>, etc.)<br>
           that constant value, as in <code>"Hello"</code>, <code>127</code>, or <code>0xA8</code></td><td>N/A</td></tr>
-    <tr><td>37</td><td><code>{</code> (&nbsp;<i>key:value pairs</i>&nbsp;) <code>}</code></td><td>define an object</td><td>left to right</td></tr>
-    <tr><td>36</td><td><code>[</code> (&nbsp;<i>expr list</i>&nbsp;) <code>]</code><br><i>var</i> <code>[</code> <i>expr</i> <code>]</code> or <i>var</i>&nbsp;<code>&#x2080;</code> .. <code>&#x2089;</code></td><td>define an array,<br>or access elements of an array, string, or object</td><td>left to right</td></tr>
-    <tr><td>35</td><td><code>{</code> (&nbsp;<i>expr list</i>&nbsp;) <code>}</code></td><td>define a set</td><td>left to right</td></tr>
-    <tr><td>34</td><td><code>(</code> <i>expr</i> <code>,</code> <i>expr</i> <code>)</code></td><td>define a complex number</td><td>left to right</td></tr>
-    <tr><td>33</td><td><i>object</i> <code>.</code> <i>member</i></td><td>access an object member</td><td>left to right</td></tr>
-    <tr><td>32</td><td><i>expr</i> <code>HAS</code> ( <i>id</i> | <i>string</i> | <code>[</code> <i>expr</i> <code>]</code> )</td><td>safely check for member or index</td><td>left to right</td></tr>
+    <tr><td>38</td><td><code>{</code> (&nbsp;<i>key:value pairs</i>&nbsp;) <code>}</code></td><td>define an object</td><td>left to right</td></tr>
+    <tr><td>37</td><td><code>[</code> (&nbsp;<i>expr list</i>&nbsp;) <code>]</code><br><i>var</i> <code>[</code> <i>expr</i> <code>]</code> or <i>var</i>&nbsp;<code>&#x2080;</code> .. <code>&#x2089;</code></td><td>define an array,<br>or access elements of an array, string, or object</td><td>left to right</td></tr>
+    <tr><td>36</td><td><code>{</code> (&nbsp;<i>expr list</i>&nbsp;) <code>}</code></td><td>define a set</td><td>left to right</td></tr>
+    <tr><td>35</td><td><code>(</code> <i>expr</i> <code>,</code> <i>expr</i> <code>)</code></td><td>define a complex number</td><td>left to right</td></tr>
+    <tr><td>34</td><td><i>object</i> <code>.</code> <i>member</i></td><td>access an object member</td><td>left to right</td></tr>
+    <tr><td>33</td><td><i>expr</i> <code>HAS</code> ( <i>id</i> | <i>string</i> | <code>[</code> <i>expr</i> <code>]</code> )</td><td>safely check for member or index</td><td>left to right</td></tr>
+    <tr><td>32</td><td><i>expr</i> <code>IS</code> ( <i>string</i> | <i>type_id</i> )</td><td>check if expression is the given type (same as <code>typeof</code>)</td><td>left to right</td></tr>
     <tr><td>31</td><td><code>( </code><i>expr</i><code> )</code></td><td>group an expression</td><td>N/A</td></tr>
     <tr><td rowspan="88">30</td>
             <td><code>ABS</code>&nbsp;<i>expr</i></td><td>absolute value</td><td rowspan="88">left to right</td></tr>
@@ -987,11 +988,11 @@ or<br>
   <p>The <code>random</code> function will generate a random value, of the current decimal precision, with a value between 0 and 1 (exclusive).
      If a seed expression is given, the bytes of that value will be used to seed the random number generator, which will produce a predictable
      value every time the same seed is used (useful for testing purposes), otherwise a different value will be returned every time (without the seed value).
-  <p>The <i>type</i> value returned from <code>typeof</code>, which can be the optional second parameter to <code>cast</code>
-     can be one of the following (string) values:
+  <p>The <i>type</i> value returned from <code>typeof</code>, which can be the optional second parameter to <code>cast</code>, or the second value
+     for the <code>IS</code> operator can be one of the following (string) values (or without quotes for <code>IS</code>):
   <p class="indent"><code>"null"</code>, <code>"string</code>, <code>"integer"</code>, <code>"float"</code>,
      <code>"fraction"</code>, <code>"complex"</code>, <code>"boolean"</code>, <code>"array"</code>, <code>"object"</code>,
-     <code>"function"</code>, or <code>"unknown"</code>.
+     <code>"set"</code>, <code>"collection"</code>, <code>"function"</code>, or <code>"unknown"</code>.
   <p>The <code>round</code> function rounds to the number of places after the decimal, with a negative value rounding to the
      left of the decimal point.  For example: <code>round(1.335577,2) &#x21E8; 1.34</code>, and
      <code>round(1234567.890,-3) &#x21E8; 1235000</code>.

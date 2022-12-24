@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.17.3', date: d'2022-12-24',
+      issues: [ 441 ],
+      comment: 'Implement "is" operator as convenience for "typeof".
+    },
     { version: '2.17.2', date: d'2022-12-22',
       issues: [ 79 ],
       comment: 'Improve random number distribution.'
