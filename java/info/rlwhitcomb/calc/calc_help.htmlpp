@@ -749,7 +749,7 @@ or<br>
     </thead>
     <tbody>
     <tr><td>39</td>
-      <td><code>pi</code>, <code>&#x1D6D1;</code>, <code>e</code>, <code>&#x2107;</code>, or <code>&#x2147;</code><br>
+      <td><code>pi</code>, <code>&#x1D6D1;</code>, <code>e</code>, <code>&#x2107;</code>, <code>&#x2147;</code>, or <code>&#x212f;</code><br>
           <code>phi</code>, <code>&#x03C6;</code>, <code>&#x03D5;</code><br>
           <code>PHI</code>, <code>&#x03A6;</code><br>
 	  <code>i</code>, <code>&#x0131;</code>, <code>&#x0399;</code>, <code>&#x03B9;</code>, or <code>&#x2148;</code><br>
@@ -780,7 +780,8 @@ or<br>
           the current Calc settings (<code>trigMode</code>, <code>silent</code>, etc.)<br>
           that constant value, as in <code>"Hello"</code>, <code>127</code>, or <code>0xA8</code></td><td>N/A</td></tr>
     <tr><td>38</td><td><code>{</code> (&nbsp;<i>key:value pairs</i>&nbsp;) <code>}</code></td><td>define an object</td><td>left to right</td></tr>
-    <tr><td>37</td><td><code>[</code> (&nbsp;<i>expr list</i>&nbsp;) <code>]</code><br><i>var</i> <code>[</code> <i>expr</i> <code>]</code> or <i>var</i>&nbsp;<code>&#x2080;</code> .. <code>&#x2089;</code></td><td>define an array,<br>or access elements of an array, string, or object</td><td>left to right</td></tr>
+    <tr><td>37</td><td><code>[</code> (&nbsp;<i>expr list</i>&nbsp;) <code>]</code><br><i>var</i> <code>[</code> <i>expr</i> <code>]</code> or <i>var</i>&nbsp;<code>&#x2080;</code> .. <code>&#x2089;</code>
+         or <code>&#x23e8;</code></td><td>define an array,<br>or access elements of an array, string, or object</td><td>left to right</td></tr>
     <tr><td>36</td><td><code>{</code> (&nbsp;<i>expr list</i>&nbsp;) <code>}</code></td><td>define a set</td><td>left to right</td></tr>
     <tr><td>35</td><td><code>(</code> <i>expr</i> <code>,</code> <i>expr</i> <code>)</code></td><td>define a complex number</td><td>left to right</td></tr>
     <tr><td>34</td><td><i>object</i> <code>.</code> <i>member</i></td><td>access an object member</td><td>left to right</td></tr>
@@ -840,8 +841,8 @@ or<br>
             <tr><td><code>SORT</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>flags_expr</i>&nbsp;)</td><td>sort the object, array, or set, optionally ignoring case,<br>or sorting objects by key instead of value,<br>returning a new sorted object</td></tr>
             <tr><td><code>TRIM</code> or <code>LTRIM</code> or <code>RTRIM</code> <i>expr</i></td><td>trim all, leading, or trailing whitespace</td></tr>
             <tr><td><code>PAD</code> or <code>LPAD</code> or <code>RPAD</code>&nbsp;<i>var</i>&nbsp;<code>,</code> <i>expr</i>&nbsp;( <code>,</code><i>expr</i> )</td><td>pad an array or string to the given width<br>with 0 or space (default) or the given value/character</td></tr>
-            <tr><td><code>FIB</code>&nbsp;<i>expr</i></td><td>Fibonacci number</td></tr>
-            <tr><td><code>Bn</code>&nbsp;<i>expr</i></td><td>Bernoulli number</td></tr>
+            <tr><td><code>FIB</code>, <code>&#x1D439;</code>, or <code>&#x2131;</code>&nbsp;<i>expr</i></td><td>Fibonacci number</td></tr>
+            <tr><td><code>Bn</code>, <code>&#x1D435;</code>, or <code>&#x212C;</code>&nbsp;<i>expr</i></td><td>Bernoulli number</td></tr>
             <tr><td><code>DEC</code>&nbsp;<i>expr</i></td><td>convert string or fraction to decimal number</td></tr>
             <tr><td><code>FRAC</code>&nbsp;<i>num</i><code>,</code>&nbsp;<i>den</i><br>or <i>int</i><code>,</code><i>num</i><code>,</code><i>den</i><br>or <i>string</i></td><td>construct a rational fraction</td></tr>
             <tr><td><code>COMPLEX</code>&nbsp;<i>r</i><code>,</code>&nbsp;<i>i</i><br>or <i>expr</i></td><td>construct a complex number</td></tr>
@@ -885,7 +886,8 @@ or<br>
     <tr><td>23</td><td><code>~~</code>&nbsp;<i>expr</i></td><td>convert to number</td><td>right to left</td></tr>
     <tr><td>22</td><td><code>~</code>&nbsp;<i>expr</i></td><td>bitwise NOT</td><td>right to left</td></tr>
     <tr><td>21</td><td><i>expr</i>&nbsp;<code>!</code></td><td>factorial</td><td>left to right</td></tr>
-    <tr><td>20</td><td><i>expr<sub>1</sub></i>&nbsp;&nbsp;<code>**</code>, <code>&times;&times;</code>, <code>&#x2217;&#x2217;</code>, <code>&#x2715;&#x2715;</code>, or <code>&#x2716;&#x2716;</code>&nbsp;&nbsp;<i>expr<sub>2</sub></i><br>or&nbsp;<i>expr</i>&nbsp;&#x2070; .. &#x2079;</td><td><i>expr<sub>1</sub></i> to <i>expr<sub>2</sub></i> power<br>or <i>expr</i> to given power</td><td>right to left</td></tr>
+    <tr><td>20</td><td><i>expr<sub>1</sub></i>&nbsp;&nbsp;<code>**</code>, <code>&times;&times;</code>, <code>&#x2217;&#x2217;</code>, <code>&#x2715;&#x2715;</code>, <code>&#x2716;&#x2716;</code>
+        <code>&#x2303;</code>, <code>&#x2B61;</code>, or <code>&#x2191;</code>&nbsp;&nbsp;<i>expr<sub>2</sub></i><br>or&nbsp;<i>expr</i>&nbsp;&#x2070; .. &#x2079;</td><td><i>expr<sub>1</sub></i> to <i>expr<sub>2</sub></i> power<br>or <i>expr</i> to given power</td><td>right to left</td></tr>
     <tr><td>19</td><td>
         <i>expr</i>&nbsp;&nbsp;<code>*</code>, <code>&times;</code>, <code>&#x2217;</code>, <code>&#x2715;</code>, or <code>&#x2716;</code>&nbsp;&nbsp;<i>expr</i><br>
         <i>expr</i>&nbsp;&nbsp;<code>/</code>, <code>&divide;</code>, <code>&#x2215;</code>, or <code>&#x2797;</code>&nbsp;&nbsp;<i>expr</i><br>
@@ -937,7 +939,8 @@ or<br>
     <tr><td>8</td><td><i>expr</i>&nbsp;<code> ?: </code>&nbsp;<i>expr</i><br><i>expr</i>&nbsp;<code> ?! </code><i>expr</i></td><td>select alternate for <code><i>false</i></code> value<br>or select an alternate for <code><i>true</i></code> value</td><td>left to right</td></tr>
     <tr><td>7</td><td><i>expr</i>&nbsp;<code> ? </code>&nbsp;<i>expr</i>&nbsp;<code> : </code>&nbsp;<i>expr</i></td><td>select one or the other value</td><td>right to left</td></tr>
     <tr><td>6</td><td><i>var</i>&nbsp;<code> = </code>&nbsp;<i>expr</i></td><td>assign <i>expr</i> value to variable</td><td>right to left</td></tr>
-    <tr><td>5</td><td><i>var</i>&nbsp;<code> **=</code>,<code> &times;&times;=</code>,<code> &#x2217;&#x2217;=</code>,<code> &#x2715;&#x2715;=</code>, or<code> &#x2716;&#x2716;= </code>&nbsp;<i>expr</i></td><td><i>var</i> to <i>expr</i> power, assign to <i>var</i></td><td>right to left</td></tr>
+    <tr><td>5</td><td><i>var</i>&nbsp;<code> **=</code>,<code> &times;&times;=</code>,<code> &#x2217;&#x2217;=</code>,<code> &#x2715;&#x2715;=</code>,<code> &#x2716;&#x2716;=</code>,
+        <code> &#x2303;=</code>,<code> &#x2B61;=</code>, or<code>&#x2191;=</code>&nbsp;<i>expr</i></td><td><i>var</i> to <i>expr</i> power, assign to <i>var</i></td><td>right to left</td></tr>
     <tr><td>4</td><td>
         <i>var</i>&nbsp;<code> *=</code>,<code> &times;=</code>,<code> &#x2217;=</code>,<code> &#x2715;=</code>, or<code> &#x2716;= </code>&nbsp;<i>expr</i><br>
         <i>var</i>&nbsp;<code> /=</code>,<code> &divide;=</code>,<code> &#x2215;=</code>, or<code> &#x2797;= </code>&nbsp;<i>expr</i><br>
@@ -1213,7 +1216,7 @@ or<br>
   retype the same expression.
   <p>The syntax for a function definition is:
   <p class="indent">
-     <code>def</code> | <code>define</code>&nbsp;<i>name</i> <i>optional parameter list</i> <code>= {</code> <i>expressions or statements</i> <code>}</code>
+     <code>def</code> | <code>define</code>&nbsp;<i>name</i> <i>optional parameter list</i> <code>=</code> | <code>&#x21A6;</code>&nbsp;<code>{</code> <i>expressions or statements</i> <code>}</code>
   </p>
   <p>The optional parameter list looks like:
   <p class="indent">

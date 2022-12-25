@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.17.4', date: d'2022-12-25',
+      issues: [ 83 ],
+      comment: 'More Unicode aliases for several built-in values and functions.'
+    },
     { version: '2.17.3', date: d'2022-12-24',
       issues: [ 441 ],
       comment: 'Implement "is" operator as convenience for "typeof".

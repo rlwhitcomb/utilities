@@ -483,6 +483,8 @@
  *	    #588: New case selector that combines "compareOp" with a "boolOp" for range selection.
  *	23-Dec-2022 (rlwhitcomb)
  *	    #441: Grammar changes for "is" operator.
+ *	24-Dec-2022 (rlwhitcomb)
+ *	    #83: Support more Unicode characters in various contexts.
  */
 
 grammar Calc;
@@ -515,7 +517,7 @@ exprStmt
    ;
 
 defineStmt
-   : K_DEFINE id formalParamList ? ASSIGN stmtBlock
+   : K_DEFINE id formalParamList ? ( ASSIGN | '\u21A6' ) stmtBlock
    ;
 
 constStmt
@@ -1148,9 +1150,15 @@ K_PAD      : 'pad'  | 'PAD'  | 'Pad'
            | 'rpad' | 'RPAD' | 'Rpad' | 'RPad' | 'rPad'
            ;
 
-K_FIB      : 'fib' | 'FIB' | 'Fib' ;
+K_FIB      : 'fib' | 'FIB' | 'Fib'
+           | '\u{1D439}'
+           | '\u2131'
+           ;
 
-K_BN       : 'bn' | 'BN' | 'Bn' ;
+K_BN       : 'bn' | 'BN' | 'Bn'
+           | '\u{1D435}'
+           | '\u212C'
+           ;
 
 K_DEC      : 'dec' | 'DEC' | 'Dec' ;
 
@@ -1352,11 +1360,13 @@ POWERS
        ;
 
 INDEXES
-       : [\u2080-\u2089]
+       : [\u2080-\u2089] // 0-9
+       | '\u23e8'        // 10
        ;
 
 POW_OP
        : ( '**' | '\u00D7\u00D7' | '\u2217\u2217' | '\u2715\u2715' | '\u2716\u2716' )
+       | ( '\u2303' | '\u2B61' | '\u2191' )
        ;
 
 MULT_OP
@@ -1368,6 +1378,7 @@ MULT_OP
 
 POW_ASSIGN
        : ( '**=' | '\u00D7\u00D7=' | '\u2217\u2217=' | '\u2715\u2715=' | '\u2716\u2716=' )
+       | ( '\u2303=' | '\u2B61=' | '\u2191=' )
        ;
 
 MULT_ASSIGN

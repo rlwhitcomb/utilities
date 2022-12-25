@@ -119,6 +119,8 @@
  *	    Rename "toNonNullString" to "getNonNullString".
  *	17-Dec-2022 (rlwhitcomb)
  *	    #572: Regularize member name access.
+ *	24-Dec-2022 (rlwhitcomb)
+ *	    #83: One more index Unicode character.
  */
 package info.rlwhitcomb.calc;
 
@@ -530,7 +532,11 @@ class LValueContext
 
 		if (expr == null) {
 		    String indexString = arrVarCtx.INDEXES().getText();
-		    index = (int) indexString.charAt(0) - 0x2080;
+		    char indexCh = indexString.charAt(0);
+		    if (indexCh == '\u23E8')
+			index = 10;
+		    else
+			index = (int) (indexCh - 0x2080);
 		}
 		else {
 		    Object indexValue = visitor.evaluate(expr);

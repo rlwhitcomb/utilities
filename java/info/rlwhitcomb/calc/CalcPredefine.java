@@ -54,6 +54,8 @@
  *	    #393: Cleanup imports.
  *	28-Jul-2022 (rlwhitcomb)
  *	    #429: Make "cpu" memory values into dynamic suppliers; add "usedmemory".
+ *	25-Dec-2022 (rlwhitcomb)
+ *	    #83: Another alias for "e".
  */
 package info.rlwhitcomb.calc;
 
@@ -96,7 +98,7 @@ class CalcPredefine
 	 * Aliases for "e".
 	 */
 	private static final String[] E_ALIASES = {
-	    "\u2107", "\u2147"
+	    "\u2107", "\u2147", "\u212F"
 	};
 
 	/**
