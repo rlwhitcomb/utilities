@@ -36,9 +36,12 @@
  *  05-Sep-22		Properly deal with wild card letters.
  *  06-Sep-22		Slight optimization if there are no wildcards.
  *  15-Sep-22 rlw #478:	Also allow '_' as wild character.
+ *  27-Dec-22 rlw	Add method to use Levenshtein distance to find words
+ *			"close" to an input string.
  */
 package info.rlwhitcomb.wordfind;
 
+import info.rlwhitcomb.string.StringUtil;
 import info.rlwhitcomb.util.CharUtil;
 import info.rlwhitcomb.util.Intl;
 
@@ -453,6 +456,40 @@ public class Dictionary
 	    } while (maxWordSize >= 0 && randomWord.length() > maxWordSize);
 
 	    return randomWord;
+	}
+
+	/**
+	 * Get the list of all dictionary words that are "closest" to the given input string
+	 * (which is presumably a misspelled word).
+	 *
+	 * @param input   Input string to get alternatives for.
+	 * @param maxDist The "closeness" value we will tolerate.
+	 * @return        List of words in the dictionary that are within the given Levenshtein
+	 *                distance of the input.
+	 * @see StringUtil#levenshteinDistance
+	 */
+	public List<String> findClosestWords(final String input, final int maxDist) {
+	    List<String> result = new ArrayList<>();
+	    @SuppressWarnings("unchecked")
+	    ArrayList<String>[] lists = (ArrayList<String>[]) new ArrayList[maxDist + 1];
+	    for (int dist = 0; dist <= maxDist; dist++) {
+		lists[dist] = new ArrayList<>();
+	    }
+
+	    for (int i = 0; i < regularWords.size(); i++) {
+		String word = regularWords.get(i).word;
+		int dist = StringUtil.levenshteinDistance(input, word);
+		if (dist <= maxDist)
+		    lists[dist].add(word);
+		// Special case if the word is valid
+		if (dist == 0)
+		    break;
+	    }
+
+	    for (int i = 0; i <= maxDist; i++)
+		result.addAll(lists[i]);
+
+	    return result;
 	}
 
 	private void displayNumbers(final PrintStream ps, final int[] indexes, final String which) {

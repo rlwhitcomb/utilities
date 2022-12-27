@@ -248,6 +248,8 @@
  *	    #541: Install SecurityManager to capture System.exit from tested classes.
  *	30-Oct-2022 (rlwhitcomb)
  *	    #538: Implement "$noenv" and "$envopt" directives.
+ *	27-Dec-2022 (rlwhitcomb)
+ *	    Make both the test class constructor and "main" methods accessible before invoking.
  */
 package info.rlwhitcomb.tester;
 
@@ -575,6 +577,8 @@ public class Tester
 		Environment.loadProgramInfo(testClass);
 
 		constructor = testClass.getDeclaredConstructor();
+		constructor.setAccessible(true);
+
 		testObject = constructor.newInstance();
 
 		if (Testable.class.isInstance(testObject)) {
@@ -593,6 +597,7 @@ public class Tester
 		}
 		else {
 		    main = testClass.getDeclaredMethod("main", String[].class);
+		    main.setAccessible(true);
 
 		    setCurrentVersion(new Version(Environment.getAppVersion()));
 

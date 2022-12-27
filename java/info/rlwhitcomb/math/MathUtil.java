@@ -54,6 +54,7 @@
  *                #514:	Move text resources out of "util" package to here.
  *  19-Dec-22 rlw #79:	Move BigDecimal "random" function into here.
  *  22-Dec-22 rlw #79:	More work on fixing the distribution of random numbers.
+ *  27-Dec-22 rlw	New varargs "minimum" and "maximum" (int) methods.
  */
 package info.rlwhitcomb.math;
 
@@ -1837,4 +1838,33 @@ public final class MathUtil
 	    BigDecimal dValue = new BigDecimal(randomBits, mc);
 	    return dValue.scaleByPowerOfTen(dValue.scale() - prec);
 	}
+
+	/**
+	 * Calculate the minimum of a series of integers.
+	 *
+	 * @param values The set of values to inspect.
+	 * @return       Minimum value of the input set.
+	 */
+	public static int minimum(final int... values) {
+	    int min = Integer.MAX_VALUE;
+	    for (int value : values) {
+		min = Math.min(min, value);
+	    }
+	    return min;
+	}
+
+	/**
+	 * Calculate the maximum of a series of integers.
+	 *
+	 * @param values The set of values to inspect.
+	 * @return       Maximum value of the input set.
+	 */
+	public static int maximum(final int... values) {
+	    int max = Integer.MIN_VALUE;
+	    for (int value : values) {
+		max = Math.max(max, value);
+	    }
+	    return max;
+	}
+
 }
