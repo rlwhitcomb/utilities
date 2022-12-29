@@ -288,3 +288,31 @@ sum_of_cubes(795, -14219049725358227, 14197965759741571, 2337348783323923)
 sum_of_cubes(906, -74924259395610397, 72054089679353378, 35961979615356503)
 sum_of_cubes(993, 8832050461219, -4404654595589, -8450650557413)
 }
+
+/*
+ * Demonstration of the Collatz Conjecture
+ *
+ * Algorithm: if the number is even, divide by two
+ * if the number is odd, multiply by 3 and add one
+ *
+ * The conjecture is that every number (eventually)
+ * end up in the 4-2-1-4 loop. This is unproven and
+ * no one knows even how to prove or disprove it.
+ */
+define collatz(n) = {
+   var steps = 0
+   var v = n
+   while v <> 1 {
+       case v % 2 of {
+          0: v \= 2,
+          1: v = v * 3 + 1
+       }
+       ++steps
+   }
+   steps
+}
+
+:results on {
+loop over 1..200 `collatz($__) -> ${collatz(__)}`@q
+}
+
