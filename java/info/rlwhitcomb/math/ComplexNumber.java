@@ -63,6 +63,8 @@
  *	    #559: Implement rational mode.
  *	20-Dec-2022 (rlwhitcomb)
  *	    #559: More fractional forms; always represents fractions as "proper".
+ *	31-Dec-2022 (rlwhitcomb)
+ *	    #558: Make F_ZERO public.
  */
 package info.rlwhitcomb.math;
 
@@ -189,7 +191,7 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 	/**
 	 * A fraction value of zero, with "alwaysProper" set.
 	 */
-	private static final BigFraction F_ZERO = BigFraction.properFraction(0);
+	public static final BigFraction F_ZERO = BigFraction.properFraction(0);
 
 
 	/**

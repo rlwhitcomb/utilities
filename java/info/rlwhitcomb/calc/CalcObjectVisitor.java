@@ -743,6 +743,8 @@
  *	    calculations; either one will do.
  *	24-Dec-2022 (rlwhitcomb)
  *	    #441: Implement "is" operator.
+ *	29-Dec-2022 (rlwhitcomb)
+ *	    #558: Beginnings of "quaternion" support.
  */
 package info.rlwhitcomb.calc;
 
@@ -754,6 +756,7 @@ import info.rlwhitcomb.math.ComplexNumber;
 import info.rlwhitcomb.math.DateUtil;
 import info.rlwhitcomb.math.MathUtil;
 import info.rlwhitcomb.math.NumericUtil;
+import info.rlwhitcomb.math.Quaternion;
 import info.rlwhitcomb.util.*;
 import net.iharder.b64.Base64;
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -3639,6 +3642,37 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	@Override
+	public Object visitQuaternionValueExpr(CalcParser.QuaternionValueExprContext ctx) {
+	    CalcParser.QuaternionContext quatern = ctx.quaternion();
+	    CalcParser.ExprContext expr1 = quatern.expr(0);
+	    CalcParser.ExprContext expr2 = quatern.expr(1);
+	    CalcParser.ExprContext expr3 = quatern.expr(2);
+	    CalcParser.ExprContext expr4 = quatern.expr(3);
+	    Object o1 = evaluate(expr1);
+	    Object o2 = evaluate(expr2);
+	    Object o3 = evaluate(expr3);
+	    Object o4 = evaluate(expr4);
+
+	    if (settings.rationalMode ||
+		(o1 instanceof BigFraction || o2 instanceof BigFraction || o3 instanceof BigFraction || o4 instanceof BigFraction)) {
+		BigFraction aFrac = toFractionValue(this, o1, expr1);
+		BigFraction bFrac = toFractionValue(this, o2, expr2);
+		BigFraction cFrac = toFractionValue(this, o3, expr3);
+		BigFraction dFrac = toFractionValue(this, o4, expr4);
+
+		return new Quaternion(aFrac, bFrac, cFrac, dFrac);
+	    }
+	    else {
+		BigDecimal a = toDecimalValue(this, o1, settings.mc, expr1);
+		BigDecimal b = toDecimalValue(this, o2, settings.mc, expr2);
+		BigDecimal c = toDecimalValue(this, o3, settings.mc, expr3);
+		BigDecimal d = toDecimalValue(this, o4, settings.mc, expr4);
+
+		return new Quaternion(a, b, c, d);
+	    }
+	}
+
+	@Override
 	public Object visitVarExpr(CalcParser.VarExprContext ctx) {
 	    LValueContext lValue = getLValue(ctx.var());
 	    return evaluate(ctx, lValue.getContextObject(this));
@@ -5984,6 +6018,39 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			return new ComplexNumber(r, i);
 		    }
 		}
+	    }
+	    catch (Exception ex) {
+		throw new CalcExprException(ex, ctx);
+	    }
+	}
+
+	@Override
+	public Object visitQuaternionFuncExpr(CalcParser.QuaternionFuncExprContext ctx) {
+	    try {
+		CalcParser.Expr4Context e4ctx = ctx.expr4();
+
+		if (e4ctx != null) {
+// TODO 4 values
+		}
+		else {
+		    CalcParser.Expr3Context e3ctx = ctx.expr3();
+
+		    if (e3ctx != null) {
+// TODO 3 values
+		    }
+		    else {
+			CalcParser.Expr2Context e2ctx = ctx.expr2();
+
+			if (e2ctx != null) {
+// TODO 2 values
+			}
+			else {
+			    CalcParser.Expr1Context e1ctx = ctx.expr1();
+// TODO 1 value
+			}
+		    }
+		}
+		/* ?? */return null;
 	    }
 	    catch (Exception ex) {
 		throw new CalcExprException(ex, ctx);

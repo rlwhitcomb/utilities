@@ -190,8 +190,8 @@ h2 {
         <li>Variables can be used for storage of values for later use.</li>
         <li>Object, array, and set structures for storage of multiple values.</li>
         <li>Therefore, JSON objects are a native part of the language.</li>
-        <li>Built-in support for real fractions and complex numbers, with matrix and
-            <a href="https://en.wikipedia.org/wiki/Quaternion">quaternion</a> support planned.</li>
+        <li>Built-in support for real fractions, complex numbers, and
+            <a href="https://en.wikipedia.org/wiki/Quaternion">quaternions</a>, with matrix support planned.</li>
         <li>String functions for doing text manipulation, including <a href="https://en.wikipedia.org/wiki/String_interpolation">string interpolation</a>.</li>
         <li>Simple file reading and writing with powerful string matching functions make writing text transformation programs very easy.</li>
         <li>The ability to do calculations straight from the command line, from a text file, in a convenient REPL mode, or in a GUI window.</li>
@@ -221,7 +221,7 @@ h2 {
      <ul><li>Arithmetic to thousands of digits precision</li>
          <li>More powerful <code>case</code> statement selectors than I have seen</li>
 	 <li>All the latest operators from many languages</li>
-	 <li>Rational fractions and complex numbers as native data types, along with objects, arrays, and sets as standard data collections</li>
+	 <li>Rational fractions, complex numbers, and quaternions as native data types, along with objects, arrays, and sets as standard data collections</li>
 	 <li>Many Unicode symbols available for use as they were intended (that is, in the appropriate mathematical sense)</li>
 	 <li>All the latest multi-line, raw, interpolated, and standard string constant forms available</li>
 	 <li>Dynamic code generation and execution, via the <code>eval</code> function</li>
@@ -411,7 +411,7 @@ h2 {
   <h2>Values, Constants, and Variables</h2>
 <div class="cols">
   The basic building blocks of the expressions implemented here are the basic value types: numbers (either integer or real
-     numbers with a fractional part), complex numbers, strings, rational fractions, boolean values, and the <code>null</code> value.
+     numbers with a fractional part), complex numbers, quaternions, strings, rational fractions, boolean values, and the <code>null</code> value.
      Numbers can be of arbitrary precision, up to a maximum of 2**32-1 (4,294,967,295) digits (although see the discussion under
      "Modes and Precision" below for further details). Strings can also be of any length up to the same number of characters (subject to
      system memory constraints of course).
@@ -420,6 +420,8 @@ h2 {
      of the special Unicode number-like symbols are also interpreted as single numbers (see the "Operators, Functions, and Precedence" table below), such as:
      <code>&#x2473;</code> = <code>20</code>, <code>&#x247D;</code> = <code>10</code>, or <code>&#xFF19;</code> = <code>9</code>.
   <p>Complex numbers are specified by a <i>real</i> <code>,</code> <i>imaginary</i> pair as in <code>(</code> <i>real</i> <code>,</code> <i>imaginary</i> <code>)</code>, the <code><i>i</i></code> constant, or the result of the <code>complex</code> function. All the simple and some more complicated arithmetic functions are supported for complex numbers.
+  <p>Quaternions are specified by the four <code>a</code>, <code>b</code>, <code>c</code>, and <code>d</code> coefficient values, or by using the built-in <code>quaternion(</code>...<code>)</code> function.
+     Support for arithmetic using quaternions (and various conversions is still being developed).
   <p>Just as an aside, Calc does not support <code>NaN</code> or <code>Infinity</code> values. Operations that might result in such values generally cause errors instead.
   <p>The boolean (or "logical") constants are <code>true</code> and <code>false</code>.
   <p>The special null constant, which signifies no value, or a value that hasn't been assigned or defined yet, is simply <code>null</code>.
@@ -788,8 +790,8 @@ or<br>
     <tr><td>33</td><td><i>expr</i> <code>HAS</code> ( <i>id</i> | <i>string</i> | <code>[</code> <i>expr</i> <code>]</code> )</td><td>safely check for member or index</td><td>left to right</td></tr>
     <tr><td>32</td><td><i>expr</i> <code>IS</code> ( <i>string</i> | <i>type_id</i> )</td><td>check if expression is the given type (same as <code>typeof</code>)</td><td>left to right</td></tr>
     <tr><td>31</td><td><code>( </code><i>expr</i><code> )</code></td><td>group an expression</td><td>N/A</td></tr>
-    <tr><td rowspan="88">30</td>
-            <td><code>ABS</code>&nbsp;<i>expr</i></td><td>absolute value</td><td rowspan="88">left to right</td></tr>
+    <tr><td rowspan="89">30</td>
+            <td><code>ABS</code>&nbsp;<i>expr</i></td><td>absolute value</td><td rowspan="89">left to right</td></tr>
             <tr><td><code>SIN</code>&nbsp;<i>expr</i></td><td>sine</td></tr>
             <tr><td><code>COS</code>&nbsp;<i>expr</i></td><td>cosine</td></tr>
             <tr><td><code>TAN</code>&nbsp;<i>expr</i></td><td>tangent</td></tr>
@@ -846,10 +848,11 @@ or<br>
             <tr><td><code>DEC</code>&nbsp;<i>expr</i></td><td>convert string or fraction to decimal number</td></tr>
             <tr><td><code>FRAC</code>&nbsp;<i>num</i><code>,</code>&nbsp;<i>den</i><br>or <i>int</i><code>,</code><i>num</i><code>,</code><i>den</i><br>or <i>string</i></td><td>construct a rational fraction</td></tr>
             <tr><td><code>COMPLEX</code>&nbsp;<i>r</i><code>,</code>&nbsp;<i>i</i><br>or <i>expr</i></td><td>construct a complex number</td></tr>
+            <tr><td><code>QUATERNION</code>&nbsp;<i>a</i><code>,</code>&nbsp;<i>b</i><code>,</code>&nbsp;<i>c</i><code>,</code>&nbsp;<i>d</i></td><td>construct a quaternion value</td></tr>
             <tr><td><code>ROMAN</code>&nbsp;<i>expr</i></td><td>interpret <i>expr</i> as a Roman Numeral</td></tr>
             <tr><td><code>TODATE</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;)&nbsp;)</td><td>convert expression(s) to a date value</td></tr>
-            <tr><td><code>TOBASE</code>&nbsp;<i>expr</i> , <i>base_expr</i></td><td>convert number to the given base (radix)</td></tr>
-            <tr><td><code>FROMBASE</code>&nbsp;<i>expr</i> , <i>base_expr</i></td><td>convert value in given base back to a number</td></tr>
+            <tr><td><code>TOBASE</code>&nbsp;<i>expr</i> <code>,</code> <i>base_expr</i></td><td>convert number to the given base (radix)</td></tr>
+            <tr><td><code>FROMBASE</code>&nbsp;<i>expr</i> <code>,</code> <i>base_expr</i></td><td>convert value in given base back to a number</td></tr>
             <tr><td><code>LOWER</code>&nbsp;<i>expr</i></td><td>convert <i>expr</i> to lower case</td></tr>
             <tr><td><code>UPPER</code>&nbsp;<i>expr</i></td><td>convert <i>expr</i> to UPPER case</td></tr>
             <tr><td><code>EVAL</code>&nbsp;<i>expr</i></td><td>evaluate the string result of <i>expr</i></td></tr>

@@ -71,6 +71,7 @@
  *  17-Dec-22 rlw #559:	New "valueOf(Object)" method.
  *  20-Dec-22 rlw #559:	Address negative scale errors in BigDecimal constructor.
  *			Numerous tweaks, including new "properFraction" static method.
+ *  31-Dec-22 rlw #558:	New methods for Quaternions.
  */
 package info.rlwhitcomb.math;
 
@@ -484,6 +485,17 @@ public class BigFraction extends Number
 	}
 
 	/**
+	 * Copy an existing fraction into a new one.
+	 *
+	 * @param frac An existing fraction to copy.
+	 */
+	public BigFraction(final BigFraction frac) {
+	    this(frac.numer, frac.denom);
+	    if (frac.alwaysProper)
+		alwaysProper = true;
+	}
+
+	/**
 	 * Construct a "proper" fraction.
 	 *
 	 * @param value A long value to convert.
@@ -511,6 +523,16 @@ public class BigFraction extends Number
 	 */
 	public static BigFraction properFraction(final BigDecimal value) {
 	    return new BigFraction(value).setAlwaysProper(true);
+	}
+
+	/**
+	 * Copy the fraction and set the "always proper" flag on the copy.
+	 *
+	 * @param frac The existing fraction to copy.
+	 * @return     Equivalent fraction, marked as "always proper".
+	 */
+	public static BigFraction properFraction(final BigFraction frac) {
+	    return new BigFraction(frac).setAlwaysProper(true);
 	}
 
 	/**

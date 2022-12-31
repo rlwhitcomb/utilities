@@ -195,12 +195,15 @@
  *	    #573: More work quoting patterns, including "%n".
  *	17-Dec-2022 (rlwhitcomb)
  *	    #572: New method to regularize member name processing.
+ *	31-Dec-2022 (rlwhitcomb)
+ *	    #558: Basic support for quaternions.
  */
 package info.rlwhitcomb.calc;
 
 import de.onyxbits.SemanticVersion;
 import info.rlwhitcomb.math.BigFraction;
 import info.rlwhitcomb.math.ComplexNumber;
+import info.rlwhitcomb.math.Quaternion;
 import info.rlwhitcomb.util.CharUtil;
 import info.rlwhitcomb.util.Environment;
 import info.rlwhitcomb.util.Exceptions;
@@ -563,12 +566,23 @@ public final class CalcUtil
 	}
 
 	/**
-	 * Fixup a {@link BigDecimal} value by stripping trailing zeros for a nicer presentation.
+	 * Convert a suitable object to {@link BigDecimal} and strip trailing zeros.
+	 * <p> The suitable objects are: {@link BigDecimal} (of course), {@link BigInteger},
+	 * or {@link String}.
 	 *
-	 * @param bd	The candidate value.
+	 * @param obj	The candidate value.
 	 * @return	The numerically equivalent value with no trailing zeros.
 	 */
-	public static BigDecimal fixup(final BigDecimal bd) {
+	public static BigDecimal fixup(final Object obj) {
+	    BigDecimal bd;
+
+	    if (obj instanceof BigDecimal)
+		bd = (BigDecimal) obj;
+	    else if (obj instanceof BigInteger)
+		bd = new BigDecimal((BigInteger) obj);
+	    else
+		bd = new BigDecimal(obj.toString());
+
 	    return bd.stripTrailingZeros();
 	}
 
@@ -638,16 +652,14 @@ public final class CalcUtil
 	public static BigDecimal convertToDecimal(final Object value, final MathContext mc, final ParserRuleContext ctx) {
 	    nullCheck(value, ctx);
 
-	    if (value instanceof BigDecimal)
-		return fixup((BigDecimal) value);
-	    else if (value instanceof BigInteger)
-		return fixup(new BigDecimal((BigInteger) value));
+	    if (value instanceof BigDecimal || value instanceof BigInteger || value instanceof String)
+		return fixup(value);
 	    else if (value instanceof BigFraction)
 		return fixup(((BigFraction) value).toDecimal(mc));
 	    else if (value instanceof ComplexNumber)
 		return fixup(((ComplexNumber) value).r());
-	    else if (value instanceof String)
-		return fixup(new BigDecimal((String) value));
+	    else if (value instanceof Quaternion)
+		return fixup(((Quaternion) value).a());
 	    else if (value instanceof Boolean)
 		return ((Boolean) value).booleanValue() ? BigDecimal.ONE : BigDecimal.ZERO;
 	    else if (isFloat(value))
@@ -692,6 +704,8 @@ public final class CalcUtil
 		return new BigFraction((BigInteger) value);
 	    else if (value instanceof ComplexNumber)
 		return new BigFraction(((ComplexNumber) value).r());
+	    else if (value instanceof Quaternion)
+		return new BigFraction(((Quaternion) value).a());
 	    else if (value instanceof String)
 		return BigFraction.valueOf((String) value);
 	    else if (value instanceof Boolean)
@@ -729,6 +743,9 @@ public final class CalcUtil
 		else if (value instanceof ComplexNumber) {
 		    return (((ComplexNumber) value).r().toBigIntegerExact());
 		}
+		else if (value instanceof Quaternion) {
+		    return (((Quaternion) value).a().toBigIntegerExact());
+		}
 		else if (value instanceof Number) {
 		    return BigInteger.valueOf(((Number) value).longValue());
 		}
@@ -761,6 +778,9 @@ public final class CalcUtil
 		}
 		else if (value instanceof ComplexNumber) {
 		    return (((ComplexNumber) value).r().intValueExact());
+		}
+		else if (value instanceof Quaternion) {
+		    return (((Quaternion) value).a().intValueExact());
 		}
 		else if (value instanceof Number) {
 		    return ((Number) value).intValue();
@@ -1123,9 +1143,9 @@ public final class CalcUtil
 	    if (obj instanceof BigDecimal)
 		return ((BigDecimal) obj).precision();
 	    if (obj instanceof BigFraction)
-		return ((BigFraction) obj).toDecimal().precision();	// ?? not really helpful, probably
+		return ((BigFraction) obj).precision();
 	    if (obj instanceof ComplexNumber)
-		return ((ComplexNumber) obj).r().precision();		// ?? again, not helpful, probably
+		return ((ComplexNumber) obj).precision();
 	    if (obj instanceof String) {
 		String str = (String) obj;
 		return str.codePointCount(0, str.length());
@@ -1848,6 +1868,8 @@ public final class CalcUtil
 		return Typeof.FRACTION;
 	    if (obj instanceof ComplexNumber)
 		return Typeof.COMPLEX;
+	    if (obj instanceof Quaternion)
+		return Typeof.QUATERNION;
 	    if (obj instanceof Boolean)
 		return Typeof.BOOLEAN;
 	    if (obj instanceof ArrayScope)
@@ -1929,6 +1951,8 @@ public final class CalcUtil
 			throw new CalcExprException(ae, ctx);
 		    }
 		    break;
+		case QUATERNION:
+		    throw new CalcExprException(ctx, "%calc#notImplemented", "Cast to quaternion");
 		case BOOLEAN:
 		    castValue = toBooleanValue(visitor, value, ctx);
 		    break;

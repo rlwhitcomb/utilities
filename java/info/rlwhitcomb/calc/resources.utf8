@@ -165,6 +165,8 @@
 #	    #566: New messages for multiple constants and variables.
 #	05-Dec-2022 (rlwhitcomb)
 #	    #573: Error messages for "scan".
+#	31-Dec-2022 (rlwhitcomb)
+#	    #558: New error message for "unimplemented".
 #
 
 #
@@ -283,6 +285,7 @@ illegalArgument		= <u>%1$s<.> value is not suitable for <y>%2$s<.> function
 radixOutOfRange		= Radix value of <u>%1$d<.> is out of range of <y>%2$d..%3$d<.>
 illegalFlagValues	= One or more flag values in <u>0x%1$04X<.> (<u>%1$d<.>) is not valid.
 assertFailure		= Assertion failed: %1$s
+notImplemented		= %1$s operation is not implemented
 
 intro.help1	= "  Enter an arithmetic expression to evaluate, or multiple expressions"
 intro.help2	= "  separated by <u>;<.>, followed by <a>Return<.> or <a>Enter<.>."

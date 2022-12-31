@@ -485,6 +485,8 @@
  *	    #441: Grammar changes for "is" operator.
  *	24-Dec-2022 (rlwhitcomb)
  *	    #83: Support more Unicode characters in various contexts.
+ *	29-Dec-2022 (rlwhitcomb)
+ *	    #558: Beginnings of quaternion support.
  */
 
 grammar Calc;
@@ -591,6 +593,7 @@ expr
    | arr                                 # arrExpr
    | set                                 # setExpr
    | complex                             # complexValueExpr
+   | quaternion                          # quaternionValueExpr
    | var                                 # varExpr
    | expr K_HAS ( member | ( LBRACK expr RBRACK ) ) # hasExpr
    | expr K_IS ( STRING | ISTRING | TYPES ) # isExpr
@@ -654,6 +657,7 @@ expr
    | K_FROMBASE expr2                    # fromBaseExpr
    | K_FRAC ( expr3 | expr2 | expr1 )    # fracExpr
    | K_COMPLEX ( expr2 | expr1 )         # complexFuncExpr
+   | K_QUAT ( expr4 | expr3 | expr2 | expr1 ) # quaternionFuncExpr
    | K_ROMAN expr1                       # romanExpr
    | ( K_UPPER | K_LOWER ) expr1         # caseConvertExpr
    | K_FACTORS expr1                     # factorsExpr
@@ -727,6 +731,11 @@ expr2
 expr3
    : LPAREN expr COMMA expr COMMA expr RPAREN
    | expr COMMA expr COMMA expr
+   ;
+
+expr4
+   : LPAREN expr COMMA expr COMMA expr COMMA expr RPAREN
+   | expr COMMA expr COMMA expr COMMA expr
    ;
 
 exprN
@@ -821,6 +830,10 @@ set
 
 complex
    : LPAREN expr COMMA expr RPAREN
+   ;
+
+quaternion
+   : LPAREN expr COMMA expr COMMA expr COMMA expr RPAREN
    ;
 
 var
@@ -1172,6 +1185,8 @@ K_FRAC     : 'frac' | 'FRAC' | 'Frac' ;
 
 K_COMPLEX  : 'complex' | 'COMPLEX' | 'Complex' ;
 
+K_QUAT     : 'quaternion' | 'QUATERNION' | 'Quaternion' ;
+
 K_ROMAN    : 'roman' | 'ROMAN' | 'Roman' ;
 
 K_UPPER    : 'upper' | 'UPPER' | 'Upper' ;
@@ -1279,6 +1294,7 @@ TYPES    : 'null'       | 'NULL'       | 'Null'
          | 'float'      | 'FLOAT'      | 'Float'
          | 'fraction'   | 'FRACTION'   | 'Fraction'
          | K_COMPLEX
+         | K_QUAT
          | 'boolean'    | 'BOOLEAN'    | 'Boolean'
          | 'array'      | 'ARRAY'      | 'Array'
          | 'object'     | 'OBJECT'     | 'Object'
