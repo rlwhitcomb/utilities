@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2011-2017,2019-2022 Roger L. Whitcomb.
+ * Copyright (c) 2011-2017,2019-2023 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -196,6 +196,9 @@
  *	    #552: Provide wrapper method, depending on Java version, for current thread id.
  *	22-Dec-2022 (rlwhitcomb)
  *	    #590: Add "CI" build information.
+ *	01-Jan-2023 (rlwhitcomb)
+ *	    Go one extra step if the main "class name" is actually a .jar file and look up
+ *	    the "Main-Class" for the .jar file (if given).
  */
 package info.rlwhitcomb.util;
 
@@ -219,6 +222,8 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.jar.Attributes;
+import java.util.jar.JarFile;
 
 import static info.rlwhitcomb.util.CharUtil.Justification.*;
 import static info.rlwhitcomb.util.ConsoleColor.Code.*;
@@ -1174,6 +1179,7 @@ public final class Environment
 	 * which are parsed into two parts: the process ID and the main class name being run by that
 	 * process. So we will match the process ID against our own value of it (from {@link #getProcessID})
 	 * and return the main class that corresponds to us.
+	 * <p> If the process was run just as a .jar file, extract the "Main-Class" attribute from it.
 	 *
 	 * @return	Fully-qualified class name that is the main program of this application.
 	 */
@@ -1200,7 +1206,17 @@ public final class Environment
 		    String parts[] = line.split("\\s+");
 		    if (parts.length == 2) {
 			if (pid.equals(parts[0])) {
-			    cachedMainClassName = parts[1];
+			    String invokedClass = parts[1];
+			    if (invokedClass.endsWith(".jar")) {
+				JarFile jar = new JarFile(invokedClass);
+				Attributes attrs = jar.getManifest().getMainAttributes();
+				cachedMainClassName = attrs.getValue(Attributes.Name.MAIN_CLASS);
+				if (cachedMainClassName == null)
+				    cachedMainClassName = invokedClass;
+			    }
+			    else {
+				cachedMainClassName = invokedClass;
+			    }
 			    return cachedMainClassName;
 			}
 		    }
