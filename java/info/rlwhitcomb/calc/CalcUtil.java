@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2021-2022 Roger L. Whitcomb.
+ * Copyright (c) 2021-2023 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -197,6 +197,8 @@
  *	    #572: New method to regularize member name processing.
  *	31-Dec-2022 (rlwhitcomb)
  *	    #558: Basic support for quaternions.
+ *	04-Jan-2023 (rlwhitcomb)
+ *	    #537: Add method to load/cache the scripts properties.
  */
 package info.rlwhitcomb.calc;
 
@@ -214,6 +216,7 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import org.padler.natorder.NaturalOrderComparator;
 
 import java.io.BufferedWriter;
+import java.io.InputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -246,6 +249,12 @@ public final class CalcUtil
 
 	/** Version identifier for library (saved) files. */
 	private static final String LIB_FORMAT = ":Requires '%1$s', Base '%2$s'";
+
+	/** Name of the scripts properties file (see also "makeScripts.calc" where it is generated). */
+	public static final String SCRIPT_PROPERTIES_FILE = "calcscripts.properties";
+
+	/** Cached properties for the utilities programs. */
+	private static Properties calcScripts = null;
 
 
 	/** Private constructor since this is a static class. */
@@ -2685,6 +2694,25 @@ public final class CalcUtil
 		}
 	    }
 	    return lastValue;
+	}
+
+	/**
+	 * Load the "calcscripts.properties" file and cache it for future use.
+	 *
+	 * @return The cached properties for our utilities programs.
+	 */
+	public static Properties loadScriptProperties() {
+	    if (calcScripts == null) {
+		try (InputStream is = CalcUtil.class.getResourceAsStream(SCRIPT_PROPERTIES_FILE)) {
+		    calcScripts = new Properties();
+		    calcScripts.load(is);
+		}
+		catch (IOException ioe) {
+		    return null;
+		}
+	    }
+
+	    return calcScripts;
 	}
 
 }
