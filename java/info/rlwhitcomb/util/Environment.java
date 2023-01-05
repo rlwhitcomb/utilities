@@ -24,7 +24,7 @@
  *	Class exposing various attributes of the Environment we're
  *	currently running in.
  *
- *  History:
+ * History:
  *	10-Aug-2011 (rlwhitcomb)
  *	    Created.
  *	15-Aug-2011 (rlwhitcomb)
@@ -199,6 +199,9 @@
  *	01-Jan-2023 (rlwhitcomb)
  *	    Go one extra step if the main "class name" is actually a .jar file and look up
  *	    the "Main-Class" for the .jar file (if given).
+ *	04-Jan-2023 (rlwhitcomb)
+ *	    Protect "readProperties" from non-existent file. Clean up Javadoc on these
+ *	    "readProperties" methods, because the return value is different now (empty vs. null).
  */
 package info.rlwhitcomb.util;
 
@@ -1679,8 +1682,8 @@ public final class Environment
 	 * properties map decoded from it.
 	 *
 	 * @param filePath	The path and name of the file to read.
-	 * @return		The decode properties or {@code null} if there was an I/O error
-	 *			reading the file.
+	 * @return		The decoded properties, which could be empty if there was
+	 *			an I/O error reading the file.
 	 */
 	public static Properties readPropertiesFile(String filePath) {
 	    return readPropertiesFile(filePath, null);
@@ -1693,20 +1696,19 @@ public final class Environment
 	 *
 	 * @param filePath		The path and name of the file to read.
 	 * @param baseProperties	The base properties to use as defaults (can be {@code null}).
-	 * @return			The decoded properties or {@code baseProperties}
-	 *				if there was an I/O error reading the file (which could be
-	 *				{@code null} if that was passed in).
+	 * @return			The decoded properties, which could be empty if there was
+	 *				an I/O error reading the file.
 	 */
 	public static Properties readPropertiesFile(String filePath, Properties baseProperties) {
 	    Properties properties = (baseProperties == null)
 			? new Properties()
 			: new Properties(baseProperties);
 	    try (InputStream is = Environment.class.getResourceAsStream(filePath)) {
-		properties.load(is);
+		if (is != null)
+		    properties.load(is);
 	    }
 	    catch (IOException ioe) {
 		// TODO: error somewhere?
-		return baseProperties;
 	    }
 	    return properties;
 	}
@@ -2037,4 +2039,3 @@ public final class Environment
 
 
 }
-
