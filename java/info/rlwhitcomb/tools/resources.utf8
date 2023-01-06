@@ -1,7 +1,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2022 Roger L. Whitcomb.
+# Copyright (c) 2022-2023 Roger L. Whitcomb.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -51,6 +51,8 @@
 #	    #545: New "-default" option for Gmt.
 #	14-Dec-2022 (rlwhitcomb)
 #	    #561: Update Gmt help for new formats and options.
+#	05-Jan-2023 (rlwhitcomb)
+#	    #28: Text for "unq" program.
 #
 
 #
@@ -212,6 +214,15 @@ os.help16	= " <Yw!>-width<.>:<Bk!>nn<.>   = force screen width for multi-column 
 os.help17	= " <Yw!>-filter<.>:<Bk!>xxx<.> = filter locale tags, where <Bk!>xxx<.> is one or more"
 os.help18	= "               locale tags to match (can be wild)"
 os.help19	= ""
+
+#
+# From Uniq.java
+#
+unique.badOption	= Unrecognized option "%1$s"!
+
+unique.help1	= ""
+unique.help2	= "Usage: unq [options] file(s)"
+unique.help3	= ""
 
 #
 # From Uuid.java

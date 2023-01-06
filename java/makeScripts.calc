@@ -1,6 +1,6 @@
-/****************************************/
-/*  Program to generate wrapper scripts */
-/****************************************/
+/*****************************************/
+/*  Program to generate wrapper scripts  */
+/*****************************************/
 :quiet on
 //
 // $0 = operation: "scripts" or "properties"
@@ -32,7 +32,7 @@ bash: [
     "CLASS_NAME=${class}",
     "CMD_ARGS=${args}",
     "JVM_ARGS=${jvm}",
-    "source _find_and_run_class"
+    "source _find_and_run_class${find}"
 ],
 
 settings: [
@@ -69,6 +69,7 @@ settings: [
     { name: 'tester',   class: '$tester.Tester',       jvm: '@@@JVM17+@@@'         },
     { name: 'timethis', class: '$util.TimeThis'                                    },
     { name: 'tre',      class: '$tree.Tree'                                        },
+    { name: 'unq',      class: '$tools.Uniq'                                       },
     { name: 'uuid',     class: '$tools.Uuid'                                       },
     { name: 'uversion'                                                             },
     { name: 'wc',       class: '$tools.WordCount'                                  },
