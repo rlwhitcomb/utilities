@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2020-2022 Roger L. Whitcomb.
+ * Copyright (c) 2020-2023 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -745,6 +745,8 @@
  *	    #441: Implement "is" operator.
  *	29-Dec-2022 (rlwhitcomb)
  *	    #558: Beginnings of "quaternion" support.
+ *	05-Jan-2023 (rlwhitcomb)
+ *	    #558: Quaternion basic arithmetic.
  */
 package info.rlwhitcomb.calc;
 
@@ -3826,6 +3828,23 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			afterValue = cValue.subtract(C_ONE);
 		}
 	    }
+	    else if (value instanceof Quaternion) {
+		Quaternion qValue = (Quaternion) value;
+		beforeValue = qValue;
+
+		if (qValue.isRational()) {
+		    if (incr)
+			afterValue = qValue.add(QR_ONE);
+		    else
+			afterValue = qValue.subtract(QR_ONE);
+		}
+		else {
+		    if (incr)
+			afterValue = qValue.add(Quaternion.ONE);
+		    else
+			afterValue = qValue.subtract(Quaternion.ONE);
+		}
+	    }
 	    else {
 		BigDecimal dValue = toDecimalValue(this, value, settings.mc, var);
 		beforeValue = dValue;
@@ -3928,6 +3947,22 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			afterValue = cValue.add(C_ONE);
 		    else
 			afterValue = cValue.subtract(C_ONE);
+		}
+	    }
+	    else if (value instanceof Quaternion) {
+		Quaternion qValue = (Quaternion) value;
+
+		if (qValue.isRational()) {
+		    if (incr)
+			afterValue = qValue.add(QR_ONE);
+		    else
+			afterValue = qValue.subtract(QR_ONE);
+		}
+		else {
+		    if (incr)
+			afterValue = qValue.add(Quaternion.ONE);
+		    else
+			afterValue = qValue.subtract(Quaternion.ONE);
 		}
 	    }
 	    else {
@@ -4144,7 +4179,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		op = "mod";
 
 	    try {
-		if (settings.rationalMode) {
+		if (settings.rationalMode || (e1 instanceof BigFraction || e2 instanceof BigFraction)) {
 		    BigFraction f1 = toFractionValue(this, e1, ctx1);
 		    BigFraction f2 = toFractionValue(this, e2, ctx2);
 
@@ -4191,6 +4226,30 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			case "%":
 			case "mod":
 			    // This one in particular potentially could be done with the same definition as for reals
+			default:
+			    throw new UnknownOpException(op, ctx);
+		    }
+		}
+		else if (e1 instanceof Quaternion || e2 instanceof Quaternion) {
+		    Quaternion q1 = Quaternion.valueOf(e1);
+		    Quaternion q2 = Quaternion.valueOf(e2);
+
+		    switch (op) {
+			case "*":
+			case "\u00D7":
+			case "\u2217":
+			case "\u2715":
+			case "\u2716":
+			    return q1.multiply(q2, settings.mc);
+			case "/":
+			case "\u00F7":
+			case "\u2215":
+			case "\u2797":
+			    return q1.divide(q2, MathUtil.divideContext(q1, settings.mcDivide));
+			case "\\":
+			case "\u2216":
+			case "%":
+			case "mod":
 			default:
 			    throw new UnknownOpException(op, ctx);
 		    }
@@ -4269,6 +4328,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			ComplexNumber c2 = ComplexNumber.valueOf(e2);
 
 			return c1.subtract(c2);
+		    }
+		    else if (e1 instanceof Quaternion || e2 instanceof Quaternion) {
+			Quaternion q1 = Quaternion.valueOf(e1);
+			Quaternion q2 = Quaternion.valueOf(e2);
+
+			return q1.subtract(q2);
 		    }
 		    else if (e1 instanceof SetScope && e2 instanceof CollectionScope) {
 			@SuppressWarnings("unchecked")
@@ -6046,7 +6111,10 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			}
 			else {
 			    CalcParser.Expr1Context e1ctx = ctx.expr1();
-// TODO 1 value
+			    CalcParser.ExprContext expr1 = e1ctx.expr();
+			    Object o1 = evaluate(expr1);
+
+			    return Quaternion.valueOf(o1);
 			}
 		    }
 		}

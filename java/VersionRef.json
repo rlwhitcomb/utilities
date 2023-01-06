@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.20.5', date: d'2023-01-05',
+      issues: [ 558 ],
+      comment: 'Basic quaternion arithmetic (+, -, *, /).'
+    },
     { version: '2.20.0', date: d'2022-12-31',
       issues: [ 558 ],
       comment: 'Introduce quaternion support.'

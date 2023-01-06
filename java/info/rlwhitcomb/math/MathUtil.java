@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2021-2022 Roger L. Whitcomb.
+ * Copyright (c) 2021-2023 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -55,6 +55,7 @@
  *  19-Dec-22 rlw #79:	Move BigDecimal "random" function into here.
  *  22-Dec-22 rlw #79:	More work on fixing the distribution of random numbers.
  *  27-Dec-22 rlw	New varargs "minimum" and "maximum" (int) methods.
+ *  05-Jan-23 rlw #558:	"divideContext" for quaternions.
  */
 package info.rlwhitcomb.math;
 
@@ -181,7 +182,7 @@ public final class MathUtil
 	 * From the given "divide" precision and the precision of the dividend, get the "best"
 	 * actual precision to use for the division.
 	 *
-	 * @param dividend	The numerator of a division operation.
+	 * @param dividend	The dividend of a division operation.
 	 * @param mc		Probably limited precision context.
 	 * @return		The max of the dividend's precision and the context precision.
 	 */
@@ -194,11 +195,24 @@ public final class MathUtil
 	 * From the given "divide" precision and the precision of the dividend, get the "best"
 	 * actual precision to use for the division.
 	 *
-	 * @param dividend	The numerator of a complex division operation.
+	 * @param dividend	The dividend of a complex division operation.
 	 * @param mc		Probably limited precision context.
 	 * @return		The max of the dividend's precision and the context precision.
 	 */
 	public static MathContext divideContext(final ComplexNumber dividend, final MathContext mc) {
+	    return new MathContext(Math.max(dividend.precision(), mc.getPrecision()), mc.getRoundingMode());
+	}
+
+
+	/**
+	 * From the given "divide" precision and the precision of the dividend, get the "best"
+	 * actual precision to use for the division.
+	 *
+	 * @param dividend	The dividend of a quaternion division operation.
+	 * @param mc		Probably limited precision context.
+	 * @return		The max of the dividend's precision and the context precision.
+	 */
+	public static MathContext divideContext(final Quaternion dividend, final MathContext mc) {
 	    return new MathContext(Math.max(dividend.precision(), mc.getPrecision()), mc.getRoundingMode());
 	}
 
@@ -210,7 +224,7 @@ public final class MathUtil
 	 * @param mc     The rounding mode and precision.
 	 * @return       Final result rounded as specified and with trailing (superfluous) zeros removed.
 	 */
-	private static BigDecimal fixup(final BigDecimal result, final MathContext mc) {
+	public static BigDecimal fixup(final BigDecimal result, final MathContext mc) {
 	    return result.round(mc).stripTrailingZeros();
 	}
 

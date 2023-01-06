@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2022 Roger L. Whitcomb.
+ * Copyright (c) 2022-2023 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,10 +25,13 @@
  *
  * History:
  *  29-Dec-22 rlw #558:	Initial coding.
+ *  05-Jan-23 rlw #558:	More operation methods.
  */
 package info.rlwhitcomb.math;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.math.MathContext;
 
 
 /**
@@ -48,6 +51,13 @@ import java.math.BigDecimal;
  */
 public final class Quaternion extends Number
 {
+	/** A value of a real zero, as a quaternion. */
+	public static final Quaternion ZERO = new Quaternion(0);
+
+	/** A value of a real one, as a quaternion. */
+	public static final Quaternion ONE = new Quaternion(1);
+
+
 	/** First term, the real part. */
 	private BigDecimal a;
 
@@ -111,6 +121,88 @@ public final class Quaternion extends Number
 	}
 
 	/**
+	 * Construct a real quaternion, with the given value.
+	 *
+	 * @param r The real value (all other parts will be zero).
+	 */
+	public Quaternion(final long r) {
+	    this(new BigDecimal(r), null, null, null);
+	}
+
+	/**
+	 * Construct a real quaternion, with the given value.
+	 *
+	 * @param r The real value (all other parts will be zero).
+	 */
+	public Quaternion(final BigInteger r) {
+	    this(new BigDecimal(r), null, null, null);
+	}
+
+	/**
+	 * Construct a real quaternion, with the given value.
+	 *
+	 * @param r The real value (all other parts will be zero).
+	 */
+	public Quaternion(final BigDecimal r) {
+	    this(r, null, null, null);
+	}
+
+	/**
+	 * Construct a real, rational quaternion with the given value.
+	 *
+	 * @param rFrac The real fractional value (all other parts will be zero).
+	 */
+	public Quaternion(final BigFraction rFrac) {
+	    this(rFrac, null, null, null);
+	}
+
+	/**
+	 * Construct a quaternion, given a complex number with two of the values.
+	 *
+	 * @param cn Complex number to convert.
+	 */
+	public Quaternion(final ComplexNumber cn) {
+	    if (cn.isRational()) {
+		aFrac = cn.rFrac();
+		bFrac = cn.iFrac();
+		cFrac = null;
+		dFrac = null;
+	    }
+	    else {
+		a = cn.r();
+		b = cn.i();
+		c = null;
+		d = null;
+	    }
+	    normalize();
+	}
+
+	/**
+	 * Convert any arbitrary object into a quaternion.
+	 *
+	 * @param value The value to convert (if possible).
+	 * @return      A compatible quaternion, or {@code null} if no conversion is possible.
+	 */
+	public static Quaternion valueOf(final Object value) {
+	    if (value == null)
+		return ZERO;
+	    if (value instanceof Quaternion)
+		return (Quaternion) value;
+	    if (value instanceof BigDecimal)
+		return new Quaternion((BigDecimal) value);
+	    if (value instanceof BigInteger)
+		return new Quaternion((BigInteger) value);
+	    if (value instanceof BigFraction)
+		return new Quaternion((BigFraction) value);
+	    if (value instanceof ComplexNumber)
+		return new Quaternion((ComplexNumber) value);
+
+// TODO: more to do, expecially String parsing
+	    return null;
+	}
+
+
+	/**
 	 * Maintain this value in its "normalized" form, that is, keeping zero (unused) terms as null instead.
 	 */
 	private void normalize() {
@@ -135,6 +227,214 @@ public final class Quaternion extends Number
 		    d = null;
 	    }
 	}
+
+	/**
+	 * Is this a rational quaternion (that is, values are stored as {@link BigFraction})?
+	 *
+	 * @return The {@link #rational} flag.
+	 */
+	public boolean isRational() {
+	    return rational;
+	}
+
+	/**
+	 * Add the given quaternion to this one.
+	 * <p> The operation is done by adding each component separately.
+	 *
+	 * @param q The other quaternion to add to this one.
+	 * @return  A new quaternion that represents the sum of the two.
+	 */
+	public Quaternion add(final Quaternion q) {
+	    if (rational && q.rational) {
+		return new Quaternion(
+			aFrac().add(q.aFrac()),
+			bFrac().add(q.bFrac()),
+			cFrac().add(q.cFrac()),
+			dFrac().add(q.dFrac()));
+	    }
+	    else {
+		return new Quaternion(
+			a().add(q.a()),
+			b().add(q.b()),
+			c().add(q.c()),
+			d().add(q.d()));
+	    }
+	}
+
+	/**
+	 * Subtract the given quaternion from this one.
+	 * <p> The operation is done by subtracting each component separately.
+	 *
+	 * @param q The other quaternion to subtract from this one.
+	 * @return  A new quaternion that represents the difference of the two.
+	 */
+	public Quaternion subtract(final Quaternion q) {
+	    if (rational && q.rational) {
+		return new Quaternion(
+			aFrac().subtract(q.aFrac()),
+			bFrac().subtract(q.bFrac()),
+			cFrac().subtract(q.cFrac()),
+			dFrac().subtract(q.dFrac()));
+	    }
+	    else {
+		return new Quaternion(
+			a().subtract(q.a()),
+			b().subtract(q.b()),
+			c().subtract(q.c()),
+			d().subtract(q.d()));
+	    }
+	}
+
+	/**
+	 * Multiply this quaternion by another; and notice that multiplication
+	 * is not commutative.
+	 * <p> The result of (a, b, c, d) * (e, f, g, h) will be:
+	 * <code> a*e - b*f - c*g - d*h
+	 * + i (b*e + a*f + c*h - d*g)
+	 * + j (a*g - b*h + c*e + d*f)
+	 * + k (a*h + b*g - c*f + d*e)</code>
+	 *
+	 * @param q  The other qaternion to multiply this one by.
+	 * @param mc Math context to control rounding and precision.
+	 * @return  Result of multiplying this by the other.
+	 */
+	public Quaternion multiply(final Quaternion q, final MathContext mc) {
+	    if (rational && q.rational) {
+		BigFraction a = aFrac();
+		BigFraction b = bFrac();
+		BigFraction c = cFrac();
+		BigFraction d = dFrac();
+		BigFraction e = q.aFrac();
+		BigFraction f = q.bFrac();
+		BigFraction g = q.cFrac();
+		BigFraction h = q.dFrac();
+
+		return new Quaternion(
+		    a.multiply(e)
+			.subtract(b.multiply(f))
+			.subtract(c.multiply(g))
+			.subtract(d.multiply(h)),
+		    b.multiply(e)
+			.add(a.multiply(f))
+			.add(c.multiply(h))
+			.subtract(d.multiply(g)),
+		    a.multiply(g)
+			.subtract(b.multiply(h))
+			.add(c.multiply(e))
+			.add(d.multiply(f)),
+		    a.multiply(h)
+			.add(b.multiply(g))
+			.subtract(c.multiply(f))
+			.add(d.multiply(e)));
+	    }
+	    else {
+		BigDecimal a = a();
+		BigDecimal b = b();
+		BigDecimal c = c();
+		BigDecimal d = d();
+		BigDecimal e = q.a();
+		BigDecimal f = q.b();
+		BigDecimal g = q.c();
+		BigDecimal h = q.d();
+
+		return new Quaternion(
+		  MathUtil.fixup(
+		    a.multiply(e, mc)
+			.subtract(b.multiply(f, mc))
+			.subtract(c.multiply(g, mc))
+			.subtract(d.multiply(h, mc)), mc),
+		  MathUtil.fixup(
+		    b.multiply(e, mc)
+			.add(a.multiply(f, mc))
+			.add(c.multiply(h, mc))
+			.subtract(d.multiply(g, mc)), mc),
+		  MathUtil.fixup(
+		    a.multiply(g, mc)
+			.subtract(b.multiply(h, mc))
+			.add(c.multiply(e, mc))
+			.add(d.multiply(f, mc)), mc),
+		  MathUtil.fixup(
+		    a.multiply(h, mc)
+			.add(b.multiply(g, mc))
+			.subtract(c.multiply(f, mc))
+			.add(d.multiply(e, mc)), mc));
+	    }
+	}
+
+	/**
+	 * Compute the conjugate value of this quaternion.
+	 *
+	 * @param mc The rouding context for decimal values.
+	 * @return {@code 1/q} as a new value.
+	 */
+	public Quaternion conjugate(final MathContext mc) {
+	    if (rational) {
+		BigFraction a = aFrac();
+		BigFraction b = bFrac();
+		BigFraction c = cFrac();
+		BigFraction d = dFrac();
+
+		BigFraction magSquare =
+		    a.multiply(a)
+			.add(b.multiply(b))
+			.add(c.multiply(c))
+			.add(d.multiply(d));
+		return new Quaternion(
+			a.divide(magSquare),
+			b.divide(magSquare).negate(),
+			c.divide(magSquare).negate(),
+			d.divide(magSquare).negate());
+	    }
+	    else {
+		BigDecimal a = a();
+		BigDecimal b = b();
+		BigDecimal c = c();
+		BigDecimal d = d();
+
+		BigDecimal magSquare =
+		    a.multiply(a)
+			.add(b.multiply(b))
+			.add(c.multiply(c))
+			.add(d.multiply(d));
+		return new Quaternion(
+			MathUtil.fixup(a.divide(magSquare, mc), mc),
+			MathUtil.fixup(b.divide(magSquare, mc).negate(), mc),
+			MathUtil.fixup(c.divide(magSquare, mc).negate(), mc),
+			MathUtil.fixup(d.divide(magSquare, mc).negate(), mc));
+	    }
+	}
+
+	/**
+	 * Divide this quaternion by another.
+	 *
+	 * @param q  The other to divide by.
+	 * @param mc Rounding context to use for decimal arithmetic (non-rational case).
+	 * @return   The result of {@code this/q} rounded appropriately.
+	 */
+	public Quaternion divide(final Quaternion q, final MathContext mc) {
+	    return multiply(q.conjugate(mc), mc);
+	}
+
+
+	/**
+	 * The precision of this quaternion, which is the maximum precision of all parts.
+	 *
+	 * @return Aggregate precision of this value.
+	 */
+	public int precision() {
+	    return rational ?
+		MathUtil.maximum(
+			aFrac().precision(),
+			bFrac().precision(),
+			cFrac().precision(),
+			dFrac().precision()) :
+		MathUtil.maximum(
+			a().precision(),
+			b().precision(),
+			c().precision(),
+			d().precision());
+	}
+
 
 	public BigDecimal a() {
 	    if (rational)

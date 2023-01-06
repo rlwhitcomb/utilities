@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2022 Roger L. Whitcomb.
+ * Copyright (c) 2022-2023 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -65,6 +65,8 @@
  *	    #559: More fractional forms; always represents fractions as "proper".
  *	31-Dec-2022 (rlwhitcomb)
  *	    #558: Make F_ZERO public.
+ *	05-Jan-2023 (rlwhitcomb)
+ *	    #558: Make copies of the fraction parts to avoid improper "proper" settings.
  */
 package info.rlwhitcomb.math;
 
@@ -260,8 +262,8 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 	 */
 	public ComplexNumber(final BigFraction rFrac, final BigFraction iFrac) {
 	    rational = true;
-	    realFrac      = rFrac;
-	    imaginaryFrac = iFrac;
+	    realFrac      = BigFraction.properFraction(rFrac);
+	    imaginaryFrac = BigFraction.properFraction(iFrac);
 	    normalize();
 	}
 

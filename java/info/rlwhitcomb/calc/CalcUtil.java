@@ -199,6 +199,8 @@
  *	    #558: Basic support for quaternions.
  *	04-Jan-2023 (rlwhitcomb)
  *	    #537: Add method to load/cache the scripts properties.
+ *	05-Jan-2023 (rlwhitcomb)
+ *	    #558: Quaternion basic arithmetic.
  */
 package info.rlwhitcomb.calc;
 
@@ -1749,27 +1751,34 @@ public final class CalcUtil
 	    // TODO: what to do with char?
 	    // could add char codepoint values, or concat strings
 
+	    nullCheck(v1, ctx1);
+	    nullCheck(v2, ctx2);
+
 	    // Otherwise, numeric values get added numerically
-	    if (rational) {
+	    if (rational || (v1 instanceof BigFraction || v2 instanceof BigFraction)) {
 		// TODO: deal with complex numbers here??
 		BigFraction f1 = convertToFraction(v1, ctx1);
 		BigFraction f2 = convertToFraction(v2, ctx2);
 
 		return f1.add(f2);
 	    }
+	    else if (v1 instanceof ComplexNumber || v2 instanceof ComplexNumber) {
+		ComplexNumber c1 = ComplexNumber.valueOf(v1);
+		ComplexNumber c2 = ComplexNumber.valueOf(v2);
+
+		return c1.add(c2);
+	    }
+	    else if (v1 instanceof Quaternion || v2 instanceof Quaternion) {
+		Quaternion q1 = Quaternion.valueOf(v1);
+		Quaternion q2 = Quaternion.valueOf(v2);
+
+		return q1.add(q2);
+	    }
 	    else {
-		if (v1 instanceof ComplexNumber || v2 instanceof ComplexNumber) {
-		    ComplexNumber c1 = ComplexNumber.valueOf(v1);
-		    ComplexNumber c2 = ComplexNumber.valueOf(v2);
+		BigDecimal d1 = convertToDecimal(v1, mc, ctx1);
+		BigDecimal d2 = convertToDecimal(v2, mc, ctx2);
 
-		    return c1.add(c2);
-		}
-		else {
-		    BigDecimal d1 = convertToDecimal(v1, mc, ctx1);
-		    BigDecimal d2 = convertToDecimal(v2, mc, ctx2);
-
-		    return fixupToInteger(d1.add(d2, mc));
-		}
+		return fixupToInteger(d1.add(d2, mc));
 	    }
 	}
 

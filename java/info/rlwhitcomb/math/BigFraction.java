@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2021-2022 Roger L. Whitcomb.
+ * Copyright (c) 2021-2023 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -72,6 +72,7 @@
  *  20-Dec-22 rlw #559:	Address negative scale errors in BigDecimal constructor.
  *			Numerous tweaks, including new "properFraction" static method.
  *  31-Dec-22 rlw #558:	New methods for Quaternions.
+ *  05-Jan-23 rlw #558:	Make "properFraction" into a method for Object; new copy constructor.
  */
 package info.rlwhitcomb.math;
 
@@ -368,7 +369,7 @@ public class BigFraction extends Number
 	 */
 	public static BigFraction valueOf(final Number num) {
 	    if (num instanceof BigFraction) {
-		return (BigFraction) num;
+		return new BigFraction((BigFraction) num);
 	    }
 	    else if (num instanceof BigDecimal) {
 		return new BigFraction((BigDecimal) num);
@@ -388,11 +389,12 @@ public class BigFraction extends Number
 	 * Construct a fraction value given an arbitrary object.
 	 *
 	 * @param obj	Some (compatible) object.
-	 * @return	The equivalent fraction, if possible, or {@code null} if there is no conversion.
+	 * @return	The equivalent fraction, if possible, or {@code null} if there is no conversion,
+	 *		but a null input gives a fraction value of zero.
 	 */
 	public static BigFraction valueOf(final Object obj) {
 	    if (obj == null)
-		return null;
+		return ZERO;
 
 	    if (obj instanceof Number)
 		return valueOf((Number) obj);
@@ -508,31 +510,11 @@ public class BigFraction extends Number
 	/**
 	 * Construct a "proper" fraction.
 	 *
-	 * @param value An integer value to convert.
+	 * @param value An arbitrary value to convert.
 	 * @return      The equivalent fraction, marked as "always proper".
 	 */
-	public static BigFraction properFraction(final BigInteger value) {
-	    return new BigFraction(value).setAlwaysProper(true);
-	}
-
-	/**
-	 * Construct a "proper" fraction.
-	 *
-	 * @param value A decimal value to convert.
-	 * @return      The equivalent fraction, marked as "always proper".
-	 */
-	public static BigFraction properFraction(final BigDecimal value) {
-	    return new BigFraction(value).setAlwaysProper(true);
-	}
-
-	/**
-	 * Copy the fraction and set the "always proper" flag on the copy.
-	 *
-	 * @param frac The existing fraction to copy.
-	 * @return     Equivalent fraction, marked as "always proper".
-	 */
-	public static BigFraction properFraction(final BigFraction frac) {
-	    return new BigFraction(frac).setAlwaysProper(true);
+	public static BigFraction properFraction(final Object value) {
+	    return BigFraction.valueOf(value).setAlwaysProper(true);
 	}
 
 	/**

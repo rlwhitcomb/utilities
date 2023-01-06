@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2022 Roger L. Whitcomb.
+ * Copyright (c) 2022-2023 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -37,11 +37,13 @@
  *                 ---  Move I_MINUS_ONE into here from Calc.
  *  12-Sep-22 rlw #480: Add "I_800" for range conversions.
  *  19-Dec-22 rlw #559:	New rational complex values.
+ *  04-Jan-23 rlw #558:	Quaternion constants.
  */
 package info.rlwhitcomb.util;
 
 import info.rlwhitcomb.math.BigFraction;
 import info.rlwhitcomb.math.ComplexNumber;
+import info.rlwhitcomb.math.Quaternion;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -183,7 +185,11 @@ public final class Constants
 	public static final ComplexNumber C_ONE = new ComplexNumber(1, 0);
 
 	/** A rational complex number corresponding to a rational value of {@code 1/1}. */
-	public static final ComplexNumber CR_ONE = ComplexNumber.real(new BigFraction(1));
+	public static final ComplexNumber CR_ONE = ComplexNumber.real(BigFraction.ONE);
+
+
+	/** A quaternion corresponding to a rational value of {@code (1, 0, 0, 0)}. */
+	public static final Quaternion QR_ONE = new Quaternion(BigFraction.ONE);
 
 
 	/** Number of nanoseconds in a second. */
