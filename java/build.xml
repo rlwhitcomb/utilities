@@ -4,7 +4,7 @@
 
 	The MIT License (MIT)
 
-	Copyright (c) 2020-2022 Roger L. Whitcomb.
+	Copyright (c) 2020-2023 Roger L. Whitcomb.
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -361,6 +361,8 @@
 		#577: Add "_find_and_run_class_gui.bat" to the mix for Windows GUI programs.
 	    22-Dec-2022 (rlwhitcomb)
 		#590: Add the "ci.build" property to the "build.number" properties.
+	    05-Jan-2023 (rlwhitcomb)
+		#577: Add "_find_and_run_class_gui" script for non-Windows platforms.
 
      ========================================================================== -->
 
@@ -487,6 +489,7 @@
 
 	<patternset id="wrapper-files">
 		<include name="_find_and_run_class"     unless:true="${on.windows}"/>
+		<include name="_find_and_run_class_gui" unless:true="${on.windows}"/>
 		<include name="_find_and_run_class.bat"     if:true="${on.windows}"/>
 		<include name="_find_and_run_class_gui.bat" if:true="${on.windows}"/>
 		<include name="fixpath"                 unless:true="${on.windows}"/>
