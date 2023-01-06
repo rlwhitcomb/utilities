@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2022 Roger L. Whitcomb.
+ * Copyright (c) 2022-2023 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -38,6 +38,7 @@
  *  15-Sep-22 rlw #478:	Also allow '_' as wild character.
  *  27-Dec-22 rlw	Add method to use Levenshtein distance to find words
  *			"close" to an input string.
+ *  06-Jan-23 rlw	Protect against index exceptions inside "contained".
  */
 package info.rlwhitcomb.wordfind;
 
@@ -355,10 +356,14 @@ public class Dictionary
 	 * @param word    Word to search for.
 	 * @param list    The list to search in.
 	 * @param indexes Indexes into the list based on starting letter.
+	 * @return        Whether or not the given word is contained in the list.
 	 */
 	private boolean contained(final String word, final List<Entry> list, final int[] indexes) {
 	    char startChar = word.charAt(0);
 	    int charIndex = (int) (startChar - firstChar);
+	    if (charIndex < 0 || charIndex >= indexes.length)
+		return false;
+
 	    int startIndex = indexes[charIndex];
 	    int endIndex = indexes[charIndex + 1];
 	    Entry wordEntry = new Entry(word, lowerWords);

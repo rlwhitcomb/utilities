@@ -114,12 +114,16 @@
  *          valid only after the heading is displayed.
  *      01-Jan-2023 (rlwhitcomb)
  *          #224: Add dictionary lookup.
+ *      06-Jan-2023 (rlwhitcomb)
+ *          #224: Thesaurus lookup also.
  */
 package info.rlwhitcomb.wordfind;
 
 import info.rlwhitcomb.util.*;
 import org.apache.pivot.beans.BXML;
 import org.apache.pivot.beans.BXMLSerializer;
+import org.apache.pivot.collections.ArrayList;
+import org.apache.pivot.collections.HashMap;
 import org.apache.pivot.json.JSONSerializer;
 import org.apache.pivot.web.*;
 import org.apache.pivot.wtk.Window;
@@ -128,8 +132,12 @@ import org.apache.pivot.wtk.*;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.io.*;
+import java.util.Comparator;
 import java.util.List;
-import java.util.*;
+import java.util.Optional;
+import java.util.Properties;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -1040,7 +1048,7 @@ public class WordFind implements Application
                 letters.append(CharUtil.makeStringOfChars('?', numberOfBlanks));
             }
 
-            List<String> results = new ArrayList<>();
+            List<String> results = new java.util.ArrayList<>();
             int largest = dictionary.findAllValidWords(results, letters.toString(), findInAdditional);
 
             @SuppressWarnings("unchecked")
@@ -1066,28 +1074,70 @@ public class WordFind implements Application
         }
     }
 
+    /**
+     * Do an online dictionary and thesaurus lookup of the given word, displaying the short definition(s) and synonyms.
+     *
+     * @param word The word to lookup.
+     */
     private static void lookup(final String word) {
         if (dictionary.contains(word, findInAdditional)) {
-            String path = String.format(DICTIONARY_API, word);
-            GetQuery query = new GetQuery(DICTIONARY_HOST, Query.DEFAULT_PORT, path, true);
-            query.getParameters().add("key", dictKey);
-            query.getRequestHeaders().put("Content-type", "application/json");
+            String dictPath = String.format(DICTIONARY_API, word);
+            String thesPath = String.format(THESAURUS_API, word);
+            GetQuery dictQuery = new GetQuery(DICTIONARY_HOST, Query.DEFAULT_PORT, dictPath, true);
+            GetQuery thesQuery = new GetQuery(DICTIONARY_HOST, Query.DEFAULT_PORT, thesPath, true);
+            dictQuery.getParameters().add("key", dictKey);
+            dictQuery.getRequestHeaders().put("Content-type", "application/json");
+            thesQuery.getParameters().add("key", thesKey);
+            thesQuery.getRequestHeaders().put("Content-type", "application/json");
+
             try {
-                Object result = query.execute();
+                Object dictResult = dictQuery.execute();
                 @SuppressWarnings("unchecked")
-                org.apache.pivot.collections.ArrayList<Object> resultList = (org.apache.pivot.collections.ArrayList<Object>) result;
+                ArrayList<Object> dictList = (ArrayList<Object>) dictResult;
                 @SuppressWarnings("unchecked")
-                org.apache.pivot.collections.HashMap<String, Object> resultMap = (org.apache.pivot.collections.HashMap<String, Object>) resultList.get(0);
+                HashMap<String, Object> dictMap = (HashMap<String, Object>) dictList.get(0);
                 int number = 1;
                 @SuppressWarnings("unchecked")
-                org.apache.pivot.collections.ArrayList<String> definitions = (org.apache.pivot.collections.ArrayList<String>) resultMap.get("shortdef");
+                ArrayList<String> definitions = (ArrayList<String>) dictMap.get("shortdef");
                 for (String definition : definitions) {
-                    System.out.println(ConsoleColor.color(String.format(BLACK_BRIGHT + "  %1$d." + infoColor + " %2$s" + RESET, number++, definition), colored));
+                    outputln(String.format(BLACK_BRIGHT + "  %1$d." + infoColor + " %2$s" + RESET, number++, definition));
+                }
+
+                Object thesResult = thesQuery.execute();
+                @SuppressWarnings("unchecked")
+                ArrayList<Object> thesList = (ArrayList<Object>) thesResult;
+                Object thesEntry = thesList.get(0);
+                if (thesEntry instanceof String) {
+                    outputln(String.format(errorColor + Intl.formatString("wordfind#noThesaurusEntry", word) + RESET));
+                    output(BLACK_BRIGHT + "");
+                    int linewidth = 0;
+                    for (Object thesObj: thesList) {
+			String otherWord = thesObj.toString();
+                        if (linewidth + otherWord.length() + 4 >= maxLineLength) {
+                            System.out.println();
+                            linewidth = 0;
+                        }
+                        System.out.printf("%1$s    ", otherWord);
+                        linewidth += otherWord.length() + 4;
+                    }
+                    outputln(RESET + "");
+                }
+                else {
+                    @SuppressWarnings("unchecked")
+                    HashMap<String, Object> thesMap = (HashMap<String, Object>) thesList.get(0);
+                    @SuppressWarnings("unchecked")
+                    ArrayList<String> thesDefs = (ArrayList<String>) thesMap.get("shortdef");
+                    for (String definition : thesDefs) {
+                        System.out.println(ConsoleColor.color(String.format(BLACK_BRIGHT + "  %1$d." + infoColor + " %2$s" + RESET, number++, definition), colored));
+                    }
                 }
             }
             catch (QueryException qe) {
                 error("wordfind#lookupIOError", Exceptions.toString(qe));
             }
+        }
+        else {
+            error("wordfind#lookupWordNotFound", word);
         }
     }
 
@@ -1232,7 +1282,7 @@ public class WordFind implements Application
         });
 
         // Command line options override the defaults (if any)
-        List<String> argWords = new ArrayList<>(args.length);
+        List<String> argWords = new java.util.ArrayList<>(args.length);
         int totalInputSize = processCommandLine(args, argWords, false);
 
         // Next read in the preferred dictionary/word file
