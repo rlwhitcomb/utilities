@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2020-2022 Roger L. Whitcomb.
+ * Copyright (c) 2020-2023 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -109,15 +109,19 @@
  *          #478: Implement patterns for "-contains" value.
  *      15-Sep-2022 (rlwhitcomb)
  *          #479: Allow ":option" for options in REPL mode.
- *	01-Dec-2022 (rlwhitcomb)
- *	    #571: Fix buffer index exception during "mark()". Report the initial word being
- *	    valid only after the heading is displayed.
+ *      01-Dec-2022 (rlwhitcomb)
+ *          #571: Fix buffer index exception during "mark()". Report the initial word being
+ *          valid only after the heading is displayed.
+ *      01-Jan-2023 (rlwhitcomb)
+ *          #224: Add dictionary lookup.
  */
 package info.rlwhitcomb.wordfind;
 
 import info.rlwhitcomb.util.*;
 import org.apache.pivot.beans.BXML;
 import org.apache.pivot.beans.BXMLSerializer;
+import org.apache.pivot.json.JSONSerializer;
+import org.apache.pivot.web.*;
 import org.apache.pivot.wtk.Window;
 import org.apache.pivot.wtk.*;
 
@@ -153,6 +157,15 @@ public class WordFind implements Application
 
     /** A pattern to recognize (and replace) all "wild" characters. */
     private static final String WILD_PATTERN = "[ \\._\\?]";
+
+    /** The dictionary API hostname. */
+    private static final String DICTIONARY_HOST = "www.dictionaryapi.com";
+
+    /** The dictionary API URL. */
+    private static final String DICTIONARY_API = "/api/v3/references/collegiate/json/%1$s";
+
+    /** The thesaurus API URL. */
+    private static final String THESAURUS_API = "/api/v3/references/thesaurus/json/%1$s";
 
 
     /**
@@ -227,6 +240,20 @@ public class WordFind implements Application
      * Sort alphabetically?
      */
     private static boolean sortAlphabetically = false;
+
+    /**
+     * Is dictionary lookup available (that is, are the dictionary API keys available)?
+     */
+    private static boolean lookupAvailable = false;
+    /**
+     * Dictionary API key.
+     */
+    private static String dictKey;
+    /**
+     * Thesaurus API key.
+     */
+    private static String thesKey;
+
 
     /** The format string for final output of the words. */
     private static final String WORD_FORMAT = "%1$s%2$s " + BLACK_BRIGHT + "(%3$3d)" + RESET;
@@ -422,7 +449,7 @@ public class WordFind implements Application
         }
 
         // Normalize a negative starting index to the beginning of the string, but do it based
-	// on the fully adorned string, otherwise with some markers present we could get really confused
+        // on the fully adorned string, otherwise with some markers present we could get really confused
         if (index >= 0)
             charPos = index * 3;
         else
@@ -1039,6 +1066,31 @@ public class WordFind implements Application
         }
     }
 
+    private static void lookup(final String word) {
+        if (dictionary.contains(word, findInAdditional)) {
+            String path = String.format(DICTIONARY_API, word);
+            GetQuery query = new GetQuery(DICTIONARY_HOST, Query.DEFAULT_PORT, path, true);
+            query.getParameters().add("key", dictKey);
+            query.getRequestHeaders().put("Content-type", "application/json");
+            try {
+                Object result = query.execute();
+                @SuppressWarnings("unchecked")
+                org.apache.pivot.collections.ArrayList<Object> resultList = (org.apache.pivot.collections.ArrayList<Object>) result;
+                @SuppressWarnings("unchecked")
+                org.apache.pivot.collections.HashMap<String, Object> resultMap = (org.apache.pivot.collections.HashMap<String, Object>) resultList.get(0);
+                int number = 1;
+                @SuppressWarnings("unchecked")
+                org.apache.pivot.collections.ArrayList<String> definitions = (org.apache.pivot.collections.ArrayList<String>) resultMap.get("shortdef");
+                for (String definition : definitions) {
+                    System.out.println(ConsoleColor.color(String.format(BLACK_BRIGHT + "  %1$d." + infoColor + " %2$s" + RESET, number++, definition), colored));
+                }
+            }
+            catch (QueryException qe) {
+                error("wordfind#lookupIOError", Exceptions.toString(qe));
+            }
+        }
+    }
+
     /**
      * Run "console" mode, where we prompt for input and process each line, in a loop,
      * provided there is no input from the command line (or the single argument is {@code "@"}).
@@ -1070,7 +1122,9 @@ public class WordFind implements Application
                 if (line.isEmpty())
                     continue replLoop;
 
-                String cmd = line.trim().toLowerCase();
+                String parts[] = line.trim().toLowerCase().split("\\s+");
+                String cmd = parts[0];
+
                 switch (cmd) {
                     case ":quit":
                     case ":exit":
@@ -1096,6 +1150,18 @@ public class WordFind implements Application
                     case ":stat":
                     case ":s":
                         dictionary.displayStatistics(System.out);
+                        continue replLoop;
+
+                    case ":lookup":
+                    case ":look":
+                    case ":dictionary":
+                    case ":dict":
+                        if (!lookupAvailable) {
+                            error("wordfind#lookupNotAvailable");
+                        }
+                        else if (parts.length > 1) {
+                            lookup(parts[1]);
+                        }
                         continue replLoop;
 
                     default:
@@ -1136,6 +1202,19 @@ public class WordFind implements Application
     }
 
     /**
+     * Read the dictionary API keys (if available).
+     */
+    private static void readAPIKeys() {
+        Properties apiProps = Environment.readPropertiesFile("/dictionary-api.properties");
+        if (apiProps != null && !apiProps.isEmpty()) {
+            dictKey = apiProps.getProperty("dictionary.key");
+            thesKey = apiProps.getProperty("thesaurus.key");
+            lookupAvailable = true;
+        }
+    }
+
+
+    /**
      * The main program, invoked from the console.
      * @param args The parsed command line arguments.
      */
@@ -1158,6 +1237,9 @@ public class WordFind implements Application
 
         // Next read in the preferred dictionary/word file
         readDictionary();
+
+        // Also, read the dictionary lookup keys (if present).
+        readAPIKeys();
 
         // BIG switch here for GUI vs console operation
         if (!runningOnConsole) {

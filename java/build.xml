@@ -363,6 +363,8 @@
 		#590: Add the "ci.build" property to the "build.number" properties.
 	    05-Jan-2023 (rlwhitcomb)
 		#577: Add "_find_and_run_class_gui" script for non-Windows platforms.
+	    05-Jan-2023 (rlwhitcomb)
+		#224: Add dictionary API keys resource to the .jar file.
 
      ========================================================================== -->
 
@@ -663,6 +665,7 @@
 			<include name="build.properties"/>
 			<include name="build.number"/>
 			<include name="version.properties"/>
+			<include name="dictionary-api.properties"/>
 			<include name="images/*.*"/>
 			<include name="info/rlwhitcomb/*.json"/>
 			<include name="info/rlwhitcomb/*.class"/>
