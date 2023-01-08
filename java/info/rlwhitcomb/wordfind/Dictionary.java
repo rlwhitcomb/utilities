@@ -39,6 +39,7 @@
  *  27-Dec-22 rlw	Add method to use Levenshtein distance to find words
  *			"close" to an input string.
  *  06-Jan-23 rlw	Protect against index exceptions inside "contained".
+ *  07-Jan-23 rlw #591:	Fix bug with multiple wildcards that are the same letter.
  */
 package info.rlwhitcomb.wordfind;
 
@@ -120,8 +121,9 @@ public class Dictionary
 			    if (letters[i] > (letterEntry.letters[i] + wildCount))
 				return false;
 
-			    wildCount -= (letters[i] - letterEntry.letters[i]);
-			    wildChars.append((char) ((lowerCase ? 'a' : 'A') + i));
+			    int neededWildCount = (letters[i] - letterEntry.letters[i]);
+			    wildCount -= neededWildCount;
+			    CharUtil.makeStringOfChars(wildChars, (char) ((lowerCase ? 'a' : 'A') + i), neededWildCount);
 			}
 		    }
 
@@ -387,6 +389,19 @@ public class Dictionary
 	}
 
 	/**
+	 * Determine if the character at the given location is marked (that is, flanked on either side)
+	 * by the given marker character.
+	 *
+	 * @param buf    The buffer of characters to examine.
+	 * @param loc    Location (index) to examine.
+	 * @param marker Marker character which might flank the given location.
+	 * @return       Whether loc - 1 and loc + 1 are within the buffer bounds and contain the marker.
+	 */
+	private boolean isMarkedBy(final StringBuilder buf, final int loc, final char marker) {
+	    return (loc > 0 && buf.charAt(loc - 1) == marker && loc < buf.length() - 1 && buf.charAt(loc + 1) == marker);
+	}
+
+	/**
 	 * Find all the valid words for the given string of letters in the word list.
 	 *
 	 * @param letterEntry Entry with the letters to search for.
@@ -402,9 +417,16 @@ public class Dictionary
 		if (entry.couldBeSpelledBy(letterEntry, wildChars, lowerWords)) {
 		    if (wildChars.length() > 0) {
 			StringBuilder adornedWord = new StringBuilder(entry.word);
+
 			for (int i = 0; i < wildChars.length(); i++) {
 			    String wildStr = wildChars.substring(i, i + 1);
 			    int ix = adornedWord.lastIndexOf(wildStr);
+
+			    // Account for multiple wild characters that are the same
+			    while (isMarkedBy(adornedWord, ix, WordFind.BLANK_MARKER)) {
+				ix = adornedWord.lastIndexOf(wildStr, ix - 1);
+			    }
+
 			    adornedWord.insert(ix, WordFind.BLANK_MARKER);
 			    adornedWord.insert(ix + 2, WordFind.BLANK_MARKER);
 			}
