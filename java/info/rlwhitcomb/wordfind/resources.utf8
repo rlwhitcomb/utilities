@@ -43,6 +43,7 @@
 #	    #224: Error messages for word lookup.
 #	06-Jan-2023 (rlwhitcomb)
 #	    #224: More lookup error messages.
+#	    #224: One more error.
 #
 
 exception		= Error: %1$s from %2$s%n
@@ -67,6 +68,7 @@ errIndexOutOfBounds	= Index %1$d is out of range of 0 .. %2$d!
 lookupWordNotFound	= The word "%1$s" was not found in our dictionary!
 lookupNotAvailable	= Dictionary lookup is not available!
 lookupIOError		= Error doing the word lookup: %1$s
+noDictionaryEntry	= No dictionary entry for "%1$s"; possible alternatives include:
 noThesaurusEntry	= No thesaurus entry for "%1$s"; possible alternatives include:
 
 infoOneLetterWord	= One letter word %1$s

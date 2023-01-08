@@ -116,6 +116,7 @@
  *          #224: Add dictionary lookup.
  *      06-Jan-2023 (rlwhitcomb)
  *          #224: Thesaurus lookup also.
+ *          #224: Common code for online results.
  */
 package info.rlwhitcomb.wordfind;
 
@@ -147,7 +148,8 @@ import static info.rlwhitcomb.util.ConsoleColor.Code.*;
 
 /**
  * A utility program to make sense out of random letter tiles
- * (such as for the "Scrabble" &trade; or "Word With Friends" &trade; games).
+ * (such as for the "Scrabble" &trade; or "Word With Friends" &trade; games),
+ * which also includes online dictionary and thesaurus lookups.
  */
 public class WordFind implements Application
 {
@@ -1074,6 +1076,41 @@ public class WordFind implements Application
         }
     }
 
+    private static int displayOnlineResult(final String word, final Object queryResult, final int startNumber, final String errorKey) {
+        int number = startNumber;
+
+        @SuppressWarnings("unchecked")
+        ArrayList<Object> queryList = (ArrayList<Object>) queryResult;
+        Object queryEntry = queryList.get(0);
+        if (queryEntry instanceof String) {
+            outputln(String.format(errorColor + Intl.formatString("wordfind#" + errorKey, word) + RESET));
+            output(BLACK_BRIGHT + "");
+
+            int lineWidth = 0;
+            for (Object obj: queryList) {
+                String otherWord = obj.toString();
+                if (lineWidth + otherWord.length() + 4 >= maxLineLength) {
+                    System.out.println();
+                    lineWidth = 0;
+                }
+                System.out.printf("%1$s    ", otherWord);
+                lineWidth += otherWord.length() + 4;
+            }
+            outputln(RESET + "");
+        }
+        else {
+            @SuppressWarnings("unchecked")
+            HashMap<String, Object> map = (HashMap<String, Object>) queryList.get(0);
+            @SuppressWarnings("unchecked")
+            ArrayList<String> defs = (ArrayList<String>) map.get("shortdef");
+            for (String definition : defs) {
+                outputln(String.format(BLACK_BRIGHT + "  %1$d." + infoColor + " %2$s" + RESET, number++, definition));
+            }
+        }
+
+        return number;
+    }
+
     /**
      * Do an online dictionary and thesaurus lookup of the given word, displaying the short definition(s) and synonyms.
      *
@@ -1091,46 +1128,8 @@ public class WordFind implements Application
             thesQuery.getRequestHeaders().put("Content-type", "application/json");
 
             try {
-                Object dictResult = dictQuery.execute();
-                @SuppressWarnings("unchecked")
-                ArrayList<Object> dictList = (ArrayList<Object>) dictResult;
-                @SuppressWarnings("unchecked")
-                HashMap<String, Object> dictMap = (HashMap<String, Object>) dictList.get(0);
-                int number = 1;
-                @SuppressWarnings("unchecked")
-                ArrayList<String> definitions = (ArrayList<String>) dictMap.get("shortdef");
-                for (String definition : definitions) {
-                    outputln(String.format(BLACK_BRIGHT + "  %1$d." + infoColor + " %2$s" + RESET, number++, definition));
-                }
-
-                Object thesResult = thesQuery.execute();
-                @SuppressWarnings("unchecked")
-                ArrayList<Object> thesList = (ArrayList<Object>) thesResult;
-                Object thesEntry = thesList.get(0);
-                if (thesEntry instanceof String) {
-                    outputln(String.format(errorColor + Intl.formatString("wordfind#noThesaurusEntry", word) + RESET));
-                    output(BLACK_BRIGHT + "");
-                    int linewidth = 0;
-                    for (Object thesObj: thesList) {
-			String otherWord = thesObj.toString();
-                        if (linewidth + otherWord.length() + 4 >= maxLineLength) {
-                            System.out.println();
-                            linewidth = 0;
-                        }
-                        System.out.printf("%1$s    ", otherWord);
-                        linewidth += otherWord.length() + 4;
-                    }
-                    outputln(RESET + "");
-                }
-                else {
-                    @SuppressWarnings("unchecked")
-                    HashMap<String, Object> thesMap = (HashMap<String, Object>) thesList.get(0);
-                    @SuppressWarnings("unchecked")
-                    ArrayList<String> thesDefs = (ArrayList<String>) thesMap.get("shortdef");
-                    for (String definition : thesDefs) {
-                        System.out.println(ConsoleColor.color(String.format(BLACK_BRIGHT + "  %1$d." + infoColor + " %2$s" + RESET, number++, definition), colored));
-                    }
-                }
+                int number = displayOnlineResult(word, dictQuery.execute(), 1, "noDictionaryEntry");
+                displayOnlineResult(word, thesQuery.execute(), number, "noThesaurusEntry");
             }
             catch (QueryException qe) {
                 error("wordfind#lookupIOError", Exceptions.toString(qe));
