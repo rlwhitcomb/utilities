@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2022 Roger L. Whitcomb.
+ * Copyright (c) 2022-2023 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,6 +27,7 @@
  *  12-Feb-22 rlw #199: Abstract from existing code.
  *  14-Feb-22 rlw #199: Override "toString" here.
  *			Override "isImmutable" here too.
+ *  08-Jan-23 rlw #592:	Move "name" and "immutable" down to Scope.
  */
 package info.rlwhitcomb.calc;
 
@@ -37,31 +38,28 @@ package info.rlwhitcomb.calc;
 abstract class ValueScope extends Scope
 {
 	/**
-	 * Name of this value, for error reporting.
-	 */
-	private String name;
-
-
-	/**
 	 * Construct one of these, given its name and type.
 	 *
 	 * @param nm Name of this value.
 	 * @param t  The type of this value object.
 	 */
 	ValueScope(final String nm, final Type t) {
-	    super(t);
-
-	    name = nm;
+	    super(t, true);
+	    setName(nm);
 	}
 
 	/**
-	 * Retrieve the name of this object.
+	 * Construct one of these, given its name, type, and immutable flag.
 	 *
-	 * @return The name assigned at definition time.
+	 * @param nm Name of this value.
+	 * @param t  The type of this value object.
+	 * @param flag "Immutable" flag for this value (mostly for {@link SystemValue}).
 	 */
-	String getName() {
-	    return name;
+	ValueScope(final String nm, final Type t, final boolean flag) {
+	    super(t, flag);
+	    setName(nm);
 	}
+
 
 	/**
 	 * Get the value of this object.
@@ -70,13 +68,6 @@ abstract class ValueScope extends Scope
 	 */
 	abstract Object getValue();
 
-	/**
-	 * @return Most values are immutable.
-	 */
-	@Override
-	protected boolean isImmutable() {
-	    return true;
-	}
 
 	/**
 	 * @return An appropriate value for one of our values.

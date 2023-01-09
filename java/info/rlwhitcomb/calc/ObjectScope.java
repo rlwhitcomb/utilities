@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2021-2022 Roger L. Whitcomb.
+ * Copyright (c) 2021-2023 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -69,6 +69,8 @@
  *	    #408: Change dummy key generator to make legal names.
  *	15-Aug-2022 (rlwhitcomb)
  *	    #440: Move "size()" up to CollectionScope.
+ *	08-Jan-2023 (rlwhitcomb)
+ *	    #592: MOve "isEmpty()" to CollectionScope.
  */
 package info.rlwhitcomb.calc;
 
@@ -543,7 +545,8 @@ class ObjectScope extends CollectionScope
 	 *
 	 * @return {@code true} if the object is empty.
 	 */
-	boolean isEmpty() {
+	@Override
+	protected boolean isEmpty() {
 	    return variables.isEmpty();
 	}
 

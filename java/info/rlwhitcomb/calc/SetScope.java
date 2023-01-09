@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2022 Roger L. Whitcomb.
+ * Copyright (c) 2022-2023 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,6 +29,7 @@
  *  25-Jun-22 rlw #314: Add "diff".
  *  08-Jul-22 rlw #393: Cleanup imports.
  *  15-Aug-22 rlw #440: Move "size()" up to CollectionScope.
+ *  08-Jan-23 rlw #592:	Move "isEmpty()" to CollectionScope.
  */
 package info.rlwhitcomb.calc;
 
@@ -202,7 +203,8 @@ class SetScope<T> extends CollectionScope
 	 *
 	 * @return {@code true} for an empty set
 	 */
-	boolean isEmpty() {
+	@Override
+	protected boolean isEmpty() {
 	    return values.isEmpty();
 	}
 

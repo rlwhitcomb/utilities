@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2022 Roger L. Whitcomb.
+ * Copyright (c) 2022-2023 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,17 +24,13 @@
  *	A "system" value that is set by a "set" method and queried
  *	by a field descriptor.
  *
- *  History:
- *	04-Feb-2022 (rlwhitcomb)
- *	    #233: Initial coding.
- *	12-Feb-2022 (rlwhitcomb)
- *	    #199: Derive from ValueScope.
- *	14-Feb-2022 (rlwhitcomb)
- *	    #199: Override "isImmutable" here from default in ValueScope.
- *	25-May-2022 (rlwhitcomb)
- *	    #348: Return new value from "setValue" methods.
- *	08-Jul-2022 (rlwhitcomb)
- *	    #393: Cleanup imports.
+ * History:
+ *  04-Feb-22 rlw #233:	Initial coding.
+ *  12-Feb-22 rlw #199:	Derive from ValueScope.
+ *  14-Feb-22 rlw #199:	Override "isImmutable" here from default in ValueScope.
+ *  25-May-22 rlw #348:	Return new value from "setValue" methods.
+ *  08-Jul-22 rlw #393:	Cleanup imports.
+ *  08-Jan-23 rlw #592:	Move "immutable" down to Scope.
  */
 package info.rlwhitcomb.calc;
 
@@ -75,21 +71,13 @@ class SystemValue<V> extends ValueScope
 	 * @param method The "set" method for this value.
 	 */
 	private SystemValue(final String nm, final Object obj, final Field field, final Consumer<V> method) {
-	    super(nm, Type.SYSTEM);
+	    super(nm, Type.SYSTEM, false);
 
 	    object    = obj;
 	    getField  = field;
 	    setMethod = method;
 	}
 
-
-	/**
-	 * @return One of these is actually mutable.
-	 */
-	@Override
-	protected boolean isImmutable() {
-	    return false;
-	}
 
 	/**
 	 * Get this system value using its defined field object.
