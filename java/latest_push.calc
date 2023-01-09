@@ -13,8 +13,8 @@
 }
 :results on {
     loop event within j {
-        if event."type" == "PushEvent" && event."payload"."ref" == "refs/heads/master" {
-           `${substr(event."payload"."head", 0, 7)}` @q
+        if event.type == "PushEvent" && event.payload.ref == "refs/heads/master" {
+           substr(event.payload.head, 0, 7) @q
            leave
         }
     }
