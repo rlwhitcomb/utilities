@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2011,2020,2022 Roger L. Whitcomb.
+ * Copyright (c) 2011,2020,2022-2023 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,12 +25,10 @@
  *  (Taken from Ant tutorials examples)
  *
  * History:
- *    18-Aug-2011 (rlwhitcomb)
- *	Initial coding from the Tutorial examples.
- *    09-Jan-2020 (rlwhitcomb)
- *	Update package, add license.
- *    09-Jul-2022 (rlwhitcomb)
- *	#393: Cleanup imports.
+ *  18-Aug-11 rlw  ---	Initial coding from the Tutorial examples.
+ *  09-Jan-20 rlw  ---	Update package, add license.
+ *  09-Jul-22 rlw #393:	Cleanup imports.
+ *  09-Jan-23 rlw #4:	Add wildcard support for "file".
  */
 package info.rlwhitcomb.ant;
 
@@ -40,6 +38,8 @@ import org.apache.tools.ant.types.Path;
 
 import java.io.File;
 import java.util.Vector;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 /**
@@ -71,72 +71,88 @@ import java.util.Vector;
 public class FindTask extends Task
 {
 	/** The name of the file we're looking for. */
-	private String file = null;
+	private String fileName = null;
+
 	/** The property name we're going to set with the file's location. */
-	private String location = null;
+	private String locationPropertyName = null;
+
 	/** Whether to list all the paths or not. */
-	private boolean all = false;
+	private boolean listAll = false;
+
 	/** The list of paths that we are to search in to find the file. */
 	private Vector<Path> paths = new Vector<Path>();
+
 	/** Whether we are running on Windows or not. */
 	private boolean isWindows = false;
 
-	public void setFile(String file) {
-	    this.file = file;
+
+	public void setFile(final String file) {
+	    fileName = file;
 	}
 
-	public void setLocation(String location) {
-	    this.location = location;
+	public void setLocation(final String location) {
+	    locationPropertyName = location;
 	}
 
-	public void addPath(Path path) {
+	public void addPath(final Path path) {
 	    paths.add(path);
 	}
 
-	public void setAll(boolean all) {
-	    this.all = all;
+	public void setAll(final boolean all) {
+	    listAll = all;
 	}
 
 	private void validate() throws BuildException {
-	    if (file == null)
+	    if (fileName == null)
 		throw new BuildException("'file' is not set");
-	    if (location == null)
+	    if (locationPropertyName == null)
 		throw new BuildException("'location' is not set");
 	    if (paths.size() == 0)
 		throw new BuildException("'path' not set");
 	}
 
+	private Pattern convertToPattern(final String name) {
+	    StringBuilder buf = new StringBuilder(name.length());
+
+	    for (int i = 0; i < name.length(); i++) {
+		char ch = name.charAt(i);
+		if (ch == '?')
+		    buf.append('.');
+		else if (ch == '*')
+		    buf.append(".*");
+		else
+		    buf.append(ch);
+	    }
+
+	    String patternString = buf.toString();
+	    return isWindows ? Pattern.compile(patternString, Pattern.CASE_INSENSITIVE)
+			     : Pattern.compile(patternString);
+	}
+
 	@Override
 	public void init() throws BuildException {
-	    this.isWindows = System.getProperty("os.name").startsWith("Windows");
+	    isWindows = System.getProperty("os.name").startsWith("Windows");
 	}
 
 	@Override
 	public void execute() throws BuildException {
 	    validate();
+	    Pattern namePattern = convertToPattern(fileName);
+
 	    Vector<String> foundFiles = new Vector<String>();
-	    for(Path path : paths) {
-		for(String includedFile : path.list()) {
+	    for (Path path : paths) {
+		for (String includedFile : path.list()) {
 		    File f = new File(includedFile);
-		    if (isWindows) {
-			// Name only has to match case-insensitively
-			if (file.equalsIgnoreCase(f.getName()) &&
-			    !foundFiles.contains(includedFile)) {
-			    foundFiles.add(includedFile);
-			}
-		    }
-		    else {
-			// Name must match exactly
-			if (file.equals(f.getName()) &&
-			    !foundFiles.contains(includedFile)) {
-			    foundFiles.add(includedFile);
-			}
+		    Matcher m = namePattern.matcher(f.getName());
+		    if (m.matches() && !foundFiles.contains(includedFile)) {
+			foundFiles.add(includedFile);
 		    }
 		}
 	    }
+
 	    String result = null;
 	    if (foundFiles.size() > 0) {
-		if (all) {
+		if (listAll) {
 		    StringBuilder buf = new StringBuilder();
 		    for (String s : foundFiles) {
 			if (buf.length() > 0)
@@ -149,8 +165,10 @@ public class FindTask extends Task
 		    result = foundFiles.firstElement();
 		}
 	    }
-	    if (result != null)
-		getProject().setNewProperty(location, result);
+
+	    if (result != null) {
+		getProject().setNewProperty(locationPropertyName, result);
+	    }
 	}
 
 	public FindTask() {
