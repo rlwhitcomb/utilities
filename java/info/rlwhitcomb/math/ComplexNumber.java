@@ -67,6 +67,8 @@
  *	    #558: Make F_ZERO public.
  *	05-Jan-2023 (rlwhitcomb)
  *	    #558: Make copies of the fraction parts to avoid improper "proper" settings.
+ *	09-Jan-2023 (rlwhitcomb)
+ *	    #103: Add "sqrt"; fixup results of subtract and multiply/divide.
  */
 package info.rlwhitcomb.math;
 
@@ -899,9 +901,10 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 	 * <code>( (a-c), (b-d) )</code>.
 	 *
 	 * @param other The number to subtract from this one.
+	 * @param mc    Rounding and precision context for decimal values.
 	 * @return      The difference.
 	 */
-	public ComplexNumber subtract(final ComplexNumber other) {
+	public ComplexNumber subtract(final ComplexNumber other, final MathContext mc) {
 	    if (isRational() && other.isRational()) {
 		BigFraction a1f = rFrac();
 		BigFraction a2f = other.rFrac();
@@ -916,7 +919,10 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 		BigDecimal b1 = i();
 		BigDecimal b2 = other.i();
 
-		return new ComplexNumber(a1.subtract(a2), b1.subtract(b2));
+		BigDecimal rTerm = MathUtil.fixup(a1.subtract(a2), mc);
+		BigDecimal iTerm = MathUtil.fixup(b1.subtract(b2), mc);
+
+		return new ComplexNumber(rTerm, iTerm);
 	    }
 	}
 
@@ -948,8 +954,8 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 		BigDecimal u = other.r();
 		BigDecimal v = other.i();
 
-		BigDecimal rTerm = x.multiply(u).subtract(y.multiply(v), mc);
-		BigDecimal iTerm = x.multiply(v).add(y.multiply(u), mc);
+		BigDecimal rTerm = MathUtil.fixup(x.multiply(u).subtract(y.multiply(v), mc), mc);
+		BigDecimal iTerm = MathUtil.fixup(x.multiply(v).add(y.multiply(u), mc), mc);
 
 		return new ComplexNumber(rTerm, iTerm);
 	    }
@@ -1159,6 +1165,42 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 		return result.negate();
 	    else
 		return result;
+	}
+
+	/**
+	 * Calculate the square root of this complex number.
+	 *
+	 * @param mc Math context for rounding and precision.
+	 * @return   The first (positive) square root.
+	 */
+	public ComplexNumber sqrt(final MathContext mc) {
+	    BigDecimal a = r();
+	    BigDecimal b = i();
+
+	    BigDecimal a2b2 = MathUtil.sqrt(a.multiply(a).add(b.multiply(b)), mc);
+
+	    BigDecimal r = MathUtil.sqrt(a.add(a2b2).divide(D_TWO, mc), mc);
+	    BigDecimal s = MathUtil.sqrt(a2b2.subtract(a).divide(D_TWO, mc), mc);
+
+	    // Now adjust the sign of s such that r*s = b/2
+	    int signb = b.signum();
+	    int signr = r.signum();
+	    int signs = s.signum();
+
+	    // b < 0 => r != s
+	    // b > 0 -> r == s
+	    if (signb != 0) {
+		if (signb < 0) {
+		    if (signr == signs)
+			s = s.negate();
+		}
+		else {
+		    if (signr != signs)
+			s = s.negate();
+		}
+	    }
+
+	    return new ComplexNumber(r, s);
 	}
 
 

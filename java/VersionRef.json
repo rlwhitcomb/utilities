@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.20.7', date: d'2023-01-10',
+      issues: [ 103 ],
+      comment: 'Extended precision complex square root.'
+    },
     { version: '2.20.5', date: d'2023-01-05',
       issues: [ 558 ],
       comment: 'Basic quaternion arithmetic (+, -, *, /).'

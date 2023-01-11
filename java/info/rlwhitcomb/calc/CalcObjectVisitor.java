@@ -747,6 +747,8 @@
  *	    #558: Beginnings of "quaternion" support.
  *	05-Jan-2023 (rlwhitcomb)
  *	    #558: Quaternion basic arithmetic.
+ *	10-Jan-2023 (rlwhitcomb)
+ *	    #103: New complex "sqrt" function; add rounding context to other functions.
  */
 package info.rlwhitcomb.calc;
 
@@ -3819,13 +3821,13 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    if (incr)
 			afterValue = cValue.add(CR_ONE);
 		    else
-			afterValue = cValue.subtract(CR_ONE);
+			afterValue = cValue.subtract(CR_ONE, settings.mc);
 		}
 		else {
 		    if (incr)
 			afterValue = cValue.add(C_ONE);
 		    else
-			afterValue = cValue.subtract(C_ONE);
+			afterValue = cValue.subtract(C_ONE, settings.mc);
 		}
 	    }
 	    else if (value instanceof Quaternion) {
@@ -3940,13 +3942,13 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    if (incr)
 			afterValue = cValue.add(CR_ONE);
 		    else
-			afterValue = cValue.subtract(CR_ONE);
+			afterValue = cValue.subtract(CR_ONE, settings.mc);
 		}
 		else {
 		    if (incr)
 			afterValue = cValue.add(C_ONE);
 		    else
-			afterValue = cValue.subtract(C_ONE);
+			afterValue = cValue.subtract(C_ONE, settings.mc);
 		}
 	    }
 	    else if (value instanceof Quaternion) {
@@ -4327,7 +4329,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			ComplexNumber c1 = ComplexNumber.valueOf(e1);
 			ComplexNumber c2 = ComplexNumber.valueOf(e2);
 
-			return c1.subtract(c2);
+			return c1.subtract(c2, settings.mc);
 		    }
 		    else if (e1 instanceof Quaternion || e2 instanceof Quaternion) {
 			Quaternion q1 = Quaternion.valueOf(e1);
@@ -4458,11 +4460,11 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    if (value instanceof ComplexNumber) {
 		ComplexNumber cValue = (ComplexNumber) value;
-		return cValue.pow(D_ONE_HALF, settings.mc);
+		return cValue.sqrt(settings.mcDivide);
 	    }
 	    else {
 		try {
-		    return MathUtil.sqrt(convertToDecimal(value, settings.mc, expr), settings.mc);
+		    return MathUtil.sqrt(convertToDecimal(value, settings.mc, expr), settings.mcDivide);
 		}
 		catch (IllegalArgumentException iae) {
 		    throw new CalcExprException(iae, ctx);
@@ -4477,10 +4479,11 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    if (value instanceof ComplexNumber) {
 		ComplexNumber cValue = (ComplexNumber) value;
-		return cValue.pow(BigDecimal.ONE.divide(D_THREE, MathUtil.divideContext(cValue, settings.mcDivide)), settings.mc);
+		MathContext mcPow = MathUtil.divideContext(cValue, settings.mcDivide);
+		return cValue.pow(BigDecimal.ONE.divide(D_THREE, mcPow), mcPow);
 	    }
 	    else {
-		return MathUtil.cbrt(convertToDecimal(value, settings.mc, expr), settings.mc);
+		return MathUtil.cbrt(convertToDecimal(value, settings.mc, expr), settings.mcDivide);
 	    }
 	}
 
@@ -7500,7 +7503,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			ComplexNumber c1 = ComplexNumber.valueOf(e1);
 			ComplexNumber c2 = ComplexNumber.valueOf(e2);
 
-			result = c1.subtract(c2);
+			result = c1.subtract(c2, settings.mc);
 		    }
 		    else {
 			BigDecimal d1 = toDecimalValue(this, e1, settings.mc, varCtx);
