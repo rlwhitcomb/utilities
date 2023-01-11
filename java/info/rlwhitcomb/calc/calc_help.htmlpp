@@ -420,8 +420,9 @@ h2 {
      of the special Unicode number-like symbols are also interpreted as single numbers (see the "Operators, Functions, and Precedence" table below), such as:
      <code>&#x2473;</code> = <code>20</code>, <code>&#x247D;</code> = <code>10</code>, or <code>&#xFF19;</code> = <code>9</code>.
   <p>Complex numbers are specified by a <i>real</i> <code>,</code> <i>imaginary</i> pair as in <code>(</code> <i>real</i> <code>,</code> <i>imaginary</i> <code>)</code>, the <code><i>i</i></code> constant, or the result of the <code>complex</code> function. All the simple and some more complicated arithmetic functions are supported for complex numbers.
-  <p>Quaternions are specified by the four <code>a</code>, <code>b</code>, <code>c</code>, and <code>d</code> coefficient values, or by using the built-in <code>quaternion(</code>...<code>)</code> function.
-     Support for arithmetic using quaternions (and various conversions is still being developed).
+  <p>Quaternions are specified by the four <code>a</code>, <code>b</code>, <code>c</code>, and <code>d</code> coefficient values, or by using the built-in <code>quaternion(</code>...<code>)</code> function. The value of <code><i>i</i></code> can be promoted to a
+     quaternion automatically, and <code><i>j</i></code> or <code><i>k</i></code> are also available.
+     Support for basic arithmetic using quaternions and some basic conversions are available, and more is currently being developed.
   <p>Just as an aside, Calc does not support <code>NaN</code> or <code>Infinity</code> values. Operations that might result in such values generally cause errors instead.
   <p>The boolean (or "logical") constants are <code>true</code> and <code>false</code>.
   <p>The special null constant, which signifies no value, or a value that hasn't been assigned or defined yet, is simply <code>null</code>.
