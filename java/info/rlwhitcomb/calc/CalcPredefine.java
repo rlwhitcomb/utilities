@@ -56,6 +56,8 @@
  *	    #429: Make "cpu" memory values into dynamic suppliers; add "usedmemory".
  *	25-Dec-2022 (rlwhitcomb)
  *	    #83: Another alias for "e".
+ *	10-Jan-2023 (rlwhitcomb)
+ *	    #558: Add aliases for "j" and "k" (quaternions).
  */
 package info.rlwhitcomb.calc;
 
@@ -358,6 +360,9 @@ class CalcPredefine
 	    for (int i = 0; i < I_ALIASES.length; i++) {
 		PredefinedValue.define(globalScope, I_ALIASES[i], C_I);
 	    }
+
+	    PredefinedValue.define(globalScope, "j", Q_J);
+	    PredefinedValue.define(globalScope, "k", Q_K);
 	}
 
 

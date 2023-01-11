@@ -20,10 +20,10 @@ define readJSON(fileName) = {
    }
 }
 
-   j = readJSON('test/data/cake.json')
+   j1 = readJSON('test/data/cake.json')
    j2 = readJSON('test/data/sample.json')
 }
 
-j @-s
+j1 @-s
 j2 @..1j
 

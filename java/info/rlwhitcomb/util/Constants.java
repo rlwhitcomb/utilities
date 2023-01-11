@@ -38,6 +38,7 @@
  *  12-Sep-22 rlw #480: Add "I_800" for range conversions.
  *  19-Dec-22 rlw #559:	New rational complex values.
  *  04-Jan-23 rlw #558:	Quaternion constants.
+ *  10-Jan-23 rlw #558:	More quaternion constants.
  */
 package info.rlwhitcomb.util;
 
@@ -190,6 +191,15 @@ public final class Constants
 
 	/** A quaternion corresponding to a rational value of {@code (1, 0, 0, 0)}. */
 	public static final Quaternion QR_ONE = new Quaternion(BigFraction.ONE);
+
+	/** Quaternion with a value of "i" ({@code (0, 1, 0, 0)}). */
+	public static final Quaternion Q_I = new Quaternion(0, 1, 0, 0);
+
+	/** Quaternion with a value of "j" ({@code (0, 0, 1, 0)}). */
+	public static final Quaternion Q_J = new Quaternion(0, 0, 1, 0);
+
+	/** Quaternion with a value of "k" ({@code (0, 0, 0, 1)}). */
+	public static final Quaternion Q_K = new Quaternion(0, 0, 0, 1);
 
 
 	/** Number of nanoseconds in a second. */

@@ -745,19 +745,19 @@ a = 128
 `a = ${a@k}`
 
 # The various assignment operators
-:clr [g,h,j,k]
+:clr [g,h,p,s]
 :dec(200)
-g = 271; h = 385; j = 192; k = 120!
+g = 271; h = 385; p = 192; s = 120!
 g+=h
-j-=g
+p-=g
 h*=g
-j/=g
-k %= 10**40;
-k
+p/=g
+s %= 10**40;
+s
 g = 0377@o; g&=0177@o
 h = 0x400@x; h|=0x080@o
-j = 0xaaa@x; j^=0x554@x
-g@o; h@x; j@x;
+p = 0xaaa@x; p^=0x554@x
+g@o; h@x; p@x;
 g = 0x4000@x
 g >>>= 3@x
 g >>= 2@x

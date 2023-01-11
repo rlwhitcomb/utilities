@@ -749,6 +749,7 @@
  *	    #558: Quaternion basic arithmetic.
  *	10-Jan-2023 (rlwhitcomb)
  *	    #103: New complex "sqrt" function; add rounding context to other functions.
+ *	    #558: Give quaternion priority over complex so operations with "i" will promote.
  */
 package info.rlwhitcomb.calc;
 
@@ -3813,23 +3814,6 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		else
 		    afterValue = fValue.subtract(BigFraction.ONE);
 	    }
-	    else if (value instanceof ComplexNumber) {
-		ComplexNumber cValue = (ComplexNumber) value;
-		beforeValue = cValue;
-
-		if (cValue.isRational()) {
-		    if (incr)
-			afterValue = cValue.add(CR_ONE);
-		    else
-			afterValue = cValue.subtract(CR_ONE, settings.mc);
-		}
-		else {
-		    if (incr)
-			afterValue = cValue.add(C_ONE);
-		    else
-			afterValue = cValue.subtract(C_ONE, settings.mc);
-		}
-	    }
 	    else if (value instanceof Quaternion) {
 		Quaternion qValue = (Quaternion) value;
 		beforeValue = qValue;
@@ -3845,6 +3829,23 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			afterValue = qValue.add(Quaternion.ONE);
 		    else
 			afterValue = qValue.subtract(Quaternion.ONE);
+		}
+	    }
+	    else if (value instanceof ComplexNumber) {
+		ComplexNumber cValue = (ComplexNumber) value;
+		beforeValue = cValue;
+
+		if (cValue.isRational()) {
+		    if (incr)
+			afterValue = cValue.add(CR_ONE);
+		    else
+			afterValue = cValue.subtract(CR_ONE, settings.mc);
+		}
+		else {
+		    if (incr)
+			afterValue = cValue.add(C_ONE);
+		    else
+			afterValue = cValue.subtract(C_ONE, settings.mc);
 		}
 	    }
 	    else {
@@ -3935,22 +3936,6 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		else
 		    afterValue = fValue.subtract(BigFraction.ONE);
 	    }
-	    else if (value instanceof ComplexNumber) {
-		ComplexNumber cValue = (ComplexNumber) value;
-
-		if (cValue.isRational()) {
-		    if (incr)
-			afterValue = cValue.add(CR_ONE);
-		    else
-			afterValue = cValue.subtract(CR_ONE, settings.mc);
-		}
-		else {
-		    if (incr)
-			afterValue = cValue.add(C_ONE);
-		    else
-			afterValue = cValue.subtract(C_ONE, settings.mc);
-		}
-	    }
 	    else if (value instanceof Quaternion) {
 		Quaternion qValue = (Quaternion) value;
 
@@ -3965,6 +3950,22 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			afterValue = qValue.add(Quaternion.ONE);
 		    else
 			afterValue = qValue.subtract(Quaternion.ONE);
+		}
+	    }
+	    else if (value instanceof ComplexNumber) {
+		ComplexNumber cValue = (ComplexNumber) value;
+
+		if (cValue.isRational()) {
+		    if (incr)
+			afterValue = cValue.add(CR_ONE);
+		    else
+			afterValue = cValue.subtract(CR_ONE, settings.mc);
+		}
+		else {
+		    if (incr)
+			afterValue = cValue.add(C_ONE);
+		    else
+			afterValue = cValue.subtract(C_ONE, settings.mc);
 		}
 	    }
 	    else {
@@ -4207,6 +4208,30 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			    throw new UnknownOpException(op, ctx);
 		    }
 		}
+		else if (e1 instanceof Quaternion || e2 instanceof Quaternion) {
+		    Quaternion q1 = Quaternion.valueOf(e1);
+		    Quaternion q2 = Quaternion.valueOf(e2);
+
+		    switch (op) {
+			case "*":
+			case "\u00D7":
+			case "\u2217":
+			case "\u2715":
+			case "\u2716":
+			    return q1.multiply(q2, settings.mc);
+			case "/":
+			case "\u00F7":
+			case "\u2215":
+			case "\u2797":
+			    return q1.divide(q2, MathUtil.divideContext(q1, settings.mcDivide));
+			case "\\":
+			case "\u2216":
+			case "%":
+			case "mod":
+			default:
+			    throw new UnknownOpException(op, ctx);
+		    }
+		}
 		else if (e1 instanceof ComplexNumber || e2 instanceof ComplexNumber) {
 		    ComplexNumber c1 = ComplexNumber.valueOf(e1);
 		    ComplexNumber c2 = ComplexNumber.valueOf(e2);
@@ -4228,30 +4253,6 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			case "%":
 			case "mod":
 			    // This one in particular potentially could be done with the same definition as for reals
-			default:
-			    throw new UnknownOpException(op, ctx);
-		    }
-		}
-		else if (e1 instanceof Quaternion || e2 instanceof Quaternion) {
-		    Quaternion q1 = Quaternion.valueOf(e1);
-		    Quaternion q2 = Quaternion.valueOf(e2);
-
-		    switch (op) {
-			case "*":
-			case "\u00D7":
-			case "\u2217":
-			case "\u2715":
-			case "\u2716":
-			    return q1.multiply(q2, settings.mc);
-			case "/":
-			case "\u00F7":
-			case "\u2215":
-			case "\u2797":
-			    return q1.divide(q2, MathUtil.divideContext(q1, settings.mcDivide));
-			case "\\":
-			case "\u2216":
-			case "%":
-			case "mod":
 			default:
 			    throw new UnknownOpException(op, ctx);
 		    }
@@ -4325,17 +4326,17 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 			return f1.subtract(f2);
 		    }
-		    else if (e1 instanceof ComplexNumber || e2 instanceof ComplexNumber) {
-			ComplexNumber c1 = ComplexNumber.valueOf(e1);
-			ComplexNumber c2 = ComplexNumber.valueOf(e2);
-
-			return c1.subtract(c2, settings.mc);
-		    }
 		    else if (e1 instanceof Quaternion || e2 instanceof Quaternion) {
 			Quaternion q1 = Quaternion.valueOf(e1);
 			Quaternion q2 = Quaternion.valueOf(e2);
 
 			return q1.subtract(q2);
+		    }
+		    else if (e1 instanceof ComplexNumber || e2 instanceof ComplexNumber) {
+			ComplexNumber c1 = ComplexNumber.valueOf(e1);
+			ComplexNumber c2 = ComplexNumber.valueOf(e2);
+
+			return c1.subtract(c2, settings.mc);
 		    }
 		    else if (e1 instanceof SetScope && e2 instanceof CollectionScope) {
 			@SuppressWarnings("unchecked")

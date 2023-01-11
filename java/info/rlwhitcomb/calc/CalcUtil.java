@@ -201,6 +201,8 @@
  *	    #537: Add method to load/cache the scripts properties.
  *	05-Jan-2023 (rlwhitcomb)
  *	    #558: Quaternion basic arithmetic.
+ *	10-Jan-2023 (rlwhitcomb)
+ *	    #558: Give quaternion priority over complex, so "i" promotion works.
  */
 package info.rlwhitcomb.calc;
 
@@ -1762,17 +1764,17 @@ public final class CalcUtil
 
 		return f1.add(f2);
 	    }
-	    else if (v1 instanceof ComplexNumber || v2 instanceof ComplexNumber) {
-		ComplexNumber c1 = ComplexNumber.valueOf(v1);
-		ComplexNumber c2 = ComplexNumber.valueOf(v2);
-
-		return c1.add(c2);
-	    }
 	    else if (v1 instanceof Quaternion || v2 instanceof Quaternion) {
 		Quaternion q1 = Quaternion.valueOf(v1);
 		Quaternion q2 = Quaternion.valueOf(v2);
 
 		return q1.add(q2);
+	    }
+	    else if (v1 instanceof ComplexNumber || v2 instanceof ComplexNumber) {
+		ComplexNumber c1 = ComplexNumber.valueOf(v1);
+		ComplexNumber c2 = ComplexNumber.valueOf(v2);
+
+		return c1.add(c2);
 	    }
 	    else {
 		BigDecimal d1 = convertToDecimal(v1, mc, ctx1);
@@ -2454,7 +2456,7 @@ public final class CalcUtil
 	 * @param visitor       Visitor used to evaluate expressions.
 	 * @param ctx		The overall parser context for the function (for error messages).
 	 * @param obj		The object to be added to the list, or recursed into when the object
-	 *			is a list or map.
+	 *			is a list, map, or set.
 	 * @param objectList	The complete list of values to be built.
 	 * @param conversion	Type of conversion to do on the values.
 	 * @param level		Level of recursion.

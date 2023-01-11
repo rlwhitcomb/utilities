@@ -26,6 +26,7 @@
  * History:
  *  29-Dec-22 rlw #558:	Initial coding.
  *  05-Jan-23 rlw #558:	More operation methods.
+ *  10-Jan-23		Constructor from long (int) values.
  */
 package info.rlwhitcomb.math;
 
@@ -119,6 +120,24 @@ public final class Quaternion extends Number
 	    dFrac = BigFraction.properFraction(dF);
 	    normalize();
 	}
+
+	/**
+	 * Construct given all four coefficients (as "real", that is {@code long}, values).
+	 *
+	 * @param aVal The first term coefficient.
+	 * @param bVal Second coefficient (i).
+	 * @param cVal Third term (j) coefficient.
+	 * @param dVal Fourth coefficient (k).
+	 */
+	public Quaternion(final long aVal, final long bVal, final long cVal, final long dVal) {
+	    rational = false;
+	    a = new BigDecimal(aVal);
+	    b = new BigDecimal(bVal);
+	    c = new BigDecimal(cVal);
+	    d = new BigDecimal(dVal);
+	    normalize();
+	}
+
 
 	/**
 	 * Construct a real quaternion, with the given value.

@@ -17,3 +17,27 @@ q1*q2
 q3 = q1/q2
 q3 * q2
 1/q2
+
+:echo 'Testing multiplying the imaginary parts of quaternions'
+i1=(0,1,0,0)
+j1=(0,0,1,0)
+k1=(0,0,0,1)
+i1*i1
+j1*j1
+k1*k1
+i1*j1
+j1*i1
+j1*k1
+k1*j1
+k1*i1
+i1*k1
+
+i*i
+j*j
+k*k
+i*j
+j*i
+j*k
+k*j
+k*i
+i*k
