@@ -124,8 +124,8 @@ sum
 :dec oldPrec
 
 # Trig and log functions
-J = 1; ++J; J;
-K = 2; K++; K;
+J0 = 1; ++J0; J0;
+K0 = 2; K0++; K0;
 :double
 pi / 2
 asin ( sin ( pi / 2 ) )

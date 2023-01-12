@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.20.8', date: d'2023-01-11',
+      issues: [ 558 ],
+      comment: 'More quaternion support, including "j" and "k" constants.'
+    },
     { version: '2.20.7', date: d'2023-01-10',
       issues: [ 103 ],
       comment: 'Extended precision complex square root.'
@@ -21,7 +25,7 @@
     },
     { version: '2.17.3', date: d'2022-12-24',
       issues: [ 441 ],
-      comment: 'Implement "is" operator as convenience for "typeof".
+      comment: 'Implement "is" operator as convenience for "typeof".'
     },
     { version: '2.17.2', date: d'2022-12-22',
       issues: [ 79 ],
