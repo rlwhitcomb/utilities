@@ -25,6 +25,7 @@
  *
  * History:
  *  05-Jan-23 rlw #28:	Coding.
+ *  11-Jan-23		Remove line ending options; add case-sensitive options.
  */
 package info.rlwhitcomb.tools;
 
@@ -51,10 +52,10 @@ public class Uniq
 	 */
 	private static enum Opts implements Options.ToggleEnum
 	{
-		IGNORE		(true,
-				 "IgnoreLineEndings", "ignore", "ign", "i"),
-		EXACT		(IGNORE,
-				 "ExactLineEndings", "exact", "ex", "e"),
+		SENSITIVE	(true,
+				 "CaseSensitive", "sensitive", "exact", "ex", "s"),
+		INSENSITIVE	(SENSITIVE,
+				 "CaseInsensitive", "insensitive", "ignore", "ign", "i"),
 		UNIQUE		(true,
 				 "unique", "uniq", "un", "u"),
 		DUPLICATES	(UNIQUE,
@@ -112,9 +113,6 @@ public class Uniq
 	}
 
 
-	private static final void usage() {
-	}
-
 	private static int processOption(final String opt) {
 	    int code = 0;
 
@@ -139,6 +137,15 @@ public class Uniq
 	    return code;
 	}
 
+	private static boolean matchLine(final String line, final String lastUniqueLine) {
+	    if (Opts.SENSITIVE.isSet()) {
+		return line.equals(lastUniqueLine);
+	    }
+	    else {
+		return line.equalsIgnoreCase(lastUniqueLine);
+	    }
+	}
+
 	/**
 	 * Input is a single file path.  The program will set the process exit code
 	 * (test with {@code ERRORLEVEL} on Windows or {@code $?} on other O/Ses).
@@ -146,6 +153,10 @@ public class Uniq
 	 * @param args The parsed command line argument array.
 	 */
 	public static void main(final String[] args) {
+	    // Reset the options to standard values each time (for testing)
+	    Opts.SENSITIVE.set(true);
+	    Opts.UNIQUE.set(true);
+
 	    String lastUniqueLine = "";
 	    final List<String> files = new ArrayList<>();
 
@@ -160,46 +171,42 @@ public class Uniq
 	    if (files.isEmpty())
 		return;
 
-	    if (Opts.IGNORE.isSet()) {
-		for (String file : files) {
-		    File f = new File(file);
-		    if (FileUtilities.exists(f, "fr")) {
-			try {
-			    List<String> lines = FileUtilities.readFileAsLines(f);
-			    lastUniqueLine = lines.get(0);
+	    for (String file : files) {
+		File f = new File(file);
+		if (FileUtilities.exists(f, "fr")) {
+		    try {
+			List<String> lines = FileUtilities.readFileAsLines(f);
+			lastUniqueLine = lines.get(0);
 
-			    if (Opts.UNIQUE.isSet())
-				System.out.println(lastUniqueLine);
+			if (Opts.UNIQUE.isSet())
+			    System.out.println(lastUniqueLine);
 
-			    int duplicates = 0;
+			int duplicates = 0;
 
-			    for (int i = 1; i < lines.size(); i++) {
-				String line = lines.get(i);
-				if (Opts.UNIQUE.isSet()) {
-				    if (!line.equals(lastUniqueLine)) {
-					System.out.println(line);
-					lastUniqueLine = line;
-				    }
+			for (int i = 1; i < lines.size(); i++) {
+			    String line = lines.get(i);
+			    if (Opts.UNIQUE.isSet()) {
+				if (!matchLine(line, lastUniqueLine)) {
+				    System.out.println(line);
+				    lastUniqueLine = line;
+				}
+			    }
+			    else {
+				if (matchLine(line, lastUniqueLine)) {
+				    if (duplicates == 0)
+					System.out.println(lastUniqueLine);
+				    duplicates++;
 				}
 				else {
-				    if (line.equals(lastUniqueLine)) {
-					if (duplicates == 0)
-					    System.out.println(lastUniqueLine);
-					duplicates++;
-				    }
-				    else {
-					lastUniqueLine = line;
-					duplicates = 0;
-				    }
+				    lastUniqueLine = line;
+				    duplicates = 0;
 				}
 			    }
 			}
-			catch (IOException ioe) {
-			}
+		    }
+		    catch (IOException ioe) {
 		    }
 		}
-	    }
-	    else {
 	    }
 	}
 }

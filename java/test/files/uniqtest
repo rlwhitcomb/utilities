@@ -1,0 +1,7 @@
+$inputDir test/canons
+$testClass info.rlwhitcomb.tools.Uniq
+
+u1:       test/data/uniq.file
+u2: -d    test/data/uniq.file
+u3: -i    test/data/uniq.file
+u4: -i -d test/data/uniq.file
