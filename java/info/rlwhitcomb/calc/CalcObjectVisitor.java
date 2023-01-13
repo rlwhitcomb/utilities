@@ -750,6 +750,8 @@
  *	10-Jan-2023 (rlwhitcomb)
  *	    #103: New complex "sqrt" function; add rounding context to other functions.
  *	    #558: Give quaternion priority over complex so operations with "i" will promote.
+ *	12-Jan-2023 (rlwhitcomb)
+ *	    Refactor the Next and Leave exceptions.
  */
 package info.rlwhitcomb.calc;
 
@@ -3456,13 +3458,13 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		throw new LeaveException(evaluate(exprCtx.expr()));
 	    }
 	    else {
-		throw LeaveException.INSTANCE;
+		throw LeaveException.instance();
 	    }
 	}
 
 	@Override
 	public Object visitNextStmt(CalcParser.NextStmtContext ctx) {
-	    throw NextException.INSTANCE;
+	    throw NextException.instance();
 	}
 
 	@Override

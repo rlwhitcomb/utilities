@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2021-2022 Roger L. Whitcomb.
+ * Copyright (c) 2021-2023 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,11 +21,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  *
- *  History:
- *      02-Dec-2021 (rlwhitcomb)
- *	    Initial coding.
- *	15-Aug-2022 (rlwhitcomb)
- *	    Add static singleton instance for the no-value case.
+ * History:
+ *  02-Dec-21 rlw  ---	Initial coding.
+ *  15-Aug-22 rlw  ---	Add static singleton instance for the no-value case.
+ *  12-Jan-23 rlw  ---	New method to return the instance.
  */
 package info.rlwhitcomb.calc;
 
@@ -38,7 +37,7 @@ public class LeaveException extends RuntimeException
 	/**
 	 * The singleton instance to throw if there is no value needed.
 	 */
-	public static final LeaveException INSTANCE = new LeaveException();
+	private static final LeaveException INSTANCE = new LeaveException();
 
 
 	/** The (optional) expression included with the statement. */
@@ -59,6 +58,15 @@ public class LeaveException extends RuntimeException
 	    super();
 	    leftValue = value;
 	    valueIncluded = true;
+	}
+
+	/**
+	 * The singleton instance of this exception.
+	 *
+	 * @return The single instance.
+	 */
+	public static final LeaveException instance() {
+	    return INSTANCE;
 	}
 
 	/**
