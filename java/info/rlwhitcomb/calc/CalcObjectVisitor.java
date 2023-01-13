@@ -953,15 +953,15 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	/** Flag for case-insensitive matches. */
 	private static final int MATCH_CASE_INSENSITIVE = 0x0001;
 	/** Flag for "dotall" matches. */
-	private static final int MATCH_DOTALL = 0x0002;
+	private static final int MATCH_DOTALL           = 0x0002;
 	/** Flag for Unicode-case match. */
-	private static final int MATCH_UNICODE_CASE = 0x0004;
+	private static final int MATCH_UNICODE_CASE     = 0x0004;
 	/** Flag for literal match. */
-	private static final int MATCH_LITERAL = 0x0008;
+	private static final int MATCH_LITERAL          = 0x0008;
 	/** Flag for multi-line match. */
-	private static final int MATCH_MULTILINE = 0x0010;
+	private static final int MATCH_MULTILINE        = 0x0010;
 	/** Flag for Unix lines mode. */
-	private static final int MATCH_UNIX_LINES = 0x0020;
+	private static final int MATCH_UNIX_LINES       = 0x0020;
 	/** The set of all the valid flags we support. */
 	private static final int MATCH_ALL_FLAGS =
 	    ( MATCH_CASE_INSENSITIVE | MATCH_DOTALL | MATCH_UNICODE_CASE | MATCH_LITERAL | MATCH_MULTILINE | MATCH_UNIX_LINES );
@@ -1017,37 +1017,37 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	private CalcPiWorker piWorker = null;
 
 	/** Stack of previous "timing" mode values. */
-	private final Deque<Boolean> timingModeStack = new ArrayDeque<>();
+	private final Deque<Boolean> timingModeStack       = new ArrayDeque<>();
 
 	/** Stack of previous "debug" mode values. */
-	private final Deque<Boolean> debugModeStack = new ArrayDeque<>();
+	private final Deque<Boolean> debugModeStack        = new ArrayDeque<>();
 
 	/** Stack of previous "rational" mode values. */
-	private final Deque<Boolean> rationalModeStack = new ArrayDeque<>();
+	private final Deque<Boolean> rationalModeStack     = new ArrayDeque<>();
 
 	/** Stack of previous "separator" mode values. */
-	private final Deque<Boolean> separatorModeStack = new ArrayDeque<>();
+	private final Deque<Boolean> separatorModeStack    = new ArrayDeque<>();
 
 	/** Stack of previous "ignore case" mode values. */
-	private final Deque<Boolean> ignoreCaseModeStack = new ArrayDeque<>();
+	private final Deque<Boolean> ignoreCaseModeStack   = new ArrayDeque<>();
 
 	/** Stack of previous "quote strings" mode values. */
 	private final Deque<Boolean> quoteStringsModeStack = new ArrayDeque<>();
 
 	/** Stack of previous "sort keys" mode values. */
-	private final Deque<Boolean> sortKeysModeStack = new ArrayDeque<>();
+	private final Deque<Boolean> sortKeysModeStack     = new ArrayDeque<>();
 
 	/** Stack of previous "colored" mode values. */
-	private final Deque<Boolean> coloredModeStack = new ArrayDeque<>();
+	private final Deque<Boolean> coloredModeStack      = new ArrayDeque<>();
 
 	/** Stack of previous "resultsOnly" mode values. */
-	private final Deque<Boolean> resultsOnlyModeStack = new ArrayDeque<>();
+	private final Deque<Boolean> resultsOnlyModeStack  = new ArrayDeque<>();
 
 	/** Stack of previous "quiet" mode values. */
-	private final Deque<Boolean> quietModeStack = new ArrayDeque<>();
+	private final Deque<Boolean> quietModeStack        = new ArrayDeque<>();
 
 	/** Stack of previous "silence" mode values. */
-	private final Deque<Boolean> silenceModeStack = new ArrayDeque<>();
+	private final Deque<Boolean> silenceModeStack      = new ArrayDeque<>();
 
 
 	/**
@@ -1455,7 +1455,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    // and restored regardless of any exceptions thrown
 	    doNotCallZeroArgFunctions = true;
 	    try {
-		return evaluate(ctx, visit(ctx));
+		return evaluate(ctx);
 	    }
 	    finally {
 		doNotCallZeroArgFunctions = false;
