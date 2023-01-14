@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  *
- *	Java language Pre-processor
+ *	Language Pre-processor for Java and other files.
  *
  * History:
  *  19-May-10 rlw  ---	First version after not finding anything useful via Google.
@@ -105,6 +105,7 @@
  *  22-Feb-21 rlw  ---	Align "exceptMessage" with our own ExceptionUtil code.
  *  07-Nov-22 rlw  ---	More exceptions to process specially.
  *  01-Jan-23 rlw  ---	Update copyright years.
+ *  13-Jan-23 rlw #593:	Rename to PreProc; refactoring, rearrangement and renaming of variables.
  */
 package info.rlwhitcomb.preproc;
 
@@ -233,7 +234,7 @@ import org.apache.tools.ant.Task;
  * <li>file name(s)
  * </ul>
  * <p> This process can also be invoked as an Ant task by using the following in your "build.xml":
- * <p> <code>&lt;taskdef name="preproc" classname="info.rlwhitcomb.preproc.JavaPreProc" classpath="anttasks.jar"/&gt;</code>.
+ * <p> <code>&lt;taskdef name="preproc" classname="info.rlwhitcomb.preproc.PreProc" classpath="anttasks.jar"/&gt;</code>.
  * <p> The directives supported in this context are:
  * <ul><li><code>directiveChar="<i>ch</i>"</code> (same as <code>-C<i>ch</i></code> parameter)
  * <li><code>define="<i>var</i>=<i>value</i>"</code> or
@@ -293,16 +294,87 @@ import org.apache.tools.ant.Task;
  * <li>Wild-card values are not supported on the input file name(s).
  * </ul>
 */
-public class JavaPreProc extends Task
+public class PreProc extends Task
 {
+	/**********************************************************/
+	/*      F I N A L   S T A T I C   V A R I A B L E S       */
+	/**********************************************************/
+
+	/** Default extension for input files. */
+	private static final String DEFAULT_INPUT_EXT = ".javapp";
+	/** Default extension for output files. */
+	private static final String DEFAULT_OUTPUT_EXT = ".java";
+
+	/** <code>__DATE__</code> predefined variable name. */
+	private static final String DATE_VAR_NAME = "__DATE__";
+	/** <code>__TIME__</code> predefined variable name. */
+	private static final String TIME_VAR_NAME = "__TIME__";
+	/** <code>__FILE__</code> predefined variable name. */
+	private static final String FILE_VAR_NAME = "__FILE__";
+	/** <code>__LINE__</code> predefined variable name. */
+	private static final String LINE_VAR_NAME = "__LINE__";
+	/** <code>__JAVA_VERSION__</code> predefined variable name. */
+	private static final String JAVA_VERSION_VAR_NAME = "__JAVA_VERSION__";
+	/** <code>__JAVA_PP_VERSION__</code> predefined variable name. */
+	private static final String JAVA_PP_VERSION_VAR_NAME = "__JAVA_PP_VERSION__";
+
+	/** Pattern to parse the <code>-D<i>var</i>=<i>value</i></code> command-line switch. */
+	private static final Pattern DEFINE_PATTERN = Pattern.compile("^([_A-Za-z][\\w\\.]*)=(.*)$");
+	/** Pattern to parse the <code>-D<i>var</i></code> command-line switch. */
+	private static final Pattern ALT_DEFINE_PATTERN = Pattern.compile("^([_A-Za-z][\\w\\.]*)$");
+	/** Pattern to parse a <code>#define <i>var value</i></code> directive in the source. */
+	private static final Pattern DEFINE_2_PATTERN = Pattern.compile("^([_A-Za-z][\\w\\.]*)\\s+(.*)$");
+	/** Pattern to parse a <code>#define <i>var</i></code> directive in the source. */
+	private static final Pattern DEFINE_3_PATTERN = Pattern.compile("^([_A-Za-z][\\w\\.]*)\\s*$");
+	/** Pattern used to separate the "INCLUDE" environment variable or define and undefine lists into pieces. */
+	private static final Pattern COMMA = Pattern.compile("[,;]");
+
+	/** Format string to build a regular expression to parse and recognize one of our preprocessing instructions. */
+	private static final String CMD_PATTERN_FORMAT = "^\\s*%1$c\\s*(\\S+)(.*)$";
+	/** Format string to build a regular expression to parse and recognize a pass-through preprocessing instruction. */
+	private static final String PASS_PATTERN_FORMAT = "^\\s*%1$c(%1$c\\s*\\S+.*)$";
+	/** Format string to build a regular expression to parse and recognize a comment directive that is not passed through. */
+	private static final String COMMENT_PATTERN_FORMAT = "^\\s*%1$c\\*.*$";
+
+	/** Pattern to skip white space inside an expression. */
+	private static final Pattern WHITE_SPACE = Pattern.compile("\\s+");
+	/** Pattern to recognize a macro reference: <code>$(<i>macroname</i>)</code> */
+	private static final Pattern MACRO_REF = Pattern.compile("\\$\\(([_A-Za-z][\\w\\.]*)\\)");
+	/** Alternate pattern to recognize a macro reference: <code>${<i>macroname</i>}</code> */
+	private static final Pattern MACRO_REF2 = Pattern.compile("\\$\\{([_A-Za-z][\\w\\.]*)\\}");
+	/** Pattern to match the reserved word <code>"true"</code>. */
+	private static final Pattern TRUE_CONST = Pattern.compile("^[tT][rR][uE][eE]");
+	/** Pattern to match the reserved word <code>"false"</code>. */
+	private static final Pattern FALSE_CONST = Pattern.compile("^[fF][aA][lL][sS][eE]");
+	/** Pattern to match an integer constant. */
+	private static final Pattern INT_CONST = Pattern.compile("^[0-9]+");
+	/** Pattern to match a floating-point constant. */
+	private static final Pattern FLT_CONST = Pattern.compile("^[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?");
+	/** Pattern to recognize the <code>"defined(<i>var</i>)"</code> function */
+	private static final Pattern DEFINED_FUNC = Pattern.compile("^[dD][eE][fF][iI][nN][eE][dD]\\s*\\(\\s*([_A-Za-z][\\w\\.]*)\\s*\\)");
+	/** Pattern to recognize a <code>"NOT"</code> operator. */
+	private static final Pattern NOT_OP = Pattern.compile("^[nN][oO][tT]");
+	/** Pattern to recognize an <code>"AND"</code> operator. */
+	private static final Pattern AND_OP = Pattern.compile("^[aA][nN][dD]");
+	/** Pattern to recognize an <code>"OR"</code> operator. */
+	private static final Pattern OR_OP = Pattern.compile("^[oO][rR]");
+	/** Pattern to recognize any old identifier. */
+	private static final Pattern IDENT = Pattern.compile("^([_A-Za-z][\\w\\.]*)");
+
+	/** The current version of this software. */
+	private static final String VERSION = "1.2.0";
+	/** The current copyright year. */
+	private static final String COPYRIGHT_YEAR = "2010-2011,2014-2016,2019-2023";
+
+
+	/**********************************************************/
+	/*           I N S T A N C E   V A R I A B L E S          */
+	/**********************************************************/
+
 	/** The current list of defined symbols and their values. */
 	private HashMap<String,String> defines = null;
-	/** Default extension for input files. */
-	private static String defaultInputExt = ".javapp";
 	/** Default (or overridden) extension for input files. */
 	private String inputExt = null;
-	/** Default extension for output files. */
-	private static String defaultOutputExt = ".java";
 	/** Default or overridden extension for output files. */
 	private String outputExt = null;
 	/** Environment variable to use to search for included files. */
@@ -343,66 +415,17 @@ public class JavaPreProc extends Task
 	/** Overwrite the output log file (not applicable to default). */
 	private boolean overwriteLog = false;
 
-	/** <code>__DATE__</code> predefined variable name. */
-	private static final String DATE_VAR_NAME = "__DATE__";
-	/** <code>__TIME__</code> predefined variable name. */
-	private static final String TIME_VAR_NAME = "__TIME__";
-	/** <code>__FILE__</code> predefined variable name. */
-	private static final String FILE_VAR_NAME = "__FILE__";
-	/** <code>__LINE__</code> predefined variable name. */
-	private static final String LINE_VAR_NAME = "__LINE__";
-	/** <code>__JAVA_VERSION__</code> predefined variable name. */
-	private static final String JAVA_VERSION_VAR_NAME = "__JAVA_VERSION__";
-	/** <code>__JAVA_PP_VERSION__</code> predefined variable name. */
-	private static final String JAVA_PP_VERSION_VAR_NAME = "__JAVA_PP_VERSION__";
-
-	/** Pattern to parse the <code>-D<i>var</i>=<i>value</i></code> command-line switch. */
-	private static Pattern defPat = Pattern.compile("^([_A-Za-z][\\w\\.]*)=(.*)$");
-	/** Pattern to parse the <code>-D<i>var</i></code> command-line switch. */
-	private static Pattern defAltPat = Pattern.compile("^([_A-Za-z][\\w\\.]*)$");
-	/** Format string to build a regular expression to parse and recognize one of our preprocessing instructions. */
-	private static String cmdPatFormat = "^\\s*%1$c\\s*(\\S+)(.*)$";
-	/** Format string to build a regular expression to parse and recognize a pass-through preprocessing instruction. */
-	private static String passPatFormat = "^\\s*%1$c(%1$c\\s*\\S+.*)$";
-	/** Format string to build a regular expression to parse and recognize a comment directive that is not passed through. */
-	private static String commentPatFormat = "^\\s*%1$c\\*.*$";
-	/** Pattern to parse our preprocessing instructions.  Built from {@link #cmdPatFormat}. */
+	/** Pattern to parse our preprocessing instructions.  Built from {@link #CMD_PATTERN_FORMAT}. */
 	private Pattern cmdPat = null;
-	/** Pattern to parse a pass-through preprocessing instruction.  Built from {@link #passPatFormat}. */
+	/** Pattern to parse a pass-through preprocessing instruction.  Built from {@link #PASS_PATTERN_FORMAT}. */
 	private Pattern passPat = null;
-	/** Pattern to parse a comment directive line.  Built from {@link #commentPatFormat}. */
+	/** Pattern to parse a comment directive line.  Built from {@link #COMMENT_PATTERN_FORMAT}. */
 	private Pattern commentPat = null;
-	/** Pattern to parse a <code>#define <i>var value</i></code> directive in the source. */
-	private static Pattern def2Pat = Pattern.compile("^([_A-Za-z][\\w\\.]*)\\s+(.*)$");
-	/** Pattern to parse a <code>#define <i>var</i></code> directive in the source. */
-	private static Pattern def3Pat = Pattern.compile("^([_A-Za-z][\\w\\.]*)\\s*$");
-	/** Pattern used to separate the "INCLUDE" environment variable or define and undefine lists into pieces. */
-	private static Pattern comma = Pattern.compile("[,;]");
 
-	/** Pattern to skip white space inside an expression. */
-	private static Pattern WHITE_SPACE = Pattern.compile("\\s+");
-	/** Pattern to recognize a macro reference: <code>$(<i>macroname</i>)</code> */
-	private static Pattern MACRO_REF = Pattern.compile("\\$\\(([_A-Za-z][\\w\\.]*)\\)");
-	/** Alternate pattern to recognize a macro reference: <code>${<i>macroname</i>}</code> */
-	private static Pattern MACRO_REF2 = Pattern.compile("\\$\\{([_A-Za-z][\\w\\.]*)\\}");
-	/** Pattern to match the reserved word <code>"true"</code>. */
-	private static Pattern TRUE_CONST = Pattern.compile("^[tT][rR][uE][eE]");
-	/** Pattern to match the reserved word <code>"false"</code>. */
-	private static Pattern FALSE_CONST = Pattern.compile("^[fF][aA][lL][sS][eE]");
-	/** Pattern to match an integer constant. */
-	private static Pattern INT_CONST = Pattern.compile("^[0-9]+");
-	/** Pattern to match a floating-point constant. */
-	private static Pattern FLT_CONST = Pattern.compile("^[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?");
-	/** Pattern to recognize the <code>"defined(<i>var</i>)"</code> function */
-	private static Pattern DEFINED_FUNC = Pattern.compile("^[dD][eE][fF][iI][nN][eE][dD]\\s*\\(\\s*([_A-Za-z][\\w\\.]*)\\s*\\)");
-	/** Pattern to recognize a <code>"NOT"</code> operator. */
-	private static Pattern NOT_OP = Pattern.compile("^[nN][oO][tT]");
-	/** Pattern to recognize an <code>"AND"</code> operator. */
-	private static Pattern AND_OP = Pattern.compile("^[aA][nN][dD]");
-	/** Pattern to recognize an <code>"OR"</code> operator. */
-	private static Pattern OR_OP = Pattern.compile("^[oO][rR]");
-	/** Pattern to recognize any old identifier. */
-	private static Pattern IDENT = Pattern.compile("^([_A-Za-z][\\w\\.]*)");
+
+	/**********************************************************/
+	/*             S T A T I C   V A R I A B L E S            */
+	/**********************************************************/
 
 	/** The default timezone value. */
 	private static TimeZone zone = null;
@@ -412,11 +435,6 @@ public class JavaPreProc extends Task
 	private static DateFormat dateFmt = null;
 	/** The {@link SimpleDateFormat} used for the variable <code>__TIME__</code>. */
 	private static DateFormat timeFmt = null;
-
-	/** The current version of this software. */
-	private static final String VERSION = "1.1.10";
-	/** The current copyright year. */
-	private static final String COPYRIGHT_YEAR = "2010-2011,2014-2016,2019-2023";
 
 
 	/**
@@ -631,7 +649,7 @@ public class JavaPreProc extends Task
 
 
 	/**
-	 * Class to filter input file names according to the current inputExt.
+	 * Class to filter input file names according to the current {@link #inputExt}.
 	 */
 	class InputFileFilter implements FilenameFilter
 	{
@@ -2107,7 +2125,7 @@ public class JavaPreProc extends Task
 				    traceLine(lineNo, line, true, doingOutput);
 				    if (doingOutput) {
 					args = doSubs(args.trim());
-					Matcher md = def2Pat.matcher(args);
+					Matcher md = DEFINE_2_PATTERN.matcher(args);
 					if (md.matches()) {
 					    String var = md.group(1);
 					    String val = md.group(2);
@@ -2117,7 +2135,7 @@ public class JavaPreProc extends Task
 					    }
 					}
 					else {
-					    md = def3Pat.matcher(args);
+					    md = DEFINE_3_PATTERN.matcher(args);
 					    if (md.matches()) {
 						// "#define ABC" puts empty string in as value
 						String var = md.group(1);
@@ -2342,7 +2360,7 @@ public class JavaPreProc extends Task
 		// Okay, not found there, try using INCLUDE (or other -E variable)
 		String env = System.getenv(inclEnvVar);
 		if (env != null && !env.isEmpty()) {
-		    String[] paths = comma.split(env);
+		    String[] paths = COMMA.split(env);
 		    for (String p : paths) {
 			File f = new File(p, arg);
 			try {
@@ -2388,8 +2406,8 @@ public class JavaPreProc extends Task
 	    else if (inputExt != null && outputExt == null)
 		outputExt = inputExt.replaceFirst("pp$", "");
 	    else if (inputExt == null && outputExt == null) {
-		outputExt = defaultOutputExt;
-		inputExt = defaultInputExt;
+		inputExt = DEFAULT_INPUT_EXT;
+		outputExt = DEFAULT_OUTPUT_EXT;
 	    }
 	}
 
@@ -2511,7 +2529,7 @@ public class JavaPreProc extends Task
 	 *
 	 * @throws	BuildException for errors parsing these arguments.
 	 */
-	private static boolean processCommandLine(JavaPreProc inst, String[] args) throws BuildException {
+	private static boolean processCommandLine(PreProc inst, String[] args) throws BuildException {
 	    // Process the command-line switches
 	    for (String arg: args) {
 		if (isOptionString(arg)) {
@@ -2611,9 +2629,9 @@ public class JavaPreProc extends Task
 	public void setDefine(String def) throws BuildException {
 	    if (def == null || def.isEmpty())
 		return;
-	    String[] defs = comma.split(def);
+	    String[] defs = COMMA.split(def);
 	    for (String d : defs) {
-		Matcher m1 = defPat.matcher(d);
+		Matcher m1 = DEFINE_PATTERN.matcher(d);
 		if (m1.matches()) {
 		    String var = m1.group(1);
 		    String val = m1.group(2);
@@ -2622,7 +2640,7 @@ public class JavaPreProc extends Task
 			out.format("Defining '%1$s' to '%2$s'%n", var, val);
 		}
 		else {
-		    m1 = defAltPat.matcher(d);
+		    m1 = ALT_DEFINE_PATTERN.matcher(d);
 		    if (m1.matches()) {
 			String var = m1.group(1);
 			defines.put(var, "");
@@ -2647,7 +2665,7 @@ public class JavaPreProc extends Task
 	public void setUndefine(String var) throws BuildException {
 	    if (var == null || var.isEmpty())
 		return;
-	    String[] vars = comma.split(var);
+	    String[] vars = COMMA.split(var);
 	    for (String v : vars) {
 		if (defines.remove(v) == null) {
 		    if (!ignoreUndefined) {
@@ -2708,7 +2726,7 @@ public class JavaPreProc extends Task
 	 */
 	public void setIncludePath(String pathArg) throws BuildException {
 	    if (pathArg.length() > 0) {
-		String[] paths = comma.split(pathArg);
+		String[] paths = COMMA.split(pathArg);
 		includePaths = new Vector<String>();
 		for (String p : paths)
 		    includePaths.add(p);
@@ -2901,7 +2919,7 @@ public class JavaPreProc extends Task
 	    Properties properties = (baseProperties == null)
 			? new Properties()
 			: new Properties(baseProperties);
-	    try (InputStream is = JavaPreProc.class.getResourceAsStream(filePath)) {
+	    try (InputStream is = PreProc.class.getResourceAsStream(filePath)) {
 		properties.load(is);
 	    }
 	    catch (IOException ioe) {
@@ -2936,7 +2954,7 @@ public class JavaPreProc extends Task
 	 * Default constructor which initializes all the per-instance
 	 * variables.
 	 */
-	public JavaPreProc() {
+	public PreProc() {
 	    // Read in the environment and define everything found
 	    defines = new HashMap<String,String>(System.getenv());
 
@@ -2982,9 +3000,9 @@ public class JavaPreProc extends Task
 	    }
 
 	    // Build the pattern matcher to recognize our directives
-	    cmdPat = Pattern.compile(String.format(cmdPatFormat, directiveStartCh));
-	    passPat = Pattern.compile(String.format(passPatFormat, directiveStartCh));
-	    commentPat = Pattern.compile(String.format(commentPatFormat, directiveStartCh));
+	    cmdPat = Pattern.compile(String.format(CMD_PATTERN_FORMAT, directiveStartCh));
+	    passPat = Pattern.compile(String.format(PASS_PATTERN_FORMAT, directiveStartCh));
+	    commentPat = Pattern.compile(String.format(COMMENT_PATTERN_FORMAT, directiveStartCh));
 
 	    // Process files or directories depending on the -r or -R switches
 	    if (processAsDirectory) {
@@ -3020,7 +3038,7 @@ public class JavaPreProc extends Task
 	 */
 	public static void main(String[] args) {
 
-	    JavaPreProc inst = new JavaPreProc();
+	    PreProc inst = new PreProc();
 
 	    // Process the command-line switches
 	    try {

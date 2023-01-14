@@ -365,6 +365,8 @@
 		#577: Add "_find_and_run_class_gui" script for non-Windows platforms.
 	    05-Jan-2023 (rlwhitcomb)
 		#224: Add dictionary API keys resource to the .jar file.
+	    13-Jan-2023 (rlwhitcomb)
+		#593: Rename JavaPreProc to PreProc.
 
      ========================================================================== -->
 
@@ -507,7 +509,7 @@
 	<ant antfile="build-ant-tasks.xml" target="install"/>
 	<echo message="Beginning build ..."/>
 
-	<taskdef name="preproc" classname="info.rlwhitcomb.preproc.JavaPreProc" classpath="${ant.tasks.jar}"/>
+	<taskdef name="preproc" classname="info.rlwhitcomb.preproc.PreProc" classpath="${ant.tasks.jar}"/>
 	<taskdef name="var" classname="net.sf.antcontrib.property.Variable" classpath="external-files/ant-contrib.jar"/>
 
 	<macrodef name="generate-text-resources">
@@ -743,7 +745,7 @@ Test starting on ${build.date} at ${build.time}
 			<arg value="-nocolors"/>
 			<arg value="info.java@j"/>
 		</java>
-		<echo>Test JavaPreProc ...</echo>
+		<echo>Test PreProc ...</echo>
 		<delete>
 			<fileset dir="test/data" includes="TestPP.java,TestPP.log"/>
 		</delete>
@@ -759,7 +761,7 @@ Test starting on ${build.date} at ${build.time}
 				<not><filesmatch file1="test/data/TestPP.log" file2="test/canons/${test.log.canon}" textfile="true"/></not>
 			</condition>
 		</fail>
-		<echo file="${test.log.path}" append="true">JavaPreProc: Preprocessing results and log match.
+		<echo file="${test.log.path}" append="true">PreProc: Preprocessing results and log match.
 </echo>
 		<echo>Test of InitializationTask ...</echo>
 		<java classname="info.rlwhitcomb.test.InitTaskTest"   output="${test.log.path}" append="true" failonerror="true" fork="true"/>
