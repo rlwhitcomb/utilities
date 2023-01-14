@@ -106,6 +106,7 @@
  *  07-Nov-22 rlw  ---	More exceptions to process specially.
  *  01-Jan-23 rlw  ---	Update copyright years.
  *  13-Jan-23 rlw #593:	Rename to PreProc; refactoring, rearrangement and renaming of variables.
+ *			Much more refactoring.
  */
 package info.rlwhitcomb.preproc;
 
@@ -143,10 +144,11 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.IllegalFormatException;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.TimeZone;
 import java.util.UnknownFormatConversionException;
-import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -362,7 +364,7 @@ public class PreProc extends Task
 	private static final Pattern IDENT = Pattern.compile("^([_A-Za-z][\\w\\.]*)");
 
 	/** The current version of this software. */
-	private static final String VERSION = "1.2.0";
+	private static final String VERSION = "1.2.1";
 	/** The current copyright year. */
 	private static final String COPYRIGHT_YEAR = "2010-2011,2014-2016,2019-2023";
 
@@ -372,7 +374,7 @@ public class PreProc extends Task
 	/**********************************************************/
 
 	/** The current list of defined symbols and their values. */
-	private HashMap<String,String> defines = null;
+	private Map<String,String> defines = null;
 	/** Default (or overridden) extension for input files. */
 	private String inputExt = null;
 	/** Default or overridden extension for output files. */
@@ -401,11 +403,11 @@ public class PreProc extends Task
 	/** Flag to say: "always do the processing regardless of file time stamps". */
 	private boolean alwaysProcess = false;
 	/** List of paths to use to search for included files. */
-	private Vector<String> includePaths = null;
+	private List<String> includePaths = null;
 	/** Directive start character. */
 	private char directiveStartCh = '#';
 	/** List of input files or directories to process. */
-	private Vector<String> fileArgs = new Vector<String>();
+	private List<String> fileArgs = new ArrayList<String>();
 	/** Output log stream (defaults to {@link System#out}). */
 	private PrintStream out = System.out;
 	/** Error stream (defaults to {@link System#err}). */
@@ -573,17 +575,18 @@ public class PreProc extends Task
 		/** Length of the token string in the input line. */
 		public int tokenLen;
 
-		public TokenValue(Token t, String v, Operator o) {
-		    this.tok = t;
-		    this.value = v;
-		    this.op = o;
+		public TokenValue(final Token t, final String v, final Operator o) {
+		    tok = t;
+		    value = v;
+		    op = o;
 		}
+
 		@Override
-		public boolean equals(Object o) {
+		public boolean equals(final Object o) {
 		    if (o instanceof TokenValue) {
 			try {
-			    TokenValue t = (TokenValue)o;
-			    switch (this.tok) {
+			    TokenValue t = (TokenValue) o;
+			    switch (tok) {
 				case SQSTRING:
 				case DQSTRING:
 				    return t.value.equals(value);
@@ -608,9 +611,10 @@ public class PreProc extends Task
 		    }
 		    return false;
 		}
-		public void setPos(int start, int len) {
-		    this.startPos = start;
-		    this.tokenLen = len;
+
+		public void setPos(final int start, final int len) {
+		    startPos = start;
+		    tokenLen = len;
 		}
 	};
 
@@ -636,14 +640,15 @@ public class PreProc extends Task
 		boolean doingOutput;
 		/** Type of the statement that pushed this state. */
 		IfType lastStmt;
+
 		/**
 		 * Constructor taking both values at once.
 		 * @param doing The current "doingOutput" flag.
 		 * @param ift   The IF/ELIF flag.
 		 */
-		public IfState(boolean doing, IfType ift) {
-		    this.doingOutput = doing;
-		    this.lastStmt = ift;
+		public IfState(final boolean doing, final IfType ift) {
+		    doingOutput = doing;
+		    lastStmt    = ift;
 		}
 	};
 
@@ -654,7 +659,7 @@ public class PreProc extends Task
 	class InputFileFilter implements FilenameFilter
 	{
 		@Override
-		public boolean accept(File dir, String name) {
+		public boolean accept(final File dir, final String name) {
 		    File f = new File(dir, name);
 		    return (f.exists() && f.isFile() && name.endsWith(inputExt));
 		}
@@ -667,7 +672,7 @@ public class PreProc extends Task
 	class InputDirFilter implements FileFilter
 	{
 		@Override
-		public boolean accept(File f) {
+		public boolean accept(final File f) {
 		    return (f.exists() && f.isDirectory());
 		}
 	}
@@ -677,7 +682,8 @@ public class PreProc extends Task
 	 * Private exception class used to gracefully exit from processing
 	 * without doing anything.
 	 */
-	class DontProcessException extends Exception {
+	static class DontProcessException extends Exception {
+		static final DontProcessException INSTANCE = new DontProcessException();
 	}
 
 
@@ -689,7 +695,7 @@ public class PreProc extends Task
 	 * @return	A (hopefully) better message than just <code>getMesssage()</code>
 	 *		will return.
 	 */
-	private static String exceptMessage(Throwable ex) {
+	private static String exceptMessage(final Throwable ex) {
 	    String className = ex.getClass().getSimpleName();
 	    String message   = ex.getMessage();
 
@@ -736,11 +742,11 @@ public class PreProc extends Task
 	 * @see		#MACRO_REF2
 	 * @see		#defines
 	 */
-	private String doSubs(String line) {
+	private String doSubs(final String line) {
 	    if (line.isEmpty())
 		return line;
 
-	    StringBuffer sb = new StringBuffer();
+	    StringBuffer sb = new StringBuffer(line.length() * 2);
 
 	    Matcher m = MACRO_REF.matcher(line);
 	    boolean found = m.find();
@@ -755,8 +761,7 @@ public class PreProc extends Task
 		    if (!ignoreUndefined)
 			err.format("Error: Macro \"%1$s\" not defined!%n", name);
 		}
-		// Recursive call in common case that value
-		// is defined in terms of other macros
+		// Recursive call in common case that value is defined in terms of other macros
 		if (value != null)
 		    m.appendReplacement(sb, Matcher.quoteReplacement(doSubs(value)));
 
@@ -773,7 +778,7 @@ public class PreProc extends Task
 	 * @param	value	The candidate string.
 	 * @return		The string stripped of leading and trailing quotes.
 	 */
-	private String stripQuotes(String value) {
+	private String stripQuotes(final String value) {
 	    if (value != null) {
 		String endQuote = null;
 		if (value.startsWith("\""))
@@ -796,7 +801,7 @@ public class PreProc extends Task
 	 * @param	value	The candidate string.
 	 * @return		The string stripped of leading and trailing brackets (or quotes).
 	 */
-	private String stripBrackets(String value) {
+	private String stripBrackets(final String value) {
 	    String endBracket = null;
 	    if (value.startsWith("<")) {
 		endBracket = ">";
@@ -828,10 +833,10 @@ public class PreProc extends Task
 	 *		(probably should never happen, or the programmer
 	 *		has made a mistake).
 	 */
-	private ArrayList<TokenValue> tokenizeInput(String input, int startPos)
+	private List<TokenValue> tokenizeInput(final String input, final int startPos)
 		throws ParseException
 	{
-	    ArrayList<TokenValue> tokens = new ArrayList<TokenValue>(input.length());
+	    List<TokenValue> tokens = new ArrayList<>(input.length());
 	    int pos = 0;
 	    int endPos = input.length();
 	    while (pos < endPos) {
@@ -1063,7 +1068,7 @@ public class PreProc extends Task
 	/**
 	 * The tokenized input expression.
 	 */
-	private ArrayList<TokenValue> inputExpr = null;
+	private List<TokenValue> inputExpr = null;
 
 	/**
 	 * The current position in the tokenized input expression while moving
@@ -1085,7 +1090,7 @@ public class PreProc extends Task
 	 * @return	The evaluated boolean result.
 	 * @throws	ParseException if tokenizing went wrong.
 	 */
-	private boolean otherFactor(ProcessAs type, int exprLen)
+	private boolean otherFactor(final ProcessAs type, final int exprLen)
 		throws ParseException
 	{
 	    TokenValue t = inputExpr.get(inputPos++);
@@ -1141,7 +1146,7 @@ public class PreProc extends Task
 	 * @throws	NumberFormatException if numbers are allowed and one of them is malformed.
 	 * @throws	ParseException for other kinds of syntax errors.
 	 */
-	private String stringFactor(boolean allowNumbers, int exprLen, boolean eating)
+	private String stringFactor(final boolean allowNumbers, final int exprLen, final boolean eating)
 		throws NumberFormatException, ParseException
 	{
 	    String value = null;
@@ -1189,7 +1194,7 @@ public class PreProc extends Task
 	 * @throws	ParseException if the macro variable is not defined and
 	 *		{@link #ignoreUndefined} is not {@code true}.
 	 */
-	private void handleVarRef(TokenValue t)
+	private void handleVarRef(final TokenValue t)
 		throws ParseException
 	{
 	    String value;
@@ -1204,7 +1209,7 @@ public class PreProc extends Task
 	    // Recursive call in common case that value
 	    // is defined in terms of other macros
 	    doSubs(value);
-	    ArrayList<TokenValue> newTokens = tokenizeInput(value, t.startPos);
+	    List<TokenValue> newTokens = tokenizeInput(value, t.startPos);
 
 	    // Remove the VARREF token at inputPos and replace by new list
 	    inputExpr.remove(--inputPos);
@@ -1215,7 +1220,7 @@ public class PreProc extends Task
 	/**
 	 * Parse an integer value out of a token.
 	 *
-	 * @param	t	The input token.
+	 * @param	tok	The input token.
 	 * @param	type	How to process the evaluation.
 	 * @param	exprLen	The length limit on the expression.
 	 * @param	eating	Whether or not we are in the "false" state of short-circuit evaluation.
@@ -1225,12 +1230,14 @@ public class PreProc extends Task
 	 * @throws	NumberFormatException if one of the numbers was not properly formed.
 	 * @throws	ParseException if the expression was not properly formed
 	 */
-	private int integerValue(TokenValue t, ProcessAs type, int exprLen, boolean eating)
+	private int integerValue(final TokenValue tok, final ProcessAs type, final int exprLen, final boolean eating)
 		throws NumberFormatException, ParseException
 	{
+	    TokenValue t = tok;
 	    int v = 0;
 	    String value;
 	    int sign = +1;
+
 	    // Check for leading + or -
 	    if (t.tok == Token.OPER) {
 		if (t.op == Operator.ADD)
@@ -1308,7 +1315,7 @@ public class PreProc extends Task
 	/**
 	 * Parse a double value out of a token.
 	 *
-	 * @param	t	The input token.
+	 * @param	tok	The input token.
 	 * @param	type	How to process the evaluation.
 	 * @param	exprLen	The length limit on the expression.
 	 * @param	eating	Whether or not we are in the "false" state of short-circuit evaluation.
@@ -1318,9 +1325,10 @@ public class PreProc extends Task
 	 * @throws	NumberFormatException if one of the numbers was not properly formed.
 	 * @throws	ParseException if the expression was not properly formed
 	 */
-	private double doubleValue(TokenValue t, ProcessAs type, int exprLen, boolean eating)
+	private double doubleValue(final TokenValue tok, final ProcessAs type, final int exprLen, final boolean eating)
 		throws NumberFormatException, ParseException
 	{
+	    TokenValue t = tok;
 	    double dv = 0.0;
 	    String value;
 	    double sign = +1.0;
@@ -1410,7 +1418,7 @@ public class PreProc extends Task
 	 * @throws	NumberFormatException if one of the numbers was not properly formed.
 	 * @throws	ParseException if the expression was not properly formed
 	 */
-	private int integerFactor(ProcessAs type, int exprLen, boolean eating)
+	private int integerFactor(final ProcessAs type, final int exprLen, final boolean eating)
 		throws NumberFormatException, ParseException
 	{
 	    TokenValue t = inputExpr.get(inputPos++);
@@ -1457,7 +1465,7 @@ public class PreProc extends Task
 	 * @throws	NumberFormatException if one of the numbers was not properly formed.
 	 * @throws	ParseException if the expression was not properly formed
 	 */
-	private int integerTerm(ProcessAs type, int exprLen, boolean eating)
+	private int integerTerm(final ProcessAs type, final int exprLen, final boolean eating)
 		throws NumberFormatException, ParseException
 	{
 	    int v = integerFactor(type, exprLen, eating);
@@ -1518,7 +1526,7 @@ public class PreProc extends Task
 	 * @throws	NumberFormatException if one of the numbers was not properly formed.
 	 * @throws	ParseException if the expression was not properly formed
 	 */
-	private double doubleFactor(ProcessAs type, int exprLen, boolean eating)
+	private double doubleFactor(final ProcessAs type, final int exprLen, final boolean eating)
 		throws NumberFormatException, ParseException
 	{
 	    TokenValue t = inputExpr.get(inputPos++);
@@ -1565,7 +1573,7 @@ public class PreProc extends Task
 	 * @throws	NumberFormatException if one of the numbers was not properly formed.
 	 * @throws	ParseException if the expression was not properly formed
 	 */
-	private double doubleTerm(ProcessAs type, int exprLen, boolean eating)
+	private double doubleTerm(final ProcessAs type, final int exprLen, final boolean eating)
 		throws NumberFormatException, ParseException
 	{
 	    double dv = doubleFactor(type, exprLen, eating);
@@ -1625,7 +1633,7 @@ public class PreProc extends Task
 	 *
 	 * @throws	ParseException if the expression was not properly formed
 	 */
-	private boolean relTerm(ProcessAs type, int exprLen, boolean eating)
+	private boolean relTerm(final ProcessAs type, final int exprLen, final boolean eating)
 		throws ParseException
 	{
 	    int savePos = inputPos;
@@ -1783,7 +1791,7 @@ public class PreProc extends Task
 	 * @throws	ParseException if the expression was not properly formed
 	 *		according to our rules.
 	 */
-	private boolean andTerm(ProcessAs type, int exprLen, boolean eating)
+	private boolean andTerm(final ProcessAs type, final int exprLen, final boolean eating)
 		throws ParseException
 	{
 	    boolean v = relTerm(type, exprLen, eating);
@@ -1824,7 +1832,7 @@ public class PreProc extends Task
 	 * @throws	ParseException if the expression was not properly formed
 	 *		according to our rules.
 	 */
-	private boolean orTerm(ProcessAs type, int exprLen)
+	private boolean orTerm(final ProcessAs type, final int exprLen)
 		throws ParseException
 	{
 	    boolean v = andTerm(type, exprLen, false);
@@ -1864,7 +1872,7 @@ public class PreProc extends Task
 	 * @throws	ParseException if the expression was not properly formed
 	 *		according to our rules.
 	 */
-	private boolean evaluate(ProcessAs type, int exprLen)
+	private boolean evaluate(final ProcessAs type, final int exprLen)
 		throws ParseException
 	{
 	    boolean v = orTerm(type, exprLen);
@@ -1886,7 +1894,7 @@ public class PreProc extends Task
 	 * @throws	ParseException if the expression was not properly formed
 	 *		according to our rules.
 	 */
-	private boolean evaluate(String expr, ProcessAs type)
+	private boolean evaluate(final String expr, final ProcessAs type)
 		throws ParseException
 	{
 	    // First, tokenize the input stream
@@ -1911,7 +1919,7 @@ public class PreProc extends Task
 	 *				doing output and {@link #plusVerbose} mode.
 	 * @param	doingOutput	<code>true</code> if we're doing output right now
 	 */
-	private void traceLine(long lineNo, String line, boolean directive, boolean doingOutput) {
+	private void traceLine(final long lineNo, final String line, final boolean directive, final boolean doingOutput) {
 	    if (verbose) {
 		if (plusVerbose && doingOutput)
 		    out.format("%1$8d.+%2$s%n", lineNo, line);
@@ -1939,7 +1947,7 @@ public class PreProc extends Task
 	 * (unless the "-A" [always process] flag is given on the command line).
 	 *
 	 * @param	inputFile	the input file to be read and processed
-	 * @param	wrtr		<code>null</code> if this is a top-level file
+	 * @param	writer		<code>null</code> if this is a top-level file
 	 *				in which case the {@link BufferedWriter}
 	 *				is created based on the input file name and
 	 *				output extension.  If non-null, this means
@@ -1950,16 +1958,17 @@ public class PreProc extends Task
 	 * @return	<code>false</code> if no errors (that is, success)
 	 *		<code>true</code> if errors (that is, failure)
 	 */
-	private boolean processFile(File inputFile, BufferedWriter wrtr) {
+	private boolean processFile(final File inputFile, final BufferedWriter writer) {
+	    BufferedWriter wrtr       = writer;
 	    boolean errors            = false;
 	    int nesting               = 0;
 	    int tooManyEndifErrors    = 0;
 	    boolean doingOutput       = true;
 	    boolean closeOutput       = false;
-	    LinkedList<IfState> state = new LinkedList<IfState>();
+	    LinkedList<IfState> state = new LinkedList<>();
 
-	    String name             = inputFile.getPath();
-	    String previousFileName = setFileVariables(name);
+	    String name               = inputFile.getPath();
+	    String previousFileName   = setFileVariables(name);
 
 	    try {
 		String fileType = "";
@@ -1979,7 +1988,7 @@ public class PreProc extends Task
 			err.format("Error: Output file name must not be the same as input file name: '%1$s'!%n", name);
 			rdr.close();
 			errors = true;
-			throw new DontProcessException();
+			throw DontProcessException.INSTANCE;
 		    }
 		    if (!alwaysProcess) {
 			// Check time stamps of input and output files
@@ -1992,7 +2001,7 @@ public class PreProc extends Task
 			    if (verbose)
 				out.format("Skipping file because output '%1$s'%n         is newer than input '%2$s'.%n", outName, name);
 			    rdr.close();
-			    throw new DontProcessException();
+			    throw DontProcessException.INSTANCE;
 			}
 		    }
 		    if (verbose) {
@@ -2260,7 +2269,7 @@ public class PreProc extends Task
 		}
 	    }
 	    catch (IOException ioe) {
-		err.format("Error: I/O error occurred while processing file '%1$s'!%n\t%2$s%n", name, exceptMessage(ioe));
+		err.format("Error: Problem while processing file '%1$s'!%n\t%2$s%n", name, exceptMessage(ioe));
 		errors = true;
 	    }
 	    catch (DontProcessException dpe) {
@@ -2283,7 +2292,7 @@ public class PreProc extends Task
 	 *		<code>true</code> if errors (that is, failure)
 	 * @throws	FileNotFoundException for the obvious reason.
 	 */
-	private boolean processOneFile(String arg, BufferedWriter wrtr)
+	private boolean processOneFile(final String arg, final BufferedWriter wrtr)
 		throws FileNotFoundException
 	{
 	    return processOneFile(new File(arg), wrtr);
@@ -2299,7 +2308,7 @@ public class PreProc extends Task
 	 *		<code>true</code> if errors (that is, failure)
 	 * @throws	FileNotFoundException for the obvious reason.
 	 */
-	private boolean processOneFile(File f, BufferedWriter wrtr)
+	private boolean processOneFile(final File f, final BufferedWriter wrtr)
 		throws FileNotFoundException
 	{
 	    boolean err = false;
@@ -2339,7 +2348,7 @@ public class PreProc extends Task
 	 *		<code>true</code> if errors (that is, failure)
 	 *		most notably if the file cannot be found anywhere
 	 */
-	private boolean processIncludeFile(String arg, BufferedWriter wrtr) {
+	private boolean processIncludeFile(final String arg, final BufferedWriter wrtr) {
 	    try {
 		return processOneFile(arg, wrtr);
 	    }
@@ -2387,7 +2396,7 @@ public class PreProc extends Task
 	 * @return	{@code true} if the value is a valid option specifier
 	 *		for the current platform.
 	 */
-	private static boolean isOptionString(String arg) {
+	private static boolean isOptionString(final String arg) {
 	    if (System.getProperty("os.name").startsWith("Windows")) {
 		return (arg.startsWith("-") || arg.startsWith("/"));
 	    }
@@ -2421,7 +2430,7 @@ public class PreProc extends Task
 	 *
 	 * @throws	BuildException if there were errors.
 	 */
-	private void processFileSpecs(Vector<String> args) throws BuildException {
+	private void processFileSpecs(final List<String> args) throws BuildException {
 	    for (String arg: args) {
 		if (isOptionString(arg))
 		    continue;
@@ -2458,7 +2467,7 @@ public class PreProc extends Task
 	 *
 	 * @return	{@code true} if there were errors.
 	 */
-	private boolean processDir(File f) {
+	private boolean processDir(final File f) {
 	    boolean errors = false;
 	    if (f.exists() && f.isDirectory()) {
 		InputFileFilter filt = new InputFileFilter();
@@ -2488,7 +2497,7 @@ public class PreProc extends Task
 	 *
 	 * @param	args	The list of arguments, some of which are directories.
 	 */
-	private void processDirSpecs(Vector<String> args) {
+	private void processDirSpecs(final List<String> args) {
 	    for (String arg: args) {
 		if (isOptionString(arg))
 		    continue;
@@ -2504,9 +2513,9 @@ public class PreProc extends Task
 	 *
 	 * @param	display	Flag to say whether or not to really display it.
 	 */
-	private void signOnBanner(boolean display) {
+	private void signOnBanner(final boolean display) {
 	    if (display)
-		out.format("Java Pre-Processor -- version %1$s%nCopyright (c) %2$s Roger L. Whitcomb.%n", VERSION, COPYRIGHT_YEAR);
+		out.format("Pre-Processor -- version %1$s%nCopyright (c) %2$s Roger L. Whitcomb.%n", VERSION, COPYRIGHT_YEAR);
 	}
 
 
@@ -2529,7 +2538,7 @@ public class PreProc extends Task
 	 *
 	 * @throws	BuildException for errors parsing these arguments.
 	 */
-	private static boolean processCommandLine(PreProc inst, String[] args) throws BuildException {
+	private static boolean processCommandLine(final PreProc inst, final String[] args) throws BuildException {
 	    // Process the command-line switches
 	    for (String arg: args) {
 		if (isOptionString(arg)) {
@@ -2608,7 +2617,7 @@ public class PreProc extends Task
 	 * @param	ch	The new value for the option.
 	 * @throws	BuildException if the value is more than one character.
 	 */
-	public void setDirectiveChar(String ch) throws BuildException {
+	public void setDirectiveChar(final String ch) throws BuildException {
 	    if (ch.length() != 1) {
 		throw new BuildException("Directive indicator must be a single character.");
 	    }
@@ -2626,7 +2635,7 @@ public class PreProc extends Task
 	 * @param	def	The new define specification ({@code "var=value"}).
 	 * @throws	BuildException if the specification can't be parsed.
 	 */
-	public void setDefine(String def) throws BuildException {
+	public void setDefine(final String def) throws BuildException {
 	    if (def == null || def.isEmpty())
 		return;
 	    String[] defs = COMMA.split(def);
@@ -2662,7 +2671,7 @@ public class PreProc extends Task
 	 * @param	var	The variable to undefine.
 	 * @throws	BuildException if the variable is not defined now, and the {@link #ignoreUndefined} flag is {@code false}.
 	 */
-	public void setUndefine(String var) throws BuildException {
+	public void setUndefine(final String var) throws BuildException {
 	    if (var == null || var.isEmpty())
 		return;
 	    String[] vars = COMMA.split(var);
@@ -2686,7 +2695,7 @@ public class PreProc extends Task
 	 * @param	arg	The new output file extension value.
 	 * @throws	BuildException if the value is empty.
 	 */
-	public void setOutputExt(String arg) throws BuildException {
+	public void setOutputExt(final String arg) throws BuildException {
 	    if (arg.length() > 0) {
 		if (arg.charAt(0) == '.')
 		    outputExt = arg;
@@ -2705,7 +2714,7 @@ public class PreProc extends Task
 	 * @param	arg	The new input file extension value.
 	 * @throws	BuildException if the value is empty.
 	 */
-	public void setInputExt(String arg) throws BuildException {
+	public void setInputExt(final String arg) throws BuildException {
 	    if (arg.length() > 0) {
 		if (arg.charAt(0) == '.')
 		    inputExt = arg;
@@ -2724,10 +2733,10 @@ public class PreProc extends Task
 	 * @param	pathArg	The new include path.
 	 * @throws	BuildException if the path is empty.
 	 */
-	public void setIncludePath(String pathArg) throws BuildException {
+	public void setIncludePath(final String pathArg) throws BuildException {
 	    if (pathArg.length() > 0) {
 		String[] paths = COMMA.split(pathArg);
-		includePaths = new Vector<String>();
+		includePaths = new ArrayList<>();
 		for (String p : paths)
 		    includePaths.add(p);
 	    }
@@ -2742,7 +2751,7 @@ public class PreProc extends Task
 	 *
 	 * @param	var	The new value for the option.
 	 */
-	public void setNologo(boolean var) {
+	public void setNologo(final boolean var) {
 	    displayLogo = !var;
 	}
 
@@ -2752,7 +2761,7 @@ public class PreProc extends Task
 	 *
 	 * @param	val	The new value for the option.
 	 */
-	public void setIgnoreUndefined(boolean val) {
+	public void setIgnoreUndefined(final boolean val) {
 	    ignoreUndefined = val;
 	}
 
@@ -2763,7 +2772,7 @@ public class PreProc extends Task
 	 * @param	value	The new value for the option.
 	 * @throws	BuildException if the value is invalid.
 	 */
-	public void setVerbose(String value) throws BuildException {
+	public void setVerbose(final String value) throws BuildException {
 	    if (value.length() == 0)
 		verbose = true;
 	    else if (value.equals("+") || value.equalsIgnoreCase("plus"))
@@ -2785,7 +2794,7 @@ public class PreProc extends Task
 	 * @param	value	The new value for the option.
 	 * @throws	BuildException if the value is invalid.
 	 */
-	public void setFormat(String value) throws BuildException {
+	public void setFormat(final String value) throws BuildException {
 	    if (value.equalsIgnoreCase("UTF8") ||
 		value.equalsIgnoreCase("UTF-8"))
 		processAsUTF8 = true;
@@ -2801,7 +2810,7 @@ public class PreProc extends Task
 	 * @param	value	The new file name for the output log.
 	 * @throws	BuildException if the name is invalid somehow.
 	 */
-	public void setLog(String value) throws BuildException {
+	public void setLog(final String value) throws BuildException {
 	    if (value == null || value.trim().isEmpty()) {
 		throw new BuildException("Log file value must not be empty.");
 	    }
@@ -2814,7 +2823,7 @@ public class PreProc extends Task
 	 *
 	 * @param	value	Whether to overwrite the log file or not.
 	 */
-	public void setOverwrite(boolean value) {
+	public void setOverwrite(final boolean value) {
 	    overwriteLog = value;
 	}
 
@@ -2822,33 +2831,33 @@ public class PreProc extends Task
 	/**
 	 * Set value for the <code>processAsDirectory</code> option.
 	 *
-	 * @param	val	The new value for the option.
+	 * @param	value	The new value for the option.
 	 */
-	public void setProcessAsDirectory(boolean val) {
-	    processAsDirectory = val;
+	public void setProcessAsDirectory(final boolean value) {
+	    processAsDirectory = value;
 	}
 
 
 	/**
 	 * Set value for the <code>recurseDirectories</code> option.
 	 *
-	 * @param	val	The new value for the option.
+	 * @param	value	The new value for the option.
 	 */
-	public void setRecurseDirectories(boolean val) {
-	    if (val)
-		processAsDirectory = recurseDirectories = val;
+	public void setRecurseDirectories(final boolean value) {
+	    if (value)
+		processAsDirectory = recurseDirectories = value;
 	    else
-		recurseDirectories = val;
+		recurseDirectories = value;
 	}
 
 
 	/**
 	 * Set value for the <code>alwaysProcess</code> option.
 	 *
-	 * @param	val	The new value for the option.
+	 * @param	value	The new value for the option.
 	 */
-	public void setAlwaysProcess(boolean val) {
-	    alwaysProcess = val;
+	public void setAlwaysProcess(final boolean value) {
+	    alwaysProcess = value;
 	}
 
 
@@ -2857,7 +2866,7 @@ public class PreProc extends Task
 	 *
 	 * @param	value	The new value for the include environment variable name.
 	 */
-	public void setIncludeVar(String value) throws BuildException {
+	public void setIncludeVar(final String value) throws BuildException {
 	    if (value.length() > 0) {
 		inclEnvVar = value;
 	    }
@@ -2872,7 +2881,7 @@ public class PreProc extends Task
 	 *
 	 * @param	arg	The next {@code "file"} option.
 	 */
-	public void setFile(String arg) {
+	public void setFile(final String arg) {
 	    fileArgs.add(arg);
 	}
 
@@ -2882,7 +2891,7 @@ public class PreProc extends Task
 	 *
 	 * @param	arg	The next {@code "dir"} option.
 	 */
-	public void setDir(String arg) {
+	public void setDir(final String arg) {
 	    fileArgs.add(arg);
 	}
 
@@ -2895,8 +2904,9 @@ public class PreProc extends Task
 	 * @param fileName The current file name.
 	 * @return The previous file name setting.
 	 */
-	private String setFileVariables(String fileName) {
+	private String setFileVariables(final String fileName) {
 	    Date now = currentCal.getTime();
+
 	    defines.put(DATE_VAR_NAME, dateFmt.format(now));
 	    defines.put(TIME_VAR_NAME, timeFmt.format(now));
 
@@ -2915,7 +2925,7 @@ public class PreProc extends Task
 	 *				if there was an I/O error reading the file (which could be
 	 *				{@code null} if that was passed in).
 	 */
-	private static Properties readPropertiesFile(String filePath, Properties baseProperties) {
+	private static Properties readPropertiesFile(final String filePath, final Properties baseProperties) {
 	    Properties properties = (baseProperties == null)
 			? new Properties()
 			: new Properties(baseProperties);
@@ -2956,7 +2966,7 @@ public class PreProc extends Task
 	 */
 	public PreProc() {
 	    // Read in the environment and define everything found
-	    defines = new HashMap<String,String>(System.getenv());
+	    defines = new HashMap<>(System.getenv());
 
 	    // Define some predefined variables
 	    defines.put(JAVA_VERSION_VAR_NAME, System.getProperty("java.version"));
@@ -2989,7 +2999,7 @@ public class PreProc extends Task
 		    err = ps;
 		}
 		catch (IOException ioe) {
-		    throw new BuildException(String.format("I/O Error creating output log file: %1$s",
+		    throw new BuildException(String.format("Error: Problem creating output log file: %1$s",
 			exceptMessage(ioe)));
 		}
 	    }
@@ -3000,14 +3010,13 @@ public class PreProc extends Task
 	    }
 
 	    // Build the pattern matcher to recognize our directives
-	    cmdPat = Pattern.compile(String.format(CMD_PATTERN_FORMAT, directiveStartCh));
-	    passPat = Pattern.compile(String.format(PASS_PATTERN_FORMAT, directiveStartCh));
+	    cmdPat     = Pattern.compile(String.format(CMD_PATTERN_FORMAT,     directiveStartCh));
+	    passPat    = Pattern.compile(String.format(PASS_PATTERN_FORMAT,    directiveStartCh));
 	    commentPat = Pattern.compile(String.format(COMMENT_PATTERN_FORMAT, directiveStartCh));
 
 	    // Process files or directories depending on the -r or -R switches
 	    if (processAsDirectory) {
 		setDefaultExtensions();
-
 		processDirSpecs(fileArgs);
 	    }
 	    else {
@@ -3036,7 +3045,7 @@ public class PreProc extends Task
 	 *
 	 * @param	args	The command line arguments for the process.
 	 */
-	public static void main(String[] args) {
+	public static void main(final String[] args) {
 
 	    PreProc inst = new PreProc();
 
@@ -3046,12 +3055,11 @@ public class PreProc extends Task
 		    System.exit(1);
 	    }
 	    catch (BuildException be1) {
-		System.err.format("Error in command line: %1$s%n", be1.getMessage());
+		System.err.format("Error: Problem in command line: %1$s%n", be1.getMessage());
 		System.exit(1);
 	    }
 
-	    // Add all the command-line arguments as potential
-	    // file specs
+	    // Add all the command-line arguments as potential file specs
 	    for (String a : args) {
 		inst.setFile(a);
 	    }
