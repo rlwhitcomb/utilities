@@ -107,6 +107,9 @@
  *  01-Jan-23 rlw  ---	Update copyright years.
  *  13-Jan-23 rlw #593:	Rename to PreProc; refactoring, rearrangement and renaming of variables.
  *			Much more refactoring.
+ *  14-Jan-23		Wrap this with PreProcTask for use with Ant. Interestingly, now we can use this
+ *			class either as an Ant task, as a standalone preprocessor, or as a helper class
+ *			called from another class which needs macro processing.
  */
 package info.rlwhitcomb.preproc;
 
@@ -152,8 +155,6 @@ import java.util.UnknownFormatConversionException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.tools.ant.BuildException;
-import org.apache.tools.ant.Task;
 
 
 /**
@@ -214,7 +215,7 @@ import org.apache.tools.ant.Task;
  * </ul>
  * <p> In addition, the contents of the "build.properties", "build.number", and "version.properties"
  * files will be read and a variable defined for each of the properties found in there.
- * <p> Command-line arguments can be:
+ * <p> Command-line arguments can be (using the <code>preproc</code> command):
  * <ul>
  * <li><code>-nologo</code> (don't display sign-on banner)
  * <li><code>-D<i>var</i>=<i>value</i></code> (define variable value)
@@ -236,7 +237,7 @@ import org.apache.tools.ant.Task;
  * <li>file name(s)
  * </ul>
  * <p> This process can also be invoked as an Ant task by using the following in your "build.xml":
- * <p> <code>&lt;taskdef name="preproc" classname="info.rlwhitcomb.preproc.PreProc" classpath="anttasks.jar"/&gt;</code>.
+ * <p> <code>&lt;taskdef name="preproc" classname="info.rlwhitcomb.preproc.PreProcTask" classpath="anttasks.jar"/&gt;</code>.
  * <p> The directives supported in this context are:
  * <ul><li><code>directiveChar="<i>ch</i>"</code> (same as <code>-C<i>ch</i></code> parameter)
  * <li><code>define="<i>var</i>=<i>value</i>"</code> or
@@ -296,7 +297,7 @@ import org.apache.tools.ant.Task;
  * <li>Wild-card values are not supported on the input file name(s).
  * </ul>
 */
-public class PreProc extends Task
+public class PreProc
 {
 	/**********************************************************/
 	/*      F I N A L   S T A T I C   V A R I A B L E S       */
@@ -364,7 +365,7 @@ public class PreProc extends Task
 	private static final Pattern IDENT = Pattern.compile("^([_A-Za-z][\\w\\.]*)");
 
 	/** The current version of this software. */
-	private static final String VERSION = "1.2.1";
+	private static final String VERSION = "1.3.0";
 	/** The current copyright year. */
 	private static final String COPYRIGHT_YEAR = "2010-2011,2014-2016,2019-2023";
 
@@ -2428,9 +2429,9 @@ public class PreProc extends Task
 	 * @param	args	The complete list of command line arguments, some of which
 	 *			are file names.
 	 *
-	 * @throws	BuildException if there were errors.
+	 * @throws	FileNotFoundException if there were errors.
 	 */
-	private void processFileSpecs(final List<String> args) throws BuildException {
+	private void processFileSpecs(final List<String> args) throws FileNotFoundException {
 	    for (String arg: args) {
 		if (isOptionString(arg))
 		    continue;
@@ -2451,7 +2452,7 @@ public class PreProc extends Task
 		    }
 		}
 		catch (FileNotFoundException fnfe) {
-		    throw new BuildException(exceptMessage(fnfe));
+		    throw fnfe;
 		}
 
 		inputExt = lastInputExt;
@@ -2536,9 +2537,9 @@ public class PreProc extends Task
 	 * @return	{@code true} to just quit without further processing (as for "-help") or
 	 *		{@code false} to continue with regular processing.
 	 *
-	 * @throws	BuildException for errors parsing these arguments.
+	 * @throws	IllegalArgumentException for errors parsing these arguments.
 	 */
-	private static boolean processCommandLine(final PreProc inst, final String[] args) throws BuildException {
+	private static boolean processCommandLine(final PreProc inst, final String[] args) throws IllegalArgumentException {
 	    // Process the command-line switches
 	    for (String arg: args) {
 		if (isOptionString(arg)) {
@@ -2603,7 +2604,7 @@ public class PreProc extends Task
 			return true;    // Just to quit without doing any processing
 		    }
 		    else {
-			throw new BuildException(String.format("Unknown option: '%1$s'", arg));
+			throw new IllegalArgumentException(String.format("Unknown option: '%1$s'", arg));
 		    }
 		}
 	    }
@@ -2615,11 +2616,11 @@ public class PreProc extends Task
 	 * Set value for <code>directiveChar</code> option.
 	 *
 	 * @param	ch	The new value for the option.
-	 * @throws	BuildException if the value is more than one character.
+	 * @throws	IllegalArgumentException if the value is more than one character.
 	 */
-	public void setDirectiveChar(final String ch) throws BuildException {
+	public void setDirectiveChar(final String ch) throws IllegalArgumentException {
 	    if (ch.length() != 1) {
-		throw new BuildException("Directive indicator must be a single character.");
+		throw new IllegalArgumentException("Directive indicator must be a single character.");
 	    }
 	    else {
 		directiveStartCh = ch.charAt(0);
@@ -2633,9 +2634,9 @@ public class PreProc extends Task
 	 * delimiters.
 	 *
 	 * @param	def	The new define specification ({@code "var=value"}).
-	 * @throws	BuildException if the specification can't be parsed.
+	 * @throws	IllegalArgumentException if the specification can't be parsed.
 	 */
-	public void setDefine(final String def) throws BuildException {
+	public void setDefine(final String def) throws IllegalArgumentException {
 	    if (def == null || def.isEmpty())
 		return;
 	    String[] defs = COMMA.split(def);
@@ -2657,7 +2658,7 @@ public class PreProc extends Task
 			    out.format("Defining '%1$s'%n", var);
 		    }
 		    else {
-			throw new BuildException(String.format("Cannot parse Define value: '-D%1$s'%n\tformat should be: -Dvar=value or -Dvar", d));
+			throw new IllegalArgumentException(String.format("Cannot parse Define value: '-D%1$s'%n\tformat should be: -Dvar=value or -Dvar", d));
 		    }
 		}
 	    }
@@ -2669,16 +2670,16 @@ public class PreProc extends Task
 	 * <p> Muliple variables can be specified (comma or semicolon delimited).
 	 *
 	 * @param	var	The variable to undefine.
-	 * @throws	BuildException if the variable is not defined now, and the {@link #ignoreUndefined} flag is {@code false}.
+	 * @throws	IllegalArgumentException if the variable is not defined now, and the {@link #ignoreUndefined} flag is {@code false}.
 	 */
-	public void setUndefine(final String var) throws BuildException {
+	public void setUndefine(final String var) throws IllegalArgumentException {
 	    if (var == null || var.isEmpty())
 		return;
 	    String[] vars = COMMA.split(var);
 	    for (String v : vars) {
 		if (defines.remove(v) == null) {
 		    if (!ignoreUndefined) {
-			throw new BuildException(String.format("Variable '%1$s' is not defined in the current environment.", v));
+			throw new IllegalArgumentException(String.format("Variable '%1$s' is not defined in the current environment.", v));
 		    }
 		}
 		else {
@@ -2693,9 +2694,9 @@ public class PreProc extends Task
 	 * Set value for <code>outputExt</code> option.
 	 *
 	 * @param	arg	The new output file extension value.
-	 * @throws	BuildException if the value is empty.
+	 * @throws	IllegalArgumentException if the value is empty.
 	 */
-	public void setOutputExt(final String arg) throws BuildException {
+	public void setOutputExt(final String arg) throws IllegalArgumentException {
 	    if (arg.length() > 0) {
 		if (arg.charAt(0) == '.')
 		    outputExt = arg;
@@ -2703,7 +2704,7 @@ public class PreProc extends Task
 		    outputExt = "." + arg;
 	    }
 	    else {
-		throw new BuildException("Cannot specify empty output extension value.");
+		throw new IllegalArgumentException("Cannot specify empty output extension value.");
 	    }
 	}
 
@@ -2712,9 +2713,9 @@ public class PreProc extends Task
 	 * Set value for <code>inputExt</code> option.
 	 *
 	 * @param	arg	The new input file extension value.
-	 * @throws	BuildException if the value is empty.
+	 * @throws	IllegalArgumentException if the value is empty.
 	 */
-	public void setInputExt(final String arg) throws BuildException {
+	public void setInputExt(final String arg) throws IllegalArgumentException {
 	    if (arg.length() > 0) {
 		if (arg.charAt(0) == '.')
 		    inputExt = arg;
@@ -2722,7 +2723,7 @@ public class PreProc extends Task
 		    inputExt = "." + arg;
 	    }
 	    else {
-		throw new BuildException("Cannot specify empty input extension value.");
+		throw new IllegalArgumentException("Cannot specify empty input extension value.");
 	    }
 	}
 
@@ -2731,9 +2732,9 @@ public class PreProc extends Task
 	 * Set value for <code>includePath</code> option.
 	 *
 	 * @param	pathArg	The new include path.
-	 * @throws	BuildException if the path is empty.
+	 * @throws	IllegalArgumentException if the path is empty.
 	 */
-	public void setIncludePath(final String pathArg) throws BuildException {
+	public void setIncludePath(final String pathArg) throws IllegalArgumentException {
 	    if (pathArg.length() > 0) {
 		String[] paths = COMMA.split(pathArg);
 		includePaths = new ArrayList<>();
@@ -2741,7 +2742,7 @@ public class PreProc extends Task
 		    includePaths.add(p);
 	    }
 	    else {
-		throw new BuildException("Cannot specify empty search path list.");
+		throw new IllegalArgumentException("Cannot specify empty search path list.");
 	    }
 	}
 
@@ -2759,10 +2760,10 @@ public class PreProc extends Task
 	/**
 	 * Set value for <code>ignoreUndefined</code> option.
 	 *
-	 * @param	val	The new value for the option.
+	 * @param	value	The new value for the option.
 	 */
-	public void setIgnoreUndefined(final boolean val) {
-	    ignoreUndefined = val;
+	public void setIgnoreUndefined(final boolean value) {
+	    ignoreUndefined = value;
 	}
 
 
@@ -2770,9 +2771,9 @@ public class PreProc extends Task
 	 * Set value for <code>verbose</code> option.
 	 *
 	 * @param	value	The new value for the option.
-	 * @throws	BuildException if the value is invalid.
+	 * @throws	IllegalArgumentException if the value is invalid.
 	 */
-	public void setVerbose(final String value) throws BuildException {
+	public void setVerbose(final String value) throws IllegalArgumentException {
 	    if (value.length() == 0)
 		verbose = true;
 	    else if (value.equals("+") || value.equalsIgnoreCase("plus"))
@@ -2784,7 +2785,7 @@ public class PreProc extends Task
 	    else if (value.equalsIgnoreCase(Boolean.toString(false)))
 		verbose = false;
 	    else
-		throw new BuildException(String.format("Undefined 'verbose' option '%1$s'.", value));
+		throw new IllegalArgumentException(String.format("Undefined 'verbose' option '%1$s'.", value));
 	}
 
 
@@ -2792,14 +2793,14 @@ public class PreProc extends Task
 	 * Set value for the <code>format</code> option.
 	 *
 	 * @param	value	The new value for the option.
-	 * @throws	BuildException if the value is invalid.
+	 * @throws	IllegalArgumentException if the value is invalid.
 	 */
-	public void setFormat(final String value) throws BuildException {
+	public void setFormat(final String value) throws IllegalArgumentException {
 	    if (value.equalsIgnoreCase("UTF8") ||
 		value.equalsIgnoreCase("UTF-8"))
 		processAsUTF8 = true;
 	    else {
-		throw new BuildException(String.format("Unknown file format: '%1$s'%n\tvalid choices are: 'UTF8' or 'UTF-8'", value));
+		throw new IllegalArgumentException(String.format("Unknown file format: '%1$s'%n\tvalid choices are: 'UTF8' or 'UTF-8'", value));
 	    }
 	}
 
@@ -2808,11 +2809,11 @@ public class PreProc extends Task
 	 * Set value for the output log file (<code>log</code> option).
 	 *
 	 * @param	value	The new file name for the output log.
-	 * @throws	BuildException if the name is invalid somehow.
+	 * @throws	IllegalArgumentException if the name is invalid somehow.
 	 */
-	public void setLog(final String value) throws BuildException {
+	public void setLog(final String value) throws IllegalArgumentException {
 	    if (value == null || value.trim().isEmpty()) {
-		throw new BuildException("Log file value must not be empty.");
+		throw new IllegalArgumentException("Log file value must not be empty.");
 	    }
 	    logFileName = value;
 	}
@@ -2865,13 +2866,14 @@ public class PreProc extends Task
 	 * Set value for the <code>includeVar</code> option.
 	 *
 	 * @param	value	The new value for the include environment variable name.
+	 * @throws	IllegalArgumentException if the argument value is empty.
 	 */
-	public void setIncludeVar(final String value) throws BuildException {
+	public void setIncludeVar(final String value) throws IllegalArgumentException {
 	    if (value.length() > 0) {
 		inclEnvVar = value;
 	    }
 	    else {
-		throw new BuildException("Cannot specify empty environment variable name for include variable.");
+		throw new IllegalArgumentException("Cannot specify empty environment variable name for include variable.");
 	    }
 	}
 
@@ -2981,11 +2983,14 @@ public class PreProc extends Task
 	/**
 	 * The main execution method (called either from {@link #main} or from Ant
 	 * when the {@code <preproc ...>} task is executed).
+	 *
+	 * @throws IOException if there were problems writing the log or output files.
+	 * @throws IllegalArgumentException for illegal combination of options.
 	 */
-	public void execute() throws BuildException {
+	public void execute() throws IOException, IllegalArgumentException {
 	    // Check for illegal combination of options
 	    if (overwriteLog && logFileName == null) {
-		throw new BuildException("Overwrite option is not applicable for output to console.");
+		throw new IllegalArgumentException("Overwrite option is not applicable for output to console.");
 	    }
 
 	    // Build the output log and error stream if the default is overridden
@@ -2999,7 +3004,7 @@ public class PreProc extends Task
 		    err = ps;
 		}
 		catch (IOException ioe) {
-		    throw new BuildException(String.format("Error: Problem creating output log file: %1$s",
+		    throw new IOException(String.format("Error: Problem creating output log file: %1$s",
 			exceptMessage(ioe)));
 		}
 	    }
@@ -3054,8 +3059,8 @@ public class PreProc extends Task
 		if (processCommandLine(inst, args))
 		    System.exit(1);
 	    }
-	    catch (BuildException be1) {
-		System.err.format("Error: Problem in command line: %1$s%n", be1.getMessage());
+	    catch (IllegalArgumentException iae) {
+		System.err.format("Error: Problem in command line: %1$s%n", iae.getMessage());
 		System.exit(1);
 	    }
 
@@ -3067,8 +3072,8 @@ public class PreProc extends Task
 	    try {
 		inst.execute();
 	    }
-	    catch (BuildException be2) {
-		System.err.format("Error: %1$s%n", be2.getMessage());
+	    catch (IllegalArgumentException | IOException ex) {
+		System.err.format("Error: %1$s%n", exceptMessage(ex));
 		System.exit(2);
 	    }
 	}

@@ -367,6 +367,8 @@
 		#224: Add dictionary API keys resource to the .jar file.
 	    13-Jan-2023 (rlwhitcomb)
 		#593: Rename JavaPreProc to PreProc.
+	    14-Jan-2023 (rlwhitcomb)
+		#6, #593: Add "PreProc*.class" into here for use in other places.
 
      ========================================================================== -->
 
@@ -690,6 +692,8 @@
 			<include name="info/rlwhitcomb/logging/*.class"/>
 			<include name="info/rlwhitcomb/matches/*.class"/>
 			<include name="info/rlwhitcomb/math/*.class"/>
+			<include name="info/rlwhitcomb/preproc/PreProc*.class"/>
+			<exclude name="info/rlwhitcomb/preproc/PreProcTask*.class"/>
 			<include name="info/rlwhitcomb/tester/*.class"/>
 			<include name="info/rlwhitcomb/tools/*.class"/>
 			<include name="info/rlwhitcomb/tree/*.class"/>

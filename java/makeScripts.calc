@@ -62,6 +62,7 @@ settings: [
     { name: 'matches',  class: '$matches.Matches'                                  },
     { name: 'md5',      class: '$tools.Hash',          args: '--algorithm=MD5'     },
     { name: 'os',       class: '$tools.OS'                                         },
+    { name: 'preproc',  class: '$preproc.PreProc'                                  },
     { name: 'sha1',     class: '$tools.Hash',          args: '--algorithm=SHA-1'   },
     { name: 'sha256',   class: '$tools.Hash'                                       },
     { name: 'sha512',   class: '$tools.Hash',          args: '--algorithm=SHA-512' },
