@@ -1,7 +1,9 @@
 $inputDir test/canons
 $testClass info.rlwhitcomb.tools.Uniq
 
-u1:       test/data/uniq.file
-u2: -d    test/data/uniq.file
-u3: -i    test/data/uniq.file
-u4: -i -d test/data/uniq.file
+#define DATA_FILE test/data/uniq.file
+
+u1:       $(DATA_FILE)
+u2: -d    $(DATA_FILE)
+u3: -i    $(DATA_FILE)
+u4: -i -d $(DATA_FILE)

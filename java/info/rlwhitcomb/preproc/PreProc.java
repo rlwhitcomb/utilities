@@ -111,6 +111,8 @@
  *			class either as an Ant task, as a standalone preprocessor, or as a helper class
  *			called from another class which needs macro processing.
  *  15-Jan-23		More refactoring in the token analysis. New output file name option.
+ *  16-Jan-23		"Ignore unknown directive" option for Tester.
+ *			Change all "set" option methods to a fluent paradigm.
  */
 package info.rlwhitcomb.preproc;
 
@@ -405,6 +407,8 @@ public class PreProc
 	/** Flag to say to ignore undefined symbols and silently expand them as empty
 	 * strings.  The default will be to issue an error message. */
 	private boolean ignoreUndefined = false;
+	/** Flag to say we ignore unknown directives (that is, no error). */
+	private boolean ignoreUnknownDirectives = false;
 	/** Flag to say: "display sign-on banner" (or not for more silent operation). */
 	private boolean displayLogo = true;
 	/** Flag to say: "always do the processing regardless of file time stamps". */
@@ -711,6 +715,17 @@ public class PreProc
 
 
 	/**
+	 * Check if the input string is null or empty (trimmed).
+	 *
+	 * @param	value	A string value (or {@code null}) to check.
+	 * @return	Whether or not the string is null or empty.
+	 */
+	private static boolean empty(final String value) {
+	    return value == null || value.trim().isEmpty();
+	}
+
+
+	/**
 	 * Try to get a sensible message from an {@link Exception} even if the
 	 * message is empty (such as for {@code NullPointerException}).
 	 *
@@ -722,7 +737,7 @@ public class PreProc
 	    String className = ex.getClass().getSimpleName();
 	    String message   = ex.getMessage();
 
-	    if (message == null || message.isEmpty())
+	    if (empty(message))
 		message = className;
 	    else if (ex instanceof UnknownHostException
 		  || ex instanceof NoClassDefFoundError
@@ -766,7 +781,7 @@ public class PreProc
 	 * @see		#defines
 	 */
 	private String doSubs(final String line) {
-	    if (line.isEmpty())
+	    if (empty(line))
 		return line;
 
 	    StringBuffer sb = new StringBuffer(line.length() * 2);
@@ -802,7 +817,7 @@ public class PreProc
 	 * @return		The string stripped of leading and trailing quotes.
 	 */
 	private String stripQuotes(final String value) {
-	    if (value != null) {
+	    if (!empty(value)) {
 		String endQuote = null;
 		if (value.startsWith("\""))
 		    endQuote = "\"";
@@ -2211,9 +2226,11 @@ public class PreProc
 				    }
 				}
 				else {
-				    traceLine(lineNo, line, true, false);
-				    err.format("Error: Line %1$d. Unknown directive: '%2$s'%n", lineNo, directive);
-				    errors = true;
+				    if (!ignoreUnknownDirectives) {
+					traceLine(lineNo, line, true, false);
+					err.format("Error: Line %1$d. Unknown directive: '%2$s'%n", lineNo, directive);
+					errors = true;
+				    }
 				}
 			    }
 			    catch (ParseException pe) {
@@ -2241,7 +2258,7 @@ public class PreProc
 		    }
 		    if (!isDirective) {
 			if (doingOutput) {
-			    if (!line.isEmpty()) {
+			    if (!empty(line)) {
 				defines.put(LINE_VAR_NAME, String.format("%1$d", lineNo));
 				line = doSubs(line);
 				wrtr.write(line, 0, line.length());
@@ -2377,7 +2394,7 @@ public class PreProc
 
 		// Okay, not found there, try using INCLUDE (or other -E variable)
 		String env = System.getenv(inclEnvVar);
-		if (env != null && !env.isEmpty()) {
+		if (!empty(env)) {
 		    String[] paths = COMMA.split(env);
 		    for (String p : paths) {
 			File f = new File(p, arg);
@@ -2625,15 +2642,17 @@ public class PreProc
 	 * Set value for <code>directiveChar</code> option.
 	 *
 	 * @param	ch	The new value for the option.
+	 * @return	This object for chaining of options.
 	 * @throws	IllegalArgumentException if the value is more than one character.
 	 */
-	public void setDirectiveChar(final String ch) throws IllegalArgumentException {
+	public PreProc setDirectiveChar(final String ch) throws IllegalArgumentException {
 	    if (ch.length() != 1) {
 		throw new IllegalArgumentException("Directive indicator must be a single character.");
 	    }
 	    else {
 		directiveStartCh = ch.charAt(0);
 	    }
+	    return this;
 	}
 
 
@@ -2643,11 +2662,13 @@ public class PreProc
 	 * delimiters.
 	 *
 	 * @param	def	The new define specification ({@code "var=value"}).
+	 * @return	This object for chaining of options.
 	 * @throws	IllegalArgumentException if the specification can't be parsed.
 	 */
-	public void setDefine(final String def) throws IllegalArgumentException {
-	    if (def == null || def.isEmpty())
-		return;
+	public PreProc setDefine(final String def) throws IllegalArgumentException {
+	    if (empty(def))
+		return this;
+
 	    String[] defs = COMMA.split(def);
 	    for (String d : defs) {
 		Matcher m1 = DEFINE_PATTERN.matcher(d);
@@ -2671,6 +2692,8 @@ public class PreProc
 		    }
 		}
 	    }
+
+	    return this;
 	}
 
 
@@ -2679,11 +2702,13 @@ public class PreProc
 	 * <p> Muliple variables can be specified (comma or semicolon delimited).
 	 *
 	 * @param	var	The variable to undefine.
+	 * @return	This object for chaining of options.
 	 * @throws	IllegalArgumentException if the variable is not defined now, and the {@link #ignoreUndefined} flag is {@code false}.
 	 */
-	public void setUndefine(final String var) throws IllegalArgumentException {
-	    if (var == null || var.isEmpty())
-		return;
+	public PreProc setUndefine(final String var) throws IllegalArgumentException {
+	    if (empty(var))
+		return this;
+
 	    String[] vars = COMMA.split(var);
 	    for (String v : vars) {
 		if (defines.remove(v) == null) {
@@ -2696,6 +2721,8 @@ public class PreProc
 			out.format("Undefining '%1$s'%n", v);
 		}
 	    }
+
+	    return this;
 	}
 
 
@@ -2703,15 +2730,17 @@ public class PreProc
 	 * Set value for output file name.
 	 *
 	 * @param	arg	The new complete output file name.
+	 * @return	This object for chaining of options.
 	 * @throws	IllegalArgumentException if the value is empty.
 	 */
-	public void setOutputFileName(final String arg) throws IllegalArgumentException {
-	    if (arg.length() > 0) {
+	public PreProc setOutputFileName(final String arg) throws IllegalArgumentException {
+	    if (!empty(arg)) {
 		outputFileName = arg;
 	    }
 	    else {
 		throw new IllegalArgumentException("Cannot specify empty output file name.");
 	    }
+	    return this;
 	}
 
 
@@ -2719,10 +2748,11 @@ public class PreProc
 	 * Set value for <code>outputExt</code> option.
 	 *
 	 * @param	arg	The new output file extension value.
+	 * @return	This object for chaining of options.
 	 * @throws	IllegalArgumentException if the value is empty.
 	 */
-	public void setOutputExt(final String arg) throws IllegalArgumentException {
-	    if (arg.length() > 0) {
+	public PreProc setOutputExt(final String arg) throws IllegalArgumentException {
+	    if (!empty(arg)) {
 		if (arg.charAt(0) == '.')
 		    outputExt = arg;
 		else
@@ -2731,6 +2761,7 @@ public class PreProc
 	    else {
 		throw new IllegalArgumentException("Cannot specify empty output extension value.");
 	    }
+	    return this;
 	}
 
 
@@ -2738,10 +2769,11 @@ public class PreProc
 	 * Set value for <code>inputExt</code> option.
 	 *
 	 * @param	arg	The new input file extension value.
+	 * @return	This object for chaining of options.
 	 * @throws	IllegalArgumentException if the value is empty.
 	 */
-	public void setInputExt(final String arg) throws IllegalArgumentException {
-	    if (arg.length() > 0) {
+	public PreProc setInputExt(final String arg) throws IllegalArgumentException {
+	    if (!empty(arg)) {
 		if (arg.charAt(0) == '.')
 		    inputExt = arg;
 		else
@@ -2750,6 +2782,7 @@ public class PreProc
 	    else {
 		throw new IllegalArgumentException("Cannot specify empty input extension value.");
 	    }
+	    return this;
 	}
 
 
@@ -2757,10 +2790,11 @@ public class PreProc
 	 * Set value for <code>includePath</code> option.
 	 *
 	 * @param	pathArg	The new include path.
+	 * @return	This object for chaining of options.
 	 * @throws	IllegalArgumentException if the path is empty.
 	 */
-	public void setIncludePath(final String pathArg) throws IllegalArgumentException {
-	    if (pathArg.length() > 0) {
+	public PreProc setIncludePath(final String pathArg) throws IllegalArgumentException {
+	    if (!empty(pathArg)) {
 		String[] paths = COMMA.split(pathArg);
 		includePaths = new ArrayList<>();
 		for (String p : paths)
@@ -2769,6 +2803,7 @@ public class PreProc
 	    else {
 		throw new IllegalArgumentException("Cannot specify empty search path list.");
 	    }
+	    return this;
 	}
 
 
@@ -2776,9 +2811,11 @@ public class PreProc
 	 * Set value for <code>nologo</code> option.
 	 *
 	 * @param	var	The new value for the option.
+	 * @return	This object for chaining of options.
 	 */
-	public void setNologo(final boolean var) {
+	public PreProc setNologo(final boolean var) {
 	    displayLogo = !var;
+	    return this;
 	}
 
 
@@ -2786,9 +2823,23 @@ public class PreProc
 	 * Set value for <code>ignoreUndefined</code> option.
 	 *
 	 * @param	value	The new value for the option.
+	 * @return	This object for chaining of options.
 	 */
-	public void setIgnoreUndefined(final boolean value) {
+	public PreProc setIgnoreUndefined(final boolean value) {
 	    ignoreUndefined = value;
+	    return this;
+	}
+
+
+	/**
+	 * Set value for <code>ignoreUnknownDirectives</code> option.
+	 *
+	 * @param	value	The new value for the option.
+	 * @return	This object for chaining of options.
+	 */
+	public PreProc setIgnoreUnknownDirectives(final boolean value) {
+	    ignoreUnknownDirectives = value;
+	    return this;
 	}
 
 
@@ -2796,10 +2847,11 @@ public class PreProc
 	 * Set value for <code>verbose</code> option.
 	 *
 	 * @param	value	The new value for the option.
+	 * @return	This object for chaining of options.
 	 * @throws	IllegalArgumentException if the value is invalid.
 	 */
-	public void setVerbose(final String value) throws IllegalArgumentException {
-	    if (value.length() == 0)
+	public PreProc setVerbose(final String value) throws IllegalArgumentException {
+	    if (empty(value))
 		verbose = true;
 	    else if (value.equals("+") || value.equalsIgnoreCase("plus"))
 		verbose = plusVerbose = true;
@@ -2811,6 +2863,7 @@ public class PreProc
 		verbose = false;
 	    else
 		throw new IllegalArgumentException(String.format("Undefined 'verbose' option '%1$s'.", value));
+	    return this;
 	}
 
 
@@ -2818,15 +2871,17 @@ public class PreProc
 	 * Set value for the <code>format</code> option.
 	 *
 	 * @param	value	The new value for the option.
+	 * @return	This object for chaining of options.
 	 * @throws	IllegalArgumentException if the value is invalid.
 	 */
-	public void setFormat(final String value) throws IllegalArgumentException {
-	    if (value.equalsIgnoreCase("UTF8") ||
-		value.equalsIgnoreCase("UTF-8"))
+	public PreProc setFormat(final String value) throws IllegalArgumentException {
+	    if ("UTF8".equalsIgnoreCase(value) ||
+		"UTF-8".equalsIgnoreCase(value))
 		processAsUTF8 = true;
 	    else {
 		throw new IllegalArgumentException(String.format("Unknown file format: '%1$s'%n\tvalid choices are: 'UTF8' or 'UTF-8'", value));
 	    }
+	    return this;
 	}
 
 
@@ -2834,13 +2889,15 @@ public class PreProc
 	 * Set value for the output log file (<code>log</code> option).
 	 *
 	 * @param	value	The new file name for the output log.
+	 * @return	This object for chaining of options.
 	 * @throws	IllegalArgumentException if the name is invalid somehow.
 	 */
-	public void setLog(final String value) throws IllegalArgumentException {
-	    if (value == null || value.trim().isEmpty()) {
+	public PreProc setLog(final String value) throws IllegalArgumentException {
+	    if (empty(value)) {
 		throw new IllegalArgumentException("Log file value must not be empty.");
 	    }
 	    logFileName = value;
+	    return this;
 	}
 
 
@@ -2848,9 +2905,11 @@ public class PreProc
 	 * Set value for the <code>overwrite</code> option.
 	 *
 	 * @param	value	Whether to overwrite the log file or not.
+	 * @return	This object for chaining of options.
 	 */
-	public void setOverwrite(final boolean value) {
+	public PreProc setOverwrite(final boolean value) {
 	    overwriteLog = value;
+	    return this;
 	}
 
 
@@ -2858,9 +2917,11 @@ public class PreProc
 	 * Set value for the <code>processAsDirectory</code> option.
 	 *
 	 * @param	value	The new value for the option.
+	 * @return	This object for chaining of options.
 	 */
-	public void setProcessAsDirectory(final boolean value) {
+	public PreProc setProcessAsDirectory(final boolean value) {
 	    processAsDirectory = value;
+	    return this;
 	}
 
 
@@ -2868,12 +2929,14 @@ public class PreProc
 	 * Set value for the <code>recurseDirectories</code> option.
 	 *
 	 * @param	value	The new value for the option.
+	 * @return	This object for chaining of options.
 	 */
-	public void setRecurseDirectories(final boolean value) {
+	public PreProc setRecurseDirectories(final boolean value) {
 	    if (value)
 		processAsDirectory = recurseDirectories = value;
 	    else
 		recurseDirectories = value;
+	    return this;
 	}
 
 
@@ -2881,9 +2944,11 @@ public class PreProc
 	 * Set value for the <code>alwaysProcess</code> option.
 	 *
 	 * @param	value	The new value for the option.
+	 * @return	This object for chaining of options.
 	 */
-	public void setAlwaysProcess(final boolean value) {
+	public PreProc setAlwaysProcess(final boolean value) {
 	    alwaysProcess = value;
+	    return this;
 	}
 
 
@@ -2891,15 +2956,17 @@ public class PreProc
 	 * Set value for the <code>includeVar</code> option.
 	 *
 	 * @param	value	The new value for the include environment variable name.
+	 * @return	This object for chaining of options.
 	 * @throws	IllegalArgumentException if the argument value is empty.
 	 */
-	public void setIncludeVar(final String value) throws IllegalArgumentException {
-	    if (value.length() > 0) {
+	public PreProc setIncludeVar(final String value) throws IllegalArgumentException {
+	    if (!empty(value)) {
 		inclEnvVar = value;
 	    }
 	    else {
 		throw new IllegalArgumentException("Cannot specify empty environment variable name for include variable.");
 	    }
+	    return this;
 	}
 
 
@@ -2907,9 +2974,11 @@ public class PreProc
 	 * Set value for one or more <code>file</code> options.
 	 *
 	 * @param	arg	The next {@code "file"} option.
+	 * @return	This object for chaining of options.
 	 */
-	public void setFile(final String arg) {
+	public PreProc setFile(final String arg) {
 	    fileArgs.add(arg);
+	    return this;
 	}
 
 
@@ -2917,9 +2986,11 @@ public class PreProc
 	 * Set value for one or more <var>dir</var> options.
 	 *
 	 * @param	arg	The next {@code "dir"} option.
+	 * @return	This object for chaining of options.
 	 */
-	public void setDir(final String arg) {
+	public PreProc setDir(final String arg) {
 	    fileArgs.add(arg);
+	    return this;
 	}
 
 
