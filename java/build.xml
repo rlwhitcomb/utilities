@@ -369,6 +369,8 @@
 		#593: Rename JavaPreProc to PreProc.
 	    14-Jan-2023 (rlwhitcomb)
 		#6, #593: Add "PreProc*.class" into here for use in other places.
+	    16-Jan-2023 (rlwhitcomb)
+		#6: "preproc" is now wrapped by "PreProcTask".
 
      ========================================================================== -->
 
@@ -511,7 +513,7 @@
 	<ant antfile="build-ant-tasks.xml" target="install"/>
 	<echo message="Beginning build ..."/>
 
-	<taskdef name="preproc" classname="info.rlwhitcomb.preproc.PreProc" classpath="${ant.tasks.jar}"/>
+	<taskdef name="preproc" classname="info.rlwhitcomb.preproc.PreProcTask" classpath="${ant.tasks.jar}"/>
 	<taskdef name="var" classname="net.sf.antcontrib.property.Variable" classpath="external-files/ant-contrib.jar"/>
 
 	<macrodef name="generate-text-resources">
