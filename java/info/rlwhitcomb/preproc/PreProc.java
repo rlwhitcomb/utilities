@@ -110,6 +110,7 @@
  *  14-Jan-23		Wrap this with PreProcTask for use with Ant. Interestingly, now we can use this
  *			class either as an Ant task, as a standalone preprocessor, or as a helper class
  *			called from another class which needs macro processing.
+ *  15-Jan-23		More refactoring in the token analysis. New output file name option.
  */
 package info.rlwhitcomb.preproc;
 
@@ -213,7 +214,7 @@ import java.util.regex.Pattern;
  * <li><code>__JAVA_VERSION__</code> (the Java version)
  * <li><code>__JAVA_PP_VERSION__</code> (the Java preprocessor version)
  * </ul>
- * <p> In addition, the contents of the "build.properties", "build.number", and "version.properties"
+ * <p> In addition, the contents of the <code>"build.properties"</code>, <code>"build.number"</code>, and <code>"version.properties"</code>
  * files will be read and a variable defined for each of the properties found in there.
  * <p> Command-line arguments can be (using the <code>preproc</code> command):
  * <ul>
@@ -303,6 +304,9 @@ public class PreProc
 	/*      F I N A L   S T A T I C   V A R I A B L E S       */
 	/**********************************************************/
 
+	/** Whether we are running on the Windows O/S. */
+	private static final boolean ON_WINDOWS = System.getProperty("os.name").startsWith("Windows");
+
 	/** Default extension for input files. */
 	private static final String DEFAULT_INPUT_EXT = ".javapp";
 	/** Default extension for output files. */
@@ -365,7 +369,7 @@ public class PreProc
 	private static final Pattern IDENT = Pattern.compile("^([_A-Za-z][\\w\\.]*)");
 
 	/** The current version of this software. */
-	private static final String VERSION = "1.3.0";
+	private static final String VERSION = "1.3.1";
 	/** The current copyright year. */
 	private static final String COPYRIGHT_YEAR = "2010-2011,2014-2016,2019-2023";
 
@@ -380,6 +384,8 @@ public class PreProc
 	private String inputExt = null;
 	/** Default or overridden extension for output files. */
 	private String outputExt = null;
+	/** Explicit output file name. */
+	private String outputFileName = null;
 	/** Environment variable to use to search for included files. */
 	private String inclEnvVar = "INCLUDE";
 	/** Flag to say whether to process the input (and output) as UTF-8 encoded
@@ -487,35 +493,51 @@ public class PreProc
 	enum Operator
 	{
 		/** The equals operator, that is, <code>"=="</code>. */
-		EQUAL,
+		EQUAL		(2),
 		/** The not equals operator, that is, <code>"!="</code>. */
-		NOTEQUAL,
+		NOTEQUAL	(2),
 		/** The less than operator, that is, <code>"&lt;"</code>. */
-		LESS,
+		LESS		(1),
 		/** The less or equal operator, that is, <code>"&lt;="</code>. */
-		LESSEQUAL,
+		LESSEQUAL	(2),
 		/** The greater than operator, that is, <code>"&gt;"</code>. */
-		GREATER,
+		GREATER		(1),
 		/** The greater or equal operator, that is, <code>"&gt;="</code>. */
-		GREATEREQUAL,
-		/** The "AND" operator, that is, <code>"&amp;&amp;"</code> or the word <code>"AND"</code>. */
-		ANDOP,
-		/** The "OR" operator, that is, <code>"||"</code> or the word <code>"OR"</code>. */
-		OROP,
-		/** The "NOT" equals operator, that is, <code>"!"</code> or the word <code>"NOT"</code>. */
-		NOTOP,
+		GREATEREQUAL	(2),
+		/** The "AND" operator, that is, <code>"&amp;&amp;"</code>. */
+		ANDOP		(2),
+		/** The second form of "AND" operator, that is the word <code>"AND"</code>. */
+		ANDOP2		(3),
+		/** The "OR" operator, that is, <code>"||"</code>. */
+		OROP		(2),
+		/** The second form of the "OR" operator, that is the word <code>"OR"</code>. */
+		OROP2		(2),
+		/** The "NOT" equals operator, that is, <code>"!"</code>. */
+		NOTOP		(1),
+		/** The second form of "NOT" operator, that is the word <code>"NOT"</code>. */
+		NOTOP2		(3),
 		/** The addition operator, that is, <code>"+"</code>. */
-		ADD,
+		ADD		(1),
 		/** The subtraction operator, that is, <code>"-"</code>. */
-		SUBTRACT,
+		SUBTRACT	(1),
 		/** The multiplication operator, that is, <code>"*"</code>. */
-		MULTIPLY,
+		MULTIPLY	(1),
 		/** The division operator, that is, <code>"/"</code>. */
-		DIVIDE,
+		DIVIDE		(1),
 		/** The modulus operator, that is, <code>"%"</code>. */
-		MODULUS,
+		MODULUS		(1),
 		/** Not an operator.  This is the type for a token that is not a {@link Token#OPER}. */
-		NONE
+		NONE		(0);
+
+		private int length;
+
+		private Operator(final int len) {
+		    length = len;
+		}
+
+		int opLen() {
+		    return length;
+		}
 	};
 
 	/**
@@ -911,37 +933,30 @@ public class PreProc
 					    switch (input.charAt(pos)) {
 						case '<':
 						    if (input.charAt(pos+1) == '=') {
-							len = 2;
 							op = Operator.LESSEQUAL;
 						    }
 						    else {
-							len = 1;
 							op = Operator.LESS;
 						    }
 						    break;
 						case '>':
 						    if (input.charAt(pos+1) == '=') {
-							len = 2;
 							op = Operator.GREATEREQUAL;
 						    }
 						    else {
-							len = 1;
 							op = Operator.GREATER;
 						    }
 						    break;
 						case '=':
 						    if (input.charAt(pos+1) == '=') {
-							len = 2;
 							op = Operator.EQUAL;
 						    }
 						    break;
 						case '!':
 						    if (input.charAt(pos+1) == '=') {
-							len = 2;
 							op = Operator.NOTEQUAL;
 						    }
 						    else {
-							len = 1;
 							op = Operator.NOTOP;
 						    }
 						    break;
@@ -955,34 +970,27 @@ public class PreProc
 						    break;
 						case '&':
 						    if (input.charAt(pos+1) == '&') {
-							len = 2;
 							op = Operator.ANDOP;
 						    }
 						    break;
 						case '|':
 						    if (input.charAt(pos+1) == '|') {
-							len = 2;
 							op = Operator.OROP;
 						    }
 						    break;
 						case '+':
-						    len = 1;
 						    op = Operator.ADD;
 						    break;
 						case '-':
-						    len = 1;
 						    op = Operator.SUBTRACT;
 						    break;
 						case '*':
-						    len = 1;
 						    op = Operator.MULTIPLY;
 						    break;
 						case '/':
-						    len = 1;
 						    op = Operator.DIVIDE;
 						    break;
 						case '%':
-						    len = 1;
 						    op = Operator.MODULUS;
 						    break;
 						case '\'':
@@ -1008,20 +1016,17 @@ public class PreProc
 						default:
 						    m = NOT_OP.matcher(seq);
 						    if (m.lookingAt()) {
-							len = m.end();
-							op = Operator.NOTOP;
+							op = Operator.NOTOP2;
 						    }
 						    else {
 							m = AND_OP.matcher(seq);
 							if (m.lookingAt()) {
-							    len = m.end();
-							    op = Operator.ANDOP;
+							    op = Operator.ANDOP2;
 							}
 							else {
 							    m = OR_OP.matcher(seq);
 							    if (m.lookingAt()) {
-								len = m.end();
-								op = Operator.OROP;
+								op = Operator.OROP2;
 							    }
 							    else {
 								m = IDENT.matcher(seq);
@@ -1041,6 +1046,9 @@ public class PreProc
 			    }
 			}
 		    }
+		}
+		if (op != Operator.NONE) {
+		    len = op.opLen();
 		}
 		if (len >= 0) {
 		    // We found something that matches!
@@ -1123,7 +1131,7 @@ public class PreProc
 		    v = otherFactor(type, exprLen);
 		    break;
 		case OPER:
-		    if (t.op == Operator.NOTOP) {
+		    if (t.op == Operator.NOTOP || t.op == Operator.NOTOP2) {
 			v = !otherFactor(type, exprLen);
 			break;
 		    }
@@ -1798,7 +1806,7 @@ public class PreProc
 	    boolean v = relTerm(type, exprLen, eating);
 	    while (inputPos < inputSize) {
 		TokenValue t = inputExpr.get(inputPos++);
-		if (t.tok == Token.OPER && t.op == Operator.ANDOP) {
+		if (t.tok == Token.OPER && (t.op == Operator.ANDOP || t.op == Operator.ANDOP2)) {
 		    if (inputPos < inputSize) {
 			// Do short-circuit evaluation:
 			// Stop evaluating as soon as we get 'false' result
@@ -1839,7 +1847,7 @@ public class PreProc
 	    boolean v = andTerm(type, exprLen, false);
 	    while (inputPos < inputSize) {
 		TokenValue t = inputExpr.get(inputPos++);
-		if (t.tok == Token.OPER && t.op == Operator.OROP) {
+		if (t.tok == Token.OPER && (t.op == Operator.OROP || t.op == Operator.OROP2)) {
 		    if (inputPos < inputSize) {
 			// Do short-circuit evaluation:
 			// Stop evaluating as soon as we get 'true' result
@@ -1984,7 +1992,7 @@ public class PreProc
 
 		// Construct output file stream if necessary (not if processing #include)
 		if (wrtr == null) {
-		    String outName = name.replace(inputExt, outputExt);
+		    String outName = outputFileName == null ? name.replace(inputExt, outputExt) : outputFileName;
 		    if (outName.equals(name)) {
 			err.format("Error: Output file name must not be the same as input file name: '%1$s'!%n", name);
 			rdr.close();
@@ -2324,7 +2332,7 @@ public class PreProc
 		File f2 = new File(name + inputExt);
 		if (f2.exists() && f2.isFile()) {
 		    if (processFile(f2, wrtr)) {
-			    err = true;
+			err = true;
 		    }
 		}
 		else {
@@ -2398,7 +2406,7 @@ public class PreProc
 	 *		for the current platform.
 	 */
 	private static boolean isOptionString(final String arg) {
-	    if (System.getProperty("os.name").startsWith("Windows")) {
+	    if (ON_WINDOWS) {
 		return (arg.startsWith("-") || arg.startsWith("/"));
 	    }
 	    else {
@@ -2433,9 +2441,6 @@ public class PreProc
 	 */
 	private void processFileSpecs(final List<String> args) throws FileNotFoundException {
 	    for (String arg: args) {
-		if (isOptionString(arg))
-		    continue;
-
 		// Set input and output extensions if not overridden on command line
 		String lastInputExt = inputExt;
 		String lastOutputExt = outputExt;
@@ -2500,8 +2505,6 @@ public class PreProc
 	 */
 	private void processDirSpecs(final List<String> args) {
 	    for (String arg: args) {
-		if (isOptionString(arg))
-		    continue;
 		if (processDir(new File(arg))) {
 		    break;
 		}
@@ -2558,6 +2561,12 @@ public class PreProc
 		    }
 		    else if (arg.startsWith("I") || arg.startsWith("i")) {
 			inst.setInputExt(arg.substring(1));
+		    }
+		    else if (arg.startsWith("N") || arg.startsWith("n")) {
+			String value = arg.substring(1);
+			if (value.startsWith(":"))
+			    value = value.substring(1);
+			inst.setOutputFileName(value);
 		    }
 		    else if (arg.startsWith("P") || arg.startsWith("p")) {
 			inst.setIncludePath(arg.substring(1));
@@ -2686,6 +2695,22 @@ public class PreProc
 		    if (plusVerbose)
 			out.format("Undefining '%1$s'%n", v);
 		}
+	    }
+	}
+
+
+	/**
+	 * Set value for output file name.
+	 *
+	 * @param	arg	The new complete output file name.
+	 * @throws	IllegalArgumentException if the value is empty.
+	 */
+	public void setOutputFileName(final String arg) throws IllegalArgumentException {
+	    if (arg.length() > 0) {
+		outputFileName = arg;
+	    }
+	    else {
+		throw new IllegalArgumentException("Cannot specify empty output file name.");
 	    }
 	}
 
@@ -2988,9 +3013,12 @@ public class PreProc
 	 * @throws IllegalArgumentException for illegal combination of options.
 	 */
 	public void execute() throws IOException, IllegalArgumentException {
-	    // Check for illegal combination of options
+	    // Check for illegal combinations of options
 	    if (overwriteLog && logFileName == null) {
 		throw new IllegalArgumentException("Overwrite option is not applicable for output to console.");
+	    }
+	    if (outputFileName != null && (processAsDirectory || fileArgs.size() > 1)) {
+		throw new IllegalArgumentException("Setting an output file name only applies to an individual input file.");
 	    }
 
 	    // Build the output log and error stream if the default is overridden
@@ -3064,9 +3092,11 @@ public class PreProc
 		System.exit(1);
 	    }
 
-	    // Add all the command-line arguments as potential file specs
+	    // Add the non-option arguments as file names
 	    for (String a : args) {
-		inst.setFile(a);
+		if (!isOptionString(a)) {
+		    inst.setFile(a);
+		}
 	    }
 
 	    try {
