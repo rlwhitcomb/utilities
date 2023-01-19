@@ -104,6 +104,10 @@ Also see "issues" at https://github.com/rlwhitcomb/utilities/issues
 - Finish the GUI code.
 - need some kind of filter to UPPER case everything, limit input to only letters and blank, and turn blank into ?
   (probably needs to go into Pivot code)
+- To enable dictionary and thesaurus lookup it is necessary to create a developer account at "dictionaryapi.com" and then
+  create a "dictionary-api.properties" file in the "java" directory with the following two entries:
+    dictionary.key
+    thesaurus.key
 
 ### UUID
 - lots of options

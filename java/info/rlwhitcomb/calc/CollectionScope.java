@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2022 Roger L. Whitcomb.
+ * Copyright (c) 2022-2023 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,6 +28,7 @@
  *  21-Jun-22 rlw  ---  Initial coding.
  *  08-Jul-22 rlw #393: Cleanup imports.
  *  15-Aug-22 rlw #440: Move "size()" up to here.
+ *  08-Jan-23 rlw #592:	Move "immutable" down to Scope; move "isEmpty" to here.
  */
 package info.rlwhitcomb.calc;
 
@@ -41,46 +42,21 @@ class CollectionScope extends Scope
 	 */
 	static final CollectionScope EMPTY = new CollectionScope();
 
-	/**
-	 * Flag to indicate the object should not be modified (after initial construction).
-	 */
-	private boolean immutable;
-
 
 	/**
 	 * Private constructor, for the {@link #EMPTY} object.
 	 */
 	private CollectionScope() {
-	    super(Type.COLLECTION);
-	    immutable = true;
+	    super(Type.COLLECTION, true);
 	}
 
 	/**
 	 * Default constructor, given the subclass type.
 	 */
 	CollectionScope(Type type) {
-	    super(type);
-	    immutable = false;
+	    super(type, false);
 	}
 
-	/**
-	 * Is this object immutable or not?
-	 *
-	 * @return The {@link #immutable} flag.
-	 */
-	@Override
-	protected boolean isImmutable() {
-	    return immutable;
-	}
-
-	/**
-	 * Sets the flag to make this object immutable (or not).
-	 *
-	 * @param value New value for the {@link #immutable} flag.
-	 */
-	void setImmutable(final boolean value) {
-	    immutable = value;
-	}
 
 	/**
 	 * Get the size (number of first-level elements) in this collection.
@@ -91,4 +67,12 @@ class CollectionScope extends Scope
 	    return 0;
 	}
 
+	/**
+	 * Access whether this collection is empty.
+	 *
+	 * @return Whether the size is zero.
+	 */
+	protected boolean isEmpty() {
+	    return true;
+	}
 }

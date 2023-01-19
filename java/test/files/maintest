@@ -27,6 +27,8 @@ t13: headtest
 t14: jsontest
 t15: hexdumptest
 t16: base64test
+t17: stringtest
+t18: uniqtest
 
 !echo
 !echo Done with all the Tester tests.

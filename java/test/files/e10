@@ -4,7 +4,7 @@
 :echo "Tests of the new LOOP construct"
 :echo
 
-:clear [j, k, value, array, SIZE ]
+:clear [ value, array, SIZE ]
 :dec 50
 value = 1
 array = []
@@ -101,12 +101,12 @@ const KAPREKAR = 6174
 const START = 3752
 var num = START
 var iterations = 0
-var k, k1, k2, num1, num2
+var k0, k1, k2, num1, num2
 :separators off {
 while num != KAPREKAR {
-   k = chars(@@num)
-   k1 = sort(k)
-   k2 = sort(k, SORT_DESCENDING)
+   k0 = chars(@@num)
+   k1 = sort(k0)
+   k2 = sort(k0, SORT_DESCENDING)
    num1 = ~~join(k1)
    num2 = ~~join(k2)
    num = num1 > num2 ? num1 - num2 : num2 - num1

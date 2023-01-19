@@ -33,6 +33,7 @@
 #  12-Apr-21 rlw   ---	Add messages.
 #  23-Sep-22 rlw  #52:	New messages.
 #  07-Dec-22 rlw  #563:	Color codes.
+#  13-Dec-22 rlw  #578:	Update help for latest options.
 #
 
 #
@@ -72,37 +73,46 @@ compare.help7			= \tsame files or directories in the target location.
 compare.help8			= ""
 compare.help9			= "  and where '<Gr>options<.>' can be:"
 compare.help10			= \t<Gr>-sync<.>\tdo a two-way compare of directories to check
-compare.help11			= \t\tfor missing/extra files on both sides
-compare.help12			= \t  or <Gr>-sync_mode<.>, <Gr>-sync-mode<.>, <Gr>-syncmode<.>, or <Gr>-syn<.> <Yw!>(default)<.>
+compare.help11			= \t\tfor missing/extra files on both sides <Yw!>(default)<.>
+compare.help12			= \t  or <Gr>-sync_mode<.>, <Gr>-sync-mode<.>, <Gr>-syncmode<.>, or <Gr>-syn<.>
 compare.help13			= \t<Gr>-copy<.>\tdo a simple compare of source to target, which
 compare.help14			= \t\tmeans files in the target that are not in the source
 compare.help15			= \t\twill not be noted (source and target should be copies)
 compare.help16			= \t  or <Gr>-copy_mode<.>, <Gr>-copy-mode<.>, <Gr>-copymode<.>, or <Gr>-c<.>
 compare.help17			= ""
-compare.help18			= \t<Gr>-super<.>\tset <Bk!>'<Cy>super verbose<.>'<.> level of output
+compare.help18			= \t<Gr>-super<.>\t\tset <Bk!>'<Cy>super verbose<.>'<.> level of output
 compare.help19			= \t  or <Gr>-super_verbose<.>, <Gr>-super-verbose<.>, <Gr>-superverbose<.>, or <Gr>-sup<.>
 compare.help20			= \t<Gr>-verbose<.>\tset <Bk!>'<Cy>verbose<.>'<.> level of output
 compare.help21			= \t  or <Gr>-verb<.>, or <Gr>-v<.>
-compare.help22			= \t<Gr>-normal<.>\tset <Bk!>'<Cy>normal<.>'<.> level of output <Yw!>(default)<.>
+compare.help22			= \t<Gr>-normal<.>\t\tset <Bk!>'<Cy>normal<.>'<.> level of output <Yw!>(default)<.>
 compare.help23			= \t  or <Gr>-norm<.>, or <Gr>-n<.>
-compare.help24			= \t<Gr>-quiet<.>\tset <Bk!>'<Cy>quiet<.>'<.> level of output
+compare.help24			= \t<Gr>-quiet<.>\t\tset <Bk!>'<Cy>quiet<.>'<.> level of output
 compare.help25			= \t  or <Gr>-q<.>
-compare.help26			= \t<Gr>-silent<.>\tset <Bk!>'<Cy>silent<.>'<.> level of output (nothing)
+compare.help26			= \t<Gr>-silent<.>\t\tset <Bk!>'<Cy>silent<.>'<.> level of output (nothing)
 compare.help27			= \t  or <Gr>-s<.>
-compare.help28			= \t<Gr>-debug<.>\tset <Bk!>'<Cy>debug<.>'<.> level of output (maximum)
+compare.help28			= \t<Gr>-debug<.>\t\tset <Bk!>'<Cy>debug<.>'<.> level of output (maximum)
 compare.help29			= \t  or <Gr>-deb<.>, or <Gr>-d<.>
-compare.help30			= \t<Gr>-recurse<.>\tdescend into subdirectories
-compare.help31			= \t  or <Gr>-recursive<.>, <Gr>-rec<.>, or <Gr>-r<.>
-compare.help32			= \t<Gr>-continue<.>\tcontinue processing files even when a mismatch
-compare.help33			= \t\toccurs <Yw!>(default)<.>
-compare.help34			= \t  or <Gr>-continue_after_error<.>, <Gr>-continue-after-error<.>,
-compare.help35			= \t     <Gr>-continueaftererror<.>, <Gr>-cont<.>, or <Gr>-con<.>
-compare.help36			= \t<Gr>-break<.>\tstop processing files on the first mismatch
-compare.help37			= \t  or <Gr>-break_on_error<.>, <Gr>-break-on-error<.>, <Gr>-breakonerror<.>,
-compare.help38			= \t     <Gr>-brk<.>, <Gr>-br<.>, or <Gr>-b<.>
-compare.help39			= \t<Gr>-help<.>\tdisplay this message
-compare.help40			= \t  or <Gr>-h<.>, or <Gr>-?<.>
-compare.help41			= \t<Gr>-version<.>\tdisplay program version/copyright information
-compare.help42			= \t  or <Gr>-vers<.>, or <Gr>-ver<.>
-compare.help43			= "<-->"
+compare.help30			= ""
+compare.help31			= \t<Gr>-recurse<.>\tdescend into subdirectories
+compare.help32			= \t  or <Gr>-recursive<.>, <Gr>-rec<.>, or <Gr>-r<.>
+compare.help33			= \t<Gr>-lines<.>\t\tignore line ending differences during compare
+compare.help34			= \t  or <Gr>-ignore_line_endings<.>, <Gr>-ignore-line-endings<.>,
+compare.help35			= \t     <Gr>-ignorelineendings<.>, <Gr>-line<.>, or <Gr>-l<.>
+compare.help36			= \t<Gr>-continue<.>\tcontinue processing files even when a mismatch
+compare.help37			= \t\t\toccurs <Yw!>(default)<.>
+compare.help38			= \t  or <Gr>-continue_after_error<.>, <Gr>-continue-after-error<.>,
+compare.help39			= \t     <Gr>-continueaftererror<.>, <Gr>-cont<.>, or <Gr>-con<.>
+compare.help40			= \t<Gr>-break<.>\t\tstop processing files on the first mismatch
+compare.help41			= \t  or <Gr>-break_on_error<.>, <Gr>-break-on-error<.>, <Gr>-breakonerror<.>,
+compare.help42			= \t     <Gr>-brk<.>, <Gr>-br<.>, or <Gr>-b<.>
+compare.help43			= \t<Gr>-colors<.>\t\tuse colors on output <Yw!>(default)<.>
+compare.help44			= \t  or <Gr>-colored<.>, <Gr>-color<.>, or <Gr>-col<.>
+compare.help45			= \t<Gr>-nocolors<.>\tdo not use colors for output
+compare.help46			= \t  or <Gr>-uncolored<.>, <Gr>-nocolor<.>, or <Gr>-noc<.>
+compare.help47			= ""
+compare.help48			= \t<Gr>-help<.>\t\tdisplay this message
+compare.help49			= \t  or <Gr>-h<.>, or <Gr>-?<.>
+compare.help50			= \t<Gr>-version<.>\tdisplay program version/copyright information
+compare.help51			= \t  or <Gr>-vers<.>, or <Gr>-ver<.>
+compare.help52			= "<-->"
 

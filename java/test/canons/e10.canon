@@ -1,6 +1,6 @@
 >Tests of the new LOOP construct
 >
->Variables 'j', 'k', 'value', 'array', and 'SIZE' cleared.
+>Variables 'value', 'array', and 'SIZE' cleared.
 >Precision is now “50” digits.
 >value = 1 -> 1
 >array = [] -> [ ]
@@ -458,57 +458,57 @@
 >Defining constant “START” = 3752
 >Defining variable “num” = 3752
 >Defining variable “iterations” = 0
->Defining variable “k”
+>Defining variable “k0”
 >Defining variable “k1”
 >Defining variable “k2”
 >Defining variable “num1”
 >Defining variable “num2”
 >Separator display set to “false”.
->k = chars (@@ num) -> [ "3", "7", "5", "2" ]
->k1 = sort (k) -> [ "2", "3", "5", "7" ]
->k2 = sort (k, SORT_DESCENDING) -> [ "7", "5", "3", "2" ]
+>k0 = chars (@@ num) -> [ "3", "7", "5", "2" ]
+>k1 = sort (k0) -> [ "2", "3", "5", "7" ]
+>k2 = sort (k0, SORT_DESCENDING) -> [ "7", "5", "3", "2" ]
 >num1 = ~~ join (k1) -> 2357
 >num2 = ~~ join (k2) -> 7532
 >num = num1 > num2 ? num1 - num2 : num2 - num1 -> 5175
 >++ iterations -> 1
->k = chars (@@ num) -> [ "5", "1", "7", "5" ]
->k1 = sort (k) -> [ "1", "5", "5", "7" ]
->k2 = sort (k, SORT_DESCENDING) -> [ "7", "5", "5", "1" ]
+>k0 = chars (@@ num) -> [ "5", "1", "7", "5" ]
+>k1 = sort (k0) -> [ "1", "5", "5", "7" ]
+>k2 = sort (k0, SORT_DESCENDING) -> [ "7", "5", "5", "1" ]
 >num1 = ~~ join (k1) -> 1557
 >num2 = ~~ join (k2) -> 7551
 >num = num1 > num2 ? num1 - num2 : num2 - num1 -> 5994
 >++ iterations -> 2
->k = chars (@@ num) -> [ "5", "9", "9", "4" ]
->k1 = sort (k) -> [ "4", "5", "9", "9" ]
->k2 = sort (k, SORT_DESCENDING) -> [ "9", "9", "5", "4" ]
+>k0 = chars (@@ num) -> [ "5", "9", "9", "4" ]
+>k1 = sort (k0) -> [ "4", "5", "9", "9" ]
+>k2 = sort (k0, SORT_DESCENDING) -> [ "9", "9", "5", "4" ]
 >num1 = ~~ join (k1) -> 4599
 >num2 = ~~ join (k2) -> 9954
 >num = num1 > num2 ? num1 - num2 : num2 - num1 -> 5355
 >++ iterations -> 3
->k = chars (@@ num) -> [ "5", "3", "5", "5" ]
->k1 = sort (k) -> [ "3", "5", "5", "5" ]
->k2 = sort (k, SORT_DESCENDING) -> [ "5", "5", "5", "3" ]
+>k0 = chars (@@ num) -> [ "5", "3", "5", "5" ]
+>k1 = sort (k0) -> [ "3", "5", "5", "5" ]
+>k2 = sort (k0, SORT_DESCENDING) -> [ "5", "5", "5", "3" ]
 >num1 = ~~ join (k1) -> 3555
 >num2 = ~~ join (k2) -> 5553
 >num = num1 > num2 ? num1 - num2 : num2 - num1 -> 1998
 >++ iterations -> 4
->k = chars (@@ num) -> [ "1", "9", "9", "8" ]
->k1 = sort (k) -> [ "1", "8", "9", "9" ]
->k2 = sort (k, SORT_DESCENDING) -> [ "9", "9", "8", "1" ]
+>k0 = chars (@@ num) -> [ "1", "9", "9", "8" ]
+>k1 = sort (k0) -> [ "1", "8", "9", "9" ]
+>k2 = sort (k0, SORT_DESCENDING) -> [ "9", "9", "8", "1" ]
 >num1 = ~~ join (k1) -> 1899
 >num2 = ~~ join (k2) -> 9981
 >num = num1 > num2 ? num1 - num2 : num2 - num1 -> 8082
 >++ iterations -> 5
->k = chars (@@ num) -> [ "8", "0", "8", "2" ]
->k1 = sort (k) -> [ "0", "2", "8", "8" ]
->k2 = sort (k, SORT_DESCENDING) -> [ "8", "8", "2", "0" ]
+>k0 = chars (@@ num) -> [ "8", "0", "8", "2" ]
+>k1 = sort (k0) -> [ "0", "2", "8", "8" ]
+>k2 = sort (k0, SORT_DESCENDING) -> [ "8", "8", "2", "0" ]
 >num1 = ~~ join (k1) -> 288
 >num2 = ~~ join (k2) -> 8820
 >num = num1 > num2 ? num1 - num2 : num2 - num1 -> 8532
 >++ iterations -> 6
->k = chars (@@ num) -> [ "8", "5", "3", "2" ]
->k1 = sort (k) -> [ "2", "3", "5", "8" ]
->k2 = sort (k, SORT_DESCENDING) -> [ "8", "5", "3", "2" ]
+>k0 = chars (@@ num) -> [ "8", "5", "3", "2" ]
+>k1 = sort (k0) -> [ "2", "3", "5", "8" ]
+>k2 = sort (k0, SORT_DESCENDING) -> [ "8", "5", "3", "2" ]
 >num1 = ~~ join (k1) -> 2358
 >num2 = ~~ join (k2) -> 8532
 >num = num1 > num2 ? num1 - num2 : num2 - num1 -> 6174

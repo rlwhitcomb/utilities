@@ -1,7 +1,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2012,2014,2016-2022 Roger L. Whitcomb.
+# Copyright (c) 2012,2014,2016-2023 Roger L. Whitcomb.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -86,6 +86,8 @@
 #	    #488: New messages for memory reporting.
 #	28-Sep-2022 (rlwhitcomb)
 #	    #488: Also report free memory.
+#	16-Jan-2023 (rlwhitcomb)
+#	    #593: Preprocessing error message.
 #
 
 mismatch		= Mismatch on test \"%1$s\":%n  Canon file: %2$s%n Output file: %3$s
@@ -124,6 +126,7 @@ finalUnderlineBoth	= "==========================================================
 initialFile		= Running %1$s...
 cannotOpenFile		= The '%1$s' file is either not found, not readable, or is not a regular file.
 readError		= Error reading '%1$s' file: %2$s
+preProcError		= Error preprocessing the '%1$s' description file: %2$s
 badOption		= Unrecognized option \"%1$s\"
 cannotFindFile		= Cannot find the '%1$s' file.
 missingDescFile		= Must specify at least one description file name.

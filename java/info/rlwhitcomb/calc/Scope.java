@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2021-2022 Roger L. Whitcomb.
+ * Copyright (c) 2021-2023 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -36,12 +36,15 @@
  *			and "toString" in here, let the appropriate subclasses override.
  *  25-May-22 rlw #348: Make the enum package private.
  *  21-Jun-22 rlw #314: Add SET type.
+ *  08-Jan-23 rlw #225:	New description field and methods.
+ *		  #592:	Move basic fields out of subclasses into this base class.
  */
 package info.rlwhitcomb.calc;
 
 
 /**
- * Generic base class for symbol tables, user-defined objects, and user-defined functions.
+ * Generic base class for symbol tables, system and predefined values, user-defined objects,
+ * and user-defined functions.
  */
 class Scope
 {
@@ -98,6 +101,21 @@ class Scope
 	 */
 	private Type type;
 
+	/**
+	 * Most of these have names, which are used to refer to their values.
+	 */
+	private String name = null;
+
+	/**
+	 * A short description of this object.
+	 */
+	private String description = null;
+
+	/**
+	 * Whether this value is immutable (many system and predefined values are like this).
+	 */
+	private boolean immutable = false;
+
 
 	/**
 	 * Construct given the object type.
@@ -106,6 +124,17 @@ class Scope
 	 */
 	Scope(final Type currentType) {
 	    type = currentType;
+	}
+
+	/**
+	 * Construct given the object type and immutable flag.
+	 *
+	 * @param currentType The type enumeration for this scope.
+	 * @param readOnly    Whether this object can be changed.
+	 */
+	Scope(final Type currentType, final boolean readOnly) {
+	    type = currentType;
+	    immutable = readOnly;
 	}
 
 	/**
@@ -127,13 +156,59 @@ class Scope
 	}
 
 	/**
+	 * Access this object's name.
+	 *
+	 * @return The name of this object.
+	 */
+	final String getName() {
+	    return name;
+	}
+
+	/**
+	 * Set the name of this object.
+	 *
+	 * @param nm The new name of this object.
+	 */
+	final void setName(final String nm) {
+	    name = nm;
+	}
+
+	/**
 	 * Is this an immutable value? These are set initially, probably soon after definition
 	 * but thereafter cannot be changed.
 	 *
 	 * @return Default implementation is {@code false}.
 	 */
-	protected boolean isImmutable() {
-	    return false;
+	final boolean isImmutable() {
+	    return immutable;
+	}
+
+	/**
+	 * Set the "immutable" flag. Usually done shortly after definition, signaling that
+	 * the value cannot afterwards be changed.
+	 *
+	 * @param flag The new value of the immutable flag (default is {@code false}).
+	 */
+	final void setImmutable(final boolean flag) {
+	    immutable = flag;
+	}
+
+	/**
+	 * Set the description for this object.
+	 *
+	 * @param desc Current description for this object.
+	 */
+	final void setDescription(final String desc) {
+	    description = desc;
+	}
+
+	/**
+	 * Access this object's description.
+	 *
+	 * @return The description for this object.
+	 */
+	final String getDescription() {
+	    return description;
 	}
 
 	/**
@@ -141,7 +216,7 @@ class Scope
 	 *
 	 * @return {@code "SYSTEM" -> "System"}.
 	 */
-	String toBookCase() {
+	final String toBookCase() {
 	    String upperName = type.toString();
 	    return String.format("%1$c%2$s", upperName.charAt(0), upperName.substring(1).toLowerCase());
 	}

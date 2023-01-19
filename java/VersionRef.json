@@ -7,6 +7,66 @@
       issues: [ 458 ],
       comment: 'Implement multi-threaded "parallel" processing.'
     },
+    { version: '2.20.8', date: d'2023-01-11',
+      issues: [ 558 ],
+      comment: 'More quaternion support, including "j" and "k" constants.'
+    },
+    { version: '2.20.7', date: d'2023-01-10',
+      issues: [ 103 ],
+      comment: 'Extended precision complex square root.'
+    },
+    { version: '2.20.5', date: d'2023-01-05',
+      issues: [ 558 ],
+      comment: 'Basic quaternion arithmetic (+, -, *, /).'
+    },
+    { version: '2.20.0', date: d'2022-12-31',
+      issues: [ 558 ],
+      comment: 'Introduce quaternion support.'
+    },
+    { version: '2.17.4', date: d'2022-12-25',
+      issues: [ 83 ],
+      comment: 'More Unicode aliases for several built-in values and functions.'
+    },
+    { version: '2.17.3', date: d'2022-12-24',
+      issues: [ 441 ],
+      comment: 'Implement "is" operator as convenience for "typeof".'
+    },
+    { version: '2.17.2', date: d'2022-12-22',
+      issues: [ 79 ],
+      comment: 'Improve random number distribution.'
+    },
+    { version: '2.17.1', date: d'2022-12-22',
+      issues: [ 559 ],
+      comment: 'Tweaks for rational complex numbers.'
+    },
+    { version: '2.17.0', date: d'2022-12-19',
+      issues: [ 559 ],
+      comment: 'Rational mode for complex numbers.'
+    },
+    { version: '2.16.2', date: d'2022-12-19',
+      issues: [ 588 ],
+      comment: 'New case selector with combined compare operations.'
+    },
+    { version: '2.16.1', date: d'2022-12-19',
+      issues: [ 79 ],
+      comment: 'Update the "random" algorithm to have better distribution of values.'
+    },
+    { version: '2.16.0', date: d'2022-12-17',
+      issues: [ 572 ],
+      comment: 'Change quoted object members to be the same as unquoted.'
+    },
+    { version: '2.15.5', date: d'2022-12-13',
+      issues: [ 582 ],
+      comment: 'Add supported file extensions of ".clc" and ".xpr" also.'
+    },
+    { version: '2.15.4', date: d'2022-12-13',
+      issues: [ 580 ],
+      comment: 'Fix bug with "sumof" over integer range.'
+    },
+    { version: '2.15.3', date: d'2022-12-12',
+      issues: [ 577 ],
+      comment: 'Update "cg" and "``" wrappers.'
+    },
     { version: '2.15.2', date: d'2022-12-06',
       issues: [ 573 ],
       comment: 'Fix quoting of literal patterns for "scan".'

@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2020-2022 Roger L. Whitcomb.
+ * Copyright (c) 2020-2023 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -732,6 +732,30 @@
  *	    #564: Use new ConsoleColor codes to expose color codes for "@Q" format.
  *	05-Dec-2022 (rlwhitcomb)
  *	    #573: New "scan" function.
+ *	13-Dec-2022 (rlwhitcomb)
+ *	    #580: Fix "sumof" bug with integer values.
+ *	17-Dec-2022 (rlwhitcomb)
+ *	    #572: Regularize member naming conventions.
+ *	19-Dec-2022 (rlwhitcomb)
+ *	    #79: Move "random" function out to MathUtil.
+ *	    #588: Another flavor of case selector with two compare ops.
+ *	    #559: Changes for rational complex numbers.
+ *	20-Dec-2022 (rlwhitcomb)
+ *	    #588: Fix incorrect evaluation of XOR in double compare op selector.
+ *	22-Dec-2022 (rlwhitcomb)
+ *	    #559: Don't insist that both values be fractions before doing fraction
+ *	    calculations; either one will do.
+ *	24-Dec-2022 (rlwhitcomb)
+ *	    #441: Implement "is" operator.
+ *	29-Dec-2022 (rlwhitcomb)
+ *	    #558: Beginnings of "quaternion" support.
+ *	05-Jan-2023 (rlwhitcomb)
+ *	    #558: Quaternion basic arithmetic.
+ *	10-Jan-2023 (rlwhitcomb)
+ *	    #103: New complex "sqrt" function; add rounding context to other functions.
+ *	    #558: Give quaternion priority over complex so operations with "i" will promote.
+ *	12-Jan-2023 (rlwhitcomb)
+ *	    Refactor the Next and Leave exceptions.
  */
 package info.rlwhitcomb.calc;
 
@@ -743,6 +767,7 @@ import info.rlwhitcomb.math.ComplexNumber;
 import info.rlwhitcomb.math.DateUtil;
 import info.rlwhitcomb.math.MathUtil;
 import info.rlwhitcomb.math.NumericUtil;
+import info.rlwhitcomb.math.Quaternion;
 import info.rlwhitcomb.util.*;
 import net.iharder.b64.Base64;
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -766,7 +791,6 @@ import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.security.SecureRandom;
 import java.text.FieldPosition;
 import java.text.NumberFormat;
 import java.time.DateTimeException;
@@ -939,15 +963,15 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	/** Flag for case-insensitive matches. */
 	private static final int MATCH_CASE_INSENSITIVE = 0x0001;
 	/** Flag for "dotall" matches. */
-	private static final int MATCH_DOTALL = 0x0002;
+	private static final int MATCH_DOTALL           = 0x0002;
 	/** Flag for Unicode-case match. */
-	private static final int MATCH_UNICODE_CASE = 0x0004;
+	private static final int MATCH_UNICODE_CASE     = 0x0004;
 	/** Flag for literal match. */
-	private static final int MATCH_LITERAL = 0x0008;
+	private static final int MATCH_LITERAL          = 0x0008;
 	/** Flag for multi-line match. */
-	private static final int MATCH_MULTILINE = 0x0010;
+	private static final int MATCH_MULTILINE        = 0x0010;
 	/** Flag for Unix lines mode. */
-	private static final int MATCH_UNIX_LINES = 0x0020;
+	private static final int MATCH_UNIX_LINES       = 0x0020;
 	/** The set of all the valid flags we support. */
 	private static final int MATCH_ALL_FLAGS =
 	    ( MATCH_CASE_INSENSITIVE | MATCH_DOTALL | MATCH_UNICODE_CASE | MATCH_LITERAL | MATCH_MULTILINE | MATCH_UNIX_LINES );
@@ -1011,43 +1035,38 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	 */
 	private CalcPiWorker piWorker = null;
 
-	/**
-	 * Our provider of random values.
-	 */
-	private Random random = null;
-
 	/** Stack of previous "timing" mode values. */
-	private final Deque<Boolean> timingModeStack = new ArrayDeque<>();
+	private final Deque<Boolean> timingModeStack       = new ArrayDeque<>();
 
 	/** Stack of previous "debug" mode values. */
-	private final Deque<Boolean> debugModeStack = new ArrayDeque<>();
+	private final Deque<Boolean> debugModeStack        = new ArrayDeque<>();
 
 	/** Stack of previous "rational" mode values. */
-	private final Deque<Boolean> rationalModeStack = new ArrayDeque<>();
+	private final Deque<Boolean> rationalModeStack     = new ArrayDeque<>();
 
 	/** Stack of previous "separator" mode values. */
-	private final Deque<Boolean> separatorModeStack = new ArrayDeque<>();
+	private final Deque<Boolean> separatorModeStack    = new ArrayDeque<>();
 
 	/** Stack of previous "ignore case" mode values. */
-	private final Deque<Boolean> ignoreCaseModeStack = new ArrayDeque<>();
+	private final Deque<Boolean> ignoreCaseModeStack   = new ArrayDeque<>();
 
 	/** Stack of previous "quote strings" mode values. */
 	private final Deque<Boolean> quoteStringsModeStack = new ArrayDeque<>();
 
 	/** Stack of previous "sort keys" mode values. */
-	private final Deque<Boolean> sortKeysModeStack = new ArrayDeque<>();
+	private final Deque<Boolean> sortKeysModeStack     = new ArrayDeque<>();
 
 	/** Stack of previous "colored" mode values. */
-	private final Deque<Boolean> coloredModeStack = new ArrayDeque<>();
+	private final Deque<Boolean> coloredModeStack      = new ArrayDeque<>();
 
 	/** Stack of previous "resultsOnly" mode values. */
-	private final Deque<Boolean> resultsOnlyModeStack = new ArrayDeque<>();
+	private final Deque<Boolean> resultsOnlyModeStack  = new ArrayDeque<>();
 
 	/** Stack of previous "quiet" mode values. */
-	private final Deque<Boolean> quietModeStack = new ArrayDeque<>();
+	private final Deque<Boolean> quietModeStack        = new ArrayDeque<>();
 
 	/** Stack of previous "silence" mode values. */
-	private final Deque<Boolean> silenceModeStack = new ArrayDeque<>();
+	private final Deque<Boolean> silenceModeStack      = new ArrayDeque<>();
 
 
 	/**
@@ -1472,7 +1491,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    // and restored regardless of any exceptions thrown
 	    doNotCallZeroArgFunctions = true;
 	    try {
-		return evaluate(ctx, visit(ctx));
+		return evaluate(ctx);
 	    }
 	    finally {
 		doNotCallZeroArgFunctions = false;
@@ -3360,10 +3379,53 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			    return returnValue;
 			}
 		    }
-		    else if (select.compareOp() != null) {
-			String op = select.compareOp().getText();
-			CalcParser.ExprContext expr = select.expr().get(0);
-			if (compareOp(caseExpr, expr, Optional.ofNullable(caseValue), op)) {
+		    else if (!select.compareOp().isEmpty()) {
+			String op = select.compareOp(0).getText();
+			CalcParser.ExprContext expr = select.expr(0);
+
+			boolean first = compareOp(caseExpr, expr, Optional.ofNullable(caseValue), op);
+			boolean matched = false;
+
+			if (select.boolOp() == null) {
+			    matched = first;
+			}
+			else {
+			    String boolOp = select.boolOp().getText();
+
+			    // Some combinations can be solved with just the first result
+			    switch (boolOp) {
+				case "&&":
+				case "\u2227":
+				    if (!first)
+					continue selectors;
+				    break;
+				case "||":
+				case "\u2228":
+				    if (first)
+					matched = true;
+				    break;
+			    }
+			    if (!matched) {
+				op = select.compareOp(1).getText();
+				expr = select.expr(1);
+				boolean second = compareOp(caseExpr, expr, Optional.ofNullable(caseValue), op);
+
+				switch (boolOp) {
+				    case "&&":
+				    case "\u2227":
+				    case "||":
+				    case "\u2228":
+					if (second)
+					    matched = true;
+					break;
+				    default:
+					// XOR - results must be different
+					matched = (first != second);
+					break;
+				}
+			    }
+			}
+			if (matched) {
 			    returnValue = visitor.execute();
 			    fallThrough = visitor.fallIntoNext();
 			    if (fallThrough)
@@ -3427,13 +3489,13 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		throw new LeaveException(evaluate(exprCtx.expr()));
 	    }
 	    else {
-		throw LeaveException.INSTANCE;
+		throw LeaveException.instance();
 	    }
 	}
 
 	@Override
 	public Object visitNextStmt(CalcParser.NextStmtContext ctx) {
-	    throw NextException.INSTANCE;
+	    throw NextException.instance();
 	}
 
 	@Override
@@ -3579,13 +3641,7 @@ System.out.println("i = " + i + ", result = " + result);
 
 	private void addPairsToObject(CalcParser.ObjContext objCtx, ObjectScope object) {
 	    for (CalcParser.PairContext pairCtx : objCtx.pair()) {
-		CalcParser.IdContext id = pairCtx.id();
-		TerminalNode str  = pairCtx.STRING();
-		TerminalNode istr = pairCtx.ISTRING();
-		String key =
-			(id != null) ? id.getText()
-		      : (str != null) ? getStringMemberName(str.getText())
-		      : getIStringValue(this, istr, pairCtx);
+		String key = getMemberName(this, pairCtx.member());
 		Object value = evaluate(pairCtx.expr());
 		object.setValue(key, settings.ignoreNameCase, value);
 	    }
@@ -3630,10 +3686,54 @@ System.out.println("i = " + i + ", result = " + result);
 	@Override
 	public Object visitComplexValueExpr(CalcParser.ComplexValueExprContext ctx) {
 	    CalcParser.ComplexContext complex = ctx.complex();
-	    BigDecimal r = getDecimalValue(complex.expr(0));
-	    BigDecimal i = getDecimalValue(complex.expr(1));
+	    CalcParser.ExprContext expr1 = complex.expr(0);
+	    CalcParser.ExprContext expr2 = complex.expr(1);
+	    Object o1 = evaluate(expr1);
+	    Object o2 = evaluate(expr2);
 
-	    return new ComplexNumber(r, i);
+	    if (settings.rationalMode || (o1 instanceof BigFraction || o2 instanceof BigFraction)) {
+		BigFraction rFrac = toFractionValue(this, o1, expr1);
+		BigFraction iFrac = toFractionValue(this, o2, expr2);
+
+		return new ComplexNumber(rFrac, iFrac);
+	    }
+	    else {
+		BigDecimal r = toDecimalValue(this, o1, settings.mc, expr1);
+		BigDecimal i = toDecimalValue(this, o2, settings.mc, expr2);
+
+		return new ComplexNumber(r, i);
+	    }
+	}
+
+	@Override
+	public Object visitQuaternionValueExpr(CalcParser.QuaternionValueExprContext ctx) {
+	    CalcParser.QuaternionContext quatern = ctx.quaternion();
+	    CalcParser.ExprContext expr1 = quatern.expr(0);
+	    CalcParser.ExprContext expr2 = quatern.expr(1);
+	    CalcParser.ExprContext expr3 = quatern.expr(2);
+	    CalcParser.ExprContext expr4 = quatern.expr(3);
+	    Object o1 = evaluate(expr1);
+	    Object o2 = evaluate(expr2);
+	    Object o3 = evaluate(expr3);
+	    Object o4 = evaluate(expr4);
+
+	    if (settings.rationalMode ||
+		(o1 instanceof BigFraction || o2 instanceof BigFraction || o3 instanceof BigFraction || o4 instanceof BigFraction)) {
+		BigFraction aFrac = toFractionValue(this, o1, expr1);
+		BigFraction bFrac = toFractionValue(this, o2, expr2);
+		BigFraction cFrac = toFractionValue(this, o3, expr3);
+		BigFraction dFrac = toFractionValue(this, o4, expr4);
+
+		return new Quaternion(aFrac, bFrac, cFrac, dFrac);
+	    }
+	    else {
+		BigDecimal a = toDecimalValue(this, o1, settings.mc, expr1);
+		BigDecimal b = toDecimalValue(this, o2, settings.mc, expr2);
+		BigDecimal c = toDecimalValue(this, o3, settings.mc, expr3);
+		BigDecimal d = toDecimalValue(this, o4, settings.mc, expr4);
+
+		return new Quaternion(a, b, c, d);
+	    }
 	}
 
 	@Override
@@ -3647,7 +3747,6 @@ System.out.println("i = " + i + ", result = " + result);
 	    Object source = evaluate(ctx.expr(0));
 	    CalcParser.ExprContext indexExpr = null;
 	    Object indexValue = null;
-	    String key;
 
 	    if (!(source instanceof CollectionScope))
 		return Boolean.FALSE;
@@ -3670,17 +3769,35 @@ System.out.println("i = " + i + ", result = " + result);
 	    if (!(source instanceof ObjectScope))
 		return Boolean.FALSE;
 
-	    CalcParser.IdContext id = ctx.id();
-	    TerminalNode str  = ctx.STRING();
-	    TerminalNode istr = ctx.ISTRING();
-	    key = (id != null) ? id.getText()
-		: (str != null) ? getStringMemberName(str.getText())
-		: (istr != null) ? getIStringValue(this, istr, ctx)
-		: getNonNullString(indexExpr, indexValue);
+	    String key = getMemberName(this, ctx.member());
+	    if (key == null)
+		key = getNonNullString(indexExpr, indexValue);
 
 	    ObjectScope obj = (ObjectScope) source;
 
 	    return Boolean.valueOf(isDefinedRecursively(obj, key, settings.ignoreNameCase));
+	}
+
+	@Override
+	public Object visitIsExpr(CalcParser.IsExprContext ctx) {
+	    boolean ret = false;
+	    Object value = evaluate(ctx.expr());
+	    Typeof type = typeof(value);
+	    String valueType;
+	    TerminalNode string  = ctx.STRING();
+	    TerminalNode istring = ctx.ISTRING();
+	    TerminalNode types   = ctx.TYPES();
+
+	    if (string != null)
+		valueType = getRawString(string.getText());
+	    else if (istring != null)
+		valueType = getIStringValue(this, istring, ctx);
+	    else
+		valueType = types.getText();
+
+	    ret = type.toString().equalsIgnoreCase(valueType);
+
+	    return Boolean.valueOf(ret);
 	}
 
 	@Override
@@ -3747,7 +3864,7 @@ System.out.println("i = " + i + ", result = " + result);
 
 		afterValue = obj;
 	    }
-	    else if (settings.rationalMode) {
+	    else if (settings.rationalMode || value instanceof BigFraction) {
 		BigFraction fValue = toFractionValue(this, value, var);
 		beforeValue = fValue;
 
@@ -3756,14 +3873,39 @@ System.out.println("i = " + i + ", result = " + result);
 		else
 		    afterValue = fValue.subtract(BigFraction.ONE);
 	    }
+	    else if (value instanceof Quaternion) {
+		Quaternion qValue = (Quaternion) value;
+		beforeValue = qValue;
+
+		if (qValue.isRational()) {
+		    if (incr)
+			afterValue = qValue.add(QR_ONE);
+		    else
+			afterValue = qValue.subtract(QR_ONE);
+		}
+		else {
+		    if (incr)
+			afterValue = qValue.add(Quaternion.ONE);
+		    else
+			afterValue = qValue.subtract(Quaternion.ONE);
+		}
+	    }
 	    else if (value instanceof ComplexNumber) {
 		ComplexNumber cValue = (ComplexNumber) value;
 		beforeValue = cValue;
 
-		if (incr)
-		    afterValue = cValue.add(C_ONE);
-		else
-		    afterValue = cValue.subtract(C_ONE);
+		if (cValue.isRational()) {
+		    if (incr)
+			afterValue = cValue.add(CR_ONE);
+		    else
+			afterValue = cValue.subtract(CR_ONE, settings.mc);
+		}
+		else {
+		    if (incr)
+			afterValue = cValue.add(C_ONE);
+		    else
+			afterValue = cValue.subtract(C_ONE, settings.mc);
+		}
 	    }
 	    else {
 		BigDecimal dValue = toDecimalValue(this, value, settings.mc, var);
@@ -3845,7 +3987,7 @@ System.out.println("i = " + i + ", result = " + result);
 
 		afterValue = list;
 	    }
-	    else if (settings.rationalMode) {
+	    else if (settings.rationalMode || value instanceof BigFraction) {
 		BigFraction fValue = toFractionValue(this, value, var);
 
 		if (incr)
@@ -3853,13 +3995,37 @@ System.out.println("i = " + i + ", result = " + result);
 		else
 		    afterValue = fValue.subtract(BigFraction.ONE);
 	    }
+	    else if (value instanceof Quaternion) {
+		Quaternion qValue = (Quaternion) value;
+
+		if (qValue.isRational()) {
+		    if (incr)
+			afterValue = qValue.add(QR_ONE);
+		    else
+			afterValue = qValue.subtract(QR_ONE);
+		}
+		else {
+		    if (incr)
+			afterValue = qValue.add(Quaternion.ONE);
+		    else
+			afterValue = qValue.subtract(Quaternion.ONE);
+		}
+	    }
 	    else if (value instanceof ComplexNumber) {
 		ComplexNumber cValue = (ComplexNumber) value;
 
-		if (incr)
-		    afterValue = cValue.add(C_ONE);
-		else
-		    afterValue = cValue.subtract(C_ONE);
+		if (cValue.isRational()) {
+		    if (incr)
+			afterValue = cValue.add(CR_ONE);
+		    else
+			afterValue = cValue.subtract(CR_ONE, settings.mc);
+		}
+		else {
+		    if (incr)
+			afterValue = cValue.add(C_ONE);
+		    else
+			afterValue = cValue.subtract(C_ONE, settings.mc);
+		}
 	    }
 	    else {
 		BigDecimal dValue = toDecimalValue(this, value, settings.mc, var);
@@ -3881,7 +4047,7 @@ System.out.println("i = " + i + ", result = " + result);
 
 	    String op = ctx.ADD_OP().getText();
 
-	    if (settings.rationalMode) {
+	    if (settings.rationalMode || e instanceof BigFraction) {
 		BigFraction f = toFractionValue(this, e, expr);
 
 		switch (op) {
@@ -4075,7 +4241,7 @@ System.out.println("i = " + i + ", result = " + result);
 		op = "mod";
 
 	    try {
-		if (settings.rationalMode) {
+		if (settings.rationalMode || (e1 instanceof BigFraction || e2 instanceof BigFraction)) {
 		    BigFraction f1 = toFractionValue(this, e1, ctx1);
 		    BigFraction f2 = toFractionValue(this, e2, ctx2);
 
@@ -4097,6 +4263,30 @@ System.out.println("i = " + i + ", result = " + result);
 			    return f1.remainder(f2);
 			case "mod":
 			    return f1.modulus(f2);
+			default:
+			    throw new UnknownOpException(op, ctx);
+		    }
+		}
+		else if (e1 instanceof Quaternion || e2 instanceof Quaternion) {
+		    Quaternion q1 = Quaternion.valueOf(e1);
+		    Quaternion q2 = Quaternion.valueOf(e2);
+
+		    switch (op) {
+			case "*":
+			case "\u00D7":
+			case "\u2217":
+			case "\u2715":
+			case "\u2716":
+			    return q1.multiply(q2, settings.mc);
+			case "/":
+			case "\u00F7":
+			case "\u2215":
+			case "\u2797":
+			    return q1.divide(q2, MathUtil.divideContext(q1, settings.mcDivide));
+			case "\\":
+			case "\u2216":
+			case "%":
+			case "mod":
 			default:
 			    throw new UnknownOpException(op, ctx);
 		    }
@@ -4195,11 +4385,17 @@ System.out.println("i = " + i + ", result = " + result);
 
 			return f1.subtract(f2);
 		    }
+		    else if (e1 instanceof Quaternion || e2 instanceof Quaternion) {
+			Quaternion q1 = Quaternion.valueOf(e1);
+			Quaternion q2 = Quaternion.valueOf(e2);
+
+			return q1.subtract(q2);
+		    }
 		    else if (e1 instanceof ComplexNumber || e2 instanceof ComplexNumber) {
 			ComplexNumber c1 = ComplexNumber.valueOf(e1);
 			ComplexNumber c2 = ComplexNumber.valueOf(e2);
 
-			return c1.subtract(c2);
+			return c1.subtract(c2, settings.mc);
 		    }
 		    else if (e1 instanceof SetScope && e2 instanceof CollectionScope) {
 			@SuppressWarnings("unchecked")
@@ -4324,11 +4520,11 @@ System.out.println("i = " + i + ", result = " + result);
 
 	    if (value instanceof ComplexNumber) {
 		ComplexNumber cValue = (ComplexNumber) value;
-		return cValue.pow(D_ONE_HALF, settings.mc);
+		return cValue.sqrt(settings.mcDivide);
 	    }
 	    else {
 		try {
-		    return MathUtil.sqrt(convertToDecimal(value, settings.mc, expr), settings.mc);
+		    return MathUtil.sqrt(convertToDecimal(value, settings.mc, expr), settings.mcDivide);
 		}
 		catch (IllegalArgumentException iae) {
 		    throw new CalcExprException(iae, ctx);
@@ -4343,10 +4539,11 @@ System.out.println("i = " + i + ", result = " + result);
 
 	    if (value instanceof ComplexNumber) {
 		ComplexNumber cValue = (ComplexNumber) value;
-		return cValue.pow(BigDecimal.ONE.divide(D_THREE, MathUtil.divideContext(cValue, settings.mcDivide)), settings.mc);
+		MathContext mcPow = MathUtil.divideContext(cValue, settings.mcDivide);
+		return cValue.pow(BigDecimal.ONE.divide(D_THREE, mcPow), mcPow);
 	    }
 	    else {
-		return MathUtil.cbrt(convertToDecimal(value, settings.mc, expr), settings.mc);
+		return MathUtil.cbrt(convertToDecimal(value, settings.mc, expr), settings.mcDivide);
 	    }
 	}
 
@@ -4421,24 +4618,15 @@ System.out.println("i = " + i + ", result = " + result);
 
 	@Override
 	public Object visitRandomExpr(CalcParser.RandomExprContext ctx) {
+	    Object seed = null;
+
 	    if (ctx.expr1() != null) {
 		CalcParser.ExprContext expr = ctx.expr1().expr();
 		if (expr != null) {
-		    Object seed = evaluate(expr);
-		    if (seed != null) {
-			byte[] bytes = ClassUtil.getBytes(seed);
-			BigInteger seedInt = new BigInteger(bytes);
-			random = new Random(seedInt.longValue());
-		    }
+		    seed = evaluate(expr);
 		}
 	    }
-	    if (random == null) {
-		random = new SecureRandom();
-	    }
-	    int precision = settings.mc.getPrecision();
-	    BigInteger randomBits = new BigInteger(precision * 6, random);
-	    BigDecimal dValue = new BigDecimal(randomBits, settings.mcDivide);
-	    return dValue.scaleByPowerOfTen(dValue.scale() - precision);
+	    return MathUtil.random(seed, settings.mc.getPrecision(), settings.mcDivide);
 	}
 
 	@Override
@@ -5391,22 +5579,9 @@ System.out.println("i = " + i + ", result = " + result);
 		    CalcParser.ObjContext addObjs = args.obj();
 
 		    if (dropObjs != null) {
-			String key;
-			Object value;
-
-			for (CalcParser.IdContext id : dropObjs.id()) {
-			    key = id.getText();
-			    value = object.remove(key, settings.ignoreNameCase);
-			    removed.map().put(key, value);
-			}
-			for (TerminalNode string : dropObjs.STRING()) {
-			    key = string.getText();
-			    value = object.remove(key, settings.ignoreNameCase);
-			    removed.map().put(key, value);
-			}
-			for (TerminalNode istring : dropObjs.ISTRING()) {
-			    key = getIStringValue(this, istring, addObjs);
-			    value = object.remove(key, settings.ignoreNameCase);
+			for (CalcParser.MemberContext member : dropObjs.member()) {
+			    String key = getMemberName(this, member);
+			    Object value = object.remove(key, settings.ignoreNameCase);
 			    removed.map().put(key, value);
 			}
 		    }
@@ -5926,9 +6101,10 @@ System.out.println("i = " + i + ", result = " + result);
 	@Override
 	public Object visitComplexFuncExpr(CalcParser.ComplexFuncExprContext ctx) {
 	    try {
-		CalcParser.Expr1Context expr1 = ctx.expr1();
-		if (expr1 != null) {
-		    CalcParser.ExprContext expr = expr1.expr();
+		CalcParser.Expr1Context e1ctx = ctx.expr1();
+
+		if (e1ctx != null) {
+		    CalcParser.ExprContext expr = e1ctx.expr();
 		    Object e = evaluate(expr);
 
 		    if (e instanceof ArrayScope) {
@@ -5951,11 +6127,61 @@ System.out.println("i = " + i + ", result = " + result);
 		}
 		else {
 		    CalcParser.Expr2Context e2ctx = ctx.expr2();
-		    BigDecimal r = getDecimalValue(e2ctx.expr(0));
-		    BigDecimal i = getDecimalValue(e2ctx.expr(1));
 
-		    return new ComplexNumber(r, i);
+		    CalcParser.ExprContext expr1 = e2ctx.expr(0);
+		    CalcParser.ExprContext expr2 = e2ctx.expr(1);
+		    Object o1 = evaluate(expr1);
+		    Object o2 = evaluate(expr2);
+
+		    if (settings.rationalMode || (o1 instanceof BigFraction || o2 instanceof BigFraction)) {
+			BigFraction rFrac = toFractionValue(this, o1, expr1);
+			BigFraction iFrac = toFractionValue(this, o2, expr2);
+
+			return new ComplexNumber(rFrac, iFrac);
+		    }
+		    else {
+			BigDecimal r = toDecimalValue(this, o1, settings.mc, expr1);
+			BigDecimal i = toDecimalValue(this, o2, settings.mc, expr2);
+
+			return new ComplexNumber(r, i);
+		    }
 		}
+	    }
+	    catch (Exception ex) {
+		throw new CalcExprException(ex, ctx);
+	    }
+	}
+
+	@Override
+	public Object visitQuaternionFuncExpr(CalcParser.QuaternionFuncExprContext ctx) {
+	    try {
+		CalcParser.Expr4Context e4ctx = ctx.expr4();
+
+		if (e4ctx != null) {
+// TODO 4 values
+		}
+		else {
+		    CalcParser.Expr3Context e3ctx = ctx.expr3();
+
+		    if (e3ctx != null) {
+// TODO 3 values
+		    }
+		    else {
+			CalcParser.Expr2Context e2ctx = ctx.expr2();
+
+			if (e2ctx != null) {
+// TODO 2 values
+			}
+			else {
+			    CalcParser.Expr1Context e1ctx = ctx.expr1();
+			    CalcParser.ExprContext expr1 = e1ctx.expr();
+			    Object o1 = evaluate(expr1);
+
+			    return Quaternion.valueOf(o1);
+			}
+		    }
+		}
+		/* ?? */return null;
 	    }
 	    catch (Exception ex) {
 		throw new CalcExprException(ex, ctx);
@@ -6726,7 +6952,8 @@ System.out.println("i = " + i + ", result = " + result);
 			    int iStop  = (Integer) stop;
 			    int iLen   = (Integer) len;
 
-			    return iLen * ((iStart + iStop) / 2);
+			    // Do the division last so we don't lose the .5 fraction for odd values
+			    return (iLen * (iStart + iStop)) / 2;
 			}
 			else {
 			    BigDecimal dStart = (BigDecimal) start;
@@ -6887,7 +7114,7 @@ System.out.println("i = " + i + ", result = " + result);
 	 * @param op      The textual representation of the operator to execute.
 	 * @return        Result of the comparison.
 	 */
-	private Boolean compareOp(
+	private boolean compareOp(
 		CalcParser.ExprContext expr1,
 		CalcParser.ExprContext expr2,
 		Optional<Object> optObj1,
@@ -6971,7 +7198,7 @@ System.out.println("i = " + i + ", result = " + result);
 		    throw new UnknownOpException(op, expr2);
 	    }
 
-	    return Boolean.valueOf(result);
+	    return result;
 	}
 
 	@Override
@@ -6980,7 +7207,7 @@ System.out.println("i = " + i + ", result = " + result);
 	    CalcParser.ExprContext expr2 = ctx.expr(1);
 	    String op = ctx.COMPARE_OP().getText();
 
-	    return compareOp(expr1, expr2, null, op);
+	    return Boolean.valueOf(compareOp(expr1, expr2, null, op));
 	}
 
 	private class InVisitor implements IterationVisitor
@@ -7049,7 +7276,7 @@ System.out.println("i = " + i + ", result = " + result);
 	    CalcParser.ExprContext expr2 = ctx.expr(1);
 	    String op = ctx.EQUAL_OP().getText();
 
-	    return compareOp(expr1, expr2, null, op);
+	    return Boolean.valueOf(compareOp(expr1, expr2, null, op));
 	}
 
 	@Override
@@ -7326,7 +7553,7 @@ System.out.println("i = " + i + ", result = " + result);
 		case "-=":
 		case "\u2212=":
 		case "\u2796=":
-		    if (settings.rationalMode) {
+		    if (settings.rationalMode || (e1 instanceof BigFraction || e2 instanceof BigFraction)) {
 			BigFraction f1 = toFractionValue(this, e1, varCtx);
 			BigFraction f2 = toFractionValue(this, e2, exprCtx);
 
@@ -7336,7 +7563,7 @@ System.out.println("i = " + i + ", result = " + result);
 			ComplexNumber c1 = ComplexNumber.valueOf(e1);
 			ComplexNumber c2 = ComplexNumber.valueOf(e2);
 
-			result = c1.subtract(c2);
+			result = c1.subtract(c2, settings.mc);
 		    }
 		    else {
 			BigDecimal d1 = toDecimalValue(this, e1, settings.mc, varCtx);
@@ -7375,7 +7602,7 @@ System.out.println("i = " + i + ", result = " + result);
 	    Object e2 = visit(exprCtx);
 
 	    try {
-		if (settings.rationalMode) {
+		if (settings.rationalMode || (e1 instanceof BigFraction || e2 instanceof BigFraction)) {
 		    BigFraction f1 = toFractionValue(this, e1, varCtx);
 		    BigFraction f2 = toFractionValue(this, e2, exprCtx);
 

@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2010-2011,2014-2016,2019-2022 Roger L. Whitcomb.
+ * Copyright (c) 2010-2011,2014-2016,2019-2023 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  *
- *	Java language Pre-processor
+ *	Language Pre-processor for Java and other files.
  *
  * History:
  *  19-May-10 rlw  ---	First version after not finding anything useful via Google.
@@ -104,6 +104,15 @@
  *			date and time variables for each file processed.
  *  22-Feb-21 rlw  ---	Align "exceptMessage" with our own ExceptionUtil code.
  *  07-Nov-22 rlw  ---	More exceptions to process specially.
+ *  01-Jan-23 rlw  ---	Update copyright years.
+ *  13-Jan-23 rlw #593:	Rename to PreProc; refactoring, rearrangement and renaming of variables.
+ *			Much more refactoring.
+ *  14-Jan-23		Wrap this with PreProcTask for use with Ant. Interestingly, now we can use this
+ *			class either as an Ant task, as a standalone preprocessor, or as a helper class
+ *			called from another class which needs macro processing.
+ *  15-Jan-23		More refactoring in the token analysis. New output file name option.
+ *  16-Jan-23		"Ignore unknown directive" option for Tester.
+ *			Change all "set" option methods to a fluent paradigm.
  */
 package info.rlwhitcomb.preproc;
 
@@ -141,15 +150,14 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.IllegalFormatException;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.TimeZone;
 import java.util.UnknownFormatConversionException;
-import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.tools.ant.BuildException;
-import org.apache.tools.ant.Task;
 
 
 /**
@@ -208,9 +216,9 @@ import org.apache.tools.ant.Task;
  * <li><code>__JAVA_VERSION__</code> (the Java version)
  * <li><code>__JAVA_PP_VERSION__</code> (the Java preprocessor version)
  * </ul>
- * <p> In addition, the contents of the "build.properties", "build.number", and "version.properties"
+ * <p> In addition, the contents of the <code>"build.properties"</code>, <code>"build.number"</code>, and <code>"version.properties"</code>
  * files will be read and a variable defined for each of the properties found in there.
- * <p> Command-line arguments can be:
+ * <p> Command-line arguments can be (using the <code>preproc</code> command):
  * <ul>
  * <li><code>-nologo</code> (don't display sign-on banner)
  * <li><code>-D<i>var</i>=<i>value</i></code> (define variable value)
@@ -232,7 +240,7 @@ import org.apache.tools.ant.Task;
  * <li>file name(s)
  * </ul>
  * <p> This process can also be invoked as an Ant task by using the following in your "build.xml":
- * <p> <code>&lt;taskdef name="preproc" classname="info.rlwhitcomb.preproc.JavaPreProc" classpath="anttasks.jar"/&gt;</code>.
+ * <p> <code>&lt;taskdef name="preproc" classname="info.rlwhitcomb.preproc.PreProcTask" classpath="anttasks.jar"/&gt;</code>.
  * <p> The directives supported in this context are:
  * <ul><li><code>directiveChar="<i>ch</i>"</code> (same as <code>-C<i>ch</i></code> parameter)
  * <li><code>define="<i>var</i>=<i>value</i>"</code> or
@@ -292,18 +300,94 @@ import org.apache.tools.ant.Task;
  * <li>Wild-card values are not supported on the input file name(s).
  * </ul>
 */
-public class JavaPreProc extends Task
+public class PreProc
 {
-	/** The current list of defined symbols and their values. */
-	private HashMap<String,String> defines = null;
+	/**********************************************************/
+	/*      F I N A L   S T A T I C   V A R I A B L E S       */
+	/**********************************************************/
+
+	/** Whether we are running on the Windows O/S. */
+	private static final boolean ON_WINDOWS = System.getProperty("os.name").startsWith("Windows");
+
 	/** Default extension for input files. */
-	private static String defaultInputExt = ".javapp";
+	private static final String DEFAULT_INPUT_EXT = ".javapp";
+	/** Default extension for output files. */
+	private static final String DEFAULT_OUTPUT_EXT = ".java";
+
+	/** <code>__DATE__</code> predefined variable name. */
+	private static final String DATE_VAR_NAME = "__DATE__";
+	/** <code>__TIME__</code> predefined variable name. */
+	private static final String TIME_VAR_NAME = "__TIME__";
+	/** <code>__FILE__</code> predefined variable name. */
+	private static final String FILE_VAR_NAME = "__FILE__";
+	/** <code>__LINE__</code> predefined variable name. */
+	private static final String LINE_VAR_NAME = "__LINE__";
+	/** <code>__JAVA_VERSION__</code> predefined variable name. */
+	private static final String JAVA_VERSION_VAR_NAME = "__JAVA_VERSION__";
+	/** <code>__JAVA_PP_VERSION__</code> predefined variable name. */
+	private static final String JAVA_PP_VERSION_VAR_NAME = "__JAVA_PP_VERSION__";
+
+	/** Pattern to parse the <code>-D<i>var</i>=<i>value</i></code> command-line switch. */
+	private static final Pattern DEFINE_PATTERN = Pattern.compile("^([_A-Za-z][\\w\\.]*)=(.*)$");
+	/** Pattern to parse the <code>-D<i>var</i></code> command-line switch. */
+	private static final Pattern ALT_DEFINE_PATTERN = Pattern.compile("^([_A-Za-z][\\w\\.]*)$");
+	/** Pattern to parse a <code>#define <i>var value</i></code> directive in the source. */
+	private static final Pattern DEFINE_2_PATTERN = Pattern.compile("^([_A-Za-z][\\w\\.]*)\\s+(.*)$");
+	/** Pattern to parse a <code>#define <i>var</i></code> directive in the source. */
+	private static final Pattern DEFINE_3_PATTERN = Pattern.compile("^([_A-Za-z][\\w\\.]*)\\s*$");
+	/** Pattern used to separate the "INCLUDE" environment variable or define and undefine lists into pieces. */
+	private static final Pattern COMMA = Pattern.compile("[,;]");
+
+	/** Format string to build a regular expression to parse and recognize one of our preprocessing instructions. */
+	private static final String CMD_PATTERN_FORMAT = "^\\s*%1$c\\s*(\\S+)(.*)$";
+	/** Format string to build a regular expression to parse and recognize a pass-through preprocessing instruction. */
+	private static final String PASS_PATTERN_FORMAT = "^\\s*%1$c(%1$c\\s*\\S+.*)$";
+	/** Format string to build a regular expression to parse and recognize a comment directive that is not passed through. */
+	private static final String COMMENT_PATTERN_FORMAT = "^\\s*%1$c\\*.*$";
+
+	/** Pattern to skip white space inside an expression. */
+	private static final Pattern WHITE_SPACE = Pattern.compile("\\s+");
+	/** Pattern to recognize a macro reference: <code>$(<i>macroname</i>)</code> */
+	private static final Pattern MACRO_REF = Pattern.compile("\\$\\(([_A-Za-z][\\w\\.]*)\\)");
+	/** Alternate pattern to recognize a macro reference: <code>${<i>macroname</i>}</code> */
+	private static final Pattern MACRO_REF2 = Pattern.compile("\\$\\{([_A-Za-z][\\w\\.]*)\\}");
+	/** Pattern to match the reserved word <code>"true"</code>. */
+	private static final Pattern TRUE_CONST = Pattern.compile("^[tT][rR][uE][eE]");
+	/** Pattern to match the reserved word <code>"false"</code>. */
+	private static final Pattern FALSE_CONST = Pattern.compile("^[fF][aA][lL][sS][eE]");
+	/** Pattern to match an integer constant. */
+	private static final Pattern INT_CONST = Pattern.compile("^[0-9]+");
+	/** Pattern to match a floating-point constant. */
+	private static final Pattern FLT_CONST = Pattern.compile("^[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?");
+	/** Pattern to recognize the <code>"defined(<i>var</i>)"</code> function */
+	private static final Pattern DEFINED_FUNC = Pattern.compile("^[dD][eE][fF][iI][nN][eE][dD]\\s*\\(\\s*([_A-Za-z][\\w\\.]*)\\s*\\)");
+	/** Pattern to recognize a <code>"NOT"</code> operator. */
+	private static final Pattern NOT_OP = Pattern.compile("^[nN][oO][tT]");
+	/** Pattern to recognize an <code>"AND"</code> operator. */
+	private static final Pattern AND_OP = Pattern.compile("^[aA][nN][dD]");
+	/** Pattern to recognize an <code>"OR"</code> operator. */
+	private static final Pattern OR_OP = Pattern.compile("^[oO][rR]");
+	/** Pattern to recognize any old identifier. */
+	private static final Pattern IDENT = Pattern.compile("^([_A-Za-z][\\w\\.]*)");
+
+	/** The current version of this software. */
+	private static final String VERSION = "1.3.1";
+	/** The current copyright year. */
+	private static final String COPYRIGHT_YEAR = "2010-2011,2014-2016,2019-2023";
+
+
+	/**********************************************************/
+	/*           I N S T A N C E   V A R I A B L E S          */
+	/**********************************************************/
+
+	/** The current list of defined symbols and their values. */
+	private Map<String,String> defines = null;
 	/** Default (or overridden) extension for input files. */
 	private String inputExt = null;
-	/** Default extension for output files. */
-	private static String defaultOutputExt = ".java";
 	/** Default or overridden extension for output files. */
 	private String outputExt = null;
+	/** Explicit output file name. */
+	private String outputFileName = null;
 	/** Environment variable to use to search for included files. */
 	private String inclEnvVar = "INCLUDE";
 	/** Flag to say whether to process the input (and output) as UTF-8 encoded
@@ -323,16 +407,18 @@ public class JavaPreProc extends Task
 	/** Flag to say to ignore undefined symbols and silently expand them as empty
 	 * strings.  The default will be to issue an error message. */
 	private boolean ignoreUndefined = false;
+	/** Flag to say we ignore unknown directives (that is, no error). */
+	private boolean ignoreUnknownDirectives = false;
 	/** Flag to say: "display sign-on banner" (or not for more silent operation). */
 	private boolean displayLogo = true;
 	/** Flag to say: "always do the processing regardless of file time stamps". */
 	private boolean alwaysProcess = false;
 	/** List of paths to use to search for included files. */
-	private Vector<String> includePaths = null;
+	private List<String> includePaths = null;
 	/** Directive start character. */
 	private char directiveStartCh = '#';
 	/** List of input files or directories to process. */
-	private Vector<String> fileArgs = new Vector<String>();
+	private List<String> fileArgs = new ArrayList<String>();
 	/** Output log stream (defaults to {@link System#out}). */
 	private PrintStream out = System.out;
 	/** Error stream (defaults to {@link System#err}). */
@@ -342,66 +428,17 @@ public class JavaPreProc extends Task
 	/** Overwrite the output log file (not applicable to default). */
 	private boolean overwriteLog = false;
 
-	/** <code>__DATE__</code> predefined variable name. */
-	private static final String DATE_VAR_NAME = "__DATE__";
-	/** <code>__TIME__</code> predefined variable name. */
-	private static final String TIME_VAR_NAME = "__TIME__";
-	/** <code>__FILE__</code> predefined variable name. */
-	private static final String FILE_VAR_NAME = "__FILE__";
-	/** <code>__LINE__</code> predefined variable name. */
-	private static final String LINE_VAR_NAME = "__LINE__";
-	/** <code>__JAVA_VERSION__</code> predefined variable name. */
-	private static final String JAVA_VERSION_VAR_NAME = "__JAVA_VERSION__";
-	/** <code>__JAVA_PP_VERSION__</code> predefined variable name. */
-	private static final String JAVA_PP_VERSION_VAR_NAME = "__JAVA_PP_VERSION__";
-
-	/** Pattern to parse the <code>-D<i>var</i>=<i>value</i></code> command-line switch. */
-	private static Pattern defPat = Pattern.compile("^([_A-Za-z][\\w\\.]*)=(.*)$");
-	/** Pattern to parse the <code>-D<i>var</i></code> command-line switch. */
-	private static Pattern defAltPat = Pattern.compile("^([_A-Za-z][\\w\\.]*)$");
-	/** Format string to build a regular expression to parse and recognize one of our preprocessing instructions. */
-	private static String cmdPatFormat = "^\\s*%1$c\\s*(\\S+)(.*)$";
-	/** Format string to build a regular expression to parse and recognize a pass-through preprocessing instruction. */
-	private static String passPatFormat = "^\\s*%1$c(%1$c\\s*\\S+.*)$";
-	/** Format string to build a regular expression to parse and recognize a comment directive that is not passed through. */
-	private static String commentPatFormat = "^\\s*%1$c\\*.*$";
-	/** Pattern to parse our preprocessing instructions.  Built from {@link #cmdPatFormat}. */
+	/** Pattern to parse our preprocessing instructions.  Built from {@link #CMD_PATTERN_FORMAT}. */
 	private Pattern cmdPat = null;
-	/** Pattern to parse a pass-through preprocessing instruction.  Built from {@link #passPatFormat}. */
+	/** Pattern to parse a pass-through preprocessing instruction.  Built from {@link #PASS_PATTERN_FORMAT}. */
 	private Pattern passPat = null;
-	/** Pattern to parse a comment directive line.  Built from {@link #commentPatFormat}. */
+	/** Pattern to parse a comment directive line.  Built from {@link #COMMENT_PATTERN_FORMAT}. */
 	private Pattern commentPat = null;
-	/** Pattern to parse a <code>#define <i>var value</i></code> directive in the source. */
-	private static Pattern def2Pat = Pattern.compile("^([_A-Za-z][\\w\\.]*)\\s+(.*)$");
-	/** Pattern to parse a <code>#define <i>var</i></code> directive in the source. */
-	private static Pattern def3Pat = Pattern.compile("^([_A-Za-z][\\w\\.]*)\\s*$");
-	/** Pattern used to separate the "INCLUDE" environment variable or define and undefine lists into pieces. */
-	private static Pattern comma = Pattern.compile("[,;]");
 
-	/** Pattern to skip white space inside an expression. */
-	private static Pattern WHITE_SPACE = Pattern.compile("\\s+");
-	/** Pattern to recognize a macro reference: <code>$(<i>macroname</i>)</code> */
-	private static Pattern MACRO_REF = Pattern.compile("\\$\\(([_A-Za-z][\\w\\.]*)\\)");
-	/** Alternate pattern to recognize a macro reference: <code>${<i>macroname</i>}</code> */
-	private static Pattern MACRO_REF2 = Pattern.compile("\\$\\{([_A-Za-z][\\w\\.]*)\\}");
-	/** Pattern to match the reserved word <code>"true"</code>. */
-	private static Pattern TRUE_CONST = Pattern.compile("^[tT][rR][uE][eE]");
-	/** Pattern to match the reserved word <code>"false"</code>. */
-	private static Pattern FALSE_CONST = Pattern.compile("^[fF][aA][lL][sS][eE]");
-	/** Pattern to match an integer constant. */
-	private static Pattern INT_CONST = Pattern.compile("^[0-9]+");
-	/** Pattern to match a floating-point constant. */
-	private static Pattern FLT_CONST = Pattern.compile("^[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?");
-	/** Pattern to recognize the <code>"defined(<i>var</i>)"</code> function */
-	private static Pattern DEFINED_FUNC = Pattern.compile("^[dD][eE][fF][iI][nN][eE][dD]\\s*\\(\\s*([_A-Za-z][\\w\\.]*)\\s*\\)");
-	/** Pattern to recognize a <code>"NOT"</code> operator. */
-	private static Pattern NOT_OP = Pattern.compile("^[nN][oO][tT]");
-	/** Pattern to recognize an <code>"AND"</code> operator. */
-	private static Pattern AND_OP = Pattern.compile("^[aA][nN][dD]");
-	/** Pattern to recognize an <code>"OR"</code> operator. */
-	private static Pattern OR_OP = Pattern.compile("^[oO][rR]");
-	/** Pattern to recognize any old identifier. */
-	private static Pattern IDENT = Pattern.compile("^([_A-Za-z][\\w\\.]*)");
+
+	/**********************************************************/
+	/*             S T A T I C   V A R I A B L E S            */
+	/**********************************************************/
 
 	/** The default timezone value. */
 	private static TimeZone zone = null;
@@ -411,11 +448,6 @@ public class JavaPreProc extends Task
 	private static DateFormat dateFmt = null;
 	/** The {@link SimpleDateFormat} used for the variable <code>__TIME__</code>. */
 	private static DateFormat timeFmt = null;
-
-	/** The current version of this software. */
-	private static final String VERSION = "1.1.10";
-	/** The current copyright year. */
-	private static final String COPYRIGHT_YEAR = "2010-2011,2014-2016,2019-2022";
 
 
 	/**
@@ -465,35 +497,51 @@ public class JavaPreProc extends Task
 	enum Operator
 	{
 		/** The equals operator, that is, <code>"=="</code>. */
-		EQUAL,
+		EQUAL		(2),
 		/** The not equals operator, that is, <code>"!="</code>. */
-		NOTEQUAL,
+		NOTEQUAL	(2),
 		/** The less than operator, that is, <code>"&lt;"</code>. */
-		LESS,
+		LESS		(1),
 		/** The less or equal operator, that is, <code>"&lt;="</code>. */
-		LESSEQUAL,
+		LESSEQUAL	(2),
 		/** The greater than operator, that is, <code>"&gt;"</code>. */
-		GREATER,
+		GREATER		(1),
 		/** The greater or equal operator, that is, <code>"&gt;="</code>. */
-		GREATEREQUAL,
-		/** The "AND" operator, that is, <code>"&amp;&amp;"</code> or the word <code>"AND"</code>. */
-		ANDOP,
-		/** The "OR" operator, that is, <code>"||"</code> or the word <code>"OR"</code>. */
-		OROP,
-		/** The "NOT" equals operator, that is, <code>"!"</code> or the word <code>"NOT"</code>. */
-		NOTOP,
+		GREATEREQUAL	(2),
+		/** The "AND" operator, that is, <code>"&amp;&amp;"</code>. */
+		ANDOP		(2),
+		/** The second form of "AND" operator, that is the word <code>"AND"</code>. */
+		ANDOP2		(3),
+		/** The "OR" operator, that is, <code>"||"</code>. */
+		OROP		(2),
+		/** The second form of the "OR" operator, that is the word <code>"OR"</code>. */
+		OROP2		(2),
+		/** The "NOT" equals operator, that is, <code>"!"</code>. */
+		NOTOP		(1),
+		/** The second form of "NOT" operator, that is the word <code>"NOT"</code>. */
+		NOTOP2		(3),
 		/** The addition operator, that is, <code>"+"</code>. */
-		ADD,
+		ADD		(1),
 		/** The subtraction operator, that is, <code>"-"</code>. */
-		SUBTRACT,
+		SUBTRACT	(1),
 		/** The multiplication operator, that is, <code>"*"</code>. */
-		MULTIPLY,
+		MULTIPLY	(1),
 		/** The division operator, that is, <code>"/"</code>. */
-		DIVIDE,
+		DIVIDE		(1),
 		/** The modulus operator, that is, <code>"%"</code>. */
-		MODULUS,
+		MODULUS		(1),
 		/** Not an operator.  This is the type for a token that is not a {@link Token#OPER}. */
-		NONE
+		NONE		(0);
+
+		private int length;
+
+		private Operator(final int len) {
+		    length = len;
+		}
+
+		int opLen() {
+		    return length;
+		}
 	};
 
 	/**
@@ -554,17 +602,18 @@ public class JavaPreProc extends Task
 		/** Length of the token string in the input line. */
 		public int tokenLen;
 
-		public TokenValue(Token t, String v, Operator o) {
-		    this.tok = t;
-		    this.value = v;
-		    this.op = o;
+		public TokenValue(final Token t, final String v, final Operator o) {
+		    tok = t;
+		    value = v;
+		    op = o;
 		}
+
 		@Override
-		public boolean equals(Object o) {
+		public boolean equals(final Object o) {
 		    if (o instanceof TokenValue) {
 			try {
-			    TokenValue t = (TokenValue)o;
-			    switch (this.tok) {
+			    TokenValue t = (TokenValue) o;
+			    switch (tok) {
 				case SQSTRING:
 				case DQSTRING:
 				    return t.value.equals(value);
@@ -589,9 +638,10 @@ public class JavaPreProc extends Task
 		    }
 		    return false;
 		}
-		public void setPos(int start, int len) {
-		    this.startPos = start;
-		    this.tokenLen = len;
+
+		public void setPos(final int start, final int len) {
+		    startPos = start;
+		    tokenLen = len;
 		}
 	};
 
@@ -617,25 +667,26 @@ public class JavaPreProc extends Task
 		boolean doingOutput;
 		/** Type of the statement that pushed this state. */
 		IfType lastStmt;
+
 		/**
 		 * Constructor taking both values at once.
 		 * @param doing The current "doingOutput" flag.
 		 * @param ift   The IF/ELIF flag.
 		 */
-		public IfState(boolean doing, IfType ift) {
-		    this.doingOutput = doing;
-		    this.lastStmt = ift;
+		public IfState(final boolean doing, final IfType ift) {
+		    doingOutput = doing;
+		    lastStmt    = ift;
 		}
 	};
 
 
 	/**
-	 * Class to filter input file names according to the current inputExt.
+	 * Class to filter input file names according to the current {@link #inputExt}.
 	 */
 	class InputFileFilter implements FilenameFilter
 	{
 		@Override
-		public boolean accept(File dir, String name) {
+		public boolean accept(final File dir, final String name) {
 		    File f = new File(dir, name);
 		    return (f.exists() && f.isFile() && name.endsWith(inputExt));
 		}
@@ -648,7 +699,7 @@ public class JavaPreProc extends Task
 	class InputDirFilter implements FileFilter
 	{
 		@Override
-		public boolean accept(File f) {
+		public boolean accept(final File f) {
 		    return (f.exists() && f.isDirectory());
 		}
 	}
@@ -658,7 +709,19 @@ public class JavaPreProc extends Task
 	 * Private exception class used to gracefully exit from processing
 	 * without doing anything.
 	 */
-	class DontProcessException extends Exception {
+	static class DontProcessException extends Exception {
+		static final DontProcessException INSTANCE = new DontProcessException();
+	}
+
+
+	/**
+	 * Check if the input string is null or empty (trimmed).
+	 *
+	 * @param	value	A string value (or {@code null}) to check.
+	 * @return	Whether or not the string is null or empty.
+	 */
+	private static boolean empty(final String value) {
+	    return value == null || value.trim().isEmpty();
 	}
 
 
@@ -670,11 +733,11 @@ public class JavaPreProc extends Task
 	 * @return	A (hopefully) better message than just <code>getMesssage()</code>
 	 *		will return.
 	 */
-	private static String exceptMessage(Throwable ex) {
+	private static String exceptMessage(final Throwable ex) {
 	    String className = ex.getClass().getSimpleName();
 	    String message   = ex.getMessage();
 
-	    if (message == null || message.isEmpty())
+	    if (empty(message))
 		message = className;
 	    else if (ex instanceof UnknownHostException
 		  || ex instanceof NoClassDefFoundError
@@ -717,11 +780,11 @@ public class JavaPreProc extends Task
 	 * @see		#MACRO_REF2
 	 * @see		#defines
 	 */
-	private String doSubs(String line) {
-	    if (line.isEmpty())
+	private String doSubs(final String line) {
+	    if (empty(line))
 		return line;
 
-	    StringBuffer sb = new StringBuffer();
+	    StringBuffer sb = new StringBuffer(line.length() * 2);
 
 	    Matcher m = MACRO_REF.matcher(line);
 	    boolean found = m.find();
@@ -736,8 +799,7 @@ public class JavaPreProc extends Task
 		    if (!ignoreUndefined)
 			err.format("Error: Macro \"%1$s\" not defined!%n", name);
 		}
-		// Recursive call in common case that value
-		// is defined in terms of other macros
+		// Recursive call in common case that value is defined in terms of other macros
 		if (value != null)
 		    m.appendReplacement(sb, Matcher.quoteReplacement(doSubs(value)));
 
@@ -754,8 +816,8 @@ public class JavaPreProc extends Task
 	 * @param	value	The candidate string.
 	 * @return		The string stripped of leading and trailing quotes.
 	 */
-	private String stripQuotes(String value) {
-	    if (value != null) {
+	private String stripQuotes(final String value) {
+	    if (!empty(value)) {
 		String endQuote = null;
 		if (value.startsWith("\""))
 		    endQuote = "\"";
@@ -777,7 +839,7 @@ public class JavaPreProc extends Task
 	 * @param	value	The candidate string.
 	 * @return		The string stripped of leading and trailing brackets (or quotes).
 	 */
-	private String stripBrackets(String value) {
+	private String stripBrackets(final String value) {
 	    String endBracket = null;
 	    if (value.startsWith("<")) {
 		endBracket = ">";
@@ -809,10 +871,10 @@ public class JavaPreProc extends Task
 	 *		(probably should never happen, or the programmer
 	 *		has made a mistake).
 	 */
-	private ArrayList<TokenValue> tokenizeInput(String input, int startPos)
+	private List<TokenValue> tokenizeInput(final String input, final int startPos)
 		throws ParseException
 	{
-	    ArrayList<TokenValue> tokens = new ArrayList<TokenValue>(input.length());
+	    List<TokenValue> tokens = new ArrayList<>(input.length());
 	    int pos = 0;
 	    int endPos = input.length();
 	    while (pos < endPos) {
@@ -886,37 +948,30 @@ public class JavaPreProc extends Task
 					    switch (input.charAt(pos)) {
 						case '<':
 						    if (input.charAt(pos+1) == '=') {
-							len = 2;
 							op = Operator.LESSEQUAL;
 						    }
 						    else {
-							len = 1;
 							op = Operator.LESS;
 						    }
 						    break;
 						case '>':
 						    if (input.charAt(pos+1) == '=') {
-							len = 2;
 							op = Operator.GREATEREQUAL;
 						    }
 						    else {
-							len = 1;
 							op = Operator.GREATER;
 						    }
 						    break;
 						case '=':
 						    if (input.charAt(pos+1) == '=') {
-							len = 2;
 							op = Operator.EQUAL;
 						    }
 						    break;
 						case '!':
 						    if (input.charAt(pos+1) == '=') {
-							len = 2;
 							op = Operator.NOTEQUAL;
 						    }
 						    else {
-							len = 1;
 							op = Operator.NOTOP;
 						    }
 						    break;
@@ -930,34 +985,27 @@ public class JavaPreProc extends Task
 						    break;
 						case '&':
 						    if (input.charAt(pos+1) == '&') {
-							len = 2;
 							op = Operator.ANDOP;
 						    }
 						    break;
 						case '|':
 						    if (input.charAt(pos+1) == '|') {
-							len = 2;
 							op = Operator.OROP;
 						    }
 						    break;
 						case '+':
-						    len = 1;
 						    op = Operator.ADD;
 						    break;
 						case '-':
-						    len = 1;
 						    op = Operator.SUBTRACT;
 						    break;
 						case '*':
-						    len = 1;
 						    op = Operator.MULTIPLY;
 						    break;
 						case '/':
-						    len = 1;
 						    op = Operator.DIVIDE;
 						    break;
 						case '%':
-						    len = 1;
 						    op = Operator.MODULUS;
 						    break;
 						case '\'':
@@ -983,20 +1031,17 @@ public class JavaPreProc extends Task
 						default:
 						    m = NOT_OP.matcher(seq);
 						    if (m.lookingAt()) {
-							len = m.end();
-							op = Operator.NOTOP;
+							op = Operator.NOTOP2;
 						    }
 						    else {
 							m = AND_OP.matcher(seq);
 							if (m.lookingAt()) {
-							    len = m.end();
-							    op = Operator.ANDOP;
+							    op = Operator.ANDOP2;
 							}
 							else {
 							    m = OR_OP.matcher(seq);
 							    if (m.lookingAt()) {
-								len = m.end();
-								op = Operator.OROP;
+								op = Operator.OROP2;
 							    }
 							    else {
 								m = IDENT.matcher(seq);
@@ -1016,6 +1061,9 @@ public class JavaPreProc extends Task
 			    }
 			}
 		    }
+		}
+		if (op != Operator.NONE) {
+		    len = op.opLen();
 		}
 		if (len >= 0) {
 		    // We found something that matches!
@@ -1044,7 +1092,7 @@ public class JavaPreProc extends Task
 	/**
 	 * The tokenized input expression.
 	 */
-	private ArrayList<TokenValue> inputExpr = null;
+	private List<TokenValue> inputExpr = null;
 
 	/**
 	 * The current position in the tokenized input expression while moving
@@ -1066,7 +1114,7 @@ public class JavaPreProc extends Task
 	 * @return	The evaluated boolean result.
 	 * @throws	ParseException if tokenizing went wrong.
 	 */
-	private boolean otherFactor(ProcessAs type, int exprLen)
+	private boolean otherFactor(final ProcessAs type, final int exprLen)
 		throws ParseException
 	{
 	    TokenValue t = inputExpr.get(inputPos++);
@@ -1098,7 +1146,7 @@ public class JavaPreProc extends Task
 		    v = otherFactor(type, exprLen);
 		    break;
 		case OPER:
-		    if (t.op == Operator.NOTOP) {
+		    if (t.op == Operator.NOTOP || t.op == Operator.NOTOP2) {
 			v = !otherFactor(type, exprLen);
 			break;
 		    }
@@ -1122,7 +1170,7 @@ public class JavaPreProc extends Task
 	 * @throws	NumberFormatException if numbers are allowed and one of them is malformed.
 	 * @throws	ParseException for other kinds of syntax errors.
 	 */
-	private String stringFactor(boolean allowNumbers, int exprLen, boolean eating)
+	private String stringFactor(final boolean allowNumbers, final int exprLen, final boolean eating)
 		throws NumberFormatException, ParseException
 	{
 	    String value = null;
@@ -1170,7 +1218,7 @@ public class JavaPreProc extends Task
 	 * @throws	ParseException if the macro variable is not defined and
 	 *		{@link #ignoreUndefined} is not {@code true}.
 	 */
-	private void handleVarRef(TokenValue t)
+	private void handleVarRef(final TokenValue t)
 		throws ParseException
 	{
 	    String value;
@@ -1185,7 +1233,7 @@ public class JavaPreProc extends Task
 	    // Recursive call in common case that value
 	    // is defined in terms of other macros
 	    doSubs(value);
-	    ArrayList<TokenValue> newTokens = tokenizeInput(value, t.startPos);
+	    List<TokenValue> newTokens = tokenizeInput(value, t.startPos);
 
 	    // Remove the VARREF token at inputPos and replace by new list
 	    inputExpr.remove(--inputPos);
@@ -1196,7 +1244,7 @@ public class JavaPreProc extends Task
 	/**
 	 * Parse an integer value out of a token.
 	 *
-	 * @param	t	The input token.
+	 * @param	tok	The input token.
 	 * @param	type	How to process the evaluation.
 	 * @param	exprLen	The length limit on the expression.
 	 * @param	eating	Whether or not we are in the "false" state of short-circuit evaluation.
@@ -1206,12 +1254,14 @@ public class JavaPreProc extends Task
 	 * @throws	NumberFormatException if one of the numbers was not properly formed.
 	 * @throws	ParseException if the expression was not properly formed
 	 */
-	private int integerValue(TokenValue t, ProcessAs type, int exprLen, boolean eating)
+	private int integerValue(final TokenValue tok, final ProcessAs type, final int exprLen, final boolean eating)
 		throws NumberFormatException, ParseException
 	{
+	    TokenValue t = tok;
 	    int v = 0;
 	    String value;
 	    int sign = +1;
+
 	    // Check for leading + or -
 	    if (t.tok == Token.OPER) {
 		if (t.op == Operator.ADD)
@@ -1289,7 +1339,7 @@ public class JavaPreProc extends Task
 	/**
 	 * Parse a double value out of a token.
 	 *
-	 * @param	t	The input token.
+	 * @param	tok	The input token.
 	 * @param	type	How to process the evaluation.
 	 * @param	exprLen	The length limit on the expression.
 	 * @param	eating	Whether or not we are in the "false" state of short-circuit evaluation.
@@ -1299,9 +1349,10 @@ public class JavaPreProc extends Task
 	 * @throws	NumberFormatException if one of the numbers was not properly formed.
 	 * @throws	ParseException if the expression was not properly formed
 	 */
-	private double doubleValue(TokenValue t, ProcessAs type, int exprLen, boolean eating)
+	private double doubleValue(final TokenValue tok, final ProcessAs type, final int exprLen, final boolean eating)
 		throws NumberFormatException, ParseException
 	{
+	    TokenValue t = tok;
 	    double dv = 0.0;
 	    String value;
 	    double sign = +1.0;
@@ -1391,7 +1442,7 @@ public class JavaPreProc extends Task
 	 * @throws	NumberFormatException if one of the numbers was not properly formed.
 	 * @throws	ParseException if the expression was not properly formed
 	 */
-	private int integerFactor(ProcessAs type, int exprLen, boolean eating)
+	private int integerFactor(final ProcessAs type, final int exprLen, final boolean eating)
 		throws NumberFormatException, ParseException
 	{
 	    TokenValue t = inputExpr.get(inputPos++);
@@ -1438,7 +1489,7 @@ public class JavaPreProc extends Task
 	 * @throws	NumberFormatException if one of the numbers was not properly formed.
 	 * @throws	ParseException if the expression was not properly formed
 	 */
-	private int integerTerm(ProcessAs type, int exprLen, boolean eating)
+	private int integerTerm(final ProcessAs type, final int exprLen, final boolean eating)
 		throws NumberFormatException, ParseException
 	{
 	    int v = integerFactor(type, exprLen, eating);
@@ -1499,7 +1550,7 @@ public class JavaPreProc extends Task
 	 * @throws	NumberFormatException if one of the numbers was not properly formed.
 	 * @throws	ParseException if the expression was not properly formed
 	 */
-	private double doubleFactor(ProcessAs type, int exprLen, boolean eating)
+	private double doubleFactor(final ProcessAs type, final int exprLen, final boolean eating)
 		throws NumberFormatException, ParseException
 	{
 	    TokenValue t = inputExpr.get(inputPos++);
@@ -1546,7 +1597,7 @@ public class JavaPreProc extends Task
 	 * @throws	NumberFormatException if one of the numbers was not properly formed.
 	 * @throws	ParseException if the expression was not properly formed
 	 */
-	private double doubleTerm(ProcessAs type, int exprLen, boolean eating)
+	private double doubleTerm(final ProcessAs type, final int exprLen, final boolean eating)
 		throws NumberFormatException, ParseException
 	{
 	    double dv = doubleFactor(type, exprLen, eating);
@@ -1606,7 +1657,7 @@ public class JavaPreProc extends Task
 	 *
 	 * @throws	ParseException if the expression was not properly formed
 	 */
-	private boolean relTerm(ProcessAs type, int exprLen, boolean eating)
+	private boolean relTerm(final ProcessAs type, final int exprLen, final boolean eating)
 		throws ParseException
 	{
 	    int savePos = inputPos;
@@ -1764,13 +1815,13 @@ public class JavaPreProc extends Task
 	 * @throws	ParseException if the expression was not properly formed
 	 *		according to our rules.
 	 */
-	private boolean andTerm(ProcessAs type, int exprLen, boolean eating)
+	private boolean andTerm(final ProcessAs type, final int exprLen, final boolean eating)
 		throws ParseException
 	{
 	    boolean v = relTerm(type, exprLen, eating);
 	    while (inputPos < inputSize) {
 		TokenValue t = inputExpr.get(inputPos++);
-		if (t.tok == Token.OPER && t.op == Operator.ANDOP) {
+		if (t.tok == Token.OPER && (t.op == Operator.ANDOP || t.op == Operator.ANDOP2)) {
 		    if (inputPos < inputSize) {
 			// Do short-circuit evaluation:
 			// Stop evaluating as soon as we get 'false' result
@@ -1805,13 +1856,13 @@ public class JavaPreProc extends Task
 	 * @throws	ParseException if the expression was not properly formed
 	 *		according to our rules.
 	 */
-	private boolean orTerm(ProcessAs type, int exprLen)
+	private boolean orTerm(final ProcessAs type, final int exprLen)
 		throws ParseException
 	{
 	    boolean v = andTerm(type, exprLen, false);
 	    while (inputPos < inputSize) {
 		TokenValue t = inputExpr.get(inputPos++);
-		if (t.tok == Token.OPER && t.op == Operator.OROP) {
+		if (t.tok == Token.OPER && (t.op == Operator.OROP || t.op == Operator.OROP2)) {
 		    if (inputPos < inputSize) {
 			// Do short-circuit evaluation:
 			// Stop evaluating as soon as we get 'true' result
@@ -1845,7 +1896,7 @@ public class JavaPreProc extends Task
 	 * @throws	ParseException if the expression was not properly formed
 	 *		according to our rules.
 	 */
-	private boolean evaluate(ProcessAs type, int exprLen)
+	private boolean evaluate(final ProcessAs type, final int exprLen)
 		throws ParseException
 	{
 	    boolean v = orTerm(type, exprLen);
@@ -1867,7 +1918,7 @@ public class JavaPreProc extends Task
 	 * @throws	ParseException if the expression was not properly formed
 	 *		according to our rules.
 	 */
-	private boolean evaluate(String expr, ProcessAs type)
+	private boolean evaluate(final String expr, final ProcessAs type)
 		throws ParseException
 	{
 	    // First, tokenize the input stream
@@ -1892,7 +1943,7 @@ public class JavaPreProc extends Task
 	 *				doing output and {@link #plusVerbose} mode.
 	 * @param	doingOutput	<code>true</code> if we're doing output right now
 	 */
-	private void traceLine(long lineNo, String line, boolean directive, boolean doingOutput) {
+	private void traceLine(final long lineNo, final String line, final boolean directive, final boolean doingOutput) {
 	    if (verbose) {
 		if (plusVerbose && doingOutput)
 		    out.format("%1$8d.+%2$s%n", lineNo, line);
@@ -1920,7 +1971,7 @@ public class JavaPreProc extends Task
 	 * (unless the "-A" [always process] flag is given on the command line).
 	 *
 	 * @param	inputFile	the input file to be read and processed
-	 * @param	wrtr		<code>null</code> if this is a top-level file
+	 * @param	writer		<code>null</code> if this is a top-level file
 	 *				in which case the {@link BufferedWriter}
 	 *				is created based on the input file name and
 	 *				output extension.  If non-null, this means
@@ -1931,16 +1982,17 @@ public class JavaPreProc extends Task
 	 * @return	<code>false</code> if no errors (that is, success)
 	 *		<code>true</code> if errors (that is, failure)
 	 */
-	private boolean processFile(File inputFile, BufferedWriter wrtr) {
+	private boolean processFile(final File inputFile, final BufferedWriter writer) {
+	    BufferedWriter wrtr       = writer;
 	    boolean errors            = false;
 	    int nesting               = 0;
 	    int tooManyEndifErrors    = 0;
 	    boolean doingOutput       = true;
 	    boolean closeOutput       = false;
-	    LinkedList<IfState> state = new LinkedList<IfState>();
+	    LinkedList<IfState> state = new LinkedList<>();
 
-	    String name             = inputFile.getPath();
-	    String previousFileName = setFileVariables(name);
+	    String name               = inputFile.getPath();
+	    String previousFileName   = setFileVariables(name);
 
 	    try {
 		String fileType = "";
@@ -1955,12 +2007,12 @@ public class JavaPreProc extends Task
 
 		// Construct output file stream if necessary (not if processing #include)
 		if (wrtr == null) {
-		    String outName = name.replace(inputExt, outputExt);
+		    String outName = outputFileName == null ? name.replace(inputExt, outputExt) : outputFileName;
 		    if (outName.equals(name)) {
 			err.format("Error: Output file name must not be the same as input file name: '%1$s'!%n", name);
 			rdr.close();
 			errors = true;
-			throw new DontProcessException();
+			throw DontProcessException.INSTANCE;
 		    }
 		    if (!alwaysProcess) {
 			// Check time stamps of input and output files
@@ -1973,7 +2025,7 @@ public class JavaPreProc extends Task
 			    if (verbose)
 				out.format("Skipping file because output '%1$s'%n         is newer than input '%2$s'.%n", outName, name);
 			    rdr.close();
-			    throw new DontProcessException();
+			    throw DontProcessException.INSTANCE;
 			}
 		    }
 		    if (verbose) {
@@ -2106,7 +2158,7 @@ public class JavaPreProc extends Task
 				    traceLine(lineNo, line, true, doingOutput);
 				    if (doingOutput) {
 					args = doSubs(args.trim());
-					Matcher md = def2Pat.matcher(args);
+					Matcher md = DEFINE_2_PATTERN.matcher(args);
 					if (md.matches()) {
 					    String var = md.group(1);
 					    String val = md.group(2);
@@ -2116,7 +2168,7 @@ public class JavaPreProc extends Task
 					    }
 					}
 					else {
-					    md = def3Pat.matcher(args);
+					    md = DEFINE_3_PATTERN.matcher(args);
 					    if (md.matches()) {
 						// "#define ABC" puts empty string in as value
 						String var = md.group(1);
@@ -2174,9 +2226,11 @@ public class JavaPreProc extends Task
 				    }
 				}
 				else {
-				    traceLine(lineNo, line, true, false);
-				    err.format("Error: Line %1$d. Unknown directive: '%2$s'%n", lineNo, directive);
-				    errors = true;
+				    if (!ignoreUnknownDirectives) {
+					traceLine(lineNo, line, true, false);
+					err.format("Error: Line %1$d. Unknown directive: '%2$s'%n", lineNo, directive);
+					errors = true;
+				    }
 				}
 			    }
 			    catch (ParseException pe) {
@@ -2204,7 +2258,7 @@ public class JavaPreProc extends Task
 		    }
 		    if (!isDirective) {
 			if (doingOutput) {
-			    if (!line.isEmpty()) {
+			    if (!empty(line)) {
 				defines.put(LINE_VAR_NAME, String.format("%1$d", lineNo));
 				line = doSubs(line);
 				wrtr.write(line, 0, line.length());
@@ -2241,7 +2295,7 @@ public class JavaPreProc extends Task
 		}
 	    }
 	    catch (IOException ioe) {
-		err.format("Error: I/O error occurred while processing file '%1$s'!%n\t%2$s%n", name, exceptMessage(ioe));
+		err.format("Error: Problem while processing file '%1$s'!%n\t%2$s%n", name, exceptMessage(ioe));
 		errors = true;
 	    }
 	    catch (DontProcessException dpe) {
@@ -2264,7 +2318,7 @@ public class JavaPreProc extends Task
 	 *		<code>true</code> if errors (that is, failure)
 	 * @throws	FileNotFoundException for the obvious reason.
 	 */
-	private boolean processOneFile(String arg, BufferedWriter wrtr)
+	private boolean processOneFile(final String arg, final BufferedWriter wrtr)
 		throws FileNotFoundException
 	{
 	    return processOneFile(new File(arg), wrtr);
@@ -2280,7 +2334,7 @@ public class JavaPreProc extends Task
 	 *		<code>true</code> if errors (that is, failure)
 	 * @throws	FileNotFoundException for the obvious reason.
 	 */
-	private boolean processOneFile(File f, BufferedWriter wrtr)
+	private boolean processOneFile(final File f, final BufferedWriter wrtr)
 		throws FileNotFoundException
 	{
 	    boolean err = false;
@@ -2295,7 +2349,7 @@ public class JavaPreProc extends Task
 		File f2 = new File(name + inputExt);
 		if (f2.exists() && f2.isFile()) {
 		    if (processFile(f2, wrtr)) {
-			    err = true;
+			err = true;
 		    }
 		}
 		else {
@@ -2320,7 +2374,7 @@ public class JavaPreProc extends Task
 	 *		<code>true</code> if errors (that is, failure)
 	 *		most notably if the file cannot be found anywhere
 	 */
-	private boolean processIncludeFile(String arg, BufferedWriter wrtr) {
+	private boolean processIncludeFile(final String arg, final BufferedWriter wrtr) {
 	    try {
 		return processOneFile(arg, wrtr);
 	    }
@@ -2340,8 +2394,8 @@ public class JavaPreProc extends Task
 
 		// Okay, not found there, try using INCLUDE (or other -E variable)
 		String env = System.getenv(inclEnvVar);
-		if (env != null && !env.isEmpty()) {
-		    String[] paths = comma.split(env);
+		if (!empty(env)) {
+		    String[] paths = COMMA.split(env);
 		    for (String p : paths) {
 			File f = new File(p, arg);
 			try {
@@ -2368,8 +2422,8 @@ public class JavaPreProc extends Task
 	 * @return	{@code true} if the value is a valid option specifier
 	 *		for the current platform.
 	 */
-	private static boolean isOptionString(String arg) {
-	    if (System.getProperty("os.name").startsWith("Windows")) {
+	private static boolean isOptionString(final String arg) {
+	    if (ON_WINDOWS) {
 		return (arg.startsWith("-") || arg.startsWith("/"));
 	    }
 	    else {
@@ -2387,8 +2441,8 @@ public class JavaPreProc extends Task
 	    else if (inputExt != null && outputExt == null)
 		outputExt = inputExt.replaceFirst("pp$", "");
 	    else if (inputExt == null && outputExt == null) {
-		outputExt = defaultOutputExt;
-		inputExt = defaultInputExt;
+		inputExt = DEFAULT_INPUT_EXT;
+		outputExt = DEFAULT_OUTPUT_EXT;
 	    }
 	}
 
@@ -2400,13 +2454,10 @@ public class JavaPreProc extends Task
 	 * @param	args	The complete list of command line arguments, some of which
 	 *			are file names.
 	 *
-	 * @throws	BuildException if there were errors.
+	 * @throws	FileNotFoundException if there were errors.
 	 */
-	private void processFileSpecs(Vector<String> args) throws BuildException {
+	private void processFileSpecs(final List<String> args) throws FileNotFoundException {
 	    for (String arg: args) {
-		if (isOptionString(arg))
-		    continue;
-
 		// Set input and output extensions if not overridden on command line
 		String lastInputExt = inputExt;
 		String lastOutputExt = outputExt;
@@ -2423,7 +2474,7 @@ public class JavaPreProc extends Task
 		    }
 		}
 		catch (FileNotFoundException fnfe) {
-		    throw new BuildException(exceptMessage(fnfe));
+		    throw fnfe;
 		}
 
 		inputExt = lastInputExt;
@@ -2439,7 +2490,7 @@ public class JavaPreProc extends Task
 	 *
 	 * @return	{@code true} if there were errors.
 	 */
-	private boolean processDir(File f) {
+	private boolean processDir(final File f) {
 	    boolean errors = false;
 	    if (f.exists() && f.isDirectory()) {
 		InputFileFilter filt = new InputFileFilter();
@@ -2469,10 +2520,8 @@ public class JavaPreProc extends Task
 	 *
 	 * @param	args	The list of arguments, some of which are directories.
 	 */
-	private void processDirSpecs(Vector<String> args) {
+	private void processDirSpecs(final List<String> args) {
 	    for (String arg: args) {
-		if (isOptionString(arg))
-		    continue;
 		if (processDir(new File(arg))) {
 		    break;
 		}
@@ -2485,9 +2534,9 @@ public class JavaPreProc extends Task
 	 *
 	 * @param	display	Flag to say whether or not to really display it.
 	 */
-	private void signOnBanner(boolean display) {
+	private void signOnBanner(final boolean display) {
 	    if (display)
-		out.format("Java Pre-Processor -- version %1$s%nCopyright (c) %2$s Roger L. Whitcomb.%n", VERSION, COPYRIGHT_YEAR);
+		out.format("Pre-Processor -- version %1$s%nCopyright (c) %2$s Roger L. Whitcomb.%n", VERSION, COPYRIGHT_YEAR);
 	}
 
 
@@ -2508,9 +2557,9 @@ public class JavaPreProc extends Task
 	 * @return	{@code true} to just quit without further processing (as for "-help") or
 	 *		{@code false} to continue with regular processing.
 	 *
-	 * @throws	BuildException for errors parsing these arguments.
+	 * @throws	IllegalArgumentException for errors parsing these arguments.
 	 */
-	private static boolean processCommandLine(JavaPreProc inst, String[] args) throws BuildException {
+	private static boolean processCommandLine(final PreProc inst, final String[] args) throws IllegalArgumentException {
 	    // Process the command-line switches
 	    for (String arg: args) {
 		if (isOptionString(arg)) {
@@ -2529,6 +2578,12 @@ public class JavaPreProc extends Task
 		    }
 		    else if (arg.startsWith("I") || arg.startsWith("i")) {
 			inst.setInputExt(arg.substring(1));
+		    }
+		    else if (arg.startsWith("N") || arg.startsWith("n")) {
+			String value = arg.substring(1);
+			if (value.startsWith(":"))
+			    value = value.substring(1);
+			inst.setOutputFileName(value);
 		    }
 		    else if (arg.startsWith("P") || arg.startsWith("p")) {
 			inst.setIncludePath(arg.substring(1));
@@ -2575,7 +2630,7 @@ public class JavaPreProc extends Task
 			return true;    // Just to quit without doing any processing
 		    }
 		    else {
-			throw new BuildException(String.format("Unknown option: '%1$s'", arg));
+			throw new IllegalArgumentException(String.format("Unknown option: '%1$s'", arg));
 		    }
 		}
 	    }
@@ -2587,15 +2642,17 @@ public class JavaPreProc extends Task
 	 * Set value for <code>directiveChar</code> option.
 	 *
 	 * @param	ch	The new value for the option.
-	 * @throws	BuildException if the value is more than one character.
+	 * @return	This object for chaining of options.
+	 * @throws	IllegalArgumentException if the value is more than one character.
 	 */
-	public void setDirectiveChar(String ch) throws BuildException {
+	public PreProc setDirectiveChar(final String ch) throws IllegalArgumentException {
 	    if (ch.length() != 1) {
-		throw new BuildException("Directive indicator must be a single character.");
+		throw new IllegalArgumentException("Directive indicator must be a single character.");
 	    }
 	    else {
 		directiveStartCh = ch.charAt(0);
 	    }
+	    return this;
 	}
 
 
@@ -2605,14 +2662,16 @@ public class JavaPreProc extends Task
 	 * delimiters.
 	 *
 	 * @param	def	The new define specification ({@code "var=value"}).
-	 * @throws	BuildException if the specification can't be parsed.
+	 * @return	This object for chaining of options.
+	 * @throws	IllegalArgumentException if the specification can't be parsed.
 	 */
-	public void setDefine(String def) throws BuildException {
-	    if (def == null || def.isEmpty())
-		return;
-	    String[] defs = comma.split(def);
+	public PreProc setDefine(final String def) throws IllegalArgumentException {
+	    if (empty(def))
+		return this;
+
+	    String[] defs = COMMA.split(def);
 	    for (String d : defs) {
-		Matcher m1 = defPat.matcher(d);
+		Matcher m1 = DEFINE_PATTERN.matcher(d);
 		if (m1.matches()) {
 		    String var = m1.group(1);
 		    String val = m1.group(2);
@@ -2621,7 +2680,7 @@ public class JavaPreProc extends Task
 			out.format("Defining '%1$s' to '%2$s'%n", var, val);
 		}
 		else {
-		    m1 = defAltPat.matcher(d);
+		    m1 = ALT_DEFINE_PATTERN.matcher(d);
 		    if (m1.matches()) {
 			String var = m1.group(1);
 			defines.put(var, "");
@@ -2629,10 +2688,12 @@ public class JavaPreProc extends Task
 			    out.format("Defining '%1$s'%n", var);
 		    }
 		    else {
-			throw new BuildException(String.format("Cannot parse Define value: '-D%1$s'%n\tformat should be: -Dvar=value or -Dvar", d));
+			throw new IllegalArgumentException(String.format("Cannot parse Define value: '-D%1$s'%n\tformat should be: -Dvar=value or -Dvar", d));
 		    }
 		}
 	    }
+
+	    return this;
 	}
 
 
@@ -2641,16 +2702,18 @@ public class JavaPreProc extends Task
 	 * <p> Muliple variables can be specified (comma or semicolon delimited).
 	 *
 	 * @param	var	The variable to undefine.
-	 * @throws	BuildException if the variable is not defined now, and the {@link #ignoreUndefined} flag is {@code false}.
+	 * @return	This object for chaining of options.
+	 * @throws	IllegalArgumentException if the variable is not defined now, and the {@link #ignoreUndefined} flag is {@code false}.
 	 */
-	public void setUndefine(String var) throws BuildException {
-	    if (var == null || var.isEmpty())
-		return;
-	    String[] vars = comma.split(var);
+	public PreProc setUndefine(final String var) throws IllegalArgumentException {
+	    if (empty(var))
+		return this;
+
+	    String[] vars = COMMA.split(var);
 	    for (String v : vars) {
 		if (defines.remove(v) == null) {
 		    if (!ignoreUndefined) {
-			throw new BuildException(String.format("Variable '%1$s' is not defined in the current environment.", v));
+			throw new IllegalArgumentException(String.format("Variable '%1$s' is not defined in the current environment.", v));
 		    }
 		}
 		else {
@@ -2658,6 +2721,26 @@ public class JavaPreProc extends Task
 			out.format("Undefining '%1$s'%n", v);
 		}
 	    }
+
+	    return this;
+	}
+
+
+	/**
+	 * Set value for output file name.
+	 *
+	 * @param	arg	The new complete output file name.
+	 * @return	This object for chaining of options.
+	 * @throws	IllegalArgumentException if the value is empty.
+	 */
+	public PreProc setOutputFileName(final String arg) throws IllegalArgumentException {
+	    if (!empty(arg)) {
+		outputFileName = arg;
+	    }
+	    else {
+		throw new IllegalArgumentException("Cannot specify empty output file name.");
+	    }
+	    return this;
 	}
 
 
@@ -2665,18 +2748,20 @@ public class JavaPreProc extends Task
 	 * Set value for <code>outputExt</code> option.
 	 *
 	 * @param	arg	The new output file extension value.
-	 * @throws	BuildException if the value is empty.
+	 * @return	This object for chaining of options.
+	 * @throws	IllegalArgumentException if the value is empty.
 	 */
-	public void setOutputExt(String arg) throws BuildException {
-	    if (arg.length() > 0) {
+	public PreProc setOutputExt(final String arg) throws IllegalArgumentException {
+	    if (!empty(arg)) {
 		if (arg.charAt(0) == '.')
 		    outputExt = arg;
 		else
 		    outputExt = "." + arg;
 	    }
 	    else {
-		throw new BuildException("Cannot specify empty output extension value.");
+		throw new IllegalArgumentException("Cannot specify empty output extension value.");
 	    }
+	    return this;
 	}
 
 
@@ -2684,18 +2769,20 @@ public class JavaPreProc extends Task
 	 * Set value for <code>inputExt</code> option.
 	 *
 	 * @param	arg	The new input file extension value.
-	 * @throws	BuildException if the value is empty.
+	 * @return	This object for chaining of options.
+	 * @throws	IllegalArgumentException if the value is empty.
 	 */
-	public void setInputExt(String arg) throws BuildException {
-	    if (arg.length() > 0) {
+	public PreProc setInputExt(final String arg) throws IllegalArgumentException {
+	    if (!empty(arg)) {
 		if (arg.charAt(0) == '.')
 		    inputExt = arg;
 		else
 		    inputExt = "." + arg;
 	    }
 	    else {
-		throw new BuildException("Cannot specify empty input extension value.");
+		throw new IllegalArgumentException("Cannot specify empty input extension value.");
 	    }
+	    return this;
 	}
 
 
@@ -2703,18 +2790,20 @@ public class JavaPreProc extends Task
 	 * Set value for <code>includePath</code> option.
 	 *
 	 * @param	pathArg	The new include path.
-	 * @throws	BuildException if the path is empty.
+	 * @return	This object for chaining of options.
+	 * @throws	IllegalArgumentException if the path is empty.
 	 */
-	public void setIncludePath(String pathArg) throws BuildException {
-	    if (pathArg.length() > 0) {
-		String[] paths = comma.split(pathArg);
-		includePaths = new Vector<String>();
+	public PreProc setIncludePath(final String pathArg) throws IllegalArgumentException {
+	    if (!empty(pathArg)) {
+		String[] paths = COMMA.split(pathArg);
+		includePaths = new ArrayList<>();
 		for (String p : paths)
 		    includePaths.add(p);
 	    }
 	    else {
-		throw new BuildException("Cannot specify empty search path list.");
+		throw new IllegalArgumentException("Cannot specify empty search path list.");
 	    }
+	    return this;
 	}
 
 
@@ -2722,19 +2811,35 @@ public class JavaPreProc extends Task
 	 * Set value for <code>nologo</code> option.
 	 *
 	 * @param	var	The new value for the option.
+	 * @return	This object for chaining of options.
 	 */
-	public void setNologo(boolean var) {
+	public PreProc setNologo(final boolean var) {
 	    displayLogo = !var;
+	    return this;
 	}
 
 
 	/**
 	 * Set value for <code>ignoreUndefined</code> option.
 	 *
-	 * @param	val	The new value for the option.
+	 * @param	value	The new value for the option.
+	 * @return	This object for chaining of options.
 	 */
-	public void setIgnoreUndefined(boolean val) {
-	    ignoreUndefined = val;
+	public PreProc setIgnoreUndefined(final boolean value) {
+	    ignoreUndefined = value;
+	    return this;
+	}
+
+
+	/**
+	 * Set value for <code>ignoreUnknownDirectives</code> option.
+	 *
+	 * @param	value	The new value for the option.
+	 * @return	This object for chaining of options.
+	 */
+	public PreProc setIgnoreUnknownDirectives(final boolean value) {
+	    ignoreUnknownDirectives = value;
+	    return this;
 	}
 
 
@@ -2742,10 +2847,11 @@ public class JavaPreProc extends Task
 	 * Set value for <code>verbose</code> option.
 	 *
 	 * @param	value	The new value for the option.
-	 * @throws	BuildException if the value is invalid.
+	 * @return	This object for chaining of options.
+	 * @throws	IllegalArgumentException if the value is invalid.
 	 */
-	public void setVerbose(String value) throws BuildException {
-	    if (value.length() == 0)
+	public PreProc setVerbose(final String value) throws IllegalArgumentException {
+	    if (empty(value))
 		verbose = true;
 	    else if (value.equals("+") || value.equalsIgnoreCase("plus"))
 		verbose = plusVerbose = true;
@@ -2756,7 +2862,8 @@ public class JavaPreProc extends Task
 	    else if (value.equalsIgnoreCase(Boolean.toString(false)))
 		verbose = false;
 	    else
-		throw new BuildException(String.format("Undefined 'verbose' option '%1$s'.", value));
+		throw new IllegalArgumentException(String.format("Undefined 'verbose' option '%1$s'.", value));
+	    return this;
 	}
 
 
@@ -2764,15 +2871,17 @@ public class JavaPreProc extends Task
 	 * Set value for the <code>format</code> option.
 	 *
 	 * @param	value	The new value for the option.
-	 * @throws	BuildException if the value is invalid.
+	 * @return	This object for chaining of options.
+	 * @throws	IllegalArgumentException if the value is invalid.
 	 */
-	public void setFormat(String value) throws BuildException {
-	    if (value.equalsIgnoreCase("UTF8") ||
-		value.equalsIgnoreCase("UTF-8"))
+	public PreProc setFormat(final String value) throws IllegalArgumentException {
+	    if ("UTF8".equalsIgnoreCase(value) ||
+		"UTF-8".equalsIgnoreCase(value))
 		processAsUTF8 = true;
 	    else {
-		throw new BuildException(String.format("Unknown file format: '%1$s'%n\tvalid choices are: 'UTF8' or 'UTF-8'", value));
+		throw new IllegalArgumentException(String.format("Unknown file format: '%1$s'%n\tvalid choices are: 'UTF8' or 'UTF-8'", value));
 	    }
+	    return this;
 	}
 
 
@@ -2780,13 +2889,15 @@ public class JavaPreProc extends Task
 	 * Set value for the output log file (<code>log</code> option).
 	 *
 	 * @param	value	The new file name for the output log.
-	 * @throws	BuildException if the name is invalid somehow.
+	 * @return	This object for chaining of options.
+	 * @throws	IllegalArgumentException if the name is invalid somehow.
 	 */
-	public void setLog(String value) throws BuildException {
-	    if (value == null || value.trim().isEmpty()) {
-		throw new BuildException("Log file value must not be empty.");
+	public PreProc setLog(final String value) throws IllegalArgumentException {
+	    if (empty(value)) {
+		throw new IllegalArgumentException("Log file value must not be empty.");
 	    }
 	    logFileName = value;
+	    return this;
 	}
 
 
@@ -2794,42 +2905,50 @@ public class JavaPreProc extends Task
 	 * Set value for the <code>overwrite</code> option.
 	 *
 	 * @param	value	Whether to overwrite the log file or not.
+	 * @return	This object for chaining of options.
 	 */
-	public void setOverwrite(boolean value) {
+	public PreProc setOverwrite(final boolean value) {
 	    overwriteLog = value;
+	    return this;
 	}
 
 
 	/**
 	 * Set value for the <code>processAsDirectory</code> option.
 	 *
-	 * @param	val	The new value for the option.
+	 * @param	value	The new value for the option.
+	 * @return	This object for chaining of options.
 	 */
-	public void setProcessAsDirectory(boolean val) {
-	    processAsDirectory = val;
+	public PreProc setProcessAsDirectory(final boolean value) {
+	    processAsDirectory = value;
+	    return this;
 	}
 
 
 	/**
 	 * Set value for the <code>recurseDirectories</code> option.
 	 *
-	 * @param	val	The new value for the option.
+	 * @param	value	The new value for the option.
+	 * @return	This object for chaining of options.
 	 */
-	public void setRecurseDirectories(boolean val) {
-	    if (val)
-		processAsDirectory = recurseDirectories = val;
+	public PreProc setRecurseDirectories(final boolean value) {
+	    if (value)
+		processAsDirectory = recurseDirectories = value;
 	    else
-		recurseDirectories = val;
+		recurseDirectories = value;
+	    return this;
 	}
 
 
 	/**
 	 * Set value for the <code>alwaysProcess</code> option.
 	 *
-	 * @param	val	The new value for the option.
+	 * @param	value	The new value for the option.
+	 * @return	This object for chaining of options.
 	 */
-	public void setAlwaysProcess(boolean val) {
-	    alwaysProcess = val;
+	public PreProc setAlwaysProcess(final boolean value) {
+	    alwaysProcess = value;
+	    return this;
 	}
 
 
@@ -2837,14 +2956,17 @@ public class JavaPreProc extends Task
 	 * Set value for the <code>includeVar</code> option.
 	 *
 	 * @param	value	The new value for the include environment variable name.
+	 * @return	This object for chaining of options.
+	 * @throws	IllegalArgumentException if the argument value is empty.
 	 */
-	public void setIncludeVar(String value) throws BuildException {
-	    if (value.length() > 0) {
+	public PreProc setIncludeVar(final String value) throws IllegalArgumentException {
+	    if (!empty(value)) {
 		inclEnvVar = value;
 	    }
 	    else {
-		throw new BuildException("Cannot specify empty environment variable name for include variable.");
+		throw new IllegalArgumentException("Cannot specify empty environment variable name for include variable.");
 	    }
+	    return this;
 	}
 
 
@@ -2852,9 +2974,11 @@ public class JavaPreProc extends Task
 	 * Set value for one or more <code>file</code> options.
 	 *
 	 * @param	arg	The next {@code "file"} option.
+	 * @return	This object for chaining of options.
 	 */
-	public void setFile(String arg) {
+	public PreProc setFile(final String arg) {
 	    fileArgs.add(arg);
+	    return this;
 	}
 
 
@@ -2862,9 +2986,11 @@ public class JavaPreProc extends Task
 	 * Set value for one or more <var>dir</var> options.
 	 *
 	 * @param	arg	The next {@code "dir"} option.
+	 * @return	This object for chaining of options.
 	 */
-	public void setDir(String arg) {
+	public PreProc setDir(final String arg) {
 	    fileArgs.add(arg);
+	    return this;
 	}
 
 
@@ -2876,8 +3002,9 @@ public class JavaPreProc extends Task
 	 * @param fileName The current file name.
 	 * @return The previous file name setting.
 	 */
-	private String setFileVariables(String fileName) {
+	private String setFileVariables(final String fileName) {
 	    Date now = currentCal.getTime();
+
 	    defines.put(DATE_VAR_NAME, dateFmt.format(now));
 	    defines.put(TIME_VAR_NAME, timeFmt.format(now));
 
@@ -2896,11 +3023,11 @@ public class JavaPreProc extends Task
 	 *				if there was an I/O error reading the file (which could be
 	 *				{@code null} if that was passed in).
 	 */
-	private static Properties readPropertiesFile(String filePath, Properties baseProperties) {
+	private static Properties readPropertiesFile(final String filePath, final Properties baseProperties) {
 	    Properties properties = (baseProperties == null)
 			? new Properties()
 			: new Properties(baseProperties);
-	    try (InputStream is = JavaPreProc.class.getResourceAsStream(filePath)) {
+	    try (InputStream is = PreProc.class.getResourceAsStream(filePath)) {
 		properties.load(is);
 	    }
 	    catch (IOException ioe) {
@@ -2935,9 +3062,9 @@ public class JavaPreProc extends Task
 	 * Default constructor which initializes all the per-instance
 	 * variables.
 	 */
-	public JavaPreProc() {
+	public PreProc() {
 	    // Read in the environment and define everything found
-	    defines = new HashMap<String,String>(System.getenv());
+	    defines = new HashMap<>(System.getenv());
 
 	    // Define some predefined variables
 	    defines.put(JAVA_VERSION_VAR_NAME, System.getProperty("java.version"));
@@ -2952,11 +3079,17 @@ public class JavaPreProc extends Task
 	/**
 	 * The main execution method (called either from {@link #main} or from Ant
 	 * when the {@code <preproc ...>} task is executed).
+	 *
+	 * @throws IOException if there were problems writing the log or output files.
+	 * @throws IllegalArgumentException for illegal combination of options.
 	 */
-	public void execute() throws BuildException {
-	    // Check for illegal combination of options
+	public void execute() throws IOException, IllegalArgumentException {
+	    // Check for illegal combinations of options
 	    if (overwriteLog && logFileName == null) {
-		throw new BuildException("Overwrite option is not applicable for output to console.");
+		throw new IllegalArgumentException("Overwrite option is not applicable for output to console.");
+	    }
+	    if (outputFileName != null && (processAsDirectory || fileArgs.size() > 1)) {
+		throw new IllegalArgumentException("Setting an output file name only applies to an individual input file.");
 	    }
 
 	    // Build the output log and error stream if the default is overridden
@@ -2970,7 +3103,7 @@ public class JavaPreProc extends Task
 		    err = ps;
 		}
 		catch (IOException ioe) {
-		    throw new BuildException(String.format("I/O Error creating output log file: %1$s",
+		    throw new IOException(String.format("Error: Problem creating output log file: %1$s",
 			exceptMessage(ioe)));
 		}
 	    }
@@ -2981,14 +3114,13 @@ public class JavaPreProc extends Task
 	    }
 
 	    // Build the pattern matcher to recognize our directives
-	    cmdPat = Pattern.compile(String.format(cmdPatFormat, directiveStartCh));
-	    passPat = Pattern.compile(String.format(passPatFormat, directiveStartCh));
-	    commentPat = Pattern.compile(String.format(commentPatFormat, directiveStartCh));
+	    cmdPat     = Pattern.compile(String.format(CMD_PATTERN_FORMAT,     directiveStartCh));
+	    passPat    = Pattern.compile(String.format(PASS_PATTERN_FORMAT,    directiveStartCh));
+	    commentPat = Pattern.compile(String.format(COMMENT_PATTERN_FORMAT, directiveStartCh));
 
 	    // Process files or directories depending on the -r or -R switches
 	    if (processAsDirectory) {
 		setDefaultExtensions();
-
 		processDirSpecs(fileArgs);
 	    }
 	    else {
@@ -3017,31 +3149,32 @@ public class JavaPreProc extends Task
 	 *
 	 * @param	args	The command line arguments for the process.
 	 */
-	public static void main(String[] args) {
+	public static void main(final String[] args) {
 
-	    JavaPreProc inst = new JavaPreProc();
+	    PreProc inst = new PreProc();
 
 	    // Process the command-line switches
 	    try {
 		if (processCommandLine(inst, args))
 		    System.exit(1);
 	    }
-	    catch (BuildException be1) {
-		System.err.format("Error in command line: %1$s%n", be1.getMessage());
+	    catch (IllegalArgumentException iae) {
+		System.err.format("Error: Problem in command line: %1$s%n", iae.getMessage());
 		System.exit(1);
 	    }
 
-	    // Add all the command-line arguments as potential
-	    // file specs
+	    // Add the non-option arguments as file names
 	    for (String a : args) {
-		inst.setFile(a);
+		if (!isOptionString(a)) {
+		    inst.setFile(a);
+		}
 	    }
 
 	    try {
 		inst.execute();
 	    }
-	    catch (BuildException be2) {
-		System.err.format("Error: %1$s%n", be2.getMessage());
+	    catch (IllegalArgumentException | IOException ex) {
+		System.err.format("Error: %1$s%n", exceptMessage(ex));
 		System.exit(2);
 	    }
 	}

@@ -1,7 +1,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2022 Roger L. Whitcomb.
+# Copyright (c) 2022-2023 Roger L. Whitcomb.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -49,6 +49,10 @@
 #	    #18: New errors for Gmt for tz offset.
 #	02-Nov-2022 (rlwhitcomb)
 #	    #545: New "-default" option for Gmt.
+#	14-Dec-2022 (rlwhitcomb)
+#	    #561: Update Gmt help for new formats and options.
+#	05-Jan-2023 (rlwhitcomb)
+#	    #28: Text for "unq" program.
 #
 
 #
@@ -100,18 +104,27 @@ gmt.help5	= \t  -log  = display in format compatible with our Logging class
 gmt.help6	= \t  -date = display compatible with Linux 'date' command
 gmt.help7	= \t  -iso  = display in ISO-8601 format
 gmt.help8	= \t  -def  = default display format
-gmt.help9	= ""
-gmt.help10	= \t or an hourly offset from GMT (range of -12 .. 14)
-gmt.help11	= \t or a timezone designator (such as 'EST', 'PST', or 'Etc/GMT-4')
+gmt.help9	= \t  -850  = display according to RFC850 format
+gmt.help10	= \t  -822  = display according to RFC822 conventions
+gmt.help11	= \t  -asc  = display in ANSI "C" "asctime()" format
 gmt.help12	= ""
-gmt.help13	= \tNote: options can be with or without '-' or can be just the first character.
-gmt.help14	= ""
-gmt.help15	= \tExamples:
-gmt.help16	= \t  -log  -> Dec 20,2021 06:45:49.829 GMT
-gmt.help17	= \t  -date -> Mon Dec 20  6:46:19 GMT 2021
-gmt.help18	= \t  -iso  -> 2021-12-20T06:46:43.526Z
-gmt.help19	= \tdefault -> Mon Dec 20,2021  6:48:22.584 GMT
+gmt.help13	= \t  -secs = display raw epoch seconds (since 01-01-1970 00:00:00)
+gmt.help14	= \t  -mill = display raw epoch milliseconds
+gmt.help15	= ""
+gmt.help16	= \t or an hourly offset from GMT (range of -12 .. 14)
+gmt.help17	= \t or a timezone designator (such as 'EST', 'PST', or 'Etc/GMT-4')
+gmt.help18	= ""
+gmt.help19	= \tNote: options can be with or without '-' or can be just the first character.
 gmt.help20	= ""
+gmt.help21	= \tExamples:
+gmt.help22	= \t  -log  -> Dec 20,2021 06:45:49.829 GMT
+gmt.help23	= \t  -date -> Mon Dec 20  6:46:19 GMT 2021
+gmt.help24	= \t  -iso  -> 2021-12-20T06:46:43.526Z
+gmt.help25	= \tdefault -> Mon Dec 20,2021  6:48:22.584 GMT
+gmt.help26	= \t  -822  -> Sun, 06 Nov 1994 08:49:37 +0000
+gmt.help27	= \t  -850  -> Sunday, 06-Nov-94 08:49:37 GMT
+gmt.help28	= \t  -asc  -> Sun Nov  6 08:49:37 1994
+gmt.help29	= ""
 
 gmt.badOption		= Unknown option: "%1$s"!
 gmt.badZoneOffset	= The timezone offset %1$d is out of range of -12 .. 14.
@@ -201,6 +214,15 @@ os.help16	= " <Yw!>-width<.>:<Bk!>nn<.>   = force screen width for multi-column 
 os.help17	= " <Yw!>-filter<.>:<Bk!>xxx<.> = filter locale tags, where <Bk!>xxx<.> is one or more"
 os.help18	= "               locale tags to match (can be wild)"
 os.help19	= ""
+
+#
+# From Uniq.java
+#
+unique.badOption	= Unrecognized option "%1$s"!
+
+unique.help1	= ""
+unique.help2	= "Usage: unq [options] file(s)"
+unique.help3	= ""
 
 #
 # From Uuid.java

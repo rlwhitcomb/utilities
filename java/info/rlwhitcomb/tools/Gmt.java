@@ -36,6 +36,8 @@
  *			Allow arbitrary timezone selection.
  *  02-Nov-22 rlw #545:	Get default options from the environment; add "-default" option;
  *			straighten out error handling on timezone selection.
+ *  14-Dec-22 rlw #561:	Display in seconds or milliseconds (raw). Three new formats: RFC822,
+ *			RFC850, and "asctime()".
  */
 package info.rlwhitcomb.tools;
 
@@ -63,6 +65,19 @@ public class Gmt
 	private static final String LOGGING_FORMAT = "MMM dd,yyyy HH:mm:ss.SSS z";
 	/** Output format compatible with ISO-8601 format. */
 	private static final String ISO_8601_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSX";
+	/** Output format per RFC 822:
+	 * Sun, 06 Nov 1994 08:49:37 +0000
+	 * [RFC 822](https://www.rfc-editor.org/rfc/rfc822),
+	 * updated by [RFC 1123](https://www.rfc-editor.org/rfc/rfc1123) */
+	private static final String RFC_822_FORMAT = "E, dd MMM yyyy HH:mm:ss Z";
+	/** Output format per RFC 850:
+	 * Sunday, 06-Nov-94 08:49:37 GMT
+	 * [RFC 850](https://www.rfc-editor.org/rfc/rfc850),
+	 * obsoleted by [RFC 1036](https://www.rfc-editor.org/rfc/rfc1036) */
+	private static final String RFC_850_FORMAT = "EEEE, dd-MMM-yy HH:mm:ss z";
+	/** Output format according to ANSI C's asctime() format:
+	 * Sun Nov  6 08:49:37 1994 */
+	private static final String ASCTIME_FORMAT = "E MMM dd HH:mm:ss yyyy";
 
 	/** Date format to use for display. */
 	private static String dateFormat = DEFAULT_FORMAT;
@@ -70,6 +85,11 @@ public class Gmt
 	private static int tzOffset = 0;
 	/** Or a timezone selected by ID to use. */
 	private static TimeZone selectedZone = null;
+
+	/** Option to just display epoch seconds instead of formatted. */
+	private static boolean displaySeconds = false;
+	/** And correspondingly, display the raw epoch milliseconds. */
+	private static boolean displayMillis = false;
 
 
 	/**
@@ -100,41 +120,69 @@ public class Gmt
 	 */
 	private static void processArgs(String[] args) {
 	    for (String arg : args) {
-		String format = arg;
+		String format = arg.replaceAll("^\\-\\-?", "");
 
 		switch (format.toLowerCase()) {
-		    case "-log":
 		    case "log":
-		    case "-l":
 		    case "l":
+			displaySeconds = displayMillis = false;
 			dateFormat = LOGGING_FORMAT;
 			break;
-		    case "-date":
 		    case "date":
-		    case "-d":
 		    case "d":
+			displaySeconds = displayMillis = false;
 			dateFormat = DATE_FORMAT;
 			break;
-		    case "-iso":
 		    case "iso":
-		    case "-i":
 		    case "i":
+			displaySeconds = displayMillis = false;
 			dateFormat = ISO_8601_FORMAT;
 			break;
-		    case "-default":
 		    case "default":
-		    case "-def":
 		    case "def":
+			displaySeconds = displayMillis = false;
 			dateFormat = DEFAULT_FORMAT;
 			break;
-		    case "-help":
+		    case "rfc822":
+		    case "822":
+			displaySeconds = displayMillis = false;
+			dateFormat = RFC_822_FORMAT;
+			break;
+		    case "rfc850":
+		    case "850":
+			displaySeconds = displayMillis = false;
+			dateFormat = RFC_850_FORMAT;
+			break;
+		    case "ansic":
+		    case "ansi":
+		    case "asc":
+		    case "a":
+			displaySeconds = displayMillis = false;
+			dateFormat = ASCTIME_FORMAT;
+			break;
+
+		    case "seconds":
+		    case "secs":
+		    case "sec":
+		    case "s":
+			displaySeconds = true;
+			displayMillis = false;
+			break;
+		    case "millis":
+		    case "mills":
+		    case "milli":
+		    case "mill":
+		    case "m":
+			displayMillis = true;
+			displaySeconds = false;
+			break;
+
 		    case "help":
-		    case "-h":
 		    case "h":
-		    case "-?":
 		    case "?":
 			Intl.printHelp("tools#gmt");
 			System.exit(0);
+
 		    default:
 			// Could be a signed tz offset from GMT
 			if (CharUtil.isValidSignedInt(arg)) {
@@ -173,22 +221,35 @@ public class Gmt
 
 	    processArgs(args);
 
-	    SimpleDateFormat fmt = new SimpleDateFormat(dateFormat);
 	    TimeZone gmt = selectedZone == null ? TimeZone.getTimeZone(getZone(tzOffset)) : selectedZone;
 	    Calendar now = Calendar.getInstance(gmt);
-	    fmt.setCalendar(now);
 
 	    StringBuffer buf = new StringBuffer();
-	    fmt.format(now.getTime(), buf, new FieldPosition(DateFormat.DATE_FIELD));
 
-	    switch (dateFormat) {
-		case DATE_FORMAT:
-		    sub(buf, 4);
-		    break;
-		case DEFAULT_FORMAT:
-		    sub(buf, 8);
-		    sub(buf, 16);
-		    break;
+	    if (displayMillis || displaySeconds) {
+		long rawTime = now.getTimeInMillis();
+		if (displaySeconds)
+		    rawTime /= 1000L;
+		buf.append(rawTime);
+	    }
+	    else {
+		SimpleDateFormat fmt = new SimpleDateFormat(dateFormat);
+		fmt.setCalendar(now);
+
+		fmt.format(now.getTime(), buf, new FieldPosition(DateFormat.DATE_FIELD));
+
+		switch (dateFormat) {
+		    case DATE_FORMAT:
+			sub(buf, 4);
+			break;
+		    case DEFAULT_FORMAT:
+			sub(buf, 8);
+			sub(buf, 16);
+			break;
+		    case ASCTIME_FORMAT:
+			sub(buf, 8);
+			break;
+		}
 	    }
 
 	    System.out.println(buf.toString());

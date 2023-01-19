@@ -38,6 +38,7 @@
  *			to single directory target. Support "@file" as input.
  *  06-Oct-22 rlw #505:	Mode to compare, ignoring line ending diffs.
  *  07-Dec-22 rlw #563:	Add "color/nocolor" options.
+ *  13-Dec-22 rlw #578:	Tweak the options.
  */
 package info.rlwhitcomb.compare;
 
@@ -128,7 +129,7 @@ public class CompareFiles
 					 "recursive", "recurse", "rec", "r"),
 		/** Whether to ignore line ending differences. */
 		IGNORE_LINE_ENDINGS	(false,
-					 "IgnoreLineEndings", "lines", "l"),
+					 "IgnoreLineEndings", "lines", "line", "l"),
 		/** Whether to compare directories/files both directions. */
 		SYNC_MODE		(true,
 					 "SyncMode", "sync", "syn"),

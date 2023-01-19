@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2020-2022 Roger L. Whitcomb.
+ * Copyright (c) 2020-2023 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -318,7 +318,9 @@
  *	    Add some Javadoc and move some methods out to CharUtil.
  *	09-Nov-2022 (rlwhitcomb)
  *	    #550: Catch AssertException at the highest levels.
- *	11-Nov-2022 (rlwhitcomb)
+ *	13-Dec-2022 (rlwhitcomb)
+ *	    #582: Add ".clc" and ".xpr" as supported file extensions.
+ *	19-Jan-2023 (rlwhitcomb)
  *	    #458: Synchronize output inside ConsoleDisplayer for parallel operations.
  *	    Rename "replMode" to "consoleMode".
  */
@@ -629,6 +631,8 @@ public class Calc
 	private static final String[] DEFAULT_EXTS = {
 		".calc",
 		".expr",
+		".clc",
+		".xpr",
 		".ca",
 		".ex"
 	};

@@ -167,6 +167,33 @@ complex('4.5+i')
 (1,1) == (2,2)
 (2,2) > (1,1)
 
+// Rational complex numbers
+ca1 = (1/2, 3/4)
+s1 = cast(ca1, "set")
+complex(s1)
+o1 = cast(ca1, "object")
+complex(o1)
+li1 = cast(ca1, "array")
+ca1 === complex(li1)
+
+cb1 = complex('2/3+5/6i')
+:rational on { cb2 = (3/4, 7/9) }
+cb1 + cb2
+cb3 = (frac(1,2), frac(7,8))
+bf1 = cb1/cb3
+bf1*cb3
+++cb3
+cb4 = complex('1/2')
+++cb4
+cb4**2
+
+cf1 = complex('7/1i')
+cf2 = complex(frac(7), frac(9))
+cf3 = cf1/cf2
+cf3 * cf2
+cf4 = complex(0, frac(7))
+cf1==cf4
+
 // more to come (to complex powers)
 
 

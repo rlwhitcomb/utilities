@@ -124,8 +124,8 @@ sum
 :dec oldPrec
 
 # Trig and log functions
-J = 1; ++J; J;
-K = 2; K++; K;
+J0 = 1; ++J0; J0;
+K0 = 2; K0++; K0;
 :double
 pi / 2
 asin ( sin ( pi / 2 ) )
@@ -215,6 +215,12 @@ junk=[1,2,3]
 cast(junk[0], 'function')
 typeof(_junk5b05d)
 :var _junk5b05d
+
+info.version.major is integer
+info.locale.name is "string"
+info.cpu.cores is "integer"
+info.version is object
+info.locale.weekdays is `array`
 
 settings.trigMode
 :degrees
@@ -739,19 +745,19 @@ a = 128
 `a = ${a@k}`
 
 # The various assignment operators
-:clr [g,h,j,k]
+:clr [g,h,p,s]
 :dec(200)
-g = 271; h = 385; j = 192; k = 120!
+g = 271; h = 385; p = 192; s = 120!
 g+=h
-j-=g
+p-=g
 h*=g
-j/=g
-k %= 10**40;
-k
+p/=g
+s %= 10**40;
+s
 g = 0377@o; g&=0177@o
 h = 0x400@x; h|=0x080@o
-j = 0xaaa@x; j^=0x554@x
-g@o; h@x; j@x;
+p = 0xaaa@x; p^=0x554@x
+g@o; h@x; p@x;
 g = 0x4000@x
 g >>>= 3@x
 g >>= 2@x
@@ -796,7 +802,7 @@ length b; scale b; length b[1];
 }
 
 :def
-p = {b:2, c: { d:true }, "e":e }
+p = {b:2, c: { d:true }, `"e"`:e }
 p@j
 length p; scale p;
 :echo "Elements of p:"
@@ -1112,11 +1118,11 @@ list has [-2]
 #
 # difference between "has" and "in"
 #
-c12 = { a:1, b:{d:23, "e": 2.718, f: { g:true, h:'def' } } }
+c12 = { a:1, b:{d:23, '"e"': 2.718, f: { g:true, h:'def' } } }
 c12 has a
 c12 has b
 c12 has d
-c12 has "e"
+c12 has '"e"'
 c12 has f
 c12 has g
 c12 has h
@@ -1142,6 +1148,10 @@ c12 has h
 #
 # Tests of "sumof" and "productof"
 #
+sumof 1..30
+var sumoftest = 0
+:quiet on { loop over 1..30 sumoftest += __ }
+sumoftest
 SumOf [ 4, 5, 6, 7, 8, 9, 10 ]
 sumOf 4..10
 4+5+6+7+8+9+10

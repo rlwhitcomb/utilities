@@ -1,0 +1,9 @@
+$inputDir test/canons
+$testClass info.rlwhitcomb.string.StringUtil
+
+s1: kitten sitting
+s2: anagam anagram
+s3: apple lemon
+s4: abc ac
+s5: anagam
+

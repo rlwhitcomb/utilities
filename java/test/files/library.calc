@@ -823,3 +823,26 @@ define mean_stddev (values) = {
   { mean: avg, stddev: round(sqrt(variance), 3) }
 }
 
+/*
+ * Calculate the number of permutations of N objects taken R at a time.
+ *
+ * @param N Number of objects to permute.
+ * @param R Number of objects at a time (default = 1).
+ * @return  The number of permutations of those objects.
+ */
+define perm(N, R) = {
+  N! / (N - R)!
+}
+
+/*
+ * Calculate the number of combinations of N object taken R at a time.
+ * Combinations are not order dependent.
+ *
+ * @param N Number of objects to start with.
+ * @param R Number of objects to select each time.
+ * @return  The number of combinations of those objects.
+ */
+define comb(N, R) = {
+  N! / ((N - R)! * R!)
+}
+

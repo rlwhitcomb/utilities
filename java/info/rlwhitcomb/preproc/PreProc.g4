@@ -26,6 +26,8 @@
  *  History:
  *      20-Jan-2021 (rlwhitcomb)
  *          First version (not quite complete yet).
+ *	14-Dec-2022 (rlwhitcomb)
+ *	    #553: Add VERSION; some other tweaks.
  */
 
 grammar PreProc;
@@ -52,8 +54,11 @@ stmt
         ;
         
 expr
-        : ID                              # idExpr
-        | STRING                          # stringExpr
+        : ID                              # idValue
+        | STRING                          # stringValue
+        | BSTRING                         # bstringValue
+        | VERSION                         # versionValue
+        | PREDEF                          # predefValue
         | '(' expr ')'                    # parenExpr
         | expr ( '*' | '/' | '%' ) expr   # multExpr
         | expr ( '+' | '-' ) expr         # addExpr
@@ -135,6 +140,14 @@ ID     : [a-zA-Z_] [a-zA-Z_0-9$] * ;
 
 TEXT   : ~ [\u0000-\u001F] + ;
 
+VERSION
+       : INT '.' INT ( '.' INT ) ? ( [+\-_.] [a-zA-Z0-9_]+ ) ?
+       ;
+
+fragment INT
+       : '0'
+       | [1-9] [0-9]*
+       ;
 
 fragment ESC
        : '\\' (["\\/bfnrt] | UNICODE)

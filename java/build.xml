@@ -4,7 +4,7 @@
 
 	The MIT License (MIT)
 
-	Copyright (c) 2020-2022 Roger L. Whitcomb.
+	Copyright (c) 2020-2023 Roger L. Whitcomb.
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -357,6 +357,20 @@
 		#537: Generate properties for wrapper scripts.
 	    08-Dec-2022 (rlwhitcomb)
 		Add "verifyhash.bat" to the list of Windows wrapper files.
+	    12-Dec-2022 (rlwhitcomb)
+		#577: Add "_find_and_run_class_gui.bat" to the mix for Windows GUI programs.
+	    22-Dec-2022 (rlwhitcomb)
+		#590: Add the "ci.build" property to the "build.number" properties.
+	    05-Jan-2023 (rlwhitcomb)
+		#577: Add "_find_and_run_class_gui" script for non-Windows platforms.
+	    05-Jan-2023 (rlwhitcomb)
+		#224: Add dictionary API keys resource to the .jar file.
+	    13-Jan-2023 (rlwhitcomb)
+		#593: Rename JavaPreProc to PreProc.
+	    14-Jan-2023 (rlwhitcomb)
+		#6, #593: Add "PreProc*.class" into here for use in other places.
+	    16-Jan-2023 (rlwhitcomb)
+		#6: "preproc" is now wrapped by "PreProcTask".
 
      ========================================================================== -->
 
@@ -410,15 +424,16 @@
 		<format property="test.log.file.name" pattern="'test'.yyyy-MM-dd_HH-mm.'log'" locale="en,US"/>
 	</tstamp>
 
+	<condition property="ci.build" value="true" else="false">
+		<isset property="CI_BUILD"/>
+	</condition>
+
 	<propertyfile file="build.number" comment="Utilities Build Values">
 		<entry key="build.number" value="${build.lastrev}"/>
 		<entry key="build.date"   value="${build.date}"/>
 		<entry key="build.time"   value="${build.time}"/>
+		<entry key="build.ci"     value="${ci.build}"/>
 	</propertyfile>
-
-	<condition property="ci.build" value="true" else="false">
-		<isset property="CI_BUILD"/>
-	</condition>
 
 	<echo message="======================================================================"/>
 	<echo message=""/>
@@ -482,7 +497,9 @@
 
 	<patternset id="wrapper-files">
 		<include name="_find_and_run_class"     unless:true="${on.windows}"/>
+		<include name="_find_and_run_class_gui" unless:true="${on.windows}"/>
 		<include name="_find_and_run_class.bat"     if:true="${on.windows}"/>
+		<include name="_find_and_run_class_gui.bat" if:true="${on.windows}"/>
 		<include name="fixpath"                 unless:true="${on.windows}"/>
 		<include name="fixpath.bat"                 if:true="${on.windows}"/>
 		<include name="ppj"                     unless:true="${on.windows}"/>
@@ -496,7 +513,7 @@
 	<ant antfile="build-ant-tasks.xml" target="install"/>
 	<echo message="Beginning build ..."/>
 
-	<taskdef name="preproc" classname="info.rlwhitcomb.preproc.JavaPreProc" classpath="${ant.tasks.jar}"/>
+	<taskdef name="preproc" classname="info.rlwhitcomb.preproc.PreProcTask" classpath="${ant.tasks.jar}"/>
 	<taskdef name="var" classname="net.sf.antcontrib.property.Variable" classpath="external-files/ant-contrib.jar"/>
 
 	<macrodef name="generate-text-resources">
@@ -654,6 +671,7 @@
 			<include name="build.properties"/>
 			<include name="build.number"/>
 			<include name="version.properties"/>
+			<include name="dictionary-api.properties"/>
 			<include name="images/*.*"/>
 			<include name="info/rlwhitcomb/*.json"/>
 			<include name="info/rlwhitcomb/*.class"/>
@@ -676,6 +694,8 @@
 			<include name="info/rlwhitcomb/logging/*.class"/>
 			<include name="info/rlwhitcomb/matches/*.class"/>
 			<include name="info/rlwhitcomb/math/*.class"/>
+			<include name="info/rlwhitcomb/preproc/PreProc*.class"/>
+			<exclude name="info/rlwhitcomb/preproc/PreProcTask*.class"/>
 			<include name="info/rlwhitcomb/tester/*.class"/>
 			<include name="info/rlwhitcomb/tools/*.class"/>
 			<include name="info/rlwhitcomb/tree/*.class"/>
@@ -731,7 +751,7 @@ Test starting on ${build.date} at ${build.time}
 			<arg value="-nocolors"/>
 			<arg value="info.java@j"/>
 		</java>
-		<echo>Test JavaPreProc ...</echo>
+		<echo>Test PreProc ...</echo>
 		<delete>
 			<fileset dir="test/data" includes="TestPP.java,TestPP.log"/>
 		</delete>
@@ -747,7 +767,7 @@ Test starting on ${build.date} at ${build.time}
 				<not><filesmatch file1="test/data/TestPP.log" file2="test/canons/${test.log.canon}" textfile="true"/></not>
 			</condition>
 		</fail>
-		<echo file="${test.log.path}" append="true">JavaPreProc: Preprocessing results and log match.
+		<echo file="${test.log.path}" append="true">PreProc: Preprocessing results and log match.
 </echo>
 		<echo>Test of InitializationTask ...</echo>
 		<java classname="info.rlwhitcomb.test.InitTaskTest"   output="${test.log.path}" append="true" failonerror="true" fork="true"/>

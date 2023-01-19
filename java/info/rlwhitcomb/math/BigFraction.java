@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2021-2022 Roger L. Whitcomb.
+ * Copyright (c) 2021-2023 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -68,6 +68,11 @@
  *  20-Oct-22 rlw  ---	Add "valueOf(Number)" method.
  *  26-Nov-22 rlw #559:	Add "isZero" and "precision" for help with complex rational calculations.
  *			Some other optimizations.
+ *  17-Dec-22 rlw #559:	New "valueOf(Object)" method.
+ *  20-Dec-22 rlw #559:	Address negative scale errors in BigDecimal constructor.
+ *			Numerous tweaks, including new "properFraction" static method.
+ *  31-Dec-22 rlw #558:	New methods for Quaternions.
+ *  05-Jan-23 rlw #558:	Make "properFraction" into a method for Object; new copy constructor.
  */
 package info.rlwhitcomb.math;
 
@@ -95,19 +100,30 @@ public class BigFraction extends Number
 
 	/** A signed integer (subpattern of other patterns). */
 	private static final String SIGNED_INT = "([+\\-]?[0-9]+)";
+
 	/** Blank or other separator (subpattern of other patterns). */
 	private static final String SEP = "(\\s+|\\s*[,/;]\\s*)";
-	/** A signed fraction (special Unicode characters) (another subpattern). */
-	private static final String SIGNED_FRAC = "([+\\-]?[\\xBC-\\xBE\\u2189[\\u2150-\\u215E]])";
 
-	/** The pattern for three ints, as in "int [&nbsp;,/;] numer [&nbsp;,/;] denom". */
-	private static final Pattern THREE_INTS = Pattern.compile(SIGNED_INT + SEP + SIGNED_INT + SEP + SIGNED_INT);
-	/** The pattern used for two ints, as in "numer [&nbsp;,/;] denom". */
-	private static final Pattern TWO_INTS = Pattern.compile(SIGNED_INT + SEP + SIGNED_INT);
-	/** The pattern for an int and a fraction character, as in "int [&nbsp;,/;] frac". */
-	private static final Pattern INT_FRAC = Pattern.compile(SIGNED_INT + SEP + "?" + SIGNED_FRAC);
+	/** A signed fraction (special Unicode characters) (another subpattern). */
+	public static final String SIGNED_FRAC_STRING = "([+\\-]?[\\xBC-\\xBE\\u2189[\\u2150-\\u215E]])";
 	/** The pattern for a single (signed) fraction character. */
-	private static final Pattern FRAC_ONLY = Pattern.compile(SIGNED_FRAC);
+	private static final Pattern SIGNED_FRAC = Pattern.compile(SIGNED_FRAC_STRING);
+
+	/** The pattern string for three ints, as in "int [&nbsp;,/;] numer [&nbsp;,/;] denom". */
+	private static final String THREE_INTS_STRING = SIGNED_INT + SEP + SIGNED_INT + SEP + SIGNED_INT;
+	/** The pattern for three ints, as in "int [&nbsp;,/;] numer [&nbsp;,/;] denom". */
+	private static final Pattern THREE_INTS = Pattern.compile(THREE_INTS_STRING);
+
+	/** The pattern string used for two ints, as in "numer [&nbsp;,/;] denom". */
+	private static final String TWO_INTS_STRING = SIGNED_INT + SEP + SIGNED_INT;
+	/** The pattern used for two ints, as in "numer [&nbsp;,/;] denom". */
+	private static final Pattern TWO_INTS = Pattern.compile(TWO_INTS_STRING);
+
+	/** The pattern string for an int and a fraction character, as in "int [&nbsp;,/;] frac". */
+	private static final String INT_FRAC_STRING = SIGNED_INT + SEP + "?" + SIGNED_FRAC_STRING;
+	/** The pattern for an int and a fraction character, as in "int [&nbsp;,/;] frac". */
+	private static final Pattern INT_FRAC = Pattern.compile(INT_FRAC_STRING);
+
 
 	/** A value of {@code 0/1} (integer 0) as a fraction. */
 	public static final BigFraction ZERO = new BigFraction(BigInteger.ZERO);
@@ -123,6 +139,7 @@ public class BigFraction extends Number
 
 	/** A value of {@code 1/2} (one-half) as a fraction. */
 	public static final BigFraction ONE_HALF = new BigFraction(1, 2);
+
 
 	/** Conversion table from Unicode fraction characters to real fractions. */
 	private static final int[][] FRACTIONS = {
@@ -146,6 +163,7 @@ public class BigFraction extends Number
 	    {  5,  8 },
 	    {  7,  8 }
 	};
+
 
 	/** The exact integer numerator of this fraction (could be negative). */
 	private BigInteger numer;
@@ -239,7 +257,7 @@ public class BigFraction extends Number
 	 * Default constructor -- a value of one.
 	 */
 	public BigFraction() {
-	    this(BigInteger.ONE, BigInteger.ONE);
+	    this(1L);
 	}
 
 	/**
@@ -281,11 +299,10 @@ public class BigFraction extends Number
 	 * @param value	A decimal value to convert.
 	 */
 	public BigFraction(final BigDecimal value) {
-	    int pow = value.scale();
-// TODO: what about negative scale?
+	    int pow = Math.max(value.scale(), 0);
 	    BigDecimal whole = value.scaleByPowerOfTen(pow);
 
-	    normalize(new BigInteger(whole.toPlainString()), MathUtil.tenPower(pow));
+	    normalize(whole.toBigIntegerExact(), MathUtil.tenPower(pow));
 	}
 
 	/**
@@ -326,7 +343,7 @@ public class BigFraction extends Number
 			    return fullValue;
 		    }
 		    else {
-			Matcher m0 = FRAC_ONLY.matcher(value);
+			Matcher m0 = SIGNED_FRAC.matcher(value);
 			if (m0.matches()) {
 			    return fractionValue(normalizeSign(value));
 			}
@@ -352,7 +369,7 @@ public class BigFraction extends Number
 	 */
 	public static BigFraction valueOf(final Number num) {
 	    if (num instanceof BigFraction) {
-		return (BigFraction) num;
+		return new BigFraction((BigFraction) num);
 	    }
 	    else if (num instanceof BigDecimal) {
 		return new BigFraction((BigDecimal) num);
@@ -366,6 +383,32 @@ public class BigFraction extends Number
 	    else {
 		return new BigFraction(num.longValue());
 	    }
+	}
+
+	/**
+	 * Construct a fraction value given an arbitrary object.
+	 *
+	 * @param obj	Some (compatible) object.
+	 * @return	The equivalent fraction, if possible, or {@code null} if there is no conversion,
+	 *		but a null input gives a fraction value of zero.
+	 */
+	public static BigFraction valueOf(final Object obj) {
+	    if (obj == null)
+		return ZERO;
+
+	    if (obj instanceof Number)
+		return valueOf((Number) obj);
+
+	    if (obj instanceof String) {
+		try {
+		    return valueOf((String) obj);
+		}
+		catch (IllegalArgumentException iae) {
+		    ;
+		}
+	    }
+
+	    return null;
 	}
 
 	/**
@@ -441,6 +484,37 @@ public class BigFraction extends Number
 	 */
 	public BigFraction(final BigInteger numerator, final BigInteger denominator) {
 	    normalize(numerator, denominator);
+	}
+
+	/**
+	 * Copy an existing fraction into a new one.
+	 *
+	 * @param frac An existing fraction to copy.
+	 */
+	public BigFraction(final BigFraction frac) {
+	    this(frac.numer, frac.denom);
+	    if (frac.alwaysProper)
+		alwaysProper = true;
+	}
+
+	/**
+	 * Construct a "proper" fraction.
+	 *
+	 * @param value A long value to convert.
+	 * @return      The equivalent fraction, marked as "always proper".
+	 */
+	public static BigFraction properFraction(final long value) {
+	    return new BigFraction(value).setAlwaysProper(true);
+	}
+
+	/**
+	 * Construct a "proper" fraction.
+	 *
+	 * @param value An arbitrary value to convert.
+	 * @return      The equivalent fraction, marked as "always proper".
+	 */
+	public static BigFraction properFraction(final Object value) {
+	    return BigFraction.valueOf(value).setAlwaysProper(true);
 	}
 
 	/**

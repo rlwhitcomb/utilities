@@ -41,9 +41,12 @@
  *  08-Nov-22 rlw #48:	Blank out leading '0' in hours value.
  *  17-Nov-22		Process ".ext" as "*.ext". Flags to enable/disable owner
  *			and group name display.
+ *  15-Dec-22		Put brackets around directory names. Flesh out part of the
+ *			"saving" process. Allow "~" as user.home directory.
  */
 package info.rlwhitcomb.directory;
 
+import info.rlwhitcomb.math.MaxInt;
 import info.rlwhitcomb.math.NumericUtil;
 import info.rlwhitcomb.util.CharUtil;
 import info.rlwhitcomb.util.Environment;
@@ -405,7 +408,7 @@ public class Dir
 	private static Set<File> directorySet = new TreeSet<>();
 	private static File lastDirectory     = null;
 
-	private static List<File> saveList = new ArrayList<>();
+	private static List<FileInfo> saveList = new ArrayList<>();
 
 	private static long totalSize        = 0L;
 	private static long totalClusterSize = 0L;
@@ -436,10 +439,16 @@ public class Dir
 	private static boolean exactSize           = false;
 	private static boolean skipDots            = false;
 	private static boolean skipOwner           = runningOnWindows;
+	private static boolean skipDirs            = false;
 	private static int limitRecursion          = 0;
 	private static boolean errorLimitRecursion = false;
-	private static int widestNameLen           = 0;
+	private static MaxInt maxNameWidth         = MaxInt.pos();
+	private static MaxInt maxOwnerWidth        = MaxInt.pos();
+	private static MaxInt maxGroupWidth        = MaxInt.pos();
 	private static boolean useForwardSlashes   = false;
+
+	private static String nameFormat       = "%1$s";
+	private static String ownerGroupFormat = "%1$s %2$s";
 
 	/** An empty set of file attributes for a "normal" file. */
 	private static final Set<Attribute> NORMAL     = EnumSet.noneOf(Attribute.class);
@@ -843,13 +852,27 @@ System.out.println("size = " + basicAttrs.size() + ", createTime = " + basicAttr
 	    }
 	}
 
+	private static void addFileName(final StringBuilder buf, final String path, final boolean isDir) {
+	    String name = convertSlashes(path);
+	    if (quoted)
+		name = quoteName(name);
+
+	    if (isDir) {
+		buf.append('[');
+		buf.append(name);
+		buf.append(']');
+	    }
+	    else {
+		buf.append(name);
+	    }
+	}
+
 	static SimpleDateFormat FULL_DATE_FORMAT = new SimpleDateFormat("MMM dd yyyy HH:mm:ss");
 	static SimpleDateFormat DATE_ONLY_FORMAT = new SimpleDateFormat("MMM dd  yyyy");
 	static SimpleDateFormat DAY_TIME_FORMAT  = new SimpleDateFormat("MMM dd HH:mm");
 
-	private static void display(File file) {
+	private static void display(final FileInfo info) {
 	    StringBuilder buf = new StringBuilder();
-	    FileInfo info = new FileInfo(file);
 	    String name;
 
 	    if (!brief) {
@@ -860,17 +883,7 @@ System.out.println("size = " + basicAttrs.size() + ", createTime = " + basicAttr
 		    buf.append(String.format("%1$8s ", NumericUtil.formatToRangeTiny(info.getLength())));
 
 		if (!skipOwner) {
-		    String owner = info.getOwnerName();
-		    if (!owner.isEmpty()) {
-			CharUtil.padToWidth(buf, owner, 6);
-			buf.append(' ');
-		    }
-
-		    String group = info.getGroupName();
-		    if (!group.isEmpty()) {
-			CharUtil.padToWidth(buf, group, 6);
-			buf.append(' ');
-		    }
+		    buf.append(String.format(ownerGroupFormat, info.getOwnerName(), info.getGroupName()));
 		}
 
 		FileTime ft = info.getLastModifiedTime();
@@ -892,20 +905,7 @@ System.out.println("size = " + basicAttrs.size() + ", createTime = " + basicAttr
 		    buf.setCharAt(length + 7, ' ');
 	    }
 
-	    if (fullName) {
-		name = convertSlashes(info.getFullPath());
-		if (quoted)
-		    buf.append(quoteName(name));
-		else
-		    buf.append(name);
-	    }
-	    else {
-		name = convertSlashes(info.getName());
-		if (quoted)
-		    buf.append(quoteName(name));
-		else
-		    buf.append(name);
-	    }
+	    addFileName(buf, fullName ? info.getFullPath() : info.getName(), info.isDirectory());
 
 	    System.out.println(buf.toString());
 	}
@@ -919,11 +919,17 @@ System.out.println("size = " + basicAttrs.size() + ", createTime = " + basicAttr
 	    }
 	}
 
-	private static void saveOrDisplay(File f) {
-	    if (saving)
-		saveList.add(f);
-	    else
-		display(f);
+	private static void saveOrDisplay(final File f) {
+	    FileInfo info = new FileInfo(f);
+	    if (saving) {
+		saveList.add(info);
+		maxNameWidth.set((fullName ? info.getFullPath() : info.getName()).length());
+		maxOwnerWidth.set(info.getOwnerName().length());
+		maxGroupWidth.set(info.getGroupName().length());
+	    }
+	    else {
+		display(info);
+	    }
 	}
 
 	private static void processDirectory(File dir, FileFilter filter) {
@@ -931,7 +937,7 @@ System.out.println("size = " + basicAttrs.size() + ", createTime = " + basicAttr
 		File[] files = filter == null ? dir.listFiles() : dir.listFiles(filter);
 		sort(files);
 
-		if (!skipDots) {
+		if (!skipDots && !skipDirs) {
 		    File dot = new File(dir, ".");
 		    if (filter == null || filter.accept(dot))
 			saveOrDisplay(dot);
@@ -951,6 +957,8 @@ System.out.println("size = " + basicAttrs.size() + ", createTime = " + basicAttr
 	    // This could be a directory name, a wildcard file spec, or just a file name
 	    // Note: Java actually processes some wildcard things already, but may not,
 	    // depending on how we arrange the options: such as "-dir basedir spec1, spec2 ..."
+
+	    spec = spec.replace("~", Environment.userHomeDirString());
 
 	    if (Match.hasWildCards(spec)) {
 		File f = new File(spec);
@@ -1011,7 +1019,7 @@ System.out.println("size = " + basicAttrs.size() + ", createTime = " + basicAttr
 	    if (specs.isEmpty())
 		specs.add(".");
 
-	    if (wide)
+	    if (wide || !skipOwner)
 		saving = true;
 
 	    for (String spec : specs) {
@@ -1027,8 +1035,23 @@ System.out.println("size = " + basicAttrs.size() + ", createTime = " + basicAttr
 
 	    saving = false;
 
-	    for (File file : saveList) {
-		display(file);
+	    if (!saveList.isEmpty()) {
+		if (wide)
+		    nameFormat = String.format("%%1$-%1$ds", maxNameWidth.get());
+		if (!skipOwner) {
+		    if (maxOwnerWidth.set() && maxGroupWidth.set())
+			ownerGroupFormat = String.format("%%1$-%1$ds %%2$-%2$ds ", maxOwnerWidth.get(), maxGroupWidth.get());
+		    else if (maxOwnerWidth.set())
+			ownerGroupFormat = String.format("%%1$-%1$ds ", maxOwnerWidth.get());
+		    else if (maxGroupWidth.set())
+			ownerGroupFormat = String.format("%%1$-%1$ds ", maxGroupWidth.get());
+		    else
+			ownerGroupFormat = "";
+		}
+	    }
+
+	    for (FileInfo info : saveList) {
+		display(info);
 	    }
 	}
 

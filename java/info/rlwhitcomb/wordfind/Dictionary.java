@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2022 Roger L. Whitcomb.
+ * Copyright (c) 2022-2023 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -36,9 +36,14 @@
  *  05-Sep-22		Properly deal with wild card letters.
  *  06-Sep-22		Slight optimization if there are no wildcards.
  *  15-Sep-22 rlw #478:	Also allow '_' as wild character.
+ *  27-Dec-22 rlw	Add method to use Levenshtein distance to find words
+ *			"close" to an input string.
+ *  06-Jan-23 rlw	Protect against index exceptions inside "contained".
+ *  07-Jan-23 rlw #591:	Fix bug with multiple wildcards that are the same letter.
  */
 package info.rlwhitcomb.wordfind;
 
+import info.rlwhitcomb.string.StringUtil;
 import info.rlwhitcomb.util.CharUtil;
 import info.rlwhitcomb.util.Intl;
 
@@ -116,8 +121,9 @@ public class Dictionary
 			    if (letters[i] > (letterEntry.letters[i] + wildCount))
 				return false;
 
-			    wildCount -= (letters[i] - letterEntry.letters[i]);
-			    wildChars.append((char) ((lowerCase ? 'a' : 'A') + i));
+			    int neededWildCount = (letters[i] - letterEntry.letters[i]);
+			    wildCount -= neededWildCount;
+			    CharUtil.makeStringOfChars(wildChars, (char) ((lowerCase ? 'a' : 'A') + i), neededWildCount);
 			}
 		    }
 
@@ -352,10 +358,14 @@ public class Dictionary
 	 * @param word    Word to search for.
 	 * @param list    The list to search in.
 	 * @param indexes Indexes into the list based on starting letter.
+	 * @return        Whether or not the given word is contained in the list.
 	 */
 	private boolean contained(final String word, final List<Entry> list, final int[] indexes) {
 	    char startChar = word.charAt(0);
 	    int charIndex = (int) (startChar - firstChar);
+	    if (charIndex < 0 || charIndex >= indexes.length)
+		return false;
+
 	    int startIndex = indexes[charIndex];
 	    int endIndex = indexes[charIndex + 1];
 	    Entry wordEntry = new Entry(word, lowerWords);
@@ -379,6 +389,19 @@ public class Dictionary
 	}
 
 	/**
+	 * Determine if the character at the given location is marked (that is, flanked on either side)
+	 * by the given marker character.
+	 *
+	 * @param buf    The buffer of characters to examine.
+	 * @param loc    Location (index) to examine.
+	 * @param marker Marker character which might flank the given location.
+	 * @return       Whether loc - 1 and loc + 1 are within the buffer bounds and contain the marker.
+	 */
+	private boolean isMarkedBy(final StringBuilder buf, final int loc, final char marker) {
+	    return (loc > 0 && buf.charAt(loc - 1) == marker && loc < buf.length() - 1 && buf.charAt(loc + 1) == marker);
+	}
+
+	/**
 	 * Find all the valid words for the given string of letters in the word list.
 	 *
 	 * @param letterEntry Entry with the letters to search for.
@@ -394,9 +417,16 @@ public class Dictionary
 		if (entry.couldBeSpelledBy(letterEntry, wildChars, lowerWords)) {
 		    if (wildChars.length() > 0) {
 			StringBuilder adornedWord = new StringBuilder(entry.word);
+
 			for (int i = 0; i < wildChars.length(); i++) {
 			    String wildStr = wildChars.substring(i, i + 1);
 			    int ix = adornedWord.lastIndexOf(wildStr);
+
+			    // Account for multiple wild characters that are the same
+			    while (isMarkedBy(adornedWord, ix, WordFind.BLANK_MARKER)) {
+				ix = adornedWord.lastIndexOf(wildStr, ix - 1);
+			    }
+
 			    adornedWord.insert(ix, WordFind.BLANK_MARKER);
 			    adornedWord.insert(ix + 2, WordFind.BLANK_MARKER);
 			}
@@ -453,6 +483,40 @@ public class Dictionary
 	    } while (maxWordSize >= 0 && randomWord.length() > maxWordSize);
 
 	    return randomWord;
+	}
+
+	/**
+	 * Get the list of all dictionary words that are "closest" to the given input string
+	 * (which is presumably a misspelled word).
+	 *
+	 * @param input   Input string to get alternatives for.
+	 * @param maxDist The "closeness" value we will tolerate.
+	 * @return        List of words in the dictionary that are within the given Levenshtein
+	 *                distance of the input.
+	 * @see StringUtil#levenshteinDistance
+	 */
+	public List<String> findClosestWords(final String input, final int maxDist) {
+	    List<String> result = new ArrayList<>();
+	    @SuppressWarnings("unchecked")
+	    ArrayList<String>[] lists = (ArrayList<String>[]) new ArrayList[maxDist + 1];
+	    for (int dist = 0; dist <= maxDist; dist++) {
+		lists[dist] = new ArrayList<>();
+	    }
+
+	    for (int i = 0; i < regularWords.size(); i++) {
+		String word = regularWords.get(i).word;
+		int dist = StringUtil.levenshteinDistance(input, word);
+		if (dist <= maxDist)
+		    lists[dist].add(word);
+		// Special case if the word is valid
+		if (dist == 0)
+		    break;
+	    }
+
+	    for (int i = 0; i <= maxDist; i++)
+		result.addAll(lists[i]);
+
+	    return result;
 	}
 
 	private void displayNumbers(final PrintStream ps, final int[] indexes, final String which) {

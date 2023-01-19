@@ -477,6 +477,18 @@
  *	    #566: Allow multiple declarations for "const" or "var".
  *	05-Dec-2022 (rlwhitcomb)
  *	    #573: Add "scan" method.
+ *	16-Dec-2022 (rlwhitcomb)
+ *	    #572: Regularize member names into "member" element, simplify "objVar"
+ *	    to just reference this "member".
+ *	19-Dec-2022 (rlwhitcomb)
+ *	    #79: Allow just "( )" on "random".
+ *	    #588: New case selector that combines "compareOp" with a "boolOp" for range selection.
+ *	23-Dec-2022 (rlwhitcomb)
+ *	    #441: Grammar changes for "is" operator.
+ *	24-Dec-2022 (rlwhitcomb)
+ *	    #83: Support more Unicode characters in various contexts.
+ *	29-Dec-2022 (rlwhitcomb)
+ *	    #558: Beginnings of quaternion support.
  */
 
 grammar Calc;
@@ -510,7 +522,7 @@ exprStmt
    ;
 
 defineStmt
-   : K_DEFINE K_PARALLEL ? id formalParamList ? ASSIGN stmtBlock
+   : K_DEFINE K_PARALLEL ? id formalParamList ? ( ASSIGN | '\u21A6' ) stmtBlock
    ;
 
 constStmt
@@ -576,14 +588,22 @@ emptyStmt
    | ENDEXPR
    ;
 
+member
+   : id
+   | STRING
+   | ISTRING
+   ;
+
 expr
    : value                               # valueExpr
    | obj                                 # objExpr
    | arr                                 # arrExpr
    | set                                 # setExpr
    | complex                             # complexValueExpr
+   | quaternion                          # quaternionValueExpr
    | var                                 # varExpr
-   | expr K_HAS ( id | STRING | ISTRING | ( LBRACK expr RBRACK ) ) # hasExpr
+   | expr K_HAS ( member | ( LBRACK expr RBRACK ) ) # hasExpr
+   | expr K_IS ( STRING | ISTRING | TYPES ) # isExpr
    | LPAREN expr RPAREN                  # parenExpr
    | K_ABS expr1                         # absExpr
    | K_SIN expr1                         # sinExpr
@@ -604,7 +624,7 @@ expr
    | K_LN expr1                          # lnExpr
    | K_EPOW expr1                        # ePowerExpr
    | K_TENPOW expr1                      # tenPowerExpr
-   | K_RANDOM expr1 ?                    # randomExpr
+   | K_RANDOM ( expr1? | LPAREN RPAREN ) # randomExpr
    | K_SIGNUM expr1                      # signumExpr
    | ( K_ISNULL | K_NOTNULL ) expr1      # isNullExpr
    | K_TYPEOF typeArg                    # typeofExpr
@@ -644,6 +664,7 @@ expr
    | K_FROMBASE expr2                    # fromBaseExpr
    | K_FRAC ( expr3 | expr2 | expr1 )    # fracExpr
    | K_COMPLEX ( expr2 | expr1 )         # complexFuncExpr
+   | K_QUAT ( expr4 | expr3 | expr2 | expr1 ) # quaternionFuncExpr
    | K_ROMAN expr1                       # romanExpr
    | ( K_UPPER | K_LOWER ) expr1         # caseConvertExpr
    | K_FACTORS expr1                     # factorsExpr
@@ -717,6 +738,11 @@ expr2
 expr3
    : LPAREN expr COMMA expr COMMA expr RPAREN
    | expr COMMA expr COMMA expr
+   ;
+
+expr4
+   : LPAREN expr COMMA expr COMMA expr COMMA expr RPAREN
+   | expr COMMA expr COMMA expr COMMA expr
    ;
 
 exprN
@@ -793,7 +819,7 @@ caseSelector
    : K_MATCHES ( expr2 | expr1 )
    | expr DOTS expr ( COMMA expr ) ?
    | expr
-   | compareOp expr
+   | compareOp expr ( boolOp compareOp expr ) ?
    | K_DEFAULT
    ;
 
@@ -802,9 +828,7 @@ obj
    ;
 
 pair
-   : id COLON EOL* expr
-   | STRING COLON EOL* expr
-   | ISTRING COLON EOL* expr
+   : member COLON EOL* expr
    ;
 
 set
@@ -815,12 +839,16 @@ complex
    : LPAREN expr COMMA expr RPAREN
    ;
 
+quaternion
+   : LPAREN expr COMMA expr COMMA expr COMMA expr RPAREN
+   ;
+
 var
-   : var ( DOT ( var | STRING | ISTRING ) ) # objVar
-   | var ( LBRACK expr RBRACK | INDEXES )   # arrVar
-   | var actualParams                       # functionVar
-   | id                                     # idVar
-   | GLOBALVAR                              # globalVar
+   : id                                   # idVar
+   | var DOT member                       # objVar
+   | var ( LBRACK expr RBRACK | INDEXES ) # arrVar
+   | var actualParams                     # functionVar
+   | GLOBALVAR                            # globalVar
    ;
 
 value
@@ -858,7 +886,7 @@ actualParams
    ;
 
 dropObjs
-   : LBRACK ( id | STRING | ISTRING ) ( COMMA ( id | STRING | ISTRING ) ) * RBRACK
+   : LBRACK member ( COMMA member ) * RBRACK
    | LBRACK RBRACK
    ;
 
@@ -912,6 +940,7 @@ id
    : ID
    | MODES
    | REPLACE_MODES
+   | TYPES
    | BASE
    ;
 
@@ -925,12 +954,19 @@ wildId
    : WILD_ID
    | MODES
    | REPLACE_MODES
+   | TYPES
    | BASE
    ;
 
 compareOp
    : COMPARE_OP
    | EQUAL_OP
+   ;
+
+boolOp
+   : BOOL_AND_OP
+   | BOOL_OR_OP
+   | BOOL_XOR_OP
    ;
 
 modeOption
@@ -1021,6 +1057,8 @@ DATE_CONST
 K_MOD      : 'mod' | 'MOD' | 'Mod' ;
 
 K_HAS      : 'has' | 'HAS' | 'Has' ;
+
+K_IS       : 'is'  | 'IS'  | 'Is' ;
 
 K_ABS      : 'abs' | 'ABS' | 'Abs' ;
 
@@ -1132,9 +1170,15 @@ K_PAD      : 'pad'  | 'PAD'  | 'Pad'
            | 'rpad' | 'RPAD' | 'Rpad' | 'RPad' | 'rPad'
            ;
 
-K_FIB      : 'fib' | 'FIB' | 'Fib' ;
+K_FIB      : 'fib' | 'FIB' | 'Fib'
+           | '\u{1D439}'
+           | '\u2131'
+           ;
 
-K_BN       : 'bn' | 'BN' | 'Bn' ;
+K_BN       : 'bn' | 'BN' | 'Bn'
+           | '\u{1D435}'
+           | '\u212C'
+           ;
 
 K_DEC      : 'dec' | 'DEC' | 'Dec' ;
 
@@ -1147,6 +1191,8 @@ K_FROMBASE : 'frombase' | 'FROMBASE' | 'FromBase' | 'Frombase' | 'fromBase' ;
 K_FRAC     : 'frac' | 'FRAC' | 'Frac' ;
 
 K_COMPLEX  : 'complex' | 'COMPLEX' | 'Complex' ;
+
+K_QUAT     : 'quaternion' | 'QUATERNION' | 'Quaternion' ;
 
 K_ROMAN    : 'roman' | 'ROMAN' | 'Roman' ;
 
@@ -1254,6 +1300,21 @@ K_WAIT     : 'wait' | 'WAIT' | 'Wait' ;
 
 K_TIMETHIS : 'timethis' | 'TIMETHIS' | 'TimeThis' | 'Timethis' | 'timeThis' ;
 
+TYPES    : 'null'       | 'NULL'       | 'Null'
+         | 'string'     | 'STRING'     | 'String'
+         | 'integer'    | 'INTEGER'    | 'Integer'
+         | 'float'      | 'FLOAT'      | 'Float'
+         | 'fraction'   | 'FRACTION'   | 'Fraction'
+         | K_COMPLEX
+         | K_QUAT
+         | 'boolean'    | 'BOOLEAN'    | 'Boolean'
+         | 'array'      | 'ARRAY'      | 'Array'
+         | 'object'     | 'OBJECT'     | 'Object'
+         | 'set'        | 'SET'        | 'Set'
+         | 'collection' | 'COLLECTION' | 'Collection'
+         | 'function'   | 'FUNCTION'   | 'Function'
+         | 'unknown'    | 'UNKNOWN'    | 'Unknown'
+         ;
 
 /* This has to include the localvar and globalvar variants */
 WILD_ID : ( '$' | NAME_START_CHAR | '?' | '*' ) ( '#' | NAME_CHAR | '?' | '*' ) * {allowWild}?
@@ -1327,11 +1388,13 @@ POWERS
        ;
 
 INDEXES
-       : [\u2080-\u2089]
+       : [\u2080-\u2089] // 0-9
+       | '\u23e8'        // 10
        ;
 
 POW_OP
        : ( '**' | '\u00D7\u00D7' | '\u2217\u2217' | '\u2715\u2715' | '\u2716\u2716' )
+       | ( '\u2303' | '\u2B61' | '\u2191' )
        ;
 
 MULT_OP
@@ -1343,6 +1406,7 @@ MULT_OP
 
 POW_ASSIGN
        : ( '**=' | '\u00D7\u00D7=' | '\u2217\u2217=' | '\u2715\u2715=' | '\u2716\u2716=' )
+       | ( '\u2303=' | '\u2B61=' | '\u2191=' )
        ;
 
 MULT_ASSIGN

@@ -54,6 +54,12 @@
  *	    #393: Cleanup imports.
  *	28-Jul-2022 (rlwhitcomb)
  *	    #429: Make "cpu" memory values into dynamic suppliers; add "usedmemory".
+ *	25-Dec-2022 (rlwhitcomb)
+ *	    #83: Another alias for "e".
+ *	10-Jan-2023 (rlwhitcomb)
+ *	    #558: Add aliases for "j" and "k" (quaternions).
+ *	11-Jan-2023 (rlwhitcomb)
+ *	    #558: More aliases for "j" and "k".
  */
 package info.rlwhitcomb.calc;
 
@@ -96,7 +102,7 @@ class CalcPredefine
 	 * Aliases for "e".
 	 */
 	private static final String[] E_ALIASES = {
-	    "\u2107", "\u2147"
+	    "\u2107", "\u2147", "\u212F"
 	};
 
 	/**
@@ -114,6 +120,21 @@ class CalcPredefine
 	private static final String[] I_ALIASES = {
 	    "i", "I", "\u0131", "\u0399", "\u03B9", "\u2110", "\u2148"
 	};
+
+	/**
+	 * Aliases for "j" (the quaternion {@code (0, 0, 1, 0)}).
+	 */
+	private static final String[] J_ALIASES = {
+	    "j", "J"
+	};
+
+	/**
+	 * Aliases for "k" (the quaternion {@code (0, 0, 0, 1)}).
+	 */
+	private static final String[] K_ALIASES = {
+	    "k", "K"
+	};
+
 
 
 	private static String tzOffset(final int offset) {
@@ -356,7 +377,12 @@ class CalcPredefine
 	    for (int i = 0; i < I_ALIASES.length; i++) {
 		PredefinedValue.define(globalScope, I_ALIASES[i], C_I);
 	    }
+	    for (int i = 0; i < J_ALIASES.length; i++) {
+		PredefinedValue.define(globalScope, J_ALIASES[i], Q_J);
+	    }
+	    for (int i = 0; i < K_ALIASES.length; i++) {
+		PredefinedValue.define(globalScope, K_ALIASES[i], Q_K);
+	    }
 	}
-
 
  }

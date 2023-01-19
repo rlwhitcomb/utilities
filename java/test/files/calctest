@@ -30,6 +30,7 @@ pfactors      : pfactors
 perfect       : perfect
 mort          : e_m1,e_m2
 f1            : f1
+q1            : q1
 text          : -text pi;e;phi;ln 2
 save          : -filetext save
 e_lib         : e_lib

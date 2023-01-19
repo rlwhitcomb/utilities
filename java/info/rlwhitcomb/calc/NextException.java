@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2022 Roger L. Whitcomb.
+ * Copyright (c) 2022-2023 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,9 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  *
- *  History:
- *      16-Aug-2022 (rlwhitcomb)
- *	    #439: Initial coding.
+ * History:
+ *  16-Aug-22 rlw #439:	Initial coding.
+ *  12-Jan-23 rlw  ---	Make a new method to return the instance.
  */
 package info.rlwhitcomb.calc;
 
@@ -36,11 +36,21 @@ public class NextException extends RuntimeException
 	/**
 	 * The only instance of this exception needed.
 	 */
-	public static final NextException INSTANCE = new NextException();
+	private static final NextException INSTANCE = new NextException();
 
 
 	private NextException() {
 	    super();
 	}
+
+	/**
+	 * The singleton instance of this exception.
+	 *
+	 * @return The only instance.
+	 */
+	public static final NextException instance() {
+	    return INSTANCE;
+	}
+
 }
 

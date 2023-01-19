@@ -1,7 +1,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2014-2018,2020-2022 Roger L. Whitcomb.
+# Copyright (c) 2014-2018,2020-2023 Roger L. Whitcomb.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -149,6 +149,10 @@
 #	    #376: New error for "exists" function.
 #	12-Oct-2022 (rlwhitcomb)
 #	    #514: Move applicable text to "math" resources.
+#	22-Dec-2022 (rlwhitcomb)
+#	    #590: Text for CI build info.
+#	01-Jan-2023 (rlwhitcomb)
+#	    Update copyright years.
 #
 
 #
@@ -187,11 +191,12 @@ dyn.indexLessThanZero	= Index %1$d cannot be negative.
 #
 # From Environment.java
 #
-env.copyright		= Copyright (c) 2008-2022 Roger L. Whitcomb.
+env.copyright		= Copyright (c) 2008-2023 Roger L. Whitcomb.
 env.version		= Version %1$s
-env.versionBuild	= %1$s build %2$s%3$s
+env.versionBuild	= %1$s build %2$s%3$s%4$s
 env.build		= Built on %1$s at %2$s
 env.debug		= " (DEBUG)"
+env.ci			= " (CI)"
 env.javaVersion		= Java version: %1$s (%2$d-bit)
 env.javaVersionModel	= %1$s (%2$d-bit)
 env.implVersion		= Implementation version %1$s

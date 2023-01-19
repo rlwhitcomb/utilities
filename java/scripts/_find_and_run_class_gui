@@ -1,0 +1,22 @@
+#!/bin/bash
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+if [ -z "$JAR_FILE" ]; then JAR_FILE=utilities.jar; fi
+JAR_PATH=$SCRIPT_DIR/$JAR_FILE
+
+if [ ! -e $JAR_PATH ]; then
+    echo Unable to locate the required '"'$JAR_FILE'"' file in the '"'$SCRIPT_DIR'"' directory.
+    exit 1
+fi
+
+for f in $(ls $SCRIPT_DIR/*.jar); do
+    if [ "$f" != "$JAR_PATH" ]; then
+        CLASSPATH=$CLASSPATH:$f
+    fi
+done
+
+if [ -e $CLASS_NAME ]; then
+    java -jar $JAR_PATH $JVM_ARGS $CMD_ARGS $@ &
+else
+    java -cp $JAR_PATH:$CLASSPATH $JVM_ARGS $CLASS_NAME $CMD_ARGS $@ &
+fi
+

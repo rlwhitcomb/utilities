@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2021-2022 Roger L. Whitcomb.
+ * Copyright (c) 2021-2023 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,33 +24,21 @@
  *      Data structures for Calc to hold user-defined function definitions,
  *      local symbol tables, etc.
  *
- *  History:
- *	06-Oct-2021 (rlwhitcomb)
- *	    Initial coding.
- *	07-Oct-2021 (rlwhitcomb)
- *	    Use generic data types.
- *	28-Dec-2021 (rlwhitcomb)
- *	    #128: Add "insert" method for "pad".
- *	02-May-2022 (rlwhitcomb)
- *	    #68: Allow negative indexing (offset from end of array).
- *	08-May-2022 (rlwhitcomb)
- *	    #315: Add "addAll" method.
- *	15-May-2022 (rlwhitcomb)
- *	    #315: Add "remove" method, and copy constructor.
- *	18-May-2022 (rlwhitcomb)
- *	    #315: Add "isEmpty" method.
- *	21-May-2022 (rlwhitcomb)
- *	    #327: Convert "List" constructor to Collection.
- *	25-May-2022 (rlwhitcomb)
- *	    #348: Make all methods package private.
- *	11-Jun-2022 (rlwhitcomb)
- *	    #365: Add "immutable" flag and checks.
- *	21-Jun-2022 (rlwhitcomb)
- *	    #314: Derive from CollectionScope.
- *	08-Jul-2022 (rlwhitcomb)
- *	    #393: Cleanup imports.
- *	15-Aug-2022 (rlwhitcomb)
- *	    #440: Move "size()" up to CollectionScope.
+ * History:
+ *  06-Oct-21 rlw  ---	Initial coding.
+ *  07-Oct-21 rlw  ---	Use generic data types.
+ *  28-Dec-21 rlw #128:	Add "insert" method for "pad".
+ *  02-May-22 rlw #68:	Allow negative indexing (offset from end of array).
+ *  08-May-22 rlw #315:	Add "addAll" method.
+ *  15-May-22 rlw #315:	Add "remove" method, and copy constructor.
+ *  18-May-22 rlw #315:	Add "isEmpty" method.
+ *  21-May-22 rlw #327:	Convert "List" constructor to Collection.
+ *  25-May-22 rlw #348:	Make all methods package private.
+ *  11-Jun-22 rlw #365:	Add "immutable" flag and checks.
+ *  21-Jun-22 rlw #314:	Derive from CollectionScope.
+ *  08-Jul-22 rlw #393:	Cleanup imports.
+ *  15-Aug-22 rlw #440:	Move "size()" up to CollectionScope.
+ *  08-Jan-23 rlw #592:	Move "isEmpty()" to CollectionScope.
  */
 package info.rlwhitcomb.calc;
 
@@ -243,7 +231,8 @@ class ArrayScope<T> extends CollectionScope
 	 *
 	 * @return {@code true} for an empty list
 	 */
-	boolean isEmpty() {
+	@Override
+	protected boolean isEmpty() {
 	    return values.isEmpty();
 	}
 

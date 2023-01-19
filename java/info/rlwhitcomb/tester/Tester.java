@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2012-2022 Roger L. Whitcomb.
+ * Copyright (c) 2012-2023 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -248,12 +248,17 @@
  *	    #541: Install SecurityManager to capture System.exit from tested classes.
  *	30-Oct-2022 (rlwhitcomb)
  *	    #538: Implement "$noenv" and "$envopt" directives.
+ *	27-Dec-2022 (rlwhitcomb)
+ *	    Make both the test class constructor and "main" methods accessible before invoking.
+ *	16-Jan-2023 (rlwhitcomb)
+ *	    #593: Preprocess our test description files using PreProc to allow macro definitions.
  */
 package info.rlwhitcomb.tester;
 
 import info.rlwhitcomb.Testable;
 import info.rlwhitcomb.directory.Match;
 import info.rlwhitcomb.math.NumericUtil;
+import info.rlwhitcomb.preproc.PreProc;
 import info.rlwhitcomb.util.*;
 import name.fraser.neil.plaintext.diff_match_patch;
 
@@ -575,6 +580,8 @@ public class Tester
 		Environment.loadProgramInfo(testClass);
 
 		constructor = testClass.getDeclaredConstructor();
+		constructor.setAccessible(true);
+
 		testObject = constructor.newInstance();
 
 		if (Testable.class.isInstance(testObject)) {
@@ -593,6 +600,7 @@ public class Tester
 		}
 		else {
 		    main = testClass.getDeclaredMethod("main", String[].class);
+		    main.setAccessible(true);
 
 		    setCurrentVersion(new Version(Environment.getAppVersion()));
 
@@ -1381,7 +1389,26 @@ public class Tester
 		}
 	    }
 
-	    try (BufferedReader reader = fileReader(f, desc.getCharset()))
+	    // Preprocess the description file into a temp file
+	    File descript = null;
+	    try {
+		descript = FileUtilities.createTempFile("desc");
+		PreProc preProc = new PreProc()
+			.setAlwaysProcess(true)
+			.setIgnoreUnknownDirectives(true)
+			.setOutputFileName(descript.getPath())
+			.setFile(f.getPath());
+		if (Constants.UTF_8_CHARSET.equals(desc.getCharset()))
+		    preProc.setFormat("UTF-8");
+
+		preProc.execute();
+	    }
+	    catch (IllegalArgumentException | IOException ex) {
+		Intl.errFormat("tester#preProcError", name, Exceptions.toString(ex));
+		return;
+	    }
+
+	    try (BufferedReader reader = fileReader(descript, desc.getCharset()))
 	    {
 		String line = null;
 		int lineNo = 0;
@@ -1468,6 +1495,11 @@ public class Tester
 	    }
 	    catch (IOException ioe) {
 		Intl.errFormat("tester#readError", name, Exceptions.toString(ioe));
+	    }
+	    finally {
+		if (descript != null) {
+		    descript.delete();
+		}
 	    }
 	}
 
@@ -1714,6 +1746,7 @@ public class Tester
 	    }
 	    catch (Exception err) {
 		Intl.errFormat("tester#exception", Exceptions.toString(err));
+		exitSecurityManager.setAllowed(true);
 		return OTHER_ERROR;
 	    }
 

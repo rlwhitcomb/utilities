@@ -338,6 +338,8 @@
  *	    #18: Add "isValidSignedInt" method.
  *	06-Dec-2022 (rlwhitcomb)
  *	    #573: New "quoteRegEx" method.
+ *	19-Dec-2022 (rlwhitcomb)
+ *	    #586: New "debugRegEx" method.
  */
 package info.rlwhitcomb.util;
 
@@ -3207,6 +3209,45 @@ public final class CharUtil
 	    }
 	    if (ix < raw.length()) {
 		buf.append(Pattern.quote(raw.substring(ix)));
+	    }
+
+	    return buf.toString();
+	}
+
+
+	/**
+	 * Make a debug printout of a regular expression, with particular emphasis on the groups.
+	 *
+	 * @param pattern The actual pattern object, compiled, that we want to debug.
+	 * @return        A {@link String}, suitable for printing that separates out all the groups.
+	 */
+	public static String debugRegEx(final Pattern pattern) {
+	    StringBuilder buf = new StringBuilder();
+	    String patString = pattern.pattern();
+	    int groupDepth = 0;
+	    int groupNumber = 0;
+
+	    buf.append("     ");
+
+	    for (int i = 0; i < patString.length(); i++) {
+		char ch = patString.charAt(i);
+		if (ch == '(') {
+		    groupNumber++;
+		    groupDepth++;
+		    buf.append('\n');
+		    buf.append(String.format("%1$3d. ", groupNumber));
+		    makeStringOfChars(buf, ' ', groupDepth * 2);
+		    buf.append(ch);
+		}
+		else if (ch == ')') {
+		    groupDepth--;
+		    buf.append(ch);
+		    buf.append('\n');
+		    makeStringOfChars(buf, ' ', groupDepth * 2 + 5);
+		}
+		else {
+		    buf.append(ch);
+		}
 	    }
 
 	    return buf.toString();

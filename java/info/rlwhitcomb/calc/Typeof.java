@@ -23,15 +23,12 @@
  *
  *      Enumeration of the Calc data types (for "typeof" and "cast").
  *
- *  History:
- *	19-Jan-2022 (rlwhitcomb)
- *	    Initial coding.
- *	24-Jan-2022 (rlwhitcomb)
- *	    #103: Add COMPLEX type.
- *	31-Jan-2022 (rlwhitcomb)
- *	    #212: Add FUNCTION.
- *	21-Jun-2022 (rlwhitcomb)
- *	    #314: Add SET.
+ * History:
+ *  19-Jan-22 rlw  ---	Initial coding.
+ *  24-Jan-22 rlw #103:	Add COMPLEX type.
+ *  31-Jan-22 rlw #212:	Add FUNCTION.
+ *  21-Jun-22 rlw #314:	Add SET.
+ *  31-Dec-22 rlw #558:	Add QUATERNION.
  */
 package info.rlwhitcomb.calc;
 
@@ -72,6 +69,11 @@ enum Typeof
 	 * Complex number value ({@code a+bi}).
 	 */
 	COMPLEX,
+
+	/**
+	 * Quaternion value ({@code a+bi+cj+dk}).
+	 */
+	QUATERNION,
 
 	/**
 	 * Boolean value ({@code true} or {@code false}).

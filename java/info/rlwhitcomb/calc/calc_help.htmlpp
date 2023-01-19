@@ -182,20 +182,25 @@ h2 {
        and the result displayed, then the prompt is repeated for the next calculation), from a file for predefined calculations, or from within a simple GUI frame.
   <p><em><strong>Why would I want this calculator when there are so many already available (handheld, apps on your phone, default apps on your computer)?</strong></em>
       <ul>
-        <li>All arithmetic is done to (essentially) unlimited precision.</li>
+        <li>All arithmetic is done to (essentially) unlimited precision (ignoring the fact that only around 38 digits is sufficient to calculate the diameter
+            of the entire known universe accurate to the size of a hydrogen atom;
+            see <a href="https://www.jpl.nasa.gov/edu/news/2016/3/16/how-many-decimals-of-pi-do-we-really-need/">How Many Decimals of Pi Do We Really Need?)</a></li>
         <li>More operators and functions are available than in almost all other calculators, and more are being added all the time.</li>
         <li>Custom function definitions for calculations beyond the list of predefined functions.</li>
         <li>Variables can be used for storage of values for later use.</li>
         <li>Object, array, and set structures for storage of multiple values.</li>
         <li>Therefore, JSON objects are a native part of the language.</li>
+        <li>Built-in support for real fractions, complex numbers, and
+            <a href="https://en.wikipedia.org/wiki/Quaternion">quaternions</a>, with matrix support planned.</li>
         <li>String functions for doing text manipulation, including <a href="https://en.wikipedia.org/wiki/String_interpolation">string interpolation</a>.</li>
+        <li>Simple file reading and writing with powerful string matching functions make writing text transformation programs very easy.</li>
         <li>The ability to do calculations straight from the command line, from a text file, in a convenient REPL mode, or in a GUI window.</li>
         <li>Data or scripts can be read from the standard input channel, and values and results can be written to the standard output channel, so Calc can be used as a filter in a longer chain of batch processing.</li>
         <li>The ability to define libraries of functions available using the "<code>-library</code>" command line option or the "<code>:include</code>" directive.</li>
         <li>Calculations can be edited (using backspace, etc.) to reduce the chance of keyboard errors.</li>
         <li>Looping and conditional statements to do pretty much any kind of calculation.</li>
         <li>Therefore, the language is <a href="https://en.wikipedia.org/wiki/Turing_completeness">&ldquo;Turing Complete&rdquo;</a>.</li>
-        <li>Currently (as of early fall-2022 at least), it is being actively developed and maintained, meaning features and fixes are constantly being added.</li>
+        <li>Currently (as of the beginning of 2023 at least), it is being actively developed and maintained, meaning features and fixes are constantly being added.</li>
         <li>This is <a href="https://opensource.com/resources/what-open-source">Open-Source Software</a> so the code can be examined, and modified (if desired) for your own use.</li>
       </ul>
   <p>"Calc" started out as an exercise in learning the <a href="https://www.antlr.org/">Antlr</a> parser generator, by combining the simple expression grammar from the introductory book
@@ -216,7 +221,7 @@ h2 {
      <ul><li>Arithmetic to thousands of digits precision</li>
          <li>More powerful <code>case</code> statement selectors than I have seen</li>
 	 <li>All the latest operators from many languages</li>
-	 <li>Rational fractions and complex numbers as native data types, along with objects, arrays, and sets as standard data collections</li>
+	 <li>Rational fractions, complex numbers, and quaternions as native data types, along with objects, arrays, and sets as standard data collections</li>
 	 <li>Many Unicode symbols available for use as they were intended (that is, in the appropriate mathematical sense)</li>
 	 <li>All the latest multi-line, raw, interpolated, and standard string constant forms available</li>
 	 <li>Dynamic code generation and execution, via the <code>eval</code> function</li>
@@ -244,12 +249,13 @@ h2 {
      (such as with <code>:include</code>, or from the command line).
   <p>If a file name is given without any extension (such as <code>e_trig</code>) and the file cannot be found via the process just described, then a series
      of default file name extensions are appended to the bare name to try to find it. These extensions are: <code>".calc"</code>, <code>".expr"</code>,
-     <code>".ca"</code>, and <code>".ex"</code> (in that order). Once all this searching fails to find the file, then the supposed file name(s) are
-     treated as if they were a set of expressions to evaluate.
+     <code>".clc"</code>, <code>".xpr"</code>, <code>".ca"</code>, and <code>".ex"</code> (in that order). If no file is found using the input plus these
+     extensions, and if a default input directory is given, then the search is repeated in that directory. Once all this searching fails to find any file
+     the supposed file name(s) are treated as if they were a set of expressions to evaluate.
   <p>When Calc tries to evaluate an expression from a file or given on the command line and any kind of error is encountered, the
      process exit code will be set to a value from 95 to 99 depending on the type of error (99 = parsing error, 98 = execution
      error, 97 = index or state exception, 96 = I/O error, 95 = ":assert" failure). The <code>leave</code> <i>expr</i> statement can also be used
-     outside of a loop or function to set a custom exit code if desired.
+     outside of a loop or function to set a custom exit code if desired (in the range of 0 to 255).
 </div>
 <a class="top-link" href="#topofpage">Top</a>
 <hr id="Command_Line_Options" class="sectionsep">
@@ -405,7 +411,7 @@ h2 {
   <h2>Values, Constants, and Variables</h2>
 <div class="cols">
   The basic building blocks of the expressions implemented here are the basic value types: numbers (either integer or real
-     numbers with a fractional part), complex numbers, strings, rational fractions, boolean values, and the <code>null</code> value.
+     numbers with a fractional part), complex numbers, quaternions, strings, rational fractions, boolean values, and the <code>null</code> value.
      Numbers can be of arbitrary precision, up to a maximum of 2**32-1 (4,294,967,295) digits (although see the discussion under
      "Modes and Precision" below for further details). Strings can also be of any length up to the same number of characters (subject to
      system memory constraints of course).
@@ -414,6 +420,9 @@ h2 {
      of the special Unicode number-like symbols are also interpreted as single numbers (see the "Operators, Functions, and Precedence" table below), such as:
      <code>&#x2473;</code> = <code>20</code>, <code>&#x247D;</code> = <code>10</code>, or <code>&#xFF19;</code> = <code>9</code>.
   <p>Complex numbers are specified by a <i>real</i> <code>,</code> <i>imaginary</i> pair as in <code>(</code> <i>real</i> <code>,</code> <i>imaginary</i> <code>)</code>, the <code><i>i</i></code> constant, or the result of the <code>complex</code> function. All the simple and some more complicated arithmetic functions are supported for complex numbers.
+  <p>Quaternions are specified by the four <code>a</code>, <code>b</code>, <code>c</code>, and <code>d</code> coefficient values, or by using the built-in <code>quaternion(</code>...<code>)</code> function. The value of <code><i>i</i></code> can be promoted to a
+     quaternion automatically, and <code><i>j</i></code> or <code><i>k</i></code> are also available.
+     Support for basic arithmetic using quaternions and some basic conversions are available, and more is currently being developed.
   <p>Just as an aside, Calc does not support <code>NaN</code> or <code>Infinity</code> values. Operations that might result in such values generally cause errors instead.
   <p>The boolean (or "logical") constants are <code>true</code> and <code>false</code>.
   <p>The special null constant, which signifies no value, or a value that hasn't been assigned or defined yet, is simply <code>null</code>.
@@ -586,10 +595,12 @@ or
      enhancement that identifiers without quotes or interpolated strings can be used as keys here, while in pure JSON form only simple quoted
      strings are allowed as keys).
   <p>As another convenience for dynamically referencing member names, an interpolated string (in the form <code>`</code>...<code>`</code>) can be used to reference
-     the member, and the current value of any expressions or variables referenced in the string will be used to construct the member name. Note that
-     when regular strings are used as member names, the exact quotes will be used as part of the name (so, for instance <code>'h'</code> is a different
-     member than <code>"h"</code>, or than <code>h</code>). When using interpolated strings to reference these <i>"string"</i> name members, the quotes
-     must be explicit. Here is an (extreme) example: <code>a."f".'h'</code> can be referenced using <code>m1='"f"';m2="'h'";a.`$m1`.`$m2`</code>.
+     the member, and the current value of any expressions or variables referenced in the string will be used to construct the member name. Regular quoted
+     strings will have their outer level of quotes removed before being used as member names, so that a name of <code>member</code> is the same as
+     <code>"member"</code> or <code>'member'</code>. If a double set of quotes is used, the inner quotes will be retained as part of the member name, as in:
+     <code>'"member"'</code> translates to an actual member name of <code>"member"</code>. So, the syntax for accessing a member using array or list
+     notation (as in <code>['"member"']</code>) is actually the same as without the brackets. Any quotes can be used in either case.
+     Here is an (extreme) example: <code>a.'"f"'."'h'"</code> can be referenced using <code>m1='"f"';m2="'h'";a.`$m1`.`$m2`</code>.
   <p>Array, object, or set constants can be expressed using this JSON notation. Note: the <i>set</i> is a Calc extension that does not exist in regular JSON,
      so be aware of this if data generated in Calc is to be shared with other applications. For example:
 <p class="indent"> <code style="color:green;">{ a: 1, b:2, c:'abc', d:[ 1,3,4 ] }</code> </p>
@@ -597,10 +608,10 @@ or
 <p class="indent"> <code style="color:green;">[ [ 1, 3, 5 ], [ 2, 4, 6 ] ]</code> </p>
 <p class="indent"> <code style="color:green;">{ first: { "flag": true, "message": 'Testing' }, second: { "flag":true, "message": 'Working' } }</code> </p>
 <p class="indent"> <code style="color:green;">{ "Red", "Green", "Yellow", "Blue", "Gold" }</code> </p>
-     Note that string object keys (as in <code>"key"</code>) do NOT reference the same element as an identifier key (as in
-     <code>key</code>).  Therefore, this is legal:
-<p class="indent"> <code style="color:green;">value = { "flag": true, flag: 'Red' }</code> </p>
-   and the elements are accessed as <code>value."flag"</code> and <code>value.flag</code>.
+     Note that string object keys (as in <code>"key"</code>) do reference the same element as an identifier key (as in
+     <code>key</code>). But, quoted keys are supported, as in:
+<p class="indent"> <code style="color:green;">value = { '"flag"': true, flag: 'Red' }</code> </p>
+   and the elements are accessed as <code>value.'"flag"' &#x21E8; true</code> and <code>value.flag &#x21E8; "Red"</code> or <code>value."flag" &#x21E8; "Red"</code>.
   <p>Objects, arrays, and sets can be combined (concatenated) using the <code>+</code> and <code>+=</code> operators.  If the first operand is an array, the result of
      the operation will also be an array. Similarly if the first operand is an object or set, the result will be also. If an array is added to an object
      the whole array will be added as one value, with the key generated in the same way (as in <code>#<i>n</i></code>) as using an index to set the value.
@@ -740,8 +751,8 @@ or<br>
     </tr>
     </thead>
     <tbody>
-    <tr><td>38</td>
-      <td><code>pi</code>, <code>&#x1D6D1;</code>, <code>e</code>, <code>&#x2107;</code>, or <code>&#x2147;</code><br>
+    <tr><td>39</td>
+      <td><code>pi</code>, <code>&#x1D6D1;</code>, <code>e</code>, <code>&#x2107;</code>, <code>&#x2147;</code>, or <code>&#x212f;</code><br>
           <code>phi</code>, <code>&#x03C6;</code>, <code>&#x03D5;</code><br>
           <code>PHI</code>, <code>&#x03A6;</code><br>
 	  <code>i</code>, <code>&#x0131;</code>, <code>&#x0399;</code>, <code>&#x03B9;</code>, or <code>&#x2148;</code><br>
@@ -771,15 +782,17 @@ or<br>
           all the current environment variables (such as <code>PATH</code>)<br>
           the current Calc settings (<code>trigMode</code>, <code>silent</code>, etc.)<br>
           that constant value, as in <code>"Hello"</code>, <code>127</code>, or <code>0xA8</code></td><td>N/A</td></tr>
-    <tr><td>37</td><td><code>{</code> (&nbsp;<i>key:value pairs</i>&nbsp;) <code>}</code></td><td>define an object</td><td>left to right</td></tr>
-    <tr><td>36</td><td><code>[</code> (&nbsp;<i>expr list</i>&nbsp;) <code>]</code><br><i>var</i> <code>[</code> <i>expr</i> <code>]</code> or <i>var</i>&nbsp;<code>&#x2080;</code> .. <code>&#x2089;</code></td><td>define an array,<br>or access elements of an array, string, or object</td><td>left to right</td></tr>
-    <tr><td>35</td><td><code>{</code> (&nbsp;<i>expr list</i>&nbsp;) <code>}</code></td><td>define a set</td><td>left to right</td></tr>
-    <tr><td>34</td><td><code>(</code> <i>expr</i> <code>,</code> <i>expr</i> <code>)</code></td><td>define a complex number</td><td>left to right</td></tr>
-    <tr><td>33</td><td><i>object</i> <code>.</code> <i>member</i></td><td>access an object member</td><td>left to right</td></tr>
-    <tr><td>32</td><td><i>expr</i> <code>HAS</code> ( <i>id</i> | <i>string</i> | <code>[</code> <i>expr</i> <code>]</code> )</td><td>safely check for member or index</td><td>left to right</td></tr>
+    <tr><td>38</td><td><code>{</code> (&nbsp;<i>key:value pairs</i>&nbsp;) <code>}</code></td><td>define an object</td><td>left to right</td></tr>
+    <tr><td>37</td><td><code>[</code> (&nbsp;<i>expr list</i>&nbsp;) <code>]</code><br><i>var</i> <code>[</code> <i>expr</i> <code>]</code> or <i>var</i>&nbsp;<code>&#x2080;</code> .. <code>&#x2089;</code>
+         or <code>&#x23e8;</code></td><td>define an array,<br>or access elements of an array, string, or object</td><td>left to right</td></tr>
+    <tr><td>36</td><td><code>{</code> (&nbsp;<i>expr list</i>&nbsp;) <code>}</code></td><td>define a set</td><td>left to right</td></tr>
+    <tr><td>35</td><td><code>(</code> <i>expr</i> <code>,</code> <i>expr</i> <code>)</code></td><td>define a complex number</td><td>left to right</td></tr>
+    <tr><td>34</td><td><i>object</i> <code>.</code> <i>member</i></td><td>access an object member</td><td>left to right</td></tr>
+    <tr><td>33</td><td><i>expr</i> <code>HAS</code> ( <i>id</i> | <i>string</i> | <code>[</code> <i>expr</i> <code>]</code> )</td><td>safely check for member or index</td><td>left to right</td></tr>
+    <tr><td>32</td><td><i>expr</i> <code>IS</code> ( <i>string</i> | <i>type_id</i> )</td><td>check if expression is the given type (same as <code>typeof</code>)</td><td>left to right</td></tr>
     <tr><td>31</td><td><code>( </code><i>expr</i><code> )</code></td><td>group an expression</td><td>N/A</td></tr>
-    <tr><td rowspan="88">30</td>
-            <td><code>ABS</code>&nbsp;<i>expr</i></td><td>absolute value</td><td rowspan="88">left to right</td></tr>
+    <tr><td rowspan="89">30</td>
+            <td><code>ABS</code>&nbsp;<i>expr</i></td><td>absolute value</td><td rowspan="89">left to right</td></tr>
             <tr><td><code>SIN</code>&nbsp;<i>expr</i></td><td>sine</td></tr>
             <tr><td><code>COS</code>&nbsp;<i>expr</i></td><td>cosine</td></tr>
             <tr><td><code>TAN</code>&nbsp;<i>expr</i></td><td>tangent</td></tr>
@@ -831,15 +844,16 @@ or<br>
             <tr><td><code>SORT</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>flags_expr</i>&nbsp;)</td><td>sort the object, array, or set, optionally ignoring case,<br>or sorting objects by key instead of value,<br>returning a new sorted object</td></tr>
             <tr><td><code>TRIM</code> or <code>LTRIM</code> or <code>RTRIM</code> <i>expr</i></td><td>trim all, leading, or trailing whitespace</td></tr>
             <tr><td><code>PAD</code> or <code>LPAD</code> or <code>RPAD</code>&nbsp;<i>var</i>&nbsp;<code>,</code> <i>expr</i>&nbsp;( <code>,</code><i>expr</i> )</td><td>pad an array or string to the given width<br>with 0 or space (default) or the given value/character</td></tr>
-            <tr><td><code>FIB</code>&nbsp;<i>expr</i></td><td>Fibonacci number</td></tr>
-            <tr><td><code>Bn</code>&nbsp;<i>expr</i></td><td>Bernoulli number</td></tr>
+            <tr><td><code>FIB</code>, <code>&#x1D439;</code>, or <code>&#x2131;</code>&nbsp;<i>expr</i></td><td>Fibonacci number</td></tr>
+            <tr><td><code>Bn</code>, <code>&#x1D435;</code>, or <code>&#x212C;</code>&nbsp;<i>expr</i></td><td>Bernoulli number</td></tr>
             <tr><td><code>DEC</code>&nbsp;<i>expr</i></td><td>convert string or fraction to decimal number</td></tr>
             <tr><td><code>FRAC</code>&nbsp;<i>num</i><code>,</code>&nbsp;<i>den</i><br>or <i>int</i><code>,</code><i>num</i><code>,</code><i>den</i><br>or <i>string</i></td><td>construct a rational fraction</td></tr>
             <tr><td><code>COMPLEX</code>&nbsp;<i>r</i><code>,</code>&nbsp;<i>i</i><br>or <i>expr</i></td><td>construct a complex number</td></tr>
+            <tr><td><code>QUATERNION</code>&nbsp;<i>a</i><code>,</code>&nbsp;<i>b</i><code>,</code>&nbsp;<i>c</i><code>,</code>&nbsp;<i>d</i></td><td>construct a quaternion value</td></tr>
             <tr><td><code>ROMAN</code>&nbsp;<i>expr</i></td><td>interpret <i>expr</i> as a Roman Numeral</td></tr>
             <tr><td><code>TODATE</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;)&nbsp;)</td><td>convert expression(s) to a date value</td></tr>
-            <tr><td><code>TOBASE</code>&nbsp;<i>expr</i> , <i>base_expr</i></td><td>convert number to the given base (radix)</td></tr>
-            <tr><td><code>FROMBASE</code>&nbsp;<i>expr</i> , <i>base_expr</i></td><td>convert value in given base back to a number</td></tr>
+            <tr><td><code>TOBASE</code>&nbsp;<i>expr</i> <code>,</code> <i>base_expr</i></td><td>convert number to the given base (radix)</td></tr>
+            <tr><td><code>FROMBASE</code>&nbsp;<i>expr</i> <code>,</code> <i>base_expr</i></td><td>convert value in given base back to a number</td></tr>
             <tr><td><code>LOWER</code>&nbsp;<i>expr</i></td><td>convert <i>expr</i> to lower case</td></tr>
             <tr><td><code>UPPER</code>&nbsp;<i>expr</i></td><td>convert <i>expr</i> to UPPER case</td></tr>
             <tr><td><code>EVAL</code>&nbsp;<i>expr</i></td><td>evaluate the string result of <i>expr</i></td></tr>
@@ -876,7 +890,8 @@ or<br>
     <tr><td>23</td><td><code>~~</code>&nbsp;<i>expr</i></td><td>convert to number</td><td>right to left</td></tr>
     <tr><td>22</td><td><code>~</code>&nbsp;<i>expr</i></td><td>bitwise NOT</td><td>right to left</td></tr>
     <tr><td>21</td><td><i>expr</i>&nbsp;<code>!</code></td><td>factorial</td><td>left to right</td></tr>
-    <tr><td>20</td><td><i>expr<sub>1</sub></i>&nbsp;&nbsp;<code>**</code>, <code>&times;&times;</code>, <code>&#x2217;&#x2217;</code>, <code>&#x2715;&#x2715;</code>, or <code>&#x2716;&#x2716;</code>&nbsp;&nbsp;<i>expr<sub>2</sub></i><br>or&nbsp;<i>expr</i>&nbsp;&#x2070; .. &#x2079;</td><td><i>expr<sub>1</sub></i> to <i>expr<sub>2</sub></i> power<br>or <i>expr</i> to given power</td><td>right to left</td></tr>
+    <tr><td>20</td><td><i>expr<sub>1</sub></i>&nbsp;&nbsp;<code>**</code>, <code>&times;&times;</code>, <code>&#x2217;&#x2217;</code>, <code>&#x2715;&#x2715;</code>, <code>&#x2716;&#x2716;</code>
+        <code>&#x2303;</code>, <code>&#x2B61;</code>, or <code>&#x2191;</code>&nbsp;&nbsp;<i>expr<sub>2</sub></i><br>or&nbsp;<i>expr</i>&nbsp;&#x2070; .. &#x2079;</td><td><i>expr<sub>1</sub></i> to <i>expr<sub>2</sub></i> power<br>or <i>expr</i> to given power</td><td>right to left</td></tr>
     <tr><td>19</td><td>
         <i>expr</i>&nbsp;&nbsp;<code>*</code>, <code>&times;</code>, <code>&#x2217;</code>, <code>&#x2715;</code>, or <code>&#x2716;</code>&nbsp;&nbsp;<i>expr</i><br>
         <i>expr</i>&nbsp;&nbsp;<code>/</code>, <code>&divide;</code>, <code>&#x2215;</code>, or <code>&#x2797;</code>&nbsp;&nbsp;<i>expr</i><br>
@@ -928,7 +943,8 @@ or<br>
     <tr><td>8</td><td><i>expr</i>&nbsp;<code> ?: </code>&nbsp;<i>expr</i><br><i>expr</i>&nbsp;<code> ?! </code><i>expr</i></td><td>select alternate for <code><i>false</i></code> value<br>or select an alternate for <code><i>true</i></code> value</td><td>left to right</td></tr>
     <tr><td>7</td><td><i>expr</i>&nbsp;<code> ? </code>&nbsp;<i>expr</i>&nbsp;<code> : </code>&nbsp;<i>expr</i></td><td>select one or the other value</td><td>right to left</td></tr>
     <tr><td>6</td><td><i>var</i>&nbsp;<code> = </code>&nbsp;<i>expr</i></td><td>assign <i>expr</i> value to variable</td><td>right to left</td></tr>
-    <tr><td>5</td><td><i>var</i>&nbsp;<code> **=</code>,<code> &times;&times;=</code>,<code> &#x2217;&#x2217;=</code>,<code> &#x2715;&#x2715;=</code>, or<code> &#x2716;&#x2716;= </code>&nbsp;<i>expr</i></td><td><i>var</i> to <i>expr</i> power, assign to <i>var</i></td><td>right to left</td></tr>
+    <tr><td>5</td><td><i>var</i>&nbsp;<code> **=</code>,<code> &times;&times;=</code>,<code> &#x2217;&#x2217;=</code>,<code> &#x2715;&#x2715;=</code>,<code> &#x2716;&#x2716;=</code>,
+        <code> &#x2303;=</code>,<code> &#x2B61;=</code>, or<code>&#x2191;=</code>&nbsp;<i>expr</i></td><td><i>var</i> to <i>expr</i> power, assign to <i>var</i></td><td>right to left</td></tr>
     <tr><td>4</td><td>
         <i>var</i>&nbsp;<code> *=</code>,<code> &times;=</code>,<code> &#x2217;=</code>,<code> &#x2715;=</code>, or<code> &#x2716;= </code>&nbsp;<i>expr</i><br>
         <i>var</i>&nbsp;<code> /=</code>,<code> &divide;=</code>,<code> &#x2215;=</code>, or<code> &#x2797;= </code>&nbsp;<i>expr</i><br>
@@ -979,11 +995,11 @@ or<br>
   <p>The <code>random</code> function will generate a random value, of the current decimal precision, with a value between 0 and 1 (exclusive).
      If a seed expression is given, the bytes of that value will be used to seed the random number generator, which will produce a predictable
      value every time the same seed is used (useful for testing purposes), otherwise a different value will be returned every time (without the seed value).
-  <p>The <i>type</i> value returned from <code>typeof</code>, which can be the optional second parameter to <code>cast</code>
-     can be one of the following (string) values:
+  <p>The <i>type</i> value returned from <code>typeof</code>, which can be the optional second parameter to <code>cast</code>, or the second value
+     for the <code>IS</code> operator can be one of the following (string) values (or without quotes for <code>IS</code>):
   <p class="indent"><code>"null"</code>, <code>"string</code>, <code>"integer"</code>, <code>"float"</code>,
      <code>"fraction"</code>, <code>"complex"</code>, <code>"boolean"</code>, <code>"array"</code>, <code>"object"</code>,
-     <code>"function"</code>, or <code>"unknown"</code>.
+     <code>"set"</code>, <code>"collection"</code>, <code>"function"</code>, or <code>"unknown"</code>.
   <p>The <code>round</code> function rounds to the number of places after the decimal, with a negative value rounding to the
      left of the decimal point.  For example: <code>round(1.335577,2) &#x21E8; 1.34</code>, and
      <code>round(1234567.890,-3) &#x21E8; 1235000</code>.
@@ -1204,7 +1220,7 @@ or<br>
   retype the same expression.
   <p>The syntax for a function definition is:
   <p class="indent">
-     <code>def</code> | <code>define</code>&nbsp;<i>name</i> <i>optional parameter list</i> <code>= {</code> <i>expressions or statements</i> <code>}</code>
+     <code>def</code> | <code>define</code>&nbsp;<i>name</i> <i>optional parameter list</i> <code>=</code> | <code>&#x21A6;</code>&nbsp;<code>{</code> <i>expressions or statements</i> <code>}</code>
   </p>
   <p>The optional parameter list looks like:
   <p class="indent">
@@ -1273,6 +1289,7 @@ whether it has previously been used/defined.
     <li><i>expr</i> <code>...</code>,&nbsp;<code>..</code>,&nbsp;or&nbsp;<code>&#x2026;</code>&nbsp;<i>expr</i> [ <code>,</code> <i>expr</i> ]</li>
     <li><code>MATCHES</code> <i>pattern</i> ( ',' <i>flags</i> )</li>
     <li><code>&gt;</code> or <code>&lt;</code>, <code>==</code>, etc. <i>expr</i> (any of the comparison operators)</li>
+    <li><code>&gt;</code>, etc. <i>expr</i> ( <code>&amp;&amp;</code> or <code>||</code> or <code>^^</code> ) <code>&gt;</code>, etc. <i>expr</i></li>
     <li><code>DEFAULT</code>
   </ul>
   <p class="indent">
@@ -1320,9 +1337,11 @@ whether it has previously been used/defined.
      but the individual block values can be any kind of expression or object (including lists, objects, strings, functions, etc.). If a <code>...</code> selector is used, the set of values
      (with optional step value) will be tested in succession to see if any value matches the case expression. When the <code>matches</code> selector is used, the expression is a regular
      expression pattern (just like the <code>MATCHES</code> standalone function) against which the case expression is tested. The optional flags are identical to the optional flags in the <code>matches(...)</code> function. Using a comparison operator with an expression will test the
-     case value against that expression, according to the operator. If the comparison succeeds, the corresponding block will be executed. Note that the idea of <i>"fall-through"</i> between
-     statement blocks makes no sense here: multiple selectors can select for a single code block, but that block stands alone and will never "bleed" into another block. If such fall-through
-     behavior is desired, it will be necessary to either duplicate code, make a separate parameterized function, or otherwise rearrange the logic.
+     case value against that expression, according to the operator. If the comparison succeeds, the corresponding block will be executed. If the selector has two comparison operators joined by one of
+     the boolean operators, the comparisons must succeed according to the boolean operator for the block to be executed. An example of a proper comparison would be: <code>&gt; 2.0 &amp;&amp; &lt; 3.0</code> which would be true for
+     any value between 2.0 and 3.0 (exclusive).
+     Note that the idea of <i>"fall-through"</i> between statement blocks does not happen automatically (as in many other languages); in order to "fall through" the <code>next</code> statement
+     must be coded as the last statement inside the block. 
   <p>The <code>LEAVE</code> statement will cause early termination of a <code>LOOP</code> or <code>WHILE</code> statement, or a function, with the final value of the statement being the
      (optional) expression on the <code>LEAVE</code> statement itself, or <code>null</code> if none is given. If a <code>LEAVE</code> statement is executed inside any other block (such as
      <code>IF</code> or <code>CASE</code>) that containing block is terminated, but the closest containing loop or function is also terminated. If the <code>LEAVE</code> is executed
@@ -1580,7 +1599,7 @@ whether it has previously been used/defined.
 <a class="top-link" href="#topofpage">Top</a>
 <hr class="sectionsep">
 
-  <footer><br><div class="title-box">Copyright&nbsp;&copy;&nbsp;2020-2022 Roger L. Whitcomb.<br>Licensed under an <a href="https://github.com/rlwhitcomb/utilities/blob/master/LICENSE">MIT</a> license.<br>Last modified: ${__DATE__} at ${__TIME__}</div><br></footer>
+  <footer><br><div class="title-box">Copyright&nbsp;&copy;&nbsp;2020-2023 Roger L. Whitcomb.<br>Licensed under an <a href="https://github.com/rlwhitcomb/utilities/blob/master/LICENSE">MIT</a> license.<br>Last modified: ${__DATE__} at ${__TIME__}</div><br></footer>
 </body>
 </html>
 

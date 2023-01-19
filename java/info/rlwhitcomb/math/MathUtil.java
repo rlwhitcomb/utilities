@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2021-2022 Roger L. Whitcomb.
+ * Copyright (c) 2021-2023 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -52,10 +52,15 @@
  *  08-Oct-22 rlw #501:	Radix back to BigDecimal conversion.
  *  12-Oct-22 rlw #513:	Move Logging to new package.
  *                #514:	Move text resources out of "util" package to here.
+ *  19-Dec-22 rlw #79:	Move BigDecimal "random" function into here.
+ *  22-Dec-22 rlw #79:	More work on fixing the distribution of random numbers.
+ *  27-Dec-22 rlw	New varargs "minimum" and "maximum" (int) methods.
+ *  05-Jan-23 rlw #558:	"divideContext" for quaternions.
  */
 package info.rlwhitcomb.math;
 
 import info.rlwhitcomb.logging.Logging;
+import info.rlwhitcomb.util.ClassUtil;
 import info.rlwhitcomb.util.DynamicArray;
 import info.rlwhitcomb.util.Intl;
 
@@ -63,9 +68,11 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.MathContext;
 import java.math.RoundingMode;
+import java.security.SecureRandom;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 
 import static info.rlwhitcomb.util.Constants.*;
@@ -102,6 +109,14 @@ public final class MathUtil
 
 	/** A rounding context to round up to the next highest integer. */
 	private static final MathContext MC_ONE = new MathContext(1);
+
+	/** Number of bits per base-ten digit. */
+	private static final double BITS_PER_DIGIT = Math.log(10.0) / Math.log(2.0);
+
+	/**
+	 * Our provider of random values.
+	 */
+	private static Random random = null;
 
 
 	/**
@@ -167,7 +182,7 @@ public final class MathUtil
 	 * From the given "divide" precision and the precision of the dividend, get the "best"
 	 * actual precision to use for the division.
 	 *
-	 * @param dividend	The numerator of a division operation.
+	 * @param dividend	The dividend of a division operation.
 	 * @param mc		Probably limited precision context.
 	 * @return		The max of the dividend's precision and the context precision.
 	 */
@@ -180,11 +195,24 @@ public final class MathUtil
 	 * From the given "divide" precision and the precision of the dividend, get the "best"
 	 * actual precision to use for the division.
 	 *
-	 * @param dividend	The numerator of a complex division operation.
+	 * @param dividend	The dividend of a complex division operation.
 	 * @param mc		Probably limited precision context.
 	 * @return		The max of the dividend's precision and the context precision.
 	 */
 	public static MathContext divideContext(final ComplexNumber dividend, final MathContext mc) {
+	    return new MathContext(Math.max(dividend.precision(), mc.getPrecision()), mc.getRoundingMode());
+	}
+
+
+	/**
+	 * From the given "divide" precision and the precision of the dividend, get the "best"
+	 * actual precision to use for the division.
+	 *
+	 * @param dividend	The dividend of a quaternion division operation.
+	 * @param mc		Probably limited precision context.
+	 * @return		The max of the dividend's precision and the context precision.
+	 */
+	public static MathContext divideContext(final Quaternion dividend, final MathContext mc) {
 	    return new MathContext(Math.max(dividend.precision(), mc.getPrecision()), mc.getRoundingMode());
 	}
 
@@ -196,7 +224,7 @@ public final class MathUtil
 	 * @param mc     The rounding mode and precision.
 	 * @return       Final result rounded as specified and with trailing (superfluous) zeros removed.
 	 */
-	private static BigDecimal fixup(final BigDecimal result, final MathContext mc) {
+	public static BigDecimal fixup(final BigDecimal result, final MathContext mc) {
 	    return result.round(mc).stripTrailingZeros();
 	}
 
@@ -1799,6 +1827,58 @@ public final class MathUtil
 	    }
 
 	    return new BigDecimal(integer).add(fraction, mc);
+	}
+
+	/**
+	 * Generate random {@link BigDecimal} value between {@code 0.0} and {@code 1.0}.
+	 *
+	 * @param seed An optional random seed value (can be set for repeatable "random"
+	 *             sequences, or to seed with an even more random value).
+	 * @param prec The number of digits of precision to calculate.
+	 * @param mc   Math Context for rounding, etc. for the final result.
+	 * @return     The next random value.
+	 */
+	public static BigDecimal random(final Object seed, final int prec, final MathContext mc) {
+	    if (seed != null) {
+		byte[] bytes = ClassUtil.getBytes(seed);
+		BigInteger seedInt = new BigInteger(bytes);
+		random = new Random(seedInt.longValue());
+	    }
+	    if (random == null) {
+		random = new SecureRandom();
+	    }
+	    int bits = (int) (prec * BITS_PER_DIGIT) + 1;
+	    BigInteger randomBits = new BigInteger(bits, random);
+	    BigDecimal dValue = new BigDecimal(randomBits, mc);
+	    return dValue.scaleByPowerOfTen(dValue.scale() - prec);
+	}
+
+	/**
+	 * Calculate the minimum of a series of integers.
+	 *
+	 * @param values The set of values to inspect.
+	 * @return       Minimum value of the input set.
+	 */
+	public static int minimum(final int... values) {
+	    int min = Integer.MAX_VALUE;
+	    for (int value : values) {
+		min = Math.min(min, value);
+	    }
+	    return min;
+	}
+
+	/**
+	 * Calculate the maximum of a series of integers.
+	 *
+	 * @param values The set of values to inspect.
+	 * @return       Maximum value of the input set.
+	 */
+	public static int maximum(final int... values) {
+	    int max = Integer.MIN_VALUE;
+	    for (int value : values) {
+		max = Math.max(max, value);
+	    }
+	    return max;
 	}
 
 }

@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2021-2022 Roger L. Whitcomb.
+ * Copyright (c) 2021-2023 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -195,12 +195,23 @@
  *	06-Dec-2022 (rlwhitcomb)
  *	    #573: Quote literal patterns in "scan".
  *	    #573: More work quoting patterns, including "%n".
+ *	17-Dec-2022 (rlwhitcomb)
+ *	    #572: New method to regularize member name processing.
+ *	31-Dec-2022 (rlwhitcomb)
+ *	    #558: Basic support for quaternions.
+ *	04-Jan-2023 (rlwhitcomb)
+ *	    #537: Add method to load/cache the scripts properties.
+ *	05-Jan-2023 (rlwhitcomb)
+ *	    #558: Quaternion basic arithmetic.
+ *	10-Jan-2023 (rlwhitcomb)
+ *	    #558: Give quaternion priority over complex, so "i" promotion works.
  */
 package info.rlwhitcomb.calc;
 
 import de.onyxbits.SemanticVersion;
 import info.rlwhitcomb.math.BigFraction;
 import info.rlwhitcomb.math.ComplexNumber;
+import info.rlwhitcomb.math.Quaternion;
 import info.rlwhitcomb.util.CharUtil;
 import info.rlwhitcomb.util.Environment;
 import info.rlwhitcomb.util.Exceptions;
@@ -211,6 +222,7 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import org.padler.natorder.NaturalOrderComparator;
 
 import java.io.BufferedWriter;
+import java.io.InputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -243,6 +255,12 @@ public final class CalcUtil
 
 	/** Version identifier for library (saved) files. */
 	private static final String LIB_FORMAT = ":Requires '%1$s', Base '%2$s'";
+
+	/** Name of the scripts properties file (see also "makeScripts.calc" where it is generated). */
+	public static final String SCRIPT_PROPERTIES_FILE = "calcscripts.properties";
+
+	/** Cached properties for the utilities programs. */
+	private static Properties calcScripts = null;
 
 
 	/** Private constructor since this is a static class. */
@@ -563,12 +581,23 @@ public final class CalcUtil
 	}
 
 	/**
-	 * Fixup a {@link BigDecimal} value by stripping trailing zeros for a nicer presentation.
+	 * Convert a suitable object to {@link BigDecimal} and strip trailing zeros.
+	 * <p> The suitable objects are: {@link BigDecimal} (of course), {@link BigInteger},
+	 * or {@link String}.
 	 *
-	 * @param bd	The candidate value.
+	 * @param obj	The candidate value.
 	 * @return	The numerically equivalent value with no trailing zeros.
 	 */
-	public static BigDecimal fixup(final BigDecimal bd) {
+	public static BigDecimal fixup(final Object obj) {
+	    BigDecimal bd;
+
+	    if (obj instanceof BigDecimal)
+		bd = (BigDecimal) obj;
+	    else if (obj instanceof BigInteger)
+		bd = new BigDecimal((BigInteger) obj);
+	    else
+		bd = new BigDecimal(obj.toString());
+
 	    return bd.stripTrailingZeros();
 	}
 
@@ -638,16 +667,14 @@ public final class CalcUtil
 	public static BigDecimal convertToDecimal(final Object value, final MathContext mc, final ParserRuleContext ctx) {
 	    nullCheck(value, ctx);
 
-	    if (value instanceof BigDecimal)
-		return fixup((BigDecimal) value);
-	    else if (value instanceof BigInteger)
-		return fixup(new BigDecimal((BigInteger) value));
+	    if (value instanceof BigDecimal || value instanceof BigInteger || value instanceof String)
+		return fixup(value);
 	    else if (value instanceof BigFraction)
 		return fixup(((BigFraction) value).toDecimal(mc));
 	    else if (value instanceof ComplexNumber)
 		return fixup(((ComplexNumber) value).r());
-	    else if (value instanceof String)
-		return fixup(new BigDecimal((String) value));
+	    else if (value instanceof Quaternion)
+		return fixup(((Quaternion) value).a());
 	    else if (value instanceof Boolean)
 		return ((Boolean) value).booleanValue() ? BigDecimal.ONE : BigDecimal.ZERO;
 	    else if (isFloat(value))
@@ -692,6 +719,8 @@ public final class CalcUtil
 		return new BigFraction((BigInteger) value);
 	    else if (value instanceof ComplexNumber)
 		return new BigFraction(((ComplexNumber) value).r());
+	    else if (value instanceof Quaternion)
+		return new BigFraction(((Quaternion) value).a());
 	    else if (value instanceof String)
 		return BigFraction.valueOf((String) value);
 	    else if (value instanceof Boolean)
@@ -729,6 +758,9 @@ public final class CalcUtil
 		else if (value instanceof ComplexNumber) {
 		    return (((ComplexNumber) value).r().toBigIntegerExact());
 		}
+		else if (value instanceof Quaternion) {
+		    return (((Quaternion) value).a().toBigIntegerExact());
+		}
 		else if (value instanceof Number) {
 		    return BigInteger.valueOf(((Number) value).longValue());
 		}
@@ -761,6 +793,9 @@ public final class CalcUtil
 		}
 		else if (value instanceof ComplexNumber) {
 		    return (((ComplexNumber) value).r().intValueExact());
+		}
+		else if (value instanceof Quaternion) {
+		    return (((Quaternion) value).a().intValueExact());
 		}
 		else if (value instanceof Number) {
 		    return ((Number) value).intValue();
@@ -1123,9 +1158,9 @@ public final class CalcUtil
 	    if (obj instanceof BigDecimal)
 		return ((BigDecimal) obj).precision();
 	    if (obj instanceof BigFraction)
-		return ((BigFraction) obj).toDecimal().precision();	// ?? not really helpful, probably
+		return ((BigFraction) obj).precision();
 	    if (obj instanceof ComplexNumber)
-		return ((ComplexNumber) obj).r().precision();		// ?? again, not helpful, probably
+		return ((ComplexNumber) obj).precision();
 	    if (obj instanceof String) {
 		String str = (String) obj;
 		return str.codePointCount(0, str.length());
@@ -1720,27 +1755,34 @@ public final class CalcUtil
 	    // TODO: what to do with char?
 	    // could add char codepoint values, or concat strings
 
+	    nullCheck(v1, ctx1);
+	    nullCheck(v2, ctx2);
+
 	    // Otherwise, numeric values get added numerically
-	    if (rational) {
+	    if (rational || (v1 instanceof BigFraction || v2 instanceof BigFraction)) {
 		// TODO: deal with complex numbers here??
 		BigFraction f1 = convertToFraction(v1, ctx1);
 		BigFraction f2 = convertToFraction(v2, ctx2);
 
 		return f1.add(f2);
 	    }
+	    else if (v1 instanceof Quaternion || v2 instanceof Quaternion) {
+		Quaternion q1 = Quaternion.valueOf(v1);
+		Quaternion q2 = Quaternion.valueOf(v2);
+
+		return q1.add(q2);
+	    }
+	    else if (v1 instanceof ComplexNumber || v2 instanceof ComplexNumber) {
+		ComplexNumber c1 = ComplexNumber.valueOf(v1);
+		ComplexNumber c2 = ComplexNumber.valueOf(v2);
+
+		return c1.add(c2);
+	    }
 	    else {
-		if (v1 instanceof ComplexNumber || v2 instanceof ComplexNumber) {
-		    ComplexNumber c1 = ComplexNumber.valueOf(v1);
-		    ComplexNumber c2 = ComplexNumber.valueOf(v2);
+		BigDecimal d1 = convertToDecimal(v1, mc, ctx1);
+		BigDecimal d2 = convertToDecimal(v2, mc, ctx2);
 
-		    return c1.add(c2);
-		}
-		else {
-		    BigDecimal d1 = convertToDecimal(v1, mc, ctx1);
-		    BigDecimal d2 = convertToDecimal(v2, mc, ctx2);
-
-		    return fixupToInteger(d1.add(d2, mc));
-		}
+		return fixupToInteger(d1.add(d2, mc));
 	    }
 	}
 
@@ -1848,6 +1890,8 @@ public final class CalcUtil
 		return Typeof.FRACTION;
 	    if (obj instanceof ComplexNumber)
 		return Typeof.COMPLEX;
+	    if (obj instanceof Quaternion)
+		return Typeof.QUATERNION;
 	    if (obj instanceof Boolean)
 		return Typeof.BOOLEAN;
 	    if (obj instanceof ArrayScope)
@@ -1929,6 +1973,8 @@ public final class CalcUtil
 			throw new CalcExprException(ae, ctx);
 		    }
 		    break;
+		case QUATERNION:
+		    throw new CalcExprException(ctx, "%calc#notImplemented", "Cast to quaternion");
 		case BOOLEAN:
 		    castValue = toBooleanValue(visitor, value, ctx);
 		    break;
@@ -2218,18 +2264,28 @@ public final class CalcUtil
 	}
 
 	/**
-	 * A string constant can be used as a member name, but it needs quotes around it.
-	 * This method gets the raw string value (with Unicode escapes decoded, and etc.) and
-	 * adds the required quotes (whichever quotes it started with, which could be "handed"
-	 * quotes as in <code>&#x00AB;</code> and <code>&#x00BB;</code>).
+	 * From the parser "member" context, extract just the proper member name.
 	 *
-	 * @param constantText	The text as it appears in the script.
-	 * @return		The properly decoded and quoted member name from it.
+	 * @param visitor The visitor used to calculate expressions.
+	 * @param ctx     The "member" context.
+	 * @return        Just the member name from the context.
 	 */
-	public static String getStringMemberName(final String constantText) {
-	    char leftQuote = constantText.charAt(0);
-	    char rightQuote = constantText.charAt(constantText.length() - 1);
-	    return CharUtil.addQuotes(getRawString(constantText), leftQuote, rightQuote);
+	public static String getMemberName(final CalcObjectVisitor visitor, final CalcParser.MemberContext ctx) {
+	    if (ctx != null) {
+		CalcParser.IdContext idCtx = ctx.id();
+		if (idCtx != null) {
+		    return idCtx.getText();
+		}
+		TerminalNode string = ctx.STRING();
+		if (string != null) {
+		    return getRawString(string.getText());
+		}
+		string = ctx.ISTRING();
+		if (string != null) {
+		    return getIStringValue(visitor, string, ctx);
+		}
+	    }
+	    return null;
 	}
 
 	/**
@@ -2402,7 +2458,7 @@ public final class CalcUtil
 	 * @param visitor       Visitor used to evaluate expressions.
 	 * @param ctx		The overall parser context for the function (for error messages).
 	 * @param obj		The object to be added to the list, or recursed into when the object
-	 *			is a list or map.
+	 *			is a list, map, or set.
 	 * @param objectList	The complete list of values to be built.
 	 * @param conversion	Type of conversion to do on the values.
 	 * @param level		Level of recursion.
@@ -2651,6 +2707,25 @@ public final class CalcUtil
 		}
 	    }
 	    return lastValue;
+	}
+
+	/**
+	 * Load the "calcscripts.properties" file and cache it for future use.
+	 *
+	 * @return The cached properties for our utilities programs.
+	 */
+	public static Properties loadScriptProperties() {
+	    if (calcScripts == null) {
+		try (InputStream is = CalcUtil.class.getResourceAsStream(SCRIPT_PROPERTIES_FILE)) {
+		    calcScripts = new Properties();
+		    calcScripts.load(is);
+		}
+		catch (IOException ioe) {
+		    return null;
+		}
+	    }
+
+	    return calcScripts;
 	}
 
 }

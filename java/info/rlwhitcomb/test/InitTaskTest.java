@@ -52,6 +52,8 @@
  *	    #273: Move math-related classes to "math" package.
  *	12-Oct-2022 (rlwhitcomb)
  *	    #513: Move Logging to new package.
+ *	22-Dec-2022 (rlwhitcomb)
+ *	    #590: Further reduce the initial time ratio for CI builds.
  */
 package info.rlwhitcomb.test;
 
@@ -209,7 +211,8 @@ public class InitTaskTest
 	    "2335628236089632080682224680122482611771858963814091839036736722208883215137" +
 	    "556003727983940041529700287830766709444745601345564172543709069793961225714";
 
-	/** The desired ratio of first time / second time (that is, the first time should be a lot,
+	/**
+	 * The desired ratio of first time / second time (that is, the first time should be a lot,
 	 * while the second time is very little).
 	 */
 	private static final double DESIRED_RATIO = 5.0e4;
@@ -335,6 +338,8 @@ public class InitTaskTest
 	    // Final check: the ratio of first to second elapsed time should be ~100,000 x
 	    double timeRatio = task.timeRatio();
 	    double desiredRatio = ON_WINDOWS ? DESIRED_RATIO / 2.0d : DESIRED_RATIO;
+	    if (Environment.isCIBuild())
+		desiredRatio /= 2.5d;
 	    if (timeRatio < desiredRatio) {
 		System.out.format("Time ratio too small:  was %1$5.2f, should be %2$5.2f%n",
 			timeRatio, desiredRatio);

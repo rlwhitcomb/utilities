@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2011-2017,2019-2022 Roger L. Whitcomb.
+ * Copyright (c) 2011-2017,2019-2023 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,7 +24,7 @@
  *	Class exposing various attributes of the Environment we're
  *	currently running in.
  *
- *  History:
+ * History:
  *	10-Aug-2011 (rlwhitcomb)
  *	    Created.
  *	15-Aug-2011 (rlwhitcomb)
@@ -194,6 +194,14 @@
  *	    Fix wrong end-of-color tag.
  *	07-Dec-2022 (rlwhitcomb)
  *	    #552: Provide wrapper method, depending on Java version, for current thread id.
+ *	22-Dec-2022 (rlwhitcomb)
+ *	    #590: Add "CI" build information.
+ *	01-Jan-2023 (rlwhitcomb)
+ *	    Go one extra step if the main "class name" is actually a .jar file and look up
+ *	    the "Main-Class" for the .jar file (if given).
+ *	04-Jan-2023 (rlwhitcomb)
+ *	    Protect "readProperties" from non-existent file. Clean up Javadoc on these
+ *	    "readProperties" methods, because the return value is different now (empty vs. null).
  */
 package info.rlwhitcomb.util;
 
@@ -217,6 +225,8 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.jar.Attributes;
+import java.util.jar.JarFile;
 
 import static info.rlwhitcomb.util.CharUtil.Justification.*;
 import static info.rlwhitcomb.util.ConsoleColor.Code.*;
@@ -321,6 +331,10 @@ public final class Environment
 	 * Whether this is a DEBUG build or not.
 	 */
 	private static boolean IS_DEBUG_BUILD = false;
+	/**
+	 * Whether this is a CI (Continuous Integration) build or not.
+	 */
+	private static boolean IS_CI_BUILD = false;
 
 	/**
 	 * Overloaded product name.
@@ -711,9 +725,10 @@ public final class Environment
 	 */
 	public static SemanticVersion programVersion() {
 	    // First build a version string compatible with the semantic versioning spec
-	    String versionSpec = String.format("%1$s%2$s+%3$s",
+	    String versionSpec = String.format("%1$s%2$s%3$s+%4$s",
 		getAppVersion(),
 		isDebugBuild() ? "-debug" : "",
+		isCIBuild() ? "-ci" : "",
 		getAppBuild());
 	    try {
 		return new SemanticVersion(versionSpec);
@@ -1167,6 +1182,7 @@ public final class Environment
 	 * which are parsed into two parts: the process ID and the main class name being run by that
 	 * process. So we will match the process ID against our own value of it (from {@link #getProcessID})
 	 * and return the main class that corresponds to us.
+	 * <p> If the process was run just as a .jar file, extract the "Main-Class" attribute from it.
 	 *
 	 * @return	Fully-qualified class name that is the main program of this application.
 	 */
@@ -1193,7 +1209,17 @@ public final class Environment
 		    String parts[] = line.split("\\s+");
 		    if (parts.length == 2) {
 			if (pid.equals(parts[0])) {
-			    cachedMainClassName = parts[1];
+			    String invokedClass = parts[1];
+			    if (invokedClass.endsWith(".jar")) {
+				JarFile jar = new JarFile(invokedClass);
+				Attributes attrs = jar.getManifest().getMainAttributes();
+				cachedMainClassName = attrs.getValue(Attributes.Name.MAIN_CLASS);
+				if (cachedMainClassName == null)
+				    cachedMainClassName = invokedClass;
+			    }
+			    else {
+				cachedMainClassName = invokedClass;
+			    }
 			    return cachedMainClassName;
 			}
 		    }
@@ -1471,15 +1497,26 @@ public final class Environment
 
 
 	/**
+	 * @return Whether or not this is a CI (Continuous Integration) build (set in the "build.number" file).
+	 */
+	public static boolean isCIBuild() {
+	    readBuildProperties();
+	    return IS_CI_BUILD;
+	}
+
+
+	/**
 	 * @return The product version string.
 	 *
 	 * @see #getAppVersion
 	 * @see #getAppBuild
 	 * @see #isDebugBuild
+	 * @see #isCIBuild
 	 */
 	public static String productVersion() {
 	    String debugInfo = isDebugBuild() ? Intl.getString("util#env.debug") : "";
-	    return Intl.formatString("util#env.versionBuild", getAppVersion(), getAppBuild(), debugInfo);
+	    String ciInfo    = isCIBuild()    ? Intl.getString("util#env.ci")    : "";
+	    return Intl.formatString("util#env.versionBuild", getAppVersion(), getAppBuild(), debugInfo, ciInfo);
 	}
 
 
@@ -1645,8 +1682,8 @@ public final class Environment
 	 * properties map decoded from it.
 	 *
 	 * @param filePath	The path and name of the file to read.
-	 * @return		The decode properties or {@code null} if there was an I/O error
-	 *			reading the file.
+	 * @return		The decoded properties, which could be empty if there was
+	 *			an I/O error reading the file.
 	 */
 	public static Properties readPropertiesFile(String filePath) {
 	    return readPropertiesFile(filePath, null);
@@ -1659,20 +1696,19 @@ public final class Environment
 	 *
 	 * @param filePath		The path and name of the file to read.
 	 * @param baseProperties	The base properties to use as defaults (can be {@code null}).
-	 * @return			The decoded properties or {@code baseProperties}
-	 *				if there was an I/O error reading the file (which could be
-	 *				{@code null} if that was passed in).
+	 * @return			The decoded properties, which could be empty if there was
+	 *				an I/O error reading the file.
 	 */
 	public static Properties readPropertiesFile(String filePath, Properties baseProperties) {
 	    Properties properties = (baseProperties == null)
 			? new Properties()
 			: new Properties(baseProperties);
 	    try (InputStream is = Environment.class.getResourceAsStream(filePath)) {
-		properties.load(is);
+		if (is != null)
+		    properties.load(is);
 	    }
 	    catch (IOException ioe) {
 		// TODO: error somewhere?
-		return baseProperties;
 	    }
 	    return properties;
 	}
@@ -1712,6 +1748,12 @@ public final class Environment
 		    IS_DEBUG_BUILD = !CharUtil.getBooleanValue(releaseBuild);
 		else
 		    IS_DEBUG_BUILD = false;
+
+		String ciBuild = buildProperties.getProperty("build.ci");
+		if (ciBuild != null)
+		    IS_CI_BUILD = CharUtil.getBooleanValue(ciBuild);
+		else
+		    IS_CI_BUILD = false;
 	    }
 	}
 
@@ -1997,4 +2039,3 @@ public final class Environment
 
 
 }
-
