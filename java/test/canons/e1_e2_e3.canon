@@ -469,6 +469,17 @@
 >false ^^ true -> true
 >true ^^ false -> true
 >true ^^ true -> false
+>u1 = true -> true
+>u2 = false -> false
+>u1 & u2 -> false
+>u1 | u2 -> true
+>u1 ^ u2 -> true
+>u1 &~ u2 -> true
+>u1 ~& u2 -> true
+>u1 |~ u2 -> true
+>u1 ~| u2 -> false
+>u1 ^~ u2 -> false
+>u1 ~^ u2 -> false
 >A = 1 -> 1
 >B = 2 -> 2
 >A == 1 || A == 2 && B == 1 -> true

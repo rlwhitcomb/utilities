@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2020-2022 Roger L. Whitcomb.
+ * Copyright (c) 2020-2023 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -487,6 +487,8 @@
  *	    #83: Support more Unicode characters in various contexts.
  *	29-Dec-2022 (rlwhitcomb)
  *	    #558: Beginnings of quaternion support.
+ *	24-Jan-2023 (rlwhitcomb)
+ *	    #594: Additional bit operations.
  */
 
 grammar Calc;
@@ -1445,8 +1447,10 @@ BIT_ASSIGN
        | '&~='
        | '^='
        | '~^='
+       | '^~='
        | '|='
        | '~|='
+       | '|~='
        ;
 
 BOOL_AND_OP
@@ -1472,8 +1476,10 @@ BIT_OP
        | '&~'
        | '^'
        | '~^'
+       | '^~'
        | '|'
        | ( '~|' | '\u22BD' )
+       | '|~'
        ;
 
 ASSIGN : '=' ;

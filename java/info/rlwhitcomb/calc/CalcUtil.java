@@ -203,6 +203,9 @@
  *	    #558: Quaternion basic arithmetic.
  *	10-Jan-2023 (rlwhitcomb)
  *	    #558: Give quaternion priority over complex, so "i" promotion works.
+ *	24-Jan-2023 (rlwhitcomb)
+ *	    #594: Redo "bitOp" to work better on pure boolean values; add two more
+ *	    bit operations.
  */
 package info.rlwhitcomb.calc;
 
@@ -744,11 +747,11 @@ public final class CalcUtil
 	 */
 	public static BigInteger toIntegerValue(final CalcObjectVisitor visitor, final Object value, final MathContext mc, final ParserRuleContext ctx) {
 	    try {
-		if (value instanceof BigDecimal) {
-		    return ((BigDecimal) value).toBigIntegerExact();
-		}
-		else if (value instanceof BigInteger) {
+		if (value instanceof BigInteger) {
 		    return (BigInteger) value;
+		}
+		else if (value instanceof BigDecimal) {
+		    return ((BigDecimal) value).toBigIntegerExact();
 		}
 		else if (value instanceof BigFraction) {
 		    return ((BigFraction) value).toIntegerExact();
@@ -785,6 +788,9 @@ public final class CalcUtil
 	    try {
 		if (value instanceof BigInteger) {
 		    return ((BigInteger) value).intValueExact();
+		}
+		else if (value instanceof BigDecimal) {
+		    return ((BigDecimal) value).intValueExact();
 		}
 		else if (value instanceof BigFraction) {
 		    return ((BigFraction) value).intValueExact();
@@ -1787,42 +1793,97 @@ public final class CalcUtil
 	/**
 	 * Calculates the given bit-wise operation on the operands.
 	 *
-	 * @param i1  The LHS operand
-	 * @param i2  The RHS operand.
+	 * @param visitor The calculation visitor.
+	 * @param o1  The LHS operand.
+	 * @param o2  The RHS operand.
 	 * @param op  The desired bit-wise operation.
 	 * @param ctx The rule context (for error reporting).
-	 * @return <code>i1 <i>op</i> i2</code>
+	 * @param mc  Rounding mode and precision for the result.
+	 * @return <code>o1 <i>op</i> o2</code>
 	 */
-	public static BigInteger bitOp(final BigInteger i1, final BigInteger i2, final String op, final ParserRuleContext ctx) {
-	    BigInteger result;
+	public static Object bitOp(final CalcObjectVisitor visitor, final Object o1, final Object o2, final String op, final ParserRuleContext ctx, final MathContext mc) {
+	    if (o1 instanceof Boolean && o2 instanceof Boolean) {
+		boolean b1 = ((Boolean) o1).booleanValue();
+		boolean b2 = ((Boolean) o2).booleanValue();
+		boolean result;
 
-	    switch (op) {
-		case "&":
-		    result = i1.and(i2);
-		    break;
-		case "~&":
-		    result = i1.and(i2).not();
-		    break;
-		case "&~":
-		    result = i1.andNot(i2);
-		    break;
-		case "^":
-		    result = i1.xor(i2);
-		    break;
-		case "~^":
-		    result = i1.xor(i2).not();
-		    break;
-		case "|":
-		    result = i1.or(i2);
-		    break;
-		case "~|":
-		    result = i1.or(i2).not();
-		    break;
-		default:
-		    throw new UnknownOpException(op, ctx);
+		switch (op) {
+		    case "&":
+			result = b1 & b2;
+			break;
+		    case "~&":
+		    case "\u22BC":
+			result = !(b1 & b2);
+			break;
+		    case "&~":
+			result = b1 & !b2;
+			break;
+		    case "^":
+			result = b1 ^ b2;
+			break;
+		    case "~^":
+			result = !(b1 ^ b2);
+			break;
+		    case "^~":
+			result = b1 ^ !b2;
+			break;
+		    case "|":
+			result = b1 | b2;
+			break;
+		    case "~|":
+		    case "\u22BD":
+			result = !(b1 | b2);
+			break;
+		    case "|~":
+			result = b1 | !b2;
+			break;
+		    default:
+			throw new UnknownOpException(op, ctx);
+		}
+
+		return Boolean.valueOf(result);
 	    }
+	    else {
+		BigInteger i1 = toIntegerValue(visitor, o1, mc, ctx);
+		BigInteger i2 = toIntegerValue(visitor, o2, mc, ctx);
+		BigInteger result;
 
-	    return result;
+		switch (op) {
+		    case "&":
+			result = i1.and(i2);
+			break;
+		    case "~&":
+		    case "\u22BC":
+			result = i1.and(i2).not();
+			break;
+		    case "&~":
+			result = i1.andNot(i2);
+			break;
+		    case "^":
+			result = i1.xor(i2);
+			break;
+		    case "~^":
+			result = i1.xor(i2).not();
+			break;
+		    case "^~":
+			result = i1.xor(i2.not());
+			break;
+		    case "|":
+			result = i1.or(i2);
+			break;
+		    case "~|":
+		    case "\u22BD":
+			result = i1.or(i2).not();
+			break;
+		    case "|~":
+			result = i1.or(i2.not());
+			break;
+		    default:
+			throw new UnknownOpException(op, ctx);
+		}
+
+		return result;
+	    }
 	}
 
 	/**

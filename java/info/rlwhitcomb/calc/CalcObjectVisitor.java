@@ -752,6 +752,8 @@
  *	    #558: Give quaternion priority over complex so operations with "i" will promote.
  *	12-Jan-2023 (rlwhitcomb)
  *	    Refactor the Next and Leave exceptions.
+ *	24-Jan-2023 (rlwhitcomb)
+ *	    #594: Redo the bit operations on pure boolean values.
  */
 package info.rlwhitcomb.calc;
 
@@ -7224,12 +7226,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitBitExpr(CalcParser.BitExprContext ctx) {
-	    BigInteger e1 = getIntegerValue(ctx.expr(0));
-	    BigInteger e2 = getIntegerValue(ctx.expr(1));
+	    Object o1 = evaluate(ctx.expr(0));
+	    Object o2 = evaluate(ctx.expr(1));
 
 	    String op = ctx.BIT_OP().getText();
 
-	    return bitOp(e1, e2, op, ctx);
+	    return bitOp(this, o1, o2, op, ctx, settings.mc);
 	}
 
 	@Override
@@ -7638,14 +7640,14 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public Object visitBitAssignExpr(CalcParser.BitAssignExprContext ctx) {
 	    LValueContext lValue = getLValue(ctx.var());
 
-	    BigInteger i1 = toIntegerValue(this, lValue.getContextObject(this), settings.mc, ctx);
-	    BigInteger i2 = getIntegerValue(ctx.expr());
+	    Object o1 = lValue.getContextObject(this);
+	    Object o2 = evaluate(ctx.expr());
 
 	    String op = ctx.BIT_ASSIGN().getText();
 	    // Strip off the trailing '=' of the operator
 	    op = op.substring(0, op.length() - 1);
 
-	    return lValue.putContextObject(this, bitOp(i1, i2, op, ctx));
+	    return lValue.putContextObject(this, bitOp(this, o1, o2, op, ctx, settings.mc));
 	}
 
 	@Override

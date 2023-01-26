@@ -931,9 +931,11 @@ or<br>
         <i>expr</i>&nbsp;<code> &amp;~ </code>&nbsp;<i>expr</i><br>
         <i>expr</i>&nbsp;<code> ^ </code>&nbsp;<i>expr</i><br>
         <i>expr</i>&nbsp;<code> ~^ </code>&nbsp;<i>expr</i><br>
+        <i>expr</i>&nbsp;<code> ^~ </code>&nbsp;<i>expr</i><br>
         <i>expr</i>&nbsp;<code> | </code>&nbsp;<i>expr</i><br>
-        <i>expr</i>&nbsp;<code> ~| </code>or<code> &#x22BD; </code>&nbsp;<i>expr</i></td>
-        <td>bitwise AND<br>NOT AND (or NAND)<br>AND NOT<br>exclusive OR<br>NOT exclusive OR<br>bitwise OR<br>NOT OR (or NOR)</td><td>left to right</td></tr>
+        <i>expr</i>&nbsp;<code> ~| </code>or<code> &#x22BD; </code>&nbsp;<i>expr</i><br>
+        <i>expr</i>&nbsp;<code> |~ </code>&nbsp;<i>expr</i></td>
+        <td>bitwise AND<br>NOT AND (or NAND)<br>AND NOT<br>exclusive OR<br>NOT exclusive OR<br>exclusive OR NOT<br>bitwise OR<br>NOT OR (or NOR)<br>OR NOT</td><td>left to right</td></tr>
     <tr><td>11</td><td>
         <i>expr</i>&nbsp;<code> &amp;&amp; </code>or<code> &#x2227; </code>&nbsp;<i>expr</i></td><td>logical AND</td><td>left to right</td></tr>
     <tr><td>10</td><td>
@@ -966,8 +968,10 @@ or<br>
         <i>var</i>&nbsp;<code> &amp;~= </code>&nbsp;<i>expr</i><br>
         <i>var</i>&nbsp;<code> ^= </code>&nbsp;<i>expr</i><br>
         <i>var</i>&nbsp;<code> ~^= </code>&nbsp;<i>expr</i><br>
+        <i>var</i>&nbsp;<code> ^~= </code>&nbsp;<i>expr</i><br>
         <i>var</i>&nbsp;<code> |= </code>&nbsp;<i>expr</i><br>
-        <i>var</i>&nbsp;<code> ~|= </code>or<code> &#x22BD;= </code>&nbsp;<i>expr</i></td>
+        <i>var</i>&nbsp;<code> ~|= </code>or<code> &#x22BD;= </code>&nbsp;<i>expr</i><br>
+        <i>var</i>&nbsp;<code> |~= </code>&nbsp;<i>expr</i></td>
         <td>perform the bit op, reassign to variable</td><td>right to left</td></tr>
     </tbody>
   </table>
