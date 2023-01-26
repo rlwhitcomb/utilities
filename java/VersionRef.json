@@ -7,6 +7,10 @@
       issues: [ 458 ],
       comment: 'Implement multi-threaded "parallel" processing.'
     },
+    { version: '2.20.9', date: d'2023-01-25',
+      issues: [ 594 ],
+      comment: 'More bit operators; bit ops on boolean values produce booleans.'
+    },
     { version: '2.20.8', date: d'2023-01-11',
       issues: [ 558 ],
       comment: 'More quaternion support, including "j" and "k" constants.'
