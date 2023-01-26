@@ -5,7 +5,17 @@
 >Test 'u2': Passed
 >Test 'u3': Passed
 >Test 'u4': Passed
+>Test 'u5': Passed
+>Test 'u6': Passed
+>Test 'u7': Passed
+>Test 'u8': Passed
+>Test 'u9': Passed
+>Test 'ua': Passed
+>Test 'ub': Passed
+>Test 'uc': Passed
+>Test 'ud': Passed
+>Test 'ud': Passed
 >------------------------------------
->Ran 4 tests: 4 passed, 0 failed.
+>Ran 14 tests: 14 passed, 0 failed.
 >====================================
 >

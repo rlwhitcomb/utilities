@@ -25,11 +25,13 @@
  *
  * History:
  *  05-Jan-23 rlw #28:	Coding.
- *  11-Jan-23		Remove line ending options; add case-sensitive options.
+ *  26-Jan-23		Remove line ending options; add case-sensitive options.
+ *			Redo "-u" and "-d" options; add "-c", "-f", and "-s" options.
  */
 package info.rlwhitcomb.tools;
 
 import info.rlwhitcomb.util.Environment;
+import info.rlwhitcomb.util.Exceptions;
 import info.rlwhitcomb.util.FileUtilities;
 import info.rlwhitcomb.util.Intl;
 import info.rlwhitcomb.util.Options;
@@ -48,18 +50,39 @@ import java.util.Optional;
 public class Uniq
 {
 	/**
+	 * "Expecting" a value on the command line?
+	 */
+	private static int expecting;
+
+	/**
+	 * Number of fields to skip at the start of each line.
+	 */
+	private static int fieldsToSkip = -1;
+
+	/**
+	 * Number of characters to skip on each line.
+	 */
+	private static int charsToSkip = -1;
+
+
+	/**
 	 * Possible command line options.
 	 */
 	private static enum Opts implements Options.ToggleEnum
 	{
-		SENSITIVE	(true,
-				 "CaseSensitive", "sensitive", "exact", "ex", "s"),
-		INSENSITIVE	(SENSITIVE,
+		INSENSITIVE	(false,
 				 "CaseInsensitive", "insensitive", "ignore", "ign", "i"),
-		UNIQUE		(true,
+		UNIQUE		(false,
 				 "unique", "uniq", "un", "u"),
-		DUPLICATES	(UNIQUE,
+		DUPLICATES	(false,
 				 "duplicates", "duplicate", "dup", "d"),
+		COUNTS		(false,
+				 "counts", "count", "c"),
+
+		FIELDS		(false,
+				 "fields", "fld", "f"),
+		CHARS		(false,
+				 "chars", "char", "s"),
 
 		HELP		("help", "h", "?"),
 		VERSION		("version", "vers", "ver", "v");
@@ -123,6 +146,13 @@ public class Uniq
 	    }
 	    else {
 		switch (option.get()) {
+		    case FIELDS:
+			expecting = 1;
+			break;
+		    case CHARS:
+			expecting = 2;
+			break;
+
 		    case HELP:
 			Intl.printHelp("tools#unique");
 			code = -1;
@@ -137,13 +167,65 @@ public class Uniq
 	    return code;
 	}
 
-	private static boolean matchLine(final String line, final String lastUniqueLine) {
-	    if (Opts.SENSITIVE.isSet()) {
-		return line.equals(lastUniqueLine);
+	private static int getInt(final String arg) {
+	    try {
+		return Integer.parseInt(arg);
 	    }
-	    else {
+	    catch (NumberFormatException nfe) {
+		Intl.errFormat("tools#unique.NaN", arg);
+		return -1;
+	    }
+	}
+
+	private static String updateLine(final String line) {
+	    String updatedLine = line;
+
+	    if (fieldsToSkip > 0) {
+		int field = 0;
+		boolean inField = false;
+		for (int i = 0; i < line.length(); i++) {
+		    char ch = line.charAt(i);
+		    if (Character.isWhitespace(ch)) {
+			if (inField) {
+			    inField = false;
+			    field++;
+			}
+		    }
+		    else {
+			if (!inField) {
+			    inField = true;
+			    if (field >= fieldsToSkip) {
+				updatedLine = line.substring(i);
+				break;
+			    }
+			}
+		    }
+		}
+	    }
+	    else if (charsToSkip > 0) {
+		if (line.length() > charsToSkip)
+		    updatedLine = line.substring(charsToSkip);
+		else
+		    updatedLine = "";
+	    }
+
+	    return updatedLine;
+	}
+
+	private static boolean matchLine(final String line, final String lastUniqueLine) {
+	    if (Opts.INSENSITIVE.isSet()) {
 		return line.equalsIgnoreCase(lastUniqueLine);
 	    }
+	    else {
+		return line.equals(lastUniqueLine);
+	    }
+	}
+
+	private static void output(final String line, final int count) {
+	    if (Opts.COUNTS.isSet())
+		System.out.format("%1$4d %2$s%n", count, line);
+	    else
+		System.out.println(line);
 	}
 
 	/**
@@ -154,13 +236,43 @@ public class Uniq
 	 */
 	public static void main(final String[] args) {
 	    // Reset the options to standard values each time (for testing)
-	    Opts.SENSITIVE.set(true);
-	    Opts.UNIQUE.set(true);
+	    expecting    = 0;
+	    fieldsToSkip = -1;
+	    charsToSkip  = -1;
+
+	    Opts.INSENSITIVE.set(false);
+	    Opts.UNIQUE.set(false);
+	    Opts.DUPLICATES.set(false);
+	    Opts.COUNTS.set(false);
 
 	    String lastUniqueLine = "";
+	    String lastUpdatedLine = "";
 	    final List<String> files = new ArrayList<>();
 
-	    int ret = Options.process(args, opt -> { return processOption(opt); }, arg -> files.add(arg));
+	    int ret = Options.process(args,
+		opt -> {
+		    if (expecting != 0) {
+			Intl.errFormat("tools#unique.expectNumber", opt);
+			return 1;
+		    }
+		    else {
+			return processOption(opt);
+		    }
+		},
+		arg -> {
+		    switch (expecting) {
+			case 1:
+			    fieldsToSkip = getInt(arg);
+			    break;
+			case 2:
+			    charsToSkip = getInt(arg);
+			    break;
+			default:
+			    files.add(arg);
+			    break;
+		    }
+		    expecting = 0;
+		});
 
 	    if (ret != 0) {
 		if (ret < 0)
@@ -171,41 +283,51 @@ public class Uniq
 	    if (files.isEmpty())
 		return;
 
+	    if (fieldsToSkip > 0 && charsToSkip > 0) {
+		Intl.errFormat("tools#unique.badSkips");
+		System.exit(1);
+	    }
+
+	    boolean unique    = Opts.UNIQUE.isSet();
+	    boolean duplicate = Opts.DUPLICATES.isSet();
+	    boolean different = !unique && !duplicate;
+
 	    for (String file : files) {
 		File f = new File(file);
 		if (FileUtilities.exists(f, "fr")) {
 		    try {
 			List<String> lines = FileUtilities.readFileAsLines(f);
-			lastUniqueLine = lines.get(0);
-
-			if (Opts.UNIQUE.isSet())
-			    System.out.println(lastUniqueLine);
-
-			int duplicates = 0;
+			lastUniqueLine  = lines.get(0);
+			lastUpdatedLine = updateLine(lastUniqueLine);
+			int count = 1;
 
 			for (int i = 1; i < lines.size(); i++) {
-			    String line = lines.get(i);
-			    if (Opts.UNIQUE.isSet()) {
-				if (!matchLine(line, lastUniqueLine)) {
-				    System.out.println(line);
-				    lastUniqueLine = line;
-				}
+			    String line        = lines.get(i);
+			    String updatedLine = updateLine(line);
+
+			    if (matchLine(updatedLine, lastUpdatedLine)) {
+				count++;
 			    }
 			    else {
-				if (matchLine(line, lastUniqueLine)) {
-				    if (duplicates == 0)
-					System.out.println(lastUniqueLine);
-				    duplicates++;
+				if (different || (unique && count == 1) || (duplicate && count > 1)) {
+				    output(lastUniqueLine, count);
 				}
-				else {
-				    lastUniqueLine = line;
-				    duplicates = 0;
-				}
+				lastUniqueLine  = line;
+				lastUpdatedLine = updatedLine;
+				count = 1;
 			    }
+			}
+			if (different || (unique && count == 1) || (duplicate && count > 1)) {
+			    output(lastUniqueLine, count);
 			}
 		    }
 		    catch (IOException ioe) {
+			Intl.errFormat("tools#unique.ioError", f.getPath(), Exceptions.toString(ioe));
+			System.exit(2);
 		    }
+		}
+		else {
+		    Intl.errFormat("tools#unique.fileNotFound", f.getPath());
 		}
 	    }
 	}
