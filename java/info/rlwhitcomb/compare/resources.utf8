@@ -1,7 +1,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2020-2022 Roger L. Whitcomb.
+# Copyright (c) 2020-2023 Roger L. Whitcomb.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -34,6 +34,7 @@
 #  23-Sep-22 rlw  #52:	New messages.
 #  07-Dec-22 rlw  #563:	Color codes.
 #  13-Dec-22 rlw  #578:	Update help for latest options.
+#  27-Jan-23 rlw   ---	New error for incompatible options; string for option reporting.
 #
 
 #
@@ -41,6 +42,9 @@
 #
 compare.unknownOption		= <Rd*!>Unknown option: <Bk!>"<Gr>%1$s<.>"<.>!<-->
 compare.notEnoughArguments	= <Rd*!>There should be at least two arguments given!<-->
+compare.sensitiveLineEndings	= <Rd*!>The case-insensitive option only applies when ignoring line endings also.<-->
+
+compare.options			= <Bk!>Options:<.>%1$s
 
 compare.comparingTwo		= <Bk!>Comparing "<Cy>%1$s<.>" to "<Cy>%2$s<.>" ...
 compare.doesNotCompare		= <Rd*!>File <Bk!>"<Gr>%1$s<.>"<.> does not compare to <Bk!>"<Gr>%2$s<.>"<.>!<-->
@@ -98,21 +102,24 @@ compare.help32			= \t  or <Gr>-recursive<.>, <Gr>-rec<.>, or <Gr>-r<.>
 compare.help33			= \t<Gr>-lines<.>\t\tignore line ending differences during compare
 compare.help34			= \t  or <Gr>-ignore_line_endings<.>, <Gr>-ignore-line-endings<.>,
 compare.help35			= \t     <Gr>-ignorelineendings<.>, <Gr>-line<.>, or <Gr>-l<.>
-compare.help36			= \t<Gr>-continue<.>\tcontinue processing files even when a mismatch
-compare.help37			= \t\t\toccurs <Yw!>(default)<.>
-compare.help38			= \t  or <Gr>-continue_after_error<.>, <Gr>-continue-after-error<.>,
-compare.help39			= \t     <Gr>-continueaftererror<.>, <Gr>-cont<.>, or <Gr>-con<.>
-compare.help40			= \t<Gr>-break<.>\t\tstop processing files on the first mismatch
-compare.help41			= \t  or <Gr>-break_on_error<.>, <Gr>-break-on-error<.>, <Gr>-breakonerror<.>,
-compare.help42			= \t     <Gr>-brk<.>, <Gr>-br<.>, or <Gr>-b<.>
-compare.help43			= \t<Gr>-colors<.>\t\tuse colors on output <Yw!>(default)<.>
-compare.help44			= \t  or <Gr>-colored<.>, <Gr>-color<.>, or <Gr>-col<.>
-compare.help45			= \t<Gr>-nocolors<.>\tdo not use colors for output
-compare.help46			= \t  or <Gr>-uncolored<.>, <Gr>-nocolor<.>, or <Gr>-noc<.>
-compare.help47			= ""
-compare.help48			= \t<Gr>-help<.>\t\tdisplay this message
-compare.help49			= \t  or <Gr>-h<.>, or <Gr>-?<.>
-compare.help50			= \t<Gr>-version<.>\tdisplay program version/copyright information
-compare.help51			= \t  or <Gr>-vers<.>, or <Gr>-ver<.>
-compare.help52			= "<-->"
+compare.help36			= \t<Gr>-ignore<.>\t\tignore case during compare
+compare.help37			= \t  or <Gr>-case_insensitive<.>, <Gr>-case-insensitive<.>,
+compare.help38			= \t     <Gr>-caseinsensitive<.>, <Gr>-ins<.>, <Gr>-ign<.>, or <Gr>-i<.>
+compare.help39			= \t<Gr>-continue<.>\tcontinue processing files even when a mismatch
+compare.help40			= \t\t\toccurs <Yw!>(default)<.>
+compare.help41			= \t  or <Gr>-continue_after_error<.>, <Gr>-continue-after-error<.>,
+compare.help42			= \t     <Gr>-continueaftererror<.>, <Gr>-cont<.>, or <Gr>-con<.>
+compare.help43			= \t<Gr>-break<.>\t\tstop processing files on the first mismatch
+compare.help44			= \t  or <Gr>-break_on_error<.>, <Gr>-break-on-error<.>, <Gr>-breakonerror<.>,
+compare.help45			= \t     <Gr>-brk<.>, <Gr>-br<.>, or <Gr>-b<.>
+compare.help46			= \t<Gr>-colors<.>\t\tuse colors on output <Yw!>(default)<.>
+compare.help47			= \t  or <Gr>-colored<.>, <Gr>-color<.>, or <Gr>-col<.>
+compare.help48			= \t<Gr>-nocolors<.>\tdo not use colors for output
+compare.help49			= \t  or <Gr>-uncolored<.>, <Gr>-nocolor<.>, or <Gr>-noc<.>
+compare.help50			= ""
+compare.help51			= \t<Gr>-help<.>\t\tdisplay this message
+compare.help52			= \t  or <Gr>-h<.>, or <Gr>-?<.>
+compare.help53			= \t<Gr>-version<.>\tdisplay program version/copyright information
+compare.help54			= \t  or <Gr>-vers<.>, or <Gr>-ver<.>
+compare.help55			= "<-->"
 

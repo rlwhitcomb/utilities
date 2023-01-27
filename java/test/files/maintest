@@ -29,6 +29,7 @@ t15: hexdumptest
 t16: base64test
 t17: stringtest
 t18: uniqtest
+t19: comparetest
 
 !echo
 !echo Done with all the Tester tests.
