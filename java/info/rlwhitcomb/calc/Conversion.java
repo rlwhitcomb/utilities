@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2022 Roger L. Whitcomb.
+ * Copyright (c) 2022-2023 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,9 +23,9 @@
  *
  *	Conversion modes for "buildValueList".
  *
- *  History:
- *	28-May-2022 (rlwhitcomb)
- *	    Refactor into a separate file.
+ * History:
+ *  28-May-22 rlw  ---	Refactor into a separate file.
+ *  10-Jan-23 rlw #558:	Add QUATERNION.
  */
 package info.rlwhitcomb.calc;
 
@@ -43,6 +43,8 @@ public enum Conversion
 	FRACTION,
 	/** Convert to complex numbers. */
 	COMPLEX,
+	/** Convert to quaternions. */
+	QUATERNION,
 	/** Leave values as they are (for "sort"). */
 	UNCHANGED
 }
