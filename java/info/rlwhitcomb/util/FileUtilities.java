@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2010-2011,2013-2017,2019-2022 Roger L. Whitcomb.
+ * Copyright (c) 2010-2011,2013-2017,2019-2023 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -127,6 +127,8 @@
  *	#481: Make "getFileReader" and "getFileWriter" public.
  *    21-Oct-2022 (rlwhitcomb)
  *	#473: Add "+" processing to "exists" function.
+ *    16-Jan-2023 (rlwhitcomb)
+ *	Add option to "compareFileLines" for case-insensitive compares.
  */
 package info.rlwhitcomb.util;
 
@@ -302,8 +304,29 @@ public final class FileUtilities
      * @return	{@code true} if the two files compare byte-for-byte,
      *		or {@code false} if not.
      * @throws IOException if something went wrong.
+     * @see #compareFileLines(File, File, boolean)
      */
     public static boolean compareFileLines(final File file1, final File file2)
+	throws IOException
+    {
+	return compareFileLines(file1, file2, false);
+    }
+
+    /**
+     * Compare two files line-by-line.
+     * <p> This is meant to compare files, ignoring line ending differences,
+     * because it uses the {@link BufferedReader#readLine} method to read
+     * through the file.
+     * <p> There is an option to ignore case differences when comparing lines.
+     *
+     * @param file1	The first file to compare.
+     * @param file2	The second file to compare.
+     * @param ignore	Whether to ignore case differences between lines.
+     * @return	{@code true} if the two files compare byte-for-byte,
+     *		or {@code false} if not.
+     * @throws IOException if something went wrong.
+     */
+    public static boolean compareFileLines(final File file1, final File file2, final boolean ignore)
 	throws IOException
     {
 	Path path1 = file1.toPath();
@@ -320,8 +343,14 @@ public final class FileUtilities
 		line2 = rdr2.readLine();
 		if (line2 == null)
 		    return false;
-		if (!line1.equals(line2))
-		    return false;
+		if (ignore) {
+		    if (!line1.equalsIgnoreCase(line2))
+			return false;
+		}
+		else {
+		    if (!line1.equals(line2))
+			return false;
+		}
 	    }
 	    line2 = rdr2.readLine();
 	    return (line2 == null);

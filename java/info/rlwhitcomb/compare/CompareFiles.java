@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2020-2022 Roger L. Whitcomb.
+ * Copyright (c) 2020-2023 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -39,6 +39,7 @@
  *  06-Oct-22 rlw #505:	Mode to compare, ignoring line ending diffs.
  *  07-Dec-22 rlw #563:	Add "color/nocolor" options.
  *  13-Dec-22 rlw #578:	Tweak the options.
+ *  27-Jan-23 rlw  ---	Add case-insensitive option; report options in verbose mode.
  */
 package info.rlwhitcomb.compare;
 
@@ -130,6 +131,9 @@ public class CompareFiles
 		/** Whether to ignore line ending differences. */
 		IGNORE_LINE_ENDINGS	(false,
 					 "IgnoreLineEndings", "lines", "line", "l"),
+		/** Whether to ignore case when doing compares. */
+		CASE_INSENSITIVE	(false,
+					 "CaseInsensitive", "insensitive", "ignore", "ins", "ign", "i"),
 		/** Whether to compare directories/files both directions. */
 		SYNC_MODE		(true,
 					 "SyncMode", "sync", "syn"),
@@ -172,6 +176,10 @@ public class CompareFiles
 		    return this.choices;
 		}
 
+		public String bestChoice() {
+		    return this.choices[1];
+		}
+
 		@Override
 		public void set(final boolean newValue) {
 		    if (obverseOpt != null)
@@ -193,6 +201,11 @@ public class CompareFiles
 		}
 	}
 
+
+	/** Colored option prefix (for verbose mode option reporting). */
+	private static final String OPT = " <Gr>--";
+	/** Colored option suffix. */
+	private static final String END = "<-->";
 
 	/** What level of output to use. */
 	private static Level verbosity = Level.NORMAL;
@@ -262,7 +275,12 @@ public class CompareFiles
 
 	    try {
 		if (Opts.IGNORE_LINE_ENDINGS.isSet()) {
-		    match = FileUtilities.compareFileLines(file1, file2);
+		    if (Opts.CASE_INSENSITIVE.isSet()) {
+			match = FileUtilities.compareFileLines(file1, file2, true);
+		    }
+		    else {
+			match = FileUtilities.compareFileLines(file1, file2);
+		    }
 		}
 		else {
 		    match = FileUtilities.compareFiles(file1, file2);
@@ -488,7 +506,6 @@ public class CompareFiles
 			    }
 			}
 		    }
-	    // TODO option process (-caseinsensitive)
 		    else {
 			err(Level.NORMAL, "unknownOption", arg);
 			error = true;
@@ -498,6 +515,38 @@ public class CompareFiles
 		    msg(Level.SUPER_VERBOSE, "addingPath", arg);
 		    pathArgs.add(arg);
 		}
+	    }
+
+	    // Check for illegal combinations of options specified
+	    if (Opts.CASE_INSENSITIVE.isSet() && !Opts.IGNORE_LINE_ENDINGS.isSet()) {
+		err(Level.NORMAL, "sensitiveLineEndings");
+	    }
+
+	    if (verbosity.meetsOrExceeds(Level.VERBOSE)) {
+		StringBuilder buf = new StringBuilder();
+
+		buf.append(OPT);
+		if (Opts.SYNC_MODE.isSet())
+		    buf.append(Opts.SYNC_MODE.bestChoice());
+		else
+		    buf.append(Opts.COPY_MODE.bestChoice());
+		buf.append(END);
+
+		if (Opts.RECURSIVE.isSet())
+		    buf.append(OPT).append(Opts.RECURSIVE.bestChoice()).append(END);
+		if (Opts.IGNORE_LINE_ENDINGS.isSet())
+		    buf.append(OPT).append(Opts.IGNORE_LINE_ENDINGS.bestChoice()).append(END);
+		if (Opts.CASE_INSENSITIVE.isSet())
+		    buf.append(OPT).append(Opts.CASE_INSENSITIVE.bestChoice()).append(END);
+
+		buf.append(OPT);
+		if (Opts.CONTINUE_AFTER_ERROR.isSet())
+		    buf.append(Opts.CONTINUE_AFTER_ERROR.bestChoice());
+		else
+		    buf.append(Opts.BREAK_ON_ERROR.bestChoice());
+		buf.append(END);
+
+		msg(Level.VERBOSE, "options", buf.toString());
 	    }
 
 	    // Special case of one argument on main command line which is "@file"
@@ -576,12 +625,24 @@ public class CompareFiles
 	    // Set the colored mode prior to any options
 	    Intl.setColoring(Opts.COLORED.isSet());
 
+	    // Reset all the (static) options to defaults (for testing)
+	    verbosity                = Level.NORMAL;
+
+	    totalNumberOfFiles       = 0;
+	    totalNumberOfMismatches  = 0;
+
+	    Opts.CONTINUE_AFTER_ERROR.set(true);
+	    Opts.RECURSIVE           .set(false);
+	    Opts.IGNORE_LINE_ENDINGS .set(false);
+	    Opts.CASE_INSENSITIVE    .set(false);
+	    Opts.SYNC_MODE           .set(true);
+
 	    // Do all the option and comparison processing on the command line arguments
 	    process(args, true);
 
 	    displayStats(totalNumberOfFiles, totalNumberOfMismatches);
 
-	    if (verbosity.meetsOrExceeds(Level.VERBOSE)) {
+	    if (verbosity.meetsOrExceeds(Level.SUPER_VERBOSE)) {
 		long memoryUseAfter = Runtime.getRuntime().freeMemory();
 		Intl.outFormat("compare#compare.memoryUse", memoryUseBefore - memoryUseAfter);
 	    }

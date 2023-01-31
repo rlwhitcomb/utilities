@@ -53,6 +53,8 @@
 #	    #561: Update Gmt help for new formats and options.
 #	05-Jan-2023 (rlwhitcomb)
 #	    #28: Text for "unq" program.
+#	26-Jan-2023 (rlwhitcomb)
+#	    #28: More error messages for "unq".
 #
 
 #
@@ -219,6 +221,11 @@ os.help19	= ""
 # From Uniq.java
 #
 unique.badOption	= Unrecognized option "%1$s"!
+unique.expectNumber	= Expecting a number, not another option ("-%1$s")!
+unique.NaN		= Value "%1$s" could not be converted to a number!
+unique.badSkips		= Cannot specify both a number of fields and number of characters to skip!
+unique.ioError		= Error reading the "%1$s" file: %2$s
+unique.fileNotFound	= File "%1$s" not found to read!
 
 unique.help1	= ""
 unique.help2	= "Usage: unq [options] file(s)"

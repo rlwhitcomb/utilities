@@ -1,0 +1,13 @@
+>====================================
+>Running comparetest...
+>------------------------------------
+>Tests of the CompareFiles utility...
+>
+>Test 'cmp_1': Passed
+>Test 'cmp_2': Passed
+>
+>End of CompareFiles test.
+>------------------------------------
+>Ran 2 tests: 2 passed, 0 failed.
+>====================================
+>

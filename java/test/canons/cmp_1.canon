@@ -1,0 +1,3 @@
+>Options: --sync --lines --insensitive --continue
+>Comparing "test/data/Gettysburg.txt" to "test/data/Upper_Gettysburg.txt" ...
+>One file compared, no mismatch.
