@@ -754,6 +754,8 @@
  *	    Refactor the Next and Leave exceptions.
  *	24-Jan-2023 (rlwhitcomb)
  *	    #594: Redo the bit operations on pure boolean values.
+ *	04-Feb-2023 (rlwhitcomb)
+ *	    #558: More quaternion arithmetic, particularly integer powers.
  */
 package info.rlwhitcomb.calc;
 
@@ -4093,7 +4095,15 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    Object value = evaluate(expr);
 
-	    if (value instanceof ComplexNumber) {
+	    if (value instanceof Quaternion) {
+		Quaternion base = (Quaternion) value;
+		if (Math.floor(exp) == exp && !Double.isInfinite(exp)) {
+		    return base.power((int) exp, settings.mc);
+		}
+		// TODO: temporary
+		throw new CalcExprException(ctx, "%calc#notImplemented", "quaternion to decimal power");
+	    }
+	    else if (value instanceof ComplexNumber) {
 		ComplexNumber base = (ComplexNumber) value;
 		return base.pow(new BigDecimal(exp), settings.mc);
 	    }
@@ -4154,6 +4164,11 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		BigFraction base = convertToFraction(value, expr);
 
 		return base.pow(exp);
+	    }
+	    else if (value instanceof Quaternion) {
+		Quaternion base = (Quaternion) value;
+
+		return base.power(exp, settings.mc);
 	    }
 	    else if (value instanceof ComplexNumber) {
 		ComplexNumber base = (ComplexNumber) value;
