@@ -1,3 +1,3 @@
->Options: --sync --continue
+>Options: --sync --lines --utf8 --continue
 >Comparing "test/data/unicode.txt" to "test/data/unicode.txt" ...
 >One file compared, no mismatch.

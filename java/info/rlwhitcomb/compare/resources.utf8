@@ -35,6 +35,7 @@
 #  07-Dec-22 rlw  #563:	Color codes.
 #  13-Dec-22 rlw  #578:	Update help for latest options.
 #  27-Jan-23 rlw   ---	New error for incompatible options; string for option reporting.
+#  05-Feb-23 rlw   ---	New "-utf8" option.
 #
 
 #
@@ -43,6 +44,7 @@
 compare.unknownOption		= <Rd*!>Unknown option: <Bk!>"<Gr>%1$s<.>"<.>!<-->
 compare.notEnoughArguments	= <Rd*!>There should be at least two arguments given!<-->
 compare.sensitiveLineEndings	= <Rd*!>The case-insensitive option only applies when ignoring line endings also.<-->
+compare.utf8LineEndings		= <Rd*!>The UTF-8 option only applies when ignoring line endings also.<-->
 
 compare.options			= <Bk!>Options:<.>%1$s
 
@@ -105,21 +107,23 @@ compare.help35			= \t     <Gr>-ignorelineendings<.>, <Gr>-line<.>, or <Gr>-l<.>
 compare.help36			= \t<Gr>-ignore<.>\t\tignore case during compare
 compare.help37			= \t  or <Gr>-case_insensitive<.>, <Gr>-case-insensitive<.>,
 compare.help38			= \t     <Gr>-caseinsensitive<.>, <Gr>-ins<.>, <Gr>-ign<.>, or <Gr>-i<.>
-compare.help39			= \t<Gr>-continue<.>\tcontinue processing files even when a mismatch
-compare.help40			= \t\t\toccurs <Yw!>(default)<.>
-compare.help41			= \t  or <Gr>-continue_after_error<.>, <Gr>-continue-after-error<.>,
-compare.help42			= \t     <Gr>-continueaftererror<.>, <Gr>-cont<.>, or <Gr>-con<.>
-compare.help43			= \t<Gr>-break<.>\t\tstop processing files on the first mismatch
-compare.help44			= \t  or <Gr>-break_on_error<.>, <Gr>-break-on-error<.>, <Gr>-breakonerror<.>,
-compare.help45			= \t     <Gr>-brk<.>, <Gr>-br<.>, or <Gr>-b<.>
-compare.help46			= \t<Gr>-colors<.>\t\tuse colors on output <Yw!>(default)<.>
-compare.help47			= \t  or <Gr>-colored<.>, <Gr>-color<.>, or <Gr>-col<.>
-compare.help48			= \t<Gr>-nocolors<.>\tdo not use colors for output
-compare.help49			= \t  or <Gr>-uncolored<.>, <Gr>-nocolor<.>, or <Gr>-noc<.>
-compare.help50			= ""
-compare.help51			= \t<Gr>-help<.>\t\tdisplay this message
-compare.help52			= \t  or <Gr>-h<.>, or <Gr>-?<.>
-compare.help53			= \t<Gr>-version<.>\tdisplay program version/copyright information
-compare.help54			= \t  or <Gr>-vers<.>, or <Gr>-ver<.>
-compare.help55			= "<-->"
+compare.help39			= \t<Gr>-utf8<.>\t\tuse UTF-8 charset when doing line compares
+compare.help40			= \t  or <Gr>-utf_8<.>, <Gr>-utf-8<.>, or <Gr>-u<.>
+compare.help41			= \t<Gr>-continue<.>\tcontinue processing files even when a mismatch
+compare.help42			= \t\t\toccurs <Yw!>(default)<.>
+compare.help43			= \t  or <Gr>-continue_after_error<.>, <Gr>-continue-after-error<.>,
+compare.help44			= \t     <Gr>-continueaftererror<.>, <Gr>-cont<.>, or <Gr>-con<.>
+compare.help45			= \t<Gr>-break<.>\t\tstop processing files on the first mismatch
+compare.help46			= \t  or <Gr>-break_on_error<.>, <Gr>-break-on-error<.>, <Gr>-breakonerror<.>,
+compare.help47			= \t     <Gr>-brk<.>, <Gr>-br<.>, or <Gr>-b<.>
+compare.help48			= \t<Gr>-colors<.>\t\tuse colors on output <Yw!>(default)<.>
+compare.help49			= \t  or <Gr>-colored<.>, <Gr>-color<.>, or <Gr>-col<.>
+compare.help50			= \t<Gr>-nocolors<.>\tdo not use colors for output
+compare.help51			= \t  or <Gr>-uncolored<.>, <Gr>-nocolor<.>, or <Gr>-noc<.>
+compare.help52			= ""
+compare.help53			= \t<Gr>-help<.>\t\tdisplay this message
+compare.help54			= \t  or <Gr>-h<.>, or <Gr>-?<.>
+compare.help55			= \t<Gr>-version<.>\tdisplay program version/copyright information
+compare.help56			= \t  or <Gr>-vers<.>, or <Gr>-ver<.>
+compare.help57			= "<-->"
 

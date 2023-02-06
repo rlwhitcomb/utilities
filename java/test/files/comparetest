@@ -9,7 +9,7 @@ $echo Tests of the CompareFiles utility...
 $echo
 
 cmp_1: -i -l test/data/Gettysburg.txt test/data/Upper_Gettysburg.txt
-cmp_2: test/data/unicode.txt test/data/unicode.txt
+cmp_2: -u -l test/data/unicode.txt test/data/unicode.txt
 
 $echo
 $echo End of CompareFiles test.

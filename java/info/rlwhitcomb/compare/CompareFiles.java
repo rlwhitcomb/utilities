@@ -40,6 +40,7 @@
  *  07-Dec-22 rlw #563:	Add "color/nocolor" options.
  *  13-Dec-22 rlw #578:	Tweak the options.
  *  27-Jan-23 rlw  ---	Add case-insensitive option; report options in verbose mode.
+ *  05-Feb-23 rlw  ---	Add "-utf8" option to satisfy Windows testing.
  */
 package info.rlwhitcomb.compare;
 
@@ -139,6 +140,9 @@ public class CompareFiles
 					 "SyncMode", "sync", "syn"),
 		COPY_MODE		(SYNC_MODE,
 					 "CopyMode", "copy", "c"),
+		/** Whether to use UTF-8 for doing file compares. */
+		UTF_8_MODE		(false,
+					 "Utf-8", "utf8", "8", "u"),
 		/** Whether to use colors or not. */
 		COLORED			(true,
 					 "colored", "colors", "color", "col"),
@@ -276,10 +280,10 @@ public class CompareFiles
 	    try {
 		if (Opts.IGNORE_LINE_ENDINGS.isSet()) {
 		    if (Opts.CASE_INSENSITIVE.isSet()) {
-			match = FileUtilities.compareFileLines(file1, file2, true);
+			match = FileUtilities.compareFileLines(file1, file2, true, Opts.UTF_8_MODE.isSet());
 		    }
 		    else {
-			match = FileUtilities.compareFileLines(file1, file2);
+			match = FileUtilities.compareFileLines(file1, file2, false, Opts.UTF_8_MODE.isSet());
 		    }
 		}
 		else {
@@ -521,6 +525,9 @@ public class CompareFiles
 	    if (Opts.CASE_INSENSITIVE.isSet() && !Opts.IGNORE_LINE_ENDINGS.isSet()) {
 		err(Level.NORMAL, "sensitiveLineEndings");
 	    }
+	    if (Opts.UTF_8_MODE.isSet() && !Opts.IGNORE_LINE_ENDINGS.isSet()) {
+		err(Level.NORMAL, "utf8LineEndings");
+	    }
 
 	    if (verbosity.meetsOrExceeds(Level.VERBOSE)) {
 		StringBuilder buf = new StringBuilder();
@@ -538,6 +545,8 @@ public class CompareFiles
 		    buf.append(OPT).append(Opts.IGNORE_LINE_ENDINGS.bestChoice()).append(END);
 		if (Opts.CASE_INSENSITIVE.isSet())
 		    buf.append(OPT).append(Opts.CASE_INSENSITIVE.bestChoice()).append(END);
+		if (Opts.UTF_8_MODE.isSet())
+		    buf.append(OPT).append(Opts.UTF_8_MODE.bestChoice()).append(END);
 
 		buf.append(OPT);
 		if (Opts.CONTINUE_AFTER_ERROR.isSet())
@@ -636,6 +645,7 @@ public class CompareFiles
 	    Opts.IGNORE_LINE_ENDINGS .set(false);
 	    Opts.CASE_INSENSITIVE    .set(false);
 	    Opts.SYNC_MODE           .set(true);
+	    Opts.UTF_8_MODE          .set(false);
 
 	    // Do all the option and comparison processing on the command line arguments
 	    process(args, true);

@@ -129,6 +129,8 @@
  *	#473: Add "+" processing to "exists" function.
  *    16-Jan-2023 (rlwhitcomb)
  *	Add option to "compareFileLines" for case-insensitive compares.
+ *    05-Feb-2023 (rlwhitcomb)
+ *	Option for "compareFileLines" to use UTF-8.
  */
 package info.rlwhitcomb.util;
 
@@ -304,12 +306,12 @@ public final class FileUtilities
      * @return	{@code true} if the two files compare byte-for-byte,
      *		or {@code false} if not.
      * @throws IOException if something went wrong.
-     * @see #compareFileLines(File, File, boolean)
+     * @see #compareFileLines(File, File, boolean, boolean)
      */
     public static boolean compareFileLines(final File file1, final File file2)
 	throws IOException
     {
-	return compareFileLines(file1, file2, false);
+	return compareFileLines(file1, file2, false, false);
     }
 
     /**
@@ -322,11 +324,12 @@ public final class FileUtilities
      * @param file1	The first file to compare.
      * @param file2	The second file to compare.
      * @param ignore	Whether to ignore case differences between lines.
+     * @param utf8	Whether to use the UTF-8 character set.
      * @return	{@code true} if the two files compare byte-for-byte,
      *		or {@code false} if not.
      * @throws IOException if something went wrong.
      */
-    public static boolean compareFileLines(final File file1, final File file2, final boolean ignore)
+    public static boolean compareFileLines(final File file1, final File file2, final boolean ignore, final boolean utf8)
 	throws IOException
     {
 	Path path1 = file1.toPath();
@@ -335,8 +338,8 @@ public final class FileUtilities
 	// We use the 8859-1 charset because all 256 byte values are legal here, so we are
 	// (basically) guaranteed not to get a character encoding exception reading any
 	// kind of text encoding.
-	try (BufferedReader rdr1 = Files.newBufferedReader(path1, ISO_8859_1_CHARSET);
-	     BufferedReader rdr2 = Files.newBufferedReader(path2, ISO_8859_1_CHARSET)) {
+	try (BufferedReader rdr1 = Files.newBufferedReader(path1, utf8 ? UTF_8_CHARSET : ISO_8859_1_CHARSET);
+	     BufferedReader rdr2 = Files.newBufferedReader(path2, utf8 ? UTF_8_CHARSET : ISO_8859_1_CHARSET)) {
 
 	    String line1, line2;
 	    while ((line1 = rdr1.readLine()) != null) {
