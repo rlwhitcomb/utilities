@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2010-2011,2020 Roger L. Whitcomb.
+ * Copyright (c) 2010-2011,2020,2023 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -34,6 +34,7 @@
 	#	define	JKL2	(JKL*2)
 # define T	true
 # define F	false
+#define LAST_VERSION 4.5.1
 
 class TestPP {
 	private static int $(GHI) = $(JKL);
@@ -88,6 +89,12 @@ class TestPP {
 	private static String XYZ_UNDEF = "This is correct -- XYZ is not defined.";
 #else
 	#error XYZ defined test failed!
+#endif
+
+#if LAST_VERSION > 4.5.0
+	private static String VERSION = "$(LAST_VERSION)";
+#else
+	#error version check didn't work right
 #endif
 
 // Test ING_REL being undefined

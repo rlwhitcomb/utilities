@@ -113,6 +113,8 @@
  *  15-Jan-23		More refactoring in the token analysis. New output file name option.
  *  16-Jan-23		"Ignore unknown directive" option for Tester.
  *			Change all "set" option methods to a fluent paradigm.
+ *  29-Jan-23 rlw #553:	Introduce VERSIONCONST and Version class with parsing, compares, etc.
+ *  30-Jan-23		Change OTHERCONST to BOOLCONST.
  */
 package info.rlwhitcomb.preproc;
 
@@ -355,6 +357,8 @@ public class PreProc
 	private static final Pattern TRUE_CONST = Pattern.compile("^[tT][rR][uE][eE]");
 	/** Pattern to match the reserved word <code>"false"</code>. */
 	private static final Pattern FALSE_CONST = Pattern.compile("^[fF][aA][lL][sS][eE]");
+	/** Pattern to match a version string. */
+	private static final Pattern VERSION_CONST = Pattern.compile("^([0-9]+)\\.([0-9]+)(\\.([0-9]+))?([+\\-_\\.][a-zA-Z0-9_]+)*");
 	/** Pattern to match an integer constant. */
 	private static final Pattern INT_CONST = Pattern.compile("^[0-9]+");
 	/** Pattern to match a floating-point constant. */
@@ -371,7 +375,7 @@ public class PreProc
 	private static final Pattern IDENT = Pattern.compile("^([_A-Za-z][\\w\\.]*)");
 
 	/** The current version of this software. */
-	private static final String VERSION = "1.3.1";
+	private static final String VERSION = "1.4.0";
 	/** The current copyright year. */
 	private static final String COPYRIGHT_YEAR = "2010-2011,2014-2016,2019-2023";
 
@@ -545,6 +549,105 @@ public class PreProc
 	};
 
 	/**
+	 * A version string representation.
+	 */
+	static class Version implements Comparable<Version>
+	{
+		/** The major version. */
+		public int major;
+		/** The minor version. */
+		public int minor;
+		/** The patch version. */
+		public int patch;
+		/** The release string. */
+		public String release;
+		/** The length of the matched input. */
+		public int length;
+
+		public Version(final int maj, final int min, final int p, final String rel, final int len) {
+		    major = maj;
+		    minor = min;
+		    patch = p;
+		    release = rel;
+		    length = len;
+		}
+
+		@Override
+		public int compareTo(final Version o) {
+		    if (major != o.major)
+			return Integer.signum(major - o.major);
+		    if (minor != o.minor)
+			return Integer.signum(minor - o.minor);
+
+		    if (patch >= 0 && o.patch >= 0) {
+			if (patch != o.patch)
+			    return Integer.signum(patch - o.patch);
+		    }
+		    else if (patch >= 0 && o.patch < 0)
+			return +1;
+		    else if (patch < 0 && o.patch >= 0)
+			return -1;
+
+		    if (release != null && o.release != null)
+			return release.compareTo(o.release);
+		    else if (release != null && o.release == null)
+			return +1;
+		    else if (release == null && o.release != null)
+			return -1;
+
+		    return 0;
+		}
+
+		/**
+		 * Parse the given input string into a usable version object if possible.
+		 *
+		 * @param input	The input string to be parsed.
+		 * @return	A valid version object if the format of the input matches
+		 *		the {@link #VERSION_CONST} pattern, otherwise {@code null}.
+		 */
+		public static Version parse(final CharSequence input) {
+		    Matcher m = VERSION_CONST.matcher(input);
+
+		    if (m.lookingAt()) {
+			int major = Integer.parseInt(m.group(1));
+			int minor = Integer.parseInt(m.group(2));
+			int patch = -1;
+			String release = null;
+
+			if (m.group(3) != null)
+			    patch = Integer.parseInt(m.group(4));
+			if (m.group(5) != null)
+			    release = m.group(5);
+
+			return new Version(major, minor, patch, release, m.end());
+		    }
+
+		    return null;
+		}
+
+		@Override
+		public String toString() {
+		    StringBuilder buf = new StringBuilder();
+
+		    buf.append(major).append('.').append(minor);
+		    if (patch != -1)
+			buf.append('.').append(patch);
+		    if (release != null)
+			buf.append(release);
+
+		    return buf.toString();
+		}
+
+		@Override
+		public boolean equals(final Object o) {
+		    if (!(o instanceof Version))
+			return false;
+
+		   return compareTo((Version) o) == 0;
+		}
+	};
+
+	/**
 	 * Enum for input tokens.  These are the broad categories of tokens that are parsed out of the input.
 	 * Every character in an expression must be characterized as belonging to one of these tokens.
 	 */
@@ -560,12 +663,14 @@ public class PreProc
 		 * single-quoted string when the value must contain double quotes.
 		 */
 		DQSTRING,
+		/** A version string; compatible with rules of semantic versioning. */
+		VERSIONCONST,
 		/** An integer constant.  Must only contain the digits '0' - '9'. */
 		INTCONST,
 		/** A floating-point constant.  The regular expression syntax is {@link #FLT_CONST}. */
 		FLTCONST,
-		/** Another type of constant.  At the moment only <code>"true"</code> and <code>"false"</code> fall into this category. */
-		OTHERCONST,
+		/** Boolean constant.  Only <code>"true"</code> and <code>"false"</code> fall into this category. */
+		BOOLCONST,
 		/** A variable reference.  This is a reference to a macro or symbol defined by <code>#define</code>.
 		 * <p>This syntax for this token is: <code>$(<i>macroname</i>)</code> or <code>${<i>macroname</i>}</code>.
 		 * Can also be just an identifier by itself when inside an <code>#if<i>xxx</i></code> expression
@@ -597,15 +702,18 @@ public class PreProc
 		public String value;
 		/** Which operator it is if an OPER type. */
 		public Operator op;
+		/** The version object if it is a VERSION_CONST type. */
+		public Version ver;
 		/** Starting position in the input line of this token. */
 		public int startPos;
 		/** Length of the token string in the input line. */
 		public int tokenLen;
 
-		public TokenValue(final Token t, final String v, final Operator o) {
-		    tok = t;
+		public TokenValue(final Token t, final String v, final Operator o, final Version vers) {
+		    tok   = t;
 		    value = v;
-		    op = o;
+		    op    = o;
+		    ver   = vers;
 		}
 
 		@Override
@@ -619,11 +727,13 @@ public class PreProc
 				    return t.value.equals(value);
 				case OPER:
 				    return t.op == op;
+				case VERSIONCONST:
+				    return t.ver.equals(ver);
 				case INTCONST:
 				    return Integer.parseInt(t.value) == Integer.parseInt(value);
 				case FLTCONST:
 				    return Double.parseDouble(t.value) == Double.parseDouble(value);
-				case OTHERCONST:
+				case BOOLCONST:
 				    return t.value.equalsIgnoreCase(value);
 				case VARREF:
 				case DEFINEDFUNC:
@@ -840,21 +950,20 @@ public class PreProc
 	 * @return		The string stripped of leading and trailing brackets (or quotes).
 	 */
 	private String stripBrackets(final String value) {
-	    String endBracket = null;
-	    if (value.startsWith("<")) {
-		endBracket = ">";
-	    }
-	    else if (value.startsWith("[")) {
-		endBracket = "]";
-	    }
-	    else if (value.startsWith("{")) {
-		endBracket = "}";
-	    }
-	    if (endBracket != null) {
-		if (value.endsWith(endBracket))
-		    return value.substring(1, value.length()-1);
-		// Could be an error, but why bother?
-		return value;
+	    if (!empty(value)) {
+		String endBracket = null;
+		if (value.startsWith("<"))
+		    endBracket = ">";
+		else if (value.startsWith("["))
+		    endBracket = "]";
+		else if (value.startsWith("{"))
+		    endBracket = "}";
+		if (endBracket != null) {
+		    if (value.endsWith(endBracket))
+			return value.substring(1, value.length()-1);
+		    // Could be an error, but why bother?
+		    return value;
+		}
 	    }
 	    // Maybe it starts with a quote instead
 	    return stripQuotes(value);
@@ -882,6 +991,7 @@ public class PreProc
 		int len = -1;
 		Operator op = Operator.NONE;
 		Token tok = Token.OPER;
+		Version ver = null;
 
 		// Start with obvious tokens
 		CharSequence seq = input.subSequence(pos, endPos);
@@ -895,165 +1005,160 @@ public class PreProc
 		    m = TRUE_CONST.matcher(seq);
 		    if (m.lookingAt()) {
 			len = m.end();
-			tok = Token.OTHERCONST;
+			tok = Token.BOOLCONST;
 		    }
 		    else {
 			m = FALSE_CONST.matcher(seq);
 			if (m.lookingAt()) {
 			    len = m.end();
-			    tok = Token.OTHERCONST;
+			    tok = Token.BOOLCONST;
 			}
 			else {
-			    m = FLT_CONST.matcher(seq);
-			    if (m.lookingAt()) {
-				len = m.end();
-				// The floating-point pattern also matches
-				// an integer, so disambiguate here
-				String test = m.group();
-				if (test.indexOf(".") < 0 &&
-				    test.indexOf("e") < 0 &&
-				    test.indexOf("E") < 0)
-				    tok = Token.INTCONST;
-				else
-				    tok = Token.FLTCONST;
+			    ver = Version.parse(seq);
+			    if (ver != null) {
+				len = ver.length;
+				tok = Token.VERSIONCONST;
 			    }
 			    else {
-				// TODO: do we even need this with the tests above?
-				m = INT_CONST.matcher(seq);
+				m = FLT_CONST.matcher(seq);
 				if (m.lookingAt()) {
 				    len = m.end();
-				    tok = Token.INTCONST;
+				    // The floating-point pattern also matches
+				    // an integer, so disambiguate here
+				    String test = m.group();
+				    if (test.indexOf(".") < 0 &&
+					test.indexOf("e") < 0 &&
+					test.indexOf("E") < 0)
+					tok = Token.INTCONST;
+				    else
+					tok = Token.FLTCONST;
 				}
 				else {
-				    m = DEFINED_FUNC.matcher(seq);
+				    // TODO: do we even need this with the tests above?
+				    m = INT_CONST.matcher(seq);
 				    if (m.lookingAt()) {
 					len = m.end();
-					tok = Token.DEFINEDFUNC;
-					value = m.group(1);
+					tok = Token.INTCONST;
 				    }
 				    else {
-					m = MACRO_REF.matcher(seq);
-					boolean lookingAt = m.lookingAt();
-					if (!lookingAt) {
-					    m = MACRO_REF2.matcher(seq);
-					    lookingAt = m.lookingAt();
-					}
-					if (lookingAt) {
+					m = DEFINED_FUNC.matcher(seq);
+					if (m.lookingAt()) {
 					    len = m.end();
-					    tok = Token.VARREF;
+					    tok = Token.DEFINEDFUNC;
 					    value = m.group(1);
 					}
 					else {
-					    // Look for operators
-					    switch (input.charAt(pos)) {
-						case '<':
-						    if (input.charAt(pos+1) == '=') {
-							op = Operator.LESSEQUAL;
-						    }
-						    else {
-							op = Operator.LESS;
-						    }
-						    break;
-						case '>':
-						    if (input.charAt(pos+1) == '=') {
-							op = Operator.GREATEREQUAL;
-						    }
-						    else {
-							op = Operator.GREATER;
-						    }
-						    break;
-						case '=':
-						    if (input.charAt(pos+1) == '=') {
-							op = Operator.EQUAL;
-						    }
-						    break;
-						case '!':
-						    if (input.charAt(pos+1) == '=') {
-							op = Operator.NOTEQUAL;
-						    }
-						    else {
-							op = Operator.NOTOP;
-						    }
-						    break;
-						case '(':
-						    len = 1;
-						    tok = Token.OPENPAREN;
-						    break;
-						case ')':
-						    len = 1;
-						    tok = Token.CLOSEPAREN;
-						    break;
-						case '&':
-						    if (input.charAt(pos+1) == '&') {
-							op = Operator.ANDOP;
-						    }
-						    break;
-						case '|':
-						    if (input.charAt(pos+1) == '|') {
-							op = Operator.OROP;
-						    }
-						    break;
-						case '+':
-						    op = Operator.ADD;
-						    break;
-						case '-':
-						    op = Operator.SUBTRACT;
-						    break;
-						case '*':
-						    op = Operator.MULTIPLY;
-						    break;
-						case '/':
-						    op = Operator.DIVIDE;
-						    break;
-						case '%':
-						    op = Operator.MODULUS;
-						    break;
-						case '\'':
-						    // TODO: deal? with embedded quotes
-						    for (len = 1; pos + len < endPos; len++) {
-							if (input.charAt(pos + len) == '\'') {
-							    len++;
-							    break;
-							}
-						    }
-						    tok = Token.SQSTRING;
-						    break;
-						case '"':
-						    // TODO: deal? with embedded quotes
-						    for (len = 1; pos + len < endPos; len++) {
-							if (input.charAt(pos + len) == '"') {
-							    len++;
-							    break;
-							}
-						    }
-						    tok = Token.DQSTRING;
-						    break;
-						default:
-						    m = NOT_OP.matcher(seq);
-						    if (m.lookingAt()) {
-							op = Operator.NOTOP2;
-						    }
-						    else {
-							m = AND_OP.matcher(seq);
-							if (m.lookingAt()) {
-							    op = Operator.ANDOP2;
-							}
-							else {
-							    m = OR_OP.matcher(seq);
-							    if (m.lookingAt()) {
-								op = Operator.OROP2;
+					    m = MACRO_REF.matcher(seq);
+					    boolean lookingAt = m.lookingAt();
+					    if (!lookingAt) {
+						m = MACRO_REF2.matcher(seq);
+						lookingAt = m.lookingAt();
+					    }
+					    if (lookingAt) {
+						len = m.end();
+						tok = Token.VARREF;
+						value = m.group(1);
+					    }
+					    else {
+						// Look for operators
+						switch (input.charAt(pos)) {
+						    case '<':
+							if (input.charAt(pos+1) == '=')
+							    op = Operator.LESSEQUAL;
+							else
+							    op = Operator.LESS;
+							break;
+						    case '>':
+							if (input.charAt(pos+1) == '=')
+							    op = Operator.GREATEREQUAL;
+							else
+							    op = Operator.GREATER;
+							break;
+						    case '=':
+							if (input.charAt(pos+1) == '=')
+							    op = Operator.EQUAL;
+							break;
+						    case '!':
+							if (input.charAt(pos+1) == '=')
+							    op = Operator.NOTEQUAL;
+							else
+							    op = Operator.NOTOP;
+							break;
+						    case '(':
+							len = 1;
+							tok = Token.OPENPAREN;
+							break;
+						    case ')':
+							len = 1;
+							tok = Token.CLOSEPAREN;
+							break;
+						    case '&':
+							if (input.charAt(pos+1) == '&')
+							    op = Operator.ANDOP;
+							break;
+						    case '|':
+							if (input.charAt(pos+1) == '|')
+							    op = Operator.OROP;
+							break;
+						    case '+':
+							op = Operator.ADD;
+							break;
+						    case '-':
+							op = Operator.SUBTRACT;
+							break;
+						    case '*':
+							op = Operator.MULTIPLY;
+							break;
+						    case '/':
+							op = Operator.DIVIDE;
+							break;
+						    case '%':
+							op = Operator.MODULUS;
+							break;
+						    case '\'':
+							// TODO: deal? with embedded quotes
+							for (len = 1; pos + len < endPos; len++) {
+							    if (input.charAt(pos + len) == '\'') {
+								len++;
+								break;
 							    }
+							}
+							tok = Token.SQSTRING;
+							break;
+						    case '"':
+							// TODO: deal? with embedded quotes
+							for (len = 1; pos + len < endPos; len++) {
+							    if (input.charAt(pos + len) == '"') {
+								len++;
+								break;
+							    }
+							}
+							tok = Token.DQSTRING;
+							break;
+						    default:
+							m = NOT_OP.matcher(seq);
+							if (m.lookingAt())
+							    op = Operator.NOTOP2;
+							else {
+							    m = AND_OP.matcher(seq);
+							    if (m.lookingAt())
+								op = Operator.ANDOP2;
 							    else {
-								m = IDENT.matcher(seq);
-								if (m.lookingAt()) {
-								    len = m.end();
-								    tok = Token.VARREF;
-								    value = m.group(1);
+								m = OR_OP.matcher(seq);
+								if (m.lookingAt())
+								    op = Operator.OROP2;
+								else {
+								    m = IDENT.matcher(seq);
+								    if (m.lookingAt()) {
+									len = m.end();
+									tok = Token.VARREF;
+									value = m.group(1);
+								    }
 								}
 							    }
 							}
-						    }
-						    break;
+							break;
+						}
 					    }
 					}
 				    }
@@ -1062,15 +1167,16 @@ public class PreProc
 			}
 		    }
 		}
-		if (op != Operator.NONE) {
+
+		if (op != Operator.NONE)
 		    len = op.opLen();
-		}
+
 		if (len >= 0) {
 		    // We found something that matches!
 		    if (value == null)
 			value = input.substring(pos, pos + len);
 		    if (tok != Token.WHITESPACE) {
-			TokenValue t = new TokenValue(tok, value, op);
+			TokenValue t = new TokenValue(tok, value, op, ver);
 			t.setPos(pos + startPos, len);
 			tokens.add(t);
 			if (superVerbose) {
@@ -1081,9 +1187,8 @@ public class PreProc
 		    }
 		    pos += len;
 		}
-		else {
+		else
 		    throw new ParseException("Unrecognized input", pos);
-		}
 	    }
 	    return tokens;
 	}
@@ -1120,7 +1225,7 @@ public class PreProc
 	    TokenValue t = inputExpr.get(inputPos++);
 	    boolean v = false;
 	    switch (t.tok) {
-		case OTHERCONST:
+		case BOOLCONST:
 		    v = Boolean.parseBoolean(t.value);
 		    break;
 		case DEFINEDFUNC:
@@ -1178,6 +1283,7 @@ public class PreProc
 	    switch (t.tok) {
 		case SQSTRING:
 		case DQSTRING:
+		case VERSIONCONST:
 		    value = doSubs(t.value);
 		    break;
 		case INTCONST:
@@ -1304,6 +1410,7 @@ public class PreProc
 			    break;
 			}
 			// else fall through
+		    case VERSIONCONST:
 		    case INTCONST:
 		    case FLTCONST:
 			v = Integer.parseInt(t.value);
@@ -1312,7 +1419,7 @@ public class PreProc
 			handleVarRef(t);
 			v = integerTerm(type, exprLen, eating);
 			break;
-		    case OTHERCONST:
+		    case BOOLCONST:
 			v = Boolean.parseBoolean(t.value) ? 1 : 0;
 			break;
 		    case OPENPAREN:
@@ -1398,6 +1505,7 @@ public class PreProc
 			    break;
 			}
 			// else fall through
+		    case VERSIONCONST:
 		    case INTCONST:
 		    case FLTCONST:
 			dv = Double.parseDouble(t.value);
@@ -1406,7 +1514,7 @@ public class PreProc
 			handleVarRef(t);
 			dv = doubleTerm(type, exprLen, eating);
 			break;
-		    case OTHERCONST:
+		    case BOOLCONST:
 			dv = Boolean.parseBoolean(t.value) ? 1.0 : 0.0;
 			break;
 		    case OPENPAREN:
