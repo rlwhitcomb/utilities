@@ -787,12 +787,6 @@ Test starting on ${build.date} at ${build.time}
 			<jvmarg value="${jvm17.args}" if:true="${java.17plus.version}"/>
 			<arg value="-timing"/>
 			<arg value="-dir:test/files"/>
-			<arg value="comparetest"/>
-		</java>
-		<java classname="${tester.class}"                     output="${test.log.path}" append="true" failonerror="true" fork="true">
-			<jvmarg value="${jvm17.args}" if:true="${java.17plus.version}"/>
-			<arg value="-timing"/>
-			<arg value="-dir:test/files"/>
 			<arg value="maintest"/>
 		</java>
 		<echo>Basic tests of Base64 utility ...</echo>
