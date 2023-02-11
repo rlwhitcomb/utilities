@@ -112,7 +112,9 @@ class TestFiles
 	    write(errorWriter, line);
 	}
 
-	private BufferedWriter close(final BufferedWriter writer) {
+	private BufferedWriter close(final BufferedWriter writer)
+		throws IOException
+	{
 	    if (writer != null) {
 		writer.flush();
 		writer.close();
