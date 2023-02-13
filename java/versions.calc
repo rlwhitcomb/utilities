@@ -3,7 +3,7 @@
     :quotestrings off
     '============================================='
     :echo '           Calc Versions Reference'
-    :echo ` Current ${versionstring}`
+    :echo ` Current ${version}`
     '============================================='
     ''
     :echo 'Version  Comment'

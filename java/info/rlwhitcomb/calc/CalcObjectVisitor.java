@@ -756,6 +756,8 @@
  *	    #594: Redo the bit operations on pure boolean values.
  *	04-Feb-2023 (rlwhitcomb)
  *	    #558: More quaternion arithmetic, particularly integer powers.
+ *	12-Feb-2023 (rlwhitcomb)
+ *	    #68: Fixes to "substr" for null begin/end values.
  */
 package info.rlwhitcomb.calc;
 
@@ -5229,14 +5231,29 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 
 	    int stringLen  = stringValue.length();
-	    int beginIndex = beginCtx == null ? 0 : getIntValue(beginCtx);
-	    int endIndex   = endCtx == null ? stringLen : getIntValue(endCtx);
+	    int beginIndex = 0;
+	    int endIndex   = stringLen;
 
+	    if (beginCtx != null) {
+		Object beginValue = evaluate(beginCtx);
+		if (beginValue != null) {
+		    beginIndex = toIntValue(this, beginValue, settings.mc, beginCtx);
+		}
+	    }
+	    if (endCtx != null) {
+		Object endValue = evaluate(endCtx);
+		if (endValue != null) {
+		    endIndex = toIntValue(this, endValue, settings.mc, endCtx);
+		}
+	    }
+
+	    // Negative indices at this point are relative to the string length
 	    if (beginIndex < 0)
 		beginIndex += stringLen;
 	    if (endIndex < 0)
 		endIndex += stringLen;
 
+	    // But, at this point, just limit to 0..length
 	    if (beginIndex < 0)
 		beginIndex = 0;
 	    if (beginIndex > stringLen)
@@ -5262,9 +5279,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		valueCtx = e3ctx.expr(0);
 	    }
 
-	    String stringValue = getStringValue(valueCtx);
+	    Object value = evaluate(valueCtx);
 
-	    return substring(stringValue, valueCtx, e2ctx, e3ctx);
+	    return substring(value, valueCtx, e2ctx, e3ctx);
 	}
 
 	@Override

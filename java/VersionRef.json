@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.20.11', date: d'2023-02-12',
+      issues: [ 68 ],
+      comment: 'Fix "substr" for null index values.'
+    },
     { version: '2.20.10', date: d'2023-02-04',
       issues: [ 558 ],
       comment: 'Quaternions to integer powers.'
