@@ -73,9 +73,11 @@
  *			Numerous tweaks, including new "properFraction" static method.
  *  31-Dec-22 rlw #558:	New methods for Quaternions.
  *  05-Jan-23 rlw #558:	Make "properFraction" into a method for Object; new copy constructor.
+ *  20-Feb-23 rlw #244:	Implement formatting with thousands separators.
  */
 package info.rlwhitcomb.math;
 
+import info.rlwhitcomb.math.Num;
 import info.rlwhitcomb.util.Intl;
 
 import java.io.Serializable;
@@ -123,6 +125,11 @@ public class BigFraction extends Number
 	private static final String INT_FRAC_STRING = SIGNED_INT + SEP + "?" + SIGNED_FRAC_STRING;
 	/** The pattern for an int and a fraction character, as in "int [&nbsp;,/;] frac". */
 	private static final Pattern INT_FRAC = Pattern.compile(INT_FRAC_STRING);
+
+	/** The regular format to display. */
+	private static final String REGULAR_FORMAT = "%1$s / %2$s";
+	/** The "proper" format for display. */
+	private static final String PROPER_FORMAT = "%1$s %2$s/%3$s";
 
 
 	/** A value of {@code 0/1} (integer 0) as a fraction. */
@@ -1198,10 +1205,16 @@ public class BigFraction extends Number
 	}
 
 	/**
-	 * @return The regular string value (<code><i>numer</i> / <i>denom</i></code>).
+	 * Internal formatter for the "unproper" form.
+	 *
+	 * @param sep	Whether to use separators.
+	 * @return	The regular string value (<code><i>numer</i> / <i>denom</i></code>).
 	 */
-	private String internalToString() {
-	    return String.format("%1$s / %2$s", numer, denom);
+	private String internalToString(final boolean sep) {
+	    if (sep)
+		return String.format(REGULAR_FORMAT, Num.formatWithSeparators(numer), Num.formatWithSeparators(denom));
+	    else
+		return String.format(REGULAR_FORMAT, numer, denom);
 	}
 
 	/**
@@ -1213,18 +1226,36 @@ public class BigFraction extends Number
 	 * @return	A string in the form of a whole number plus the fraction.
 	 */
 	public String toProperString() {
+	    return toProperString(false);
+	}
+
+	/**
+	 * Return a string of this value in whole number plus fraction form, with optional separators.
+	 * <p> The fraction is maintained in strictly rational form of {@code numerator / denominator },
+	 * while this function will return the fraction in proper form ({@code numerator < denominator})
+	 * plus the whole number.
+	 *
+	 * @param sep	Whether to use separators.
+	 * @return	A string in the form of a whole number plus the fraction.
+	 */
+	public String toProperString(final boolean sep) {
 	    if (isWholeNumber()) {
-		return numer.toString();
+		return sep ? Num.formatWithSeparators(numer) : numer.toString();
 	    }
 	    else if (numer.abs().compareTo(denom) >= 0) {
 		BigInteger[] results = numer.divideAndRemainder(denom);
 		if (results[1].equals(BigInteger.ZERO))
-		    return results[0].toString();
+		    return sep ? Num.formatWithSeparators(results[0]) : results[0].toString();
+		else if (sep)
+		    return String.format(PROPER_FORMAT,
+				Num.formatWithSeparators(results[0]),
+				Num.formatWithSeparators(results[1].abs()),
+				Num.formatWithSeparators(denom));
 		else
-		    return String.format("%1$s %2$s/%3$s",
+		    return String.format(PROPER_FORMAT,
 				results[0], results[1].abs(), denom);
 	    }
-	    return internalToString();
+	    return internalToString(sep);
 	}
 
 	/**
@@ -1236,7 +1267,20 @@ public class BigFraction extends Number
 	 */
 	@Override
 	public String toString() {
-	    return alwaysProper ? toProperString() : internalToString();
+	    return alwaysProper ? toProperString(false) : internalToString(false);
+	}
+
+	/**
+	 * Return a string in the form of <code>"<i>numer</i>/<i>denom</i>"</code>,
+	 * unless the {@link #alwaysProper} flag is set, in which case call
+	 * {@link #toProperString(boolean)}.
+	 *
+	 * @param sep	Whether or not to format with separators.
+	 * @return	The string form of this fraction with optional separators.
+	 * @see #toString
+	 */
+	public String toFormatString(final boolean sep) {
+	    return alwaysProper ? toProperString(sep) : internalToString(sep);
 	}
 
 	/**

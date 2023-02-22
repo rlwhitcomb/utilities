@@ -206,12 +206,16 @@
  *	24-Jan-2023 (rlwhitcomb)
  *	    #594: Redo "bitOp" to work better on pure boolean values; add two more
  *	    bit operations.
+ *	16-Feb-2023 (rlwhitcomb)
+ *	    #244: Move "formatWithSeparators" into Num, for use in more places. Apply
+ *	    to fraction formatting.
  */
 package info.rlwhitcomb.calc;
 
 import de.onyxbits.SemanticVersion;
 import info.rlwhitcomb.math.BigFraction;
 import info.rlwhitcomb.math.ComplexNumber;
+import info.rlwhitcomb.math.Num;
 import info.rlwhitcomb.math.Quaternion;
 import info.rlwhitcomb.util.CharUtil;
 import info.rlwhitcomb.util.Environment;
@@ -935,13 +939,13 @@ public final class CalcUtil
 			    return (String) result;
 		    }
 		    else if (result instanceof BigDecimal) {
-			return formatWithSeparators(((BigDecimal) result), format.separators, Integer.MIN_VALUE);
+			return Num.formatWithSeparators(((BigDecimal) result), format.separators, Integer.MIN_VALUE);
 		    }
 		    else if (result instanceof BigInteger) {
-			if (format.separators)
-			    return String.format("%1$,d", (BigInteger) result);
-			else
-			    return result.toString();
+			return Num.formatWithSeparators(((BigInteger) result), format.separators);
+		    }
+		    else if (result instanceof BigFraction) {
+			return ((BigFraction) result).toFormatString(format.separators);
 		    }
 
 		    // Any other type, just get the string representation
@@ -2135,59 +2139,6 @@ public final class CalcUtil
 	    return -1;
 	}
 
-
-	/**
-	 * Format a decimal/integer number with/without thousands separators.
-	 *
-	 * @param value A decimal value which could actually be an integer.
-	 * @param sep   Whether or not to use separators.
-	 * @param scale The minimum number of decimal digits to display (pad on the left
-	 *              with zeros, before adding separators); {@code Integer.MIN_VALUE}
-	 *              to ignore.
-	 * @return      The value formatted appropriately with thousands separators.
-	 */
-	public static String formatWithSeparators(final BigDecimal value, final boolean sep, final int scale) {
-	    String formatString = "";
-	    int valueScale = value.scale();
-	    int valuePrec = value.precision();
-	    int displayScale = scale;
-
-	    // There are no digits right of the decimal point, so treat as an integer
-	    if (valueScale <= 0) {
-		if (scale != Integer.MIN_VALUE) {
-		    if (sep)
-			displayScale += (valuePrec - valueScale) / 3;
-		    formatString = String.format("%%1$0%1$dd", displayScale);
-		}
-		else {
-		    formatString = "%1$d";
-		}
-	    }
-	    else {
-		if (scale != Integer.MIN_VALUE) {
-		    if (sep)
-			displayScale += (valuePrec - valueScale) / 3;
-		    formatString = String.format("%%1$0%1$d.%2$df", displayScale, valueScale);
-		}
-		else {
-		    formatString = String.format("%%1$.%1$df", valueScale);
-		}
-	    }
-
-	    if (sep && !formatString.isEmpty()) {
-		formatString = formatString.replace("%1$", "%1$,");
-	    }
-
-	    if (formatString.isEmpty()) {
-		return value.toPlainString();
-	    }
-	    else {
-		if (formatString.endsWith("d"))
-		    return String.format(formatString, value.toBigInteger());
-		else
-		    return String.format(formatString, value);
-	    }
-	}
 
 	/**
 	 * Is the given character a "part" (that is, legal for after the start char)

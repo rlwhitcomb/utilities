@@ -758,6 +758,9 @@
  *	    #558: More quaternion arithmetic, particularly integer powers.
  *	12-Feb-2023 (rlwhitcomb)
  *	    #68: Fixes to "substr" for null begin/end values.
+ *	16-Feb-2023 (rlwhitcomb)
+ *	    #244: Move "formatWithSeparators" from CalcUtil to Num. Apply to formatting
+ *	    fractions.
  */
 package info.rlwhitcomb.calc;
 
@@ -768,6 +771,7 @@ import info.rlwhitcomb.math.BigFraction;
 import info.rlwhitcomb.math.ComplexNumber;
 import info.rlwhitcomb.math.DateUtil;
 import info.rlwhitcomb.math.MathUtil;
+import info.rlwhitcomb.math.Num;
 import info.rlwhitcomb.math.NumericUtil;
 import info.rlwhitcomb.math.Quaternion;
 import info.rlwhitcomb.util.*;
@@ -2545,7 +2549,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			if (precision != Integer.MIN_VALUE) {
 			    dValue = MathUtil.round(dValue, precision);
 			}
-			valueBuf.append(formatWithSeparators(dValue, separators, scale));
+			valueBuf.append(Num.formatWithSeparators(dValue, separators, scale));
 			break;
 
 		    case 'I':
@@ -2606,10 +2610,10 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			break;
 
 		    case 'f':
-			valueBuf.append(toFractionValue(this, result, ctx));
+			valueBuf.append(toFractionValue(this, result, ctx).toFormatString(separators));
 			break;
 		    case 'F':
-			valueBuf.append(toFractionValue(this, result, ctx).toProperString());
+			valueBuf.append(toFractionValue(this, result, ctx).toProperString(separators));
 			break;
 
 		    case 'J':
