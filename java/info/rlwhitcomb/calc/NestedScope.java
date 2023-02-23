@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2021-2022 Roger L. Whitcomb.
+ * Copyright (c) 2021-2023 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -35,6 +35,7 @@
  *  25-May-22 rlw #348: Return the new value from "setValue" methods.
  *			Make all methods package private.
  *  10-Nov-22 rlw #554:	Add field and access methods for LValueContext.
+ *  22-Feb-23 rlw  ---	Add "dumpScopeStack" for debugging.
  */
 package info.rlwhitcomb.calc;
 
@@ -199,6 +200,14 @@ class NestedScope extends ObjectScope
 	    return null;
 	}
 
+	/**
+	 * For debugging, dump the scope stack starting from this one to {@link System#out}.
+	 */
+	void dumpScopeStack() {
+	    for (NestedScope scope = this; scope != null; scope = scope.enclosingScope) {
+		System.out.println("scope = " + scope);
+	    }
+	}
 }
 
 

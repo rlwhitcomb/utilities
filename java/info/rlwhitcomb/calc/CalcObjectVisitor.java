@@ -758,6 +758,9 @@
  *	    Refactor the Next and Leave exceptions.
  *	24-Jan-2023 (rlwhitcomb)
  *	    #594: Redo the bit operations on pure boolean values.
+ *	22-Feb-2023 (rlwhitcomb)
+ *	    #458: Pop the scope stack for parallel functions once the thread has been
+ *	    launched. Different message for defining a parallel function.
  */
 package info.rlwhitcomb.calc;
 
@@ -1546,6 +1549,13 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		if (func.isParallel() && !func.isNestedInvocation(getVariables())) {
 		    numberOfParallelJobs++;
 		    cs.submit(() -> { return executeFunction(func); });
+		    // pop the parallel function scope in the current thread now that
+		    // the parallel thread has it
+// Note: this needs to be synchronized to happen on the main thread, but only after the parallel
+// thread has duplicated the inherited thread local... But, yielding to the new thread *seems*
+// to work well enough.......
+		    Thread.currentThread().yield();
+		    popScope();
 		    returnValue = null;
 		}
 		else {
@@ -3577,7 +3587,8 @@ System.out.println("i = " + i + ", result = " + result);
 
 	    getVariables().setValue(funcName, settings.ignoreNameCase, func);
 
-	    displayActionMessage("%calc#definingFunc", func.getFullFunctionName(), getTreeText(functionBody));
+	    displayActionMessage(parallel ? "%calc#definingPFunc" : "%calc#definingFunc",
+		func.getFullFunctionName(), getTreeText(functionBody));
 
 	    return Intl.formatString("calc#definedFunc", func.getFullFunctionName());
 	}

@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2021-2022 Roger L. Whitcomb.
+ * Copyright (c) 2021-2023 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,36 +24,23 @@
  *      Data structures for Calc to hold user-defined function definitions,
  *      local symbol tables, etc.
  *
- *  History:
- *	06-Oct-2021 (rlwhitcomb)
- *	    Initial coding.
- *	07-Oct-2021 (rlwhitcomb)
- *	    Add context parameter to "evaluateFunction".
- *	07-Nov-2021 (rlwhitcomb)
- *	    #69: Maintain "$*" and "$#" variables for function parameters.
- *	13-Feb-2022 (rlwhitcomb)
- *	    #199: Derive from ParameterizedScope; move common code to there.
- *	14-Feb-2022 (rlwhitcomb)
- *	    #199: Override "toString" here from default in Scope.
- *	15-Feb-2022 (rlwhitcomb)
- *	    #169: Set flag not to call zero-arg functions without parens
- *	    during "setParameterValue".
- *	11-May-2022 (rlwhitcomb)
- *	    #318: Rename "evaluateFunction" to just "evaluate".
- *	25-May-2022 (rlwhitcomb)
- *	    #348: Make all methods package private.
- *	27-May-2022 (rlwhitcomb)
- *	    Change "getDeclaration" into "getFunctionBody".
- *	04-Jun-2022 (rlwhitcomb)
- *	    #361: Add "getFunctionName".
- *	08-Jul-2022 (rlwhitcomb)
- *	    #393: Cleanup imports.
- *	26-Aug-2022 (rlwhitcomb)
- *	    #458: Add "isParallel" and "isNestedInvocation" methods.
- *	08-Sep-2022 (rlwhitcomb)
- *	    #475: Add calls for getting function stack, and full function name.
- *	11-Nov-2022 (rlwhitcomb)
- *	    #554: Spiff up the "toString" value with quoted full function name.
+ * History:
+ *  06-Oct-21 rlw  ---	Initial coding.
+ *  07-Oct-21 rlw  ---	Add context parameter to "evaluateFunction".
+ *  07-Nov-21 rlw #69:	Maintain "$*" and "$#" variables for function parameters.
+ *  13-Feb-22 rlw #199:	Derive from ParameterizedScope; move common code to there.
+ *  14-Feb-22 rlw #199:	Override "toString" here from default in Scope.
+ *  15-Feb-22 rlw #169:	Set flag not to call zero-arg functions without parens
+ *			during "setParameterValue".
+ *  11-May-22 rlw #318:	Rename "evaluateFunction" to just "evaluate".
+ *  25-May-22 rlw #348:	Make all methods package private.
+ *  27-May-22 rlw  ---	Change "getDeclaration" into "getFunctionBody".
+ *  04-Jun-22 rlw #361:	Add "getFunctionName".
+ *  08-Jul-22 rlw #393:	Cleanup imports.
+ *  26-Aug-22 rlw #458:	Add "isParallel" and "isNestedInvocation" methods.
+ *  08-Sep-22 rlw #475:	Add calls for getting function stack, and full function name.
+ *  11-Nov-22 rlw #554:	Spiff up the "toString" value with quoted full function name.
+ *  22-Feb-23 rlw #458:	"isNestedInvocation" needs to start with enclosing scope.
  */
 package info.rlwhitcomb.calc;
 
@@ -160,7 +147,7 @@ class FunctionScope extends ParameterizedScope
 	 */
 	boolean isNestedInvocation(final NestedScope currentScope) {
 	    FunctionDeclaration currentFunc = declaration;
-	    NestedScope scope = currentScope;
+	    NestedScope scope = currentScope.getEnclosingScope();
 
 	    while (scope != null) {
 		if (scope instanceof FunctionScope) {
