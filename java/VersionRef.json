@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.20.13', date: d'2023-02-21',
+      issues: [ 244 ],
+      comment: 'Implement formatting of complex numbers with separators.'
+    },
     { version: '2.20.12', date: d'2023-02-21',
       issues: [ 244 ],
       comment: 'Implement formatting of fractions with separators.'

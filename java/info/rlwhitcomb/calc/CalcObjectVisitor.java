@@ -761,6 +761,8 @@
  *	16-Feb-2023 (rlwhitcomb)
  *	    #244: Move "formatWithSeparators" from CalcUtil to Num. Apply to formatting
  *	    fractions.
+ *	21-Feb-2023 (rlwhitcomb)
+ *	    #244: Move to applying separators to complex numbers too.
  */
 package info.rlwhitcomb.calc;
 
@@ -2561,7 +2563,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			else {
 			    c = ComplexNumber.real(toDecimalValue(this, result, settings.mc, ctx));
 			}
-			valueBuf.append(c.toLongString(formatChar == 'I'));
+			valueBuf.append(c.toLongString(formatChar == 'I', separators));
 			break;
 
 		    case 'P':
@@ -2573,7 +2575,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			else {
 			    c2 = ComplexNumber.real(toDecimalValue(this, result, settings.mc, ctx));
 			}
-			valueBuf.append(c2.toPolarString(formatChar == 'P', MathUtil.divideContext(c2, settings.mcDivide)));
+			valueBuf.append(c2.toPolarString(formatChar == 'P', separators,
+				MathUtil.divideContext(c2, settings.mcDivide)));
 			break;
 
 		    // @E = US format: MM/dd/yyyy

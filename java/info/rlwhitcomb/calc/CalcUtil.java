@@ -209,6 +209,8 @@
  *	16-Feb-2023 (rlwhitcomb)
  *	    #244: Move "formatWithSeparators" into Num, for use in more places. Apply
  *	    to fraction formatting.
+ *	21-Feb-2023 (rlwhitcomb)
+ *	    #244: Apply separators to complex numbers now too.
  */
 package info.rlwhitcomb.calc;
 
@@ -946,6 +948,9 @@ public final class CalcUtil
 		    }
 		    else if (result instanceof BigFraction) {
 			return ((BigFraction) result).toFormatString(format.separators);
+		    }
+		    else if (result instanceof ComplexNumber) {
+			return ((ComplexNumber) result).toFormatString(format.separators);
 		    }
 
 		    // Any other type, just get the string representation

@@ -25,50 +25,32 @@
  *	imaginary part. This class stores these values, and provides a number
  *	of arithmetic and other operations related to them.
  *
- *  History:
- *	24-Jan-2022 (rlwhitcomb)
- *	    Created.
- *	    #103: More work: extend Number, implement Comparable, Serializable.
- *	30-Jan-2022 (rlwhitcomb)
- *	    #103: extend aliases of "i" (must match CalcPredefine).
- *	31-Jan-2022 (rlwhitcomb)
- *	    #103: Create from List and Map; convert to List and Map.
- *	01-Feb-2022 (rlwhitcomb)
- *	    #103: Powers of integer and real values, negate, another alias,
- *	    "toLongString" method, override "equals" and "hashCode".
- *	    #231: Use new Constants values instead of our own.
- *	05-Feb-2022 (rlwhitcomb)
- *	    Fix Intl keys.
- *	08-Feb-2022 (rlwhitcomb)
- *	    #235: Use MathUtil.atan2 for "theta" to get full precision.
- *	    A lot of refactoring, include support for "polar" form.
- *	18-Feb-2022 (rlwhitcomb)
- *	    Add "signum" method.
- *	14-Apr-2022 (rlwhitcomb)
- *	    #272: Some (mostly) documentation fixes.
- *	    #273: Move to "math" package.
- *	21-Jun-2022 (rlwhitcomb)
- *	    #314: Add SetScope to the mix: conversions to/from sets.
- *	08-Jul-2022 (rlwhitcomb)
- *	    #393: Cleanup imports.
- *	19-Jul-2022 (rlwhitcomb)
- *	    #420: Add new formats for "parse". Add "imaginary" constructors.
- *	01-Oct-2022 (rlwhitcomb)
- *	    #497: New method for precision.
- *	12-Oct-2022 (rlwhitcomb)
- *	    #514: Move resource text from "util" to "math" package.
- *	11-Nov-2022 (rlwhitcomb)
- *	    #420: Adjust COMPLEX_PATTERNS to recognize '1+i' (for instance).
- *	19-Dec-2022 (rlwhitcomb)
- *	    #559: Implement rational mode.
- *	20-Dec-2022 (rlwhitcomb)
- *	    #559: More fractional forms; always represents fractions as "proper".
- *	31-Dec-2022 (rlwhitcomb)
- *	    #558: Make F_ZERO public.
- *	05-Jan-2023 (rlwhitcomb)
- *	    #558: Make copies of the fraction parts to avoid improper "proper" settings.
- *	09-Jan-2023 (rlwhitcomb)
- *	    #103: Add "sqrt"; fixup results of subtract and multiply/divide.
+ * History:
+ *  24-Jan-22 rlw  ---	Created.
+ *		  #103:	More work: extend Number, implement Comparable, Serializable.
+ *  30-Jan-22 rlw #103:	extend aliases of "i" (must match CalcPredefine).
+ *  31-Jan-22 rlw #103:	Create from List and Map; convert to List and Map.
+ *  01-Feb-22 rlw #103:	Powers of integer and real values, negate, another alias,
+ *			"toLongString" method, override "equals" and "hashCode".
+ *		  #231:	Use new Constants values instead of our own.
+ *  05-Feb-22 rlw  ---	Fix Intl keys.
+ *  08-Feb-22 rlw #235:	Use MathUtil.atan2 for "theta" to get full precision.
+ *			A lot of refactoring, include support for "polar" form.
+ *  18-Feb-22 rlw  ---	Add "signum" method.
+ *  14-Apr-22 rlw #272:	Some (mostly) documentation fixes.
+ *		  #273:	Move to "math" package.
+ *  21-Jun-22 rlw #314:	Add SetScope to the mix: conversions to/from sets.
+ *  08-Jul-22 rlw #393:	Cleanup imports.
+ *  19-Jul-22 rlw #420:	Add new formats for "parse". Add "imaginary" constructors.
+ *  01-Oct-22 rlw #497:	New method for precision.
+ *  12-Oct-22 rlw #514:	Move resource text from "util" to "math" package.
+ *  11-Nov-22 rlw #420:	Adjust COMPLEX_PATTERNS to recognize '1+i' (for instance).
+ *  19-Dec-22 rlw #559:	Implement rational mode.
+ *  20-Dec-22 rlw #559:	More fractional forms; always represents fractions as "proper".
+ *  31-Dec-22 rlw #558:	Make F_ZERO public.
+ *  05-Jan-23 rlw #558:	Make copies of the fraction parts to avoid improper "proper" settings.
+ *  09-Jan-23 rlw #103:	Add "sqrt"; fixup results of subtract and multiply/divide.
+ *  21-Feb-23 rlw #244:	Implement formatting with separators.
  */
 package info.rlwhitcomb.math;
 
@@ -157,6 +139,24 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 	    Pattern.compile("^\\s*\\(\\s*(" + FRACTION + ")\\s*(" + I_ALIASES + ")\\s*\\)\\s*$"),
 	    Pattern.compile("^\\s*(" + FRACTION + ")\\s*(" + I_ALIASES + ")\\s*$")
 	};
+
+	/** Normal format for display. */
+	private static final String NORMAL_FORMAT = "( %1$s, %2$s )";
+	/** Format for long form positive values. */
+	private static final String LONG_POS_FORMAT = "%1$s + %2$s%3$c";
+	/** Format for long form negative values. */
+	private static final String LONG_NEG_FORMAT = "%1$s - %2$s%3$c";
+	/** Format for positive "i" value. */
+	private static final String I_POS_FORMAT = "%1$c";
+	/** Format for negative "i" value. */
+	private static final String I_NEG_FORMAT = "-%1$c";
+	/** Format for pure imaginary values. */
+	private static final String IMAG_FORMAT = "%1$s%2$c";
+
+	/**
+	 * Format for {@link #toPolarString}.
+	 */
+	private static final String POLAR_FORMAT = "{ %1$c: %2$s, %3$c: %4$s }";
 
 	/**
 	 * A map key indicating the real part.
@@ -1407,12 +1407,28 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 	    }
 	}
 
+	private String internalToString(final boolean sep) {
+	    if (rational)
+		return String.format(NORMAL_FORMAT,
+			rFrac().toFormatString(sep), iFrac().toFormatString(sep));
+	    else
+		return String.format(NORMAL_FORMAT,
+			Num.formatWithSeparators(r(), sep), Num.formatWithSeparators(i(), sep));
+	}
+
+	/**
+	 * Formatted version of {@link #toString} with support for thousands separators.
+	 *
+	 * @param sep Whether to format with separators.
+	 * @return    The formatted version.
+	 */
+	public String toFormatString(final boolean sep) {
+	    return internalToString(sep);
+	}
+
 	@Override
 	public String toString() {
-	    if (rational)
-		return String.format("( %1$s, %2$s )", rFrac().toString(), iFrac().toString());
-	    else
-		return String.format("( %1$s, %2$s )", r().toPlainString(), i().toPlainString());
+	    return internalToString(false);
 	}
 
 	/**
@@ -1421,55 +1437,56 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 	 * <p> Note: this form is recognizable by {@link #parse}.
 	 *
 	 * @param upperCase Casing for the representation of {@code i}.
+	 * @param sep       Whether to format with thousands separators.
 	 * @return The alternate string representation of this number.
 	 */
-	public String toLongString(final boolean upperCase) {
+	public String toLongString(final boolean upperCase, final boolean sep) {
 	    char i = upperCase ? '\u2110' : '\u2148';
 
 	    if (rational) {
 		if (realFrac == null) {
 		    if (imaginaryFrac.equals(BigFraction.ONE))
-			return String.format("%1$c", i);
+			return String.format(I_POS_FORMAT, i);
 		    else if (imaginaryFrac.equals(BigFraction.MINUS_ONE))
-			return String.format("-%1$c", i);
+			return String.format(I_NEG_FORMAT, i);
 		    else
-			return String.format("%1$s%2$c", imaginaryFrac.toString(), i);
+			return String.format(IMAG_FORMAT, imaginaryFrac.toFormatString(sep), i);
 		}
 		else if (imaginaryFrac == null) {
-		    return realFrac.toString();
+		    return realFrac.toFormatString(sep);
 		}
 		else {
 		    if (imaginaryFrac.signum() < 0)
-			return String.format("%1$s - %2$s%3$c",
-			    realFrac.toString(),
-			    imaginaryFrac.abs().toString(), i);
+			return String.format(LONG_NEG_FORMAT,
+			    realFrac.toFormatString(sep),
+			    imaginaryFrac.abs().toFormatString(sep), i);
 		    else
-			return String.format("%1$s + %2$s%3$c",
-			    realFrac.toString(),
-			    imaginaryFrac.toString(), i);
+			return String.format(LONG_POS_FORMAT,
+			    realFrac.toFormatString(sep),
+			    imaginaryFrac.toFormatString(sep), i);
 		}
 	    }
 	    else {
 		if (realPart == null) {
 		    if (imaginaryPart.equals(BigDecimal.ONE))
-			return String.format("%1$c", i);
+			return String.format(I_POS_FORMAT, i);
 		    else if (imaginaryPart.equals(D_MINUS_ONE))
-			return String.format("-%1$c", i);
+			return String.format(I_NEG_FORMAT, i);
 		    else
-			return String.format("%1$s%2$c", imaginaryPart.toPlainString(), i);
+			return String.format(IMAG_FORMAT, Num.formatWithSeparators(imaginaryPart, sep), i);
 		}
 		else if (imaginaryPart == null) {
-		    return realPart.toPlainString();
+		    return Num.formatWithSeparators(realPart, sep);
 		}
 		else {
 		    if (imaginaryPart.signum() < 0)
-			return String.format("%1$s - %2$s%3$c",
-			    realPart.toPlainString(),
-			    imaginaryPart.abs().toPlainString(), i);
+			return String.format(LONG_NEG_FORMAT,
+			    Num.formatWithSeparators(realPart, sep),
+			    Num.formatWithSeparators(imaginaryPart.abs(), sep), i);
 		    else
-			return String.format("%1$s + %2$s%3$c",
-			    realPart.toPlainString(),
-			    imaginaryPart.toPlainString(), i);
+			return String.format(LONG_POS_FORMAT,
+			    Num.formatWithSeparators(realPart, sep),
+			    Num.formatWithSeparators(imaginaryPart, sep), i);
 		}
 	    }
 	}
@@ -1482,14 +1499,17 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 	 * will always return decimal values here.
 	 *
 	 * @param upperCase Case to use for the map keys.
+	 * @param sep       Whether to use thousands separators.
 	 * @param mc        Rounding and precision for the conversion to polar values.
 	 * @return Polar form (r, theta) of this complex number (as a string).
 	 */
-	public String toPolarString(final boolean upperCase, final MathContext mc) {
+	public String toPolarString(final boolean upperCase, final boolean sep, final MathContext mc) {
 	    char r = upperCase ? 'R' : 'r';
 	    char theta = upperCase ? '\u0398' : '\u03B8';
 
-	    return String.format("{ %1$c: %2$s, %3$c: %4$s }", r, radius(mc).toPlainString(), theta, theta(mc).toPlainString());
+	    return String.format(POLAR_FORMAT,
+			r,     Num.formatWithSeparators(radius(mc), sep),
+			theta, Num.formatWithSeparators(theta(mc), sep));
 	}
 
 }
