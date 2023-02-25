@@ -28,6 +28,10 @@
  *  05-Jan-23 rlw #558:	More operation methods.
  *  10-Jan-23		Constructor from long (int) values.
  *  04-Feb-23		"power(int)" function.
+ *  23-Feb-23 rlw #244:	Formatting with thousands separators.
+ *			"conjugate" to "inverse", implement "conjugate" correctly,
+ *			Implement "magnitude(), "equals()", "hashCode()", and
+ *			Comparable interface (same paradigm as ComplexNumber).
  */
 package info.rlwhitcomb.math;
 
@@ -52,12 +56,17 @@ import java.math.MathContext;
  * accessed on 28-Dec-2022 at 09:10am.
  */
 public final class Quaternion extends Number
+	implements Comparable<Quaternion>
 {
 	/** A value of a real zero, as a quaternion. */
 	public static final Quaternion ZERO = new Quaternion(0);
 
 	/** A value of a real one, as a quaternion. */
 	public static final Quaternion ONE = new Quaternion(1);
+
+
+	/** Normal format for display. */
+	private static final String NORMAL_FORMAT = "( %1$s, %2$s, %3$s, %4$s )";
 
 
 	/** First term, the real part. */
@@ -382,57 +391,102 @@ public final class Quaternion extends Number
 	}
 
 	/**
-	 * Compute the conjugate value of this quaternion.
+	 * Compute the conjugate value ({@code q'}) of this quaternion, which is
+	 * {@code a - b*i - c*j - d*k}.
 	 *
-	 * @param mc The rouding context for decimal values.
+	 * @return This quaternion's conjugate value.
+	 */
+	public Quaternion conjugate() {
+	    if (rational)
+		return new Quaternion(aFrac(), bFrac().negate(), cFrac().negate(), dFrac().negate());
+	    else
+		return new Quaternion(a(), b().negate(), c().negate(), d().negate());
+	}
+
+	/**
+	 * The magnitude of this rational quaternion, squared.
+	 *
+	 * @return {@code a*a + b*b + c*c + d*d}.
+	 */
+	private BigFraction magSquareFrac() {
+	    BigFraction a = aFrac();
+	    BigFraction b = bFrac();
+	    BigFraction c = cFrac();
+	    BigFraction d = dFrac();
+
+	    return a.multiply(a)
+		    .add(b.multiply(b))
+		    .add(c.multiply(c))
+		    .add(d.multiply(d));
+	}
+
+	/**
+	 * The magnitude of this decimal quaternion, squared.
+	 *
+	 * @return {@code a*a + b*b + c*c + d*d}.
+	 */
+	private BigDecimal magSquare() {
+	    BigDecimal a = a();
+	    BigDecimal b = b();
+	    BigDecimal c = c();
+	    BigDecimal d = d();
+
+	    return a.multiply(a)
+		    .add(b.multiply(b))
+		    .add(c.multiply(c))
+		    .add(d.multiply(d));
+	}
+
+	/**
+	 * The magnitude of this quaternion, which is {@link sqrt(a*a + b*b + c*c + d*d)}.
+	 *
+	 * @param mc The precision and rounding used to compute the value.
+	 * @return The decimal magnitude, regardless of whether this quaternion is stored
+	 * as a fraction or not.
+	 */
+	public BigDecimal magnitude(final MathContext mc) {
+	    BigDecimal magSquare = rational ? magSquareFrac().toDecimal(mc) : magSquare();
+
+	    return MathUtil.sqrt(magSquare, mc);
+	}
+
+	/**
+	 * Compute the inverse value of this quaternion, which is {@code q'/(q*q')},
+	 * where {@code q'} is the conjugate of {@code q}.
+	 *
+	 * @param mc The rounding context for decimal values.
 	 * @return {@code 1/q} as a new value.
 	 */
-	public Quaternion conjugate(final MathContext mc) {
+	public Quaternion inverse(final MathContext mc) {
 	    if (rational) {
-		BigFraction a = aFrac();
-		BigFraction b = bFrac();
-		BigFraction c = cFrac();
-		BigFraction d = dFrac();
+		BigFraction magSquare = magSquareFrac();
 
-		BigFraction magSquare =
-		    a.multiply(a)
-			.add(b.multiply(b))
-			.add(c.multiply(c))
-			.add(d.multiply(d));
 		return new Quaternion(
-			a.divide(magSquare),
-			b.divide(magSquare).negate(),
-			c.divide(magSquare).negate(),
-			d.divide(magSquare).negate());
+			aFrac().divide(magSquare),
+			bFrac().divide(magSquare).negate(),
+			cFrac().divide(magSquare).negate(),
+			dFrac().divide(magSquare).negate());
 	    }
 	    else {
-		BigDecimal a = a();
-		BigDecimal b = b();
-		BigDecimal c = c();
-		BigDecimal d = d();
+		BigDecimal magSquare = magSquare();
 
-		BigDecimal magSquare =
-		    a.multiply(a)
-			.add(b.multiply(b))
-			.add(c.multiply(c))
-			.add(d.multiply(d));
 		return new Quaternion(
-			MathUtil.fixup(a.divide(magSquare, mc), mc),
-			MathUtil.fixup(b.divide(magSquare, mc).negate(), mc),
-			MathUtil.fixup(c.divide(magSquare, mc).negate(), mc),
-			MathUtil.fixup(d.divide(magSquare, mc).negate(), mc));
+			MathUtil.fixup(a().divide(magSquare, mc), mc),
+			MathUtil.fixup(b().divide(magSquare, mc).negate(), mc),
+			MathUtil.fixup(c().divide(magSquare, mc).negate(), mc),
+			MathUtil.fixup(d().divide(magSquare, mc).negate(), mc));
 	    }
 	}
 
 	/**
-	 * Divide this quaternion by another.
+	 * Divide this quaternion by another, which is computed as {@code this*(1/q)}.
 	 *
 	 * @param q  The other to divide by.
 	 * @param mc Rounding context to use for decimal arithmetic (non-rational case).
 	 * @return   The result of {@code this/q} rounded appropriately.
 	 */
 	public Quaternion divide(final Quaternion q, final MathContext mc) {
-	    return multiply(q.conjugate(mc), mc);
+	    return multiply(q.inverse(mc), mc);
 	}
 
 	/**
@@ -590,18 +644,91 @@ public final class Quaternion extends Number
 	}
 
 	@Override
-	public String toString() {
-	    if (rational) {
-		return String.format("( %1$s, %2$s, %3$s, %4$s )",
-			aFrac(), bFrac(), cFrac(), dFrac());
+	public int compareTo(final Quaternion o) {
+	    if (rational && o.rational) {
+		BigFraction mag = magSquareFrac();
+		BigFraction mag2 = o.magSquareFrac();
+		return mag.compareTo(mag2);
 	    }
 	    else {
-		return String.format("( %1$s, %2$s, %3$s, %4$s )",
-			a().toPlainString(),
-			b().toPlainString(),
-			c().toPlainString(),
-			d().toPlainString());
+		// Presumably since this comparison doesn't make any sense anyway
+		// using an arbitrary precision here won't make a real difference
+		BigDecimal mag = magnitude(MathContext.DECIMAL128);
+		BigDecimal mag2 = o.magnitude(MathContext.DECIMAL128);
+		// Magnitude alone says nothing about direction
+		return mag.compareTo(mag2);
 	    }
+	}
+
+	@Override
+	public boolean equals(final Object o) {
+	    if (!(o instanceof Quaternion))
+		return false;
+
+	    Quaternion q = (Quaternion) o;
+
+	    if (rational != q.rational)
+		return false;
+
+	    if (rational) {
+		return aFrac().equals(q.aFrac()) &&
+		       bFrac().equals(q.bFrac()) &&
+		       cFrac().equals(q.cFrac()) &&
+		       dFrac().equals(q.dFrac());
+	    }
+	    else {
+		return a().equals(q.a()) &&
+		       b().equals(q.b()) &&
+		       c().equals(q.c()) &&
+		       d().equals(q.d());
+	    }
+	}
+
+	@Override
+	public int hashCode() {
+	    if (rational)
+		return aFrac().hashCode() ^ bFrac().hashCode() ^ cFrac().hashCode() ^ dFrac().hashCode();
+	    else
+		return a().hashCode() ^ b().hashCode() ^ c().hashCode() ^ d().hashCode();
+	}
+
+	/**
+	 * Format the value using optional thousands separators.
+	 *
+	 * @param sep Whether to use separators in each value.
+	 * @return    The formatted value.
+	 * @see #NORMAL_FORMAT
+	 */
+	private String internalToString(final boolean sep) {
+	    if (rational) {
+		return String.format(NORMAL_FORMAT,
+			aFrac().toFormatString(sep),
+			bFrac().toFormatString(sep),
+			cFrac().toFormatString(sep),
+			dFrac().toFormatString(sep));
+	    }
+	    else {
+		return String.format(NORMAL_FORMAT,
+			Num.formatWithSeparators(a(), sep),
+			Num.formatWithSeparators(b(), sep),
+			Num.formatWithSeparators(c(), sep),
+			Num.formatWithSeparators(d(), sep));
+	    }
+	}
+
+	/**
+	 * Format the value for display, with the option to use thousands separators.
+	 *
+	 * @param sep Whether to use thousands separators.
+	 * @return    The properly formatted value.
+	 */
+	public String toFormatString(final boolean sep) {
+	    return internalToString(sep);
+	}
+
+	@Override
+	public String toString() {
+	    return internalToString(false);
 	}
 
 }

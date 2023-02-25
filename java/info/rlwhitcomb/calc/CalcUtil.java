@@ -211,6 +211,8 @@
  *	    to fraction formatting.
  *	21-Feb-2023 (rlwhitcomb)
  *	    #244: Apply separators to complex numbers now too.
+ *	23-Feb-2023 (rlwhitcomb)
+ *	    #244: Upgrades for Quaternions.
  */
 package info.rlwhitcomb.calc;
 
@@ -952,6 +954,9 @@ public final class CalcUtil
 		    else if (result instanceof ComplexNumber) {
 			return ((ComplexNumber) result).toFormatString(format.separators);
 		    }
+		    else if (result instanceof Quaternion) {
+			return ((Quaternion) result).toFormatString(format.separators);
+		    }
 
 		    // Any other type, just get the string representation
 		    return result.toString();
@@ -1174,6 +1179,8 @@ public final class CalcUtil
 		return ((BigFraction) obj).precision();
 	    if (obj instanceof ComplexNumber)
 		return ((ComplexNumber) obj).precision();
+	    if (obj instanceof Quaternion)
+		return ((Quaternion) obj).precision();
 	    if (obj instanceof String) {
 		String str = (String) obj;
 		return str.codePointCount(0, str.length());
@@ -1519,6 +1526,16 @@ public final class CalcUtil
 		}
 
 		return c1.compareTo(c2);
+	    }
+	    else if (e1 instanceof Quaternion || e2 instanceof Quaternion) {
+		Quaternion q1 = Quaternion.valueOf(e1);
+		Quaternion q2 = Quaternion.valueOf(e2);
+
+		if (equality) {
+		    return q1.equals(q2) ? 0 : -1;
+		}
+
+		return q1.compareTo(q2);
 	    }
 	    else if (e1 instanceof BigDecimal || e2 instanceof BigDecimal) {
 		BigDecimal d1 = toDecimalValue(visitor, e1, mc, ctx1);
