@@ -438,7 +438,7 @@ public final class Quaternion extends Number
 	}
 
 	/**
-	 * The magnitude of this quaternion, which is {@link sqrt(a*a + b*b + c*c + d*d)}.
+	 * The magnitude of this quaternion, which is {@code sqrt(a*a + b*b + c*c + d*d)}.
 	 *
 	 * @param mc The precision and rounding used to compute the value.
 	 * @return The decimal magnitude, regardless of whether this quaternion is stored
