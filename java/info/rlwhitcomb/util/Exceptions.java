@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2013-2018,2020-2022 Roger L. Whitcomb.
+ * Copyright (c) 2013-2018,2020-2023 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,63 +23,39 @@
  *
  *	Utility class to make handling exceptions easier.
  *
- *  History:
- *	23-Jul-2013 (rlwhitcomb)
- *	    Created.
- *	20-Feb-2014 (rlwhitcomb)
- *	    Add ability to substitute spaces for tabs.
- *	24-Apr-2015 (rlwhitcomb)
- *	    More special case handling for certain system exceptions
- *	    that have a message that is less than helpful.
- *	13-May-2015 (rlwhitcomb)
- *	    Special handling for all cases of NullPointerException
- *	    (always use the simple name along with the message even
- *	    if the message is not null).
- *	07-Jan-2016 (rlwhitcomb)
- *	    Fix Javadoc warnings from Java 8.
- *	29-May-2017 (rlwhitcomb)
- *	    Add CharacterCodingException to the list of those for which
- *	    we use the simple name as part of the message.
- *	07-May-2018 (rlwhitcomb)
- *	    Some more exceptions that needs name + message.
- *	29-Aug-2018 (rlwhitcomb)
- *	    Another exception that needs name + message.
- *	31-Aug-2018 (rlwhitcomb)
- *	    And yet another ...
- *	10-Mar-2020 (rlwhitcomb)
- *	    Prepare for GitHub.
- *	21-Dec-2020 (rlwhitcomb)
- *	    Update obsolete Javadoc constructs.
- *	22-Jan-2021 (rlwhitcomb)
- *	    One more exception that needs the name and message.
- *	05-Mar-2021 (rlwhitcomb)
- *	    And another one. Tweak the message formatting.
- *	12-Mar-2021 (rlwhitcomb)
- *	    Remove some unneeded logic.
- *	15-Mar-2021 (rlwhitcomb)
- *	    Add in some stack trace info if available.
- *	29-Apr-2021 (rlwhitcomb)
- *	    The string index exception needs a bit more than the message.
- *	    By default don't add in the stack trace, but allow it when desired.
- *	07-Jun-2021 (rlwhitcomb)
- *	    One more strange exception.
- *	07-Jul-2021 (rlwhitcomb)
- *	    Make class final and constructor private.
- *	24-Dec-2021 (rlwhitcomb)
- *	    Add ParseException to the mix.
- *	22-Jan-2022 (rlwhitcomb)
- *	    IllegalFormatException needs name as well as message.
- *	04-Feb-2022 (rlwhitcomb)
- *	    NoSuchFieldException needs name also.
- *	09-Feb-2022 (rlwhitcomb)
- *	    UnsupportedEncodingException also needs name.
- *	18-Feb-2022 (rlwhitcomb)
- *	    Deal gracefully with UncheckedIOException; tweak "exceptionName".
- *	    Rename class.
- *	09-Jul-2022 (rlwhitcomb)
- *	    #393: Cleanup imports.
- *	25-Aug-2022 (rlwhitcomb)
- *	    #465: Add "DirectoryNotEmptyException" and "FileAlreadyExistsException".
+ * History:
+ *  23-Jul-13 rlw  ---	Created.
+ *  20-Feb-14 rlw  ---	Add ability to substitute spaces for tabs.
+ *  24-Apr-15 rlw  ---	More special case handling for certain system exceptions
+ *			that have a message that is less than helpful.
+ *  13-May-15 rlw  ---	Special handling for all cases of NullPointerException
+ *			(always use the simple name along with the message even
+ *			if the message is not null).
+ *  07-Jan-16 rlw  ---	Fix Javadoc warnings from Java 8.
+ *  29-May-17 rlw  ---	Add CharacterCodingException to the list of those for which
+ *			we use the simple name as part of the message.
+ *  07-May-18 rlw  ---	Some more exceptions that need name + message.
+ *  29-Aug-18 rlw  ---	Another exception that needs name + message.
+ *  31-Aug-18 rlw  ---	And yet another ...
+ *  10-Mar-20 rlw  ---	Prepare for GitHub.
+ *  21-Dec-20 rlw  ---	Update obsolete Javadoc constructs.
+ *  22-Jan-21 rlw  ---	One more exception that needs the name and message.
+ *  05-Mar-21 rlw  ---	And another one. Tweak the message formatting.
+ *  12-Mar-21 rlw  ---	Remove some unneeded logic.
+ *  15-Mar-21 rlw  ---	Add in some stack trace info if available.
+ *  29-Apr-21 rlw  ---	The string index exception needs a bit more than the message.
+ *			By default don't add in the stack trace, but allow it when desired.
+ *  07-Jun-21 rlw  ---	One more strange exception.
+ *  07-Jul-21 rlw  ---	Make class final and constructor private.
+ *  24-Dec-21 rlw  ---	Add ParseException to the mix.
+ *  22-Jan-22 rlw  ---	IllegalFormatException needs name as well as message.
+ *  04-Feb-22 rlw  ---	NoSuchFieldException needs name also.
+ *  09-Feb-22 rlw  ---	UnsupportedEncodingException also needs name.
+ *  18-Feb-22 rlw  ---	Deal gracefully with UncheckedIOException; tweak "exceptionName".
+ *			Rename class.
+ *  09-Jul-22 rlw #393:	Cleanup imports.
+ *  25-Aug-22 rlw #465:	Add "DirectoryNotEmptyException" and "FileAlreadyExistsException".
+ *  27-Feb-23 rlw  ---	Redo logic that recognizes the long list of exceptional classes.
  */
 package info.rlwhitcomb.util;
 
@@ -94,7 +70,9 @@ import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.NoSuchFileException;
 import java.text.ParseException;
+import java.util.HashSet;
 import java.util.IllegalFormatException;
+import java.util.Set;
 import java.util.UnknownFormatConversionException;
 
 
@@ -104,6 +82,32 @@ import java.util.UnknownFormatConversionException;
  */
 public final class Exceptions
 {
+	/**
+	 * Set of exceptions to be treated specially.
+	 */
+	private static final Set<Class<?>> SPECIAL_CLASSES = new HashSet<>();
+
+	static {
+	    SPECIAL_CLASSES.add(UnknownHostException.class);
+	    SPECIAL_CLASSES.add(NoClassDefFoundError.class);
+	    SPECIAL_CLASSES.add(ClassNotFoundException.class);
+	    SPECIAL_CLASSES.add(NullPointerException.class);
+	    SPECIAL_CLASSES.add(CharacterCodingException.class);
+	    SPECIAL_CLASSES.add(IllegalCharsetNameException.class);
+	    SPECIAL_CLASSES.add(UnsupportedCharsetException.class);
+	    SPECIAL_CLASSES.add(UnsupportedEncodingException.class);
+	    SPECIAL_CLASSES.add(FileNotFoundException.class);
+	    SPECIAL_CLASSES.add(NoSuchFileException.class);
+	    SPECIAL_CLASSES.add(DirectoryNotEmptyException.class);
+	    SPECIAL_CLASSES.add(FileAlreadyExistsException.class);
+	    SPECIAL_CLASSES.add(UnsupportedOperationException.class);
+	    SPECIAL_CLASSES.add(NumberFormatException.class);
+	    SPECIAL_CLASSES.add(StringIndexOutOfBoundsException.class);
+	    SPECIAL_CLASSES.add(UnknownFormatConversionException.class);
+	    SPECIAL_CLASSES.add(IllegalFormatException.class);
+	    SPECIAL_CLASSES.add(NoSuchFieldException.class);
+	}
+
 	/**
 	 * Private constructor since this is a utility class.
 	 */
@@ -241,24 +245,7 @@ public final class Exceptions
 		    if (msg == null || msg.trim().isEmpty()) {
 			msg = exceptionName(next);
 		    }
-		    else if ((next instanceof UnknownHostException)
-			  || (next instanceof NoClassDefFoundError)
-			  || (next instanceof ClassNotFoundException)
-			  || (next instanceof NullPointerException)
-			  || (next instanceof CharacterCodingException)
-			  || (next instanceof IllegalCharsetNameException)
-			  || (next instanceof UnsupportedCharsetException)
-			  || (next instanceof UnsupportedEncodingException)
-			  || (next instanceof FileNotFoundException)
-			  || (next instanceof NoSuchFileException)
-			  || (next instanceof DirectoryNotEmptyException)
-			  || (next instanceof FileAlreadyExistsException)
-			  || (next instanceof UnsupportedOperationException)
-			  || (next instanceof NumberFormatException)
-			  || (next instanceof StringIndexOutOfBoundsException)
-			  || (next instanceof UnknownFormatConversionException)
-			  || (next instanceof IllegalFormatException)
-			  || (next instanceof NoSuchFieldException)) {
+		    else if (SPECIAL_CLASSES.contains(next.getClass())) {
 			msg = String.format("%1$s: \"%2$s\"", exceptionName(next), msg);
 		    }
 		    else if (next instanceof ParseException) {
