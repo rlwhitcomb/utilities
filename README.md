@@ -37,7 +37,7 @@ All the "java" directory classes are built into a single "utilities.jar" file, w
 
 Work going on currently includes:
 
-- Finish converting D.C to Java (include supporting code).
+- Since Dir.java isn't going to work like I want because of the way wildcards are dealt with on the command line, try converting to "golang" instead.
 - New Java-based "tail", and other Linux utilities missing on Windows.
 - Finish -color and -nocolor flags everywhere
 - Maybe find a way in Options to add "standard" flags (like "-color" above)
@@ -75,6 +75,7 @@ Also see "issues" at https://github.com/rlwhitcomb/utilities/issues
 - Word Finder can also use this option
 
 ### Calc
+- ongoing expansion of complex and quaternion support
 - implement Taylor series expansion of other trig/log functions to requested precision
 - need sec, cot, csc, and inverses as well
 - allow "_" in numeric values, like Java does

@@ -10,87 +10,93 @@ Generating output file 'test/data/TestPP.java'
       34.+	#	define	JKL2	(JKL*2)
       35.+# define T	true
       36.+# define F	false
-      40.  # if	T
-      41.+	private static String TRUE_WORKS = "true works!";
-      42.  # else
-      43.  	#error T doesn't work!
-      44.  #endif
-      45. 	# if !F
-      46.+	private static String FALSE_ALSO_WORKS = "!false also works correctly.";
-      47. 	# else
-      48. 	#error !F doesn't work
-      49. 	# endif
-      51. #if !F && T
-      52.+	// !false && true works
-      53. #else
-      55. #endif
-      56. #if !(F || T)
-      58. #else
-      59.+	// Good!  !(false || true) works
-      60. #endif
-      61. #if F
-      63. #elif F
-      65. #elif T
-      66.+	// Finally!  true is true
-      67. #else
-      69. #endif
-      70.+#define	TEST	(T && !F)
-      71. #if TEST
-      72.+	// Compound test of (T && !F) worked!
-      73.  #else
-      75. #endif
-      77. #ifdef DEF
-      78.+	private static String DEF = "DEF is defined as '' (should be '')";
-      79. #else
-      80. 	#error DEF should be defined!
-      81. #endif
-      82. #if defined(DEF)
-      83.+	private static String DEF2 = "DEF tested correctly by #defined";
-      84. #else
-      85. 	#error defined(DEF) didn't work right.
-      86. #endif
-      87. #ifndef XYZ
-      88.+	private static String XYZ_UNDEF = "This is correct -- XYZ is not defined.";
-      89. #else
-      90. 	#error XYZ defined test failed!
-      91. #endif
-      94. #if !defined(ING_REL)
-      95.+	private static String ING_REL_UNDEFINED = "Correct, we should have undefined ING_REL on the command line.";
+      37.+#define LAST_VERSION 4.5.1
+      41.  # if	T
+      42.+	private static String TRUE_WORKS = "true works!";
+      43.  # else
+      44.  	#error T doesn't work!
+      45.  #endif
+      46. 	# if !F
+      47.+	private static String FALSE_ALSO_WORKS = "!false also works correctly.";
+      48. 	# else
+      49. 	#error !F doesn't work
+      50. 	# endif
+      52. #if !F && T
+      53.+	// !false && true works
+      54. #else
+      56. #endif
+      57. #if !(F || T)
+      59. #else
+      60.+	// Good!  !(false || true) works
+      61. #endif
+      62. #if F
+      64. #elif F
+      66. #elif T
+      67.+	// Finally!  true is true
+      68. #else
+      70. #endif
+      71.+#define	TEST	(T && !F)
+      72. #if TEST
+      73.+	// Compound test of (T && !F) worked!
+      74.  #else
+      76. #endif
+      78. #ifdef DEF
+      79.+	private static String DEF = "DEF is defined as '' (should be '')";
+      80. #else
+      81. 	#error DEF should be defined!
+      82. #endif
+      83. #if defined(DEF)
+      84.+	private static String DEF2 = "DEF tested correctly by #defined";
+      85. #else
+      86. 	#error defined(DEF) didn't work right.
+      87. #endif
+      88. #ifndef XYZ
+      89.+	private static String XYZ_UNDEF = "This is correct -- XYZ is not defined.";
+      90. #else
+      91. 	#error XYZ defined test failed!
+      92. #endif
+      94. #if LAST_VERSION > 4.5.0
+      95.+	private static String VERSION = "4.5.1";
       96. #else
-      97. 	#error ING_REL should be undefined and is not!
+      97. 	#error version check didn't work right
       98. #endif
+     101. #if !defined(ING_REL)
+     102.+	private static String ING_REL_UNDEFINED = "Correct, we should have undefined ING_REL on the command line.";
+     103. #else
+     104. 	#error ING_REL should be undefined and is not!
+     105. #endif
 Error: Macro "pqr" not defined!
 Error: Macro "xyzzy" not defined!
-     103. # ifistr "abc" == ABC
-     104.+	// This is correct -- "abc" should equal (case-insensitive) "ABC"
-     105. # elseif ABC == "abc"
-     107. # else
-     109. #endif
-     111. # ifistr ABC != "abc"
-     113. # elseif ABC == "abc"
-     115. # else
-     116.+	// Correct!  Correctly tested different scenario with #ifistr
-     117. #endif
-     120. #if JKL + 2 == 125
-     121.+	private static int JKL_PLUS = 123 + 2;	// simple arithmetic test works
-     122. #else
-     123. 	#error Numeric addition test failed!
+     110. # ifistr "abc" == ABC
+     111.+	// This is correct -- "abc" should equal (case-insensitive) "ABC"
+     112. # elseif ABC == "abc"
+     114. # else
+     116. #endif
+     118. # ifistr ABC != "abc"
+     120. # elseif ABC == "abc"
+     122. # else
+     123.+	// Correct!  Correctly tested different scenario with #ifistr
      124. #endif
-     127. #if ((JKL + 123) / JKL) % JKL + 2 == (255 % 128 % 4 +1)
-     128.+	// Correct result using JKL=123
+     127. #if JKL + 2 == 125
+     128.+	private static int JKL_PLUS = 123 + 2;	// simple arithmetic test works
      129. #else
-     130. 	#error Error evaluating '((JKL + 123) / JKL) % JKL + 2 == (255 % 128 % 4 +1)'
+     130. 	#error Numeric addition test failed!
      131. #endif
-     132. #if (255 % 128 % 4 +1) == ((JKL + 123) / JKL) % JKL + 2
-     133.+	// Correct result using JKL=123 and switching the order of operations
-     134. #else
-     135. 	#error Error evaluating '(255 % 128 % 4 +1) == ((JKL + 123) / JKL) % JKL + 2'
-     136. #endif
-     138. #ifnum JKL+1 == JKL1
-     139.+	// Arithmetic test of JKL+1==JKL1 (${JKL}+1==(JKL+1)) correct.
-     140. #else
-     142. #endif
-     144. #ifnum JKL*2 == JKL2
-     145.+	// Arithmetic test of JKL*2==JKL2 (123*2==(JKL*2)) correct.
-     146. #else
-     148. #endif
+     134. #if ((JKL + 123) / JKL) % JKL + 2 == (255 % 128 % 4 +1)
+     135.+	// Correct result using JKL=123
+     136. #else
+     137. 	#error Error evaluating '((JKL + 123) / JKL) % JKL + 2 == (255 % 128 % 4 +1)'
+     138. #endif
+     139. #if (255 % 128 % 4 +1) == ((JKL + 123) / JKL) % JKL + 2
+     140.+	// Correct result using JKL=123 and switching the order of operations
+     141. #else
+     142. 	#error Error evaluating '(255 % 128 % 4 +1) == ((JKL + 123) / JKL) % JKL + 2'
+     143. #endif
+     145. #ifnum JKL+1 == JKL1
+     146.+	// Arithmetic test of JKL+1==JKL1 (${JKL}+1==(JKL+1)) correct.
+     147. #else
+     149. #endif
+     151. #ifnum JKL*2 == JKL2
+     152.+	// Arithmetic test of JKL*2==JKL2 (123*2==(JKL*2)) correct.
+     153. #else
+     155. #endif

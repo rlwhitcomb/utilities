@@ -758,6 +758,13 @@
  *	    Refactor the Next and Leave exceptions.
  *	24-Jan-2023 (rlwhitcomb)
  *	    #594: Redo the bit operations on pure boolean values.
+ *	04-Feb-2023 (rlwhitcomb)
+ *	    #558: More quaternion arithmetic, particularly integer powers.
+ *	12-Feb-2023 (rlwhitcomb)
+ *	    #68: Fixes to "substr" for null begin/end values.
+ *	16-Feb-2023 (rlwhitcomb)
+ *	    #244: Move "formatWithSeparators" from CalcUtil to Num. Apply to formatting
+ *	    fractions.
  *	22-Feb-2023 (rlwhitcomb)
  *	    #458: Pop the scope stack for parallel functions once the thread has been
  *	    launched. Different message for defining a parallel function.
@@ -771,6 +778,7 @@ import info.rlwhitcomb.math.BigFraction;
 import info.rlwhitcomb.math.ComplexNumber;
 import info.rlwhitcomb.math.DateUtil;
 import info.rlwhitcomb.math.MathUtil;
+import info.rlwhitcomb.math.Num;
 import info.rlwhitcomb.math.NumericUtil;
 import info.rlwhitcomb.math.Quaternion;
 import info.rlwhitcomb.util.*;
@@ -2582,7 +2590,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			if (precision != Integer.MIN_VALUE) {
 			    dValue = MathUtil.round(dValue, precision);
 			}
-			valueBuf.append(formatWithSeparators(dValue, separators, scale));
+			valueBuf.append(Num.formatWithSeparators(dValue, separators, scale));
 			break;
 
 		    case 'I':
@@ -2643,10 +2651,10 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			break;
 
 		    case 'f':
-			valueBuf.append(toFractionValue(this, result, ctx));
+			valueBuf.append(toFractionValue(this, result, ctx).toFormatString(separators));
 			break;
 		    case 'F':
-			valueBuf.append(toFractionValue(this, result, ctx).toProperString());
+			valueBuf.append(toFractionValue(this, result, ctx).toProperString(separators));
 			break;
 
 		    case 'J':
@@ -4161,7 +4169,15 @@ System.out.println("i = " + i + ", result = " + result);
 
 	    Object value = evaluate(expr);
 
-	    if (value instanceof ComplexNumber) {
+	    if (value instanceof Quaternion) {
+		Quaternion base = (Quaternion) value;
+		if (Math.floor(exp) == exp && !Double.isInfinite(exp)) {
+		    return base.power((int) exp, settings.mc);
+		}
+		// TODO: temporary
+		throw new CalcExprException(ctx, "%calc#notImplemented", "quaternion to decimal power");
+	    }
+	    else if (value instanceof ComplexNumber) {
 		ComplexNumber base = (ComplexNumber) value;
 		return base.pow(new BigDecimal(exp), settings.mc);
 	    }
@@ -4222,6 +4238,11 @@ System.out.println("i = " + i + ", result = " + result);
 		BigFraction base = convertToFraction(value, expr);
 
 		return base.pow(exp);
+	    }
+	    else if (value instanceof Quaternion) {
+		Quaternion base = (Quaternion) value;
+
+		return base.power(exp, settings.mc);
 	    }
 	    else if (value instanceof ComplexNumber) {
 		ComplexNumber base = (ComplexNumber) value;
@@ -5282,14 +5303,29 @@ System.out.println("i = " + i + ", result = " + result);
 	    }
 
 	    int stringLen  = stringValue.length();
-	    int beginIndex = beginCtx == null ? 0 : getIntValue(beginCtx);
-	    int endIndex   = endCtx == null ? stringLen : getIntValue(endCtx);
+	    int beginIndex = 0;
+	    int endIndex   = stringLen;
 
+	    if (beginCtx != null) {
+		Object beginValue = evaluate(beginCtx);
+		if (beginValue != null) {
+		    beginIndex = toIntValue(this, beginValue, settings.mc, beginCtx);
+		}
+	    }
+	    if (endCtx != null) {
+		Object endValue = evaluate(endCtx);
+		if (endValue != null) {
+		    endIndex = toIntValue(this, endValue, settings.mc, endCtx);
+		}
+	    }
+
+	    // Negative indices at this point are relative to the string length
 	    if (beginIndex < 0)
 		beginIndex += stringLen;
 	    if (endIndex < 0)
 		endIndex += stringLen;
 
+	    // But, at this point, just limit to 0..length
 	    if (beginIndex < 0)
 		beginIndex = 0;
 	    if (beginIndex > stringLen)
@@ -5315,9 +5351,9 @@ System.out.println("i = " + i + ", result = " + result);
 		valueCtx = e3ctx.expr(0);
 	    }
 
-	    String stringValue = getStringValue(valueCtx);
+	    Object value = evaluate(valueCtx);
 
-	    return substring(stringValue, valueCtx, e2ctx, e3ctx);
+	    return substring(value, valueCtx, e2ctx, e3ctx);
 	}
 
 	@Override

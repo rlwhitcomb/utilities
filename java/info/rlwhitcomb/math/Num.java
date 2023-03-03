@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2008-2010,2014,2020-2022 Roger L. Whitcomb.
+ * Copyright (c) 2008-2009,2014,2020-2023 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,32 +24,26 @@
  *	Numeric Utility Library
  *
  * History:
- *	11-Nov-2008 (rlwhitcomb)
- *	    Initial creation from code in ClientService.java.
- *	06-Jan-2009 (rlwhitcomb)
- *	    Added Javadoc comments all around.
- *	24-Jul-2014 (rlwhitcomb)
- *	    Add "parse" methods using the formats.
- *	14-Aug-2014 (rlwhitcomb)
- *	    Cleanup "lint" warnings.
- *	14-Apr-2020 (rlwhitcomb)
- *	    Cleanup and prepare for GitHub.
- *	09-Jul-2021 (rlwhitcomb)
- *	    Make the class final and constructor private for a utility class.
- *	18-Feb-2022 (rlwhitcomb)
- *	    Use Exceptions to get better error messages.
- *	14-Apr-2022 (rlwhitcomb)
- *	    #273: Move to "math" package.
- *	08-Jul-2022 (rlwhitcomb)
- *	    #393: Cleanup imports.
- *	12-Oct-2022 (rlwhitcomb)
- *	    #513: Move Logging to new package.
+ *  11-Nov-08 rlw  ---	Initial creation from code in ClientService.
+ *  06-Jan-09 rlw  ---	Added Javadoc comments all around.
+ *  24-Jul-14 rlw  ---	Add "parse" methods using the formats.
+ *  14-Aug-14 rlw  ---	Cleanup "lint" warnings.
+ *  14-Apr-20 rlw  ---	Cleanup and prepare for GitHub.
+ *  09-Jul-21 rlw  ---	Make the class final and constructor private for a utility class.
+ *  18-Feb-22 rlw  ---	Use Exceptions to get better error messages.
+ *  14-Apr-22 rlw #273:	Move to "math" package.
+ *  08-Jul-22 rlw #393:	Cleanup imports.
+ *  12-Oct-22 rlw #513:	Move Logging to new package.
+ *  16-Feb-23 rlw #244:	Move "formatWithSeparators" into here, add BigInteger version,
+ *			and add variants with fewer params.
  */
 package info.rlwhitcomb.math;
 
 import info.rlwhitcomb.logging.Logging;
 import info.rlwhitcomb.util.Exceptions;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.text.DecimalFormat;
 import java.text.FieldPosition;
 import java.text.NumberFormat;
@@ -227,6 +221,115 @@ public final class Num
 		Logging.Error("Parsing error: %1$s", Exceptions.toString(pe));
 	    }
 	    return 0.0d;
+	}
+
+	/**
+	 * Format an integer number with thousands separators.
+	 *
+	 * @param	value	An integer value to format.
+	 * @return		The value formatted appropriately with thousands separators.
+	 */
+	public static String formatWithSeparators(final BigInteger value) {
+	    return formatWithSeparators(new BigDecimal(value), true, Integer.MIN_VALUE);
+	}
+
+	/**
+	 * Format an integer number with/without thousands separators.
+	 *
+	 * @param	value	An integer value to format.
+	 * @param	sep	Whether or not to use separators.
+	 * @return		The value formatted appropriately with thousands separators.
+	 */
+	public static String formatWithSeparators(final BigInteger value, final boolean sep) {
+	    return formatWithSeparators(new BigDecimal(value), sep, Integer.MIN_VALUE);
+	}
+
+	/**
+	 * Format an integer number with/without thousands separators.
+	 *
+	 * @param	value	An integer value to format.
+	 * @param	sep	Whether or not to use separators.
+	 * @param	scale	The minimum number of decimal digits to display (pad on the left
+	 *			with zeros, before adding separators); {@code Integer.MIN_VALUE}
+	 *			to ignore.
+	 * @return		The value formatted appropriately with thousands separators.
+	 */
+	public static String formatWithSeparators(final BigInteger value, final boolean sep, final int scale) {
+	    return formatWithSeparators(new BigDecimal(value), sep, scale);
+	}
+
+	/**
+	 * Format a decimal/integer number with thousands separators.
+	 *
+	 * @param	value	A decimal value which could actually be an integer.
+	 * @return		The value formatted appropriately with thousands separators.
+	 */
+	public static String formatWithSeparators(final BigDecimal value) {
+	    return formatWithSeparators(value, true, Integer.MIN_VALUE);
+	}
+
+	/**
+	 * Format a decimal/integer number with/without thousands separators.
+	 *
+	 * @param	value	A decimal value which could actually be an integer.
+	 * @param	sep	Whether or not to use separators.
+	 * @return		The value formatted appropriately with thousands separators.
+	 */
+	public static String formatWithSeparators(final BigDecimal value, final boolean sep) {
+	    return formatWithSeparators(value, sep, Integer.MIN_VALUE);
+	}
+
+	/**
+	 * Format a decimal/integer number with/without thousands separators.
+	 *
+	 * @param	value	A decimal value which could actually be an integer.
+	 * @param	sep	Whether or not to use separators.
+	 * @param	scale	The minimum number of decimal digits to display (pad on the left
+	 *			with zeros, before adding separators); {@code Integer.MIN_VALUE}
+	 *			to ignore.
+	 * @return		The value formatted appropriately with thousands separators.
+	 */
+	public static String formatWithSeparators(final BigDecimal value, final boolean sep, final int scale) {
+	    String formatString = "";
+	    int valueScale = value.scale();
+	    int valuePrec = value.precision();
+	    int displayScale = scale;
+
+	    // There are no digits right of the decimal point, so treat as an integer
+	    if (valueScale <= 0) {
+		if (scale != Integer.MIN_VALUE) {
+		    if (sep)
+			displayScale += (valuePrec - valueScale) / 3;
+		    formatString = String.format("%%1$0%1$dd", displayScale);
+		}
+		else {
+		    formatString = "%1$d";
+		}
+	    }
+	    else {
+		if (scale != Integer.MIN_VALUE) {
+		    if (sep)
+			displayScale += (valuePrec - valueScale) / 3;
+		    formatString = String.format("%%1$0%1$d.%2$df", displayScale, valueScale);
+		}
+		else {
+		    formatString = String.format("%%1$.%1$df", valueScale);
+		}
+	    }
+
+	    if (sep && !formatString.isEmpty()) {
+		formatString = formatString.replace("%1$", "%1$,");
+	    }
+
+	    if (formatString.isEmpty()) {
+		return value.toPlainString();
+	    }
+	    else {
+		if (formatString.endsWith("d"))
+		    return String.format(formatString, value.toBigInteger());
+		else
+		    return String.format(formatString, value);
+	    }
 	}
 
 }

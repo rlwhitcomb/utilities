@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2010-2011,2020 Roger L. Whitcomb.
+ * Copyright (c) 2010-2011,2020,2023 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -40,6 +40,8 @@ class TestPP {
 	private static String DEF = "DEF is defined as '' (should be '')";
 	private static String DEF2 = "DEF tested correctly by #defined";
 	private static String XYZ_UNDEF = "This is correct -- XYZ is not defined.";
+
+	private static String VERSION = "4.5.1";
 
 // Test ING_REL being undefined
 	private static String ING_REL_UNDEFINED = "Correct, we should have undefined ING_REL on the command line.";

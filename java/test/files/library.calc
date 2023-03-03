@@ -768,7 +768,7 @@ def peek(s) = { s._values ? s._values[-1] : null }
 /*
  * Construct a nice string form of the version information.
  */
-def versionstring = `Version ${info.version.major}.${info.version.minor}.${info.version.patch} build ${substr(info.version.build, 1)}${info.version.prerelease}`
+def version = `Version ${info.version.major}.${info.version.minor}.${info.version.patch} build ${substr(info.version.build, 1)}${info.version.prerelease}`
 
 /*
  * Execute the "uuid" program to return a unique identifier.

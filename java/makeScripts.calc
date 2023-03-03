@@ -137,8 +137,7 @@ define scripts() = {
 }
 
 case operation of {
-    "scripts":    scripts(),
-    "properties": properties(),
-    default:      :assert false, `Undefined operation "$operation"!`
+    "scripts","properties": eval(`$operation()`),
+    default:                :assert false, `Undefined operation "$operation"!`
 }
 

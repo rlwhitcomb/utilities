@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2022 Roger L. Whitcomb.
+ * Copyright (c) 2022-2023 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,6 +25,7 @@
  *
  * History:
  *  26-Oct-22 rlw #540:	Move out of Tester into separate class file.
+ *  10-Feb-23 rlw  ---	Small optimization not to write empty strings.
  */
 package info.rlwhitcomb.tester;
 
@@ -80,7 +81,8 @@ class TestFiles
 		throws IOException
 	{
 	    if (line != null) {
-		inputWriter.write(line);
+		if (!line.isEmpty())
+		    inputWriter.write(line);
 		inputWriter.newLine();
 	    }
 	}
@@ -110,29 +112,29 @@ class TestFiles
 	    write(errorWriter, line);
 	}
 
+	private BufferedWriter close(final BufferedWriter writer)
+		throws IOException
+	{
+	    if (writer != null) {
+		writer.flush();
+		writer.close();
+	    }
+
+	    return null;
+	}
+
 	public void closeStreams()
 		throws IOException
 	{
-	    inputWriter.flush();
-	    inputWriter.close();
-	    inputWriter = null;
-	    outputWriter.flush();
-	    outputWriter.close();
-	    outputWriter = null;
-	    errorWriter.flush();
-	    errorWriter.close();
-	    errorWriter = null;
+	    inputWriter  = close(inputWriter);
+	    outputWriter = close(outputWriter);
+	    errorWriter  = close(errorWriter);
 	}
 
 	public void abort()
 		throws IOException
 	{
-	    if (inputWriter != null)
-		inputWriter.close();
-	    if (outputWriter != null)
-		outputWriter.close();
-	    if (errorWriter != null)
-		errorWriter.close();
+	    closeStreams();
 	}
 
 	public void deleteFiles()

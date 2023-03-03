@@ -27,6 +27,7 @@
  *  29-Dec-22 rlw #558:	Initial coding.
  *  05-Jan-23 rlw #558:	More operation methods.
  *  10-Jan-23		Constructor from long (int) values.
+ *  04-Feb-23		"power(int)" function.
  */
 package info.rlwhitcomb.math;
 
@@ -432,6 +433,29 @@ public final class Quaternion extends Number
 	 */
 	public Quaternion divide(final Quaternion q, final MathContext mc) {
 	    return multiply(q.conjugate(mc), mc);
+	}
+
+	/**
+	 * Take this quaternion to an integer power.
+	 *
+	 * @param n  The integer power to raise this quaternion to.
+	 * @param mc Rounding context for the non-rational case.
+	 * @return   Result of the exponentiation.
+	 */
+	public Quaternion power(final int n, final MathContext mc) {
+	    Quaternion result = ONE;
+	    Quaternion mult = this;
+	    int scale = n;
+
+	    while (scale > 0) {
+		if ((scale & 1) == 1) {
+		    result = result.multiply(mult, mc);
+		}
+		mult = mult.multiply(mult, mc);
+		scale >>= 1;
+	    }
+
+	    return result;
 	}
 
 

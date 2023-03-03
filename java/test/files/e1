@@ -430,6 +430,15 @@ three = substr(target, index(target, 'test', -1))
 substr(target, index(target, '"', 0), index(target, '"', -1) + 1)
 substr 1.234, 1, 3
 substr(target, -1, -3)
+substr(target, null, -1)
+substr target, index(target, " is") + 1, index(target, "test") - 1
+tar = 'abc'
+substr(tar, -2, -1)
+substr tar, null, -1
+substr tar, -2, null
+substr tar, -1
+substr tar, 1, -1
+substr tar
 
 # The "replace" function in all of its options
 tl = 'tell teal tail teel toil tool toll'
