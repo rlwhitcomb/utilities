@@ -41,7 +41,7 @@ import java.math.MathContext;
 
 
 /**
- * Implementation of a quaternion, which is a number system that extends the complex numbers.
+ * Implementation of a quaternion.
  * <p> In mathematics, the quaternion number system extends the complex numbers.
  * <p> Quaternions were first described by the Irish mathematician William Rowan Hamilton in 1843 and applied to mechanics in three-dimensional space.
  * Hamilton defined a quaternion as the quotient of two directed lines in a three-dimensional space, or, equivalently, as the quotient of two vectors.
