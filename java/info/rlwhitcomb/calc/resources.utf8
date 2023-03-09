@@ -1,7 +1,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2021-2022 Roger L. Whitcomb.
+# Copyright (c) 2021-2023 Roger L. Whitcomb.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -167,6 +167,8 @@
 #	    #573: Error messages for "scan".
 #	31-Dec-2022 (rlwhitcomb)
 #	    #558: New error message for "unimplemented".
+#	09-Mar-2023 (rlwhitcomb)
+#	    Update the REPL help message a little bit.
 #
 
 #
@@ -289,10 +291,12 @@ notImplemented		= %1$s operation is not implemented
 
 intro.help1	= "  Enter an arithmetic expression to evaluate, or multiple expressions"
 intro.help2	= "  separated by <u>;<.>, followed by <a>Return<.> or <a>Enter<.>."
-intro.help3	= "  Use <u>:help<.> or <u>:?<.> to display the help page in your browser."
-intro.help4	= "  Enter <u>:quit<.> or <u>:exit<.> to end."
-intro.help5	= "  Enter <u>:gui<.> to enter GUI mode."
-intro.help6	= ""
+intro.help3	= ""
+intro.help4	= "  Use <u>:help<.> or <u>:?<.> to display the help page in your browser."
+intro.help5	= "  Enter <u>:quit<.> or <u>:exit<.> to end."
+intro.help6	= "  Use <u>:gui<.> to switch to GUI mode."
+intro.help7	= "  The <u>:version<.> command is also available here."
+intro.help8	= ""
 
 #
 # From CalcUtil
