@@ -558,9 +558,22 @@ define ft2time(ft) = {
 define epoch_secs_to_datetime(secs) = {
    var days = secs \ SECS_PER_DAY
    var ticks = (secs % SECS_PER_DAY) * TICKS_PER_SECOND
-   var date = `${days@-e}`
-   var time = `${ticks@-h}`
-   `$date $time`
+   while ticks < 0 {
+      --days; ticks += TICKS_PER_DAY
+   }
+   `${days@-e} ${ticks@-h}`
+}
+
+/*
+ * Convert a date and time to number of seconds since the epoch start
+ * (1970-01-01 00:00:00).
+ *
+ * @param date One of our date values.
+ * @param time A time value (nanos since midnight).
+ * @return Number of seconds since the epoch start.
+ */
+define datetime_to_epoch_secs(d, t) = {
+   d * SECS_PER_DAY + t / TICKS_PER_SECOND
 }
 
 /*

@@ -131,6 +131,12 @@ cp_to_high_surr(cp) @x
 cp_to_low_surr(cp) @x
 
 #
+# Epoch seconds to/from date and time
+#
+epoch_secs_to_datetime(datetime_to_epoch_secs(D'12-31-1969', H'11:30:29pm'))
+epoch_secs_to_datetime(datetime_to_epoch_secs(d'1941-12-07', h'07:48'))
+
+#
 # Tangent numbers
 #
 :decimal 300

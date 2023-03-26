@@ -99,6 +99,8 @@
 >surr_pair_to_cp(0xd83d, 0xde03) @c -> "😃"
 >cp_to_high_surr(cp) @x -> 0xd83d
 >cp_to_low_surr(cp) @x -> 0xde03
+>epoch_secs_to_datetime(datetime_to_epoch_secs(D'12-31-1969', H'11:30:29pm')) -> "1969-12-31 23:30:29"
+>epoch_secs_to_datetime(datetime_to_epoch_secs(d'1941-12-07', h'07:48')) -> "1941-12-07 7:48"
 >Precision is now “300” digits.
 >Tn(0) = 1
 >Tn(1) = -2
