@@ -763,6 +763,8 @@
  *	    fractions.
  *	21-Feb-2023 (rlwhitcomb)
  *	    #244: Move to applying separators to complex numbers too.
+ *	26-Mar-2023 (rlwhitcomb)
+ *	    Modify "timethis" grammar to not require ugly comma before LBRACE.
  */
 package info.rlwhitcomb.calc;
 
@@ -3480,6 +3482,16 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    throw NextException.instance();
 	}
 
+	private Object executeTimeBlock(CalcParser.TimeThisStmtContext ctx) {
+	    CalcParser.BracketBlockContext block = ctx.bracketBlock();
+	    if (block != null) {
+		return evaluate(block);
+	    }
+	    else {
+		return evaluate(ctx.stmtOrExpr());
+	    }
+	}
+
 	@Override
 	public Object visitTimeThisStmt(CalcParser.TimeThisStmtContext ctx) {
 	    CalcParser.ExprContext descExpr = ctx.expr();
@@ -3488,12 +3500,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		if (descObj != null) {
 		    String description = descObj.toString();
 		    return Environment.timeThis(description, () -> {
-			return evaluate(ctx.stmtBlock());
+			return executeTimeBlock(ctx);
 		    });
 		}
 	    }
 	    return Environment.timeThis( () -> {
-		return evaluate(ctx.stmtBlock());
+		return executeTimeBlock(ctx);
 	    });
 	}
 

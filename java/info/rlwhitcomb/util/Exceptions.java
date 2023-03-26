@@ -56,6 +56,7 @@
  *  09-Jul-22 rlw #393:	Cleanup imports.
  *  25-Aug-22 rlw #465:	Add "DirectoryNotEmptyException" and "FileAlreadyExistsException".
  *  27-Feb-23 rlw  ---	Redo logic that recognizes the long list of exceptional classes.
+ *  25-Mar-23 rlw  ---	Add specials for "no such method" and "no such field" errors and exceptions.
  */
 package info.rlwhitcomb.util;
 
@@ -97,7 +98,11 @@ public final class Exceptions
 	    SPECIAL_CLASSES.add(UnsupportedCharsetException.class);
 	    SPECIAL_CLASSES.add(UnsupportedEncodingException.class);
 	    SPECIAL_CLASSES.add(FileNotFoundException.class);
+	    SPECIAL_CLASSES.add(NoSuchFieldError.class);
+	    SPECIAL_CLASSES.add(NoSuchFieldException.class);
 	    SPECIAL_CLASSES.add(NoSuchFileException.class);
+	    SPECIAL_CLASSES.add(NoSuchMethodError.class);
+	    SPECIAL_CLASSES.add(NoSuchMethodException.class);
 	    SPECIAL_CLASSES.add(DirectoryNotEmptyException.class);
 	    SPECIAL_CLASSES.add(FileAlreadyExistsException.class);
 	    SPECIAL_CLASSES.add(UnsupportedOperationException.class);

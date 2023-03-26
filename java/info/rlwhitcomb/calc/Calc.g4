@@ -489,6 +489,8 @@
  *	    #558: Beginnings of quaternion support.
  *	24-Jan-2023 (rlwhitcomb)
  *	    #594: Additional bit operations.
+ *	25-Mar-2023 (rlwhitcomb)
+ *	    Clarify "timethis" grammar so awkward comma before LBRACE is not needed.
  */
 
 grammar Calc;
@@ -562,7 +564,8 @@ nextStmt
    ;
 
 timeThisStmt
-   : K_TIMETHIS ( expr COMMA ) ? stmtBlock
+   : K_TIMETHIS expr ? bracketBlock
+   | K_TIMETHIS ( expr COMMA ) ? EOL* stmtOrExpr EOL*
    ;
 
 bracketBlock
