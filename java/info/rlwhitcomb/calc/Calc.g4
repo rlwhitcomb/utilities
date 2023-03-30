@@ -491,6 +491,9 @@
  *	    #594: Additional bit operations.
  *	25-Mar-2023 (rlwhitcomb)
  *	    Clarify "timethis" grammar so awkward comma before LBRACE is not needed.
+ *	24-Mar-2023 (rlwhitcomb)
+ *	    #596: Put the REPL commands into the grammar, so they can be executed from the command
+ *	    line as well, and no special processing is needed for REPL mode.
  */
 
 grammar Calc;
@@ -920,6 +923,10 @@ directive
    | D_COLORS modeOption bracketBlock ?       # colorsDirective
    | D_REQUIRE requireOptions                 # requireDirective
    | D_ASSERT expr ( COMMA expr ) ?           # assertDirective
+   | D_QUIT                                   # quitDirective
+   | D_HELP                                   # helpDirective
+   | D_VERSION                                # versionDirective
+   | D_GUI                                    # guiDirective
    ;
 
 numberOption
@@ -1681,6 +1688,30 @@ D_ASSERT
    : DIR  ( 'assert' | 'ASSERT' | 'Assert' )
    ;
 
+D_QUIT
+   : DIR  ( 'quit' | 'QUIT' | 'Quit' )
+   | DIR  ( 'exit' | 'EXIT' | 'Exit' )
+   | DIR  ( 'q'    | 'Q'    )
+   | DIR  ( 'x'    | 'X'    )
+   ;
+
+D_HELP
+   : DIR  ( 'help' | 'HELP' | 'Help' )
+   | DIR  ( 'h'    | 'H'    )
+   | DIR  ( '?'    )
+   ;
+
+D_VERSION
+   : DIR  ( 'version' | 'VERSION' | 'Version' )
+   | DIR  ( 'vers'    | 'VERS'    | 'Vers'    )
+   | DIR  ( 'ver'     | 'VER'     | 'Ver'     )
+   | DIR  ( 'v'       | 'V'       )
+   ;
+
+D_GUI
+   : DIR  ( 'gui' | 'GUI' | 'Gui' )
+   | DIR  ( 'g'   | 'G'   )
+   ;
 
 FORMAT
    : '@' [\-+] ? INT ? ( '.' INT ? ( '.' INT ) ? ) ? [a-zA-Z,_] ? [a-zA-Z%$]

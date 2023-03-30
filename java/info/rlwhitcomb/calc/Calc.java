@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2020-2022 Roger L. Whitcomb.
+ * Copyright (c) 2020-2023 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -320,6 +320,9 @@
  *	    #550: Catch AssertException at the highest levels.
  *	13-Dec-2022 (rlwhitcomb)
  *	    #582: Add ".clc" and ".xpr" as supported file extensions.
+ *	24-Mar-2023 (rlwhitcomb)
+ *	    #596: Need to set "guiMode" from REPL ":gui" command. Move pure REPL commands
+ *	    into the grammar itself.
  */
 package info.rlwhitcomb.calc;
 
@@ -1669,7 +1672,16 @@ public class Calc
 	}
 
 	public static void printIntro() {
-	    Intl.printHelp("calc#intro", colors);
+	    if (!guiMode) {
+		Intl.printHelp("calc#intro", colors);
+	    }
+	}
+
+	public static void doGuiMode(String[] args) {
+	    if (!guiMode) {
+		guiMode = true;
+		DesktopApplicationContext.main(Calc.class, args);
+	    }
 	}
 
 	/**
@@ -2605,52 +2617,13 @@ public class Calc
 			    String prompt = ConsoleColor.color("<Bk!>> <.>");
 			replLoop:
 			    while ((line = console.readLine(prompt)) != null) {
-				boolean scriptInput = false;
-				if (buf.length() == 0) {
-				    String cmd = line.trim().toLowerCase();
-				    switch (cmd) {
-					case ":quit":
-					case ":exit":
-					case ":q":
-					case ":e":
-					case ":x":
-					    exit();
-					    break;
-					case "?":
-					case ":?":
-					case ":help":
-					case ":h":
-					    printIntro();
-					    displayHelp();
-					    break;
-					case ":version":
-					case ":vers":
-					case ":ver":
-					case ":v":
-					    printTitleAndVersion();
-					    break;
-					case ":gui":
-					case ":g":
-					    DesktopApplicationContext.main(Calc.class, args);
-					    break replLoop;
-					default:
-					    scriptInput = true;
-					    break;
-				    }
+				if (line.endsWith("\\")) {
+				    buf.append(line.substring(0, line.length() - 1)).append(LINESEP);
 				}
 				else {
-				    scriptInput = true;
-				}
-
-				if (scriptInput) {
-				    if (line.endsWith("\\")) {
-					buf.append(line.substring(0, line.length() - 1)).append(LINESEP);
-				    }
-				    else {
-					buf.append(line);
-					process(CharStreams.fromString(buf.toString()), visitor, errorStrategy, quiet, false);
-					buf.setLength(0);
-				    }
+				    buf.append(line);
+				    process(CharStreams.fromString(buf.toString()), visitor, errorStrategy, quiet, false);
+				    buf.setLength(0);
 				}
 			    }
 

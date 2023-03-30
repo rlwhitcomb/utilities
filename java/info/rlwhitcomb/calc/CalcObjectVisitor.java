@@ -765,6 +765,8 @@
  *	    #244: Move to applying separators to complex numbers too.
  *	26-Mar-2023 (rlwhitcomb)
  *	    Modify "timethis" grammar to not require ugly comma before LBRACE.
+ *	28-Mar-2023 (rlwhitcomb)
+ *	    #596: Move pure REPL commands into the grammar, and implement here.
  */
 package info.rlwhitcomb.calc;
 
@@ -2329,6 +2331,32 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 	    return Boolean.TRUE;
 	}
+
+	@Override
+	public Object visitQuitDirective(CalcParser.QuitDirectiveContext ctx) {
+	    Calc.exit();
+	    return null;
+	}
+
+	@Override
+	public Object visitHelpDirective(CalcParser.HelpDirectiveContext ctx) {
+	    Calc.printIntro();
+	    Calc.displayHelp();
+	    return null;
+	}
+
+	@Override
+	public Object visitVersionDirective(CalcParser.VersionDirectiveContext ctx) {
+	    Calc.printTitleAndVersion();
+	    return null;
+	}
+
+	@Override
+	public Object visitGuiDirective(CalcParser.GuiDirectiveContext ctx) {
+	    Calc.doGuiMode(new String[0]);
+	    return null;
+	}
+
 
 
 	private boolean isEmptyStmt(final ParseTree root) {

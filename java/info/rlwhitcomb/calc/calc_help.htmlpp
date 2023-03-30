@@ -376,10 +376,9 @@ h2 {
   <h2><span class="underline">R</span>ead, <span class="underline">E</span>val, <span class="underline">P</span>rint
       <span class="underline">L</span>oop Commands</h2>
   <div class="cols">
-  <p>In REPL mode, in addition to expressions and directives (as described below), there are a few commands available to do other
-     things (all of which are alternatives to command-line options). Note that these commands are only available in REPL mode, and not
-     from a script or library file, nor in the GUI input window (although there are buttons in the GUI window for all but
-     <code>gui</code> [obviously]).
+  <p>For convenience in REPL mode, in addition to expressions and directives (as described below), there are a few commands available to do other
+     things (all of which are alternatives to command-line options). Note that these commands are mostly for convenience in REPL mode, but are also available from a script or library file, as well as from the GUI input window.
+     Note there are buttons in the GUI window for all but <code>:gui</code> (obviously).
   <p>Interestingly, although the Calculator can switch from console mode to GUI mode, the reverse is not possible. Also, the console application will
      not actually exit after switching modes until the GUI window is closed. This also applies to using the <code>-gui</code> option on the command line.
   <p>Also note that using the command line options (such as <code>c -version</code>) will do the operation and immediately exit, while using the
@@ -399,8 +398,8 @@ h2 {
     </tr>
     </thead>
     <tbody>
-    <tr><td><code>:quit</code></td><td>Exit the program normally.</td><td><code>:exit</code>,<br><code>:q</code>, <code>:e</code>, <code>:x</code></td><td></td></tr>
-    <tr><td><code>:help</code></td><td>Display the HTML help page in the browser.</td><td><code>?</code>, <code>:?</code>, <code>:h</code></td><td><code>-help</code></td></tr>
+    <tr><td><code>:quit</code></td><td>Exit the program normally.</td><td><code>:exit</code>,<br><code>:q</code>, <code>:x</code></td><td></td></tr>
+    <tr><td><code>:help</code></td><td>Display the HTML help page in the browser.</td><td><code>:?</code>, <code>:h</code></td><td><code>-help</code></td></tr>
     <tr><td><code>:version</code></td><td>Display program version information.</td><td><code>:vers</code>,<br><code>:ver</code>, <code>:v</code></td><td><code>-version</code></td></tr>
     <tr><td><code>:gui</code></td><td>Switch to GUI mode</td><td><code>:g</code></td><td><code>-gui</code></td></tr>
   </tbody>
@@ -566,8 +565,7 @@ or
      in canonical form, that is, with the least common denominator.
   <p>Calc has the capability to define and use variables, which are simply named representations of values. Variable names can be
      of any length, but must start with either an underscore (<code>"_"</code>) or a letter, and may contain any combination of
-     underscores, letters, and digits. Currently, "letters" only means <code>"a"</code> to <code>"z"</code> or <code>"A"</code> to <code>"Z"</code>,
-     and digits only means <code>"0"</code> to <code>"9"</code> (in other words, only US-ASCII letters or digits).
+     underscores, letters, and digits. "Letters" mean basically any Latin alphabet character, but digits only means <code>"0"</code> to <code>"9"</code>.
      Note that loop variables (see <code>LOOP</code> statement below) follow the same rules.
      <em>Note that the predefined constant, function, and statement
      names may NOT be used as variable names.</em> The value of a variable is the value last assigned to it by
