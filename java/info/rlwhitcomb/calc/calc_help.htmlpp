@@ -1007,7 +1007,7 @@ or<br>
      <code>round(1234567.890,-3) &#x21E8; 1235000</code>.
   <p>The <code>min</code> and <code>max</code> functions do either numeric or string comparisons, depending on the type of the
      first value in the list. While the <code>sumof</code> and <code>productof</code> functions try to convert all their
-     values to numbers.
+     values to the (numeric) type of their first operand (decimals by default, or fractions in rational mode).
   <p>The <code>join</code> function is a little complicated, but still intuitive once you figure it out. With one simple value argument
      the result is the string representation of the value. With one array or object value, the result is the concatenation of the values
      within the object (the flat map of the values, that is). With one array/object value and one other value, the flat map of the values

@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.30.2', date: d'2023-04-05',
+      issues: [ 263 ],
+      comment: 'Allow "sumof" and "productof" to work correctly with complex numbers and quaternions.'
+    },
     { version: '2.30', date: d'2023-03-30',
       issues: [ 596 ],
       comment: 'Implement REPL commands as part of the grammar.'

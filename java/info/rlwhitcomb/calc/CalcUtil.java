@@ -213,6 +213,8 @@
  *	    #244: Apply separators to complex numbers now too.
  *	23-Feb-2023 (rlwhitcomb)
  *	    #244: Upgrades for Quaternions.
+ *	03-Apr-2023 (rlwhitcomb)
+ *	    #263: New conversions for complex and quaternions.
  */
 package info.rlwhitcomb.calc;
 
@@ -2556,6 +2558,14 @@ public final class CalcUtil
 		    case FRACTION:
 			nullCheck(value, ctx);
 			objectList.add(toFractionValue(visitor, value, ctx));
+			break;
+		    case COMPLEX:
+			nullCheck(value, ctx);
+			objectList.add(ComplexNumber.valueOf(value));
+			break;
+		    case QUATERNION:
+			nullCheck(value, ctx);
+			objectList.add(Quaternion.valueOf(value));
 			break;
 		    case UNCHANGED:
 			objectList.add(value);

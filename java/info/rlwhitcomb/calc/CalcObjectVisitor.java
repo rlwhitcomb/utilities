@@ -767,6 +767,8 @@
  *	    Modify "timethis" grammar to not require ugly comma before LBRACE.
  *	28-Mar-2023 (rlwhitcomb)
  *	    #596: Move pure REPL commands into the grammar, and implement here.
+ *	03-Apr-2023 (rlwhitcomb)
+ *	    #263: More work on conversions in flat maps, etc.
  */
 package info.rlwhitcomb.calc;
 
@@ -4920,8 +4922,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	 * @param ctx	The outer level context (that of the function itself) (for error reporting).
 	 * @param obj	One of the objects listed as parameters to the function, which could be arrays, maps, etc.
 	 * @param objectList	The "flat map" or list of objects we're building.
-	 * @param isString	Whether to build the value list as strings, or numeric (determined by the
-	 *			first actual value, or always {@code true} for {@code join}).
+	 * @param conv		Conversion for the result list values (determined by the first actual value, or always
+	 *			{@code true} for {@code join}).
 	 * @param forJoin	{@code true} for a "join" operation, which will not recurse into lists or maps to begin with.
 	 * @see #getFirstValue
 	 */
@@ -4929,7 +4931,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		final ParserRuleContext ctx,
 		final Object obj,
 		final List<Object> objectList,
-		final boolean isString,
+		final Conversion conv,
 		final boolean forJoin)
 	{
 	    Object value = evaluate(ctx, obj);
@@ -4944,7 +4946,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		}
 		else {
 		    for (Object listObj : array.list()) {
-			buildFlatMap(ctx, listObj, objectList, isString, forJoin);
+			buildFlatMap(ctx, listObj, objectList, conv, forJoin);
 		    }
 		}
 	    }
@@ -4956,7 +4958,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		}
 		else {
 		    for (Object mapObj : object.values()) {
-			buildFlatMap(ctx, mapObj, objectList, isString, forJoin);
+			buildFlatMap(ctx, mapObj, objectList, conv, forJoin);
 		    }
 		}
 	    }
@@ -4968,22 +4970,34 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		}
 		else {
 		    for (Object setObj : set.set()) {
-			buildFlatMap(ctx, setObj, objectList, isString, forJoin);
+			buildFlatMap(ctx, setObj, objectList, conv, forJoin);
 		    }
 		}
 	    }
-	    else if (isString) {
+	    else if (value instanceof CollectionScope) {
+		// This is an empty map or set, so nothing to do
+	    }
+	    else if (settings.rationalMode || conv == Conversion.FRACTION) {
+		objectList.add(toFractionValue(this, value, ctx));
+	    }
+	    else if (conv == Conversion.QUATERNION) {
+		objectList.add(Quaternion.valueOf(value));
+	    }
+	    else if (conv == Conversion.COMPLEX) {
+		objectList.add(ComplexNumber.valueOf(value));
+	    }
+	    else if (conv == Conversion.DECIMAL) {
+		objectList.add(toDecimalValue(this, value, settings.mc, ctx));
+	    }
+	    else if (conv == Conversion.STRING) {
 		// Note: this logic follows "getStringValue"
 		if (value instanceof String)
 		    objectList.add(value);
 		else
 		    objectList.add(value.toString());
 	    }
-	    else if (settings.rationalMode) {
-		objectList.add(toFractionValue(this, value, ctx));
-	    }
-	    else {
-		objectList.add(toDecimalValue(this, value, settings.mc, ctx));
+	    else /* UNCHANGED */ {
+		objectList.add(value);
 	    }
 	}
 
@@ -4998,12 +5012,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	private List<Object> buildFlatMap(final List<CalcParser.ExprContext> exprs, final boolean forJoin) {
 	    // Do a "peek" inside any lists or maps to get the first value
 	    CalcParser.ExprContext firstCtx = exprs.get(0);
-	    boolean isString = getFirstValue(firstCtx, evaluate(firstCtx), forJoin) instanceof String;
+	    Conversion conv = Conversion.fromValue(getFirstValue(firstCtx, evaluate(firstCtx), forJoin));
 
 	    List<Object> objects = new ArrayList<>();
 
 	    for (CalcParser.ExprContext eCtx : exprs) {
-		buildFlatMap(eCtx, evaluate(eCtx), objects, isString, forJoin);
+		buildFlatMap(eCtx, evaluate(eCtx), objects, conv, forJoin);
 	    }
 
 	    return objects;
@@ -5089,7 +5103,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    List<Object> objects = new ArrayList<>();
 
 	    for (CalcParser.ExprContext eCtx : exprs) {
-		buildFlatMap(eCtx, evaluate(eCtx), objects, true, true);
+		buildFlatMap(eCtx, evaluate(eCtx), objects, Conversion.STRING, true);
 	    }
 
 	    StringBuilder buf = new StringBuilder();
@@ -5104,7 +5118,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		// One map, list, or set => concatenate all objects in it
 		if (obj0 instanceof CollectionScope) {
 		    objects.clear();
-		    buildFlatMap(ctx, obj0, objects, true, false);
+		    buildFlatMap(ctx, obj0, objects, Conversion.STRING, false);
 		    for (Object obj : objects) {
 			buf.append(obj);
 		    }
@@ -5118,7 +5132,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		if (obj0 instanceof CollectionScope) {
 		    // One map, list, or set, plus a join expression
 		    objects.clear();
-		    buildFlatMap(ctx, obj0, objects, true, false);
+		    buildFlatMap(ctx, obj0, objects, Conversion.STRING, false);
 		    for (int i = 0; i < objects.size(); i++) {
 			if (i > 0)
 			    buf.append(obj1);
@@ -5140,7 +5154,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    Object obj = objects.get(i);
 		    if (obj instanceof Scope) {
 			List<Object> objects1 = new ArrayList<>();
-			buildFlatMap(ctx, obj, objects1, true, false);
+			buildFlatMap(ctx, obj, objects1, Conversion.STRING, false);
 			for (int j = 0; j < objects1.size(); j++) {
 			    if (j > 0)
 				buf.append(joinExpr);
@@ -6927,11 +6941,15 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	private class SumOfVisitor implements IterationVisitor
 	{
 		private BigFraction sumFrac = BigFraction.ZERO;
+		private ComplexNumber sumCmplx = C_ZERO;
+		private Quaternion sumQuat = Quaternion.ZERO;
 		private BigDecimal sum = BigDecimal.ZERO;
 		private ParserRuleContext ctx;
+		private Conversion conv;
 
-		public SumOfVisitor(final ParserRuleContext context) {
+		public SumOfVisitor(final ParserRuleContext context, final Conversion conversion) {
 		    ctx = context;
+		    conv = conversion;
 		}
 
 		@Override
@@ -6941,19 +6959,23 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 		@Override
 		public Object apply(final Object value) {
-		    if (settings.rationalMode) {
-			BigFraction frac = value instanceof BigFraction
-				? (BigFraction) value
-				: toFractionValue(CalcObjectVisitor.this, value, ctx);
-			sumFrac = sumFrac.add(frac);
-			return sumFrac;
-		    }
-		    else {
-			BigDecimal dec = value instanceof BigDecimal
-				? (BigDecimal) value
-				: toDecimalValue(CalcObjectVisitor.this, value, settings.mc, ctx);
-			sum = sum.add(dec, settings.mc);
-			return sum;
+		    switch (conv) {
+			case FRACTION:
+			    BigFraction frac = toFractionValue(CalcObjectVisitor.this, value, ctx);
+			    sumFrac = sumFrac.add(frac);
+			    return sumFrac;
+			case COMPLEX:
+			    ComplexNumber cmplx = ComplexNumber.valueOf(value);
+			    sumCmplx = sumCmplx.add(cmplx);
+			    return sumCmplx;
+			case QUATERNION:
+			    Quaternion quat = Quaternion.valueOf(value);
+			    sumQuat = sumQuat.add(quat);
+			    return sumQuat;
+			default:
+			    BigDecimal dec = toDecimalValue(CalcObjectVisitor.this, value, settings.mc, ctx);
+			    sum = sum.add(dec, settings.mc);
+			    return sum;
 		    }
 		}
 
@@ -6963,7 +6985,10 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 		    Number len = IterationVisitor.length(start, stop, step);
 
-		    if (settings.rationalMode) {
+		    // This function is only used for the "dot range" case, so there will only be
+		    // fraction / not choice, which we further divide into fraction/integer/decimal here
+		    // but no need to handle complex, or quaternion (at least for now)
+		    if (conv == Conversion.FRACTION) {
 			BigFraction fStart = BigFraction.valueOf(start);
 			BigFraction fStop  = BigFraction.valueOf(stop);
 			BigFraction fLen   = BigFraction.valueOf(len);
@@ -6992,20 +7017,30 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitSumOfExpr(CalcParser.SumOfExprContext ctx) {
-	    SumOfVisitor sumVisitor = new SumOfVisitor(ctx);
+	    SumOfVisitor sumVisitor;
+	    Conversion conv;
 	    Object sum = null;
 
 	    CalcParser.DotRangeContext dotRange = ctx.dotRange();
 	    if (dotRange == null) {
 		List<CalcParser.ExprContext> exprs = ctx.exprN().exprList().expr();
-		List<Object> objects = buildValueList(this, exprs,
-			settings.rationalMode ? Conversion.FRACTION : Conversion.DECIMAL);
+		conv = Conversion.fromValue(getFirstValue(ctx, evaluate(exprs.get(0)), false));
+		if (settings.rationalMode)
+		    conv = Conversion.FRACTION;
+		else if (conv == Conversion.STRING)
+		    conv = Conversion.DECIMAL;
+
+		List<Object> objects = buildValueList(this, exprs, conv);
+		sumVisitor = new SumOfVisitor(ctx, conv);
 
 		for (Object obj : objects) {
 		    sum = sumVisitor.apply(obj);
 		}
 	    }
 	    else {
+		conv = settings.rationalMode ? Conversion.FRACTION : Conversion.DECIMAL;
+		sumVisitor = new SumOfVisitor(ctx, conv);
+
 		sum = iterateOverDotRange(null, dotRange.expr(), dotRange.DOTS() != null, sumVisitor, false, false);
 	    }
 
@@ -7015,11 +7050,15 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	private class ProductOfVisitor implements IterationVisitor
 	{
 		private BigFraction productFrac = BigFraction.ONE;
+		private ComplexNumber productCmplx = C_ONE;
+		private Quaternion productQuat = Quaternion.ONE;
 		private BigDecimal product = BigDecimal.ONE;
 		private ParserRuleContext ctx;
+		private Conversion conv;
 
-		public ProductOfVisitor(final ParserRuleContext context) {
+		public ProductOfVisitor(final ParserRuleContext context, final Conversion conversion) {
 		    ctx = context;
+		    conv = conversion;
 		}
 
 		@Override
@@ -7029,19 +7068,23 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 		@Override
 		public Object apply(final Object value) {
-		    if (settings.rationalMode) {
-			BigFraction frac = value instanceof BigFraction
-				? (BigFraction) value
-				: toFractionValue(CalcObjectVisitor.this, value, ctx);
-			productFrac = productFrac.multiply(frac);
-			return productFrac;
-		    }
-		    else {
-			BigDecimal dec = value instanceof BigDecimal
-				? (BigDecimal) value
-				: toDecimalValue(CalcObjectVisitor.this, value, settings.mc, ctx);
-			product = product.multiply(dec, settings.mc);
-			return product;
+		    switch (conv) {
+			case FRACTION:
+			    BigFraction frac = toFractionValue(CalcObjectVisitor.this, value, ctx);
+			    productFrac = productFrac.multiply(frac);
+			    return productFrac;
+			case COMPLEX:
+			    ComplexNumber cmplx = ComplexNumber.valueOf(value);
+			    productCmplx = productCmplx.multiply(cmplx, settings.mc);
+			    return productCmplx;
+			case QUATERNION:
+			    Quaternion quat = Quaternion.valueOf(value);
+			    productQuat = productQuat.multiply(quat, settings.mc);
+			    return productQuat;
+			default:
+			    BigDecimal dec = toDecimalValue(CalcObjectVisitor.this, value, settings.mc, ctx);
+			    product = product.multiply(dec, settings.mc);
+			    return product;
 		    }
 		}
 
@@ -7080,20 +7123,30 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitProductOfExpr(CalcParser.ProductOfExprContext ctx) {
-	    ProductOfVisitor productVisitor = new ProductOfVisitor(ctx);
+	    ProductOfVisitor productVisitor;
+	    Conversion conv;
 	    Object product = null;
 
 	    CalcParser.DotRangeContext dotRange = ctx.dotRange();
 	    if (dotRange == null) {
 		List<CalcParser.ExprContext> exprs = ctx.exprN().exprList().expr();
-		List<Object> objects = buildValueList(this, exprs,
-			settings.rationalMode ? Conversion.FRACTION : Conversion.DECIMAL);
+		conv = Conversion.fromValue(getFirstValue(ctx, evaluate(exprs.get(0)), false));
+		if (settings.rationalMode)
+		    conv = Conversion.FRACTION;
+		else if (conv == Conversion.STRING)
+		    conv = Conversion.DECIMAL;
+
+		List<Object> objects = buildValueList(this, exprs, conv);
+		productVisitor = new ProductOfVisitor(ctx, conv);
 
 		for (Object obj : objects) {
 		    product = productVisitor.apply(obj);
 		}
 	    }
 	    else {
+		conv = settings.rationalMode ? Conversion.FRACTION : Conversion.DECIMAL;
+		productVisitor = new ProductOfVisitor(ctx, conv);
+
 		product = iterateOverDotRange(null, dotRange.expr(), dotRange.DOTS() != null, productVisitor, false, false);
 	    }
 
@@ -7102,9 +7155,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitFactorialExpr(CalcParser.FactorialExprContext ctx) {
-	    BigDecimal e = getDecimalValue(ctx.expr());
+	    BigDecimal value = getDecimalValue(ctx.expr());
 
-	    return MathUtil.factorial(e, settings.mc);
+	    return MathUtil.factorial(value, settings.mc);
 	}
 
 	@Override

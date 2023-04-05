@@ -26,8 +26,13 @@
  * History:
  *  28-May-22 rlw  ---	Refactor into a separate file.
  *  10-Jan-23 rlw #558:	Add QUATERNION.
+ *  03-Apr-23 rlw #263:	New conversion function for "buildFlatMap".
  */
 package info.rlwhitcomb.calc;
+
+import info.rlwhitcomb.math.BigFraction;
+import info.rlwhitcomb.math.ComplexNumber;
+import info.rlwhitcomb.math.Quaternion;
 
 
 /**
@@ -46,5 +51,27 @@ public enum Conversion
 	/** Convert to quaternions. */
 	QUATERNION,
 	/** Leave values as they are (for "sort"). */
-	UNCHANGED
+	UNCHANGED;
+
+
+	/**
+	 * Find a proper conversion given an object (from its type).
+	 *
+	 * @param obj	Typically the first object in a map, set, or list.
+	 * @return	A simplified idea of the conversion to use for the
+	 *		whole object based on the first value type.
+	 */
+	public static Conversion fromValue(final Object obj) {
+	    if (obj instanceof Quaternion)
+		return QUATERNION;
+	    if (obj instanceof ComplexNumber)
+		return COMPLEX;
+	    if (obj instanceof BigFraction)
+		return FRACTION;
+	    if (obj instanceof Number)
+		return DECIMAL;
+
+	    return STRING;
+	}
+
 }
