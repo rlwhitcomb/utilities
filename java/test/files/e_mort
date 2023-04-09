@@ -25,7 +25,7 @@
 #   r = monthly interest as a decimal value (% / 100 / 12)
 #   n = number of months (years * 12)
 #
-:quiet on
+$quiet on
 ctx = { }
 
 define PMT(P, R, N) = {
@@ -47,9 +47,9 @@ define PMT(P, R, N) = {
 # regardless of the number of whole digits in the result; so "0" will round
 # to a whole dollar, "2" rounds to pennies.
 M = PMT(P, R, N)
-:quiet pop
-:results on
+$quiet pop
+$results on
 ctx
-:echo `Full monthly payment is ${M@2,$}`
-:echo `Monthly payment in whole dollars is ${M@0,$}`
-:results pop
+$echo `Full monthly payment is ${M@2,$}`
+$echo `Monthly payment in whole dollars is ${M@0,$}`
+$results pop

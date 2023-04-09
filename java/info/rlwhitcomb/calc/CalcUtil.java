@@ -215,6 +215,8 @@
  *	    #244: Upgrades for Quaternions.
  *	03-Apr-2023 (rlwhitcomb)
  *	    #263: New conversions for complex and quaternions.
+ *	07-Apr-2023 (rlwhitcomb)
+ *	    #603: Change directive char to "$" to eliminate amibiguity.
  */
 package info.rlwhitcomb.calc;
 
@@ -265,7 +267,7 @@ public final class CalcUtil
 	private static final String DEFAULT_INCREMENT = "  ";
 
 	/** Version identifier for library (saved) files. */
-	private static final String LIB_FORMAT = ":Requires '%1$s', Base '%2$s'";
+	private static final String LIB_FORMAT = "$Requires '%1$s', Base '%2$s'";
 
 	/** Name of the scripts properties file (see also "makeScripts.calc" where it is generated). */
 	public static final String SCRIPT_PROPERTIES_FILE = "calcscripts.properties";
@@ -2341,7 +2343,7 @@ public final class CalcUtil
 			throws IOException
 	{
 	    try (BufferedWriter writer = Files.newBufferedWriter(path, charset == null ? DEFAULT_CHARSET : charset)) {
-		// Write out the current version as a ":requires" directive
+		// Write out the current version as a "$requires" directive
 		SemanticVersion prog_version = Environment.programVersion();
 		SemanticVersion prog_base = Environment.implementationVersion();
 		writer.write(String.format(LIB_FORMAT, prog_version.toPreReleaseString(), prog_base.toPreReleaseString()));

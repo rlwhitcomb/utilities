@@ -5,8 +5,8 @@
 # Test variables defined on the command line
 verbose
 
-:Clear
-:Variables
+$Clear
+$Variables
 
 define oddness={
    Case value%2 Of
@@ -92,19 +92,19 @@ def srt(a1, a2, f) = { f(a1, a2) > 0 ? a1 : a2 }
 #
 define precision_to_directive = {
   case settings.precision of {
-    0 : ':unlimited',
+    0 : '$unlimited',
     1,2,3,4,5,6,
     8 ... 15,1,
-    17 .. 33 : `:dec ${settings.precision}`,
-    7 : ':float',
-    16: ':double',
-    34: ':default',
-    default: `:decimal(${settings.precision})`
+    17 .. 33 : `$$dec ${settings.precision}`,
+    7 : '$float',
+    16: '$double',
+    34: '$default',
+    default: `$$decimal(${settings.precision})`
   }
 }
 
 old_precision = settings.precision
-loop over 0..40 { :dec __; precision_to_directive }
+loop over 0..40 { $dec __; precision_to_directive }
 settings.precision = old_precision
 precision_to_directive
 
@@ -218,7 +218,7 @@ $5
 # Solutions taken from https://en.wikipedia.org/wiki/Sums_of_three_cubes
 # and here: https://www.uni-math.gwdg.de/jahnel/Arbeiten/Liste/threecubes_20070419.txt
 define sum_of_cubes(sum, x, y, z) = { x**3 + y**3 + z**3 == sum }
-:dec 400 {
+$dec 400 {
 sum_of_cubes(1, 9, 10, −12)
 sum_of_cubes(2, 1214928, 3480205, -3528875)
 sum_of_cubes(2, 37404275617, -25282289375, -33071554596)
@@ -312,7 +312,7 @@ define collatz(n) = {
    steps
 }
 
-:results on {
+$results on {
 loop over 1..200 `collatz($__) -> ${collatz(__)}`@q
 }
 

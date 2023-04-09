@@ -1,6 +1,6 @@
-:dec 100
+$dec 100
 x = 2
-:quiet on
+$quiet on
 #
 # Newton-Raphson method of computing square roots
 #
@@ -18,11 +18,11 @@ loop 50 { trial_root * trial_root > x ? trial_root /= 2 : trial_root }
 result = trial_root
 loop i in 50 { result = (result + x / result) / 2 }
 
-:quiet off
-:result on
+$quiet off
+$result on
 `sqrt($x)/2 = ${result/2}`
 `sin(pi/4) = ${sin(pi/4)}`
 
-:result off
-:quiet off
+$result off
+$quiet off
 

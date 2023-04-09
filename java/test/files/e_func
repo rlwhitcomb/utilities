@@ -73,13 +73,13 @@ define ifmany(value) = {
     value
 }
 
-:results on {
+$results on {
   loop over 0..4,0.5 {
     `$__ = ${ifmany(__)}`
   }
 }
 define type(value) = `${value} = ${typeof(value)}`
-:results on {
+$results on {
 loop over 0..4,0.5 type(__)
 }
 
@@ -102,7 +102,7 @@ f(mul, 3, 4)
 pp = 5
 def func(pp) = { pp }
 func(21)
-:results on {
+$results on {
 `var pp before loop = $pp` @q
 loop pp over 2 { `param pp in loop = $pp` @q }
 `var pp after loop = $pp` @q
@@ -120,9 +120,9 @@ valueFunc(3)
 calls
 
 def n1(n) = {
-   if n == 2 { :echo callers() }
+   if n == 2 { $echo callers() }
    if n == 0 { 0 }
-   else if n == 1 { :echo callers(1); 1 }
+   else if n == 1 { $echo callers(1); 1 }
    else { n + n1(n - 1) }
 }
 

@@ -1,10 +1,10 @@
-:quiet on
-:resultsonly off
+$quiet on
+$resultsonly off
 start = 11!
 end = start + tenpow(5) - 1
 primes = []
-:echo `Running primality tests on ${(end-start)+1} values from $start to $end...`
+$echo `Running primality tests on ${(end-start)+1} values from $start to $end...`
 loop _i in start .. end { if isprime(_i) { primes[length(primes)] = _i } }
-:quiet pop
+$quiet pop
 length(primes); primes;
 

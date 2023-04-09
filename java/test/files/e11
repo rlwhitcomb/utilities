@@ -7,11 +7,11 @@
 # Then the (double) round-trip test can be done with:
 #    c -q -nocol e11 | lists -s | c -result -nocol @ | c @
 #
-:resultsonly on
+$resultsonly on
 
-:clear [i, j, value, array, SIZE ]
-:dec 50
-:quiet on
+$clear [i, j, value, array, SIZE ]
+$dec 50
+$quiet on
 value = 1
 array = []
 SIZE = 5
@@ -20,6 +20,6 @@ loop _i in SIZE {
       array[_i-1][_j-1] = value++!
    }
 }
-:quiet off
+$quiet off
 { "factorials": array }@j
 

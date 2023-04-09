@@ -7,7 +7,7 @@
 # https://www.thirteen.org/edonline/adulted/lessons/stuff/lp46_fracword.pdf
 # https://www.hackmath.net/en/calculator/complex-number
 #
-:rational on
+$rational on
 
 # The "frac" function
 frac('1 \u215c')
@@ -44,7 +44,7 @@ F'3,-3,-8'@F
 7/15 - 8/35 + 9/21
 5/49 + 3/21 - 6/25
 
-:echo
+$echo
 
 (7/8) ÷ (2/9)@F
 (2/3) ∕ (4/7)
@@ -52,34 +52,34 @@ F'3,-3,-8'@F
 (10/11) ÷ (9/4)
 (5/6) / (7/10)
 
-:echo
-:echo '#1 Jessica bought 8/9 of a pound of chocolates and ate 1/3 of a pound. How much was left?'
+$echo
+$echo '#1 Jessica bought 8/9 of a pound of chocolates and ate 1/3 of a pound. How much was left?'
 `${(8/9) - (1/3)} pound`
-:echo '#2 Tom bought a board that was 7/8 of a yard long. He cut off 1/2 of a yard. How much was left?'
+$echo '#2 Tom bought a board that was 7/8 of a yard long. He cut off 1/2 of a yard. How much was left?'
 `${(7/8) - (1/2)} of a yard`
-:echo '#3 Sam rode his bike 2/5 of a mile and walked another 3/4 of a mile. How far did he travel?'
+$echo '#3 Sam rode his bike 2/5 of a mile and walked another 3/4 of a mile. How far did he travel?'
 `${(2/5) + (3/4)@F} miles`
-:echo '#4 Sally walked 3/4 of a mile before lunch and 1/2 of a mile after lunch. How far did she walk in all?'
+$echo '#4 Sally walked 3/4 of a mile before lunch and 1/2 of a mile after lunch. How far did she walk in all?'
 `${3/4 + 1/2@F} miles`
-:echo '#5 Don bought 3/4 of a pound of jellybeans and 5/8 pound of gummy bears. How much candy did he buy?'
+$echo '#5 Don bought 3/4 of a pound of jellybeans and 5/8 pound of gummy bears. How much candy did he buy?'
 `${3/4 + 5/8@F} pounds`
-:echo '#6 The track is 3/5 of a mile long. If Tyrone jogged around it twice, how far did he run?'
+$echo '#6 The track is 3/5 of a mile long. If Tyrone jogged around it twice, how far did he run?'
 `${(3/5) * 2@F} miles`
-:echo '#7 Which apple weighs more, one that weighs 2/3 of a pound or one that weighs 5/6 of a pound?'
+$echo '#7 Which apple weighs more, one that weighs 2/3 of a pound or one that weighs 5/6 of a pound?'
 `${2/3 > 5/6 ? "apple 1" : "apple 2"} weighs more`
-:echo '#8 Stanley ordered two pizzas cut into eighths. If he ate 5/8 of a pizza, how much was left?'
+$echo '#8 Stanley ordered two pizzas cut into eighths. If he ate 5/8 of a pizza, how much was left?'
 `${2 * (8/8) - 5/8@F} pizzas`
-:echo '#9 Sandra bought 2 3⁄4 yards of red fabric and 1 1⁄4 of blue. How much cloth did she buy in all?'
+$echo '#9 Sandra bought 2 3⁄4 yards of red fabric and 1 1⁄4 of blue. How much cloth did she buy in all?'
 `${frac('2 3/4') + frac('1 1/4')@F} yards`
-:echo '#10 An equilateral triangle measures 3 1⁄2 inches on one side. What is the perimeter of the triangle?'
+$echo '#10 An equilateral triangle measures 3 1⁄2 inches on one side. What is the perimeter of the triangle?'
 `${f'3 1/2' * 3@F} inches`
-:echo
+$echo
 
 dec(f'3,7/8')
 dec(5/14)
 dec("-14.67583")
 
-:rational pop
+$rational pop
 
 #
 # Complex Numbers
@@ -177,7 +177,7 @@ li1 = cast(ca1, "array")
 ca1 === complex(li1)
 
 cb1 = complex('2/3+5/6i')
-:rational on { cb2 = (3/4, 7/9) }
+$rational on { cb2 = (3/4, 7/9) }
 cb1 + cb2
 cb3 = (frac(1,2), frac(7,8))
 bf1 = cb1/cb3

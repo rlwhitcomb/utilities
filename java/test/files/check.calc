@@ -1,6 +1,6 @@
-:requires '2.12.0-alpha'
+$requires '2.12.0-alpha'
 
-:quiet on {
+$quiet on {
 define readJSON(f) = { eval(read(f)) }
 
 oldForm = readJSON($0)
@@ -13,12 +13,12 @@ define newKey(prefix, key) = {
 define check(prefix, oldValue, newValue) = {
     oldType = typeof(oldValue)
     newType = typeof(newValue)
-    if oldType <> newType { :echo `Key '$prefix': type mismatch: old=$oldType, new=$newType` }
+    if oldType <> newType { $echo `Key '$prefix': type mismatch: old=$oldType, new=$newType` }
     else {
         case oldType of {
             "array": checkArray(prefix, oldValue, newValue),
             "object": checkObject(prefix, oldValue, newValue),
-            default: if oldValue <> newValue { :echo `Key '$prefix': old '$oldValue' != new '$newValue'` }
+            default: if oldValue <> newValue { $echo `Key '$prefix': old '$oldValue' != new '$newValue'` }
         }
     }
 }

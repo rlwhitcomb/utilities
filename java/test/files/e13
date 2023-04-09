@@ -1,6 +1,6 @@
 # Tests to see if the loop value for "cbrt" is enough for large values
 
-:dec 200
+$dec 200
 a = []
 _i_ = 0
 loop _i in 10 .. 100, 10 { a[_i_++] = _i! }

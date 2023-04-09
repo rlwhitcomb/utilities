@@ -1,5 +1,5 @@
-:dec 50
-:result on
+$dec 50
+$result on
 loop _i in 0.1 .. pi/2-0.001, 0.1 { `tan($_i) = ${tan _i}`@q }
-:default
-:result pop
+$default
+$result pop

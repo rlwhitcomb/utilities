@@ -1,15 +1,15 @@
 #
 # Testing new looping construct
 #
-:echo "Tests of the new LOOP construct"
-:echo
+$echo "Tests of the new LOOP construct"
+$echo
 
-:clear [ value, array, SIZE ]
-:dec 50
+$clear [ value, array, SIZE ]
+$dec 50
 value = 1
 array = []
 SIZE = 5
-:resultsonly on {
+$resultsonly on {
   loop i in SIZE {
     loop j in SIZE {
       array[i-1][j-1] = value++!
@@ -20,7 +20,7 @@ array@j
 
 primes = []
 start = 2; end = 102;
-:quiet on {
+$quiet on {
   loop _i_ in start .. end { isprime(_i_) ? primes[length(primes)] = _i_ : "" }
 }
 length(primes); primes;
@@ -33,11 +33,11 @@ loop i in -2 .. -10 { i }
 
 loop ( 'This', 'is', 'a', 'test', 'of', 'the', 'Emergency', "Broadcast", "System" ) { __ }
 
-:clear map
+$clear map
 map = { a:1, b:2, c:3, d:17, f:42 }
 loop _i in map { `map.$_i = ${map[_i]}` }
 
-:clear list
+$clear list
 list = [ 'Once', 'upon', 'a', 'time', 'there', 'lived', 'a', 'princess', '...' ]
 loop i in list {i}
 
@@ -55,7 +55,7 @@ loop x over 6..-6,-1 { `$x: ${tn(x)}` }
 define tm(d) = { case d of -2.0 .. -2.5, -0.1: 'minus 2.5', 3.1 .. 2.8, -0.1: 'around three', default: 'other' }
 loop x over -3.0 .. 3.3, 0.1 { `$x: ${tm(x)}` }
 
-:quiet on {
+$quiet on {
 define test(value) = {
    if value < 0 "negative"
    else if value == 0 "zero"
@@ -65,15 +65,15 @@ define test(value) = {
 }
 }
 
-:resultsonly on { loop v over -2 .. 5 `$v -> ${test(v)}`@q }
+$resultsonly on { loop v over -2 .. 5 `$v -> ${test(v)}`@q }
 
-loop p ∈ 10...40 { :dec p; pi }
-:default
+loop p ∈ 10...40 { $dec p; pi }
+$default
 
-:echo "Bernoulli Numbers 0 to 60"
-:resultonly on {
-  :rational on {
-    :quotestrings off {
+$echo "Bernoulli Numbers 0 to 60"
+$resultonly on {
+  $rational on {
+    $quotestrings off {
 `B(0) = ${bn 0}`
 `B(1) = ${bn 1}`
 loop b in 2 .. 60, 2 { `B($b) = ${bn b}` }
@@ -102,7 +102,7 @@ const START = 3752
 var num = START
 var iterations = 0
 var k0, k1, k2, num1, num2
-:separators off {
+$separators off {
 while num != KAPREKAR {
    k0 = chars(@@num)
    k1 = sort(k0)
@@ -112,9 +112,9 @@ while num != KAPREKAR {
    num = num1 > num2 ? num1 - num2 : num2 - num1
    ++iterations
 }
-:echo `Starting from $START, sequence converged to Kaprekar's constant ($KAPREKAR) in $iterations iterations.`
+$echo `Starting from $START, sequence converged to Kaprekar's constant ($KAPREKAR) in $iterations iterations.`
 }
 
-:echo
-:echo "Done with LOOP tests."
+$echo
+$echo "Done with LOOP tests."
 

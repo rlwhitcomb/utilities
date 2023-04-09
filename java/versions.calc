@@ -1,16 +1,16 @@
-:quiet on { versions = eval(read('VersionRef.json')) }
-:resultsonly on {
-    :quotestrings off
+$quiet on { versions = eval(read('VersionRef.json')) }
+$resultsonly on {
+    $quotestrings off
     '============================================='
-    :echo '           Calc Versions Reference'
-    :echo ` Current ${version}`
+    $echo '           Calc Versions Reference'
+    $echo ` Current ${version}`
     '============================================='
     ''
-    :echo 'Version  Comment'
-    '-------  ----------------------------------------------'
+    $echo 'Version  Comment'
+    '-------  --------------------------------------------------------'
     loop v over versions {
-        if v.base { :echo `${CYAN_BRIGHT}B${v.base@6s}$RESET  ${v.comment}`   }
-        else      { :echo `${YELLOW_BRIGHT}${v.version@7s}$RESET  ${v.comment}` }
+        if v.base { $echo `${CYAN_BRIGHT}B${v.base@6s}$RESET  ${v.comment}`   }
+        else      { $echo `${YELLOW_BRIGHT}${v.version@7s}$RESET  ${v.comment}` }
     }
-    '-------  ----------------------------------------------'
+    '-------  --------------------------------------------------------'
 }

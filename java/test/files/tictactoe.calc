@@ -6,7 +6,7 @@
 // Winning strategies from here:
 // http://www.wikihow.com/Win-at-Tic-Tac-Toe
 //
-:quiet on
+$quiet on
 
 /* The values that correspond to each side. */
 const X = -1
@@ -118,12 +118,12 @@ define displayBoard() = {
 /*
  * Make the desired move for the given color.
  */
-define makeMove(_index, color) = {
-  board[(_index - 1) \ 3][(_index - 1) % 3] = color;
-  if color === userColor {
-    :echo `You have chosen space $_index`
+define makeMove(_index, _color) = {
+  board[(_index - 1) \ 3][(_index - 1) % 3] = _color;
+  if _color === userColor {
+    $echo `You have chosen space $_index`
   } else {
-    :echo `Choosing space $_index`
+    $echo `Choosing space $_index`
   }
   displayBoard()@q
 }
@@ -150,31 +150,31 @@ define sumDiagonal(which) = {
  * Return 1 if the color at the given position matches, or 0 if it does not.
  * Called by the various "count" functions.
  */
-define countValue(row, col, color) = { board[row][col] === color ? 1 : 0 }
+define countValue(row, col, _color) = { board[row][col] === _color ? 1 : 0 }
 
 /*
  * Return count of the given color in the given row.
  */
-define countInRow(row, color) = {
+define countInRow(row, _color) = {
   count = 0
-  loop col within 3 { count += countValue(row, col, color) }
+  loop col within 3 { count += countValue(row, col, _color) }
 }
 
 /*
  * Return count of the given color in the given column.
  */
-define countInCol(col, color) = {
+define countInCol(col, _color) = {
   count = 0
-  loop row within 3 { count += countValue(row, col, color) }
+  loop row within 3 { count += countValue(row, col, _color) }
 }
 
 /*
  * Count the number of the given color in the given diagonal
  * (0 = NW to SE, 1 = SW to NE).
  */
-define countInDiag(which, color) = {
+define countInDiag(which, _color) = {
   count = 0
-  loop diag over diagonals[which] { if color == valueAt(diag) { count++ } }
+  loop diag over diagonals[which] { if _color == valueAt(diag) { count++ } }
   count
 }
 
@@ -189,8 +189,8 @@ define checkWinner(sum) = {
 /*
  * Decide if any of the corners are filled with the given color.
  */
-define cornerIsFilled(color) = {
-  board[0][0] == color || board[0][2] == color || board[2][0] == color || board[2][2] == color
+define cornerIsFilled(_color) = {
+  board[0][0] == _color || board[0][2] == _color || board[2][0] == _color || board[2][2] == _color
 }
 
 /*
@@ -216,8 +216,8 @@ define getRandomCorner() = { random >= 0.5 ? 2 : 0 }
 /*
  * Fill a random cornder with the given color piece.
  */
-define selectRandomCorner(color) = {
-  makeMove(toIndex(getRandomCorner(), getRandomCorner()), color)
+define selectRandomCorner(_color) = {
+  makeMove(toIndex(getRandomCorner(), getRandomCorner()), _color)
 }
 
 /*
@@ -229,8 +229,8 @@ define acceptUserMove() = {
     // need "input" function to integer "move" (range 1-9)
     // input 'Which square do you want?', move:"integer"(1-9)
     if valueAt(move) != EMPTY {
-      :echo `Position $move is already taken. Choose another.`
-      :echo
+      $echo `Position $move is already taken. Choose another.`
+      $echo
     } else {
       makeMove(move, userColor)
     }
@@ -241,8 +241,8 @@ define acceptUserMove() = {
  * Find the column (0, 1, or 2) in the given row where there are two
  * of the given color and none of the other color. Or return -1 if not found.
  */
-define findRowMove(row, color, otherColor) = {
-  if countInRow(row, color) == 2 && countInRow(row, otherColor) == 0 {
+define findRowMove(row, _color, otherColor) = {
+  if countInRow(row, _color) == 2 && countInRow(row, otherColor) == 0 {
     loop col within 3 { if board[row][col] == EMPTY { leave col } }
   }
   -1
@@ -252,8 +252,8 @@ define findRowMove(row, color, otherColor) = {
  * Find the row (0, 1, or 2) in the given column where there are two
  * of the given color and none of the other color. Or return -1 if not found.
  */
-define findColMove(col, color, otherColor) = {
-  if countInCol(col, color) == 2 && countInCol(col, otherColor) == 0 {
+define findColMove(col, _color, otherColor) = {
+  if countInCol(col, _color) == 2 && countInCol(col, otherColor) == 0 {
     loop row within 3 { if board[row][col] == EMPTY { leave row } }
   }
   -1
@@ -263,8 +263,8 @@ define findColMove(col, color, otherColor) = {
  * Find a needed diagonal block and return the 1-9 index of the spot
  * or return 0 if not needed.
  */
-define findDiagMove(which, color, otherColor) = {
-  if countInDiag(which, color) == 2 && countInDiag(which, otherColor) == 0 {
+define findDiagMove(which, _color, otherColor) = {
+  if countInDiag(which, _color) == 2 && countInDiag(which, otherColor) == 0 {
     loop diag over diagonals[which] { if valueAt(diag) == EMPTY { leave diag } }
   }
   0
@@ -276,20 +276,20 @@ define findDiagMove(which, color, otherColor) = {
  * so the user won't win.
  * Returns 0 for none.
  */
-define findNecessaryMove(color, otherColor) = {
+define findNecessaryMove(_color, otherColor) = {
   // Check rows
   loop row within 3 {
-    col = findRowMove(row, color, otherColor)
+    col = findRowMove(row, _color, otherColor)
     if col >= 0 { leave toIndex(row, col) }
   }
   // Check columns
   loop col within 3 {
-    row = findColMove(col, color, otherColor)
+    row = findColMove(col, _color, otherColor)
     if row >= 0 { leave toIndex(row, col) }
   }
   // Check diagonals
   loop diag within 2 {
-    ix = findDiagMove(diag, color, otherColor)
+    ix = findDiagMove(diag, _color, otherColor)
     if ix > 0 { leave ix }
   }
   0
@@ -340,7 +340,7 @@ define pickComputerMove() = {
     }
   }
 
-:echo 'No code for this situation!'
+$echo 'No code for this situation!'
 
   displayBoard() @q
 }
@@ -363,26 +363,26 @@ define conclusion = {
   }
 }
 
-:quiet pop
-:resultsonly on
+$quiet pop
+$resultsonly on
 displayBoard()@q
 
 /*
  * Demonstration - enable with "-define demo=true" or "-- demo --"
  */
 if demo || ($0 != null && matches($0, '[dD][eE][mM][oO]')) {
-  :echo '*** Start of Demo ***'
-  :echo 'Set up two moves'
-  :quiet on
+  $echo '*** Start of Demo ***'
+  $echo 'Set up two moves'
+  $quiet on
   board[1][0] = X
   board[1][1] = O
-  :quiet pop
+  $quiet pop
   displayBoard()@q
-  :echo 'Testing some of the support functions used for game play...'
+  $echo 'Testing some of the support functions used for game play...'
   `Count of 'X' in column 0 = ${countInCol(0, X)}` @q
   `Count of 'O' in row 1 = ${countInRow(1, O)}` @q
   `Count of 'O' in top-left to bottom-right = ${countInDiag(0, O)}` @q
   `Game is over? ${gameIsOver()}` @q
   conclusion() @q
-  :echo '*** End of Demo ***'
+  $echo '*** End of Demo ***'
 }

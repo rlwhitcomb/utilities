@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.31.0', date: d'2023-04-07',
+      issues: [ 603 ],
+      comment: 'Change directives to use "$dir" instead of ":dir" form.'
+    },
     { version: '2.30.2', date: d'2023-04-05',
       issues: [ 263 ],
       comment: 'Allow "sumof" and "productof" to work correctly with complex numbers and quaternions.'

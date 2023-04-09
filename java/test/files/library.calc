@@ -1,5 +1,5 @@
-:Require '2.14.80-alpha'
-:Requires '2.14.80-alpha', Base '1.9.15-alpha'
+$Require '2.31.00-alpha' // Directives in "$dir" form
+$Requires '2.31.00-alpha', Base '1.9.15-alpha'
 // The versions above must conform to the latest values in "version.properties" and "build.properties"
 
 /*
@@ -652,7 +652,7 @@ define zeta_2n(_2n) = { ((-1)**(_2n / 2 + 1) * Bn(_2n) * (2 * pi) ** _2n) / (2 *
 define Tn(k) = {
   var _2k2 = 2*k + 2
   var _2_2k2 = 2 ** _2k2
-  :rational on {
+  $rational on {
     var _fact = Bn(_2k2) / _2k2
     var _result = _2_2k2 * (_2_2k2 - 1) * _fact
   }

@@ -196,7 +196,7 @@ h2 {
         <li>Simple file reading and writing with powerful string matching functions make writing text transformation programs very easy.</li>
         <li>The ability to do calculations straight from the command line, from a text file, in a convenient REPL mode, or in a GUI window.</li>
         <li>Data or scripts can be read from the standard input channel, and values and results can be written to the standard output channel, so Calc can be used as a filter in a longer chain of batch processing.</li>
-        <li>The ability to define libraries of functions available using the "<code>-library</code>" command line option or the "<code>:include</code>" directive.</li>
+        <li>The ability to define libraries of functions available using the "<code>-library</code>" command line option or the "<code>$include</code>" directive.</li>
         <li>Calculations can be edited (using backspace, etc.) to reduce the chance of keyboard errors.</li>
         <li>Looping and conditional statements to do pretty much any kind of calculation.</li>
         <li>Therefore, the language is <a href="https://en.wikipedia.org/wiki/Turing_completeness">&ldquo;Turing Complete&rdquo;</a>.</li>
@@ -246,7 +246,7 @@ h2 {
   <p>Also, if the input argument looks like <code>@<i>file_name</i></code> the <code>@</code> is discarded and the <i>file_name</i> is read.
   <p>Files are found by first trying to locate the file just as it is named. If not found, the latest input directory is used as a prefix
      (either the directory of the last file found, or the value of <code>-inputdir</code> if set). This same process is used anytime a file is read
-     (such as with <code>:include</code>, or from the command line).
+     (such as with <code>$include</code>, or from the command line).
   <p>If a file name is given without any extension (such as <code>e_trig</code>) and the file cannot be found via the process just described, then a series
      of default file name extensions are appended to the bare name to try to find it. These extensions are: <code>".calc"</code>, <code>".expr"</code>,
      <code>".clc"</code>, <code>".xpr"</code>, <code>".ca"</code>, and <code>".ex"</code> (in that order). If no file is found using the input plus these
@@ -254,7 +254,7 @@ h2 {
      the supposed file name(s) are treated as if they were a set of expressions to evaluate.
   <p>When Calc tries to evaluate an expression from a file or given on the command line and any kind of error is encountered, the
      process exit code will be set to a value from 95 to 99 depending on the type of error (99 = parsing error, 98 = execution
-     error, 97 = index or state exception, 96 = I/O error, 95 = ":assert" failure). The <code>leave</code> <i>expr</i> statement can also be used
+     error, 97 = index or state exception, 96 = I/O error, 95 = "$assert" failure). The <code>leave</code> <i>expr</i> statement can also be used
      outside of a loop or function to set a custom exit code if desired (in the range of 0 to 255).
 </div>
 <a class="top-link" href="#topofpage">Top</a>
@@ -296,35 +296,35 @@ h2 {
     <tr><td><code>-intro</code></td><td>Print the introductory message in REPL mode <i>(default)</i></td><td><code>-int</code>, <code>-i</code></td><td></td></tr>
     <tr><td><code>-gui</code></td><td>Start immediately in GUI mode</td><td><code>-g</code></td><td></td></tr>
     <tr><td><code>-console</code></td><td>Start instead in console mode <i>(default)</i></td><td><code>-cons</code>, <code>-con</code>, <code>-c</code></td><td></td></tr>
-    <tr><td><code>-debug</code></td><td>Display a debug printout of the syntax tree for every input</td><td><code>-deb</code>, <code>-d</code></td><td><code>:debug on</code></td></tr>
-    <tr><td><code>-nodebug</code></td><td>Don't display the syntax tree for debugging <i>(default)</i></td><td><code>-nodeb</code>, <code>-no</code></td><td><code>:debug off</code></td></tr>
-    <tr><td><code>-colors</code></td><td>Use coloring (on the console) for results and messages <i>(default)</i></td><td><code>-color</code>, <code>-col</code></td><td><code>:colors on</code></td></tr>
-    <tr><td><code>-nocolors</code></td><td>Do not use coloring in the console</td><td><code>-nocolor</code>, <code>-nocol</code>, <code>-noc</code></td><td><code>:colors off</code></td></tr>
+    <tr><td><code>-debug</code></td><td>Display a debug printout of the syntax tree for every input</td><td><code>-deb</code>, <code>-d</code></td><td><code>$debug on</code></td></tr>
+    <tr><td><code>-nodebug</code></td><td>Don't display the syntax tree for debugging <i>(default)</i></td><td><code>-nodeb</code>, <code>-no</code></td><td><code>$debug off</code></td></tr>
+    <tr><td><code>-colors</code></td><td>Use coloring (on the console) for results and messages <i>(default)</i></td><td><code>-color</code>, <code>-col</code></td><td><code>$colors on</code></td></tr>
+    <tr><td><code>-nocolors</code></td><td>Do not use coloring in the console</td><td><code>-nocolor</code>, <code>-nocol</code>, <code>-noc</code></td><td><code>$colors off</code></td></tr>
     <tr><td><code>-darkbackgrounds</code></td><td>Use colors suitable for a dark console background<br><i>(default for Windows)</i></td><td><code>-darkbackground</code>, <code>-darkback</code>,<br><code>-darkbg</code>, <code>-dark</code>, <code>-dk</code></td><td></td></tr>
     <tr><td><code>-lightbackgrounds</code></td><td>Use colors suitable for a light (white) console background<br><i>(default for non-Windows platforms)</i></td><td><code>-lightbackground</code>,<br><code>-lightback</code>, <code>-lightbg</code>,<br><code>-light</code>, <code>-lt</code></td><td></td></tr>
-    <tr><td><code>-timing</code></td><td>Display timing after each input</td><td><code>-time</code>, <code>-t</code></td><td><code>:timing on</code></td></tr>
-    <tr><td><code>-notiming</code></td><td>Do not display timings <i>(default)</i></td><td><code>-notime</code>, <code>-not</code></td><td><code>:timing off</code></td></tr>
-    <tr><td><code>-resultsonly</code></td><td>Do not display the input expression on output,<br>but only the results</td><td><code>-resultonly</code>, <code>-results</code>,<br><code>-result</code>, <code>-res</code>, <code>-r</code></td><td><code>:resultsonly on</code></td></tr>
-    <tr><td><code>-expressions</code></td><td>Display both expressions and results</td><td><code>-expression</code>, <code>-express</code>,<br><code>-exprs</code>, <code>-expr</code>, <code>-exp</code>, or <code>-ex</code></td><td><code>:resultsonly off</code></td></tr>
-    <tr><td><code>-quiet</code></td><td>Do not display anything<br>(suitable for behind-the-scenes calculations)</td><td><code>-q</code></td><td><code>:quiet on</code>/<code>off</code></td></tr>
-    <tr><td><code>-silence</code></td><td>Do not display directives</td><td><code>-silencedirectives</code>,<br><code>-silentdirectives</code>,<br><code>-silencedir</code>, <code>-silentdir</code>,<br><code>-silent</code></td><td><code>:silence on</code></td></tr>
-    <tr><td><code>-display</code></td><td>Display results of directives</td><td><code>-displaydirectives</code>,<br><code>-displaydir</code></td><td><code>:silence off</code></td></tr>
-    <tr><td><code>-rational</code></td><td>Do all possible calculations in fraction mode,<br>that is as a ratio of natural numbers<br>(as in <code>1/3</code> instead of <code>0.3333333333333333</code>)</td><td><code>-ration</code>, <code>-rat</code></td><td><code>:rational on</code></td></tr>
-    <tr><td><code>-decimal</code></td><td>Do all calculations as decimal values <i>(default)</i></td><td><code>-dec</code></td><td><code>:rational off</code></td></tr>
-    <tr><td><code>-separators</code></td><td>Display all numeric values with thousands separators</td><td><code>-separator</code>, <code>-seps</code>, <code>-sep</code>, <code>-s</code></td><td><code>:separators on</code></td></tr>
-    <tr><td><code>-noseparators</code></td><td>Display all numeric values without thousands separators <i>(default)</i></td><td><code>-noseparator</code>,<br><code>-noseps</code>, <code>-nosep</code>, <code>-ns</code></td><td><code>:separators off</code></td></tr>
-    <tr><td><code>-ignorecase</code></td><td>Ignore case of variable and member names</td><td><code>-caseinsensitive</code>,<br><code>-insensitive</code>, <code>-ignore</code>,<br><code>-case</code>, <code>-ign</code>, <code>-ins</code></td><td><code>:ignorecase on</code></td></tr>
-    <tr><td><code>-casesense</code></td><td>Respect case of variable and member names <i>(default)</i></td><td><code>-casesensitive</code>, <code>-sensitive</code>,<br><code>-sense</code>, <code>-sens</code>, <code>-sen</code></td><td><code>:ignorecase off</code></td></tr>
-    <tr><td><code>-quotestrings</code></td><td>Quote displayed strings in results (default)</td><td><code>-quotestring</code>, <code>-quotes</code>,<br><code>-quote</code>, <code>-quo</code></td><td><code>:quotestrings on</code></td></tr>
-    <tr><td><code>-noquotestrings</code></td><td>Do not quote displayed strings in results</td><td><code>-noquotestring</code>, <code>-noquotes</code>,<br><code>-noquote</code>, <code>-noq</code></td><td><code>:quotestrings off</code></td></tr>
+    <tr><td><code>-timing</code></td><td>Display timing after each input</td><td><code>-time</code>, <code>-t</code></td><td><code>$timing on</code></td></tr>
+    <tr><td><code>-notiming</code></td><td>Do not display timings <i>(default)</i></td><td><code>-notime</code>, <code>-not</code></td><td><code>$timing off</code></td></tr>
+    <tr><td><code>-resultsonly</code></td><td>Do not display the input expression on output,<br>but only the results</td><td><code>-resultonly</code>, <code>-results</code>,<br><code>-result</code>, <code>-res</code>, <code>-r</code></td><td><code>$resultsonly on</code></td></tr>
+    <tr><td><code>-expressions</code></td><td>Display both expressions and results</td><td><code>-expression</code>, <code>-express</code>,<br><code>-exprs</code>, <code>-expr</code>, <code>-exp</code>, or <code>-ex</code></td><td><code>$resultsonly off</code></td></tr>
+    <tr><td><code>-quiet</code></td><td>Do not display anything<br>(suitable for behind-the-scenes calculations)</td><td><code>-q</code></td><td><code>$quiet on</code>/<code>off</code></td></tr>
+    <tr><td><code>-silence</code></td><td>Do not display directives</td><td><code>-silencedirectives</code>,<br><code>-silentdirectives</code>,<br><code>-silencedir</code>, <code>-silentdir</code>,<br><code>-silent</code></td><td><code>$silence on</code></td></tr>
+    <tr><td><code>-display</code></td><td>Display results of directives</td><td><code>-displaydirectives</code>,<br><code>-displaydir</code></td><td><code>$silence off</code></td></tr>
+    <tr><td><code>-rational</code></td><td>Do all possible calculations in fraction mode,<br>that is as a ratio of natural numbers<br>(as in <code>1/3</code> instead of <code>0.3333333333333333</code>)</td><td><code>-ration</code>, <code>-rat</code></td><td><code>$rational on</code></td></tr>
+    <tr><td><code>-decimal</code></td><td>Do all calculations as decimal values <i>(default)</i></td><td><code>-dec</code></td><td><code>$rational off</code></td></tr>
+    <tr><td><code>-separators</code></td><td>Display all numeric values with thousands separators</td><td><code>-separator</code>, <code>-seps</code>, <code>-sep</code>, <code>-s</code></td><td><code>$separators on</code></td></tr>
+    <tr><td><code>-noseparators</code></td><td>Display all numeric values without thousands separators <i>(default)</i></td><td><code>-noseparator</code>,<br><code>-noseps</code>, <code>-nosep</code>, <code>-ns</code></td><td><code>$separators off</code></td></tr>
+    <tr><td><code>-ignorecase</code></td><td>Ignore case of variable and member names</td><td><code>-caseinsensitive</code>,<br><code>-insensitive</code>, <code>-ignore</code>,<br><code>-case</code>, <code>-ign</code>, <code>-ins</code></td><td><code>$ignorecase on</code></td></tr>
+    <tr><td><code>-casesense</code></td><td>Respect case of variable and member names <i>(default)</i></td><td><code>-casesensitive</code>, <code>-sensitive</code>,<br><code>-sense</code>, <code>-sens</code>, <code>-sen</code></td><td><code>$ignorecase off</code></td></tr>
+    <tr><td><code>-quotestrings</code></td><td>Quote displayed strings in results (default)</td><td><code>-quotestring</code>, <code>-quotes</code>,<br><code>-quote</code>, <code>-quo</code></td><td><code>$quotestrings on</code></td></tr>
+    <tr><td><code>-noquotestrings</code></td><td>Do not quote displayed strings in results</td><td><code>-noquotestring</code>, <code>-noquotes</code>,<br><code>-noquote</code>, <code>-noq</code></td><td><code>$quotestrings off</code></td></tr>
     <tr><td><code>-locale</code> <i>locale_name</i></td><td>Specify the locale to use for messages</td><td><code>-loc</code>, <code>-l</code></td><td></td></tr>
-    <tr><td><code>-sortobjects</code></td><td>Sort user objects by keys, instead of by order of declaration</td><td><code>-sortobject</code>, <code>-sortkeys</code>,<br><code>-sortkey</code></td><td><code>:sortobjects on</code></td></tr>
-    <tr><td><code>-nosortobjects</code></td><td>Sort objects by order of declaration (default)</td><td><code>-nosortobject</code>, <code>-nosortkeys</code>,<br><code>-nosortkey</code></td><td><code>:sortobjects off</code></td></tr>
+    <tr><td><code>-sortobjects</code></td><td>Sort user objects by keys, instead of by order of declaration</td><td><code>-sortobject</code>, <code>-sortkeys</code>,<br><code>-sortkey</code></td><td><code>$sortobjects on</code></td></tr>
+    <tr><td><code>-nosortobjects</code></td><td>Sort objects by order of declaration (default)</td><td><code>-nosortobject</code>, <code>-nosortkeys</code>,<br><code>-nosortkey</code></td><td><code>$sortobjects off</code></td></tr>
     <tr><td><code>-inputdir</code> <i>directory</i></td><td>Specify a default directory location to find files to be processed</td><td><code>-input</code>, <code>-dir</code></td><td></td></tr>
-    <tr><td><code>-library</code> <i>library_name(s)</i></td><td>Specify one or more libraries to load to begin with</td><td><code>-libraries</code>, <code>-libs</code>, <code>-lib</code></td><td><code>:include</code>, <code>:load</code>,<br> or <code>:open</code><br>(also see the <code>:save</code> directive)</td></tr>
+    <tr><td><code>-library</code> <i>library_name(s)</i></td><td>Specify one or more libraries to load to begin with</td><td><code>-libraries</code>, <code>-libs</code>, <code>-lib</code></td><td><code>$include</code>, <code>$load</code>,<br> or <code>$open</code><br>(also see the <code>$save</code> directive)</td></tr>
     <tr><td><code>-ignorelibraries</code></td><td>Ignore previous libraries<br>(from <code>CALC_OPTIONS</code> for instance)</td><td><code>-nolibraries</code>, <code>-nolibrary</code>,<br><code>-nolibs</code>, <code>-nolib</code></td><td></td></tr>
-    <tr><td><code>-requires</code>&nbsp;<i>version</i></td><td>Set a required program version</td><td><code>-requiresversion</code>,<br><code>-requireversion</code>,<br><code>-require</code>, <code>-req</code></td><td><code>:require</code> directive</td></tr>
-    <tr><td><code>-base</code>&nbsp;<i>version</i></td><td>Set a required base version</td><td><code>-requiresbaseversion</code>,<br><code>-requirebaseversion</code>,<br><code>-baseversion</code></td><td><code>:require</code> ... <code>base</code> directive</td></tr>
+    <tr><td><code>-requires</code>&nbsp;<i>version</i></td><td>Set a required program version</td><td><code>-requiresversion</code>,<br><code>-requireversion</code>,<br><code>-require</code>, <code>-req</code></td><td><code>$require</code> directive</td></tr>
+    <tr><td><code>-base</code>&nbsp;<i>version</i></td><td>Set a required base version</td><td><code>-requiresbaseversion</code>,<br><code>-requirebaseversion</code>,<br><code>-baseversion</code></td><td><code>$require</code> ... <code>base</code> directive</td></tr>
     <tr><td><code>-clear</code></td><td>Clear any variables defined by <code>CALC_OPTIONS</code>.</td><td><code>-cleararguments</code>,<br><code>-clearargs</code>, <code>-clr</code></td><td></td></tr>
     <tr><td><code>-file</code>, <code>-text</code>,<br>or <code>-filetext</code></td><td>How to treat values on the command line:<br>as file names, as expression text,<br>or as files (if found) otherwise text (default)</td><td><code>-files</code>, <code>-f</code>,<br><code>-txt</code>, <code>-tx</code></td><td></td></tr>
     <tr><td><code>-ctrlenter</code></td><td>Use <code>Ctrl+Enter</code> (or <code>&#x2318;Enter</code> on Mac)<br>to calculate in the GUI input field <i>(default)</i></td><td><code>-cmdenter</code>, <code>-ctrl</code>, <code>-cmd</code></td><td></td></tr>
@@ -341,8 +341,8 @@ h2 {
     <tr><td><code>-variable</code><br><i>name</i><code>=</code><i>value</i><br>or <i>name</i><code>:</code><i>value</i></td><td>Set the value of a variable</td><td><code>-define</code>, <code>-var</code></td><td><i>name</i>&nbsp;<code>=</code>&nbsp;<i>value</i></td></tr>
     <tr><td><code>--</code> <i>parameter_values</i><br>[ <code>--</code> ]</td><td>Provide values for the <code>$0</code>, <code>$1</code>, etc. parameters<br>
             (every value between the <code>--</code> markers<br>is taken as a parameter value)</td><td></td><td></td></tr>
-    <tr><td><code>-help</code></td><td>Display this help page</td><td><code>-h</code>, <code>-?</code></td><td><code>:help</code> (REPL mode only)</td></tr>
-    <tr><td><code>-version</code></td><td>Display the version information for the program on the console</td><td><code>-vers</code>, <code>-ver</code>, <code>-v</code></td><td><code>:version</code> (REPL mode only)</td></tr>
+    <tr><td><code>-help</code></td><td>Display this help page</td><td><code>-h</code>, <code>-?</code></td><td><code>$help</code></td></tr>
+    <tr><td><code>-version</code></td><td>Display the version information for the program on the console</td><td><code>-vers</code>, <code>-ver</code>, <code>-v</code></td><td><code>$version</code></td></tr>
   </tbody>
   </table>
   </div>
@@ -378,7 +378,7 @@ h2 {
   <div class="cols">
   <p>For convenience in REPL mode, in addition to expressions and directives (as described below), there are a few commands available to do other
      things (all of which are alternatives to command-line options). Note that these commands are mostly for convenience in REPL mode, but are also available from a script or library file, as well as from the GUI input window.
-     Note there are buttons in the GUI window for all but <code>:gui</code> (obviously).
+     Note there are buttons in the GUI window for all but <code>$gui</code> (obviously).
   <p>Interestingly, although the Calculator can switch from console mode to GUI mode, the reverse is not possible. Also, the console application will
      not actually exit after switching modes until the GUI window is closed. This also applies to using the <code>-gui</code> option on the command line.
   <p>Also note that using the command line options (such as <code>c -version</code>) will do the operation and immediately exit, while using the
@@ -398,10 +398,10 @@ h2 {
     </tr>
     </thead>
     <tbody>
-    <tr><td><code>:quit</code></td><td>Exit the program normally.</td><td><code>:exit</code>,<br><code>:q</code>, <code>:x</code></td><td></td></tr>
-    <tr><td><code>:help</code></td><td>Display the HTML help page in the browser.</td><td><code>:?</code>, <code>:h</code></td><td><code>-help</code></td></tr>
-    <tr><td><code>:version</code></td><td>Display program version information.</td><td><code>:vers</code>,<br><code>:ver</code>, <code>:v</code></td><td><code>-version</code></td></tr>
-    <tr><td><code>:gui</code></td><td>Switch to GUI mode</td><td><code>:g</code></td><td><code>-gui</code></td></tr>
+    <tr><td><code>$quit</code></td><td>Exit the program normally.</td><td><code>$exit</code>,<br><code>$q</code>, <code>$x</code></td><td></td></tr>
+    <tr><td><code>$help</code></td><td>Display the HTML help page in the browser.</td><td><code>$?</code>, <code>$h</code></td><td><code>-help</code></td></tr>
+    <tr><td><code>$version</code></td><td>Display program version information.</td><td><code>$vers</code>,<br><code>$ver</code>, <code>$v</code></td><td><code>-version</code></td></tr>
+    <tr><td><code>$gui</code></td><td>Switch to GUI mode</td><td><code>$g</code></td><td><code>-gui</code></td></tr>
   </tbody>
   </table>
   </div>
@@ -451,16 +451,16 @@ h2 {
      multiplier suffixes are case-insensitive.
   <p>For example:  <code>2Kb = 2000</code>, or <code>4Kib = 4096</code>. Any integer results can be formatted as these type of
      values using the <code>@k</code> or <code>@K</code> formats (the latter giving long name suffixes), and depending on the
-     <code>:SI</code>, <code>:BINARY</code>, or <code>:MIXED</code> mode directives in effect. These modes function as illustrated here:<br>
-<code><span style="color:grey;">&gt;</span> :mixed<br>
+     <code>$SI</code>, <code>$BINARY</code>, or <code>$MIXED</code> mode directives in effect. These modes function as illustrated here:<br>
+<code><span style="color:grey;">&gt;</span> $mixed<br>
 <span style="color:green;">Units in mixed form.</span><br>
 <span style="color:grey;">&gt;</span> 2000@k<br>
 <span style="color:blue;">2000 @k</span><span style="color:grey;"> &#x21E8; </span><span style="color:green;">1.95 Kbytes</span><br>
-<span style="color:grey;">&gt;</span> :si<br>
+<span style="color:grey;">&gt;</span> $si<br>
 <span style="color:green;">Units in SI (base ten) form.</span><br>
 <span style="color:grey;">&gt;</span> 2000@k<br>
 <span style="color:blue;">2000 @k</span><span style="color:grey;"> &#x21E8; </span><span style="color:green;">2.00 Kbytes</span><br>
-<span style="color:grey;">&gt;</span> :bin<br>
+<span style="color:grey;">&gt;</span> $bin<br>
 <span style="color:green;">Units in binary.</span><br>
 <span style="color:grey;">&gt;</span> 2000@K<br>
 <span style="color:blue;">2000 @K</span><span style="color:grey;"> &#x21E8; </span><span style="color:green;">1.95 Kibibytes</span>
@@ -513,8 +513,8 @@ which gives:
      characters are interpreted and stored as their actual codepoints. This means that string values inserted into interpolated
      strings will be inserted as they are stored (without quotes, etc.).
   <p>But, string results can be displayed without quotes using the <code>@q</code> format,
-     or by using the <code>:quotestrings off</code> directive, or the <code>-noquotestrings</code> command line option. Also the <code>@Q</code> format can be
-     used to force quoting of string results, regardless of the state of the <code>:quotestrings</code> mode.
+     or by using the <code>$quotestrings off</code> directive, or the <code>-noquotestrings</code> command line option. Also the <code>@Q</code> format can be
+     used to force quoting of string results, regardless of the state of the <code>$quotestrings</code> mode.
   <p>Calc reserves the names <code>pi</code>, <code>e</code>, <code>phi</code>, and <code>i</code> for these four fundamental constants. All the various Unicode characters
      for <code>&#x1D6D1;</code> are supported, as well as Unicode alternatives for <code>e</code> and <code>i</code> (see the <a href="#Available_Operators_and_Predefined_Functions">"Operators, Functions, and Precedence"</a>
      table below). But note that these names CAN be used for local variables inside loops, and functions (and any other local code blocks), but which will override the predefined
@@ -650,8 +650,8 @@ or<br>
      Also, in rational mode the precision setting does not apply to the numerator or denominator values of the fractions.
   <p>As another side note, the Bernoulli numbers are best calculated in rational mode, since they are defined as the ratio of integer values.
      Of course, in decimal mode the fractions will be divided and the results returned as a decimal value up the specified precision.
-  <p>Trigonometric calculations are, by default, done in radians, but this can be changed to use degrees using the <code>:degrees</code> directive,
-     changed to use gradians or grads using the <code>:grads</code> directive, or back using the <code>:radians</code> directive.
+  <p>Trigonometric calculations are, by default, done in radians, but this can be changed to use degrees using the <code>$degrees</code> directive,
+     changed to use gradians or grads using the <code>$grads</code> directive, or back using the <code>$radians</code> directive.
   <p>Dates have a valid range of <code>d'-9999/01/01'</code> to <code>d'9999/12/31'</code>, or a total range of 7,304,484 days. Significantly, dates
      use the <a href="https://www.dictionary.com/browse/proleptic">proleptic</a> values of the Gregorian calendar extended indefinitely to the past
      and future, such that date results prior to the adoption of the Gregorian calendar (in roughly 1582 AD) <strong>will not correspond</strong>
@@ -719,7 +719,7 @@ or<br>
      as explained here: <a href="https://en.wikipedia.org/wiki/Names_of_large_numbers">Names of large numbers</a>. We always use
      the US, Canada, and modern British (short scale) form, regardless of the locale used. The implementation here will work up to a
      value of around 10<sup>3,000,000,000</sup>.
-  <p>While thousands separators are supported on output (the <code>d</code>, <code>j</code>, <code>%</code>, and <code>$</code> formats), they are not supported on input. For this reason, the separators setting is ignored for <code>:save</code>, and should be avoided if the output is meant to be read as input by Calc.
+  <p>While thousands separators are supported on output (the <code>d</code>, <code>j</code>, <code>%</code>, and <code>$</code> formats), they are not supported on input. For this reason, the separators setting is ignored for <code>$save</code>, and should be avoided if the output is meant to be read as input by Calc.
   <p>The optional <code>-</code> modifier for <code>@h</code>, <code>@t</code>, <code>@e</code>, and <code>@r</code> will remove the constant formatting
      and treat the value as a simple quoted string. This simplifies using these values inside interpolated strings (for instance), as in:&nbsp;
   <code style="color:blue;">today@-e</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">"2022-10-17"</code> while
@@ -1111,11 +1111,11 @@ or<br>
      by a <code>"-"</code> in the format string.
   <p>For most values the <code>upper</code> and <code>lower</code> functions simply convert the value to a string and do the case conversion on that string.
      But, for objects and lists the results are more subtle. For a list, the result is another list with all the values suitably
-     case shifted. For an object, if <code>:ignorecase</code> is on the resulting object has only the values converted, while for
-     <code>:ignorecase off</code> (the default) BOTH the keys and the values are case-converted. For example:
+     case shifted. For an object, if <code>$ignorecase</code> is on the resulting object has only the values converted, while for
+     <code>$ignorecase off</code> (the default) BOTH the keys and the values are case-converted. For example:
 <p class="indent"><code style="color:blue;">g3 = {b: 'This', c: 'is', d: 'crazy' }</code><br>
      <code style="color:blue;">upper g3</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">{ B: 'THIS', C: 'IS', D: 'CRAZY' }</code><br>
-     <code style="color:blue;">:ignorecase on { upper g3 }</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">{ b: 'THIS', c: 'IS', d: 'CRAZY' }</code>
+     <code style="color:blue;">$ignorecase on { upper g3 }</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">{ b: 'THIS', c: 'IS', d: 'CRAZY' }</code>
   <p>The <code>FACTORS</code> and <code>PFACTORS</code> functions only accept integer values, and produce arrays of the
      desired values.<br>Examples: <code>factors(123) &#x21E8; [ 1, 3, 41, 123 ]</code>, while <code>pfactors 123 &#x21E8; [ 3, 41 ]</code>.
   <p>The <code>EXEC</code> function will execute the operating system program given by the first (string) expression, using the remaining
@@ -1125,7 +1125,7 @@ or<br>
      <p class="indent"><code>split(exec('wc', 'calc.txt'), '\\s+')</code></p>
      which will invoke the <code>wc</code> executable on Linux or MacOS, but will also run <code>cmd /c wc.bat</code> on Windows.
   <p>When using the color tag values from <code>"library.calc"</code> inside a string, it may be necessary (such as for writing to a file)
-     when the tags need translation to the real console escape codes. The <code>COLOR</code> function does this, but according to the <code>:colors</code>
+     when the tags need translation to the real console escape codes. The <code>COLOR</code> function does this, but according to the <code>$colors</code>
      setting currently in effect.
   <p>For now, the <code>encode</code> and <code>decode</code> functions only work on string objects (or other values / objects converted
      to their string representations). So, in order to reconstruct an array (for instance) from its encoded form you would need to do:
@@ -1192,7 +1192,7 @@ or<br>
   <p>The <code>settings</code> object contains the settable values of many of the directives, such
      as: <code>trigMode</code>, <code>separatorMode</code>, <code>precision</code>, etc. The values
      can be queried, or set, which has exactly the same effect as using the directives, as in:
-  <p class="indent"><code style="color:blue;">:decimal 60</code> is the same as
+  <p class="indent"><code style="color:blue;">$decimal 60</code> is the same as
     <code style="color:blue;">settings.precision = 60</code>.
   <p>See the <a href="#Directives">Directives</a> section below for the complete list of equivalents.
   <p>The <code>env</code> object contains entries for all the current variables defined in the process environment. If any of the variable names do not conform to the syntax
@@ -1376,7 +1376,7 @@ whether it has previously been used/defined.
   </p>
   <p>The <code>timethis</code> statement is a bit different than the others in that it doesn't affect the order of execution
      or change the result, but it can be used for debugging to evaluate the execution time of a piece of code. The optional first expression will be evaluated to a string and used to annotate the timing message. Note: the timing message is not
-     affected by the <code>:quiet</code> or <code>:resultsonly</code> settings &mdash; it will always be displayed.
+     affected by the <code>$quiet</code> or <code>$resultsonly</code> settings &mdash; it will always be displayed.
   <p class="indent">
     <code>timethis 'atan' { atan(pi/4) }</code><br>
     <code style="color:blue;">atan (pi / 4)</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">0.6657737500283538</code><br>
@@ -1390,8 +1390,8 @@ whether it has previously been used/defined.
   Various directives can be given within a script or on a separate input line in REPL mode that will affect the operation of the calculator. Some of them allow you to change the options given on the command line, while others are only available from within the script. All the mode-setting directives are also available in the Settings dialog (the <span class="orangebutton">&#x2261;</span> button or <code>F2</code> key) in GUI mode.
   <p>Note that directives do not themselves have values. This means that directives can be nested around expressions in functions (for instance)
      and the function value will be the same as if the directives were not present (well, unless the directives directly affect the calculation,
-     as in <code>:rational on</code>).
-  <p>The directives can be spelled in several ways (same as for predefined functions): all lower case, all UPPER case, and one or two MixedCase forms. For example: <code>:resultsonly</code>, <code>:RESULTSONLY</code>, <code>:Resultsonly</code>, or <code>:ResultsOnly</code>.
+     as in <code>$rational on</code>).
+  <p>The directives can be spelled in several ways (same as for predefined functions): all lower case, all UPPER case, and one or two MixedCase forms. For example: <code>$resultsonly</code>, <code>$RESULTSONLY</code>, <code>$Resultsonly</code>, or <code>$ResultsOnly</code>.
 </div>
   <div class="center">
   <table style="margin-left:auto;margin-right:auto;">
@@ -1404,36 +1404,36 @@ whether it has previously been used/defined.
     </tr>
     </thead>
     <tbody>
-    <tr><td><code>:decimal</code> <i>number_option</i> [ <i>statements</i> ]</td><td>Set the precision of all decimal calculations,<br>where <i>number_option</i> can be <code>(</code><i>number</i><code>)</code>, or <i>number</i>, or <i>variable</i><br>to specify the number of decimal digits of precision</td><td><code>:dec</code>, <code>:precision</code>, <code>:prec</code><br>or <code>settings.precision=</code><i>expr</i></td></tr>
-    <tr><td><code>:default</code> [ <i>statements</i> ]</td><td>Set the default decimal precision (~34 digits) <i>(default)</i></td><td><code>:def</code><br>or <code>settings.precision=34</code></td></tr>
-    <tr><td><code>:double</code> [ <i>statements</i> ]</td><td>Select the "double" decimal precision (~16 digits)</td><td><code>:dbl</code><br>or <code>settings.precision=16</code></td></tr>
-    <tr><td><code>:float</code> [ <i>statements</i> ]</td><td>Select "float" decimal precision (~7 digits)</td><td><code>:flt</code><br>or <code>settings.precision=7</code></td></tr>
-    <tr><td><code>:unlimited</code> [ <i>statements</i> ]</td><td>Set to unlimited decimal precision<br>(some calculations will still limit the precision to avoid<br>"non-terminating decimal expansion" errors)</td><td><code>:unl</code><br>or <code>settings.precision=0</code></td></tr>
-    <tr><td><code>:degrees</code> [ <i>statements</i> ]</td><td>Do all trigonometric calculations assuming the inputs are in degrees</td><td><code>:deg</code><br>or <code>settings.trigMode='degrees'</code></td></tr>
-    <tr><td><code>:radians</code> [ <i>statements</i> ]</td><td>Do all calculations assuming inputs are radians <i>(default)</i></td><td><code>:rad</code><br>or <code>settings.trigMode="RADIANS"</code></td></tr>
-    <tr><td><code>:grads</code> [ <i>statements</i> ]</td><td>Do all calculations assuming values are gradians or grads</td><td><code>:gradians</code><br>or <code>settings.trigMode="GRADS"</code></td></tr>
-    <tr><td><code>:binary</code> [ <i>statements</i> ]</td><td>Display units in terms of multiples of 1024</td><td><code>:bin</code><br>or <code>settings.units='binary'</code></td></tr>
-    <tr><td><code>:si</code> [ <i>statements</i> ]</td><td>Display units in terms of multiples of 1000</td><td><code>:ten</code><br>or <code>settings.units='DECIMAL'</code></td></tr>
-    <tr><td><code>:mixed</code> [ <i>statements</i> ]</td><td>Unit multiplier based on powers of 2 (same as <code>:binary</code>), but with SI suffix <i>(default)</i></td><td><code>:mix</code><br>or <code>settings.units="Mixed"</code></tr>
-    <tr><td><code>:clear</code> [ <i>wild_id</i> ( <code>,</code> <i>wild_id</i> ) * ]</td><td>Clear all or only the specified variables (set values to <code>null</code>)</td><td><code>:clr</code></td></tr>
-    <tr><td><code>:variables</code> [ <i>wild_id</i> ( <code>,</code> <i>wild_id</i> ) * ]</td><td>Display the values of all or only the specified variables<br>(for a function the definition will be displayed, not the current value)</td><td><code>:variable</code>, <code>:vars</code>, <code>:var</code></td></tr>
-    <tr><td><code>:predefined</code> [ <i>wild_id</i> ( <code>,</code> <i>wild_id</i> ) * ]</td><td>Display the current values of all or some of the predefined variables</td><td><code>:predefs</code>, <code>:predef</code></td></tr>
-    <tr><td><code>:echo</code> ( <i>expr</i> ( <code>,</code> <i>expr</i> ) )</td><td>Echo the value of the expression to the output, error, or both channels</td><td></td></tr>
-    <tr><td><code>:include</code> <i>name_expr</i> ( <code>,</code> <i>charset_expr</i> )</td><td>Include the contents of the file(s) named by <i>name_expr</i>,<br>using the optional <i>charset_expr</i> as the charset</td><td><code>:inc</code>, <code>:load</code>, <code>:open</code>, <code>:lib</code>, <code>:library</code><br><code>:libs</code>, <code>:libraries</code></td></tr>
-    <tr><td><code>:save</code> <i>name_expr</i> ( <code>,</code> <i>charset_expr</i> )</td><td>Save all variable values and function definitions in the file, using the optional charset</td><td>&nbsp;</td></tr>
-    <tr><td><code>:rational</code> <i>mode_option</i> [ <i>statements</i> ]</td><td>Set the rational calculation mode where <i>mode_option</i> is one of:<br><code>on</code>, <code>off</code>, <code>true</code>, <code>false</code>, <code>yes</code>, <code>no</code>, <code>pop</code>, <code>previous</code>, <code>prev</code>, or <i>variable</i><br><i>(default is <code>off</code>, or the value set on the command line)</i></td><td><code>:ration</code>, <code>:fraction</code>, <code>:frac</code>, <code>:fr</code><br>or <code>settings.rationalMode=</code><i>expr</i></td></tr>
-    <tr><td><code>:separators</code> <i>mode_option</i> [ <i>statements</i> ]</td><td>Set whether to display thousands separators always<br><i>(default is <code>off</code> or value on command line)</i></td><td><code>:separator</code>, <code>:seps</code>, <code>:sep</code><br>or <code>settings.separatorMode=</code><i>expr</i></td></tr>
-    <tr><td><code>:ignorecase</code> <i>mode_option</i> [ <i>statements</i> ]</td><td>Set whether to ignore case of variable and member names<br><i>(default is <code>off</code> or value on command line)</i></td><td><code>:caseinsensitive</code>, <code>:insensitive</code>,<br><code>:ignore</code>, <code>:case</code>, <code>:ign</code>, <code>:ins</code><br>or <code>settings.ignoreNameCase=</code><i>expr</i></td></tr>
-    <tr><td><code>:quotestrings</code> <i>mode_option</i> [ <i>statements</i> ]</td><td>Set whether to quote string results<br>(default is <code>on</code> or value on command line)</td><td><code>:quotestring</code>, <code>:quotes</code>, <code>:quote</code><br>or <code>settings.quoteStrings=</code><i>expr</i></td></tr>
-    <tr><td><code>:sortobjects</code> <i>mode_option</i> [ <i>statements</i> ]</td><td>Whether object keys are sorted<br>(default is <code>off</code> or value on command line)</td><td><code>:sortobject</code>, <code>:sortkeys</code>, <code>:sortkey</code><br>or <code>settings.sortKeys=</code><i>expr</i></td></tr>
-    <tr><td><code>:colors</code> <i>mode_option</i> [ <i>statements</i> ]</td><td>Whether to use colors for subsequent output<br>(default is <code>on</code> or the command line value)</td><td><code>:color</code></td></tr>
-    <tr><td><code>:require</code> [ <i>version</i> ] [<code>,</code>] [ <code>base</code> <i>version</i> ]</td><td>Establish minimum program and/or base versions required to run</td><td><code>:requires</code></td></tr>
-    <tr><td><code>:assert</code> <i>expr</i> [ <code>,</code> <i>message</i> ]</td><td>Assert that a certain value is true, otherwise halt and display message</td><td></td></tr>
-    <tr><td><code>:timing</code> <i>mode_option</i> [ <i>statements</i> ]</td><td>Set the timing mode (same <i>mode_option</i> choices as for <code>:rational</code>)<br><i>(default is <code>off</code> or the value set on the command line)</i></td><td><code>:time</code></td></tr>
-    <tr><td><code>:debug</code> <i>mode_option</i> [ <i>statements</i> ]</td><td>Set the debug mode (same <i>mode_option</i> choices as for <code>:rational</code>)<br><i>(default is <code>off</code> or the value set on the command line)</i></td><td><code>:deb</code>, <code>:dbg</code></td></tr>
-    <tr><td><code>:resultsonly</code> <i>mode_option</i> [ <i>statements</i> ]</td><td>Set the results-only mode<br><i>(default is <code>off</code> or value on command line)</i></td><td><code>:resultonly</code>, <code>:results</code>, <code>:result</code>, <code>:res</code></td></tr>
-    <tr><td><code>:quiet</code> <i>mode_option</i> [ <i>statements</i> ]</td><td>Set quiet mode<br><i>(default is <code>off</code> or the value on command line)</i></td><td><code>settings.silent=</code><i>expr</i></td></tr>
-    <tr><td><code>:silence</code> <i>mode_option</i> [ <i>statements</i> ]</td><td>Set "silence directives" mode<br><i>(default is <code>off</code> or the value on the command line)</i></td><td><code>:silencedirectives</code>,<br><code>:silentdirectives</code>,<br><code>:silencedir</code>, <code>:silentdir</code>,<br><code>:silent</code><br>or <code>settings.silenceDirectives=</code><i>expr</i></td></tr>
+    <tr><td><code>$decimal</code> <i>number_option</i> [ <i>statements</i> ]</td><td>Set the precision of all decimal calculations,<br>where <i>number_option</i> can be <code>(</code><i>number</i><code>)</code>, or <i>number</i>, or <i>variable</i><br>to specify the number of decimal digits of precision</td><td><code>$dec</code>, <code>$precision</code>, <code>$prec</code><br>or <code>settings.precision=</code><i>expr</i></td></tr>
+    <tr><td><code>$default</code> [ <i>statements</i> ]</td><td>Set the default decimal precision (~34 digits) <i>(default)</i></td><td><code>$def</code><br>or <code>settings.precision=34</code></td></tr>
+    <tr><td><code>$double</code> [ <i>statements</i> ]</td><td>Select the "double" decimal precision (~16 digits)</td><td><code>$dbl</code><br>or <code>settings.precision=16</code></td></tr>
+    <tr><td><code>$float</code> [ <i>statements</i> ]</td><td>Select "float" decimal precision (~7 digits)</td><td><code>$flt</code><br>or <code>settings.precision=7</code></td></tr>
+    <tr><td><code>$unlimited</code> [ <i>statements</i> ]</td><td>Set to unlimited decimal precision<br>(some calculations will still limit the precision to avoid<br>"non-terminating decimal expansion" errors)</td><td><code>$unl</code><br>or <code>settings.precision=0</code></td></tr>
+    <tr><td><code>$degrees</code> [ <i>statements</i> ]</td><td>Do all trigonometric calculations assuming the inputs are in degrees</td><td><code>$deg</code><br>or <code>settings.trigMode='degrees'</code></td></tr>
+    <tr><td><code>$radians</code> [ <i>statements</i> ]</td><td>Do all calculations assuming inputs are radians <i>(default)</i></td><td><code>$rad</code><br>or <code>settings.trigMode="RADIANS"</code></td></tr>
+    <tr><td><code>$grads</code> [ <i>statements</i> ]</td><td>Do all calculations assuming values are gradians or grads</td><td><code>$gradians</code><br>or <code>settings.trigMode="GRADS"</code></td></tr>
+    <tr><td><code>$binary</code> [ <i>statements</i> ]</td><td>Display units in terms of multiples of 1024</td><td><code>$bin</code><br>or <code>settings.units='binary'</code></td></tr>
+    <tr><td><code>$si</code> [ <i>statements</i> ]</td><td>Display units in terms of multiples of 1000</td><td><code>$ten</code><br>or <code>settings.units='DECIMAL'</code></td></tr>
+    <tr><td><code>$mixed</code> [ <i>statements</i> ]</td><td>Unit multiplier based on powers of 2 (same as <code>$binary</code>), but with SI suffix <i>(default)</i></td><td><code>$mix</code><br>or <code>settings.units="Mixed"</code></tr>
+    <tr><td><code>$clear</code> [ <i>wild_id</i> ( <code>,</code> <i>wild_id</i> ) * ]</td><td>Clear all or only the specified variables (set values to <code>null</code>)</td><td><code>$clr</code></td></tr>
+    <tr><td><code>$variables</code> [ <i>wild_id</i> ( <code>,</code> <i>wild_id</i> ) * ]</td><td>Display the values of all or only the specified variables<br>(for a function the definition will be displayed, not the current value)</td><td><code>$variable</code>, <code>$vars</code>, <code>$var</code></td></tr>
+    <tr><td><code>$predefined</code> [ <i>wild_id</i> ( <code>,</code> <i>wild_id</i> ) * ]</td><td>Display the current values of all or some of the predefined variables</td><td><code>$predefs</code>, <code>$predef</code></td></tr>
+    <tr><td><code>$echo</code> ( <i>expr</i> ( <code>,</code> <i>expr</i> ) )</td><td>Echo the value of the expression to the output, error, or both channels</td><td></td></tr>
+    <tr><td><code>$include</code> <i>name_expr</i> ( <code>,</code> <i>charset_expr</i> )</td><td>Include the contents of the file(s) named by <i>name_expr</i>,<br>using the optional <i>charset_expr</i> as the charset</td><td><code>$inc</code>, <code>$load</code>, <code>$open</code>, <code>$lib</code>, <code>$library</code><br><code>$libs</code>, <code>$libraries</code></td></tr>
+    <tr><td><code>$save</code> <i>name_expr</i> ( <code>,</code> <i>charset_expr</i> )</td><td>Save all variable values and function definitions in the file, using the optional charset</td><td>&nbsp;</td></tr>
+    <tr><td><code>$rational</code> <i>mode_option</i> [ <i>statements</i> ]</td><td>Set the rational calculation mode where <i>mode_option</i> is one of:<br><code>on</code>, <code>off</code>, <code>true</code>, <code>false</code>, <code>yes</code>, <code>no</code>, <code>pop</code>, <code>previous</code>, <code>prev</code>, or <i>variable</i><br><i>(default is <code>off</code>, or the value set on the command line)</i></td><td><code>$ration</code>, <code>$fraction</code>, <code>$frac</code>, <code>$fr</code><br>or <code>settings.rationalMode=</code><i>expr</i></td></tr>
+    <tr><td><code>$separators</code> <i>mode_option</i> [ <i>statements</i> ]</td><td>Set whether to display thousands separators always<br><i>(default is <code>off</code> or value on command line)</i></td><td><code>$separator</code>, <code>$seps</code>, <code>$sep</code><br>or <code>settings.separatorMode=</code><i>expr</i></td></tr>
+    <tr><td><code>$ignorecase</code> <i>mode_option</i> [ <i>statements</i> ]</td><td>Set whether to ignore case of variable and member names<br><i>(default is <code>off</code> or value on command line)</i></td><td><code>$caseinsensitive</code>, <code>$insensitive</code>,<br><code>$ignore</code>, <code>$case</code>, <code>$ign</code>, <code>$ins</code><br>or <code>settings.ignoreNameCase=</code><i>expr</i></td></tr>
+    <tr><td><code>$quotestrings</code> <i>mode_option</i> [ <i>statements</i> ]</td><td>Set whether to quote string results<br>(default is <code>on</code> or value on command line)</td><td><code>$quotestring</code>, <code>$quotes</code>, <code>$quote</code><br>or <code>settings.quoteStrings=</code><i>expr</i></td></tr>
+    <tr><td><code>$sortobjects</code> <i>mode_option</i> [ <i>statements</i> ]</td><td>Whether object keys are sorted<br>(default is <code>off</code> or value on command line)</td><td><code>$sortobject</code>, <code>$sortkeys</code>, <code>$sortkey</code><br>or <code>settings.sortKeys=</code><i>expr</i></td></tr>
+    <tr><td><code>$colors</code> <i>mode_option</i> [ <i>statements</i> ]</td><td>Whether to use colors for subsequent output<br>(default is <code>on</code> or the command line value)</td><td><code>$color</code></td></tr>
+    <tr><td><code>$require</code> [ <i>version</i> ] [<code>,</code>] [ <code>base</code> <i>version</i> ]</td><td>Establish minimum program and/or base versions required to run</td><td><code>$requires</code></td></tr>
+    <tr><td><code>$assert</code> <i>expr</i> [ <code>,</code> <i>message</i> ]</td><td>Assert that a certain value is true, otherwise halt and display message</td><td></td></tr>
+    <tr><td><code>$timing</code> <i>mode_option</i> [ <i>statements</i> ]</td><td>Set the timing mode (same <i>mode_option</i> choices as for <code>$rational</code>)<br><i>(default is <code>off</code> or the value set on the command line)</i></td><td><code>$time</code></td></tr>
+    <tr><td><code>$debug</code> <i>mode_option</i> [ <i>statements</i> ]</td><td>Set the debug mode (same <i>mode_option</i> choices as for <code>$rational</code>)<br><i>(default is <code>off</code> or the value set on the command line)</i></td><td><code>$deb</code>, <code>$dbg</code></td></tr>
+    <tr><td><code>$resultsonly</code> <i>mode_option</i> [ <i>statements</i> ]</td><td>Set the results-only mode<br><i>(default is <code>off</code> or value on command line)</i></td><td><code>$resultonly</code>, <code>$results</code>, <code>$result</code>, <code>$res</code></td></tr>
+    <tr><td><code>$quiet</code> <i>mode_option</i> [ <i>statements</i> ]</td><td>Set quiet mode<br><i>(default is <code>off</code> or the value on command line)</i></td><td><code>settings.silent=</code><i>expr</i></td></tr>
+    <tr><td><code>$silence</code> <i>mode_option</i> [ <i>statements</i> ]</td><td>Set "silence directives" mode<br><i>(default is <code>off</code> or the value on the command line)</i></td><td><code>$silencedirectives</code>,<br><code>$silentdirectives</code>,<br><code>$silencedir</code>, <code>$silentdir</code>,<br><code>$silent</code><br>or <code>settings.silenceDirectives=</code><i>expr</i></td></tr>
   </tbody>
   </table>
   </div>
@@ -1441,7 +1441,7 @@ whether it has previously been used/defined.
 <hr id="Notes_on_Directives" class="sectionsep">
   <h2>Notes on Directives</h2>
 <div class="cols">
-  The <i>string</i> argument for the <code>:include</code> directive can be a comma-separated list of file names, with or without
+  The <i>string</i> argument for the <code>$include</code> directive can be a comma-separated list of file names, with or without
      paths. If a file cannot be read and there is a previous input directory available (set either by a previous file with a path
      given, or by the <code>-inputDir</code> command-line option), that directory is searched for the file. If not found there,
      the string is presumed not to be a file name, and the value of the string itself is processed as an expression. Note: this is
@@ -1456,23 +1456,23 @@ whether it has previously been used/defined.
      the corresponding command-line option. If there are no more entries in the stack when the <code>pop</code> option is given
      the value will be set to <code><i>off</i></code>.
   <p>If the optional statement block is given, the mode is set to the given value, the statements are executed, then the mode is
-     "popped" back to the original value, as if the statement block was ended by <code>:<i>directive</i> pop</code> (or the equivalent setting
-     for the "non-mode-option" directives such as <code>:mixed</code>). For example:
-  <p class="indent"><code style="color:black;">&gt; </code><code style="color:blue;">:results on { "This is true." }</code><br>
+     "popped" back to the original value, as if the statement block was ended by <code>$<i>directive</i> pop</code> (or the equivalent setting
+     for the "non-mode-option" directives such as <code>$mixed</code>). For example:
+  <p class="indent"><code style="color:black;">&gt; </code><code style="color:blue;">$results on { "This is true." }</code><br>
      <code style="color:green;">"This is true."</code>
-  <p class="indent"><code style="color:black;">&gt; </code><code style="color:blue;">:binary { settings.units }</code><br>
+  <p class="indent"><code style="color:black;">&gt; </code><code style="color:blue;">$binary { settings.units }</code><br>
      <code style="color:blue;">Units in </code><code style="color:green;">binary</code><code>.</code><br>
      <code style="color:blue;">settings.units</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">"BINARY"</code><br>
      <code style="color:blue;">Units in </code><code style="color:green;">mixed</code><code style="color:blue;"> form.</code>
   <p>The <i>statements</i> can be a single statement, or multiple statements, but must be enclosed by brackets, as in <code>{ ... }</code> in any case.
-  <p>If a string constant of any kind is given as the argument to <code>:echo</code> the surrounding quotes will be removed, and any
+  <p>If a string constant of any kind is given as the argument to <code>$echo</code> the surrounding quotes will be removed, and any
      embedded quotes will be unescaped before the message is displayed. This is the equivalent of using the <code>@q</code> format.
-  <p>The <code>wild_id</code> values for <code>:clear</code>, <code>:variables</code>, and <code>:predefined</code> can be wild-card values, such as
+  <p>The <code>wild_id</code> values for <code>$clear</code>, <code>$variables</code>, and <code>$predefined</code> can be wild-card values, such as
      <code>t*</code> or <code>?a?</code>. A <code>?</code> matches any one character, and <code>*</code> matches any string (including empty) of characters up until the trailing sequence. Only values matching these patterns will be displayed or cleared.
   <p>The only effect of debug mode is to display the parse tree (in LISP format) before the expression(s) is/are evaluated.
-  <p>The <i>version</i> values for the <code>:require</code> directive, or <code>-requires</code> command line option, can be strings (in the <a href="https://semver.org">Semantic Version</a> format, including a possible pre-release string),
+  <p>The <i>version</i> values for the <code>$require</code> directive, or <code>-requires</code> command line option, can be strings (in the <a href="https://semver.org">Semantic Version</a> format, including a possible pre-release string),
      or one, two, or three integers separated by periods. The current version numbers are available by running <code>c -version</code> (from the command line) or using the
-     <code>:version</code> command in REPL mode, or from the <code>info.version</code> predefined variable. There is also a standard library function named <code>"versionstring"</code> that
+     <code>$version</code> command in REPL mode, or from the <code>info.version</code> predefined variable. There is also a standard library function named <code>"version"</code> that
      formats a "long" version string out of the bare values. Examples of valid version values (note: the quotes are significant):
      <ul><li><code style="color:blue;">15</code></li>
          <li><code style="color:blue;">0.9</code></li>
@@ -1482,12 +1482,12 @@ whether it has previously been used/defined.
          <li><code style="color:blue;">"1.9.22-debug+5e7f77e"</code></li>
     </ul>
   <p>Timing mode displays the total parsing and execution time (to nanosecond precision on some systems) after the results are displayed.
-  <p>The optional second expression to the <code>:echo</code> directive tells where the output should go: default, <code>0</code> or <code>"output"</code> goes to <code>stdout</code>, <code>1</code> or <code>'ERROR'</code> (case does not matter) for <code>stderr</code>, or <code>2</code> or <code>"Both"</code> does, well... both.
-  <p>If no arguments are given to <code>:echo</code>, an empty line is displayed. In the GUI frame, the <code>stdout</code> and <code>stderr</code> streams are merged, so the output value is essentially meaningless, but specifying <code>"both"</code> will still display the message twice.
-  <p>The effect of <code>:sortobjects on</code> is to override the way <i>key</i><code>:</code><i>value</i> pairs are added to objects. By default they are
+  <p>The optional second expression to the <code>$echo</code> directive tells where the output should go: default, <code>0</code> or <code>"output"</code> goes to <code>stdout</code>, <code>1</code> or <code>'ERROR'</code> (case does not matter) for <code>stderr</code>, or <code>2</code> or <code>"Both"</code> does, well... both.
+  <p>If no arguments are given to <code>$echo</code>, an empty line is displayed. In the GUI frame, the <code>stdout</code> and <code>stderr</code> streams are merged, so the output value is essentially meaningless, but specifying <code>"both"</code> will still display the message twice.
+  <p>The effect of <code>$sortobjects on</code> is to override the way <i>key</i><code>:</code><i>value</i> pairs are added to objects. By default they are
      added in the order of declaration. With this option on, the keys are sorted alphabetically and kept sorted this way as elements are added and removed.
   <p>Gradian mode is used to do trignometric calculations assuming a circle has 400 grads (also called "gons" -- see <a href="https://en.wikipedia.org/wiki/Gradian">"Gradian"</a> for further explanation).
-  <p>The <code>:assert</code> directive is used to guarantee that certain conditions are met before proceeding. The required expression is evaluated, and if it does not evaluate to <code>true</code> an error is thrown, execution stops, and either the message (if given), or the text of the failing expression, is displayed. If the expression does evaluate <code>true</code> execution continues to the next expression.
+  <p>The <code>$assert</code> directive is used to guarantee that certain conditions are met before proceeding. The required expression is evaluated, and if it does not evaluate to <code>true</code> an error is thrown, execution stops, and either the message (if given), or the text of the failing expression, is displayed. If the expression does evaluate <code>true</code> execution continues to the next expression.
 </div>
 <a class="top-link" href="#topofpage">Top</a>
 <hr id="Standard_Libraries_of_Functions" class="sectionsep">
@@ -1499,9 +1499,9 @@ whether it has previously been used/defined.
      that explains the finance-related code.
   <p>At a minimum, the "library" has code to convert to/from our date values and the standard Excel&trade; date values, and do other date-related manipulation.
      There are also some mortgage-related (or "time value of money") functions defined.
-  <p>The "library.calc" file is version-stamped at the beginning, using the <code>:require</code> directive, so that this library must match the current version of Calc in order to be loaded. The <code>:save</code> directive also places a <code>:require</code> directive with the current version strings into the saved file. This mechanism ensures that an older version of Calc will
-     not be able to load a new library (since it might depend on features not present in the older version). Also, a saved file will ignore the <code>:separators</code> mode while writing, since numbers with separators are not (yet) supported on input.
-  <p>Any file of compatible expressions and directives can be used as a "library". In order to use such a library, list its name with a <code>-library</code> option on the command line, or use the <code>:include</code> directive inside any other script.
+  <p>The "library.calc" file is version-stamped at the beginning, using the <code>$require</code> directive, so that this library must match the current version of Calc in order to be loaded. The <code>$save</code> directive also places a <code>$require</code> directive with the current version strings into the saved file. This mechanism ensures that an older version of Calc will
+     not be able to load a new library (since it might depend on features not present in the older version). Also, a saved file will ignore the <code>$separators</code> mode while writing, since numbers with separators are not (yet) supported on input.
+  <p>Any file of compatible expressions and directives can be used as a "library". In order to use such a library, list its name with a <code>-library</code> option on the command line, or use the <code>$include</code> directive inside any other script.
   <p>The standard library (as of version 2.12.15) contains the following functions (partial listing):
 </div>
 <div class="center">
@@ -1546,7 +1546,7 @@ whether it has previously been used/defined.
     <tr><td><code>gmtnow</code></td><td></td><td>Current time in the GMT time zone</td></tr>
     <tr><td><code>flat_map</code></td><td><code>arr</code></td><td>Compute the flat map of an array</td></tr>
     <tr><td><code>is_perfect</code></td><td><code>n</code></td><td>Determine if the given number is a "perfect" number</td></tr>
-    <tr><td><code>versionstring</code></td><td></td><td>Complete current version information</td></tr>
+    <tr><td><code>version</code></td><td></td><td>Complete current version information</td></tr>
     <tr><td><code>quad</code></td><td><code>a</code>, <code>b</code>, <code>c</code></td><td>Solve the quadratic formula for the equation <code>a<i>x</i><sup>2</sup> + b<i>x</i> + c = 0</code></td></tr>
     <tr><td><code>quad_exp</code></td><td><code>a</code>, <code>b</code>, <code>c</code>, <code>x</code></td><td>Find the <i>y</i> value of the quadratic equation <code>a<i>x</i><sup>2</sup> + b<i>x</i> + c</code></td></tr>
     <tr><td><code>zeta_2n</code></td><td><code>_2n</code></td><td>The Euler-Riemann "zeta" function for positive even integers</td></tr>
@@ -1582,7 +1582,7 @@ whether it has previously been used/defined.
      main window, so using the command-line options <code>-darkbg</code> or <code>-lightbg</code>, or the "Colors" setting in the GUI "Window Settings" tab will switch between these color schemes.
   <p>Most of the settings available using Directives can be set in the GUI using the Settings dialog (the <span class="orangebutton">&#x2261;</span> button or <code>F2</code> key).
   <p>The calculation settings are also available to either read or write by accesssing the fields in the <code>settings</code> object. Setting one of the <code>settings</code> fields has the exact same effect as using the corresponding directive.
-  <p>Although the option for "Color the results?" is visible in the Settings dialog, it is always disabled (and the <code>:colors on</code> directive has no effect) since coloring is not implemented in the GUI Results field.
+  <p>Although the option for "Color the results?" is visible in the Settings dialog, it is always disabled (and the <code>$colors on</code> directive has no effect) since coloring is not implemented in the GUI Results field.
 </div>
   <div class="center">
   <br><img src="calc_settings.png" alt="GUI Settings screen" width="40%">

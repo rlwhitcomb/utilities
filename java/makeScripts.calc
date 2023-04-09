@@ -1,13 +1,13 @@
 /*****************************************/
 /*  Program to generate wrapper scripts  */
 /*****************************************/
-:quiet on
+$quiet on
 //
 // $0 = operation: "scripts" or "properties"
 // $1 = output directory
 // $2 = token/replacement
 //
-:assert $# == 3, "Three arguments required: operation, output directory, and token/replacement value."
+$assert $# == 3, "Three arguments required: operation, output directory, and token/replacement value."
 
 const operation = lower($0)
 const outdir = fixpath($1)
@@ -87,7 +87,7 @@ var replacement = splits[1] ?: ""
 define properties() = {
     var file = []
     const outputFile = outdir + 'calcscripts.properties'
-    :echo `Generating "$outputFile" ...`
+    $echo `Generating "$outputFile" ...`
 
     loop set in data.settings {
         var name = set.name
@@ -119,7 +119,7 @@ define scripts() = {
         }
         outputFile = outdir + outputFile
 
-        :echo `Generating "$outputFile" ...`
+        $echo `Generating "$outputFile" ...`
         loop line over template {
             case line in {
                 matches s'.+\$\{class\}'  : if class    { file += replace(line, '${class}', class)   },
@@ -138,6 +138,6 @@ define scripts() = {
 
 case operation of {
     "scripts","properties": eval(`$operation()`),
-    default:                :assert false, `Undefined operation "$operation"!`
+    default:                $assert false, `Undefined operation "$operation"!`
 }
 

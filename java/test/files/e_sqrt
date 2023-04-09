@@ -1,4 +1,4 @@
-:dec 100
+$dec 100
 loop _x in 10 .. 100, 10 {
    x = _x!
    trial_root = 10 ** (log( x ) / 2)

@@ -1,7 +1,7 @@
 #
 # Testing the distribution of random numbers
 #
-:quiet on
+$quiet on
 
 define bucket(v) = {
   case v of {
@@ -34,7 +34,7 @@ loop over v {
   b = bucket(__)
   freq[b]++
 }
-:assert sumof(freq) == length(v)
+$assert sumof(freq) == length(v)
 
 chisq = 0
 const expected = length(v) / length(freq)
@@ -43,8 +43,8 @@ loop f over freq {
 }
 
 b = 0
-:quiet pop
-:resultsonly on {
+$quiet pop
+$resultsonly on {
 
 `Minimum = ${min v}` @q
 `Maximum = ${max v}` @q
@@ -52,9 +52,9 @@ b = 0
 `Std Dev = $stddev`  @q
 `\u03C7\u00B2      = $chisq` @q
 
-:echo 'Bucket distribution'
-:echo '-------------------'
+$echo 'Bucket distribution'
+$echo '-------------------'
 loop f over freq {
-  :echo `${b++}. $f`
+  $echo `${b++}. $f`
 }
 }

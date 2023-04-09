@@ -1,2 +1,2 @@
-:echo 'The answer to life, the universe, and everything ...'
+$echo 'The answer to life, the universe, and everything ...'
 leave 42

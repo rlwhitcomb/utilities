@@ -3,5 +3,5 @@ P = 3004000 * 0.80
 R = 2.91
 N = 30
 
-:include 'e_mort'
+$include 'e_mort'
 

@@ -6,7 +6,7 @@ m1["ix1"] = 23;
 m2.ix2 = 47;
 m3.abc = 'ABC';
 
-:ignorecase on
+$ignorecase on
 
 m1
 M1
@@ -18,7 +18,7 @@ M4.e5.E6 = 99
 
 loop _i in 1 .. 10 { _I * _i }
 
-:ignorecase pop
+$ignorecase pop
 
 M1
 M2

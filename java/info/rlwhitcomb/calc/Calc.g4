@@ -494,6 +494,9 @@
  *	24-Mar-2023 (rlwhitcomb)
  *	    #596: Put the REPL commands into the grammar, so they can be executed from the command
  *	    line as well, and no special processing is needed for REPL mode.
+ *	07-Apr-2023 (rlwhitcomb)
+ *	    #603: Change DIR to be "$" instead, to eliminate ambiguities with directives and
+ *	    object values.
  */
 
 grammar Calc;
@@ -1976,7 +1979,7 @@ fragment DIG
    ;
 
 fragment DIR
-   : ':'
+   : '$'
    ;
 
 fragment NL

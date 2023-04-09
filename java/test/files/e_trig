@@ -13,32 +13,32 @@
 # Sigma(0..infinity) (-1)^n * x^2n / (2n)!
 #
 
-:dec 50
+$dec 50
 LOOPS = 50
 x = pi/4
 
 sin_x = x
 sign = 1
 
-:quiet on
+$quiet on
 loop _x in 2 .. LOOPS, 2 { sign = - sign; sin_x += sign * ((x ** (_x + 1)) / (_x + 1)!) }
-:quiet off
+$quiet off
 
 sin_x
 sin x
 
-:echo
+$echo
 
 cos_x = 1
 sign = 1
 
-:quiet on
+$quiet on
 loop _x in 2 .. LOOPS, 2 { sign = - sign; cos_x += sign * ((x ** _x) / _x!) }
-:quiet off
+$quiet off
 
 cos_x
 cos x
 
-:echo
+$echo
 (sqrt 2)/2
 

@@ -1,18 +1,18 @@
 /*
  * Tests of the expression engine in Calc.
  */
-:echo "Starting expression tests (suite 1)."
-:echo
+$echo "Starting expression tests (suite 1)."
+$echo
 
 # Simple version check ...
 # version 2.3.0 was first version where these checks would work, and 2.4.11 is where versioninfo -> info.version
 info.version.major > 2 ||
     (info.version.major == 2 && info.version.minor > 4) ||
     (info.version.major == 2 && info.version.minor == 4 && info.version.patch >= 11)
-:requires '2.14.15-alpha', base '1.9.23-alpha'
+$requires '2.14.15-alpha', base '1.9.23-alpha'
 
 # Various simple expressions
-:decimal(50)
+$decimal(50)
 52+27
 3.4 + 5
 34 + 5 @x
@@ -23,14 +23,14 @@ phi
 1/phi == PHI
 1/PHI == phi
 PHI+1 == phi
-:rational on {
+$rational on {
   phi
   PHI
   phi@d
 }
 
-:decimal 989 {
-  :rational on {
+$decimal 989 {
+  $rational on {
     pf = phi
   }
   pd = phi
@@ -39,30 +39,30 @@ PHI+1 == phi
 
 # Tests of rational pi
 loop pre over 1..26 {
-   :decimal pre
-   :rational on { ratpi = pi }
+   $decimal pre
+   $rational on { ratpi = pi }
    ~~ratpi == pi
 }
 
-:decimal(50)
+$decimal(50)
 sin(pi/3)
 4 & 7
 true && false
 (1+2) * (3+4)
-:Double
+$Double
 atan2(4, 5)
 14/7;12/4;13/9
 a = 1; b = 2; a+b;
 a<=>b; a<=b; b<a; 1>2; 2>=1;
-:DEFAULT
+$DEFAULT
 1.2+3.4
 1/7
 settings.precision
-:decimal 18
+$decimal 18
 settings.precision
 e
 a
-:clear a,b
+$clear a,b
 a
 a = b = c = 27; a+b; b+c
 e
@@ -81,7 +81,7 @@ raw = s"abc
 codes(raw)
 
 # Other operators and functions
-:decimal 60
+$decimal 60
 s = sqrt(17);
 t = s * s;
 t = 17**0.5
@@ -96,7 +96,7 @@ t⁸
 _This_is_a_very_long_variable_name_Which_not_surprisingly_is_not_worth_remembering_1_ = sqrt 42
 ++ _This_is_a_very_long_variable_name_Which_not_surprisingly_is_not_worth_remembering_1_
 
-:clear [ _This_is_a_very_long_variable_name_Which_not_surprisingly_is_not_worth_remembering_1_ ]
+$clear [ _This_is_a_very_long_variable_name_Which_not_surprisingly_is_not_worth_remembering_1_ ]
 _This_is_a_very_long_variable_name_Which_not_surprisingly_is_not_worth_remembering_1_
 
 # Factorial tests
@@ -119,14 +119,14 @@ fib 200
 oldPrec = settings.precision
 settings.precision = 100
 sum = 0
-:quiet on { loop f over 100..200 { sum += fib(f) } }
+$quiet on { loop f over 100..200 { sum += fib(f) } }
 sum
-:dec oldPrec
+$dec oldPrec
 
 # Trig and log functions
 J0 = 1; ++J0; J0;
 K0 = 2; K0++; K0;
-:double
+$double
 pi / 2
 asin ( sin ( pi / 2 ) )
 pi/4
@@ -167,12 +167,12 @@ upper g1
 lower g1
 g2=['abc', 'Def', "gHI"]; upper(g2); lower g2
 g3 = { b: 'This', c: 'is', d: 'crazy' }; upper(g3); lower(g3)
-:ignore on { upper g3; lower g3 }
+$ignore on { upper g3; lower g3 }
 g4 = { b: "abc", c: [ "an", "Upper", "way" ], d: { c: "over", f: "One" } }
 upper g4
-:ignore on { upper g4 }
+$ignore on { upper g4 }
 
-:clear j7
+$clear j7
 j7["help"] = 42
 j7
 
@@ -180,9 +180,9 @@ typeof "abc"
 typeof null
 typeof PHI
 typeof(1.2)
-:rational on
+$rational on
 typeof(½)
-:rational pop
+$rational pop
 typeof(tenpow(5))
 typeof(false)
 typeof(info)
@@ -210,11 +210,11 @@ cast(3, 'null')
 cast([1,2,3], 'array')
 cast({ a:'123' }, 'object')
 cast(null, 'object')
-:clr junk
+$clr junk
 junk=[1,2,3]
 cast(junk[0], 'function')
 typeof(_junk5b05d)
-:var _junk5b05d
+$var _junk5b05d
 
 info.version.major is integer
 info.locale.name is "string"
@@ -223,7 +223,7 @@ info.version is object
 info.locale.weekdays is `array`
 
 settings.trigMode
-:degrees
+$degrees
 settings.trigMode
 
 sin(45)
@@ -232,9 +232,9 @@ asin(sin(50))
 acos(cos(30))
 atan(tan(15))
 
-:rad
+$rad
 settings.trigMode
-:dec 60
+$dec 60
 π
 a = sin(π/4)
 b = a * 2
@@ -244,17 +244,17 @@ round(a, 10)
 round a, -2
 round c, 0
 
-:grad
+$grad
 settings.trigMode
 cos(100)
 sin(300)
 asin(0.5)
 
-:radians
+$radians
 
 v = 1621.9
 
-:resultonly on {
+$resultonly on {
 loop -10 .. 10 { `round to $__ -> ${round(v, __)}` }
 random(123)
 loop over 20 { random }
@@ -298,7 +298,7 @@ ty\=6
 21 % -4
 21 mod -4
 
-:frac on {
+$frac on {
 g1 = 2/3
 g2 = 9/7
 g1 % g2
@@ -355,7 +355,7 @@ A==1&&A==2||B==1
 ~ 0x7FFF @b
 255 @o
 123 @b
-:quotestrings off {
+$quotestrings off {
 f1 = `${'def' @o}`
 f2 = `${'abc' @b}`
 f3 = `${'Hello' @X}`
@@ -374,7 +374,7 @@ floor(t1);floor(t2)
 floor(0);floor(1.2e9)
 
 # The "join" operator
-:clear this, hello, handsome, rude
+$clear this, hello, handsome, rude
 this = join('This', 'is', 'a', 'test', ' ');
 hello = join('Hello', "World!", ', ');
 handsome = join("Hello ", "handsome.");
@@ -396,10 +396,10 @@ split(target, 'o', -2)
 split target, 'o'
 split 1.2, '\\.'
 c9 = " a   b d   c   e   f "
-:echo `pieces = ${split(trim(c9), '\\s+') @Q}`
+$echo `pieces = ${split(trim(c9), '\\s+') @Q}`
 
 # The "index" operator
-:clear target, one, two, three
+$clear target, one, two, three
 target = 'This is an "index" test.'
 one = index target, 'is'
 two = index target, 'is', one+1
@@ -469,7 +469,7 @@ s2
 s3 = { a:1, b:true, c:'tree', d:14 }
 splice s3, [ b, c ], { f: 'def', g: 'green' }
 s3
-:sortobjects on {
+$sortobjects on {
   s4 = { d:12, b:14, a:2, g:7, f: 3 }
   splice s4, [b, d], { c: 9 }
   s4
@@ -621,17 +621,17 @@ foundset.username='Don'
 !!foundset.username
 
 # Testing operations a various precisions
-:decimal 200 { 1/7 }
-:decimal 30 { 1/9 }
-:decimal 50 { pi }
-:decimal 10000 { e }
+$decimal 200 { 1/7 }
+$decimal 30 { 1/9 }
+$decimal 50 { pi }
+$decimal 10000 { e }
 
 # The formatting operations
-:binary
+$binary
 1024**2@k
-:ten
+$ten
 1000**4@k
-:mixed
+$mixed
 1024**3@k
 2000**10@K
 
@@ -643,14 +643,14 @@ foundset.username='Don'
 450PiB
 320Yb @K
 
-:binary { settings.units }
-:si { settings.units }
+$binary { settings.units }
+$si { settings.units }
 
-:decimal 50 { settings.precision }
-:default { settings.precision }
-:double { settings.precision }
+$decimal 50 { settings.precision }
+$default { settings.precision }
+$double { settings.precision }
 
-:degrees { settings.trigMode }
+$degrees { settings.trigMode }
 
 10! @w
 500 + 40 + 7 @W
@@ -670,10 +670,10 @@ foundset.username='Don'
 'def'@-20s
 'ghi'@20s
 
-:echo
+$echo
 
 # Rational mode pre/post inc/dec
-:rational true {
+$rational true {
 fr1 = 5/6
 ++fr1
 --fr1
@@ -716,7 +716,7 @@ d
 d[0] = 2; d[1].start = 3; d[2].py = 4; d[3] = "Bounding " + d[3];
 d@j
 length d; scale d;
-:quote off { d@-j }
+$quote off { d@-j }
 
 f = { coords: [1, 1, 4, 5], name: "box" }
 f@0.4j
@@ -746,15 +746,15 @@ false ?! 'oops! true'
 y = x = 7 + 1
 y; x;
 
-:clear m
+$clear m
 m[0] = m[1] = m[2] = 3;
 m
-:clear n
+$clear n
 n.a = 'First'; n.b = 123; n.c = false;
 n
 
 # Interpolated strings
-:clear a
+$clear a
 a = 128
 ` a is $a, b isn't $a`
 `a + 1 = ${a + 1}`
@@ -765,8 +765,8 @@ a = 128
 `a = ${a@k}`
 
 # The various assignment operators
-:clr [g,h,p,s]
-:dec(200)
+$clr [g,h,p,s]
+$dec(200)
 g = 271; h = 385; p = 192; s = 120!
 g+=h
 p-=g
@@ -816,17 +816,17 @@ b[1] = [ [ 7,9], [0,1], [3,4] ]
 b@-j
 length b; scale b; length b[1];
 
-:sortobjects on {
+$sortobjects on {
   o9 = { h: 12, g:9, f:17, d:3, a:4, c:-1 }
   o9 += { b: 3 }
 }
 
-:def
+$def
 p = {b:2, c: { d:true }, `"e"`:e }
 p@j
 length p; scale p;
-:echo "Elements of p:"
-:result on {
+$echo "Elements of p:"
+$result on {
 loop _p ∈ p { `name: $_p, value: ${p[_p]}` }
 }
 
@@ -877,7 +877,7 @@ Z\{}
 #
 # Fractions
 #
-:rational on
+$rational on
 4/5 < 7/9
 1/3 * 4/5@F
 (7/11) / (9/5)
@@ -899,12 +899,12 @@ bn -1
 bn 2
 bn 20
 bn 126
-:rational pop
+$rational pop
 
 #
 # Tests of functions
 #
-:clear a
+$clear a
 def a={ loop i in 10 { i }}
 a
 eval a
@@ -993,9 +993,9 @@ pi@,d
 10e-9@,d
 nanosperday=24*60*60*1e9@,d
 
-:sep on {
+$sep on {
 nanosperday
-:clear m
+$clear m
 n = [ 1e10, 2<<15, 42! ]
 m = { p:15!, q:3**12, r:pi**15, s:n }
 `1^10 = ${1e10}`
@@ -1065,7 +1065,7 @@ v2
 v2 = 'three sheets'
 v2 += ' to the wind'
 v2
-:clear v1, v2
+$clear v1, v2
 
 #
 # "matches" function
@@ -1092,10 +1092,10 @@ matches('abcdef', 'abc.ef', MATCH_LITERAL)
 #
 # Defining functions inside blocks
 #
-:default
+$default
 loop j over settings.precision {
   define help(n) = 10 ** -n
-  :decimal j
+  $decimal j
   help(j)
 }
 
@@ -1170,14 +1170,14 @@ c12 has h
 #
 sumof 1..30
 var sumoftest = 0
-:quiet on { loop over 1..30 sumoftest += __ }
+$quiet on { loop over 1..30 sumoftest += __ }
 sumoftest
 SumOf [ 4, 5, 6, 7, 8, 9, 10 ]
 sumOf 4..10
 4+5+6+7+8+9+10
 sumof 4..10,2
 4+6+8+10
-:rational on { sumof 3/4, 5/9, 17/8, 4/3 }
+$rational on { sumof 3/4, 5/9, 17/8, 4/3 }
 sumof i, 2, 7, 3*i
 sumof 2*k, j, 17, i
 ProductOf 10
@@ -1186,20 +1186,20 @@ ProductOf 2..10
 productOf 9..10
 productof [ 3, 5, 7, 9, 11 ]
 ProductOf 3..11,2
-:ration on { productof 3/5, 5/6, 7/8, 8/9 }
+$ration on { productof 3/5, 5/6, 7/8, 8/9 }
 ProductOf 3*k + 5*i + 4*j, 9
 
 #
 # Test read/write, especially of Unicode data
 #
 const UTF_8 = 'utf-8'
-:quiet on {
+$quiet on {
    uni1 = read('test/data/unicode.txt', UTF_8)
    write(uni1, 'uni2', UTF_8)
    uni2 = read('uni2', UTF_8)
 }
 `Test of read/write/read of Unicode data = ${uni1 === uni2}`
-:quiet on {
+$quiet on {
    exec('gunz', 'test/data/ExportCSV.csv.gz')
    data = read('test/data/ExportCSV.csv')
    exec('gz', 'test/data/ExportCSV.csv')
@@ -1230,10 +1230,10 @@ delete 'alpha.beta', 'delta.gamma', 'alpha.omega'
 # "rename" function
 const FILE1 = '_ftest_.beta'
 const FILE2 = '_gtest_.zeta'
-:quiet on { delete FILE1, FILE2 }
+$quiet on { delete FILE1, FILE2 }
 
 write('test data', FILE1)
-:quiet on { rename(FILE1, FILE2) }
+$quiet on { rename(FILE1, FILE2) }
 read(FILE2)
 
 delete(FILE2)
@@ -1257,6 +1257,6 @@ define z09 = { var b22 }
 z09()
 var a27, a38 = 7!, a92
 
-:echo
-:echo "End of expression tests (suite 1)."
+$echo
+$echo "End of expression tests (suite 1)."
 

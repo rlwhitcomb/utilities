@@ -1,5 +1,5 @@
-:quiet on {
+$quiet on {
 results = []
 loop _i in 500 { a = factors(_i); b = sumof(a) - _i; (b == 1) ? results[length results] = `$_i is prime!` : (b == _i) ? results[length results] = `$_i is perfect!` : "" }
 }
-:resultsonly on { results @j }
+$resultsonly on { results @j }

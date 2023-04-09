@@ -13,9 +13,9 @@ b@u
 `${b@u}`
 `${b@+40s}`
 
-:quiet on {
+$quiet on {
 define readJSON(fileName) = {
-   :sortkeys on {
+   $sortkeys on {
       eval(read(fileName, 'UTF-8'))
    }
 }

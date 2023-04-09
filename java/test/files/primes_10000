@@ -1,4 +1,4 @@
-:quiet on {
+$quiet on {
 primes = [ ]
 loop over 2 … 9997 {
   if isprime(__) {
@@ -6,4 +6,4 @@ loop over 2 … 9997 {
   }
 }
 }
-:resultsonly on { primes @j }
+$resultsonly on { primes @j }
