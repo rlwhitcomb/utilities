@@ -169,6 +169,8 @@
 #	    #558: New error message for "unimplemented".
 #	09-Mar-2023 (rlwhitcomb)
 #	    Update the REPL help message a little bit.
+#	09-Apr-2023 (rlwhitcomb)
+#	    #603: Update REPL help for new directive/command format.
 #
 
 #
@@ -292,10 +294,10 @@ notImplemented		= %1$s operation is not implemented
 intro.help1	= "  Enter an arithmetic expression to evaluate, or multiple expressions"
 intro.help2	= "  separated by <u>;<.>, followed by <a>Return<.> or <a>Enter<.>."
 intro.help3	= ""
-intro.help4	= "  Use <u>:help<.> or <u>:?<.> to display the help page in your browser."
-intro.help5	= "  Enter <u>:quit<.> or <u>:exit<.> to end."
-intro.help6	= "  Use <u>:gui<.> to switch to GUI mode."
-intro.help7	= "  The <u>:version<.> command is also available here."
+intro.help4	= "  Use <u>$help<.> or <u>$?<.> to display the help page in your browser."
+intro.help5	= "  Enter <u>$quit<.> or <u>$exit<.> to end."
+intro.help6	= "  Use <u>$gui<.> to switch to GUI mode."
+intro.help7	= "  The <u>$version<.> command is also available here."
 intro.help8	= ""
 
 #
