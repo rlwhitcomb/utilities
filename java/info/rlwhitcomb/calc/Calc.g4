@@ -497,6 +497,8 @@
  *	07-Apr-2023 (rlwhitcomb)
  *	    #603: Change DIR to be "$" instead, to eliminate ambiguities with directives and
  *	    object values.
+ *	08-Apr-2023 (rlwhitcomb)
+ *	    #601: Change "lcm" and "gcd" to be "exprN".
  */
 
 grammar Calc;
@@ -639,8 +641,8 @@ expr
    | K_CEIL expr1                        # ceilExpr
    | K_FLOOR expr1                       # floorExpr
    | K_ISPRIME expr1                     # isPrimeExpr
-   | K_GCD expr2                         # gcdExpr
-   | K_LCM expr2                         # lcmExpr
+   | K_GCD exprN                         # gcdExpr
+   | K_LCM exprN                         # lcmExpr
    | K_MAX exprN                         # maxExpr
    | K_MIN exprN                         # minExpr
    | K_SUMOF ( exprN | dotRange )        # sumOfExpr

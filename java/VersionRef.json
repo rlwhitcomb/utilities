@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.31.2', date: d'2023-04-09',
+      issues: [ 601 ],
+      comment: 'Update "lcm" and "gcd" to accept arrays, objects, and multiple arguments.'
+    },
     { version: '2.31.0', date: d'2023-04-07',
       issues: [ 603 ],
       comment: 'Change directives to use "$dir" instead of ":dir" form.'

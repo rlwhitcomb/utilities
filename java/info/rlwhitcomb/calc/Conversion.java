@@ -27,12 +27,14 @@
  *  28-May-22 rlw  ---	Refactor into a separate file.
  *  10-Jan-23 rlw #558:	Add QUATERNION.
  *  03-Apr-23 rlw #263:	New conversion function for "buildFlatMap".
+ *  08-Apr-23 rlw #601:	Add INTEGER for "gcd" and "lcm".
  */
 package info.rlwhitcomb.calc;
 
 import info.rlwhitcomb.math.BigFraction;
 import info.rlwhitcomb.math.ComplexNumber;
 import info.rlwhitcomb.math.Quaternion;
+import info.rlwhitcomb.util.ClassUtil;
 
 
 /**
@@ -42,6 +44,8 @@ public enum Conversion
 {
 	/** Convert all values to strings (for "exec"). */
 	STRING,
+	/** Convert all values to integers (for "lcm" or "gcd"). */
+	INTEGER,
 	/** Convert all values to decimal (for "sumof" or "productof" in decimal mode). */
 	DECIMAL,
 	/** Convert to fractions (rational mode). */
@@ -68,6 +72,11 @@ public enum Conversion
 		return COMPLEX;
 	    if (obj instanceof BigFraction)
 		return FRACTION;
+
+	    if (ClassUtil.isInteger(obj))
+		return INTEGER;
+
+	    // Any remaining number that isn't an integer from above will be a decimal
 	    if (obj instanceof Number)
 		return DECIMAL;
 

@@ -769,6 +769,8 @@
  *	    #596: Move pure REPL commands into the grammar, and implement here.
  *	03-Apr-2023 (rlwhitcomb)
  *	    #263: More work on conversions in flat maps, etc.
+ *	08-Apr-2023 (rlwhitcomb)
+ *	    #601: Make "lcm" and "gcd" work on n-ary inputs.
  */
 package info.rlwhitcomb.calc;
 
@@ -4836,40 +4838,54 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitGcdExpr(CalcParser.GcdExprContext ctx) {
-	    CalcParser.Expr2Context e2ctx = ctx.expr2();
+	    List<CalcParser.ExprContext> exprs = ctx.exprN().exprList().expr();
+	    List<Object> objects = buildFlatMap(exprs, false,
+		settings.rationalMode ? Conversion.FRACTION : Conversion.INTEGER);
+	    int index;
 
 	    if (settings.rationalMode) {
-		BigFraction f1 = getFractionValue(e2ctx.expr(0));
-		BigFraction f2 = getFractionValue(e2ctx.expr(1));
+		BigFraction result = (BigFraction) objects.get(0);
+		for (index = 1; index < objects.size(); index++) {
+		    result = result.gcd((BigFraction) objects.get(index));
+		}
 
-		return f1.gcd(f2);
+		return result;
 	    }
 	    else {
-		BigInteger e1 = getIntegerValue(e2ctx.expr(0));
-		BigInteger e2 = getIntegerValue(e2ctx.expr(1));
+		BigInteger result = (BigInteger) objects.get(0);
+		for (index = 1; index < objects.size(); index++) {
+		    result = result.gcd((BigInteger) objects.get(index));
+		}
 
-		return e1.gcd(e2);
+		return result;
 	    }
 	}
 
 	@Override
 	public Object visitLcmExpr(CalcParser.LcmExprContext ctx) {
-	    CalcParser.Expr2Context e2ctx = ctx.expr2();
+	    List<CalcParser.ExprContext> exprs = ctx.exprN().exprList().expr();
+	    List<Object> objects = buildFlatMap(exprs, false,
+		settings.rationalMode ? Conversion.FRACTION : Conversion.INTEGER);
+	    int index;
 
 	    try {
 		if (settings.rationalMode) {
-		    BigFraction f1 = getFractionValue(e2ctx.expr(0));
-		    BigFraction f2 = getFractionValue(e2ctx.expr(1));
+		    BigFraction result = (BigFraction) objects.get(0);
+		    for (index = 1; index < objects.size(); index++) {
+			result = result.lcm((BigFraction) objects.get(index));
+		    }
 
-		    return f1.lcm(f2);
+		    return result;
 		}
 		else {
-		    BigInteger e1 = getIntegerValue(e2ctx.expr(0));
-		    BigInteger e2 = getIntegerValue(e2ctx.expr(1));
+		    BigInteger result = (BigInteger) objects.get(0);
+		    for (index = 1; index < objects.size(); index++) {
+			// Note: this "lcm" method is a helper function inside BigFraction
+			// that works on and returns a BigInteger value
+			result = BigFraction.lcm(result, (BigInteger) objects.get(index));
+		    }
 
-		    // Note: this "lcm" method is a helper function inside BigFraction
-		    // that works on and returns a BigInteger value
-		    return BigFraction.lcm(e1, e2);
+		    return result;
 		}
 	    }
 	    catch (ArithmeticException ae) {
@@ -5007,17 +5023,24 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	 *
 	 * @param exprs	  The list of expressions parsed as the arguments to the function.
 	 * @param forJoin Whether or not this is a "join" operation.
+	 * @param conv	  Default conversion (or {@code null} to peek inside)
 	 * @return	  The "flat map" of the values from those arguments.
 	 */
-	private List<Object> buildFlatMap(final List<CalcParser.ExprContext> exprs, final boolean forJoin) {
-	    // Do a "peek" inside any lists or maps to get the first value
-	    CalcParser.ExprContext firstCtx = exprs.get(0);
-	    Conversion conv = Conversion.fromValue(getFirstValue(firstCtx, evaluate(firstCtx), forJoin));
+	private List<Object> buildFlatMap(final List<CalcParser.ExprContext> exprs, final boolean forJoin, final Conversion conv) {
+	    Conversion conversion = conv;
+	    if (conversion == null) {
+		// Do a "peek" inside any lists or maps to get the first value
+		CalcParser.ExprContext firstCtx = exprs.get(0);
+		conversion = Conversion.fromValue(getFirstValue(firstCtx, evaluate(firstCtx), forJoin));
+		// Don't do INTEGER unless specifically requested
+		if (conversion == Conversion.INTEGER)
+		    conversion = Conversion.DECIMAL;
+	    }
 
 	    List<Object> objects = new ArrayList<>();
 
 	    for (CalcParser.ExprContext eCtx : exprs) {
-		buildFlatMap(eCtx, evaluate(eCtx), objects, conv, forJoin);
+		buildFlatMap(eCtx, evaluate(eCtx), objects, conversion, forJoin);
 	    }
 
 	    return objects;
@@ -5026,7 +5049,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitMaxExpr(CalcParser.MaxExprContext ctx) {
 	    List<CalcParser.ExprContext> exprs = ctx.exprN().exprList().expr();
-	    List<Object> objects = buildFlatMap(exprs, false);
+	    List<Object> objects = buildFlatMap(exprs, false, null);
 	    Object firstValue = objects.size() > 0 ? objects.get(0) : null;
 
 	    if (firstValue instanceof String) {
@@ -5063,7 +5086,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitMinExpr(CalcParser.MinExprContext ctx) {
 	    List<CalcParser.ExprContext> exprs = ctx.exprN().exprList().expr();
-	    List<Object> objects = buildFlatMap(exprs, false);
+	    List<Object> objects = buildFlatMap(exprs, false, null);
 	    Object firstValue = objects.size() > 0 ? objects.get(0) : null;
 
 	    if (firstValue instanceof String) {
@@ -5100,11 +5123,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitJoinExpr(CalcParser.JoinExprContext ctx) {
 	    List<CalcParser.ExprContext> exprs = ctx.exprN().exprList().expr();
-	    List<Object> objects = new ArrayList<>();
-
-	    for (CalcParser.ExprContext eCtx : exprs) {
-		buildFlatMap(eCtx, evaluate(eCtx), objects, Conversion.STRING, true);
-	    }
+	    List<Object> objects = buildFlatMap(exprs, true, Conversion.STRING);
 
 	    StringBuilder buf = new StringBuilder();
 	    int length = objects.size();
@@ -7029,6 +7048,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    conv = Conversion.FRACTION;
 		else if (conv == Conversion.STRING)
 		    conv = Conversion.DECIMAL;
+		else if (conv == Conversion.INTEGER)
+		    conv = Conversion.DECIMAL;
 
 		List<Object> objects = buildValueList(this, exprs, conv);
 		sumVisitor = new SumOfVisitor(ctx, conv);
@@ -7134,6 +7155,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		if (settings.rationalMode)
 		    conv = Conversion.FRACTION;
 		else if (conv == Conversion.STRING)
+		    conv = Conversion.DECIMAL;
+		else if (conv == Conversion.INTEGER)
 		    conv = Conversion.DECIMAL;
 
 		List<Object> objects = buildValueList(this, exprs, conv);

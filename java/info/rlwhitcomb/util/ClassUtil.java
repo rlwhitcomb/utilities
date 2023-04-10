@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2012-2014,2016-2018,2020-2022 Roger L. Whitcomb.
+ * Copyright (c) 2012-2014,2016-2018,2020-2023 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,90 +23,57 @@
  *
  *	Class / reflection-related utility methods.
  *
- *  History:
- *	30-Aug-2012 (rlwhitcomb)
- *	    Created.
- *	04-Sep-2012 (rlwhitcomb)
- *	    Do a better job of coercing values to the field types.
- *	04-Sep-2012 (rlwhitcomb)
- *	    Allow single values to pass as 1-length arrays.
- *	05-Sep-2012 (rlwhitcomb)
- *	    Add double value and enum support.
- *	26-Sep-2013 (rlwhitcomb)
- *	    Add EnumSet support (for ExtendOptions at least).
- *	28-Oct-2013 (rlwhitcomb)
- *	    Add "long" support to "createAndSetValues"; add support
- *	    for setting int and long values via hex strings.
- *	07-May-2014 (rlwhitcomb)
- *	    Add a convenience method to get stack elements (in order
- *	    to pinpoint the callers of functions for identification).
- *	08-Sep-2014 (rlwhitcomb)
- *	    Add methods to initialize class loader strategy and to get
- *	    a suitable class loader for use.  For now this uses TCCL
- *	    but could be changed if need be.  This gives us a single
- *	    place to implement a different strategy if needed.
- *	30-Sep-2014 (rlwhitcomb)
- *	    Add utility methods to convert objects and longs to byte arrays
- *	    (using serialization).
- *	07-Jan-2016 (rlwhitcomb)
- *	    Fix Javadoc warnings found by Java 8.
- *	17-Feb-2016 (rlwhitcomb)
- *	    Add a new method to log the stack trace of the method's caller.
- *	18-Mar-2016 (rlwhitcomb)
- *	    Two new utility methods to throw an IllegalStateException if the input
- *	    value is true or set (meaning not the default value).  Used for the data
- *	    transfer functions of the various utility options classes.
- *	    Use a different method to match option keys to field names so that we can
- *	    do a case-insensitive match.
- *	06-Mar-2017 (rlwhitcomb)
- *	    Always return some kind of string from "getCallingMethod" ("<unknown caller>"
- *	    if not known).
- *	18-Apr-2018 (rlwhitcomb)
- *	    Add method to compare objects with null checking.
- *	10-Mar-2020 (rlwhitcomb)
- *	    Prepare for GitHub.
- *	14-Apr-2020 (rlwhitcomb)
- *	    Rework code to avoid deprecated "Class.newInstance" method.
- *	15-Apr-2020 (rlwhitcomb)
- *	    New method to turn a class into a resource path.
- *	21-Dec-2020 (rlwhitcomb)
- *	    Update obsolete Javadoc constructs.
- *	27-Jan-2021 (rlwhitcomb)
- *	    New method to get a directory name from a class (package).
- *	29-Jan-2021 (rlwhitcomb)
- *	    Use new Intl Exception variants for convenience.
- *	07-Jul-2021 (rlwhitcomb)
- *	    Make the class final and the constructor private.
- *	17-Nov-2021 (rlwhitcomb)
- *	    Add "defaultToString". Make all parameters final.
- *	18-Dec-2021 (rlwhitcomb)
- *	    #148: Method to construct map from Scriptable fields. Cleanup.
- *	24-Jan-2022 (rlwhitcomb)
- *	    #79: New method to convert an object to a byte array.
- *	02-Feb-2022 (rlwhitcomb)
- *	    #115: In "getMapFromObject" for the general case put the String value,
- *	    not the object itself.
- *	    #115: Add methods into the Scriptable processing in "getMapFromObject".
- *	05-Feb-2022 (rlwhitcomb)
- *	    #233: Add "getField" method to support the "system value" idea in Calc.
- *	    And remove "getMapFromObject" which is not being used now.
- *	16-Feb-2022 (rlwhitcomb)
- *	    Add two flavors of "getResourceAsString" to load text from the .jar file.
- *	12-Apr-2022 (rlwhitcomb)
- *	    #269: Method to parse full module/class.name into parts as well as class
- *	    to parse and hold the information.
- *	14-Apr-2022 (rlwhitcomb)
- *	    #273: Move math-related classes to "math" package.
- *	09-Jul-2022 (rlwhitcomb)
- *	    #393: Cleanup imports.
- *	24-Aug-2022 (rlwhitcomb)
- *	    Handle null input to "defaultToString()".
- *	25-Aug-2022 (rlwhitcomb)
- *	    Another tweak to "defaultToString()" for null input.
- *	29-Aug-2022 (rlwhitcomb)
- *	    #453: Add back "getMapFromObject" method.
- *	12-Oct-2022 (rlwhitcomb)
- *	    #513: Move Logging to a new package.
+ * History:
+ *  30-Aug-12 rlw  ---	Created.
+ *  04-Sep-12 rlw  ---	Do a better job of coercing values to the field types.
+ *  04-Sep-12 rlw  ---	Allow single values to pass as 1-length arrays.
+ *  05-Sep-12 rlw  ---	Add double value and enum support.
+ *  26-Sep-13 rlw  ---	Add EnumSet support (for ExtendOptions at least).
+ *  28-Oct-13 rlw  ---	Add "long" support to "createAndSetValues"; add support
+ *			for setting int and long values via hex strings.
+ *  07-May-14 rlw  ---	Add a convenience method to get stack elements (in order
+ *			to pinpoint the callers of functions for identification).
+ *  08-Sep-14 rlw  ---	Add methods to initialize class loader strategy and to get
+ *			a suitable class loader for use.  For now this uses TCCL
+ *			but could be changed if need be.  This gives us a single
+ *			place to implement a different strategy if needed.
+ *  30-Sep-14 rlw  ---	Add utility methods to convert objects and longs to byte arrays
+ *			(using serialization).
+ *  07-Jan-16 rlw  ---	Fix Javadoc warnings found by Java 8.
+ *  17-Feb-16 rlw  ---	Add a new method to log the stack trace of the method's caller.
+ *  18-Mar-16 rlw  ---	Two new utility methods to throw an IllegalStateException if the input
+ *			value is true or set (meaning not the default value).  Used for the data
+ *			transfer functions of the various utility options classes.
+ *			Use a different method to match option keys to field names so that we can
+ *			do a case-insensitive match.
+ *  06-Mar-17 rlw  ---	Always return some kind of string from "getCallingMethod" ("<unknown caller>"
+ *			if not known).
+ *  18-Apr-18 rlw  ---	Add method to compare objects with null checking.
+ *  10-Mar-20 rlw  ---	Prepare for GitHub.
+ *  14-Apr-20 rlw  ---	Rework code to avoid deprecated "Class.newInstance" method.
+ *  15-Apr-20 rlw  ---	New method to turn a class into a resource path.
+ *  21-Dec-20 rlw  ---	Update obsolete Javadoc constructs.
+ *  27-Jan-21 rlw  ---	New method to get a directory name from a class (package).
+ *  29-Jan-21 rlw  ---	Use new Intl Exception variants for convenience.
+ *  07-Jul-21 rlw  ---	Make the class final and the constructor private.
+ *  17-Nov-21 rlw  ---	Add "defaultToString". Make all parameters final.
+ *  18-Dec-21 rlw #148:	Method to construct map from Scriptable fields. Cleanup.
+ *  24-Jan-22 rlw #79:	New method to convert an object to a byte array.
+ *  02-Feb-22 rlw #115:	In "getMapFromObject" for the general case put the String value,
+ *			not the object itself.
+ *		  #115:	Add methods into the Scriptable processing in "getMapFromObject".
+ *  05-Feb-22 rlw #233:	Add "getField" method to support the "system value" idea in Calc.
+ *			And remove "getMapFromObject" which is not being used now.
+ *  16-Feb-22 rlw  ---	Add two flavors of "getResourceAsString" to load text from the .jar file.
+ *  12-Apr-22 rlw #269:	Method to parse full module/class.name into parts as well as class
+ *			to parse and hold the information.
+ *  14-Apr-22 rlw #273:	Move math-related classes to "math" package.
+ *  09-Jul-22 rlw #393:	Cleanup imports.
+ *  24-Aug-22 rlw  ---	Handle null input to "defaultToString()".
+ *  25-Aug-22 rlw  ---	Another tweak to "defaultToString()" for null input.
+ *  29-Aug-22 rlw #453:	Add back "getMapFromObject" method.
+ *  12-Oct-22 rlw #513:	Move Logging to a new package.
+ *  09-Apr-23 rlw #601:	New method to determine if an object is an integer object.
  */
 package info.rlwhitcomb.util;
 
@@ -116,6 +83,8 @@ import info.rlwhitcomb.math.NumericUtil;
 
 import java.io.*;
 import java.lang.reflect.*;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -453,6 +422,38 @@ public final class ClassUtil
 	    }
 	    catch (NoSuchMethodException | InstantiationException | IllegalAccessException ex) { }
 	    return obj;
+	}
+
+
+	/**
+	 * Determine if the given object is an "integer" type, which includes the built-in
+	 * integers, as well as the {@link BigInteger} type and {@link BigDecimal} values
+	 * with no decimal part.
+	 *
+	 * @param obj The object to check.
+	 * @return    Whether or not this object is an integer type.
+	 */
+	public static boolean isInteger(final Object obj) {
+	    if (obj instanceof Number) {
+		Class<?> clz = obj.getClass();
+		if (clz == BigInteger.class)
+		    return true;
+		if (clz == Integer.class || clz == Integer.TYPE)
+		    return true;
+		if (clz == Long.class || clz == Long.TYPE)
+		    return true;
+		if (clz == Short.class || clz == Short.TYPE)
+		    return true;
+		if (clz == Byte.class || clz == Byte.TYPE)
+		    return true;
+		if (clz == BigDecimal.class) {
+		    BigDecimal bd = ((BigDecimal) obj).stripTrailingZeros();
+		    if (bd.scale() <= 0)
+			return true;
+		}
+	    }
+
+	    return false;
 	}
 
 
@@ -825,6 +826,7 @@ public final class ClassUtil
 	    return baos.toByteArray();
 	}
 
+
 	/**
 	 * Load a resource from this classloader and convert to a String (UTF-8 charset).
 	 *
@@ -835,6 +837,7 @@ public final class ClassUtil
 	public static String getResourceAsString(final String resourcePath) {
 	    return getResourceAsString(resourcePath, Constants.UTF_8_CHARSET);
 	}
+
 
 	/**
 	 * Load a resource from this classloader and convert to a String using the given charset.
@@ -860,6 +863,7 @@ public final class ClassUtil
 
 	    return builder.toString();
 	}
+
 
 	/**
 	 * Parse a module / class name into parts.

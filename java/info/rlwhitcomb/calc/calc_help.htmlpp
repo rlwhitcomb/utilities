@@ -820,8 +820,8 @@ or<br>
             <tr><td><code>FLOOR</code>&nbsp;<i>expr</i></td><td>the "floor" of a numeric value</td></tr>
             <tr><td><code>CEIL</code>&nbsp;<i>expr</i></td><td>the "ceil" of a numeric value</td></tr>
             <tr><td><code>ISPRIME</code>&nbsp;<i>expr</i></td><td>is the value a prime number?</td></tr>
-            <tr><td><code>GCD</code>&nbsp;<i>expr</i><code>,</code>&nbsp;<i>expr</i></td><td>greatest common divisor</td></tr>
-            <tr><td><code>LCM</code>&nbsp;<i>expr</i><code>,</code>&nbsp;<i>expr</i></td><td>least common multiple</td></tr>
+            <tr><td><code>GCD</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;) *</td><td>greatest common divisor</td></tr>
+            <tr><td><code>LCM</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;) *</td><td>least common multiple</td></tr>
             <tr><td><code>MAX</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;) *</td><td>maximum value</td></tr>
             <tr><td><code>MIN</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;) *</td><td>minimum value</td></tr>
             <tr><td><code>SUMOF</code> or <code>&#x2211;</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;) *<br>or <i>expr</i> [ <code>..</code> or <code>&#x2026;</code> <i>expr</i> [ <code>,</code> <i>expr</i> ] ]</td><td>sum of all the values</td></tr>
