@@ -771,6 +771,8 @@
  *	    #263: More work on conversions in flat maps, etc.
  *	08-Apr-2023 (rlwhitcomb)
  *	    #601: Make "lcm" and "gcd" work on n-ary inputs.
+ *	09-Apr-2023 (rlwhitcomb)
+ *	    #605: Add "arrayof" function.
  */
 package info.rlwhitcomb.calc;
 
@@ -2886,6 +2888,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	 * <li>"case" selector
 	 * <li>"sumof" operation
 	 * <li>"productof" operation
+	 * <li>"arrayof" operator
 	 * <li>"loop" statement
 	 * </ul>
 	 *
@@ -7046,9 +7049,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		conv = Conversion.fromValue(getFirstValue(ctx, evaluate(exprs.get(0)), false));
 		if (settings.rationalMode)
 		    conv = Conversion.FRACTION;
-		else if (conv == Conversion.STRING)
-		    conv = Conversion.DECIMAL;
-		else if (conv == Conversion.INTEGER)
+		else if (conv == Conversion.STRING || conv == Conversion.INTEGER)
 		    conv = Conversion.DECIMAL;
 
 		List<Object> objects = buildValueList(this, exprs, conv);
@@ -7154,9 +7155,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		conv = Conversion.fromValue(getFirstValue(ctx, evaluate(exprs.get(0)), false));
 		if (settings.rationalMode)
 		    conv = Conversion.FRACTION;
-		else if (conv == Conversion.STRING)
-		    conv = Conversion.DECIMAL;
-		else if (conv == Conversion.INTEGER)
+		else if (conv == Conversion.STRING || conv == Conversion.INTEGER)
 		    conv = Conversion.DECIMAL;
 
 		List<Object> objects = buildValueList(this, exprs, conv);
@@ -7174,6 +7173,43 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 
 	    return product;
+	}
+
+	private class ArrayOfVisitor implements IterationVisitor
+	{
+		private ArrayScope<Object> array;
+
+		public ArrayOfVisitor(ArrayScope<Object> arr) {
+		    array = arr;
+		}
+
+		@Override
+		public Object apply(Object obj) {
+		    array.add(obj);
+		    return obj;
+		}
+	}
+
+	@Override
+	public Object visitArrayOfExpr(CalcParser.ArrayOfExprContext ctx) {
+	    ArrayScope<Object> array = new ArrayScope<>();
+	    ArrayOfVisitor arrayVisitor = new ArrayOfVisitor(array);
+
+	    CalcParser.DotRangeContext dotRange = ctx.dotRange();
+	    if (dotRange == null) {
+		List<CalcParser.ExprContext> exprs = ctx.exprN().exprList().expr();
+
+		List<Object> objects = buildValueList(this, exprs, Conversion.UNCHANGED);
+
+		for (Object obj : objects) {
+		    arrayVisitor.apply(obj);
+		}
+	    }
+	    else {
+		iterateOverDotRange(null, dotRange.expr(), dotRange.DOTS() != null, arrayVisitor, true, false);
+	    }
+
+	    return array;
 	}
 
 	@Override

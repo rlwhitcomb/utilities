@@ -499,6 +499,8 @@
  *	    object values.
  *	08-Apr-2023 (rlwhitcomb)
  *	    #601: Change "lcm" and "gcd" to be "exprN".
+ *	09-Apr-2023 (rlwhitcomb)
+ *	    #605: Add "arrayof" function.
  */
 
 grammar Calc;
@@ -647,6 +649,7 @@ expr
    | K_MIN exprN                         # minExpr
    | K_SUMOF ( exprN | dotRange )        # sumOfExpr
    | K_PRODUCTOF ( exprN | dotRange )    # productOfExpr
+   | K_ARRAYOF ( exprN | dotRange )      # arrayOfExpr
    | K_JOIN exprN                        # joinExpr
    | K_SPLIT ( expr3 | expr2 )           # splitExpr
    | K_INDEX ( expr3 | expr2 )           # indexExpr
@@ -1265,6 +1268,8 @@ K_CALLERS  : 'callers' | 'CALLERS' | 'Callers' ;
 K_SUMOF    : 'sumof' | 'SUMOF' | 'Sumof' | 'SumOf' | 'sumOf' | '\u2211' ;
 
 K_PRODUCTOF: 'productof' | 'PRODUCTOF' | 'Productof' | 'ProductOf' | 'productOf' | '\u220F' ;
+
+K_ARRAYOF  : 'arrayof' | 'ARRAYOF' | 'Arrayof' | 'ArrayOf' | 'arrayOf' ;
 
 /*
  * Statement keywords
