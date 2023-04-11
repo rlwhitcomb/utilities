@@ -773,6 +773,8 @@
  *	    #601: Make "lcm" and "gcd" work on n-ary inputs.
  *	09-Apr-2023 (rlwhitcomb)
  *	    #605: Add "arrayof" function.
+ *	11-Apr-2023 (rlwhitcomb)
+ *	    Make mode option enum for all the relevant values.
  */
 package info.rlwhitcomb.calc;
 
@@ -836,6 +838,32 @@ import static info.rlwhitcomb.util.Constants.*;
  */
 public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 {
+	/**
+	 * One of the mode options for "on", "off", "pop", and so forth.
+	 * <p> Note: these must match the values in Calc.g4
+	 */
+	private enum ModeOption
+	{
+		TRUE,
+		ON,
+		YES,
+		FALSE,
+		OFF,
+		NO,
+		POP,
+		PREV,
+		PREVIOUS;
+
+		static ModeOption fromValue(final Object obj) {
+		    String string = obj.toString();
+		    for (ModeOption opt : values()) {
+			if (opt.toString().equalsIgnoreCase(string))
+			    return opt;
+		    }
+		    throw new Intl.IllegalArgumentException("calc#modeError", string);
+		}
+	}
+
 	/**
 	 * Enumeration of possible optimization strategies for {@link #iterateOverDotRange},
 	 * depending on what we're really trying to do during the iteration.
@@ -1538,7 +1566,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		}
 		finally {
 		    popScope();
-		    pushQuietMode.accept("pop");
+		    pushQuietMode.accept(ModeOption.POP);
 		}
 	    }
 
@@ -2168,7 +2196,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			ret = evaluate(bracketBlock);
 		    }
 		    finally {
-			processModeOption("pop", stack, setOperator);
+			processModeOption(ModeOption.POP, stack, setOperator);
 		    }
 		}
 		else {
@@ -2186,30 +2214,28 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    boolean mode = false;
 	    boolean push = true;
 
-	    String option = (value instanceof String) ? (String) value : value.toString();
+	    ModeOption option = ModeOption.fromValue(value);
 
-	    switch (option.toLowerCase()) {
-		case "true":
-		case "on":
-		case "yes":
+	    switch (option) {
+		case TRUE:
+		case ON:
+		case YES:
 		    mode = true;
 		    break;
-		case "false":
-		case "off":
-		case "no":
+		case FALSE:
+		case OFF:
+		case NO:
 		    mode = false;
 		    break;
-		case "pop":
-		case "prev":
-		case "previous":
+		case POP:
+		case PREV:
+		case PREVIOUS:
 		    if (stack.isEmpty())
 			mode = false;
 		    else
 			mode = stack.pop();
 		    push = false;
 		    break;
-		default:
-		    throw new Intl.IllegalArgumentException("calc#modeError", option);
 	    }
 
 	    // Run the process to actually set the new mode
@@ -3280,7 +3306,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    }
 		    finally {
 			popScope();
-			pushQuietMode.accept("pop");
+			pushQuietMode.accept(ModeOption.POP);
 			isMatched = true;
 		    }
 		    return returnValue;
