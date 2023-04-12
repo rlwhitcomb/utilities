@@ -1,0 +1,42 @@
+/*
+ * Problem 4 from Project Euler (projecteuler.net)
+ *
+ * Largest palindrome product
+ *
+ * A palindromic number reads the same both ways. The largest palindrome
+ * made from the product of two 2-digit numbers is 9009 = 91 × 99.
+ *
+ * Find the largest palindrome made from the product of two 3-digit numbers.
+ */
+$quiet on {
+
+const LIMIT = 999
+const LOWER_LIMIT = 900
+
+define isPalindrome(x) = {
+  $sep off { const s = @@x }
+  s === reverse(s)
+}
+
+define solve() = {
+  var palindromes = []
+  loop x over LIMIT..LOWER_LIMIT,-1 {
+    loop y over x..LOWER_LIMIT,-1 {
+      var product = x * y
+      if isPalindrome(product) {
+        palindromes += product
+      }
+    }
+  }
+  palindromes
+}
+
+}
+
+$resultsonly on {
+
+const results = solve();
+
+`Largest palindrome made from product of two 3-digit numbers is ${max(results)}.`@q
+
+}

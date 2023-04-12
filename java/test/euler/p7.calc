@@ -1,0 +1,28 @@
+/*
+ * Problem 7 from Project Euler (projecteuler.net)
+ *
+ * 10001st prime
+ *
+ * By listing the first six prime numbers: 2, 3, 5, 7, 11, and 13, we can see that the 6th prime is 13.
+ *
+ * What is the 10 001st prime number?
+ */
+$quiet on {
+
+const WHICH = 10001
+
+var prime = 13
+var which = 6
+
+while which < WHICH {
+   prime += 2
+   if isprime(prime) which++
+}
+
+}
+
+$resultsonly on {
+
+`The ${WHICH}st prime number is $prime.`@q
+
+}

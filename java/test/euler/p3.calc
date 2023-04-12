@@ -1,0 +1,35 @@
+/*
+ * Project 3 from Project Euler (projecteuler.net)
+ *
+ * Largest prime factor
+ *
+ * The prime factors of 13195 are 5, 7, 13 and 29.
+ *
+ * What is the largest prime factor of the number 600851475143 ?
+ */
+$quiet on {
+
+const VALUE = 600851475143
+
+var f = []
+var remaining = VALUE
+var factor = 3
+
+while remaining > 1 {
+  if isprime(factor) && remaining % factor == 0 {
+    f += factor
+    remaining /= factor
+  }
+  factor += 2
+}
+
+const largest = max(f)
+
+}
+
+$resultsonly on {
+
+`Largest prime factor of $VALUE is $largest.`@q
+`All the prime factors of $VALUE are $f.`@q
+
+}

@@ -1309,7 +1309,19 @@ public final class MathUtil
 
 	private static final BigInteger MAX_PRIME = MAX_INT;
 
+	/**
+	 * This is the "Sieve of Eratosthenes" used for primality tests.
+	 * <p> The one bits in this value correspond to the multiples of
+	 * each prime number starting with 3 (that is, the composite numbers)
+	 * while the zero bits are the primes in between them. Only the
+	 * odd numbers starting at 3 are represented, with bit 0 (the least-
+	 * significant bit) representing 3.
+	 */
 	private static BigInteger primeSieve = BigInteger.ZERO;
+	/**
+	 * This represents the size in bits of the sieve that we have already
+	 * set correctly. Any value bigger than this is undefined.
+	 */
 	private static int primeSieveMax = -1;
 
 	private static void constructSieve(final int size) {

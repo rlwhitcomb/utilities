@@ -1,0 +1,25 @@
+/*
+ * Problem 10 from Project Euler (projecteuler.net)
+ *
+ * Summation of primes
+ *
+ * The sum of the primes below 10 is 2 + 3 + 5 + 7 = 17.
+ *
+ * Find the sum of all the primes below two million.
+ */
+$quiet on {
+
+const LIMIT = 2e6
+var sum = 2
+
+loop p over 3..LIMIT,2 {
+   if isprime(p) { sum += p }
+}
+
+}
+
+$resultsonly on {
+
+`The sum of all the primes below $LIMIT is $sum.`@q
+
+}
