@@ -29,7 +29,7 @@ while (f = fib1 + fib2) < LIMIT {
 
 $resultsonly on {
 
-`Sum of the even-valued Fibonacci terms below $LIMIT is $sum.`@q
+`Sum of the even-valued Fibonacci terms below $LIMIT is $sum.`
 
 }
 

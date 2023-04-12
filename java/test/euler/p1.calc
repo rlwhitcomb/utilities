@@ -10,17 +10,26 @@
  */
 $quiet on {
 
-const LIMIT = 1000
-var sum = 0
+const TEST_LIMIT = 10
+const LIMIT      = 1000
 
-loop x within LIMIT {
-  if x % 3 == 0 || x % 5 == 0 { sum += x }
+define test(limit) = {
+   var sum = 0
+   loop x within limit {
+      if x % 3 == 0 || x % 5 == 0 { sum += x }
+   }
+   sum
+}
+
+define report(limit, result) = {
+   `Sum of multiples of 3 or 5 below $limit is $result.`
 }
 
 }
 $resultsonly on {
 
-`Sum of multiples of 3 or 5 below $LIMIT is $sum.`@q
+report(TEST_LIMIT, test(TEST_LIMIT))
+report(LIMIT,      test(LIMIT)     )
 
 }
 

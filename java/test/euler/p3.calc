@@ -9,27 +9,36 @@
  */
 $quiet on {
 
-const VALUE = 600851475143
+const TEST_VALUE = 13195
+const VALUE      = 600851475143
 
-var f = []
-var remaining = VALUE
-var factor = 3
+define test(value) = {
+   var f = []
+   var remaining = value
+   var factor = 3
 
-while remaining > 1 {
-  if isprime(factor) && remaining % factor == 0 {
-    f += factor
-    remaining /= factor
-  }
-  factor += 2
+   while remaining > 1 {
+      if isprime(factor) && remaining % factor == 0 {
+         f += factor
+         remaining /= factor
+      }
+      factor += 2
+   }
+   f
 }
 
-const largest = max(f)
+define report(value, values, largest) = {
+   `All the prime factors of $value are $values; the largest is $largest.`
+}
 
 }
 
 $resultsonly on {
 
-`Largest prime factor of $VALUE is $largest.`@q
-`All the prime factors of $VALUE are $f.`@q
+var f1 = test(TEST_VALUE)
+report(TEST_VALUE, f1, max(f1))
+
+var f2 = test(VALUE)
+report(VALUE, f2, max(f2))
 
 }
