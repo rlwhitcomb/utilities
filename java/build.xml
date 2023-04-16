@@ -371,6 +371,8 @@
 		#6, #593: Add "PreProc*.class" into here for use in other places.
 	    16-Jan-2023 (rlwhitcomb)
 		#6: "preproc" is now wrapped by "PreProcTask".
+	    15-Apr-2023 (rlwhitcomb)
+		#599: Run the "Project Euler" tests if the canons exist.
 
      ========================================================================== -->
 
@@ -494,6 +496,14 @@
 		<istrue value="${ci.build}"/>
 	</condition>
 	<property name="full.build" value="${build.version}${debug.flag}+${build.lastrev}"/>
+	<condition property="euler.canons.exist" value="true" else="false">
+		<and>
+			<available file="test/euler/eulertest" type="file"/>
+			<available file="test/euler/p1.canon" type="file"/>
+			<available file="test/euler/p2.canon" type="file"/>
+			<available file="test/euler/p10.canon" type="file"/>
+		</and>
+	</condition>
 
 	<patternset id="wrapper-files">
 		<include name="_find_and_run_class"     unless:true="${on.windows}"/>
@@ -788,6 +798,12 @@ Test starting on ${build.date} at ${build.time}
 			<arg value="-timing"/>
 			<arg value="-dir:test/files"/>
 			<arg value="maintest"/>
+		</java>
+		<java classname="${tester.class}"                     output="${test.log.path}" append="true" failonerror="true" fork="true" if:true="${euler.canons.exist}">
+			<jvmarg value="${jvm17.args}" if:true="${java.17plus.version}"/>
+			<arg value="-timing"/>
+			<arg value="-dir:test/euler"/>
+			<arg value="eulertest"/>
 		</java>
 		<echo>Basic tests of Base64 utility ...</echo>
 		<exec executable="./verify_b64"   dir="."             output="${test.log.path}" append="true" unless:true="${on.windows}" failonerror="true"/>
