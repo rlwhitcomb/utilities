@@ -1,8 +1,8 @@
-:quiet on {
+$quiet on {
 json = eval(read($0))
 ix = 1
 }
-:results on {
+$results on {
 
 loop over json[0].shortdef { `${ix++}. $__`@q }
 }

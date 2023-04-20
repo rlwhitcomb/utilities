@@ -1,5 +1,5 @@
-:quiet on {
-   :colors off
+$quiet on {
+   $colors off
    cp = []
    jars = findfiles ('external-files', '*.jar')
    loop jar over jars {
@@ -8,8 +8,8 @@
       }
    }
 }
-:results on {
-   :quotestrings off {
+$results on {
+   $quotestrings off {
       `CLASSPATH=${join cp, info.os.pathsep}`
    }
 }

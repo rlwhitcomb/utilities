@@ -8,11 +8,11 @@
  *
  * $0 = name of file retrieved by "curl"
  */
-:quiet on {
-    j = eval(read($0, 'UTF-8'))
+$quiet on {
+    record = eval(read($0, 'UTF-8'))
 }
-:results on {
-    loop event within j {
+$results on {
+    loop event within record {
         if event.type == "PushEvent" && event.payload.ref == "refs/heads/master" {
            substr(event.payload.head, 0, 7) @q
            leave
