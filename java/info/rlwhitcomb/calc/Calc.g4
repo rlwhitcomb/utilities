@@ -501,6 +501,8 @@
  *	    #601: Change "lcm" and "gcd" to be "exprN".
  *	09-Apr-2023 (rlwhitcomb)
  *	    #605: Add "arrayof" function.
+ *	20-Apr-2023 (rlwhitcomb)
+ *	    #607: Allow decimals without leading digits as numbers.
  */
 
 grammar Calc;
@@ -1926,6 +1928,7 @@ fragment PI_VALUES
 
 NUMBER
    : INT ('.' [0-9] +)? EXP?
+   | '.' [0-9] + EXP?
    ;
 
 VERSION
