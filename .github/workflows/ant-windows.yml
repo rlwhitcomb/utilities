@@ -29,7 +29,7 @@ jobs:
     - name: Build with Ant
       run: .\ci-build.bat
     - name: Upload test results
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: test-results
         path: dist\*.log
