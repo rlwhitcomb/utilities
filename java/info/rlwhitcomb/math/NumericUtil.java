@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2011,2013-2014,2016-2018,2020-2022 Roger L. Whitcomb.
+ * Copyright (c) 2011,2013-2014,2016-2018,2020-2023 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -178,6 +178,8 @@
  *	    #514: Move resource text from "util" package to here.
  *	04-Nov-2022 (rlwhitcomb)
  *	    #48: Introduce TINY format for names (for "Dir" utility).
+ *	03-May-2023 (rlwhitcomb)
+ *	    #599: New option for "convertToWords" for British usage (to use "and" as in "three hundred and twenty").
  */
 package info.rlwhitcomb.math;
 
@@ -1129,11 +1131,11 @@ public final class NumericUtil
 	 *
 	 * @param	value	The value to convert.
 	 * @return		The value written out as its English name.
-	 * @see #convertToWords(BigInteger, StringBuilder, boolean)
+	 * @see #convertToWords(BigInteger, StringBuilder, boolean, boolean)
 	 */
 	public static String convertToWords(final BigInteger value) {
 	    StringBuilder buf = new StringBuilder();
-	    convertToWords(value, buf, false);
+	    convertToWords(value, buf, false, false);
 	    return buf.toString();
 	}
 
@@ -1149,11 +1151,11 @@ public final class NumericUtil
 	 * @param	value	The value to convert.
 	 * @param	commas	Whether to use commas to separate 10**3 blocks.
 	 * @return		The value written out as its English name.
-	 * @see #convertToWords(BigInteger, StringBuilder, boolean)
+	 * @see #convertToWords(BigInteger, StringBuilder, boolean, boolean)
 	 */
 	public static String convertToWords(final BigInteger value, final boolean commas) {
 	    StringBuilder buf = new StringBuilder();
-	    convertToWords(value, buf, commas);
+	    convertToWords(value, buf, commas, false);
 	    return buf.toString();
 	}
 
@@ -1169,8 +1171,9 @@ public final class NumericUtil
 	 * @param	iValue	The value to convert.
 	 * @param	buf	Buffer to append the value to.
 	 * @param	commas	Whether to use commas to separate 10**3 blocks.
+	 * @param	useAnd	For "British" usage, add "and" for the hundreds residues.
 	 */
-	public static void convertToWords(final BigInteger iValue, final StringBuilder buf, final boolean commas) {
+	public static void convertToWords(final BigInteger iValue, final StringBuilder buf, final boolean commas, final boolean useAnd) {
 	    BigInteger value = iValue;
 	    int sign = value.signum();
 	    int bits = value.bitLength();
@@ -1198,19 +1201,19 @@ public final class NumericUtil
 		int residual = ivalue % 100;
 		buf.append(SMALL_WORDS[chiliad]).append(" hundred");
 		if (residual != 0) {
-		    buf.append(' ');
-		    convertToWords(BigInteger.valueOf(residual), buf, commas);
+		    buf.append(useAnd ? " and " : " ");
+		    convertToWords(BigInteger.valueOf(residual), buf, commas, useAnd);
 		}
 	    }
 	    else if (value.compareTo(I_MILLION) < 0) {
 		int ivalue = value.intValue();
 		int milliad = ivalue / 1000;
 		int residual = ivalue % 1000;
-		convertToWords(BigInteger.valueOf(milliad), buf, commas);
+		convertToWords(BigInteger.valueOf(milliad), buf, commas, useAnd);
 		buf.append(" thousand");
 		if (residual != 0) {
 		    buf.append(commas ? ", " : " ");
-		    convertToWords(BigInteger.valueOf(residual), buf, commas);
+		    convertToWords(BigInteger.valueOf(residual), buf, commas, useAnd);
 		}
 	    }
 	    else {
@@ -1231,12 +1234,12 @@ public final class NumericUtil
 		tenpow -= 3;
 
 		BigInteger[] parts = value.divideAndRemainder(scale);
-		convertToWords(parts[0], buf, commas);
+		convertToWords(parts[0], buf, commas, useAnd);
 		buf.append(' ').append(getZillionName((tenpow - 3) / 3));
 		BigInteger residual = parts[1];
 		if (residual.signum() != 0) {
 		    buf.append(commas ? ", " : " ");
-		    convertToWords(residual, buf, commas);
+		    convertToWords(residual, buf, commas, useAnd);
 		}
 	    }
 	}

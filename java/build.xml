@@ -373,6 +373,8 @@
 		#6: "preproc" is now wrapped by "PreProcTask".
 	    15-Apr-2023 (rlwhitcomb)
 		#599: Run the "Project Euler" tests if the canons exist.
+	    03-May-2023 (rlwhitcomb)
+		#599: More "Project Euler" solutions extant.
 
      ========================================================================== -->
 
@@ -502,6 +504,7 @@
 			<available file="test/euler/p1.canon" type="file"/>
 			<available file="test/euler/p2.canon" type="file"/>
 			<available file="test/euler/p10.canon" type="file"/>
+			<available file="test/euler/p20.canon" type="file"/>
 		</and>
 	</condition>
 

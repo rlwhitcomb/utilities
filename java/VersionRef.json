@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.31.6', date: d'2023-05-03',
+      issues: [ 599, 607 ],
+      comment: 'Add "+" flag to "@w" format; allow decimal values without leading "0".'
+    },
     { version: '2.31.4', date: d'2023-04-09',
       issues: [ 605 ],
       comment: 'Add "arrayof" function.'

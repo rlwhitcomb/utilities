@@ -837,6 +837,23 @@ define mean_stddev (values) = {
 }
 
 /*
+ * Construct the Collatz sequence from the given start value.
+ *
+ * @param start The starting value for the sequence.
+ * @return      The Collatz sequence starting from that value.
+ */
+define collatz(start) = {
+   var value = start
+   var seq = [ value ]
+   while value > 1 {
+      if value % 2 == 0 { value \= 2            }
+                   else { value = 3 * value + 1 }
+      seq += value
+   }
+   seq += value
+}
+
+/*
  * Calculate the number of permutations of N objects taken R at a time.
  *
  * @param N Number of objects to permute.

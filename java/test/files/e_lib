@@ -137,6 +137,12 @@ epoch_secs_to_datetime(datetime_to_epoch_secs(D'12-31-1969', H'11:30:29pm'))
 epoch_secs_to_datetime(datetime_to_epoch_secs(d'1941-12-07', h'07:48'))
 
 #
+# Collatz sequences
+#
+collatz(13)
+collatz(837799)
+
+#
 # Tangent numbers
 #
 $decimal 300

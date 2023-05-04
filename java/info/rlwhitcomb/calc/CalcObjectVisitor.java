@@ -775,6 +775,8 @@
  *	    #605: Add "arrayof" function.
  *	11-Apr-2023 (rlwhitcomb)
  *	    Make mode option enum for all the relevant values.
+ *	03-May-2023 (rlwhitcomb)
+ *	    #599: New parameter to "convertToWords" for British ("and") usage.
  */
 package info.rlwhitcomb.calc;
 
@@ -2787,7 +2789,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    case 'w':
 			iValue = toIntegerValue(this, result, settings.mc, ctx);
 			try {
-			    NumericUtil.convertToWords(iValue, valueBuf, separators);
+			    NumericUtil.convertToWords(iValue, valueBuf, separators, signChar == '+');
 			}
 			catch (IllegalArgumentException iae) {
 			    throw new CalcExprException(iae, ctx);

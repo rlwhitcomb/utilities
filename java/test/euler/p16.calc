@@ -1,0 +1,26 @@
+/*
+ * Problem 16 from Project Euler (projecteuler.net)
+ *
+ * Power digit sum
+ *
+ * 2^15 = 32768 and the sum of its digits is 3 + 2 + 7 + 6 + 8 = 26.
+ *
+ * What is the sum of the digits of the number 2^1000?
+ */
+$quiet on {
+
+$unlimited
+
+const EXPONENT = 1000
+
+$sep off { const string = @@(2**EXPONENT) }
+
+const result = sumof(chars(string))
+
+}
+
+$resultsonly on {
+
+`The sum of the digits of 2**$EXPONENT is $result.`@q
+
+}

@@ -816,6 +816,8 @@
 >10 ** 12012 @W -> ONE QUADRILLITRILLION
 >1492 @,w -> one thousand, four hundred ninety-two
 >100101 @_w -> one hundred thousand one hundred one
+>2 ** 32 @w -> four billion two hundred ninety-four million nine hundred sixty-seven thousand two hundred ninety-six
+>2 ** 32 @+w -> four billion two hundred and ninety-four million nine hundred and sixty-seven thousand two hundred and ninety-six
 >0.125 @2% -> 12.50%
 >0.1234567 @4% -> 12.3457%
 >20 ! + 0.5 @2,$ -> $2,432,902,008,176,640,000.50
