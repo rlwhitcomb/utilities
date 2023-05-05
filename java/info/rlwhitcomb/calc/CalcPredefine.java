@@ -45,6 +45,7 @@
  *  10-Jan-23 rlw #558:	Add aliases for "j" and "k" (quaternions).
  *  11-Jan-23 rlw #558:	More aliases for "j" and "k".
  *  09-Feb-23 rlw  ---	Rearrange some code and all history.
+ *  05-May-23 rlw #610:	Add "currentdir" to "info.os".
  */
 package info.rlwhitcomb.calc;
 
@@ -200,16 +201,17 @@ class CalcPredefine
 
 	    ObjectScope os = new ObjectScope();
 
-	    PredefinedValue.define(os, "platform", Environment.platform());
-	    PredefinedValue.define(os, "version",  Environment.osVersion());
-	    PredefinedValue.define(os, "id",       Environment.platformIdentifier());
-	    PredefinedValue.define(os, "hostname", Environment.hostName());
-	    PredefinedValue.define(os, "user",     Environment.currentUser());
-	    PredefinedValue.define(os, "linesep",  Environment.lineSeparator());
-	    PredefinedValue.define(os, "filesep",  Environment.fileSeparator());
-	    PredefinedValue.define(os, "pathsep",  Environment.pathSeparator());
-	    PredefinedValue.define(os, "tempdir",  Environment.tempDirName());
-	    PredefinedValue.define(os, "userdir",  Environment.userHomeDirString());
+	    PredefinedValue.define(os, "platform",   Environment.platform());
+	    PredefinedValue.define(os, "version",    Environment.osVersion());
+	    PredefinedValue.define(os, "id",         Environment.platformIdentifier());
+	    PredefinedValue.define(os, "hostname",   Environment.hostName());
+	    PredefinedValue.define(os, "user",       Environment.currentUser());
+	    PredefinedValue.define(os, "linesep",    Environment.lineSeparator());
+	    PredefinedValue.define(os, "filesep",    Environment.fileSeparator());
+	    PredefinedValue.define(os, "pathsep",    Environment.pathSeparator());
+	    PredefinedValue.define(os, "tempdir",    Environment.tempDirName());
+	    PredefinedValue.define(os, "userdir",    Environment.userHomeDirString());
+	    PredefinedValue.define(os, "currentdir", Environment.userDirectory().getPath());
 
 	    PredefinedValue.define(os, "screenheight", () -> {
 		Dimension consoleSize = Environment.consoleSize();

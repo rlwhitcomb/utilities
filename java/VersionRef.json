@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.31.9', date: d'2023-05-05',
+      issues: [ 610 ],
+      comment: 'Add "currentdir" to "info.os" values.'
+    },
     { version: '2.31.8', date: d'2023-05-04',
       issues: [ 609 ],
       comment: 'Fix precedence of bit operations relative to relational ops.'
