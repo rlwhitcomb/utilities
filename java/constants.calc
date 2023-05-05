@@ -4,9 +4,19 @@
  */
 $quiet on
 $resultsonly on
-const INPUT_FILE = 'info/rlwhitcomb/util/Constants.java'
 
-lines = split(trim(read(INPUT_FILE)), '\\r?\\n')
+define message(string) = {
+   $quiet pop
+   $echo string
+   $quiet on
+}
+
+const LINE_END = '\\r?\\n'
+const INPUT_FILE = 'info/rlwhitcomb/util/Constants.java'
+const CURRENT_DIR = info.os.currentdir
+const JAVA_FILES = findfiles('info/rlwhitcomb', '*.java', 'fr*!')
+
+lines = split(trim(read(INPUT_FILE)), LINE_END)
 
 loop line over lines {
   trimmed = trim(line)
@@ -14,10 +24,20 @@ loop line over lines {
     words = split(trimmed, '\\s+')
     if words[0] == 'public' && words[1] == 'static' {
       name = words[4]
-      $quiet pop
-      $echo name
-      exec('./g.sh', name) @q
-      $quiet on
+      message(CYAN_BRIGHT + name + END)
+      loop file over JAVA_FILES {
+        const filelines = split(trim(read(file)), LINE_END)
+        const finfo = fileinfo(file)
+        const filename = replace(finfo.name, CURRENT_DIR, "")
+        var linenumber = 0
+        loop fileline over filelines {
+          linenumber++
+          if notnull(index(fileline, name)) {
+            message(formatstring('%s%s%s(%d)%s: %s%s%s', WHITE, filename, BLACK_BRIGHT, linenumber, RESET, WHITE_BRIGHT, fileline, END))
+          }
+        }
+      }
+      message("")
     }
   }
 }
