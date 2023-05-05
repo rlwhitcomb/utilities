@@ -39,6 +39,7 @@
  *  19-Dec-22 rlw #559:	New rational complex values.
  *  04-Jan-23 rlw #558:	Quaternion constants.
  *  10-Jan-23 rlw #558:	More quaternion constants.
+ *  05-May-23 rlw  ---	Remove actually unused values.
  */
 package info.rlwhitcomb.util;
 
@@ -76,9 +77,6 @@ public final class Constants
 
 	/** A {@link BigInteger} value of four. */
 	public static final BigInteger I_FOUR  = BigInteger.valueOf(4);
-
-	/** A {@link BigInteger} value of seven. */
-	public static final BigInteger I_SEVEN = BigInteger.valueOf(7);
 
 	/** A {@link BigInteger} value of ten. */
 	public static final BigInteger I_TEN = BigInteger.valueOf(10);
@@ -176,9 +174,6 @@ public final class Constants
 	/** A complex number corresponding to {@code i}. */
 	public static final ComplexNumber C_I = new ComplexNumber(0, 1);
 
-	/** A complex number corresponding to {@code -i}. */
-	public static final ComplexNumber C_MINUS_I = new ComplexNumber(0, -1);
-
 	/** A complex number corresponding to {@code 0}. */
 	public static final ComplexNumber C_ZERO = new ComplexNumber(0, 0);
 
@@ -191,9 +186,6 @@ public final class Constants
 
 	/** A quaternion corresponding to a rational value of {@code (1, 0, 0, 0)}. */
 	public static final Quaternion QR_ONE = new Quaternion(BigFraction.ONE);
-
-	/** Quaternion with a value of "i" ({@code (0, 1, 0, 0)}). */
-	public static final Quaternion Q_I = new Quaternion(0, 1, 0, 0);
 
 	/** Quaternion with a value of "j" ({@code (0, 0, 1, 0)}). */
 	public static final Quaternion Q_J = new Quaternion(0, 0, 1, 0);
