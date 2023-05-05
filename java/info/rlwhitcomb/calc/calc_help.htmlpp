@@ -907,24 +907,7 @@ or<br>
         <i>expr</i>&nbsp;<code> &gt;&gt; </code>&nbsp;<i>expr</i><br>
         <i>expr</i>&nbsp;<code> &lt;&lt; </code>&nbsp;<i>expr</i></td>
         <td>bit shift operations</td><td>left to right</td></tr>
-    <tr><td>16</td><td><i>expr</i>&nbsp;<code> &lt;=&gt; </code>&nbsp;<i>expr</i><td>returns <code>-1</code> if <i>expr</i> &lt; 0<br><code>0</code> if <i>expr</i> = 0<br><code>+1</code> if <i>expr</i> &gt; 0</td><td>left to right</td></tr>
-    <tr><td>15</td><td>
-        <i>expr</i>&nbsp;<code> &lt;= </code>or<code> &#x2264; </code>&nbsp;<i>expr</i><br>
-        <i>expr</i>&nbsp;<code> &lt; </code>&nbsp;<i>expr</i><br>
-        <i>expr</i>&nbsp;<code> &gt;= </code>or<code> &#x2265; </code>&nbsp;<i>expr</i><br>
-        <i>expr</i>&nbsp;<code> &gt; </code>&nbsp;<i>expr</i></td>
-        <td>comparison</td><td>left to right</td></tr>
-    <tr><td>14</td><td>
-        <i>expr</i>&nbsp;<code>OF</code>, <code>IN</code>, <code>WITHIN</code>, <code>&#x2208;</code>, or <code>&#x220A;</code><br>
-        <i>expr</i> [ <code>...</code>,&nbsp;<code>..</code>,&nbsp;or&nbsp;<code>&#x2026;</code>&nbsp;<i>expr</i> ] [ <code>,</code> <i>expr</i> ]</td>
-        <td>test set membership, or match a value within a range</td><td>left to right</td></tr>
-    <tr><td>13</td><td>
-        <i>expr</i>&nbsp;<code> === </code>or<code> &#x2A76; </code>or<code> &#x2261; </code>&nbsp;<i>expr</i><br>
-        <i>expr</i>&nbsp;<code> !== </code>or<code> &#x2262; </code>&nbsp;<i>expr</i><br>
-        <i>expr</i>&nbsp;<code> == </code>or<code> &#x2A75; </code>&nbsp;<i>expr</i><br>
-        <i>expr</i>&nbsp;<code> != </code>or<code> &lt;&gt; </code>or<code> &#x2260; </code>&nbsp;<i>expr</i></td>
-        <td>strict equality<br>strict inequality<br>equality<br>inequality</td><td>left to right</td></tr>
-    <tr><td>12</td><td>
+    <tr><td>16</td><td>
         <i>expr</i>&nbsp;<code> &amp; </code>&nbsp;<i>expr</i><br>
         <i>expr</i>&nbsp;<code> ~&amp; </code>or<code> &#x22BC; </code>&nbsp;<i>expr</i><br>
         <i>expr</i>&nbsp;<code> &amp;~ </code>&nbsp;<i>expr</i><br>
@@ -935,6 +918,23 @@ or<br>
         <i>expr</i>&nbsp;<code> ~| </code>or<code> &#x22BD; </code>&nbsp;<i>expr</i><br>
         <i>expr</i>&nbsp;<code> |~ </code>&nbsp;<i>expr</i></td>
         <td>bitwise AND<br>NOT AND (or NAND)<br>AND NOT<br>exclusive OR<br>NOT exclusive OR<br>exclusive OR NOT<br>bitwise OR<br>NOT OR (or NOR)<br>OR NOT</td><td>left to right</td></tr>
+    <tr><td>15</td><td><i>expr</i>&nbsp;<code> &lt;=&gt; </code>&nbsp;<i>expr</i><td>returns <code>-1</code> if <i>expr</i> &lt; 0<br><code>0</code> if <i>expr</i> = 0<br><code>+1</code> if <i>expr</i> &gt; 0</td><td>left to right</td></tr>
+    <tr><td>14</td><td>
+        <i>expr</i>&nbsp;<code> &lt;= </code>or<code> &#x2264; </code>&nbsp;<i>expr</i><br>
+        <i>expr</i>&nbsp;<code> &lt; </code>&nbsp;<i>expr</i><br>
+        <i>expr</i>&nbsp;<code> &gt;= </code>or<code> &#x2265; </code>&nbsp;<i>expr</i><br>
+        <i>expr</i>&nbsp;<code> &gt; </code>&nbsp;<i>expr</i></td>
+        <td>comparison</td><td>left to right</td></tr>
+    <tr><td>13</td><td>
+        <i>expr</i>&nbsp;<code>OF</code>, <code>IN</code>, <code>WITHIN</code>, <code>&#x2208;</code>, or <code>&#x220A;</code><br>
+        <i>expr</i> [ <code>...</code>,&nbsp;<code>..</code>,&nbsp;or&nbsp;<code>&#x2026;</code>&nbsp;<i>expr</i> ] [ <code>,</code> <i>expr</i> ]</td>
+        <td>test set membership, or match a value within a range</td><td>left to right</td></tr>
+    <tr><td>12</td><td>
+        <i>expr</i>&nbsp;<code> === </code>or<code> &#x2A76; </code>or<code> &#x2261; </code>&nbsp;<i>expr</i><br>
+        <i>expr</i>&nbsp;<code> !== </code>or<code> &#x2262; </code>&nbsp;<i>expr</i><br>
+        <i>expr</i>&nbsp;<code> == </code>or<code> &#x2A75; </code>&nbsp;<i>expr</i><br>
+        <i>expr</i>&nbsp;<code> != </code>or<code> &lt;&gt; </code>or<code> &#x2260; </code>&nbsp;<i>expr</i></td>
+        <td>strict equality<br>strict inequality<br>equality<br>inequality</td><td>left to right</td></tr>
     <tr><td>11</td><td>
         <i>expr</i>&nbsp;<code> &amp;&amp; </code>or<code> &#x2227; </code>&nbsp;<i>expr</i></td><td>logical AND</td><td>left to right</td></tr>
     <tr><td>10</td><td>

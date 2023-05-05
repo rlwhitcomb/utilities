@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.31.8', date: d'2023-05-04',
+      issues: [ 609 ],
+      comment: 'Fix precedence of bit operations relative to relational ops.'
+    },
     { version: '2.31.6', date: d'2023-05-03',
       issues: [ 599, 607 ],
       comment: 'Add "+" flag to "@w" format; allow decimal values without leading "0".'

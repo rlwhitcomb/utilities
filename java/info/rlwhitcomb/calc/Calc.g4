@@ -503,6 +503,8 @@
  *	    #605: Add "arrayof" function.
  *	20-Apr-2023 (rlwhitcomb)
  *	    #607: Allow decimals without leading digits as numbers.
+ *	04-May-2023 (rlwhitcomb)
+ *	    Fix precedence of BIT_OP relative to relationals.
  */
 
 grammar Calc;
@@ -717,11 +719,11 @@ expr
    | expr ( MULT_OP | K_MOD ) expr                # multiplyExpr
    | expr ADD_OP expr                             # addExpr
    | expr SHIFT_OP expr                           # shiftExpr
+   | expr BIT_OP expr                             # bitExpr
    | expr SPACE_OP expr                           # spaceshipExpr
    | expr COMPARE_OP expr                         # compareExpr
    | expr ( K_OF|K_IN|K_WITHIN|SET_IN ) loopCtl   # inExpr
    | expr EQUAL_OP expr                           # equalExpr
-   | expr BIT_OP expr                             # bitExpr
    | expr EOL* BOOL_AND_OP EOL* expr              # booleanAndExpr
    | expr EOL* BOOL_OR_OP EOL* expr               # booleanOrExpr
    | expr EOL* BOOL_XOR_OP EOL* expr              # booleanXorExpr

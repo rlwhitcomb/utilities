@@ -482,6 +482,8 @@
 >u1 ~| u2 -> false
 >u1 ^~ u2 -> false
 >u1 ~^ u2 -> false
+>0b1 & 0b1000 != 0 -> false
+>0b1 & 0b1 != 0 -> true
 >A = 1 -> 1
 >B = 2 -> 2
 >A == 1 || A == 2 && B == 1 -> true
