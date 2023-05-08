@@ -1,0 +1,5 @@
+files = findfiles('test/euler', 'p*.calc', 'fr!')
+loop f over files {
+   finfo = fileinfo(f)
+   exec('test/euler/upe', finfo.nameOnly)
+}
