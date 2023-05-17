@@ -7,6 +7,11 @@
 >Defining function “visit(type)” = { case type of 1: f1, 2: f2 }
 >visit(1)(4, 5) -> 9
 >visit(2)(7, 8) -> 56
+>Defining function “gop(op,m,n)” = op(m, n)
+>gop(f1, 5, 6) -> 11
+>gop(f2, 9, 8) -> 72
+>gop(f1, 3, 4) -> 7
+>gop(f2, 12, 13) -> 156
 >Defining function “g1(...)” = { `number = $_#` }
 >g1(1, 2, 3) -> "number = 3"
 >Defining function “g2(...)” = { _* }

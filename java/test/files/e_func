@@ -15,6 +15,15 @@ visit(1)(4,5)
 visit(2)(7,8)
 
 #
+# Passing a function as a parameter to another function
+#
+define gop(op, m, n) = op(m, n)
+gop(f1, 5, 6)
+gop(f2, 9, 8)
+gop(f1, 3, 4)
+gop(f2, 12, 13)
+
+#
 # Issue #69: varargs, define "_#" and "_*" inside functions
 #
 def g1(...) = { `number = $_#` }
