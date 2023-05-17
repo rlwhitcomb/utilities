@@ -25,11 +25,12 @@
  *	such as intersection, union, etc.
  *
  * History:
- *  21-Jun-21 rlw  ---  Initial coding.
- *  25-Jun-22 rlw #314: Add "diff".
- *  08-Jul-22 rlw #393: Cleanup imports.
- *  15-Aug-22 rlw #440: Move "size()" up to CollectionScope.
+ *  21-Jun-21 rlw  ---	Initial coding.
+ *  25-Jun-22 rlw #314:	Add "diff".
+ *  08-Jul-22 rlw #393:	Cleanup imports.
+ *  15-Aug-22 rlw #440:	Move "size()" up to CollectionScope.
  *  08-Jan-23 rlw #592:	Move "isEmpty()" to CollectionScope.
+ *  16-May-23 rlw  ---	New "addAll" method from a Collection.
  */
 package info.rlwhitcomb.calc;
 
@@ -126,6 +127,18 @@ class SetScope<T> extends CollectionScope
 	    checkImmutable();
 
 	    return values.addAll(set.values);
+	}
+
+	/**
+	 * Add all the values from the given collection to this set.
+	 *
+	 * @param c The new collection to add to this set.
+	 * @return  Whether the set changed as a result of this operation.
+	 */
+	boolean addAll(final Collection<T> c) {
+	    checkImmutable();
+
+	    return values.addAll(c);
 	}
 
 	/**

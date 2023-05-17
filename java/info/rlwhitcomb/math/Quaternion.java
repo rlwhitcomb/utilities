@@ -32,6 +32,7 @@
  *			"conjugate" to "inverse", implement "conjugate" correctly,
  *			Implement "magnitude(), "equals()", "hashCode()", and
  *			Comparable interface (same paradigm as ComplexNumber).
+ *  05-May-23 rlw #558:	New "negate()" method. Move F_ZERO into BigFraction.
  */
 package info.rlwhitcomb.math;
 
@@ -315,6 +316,28 @@ public final class Quaternion extends Number
 	}
 
 	/**
+	 * Negate this quaternion, which is the same as {@link #ZERO} minus this one.
+	 *
+	 * @return A new quaternion that is the negative of this one.
+	 */
+	public Quaternion negate() {
+	    if (rational) {
+		return new Quaternion(
+		    aFrac().negate(),
+		    bFrac().negate(),
+		    cFrac().negate(),
+		    dFrac().negate());
+	    }
+	    else {
+		return new Quaternion(
+		    a().negate(),
+		    b().negate(),
+		    c().negate(),
+		    d().negate());
+	    }
+	}
+
+	/**
 	 * Multiply this quaternion by another; and notice that multiplication
 	 * is not commutative.
 	 * <p> The result of (a, b, c, d) * (e, f, g, h) will be:
@@ -563,30 +586,30 @@ public final class Quaternion extends Number
 
 	public BigFraction aFrac() {
 	    if (rational)
-		return aFrac == null ? ComplexNumber.F_ZERO: aFrac;
+		return aFrac == null ? BigFraction.F_ZERO: aFrac;
 	    else
-		return a == null ? ComplexNumber.F_ZERO : BigFraction.valueOf(a);
+		return a == null ? BigFraction.F_ZERO : BigFraction.valueOf(a);
 	}
 
 	public BigFraction bFrac() {
 	    if (rational)
-		return bFrac == null ? ComplexNumber.F_ZERO: bFrac;
+		return bFrac == null ? BigFraction.F_ZERO: bFrac;
 	    else
-		return b == null ? ComplexNumber.F_ZERO : BigFraction.valueOf(b);
+		return b == null ? BigFraction.F_ZERO : BigFraction.valueOf(b);
 	}
 
 	public BigFraction cFrac() {
 	    if (rational)
-		return cFrac == null ? ComplexNumber.F_ZERO: cFrac;
+		return cFrac == null ? BigFraction.F_ZERO: cFrac;
 	    else
-		return c == null ? ComplexNumber.F_ZERO : BigFraction.valueOf(c);
+		return c == null ? BigFraction.F_ZERO : BigFraction.valueOf(c);
 	}
 
 	public BigFraction dFrac() {
 	    if (rational)
-		return dFrac == null ? ComplexNumber.F_ZERO: dFrac;
+		return dFrac == null ? BigFraction.F_ZERO: dFrac;
 	    else
-		return d == null ? ComplexNumber.F_ZERO : BigFraction.valueOf(d);
+		return d == null ? BigFraction.F_ZERO : BigFraction.valueOf(d);
 	}
 
 	@Override

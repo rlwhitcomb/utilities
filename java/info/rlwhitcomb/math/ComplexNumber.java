@@ -51,6 +51,7 @@
  *  05-Jan-23 rlw #558:	Make copies of the fraction parts to avoid improper "proper" settings.
  *  09-Jan-23 rlw #103:	Add "sqrt"; fixup results of subtract and multiply/divide.
  *  21-Feb-23 rlw #244:	Implement formatting with separators.
+ *  09-May-23 rlw  ---	Move F_ZERO back to BigFraction (too weird in here).
  */
 package info.rlwhitcomb.math;
 
@@ -191,11 +192,6 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 	    "theta",
 	    "angle"
 	};
-
-	/**
-	 * A fraction value of zero, with "alwaysProper" set.
-	 */
-	public static final BigFraction F_ZERO = BigFraction.properFraction(0);
 
 
 	/**
@@ -643,9 +639,9 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 	 */
 	public BigFraction rFrac() {
 	    if (rational)
-		return realFrac == null ? F_ZERO : realFrac;
+		return realFrac == null ? BigFraction.F_ZERO : realFrac;
 	    else
-		return realPart == null ? F_ZERO : BigFraction.properFraction(realPart);
+		return realPart == null ? BigFraction.F_ZERO : BigFraction.properFraction(realPart);
 	}
 
 	/**
@@ -656,9 +652,9 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 	 */
 	public BigFraction iFrac() {
 	    if (rational)
-		return imaginaryFrac == null ? F_ZERO : imaginaryFrac;
+		return imaginaryFrac == null ? BigFraction.F_ZERO : imaginaryFrac;
 	    else
-		return imaginaryPart == null ? F_ZERO : BigFraction.properFraction(imaginaryPart);
+		return imaginaryPart == null ? BigFraction.F_ZERO : BigFraction.properFraction(imaginaryPart);
 	}
 
 
@@ -671,7 +667,7 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 	    int prec = 0;
 
 	    if (rational) {
-		prec = F_ZERO.precision();
+		prec = BigFraction.F_ZERO.precision();
 
 		if (realFrac != null)
 		    prec = Math.max(prec, realFrac.precision());
@@ -704,7 +700,7 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 		    imaginaryFrac = null;
 
 		if (realFrac == null && imaginaryFrac == null)
-		    realFrac = F_ZERO;
+		    realFrac = BigFraction.F_ZERO;
 
 		if (realFrac != null)
 		    realFrac.setAlwaysProper(true);

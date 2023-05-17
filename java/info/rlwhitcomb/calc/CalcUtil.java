@@ -217,6 +217,9 @@
  *	    #263: New conversions for complex and quaternions.
  *	07-Apr-2023 (rlwhitcomb)
  *	    #603: Change directive char to "$" to eliminate amibiguity.
+ *	16-May-2023 (rlwhitcomb)
+ *	    Protect against NPE in some obscure cases of object concatenation.
+ *	    Rename some methods. Implement object concatenation more completely.
  */
 package info.rlwhitcomb.calc;
 
@@ -750,14 +753,13 @@ public final class CalcUtil
 	/**
 	 * Cast or convert the given object value to a {@link BigInteger} for certain integer calculations.
 	 *
-	 * @param visitor	The visitor used to evaluate expressions.
 	 * @param value		The input value to convert.
 	 * @param mc		The math context to use for any conversions from decimal values.
 	 * @param ctx		The parse tree context, used for error reporting.
 	 * @return		The converted value, if possible.
 	 * @throws CalcExprException if the value is not or cannot be converted to an exact integer value.
 	 */
-	public static BigInteger toIntegerValue(final CalcObjectVisitor visitor, final Object value, final MathContext mc, final ParserRuleContext ctx) {
+	public static BigInteger convertToInteger(final Object value, final MathContext mc, final ParserRuleContext ctx) {
 	    try {
 		if (value instanceof BigInteger) {
 		    return (BigInteger) value;
@@ -778,7 +780,7 @@ public final class CalcUtil
 		    return BigInteger.valueOf(((Number) value).longValue());
 		}
 		else {
-		    return toDecimalValue(visitor, value, mc, ctx).toBigIntegerExact();
+		    return convertToDecimal(value, mc, ctx).toBigIntegerExact();
 		}
 	    }
 	    catch (ArithmeticException ae) {
@@ -796,7 +798,7 @@ public final class CalcUtil
 	 * @return		The converted value, if possible.
 	 * @throws CalcExprException if the value is not or cannot be converted to an exact integer value.
 	 */
-	public static int toIntValue(final CalcObjectVisitor visitor, final Object value, final MathContext mc, final ParserRuleContext ctx) {
+	public static int convertToInt(final Object value, final MathContext mc, final ParserRuleContext ctx) {
 	    try {
 		if (value instanceof BigInteger) {
 		    return ((BigInteger) value).intValueExact();
@@ -817,7 +819,7 @@ public final class CalcUtil
 		    return ((Number) value).intValue();
 		}
 		else {
-		    return toDecimalValue(visitor, value, mc, ctx).intValueExact();
+		    return convertToDecimal(value, mc, ctx).intValueExact();
 		}
 	    }
 	    catch (ArithmeticException ae) {
@@ -1548,8 +1550,8 @@ public final class CalcUtil
 		return d1.compareTo(d2);
 	    }
 	    else if (e1 instanceof BigInteger || e2 instanceof BigInteger) {
-		BigInteger i1 = toIntegerValue(visitor, e1, mc, ctx1);
-		BigInteger i2 = toIntegerValue(visitor, e2, mc, ctx2);
+		BigInteger i1 = convertToInteger(e1, mc, ctx1);
+		BigInteger i2 = convertToInteger(e2, mc, ctx2);
 
 		return i1.compareTo(i2);
 	    }
@@ -1689,7 +1691,7 @@ public final class CalcUtil
 
 		    result.addAll(arr2.list());
 		}
-		else if (obj2.equals(CollectionScope.EMPTY)) {
+		else if (CollectionScope.EMPTY.equals(obj2)) {
 		    ;
 		}
 		else {
@@ -1707,7 +1709,7 @@ public final class CalcUtil
 
 		    result.putAll(map2);
 		}
-		else if (obj2.equals(CollectionScope.EMPTY)) {
+		else if (CollectionScope.EMPTY.equals(obj2)) {
 		    ;
 		}
 		else {
@@ -1727,7 +1729,7 @@ public final class CalcUtil
 
 		    result.addAll(set2);
 		}
-		else if (obj2.equals(CollectionScope.EMPTY)) {
+		else if (CollectionScope.EMPTY.equals(obj2)) {
 		    ;
 		}
 		else {
@@ -1737,8 +1739,23 @@ public final class CalcUtil
 		ret = result;
 	    }
 	    else if (obj1 instanceof CollectionScope) {
-		// This has to be the EMPTY object
-		ret = obj2;
+		// This is an empty object, so convert to either a set or a map
+		// depending on the value added to it
+		if (obj2 instanceof SetScope) {
+		    ret = obj2;
+		}
+		else if (obj2 instanceof ArrayScope) {
+		    @SuppressWarnings("unchecked")
+		    ArrayScope<Object> array = (ArrayScope<Object>) obj2;
+		    ret = new SetScope<Object>(array.list());
+		}
+		else if (obj2 instanceof ObjectScope || CollectionScope.EMPTY.equals(obj2)) {
+		    ret = obj2;
+		}
+		else {
+		    // Single values means this should be a set
+		    ret = new SetScope<Object>(obj2);
+		}
 	    }
 
 	    return ret;
@@ -1874,8 +1891,8 @@ public final class CalcUtil
 		return Boolean.valueOf(result);
 	    }
 	    else {
-		BigInteger i1 = toIntegerValue(visitor, o1, mc, ctx);
-		BigInteger i2 = toIntegerValue(visitor, o2, mc, ctx);
+		BigInteger i1 = convertToInteger(o1, mc, ctx);
+		BigInteger i2 = convertToInteger(o2, mc, ctx);
 		BigInteger result;
 
 		switch (op) {
@@ -2030,13 +2047,13 @@ public final class CalcUtil
 		    castValue = toStringValue(visitor, ctx, value, new StringFormat(false, separators));
 		    break;
 		case INTEGER:
-		    castValue = toIntegerValue(visitor, value, mc, ctx);
+		    castValue = convertToInteger(value, mc, ctx);
 		    break;
 		case FLOAT:
-		    castValue = toDecimalValue(visitor, value, mc, ctx);
+		    castValue = convertToDecimal(value, mc, ctx);
 		    break;
 		case FRACTION:
-		    castValue = toFractionValue(visitor, value, ctx);
+		    castValue = convertToFraction(value, ctx);
 		    break;
 		case COMPLEX:
 		    try {

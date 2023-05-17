@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.31.10', date: d'2023-05-16',
+      issues: [ 558 ],
+      comment: 'Negate and posate for quaternions; other quaternion math; better support for adding values to sets.'
+    },
     { version: '2.31.9', date: d'2023-05-05',
       issues: [ 610 ],
       comment: 'Add "currentdir" to "info.os" values.'

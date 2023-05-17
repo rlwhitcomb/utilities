@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2021-2022 Roger L. Whitcomb.
+ * Copyright (c) 2021-2023 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -121,6 +121,8 @@
  *	    #572: Regularize member name access.
  *	24-Dec-2022 (rlwhitcomb)
  *	    #83: One more index Unicode character.
+ *	16-May-2023 (rlwhitcomb)
+ *	    Rename some helper methods.
  */
 package info.rlwhitcomb.calc;
 
@@ -515,7 +517,7 @@ class LValueContext
 		    Object indexValue = visitor.evaluate(expr);
 
 		    if (indexValue instanceof Number) {
-			int index = CalcUtil.toIntValue(visitor, indexValue, visitor.getSettings().mc, expr);
+			int index = CalcUtil.convertToInt(indexValue, visitor.getSettings().mc, expr);
 			return new LValueContext(arrLValue, arrVarCtx, arrValue, index);
 		    }
 		    else {
@@ -542,7 +544,7 @@ class LValueContext
 		    Object indexValue = visitor.evaluate(expr);
 
 		    if (indexValue instanceof Number) {
-			index = CalcUtil.toIntValue(visitor, indexValue, visitor.getSettings().mc, expr);
+			index = CalcUtil.convertToInt(indexValue, visitor.getSettings().mc, expr);
 		    }
 		    else {
 			memberName = visitor.getNonNullString(expr, indexValue);

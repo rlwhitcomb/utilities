@@ -74,6 +74,7 @@
  *  31-Dec-22 rlw #558:	New methods for Quaternions.
  *  05-Jan-23 rlw #558:	Make "properFraction" into a method for Object; new copy constructor.
  *  20-Feb-23 rlw #244:	Implement formatting with thousands separators.
+ *  09-May-23 rlw  ---	Move F_ZERO into here (too weird inside ComplexNumber).
  */
 package info.rlwhitcomb.math;
 
@@ -146,6 +147,11 @@ public class BigFraction extends Number
 
 	/** A value of {@code 1/2} (one-half) as a fraction. */
 	public static final BigFraction ONE_HALF = new BigFraction(1, 2);
+
+	/**
+	 * A fraction value of zero, with "alwaysProper" set.
+	 */
+	public static final BigFraction F_ZERO = properFraction(0);
 
 
 	/** Conversion table from Unicode fraction characters to real fractions. */
