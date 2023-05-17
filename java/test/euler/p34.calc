@@ -1,0 +1,53 @@
+/*
+ * Problem 34 from Project Euler (projecteuler.net)
+ *
+ * Digit factorials
+ *
+ * 145 is a curious number, as 1! + 4! + 5! = 1 + 24 + 120 = 145.
+ *
+ * Find the sum of all numbers which are equal to the sum of the factorial of their digits.
+ *
+ * Note: As 1! = 1 and 2! = 2 are not sums they are not included.
+ */
+$quiet on {
+
+$unlimited
+$separators off
+
+/*
+ * I have no idea (currently) how to derive an appropriate limit. Using a much bigger
+ * limit gives the right answer under this limit. So I'm going to leave this as an
+ * empirically-derived value, until I can find a way to prove what the upper limit
+ * should be.
+ */
+const LIMIT = 49999
+
+define sumOfDigitFactorials(n) = {
+   var sum = 0
+   loop c over chars(@@n) {
+      const fact = (~~c)!
+      sum += fact
+   }
+   sum
+}
+
+var sumOfDigits
+var sum = 0
+
+loop n over 3..LIMIT {
+   sumOfDigits = sumOfDigitFactorials(n)
+   if n == sumOfDigits {
+      sum += sumOfDigits
+   }
+}
+
+$separators pop
+
+}
+
+$resultsonly on {
+
+   $echo `The sum of all numbers which are equal to the sum of the factorial of their digits is $sum.`@q
+
+}
+

@@ -1,0 +1,46 @@
+/*
+ * Problem 22 from Project Euler (projecteuler.net)
+ *
+ * Names scores
+ *
+ * Using names.txt (right click and 'Save Link/Target As...'), a 46K text file containing over
+ * five-thousand first names, begin by sorting it into alphabetical order. Then working out the
+ * alphabetical value for each name, multiply this value by its alphabetical position in the list
+ * to obtain a name score.
+ *
+ * For example, when the list is sorted into alphabetical order, COLIN, which is worth 3 + 15 + 12 + 9 + 14 = 53,
+ * is the 938th name in the list. So, COLIN would obtain a score of 938 × 53 = 49714.
+ *
+ * What is the total of all the name scores in the file?
+ */
+$quiet on {
+
+const FILENAME = 'test/data/p022_names.txt'
+const TEST = 938
+const A = codes('A')
+
+define word_score(n) = {
+   var score = 0
+   loop c over codes(n) {
+      score += c - A + 1
+   }
+   score
+}
+
+// Read, process, and sort the input names
+var names = sort(split(replace(read(FILENAME), '"', ''), ','))
+
+var sum = 0
+
+loop ix within length(names) {
+   sum += (ix + 1) × word_score(names[ix])
+}
+
+}
+
+$resultsonly on {
+
+`The "name score" for the ${TEST}th value (${names[TEST-1]}) is ${word_score(names[TEST-1])×TEST}.`@q
+`The total of all the name scores in "$FILENAME" is $sum.`@q
+
+}
