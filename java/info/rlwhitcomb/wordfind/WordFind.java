@@ -117,6 +117,8 @@
  *      06-Jan-2023 (rlwhitcomb)
  *          #224: Thesaurus lookup also.
  *          #224: Common code for online results.
+ *      23-May-2023 (rlwhitcomb)
+ *          Allow "$quit" and etc. for the REPL commands.
  */
 package info.rlwhitcomb.wordfind;
 
@@ -1174,49 +1176,56 @@ public class WordFind implements Application
                 String parts[] = line.trim().toLowerCase().split("\\s+");
                 String cmd = parts[0];
 
-                switch (cmd) {
-                    case ":quit":
-                    case ":exit":
-                    case ":q":
-                    case ":x":
-                        break replLoop;
+                if (cmd.startsWith("#") || cmd.startsWith("!") || cmd.startsWith("//"))
+                    continue replLoop;
 
-                    case ":help":
-                    case ":h":
-                    case ":?":
-                        displayHelp(false);
-                        continue replLoop;
+                if (cmd.startsWith(":") || cmd.startsWith("$")) {
+                    cmd = cmd.substring(1);
 
-                    case ":version":
-                    case ":vers":
-                    case ":ver":
-                    case ":v":
-                        displayProgramInfo();
-                        continue replLoop;
+                    switch (cmd) {
+                        case "quit":
+                        case "exit":
+                        case "q":
+                        case "x":
+                            break replLoop;
 
-                    case ":statistics":
-                    case ":stats":
-                    case ":stat":
-                    case ":s":
-                        dictionary.displayStatistics(System.out);
-                        continue replLoop;
+                        case "help":
+                        case "h":
+                        case "?":
+                            displayHelp(false);
+                            break;
 
-                    case ":lookup":
-                    case ":look":
-                    case ":dictionary":
-                    case ":dict":
-                        if (!lookupAvailable) {
-                            error("wordfind#lookupNotAvailable");
-                        }
-                        else if (parts.length > 1) {
-                            lookup(parts[1]);
-                        }
-                        continue replLoop;
+                        case "version":
+                        case "vers":
+                        case "ver":
+                        case "v":
+                            displayProgramInfo();
+                            break;
 
-                    default:
-                        if (cmd.startsWith("#") || cmd.startsWith("!") || cmd.startsWith("//"))
-                            continue replLoop;
-                        break;
+                        case "statistics":
+                        case "stats":
+                        case "stat":
+                        case "s":
+                            dictionary.displayStatistics(System.out);
+                            break;
+
+                        case "lookup":
+                        case "look":
+                        case "dictionary":
+                        case "dict":
+                            if (!lookupAvailable) {
+                                error("wordfind#lookupNotAvailable");
+                            }
+                            else if (parts.length > 1) {
+                                lookup(parts[1]);
+                            }
+                            break;
+
+                        default:
+                            // TODO: error here?
+                            break;
+                    }
+                    continue replLoop;
                 }
 
                 String[] args = CharUtil.parseCommandLine(line);
