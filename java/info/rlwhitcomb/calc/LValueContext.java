@@ -23,110 +23,68 @@
  *
  *      Deal with LValue context in Calc -- mostly for nested variables (such as objects and arrays).
  *
- *  History:
- *	08-Jan-2021 (rlwhitcomb)
- *	    Extracted from CalcObjectVisitor.
- *	18-Jan-2021 (rlwhitcomb)
- *	    Move text to the resource file.
- *	20-Jan-2021 (rlwhitcomb)
- *	    Allow indexing into strings. Some renaming of parameters and variables.
- *	25-Jan-2021 (rlwhitcomb)
- *	    Add Javadoc; one more rename; one more error check on loop variables.
- *	26-Jan-2021 (rlwhitcomb)
- *	    Allow ["name"] to extract fields of map objects.
- *	29-Jan-2021 (rlwhitcomb)
- *	    Use new Intl Exception variants.
- *	17-Feb-2021 (rlwhitcomb)
- *	    Add "visitor" parameter for function evaluation.
- *	22-Feb-2021 (rlwhitcomb)
- *	    Refactor "loopvar" to "localvar".
- *	25-Mar-2021 (rlwhitcomb)
- *	    Check for string index out of bounds in getContextObject.
- *	07-Apr-2021 (rlwhitcomb)
- *	    Implement Unicode subscripts as array indexes.
- *	20-Apr-2021 (rlwhitcomb)
- *	    Simplify objVar parsing. Partially add "functionVar" processing.
- *	02-Jul-2021 (rlwhitcomb)
- *	    Changes for always displaying thousands separators.
- *	10-Jul-2021 (rlwhitcomb)
- *	    Implement "ignore case" for variable / member names.
- *	25-Aug-2021 (rlwhitcomb)
- *	    Implement global variables ($nn, set on command line) and do
- *	    special error handling for them.
- *	09-Sep-2021 (rlwhitcomb)
- *	    Allow interpolated strings as member names; fix potential
- *	    problems with string names having escape sequences.
- *	06-Oct-2021 (rlwhitcomb)
- *	    #24 Fully implement function parameters.
- *	07-Oct-2021 (rlwhitcomb)
- *	    Add context parameter to "toStringValue", move function call setup
- *	    to CalcObjectVisitor so it can be called from there if needed also.
- *	08-Oct-2021 (rlwhitcomb)
- *	    Error if function is undefined.
- *	14-Oct-2021 (rlwhitcomb)
- *	    Allow the "mode" option values as IDs.
- *	16-Oct-2021 (rlwhitcomb)
- *	    #33: If we have a function var context (that is a function call with parameters)
- *	    and the context object is a FunctionScope (that is another function call) then we
- *	    need to call it, and setup the context with the result.
- *	19-Oct-2021 (rlwhitcomb)
- *	    Special mode for "getContextObject" to throw if the variable/member is not defined.
- *	28-Oct-2021 (rlwhitcomb)
- *	    Changes for new predefined value paradigm.
- *	03-Nov-2021 (rlwhitcomb)
- *	    #69: New global variables "$#" and "$*".
- *	09-Nov-2021 (rlwhitcomb)
- *	    #74: Improve error messages.
- *	17-Nov-2021 (rlwhitcomb)
- *	    #96: Add "visitor" to "getContextObject" parameters so that functions can be evaluated.
- *	    Two changes to make LValues that are function results work correctly for indexes and members.
- *	31-Dec-2021 (rlwhitcomb)
- *	    #180: Change parameters to "toStringValue".
- *	21-Jan-2022 (rlwhitcomb)
- *	    #135: Add support for constant values.
- *	30-Jan-2022 (rlwhitcomb)
- *	    #229: Fix defaulting of missing actual parameters.
- *	05-Feb-2022 (rlwhitcomb)
- *	    #233: Implement calling "setValue" for SystemValue.
- *	13-Feb-2022 (rlwhitcomb)
- *	    #199: Redo the local / global variable handling.
- *	02-May-2022 (rlwhitcomb)
- *	    #68: Allow indexing by integer index value (using key list), including
- *	    negative indexes (offset from length).
- *	11-May-2022 (rlwhitcomb)
- *	    #318: Rename "evaluateFunction" to "evaluate".
- *	17-May-2022 (rlwhitcomb)
- *	    #333: Redo awkward error message.
- *	27-May-2022 (rlwhitcomb)
- *	    Move "setupFunctionCall" to FunctionDeclaration.
- *	    Make parameters final.
- *	04-Jun-2022 (rlwhitcomb)
- *	    #361: Don't access the LHS of an array object twice during dereference.
- *	23-Jun-2022 (rlwhitcomb)
- *	    #314: Turn the empty collection into an ObjectScope when necessary.
- *	08-Jul-2022 (rlwhitcomb)
- *	    #393: Cleanup imports.
- *	10-Jul-2022 (rlwhitcomb)
- *	    #392: Create objects with proper sorting of keys; allow "a['ten'] = 20" to
- *	    create an object based on the non-numeric index value.
- *	13-Jul-2022 (rlwhitcomb)
- *	    #407: Another case where we need to promote the empty CollectionScope to a real map.
- *	19-Jul-2022 (rlwhitcomb)
- *	    #412: Refactor parameter to "toStringValue" using "StringFormat" structure.
- *	15-Aug-2022 (rlwhitcomb)
- *	    #440: Use correct math context for index conversion.
- *	25-Sep-2022 (rlwhitcomb)
- *	    Rename "toNonNullString" to "getNonNullString".
- *	17-Dec-2022 (rlwhitcomb)
- *	    #572: Regularize member name access.
- *	24-Dec-2022 (rlwhitcomb)
- *	    #83: One more index Unicode character.
- *	16-May-2023 (rlwhitcomb)
- *	    Rename some helper methods.
+ * History:
+ *  08-Jan-21 rlw ----	Extracted from CalcObjectVisitor.
+ *  18-Jan-21 rlw ----	Move text to the resource file.
+ *  20-Jan-21 rlw ----	Allow indexing into strings. Some renaming of parameters and variables.
+ *  25-Jan-21 rlw ----	Add Javadoc; one more rename; one more error check on loop variables.
+ *  26-Jan-21 rlw ----	Allow ["name"] to extract fields of map objects.
+ *  29-Jan-21 rlw ----	Use new Intl Exception variants.
+ *  17-Feb-21 rlw ----	Add "visitor" parameter for function evaluation.
+ *  22-Feb-21 rlw ----	Refactor "loopvar" to "localvar".
+ *  25-Mar-21 rlw ----	Check for string index out of bounds in getContextObject.
+ *  07-Apr-21 rlw ----	Implement Unicode subscripts as array indexes.
+ *  20-Apr-21 rlw ----	Simplify objVar parsing. Partially add "functionVar" processing.
+ *  02-Jul-21 rlw ----	Changes for always displaying thousands separators.
+ *  10-Jul-21 rlw ----	Implement "ignore case" for variable / member names.
+ *  25-Aug-21 rlw ----	Implement global variables ($nn, set on command line) and do
+ *			special error handling for them.
+ *  09-Sep-21 rlw ----	Allow interpolated strings as member names; fix potential
+ *			problems with string names having escape sequences.
+ *  06-Oct-21 rlw #24	Fully implement function parameters.
+ *  07-Oct-21 rlw ----	Add context parameter to "toStringValue", move function call setup
+ *			to CalcObjectVisitor so it can be called from there if needed also.
+ *  08-Oct-21 rlw ----	Error if function is undefined.
+ *  14-Oct-21 rlw ----	Allow the "mode" option values as IDs.
+ *  16-Oct-21 rlw #33	If we have a function var context (that is a function call with parameters)
+ *			and the context object is a FunctionScope (that is another function call) then we
+ *			need to call it, and setup the context with the result.
+ *  19-Oct-21 rlw ----	Special mode for "getContextObject" to throw if the variable/member is not defined.
+ *  28-Oct-21 rlw ----	Changes for new predefined value paradigm.
+ *  03-Nov-21 rlw #69	New global variables "$#" and "$*".
+ *  09-Nov-21 rlw #74	Improve error messages.
+ *  17-Nov-21 rlw #96	Add "visitor" to "getContextObject" parameters so that functions can be evaluated.
+ *			Two changes to make LValues that are function results work correctly for indexes and members.
+ *  31-Dec-21 rlw #180	Change parameters to "toStringValue".
+ *  21-Jan-22 rlw #135	Add support for constant values.
+ *  30-Jan-22 rlw #229	Fix defaulting of missing actual parameters.
+ *  05-Feb-22 rlw #233	Implement calling "setValue" for SystemValue.
+ *  13-Feb-22 rlw #199	Redo the local / global variable handling.
+ *  02-May-22 rlw #68	Allow indexing by integer index value (using key list), including
+ *			negative indexes (offset from length).
+ *  11-May-22 rlw #318	Rename "evaluateFunction" to "evaluate".
+ *  17-May-22 rlw #333	Redo awkward error message.
+ *  27-May-22 rlw ----	Move "setupFunctionCall" to FunctionDeclaration.
+ *			Make parameters final.
+ *  04-Jun-22 rlw #361	Don't access the LHS of an array object twice during dereference.
+ *  23-Jun-22 rlw #314	Turn the empty collection into an ObjectScope when necessary.
+ *  08-Jul-22 rlw #393	Cleanup imports.
+ *  10-Jul-22 rlw #392	Create objects with proper sorting of keys; allow "a['ten'] = 20" to
+ *			create an object based on the non-numeric index value.
+ *  13-Jul-22 rlw #407	Another case where we need to promote the empty CollectionScope to a real map.
+ *  19-Jul-22 rlw #412	Refactor parameter to "toStringValue" using "StringFormat" structure.
+ *  15-Aug-22 rlw #440	Use correct math context for index conversion.
+ *  25-Sep-22 rlw ----	Rename "toNonNullString" to "getNonNullString".
+ *  17-Dec-22 rlw #572	Regularize member name access.
+ *  24-Dec-22 rlw #83	One more index Unicode character.
+ *  16-May-23 rlw ----	Rename some helper methods.
+ *  24-May-23 rlw ----	Try a slight variation for the new History format.
+ *		  #611	Move processing of builtin functions to here.
  */
 package info.rlwhitcomb.calc;
 
 import info.rlwhitcomb.util.Intl;
+import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
 import java.util.List;
@@ -331,6 +289,9 @@ class LValueContext
 	public Object getContextObject(final CalcObjectVisitor visitor, final boolean allowUndefined) {
 	    Object result = getPredefinedContextObject(allowUndefined);
 
+	    if (result instanceof CalcParser.BuiltinFunctionContext) {
+		result = visitor.evaluate((ParserRuleContext) result);
+	    }
 	    if (result instanceof FunctionScope) {
 		result = visitor.evaluate(varCtx, result);
 	    }
@@ -492,6 +453,10 @@ class LValueContext
 	    if (ctx instanceof CalcParser.IdVarContext) {
 		CalcParser.IdVarContext idVarCtx = (CalcParser.IdVarContext) ctx;
 		return new LValueContext(lValue, idVarCtx, lValue.getPredefinedContextObject(true), idVarCtx.id().getText());
+	    }
+	    else if (ctx instanceof CalcParser.BuiltinVarContext) {
+		CalcParser.BuiltinVarContext builtinCtx = (CalcParser.BuiltinVarContext) ctx;
+		return new LValueContext(lValue, builtinCtx, builtinCtx.builtinFunction());
 	    }
 	    else if (ctx instanceof CalcParser.GlobalVarContext) {
 		CalcParser.GlobalVarContext globalVarCtx = (CalcParser.GlobalVarContext) ctx;

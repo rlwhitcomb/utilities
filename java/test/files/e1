@@ -1240,6 +1240,9 @@ findfiles('test', 'd*', 'fr*~')
 # "delete" function
 delete 'alpha.beta', 'delta.gamma', 'alpha.omega'
 
+# "fileinfo" function and result object
+fileinfo('build.xml').name
+
 # "rename" function
 const FILE1 = '_ftest_.beta'
 const FILE2 = '_gtest_.zeta'

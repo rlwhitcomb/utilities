@@ -505,6 +505,9 @@
  *	    #607: Allow decimals without leading digits as numbers.
  *	04-May-2023 (rlwhitcomb)
  *	    Fix precedence of BIT_OP relative to relationals.
+ *	24-May-2023 (rlwhitcomb)
+ *	    #611: Rearrange builtin functions as part of "var" to allow direct reference to
+ *	    return value composite objects. Note: this slows down parsing A LOT.
  */
 
 grammar Calc;
@@ -606,18 +609,8 @@ member
    | ISTRING
    ;
 
-expr
-   : value                               # valueExpr
-   | obj                                 # objExpr
-   | arr                                 # arrExpr
-   | set                                 # setExpr
-   | complex                             # complexValueExpr
-   | quaternion                          # quaternionValueExpr
-   | var                                 # varExpr
-   | expr K_HAS ( member | ( LBRACK expr RBRACK ) ) # hasExpr
-   | expr K_IS ( STRING | ISTRING | TYPES ) # isExpr
-   | LPAREN expr RPAREN                  # parenExpr
-   | K_ABS expr1                         # absExpr
+builtinFunction
+   : K_ABS expr1                         # absExpr
    | K_SIN expr1                         # sinExpr
    | K_COS expr1                         # cosExpr
    | K_TAN expr1                         # tanExpr
@@ -705,6 +698,19 @@ expr
    | K_RENAME expr2                      # renameExpr
    | K_MATCHES ( expr3 | expr2 )         # matchesExpr
    | K_CALLERS LPAREN optExpr RPAREN     # callersExpr
+   ;
+
+expr
+   : value                               # valueExpr
+   | obj                                 # objExpr
+   | arr                                 # arrExpr
+   | set                                 # setExpr
+   | complex                             # complexValueExpr
+   | quaternion                          # quaternionValueExpr
+   | var                                 # varExpr
+   | expr K_HAS ( member | ( LBRACK expr RBRACK ) ) # hasExpr
+   | expr K_IS ( STRING | ISTRING | TYPES ) # isExpr
+   | LPAREN expr RPAREN                  # parenExpr
    | var INC_OP                          # postIncOpExpr
    |<assoc=right> INC_OP var             # preIncOpExpr
    |<assoc=right> ADD_OP expr            # negPosExpr
@@ -858,6 +864,7 @@ quaternion
 
 var
    : id                                   # idVar
+   | builtinFunction                      # builtinVar
    | var DOT member                       # objVar
    | var ( LBRACK expr RBRACK | INDEXES ) # arrVar
    | var actualParams                     # functionVar

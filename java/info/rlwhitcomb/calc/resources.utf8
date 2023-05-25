@@ -171,6 +171,8 @@
 #	    Update the REPL help message a little bit.
 #	09-Apr-2023 (rlwhitcomb)
 #	    #603: Update REPL help for new directive/command format.
+#	17-May-2023 (rlwhitcomb)
+#	    #611: Reword an error message.
 #
 
 #
@@ -316,7 +318,7 @@ nonObjectValue		= Cannot access a member of variable <y>%1$s<.> which is type %2
 nonArrayValue		= Cannot index into variable <y>%1$s<.> which is type %2$s
 callNotAFunction	= Cannot make a function call on the non-function value <y>%1$s<.>
 indexNegative		= Effective index value of <u>%1$d<.> cannot be negative
-unknownVarCtx		= ERROR: unknown var context subclass: <y>%1$s<.>
+unknownVarCtx		= Unknown variable context subclass: <y>%1$s<.>
 badAssign		= Assignment to <y>%1$s<.> without name or index
 tooManyForOneValue	= Too many actual values (%1$d) passed for only one parameter declared
 tooManyForValues	= Too many actual values (%1$d) passed for only %2$d parameters declared

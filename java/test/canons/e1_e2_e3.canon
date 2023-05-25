@@ -1479,6 +1479,7 @@
 >findFiles ('.', '*.java') -> [ "CheckCopyrights.java", "FormatValues.java" ]
 >findfiles ('test', 'd*', 'fr*~') -> [ "Declaration.txt", "dacted.canon", "defunkt.json", "demo", "dupjson.calc", "dynarray.canon", "dynarraytest" ]
 >delete 'alpha.beta', 'delta.gamma', 'alpha.omega' -> false
+>fileinfo ('build.xml').name -> "build.xml"
 >Defining constant “FILE1” = "_ftest_.beta"
 >Defining constant “FILE2” = "_gtest_.zeta"
 >write ('test data', FILE1) -> 9

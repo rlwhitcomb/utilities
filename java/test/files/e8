@@ -5,18 +5,20 @@ $quiet on
 # Newton-Raphson method of computing square roots
 #
 
+const TIMES = 50
+
 # There's certainly a better method of computing the trial root, but this works
 # fairly well for large values of x, at the expense of an expensive computation
 
 trial_root = 10 ** (log( x ) / 2)
-loop 50 { trial_root * trial_root > x ? trial_root /= 2 : trial_root }
+loop TIMES { trial_root * trial_root > x ? trial_root /= 2 : trial_root }
 
 # The Newton-Raphson iteration
 # (50 is very arbitrary, should be something like "until the result is the same as previous")
 # (with the trial root above, only takes about 5 iterations usually)
 
 result = trial_root
-loop i in 50 { result = (result + x / result) / 2 }
+loop TIMES { result = (result + x / result) / 2 }
 
 $quiet off
 $result on

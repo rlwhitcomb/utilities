@@ -780,6 +780,9 @@
  *	05-May-2023 (rlwhitcomb)
  *	    #558: Negate quaternions, and other quaternion arithmetic.
  *	    Rename some helper methods.
+ *	24-May-2023 (rlwhitcomb)
+ *	    #611: Need small parameter update for rearrangement of builtin functions
+ *	    within the grammar.
  */
 package info.rlwhitcomb.calc;
 
@@ -4964,12 +4967,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	 * to find the actual first value, in order to determine if the comparisons will be
 	 * done as string or numeric.
 	 *
-	 * @param eCtx	  The expression context we're evaluating (i.e., the first parse tree).
+	 * @param eCtx	  The value context we're evaluating (i.e., the first parse tree).
 	 * @param obj	  The first object, which could be an object, a list, or an actual value.
 	 * @param forJoin Whether or not this is a "join" operation.
 	 * @return	  The real first value, descending to the lowest level of a compound object.
 	 */
-	private Object getFirstValue(final CalcParser.ExprContext eCtx, final Object obj, final boolean forJoin) {
+	private Object getFirstValue(final ParserRuleContext eCtx, final Object obj, final boolean forJoin) {
 	    Object value = evaluate(eCtx, obj);
 
 	    nullCheck(value, eCtx);

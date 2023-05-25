@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.32.0', date: d'2023-05-24',
+      issues: [ 611 ],
+      comment: 'Allow builtin functions as lvalues.'
+    },
     { version: '2.31.10', date: d'2023-05-16',
       issues: [ 558 ],
       comment: 'Negate and posate for quaternions; other quaternion math; better support for adding values to sets.'
