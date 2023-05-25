@@ -791,7 +791,6 @@ public final class CalcUtil
 	/**
 	 * Cast or convert the given object value to a regular integer value for certain parameter values.
 	 *
-	 * @param visitor	The visitor used to evaluate expressions.
 	 * @param value		The input value to convert.
 	 * @param mc		The math context to use for any conversions from decimal values.
 	 * @param ctx		The parse tree context, used for error reporting.
