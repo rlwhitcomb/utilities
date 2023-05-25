@@ -1,3 +1,8 @@
+$quiet on {
+  define result(n) = `factors of $n = ${factors n}`
+}
 $resultsonly on {
-  loop i in 0 .. 100 { `factors of $i = ${factors i}` }
+  loop i in 0 .. 100 { result(i)@q }
+  result(162)@q
+  result(567)@q
 }

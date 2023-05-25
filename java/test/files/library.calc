@@ -595,6 +595,20 @@ def flat_map(arr) = { eval `[${join arr, ','}]` }
 define is_perfect(n) = { sumof ( factors (n) ) - n == n }
 
 /*
+ * Return a list of the prime numbers smaller than the given number.
+ *
+ * @param n Limit for the list of primes.
+ * @return  Array of prime numbers smaller than the input.
+ */
+define primes(n) = {
+   var list = []
+   loop x within n {
+      if isprime(x) list += x
+   }
+   list
+}
+
+/*
  * Solve the quadratic formula to find the roots of a general
  * quadratic equation: a*x**2 + b*x + c = 0.
  * x = (-b +- sqrt(b**2 - 4 * a * c))/2*a
