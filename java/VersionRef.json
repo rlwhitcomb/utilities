@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.32.2', date: d'2023-06-05',
+      issues: [ 614 ],
+      comment: 'Ignore "-debug" command-line option during library loads.'
+    },
     { version: '2.32.0', date: d'2023-05-24',
       issues: [ 611 ],
       comment: 'Allow builtin functions as lvalues.'

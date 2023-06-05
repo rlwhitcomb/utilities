@@ -323,6 +323,8 @@
  *	24-Mar-2023 (rlwhitcomb)
  *	    #596: Need to set "guiMode" from REPL ":gui" command. Move pure REPL commands
  *	    into the grammar itself.
+ *	01-Jun-2023 (rlwhitcomb)
+ *	    #614: Ignore debug mode during initial library loads.
  */
 package info.rlwhitcomb.calc;
 
@@ -1983,7 +1985,7 @@ public class Calc
 
 		parseEndTime = Environment.highResTimer();
 
-		if (debug) {
+		if (debug && !initialLibraryLoad) {
 		    displayer.displayMessage(tree.toStringTree(parser), CalcDisplayer.Output.OUTPUT);
 		}
 
