@@ -1,0 +1,57 @@
+/*
+ * Problem 27 from Project Euler (projecteuler.net)
+ *
+ * Quadratic Primes
+ *
+ * Euler discovered the remarkable quadratic formula:
+ *
+ *      𝑛² + 𝑛 + 41
+ *
+ * It turns out that the formula will produce 40 primes for the consecutive integer values
+ * 0 ≤ 𝑛 ≤ 39. However, when 𝑛 = 40, 40² + 40 + 41 = 40(40 + 1) + 41 is divisible by 41, and
+ * certainly when 𝑛 = 41, 41² + 41 + 41 is clearly divisible by 41.
+ *
+ * The incredible formula 𝑛² − 79𝑛 + 1601 was discovered, which produces 80 primes for the consecutive values
+ * 0 ≤ 𝑛 ≤ 79. The product of the coefficients, −79 and 1601, is −126479.
+ *
+ * Considering quadratics of the form:
+ *
+ *      𝑛² + 𝑎𝑛 + 𝑏, where |𝑎| < 1000 and |𝑏| ≤ 1000
+ *
+ *      where |𝑛| is the modulus/absolute value of 𝑛
+ *      e.g.  |11| = 11 and |−4| = 4
+ *
+ * Find the product of the coefficients, 𝑎 and 𝑏, for the quadratic expression that produces the maximum
+ * number of primes for consecutive values of 𝑛, starting with 𝑛 = 0.
+ */
+$quiet on {
+
+$unlimited
+
+const A_MAX = 1000-1
+const B_MAX = 1000
+
+define quadratic(n, a, b) = n*n + a*n + b
+
+var max_a = 0, max_b = 0
+var max_number_primes = 0
+
+loop a over -A_MAX..A_MAX {
+   loop b over -B_MAX..B_MAX {
+      var n = 0
+      while isprime(quadratic(n, a, b)) n++
+      if n > max_number_primes {
+         max_number_primes = n
+         max_a = a
+         max_b = b
+      }
+   }
+}
+
+}
+
+$resultsonly on {
+
+`Product of the coefficients of the quadratic that produces the most primes is ${max_a * max_b}, number of primes is $max_number_primes.`@q
+
+}
