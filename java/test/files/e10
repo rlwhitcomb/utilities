@@ -41,6 +41,10 @@ $clear list
 list = [ 'Once', 'upon', 'a', 'time', 'there', 'lived', 'a', 'princess', '...' ]
 loop i in list {i}
 
+$clear x
+loop over x=[1,2,3,4] { __ in x }
+x
+
 loop _i in 0.1 .. 0.9, 0.1 { _i }
 loop _j in 10.5 {_j}
 loop _k in 5.5, 1.5 {_k}

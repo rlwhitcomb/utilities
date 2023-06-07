@@ -9,7 +9,7 @@ $echo
 info.version.major > 2 ||
     (info.version.major == 2 && info.version.minor > 4) ||
     (info.version.major == 2 && info.version.minor == 4 && info.version.patch >= 11)
-$requires '2.14.15-alpha', base '1.9.23-alpha'
+$requires '2.32.4-alpha', base '1.9.32-alpha'
 
 # Various simple expressions
 $decimal(50)

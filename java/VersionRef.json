@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.32.4', date: d'2023-06-05',
+      issues: [ 615 ],
+      comment: 'Assignment to a variable inside a loop range expression now works.'
+    },
     { version: '2.32.2', date: d'2023-06-05',
       issues: [ 614 ],
       comment: 'Ignore "-debug" command-line option during library loads.'

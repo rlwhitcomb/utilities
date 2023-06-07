@@ -783,6 +783,9 @@
  *	24-May-2023 (rlwhitcomb)
  *	    #611: Need small parameter update for rearrangement of builtin functions
  *	    within the grammar.
+ *	02-Jun-2023 (rlwhitcomb)
+ *	    #615: Rearrange logic for loops so that any variables assigned during loop
+ *	    initialization get defined in the enclosing scope instead of the loop scope.
  */
 package info.rlwhitcomb.calc;
 
@@ -911,8 +914,20 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    return Purpose.ALL;
 		}
 
+		/**
+		 * Do any startup operations before the actual iteration begins.
+		 */
+		default void start() {
+		}
+
 		@Override
 		Object apply(Object value);
+
+		/**
+		 * Do any cleanup operations after the iteration finishes.
+		 */
+		default void finish() {
+		}
 
 		/**
 		 * Given the "dot" range values, compute the short-circuit "final" value.
@@ -2889,12 +2904,19 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	private class LoopVisitor implements IterationVisitor
 	{
 		private CalcParser.StmtBlockContext block;
+		private LoopScope localScope;
 		private String localVarName;
 		private Object lastValue = null;
 
-		LoopVisitor(final CalcParser.StmtBlockContext blockContext, final String varName) {
+		LoopVisitor(final CalcParser.StmtBlockContext blockContext, final LoopScope scope, final String varName) {
 		    block        = blockContext;
+		    localScope   = scope;
 		    localVarName = varName;
+		}
+
+		@Override
+		public void start() {
+		    pushScope(localScope);
 		}
 
 		@Override
@@ -2910,9 +2932,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    return lastValue;
 		}
 
+		@Override
 		public void finish() {
-		    // Make sure the local loop var gets removed, even on exceptions
-		    currentScope.remove(localVarName, settings.ignoreNameCase);
+		    popScope();
 		}
 	}
 
@@ -3037,6 +3059,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		}
 	    }
 
+	    // Do any initialization required for the visitor before the actual iteration begins
+	    visitor.start();
+
 	    if (stepWise) {
 		// Try to convert loop values to exact integers if possible
 		try {
@@ -3136,25 +3161,35 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			}
 		    }
 		}
-	    }
-	    else if (iter != null) {
-		while (iter.hasNext()) {
-		    Object value = iter.next();
-		    lastValue = visitor.apply(value);
-		}
-	    }
-	    else if (codePoints != null) {
-		StringBuilder buf = new StringBuilder(4);
-		for (Iterator<Integer> intIter = codePoints.iterator(); intIter.hasNext(); ) {
-		    Integer cp = intIter.next();
-		    buf.setLength(0);
-		    buf.appendCodePoint(cp);
-		    lastValue = visitor.apply(buf.toString());
+		finally {
+		    visitor.finish();
 		}
 	    }
 	    else {
-		for (CalcParser.ExprContext expr : exprs) {
-		    lastValue = visitor.apply(evaluate(expr));
+		try {
+		    if (iter != null) {
+			while (iter.hasNext()) {
+			    Object value = iter.next();
+			    lastValue = visitor.apply(value);
+			}
+		    }
+		    else if (codePoints != null) {
+			StringBuilder buf = new StringBuilder(4);
+			for (Iterator<Integer> intIter = codePoints.iterator(); intIter.hasNext(); ) {
+			    Integer cp = intIter.next();
+			    buf.setLength(0);
+			    buf.appendCodePoint(cp);
+			    lastValue = visitor.apply(buf.toString());
+			}
+		    }
+		    else {
+			for (CalcParser.ExprContext expr : exprs) {
+			    lastValue = visitor.apply(evaluate(expr));
+			}
+		    }
+		}
+		finally {
+		    visitor.finish();
 		}
 	    }
 
@@ -3173,8 +3208,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    boolean doingWithin = ctx.K_WITHIN() != null;
 
-	    pushScope(new LoopScope());
-	    LoopVisitor visitor = new LoopVisitor(block, localVarName);
+	    LoopVisitor visitor = new LoopVisitor(block, new LoopScope(), localVarName);
 
 	    Object value = null;
 
@@ -3188,10 +3222,6 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		if (lex.hasValue()) {
 		    value = lex.getValue();
 		}
-	    }
-	    finally {
-		visitor.finish();
-		popScope();
 	    }
 
 	    return value;

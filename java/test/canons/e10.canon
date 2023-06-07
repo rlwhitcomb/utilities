@@ -114,6 +114,12 @@
 >i -> "a"
 >i -> "princess"
 >i -> "..."
+>Variable 'x' cleared.
+>__ in x -> true
+>__ in x -> true
+>__ in x -> true
+>__ in x -> true
+>x -> [ 1, 2, 3, 4 ]
 >_i -> 0.1
 >_i -> 0.2
 >_i -> 0.3

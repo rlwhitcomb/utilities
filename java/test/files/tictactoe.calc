@@ -334,7 +334,7 @@ define pickComputerMove() = {
   }
 
   // Last-ditch attempt:  find the first available empty position
-  loop slot over 1..9 {
+  loop slot in 9 {
     if valueAt(slot) == EMPTY {
       leave makeMove(slot, ourColor)
     }
