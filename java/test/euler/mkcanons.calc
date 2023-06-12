@@ -2,9 +2,7 @@ $quiet on {
 files = sort(findfiles('test/euler', 'p*.calc', 'fr!'))
 loop f over files {
    finfo = fileinfo(f)
-   $quiet pop
    $echo `Generating ${finfo.nameOnly}.canon ...`
-   $quiet on
    exec('test/euler/upe', finfo.nameOnly)
 }
 }
