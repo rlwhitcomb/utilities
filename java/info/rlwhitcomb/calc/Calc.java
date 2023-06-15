@@ -325,6 +325,8 @@
  *	    into the grammar itself.
  *	01-Jun-2023 (rlwhitcomb)
  *	    #614: Ignore debug mode during initial library loads.
+ *	15-Jun-2023 (rlwhitcomb)
+ *	    #618: Add "-nol" and other command-line option aliases.
  */
 package info.rlwhitcomb.calc;
 
@@ -2105,6 +2107,7 @@ public class Calc
 		    break;
 		case "nodebug":
 		case "nodeb":
+		case "nod":
 		case "no":
 		    debug = false;
 		    break;
@@ -2117,6 +2120,7 @@ public class Calc
 		case "nocolor":
 		case "nocol":
 		case "noc":
+		case "nc":
 		    computeColors(false);
 		    break;
 		case "darkbackgrounds":
@@ -2139,12 +2143,14 @@ public class Calc
 		    break;
 		case "timing":
 		case "time":
+		case "tm":
 		case "t":
 		    timing = true;
 		    break;
 		case "notiming":
 		case "notime":
 		case "not":
+		case "nt":
 		    timing = false;
 		    break;
 		case "resultsonly":
@@ -2152,6 +2158,7 @@ public class Calc
 		case "results":
 		case "result":
 		case "res":
+		case "rs":
 		case "r":
 		    resultsOnly = true;
 		    break;
@@ -2188,6 +2195,7 @@ public class Calc
 		case "noseparator":
 		case "noseps":
 		case "nosep":
+		case "nos":
 		case "ns":
 		    separators = false;
 		    break;
@@ -2270,12 +2278,16 @@ public class Calc
 		case "library":
 		case "libs":
 		case "lib":
+		case "lb":
 		    return Expecting.LIBRARY;
 		case "ignorelibraries":
 		case "nolibraries":
 		case "nolibrary":
 		case "nolibs":
 		case "nolib":
+		case "nolb":
+		case "nol":
+		case "nl":
 		    libraryNames = null;
 		    break;
 		case "files":
@@ -2291,6 +2303,7 @@ public class Calc
 		    treatAsFile = false;
 		    break;
 		case "filetext":
+		case "ft":
 		    treatAsText = treatAsFile = false;
 		    break;
 		case "cleararguments":
@@ -2310,6 +2323,7 @@ public class Calc
 		    useCmdEnter = true;
 		    break;
 		case "enter":
+		case "ent":
 		case "e":
 		    useCmdEnter = false;
 		    break;

@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.32.7', date: d'2023-06-15',
+      issues: [ 618 ],
+      comment: 'Add new aliases (including "-nol") for some command-line options.'
+    },
     { version: '2.32.6', date: d'2023-06-15',
       issues: [ 616 ],
       comment: 'Fix the output parameter to the "$echo" directive.'
