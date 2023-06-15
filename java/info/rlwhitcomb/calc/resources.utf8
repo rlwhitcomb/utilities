@@ -173,6 +173,8 @@
 #	    #603: Update REPL help for new directive/command format.
 #	17-May-2023 (rlwhitcomb)
 #	    #611: Reword an error message.
+#	12-Jun-2023 (rlwhitcomb)
+#	    #616: New error message for CalcDisplayer.Output.
 #
 
 #
@@ -301,6 +303,11 @@ intro.help5	= "  Enter <u>$quit<.> or <u>$exit<.> to end."
 intro.help6	= "  Use <u>$gui<.> to switch to GUI mode."
 intro.help7	= "  The <u>$version<.> command is also available here."
 intro.help8	= ""
+
+#
+# From CalcDisplayer
+#
+unknownOutput		= Unknown output type: <y>%1$s<.>
 
 #
 # From CalcUtil

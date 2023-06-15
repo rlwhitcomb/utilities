@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2020,2022 Roger L. Whitcomb.
+ * Copyright (c) 2020,2022-2023 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,15 +23,16 @@
  *
  *      Display interface for the Calc program.
  *
- *  History:
- *      11-Dec-2020 (rlwhitcomb)
- *          Inital coding.
- *	16-Dec-2020 (rlwhitcomb)
- *	    New interface method for "$echo".
- *	20-Jun-2022 (rlwhitcomb)
- *	    #364: Add parameter and enum to "displayMessage" for output destination.
+ * History:
+ *  11-Dec-20 rlw ----	Inital coding.
+ *  16-Dec-20 rlw ----	New interface method for "$echo".
+ *  20-Jun-22 rlw #364	Add parameter and enum to "displayMessage" for output destination.
+ *  12-Jun-23 rlw #616	Error for "Output.fromString" with unknown, non-empty value.
  */
 package info.rlwhitcomb.calc;
+
+import info.rlwhitcomb.util.Intl;
+
 
 /**
  * Interface so that calculated results can be displayed in many different ways:
@@ -56,7 +57,10 @@ public interface CalcDisplayer
 		 * @return The decoded value, or {@link #OUTPUT} by default.
 		 */
 		public static Output fromString(final String input) {
-		    if (input != null && !input.isEmpty()) {
+		    if (input != null && input.trim().isEmpty()) {
+			return OUTPUT;
+		    }
+		    else if (input != null) {
 			try {
 			    return valueOf(input.toUpperCase());
 			}
@@ -78,7 +82,7 @@ public interface CalcDisplayer
 			    }
 			}
 		    }
-		    return OUTPUT;
+		    throw new Intl.IllegalArgumentException("calc#unknownOutput", input);
 		}
 	}
 

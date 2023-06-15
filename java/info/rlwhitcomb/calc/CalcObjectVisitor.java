@@ -786,6 +786,8 @@
  *	02-Jun-2023 (rlwhitcomb)
  *	    #615: Rearrange logic for loops so that any variables assigned during loop
  *	    initialization get defined in the enclosing scope instead of the loop scope.
+ *	12-Jun-2023 (rlwhitcomb)
+ *	    #616: Fix "$echo" output parameter.
  */
 package info.rlwhitcomb.calc;
 
@@ -2143,8 +2145,17 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitEchoDirective(CalcParser.EchoDirectiveContext ctx) {
 	    String msg = getStringValue(ctx.expr(0), true, false, settings.separatorMode);
-	    String out = getStringValue(ctx.expr(1), true, false, false);
-	    CalcDisplayer.Output output = CalcDisplayer.Output.fromString(out);
+	    CalcParser.ExprContext expr = ctx.expr(1);
+	    String out = expr == null ? "" : getTreeText(expr);
+	    CalcDisplayer.Output output = CalcDisplayer.Output.OUTPUT;
+
+	    try {
+		output = CalcDisplayer.Output.fromString(out);
+	    }
+	    catch (IllegalArgumentException iae) {
+		out = getStringValue(expr, false, false, false);
+		output = CalcDisplayer.Output.fromString(out);
+	    }
 
 	    displayer.displayMessage(ConsoleColor.color(msg, Calc.getColoredMode()), output);
 
