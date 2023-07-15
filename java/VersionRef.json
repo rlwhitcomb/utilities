@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.32.8', date: d'2023-06-19',
+      issues: [ 613 ],
+      comment: 'Extend the range of "isprime", "factors", and "pfactors" out to 4,611,686,014,132,420,608.'
+    },
     { version: '2.32.7', date: d'2023-06-15',
       issues: [ 618 ],
       comment: 'Add new aliases (including "-nol") for some command-line options.'

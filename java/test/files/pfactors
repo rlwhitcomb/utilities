@@ -4,4 +4,8 @@ loop _i in 0 .. 100 {
    `prime factors of $_i = ${facts = pfactors _i}`
    if prod <> _i { `$_i failed!` }
 }
+const FACTOR = 59
+`2**$FACTOR-1 = ${pr1 = 2**FACTOR - 1}`
+`prime factors of $pr1 = ${pf1 = pfactors pr1}`
+`product of $pf1 equals $pr1 ? ${productof(pf1) == pr1}`
 }

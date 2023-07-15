@@ -21,7 +21,7 @@ array@j
 primes = []
 start = 2; end = 102;
 $quiet on {
-  loop _i_ in start .. end { isprime(_i_) ? primes[length(primes)] = _i_ : "" }
+  loop _i_ in start .. end { isprime(_i_) ? primes += _i_ : "" }
 }
 length(primes); primes;
 

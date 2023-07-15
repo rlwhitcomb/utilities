@@ -147,7 +147,12 @@ n = log(m)
 tenpow(n)
 p = ln2(1000000)
 2**p
+$default
 isprime 15485863
+t31=((2**31-1)**2)-1
+isprime (t31)
+p31=pfactors(t31)
+productof p31
 
 isnull junk
 notnull junk

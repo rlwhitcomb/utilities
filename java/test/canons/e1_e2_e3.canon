@@ -268,7 +268,12 @@
 >tenpow (n) -> 10000
 >p = ln2 (1000000) -> 19.93156856932417
 >2 ** p -> 999999.9999999974
+>Precision is now “34” digits.
 >isprime 15485863 -> true
+>t31 = ((2 ** 31 - 1) ** 2) - 1 -> 4611686014132420608
+>isprime (t31) -> false
+>p31 = pfactors (t31) -> [ 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 7, 11, 31, 151, 331 ]
+>productof p31 -> 4611686014132420608
 >isnull junk -> true
 >notnull junk -> false
 >notnull h2 -> true
@@ -308,7 +313,7 @@
 >typeof (1.2) -> "float"
 >Calculation mode set to “RATIONAL”.
 >typeof (½) -> "fraction"
->Calculation mode set to “DECIMAL(16)”.
+>Calculation mode set to “DECIMAL(34)”.
 >typeof (tenpow (5)) -> "integer"
 >typeof (false) -> "boolean"
 >typeof (info) -> "object"
@@ -351,11 +356,11 @@
 >settings.trigMode -> "RADIANS"
 >Trig mode is now “DEGREES”.
 >settings.trigMode -> "DEGREES"
->sin (45) -> 0.7071067811865477
->cos (60) -> 0.4999999999999998
->asin (sin (50)) -> 50.00000000000001
->acos (cos (30)) -> 29.99999999999999
->atan (tan (15)) -> 15
+>sin (45) -> 0.7071067811865475244008443621048491
+>cos (60) -> 0.4999999999999999999999999999999997
+>asin (sin (50)) -> 50.00000000000000
+>acos (cos (30)) -> 30.00000000000000
+>atan (tan (15)) -> 15.00000000000000
 >Trig mode is now “RADIANS”.
 >settings.trigMode -> "RADIANS"
 >Precision is now “60” digits.

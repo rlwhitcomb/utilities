@@ -788,6 +788,8 @@
  *	    initialization get defined in the enclosing scope instead of the loop scope.
  *	12-Jun-2023 (rlwhitcomb)
  *	    #616: Fix "$echo" output parameter.
+ *	14-Jul-2023 (rlwhitcomb)
+ *	    #613: Expand the width of results for the "factors" and "pfactors" functions.
  */
 package info.rlwhitcomb.calc;
 
@@ -6476,7 +6478,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitFactorsExpr(CalcParser.FactorsExprContext ctx) {
-	    ArrayScope<Integer> result = new ArrayScope<>();
+	    ArrayScope<BigInteger> result = new ArrayScope<>();
 	    BigInteger n = getIntegerValue(ctx.expr1().expr());
 
 	    MathUtil.getFactors(n, result.list());
@@ -6486,7 +6488,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitPrimeFactorsExpr(CalcParser.PrimeFactorsExprContext ctx) {
-	    ArrayScope<Integer> result = new ArrayScope<>();
+	    ArrayScope<BigInteger> result = new ArrayScope<>();
 	    BigInteger n = getIntegerValue(ctx.expr1().expr());
 
 	    MathUtil.getPrimeFactors(n, result.list());

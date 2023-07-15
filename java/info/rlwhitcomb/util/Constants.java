@@ -24,22 +24,22 @@
  *	A collection of math-related constant values that are used in multiple places.
  *
  * History:
- *  01-Feb-22 rlw #231: Created from constants already defined in other places.
- *  02-Feb-22 rlw #231: More values.
- *  08-Feb-22 rlw #235: D_FOUR added.
- *  16-Feb-22 rlw  ---  Buffer sizes added.
- *  17-Feb-22 rlw  ---  Double and float limits.
- *  14-Apr-22 rlw #273: Move math-related classes to "math" package.
- *  29-May-22 rlw #301: Add values used for "convertToWords" (BigInteger).
- *  29-Jun-22 rlw #380: Increase string file size for FileUtilities.
- *  09-Jul-22 rlw #393: Cleanup imports.
- *  24-Aug-22 rlw #447: Add "D_200" value.
- *                 ---  Move I_MINUS_ONE into here from Calc.
- *  12-Sep-22 rlw #480: Add "I_800" for range conversions.
- *  19-Dec-22 rlw #559:	New rational complex values.
- *  04-Jan-23 rlw #558:	Quaternion constants.
- *  10-Jan-23 rlw #558:	More quaternion constants.
- *  05-May-23 rlw  ---	Remove actually unused values.
+ *  01-Feb-22 rlw #231	Created from constants already defined in other places.
+ *  02-Feb-22 rlw #231	More values.
+ *  08-Feb-22 rlw #235	D_FOUR added.
+ *  16-Feb-22 rlw ----	Buffer sizes added.
+ *  17-Feb-22 rlw ----	Double and float limits.
+ *  14-Apr-22 rlw #273	Move math-related classes to "math" package.
+ *  29-May-22 rlw #301	Add values used for "convertToWords" (BigInteger).
+ *  29-Jun-22 rlw #380	Increase string file size for FileUtilities.
+ *  09-Jul-22 rlw #393	Cleanup imports.
+ *  24-Aug-22 rlw #447	Add "D_200" value.
+ *                ----	Move I_MINUS_ONE into here from Calc.
+ *  12-Sep-22 rlw #480	Add "I_800" for range conversions.
+ *  19-Dec-22 rlw #559	New rational complex values.
+ *  04-Jan-23 rlw #558	Quaternion constants.
+ *  10-Jan-23 rlw #558	More quaternion constants.
+ *  05-May-23 rlw ----	Remove actually unused values.
  */
 package info.rlwhitcomb.util;
 
@@ -197,7 +197,7 @@ public final class Constants
 	/** Number of nanoseconds in a second. */
 	public static final long NANOSECONDS = 1_000_000_000L;
 
-	/** Nanoseconds in one minutes. */
+	/** Nanoseconds in one minute. */
 	public static final long ONE_MINUTE = 60L * NANOSECONDS;
 
 	/** Nanoseconds in one hour. */
@@ -219,7 +219,7 @@ public final class Constants
 	/** The standard UTF-8 character set. */
 	public static final Charset UTF_8_CHARSET = StandardCharsets.UTF_8;
 
-	/** The ISO-8859-l (Latin 1) character set. */
+	/** The ISO-8859-1 (Latin 1) character set. */
 	public static final Charset ISO_8859_1_CHARSET = Charset.forName("ISO-8859-1");
 
 	/** The normal Windows character set (windows-1252). */

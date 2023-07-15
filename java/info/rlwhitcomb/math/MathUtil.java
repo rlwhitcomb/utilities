@@ -24,38 +24,42 @@
  *	Various static methods for trig, log, and other mathematical calculations.
  *
  * History:
- *  26-Mar-21 rlw  ---	Moved out of NumericUtil into this separate class.
- *  27-Mar-21 rlw  ---	Add "ePower" method (which is e**x, or anti-logarithm).
- *  27-Mar-21 rlw  ---	Clean up code in "pow()"
- *  29-Mar-21 rlw  ---	Implement simpler, faster "ln2" function.
+ *  26-Mar-21 rlw ----	Moved out of NumericUtil into this separate class.
+ *  27-Mar-21 rlw ----	Add "ePower" method (which is e**x, or anti-logarithm).
+ *  27-Mar-21 rlw ----	Clean up code in "pow()"
+ *  29-Mar-21 rlw ----	Implement simpler, faster "ln2" function.
  *			Rename the resource strings.
- *  30-Mar-21 rlw  ---	Implement Taylor series for "ln" function. Clean up "pow" and "ePower".
- *  08-Apr-21 rlw  ---	Move the "round" function from Calc into here.
- *  26-Apr-21 rlw  ---	Tweak some error messages.
- *  07-Jul-21 rlw  ---	Make the class final.
- *  20-Sep-21 rlw  ---	Add 'tenPower' method (like 'ePower').
- *  05-Oct-21 rlw  ---	Make "fixup" method that does "round" and "stripTrailingZeros".
- *  07-Oct-21 rlw  ---	Fix operation of "round" when rounding to more precision than the original.
- *  18-Nov-21 rlw #95:	Add calculation of "phi".
- *  01-Dec-21 rlw #95:	Add "ratphi" and "fib2" to support it.
- *  29-Dec-21 rlw #188:	Add "ceil" and "floor" methods.
- *  01-Feb-22 rlw #231:	Use new Constants class values instead of our own.
- *  08-Feb-22 rlw #235:	Add "atan2" code.
- *  14-Apr-22 rlw #273:	Move to "math" package.
- *  08-Jul-22 rlw #393:	Cleanup imports.
- *  15-Sep-22 rlw #485:	Add "modulus" function.
- *  30-Sep-22 rlw  ---	Enlarge the "ratphi" table up to precision of 1,000.
- *		  #288:	Add a method to return rational values of pi up to a certain precision.
- *  01-Oct-22 rlw #288:	Add source links to the PI_VALUES table, rename "piFraction" to "ratpi".
- *  03-Oct-22 rlw #497:	Methods to get a MathContext for division particularly for large dividends.
- *  06-Oct-22 rlw #501:	BigDecimal to radix conversion.
- *  08-Oct-22 rlw #501:	Radix back to BigDecimal conversion.
- *  12-Oct-22 rlw #513:	Move Logging to new package.
- *                #514:	Move text resources out of "util" package to here.
- *  19-Dec-22 rlw #79:	Move BigDecimal "random" function into here.
- *  22-Dec-22 rlw #79:	More work on fixing the distribution of random numbers.
- *  27-Dec-22 rlw	New varargs "minimum" and "maximum" (int) methods.
- *  05-Jan-23 rlw #558:	"divideContext" for quaternions.
+ *  30-Mar-21 rlw ----	Implement Taylor series for "ln" function. Clean up "pow" and "ePower".
+ *  08-Apr-21 rlw ----	Move the "round" function from Calc into here.
+ *  26-Apr-21 rlw ----	Tweak some error messages.
+ *  07-Jul-21 rlw ----	Make the class final.
+ *  20-Sep-21 rlw ----	Add 'tenPower' method (like 'ePower').
+ *  05-Oct-21 rlw ----	Make "fixup" method that does "round" and "stripTrailingZeros".
+ *  07-Oct-21 rlw ----	Fix operation of "round" when rounding to more precision than the original.
+ *  18-Nov-21 rlw #95	Add calculation of "phi".
+ *  01-Dec-21 rlw #95	Add "ratphi" and "fib2" to support it.
+ *  29-Dec-21 rlw #188	Add "ceil" and "floor" methods.
+ *  01-Feb-22 rlw #231	Use new Constants class values instead of our own.
+ *  08-Feb-22 rlw #235	Add "atan2" code.
+ *  14-Apr-22 rlw #273	Move to "math" package.
+ *  08-Jul-22 rlw #393	Cleanup imports.
+ *  15-Sep-22 rlw #485	Add "modulus" function.
+ *  30-Sep-22 rlw ----	Enlarge the "ratphi" table up to precision of 1,000.
+ *		  #288	Add a method to return rational values of pi up to a certain precision.
+ *  01-Oct-22 rlw #288	Add source links to the PI_VALUES table, rename "piFraction" to "ratpi".
+ *  03-Oct-22 rlw #497	Methods to get a MathContext for division particularly for large dividends.
+ *  06-Oct-22 rlw #501	BigDecimal to radix conversion.
+ *  08-Oct-22 rlw #501	Radix back to BigDecimal conversion.
+ *  12-Oct-22 rlw #513	Move Logging to new package.
+ *                #514	Move text resources out of "util" package to here.
+ *  19-Dec-22 rlw #79	Move BigDecimal "random" function into here.
+ *  22-Dec-22 rlw #79	More work on fixing the distribution of random numbers.
+ *  27-Dec-22 rlw ----	New varargs "minimum" and "maximum" (int) methods.
+ *  05-Jan-23 rlw #558	"divideContext" for quaternions.
+ *  19-Jun-23 rlw #613	Make MAX_PRIME the square of MAX_INT to expand the range
+ *			of prime checking and factoring.
+ *			Some small optimizations around checking for zeros.
+ *			Major optimizations in constructing the prime sieve.
  */
 package info.rlwhitcomb.math;
 
@@ -803,7 +807,7 @@ public final class MathUtil
 	    }
 
 	    // Some simplifications
-	    if (xValue.equals(BigDecimal.ZERO))
+	    if (xValue.signum() == 0)
 		return BigDecimal.ZERO;
 
 	    BigDecimal result     = xValue;
@@ -817,7 +821,7 @@ public final class MathUtil
 
 	    // This seems to require (precision/4) * input/0.1 iterations, so for
 	    // precision 20, about 5 * 0.1, for 34 about 8 * 0.1, etc.
-	    int approxRange = (int)Math.floor(xValue.divide(D_ONE_TENTH, mc).doubleValue()) + 1;
+	    int approxRange = (int) Math.floor(xValue.divide(D_ONE_TENTH, mc).doubleValue()) + 1;
 	    int loopCountPerRange = (mc.getPrecision() + 3) / 4;
 	    int loops = (approxRange + approxRange / 6) * loopCountPerRange + 3;
 	    logger.debug("tan: precision = %1$d, approx range = %2$d, loops per = %3$d -> loops = %4$d", mc.getPrecision(), approxRange, loopCountPerRange, loops);
@@ -963,9 +967,10 @@ public final class MathUtil
 	 * @return	The {@code sqrt(x)} value such that {@code x = result * result}.
 	 */
 	public static BigDecimal sqrt(final BigDecimal x, final MathContext mc) {
-	    if (x.signum() < 0)
+	    int sign = x.signum();
+	    if (sign < 0)
 		throw new Intl.IllegalArgumentException("math#math.sqrtNegative");
-	    if (x.equals(BigDecimal.ZERO) || x.equals(BigDecimal.ONE))
+	    if (sign == 0 || x.equals(BigDecimal.ONE))
 		return x;
 
 	    BigDecimal trial_root = BigDecimal.ONE.movePointRight((x.precision() - x.scale()) / 2);
@@ -1117,14 +1122,17 @@ public final class MathUtil
 	 * @return	The result of e**x rounded to the given precision.
 	 */
 	public static BigDecimal ePower(final BigDecimal exp, final MathContext mc) {
-	    if (exp.equals(BigDecimal.ZERO))
+	    int sign = exp.signum();
+
+	    // e**0 == 1
+	    if (sign == 0)
 		return BigDecimal.ONE;
 
 	    BigDecimal result;
 
 	    boolean reciprocal = false;
 	    BigDecimal exponent = exp;
-	    if (exp.signum() < 0) {
+	    if (sign < 0) {
 		reciprocal = true;
 		exponent = exp.abs();
 	    }
@@ -1141,7 +1149,7 @@ public final class MathUtil
 
 	    result = BigDecimal.ONE;
 
-	    if (!fracExp.equals(BigDecimal.ZERO)) {
+	    if (fracExp.signum() != 0) {
 		result = result.add(fracExp);
 
 		BigDecimal numer      = fracExp;
@@ -1181,7 +1189,8 @@ public final class MathUtil
 	 * @return	The result of 10**x rounded to the given precision.
 	 */
 	public static BigDecimal tenPower(final BigDecimal exp, final MathContext mc) {
-	    if (exp.equals(BigDecimal.ZERO))
+	    // 10**0 == 1
+	    if (exp.signum() == 0)
 		return BigDecimal.ONE;
 
 	    BigDecimal result;
@@ -1189,7 +1198,7 @@ public final class MathUtil
 	    int intExp         = exp.intValue();
 	    BigDecimal fracExp = exp.subtract(new BigDecimal(intExp));
 
-	    if (!fracExp.equals(BigDecimal.ZERO)) {
+	    if (fracExp.signum() != 0) {
 		boolean reciprocal = false;
 		BigDecimal exponent = exp;
 		if (exp.signum() < 0) {
@@ -1307,11 +1316,11 @@ public final class MathUtil
 	}
 
 
-	private static final BigInteger MAX_PRIME = MAX_INT;
+	private static final BigInteger MAX_PRIME = MAX_INT.multiply(MAX_INT);
 
 	/**
 	 * This is the "Sieve of Eratosthenes" used for primality tests.
-	 * <p> The one bits in this value correspond to the multiples of
+	 * <p> The one bits in this sieve correspond to the multiples of
 	 * each prime number starting with 3 (that is, the composite numbers)
 	 * while the zero bits are the primes in between them. Only the
 	 * odd numbers starting at 3 are represented, with bit 0 (the least-
@@ -1322,33 +1331,64 @@ public final class MathUtil
 	 * This represents the size in bits of the sieve that we have already
 	 * set correctly. Any value bigger than this is undefined.
 	 */
-	private static int primeSieveMax = -1;
+	private static long primeSieveMax = -1L;
+	/**
+	 * The maximum bit position of the current sieve, indicating the maximum prime
+	 * found so far in the sieve.
+	 */
+	private static int primeSieveBitPos = 0;
 
-	private static void constructSieve(final int size) {
-	    int sizeInBits = roundUpPowerTwo(Math.max(size, 100));
+	private static final long SIEVE_CHUNK_SIZE = 16384L;
+
+	/**
+	 * Construct or reconstruct the Sieve of Eratosthenes to the given size (in bits).
+	 * <p> If the current size is at least the given size then nothing will happen.
+	 * <p> To reduce the number of resizes required, the sieve is constructed in chunks
+	 * of {@link #SIEVE_CHUNK_SIZE} bits.
+	 * <p> For optimization, when we resize larger there should be no need to recompute
+	 * everything from scratch, but simply use a segmented sieve algorithm to generate the
+	 * next higher chunks. At bigger sizes this should substantially reduce the computation
+	 * time.
+	 *
+	 * @param size The number of bits to construct, which corresponds to a maximum prime number
+	 * of {@code size * 2 + 3}, since only the odd values are present and the bits start at 3.
+	 * @see #primeSieve
+	 * @see #primeSieveMax
+	 * @see #primeSieveBitPos
+	 */
+	private static void constructSieve(final long size) {
+	    long sizeInBits = (Math.max(size, SIEVE_CHUNK_SIZE) + SIEVE_CHUNK_SIZE - 1L) / SIEVE_CHUNK_SIZE * SIEVE_CHUNK_SIZE;
+
+	    if (sizeInBits >= Integer.MAX_VALUE)
+		throw new Intl.IllegalArgumentException("math#math.primeTooBig", BigInteger.valueOf(sizeInBits * 2L + 3L));
 
 	    // Don't need to do anything if the sieve is already big enough
 	    if (sizeInBits > primeSieveMax) {
 		// In this implementation, a 0 bit means prime, 1 bit is composite.
-		BigInteger sieve = BigInteger.ZERO;
+		BigInteger sieve = primeSieve;
 
 		// Only the odd bits are present, and correspond so:
 		// bit 0 -> 3
 		// bit 1 -> 5
 		// bit 2 -> 7
-		int bitPos = 0;
-		while (bitPos >= 0 && bitPos <= sizeInBits) {
+		int bitPos = primeSieveBitPos;
+
+		// Okay, okay. This is going to take an enormous amount of time even well below the maximum
+		// bit position (2**31 - 1). Empirically a "sizeInBits" value of 1.5 billion takes hours to compute.
+		// This actually should be done as a segmented sieve, where we start with the existing one and only
+		// set the values from the previous top value up to the new bit size.
+		while (bitPos >= 0 && bitPos <= (int) sizeInBits) {
 		    int prime = (bitPos * 2) + 3;
 
-		    // Start at prime * 3, increment by prime * 2
-		    // to get 3p, 5p, 7p, ... (since all the even multiples
-		    // are even numbers, and thus NOT prime and not represented
-		    // in this bitmap)
-		    for (int j = bitPos + prime; j <= sizeInBits; j += prime) {
+		    // Start at prime * 3, increment by prime * 2 to get 3p, 5p, 7p, ...
+		    // (since all the even multiples are even numbers, and thus NOT prime
+		    // and not even represented in this bitmap)
+		    for (int j = bitPos + prime; j <= (int) sizeInBits; j += prime) {
 			sieve = sieve.setBit(j);
 		    }
 
-		    int nextBitPos = findLowestClearBit(sieve, bitPos + 1, sizeInBits);
+		    // This corresponds to the next larger prime number
+		    int nextBitPos = findLowestClearBit(sieve, bitPos + 1, (int) sizeInBits);
 		    if (nextBitPos < 0) {
 			break;
 		    }
@@ -1358,6 +1398,7 @@ public final class MathUtil
 		// Save the cached sieve for next time
 		primeSieve = sieve;
 		primeSieveMax = sizeInBits;
+		primeSieveBitPos = bitPos;
 	    }
 	}
 
@@ -1377,10 +1418,29 @@ public final class MathUtil
 	 * @param posN	A positive number to be tested for primality or factored.
 	 * @return	The maximum bit position that should be tested for prime factors.
 	 */
-	private static int maxPrimeBitPos(final BigInteger posN) {
-	    int max = ((int)(Math.ceil(Math.sqrt(posN.doubleValue())) + 0.5d) + 1) * 2;
+	private static long maxPrimeBitPos(final BigInteger posN) {
+	    long max = ((long) (Math.ceil(Math.sqrt(posN.doubleValue())) + 0.5d) + 1) * 2;
 	    return (max + 1 - 3) / 2;
 	}
+
+	/**
+	 * The prime numbers less than 1,000. For use with primality testing for small values.
+	 */
+	private static final int[] SMALL_PRIMES = {
+		2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97,
+		101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151, 157, 163, 167, 173, 179, 181, 191, 193, 197, 199,
+		211, 223, 227, 229, 233, 239, 241, 251, 257, 263, 269, 271, 277, 281, 283, 293,
+		307, 311, 313, 317, 331, 337, 347, 349, 353, 359, 367, 373, 379, 383, 389, 397,
+		401, 409, 419, 421, 431, 433, 439, 443, 449, 457, 461, 463, 467, 479, 487, 491, 499,
+		503, 509, 521, 523, 541, 547, 557, 563, 569, 571, 577, 587, 593, 599,
+		601, 607, 613, 617, 619, 631, 641, 643, 647, 653, 659, 661, 673, 677, 683, 691,
+		701, 709, 719, 727, 733, 739, 743, 751, 757, 761, 769, 773, 787, 797,
+		809, 811, 821, 823, 827, 829, 839, 853, 857, 859, 863, 877, 881, 883, 887,
+		907, 911, 919, 929, 937, 941, 947, 953, 967, 971, 977, 983, 991, 997
+	};
+
+	/** A "certainty" factor used with {@link BigInteger#isProbablePrime}. */
+	private static final int PRIME_CERTAINTY = 10;
 
 	/**
 	 * Using a Sieve of Eratosthenes, figure out if the given number is prime.
@@ -1396,7 +1456,7 @@ public final class MathUtil
 	    // Negative numbers are essentially the same primality as their positive counterparts
 	    BigInteger posN = n.abs();
 
-	    if (posN.compareTo(MAX_PRIME) > 0)
+	    if (posN.compareTo(MAX_PRIME) >= 0)
 		throw new Intl.IllegalArgumentException("math#math.primeTooBig", posN);
 
 	    // Easy decisions here: zero and one are not prime
@@ -1408,15 +1468,31 @@ public final class MathUtil
 		return true;
 
 	    // Any other even number is NOT prime
-	    if (posN.remainder(I_TWO).equals(BigInteger.ZERO))
+	    if (posN.remainder(I_TWO).signum() == 0)
+		return false;
+
+	    // Now, make a preliminary pass to see if the number is divisible by any of the other "small" primes
+	    // in the list above before we go to the expensive sieve operation.
+	    for (int i = 1; i < SMALL_PRIMES.length; i++) {
+		BigInteger smallPrime = BigInteger.valueOf(SMALL_PRIMES[i]);
+		if (posN.compareTo(smallPrime) > 0) {
+		    if (posN.remainder(smallPrime).signum() == 0)
+			return false;
+		}
+		else {
+		    // The number is now smaller than the next "small" prime and hasn't been divided yet,
+		    // thence it is itself prime.
+		    return true;
+		}
+	    }
+
+	    // Quick test for "is this probably a prime" vs. "is this definitely composite"?
+	    if (!posN.isProbablePrime(PRIME_CERTAINTY))
 		return false;
 
 	    // Choose a size for our sieve that is at least as big as the square root
 	    // of the number in question (a little bit bigger is better)
-	    int maxBitPos = maxPrimeBitPos(posN);
-
-	    // Create or expand the sieve to accommodate this ~square root value
-	    constructSieve(maxBitPos);
+	    long maxBitPos = maxPrimeBitPos(posN);
 
 	    // Make a preliminary check in case the number itself is within the sieve size
 	    // and we can just test directly
@@ -1428,17 +1504,20 @@ public final class MathUtil
 	    // to see if the number has any prime factors
 	    // bitPos 0 corresponds to 3, and bitPos will only ever correspond
 	    // to a "clear" bit in the sieve, which is a prime number
-	    bitPos = 0;
+	    bitPos = (SMALL_PRIMES[SMALL_PRIMES.length - 1] - 3) / 2;
 	    while (true) {
 		int prime = (bitPos * 2) + 3;
 		BigInteger iPrime = BigInteger.valueOf(prime);
 
 		// If the number is divided evenly by one of the primes, then we have a factor
 		// and the number is by definition NOT prime
-		if (posN.remainder(iPrime).equals(BigInteger.ZERO))
+		if (posN.remainder(iPrime).signum() == 0)
 		    return false;
 
-		int nextBitPos = findLowestClearBit(primeSieve, bitPos + 1, maxBitPos);
+		// Create or expand the sieve to accommodate this next possible prime factor
+		constructSieve(bitPos);
+
+		int nextBitPos = findLowestClearBit(primeSieve, bitPos + 1, (int) maxBitPos);
 
 		// No more possible prime factors below the square root -> the number must be prime
 		if (nextBitPos < 0)
@@ -1450,35 +1529,34 @@ public final class MathUtil
 
 	/**
 	 * Get a list of all the factors of an integer number.
-	 * <p> Because this can be expensive, limit to a relatively small value (~10**7).
+	 * <p> Because this can be expensive, limit to a relatively small value (~2**63).
 	 *
 	 * @param n The number to factor.
 	 * @param factors The (empty) list to populate with the factors of the number..
 	 * @throws  IllegalArgumentException if the number is "too big" for this method.
 	 */
-	public static void getFactors(final BigInteger n, final List<Integer> factors) {
+	public static void getFactors(final BigInteger n, final List<BigInteger> factors) {
 	    int sign = n.signum();
 	    BigInteger posN = (sign < 0) ? n.negate() : n;
 
-	    if (posN.compareTo(MAX_PRIME) > 0)
+	    if (posN.compareTo(MAX_PRIME) >= 0)
 		throw new Intl.IllegalArgumentException("math#math.primeTooBig", posN);
 
 	    // Zero has no factors
-	    if (posN.equals(BigInteger.ZERO))
+	    if (posN.signum() == 0)
 		return;
 
 	    // Every non-zero number has 1 and itself as a factor
-	    factors.add(1);
+	    factors.add(BigInteger.ONE);
 	    if (sign < 0)
-		factors.add(-1);
+		factors.add(I_MINUS_ONE);
 
 	    if (posN.equals(BigInteger.ONE))
 		return;
 
-	    int intFactor = posN.intValue();
-	    factors.add(intFactor);
+	    factors.add(posN);
 	    if (sign < 0)
-		factors.add(-intFactor);
+		factors.add(posN.negate());
 
 	    // For 1, 2, and 3 we are done already
 	    if (posN.compareTo(I_THREE) <= 0)
@@ -1494,7 +1572,7 @@ public final class MathUtil
 
 		if (!existingFactors.contains(factor)) {
 		    BigInteger[] parts = posN.divideAndRemainder(factor);
-		    if (parts[1].equals(BigInteger.ZERO)) {
+		    if (parts[1].signum() == 0) {
 		        existingFactors.add(factor);
 			existingFactors.add(parts[0]);
 		    }
@@ -1505,25 +1583,23 @@ public final class MathUtil
 
 	    // Add all the factors we found to the list
 	    for (BigInteger fact : existingFactors) {
-		intFactor = fact.intValue();
-		factors.add(intFactor);
+		factors.add(fact);
 		if (sign < 0)
-		    factors.add(-intFactor);
+		    factors.add(fact.negate());
 	    }
 
 	    // Finally, sort all the factors since they are kinda out of order
 	    Collections.sort(factors);
 	}
 
-	private static BigInteger addPrimeFactors(final BigInteger value, final BigInteger factor, final int sign, final List<Integer> factors) {
+	private static BigInteger addPrimeFactors(final BigInteger value, final BigInteger factor, final int sign, final List<BigInteger> factors) {
 	    BigInteger currentValue = value;
 	    while (true) {
 		BigInteger[] possibleFactorParts = currentValue.divideAndRemainder(factor);
-		if (possibleFactorParts[1].equals(BigInteger.ZERO)) {
-		    int intFactor = factor.intValue();
-		    factors.add(intFactor);
+		if (possibleFactorParts[1].signum() == 0) {
+		    factors.add(factor);
 		    if (sign < 0)
-			factors.add(-intFactor);
+			factors.add(factor.negate());
 		    currentValue = possibleFactorParts[0];
 		}
 		else {
@@ -1539,46 +1615,47 @@ public final class MathUtil
 
 	/**
 	 * Using a Sieve of Eratosthenes, figure out the prime factors of a small-ish number.
-	 * <p> Because this uses a bunch of space, the calculation is limited to
-	 * a relatively small value (~10**7).
-	 * <p> NOTE: this is incomplete and incorrect as of 3/5/21 as I think through how
-	 * to implement.
 	 *
 	 * @param n The number to factor.
 	 * @param factors The (empty) list to populate with the prime factors.
 	 * @throws  IllegalArgumentException if the number is "too big" for this method.
 	 */
-	public static void getPrimeFactors(final BigInteger n, final List<Integer> factors) {
+	public static void getPrimeFactors(final BigInteger n, final List<BigInteger> factors) {
 	    int sign = n.signum();
-	    BigInteger posN = (sign < 0) ? n.negate() : n;
-
-	    if (posN.compareTo(MAX_PRIME) > 0)
-		throw new Intl.IllegalArgumentException("math#math.primeTooBig", posN);
 
 	    // Zero has no factors
-	    if (posN.equals(BigInteger.ZERO))
+	    if (sign == 0)
 		return;
+
+	    BigInteger posN = (sign < 0) ? n.negate() : n;
+
+	    if (posN.compareTo(MAX_PRIME) >= 0)
+		throw new Intl.IllegalArgumentException("math#math.primeTooBig", posN);
 
 	    // One has only itself
 	    if (posN.equals(BigInteger.ONE)) {
-		factors.add(1);
+		factors.add(BigInteger.ONE);
 		if (sign < 0)
-		    factors.add(-1);
+		    factors.add(I_MINUS_ONE);
 		return;
 	    }
 
-	    // Factor out all the powers of two first
-	    BigInteger currentN = addPrimeFactors(posN, I_TWO, sign, factors);
+	    // Factor out all the powers of all the "small" primes first
+	    BigInteger currentN = posN;
+	    for (int i = 0; i < SMALL_PRIMES.length; i++) {
+		BigInteger smallPrime = BigInteger.valueOf(SMALL_PRIMES[i]);
+		if (currentN.compareTo(smallPrime) > 0)
+		    currentN = addPrimeFactors(currentN, smallPrime, sign, factors);
+		else
+		    break;
+	    }
 
 	    // Choose a size for our sieve that is at least as big as the square root
 	    // of the number in question (a little bit bigger is better)
-	    int maxBitPos = maxPrimeBitPos(currentN);
-
-	    // Create or expand the sieve to accommodate this ~square root value
-	    constructSieve(maxBitPos);
+	    long maxBitPos = maxPrimeBitPos(currentN);
 
 	    // Go through the sieve and find the prime factors
-	    int bitPos = 0;	// corresponds to 3, which is a prime
+	    int bitPos = (SMALL_PRIMES[SMALL_PRIMES.length - 1] - 3) / 2;
 	    while (true) {
 		int prime = (bitPos * 2) + 3;
 		BigInteger iPrime = BigInteger.valueOf(prime);
@@ -1587,10 +1664,16 @@ public final class MathUtil
 		if (iPrime.multiply(iPrime).compareTo(currentN) > 0)
 		    break;
 
+		// Create or expand the sieve to accommodate this next possible prime factor
+		constructSieve(bitPos);
+
 		// If the number is divided evenly by one of the primes, then we have a factor
 		currentN = addPrimeFactors(currentN, iPrime, sign, factors);
 
-		int nextBitPos = findLowestClearBit(primeSieve, bitPos + 1, maxBitPos);
+		// Also redo the max sieve position since we just reduced the number we're examining
+		maxBitPos = maxPrimeBitPos(currentN);
+
+		int nextBitPos = findLowestClearBit(primeSieve, bitPos + 1, (int) maxBitPos);
 
 		// No more possible prime factors below the square root
 		if (nextBitPos < 0)
@@ -1602,10 +1685,9 @@ public final class MathUtil
 	    // Any remaining value not equal one will be the final prime factor
 	    // (at most one prime factor greater than square root)
 	    if (!currentN.equals(BigInteger.ONE)) {
-		int intFactor = currentN.intValue();
-		factors.add(intFactor);
+		factors.add(currentN);
 		if (sign < 0)
-		    factors.add(-intFactor);
+		    factors.add(currentN.negate());
 	    }
 
 	    // Finally, sort all the factors since they might be out of order (esp. if the number is negative)
@@ -1621,7 +1703,7 @@ public final class MathUtil
 	 * @throws IllegalArgumentException if the input is negative or zero.
 	 */
 	public static BigDecimal ln(final BigDecimal input, final MathContext mc) {
-	    if (input.compareTo(BigDecimal.ZERO) <= 0)
+	    if (input.signum() <= 0)
 		throw new Intl.IllegalArgumentException("math#numeric.outOfRange");
 
 	    // Calculate a sufficient number of loops for the value to converge nicely
@@ -1686,7 +1768,7 @@ public final class MathUtil
 	 * @throws IllegalArgumentException if the input is negative or zero.
 	 */
 	public static BigDecimal ln2(final BigDecimal input, final MathContext mc) {
-	    if (input.compareTo(BigDecimal.ZERO) <= 0)
+	    if (input.signum() <= 0)
 		throw new Intl.IllegalArgumentException("math#numeric.outOfRange");
 
 	    BigDecimal y = BigDecimal.ZERO;
@@ -1763,7 +1845,8 @@ public final class MathUtil
 	 * @return    The value of {@code x mod y}.
 	 */
 	public static BigDecimal modulus(final BigDecimal x, final BigDecimal y, final MathContext mc) {
-	    if (y.equals(BigDecimal.ZERO))
+	    // x mod 0 == x
+	    if (y.signum() == 0)
 		return x;
 
 	    BigDecimal floorValue = x.divide(y, mc).setScale(0, RoundingMode.FLOOR);
@@ -1785,11 +1868,11 @@ public final class MathUtil
 	    buf.append(intPart.toString(radix));
 
 	    BigDecimal fracPart = value.subtract(new BigDecimal(intPart));
-	    if (!fracPart.equals(BigDecimal.ZERO)) {
+	    if (fracPart.signum() != 0) {
 		int adjPrec = (int) ((double) mc.getPrecision() * Math.log(10) / Math.log(radix) + 0.5d);
 		int digits = buf.length();
 		buf.append('.');
-		while (!fracPart.equals(BigDecimal.ZERO) && digits < adjPrec) {
+		while (fracPart.signum() != 0 && digits < adjPrec) {
 		    fracPart = fracPart.multiply(scale, mc);
 		    intPart = floor(fracPart);
 		    fracPart = fracPart.subtract(new BigDecimal(intPart));
