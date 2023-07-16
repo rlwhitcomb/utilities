@@ -508,6 +508,8 @@
  *	24-May-2023 (rlwhitcomb)
  *	    #611: Rearrange builtin functions as part of "var" to allow direct reference to
  *	    return value composite objects. Note: this slows down parsing A LOT.
+ *	15-Jul-2023 (rlwhitcomb)
+ *	    #619: Add "defined" function.
  */
 
 grammar Calc;
@@ -698,6 +700,7 @@ builtinFunction
    | K_RENAME expr2                      # renameExpr
    | K_MATCHES ( expr3 | expr2 )         # matchesExpr
    | K_CALLERS LPAREN optExpr RPAREN     # callersExpr
+   | K_DEFINED idExpr                    # definedExpr
    ;
 
 expr
@@ -899,6 +902,11 @@ formalParam
 
 optExpr
    : expr ?
+   ;
+
+idExpr
+   : LPAREN member RPAREN
+   | member
    ;
 
 actualParams
@@ -1281,6 +1289,8 @@ K_SUMOF    : 'sumof' | 'SUMOF' | 'Sumof' | 'SumOf' | 'sumOf' | '\u2211' ;
 K_PRODUCTOF: 'productof' | 'PRODUCTOF' | 'Productof' | 'ProductOf' | 'productOf' | '\u220F' ;
 
 K_ARRAYOF  : 'arrayof' | 'ARRAYOF' | 'Arrayof' | 'ArrayOf' | 'arrayOf' ;
+
+K_DEFINED  : 'defined' | 'DEFINED' | 'Defined' ;
 
 /*
  * Statement keywords

@@ -789,8 +789,8 @@ or<br>
     <tr><td>33</td><td><i>expr</i> <code>HAS</code> ( <i>id</i> | <i>string</i> | <code>[</code> <i>expr</i> <code>]</code> )</td><td>safely check for member or index</td><td>left to right</td></tr>
     <tr><td>32</td><td><i>expr</i> <code>IS</code> ( <i>string</i> | <i>type_id</i> )</td><td>check if expression is the given type (same as <code>typeof</code>)</td><td>left to right</td></tr>
     <tr><td>31</td><td><code>( </code><i>expr</i><code> )</code></td><td>group an expression</td><td>N/A</td></tr>
-    <tr><td rowspan="90">30</td>
-            <td><code>ABS</code>&nbsp;<i>expr</i></td><td>absolute value</td><td rowspan="90">left to right</td></tr>
+    <tr><td rowspan="91">30</td>
+            <td><code>ABS</code>&nbsp;<i>expr</i></td><td>absolute value</td><td rowspan="91">left to right</td></tr>
             <tr><td><code>SIN</code>&nbsp;<i>expr</i></td><td>sine</td></tr>
             <tr><td><code>COS</code>&nbsp;<i>expr</i></td><td>cosine</td></tr>
             <tr><td><code>TAN</code>&nbsp;<i>expr</i></td><td>tangent</td></tr>
@@ -871,6 +871,7 @@ or<br>
             <tr><td><code>RENAME</code>&nbsp;<i>expr<sub>1</sub></i> <code>,</code> <i>expr<sub>2</sub></i></td><td>rename or move file<sub>1</sub> to file<sub>2</sub></td></tr>
             <tr><td><code>MATCHES</code>&nbsp;<i>expr</i>&nbsp;<code>,</code>&nbsp;<i>pattern_expr</i>&nbsp;( <code>,</code> <i>flags_expr</i> )</td><td>match the expression string against<br>the regular expression pattern with possible flags</td></tr>
             <tr><td><code>CALLERS</code>&nbsp;<i>expr</i> ?</td><td>get all or one of the callers of the current function</td></tr>
+            <tr><td><code>DEFINED</code>&nbsp;( <i>id</i> | <i>string</i> )</td><td>return whether the given variable, function, or constant<br>has been defined already</td></tr>
             <tr><td><code>FACTORS</code>&nbsp;<i>expr</i></td><td>calculate all the factors of the number</td></tr>
             <tr><td><code>PFACTORS</code>&nbsp;<i>expr</i></td><td>calculate the prime factors of the number</td></tr>
             <tr><td><code>CHARS</code>&nbsp;<i>expr</i></td><td>break apart a string or an array of strings into separate characters<br>or convert a number to a single character</td></tr>

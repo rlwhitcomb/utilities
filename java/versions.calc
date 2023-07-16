@@ -1,4 +1,10 @@
-$quiet on { versions = eval(read('VersionRef.json')) }
+$quiet on {
+    if !defined("version") {
+        $echo 'Rerun without the "-nolib" flag ...'
+        leave 1
+    }
+    versions = eval(read('VersionRef.json'))
+}
 $resultsonly on {
     $quotestrings off
     '============================================='

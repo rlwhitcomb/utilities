@@ -145,3 +145,12 @@ define fun(a, b=a, c=b) = { [ a, b, c ] }
 fun(1)
 fun(1,2)
 fun(1,2,3)
+
+#
+# "defined" function
+#
+defined(ON_WINDOWS)
+defined 'junk'
+const M1="MATCH"
+const M2="LITERAL"
+defined `${M1}_${M2}`

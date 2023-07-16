@@ -790,6 +790,8 @@
  *	    #616: Fix "$echo" output parameter.
  *	14-Jul-2023 (rlwhitcomb)
  *	    #613: Expand the width of results for the "factors" and "pfactors" functions.
+ *	15-Jul-2023 (rlwhitcomb)
+ *	    #619: Add the "defined" function.
  */
 package info.rlwhitcomb.calc;
 
@@ -7132,6 +7134,24 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 	}
 
+	@Override
+	public Object visitDefinedExpr(CalcParser.DefinedExprContext ctx) {
+	    CalcParser.MemberContext member = ctx.idExpr().member();
+	    TerminalNode string = null;
+	    String name = "";
+
+	    if ((string = member.STRING()) != null) {
+		name = getRawString(string.getText());
+	    }
+	    else if ((string = member.ISTRING()) != null) {
+		name = getIStringValue(this, string, ctx);
+	    }
+	    else {
+		name = member.id().getText();
+	    }
+
+	    return Boolean.valueOf(currentScope.isDefined(name, settings.ignoreNameCase));
+	}
 
 	/**
 	 * Visitor for the {@code SumOf} function, to do the actual summing during iteration.

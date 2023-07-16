@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.32.9', date: d'2023-07-15',
+      issues: [ 619 ],
+      comment: 'Add the "defined" function.'
+    },
     { version: '2.32.8', date: d'2023-06-19',
       issues: [ 613 ],
       comment: 'Extend the range of "isprime", "factors", and "pfactors" out to 4,611,686,014,132,420,608.'

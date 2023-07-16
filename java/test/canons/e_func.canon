@@ -123,3 +123,8 @@
 >fun(1) -> [ 1, 1, 1 ]
 >fun(1, 2) -> [ 1, 2, 2 ]
 >fun(1, 2, 3) -> [ 1, 2, 3 ]
+>defined (ON_WINDOWS) -> true
+>defined 'junk' -> false
+>Defining constant “M1” = "MATCH"
+>Defining constant “M2” = "LITERAL"
+>defined `${M1}_${M2}` -> true
