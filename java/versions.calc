@@ -1,4 +1,5 @@
 $quiet on {
+    $requires '2.32.9-alpha' // "defined" function
     if !defined("version") {
         $echo 'Rerun without the "-nolib" flag ...'
         leave 1

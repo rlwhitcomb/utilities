@@ -836,6 +836,30 @@ define hashstring(value, algorithm = 'sha-256', uppercase = false) = {
 }
 
 /*
+ * Capitalize a string according to the given mode.
+ *
+ * @param s    The input value to change.
+ * @param mode Which mode to use: 0 = change to all capitals
+ *                                1 = only capitalize the first letter
+ *                                2 = Capitalize all words
+ * @return     The modified string.
+ */
+define capitalize(s, mode) = {
+   define cap(n) = upper(substr(n, 0, 1)) + substr(n, 1)
+   case mode of {
+      0: upper(s),
+      1: cap(s),
+      2: {
+            var res = []
+            loop w over split(s, s'\s') { res += cap(w) }
+            join(res, ' ')
+         },
+      default:
+         $assert false, `Unknown mode $mode passed to "capitalize(...)".`
+   }
+}
+
+/*
  * Compute the mean and standard deviation of a list of values.
  *
  * @param values

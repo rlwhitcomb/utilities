@@ -112,6 +112,11 @@ $echo `Number of tests = $_tests, mistakes = $_mistakes`
 hash('test/data/Declaration.txt',,true)
 hashstring('Four score and seven years ago')
 
+const TS = 'this is a test'
+capitalize(TS, 0)
+capitalize(TS, 1)
+capitalize(TS, 2)
+
 #
 # Date format checks
 #
