@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.35.0', date: d'2023-08-10',
+      issues: [ 621 ],
+      comment: 'Introduce "enum" types.'
+    },
     { version: '2.32.9', date: d'2023-07-15',
       issues: [ 619 ],
       comment: 'Add the "defined" function.'

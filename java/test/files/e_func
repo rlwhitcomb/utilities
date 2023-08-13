@@ -10,9 +10,10 @@ f(true)(1,2)
 f(true)(7,8)
 f(false)(3,4)
 
-def visit(type) = { case type of 1: f1, 2: f2 }
-visit(1)(4,5)
-visit(2)(7,8)
+enum F1, F2
+def visit(type) = { case type of F1: f1, F2: f2 }
+visit(F1)(4,5)
+visit(F2)(7,8)
 
 #
 # Passing a function as a parameter to another function

@@ -792,6 +792,8 @@
  *	    #613: Expand the width of results for the "factors" and "pfactors" functions.
  *	15-Jul-2023 (rlwhitcomb)
  *	    #619: Add the "defined" function.
+ *	05-Aug-2023 (rlwhitcomb)
+ *	    #621: Add processing for "enum" statement.
  */
 package info.rlwhitcomb.calc;
 
@@ -2015,6 +2017,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		else {
 		    if (value instanceof ConstantValue)
 			fullKey = Intl.formatString("calc#constKey", key);
+		    else if (value instanceof EnumValue)
+			fullKey = Intl.formatString("calc#enumKey", key);
 		    else if (!(value instanceof ParameterValue))
 			fullKey = Intl.formatString("calc#varKey", key);
 		    displayer.displayResult(fullKey, toStringValue(this, ctx, value, new StringFormat(true, settings)));
@@ -3423,6 +3427,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    CalcParser.CaseBlockContext defaultCtx = null;
 	    CaseScope scope = new CaseScope();
 	    CaseVisitor visitor = new CaseVisitor(caseExpr, caseValue, scope);
+	    StringFormat format = new StringFormat(false, false);
 	    boolean fallThrough = false;
 	    Object returnValue = null;
 
@@ -3467,7 +3472,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			    pattern = getStringValue(e1ctx.expr());
 			}
 
-			String input = toStringValue(this, caseExpr, caseValue, new StringFormat(false, false));
+			String input = toStringValue(this, caseExpr, caseValue, format);
 			if (matches(input, pattern, flags)) {
 			    returnValue = visitor.execute();
 			    fallThrough = visitor.fallIntoNext();
@@ -3667,6 +3672,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    List<CalcParser.IdContext>   ids   = ctx.id();
 	    List<CalcParser.ExprContext> exprs = ctx.expr();
 	    List<String> constNames = new ArrayList<>();
+	    StringFormat format = new StringFormat(settings);
 
 	    for (int i = 0; i < ids.size(); i++) {
 		String constantName         = ids.get(i).getText();
@@ -3679,8 +3685,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 		ConstantValue.define(currentScope, constantName, value);
 
-		displayActionMessage("%calc#definingConst", constantName,
-		    toStringValue(this, ctx, value, new StringFormat(settings)));
+		displayActionMessage("%calc#definingConst", constantName, toStringValue(this, ctx, value, format));
 
 		constNames.add(constantName);
 	    }
@@ -3693,6 +3698,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public Object visitVarStmt(CalcParser.VarStmtContext ctx) {
 	    List<CalcParser.VarAssignContext> assigns = ctx.varAssign();
 	    List<String> varNames = new ArrayList<>();
+	    StringFormat format = new StringFormat(settings);
 
 	    for (int i = 0; i < assigns.size(); i++) {
 		String varName              = assigns.get(i).id().getText();
@@ -3707,7 +3713,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    value = evaluate(expr);
 
 		    displayActionMessage("%calc#definingVar", varName,
-			    toStringValue(this, ctx, value, new StringFormat(settings)));
+			    toStringValue(this, ctx, value, format));
 		}
 		else {
 		    displayActionMessage("%calc#definingVarOnly", varName);
@@ -3719,6 +3725,36 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    return varNames.size() == 1 ? Intl.formatString("calc#definedVar", varNames.get(0))
 					: Intl.formatString("calc#definedVars", CharUtil.makeSimpleStringList(varNames));
+	}
+
+	@Override
+	public Object visitEnumStmt(CalcParser.EnumStmtContext ctx) {
+	    List<CalcParser.VarAssignContext> assigns = ctx.varAssign();
+	    List<String> enumNames = new ArrayList<>();
+	    StringFormat format = new StringFormat(settings);
+	    BigInteger value = BigInteger.ONE;
+
+	    for (int i = 0; i < assigns.size(); i++) {
+		String enumName             = assigns.get(i).id().getText();
+		CalcParser.ExprContext expr = assigns.get(i).expr();
+
+		if (currentScope.isDefinedLocally(enumName, settings.ignoreNameCase))
+		    throw new CalcExprException(ctx, "%calc#noDupLocalVar", enumName);
+
+		if (expr != null) {
+		    value = getIntegerValue(expr);
+		}
+		displayActionMessage("%calc#definingEnum", enumName, toStringValue(this, ctx, value, format));
+
+		EnumValue.define(currentScope, enumName, value);
+
+		enumNames.add(enumName);
+
+		value = value.add(BigInteger.ONE);
+	    }
+
+	    return enumNames.size() == 1 ? Intl.formatString("calc#definedEnum", enumNames.get(0))
+					 : Intl.formatString("calc#definedEnums", CharUtil.makeSimpleStringList(enumNames));
 	}
 
 	private void addPairsToObject(CalcParser.ObjContext objCtx, ObjectScope object) {

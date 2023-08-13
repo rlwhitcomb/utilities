@@ -175,6 +175,8 @@
 #	    #611: Reword an error message.
 #	12-Jun-2023 (rlwhitcomb)
 #	    #616: New error message for CalcDisplayer.Output.
+#	09-Aug-2023 (rlwhitcomb)
+#	    #621: Output messages for "enum".
 #
 
 #
@@ -201,6 +203,7 @@ error		= <e>%1$s<r>
 errorPeriod	= <e>%1$s.<r>
 defineKey	= <a>define<x> %1$s
 constKey	= <a>const<x> %1$s
+enumKey		= <a>enum<x> %1$s
 varKey		= <a>var<x> %1$s
 expectNotOption	= <e>Expecting <y>%1$s<.> value, not the <v>%2$s<.> option.<r>
 expectValue	= <e>Expecting <y>%1$s<.> value.<r>
@@ -250,11 +253,14 @@ definingFunc	= <r>Defining function <y>%1$s<.><r> = <v>%2$s<r>
 definingConst	= <r>Defining constant <y>%1$s<.><r> = <v>%2$s<r>
 definingVar	= <r>Defining variable <y>%1$s<.><r> = <v>%2$s<r>
 definingVarOnly	= <r>Defining variable <y>%1$s<.><r>
+definingEnum	= <r>Defining enum value <y>%1$s<.><r> = <v>%2$s<r>
 definedFunc	= Defined function <y>%1$s<.>
 definedConst	= Defined constant <y>%1$s<.>
 definedConsts	= Defined constants <y>%1$s<.>
 definedVar	= Defined variable <y>%1$s<.>
 definedVars	= Defined variables <y>%1$s<.>
+definedEnum	= Defined enum value <y>%1$s<.>
+definedEnums	= Defined enum values <y>%1$s<.>
 variables	= Variables
 varUnder1	= ---------
 varUnder2	= =========

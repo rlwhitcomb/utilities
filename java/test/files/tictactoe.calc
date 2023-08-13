@@ -9,9 +9,7 @@
 $quiet on
 
 /* The values that correspond to each side. */
-const X = -1
-const O = +1
-const EMPTY = 0
+enum X = -1, EMPTY, O
 
 board = [
   [ EMPTY, EMPTY, EMPTY ],
@@ -35,6 +33,7 @@ Diagonals are (by index):
  0 = NW to SE (1, 5, 9)
  1 = SW to NE (7, 5, 3)
 */
+enum NW_SE = 0, SW_NE
 const diagonals = [
   [ 1, 5, 9 ],
   [ 7, 5, 3 ]
@@ -169,8 +168,7 @@ define countInCol(col, _color) = {
 }
 
 /*
- * Count the number of the given color in the given diagonal
- * (0 = NW to SE, 1 = SW to NE).
+ * Count the number of the given color in the given diagonal.
  */
 define countInDiag(which, _color) = {
   count = 0
@@ -203,7 +201,7 @@ define gameIsOver() = {
   // Check the columns
   loop col within 3 { if checkWinner(sumColumn(col)) { leave true } }
   // Check the two diagonals
-  if checkWinner(sumDiagonal(0)) || checkWinner(sumDiagonal(1)) { leave true }
+  if checkWinner(sumDiagonal(NW_SE)) || checkWinner(sumDiagonal(SW_NE)) { leave true }
   // Lastly, check for a draw
   gameIsDrawn = (numberOfMoves == 9)
 }
@@ -288,7 +286,7 @@ define findNecessaryMove(_color, otherColor) = {
     if row >= 0 { leave toIndex(row, col) }
   }
   // Check diagonals
-  loop diag within 2 {
+  loop diag over [ NW_SE, SW_NE ] {
     ix = findDiagMove(diag, _color, otherColor)
     if ix > 0 { leave ix }
   }

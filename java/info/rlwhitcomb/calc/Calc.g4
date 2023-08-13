@@ -510,6 +510,8 @@
  *	    return value composite objects. Note: this slows down parsing A LOT.
  *	15-Jul-2023 (rlwhitcomb)
  *	    #619: Add "defined" function.
+ *	05-Aug-2023 (rlwhitcomb)
+ *	    #621: Add syntax for "enum" declarations. Allow const, var, and enum declarations to span lines.
  */
 
 grammar Calc;
@@ -528,6 +530,7 @@ stmtOrExpr
    | defineStmt
    | constStmt
    | varStmt
+   | enumStmt
    | loopStmt
    | whileStmt
    | ifStmt
@@ -546,7 +549,7 @@ defineStmt
    ;
 
 constStmt
-   : K_CONST id ASSIGN expr ( COMMA id ASSIGN expr ) *
+   : K_CONST id ASSIGN expr ( COMMA EOL* id ASSIGN expr ) *
    ;
 
 varAssign
@@ -554,7 +557,11 @@ varAssign
    ;
 
 varStmt
-   : K_VAR varAssign ( COMMA varAssign ) *
+   : K_VAR varAssign ( COMMA EOL* varAssign ) *
+   ;
+
+enumStmt
+   : K_ENUM varAssign ( COMMA EOL* varAssign ) *
    ;
 
 loopStmt
@@ -1318,6 +1325,8 @@ K_CONST    : 'constant' | 'CONSTANT' | 'Constant'
 
 K_VAR      : 'variable' | 'VARIABLE' | 'Variable'
            | 'var' | 'VAR' | 'Var' ;
+
+K_ENUM     : 'enum' | 'ENUM' | 'Enum' ;
 
 K_CASE     : 'case' | 'CASE' | 'Case' ;
 

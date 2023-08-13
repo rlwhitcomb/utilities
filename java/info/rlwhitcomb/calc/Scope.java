@@ -38,6 +38,7 @@
  *  21-Jun-22 rlw #314: Add SET type.
  *  08-Jan-23 rlw #225:	New description field and methods.
  *		  #592:	Move basic fields out of subclasses into this base class.
+ *  06-Aug-23 rlw #621:	Add "ENUM" type.
  */
 package info.rlwhitcomb.calc;
 
@@ -88,6 +89,9 @@ class Scope
 
 		/** A constant value, evaluated once and cached. */
 		CONSTANT,
+
+		/** An enumerated value, with a (mostly) automatic value. */
+		ENUM,
 
 		/** A function parameter, including the param array and count values. */
 		PARAMETER,
