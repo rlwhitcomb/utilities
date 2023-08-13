@@ -11,7 +11,9 @@
  */
 $quiet on {
 
+// We're dealing with factorials up to ~50000! so we need lots of digits available
 $unlimited
+// Separators must remain off so looping over the characters of a number does not include them
 $separators off
 
 /*
@@ -31,11 +33,10 @@ define sumOfDigitFactorials(n) = {
    sum
 }
 
-var sumOfDigits
 var sum = 0
 
 loop n over 3..LIMIT {
-   sumOfDigits = sumOfDigitFactorials(n)
+   const sumOfDigits = sumOfDigitFactorials(n)
    if n == sumOfDigits {
       sum += sumOfDigits
    }
@@ -43,11 +44,11 @@ loop n over 3..LIMIT {
 
 $separators pop
 
-}
+} // end of quiet on
 
 $resultsonly on {
 
    $echo `The sum of all numbers which are equal to the sum of the factorial of their digits is $sum.`@q
 
-}
+} // end of results on
 
