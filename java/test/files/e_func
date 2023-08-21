@@ -155,3 +155,26 @@ defined 'junk'
 const M1="MATCH"
 const M2="LITERAL"
 defined `${M1}_${M2}`
+
+#
+# Interesting mathematical way to implement "max" and "min"
+# (average +/- half the difference)
+#
+define mx(a,b) = {
+  (a + b) / 2 + abs(a - b) / 2
+}
+
+define mn(a,b) = {
+  (a + b) / 2 - abs(a - b) / 2
+}
+
+const M_1 = 1.1
+const M_2 = 1.09
+const M_3 = -2
+const M_4 = -1
+
+mx(M_1, M_2)
+mn(M_1, M_2)
+mx(M_3, M_4)
+mn(M_3, M_4)
+

@@ -130,3 +130,17 @@
 >Defining constant “M1” = "MATCH"
 >Defining constant “M2” = "LITERAL"
 >defined `${M1}_${M2}` -> true
+>Defining function “mx(a,b)” = {
+> (a + b) / 2 + abs (a - b) / 2
+>}
+>Defining function “mn(a,b)” = {
+> (a + b) / 2 - abs (a - b) / 2
+>}
+>Defining constant “M_1” = 1.1
+>Defining constant “M_2” = 1.09
+>Defining constant “M_3” = -2
+>Defining constant “M_4” = -1
+>mx(M_1, M_2) -> 1.1
+>mn(M_1, M_2) -> 1.09
+>mx(M_3, M_4) -> -1
+>mn(M_3, M_4) -> -2
