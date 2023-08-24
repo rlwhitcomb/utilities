@@ -1,0 +1,56 @@
+/*
+ * Problem 28 from Project Euler (projecteuler.net)
+ *
+ * Starting with the number 1 and moving to the right in a clockwise direction a 5 by 5 spiral is formed as follows:
+ *
+ *        21 22 23 24 25
+ *        20  7  8  9 10
+ *        19  6  1  2 11
+ *        18  5  4  3 12
+ *        17 16 15 14 13
+ *
+ * It can be verified that the sum of the numbers on the diagonals is 101.
+ *
+ * What is the sum of the numbers on the diagonals in a 1001 by 1001 spiral formed in the same way?
+ */
+$quiet on {
+
+const TRIAL_SIZE = 5
+const REAL_SIZE = 1001
+
+/*
+ * The values on the diagonals can be easily computed for a given (odd) size as follows:
+ * - upper right = size²
+ * - upper left = upper right - (size - 1)
+ * - lower left = upper left - (size - 1)
+ * - lower right = lower left - (size - 1)
+ *
+ * Which gives us a formula to quickly and easily compute the values at each size 𝑛:
+ *   sum = 4𝑛² - 6𝑛 + 6
+ *
+ * @param size The (odd) size (3..limit) of the square.
+ * @return     Sum of the diagonals at that size.
+ */
+define sumOfDiagonals(size) = {
+   4 * size² - 6 * size + 6
+}
+
+var trial_sum = 1
+var real_sum = 1
+
+loop size over 3..TRIAL_SIZE, 2 {
+   trial_sum += sumOfDiagonals(size)
+}
+
+loop size over 3..REAL_SIZE, 2 {
+   real_sum += sumOfDiagonals(size)
+}
+
+}
+
+$resultsonly on {
+
+`Sum of the diagonals in a $TRIAL_SIZE x $TRIAL_SIZE spiral is $trial_sum.`
+`Sum of the diagonals in a $REAL_SIZE x $REAL_SIZE spiral is $real_sum.`
+
+}
