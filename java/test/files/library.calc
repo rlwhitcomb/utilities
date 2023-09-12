@@ -602,7 +602,8 @@ define is_perfect(n) = { sumof ( factors (n) ) - n == n }
  */
 define primes(n) = {
    var list = []
-   loop x within n {
+   if n > 2 list += 2
+   loop x over 3..n, 2 {
       if isprime(x) list += x
    }
    list

@@ -794,6 +794,8 @@
  *	    #619: Add the "defined" function.
  *	05-Aug-2023 (rlwhitcomb)
  *	    #621: Add processing for "enum" statement.
+ *	06-Sep-2023 (rlwhitcomb)
+ *	    #621: Fix "enum" to start at zero, not one.
  */
 package info.rlwhitcomb.calc;
 
@@ -3732,7 +3734,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    List<CalcParser.VarAssignContext> assigns = ctx.varAssign();
 	    List<String> enumNames = new ArrayList<>();
 	    StringFormat format = new StringFormat(settings);
-	    BigInteger value = BigInteger.ONE;
+	    BigInteger value = BigInteger.ZERO;
 
 	    for (int i = 0; i < assigns.size(); i++) {
 		String enumName             = assigns.get(i).id().getText();

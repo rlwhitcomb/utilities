@@ -115,7 +115,7 @@ hashstring('Four score and seven years ago')
 const TS = 'this is a test'
 capitalize(TS, 0)
 capitalize(TS, 1)
-capitalize(TS, 2)
+capitalize(TS, WORDCAP)
 
 #
 # Date format checks

@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.35.2', date: d'2023-09-09',
+      issues: [ 621 ],
+      comment: 'Fix "enum" to start at zero instead of one.'
+    },
     { version: '2.35.0', date: d'2023-08-10',
       issues: [ 621 ],
       comment: 'Introduce "enum" types.'

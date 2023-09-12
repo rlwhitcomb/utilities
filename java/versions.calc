@@ -1,13 +1,21 @@
 $quiet on {
-    $requires '2.32.9-alpha' // "defined" function
+    // the source of the version information (JSON format)
+    const VERSION_INFO = 'VersionRef.json'
+
+    // make sure the "defined" function is implemented
+    $requires '2.32.9-alpha'
+
+    // also make sure the standard library is loaded
     if !defined("version") {
         $echo 'Rerun without the "-nolib" flag ...'
         leave 1
     }
-    versions = eval(read('VersionRef.json'))
+
+    versions = eval(read(VERSION_INFO))
 }
 $resultsonly on {
     $quotestrings off
+    // use just strings or "$echo" statements to display different colors
     '============================================='
     $echo '           Calc Versions Reference'
     $echo ` Current ${version}`
@@ -16,7 +24,7 @@ $resultsonly on {
     $echo 'Version  Comment'
     '-------  --------------------------------------------------------'
     loop v over versions {
-        if v.base { $echo `${CYAN_BRIGHT}B${v.base@6s}$RESET  ${v.comment}`   }
+        if v.base { $echo `${CYAN_BRIGHT}B${v.base@6s}$RESET  ${v.comment}`     }
         else      { $echo `${YELLOW_BRIGHT}${v.version@7s}$RESET  ${v.comment}` }
     }
     '-------  --------------------------------------------------------'
