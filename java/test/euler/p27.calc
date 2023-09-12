@@ -31,14 +31,36 @@ $unlimited
 const A_MAX = 1000-1
 const B_MAX = 1000
 
-define quadratic(n, a, b) = n*n + a*n + b
+/*
+ * Return a list of the prime numbers smaller than the given number.
+ *
+ * @param n Limit for the list of primes.
+ * @return  Array of prime numbers smaller than the input.
+ */
+define primes(n) = {
+   var list = []
+   if n > 2 list += 2
+   loop x over 3..n,2 {
+      if isprime(x) list += x
+   }
+   list
+}
+
+define quadratic(n, a, b) = n² + a*n + b
 
 var max_a = 0, max_b = 0
 var max_number_primes = 0
 
+/*
+ * Since "quadratic(n, a, b)" must be prime when n == 0, then clearly b must be prime always,
+ * so restrict "b" to the list of primes < B_MAX.
+ */
+const B_VALUES = primes(B_MAX)
+
 loop a over -A_MAX..A_MAX {
-   loop b over -B_MAX..B_MAX {
-      var n = 0
+   loop b over B_VALUES {
+      // And since "b" will always be prime here, we can start n at 1 instead of 0
+      var n = 1
       while isprime(quadratic(n, a, b)) n++
       if n > max_number_primes {
          max_number_primes = n
@@ -52,6 +74,6 @@ loop a over -A_MAX..A_MAX {
 
 $resultsonly on {
 
-`Product of the coefficients of the quadratic that produces the most primes is ${max_a * max_b}, number of primes is $max_number_primes.`@q
+`Product of the coefficients of the quadratic that produces the most primes is ${max_a * max_b}, number of primes is $max_number_primes, and a = $max_a, b = $max_b.`@q
 
 }

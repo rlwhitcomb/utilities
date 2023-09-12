@@ -23,11 +23,12 @@ $quiet on {
 
 const START_LIMIT = 1e6
 var savedLengths = [ 0, 1 ]
+fill(savedLengths, -1, 2, START_LIMIT - 2)
 
 define collatzLength(start) = {
    var seqlen = 0
    var value = start
-   while value >= length(savedLengths) {
+   while value >= START_LIMIT || savedLengths[value] < 0 {
       seqlen++
       if value % 2 == 0 { value \= 2            }
                    else { value = 3 * value + 1 }
@@ -40,7 +41,13 @@ var longestSequence = 0
 
 loop start over 2..START_LIMIT-1 {
    const seqlen = collatzLength(start)
+
+   // Cache the already calculated values for faster computation next time
    savedLengths[start] = seqlen
+   // Once we know a length, then the length at n*2 will be one longer
+   if start < START_LIMIT / 2 {
+      savedLengths[start * 2] = seqlen + 1
+   }
 
    if seqlen > longestSequence {
       longestSequence = seqlen
