@@ -1211,10 +1211,12 @@ arrayof arr1, arr2, arr3
 # Test read/write, especially of Unicode data
 #
 const UTF_8 = 'utf-8'
+const UNI2  = 'uni2'
 $quiet on {
    uni1 = read('test/data/unicode.txt', UTF_8)
-   write(uni1, 'uni2', UTF_8)
-   uni2 = read('uni2', UTF_8)
+   write(uni1, UNI2, UTF_8)
+   uni2 = read(UNI2, UTF_8)
+   delete UNI2
 }
 `Test of read/write/read of Unicode data = ${uni1 === uni2}`
 $quiet on {

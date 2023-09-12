@@ -375,6 +375,8 @@
 		#599: Run the "Project Euler" tests if the canons exist.
 	    03-May-2023 (rlwhitcomb)
 		#599: More "Project Euler" solutions extant.
+	    11-Sep-2023 (rlwhitcomb)
+		Do test cleanup inside the scripts instead of in here.
 
      ========================================================================== -->
 
@@ -838,9 +840,6 @@ Test starting on ${build.date} at ${build.time}
 			<arg value="/c"/>
 			<arg value="check_sorted.bat"/>
 		</exec>
-		<delete>
-			<fileset dir="." includes="savetest,uni2"/>
-		</delete>
 		<echo unless:true="${ci.build}">Done with unit tests. Successful. Results in "${test.log.path}" file.</echo>
 		<echo if:true="${ci.build}">Done with unit tests. Successful.</echo>
 		<concat if:true="${ci.build}">

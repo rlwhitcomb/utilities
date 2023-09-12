@@ -16,4 +16,7 @@ $save 'savetest'
 $clear
 $open 'savetest'
 b;c;a;Z;A
+
+delete 'savetest'
+
 $separators pop

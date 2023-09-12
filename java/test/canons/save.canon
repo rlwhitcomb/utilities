@@ -19,4 +19,5 @@
 >a -> 19,683
 >Z -> 27
 >A -> true
+>delete 'savetest' -> true
 >Separator display set to “false”.
