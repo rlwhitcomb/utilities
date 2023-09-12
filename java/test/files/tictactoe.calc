@@ -33,7 +33,7 @@ Diagonals are (by index):
  0 = NW to SE (1, 5, 9)
  1 = SW to NE (7, 5, 3)
 */
-enum NW_SE = 0, SW_NE
+enum NW_SE, SW_NE
 const diagonals = [
   [ 1, 5, 9 ],
   [ 7, 5, 3 ]
