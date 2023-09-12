@@ -4,8 +4,8 @@
 >f(true)(1, 2) -> 3
 >f(true)(7, 8) -> 15
 >f(false)(3, 4) -> 12
->Defining enum value “F1” = 1
->Defining enum value “F2” = 2
+>Defining enum value “F1” = 0
+>Defining enum value “F2” = 1
 >Defining function “visit(type)” = { case type of F1: f1, F2: f2 }
 >visit(F1)(4, 5) -> 9
 >visit(F2)(7, 8) -> 56
