@@ -445,19 +445,19 @@ h2 {
      initial values, as in:
   <p class="indent"><code>var</code>&nbsp;<i>pos</i><code> = </code><i>27</i><code>, </code><i>start</i><code> = </code><i>0</i><code>,</code> <i>end</i><code>, </code><i>found</i>
   <p>Another way that symbolic names can be used is via the <code>enum</code> directive. This works exactly the same way as a <code>var</code> declaration, except that
-     <i>a)</i> values for the names start at one unless another expression is given,
+     <i>a)</i> values for the names start at zero unless another expression is given,
      <i>b)</i> each successive name is given the value of the previous name plus one (in the absence of a value expression), and
      <i>c)</i> the values cannot be modified after the declaration (same as <code>const</code>).
      Such a construct is useful for declaring a meaningful name to use as a constant value where the numeric value is not important, or only marginally important.
      Perhaps some examples might help:
   <p class="indent"><code>enum</code>&nbsp;<i>north</i><code>, </code><i>south</i><code>, </code><i>east</i><code>, </code><i>west</i><br>
-<code>Defining enum value north = 1<br>
-Defining enum value south = 2<br>
-Defining enum value east = 3<br>
-Defining enum value west = 4</code>
-  <p class="indent"><code>enum</code>&nbsp;<i>USER=0</i><code>, </code><i>SYSTEM</i><br>
-<code>Defining enum value USER = 0<br>
-Defining enum value SYSTEM = 1</code>
+<code>Defining enum value north = 0<br>
+Defining enum value south = 1<br>
+Defining enum value east = 2<br>
+Defining enum value west = 3</code>
+  <p class="indent"><code>enum</code>&nbsp;<i>USER=1</i><code>, </code><i>SYSTEM</i><br>
+<code>Defining enum value USER = 1<br>
+Defining enum value SYSTEM = 2</code>
   <p>Like all other <code>var</code>, <code>const</code>, or <code>define</code> declarations, the <code>$clear</code> directive will erase one or more enum values.
   <p>Numeric values can also be specified using "kilobyte" notation in one of two forms: multipliers of 1000, or multipliers of 1024 (2**10).
      These multipliers are simply appended to the number to automatically multiply by the given amount. The allowed suffixes are:
