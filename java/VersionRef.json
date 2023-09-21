@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.36.0', date: d'2023-09-20',
+      issues: [ 629 ],
+      comment: "Fix problems with no-arg functions whose values we pass as parameters (it's complicated)."
+    },
     { version: '2.35.2', date: d'2023-09-09',
       issues: [ 621 ],
       comment: 'Fix "enum" to start at zero instead of one.'

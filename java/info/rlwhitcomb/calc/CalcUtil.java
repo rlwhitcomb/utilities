@@ -220,6 +220,9 @@
  *	16-May-2023 (rlwhitcomb)
  *	    Protect against NPE in some obscure cases of object concatenation.
  *	    Rename some methods. Implement object concatenation more completely.
+ *	19-Sep-2023 (rlwhitcomb)
+ *	    #629: Calling "evaluateToValue" now so that function parameters get called
+ *	    as needed to get their return values.
  */
 package info.rlwhitcomb.calc;
 
@@ -667,7 +670,7 @@ public final class CalcUtil
 	 * @throws CalcExprException for null input values, or other errors in conversion.
 	 */
 	public static BigDecimal toDecimalValue(final CalcObjectVisitor visitor, final Object obj, final MathContext mc, final ParserRuleContext ctx) {
-	    Object value = visitor.evaluate(ctx, obj);
+	    Object value = visitor.evaluateToValue(ctx, obj);
 	    return convertToDecimal(value, mc, ctx);
 	}
 
@@ -712,7 +715,7 @@ public final class CalcUtil
 	 * @throws CalcExprException for null inputs, or other errors from conversion.
 	 */
 	public static BigFraction toFractionValue(final CalcObjectVisitor visitor, final Object obj, final ParserRuleContext ctx) {
-	    Object value = visitor.evaluate(ctx, obj);
+	    Object value = visitor.evaluateToValue(ctx, obj);
 	    return convertToFraction(value, ctx);
 	}
 
@@ -838,7 +841,7 @@ public final class CalcUtil
 	 * @throws CalcExprException if there was a problem (for instance, in evaluating an expression).
 	 */
 	public static Boolean toBooleanValue(final CalcObjectVisitor visitor, final Object obj, final ParserRuleContext ctx) {
-	    Object value = visitor.evaluate(ctx, obj);
+	    Object value = visitor.evaluateToValue(ctx, obj);
 
 	    // Compatibility with JavaScript here...
 	    if (CharUtil.isNullOrEmpty(value))
@@ -913,7 +916,7 @@ public final class CalcUtil
 		final String indent,
 		final int level)
 	{
-	    Object result = visitor.evaluate(ctx, obj);
+	    Object result = visitor.evaluateToValue(ctx, obj);
 
 	    if (result instanceof CollectionScope) {
 		if (result instanceof ObjectScope) {
@@ -1164,7 +1167,7 @@ public final class CalcUtil
 	 * @return		The "length" according to the above rules.
 	 */
 	public static int length(final CalcObjectVisitor visitor, final Object valueObj, final ParserRuleContext ctx, final boolean recursive) {
-	    Object obj = visitor.evaluate(ctx, valueObj);
+	    Object obj = visitor.evaluateToValue(ctx, valueObj);
 
 	    if (obj == null)
 		return 0;
@@ -1259,7 +1262,7 @@ public final class CalcUtil
 	 * @return		The scale of the object.
 	 */
 	public static int scale(final CalcObjectVisitor visitor, final Object valueObj, final ParserRuleContext ctx) {
-	    Object obj = visitor.evaluate(ctx, valueObj);
+	    Object obj = visitor.evaluateToValue(ctx, valueObj);
 
 	    if (obj instanceof BigDecimal)
 		return ((BigDecimal) obj).scale();
@@ -1489,8 +1492,8 @@ public final class CalcUtil
 		final Object obj1, final Object obj2,
 		final MathContext mc, final boolean strict, final boolean allowNulls,
 		final boolean ignoreCase, final boolean naturalOrder, final boolean equality) {
-	    Object e1 = visitor.evaluate(ctx1, obj1);
-	    Object e2 = visitor.evaluate(ctx2, obj2);
+	    Object e1 = visitor.evaluateToValue(ctx1, obj1);
+	    Object e2 = visitor.evaluateToValue(ctx2, obj2);
 
 	    if (allowNulls) {
 		if (e1 == null && e2 == null)
@@ -1787,8 +1790,8 @@ public final class CalcUtil
 	    if (e1 == null && e2 == null)
 		return null;
 
-	    Object v1 = visitor.evaluate(ctx1, e1);
-	    Object v2 = visitor.evaluate(ctx2, e2);
+	    Object v1 = visitor.evaluateToValue(ctx1, e1);
+	    Object v2 = visitor.evaluateToValue(ctx2, e2);
 
 	    // Concatenate objects if the first is an object
 	    if (v1 instanceof CollectionScope) {
@@ -2418,7 +2421,7 @@ public final class CalcUtil
 		    Object newValue = null;
 
 		    if (value != null) {
-			value = visitor.evaluate(ctx, value);
+			value = visitor.evaluateToValue(ctx, value);
 
 			if (value instanceof CollectionScope) {
 			    newValue = copyAndTransform(visitor, ctx, value, sortKeys, mapper);
@@ -2451,7 +2454,7 @@ public final class CalcUtil
 		for (Object value : list.list()) {
 		    Object newValue = null;
 		    if (value != null) {
-			value = visitor.evaluate(ctx, value);
+			value = visitor.evaluateToValue(ctx, value);
 
 			if (value instanceof CollectionScope) {
 			    newValue = copyAndTransform(visitor, ctx, value, sortKeys, mapper);
@@ -2476,7 +2479,7 @@ public final class CalcUtil
 		for (Object value : set.set()) {
 		    Object newValue = null;
 		    if (value != null) {
-			value = visitor.evaluate(ctx, value);
+			value = visitor.evaluateToValue(ctx, value);
 
 			if (value instanceof CollectionScope) {
 			    newValue = copyAndTransform(visitor, ctx, value, sortKeys, mapper);
@@ -2523,7 +2526,7 @@ public final class CalcUtil
 		final Conversion conversion,
 		final int level)
 	{
-	    Object value = visitor.evaluate(ctx, obj);
+	    Object value = visitor.evaluateToValue(ctx, obj);
 
 	    if (value instanceof ArrayScope) {
 		if (conversion == Conversion.UNCHANGED && level > 0) {
@@ -2605,7 +2608,7 @@ public final class CalcUtil
 	    List<Object> objects = new ArrayList<>();
 
 	    for (CalcParser.ExprContext exprCtx : exprs) {
-		buildValueList(visitor, exprCtx, visitor.evaluate(exprCtx), objects, conversion, 0);
+		buildValueList(visitor, exprCtx, visitor.evaluateToValue(exprCtx), objects, conversion, 0);
 	    }
 
 	    return objects;

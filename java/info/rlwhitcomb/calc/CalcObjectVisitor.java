@@ -796,6 +796,9 @@
  *	    #621: Add processing for "enum" statement.
  *	06-Sep-2023 (rlwhitcomb)
  *	    #621: Fix "enum" to start at zero, not one.
+ *	20-Sep-2023 (rlwhitcomb)
+ *	    #629: Introduce "evaluateToValue" for the case of passing no-arg functions as
+ *	    parameters meant to be called, not used as function references.
  */
 package info.rlwhitcomb.calc;
 
@@ -1548,6 +1551,43 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	/**
+	 * Evaluate to a real value, by doing {@link #evaluate(ParserRuleContext)} but making sure to
+	 * call any functions encountered by resetting the {@link #doNotCallZeroArgFunctions} flag.
+	 *
+	 * @param ctx The parsing context to visit to get the value.
+	 * @return    Either the value or the result of visiting that function context if it is one.
+	 */
+	Object evaluateToValue(final ParserRuleContext ctx) {
+	    boolean functions = doNotCallZeroArgFunctions;
+	    doNotCallZeroArgFunctions = false;
+	    try {
+		return evaluate(ctx);
+	    }
+	    finally {
+		doNotCallZeroArgFunctions = functions;
+	    }
+	}
+
+	/**
+	 * Evaluate to a real value, by doing {@link #evaluate(ParserRuleContext)} but making sure to
+	 * call any functions encountered by resetting the {@link #doNotCallZeroArgFunctions} flag.
+	 *
+	 * @param ctx   The parsing context (for error reporting).
+	 * @param value The result of an expression, which could be a reference to a function call.
+	 * @return      Either the value or the result of visiting that function context if it is one.
+	 */
+	Object evaluateToValue(final ParserRuleContext ctx, final Object value) {
+	    boolean functions = doNotCallZeroArgFunctions;
+	    doNotCallZeroArgFunctions = false;
+	    try {
+		return evaluate(ctx, value);
+	    }
+	    finally {
+		doNotCallZeroArgFunctions = functions;
+	    }
+	}
+
+	/**
 	 * Evaluate a function by calling {@link #evaluate(ParserRuleContext, Object)}
 	 * by calling {@code visit(ctx)} to get the value.
 	 *
@@ -1619,12 +1659,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	private BigInteger getIntegerValue(final ParserRuleContext ctx) {
-	    return convertToInteger(evaluate(ctx), settings.mc, ctx);
+	    return convertToInteger(evaluateToValue(ctx), settings.mc, ctx);
 	}
 
 	private LocalDate getDateValue(final ParserRuleContext ctx) {
 	    try {
-		BigInteger iValue = convertToInteger(evaluate(ctx), settings.mc, ctx);
+		BigInteger iValue = convertToInteger(evaluateToValue(ctx), settings.mc, ctx);
 		return LocalDate.ofEpochDay(iValue.longValueExact());
 	    }
 	    catch (ArithmeticException | DateTimeException ex) {
@@ -1644,7 +1684,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    if (ctx == null && allowNull)
 		return "";
 
-	    Object value = evaluate(ctx);
+	    Object value = evaluateToValue(ctx);
 
 	    if (!allowNull)
 		nullCheck(value, ctx);
@@ -1664,7 +1704,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	protected int getIntValue(final ParserRuleContext ctx) {
-	    return convertToInt(evaluate(ctx), settings.mc, ctx);
+	    return convertToInt(evaluateToValue(ctx), settings.mc, ctx);
 	}
 
 	private BigDecimal getDecimalTrigValue(final ParserRuleContext ctx) {

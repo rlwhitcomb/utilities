@@ -360,6 +360,20 @@ define ml_to_pt(ml) = { (ml * 8) / (IN3_PER_CM3 * IN3_PER_GAL) }
 define pt_to_ml(pt) = { (pt * IN3_PER_GAL * IN3_PER_CM3) / 8 }
 
 /*
+ * Define a dynamic constant that refers to one day ago ("yesterday").
+ *
+ * @return today - 1
+ */
+define yesterday = today - 1
+
+/*
+ * Define a dynamic constant that refers to the next day ("tomorrow").
+ *
+ * @return today + 1
+ */
+define tomorrow = today + 1
+
+/*
  * Get the day of week name for a given date.
  *
  * @param date The input date value.

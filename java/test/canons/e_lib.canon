@@ -101,6 +101,9 @@
 >dateformat(dt1) -> "08/05/2021"
 >dateformat(dt1, 'm/d/yy') -> "8/5/21"
 >dateformat(dt1, 'mm/dd/yy') -> "08/05/21"
+>Defining function “dx2” = dt1 - 1
+>dateformat(dx2) -> "08/04/2021"
+>dateformat(dt1) -> "08/05/2021"
 >cp = 0x1f603 -> 128515
 >surr_pair_to_cp(0xd83d, 0xde03) @c -> "😃"
 >cp_to_high_surr(cp) @x -> 0xd83d

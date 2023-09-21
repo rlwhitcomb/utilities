@@ -130,6 +130,13 @@ dateformat(dt1, 'm/d/yy')
 dateformat(dt1, 'mm/dd/yy')
 
 #
+# Tests of #629 related to calling no-arg functions as parameters
+#
+define dx2 = dt1 - 1
+dateformat(dx2)
+dateformat(dt1)
+
+#
 # Surrogate pair conversions
 #
 cp = 0x1f603
