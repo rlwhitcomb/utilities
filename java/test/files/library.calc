@@ -487,8 +487,8 @@ def timestamp(date = today, time = now) = {
  * @return   The date formatted according to the pattern.
  */
 define dateformat(d, f = 'mm/dd/yyyy') = {
-    define d2(n) = { n < 10 ? '0' + n : '' + n }
-    define dg(n) = { '' + n }
+    define d2(n) = n < 10 ? '0' + n : @@n
+    define dg(n) = @@n
     define finishRun(ch) = {
         var len = length(runOf)
         if len {

@@ -177,6 +177,8 @@
 #	    #616: New error message for CalcDisplayer.Output.
 #	09-Aug-2023 (rlwhitcomb)
 #	    #621: Output messages for "enum".
+#	18-Sep-2023 (rlwhitcomb)
+#	    Update the "undefined function" error message.
 #
 
 #
@@ -293,7 +295,7 @@ replaceOptionError	= Replace option <y>%1$s<.> not recognized
 illegalFormat		= Unrecognized format <y>%1$s<.>
 targetWrongType		= Target of a <y>%1$s<.> must be an array or string
 oneCharInt		= %1$s value for a string must be one character or an integer \u2264 65535
-undefinedFunction	= Cannot call undefined function <y>%1$s<.>
+undefinedFunction	= Cannot call undefined function <y>%1$s(...)<.>
 withinNotAllowed	= Specifying <y>within<.> is only allowed with an end value with implied start
 illegalArgument		= <u>%1$s<.> value is not suitable for <y>%2$s<.> function
 radixOutOfRange		= Radix value of <u>%1$d<.> is out of range of <y>%2$d..%3$d<.>

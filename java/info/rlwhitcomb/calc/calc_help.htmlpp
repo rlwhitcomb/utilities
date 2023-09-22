@@ -905,7 +905,7 @@ or<br>
     <tr><td>23</td><td><code>~~</code>&nbsp;<i>expr</i></td><td>convert to number</td><td>right to left</td></tr>
     <tr><td>22</td><td><code>~</code>&nbsp;<i>expr</i></td><td>bitwise NOT</td><td>right to left</td></tr>
     <tr><td>21</td><td><i>expr</i>&nbsp;<code>!</code></td><td>factorial</td><td>left to right</td></tr>
-    <tr><td>20</td><td><i>expr<sub>1</sub></i>&nbsp;&nbsp;<code>**</code>, <code>&times;&times;</code>, <code>&#x2217;&#x2217;</code>, <code>&#x2715;&#x2715;</code>, <code>&#x2716;&#x2716;</code>
+    <tr><td>20</td><td><i>expr<sub>1</sub></i>&nbsp;&nbsp;<code>**</code>, <code>&times;&times;</code>, <code>&#x2217;&#x2217;</code>, <code>&#x2715;&#x2715;</code>, <code>&#x2716;&#x2716;</code>,
         <code>&#x2303;</code>, <code>&#x2B61;</code>, or <code>&#x2191;</code>&nbsp;&nbsp;<i>expr<sub>2</sub></i><br>or&nbsp;<i>expr</i>&nbsp;&#x2070; .. &#x2079;</td><td><i>expr<sub>1</sub></i> to <i>expr<sub>2</sub></i> power<br>or <i>expr</i> to given power</td><td>right to left</td></tr>
     <tr><td>19</td><td>
         <i>expr</i>&nbsp;&nbsp;<code>*</code>, <code>&times;</code>, <code>&#x2217;</code>, <code>&#x2715;</code>, or <code>&#x2716;</code>&nbsp;&nbsp;<i>expr</i><br>
