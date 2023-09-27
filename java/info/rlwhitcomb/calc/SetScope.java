@@ -25,12 +25,13 @@
  *	such as intersection, union, etc.
  *
  * History:
- *  21-Jun-21 rlw  ---	Initial coding.
- *  25-Jun-22 rlw #314:	Add "diff".
- *  08-Jul-22 rlw #393:	Cleanup imports.
- *  15-Aug-22 rlw #440:	Move "size()" up to CollectionScope.
- *  08-Jan-23 rlw #592:	Move "isEmpty()" to CollectionScope.
- *  16-May-23 rlw  ---	New "addAll" method from a Collection.
+ *  21-Jun-21 rlw ----	Initial coding.
+ *  25-Jun-22 rlw #314	Add "diff".
+ *  08-Jul-22 rlw #393	Cleanup imports.
+ *  15-Aug-22 rlw #440	Move "size()" up to CollectionScope.
+ *  08-Jan-23 rlw #592	Move "isEmpty()" to CollectionScope.
+ *  16-May-23 rlw ----	New "addAll" method from a Collection.
+ *  27-Sep-23 rlw #630	New indexing capability.
  */
 package info.rlwhitcomb.calc;
 
@@ -52,6 +53,12 @@ class SetScope<T> extends CollectionScope
 	 * The set of values contained in this scope, accessible by iterator or "in" operation.
 	 */
 	private Set<T> values;
+
+	/**
+	 * The current set of values, as an array (for convenience in indexing). This is only
+	 * present (allocated) as needed, and not constantly maintained (for performance reasons).
+	 */
+	private transient Object[] valueArray = null;
 
 
 	/**
@@ -115,6 +122,8 @@ class SetScope<T> extends CollectionScope
 	    checkImmutable();
 
 	    values.add(value);
+	    // Invalidate the array copy now that we (potentially) have a new member
+	    valueArray = null;
 	}
 
 	/**
@@ -126,6 +135,7 @@ class SetScope<T> extends CollectionScope
 	boolean addAll(final SetScope<T> set) {
 	    checkImmutable();
 
+	    valueArray = null;
 	    return values.addAll(set.values);
 	}
 
@@ -138,6 +148,7 @@ class SetScope<T> extends CollectionScope
 	boolean addAll(final Collection<T> c) {
 	    checkImmutable();
 
+	    valueArray = null;
 	    return values.addAll(c);
 	}
 
@@ -160,6 +171,24 @@ class SetScope<T> extends CollectionScope
 	    checkImmutable();
 
 	    values.remove(value);
+	    valueArray = null;
+	}
+
+	/**
+	 * Get the indexed value out of the set.
+	 * <p> Since we maintain the set using {@link LinkedHashSet} we can guarantee
+	 * the ordering, so this operation makes sense where it normally would not.
+	 *
+	 * @param index The specific element index.
+	 * @return      The typed object at that index in the set.
+	 */
+	@SuppressWarnings("unchecked")
+	T get(final int index) {
+	    if (valueArray == null) {
+		valueArray = values.toArray();
+	    }
+
+	    return (T) valueArray[index];
 	}
 
 	/**

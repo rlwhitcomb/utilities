@@ -80,6 +80,7 @@
  *  16-May-23 rlw ----	Rename some helper methods.
  *  24-May-23 rlw ----	Try a slight variation for the new History format.
  *		  #611	Move processing of builtin functions to here.
+ *  27-Sep-23 rlw #630	Add indexing into sets.
  */
 package info.rlwhitcomb.calc;
 
@@ -165,7 +166,7 @@ class LValueContext
 	 *
 	 * @param p	The parent lvalue.
 	 * @param ctx	The parser context we're working in.
-	 * @param obj	The array (or string) object we're referencing into.
+	 * @param obj	The array, set, or string object we're referencing into.
 	 * @param idx	The index into the object.
 	 */
 	LValueContext(final LValueContext p, final CalcParser.VarContext ctx, final Object obj, final int idx) {
@@ -248,6 +249,10 @@ class LValueContext
 		else if (contextObject instanceof ObjectScope) {
 		    ObjectScope obj = (ObjectScope) contextObject;
 		    return obj.valueAt(index);
+		}
+		else if (contextObject instanceof SetScope) {
+		    SetScope set = (SetScope) contextObject;
+		    return set.get(index);
 		}
 		else if (contextObject instanceof String) {
 		    String str = (String) contextObject;
@@ -475,7 +480,7 @@ class LValueContext
 
 		CalcParser.ExprContext expr = arrVarCtx.expr();
 
-		// Okay, here the "arrValue" could be null, an array, a string, OR an object (map)
+		// Okay, here the "arrValue" could be null, an array, a set, an object (map), or a string.
 		if (arrValue != null && arrValue instanceof ObjectScope) {
 		    // The "index" expression should be a string (meaning a member name)
 		    // but it could be a numeric index into the key set (return from "index")
@@ -491,7 +496,7 @@ class LValueContext
 		    }
 		}
 
-		// By now, the object must either be null, a list, a string, or a simple value (an error)
+		// By now, the object must either be null, a list, set, string, or a simple value (an error)
 		// so we need to decide if the index is a string or a number to decide if a null value
 		// should create and object or an array.
 		int index = Integer.MIN_VALUE;
@@ -518,6 +523,7 @@ class LValueContext
 
 		ArrayScope list = null;
 		ObjectScope map = null;
+		SetScope set = null;
 
 		if (arrValue == null) {
 		    if (memberName != null) {
@@ -532,6 +538,9 @@ class LValueContext
 		else if (arrValue instanceof ArrayScope) {
 		    list = (ArrayScope) arrValue;
 		}
+		else if (arrValue instanceof SetScope) {
+		    set = (SetScope) arrValue;
+		}
 		else if (arrValue instanceof String) {
 		    return new LValueContext(arrLValue, arrVarCtx, arrValue, index);
 		}
@@ -541,6 +550,9 @@ class LValueContext
 
 		if (list != null) {
 		    return new LValueContext(arrLValue, arrVarCtx, list, index);
+		}
+		else if (set != null) {
+		    return new LValueContext(arrLValue, arrVarCtx, set, index);
 		}
 		else {
 		    return arrLValue.makeMapLValue(visitor, arrVarCtx, map, memberName);
