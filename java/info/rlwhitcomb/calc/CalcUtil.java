@@ -223,6 +223,8 @@
  *	19-Sep-2023 (rlwhitcomb)
  *	    #629: Calling "evaluateToValue" now so that function parameters get called
  *	    as needed to get their return values.
+ *	26-Sep-2023 (rlwhitcomb)
+ *	    #626: Add (recursive) "negate" and "number" methods.
  */
 package info.rlwhitcomb.calc;
 
@@ -2503,6 +2505,123 @@ public final class CalcUtil
 	    // For all other scalar values, just get the string value and apply the transform
 	    String exprString = toStringValue(visitor, ctx, obj, new StringFormat(false, visitor.getSettings()));
 	    return mapper.apply(exprString);
+	}
+
+	/**
+	 * Negate (or posate) a value, which includes recursively applying the function
+	 * to arrays, objects, and sets.
+	 *
+	 * @param expr     The expression context of the value.
+	 * @param e        Value from evaluating that expression.
+	 * @param negate   Whether to negate the value or save the sign.
+	 * @param rational Rational mode, which dictates converting all to fractions.
+	 * @param mc       Precision setting for conversion to decimal.
+	 * @return         The resulting negated object.
+	 */
+	public static Object negate(final ParserRuleContext expr, final Object e, final boolean negate, final boolean rational, final MathContext mc) {
+	    if (rational || e instanceof BigFraction) {
+		BigFraction f = convertToFraction(e, expr);
+
+		return negate ? f.negate() : f;
+	    }
+	    else if (e instanceof Quaternion) {
+		Quaternion q = (Quaternion) e;
+
+		return negate ? q.negate() : q;
+	    }
+	    else if (e instanceof ComplexNumber) {
+		ComplexNumber c = (ComplexNumber) e;
+
+		return negate ? c.negate() : c;
+	    }
+	    else if (e instanceof ArrayScope) {
+		@SuppressWarnings("unchecked")
+		ArrayScope<Object> array = (ArrayScope<Object>) e;
+		ArrayScope<Object> result = new ArrayScope<>();
+		for (int i = 0; i < array.size(); i++) {
+		    Object v = array.getValue(i);
+		    result.setValue(i, negate(expr, v, negate, rational, mc));
+		}
+		return result;
+	    }
+	    else if (e instanceof ObjectScope) {
+		ObjectScope map = (ObjectScope) e;
+		ObjectScope result = new ObjectScope();
+		for (Map.Entry<String, Object> entry : map.map().entrySet()) {
+		    result.setValue(entry.getKey(), negate(expr, entry.getValue(), negate, rational, mc));
+		}
+		return result;
+	    }
+	    else if (e instanceof SetScope) {
+		@SuppressWarnings("unchecked")
+		SetScope<Object> set = (SetScope<Object>) e;
+		SetScope<Object> result = new SetScope<>();
+		for (Object v : set.set()) {
+		    result.add(negate(expr, v, negate, rational, mc));
+		}
+		return result;
+	    }
+	    else if (e instanceof CollectionScope) {
+		return e;
+	    }
+	    else {
+		BigDecimal d = convertToDecimal(e, mc, expr);
+
+		// Interestingly, the "plus" operation can change the value, if the previous
+		// value was not to the specified precision.
+		return fixupToInteger(negate ? d.negate() : d.plus(mc));
+	    }
+	}
+
+	/**
+	 * Convert an object recursively to a number. Sets, arrays, and maps have their structures
+	 * preserved, but all values are converted to numbers.
+	 *
+	 * @param ctx      The parsed expression node.
+	 * @param value    Object value evaluated from the expression.
+	 * @param rational Whether we're converting to fractions.
+	 * @param mc       Precision setting for decimal conversions.
+	 * @return         The object converted to a number.
+	 */
+	public static Object number(final ParserRuleContext ctx, final Object value, final boolean rational, final MathContext mc) {
+	    if (rational) {
+		return convertToFraction(value, ctx);
+	    }
+	    else if (value instanceof ComplexNumber || value instanceof Quaternion) {
+		return value;
+	    }
+	    else if (value instanceof ArrayScope) {
+		@SuppressWarnings("unchecked")
+		ArrayScope<Object> array = (ArrayScope<Object>) value;
+		ArrayScope<Object> result = new ArrayScope<>();
+		for (int i = 0; i < array.size(); i++) {
+		    Object v = array.getValue(i);
+		    result.setValue(i, number(ctx, v, rational, mc));
+		}
+		return result;
+	    }
+	    else if (value instanceof ObjectScope) {
+		ObjectScope map = (ObjectScope) value;
+		ObjectScope result = new ObjectScope();
+		for (Map.Entry<String, Object> entry : map.map().entrySet()) {
+		    result.setValue(entry.getKey(), number(ctx, entry.getValue(), rational, mc));
+		}
+		return result;
+	    }
+	    else if (value instanceof SetScope) {
+		@SuppressWarnings("unchecked")
+		SetScope<Object> set = (SetScope<Object>) value;
+		SetScope<Object> result = new SetScope<>();
+		for (Object v : set.set()) {
+		    result.add(number(ctx, v, rational, mc));
+		}
+		return result;
+	    }
+	    else if (value instanceof CollectionScope) {
+		return value;
+	    }
+
+	    return fixupToInteger(convertToDecimal(value, mc, ctx));
 	}
 
 	/**

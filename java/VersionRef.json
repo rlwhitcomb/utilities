@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.37.0', date: d'2023-09-27',
+      issues: [ 626 ],
+      comment: 'Arrays, objects, and sets are processed recursively for +/- and ~~ operators.'
+    },
     { version: '2.36.0', date: d'2023-09-20',
       issues: [ 629 ],
       comment: "Fix problems with no-arg functions whose values we pass as parameters (it's complicated)."

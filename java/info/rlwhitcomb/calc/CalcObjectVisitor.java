@@ -799,6 +799,9 @@
  *	20-Sep-2023 (rlwhitcomb)
  *	    #629: Introduce "evaluateToValue" for the case of passing no-arg functions as
  *	    parameters meant to be called, not used as function references.
+ *	26-Sep-2023 (rlwhitcomb)
+ *	    #626: Recursive procedures for "negate" and "number" to do the right things
+ *	    for objects, lists, and sets.
  */
 package info.rlwhitcomb.calc;
 
@@ -4206,70 +4209,22 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    Object e = evaluate(expr);
 
 	    String op = ctx.ADD_OP().getText();
+	    boolean negate = false;
 
-	    if (settings.rationalMode || e instanceof BigFraction) {
-		BigFraction f = convertToFraction(e, expr);
-
-		switch (op) {
-		    case "+":
-		    case "\u2795":
-			return f;
-		    case "-":
-		    case "\u2212":
-		    case "\u2796":
-			return f.negate();
-		    default:
-			throw new UnknownOpException(op, expr);
-		}
+	    switch (op) {
+		case "+":
+		case "\u2795":
+		    break;
+		case "-":
+		case "\u2212":
+		case "\u2796":
+		    negate = true;
+		    break;
+		default:
+		    throw new UnknownOpException(op, expr);
 	    }
-	    else if (e instanceof Quaternion) {
-		Quaternion q = (Quaternion) e;
 
-		switch (op) {
-		    case "+":
-		    case "\u2795":
-			return q;
-		    case "-":
-		    case "\u2212":
-		    case "\u2796":
-			return q.negate();
-		    default:
-			throw new UnknownOpException(op, expr);
-		}
-
-	    }
-	    else if (e instanceof ComplexNumber) {
-		ComplexNumber c = (ComplexNumber) e;
-
-		switch (op) {
-		    case "+":
-		    case "\u2795":
-			return c;
-		    case "-":
-		    case "\u2212":
-		    case "\u2796":
-			return c.negate();
-		    default:
-			throw new UnknownOpException(op, expr);
-		}
-	    }
-	    else {
-		BigDecimal d = convertToDecimal(e, settings.mc, expr);
-
-		switch (op) {
-		    case "+":
-		    case "\u2795":
-			// Interestingly, this operation can change the value, if the previous
-			// value was not to the specified precision.
-			return fixupToInteger(d.plus(settings.mc));
-		    case "-":
-		    case "\u2212":
-		    case "\u2796":
-			return fixupToInteger(d.negate());
-		    default:
-			throw new UnknownOpException(op, expr);
-		}
-	    }
+	    return negate(expr, e, negate, settings.rationalMode, settings.mc);
 	}
 
 	@Override
@@ -4282,13 +4237,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    CalcParser.ExprContext expr = ctx.expr();
 	    Object value = evaluate(expr);
 
-	    if (settings.rationalMode) {
-		return convertToFraction(value, ctx);
-	    }
-	    else if (value instanceof ComplexNumber || value instanceof Quaternion) {
-		return value;
-	    }
-	    return fixupToInteger(convertToDecimal(value, settings.mc, ctx));
+	    return number(expr, value, settings.rationalMode, settings.mc);
 	}
 
 	@Override
