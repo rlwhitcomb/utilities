@@ -174,7 +174,9 @@ h2 {
   <h2>Introduction</h2>
 <div class="cols">
   The "Calc" program is a calculator of arithmetic "expressions" (such as <code style="color:blue;">1 + 1</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">2</code>)
-  that combines (nearly) unlimited precision decimal arithmetic with a rich assortment of operators and functions to give the ability to calculate nearly any arithmetic expression.
+  that combines (nearly) unlimited precision decimal arithmetic with a rich assortment of operators and functions to give the ability to calculate nearly any arithmetic expression. In addition,
+  the language features looping, conditional statements, and user-defined functions, as well as the ability to read and write files, all of which make the language into a rich scripting engine
+  suitable for a wide variety of applications.
   <p>As input, the calculator operates on either an expression given on the command line (may need to be
        quoted for certain operator characters), or in <a href="https://en.wikipedia.org/wiki/Read-eval-print_loop">REPL</a> mode
        (<span class="underline">R</span>ead, <span class="underline">E</span>val, <span class="underline">P</span>rint
