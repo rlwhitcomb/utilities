@@ -327,6 +327,8 @@
  *	    #614: Ignore debug mode during initial library loads.
  *	15-Jun-2023 (rlwhitcomb)
  *	    #618: Add "-nol" and other command-line option aliases.
+ *	29-Sep-2023 (rlwhitcomb)
+ *	    #622: Add "f" to the color map for the RED_BOLD_BRIGHT color.
  */
 package info.rlwhitcomb.calc;
 
@@ -656,6 +658,7 @@ public class Calc
 		colorMap.put("v", GREEN_BOLD);
 		colorMap.put("u", GREEN_BOLD);
 		colorMap.put("e", RED_BOLD);
+		colorMap.put("f", RED_BOLD_BRIGHT);
 		colorMap.put("r", RESET);
 		colorMap.put(".", null);
 	    }
@@ -670,6 +673,7 @@ public class Calc
 		quoteMap.put("v", "");
 		quoteMap.put("u", "\u201C");
 		quoteMap.put("e", "");
+		quoteMap.put("f", "\u201C");
 		quoteMap.put("r", "");
 		quoteMap.put(".", "\u201D");
 	    }

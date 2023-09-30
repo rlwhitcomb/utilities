@@ -181,17 +181,19 @@
 #	    Update the "undefined function" error message.
 #	29-Sep-2023 (rlwhitcomb)
 #	    #622: Brighten the actual error message in the assertion message.
+#	    Add "f" for the RED_BOLD_BRIGHT color or left quote.
 #
 
 #
 # Note: <v> is VALUE_COLOR
 #	<u> is VALUE_COLOR or left quote
-#       <a> is ARROW_COLOR
-#       <x> is EXPR_COLOR
+#	<a> is ARROW_COLOR
+#	<x> is EXPR_COLOR
 #	<y> is EXPR_COLOR or left quote
-#       <e> is ERROR_COLOR
-#       <r> is RESET
-#       <.> resets to previous color or right quote
+#	<e> is ERROR_COLOR
+#	<f> is RED_BOLD_BRIGHT or left quote
+#	<r> is RESET
+#	<.> resets to previous color or right quote
 #
 
 #
@@ -302,7 +304,7 @@ withinNotAllowed	= Specifying <y>within<.> is only allowed with an end value wit
 illegalArgument		= <u>%1$s<.> value is not suitable for <y>%2$s<.> function
 radixOutOfRange		= Radix value of <u>%1$d<.> is out of range of <y>%2$d..%3$d<.>
 illegalFlagValues	= One or more flag values in <u>0x%1$04X<.> (<u>%1$d<.>) is not valid.
-assertFailure		= Assertion failed: <Rd*!>%1$s<.>
+assertFailure		= Assertion failed: <f>%1$s<.>
 notImplemented		= %1$s operation is not implemented
 
 intro.help1	= "  Enter an arithmetic expression to evaluate, or multiple expressions"
