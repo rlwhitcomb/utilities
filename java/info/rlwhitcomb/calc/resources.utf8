@@ -179,6 +179,8 @@
 #	    #621: Output messages for "enum".
 #	18-Sep-2023 (rlwhitcomb)
 #	    Update the "undefined function" error message.
+#	29-Sep-2023 (rlwhitcomb)
+#	    #622: Brighten the actual error message in the assertion message.
 #
 
 #
@@ -300,7 +302,7 @@ withinNotAllowed	= Specifying <y>within<.> is only allowed with an end value wit
 illegalArgument		= <u>%1$s<.> value is not suitable for <y>%2$s<.> function
 radixOutOfRange		= Radix value of <u>%1$d<.> is out of range of <y>%2$d..%3$d<.>
 illegalFlagValues	= One or more flag values in <u>0x%1$04X<.> (<u>%1$d<.>) is not valid.
-assertFailure		= Assertion failed: %1$s
+assertFailure		= Assertion failed: <Rd*!>%1$s<.>
 notImplemented		= %1$s operation is not implemented
 
 intro.help1	= "  Enter an arithmetic expression to evaluate, or multiple expressions"
