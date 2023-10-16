@@ -512,6 +512,9 @@
  *	    #619: Add "defined" function.
  *	05-Aug-2023 (rlwhitcomb)
  *	    #621: Add syntax for "enum" declarations. Allow const, var, and enum declarations to span lines.
+ *	16-Oct-2023 (rlwhitcomb)
+ *	    #625: Change "replace" syntax to allow missing replacement argument.
+ *	    #424: Update "read" and "write" parameters to use COLON for charset modifier.
  */
 
 grammar Calc;
@@ -699,10 +702,10 @@ builtinFunction
    | K_EXISTS ( expr2 | expr1 )          # existsExpr
    | K_FILEINFO expr1                    # fileInfoExpr
    | K_FINDFILES ( expr3 | expr2 )       # findFilesExpr
-   | K_READ ( expr2 | expr1 )            # readExpr
-   | K_WRITE ( expr3 | expr2 )           # writeExpr
-   | K_READPROPERTIES ( expr2 | expr1 )  # readPropExpr
-   | K_WRITEPROPERTIES ( expr3 | expr2 ) # writePropExpr
+   | K_READ readExprs                    # readExpr
+   | K_WRITE writeExprs                  # writeExpr
+   | K_READPROPERTIES readExprs          # readPropExpr
+   | K_WRITEPROPERTIES writeExprs        # writePropExpr
    | K_DELETE exprN                      # deleteExpr
    | K_RENAME expr2                      # renameExpr
    | K_MATCHES ( expr3 | expr2 )         # matchesExpr
@@ -779,6 +782,16 @@ exprN
    | exprList
    ;
 
+readExprs
+   : LPAREN expr ( COLON expr ) ? RPAREN
+   | expr ( COLON expr ) ?
+   ;
+
+writeExprs
+   : LPAREN expr COMMA expr ( COLON expr ) ? RPAREN
+   | expr COMMA expr ( COLON expr ) ?
+   ;
+
 typeArg
    : LPAREN ( var | expr ) RPAREN
    | ( var | expr )
@@ -787,6 +800,10 @@ typeArg
 replaceArgs
    : LPAREN expr COMMA expr COMMA expr ( COMMA replaceOption ) ? RPAREN
    | expr COMMA expr COMMA expr ( COMMA replaceOption ) ?
+   | LPAREN expr COMMA expr COMMA RPAREN
+   | expr COMMA expr COMMA
+   | LPAREN expr COMMA expr ( COMMA COMMA replaceOption ) ? RPAREN
+   | expr COMMA expr ( COMMA COMMA replaceOption ) ?
    ;
 
 spliceArgs

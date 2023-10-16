@@ -16,7 +16,7 @@ b@u
 $quiet on {
 define readJSON(fileName) = {
    $sortkeys on {
-      eval(read(fileName, 'UTF-8'))
+      eval(read(fileName: 'UTF-8'))
    }
 }
 

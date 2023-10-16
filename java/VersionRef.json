@@ -3,6 +3,11 @@
 /*======================*/
 
 [
+    { version: '2.38.0', date: d'2023-10-16',
+      issues: [ 625, 424 ],
+      comment: '''Change replace arguments to allow missing replacement value.
+\t [BREAKING] Use ":" instead of "," for charset name in "read" and "write" functions.'''
+    },
     { version: '2.37.5', date: d'2023-09-27',
       issues: [ 630 ],
       comment: 'Ability to index into sets.'

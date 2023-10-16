@@ -452,12 +452,17 @@ substr tar
 
 # The "replace" function in all of its options
 tl = 'tell teal tail teel toil tool toll'
+tm = 'abcabc'
 replace(tl, 't(..)l', 't$1b', all)
 replace tl, 't..l', 'test', first
 replace tl, 't..l', 'test', last
 replace tl, 't', 'b'
+replace tl, 't', , first
 r1 = [ 'tell', 'teal', 'tail', 'teel', 'toil', 'tool', 'toll' ]
 replace(r1, 't(..)l', "t$1b", all)
+replace tm, 'b'
+replace tm, 'c',
+replace(tm, 'a', , last)
 
 # Make sure the option keywords still work as variable names
 all = 1; first = 2; last=7; all+first-last
@@ -1224,9 +1229,9 @@ arrayof arr1, arr2, arr3
 const UTF_8 = 'utf-8'
 const UNI2  = 'uni2'
 $quiet on {
-   uni1 = read('test/data/unicode.txt', UTF_8)
-   write(uni1, UNI2, UTF_8)
-   uni2 = read(UNI2, UTF_8)
+   uni1 = read('test/data/unicode.txt': UTF_8)
+   write(uni1, UNI2: UTF_8)
+   uni2 = read(UNI2: UTF_8)
    delete UNI2
 }
 `Test of read/write/read of Unicode data = ${uni1 === uni2}`

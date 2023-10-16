@@ -802,6 +802,11 @@
  *	26-Sep-2023 (rlwhitcomb)
  *	    #626: Recursive procedures for "negate" and "number" to do the right things
  *	    for objects, lists, and sets.
+ *	16-Oct-2023 (rlwhitcomb)
+ *	    #625: Fix "replace" to work with missing replacement value. Change some uses
+ *	    of "Boolean.valueOf".
+ *	    #424: Change syntax of "read" and "write" to use COLON separator for charset
+ *	    name (removes ambiguity with optional params in "replace(read(..." sequences).
  */
 package info.rlwhitcomb.calc;
 
@@ -3531,7 +3536,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			String op = select.compareOp(0).getText();
 			CalcParser.ExprContext expr = select.expr(0);
 
-			boolean first = compareOp(caseExpr, expr, Optional.ofNullable(caseValue), op);
+			boolean first = compareOp(caseExpr, expr, Optional.ofNullable(caseValue), op).booleanValue();
 			boolean matched = false;
 
 			if (select.boolOp() == null) {
@@ -3556,7 +3561,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			    if (!matched) {
 				op = select.compareOp(1).getText();
 				expr = select.expr(1);
-				boolean second = compareOp(caseExpr, expr, Optional.ofNullable(caseValue), op);
+				boolean second = compareOp(caseExpr, expr, Optional.ofNullable(caseValue), op).booleanValue();
 
 				switch (boolOp) {
 				    case "&&":
@@ -3943,7 +3948,6 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitIsExpr(CalcParser.IsExprContext ctx) {
-	    boolean ret = false;
 	    Object value = evaluate(ctx.expr());
 	    Typeof type = typeof(value);
 	    String valueType;
@@ -3958,9 +3962,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    else
 		valueType = types.getText();
 
-	    ret = type.toString().equalsIgnoreCase(valueType);
-
-	    return Boolean.valueOf(ret);
+	    return Boolean.valueOf(type.toString().equalsIgnoreCase(valueType));
 	}
 
 	@Override
@@ -5554,11 +5556,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitReplaceExpr(CalcParser.ReplaceExprContext ctx) {
 	    CalcParser.ReplaceArgsContext args = ctx.replaceArgs();
-	    CalcParser.ExprContext exprCtx = args.expr(0);
+	    List<CalcParser.ExprContext> exprs = args.expr();
+	    CalcParser.ExprContext exprCtx = exprs.get(0);
 
 	    Object originalObj = evaluate(exprCtx);
-	    String pattern     = getStringValue(args.expr(1));
-	    String replace     = getStringValue(args.expr(2));
+	    String pattern     = getStringValue(exprs.get(1));
+	    String replace     = exprs.size() > 2 ? getStringValue(exprs.get(2)) : "";
 
 	    Object result = originalObj;
 	    String option = "";
@@ -6825,18 +6828,10 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitReadExpr(CalcParser.ReadExprContext ctx) {
-	    CalcParser.Expr1Context e1ctx = ctx.expr1();
-	    CalcParser.Expr2Context e2ctx = ctx.expr2();
-	    String fileName = "";
-	    Charset cs = null;
+	    List<CalcParser.ExprContext> exprs = ctx.readExprs().expr();
 
-	    if (e1ctx != null) {
-		fileName = getStringValue(e1ctx.expr());
-	    }
-	    else {
-		fileName = getStringValue(e2ctx.expr(0));
-		cs = getCharsetValue(e2ctx.expr(1), false);
-	    }
+	    String fileName = getStringValue(exprs.get(0));
+	    Charset cs = exprs.size() > 1 ? getCharsetValue(exprs.get(1), false) : null;
 
 	    try {
 		return FileUtilities.readRawText(new File(fileName), cs);
@@ -6848,25 +6843,13 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitWriteExpr(CalcParser.WriteExprContext ctx) {
-	    CalcParser.Expr2Context e2ctx = ctx.expr2();
-	    CalcParser.Expr3Context e3ctx = ctx.expr3();
-	    CalcParser.ExprContext expr;
-	    String fileName = "";
-	    Charset cs = null;
-	    Object outputObj =  null;
-	    CharSequence seq = null;
+	    List<CalcParser.ExprContext> exprs = ctx.writeExprs().expr();
 
-	    if (e3ctx != null) {
-		expr = e3ctx.expr(0);
-		outputObj = evaluate(expr);
-		fileName = getStringValue(e3ctx.expr(1));
-		cs = getCharsetValue(e3ctx.expr(2), false);
-	    }
-	    else {
-		expr = e2ctx.expr(0);
-		outputObj = evaluate(expr);
-		fileName = getStringValue(e2ctx.expr(1));
-	    }
+	    CalcParser.ExprContext exprCtx = exprs.get(0);
+	    Object outputObj = evaluate(exprCtx);
+	    String fileName = getStringValue(exprs.get(1));
+	    Charset cs = exprs.size() > 2 ? getCharsetValue(exprs.get(2), false) : null;
+	    CharSequence seq = null;
 
 	    try {
 		if (outputObj != null) {
@@ -6877,7 +6860,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			ArrayScope<Object> array = (ArrayScope<Object>) outputObj;
 			StringBuilder buf = new StringBuilder();
 			for (Object obj : array.list()) {
-			    buf.append(getNonNullString(expr, obj)).append(eol);
+			    buf.append(getNonNullString(exprCtx, obj)).append(eol);
 			}
 			seq = buf;
 		    }
@@ -6886,17 +6869,17 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			SetScope<Object> set = (SetScope<Object>) outputObj;
 			StringBuilder buf = new StringBuilder();
 			for (Object obj : set.set()) {
-			    buf.append(getNonNullString(expr, obj)).append(eol);
+			    buf.append(getNonNullString(exprCtx, obj)).append(eol);
 			}
 			seq = buf;
 		    }
 		    else if (outputObj instanceof ObjectScope) {
 			ObjectScope obj = (ObjectScope) outputObj;
 			// For now (maybe always?) write out a JSON object
-			seq = toStringValue(this, expr, obj.map(), new StringFormat(true, false, false, false, "", 0), "", 0);
+			seq = toStringValue(this, exprCtx, obj.map(), new StringFormat(true, false, false, false, "", 0), "", 0);
 		    }
 		    else {
-			seq = getNonNullString(expr, outputObj);
+			seq = getNonNullString(exprCtx, outputObj);
 		    }
 		    return BigInteger.valueOf(FileUtilities.writeRawText(seq, new File(fileName), cs));
 		}
@@ -6925,18 +6908,10 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitReadPropExpr(CalcParser.ReadPropExprContext ctx) {
-	    CalcParser.Expr1Context e1ctx = ctx.expr1();
-	    CalcParser.Expr2Context e2ctx = ctx.expr2();
-	    String fileName = "";
-	    Charset cs = null;
+	    List<CalcParser.ExprContext> exprs = ctx.readExprs().expr();
 
-	    if (e1ctx != null) {
-		fileName = getStringValue(e1ctx.expr());
-	    }
-	    else {
-		fileName = getStringValue(e2ctx.expr(0));
-		cs = getCharsetValue(e2ctx.expr(1), false);
-	    }
+	    String fileName = getStringValue(exprs.get(0));
+	    Charset cs = exprs.size() > 1 ? getCharsetValue(exprs.get(1), false) : null;
 
 	    try (Reader r = newReader(fileName, cs)) {
 		Properties p = new Properties();
@@ -6956,25 +6931,13 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitWritePropExpr(CalcParser.WritePropExprContext ctx) {
-	    CalcParser.Expr2Context e2ctx = ctx.expr2();
-	    CalcParser.Expr3Context e3ctx = ctx.expr3();
-	    CalcParser.ExprContext expr;
-	    String fileName = "";
-	    Charset cs = null;
-	    Object outputObj =  null;
-	    Properties p = new Properties();
+	    List<CalcParser.ExprContext> exprs = ctx.writeExprs().expr();
 
-	    if (e3ctx != null) {
-		expr = e3ctx.expr(0);
-		outputObj = evaluate(expr);
-		fileName = getStringValue(e3ctx.expr(1));
-		cs = getCharsetValue(e3ctx.expr(2), false);
-	    }
-	    else {
-		expr = e2ctx.expr(0);
-		outputObj = evaluate(expr);
-		fileName = getStringValue(e2ctx.expr(1));
-	    }
+	    CalcParser.ExprContext exprCtx = exprs.get(0);
+	    Object outputObj = evaluate(exprCtx);
+	    String fileName = getStringValue(exprs.get(1));
+	    Charset cs = exprs.size() > 2 ? getCharsetValue(exprs.get(2), false) : null;
+	    Properties p = new Properties();
 
 	    try {
 		if (outputObj != null) {
@@ -6984,7 +6947,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			int seq = 0;
 			for (Object obj : array.list()) {
 			    String key = String.format("_%1$d", seq++);
-			    p.setProperty(key, getNonNullString(expr, obj));
+			    p.setProperty(key, getNonNullString(exprCtx, obj));
 			}
 		    }
 		    else if (outputObj instanceof SetScope) {
@@ -6993,17 +6956,17 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			int seq = 0;
 			for (Object obj : set.set()) {
 			    String key = String.format("_%1$d", seq++);
-			    p.setProperty(key, getNonNullString(expr, obj));
+			    p.setProperty(key, getNonNullString(exprCtx, obj));
 			}
 		    }
 		    else if (outputObj instanceof ObjectScope) {
 			ObjectScope obj = (ObjectScope) outputObj;
 			for (String key : obj.keyList()) {
-			    p.setProperty(key, getNonNullString(expr, obj.getValue(key, false)));
+			    p.setProperty(key, getNonNullString(exprCtx, obj.getValue(key, false)));
 			}
 		    }
 		    else {
-			p.setProperty("_0", getNonNullString(expr, outputObj));
+			p.setProperty("_0", getNonNullString(exprCtx, outputObj));
 		    }
 
 		    try (Writer w = newWriter(fileName, cs)) {
@@ -7022,13 +6985,13 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public Object visitDeleteExpr(CalcParser.DeleteExprContext ctx) {
 	    CalcParser.ExprNContext exprN = ctx.exprN();
 	    List<CalcParser.ExprContext> exprs = exprN.exprList().expr();
-	    boolean result = true;
+	    Boolean result = Boolean.TRUE;
 
 	    for (CalcParser.ExprContext expr : exprs) {
 		Path path = new File(getStringValue(expr)).toPath();
 		try {
 		    if (!Files.deleteIfExists(path))
-			result = false;
+			result = Boolean.FALSE;
 		}
 		catch (DirectoryNotEmptyException dnee) {
 		    throw new CalcExprException(dnee, ctx);
@@ -7038,7 +7001,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		}
 	    }
 
-	    return Boolean.valueOf(result);
+	    return result;
 	}
 
 	@Override
@@ -7473,7 +7436,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	 * @param op      The textual representation of the operator to execute.
 	 * @return        Result of the comparison.
 	 */
-	private boolean compareOp(
+	private Boolean compareOp(
 		CalcParser.ExprContext expr1,
 		CalcParser.ExprContext expr2,
 		Optional<Object> optObj1,
@@ -7557,7 +7520,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    throw new UnknownOpException(op, expr2);
 	    }
 
-	    return result;
+	    return Boolean.valueOf(result);
 	}
 
 	@Override
@@ -7566,7 +7529,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    CalcParser.ExprContext expr2 = ctx.expr(1);
 	    String op = ctx.COMPARE_OP().getText();
 
-	    return Boolean.valueOf(compareOp(expr1, expr2, null, op));
+	    return compareOp(expr1, expr2, null, op);
 	}
 
 	private class InVisitor implements IterationVisitor
@@ -7574,7 +7537,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		private CalcParser.ExprContext valueCtx;
 		private CalcParser.LoopCtlContext loopCtx;
 		private Object inValue;
-		private boolean compared = false;
+		private Boolean compared = Boolean.FALSE;
 
 
 		InVisitor(CalcParser.ExprContext ctx1, CalcParser.LoopCtlContext ctx2, Object value) {
@@ -7598,9 +7561,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			false, true, false, false, true);
 
 		    if (cmp == 0)
-			compared = true;
+			compared = Boolean.TRUE;
 
-		    return Boolean.valueOf(compared);
+		    return compared;
 		}
 
 		@Override
@@ -7635,7 +7598,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    CalcParser.ExprContext expr2 = ctx.expr(1);
 	    String op = ctx.EQUAL_OP().getText();
 
-	    return Boolean.valueOf(compareOp(expr1, expr2, null, op));
+	    return compareOp(expr1, expr2, null, op);
 	}
 
 	@Override

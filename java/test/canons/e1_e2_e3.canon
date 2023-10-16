@@ -602,12 +602,17 @@
 >substr tar, 1, -1 -> "b"
 >substr tar -> "abc"
 >tl = 'tell teal tail teel toil tool toll' -> "tell teal tail teel toil tool toll"
+>tm = 'abcabc' -> "abcabc"
 >replace (tl, 't(..)l', 't$1b', all) -> "telb teab taib teeb toib toob tolb"
 >replace tl, 't..l', 'test', first -> "test teal tail teel toil tool toll"
 >replace tl, 't..l', 'test', last -> "tell teal tail teel toil tool test"
 >replace tl, 't', 'b' -> "bell beal bail beel boil bool boll"
+>replace tl, 't',, first -> "ell teal tail teel toil tool toll"
 >r1 = ['tell', 'teal', 'tail', 'teel', 'toil', 'tool', 'toll'] -> [ "tell", "teal", "tail", "teel", "toil", "tool", "toll" ]
 >replace (r1, 't(..)l', "t$1b", all) -> [ "telb", "teab", "taib", "teeb", "toib", "toob", "tolb" ]
+>replace tm, 'b' -> "acac"
+>replace tm, 'c', -> "abab"
+>replace (tm, 'a',, last) -> "abcbc"
 >all = 1 -> 1
 >first = 2 -> 2
 >last = 7 -> 7

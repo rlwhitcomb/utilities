@@ -231,6 +231,9 @@ h2 {
 	 <li>Native support for delimited files is also coming soon, with virtually unlimited support for delimiters, quoting and escaping, etc.</li>
 	 <li>Gosh, even Roman numerals are supported natively!</li>
      </ul>
+  <p>A note on syntax in the following pages: <b>Bold</b> values must be typed as given (except for allowed case differences) everywhere. <code>(</code> and <code>)</code> around values in the
+     Command Line Options and Operators and Functions sections signify optional values / parameters, while in the Formats section, <code>[</code> and <code>]</code> are the "optional"
+     markers. Items inside parentheses separated by <code>|</code> signifies one of variations should be used.
 </div>
 <a class="top-link" href="#topofpage">Top</a>
 <hr id="Command_Line" class="sectionsep">
@@ -341,7 +344,7 @@ h2 {
     <tr><td><code>-linefeed</code></td><td>Use only line feed as line separator on output</td><td><code>-lfonly</code>, <code>-lf</code></td><td></td></tr>
     <tr><td><code>-lineend</code></td><td>Use the system line separators on output (default)</td><td><code>-lineending</code>, <code>-ln</code></td><td></td></tr>
     <tr><td><code>-variable</code><br><i>name</i><code>=</code><i>value</i><br>or <i>name</i><code>:</code><i>value</i></td><td>Set the value of a variable</td><td><code>-define</code>, <code>-var</code></td><td><i>name</i>&nbsp;<code>=</code>&nbsp;<i>value</i></td></tr>
-    <tr><td><code>--</code> <i>parameter_values</i><br>[ <code>--</code> ]</td><td>Provide values for the <code>$0</code>, <code>$1</code>, etc. parameters<br>
+    <tr><td><code>--</code> <i>parameter_values</i><br>( <code>--</code> )</td><td>Provide values for the <code>$0</code>, <code>$1</code>, etc. parameters<br>
             (every value between the <code>--</code> markers<br>is taken as a parameter value)</td><td></td><td></td></tr>
     <tr><td><code>-help</code></td><td>Display this help page</td><td><code>-h</code>, <code>-?</code></td><td><code>$help</code></td></tr>
     <tr><td><code>-version</code></td><td>Display the version information for the program on the console</td><td><code>-vers</code>, <code>-ver</code>, <code>-v</code></td><td><code>$version</code></td></tr>
@@ -826,12 +829,12 @@ or<br>
             <tr><td><code>LN</code>&nbsp;<i>expr</i></td><td>natural log (base e)</td></tr>
             <tr><td><code>EPOW</code>&nbsp;<i>expr</i></td><td>anti-log (e ** <i>expr</i>)</td></tr>
             <tr><td><code>TENPOW</code>&nbsp;<i>expr</i></td><td>10 ** <i>expr</i> (anti-log base ten)</td></tr>
-            <tr><td><code>RANDOM</code>&nbsp;( <i>expr</i> ) ?&nbsp;</td><td>random number with optional seed value</td></tr>
+            <tr><td><code>RANDOM</code>&nbsp;( <i>expr</i> )&nbsp;</td><td>random number with optional seed value</td></tr>
             <tr><td><code>SIGNUM</code> or <code>SGN</code>&nbsp;<i>expr</i></td><td>sign (&lt; 0 = -1, 0 = 0, &gt; 0 = +1)</td></tr>
             <tr><td><code>ISNULL</code> or <code>NOTNULL</code>&nbsp;<i>expr</i></td><td>is the value null / not null?</td></tr>
             <tr><td><code>TYPEOF</code>&nbsp;<i>expr</i></td><td>the type of the result<br>as in <code>"string"</code>, <code>"integer"</code>, <code>"boolean"</code>, etc.</td></tr>
-            <tr><td><code>CAST</code>&nbsp;<i>expr</i>&nbsp;[ <code>,</code> <i>type_expr</i> ]</td><td>convert the value to the given type<br>(default type is <code>"string"</code>)</td></tr>
-            <tr><td><code>LENGTH</code>&nbsp;<i>expr</i><br>or <i>expr</i> [ <code>..</code> or <code>&#x2026;</code> <i>expr</i> [ <code>,</code> <i>expr</i> ] ]</td><td>length of string, array, object, or range</td></tr>
+            <tr><td><code>CAST</code>&nbsp;<i>expr</i>&nbsp;( <code>,</code> <i>type_expr</i> )</td><td>convert the value to the given type<br>(default type is <code>"string"</code>)</td></tr>
+            <tr><td><code>LENGTH</code>&nbsp;<i>expr</i><br>or <i>expr</i> ( <code>..</code> or <code>&#x2026;</code> <i>expr</i> ( <code>,</code> <i>expr</i> ) )</td><td>length of string, array, object, or range</td></tr>
             <tr><td><code>SCALE</code>&nbsp;<i>expr</i></td><td>scale of number, total size of object or array</td></tr>
             <tr><td><code>ROUND</code>&nbsp;<i>expr</i><code>,</code>&nbsp;<i>places_expr</i></td><td>round value to given places</td></tr>
             <tr><td><code>FLOOR</code>&nbsp;<i>expr</i></td><td>the "floor" of a numeric value</td></tr>
@@ -841,16 +844,16 @@ or<br>
             <tr><td><code>LCM</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;) *</td><td>least common multiple</td></tr>
             <tr><td><code>MAX</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;) *</td><td>maximum value</td></tr>
             <tr><td><code>MIN</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;) *</td><td>minimum value</td></tr>
-            <tr><td><code>SUMOF</code> or <code>&#x2211;</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;) *<br>or <i>expr</i> [ <code>..</code> or <code>&#x2026;</code> <i>expr</i> [ <code>,</code> <i>expr</i> ] ]</td><td>sum of all the values</td></tr>
-            <tr><td><code>PRODUCTOF</code> or <code>&#x220F;</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;) *<br>or <i>expr</i> [ <code>..</code> or <code>&#x2026;</code> <i>expr</i> [ <code>,</code> <i>expr</i> ] ]</td><td>product of all the values</td></tr>
-            <tr><td><code>ARRAYOF</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;) *<br>or <i>expr</i> [ <code>..</code> or <code>&#x2026;</code> <i>expr</i> [ <code>,</code> <i>expr</i> ] ]</td><td>make a single array of all the values</td></tr>
+            <tr><td><code>SUMOF</code> or <code>&#x2211;</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;) *<br>or <i>expr</i> ( <code>..</code> or <code>&#x2026;</code> <i>expr</i> ( <code>,</code> <i>expr</i> ) )</td><td>sum of all the values</td></tr>
+            <tr><td><code>PRODUCTOF</code> or <code>&#x220F;</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;) *<br>or <i>expr</i> ( <code>..</code> or <code>&#x2026;</code> <i>expr</i> ( <code>,</code> <i>expr</i> ) )</td><td>product of all the values</td></tr>
+            <tr><td><code>ARRAYOF</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;) *<br>or <i>expr</i> ( <code>..</code> or <code>&#x2026;</code> <i>expr</i> ( <code>,</code> <i>expr</i> ) )</td><td>make a single array of all the values</td></tr>
             <tr><td><code>JOIN</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;) *</td><td>join strings</td></tr>
             <tr><td><code>SPLIT</code>&nbsp;<i>expr</i> <code>,</code> <i>regexpr</i> (&nbsp;<code>,</code> <i>limit_expr</i>&nbsp;)</td><td>split string into parts</td></tr>
 	    <tr><td><code>REVERSE</code>&nbsp;<i>expr</i></td><td>reverse the order of an array or string</td></tr>
             <tr><td><code>UNIQUE</code>&nbsp;<i>expr</i></td><td>produce the unique values in an array or string</td></tr>
             <tr><td><code>INDEX</code>&nbsp;<i>expr</i> <code>,</code> <i>search_expr</i> (&nbsp;<code>,</code> <i>start_expr</i>&nbsp;)</td><td>find value within a string</td></tr>
             <tr><td><code>SUBSTR</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>start_expr</i> (&nbsp;<code>,</code> <i>end_expr</i>&nbsp;)&nbsp;)</td><td>extract a substring</td></tr>
-            <tr><td><code>REPLACE</code>&nbsp;<i>expr</i> <code>,</code> <i>expr</i> <code>,</code> <i>expr</i> (&nbsp;<code>,</code> <i>mode</i>&nbsp;)</td><td>replace substrings within a string</td></tr>
+            <tr><td><code>REPLACE</code>&nbsp;<i>expr</i> <code>,</code> <i>expr</i> <code>,</code> ( <i>expr</i> ) (&nbsp;<code>,</code> <i>mode</i>&nbsp;)<br>or <i>expr</i> <code>,</code> <i>expr</i></td><td>replace substrings within a string</td></tr>
             <tr><td><code>SLICE</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;)&nbsp;)</td><td>extract a slice of an array (or string)</td></tr>
             <tr><td><code>SPLICE</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;) *</td><td>modify an array by deleting and/or adding elements</td></tr>
             <tr><td><code>SPLICE</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <code>[</code> <i>id or string list</i> <code>]</code>&nbsp;)<br>(&nbsp;<code>,</code> <code>{</code> <i>key:value pairs</i> <code>}</code>&nbsp;)</td><td>modify an object by deleting and/or adding elements</td></tr>
@@ -877,13 +880,13 @@ or<br>
             <tr><td><code>COLOR</code>&nbsp;<i>expr</i></td><td>translate color tags to escape codes or remove (depending on mode)</td></tr>
             <tr><td><code>DECODE</code>&nbsp;<i>expr</i></td><td>decode a base64 string into the original string value</td></tr>
             <tr><td><code>ENCODE</code>&nbsp;<i>expr</i></td><td>encode a string into its base64 form</td></tr>
-            <tr><td><code>EXISTS</code>&nbsp;<i>expr</i>&nbsp;( <code>,</code>&nbsp;<i>flag_expr</i>&nbsp;)</td><td>check the existence/permissions of file or directory</td></tr>
+            <tr><td><code>EXISTS</code>&nbsp;<i>expr</i>&nbsp;( <code>,</code>&nbsp;<i>flags_expr</i>&nbsp;)</td><td>check the existence/permissions of file or directory</td></tr>
             <tr><td><code>FILEINFO</code>&nbsp;<i>expr</i></td><td>get information about a given file</td></tr>
-            <tr><td><code>FINDFILES</code>&nbsp;<i>dir</i><code>,</code> <i>pattern</i> [ <code>,</code> <i>flags</i> ]</td><td>list files in the given directory<br>matching the pattern and optional flags</td></tr> 
-            <tr><td><code>READ</code>&nbsp;<i>expr</i>&nbsp;( <code>,</code>&nbsp;<i>charset_expr</i>&nbsp;)</td><td>read the file (or files) using the optional charset</td></tr>
-            <tr><td><code>WRITE</code>&nbsp;<i>expr</i> <code>,</code>&nbsp;<i>file name</i>&nbsp;( <code>,</code>&nbsp;<i>charset_expr</i>&nbsp;)</td><td>write the value to the file using the optional charset</td></tr>
-            <tr><td><code>READPROPERTIES</code>&nbsp;<i>expr</i>&nbsp;( <code>,</code>&nbsp;<i>charset_expr</i>&nbsp;)</td><td>read the properties file using the optional charset</td></tr>
-            <tr><td><code>WRITEPROPERTIES</code>&nbsp;<i>expr</i> <code>,</code>&nbsp;<i>file name</i>&nbsp;( <code>,</code>&nbsp;<i>charset_expr</i>&nbsp;)</td><td>write the value to the properties file using the optional charset</td></tr>
+            <tr><td><code>FINDFILES</code>&nbsp;<i>dir</i><code>,</code> <i>pattern_expr</i> ( <code>,</code> <i>flags_expr</i> )</td><td>list files in the given directory<br>matching the pattern and optional flags</td></tr> 
+            <tr><td><code>READ</code>&nbsp;<i>file_name_expr</i>&nbsp;( <code>:</code>&nbsp;<i>charset_expr</i>&nbsp;)</td><td>read the file (or files) using the optional charset</td></tr>
+            <tr><td><code>WRITE</code>&nbsp;<i>expr</i> <code>,</code>&nbsp;<i>file_name_expr</i>&nbsp;( <code>:</code>&nbsp;<i>charset_expr</i>&nbsp;)</td><td>write the value to the file using the optional charset</td></tr>
+            <tr><td><code>READPROPERTIES</code>&nbsp;<i>file_name_expr</i>&nbsp;( <code>:</code>&nbsp;<i>charset_expr</i>&nbsp;)</td><td>read the properties file using the optional charset</td></tr>
+            <tr><td><code>WRITEPROPERTIES</code>&nbsp;<i>expr</i> <code>,</code>&nbsp;<i>file_name_expr</i>&nbsp;( <code>:</code>&nbsp;<i>charset_expr</i>&nbsp;)</td><td>write the value to the properties file using the optional charset</td></tr>
             <tr><td><code>DELETE</code>&nbsp;<i>expr</i>&nbsp;( <code>,</code>&nbsp;<i>expr</i> ) *</td><td>delete one or more files</td></tr>
             <tr><td><code>RENAME</code>&nbsp;<i>expr<sub>1</sub></i> <code>,</code> <i>expr<sub>2</sub></i></td><td>rename or move file<sub>1</sub> to file<sub>2</sub></td></tr>
             <tr><td><code>MATCHES</code>&nbsp;<i>expr</i>&nbsp;<code>,</code>&nbsp;<i>pattern_expr</i>&nbsp;( <code>,</code> <i>flags_expr</i> )</td><td>match the expression string against<br>the regular expression pattern with possible flags</td></tr>
@@ -945,7 +948,7 @@ or<br>
         <td>comparison</td><td>left to right</td></tr>
     <tr><td>13</td><td>
         <i>expr</i>&nbsp;<code>OF</code>, <code>IN</code>, <code>WITHIN</code>, <code>&#x2208;</code>, or <code>&#x220A;</code><br>
-        <i>expr</i> [ <code>...</code>,&nbsp;<code>..</code>,&nbsp;or&nbsp;<code>&#x2026;</code>&nbsp;<i>expr</i> ] [ <code>,</code> <i>expr</i> ]</td>
+        <i>expr</i> ( <code>...</code>,&nbsp;<code>..</code>,&nbsp;or&nbsp;<code>&#x2026;</code>&nbsp;<i>expr</i> ) ( <code>,</code> <i>expr</i> )</td>
         <td>test set membership, or match a value within a range</td><td>left to right</td></tr>
     <tr><td>12</td><td>
         <i>expr</i>&nbsp;<code> === </code>or<code> &#x2A76; </code>or<code> &#x2261; </code>&nbsp;<i>expr</i><br>
@@ -1061,6 +1064,8 @@ or<br>
      expression are replaced with the third string value. Group substitutions are allowed in the replacement string, as in
      <code>replace ('tell teal tail teel toil tool toll', 't(..)l', 't$1b', all) &#x21E8; "telb teab taib teeb toib toob tolb"</code>.
   <p>If the first argument to <code>replace</code> is an object or array, the replace operation is performed on each of the values in that object recursively.
+  <p>If the replacement value is missing or empty the search value is deleted in the result according to the option value used,
+     as in <code>replace 'abcabc', 'b' &#x21E8; "acac"</code>.
   <p>The arguments to <code>slice</code> work exactly the same was as for <code>substr</code>, except for arrays or the values of
      an object. But if a simple value is given by the first expression, the value is converted to a string and it will work exactly
      the same as <code>substr</code> on the string value.
@@ -1245,7 +1250,7 @@ or<br>
   </p>
   <p>The optional parameter list looks like:
   <p class="indent">
-    <code>( </code> <i>name</i> [ <code> = </code> <i>expr</i> ] [ <code>,</code> ... ] <code> )</code>
+    <code>( </code> <i>name</i> ( <code> = </code> <i>expr</i> ) ( <code>,</code> ... ) <code> )</code>
   </p>
   <p>Note that the <code>{</code> and <code>}</code> are optional if there is only one expression/statement in the definition.
   <p>The parameter values are assigned when the function is called, and there can be fewer actual values given than are declared; the remaining values
