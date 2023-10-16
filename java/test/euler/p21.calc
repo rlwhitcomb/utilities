@@ -28,9 +28,7 @@ var sum = 0
 
 loop a within length(sums) {
    const b = sums[a]
-   if notnull(b) {
-      if sums[b] == a && a ≠ b { sum += a }
-   }
+   if notnull(b) && sums[b] == a && a ≠ b { sum += a }
 }
 
 }
