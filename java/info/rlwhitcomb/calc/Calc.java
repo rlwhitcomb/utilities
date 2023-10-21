@@ -329,6 +329,9 @@
  *	    #618: Add "-nol" and other command-line option aliases.
  *	29-Sep-2023 (rlwhitcomb)
  *	    #622: Add "f" to the color map for the RED_BOLD_BRIGHT color.
+ *	19-Oct-2023 (rlwhitcomb)
+ *	    #624: Add new interface message to CalcDisplayer for timing messages and implement
+ *	    appropriately for console, GUI, and files.
  */
 package info.rlwhitcomb.calc;
 
@@ -1307,6 +1310,12 @@ public class Calc
 	    updateOutputSize();
 	}
 
+	@Override
+	public void displayTimingMessage(String message) {
+	    // In the GUI these come out in the results window as always
+	    displayMessage(message, CalcDisplayer.Output.OUTPUT);
+	}
+
 
 	public static boolean getReplMode() {
 	    return replMode;
@@ -1473,6 +1482,13 @@ public class Calc
 			Intl.errFormat("calc#errorPeriod", regularMessage);
 		    else
 			Intl.errFormat("calc#errorLine", regularMessage, lineNumber);
+		}
+
+		@Override
+		public void displayTimingMessage(String message) {
+		    // In the console and output files these come out on the error channel to avoid
+		    // corrupting the canon file
+		    displayMessage(message, CalcDisplayer.Output.ERROR);
 		}
 	}
 
@@ -2036,7 +2052,7 @@ public class Calc
 		double parseTime = Environment.timerValueToSeconds(parseEndTime - startTime);
 		double execTime  = Environment.timerValueToSeconds(endTime - execStartTime);
 		double totalTime = Environment.timerValueToSeconds(endTime - startTime);
-		displayer.displayMessage(Intl.formatString("calc#timing", parseTime, execTime, totalTime), CalcDisplayer.Output.OUTPUT);
+		displayer.displayTimingMessage(Intl.formatString("calc#timing", parseTime, execTime, totalTime));
 	    }
 
 	    return returnValue;

@@ -28,6 +28,7 @@
  *  16-Dec-20 rlw ----	New interface method for "$echo".
  *  20-Jun-22 rlw #364	Add parameter and enum to "displayMessage" for output destination.
  *  12-Jun-23 rlw #616	Error for "Output.fromString" with unknown, non-empty value.
+ *  19-Oct-23 rlw #624	Add new interface method for displaying timing information.
  */
 package info.rlwhitcomb.calc;
 
@@ -126,5 +127,13 @@ public interface CalcDisplayer
 	 * @param lineNumber	The line number where the error occurred.
 	 */
 	void displayErrorMessage(String message, int lineNumber);
+
+	/**
+	 * Display timing information on a separate channel.
+	 *
+	 * @param message	The timing message to display.
+	 */
+	void displayTimingMessage(String message);
+
 }
 
