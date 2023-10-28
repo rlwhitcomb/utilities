@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { base: '1.12.0', version: '2.38.8', date: d'2023-10-27',
+      issues: [ 633 ],
+      comment: 'Add "-noopt" and "-opt" command line options for processing CALC_OPTIONS.'
+    },
     { version: '2.38.5', date: d'2023-10-19',
       issues: [ 624 ],
       comment: 'Send timing information to error channel instead of output channel.'

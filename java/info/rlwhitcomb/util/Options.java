@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2015-2018,2020-2022 Roger L. Whitcomb
+ * Copyright (c) 2015-2018,2020-2023 Roger L. Whitcomb
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -80,6 +80,9 @@
  *	    #536: Don't process environment variable with options if we're doing testing.
  *	30-Oct-2022 (rlwhitcomb)
  *	    #536: Rename and repurpose the environment variable method.
+ *	20-Oct-2023 (rlwhitcomb)
+ *	    #633: New methods for scanning for "-opt" and "-noopt" options; recast "isOption"
+ *	    with param to allow empty options or not.
  */
 package info.rlwhitcomb.util;
 
@@ -97,6 +100,7 @@ public class Options
 	 * to start with "/" (in addition to "--" and "-" allowed on all platforms).
 	 */
 	private static final boolean ON_WINDOWS = Environment.isWindows();
+
 
 	/**
 	 * An interface that can be implemented by enums or other classes such that we can
@@ -125,6 +129,17 @@ public class Options
 	{
 		void set(boolean value);
 		boolean isSet();
+	}
+
+
+	/**
+	 * An enumeration of the "-opt" and "-noopt" checks.
+	 */
+	public enum OptionChoice
+	{
+		OPT,
+		NOOPT,
+		NONE
 	}
 
 
@@ -345,20 +360,37 @@ public class Options
 	/**
 	 * Does the given string look like an argument (that is, does it start with
 	 * <code>"--"</code>, <code>"-"</code> or <code>"/"</code> [on Windows])?
+	 *
 	 * @param arg	The candidate argument value.
 	 * @return	The remaining string if so, or {@code null} if not.
 	 */
 	public static String isOption(String arg) {
+	    return isOption(arg, false);
+	}
+
+	/**
+	 * Does the given string look like an argument (that is, does it start with
+	 * <code>"--"</code>, <code>"-"</code> or <code>"/"</code> [on Windows])?
+	 * <p> Option to allow empty options to be counted as valid.
+	 *
+	 * @param arg	     The candidate argument value.
+	 * @param allowEmpty Whether to allow empty options (such as {@code "--"}).
+	 * @return	     The remaining string if valid, or {@code null} if not.
+	 */
+	public static String isOption(String arg, boolean allowEmpty) {
 	    String result = null;
+
 	    if (arg != null && !arg.isEmpty()) {
 		int length = arg.length();
-		if (length > 2 && arg.startsWith("--")) {
+
+		if (arg.startsWith("--") && (allowEmpty || length > 2)) {
 		    result = arg.substring(2);
 		}
-		else if (length > 1 && arg.startsWith("-") && !arg.equals("--")) {
+		else if (arg.startsWith("-") && (allowEmpty || length > 1)) {
 		    result = arg.substring(1);
 		}
-		else if (ON_WINDOWS && length > 1 && arg.startsWith("/")) {
+		// I don't think Windows historically does empty options, so ...
+		else if (ON_WINDOWS && arg.startsWith("/")) {
 		    result = arg.substring(1);
 		}
 	    }
@@ -429,6 +461,64 @@ public class Options
 	    return ignoreCase
 		? choice.matchesIgnoreCase(arg)
 		: choice.matches(arg);
+	}
+
+	/**
+	 * Check if the given option value is one of the special option options (without the prefix).
+	 *
+	 * @param option The candidate option value.
+	 * @return       One of the {@link OptionChoice} values indicating a match or not.
+	 */
+	public static OptionChoice checkOptionOption(String option) {
+	    switch (option.toLowerCase()) {
+		case "options":
+		case "option":
+		case "opt":
+		    return OptionChoice.OPT;
+		case "nooptions":
+		case "nooption":
+		case "noopt":
+		    return OptionChoice.NOOPT;
+		default:
+		    return OptionChoice.NONE;
+	    }
+	}
+
+	/**
+	 * Scan the arguments to see if one of the option options is present. The default is to
+	 * allow the options. Return {@code true} if none of the options are present or if
+	 * {@code "-opt"} is present and {@code "-noopt"} is not present, otherwise {@code false}.
+	 * <p> Note: this is to deal with processing the {@code xxx_OPTIONS} environment variable(s)
+	 * (or not) via a command-line option (when normally these environmental options would be
+	 * processed before processing the command line).
+	 *
+	 * @param args	     The list of command line arguments to scan.
+	 * @param allowEmpty Whether to allow empty options to count as options.
+	 * @return	     Result of scanning for the option options.
+	 */
+	public static boolean preProcessOptions(String[] args, boolean allowEmpty) {
+	    boolean processOptions = true;
+	    String opt;
+
+	    for (String arg : args) {
+		opt = isOption(arg, allowEmpty);
+		if (opt == null)
+		    continue;
+
+		OptionChoice choice = checkOptionOption(opt);
+		switch (choice) {
+		    case OPT:
+			processOptions = true;
+			break;
+		    case NOOPT:
+			processOptions = false;
+			break;
+		    default:
+			break;
+		}
+	    }
+
+	    return processOptions;
 	}
 
 	/**

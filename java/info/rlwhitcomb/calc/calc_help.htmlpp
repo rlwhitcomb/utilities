@@ -298,9 +298,11 @@ h2 {
     </thead>
     <tbody>
     <tr><td><code>-nointro</code></td><td>Do not print the introductory message in REPL mode</td><td><code>-noi</code></td><td></td></tr>
-    <tr><td><code>-intro</code></td><td>Print the introductory message in REPL mode <i>(default)</i></td><td><code>-int</code>, <code>-i</code></td><td></td></tr>
-    <tr><td><code>-gui</code></td><td>Start immediately in GUI mode</td><td><code>-g</code></td><td></td></tr>
+    <tr><td><code>-intro</code></td><td>Print the introductory message in REPL mode <i>(default)</i></td><td><code>-int</code>, <code>-i</code></td><td><code>$help</code> (in REPL mode)</td></tr>
+    <tr><td><code>-gui</code></td><td>Start immediately in GUI mode</td><td><code>-g</code></td><td><code>$gui</code> (in REPL mode)</td></tr>
     <tr><td><code>-console</code></td><td>Start instead in console mode <i>(default)</i></td><td><code>-cons</code>, <code>-con</code>, <code>-c</code></td><td></td></tr>
+    <tr><td><code>-noopt</code></td><td>Do not process the <code>CALC_OPTIONS</code> environment variable for default options on startup</td><td><code>-nooptions</code>, <code>-nooption</code></td><td></td></tr>
+    <tr><td><code>-opt</code></td><td>Process <code>CALC_OPTIONS</code> from the environment <i>(default)</i></td><td><code>-options</code>, <code>-option</code></td><td></td></tr>
     <tr><td><code>-debug</code></td><td>Display a debug printout of the syntax tree for every input</td><td><code>-deb</code>, <code>-d</code></td><td><code>$debug on</code></td></tr>
     <tr><td><code>-nodebug</code></td><td>Don't display the syntax tree for debugging <i>(default)</i></td><td><code>-nodeb</code>, <code>-nod</code>, <code>-no</code></td><td><code>$debug off</code></td></tr>
     <tr><td><code>-colors</code></td><td>Use coloring (on the console) for results and messages <i>(default)</i></td><td><code>-color</code>, <code>-col</code></td><td><code>$colors on</code></td></tr>

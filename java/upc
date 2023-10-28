@@ -12,8 +12,5 @@ then
 else
    canon=$2
 fi
-options=$CALC_OPTIONS
-export -n CALC_OPTIONS
 # Note: these options must match the $defaultOptions in calctest
-c -nocolors -dir test/files -lib library -noseps -quotes -sense -utf8 -loc en-US $test | mkcanon > test/canons/${canon//[,;]/_}.canon
-export CALC_OPTIONS=$options
+c -noOptions -timing -noColors -dir test/files -lib library -noSeps -quotes -sense -utf8 -loc en-US $test | mkcanon > test/canons/${canon//[,;]/_}.canon

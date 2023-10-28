@@ -332,6 +332,9 @@
  *	19-Oct-2023 (rlwhitcomb)
  *	    #624: Add new interface message to CalcDisplayer for timing messages and implement
  *	    appropriately for console, GUI, and files.
+ *	27-Oct-2023 (rlwhitcomb)
+ *	    #633: Add options on the command line to ignore (or not) the CALC_OPTIONS settings
+ *	    on startup (new methods in Options class).
  */
 package info.rlwhitcomb.calc;
 
@@ -2100,7 +2103,9 @@ public class Calc
 		return Expecting.QUIT_NOW;
 	    }
 
-	    switch (option.toLowerCase()) {
+	    String lowerOption = option.toLowerCase();
+
+	    switch (lowerOption) {
 		case "nointro":
 		case "noi":
 		    noIntro = true;
@@ -2400,8 +2405,11 @@ public class Calc
 		    printTitleAndVersion();
 		    return Expecting.QUIT_NOW;
 		default:
-		    Intl.errFormat("calc#unknownOption", arg);
-		    return Expecting.QUIT_NOW;
+		    // Allow the option options (and ignore them here)
+		    if (Options.checkOptionOption(lowerOption) == Options.OptionChoice.NONE) {
+			Intl.errFormat("calc#unknownOption", arg);
+			return Expecting.QUIT_NOW;
+		    }
 	    }
 	    return Expecting.DEFAULT;
 	}
@@ -2410,12 +2418,10 @@ public class Calc
 	    expecting = Expecting.DEFAULT;
 
 	    for (String arg : args) {
-		if (arg.startsWith("--"))
-		    expecting = processOption(arg, arg.substring(2));
-		else if (arg.startsWith("-"))
-		    expecting = processOption(arg, arg.substring(1));
-		else if (ON_WINDOWS && arg.startsWith("/"))
-		    expecting = processOption(arg, arg.substring(1));
+		String opt = Options.isOption(arg, true);
+		if (opt != null) {
+		    expecting = processOption(arg, opt);
+		}
 		else {
 		    switch (expecting) {
 			case DEFAULT:
@@ -2533,20 +2539,24 @@ public class Calc
 	    final List<String> argList = new ArrayList<>(args.length * 2);
 	    argValues.clear();
 
-	    // Preprocess the CALC_OPTIONS environment variable (if present)
-	    Options.environmentOptions(Calc.class, (options) -> {
-		processArgs(options, argList);
+	    // Preprocess the command line arguments to see if we should process
+	    // the environment options at all
+	    if (Options.preProcessOptions(args, true)) {
+		// Preprocess the CALC_OPTIONS environment variable (if present)
+		Options.environmentOptions(Calc.class, (options) -> {
+		    processArgs(options, argList);
 
-		switch (expecting) {
-		    case QUIT_NOW:
-			System.exit(0);
-		    case DEFAULT:
-		    case ARGUMENTS:
-			break;
-		    default:
-			System.exit(1);
-		}
-	    });
+		    switch (expecting) {
+			case QUIT_NOW:
+			    System.exit(0);
+			case DEFAULT:
+			case ARGUMENTS:
+			    break;
+			default:
+			    System.exit(1);
+		    }
+		});
+	    }
 
 	    // Now process the command line (options will override the env var)
 	    processArgs(args, argList);
