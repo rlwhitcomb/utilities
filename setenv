@@ -36,6 +36,9 @@ then
     source .settings
 fi
 
+# Eliminate duplicates in the path
+export PATH=$(fixpath)
+
 # Switch to the Java directory for convenience
 cd java
 
