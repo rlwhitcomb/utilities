@@ -44,6 +44,8 @@
 #	06-Jan-2023 (rlwhitcomb)
 #	    #224: More lookup error messages.
 #	    #224: One more error.
+#	04-Nov-2023 (rlwhitcomb)
+#	    #633: More help for the "-noopt" and "-opt" options.
 #
 
 exception		= Error: %1$s from %2$s%n
@@ -80,7 +82,7 @@ intro.help1	= Usage: wf [ letters ] [ options ]
 intro.help2	= ""
 intro.help3	= "  use '-gui' option to open the GUI window."
 intro.help4	= ""
-intro.help5	= (WORDFIND_OPTIONS can be set in th environment)
+intro.help5	= (WORDFIND_OPTIONS can be set in the environment)
 intro.help6	= ""
 intro.help7	= For one-time use, the letters and options are given on the command line.
 intro.help8	= If no letters are given on the command line, then we enter REPL mode.
@@ -134,4 +136,7 @@ addl.help12	= "  -statistics, -stats, -stat, -st\tdisplay dictionary statistics"
 addl.help13	= "  -help, -h, -?\t\t\t\tdisplay this help message"
 addl.help14	= "     (use \"-verbose\" or \"-v\" to display all the possible options)"
 addl.help15	= ""
+addl.help16	= "  -noopt, -nooptions, -nooption\tdo NOT process WORDFIND_OPTIONS"
+addl.help17	= "  -opt, -options, -option\t(default) process WORDFIND_OPTIONS at startup"
+addl.help18	= ""
 

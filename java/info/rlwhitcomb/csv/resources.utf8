@@ -1,7 +1,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2014-2016,2020-2022 Roger L. Whitcomb.
+# Copyright (c) 2014-2016,2020-2023 Roger L. Whitcomb.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -48,6 +48,8 @@
 #	    #156: Properly quote value strings on output.
 #	05-May-2022 (rlwhitcomb)
 #	    #308: Change reset color tag.
+#	02-Nov-2023 (rlwhitcomb)
+#	    #633: New help text for CSVTest for the "-opt" and "-noopt" options.
 #
 
 #
@@ -115,6 +117,10 @@ test.help23			= \t<Gr>-W<-->   = enable writeback mode, where the contents are w
 test.help24			= \t       and then read back in and compared to the original parsed values.
 test.help25			= \t<Gr>-i<-->   = use "iterator" for testing.
 test.help26			= ""
+test.help27			= Set default options in the environment with the <Gr>CSVTEST_OPTIONS<--> variable.
+test.help28			= \t<Gr>-noopt<--> = don't process these defaults
+test.help29			= \t<Gr>-opt<-->   = process them (default)
+test.help30			= ""
 
 test.onlyOneChar		= Only one character allowed for the "-%1$s" option!
 test.unknownOption		= Unknown option "-%1$s"!

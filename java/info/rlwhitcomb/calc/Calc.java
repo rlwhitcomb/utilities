@@ -335,6 +335,7 @@
  *	27-Oct-2023 (rlwhitcomb)
  *	    #633: Add options on the command line to ignore (or not) the CALC_OPTIONS settings
  *	    on startup (new methods in Options class).
+ *	    Rename the new methods in Options.
  */
 package info.rlwhitcomb.calc;
 
@@ -2541,9 +2542,9 @@ public class Calc
 
 	    // Preprocess the command line arguments to see if we should process
 	    // the environment options at all
-	    if (Options.preProcessOptions(args, true)) {
+	    if (Options.allowEnvironmentOptions(args, true)) {
 		// Preprocess the CALC_OPTIONS environment variable (if present)
-		Options.environmentOptions(Calc.class, (options) -> {
+		Options.processEnvironmentOptions(Calc.class, options -> {
 		    processArgs(options, argList);
 
 		    switch (expecting) {

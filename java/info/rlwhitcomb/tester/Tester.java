@@ -252,6 +252,8 @@
  *	    Make both the test class constructor and "main" methods accessible before invoking.
  *	16-Jan-2023 (rlwhitcomb)
  *	    #593: Preprocess our test description files using PreProc to allow macro definitions.
+ *	27-Oct-2023 (rlwhitcomb)
+ *	    #633: New methods in Options to disable checking TESTER_OPTIONS if desired.
  */
 package info.rlwhitcomb.tester;
 
@@ -1595,7 +1597,7 @@ public class Tester
 	/**
 	 * Process a single command-line option.
 	 *
-	 * @param arg	The option to process (without the leading "-", or whatever).
+	 * @param arg	The option to process (with the leading "-", or whatever).
 	 */
 	private void processOption(final String arg) {
 	    if (Options.isOption(arg) == null) {
@@ -1685,7 +1687,7 @@ public class Tester
 		Intl.printHelp("tester#");
 		System.exit(ACTION_DONE);
 	    }
-	    else {
+	    else if (Options.checkOptionOption(opt) == Options.OptionChoice.NONE) {
 		Intl.errFormat("tester#badOption", opt);
 		System.exit(BAD_ARGUMENT);
 	    }
@@ -1716,10 +1718,12 @@ public class Tester
 	public int setup(final String[] args) {
 	    testDescriptionFiles = new ArrayList<>(args.length);
 
-	    // Preprocess the TESTER_OPTIONS environment variable (if present)
-	    Options.environmentOptions(Tester.class, (options) -> {
-		processArgs(options);
-	    });
+	    if (Options.allowEnvironmentOptions(args, false)) {
+		// Preprocess the TESTER_OPTIONS environment variable (if present)
+		Options.processEnvironmentOptions(Tester.class, options -> {
+		    processArgs(options);
+		});
+	    }
 
 	    // Now the regular command-line arguments
 	    processArgs(args);

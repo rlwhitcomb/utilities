@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2020-2022 Roger L. Whitcomb.
+ * Copyright (c) 2020-2023 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,24 +25,25 @@
  *	to be a better/simpler version of the "dir" command.
  *
  * History:
- *  20-Nov-20 rlw  ---	More work on new version in Java, loosely translated from C.
- *  15-Aug-21 rlw  ---	More coding using Java paradigms.
- *  12-Apr-22 rlw #269:	New method to load main program info (in Environment).
- *  18-Apr-22 rlw #270:	Make this automatic now.
- *  02-Nov-22 rlw #48:	More coding in the higher level methods.
+ *  20-Nov-20 rlw ----	More work on new version in Java, loosely translated from C.
+ *  15-Aug-21 rlw ----	More coding using Java paradigms.
+ *  12-Apr-22 rlw #269	New method to load main program info (in Environment).
+ *  18-Apr-22 rlw #270	Make this automatic now.
+ *  02-Nov-22 rlw #48	More coding in the higher level methods.
  *  04-Nov-22		Process indirect files, process wildcards, begin real
  *			display code, add "link" to the attributes, process
  *			more command-line options.
  *			Add dates to the file display; sort files.
- *  05-Nov-22 rlw #48:	Add owner and group names.
+ *  05-Nov-22 rlw #48	Add owner and group names.
  *  06-Nov-22		Pad owner and group to standard width. Get rid of some
  *			unused code.
  *  07-Nov-22		Fix spacing with long owner names; fix Javadoc warning.
- *  08-Nov-22 rlw #48:	Blank out leading '0' in hours value.
+ *  08-Nov-22 rlw #48	Blank out leading '0' in hours value.
  *  17-Nov-22		Process ".ext" as "*.ext". Flags to enable/disable owner
  *			and group name display.
  *  15-Dec-22		Put brackets around directory names. Flesh out part of the
  *			"saving" process. Allow "~" as user.home directory.
+ *  04-Nov-23 rlw #633	Allow "-opt" and "-noopt" for environment options.
  */
 package info.rlwhitcomb.directory;
 
@@ -788,7 +789,8 @@ System.out.println("size = " + basicAttrs.size() + ", createTime = " + basicAttr
 		    return false;
 
 		default:
-		    Intl.errFormat("directory#unknownOption", option);
+		    if (Options.checkOptionOption(option) == Options.OptionChoice.NONE)
+			Intl.errFormat("directory#unknownOption", option);
 		    break;
 	    }
 	    return true;
@@ -1002,12 +1004,14 @@ System.out.println("size = " + basicAttrs.size() + ", createTime = " + basicAttr
 
 	    final List<String> specs = new ArrayList<>();
 
-	    Options.environmentOptions(Dir.class, a -> {
-		for (String arg : a) {
-		    if (!processOption(arg, specs))
-			return;
-		}
-	    });
+	    if (Options.allowEnvironmentOptions(args, false)) {
+		Options.processEnvironmentOptions(Dir.class, options -> {
+		    for (String opt : options) {
+			if (!processOption(opt, specs))
+			    System.exit(0);
+		    }
+		});
+	    }
 
 	    // Process command line options
 	    for (String arg : args) {

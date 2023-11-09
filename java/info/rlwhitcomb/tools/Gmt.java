@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2021-2022 Roger L. Whitcomb.
+ * Copyright (c) 2021-2023 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,20 +24,22 @@
  *	Display the time in GMT.
  *
  * History:
- *  23-Feb-21 rlw  ---	Initial implementation.
- *  23-Feb-21 rlw  ---	Add options.
- *  03-Mar-21 rlw  ---	Tweak the output so it matches what we're emulating better.
- *  29-Mar-21 rlw  ---	Move to new package.
- *  19-Dec-21 rlw #158:	Add ISO-8601 format and help.
- *  01-Feb-22 rlw  ---	ISO format doesn't need any fixup; add milliseconds there.
- *  09-Jul-22 rlw #393:	Cleanup imports.
- *  25-Oct-22 rlw #18:	Allow +/-nn on command line to get offset from GMT.
+ *  23-Feb-21 rlw ----	Initial implementation.
+ *  23-Feb-21 rlw ----	Add options.
+ *  03-Mar-21 rlw ----	Tweak the output so it matches what we're emulating better.
+ *  29-Mar-21 rlw ----	Move to new package.
+ *  19-Dec-21 rlw #158	Add ISO-8601 format and help.
+ *  01-Feb-22 rlw ----	ISO format doesn't need any fixup; add milliseconds there.
+ *  09-Jul-22 rlw #393	Cleanup imports.
+ *  25-Oct-22 rlw #18	Allow +/-nn on command line to get offset from GMT.
  *			Tweak the date formats.
  *			Allow arbitrary timezone selection.
- *  02-Nov-22 rlw #545:	Get default options from the environment; add "-default" option;
+ *  02-Nov-22 rlw #545	Get default options from the environment; add "-default" option;
  *			straighten out error handling on timezone selection.
- *  14-Dec-22 rlw #561:	Display in seconds or milliseconds (raw). Three new formats: RFC822,
+ *  14-Dec-22 rlw #561	Display in seconds or milliseconds (raw). Three new formats: RFC822,
  *			RFC850, and "asctime()".
+ *  02-Nov-23 rlw #633	New call to allow "-opt" and "-noopt" for processing default options
+ *			from the environment.
  */
 package info.rlwhitcomb.tools;
 
@@ -53,7 +55,7 @@ import java.util.TimeZone;
 
 
 /**
- * Display the current GMT time.
+ * Display the current GMT (or other timezone) time in various standard / useful formats.
  */
 public class Gmt
 {
@@ -193,7 +195,7 @@ public class Gmt
 			    }
 			    selectedZone = null;
 			}
-			else {
+			else if (Options.checkOptionOption(arg) == Options.OptionChoice.NONE) {
 			    String[] zones = TimeZone.getAvailableIDs();
 			    selectedZone = null;
 			    for (String zone : zones) {
@@ -217,7 +219,9 @@ public class Gmt
 	 * @param args The parsed command line argument array.
 	 */
 	public static void main(String[] args) {
-	    Options.environmentOptions(Gmt.class, a -> processArgs(a));
+	    if (Options.allowEnvironmentOptions(args, false)) {
+		Options.processEnvironmentOptions(Gmt.class, options -> processArgs(options));
+	    }
 
 	    processArgs(args);
 

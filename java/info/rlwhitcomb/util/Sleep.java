@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2020-2022 Roger L. Whitcomb.
+ * Copyright (c) 2020-2023 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,22 +23,18 @@
  *
  *	Simply wait/sleep for a given number of seconds (default one).
  *
- *  History:
- *      16-Dec-2020 (rlwhitcomb)
- *          First version.
- *	04-Jan-2021 (rlwhitcomb)
- *	    Move to named package. Allow minutes, hours, etc. intervals.
- *	05-Jan-2021 (rlwhitcomb)
- *	    Just for info, report the total elapsed time at the end.
- *	19-Jan-2022 (rlwhitcomb)
- *	    #126: Add "-quiet" and "-verbose" flags with lots of aliases 😉.
- *	    Using Optional and OptionalDouble.
- *	    Process SLEEP_OPTIONS env variable.
- *	    Refactor a bit more.
- *	21-Jan-2022 (rlwhitcomb)
- *	    Use new Options method to process environment options.
- *	09-Jul-2022 (rlwhitcomb)
- *	    #393: Cleanup imports.
+ * History:
+ *  16-Dec-20 rlw ----	First version.
+ *  04-Jan-21 rlw ----	Move to named package. Allow minutes, hours, etc. intervals.
+ *  05-Jan-21 rlw ----	Just for info, report the total elapsed time at the end.
+ *  19-Jan-22 rlw #126	Add "-quiet" and "-verbose" flags with lots of aliases 😉.
+ *			Using Optional and OptionalDouble.
+ *			Process SLEEP_OPTIONS env variable.
+ *			Refactor a bit more.
+ *  21-Jan-22 rlw ----	Use new Options method to process environment options.
+ *  09-Jul-22 rlw #393	Cleanup imports.
+ *  02-Nov-23 rlw #633	Support for "-opt" and "-noopt" for processing SLEEP_OPTIONS.
+ *			Cleanup some comments that were invalid from earlier changes.
  */
 package info.rlwhitcomb.util;
 
@@ -49,7 +45,7 @@ import java.util.regex.Pattern;
 
 
 /**
- * Sleep for the given number of seconds (can be a fraction).
+ * Sleep for the given duration (anywhere from seconds to weeks) (can be a fraction).
  */
 public class Sleep
 {
@@ -82,7 +78,7 @@ public class Sleep
 	 * Simply parse the given string into a decimal number of seconds.
 	 * <p> Default to an empty Optional if empty.
 	 *
-	 * @param arg	The supposed number of seconds to parse.
+	 * @param arg	The supposed duration to parse (according to {@link #SLEEP_PATTERN}).
 	 * @return	The parsed double value, or an empty Optional (which will use the default)
 	 *		if unable to parse the input.
 	 */
@@ -131,7 +127,7 @@ public class Sleep
 		}
 
 		if (prolijo)
-		    System.err.format("Could not decipher a number of seconds to sleep from the argument \"%1$s\" given!%n  Defaulting to %2$11.9f second(s).%n", value, DEFAULT_SLEEP_SECS);
+		    System.err.format("Could not decipher a duration to sleep from the argument \"%1$s\" given!%n  Defaulting to %2$11.9f second(s).%n", value, DEFAULT_SLEEP_SECS);
 	    }
 
 	    // The default value indicator (empty)
@@ -208,7 +204,8 @@ public class Sleep
 			    prolijo = true;
 			    break;
 			default:
-			    System.err.println("Unknown option \"" + arg + "\" specified. Ignored!");
+			    if (Options.checkOptionOption(arg) == Options.OptionChoice.NONE)
+				System.err.println("Unknown option \"" + arg + "\" specified. Ignored!");
 			    break;
 		    }
 		}
@@ -229,13 +226,15 @@ public class Sleep
 	 * @param args	The parsed command line arguments (we only need one).
 	 */
 	public static void main(String[] args) {
-	    long startTime = Environment.highResTimer();
-
-	    Options.environmentOptions(Sleep.class, (options) -> {
-		processOptions(options);
-	    });
+	    if (Options.allowEnvironmentOptions(args, false)) {
+		Options.processEnvironmentOptions(Sleep.class, options -> {
+		    processOptions(options);
+		});
+	    }
 
 	    processOptions(args);
+
+	    long startTime = Environment.highResTimer();
 
 	    // Finally do the hard work of ... sleeping ... for that long
 	    sleep(sleepTimeSecs.orElseGet(() -> defaultValue()));

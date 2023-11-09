@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2020-2022 Roger L. Whitcomb.
+ * Copyright (c) 2020-2023 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -79,6 +79,9 @@
  *	25-Oct-2022 (rlwhitcomb)
  *	    #39: Option to list all the currencies available. List more Locale information
  *	    in verbose mode.
+ *	02-Nov-2023 (rlwhitcomb)
+ *	    #633: New "-noopt" and "-opt" options to allow processing the default options
+ *	    from the environment.
  */
 package info.rlwhitcomb.tools;
 
@@ -375,7 +378,7 @@ public class OS
 		    usage(System.out);
 		    return false;
 		}
-		else {
+		else if (Options.checkOptionOption(arg) == Options.OptionChoice.NONE) {
 		    Intl.errFormat("tools#os.unknownChoice", arg);
 		    usage(System.err);
 		    return false;
@@ -777,10 +780,12 @@ public class OS
 	    screenWidth = Environment.consoleWidth();
 	    Intl.setColoring(colors);
 
-	    Options.environmentOptions(OS.class, (options) -> {
-		if (!parseArgs(options))
-		    System.exit(1);
-	    });
+	    if (Options.allowEnvironmentOptions(args, false)) {
+		Options.processEnvironmentOptions(OS.class, options -> {
+		    if (!parseArgs(options))
+			System.exit(1);
+		});
+	    }
 
 	    if (!parseArgs(args))
 		System.exit(1);

@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2021-2022 Roger L. Whitcomb.
+ * Copyright (c) 2021-2023 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,19 +23,15 @@
  *
  *	Deal with UUIDs.
  *
- *  Change History:
- *	09-Nov-2021 (rlwhitcomb)
- *	    Initial first-pass implementation to just generate random UUIDs.
- *	11-Nov-2021 (rlwhitcomb)
- *	    #80: Add "-lower", "-upper", "-string", "-bytes" options, as well as "-nn".
- *	12-Nov-2021 (rlwhitcomb)
- *	    #80: Add "-int" option.
- *	21-Jan-2022 (rlwhitcomb)
- *	    #217: Allow environment options through new Options method.
- *	08-Feb-2022 (rlwhitcomb)
- *	    Move text to resources.
- *	09-Jul-2022 (rlwhitcomb)
- *	    #393: Cleanup imports.
+ * History:
+ *  09-Nov-21 rlw ----	Initial first-pass implementation to just generate random UUIDs.
+ *  11-Nov-21 rlw #80	Add "-lower", "-upper", "-string", "-bytes" options, as well as "-nn".
+ *  12-Nov-21 rlw #80	Add "-int" option.
+ *  21-Jan-22 rlw #217	Allow environment options through new Options method.
+ *  08-Feb-22 rlw ----	Move text to resources.
+ *  09-Jul-22 rlw #393	Cleanup imports.
+ *  02-Nov-23 rlw #633	Allow "-opt" and "-noopt" to control processing of default
+ *			options in the environment.
  */
 package info.rlwhitcomb.tools;
 
@@ -149,7 +145,7 @@ public class Uuid
 			usage();
 			return false;
 		    }
-		    else {
+		    else if (Options.checkOptionOption(opt) == Options.OptionChoice.NONE) {
 			try {
 			    int nn = Integer.parseInt(value);
 			    if (nn < 1 || nn > 99) {
@@ -180,10 +176,12 @@ public class Uuid
 	 */
 	public static void main(String[] args) {
 
-	    Options.environmentOptions(Uuid.class, (options) -> {
-		if (!processOptions(options))
-		    System.exit(0);
-	    });
+	    if (Options.allowEnvironmentOptions(args, false)) {
+		Options.processEnvironmentOptions(Uuid.class, options -> {
+		    if (!processOptions(options))
+			System.exit(0);
+		});
+	    }
 
 	    if (!processOptions(args))
 		return;

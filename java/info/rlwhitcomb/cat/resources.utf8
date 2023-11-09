@@ -1,7 +1,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2020-2022 Roger L. Whitcomb.
+# Copyright (c) 2020-2023 Roger L. Whitcomb.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -24,11 +24,12 @@
 #       Internationalizable strings for the info.rlwhitcomb.cat code.
 #
 # History:
-#  14-Oct-20 rlw  ---	Moved into here from the .java file.
-#  11-Dec-20 rlw  ---	Move product name to build.properties.
-#  24-Aug-21 rlw  ---	One more error for the locale option.
+#  14-Oct-20 rlw ----	Moved into here from the .java file.
+#  11-Dec-20 rlw ----	Move product name to build.properties.
+#  24-Aug-21 rlw ----	One more error for the locale option.
 #  17-Feb-22 rlw #251:	Charset error message.
 #  11-Oct-22 rlw #2:	Add help.
+#  27-Oct-23 rlw #633	Add options to ignore environment options; update help.
 #
 
 unrecognized		= Unrecognized option: "%1$s"!
@@ -86,7 +87,12 @@ help40	= "    Any number of input files, or any number of these options may be g
 help41	= \t-stdin\t\tread input from the console
 help42	= \t\t\tor -std, -in, --, -, or @
 help43	= ""
-help44	= Each input file (or set of console lines) will be read according to the charset
-help45	= "  in effect at the time, then the entire set of input will be written to the"
-help46	= "  console, or to the specified output file (according to the output charset)."
-help47	= ""
+help44	= Preset options can be given via an environment variable named CAT_OPTIONS. These
+help45	= "  options will be set before any specified on the command line. Using the"
+help46	= "  -noopt (or -nooptions, or -nooption) flag will ignore the environment"
+help47	= "  values, or -opt (or -options, or -option) will restore the default behavior."
+help48	= ""
+help49	= Each input file (or set of console lines) will be read according to the charset
+help50	= "  in effect at the time, then the entire set of input will be written to the"
+help51	= "  console, or to the specified output file (according to the output charset)."
+help52	= ""

@@ -88,6 +88,8 @@
 #	    #488: Also report free memory.
 #	16-Jan-2023 (rlwhitcomb)
 #	    #593: Preprocessing error message.
+#	27-Oct-2023 (rlwhitcomb)
+#	    #633: New help text for "-noopt" and "-opt" options.
 #
 
 mismatch		= Mismatch on test \"%1$s\":%n  Canon file: %2$s%n Output file: %3$s
@@ -163,25 +165,29 @@ help8		= \t preceding information and then more.)
 help9		= \tWithout any options, only the name of the description file
 help10		= \t  and the total results will be displayed.
 help11		=
-help12		= The format of a test description file is as follows:
-help13		= \tcanonfilename: test_command_line
-help14		=
-help15		= "Where \"#\" or \"!\" or \"//\" at the beginning of a line means"
-help16		= "  it is a comment that is ignored."
-help17		= "Lines beginning with \"$\", \"!\", or \":\" contain directives"
-help18		= "  and options for the test process."
-help19		=
-help20		= Additionally, each test line can be prefixed with a version
-help21		= "  prefix in the form of \"{[platform],[begin][-end][+]}\" where:"
-help22		= "  \"platform\" is a platform identifier,"
-help23		= "  \"begin\" and \"end\" can be \"major.minor\" with"
-help24		= "  either part missing or given as \"*\" or \"x\" (meaning"
-help25		= "  don't care), and the trailing \"+\" means 'that version or"
-help26		= "  any later one'."
-help27		=
-help28		= Canon files have the following kinds of lines:
-help29		= "  <input"
-help30		= "  >output"
-help31		= "  >>error"
-help32		=
+help12		= Options can be specified by TESTER_OPTIONS set in the environment.
+help13		= \tUse "-noopt" to disallow this, or
+help14		= \t    "-opt" to reenable (this is the default).
+help15		=
+help16		= The format of a test description file is as follows:
+help17		= \tcanonfilename: test_command_line
+help18		=
+help19		= "Where \"#\" or \"!\" or \"//\" at the beginning of a line means"
+help20		= "  it is a comment that is ignored."
+help21		= "Lines beginning with \"$\", \"!\", or \":\" contain directives"
+help22		= "  and options for the test process."
+help23		=
+help24		= Additionally, each test line can be prefixed with a version
+help25		= "  prefix in the form of \"{[platform],[begin][-end][+]}\" where:"
+help26		= "  \"platform\" is a platform identifier,"
+help27		= "  \"begin\" and \"end\" can be \"major.minor\" with"
+help28		= "  either part missing or given as \"*\" or \"x\" (meaning"
+help29		= "  don't care), and the trailing \"+\" means 'that version or"
+help30		= "  any later one'."
+help31		=
+help32		= Canon files have the following kinds of lines:
+help33		= "  <input"
+help34		= "  >output"
+help35		= "  >>error"
+help36		=
 

@@ -119,6 +119,8 @@
  *          #224: Common code for online results.
  *      23-May-2023 (rlwhitcomb)
  *          Allow "$quit" and etc. for the REPL commands.
+ *      04-Nov-2023 (rlwhitcomb)
+ *          #633: New options "-opt" and "-noopt" for processing environment defaults.
  */
 package info.rlwhitcomb.wordfind;
 
@@ -670,6 +672,7 @@ public class WordFind implements Application
      */
     private static void processOption(final String prefix, final String arg, final boolean ignoreOptions) {
         boolean ignored = false;
+        String wholeArg = prefix + arg;
 
         if (matches(arg, "letters", "letter", "l")) {
             letter = true;
@@ -763,10 +766,11 @@ public class WordFind implements Application
                 System.exit(0);
             }
         } else {
-            error("wordfind#errUnknownOption", quote(prefix + arg));
+            if (Options.checkOptionOption(wholeArg) == Options.OptionChoice.NONE)
+                error("wordfind#errUnknownOption", quote(wholeArg));
         }
         if (ignored) {
-            error("wordfind#errIgnoredOption", quote(prefix + arg));
+            error("wordfind#errIgnoredOption", quote(wholeArg));
         }
     }
 
@@ -1285,9 +1289,11 @@ public class WordFind implements Application
         // Set default colors before options so there is a setting for error messages right away
         setColors(!ON_WINDOWS);
 
-        Options.environmentOptions(WordFind.class, (options) -> {
-            processCommandLine(options, null, false);
-        });
+        if (Options.allowEnvironmentOptions(args, false)) {
+            Options.processEnvironmentOptions(WordFind.class, options -> {
+                processCommandLine(options, null, false);
+            });
+        }
 
         // Command line options override the defaults (if any)
         List<String> argWords = new java.util.ArrayList<>(args.length);

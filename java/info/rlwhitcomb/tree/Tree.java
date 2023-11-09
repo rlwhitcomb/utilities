@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2020-2022 Roger L. Whitcomb.
+ * Copyright (c) 2020-2023 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -99,6 +99,8 @@
  *	    #284: Default to current directory if nothing specified.
  *	08-Jul-2022 (rlwhitcomb)
  *	    #393: Cleanup imports.
+ *	27-Oct-2023 (rlwhitcomb)
+ *	    #633: New options to allow/disallow options set in the environment.
  */
 package info.rlwhitcomb.tree;
 
@@ -695,7 +697,9 @@ public class Tree
 		    showInfoOnly = true;
 		}
 		else if (Options.isOption(arg) != null) {
-		    error("tree#warnUnknownOpt", arg);
+		    if (Options.checkOptionOption(arg) == Options.OptionChoice.NONE) {
+			error("tree#warnUnknownOpt", arg);
+		    }
 		}
 		else {
 		    if (argList != null)
@@ -719,11 +723,13 @@ public class Tree
 	public static void main(String[] args) {
 	    List<String> argList = new ArrayList<>(args.length);
 
-	    // First, parse the TREE_OPTIONS env variable for predefined options
-	    // (ignoring any non-options, that is directory names, here)
-	    Options.environmentOptions(Tree.class, (options) -> {
-		parseOptions(options, null);
-	    });
+	    if (Options.allowEnvironmentOptions(args, false)) {
+		// First, parse the TREE_OPTIONS env variable for predefined options
+		// (ignoring any non-options, that is directory names, here)
+		Options.processEnvironmentOptions(Tree.class, options -> {
+		    parseOptions(options, null);
+		});
+	    }
 
 	    // Now, scan the input arguments for options vs. file/directory specs
 	    // (so, the command line options override the predefined ones)

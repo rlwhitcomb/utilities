@@ -83,6 +83,11 @@
  *	20-Oct-2023 (rlwhitcomb)
  *	    #633: New methods for scanning for "-opt" and "-noopt" options; recast "isOption"
  *	    with param to allow empty options or not.
+ *	27-Oct-2023 (rlwhitcomb)
+ *	    #633: Recast "checkOptionOption" to allow leading option chars (or not, automatically).
+ *	    Rename "environmentOptions" to "processEnvironmentOptions" and "preProcessOptions" to
+ *	    "allowEnvironmentOptions". Quick fix for "isOption" to correctly deal with "--" in
+ *	    not-allow-empty case.
  */
 package info.rlwhitcomb.util;
 
@@ -386,7 +391,7 @@ public class Options
 		if (arg.startsWith("--") && (allowEmpty || length > 2)) {
 		    result = arg.substring(2);
 		}
-		else if (arg.startsWith("-") && (allowEmpty || length > 1)) {
+		else if (arg.startsWith("-") && !arg.equals("--") && (allowEmpty || length > 1)) {
 		    result = arg.substring(1);
 		}
 		// I don't think Windows historically does empty options, so ...
@@ -461,64 +466,6 @@ public class Options
 	    return ignoreCase
 		? choice.matchesIgnoreCase(arg)
 		: choice.matches(arg);
-	}
-
-	/**
-	 * Check if the given option value is one of the special option options (without the prefix).
-	 *
-	 * @param option The candidate option value.
-	 * @return       One of the {@link OptionChoice} values indicating a match or not.
-	 */
-	public static OptionChoice checkOptionOption(String option) {
-	    switch (option.toLowerCase()) {
-		case "options":
-		case "option":
-		case "opt":
-		    return OptionChoice.OPT;
-		case "nooptions":
-		case "nooption":
-		case "noopt":
-		    return OptionChoice.NOOPT;
-		default:
-		    return OptionChoice.NONE;
-	    }
-	}
-
-	/**
-	 * Scan the arguments to see if one of the option options is present. The default is to
-	 * allow the options. Return {@code true} if none of the options are present or if
-	 * {@code "-opt"} is present and {@code "-noopt"} is not present, otherwise {@code false}.
-	 * <p> Note: this is to deal with processing the {@code xxx_OPTIONS} environment variable(s)
-	 * (or not) via a command-line option (when normally these environmental options would be
-	 * processed before processing the command line).
-	 *
-	 * @param args	     The list of command line arguments to scan.
-	 * @param allowEmpty Whether to allow empty options to count as options.
-	 * @return	     Result of scanning for the option options.
-	 */
-	public static boolean preProcessOptions(String[] args, boolean allowEmpty) {
-	    boolean processOptions = true;
-	    String opt;
-
-	    for (String arg : args) {
-		opt = isOption(arg, allowEmpty);
-		if (opt == null)
-		    continue;
-
-		OptionChoice choice = checkOptionOption(opt);
-		switch (choice) {
-		    case OPT:
-			processOptions = true;
-			break;
-		    case NOOPT:
-			processOptions = false;
-			break;
-		    default:
-			break;
-		}
-	    }
-
-	    return processOptions;
 	}
 
 	/**
@@ -610,6 +557,68 @@ public class Options
 	}
 
 	/**
+	 * Check if the given option value is one of the special option options (without the prefix).
+	 *
+	 * @param arg The candidate option value (with or without leading "-" or "/")..
+	 * @return    One of the {@link OptionChoice} values indicating a match or not.
+	 */
+	public static OptionChoice checkOptionOption(String arg) {
+	    String option = isOption(arg);
+	    if (option == null)
+		option = arg;
+
+	    switch (option.toLowerCase()) {
+		case "options":
+		case "option":
+		case "opt":
+		    return OptionChoice.OPT;
+		case "nooptions":
+		case "nooption":
+		case "noopt":
+		    return OptionChoice.NOOPT;
+		default:
+		    return OptionChoice.NONE;
+	    }
+	}
+
+	/**
+	 * Scan the arguments to see if one of the option options is present. The default is to
+	 * allow the options. Return {@code true} if none of the options are present or if
+	 * {@code "-opt"} is present and {@code "-noopt"} is not present, otherwise {@code false}.
+	 * <p> Note: this is to deal with processing the {@code xxx_OPTIONS} environment variable(s)
+	 * (or not) via a command-line option (when normally these environmental options would be
+	 * processed before processing the command line).
+	 *
+	 * @param args	     The list of command line arguments to scan.
+	 * @param allowEmpty Whether to allow empty options to count as options.
+	 * @return	     Result of scanning for the option options.
+	 */
+	public static boolean allowEnvironmentOptions(String[] args, boolean allowEmpty) {
+	    boolean allowOptions = true;
+	    String opt;
+
+	    for (String arg : args) {
+		opt = isOption(arg, allowEmpty);
+		if (opt == null)
+		    continue;
+
+		OptionChoice choice = checkOptionOption(opt);
+		switch (choice) {
+		    case OPT:
+			allowOptions = true;
+			break;
+		    case NOOPT:
+			allowOptions = false;
+			break;
+		    default:
+			break;
+		}
+	    }
+
+	    return allowOptions;
+	}
+
+	/**
 	 * Generic method to find an environment variable that may contain default options for a particular class
 	 * and then call a class-specific processing routine through a lambda.
 	 *
@@ -617,7 +626,7 @@ public class Options
 	 *              ({@code classSimpleName.toUpperCase + "_OPTIONS"}).
 	 * @param processor The class-specific handler to process the option(s).
 	 */
-	public static void environmentOptions(final Class<?> clazz, final Consumer<String[]> processor) {
+	public static void processEnvironmentOptions(final Class<?> clazz, final Consumer<String[]> processor) {
 	    // During testing, ignore settings in the environment variables
 	    if (!Environment.allowEnvOptions())
 		return;

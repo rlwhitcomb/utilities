@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2014-2017,2019-2022 Roger L. Whitcomb.
+ * Copyright (c) 2014-2017,2019-2023 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -75,7 +75,10 @@
  *	    #231: Use new Constants class variables instead of our own.
  *	    #156: Properly quote output values and quote control characters.
  *	18-Feb-2022 (rlwhitcomb)
- *	   Use Exceptions for better I/O error messages.
+ *	    Use Exceptions for better I/O error messages.
+ *	02-Nov-2023 (rlwhitcomb)
+ *	    #633: New "-opt" and "-noopt" options for default processing of options via
+ *	    the environment variable.
  */
 package info.rlwhitcomb.test;
 
@@ -221,8 +224,10 @@ public class CSVTest
 			    doHelp(System.out);
 			    System.exit(0);
 			}
-			Intl.errFormat("csv#test.unknownOption", arg);
-			return false;
+			else if (Options.checkOptionOption(arg) == Options.OptionChoice.NONE) {
+			    Intl.errFormat("csv#test.unknownOption", arg);
+			    return false;
+			}
 		}
 	    }
 	    else if (arg.length() > 0) {
@@ -306,14 +311,16 @@ public class CSVTest
 	    resetOptions();
 
 	    // Process default options from the environment, but ignore any files listed there
-	    Options.environmentOptions(CSVTest.class, (options) -> {
-		processArguments(options, null);
-	    });
+	    if (Options.allowEnvironmentOptions(args, false)) {
+		Options.processEnvironmentOptions(CSVTest.class, options -> {
+		    processArguments(options, null);
+		});
+	    }
 
 	    // Process override options AND file names present on the command line
 	    processArguments(args, fileList);
 
-	    if (fileList.size() == 0) {
+	    if (fileList.isEmpty()) {
 		Intl.errPrintln("csv#test.noInputFiles");
 		argErrors = true;
 	    }

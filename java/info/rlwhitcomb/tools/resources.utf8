@@ -55,6 +55,8 @@
 #	    #28: Text for "unq" program.
 #	26-Jan-2023 (rlwhitcomb)
 #	    #28: More error messages for "unq".
+#	02-Nov-2023 (rlwhitcomb)
+#	    #633: Additional help for "gmt", "os", and "uuid"; correct a typo.
 #
 
 #
@@ -127,6 +129,10 @@ gmt.help26	= \t  -822  -> Sun, 06 Nov 1994 08:49:37 +0000
 gmt.help27	= \t  -850  -> Sunday, 06-Nov-94 08:49:37 GMT
 gmt.help28	= \t  -asc  -> Sun Nov  6 08:49:37 1994
 gmt.help29	= ""
+gmt.help30	= \tSet default options in the environment via the GMT_OPTIONS variable.
+gmt.help31	= \t  -noopt to disable (or -nooptions, or -nooption)
+gmt.help32	= \t  -opt to enable (default) (or -options, or -option)
+gmt.help33	= ""
 
 gmt.badOption		= Unknown option: "%1$s"!
 gmt.badZoneOffset	= The timezone offset %1$d is out of range of -12 .. 14.
@@ -216,6 +222,10 @@ os.help16	= " <Yw!>-width<.>:<Bk!>nn<.>   = force screen width for multi-column 
 os.help17	= " <Yw!>-filter<.>:<Bk!>xxx<.> = filter locale tags, where <Bk!>xxx<.> is one or more"
 os.help18	= "               locale tags to match (can be wild)"
 os.help19	= ""
+os.help20	= "Default options can be set via <Gr>OS_OPTIONS<.> in the environment."
+os.help21	= "Use <Yw!>-noopt<.> = disable processing these defaults"
+os.help22	= " or <Yw!>-opt<.>   = enable (default) this processing"
+os.help23	= ""
 
 #
 # From Uniq.java
@@ -246,10 +256,17 @@ uuid.help9	= "     -bytes = -byte, -by, -b"
 uuid.help10	= "     -int = -integer, -i"
 uuid.help11	= "     -nn means output nn unique values (1..99)"
 uuid.help12	= ""
+uuid.help13	= "  Default options can be set in the environment by the UUID_OPTIONS"
+uuid.help14	= "    environment variable. Use the -noopt or -opt options to control"
+uuid.help15	= "    whether these defaults are used."
+uuid.help16	= "  Aliases are:"
+uuid.help17	= "    -noopt = -nooptions, -nooption"
+uuid.help18	= "    -opt = -options, -option"
+uuid.help19	= ""
 
 uuid.invalidNumber	= Number of values should be between 1 and 99.
 uuid.unrecognizedOption	= Unrecognized option "%1$s"!
-uuid.unrecognizedArg	= Unrecoznized argument "%1$s"!
+uuid.unrecognizedArg	= Unrecognized argument "%1$s"!
 
 #
 # From WordCount.java
