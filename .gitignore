@@ -8,6 +8,8 @@ java/doc-files
 *.interp
 *.tokens
 build.number
+calc_help.html
+calcscripts.properties
 CalcBaseVisitor.java
 CalcParser.java
 CalcLexer.java
@@ -22,6 +24,5 @@ JSONLexer.java
 JSONVisitor.java
 test*.log
 TestPP.java
-calc_help.html
 MANIFEST.MF
 dist
