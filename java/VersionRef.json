@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.39.0', date: d'2023-11-26',
+      issues: [ 634 ],
+      comment: 'Options to clear / load GUI preferences on startup.'
+    },
     { base: '1.12.0', version: '2.38.8', date: d'2023-10-27',
       issues: [ 633 ],
       comment: 'Add "-noopt" and "-opt" command line options for processing CALC_OPTIONS.'

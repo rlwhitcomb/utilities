@@ -336,6 +336,9 @@
  *	    #633: Add options on the command line to ignore (or not) the CALC_OPTIONS settings
  *	    on startup (new methods in Options class).
  *	    Rename the new methods in Options.
+ *	26-Nov-2023 (rlwhitcomb)
+ *	    #634: Add command line option to clear the GUI preferences on startup.
+ *	    Change default split ratio.
  */
 package info.rlwhitcomb.calc;
 
@@ -408,8 +411,8 @@ public class Calc
 	/** Preferences key for the saved split ratio for the main GUI window. */
 	private static final String SPLIT_RATIO = "splitRatio";
 
-	/** Default split ratio. */
-	private static final float DEFAULT_SPLIT_RATIO = 0.4f;
+	/** Default split ratio; this is the percentage (fraction) occupied by the top pane. */
+	private static final float DEFAULT_SPLIT_RATIO = 0.6f;
 
 
 	/**
@@ -537,6 +540,8 @@ public class Calc
 	private static boolean useCmdEnter = true;
 
 	private static boolean initialLibraryLoad = false;
+
+	private static boolean clearPrefs = false;
 
 	private static Locale  locale  = null;
 
@@ -1033,9 +1038,18 @@ public class Calc
 	 * Read all our saved value from the current user's preferences for this package.
 	 */
 	private void loadPreferences() {
-	    Preferences node = getPrefsNode();
+	    try {
+		Preferences node = getPrefsNode();
 
-	    splitPane.setSplitRatio(node.getFloat(SPLIT_RATIO, DEFAULT_SPLIT_RATIO));
+		if (clearPrefs)
+		    node.clear();
+
+		splitPane.setSplitRatio(node.getFloat(SPLIT_RATIO, DEFAULT_SPLIT_RATIO));
+	    }
+	    catch (BackingStoreException ex) {
+		// Ignore this, which is only thrown by "clear()", which would mean the
+		// "-noprefs" flag is effectively ignored
+	    }
 	}
 
 	/**
@@ -2338,6 +2352,18 @@ public class Calc
 		case "clr":
 		    argValues.clear();
 		    break;
+		case "nopreferences":
+		case "noprefs":
+		case "nopref":
+		case "nop":
+		    clearPrefs = true;
+		    break;
+		case "loadpreferences":
+		case "loadprefs":
+		case "loadpref":
+		case "ldp":
+		    clearPrefs = false;
+		    break;
 		case "variable":
 		case "define":
 		case "var":
@@ -2611,7 +2637,20 @@ public class Calc
 			if (input != null)
 			    inputText = input.toString();
 
-			DesktopApplicationContext.main(Calc.class, new String[0]);
+			if (clearPrefs) {
+			    try {
+				// Also clear the window preferences setup by Pivot (same code as DesktopApplicationContext)
+				// before instantiating the main window
+				Preferences windowNode = Preferences.userNodeForPackage(DesktopApplicationContext.class);
+				windowNode = windowNode.node(Calc.class.getName());
+				windowNode.clear();
+			    }
+			    catch (BackingStoreException bse) {
+				// Going to ignore this (same as other places) because it makes no difference, really
+			    }
+			}
+
+			DesktopApplicationContext.main(Calc.class);
 		    }
 		}
 		else {
