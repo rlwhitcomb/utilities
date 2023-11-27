@@ -339,6 +339,8 @@
  *	26-Nov-2023 (rlwhitcomb)
  *	    #634: Add command line option to clear the GUI preferences on startup.
  *	    Change default split ratio.
+ *	27-Nov-2023 (rlwhitcomb)
+ *	    New aliases for rational mode on the command line.
  */
 package info.rlwhitcomb.calc;
 
@@ -2215,8 +2217,11 @@ public class Calc
 		case "q":
 		    quiet = true;
 		    break;
+		case "fractions":
 		case "rational":
+		case "fraction":
 		case "ration":
+		case "frac":
 		case "rat":
 		    rational = true;
 		    break;

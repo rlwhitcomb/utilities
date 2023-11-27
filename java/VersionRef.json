@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.39.1', date: d'2023-11-27',
+      issues: [ ],
+      comment: 'New command line aliases for rational mode.'
+    },
     { version: '2.39.0', date: d'2023-11-26',
       issues: [ 634 ],
       comment: 'Options to clear / load GUI preferences on startup.'
