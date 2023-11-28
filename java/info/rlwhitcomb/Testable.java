@@ -29,6 +29,7 @@
  *  26-Sep-22 rlw #489	More return codes.
  *  08-Oct-22 rlw #481	Add NO_INPUTS return code.
  *  28-Nov-23 rlw #627	New static methods for the "in testing" flag.
+ *			Fix Java 8 incompatibility.
  */
 package info.rlwhitcomb;
 
@@ -89,7 +90,7 @@ public interface Testable
 
 
 	/** Name of system property set by {@code Tester} while testing is in progress. */
-	public static final String TESTING_IN_PROGRESS_PROPERTY = Testable.class.getPackageName() + ".testing_in_progress";
+	public static final String TESTING_IN_PROGRESS_PROPERTY = Testable.class.getPackage().getName() + ".testing_in_progress";
 
 
 	/**
