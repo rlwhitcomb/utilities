@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2011-2014,2017-2018,2020 Roger L. Whitcomb.
+ * Copyright (c) 2011-2014,2017-2018,2020,2023 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -73,6 +73,8 @@
  *	    by the rest of the code.
  *	20-Aug-2018 (rlwhitcomb)
  *	    Replace MD5 checksum (now considered insecure) with SHA-256.
+ *	28-Nov-2023 (rlwhitcomb)
+ *	    #632: Replace deprecated URL constructor (in Java 21) with safer alternative.
  */
 
 package info.rlwhitcomb.jarfile;
@@ -191,7 +193,7 @@ public class Launcher
 		    if (ix >= 0)
 			classURLString = classURLString.substring(0, ix);
 		}
-		return new URL(classURLString);
+		return URI.create(classURLString).toURL();
 	    }
 
 	    // Since we're dealing with stuff returned by the system, this
