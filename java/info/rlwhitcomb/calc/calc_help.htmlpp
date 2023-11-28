@@ -246,7 +246,7 @@ h2 {
   <p>Otherwise, if there is more than one argument on the command line, or the single argument does not name one or more existing files,
      the command line is taken as a single expression to be parsed and evaluated.
   <p>If Calc is invoked by piping or redirecting input from somewhere, that input stream is immediately read and evaluated, and Calc will exit.
-  <p>Giving a single <code>@</code> argument signals Calc to read from the console (until Ctrl-D or Ctrl-Z on Windows is entered).
+  <p>Giving a single <code>@</code> argument signals Calc to read from the console until <code>Ctrl-D</code> (or <code>Ctrl-Z</code> or <code>F6</code> on Windows) is entered.
   <p>Otherwise if there are no non-option arguments given, Calc will enter <a href="#Read_Eval_Print_loop_Commands">REPL</a> mode.
   <p>Also, if the input argument looks like <code>@<i>file_name</i></code> the <code>@</code> is discarded and the <i>file_name</i> is read.
   <p>Files are found by first trying to locate the file just as it is named. If not found, the latest input directory is used as a prefix

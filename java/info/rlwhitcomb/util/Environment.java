@@ -202,6 +202,8 @@
  *	04-Jan-2023 (rlwhitcomb)
  *	    Protect "readProperties" from non-existent file. Clean up Javadoc on these
  *	    "readProperties" methods, because the return value is different now (empty vs. null).
+ *	28-Nov-2023 (rlwhitcomb)
+ *	    #627: Use new Constants values.
  */
 package info.rlwhitcomb.util;
 
@@ -230,6 +232,7 @@ import java.util.jar.JarFile;
 
 import static info.rlwhitcomb.util.CharUtil.Justification.*;
 import static info.rlwhitcomb.util.ConsoleColor.Code.*;
+import static info.rlwhitcomb.util.Constants.*;
 
 
 /**
@@ -1662,7 +1665,7 @@ public final class Environment
 	    if (allow)
 		System.clearProperty(ALLOW_ENV_OPTIONS_PROPERTY);
 	    else
-		System.setProperty(ALLOW_ENV_OPTIONS_PROPERTY, Boolean.FALSE.toString());
+		System.setProperty(ALLOW_ENV_OPTIONS_PROPERTY, B_FALSE);
 	}
 
 
@@ -1672,7 +1675,7 @@ public final class Environment
 	 * @return The state of the system property set during testing.
 	 */
 	public static boolean allowEnvOptions() {
-	    String value = System.getProperty(ALLOW_ENV_OPTIONS_PROPERTY, Boolean.TRUE.toString());
+	    String value = System.getProperty(ALLOW_ENV_OPTIONS_PROPERTY, B_TRUE);
 	    return Boolean.valueOf(value);
 	}
 

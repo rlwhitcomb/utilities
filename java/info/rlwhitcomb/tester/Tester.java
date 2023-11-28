@@ -254,6 +254,8 @@
  *	    #593: Preprocess our test description files using PreProc to allow macro definitions.
  *	27-Oct-2023 (rlwhitcomb)
  *	    #633: New methods in Options to disable checking TESTER_OPTIONS if desired.
+ *	28-Nov-2023 (rlwhitcomb)
+ *	    #627: Set/clear the "in testing" property for use in the testable classes.
  */
 package info.rlwhitcomb.tester;
 
@@ -566,6 +568,8 @@ public class Tester
 
 	    int exitCode = SUCCESS;
 
+	    Testable.setInTesting();
+
 	    try {
 		URL[] urls = Environment.getURLClassPath();
 		cl = new URLClassLoader(urls);
@@ -652,6 +656,7 @@ public class Tester
 		testObject = null;
 		testClass = null;
 		cl = null;
+		Testable.clearInTesting();
 	    }
 
 	    return exitCode;
@@ -1400,7 +1405,7 @@ public class Tester
 			.setIgnoreUnknownDirectives(true)
 			.setOutputFileName(descript.getPath())
 			.setFile(f.getPath());
-		if (Constants.UTF_8_CHARSET.equals(desc.getCharset()))
+		if (UTF_8_CHARSET.equals(desc.getCharset()))
 		    preProc.setFormat("UTF-8");
 
 		preProc.execute();

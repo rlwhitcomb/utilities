@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2021-2022 Roger L. Whitcomb.
+ * Copyright (c) 2021-2023 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,12 +24,16 @@
  *      An interface to assist with unit testing.
  *
  * History:
- *  22-Jan-21 rlw  ---	Initial coding.
- *  15-Mar-21 rlw  ---	Add another return code.
- *  26-Sep-22 rlw #489:	More return codes.
- *  08-Oct-22 rlw #481:	Add NO_INPUTS return code.
+ *  22-Jan-21 rlw ----	Initial coding.
+ *  15-Mar-21 rlw ----	Add another return code.
+ *  26-Sep-22 rlw #489	More return codes.
+ *  08-Oct-22 rlw #481	Add NO_INPUTS return code.
+ *  28-Nov-23 rlw #627	New static methods for the "in testing" flag.
  */
 package info.rlwhitcomb;
+
+import static info.rlwhitcomb.util.Constants.*;
+
 
 /**
  * An interface to facilitate unit testing. Includes a small set of defined
@@ -82,6 +86,10 @@ public interface Testable
 
 	/** Base for non-zero status codes that need a "number of failures" code. */
 	public static final int NUMBER_OF_ERRORS = 100;
+
+
+	/** Name of system property set by {@code Tester} while testing is in progress. */
+	public static final String TESTING_IN_PROGRESS_PROPERTY = Testable.class.getPackageName() + ".testing_in_progress";
 
 
 	/**
@@ -140,6 +148,31 @@ public interface Testable
 		code = 255;
 
 	    System.exit(code);
+	}
+
+	/**
+	 * Set the system property to signify that we are in the process of testing,
+	 * just in case the class being tested has to do something special in that case.
+	 */
+	public static void setInTesting() {
+	    System.setProperty(TESTING_IN_PROGRESS_PROPERTY, B_TRUE);
+	}
+
+	/**
+	 * Clear the system property to signify that testing of a class has finished.
+	 */
+	public static void clearInTesting() {
+	    System.clearProperty(TESTING_IN_PROGRESS_PROPERTY);
+	}
+
+	/**
+	 * Check to see if the special {@link #TESTING_IN_PROGRESS_PROPERTY} system property has
+	 * been set, meaning that we are in the process of testing.
+	 *
+	 * @return {@code true} if we are in the middle of testing, {@code false} if not.
+	 */
+	public static boolean inTesting() {
+	    return Boolean.valueOf(System.getProperty(TESTING_IN_PROGRESS_PROPERTY, B_FALSE));
 	}
 
 }

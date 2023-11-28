@@ -40,6 +40,7 @@
  *  04-Jan-23 rlw #558	Quaternion constants.
  *  10-Jan-23 rlw #558	More quaternion constants.
  *  05-May-23 rlw ----	Remove actually unused values.
+ *  28-Nov-23 rlw #627	New boolean constants (strings).
  */
 package info.rlwhitcomb.util;
 
@@ -238,5 +239,12 @@ public final class Constants
 
 	/** Maximum size of file we want to read into a string (10MB). */
 	public static final long FILE_STRING_SIZE_LIMIT = 10_485_760L;
+
+
+	/** A string value of {@link Boolean#TRUE} (for use in setting properties). */
+	public static final String B_TRUE = Boolean.TRUE.toString();
+
+	/** A string value of {@link Boolean#FALSE} (for use in setting properties). */
+	public static final String B_FALSE = Boolean.FALSE.toString();
 
 }

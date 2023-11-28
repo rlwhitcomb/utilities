@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2019,2020-2022 Roger L. Whitcomb.
+ * Copyright (c) 2019,2020-2023 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -41,6 +41,10 @@
  *	    #273: Move math-related classes to "math" package.
  *	09-Jul-2022 (rlwhitcomb)
  *	    #393: Cleanup imports.
+ *	11-Sep-2023 (rlwhitcomb)
+ *	    Add "copy" constructor; final parameters.
+ *	27-Nov-2023 (rlwhitcomb)
+ *	    #627: New constructor with just size given. New logic in reallocate().
  */
 package info.rlwhitcomb.util;
 
@@ -64,7 +68,7 @@ public class DynamicArray<T>
 	/** The actual array used for storage (of objects, not primitives). */
 	private volatile T[] internalArray;
 	/** Class of objects to be stored in this array. */
-	private Class<?> internalClass;
+	private transient Class<?> internalClass;
 	/** The "size" of this array, which is the largest index yet seen by {@link #put}. */
 	private int largestIndex = -1;
 
@@ -75,7 +79,7 @@ public class DynamicArray<T>
 	 *
 	 * @param clazz Class of objects to store in this array.
 	 */
-	public DynamicArray(Class<T> clazz) {
+	public DynamicArray(final Class<T> clazz) {
 	    init(clazz, 0);
 	}
 
@@ -88,8 +92,18 @@ public class DynamicArray<T>
 	 * @param size The initial size of the array (but always expandable). If this is
 	 * less or equal zero then the {@link #DEFAULT_SIZE} will be used instead.
 	 */
-	public DynamicArray(Class<T> clazz, int size) {
+	public DynamicArray(final Class<T> clazz, final int size) {
 	    init(clazz, size);
+	}
+
+	/**
+	 * Construct a dynamic array of {@link Object} of the given (initial) size.
+	 *
+	 * @param size The initial size of the array. The default size will be used if a value
+	 * less or equal zero is given.
+	 */
+	public DynamicArray(final int size) {
+	    init(Object.class, size);
 	}
 
 	/**
@@ -98,7 +112,7 @@ public class DynamicArray<T>
 	 * @param values The initial values for the array.
 	 */
 	@SuppressWarnings("unchecked")
-	public DynamicArray(T... values) {
+	public DynamicArray(final T... values) {
 	    if (values == null || values.length == 0) {
 		init(Object.class, 0);
 	    }
@@ -110,14 +124,23 @@ public class DynamicArray<T>
 	}
 
 	/**
+	 * Initialize this array from another dynamic array.
+	 *
+	 * @param array The other array to copy.
+	 */
+	public DynamicArray(final DynamicArray<T> array) {
+	    this(array.internalArray);
+	}
+
+	/**
 	 * Initialize the array to store the given class of objects and allocate
 	 * the given size internal array.
 	 *
 	 * @param clazz Class of objects to store in this array.
 	 * @param size The initial size of the array (but always expandable).
 	 */
-	private void init(Class<?> clazz, int size) {
-	    this.internalClass = clazz;
+	private void init(final Class<?> clazz, final int size) {
+	    internalClass = clazz;
 
 	    reallocate(size <= 0 ? DEFAULT_SIZE : size);
 	}
@@ -127,16 +150,18 @@ public class DynamicArray<T>
 	 *
 	 * @param newSize The new (presumably larger) size required for the array.
 	 */
-	private void reallocate(int newSize) {
+	private void reallocate(final int newSize) {
 	    int roundedSize = MathUtil.roundUpPowerTwo(newSize);
 
-	    @SuppressWarnings("unchecked")
-	    final T[] newArray = (T[]) Array.newInstance(internalClass, roundedSize);
+	    if (internalArray == null || roundedSize > internalArray.length) {
+		@SuppressWarnings("unchecked")
+		final T[] newArray = (T[]) Array.newInstance(internalClass, roundedSize);
 
-	    if (internalArray != null)
-		System.arraycopy(internalArray, 0, newArray, 0, internalArray.length);
+		if (internalArray != null)
+		    System.arraycopy(internalArray, 0, newArray, 0, internalArray.length);
 
-	    this.internalArray = newArray;
+		internalArray = newArray;
+	    }
 	}
 
 	/**
@@ -160,7 +185,7 @@ public class DynamicArray<T>
 	 *
 	 * @param index Zero-based index into the array.
 	 */
-	public T get(int index) {
+	public T get(final int index) {
 	    if (index < 0)
 		throw new Intl.IndexOutOfBoundsException("util#dyn.indexLessThanZero", index);
 
@@ -178,7 +203,7 @@ public class DynamicArray<T>
 	 * @return The already existing value (or null if the array needs resizing)
 	 * at the given index position.
 	 */
-	public T put(int index, T value) {
+	public T put(final int index, final T value) {
 	    if (index < 0)
 		throw new Intl.IndexOutOfBoundsException("util#dyn.indexLessThanZero", index);
 

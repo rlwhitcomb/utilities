@@ -807,6 +807,8 @@
  *	    of "Boolean.valueOf".
  *	    #424: Change syntax of "read" and "write" to use COLON separator for charset
  *	    name (removes ambiguity with optional params in "replace(read(..." sequences).
+ *	28-Nov-2023 (rlwhitcomb)
+ *	    #627: Make sure the ArrayScope object has enough room preallocated before a "fill".
  */
 package info.rlwhitcomb.calc;
 
@@ -5967,12 +5969,15 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		length = getIntValue(exprs.get(2));
 	    }
 
+	    int end = start + length;
+
 	    if (value instanceof ArrayScope) {
 		@SuppressWarnings("unchecked")
 		ArrayScope<Object> list = (ArrayScope<Object>) value;
 		if (length == 0)
 		    length = list.size();
-		for (int index = start; index < (start + length); index++) {
+		list.ensureCapacity(end);
+		for (int index = start; index < end; index++) {
 		    list.setValue(index, fillValue);
 		}
 	    }
@@ -5980,13 +5985,13 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		StringBuilder buf = new StringBuilder((String) value);
 		if (length == 0)
 		    length = buf.length();
-		if (buf.length() < start + length) {
-		    buf.setLength(start + length);
+		if (buf.length() < end) {
+		    buf.setLength(end);
 		}
 
 		char fillChar = getCharValue(fillExpr, fillValue, "Fill", '\0');
 
-		for (int index = start; index < (start + length); index++) {
+		for (int index = start; index < end; index++) {
 		    buf.setCharAt(index, fillChar);
 		}
 		value = buf.toString();

@@ -24,56 +24,56 @@
  *	Class / reflection-related utility methods.
  *
  * History:
- *  30-Aug-12 rlw  ---	Created.
- *  04-Sep-12 rlw  ---	Do a better job of coercing values to the field types.
- *  04-Sep-12 rlw  ---	Allow single values to pass as 1-length arrays.
- *  05-Sep-12 rlw  ---	Add double value and enum support.
- *  26-Sep-13 rlw  ---	Add EnumSet support (for ExtendOptions at least).
- *  28-Oct-13 rlw  ---	Add "long" support to "createAndSetValues"; add support
+ *  30-Aug-12 rlw ----	Created.
+ *  04-Sep-12 rlw ----	Do a better job of coercing values to the field types.
+ *  04-Sep-12 rlw ----	Allow single values to pass as 1-length arrays.
+ *  05-Sep-12 rlw ----	Add double value and enum support.
+ *  26-Sep-13 rlw ----	Add EnumSet support (for ExtendOptions at least).
+ *  28-Oct-13 rlw ----	Add "long" support to "createAndSetValues"; add support
  *			for setting int and long values via hex strings.
- *  07-May-14 rlw  ---	Add a convenience method to get stack elements (in order
+ *  07-May-14 rlw ----	Add a convenience method to get stack elements (in order
  *			to pinpoint the callers of functions for identification).
- *  08-Sep-14 rlw  ---	Add methods to initialize class loader strategy and to get
+ *  08-Sep-14 rlw ----	Add methods to initialize class loader strategy and to get
  *			a suitable class loader for use.  For now this uses TCCL
  *			but could be changed if need be.  This gives us a single
  *			place to implement a different strategy if needed.
- *  30-Sep-14 rlw  ---	Add utility methods to convert objects and longs to byte arrays
+ *  30-Sep-14 rlw ----	Add utility methods to convert objects and longs to byte arrays
  *			(using serialization).
- *  07-Jan-16 rlw  ---	Fix Javadoc warnings found by Java 8.
- *  17-Feb-16 rlw  ---	Add a new method to log the stack trace of the method's caller.
- *  18-Mar-16 rlw  ---	Two new utility methods to throw an IllegalStateException if the input
+ *  07-Jan-16 rlw ----	Fix Javadoc warnings found by Java 8.
+ *  17-Feb-16 rlw ----	Add a new method to log the stack trace of the method's caller.
+ *  18-Mar-16 rlw ----	Two new utility methods to throw an IllegalStateException if the input
  *			value is true or set (meaning not the default value).  Used for the data
  *			transfer functions of the various utility options classes.
  *			Use a different method to match option keys to field names so that we can
  *			do a case-insensitive match.
- *  06-Mar-17 rlw  ---	Always return some kind of string from "getCallingMethod" ("<unknown caller>"
+ *  06-Mar-17 rlw ----	Always return some kind of string from "getCallingMethod" ("<unknown caller>"
  *			if not known).
- *  18-Apr-18 rlw  ---	Add method to compare objects with null checking.
- *  10-Mar-20 rlw  ---	Prepare for GitHub.
- *  14-Apr-20 rlw  ---	Rework code to avoid deprecated "Class.newInstance" method.
- *  15-Apr-20 rlw  ---	New method to turn a class into a resource path.
- *  21-Dec-20 rlw  ---	Update obsolete Javadoc constructs.
- *  27-Jan-21 rlw  ---	New method to get a directory name from a class (package).
- *  29-Jan-21 rlw  ---	Use new Intl Exception variants for convenience.
- *  07-Jul-21 rlw  ---	Make the class final and the constructor private.
- *  17-Nov-21 rlw  ---	Add "defaultToString". Make all parameters final.
- *  18-Dec-21 rlw #148:	Method to construct map from Scriptable fields. Cleanup.
- *  24-Jan-22 rlw #79:	New method to convert an object to a byte array.
- *  02-Feb-22 rlw #115:	In "getMapFromObject" for the general case put the String value,
+ *  18-Apr-18 rlw ----	Add method to compare objects with null checking.
+ *  10-Mar-20 rlw ----	Prepare for GitHub.
+ *  14-Apr-20 rlw ----	Rework code to avoid deprecated "Class.newInstance" method.
+ *  15-Apr-20 rlw ----	New method to turn a class into a resource path.
+ *  21-Dec-20 rlw ----	Update obsolete Javadoc constructs.
+ *  27-Jan-21 rlw ----	New method to get a directory name from a class (package).
+ *  29-Jan-21 rlw ----	Use new Intl Exception variants for convenience.
+ *  07-Jul-21 rlw ----	Make the class final and the constructor private.
+ *  17-Nov-21 rlw ----	Add "defaultToString". Make all parameters final.
+ *  18-Dec-21 rlw #148	Method to construct map from Scriptable fields. Cleanup.
+ *  24-Jan-22 rlw #79	New method to convert an object to a byte array.
+ *  02-Feb-22 rlw #115	In "getMapFromObject" for the general case put the String value,
  *			not the object itself.
- *		  #115:	Add methods into the Scriptable processing in "getMapFromObject".
- *  05-Feb-22 rlw #233:	Add "getField" method to support the "system value" idea in Calc.
+ *		  #115	Add methods into the Scriptable processing in "getMapFromObject".
+ *  05-Feb-22 rlw #233	Add "getField" method to support the "system value" idea in Calc.
  *			And remove "getMapFromObject" which is not being used now.
- *  16-Feb-22 rlw  ---	Add two flavors of "getResourceAsString" to load text from the .jar file.
- *  12-Apr-22 rlw #269:	Method to parse full module/class.name into parts as well as class
+ *  16-Feb-22 rlw ----	Add two flavors of "getResourceAsString" to load text from the .jar file.
+ *  12-Apr-22 rlw #269	Method to parse full module/class.name into parts as well as class
  *			to parse and hold the information.
- *  14-Apr-22 rlw #273:	Move math-related classes to "math" package.
- *  09-Jul-22 rlw #393:	Cleanup imports.
- *  24-Aug-22 rlw  ---	Handle null input to "defaultToString()".
- *  25-Aug-22 rlw  ---	Another tweak to "defaultToString()" for null input.
- *  29-Aug-22 rlw #453:	Add back "getMapFromObject" method.
- *  12-Oct-22 rlw #513:	Move Logging to a new package.
- *  09-Apr-23 rlw #601:	New method to determine if an object is an integer object.
+ *  14-Apr-22 rlw #273	Move math-related classes to "math" package.
+ *  09-Jul-22 rlw #393	Cleanup imports.
+ *  24-Aug-22 rlw ----	Handle null input to "defaultToString()".
+ *  25-Aug-22 rlw ----	Another tweak to "defaultToString()" for null input.
+ *  29-Aug-22 rlw #453	Add back "getMapFromObject" method.
+ *  12-Oct-22 rlw #513	Move Logging to a new package.
+ *  09-Apr-23 rlw #601	New method to determine if an object is an integer object.
  */
 package info.rlwhitcomb.util;
 
@@ -835,7 +835,7 @@ public final class ClassUtil
 	 * @return The contents of the resource converting the bytes to a String using the UTF-8 charset.
 	 */
 	public static String getResourceAsString(final String resourcePath) {
-	    return getResourceAsString(resourcePath, Constants.UTF_8_CHARSET);
+	    return getResourceAsString(resourcePath, UTF_8_CHARSET);
 	}
 
 

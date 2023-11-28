@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.39.2', date: d'2023-11-28',
+      issues: [ 627 ],
+      comment: 'Preallocate array space for a "fill" operation.'
+    },
     { version: '2.39.1', date: d'2023-11-27',
       issues: [ ],
       comment: 'New command line aliases for rational mode.'

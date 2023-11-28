@@ -25,20 +25,21 @@
  *      local symbol tables, etc.
  *
  * History:
- *  06-Oct-21 rlw  ---	Initial coding.
- *  07-Oct-21 rlw  ---	Use generic data types.
- *  28-Dec-21 rlw #128:	Add "insert" method for "pad".
- *  02-May-22 rlw #68:	Allow negative indexing (offset from end of array).
- *  08-May-22 rlw #315:	Add "addAll" method.
- *  15-May-22 rlw #315:	Add "remove" method, and copy constructor.
- *  18-May-22 rlw #315:	Add "isEmpty" method.
- *  21-May-22 rlw #327:	Convert "List" constructor to Collection.
- *  25-May-22 rlw #348:	Make all methods package private.
- *  11-Jun-22 rlw #365:	Add "immutable" flag and checks.
- *  21-Jun-22 rlw #314:	Derive from CollectionScope.
- *  08-Jul-22 rlw #393:	Cleanup imports.
- *  15-Aug-22 rlw #440:	Move "size()" up to CollectionScope.
- *  08-Jan-23 rlw #592:	Move "isEmpty()" to CollectionScope.
+ *  06-Oct-21 rlw ----	Initial coding.
+ *  07-Oct-21 rlw ----	Use generic data types.
+ *  28-Dec-21 rlw #128	Add "insert" method for "pad".
+ *  02-May-22 rlw #68	Allow negative indexing (offset from end of array).
+ *  08-May-22 rlw #315	Add "addAll" method.
+ *  15-May-22 rlw #315	Add "remove" method, and copy constructor.
+ *  18-May-22 rlw #315	Add "isEmpty" method.
+ *  21-May-22 rlw #327	Convert "List" constructor to Collection.
+ *  25-May-22 rlw #348	Make all methods package private.
+ *  11-Jun-22 rlw #365	Add "immutable" flag and checks.
+ *  21-Jun-22 rlw #314	Derive from CollectionScope.
+ *  08-Jul-22 rlw #393	Cleanup imports.
+ *  15-Aug-22 rlw #440	Move "size()" up to CollectionScope.
+ *  08-Jan-23 rlw #592	Move "isEmpty()" to CollectionScope.
+ *  28-Nov-23 rlw #627	Add "ensureCapacity" method.
  */
 package info.rlwhitcomb.calc;
 
@@ -59,7 +60,7 @@ class ArrayScope<T> extends CollectionScope
 	/**
 	 * The list / array of values contained in this scope, accessible by index value.
 	 */
-	private List<T> values;
+	private ArrayList<T> values;
 
 
 	/**
@@ -101,6 +102,16 @@ class ArrayScope<T> extends CollectionScope
 	ArrayScope(final Collection<? extends T> initialValues) {
 	    super(Type.ARRAY);
 	    values = new ArrayList<>(initialValues);
+	}
+
+	/**
+	 * Setup the internal storage to ensure the given number of value slots are available
+	 * beforehand (typically before a bulk "fill" operation).
+	 *
+	 * @param capacity The new desired capacity for the array.
+	 */
+	void ensureCapacity(final int capacity) {
+	    values.ensureCapacity(capacity);
 	}
 
 	/**
