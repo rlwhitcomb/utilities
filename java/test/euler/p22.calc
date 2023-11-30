@@ -40,7 +40,7 @@ loop ix within length(names) {
 
 $resultsonly on {
 
-`The "name score" for the ${TEST}th value (${names[TEST-1]}) is ${word_score(names[TEST-1])×TEST}.`@q
-`The total of all the name scores in "$FILENAME" is $sum.`@q
+`The "name score" for the ${TEST}th value (${names[TEST-1]}) is ${word_score(names[TEST-1])×TEST}.`
+`The total of all the name scores in "$FILENAME" is $sum.`
 
 }

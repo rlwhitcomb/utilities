@@ -10,33 +10,27 @@
  */
 $quiet on {
 
-const LIMIT = 999
+const UPPER_LIMIT = 999
 const LOWER_LIMIT = 900
 
 define isPalindrome(x) = {
-  $sep off { const s = @@x }
+  const s = @@x
   s === reverse(s)
 }
 
-define solve() = {
-  var palindromes = []
-  loop x over LIMIT..LOWER_LIMIT,-1 {
-    loop y over x..LOWER_LIMIT,-1 {
-      var product = x * y
-      if isPalindrome(product) {
-        palindromes += product
-      }
-    }
+var palindromes = []
+
+loop x over UPPER_LIMIT .. LOWER_LIMIT, -1 {
+  loop y over x .. LOWER_LIMIT, -1 {
+    const product = x * y
+    if isPalindrome(product) palindromes += product
   }
-  palindromes
 }
 
 }
 
 $resultsonly on {
 
-const results = solve();
-
-`Largest palindrome made from product of two 3-digit numbers is ${max(results)}.`@q
+`Largest palindrome made from product of two 3-digit numbers is ${max(palindromes)}.`
 
 }

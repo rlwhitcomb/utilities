@@ -11,6 +11,7 @@ $quiet on {
 
 const WHICH = 10001
 
+// To start with, 13 is the 6th prime
 var prime = 13
 var which = 6
 
@@ -23,6 +24,6 @@ while which < WHICH {
 
 $resultsonly on {
 
-`The ${WHICH}st prime number is $prime.`@q
+`The ${WHICH}st prime number is $prime.`
 
 }

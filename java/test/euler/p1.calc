@@ -16,20 +16,20 @@ const LIMIT      = 1000
 define test(limit) = {
    var sum = 0
    loop x within limit {
-      if x % 3 == 0 || x % 5 == 0 { sum += x }
+      if x % 3 == 0 || x % 5 == 0 sum += x
    }
    sum
 }
 
-define report(limit, result) = {
-   `Sum of multiples of 3 or 5 below $limit is $result.`
+define report(limit) = {
+   `Sum of multiples of 3 or 5 below $limit is ${test(limit)}.`
 }
 
 }
 $resultsonly on {
 
-report(TEST_LIMIT, test(TEST_LIMIT))
-report(LIMIT,      test(LIMIT)     )
+report(TEST_LIMIT)
+report(LIMIT)
 
 }
 

@@ -12,33 +12,17 @@ $quiet on {
 const TEST_VALUE = 13195
 const VALUE      = 600851475143
 
-define test(value) = {
-   var f = []
-   var remaining = value
-   var factor = 3
-
-   while remaining > 1 {
-      if isprime(factor) && remaining % factor == 0 {
-         f += factor
-         remaining /= factor
-      }
-      factor += 2
-   }
-   f
-}
-
-define report(value, values, largest) = {
-   `All the prime factors of $value are $values; the largest is $largest.`
+define report(value) = {
+   const values = pfactors(value)
+   `All the prime factors of $value are $values; the largest is ${max(values)}.`
 }
 
 }
 
 $resultsonly on {
 
-var f1 = test(TEST_VALUE)
-report(TEST_VALUE, f1, max(f1))
+report(TEST_VALUE)
 
-var f2 = test(VALUE)
-report(VALUE, f2, max(f2))
+report(VALUE)
 
 }

@@ -35,6 +35,6 @@ loop a within length(sums) {
 
 $resultsonly on {
 
-`The sum of the amicable numbers under $LIMIT is $sum.`@q
+`The sum of the amicable numbers under $LIMIT is $sum.`
 
 }

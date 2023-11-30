@@ -118,11 +118,11 @@ loop value over NUMBERS {
    sum += value
 }
 
-$sep off { const sumString = @@sum }
+const sumString = @@sum
 }
 
 $resultsonly on {
 
-`The first $DIGITS digits of the sum is ${substr(sumString, 0, DIGITS)}.`@q
+`The first $DIGITS digits of the sum is ${substr(sumString, 0, DIGITS)}.`
 
 }

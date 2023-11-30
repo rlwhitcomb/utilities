@@ -59,6 +59,6 @@ loop start over 2..START_LIMIT-1 {
 
 $resultsonly on {
 
-`The starting number under $START_LIMIT with the longest Collatz sequence is $longestStartValue ($longestSequence values).`@q
+`The starting number under $START_LIMIT with the longest Collatz sequence is $longestStartValue ($longestSequence values).`
 
 }

@@ -35,6 +35,6 @@ loop a over LOWER_LIMIT...UPPER_LIMIT {
 
 $resultsonly on {
 
-`Number of distinct terms in the sequence of values is ${length(s)}.`@q
+`Number of distinct terms in the sequence of values is ${length(s)}.`
 
 }

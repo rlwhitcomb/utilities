@@ -36,6 +36,6 @@ while length(factors(triangle)) < DIVISORS_LIMIT {
 
 $resultsonly on {
 
-`The smallest triangle number with over $DIVISORS_LIMIT divisors is $triangle, with ${length(factors(triangle))}.`@q
+`The smallest triangle number with over $DIVISORS_LIMIT divisors is $triangle, with ${length(factors(triangle))}.`
 
 }

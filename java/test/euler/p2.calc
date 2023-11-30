@@ -20,7 +20,7 @@ var fib2 = 1
 var f
 
 while (f = fib1 + fib2) < LIMIT {
-  if f % 2 == 0 { sum += f }
+  if f % 2 == 0 sum += f
   fib1 = fib2
   fib2 = f
 }

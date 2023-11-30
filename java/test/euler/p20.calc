@@ -16,7 +16,7 @@ $unlimited
 
 const VALUE = 100
 const v = VALUE!
-$sep off { const s = @@v }
+const s = @@v
 
 const result = sumof(chars(s))
 
@@ -24,6 +24,6 @@ const result = sumof(chars(s))
 
 $resultsonly on {
 
-`The sum of the digits in the number $VALUE! is $result.`@q
+`The sum of the digits in the number $VALUE! is $result.`
 
 }

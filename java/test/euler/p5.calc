@@ -11,12 +11,12 @@ $quiet on {
 
 const LIMIT = 20
 
-const result = lcm(arrayof 1..LIMIT)
+const result = lcm(arrayof 1 ... LIMIT)
 
 }
 
 $resultsonly on {
 
-`Smallest positive number divisible by all of 1..$LIMIT is $result.`@q
+`Smallest positive number divisible by all of 1..$LIMIT is $result.`
 
 }

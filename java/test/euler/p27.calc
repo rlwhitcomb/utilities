@@ -74,6 +74,6 @@ loop a over -A_MAX..A_MAX {
 
 $resultsonly on {
 
-`Product of the coefficients of the quadratic that produces the most primes is ${max_a * max_b}, number of primes is $max_number_primes, and a = $max_a, b = $max_b.`@q
+`Product of the coefficients of the quadratic that produces the most primes is ${max_a * max_b}, number of primes is $max_number_primes, and a = $max_a, b = $max_b.`
 
 }

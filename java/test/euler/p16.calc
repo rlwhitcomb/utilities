@@ -13,7 +13,7 @@ $unlimited
 
 const EXPONENT = 1000
 
-$sep off { const string = @@(2**EXPONENT) }
+const string = @@(2**EXPONENT)
 
 const result = sumof(chars(string))
 
@@ -21,6 +21,6 @@ const result = sumof(chars(string))
 
 $resultsonly on {
 
-`The sum of the digits of 2**$EXPONENT is $result.`@q
+`The sum of the digits of 2**$EXPONENT is $result.`
 
 }

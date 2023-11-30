@@ -39,6 +39,6 @@ while length(fib(f)) < LIMIT {
 
 $resultsonly on {
 
-`The index of the first Fibonacci number to contain $LIMIT digits is $f.`@q
+`The index of the first Fibonacci number to contain $LIMIT digits is $f.`
 
 }

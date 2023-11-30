@@ -22,7 +22,7 @@ $quiet on {
 const LIMIT = 100
 
 var sumOfSquares = 0
-const squareOfSum = (sumof 1..LIMIT)**2
+const squareOfSum = (sumof 1 ... LIMIT)**2
 
 loop x over 1..LIMIT {
   sumOfSquares += x**2
@@ -32,6 +32,6 @@ loop x over 1..LIMIT {
 
 $resultsonly on {
 
-`Difference between sum of squares and square of sum of first $LIMIT natural numbers is ${squareOfSum - sumOfSquares}.`@q
+`Difference between sum of squares and square of sum of first $LIMIT natural numbers is ${squareOfSum - sumOfSquares}.`
 
 }

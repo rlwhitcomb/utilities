@@ -13,8 +13,6 @@ $quiet on {
 
 // We're dealing with factorials up to ~50000! so we need lots of digits available
 $unlimited
-// Separators must remain off so looping over the characters of a number does not include them
-$separators off
 
 /*
  * I have no idea (currently) how to derive an appropriate limit. Using a much bigger
@@ -41,8 +39,6 @@ loop n over 3..LIMIT {
       sum += sumOfDigits
    }
 }
-
-$separators pop
 
 } // end of quiet on
 

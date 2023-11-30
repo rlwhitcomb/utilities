@@ -12,14 +12,14 @@ $quiet on {
 const LIMIT = 2e6
 var sum = 2
 
-loop p over 3..LIMIT,2 {
-   if isprime(p) { sum += p }
+loop p over 3 ... LIMIT, 2 {
+   if isprime(p) sum += p
 }
 
 }
 
 $resultsonly on {
 
-`The sum of all the primes below $LIMIT is $sum.`@q
+`The sum of all the primes below $LIMIT is $sum.`
 
 }

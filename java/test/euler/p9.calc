@@ -15,28 +15,37 @@
 $quiet on {
 
 const SUM = 1000
-var product = -1
-var a1, b1, c1
+var triplet = []
 
-loop a within SUM {
+/*
+ * Return a list of the a, b, c values if there is a solution, or an empty list
+ * if no solution is found.
+ */
+define inner(a) = {
+   var result = [ ]
    const a2 = a*a
-   loop b over a+1..SUM-1 {
+   loop b over a+1 ... SUM-1 {
       const c = SUM - a - b
       if a2 + b*b == c*c {
-         product = a*b*c
-         a1=a;b1=b;c1=c
-// Here it would be nice to have a version of "leave" for both loops
-// or put this into a function with a "leave function" or "return"
+         result = [ a, b, c ]
          leave
       }
    }
-   if product > 0 leave
+   result
+}
+
+loop a over 1 ... SUM-1 {
+   const result = inner(a)
+   if length(result) {
+      triplet = result
+      leave
+   }
 }
 
 }
 
 $resultsonly on {
 
-`The Pythagorean triplet whose sum is $SUM ($a1,$b1,$c1) has a product of $product.`@q
+`The Pythagorean triplet whose sum is $SUM $triplet has a product of ${productof triplet}.`
 
 }

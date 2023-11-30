@@ -23,7 +23,7 @@ const LAST_YEAR = 2000
 var countOfSundays = 0
 
 loop year over FIRST_YEAR...LAST_YEAR {
-   loop month over 1..12 {
+   loop month over 12 {
       const firstOfMonth = todate(month, 1, year)
       if dow(firstOfMonth) == 0 countOfSundays++
    }
@@ -33,6 +33,6 @@ loop year over FIRST_YEAR...LAST_YEAR {
 
 $resultsonly on {
 
-`Number of Sundays that fell on the first of the month during ${FIRST_YEAR@_d} to ${LAST_YEAR@_d} were $countOfSundays.`@q
+`Number of Sundays that fell on the first of the month during ${FIRST_YEAR@_d} to ${LAST_YEAR@_d} were $countOfSundays.`
 
 }

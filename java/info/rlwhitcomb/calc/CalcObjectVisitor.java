@@ -809,6 +809,8 @@
  *	    name (removes ambiguity with optional params in "replace(read(..." sequences).
  *	28-Nov-2023 (rlwhitcomb)
  *	    #627: Make sure the ArrayScope object has enough room preallocated before a "fill".
+ *	29-Nov-2023 (rlwhitcomb)
+ *	    #636: Never use separators for the "@@" operator.
  */
 package info.rlwhitcomb.calc;
 
@@ -4233,7 +4235,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitToStringExpr(CalcParser.ToStringExprContext ctx) {
-	    return getStringValue(ctx.expr(), true, false, settings.separatorMode);
+	    return getStringValue(ctx.expr(), true, false, false);
 	}
 
 	@Override

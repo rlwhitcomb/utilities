@@ -31,9 +31,7 @@ const REAL_SIZE = 1001
  * @param size The (odd) size (3..limit) of the square.
  * @return     Sum of the diagonals at that size.
  */
-define sumOfDiagonals(size) = {
-   4 * size² - 6 * size + 6
-}
+define sumOfDiagonals(size) = 4 * size² - 6 * size + 6
 
 var trial_sum = 1
 var real_sum = 1

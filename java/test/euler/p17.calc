@@ -23,7 +23,7 @@ define countLetters(word) = {
    count
 }
 
-loop value over 1..LIMIT {
+loop value over LIMIT {
    const word = `${value@+w}`
    sum += countLetters(word)
 }
@@ -32,6 +32,6 @@ loop value over 1..LIMIT {
 
 $resultsonly on {
 
-`The number of characters in the words from ${1@w} to ${LIMIT@w} is $sum.`@q
+`The number of characters in the words from ${1@w} to ${LIMIT@w} is $sum.`
 
 }
