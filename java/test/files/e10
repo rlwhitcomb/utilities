@@ -106,7 +106,6 @@ const START = 3752
 var num = START
 var iterations = 0
 var k0, k1, k2, num1, num2
-$separators off {
 while num != KAPREKAR {
    k0 = chars(@@num)
    k1 = sort(k0)
@@ -117,7 +116,6 @@ while num != KAPREKAR {
    ++iterations
 }
 $echo `Starting from $START, sequence converged to Kaprekar's constant ($KAPREKAR) in $iterations iterations.`
-}
 
 $echo
 $echo "Done with LOOP tests."

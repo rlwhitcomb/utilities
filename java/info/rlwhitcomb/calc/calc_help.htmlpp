@@ -1302,10 +1302,10 @@ whether it has previously been used/defined.
      All keywords in these statements have three differently-cased forms: all lower case, all UPPER case, and MixedCase.  For example: <code>loop</code>, <code>LOOP</code>, and <code>Loop</code>.
   <p>The syntax for each is as follows:
   <p class="indent">
-     <code>LOOP</code>&nbsp;[ [ <i>loopvar</i> ] ( <code>IN</code> | <code>WITHIN</code> | <code>OVER</code> | <code>&#x2208;</code> | <code>&#x220A;</code>) ] <i>expr</i> [ <code>...</code>,&nbsp;<code>..</code>,&nbsp;or&nbsp;<code>&#x2026;</code>&nbsp;<i>expr</i> ] [ <code>,</code> <i>expr</i> ] <code>{</code> <i>statements or expressions</i> <code>}</code>
+     [ <i>id</i> <code>:</code> ] <code>LOOP</code>&nbsp;[ [ <i>loopvar</i> ] ( <code>IN</code> | <code>WITHIN</code> | <code>OVER</code> | <code>&#x2208;</code> | <code>&#x220A;</code>) ] <i>expr</i> [ <code>...</code>,&nbsp;<code>..</code>,&nbsp;or&nbsp;<code>&#x2026;</code>&nbsp;<i>expr</i> ] [ <code>,</code> <i>expr</i> ] <code>{</code> <i>statements or expressions</i> <code>}</code>
   </p>
   <p class="indent">
-     <code>WHILE</code>&nbsp;<i>expr</i> <code>{</code> <i>statements or expressions</i> <code>}</code>
+     [ <i>id</i> <code>:</code> ] <code>WHILE</code>&nbsp;<i>expr</i> <code>{</code> <i>statements or expressions</i> <code>}</code>
   </p>
   <p class="indent">
      <code>IF</code>&nbsp;<i>expr</i>&nbsp;<code>{</code> <i>statements or expressions</i> <code>}</code> [ <code>ELSE {</code> <i>statements or expressions</i> <code>}</code> ]
@@ -1323,7 +1323,7 @@ whether it has previously been used/defined.
     <li><code>DEFAULT</code>
   </ul>
   <p class="indent">
-    <code>LEAVE</code>&nbsp;<i>expr</i> ?
+    <code>LEAVE</code> [ <i>id</i> <code>:</code> ] [ <i>expr</i> ]
   </p>
   <p class="indent">
     <code>NEXT</code>
@@ -1357,6 +1357,15 @@ whether it has previously been used/defined.
      This means the block might not be executed at all if the expression evaluates initially to <code>false</code>.
      If the code inside the statement block requires knowledge of which iteration is currently being executed a regular variable
      should be used (that is, there is no concept of a <i>loopvar</i> as in the <code>LOOP</code> statement).
+     The resulting value of a <code>WHILE</code> statement is the final value of the last iteration of the statement block that was
+     completed (that is, without a <code>NEXT</code> statement doing a short-circuit). The value of the controlling expression that
+     continues or terminates the loop is never saved, except in any variables that are used.
+  <p>Both <code>LOOP</code> and <code>WHILE</code> statements can have an optional label, which can be referenced from the
+     <code>LEAVE</code> statement. Without the label on <code>leave</code>, the innermost loop will be exited. Using a label
+     means the corresponding labeled loop is exited, which can be the outermost loop. Or <code>leave</code> can be used to exit
+     the enclosing function early by referencing the function name as the label. For Java aficionados, this means <code>LEAVE</code>
+     can function either as a labeled "break" statement, or as a "return", depending on the context and the label name, but also with
+     the option to return the expression value, if given.
   <p>The <code>IF</code> statement evaluates the expression and executes the code block only if the expression evaluates to a
      boolean <code>true</code> value. If the optional <code>ELSE</code> block is given and the expression evaluates to
      <code>false</code> that block will be executed instead.
@@ -1374,8 +1383,9 @@ whether it has previously been used/defined.
      must be coded as the last statement inside the block. 
   <p>The <code>LEAVE</code> statement will cause early termination of a <code>LOOP</code> or <code>WHILE</code> statement, or a function, with the final value of the statement being the
      (optional) expression on the <code>LEAVE</code> statement itself, or <code>null</code> if none is given. If a <code>LEAVE</code> statement is executed inside any other block (such as
-     <code>IF</code> or <code>CASE</code>) that containing block is terminated, but the closest containing loop or function is also terminated. If the <code>LEAVE</code> is executed
+     <code>IF</code> or <code>CASE</code>) that containing block is terminated, but the closest containing loop or function (or the labeled loop or function, if one is given here) is also terminated. If the <code>LEAVE</code> is executed
      outside any loop or function, the entire script is exited with the optional expression as the final value (and therefore as the process exit code).
+     Note that it is an error to reference a label from <code>LEAVE</code> if that label does not exist in the enclosing context of the statement (particularly at the global code level).
   <p>The <code>NEXT</code> statement is only available inside a <code>LOOP</code>, <code>WHILE</code>, or <code>CASE</code> statement, where it transfers control to the next
      iteration of the loop or while, or to the next block in the case statement (without regard to the selector). This will obviously affect the final value of the statement.
      Note that in the absence of a <code>next</code> statement, execution does NOT fall through from one code block to the next inside a <code>CASE</code> statement.

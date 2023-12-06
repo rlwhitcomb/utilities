@@ -50,8 +50,10 @@ iss().ver
 def l(a) = {
   if a & 1 { leave 'odd' } else { leave 'even' }
 }
+def l2(a) = a & 1 ? 'odd' : 'even'
 
 l(3);l(4)
+l2(3);l2(4)
 
 define array(a=1, b=2, c=3) = { [ a, b, c ] }
 array()
@@ -178,3 +180,31 @@ mn(M_1, M_2)
 mx(M_3, M_4)
 mn(M_3, M_4)
 
+#
+# Tests of labeled "leave" statements
+#
+define silly(n) = {
+   loop y over n {
+      loop z over n {
+         if y + z > 5 leave silly: [ y, z ]
+      }
+   }
+   [ 0, 0 ]
+}
+
+silly(2)
+silly(4)
+silly(10)
+
+define silt(a, b) = {
+   var result = 0
+   salt: loop a2 over a {
+      loop b2 over b {
+         if a2 + b2 > 5 { result = a2 + b2; leave salt: }
+      }
+   }
+   result
+}
+
+silt(3, 2)
+silt(4, 5)

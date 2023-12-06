@@ -32,8 +32,11 @@
 >Defining function “l(a)” = {
 > if a & 1 { leave 'odd' } else { leave 'even' }
 >}
+>Defining function “l2(a)” = a & 1 ? 'odd' : 'even'
 >l(3) -> "odd"
 >l(4) -> "even"
+>l2(3) -> "odd"
+>l2(4) -> "even"
 >Defining function “array(a=1,b=2,c=3)” = { [a, b, c] }
 >array() -> [ 1, 2, 3 ]
 >array(7) -> [ 7, 2, 3 ]
@@ -144,3 +147,25 @@
 >mn(M_1, M_2) -> 1.09
 >mx(M_3, M_4) -> -1
 >mn(M_3, M_4) -> -2
+>Defining function “silly(n)” = {
+> loop y over n {
+> loop z over n {
+> if y + z > 5 leave silly: [y, z]
+>}
+>}
+> [0, 0]
+>}
+>silly(2) -> [ 0, 0 ]
+>silly(4) -> [ 2, 4 ]
+>silly(10) -> [ 1, 5 ]
+>Defining function “silt(a,b)” = {
+> var result = 0
+> salt: loop a2 over a {
+> loop b2 over b {
+> if a2 + b2 > 5 { result = a2 + b2 ; leave salt: }
+>}
+>}
+> result
+>}
+>silt(3, 2) -> 0
+>silt(4, 5) -> 6

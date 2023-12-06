@@ -119,44 +119,40 @@ define displayBoard() = {
  */
 define makeMove(_index, _color) = {
   board[(_index - 1) \ 3][(_index - 1) % 3] = _color;
-  if _color === userColor {
-    $echo `You have chosen space $_index`
-  } else {
-    $echo `Choosing space $_index`
-  }
+  $echo _color === userColor ? `You have chosen space $_index` : `Choosing space $_index`
   displayBoard()@q
 }
 
 /*
  * Sum the given row.
  */
-define sumRow(row) = { sumof board[row] }
+define sumRow(row) = sumof board[row]
 
 /*
  * Sum the given column.
  */
-define sumColumn(col) = { board[0][col] + board[1][col] + board[2][col] }
+define sumColumn(col) = board[0][col] + board[1][col] + board[2][col]
 
 /*
  * Sum the given diagonal.
  */
 define sumDiagonal(which) = {
   sum = 0
-  loop diag over diagonals[which] { sum += valueAt(diag) }
+  loop diag over diagonals[which] sum += valueAt(diag)
 }
 
 /*
  * Return 1 if the color at the given position matches, or 0 if it does not.
  * Called by the various "count" functions.
  */
-define countValue(row, col, _color) = { board[row][col] === _color ? 1 : 0 }
+define countValue(row, col, _color) = board[row][col] === _color ? 1 : 0
 
 /*
  * Return count of the given color in the given row.
  */
 define countInRow(row, _color) = {
   count = 0
-  loop col within 3 { count += countValue(row, col, _color) }
+  loop col within 3 count += countValue(row, col, _color)
 }
 
 /*
@@ -164,7 +160,7 @@ define countInRow(row, _color) = {
  */
 define countInCol(col, _color) = {
   count = 0
-  loop row within 3 { count += countValue(row, col, _color) }
+  loop row within 3 count += countValue(row, col, _color)
 }
 
 /*
@@ -172,7 +168,7 @@ define countInCol(col, _color) = {
  */
 define countInDiag(which, _color) = {
   count = 0
-  loop diag over diagonals[which] { if _color == valueAt(diag) { count++ } }
+  loop diag over diagonals[which] if _color == valueAt(diag) count++
   count
 }
 
@@ -188,7 +184,10 @@ define checkWinner(sum) = {
  * Decide if any of the corners are filled with the given color.
  */
 define cornerIsFilled(_color) = {
-  board[0][0] == _color || board[0][2] == _color || board[2][0] == _color || board[2][2] == _color
+  board[0][0] == _color ||
+  board[0][2] == _color ||
+  board[2][0] == _color ||
+  board[2][2] == _color
 }
 
 /*
@@ -197,11 +196,11 @@ define cornerIsFilled(_color) = {
  */
 define gameIsOver() = {
   // Check the rows
-  loop row within 3 { if checkWinner(sumRow(row)) { leave true } }
+  loop row within 3 { if checkWinner(sumRow(row)) leave gameIsOver: true }
   // Check the columns
-  loop col within 3 { if checkWinner(sumColumn(col)) { leave true } }
+  loop col within 3 { if checkWinner(sumColumn(col)) leave gameIsOver: true }
   // Check the two diagonals
-  if checkWinner(sumDiagonal(NW_SE)) || checkWinner(sumDiagonal(SW_NE)) { leave true }
+  if checkWinner(sumDiagonal(NW_SE)) || checkWinner(sumDiagonal(SW_NE)) leave gameIsOver: true
   // Lastly, check for a draw
   gameIsDrawn = (numberOfMoves == 9)
 }
@@ -209,7 +208,7 @@ define gameIsOver() = {
 /*
  * Get a random "corner" value (either 0 or 2)
  */
-define getRandomCorner() = { random >= 0.5 ? 2 : 0 }
+define getRandomCorner() = random >= 0.5 ? 2 : 0
 
 /*
  * Fill a random cornder with the given color piece.
@@ -241,7 +240,7 @@ define acceptUserMove() = {
  */
 define findRowMove(row, _color, otherColor) = {
   if countInRow(row, _color) == 2 && countInRow(row, otherColor) == 0 {
-    loop col within 3 { if board[row][col] == EMPTY { leave col } }
+    loop col within 3 { if board[row][col] == EMPTY leave findRowMove: col }
   }
   -1
 }
@@ -252,7 +251,7 @@ define findRowMove(row, _color, otherColor) = {
  */
 define findColMove(col, _color, otherColor) = {
   if countInCol(col, _color) == 2 && countInCol(col, otherColor) == 0 {
-    loop row within 3 { if board[row][col] == EMPTY { leave row } }
+    loop row within 3 { if board[row][col] == EMPTY leave findColMove: row }
   }
   -1
 }
@@ -263,7 +262,7 @@ define findColMove(col, _color, otherColor) = {
  */
 define findDiagMove(which, _color, otherColor) = {
   if countInDiag(which, _color) == 2 && countInDiag(which, otherColor) == 0 {
-    loop diag over diagonals[which] { if valueAt(diag) == EMPTY { leave diag } }
+    loop diag over diagonals[which] { if valueAt(diag) == EMPTY leave findDiagMove: diag }
   }
   0
 }
@@ -278,17 +277,17 @@ define findNecessaryMove(_color, otherColor) = {
   // Check rows
   loop row within 3 {
     col = findRowMove(row, _color, otherColor)
-    if col >= 0 { leave toIndex(row, col) }
+    if col >= 0 leave toIndex(row, col)
   }
   // Check columns
   loop col within 3 {
     row = findColMove(col, _color, otherColor)
-    if row >= 0 { leave toIndex(row, col) }
+    if row >= 0 leave toIndex(row, col)
   }
   // Check diagonals
   loop diag over [ NW_SE, SW_NE ] {
     ix = findDiagMove(diag, _color, otherColor)
-    if ix > 0 { leave ix }
+    if ix > 0 leave ix
   }
   0
 }
@@ -303,9 +302,7 @@ define pickComputerMove() = {
   // Method 2. 1. If user picked a corner on first move, force a draw by choosing center
   if userFirst {
     if numberOfMoves == 1 {
-      if cornerIsFilled(userColor) {
-        leave makeMove(5, ourColor)
-      }
+      if cornerIsFilled(userColor) leave makeMove(5, ourColor)
     }
   } else {
     // Method 1. 2a. Our first move (above) was a random corner,
@@ -322,20 +319,14 @@ define pickComputerMove() = {
   // TODO: implement the rest of the winning logic
 
   winningMove = findNecessaryMove(ourColor, userColor)
-  if winningMove > 0 {
-    leave makeMove(winningMove, ourColor)
-  }
+  if winningMove > 0 leave makeMove(winningMove, ourColor)
 
   blockingMove = findNecessaryMove(ourColor, userColor)
-  if blockingMove > 0 {
-    leave makeMove(blockingMove, ourColor)
-  }
+  if blockingMove > 0 leave makeMove(blockingMove, ourColor)
 
   // Last-ditch attempt:  find the first available empty position
   loop slot in 9 {
-    if valueAt(slot) == EMPTY {
-      leave makeMove(slot, ourColor)
-    }
+    if valueAt(slot) == EMPTY leave makeMove(slot, ourColor)
   }
 
 $echo 'No code for this situation!'

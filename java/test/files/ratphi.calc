@@ -4,10 +4,11 @@ PHI_VALUES = [ ]
 loop precision over 380..1000 {
   $echo 'Precision ' + precision
   settings.precision = precision
+ setPrecision:
   loop n in precision * 3 {
     if (ratphi(n) == phi) {
       PHI_VALUES[precision] = n
-      leave
+      leave setPrecision:
     }
   }
 }

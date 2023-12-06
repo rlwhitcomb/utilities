@@ -517,6 +517,7 @@
  *	    #424: Update "read" and "write" parameters to use COLON for charset modifier.
  *	05-Dec-2023 (rlwhitcomb)
  *	    #600: Additional syntax for scoped "leave" statements.
+ *	    Allow EOL after loop label.
  */
 
 grammar Calc;
@@ -570,7 +571,7 @@ enumStmt
    ;
 
 loopLabel
-   : id COLON
+   : id COLON EOL*
    ;
 
 loopStmt
