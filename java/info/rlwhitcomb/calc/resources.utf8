@@ -182,6 +182,8 @@
 #	29-Sep-2023 (rlwhitcomb)
 #	    #622: Brighten the actual error message in the assertion message.
 #	    Add "f" for the RED_BOLD_BRIGHT color or left quote.
+#	06-Dec-2023 (rlwhitcomb)
+#	    #600: New error for labeled "leave" statement.
 #
 
 #
@@ -224,6 +226,7 @@ timing		= Parse time %1$11.9f secs. Execution time %2$11.9f secs. Total elapsed 
 syntaxError	= Syntax error at position %1$d: %2$s
 errorNoAlt	= Syntax error at position %1$d: no viable alternative at input <y>%2$s<.>
 nextError	= The <y>next<.> statement is only allowed inside <y>loop<.> or <y>while<.>.
+missingLeaveLabel= Label <y>%1$s<.> from <u>leave<.> statement was not found.
 badScanPattern	= Scan pattern <y>%1$s<.> is badly formed.
 scanPatternError= The input doesn't match the pattern <y>%1$s<.>
 illegalScanType	= Unknown scan pattern <y>%%%1$c<.>

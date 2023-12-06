@@ -341,6 +341,8 @@
  *	    Change default split ratio.
  *	27-Nov-2023 (rlwhitcomb)
  *	    New aliases for rational mode on the command line.
+ *	06-Dec-2023 (rlwhitcomb)
+ *	    #600: New handling of "leave" if there is a label.
  */
 package info.rlwhitcomb.calc;
 
@@ -2742,7 +2744,13 @@ public class Calc
 		exitValue = "97";
 	    }
 	    catch (LeaveException lex) {
-		if (lex.hasValue()) {
+		// Technically, if a "leave" is given with a label and we get up to here it is a programming error
+		// since we never matched that label going up the loop chain
+		if (!CharUtil.isNullOrEmpty(lex.getLabel())) {
+		    displayer.displayErrorMessage(Intl.formatString("calc#missingLeaveLabel", lex.getLabel()));
+		    exitValue = "97";
+		}
+		else if (lex.hasValue()) {
 		    exitValue = lex.getValue();
 		}
 	    }

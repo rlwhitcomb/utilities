@@ -811,6 +811,8 @@
  *	    #627: Make sure the ArrayScope object has enough room preallocated before a "fill".
  *	29-Nov-2023 (rlwhitcomb)
  *	    #636: Never use separators for the "@@" operator.
+ *	06-Dec-2023 (rlwhitcomb)
+ *	    #600: Labeled "leave" statement and optional labels on loop/while statements.
  */
 package info.rlwhitcomb.calc;
 
@@ -1641,13 +1643,24 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    if (returnValue != null && returnValue instanceof FunctionScope) {
 		FunctionScope func = (FunctionScope) returnValue;
+		String functionName = func.getFunctionName();
 
 		pushQuietMode.accept(true);
 		try {
 		    returnValue = visit(func.getFunctionBody());
 		}
 		catch (LeaveException lex) {
-		    returnValue = lex.hasValue() ? lex.getValue() : null;
+		    // Slightly different rules here: an unlabeled "leave" is sufficient to exit
+		    // a function (because a function always has a name, where a loop might not
+		    // have a label). So, the only way NOT to get caught here is to have a "leave"
+		    // label that doesn't match the function name.
+		    String leaveLabel = lex.getLabel();
+		    if (compareLabels(functionName, leaveLabel) || compareLabels("", leaveLabel)) {
+			returnValue = lex.hasValue() ? lex.getValue() : null;
+		    }
+		    else {
+			throw lex;
+		    }
 		}
 		finally {
 		    popScope();
@@ -3269,8 +3282,34 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    return lastValue;
 	}
 
+	/**
+	 * Do a compare of the label given to this loop/while/function with any label specified
+	 * on the "leave" statement. If both are empty, we have a match, or if both are given
+	 * and they match according to the case-sensitivity rules currently in effect, then we
+	 * have a match. Otherwise not.
+	 *
+	 * @param loopLabel  The optional loop/while label, or function name.
+	 * @param leaveLabel The also optional label given in the "leave" statement.
+	 * @return           Whether they match according to the rules.
+	 */
+	private boolean compareLabels(String loopLabel, String leaveLabel) {
+	    boolean emptyLoop  = CharUtil.isNullOrEmpty(loopLabel);
+	    boolean emptyLeave = CharUtil.isNullOrEmpty(leaveLabel);
+
+	    if (emptyLoop && emptyLeave)
+		return true;
+	    if ((emptyLoop && !emptyLeave) || (!emptyLoop && emptyLeave))
+		return false;
+
+	    if (settings.ignoreNameCase)
+		return loopLabel.equalsIgnoreCase(leaveLabel);
+	    else
+		return loopLabel.equals(leaveLabel);
+	}
+
 	@Override
 	public Object visitLoopStmt(CalcParser.LoopStmtContext ctx) {
+	    CalcParser.LoopLabelContext label   = ctx.loopLabel();
 	    CalcParser.IdContext id             = ctx.id();
 	    CalcParser.LoopCtlContext ctlCtx    = ctx.loopCtl();
 	    CalcParser.StmtBlockContext block   = ctx.stmtBlock();
@@ -3278,6 +3317,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    CalcParser.DotRangeContext dotCtx   = ctlCtx.dotRange();
 
 	    String localVarName = id != null ? id.getText() : LoopScope.LOOP_VAR;
+	    String loopLabel = label != null ? label.id().getText() : null;
 
 	    boolean doingWithin = ctx.K_WITHIN() != null;
 
@@ -3292,8 +3332,13 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    value = iterateOverDotRange(null, dotCtx.expr(), dotCtx.DOTS() != null, visitor, true, doingWithin);
 	    }
 	    catch (LeaveException lex) {
-		if (lex.hasValue()) {
-		    value = lex.getValue();
+		if (compareLabels(loopLabel, lex.getLabel())) {
+		    if (lex.hasValue()) {
+			value = lex.getValue();
+		    }
+		}
+		else {
+		    throw lex;
 		}
 	    }
 
@@ -3302,10 +3347,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitWhileStmt(CalcParser.WhileStmtContext ctx) {
+	    CalcParser.LoopLabelContext label = ctx.loopLabel();
 	    CalcParser.ExprContext exprCtx    = ctx.expr();
 	    CalcParser.StmtBlockContext block = ctx.stmtBlock();
 
 	    Object lastValue = null;
+	    String loopLabel = label != null ? label.id().getText() : null;
 
 	    boolean exprResult = getBooleanValue(exprCtx);
 
@@ -3323,8 +3370,13 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		}
 	    }
 	    catch (LeaveException lex) {
-		if (lex.hasValue()) {
-		    lastValue = lex.getValue();
+		if (compareLabels(loopLabel, lex.getLabel())) {
+		    if (lex.hasValue()) {
+			lastValue = lex.getValue();
+		    }
+		}
+		else {
+		    throw lex;
 		}
 	    }
 	    finally {
@@ -3641,9 +3693,16 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitLeaveStmt(CalcParser.LeaveStmtContext ctx) {
-	    CalcParser.Expr1Context exprCtx = ctx.expr1();
+	    CalcParser.LeaveLabelContext label = ctx.leaveLabel();
+	    CalcParser.Expr1Context exprCtx    = ctx.expr1();
+
+	    String leaveLabel = label != null ? label.id().getText() : null;
+
 	    if (exprCtx != null) {
-		throw new LeaveException(evaluate(exprCtx.expr()));
+		throw new LeaveException(evaluate(exprCtx.expr()), leaveLabel);
+	    }
+	    else if (leaveLabel != null) {
+		throw new LeaveException(null, leaveLabel);
 	    }
 	    else {
 		throw LeaveException.instance();

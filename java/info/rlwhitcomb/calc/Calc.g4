@@ -515,6 +515,8 @@
  *	16-Oct-2023 (rlwhitcomb)
  *	    #625: Change "replace" syntax to allow missing replacement argument.
  *	    #424: Update "read" and "write" parameters to use COLON for charset modifier.
+ *	05-Dec-2023 (rlwhitcomb)
+ *	    #600: Additional syntax for scoped "leave" statements.
  */
 
 grammar Calc;
@@ -567,12 +569,16 @@ enumStmt
    : K_ENUM varAssign ( COMMA EOL* varAssign ) *
    ;
 
+loopLabel
+   : id COLON
+   ;
+
 loopStmt
-   : K_LOOP ( id ? ( K_OVER | K_IN | K_WITHIN | SET_IN ) ) ? loopCtl stmtBlock
+   : loopLabel ? K_LOOP ( id ? ( K_OVER | K_IN | K_WITHIN | SET_IN ) ) ? loopCtl stmtBlock
    ;
 
 whileStmt
-   : K_WHILE expr stmtBlock
+   : loopLabel ? K_WHILE expr stmtBlock
    ;
 
 ifStmt
@@ -584,8 +590,12 @@ caseStmt
    | K_CASE expr ( K_OF | K_IN | SET_IN ) caseBlock ( COMMA caseBlock ) *
    ;
 
+leaveLabel
+   : id COLON
+   ;
+
 leaveStmt
-   : K_LEAVE expr1 ?
+   : K_LEAVE leaveLabel ? expr1 ?
    ;
 
 nextStmt

@@ -22,9 +22,10 @@
  * SOFTWARE.
  *
  * History:
- *  02-Dec-21 rlw  ---	Initial coding.
- *  15-Aug-22 rlw  ---	Add static singleton instance for the no-value case.
- *  12-Jan-23 rlw  ---	New method to return the instance.
+ *  02-Dec-21 rlw ----	Initial coding.
+ *  15-Aug-22 rlw ----	Add static singleton instance for the no-value case.
+ *  12-Jan-23 rlw ----	New method to return the instance.
+ *  05-Dec-23 rlw #600	Add label value and accessor.
  */
 package info.rlwhitcomb.calc;
 
@@ -41,7 +42,13 @@ public class LeaveException extends RuntimeException
 
 
 	/** The (optional) expression included with the statement. */
-	private Object leftValue = null;
+	private Object leftValue;
+
+	/**
+	 * The label (or not) specified on the leave statement.
+	 */
+	private String blockLabel;
+
 
 	/**
 	 * Flag to say whether or not the value was included (separate so that
@@ -54,14 +61,15 @@ public class LeaveException extends RuntimeException
 	    super();
 	}
 
-	public LeaveException(final Object value) {
+	public LeaveException(final Object value, final String label) {
 	    super();
 	    leftValue = value;
 	    valueIncluded = true;
+	    blockLabel = label;
 	}
 
 	/**
-	 * The singleton instance of this exception.
+	 * The singleton instance of this exception that has no value or label specified.
 	 *
 	 * @return The single instance.
 	 */
@@ -83,5 +91,13 @@ public class LeaveException extends RuntimeException
 	public Object getValue() {
 	    return leftValue;
 	}
+
+	/**
+	 * @return The block label (if any) specified on the {@code leave} statement.
+	 */
+	public String getLabel() {
+	    return blockLabel;
+	}
+
 }
 
