@@ -1,5 +1,5 @@
->Defining function “f1(a,b)” = { a + b }
->Defining function “f2(a,b)” = { a * b }
+>Defining function “f1(a, b)” = { a + b }
+>Defining function “f2(a, b)” = { a * b }
 >Defining function “f(c)” = { c ? f1 : f2 }
 >f(true)(1, 2) -> 3
 >f(true)(7, 8) -> 15
@@ -9,7 +9,7 @@
 >Defining function “visit(type)” = { case type of F1: f1, F2: f2 }
 >visit(F1)(4, 5) -> 9
 >visit(F2)(7, 8) -> 56
->Defining function “gop(op,m,n)” = op(m, n)
+>Defining function “gop(op, m, n)” = op(m, n)
 >gop(f1, 5, 6) -> 11
 >gop(f2, 9, 8) -> 72
 >gop(f1, 3, 4) -> 7
@@ -21,48 +21,48 @@
 >g2(1) -> [ 1 ]
 >g2(1, 2) -> [ 1, 2 ]
 >g2(3, 4, 5) -> [ 3, 4, 5 ]
->Defining function “g3(a,...)” = { a + (isnull (_*[1]) ? '' : ' ' + _*[1]) }
+>Defining function “g3(a, ...)” = { a + (isnull (_*[1]) ? '' : ' ' + _*[1]) }
 >g3(1) -> "1"
 >g3(2, 'days') -> "2 days"
->Defining function “g4(a,...)” = { a + _1 }
+>Defining function “g4(a, ...)” = { a + _1 }
 >g4(1, 2) -> 3
 >set = {os: {ver: '7.3', major: 7, minor: 3}} -> { os: { ver: "7.3", major: 7, minor: 3 } }
 >Defining function “iss” = { set.os }
 >iss().ver -> "7.3"
 >Defining function “l(a)” = {
-> if a & 1 { leave 'odd' } else { leave 'even' }
+>   if a & 1 { leave 'odd' } else { leave 'even' }
 >}
 >Defining function “l2(a)” = a & 1 ? 'odd' : 'even'
 >l(3) -> "odd"
 >l(4) -> "even"
 >l2(3) -> "odd"
 >l2(4) -> "even"
->Defining function “array(a=1,b=2,c=3)” = { [a, b, c] }
+>Defining function “array(a = 1, b = 2, c = 3)” = { [a, b, c] }
 >array() -> [ 1, 2, 3 ]
 >array(7) -> [ 7, 2, 3 ]
 >array(, 9) -> [ 1, 9, 3 ]
 >array(, , 11) -> [ 1, 2, 11 ]
 >array(7, , 11) -> [ 7, 2, 11 ]
 >array(7, 9) -> [ 7, 9, 3 ]
->Defining function “arr2(a=1,...)” = { _* }
+>Defining function “arr2(a = 1, ...)” = { _* }
 >arr2() -> [ ]
 >arr2(, ) -> [ 1, <null> ]
 >arr2(, , 3) -> [ 1, <null>, 3 ]
 >arr2(8) -> [ 8 ]
 >arr2(9, , 11) -> [ 9, <null>, 11 ]
 >Defining function “ifmany(value)” = {
-> if value === 0
-> 'zero'
-> else if value === 1
-> 'one'
-> else if value === 2
-> 'two'
-> else if value === 3
-> 'three'
-> else if value === 3.5
-> 'three and a half'
-> else
-> value
+>   if value === 0
+>   'zero'
+>   else if value === 1
+>   'one'
+>   else if value === 2
+>   'two'
+>   else if value === 3
+>   'three'
+>   else if value === 3.5
+>   'three and a half'
+>   else
+>   value
 >}
 >"0 = zero"
 >"0.5 = 0.5"
@@ -86,14 +86,14 @@
 >Defining function “f1” = 'f1 here'
 >Defining function “f2(a)” = a + ' here'
 >Defining function “c(f)” = f()
->Defining function “c1(f,a)” = f(a)
+>Defining function “c1(f, a)” = f(a)
 >c(f1) -> "f1 here"
 >Defining function “c(f)” = f
 >c(f1) -> "f1 here"
 >c1(f2, 'roger') -> "roger here"
->Defining function “f(op,v1,v2)” = { op(v1, v2) }
->Defining function “add(o1,o2)” = o1 + o2
->Defining function “mul(o1,o2)” = o1 * o2
+>Defining function “f(op, v1, v2)” = { op(v1, v2) }
+>Defining function “add(o1, o2)” = o1 + o2
+>Defining function “mul(o1, o2)” = o1 * o2
 >f(add, 1, 2) -> 3
 >f(mul, 3, 4) -> 12
 >pp = 5 -> 5
@@ -115,16 +115,16 @@
 >valueFunc(3) -> { value: 3 }
 >calls -> 2
 >Defining function “n1(n)” = {
-> if n == 2 { $echo callers () }
-> if n == 0 { 0 }
-> else if n == 1 { $echo callers (1) ; 1 }
-> else { n + n1(n - 1) }
+>   if n == 2 { $echo callers () }
+>   if n == 0 { 0 }
+>   else if n == 1 { $echo callers (1) ; 1 }
+>   else { n + n1(n - 1) }
 >}
 >n1(0) -> 0
 >[ n1(n), n1(n) ]
 >n1(n)
 >n1(3) -> 6
->Defining function “fun(a,b=a,c=b)” = { [a, b, c] }
+>Defining function “fun(a, b = a, c = b)” = { [a, b, c] }
 >fun(1) -> [ 1, 1, 1 ]
 >fun(1, 2) -> [ 1, 2, 2 ]
 >fun(1, 2, 3) -> [ 1, 2, 3 ]
@@ -133,11 +133,11 @@
 >Defining constant “M1” = "MATCH"
 >Defining constant “M2” = "LITERAL"
 >defined `${M1}_${M2}` -> true
->Defining function “mx(a,b)” = {
-> (a + b) / 2 + abs (a - b) / 2
+>Defining function “mx(a, b)” = {
+>   (a + b) / 2 + abs (a - b) / 2
 >}
->Defining function “mn(a,b)” = {
-> (a + b) / 2 - abs (a - b) / 2
+>Defining function “mn(a, b)” = {
+>   (a + b) / 2 - abs (a - b) / 2
 >}
 >Defining constant “M_1” = 1.1
 >Defining constant “M_2” = 1.09
@@ -148,24 +148,24 @@
 >mx(M_3, M_4) -> -1
 >mn(M_3, M_4) -> -2
 >Defining function “silly(n)” = {
-> loop y over n {
-> loop z over n {
-> if y + z > 5 leave silly: [y, z]
->}
->}
-> [0, 0]
+>   loop y over n {
+>      loop z over n {
+>         if y + z > 5 leave silly: [y, z]
+>      }
+>   }
+>   [0, 0]
 >}
 >silly(2) -> [ 0, 0 ]
 >silly(4) -> [ 2, 4 ]
 >silly(10) -> [ 1, 5 ]
->Defining function “silt(a,b)” = {
-> var result = 0
-> salt: loop a2 over a {
-> loop b2 over b {
-> if a2 + b2 > 5 { result = a2 + b2 ; leave salt: }
->}
->}
-> result
+>Defining function “silt(a, b)” = {
+>   var result = 0
+>   salt: loop a2 over a {
+>      loop b2 over b {
+>         if a2 + b2 > 5 { result = a2 + b2 ; leave salt: }
+>      }
+>   }
+>   result
 >}
 >silt(3, 2) -> 0
 >silt(4, 5) -> 6

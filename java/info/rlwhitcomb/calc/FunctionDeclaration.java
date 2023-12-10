@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2021-2022 Roger L. Whitcomb.
+ * Copyright (c) 2021-2023 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,21 +25,22 @@
  *      local symbol tables, etc.
  *
  * History:
- *  06-Oct-21 rlw	Initial coding.
- *  30-Oct-21 rlw	Implement "toString()".
- *  07-Nov-21 rlw #69:	Implement variable number of parameters.
- *  09-Nov-21 rlw #74:	Add "hasVarargs" method.
- *  13-Feb-22 rlw #199:	Rename local parameter values to "_" prefix.
- *  14-Feb-22 rlw #199:	Get the "_" prefix from FunctionScope.
- *  28-Apr-22 rlw #68:	Tweak index out of bounds error.
- *  27-May-22 rlw	Move "setupFunctionCall" into here from CalcObjectVisitor.
- *  28-May-22 rlw #355:	Define "_funcname" constant for functions.
- *  08-Jul-22 rlw #393:	Cleanup imports.
+ *  06-Oct-21 rlw ----	Initial coding.
+ *  30-Oct-21 rlw ----	Implement "toString()".
+ *  07-Nov-21 rlw #69	Implement variable number of parameters.
+ *  09-Nov-21 rlw #74	Add "hasVarargs" method.
+ *  13-Feb-22 rlw #199	Rename local parameter values to "_" prefix.
+ *  14-Feb-22 rlw #199	Get the "_" prefix from FunctionScope.
+ *  28-Apr-22 rlw #68	Tweak index out of bounds error.
+ *  27-May-22 rlw ----	Move "setupFunctionCall" into here from CalcObjectVisitor.
+ *  28-May-22 rlw #355	Define "_funcname" constant for functions.
+ *  08-Jul-22 rlw #393	Cleanup imports.
  *  01-Sep-22 rlw	Fix typo in error message key.
- *  10-Nov-22 rlw #554:	Push and pop our scope during parameter evaluation so any
+ *  10-Nov-22 rlw #554	Push and pop our scope during parameter evaluation so any
  *			default expressions can reference previous parameter values.
- *  11-Nov-22 rlw #554:	Make "setupFunctionCall" THE place to push the scope, while
+ *  11-Nov-22 rlw #554	Make "setupFunctionCall" THE place to push the scope, while
  *			"evaluate" is THE place to pop it.
+ *  09-Dec-23 rlw #635	Additional spacing in the formal parameter list text.
  */
 package info.rlwhitcomb.calc;
 
@@ -188,11 +189,11 @@ class FunctionDeclaration
 		boolean first = true;
 		for (Map.Entry<String, ParserRuleContext> entry : parameters.entrySet()) {
 		    if (!first)
-			buf.append(',');
+			buf.append(", ");
 		    buf.append(entry.getKey());
 		    ParserRuleContext initialExpr = entry.getValue();
 		    if (initialExpr != null)
-			buf.append('=').append(getTreeText(initialExpr));
+			buf.append(" = ").append(getTreeText(initialExpr));
 		    first = false;
 		}
 		buf.append(')');

@@ -225,6 +225,8 @@
  *	    as needed to get their return values.
  *	26-Sep-2023 (rlwhitcomb)
  *	    #626: Add (recursive) "negate" and "number" methods.
+ *	28-Nov-2023 (rlwhitcomb)
+ *	    #635: Add indenting to "getTreeText".
  */
 package info.rlwhitcomb.calc;
 
@@ -303,6 +305,8 @@ public final class CalcUtil
 		boolean spaceOpenParen = true;
 		/** {@code false} means <code>"{...}"</code>, while {@code true} means <code>"{ ... }"</code> */
 		boolean spaceBraces = false;
+		/** Level of indent (each is 3 spaces) for the new lines. */
+		int level = 0;
 
 
 		TreeTextOptions() {
@@ -314,6 +318,7 @@ public final class CalcUtil
 		    spaceOpenBracket = other.spaceOpenBracket;
 		    spaceOpenParen   = other.spaceOpenParen;
 		    spaceBraces      = other.spaceBraces;
+		    level            = other.level;
 		}
 	}
 
@@ -330,12 +335,7 @@ public final class CalcUtil
 
 	    getTreeText(buf, ctx, options);
 
-	    int len = buf.length();
-	    while (len > 0 && Character.isWhitespace(buf.charAt(len - 1)))
-		len--;
-	    buf.setLength(len);
-
-	    return buf.toString();
+	    return CharUtil.rtrim(buf);
 	}
 
 	private static char prevChar(final StringBuilder buf, final int offset) {
@@ -376,7 +376,7 @@ public final class CalcUtil
 		localOptions = new TreeTextOptions(options);
 		localOptions.spaceOpenParen = false;
 	    }
-	    else if (ctx instanceof CalcParser.StmtBlockContext) {
+	    else if (ctx instanceof CalcParser.StmtBlockContext || ctx instanceof CalcParser.CaseStmtContext) {
 		localOptions = new TreeTextOptions(options);
 		localOptions.spaceBraces = true;
 	    }
@@ -395,25 +395,32 @@ public final class CalcUtil
 
 		    switch (childText) {
 			case "(":
-			     space = false;
-			     if (!localOptions.spaceOpenParen)
+			    space = false;
+			    if (!localOptions.spaceOpenParen)
 				replace = true;
-			     break;
-			case "{":
-			     space = localOptions.spaceBraces;
-			     break;
+			    break;
 			case "[":
-			     space = false;
-			     if (!localOptions.spaceOpenBracket)
+			    space = false;
+			    if (!localOptions.spaceOpenBracket)
 				replace = true;
-			     break;
+			    break;
 			case ",":
 			case ")":
 			case "]":
 			    replace = true;
 			    break;
+			case "{":
+			    space = localOptions.spaceBraces;
+			    localOptions.level++;
+			    break;
 			case "}":
 			    replace = !localOptions.spaceBraces || (prevChar == '\r' || prevChar == '\n');
+			    // reduce indent already added by removing 3 spaces prior (if present)
+			    int len = buf.length() - 1;
+			    if (buf.charAt(len) == ' ' && buf.charAt(len - 1) == ' ' && buf.charAt(len - 2) == ' ') {
+				buf.setLength(buf.length() - 3);
+			    }
+			    localOptions.level--;
 			    break;
 			case ":":
 			    if (!localOptions.spaceColon)
@@ -445,6 +452,11 @@ public final class CalcUtil
 		    }
 		    else {
 			buf.append(childText);
+		    }
+
+		    if ((firstChar == '\n' || firstChar == '\r') && localOptions.level > 0) {
+			CharUtil.makeStringOfChars(buf, ' ', localOptions.level * 3);
+			space = false;
 		    }
 
 		    if (space) {

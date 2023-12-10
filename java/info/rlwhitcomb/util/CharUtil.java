@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2011-2022 Roger L. Whitcomb.
+ * Copyright (c) 2011-2023 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -340,6 +340,9 @@
  *	    #573: New "quoteRegEx" method.
  *	19-Dec-2022 (rlwhitcomb)
  *	    #586: New "debugRegEx" method.
+ *	06-Dec-2023 (rlwhitcomb)
+ *	    #635: Change some casts of (String) to (CharSequence) to facilitate use with StringBuffer, etc.
+ *	    Rename some pattern constants; make final.
  */
 package info.rlwhitcomb.util;
 
@@ -362,28 +365,28 @@ import static info.rlwhitcomb.util.Constants.*;
 public final class CharUtil
 {
 	/** Pattern string for a regular DBMS identifier. */
-	public static String regularIdentifier = "[_\\p{IsAlphabetic}][_\\p{IsAlphabetic}\\p{IsDigit}\\$@#]*";
+	public static final String regularIdentifier = "[_\\p{IsAlphabetic}][_\\p{IsAlphabetic}\\p{IsDigit}\\$@#]*";
 	/** Pattern for a regular DBMS identifier. */
-	private static Pattern regularIdentifierPattern = Pattern.compile(regularIdentifier);
+	private static final Pattern REGULAR_IDENTIFIER_PATTERN = Pattern.compile(regularIdentifier);
 	/** Pattern string for a delimited identifier. Note: does not include double quote here.... */
-	public static String delimitedIdentifier = "\"[_\\p{IsAlphabetic}\\p{IsDigit}\\$@#\\&\\*:\\,\\=/\\<\\>\\(\\)\\-%\\.\\+\\?;' \\|\\\\\\^\\{\\}\\!`~]+\"";
+	public static final String delimitedIdentifier = "\"[_\\p{IsAlphabetic}\\p{IsDigit}\\$@#\\&\\*:\\,\\=/\\<\\>\\(\\)\\-%\\.\\+\\?;' \\|\\\\\\^\\{\\}\\!`~]+\"";
 	/** Pattern to recognize a delimited identifier. */
-	private static Pattern delimitedIdentifierPattern = Pattern.compile(delimitedIdentifier);
+	private static final Pattern DELIMITED_IDENTIFIER_PATTERN = Pattern.compile(delimitedIdentifier);
 	/** Pattern for an identifier that should be UPPER CASE only. */
-	private static Pattern upperIdentifierPattern = Pattern.compile("[_\\p{Lu}][_\\p{Lu}\\p{IsDigit}\\$@#]*");
+	private static final Pattern UPPER_IDENTIFIER_PATTERN = Pattern.compile("[_\\p{Lu}][_\\p{Lu}\\p{IsDigit}\\$@#]*");
 	/** Pattern to identify presence of special characters that require delimiting. Note: this DOES include the double quote.... */
-	private static Pattern specialCharsPattern = Pattern.compile("[0-9\\$@#].*|.*[&\\*:\\,\"\\=/\\<\\>\\(\\)\\-%\\.\\+\\?;' \\|\\\\\\^\\{\\}\\!`~].*");
+	private static final Pattern SPECIAL_CHARS_PATTERN = Pattern.compile("[0-9\\$@#].*|.*[&\\*:\\,\"\\=/\\<\\>\\(\\)\\-%\\.\\+\\?;' \\|\\\\\\^\\{\\}\\!`~].*");
 	/** Pattern to recognize runs of multiple spaces. */
-	private static Pattern runsOfSpacesPattern = Pattern.compile("  +");
+	private static final Pattern RUNS_OF_SPACES_PATTERN = Pattern.compile("  +");
 	/** Pattern to recognize trailing spaces. */
-	private static Pattern rtrimPattern = Pattern.compile("[\u0000-\u0020]+$");
+	private static final Pattern RTRIM_PATTERN = Pattern.compile("[\u0000-\u0020]+$");
 	/** Pattern to recognize leading spaces. */
-	private static Pattern ltrimPattern = Pattern.compile("^[\u0000-\u0020]+");
+	private static final Pattern LTRIM_PATTERN = Pattern.compile("^[\u0000-\u0020]+");
 	/** Pattern to recognize command-line arguments that need quoting (on Windows platforms). */
-	private static Pattern winCmdArgNeedsQuotingPattern = Pattern.compile("[\\s\"\\\\]+");
+	private static final Pattern WIN_CMD_ARG_NEEDS_QUOTING_PATTERN = Pattern.compile("[\\s\"\\\\]+");
 	/** Pattern to recognize a string of zero or more backslashes preceding a doublequote,
 	 *  OR, a string of one or more backslashes preceding the end of the string. */
-	private static Pattern backslashesBeforeDoubleQuotePattern = Pattern.compile("\\\\*\"|\\\\+$");
+	private static final Pattern BACKSLASHES_BEFORE_DOUBLE_QUOTE_PATTERN = Pattern.compile("\\\\*\"|\\\\+$");
 	/** The regular expression string used to parse floating-point values according
 	 * to the Java language specification.
 	 */
@@ -1286,7 +1289,7 @@ public final class CharUtil
 		    if (mixedcase)
 			needsDelimiting = !strValue.toUpperCase().equals(strValue);
 		    if (!needsDelimiting) {
-			Matcher m = specialCharsPattern.matcher(strValue);
+			Matcher m = SPECIAL_CHARS_PATTERN.matcher(strValue);
 			needsDelimiting = m.matches();
 		    }
 		}
@@ -1549,15 +1552,15 @@ public final class CharUtil
 	    Matcher m;
 	    int len = value.length();
 	    if (len > 1 && value.charAt(0) == '"' && value.charAt(len-1) == '"') {
-		m = delimitedIdentifierPattern.matcher(value);
+		m = DELIMITED_IDENTIFIER_PATTERN.matcher(value);
 	    }
 	    else {
 		// TODO: with keywords in these cases
 		if (uppercase) {
-		    m = upperIdentifierPattern.matcher(value);
+		    m = UPPER_IDENTIFIER_PATTERN.matcher(value);
 		}
 		else {
-		    m = regularIdentifierPattern.matcher(value);
+		    m = REGULAR_IDENTIFIER_PATTERN.matcher(value);
 		}
 	    }
 	    return m.matches();
@@ -1592,7 +1595,7 @@ public final class CharUtil
 	 * @return		Regularized result.
 	 */
 	public static String regularizeSpaces(final String value) {
-	    return runsOfSpacesPattern.matcher(value.trim()).replaceAll(" ");
+	    return RUNS_OF_SPACES_PATTERN.matcher(value.trim()).replaceAll(" ");
 	}
 
 
@@ -1616,7 +1619,7 @@ public final class CharUtil
 	 * @return		Trimmed result.
 	 */
 	public static String delimRtrim(final Object input) {
-	    String result = rtrimPattern.matcher((String) input).replaceAll("");
+	    String result = RTRIM_PATTERN.matcher((CharSequence) input).replaceAll("");
 	    if (result.length() == 0)
 		result = " ";
 	    return result;
@@ -1633,7 +1636,7 @@ public final class CharUtil
 	 * @return		Trimmed result.
 	 */
 	public static String rtrim(final Object input) {
-	    return rtrimPattern.matcher((String) input).replaceAll("");
+	    return RTRIM_PATTERN.matcher((CharSequence) input).replaceAll("");
 	}
 
 
@@ -1647,7 +1650,7 @@ public final class CharUtil
 	 * @return		Trimmed result.
 	 */
 	public static String ltrim(final Object input) {
-	    return ltrimPattern.matcher((String) input).replaceAll("");
+	    return LTRIM_PATTERN.matcher((CharSequence) input).replaceAll("");
 	}
 
 
@@ -1703,13 +1706,13 @@ public final class CharUtil
 	    // will pass through the CRTL parsing (and ProcessBuilder) unchanged, so we
 	    // don't even need to add our own doublequotes.
 	    //
-	    Matcher m = winCmdArgNeedsQuotingPattern.matcher(value);
+	    Matcher m = WIN_CMD_ARG_NEEDS_QUOTING_PATTERN.matcher(value);
 	    if (m.find()) {
 		// We need to doublequote the entire argument (which prevents ProcessBuilder
 		// from doing that), and escape any embedded doublequotes, and ensure that
 		// existing embedded backslashes survive the argv parsing.
 		StringBuffer sb = new StringBuffer();
-		m = backslashesBeforeDoubleQuotePattern.matcher(value);
+		m = BACKSLASHES_BEFORE_DOUBLE_QUOTE_PATTERN.matcher(value);
 		while (m.find()) {
 		    if (!m.hitEnd()) {
 			// We found a doublequote, preceded by N (possibly zero) backslashes.

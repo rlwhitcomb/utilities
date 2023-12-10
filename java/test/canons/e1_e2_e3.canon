@@ -1408,7 +1408,7 @@
 >Precision is now “34” digits.
 >help(j) -> 0.0000000000000000000000000000000001
 >Defining function “Truth(v)” = {
-> if v "T" else "F"
+>   if v "T" else "F"
 >}
 >Truth({}) -> "F"
 >Truth("") -> "F"
@@ -1665,7 +1665,7 @@
 >a.c.g.`$m1`.`$m2` = 3.45 -> 3.45
 >a -> { b: true, c: { d: "123", f: "fghi", g: { r: 6, s: 5, "e": "E", "f": { "g": 23, "h": { "i": 28, j: 16 }, 'h': 3.45 } } } }
 >Defining function “stack” = { _len: 0, _arr: [] }
->Defining function “push(s,v)” = { s._arr[s._len ++] = v }
+>Defining function “push(s, v)” = { s._arr[s._len ++] = v }
 >Defining function “pop(s)” = { _v = splice (s._arr, -- s._len, 1) ; _v[0] }
 >s1 = eval stack -> { _len: 0, _arr: [ ] }
 >push(s1, 19) -> 19
@@ -1684,9 +1684,9 @@
 >
 >] -> [ ]
 >{
-> a: 10,
-> b: true,
-> c: 'ABC'
+>   a: 10,
+>   b: true,
+>   c: 'ABC'
 >} -> { a: 10, b: true, c: "ABC" }
 >m2 = {} -> { }
 >m2.first = 'Rupert' -> "Rupert"

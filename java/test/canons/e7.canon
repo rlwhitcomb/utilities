@@ -12,10 +12,10 @@
 >$5 -> "text"
 >=========
 >Defining function “oddness” = {
-> Case value % 2 Of
-> 0: 'even',
-> 1: 'odd',
-> Default: 'NOT POSSIBLE!'
+>   Case value % 2 Of
+>   0: 'even',
+>   1: 'odd',
+>   Default: 'NOT POSSIBLE!'
 >}
 >value = 27 -> 27
 >oddness -> "odd"
@@ -24,10 +24,10 @@
 >value = -1 -> -1
 >oddness -> "NOT POSSIBLE!"
 >Defining function “oddness_if” = {
-> IF Abs (value % 2) == 0
-> 'even'
-> ELSE
-> 'odd'
+>   IF Abs (value % 2) == 0
+>   'even'
+>   ELSE
+>   'odd'
 >}
 >value = 23 -> 23
 >oddness_if -> "odd"
@@ -37,10 +37,10 @@
 >oddness_if -> "odd"
 >Defining function “multiples” = 
 > {
-> case value of
-> Default: { 'some other value' },
-> 7, 14, 21: { 'multiple of 7' },
-> 6, 12, 18: { 'multiple of 6' }
+>   case value of
+>   Default: { 'some other value' },
+>   7, 14, 21: { 'multiple of 7' },
+>   6, 12, 18: { 'multiple of 6' }
 >}
 >value = 14 -> 14
 >multiples -> "multiple of 7"
@@ -49,17 +49,17 @@
 >value = 3 -> 3
 >multiples -> "some other value"
 >Defining function “match_arrays” = {
-> case value of {
-> []: {
-> 'empty array'
->},
-> [1, 2]: {
-> "one and two"
->},
-> default: {
-> 'some other array'
->}
->}
+>   case value of {
+>      []: {
+>         'empty array'
+>      },
+>      [1, 2]: {
+>         "one and two"
+>      },
+>      default: {
+>         'some other array'
+>      }
+>   }
 >}
 >value = [] -> [ ]
 >match_arrays -> "empty array"
@@ -68,11 +68,11 @@
 >value = [3, 4, 5] -> [ 3, 4, 5 ]
 >match_arrays -> "some other array"
 >Defining function “strings” = {
-> case upper (value) of
-> "ONE": 1,
-> "TWO": 2,
-> "THREE": 3.14,
-> default: "many"
+>   case upper (value) of
+>   "ONE": 1,
+>   "TWO": 2,
+>   "THREE": 3.14,
+>   default: "many"
 >}
 >value = 'one' -> "one"
 >strings -> 1
@@ -83,13 +83,13 @@
 >value = "zero" -> "zero"
 >strings -> "many"
 >Defining function “fieldType(typeid)” = {
-> case typeid of {
-> 4: ' TEXT',
-> 7: 'LABEL',
-> 19,
-> default,
-> 23: `$typeid`
->}
+>   case typeid of {
+>      4: ' TEXT',
+>      7: 'LABEL',
+>      19,
+>      default,
+>      23: `$typeid`
+>   }
 >}
 >fieldType(4) -> " TEXT"
 >fieldType(7) -> "LABEL"
@@ -97,18 +97,18 @@
 >fieldType(19) -> "19"
 >fieldType(99) -> "99"
 >'type: ' + fieldType(4) -> "type:  TEXT"
->Defining function “srt(a1,a2,f)” = { f(a1, a2) > 0 ? a1 : a2 }
+>Defining function “srt(a1, a2, f)” = { f(a1, a2) > 0 ? a1 : a2 }
 >Defining function “precision_to_directive” = {
-> case settings.precision of {
-> 0: '$unlimited',
-> 1, 2, 3, 4, 5, 6,
-> 8 ... 15, 1,
-> 17 .. 33: `$$dec ${settings.precision}`,
-> 7: '$float',
-> 16: '$double',
-> 34: '$default',
-> default: `$$decimal(${settings.precision})`
->}
+>   case settings.precision of {
+>      0: '$unlimited',
+>      1, 2, 3, 4, 5, 6,
+>      8 ... 15, 1,
+>      17 .. 33: `$$dec ${settings.precision}`,
+>      7: '$float',
+>      16: '$double',
+>      34: '$default',
+>      default: `$$decimal(${settings.precision})`
+>   }
 >}
 >old_precision = settings.precision -> 34
 >Precision is now “UNLIMITED”.
@@ -198,17 +198,17 @@
 >precision_to_directive -> "$default"
 >test_string = 'abababc' -> "abababc"
 >case test_string of {
-> matches '(ab){3}.': 'match',
-> default: 'not a match'
+>   matches '(ab){3}.': 'match',
+>   default: 'not a match'
 >} -> "match"
 >Defining function “test(a)” = {
-> case a of {
-> 0: 'zero',
-> 1: 'one',
-> 3: 'three',
-> default: next,
-> 4: 'even'
->}
+>   case a of {
+>      0: 'zero',
+>      1: 'one',
+>      3: 'three',
+>      default: next,
+>      4: 'even'
+>   }
 >}
 >test(v) -> "zero"
 >test(v) -> "one"
@@ -216,30 +216,30 @@
 >test(v) -> "three"
 >test(v) -> "even"
 >Defining function “power(n)” = {
-> var result = 1 ;
-> case n of {
-> 20: { result *= n ; next },
-> 19: { result *= n ; next },
-> 18: { result *= n ; next },
-> 17: { result *= n ; next },
-> 16: { result *= n ; next },
-> 15: { result *= n ; next },
-> 14: { result *= n ; next },
-> 13: { result *= n ; next },
-> 12: { result *= n ; next },
-> 11: { result *= n ; next },
-> 10: { result *= n ; next },
-> 9: { result *= n ; next },
-> 8: { result *= n ; next },
-> 7: { result *= n ; next },
-> 6: { result *= n ; next },
-> 5: { result *= n ; next },
-> 4: { result *= n ; next },
-> 3: { result *= n ; next },
-> 2: { result *= n ; next },
-> 1: { result *= n ; next }
->}
-> result
+>   var result = 1 ;
+>   case n of {
+>      20: { result *= n ; next },
+>      19: { result *= n ; next },
+>      18: { result *= n ; next },
+>      17: { result *= n ; next },
+>      16: { result *= n ; next },
+>      15: { result *= n ; next },
+>      14: { result *= n ; next },
+>      13: { result *= n ; next },
+>      12: { result *= n ; next },
+>      11: { result *= n ; next },
+>      10: { result *= n ; next },
+>      9: { result *= n ; next },
+>      8: { result *= n ; next },
+>      7: { result *= n ; next },
+>      6: { result *= n ; next },
+>      5: { result *= n ; next },
+>      4: { result *= n ; next },
+>      3: { result *= n ; next },
+>      2: { result *= n ; next },
+>      1: { result *= n ; next }
+>   }
+>   result
 >}
 >power(f) -> 1
 >power(f) -> 4
@@ -262,11 +262,11 @@
 >power(f) -> 1978419655660313589123979
 >power(f) -> 104857600000000000000000000
 >Defining function “sign(value)” = {
-> case value of {
-> < 0: -1,
-> == 0: 0,
-> > 0: + 1
->}
+>   case value of {
+>      < 0: -1,
+>      == 0: 0,
+>      > 0: + 1
+>   }
 >}
 >sign(-23) -> -1
 >signum (-23) -> -1
@@ -275,11 +275,11 @@
 >sign(0.01) -> 1
 >signum (0.01) -> 1
 >Defining function “m(v)” = {
-> case v of {
-> matches "abc", 1: 'this is abc',
-> matches "def", 1: 'and def',
-> default: 'something else!'
->}
+>   case v of {
+>      matches "abc", 1: 'this is abc',
+>      matches "def", 1: 'and def',
+>      default: 'something else!'
+>   }
 >}
 >m("ABC") -> "this is abc"
 >m("abc") -> "this is abc"
@@ -287,13 +287,13 @@
 >m("def") -> "and def"
 >m("junk") -> "something else!"
 >Defining function “range(value)” = {
-> case value of {
-> >= 0.0 && < 1.0: 1,
-> >= 1.0 && < 2.0: 2,
-> >= 2.0 && < 3.0: 3,
-> >= 3.0 && < 4.0: 4,
-> default: 0
->}
+>   case value of {
+>      >= 0.0 && < 1.0: 1,
+>      >= 1.0 && < 2.0: 2,
+>      >= 2.0 && < 3.0: 3,
+>      >= 3.0 && < 4.0: 4,
+>      default: 0
+>   }
 >}
 >range(1.5) -> 2
 >range(3.7) -> 4
@@ -312,7 +312,7 @@
 >$4 -> 3
 >$*[2] -> 1
 >$5 -> "text"
->Defining function “sum_of_cubes(sum,x,y,z)” = { x ** 3 + y ** 3 + z ** 3 == sum }
+>Defining function “sum_of_cubes(sum, x, y, z)” = { x ** 3 + y ** 3 + z ** 3 == sum }
 >Precision is now “400” digits.
 >sum_of_cubes(1, 9, 10, − 12) -> true
 >sum_of_cubes(2, 1214928, 3480205, -3528875) -> true
@@ -384,16 +384,16 @@
 >sum_of_cubes(993, 8832050461219, -4404654595589, -8450650557413) -> true
 >Precision is now “34” digits.
 >Defining function “collatz(n)” = {
-> var steps = 0
-> var v = n
-> while v <> 1 {
-> case v % 2 of {
-> 0: v \= 2,
-> 1: v = v * 3 + 1
->}
-> ++ steps
->}
-> steps
+>   var steps = 0
+>   var v = n
+>   while v <> 1 {
+>      case v % 2 of {
+>         0: v \= 2,
+>         1: v = v * 3 + 1
+>      }
+>      ++ steps
+>   }
+>   steps
 >}
 >collatz(1) -> 0
 >collatz(2) -> 1

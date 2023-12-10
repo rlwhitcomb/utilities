@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.40.2', date: d'2023-12-09',
+      issues: [ 635 ],
+      comment: 'Improve indenting in display of statement blocks.'
+    },
     { version: '2.40.0', date: d'2023-12-06',
       issues: [ 600 ],
       comment: 'Loop labels and "leave" statement with a target label.'
