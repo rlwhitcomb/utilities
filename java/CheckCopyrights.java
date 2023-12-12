@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2015-2018,2020-2022 Roger L. Whitcomb
+ * Copyright (c) 2015-2018,2020-2023 Roger L. Whitcomb
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,31 +26,32 @@
  *	present and accurate.
  *
  * History:
- *  23-Jan-15 rlw  ---	Initial version.
- *  03-Mar-15 rlw  ---	Move CommandProcessor to the new package.
- *  26-May-16 rlw  ---	Fix Javadoc warnings from Java 8.
- *  05-Jul-16 rlw  ---	Simplify the Intl.PackageResourceProvider installation.
- *  21-Mar-17 rlw  ---	Simplify Intl initialization once again.
- *  01-Jun-17 rlw  ---	Add some more ignored extensions and file names.  Add
+ *  23-Jan-15 rlw ----	Initial version.
+ *  03-Mar-15 rlw ----	Move CommandProcessor to the new package.
+ *  26-May-16 rlw ----	Fix Javadoc warnings from Java 8.
+ *  05-Jul-16 rlw ----	Simplify the Intl.PackageResourceProvider installation.
+ *  21-Mar-17 rlw ----	Simplify Intl initialization once again.
+ *  01-Jun-17 rlw ----	Add some more ignored extensions and file names.  Add
  *			the concept of ignored directories also.
- *  16-Jun-17 rlw  ---	Adapt to new return values from LineProcessor methods.
- *  28-Jul-17 rlw  ---	Move the default package resource initialization into Intl itself, so
+ *  16-Jun-17 rlw ----	Adapt to new return values from LineProcessor methods.
+ *  28-Jul-17 rlw ----	Move the default package resource initialization into Intl itself, so
  *			all the callers don't have to do it.
- *  07-Feb-18 rlw  ---	If a preprocessor version of the file exists, don't check the processed
+ *  07-Feb-18 rlw ----	If a preprocessor version of the file exists, don't check the processed
  *			version.
- *  07-Feb-18 rlw  ---	Add ".tab" to ignored extensions.
- *  13-Feb-20 rlw  ---	Add a few more extensions, files, and directories to ignore.
+ *  07-Feb-18 rlw ----	Add ".tab" to ignored extensions.
+ *  13-Feb-20 rlw ----	Add a few more extensions, files, and directories to ignore.
  *			Add a new "optionalFileNames" set for those files we want to check for proper
  *			copyrights in, but don't want to error out if there isn't one (like "package-info.java").
- *  18-Feb-20 rlw  ---	Use default methods in LineProcessor interface instead of Adapter class; add nesting level
+ *  18-Feb-20 rlw ----	Use default methods in LineProcessor interface instead of Adapter class; add nesting level
  *			to "enterDirectory" method.
- *  29-Mar-21 rlw  ---	Prepare for GitHub.
- *  04-Sep-21 rlw  ---	Use "git" commands to get information. Check license information.
- *  05-Jan-22 rlw  ---	Tweak output; update copyright year.
- *		  #99:	Quit early if "git" is not available.
- *  10-Jan-22 rlw #99:	Don't throw an exception, just error out.
- *  26-Oct-22 rlw  ---	Read all our configuration from "copyrights.json" file, including new
+ *  29-Mar-21 rlw ----	Prepare for GitHub.
+ *  04-Sep-21 rlw ----	Use "git" commands to get information. Check license information.
+ *  05-Jan-22 rlw ----	Tweak output; update copyright year.
+ *		  #99	Quit early if "git" is not available.
+ *  10-Jan-22 rlw #99	Don't throw an exception, just error out.
+ *  26-Oct-22 rlw ----	Read all our configuration from "copyrights.json" file, including new
  *			information on overridden starting years.
+ *  11-Dec-23 rlw ----	Minor reformatting.
  */
 import info.rlwhitcomb.json.JSON;
 import info.rlwhitcomb.util.CommandProcessor;
@@ -132,6 +133,7 @@ public class CheckCopyrights
 
 	private static final Pattern COMMITLOG_PATTERN =
 		Pattern.compile("Date:\\s+([A-Z][a-z][a-z])\\s([A-Z][a-z][a-z])\\s(\\d{1,2})\\s(\\d\\d:\\d\\d:\\d\\d)\\s(\\d\\d\\d\\d)\\s\\-?[0-9]{4}");
+
 
 	/**
 	 * Get the last two parts of a file path, with standard (that is, {@code "/"}) separators
@@ -453,23 +455,25 @@ public class CheckCopyrights
 			    }
 			    if (correct) {
 				if (verbose) {
-				    System.out.format("File '%1$s': correct copyright '%2$s' matches that found in file '%3$s'%n", file.getPath(), correctYearString, yearString);
+				    System.out.format("File '%1$s': correct copyright '%2$s' matches that found in file '%3$s'%n",
+					file.getPath(), correctYearString, yearString);
 				}
 			    }
 			    else {
 				wrongCopyrightErrors++;
-				System.out.format("Wrong copyright years in file '%1$s':%nValid Years Found: '%2$s'%n        Should be: '%3$s'%n", file.getPath(), yearString, correctYearString);
+				System.out.format("Wrong copyright years in file '%1$s':%nValid Years Found: '%2$s'%n        Should be: '%3$s'%n",
+					file.getPath(), yearString, correctYearString);
 			    }
 			}
 			else {
 			    wrongCopyrightErrors++;
-			    System.out.format("Wrong format for copyright in file '%1$s':%n\tFound: '%2$s'%n", file.getPath(), copyrightString);
+			    System.out.format("Wrong format for copyright in file '%1$s':%n\tFound: '%2$s'%n",
+				    file.getPath(), copyrightString);
 			}
 		    }
 		    // We want to process every file, regardless of "errors" in it
 		    return true;
 		}
-
 	}
 
 	@SuppressWarnings("unchecked")
