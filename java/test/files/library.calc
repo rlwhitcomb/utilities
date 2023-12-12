@@ -489,7 +489,7 @@ define dateformat(d, f = 'mm/dd/yyyy') = {
     define d2(n) = n < 10 ? '0' + n : @@n
     define dg(n) = @@n
     define finishRun(ch) = {
-        var len = length(runOf)
+        const len = length(runOf)
         if len {
             if ch == runOf[0] leave
             case runOf[0] of {
@@ -631,8 +631,8 @@ define primes(n) = {
  * @return [ x1, x2 ] if solution is real, error if not
  */
 define quad(a, b, c) = {
-  var _b2 = b * b
-  var _2a = 2 * a
+  const _b2 = b²
+  const _2a = 2 * a
   var _r = (_b2 - 4 * a * c)
   if _r < 0 {
     _r = abs(_r)
@@ -674,13 +674,13 @@ define zeta_2n(_2n) = ((-1)**(_2n / 2 + 1) * Bn(_2n) * (2 * pi) ** _2n) / (2 * _
  * @return The k-th Tangent number
  */
 define Tn(k) = {
-  var _2k2 = 2*k + 2
-  var _2_2k2 = 2 ** _2k2
+  const _2k2 = 2*k + 2
+  const _2_2k2 = 2 ** _2k2
   $rational on {
-    var _fact = Bn(_2k2) / _2k2
-    var _result = _2_2k2 * (_2_2k2 - 1) * _fact
+    const _fact = Bn(_2k2) / _2k2
+    const _result = _2_2k2 * (_2_2k2 - 1) * _fact
   }
-  _result@d
+  ~~_result
 }
 
 #
@@ -715,9 +715,9 @@ define _pmt_internal_(ctx) = {
   ctx.num = (ctx.N ? (ctx.N * 12) : ctx.n)
 
   # Calculate the intermediate values (which are reused)
-  var r_n = (1 + ctx.rate) ** ctx.num
-  var r_r_n = ctx.rate * r_n
-  var r_n_1 = r_n - 1
+  const r_n = (1 + ctx.rate) ** ctx.num
+  const r_r_n = ctx.rate * r_n
+  const r_n_1 = r_n - 1
 
   # Now the final monthly payment value
   ctx.P * (r_r_n / r_n_1)
@@ -879,10 +879,10 @@ define capitalize(s, mode) = {
  * @return { mean: xxx, stddev: sss }
  */
 define mean_stddev (values) = {
-  var len = length(values)
-  var avg = sumof(values) / len
+  const len = length(values)
+  const avg = sumof(values) / len
   var variance = 0
-  loop v over values { variance += (v - avg) ** 2 }
+  loop v over values { variance += (v - avg)² }
   variance /= len
   { mean: avg, stddev: round(sqrt(variance), 3) }
 }
