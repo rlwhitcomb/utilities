@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2013-2014,2016,2020-2022 Roger L. Whitcomb.
+ * Copyright (c) 2013-2014,2016,2020-2023 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -50,8 +50,12 @@
  *	    Code cleanup.
  *	09-Jul-2022 (rlwhitcomb)
  *	    #393: Cleanup imports.
+ *	14-Dec-2023 (rlwhitcomb)
+ *	    Use MaxInt appropriately.
  */
 package info.rlwhitcomb.util;
+
+import info.rlwhitcomb.math.MaxInt;
 
 import java.util.*;
 
@@ -667,7 +671,7 @@ public class BidiMap<K, V> implements Map<K, V>
 	public void dumpState(final boolean printNulls) {
 	    System.out.format("BidiMap statistics%n------------------%n");
 	    System.out.format("Size: %1$d, Capacity: %2$d, Load Factor: %3$6.3f%n", size, keyTable.length, loadFactor);
-	    int longestChain = 0;
+	    MaxInt longestChain = MaxInt.zero();
 	    int numFilled = 0;
 	    int numKeys = 0, numValues = 0;
 	    System.out.format("Key Table:%n----------%n");
@@ -691,14 +695,16 @@ public class BidiMap<K, V> implements Map<K, V>
 			numKeys++;
 		    }
 		    System.out.println();
-		    longestChain = Math.max(longestChain, chainLen);
+		    longestChain.set(chainLen);
 		}
 	    }
 	    System.out.println("----------------");
-	    System.out.format("Longest key chain: %1$d, percent filled = %2$4.1f%%%n", longestChain, (float) numFilled / (float) keyTable.length * 100.0f);
+	    System.out.format("Longest key chain: %1$d, percent filled = %2$4.1f%%%n",
+		longestChain.get(), (float) numFilled / (float) keyTable.length * 100.0f);
 	    System.out.format("Size = %1$d, number of keys = %2$d%n", size, numKeys);
 	    System.out.println("================");
-	    longestChain = 0;
+
+	    longestChain.reset();
 	    numFilled = 0;
 	    System.out.format("Value Table:%n------------%n");
 	    for (int index = 0; index < valueTable.length; index++) {
@@ -721,11 +727,12 @@ public class BidiMap<K, V> implements Map<K, V>
 			numValues++;
 		    }
 		    System.out.println();
-		    longestChain = Math.max(longestChain, chainLen);
+		    longestChain.set(chainLen);
 		}
 	    }
 	    System.out.println("----------------");
-	    System.out.format("Longest value chain: %1$d, percent filled = %2$4.1f%%%n", longestChain, (float) numFilled / (float) keyTable.length * 100.0f);
+	    System.out.format("Longest value chain: %1$d, percent filled = %2$4.1f%%%n",
+		longestChain.get(), (float) numFilled / (float) keyTable.length * 100.0f);
 	    System.out.format("Size = %1$d, number of values = %2$d%n", size, numValues);
 	    System.out.println("================");
 	}

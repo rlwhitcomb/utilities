@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2010-2011,2013,2015-2017,2020,2022 Roger L. Whitcomb.
+ * Copyright (c) 2010-2011,2013,2015-2017,2020,2022-2023 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -68,11 +68,14 @@
  *	#393: Cleanup imports.
  *    12-Oct-2022 (rlwhitcomb)
  *	#513: Move Logging and LogStream to new package.
+ *    12-Dec-2023 (rlwhitcomb)
+ *	Use MaxInt.
  */
 package info.rlwhitcomb.util;
 
 import info.rlwhitcomb.logging.Logging;
 import info.rlwhitcomb.logging.LogStream;
+import info.rlwhitcomb.math.MaxInt;
 import info.rlwhitcomb.math.Num;
 
 import java.io.PrintStream;
@@ -110,7 +113,7 @@ public class ClientStatistics implements Runnable
 	/** Total number of client sessions that have been started so far. */
 	public static long numberClients = 0;
 	/** The maximum number of client sessions that have been running concurrently. */
-	public static int maxConcurrency = 0;
+	public static MaxInt maxConcurrency = MaxInt.zero();
 	/** The total number of bytes transferred through any input or output streams
 	 * created by all sessions so far (updated by {@link #addToBytes} method. */
 	public static long totalNumberBytes = 0;
@@ -229,7 +232,7 @@ public class ClientStatistics implements Runnable
 	}
 
 	private static String format(double value) {
-	    return (value == (double)Long.MIN_VALUE || value == (double)Long.MAX_VALUE)
+	    return (value == (double) Long.MIN_VALUE || value == (double) Long.MAX_VALUE)
 		? CharUtil.padToWidth("N/A", 16, CharUtil.Justification.RIGHT)
 		: Num.fmt2(value, SCALE, 12);
 	}
@@ -253,7 +256,7 @@ public class ClientStatistics implements Runnable
 	    // and update some statistics right away
 	    synchronized(runningClients) {
 		runningClients.put(name, clientObj);
-		maxConcurrency = Math.max(maxConcurrency, runningClients.size());
+		maxConcurrency.set(runningClients.size());
 		numberClients++;
 	    }
 	    return clientObj;
@@ -291,7 +294,7 @@ public class ClientStatistics implements Runnable
 		    Logging.Info("              Number of bytes read: %1$s", format(numBytesRead));
 		    Logging.Info("           Number of bytes written: %1$s", format(numBytes - numBytesRead));
 		    Logging.Info("    Total number bytes transferred: %1$s", format(numBytes));
-		    Logging.Info(" Total time (seconds) this session: %1$s", format((double)sessionTime));
+		    Logging.Info(" Total time (seconds) this session: %1$s", format((double) sessionTime));
 		    Logging.Info(" Amount of memory currently in use: %1$s", format(usedMemory));
 		    Logging.Info("Maximum amount of memory available: %1$s", format(maxMemory));
 		    Logging.Info("       Remaining number of clients: %1$s", format(runningClients.size()));
@@ -366,7 +369,7 @@ public class ClientStatistics implements Runnable
 	    synchronized(runningClients) {
 		out.print("Total number of client sessions so far: "); out.println(format(numberClients));
 		out.print("    Number of currently active clients: "); out.println(format(runningClients.size()));
-		out.print("  Maximum number of concurrent clients: "); out.println(format(maxConcurrency));
+		out.print("  Maximum number of concurrent clients: "); out.println(format(maxConcurrency.get()));
 		out.print("                  Number of bytes read: "); out.println(format(totalNumberBytesRead));
 		out.print("               Number of bytes written: "); out.println(format(totalNumberBytes - totalNumberBytesRead));
 		out.print("     Total number of bytes transferred: "); out.println(format(totalNumberBytes));
@@ -377,19 +380,19 @@ public class ClientStatistics implements Runnable
 		    average = totalNumberBytes / numberClients;
 		    out.print("   Average number of bytes per session: "); out.println(format(average));
 		}
-		out.print(" Total time (seconds) for all sessions: "); out.println(format((double)totalTime));
+		out.print(" Total time (seconds) for all sessions: "); out.println(format((double) totalTime));
 		long elapsed = Environment.highResTimer() - lastRequestTime;
 		if (numberClients != 0) {
-		    out.print("             Minimum time in a session: "); out.println(format((double)minTime));
-		    out.print("             Maximum time in a session: "); out.println(format((double)maxTime));
-		    double avg = (double)totalTime / (double)numberClients;
+		    out.print("             Minimum time in a session: "); out.println(format((double) minTime));
+		    out.print("             Maximum time in a session: "); out.println(format((double) maxTime));
+		    double avg = (double) totalTime / (double) numberClients;
 		    out.print("   Average amount of time in a session: "); out.println(format(avg));
 		    out.print(" Time (secs) since last client request: ");
 		}
 		else {
 		    out.print("             Time (secs) since startup: ");
 		}
-		out.println(format((double)elapsed));
+		out.println(format((double) elapsed));
 
 		Runtime runtime = Runtime.getRuntime();
 		long usedMemory = runtime.totalMemory() - runtime.freeMemory();

@@ -26,35 +26,37 @@
  *	of arithmetic and other operations related to them.
  *
  * History:
- *  24-Jan-22 rlw  ---	Created.
- *		  #103:	More work: extend Number, implement Comparable, Serializable.
- *  30-Jan-22 rlw #103:	extend aliases of "i" (must match CalcPredefine).
- *  31-Jan-22 rlw #103:	Create from List and Map; convert to List and Map.
- *  01-Feb-22 rlw #103:	Powers of integer and real values, negate, another alias,
+ *  24-Jan-22 rlw ----	Created.
+ *		  #103	More work: extend Number, implement Comparable, Serializable.
+ *  30-Jan-22 rlw #103	extend aliases of "i" (must match CalcPredefine).
+ *  31-Jan-22 rlw #103	Create from List and Map; convert to List and Map.
+ *  01-Feb-22 rlw #103	Powers of integer and real values, negate, another alias,
  *			"toLongString" method, override "equals" and "hashCode".
- *		  #231:	Use new Constants values instead of our own.
- *  05-Feb-22 rlw  ---	Fix Intl keys.
- *  08-Feb-22 rlw #235:	Use MathUtil.atan2 for "theta" to get full precision.
+ *		  #231	Use new Constants values instead of our own.
+ *  05-Feb-22 rlw ----	Fix Intl keys.
+ *  08-Feb-22 rlw #235	Use MathUtil.atan2 for "theta" to get full precision.
  *			A lot of refactoring, include support for "polar" form.
- *  18-Feb-22 rlw  ---	Add "signum" method.
- *  14-Apr-22 rlw #272:	Some (mostly) documentation fixes.
- *		  #273:	Move to "math" package.
- *  21-Jun-22 rlw #314:	Add SetScope to the mix: conversions to/from sets.
- *  08-Jul-22 rlw #393:	Cleanup imports.
- *  19-Jul-22 rlw #420:	Add new formats for "parse". Add "imaginary" constructors.
- *  01-Oct-22 rlw #497:	New method for precision.
- *  12-Oct-22 rlw #514:	Move resource text from "util" to "math" package.
- *  11-Nov-22 rlw #420:	Adjust COMPLEX_PATTERNS to recognize '1+i' (for instance).
- *  19-Dec-22 rlw #559:	Implement rational mode.
- *  20-Dec-22 rlw #559:	More fractional forms; always represents fractions as "proper".
- *  31-Dec-22 rlw #558:	Make F_ZERO public.
- *  05-Jan-23 rlw #558:	Make copies of the fraction parts to avoid improper "proper" settings.
- *  09-Jan-23 rlw #103:	Add "sqrt"; fixup results of subtract and multiply/divide.
- *  21-Feb-23 rlw #244:	Implement formatting with separators.
- *  09-May-23 rlw  ---	Move F_ZERO back to BigFraction (too weird in here).
+ *  18-Feb-22 rlw ----	Add "signum" method.
+ *  14-Apr-22 rlw #272	Some (mostly) documentation fixes.
+ *		  #273	Move to "math" package.
+ *  21-Jun-22 rlw #314	Add SetScope to the mix: conversions to/from sets.
+ *  08-Jul-22 rlw #393	Cleanup imports.
+ *  19-Jul-22 rlw #420	Add new formats for "parse". Add "imaginary" constructors.
+ *  01-Oct-22 rlw #497	New method for precision.
+ *  12-Oct-22 rlw #514	Move resource text from "util" to "math" package.
+ *  11-Nov-22 rlw #420	Adjust COMPLEX_PATTERNS to recognize '1+i' (for instance).
+ *  19-Dec-22 rlw #559	Implement rational mode.
+ *  20-Dec-22 rlw #559	More fractional forms; always represents fractions as "proper".
+ *  31-Dec-22 rlw #558	Make F_ZERO public.
+ *  05-Jan-23 rlw #558	Make copies of the fraction parts to avoid improper "proper" settings.
+ *  09-Jan-23 rlw #103	Add "sqrt"; fixup results of subtract and multiply/divide.
+ *  21-Feb-23 rlw #244	Implement formatting with separators.
+ *  09-May-23 rlw ----	Move F_ZERO back to BigFraction (too weird in here).
+ *  13-Dec-23 rlw ----	Use MaxInt.
  */
 package info.rlwhitcomb.math;
 
+import info.rlwhitcomb.math.MaxInt;
 import info.rlwhitcomb.util.CharUtil;
 import info.rlwhitcomb.util.Intl;
 
@@ -76,6 +78,9 @@ import static info.rlwhitcomb.util.Constants.*;
  * numbers have their other component set to {@code null},
  * which also means that {@code 0} values for either are
  * removed, to reduce the number of special cases in the math.
+ * <p> Values can also be stored as two {@link BigFraction} values (real
+ * and imaginary) if desired, in which case all arithmetic (if possible)
+ * is done as rational values also.
  * <p> TODO: more math operations.
  */
 public class ComplexNumber extends Number implements Serializable, Comparable<ComplexNumber>
@@ -664,26 +669,26 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 	 * @return Maximum precision of the two parts.
 	 */
 	public int precision() {
-	    int prec = 0;
+	    MaxInt prec;
 
 	    if (rational) {
-		prec = BigFraction.F_ZERO.precision();
+		prec = MaxInt.of(BigFraction.F_ZERO.precision());
 
 		if (realFrac != null)
-		    prec = Math.max(prec, realFrac.precision());
+		    prec.set(realFrac.precision());
 		if (imaginaryFrac != null)
-		    prec = Math.max(prec, imaginaryFrac.precision());
+		    prec.set(imaginaryFrac.precision());
 	    }
 	    else {
-		prec = BigDecimal.ZERO.precision();
+		prec = MaxInt.of(BigDecimal.ZERO.precision());
 
 		if (realPart != null)
-		    prec = Math.max(prec, realPart.precision());
+		    prec.set(realPart.precision());
 		if (imaginaryPart != null)
-		    prec = Math.max(prec, imaginaryPart.precision());
+		    prec.set(imaginaryPart.precision());
 	    }
 
-	    return prec;
+	    return prec.get();
 	}
 
 

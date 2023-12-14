@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2022-2023 Roger L. Whitcomb.
+ * Copyright (c) 2023 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,29 +21,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  *
- *	An integer that always keeps its maximum value.
+ *	An integer that always keeps its minimum value.
  *
  * History:
- *  15-Dec-22 rlw ----	Initial coding.
- *  13-Dec-23 rlw ----	Add "next" method to get max value + 1; rename "pos" to "zero";
- *			Add "increment" and "reset" methods. Add "min" static method.
+ *  14-Dec-23 rlw ----	Clone from "MaxInt".
  */
 package info.rlwhitcomb.math;
 
 
 /**
- * Instead of the rather verbose syntax: <code>int j = 0; j = Math.max(j, some_other_value);</code>
- * use one of these to say: <code>MaxInt j = MaxInt.zero(); j.set(some_other_value);</code>
+ * Instead of the rather verbose syntax: <code>int j = Integer.MAX_VALUE; j = Math.min(j, some_other_value);</code>
+ * use one of these to say: <code>MinInt j = MinInt.max(); j.set(some_other_value);</code>
  * <p> But really, the main purpose is to (hopefully) reduce copy/paste kind of errors, because
- * there is only one reference to the "max" variable per use, instead of two needed with just
- * {@link Math#max(int,int)}.
+ * there is only one reference to the "min" variable per use, instead of two needed with just
+ * {@link Math#min(int,int)}.
  */
-public final class MaxInt extends Number
+public final class MinInt extends Number
 {
 	/**
-	 * The default minimum value (suitable for any signed value).
+	 * The default maximum value (suitable for any signed value).
 	 */
-	private static final int DEFAULT_MINIMUM = Integer.MIN_VALUE;
+	private static final int DEFAULT_MAXIMUM = Integer.MAX_VALUE;
 
 	/**
 	 * The value of this variable.
@@ -51,34 +49,34 @@ public final class MaxInt extends Number
 	private int value;
 
 	/**
-	 * The initial value (minimum), used by {@link #set()}, and {@link #reset()}.
+	 * The initial value (maximum), used by {@link #set()}, and {@link #reset()}.
 	 */
 	private final int initialValue;
 
 
 	/**
-	 * Construct one with the default minimum value.
+	 * Construct one with the default maximum value.
 	 */
-	public MaxInt() {
-	    value = initialValue = DEFAULT_MINIMUM;
+	public MinInt() {
+	    value = initialValue = DEFAULT_MAXIMUM;
 	}
 
 	/**
-	 * Construct the default version with {@link #DEFAULT_MINIMUM} as the initial value.
+	 * Construct the default version with {@link #DEFAULT_MAXIMUM} as the initial value.
 	 *
-	 * @return A new object with the default minimum value.
+	 * @return A new object with the default maximum value.
 	 */
-	public static MaxInt min() {
-	    return new MaxInt();
+	public static MinInt max() {
+	    return new MinInt();
 	}
 
 	/**
-	 * Construct one suitable for positive values only.
+	 * Construct one suitable for negative values only.
 	 *
-	 * @return A new object with minimum value of zero.
+	 * @return A new object with maximum value of zero.
 	 */
-	public static MaxInt zero() {
-	    return new MaxInt(0);
+	public static MinInt zero() {
+	    return new MinInt(0);
 	}
 
 	/**
@@ -86,39 +84,39 @@ public final class MaxInt extends Number
 	 *
 	 * @param v The starting minimum value.
 	 */
-	public MaxInt(final int v) {
+	public MinInt(final int v) {
 	    value = initialValue = v;
 	}
 
 	/**
-	 * Alternate static constructor for any minimum value.
+	 * Alternate static constructor for any maximum value.
 	 *
-	 * @param v The starting minimum value.
+	 * @param v The starting maximum value.
 	 * @return  A new object with this value.
 	 */
-	public static MaxInt of(final int v) {
-	    return new MaxInt(v);
+	public static MinInt of(final int v) {
+	    return new MinInt(v);
 	}
 
 	/**
-	 * Set the new value of this object to be the maximum of the existing value
+	 * Set the new value of this object to be the minimum of the existing value
 	 * and this new value.
 	 *
 	 * @param v The new value to set.
 	 * @return  This object again.
 	 */
-	public MaxInt set(final int v) {
-	    value = Math.max(value, v);
+	public MinInt set(final int v) {
+	    value = Math.min(value, v);
 	    return this;
 	}
 
 	/**
-	 * Has the value been set above the initial minimum?
+	 * Has the value been set below the initial maximum?
 	 *
-	 * @return Whether the value is above the minimum.
+	 * @return Whether the value is below the initial value.
 	 */
 	public boolean set() {
-	    return value > initialValue;
+	    return value < initialValue;
 	}
 
 	/**
@@ -126,29 +124,8 @@ public final class MaxInt extends Number
 	 *
 	 * @return     The current object.
 	 */
-	public MaxInt reset() {
+	public MinInt reset() {
 	    value = initialValue;
-	    return this;
-	}
-
-	/**
-	 * Increment the current value by one.
-	 *
-	 * @return     The current object.
-	 */
-	public MaxInt increment() {
-	    value++;
-	    return this;
-	}
-
-	/**
-	 * Increment the current value by any amount.
-	 *
-	 * @param incr The amount to increment by.
-	 * @return     The current object.
-	 */
-	public MaxInt increment(final int incr) {
-	    value += incr;
 	    return this;
 	}
 
@@ -159,15 +136,6 @@ public final class MaxInt extends Number
 	 */
 	public int get() {
 	    return value;
-	}
-
-	/**
-	 * Access the current value plus one.
-	 *
-	 * @return The current maximum value plus one.
-	 */
-	public int next() {
-	    return value + 1;
 	}
 
 	@Override

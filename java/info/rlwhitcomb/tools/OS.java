@@ -82,10 +82,13 @@
  *	02-Nov-2023 (rlwhitcomb)
  *	    #633: New "-noopt" and "-opt" options to allow processing the default options
  *	    from the environment.
+ *	14-Dec-2023 (rlwhitcomb)
+ *	    Use MaxInt class.
  */
 package info.rlwhitcomb.tools;
 
 import info.rlwhitcomb.directory.Match;
+import info.rlwhitcomb.math.MaxInt;
 import info.rlwhitcomb.util.CharUtil;
 import info.rlwhitcomb.util.ConsoleColor;
 import info.rlwhitcomb.util.Environment;
@@ -394,14 +397,14 @@ public class OS
 	}
 
 	private static void display(final String title, final List<String> values) {
-	    int size      = values.size();
-	    int maxLength = 0;
+	    int size = values.size();
+	    MaxInt maxLength = MaxInt.zero();
 
 	    for (String value : values)
-		maxLength = Math.max(maxLength, ConsoleColor.textLength(value));
-	    maxLength += 2;	// to leave some space b/w columns
+		maxLength.set(ConsoleColor.textLength(value));
+	    maxLength.increment(2);	// to leave some space b/w columns
 
-	    int numberColumns = Math.max(1, screenWidth / maxLength);
+	    int numberColumns = Math.max(1, screenWidth / maxLength.get());
 	    int columnWidth   = screenWidth / numberColumns;
 
 	    if (showTitles)

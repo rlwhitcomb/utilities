@@ -44,6 +44,7 @@
  *  15-Dec-22		Put brackets around directory names. Flesh out part of the
  *			"saving" process. Allow "~" as user.home directory.
  *  04-Nov-23 rlw #633	Allow "-opt" and "-noopt" for environment options.
+ *  12-Dec-23 rlw ----	Rename "MaxInt.pos()" to "zero()".
  */
 package info.rlwhitcomb.directory;
 
@@ -443,9 +444,9 @@ public class Dir
 	private static boolean skipDirs            = false;
 	private static int limitRecursion          = 0;
 	private static boolean errorLimitRecursion = false;
-	private static MaxInt maxNameWidth         = MaxInt.pos();
-	private static MaxInt maxOwnerWidth        = MaxInt.pos();
-	private static MaxInt maxGroupWidth        = MaxInt.pos();
+	private static MaxInt maxNameWidth         = MaxInt.zero();
+	private static MaxInt maxOwnerWidth        = MaxInt.zero();
+	private static MaxInt maxGroupWidth        = MaxInt.zero();
 	private static boolean useForwardSlashes   = false;
 
 	private static String nameFormat       = "%1$s";

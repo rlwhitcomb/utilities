@@ -204,10 +204,14 @@
  *	    "readProperties" methods, because the return value is different now (empty vs. null).
  *	28-Nov-2023 (rlwhitcomb)
  *	    #627: Use new Constants values.
+ *	13-Dec-2023 (rlwhitcomb)
+ *	    Use MaxInt as appropriate.
  */
 package info.rlwhitcomb.util;
 
 import de.onyxbits.SemanticVersion;
+
+import info.rlwhitcomb.math.MaxInt;
 
 import java.awt.Dimension;
 import java.io.File;
@@ -1948,24 +1952,24 @@ public final class Environment
 	    String mainClass   = getMainClass();
 	    String processID   = getProcess();
 
-	    int lineWidth = centerWidth;
+	    MaxInt lineWidth = MaxInt.of(centerWidth);
 
 	    // Even if a width is given, the strings might be longer still
-	    lineWidth = Math.max(lineWidth, productName.length());
-	    lineWidth = Math.max(lineWidth, versionInfo.length());
-	    lineWidth = Math.max(lineWidth, buildInfo.length());
-	    lineWidth = Math.max(lineWidth, implVersion.length());
-	    lineWidth = Math.max(lineWidth, copyright.length());
-	    lineWidth = Math.max(lineWidth, javaVersion.length());
-	    lineWidth = Math.max(lineWidth, mainClass.length());
-	    lineWidth = Math.max(lineWidth, processID.length());
+	    lineWidth.set(productName.length());
+	    lineWidth.set(versionInfo.length());
+	    lineWidth.set(buildInfo.length());
+	    lineWidth.set(implVersion.length());
+	    lineWidth.set(copyright.length());
+	    lineWidth.set(javaVersion.length());
+	    lineWidth.set(mainClass.length());
+	    lineWidth.set(processID.length());
 
-	    // If the given width wasn't sufficient for all the text
+	    // If we've increased the line width above the initial value
 	    // then give a little extra to make it look better
-	    if (lineWidth > centerWidth)
-		lineWidth += 2;
+	    if (lineWidth.set())
+		lineWidth.increment(2);
 
-	    String underline = CharUtil.makeStringOfChars(colors ? '\u2550' : '=', lineWidth);
+	    String underline = CharUtil.makeStringOfChars(colors ? '\u2550' : '=', lineWidth.get());
 
 	    ps.println();
 	    println(ps, colors, "util#env.otherInfo", "", underline);
@@ -1983,7 +1987,7 @@ public final class Environment
 		println(ps, colors, "util#env.otherInfo", " ", processID);
 	    } 
 	    else {
-		int width = (lineWidth + 1) / 2 * 2;
+		int width = lineWidth.next() / 2 * 2;
 
 		// Negative width puts the odd space on the right
 		String product = CharUtil.padToWidth(productName, -width, CENTER);

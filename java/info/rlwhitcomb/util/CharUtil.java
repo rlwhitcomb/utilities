@@ -343,10 +343,13 @@
  *	06-Dec-2023 (rlwhitcomb)
  *	    #635: Change some casts of (String) to (CharSequence) to facilitate use with StringBuffer, etc.
  *	    Rename some pattern constants; make final.
+ *	14-Dec-2023 (rlwhitcomb)
+ *	    Use MaxInt appropriately.
  */
 package info.rlwhitcomb.util;
 
 import info.rlwhitcomb.csv.Quotes;
+import info.rlwhitcomb.math.MaxInt;
 
 import java.io.File;
 import java.math.BigDecimal;
@@ -3345,11 +3348,11 @@ public final class CharUtil
 	 * @return      The maximum length of any of the lines.
 	 */
 	public static int maxLength(final String[] lines) {
-	    int max = 0;
+	    MaxInt max = MaxInt.zero();
 	    for (String line : lines) {
-		max = Math.max(max, line.length());
+		max.set(line.length());
 	    }
-	    return max;
+	    return max.get();
 	}
 
 

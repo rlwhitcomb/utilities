@@ -25,24 +25,26 @@
  *	dictionary).
  *
  * History:
- *  19-Jul-22 rlw #411: Abstracted out of WordFind for use with other programs.
- *  27-Jul-22 rlw  ---  Add indexed access, and random word selection.
+ *  19-Jul-22 rlw #411	Abstracted out of WordFind for use with other programs.
+ *  27-Jul-22 rlw ----	Add indexed access, and random word selection.
  *			New "displayStatistics" method.
  *			Omit additional word list statistics if there are none (some of
  *			the dictionaries don't have any).
- *  04-Sep-22 rlw #29:	Save a dictionary entry for each word.
+ *  04-Sep-22 rlw #29	Save a dictionary entry for each word.
  *			Search for valid words using the letter counts.
  *			Further refactoring.
  *  05-Sep-22		Properly deal with wild card letters.
  *  06-Sep-22		Slight optimization if there are no wildcards.
- *  15-Sep-22 rlw #478:	Also allow '_' as wild character.
- *  27-Dec-22 rlw	Add method to use Levenshtein distance to find words
+ *  15-Sep-22 rlw #478	Also allow '_' as wild character.
+ *  27-Dec-22 rlw ----	Add method to use Levenshtein distance to find words
  *			"close" to an input string.
- *  06-Jan-23 rlw	Protect against index exceptions inside "contained".
- *  07-Jan-23 rlw #591:	Fix bug with multiple wildcards that are the same letter.
+ *  06-Jan-23 rlw ----	Protect against index exceptions inside "contained".
+ *  07-Jan-23 rlw #591	Fix bug with multiple wildcards that are the same letter.
+ *  12-Dec-23 rlw ----	Use MaxInt.
  */
 package info.rlwhitcomb.wordfind;
 
+import info.rlwhitcomb.math.MaxInt;
 import info.rlwhitcomb.string.StringUtil;
 import info.rlwhitcomb.util.CharUtil;
 import info.rlwhitcomb.util.Intl;
@@ -215,7 +217,7 @@ public class Dictionary
 	/**
 	 * From initial read of the dictionary, the maximum word length found.
 	 */
-	private int maxWordLength = 0;
+	private MaxInt maxWordLength = MaxInt.zero();
 
 	/**
 	 * Indexes into the word list for each letter.
@@ -232,7 +234,7 @@ public class Dictionary
 	 * @return The maximum word size of this dictionary.
 	 */
 	public int getMaxWordLength() {
-	    return maxWordLength;
+	    return maxWordLength.get();
 	}
 
 
@@ -256,7 +258,7 @@ public class Dictionary
 		newLast = startChar;
 	    }
 
-	    maxWordLength = Math.max(maxWordLength, entry.length);
+	    maxWordLength.set(entry.length);
 
 	    list.add(entry);
 
@@ -410,8 +412,8 @@ public class Dictionary
 	 * @return            The maximum length of the valid words found.
 	 */
 	private int findValid(final Entry letterEntry, final List<Entry> words, final List<String> result) {
-	    int maxLength = 0;
-	    StringBuilder wildChars = new StringBuilder(maxWordLength);
+	    MaxInt maxLength = MaxInt.zero();
+	    StringBuilder wildChars = new StringBuilder(maxWordLength.get());
 
 	    for (Entry entry : words) {
 		if (entry.couldBeSpelledBy(letterEntry, wildChars, lowerWords)) {
@@ -435,11 +437,11 @@ public class Dictionary
 		    else {
 			result.add(entry.word);
 		    }
-		    maxLength = Math.max(maxLength, entry.length);
+		    maxLength.set(entry.length);
 		}
 	    }
 
-	    return maxLength;
+	    return maxLength.get();
 	}
 
 	/**
@@ -455,15 +457,13 @@ public class Dictionary
 	 */
 	public int findAllValidWords(List<String> result, final String letters, final boolean addl) {
 	    Entry letterEntry = new Entry(letters, lowerWords);
-	    int maxLength;
-
-	    maxLength = findValid(letterEntry, regularWords, result);
+	    MaxInt maxLength = MaxInt.of(findValid(letterEntry, regularWords, result));
 
 	    if (addl) {
-		maxLength = Math.max(maxLength, findValid(letterEntry, additionalWords, result));
+		maxLength.set(findValid(letterEntry, additionalWords, result));
 	    }
 
-	    return maxLength;
+	    return maxLength.get();
 	}
 
 	/**
@@ -578,8 +578,8 @@ public class Dictionary
 	    displayNumbers(ps, startingRegularIndex, "Regular");
 	    displayNumbers(ps, startingAddlIndex, "Additional");
 
-	    int regularSizeCounts[] = new int[maxWordLength + 1];
-	    int addlSizeCounts[] = new int[maxWordLength + 1];
+	    int regularSizeCounts[] = new int[maxWordLength.next()];
+	    int addlSizeCounts[] = new int[maxWordLength.next()];
 
 	    Arrays.fill(regularSizeCounts, 0);
 	    Arrays.fill(addlSizeCounts, 0);

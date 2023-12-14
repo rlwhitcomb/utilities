@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2016,2020,2022 Roger L. Whitcomb.
+ * Copyright (c) 2016,2020,2022-2023 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -54,10 +54,13 @@
  *	    #393: Cleanup imports.
  *	12-Oct-2022 (rlwhitcomb)
  *	    #513: Move Logging to new package.
+ *	14-Dec-2023 (rlwhitcomb)
+ *	    Use MaxInt appropriately.
  */
 package info.rlwhitcomb.util;
 
 import info.rlwhitcomb.logging.Logging;
+import info.rlwhitcomb.math.MaxInt;
 
 import java.util.*;
 
@@ -294,8 +297,8 @@ public class SQLFormatter
     {
         Queue<String> typeNameQueue = new LinkedList<>();
         StringBuilder typeNameBuffer = new StringBuilder();
-        int maxNameLength = 0;
-        int maxTypeNameLength = 0;
+        MaxInt maxNameLength = MaxInt.zero();
+        MaxInt maxTypeNameLength = MaxInt.zero();
 
         public void bufferTypeToken(String token) {
             if (firstPass) {
@@ -318,10 +321,11 @@ public class SQLFormatter
         public void addToDataType(boolean atEnd) {
             if ((firstDefaultToken || atEnd) && firstPass) {
                 String typeName = typeNameBuffer.toString();
-                maxTypeNameLength = Math.max(maxTypeNameLength, typeName.length());
+                maxTypeNameLength.set(typeName.length());
                 String trimmedName = typeName.trim();
                 typeNameQueue.add(trimmedName);
-                printDebug("typeNameQueue added \"%1$s\" => queue length = %2$d, maxTypeNameLength = %3$d%n", trimmedName, size(), maxTypeNameLength);
+                printDebug("typeNameQueue added \"%1$s\" => queue length = %2$d, maxTypeNameLength = %3$d%n",
+			trimmedName, size(), maxTypeNameLength.get());
             }
         }
 
@@ -336,11 +340,11 @@ public class SQLFormatter
 
         public String getMaxName(String name) {
             if (firstPass) {
-                maxNameLength = Math.max(maxNameLength, name.length());
+                maxNameLength.set(name.length());
                 return name;    // not really used by callers
             }
             else {
-                return CharUtil.padToWidth(name, maxNameLength);
+                return CharUtil.padToWidth(name, maxNameLength.get());
             }
         }
 
@@ -350,7 +354,7 @@ public class SQLFormatter
             }
             else {
                 // Pop a data type off the queue and ignore the token.
-                output(CharUtil.padToWidth(typeNameQueue.remove(), maxTypeNameLength));
+                output(CharUtil.padToWidth(typeNameQueue.remove(), maxTypeNameLength.get()));
             }
         }
 

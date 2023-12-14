@@ -45,10 +45,13 @@
  *	    Add "copy" constructor; final parameters.
  *	27-Nov-2023 (rlwhitcomb)
  *	    #627: New constructor with just size given. New logic in reallocate().
+ *	14-Dec-2023 (rlwhitcomb)
+ *	    Use MaxInt appropriately.
  */
 package info.rlwhitcomb.util;
 
 import info.rlwhitcomb.math.MathUtil;
+import info.rlwhitcomb.math.MaxInt;
 
 import java.lang.reflect.Array;
 
@@ -70,7 +73,7 @@ public class DynamicArray<T>
 	/** Class of objects to be stored in this array. */
 	private transient Class<?> internalClass;
 	/** The "size" of this array, which is the largest index yet seen by {@link #put}. */
-	private int largestIndex = -1;
+	private MaxInt largestIndex = MaxInt.of(-1);
 
 
 	/**
@@ -119,7 +122,7 @@ public class DynamicArray<T>
 	    else {
 		init(values[0].getClass(), values.length);
 		System.arraycopy(values, 0, internalArray, 0, values.length);
-		largestIndex = values.length - 1;
+		largestIndex.set(values.length - 1);
 	    }
 	}
 
@@ -169,7 +172,7 @@ public class DynamicArray<T>
 	 * index seen by {@link #put} plus one.
 	 */
 	public int size() {
-	    return largestIndex + 1;
+	    return largestIndex.next();
 	}
 
 	/**
@@ -217,7 +220,7 @@ public class DynamicArray<T>
 		internalArray[index] = value;
 	    }
 
-	    largestIndex = Math.max(largestIndex, index);
+	    largestIndex.set(index);
 
 	    return oldValue;
 	}

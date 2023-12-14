@@ -60,10 +60,12 @@
  *			of prime checking and factoring.
  *			Some small optimizations around checking for zeros.
  *			Major optimizations in constructing the prime sieve.
+ *  14-Dec-23 rlw ----	Use MaxInt.
  */
 package info.rlwhitcomb.math;
 
 import info.rlwhitcomb.logging.Logging;
+import info.rlwhitcomb.math.MaxInt;
 import info.rlwhitcomb.util.ClassUtil;
 import info.rlwhitcomb.util.DynamicArray;
 import info.rlwhitcomb.util.Intl;
@@ -1955,11 +1957,11 @@ public final class MathUtil
 	 * @return       Minimum value of the input set.
 	 */
 	public static int minimum(final int... values) {
-	    int min = Integer.MAX_VALUE;
+	    MinInt min = MinInt.max();
 	    for (int value : values) {
-		min = Math.min(min, value);
+		min.set(value);
 	    }
-	    return min;
+	    return min.get();
 	}
 
 	/**
@@ -1969,11 +1971,11 @@ public final class MathUtil
 	 * @return       Maximum value of the input set.
 	 */
 	public static int maximum(final int... values) {
-	    int max = Integer.MIN_VALUE;
+	    MaxInt max = MaxInt.min();
 	    for (int value : values) {
-		max = Math.max(max, value);
+		max.set(value);
 	    }
-	    return max;
+	    return max.get();
 	}
 
 }
