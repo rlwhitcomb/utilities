@@ -377,6 +377,8 @@
 		#599: More "Project Euler" solutions extant.
 	    11-Sep-2023 (rlwhitcomb)
 		Do test cleanup inside the scripts instead of in here.
+	    21-Dec-2023 (rlwhitcomb)
+		Add end-of-test banner to the log file.
 
      ========================================================================== -->
 
@@ -761,6 +763,7 @@
 		<echo file="${test.log.path}" append="false">===============================================
 Test starting on ${build.date} at ${build.time}
 -----------------------------------------------
+
 </echo>
 		<java classname="info.rlwhitcomb.calc.Calc"           output="${test.log.path}" append="true" failonerror="true" fork="true">
 			<arg value="-nocolors"/>
@@ -840,6 +843,15 @@ Test starting on ${build.date} at ${build.time}
 			<arg value="/c"/>
 			<arg value="check_sorted.bat"/>
 		</exec>
+		<tstamp>
+			<format property="end.of.test.date" pattern="yyyy-MM-dd"/>
+			<format property="end.of.test.time" pattern="HH:mm:ss.SSS z"/>
+		</tstamp>
+		<echo file="${test.log.path}" append="true">
+---------------------------------------------
+Test ending on ${end.of.test.date} at ${end.of.test.time}
+=============================================
+</echo>
 		<echo unless:true="${ci.build}">Done with unit tests. Successful. Results in "${test.log.path}" file.</echo>
 		<echo if:true="${ci.build}">Done with unit tests. Successful.</echo>
 		<concat if:true="${ci.build}">
