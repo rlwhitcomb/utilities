@@ -169,3 +169,16 @@
 >}
 >silt(3, 2) -> 0
 >silt(4, 5) -> 6
+>Defining function “loop99(n)” = {
+>   if n > 4 leave outerloop: 99
+>   n + 1
+>}
+>Defining function “looptest(n)” = {
+>   outerloop:
+>   loop x over n {
+>      loop99(x)
+>   }
+>}
+>looptest(2) -> 3
+>looptest(4) -> 5
+>looptest(5) -> 99
