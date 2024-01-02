@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2020-2023 Roger L. Whitcomb.
+ * Copyright (c) 2020-2024 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -343,6 +343,8 @@
  *	    New aliases for rational mode on the command line.
  *	06-Dec-2023 (rlwhitcomb)
  *	    #600: New handling of "leave" if there is a label.
+ *	01-Jan-2024 (rlwhitcomb)
+ *	    #638: New tree debug printout.
  */
 package info.rlwhitcomb.calc;
 
@@ -2031,6 +2033,7 @@ public class Calc
 
 		if (debug && !initialLibraryLoad) {
 		    displayer.displayMessage(tree.toStringTree(parser), CalcDisplayer.Output.OUTPUT);
+		    displayer.displayMessage(CalcUtil.printTree(tree), CalcDisplayer.Output.OUTPUT);
 		}
 
 		execStartTime = Environment.highResTimer();

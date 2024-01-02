@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.40.3', date: d'2024-01-01',
+      issues: [ 638 ],
+      comment: 'Another form of "debug" printout of the parse tree.'
+    },
     { version: '2.40.2', date: d'2023-12-09',
       issues: [ 635 ],
       comment: 'Improve indenting in display of statement blocks.'

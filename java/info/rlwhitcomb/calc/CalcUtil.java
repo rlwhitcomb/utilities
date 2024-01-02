@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2021-2023 Roger L. Whitcomb.
+ * Copyright (c) 2021-2024 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -227,6 +227,8 @@
  *	    #626: Add (recursive) "negate" and "number" methods.
  *	28-Nov-2023 (rlwhitcomb)
  *	    #635: Add indenting to "getTreeText".
+ *	01-Jan-2024 (rlwhitcomb)
+ *	   #638: Add a new kind of debug printout of the parse tree.
  */
 package info.rlwhitcomb.calc;
 
@@ -322,6 +324,82 @@ public final class CalcUtil
 		}
 	}
 
+
+	/**
+	 * Make simple text string from the given parse tree, with a single space between nodes.
+	 *
+	 * @param ctx The parse tree to scan.
+	 * @return    The text from the tree.
+	 */
+	static String getSimpleTreeText(final ParseTree ctx) {
+	    StringBuilder buf = new StringBuilder();
+	    getSimpleTreeText(buf, ctx);
+	    return CharUtil.rtrim(CharUtil.quoteControl(buf.toString()));
+	}
+
+	private static void getSimpleTreeText(final StringBuilder buf, final ParseTree ctx) {
+	    int count = ctx.getChildCount();
+	    if (count == 0) {
+		buf.append(ctx.getText());
+	    }
+	    else {
+		for (int i = 0; i < count; i++) {
+		    getSimpleTreeText(buf, ctx.getChild(i));
+		}
+	    }
+	    int len = buf.length();
+	    while (len > 0) {
+		if (buf.charAt(--len) != ' ')
+		    break;
+	    }
+	    buf.setLength(++len);
+	    buf.append(' ');
+	}
+
+	/**
+	 * Try to derive a "nice" name for the object, which should be a parse tree node.
+	 *
+	 * @param obj The parse tree object for which we want a good name for display.
+	 * @return    A suitable name for this object for display.
+	 */
+	static String objName(Object obj) {
+	    String name = obj.getClass().getSimpleName();
+	    name = name.replace("Context", "").replace("TerminalNodeImpl", "text");
+	    return CharUtil.capitalizeFirst(name);
+	}
+
+	/**
+	 * Append the tree node display name (olus newline) to the buffer being built.
+	 *
+	 * @param buf   The buffer to build the entire string in.
+	 * @param ctx   Current parse tree node to print.
+	 * @param level Indent level of this node (should start at zero for the root node).
+	 */
+	private static void printTreeNode(StringBuilder buf, ParseTree ctx, int level) {
+	    CharUtil.makeStringOfChars(buf, ' ', level * 3);
+
+	    buf.append(objName(ctx))
+	       .append(": ")
+	       .append(getSimpleTreeText(ctx))
+	       .append(Environment.lineSeparator());
+
+	    for (int i = 0; i < ctx.getChildCount(); i++) {
+		printTreeNode(buf, ctx.getChild(i), level + 1);
+	    }
+	}
+
+	/**
+	 * Come up with a debug representation of the given parse tree.
+	 *
+	 * @param ctx The entire or partial parse tree to traverse.
+	 * @return    An appropriate string representation of the tree to display
+	 *            with embedded newlines, but not a trailing one.
+	 */
+	public static String printTree(ParseTree ctx) {
+	    StringBuilder buf = new StringBuilder();
+	    printTreeNode(buf, ctx, 0);
+	    return CharUtil.rtrim(buf.toString());
+	}
 
 	/**
 	 * Get a nicely formatted string of the contents of the given parse tree.

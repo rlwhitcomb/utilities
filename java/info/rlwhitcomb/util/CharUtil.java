@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2011-2023 Roger L. Whitcomb.
+ * Copyright (c) 2011-2024 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -345,6 +345,8 @@
  *	    Rename some pattern constants; make final.
  *	14-Dec-2023 (rlwhitcomb)
  *	    Use MaxInt appropriately.
+ *	01-Jan-2024 (rlwhitcomb)
+ *	    Minor code and doc tweaks.
  */
 package info.rlwhitcomb.util;
 
@@ -752,6 +754,8 @@ public final class CharUtil
 
 	/**
 	 * Quote control characters in the string, using the designated escape char.
+	 * <p> Note: other than the "normal" control characters, others are formatted
+	 * with "caret" notation, as in {@code \cA} for {@code 0x0001}.
 	 *
 	 * @param input      The input string to process.
 	 * @param escapeChar The escape character to recognize and use.
@@ -762,50 +766,56 @@ public final class CharUtil
 	    if (input == null || input.isEmpty())
 		return input;
 
-	    StringBuilder buf = new StringBuilder(input.length() + 10);
-	    for (int i = 0; i < input.length(); i++) {
+	    int len = input.length();
+	    StringBuilder buf = new StringBuilder(len * 2);
+	    for (int i = 0; i < len; i++) {
 		char ch = input.charAt(i);
+
 		if (Character.isISOControl(ch)) {
+		    buf.append(escapeChar);
+
 		    switch (ch) {
 			case '\b':
-			    buf.append(escapeChar).append('b');
+			    buf.append('b');
 			    break;
 			case '\f':
-			    buf.append(escapeChar).append('f');
+			    buf.append('f');
 			    break;
 			case '\n':
-			    buf.append(escapeChar).append('n');
+			    buf.append('n');
 			    break;
 			case '\r':
-			    buf.append(escapeChar).append('r');
+			    buf.append('r');
 			    break;
 			case '\t':
-			    buf.append(escapeChar).append('t');
+			    buf.append('t');
 			    break;
 			case '\0':
-			    buf.append(escapeChar).append('0');
+			    buf.append('0');
 			    break;
 			default:
 			    if (ch <= '\u001A') {
+				buf.append('c');
 				int caretCh = ch + ('A' - 1);
-				buf.append(escapeChar).append('c');
 				buf.appendCodePoint(caretCh);
 			    }
 			    else {
-				buf.append(escapeChar).append('u');
+				buf.append('u');
 				buf.append(String.format("%1$04x", (int) ch));
 			    }
 			    break;
 		    }
 		}
-		else if (ch == escapeChar) {
-		    // We have to double the actual escape character also, or this whole mess doesn't work
-		    buf.append(ch).append(ch);
-		}
 		else {
 		    buf.append(ch);
+
+		    if (ch == escapeChar) {
+			// We have to double the actual escape character also, or this whole mess doesn't work
+			buf.append(ch);
+		    }
 		}
 	    }
+
 	    return buf.toString();
 	}
 
@@ -984,6 +994,20 @@ public final class CharUtil
 	}
 
 
+	/**
+	 * Internal method to parse hex, octal, and binary digit sequences to codepoints.
+	 * <p> The sequence to parse can either be contained between braces, or consist
+	 * of a "normal" number of digits.
+	 * <p> Note: this method does NOT carefully check for improperly formed sequences
+	 * (in other words, the syntax should have been checked before calling this method).
+	 *
+	 * @param input        The input string to be parsed.
+	 * @param index        Starting index of the sequence to be interpreted.
+	 * @param base         Integer number base to be expected here (usually 16, 8, or 2).
+	 * @param normalLength The expected number of digits of that base to find.
+	 * @param output       Buffer to add the parsed codepoint to.
+	 * @return             "index" advanced past the parsed sequence.
+	 */
 	private static int parseCharEscape(
 		final String input,
 		final int index,
@@ -1358,7 +1382,7 @@ public final class CharUtil
 	    for (int i = 0; i < input.length(); i++) {
 		char ch = input.charAt(i);
 		if (!Character.isJavaIdentifierPart(ch)) {
-		    buf.append(Integer.toString((int)ch, 16));
+		    buf.append(Integer.toString((int) ch, 16));
 		}
 		else {
 		    buf.append(ch);
@@ -1581,7 +1605,8 @@ public final class CharUtil
 	    try {
 		new BigDecimal(input);
 		return true;
-	    } catch (NumberFormatException nfe) {
+	    }
+	    catch (NumberFormatException nfe) {
 		;
 	    }
 	    return false;
@@ -1813,11 +1838,17 @@ public final class CharUtil
 	 */
 	public static void makeStringList(final String[] values, final StringBuilder buf) {
 	    buf.append('(');
-	    for (String value : values) {
-		addQuotes(value, buf);
-		buf.append(',');
+	    if (values.length > 0) {
+		for (String value : values) {
+		    addQuotes(value, buf);
+		    buf.append(',');
+		}
+		// Replace the last trailing comma with the right paren
+		buf.setCharAt(buf.length() - 1, ')');
 	    }
-	    buf.setCharAt(buf.length() - 1, ')');
+	    else {
+		buf.append(')');
+	    }
 	}
 
 
@@ -1846,11 +1877,17 @@ public final class CharUtil
 	 */
 	public static void makeStringList(final Object[] values, final StringBuilder buf) {
 	    buf.append('(');
-	    for (Object value : values) {
-		addQuotes(value == null ? null : value.toString(), buf);
-		buf.append(',');
+	    if (values.length > 0) {
+		for (Object value : values) {
+		    addQuotes(value == null ? null : value.toString(), buf);
+		    buf.append(',');
+		}
+		// Replace the last trailing comma with the right paren
+		buf.setCharAt(buf.length() - 1, ')');
 	    }
-	    buf.setCharAt(buf.length() - 1, ')');
+	    else {
+		buf.append(')');
+	    }
 	}
 
 
@@ -1863,13 +1900,19 @@ public final class CharUtil
 	 */
 	public static void addStringList(final List<?> values, final StringBuilder buf) {
 	    buf.append('(');
-	    for (Object value : values) {
-		if (value != null) {
-		    buf.append(value.toString());
+	    if (values.size() > 0) {
+		for (Object value : values) {
+		    if (value != null) {
+			buf.append(value.toString());
+		    }
+		    buf.append(',');
 		}
-		buf.append(',');
+		// Replace the last trailing comma with the right paren
+		buf.setCharAt(buf.length() - 1, ')');
 	    }
-	    buf.setCharAt(buf.length() - 1, ')');
+	    else {
+		buf.append(')');
+	    }
 	}
 
 
@@ -2521,6 +2564,7 @@ public final class CharUtil
 
 	/**
 	 * Capitalize the first letter of the string.
+	 * <p> Note: this will not work correctly if the first character is outside the BMP.
 	 *
 	 * @param	input	The raw text.
 	 * @return		The input with the first letter capitalized
@@ -2532,11 +2576,11 @@ public final class CharUtil
 	    if (input == null || input.isEmpty())
 		return input;
 
-	    char first = input.charAt(0);
-	    StringBuilder buf = new StringBuilder(input.length());
-	    buf.append(Character.toUpperCase(first));
-	    if (input.length() > 1) {
-		buf.append(input.substring(1));
+	    int len = input.length();
+	    StringBuilder buf = new StringBuilder(len);
+	    buf.append(Character.toUpperCase(input.charAt(0)));
+	    if (len > 1) {
+		buf.append(input, 1, len);
 	    }
 
 	    return buf.toString();
@@ -2545,6 +2589,7 @@ public final class CharUtil
 
 	/**
 	 * Lowercase the first letter of the string.
+	 * <p> Note: this will not work correctly if the first character is outside the BMP.
 	 *
 	 * @param	input	The raw text.
 	 * @return		The input with the first letter converted to lower case
@@ -2556,11 +2601,11 @@ public final class CharUtil
 	    if (input == null || input.isEmpty())
 		return input;
 
-	    char first = input.charAt(0);
-	    StringBuilder buf = new StringBuilder(input.length());
-	    buf.append(Character.toLowerCase(first));
-	    if (input.length() > 1) {
-		buf.append(input.substring(1));
+	    int len = input.length();
+	    StringBuilder buf = new StringBuilder(len);
+	    buf.append(Character.toLowerCase(input.charAt(0)));
+	    if (len > 1) {
+		buf.append(input, 1, len);
 	    }
 
 	    return buf.toString();
@@ -2572,7 +2617,7 @@ public final class CharUtil
 	 *
 	 * @param	ch	The fill character.
 	 * @param	width	How much of it you want.
-	 * @return		That many of the fill character.
+	 * @return		A {@code String} filled with that many fill characters.
 	 */
 	public static String makeStringOfChars(final char ch, final int width) {
 	    if (width > 0) {
@@ -2716,7 +2761,7 @@ public final class CharUtil
 	 * @param value	The (presumably) string value to test.
 	 */
 	public static boolean isNullOrEmpty(final Object value) {
-	    return value == null || (value instanceof String && ((String)value).trim().isEmpty());
+	    return value == null || (value instanceof String && ((String) value).trim().isEmpty());
 	}
 
 
@@ -2775,13 +2820,13 @@ public final class CharUtil
 	 */
 	public static boolean getBooleanValue(final Object value, final boolean extended) {
 	    if (value instanceof Boolean) {
-		return ((Boolean)value).booleanValue();
+		return ((Boolean) value).booleanValue();
 	    }
 	    else if (value instanceof Number) {
-		return ((Number)value).longValue() != 0L;
+		return ((Number) value).longValue() != 0L;
 	    }
 	    else if (value instanceof String) {
-		String stringValue = (String)value;
+		String stringValue = (String) value;
 		boolean bool = Boolean.parseBoolean(stringValue);
 		// A little explanation:  if the value returns true
 		// then it must be "true" in some mixed-case sense

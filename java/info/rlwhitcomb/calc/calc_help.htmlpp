@@ -1639,7 +1639,7 @@ whether it has previously been used/defined.
 <a class="top-link" href="#topofpage">Top</a>
 <hr class="sectionsep">
 
-  <footer><br><div class="title-box">Copyright&nbsp;&copy;&nbsp;2020-2023 Roger L. Whitcomb.<br>Licensed under an <a href="https://github.com/rlwhitcomb/utilities/blob/master/LICENSE">MIT</a> license.<br>Last modified: ${__DATE__} at ${__TIME__}</div><br></footer>
+  <footer><br><div class="title-box">Copyright&nbsp;&copy;&nbsp;2020-2024 Roger L. Whitcomb.<br>Licensed under an <a href="https://github.com/rlwhitcomb/utilities/blob/master/LICENSE">MIT</a> license.<br>Last modified: ${__DATE__} at ${__TIME__}</div><br></footer>
 </body>
 </html>
 
