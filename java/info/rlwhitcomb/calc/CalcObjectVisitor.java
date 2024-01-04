@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2020-2023 Roger L. Whitcomb.
+ * Copyright (c) 2020-2024 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -813,6 +813,8 @@
  *	    #636: Never use separators for the "@@" operator.
  *	06-Dec-2023 (rlwhitcomb)
  *	    #600: Labeled "leave" statement and optional labels on loop/while statements.
+ *	03-Jan-2024 (rlwhitcomb)
+ *	    #640: Refactor CalcPiWorker.
  */
 package info.rlwhitcomb.calc;
 
@@ -1116,7 +1118,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	 * The worker used to maintain the current e/pi values, and calculate them
 	 * in a background thread.
 	 */
-	private CalcPiWorker piWorker = null;
+	private CalcPiWorker piWorker = new CalcPiWorker();
 
 	/** Stack of previous "timing" mode values. */
 	private final Deque<Boolean> timingModeStack       = new ArrayDeque<>();
@@ -1322,15 +1324,6 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    return settings.mc;
 	}
 
-	private void triggerPiCalculation() {
-	    if (piWorker == null) {
-		piWorker = new CalcPiWorker(settings.mcDivide);
-		piWorker.setRational(settings.rationalMode);
-	    }
-	    else {
-		piWorker.calculate(settings.mcDivide);
-	    }
-	}
 
 	public int setMathContext(final MathContext newMathContext) {
 	    int prec = newMathContext.getPrecision();
@@ -1341,8 +1334,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    // Use a limited precision of our max digits in the case of unlimited precision
 	    settings.mcDivide = (prec == 0) ? MC_MAX_DIGITS : newMathContext;
 
-	    // Either create the worker object, or trigger a recalculation
-	    triggerPiCalculation();
+	    // Trigger a background (re)calculation with the new precision
+	    piWorker.apply(settings.mcDivide, settings.rationalMode);
 
 	    if (settings.precision == 0)
 		displayDirectiveMessage("%calc#precUnlimited");
@@ -1500,7 +1493,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    boolean oldMode = settings.rationalMode;
 
 	    settings.rationalMode = CharUtil.getBooleanValue(mode);
-	    piWorker.setRational(settings.rationalMode);
+	    piWorker.apply(settings.mcDivide, settings.rationalMode);
 
 	    String msg;
 

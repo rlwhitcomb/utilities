@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2012-2014,2016-2018,2020-2023 Roger L. Whitcomb.
+ * Copyright (c) 2012-2014,2016-2018,2020-2024 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -74,6 +74,7 @@
  *  29-Aug-22 rlw #453	Add back "getMapFromObject" method.
  *  12-Oct-22 rlw #513	Move Logging to a new package.
  *  09-Apr-23 rlw #601	New method to determine if an object is an integer object.
+ *  03-Jan-24 rlw #640	Method to check null and throw IllegalStateException.
  */
 package info.rlwhitcomb.util;
 
@@ -873,6 +874,20 @@ public final class ClassUtil
 	 */
 	public static ModuleClass parseModuleClassName(final String input) {
 	    return new ModuleClass(input);
+	}
+
+
+	/**
+	 * Throw an {@link IllegalStateException} if the given input value is {@code null}.
+	 *
+	 * @param obj    The value to check, which should be non-null.
+	 * @param msgKey An {@link Intl} message key, as required by {@link Intl#getString}..
+	 * @throws       IllegalStateException if the value IS null.
+	 */
+	public static void throwNullException(final Object obj, final String msgKey) {
+	    if (obj == null) {
+		throw new Intl.IllegalStateException(msgKey);
+	    }
 	}
 
 }

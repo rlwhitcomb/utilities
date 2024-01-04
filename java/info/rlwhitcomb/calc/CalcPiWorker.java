@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2020-2022 Roger L. Whitcomb.
+ * Copyright (c) 2020-2022,2024 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -44,11 +44,14 @@
  *	    #288: Return best fractional values for PI in rational mode.
  *	01-Oct-2022 (rlwhitcomb)
  *	    #288: Rename "piFraction" to "ratpi".
+ *	03-Jan-2024 (rlwhitcomb)
+ *	    #640: Refactor.
  */
 package info.rlwhitcomb.calc;
 
 import info.rlwhitcomb.math.BigFraction;
 import info.rlwhitcomb.math.MathUtil;
+import info.rlwhitcomb.util.ClassUtil;
 import info.rlwhitcomb.util.QueuedThread;
 
 import java.math.BigDecimal;
@@ -67,9 +70,9 @@ import static info.rlwhitcomb.util.Constants.*;
  */
 public class CalcPiWorker
 {
-	private MathContext mc;
+	private MathContext mc = null;
 	private int precision;
-	private boolean rational;
+	private boolean rational = false;
 
 	/**
 	 * Euler's constant (e) or the base of the natural logarithms.
@@ -104,37 +107,33 @@ public class CalcPiWorker
 
 
 	/**
-	 * Private since we need a precision to do anything, so not allowed.
+	 * The only constructor of this object.
+	 * <p> Use the {@link #apply} method before attempting to acquire any values.
 	 */
-	private CalcPiWorker() {
+	public CalcPiWorker() {
 	}
 
 	/**
-	 * Construct and start a new calculation with the specified precision.
+	 * Apply the new settings to this object and initiate a recalculation if necessary.
 	 *
-	 * @param newMC	The new context (precision) to use for the calculation.
+	 * @param newMC  New settings for math precision.
+	 * @param newRat Whether we need rational values or not.
 	 */
-	public CalcPiWorker(final MathContext newMC) {
-	    calculate(newMC);
-	}
+	public void apply(final MathContext newMC, final boolean newRat) {
+	    // This value is only used in the "supplier" code and changing it
+	    // doesn't require a new calculation
+	    rational = newRat;
 
-	/**
-	 * Call to recalculate the values to a new precision.
-	 * <p> Immediately makes the result unavailable, sets the new precision
-	 * and then starts a new calculation in the background thread.  Once that
-	 * is complete, the sempahore will be released and the result will be
-	 * accessible by others.
-	 *
-	 * @param newMC	The new precision for the calculated values.
-	 */
-	public void calculate(final MathContext newMC) {
-	    // Starting a new calculation; the result is not available until it's done
-	    readySem.acquireUninterruptibly();
+	    // Only start a new calculation if the settings have changed
+	    if (!ClassUtil.objectsEqual(mc, newMC)) {
+		readySem.acquireUninterruptibly();
 
-	    mc        = newMC;
-	    precision = mc.getPrecision();
+		mc        = newMC;
+		precision = mc.getPrecision();
 
-	    queuedThread.submitWork( () -> calculate() );
+		// Starting a new calculation; the result is not available until it's done
+		queuedThread.submitWork( () -> calculate() );
+	    }
 	}
 
 	/**
@@ -166,6 +165,8 @@ public class CalcPiWorker
 	 * @return	The value produced by the supplier.
 	 */
 	private BigDecimal getWhenReady(final Supplier<BigDecimal> f) {
+	    ClassUtil.throwNullException(mc, "calc#workerNotStarted");
+
 	    readySem.acquireUninterruptibly();
 	    try {
 		return f.get();

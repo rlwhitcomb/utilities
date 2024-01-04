@@ -1,7 +1,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2021-2023 Roger L. Whitcomb.
+# Copyright (c) 2021-2024 Roger L. Whitcomb.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -184,6 +184,8 @@
 #	    Add "f" for the RED_BOLD_BRIGHT color or left quote.
 #	06-Dec-2023 (rlwhitcomb)
 #	    #600: New error for labeled "leave" statement.
+#	03-Jan-2024 (rlwhitcomb)
+#	    #640: Error for CalcPiWorker.
 #
 
 #
@@ -331,6 +333,11 @@ valueNotNull		= Value of <y>%1$s<.> must not be null
 noConvertDecimal	= Unable to convert value of <y>%1$s<.> type to decimal number
 noConvertFraction	= Unable to convert value of <y>%1$s<.> type to fraction
 unknownType		= Unknown value type: <y>%1$s<.>
+
+#
+# From CalcPiWorker
+#
+workerNotStarted	= Values of \u213C and \u2147 are not available.
 
 #
 # From LValueContext
