@@ -1,0 +1,64 @@
+/*
+ * Rational approximations of e using continued fractions.
+ * Taken from: https://www.johndcook.com/blog/2013/01/30/rational-approximations-to-e/
+ *
+ * Python code:
+ * from math import e
+ *
+ * e_frac = [2,1,2,1,1,4,1,1,6,1,1,8]
+ *
+ * def display(n, d, exact):
+ *     print(n, d, n/d, n/d - exact)
+ *
+ * def approx(a, exact):
+ *     # initialize the recurrence
+ *     n0 = a[0]
+ *     d0 = 1
+ *     n1 = a[0]*a[1] + 1
+ *     d1 = a[1]
+ *
+ *     display(n0, d0, exact)
+ *     display(n1, d1, exact)
+ *
+ *     for x in a[2:]:
+ *         n = x*n1 + n0 # numerator
+ *         d = x*d1 + d0 # denominator
+ *         display(n, d, exact)
+ *         n1, n0 = n, n1
+ *         d1, d0 = d, d1
+ *
+ * approx(e_frac, e)
+ */
+
+$quiet on
+$separators off
+$decimal 100
+
+e_frac = [2,1,2,1,1,4,1,1,6,1,1,8,1,1,10,1,1,12]
+pi_frac = [3,7,15,1,292,1,1,1,2,1,3,1,14,2,1,1,2,2,2,2,1,84,2,1,1,15,3,13,1,4,2,6,6,99,1,2,2,6,3,5,1,1,6,8,1,7,1,2,3,7,1,2,1,1,12,1,1,1,3,1,1,8,1,1,2,1,6,1,1,5,2,2,3,1,2,4,4,16,1,161,45,1,22,1,2,2,1,4,1,2,24,1,2,1,3,1,2,1]
+
+def display(n, d, exact) = {
+   $echo `$n / $d = ${n/d} (${n/d - exact})`
+}
+
+def approx(a, exact) = {
+    # initialize the recurrence
+    n0 = a[0]
+    d0 = 1
+    n1 = a[0]*a[1] + 1
+    d1 = a[1]
+
+    display(n0, d0, exact)
+    display(n1, d1, exact)
+
+    loop x over slice(a, 2) {
+        n = x*n1 + n0 # numerator
+        d = x*d1 + d0 # denominator
+        display(n, d, exact)
+        n0 = n1; n1 = n
+        d0 = d1; d1 = d
+    }
+}
+
+approx(e_frac, e)
+approx(pi_frac, pi)
