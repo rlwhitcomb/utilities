@@ -51,7 +51,7 @@ def approx(a, exact) = {
     display(n0, d0, exact)
     display(n1, d1, exact)
 
-    loop x over slice(a, 2) {
+    loop x over a[2:] {
         n = x*n1 + n0 # numerator
         d = x*d1 + d0 # denominator
         display(n, d, exact)

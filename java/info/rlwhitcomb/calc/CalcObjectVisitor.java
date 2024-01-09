@@ -815,6 +815,8 @@
  *	    #600: Labeled "leave" statement and optional labels on loop/while statements.
  *	03-Jan-2024 (rlwhitcomb)
  *	    #640: Refactor CalcPiWorker.
+ *	09-Jan-2024 (rlwhitcomb)
+ *	    #644: Add Python "slice" notation.
  */
 package info.rlwhitcomb.calc;
 
@@ -1719,6 +1721,10 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    BigDecimal dec = getDecimalValue(ctx);
 
 	    return dec.doubleValue();
+	}
+
+	protected int getIntValue(final ParserRuleContext ctx, final Integer nullValue) {
+	    return convertToInt(evaluateToValue(ctx), settings.mc, ctx, nullValue);
 	}
 
 	protected int getIntValue(final ParserRuleContext ctx) {
@@ -3967,6 +3973,25 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	@Override
+	public Object visitSlice2Expr(CalcParser.Slice2ExprContext ctx) {
+	    CalcParser.ExprContext expr1 = null;
+	    CalcParser.ExprContext expr2 = null;
+
+	    if (ctx.slice3() != null) {
+		expr1 = ctx.slice3().expr(0);
+		expr2 = ctx.slice3().expr(1);
+	    }
+	    else if (ctx.slice2() != null) {
+		expr2 = ctx.slice2().expr();
+	    }
+	    else {
+		expr1 = ctx.slice1().expr();
+	    }
+
+	    return doSlice(ctx.expr(), expr1, expr2);
+	}
+
+	@Override
 	public Object visitHasExpr(CalcParser.HasExprContext ctx) {
 	    Object source = evaluate(ctx.expr(0));
 	    CalcParser.ExprContext indexExpr = null;
@@ -5492,20 +5517,10 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    return BigInteger.valueOf((long) ret);
 	}
 
-	private String substring(Object value, CalcParser.ExprContext ctx, CalcParser.Expr2Context e2ctx, CalcParser.Expr3Context e3ctx) {
-	    CalcParser.ExprContext beginCtx = null, endCtx = null;
-
-	    if (e2ctx != null) {
-		beginCtx = e2ctx.expr(1);
-	    }
-	    else if (e3ctx != null) {
-		beginCtx = e3ctx.expr(1);
-		endCtx   = e3ctx.expr(2);
-	    }
-
+	private String substring(Object value, CalcParser.ExprContext ctx, CalcParser.ExprContext beginCtx, CalcParser.ExprContext endCtx) {
 	    String stringValue = toStringValue(this, ctx, value, new StringFormat(false, settings));
 
-	    if (beginCtx == null) {
+	    if (beginCtx == null && endCtx == null) {
 		return stringValue;
 	    }
 
@@ -5532,7 +5547,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    if (endIndex < 0)
 		endIndex += stringLen;
 
-	    // But, at this point, just limit to 0..length
+	    // But, by this point, the values should be in the range of 0..length
+	    // Note: should we do index checking errors? or just limit and go on?
 	    if (beginIndex < 0)
 		beginIndex = 0;
 	    if (beginIndex > stringLen)
@@ -5545,27 +5561,28 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    return stringValue.substring(beginIndex, endIndex);
 	}
 
-	private String substring(CalcParser.Expr1Context e1ctx, CalcParser.Expr2Context e2ctx, CalcParser.Expr3Context e3ctx) {
+	@Override
+	public Object visitSubstrExpr(CalcParser.SubstrExprContext ctx) {
+	    CalcParser.Expr1Context e1ctx = ctx.expr1();
+	    CalcParser.Expr2Context e2ctx = ctx.expr2();
+	    CalcParser.Expr3Context e3ctx = ctx.expr3();
 	    CalcParser.ExprContext valueCtx;
+	    CalcParser.ExprContext beginCtx = null, endCtx = null;
 
 	    if (e1ctx != null) {
 		valueCtx = e1ctx.expr();
 	    }
 	    else if (e2ctx != null) {
 		valueCtx = e2ctx.expr(0);
+		beginCtx = e2ctx.expr(1);
 	    }
 	    else {
 		valueCtx = e3ctx.expr(0);
+		beginCtx = e3ctx.expr(1);
+		endCtx   = e3ctx.expr(2);
 	    }
 
-	    Object value = evaluate(valueCtx);
-
-	    return substring(value, valueCtx, e2ctx, e3ctx);
-	}
-
-	@Override
-	public Object visitSubstrExpr(CalcParser.SubstrExprContext ctx) {
-	    return substring(ctx.expr1(), ctx.expr2(), ctx.expr3());
+	    return substring(evaluate(valueCtx), valueCtx, beginCtx, endCtx);
 	}
 
 	/**
@@ -5656,29 +5673,11 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    return result;
 	}
 
-	@Override
-	public Object visitSliceExpr(CalcParser.SliceExprContext ctx) {
-	    CalcParser.Expr1Context e1ctx = ctx.expr1();
-	    CalcParser.Expr2Context e2ctx = ctx.expr2();
-	    CalcParser.Expr3Context e3ctx = ctx.expr3();
-	    CalcParser.ExprContext valueCtx, beginCtx = null, endCtx = null;
+	private Object doSlice(CalcParser.ExprContext valueCtx, CalcParser.ExprContext beginCtx, CalcParser.ExprContext endCtx) {
 	    int beginIndex, endIndex;
 	    int arrayLen;
 	    Object value;
 	    ArrayScope<?> listValue;
-
-	    if (e1ctx != null) {
-		valueCtx = e1ctx.expr();
-	    }
-	    else if (e2ctx != null) {
-		valueCtx = e2ctx.expr(0);
-		beginCtx = e2ctx.expr(1);
-	    }
-	    else {
-		valueCtx = e3ctx.expr(0);
-		beginCtx = e3ctx.expr(1);
-		endCtx   = e3ctx.expr(2);
-	    }
 
 	    value = evaluate(valueCtx);
 
@@ -5693,11 +5692,11 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 	    else {
 		// Any simple object behaves the same way as "substr"
-		return substring(value, valueCtx, e2ctx, e3ctx);
+		return substring(value, valueCtx, beginCtx, endCtx);
 	    }
 
-	    beginIndex = beginCtx == null ? 0 : getIntValue(beginCtx);
-	    endIndex   = endCtx == null ? arrayLen : getIntValue(endCtx);
+	    beginIndex = beginCtx == null ? 0 : getIntValue(beginCtx, Integer.valueOf(0));
+	    endIndex   = endCtx == null ? arrayLen : getIntValue(endCtx, Integer.valueOf(arrayLen));
 
 	    if (beginIndex < 0)
 		beginIndex += arrayLen;
@@ -5738,6 +5737,29 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 
 	    return result;
+	}
+
+	@Override
+	public Object visitSliceExpr(CalcParser.SliceExprContext ctx) {
+	    CalcParser.Expr1Context e1ctx = ctx.expr1();
+	    CalcParser.Expr2Context e2ctx = ctx.expr2();
+	    CalcParser.Expr3Context e3ctx = ctx.expr3();
+	    CalcParser.ExprContext valueCtx, beginCtx = null, endCtx = null;
+
+	    if (e1ctx != null) {
+		valueCtx = e1ctx.expr();
+	    }
+	    else if (e2ctx != null) {
+		valueCtx = e2ctx.expr(0);
+		beginCtx = e2ctx.expr(1);
+	    }
+	    else {
+		valueCtx = e3ctx.expr(0);
+		beginCtx = e3ctx.expr(1);
+		endCtx   = e3ctx.expr(2);
+	    }
+
+	    return doSlice(valueCtx, beginCtx, endCtx);
 	}
 
 	@Override

@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.40.6', date: d'2024-01-09',
+      issues: [ 644 ],
+      comment: 'Add Python "slice" notation.'
+    },
     { version: '2.40.3', date: d'2024-01-01',
       issues: [ 638 ],
       comment: 'Another form of "debug" printout of the parse tree.'

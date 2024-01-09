@@ -473,6 +473,11 @@ on; off; prev; previous; yes; no; pop
 n = [ 1, 2, 3, 4, 5 ]
 slice n, 2, -1
 slice(target, -5)
+n[2:]
+n[2:null]
+n[:3]
+n[null:3]
+n[2:3]
 
 # Splice function
 s1 = [ 1, 2, 3 ]

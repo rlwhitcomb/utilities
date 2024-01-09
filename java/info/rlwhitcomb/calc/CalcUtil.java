@@ -228,7 +228,9 @@
  *	28-Nov-2023 (rlwhitcomb)
  *	    #635: Add indenting to "getTreeText".
  *	01-Jan-2024 (rlwhitcomb)
- *	   #638: Add a new kind of debug printout of the parse tree.
+ *	    #638: Add a new kind of debug printout of the parse tree.
+ *	09-Jan-2024 (rlwhitcomb)
+ *	    #644: New flavors of "convertToInteger" and "convertToInt" with possible null substitutions.
  */
 package info.rlwhitcomb.calc;
 
@@ -855,6 +857,24 @@ public final class CalcUtil
 	 * @throws CalcExprException if the value is not or cannot be converted to an exact integer value.
 	 */
 	public static BigInteger convertToInteger(final Object value, final MathContext mc, final ParserRuleContext ctx) {
+	    return convertToInteger(value, mc, ctx, null);
+	}
+
+	/**
+	 * Cast or convert the given object value to a {@link BigInteger} for certain integer calculations.
+	 *
+	 * @param value		The input value to convert.
+	 * @param mc		The math context to use for any conversions from decimal values.
+	 * @param ctx		The parse tree context, used for error reporting.
+	 * @param nullValue	What a null value should be converted to (can still be null).
+	 * @return		The converted value, if possible.
+	 * @throws CalcExprException if the value is not or cannot be converted to an exact integer value.
+	 */
+	public static BigInteger convertToInteger(final Object value, final MathContext mc, final ParserRuleContext ctx, final BigInteger nullValue) {
+	    if (value == null && nullValue != null) {
+		return nullValue;
+	    }
+
 	    try {
 		if (value instanceof BigInteger) {
 		    return (BigInteger) value;
@@ -893,6 +913,24 @@ public final class CalcUtil
 	 * @throws CalcExprException if the value is not or cannot be converted to an exact integer value.
 	 */
 	public static int convertToInt(final Object value, final MathContext mc, final ParserRuleContext ctx) {
+	    return convertToInt(value, mc, ctx, null);
+	}
+
+	/**
+	 * Cast or convert the given object value to a regular integer value for certain parameter values.
+	 *
+	 * @param value		The input value to convert.
+	 * @param mc		The math context to use for any conversions from decimal values.
+	 * @param ctx		The parse tree context, used for error reporting.
+	 * @param nullValue	Possible value to use if the input is null (can be null still).
+	 * @return		The converted value, if possible.
+	 * @throws CalcExprException if the value is not or cannot be converted to an exact integer value.
+	 */
+	public static int convertToInt(final Object value, final MathContext mc, final ParserRuleContext ctx, final Integer nullValue) {
+	    if (value == null && nullValue != null) {
+		return nullValue.intValue();
+	    }
+
 	    try {
 		if (value instanceof BigInteger) {
 		    return ((BigInteger) value).intValueExact();

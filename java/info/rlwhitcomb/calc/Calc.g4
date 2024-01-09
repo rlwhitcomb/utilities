@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2020-2023 Roger L. Whitcomb.
+ * Copyright (c) 2020-2024 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -518,6 +518,8 @@
  *	05-Dec-2023 (rlwhitcomb)
  *	    #600: Additional syntax for scoped "leave" statements.
  *	    Allow EOL after loop label.
+ *	08-Jan-2024 (rlwhitcomb)
+ *	    #644: Add Python "slice" notation to the grammar.
  */
 
 grammar Calc;
@@ -734,6 +736,7 @@ expr
    | var                                 # varExpr
    | expr K_HAS ( member | ( LBRACK expr RBRACK ) ) # hasExpr
    | expr K_IS ( STRING | ISTRING | TYPES ) # isExpr
+   | expr LBRACK ( slice3 | slice2 | slice1 ) RBRACK # slice2Expr
    | LPAREN expr RPAREN                  # parenExpr
    | var INC_OP                          # postIncOpExpr
    |<assoc=right> INC_OP var             # preIncOpExpr
@@ -801,6 +804,18 @@ readExprs
 writeExprs
    : LPAREN expr COMMA expr ( COLON expr ) ? RPAREN
    | expr COMMA expr ( COLON expr ) ?
+   ;
+
+slice1
+   : expr COLON
+   ;
+
+slice2
+   : COLON expr
+   ;
+
+slice3
+   : expr COLON expr
    ;
 
 typeArg
