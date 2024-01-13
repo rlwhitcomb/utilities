@@ -817,6 +817,8 @@
  *	    #640: Refactor CalcPiWorker.
  *	09-Jan-2024 (rlwhitcomb)
  *	    #644: Add Python "slice" notation.
+ *	11-Jan-2024 (rlwhitcomb)
+ *	    #644: Remove the "slice" builtin function and refactor again.
  */
 package info.rlwhitcomb.calc;
 
@@ -3973,25 +3975,6 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	@Override
-	public Object visitSlice2Expr(CalcParser.Slice2ExprContext ctx) {
-	    CalcParser.ExprContext expr1 = null;
-	    CalcParser.ExprContext expr2 = null;
-
-	    if (ctx.slice3() != null) {
-		expr1 = ctx.slice3().expr(0);
-		expr2 = ctx.slice3().expr(1);
-	    }
-	    else if (ctx.slice2() != null) {
-		expr2 = ctx.slice2().expr();
-	    }
-	    else {
-		expr1 = ctx.slice1().expr();
-	    }
-
-	    return doSlice(ctx.expr(), expr1, expr2);
-	}
-
-	@Override
 	public Object visitHasExpr(CalcParser.HasExprContext ctx) {
 	    Object source = evaluate(ctx.expr(0));
 	    CalcParser.ExprContext indexExpr = null;
@@ -5673,13 +5656,26 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    return result;
 	}
 
-	private Object doSlice(CalcParser.ExprContext valueCtx, CalcParser.ExprContext beginCtx, CalcParser.ExprContext endCtx) {
+	@Override
+	public Object visitSliceExpr(CalcParser.SliceExprContext ctx) {
+	    CalcParser.ExprContext valueCtx = ctx.expr();
+	    CalcParser.ExprContext beginCtx = null, endCtx = null;
+
+	    if (ctx.slice3() != null) {
+		beginCtx = ctx.slice3().expr(0);
+		endCtx   = ctx.slice3().expr(1);
+	    }
+	    else if (ctx.slice2() != null) {
+		endCtx = ctx.slice2().expr();
+	    }
+	    else {
+		beginCtx = ctx.slice1().expr();
+	    }
+
 	    int beginIndex, endIndex;
 	    int arrayLen;
-	    Object value;
-	    ArrayScope<?> listValue;
 
-	    value = evaluate(valueCtx);
+	    Object value = evaluate(valueCtx);
 
 	    if (value instanceof ArrayScope) {
 		arrayLen = ((ArrayScope) value).size();
@@ -5695,14 +5691,19 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		return substring(value, valueCtx, beginCtx, endCtx);
 	    }
 
+	    // We are going to let either a null context (meaning no text was present) OR
+	    // a null value mean the beginning or end of the array or string respectively
 	    beginIndex = beginCtx == null ? 0 : getIntValue(beginCtx, Integer.valueOf(0));
 	    endIndex   = endCtx == null ? arrayLen : getIntValue(endCtx, Integer.valueOf(arrayLen));
 
+	    // Of course, negative values here are relative to the length of the array/string
 	    if (beginIndex < 0)
 		beginIndex += arrayLen;
 	    if (endIndex < 0)
 		endIndex += arrayLen;
 
+	    // This is questionable: should we LIMIT the values to 0..length or throw exceptions
+	    // for them being out of that range?
 	    if (beginIndex < 0)
 		beginIndex = 0;
 	    if (beginIndex > arrayLen)
@@ -5712,6 +5713,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    if (endIndex > arrayLen)
 		endIndex = arrayLen;
 
+	    // No matter the type of the input object, the result here will be an array
 	    ArrayScope<Object> result = new ArrayScope<>();
 
 	    if (value instanceof ArrayScope) {
@@ -5737,29 +5739,6 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 
 	    return result;
-	}
-
-	@Override
-	public Object visitSliceExpr(CalcParser.SliceExprContext ctx) {
-	    CalcParser.Expr1Context e1ctx = ctx.expr1();
-	    CalcParser.Expr2Context e2ctx = ctx.expr2();
-	    CalcParser.Expr3Context e3ctx = ctx.expr3();
-	    CalcParser.ExprContext valueCtx, beginCtx = null, endCtx = null;
-
-	    if (e1ctx != null) {
-		valueCtx = e1ctx.expr();
-	    }
-	    else if (e2ctx != null) {
-		valueCtx = e2ctx.expr(0);
-		beginCtx = e2ctx.expr(1);
-	    }
-	    else {
-		valueCtx = e3ctx.expr(0);
-		beginCtx = e3ctx.expr(1);
-		endCtx   = e3ctx.expr(2);
-	    }
-
-	    return doSlice(valueCtx, beginCtx, endCtx);
 	}
 
 	@Override

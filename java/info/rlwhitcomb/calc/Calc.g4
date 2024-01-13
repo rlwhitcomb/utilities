@@ -520,6 +520,8 @@
  *	    Allow EOL after loop label.
  *	08-Jan-2024 (rlwhitcomb)
  *	    #644: Add Python "slice" notation to the grammar.
+ *	10-Jan-2024 (rlwhitcomb)
+ *	    #644: Take out "slice" in favor of the new syntax.
  */
 
 grammar Calc;
@@ -677,7 +679,6 @@ builtinFunction
    | K_INDEX ( expr3 | expr2 )           # indexExpr
    | K_SUBSTR ( expr3 | expr2 | expr1 )  # substrExpr
    | K_REPLACE replaceArgs               # replaceExpr
-   | K_SLICE ( expr3 | expr2 | expr1 )   # sliceExpr
    | K_SPLICE spliceArgs                 # spliceExpr
    | K_FILL fillArgs                     # fillExpr
    | K_FORMATSTRING exprN                # formatExpr
@@ -736,7 +737,7 @@ expr
    | var                                 # varExpr
    | expr K_HAS ( member | ( LBRACK expr RBRACK ) ) # hasExpr
    | expr K_IS ( STRING | ISTRING | TYPES ) # isExpr
-   | expr LBRACK ( slice3 | slice2 | slice1 ) RBRACK # slice2Expr
+   | expr LBRACK ( slice3 | slice2 | slice1 ) RBRACK # sliceExpr
    | LPAREN expr RPAREN                  # parenExpr
    | var INC_OP                          # postIncOpExpr
    |<assoc=right> INC_OP var             # preIncOpExpr
@@ -1225,8 +1226,6 @@ K_INDEX    : 'index' | 'INDEX' | 'Index' ;
 K_SUBSTR   : 'substr' | 'SUBSTR' | 'Substr' | 'SubStr' | 'subStr' ;
 
 K_REPLACE  : 'replace' | 'REPLACE' | 'Replace' ;
-
-K_SLICE    : 'slice' | 'SLICE' | 'Slice' ;
 
 K_SPLICE   : 'splice' | 'SPLICE' | 'Splice' ;
 

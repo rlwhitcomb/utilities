@@ -773,7 +773,7 @@ or<br>
     </tr>
     </thead>
     <tbody>
-    <tr><td>39</td>
+    <tr><td>40</td>
       <td><code>pi</code>, <code>&#x1D6D1;</code>, <code>e</code>, <code>&#x2107;</code>, <code>&#x2147;</code>, or <code>&#x212f;</code><br>
           <code>phi</code>, <code>&#x03C6;</code>, <code>&#x03D5;</code><br>
           <code>PHI</code>, <code>&#x03A6;</code><br>
@@ -804,17 +804,18 @@ or<br>
           all the current environment variables (such as <code>PATH</code>)<br>
           the current Calc settings (<code>trigMode</code>, <code>silent</code>, etc.)<br>
           that constant value, as in <code>"Hello"</code>, <code>127</code>, or <code>0xA8</code></td><td>N/A</td></tr>
-    <tr><td>38</td><td><code>{</code> (&nbsp;<i>key:value pairs</i>&nbsp;) <code>}</code></td><td>define an object</td><td>left to right</td></tr>
-    <tr><td>37</td><td><code>[</code> (&nbsp;<i>expr list</i>&nbsp;) <code>]</code><br><i>var</i> <code>[</code> <i>expr</i> <code>]</code> or <i>var</i>&nbsp;<code>&#x2080;</code> .. <code>&#x2089;</code>
+    <tr><td>39</td><td><code>{</code> (&nbsp;<i>key:value pairs</i>&nbsp;) <code>}</code></td><td>define an object</td><td>left to right</td></tr>
+    <tr><td>38</td><td><code>[</code> (&nbsp;<i>expr list</i>&nbsp;) <code>]</code><br><i>var</i> <code>[</code> <i>expr</i> <code>]</code> or <i>var</i>&nbsp;<code>&#x2080;</code> .. <code>&#x2089;</code>
          or <code>&#x23e8;</code></td><td>define an array,<br>or access elements of an array, string, or object</td><td>left to right</td></tr>
-    <tr><td>36</td><td><code>{</code> (&nbsp;<i>expr list</i>&nbsp;) <code>}</code></td><td>define a set</td><td>left to right</td></tr>
-    <tr><td>35</td><td><code>(</code> <i>expr</i> <code>,</code> <i>expr</i> <code>)</code></td><td>define a complex number</td><td>left to right</td></tr>
-    <tr><td>34</td><td><i>object</i> <code>.</code> <i>member</i></td><td>access an object member</td><td>left to right</td></tr>
-    <tr><td>33</td><td><i>expr</i> <code>HAS</code> ( <i>id</i> | <i>string</i> | <code>[</code> <i>expr</i> <code>]</code> )</td><td>safely check for member or index</td><td>left to right</td></tr>
-    <tr><td>32</td><td><i>expr</i> <code>IS</code> ( <i>string</i> | <i>type_id</i> )</td><td>check if expression is the given type (same as <code>typeof</code>)</td><td>left to right</td></tr>
+    <tr><td>37</td><td><code>{</code> (&nbsp;<i>expr list</i>&nbsp;) <code>}</code></td><td>define a set</td><td>left to right</td></tr>
+    <tr><td>36</td><td><code>(</code> <i>expr</i> <code>,</code> <i>expr</i> <code>)</code></td><td>define a complex number</td><td>left to right</td></tr>
+    <tr><td>35</td><td><i>object</i> <code>.</code> <i>member</i></td><td>access an object member</td><td>left to right</td></tr>
+    <tr><td>34</td><td><i>expr</i> <code>HAS</code> ( <i>id</i> | <i>string</i> | <code>[</code> <i>expr</i> <code>]</code> )</td><td>safely check for member or index</td><td>left to right</td></tr>
+    <tr><td>33</td><td><i>expr</i> <code>IS</code> ( <i>string</i> | <i>type_id</i> )</td><td>check if expression is the given type (same as <code>typeof</code>)</td><td>left to right</td></tr>
+    <tr><td>32</td><td><i>expr</i> <code>[</code> <i>expr</i> ? <code>:</code> <i>expr</i> ? <code>]</code></td><td>produce a slice of an object or string</td><td>left to right</td></tr>
     <tr><td>31</td><td><code>( </code><i>expr</i><code> )</code></td><td>group an expression</td><td>N/A</td></tr>
-    <tr><td rowspan="91">30</td>
-            <td><code>ABS</code>&nbsp;<i>expr</i></td><td>absolute value</td><td rowspan="91">left to right</td></tr>
+    <tr><td rowspan="90">30</td>
+            <td><code>ABS</code>&nbsp;<i>expr</i></td><td>absolute value</td><td rowspan="90">left to right</td></tr>
             <tr><td><code>SIN</code>&nbsp;<i>expr</i></td><td>sine</td></tr>
             <tr><td><code>COS</code>&nbsp;<i>expr</i></td><td>cosine</td></tr>
             <tr><td><code>TAN</code>&nbsp;<i>expr</i></td><td>tangent</td></tr>
@@ -858,7 +859,6 @@ or<br>
             <tr><td><code>INDEX</code>&nbsp;<i>expr</i> <code>,</code> <i>search_expr</i> (&nbsp;<code>,</code> <i>start_expr</i>&nbsp;)</td><td>find value within a string</td></tr>
             <tr><td><code>SUBSTR</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>start_expr</i> (&nbsp;<code>,</code> <i>end_expr</i>&nbsp;)&nbsp;)</td><td>extract a substring</td></tr>
             <tr><td><code>REPLACE</code>&nbsp;<i>expr</i> <code>,</code> <i>expr</i> <code>,</code> ( <i>expr</i> ) (&nbsp;<code>,</code> <i>mode</i>&nbsp;)<br>or <i>expr</i> <code>,</code> <i>expr</i></td><td>replace substrings within a string</td></tr>
-            <tr><td><code>SLICE</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;)&nbsp;)</td><td>extract a slice of an array (or string)</td></tr>
             <tr><td><code>SPLICE</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;) *</td><td>modify an array by deleting and/or adding elements</td></tr>
             <tr><td><code>SPLICE</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <code>[</code> <i>id or string list</i> <code>]</code>&nbsp;)<br>(&nbsp;<code>,</code> <code>{</code> <i>key:value pairs</i> <code>}</code>&nbsp;)</td><td>modify an object by deleting and/or adding elements</td></tr>
             <tr><td><code>FILL</code>&nbsp;<i>var</i>&nbsp;( <code>,</code> <i>expr</i>&nbsp;( <code>,</code> <i>expr</i>&nbsp;( <code>,</code><i>expr</i> ) ) )</td><td>fill an array or string</td></tr>
@@ -1070,11 +1070,12 @@ or<br>
   <p>If the first argument to <code>replace</code> is an object or array, the replace operation is performed on each of the values in that object recursively.
   <p>If the replacement value is missing or empty the search value is deleted in the result according to the option value used,
      as in <code>replace 'abcabc', 'b' &#x21E8; "acac"</code>.
-  <p>The arguments to <code>slice</code> work exactly the same was as for <code>substr</code>, except for arrays or the values of
-     an object. But if a simple value is given by the first expression, the value is converted to a string and it will work exactly
-     the same as <code>substr</code> on the string value.
-     The original array or string is not modified by the <code>slice</code> operation; instead it
-     constructs a new array as a copy of the specified portion of the original, leaving the original unmodified.
+  <p>The arguments in brackets for the slice notation are the beginning (inclusive) and ending (exclusive) indices of the values to
+     be returned. If either or both are negative, they refer to offsets from the end of the object / string. If the actual value
+     of the expression is anything other than an object, set, or array, it is converted to a string and the result is the same as
+     the <code>substr</code> function. A missing or null first value refers to the beginning of the object or string, and a missing
+     or null second index refers to the end of the object or string. One or the other or both index values can be given.
+     The result for an object, set, or array will always be a new array with the selected elements; for a string a new string is returned.
   <p>By contrast, the <code>splice</code> function DOES modify the original array or object by potentially removing elements and
      adding new ones.
      If only the array/object argument is given, the entire contents are removed and returned. This is a convenient way to

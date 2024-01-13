@@ -469,10 +469,10 @@ all = 1; first = 2; last=7; all+first-last
 on = true; off ='OFF'; prev = 12; previous = 15; yes = 'really'; no = 'fat chance'; pop = 27
 on; off; prev; previous; yes; no; pop
 
-# Slice function
+# Slice notation
 n = [ 1, 2, 3, 4, 5 ]
-slice n, 2, -1
-slice(target, -5)
+n[2:-1]
+target[-5:]
 n[2:]
 n[2:null]
 n[:3]
