@@ -21,31 +21,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  *
- *  History:
- *      31-Dec-2020 (rlwhitcomb)
- *	    Initial version.
- *	26-Mar-2021 (rlwhitcomb)
- *	    Move some methods from NumericUtil to MathUtil.
- *	01-Dec-2021 (rlwhitcomb)
- *	    #114: Fix final precision of e/pi compared to "phi" (normal precision).
- *	03-Dec-2021 (rlwhitcomb)
- *	    #122: Refactor to reduce duplicated code.
- *	26-Jan-2022 (rlwhitcomb)
- *	    Make new Supplier methods for CalcPredefine.
- *	06-Feb-2022 (rlwhitcomb)
- *	    Also calculate pi/2.
- *	14-Apr-2022 (rlwhitcomb)
- *	    #273: Move math-related classes to "math" package.
- *	08-Jul-2022 (rlwhitcomb)
- *	    #393: Cleanup imports.
- *	24-Aug-2022 (rlwhitcomb)
- *	    #447: Add constant for pi/200 for gradian/grad conversion.
- *	30-Sep-2022 (rlwhitcomb)
- *	    #288: Return best fractional values for PI in rational mode.
- *	01-Oct-2022 (rlwhitcomb)
- *	    #288: Rename "piFraction" to "ratpi".
- *	03-Jan-2024 (rlwhitcomb)
- *	    #640: Refactor.
+ * History:
+ *  31-Dec-20 rlw ----	Initial version.
+ *  26-Mar-21 rlw ----	Move some methods from NumericUtil to MathUtil.
+ *  01-Dec-21 rlw #114	Fix final precision of e/pi compared to "phi" (normal precision).
+ *  03-Dec-21 rlw #122	Refactor to reduce duplicated code.
+ *  26-Jan-22 rlw ----	Make new Supplier methods for CalcPredefine.
+ *  06-Feb-22 rlw ----	Also calculate pi/2.
+ *  14-Apr-22 rlw #273	Move math-related classes to "math" package.
+ *  08-Jul-22 rlw #393	Cleanup imports.
+ *  24-Aug-22 rlw #447	Add constant for pi/200 for gradian/grad conversion.
+ *  30-Sep-22 rlw #288	Return best fractional values for PI in rational mode.
+ *  01-Oct-22 rlw #288	Rename "piFraction" to "ratpi".
+ *  03-Jan-24 rlw #640	Refactor.
  */
 package info.rlwhitcomb.calc;
 
