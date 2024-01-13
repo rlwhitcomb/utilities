@@ -1,0 +1,75 @@
+/*
+ * Problem 23 from Project Euler (projecteuler.net)
+ *
+ * Non-Abundant Sums
+ *
+ * A perfect number is a number for which the sum of its proper divisors is exactly equal to the number.
+ * For example, the sum of the proper divisors of 28 would be 1 + 2 + 4 + 7 + 14 = 28, which means that
+ * 28 is a perfect number.
+ *
+ * A number n is called deficient if the sum of its proper divisors is less than n and it is called abundant
+ * if this sum exceeds n.
+ *
+ * As 12 is the smallest abundant number, 1 + 2 + 3 + 4 + 6 = 16, the smallest number that can be written as
+ * the sum of two abundant numbers is 24. By mathematical analysis, it can be shown that all integers greater
+ * than 28123 can be written as the sum of two abundant numbers. However, this upper limit cannot be reduced
+ * any further by analysis even though it is known that the greatest number that cannot be expressed as the
+ * sum of two abundant numbers is less than this limit.
+ *
+ * Find the sum of all the positive integers which cannot be written as the sum of two abundant numbers.
+ */
+$quiet on {
+
+const FIRST = 12	// First abundant number
+const FINISH = 28123
+const MID = (FINISH + 1) / 2
+
+define isAbundant(n) = {
+   sumof(factors(n)[:-1]) > n
+}
+
+// First, construct a list of all the abundant numbers less than the known limit
+$echo `Finding all the abundant numbers from $FIRST to $FINISH...`
+var abundantNumbers = [ ]
+var abundantFlags = 0
+
+loop n over FIRST ... FINISH {
+   if isAbundant(n) {
+      abundantNumbers += n
+      abundantFlags |= 1 << n
+   }
+}
+
+$echo `Found ${length(abundantNumbers)} abundant numbers there.`
+
+// Now, go thru all the candidates, trying each abundant number, testing to see if the
+// difference is also abundant
+var totalSum = 0
+var largest = 0
+
+loop n over FINISH {
+   var sumWorks = false
+ inner:
+   loop a over abundantNumbers {
+      if a >= n leave inner:
+      const diff = n - a
+      if abundantFlags & (1 << diff) != 0 {
+         // found a pair of abundant numbers that sum to our "n" value
+         sumWorks = true
+         leave inner:
+      }
+   }
+   if !sumWorks {
+      totalSum += n
+      largest = n
+   }
+}
+
+}
+
+$resultsonly on {
+
+`The sum of all the positive integers which are not the sum of two abundant numbers is $totalSum.`@q
+`The largest of these is $largest.`@q
+
+}
