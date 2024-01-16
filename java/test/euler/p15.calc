@@ -1,0 +1,167 @@
+/*
+ * Problem 15 from Project Euler (projecteuler.net)
+ *
+ * Lattice Paths
+ *
+ * Starting in the top left corner of a 2 x 2 grid, and only being able to move
+ * to the right and down, there are exactly 6 routes to the bottom right corner.
+ *
+ * How many such routes are there through a 20 x 20 grid?
+ */
+$quiet on {
+
+enum L, R
+const X = -1
+
+#
+# Some sample maps, "drawn" by hand; used to check the "makeMap" algorithm.
+#
+const MAP_1 = [
+  [ 1, 2 ],
+  [ X, 3 ],
+  [ 3, X ],
+  [ X, X ]
+]
+
+const MAP_2 = [
+  [ 1, 3 ],
+  [ 2, 4 ],
+  [ X, 5 ],
+  [ 4, 6 ],
+  [ 5, 7 ],
+  [ X, 8 ],
+  [ 7, X ],
+  [ 8, X ],
+  [ X, X ]
+]
+
+const MAP_3 = [
+  [  1,  4 ],
+  [  2,  5 ],
+  [  3,  6 ],
+  [  X,  7 ],
+
+  [  5,  8 ],
+  [  6,  9 ],
+  [  7, 10 ],
+  [  X, 11 ],
+
+  [  9, 12 ],
+  [ 10, 13 ],
+  [ 11, 14 ],
+  [  X, 15 ],
+
+  [ 13,  X ],
+  [ 14,  X ],
+  [ 15,  X ],
+  [  X,  X ]
+]
+
+/*
+ * Make a node map for the given side length.
+ *
+ * @param sides Number of boxes, giving side + 1 nodes.
+ * @return      The completed map of node connections.
+ */
+define makeMap(sides) = {
+   var result = []
+   const nodes = sides + 1
+   var left = 1, right = nodes
+   loop row over nodes² {
+      var element = []
+      element[L] = (row % nodes == 0) ? X : left
+      element[R] = (row > nodes² - nodes) ? X : right
+      result[row - 1] = element
+      left++
+      right++
+   }
+   result
+}
+
+/*
+ * Visit the given map and enumerate all the paths from the top-left to bottom-right.
+ *
+ * Each node is row in the map with L and R values corresponding to the adjacent nodes
+ * in each direction. A value of X (or -1) means there is no next node that way.
+ * The terminal node has no other nodes from it (marked as [ X, X ]).
+ *
+ * The global 'paths' variable is filled with the list of paths through the map, and
+ * therefore its length is the number of paths.
+ *
+ * @param map     The lattice or map to traverse, setup as a 2-d array of left and right
+ *                node numbers for each node.
+ * @param path    The path traced so far to the current node.
+ * @param current Current node number we're visiting.
+ */
+define visit(map, path, current) = {
+   const newpath = path + current
+
+   const left  = map[current][L]
+   const right = map[current][R]
+
+   if left == X && right == X {
+      paths += @@newpath
+   } else {
+      if left != X  { visit(map, newpath, left)  }
+      if right != X { visit(map, newpath, right) }
+   }
+}
+
+#
+# Verify the "makeMap" algorithm against our reference hand-drawn maps
+#
+const map1 = makeMap(1)
+$assert map1 == MAP_1
+const map2 = makeMap(2)
+$assert map2 == MAP_2
+const map3 = makeMap(3)
+$assert map3 == MAP_3
+
+/*
+ * Drive a single test with the given number of grid boxes on each side of the lattice.
+ *
+ * @param n Number of boxes.
+ */
+define test(n) = {
+   // Just a word here about variable scope: inside "visit" we reference "paths" and
+   // add the new path found to it. But there is no contextual way to associate "paths"
+   // which is local to this function, and "visit", except that at runtime "paths"
+   // exists in the calling function's symbol table, and so it can be found. Kinda weird.
+   var paths = []
+   const map = makeMap(n)
+   visit(map, [], 0)
+   const number = length(paths)
+   $echo `Number of paths through size $n is $number, factors: ${pfactors(number)}`
+}
+
+loop n over 9 {
+   test(n)
+}
+
+/*
+ * The results of the first 10 sizes are:
+ *   lattice size:  1,   2,    3,    4,     5,    6,     7,     8,     9,     10
+ *   number paths:  2,   6,   20,   70,   252,  924,  3432, 12870, 48620, 184756
+ * with the following ratios between successive values:
+ *                2/1, 6/2, 10/3, 14/4, 18/5, 22/6, 26/7,  30/8,  34/9,  38/10, etc.
+ * So, we just need to continue this list up to the target size (20 in this case).
+ */
+
+const FINAL_SIZE = 20
+var size = 1
+var paths = 1
+var numer = 2
+const INCR = 4
+
+loop s over FINAL_SIZE {
+   const ratio = frac(numer, s)
+   paths *= ratio
+   $echo `size $s -> paths ${paths@d}`
+   numer += INCR
+}
+
+}
+
+$resultsonly on {
+   `Number of paths through a $FINAL_SIZE x $FINAL_SIZE lattice is ${paths@d}`
+}

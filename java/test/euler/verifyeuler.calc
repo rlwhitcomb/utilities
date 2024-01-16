@@ -16,7 +16,7 @@ const PATTERN  = 'p*'
 const CALC     = '.calc'
 const CANON    = '.canon'
 const TESTFILE = 'eulertest'
-const VALUES   = 'test_values.txt'
+const VALUES   = 'euler_values.txt'
 
 var numberOfTests = 0
 

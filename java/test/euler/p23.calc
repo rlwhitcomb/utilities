@@ -22,7 +22,6 @@ $quiet on {
 
 const FIRST = 12	// First abundant number
 const FINISH = 28123
-const MID = (FINISH + 1) / 2
 
 define isAbundant(n) = {
    sumof(factors(n)[:-1]) > n
