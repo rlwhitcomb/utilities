@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.40.8', date: d'2024-01-17',
+      issues: [ 646 ],
+      comment: 'Add multiple assignment syntax.'
+    },
     { version: '2.40.6', date: d'2024-01-12',
       issues: [ 644 ],
       comment: 'Add Python "slice" notation; remove "slice" function.'

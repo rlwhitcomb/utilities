@@ -816,6 +816,16 @@ g >>= 2@x
 g<<=2@x
 g@x
 
+var1, var2 = 27, 33
+var1, var2 = var2, var1
+var1; var2
+
+vara = [ 1, 2, 3, 4, 5, 6 ]
+vara[1], vara[-2] = vara[-2], vara[1]
+vara
+vara[0], vara[1], vara[2] = vara[-1], vara[-2], vara[-3]
+vara
+
 # Operations on parts of arrays and objects
 a = { b : [ 1, 2, 3 ], c : { d: 1, f: true, g: 'abcd' } } 
 a

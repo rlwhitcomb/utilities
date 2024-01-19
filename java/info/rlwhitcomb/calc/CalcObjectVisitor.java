@@ -819,6 +819,8 @@
  *	    #644: Add Python "slice" notation.
  *	11-Jan-2024 (rlwhitcomb)
  *	    #644: Remove the "slice" builtin function and refactor again.
+ *	17-Jan-2024 (rlwhitcomb)
+ *	    #646: Implement Python's multiple assignment notation.
  */
 package info.rlwhitcomb.calc;
 
@@ -8109,9 +8111,27 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitAssignExpr(CalcParser.AssignExprContext ctx) {
-	    Object value = evaluate(ctx.expr());
+	    List<CalcParser.VarContext> vars = ctx.var();
+	    List<CalcParser.ExprContext> exprs = ctx.expr();
 
-	    LValueContext lValue = getLValue(ctx.var());
-	    return lValue.putContextObject(this, value);
+	    if (vars.size() != exprs.size())
+		throw new CalcExprException(ctx, "%calc#mismatchVarExpr", exprs.size(), vars.size());
+
+	    // In order to make a swap work correctly, we must evaluate all the expressions before
+	    // doing any assignments back
+	    List<Object> valueList = new ArrayList<>(exprs.size());
+	    for (int i = 0; i < exprs.size(); i++) {
+		valueList.add(evaluate(exprs.get(i)));
+	    }
+
+	    Object value = null;
+
+	    for (int i = 0; i < vars.size(); i++) {
+		LValueContext lValue = getLValue(vars.get(i));
+		value = valueList.get(i);
+		lValue.putContextObject(this, value);
+	    }
+
+	    return value;	// this is the last value we dealt with...
 	}
 }

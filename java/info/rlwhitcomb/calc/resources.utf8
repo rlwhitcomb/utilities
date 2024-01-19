@@ -186,6 +186,8 @@
 #	    #600: New error for labeled "leave" statement.
 #	03-Jan-2024 (rlwhitcomb)
 #	    #640: Error for CalcPiWorker.
+#	17-Jan-2024 (rlwhitcomb)
+#	    #646: New error for multiple assignment.
 #
 
 #
@@ -311,6 +313,7 @@ radixOutOfRange		= Radix value of <u>%1$d<.> is out of range of <y>%2$d..%3$d<.>
 illegalFlagValues	= One or more flag values in <u>0x%1$04X<.> (<u>%1$d<.>) is not valid.
 assertFailure		= Assertion failed: <f>%1$s<.>
 notImplemented		= %1$s operation is not implemented
+mismatchVarExpr		= Number of expressions <y>(%1$d)<.> does not equal the number of variables <y>(%2$d)<.>
 
 intro.help1	= "  Enter an arithmetic expression to evaluate, or multiple expressions"
 intro.help2	= "  separated by <u>;<.>, followed by <a>Return<.> or <a>Enter<.>."

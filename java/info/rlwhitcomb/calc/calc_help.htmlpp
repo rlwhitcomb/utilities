@@ -968,7 +968,7 @@ or<br>
         <i>expr</i>&nbsp;<code> ^^ </code>or<code> &#x22BB; </code>&nbsp;<i>expr</i></td><td>logical exclusive OR</td><td>left to right</td></tr>
     <tr><td>8</td><td><i>expr</i>&nbsp;<code> ?: </code>&nbsp;<i>expr</i><br><i>expr</i>&nbsp;<code> ?! </code><i>expr</i></td><td>select alternate for <code><i>false</i></code> value<br>or select an alternate for <code><i>true</i></code> value</td><td>left to right</td></tr>
     <tr><td>7</td><td><i>expr</i>&nbsp;<code> ? </code>&nbsp;<i>expr</i>&nbsp;<code> : </code>&nbsp;<i>expr</i></td><td>select one or the other value</td><td>right to left</td></tr>
-    <tr><td>6</td><td><i>var</i>&nbsp;<code> = </code>&nbsp;<i>expr</i></td><td>assign <i>expr</i> value to variable</td><td>right to left</td></tr>
+    tr><td>6</td><td><i>var<sub>1</sub></i>&nbsp;(<code> , </code> <i>var<sub>n</sub></i>&nbsp;) *<code> = </code>&nbsp;<i>expr<sub>1</sub></i>&nbsp;(<code> , </code> <i>expr<sub>n</sub></i>&nbsp;) *</td><td>assign <i>expr(s)</i> values to variable(s)</td><td>right to left</td></tr>
     <tr><td>5</td><td><i>var</i>&nbsp;<code> **=</code>,<code> &times;&times;=</code>,<code> &#x2217;&#x2217;=</code>,<code> &#x2715;&#x2715;=</code>,<code> &#x2716;&#x2716;=</code>,
         <code> &#x2303;=</code>,<code> &#x2B61;=</code>, or<code>&#x2191;=</code>&nbsp;<i>expr</i></td><td><i>var</i> to <i>expr</i> power, assign to <i>var</i></td><td>right to left</td></tr>
     <tr><td>4</td><td>
@@ -1005,6 +1005,10 @@ or<br>
   <h2>Notes on Functions</h2>
 <div class="cols">
   <p>Some of the functions might require a bit of explanation as to how they work.
+  <p>The multiple assignment operation assigns the values of the corresponding expressions to the respective variables. The normal
+     case is one variable and one expression (normal assignment), as in <code>a = 7</code>. In addition, this construct can be used
+     to swap the values of two variables as in: <code>a, b = b, a</code>. It is an error if the number of variables does not equal
+     the number of expressions.
   <p>The <code>length</code> function takes
      any one of a number, an array, an object, a string, or a range expression and returns the "size" of the value. For strings,
      this is the number of codepoints in the string, for arrays it is the number of items in the array (first-level size),

@@ -522,6 +522,8 @@
  *	    #644: Add Python "slice" notation to the grammar.
  *	10-Jan-2024 (rlwhitcomb)
  *	    #644: Take out "slice" in favor of the new syntax.
+ *	17-Jan-2024 (rlwhitcomb)
+ *	    #646: Multiple assignments as in Python.
  */
 
 grammar Calc;
@@ -763,7 +765,7 @@ expr
    | expr EOL* BOOL_XOR_OP EOL* expr              # booleanXorExpr
    | expr EOL* ELVIS_OP EOL* expr                 # elvisExpr
    |<assoc=right> expr EOL* QUEST EOL* expr EOL* COLON EOL* expr # eitherOrExpr
-   |<assoc=right> var EOL* ASSIGN EOL* expr       # assignExpr
+   |<assoc=right> var ( COMMA var )* EOL* ASSIGN EOL* expr ( COMMA expr )* # assignExpr
    |<assoc=right> var EOL* POW_ASSIGN EOL* expr   # powerAssignExpr
    |<assoc=right> var EOL* MULT_ASSIGN EOL* expr  # multAssignExpr
    |<assoc=right> var EOL* ADD_ASSIGN EOL* expr   # addAssignExpr
