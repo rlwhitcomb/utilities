@@ -157,6 +157,8 @@ defined 'junk'
 const M1="MATCH"
 const M2="LITERAL"
 defined `${M1}_${M2}`
+defined(n1, fun, f1, f2)
+defined(mx, mn)
 
 #
 # Interesting mathematical way to implement "max" and "min"
@@ -169,6 +171,8 @@ define mx(a,b) = {
 define mn(a,b) = {
   (a + b) / 2 - abs(a - b) / 2
 }
+
+defined(mx, mn)
 
 const M_1 = 1.1
 const M_2 = 1.09

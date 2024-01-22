@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.40.10', date: d'2024-01-22',
+      issues: [ 647 ],
+      comment: 'Allow multiple names for "defined" function.'
+    },
     { version: '2.40.8', date: d'2024-01-17',
       issues: [ 646 ],
       comment: 'Add multiple assignment syntax.'

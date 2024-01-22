@@ -895,7 +895,7 @@ or<br>
             <tr><td><code>RENAME</code>&nbsp;<i>expr<sub>1</sub></i> <code>,</code> <i>expr<sub>2</sub></i></td><td>rename or move file<sub>1</sub> to file<sub>2</sub></td></tr>
             <tr><td><code>MATCHES</code>&nbsp;<i>expr</i>&nbsp;<code>,</code>&nbsp;<i>pattern_expr</i>&nbsp;( <code>,</code> <i>flags_expr</i> )</td><td>match the expression string against<br>the regular expression pattern with possible flags</td></tr>
             <tr><td><code>CALLERS</code>&nbsp;<i>expr</i> ?</td><td>get all or one of the callers of the current function</td></tr>
-            <tr><td><code>DEFINED</code>&nbsp;( <i>id</i> | <i>string</i> )</td><td>return whether the given variable, function, or constant<br>has been defined already</td></tr>
+            <tr><td><code>DEFINED</code>&nbsp;( <i>id</i> | <i>string</i> ) ( <code>,</code> <i>id</i> | <i>string</i> ) *</td><td>return whether the given variable(s), function(s), or constant(s)<br>are already defined</td></tr>
             <tr><td><code>FACTORS</code>&nbsp;<i>expr</i></td><td>calculate all the factors of the number</td></tr>
             <tr><td><code>PFACTORS</code>&nbsp;<i>expr</i></td><td>calculate the prime factors of the number</td></tr>
             <tr><td><code>CHARS</code>&nbsp;<i>expr</i></td><td>break apart a string or an array of strings into separate characters<br>or convert a number to a single character</td></tr>

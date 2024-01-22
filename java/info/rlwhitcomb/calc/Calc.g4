@@ -524,6 +524,8 @@
  *	    #644: Take out "slice" in favor of the new syntax.
  *	17-Jan-2024 (rlwhitcomb)
  *	    #646: Multiple assignments as in Python.
+ *	22-Jan-2024 (rlwhitcomb)
+ *	    #647: Multiple names for "defined" function.
  */
 
 grammar Calc;
@@ -958,8 +960,8 @@ optExpr
    ;
 
 idExpr
-   : LPAREN member RPAREN
-   | member
+   : LPAREN member ( COMMA member ) * RPAREN
+   | member ( COMMA member ) *
    ;
 
 actualParams

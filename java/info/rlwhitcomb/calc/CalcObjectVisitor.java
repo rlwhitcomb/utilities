@@ -821,6 +821,8 @@
  *	    #644: Remove the "slice" builtin function and refactor again.
  *	17-Jan-2024 (rlwhitcomb)
  *	    #646: Implement Python's multiple assignment notation.
+ *	22-Jan-2024 (rlwhitcomb)
+ *	    #647: Allow multiple names for "defined" function.
  */
 package info.rlwhitcomb.calc;
 
@@ -7188,21 +7190,19 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitDefinedExpr(CalcParser.DefinedExprContext ctx) {
-	    CalcParser.MemberContext member = ctx.idExpr().member();
-	    TerminalNode string = null;
-	    String name = "";
+	    boolean allDefined = true;
 
-	    if ((string = member.STRING()) != null) {
-		name = getRawString(string.getText());
-	    }
-	    else if ((string = member.ISTRING()) != null) {
-		name = getIStringValue(this, string, ctx);
-	    }
-	    else {
-		name = member.id().getText();
+	    for (CalcParser.MemberContext member : ctx.idExpr().member()) {
+		String name = getMemberName(this, member);
+
+		// Short-circuit analysis: first one that fails ends the loop
+		if (!currentScope.isDefined(name, settings.ignoreNameCase)) {
+		    allDefined = false;
+		    break;
+		}
 	    }
 
-	    return Boolean.valueOf(currentScope.isDefined(name, settings.ignoreNameCase));
+	    return Boolean.valueOf(allDefined);
 	}
 
 	/**

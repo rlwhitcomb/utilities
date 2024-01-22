@@ -1,44 +1,99 @@
 /*
  * Reads the "Constants.java" file, parses out the extant declarations there,
- * then does a search for .java files containing these values.
+ * then does a search for .java files containing these values, generating a
+ * formatted report.
  */
 $quiet on
-$resultsonly on
 
-define message(string) = {
-   $quiet pop
-   $echo string
-   $quiet on
+// Make sure we have the standard library included already
+$assert defined(LINESEP, readFileLines, CYAN_BRIGHT), 'The standard "library.calc" must be included to run this script.'
+
+const START_DIR = 'info/rlwhitcomb'
+const CONST_FILE = 'Constants.java'
+const INPUT_FILE = findfiles(START_DIR, CONST_FILE, 'fr*!')[0]
+const INPUT_FILE_INFO = fileinfo(INPUT_FILE)
+const CURRENT_DIR = info.os.currentdir
+const JAVA_FILES = findfiles(START_DIR, '*.java', 'fr*!')
+
+/*
+ * Return a version of the input string with the given name
+ * highlighted with either a default or a specified color.
+ *
+ * @param s    The input string.
+ * @param name A name (word) to highlight within the input.
+ * @param clr  Default or specific color for the highlight (optional).
+ * @return     Reformatted input string.
+ */
+define highlight(s, name, clr = GREEN_BRIGHT) = {
+    const b = index(s, name)
+    const c = b + length(name)
+    substr(s, 0, b) + clr + name + RESET + substr(s, c)
 }
 
-const LINE_END = '\\r?\\n'
-const INPUT_FILE = 'info/rlwhitcomb/util/Constants.java'
-const CURRENT_DIR = info.os.currentdir
-const JAVA_FILES = findfiles('info/rlwhitcomb', '*.java', 'fr*!')
+#
+# 1. Read the file of constant declarations
+#
+$echo '----------------------------------------------'
+$echo `  Usage Report for the $CONST_FILE values  `
+$echo '=============================================='
+$echo
+$echo `Reading ${replace(INPUT_FILE, CURRENT_DIR + info.os.filesep)} ...`
+const lines = readFileLines(INPUT_FILE)
 
-lines = split(trim(read(INPUT_FILE)), LINE_END)
+#
+# 2. Read all the ".java" files into a map by name
+#
+$echo 'Reading all the ".java" files ...'
+var javaFiles = { }
+
+loop file over JAVA_FILES {
+   if file !== INPUT_FILE_INFO.fullPath {
+      const finfo = fileinfo(file)
+      if finfo.name !== "package-info.java" {
+         const fileName = replace(finfo.name, CURRENT_DIR)
+         javaFiles[fileName] = readFileLines(file)
+      }
+   }
+}
+
+#
+# 3. Now, loop through all the constant declarations and find all their uses
+#    in the extant .java files and report
+#
+$echo
+var constantLineNumber = 0
 
 loop line over lines {
-  trimmed = trim(line)
-  if !index(trimmed, '*') {
-    words = split(trimmed, '\\s+')
-    if words[0] == 'public' && words[1] == 'static' {
-      name = words[4]
-      message(CYAN_BRIGHT + name + END)
-      loop file over JAVA_FILES {
-        const filelines = split(trim(read(file)), LINE_END)
-        const finfo = fileinfo(file)
-        const filename = replace(finfo.name, CURRENT_DIR, "")
-        var linenumber = 0
-        loop fileline over filelines {
-          linenumber++
-          if notnull(index(fileline, name)) {
-            message(formatstring('%s%s%s(%d)%s: %s%s%s', WHITE, filename, BLACK_BRIGHT, linenumber, RESET, WHITE_BRIGHT, fileline, END))
-          }
-        }
-      }
-      message("")
-    }
-  }
+   constantLineNumber++
+   trimmed = trim(line)
+
+   if !index(trimmed, '*') {
+      words = split(trimmed, s'\s+')
+      if words[0] === 'public' && words[1] === 'static' {
+         name = words[4]
+         $echo CYAN_BRIGHT + name + END
+         $echo BLACK_BRIGHT + "  (" + constantLineNumber + ")" + RESET + ": " + highlight(trimmed, name, CYAN_BRIGHT) + END
+
+         var numberReferences = 0
+         loop file over javaFiles {
+            var lineNumber = 0
+            loop fileLine over javaFiles[file] {
+               lineNumber++
+               if notnull(index(fileLine, name)) {
+                  $echo formatstring('%s%s%s(%d)%s: %s%s%s', WHITE, file, BLACK_BRIGHT, lineNumber, RESET, WHITE_BRIGHT, highlight(fileLine, name), END)
+                  numberReferences++
+               }
+            }
+         } // over java files
+
+         // Special notices for only one or no references found
+         case numberReferences of {
+            0: $echo RED_BOLD_BRIGHT + "No references to " + RESET + name + RED_BOLD_BRIGHT + " were found!" + END,
+            1: $echo YELLOW_BRIGHT + "Only one reference to " + RESET + name + YELLOW_BRIGHT + " was found." + END
+         }
+
+         $echo
+      } // for each declaration found
+   }
 }
 

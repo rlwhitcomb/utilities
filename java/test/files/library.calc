@@ -923,3 +923,13 @@ define perm(N, R = 1) = N! / (N - R)!
  */
 define comb(N, R) = N! / ((N - R)! * R!)
 
+/*
+ * Read a text file, separate into lines, then return the list of them in order.
+ *
+ * @param fn The full or partially qualified file name to read.
+ * @return   List of lines in that file.
+ */
+define readFileLines(fn) = {
+   split(trim(read(fn)), LINESEP)
+}
+
