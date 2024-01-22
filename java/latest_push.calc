@@ -9,7 +9,7 @@
  * $0 = name of file retrieved by "curl"
  */
 $quiet on {
-    record = eval(read($0, 'UTF-8'))
+    record = eval(read($0 : 'UTF-8'))
 }
 $results on {
     loop event within record {

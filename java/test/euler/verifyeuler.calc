@@ -2,7 +2,7 @@ $quiet on
 // We can't have separators in our number strings
 $separators off
 // We rely on the standard library here
-$assert defined(capitalize), '"library.calc" is required; please rerun without "-nolib" option.'
+$assert defined(capitalize, readFileLines), '"library.calc" is required; please rerun without "-nolib" option.'
 
 $echo '**********************************'
 $echo ' R E M E M B E R'
@@ -27,7 +27,7 @@ eval(read(DIR + VALUES))
 
 // This is the "tester" script that actually runs the calculations against the canon files
 // to make sure we have test coverage of each completed problem.
-const TEST_LINES = split(read(DIR + TESTFILE), LINESEP)
+const TEST_LINES = readFileLines(DIR + TESTFILE)
 
 /*
  * Verify that every file in the first list is present in the second list.
