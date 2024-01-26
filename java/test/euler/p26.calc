@@ -1,0 +1,131 @@
+/*
+ * Problem 26 from Project Euler (projecteuler.net)
+ *
+ * Reciprocal Cycles
+ *
+ * A unit fraction contains 1 in the numerator. The decimal representation of the unit fractions with denominators 2 to 10 are given:
+ *
+ *                 1 / 2 = 0.5
+ *                 1 / 3 = 0.(3)
+ *                 1 / 4 = 0.25
+ *                 1 / 5 = 0.2
+ *                 1 / 6 = 0.1(6)
+ *                 1 / 7 = 0.(142857)
+ *                 1 / 8 = 0.125
+ *                 1 / 9 = 0.(1)
+ *                1 / 10 = 0.1
+ *
+ * Where 0.1(6) means 0.16666..., and has a 1-digit recurring cycle. It can be seen that 1/7 has a 6-digit recurring cycle.
+ *
+ * Find the value of d < 1000 for which 1/d contains the longest recurring cycle in its decimal fraction part.
+ */
+
+$quiet on {
+// Note: this is empirically derived by running the program over and over until we arrived at a limit
+// that allowed every value to succeed. Note that this is roughly the maxD value times three, just FYI.
+$decimal 3000
+
+const D_LIMIT = 1000
+
+/*
+ * Get the digit string of the value in n, with some modifications:
+ * 1. Strip off the leading "0.0..." part
+ * 2. Also strip off the first non-zero digit at the beginning,
+ *    because it is often NOT the repeating part, and even if it
+ *    is part of the repeat, starting with the second digit doesn't
+ *    change the repeating length.
+ * 3. Strip off the last digit, which will (likely) be rounded, and
+ *    therefore not entirely accurate for the repeating pattern.
+ *
+ * @param n The number to get the digits of (in this case it will be 1/d).
+ * @return  The modified digit string for analysis.
+ */
+define digits(n) = {
+   const s = @@n
+   var i = 0
+
+   // Skip the leading zero digits and decimal point
+   while s[i] === '0' || s[i] === '.' i++
+
+   // Then skip the first non-zero digit
+   // and chop off the last (rounded) digit
+   substr(s, i + 1, -1)
+}
+
+var maxRepeat = 0
+var maxD = 0
+
+/*
+ * Find the length of the repeating digit pattern in the given string (1/d).
+ *
+ * This is the heart of the problem solution here. We are going to
+ * examine the digits starting at position 0 in the given string to
+ * see if there is a repeating pattern there of some length. Actually
+ * there always will be in this context, so the result will be what
+ * the actual length of the repeating pattern is.
+ *
+ * The algorithm:
+ *  0. Start with the digits at position 0 in the string (in i)
+ *  1. Scan for the next occurrence in the string of the digit at position i into k.
+ *  2. Extract the pattern starting at i of len (k - i)
+ *  3. Compare the pattern at position k of that length with what starts at i.
+ *  4. Continue comparing until we hit a mismatch or less than len digits left in the string.
+ *  5. If there was more than one repetition, return the length of the pattern
+ *  6. Otherwise advance i and start over at step 1
+ *
+ * @param  s  the digits of 1/d with some modifications
+ * @return    length of the repeat in s
+ */
+define repeatLength(s) = {
+   const strlen = length(s)
+   var i = 0
+
+   // look for the char at i starting at position j + 1, save into k
+   while true {
+      var j = i, k
+      while notnull(k = index(s, s[i], j + 1)) {
+         const len = k - i
+         const original = substr(s, i, i + len)
+
+         // Scan to see how many repetitions of the pattern occur starting at k
+         var reps = 0
+         while k + len < strlen && original === substr(s, k, k + len) {
+            reps++
+            k += len
+         }
+         if reps > 1 {
+            leave repeatLength: len
+         }
+         // if string starting at i doesn't match starting at k
+         // then restart the search by advancing j past the k position
+         // we just tried. This would be the case where the repeating
+         // pattern contains the starting digit in the middle.
+         j = k
+      }
+      // Here we failed to find any repeating pattern starting at i,
+      // so try i + 1
+      i++
+   }
+   // We start with a string that will of necessity have a pattern, so we will
+   // never get here
+}
+
+loop d over 2 ... D_LIMIT - 1 {
+   const s = digits(1/d)
+
+   // Non-repeating values will have a (very) short decimal representation, so ignore them
+   if length(s) > 15 {
+      const len = repeatLength(s)
+      if len > maxRepeat {
+         maxRepeat = len
+         maxD = d
+      }
+   }
+}
+
+} // end of quiet calculation
+
+$resultonly on {
+   `The maximum length reciprocal cycle is $maxRepeat for the value 1/$maxD.`
+}
+
