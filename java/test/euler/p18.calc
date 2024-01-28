@@ -1,0 +1,109 @@
+/*
+ * Problem 18 from Project Euler (projecteuler.net)
+ *
+ * Maximum Path Sum I
+ *
+ * By starting at the top of the triangle below and moving to adjacent numbers on the row below, the maximum total from
+ * top to bottom is 23.
+ *
+ *                       3
+ *                      7 4
+ *                     2 4 6
+ *                    8 5 9 3
+ *
+ * That is, 3 + 7 + 4 + 9 = 23.
+ *
+ * Find the maximum total from top to bottom of the triangle below:
+ *
+ *                                   75
+ *                                 95  64
+ *                               17  47  82
+ *                             18  35  87  10
+ *                           20  04  82  47  65
+ *                         19  01  23  75  03  34
+ *                       88  02  77  73  07  63  67
+ *                     99  65  04  28  06  16  70  92
+ *                   41  41  26  56  83  40  80  70  33
+ *                 41  48  72  33  47  32  37  16  94  29
+ *               53  71  44  65  25  43  91  52  97  51  14
+ *             70  11  33  28  77  73  17  78  39  68  17  57
+ *           91  71  52  38  17  14  91  43  58  50  27  29  48
+ *         63  66  04  68  89  53  67  30  73  16  69  87  40  31
+ *       04  62  98  27  23  09  70  98  73  93  38  53  60  04  23
+ *
+ * NOTE: As there are only 16384 routes, it is possible to solve this problem by trying every route. However, Problem 67,
+ * is the same challenge with a triangle containing one-hundred rows; it cannot be solved by brute force, and requires a
+ * clever method! ;o)
+ */
+
+$quiet on {
+
+const DEMO = [
+     [ 3 ],
+    [ 7, 4 ],
+   [ 2, 4, 6 ],
+  [ 8, 5, 9, 3 ]
+]
+
+const TREE = [
+                               [ 75 ],
+                             [ 95, 64 ],
+                           [ 17, 47, 82 ],
+                         [ 18, 35, 87, 10 ],
+                       [ 20,  4, 82, 47, 65 ],
+                     [ 19,  1, 23, 75,  3, 34 ],
+                   [ 88,  2, 77, 73,  7, 63, 67 ],
+                 [ 99, 65,  4, 28,  6, 16, 70, 92 ],
+               [ 41, 41, 26, 56, 83, 40, 80, 70, 33 ],
+             [ 41, 48, 72, 33, 47, 32, 37, 16, 94, 29 ],
+           [ 53, 71, 44, 65, 25, 43, 91, 52, 97, 51, 14 ],
+         [ 70, 11, 33, 28, 77, 73, 17, 78, 39, 68, 17, 57 ],
+       [ 91, 71, 52, 38, 17, 14, 91, 43, 58, 50, 27, 29, 48 ],
+     [ 63, 66,  4, 68, 89, 53, 67, 30, 73, 16, 69, 87, 40, 31 ],
+   [  4, 62, 98, 27, 23,  9, 70, 98, 73, 93, 38, 53, 60,  4, 23 ]
+]
+
+/*
+ * Do a depth-first traversal of the given tree (two-dimensional array)
+ * starting from the given row and column (both 0-based). This is a
+ * recursive routine, called at each level of the tree.
+ *
+ * This function picks the maximum sum of its left and right branches
+ * plus the value at the given location.
+ *
+ * @param tree The tree to traverse.
+ * @param row  Zero-based row to work on.
+ * @param col  Column number.
+ * @return     The max sum from the given location down.
+ */
+define traverse(tree, row = 0, col = 0) = {
+   const len = length(tree)
+   const value = tree[row][col]
+   const sum = case row of {
+      0 .. len - 2: {
+         // There is a bug here: #648 -- max evaluates its first argument twice
+         // which in this case means a LOT of extra work if we put the recursive
+         // calls directly as the parameters to "max", so work around that for now.
+         const left = traverse(tree, row + 1, col)
+         const right = traverse(tree, row + 1, col + 1)
+         value + max(left, right)
+      },
+      len - 1: value,
+      default: 0
+   }
+   sum
+}
+
+const demo_sum = traverse(DEMO)
+const tree_sum = traverse(TREE)
+
+} /* end of the quiet block */
+
+$resultonly on {
+
+`The maximum sum of a path through the demo tree is $demo_sum.`
+
+`The maximum sum of a path through the tree is $tree_sum.`
+
+}
+

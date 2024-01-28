@@ -1,0 +1,78 @@
+/*
+ * Problem 30 from Project Euler (projecteuler.net)
+ *
+ * Digit Fifth Powers
+ *
+ * Surprisingly there are only three numbers that can be written as the sum of fourth powers of their digits:
+ *
+ *                         1634 = 1⁴ + 6⁴ + 3⁴ + 4⁴
+ *                         8208 = 8⁴ + 2⁴ + 0⁴ + 8⁴
+ *                         9474 = 9⁴ + 4⁴ + 7⁴ + 4⁴
+ *
+ * As 1 = 1⁴ is not a sum it is not included.
+ *
+ * The sum of these numbers is 1634 + 8208 + 9474 = 19316.
+ *
+ * Find the sum of all the numbers that can be written as the sum of fifth powers of their digits.
+ */
+$quiet on {
+
+$unlimited
+
+const POWER_4       = 4
+const LOWER_LIMIT_4 = 1000
+const UPPER_LIMIT_4 = 9999
+
+const POWER_5       = 5
+const LOWER_LIMIT_5 = 2
+const UPPER_LIMIT_5 = 200000;   // This is empirically derived (and NOT proven)
+                                // to be bigger than the biggest we observed up to
+                                // 100,000,000 (one hundred million)
+
+/*
+ * Do the basic verification for one number, to see if that number is equal to the sum
+ * of the given power of its digits.
+ *
+ * @param v     The number to verify
+ * @param power Power to use for the computation.
+ * @return      true/false if the number equals that sum of powers
+ */
+define verify(v, power) = {
+   var sum = 0
+   loop d over chars(@@v) {
+      sum += d ** power
+   }
+   sum === v
+}
+
+/*
+ * Run one test (either the example, or the "real" one), between the given limits
+ * of test values, using the power factor for the sums.
+ *
+ * Sums the values which pass the test (that is, that are equal to the sum of the
+ * powers of their digits).
+ *
+ * @param lowerLimit Starting value for the test values.
+ * @param upperLimit Ending value for the test.
+ * @param power      Power value to use for the test sums.
+ * @return           The sum of the individual values that pass the test.
+ */
+define test(lowerLimit, upperLimit, power) = {
+   var sum = 0
+   loop v over lowerLimit ... upperLimit {
+      if verify(v, power) sum += v
+   }
+   sum
+}
+
+const sum_4 = test(LOWER_LIMIT_4, UPPER_LIMIT_4, POWER_4)
+const sum_5 = test(LOWER_LIMIT_5, UPPER_LIMIT_5, POWER_5)
+
+} /* end of quiet block */
+
+$resultsonly on {
+
+`The sum of the numbers that can be written as the sum of fourth powers of their digits is $sum_4.`
+`The sum of all the numbers which are the sum of the fifth powers of their digits is $sum_5.`
+
+}

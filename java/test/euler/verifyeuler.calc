@@ -11,23 +11,27 @@ $echo '  kept private to Project Euler.'
 $echo ' D O   N O T   C O M M I T'
 $echo '**********************************'
 
-const DIR      = 'test/euler/'
-const PATTERN  = 'p*'
-const CALC     = '.calc'
-const CANON    = '.canon'
-const TESTFILE = 'eulertest'
-const VALUES   = 'euler_values.txt'
+const PATTERN     = 'p*'
+const CALC        = '.calc'
+const CANON       = '.canon'
+
+const DIR         = 'test/euler/'
+
+const TEST        = 'eulertest'
+const TEST_FILE   = DIR + TEST
+const VALUES      = 'euler_values.txt'
+const VALUES_FILE = DIR + VALUES
 
 var numberOfTests = 0
 
 // The real (secret) solution values are in a separate file, which must be present for
 // this to complete correctly.
-$assert exists(DIR + VALUES, 'fr'), `$VALUES file must exist in the $DIR directory!`
-eval(read(DIR + VALUES))
+$assert exists(VALUES_FILE, 'fr'), `$VALUES file must exist in the $DIR directory!`
+$load VALUES_FILE
 
 // This is the "tester" script that actually runs the calculations against the canon files
 // to make sure we have test coverage of each completed problem.
-const TEST_LINES = readFileLines(DIR + TESTFILE)
+const TEST_LINES = readFileLines(TEST_FILE)
 
 /*
  * Verify that every file in the first list is present in the second list.
