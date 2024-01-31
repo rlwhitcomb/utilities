@@ -231,6 +231,8 @@
  *	    #638: Add a new kind of debug printout of the parse tree.
  *	09-Jan-2024 (rlwhitcomb)
  *	    #644: New flavors of "convertToInteger" and "convertToInt" with possible null substitutions.
+ *	30-Jan-2024 (rlwhitcomb)
+ *	    #649: Options for extra spacing for fractions.
  */
 package info.rlwhitcomb.calc;
 
@@ -1087,13 +1089,13 @@ public final class CalcUtil
 			return Num.formatWithSeparators(((BigInteger) result), format.separators);
 		    }
 		    else if (result instanceof BigFraction) {
-			return ((BigFraction) result).toFormatString(format.separators);
+			return ((BigFraction) result).toFormatString(format.separators, format.extraSpace);
 		    }
 		    else if (result instanceof ComplexNumber) {
-			return ((ComplexNumber) result).toFormatString(format.separators);
+			return ((ComplexNumber) result).toFormatString(format.separators, format.extraSpace);
 		    }
 		    else if (result instanceof Quaternion) {
-			return ((Quaternion) result).toFormatString(format.separators);
+			return ((Quaternion) result).toFormatString(format.separators, format.extraSpace);
 		    }
 
 		    // Any other type, just get the string representation

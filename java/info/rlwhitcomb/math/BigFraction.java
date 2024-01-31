@@ -76,6 +76,7 @@
  *  20-Feb-23 rlw #244	Implement formatting with thousands separators.
  *  09-May-23 rlw ----	Move F_ZERO into here (too weird inside ComplexNumber).
  *  30-Jan-24 rlw #649	Add parameter to "internalToString" for adding spaces or not (soon to be extended).
+ *			Move the "space" parameter up to callers.
  */
 package info.rlwhitcomb.math;
 
@@ -134,6 +135,8 @@ public class BigFraction extends Number
 	private static final String CONDENSED_FORMAT = "%1$s/%2$s";
 	/** The "proper" format for display. */
 	private static final String PROPER_FORMAT = "%1$s %2$s/%3$s";
+	/** The "proper" format for display, with extra spaces. */
+	private static final String PROPER_EXPANDED_FORMAT = "%1$s %2$s / %3$s";
 
 
 	/** A value of {@code 0/1} (integer 0) as a fraction. */
@@ -1222,18 +1225,11 @@ public class BigFraction extends Number
 	 *		or <code><i>numer</i>/<i>denom</i></code>).
 	 */
 	private String internalToString(final boolean sep, final boolean space) {
-	    if (sep) {
-		if (space)
-		    return String.format(REGULAR_FORMAT, Num.formatWithSeparators(numer), Num.formatWithSeparators(denom));
-		else
-		    return String.format(CONDENSED_FORMAT, Num.formatWithSeparators(numer), Num.formatWithSeparators(denom));
-	    }
-	    else {
-		if (space)
-		    return String.format(REGULAR_FORMAT, numer, denom);
-		else
-		    return String.format(CONDENSED_FORMAT, numer, denom);
-	    }
+	    if (sep)
+		return String.format(space ? REGULAR_FORMAT : CONDENSED_FORMAT,
+			Num.formatWithSeparators(numer), Num.formatWithSeparators(denom));
+	    else
+		return String.format(space ? REGULAR_FORMAT : CONDENSED_FORMAT, numer, denom);
 	}
 
 	/**
@@ -1245,7 +1241,7 @@ public class BigFraction extends Number
 	 * @return	A string in the form of a whole number plus the fraction.
 	 */
 	public String toProperString() {
-	    return toProperString(false);
+	    return toProperString(false, false);
 	}
 
 	/**
@@ -1255,9 +1251,10 @@ public class BigFraction extends Number
 	 * plus the whole number.
 	 *
 	 * @param sep	Whether to use separators.
+	 * @param space	Whether to add spaces around "/" in the fractional part.
 	 * @return	A string in the form of a whole number plus the fraction.
 	 */
-	public String toProperString(final boolean sep) {
+	public String toProperString(final boolean sep, final boolean space) {
 	    if (isWholeNumber()) {
 		return sep ? Num.formatWithSeparators(numer) : numer.toString();
 	    }
@@ -1266,40 +1263,42 @@ public class BigFraction extends Number
 		if (results[1].equals(BigInteger.ZERO))
 		    return sep ? Num.formatWithSeparators(results[0]) : results[0].toString();
 		else if (sep)
-		    return String.format(PROPER_FORMAT,
+		    return String.format(space ? PROPER_EXPANDED_FORMAT : PROPER_FORMAT,
 				Num.formatWithSeparators(results[0]),
 				Num.formatWithSeparators(results[1].abs()),
 				Num.formatWithSeparators(denom));
 		else
-		    return String.format(PROPER_FORMAT,
+		    return String.format(space ? PROPER_EXPANDED_FORMAT : PROPER_FORMAT,
 				results[0], results[1].abs(), denom);
 	    }
-	    return internalToString(sep, true);
+	    return internalToString(sep, space);
 	}
 
 	/**
 	 * Return a string in the form of <code>"<i>numer</i>/<i>denom</i>"</code>,
 	 * unless the {@link #alwaysProper} flag is set, in which case call
-	 * {@link #toProperString}.
+	 * {@link #toProperString(boolean,boolean)}.
 	 *
 	 * @return	The string form of this fraction.
 	 */
 	@Override
 	public String toString() {
-	    return alwaysProper ? toProperString(false) : internalToString(false, true);
+	    return alwaysProper ? toProperString(false, false) : internalToString(false, true);
 	}
 
 	/**
 	 * Return a string in the form of <code>"<i>numer</i>/<i>denom</i>"</code>,
 	 * unless the {@link #alwaysProper} flag is set, in which case call
-	 * {@link #toProperString(boolean)}.
+	 * {@link #toProperString(boolean,boolean)}.
 	 *
 	 * @param sep	Whether or not to format with separators.
+	 * @param space	Whether or not to add space around "/" for improper fractions only;
+	 *		"alwaysProper" fractions will not respect this flag (same as {@link #toString})..
 	 * @return	The string form of this fraction with optional separators.
 	 * @see #toString
 	 */
-	public String toFormatString(final boolean sep) {
-	    return alwaysProper ? toProperString(sep) : internalToString(sep, true);
+	public String toFormatString(final boolean sep, final boolean space) {
+	    return alwaysProper ? toProperString(sep, false) : internalToString(sep, space);
 	}
 
 	/**

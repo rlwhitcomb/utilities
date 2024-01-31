@@ -823,6 +823,8 @@
  *	    #646: Implement Python's multiple assignment notation.
  *	22-Jan-2024 (rlwhitcomb)
  *	    #647: Allow multiple names for "defined" function.
+ *	30-Jan-2024 (rlwhitcomb)
+ *	    #649: Options for "f" and "F" formatting for less/more spaces.
  */
 package info.rlwhitcomb.calc;
 
@@ -2739,7 +2741,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			else {
 			    c = ComplexNumber.real(convertToDecimal(result, settings.mc, ctx));
 			}
-			valueBuf.append(c.toLongString(formatChar == 'I', separators));
+			valueBuf.append(c.toLongString(formatChar == 'I', separators, true));
 			break;
 
 		    case 'P':
@@ -2789,10 +2791,10 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			break;
 
 		    case 'f':
-			valueBuf.append(convertToFraction(result, ctx).toFormatString(separators));
+			valueBuf.append(convertToFraction(result, ctx).toFormatString(separators, (signChar != '-')));
 			break;
 		    case 'F':
-			valueBuf.append(convertToFraction(result, ctx).toProperString(separators));
+			valueBuf.append(convertToFraction(result, ctx).toProperString(separators, (signChar == '+')));
 			break;
 
 		    case 'J':
@@ -2944,7 +2946,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			if (result instanceof Scope) {
 			    boolean extraSpace = signChar != '-';
 			    valueBuf.append(toStringValue(this, ctx, result,
-				new StringFormat(true, false, extraSpace, separators, null, 0), "", 0));
+				new StringFormat(true, false, extraSpace, separators), "", 0));
 			}
 			else {
 			    stringValue = toStringValue(this, ctx, result, new StringFormat(false, separators));
@@ -6940,7 +6942,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    else if (outputObj instanceof ObjectScope) {
 			ObjectScope obj = (ObjectScope) outputObj;
 			// For now (maybe always?) write out a JSON object
-			seq = toStringValue(this, exprCtx, obj.map(), new StringFormat(true, false, false, false, "", 0), "", 0);
+			seq = toStringValue(this, exprCtx, obj.map(), new StringFormat(true, false, false, false), "", 0);
 		    }
 		    else {
 			seq = getNonNullString(exprCtx, outputObj);

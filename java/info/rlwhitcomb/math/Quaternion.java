@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2022-2023 Roger L. Whitcomb.
+ * Copyright (c) 2022-2024 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,15 +24,16 @@
  *	Quaternion support.
  *
  * History:
- *  29-Dec-22 rlw #558:	Initial coding.
- *  05-Jan-23 rlw #558:	More operation methods.
+ *  29-Dec-22 rlw #558	Initial coding.
+ *  05-Jan-23 rlw #558	More operation methods.
  *  10-Jan-23		Constructor from long (int) values.
  *  04-Feb-23		"power(int)" function.
- *  23-Feb-23 rlw #244:	Formatting with thousands separators.
+ *  23-Feb-23 rlw #244	Formatting with thousands separators.
  *			"conjugate" to "inverse", implement "conjugate" correctly,
  *			Implement "magnitude(), "equals()", "hashCode()", and
  *			Comparable interface (same paradigm as ComplexNumber).
- *  05-May-23 rlw #558:	New "negate()" method. Move F_ZERO into BigFraction.
+ *  05-May-23 rlw #558	New "negate()" method. Move F_ZERO into BigFraction.
+ *  30-Jan-24 rlw #649	Options for extra spacing in fractional form.
  */
 package info.rlwhitcomb.math;
 
@@ -718,17 +719,18 @@ public final class Quaternion extends Number
 	/**
 	 * Format the value using optional thousands separators.
 	 *
-	 * @param sep Whether to use separators in each value.
-	 * @return    The formatted value.
+	 * @param sep   Whether to use separators in each value.
+	 * @param space Whether to put extra space in the fractional form.
+	 * @return      The formatted value.
 	 * @see #NORMAL_FORMAT
 	 */
-	private String internalToString(final boolean sep) {
+	private String internalToString(final boolean sep, final boolean space) {
 	    if (rational) {
 		return String.format(NORMAL_FORMAT,
-			aFrac().toFormatString(sep),
-			bFrac().toFormatString(sep),
-			cFrac().toFormatString(sep),
-			dFrac().toFormatString(sep));
+			aFrac().toFormatString(sep, space),
+			bFrac().toFormatString(sep, space),
+			cFrac().toFormatString(sep, space),
+			dFrac().toFormatString(sep, space));
 	    }
 	    else {
 		return String.format(NORMAL_FORMAT,
@@ -742,16 +744,17 @@ public final class Quaternion extends Number
 	/**
 	 * Format the value for display, with the option to use thousands separators.
 	 *
-	 * @param sep Whether to use thousands separators.
-	 * @return    The properly formatted value.
+	 * @param sep   Whether to use thousands separators.
+	 * @param space Whether to use extra spaces in fractional form.
+	 * @return      The properly formatted value.
 	 */
-	public String toFormatString(final boolean sep) {
-	    return internalToString(sep);
+	public String toFormatString(final boolean sep, final boolean space) {
+	    return internalToString(sep, space);
 	}
 
 	@Override
 	public String toString() {
-	    return internalToString(false);
+	    return internalToString(false, true);
 	}
 
 }

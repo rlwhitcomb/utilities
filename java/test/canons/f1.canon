@@ -134,21 +134,21 @@
 >complex (o1) -> ( 0.5, 0.75 )
 >li1 = cast (ca1, "array") -> [ 0.5, 0.75 ]
 >ca1 === complex (li1) -> true
->cb1 = complex ('2/3+5/6i') -> ( 2 / 3, 5 / 6 )
+>cb1 = complex ('2/3+5/6i') -> ( 2/3, 5/6 )
 >Calculation mode set to “RATIONAL”.
->cb2 = (3 / 4, 7 / 9) -> ( 3 / 4, 7 / 9 )
+>cb2 = (3 / 4, 7 / 9) -> ( 3/4, 7/9 )
 >Calculation mode set to “DECIMAL(34)”.
 >cb1 + cb2 -> ( 1 5/12, 1 11/18 )
->cb3 = (frac (1, 2), frac (7, 8)) -> ( 1 / 2, 7 / 8 )
->bf1 = cb1 / cb3 -> ( 1 3/65, -32 / 195 )
->bf1 * cb3 -> ( 2 / 3, 5 / 6 )
->++ cb3 -> ( 1 1/2, 7 / 8 )
->cb4 = complex ('1/2') -> ( 1 / 2, 0 )
+>cb3 = (frac (1, 2), frac (7, 8)) -> ( 1/2, 7/8 )
+>bf1 = cb1 / cb3 -> ( 1 3/65, -32/195 )
+>bf1 * cb3 -> ( 2/3, 5/6 )
+>++ cb3 -> ( 1 1/2, 7/8 )
+>cb4 = complex ('1/2') -> ( 1/2, 0 )
 >++ cb4 -> ( 1 1/2, 0 )
 >cb4 ** 2 -> ( 2 1/4, 0 )
 >cf1 = complex ('7/1i') -> ( 0, 7 )
 >cf2 = complex (frac (7), frac (9)) -> ( 7, 9 )
->cf3 = cf1 / cf2 -> ( 63 / 130, 49 / 130 )
+>cf3 = cf1 / cf2 -> ( 63/130, 49/130 )
 >cf3 * cf2 -> ( 0, 7 )
 >cf4 = complex (0, frac (7)) -> ( 0, 7 )
 >cf1 == cf4 -> true

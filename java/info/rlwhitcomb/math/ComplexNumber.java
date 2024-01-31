@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2022-2023 Roger L. Whitcomb.
+ * Copyright (c) 2022-2024 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -53,6 +53,7 @@
  *  21-Feb-23 rlw #244	Implement formatting with separators.
  *  09-May-23 rlw ----	Move F_ZERO back to BigFraction (too weird in here).
  *  13-Dec-23 rlw ----	Use MaxInt.
+ *  30-Jan-24 rlw #649	Options for spacing of fraction values.
  */
 package info.rlwhitcomb.math;
 
@@ -1408,10 +1409,10 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 	    }
 	}
 
-	private String internalToString(final boolean sep) {
+	private String internalToString(final boolean sep, final boolean space) {
 	    if (rational)
 		return String.format(NORMAL_FORMAT,
-			rFrac().toFormatString(sep), iFrac().toFormatString(sep));
+			rFrac().toFormatString(sep, space), iFrac().toFormatString(sep, space));
 	    else
 		return String.format(NORMAL_FORMAT,
 			Num.formatWithSeparators(r(), sep), Num.formatWithSeparators(i(), sep));
@@ -1420,16 +1421,17 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 	/**
 	 * Formatted version of {@link #toString} with support for thousands separators.
 	 *
-	 * @param sep Whether to format with separators.
-	 * @return    The formatted version.
+	 * @param sep	Whether to format with separators.
+	 * @param space Whether to use extra spaces for the fractional form.
+	 * @return	The formatted version.
 	 */
-	public String toFormatString(final boolean sep) {
-	    return internalToString(sep);
+	public String toFormatString(final boolean sep, final boolean space) {
+	    return internalToString(sep, space);
 	}
 
 	@Override
 	public String toString() {
-	    return internalToString(false);
+	    return internalToString(false, true);
 	}
 
 	/**
@@ -1439,9 +1441,10 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 	 *
 	 * @param upperCase Casing for the representation of {@code i}.
 	 * @param sep       Whether to format with thousands separators.
+	 * @param space     Whether to use extra spaces for the fractional form.
 	 * @return The alternate string representation of this number.
 	 */
-	public String toLongString(final boolean upperCase, final boolean sep) {
+	public String toLongString(final boolean upperCase, final boolean sep, final boolean space) {
 	    char i = upperCase ? '\u2110' : '\u2148';
 
 	    if (rational) {
@@ -1451,20 +1454,20 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 		    else if (imaginaryFrac.equals(BigFraction.MINUS_ONE))
 			return String.format(I_NEG_FORMAT, i);
 		    else
-			return String.format(IMAG_FORMAT, imaginaryFrac.toFormatString(sep), i);
+			return String.format(IMAG_FORMAT, imaginaryFrac.toFormatString(sep, space), i);
 		}
 		else if (imaginaryFrac == null) {
-		    return realFrac.toFormatString(sep);
+		    return realFrac.toFormatString(sep, space);
 		}
 		else {
 		    if (imaginaryFrac.signum() < 0)
 			return String.format(LONG_NEG_FORMAT,
-			    realFrac.toFormatString(sep),
-			    imaginaryFrac.abs().toFormatString(sep), i);
+			    realFrac.toFormatString(sep, space),
+			    imaginaryFrac.abs().toFormatString(sep, space), i);
 		    else
 			return String.format(LONG_POS_FORMAT,
-			    realFrac.toFormatString(sep),
-			    imaginaryFrac.toFormatString(sep), i);
+			    realFrac.toFormatString(sep, space),
+			    imaginaryFrac.toFormatString(sep, space), i);
 		}
 	    }
 	    else {

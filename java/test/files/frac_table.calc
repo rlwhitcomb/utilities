@@ -1,0 +1,8 @@
+/*
+ * Generate a handy little table of fraction to decimal conversions.
+ */
+$quiet on
+$rational on
+
+loop m over 1/16 .. 15/16, 1/16 $echo `${m@-f}\t= ${m@d}`
+

@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.40.12', date: d'2024-01-30',
+      issues: [ 649 ],
+      comment: 'Spacing flags for "@f" and "@F" formats.'
+    },
     { version: '2.40.10', date: d'2024-01-22',
       issues: [ 647 ],
       comment: 'Allow multiple names for "defined" function.'

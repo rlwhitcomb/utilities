@@ -182,6 +182,7 @@ h2 {
        (<span class="underline">R</span>ead, <span class="underline">E</span>val, <span class="underline">P</span>rint
         <span class="underline">L</span>oop, where a prompt is displayed, the input line is evaluated
        and the result displayed, then the prompt is repeated for the next calculation), from a file for predefined calculations, or from within a simple GUI frame.
+  <h3>Why?</h3>
   <p><em><strong>Why would I want this calculator when there are so many already available (handheld, apps on your phone, default apps on your computer)?</strong></em>
       <ul>
         <li>All arithmetic is done to (essentially) unlimited precision (ignoring the fact that only around 38 digits is sufficient to calculate the diameter
@@ -202,12 +203,13 @@ h2 {
         <li>Calculations can be edited (using backspace, etc.) to reduce the chance of keyboard errors.</li>
         <li>Looping and conditional statements to do pretty much any kind of calculation.</li>
         <li>Therefore, the language is <a href="https://en.wikipedia.org/wiki/Turing_completeness">&ldquo;Turing Complete&rdquo;</a>.</li>
-        <li>Currently (as of the beginning of 2023 at least), it is being actively developed and maintained, meaning features and fixes are constantly being added.</li>
+        <li>Currently (as of early 2024 at least), it is being actively developed and maintained, meaning features and fixes are constantly being added.</li>
         <li>This is <a href="https://opensource.com/resources/what-open-source">Open-Source Software</a> so the code can be examined, and modified (if desired) for your own use.</li>
       </ul>
+  <h3>History</h3>
   <p>"Calc" started out as an exercise in learning the <a href="https://www.antlr.org/">Antlr</a> parser generator, by combining the simple expression grammar from the introductory book
      with the JSON grammar in another chapter of the book. Once that was working, adding more operators and then built-in functions, and then user-defined functions, and on and on,
-     was fairly easy. And now, 2&frac12; years later, and a lot of head-scratching work, we have what we have here.
+     was fairly easy. And now, over 3 years later, with a lot of head-scratching along the way, we have what we have here.
   <p>The language is built around the idea of an expression evaluator. So, everything in the language (with the exception of <a href="#Directives">Directives</a>) is basically an expression.
      And since each piece of data basically describes itself (by its Java class) we can get away with being dynamically typed, and doing "appropriate" conversions as needed.
      Even the <a href="#Statements">Statements</a> in the language actually return a value, so it is not a stretch for the result of anything to simply be the last expression value
@@ -216,24 +218,49 @@ h2 {
      having JSON objects as "native" data types is pretty darn useful. And, of course, many features and ideas have come from JavaScript, the most (mis-)used dynamically typed
      language in general use today. Other features have come from the functional programming arena, with ideas from <a href="https://www.scala-lang.org/">Scala</a> and elsewhere.
   <p>Having a scripting language / calculation engine that can run as a command line filter, or as a REPL-based quick calculation tool (&agrave; la <a href="https://www.python.org/">Python</a>), or as a GUI calculator application, all in one package, is
-     unprecedented (AFAIK) right now. Adding high-end features such as graphing of tables and equations, along with a popup operator and function "keyboard" would make this even
+     unprecedented (AFAIK) right now. Adding high-end features (planned) such as graphing of tables and equations, along with a popup operator and function "keyboard" will make this even
      more useful and unique. And the list of desired enhancements at <a href="https://github.com/rlwhitcomb/utilities/issues">Utilities Issues</a> continues to grow faster than
      they can be implemented.
+  <h3>Unique Features</h3>
   <p>Many features are found nowhere else, or only at great cost in commercial applications:
-     <ul><li>Arithmetic to thousands of digits precision</li>
+     <ul><li>Arithmetic to thousands of digits of precision</li>
          <li>More powerful <code>case</code> statement selectors than I have seen</li>
-	 <li>All the latest operators from many languages</li>
+         <li>The <code>case</code> statement is also an expression that can be used to assign one of any number of values, depending on these powerful selectors</li>
+	 <li>All the latest operators from many other programming languages</li>
 	 <li>Rational fractions, complex numbers, and quaternions as native data types, along with objects, arrays, and sets as standard data collections</li>
 	 <li>Many Unicode symbols available for use as they were intended (that is, in the appropriate mathematical sense)</li>
 	 <li>All the latest multi-line, raw, interpolated, and standard string constant forms available</li>
 	 <li>Dynamic code generation and execution, via the <code>eval</code> function</li>
 	 <li>Equally adept at string, numeric, and object manipulation (with matrices, file manipulation, and other enhancements still coming)</li>
+         <li>JSON (<span class="underline">J</span>ava<span class="underline">S</span>cript <span class="underline">O</span>bject <span class="underline">N</span>otation) is supported natively, allowing efficient manipulation, querying, and editing</li>
+         <li>Built-in functions to read and write "properties" files are available, allowing easy querying and editing (via "map" collections)
 	 <li>Native support for delimited files is also coming soon, with virtually unlimited support for delimiters, quoting and escaping, etc.</li>
 	 <li>Gosh, even Roman numerals are supported natively!</li>
      </ul>
+  <h3>Possible Applications</h3>
+  <p>What are some possible applications of this technology? Here are some of the uses I have found, and that are (mostly) demonstrated in files in the "java" and "java/test/files" directories of this repository.
+  <ul><li>In combination with "curl" or "wget", efficiently processing the JSON output of web results to extract information (see "latest_push" and "latest_push.calc")</li>
+      <li>Solving mathematical or programming problems, such as those at <a href="projecteuler.net">Project Euler</a> (see all the files in the "java/test/euler" directory)</li>
+      <li>Efficiently doing text searches and reporting on files in a directory tree (see "constants.calc")</li>
+      <li>Generating handy conversion tables (such as "java/test/files/frac_table.calc")</li>
+      <li>As a desktop calculator (using GUI mode with the "-gui" command line option)</li>
+      <li>As a teaching tool for learning fractions, Roman numerals, complex numbers, or even quaternions</li>
+      <li>Doing statistical or other data-analysis tasks (see "mean_stddev" inside "library.calc")</li>
+      <li>Developing and playing simple games (see "java/test/files/tictactoe.calc")</li>
+      <li>Efficiently reformatting input data (see "versions.calc" along with "VersionRef.json")</li>
+      <li>Dynamic generation of code (see "java/makeScripts.calc")</li>
+      <li>Developing cross-platform scripts because the language is OS-independent, with a combination of "exec", "eval", and file-manipulation functions</li>
+      <li>Quick manipulation of command-line values or results (see "java/latest_test" or "java/latest_test.bat")</li>
+      <li>All kinds of date- or time-related calculations, such as intervals between dates or times, calendar generation, past or future dates (such as "what is 90 days from today?"), etc.</li>
+      <li>All kinds of quick conversions, such as temperature, metric-to-English measurements, etc. (see "java/test/files/library.calc")</li>
+      <li>Building a library of your own frequently-used calculations (again, "library.calc" is a good example)</li>
+      <li>There are even library functions for calculating mortgage and loan payments</li>
+      <li>And the ultimate application could be using "Calc" as an embedded calculation / scripting engine inside one of your own JVM-based programs</li>
+  </ul>
+  <h3>Notes</h3>
   <p>A note on syntax in the following pages: <b>Bold</b> values must be typed as given (except for allowed case differences) everywhere. <code>(</code> and <code>)</code> around values in the
      Command Line Options and Operators and Functions sections signify optional values / parameters, while in the Formats section, <code>[</code> and <code>]</code> are the "optional"
-     markers. Items inside parentheses separated by <code>|</code> signifies one of variations should be used.
+     markers. Items inside parentheses separated by <code>|</code> signifies one of the variations should be used.
 </div>
 <a class="top-link" href="#topofpage">Top</a>
 <hr id="Command_Line" class="sectionsep">
@@ -693,7 +720,8 @@ or<br>
      do the same formatting, except mapping the result to UPPER case as well. The exceptions are <code>@e</code> which formats the
      value as a date in ISO-8601 form (<code><i>yyyy</i>-<i>mm</i>-<i>dd</i></code>), while <code>@E</code> puts the value in U.S.
      format (<code><i>mm</i>/<i>dd</i>/<i>yyyy</i></code>), <code>@f</code> which formats the
-     result as a fraction, while <code>@F</code> formats the result as a proper fraction (as in <code>15/8@F = 1 7/8</code>),
+     result as a fraction (even if "improper"), such as <code>15/8@f = 15 / 8</code>, while <code>@F</code> formats the result as a 
+     proper fraction (as in <code>15/8@F = 1 7/8</code>),
      <code>@O</code> or <code>@D</code> which would make no difference in the outputs, <code>@J</code> which doesn't make sense
      given the output could have strings which shouldn't be case-shifted, and <code>@K</code> which uses the long-format names instead of the short form.
 </div>
@@ -717,8 +745,8 @@ or<br>
           <td>Primarily for rational mode: format the result as a decimal value,<br>with optional separators, and optionally rounding to scale of <code>+</code>|<code>-</code> <i>n</i> digits<br>and where <i>m</i> is 0 padding width<br><code>,</code> adds thousands separators regardless of settings<br>and <code>_</code> removes them always<br>as in <code style="color:blue;">1234.567 @2,d</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">1,234.57</code><br>and <code style="color:blue;">2.345e9 @.12_d</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">002345000000</code><br>(prints codepoint for single character<br>as in <code style="color:blue;">"&#x1D6D1;" @d</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">120529</code>)</td></tr>
       <tr><td><code>@</code>[<code>-</code>]<code>e</code></td><td>Format an integer as a date (yyyy-mm-dd) (ISO-8601 format)<br>as in <code style="color:blue;">18908 @e</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">d'2021-10-08'</code><br><code>-</code> strips the decoration, as in <code style="color:green">"2020-10-08"</code></td></tr>
 <tr><td><code>@</code>[<code>-</code>]<code>E</code></td><td>Format an integer as a date (mm/dd/yyyy) (U.S. format)<br> as in <code style="color:blue;">-10252 @E</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">D'12/07/1941'</code><br><code>-</code> strips the decoration, as in <code style="color:green">"12/07/1941"</code></td></tr>
-      <tr><td><code>@f</code></td><td>For decimal mode, format the result as a rational fraction<br>as in <code style="color:blue;">5.125 @f</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">41/8</code></td></tr>
-      <tr><td><code>@F</code></td><td>Format as a proper fraction (with possible integer portion)<br>as in <code style="color:blue;">3.75 @F</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">3 3/4</code></td></tr>
+      <tr><td><code>@</code>[<code>-</code>]<code>f</code></td><td>For decimal mode, format the result as a rational fraction<br>as in <code style="color:blue;">5.125 @f</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">41 / 8</code><br>using <code>-</code> will not use spaces around the <code>/</code></td></tr>
+      <tr><td><code>@</code>[<code>+</code>]<code>F</code></td><td>Format as a proper fraction (with possible integer portion)<br>as in <code style="color:blue;">3.75 @F</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">3 3/4</code><br>using <code>+</code> will add spaces around the <code>/</code></td></tr>
       <tr><td><code>@c</code></td><td>Format an integer (range of 0 .. 0x10FFFF) as a Unicode character<br>as in <code style="color:blue;">120529 @c</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">"&#x1D6D1;"</code></td></tr>
       <tr><td><code>@i</code></td><td>Format the result as a complex number, as in<br><code style="color:blue;">(1,1)**3 @i</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">-2 + 2&#x2148;</code></td></tr>
       <tr><td><code>@p</code></td><td>Format the result as a complex number<br>in polar form, as in<br><code style="color:blue;">(3,4) @p</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">{ r: 5, &#x03B8;: 0.9272952180016122 }</code></td></tr>

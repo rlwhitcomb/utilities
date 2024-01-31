@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2022 Roger L. Whitcomb.
+ * Copyright (c) 2022,2024 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,11 +24,10 @@
  *	Flags used during calls to "toStringValue" (to reduce the number of invariant
  *	parameters passed around everywhere).
  *
- *  Change History:
- *	14-Jul-2022 (rlwhitcomb)
- *	    #412: Initial coding.
- *	24-Jul-2022 (rlwhitcomb)
- *	    #412: Add "skipLevels" value.
+ * History:
+ *  14-Jul-22 rlw #412	Initial coding.
+ *  24-Jul-22 rlw #412	Add "skipLevels" value.
+ *  30-Jan-24 rlw #649	New constructor.
  */
 package info.rlwhitcomb.calc;
 
@@ -131,6 +130,23 @@ class StringFormat
 	    quotes = q;
 	    pretty = p;
 	    extraSpace = true;
+	    separators = sep;
+	    increment = DEFAULT_INCREMENT;
+	    skipLevels = 0;
+	}
+
+	/**
+	 * Construct for extra spacing ({@code @s} and {@code @f} formats).
+	 *
+	 * @param q   Whether to quote strings or not.
+	 * @param p   Whether to do "pretty printing".
+	 * @param es  Extra spaces?
+	 * @param sep Value for thousands separators.
+	 */
+	StringFormat(final boolean q, final boolean p, final boolean es, final boolean sep) {
+	    quotes = q;
+	    pretty = p;
+	    extraSpace = es;
 	    separators = sep;
 	    increment = DEFAULT_INCREMENT;
 	    skipLevels = 0;
