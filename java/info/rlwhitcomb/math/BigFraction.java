@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2021-2023 Roger L. Whitcomb.
+ * Copyright (c) 2021-2024 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,57 +24,58 @@
  *	Class implementing rational fractions, including many arithmetic functions.
  *
  * History:
- *  29-Jan-21 rlw  ---	Initial coding, not complete.
- *  29-Jan-21 rlw  ---	Continued coding and documenting.
- *  29-Jan-21 rlw  ---	Add a constructor from two integer strings.
- *  30-Jan-21 rlw  ---	Add "compareTo" and "hashCode" methods; implement Comparable and
+ *  29-Jan-21 rlw ----	Initial coding, not complete.
+ *  29-Jan-21 rlw ----	Continued coding and documenting.
+ *  29-Jan-21 rlw ----	Add a constructor from two integer strings.
+ *  30-Jan-21 rlw ----	Add "compareTo" and "hashCode" methods; implement Comparable and
  *			Serializable. Add methods to construct from strings. Add
  *			BigDecimal constructor. Add ZERO and ONE constants.
- *  30-Jan-21 rlw  ---	Normalize to keep sign always in the numerator. Add "abs",
+ *  30-Jan-21 rlw ----	Normalize to keep sign always in the numerator. Add "abs",
  *			"signum", and "equals"  methods.
- *  31-Jan-21 rlw  ---	More methods dealing with whole number operands.
+ *  31-Jan-21 rlw ----	More methods dealing with whole number operands.
  *			Divide by long was also missing.
- *  01-Feb-21 rlw  ---	Tweaks to "normalize".
- *  01-Feb-21 rlw  ---	Make this a subclass of Number; implement the required methods.
- *  02-Feb-21 rlw  ---	Implement GCD and LCM.
+ *  01-Feb-21 rlw ----	Tweaks to "normalize".
+ *  01-Feb-21 rlw ----	Make this a subclass of Number; implement the required methods.
+ *  02-Feb-21 rlw ----	Implement GCD and LCM.
  *			Add "isWholeNumber", and "toInteger". Rework "longValue()" and
  *			"intValue()" in terms of "toInteger" now. Add "intValueExact()"
  *			and "longValueExact()" as well. Add "increment()" and "decrement()",
  *			as well as two more constant values.
- *  03-Feb-21 rlw  ---	General cleanup.
+ *  03-Feb-21 rlw ----	General cleanup.
  *			Tweak the two patterns and their doc.
  *			More tweaking.
- *  09-Mar-21 rlw  ---	The two and three string patterns are still not right...
- *  26-Mar-21 rlw  ---	Move some methods from NumericUtil to MathUtil.
- *  29-Mar-21 rlw  ---	Add a flag to signal this fraction should always be represented
+ *  09-Mar-21 rlw ----	The two and three string patterns are still not right...
+ *  26-Mar-21 rlw ----	Move some methods from NumericUtil to MathUtil.
+ *  29-Mar-21 rlw ----	Add a flag to signal this fraction should always be represented
  *			as a proper fraction (helps with @F formatting in Calc).
- *  27-Jul-21 rlw  ---	Add "pow" function.
- *  27-Jul-21 rlw  ---	Negative powers and special cases for 0 and 1. Add "reciprocal".
- *  28-Jul-21 rlw  ---	Beef up the "valueOf" with treatment of the Unicode fraction chars.
- *  06-Aug-21 rlw  ---	And ... finish that work.
- *  25-Aug-21 rlw  ---	Correct a typo in the INT_FRAC regex.
+ *  27-Jul-21 rlw ----	Add "pow" function.
+ *  27-Jul-21 rlw ----	Negative powers and special cases for 0 and 1. Add "reciprocal".
+ *  28-Jul-21 rlw ----	Beef up the "valueOf" with treatment of the Unicode fraction chars.
+ *  06-Aug-21 rlw ----	And ... finish that work.
+ *  25-Aug-21 rlw ----	Correct a typo in the INT_FRAC regex.
  *			Display the input value in the "unsupportedFormat" exception.
- *  05-Oct-21 rlw  ---	Strip trailing zeros in "toDecimal".
- *  02-Dec-21 rlw #124:	Tweak default display, not proper form.
- *  14-Jan-22 rlw  ---	Some optimizations in "pow()".
- *  10-Feb-22 rlw  ---	Oops! Modulus is non-integer part after division (as in @F formatting).
- *  23-Mar-22 rlw  ---	Allow '+' in "fractionValue" and other input patterns also.
- *  14-Apr-22 rlw #273:	Move to "math" package.
- *  08-Jul-22 rlw #393:	Cleanup imports.
- *  15-Sep-22 rlw #485:	Make the "remainder" function public.
- *		  #485:	Add "floor" and "ceil" functions.
- *  27-Sep-22 rlw #494:	Fix code scanning issue with the special fraction characters.
- *  12-Oct-22 rlw #514:	Update text resource package.
- *  20-Oct-22 rlw  ---	Add "valueOf(Number)" method.
- *  26-Nov-22 rlw #559:	Add "isZero" and "precision" for help with complex rational calculations.
+ *  05-Oct-21 rlw ----	Strip trailing zeros in "toDecimal".
+ *  02-Dec-21 rlw #124	Tweak default display, not proper form.
+ *  14-Jan-22 rlw ----	Some optimizations in "pow()".
+ *  10-Feb-22 rlw ----	Oops! Modulus is non-integer part after division (as in @F formatting).
+ *  23-Mar-22 rlw ----	Allow '+' in "fractionValue" and other input patterns also.
+ *  14-Apr-22 rlw #273	Move to "math" package.
+ *  08-Jul-22 rlw #393	Cleanup imports.
+ *  15-Sep-22 rlw #485	Make the "remainder" function public.
+ *		  #485	Add "floor" and "ceil" functions.
+ *  27-Sep-22 rlw #494	Fix code scanning issue with the special fraction characters.
+ *  12-Oct-22 rlw #514	Update text resource package.
+ *  20-Oct-22 rlw ----	Add "valueOf(Number)" method.
+ *  26-Nov-22 rlw #559	Add "isZero" and "precision" for help with complex rational calculations.
  *			Some other optimizations.
- *  17-Dec-22 rlw #559:	New "valueOf(Object)" method.
- *  20-Dec-22 rlw #559:	Address negative scale errors in BigDecimal constructor.
+ *  17-Dec-22 rlw #559	New "valueOf(Object)" method.
+ *  20-Dec-22 rlw #559	Address negative scale errors in BigDecimal constructor.
  *			Numerous tweaks, including new "properFraction" static method.
- *  31-Dec-22 rlw #558:	New methods for Quaternions.
- *  05-Jan-23 rlw #558:	Make "properFraction" into a method for Object; new copy constructor.
- *  20-Feb-23 rlw #244:	Implement formatting with thousands separators.
- *  09-May-23 rlw  ---	Move F_ZERO into here (too weird inside ComplexNumber).
+ *  31-Dec-22 rlw #558	New methods for Quaternions.
+ *  05-Jan-23 rlw #558	Make "properFraction" into a method for Object; new copy constructor.
+ *  20-Feb-23 rlw #244	Implement formatting with thousands separators.
+ *  09-May-23 rlw ----	Move F_ZERO into here (too weird inside ComplexNumber).
+ *  30-Jan-24 rlw #649	Add parameter to "internalToString" for adding spaces or not (soon to be extended).
  */
 package info.rlwhitcomb.math;
 
@@ -129,6 +130,8 @@ public class BigFraction extends Number
 
 	/** The regular format to display. */
 	private static final String REGULAR_FORMAT = "%1$s / %2$s";
+	/** The "condensend" format to display (without extra spaces). */
+	private static final String CONDENSED_FORMAT = "%1$s/%2$s";
 	/** The "proper" format for display. */
 	private static final String PROPER_FORMAT = "%1$s %2$s/%3$s";
 
@@ -1214,13 +1217,23 @@ public class BigFraction extends Number
 	 * Internal formatter for the "unproper" form.
 	 *
 	 * @param sep	Whether to use separators.
-	 * @return	The regular string value (<code><i>numer</i> / <i>denom</i></code>).
+	 * @param space	Whether to add spaces around "/".
+	 * @return	The regular string value (<code><i>numer</i> / <i>denom</i></code>,
+	 *		or <code><i>numer</i>/<i>denom</i></code>).
 	 */
-	private String internalToString(final boolean sep) {
-	    if (sep)
-		return String.format(REGULAR_FORMAT, Num.formatWithSeparators(numer), Num.formatWithSeparators(denom));
-	    else
-		return String.format(REGULAR_FORMAT, numer, denom);
+	private String internalToString(final boolean sep, final boolean space) {
+	    if (sep) {
+		if (space)
+		    return String.format(REGULAR_FORMAT, Num.formatWithSeparators(numer), Num.formatWithSeparators(denom));
+		else
+		    return String.format(CONDENSED_FORMAT, Num.formatWithSeparators(numer), Num.formatWithSeparators(denom));
+	    }
+	    else {
+		if (space)
+		    return String.format(REGULAR_FORMAT, numer, denom);
+		else
+		    return String.format(CONDENSED_FORMAT, numer, denom);
+	    }
 	}
 
 	/**
@@ -1261,7 +1274,7 @@ public class BigFraction extends Number
 		    return String.format(PROPER_FORMAT,
 				results[0], results[1].abs(), denom);
 	    }
-	    return internalToString(sep);
+	    return internalToString(sep, true);
 	}
 
 	/**
@@ -1273,7 +1286,7 @@ public class BigFraction extends Number
 	 */
 	@Override
 	public String toString() {
-	    return alwaysProper ? toProperString(false) : internalToString(false);
+	    return alwaysProper ? toProperString(false) : internalToString(false, true);
 	}
 
 	/**
@@ -1286,7 +1299,7 @@ public class BigFraction extends Number
 	 * @see #toString
 	 */
 	public String toFormatString(final boolean sep) {
-	    return alwaysProper ? toProperString(sep) : internalToString(sep);
+	    return alwaysProper ? toProperString(sep) : internalToString(sep, true);
 	}
 
 	/**
