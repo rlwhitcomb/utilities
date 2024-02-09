@@ -280,6 +280,38 @@ const MM_PER_FOOT = MM_PER_INCH * 12
 const MM_PER_MILE = MM_PER_FOOT * 5280
 
 /*
+ * Convert millimeters to inches.
+ *
+ * @param mm Number of millimeters.
+ * @return   Equivalent number of inches.
+ */
+define mm_to_in(mm) = mm / MM_PER_INCH
+
+/*
+ * Convert inches to millimeters.
+ *
+ * @param inch Number of inches to convert.
+ * @return     Equivalent number of millimeters.
+ */
+define in_to_mm(inch) = inch * MM_PER_INCH
+
+/*
+ * Convert centimeters to inches.
+ *
+ * @param cm Number of centimeters.
+ * @return   Equivalent number of inches.
+ */
+define cm_to_in(cm) = cm * 10 / MM_PER_INCH
+
+/*
+ * Convert inches to centimeters.
+ *
+ * @param inch Number of inches to convert.
+ * @return     Equivalent number of centimeters.
+ */
+define in_to_cm(inch) = inch * MM_PER_INCH / 10
+
+/*
  * Convert meters to feet.
  *
  * @param m Number of meters to convert.
