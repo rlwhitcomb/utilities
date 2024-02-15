@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.40.13', date: d'2024-02-14',
+      issues: [ 653 ],
+      comment: 'Fix version string format to make "$requires" work better.'
+    },
     { version: '2.40.12', date: d'2024-01-30',
       issues: [ 649 ],
       comment: 'Spacing flags for "@f" and "@F" formats.'

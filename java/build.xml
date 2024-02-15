@@ -4,7 +4,7 @@
 
 	The MIT License (MIT)
 
-	Copyright (c) 2020-2023 Roger L. Whitcomb.
+	Copyright (c) 2020-2024 Roger L. Whitcomb.
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -379,6 +379,8 @@
 		Do test cleanup inside the scripts instead of in here.
 	    21-Dec-2023 (rlwhitcomb)
 		Add end-of-test banner to the log file.
+	    14-Feb-2024 (rlwhitcomb)
+		#653: Change "full.build" to be "+rev[.debug][.ci]"
 
      ========================================================================== -->
 
@@ -492,8 +494,11 @@
 	<condition property="debug.build" value="false" else="true">
 		<istrue value="${release.build}"/>
 	</condition>
-	<condition property="debug.flag" value="-debug" else="">
+	<condition property="debug.flag" value=".debug" else="">
 		<istrue value="${debug.build}"/>
+	</condition>
+	<condition property="ci.flag" value=".ci" else="">
+		<istrue value="${ci.build}"/>
 	</condition>
 	<condition property="test.log.canon" value="TestPP.log.windows.canon" else="TestPP.log.other.canon">
 		<os family="windows"/>
@@ -501,7 +506,7 @@
 	<condition property="test.log.path" value="../dist/${test.log.file.name}" else="${test.log.file.name}">
 		<istrue value="${ci.build}"/>
 	</condition>
-	<property name="full.build" value="${build.version}${debug.flag}+${build.lastrev}"/>
+	<property name="full.build" value="${build.version}+${build.lastrev}${debug.flag}${ci.flag}"/>
 	<condition property="euler.canons.exist" value="true" else="false">
 		<and>
 			<available file="test/euler/eulertest" type="file"/>

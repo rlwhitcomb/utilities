@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2022 Roger L. Whitcomb.
+ * Copyright (c) 2022,2024 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,8 +24,9 @@
  *      Test program for the SemanticVersion parsing and display.
  *
  * History:
- *  17-Feb-22 rlw  ---	Initial coding.
- *  26-Sep-22 rlw #491:	New test of "failing" Java 8 version string.
+ *  17-Feb-22 rlw ----	Initial coding.
+ *  26-Sep-22 rlw #491	New test of "failing" Java 8 version string.
+ *  14-Feb-24 rlw #653	Change version format for our version strings.
  */
 package info.rlwhitcomb.test;
 
@@ -55,7 +56,7 @@ public class VersionTest
 	    { "11.0.14.1+1",          "11.0.14.1+1"         },
 	    { "11+28",                "11.0.0+28"           },
 	    { "17.0.2+8",             "17.0.2+8"            },
-	    { "1.9.0-debug+8b74297",  "1.9.0-debug+8b74297" },
+	    { "1.9.0+8b74297.debug",  "1.9.0+8b74297.debug" },
 	    { "1.3.1-beta",           "1.3.1-beta"          },
 	    { "1.3.1_01",             "1.3.1_01"            },
 	    { "1.3.1_05-ea-b01",      "1.3.1_05-ea-b01"     },

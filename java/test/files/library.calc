@@ -1,6 +1,6 @@
-$Require '2.31.00-alpha' // Directives in "$dir" form
-$Requires '2.31.00-alpha', Base '1.9.15-alpha'
-// The versions above must conform to the latest values in "version.properties" and "build.properties"
+$Require '2.40.13'
+$Requires '2.40.13', Base '1.12.3'
+// Calc latest version is in "version.properties", base version is in "build.properties"
 
 /*
  * A series of functions that provide some added value to Calculator.

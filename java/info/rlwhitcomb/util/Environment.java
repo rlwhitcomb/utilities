@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2011-2017,2019-2023 Roger L. Whitcomb.
+ * Copyright (c) 2011-2017,2019-2024 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -206,6 +206,8 @@
  *	    #627: Use new Constants values.
  *	13-Dec-2023 (rlwhitcomb)
  *	    Use MaxInt as appropriate.
+ *	14-Feb-2024 (rlwhitcomb)
+ *	    #653: Fix "programVersion" so the metadata is more compatible with SemanticVersion.
  */
 package info.rlwhitcomb.util;
 
@@ -732,11 +734,11 @@ public final class Environment
 	 */
 	public static SemanticVersion programVersion() {
 	    // First build a version string compatible with the semantic versioning spec
-	    String versionSpec = String.format("%1$s%2$s%3$s+%4$s",
+	    String versionSpec = String.format("%1$s+%2$s%3$s%4$s",
 		getAppVersion(),
-		isDebugBuild() ? "-debug" : "",
-		isCIBuild() ? "-ci" : "",
-		getAppBuild());
+		getAppBuild(),
+		isDebugBuild() ? ".debug" : "",
+		isCIBuild() ? ".ci" : "");
 	    try {
 		return new SemanticVersion(versionSpec);
 	    }
