@@ -965,3 +965,10 @@ define readFileLines(fn) = {
    split(trim(read(fn)), LINESEP)
 }
 
+/*
+ * Return an array of the screen width and height (taken from "info.os").
+ *
+ * @return Array of {@code [ width, height ]}
+ */
+define screenSize = [ info.os.screenwidth, info.os.screenheight ]
+
