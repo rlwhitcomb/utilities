@@ -406,6 +406,16 @@ define yesterday = today - 1
 define tomorrow = today + 1
 
 /*
+ * Define a constant that refers to a time of midnight.
+ */
+const midnight = h'12:00am'
+
+/*
+ * Define a constant that refers to a time of noon.
+ */
+const noon = h'12:00pm'
+
+/*
  * Get the day of week name for a given date.
  *
  * @param date The input date value.
