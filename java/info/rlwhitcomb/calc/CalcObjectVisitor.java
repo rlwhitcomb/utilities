@@ -825,6 +825,9 @@
  *	    #647: Allow multiple names for "defined" function.
  *	30-Jan-2024 (rlwhitcomb)
  *	    #649: Options for "f" and "F" formatting for less/more spaces.
+ *	15-Feb-2024 (rlwhitcomb)
+ *	    #654: Allow multiple arguments to "isPrime"; use "buildValueList" for
+ *	    "gcd" and "lcm" (now that INTEGER is supported).
  */
 package info.rlwhitcomb.calc;
 
@@ -5030,29 +5033,21 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitIsPrimeExpr(CalcParser.IsPrimeExprContext ctx) {
-	    BigInteger i;
+	    List<CalcParser.ExprContext> exprs = ctx.exprN().exprList().expr();
+	    List<Object> objects = buildValueList(this, exprs, Conversion.INTEGER);
 
-	    if (settings.rationalMode) {
-		BigFraction f = getFractionValue(ctx.expr1().expr());
-
-		if (f.isWholeNumber()) {
-		    i = f.toInteger();
-		}
-		else {
-		    throw new CalcExprException(ctx, "%calc#noConvertInteger", f);
-		}
-	    }
-	    else {
-		i = getIntegerValue(ctx.expr1().expr());
+	    for (Object obj : objects) {
+		if (!MathUtil.isPrime((BigInteger) obj))
+		    return Boolean.FALSE;
 	    }
 
-	    return Boolean.valueOf(MathUtil.isPrime(i));
+	    return Boolean.TRUE;
 	}
 
 	@Override
 	public Object visitGcdExpr(CalcParser.GcdExprContext ctx) {
 	    List<CalcParser.ExprContext> exprs = ctx.exprN().exprList().expr();
-	    List<Object> objects = buildFlatMap(exprs, false,
+	    List<Object> objects = buildValueList(this, exprs,
 		settings.rationalMode ? Conversion.FRACTION : Conversion.INTEGER);
 	    int index;
 
@@ -5077,7 +5072,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitLcmExpr(CalcParser.LcmExprContext ctx) {
 	    List<CalcParser.ExprContext> exprs = ctx.exprN().exprList().expr();
-	    List<Object> objects = buildFlatMap(exprs, false,
+	    List<Object> objects = buildValueList(this, exprs,
 		settings.rationalMode ? Conversion.FRACTION : Conversion.INTEGER);
 	    int index;
 
@@ -5244,7 +5239,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    if (conversion == null) {
 		// Do a "peek" inside any lists or maps to get the first value
 		CalcParser.ExprContext firstCtx = exprs.get(0);
-		conversion = Conversion.fromValue(getFirstValue(firstCtx, evaluate(firstCtx), forJoin));
+		conversion = Conversion.fromValue(getFirstValue(firstCtx, evaluate(firstCtx), forJoin), settings.rationalMode);
 		// Don't do INTEGER unless specifically requested
 		if (conversion == Conversion.INTEGER)
 		    conversion = Conversion.DECIMAL;
@@ -7296,7 +7291,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    CalcParser.DotRangeContext dotRange = ctx.dotRange();
 	    if (dotRange == null) {
 		List<CalcParser.ExprContext> exprs = ctx.exprN().exprList().expr();
-		conv = Conversion.fromValue(getFirstValue(ctx, evaluate(exprs.get(0)), false));
+		conv = Conversion.fromValue(getFirstValue(ctx, evaluate(exprs.get(0)), false), settings.rationalMode);
 		if (settings.rationalMode)
 		    conv = Conversion.FRACTION;
 		else if (conv == Conversion.STRING || conv == Conversion.INTEGER)
@@ -7402,7 +7397,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    CalcParser.DotRangeContext dotRange = ctx.dotRange();
 	    if (dotRange == null) {
 		List<CalcParser.ExprContext> exprs = ctx.exprN().exprList().expr();
-		conv = Conversion.fromValue(getFirstValue(ctx, evaluate(exprs.get(0)), false));
+		conv = Conversion.fromValue(getFirstValue(ctx, evaluate(exprs.get(0)), false), settings.rationalMode);
 		if (settings.rationalMode)
 		    conv = Conversion.FRACTION;
 		else if (conv == Conversion.STRING || conv == Conversion.INTEGER)

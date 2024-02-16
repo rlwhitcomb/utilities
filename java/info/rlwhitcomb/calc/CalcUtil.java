@@ -233,6 +233,8 @@
  *	    #644: New flavors of "convertToInteger" and "convertToInt" with possible null substitutions.
  *	30-Jan-2024 (rlwhitcomb)
  *	    #649: Options for extra spacing for fractions.
+ *	15-Feb-2024 (rlwhitcomb)
+ *	    #654: Add INTEGER conversion to "buildValueList" for "isPrime".
  */
 package info.rlwhitcomb.calc;
 
@@ -847,6 +849,22 @@ public final class CalcUtil
 
 	    // Here we are not able to make sense of the object, so we have an error
 	    throw new CalcExprException(ctx, "%calc#noConvertFraction", typeName(value));
+	}
+
+	/**
+	 * Cast or convert the given value to a {@link BigInteger} value for use in strictly integer calculations
+	 * (such as gcd, lcm, or isprime).
+	 *
+	 * @param visitor	The visitor, used to evaluate expressions.
+	 * @param obj		The input object value to be converted.
+	 * @param mc		Rounding mode for conversions.
+	 * @param ctx		The parse tree context (for error reporting).
+	 * @return		The converted integer value from the input.
+	 * @throws CalcExprException for null inputs, or other errors from conversion.
+	 */
+	public static BigInteger toIntegerValue(final CalcObjectVisitor visitor, final Object obj, final MathContext mc, final ParserRuleContext ctx) {
+	    Object value = visitor.evaluateToValue(ctx, obj);
+	    return convertToInteger(value, mc, ctx);
 	}
 
 	/**
@@ -2824,6 +2842,10 @@ public final class CalcUtil
 		    case DECIMAL:
 			nullCheck(value, ctx);
 			objectList.add(toDecimalValue(visitor, value, visitor.getSettings().mc, ctx));
+			break;
+		    case INTEGER:
+			nullCheck(value, ctx);
+			objectList.add(toIntegerValue(visitor, value, visitor.getSettings().mc, ctx));
 			break;
 		    case FRACTION:
 			nullCheck(value, ctx);

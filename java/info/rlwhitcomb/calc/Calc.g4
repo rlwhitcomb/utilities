@@ -526,6 +526,8 @@
  *	    #646: Multiple assignments as in Python.
  *	22-Jan-2024 (rlwhitcomb)
  *	    #647: Multiple names for "defined" function.
+ *	15-Feb-2024 (rlwhitcomb)
+ *	    #654: Multiple arguments for "isPrime" also.
  */
 
 grammar Calc;
@@ -670,7 +672,7 @@ builtinFunction
    | K_ROUND expr2                       # roundExpr
    | K_CEIL expr1                        # ceilExpr
    | K_FLOOR expr1                       # floorExpr
-   | K_ISPRIME expr1                     # isPrimeExpr
+   | K_ISPRIME exprN                     # isPrimeExpr
    | K_GCD exprN                         # gcdExpr
    | K_LCM exprN                         # lcmExpr
    | K_MAX exprN                         # maxExpr

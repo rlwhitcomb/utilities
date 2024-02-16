@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2022-2023 Roger L. Whitcomb.
+ * Copyright (c) 2022-2024 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,10 +24,11 @@
  *	Conversion modes for "buildValueList".
  *
  * History:
- *  28-May-22 rlw  ---	Refactor into a separate file.
- *  10-Jan-23 rlw #558:	Add QUATERNION.
- *  03-Apr-23 rlw #263:	New conversion function for "buildFlatMap".
- *  08-Apr-23 rlw #601:	Add INTEGER for "gcd" and "lcm".
+ *  28-May-22 rlw ----	Refactor into a separate file.
+ *  10-Jan-23 rlw #558	Add QUATERNION.
+ *  03-Apr-23 rlw #263	New conversion function for "buildFlatMap".
+ *  08-Apr-23 rlw #601	Add INTEGER for "gcd" and "lcm".
+ *  11-Feb-24 rlw #65	New param for "fromValue"; reorder the enum values.
  */
 package info.rlwhitcomb.calc;
 
@@ -42,35 +43,36 @@ import info.rlwhitcomb.util.ClassUtil;
  */
 public enum Conversion
 {
+	/** Leave values as they are (for "sort"). */
+	UNCHANGED,
 	/** Convert all values to strings (for "exec"). */
 	STRING,
-	/** Convert all values to integers (for "lcm" or "gcd"). */
-	INTEGER,
 	/** Convert all values to decimal (for "sumof" or "productof" in decimal mode). */
 	DECIMAL,
+	/** Convert all values to integers (for "lcm" or "gcd"). */
+	INTEGER,
 	/** Convert to fractions (rational mode). */
 	FRACTION,
 	/** Convert to complex numbers. */
 	COMPLEX,
 	/** Convert to quaternions. */
-	QUATERNION,
-	/** Leave values as they are (for "sort"). */
-	UNCHANGED;
+	QUATERNION;
 
 
 	/**
 	 * Find a proper conversion given an object (from its type).
 	 *
-	 * @param obj	Typically the first object in a map, set, or list.
-	 * @return	A simplified idea of the conversion to use for the
-	 *		whole object based on the first value type.
+	 * @param obj		Typically the first object in a map, set, or list.
+	 * @param rational	Whether we're in "rational" mode or calculating numbers as fractions.
+	 * @return		A simplified idea of the conversion to use for the
+	 *			whole object based on the first value type.
 	 */
-	public static Conversion fromValue(final Object obj) {
+	public static Conversion fromValue(final Object obj, final boolean rational) {
 	    if (obj instanceof Quaternion)
 		return QUATERNION;
 	    if (obj instanceof ComplexNumber)
 		return COMPLEX;
-	    if (obj instanceof BigFraction)
+	    if (rational || (obj instanceof BigFraction))
 		return FRACTION;
 
 	    if (ClassUtil.isInteger(obj))

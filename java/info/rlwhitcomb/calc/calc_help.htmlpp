@@ -872,7 +872,7 @@ or<br>
             <tr><td><code>ROUND</code>&nbsp;<i>expr</i><code>,</code>&nbsp;<i>places_expr</i></td><td>round value to given places</td></tr>
             <tr><td><code>FLOOR</code>&nbsp;<i>expr</i></td><td>the "floor" of a numeric value</td></tr>
             <tr><td><code>CEIL</code>&nbsp;<i>expr</i></td><td>the "ceil" of a numeric value</td></tr>
-            <tr><td><code>ISPRIME</code>&nbsp;<i>expr</i></td><td>is the value a prime number?</td></tr>
+            <tr><td><code>ISPRIME</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;) *</td><td>are all the values prime numbers?</td></tr>
             <tr><td><code>GCD</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;) *</td><td>greatest common divisor</td></tr>
             <tr><td><code>LCM</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;) *</td><td>least common multiple</td></tr>
             <tr><td><code>MAX</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;) *</td><td>maximum value</td></tr>

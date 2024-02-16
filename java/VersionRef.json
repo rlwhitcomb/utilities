@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.40.14', date: d'2024-02-15',
+      issues: [ 654 ],
+      comment: 'Allow multiple arguments to "isprime".'
+    },
     { version: '2.40.13', date: d'2024-02-14',
       issues: [ 653 ],
       comment: 'Fix version string format to make "$requires" work better.'
