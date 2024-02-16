@@ -21,11 +21,13 @@ $resultsonly on {
     $echo ` Current ${version}`
     '============================================='
     ''
-    $echo 'Version  Comment'
-    '-------  --------------------------------------------------------'
+    $echo 'Version  Date       Comment'
+          '-------  ---------  ---------------------------------------------------------'
     loop v over versions {
-        if v.base { $echo `${CYAN_BRIGHT}B${v.base@6s}$RESET  ${v.comment}`     }
-        else      { $echo `${YELLOW_BRIGHT}${v.version@7s}$RESET  ${v.comment}` }
+        const dt = dateformat(v.date, 'yyyy.mm.dd')
+        const cm = replace(v.comment, "\t ", "\t\t     ")
+        if v.base { $echo `${CYAN_BRIGHT}B${v.base@6s}  $BLACK_BRIGHT$dt$RESET  $YELLOW_BRIGHT$cm` }
+        else      { $echo `${YELLOW_BRIGHT}${v.version@7s}  $BLACK_BRIGHT$dt$RESET  $cm` }
     }
-    '-------  --------------------------------------------------------'
+          '-------  ---------  ---------------------------------------------------------'
 }
