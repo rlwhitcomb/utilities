@@ -153,6 +153,8 @@ t31=((2**31-1)**2)-1
 isprime (t31)
 p31=pfactors(t31)
 productof p31
+// Fibonacci primes!
+isprime(2, 3, 5, 13, 89, 233, 1597, 28657, 514229, 433494437, 2971215073)
 
 isnull junk
 notnull junk

@@ -61,6 +61,7 @@
  *			Some small optimizations around checking for zeros.
  *			Major optimizations in constructing the prime sieve.
  *  14-Dec-23 rlw ----	Use MaxInt.
+ *  15-Feb-24 rlw #654	Simple additional test in prime number calculations to avoid exceptions.
  */
 package info.rlwhitcomb.math;
 
@@ -1499,7 +1500,7 @@ public final class MathUtil
 	    // Make a preliminary check in case the number itself is within the sieve size
 	    // and we can just test directly
 	    int bitPos = (posN.intValue() - 3) / 2;
-	    if (bitPos < primeSieveMax)
+	    if (bitPos >= 0 && bitPos < primeSieveMax)
 		return !primeSieve.testBit(bitPos);
 
 	    // Loop through all the primes in the sieve less than ~sqrt(n)
