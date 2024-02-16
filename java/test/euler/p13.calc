@@ -112,17 +112,12 @@ const NUMBERS = [
    53503534226472524250874054075591789781264330331690
 ]
 
-var sum = 0
+const sum = sumOf(NUMBERS)
 
-loop value over NUMBERS {
-   sum += value
-}
-
-const sumString = @@sum
 }
 
 $resultsonly on {
 
-`The first $DIGITS digits of the sum is ${substr(sumString, 0, DIGITS)}.`
+`The first $DIGITS digits of the sum is ${@@sum[:DIGITS]}.`
 
 }

@@ -21,8 +21,9 @@
  */
 
 $quiet on {
+
 // Note: this is empirically derived by running the program over and over until we arrived at a limit
-// that allowed every value to succeed. Note that this is roughly the maxD value times three, just FYI.
+// that allowed every value to succeed. Note that this is roughly the D_LIMIT value times three, just FYI.
 $decimal 3000
 
 const D_LIMIT = 1000
@@ -49,7 +50,7 @@ define digits(n) = {
 
    // Then skip the first non-zero digit
    // and chop off the last (rounded) digit
-   substr(s, i + 1, -1)
+   s[i + 1: -1]
 }
 
 var maxRepeat = 0
@@ -85,11 +86,11 @@ define repeatLength(s) = {
       var j = i, k
       while notnull(k = index(s, s[i], j + 1)) {
          const len = k - i
-         const original = substr(s, i, i + len)
+         const original = s[i: i + len]
 
          // Scan to see how many repetitions of the pattern occur starting at k
          var reps = 0
-         while k + len < strlen && original === substr(s, k, k + len) {
+         while k + len < strlen && original ===  s[k: k + len] {
             reps++
             k += len
          }
@@ -123,9 +124,11 @@ loop d over 2 ... D_LIMIT - 1 {
    }
 }
 
-} // end of quiet calculation
+} // end of quiet calculations
 
 $resultonly on {
+
    `The maximum length reciprocal cycle is $maxRepeat for the value 1/$maxD.`
+
 }
 

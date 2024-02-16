@@ -517,7 +517,7 @@ define sot(time) = (time - (hot(time) * TICKS_PER_HOUR) - (mot(time) * TICKS_PER
  * @return     Timestamp in the form of "Mon Dec 20  6:46:19 PST 2021"
  */
 def timestamp(date = today, time = now) = {
-   `${substr(dow_name(date),0,3)} ${substr(moy_name(date),0,3)} ${dom(date)@.2d} ${hot(time)@-2s}:${mot(time)@.2d}:${sot(time)@.2d} ${info.timezone.name} ${yod(date)@_d}`
+   `${dow_name(date)[:3]} ${moy_name(date)[:3]} ${dom(date)@.2d} ${hot(time)@-2s}:${mot(time)@.2d}:${sot(time)@.2d} ${info.timezone.name} ${yod(date)@_d}`
 }
 
 /*
@@ -542,7 +542,7 @@ define dateformat(d, f = 'mm/dd/yyyy') = {
                 'm': result +=
                         (len == 1 ? dg(moy(d)) : d2(moy(d))),
                 'M': result +=
-                        (len <= 2 ? substr(moy_name(d), 0, 3) : moy_name(d))
+                        (len <= 2 ? moy_name(d)[:3] : moy_name(d))
             }
         }
         runOf = ''
@@ -597,8 +597,8 @@ define ft2time(ft) = {
     define date(d) = `${d@-E}`
     define time(t) = { var v = `${t@-h}`; lpad(v, 8, '0') }
 
-    var dt = eval(`d'${substr(ft, 0, 10)}'`)
-    var tm = eval(`h'${substr(ft, 11, 19)}'`)
+    var dt = eval(`d'${ft[0:10]}'`)
+    var tm = eval(`h'${ft[11:19]}'`)
     tm += TZ_OFFSET
     if tm < 0 { dt--; tm += TICKS_PER_DAY }
     `${date(dt)}  ${time(tm)}`
@@ -845,7 +845,7 @@ def peek(s) = { s._values ? s._values[-1] : null }
 /*
  * Construct a nice string form of the version information.
  */
-def version = `Version ${info.version.major}.${info.version.minor}.${info.version.patch} build ${substr(info.version.build, 1)}${info.version.prerelease}`
+def version = `Version ${info.version.major}.${info.version.minor}.${info.version.patch} build ${info.version.build[1:]}${info.version.prerelease}`
 
 /*
  * Execute the "uuid" program to return a unique identifier.
@@ -900,7 +900,7 @@ enum ALLCAPS, FIRSTCAP, WORDCAP
  * @return     The modified string.
  */
 define capitalize(s, mode) = {
-   define cap(n) = upper(substr(n, 0, 1)) + substr(n, 1)
+   define cap(n) = upper(n[:1]) + n[1:]
    case mode of {
        ALLCAPS: upper(s),
       FIRSTCAP: cap(s),
