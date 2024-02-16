@@ -1,0 +1,60 @@
+/*
+ * Problem 35 from Project Euler (projecteuler.net)
+ *
+ * Circular Primes
+ *
+ * The number, 197, is called a circular prime because all rotations of the digits: 197, 971, and 719, are themselves prime.
+ *
+ * There are thirteen such primes below 100: 2, 3, 5, 7, 11, 13, 17, 31, 37, 71, 73, 79, and 97.
+ *
+ * How many circular primes are there below one million?
+ */
+$quiet on {
+
+const TEST_LIMIT = 100
+const LIMIT = 1e6
+
+/*
+ * Return an array of all the possible rotations of the given input.
+ *
+ * @param value The input value to rotate.
+ * @return      List of the possible rotations.
+ */
+define rotations(value) = {
+   var values = [ ]
+   var str = @@value
+   loop within length(str) - 1 {
+      str = str[1:] + str[0]
+      values += ~~str
+   }
+   values
+}
+
+/*
+ * Return a list of all the circular primes below the given limit.
+ *
+ * @param limit The limit of values to check (everything below this).
+ * @return      A list of all the circular primes below this limit.
+ */
+define circulars(limit) = {
+   var result = limit >= 2 ? [ 2 ] : [ ]
+   loop v over 3 ... limit - 1, 2 {
+      if isPrime(v) {
+         if isPrime(rotations(v)) result += v
+      }
+   }
+   result
+}
+
+const test_primes = circulars(TEST_LIMIT)
+const primes      = circulars(LIMIT)
+
+} // end of quiet on
+
+$resultsonly on {
+
+   $echo `The number of circular primes below $TEST_LIMIT is ${length test_primes} $test_primes.`
+   $echo `The number of circular primes below $LIMIT is ${length primes} $primes.`
+
+} // end of results on
+
