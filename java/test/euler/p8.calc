@@ -22,7 +22,7 @@ var start = -1
 loop ix within length(STRING) - DIGITS {
    var product = 1
    loop iy within DIGITS {
-      const digit = dec(substr(STRING, ix + iy, ix + iy + 1))
+      const digit = dec(substr(STRING, ix + iy, 1))
       product *= digit
    }
    if product > largest {
@@ -35,6 +35,6 @@ loop ix within length(STRING) - DIGITS {
 
 $resultsonly on {
 
-`The $DIGITS adjacent digits with the greatest product are ${chars(substr(STRING, start, start + DIGITS))} (starting at index $start), and the product is $largest.`
+`The $DIGITS adjacent digits with the greatest product are ${chars(substr(STRING, start, DIGITS))} (starting at index $start), and the product is $largest.`
 
 }

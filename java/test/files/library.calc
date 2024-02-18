@@ -280,6 +280,11 @@ const MM_PER_FOOT = MM_PER_INCH * 12
 const MM_PER_MILE = MM_PER_FOOT * 5280
 
 /*
+ * Constant for converting acres to square feet / yards.
+ */
+const SQFT_PER_ACRE = 43560
+
+/*
  * Convert millimeters to inches.
  *
  * @param mm Number of millimeters.
@@ -390,6 +395,23 @@ define ml_to_pt(ml) = (ml * 8) / (IN3_PER_CM3 * IN3_PER_GAL)
  * @return   Equivalant volume in millliters (ml).
  */
 define pt_to_ml(pt) = (pt * IN3_PER_GAL * IN3_PER_CM3) / 8
+
+/*
+ * Convert acres to square feet.
+ *
+ * @param acre Number of acres to convert.
+ * @return     Number of square feet in that many acres.
+ */
+define acre_to_sqft(acre) = acre * SQFT_PER_ACRE
+
+/*
+ * Convert square feet to acres.
+ *
+ * @param sqft Number of square feet to convert.
+ * @return     Equivalent number of acres.
+ */
+define sqft_to_acre(sqft) = sqft / SQFT_PER_ACRE
+
 
 /*
  * Define a dynamic constant that refers to one day ago ("yesterday").

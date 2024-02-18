@@ -85,6 +85,8 @@ kg_to_lb(1)
 lb_to_kg(2)
 pt_to_ml(1)
 ml_to_pt(500)
+acre_to_sqft(1/3)
+sqft_to_acre(12000)
 
 to_excel_col(1)
 to_excel_col(2)

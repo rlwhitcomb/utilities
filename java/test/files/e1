@@ -435,22 +435,24 @@ loop key over ob2 { index(ob2, key) }
 t8 = [ 2, 3, 5, 7, 11, 13, 17, 19, 21, 23, 29, 31 ]
 notnull(index(t8, 22-1, -1))
 
-# The "substr" operator
+# The "substr" and "slice" operators
 one = substr(target, 4)
-two = substr(target, 11, 18)
+two = substr(target, 11, 7)
 three = substr(target, index(target, 'test', -1))
-substr(target, index(target, '"', 0), index(target, '"', -1) + 1)
-substr 1.234, 1, 3
-substr(target, -1, -3)
-substr(target, null, -1)
-substr target, index(target, " is") + 1, index(target, "test") - 1
+target[index(target, '"', 0) : index(target, '"', -1) + 1]
+substr 1.234, 1, 2
+target[-1: -3]
+target[:-1]
+target[index(target, " is") + 1 : index(target, "test") - 1]
 tar = 'abc'
-substr(tar, -2, -1)
-substr tar, null, -1
+tar[-2: -1]
+tar[null: -1]
 substr tar, -2, null
 substr tar, -1
-substr tar, 1, -1
+tar[1: -1]
 substr tar
+const find1 = " is "
+substr(target, index(target, find1), length(find1))
 
 # The "replace" function in all of its options
 tl = 'tell teal tail teel toil tool toll'

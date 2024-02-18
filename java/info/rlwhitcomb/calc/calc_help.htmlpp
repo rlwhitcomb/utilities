@@ -41,7 +41,7 @@ h2 {
    margin-right: 30px;
 }
 
-.top-link {
+.right-link {
    margin-right: 30px;
    text-align: right;
    float: right;
@@ -262,7 +262,7 @@ h2 {
      Command Line Options and Operators and Functions sections signify optional values / parameters, while in the Formats section, <code>[</code> and <code>]</code> are the "optional"
      markers. Items inside parentheses separated by <code>|</code> signifies one of the variations should be used.
 </div>
-<a class="top-link" href="#topofpage">Top</a>
+<a class="right-link" href="#topofpage">Top</a>
 <hr id="Command_Line" class="sectionsep">
   <h2>Command Line</h2>
 <div class="cols">
@@ -289,7 +289,7 @@ h2 {
      error, 97 = index or state exception, 96 = I/O error, 95 = "$assert" failure). The <code>leave</code> <i>expr</i> statement can also be used
      outside of a loop or function to set a custom exit code if desired (in the range of 0 to 255).
 </div>
-<a class="top-link" href="#topofpage">Top</a>
+<a class="right-link" href="#topofpage">Top</a>
 <hr id="Command_Line_Options" class="sectionsep">
   <h2>Command Line Options</h2>
 <div class="cols">
@@ -312,6 +312,7 @@ h2 {
      addition, can be set using Directives from within a script, by setting the element values of the built-in <code>"settings"</code> object, or from the Settings dialog in the GUI window. See the
      <a href="#Read_Eval_Print_loop_Commands">REPL Commands</a> and <a href="#Directives">Directives</a> sections below for additional discussion, including other aliases that can be used.
 </div>
+<a class="right-link" href="#Notes_on_Command_Line_Options">Notes</a>
   <div class="center">
   <table style="margin-left:auto;margin-right:auto;width:70%;">
     <caption class="tablecap">Command Line Options</caption>
@@ -382,7 +383,7 @@ h2 {
   </tbody>
   </table>
   </div>
-<a class="top-link" href="#topofpage">Top</a>
+<a class="right-link" href="#topofpage">Top</a>
 <hr id="Notes_on_Command_Line_Options" class="sectionsep">
   <h2>Notes on Command Line Options</h2>
   <div class="cols">
@@ -407,7 +408,7 @@ h2 {
       value on the actual command line becomes <code>$0</code>.
   </ul>
   </div>
-<a class="top-link" href="#topofpage">Top</a>
+<a class="right-link" href="#topofpage">Top</a>
 <hr id="Read_Eval_Print_loop_Commands" class="sectionsep">
   <h2><span class="underline">R</span>ead, <span class="underline">E</span>val, <span class="underline">P</span>rint
       <span class="underline">L</span>oop Commands</h2>
@@ -441,7 +442,7 @@ h2 {
   </tbody>
   </table>
   </div>
-<a class="top-link" href="#topofpage">Top</a>
+<a class="right-link" href="#topofpage">Top</a>
 <hr id="Values_Constants_and_Variables" class="sectionsep">
   <h2>Values, Constants, and Variables</h2>
 <div class="cols">
@@ -680,7 +681,7 @@ or<br>
     <code>&gt;</code><code style="color:blue;">s + t</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">{ "sunny", "cloudy", "rain", "snow", "ice" }</code>
     <p>Note that using <code>+=</code> to add values to an array is the equivalent of doing a "push" operation on a stack or queue.
 </div>
-<a class="top-link" href="#topofpage">Top</a>
+<a class="right-link" href="#topofpage">Top</a>
 <hr id="Modes_and_Precision" class="sectionsep">
   <h2>Modes and Precision</h2>
 <div class="cols">
@@ -711,7 +712,7 @@ or<br>
   <p>Dates and times represent date/time values (such as birthdays, anniversaries, or wall clock times), and have no reference to time zones, although
      using time arithmetic can be a convenient way to do conversion of times between time zones.
 </div>
-<a class="top-link" href="#topofpage">Top</a>
+<a class="right-link" href="#topofpage">Top</a>
 <hr id="Formats" class="sectionsep">
   <h2>Formats</h2>
 <div class="cols">
@@ -725,6 +726,7 @@ or<br>
      <code>@O</code> or <code>@D</code> which would make no difference in the outputs, <code>@J</code> which doesn't make sense
      given the output could have strings which shouldn't be case-shifted, and <code>@K</code> which uses the long-format names instead of the short form.
 </div>
+<a class="right-link" href="#Notes_on_Formats">Notes</a>
   <div class="center">
     <table style="margin-left:auto;margin-right:auto;">
       <caption class="tablecap">Formats</caption>
@@ -763,7 +765,7 @@ or<br>
     </tbody>
     </table>
   </div>
-<a class="top-link" href="#topofpage">Top</a>
+<a class="right-link" href="#topofpage">Top</a>
 <hr id="Notes_on_Formats" class="sectionsep">
   <h2>Notes on Formats</h2>
 <div class="cols">
@@ -779,7 +781,7 @@ or<br>
   <p>For strings that contain the standard color codes (such as <code style="color:blue;">BLUE_BOLD</code> from <code>library.calc</code>) the
      <code>@Q</code> format will expose those codes instead of using them to color the result.
 </div>
-<a class="top-link" href="#topofpage">Top</a>
+<a class="right-link" href="#topofpage">Top</a>
 <hr id="Available_Operators_and_Predefined_Functions" class="sectionsep">
   <h2>Available Operators and Predefined Functions</h2>
 <div class="cols">
@@ -789,6 +791,7 @@ or<br>
      done to "double" precision (currently &mdash; this may change in subsequent versions).
   <p>Names of predefined functions are available in 3 or 4 forms: all lower case, all UPPER case, and one or two MixedCase forms. For example: <code>sin</code>, <code>SIN</code>, or <code>Sin</code>, and <code>sumof</code>, <code>SUMOF</code>, <code>Sumof</code>, or <code>SumOf</code>.
 </div>
+<a class="right-link" href="#Notes_on_Functions">Notes</a>
   <div class="center">
   <table style="margin-left:auto;margin-right:auto;">
     <caption class="tablecap">Operators, Functions, and Precedence</caption>
@@ -885,7 +888,7 @@ or<br>
 	    <tr><td><code>REVERSE</code>&nbsp;<i>expr</i></td><td>reverse the order of an array or string</td></tr>
             <tr><td><code>UNIQUE</code>&nbsp;<i>expr</i></td><td>produce the unique values in an array or string</td></tr>
             <tr><td><code>INDEX</code>&nbsp;<i>expr</i> <code>,</code> <i>search_expr</i> (&nbsp;<code>,</code> <i>start_expr</i>&nbsp;)</td><td>find value within a string</td></tr>
-            <tr><td><code>SUBSTR</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>start_expr</i> (&nbsp;<code>,</code> <i>end_expr</i>&nbsp;)&nbsp;)</td><td>extract a substring</td></tr>
+            <tr><td><code>SUBSTR</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>start_expr</i> (&nbsp;<code>,</code> <i>length_expr</i>&nbsp;)&nbsp;)</td><td>extract a substring</td></tr>
             <tr><td><code>REPLACE</code>&nbsp;<i>expr</i> <code>,</code> <i>expr</i> <code>,</code> ( <i>expr</i> ) (&nbsp;<code>,</code> <i>mode</i>&nbsp;)<br>or <i>expr</i> <code>,</code> <i>expr</i></td><td>replace substrings within a string</td></tr>
             <tr><td><code>SPLICE</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;) *</td><td>modify an array by deleting and/or adding elements</td></tr>
             <tr><td><code>SPLICE</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <code>[</code> <i>id or string list</i> <code>]</code>&nbsp;)<br>(&nbsp;<code>,</code> <code>{</code> <i>key:value pairs</i> <code>}</code>&nbsp;)</td><td>modify an object by deleting and/or adding elements</td></tr>
@@ -1028,7 +1031,7 @@ or<br>
     </tbody>
   </table>
   </div>
-<a class="top-link" href="#topofpage">Top</a>
+<a class="right-link" href="#topofpage">Top</a>
 <hr id="Notes_on_Functions" class="sectionsep">
   <h2>Notes on Functions</h2>
 <div class="cols">
@@ -1078,8 +1081,8 @@ or<br>
   <p>The <code>split</code> function takes one string argument, a second regular expression string, and an optional limit
      value that determines how many splits are returned. See the documentation for the Java <code>String.split</code> method
      for further details on how this parameter works.
-  <p>The arguments to <code>index</code> are the string, object, or list to search, the value to search for, and the optional starting index. If the
-     starting index is given, and is negative, the search starts from the end of the object, and the return value will be
+  <p>The arguments to <code>index</code> are the string, object, or list to search, the value to search for, and the optional starting index.
+     If the starting index is given, and is negative, the search starts from the end of the object, and the return value will be
      negative if the search value is found (an offset from the end of the string or object). Otherwise the search starts from the
      beginning and returns a non-negative value. If the search value is not found, the function returns <code>null</code>.
      In addition, the starting index value can also be null, which starts the search at the beginning of the object. When searching
@@ -1088,11 +1091,11 @@ or<br>
      and returned indices are relative to this key list.
   <p>For a <i>set</i> passed to the <code>index</code> function, the starting index value is ignored, and the return value is either <code>1</code>
      if the search object is a member of the set, or <code>null</code> if the object is not a member.
-  <p>The arguments to <code>substr</code> are the value (converted to a string), and optional starting and ending indices
-     for the extraction. If the start/end are negative, they refer to offsets from the end of the string (same as returned
-     by <code>index</code>), otherwise they are zero-based indices from the beginning. If the ending value is given, this is
-     the ending value exclusive, while if null or not given the end of the string is used. Calling <code>substr</code> with
-     just one argument is a convenient way to convert a non-string value to a string as in: <code>substr 1 &#x21E8; "1"</code>.
+  <p>The arguments to <code>substr</code> are the value (converted to a string), and optional starting index, and optional length
+     for the extraction. If the start is negative, it refers to an offset from the end of the string (same as returned
+     by <code>index</code>), otherwise it is a zero-based index from the beginning. If the length value is not given or is null, it refers
+     to the end of the string. Calling <code>substr</code> with just one argument is one of several ways to convert a non-string value
+     to a string as in: <code>substr 1 &#x21E8; "1"</code> (same as using <code>@@1 &#x21E8; "1"</code>).
   <p>The <code>replace</code> function allows replacement of substrings within a string by exact matches, or using regular expressions. This is chosen
      using the various modes. If no mode is given, or a variable is used whose value is null or an empty string, then the replacement is done
      exactly, as in <code>replace('tell', 'l', 'b') &#x21E8; 'tebb'</code>. If the option value is <code>all</code>, <code>first</code>, or
@@ -1102,7 +1105,9 @@ or<br>
   <p>If the first argument to <code>replace</code> is an object or array, the replace operation is performed on each of the values in that object recursively.
   <p>If the replacement value is missing or empty the search value is deleted in the result according to the option value used,
      as in <code>replace 'abcabc', 'b' &#x21E8; "acac"</code>.
-  <p>The arguments in brackets for the slice notation are the beginning (inclusive) and ending (exclusive) indices of the values to
+  <p>The "slice" notation is an alternative way to extract part of a string (same as <code>substr</code>, but with different arguments),
+     and both operations can be used on lists, maps, and sets as well. The arguments in brackets for the slice notation are the beginning
+     (inclusive) and ending (exclusive) indices of the values to
      be returned. If either or both are negative, they refer to offsets from the end of the object / string. If the actual value
      of the expression is anything other than an object, set, or array, it is converted to a string and the result is the same as
      the <code>substr</code> function. A missing or null first value refers to the beginning of the object or string, and a missing
@@ -1275,7 +1280,7 @@ or<br>
     <code style="color:blue;">info has maxmemory </code><code style="color:grey;">&#x21E8;</code><code style="color:green;"> true</code><br>
     <code style="color:blue;">"maxmemory" in info </code><code style="color:grey;">&#x21E8;</code><code style="color:green;"> false</code><br>
 </div>
-<a class="top-link" href="#topofpage">Top</a>
+<a class="right-link" href="#topofpage">Top</a>
 <hr id="User_Defined_Functions" class="sectionsep">
   <h2>User-Defined Functions</h2>
 <div class="cols">
@@ -1326,7 +1331,7 @@ whether it has previously been used/defined.
   <p>as it should. So, you can setup the data structure with <code>def</code>, and make instances of that structure with just
      <code><i>var</i> = eval <i>struct</i></code>.
 </div>
-<a class="top-link" href="#topofpage">Top</a>
+<a class="right-link" href="#topofpage">Top</a>
 <hr id="Statements" class="sectionsep">
   <h2>Statements</h2>
 <div class="cols">
@@ -1454,7 +1459,7 @@ whether it has previously been used/defined.
     <code>Elapsed time of "atan" was 0.003862 secs.</code>
   <p>There are many more code examples in the <code>test/files</code> directory of the source distribution.
 </div>
-<a class="top-link" href="#topofpage">Top</a>
+<a class="right-link" href="#topofpage">Top</a>
 <hr id="Directives" class="sectionsep">
   <h2>Directives</h2>
 <div class="cols">
@@ -1464,6 +1469,7 @@ whether it has previously been used/defined.
      as in <code>$rational on</code>).
   <p>The directives can be spelled in several ways (same as for predefined functions): all lower case, all UPPER case, and one or two MixedCase forms. For example: <code>$resultsonly</code>, <code>$RESULTSONLY</code>, <code>$Resultsonly</code>, or <code>$ResultsOnly</code>.
 </div>
+<a class="right-link" href="#Notes_on_Directives">Notes</a>
   <div class="center">
   <table style="margin-left:auto;margin-right:auto;">
     <caption class="tablecap">Available Directives</caption>
@@ -1508,7 +1514,7 @@ whether it has previously been used/defined.
   </tbody>
   </table>
   </div>
-<a class="top-link" href="#topofpage">Top</a>
+<a class="right-link" href="#topofpage">Top</a>
 <hr id="Notes_on_Directives" class="sectionsep">
   <h2>Notes on Directives</h2>
 <div class="cols">
@@ -1560,7 +1566,7 @@ whether it has previously been used/defined.
   <p>Gradian mode is used to do trignometric calculations assuming a circle has 400 grads (also called "gons" -- see <a href="https://en.wikipedia.org/wiki/Gradian">"Gradian"</a> for further explanation).
   <p>The <code>$assert</code> directive is used to guarantee that certain conditions are met before proceeding. The required expression is evaluated, and if it does not evaluate to <code>true</code> an error is thrown, execution stops, and either the message (if given), or the text of the failing expression, is displayed. If the expression does evaluate <code>true</code> execution continues to the next expression.
 </div>
-<a class="top-link" href="#topofpage">Top</a>
+<a class="right-link" href="#topofpage">Top</a>
 <hr id="Standard_Libraries_of_Functions" class="sectionsep">
   <h2>Standard Libraries of Functions</h2>
 <div class="cols">
@@ -1636,7 +1642,7 @@ whether it has previously been used/defined.
     </tbody>
   </table>
 </div>
-<a class="top-link" href="#topofpage">Top</a>
+<a class="right-link" href="#topofpage">Top</a>
 <hr id="GUI_Operations" class="sectionsep">
   <h2>GUI Operations</h2>
 <div class="cols">
@@ -1659,7 +1665,7 @@ whether it has previously been used/defined.
   <br><img src="calc_settings.png" alt="GUI Settings screen" width="40%">
       <img src="calc_window_settings.png" alt="GUI Window Settings screen" width="40%">
   </div>
-<a class="top-link" href="#topofpage">Top</a>
+<a class="right-link" href="#topofpage">Top</a>
 <hr id="TODO_Items_for_This_Document" class="sectionsep">
   <h2>TODO Items for This Document</h2>
 <div class="cols">
@@ -1669,7 +1675,7 @@ whether it has previously been used/defined.
     <li>Notes on colors and the changes with dark and light backgrounds</li>
   </ul>
 </div>
-<a class="top-link" href="#topofpage">Top</a>
+<a class="right-link" href="#topofpage">Top</a>
 <hr class="sectionsep">
 
   <footer><br><div class="title-box">Copyright&nbsp;&copy;&nbsp;2020-2024 Roger L. Whitcomb.<br>Licensed under an <a href="https://github.com/rlwhitcomb/utilities/blob/master/LICENSE">MIT</a> license.<br>Last modified: ${__DATE__} at ${__TIME__}</div><br></footer>

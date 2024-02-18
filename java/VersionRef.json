@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.40.16', date: d'2024-02-17',
+      issues: [ 655 ],
+      comment: 'Change third argument to "substr" to be length instead of "end".'
+    },
     { version: '2.40.14', date: d'2024-02-15',
       issues: [ 654 ],
       comment: 'Allow multiple arguments to "isprime".'

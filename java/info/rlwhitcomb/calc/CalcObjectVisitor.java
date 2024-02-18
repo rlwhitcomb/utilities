@@ -828,6 +828,8 @@
  *	15-Feb-2024 (rlwhitcomb)
  *	    #654: Allow multiple arguments to "isPrime"; use "buildValueList" for
  *	    "gcd" and "lcm" (now that INTEGER is supported).
+ *	17-Feb-2024 (rlwhitcomb)
+ *	    #655: Change the meaning of the third parameter of "substr" to length instead of end.
  */
 package info.rlwhitcomb.calc;
 
@@ -5501,16 +5503,30 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    return BigInteger.valueOf((long) ret);
 	}
 
-	private String substring(Object value, CalcParser.ExprContext ctx, CalcParser.ExprContext beginCtx, CalcParser.ExprContext endCtx) {
+
+	/**
+	 * Perform a "substring" operation, meaning extracting all or part of a string based on either
+	 * start and end locations, or start and length.
+	 * <p> Suitable defaults are applied if one or both values are missing.
+	 *
+	 * @param value    The source value object (could be anything, but is always converted to its string representation).
+	 * @param ctx      Parsing context for the source (for error reporting).
+	 * @param beginCtx Expression for the beginning location value (can be null).
+	 * @param endCtx   Expression for either the end location (+1) or the length, depending on the "useEnd" flag.
+	 * @param useEnd   {@code true} if "endCtx" is the end value, {@code false} if it is a length.
+	 * @return         The extracted part of the source string.
+	 */
+	private String substring(Object value, CalcParser.ExprContext ctx, CalcParser.ExprContext beginCtx, CalcParser.ExprContext endCtx, final boolean useEnd) {
 	    String stringValue = toStringValue(this, ctx, value, new StringFormat(false, settings));
 
+	    // First default: if both values are missing, return the entire string
 	    if (beginCtx == null && endCtx == null) {
 		return stringValue;
 	    }
 
-	    int stringLen  = stringValue.length();
-	    int beginIndex = 0;
-	    int endIndex   = stringLen;
+	    int stringLen   = stringValue.length();
+	    int beginIndex  = 0;
+	    int endOrLength = stringLen; // This value works regardless of "useEnd" flag...
 
 	    if (beginCtx != null) {
 		Object beginValue = evaluate(beginCtx);
@@ -5521,15 +5537,22 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    if (endCtx != null) {
 		Object endValue = evaluate(endCtx);
 		if (endValue != null) {
-		    endIndex = convertToInt(endValue, settings.mc, endCtx);
+		    endOrLength = convertToInt(endValue, settings.mc, endCtx);
 		}
 	    }
 
 	    // Negative indices at this point are relative to the string length
 	    if (beginIndex < 0)
 		beginIndex += stringLen;
-	    if (endIndex < 0)
-		endIndex += stringLen;
+	    if (useEnd) {
+		if (endOrLength < 0)
+		    endOrLength += stringLen;
+	    }
+	    else {
+		// Negative length just means zero
+		if (endOrLength < 0)
+		    endOrLength = 0;
+	    }
 
 	    // But, by this point, the values should be in the range of 0..length
 	    // Note: should we do index checking errors? or just limit and go on?
@@ -5537,12 +5560,27 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		beginIndex = 0;
 	    if (beginIndex > stringLen)
 		beginIndex = stringLen;
-	    if (endIndex < beginIndex)
-		endIndex = beginIndex;
-	    if (endIndex > stringLen)
-		endIndex = stringLen;
 
-	    return stringValue.substring(beginIndex, endIndex);
+	    // Here we have to make differences depending on if "end" is really end or if it's length
+	    if (useEnd) {
+		// Here the variable is "end"
+		if (endOrLength < beginIndex)
+		    endOrLength = beginIndex;
+		if (endOrLength > stringLen)
+		    endOrLength = stringLen;
+	    }
+	    else {
+		// Here the variable comes in as "length"
+		if (endOrLength < 0)
+		    endOrLength = 0;
+		if (beginIndex + endOrLength > stringLen)
+		    endOrLength = stringLen - beginIndex;
+
+		// Now, convert "length" to "end"
+		endOrLength = beginIndex + endOrLength;
+	    }
+
+	    return stringValue.substring(beginIndex, endOrLength);
 	}
 
 	@Override
@@ -5551,7 +5589,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    CalcParser.Expr2Context e2ctx = ctx.expr2();
 	    CalcParser.Expr3Context e3ctx = ctx.expr3();
 	    CalcParser.ExprContext valueCtx;
-	    CalcParser.ExprContext beginCtx = null, endCtx = null;
+	    CalcParser.ExprContext beginCtx = null, lengthCtx = null;
 
 	    if (e1ctx != null) {
 		valueCtx = e1ctx.expr();
@@ -5561,12 +5599,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		beginCtx = e2ctx.expr(1);
 	    }
 	    else {
-		valueCtx = e3ctx.expr(0);
-		beginCtx = e3ctx.expr(1);
-		endCtx   = e3ctx.expr(2);
+		valueCtx  = e3ctx.expr(0);
+		beginCtx  = e3ctx.expr(1);
+		lengthCtx = e3ctx.expr(2);
 	    }
 
-	    return substring(evaluate(valueCtx), valueCtx, beginCtx, endCtx);
+	    return substring(evaluate(valueCtx), valueCtx, beginCtx, lengthCtx, false);
 	}
 
 	/**
@@ -5689,7 +5727,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 	    else {
 		// Any simple object behaves the same way as "substr"
-		return substring(value, valueCtx, beginCtx, endCtx);
+		return substring(value, valueCtx, beginCtx, endCtx, true);
 	    }
 
 	    // We are going to let either a null context (meaning no text was present) OR
