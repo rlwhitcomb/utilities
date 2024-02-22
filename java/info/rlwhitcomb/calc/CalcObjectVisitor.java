@@ -830,6 +830,8 @@
  *	    "gcd" and "lcm" (now that INTEGER is supported).
  *	17-Feb-2024 (rlwhitcomb)
  *	    #655: Change the meaning of the third parameter of "substr" to length instead of end.
+ *	22-Feb-2024 (rlwhitcomb)
+ *	    #612: Rename "dotRange" to "rangeExpr" in preparation.
  */
 package info.rlwhitcomb.calc;
 
@@ -920,7 +922,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	/**
-	 * Enumeration of possible optimization strategies for {@link #iterateOverDotRange},
+	 * Enumeration of possible optimization strategies for {@link #iterateOverRangeExpr},
 	 * depending on what we're really trying to do during the iteration.
 	 */
 	private enum Purpose
@@ -938,7 +940,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	/**
-	 * Interface for the {@link #iterateOverDotRange iterateOverDotRange(...)} method, which is either called for each value
+	 * Interface for the {@link #iterateOverRangeExpr iterateOverRangeExpr(...)} method, which is either called for each value
 	 * in the range, or is used to optimally calculate the result without having to do the entire
 	 * iteration.
 	 * <p> We use the {@link Purpose} to partially decide if the optimization will apply. For instance,
@@ -3058,7 +3060,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	 * @return Whatever the "last" value is as determined by the visitor (could be a sum,
 	 *         a product, the result of the selected block in a case statement, etc.)
 	 */
-	private Object iterateOverDotRange(
+	private Object iterateOverRangeExpr(
 		final List<CalcParser.ExprContext> valueExprs,
 		final List<CalcParser.ExprContext> dotExprs,
 		final boolean hasDots,
@@ -3321,12 +3323,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitLoopStmt(CalcParser.LoopStmtContext ctx) {
-	    CalcParser.LoopLabelContext label   = ctx.loopLabel();
-	    CalcParser.IdContext id             = ctx.id();
-	    CalcParser.LoopCtlContext ctlCtx    = ctx.loopCtl();
-	    CalcParser.StmtBlockContext block   = ctx.stmtBlock();
-	    CalcParser.ExprListContext exprList = ctlCtx.exprList();
-	    CalcParser.DotRangeContext dotCtx   = ctlCtx.dotRange();
+	    CalcParser.LoopLabelContext label    = ctx.loopLabel();
+	    CalcParser.IdContext id              = ctx.id();
+	    CalcParser.LoopCtlContext ctlCtx     = ctx.loopCtl();
+	    CalcParser.StmtBlockContext block    = ctx.stmtBlock();
+	    CalcParser.ExprListContext exprList  = ctlCtx.exprList();
+	    CalcParser.RangeExprContext rangeCtx = ctlCtx.rangeExpr();
 
 	    String localVarName = id != null ? id.getText() : LoopScope.LOOP_VAR;
 	    String loopLabel = label != null ? label.id().getText() : null;
@@ -3339,9 +3341,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    try {
 		if (exprList != null)
-		    value = iterateOverDotRange(exprList.expr(), null, false, visitor, true, doingWithin);
+		    value = iterateOverRangeExpr(exprList.expr(), null, false, visitor, true, doingWithin);
 		else
-		    value = iterateOverDotRange(null, dotCtx.expr(), dotCtx.DOTS() != null, visitor, true, doingWithin);
+		    value = iterateOverRangeExpr(null, rangeCtx.expr(), rangeCtx.DOTS() != null, visitor, true, doingWithin);
 	    }
 	    catch (LeaveException lex) {
 		if (compareLabels(loopLabel, lex.getLabel())) {
@@ -3567,7 +3569,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			defaultCtx = cbCtx;
 		    }
 		    else if (select.DOTS() != null) {
-			iterateOverDotRange(null, select.expr(), true, visitor, true, false);
+			iterateOverRangeExpr(null, select.expr(), true, visitor, true, false);
 			if (visitor.fallIntoNext()) {
 			    fallThrough = true;
 			    break selectors;
@@ -4971,11 +4973,11 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitLengthExpr(CalcParser.LengthExprContext ctx) {
-	    CalcParser.DotRangeContext dotRange = ctx.dotRange();
+	    CalcParser.RangeExprContext rangeExpr = ctx.rangeExpr();
 
-	    if (dotRange != null) {
+	    if (rangeExpr != null) {
 		LengthVisitor visitor = new LengthVisitor();
-		return iterateOverDotRange(null, dotRange.expr(), dotRange.DOTS() != null, visitor, false, false);
+		return iterateOverRangeExpr(null, rangeExpr.expr(), rangeExpr.DOTS() != null, visitor, false, false);
 	    }
 	    else {
 		Object obj = evaluate(ctx.expr1().expr());
@@ -7326,8 +7328,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    Conversion conv;
 	    Object sum = null;
 
-	    CalcParser.DotRangeContext dotRange = ctx.dotRange();
-	    if (dotRange == null) {
+	    CalcParser.RangeExprContext rangeExpr = ctx.rangeExpr();
+	    if (rangeExpr == null) {
 		List<CalcParser.ExprContext> exprs = ctx.exprN().exprList().expr();
 		conv = Conversion.fromValue(getFirstValue(ctx, evaluate(exprs.get(0)), false), settings.rationalMode);
 		if (settings.rationalMode)
@@ -7346,7 +7348,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		conv = settings.rationalMode ? Conversion.FRACTION : Conversion.DECIMAL;
 		sumVisitor = new SumOfVisitor(ctx, conv);
 
-		sum = iterateOverDotRange(null, dotRange.expr(), dotRange.DOTS() != null, sumVisitor, false, false);
+		sum = iterateOverRangeExpr(null, rangeExpr.expr(), rangeExpr.DOTS() != null, sumVisitor, false, false);
 	    }
 
 	    return sum;
@@ -7432,8 +7434,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    Conversion conv;
 	    Object product = null;
 
-	    CalcParser.DotRangeContext dotRange = ctx.dotRange();
-	    if (dotRange == null) {
+	    CalcParser.RangeExprContext rangeExpr = ctx.rangeExpr();
+	    if (rangeExpr == null) {
 		List<CalcParser.ExprContext> exprs = ctx.exprN().exprList().expr();
 		conv = Conversion.fromValue(getFirstValue(ctx, evaluate(exprs.get(0)), false), settings.rationalMode);
 		if (settings.rationalMode)
@@ -7452,7 +7454,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		conv = settings.rationalMode ? Conversion.FRACTION : Conversion.DECIMAL;
 		productVisitor = new ProductOfVisitor(ctx, conv);
 
-		product = iterateOverDotRange(null, dotRange.expr(), dotRange.DOTS() != null, productVisitor, false, false);
+		product = iterateOverRangeExpr(null, rangeExpr.expr(), rangeExpr.DOTS() != null, productVisitor, false, false);
 	    }
 
 	    return product;
@@ -7478,8 +7480,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    ArrayScope<Object> array = new ArrayScope<>();
 	    ArrayOfVisitor arrayVisitor = new ArrayOfVisitor(array);
 
-	    CalcParser.DotRangeContext dotRange = ctx.dotRange();
-	    if (dotRange == null) {
+	    CalcParser.RangeExprContext rangeExpr = ctx.rangeExpr();
+	    if (rangeExpr == null) {
 		List<CalcParser.ExprContext> exprs = ctx.exprN().exprList().expr();
 
 		List<Object> objects = buildValueList(this, exprs, Conversion.UNCHANGED);
@@ -7489,7 +7491,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		}
 	    }
 	    else {
-		iterateOverDotRange(null, dotRange.expr(), dotRange.DOTS() != null, arrayVisitor, true, false);
+		iterateOverRangeExpr(null, rangeExpr.expr(), rangeExpr.DOTS() != null, arrayVisitor, true, false);
 	    }
 
 	    return array;
@@ -7671,10 +7673,10 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitInExpr(CalcParser.InExprContext ctx) {
-	    CalcParser.ExprContext expr         = ctx.expr();
-	    CalcParser.LoopCtlContext ctlCtx    = ctx.loopCtl();
-	    CalcParser.ExprListContext exprList = ctlCtx.exprList();
-	    CalcParser.DotRangeContext dotCtx   = ctlCtx.dotRange();
+	    CalcParser.ExprContext expr          = ctx.expr();
+	    CalcParser.LoopCtlContext ctlCtx     = ctx.loopCtl();
+	    CalcParser.ExprListContext exprList  = ctlCtx.exprList();
+	    CalcParser.RangeExprContext rangeCtx = ctlCtx.rangeExpr();
 	    Object value = evaluate(expr);
 	    Object retValue;
 	    boolean doingWithin = ctx.K_WITHIN() != null;
@@ -7682,9 +7684,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    InVisitor visitor = new InVisitor(expr, ctlCtx, value);
 
 	    if (exprList != null)
-		retValue = iterateOverDotRange(exprList.expr(), null, false, visitor, true, doingWithin);
+		retValue = iterateOverRangeExpr(exprList.expr(), null, false, visitor, true, doingWithin);
 	    else
-		retValue = iterateOverDotRange(null, dotCtx.expr(), dotCtx.DOTS() != null, visitor, true, doingWithin);
+		retValue = iterateOverRangeExpr(null, rangeCtx.expr(), rangeCtx.DOTS() != null, visitor, true, doingWithin);
 
 	    return retValue;
 	}

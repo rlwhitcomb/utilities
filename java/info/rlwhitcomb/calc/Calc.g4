@@ -528,6 +528,8 @@
  *	    #647: Multiple names for "defined" function.
  *	15-Feb-2024 (rlwhitcomb)
  *	    #654: Multiple arguments for "isPrime" also.
+ *	22-Feb-2024 (rlwhitcomb)
+ *	    #612: Rename "dotRange" to "rangeExpr" in preparation.
  */
 
 grammar Calc;
@@ -667,7 +669,7 @@ builtinFunction
    | ( K_ISNULL | K_NOTNULL ) expr1      # isNullExpr
    | K_TYPEOF typeArg                    # typeofExpr
    | K_CAST ( expr2 | expr1 )            # castExpr
-   | K_LENGTH ( expr1 | dotRange )       # lengthExpr
+   | K_LENGTH ( expr1 | rangeExpr )      # lengthExpr
    | K_SCALE expr1                       # scaleExpr
    | K_ROUND expr2                       # roundExpr
    | K_CEIL expr1                        # ceilExpr
@@ -677,9 +679,9 @@ builtinFunction
    | K_LCM exprN                         # lcmExpr
    | K_MAX exprN                         # maxExpr
    | K_MIN exprN                         # minExpr
-   | K_SUMOF ( exprN | dotRange )        # sumOfExpr
-   | K_PRODUCTOF ( exprN | dotRange )    # productOfExpr
-   | K_ARRAYOF ( exprN | dotRange )      # arrayOfExpr
+   | K_SUMOF ( exprN | rangeExpr )       # sumOfExpr
+   | K_PRODUCTOF ( exprN | rangeExpr )   # productOfExpr
+   | K_ARRAYOF ( exprN | rangeExpr )     # arrayOfExpr
    | K_JOIN exprN                        # joinExpr
    | K_SPLIT ( expr3 | expr2 )           # splitExpr
    | K_INDEX ( expr3 | expr2 )           # indexExpr
@@ -875,12 +877,12 @@ exprVars
    | expr COMMA expr COMMA var ( COMMA var ) *
    ;
 
-dotRange
+rangeExpr
    : ( expr DOTS ) ? expr ( COMMA expr ) ?
    ;
 
 loopCtl
-   : dotRange
+   : rangeExpr
    | LPAREN exprList RPAREN
    | LPAREN RPAREN
    ;
