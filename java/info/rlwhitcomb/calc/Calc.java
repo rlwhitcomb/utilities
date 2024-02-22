@@ -345,6 +345,8 @@
  *	    #600: New handling of "leave" if there is a label.
  *	01-Jan-2024 (rlwhitcomb)
  *	    #638: New tree debug printout.
+ *	22-Feb-2024 (rlwhitcomb)
+ *	    Add "-n" as an alias for "-nolib".
  */
 package info.rlwhitcomb.calc;
 
@@ -2338,6 +2340,7 @@ public class Calc
 		case "nolb":
 		case "nol":
 		case "nl":
+		case "n":
 		    libraryNames = null;
 		    break;
 		case "files":
