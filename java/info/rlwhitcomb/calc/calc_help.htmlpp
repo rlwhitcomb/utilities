@@ -809,6 +809,8 @@ or<br>
           <code>phi</code>, <code>&#x03C6;</code>, <code>&#x03D5;</code><br>
           <code>PHI</code>, <code>&#x03A6;</code><br>
 	  <code>i</code>, <code>&#x0131;</code>, <code>&#x0399;</code>, <code>&#x03B9;</code>, or <code>&#x2148;</code><br>
+          <code>j</code>, <code>J</code><br>
+          <code>k</code>, <code>K</code><br>
           <code>true</code> or <code>false</code><br>
           <code>null</code> or <code>nil</code> or <code>&#x2400;</code><br>
           <code>&#x2205;</code> or <code>&#x29B0;</code><br>
@@ -823,7 +825,9 @@ or<br>
       <td>the fundamental constants <code>&#x1D6D1;</code> and <code>e</code><br>
           the fundamental Golden Ratio constant <code>&#x03C6;</code> or <code>phi</code><br>
           <code>(1 / &#x03C6;)</code> which is also <code>(&#x03C6; - 1)</code><br>
-          <code><i>i</i></code> or <code>&#x221A;-1</code> (the root of the imaginary numbers)<br>
+          <code><i>i</i></code>, <code>&#x221A;-1</code>, or <code>(0,1)</code> (root of imaginary numbers)<br>
+          <code><i>j</i></code> or <code>(0,0,1,0)</code> (third quaternion axis root)<br>
+          <code><i>k</i></code> or <code>(0,0,0,1)</code> (fourth quaternion axis root)<br>
           the <code>boolean</code> values<br>
           the <code>null</code> (empty) value<br>
           the empty object / set (same as <code>{ }</code>)<br>
