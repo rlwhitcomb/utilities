@@ -832,6 +832,8 @@
  *	    #655: Change the meaning of the third parameter of "substr" to length instead of end.
  *	22-Feb-2024 (rlwhitcomb)
  *	    #612: Rename "dotRange" to "rangeExpr" in preparation.
+ *	22-Feb-2024 (rlwhitcomb)
+ *	    Allow "-" modifier on "x", "o", and "b" formatting to skip the leading conversion indicators.
  */
 package info.rlwhitcomb.calc;
 
@@ -2835,7 +2837,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			    valueBuf.append('\'');
 			}
 			else {
-			    valueBuf.append('0').append(formatChar);
+			    if (signChar != '-')
+				valueBuf.append('0').append(formatChar);
 			    iValue = convertToInteger(result, settings.mc, ctx);
 			    if (iValue.compareTo(BigInteger.ZERO) < 0)
 				convert(iValue.toByteArray(), 16, formatChar == 'X', false, valueBuf);
@@ -2855,7 +2858,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			    valueBuf.append('\'');
 			}
 			else {
-			    valueBuf.append('0');
+			    if (signChar != '-')
+				valueBuf.append('0');
 			    iValue = convertToInteger(result, settings.mc, ctx);
 			    if (iValue.compareTo(BigInteger.ZERO) < 0)
 				convert(iValue.toByteArray(), 8, false, false, valueBuf);
@@ -2873,7 +2877,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			    valueBuf.append('\'');
 			}
 			else {
-			    valueBuf.append('0').append(formatChar);
+			    if (signChar != '-')
+				valueBuf.append('0').append(formatChar);
 			    iValue = convertToInteger(result, settings.mc, ctx);
 			    if (iValue.compareTo(BigInteger.ZERO) < 0)
 				convert(iValue.toByteArray(), 2, false, false, valueBuf);

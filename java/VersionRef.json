@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.40.18', date: d'2024-02-22',
+      issues: [  ],
+      comment: 'Allow "-" modifier on "x", "o", and "b" formats to remove leading indicators.'
+    },
     { version: '2.40.17', date: d'2024-02-22',
       issues: [  ],
       comment: 'Add "-n" as an alias for "-nolib".'
