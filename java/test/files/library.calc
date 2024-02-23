@@ -191,7 +191,7 @@ define from_excel_col(col) = {
  * @param rad The input radians value
  * @return    Computed degrees
  */
-def rad_to_deg(rad) = rad / pi * 180
+def rad_to_deg(rad) = rad / pi × 180
 
 /*
  * Convert degrees to radians: 2*pi = 360, so degrees / 180 * pi = radians
@@ -199,7 +199,7 @@ def rad_to_deg(rad) = rad / pi * 180
  * @param deg The input degrees value
  * @return    Computed radians
  */
-def deg_to_rad(deg) = deg / 180 * pi
+def deg_to_rad(deg) = deg / 180 × pi
 
 /*
  * Convert radians to gradians (centesimal degrees): 2*pi = 400, so radians / pi * 200 = gradians
@@ -207,7 +207,7 @@ def deg_to_rad(deg) = deg / 180 * pi
  * @param rad The input radians value
  * @return    Computed gradians
  */
-def rad_to_grad(rad) = rad / pi * 200
+def rad_to_grad(rad) = rad / pi × 200
 
 /*
  * Convert gradians to radians: 2*pi = 400, so gradians / 200 * pi = radians
@@ -215,7 +215,7 @@ def rad_to_grad(rad) = rad / pi * 200
  * @param grad The input gradians value
  * @return     Computed radians
  */
-def grad_to_rad(grad) = grad / 200 * pi
+def grad_to_rad(grad) = grad / 200 × pi
 
 /*
  * Convert gradians to degrees: 400 = 360, so gradians / 10 * 9 = degrees
@@ -223,7 +223,7 @@ def grad_to_rad(grad) = grad / 200 * pi
  * @param grad The input gradians value
  * @return     Computed degrees
  */
-def grad_to_deg(grad) = grad / 10 * 9
+def grad_to_deg(grad) = grad / 10 × 9
 
 /*
  * Convert degrees to gradians: 360 = 400, so degrees / 9 * 10 = gradians
@@ -231,7 +231,7 @@ def grad_to_deg(grad) = grad / 10 * 9
  * @param deg The input degrees value
  * @return    Computed gradians
  */
-def deg_to_grad(deg) = deg / 9 * 10
+def deg_to_grad(deg) = deg / 9 × 10
 
 /*
  * Convert degrees Fahrenheit to degrees Celsius.
@@ -239,7 +239,7 @@ def deg_to_grad(deg) = deg / 9 * 10
  * @param f Degrees in Fahrenheit (32 = freezing point of water)
  * @return  Equivalent in degrees Celsius.
  */
-def FtoC(f) = (f - 32) * 5 / 9
+def FtoC(f) = (f - 32) × 5 / 9
 
 /*
  * Convert degrees Celsius to degrees Fahrenheit.
@@ -247,7 +247,7 @@ def FtoC(f) = (f - 32) * 5 / 9
  * @param c Degrees in Celsius (0 = freezing point of water)
  * @return  Equivalent in degrees Fahrenheit.
  */
-def CtoF(c) = (c * 9 / 5) + 32
+def CtoF(c) = (c × 9 / 5) + 32
 
 /*
  * The basic English to/from metric length conversion (defined).
@@ -272,12 +272,12 @@ const IN3_PER_GAL = 231
 /*
  * Derived constant for feet / m conversions.
  */
-const MM_PER_FOOT = MM_PER_INCH * 12
+const MM_PER_FOOT = MM_PER_INCH × 12
 
 /*
  * Derived constant for mile / km conversions.
  */
-const MM_PER_MILE = MM_PER_FOOT * 5280
+const MM_PER_MILE = MM_PER_FOOT × 5280
 
 /*
  * Constant for converting acres to square feet / yards.
@@ -298,7 +298,7 @@ define mm_to_in(mm) = mm / MM_PER_INCH
  * @param inch Number of inches to convert.
  * @return     Equivalent number of millimeters.
  */
-define in_to_mm(inch) = inch * MM_PER_INCH
+define in_to_mm(inch) = inch × MM_PER_INCH
 
 /*
  * Convert centimeters to inches.
@@ -306,7 +306,7 @@ define in_to_mm(inch) = inch * MM_PER_INCH
  * @param cm Number of centimeters.
  * @return   Equivalent number of inches.
  */
-define cm_to_in(cm) = cm * 10 / MM_PER_INCH
+define cm_to_in(cm) = cm × 10 / MM_PER_INCH
 
 /*
  * Convert inches to centimeters.
@@ -314,7 +314,7 @@ define cm_to_in(cm) = cm * 10 / MM_PER_INCH
  * @param inch Number of inches to convert.
  * @return     Equivalent number of centimeters.
  */
-define in_to_cm(inch) = inch * MM_PER_INCH / 10
+define in_to_cm(inch) = inch × MM_PER_INCH / 10
 
 /*
  * Convert meters to feet.
@@ -322,7 +322,7 @@ define in_to_cm(inch) = inch * MM_PER_INCH / 10
  * @param m Number of meters to convert.
  * @return  Equivalent number of feet.
  */
-define m_to_ft(m) = (m * 1e3) / MM_PER_FOOT
+define m_to_ft(m) = (m × 1e3) / MM_PER_FOOT
 
 /*
  * Convert feet to meters.
@@ -330,7 +330,7 @@ define m_to_ft(m) = (m * 1e3) / MM_PER_FOOT
  * @param ft Number of feet to convert.
  * @return   Equivalent number of meters.
  */
-define ft_to_m(ft) = (ft * MM_PER_FOOT) / 1e3
+define ft_to_m(ft) = (ft × MM_PER_FOOT) / 1e3
 
 /*
  * Convert kilometers to miles.
@@ -338,7 +338,7 @@ define ft_to_m(ft) = (ft * MM_PER_FOOT) / 1e3
  * @param km Number of kilometers to convert
  * @return   Corresponding number of miles
  */
-define km_to_mile(km) = (km * 1e6) / MM_PER_MILE
+define km_to_mile(km) = (km × 1e6) / MM_PER_MILE
 
 /*
  * Convert miles to kilometers.
@@ -346,7 +346,7 @@ define km_to_mile(km) = (km * 1e6) / MM_PER_MILE
  * @param mi Number of miles to convert
  * @return   Corresponding number of kilometers
  */
-define mile_to_km(mi) = (mi * MM_PER_MILE) / 1e6
+define mile_to_km(mi) = (mi × MM_PER_MILE) / 1e6
 
 /*
  * Convert grams to ounces.
@@ -362,7 +362,7 @@ define gm_to_oz(gm) = gm / GM_PER_OZ
  * @param oz Number of avoirdupois ounces to convert.
  * @return   Equivalent in grams.
  */
-define oz_to_gm(oz) = oz * GM_PER_OZ
+define oz_to_gm(oz) = oz × GM_PER_OZ
 
 /*
  * Convert kilograms to pounds.
@@ -370,7 +370,7 @@ define oz_to_gm(oz) = oz * GM_PER_OZ
  * @param kg Number of kilograms to convert.
  * @return   Equivalent mass in pounds.
  */
-define kg_to_lb(kg) = (kg * 1e3) / (GM_PER_OZ * 16)
+define kg_to_lb(kg) = (kg × 1e3) / (GM_PER_OZ × 16)
 
 /*
  * Convert pounds to kilograms.
@@ -378,7 +378,7 @@ define kg_to_lb(kg) = (kg * 1e3) / (GM_PER_OZ * 16)
  * @param lb Number of pounds to convert.
  * @return   Equivalent mass in kilograms.
  */
-define lb_to_kg(lb) = (lb * 16 * GM_PER_OZ) / 1e3
+define lb_to_kg(lb) = (lb × 16 × GM_PER_OZ) / 1e3
 
 /*
  * Convert milliliters to pints (US fluid).
@@ -386,7 +386,7 @@ define lb_to_kg(lb) = (lb * 16 * GM_PER_OZ) / 1e3
  * @param ml Number of milliliters (cm^3) to convert.
  * @return   Equivalent volume in US fluid pints.
  */
-define ml_to_pt(ml) = (ml * 8) / (IN3_PER_CM3 * IN3_PER_GAL)
+define ml_to_pt(ml) = (ml × 8) / (IN3_PER_CM3 × IN3_PER_GAL)
 
 /*
  * Convert US fluid pints to milliliters.
@@ -394,7 +394,7 @@ define ml_to_pt(ml) = (ml * 8) / (IN3_PER_CM3 * IN3_PER_GAL)
  * @param pt Number of pints to convert.
  * @return   Equivalant volume in millliters (ml).
  */
-define pt_to_ml(pt) = (pt * IN3_PER_GAL * IN3_PER_CM3) / 8
+define pt_to_ml(pt) = (pt × IN3_PER_GAL × IN3_PER_CM3) / 8
 
 /*
  * Convert acres to square feet.
@@ -402,7 +402,7 @@ define pt_to_ml(pt) = (pt * IN3_PER_GAL * IN3_PER_CM3) / 8
  * @param acre Number of acres to convert.
  * @return     Number of square feet in that many acres.
  */
-define acre_to_sqft(acre) = acre * SQFT_PER_ACRE
+define acre_to_sqft(acre) = acre × SQFT_PER_ACRE
 
 /*
  * Convert square feet to acres.
@@ -986,6 +986,30 @@ define perm(N, R = 1) = N! / (N - R)!
  * @return  The number of combinations of those objects.
  */
 define comb(N, R) = N! / ((N - R)! * R!)
+
+/*
+ * Compute the nth triangle number.
+ *
+ * @param n Which triangle number.
+ * @return  The given triangle number.
+ */
+define tri(n) = (n² + n) / 2
+
+/*
+ * Compute the nth pentagonal number.
+ *
+ * @param n Which pentagonal number.
+ * @return  The given pentagonal number.
+ */
+define pent(n) = (3 × n² - n) / 2
+
+/*
+ * Compute the nth hexagonal number.
+ *
+ * @param n Which hexagonal number.
+ * @return  The given hexagonal number.
+ */
+define hex(n) = 2 × n² - n
 
 /*
  * Read a text file, separate into lines, then return the list of them in order.

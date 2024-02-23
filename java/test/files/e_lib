@@ -163,6 +163,13 @@ collatz(13)
 collatz(837799)
 
 #
+# Triangle, pentagonal, and hexagonal numbers
+#
+tri(285)
+pent(165)
+hex(143)
+
+#
 # Tangent numbers
 #
 $decimal 300
