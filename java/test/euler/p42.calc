@@ -1,0 +1,73 @@
+/*
+ * Problem 42 from Project Euler (projecteuler.net)
+ *
+ * The nth term of the sequence of triangle numbers is given by, t𝑛 = ½n(n + 1); so the first ten triangle numbers are:
+ *
+ *                             1, 3, 6, 10, 15, 21, 28, 36, 45, 55, ...
+ *
+ * By converting each letter in a word to a number corresponding to its alphabetical position and adding these values we form a
+ * word value. For example, the word value for SKY is 19 + 11 + 25 = 55 = t10. If the word value is a triangle number then we
+ * shall call the word a triangle word.
+ *
+ * Using words.txt (right click and 'Save Link/Target As...'), a 16K text file containing nearly two-thousand common English words,
+ * how many are triangle words?
+ */
+$quiet on {
+
+const WORD_FILE = 'test/data/0042_words.txt'
+
+const A = codes('A')
+
+define tri(n) = (n² + n) / 2
+
+/*
+ * This limit is empirically derived: counting the max word score is < 200, which means
+ * we only need the first 20 triangle numbers to verify the maximum score.
+ */
+const UPPER_T_LIMIT = 20
+
+const TEST_WORD = "SKY"
+
+// Evaluate the word file as if it was JSON format
+const WORDS = eval('[' + read(WORD_FILE) + ']')
+
+/*
+ * Compute the "score" of the given word, which is the sum of its composite
+ * characters (assumes UPPERCASE), where 'A' = 1, 'B' = 2, etc.
+ *
+ * @param word The word to score.
+ * @return     Sum of the letter values.
+ */
+define wordScore(word) = {
+   var score = 0
+   loop ch over word {
+      score += codes(ch) - A + 1
+   }
+   score
+}
+
+/*
+ * Generate the list of triangle numbers up to the value needed for the longest word
+ */
+var T = []
+loop t over UPPER_T_LIMIT { T += tri(t)  }
+
+var tri_words = []
+
+loop word over WORDS {
+   const score = wordScore(word)
+   if score in T {
+      tri_words += word
+   }
+}
+
+} // end of quiet on
+
+$resultsonly on {
+
+   $echo `Word score for "A" is ${wordScore("A")}.`
+   $echo `Word score for "$TEST_WORD" is ${wordScore(TEST_WORD)}.`
+   $echo `The number of triangle words is ${length tri_words}.`
+
+} // end of results on
+
