@@ -13,7 +13,7 @@
     },
     { version: '2.40.16', date: d'2024-02-17',
       issues: [ 655 ],
-      comment: 'Change third argument to "substr" to be length instead of "end".'
+      comment: '[BREAKING] Change third argument to "substr" to be length instead of "end".'
     },
     { version: '2.40.14', date: d'2024-02-15',
       issues: [ 654 ],
@@ -37,7 +37,7 @@
     },
     { version: '2.40.6', date: d'2024-01-12',
       issues: [ 644 ],
-      comment: 'Add Python "slice" notation; remove "slice" function.'
+      comment: '[BREAKING] Add Python "slice" notation; remove "slice" function.'
     },
     { version: '2.40.3', date: d'2024-01-01',
       issues: [ 638 ],
@@ -94,7 +94,7 @@
     },
     { version: '2.35.2', date: d'2023-09-09',
       issues: [ 621 ],
-      comment: 'Fix "enum" to start at zero instead of one.'
+      comment: '[BREAKING] Fix "enum" to start at zero instead of one.'
     },
     { version: '2.35.0', date: d'2023-08-10',
       issues: [ 621 ],
@@ -154,7 +154,7 @@
     },
     { version: '2.31.0', date: d'2023-04-07',
       issues: [ 603 ],
-      comment: 'Change directives to use "$dir" instead of ":dir" form.'
+      comment: '[BREAKING] Change directives to use "$dir" instead of ":dir" form.'
     },
     { version: '2.30.2', date: d'2023-04-05',
       issues: [ 263 ],
@@ -238,7 +238,7 @@
     },
     { version: '2.16.0', date: d'2022-12-17',
       issues: [ 572 ],
-      comment: 'Change quoted object members to be the same as unquoted.'
+      comment: '[BREAKING] Change quoted object members to be the same as unquoted.'
     },
     { version: '2.15.5', date: d'2022-12-13',
       issues: [ 582 ],
@@ -432,7 +432,7 @@
     },
     { version: '2.14.5', date: d'2022-08-23',
       issues: [ 455 ],
-      comment: 'Change the way "chars" and "codes" work for different input values.'
+      comment: '[BREAKING] Change the way "chars" and "codes" work for different input values.'
     },
     { version: '2.14.1', date: d'2022-08-23',
       issues: [ 452 ],
@@ -770,7 +770,7 @@
     },
     { version: '2.9.5', date: d'2022-05-06',
       issues: [ 305 ],
-      comment: 'Change "chars" to "codes" and add new "chars" function.'
+      comment: '[BREAKING] Change "chars" to "codes" and add new "chars" function.'
     },
     { version: '2.9.4', date: d'2022-05-06',
       issues: [ 298 ],

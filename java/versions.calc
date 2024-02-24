@@ -25,7 +25,7 @@ $resultsonly on {
           '-------  ---------  ---------------------------------------------------------'
     loop v over versions {
         const dt = dateformat(v.date, 'yyyy.mm.dd')
-        const cm = replace(v.comment, "\t ", "\t\t     ")
+        const cm = replace(replace(v.comment, "\t ", "\t\t     "), "[BREAKING]", `$RED_BRIGHT[BREAKING]$RESET`)
         if v.base { $echo `${CYAN_BRIGHT}B${v.base@6s}  $BLACK_BRIGHT$dt$RESET  $YELLOW_BRIGHT$cm` }
         else      { $echo `${YELLOW_BRIGHT}${v.version@7s}  $BLACK_BRIGHT$dt$RESET  $cm` }
     }
