@@ -670,15 +670,17 @@ def flat_map(arr) = eval `[${join arr, ','}]`
 define is_perfect(n) = sumof ( factors (n) ) - n == n
 
 /*
- * Return a list of the prime numbers smaller than the given number.
+ * Return a list of the prime numbers within the given range.
  *
+ * @param m Starting value for the list (should be 2 or any odd number).
  * @param n Limit for the list of primes.
- * @return  Array of prime numbers smaller than the input.
+ * @return  Array of prime numbers within the input range.
  */
-define primes(n) = {
+define primes(m, n) = {
    var list = []
-   if n > 2 list += 2
-   loop x over 3..n, 2 {
+   if 2 in m..n list += 2
+   const s = max(m|1, 3)
+   loop x over s..n, 2 {
       if isprime(x) list += x
    }
    list

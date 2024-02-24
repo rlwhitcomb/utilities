@@ -1,0 +1,38 @@
+/*
+ * Problem 36 from Project Euler (projecteuler.net)
+ *
+ * Double-base Palindromes
+ *
+ * The decimal number, 585 = 1001001001₂ (binary), is palindromic in both bases.
+ *
+ * Find the sum of all numbers, less than one million, which are palindromic in base 10 and base 2.
+ *
+ * (Please note that the palindromic number, in either base, may not include leading zeros.)
+ */
+$quiet on {
+
+const LIMIT = 1e6
+var sum = 0
+
+/*
+ * Decide if the given string is a palindrome, meaning it is the same as its reverse.
+ *
+ * @param s The string to test.
+ * @return  true if the string reads the same in reverse as it does forward, false otherwise.
+ */
+define is_palindrome(s) = s === reverse(s)
+
+// The note in the problem description means that every even number (zero in LSD in base 2)
+// will not work, so confine our search to just the odd values.
+loop n over 1 ... LIMIT, 2 {
+   if is_palindrome(@@n) && is_palindrome(`${n@-b}`) sum += n
+}
+
+} // end of quiet on
+
+$resultsonly on {
+
+   $echo `Sum of the double-base (10 and 2) palindromes less than $LIMIT is $sum.`
+
+} // end of results on
+
