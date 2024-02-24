@@ -381,6 +381,8 @@
 		Add end-of-test banner to the log file.
 	    14-Feb-2024 (rlwhitcomb)
 		#653: Change "full.build" to be "+rev[.debug][.ci]"
+	    23-Feb-2024 (rlwhitcomb)
+		Now that there are more Unicode chars in the Calc library, setup to read it as "UTF-8".
 
      ========================================================================== -->
 
@@ -676,6 +678,7 @@
 		<java classname="info.rlwhitcomb.calc.Calc" failonerror="true" fork="true">
 			<arg value="-nocolor"/>
 			<arg value="-nolibs"/>
+			<arg value="-utf8"/>
 			<arg value="-library"/>
 			<arg value="test/files/library"/>
 			<arg value="-clear"/>
@@ -934,6 +937,7 @@ Test ending on ${end.of.test.date} at ${end.of.test.time}
 		<java classname="info.rlwhitcomb.calc.Calc" failonerror="true" fork="true" if:true="${utilities.available}">
 			<arg value="-nocolor"/>
 			<arg value="-nolibs"/>
+			<arg value="-utf8"/>
 			<arg value="-library"/>
 			<arg value="${env.UTILITIES_HOME}/library"/>
 			<arg value="-clear"/>
