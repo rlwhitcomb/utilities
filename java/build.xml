@@ -383,6 +383,8 @@
 		#653: Change "full.build" to be "+rev[.debug][.ci]"
 	    23-Feb-2024 (rlwhitcomb)
 		Now that there are more Unicode chars in the Calc library, setup to read it as "UTF-8".
+	    24-Feb-2024 (rlwhitcomb)
+		Add "remove" option to "makeScripts" to run during "clean".
 
      ========================================================================== -->
 
@@ -868,6 +870,19 @@ Test ending on ${end.of.test.date} at ${end.of.test.time}
 	</target>
 
 	<target name="clean" depends="purge" description="Cleans all generated files, old temp files, and old log files.">
+		<java classname="info.rlwhitcomb.calc.Calc" failonerror="true" fork="true" if:true="${utilities.available}">
+			<arg value="-nocolor"/>
+			<arg value="-nolibs"/>
+			<arg value="-utf8"/>
+			<arg value="-library"/>
+			<arg value="${env.UTILITIES_HOME}/library"/>
+			<arg value="-clear"/>
+			<arg value="makeScripts"/>
+			<arg value="--"/>
+			<arg value="remove"/>
+			<arg value="${env.UTILITIES_HOME}"/>
+			<arg value="@@@JVM17+@@@/${jvm17.args}"/>
+		</java>
 		<delete>
 			<fileset dir="." includes="${result.jar}"/>
 			<fileset dir="." includes="*.class"/>

@@ -3,7 +3,7 @@
 /*****************************************/
 $quiet on
 //
-// $0 = operation: "scripts" or "properties"
+// $0 = operation: "scripts", "properties", or "remove"
 // $1 = output directory
 // $2 = token/replacement
 //
@@ -136,8 +136,19 @@ define scripts() = {
     }
 }
 
+define remove() = {
+    loop set in data.settings {
+        outputFile = ON_WINDOWS ? set.name + ".bat" : set.name
+        outputFile = outdir + outputFile
+        $echo `Removing "$outputFile" ...`
+        delete outputFile
+    }
+}
+
 case operation of {
-    "scripts","properties": eval(`$operation()`),
-    default:                $assert false, `Undefined operation "$operation"!`
+       "scripts",
+    "properties",
+        "remove" : eval(`$operation()`),
+    default      : $assert false, `Undefined operation "$operation"!`
 }
 
