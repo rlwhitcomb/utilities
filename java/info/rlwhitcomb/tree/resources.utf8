@@ -1,7 +1,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2020-2022 Roger L. Whitcomb.
+# Copyright (c) 2020-2022,2024 Roger L. Whitcomb.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -52,6 +52,8 @@
 #	    #284: Remove unused error message. Update help.
 #	03-Dec-2022 (rlwhitcomb)
 #	    Tweak some colors.
+#	24-Feb-2024 (rlwhitcomb)
+#	    Add help text for "-1" option. Add highlight to the values.
 #
 
 unavailable	= " <unavailable>"
@@ -106,30 +108,31 @@ usage.help37	= "\t  (or %DarkBackground%, <Gr>-darkback<.>, or <Gr>-darkbg<.>)"
 usage.help38	= "\t<Gr>-light<.>   use colors suitable for a light/white background"
 usage.help39	= "\t  (or %LightBackground%, <Gr>-lightback<.>, or <Gr>-lightbg<.>)"
 usage.help40	= ""
-usage.help41	= "\t<Gr>-locale<.> locale_name   set the locale"
+usage.help41	= "\t<Gr>-locale<.> <Cy>locale_name<.>   set the locale"
 usage.help42	= "\t  (or <Gr>-loc<.>, or <Gr>-l<.>)"
 usage.help43	= ""
-usage.help44	= "\t<Gr>-depth<.>  depth         set the depth of the list"
+usage.help44	= "\t<Gr>-depth<.>  <Cy>depth<.>         set the depth of the list"
 usage.help45	= "\t  where value can be a number, or one of <Gr>empty<.>, <Gr>files<.>,"
 usage.help46	= "\t    <Gr>immediates<.>, or <Gr>infinity<.>"
-usage.help47	= ""
-usage.help48	= "\t<Gr>-help<.>  prints this message"
-usage.help49	= "\t  (or <Gr>-usage<.>, <Gr>-h<.>, <Gr>-u<.>, or <Gr>-?<.>)"
-usage.help50	= ""
-usage.help51	= "\t<Gr>-version<.>  prints the program version information"
-usage.help52	= "\t  (or <Gr>-vers<.>, <Gr>-ver<.>, or <Gr>-v<.>)"
-usage.help53	= ""
-usage.help54	= " Note: options can be specified by \"<Gr>-opt<.>\" or \"<Gr>--opt<.>\""
-usage.help55	= "  (or on Windows by \"<Gr>/opt<.>\")."
-usage.help56	= ""
-usage.help57	= " Options can also be preset by listing them in the TREE_OPTIONS"
-usage.help58	= "  environment variable (such as <Cy>TREE_OPTIONS=-nocolor<.>)"
-usage.help59	= ""
-usage.help60	= " Also note: all options are parsed before any files are processed,"
-usage.help61	= "  so later options will override earlier ones for the entire output,"
-usage.help62	= "  and options on the command line override ones set by <Cy>TREE_OPTIONS<.>."
-usage.help63	= ""
-usage.help64	= " If no files or directories are specified, the current directory ('.')"
-usage.help65	= "  is traversed."
-usage.help66	= ""
+usage.help47	= "\t<Gr>-1<.>     alternative to <Gr>-depth 1<.>"
+usage.help48	= ""
+usage.help49	= "\t<Gr>-help<.>  prints this message"
+usage.help50	= "\t  (or <Gr>-usage<.>, <Gr>-h<.>, <Gr>-u<.>, or <Gr>-?<.>)"
+usage.help51	= ""
+usage.help52	= "\t<Gr>-version<.>  prints the program version information"
+usage.help53	= "\t  (or <Gr>-vers<.>, <Gr>-ver<.>, or <Gr>-v<.>)"
+usage.help54	= ""
+usage.help55	= " Note: options can be specified by \"<Gr>-opt<.>\" or \"<Gr>--opt<.>\""
+usage.help56	= "  (or on Windows by \"<Gr>/opt<.>\")."
+usage.help57	= ""
+usage.help58	= " Options can also be preset by listing them in the TREE_OPTIONS"
+usage.help59	= "  environment variable (such as <Cy>TREE_OPTIONS=-nocolor<.>)"
+usage.help60	= ""
+usage.help61	= " Also note: all options are parsed before any files are processed,"
+usage.help62	= "  so later options will override earlier ones for the entire output,"
+usage.help63	= "  and options on the command line override ones set by <Cy>TREE_OPTIONS<.>."
+usage.help64	= ""
+usage.help65	= " If no files or directories are specified, the current directory ('.')"
+usage.help66	= "  is traversed."
+usage.help67	= ""
 

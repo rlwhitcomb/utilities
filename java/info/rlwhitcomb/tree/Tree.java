@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2020-2023 Roger L. Whitcomb.
+ * Copyright (c) 2020-2024 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -101,6 +101,8 @@
  *	    #393: Cleanup imports.
  *	27-Oct-2023 (rlwhitcomb)
  *	    #633: New options to allow/disallow options set in the environment.
+ *	24-Feb-2024 (rlwhitcomb)
+ *	    New "-1" option to conveniently set the depth value for listing the current directory.
  */
 package info.rlwhitcomb.tree;
 
@@ -183,6 +185,9 @@ public class Tree
 	 * </ul>
 	 */
 	private static int maxDepth = -1;
+
+	/** Option to set a max depth of "1". */
+	private static final String ONE = "1";
 
 	/** Locale used to format messages, etc. */
 	private static Locale locale = null;
@@ -687,6 +692,10 @@ public class Tree
 		}
 		else if (Options.matchesOption(arg, true, "depth")) {
 		    expectDepth = true;
+		}
+		else if (Options.matchesOption(arg, true, ONE)) {
+		    parseDepth(ONE);
+		    omitFiles = false;
 		}
 		else if (Options.matchesOption(arg, true, "help", "usage", "h", "u", "?")) {
 		    usage();

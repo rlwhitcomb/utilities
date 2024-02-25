@@ -1,7 +1,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2020-2022 Roger L. Whitcomb.
+# Copyright (c) 2020-2022,2024 Roger L. Whitcomb.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -48,6 +48,8 @@
 #	    #308: Change reset color tag.
 #	06-May-2022 (rlwhitcomb)
 #	    #286: Removed unused error message. Update help.
+#	24-Feb-2024 (rlwhitcomb)
+#	    Add help text for new "-1" option. Highlight the extra option values.
 #
 
 unavailable	= " <no disponible>"
@@ -103,29 +105,30 @@ usage.help38	= "\t  (o %DarkBackground%, <Gr>-darkback<.>, o <Gr>-darkbg<.>)"
 usage.help39	= "\t<Gr>-light<.>   utilizar colores adecuados para un fondo claro / blanco"
 usage.help40	= "\t  (o %LightBackground%, <Gr>-lightback<.>, o <Gr>-lightbg<.>)"
 usage.help41	= ""
-usage.help42    = "\t<Gr>-locale<.> locale_name   establecer la configuración regional"
+usage.help42    = "\t<Gr>-locale<.> <Cy>locale_name<.>   establecer la configuración regional"
 usage.help43    = "\t  (o <Gr>-loc<.>, o <Gr>-l<.>)"
 usage.help44    = ""
-usage.help45    = "\t<Gr>-depth<.>  depth         establecer la profundidad de la lista"
+usage.help45    = "\t<Gr>-depth<.>  <Cy>depth<.>         establecer la profundidad de la lista"
 usage.help46    = "\t  donde valor puede ser un número, o uno de <Gr>empty<.>, <Gr>files<.>,"
 usage.help47    = "\t    <Gr>immediates<.>, o <Gr>infinity<.>"
-usage.help48    = ""
-usage.help49    = "\t<Gr>-help<.>  imprime este mensaje"
-usage.help50    = "\t  (o <Gr>-usage<.>, <Gr>-h<.>, <Gr>-u<.>, o <Gr>-?<.>)"
-usage.help51    = ""
-usage.help52    = "\t<Gr>-version<.>  imprime la información de la versión del programa"
-usage.help53    = "\t  (o <Gr>-vers<.>, <Gr>-ver<.>, o <Gr>-v<.>)"
-usage.help54    = ""
-usage.help55	= " Nota: las opciones se pueden especificar mediante \"<Gr>-opt<.>\" o \"<Gr>-opt<.>\""
-usage.help56	= "  (o en Windows por \"<Gr>/opt<.>\")."
-usage.help57	= ""
-usage.help58	= " Las opciones también se pueden preestablecer enumerándolas en variable"
-usage.help59	= "  entorno TREE_OPTIONS (como <Cy>TREE_OPTIONS=-nocolor<.>)"
-usage.help60	= ""
-usage.help61	= " También tenga en cuenta: todas las opciones se analizan antes de que"
-usage.help62	= "  se procese cualquier archivo, por lo que las opciones posteriores"
-usage.help63	= "  anularán las anteriores para toda la salida, y las opciones en la"
-usage.help64	= "  línea de comando anulan las establecidas por TREE_OPTIONS."
-usage.help65    = ""
-usage.help66	= " Si no se especifican archivos o directorios, se recorre el directorio actual ('.')."
-usage.help67	= ""
+usage.help48	= "\t<Gr>-1<.>     alternativa a la <Gr>-depth 1<.>"
+usage.help49    = ""
+usage.help50    = "\t<Gr>-help<.>  imprime este mensaje"
+usage.help51    = "\t  (o <Gr>-usage<.>, <Gr>-h<.>, <Gr>-u<.>, o <Gr>-?<.>)"
+usage.help52    = ""
+usage.help53    = "\t<Gr>-version<.>  imprime la información de la versión del programa"
+usage.help54    = "\t  (o <Gr>-vers<.>, <Gr>-ver<.>, o <Gr>-v<.>)"
+usage.help55    = ""
+usage.help56	= " Nota: las opciones se pueden especificar mediante \"<Gr>-opt<.>\" o \"<Gr>-opt<.>\""
+usage.help57	= "  (o en Windows por \"<Gr>/opt<.>\")."
+usage.help58	= ""
+usage.help59	= " Las opciones también se pueden preestablecer enumerándolas en variable"
+usage.help60	= "  entorno TREE_OPTIONS (como <Cy>TREE_OPTIONS=-nocolor<.>)"
+usage.help61	= ""
+usage.help62	= " También tenga en cuenta: todas las opciones se analizan antes de que"
+usage.help63	= "  se procese cualquier archivo, por lo que las opciones posteriores"
+usage.help64	= "  anularán las anteriores para toda la salida, y las opciones en la"
+usage.help65	= "  línea de comando anulan las establecidas por TREE_OPTIONS."
+usage.help66    = ""
+usage.help67	= " Si no se especifican archivos o directorios, se recorre el directorio actual ('.')."
+usage.help68	= ""
