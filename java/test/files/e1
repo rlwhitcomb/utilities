@@ -9,7 +9,7 @@ $echo
 info.version.major > 2 ||
     (info.version.major == 2 && info.version.minor > 4) ||
     (info.version.major == 2 && info.version.minor == 4 && info.version.patch >= 11)
-$requires '2.32.4-alpha', base '1.9.32-alpha'
+$requires 2.40.20, base 1.12.3
 
 # Various simple expressions
 $decimal(50)
@@ -345,6 +345,24 @@ false ^^ false
 false ^^ true
 true ^^ false
 true ^^ true
+
+Not false
+NOT true
+
+false Or false
+false or true
+true OR false
+true or true
+
+false And false
+false AND true
+true and false
+true and true
+
+false Xor false
+false xor true
+true XOR false
+true xor true
 
 u1 = true; u2 = false
 u1 & u2

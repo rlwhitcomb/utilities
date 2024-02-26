@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.40.20', date: d'2024-02-26',
+      issues: [ 658 ],
+      comment: 'Add keywords "NOT", "AND", "OR", and "XOR" for the boolean operators.'
+    },
     { version: '2.40.18', date: d'2024-02-22',
       issues: [  ],
       comment: 'Allow "-" modifier on "x", "o", and "b" formats to remove leading indicators.'

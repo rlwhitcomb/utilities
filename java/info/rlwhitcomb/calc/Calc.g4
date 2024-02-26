@@ -532,6 +532,8 @@
  *	    #612: Rename "dotRange" to "rangeExpr" in preparation.
  *	23-Feb-2024 (rlwhitcomb)
  *	    #657: Add "search" function. Spacing changes for clarity.
+ *	26-Feb-2024 (rlwhitcomb)
+ *	    #658: Add "NOT", "AND", "OR", and "XOR" logical keywords.
  */
 
 grammar Calc;
@@ -739,28 +741,28 @@ builtinFunction
    ;
 
 expr
-   : value                               # valueExpr
-   | obj                                 # objExpr
-   | arr                                 # arrExpr
-   | set                                 # setExpr
-   | complex                             # complexValueExpr
-   | quaternion                          # quaternionValueExpr
-   | var                                 # varExpr
+   : value                                        # valueExpr
+   | obj                                          # objExpr
+   | arr                                          # arrExpr
+   | set                                          # setExpr
+   | complex                                      # complexValueExpr
+   | quaternion                                   # quaternionValueExpr
+   | var                                          # varExpr
    | expr K_HAS ( member | ( LBRACK expr RBRACK ) ) # hasExpr
-   | expr K_IS ( STRING | ISTRING | TYPES ) # isExpr
+   | expr K_IS ( STRING | ISTRING | TYPES )       # isExpr
    | expr LBRACK ( slice3 | slice2 | slice1 ) RBRACK # sliceExpr
-   | LPAREN expr RPAREN                  # parenExpr
-   | var INC_OP                          # postIncOpExpr
-   |<assoc=right> INC_OP var             # preIncOpExpr
-   |<assoc=right> ADD_OP expr            # negPosExpr
-   |<assoc=right> '!!' expr              # toBooleanExpr
-   |<assoc=right> ('!'|'\u00AC') expr    # booleanNotExpr
-   |<assoc=right> TO_STRING_OP expr      # toStringExpr
-   |<assoc=right> TO_NUM_OP expr         # toNumberExpr
-   |<assoc=right> BIT_NOT_OP expr        # bitNotExpr
-   | expr '!'                            # factorialExpr
-   |<assoc=right> expr POW_OP expr       # powerExpr
-   |<assoc=right> expr POWERS            # powerNExpr
+   | LPAREN expr RPAREN                           # parenExpr
+   | var INC_OP                                   # postIncOpExpr
+   |<assoc=right> INC_OP var                      # preIncOpExpr
+   |<assoc=right> ADD_OP expr                     # negPosExpr
+   |<assoc=right> '!!' expr                       # toBooleanExpr
+   |<assoc=right> ( '!' | '\u00AC' | K_NOT ) expr # booleanNotExpr
+   |<assoc=right> TO_STRING_OP expr               # toStringExpr
+   |<assoc=right> TO_NUM_OP expr                  # toNumberExpr
+   |<assoc=right> BIT_NOT_OP expr                 # bitNotExpr
+   | expr '!'                                     # factorialExpr
+   |<assoc=right> expr POW_OP expr                # powerExpr
+   |<assoc=right> expr POWERS                     # powerNExpr
    | expr ( MULT_OP | K_MOD ) expr                # multiplyExpr
    | expr ADD_OP expr                             # addExpr
    | expr SHIFT_OP expr                           # shiftExpr
@@ -769,9 +771,9 @@ expr
    | expr COMPARE_OP expr                         # compareExpr
    | expr ( K_OF|K_IN|K_WITHIN|SET_IN ) loopCtl   # inExpr
    | expr EQUAL_OP expr                           # equalExpr
-   | expr EOL* BOOL_AND_OP EOL* expr              # booleanAndExpr
-   | expr EOL* BOOL_OR_OP EOL* expr               # booleanOrExpr
-   | expr EOL* BOOL_XOR_OP EOL* expr              # booleanXorExpr
+   | expr EOL* ( BOOL_AND_OP | K_AND ) EOL* expr  # booleanAndExpr
+   | expr EOL* ( BOOL_OR_OP | K_OR ) EOL* expr    # booleanOrExpr
+   | expr EOL* ( BOOL_XOR_OP | K_XOR ) EOL* expr  # booleanXorExpr
    | expr EOL* ELVIS_OP EOL* expr                 # elvisExpr
    |<assoc=right> expr EOL* QUEST EOL* expr EOL* COLON EOL* expr # eitherOrExpr
    |<assoc=right> var ( COMMA var )* EOL* ASSIGN EOL* expr ( COMMA expr )* # assignExpr
@@ -1411,6 +1413,14 @@ K_LEAVE    : 'leave' | 'LEAVE' | 'Leave' ;
 K_NEXT     : 'next' | 'NEXT' | 'Next' ;
 
 K_TIMETHIS : 'timethis' | 'TIMETHIS' | 'TimeThis' | 'Timethis' | 'timeThis' ;
+
+K_NOT    : 'not' | 'NOT' | 'Not' ;
+
+K_AND    : 'and' | 'AND' | 'And' ;
+
+K_OR     : 'or' | 'OR' | 'Or' ;
+
+K_XOR    : 'xor' | 'XOR' | 'Xor' ;
 
 TYPES    : 'null'       | 'NULL'       | 'Null'
          | 'string'     | 'STRING'     | 'String'

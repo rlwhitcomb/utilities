@@ -483,6 +483,20 @@
 >false ^^ true -> true
 >true ^^ false -> true
 >true ^^ true -> false
+>Not false -> true
+>NOT true -> false
+>false Or false -> false
+>false or true -> true
+>true OR false -> true
+>true or true -> true
+>false And false -> false
+>false AND true -> false
+>true and false -> false
+>true and true -> true
+>false Xor false -> false
+>false xor true -> true
+>true XOR false -> true
+>true xor true -> false
 >u1 = true -> true
 >u2 = false -> false
 >u1 & u2 -> false
