@@ -530,6 +530,8 @@
  *	    #654: Multiple arguments for "isPrime" also.
  *	22-Feb-2024 (rlwhitcomb)
  *	    #612: Rename "dotRange" to "rangeExpr" in preparation.
+ *	23-Feb-2024 (rlwhitcomb)
+ *	    #657: Add "search" function. Spacing changes for clarity.
  */
 
 grammar Calc;
@@ -600,7 +602,7 @@ ifStmt
 
 caseStmt
    : K_CASE expr ( K_OF | K_IN | SET_IN ) LBRACE caseBlock ( COMMA caseBlock ) * RBRACE
-   | K_CASE expr ( K_OF | K_IN | SET_IN ) caseBlock ( COMMA caseBlock ) *
+   | K_CASE expr ( K_OF | K_IN | SET_IN )        caseBlock ( COMMA caseBlock ) *
    ;
 
 leaveLabel
@@ -685,6 +687,7 @@ builtinFunction
    | K_JOIN exprN                        # joinExpr
    | K_SPLIT ( expr3 | expr2 )           # splitExpr
    | K_INDEX ( expr3 | expr2 )           # indexExpr
+   | K_SEARCH searchArgs                 # searchExpr
    | K_SUBSTR ( expr3 | expr2 | expr1 )  # substrExpr
    | K_REPLACE replaceArgs               # replaceExpr
    | K_SPLICE spliceArgs                 # spliceExpr
@@ -782,37 +785,37 @@ expr
 
 expr1
    : LPAREN expr RPAREN
-   | expr
+   |        expr
    ;
 
 expr2
    : LPAREN expr COMMA expr RPAREN
-   | expr COMMA expr
+   |        expr COMMA expr
    ;
 
 expr3
    : LPAREN expr COMMA expr COMMA expr RPAREN
-   | expr COMMA expr COMMA expr
+   |        expr COMMA expr COMMA expr
    ;
 
 expr4
    : LPAREN expr COMMA expr COMMA expr COMMA expr RPAREN
-   | expr COMMA expr COMMA expr COMMA expr
+   |        expr COMMA expr COMMA expr COMMA expr
    ;
 
 exprN
    : LPAREN exprList RPAREN
-   | exprList
+   |        exprList
    ;
 
 readExprs
    : LPAREN expr ( COLON expr ) ? RPAREN
-   | expr ( COLON expr ) ?
+   |        expr ( COLON expr ) ?
    ;
 
 writeExprs
    : LPAREN expr COMMA expr ( COLON expr ) ? RPAREN
-   | expr COMMA expr ( COLON expr ) ?
+   |        expr COMMA expr ( COLON expr ) ?
    ;
 
 slice1
@@ -829,25 +832,42 @@ slice3
 
 typeArg
    : LPAREN ( var | expr ) RPAREN
-   | ( var | expr )
+   |        ( var | expr )
+   ;
+
+startEnd3
+   : expr COMMA expr
+   ;
+
+startEnd2
+   : COMMA expr
+   ;
+
+startEnd1
+   : expr COMMA ?
+   ;
+
+searchArgs
+   : LPAREN expr COMMA expr ( COMMA ( startEnd3 | startEnd2 | startEnd1 ) ) ? RPAREN
+   |        expr COMMA expr ( COMMA ( startEnd3 | startEnd2 | startEnd1 ) ) ?
    ;
 
 replaceArgs
    : LPAREN expr COMMA expr COMMA expr ( COMMA replaceOption ) ? RPAREN
-   | expr COMMA expr COMMA expr ( COMMA replaceOption ) ?
+   |        expr COMMA expr COMMA expr ( COMMA replaceOption ) ?
    | LPAREN expr COMMA expr COMMA RPAREN
-   | expr COMMA expr COMMA
+   |        expr COMMA expr COMMA
    | LPAREN expr COMMA expr ( COMMA COMMA replaceOption ) ? RPAREN
-   | expr COMMA expr ( COMMA COMMA replaceOption ) ?
+   |        expr COMMA expr ( COMMA COMMA replaceOption ) ?
    ;
 
 spliceArgs
    : LPAREN expr COMMA dropObjs COMMA obj RPAREN
+   |        expr COMMA dropObjs COMMA obj
    | LPAREN expr COMMA dropObjs RPAREN
+   |        expr COMMA dropObjs
    | LPAREN expr COMMA obj RPAREN
-   | expr COMMA dropObjs COMMA obj
-   | expr COMMA dropObjs
-   | expr COMMA obj
+   |        expr COMMA obj
    | exprN
    | expr3
    | expr2
@@ -856,25 +876,25 @@ spliceArgs
 
 fillArgs
    : LPAREN var COMMA expr COMMA expr COMMA expr RPAREN
+   |        var COMMA expr COMMA expr COMMA expr
    | LPAREN var COMMA expr COMMA expr RPAREN
+   |        var COMMA expr COMMA expr
    | LPAREN var COMMA expr RPAREN
+   |        var COMMA expr
    | LPAREN var RPAREN
-   | var COMMA expr COMMA expr COMMA expr
-   | var COMMA expr COMMA expr
-   | var COMMA expr
-   | var
+   |        var
    ;
 
 padArgs
    : LPAREN var COMMA expr COMMA expr RPAREN
+   |        var COMMA expr COMMA expr
    | LPAREN var COMMA expr RPAREN
-   | var COMMA expr COMMA expr
-   | var COMMA expr
+   |        var COMMA expr
    ;
 
 exprVars
    : LPAREN expr COMMA expr COMMA var ( COMMA var ) * RPAREN
-   | expr COMMA expr COMMA var ( COMMA var ) *
+   |        expr COMMA expr COMMA var ( COMMA var ) *
    ;
 
 rangeExpr
@@ -965,7 +985,7 @@ optExpr
 
 idExpr
    : LPAREN member ( COMMA member ) * RPAREN
-   | member ( COMMA member ) *
+   |        member ( COMMA member ) *
    ;
 
 actualParams
@@ -1017,14 +1037,14 @@ directive
 
 numberOption
    : LPAREN NUMBER RPAREN
-   | NUMBER
+   |        NUMBER
    | var
    ;
 
 idList
    : LBRACK id ( COMMA id ) * RBRACK
-   | id ( COMMA id ) *
-   | LBRACK RBRACK
+   |        id ( COMMA id ) *
+   | LBRACK                   RBRACK
    ;
 
 id
@@ -1037,8 +1057,8 @@ id
 
 wildIdList
    : LBRACK wildId ( COMMA wildId ) * RBRACK
-   | wildId ( COMMA wildId ) *
-   | LBRACK RBRACK
+   |        wildId ( COMMA wildId ) *
+   | LBRACK                           RBRACK
    ;
 
 wildId
@@ -1230,6 +1250,8 @@ K_JOIN     : 'join' | 'JOIN' | 'Join' ;
 K_SPLIT    : 'split' | 'SPLIT' | 'Split' ;
 
 K_INDEX    : 'index' | 'INDEX' | 'Index' ;
+
+K_SEARCH   : 'search' | 'SEARCH' | 'Search' ;
 
 K_SUBSTR   : 'substr' | 'SUBSTR' | 'Substr' | 'SubStr' | 'subStr' ;
 
