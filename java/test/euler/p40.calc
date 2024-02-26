@@ -1,0 +1,44 @@
+/*
+ * Problem 40 from Project Euler (projecteuler.net)
+ *
+ * Champernowne's Constant
+ *
+ * An irrational decimal fraction is created by concatenating the positive integers:
+ *
+ *                0.123456789101112131415161718192021 ...
+ *
+ * It can be seen that the 12th digit of the fractional part is 1.
+ *
+ * If d𝑛 represents the 𝑛th digit of the fractional part, find the value of the following expression.
+ *
+ *                d1 × d10 × d100 × d1000 × d10000 × d100000 × d1000000
+ *
+ */
+$quiet on {
+
+const LIMIT = 1e6
+var str = "."
+var value = 1
+
+while length(str) <= LIMIT {
+   str += @@value++
+}
+$echo `Length = ${length str}, last value = $value`
+
+const TEST = 12
+const DIGITS = [ 1, 10, 1e2, 1e3, 1e4, 1e5, 1e6 ]
+
+var digits = []
+loop d over DIGITS {
+   digits += str[d]
+}
+
+} // end of quiet on
+
+$resultsonly on {
+
+   $echo `${TEST}th digit is ${str[TEST]}`
+   $echo `Product of the ${DIGITS}th digits is ${productOf(digits)}.`
+
+} // end of results on
+
