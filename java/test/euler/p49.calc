@@ -1,0 +1,133 @@
+/*
+ * Problem 49 from Project Euler (projecteuler.net)
+ *
+ * Prime Permutations
+ *
+ * The arithmetic sequence, 1487, 4817, 8147, in which each of the terms increases by 3330, is unusual in two ways: (i) each of
+ * the three terms are prime, and, (ii) each of the 4-digit numbers are permutations of one another.
+ *
+ * There are no arithmetic sequences made up of three 1-, 2-, or 3-digit primes, exhibiting this property, but there is one other
+ * 4-digit increasing sequence.
+ *
+ * What 12-digit number do you form by concatenating the three terms in this sequence?
+ */
+$quiet on {
+$separators off
+
+/*
+ * Return a list of the prime numbers within the given range.
+ *
+ * @param m Starting value for the list (should be 2 or any odd number).
+ * @param n Limit for the list of primes.
+ * @return  Array of prime numbers within the input range.
+ */
+define primes(m, n) = {
+   var list = []
+   if 2 in m..n list += 2
+   const s = max(m|1, 3)
+   loop x over s..n, 2 {
+      if isprime(x) list += x
+   }
+   list
+}
+
+/*
+ * Produce a list of all the permutations of the given number.
+ * Heap's algorithm, transcribed from the code here:
+ * https://www.geeksforgeeks.org/heaps-algorithm-for-generating-permutations/
+ *
+ * @param n Any number to permute.
+ * @return  A list of all the possible permutations of that number.
+ */
+define permute(n) = {
+   // The string representation of the input number
+   var a = @@n
+   var permutations = []
+
+   /*
+    * Permute the "size" characters of "a" in place.
+    */
+   define perm(size) = {
+      if size == 1 {
+         // Add the numeric value to the return list
+         permutations += ~~a
+         leave
+      }
+      loop m within size {
+         perm(size - 1)
+
+         if size % 2 == 1 {
+            // Swap first and last elements for even sizes
+            a[0], a[size-1] = a[size-1], a[0]
+         }
+         else {
+            // Swap current and last elements for odd sizes
+            a[m], a[size-1] = a[size-1], a[m]
+         }
+      }
+   }
+
+   perm(length(a))
+
+   unique(sort(permutations))
+}
+
+// Step 1. Get the list of candidate 4-digit primes
+const p = primes(1000, 9999)
+
+// Map from concatenated strings to sorted sets of numbers
+var winners = {}
+
+// Step 2. Loop through these primes, get all their permutations, then produce a list of which of them are prime
+loop n over p {
+   const p2 = permute(n)
+   p2_primes = []
+   loop over p2 {
+      if isprime(__) p2_primes += __
+   }
+
+   // Now we need to look for any three that have a constant difference between them
+   if length(p2_primes) >= 3 {
+      // Map from differences to the set of numbers that produce them
+      var m = {}
+
+      loop x within length(p2_primes) {
+         loop y over x + 1 .. length(p2_primes) - 1 {
+            const p1 = p2_primes[y]
+            const p2 = p2_primes[x]
+            const d = p1 - p2
+            if m has `$d` {
+               m.`$d` += p1
+               m.`$d` += p2
+            }
+            else {
+               m.`$d` = { p1, p2 }
+            }
+         }
+      }
+
+      loop d over m {
+         var s = m.`$d`
+
+         // The winners are those that are truly 4 digits each, and that have exactly three values in the difference set
+         // (meaning they are an arithmetic progression)
+         if length(s) == 3 {
+            s = sort(s)
+            // Final check, all the numbers are actually 4 digits
+            var in_range = true
+            loop over s {
+               if __ < 1000 in_range = false
+            }
+            if in_range {
+               const string = join(s, "")
+               winners.`$string` = s
+            }
+         }
+      }
+   }
+}
+
+$echo `The winners are: ${winners@j}`
+
+} // end of quiet
+

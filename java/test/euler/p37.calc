@@ -16,11 +16,11 @@ const LIMIT = 11
 var sum = 0
 
 /*
- * Return a list of the prime numbers smaller than the given number.
+ * Return a list of the prime numbers within the given range.
  *
  * @param m Starting value for the list (should be 2 or any odd number).
  * @param n Limit for the list of primes.
- * @return  Array of prime numbers smaller than the input.
+ * @return  Array of prime numbers within the input range.
  */
 define primes(m, n) = {
    var list = []
