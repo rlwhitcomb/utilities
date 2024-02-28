@@ -1,0 +1,27 @@
+/*
+ * Problem 48 from Project Euler (projecteuler.net)
+ *
+ * Self Powers
+ *
+ * The series, 1**1 + 2**2 + 3**3 + ... + 10**10 = 10405071317.
+ *
+ * Find the last ten digits of the series, 1**1 + 2**2 + 3**3 + ... + 1000**1000.
+ */
+$quiet on {
+$separators off
+$unlimited
+
+const TEST_LIMIT = 10
+const LIMIT = 1000
+
+define power_series(limit, digits) = {
+   var sum = 0
+   loop n over limit sum += n**n
+   $echo `Last ${digits@w} digits of the sum of self-power series from one to ${limit@w} is ${@@sum[-digits:]}.`
+}
+
+power_series(TEST_LIMIT, 11)
+power_series(LIMIT, 10)
+
+} // end of quiet
+
