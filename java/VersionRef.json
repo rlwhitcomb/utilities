@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.40.22', date: d'2024-03-01',
+      issues: [ 659 ],
+      comment: 'Additional highlighting in error messages for consistency.'
+    },
     { version: '2.40.20', date: d'2024-02-26',
       issues: [ 658 ],
       comment: 'Add keywords "NOT", "AND", "OR", and "XOR" for the boolean operators.'

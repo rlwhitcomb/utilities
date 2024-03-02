@@ -347,6 +347,8 @@
  *	    #638: New tree debug printout.
  *	22-Feb-2024 (rlwhitcomb)
  *	    Add "-n" as an alias for "-nolib".
+ *	29-Feb-2024 (rlwhitcomb)
+ *	    #659: Do some more substitutions for highlighting in ErrorListener.syntaxError.
  */
 package info.rlwhitcomb.calc;
 
@@ -1388,6 +1390,31 @@ public class Calc
 	}
 
 
+	private static String addHighlight(String input, String search) {
+	    String message = input;
+
+	    String searchTerm = String.format(" %1$s '", search);
+	    String replaceTerm = String.format(" %1$s <x>", search);
+
+	    int ix = message.indexOf(searchTerm);
+	    if (ix > 0) {
+		message = message.replace(searchTerm, replaceTerm);
+		// Sometimes the message has embedded quotes, so be careful
+		int count = CharUtil.countQuotes(message, '\'');
+		if (count > 2) {
+		    // embedded quotes, replace only the last one with end tag
+		    ix = message.lastIndexOf('\'');
+		    message = message.substring(0, ix) + "<.>" + message.substring(ix + 1);
+		}
+		else {
+		    message = message.replace("'", "<.>");
+		}
+	    }
+	    message = message.replace("<EOF>", "<x><EOF><.>");
+
+	    return message;
+	}
+
 	/**
 	 * An error listener that hooks into our error reporting strategy.
 	 */
@@ -1404,20 +1431,10 @@ public class Calc
 		    if (replMode) {
 			Intl.outFormat("calc#error", currentIndicator);
 		    }
-		    int ix = message.indexOf("at input '");
-		    if (ix > 0) {
-			message = message.replace("at input '", "at input <x>");
-			// Sometimes the message has embedded quotes, so be careful
-			int count = CharUtil.countQuotes(message, '\'');
-			if (count > 2) {
-			    // embedded quotes, replace only the last one with end tag
-			    ix = message.lastIndexOf('\'');
-			    message = message.substring(0, ix) + "<.>" + message.substring(ix + 1);
-			}
-			else {
-			    message = message.replace("'", "<.>");
-			}
-		    }
+
+		    message = addHighlight(message, "input");
+		    message = addHighlight(message, "error at:");
+
 		    throw new CalcException(Intl.formatString("calc#syntaxError", charPositionInLine, message), line);
 		}
 	}
