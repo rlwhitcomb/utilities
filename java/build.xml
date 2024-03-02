@@ -385,6 +385,8 @@
 		Now that there are more Unicode chars in the Calc library, setup to read it as "UTF-8".
 	    24-Feb-2024 (rlwhitcomb)
 		Add "remove" option to "makeScripts" to run during "clean".
+	    01-Mar-2024 (rlwhitcomb)
+		Add seconds to to the test log file names to avoid duplicate upload artifacts in CI build.
 
      ========================================================================== -->
 
@@ -435,7 +437,7 @@
 	<tstamp>
 		<format property="build.date" pattern="yyyy-MM-dd"/>
 		<format property="build.time" pattern="HH:mm:ss.SSS z"/>
-		<format property="test.log.file.name" pattern="'test'.yyyy-MM-dd_HH-mm.'log'" locale="en,US"/>
+		<format property="test.log.file.name" pattern="'test'.yyyy-MM-dd_HH-mm-ss.'log'" locale="en,US"/>
 	</tstamp>
 
 	<condition property="ci.build" value="true" else="false">
