@@ -349,6 +349,8 @@
  *	    Add "-n" as an alias for "-nolib".
  *	29-Feb-2024 (rlwhitcomb)
  *	    #659: Do some more substitutions for highlighting in ErrorListener.syntaxError.
+ *	02-Mar-2024 (rlwhitcomb)
+ *	    #659: Oops! Need to use "<y>" instead of "<x>" for this highlighting.
  */
 package info.rlwhitcomb.calc;
 
@@ -1394,7 +1396,7 @@ public class Calc
 	    String message = input;
 
 	    String searchTerm = String.format(" %1$s '", search);
-	    String replaceTerm = String.format(" %1$s <x>", search);
+	    String replaceTerm = String.format(" %1$s <y>", search);
 
 	    int ix = message.indexOf(searchTerm);
 	    if (ix > 0) {
@@ -1410,7 +1412,7 @@ public class Calc
 		    message = message.replace("'", "<.>");
 		}
 	    }
-	    message = message.replace("<EOF>", "<x><EOF><.>");
+	    message = message.replace("<EOF>", "<y><EOF><.>");
 
 	    return message;
 	}
