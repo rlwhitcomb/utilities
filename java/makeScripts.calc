@@ -9,6 +9,8 @@ $quiet on
 //
 $assert $# == 3, "Three arguments required: operation, output directory, and token/replacement value."
 
+$assert defined(fixpath), 'The standard "library.calc" is required; do not use the "-nolib" option!'
+
 const operation = lower($0)
 const outdir = fixpath($1)
 const tokenreplacement = $2
