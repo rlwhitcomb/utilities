@@ -9,7 +9,7 @@ $echo
 info.version.major > 2 ||
     (info.version.major == 2 && info.version.minor > 4) ||
     (info.version.major == 2 && info.version.minor == 4 && info.version.patch >= 11)
-$requires 2.40.20, base 1.12.3
+$requires 2.41.0, base 1.12.3
 
 # Various simple expressions
 $decimal(50)
@@ -459,6 +459,18 @@ loop key over ob2 { index(ob2, key) }
 
 t8 = [ 2, 3, 5, 7, 11, 13, 17, 19, 21, 23, 29, 31 ]
 notnull(index(t8, 22-1, -1))
+
+# Binary "search" operator
+# (Note: input must be sorted for this to work properly)
+const sentence = "this is a very good time to be properly aware of the consequences of our actions"
+const words = unique(sort(split(sentence, " ")))
+search(words, "time")
+search(words, "fortune")
+search(words, "good", 4)
+search(words, "our", -5)
+search(words, "a", , -2)
+search(words, "a", -2, -1)
+search(words, "the", 3, )
 
 # The "substr" and "slice" operators
 one = substr(target, 4)

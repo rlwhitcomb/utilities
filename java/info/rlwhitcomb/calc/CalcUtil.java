@@ -235,6 +235,8 @@
  *	    #649: Options for extra spacing for fractions.
  *	15-Feb-2024 (rlwhitcomb)
  *	    #654: Add INTEGER conversion to "buildValueList" for "isPrime".
+ *	04-Mar-2024 (rlwhitcomb)
+ *	    #657: Make ObjectComparator non-private for use by "search".
  */
 package info.rlwhitcomb.calc;
 
@@ -1483,7 +1485,7 @@ public final class CalcUtil
 	/**
 	 * A comparator that uses {@code compareValues} to do the comparison.
 	 */
-	private static class ObjectComparator implements Comparator<Object>
+	static class ObjectComparator implements Comparator<Object>
 	{
 		private CalcObjectVisitor visitor;
 		private ParserRuleContext ctx;

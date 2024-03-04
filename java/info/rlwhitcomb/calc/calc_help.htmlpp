@@ -201,10 +201,12 @@ h2 {
         <li>Data or scripts can be read from the standard input channel, and values and results can be written to the standard output channel, so Calc can be used as a filter in a longer chain of batch processing.</li>
         <li>The ability to define libraries of functions available using the "<code>-library</code>" command line option or the "<code>$include</code>" directive.</li>
         <li>Calculations can be edited (using backspace, etc.) to reduce the chance of keyboard errors.</li>
-        <li>Looping and conditional statements to do pretty much any kind of calculation.</li>
-        <li>Therefore, the language is <a href="https://en.wikipedia.org/wiki/Turing_completeness">&ldquo;Turing Complete&rdquo;</a>.</li>
+        <li>Looping and conditional statements, including powerful pattern matching, to do pretty much any kind of calculation or programming task.</li>
+        <li>Did I mention that this is an actual programming / scripting language?</li>
+        <li>Therefore, this "calculator" is a <a href="https://en.wikipedia.org/wiki/Turing_completeness">&ldquo;Turing Complete&rdquo;</a> language.</li>
         <li>Currently (as of early 2024 at least), it is being actively developed and maintained, meaning features and fixes are constantly being added.</li>
-        <li>This is <a href="https://opensource.com/resources/what-open-source">Open-Source Software</a> so the code can be examined, and modified (if desired) for your own use.</li>
+        <li>This is <a href="https://opensource.com/resources/what-open-source">Open-Source Software</a> released under the very permissive
+            <a href="https://opensource.org/license/mit">MIT</a> license, so the code can be freely examined, and modified (if desired) for your own use.</li>
       </ul>
   <h3>History</h3>
   <p>"Calc" started out as an exercise in learning the <a href="https://www.antlr.org/">Antlr</a> parser generator, by combining the simple expression grammar from the introductory book
@@ -261,6 +263,12 @@ h2 {
   <p>A note on syntax in the following pages: <b>Bold</b> values must be typed as given (except for allowed case differences) everywhere. <code>(</code> and <code>)</code> around values in the
      Command Line Options and Operators and Functions sections signify optional values / parameters, while in the Formats section, <code>[</code> and <code>]</code> are the "optional"
      markers. Items inside parentheses separated by <code>|</code> signifies one of the variations should be used.
+  <p>Also note that although every effort is made to ensure this help document is up-to-date with the latest code, occasionally there will be code
+     changes that are not reflected here. So, if there seems to be a difference, the code is always "right". You can also use the
+     <code>c versions</code> command to check the latest revisions list to see if a change has been made that may not be reflected here (yet).
+     There are also (usually) example code and tests in the <code>test/files</code> and <code>test/euler</code> directories that may shed light
+     on the correct or recommended usage of the many functions and operators documented here.
+  <p>And a further disclaimer: a few times, this document reflects what "ought" to be, and the code is actually wrong (this is known as a <b><i>bug</i></b> in the vernacular). That is what the <a href="https://github.com/rlwhitcomb/utilities/issues/">Issues</a> are for.
 </div>
 <a class="right-link" href="#topofpage">Top</a>
 <hr id="Command_Line" class="sectionsep">
@@ -849,8 +857,8 @@ or<br>
     <tr><td>33</td><td><i>expr</i> <code>IS</code> ( <i>string</i> | <i>type_id</i> )</td><td>check if expression is the given type (same as <code>typeof</code>)</td><td>left to right</td></tr>
     <tr><td>32</td><td><i>expr</i> <code>[</code> <i>expr</i> ? <code>:</code> <i>expr</i> ? <code>]</code></td><td>produce a slice of an object or string</td><td>left to right</td></tr>
     <tr><td>31</td><td><code>( </code><i>expr</i><code> )</code></td><td>group an expression</td><td>N/A</td></tr>
-    <tr><td rowspan="90">30</td>
-            <td><code>ABS</code>&nbsp;<i>expr</i></td><td>absolute value</td><td rowspan="90">left to right</td></tr>
+    <tr><td rowspan="91">30</td>
+            <td><code>ABS</code>&nbsp;<i>expr</i></td><td>absolute value</td><td rowspan="91">left to right</td></tr>
             <tr><td><code>SIN</code>&nbsp;<i>expr</i></td><td>sine</td></tr>
             <tr><td><code>COS</code>&nbsp;<i>expr</i></td><td>cosine</td></tr>
             <tr><td><code>TAN</code>&nbsp;<i>expr</i></td><td>tangent</td></tr>
@@ -892,6 +900,7 @@ or<br>
 	    <tr><td><code>REVERSE</code>&nbsp;<i>expr</i></td><td>reverse the order of an array or string</td></tr>
             <tr><td><code>UNIQUE</code>&nbsp;<i>expr</i></td><td>produce the unique values in an array or string</td></tr>
             <tr><td><code>INDEX</code>&nbsp;<i>expr</i> <code>,</code> <i>search_expr</i> (&nbsp;<code>,</code> <i>start_expr</i>&nbsp;)</td><td>find value within a string</td></tr>
+            <tr><td><code>SEARCH</code>&nbsp;<i>expr</i> <code>,</code> <i>search_expr</i> (&nbsp;<code>,</code> ( <i>start_expr</i> ) <code>,</code> ( <i>end_expr</i> ) )</td><td>binary search for a value in the given array/map/set</td></tr>
             <tr><td><code>SUBSTR</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>start_expr</i> (&nbsp;<code>,</code> <i>length_expr</i>&nbsp;)&nbsp;)</td><td>extract a substring</td></tr>
             <tr><td><code>REPLACE</code>&nbsp;<i>expr</i> <code>,</code> <i>expr</i> <code>,</code> ( <i>expr</i> ) (&nbsp;<code>,</code> <i>mode</i>&nbsp;)<br>or <i>expr</i> <code>,</code> <i>expr</i></td><td>replace substrings within a string</td></tr>
             <tr><td><code>SPLICE</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;) *</td><td>modify an array by deleting and/or adding elements</td></tr>
@@ -1095,6 +1104,13 @@ or<br>
      and returned indices are relative to this key list.
   <p>For a <i>set</i> passed to the <code>index</code> function, the starting index value is ignored, and the return value is either <code>1</code>
      if the search object is a member of the set, or <code>null</code> if the object is not a member.
+  <p>The <code>search</code> function is a faster (that is, "binary") search where the input list is known to be pre-sorted. Unlike <code>index</code>,
+     even though the input arguments can be negative, meaning relative to the end of the list, the result value will always be positive if the
+     search term is actually found, but negative <b><i>iff</i></b> the term is not found, and indicates the negative index of the insertion point for the
+     search term in the sorted list. Like most other functions and operators, nested objects are flattened into a linear list (which must end up
+     being sorted) before the search is attempted. Also unlike <code>index</code>, or <code>in</code>, the maximum number of comparisons needed for <code>search</code>
+     is <code>log<sub>2</sub>(<i>n</i>)</code> due to the binary search algorithm being used (thus the need for sorting beforehand). Missing or null
+     <i>start</i> or <i>end</i> values will default to the start (index 0) or end (index "length") of the input list, map, or set.
   <p>The arguments to <code>substr</code> are the value (converted to a string), and optional starting index, and optional length
      for the extraction. If the start is negative, it refers to an offset from the end of the string (same as returned
      by <code>index</code>), otherwise it is a zero-based index from the beginning. If the length value is not given or is null, it refers

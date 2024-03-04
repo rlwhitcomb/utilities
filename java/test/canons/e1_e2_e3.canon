@@ -607,6 +607,15 @@
 >index (ob2, key) -> 2
 >t8 = [2, 3, 5, 7, 11, 13, 17, 19, 21, 23, 29, 31] -> [ 2, 3, 5, 7, 11, 13, 17, 19, 21, 23, 29, 31 ]
 >notnull (index (t8, 22 - 1, -1)) -> true
+>Defining constant “sentence” = "this is a very good time to be properly aware of the consequences of our actions"
+>Defining constant “words” = [ "a", "actions", "aware", "be", "consequences", "good", "is", "of", "our", "properly", "the", "this", "time", "to", "very" ]
+>search (words, "time") -> 12
+>search (words, "fortune") -> -6
+>search (words, "good", 4) -> 5
+>search (words, "our", -5) -> -11
+>search (words, "a",, -2) -> 0
+>search (words, "a", -2, -1) -> -14
+>search (words, "the", 3,) -> 10
 >one = substr (target, 4) -> " is an \"index\" test."
 >two = substr (target, 11, 7) -> "\"index\""
 >three = substr (target, index (target, 'test', -1)) -> "test."

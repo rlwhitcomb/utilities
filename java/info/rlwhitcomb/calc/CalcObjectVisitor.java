@@ -834,6 +834,8 @@
  *	    #612: Rename "dotRange" to "rangeExpr" in preparation.
  *	22-Feb-2024 (rlwhitcomb)
  *	    Allow "-" modifier on "x", "o", and "b" formatting to skip the leading conversion indicators.
+ *	04-Mar-2024 (rlwhitcomb)
+ *	    #657: Implement "search" function; rearrange logic in "multiply" operator code.
  */
 package info.rlwhitcomb.calc;
 
@@ -1741,7 +1743,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	protected int getIntValue(final ParserRuleContext ctx, final Integer nullValue) {
-	    return convertToInt(evaluateToValue(ctx), settings.mc, ctx, nullValue);
+	    return ctx == null ? nullValue : convertToInt(evaluateToValue(ctx), settings.mc, ctx, nullValue);
 	}
 
 	protected int getIntValue(final ParserRuleContext ctx) {
@@ -4457,10 +4459,36 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    Object e2 = evaluate(ctx2);
 
 	    String op;
-	    if (ctx.K_MOD() == null)
+	    if (ctx.K_MOD() == null) {
 		op = ctx.MULT_OP().getText();
-	    else
+		switch (op) {
+		    case "*":
+		    case "\u00D7":
+		    case "\u2217":
+		    case "\u2715":
+		    case "\u2716":
+			op = "*";
+			break;
+		    case "/":
+		    case "\u00F7":
+		    case "\u2215":
+		    case "\u2797":
+			op = "/";
+			break;
+		    case "\\":
+		    case "\u2216":
+			op = "\\";
+			break;
+		    case "%":
+		    case "mod":
+			break;
+		    default:
+			throw new UnknownOpException(op, ctx);
+		}
+	    }
+	    else {
 		op = "mod";
+	    }
 
 	    try {
 		if (settings.rationalMode || (e1 instanceof BigFraction || e2 instanceof BigFraction)) {
@@ -4469,24 +4497,14 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 		    switch (op) {
 			case "*":
-			case "\u00D7":
-			case "\u2217":
-			case "\u2715":
-			case "\u2716":
 			    return f1.multiply(f2);
 			case "/":
-			case "\u00F7":
-			case "\u2215":
-			case "\u2797":
 			case "\\":
-			case "\u2216":
 			    return f1.divide(f2);
 			case "%":
 			    return f1.remainder(f2);
 			case "mod":
 			    return f1.modulus(f2);
-			default:
-			    throw new UnknownOpException(op, ctx);
 		    }
 		}
 		else if (e1 instanceof Quaternion || e2 instanceof Quaternion) {
@@ -4495,18 +4513,10 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 		    switch (op) {
 			case "*":
-			case "\u00D7":
-			case "\u2217":
-			case "\u2715":
-			case "\u2716":
 			    return q1.multiply(q2, settings.mc);
 			case "/":
-			case "\u00F7":
-			case "\u2215":
-			case "\u2797":
 			    return q1.divide(q2, MathUtil.divideContext(q1, settings.mcDivide));
 			case "\\":
-			case "\u2216":
 			case "%":
 			case "mod":
 			default:
@@ -4519,18 +4529,10 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 		    switch (op) {
 			case "*":
-			case "\u00D7":
-			case "\u2217":
-			case "\u2715":
-			case "\u2716":
 			    return c1.multiply(c2, settings.mc);
 			case "/":
-			case "\u00F7":
-			case "\u2215":
-			case "\u2797":
 			    return c1.divide(c2, MathUtil.divideContext(c1, settings.mcDivide));
 			case "\\":
-			case "\u2216":
 			case "%":
 			case "mod":
 			    // This one in particular potentially could be done with the same definition as for reals
@@ -4545,7 +4547,6 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 		    switch (op) {
 			case "\\":
-			case "\u2216":
 			     return set.diff(c);
 			default:
 			    throw new UnknownOpException(op, ctx);
@@ -4559,31 +4560,23 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 		    switch (op) {
 			case "*":
-			case "\u00D7":
-			case "\u2217":
-			case "\u2715":
-			case "\u2716":
 			    return fixupToInteger(d1.multiply(d2, settings.mc));
 			case "/":
-			case "\u00F7":
-			case "\u2215":
-			case "\u2797":
 			    return fixupToInteger(d1.divide(d2, mcDivide));
 			case "\\":
-			case "\u2216":
 			    return fixupToInteger(d1.divideToIntegralValue(d2, mcDivide));
 			case "%":
 			    return fixupToInteger(d1.remainder(d2, mcDivide));
 			case "mod":
 			    return fixupToInteger(MathUtil.modulus(d1, d2, mcDivide));
-			default:
-			    throw new UnknownOpException(op, ctx);
 		    }
 		}
 	    }
 	    catch (ArithmeticException ae) {
 		throw new CalcExprException(ae, ctx);
 	    }
+
+	    return null;
 	}
 
 	@Override
@@ -5510,6 +5503,48 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    return BigInteger.valueOf((long) ret);
 	}
 
+	@Override
+	public Object visitSearchExpr(CalcParser.SearchExprContext ctx) {
+	    CalcParser.SearchArgsContext args = ctx.searchArgs();
+	    CalcParser.ExprContext target = args.expr(0);
+	    Object search = evaluate(args.expr(1));
+	    CalcParser.StartEnd3Context start3 = args.startEnd3();
+	    CalcParser.StartEnd2Context start2 = args.startEnd2();
+	    CalcParser.StartEnd1Context start1 = args.startEnd1();
+	    CalcParser.ExprContext startCtx = null;
+	    CalcParser.ExprContext endCtx   = null;
+	    int startIndex;
+	    int endIndex;
+
+	    List<CalcParser.ExprContext> exprs = new ArrayList<>(1);
+	    exprs.add(target);
+
+	    List<Object> objects = buildValueList(this, exprs, Conversion.UNCHANGED);
+	    Object[] objs = objects.toArray();
+
+	    if (start3 != null) {
+		startCtx = start3.expr(0);
+		endCtx   = start3.expr(1);
+	    }
+	    else if (start2 != null) {
+		endCtx = start2.expr();
+	    }
+	    else if (start1 != null) {
+		startCtx = start1.expr();
+	    }
+
+	    startIndex = getIntValue(startCtx, 0);
+	    endIndex   = getIntValue(endCtx, objs.length);
+
+	    // As usual, negative indices are relative to the end of the list
+	    if (startIndex < 0)
+		startIndex += objs.length;
+	    if (endIndex < 0)
+		endIndex += objs.length;
+
+	    return Integer.valueOf(Arrays.binarySearch(objs, startIndex, endIndex, search,
+		new CalcUtil.ObjectComparator(this, ctx, settings.mc, settings.ignoreNameCase, false)));
+	}
 
 	/**
 	 * Perform a "substring" operation, meaning extracting all or part of a string based on either

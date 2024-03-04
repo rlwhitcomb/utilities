@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.41.0', date: d'2024-03-04',
+      issues: [ 657 ],
+      comment: 'Implement binary "search" built-in function.'
+    },
     { version: '2.40.22', date: d'2024-03-01',
       issues: [ 659 ],
       comment: 'Additional highlighting in error messages for consistency.'
@@ -29,7 +33,7 @@
     },
     { version: '2.40.13', date: d'2024-02-14',
       issues: [ 653 ],
-      comment: 'Fix version string format to make "$requires" work better.'
+      comment: '[BREAKING] Fix version string format to make "$requires" work better.'
     },
     { version: '2.40.12', date: d'2024-01-30',
       issues: [ 649 ],
@@ -61,7 +65,7 @@
     },
     { version: '2.39.4', date: d'2023-11-29',
       issues: [ 636 ],
-      comment: 'Change "@@" operator never to use separators.'
+      comment: '[BREAKING] Change "@@" operator never to use separators.'
     },
     { version: '2.39.2', date: d'2023-11-28',
       issues: [ 627 ],
@@ -488,7 +492,7 @@
     },
     { version: '2.13.43', date: d'2022-07-14',
       issues: [ 408 ],
-      comment: 'Change dummy map key names to legal ones (as in "_nn").'
+      comment: '[BREAKING] Change dummy map key names to legal ones (as in "_nn").'
     },
     { version: '2.13.42', date: d'2022-07-13',
       issues: [ 407 ],
@@ -553,7 +557,7 @@
     },
     { version: '2.13.5', date: d'2022-06-29',
       issues: [ 384 ],
-      comment: 'Disallow the exotic "truth" values such as "T"/"F", "yes"/"no", etc.'
+      comment: '[BREAKING] Disallow the exotic "truth" values such as "T"/"F", "yes"/"no", etc.'
     },
     { version: '2.13.4', date: d'2022-06-27',
       issues: [ 376 ],
@@ -770,7 +774,7 @@
     },
     { version: '2.9.9', date: d'2022-05-06',
       issues: [ 286 ],
-      comment: 'Fix "truth" values of empty objects and lists.'
+      comment: '[BREAKING] Fix "truth" values of empty objects and lists.'
     },
     { version: '2.9.8', date: d'2022-05-06',
       issues: [ 287 ],
@@ -795,5 +799,9 @@
     { version: '2.9.0', date: d'2022-05-04',
       issues: [ 68 ],
       comment: 'Help changes for "index" changes; implement "index" for objects; allow negative indices.'
+    },
+    { version: '1.0.0', date: d'2021-01-07',
+      issues: [ ],
+      comment: 'Add the remaining assignment operators; version 1.0.0'
     }
 ]
