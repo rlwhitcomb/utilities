@@ -803,5 +803,9 @@
     { version: '1.0.0', date: d'2021-01-07',
       issues: [ ],
       comment: 'Add the remaining assignment operators; version 1.0.0'
+    },
+    { version: '0.0.0', date: d'2020-12-04',
+      issues: [ ],
+      comment: 'Initial (incomplete) code commit.'
     }
 ]
