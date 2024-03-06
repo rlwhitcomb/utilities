@@ -800,13 +800,75 @@
       issues: [ 68 ],
       comment: 'Help changes for "index" changes; implement "index" for objects; allow negative indices.'
     },
+    { version: '2.8.0', date: d'2022-02-13',
+      issues: [ 199 ],
+      comment: 'Significant refactoring to support regular ids for loop variables and function parameters.'
+    },
+    { version: '2.7.0', date: d'2022-01-26',
+      issues: [ 206 ],
+      comment: 'Refactoring of predefined variable implementation.'
+    },
+    { version: '2.6.0', date: d'2022-01-24',
+      issues: [ 103 ],
+      comment: 'Initial implementation of complex number support.'
+    },
+    { version: '2.5.0', date: d'2022-01-22',
+      issues: [ 160 ],
+      comment: '[BREAKING] Change casing of predefined functions, constants, keywords, and directives.'
+    },
+    { version: '2.4.0', date: d'2021-11-07',
+      issues: [ 69 ],
+      comment: 'Add local "$*" and "$#" variables for function parameters; implement varargs.'
+    },
+    { version: '2.3.0', date: d'2021-10-30',
+      issues: [ 44 ],
+      comment: '''Reimplement predefined values; allow all Unicode characters in identifiers;
+\t fix no-arg user-defined function calls.'''
+    },
+    { version: '2.2.0', date: d'2021-10-15',
+      issues: [ ],
+      comment: 'Implement "slice" and "splice"; update "substr" to work with one argument.'
+    },
+    { version: '2.1.0', date: d'2021-10-15',
+      issues: [ 32 ],
+      comment: 'Fix argument passing for all one-arg predefined functions.'
+    },
+    { version: '2.0.0', date: d'2021-10-07',
+      issues: [ ],
+      comment: 'Big rewrite to use Scope for symbol tables; allow real parameters to user-defined functions.'
+    },
+    { version: '1.6.0', date: d'2021-08-11',
+      issues: [ ],
+      comment: 'Implement dot range for "length", "sumof", and "productof".'
+    },
+    { version: '1.5.0', date: d'2021-07-02',
+      issues: [ ],
+      comment: 'New directive for thousand separators; new aliases for other directives.'
+    },
+    { version: '1.4.0', date: d'2021-04-05',
+      issues: [ ],
+      comment: 'Rework settings and implement GUI "Settings" dialog.'
+    },
+    { version: '1.3.0', date: d'2021-02-24',
+      issues: [ ],
+      comment: 'Next phase of adding Unicode symbols.'
+    },
+    { version: '1.2.0', date: d'2021-02-16',
+      issues: [ ],
+      comment: 'Add "if", "while", and "define" statements.'
+    },
+    { version: '1.1.0', date: d'2021-01-31',
+      issues: [ ],
+      comment: 'Beginning of rational calculation mode.'
+    },
     { version: '1.0.0', date: d'2021-01-07',
       issues: [ ],
       comment: 'Add the remaining assignment operators; version 1.0.0'
     },
     { version: '0.9.0', date: d'2020-12-07',
       issues: [ ],
-      comment: 'Add "help" and "version" commands; first actual version number; use color codes; catch and report errors.'
+      comment: '''Add "help" and "version" commands; first actual version number; use color codes;
+\t catch and report errors.'''
     },
     { version: '0.0.0', date: d'2020-12-04',
       issues: [ ],
