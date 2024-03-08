@@ -1,0 +1,61 @@
+/*
+ * Do some speed comparisons on "large" datasets between "index" and "search".
+ */
+$quiet on {
+
+/* The number of values (that is, the magnitude of "large") for testing purposes. */
+const LIMIT = $# > 0 ? ~~$0 : 1e5
+
+/* The number of test searches to run. */
+const TESTS = LIMIT \ 10
+
+define integer(f) = f * (10⌃scale(f))
+
+// A "seed" value for the random number generator, so this is a repeatable test
+//$decimal 24 {
+//   const SEED = integer(pi)
+//$echo `seed = $SEED`
+//   random(SEED)
+//}
+
+// Fill an array with random values
+timethis "fill and sort array" {
+var values = []
+loop over LIMIT {
+   values += integer(random)
+}
+values = sort values
+}
+
+// Generate a random list of indices to try
+timethis "generate random test indices" {
+var indices = []
+loop over TESTS {
+   indices += floor(random * length(values))
+}
+}
+
+const avg = sumof(indices) / length(indices)
+
+}
+indices@j
+
+$resultsonly on {
+
+`Average index value = $avg out of ${length(values)} total`
+
+timethis "search test" {
+loop ix over indices {
+   const iy = search(values, values[ix])
+   $assert ix == iy, `Result of "search" doesn't match: ix = $ix, iy = $iy!`
+}
+}
+
+timethis "index test" {
+loop ix over indices {
+   const iy = index(values, values[ix])
+   $assert ix == iy, `Result of "index" doesn't match: ix = $ix, iy = $iy!`
+}
+}
+
+}
