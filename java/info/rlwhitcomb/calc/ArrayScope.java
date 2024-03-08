@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2021-2023 Roger L. Whitcomb.
+ * Copyright (c) 2021-2024 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,8 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  *
- *      Data structures for Calc to hold user-defined function definitions,
- *      local symbol tables, etc.
+ *      Data structures for Calc to hold a list or multi-dimensional array.
  *
  * History:
  *  06-Oct-21 rlw ----	Initial coding.
@@ -40,6 +39,7 @@
  *  15-Aug-22 rlw #440	Move "size()" up to CollectionScope.
  *  08-Jan-23 rlw #592	Move "isEmpty()" to CollectionScope.
  *  28-Nov-23 rlw #627	Add "ensureCapacity" method.
+ *  11-Feb-24 rlw #65	Methods to get array sizes.
  */
 package info.rlwhitcomb.calc;
 
@@ -245,6 +245,45 @@ class ArrayScope<T> extends CollectionScope
 	@Override
 	protected boolean isEmpty() {
 	    return values.isEmpty();
+	}
+
+	/**
+	 * Get the number of dimensions of this array.
+	 *
+	 * @return {@code 1} for a single list, {@code 2} for a two-dimensional
+	 * array, and so on.
+	 */
+	int numberDimensions() {
+	    int numChildren = 0;
+
+	    for (T obj : values) {
+		if (obj instanceof ArrayScope) {
+		    ArrayScope array = (ArrayScope) obj;
+		    numChildren = Math.max(numChildren, array.numberDimensions());
+		}
+	    }
+
+	    return numChildren + 1;
+	}
+
+	/**
+	 * Get the maximum size of the given dimension.
+	 *
+	 * @param dim The zero-based dimension index.
+	 * @return    Size of that dimension.
+	 */
+	int dimensionSize(final int dim) {
+	    if (dim == 0)
+		return values.size();
+
+	    int size = 0;
+	    for (T obj : values) {
+		if (obj instanceof ArrayScope) {
+		    ArrayScope array = (ArrayScope) obj;
+		    size = Math.max(size, array.dimensionSize(dim - 1));
+		}
+	    }
+	    return size;
 	}
 
 }
