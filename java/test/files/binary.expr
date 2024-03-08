@@ -1,0 +1,44 @@
+/*
+ * Testing our binary search algorithm against the built-in version, especially
+ * the insertion point (negative) if the value isn't found.
+ */
+const VALUES = [ 2, 9, 15, 23, 87, 92, 111, 239 ]
+
+define binary_search(values, obj) = {
+   var begin = 0
+   var end = length values
+
+   while begin <= end {
+      const mid = (begin + end) \ 2
+      case values[mid] <=> obj of {
+         == 0: leave binary_search: mid,
+          < 0: begin = mid + 1,
+          > 0: end = mid - 1
+      }
+   }
+   begin > length(values) ? -(length(values) + 1) : -(begin + 1)
+}
+
+define test(v, s) = {
+   const search_result = search(v, s)
+   const binary_result = binary_search(v, s)
+   $echo `search for $s = $search_result, binary for $s = $binary_result`
+   $assert search_result == binary_result `Mismatch: search = $search_result, binary = $binary_result`
+}
+
+$quiet on {
+
+loop val over VALUES {
+   test(VALUES, val)
+   test(VALUES, val - 1)
+   test(VALUES, val + 1)
+}
+
+test(VALUES, 24)
+test(VALUES, 239)
+test(VALUES, 1)
+test(VALUES, 500)
+test(VALUES, 10)
+test(VALUES, 91)
+
+}
