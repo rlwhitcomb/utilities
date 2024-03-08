@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2022-2023 Roger L. Whitcomb.
+ * Copyright (c) 2022-2024 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -32,6 +32,7 @@
  *  08-Jan-23 rlw #592	Move "isEmpty()" to CollectionScope.
  *  16-May-23 rlw ----	New "addAll" method from a Collection.
  *  27-Sep-23 rlw #630	New indexing capability.
+ *  07-Mar-24 rlw #661	New methods for "union" and "intersect".
  */
 package info.rlwhitcomb.calc;
 
@@ -216,6 +217,70 @@ class SetScope<T> extends CollectionScope
 		@SuppressWarnings("unchecked")
 		SetScope<Object> set = (SetScope<Object>) c;
 		result.values.removeAll(set.set());
+	    }
+
+	    return result;
+	}
+
+	/**
+	 * Compute the union of this set and another collection.
+	 *
+	 * @param c Another collection to "union" with this set.
+	 * @return  A new set containing the members of this set along
+	 *          with the members of the other collection.
+	 */
+	SetScope<T> union(final CollectionScope c) {
+	    if (c.equals(CollectionScope.EMPTY))
+		return this;
+
+	    SetScope<T> result = new SetScope<T>(values);
+
+	    if (c instanceof ArrayScope) {
+		@SuppressWarnings("unchecked")
+		ArrayScope<? extends T> array = (ArrayScope<? extends T>) c;
+		result.values.addAll(array.list());
+	    }
+	    else if (c instanceof ObjectScope) {
+		ObjectScope map = (ObjectScope) c;
+		@SuppressWarnings("unchecked")
+		Collection<? extends T> values = (Collection<? extends T>) map.values();
+		result.values.addAll(values);
+	    }
+	    else if (c instanceof SetScope) {
+		@SuppressWarnings("unchecked")
+		SetScope<? extends T> set = (SetScope<? extends T>) c;
+		result.values.addAll(set.set());
+	    }
+
+	    return result;
+	}
+
+	/**
+	 * Compute the intersection of this set and another collection.
+	 *
+	 * @param c Another collection to intersect with this set.
+	 * @return  A new set containing the members of this set which are
+	 *          also contained in the other collection.
+	 */
+	SetScope<T> intersect(final CollectionScope c) {
+	    if (c.equals(CollectionScope.EMPTY))
+		return new SetScope<T>();
+
+	    SetScope<T> result = new SetScope<T>(values);
+
+	    if (c instanceof ArrayScope) {
+		@SuppressWarnings("unchecked")
+		ArrayScope<Object> array = (ArrayScope<Object>) c;
+		result.values.retainAll(array.list());
+	    }
+	    else if (c instanceof ObjectScope) {
+		ObjectScope map = (ObjectScope) c;
+		result.values.retainAll(map.values());
+	    }
+	    else if (c instanceof SetScope) {
+		@SuppressWarnings("unchecked")
+		SetScope<Object> set = (SetScope<Object>) c;
+		result.values.retainAll(set.set());
 	    }
 
 	    return result;
