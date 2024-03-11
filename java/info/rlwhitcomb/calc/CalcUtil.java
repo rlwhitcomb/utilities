@@ -237,6 +237,8 @@
  *	    #654: Add INTEGER conversion to "buildValueList" for "isPrime".
  *	04-Mar-2024 (rlwhitcomb)
  *	    #657: Make ObjectComparator non-private for use by "search".
+ *	07-Mar-2024 (rlwhitcomb)
+ *	    #657: New binary search method that works on ArrayList...
  */
 package info.rlwhitcomb.calc;
 
@@ -3062,6 +3064,35 @@ public final class CalcUtil
 	    }
 
 	    return calcScripts;
+	}
+
+	/**
+	 * Search for a given object in the (presumably, and required) sorted list.
+	 * <p> The list is presumed to be an {@link ArrayList} which has constant time
+	 * access and thus is suitable for this algorithm.
+	 *
+	 * @param list  The already sorted list to search.
+	 * @param obj   Object to search for in the list.
+	 * @param begin Beginning index in the list (instead of 0).
+	 * @param end   Ending index in the list.
+	 * @param cmp   Comparator for the items in the list.
+	 * @return      Zero or positive index into the list if the object was found,
+	 *              or negative index where the object should be if not found.
+	 */
+	public static int binarySearch(final List<?> list, final Object obj, final int begin, final int end, final Comparator<Object> cmp) {
+	    int b = begin, e = end;
+
+	    while (b < e) {
+		int mid = (b + e) / 2;
+		int ret = cmp.compare(list.get(mid), obj);
+		if (ret == 0)
+		    return mid;
+		if (ret < 0)
+		    b = mid + 1;
+		else
+		    e = mid;
+	    }
+	    return (b > end) ? -(end + 1) : -(b + 1);
 	}
 
 }

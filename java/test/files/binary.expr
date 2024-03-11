@@ -8,12 +8,12 @@ define binary_search(values, obj) = {
    var begin = 0
    var end = length values
 
-   while begin <= end {
+   while begin < end {
       const mid = (begin + end) \ 2
       case values[mid] <=> obj of {
          == 0: leave binary_search: mid,
           < 0: begin = mid + 1,
-          > 0: end = mid - 1
+          > 0: end = mid
       }
    }
    begin > length(values) ? -(length(values) + 1) : -(begin + 1)

@@ -616,6 +616,10 @@
 >search (words, "a",, -2) -> 0
 >search (words, "a", -2, -1) -> -14
 >search (words, "the", 3,) -> 10
+>Defining constant “teststring” = "abcdefg"
+>search (teststring, "c") -> 2
+>search (teststring, "i") -> -8
+>search (teststring, "e", 1, 4) -> -5
 >one = substr (target, 4) -> " is an \"index\" test."
 >two = substr (target, 11, 7) -> "\"index\""
 >three = substr (target, index (target, 'test', -1)) -> "test."

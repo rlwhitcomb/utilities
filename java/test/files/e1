@@ -472,6 +472,11 @@ search(words, "a", , -2)
 search(words, "a", -2, -1)
 search(words, "the", 3, )
 
+const teststring = "abcdefg"
+search(teststring, "c")
+search(teststring, "i")
+search(teststring, "e", 1, 4)
+
 # The "substr" and "slice" operators
 one = substr(target, 4)
 two = substr(target, 11, 7)

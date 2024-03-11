@@ -877,7 +877,7 @@ or<br>
             <tr><td><code>LN</code>&nbsp;<i>expr</i></td><td>natural log (base e)</td></tr>
             <tr><td><code>EPOW</code>&nbsp;<i>expr</i></td><td>anti-log (e ** <i>expr</i>)</td></tr>
             <tr><td><code>TENPOW</code>&nbsp;<i>expr</i></td><td>10 ** <i>expr</i> (anti-log base ten)</td></tr>
-            <tr><td><code>RANDOM</code>&nbsp;( <i>expr</i> )&nbsp;</td><td>random number with optional seed value</td></tr>
+            <tr><td><code>RANDOM</code>&nbsp;( <i>expr</i> ? )&nbsp;</td><td>random number with optional seed value</td></tr>
             <tr><td><code>SIGNUM</code> or <code>SGN</code>&nbsp;<i>expr</i></td><td>sign (&lt; 0 = -1, 0 = 0, &gt; 0 = +1)</td></tr>
             <tr><td><code>ISNULL</code> or <code>NOTNULL</code>&nbsp;<i>expr</i></td><td>is the value null / not null?</td></tr>
             <tr><td><code>TYPEOF</code>&nbsp;<i>expr</i></td><td>the type of the result<br>as in <code>"string"</code>, <code>"integer"</code>, <code>"boolean"</code>, etc.</td></tr>
@@ -1107,10 +1107,13 @@ or<br>
   <p>The <code>search</code> function is a faster (that is, "binary") search where the input list is known to be pre-sorted. Unlike <code>index</code>,
      even though the input arguments can be negative, meaning relative to the end of the list, the result value will always be positive if the
      search term is actually found, but negative <b><i>iff</i></b> the term is not found, and indicates the negative index of the insertion point for the
-     search term in the sorted list. Like most other functions and operators, nested objects are flattened into a linear list (which must end up
-     being sorted) before the search is attempted. Also unlike <code>index</code>, or <code>in</code>, the maximum number of comparisons needed for <code>search</code>
-     is <code>log<sub>2</sub>(<i>n</i>)</code> due to the binary search algorithm being used (thus the need for sorting beforehand). Missing or null
-     <i>start</i> or <i>end</i> values will default to the start (index 0) or end (index "length") of the input list, map, or set.
+     search term in the sorted list. Just like <code>index</code>, but unlike some other operators and functions, nested objects are not flattened
+     before doing the search. If the target is not a list, map, or set, the object is converted to its string representation, and the search is
+     conducted on the array of code points in that string. In this case, the search object should be a string consisting of a single code point also.
+     The main advantage of <code>search</code> over <code>index</code>, or <code>in</code>, is that the maximum number of comparisons needed for <code>search</code>
+     is <code>log<sub>2</sub>(<i>n</i>)</code> due to the binary search algorithm being used (thus the need for sorting beforehand), which vastly
+     improves the search speed, especially with large input data sets.
+     Missing or null <i>start</i> or <i>end</i> values will default to the start (index 0) or end (index "length") of the input list, map, or set.
   <p>The arguments to <code>substr</code> are the value (converted to a string), and optional starting index, and optional length
      for the extraction. If the start is negative, it refers to an offset from the end of the string (same as returned
      by <code>index</code>), otherwise it is a zero-based index from the beginning. If the length value is not given or is null, it refers

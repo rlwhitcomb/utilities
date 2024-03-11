@@ -62,6 +62,7 @@
  *			Major optimizations in constructing the prime sieve.
  *  14-Dec-23 rlw ----	Use MaxInt.
  *  15-Feb-24 rlw #654	Simple additional test in prime number calculations to avoid exceptions.
+ *  05-Mar-24 rlw ----	Optimization in "pow" for 10**n.
  */
 package info.rlwhitcomb.math;
 
@@ -267,6 +268,10 @@ public final class MathUtil
 	    if (base.equals(D_TWO) && (double) intExp == inputExp) {
 		BigInteger value = BigInteger.ZERO.setBit(intExp);
 		result = new BigDecimal(value);
+	    }
+	    // Turn an integer power of ten into a simple scale change
+	    else if (base.equals(D_TEN) && (double) intExp == inputExp) {
+		result = BigDecimal.ONE.scaleByPowerOfTen(intExp);
 	    }
 	    else {
 		// Do the integer power part

@@ -33,13 +33,17 @@
  *  16-May-23 rlw ----	New "addAll" method from a Collection.
  *  27-Sep-23 rlw #630	New indexing capability.
  *  07-Mar-24 rlw #661	New methods for "union" and "intersect".
+ *  08-Mar-24 rlw #657	Use ArrayList instead of array for indexed access;
+ *			new accessor for the values as a list.
  */
 package info.rlwhitcomb.calc;
 
 import info.rlwhitcomb.util.Intl;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 
@@ -59,7 +63,7 @@ class SetScope<T> extends CollectionScope
 	 * The current set of values, as an array (for convenience in indexing). This is only
 	 * present (allocated) as needed, and not constantly maintained (for performance reasons).
 	 */
-	private transient Object[] valueArray = null;
+	private transient List<Object> valueList = new ArrayList<>();
 
 
 	/**
@@ -123,8 +127,8 @@ class SetScope<T> extends CollectionScope
 	    checkImmutable();
 
 	    values.add(value);
-	    // Invalidate the array copy now that we (potentially) have a new member
-	    valueArray = null;
+	    // Invalidate the list copy now that we (potentially) have a new member
+	    valueList.clear();
 	}
 
 	/**
@@ -136,7 +140,7 @@ class SetScope<T> extends CollectionScope
 	boolean addAll(final SetScope<T> set) {
 	    checkImmutable();
 
-	    valueArray = null;
+	    valueList.clear();
 	    return values.addAll(set.values);
 	}
 
@@ -149,7 +153,7 @@ class SetScope<T> extends CollectionScope
 	boolean addAll(final Collection<T> c) {
 	    checkImmutable();
 
-	    valueArray = null;
+	    valueList.clear();
 	    return values.addAll(c);
 	}
 
@@ -172,7 +176,7 @@ class SetScope<T> extends CollectionScope
 	    checkImmutable();
 
 	    values.remove(value);
-	    valueArray = null;
+	    valueList.clear();
 	}
 
 	/**
@@ -185,11 +189,11 @@ class SetScope<T> extends CollectionScope
 	 */
 	@SuppressWarnings("unchecked")
 	T get(final int index) {
-	    if (valueArray == null) {
-		valueArray = values.toArray();
+	    if (valueList.isEmpty()) {
+		valueList.addAll(values);
 	    }
 
-	    return (T) valueArray[index];
+	    return (T) valueList.get(index);
 	}
 
 	/**
@@ -284,6 +288,18 @@ class SetScope<T> extends CollectionScope
 	    }
 
 	    return result;
+	}
+
+	/**
+	 * Access the values as a list.
+	 *
+	 * @return Indexable list of the values.
+	 */
+	List<Object> list() {
+	    if (valueList.isEmpty() && !values.isEmpty())
+		valueList.addAll(values);
+
+	    return valueList;
 	}
 
 	/**

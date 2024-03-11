@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2021-2023 Roger L. Whitcomb.
+ * Copyright (c) 2021-2024 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,8 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  *
- *      Data structures for Calc to hold user-defined function definitions,
- *      local symbol tables, etc.
+ *      Data structure for Calc to hold a "map" of key/value pairs, or a global
+ *      or local symbol table.
  *
  *  History:
  *	06-Oct-2021 (rlwhitcomb)
@@ -70,7 +70,7 @@
  *	15-Aug-2022 (rlwhitcomb)
  *	    #440: Move "size()" up to CollectionScope.
  *	08-Jan-2023 (rlwhitcomb)
- *	    #592: MOve "isEmpty()" to CollectionScope.
+ *	    #592: Move "isEmpty()" to CollectionScope.
  */
 package info.rlwhitcomb.calc;
 

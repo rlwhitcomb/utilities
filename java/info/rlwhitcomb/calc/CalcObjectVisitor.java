@@ -836,6 +836,9 @@
  *	    Allow "-" modifier on "x", "o", and "b" formatting to skip the leading conversion indicators.
  *	04-Mar-2024 (rlwhitcomb)
  *	    #657: Implement "search" function; rearrange logic in "multiply" operator code.
+ *	10-Mar-2024 (rlwhitcomb)
+ *	    #657: Improve "search" speed (a lot) by not copying the search object so much.
+ *	    Small tweaks to the "$assert" processing.
  */
 package info.rlwhitcomb.calc;
 
@@ -2476,15 +2479,14 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitAssertDirective(CalcParser.AssertDirectiveContext ctx) {
 	    CalcParser.ExprContext expr1 = ctx.expr(0);
-	    CalcParser.ExprContext expr2 = ctx.expr(1);
-	    String assertMessage = "";
 
 	    // expr1 is the asserted expression
 	    // expr2 is the optional message, which doesn't need to be evaluated until and unless
 	    // the assert fails
 	    boolean value = getBooleanValue(expr1);
 	    if (!value) {
-		assertMessage = Intl.formatString("calc#assertFailure",
+		CalcParser.ExprContext expr2 = ctx.expr(1);
+		String assertMessage = Intl.formatString("calc#assertFailure",
 			expr2 != null ? getStringValue(expr2) : getTreeText(expr1));
 		throw new AssertException(assertMessage, ctx);
 	    }
@@ -5506,8 +5508,10 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitSearchExpr(CalcParser.SearchExprContext ctx) {
 	    CalcParser.SearchArgsContext args = ctx.searchArgs();
-	    CalcParser.ExprContext target = args.expr(0);
-	    Object search = evaluate(args.expr(1));
+	    CalcParser.ExprContext e0ctx = args.expr(0);
+	    CalcParser.ExprContext e1ctx = args.expr(1);
+	    Object target = evaluate(e0ctx);
+	    Object search = evaluate(e1ctx);
 	    CalcParser.StartEnd3Context start3 = args.startEnd3();
 	    CalcParser.StartEnd2Context start2 = args.startEnd2();
 	    CalcParser.StartEnd1Context start1 = args.startEnd1();
@@ -5516,11 +5520,35 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    int startIndex;
 	    int endIndex;
 
-	    List<CalcParser.ExprContext> exprs = new ArrayList<>(1);
-	    exprs.add(target);
+	    List<?> objects = null;
 
-	    List<Object> objects = buildValueList(this, exprs, Conversion.UNCHANGED);
-	    Object[] objs = objects.toArray();
+	    if (target instanceof ObjectScope) {
+		objects = ((ObjectScope) target).keyList();
+	    }
+	    else if (target instanceof ArrayScope) {
+		@SuppressWarnings("unchecked")
+		ArrayScope<Object> array = (ArrayScope<Object>) target;
+		objects = array.list();
+	    }
+	    else if (target instanceof SetScope) {
+		@SuppressWarnings("unchecked")
+		SetScope<Object> set = (SetScope<Object>) target;
+		objects = set.list();
+	    }
+	    else {
+		String targetString = getNonNullString(e0ctx, target);
+		String searchString = getNonNullString(e1ctx, search);
+		// Okay, the only way this makes sense is if target becomes a list of chars
+		// and search is one char only (or maybe it's codepoints)
+		int[] codes = targetString.codePoints().toArray();
+		List<String> strings = new ArrayList<>(codes.length);
+		for (int i = 0; i < codes.length; i++) {
+		    strings.add(new String(codes, i, 1));
+		}
+		objects = strings;
+	    }
+
+	    int length = objects.size();
 
 	    if (start3 != null) {
 		startCtx = start3.expr(0);
@@ -5534,15 +5562,15 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 
 	    startIndex = getIntValue(startCtx, 0);
-	    endIndex   = getIntValue(endCtx, objs.length);
+	    endIndex   = getIntValue(endCtx, length);
 
 	    // As usual, negative indices are relative to the end of the list
 	    if (startIndex < 0)
-		startIndex += objs.length;
+		startIndex += length;
 	    if (endIndex < 0)
-		endIndex += objs.length;
+		endIndex += length;
 
-	    return Integer.valueOf(Arrays.binarySearch(objs, startIndex, endIndex, search,
+	    return Integer.valueOf(CalcUtil.binarySearch(objects, search, startIndex, endIndex,
 		new CalcUtil.ObjectComparator(this, ctx, settings.mc, settings.ignoreNameCase, false)));
 	}
 
