@@ -534,6 +534,8 @@
  *	    #657: Add "search" function. Spacing changes for clarity.
  *	26-Feb-2024 (rlwhitcomb)
  *	    #658: Add "NOT", "AND", "OR", and "XOR" logical keywords.
+ *	12-Mar-2024 (rlwhitcomb)
+ *	    #662: Fix grammar for "random" and optional seed parameter.
  */
 
 grammar Calc;
@@ -668,7 +670,7 @@ builtinFunction
    | K_LN expr1                          # lnExpr
    | K_EPOW expr1                        # ePowerExpr
    | K_TENPOW expr1                      # tenPowerExpr
-   | K_RANDOM ( expr1? | LPAREN RPAREN ) # randomExpr
+   | K_RANDOM optExpr1                   # randomExpr
    | K_SIGNUM expr1                      # signumExpr
    | ( K_ISNULL | K_NOTNULL ) expr1      # isNullExpr
    | K_TYPEOF typeArg                    # typeofExpr
@@ -788,6 +790,11 @@ expr
 expr1
    : LPAREN expr RPAREN
    |        expr
+   ;
+
+optExpr1
+   : LPAREN expr ? RPAREN
+   |        expr ?
    ;
 
 expr2

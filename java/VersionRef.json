@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.41.2', date: d'2024-03-12',
+      issues: [ 662 ],
+      comment: 'Fix parsing of "random()".'
+    },
     { version: '2.41.0', date: d'2024-03-04',
       issues: [ 657 ],
       comment: 'Implement binary "search" built-in function.'

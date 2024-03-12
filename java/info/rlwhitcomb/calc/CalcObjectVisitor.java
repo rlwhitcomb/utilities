@@ -839,6 +839,8 @@
  *	10-Mar-2024 (rlwhitcomb)
  *	    #657: Improve "search" speed (a lot) by not copying the search object so much.
  *	    Small tweaks to the "$assert" processing.
+ *	12-Mar-2024 (rlwhitcomb)
+ *	    #662: Fix parsing of "random()".
  */
 package info.rlwhitcomb.calc;
 
@@ -4852,13 +4854,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitRandomExpr(CalcParser.RandomExprContext ctx) {
 	    Object seed = null;
+	    CalcParser.ExprContext expr = ctx.optExpr1().expr();
 
-	    if (ctx.expr1() != null) {
-		CalcParser.ExprContext expr = ctx.expr1().expr();
-		if (expr != null) {
-		    seed = evaluate(expr);
-		}
+	    if (expr != null) {
+		seed = evaluate(expr);
 	    }
+
 	    return MathUtil.random(seed, settings.mc.getPrecision(), settings.mcDivide);
 	}
 
