@@ -19,7 +19,7 @@ define bucket(v) = {
 }
 
 v = []
-loop over 10000 { v += random }
+loop over 10000 { v += random() }
 
 mean = sumof(v)/length(v)
 
