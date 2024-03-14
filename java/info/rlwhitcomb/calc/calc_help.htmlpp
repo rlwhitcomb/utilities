@@ -159,7 +159,7 @@ h2 {
     <li><a href="#Formats">Formats</a>
     <li><a href="#Notes_on_Formats">Notes on Formats</a>
     <li><a href="#Available_Operators_and_Predefined_Functions">Available Operators and Predefined Functions</a>
-    <li><a href="#Notes_on_Functions">Notes on Functions</a>
+    <li><a href="#Notes_on_Operators_and_Functions">Notes on Operators and Functions</a>
     <li><a href="#User_Defined_Functions">User-Defined Functions</a>
     <li><a href="#Statements">Statements</a>
     <li><a href="#Directives">Directives</a>
@@ -799,7 +799,7 @@ or<br>
      done to "double" precision (currently &mdash; this may change in subsequent versions).
   <p>Names of predefined functions are available in 3 or 4 forms: all lower case, all UPPER case, and one or two MixedCase forms. For example: <code>sin</code>, <code>SIN</code>, or <code>Sin</code>, and <code>sumof</code>, <code>SUMOF</code>, <code>Sumof</code>, or <code>SumOf</code>.
 </div>
-<a class="right-link" href="#Notes_on_Functions">Notes</a>
+<a class="right-link" href="#Notes_on_Operators_and_Functions">Notes</a>
   <div class="center">
   <table style="margin-left:auto;margin-right:auto;">
     <caption class="tablecap">Operators, Functions, and Precedence</caption>
@@ -977,16 +977,16 @@ or<br>
         <i>expr</i>&nbsp;<code> &lt;&lt; </code>&nbsp;<i>expr</i></td>
         <td>bit shift operations</td><td>left to right</td></tr>
     <tr><td>16</td><td>
-        <i>expr</i>&nbsp;<code> &amp; </code>&nbsp;<i>expr</i><br>
+        <i>expr</i>&nbsp;<code> &amp; </code>or<code> &#x2229; </code>or<code> &#x22C2; </code>&nbsp;<i>expr</i><br>
         <i>expr</i>&nbsp;<code> ~&amp; </code>or<code> &#x22BC; </code>&nbsp;<i>expr</i><br>
         <i>expr</i>&nbsp;<code> &amp;~ </code>&nbsp;<i>expr</i><br>
         <i>expr</i>&nbsp;<code> ^ </code>&nbsp;<i>expr</i><br>
         <i>expr</i>&nbsp;<code> ~^ </code>&nbsp;<i>expr</i><br>
         <i>expr</i>&nbsp;<code> ^~ </code>&nbsp;<i>expr</i><br>
-        <i>expr</i>&nbsp;<code> | </code>&nbsp;<i>expr</i><br>
+        <i>expr</i>&nbsp;<code> | </code>or<code> &#x222A; </code>or<code> &#x22C3; </code>&nbsp;<i>expr</i><br>
         <i>expr</i>&nbsp;<code> ~| </code>or<code> &#x22BD; </code>&nbsp;<i>expr</i><br>
         <i>expr</i>&nbsp;<code> |~ </code>&nbsp;<i>expr</i></td>
-        <td>bitwise AND<br>NOT AND (or NAND)<br>AND NOT<br>exclusive OR<br>NOT exclusive OR<br>exclusive OR NOT<br>bitwise OR<br>NOT OR (or NOR)<br>OR NOT</td><td>left to right</td></tr>
+        <td>bitwise AND or set INTERSECTION<br>NOT AND (or NAND)<br>AND NOT<br>exclusive OR<br>NOT exclusive OR<br>exclusive OR NOT<br>bitwise OR or set UNION<br>NOT OR (or NOR)<br>OR NOT</td><td>left to right</td></tr>
     <tr><td>15</td><td><i>expr</i>&nbsp;<code> &lt;=&gt; </code>&nbsp;<i>expr</i><td>returns <code>-1</code> if <i>expr</i> &lt; 0<br><code>0</code> if <i>expr</i> = 0<br><code>+1</code> if <i>expr</i> &gt; 0</td><td>left to right</td></tr>
     <tr><td>14</td><td>
         <i>expr</i>&nbsp;<code> &lt;= </code>or<code> &#x2264; </code>&nbsp;<i>expr</i><br>
@@ -1045,10 +1045,12 @@ or<br>
   </table>
   </div>
 <a class="right-link" href="#topofpage">Top</a>
-<hr id="Notes_on_Functions" class="sectionsep">
-  <h2>Notes on Functions</h2>
+<hr id="Notes_on_Operators_and_Functions" class="sectionsep">
+  <h2>Notes on Operators and Functions</h2>
 <div class="cols">
-  <p>Some of the functions might require a bit of explanation as to how they work.
+  <p>Some of the operators and functions might require a bit of explanation as to how they work.
+  <p>The set union and intersection operators work on any collections, but also on integers (operating as bit sets). The other bit operators
+     also work with pure boolean values, doing the appropriate boolean operations.
   <p>The multiple assignment operation assigns the values of the corresponding expressions to the respective variables. The normal
      case is one variable and one expression (normal assignment), as in <code>a = 7</code>. In addition, this construct can be used
      to swap the values of two variables as in: <code>a, b = b, a</code>. It is an error if the number of variables does not equal

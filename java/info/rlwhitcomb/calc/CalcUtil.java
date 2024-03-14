@@ -239,6 +239,8 @@
  *	    #657: Make ObjectComparator non-private for use by "search".
  *	07-Mar-2024 (rlwhitcomb)
  *	    #657: New binary search method that works on ArrayList...
+ *	13-Mar-2024 (rlwhitcomb)
+ *	    #661: Add set union and intersection to "bitOp".
  */
 package info.rlwhitcomb.calc;
 
@@ -2005,7 +2007,31 @@ public final class CalcUtil
 	 * @return <code>o1 <i>op</i> o2</code>
 	 */
 	public static Object bitOp(final CalcObjectVisitor visitor, final Object o1, final Object o2, final String op, final ParserRuleContext ctx, final MathContext mc) {
-	    if (o1 instanceof Boolean && o2 instanceof Boolean) {
+	    if (o1 instanceof CollectionScope && o2 instanceof CollectionScope) {
+		SetScope<Object> s1 = SetScope.from((CollectionScope) o1);
+		SetScope<Object> s2 = SetScope.from((CollectionScope) o2);
+		SetScope<Object> result = null;
+
+		switch (op) {
+		    case "&":
+		    case "\u2229":   // INTERSECTION
+		    case "\u22C2":   // N-ARY INTERSECTION
+			// set intersection
+			result = s1.intersect(s2);
+			break;
+		    case "|":
+		    case "\u222A":   // UNION
+		    case "\u22C3":   // UN-ARY UNION
+			// set union
+			result = s1.union(s2);
+			break;
+		    default:
+			throw new UnknownOpException(op, ctx);
+		}
+
+		return result;
+	    }
+	    else if (o1 instanceof Boolean && o2 instanceof Boolean) {
 		boolean b1 = ((Boolean) o1).booleanValue();
 		boolean b2 = ((Boolean) o2).booleanValue();
 		boolean result;
@@ -2053,6 +2079,8 @@ public final class CalcUtil
 
 		switch (op) {
 		    case "&":
+		    case "\u2229":   // INTERSECTION
+		    case "\u22C2":   // N-ARY INTERSECTION
 			result = i1.and(i2);
 			break;
 		    case "~&":
@@ -2072,6 +2100,8 @@ public final class CalcUtil
 			result = i1.xor(i2.not());
 			break;
 		    case "|":
+		    case "\u222A":   // UNION
+		    case "\u22C3":   // UN-ARY UNION
 			result = i1.or(i2);
 			break;
 		    case "~|":

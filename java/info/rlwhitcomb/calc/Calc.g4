@@ -536,6 +536,8 @@
  *	    #658: Add "NOT", "AND", "OR", and "XOR" logical keywords.
  *	12-Mar-2024 (rlwhitcomb)
  *	    #662: Fix grammar for "random" and optional seed parameter.
+ *	13-Mar-2024 (rlwhitcomb)
+ *	    #661: Grammar for set intersection and union (special characters).
  */
 
 grammar Calc;
@@ -1619,6 +1621,10 @@ BIT_OP
        | '|'
        | ( '~|' | '\u22BD' )
        | '|~'
+       | '\u2229'   // INTERSECTION
+       | '\u22C2'   // N-ARY INTERSECTION
+       | '\u222A'   // UNION
+       | '\u22C3'   // UN-ARY UNION
        ;
 
 ASSIGN : '=' ;

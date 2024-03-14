@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.42.0', date: d'2024-03-13',
+      issues: [ 661 ],
+      comment: 'Implement set union and intersection.'
+    },
     { version: '2.41.2', date: d'2024-03-12',
       issues: [ 662 ],
       comment: 'Fix parsing of "random()".'

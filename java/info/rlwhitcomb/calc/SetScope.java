@@ -35,6 +35,7 @@
  *  07-Mar-24 rlw #661	New methods for "union" and "intersect".
  *  08-Mar-24 rlw #657	Use ArrayList instead of array for indexed access;
  *			new accessor for the values as a list.
+ *  13-Mar-24 rlw #661	New "from" static function to convert from other collections.
  */
 package info.rlwhitcomb.calc;
 
@@ -52,7 +53,7 @@ import java.util.Set;
  *
  * @param <T> Type of value stored in the set.
  */
-class SetScope<T> extends CollectionScope
+class SetScope<T extends Object> extends CollectionScope
 {
 	/**
 	 * The set of values contained in this scope, accessible by iterator or "in" operation.
@@ -329,6 +330,36 @@ class SetScope<T> extends CollectionScope
 	@Override
 	protected boolean isEmpty() {
 	    return values.isEmpty();
+	}
+
+	/**
+	 * Convert any {@link CollectionScope} object to one of us.
+	 *
+	 * @param <T> Type of object in this set.
+	 * @param coll Any collection to convert to a set.
+	 * @return     The set of values from that collection.
+	 */
+	static <T> SetScope<T> from(final CollectionScope coll) {
+	    if (coll.equals(EMPTY))
+		return new SetScope<T>();
+
+	    if (coll instanceof SetScope) {
+		@SuppressWarnings("unchecked")
+		SetScope<T> set = (SetScope<T>) coll;
+		return set;
+	    }
+	    if (coll instanceof ArrayScope) {
+		@SuppressWarnings("unchecked")
+		ArrayScope<T> array = (ArrayScope<T>) coll;
+		return new SetScope<T>(array.list());
+	    }
+	    if (coll instanceof ObjectScope) {
+		ObjectScope map = (ObjectScope) coll;
+		@SuppressWarnings("unchecked")
+		SetScope<T> set = new SetScope(map.keyObjectSet());
+		return set;
+	    }
+	    return null;
 	}
 
 }
