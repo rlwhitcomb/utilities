@@ -1,7 +1,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2021-2023 Roger L. Whitcomb.
+# Copyright (c) 2021-2024 Roger L. Whitcomb.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -46,6 +46,8 @@
 #	    #224: One more error.
 #	04-Nov-2023 (rlwhitcomb)
 #	    #633: More help for the "-noopt" and "-opt" options.
+#	13-Mar-2024 (rlwhitcomb)
+#	    #663: Title string for dictionary lookup; help for "-look" option.
 #
 
 exception		= Error: %1$s from %2$s%n
@@ -67,6 +69,7 @@ errArgNotValid		= %1$s NOT VALID!
 errNoValidWords		= Unable to find any valid words!
 errIndexOutOfBounds	= Index %1$d is out of range of 0 .. %2$d!
 
+lookupTitle             = Definitions and Synonyms for "%1$s"
 lookupWordNotFound	= The word "%1$s" was not found in our dictionary!
 lookupNotAvailable	= Dictionary lookup is not available!
 lookupIOError		= Error doing the word lookup: %1$s
@@ -118,8 +121,9 @@ repl.help27	= There are also a few commands available in this mode:
 repl.help28	= "  :help, :h, :?\t\t\t\tdisplay this help text"
 repl.help29	= "  :version, :vers, :ver, :v\t\tdisplay the program version information"
 repl.help30	= "  :statistics, :stats, :stat, :s\tdisplay dictionary statistics"
-repl.help31	= "  :quit, :exit, :q, :x\t\t\tleave the program"
-repl.help32	= ""
+repl.help31	= "  :dictionary, :lookup, :dict, :look\tdictionary / thesaurus lookup"
+repl.help32	= "  :quit, :exit, :q, :x\t\t\tleave the program"
+repl.help33	= ""
 
 addl.help1	= Additional options available only on the command line:
 addl.help2	= ""
@@ -130,13 +134,14 @@ addl.help6	= "  -original, -twl06, -orig, -o\t\t\tuse the original word file"
 addl.help7	= "  -antique, -enable1, -enable, -ant, -en\tuse the antique word file"
 addl.help8	= "  -lowercase, -lower, -low\t\tdisplay the results in lowercase"
 addl.help9	= "  -uppercase, -upper, -up\t\tdisplay the results in UPPERCASE"
-addl.help10	= ""
-addl.help11	= "  -version, -vers, -ver\t\t\tdisplay the program version and quit"
-addl.help12	= "  -statistics, -stats, -stat, -st\tdisplay dictionary statistics"
-addl.help13	= "  -help, -h, -?\t\t\t\tdisplay this help message"
-addl.help14	= "     (use \"-verbose\" or \"-v\" to display all the possible options)"
-addl.help15	= ""
-addl.help16	= "  -noopt, -nooptions, -nooption\tdo NOT process WORDFIND_OPTIONS"
-addl.help17	= "  -opt, -options, -option\t(default) process WORDFIND_OPTIONS at startup"
-addl.help18	= ""
+addl.help10	= "  -dictionary, -lookup, -dict, -look\tdictionary / thesaurus lookup ..."
+addl.help11	= ""
+addl.help12	= "  -version, -vers, -ver\t\t\tdisplay the program version and quit"
+addl.help13	= "  -statistics, -stats, -stat, -st\tdisplay dictionary statistics"
+addl.help14	= "  -help, -h, -?\t\t\t\tdisplay this help message"
+addl.help15	= "     (use \"-verbose\" or \"-v\" to display all the possible options)"
+addl.help16	= ""
+addl.help17	= "  -noopt, -nooptions, -nooption\tdo NOT process WORDFIND_OPTIONS"
+addl.help18	= "  -opt, -options, -option\t(default) process WORDFIND_OPTIONS at startup"
+addl.help19	= ""
 

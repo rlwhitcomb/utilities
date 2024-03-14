@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2020-2023 Roger L. Whitcomb.
+ * Copyright (c) 2020-2024 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -121,6 +121,8 @@
  *          Allow "$quit" and etc. for the REPL commands.
  *      04-Nov-2023 (rlwhitcomb)
  *          #633: New options "-opt" and "-noopt" for processing environment defaults.
+ *	13-Mar-2024 (rlwhitcomb)
+ *	    #663: Immediate dictionary lookup from the command line.
  */
 package info.rlwhitcomb.wordfind;
 
@@ -234,6 +236,12 @@ public class WordFind implements Application
 
     /** Optional "Ends With" value. */
     private static Optional<String> endingValue = Optional.empty();
+
+    /** Whether the next value is a word to lookup in the dictionary. */
+    private static boolean lookupWord = false;
+
+    /** Optional lookup word. */
+    private static Optional<String> lookupValue = Optional.empty();
 
     /** Whether next value is supposed to be a min word size value. */
     private static boolean needMinWordSize = false;
@@ -700,6 +708,8 @@ public class WordFind implements Application
             contains = true;
         } else if (matches(arg, "ending", "ends", "end", "e")) {
             endsWith = true;
+        } else if (matches(arg, "dictionary", "lookup", "dict", "look")) {
+            lookupWord = true;
         } else if (matches(arg, "colored", "colors", "color", "col")) {
             colored = true;
         } else if (matches(arg, "notcolored", "nocolors", "nocolor", "nocol", "noc")) {
@@ -900,6 +910,8 @@ public class WordFind implements Application
         containsPattern = null;
         endsWith = false;
         endingValue = Optional.empty();
+        lookupWord = false;
+        lookupValue = Optional.empty();
         needMinWordSize = false;
         needMaxNumber = false;
         needMaxLineLength = false;
@@ -923,6 +935,9 @@ public class WordFind implements Application
             } else if (endsWith) {
                 endingValue = Optional.of(arg.replaceAll(WILD_PATTERN, ""));
                 endsWith = false;
+            } else if (lookupWord) {
+                lookupValue = Optional.of(arg.replaceAll(WILD_PATTERN, ""));
+                lookupWord = false;
             } else if (needMinWordSize) {
                 try {
                     minWordSizeToReport = Integer.parseInt(arg);
@@ -961,6 +976,8 @@ public class WordFind implements Application
             errorMissingValue("contains");
         if (endsWith)
             errorMissingValue("ends");
+        if (lookupWord)
+            errorMissingValue("lookup");
         if (needMinWordSize)
             errorMissingValue("minwordsize");
         if (needMaxNumber)
@@ -1109,6 +1126,9 @@ public class WordFind implements Application
             HashMap<String, Object> map = (HashMap<String, Object>) queryList.get(0);
             @SuppressWarnings("unchecked")
             ArrayList<String> defs = (ArrayList<String>) map.get("shortdef");
+            if (!defs.isEmpty() && number == 1) {
+                outputln(headingColor + Intl.formatString("wordfind#lookupTitle", word) + RESET);
+            }
             for (String definition : defs) {
                 outputln(String.format(BLACK_BRIGHT + "  %1$d." + infoColor + " %2$s" + RESET, number++, definition));
             }
@@ -1305,8 +1325,15 @@ public class WordFind implements Application
         // Also, read the dictionary lookup keys (if present).
         readAPIKeys();
 
-        // BIG switch here for GUI vs console operation
-        if (!runningOnConsole) {
+        // Do immediate dictionary lookup if called for
+        // then a BIG switch for GUI vs console operation
+        if (lookupValue.isPresent()) {
+            if (!lookupAvailable) {
+                error("wordfind#lookupNotAvailable");
+            } else {
+                lookup(lookupValue.get());
+            }
+        } else if (!runningOnConsole) {
             DesktopApplicationContext.main(WordFind.class, argWords.toArray(new String[0]));
         } else {
             consoleMode(argWords, totalInputSize);
