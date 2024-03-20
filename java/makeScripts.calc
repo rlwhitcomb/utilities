@@ -46,6 +46,7 @@ settings: [
     { name: 'cat',      class: '$cat.Cat'                                          },
     { name: 'cg',       class: '$calc.Calc',           args: '-g',    find: '_gui' },
     { name: 'cmp',      class: '$compare.CompareFiles'                             },
+    { name: 'cn',       class: '$calc.Calc', args: '-nolibraries'                  },
     { name: 'crl',      class: '$curl.CURL',                          find: '_gui' },
     { name: 'csv',      class: '$test.CSVTest'                                     },
     { name: 'd',        class: '$directory.Dir'                                    },
@@ -64,6 +65,7 @@ settings: [
     { name: 'matches',  class: '$matches.Matches'                                  },
     { name: 'md5',      class: '$tools.Hash',          args: '--algorithm=MD5'     },
     { name: 'os',       class: '$tools.OS'                                         },
+    { name: 'prep',     class: '$preproc.PreProc'                                  },
     { name: 'preproc',  class: '$preproc.PreProc'                                  },
     { name: 'sha1',     class: '$tools.Hash',          args: '--algorithm=SHA-1'   },
     { name: 'sha256',   class: '$tools.Hash'                                       },
@@ -80,12 +82,16 @@ settings: [
     { name: 'wfg',      class: '$wordfind.WordFind',   args: '-gui',  find: '_gui' },
     { name: 'which',    class: '$util.Which'                                       }
 ]
-}
+} // end of "data"
+
 var splits = split(tokenreplacement, '/')
 var token = splits[0]
 var replacement = splits[1] ?: ""
 
 
+/*
+ * Main function to generate the "calcscripts.properties" file to include within the .jar file.
+ */
 define properties() = {
     var file = []
     const outputFile = outdir + 'calcscripts.properties'
@@ -102,6 +108,9 @@ define properties() = {
     write(file, outputFile)
 }
 
+/*
+ * Main function to generate the various wrapper scripts for all our tools.
+ */
 define scripts() = {
     loop set in data.settings {
         var file = []
@@ -138,6 +147,9 @@ define scripts() = {
     }
 }
 
+/*
+ * Main function to remove the generated wrapper scripts (during "clean").
+ */
 define remove() = {
     loop set in data.settings {
         outputFile = ON_WINDOWS ? set.name + ".bat" : set.name
