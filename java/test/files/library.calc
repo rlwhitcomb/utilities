@@ -610,6 +610,14 @@ define fixpath(path) = {
 }
 
 /*
+ * Concatenate together a series of path segments, using the O/S file separator string.
+ *
+ * @param ... Fragments of a path
+ * @return    The fragments joined together appropriately.
+ */
+define makepath(...) = join(_*, info.os.filesep)
+
+/*
  * Format a FILETIME value (from "FileInfo") to a more readable local time string.
  *
  * @param ft One of the "fileinfo" time strings.
