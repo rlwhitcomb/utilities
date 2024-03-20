@@ -33,9 +33,20 @@ Complete Javadoc for the straight Java code can be built using "ant doc" and wil
 
 All the "java" directory classes are built into a single "utilities.jar" file, which can be used as the CLASSPATH for running any of the main program (such as Cat, Tree, DumpManifest, etc.). There are some wrapper shell/bat scripts ("tre", "tre.bat", etc.) to invoke these main programs, which are good examples of how to do any additional main programs.
 
-# ToDo
+# Usage Notes
 
-Work going on currently includes:
+The "WordFind" program provides dictionary and thesaurus lookup of words, through the Merriam-Webster dictionary website. But, a developer API key is required, with the values provided via a "dictionary-api.properties" file placed in the "java" directory during the build. This file must be in the following format:
+```
+	# Keys for the Merriam-Webster Dictionary API
+
+	dictionary.key	= xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+	thesaurus.key	= yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy
+```
+where the _xxx_ and _yyy_ values must be obtained via the [Merriam-Webster Developer Center](https://dictionaryapi.com) website.
+
+# Current Work
+
+Work currently planned includes:
 
 - Since Dir.java isn't going to work like I want because of the way wildcards are dealt with on the command line, try converting to "golang" instead.
 - New Java-based "tail", and other Linux utilities missing on Windows.
@@ -43,12 +54,12 @@ Work going on currently includes:
 - Maybe find a way in Options to add "standard" flags (like "-color" above)
 - Completely new paradigm for Options, similar to Apache commons-cli, including support for printing help text from the options list.
 - Lots of unit tests.
-- Consider a standard method to read .properties files (take the code from "readVersionProperties" in Environment and make it general somewhere else?)
-- Finish update of JavaPreProc to use the Antlr expression grammar for directives.
+- Consider a standard method to read .properties files (take the code from "readVersionProperties" in Environment and make it general somewhere else?) (there is an issue open for a lot of enhancements at [Issue #546](https://github.com/rlwhitcomb/utilities/issues/546))
+- Finish update of JavaPreProc to actually use the Antlr expression grammar for directives.
 - Add a Spanish translation for all the current resources (and ongoing for new resource files).
 - Finish WordFind GUI, including the input filtering or else do "editing" with a bunch of separate fields.
 
-Also see "issues" at https://github.com/rlwhitcomb/utilities/issues
+Most of the bug and enhancement issues are current at https://github.com/rlwhitcomb/utilities/issues
 
 ## Notes on New Programs and Features
 
