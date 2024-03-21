@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.43.0', date: d'2024-03-20',
+      issues: [ 665 ],
+      comment: '[BREAKING] Allow multiple arguments to "$echo".'
+    },
     { version: '2.42.0', date: d'2024-03-13',
       issues: [ 661 ],
       comment: 'Implement set union and intersection.'

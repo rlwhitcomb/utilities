@@ -841,6 +841,8 @@
  *	    Small tweaks to the "$assert" processing.
  *	12-Mar-2024 (rlwhitcomb)
  *	    #662: Fix parsing of "random()".
+ *	19-Mar-2024 (rlwhitcomb)
+ *	    #665: Allow multiple arguments to "$echo".
  */
 package info.rlwhitcomb.calc;
 
@@ -2242,8 +2244,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitEchoDirective(CalcParser.EchoDirectiveContext ctx) {
-	    String msg = getStringValue(ctx.expr(0), true, false, settings.separatorMode);
-	    CalcParser.ExprContext expr = ctx.expr(1);
+	    CalcParser.OutputOptionContext outOpt = ctx.outputOption();
+	    CalcParser.ExprContext expr = outOpt == null ? null : outOpt.expr();
 	    String out = expr == null ? "" : getTreeText(expr);
 	    CalcDisplayer.Output output = CalcDisplayer.Output.OUTPUT;
 
@@ -2255,9 +2257,21 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		output = CalcDisplayer.Output.fromString(out);
 	    }
 
-	    displayer.displayMessage(ConsoleColor.color(msg, Calc.getColoredMode()), output);
+	    StringBuilder buf = new StringBuilder();
+	    StringFormat format = new StringFormat(false, settings);
 
-	    return msg;
+	    for (CalcParser.OptExprContext ex : ctx.optExpr()) {
+		CalcParser.ExprContext exp = ex.expr();
+		String msg = exp == null ? "" : toStringValue(this, exp, evaluate(ex), format);
+		if (buf.length() > 0)
+		    buf.append(' ');
+		buf.append(msg);
+	    }
+
+	    String fullMsg = buf.toString();
+	    displayer.displayMessage(ConsoleColor.color(fullMsg, Calc.getColoredMode()), output);
+
+	    return fullMsg;
 	}
 
 	@Override

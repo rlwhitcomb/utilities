@@ -538,6 +538,8 @@
  *	    #662: Fix grammar for "random" and optional seed parameter.
  *	13-Mar-2024 (rlwhitcomb)
  *	    #661: Grammar for set intersection and union (special characters).
+ *	19-Mar-2024 (rlwhitcomb)
+ *	    #665: Redo grammar for "$echo" to allow multiple expressions.
  */
 
 grammar Calc;
@@ -1021,7 +1023,7 @@ directive
    | D_BINARY bracketBlock ?                  # binaryDirective
    | D_SI bracketBlock ?                      # siDirective
    | D_MIXED bracketBlock ?                   # mixedDirective
-   | D_ECHO ( expr ( COMMA expr ) ? ) ?       # echoDirective
+   | D_ECHO outputOption ? ( optExpr ( COMMA optExpr ) * ) # echoDirective
    | D_CLEAR wildIdList ?                     # clearDirective
    | D_VARIABLES wildIdList ?                 # variablesDirective
    | D_PREDEFINED wildIdList ?                # predefinedDirective
@@ -1050,6 +1052,10 @@ numberOption
    : LPAREN NUMBER RPAREN
    |        NUMBER
    | var
+   ;
+
+outputOption
+   : expr COLON
    ;
 
 idList

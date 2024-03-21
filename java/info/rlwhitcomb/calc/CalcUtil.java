@@ -241,6 +241,9 @@
  *	    #657: New binary search method that works on ArrayList...
  *	13-Mar-2024 (rlwhitcomb)
  *	    #661: Add set union and intersection to "bitOp".
+ *	20-Mar-2024 (rlwhitcomb)
+ *	    #665: "addOp" and "compareValues" need to convert values using
+ *	    "toStringValue" instead of generic "toString".
  */
 package info.rlwhitcomb.calc;
 
@@ -1647,7 +1650,8 @@ public final class CalcUtil
 		final ParserRuleContext ctx1, final ParserRuleContext ctx2,
 		final Object obj1, final Object obj2,
 		final MathContext mc, final boolean strict, final boolean allowNulls,
-		final boolean ignoreCase, final boolean naturalOrder, final boolean equality) {
+		final boolean ignoreCase, final boolean naturalOrder, final boolean equality)
+	{
 	    Object e1 = visitor.evaluateToValue(ctx1, obj1);
 	    Object e2 = visitor.evaluateToValue(ctx2, obj2);
 
@@ -1670,8 +1674,10 @@ public final class CalcUtil
 	    }
 
 	    if (e1 instanceof String || e2 instanceof String) {
-		String s1 = e1.toString();
-		String s2 = e2.toString();
+		StringFormat fmt = new StringFormat(false, visitor.getSettings());
+
+		String s1 = toStringValue(visitor, ctx1, e1, fmt);
+		String s2 = toStringValue(visitor, ctx2, e2, fmt);
 
 		return compareStrings(s1, s2, ignoreCase, naturalOrder);
 	    }
@@ -1956,8 +1962,11 @@ public final class CalcUtil
 
 	    // Do string concatenation if either expr is a string
 	    if (v1 instanceof String || v2 instanceof String) {
-		String s1 = v1 == null ? "" : v1.toString();
-		String s2 = v2 == null ? "" : v2.toString();
+		StringFormat fmt = new StringFormat(false, visitor.getSettings());
+
+		String s1 = v1 == null ? "" : toStringValue(visitor, ctx1, v1, fmt);
+		String s2 = v2 == null ? "" : toStringValue(visitor, ctx2, v2, fmt);
+
 		return s1 + s2;
 	    }
 

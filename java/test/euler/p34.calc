@@ -44,7 +44,7 @@ loop n over 3..LIMIT {
 
 $resultsonly on {
 
-   $echo `The sum of all numbers which are equal to the sum of the factorial of their digits is $sum.`@q
+   $echo `The sum of all numbers which are equal to the sum of the factorial of their digits is $sum.`
 
 } // end of results on
 

@@ -28,7 +28,7 @@ define isAbundant(n) = {
 }
 
 // First, construct a list of all the abundant numbers less than the known limit
-$echo `Finding all the abundant numbers from $FIRST to $FINISH...`
+$echo 'Finding all the abundant numbers from', FIRST, 'to', FINISH, '...'
 var abundantNumbers = [ ]
 var abundantFlags = 0
 
@@ -39,7 +39,7 @@ loop n over FIRST ... FINISH {
    }
 }
 
-$echo `Found ${length(abundantNumbers)} abundant numbers there.`
+$echo 'Found', length(abundantNumbers), 'abundant numbers there.'
 
 // Now, go thru all the candidates, trying each abundant number, testing to see if the
 // difference is also abundant
@@ -68,7 +68,7 @@ loop n over FINISH {
 
 $resultsonly on {
 
-`The sum of all the positive integers which are not the sum of two abundant numbers is $totalSum.`@q
-`The largest of these is $largest.`@q
+`The sum of all the positive integers which are not the sum of two abundant numbers is $totalSum.`
+`The largest of these is $largest.`
 
 }
