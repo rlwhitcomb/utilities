@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2021-2022 Roger L. Whitcomb.
+ * Copyright (c) 2021-2022,2024 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -52,8 +52,13 @@
  *	    #475: Add calls for getting function stack, and full function name.
  *	11-Nov-2022 (rlwhitcomb)
  *	    #554: Spiff up the "toString" value with quoted full function name.
+ *	22-Mar-2024 (rlwhitcomb)
+ *	    #645: Start of non-constant parameter processing.
+ *	    #664: Set parameter values by either name or index.
  */
 package info.rlwhitcomb.calc;
+
+import info.rlwhitcomb.util.ClassUtil;
 
 import org.antlr.v4.runtime.ParserRuleContext;
 
@@ -99,17 +104,35 @@ class FunctionScope extends ParameterizedScope
 	 * @param expr    The expression value (could be {@code null}) to be assigned.
 	 */
 	void setParameterValue(final CalcObjectVisitor visitor, final int index, final ParserRuleContext expr) {
-	    ParserRuleContext valueExpr = expr;
 	    String paramName = declaration.getParameterName(index);
-	    Object paramValue = null;
+	    setParameterValue(visitor, paramName, expr);
+	}
 
+	/**
+	 * Set the value of the given parameter to the given expression.
+	 *
+	 * @param visitor   The visitor class used to evaluate expressions.
+	 * @param paramName Parameter name.
+	 * @param expr      The expression value (could be {@code null}) to be assigned.
+	 */
+	void setParameterValue(final CalcObjectVisitor visitor, final String paramName, final ParserRuleContext expr) {
+	    ParserRuleContext valueExpr = expr;
+	    Object paramValue = null;
+// TODO: if the parameter is marked "var" (mutable) then we need the lvalue instead of the regular value
+	    boolean constantFlag = declaration.getConstantFlag(paramName);
 	    if (valueExpr == null) {
 		valueExpr = declaration.getParameterExpr(paramName);
 	    }
 	    if (valueExpr != null) {
-		paramValue = visitor.evaluateParameter(valueExpr);
+		if (constantFlag) {
+		    paramValue = visitor.evaluateParameter(valueExpr);
+		}
+		else {
+		    paramValue = visitor.evaluateParameter(valueExpr); // temp until we figure this out
+//System.out.println("func scope: 'var' param: value = " + ClassUtil.fullToString(valueExpr) + ", param value = " + ClassUtil.fullToString(paramValue));
+		}
 	    }
-	    ParameterValue.define(this, paramName, paramValue);
+	    ParameterValue.define(this, paramName, paramValue, constantFlag);
 	}
 
 	/**

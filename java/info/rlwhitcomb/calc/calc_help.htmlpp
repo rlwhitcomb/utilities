@@ -1315,7 +1315,7 @@ or<br>
   <p class="indent">
      <code>def</code> | <code>define</code>&nbsp;<i>name</i> <i>optional parameter list</i> <code>=</code> | <code>&#x21A6;</code>&nbsp;<code>{</code> <i>expressions or statements</i> <code>}</code>
   </p>
-  <p>The optional parameter list looks like:
+  <p>The optional formal parameter list looks like:
   <p class="indent">
     <code>( </code> <i>name</i> ( <code> = </code> <i>expr</i> ) ( <code>,</code> ... ) <code> )</code>
   </p>
@@ -1323,6 +1323,19 @@ or<br>
   <p>The parameter values are assigned when the function is called, and there can be fewer actual values given than are declared; the remaining values
      will be assigned <code>null</code> unless there is a default expression given in the declaration, in which case that expression is evaluated.
      The parentheses are optional on the function call if there are no parameters being sent.
+  <p>Actual parameters can be assigned positionally, and are assigned to the local parameter variables in the order they are defined in the formal
+     parameter list, or a <code><i>id = </i></code> prefix to the actual value means the correspondingly named parameter is assigned this value,
+     regardless of the order of this parameter in the formal list. Any unnamed actual parameters are assigned positionally. 
+     Named parameters will override any positional parameters that might have otherwise been assigned by the call.
+     Perhaps some examples are in order:
+  <p class="indent">
+    <code>define call(m, n=0, r=1, p=-1, ...) = { ... ; _* }</code><br>
+    <code style="color:blue;">call(2, 3, 4, 5, 6, 7) </code><code style="color:grey;"> &#x21E8; </code><code style="color:green;"> [ 2, 3, 4, 5, 6, 7 ]</code><br>
+    <code style="color:blue;">call(m = 23) </code><code style="color:grey;"> &#x21E8; </code><code style="color:green;"> [ 23, 0, 1, -1 ]</code><br>
+    <code style="color:blue;">call(p = 14) </code><code style="color:grey;"> &#x21E8; </code><code style="color:green;"> [ &lt;null&gt;, 0, 1, 14 ]</code><br>
+    <code style="color:blue;">call(r = 87, n = 6) </code><code style="color:grey;"> &#x21E8; </code><code style="color:green;"> [ &lt;null&gt;, 6, 87, -1 ]</code><br>
+    <code style="color:blue;">call(n = 3, 17, 9, 8, 10) </code><code style="color:grey;"> &#x21E8; </code><code style="color:green;"> [ 17, 3, 8, 10 ]</code><br>
+    <code style="color:blue;">call(n = 3, 17, , 42, 99) </code><code style="color:grey;"> &#x21E8; </code><code style="color:green;"> [ 17, 3, 42, 99 ]</code>
   <p>Similarly to the <code>$#</code> and <code>$*</code> variables maintained for the command line arguments, local variables named <code>_#</code> and <code>_*</code>
      are maintained for each function call. Thus the number of actual parameters passed to the function is available as
      <code>_#</code> inside the function, the first parameter is available through <code>_*[0]</code> or <code>_0</code>, etc. and the whole array of

@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2021-2023 Roger L. Whitcomb.
+ * Copyright (c) 2021-2024 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -41,12 +41,17 @@
  *  11-Nov-22 rlw #554	Make "setupFunctionCall" THE place to push the scope, while
  *			"evaluate" is THE place to pop it.
  *  09-Dec-23 rlw #635	Additional spacing in the formal parameter list text.
+ *  04-Feb-24 rlw #645	Non-constant parameter declarations.
+ *  22-Mar-24 rlw #664	Support for named parameters.
  */
 package info.rlwhitcomb.calc;
 
+import info.rlwhitcomb.util.CharUtil;
 import info.rlwhitcomb.util.Intl;
 import org.antlr.v4.runtime.ParserRuleContext;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -59,6 +64,23 @@ import static info.rlwhitcomb.calc.CalcUtil.getTreeText;
  */
 class FunctionDeclaration
 {
+	/**
+	 * One parameter declaration, with name, initial value expression, and constant flag.
+	 */
+	private class ParameterDeclaration
+	{
+		String name;
+		ParserRuleContext initialValueExpr;
+		boolean constant;
+
+		ParameterDeclaration(final String nm, final ParserRuleContext valExpr, final boolean con) {
+		    name = nm;
+		    initialValueExpr = valExpr;
+		    constant = con;
+		}
+	}
+
+
 	/**
 	 * Name of predefined (local) constant that has the function name as the value.
 	 */
@@ -75,13 +97,13 @@ class FunctionDeclaration
 	private final ParserRuleContext functionBody;
 
 	/**
-	 * The defined parameters, along with their default value expressions.
+	 * The defined parameters, along with their default value expressions, and constant flags.
 	 */
-	private final LinkedHashMap<String, ParserRuleContext> parameters;
+	private final LinkedHashMap<String, ParameterDeclaration> parameters;
 
 	/**
 	 * For convenience, the ordered list of the parameter names (constructed as needed
-	 * to access parameters by index.
+	 * to access parameters by index).
 	 */
 	private String[] parameterNames;
 
@@ -119,13 +141,26 @@ class FunctionDeclaration
 	 * @param expr	The (possibly {@code null}) initializer expression.
 	 */
 	public void defineParameter(final ParserRuleContext ctx, final String name, final ParserRuleContext expr) {
+	    defineParameter(ctx, name, expr, true);
+	}
+
+	/**
+	 * Define a parameter / local variable with a possible initializer expression.
+	 * <p> Note: must be called for each parameter in order of declaration.
+	 *
+	 * @param ctx	The parameter declaration context.
+	 * @param name	The parameter / local variable name.
+	 * @param expr	The (possibly {@code null}) initializer expression.
+	 * @param con	Flag to say whether the parameter can be modified.
+	 */
+	public void defineParameter(final ParserRuleContext ctx, final String name, final ParserRuleContext expr, final boolean con) {
 	    if (hasVarargs)
 		throw new CalcExprException(ctx, "%calc#varargsLast");
 
 	    if (parameters.containsKey(name))
 		throw new CalcExprException(ctx, "%calc#noDupLocalVar", name);
 
-	    parameters.put(name, expr);
+	    parameters.put(name, new ParameterDeclaration(name, expr, con));
 	    if (name.equals(VARARG))
 		hasVarargs = true;
 
@@ -164,7 +199,20 @@ class FunctionDeclaration
 	 * @return     The initial value expression declared in the script.
 	 */
 	public ParserRuleContext getParameterExpr(final String name) {
-	    return parameters.get(name);
+	    ParameterDeclaration decl = parameters.get(name);
+	    return decl == null ? null : decl.initialValueExpr;
+	}
+
+	/**
+	 * Get the named parameter's "constant" flag (default is constant, which also can be indicated
+	 * using the "const" declaration; the exception is to use "var", indicating a modifiable parameter).
+	 *
+	 * @param name The parameter name (presumably gotten from {@link #getParameterName}).
+	 * @return     The constant flag value ({@code true} meaning the parameter cannot be modified).
+	 */
+	public boolean getConstantFlag(final String name) {
+	    ParameterDeclaration decl = parameters.get(name);
+	    return decl == null ? true : decl.constant;
 	}
 
 	/**
@@ -187,11 +235,14 @@ class FunctionDeclaration
 	    if (!parameters.isEmpty()) {
 		buf.append('(');
 		boolean first = true;
-		for (Map.Entry<String, ParserRuleContext> entry : parameters.entrySet()) {
+		for (Map.Entry<String, ParameterDeclaration> entry : parameters.entrySet()) {
 		    if (!first)
 			buf.append(", ");
+		    ParameterDeclaration paramDecl = entry.getValue();
+		    if (!paramDecl.constant)
+			buf.append("var ");
 		    buf.append(entry.getKey());
-		    ParserRuleContext initialExpr = entry.getValue();
+		    ParserRuleContext initialExpr = paramDecl.initialValueExpr;
 		    if (initialExpr != null)
 			buf.append(" = ").append(getTreeText(initialExpr));
 		    first = false;
@@ -243,13 +294,13 @@ class FunctionDeclaration
 	 *
 	 * @param ctx     The function call context (parse tree).
 	 * @param visitor The visitor needed to calculate expressions.
-	 * @param exprs   The actual parameter value list.
+	 * @param params  The actual parameter value list.
 	 * @return        Function scope with the actual values set in it.
 	 */
-	public FunctionScope setupFunctionCall(final ParserRuleContext ctx, final CalcObjectVisitor visitor, final List<CalcParser.OptExprContext> exprs) {
+	public FunctionScope setupFunctionCall(final ParserRuleContext ctx, final CalcObjectVisitor visitor, final List<CalcParser.OptParamContext> params) {
 	    FunctionScope funcScope = new FunctionScope(this);
 	    int numParams = getNumberOfParameters();
-	    int numActuals = exprs != null ? exprs.size() : 0;
+	    int numActuals = params != null ? params.size() : 0;
 
 	    // First, make this function the current symbol table scope so we can define the parameter values in it, and so they
 	    // can refer to previous parameters if desired. This scope won't be popped until the function call is over
@@ -259,9 +310,9 @@ class FunctionDeclaration
 	    // And so firstly, set the "_funcname" value to the function's name, so it can be used by param default expressions too
 	    ConstantValue.define(funcScope, FUNCNAME, functionName);
 
-	    if (exprs != null) {
+	    if (params != null) {
 		// Special case: 0 or variable # params, but one actual, except the actual expr is zero -> zero actuals
-		if (numParams <= 0 && numActuals == 1 && exprs.get(0).expr() == null)
+		if (numParams <= 0 && numActuals == 1 && params.get(0).expr() == null)
 		    numActuals--;
 
 		if (numParams >= 0 && numActuals > numParams) {
@@ -271,15 +322,64 @@ class FunctionDeclaration
 			throw new CalcExprException(ctx, "%calc#tooManyForValues", numActuals, numParams);
 		}
 
-		for (int index = 0; index < numActuals; index++) {
-		    funcScope.setParameterValue(visitor, index, exprs.get(index).expr());
-		}
-	    }
+		// Before anything, make a map of the named actuals for quick retrieval as we encounter
+		// the formal names to be matched, as well as a list of the positional parameters in the
+		// the correct order.
+		Map<String, CalcParser.ExprContext> namedActuals = new HashMap<>(numActuals);
+		List<CalcParser.ExprContext> positionActuals = new ArrayList<>(numActuals);
 
-	    // In case there were fewer actuals passed than declared, explicitly set the remaining values
-	    // to null so that their parameter names are present in the symbol table.
-	    for (int index = numActuals; index < numParams; index++) {
-		funcScope.setParameterValue(visitor, index, null);
+		for (int index = 0; index < numActuals; index++) {
+		    CalcParser.OptParamContext param = params.get(index);
+		    CalcParser.IdContext id = param.id();
+		    CalcParser.ExprContext expr = param.expr();
+
+		    if (id != null)
+			namedActuals.put(id.getText(), expr);
+		    else
+			positionActuals.add(expr);
+		}
+
+		// We MUST deal with the actual parameters in the order of the formal declaration
+		// so that the _* array is in the correct order. So, iterate through the formals,
+		// looking first for values with that name, and failing that, set in the positional order.
+		int position = 0;
+
+		for (Map.Entry<String, ParameterDeclaration> entry : parameters.entrySet()) {
+		    String paramName = entry.getKey();
+		    ParameterDeclaration decl = entry.getValue();
+
+		    // If we have a named actual, use that expression to set the value
+		    CalcParser.ExprContext namedExpr = namedActuals.get(paramName);
+		    if (namedExpr != null) {
+			funcScope.setParameterValue(visitor, paramName, namedExpr);
+			namedActuals.remove(paramName);
+		    }
+		    // Then if there is an actual for this parameter position, use it
+		    else if (position < positionActuals.size()) {
+			if (paramName.equals(VARARG))
+			    funcScope.setParameterValue(visitor, position, positionActuals.get(position));
+			else
+			    funcScope.setParameterValue(visitor, paramName, positionActuals.get(position));
+		    }
+		    // Finally, set the parameter value to null because there are no more actuals
+		    else if (!paramName.equals(VARARG)) {
+			funcScope.setParameterValue(visitor, position, null);
+		    }
+		    position++;
+		}
+
+		// If there are still named parameters in the map, that means there were unknown parameters
+		// listed, so this is an error.
+		if (!namedActuals.isEmpty()) {
+		    String names = CharUtil.makeSimpleStringList(namedActuals.keySet());
+		    throw new CalcExprException(ctx, "%calc#noNamedParams", names);
+		}
+
+		// Now, if there are more positional arguments remaining after the formal list,
+		// set the value into the parameter array
+		for (int index = position; index < positionActuals.size(); index++) {
+		    funcScope.setParameterValue(visitor, position, positionActuals.get(position++));
+		}
 	    }
 
 	    return funcScope;

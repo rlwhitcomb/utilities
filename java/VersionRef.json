@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.44.0', date: d'2024-03-22',
+      issues: [ 664 ],
+      comment: 'Support for named parameters in function calls.'
+    },
     { version: '2.43.0', date: d'2024-03-20',
       issues: [ 665 ],
       comment: '[BREAKING] Allow multiple arguments to "$echo".'

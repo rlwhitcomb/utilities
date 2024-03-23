@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2022 Roger L. Whitcomb.
+ * Copyright (c) 2022,2024 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,18 +21,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  *
- *      Data structure for a constant value.
+ *      Data structure for a function parameter.
  *
- *  History:
- *	12-Feb-2022 (rlwhitcomb)
- *	    #199: Initial coding.
- *	14-Feb-2022 (rlwhitcomb)
- *	    #199: Add back in the "isImmutable" override method.
- *	    Now move back to "ValueScope".
- *	17-Feb-2022 (rlwhitcomb)
- *	    #252: Make sure to set the parameter in the local scope.
- *	25-May-2022 (rlwhitcomb)
- *	    #348: Just call "setValue" which defaults to locally.
+ * History:
+ *  12-Feb-22 rlw #199	Initial coding.
+ *  14-Feb-22 rlw #199	Add back in the "isImmutable" override method.
+ *			Now move back to "ValueScope".
+ *  17-Feb-22 rlw #252	Make sure to set the parameter in the local scope.
+ *  25-May-22 rlw #348	Just call "setValue" which defaults to locally.
+ *  04-Feb-24 rlw #645	Allow parameters to pass by reference (and thereby
+ *			be modifiable).
  */
 package info.rlwhitcomb.calc;
 
@@ -54,11 +52,14 @@ class ParameterValue extends ValueScope
 	 *
 	 * @param nm    Name of this parameter value.
 	 * @param value The unchanging value of this parameter.
+	 * @param con   Except when it is markable modifiable.
 	 */
-	private ParameterValue(final String nm, final Object value) {
+	private ParameterValue(final String nm, final Object value, final boolean con) {
 	    super(nm, Type.PARAMETER);
 
-	    paramValue  = value;
+	    paramValue = value;
+
+	    setImmutable(con);
 	}
 
 
@@ -73,26 +74,39 @@ class ParameterValue extends ValueScope
 	}
 
 	/**
-	 * Define one of these into the given scope.
+	 * Define a constant one of these into the given scope.
 	 *
 	 * @param scope	The enclosing scope in which to define it.
 	 * @param nm	The name of this parameter value.
 	 * @param value	The current value of it.
 	 */
 	static void define(final ParameterizedScope scope, final String nm, final Object value) {
-	    ParameterValue param = new ParameterValue(nm, value);
+	    define(scope, nm, value, true);
+	}
+
+	/**
+	 * Define one of these into the given scope.
+	 *
+	 * @param scope	The enclosing scope in which to define it.
+	 * @param nm	The name of this parameter value.
+	 * @param value	The current value of it.
+	 * @param con	Whether the value is constant or not.
+	 */
+	static void define(final ParameterizedScope scope, final String nm, final Object value, final boolean con) {
+	    ParameterValue param = new ParameterValue(nm, value, con);
 	    scope.addParamValue(param);
 	}
 
 	/**
-	 * Set the value of one of these into the given scope.
+	 * Set the value of one of these into the given scope. This is used only for the arg count
+	 * and argument array; always immutable.
 	 *
 	 * @param scope	The enclosing scope in which to define it.
 	 * @param nm	The name of this parameter value.
 	 * @param value	The current value of it.
 	 */
 	static void put(final ParameterizedScope scope, final String nm, final Object value) {
-	    ParameterValue param = new ParameterValue(nm, value);
+	    ParameterValue param = new ParameterValue(nm, value, true);
 	    scope.setValue(nm, param);
 	}
 

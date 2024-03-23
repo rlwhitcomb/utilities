@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2022 Roger L. Whitcomb.
+ * Copyright (c) 2022,2024 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,8 +25,9 @@
  *      Includes the GlobalScope and FunctionScope.
  *
  * History:
- *  12-Feb-22 rlw #199: Initial coding, abstracted out of other code.
- *  25-May-22 rlw #348: Make all methods package private.
+ *  12-Feb-22 rlw #199	Initial coding, abstracted out of other code.
+ *  25-May-22 rlw #348	Make all methods package private.
+ *  22-Mar-24 rlw #664	Open "parameters" to subclasses.
  */
 package info.rlwhitcomb.calc;
 
@@ -51,7 +52,7 @@ class ParameterizedScope extends NestedScope
 	/**
 	 * An array, addressable by index, of the parameter values in order of declaration.
 	 */
-	private final ArrayScope<ParameterValue> parameters;
+	protected final ArrayScope<ParameterValue> parameters;
 
 
 	/**

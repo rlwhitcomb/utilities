@@ -75,6 +75,7 @@
  *  12-Oct-22 rlw #513	Move Logging to a new package.
  *  09-Apr-23 rlw #601	New method to determine if an object is an integer object.
  *  03-Jan-24 rlw #640	Method to check null and throw IllegalStateException.
+ *  05-Feb-24 rlw #645	"fullToString" method for debugging purposes.
  */
 package info.rlwhitcomb.util;
 
@@ -804,6 +805,20 @@ public final class ClassUtil
 	    return String.format("%1$s@%2$s",
 		obj == null ? "null" : obj.getClass().getSimpleName(),
 		Integer.toHexString(System.identityHashCode(obj)));
+	}
+
+
+	/**
+	 * Get a "full" string value of the object: namely its "toString" value plus its
+	 * simple class name.
+	 *
+	 * @param obj	The object in question, which can be {@code null}.
+	 * @return	A "full" name for the object, which is {@code toString[class]}.
+	 */
+	public static String fullToString(final Object obj) {
+	    return String.format("%1$s[%2$s]",
+		obj == null ? "null" : obj.toString(),
+		obj == null ? "NULL" : obj.getClass().getSimpleName());
 	}
 
 

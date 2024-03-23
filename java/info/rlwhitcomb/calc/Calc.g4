@@ -540,6 +540,9 @@
  *	    #661: Grammar for set intersection and union (special characters).
  *	19-Mar-2024 (rlwhitcomb)
  *	    #665: Redo grammar for "$echo" to allow multiple expressions.
+ *	20-Mar-2024 (rlwhitcomb)
+ *	    #664: Grammar for using named parameters to functions.
+ *	    #645: Optional "var" and "const" on parameters.
  */
 
 grammar Calc;
@@ -989,7 +992,7 @@ formalParamList
    ;
 
 formalParam
-   : id ( ASSIGN expr ) ?
+   : ( K_VAR | K_CONST ) ? id ( ASSIGN expr ) ?
    ;
 
 optExpr
@@ -1001,8 +1004,12 @@ idExpr
    |        member ( COMMA member ) *
    ;
 
+optParam
+   : ( ( id ASSIGN ) ? expr ) ?
+   ;
+
 actualParams
-   : LPAREN optExpr ( COMMA optExpr ) * RPAREN
+   : LPAREN optParam ( COMMA optParam ) * RPAREN
    ;
 
 dropObjs

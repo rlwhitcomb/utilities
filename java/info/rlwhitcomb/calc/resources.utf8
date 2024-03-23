@@ -188,6 +188,8 @@
 #	    #640: Error for CalcPiWorker.
 #	17-Jan-2024 (rlwhitcomb)
 #	    #646: New error for multiple assignment.
+#	22-Mar-2024 (rlwhitcomb)
+#	    #664: Error for unknown parameter names.
 #
 
 #
@@ -376,6 +378,7 @@ immutableSet		= Cannot change values in a constant set.
 # From FunctionDeclaration
 #
 varargsLast		= Variable argument declaration must be last in the parameter list
+noNamedParams		= Actual parameters named <u>%1$s<.> do not match any formal parameter names
 
 #
 # From ObjectScope

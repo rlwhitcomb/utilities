@@ -3805,7 +3805,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    if (formalParams != null) {
 		for (CalcParser.FormalParamContext paramVar : formalParams.formalParam()) {
 		    String paramName = paramVar.id().getText();
-		    func.defineParameter(paramVar, paramName, paramVar.expr());
+		    boolean constParam = paramVar.K_CONST() != null || paramVar.K_VAR() == null;
+		    func.defineParameter(paramVar, paramName, paramVar.expr(), constParam);
 		}
 		if (formalParams.DOTS() != null) {
 		    func.defineParameter(formalParams, FunctionDeclaration.VARARG, null);

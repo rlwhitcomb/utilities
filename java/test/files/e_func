@@ -229,3 +229,14 @@ looptest(2)
 looptest(4)
 looptest(5)
 
+#
+# Issue #664: named parameters
+#
+define call(m, n = 0, r = 1, p = -1, ...) = { $echo m ; $echo n ; $echo r ; $echo p ;  _* }
+call(2,3,4,5,6,7)
+call(m=23)
+call(p=14)
+call(r=87, n=6)
+call(n = 3, 17, 9, 8, 10)
+call(n = 3, 17, , 42, 99)
+
