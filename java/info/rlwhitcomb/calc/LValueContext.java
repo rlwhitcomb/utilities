@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2021-2023 Roger L. Whitcomb.
+ * Copyright (c) 2021-2024 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -81,6 +81,7 @@
  *  24-May-23 rlw ----	Try a slight variation for the new History format.
  *		  #611	Move processing of builtin functions to here.
  *  27-Sep-23 rlw #630	Add indexing into sets.
+ *  23-Mar-24 rlw #664	Named parameter changes.
  */
 package info.rlwhitcomb.calc;
 
@@ -580,9 +581,9 @@ class LValueContext
 		    throw new CalcExprException(funcVarCtx, "%calc#undefinedFunction", getTreeText(funcVarCtx.var()));
 
 		FunctionDeclaration func = (FunctionDeclaration) funcObj;
-		List<CalcParser.OptExprContext> exprs = funcVarCtx.actualParams().optExpr();
+		List<CalcParser.OptParamContext> params = funcVarCtx.actualParams().optParam();
 
-		return new LValueContext(funcLValue, funcVarCtx, func.setupFunctionCall(funcVarCtx, visitor, exprs));
+		return new LValueContext(funcLValue, funcVarCtx, func.setupFunctionCall(funcVarCtx, visitor, params));
 	    }
 	    else {
 		throw new CalcExprException(ctx, "%calc#unknownVarCtx", ctx.getClass().getName());
