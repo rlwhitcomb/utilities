@@ -131,7 +131,7 @@ define test(n) = {
    const map = makeMap(n)
    visit(map, [], 0)
    const number = length(paths)
-   $echo `Number of paths through size $n is $number, factors: ${pfactors(number)}`
+   $echo 'Number of paths through size', n, `is $number, factors:`, pfactors(number)
 }
 
 loop n over 9 {
@@ -156,12 +156,12 @@ const INCR = 4
 loop s over FINAL_SIZE {
    const ratio = frac(numer, s)
    paths *= ratio
-   $echo `size $s -> paths ${paths@d}`
+   $echo 'size', s, '-> paths', paths@d
    numer += INCR
 }
 
 }
 
 $resultsonly on {
-   `Number of paths through a $FINAL_SIZE x $FINAL_SIZE lattice is ${paths@d}`
+   $echo 'Number of paths through a', FINAL_SIZE, 'x', FINAL_SIZE, 'lattice is', paths@d
 }

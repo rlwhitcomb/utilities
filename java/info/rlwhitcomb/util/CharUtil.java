@@ -347,6 +347,8 @@
  *	    Use MaxInt appropriately.
  *	01-Jan-2024 (rlwhitcomb)
  *	    Minor code and doc tweaks.
+ *	26-Mar-2024 (rlwhitcomb)
+ *	    #666: New "startsWithAny" and "endsWithAny" methods.
  */
 package info.rlwhitcomb.util;
 
@@ -817,6 +819,48 @@ public final class CharUtil
 	    }
 
 	    return buf.toString();
+	}
+
+
+	/**
+	 * Variation of the {@link String#startsWith} method that tests for the given string
+	 * starting with ANY of the characters in the second argument string.
+	 *
+	 * @param input The char sequence to test.
+	 * @param start A list of possible characters to start with.
+	 * @return      Whether the "input" string starts with any of the characters in the "start" string.
+	 */
+	public static boolean startsWithAny(final CharSequence input, final String start) {
+	    boolean result = false;
+	    char startChar = input.charAt(0);
+	    for (char ch : start.toCharArray()) {
+		if (startChar == ch) {
+		    result = true;
+		    break;
+		}
+	    }
+	    return result;
+	}
+
+
+	/**
+	 * Variation of the {@link String#endsWith} method that tests for the given string
+	 * ending with ANY of the characters in the second argument string.
+	 *
+	 * @param input The string to test.
+	 * @param end   A list of possible characters to end with.
+	 * @return      Whether the "input" string ends with any of the characters in the "end" string.
+	 */
+	public static boolean endsWithAny(final CharSequence input, final String end) {
+	    boolean result = false;
+	    char endChar = input.charAt(input.length() - 1);
+	    for (char ch : end.toCharArray()) {
+		if (endChar == ch) {
+		    result = true;
+		    break;
+		}
+	    }
+	    return result;
 	}
 
 

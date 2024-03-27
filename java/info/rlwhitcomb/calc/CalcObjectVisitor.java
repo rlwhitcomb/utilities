@@ -843,6 +843,8 @@
  *	    #662: Fix parsing of "random()".
  *	19-Mar-2024 (rlwhitcomb)
  *	    #665: Allow multiple arguments to "$echo".
+ *	26-Mar-2024 (rlwhitcomb)
+ *	    #666: Allow format specs on arguments to "$echo".
  */
 package info.rlwhitcomb.calc;
 
@@ -1069,6 +1071,22 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 				fixup(dValue.subtract(dStart).remainder(dStep)).equals(BigDecimal.ZERO);
 			}
 		    }
+		}
+	}
+
+	/**
+	 * Results of an "exprStmt" or an expression plus a format.
+	 */
+	private static class ExprStmtResult
+	{
+		String exprString;
+		String resultString;
+		Object result;
+
+		ExprStmtResult(final String exString, final String resString, final Object res) {
+		    exprString   = exString;
+		    resultString = resString;
+		    result       = res;
 		}
 	}
 
@@ -2258,14 +2276,23 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 
 	    StringBuilder buf = new StringBuilder();
-	    StringFormat format = new StringFormat(false, settings);
+	    String startPunct = Intl.getString("calc#validStartPunct");
+	    String endPunct   = Intl.getString("calc#validEndPunct");
 
-	    for (CalcParser.OptExprContext ex : ctx.optExpr()) {
-		CalcParser.ExprContext exp = ex.expr();
-		String msg = exp == null ? "" : toStringValue(this, exp, evaluate(ex), format);
-		if (buf.length() > 0)
+	    for (CalcParser.OptExprStmtContext ex : ctx.optExprStmt()) {
+		CalcParser.ExprStmtContext exprStmt = ex.exprStmt();
+
+		if (buf.length() > 0 && exprStmt == null)
 		    buf.append(' ');
-		buf.append(msg);
+
+		if (exprStmt != null) {
+		    ExprStmtResult res = formatExpr(exprStmt, false, false);
+		    if (buf.length() > 0
+			&& !CharUtil.startsWithAny(res.resultString, endPunct)
+			&& !CharUtil.endsWithAny(buf, startPunct))
+			buf.append(' ');
+		    buf.append(res.resultString);
+		}
 	    }
 
 	    String fullMsg = buf.toString();
@@ -2615,8 +2642,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		buf.append('"');
 	}
 
-	@Override
-	public Object visitExprStmt(CalcParser.ExprStmtContext ctx) {
+	private ExprStmtResult formatExpr(CalcParser.ExprStmtContext ctx, boolean silent, boolean quote) {
 	    CalcParser.ExprContext expr = ctx.expr();
 	    Object result               = evaluate(expr);
 	    String resultString         = "";
@@ -2707,12 +2733,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    case 'U':
 		    case 'u':
 			toUpperCase = true;
-			valueBuf.append(toStringValue(this, ctx, result, new StringFormat(settings)));
+			valueBuf.append(toStringValue(this, ctx, result, new StringFormat(quote, settings)));
 			break;
 		    case 'L':
 		    case 'l':
 			toLowerCase = true;
-			valueBuf.append(toStringValue(this, ctx, result, new StringFormat(settings)));
+			valueBuf.append(toStringValue(this, ctx, result, new StringFormat(quote, settings)));
 			break;
 
 		    case 'Q':
@@ -2844,7 +2870,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			if (skip == 0)
 			    valueBuf.append(indent);
 			valueBuf.append(toStringValue(this, ctx, result,
-				new StringFormat(settings.quoteStrings, true, (signChar != '-'),
+				new StringFormat(quote, true, (signChar != '-'),
 					separators, increment, skip), indent, 0));
 			break;
 
@@ -3016,14 +3042,20 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    else {
 		// For large numbers it takes a significant amount of time just to convert
 		// to a string, so don't even try if we don't need to for display
-		if (!settings.silent)
-		    resultString = toStringValue(this, expr, result, new StringFormat(settings, separators));
+		if (!silent)
+		    resultString = toStringValue(this, expr, result, new StringFormat(quote, separators));
 	    }
 
-	    if (!settings.silent) displayer.displayResult(exprString, resultString);
+	    return new ExprStmtResult(exprString, resultString, result);
+	}
 
-	    return result;
+	@Override
+	public Object visitExprStmt(CalcParser.ExprStmtContext ctx) {
+	    ExprStmtResult res = formatExpr(ctx, settings.silent, settings.quoteStrings);
 
+	    if (!settings.silent) displayer.displayResult(res.exprString, res.resultString);
+
+	    return res.result;
 	}
 
 	private class LoopVisitor implements IterationVisitor

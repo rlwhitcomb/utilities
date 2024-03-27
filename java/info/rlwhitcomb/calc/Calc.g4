@@ -543,6 +543,8 @@
  *	20-Mar-2024 (rlwhitcomb)
  *	    #664: Grammar for using named parameters to functions.
  *	    #645: Optional "var" and "const" on parameters.
+ *	26-Mar-2024 (rlwhitcomb)
+ *	    #666: Allow format specs on arguments to "$echo".
  */
 
 grammar Calc;
@@ -999,6 +1001,10 @@ optExpr
    : expr ?
    ;
 
+optExprStmt
+   : exprStmt ?
+   ;
+
 idExpr
    : LPAREN member ( COMMA member ) * RPAREN
    |        member ( COMMA member ) *
@@ -1030,7 +1036,7 @@ directive
    | D_BINARY bracketBlock ?                  # binaryDirective
    | D_SI bracketBlock ?                      # siDirective
    | D_MIXED bracketBlock ?                   # mixedDirective
-   | D_ECHO outputOption ? ( optExpr ( COMMA optExpr ) * ) # echoDirective
+   | D_ECHO outputOption ? ( optExprStmt ( COMMA optExprStmt ) * ) # echoDirective
    | D_CLEAR wildIdList ?                     # clearDirective
    | D_VARIABLES wildIdList ?                 # variablesDirective
    | D_PREDEFINED wildIdList ?                # predefinedDirective

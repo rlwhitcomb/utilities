@@ -190,6 +190,8 @@
 #	    #646: New error for multiple assignment.
 #	22-Mar-2024 (rlwhitcomb)
 #	    #664: Error for unknown parameter names.
+#	26-Mar-2024 (rlwhitcomb)
+#	    #666: Starting and ending punctuation values for "$echo" spacing.
 #
 
 #
@@ -316,6 +318,8 @@ illegalFlagValues	= One or more flag values in <u>0x%1$04X<.> (<u>%1$d<.>) is no
 assertFailure		= Assertion failed: <f>%1$s<.>
 notImplemented		= %1$s operation is not implemented
 mismatchVarExpr		= Number of expressions <y>(%1$d)<.> does not equal the number of variables <y>(%2$d)<.>
+validStartPunct		= ([{'"`
+validEndPunct		= .,;:!?)]}'"`
 
 intro.help1	= "  Enter an arithmetic expression to evaluate, or multiple expressions"
 intro.help2	= "  separated by <u>;<.>, followed by <a>Return<.> or <a>Enter<.>."

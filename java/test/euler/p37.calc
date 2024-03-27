@@ -54,8 +54,8 @@ loop p over test_primes {
 
 $resultsonly on {
 
-   $echo `Sum of the ${LIMIT@w} truncatable primes is ${sumof(truncatables)}.`
-   $echo `All the truncatable primes are $truncatables.`
+   $echo 'Sum of the', LIMIT@w, 'truncatable primes is', sumof(truncatables), '.'
+   $echo 'All the truncatable primes are', truncatables, '.'
 
 } // end of results on
 

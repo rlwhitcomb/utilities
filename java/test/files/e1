@@ -9,7 +9,7 @@ $echo
 info.version.major > 2 ||
     (info.version.major == 2 && info.version.minor > 4) ||
     (info.version.major == 2 && info.version.minor == 4 && info.version.patch >= 11)
-$requires 2.41.0, base 1.12.3
+$requires 2.45.0, base 1.12.3
 
 # Various simple expressions
 $decimal(50)
@@ -436,7 +436,7 @@ split(target, 'o', -2)
 split target, 'o'
 split 1.2, '\\.'
 c9 = " a   b d   c   e   f "
-$echo `pieces = ${split(trim(c9), '\\s+') @Q}`
+$echo 'pieces =', split(trim(c9), '\\s+') @Q
 
 # The "index" operator
 $clear target, one, two, three
