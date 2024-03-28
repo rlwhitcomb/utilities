@@ -7,6 +7,6 @@ $colors off
 
 loop m over 1/32 .. 31/32, 1/32 {
    f = `${m@-f}`
-   $echo `${pad(f, 5)}\t= ${m@d}`
+   display `${pad(f, 5)}\t= ${m@d}`
 }
 

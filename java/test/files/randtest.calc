@@ -52,9 +52,9 @@ $resultsonly on {
 `Std Dev = $stddev`  @q
 `\u03C7\u00B2      = $chisq` @q
 
-$echo 'Bucket distribution'
-$echo '-------------------'
+print 'Bucket distribution'
+print '-------------------'
 loop f over freq {
-  $echo `${b++}. $f`
+  print `${b++}. $f`
 }
 }

@@ -107,13 +107,13 @@ from_excel_col('AF')
 from_excel_col('ZZ')
 from_excel_col('XFD')
 
-$echo 'Checking all columns from 1 - 16384 ...'
+print 'Checking all columns from 1 - 16384 ...'
 $quiet on {
 _tests = 0
 _mistakes = 0
 loop over 16384 { _tests++; if from_excel_col(to_excel_col(__)) != __ { _mistakes++ } }
 }
-$echo `Number of tests = $_tests, mistakes = $_mistakes`
+print `Number of tests = $_tests, mistakes = $_mistakes`
 
 hash('test/data/Declaration.txt',,true)
 hashstring('Four score and seven years ago')

@@ -1,5 +1,5 @@
-$echo "Tests of nested object / array variables."
-$echo
+print "Tests of nested object / array variables."
+print
 
 $clear a
 a = { b: { c: 4 }, '"b"': { c: [ 1, 8, 9], '"c"': { d: 5 } } }
@@ -146,5 +146,5 @@ p8 = { align: 4, pos: { x: 30, y: 15 }, size: { width: 1000, height: '75%' }}
 `align: ${case p8.align of { 2: 'LEFT', 0: 'CENTER', 4: 'RIGHT', default: 'DEFAULT' } }`
 
 
-$echo
-$echo "End of nested object / array tests."
+print
+print "End of nested object / array tests."

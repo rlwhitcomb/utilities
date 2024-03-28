@@ -1,13 +1,13 @@
-$echo "Tests of :include directive."
-$echo
+print "Tests of :include directive."
+print
 
-$echo "This is the main file."
+print "This is the main file."
 
 $include "e4"
 
-$echo "Back to main file."
+print "Back to main file."
 msg
 poem@..1j
 
-$echo
-$echo "Done with :include tests."
+print
+print "Done with :include tests."

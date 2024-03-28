@@ -545,6 +545,8 @@
  *	    #645: Optional "var" and "const" on parameters.
  *	26-Mar-2024 (rlwhitcomb)
  *	    #666: Allow format specs on arguments to "$echo".
+ *	27-Mar-2024 (rlwhitcomb)
+ *	    #668: Change "$echo" to "print" or "display" (that is, a statement not a directive).
  */
 
 grammar Calc;
@@ -570,6 +572,7 @@ stmtOrExpr
    | leaveStmt
    | nextStmt
    | timeThisStmt
+   | printStmt
    | emptyStmt
    ;
 
@@ -633,6 +636,10 @@ nextStmt
 timeThisStmt
    : K_TIMETHIS expr ? bracketBlock
    | K_TIMETHIS ( expr COMMA ) ? EOL* stmtOrExpr EOL*
+   ;
+
+printStmt
+   : K_PRINT outputOption ? ( optExprStmt ( COMMA optExprStmt ) * )
    ;
 
 bracketBlock
@@ -1036,7 +1043,6 @@ directive
    | D_BINARY bracketBlock ?                  # binaryDirective
    | D_SI bracketBlock ?                      # siDirective
    | D_MIXED bracketBlock ?                   # mixedDirective
-   | D_ECHO outputOption ? ( optExprStmt ( COMMA optExprStmt ) * ) # echoDirective
    | D_CLEAR wildIdList ?                     # clearDirective
    | D_VARIABLES wildIdList ?                 # variablesDirective
    | D_PREDEFINED wildIdList ?                # predefinedDirective
@@ -1442,6 +1448,10 @@ K_NEXT     : 'next' | 'NEXT' | 'Next' ;
 
 K_TIMETHIS : 'timethis' | 'TIMETHIS' | 'TimeThis' | 'Timethis' | 'timeThis' ;
 
+K_PRINT    : 'print'   | 'PRINT'   | 'Print'
+           | 'display' | 'DISPLAY' | 'Display'
+           ;
+
 K_NOT    : 'not' | 'NOT' | 'Not' ;
 
 K_AND    : 'and' | 'AND' | 'And' ;
@@ -1736,10 +1746,6 @@ D_RATIONAL
 D_CLEAR
    : DIR  ( 'clear' | 'CLEAR' | 'Clear' ) { allowWild = true; }
    | DIR  ( 'clr'   | 'CLR'   | 'Clr'   ) { allowWild = true; }
-   ;
-
-D_ECHO
-   : DIR  ( 'echo' | 'ECHO' | 'Echo' )
    ;
 
 D_INCLUDE

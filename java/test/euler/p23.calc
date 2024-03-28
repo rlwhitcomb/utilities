@@ -28,7 +28,7 @@ define isAbundant(n) = {
 }
 
 // First, construct a list of all the abundant numbers less than the known limit
-$echo 'Finding all the abundant numbers from', FIRST, 'to', FINISH, '...'
+print 'Finding all the abundant numbers from', FIRST, 'to', FINISH, '...'
 var abundantNumbers = [ ]
 var abundantFlags = 0
 
@@ -39,7 +39,7 @@ loop n over FIRST ... FINISH {
    }
 }
 
-$echo 'Found', length(abundantNumbers), 'abundant numbers there.'
+print 'Found', length(abundantNumbers), 'abundant numbers there.'
 
 // Now, go thru all the candidates, trying each abundant number, testing to see if the
 // difference is also abundant

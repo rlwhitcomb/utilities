@@ -95,7 +95,7 @@ var replacement = splits[1] ?: ""
 define properties() = {
     var file = []
     const outputFile = outdir + 'calcscripts.properties'
-    $echo `Generating "$outputFile" ...`
+    display `Generating "$outputFile" ...`
 
     loop set in data.settings {
         var name = set.name
@@ -130,7 +130,7 @@ define scripts() = {
         }
         outputFile = outdir + outputFile
 
-        $echo `Generating "$outputFile" ...`
+        display `Generating "$outputFile" ...`
         loop line over template {
             case line in {
                 matches s'.+\$\{class\}'  : if class    { file += replace(line, '${class}', class)   },
@@ -154,7 +154,7 @@ define remove() = {
     loop set in data.settings {
         outputFile = ON_WINDOWS ? set.name + ".bat" : set.name
         outputFile = outdir + outputFile
-        $echo `Removing "$outputFile" ...`
+        display `Removing "$outputFile" ...`
         delete outputFile
     }
 }

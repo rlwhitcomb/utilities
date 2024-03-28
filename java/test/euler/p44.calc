@@ -39,7 +39,7 @@ loop _j over 0 .. len {
             Dmin = diff
             j_min = _j
             k_min = _k
-$echo `New min D = $Dmin, j = ${_j + LOWER_LIMIT}, k = ${_k + LOWER_LIMIT}, Pj = $Pj, Pk = $Pk`
+print `New min D = $Dmin, j = ${_j + LOWER_LIMIT}, k = ${_k + LOWER_LIMIT}, Pj = $Pj, Pk = $Pk`
          }
       }
    }
@@ -49,7 +49,7 @@ $echo `New min D = $Dmin, j = ${_j + LOWER_LIMIT}, k = ${_k + LOWER_LIMIT}, Pj =
 
 $resultsonly on {
 
-   $echo `Minimum value of D is $Dmin, which comes from P${j_min+LOWER_LIMIT} = ${pentagons[j_min]} and P${k_min+LOWER_LIMIT} = ${pentagons[k_min]}.`
+   print `Minimum value of D is $Dmin, which comes from P${j_min+LOWER_LIMIT} = ${pentagons[j_min]} and P${k_min+LOWER_LIMIT} = ${pentagons[k_min]}.`
 
 } // end of results on
 

@@ -14,7 +14,7 @@ define integer(f) = f * (10⌃scale(f))
 // A "seed" value for the random number generator, so this is a repeatable test
 //$decimal 24 {
 //   const SEED = integer(pi)
-//$echo `seed = $SEED`
+//print `seed = $SEED`
 //   random(SEED)
 //}
 

@@ -1,6 +1,6 @@
-$echo "This is the first level of include file."
+print "This is the first level of include file."
 
 $include "e5,e6"
 
-$echo "Back to first level include."
+print "Back to first level include."
 

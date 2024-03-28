@@ -53,8 +53,8 @@ const primes      = circulars(LIMIT)
 
 $resultsonly on {
 
-   $echo 'The number of circular primes below', TEST_LIMIT, 'is', length test_primes, test_primes, '.'
-   $echo 'The number of circular primes below', LIMIT,      'is', length primes,      primes,      '.'
+   print 'The number of circular primes below', TEST_LIMIT, 'is', length test_primes, test_primes, '.'
+   print 'The number of circular primes below', LIMIT,      'is', length primes,      primes,      '.'
 
 } // end of results on
 

@@ -32,7 +32,7 @@ loop n over 1 ... LIMIT, 2 {
 
 $resultsonly on {
 
-   $echo `Sum of the double-base (10 and 2) palindromes less than $LIMIT is $sum.`
+   print `Sum of the double-base (10 and 2) palindromes less than $LIMIT is $sum.`
 
 } // end of results on
 

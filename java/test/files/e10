@@ -1,8 +1,8 @@
 #
 # Testing new looping construct
 #
-$echo "Tests of the new LOOP construct"
-$echo
+print "Tests of the new LOOP construct"
+print
 
 $clear [ value, array, SIZE ]
 $dec 50
@@ -74,7 +74,7 @@ $resultsonly on { loop v over -2 .. 5 `$v -> ${test(v)}`@q }
 loop p ∈ 10...40 { $dec p; pi }
 $default
 
-$echo "Bernoulli Numbers 0 to 60"
+print "Bernoulli Numbers 0 to 60"
 $resultonly on {
   $rational on {
     $quotestrings off {
@@ -115,8 +115,8 @@ while num != KAPREKAR {
    num = num1 > num2 ? num1 - num2 : num2 - num1
    ++iterations
 }
-$echo `Starting from $START, sequence converged to Kaprekar's constant ($KAPREKAR) in $iterations iterations.`
+print `Starting from $START, sequence converged to Kaprekar's constant ($KAPREKAR) in $iterations iterations.`
 
-$echo
-$echo "Done with LOOP tests."
+print
+print "Done with LOOP tests."
 

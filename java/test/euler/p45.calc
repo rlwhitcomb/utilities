@@ -77,8 +77,8 @@ const indexH = search(H, nextT) + LOWER_H_LIMIT
 
 $resultsonly on {
    
-   $echo verify(40755, TEST_T, TEST_P, TEST_H)
-   $echo verify(nextT, indexT, indexP, indexH)
+   print verify(40755, TEST_T, TEST_P, TEST_H)
+   print verify(nextT, indexT, indexP, indexH)
 
 } // end of results on
 

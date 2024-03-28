@@ -4,12 +4,12 @@ $separators off
 // We rely on the standard library here
 $assert defined(capitalize, readFileLines), '"library.calc" is required; please rerun without "-nolib" option.'
 
-$echo '**********************************'
-$echo ' R E M E M B E R'
-$echo '  These solutions are meant to be'
-$echo '  kept private to Project Euler.'
-$echo ' D O   N O T   C O M M I T'
-$echo '**********************************'
+print '**********************************'
+print ' R E M E M B E R'
+print '  These solutions are meant to be'
+print '  kept private to Project Euler.'
+print ' D O   N O T   C O M M I T'
+print '**********************************'
 
 const PATTERN     = 'p*'
 const CALC        = '.calc'
@@ -42,7 +42,7 @@ const TEST_LINES = readFileLines(TEST_FILE)
  * @param ext2   Extensions found in the second list.
  */
 define verify_files(list1, list2, ext1, ext2) = {
-   $echo `Verifying "$ext2" files exist for each "$ext1" file ...`
+   print `Verifying "$ext2" files exist for each "$ext1" file ...`
    loop f over list1 {
       const g = replace(f, ext1, '')
       const h = join(g, g, ': ')
@@ -63,7 +63,7 @@ define verify_files(list1, list2, ext1, ext2) = {
  * @param val  Expected value (from the Project Euler archives).
  */
 define verify(name, val) = {
-   $echo `Verifying "$name" ...`
+   print `Verifying "$name" ...`
    var f = read(DIR + name + CANON)
    $assert notnull(index(f, @@val)), `"${name + CANON} does not contain correct value of $val!`
    numberOfTests++
@@ -80,4 +80,4 @@ loop test over TEST_VALUES {
 }
 
 const res = `${numberOfTests@w}`
-$echo `${capitalize(res, FIRSTCAP)} canon files verified.`
+print `${capitalize(res, FIRSTCAP)} canon files verified.`

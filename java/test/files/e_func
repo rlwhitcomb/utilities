@@ -132,9 +132,9 @@ valueFunc(3)
 calls
 
 def n1(n) = {
-   if n == 2 { $echo callers() }
+   if n == 2 { print callers() }
    if n == 0 { 0 }
-   else if n == 1 { $echo callers(1); 1 }
+   else if n == 1 { print callers(1); 1 }
    else { n + n1(n - 1) }
 }
 
@@ -232,7 +232,7 @@ looptest(5)
 #
 # Issue #664: named parameters
 #
-define call(m, n = 0, r = 1, p = -1, ...) = { $echo m ; $echo n ; $echo r ; $echo p ;  _* }
+define call(m, n = 0, r = 1, p = -1, ...) = { print m ; print n ; print r ; print p ;  _* }
 call(2,3,4,5,6,7)
 call(m=23)
 call(p=14)

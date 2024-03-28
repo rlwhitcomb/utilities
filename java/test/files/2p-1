@@ -1,27 +1,27 @@
-$echo "Some Mersenne primes."
+print "Some Mersenne primes."
 
 $unlimited
 
-$echo
-$echo "7th Mersenne prime: (2**19)-1"
+print
+print "7th Mersenne prime: (2**19)-1"
 (2**19) - 1
 
-$echo
-$echo "17th Mersenne prime: (2**2281)-1"
+print
+print "17th Mersenne prime: (2**2281)-1"
 (2**2281) - 1
 
-$echo
-$echo "27th Mersenne prime: (2**44497)-1"
+print
+print "27th Mersenne prime: (2**44497)-1"
 (2**44497) - 1
 
-$echo
-$echo "37th Mersenne prime: (2**3021377) - 1"
+print
+print "37th Mersenne prime: (2**3021377) - 1"
 (2**3021377) - 1
 
-$echo
-$echo "47th Mersenne prime: (2**43112609) - 1"
+print
+print "47th Mersenne prime: (2**43112609) - 1"
 (2**43112609) - 1
 
-$echo
-$echo "Done."
+print
+print "Done."
 

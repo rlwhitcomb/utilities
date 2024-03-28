@@ -3,7 +3,7 @@ $quiet on {
   start = 11!
   end = start + tenpow(5) - 1
   primes = []
-  $echo `Running primality tests on ${(end-start)+1} values from $start to $end...`
+  print `Running primality tests on ${(end-start)+1} values from $start to $end...`
   loop _i in start .. end { if isprime(_i) primes += _i }
 }
 length(primes); primes;

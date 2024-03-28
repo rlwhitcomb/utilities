@@ -119,7 +119,7 @@ define displayBoard() = {
  */
 define makeMove(_index, _color) = {
   board[(_index - 1) \ 3][(_index - 1) % 3] = _color;
-  $echo _color === userColor ? `You have chosen space $_index` : `Choosing space $_index`
+  print _color === userColor ? `You have chosen space $_index` : `Choosing space $_index`
   displayBoard()@q
 }
 
@@ -226,8 +226,8 @@ define acceptUserMove() = {
     // need "input" function to integer "move" (range 1-9)
     // input 'Which square do you want?', move:"integer"(1-9)
     if valueAt(move) != EMPTY {
-      $echo `Position $move is already taken. Choose another.`
-      $echo
+      print `Position $move is already taken. Choose another.`
+      print
     } else {
       makeMove(move, userColor)
     }
@@ -329,7 +329,7 @@ define pickComputerMove() = {
     if valueAt(slot) == EMPTY leave makeMove(slot, ourColor)
   }
 
-$echo 'No code for this situation!'
+print 'No code for this situation!'
 
   displayBoard() @q
 }
@@ -360,18 +360,18 @@ displayBoard()@q
  * Demonstration - enable with "-define demo=true" or "-- demo --"
  */
 if demo || ($0 != null && matches($0, '[dD][eE][mM][oO]')) {
-  $echo '*** Start of Demo ***'
-  $echo 'Set up two moves'
+  print '*** Start of Demo ***'
+  print 'Set up two moves'
   $quiet on {
     board[1][0] = X
     board[1][1] = O
   }
   displayBoard()@q
-  $echo 'Testing some of the support functions used for game play...'
+  print 'Testing some of the support functions used for game play...'
   `Count of 'X' in column 0 = ${countInCol(0, X)}` @q
   `Count of 'O' in row 1 = ${countInRow(1, O)}` @q
   `Count of 'O' in top-left to bottom-right = ${countInDiag(0, O)}` @q
   `Game is over? ${gameIsOver()}` @q
   conclusion() @q
-  $echo '*** End of Demo ***'
+  print '*** End of Demo ***'
 }

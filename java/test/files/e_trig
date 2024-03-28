@@ -27,7 +27,7 @@ $quiet off
 sin_x
 sin x
 
-$echo
+display
 
 cos_x = 1
 sign = 1
@@ -39,6 +39,6 @@ $quiet off
 cos_x
 cos x
 
-$echo
+display
 (sqrt 2)/2
 

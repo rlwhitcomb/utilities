@@ -13,12 +13,12 @@ define newKey(prefix, key) = {
 define check(prefix, oldValue, newValue) = {
     oldType = typeof(oldValue)
     newType = typeof(newValue)
-    if oldType <> newType { $echo `Key '$prefix': type mismatch: old=$oldType, new=$newType` }
+    if oldType <> newType { print `Key '$prefix': type mismatch: old=$oldType, new=$newType` }
     else {
         case oldType of {
             "array": checkArray(prefix, oldValue, newValue),
             "object": checkObject(prefix, oldValue, newValue),
-            default: if oldValue <> newValue { $echo `Key '$prefix': old '$oldValue' != new '$newValue'` }
+            default: if oldValue <> newValue { print `Key '$prefix': old '$oldValue' != new '$newValue'` }
         }
     }
 }

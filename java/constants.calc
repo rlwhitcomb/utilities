@@ -33,17 +33,17 @@ define highlight(s, name, clr = GREEN_BRIGHT) = {
 #
 # 1. Read the file of constant declarations
 #
-$echo '----------------------------------------------'
-$echo `  Usage Report for the $CONST_FILE values  `
-$echo '=============================================='
-$echo
-$echo `Reading ${replace(INPUT_FILE, CURRENT_DIR + info.os.filesep)} ...`
+print '----------------------------------------------'
+print `  Usage Report for the $CONST_FILE values  `
+print '=============================================='
+print
+print `Reading ${replace(INPUT_FILE, CURRENT_DIR + info.os.filesep)} ...`
 const lines = readFileLines(INPUT_FILE)
 
 #
 # 2. Read all the ".java" files into a map by name
 #
-$echo 'Reading all the ".java" files ...'
+print 'Reading all the ".java" files ...'
 var javaFiles = { }
 
 loop file over JAVA_FILES {
@@ -60,7 +60,7 @@ loop file over JAVA_FILES {
 # 3. Now, loop through all the constant declarations and find all their uses
 #    in the extant .java files and report
 #
-$echo
+print
 var constantLineNumber = 0
 
 loop line over lines {
@@ -71,8 +71,8 @@ loop line over lines {
       words = split(trimmed, s'\s+')
       if words[0] === 'public' && words[1] === 'static' {
          name = words[4]
-         $echo CYAN_BRIGHT + name + END
-         $echo BLACK_BRIGHT + "  (" + constantLineNumber + ")" + RESET + ": " + highlight(trimmed, name, CYAN_BRIGHT) + END
+         print CYAN_BRIGHT + name + END
+         print BLACK_BRIGHT + "  (" + constantLineNumber + ")" + RESET + ": " + highlight(trimmed, name, CYAN_BRIGHT) + END
 
          var numberReferences = 0
          loop file over javaFiles {
@@ -80,7 +80,7 @@ loop line over lines {
             loop fileLine over javaFiles[file] {
                lineNumber++
                if notnull(index(fileLine, name)) {
-                  $echo formatstring('%s%s%s(%d)%s: %s%s%s', WHITE, file, BLACK_BRIGHT, lineNumber, RESET, WHITE_BRIGHT, highlight(fileLine, name), END)
+                  print formatstring('%s%s%s(%d)%s: %s%s%s', WHITE, file, BLACK_BRIGHT, lineNumber, RESET, WHITE_BRIGHT, highlight(fileLine, name), END)
                   numberReferences++
                }
             }
@@ -88,11 +88,11 @@ loop line over lines {
 
          // Special notices for only one or no references found
          case numberReferences of {
-            0: $echo RED_BOLD_BRIGHT + "No references to " + RESET + name + RED_BOLD_BRIGHT + " were found!" + END,
-            1: $echo YELLOW_BRIGHT + "Only one reference to " + RESET + name + YELLOW_BRIGHT + " was found." + END
+            0: print RED_BOLD_BRIGHT + "No references to " + RESET + name + RED_BOLD_BRIGHT + " were found!" + END,
+            1: print YELLOW_BRIGHT + "Only one reference to " + RESET + name + YELLOW_BRIGHT + " was found." + END
          }
 
-         $echo
+         print
       } // for each declaration found
    }
 }

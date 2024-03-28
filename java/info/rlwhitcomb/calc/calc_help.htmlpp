@@ -568,7 +568,7 @@ which gives:
      formatted in a canonical form, again just as they would be displayed. Using an interpolated string inside an expression
      construct inside an interpolated string is not allowed, sadly.
   <p>Note that string results are always finally displayed / returned using double quotes (and double quotes internally escaped),
-     regardless of the quoting used to construct them, which includes interpolated strings -- the result is always just a string
+     regardless of the quoting used to construct them, which includes interpolated strings &mdash; the result is always just a string
      with the values pieced into it. String values are stored in variables without any surrounding quotes, and the escaped
      characters are interpreted and stored as their actual codepoints. This means that string values inserted into interpolated
      strings will be inserted as they are stored (without quotes, etc.).
@@ -1373,8 +1373,10 @@ whether it has previously been used/defined.
 <hr id="Statements" class="sectionsep">
   <h2>Statements</h2>
 <div class="cols">
-  In addition to the functions and operators listed above, Calc has six different statements which can be used to do
-     iterative or repeated calculations, and to select between actions based on the value of an expression. These are the <code>LOOP</code>, <code>WHILE</code>, <code>IF</code>, <code>CASE</code>, <code>LEAVE</code>, <code>NEXT</code>, and <code>TIMETHIS</code> statements.
+  In addition to the functions and operators listed above, Calc has eight different statements which can be used to do
+     iterative or repeated calculations, to select between actions based on the value of an expression, and to display text or values.
+     These are the: <code>LOOP</code>, <code>WHILE</code>, <code>IF</code>, <code>CASE</code>, <code>LEAVE</code>, <code>NEXT</code>,
+     <code>TIMETHIS</code>, and the <code>PRINT</code> or <code>DISPLAY</code> statements.
      All keywords in these statements have three differently-cased forms: all lower case, all UPPER case, and MixedCase.  For example: <code>loop</code>, <code>LOOP</code>, and <code>Loop</code>.
   <p>The syntax for each is as follows:
   <p class="indent">
@@ -1405,14 +1407,17 @@ whether it has previously been used/defined.
     <code>NEXT</code>
   </p>
   <p class="indent">
-    <code>TIMETHIS</code>&nbsp;( <i>expr</i> ) ? <code>{</code> <i>statements or expressions</i> <code>}</code>
+    <code>TIMETHIS</code>&nbsp;[ <i>expr</i> ] <code>{</code> <i>statements or expressions</i> <code>}</code>
   </p>
-  <p>In all these statements the <code>{</code> and <code>}</code> are not needed if there is only one statement or expression in the block. But for <code>timethis</code>, if the brackets are omitted a comma must separate the name expression from the timed expression.
+  <p class="indent">
+    <code>PRINT</code> (or <code>DISPLAY</code>) [ <i>output</i> <code>:</code> ] [ <i>expr</i> [ <i>format</i> ] ( <code>,</code> <i>expr</i> [ <i>format</i> ] ) * ]
+  </p>
+  <p>In any of these statements the <code>{</code> and <code>}</code> are not needed if there is only one statement or expression in the block. But for <code>timethis</code>, if the brackets are omitted a comma must separate the name expression from the timed expression.
   <p>The <code>LOOP</code> statement will repeatedly execute the block of statements based on several conditions:
      <ul><li>if only one expression is listed, the loop will be repeated that number of times, starting from one</li>
          <li>but if the <code>WITHIN</code> keyword is used then the starting value will be zero (and, of course) the end will be that value <code>- 1</code></li>
          <li>if the <i>expr</i> <code>..</code> <i>expr</i> form is used the loop will be repeated starting from the
-             first value, until the second value is reached, incrementing by one each time</li>
+             first value, until the second value is reached (inclusive), incrementing by one each time</li>
          <li>if the <code>,</code> <i>expr</i> is given, the loop is repeated starting from either one, or the first expression value, incrementing by this <i>step</i> expression until the value reaches the maximum.
          <li>and if only the end value and step are given, and if the step is negative, the starting value is <code>-1</code>, and the loop value is decremented each time.</li>
          <li>and if <code>WITHIN</code> is used, the starting value will be zero and the end will be one smaller (or less negative for a negative step)</li>
@@ -1495,6 +1500,21 @@ whether it has previously been used/defined.
     <code>timethis 'atan' { atan(pi/4) }</code><br>
     <code style="color:blue;">atan (pi / 4)</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">0.6657737500283538</code><br>
     <code>Elapsed time of "atan" was 0.003862 secs.</code>
+  <p>The <code>Print</code> or <code>Display</code> statements will unconditionally display the optionally formatted expression results to the
+     standard output channel, the error channel, or both. If a string constant of any kind is given as the argument to <code>print</code> the
+     surrounding quotes will be removed, and any embedded quotes will be unescaped before the message is displayed. This is the equivalent of
+     using the <code>@q</code> format.
+  <p>There are many ways to produce good-looking output using <code>print</code>, including: specifying multiple expressions, which are
+     displayed and concatenated "intelligently", according to English punctuation conventions; using interpolated strings to embed expression
+     results along with text; using string concatenation; using the <code>formatstring</code> function to precisely format values; and using
+     the color constants in the standard "library.calc" file to display nicely colored output. 
+  <p>The optional output expression to the <code>print</code> statement tells where the output should go: default, <code>0</code> or
+     <code>"output"</code> goes to <code>stdout</code>, <code>1</code> or <code>'ERROR'</code> (case does not matter) for <code>stderr</code>,
+     or <code>2</code> or <code>"Both"</code> does, well... both.
+  <p>If no arguments are given to <code>PRINT</code>, an empty line is displayed. Multiple arguments are displayed separated by a single space,
+     except in certain cases where the surrounding punctuation shouldn't have it. In the GUI frame, the <code>stdout</code> and
+     <code>stderr</code> streams are merged into the "Results" text area, so the output value is essentially meaningless. Specifying
+     <code>"both"</code>, however, will display the message twice.
   <p>There are many more code examples in the <code>test/files</code> directory of the source distribution.
 </div>
 <a class="right-link" href="#topofpage">Top</a>
@@ -1524,26 +1544,25 @@ whether it has previously been used/defined.
     <tr><td><code>$double</code> [ <i>statements</i> ]</td><td>Select the "double" decimal precision (~16 digits)</td><td><code>$dbl</code><br>or <code>settings.precision=16</code></td></tr>
     <tr><td><code>$float</code> [ <i>statements</i> ]</td><td>Select "float" decimal precision (~7 digits)</td><td><code>$flt</code><br>or <code>settings.precision=7</code></td></tr>
     <tr><td><code>$unlimited</code> [ <i>statements</i> ]</td><td>Set to unlimited decimal precision<br>(some calculations will still limit the precision to avoid<br>"non-terminating decimal expansion" errors)</td><td><code>$unl</code><br>or <code>settings.precision=0</code></td></tr>
-    <tr><td><code>$degrees</code> [ <i>statements</i> ]</td><td>Do all trigonometric calculations assuming the inputs are in degrees</td><td><code>$deg</code><br>or <code>settings.trigMode='degrees'</code></td></tr>
-    <tr><td><code>$radians</code> [ <i>statements</i> ]</td><td>Do all calculations assuming inputs are radians <i>(default)</i></td><td><code>$rad</code><br>or <code>settings.trigMode="RADIANS"</code></td></tr>
-    <tr><td><code>$grads</code> [ <i>statements</i> ]</td><td>Do all calculations assuming values are gradians or grads</td><td><code>$gradians</code><br>or <code>settings.trigMode="GRADS"</code></td></tr>
+    <tr><td><code>$degrees</code> [ <i>statements</i> ]</td><td>Do all trigonometric calculations assuming the inputs<br>are in <b>degrees</b> (360&#x00B0; in a circle)</td><td><code>$deg</code><br>or <code>settings.trigMode='degrees'</code></td></tr>
+    <tr><td><code>$radians</code> [ <i>statements</i> ]</td><td>Do trig calculations assuming inputs are <b>radians</b> <i>(default)</i><br>(2&#x1D6D1; radians in a circle)</td><td><code>$rad</code><br>or <code>settings.trigMode="RADIANS"</code></td></tr>
+    <tr><td><code>$grads</code> [ <i>statements</i> ]</td><td>Do trig calculations assuming values are <b>gradians</b> or <b>grads</b><br>(400&#x1d4d; in a full circle)</td><td><code>$gradians</code><br>or <code>settings.trigMode="GRADS"</code></td></tr>
     <tr><td><code>$binary</code> [ <i>statements</i> ]</td><td>Display units in terms of multiples of 1024</td><td><code>$bin</code><br>or <code>settings.units='binary'</code></td></tr>
     <tr><td><code>$si</code> [ <i>statements</i> ]</td><td>Display units in terms of multiples of 1000</td><td><code>$ten</code><br>or <code>settings.units='DECIMAL'</code></td></tr>
-    <tr><td><code>$mixed</code> [ <i>statements</i> ]</td><td>Unit multiplier based on powers of 2 (same as <code>$binary</code>), but with SI suffix <i>(default)</i></td><td><code>$mix</code><br>or <code>settings.units="Mixed"</code></tr>
+    <tr><td><code>$mixed</code> [ <i>statements</i> ]</td><td>Unit multiplier based on powers of 2 (same as <code>$binary</code>),<br>but with SI suffix instead <i>(default)</i></td><td><code>$mix</code><br>or <code>settings.units="Mixed"</code></tr>
     <tr><td><code>$clear</code> [ <i>wild_id</i> ( <code>,</code> <i>wild_id</i> ) * ]</td><td>Clear all or only the specified variables (set values to <code>null</code>)</td><td><code>$clr</code></td></tr>
     <tr><td><code>$variables</code> [ <i>wild_id</i> ( <code>,</code> <i>wild_id</i> ) * ]</td><td>Display the values of all or only the specified variables<br>(for a function the definition will be displayed, not the current value)</td><td><code>$variable</code>, <code>$vars</code>, <code>$var</code></td></tr>
-    <tr><td><code>$predefined</code> [ <i>wild_id</i> ( <code>,</code> <i>wild_id</i> ) * ]</td><td>Display the current values of all or some of the predefined variables</td><td><code>$predefs</code>, <code>$predef</code></td></tr>
-    <tr><td><code>$echo</code> ( <i>output</i> <code>:</code> ) ? ( <i>expr</i> <i>format</i> ? ( <code>,</code> <i>expr</i> <i>format</i> ? ) )</td><td>Echo the value of the expressions (appropriately spaced)<br>to the output, error, or both channels</td><td></td></tr>
+    <tr><td><code>$predefined</code> [ <i>wild_id</i> ( <code>,</code> <i>wild_id</i> ) * ]</td><td>Display the current values of all or some of<br>the predefined variables</td><td><code>$predefs</code>, <code>$predef</code></td></tr>
     <tr><td><code>$include</code> <i>name_expr</i> ( <code>,</code> <i>charset_expr</i> )</td><td>Include the contents of the file(s) named by <i>name_expr</i>,<br>using the optional <i>charset_expr</i> as the charset</td><td><code>$inc</code>, <code>$load</code>, <code>$open</code>, <code>$lib</code>, <code>$library</code><br><code>$libs</code>, <code>$libraries</code></td></tr>
-    <tr><td><code>$save</code> <i>name_expr</i> ( <code>,</code> <i>charset_expr</i> )</td><td>Save all variable values and function definitions in the file, using the optional charset</td><td>&nbsp;</td></tr>
+    <tr><td><code>$save</code> <i>name_expr</i> ( <code>,</code> <i>charset_expr</i> )</td><td>Save all variable values and function definitions in the file,<br>using the optional charset</td><td>&nbsp;</td></tr>
     <tr><td><code>$rational</code> <i>mode_option</i> [ <i>statements</i> ]</td><td>Set the rational calculation mode where <i>mode_option</i> is one of:<br><code>on</code>, <code>off</code>, <code>true</code>, <code>false</code>, <code>yes</code>, <code>no</code>, <code>pop</code>, <code>previous</code>, <code>prev</code>, or <i>variable</i><br><i>(default is <code>off</code>, or the value set on the command line)</i></td><td><code>$ration</code>, <code>$fraction</code>, <code>$frac</code>, <code>$fr</code><br>or <code>settings.rationalMode=</code><i>expr</i></td></tr>
     <tr><td><code>$separators</code> <i>mode_option</i> [ <i>statements</i> ]</td><td>Set whether to display thousands separators always<br><i>(default is <code>off</code> or value on command line)</i></td><td><code>$separator</code>, <code>$seps</code>, <code>$sep</code><br>or <code>settings.separatorMode=</code><i>expr</i></td></tr>
     <tr><td><code>$ignorecase</code> <i>mode_option</i> [ <i>statements</i> ]</td><td>Set whether to ignore case of variable and member names<br><i>(default is <code>off</code> or value on command line)</i></td><td><code>$caseinsensitive</code>, <code>$insensitive</code>,<br><code>$ignore</code>, <code>$case</code>, <code>$ign</code>, <code>$ins</code><br>or <code>settings.ignoreNameCase=</code><i>expr</i></td></tr>
     <tr><td><code>$quotestrings</code> <i>mode_option</i> [ <i>statements</i> ]</td><td>Set whether to quote string results<br>(default is <code>on</code> or value on command line)</td><td><code>$quotestring</code>, <code>$quotes</code>, <code>$quote</code><br>or <code>settings.quoteStrings=</code><i>expr</i></td></tr>
     <tr><td><code>$sortobjects</code> <i>mode_option</i> [ <i>statements</i> ]</td><td>Whether object keys are sorted<br>(default is <code>off</code> or value on command line)</td><td><code>$sortobject</code>, <code>$sortkeys</code>, <code>$sortkey</code><br>or <code>settings.sortKeys=</code><i>expr</i></td></tr>
     <tr><td><code>$colors</code> <i>mode_option</i> [ <i>statements</i> ]</td><td>Whether to use colors for subsequent output<br>(default is <code>on</code> or the command line value)</td><td><code>$color</code></td></tr>
-    <tr><td><code>$require</code> [ <i>version</i> ] [<code>,</code>] [ <code>base</code> <i>version</i> ]</td><td>Establish minimum program and/or base versions required to run</td><td><code>$requires</code></td></tr>
-    <tr><td><code>$assert</code> <i>expr</i> [ <code>,</code> <i>message</i> ]</td><td>Assert that a certain value is true, otherwise halt and display message</td><td></td></tr>
+    <tr><td><code>$require</code> [ <i>version</i> ] [<code>,</code>] [ <code>base</code> <i>version</i> ]</td><td>Establish minimum program and/or base versions<br>required for the script to run</td><td><code>$requires</code></td></tr>
+    <tr><td><code>$assert</code> <i>expr</i> [ <code>,</code> <i>message</i> ]</td><td>Assert that a certain value is <code>true</code>,<br>otherwise halt and display message</td><td></td></tr>
     <tr><td><code>$timing</code> <i>mode_option</i> [ <i>statements</i> ]</td><td>Set the timing mode (same <i>mode_option</i> choices as for <code>$rational</code>)<br><i>(default is <code>off</code> or the value set on the command line)</i></td><td><code>$time</code></td></tr>
     <tr><td><code>$debug</code> <i>mode_option</i> [ <i>statements</i> ]</td><td>Set the debug mode (same <i>mode_option</i> choices as for <code>$rational</code>)<br><i>(default is <code>off</code> or the value set on the command line)</i></td><td><code>$deb</code>, <code>$dbg</code></td></tr>
     <tr><td><code>$resultsonly</code> <i>mode_option</i> [ <i>statements</i> ]</td><td>Set the results-only mode<br><i>(default is <code>off</code> or value on command line)</i></td><td><code>$resultonly</code>, <code>$results</code>, <code>$result</code>, <code>$res</code></td></tr>
@@ -1580,8 +1599,6 @@ whether it has previously been used/defined.
      <code style="color:blue;">settings.units</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">"BINARY"</code><br>
      <code style="color:blue;">Units in </code><code style="color:green;">mixed</code><code style="color:blue;"> form.</code>
   <p>The <i>statements</i> can be a single statement, or multiple statements, but must be enclosed by brackets, as in <code>{ ... }</code> in any case.
-  <p>If a string constant of any kind is given as the argument to <code>$echo</code> the surrounding quotes will be removed, and any
-     embedded quotes will be unescaped before the message is displayed. This is the equivalent of using the <code>@q</code> format.
   <p>The <code>wild_id</code> values for <code>$clear</code>, <code>$variables</code>, and <code>$predefined</code> can be wild-card values, such as
      <code>t*</code> or <code>?a?</code>. A <code>?</code> matches any one character, and <code>*</code> matches any string (including empty) of characters up until the trailing sequence. Only values matching these patterns will be displayed or cleared.
   <p>The only effect of debug mode is to display the parse tree (in LISP format) before the expression(s) is/are evaluated.
@@ -1597,11 +1614,12 @@ whether it has previously been used/defined.
          <li><code style="color:blue;">"1.9.22-debug+5e7f77e"</code></li>
     </ul>
   <p>Timing mode displays the total parsing and execution time (to nanosecond precision on some systems) after the results are displayed.
-  <p>The optional output expression to the <code>$echo</code> directive tells where the output should go: default, <code>0</code> or <code>"output"</code> goes to <code>stdout</code>, <code>1</code> or <code>'ERROR'</code> (case does not matter) for <code>stderr</code>, or <code>2</code> or <code>"Both"</code> does, well... both.
-  <p>If no arguments are given to <code>$echo</code>, an empty line is displayed. Multiple arguments are separated by a single space, except in certain cases where the surrounding punctuation shouldn't have it. In the GUI frame, the <code>stdout</code> and <code>stderr</code> streams are merged, so the output value is essentially meaningless, but specifying <code>"both"</code> will still display the message twice.
-  <p>The effect of <code>$sortobjects on</code> is to override the way <i>key</i><code>:</code><i>value</i> pairs are added to objects. By default they are
-     added in the order of declaration. With this option on, the keys are sorted alphabetically and kept sorted this way as elements are added and removed.
-  <p>Gradian mode is used to do trignometric calculations assuming a circle has 400 grads (also called "gons" -- see <a href="https://en.wikipedia.org/wiki/Gradian">"Gradian"</a> for further explanation).
+  <p>The effect of <code>$sortobjects on</code> is to override the way <i>key</i><code>:</code><i>value</i> pairs are added to objects.
+     By default they are added and kept in the order of declaration. With this option <code>on</code>, the keys are sorted alphabetically and kept
+     sorted that way as elements are added and removed.
+  <p>Gradian mode is used to do trignometric calculations using a measure of 400 <em>grads</em> (also called "gons" &mdash;
+     see <a href="https://en.wikipedia.org/wiki/Gradian">"Gradian"</a> for further explanation) for the full circle (vs. 360 degrees or
+     2&#x1D6D1; radians).
   <p>The <code>$assert</code> directive is used to guarantee that certain conditions are met before proceeding. The required expression is evaluated, and if it does not evaluate to <code>true</code> an error is thrown, execution stops, and either the message (if given), or the text of the failing expression, is displayed. If the expression does evaluate <code>true</code> execution continues to the next expression.
 </div>
 <a class="right-link" href="#topofpage">Top</a>

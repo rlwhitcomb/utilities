@@ -50,6 +50,6 @@ M = PMT(P, R, N)
 }
 $results on {
 ctx
-$echo `Full monthly payment is ${M@2,$}`
-$echo `Monthly payment in whole dollars is ${M@0,$}`
+print `Full monthly payment is ${M@2,$}`
+print `Monthly payment in whole dollars is ${M@0,$}`
 }

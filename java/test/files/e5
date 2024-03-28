@@ -1,6 +1,6 @@
-$echo "Lowest level of :include."
+print "Lowest level of :include."
 
 msg = "This is a test of the :include directive."
 
-$echo "Leaving lowest level :include."
+print "Leaving lowest level :include."
 

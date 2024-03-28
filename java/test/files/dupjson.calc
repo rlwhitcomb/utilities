@@ -4,7 +4,7 @@
  *
  * @param $0 Input file path
  */
-$requires 2.14.8 // "$colors" directive
+$requires 2.50 // "print" statement
 $quiet on
 $colors off
 
@@ -19,6 +19,6 @@ loop key over json {
    lines += `  $key: ` + q(json[key])
 }
 
-$echo '{'
-$echo join(lines, ',\r\n')
-$echo '}'
+print '{'
+print join(lines, ',\r\n')
+print '}'

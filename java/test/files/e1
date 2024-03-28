@@ -1,8 +1,8 @@
 /*
  * Tests of the expression engine in Calc.
  */
-$echo "Starting expression tests (suite 1)."
-$echo
+print "Starting expression tests (suite 1)."
+print
 
 # Simple version check ...
 # version 2.3.0 was first version where these checks would work, and 2.4.11 is where versioninfo -> info.version
@@ -436,7 +436,7 @@ split(target, 'o', -2)
 split target, 'o'
 split 1.2, '\\.'
 c9 = " a   b d   c   e   f "
-$echo 'pieces =', split(trim(c9), '\\s+') @Q
+print 'pieces =', split(trim(c9), '\\s+') @Q
 
 # The "index" operator
 $clear target, one, two, three
@@ -751,7 +751,7 @@ $degrees { settings.trigMode }
 'def'@-20s
 'ghi'@20s
 
-$echo
+print
 
 # Rational mode pre/post inc/dec
 $rational true {
@@ -916,7 +916,7 @@ $def
 p = {b:2, c: { d:true }, `"e"`:e }
 p@j
 length p; scale p;
-$echo "Elements of p:"
+print "Elements of p:"
 $result on {
 loop _p ∈ p { `name: $_p, value: ${p[_p]}` }
 }
@@ -1372,6 +1372,6 @@ define z09 = { var b22 }
 z09()
 var a27, a38 = 7!, a92
 
-$echo
-$echo "End of expression tests (suite 1)."
+print
+print "End of expression tests (suite 1)."
 

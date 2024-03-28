@@ -49,7 +49,7 @@ inner:loop over goal - 1 {
       }
 
       if val == value + goal {
-         $echo 'The first', goal@w, 'consecutive numbers to have', goal@w, `distinct prime factors is $value.`
+         print 'The first', goal@w, 'consecutive numbers to have', goal@w, `distinct prime factors is $value.`
          end = goal++ == FINAL_GOAL
       }
    }

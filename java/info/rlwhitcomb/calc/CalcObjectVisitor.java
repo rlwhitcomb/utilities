@@ -845,6 +845,8 @@
  *	    #665: Allow multiple arguments to "$echo".
  *	26-Mar-2024 (rlwhitcomb)
  *	    #666: Allow format specs on arguments to "$echo".
+ *	27-Mar-2024 (rlwhitcomb)
+ *	    #668: Change "$echo" to "print" or "display" (that is, a statement not a directive).
  */
 package info.rlwhitcomb.calc;
 
@@ -2258,47 +2260,6 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    Calc.setResultsOnlyMode(oldMode);
 
 	    return BigInteger.valueOf(numberDisplayed);
-	}
-
-	@Override
-	public Object visitEchoDirective(CalcParser.EchoDirectiveContext ctx) {
-	    CalcParser.OutputOptionContext outOpt = ctx.outputOption();
-	    CalcParser.ExprContext expr = outOpt == null ? null : outOpt.expr();
-	    String out = expr == null ? "" : getTreeText(expr);
-	    CalcDisplayer.Output output = CalcDisplayer.Output.OUTPUT;
-
-	    try {
-		output = CalcDisplayer.Output.fromString(out);
-	    }
-	    catch (IllegalArgumentException iae) {
-		out = getStringValue(expr, false, false, false);
-		output = CalcDisplayer.Output.fromString(out);
-	    }
-
-	    StringBuilder buf = new StringBuilder();
-	    String startPunct = Intl.getString("calc#validStartPunct");
-	    String endPunct   = Intl.getString("calc#validEndPunct");
-
-	    for (CalcParser.OptExprStmtContext ex : ctx.optExprStmt()) {
-		CalcParser.ExprStmtContext exprStmt = ex.exprStmt();
-
-		if (buf.length() > 0 && exprStmt == null)
-		    buf.append(' ');
-
-		if (exprStmt != null) {
-		    ExprStmtResult res = formatExpr(exprStmt, false, false);
-		    if (buf.length() > 0
-			&& !CharUtil.startsWithAny(res.resultString, endPunct)
-			&& !CharUtil.endsWithAny(buf, startPunct))
-			buf.append(' ');
-		    buf.append(res.resultString);
-		}
-	    }
-
-	    String fullMsg = buf.toString();
-	    displayer.displayMessage(ConsoleColor.color(fullMsg, Calc.getColoredMode()), output);
-
-	    return fullMsg;
 	}
 
 	@Override
@@ -3810,6 +3771,47 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    return Environment.timeThis( () -> {
 		return executeTimeBlock(ctx);
 	    });
+	}
+
+	@Override
+	public Object visitPrintStmt(CalcParser.PrintStmtContext ctx) {
+	    CalcParser.OutputOptionContext outOpt = ctx.outputOption();
+	    CalcParser.ExprContext expr = outOpt == null ? null : outOpt.expr();
+	    String out = expr == null ? "" : getTreeText(expr);
+	    CalcDisplayer.Output output = CalcDisplayer.Output.OUTPUT;
+
+	    try {
+		output = CalcDisplayer.Output.fromString(out);
+	    }
+	    catch (IllegalArgumentException iae) {
+		out = getStringValue(expr, false, false, false);
+		output = CalcDisplayer.Output.fromString(out);
+	    }
+
+	    StringBuilder buf = new StringBuilder();
+	    String startPunct = Intl.getString("calc#validStartPunct");
+	    String endPunct   = Intl.getString("calc#validEndPunct");
+
+	    for (CalcParser.OptExprStmtContext ex : ctx.optExprStmt()) {
+		CalcParser.ExprStmtContext exprStmt = ex.exprStmt();
+
+		if (buf.length() > 0 && exprStmt == null)
+		    buf.append(' ');
+
+		if (exprStmt != null) {
+		    ExprStmtResult res = formatExpr(exprStmt, false, false);
+		    if (buf.length() > 0
+			&& !CharUtil.startsWithAny(res.resultString, endPunct)
+			&& !CharUtil.endsWithAny(buf, startPunct))
+			buf.append(' ');
+		    buf.append(res.resultString);
+		}
+	    }
+
+	    String fullMsg = buf.toString();
+	    displayer.displayMessage(ConsoleColor.color(fullMsg, Calc.getColoredMode()), output);
+
+	    return fullMsg;
 	}
 
 	@Override

@@ -23,7 +23,7 @@ var value = 1
 while length(str) <= LIMIT {
    str += @@value++
 }
-$echo `Length = ${length str}, last value = $value`
+print `Length = ${length str}, last value = $value`
 
 const TEST = 12
 const DIGITS = [ 1, 10, 1e2, 1e3, 1e4, 1e5, 1e6 ]
@@ -37,8 +37,8 @@ loop d over DIGITS {
 
 $resultsonly on {
 
-   $echo `${TEST}th digit is ${str[TEST]}`
-   $echo `Product of the ${DIGITS}th digits is ${productOf(digits)}.`
+   print `${TEST}th digit is ${str[TEST]}`
+   print `Product of the ${DIGITS}th digits is ${productOf(digits)}.`
 
 } // end of results on
 

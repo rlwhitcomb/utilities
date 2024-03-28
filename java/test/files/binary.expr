@@ -22,7 +22,7 @@ define binary_search(values, obj) = {
 define test(v, s) = {
    const search_result = search(v, s)
    const binary_result = binary_search(v, s)
-   $echo `search for $s = $search_result, binary for $s = $binary_result`
+   print `search for $s = $search_result, binary for $s = $binary_result`
    $assert search_result == binary_result `Mismatch: search = $search_result, binary = $binary_result`
 }
 

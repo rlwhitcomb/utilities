@@ -127,7 +127,7 @@ loop n over p {
    }
 }
 
-$echo `The winners are: ${winners@j}`
+print 'The winners are:', winners@j
 
 } // end of quiet
 

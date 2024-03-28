@@ -65,9 +65,9 @@ loop word over WORDS {
 
 $resultsonly on {
 
-   $echo `Word score for "A" is ${wordScore("A")}.`
-   $echo `Word score for "$TEST_WORD" is ${wordScore(TEST_WORD)}.`
-   $echo `The number of triangle words is ${length tri_words}.`
+   print `Word score for "A" is ${wordScore("A")}.`
+   print `Word score for "$TEST_WORD" is ${wordScore(TEST_WORD)}.`
+   print `The number of triangle words is ${length tri_words}.`
 
 } // end of results on
 

@@ -7,7 +7,7 @@ $quiet on {
 
     // also make sure the standard library is loaded
     if !defined("version") {
-        $echo 'Rerun without the "-nolib" flag ...'
+        print 'Rerun without the "-nolib" flag ...'
         leave 1
     }
 
@@ -15,19 +15,19 @@ $quiet on {
 }
 $resultsonly on {
     $quotestrings off
-    // use just strings or "$echo" statements to display different colors
+    // use just strings or "print" statements to display different colors
     '============================================='
-    $echo '           Calc Versions Reference'
-    $echo ` Current ${version}`
+    print '           Calc Versions Reference'
+    print ` Current ${version}`
     '============================================='
     ''
-    $echo 'Version  Date        Comment'
+    print 'Version  Date        Comment'
           '-------  ----------  ---------------------------------------------------------'
     loop v over versions {
         const dt = dateformat(v.date, 'yyyy.mm.dd')
         const cm = replace(replace(v.comment, "\t ", "\t\t     "), "[BREAKING]", `$RED_BRIGHT[BREAKING]$RESET`)
-        if v.base { $echo `${CYAN_BRIGHT}B${v.base@6s}  $BLACK_BRIGHT$dt$RESET  $YELLOW_BRIGHT$cm` }
-        else      { $echo `${YELLOW_BRIGHT}${v.version@7s}  $BLACK_BRIGHT$dt$RESET  $cm` }
+        if v.base { print `${CYAN_BRIGHT}B${v.base@6s}  $BLACK_BRIGHT$dt$RESET  $YELLOW_BRIGHT$cm` }
+        else      { print `${YELLOW_BRIGHT}${v.version@7s}  $BLACK_BRIGHT$dt$RESET  $cm` }
     }
           '-------  ----------  ---------------------------------------------------------'
 }
