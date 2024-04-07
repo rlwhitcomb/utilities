@@ -1336,6 +1336,10 @@ or<br>
     <code style="color:blue;">call(r = 87, n = 6) </code><code style="color:grey;"> &#x21E8; </code><code style="color:green;"> [ &lt;null&gt;, 6, 87, -1 ]</code><br>
     <code style="color:blue;">call(n = 3, 17, 9, 8, 10) </code><code style="color:grey;"> &#x21E8; </code><code style="color:green;"> [ 17, 3, 8, 10 ]</code><br>
     <code style="color:blue;">call(n = 3, 17, , 42, 99) </code><code style="color:grey;"> &#x21E8; </code><code style="color:green;"> [ 17, 3, 42, 99 ]</code>
+  <p>So, parameter values are assigned first by a named value assignment if present, second by a value in the same position in the parameter list
+     (lacking an explicit named assignment), and third (lacking the others) by an expression given as part of the formal parameter declaration.
+     Incidentally, variables referenced in the formal parameter expressions will first be resolved within the formal parameter list, and then by outer
+     contexts if needed.
   <p>Similarly to the <code>$#</code> and <code>$*</code> variables maintained for the command line arguments, local variables named <code>_#</code> and <code>_*</code>
      are maintained for each function call. Thus the number of actual parameters passed to the function is available as
      <code>_#</code> inside the function, the first parameter is available through <code>_*[0]</code> or <code>_0</code>, etc. and the whole array of
