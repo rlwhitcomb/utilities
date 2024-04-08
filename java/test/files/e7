@@ -318,7 +318,9 @@ loop over 1..200 `collatz($__) -> ${collatz(__)}`@q
 
 define flow(n=1, N=n*12) = { `n=$n, N=$N` }
 flow(3)
+flow(8,n=2)
 flow(N=5)
+flow(N=7, 4)
 flow(4,3)
 flow(n=2)
 flow(, 14)

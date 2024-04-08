@@ -597,7 +597,9 @@
 >collatz(200) -> 26
 >Defining function “flow(n = 1, N = n * 12)” = { `n=$n, N=$N` }
 >flow(3) -> "n=3, N=36"
+>flow(8, n = 2) -> "n=2, N=8"
 >flow(N = 5) -> "n=1, N=5"
+>flow(N = 7, 4) -> "n=4, N=7"
 >flow(4, 3) -> "n=4, N=3"
 >flow(n = 2) -> "n=2, N=24"
 >flow(, 14) -> "n=1, N=14"

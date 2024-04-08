@@ -24,37 +24,23 @@
  *      Data structures for Calc to hold user-defined function definitions,
  *      local symbol tables, etc.
  *
- *  History:
- *	06-Oct-2021 (rlwhitcomb)
- *	    Initial coding.
- *	07-Oct-2021 (rlwhitcomb)
- *	    Add context parameter to "evaluateFunction".
- *	07-Nov-2021 (rlwhitcomb)
- *	    #69: Maintain "$*" and "$#" variables for function parameters.
- *	13-Feb-2022 (rlwhitcomb)
- *	    #199: Derive from ParameterizedScope; move common code to there.
- *	14-Feb-2022 (rlwhitcomb)
- *	    #199: Override "toString" here from default in Scope.
- *	15-Feb-2022 (rlwhitcomb)
- *	    #169: Set flag not to call zero-arg functions without parens
- *	    during "setParameterValue".
- *	11-May-2022 (rlwhitcomb)
- *	    #318: Rename "evaluateFunction" to just "evaluate".
- *	25-May-2022 (rlwhitcomb)
- *	    #348: Make all methods package private.
- *	27-May-2022 (rlwhitcomb)
- *	    Change "getDeclaration" into "getFunctionBody".
- *	04-Jun-2022 (rlwhitcomb)
- *	    #361: Add "getFunctionName".
- *	08-Jul-2022 (rlwhitcomb)
- *	    #393: Cleanup imports.
- *	08-Sep-2022 (rlwhitcomb)
- *	    #475: Add calls for getting function stack, and full function name.
- *	11-Nov-2022 (rlwhitcomb)
- *	    #554: Spiff up the "toString" value with quoted full function name.
- *	22-Mar-2024 (rlwhitcomb)
- *	    #645: Start of non-constant parameter processing.
- *	    #664: Set parameter values by either name or index.
+ * History:
+ *  06-Oct-21 rlw ----	Initial coding.
+ *  07-Oct-21 rlw ----	Add context parameter to "evaluateFunction".
+ *  07-Nov-21 rlw #69	Maintain "$*" and "$#" variables for function parameters.
+ *  13-Feb-22 rlw #199	Derive from ParameterizedScope; move common code to there.
+ *  14-Feb-22 rlw #199	Override "toString" here from default in Scope.
+ *  15-Feb-22 rlw #169	Set flag not to call zero-arg functions without parens
+ *			during "setParameterValue".
+ *  11-May-22 rlw #318	Rename "evaluateFunction" to just "evaluate".
+ *  25-May-22 rlw #348	Make all methods package private.
+ *  27-May-22 rlw ----	Change "getDeclaration" into "getFunctionBody".
+ *  04-Jun-22 rlw #361	Add "getFunctionName".
+ *  08-Jul-22 rlw #393	Cleanup imports.
+ *  08-Sep-22 rlw #475	Add calls for getting function stack, and full function name.
+ *  11-Nov-22 rlw #554	Spiff up the "toString" value with quoted full function name.
+ *  22-Mar-24 rlw #645	Start of non-constant parameter processing.
+ *		  #664	Set parameter values by either name or index.
  */
 package info.rlwhitcomb.calc;
 

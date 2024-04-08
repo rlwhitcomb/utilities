@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.50.5', date: d'2024-04-07',
+      issues: [ 664 ],
+      comment: 'Fix bugs with positional parameters before named ones.'
+    },
     { version: '2.50', date: d'2024-03-27',
       issues: [ 668 ],
       comment: '[BREAKING] Rework "$echo" as a "print" or "display" statement, not a directive.'

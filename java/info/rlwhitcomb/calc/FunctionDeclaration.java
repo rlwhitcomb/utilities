@@ -43,6 +43,7 @@
  *  09-Dec-23 rlw #635	Additional spacing in the formal parameter list text.
  *  04-Feb-24 rlw #645	Non-constant parameter declarations.
  *  22-Mar-24 rlw #664	Support for named parameters.
+ *  07-Apr-24 rlw #664	Fix bug with positional parameters before named ones.
  */
 package info.rlwhitcomb.calc;
 
@@ -342,7 +343,8 @@ class FunctionDeclaration
 		// We MUST deal with the actual parameters in the order of the formal declaration
 		// so that the _* array is in the correct order. So, iterate through the formals,
 		// looking first for values with that name, and failing that, set in the positional order.
-		int position = 0;
+		int paramPos = 0;
+		int actualPos = 0;
 
 		for (Map.Entry<String, ParameterDeclaration> entry : parameters.entrySet()) {
 		    String paramName = entry.getKey();
@@ -355,17 +357,19 @@ class FunctionDeclaration
 			namedActuals.remove(paramName);
 		    }
 		    // Then if there is an actual for this parameter position, use it
-		    else if (position < positionActuals.size()) {
+		    else if (actualPos < positionActuals.size()) {
+			CalcParser.ExprContext actualExpr = positionActuals.get(actualPos++);
+
 			if (paramName.equals(VARARG))
-			    funcScope.setParameterValue(visitor, position, positionActuals.get(position));
+			    funcScope.setParameterValue(visitor, paramPos, actualExpr);
 			else
-			    funcScope.setParameterValue(visitor, paramName, positionActuals.get(position));
+			    funcScope.setParameterValue(visitor, paramName, actualExpr);
 		    }
 		    // Finally, set the parameter value to null because there are no more actuals
 		    else if (!paramName.equals(VARARG)) {
-			funcScope.setParameterValue(visitor, position, null);
+			funcScope.setParameterValue(visitor, paramPos, null);
 		    }
-		    position++;
+		    paramPos++;
 		}
 
 		// If there are still named parameters in the map, that means there were unknown parameters
@@ -377,8 +381,8 @@ class FunctionDeclaration
 
 		// Now, if there are more positional arguments remaining after the formal list,
 		// set the value into the parameter array
-		for (int index = position; index < positionActuals.size(); index++) {
-		    funcScope.setParameterValue(visitor, position, positionActuals.get(position++));
+		for (int index = actualPos; index < positionActuals.size(); index++) {
+		    funcScope.setParameterValue(visitor, paramPos++, positionActuals.get(index));
 		}
 	    }
 
