@@ -389,6 +389,7 @@
 		Add seconds to to the test log file names to avoid duplicate upload artifacts in CI build.
 	    09-Apr-2024 (rlwhitcomb)
 		Somehow the default git "short" rev length has changed, so make the length explicit.
+		More "echo" information during testing.
 
      ========================================================================== -->
 
@@ -773,7 +774,7 @@
 	</target>
 
 	<target name="test" depends="compile" description="Run extant unit tests.">
-		<echo>Running unit tests. Output going to "${test.log.path}" file.</echo>
+		<echo>Starting unit tests. Output going to "${test.log.path}" file.</echo>
 		<echo file="${test.log.path}" append="false">===============================================
 Test starting on ${build.date} at ${build.time}
 -----------------------------------------------
@@ -803,7 +804,7 @@ Test starting on ${build.date} at ${build.time}
 </echo>
 		<echo>Test of InitializationTask ...</echo>
 		<java classname="info.rlwhitcomb.test.InitTaskTest"   output="${test.log.path}" append="true" failonerror="true" fork="true"/>
-		<echo>Running various tests through the Tester ...</echo>
+		<echo>Running "Calc" tests through the Tester ...</echo>
 		<java classname="${tester.class}"                     output="${test.log.path}" append="true" failonerror="true" fork="true">
 			<jvmarg value="${jvm17.args}" if:true="${java.17plus.version}"/>
 			<arg value="-timing"/>
@@ -815,12 +816,14 @@ Test starting on ${build.date} at ${build.time}
 				<fileset dir="external-files" includes="*.jar" excludes="antlr-*-complete.jar"/>
 			</classpath>
 		</java>
+		<echo>Running various other tests with Tester ...</echo>
 		<java classname="${tester.class}"                     output="${test.log.path}" append="true" failonerror="true" fork="true">
 			<jvmarg value="${jvm17.args}" if:true="${java.17plus.version}"/>
 			<arg value="-timing"/>
 			<arg value="-dir:test/files"/>
 			<arg value="maintest"/>
 		</java>
+		<echo if:true="${euler.canons.exist}">Running the "Project Euler" tests ...</echo>
 		<java classname="${tester.class}"                     output="${test.log.path}" append="true" failonerror="true" fork="true" if:true="${euler.canons.exist}">
 			<jvmarg value="${jvm17.args}" if:true="${java.17plus.version}"/>
 			<arg value="-timing"/>
