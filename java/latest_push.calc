@@ -5,6 +5,7 @@
  * Read and evaluate the result as a JSON object
  * Loop through the outer array looking for ."type" == "PushEvent" on the "master" branch
  * Retrieve the "payload"."head" value and pull the first 7 characters
+ * Note: the length here (7) should match the "--short=7" value on "rev-parse" in the "build.xml" file
  *
  * $0 = name of file retrieved by "curl"
  */
@@ -14,7 +15,7 @@ $quiet on {
 $results on {
     loop event within record {
         if event.type == "PushEvent" && event.payload.ref == "refs/heads/master" {
-           substr(event.payload.head, 0, 7) @q
+           event.payload.head[:7] @q
            leave
         }
     }

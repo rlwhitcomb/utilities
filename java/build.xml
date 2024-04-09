@@ -387,6 +387,8 @@
 		Add "remove" option to "makeScripts" to run during "clean".
 	    01-Mar-2024 (rlwhitcomb)
 		Add seconds to to the test log file names to avoid duplicate upload artifacts in CI build.
+	    09-Apr-2024 (rlwhitcomb)
+		Somehow the default git "short" rev length has changed, so make the length explicit.
 
      ========================================================================== -->
 
@@ -425,7 +427,7 @@
 	</condition>
 
 	<exec executable="git" dir="." outputproperty="commit.id" unless:set="commit.id">
-		<arg line="rev-parse --short HEAD"/>
+		<arg line="rev-parse --short=7 HEAD"/>
 	</exec>
 	<loadproperties>
 		<propertyresource name="commit.id"/>
