@@ -43,7 +43,7 @@ const lines = readFileLines(INPUT_FILE)
 #
 # 2. Read all the ".java" files into a map by name
 #
-print 'Reading all the ".java" files ...'
+print 'Reading all the other ".java" files ...'
 var javaFiles = { }
 
 loop file over JAVA_FILES {
