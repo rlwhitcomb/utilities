@@ -8,6 +8,7 @@
 # https://www.hackmath.net/en/calculator/complex-number
 #
 $rational on
+$silencedirectives on
 
 # The "frac" function
 frac('1 \u215c')
@@ -38,11 +39,13 @@ F'3,-3,-8'@F
 1/5 + 2/9 + 7/15
 3/27 + 11/15 + 17/30
 
+$proper on {
 5/14 + 13/21 + 3/28
 13/19 + 5/7 + 8/11
 5/14 - 8/21 + 17/35
 7/15 - 8/35 + 9/21
 5/49 + 3/21 - 6/25
+}
 
 print
 

@@ -351,6 +351,8 @@
  *	    #659: Do some more substitutions for highlighting in ErrorListener.syntaxError.
  *	02-Mar-2024 (rlwhitcomb)
  *	    #659: Oops! Need to use "<y>" instead of "<x>" for this highlighting.
+ *	08-May-2024 (rlwhitcomb)
+ *	    #672: New command line option for proper fractions.
  */
 package info.rlwhitcomb.calc;
 
@@ -543,6 +545,7 @@ public class Calc
 	private static boolean separators        = false;
 	private static boolean ignoreCase        = false;
 	private static boolean quotes            = true;
+	private static boolean proper            = false;
 	private static boolean sortKeys          = false;
 	private static boolean silenceDirectives = false;
 
@@ -1192,7 +1195,7 @@ public class Calc
 		});
 
 		displayer = this;
-		visitor = new CalcObjectVisitor(displayer, rational, separators, silenceDirectives, ignoreCase, quotes, sortKeys);
+		visitor = new CalcObjectVisitor(displayer, rational, separators, silenceDirectives, ignoreCase, quotes, proper, sortKeys);
 
 		// Set the command-line arguments into the symbol table as $nn
 		int index = 0;
@@ -2279,8 +2282,8 @@ public class Calc
 		case "ins":
 		    ignoreCase = true;
 		    break;
-		case "casesense":
 		case "casesensitive":
+		case "casesense":
 		case "sensitive":
 		case "sense":
 		case "sens":
@@ -2300,6 +2303,28 @@ public class Calc
 		case "noquote":
 		case "noq":
 		    quotes = false;
+		    break;
+		case "properfractions":
+		case "properfraction":
+		case "properfrac":
+		case "proper":
+		case "prop":
+		case "pro":
+		    proper = true;
+		    break;
+		case "noproperfractions":
+		case "improperfractions":
+		case "noproperfraction":
+		case "improperfraction":
+		case "noproperfrac":
+		case "improperfrac":
+		case "noproper":
+		case "improper":
+		case "noprop":
+		case "improp":
+		case "nopro":
+		case "impro":
+		    proper = false;
 		    break;
 		case "sortobjects":
 		case "sortobject":
@@ -2691,7 +2716,7 @@ public class Calc
 		    else
 			displayer = new ConsoleDisplayer();
 
-		    visitor = new CalcObjectVisitor(displayer, rational, separators, silenceDirectives, ignoreCase, quotes, sortKeys);
+		    visitor = new CalcObjectVisitor(displayer, rational, separators, silenceDirectives, ignoreCase, quotes, proper, sortKeys);
 
 		    // In case there are version requirements for libraries or variables,
 		    // check the values set by "-requires", etc.

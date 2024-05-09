@@ -847,6 +847,8 @@
  *	    #666: Allow format specs on arguments to "$echo".
  *	27-Mar-2024 (rlwhitcomb)
  *	    #668: Change "$echo" to "print" or "display" (that is, a statement not a directive).
+ *	06-May-2024 (rlwhitcomb)
+ *	    #672: Processing of "proper fractions" mode.
  */
 package info.rlwhitcomb.calc;
 
@@ -1148,7 +1150,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	private boolean doNotCallZeroArgFunctions = false;
 
 	/** The mode settings for this instantiation of the visitor. */
-	private Settings settings = new Settings();
+	private Settings settings;
 
 	/** Global symbol table for variables. */
 	private final GlobalScope globals;
@@ -1157,7 +1159,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	private NestedScope currentScope;
 
 	/** The current {@code LValueContext} for variables. */
-	private LValueContext currentContext;
+	private LValueContext currentLValue;
 
 	/** {@link CalcDisplayer} object so we can output results to either the console or GUI window. */
 	private final CalcDisplayer displayer;
@@ -1169,37 +1171,40 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	private CalcPiWorker piWorker = new CalcPiWorker();
 
 	/** Stack of previous "timing" mode values. */
-	private final Deque<Boolean> timingModeStack       = new ArrayDeque<>();
+	private final Deque<Boolean> timingModeStack          = new ArrayDeque<>();
 
 	/** Stack of previous "debug" mode values. */
-	private final Deque<Boolean> debugModeStack        = new ArrayDeque<>();
+	private final Deque<Boolean> debugModeStack           = new ArrayDeque<>();
 
 	/** Stack of previous "rational" mode values. */
-	private final Deque<Boolean> rationalModeStack     = new ArrayDeque<>();
+	private final Deque<Boolean> rationalModeStack        = new ArrayDeque<>();
 
 	/** Stack of previous "separator" mode values. */
-	private final Deque<Boolean> separatorModeStack    = new ArrayDeque<>();
+	private final Deque<Boolean> separatorModeStack       = new ArrayDeque<>();
 
 	/** Stack of previous "ignore case" mode values. */
-	private final Deque<Boolean> ignoreCaseModeStack   = new ArrayDeque<>();
+	private final Deque<Boolean> ignoreCaseModeStack      = new ArrayDeque<>();
 
 	/** Stack of previous "quote strings" mode values. */
-	private final Deque<Boolean> quoteStringsModeStack = new ArrayDeque<>();
+	private final Deque<Boolean> quoteStringsModeStack    = new ArrayDeque<>();
+
+	/** Stack of previous "proper fractions" mode values. */
+	private final Deque<Boolean> properFractionsModeStack = new ArrayDeque<>();
 
 	/** Stack of previous "sort keys" mode values. */
-	private final Deque<Boolean> sortKeysModeStack     = new ArrayDeque<>();
+	private final Deque<Boolean> sortKeysModeStack        = new ArrayDeque<>();
 
 	/** Stack of previous "colored" mode values. */
-	private final Deque<Boolean> coloredModeStack      = new ArrayDeque<>();
+	private final Deque<Boolean> coloredModeStack         = new ArrayDeque<>();
 
 	/** Stack of previous "resultsOnly" mode values. */
-	private final Deque<Boolean> resultsOnlyModeStack  = new ArrayDeque<>();
+	private final Deque<Boolean> resultsOnlyModeStack     = new ArrayDeque<>();
 
 	/** Stack of previous "quiet" mode values. */
-	private final Deque<Boolean> quietModeStack        = new ArrayDeque<>();
+	private final Deque<Boolean> quietModeStack           = new ArrayDeque<>();
 
 	/** Stack of previous "silence" mode values. */
-	private final Deque<Boolean> silenceModeStack      = new ArrayDeque<>();
+	private final Deque<Boolean> silenceModeStack         = new ArrayDeque<>();
 
 
 	/**
@@ -1214,7 +1219,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	/**
 	 * Set the given symbol table scope as the topmost (current) context.
-	 * <p> Also set {@link #currentContext} for symbol table lookup.
+	 * <p> Also set {@link #currentLValue} for symbol table lookup.
 	 *
 	 * @param newScope The new symbol table scope to be the current one.
 	 */
@@ -1222,27 +1227,27 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    newScope.setEnclosingScope(currentScope);
 	    currentScope = newScope;
 
-	    LValueContext context = currentScope.getContext();
+	    LValueContext context = currentScope.getLValue();
 	    if (context == null) {
 		context = new LValueContext(currentScope, settings.ignoreNameCase);
-		currentScope.setContext(context);
+		currentScope.setLValue(context);
 	    }
 	    else {
 		context.setIgnoreCase(settings.ignoreNameCase);
 	    }
-	    currentContext = context;
+	    currentLValue = context;
 	}
 
 	/**
 	 * Pop the topmost symbol table scope off the stack, making the previous (parent)
-	 * scope as the current one. Also pops the {@link #currentContext} for correct
+	 * scope as the current one. Also pops the {@link #currentLValue} for correct
 	 * symbol lookup.
 	 */
 	public void popScope() {
 	    currentScope = currentScope.getEnclosingScope();
 
-	    currentContext = currentScope.getContext();
-	    currentContext.setIgnoreCase(settings.ignoreNameCase);
+	    currentLValue = currentScope.getLValue();
+	    currentLValue.setIgnoreCase(settings.ignoreNameCase);
 	}
 
 	/**
@@ -1251,8 +1256,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	 * @param var The parsing context to construct the lookup context for.
 	 * @return    A variable lookup context for this variable.
 	 */
-	private LValueContext getLValue(CalcParser.VarContext var) {
-	    return LValueContext.getLValue(this, var, currentContext);
+	LValueContext makeLValue(CalcParser.VarContext var) {
+	    return LValueContext.getLValue(this, var, currentLValue);
 	}
 
 
@@ -1280,6 +1285,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	 * @param silence         Flag for "quiet" mode.
 	 * @param ignoreCase      Whether to ignore variable name case.
 	 * @param quotes          Setting for quoting strings on output.
+	 * @param proper          Using proper fraction display mode by default.
 	 * @param sortKeys        Whether to sort map keys or leave them in declared order.
 	 */
 	public CalcObjectVisitor(
@@ -1289,10 +1295,11 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		final boolean silence,
 		final boolean ignoreCase,
 		final boolean quotes,
+		final boolean proper,
 		final boolean sortKeys)
 	{
 	    displayer = resultDisplayer;
-	    settings  = new Settings(rational, separators, silence, ignoreCase, quotes, sortKeys);
+	    settings  = new Settings(rational, separators, silence, ignoreCase, quotes, proper, sortKeys);
 	    setIntMathContext(MathContext.DECIMAL128);
 
 	    globals = new GlobalScope();
@@ -1303,16 +1310,17 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    ObjectScope sets = new ObjectScope();
 	    PredefinedValue.define(globals, "settings", sets);
 
-	    SystemValue.define(sets, settings, "trigMode",          this::setTrigMode    );
-	    SystemValue.define(sets, settings, "units",             this::setUnits       );
-	    SystemValue.define(sets, settings, "rationalMode",      pushRationalMode     );
-	    SystemValue.define(sets, settings, "separatorMode",     pushSeparatorMode    );
-	    SystemValue.define(sets, settings, "silent",            pushQuietMode        );
-	    SystemValue.define(sets, settings, "silenceDirectives", pushSilenceMode      );
-	    SystemValue.define(sets, settings, "ignoreNameCase",    pushIgnoreCaseMode   );
-	    SystemValue.define(sets, settings, "quoteStrings",      pushQuoteStringsMode );
-	    SystemValue.define(sets, settings, "sortKeys",          pushSortKeysMode     );
-	    SystemValue.define(sets, settings, "precision",         this::setPrecision   );
+	    SystemValue.define(sets, settings, "trigMode",          this::setTrigMode      );
+	    SystemValue.define(sets, settings, "units",             this::setUnits         );
+	    SystemValue.define(sets, settings, "rationalMode",      pushRationalMode       );
+	    SystemValue.define(sets, settings, "separatorMode",     pushSeparatorMode      );
+	    SystemValue.define(sets, settings, "silent",            pushQuietMode          );
+	    SystemValue.define(sets, settings, "silenceDirectives", pushSilenceMode        );
+	    SystemValue.define(sets, settings, "ignoreNameCase",    pushIgnoreCaseMode     );
+	    SystemValue.define(sets, settings, "quoteStrings",      pushQuoteStringsMode   );
+	    SystemValue.define(sets, settings, "properFractions",   pushProperFractionsMode);
+	    SystemValue.define(sets, settings, "sortKeys",          pushSortKeysMode       );
+	    SystemValue.define(sets, settings, "precision",         this::setPrecision     );
 	    sets.setImmutable(true);
 
 	    initialized = true;
@@ -1373,6 +1381,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 
+	/* ============= Math Context (Precision) ============= */
+
 	public int setMathContext(final MathContext newMathContext) {
 	    int prec = newMathContext.getPrecision();
 
@@ -1399,6 +1409,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    return BigInteger.valueOf(setMathContext(newMathContext));
 	}
 
+
+	/* ============= Quiet (Silent) Mode ============= */
+
 	public boolean setSilent(final boolean newSilent) {
 	    boolean oldSilent = settings.silent;
 	    settings.silent = newSilent;
@@ -1412,6 +1425,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	private Consumer<Object> pushQuietMode = mode -> {
 	    processModeOption(mode, quietModeStack, setQuietMode);
 	};
+
+
+	/* ============= Silence (Directives) Mode ============= */
 
 	public boolean setSilenceDirectives(final boolean newSilence) {
 	    boolean oldSilence = settings.silenceDirectives;
@@ -1427,6 +1443,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    processModeOption(mode, silenceModeStack, setSilenceMode);
 	};
 
+
+	/* ============= Trig Mode ============= */
+
 	public String setTrigMode(final Object mode) {
 	    settings.trigMode = TrigMode.getFrom(mode);
 
@@ -1434,6 +1453,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    return settings.trigMode.toString();
 	}
+
+
+	/* ============= Units ============= */
 
 	public String setUnits(final Object mode) {
 	    settings.units = RangeMode.getFrom(mode);
@@ -1453,6 +1475,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    return settings.units.toString();
 	}
 
+
+	/* ============= Separator Mode ============= */
+
 	public boolean setSeparatorMode(final Object mode) {
 	    boolean oldMode = settings.separatorMode;
 	    settings.separatorMode = CharUtil.getBooleanValue(mode);
@@ -1470,10 +1495,13 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    processModeOption(mode, separatorModeStack, setSeparatorMode);
 	};
 
+
+	/* ============= Ignore Case Mode ============= */
+
 	public boolean setIgnoreCaseMode(final Object mode) {
 	    boolean oldMode = settings.ignoreNameCase;
 	    settings.ignoreNameCase = CharUtil.getBooleanValue(mode);
-	    currentContext.setIgnoreCase(settings.ignoreNameCase);
+	    currentLValue.setIgnoreCase(settings.ignoreNameCase);
 
 	    displayDirectiveMessage("%calc#ignoreCaseMode", settings.ignoreNameCase);
 
@@ -1487,6 +1515,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	private Consumer<Object> pushIgnoreCaseMode = mode -> {
 	    processModeOption(mode, ignoreCaseModeStack, setIgnoreCaseMode);
 	};
+
+
+	/* ============= Quote Strings Mode ============= */
 
 	public boolean setQuoteStringsMode(final Object mode) {
 	    boolean oldMode = settings.quoteStrings;
@@ -1505,6 +1536,29 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    processModeOption(mode, quoteStringsModeStack, setQuoteStringsMode);
 	};
 
+
+	/* ============= Proper Fractions Mode ============= */
+
+	public boolean setProperFractionsMode(final Object mode) {
+	    boolean oldMode = settings.properFractions;
+	    settings.properFractions = CharUtil.getBooleanValue(mode);
+
+	    displayDirectiveMessage("%calc#properFractionsMode", settings.properFractions);
+
+	    return oldMode;
+	}
+
+	private UnaryOperator<Boolean> setProperFractionsMode = mode -> {
+	    return setProperFractionsMode(mode);
+	};
+
+	private Consumer<Object> pushProperFractionsMode = mode -> {
+	    processModeOption(mode, properFractionsModeStack, setProperFractionsMode);
+	};
+
+
+	/* ============= Sort Keys Mode ============= */
+
 	public boolean setSortKeysMode(final Object mode) {
 	    boolean oldMode = settings.sortKeys;
 	    settings.sortKeys = CharUtil.getBooleanValue(mode);
@@ -1522,6 +1576,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    processModeOption(mode, sortKeysModeStack, setSortKeysMode);
 	};
 
+
+	/* ============= Colored Mode ============= */
+
 	public boolean setColoredMode(final Object mode) {
 	    boolean oldMode = Calc.getColoredMode();
 	    Calc.setColoredMode(CharUtil.getBooleanValue(mode));
@@ -1536,6 +1593,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	private Consumer<Object> pushColoredMode = mode -> {
 	    processModeOption(mode, coloredModeStack, setColoredMode);
 	};
+
+
+	/* ============= Rational Mode ============= */
 
 	public boolean setRationalMode(final Object mode) {
 	    boolean oldMode = settings.rationalMode;
@@ -1569,6 +1629,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    processModeOption(mode, rationalModeStack, setRationalMode);
 	};
 
+
+	/* ============= Timing Mode ============= */
+
 	public boolean setTimingMode(final boolean mode) {
 	    boolean oldMode = Calc.setTimingMode(mode);
 
@@ -1576,6 +1639,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    return oldMode;
 	}
+
+
+	/* ============= Debug Mode ============= */
 
 	public boolean setDebugMode(final boolean mode) {
 	    boolean oldMode = Calc.setDebugMode(mode);
@@ -1682,7 +1748,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		}
 	    }
 
-	    if (returnValue != null && returnValue instanceof FunctionScope) {
+	    if (returnValue instanceof FunctionScope) {
 		FunctionScope func = (FunctionScope) returnValue;
 		String functionName = func.getFunctionName();
 
@@ -1893,7 +1959,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		dPrecision = new BigDecimal(opt.NUMBER().getText());
 	    }
 	    else {
-		LValueContext lValue = getLValue(opt.var());
+		LValueContext lValue = makeLValue(opt.var());
 		dPrecision = convertToDecimal(lValue.getContextObject(this, false), settings.mc, opt);
 	    }
 
@@ -1978,63 +2044,58 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitDegreesDirective(CalcParser.DegreesDirectiveContext ctx) {
-	    CalcParser.BracketBlockContext blockCtx = ctx.bracketBlock();
 	    TrigMode oldMode = settings.trigMode;
 
 	    String value = setTrigMode(TrigMode.DEGREES);
 
-	    return directiveTrigModeBlock(blockCtx, value, oldMode);
+	    return directiveTrigModeBlock(ctx.bracketBlock(), value, oldMode);
 	}
 
 	@Override
 	public Object visitRadiansDirective(CalcParser.RadiansDirectiveContext ctx) {
-	    CalcParser.BracketBlockContext blockCtx = ctx.bracketBlock();
 	    TrigMode oldMode = settings.trigMode;
 
 	    String value = setTrigMode(TrigMode.RADIANS);
 
-	    return directiveTrigModeBlock(blockCtx, value, oldMode);
+	    return directiveTrigModeBlock(ctx.bracketBlock(), value, oldMode);
 	}
 
 	@Override
 	public Object visitGradsDirective(CalcParser.GradsDirectiveContext ctx) {
-	    CalcParser.BracketBlockContext blockCtx = ctx.bracketBlock();
 	    TrigMode oldMode = settings.trigMode;
 
 	    String value = setTrigMode(TrigMode.GRADS);
 
-	    return directiveTrigModeBlock(blockCtx, value, oldMode);
+	    return directiveTrigModeBlock(ctx.bracketBlock(), value, oldMode);
 	}
 
 	@Override
 	public Object visitBinaryDirective(CalcParser.BinaryDirectiveContext ctx) {
-	    CalcParser.BracketBlockContext blockCtx = ctx.bracketBlock();
 	    RangeMode oldUnits = settings.units;
 
 	    String value = setUnits(RangeMode.BINARY);
 
-	    return directiveRangeModeBlock(blockCtx, value, oldUnits);
+	    return directiveRangeModeBlock(ctx.bracketBlock(), value, oldUnits);
 	}
 
 	@Override
 	public Object visitSiDirective(CalcParser.SiDirectiveContext ctx) {
-	    CalcParser.BracketBlockContext blockCtx = ctx.bracketBlock();
 	    RangeMode oldUnits = settings.units;
 
 	    String value = setUnits(RangeMode.DECIMAL);
 
-	    return directiveRangeModeBlock(blockCtx, value, oldUnits);
+	    return directiveRangeModeBlock(ctx.bracketBlock(), value, oldUnits);
 	}
 
 	@Override
 	public Object visitMixedDirective(CalcParser.MixedDirectiveContext ctx) {
-	    CalcParser.BracketBlockContext blockCtx = ctx.bracketBlock();
 	    RangeMode oldUnits = settings.units;
 
 	    String value = setUnits(RangeMode.MIXED);
 
-	    return directiveRangeModeBlock(blockCtx, value, oldUnits);
+	    return directiveRangeModeBlock(ctx.bracketBlock(), value, oldUnits);
 	}
+
 
 	private int addName(String name, StringBuilder message) {
 	    if (message.length() > 0)
@@ -2116,6 +2177,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    return BigInteger.valueOf(numberCleared);
 	}
+
 
 	private boolean displayValue(String key, Object value, ParserRuleContext ctx) {
 	    if (!isPredefined(value, false)) {
@@ -2313,7 +2375,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    if (ctx.var() != null) {
 		CalcParser.VarContext var = ctx.var();
-		LValueContext lValue = getLValue(var);
+		LValueContext lValue = makeLValue(var);
 		Object modeObject = evaluate(ctx, lValue.getContextObject(this, false));
 		option = toStringValue(this, var, modeObject, new StringFormat(false, false));
 	    }
@@ -2430,6 +2492,11 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	@Override
+	public Object visitProperFractionsDirective(CalcParser.ProperFractionsDirectiveContext ctx) {
+	    return processModeOption(ctx.modeOption(), properFractionsModeStack, ctx.bracketBlock(), setProperFractionsMode);
+	}
+
+	@Override
 	public Object visitSortObjectsDirective(CalcParser.SortObjectsDirectiveContext ctx) {
 	    return processModeOption(ctx.modeOption(), sortKeysModeStack, ctx.bracketBlock(), setSortKeysMode);
 	}
@@ -2440,6 +2507,13 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 
+	/**
+	 * Extract the version text from the given version number context.
+	 *
+	 * @param versionCtx Context that should contain a version number (could be {@code null}).
+	 * @return           The version text from the input, depending on which format it is
+	 *	             (also can be {@code null}).
+	 */
 	private String versionText(CalcParser.VersionNumberContext versionCtx) {
 	    if (versionCtx == null)
 		return null;
@@ -3003,8 +3077,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    else {
 		// For large numbers it takes a significant amount of time just to convert
 		// to a string, so don't even try if we don't need to for display
-		if (!silent)
+		if (!silent) {
+		    if (result instanceof BigFraction && settings.properFractions)
+			((BigFraction) result).setAlwaysProper(true);
+
 		    resultString = toStringValue(this, expr, result, new StringFormat(quote, separators));
+		}
 	    }
 
 	    return new ExprStmtResult(exprString, resultString, result);
@@ -3022,19 +3100,19 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	private class LoopVisitor implements IterationVisitor
 	{
 		private CalcParser.StmtBlockContext block;
-		private LoopScope localScope;
+		private LoopScope loopScope;
 		private String localVarName;
 		private Object lastValue = null;
 
 		LoopVisitor(final CalcParser.StmtBlockContext blockContext, final LoopScope scope, final String varName) {
 		    block        = blockContext;
-		    localScope   = scope;
+		    loopScope    = scope;
 		    localVarName = varName;
 		}
 
 		@Override
 		public void start() {
-		    pushScope(localScope);
+		    pushScope(loopScope);
 		}
 
 		@Override
@@ -3843,7 +3921,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    func.defineParameter(paramVar, paramName, paramVar.expr(), constParam);
 		}
 		if (formalParams.DOTS() != null) {
-		    func.defineParameter(formalParams, FunctionDeclaration.VARARG, null);
+		    func.defineParameter(formalParams, FunctionDeclaration.VARARG, null, true);
 		}
 	    }
 
@@ -4043,7 +4121,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitVarExpr(CalcParser.VarExprContext ctx) {
-	    LValueContext lValue = getLValue(ctx.var());
+	    LValueContext lValue = makeLValue(ctx.var());
 	    return evaluate(ctx, lValue.getContextObject(this));
 	}
 
@@ -4105,7 +4183,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitPostIncOpExpr(CalcParser.PostIncOpExprContext ctx) {
 	    CalcParser.VarContext var = ctx.var();
-	    LValueContext lValue = getLValue(var);
+	    LValueContext lValue = makeLValue(var);
 	    Object value = evaluate(var, lValue.getContextObject(this));
 	    String op = ctx.INC_OP().getText();
 	    boolean incr = false;
@@ -4228,7 +4306,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitPreIncOpExpr(CalcParser.PreIncOpExprContext ctx) {
 	    CalcParser.VarContext var = ctx.var();
-	    LValueContext lValue = getLValue(var);
+	    LValueContext lValue = makeLValue(var);
 	    Object value = evaluate(var, lValue.getContextObject(this));
 	    String op = ctx.INC_OP().getText();
 	    boolean incr = false;
@@ -4953,7 +5031,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    Object obj = null;
 
 	    if (arg.var() != null) {
-		LValueContext lValue = getLValue(arg.var());
+		LValueContext lValue = makeLValue(arg.var());
 		obj = lValue.getContextObject(this);
 	    }
 	    else {
@@ -5784,7 +5862,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    if (args.replaceOption() != null) {
 		if (args.replaceOption().var() != null) {
 		    CalcParser.VarContext var = args.replaceOption().var();
-		    LValueContext lValue = getLValue(var);
+		    LValueContext lValue = makeLValue(var);
 		    Object optionObject = lValue.getContextObject(this, false);
 		    option = optionObject == null ? "" : toStringValue(this, var, optionObject, new StringFormat(true, false));
 		}
@@ -6162,7 +6240,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public Object visitFillExpr(CalcParser.FillExprContext ctx) {
 	    CalcParser.FillArgsContext fillCtx  = ctx.fillArgs();
 	    CalcParser.VarContext varCtx        = fillCtx.var();
-	    LValueContext lValue                = getLValue(varCtx);
+	    LValueContext lValue                = makeLValue(varCtx);
 	    Object value		        = lValue.getContextObject(this);
 	    List<CalcParser.ExprContext> exprs  = fillCtx.expr();
 	    CalcParser.ExprContext fillExpr	= null;
@@ -6242,7 +6320,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    List<LValueContext> varList = new ArrayList<>(exprVars.var().size());
 	    for (CalcParser.VarContext var : exprVars.var()) {
-		varList.add(getLValue(var));
+		varList.add(makeLValue(var));
 	    }
 
 	    return scanIntoVars(this, sourceString, formatString, varList);
@@ -6304,7 +6382,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public Object visitPadExpr(CalcParser.PadExprContext ctx) {
 	    CalcParser.PadArgsContext args	= ctx.padArgs();
 	    CalcParser.VarContext varCtx	= args.var();
-	    LValueContext lValue		= getLValue(varCtx);
+	    LValueContext lValue		= makeLValue(varCtx);
 	    Object value			= lValue.getContextObject(this);
 	    List<CalcParser.ExprContext> exprs	= args.expr();
 	    String op				= ctx.K_PAD().getText();
@@ -8076,8 +8154,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public Object visitAddAssignExpr(CalcParser.AddAssignExprContext ctx) {
 	    CalcParser.VarContext varCtx = ctx.var();
 	    ParserRuleContext exprCtx    = ctx.expr();
+	    LValueContext lValue         = makeLValue(varCtx);
 
-	    LValueContext lValue = getLValue(varCtx);
 	    Object result;
 
 	    String op = ctx.ADD_ASSIGN().getText();
@@ -8126,7 +8204,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitPowerAssignExpr(CalcParser.PowerAssignExprContext ctx) {
-	    LValueContext lValue = getLValue(ctx.var());
+	    LValueContext lValue = makeLValue(ctx.var());
 
 	    BigDecimal base = convertToDecimal(lValue.getContextObject(this), settings.mc, ctx);
 	    double exp      = getDoubleValue(ctx.expr());
@@ -8139,7 +8217,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    CalcParser.VarContext varCtx = ctx.var();
 	    ParserRuleContext exprCtx    = ctx.expr();
 
-	    LValueContext lValue = getLValue(varCtx);
+	    LValueContext lValue = makeLValue(varCtx);
 	    Object result;
 
 	    String op = ctx.MULT_ASSIGN().getText();
@@ -8238,7 +8316,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitBitAssignExpr(CalcParser.BitAssignExprContext ctx) {
-	    LValueContext lValue = getLValue(ctx.var());
+	    LValueContext lValue = makeLValue(ctx.var());
 
 	    Object o1 = lValue.getContextObject(this);
 	    Object o2 = evaluate(ctx.expr());
@@ -8252,7 +8330,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitShiftAssignExpr(CalcParser.ShiftAssignExprContext ctx) {
-	    LValueContext lValue = getLValue(ctx.var());
+	    LValueContext lValue = makeLValue(ctx.var());
 
 	    BigInteger i1 = convertToInteger(lValue.getContextObject(this), settings.mc, ctx);
 	    int e2        = getIntValue(ctx.expr());
@@ -8282,7 +8360,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    Object value = null;
 
 	    for (int i = 0; i < vars.size(); i++) {
-		LValueContext lValue = getLValue(vars.get(i));
+		LValueContext lValue = makeLValue(vars.get(i));
 		value = valueList.get(i);
 		lValue.putContextObject(this, value);
 	    }

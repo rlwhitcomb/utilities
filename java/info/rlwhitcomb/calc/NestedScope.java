@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2021-2022 Roger L. Whitcomb.
+ * Copyright (c) 2021-2022,2024 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,16 +25,17 @@
  *      local symbol tables, etc.
  *
  * History:
- *  06-Oct-21 rlw  ---  Initial coding.
- *  07-Oct-21 rlw  ---  Override "remove". Also override "isDefined" and "setValue", and tweak
+ *  06-Oct-21 rlw ----	Initial coding.
+ *  07-Oct-21 rlw ----	Override "remove". Also override "isDefined" and "setValue", and tweak
  *			the way "getValue" works so that we get/set things in the proper scope.
- *  19-Oct-21 rlw  ---  Change return value of "remove" to the previous value.
- *  03-Feb-22 rlw  ---  Add "getWildValues" here for wild-card search.
- *  13-Feb-22 rlw #199: Move GlobalScope out to ParameterizedScope; add LOOP_VAR to LoopScope.
- *  17-Feb-22 rlw #252: Rename some methods to be more clear.
- *  25-May-22 rlw #348: Return the new value from "setValue" methods.
+ *  19-Oct-21 rlw ----	Change return value of "remove" to the previous value.
+ *  03-Feb-22 rlw ----	Add "getWildValues" here for wild-card search.
+ *  13-Feb-22 rlw #199	Move GlobalScope out to ParameterizedScope; add LOOP_VAR to LoopScope.
+ *  17-Feb-22 rlw #252	Rename some methods to be more clear.
+ *  25-May-22 rlw #348	Return the new value from "setValue" methods.
  *			Make all methods package private.
- *  10-Nov-22 rlw #554:	Add field and access methods for LValueContext.
+ *  10-Nov-22 rlw #554	Add field and access methods for LValueContext.
+ *  09-May-24 rlw ----	Some method renames.
  */
 package info.rlwhitcomb.calc;
 
@@ -95,7 +96,7 @@ class NestedScope extends ObjectScope
 	 *
 	 * @return The symbol table context.
 	 */
-	LValueContext getContext() {
+	LValueContext getLValue() {
 	    return lValue;
 	}
 
@@ -104,7 +105,7 @@ class NestedScope extends ObjectScope
 	 *
 	 * @param context The symbol table context.
 	 */
-	void setContext(final LValueContext context) {
+	void setLValue(final LValueContext context) {
 	    lValue = context;
 	}
 

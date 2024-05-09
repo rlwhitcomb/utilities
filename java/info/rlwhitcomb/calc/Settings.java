@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2022 Roger L. Whitcomb.
+ * Copyright (c) 2022,2024 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -39,6 +39,8 @@
  *	    #393: Cleanup imports.
  *	10-Jul-2022 (rlwhitcomb)
  *	    #392: New option to sort objects by key.
+ *	06-May-2024 (rlwhitcomb)
+ *	    #672: New option for always using proper fraction display mode.
  */
 package info.rlwhitcomb.calc;
 
@@ -85,6 +87,10 @@ public class Settings
 	@Scriptable
 	boolean quoteStrings;
 
+	/** Always display fractions as proper fractions. */
+	@Scriptable
+	boolean properFractions;
+
 	/** Sort object by key (instead of by order of entry). */
 	@Scriptable
 	boolean sortKeys;
@@ -119,9 +125,10 @@ public class Settings
 	 * @param silence    Whether to silence directives.
 	 * @param ignoreCase Whether to ignore case on variable / member names.
 	 * @param quotes     Whether to quote string values on output.
+	 * @param proper     Always using proper fraction display.
 	 * @param sortObjs   Whether to sort objects by keys.
 	 */
-	public Settings(boolean rational, boolean separators, boolean silence, boolean ignoreCase, boolean quotes, boolean sortObjs) {
+	public Settings(boolean rational, boolean separators, boolean silence, boolean ignoreCase, boolean quotes, boolean proper, boolean sortObjs) {
 	    trigMode          = TrigMode.RADIANS;
 	    units             = RangeMode.MIXED;
 	    rationalMode      = rational;
@@ -130,6 +137,7 @@ public class Settings
 	    silenceDirectives = silence;
 	    ignoreNameCase    = ignoreCase;
 	    quoteStrings      = quotes;
+	    properFractions   = proper;
 	    sortKeys          = sortObjs;
 	}
 
@@ -147,6 +155,7 @@ public class Settings
 	    silenceDirectives = other.silenceDirectives;
 	    ignoreNameCase    = other.ignoreNameCase;
 	    quoteStrings      = other.quoteStrings;
+	    properFractions   = other.properFractions;
 	    sortKeys          = other.sortKeys;
 	    mc                = other.mc;
 	    mcDivide          = other.mcDivide;

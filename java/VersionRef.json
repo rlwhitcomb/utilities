@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.50.8', date: d'2024-05-09',
+      issues: [ 672 ],
+      comment: 'Directive and options to always display fractions as "proper" ("@F" format).'
+    },
     { version: '2.50.5', date: d'2024-04-07',
       issues: [ 664 ],
       comment: 'Fix bugs with positional parameters before named ones.'

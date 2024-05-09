@@ -680,11 +680,11 @@ define is_perfect(n) = sumof ( factors (n) ) - n == n
 /*
  * Return a list of the prime numbers within the given range.
  *
- * @param m Starting value for the list (should be 2 or any odd number).
+ * @param m Starting value for the list (should be 2 or any odd number); default 2.
  * @param n Limit for the list of primes.
  * @return  Array of prime numbers within the input range.
  */
-define primes(m, n) = {
+define primes(m = 2, n) = {
    var list = []
    if 2 in m..n list += 2
    const s = max(m|1, 3)

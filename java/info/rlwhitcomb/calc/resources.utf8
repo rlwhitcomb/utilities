@@ -192,6 +192,8 @@
 #	    #664: Error for unknown parameter names.
 #	26-Mar-2024 (rlwhitcomb)
 #	    #666: Starting and ending punctuation values for "$echo" spacing.
+#	06-May-2024 (rlwhitcomb)
+#	    #672: Message for displaying proper fractions mode.
 #
 
 #
@@ -265,6 +267,7 @@ rationalMode	= Calculation mode set to <u>%1$s<.>.
 separatorMode	= Separator display set to <u>%1$s<.>.
 ignoreCaseMode  = Ignoring case is now <u>%1$s<.>.
 quoteStringsMode= Quoting result strings is now <u>%1$s<.>.
+properFractionsMode= Displaying proper fractions is now <u>%1$s<.>.
 sortKeysMode	= Sorting objects by keys is now <u>%1$s<.>.
 definingFunc	= <r>Defining function <y>%1$s<.><r> = <v>%2$s<r>
 definingConst	= <r>Defining constant <y>%1$s<.><r> = <v>%2$s<r>

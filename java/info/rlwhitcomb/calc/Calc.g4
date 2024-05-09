@@ -547,6 +547,8 @@
  *	    #666: Allow format specs on arguments to "$echo".
  *	27-Mar-2024 (rlwhitcomb)
  *	    #668: Change "$echo" to "print" or "display" (that is, a statement not a directive).
+ *	06-May-2024 (rlwhitcomb)
+ *	    #672: New "proper fractions" directive.
  */
 
 grammar Calc;
@@ -1032,39 +1034,40 @@ dropObjs
 
 directive
    : ( D_DECIMAL | D_PRECISION ) numberOption
-                               bracketBlock ? # decimalDirective
-   | D_DEFAULT bracketBlock ?                 # defaultDirective
-   | D_DOUBLE bracketBlock ?                  # doubleDirective
-   | D_FLOAT bracketBlock ?                   # floatDirective
-   | D_UNLIMITED bracketBlock ?               # unlimitedDirective
-   | D_DEGREES bracketBlock ?                 # degreesDirective
-   | D_RADIANS bracketBlock ?                 # radiansDirective
-   | D_GRADS bracketBlock ?                   # gradsDirective
-   | D_BINARY bracketBlock ?                  # binaryDirective
-   | D_SI bracketBlock ?                      # siDirective
-   | D_MIXED bracketBlock ?                   # mixedDirective
-   | D_CLEAR wildIdList ?                     # clearDirective
-   | D_VARIABLES wildIdList ?                 # variablesDirective
-   | D_PREDEFINED wildIdList ?                # predefinedDirective
-   | D_INCLUDE expr ( COMMA expr ) ?          # includeDirective
-   | D_SAVE expr ( COMMA expr ) ?             # saveDirective
-   | D_TIMING modeOption bracketBlock ?       # timingDirective
-   | D_RATIONAL modeOption bracketBlock ?     # rationalDirective
-   | D_DEBUG modeOption bracketBlock ?        # debugDirective
-   | D_RESULTSONLY modeOption bracketBlock ?  # resultsOnlyDirective
-   | D_QUIET modeOption bracketBlock ?        # quietDirective
-   | D_SILENCE modeOption bracketBlock ?      # silenceDirective
-   | D_SEPARATORS modeOption bracketBlock ?   # separatorsDirective
-   | D_IGNORECASE modeOption bracketBlock ?   # ignoreCaseDirective
-   | D_QUOTESTRINGS modeOption bracketBlock ? # quoteStringsDirective
-   | D_SORTOBJECTS modeOption bracketBlock ?  # sortObjectsDirective
-   | D_COLORS modeOption bracketBlock ?       # colorsDirective
-   | D_REQUIRE requireOptions                 # requireDirective
-   | D_ASSERT expr ( COMMA expr ) ?           # assertDirective
-   | D_QUIT                                   # quitDirective
-   | D_HELP                                   # helpDirective
-   | D_VERSION                                # versionDirective
-   | D_GUI                                    # guiDirective
+                               bracketBlock ?     # decimalDirective
+   | D_DEFAULT bracketBlock ?                     # defaultDirective
+   | D_DOUBLE bracketBlock ?                      # doubleDirective
+   | D_FLOAT bracketBlock ?                       # floatDirective
+   | D_UNLIMITED bracketBlock ?                   # unlimitedDirective
+   | D_DEGREES bracketBlock ?                     # degreesDirective
+   | D_RADIANS bracketBlock ?                     # radiansDirective
+   | D_GRADS bracketBlock ?                       # gradsDirective
+   | D_BINARY bracketBlock ?                      # binaryDirective
+   | D_SI bracketBlock ?                          # siDirective
+   | D_MIXED bracketBlock ?                       # mixedDirective
+   | D_CLEAR wildIdList ?                         # clearDirective
+   | D_VARIABLES wildIdList ?                     # variablesDirective
+   | D_PREDEFINED wildIdList ?                    # predefinedDirective
+   | D_INCLUDE expr ( COMMA expr ) ?              # includeDirective
+   | D_SAVE expr ( COMMA expr ) ?                 # saveDirective
+   | D_TIMING modeOption bracketBlock ?           # timingDirective
+   | D_RATIONAL modeOption bracketBlock ?         # rationalDirective
+   | D_DEBUG modeOption bracketBlock ?            # debugDirective
+   | D_RESULTS_ONLY modeOption bracketBlock ?     # resultsOnlyDirective
+   | D_QUIET modeOption bracketBlock ?            # quietDirective
+   | D_SILENCE modeOption bracketBlock ?          # silenceDirective
+   | D_SEPARATORS modeOption bracketBlock ?       # separatorsDirective
+   | D_IGNORE_CASE modeOption bracketBlock ?      # ignoreCaseDirective
+   | D_QUOTE_STRINGS modeOption bracketBlock ?    # quoteStringsDirective
+   | D_PROPER_FRACTIONS modeOption bracketBlock ? # properFractionsDirective
+   | D_SORT_OBJECTS modeOption bracketBlock ?     # sortObjectsDirective
+   | D_COLORS modeOption bracketBlock ?           # colorsDirective
+   | D_REQUIRE requireOptions                     # requireDirective
+   | D_ASSERT expr ( COMMA expr ) ?               # assertDirective
+   | D_QUIT                                       # quitDirective
+   | D_HELP                                       # helpDirective
+   | D_VERSION                                    # versionDirective
+   | D_GUI                                        # guiDirective
    ;
 
 numberOption
@@ -1769,7 +1772,7 @@ D_DEBUG
    | DIR  ( 'dbg'   | 'DBG'   | 'Dbg'   )
    ;
 
-D_RESULTSONLY
+D_RESULTS_ONLY
    : DIR  ( 'resultsonly' | 'RESULTSONLY' | 'Resultsonly' | 'ResultsOnly' )
    | DIR  ( 'resultonly'  | 'RESULTONLY'  | 'Resultonly'  | 'ResultOnly'  )
    | DIR  ( 'results'     | 'RESULTS'     | 'Results'     )
@@ -1810,7 +1813,7 @@ D_SEPARATORS
    | DIR  ( 'sep'        | 'SEP'        | 'Sep'        )
    ;
 
-D_IGNORECASE
+D_IGNORE_CASE
    : DIR  ( 'caseinsensitive' | 'CASEINSENSITIVE' | 'Caseinsensitive' | 'CaseInsensitive' )
    | DIR  ( 'insensitive'     | 'INSENSITIVE'     | 'Insensitive'     )
    | DIR  ( 'ignorecase'      | 'IGNORECASE'      | 'Ignorecase'      | 'IgnoreCase'      )
@@ -1820,14 +1823,20 @@ D_IGNORECASE
    | DIR  ( 'ign'             | 'IGN'             | 'Ign'             )
    ;
 
-D_QUOTESTRINGS
+D_QUOTE_STRINGS
    : DIR  ( 'quotestrings' | 'QUOTESTRINGS' | 'Quotestrings' | 'QuoteStrings' )
    | DIR  ( 'quotestring'  | 'QUOTESTRING'  | 'Quotestring'  | 'QuoteString'  )
    | DIR  ( 'quotes'       | 'QUOTES'       | 'Quotes'       )
    | DIR  ( 'quote'        | 'QUOTE'        | 'Quote'        )
    ;
 
-D_SORTOBJECTS
+D_PROPER_FRACTIONS
+   : DIR  ( 'properfractions' | 'PROPERFRACTIONS' | 'Properfractions' | 'ProperFractions' )
+   | DIR  ( 'properfraction'  | 'PROPERFRACTION'  | 'Properfraction'  | 'ProperFraction'  )
+   | DIR  ( 'proper'          | 'PROPER'          | 'Proper'          )
+   ;
+
+D_SORT_OBJECTS
    : DIR  ( 'sortobjects' | 'SORTOBJECTS' | 'Sortobjects' | 'SortObjects' )
    | DIR  ( 'sortobject'  | 'SORTOBJECT'  | 'Sortobject'  | 'SortObject'  )
    | DIR  ( 'sortkeys'    | 'SORTKEYS'    | 'Sortkeys'    | 'SortKeys'    )
