@@ -1,7 +1,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2022-2023 Roger L. Whitcomb.
+# Copyright (c) 2022-2024 Roger L. Whitcomb.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -57,6 +57,8 @@
 #	    #28: More error messages for "unq".
 #	02-Nov-2023 (rlwhitcomb)
 #	    #633: Additional help for "gmt", "os", and "uuid"; correct a typo.
+#	10-May-2024 (rlwhitcomb)
+#	    #671: Move all text for "Hash" into here: alphabetize by prefix.
 #
 
 #
@@ -86,16 +88,6 @@ base64.help4	= ""
 # From FixPath.java
 #
 fixpath.errorCanonicalPath	= Error getting canonical path of "%1$s": %2$s
-
-#
-# From GUnzip.java and GZip.java
-#
-gunzip.badOption		= Unknown option: "-%1$s"!
-gunzip.missingOutputName	= The "-output" option requires a file name argument!
-gunzip.noFiles			= No files processed.
-gunzip.cannotFindOrRead		= Cannot find or read the input file: "%1$s"!
-gunzip.wrongExtension		= The input file (%1$s) doesn't have the (required) ".gz" extension.
-gunzip.ioError			= Error reading the input or writing the output file (%1$s): %2$s
 
 #
 # From Gmt.java
@@ -138,6 +130,62 @@ gmt.badOption		= Unknown option: "%1$s"!
 gmt.badZoneOffset	= The timezone offset %1$d is out of range of -12 .. 14.
 
 #
+# From GUnzip.java and GZip.java
+#
+gunzip.badOption		= Unknown option: "-%1$s"!
+gunzip.missingOutputName	= The "-output" option requires a file name argument!
+gunzip.noFiles			= No files processed.
+gunzip.cannotFindOrRead		= Cannot find or read the input file: "%1$s"!
+gunzip.wrongExtension		= The input file (%1$s) doesn't have the (required) ".gz" extension.
+gunzip.ioError			= Error reading the input or writing the output file (%1$s): %2$s
+
+#
+# From Hash.java
+#
+hash.inputBytes	= "Input bytes: "
+
+hash.errBadOption	= Unrecognized option: '%1$s' -- ignored!
+hash.errBadDigest	= Unrecognized digest algorithm: '%1$s'!%n
+hash.errException	= Exception while processing file '%1$s':%n%2$s
+hash.errNoFiles		= No files or strings given to process!
+
+hash.help1	= Hash - a program to compute cryptographic hash values
+hash.help2	= -----------------------------------------------------
+hash.help3	= ""
+hash.help4	= Usage: hsh [options] [files] [values]
+hash.help5	= ""
+hash.help6	= Options:
+hash.help7	= \t--lower\t\tforce hex output to lower-case
+hash.help8	= \t--upper\t\tforce hex output to UPPER-CASE
+hash.help9	= \t--lines\t\tprocess input files one line at a time
+hash.help10	= \t--line\t\tsame
+hash.help11	= \t--file\t\tcompute one hash for the entire input file
+hash.help12	= \t--verbose\toutput verbose messages during processing
+hash.help13	= \t--utf8\t\tprocess input files as UTF-8 encoded
+hash.help14	= \t--UTF-8\t\tsame
+hash.help15	= \t--native\tprocess input files using native character set: '%CHARSET%'
+hash.help16	= \t--<nnn>\t\tlimit output to <nnn> bytes
+hash.help17	= \t--split[<ch>]\tsplit the hex bytes with comma or given <ch>
+hash.help18	= \t--prefix\tif splitting bytes, output a \"0x\" prefix on each byte
+hash.help19	= \t--algorithm=<name>\tspecify an alternate digest algorithm (not SHA-256):
+hash.help20	= \t\t\t\tMD2, MD5, SHA-1, SHA-256, SHA-384 or SHA-512
+hash.help21	= \t\t\t\t(use \"os md\" to list the available algorithms)
+hash.help22	= \t--version\tdisplay version information
+hash.help23	= \t--help\t\tprint this help message
+hash.help24	= \t-? or -h\tsame
+hash.help25	= ""
+hash.help26	= Note: options may be specified by \"-\", \"--\" or \"/\" (on Windows).
+hash.help27	= Note: [files] may not contain wild-card ('?' or '*') characters
+hash.help28	= "      [values] are assumed if the string given does not match any existing file name"
+hash.help29	= ""
+hash.help30	= Additional wrapper scripts are available for convenience:
+hash.help31	= \tmd5\tcompute using the "MD5" algorithm
+hash.help32	= \tsha1\tuse the "SHA-1" digest
+hash.help33	= \tsha256\tcompute using the default "SHA-256" algorithm
+hash.help34	= \tsha512\tdo the calculations using "SHA-512" as the message digest
+hash.help35	= ""
+
+#
 # From Head.java
 #
 head.invalidLines	= Number of lines must be a valid integer.
@@ -145,22 +193,6 @@ head.invalidPath	= Unable to find the file "%1$s".
 head.ioError		= I/O error: %1$s
 head.fileHeader		= <Cy>======== <Gr*!>%1$s<.> ========<-->
 head.number		= <Yw!>%1$3d: <-->
-
-#
-# From IsDir.java
-#
-isdir.help1	= ""
-isdir.help2	= "Usage: isdir _path_"
-isdir.help3	= ""
-isdir.help4	= "  Exit code will be 0 if the given _path_ really exists and is a directory"
-isdir.help5	= "                    1 if the _path_ is some other kind of file"
-isdir.help6	= "                    2 if there were either none or too many arguments given"
-isdir.help7	= "                    3 if the _path_ does not exist as typed"
-isdir.help8	= ""
-
-isdir.pathRequired	= Error: one path name is required!
-isdir.tooManyArgs	= Error: too many arguments given!
-isdir.cannotFindPath	= Cannot find the requested path: "%1$s"!
 
 #
 # From HexDump.java
@@ -195,6 +227,22 @@ hexdump.invalidPath		= Unable to find the file "%1$s".
 hexdump.ioError			= I/O error: %1$s
 hexdump.missingOutputFile	= Missing file name for "-out" option.
 hexdump.missingOutputCharset	= Missing charset name for "-charset" option.
+
+#
+# From IsDir.java
+#
+isdir.help1	= ""
+isdir.help2	= "Usage: isdir _path_"
+isdir.help3	= ""
+isdir.help4	= "  Exit code will be 0 if the given _path_ really exists and is a directory"
+isdir.help5	= "                    1 if the _path_ is some other kind of file"
+isdir.help6	= "                    2 if there were either none or too many arguments given"
+isdir.help7	= "                    3 if the _path_ does not exist as typed"
+isdir.help8	= ""
+
+isdir.pathRequired	= Error: one path name is required!
+isdir.tooManyArgs	= Error: too many arguments given!
+isdir.cannotFindPath	= Cannot find the requested path: "%1$s"!
 
 #
 # From OS.java

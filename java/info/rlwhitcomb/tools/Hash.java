@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2010-2011,2015,2018-2022 Roger L. Whitcomb.
+ * Copyright (c) 2010-2011,2015,2018-2022,2024 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -56,10 +56,15 @@
  *	    Use Exceptions for exception messages.
  *	09-Jul-2022 (rlwhitcomb)
  *	    #393: Cleanup imports.
+ *	10-May-2024 (rlwhitcomb)
+ *	    #671: Move all text into resource file. Add version printout.
+ *	    More aliases for command-line options.
  */
 package info.rlwhitcomb.tools;
 
+import info.rlwhitcomb.util.Environment;
 import info.rlwhitcomb.util.Exceptions;
+import info.rlwhitcomb.util.Intl;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -69,6 +74,8 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -153,31 +160,10 @@ public class Hash {
 	 * Output a small help screen.
 	 */
 	private static void printHelp() {
-	    System.err.println("Hash - a program to compute cryptographic hash values");
-	    System.err.println("-----------------------------------------------------");
-	    System.err.println("Usage: java Hash [options] [files] [values]");
-	    System.err.println("Options:");
-	    System.err.println("\t--lower\t\tforce hex output to lower-case");
-	    System.err.println("\t--upper\t\tforce hex output to UPPER-CASE");
-	    System.err.println("\t--lines\t\tprocess input files one line at a time");
-	    System.err.println("\t--line\t\tsame");
-	    System.err.println("\t--file\t\tcompute one hash for the entire input file");
-	    System.err.println("\t--verbose\toutput verbose messages during processing");
-	    System.err.println("\t--utf8\t\tprocess input files as UTF-8 encoded");
-	    System.err.println("\t--UTF-8\t\tsame");
-	    System.err.format("\t--native\tprocess input files using native character set: '%1$s'%n", defaultCharset.displayName());
-	    System.err.println("\t--<nnn>\t\tlimit output to <nnn> bytes");
-	    System.err.println("\t--split[<ch>]\tsplit the hex bytes with comma or given <ch>");
-	    System.err.println("\t--prefix\tif splitting bytes, output a \"0x\" prefix on each byte");
-	    System.err.println("\t--algorithm=<name>\tspecify an alternate digest algorithm (not SHA-256):");
-	    System.err.println("\t\t\t\tMD2, MD5, SHA-1, SHA-256, SHA-384 or SHA-512");
-	    System.err.println("\t\t\t\t(use \"os md\" to list the available algorithms)");
-	    System.err.println("\t--help\t\tprint this help message");
-	    System.err.println("\t-? or -h\tsame");
-	    System.err.println();
-	    System.err.println("Note: options may be specified by \"-\", \"--\" or \"/\" (on Windows).");
-	    System.err.println("Note: [files] may not contain wild-card ('?' or '*') characters");
-	    System.err.println("      [values] are assumed if the string given does not match any existing file name");
+	    Map<String, String> values = new HashMap<>();
+	    values.put("CHARSET", defaultCharset.displayName());
+
+	    Intl.printHelp("tools#hash", values);
 	}
 
 
@@ -269,7 +255,7 @@ public class Hash {
 		    __md.reset();
 		    if (verbose) {
 			byte[] input = line.getBytes(charset);
-			System.out.print("Input bytes: ");
+			System.out.print(Intl.getString("tools#hash.inputBytes"));
 			printDigest(input, 0);
 			__md.update(input);
 		    }
@@ -287,7 +273,7 @@ public class Hash {
 		int len;
 		while ((len = fis.read(bytes)) != -1) {
 		    if (verbose) {
-			System.out.print("Input bytes: ");
+			System.out.print(Intl.getString("tools#hash.inputBytes"));
 			printDigest(bytes, len, 0);
 		    }
 		    __md.update(bytes, 0, len);
@@ -302,7 +288,7 @@ public class Hash {
 	    __md.reset();
 	    if (verbose) {
 		byte[] input = line.getBytes(charset);
-		System.out.print("Input bytes: ");
+		System.out.print(Intl.getString("tools#hash.inputBytes"));
 		printDigest(input, 0);
 		__md.update(input);
 	    }
@@ -334,29 +320,33 @@ public class Hash {
 	    for (String a : args) {
 		String s;
 		if ((s = checkOption(a)) != null) {
-		    if (s.equalsIgnoreCase("line") || s.equalsIgnoreCase("lines")) {
+		    if (s.equalsIgnoreCase("lines") || s.equalsIgnoreCase("line") || s.equalsIgnoreCase("l")) {
 			doLines = true;
 		    }
-		    else if (s.equalsIgnoreCase("file")) {
+		    else if (s.equalsIgnoreCase("file") || s.equalsIgnoreCase("f")) {
 			doLines = false;
 		    }
-		    else if (s.equalsIgnoreCase("lower")) {
+		    else if (s.equalsIgnoreCase("lower") || s.equalsIgnoreCase("low")) {
 			doLower = true;
 		    }
-		    else if (s.equalsIgnoreCase("upper")) {
+		    else if (s.equalsIgnoreCase("upper") || s.equalsIgnoreCase("up")) {
 			doLower = false;
 		    }
 		    else if (s.equalsIgnoreCase("utf8") || s.equalsIgnoreCase("UTF-8")) {
 			doUTF8 = true;
 		    }
-		    else if (s.equalsIgnoreCase("native")) {
+		    else if (s.equalsIgnoreCase("native") || s.equalsIgnoreCase("n")) {
 			doUTF8 = false;
 		    }
-		    else if (s.equalsIgnoreCase("verbose")) {
+		    else if (s.equalsIgnoreCase("verbose") || s.equalsIgnoreCase("v")) {
 			verbose = true;
 		    }
-		    else if (s.equalsIgnoreCase("prefix")) {
+		    else if (s.equalsIgnoreCase("prefix") || s.equalsIgnoreCase("pre")) {
 			doPrefix = true;
+		    }
+		    else if (s.equalsIgnoreCase("version") || s.equalsIgnoreCase("vers") || s.equalsIgnoreCase("ver")) {
+			Environment.printProgramInfo();
+			return;
 		    }
 		    else if (s.equalsIgnoreCase("help") || s.equalsIgnoreCase("h") || s.equals("?")) {
 			printHelp();
@@ -381,7 +371,7 @@ public class Hash {
 				    numBytes = Integer.parseInt(s);
 				}
 				catch (NumberFormatException nfe) {
-				    System.err.format("Unrecognized option: '%1$s' -- ignored!%n", a);
+				    Intl.errFormat("tools#hash.errBadOption", a);
 				}
 			    }
 			}
@@ -394,7 +384,7 @@ public class Hash {
 		    __md = MessageDigest.getInstance(algorithmName);
 		}
 		catch (NoSuchAlgorithmException nsae) {
-		    System.err.format("Unrecognized digest algorithm: '%1$s'!%n%n", algorithmName);
+		    Intl.errFormat("tools#hash.badDigest", algorithmName);
 		    printHelp();
 		    return;
 		}
@@ -418,8 +408,7 @@ public class Hash {
 			    processFile(f);
 			}
 			catch (IOException ioe) {
-			    System.err.format("Exception while processing file '%1$s':%n%2$s%n",
-				f.getPath(), Exceptions.toString(ioe));
+			    Intl.errFormat("tools#hash.errException", f.getPath(), Exceptions.toString(ioe));
 			}
 		    }
 		    else if (doLines) {
@@ -441,8 +430,8 @@ public class Hash {
 	    }
 
 	    if (!didAnything) {
-		System.err.println("No files or strings given to process!");
-		System.err.println();
+		Intl.errPrintln("tools#hash.errNoFiles");
+		Intl.errPrintln();
 		printHelp();
 	    }
 	}
