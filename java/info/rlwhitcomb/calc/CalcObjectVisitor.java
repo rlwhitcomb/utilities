@@ -849,6 +849,8 @@
  *	    #668: Change "$echo" to "print" or "display" (that is, a statement not a directive).
  *	06-May-2024 (rlwhitcomb)
  *	    #672: Processing of "proper fractions" mode.
+ *	11-May-2024 (rlwhitcomb)
+ *	    #672: Fix for "@@" operator for proper fractions also.
  */
 package info.rlwhitcomb.calc;
 
@@ -1820,6 +1822,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    if (!allowNull)
 		nullCheck(value, ctx);
+
+	    if (value instanceof BigFraction && settings.properFractions)
+		((BigFraction) value).setAlwaysProper(true);
 
 	    return value == null ? "" : toStringValue(this, ctx, value, new StringFormat(quote, separators));
 	}

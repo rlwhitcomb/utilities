@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.50.9', date: d'2024-05-12',
+      issues: [ 672 ],
+      comment: 'Make proper fractions work with "@@" operator.'
+    },
     { version: '2.50.8', date: d'2024-05-09',
       issues: [ 672 ],
       comment: 'Directive and options to always display fractions as "proper" ("@F" format).'
