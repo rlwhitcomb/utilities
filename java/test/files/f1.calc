@@ -205,6 +205,11 @@ cf3 * cf2
 cf4 = complex(0, frac(7))
 cf1==cf4
 
+cf1[0]
+cf1[1]
+cf4[1]=6
+cf4
+
 // more to come (to complex powers)
 
 $silencedirectives pop

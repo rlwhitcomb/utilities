@@ -54,6 +54,8 @@
  *  09-May-23 rlw ----	Move F_ZERO back to BigFraction (too weird in here).
  *  13-Dec-23 rlw ----	Use MaxInt.
  *  30-Jan-24 rlw #649	Options for spacing of fraction values.
+ *  14-May-24 rlw ----	Conversion of Quaternion to complex in "valueOf". New "part" method
+ *			to extract one part or the other.
  */
 package info.rlwhitcomb.math;
 
@@ -1267,6 +1269,10 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 		return fromSet(set);
 	    }
 
+	    if (value instanceof Quaternion) {
+		return ((Quaternion) value).toComplex();
+	    }
+
 	    if (value instanceof BigFraction) {
 		return real((BigFraction) value);
 	    }
@@ -1350,6 +1356,43 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 
 		    return new ComplexNumber(rPart, iPart);
 		}
+	    }
+	}
+
+	/**
+	 * Extract one of the values by index.
+	 *
+	 * @param index {@code 0} for the real part, {@code 1} for the imaginary part.
+	 * @return      The indexed part of this value.
+	 * @throws      IllegalArgumentException if this index value is out of range.
+	 */
+	public Number part(final int index) {
+	    switch (index) {
+		case 0: return rational ? rFrac() : r();
+		case 1: return rational ? iFrac() : i();
+		default:
+		    throw new Intl.IllegalArgumentException("math#complex.badIndex", index);
+	    }
+	}
+
+	/**
+	 * Set one of the values by index.
+	 *
+	 * @param index {@code 0} for the real part, {@code 1} for the imaginary part.
+	 * @param value The new value for the specified part.
+	 * @return      New complex number with the specified part updated.
+	 * @throws      IllegalArgumentException if this index value is out of range.
+	 */
+	public ComplexNumber setPart(final int index, final Object value) {
+	    switch (index) {
+		case 0:
+		    return rational ? new ComplexNumber(BigFraction.valueOf(value), iFrac())
+				    : new ComplexNumber(getDecimal(value), i());
+		case 1:
+		    return rational ? new ComplexNumber(rFrac(), BigFraction.valueOf(value))
+				    : new ComplexNumber(r(), getDecimal(value));
+		default:
+		    throw new Intl.IllegalArgumentException("math#complex.badIndex", index);
 	    }
 	}
 

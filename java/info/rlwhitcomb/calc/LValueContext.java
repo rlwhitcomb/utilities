@@ -82,9 +82,12 @@
  *		  #611	Move processing of builtin functions to here.
  *  27-Sep-23 rlw #630	Add indexing into sets.
  *  23-Mar-24 rlw #664	Named parameter changes.
+ *  14-May-24 rlw ----	Index into complex numbers and quaternions to get the parts.
  */
 package info.rlwhitcomb.calc;
 
+import info.rlwhitcomb.math.ComplexNumber;
+import info.rlwhitcomb.math.Quaternion;
 import info.rlwhitcomb.util.Intl;
 import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.TerminalNode;
@@ -255,6 +258,12 @@ class LValueContext
 		    SetScope set = (SetScope) contextObject;
 		    return set.get(index);
 		}
+		else if (contextObject instanceof Quaternion) {
+		    return ((Quaternion) contextObject).part(index);
+		}
+		else if (contextObject instanceof ComplexNumber) {
+		    return ((ComplexNumber) contextObject).part(index);
+		}
 		else if (contextObject instanceof String) {
 		    String str = (String) contextObject;
 		    if (index >= str.length()) {
@@ -357,12 +366,16 @@ class LValueContext
 	    }
 	    else if (index != Integer.MIN_VALUE) {
 		if (context instanceof ArrayScope) {
-		    ArrayScope list = (ArrayScope) context;
-		    list.setValue(index, value);
+		    ((ArrayScope) context).setValue(index, value);
 		}
 		else if (context instanceof ObjectScope) {
-		    ObjectScope map = (ObjectScope) context;
-		    map.setValue(index, value);
+		    ((ObjectScope) context).setValue(index, value);
+		}
+		else if (context instanceof Quaternion) {
+		    parent.putContextObject(visitor, ((Quaternion) context).setPart(index, value));
+		}
+		else if (context instanceof ComplexNumber) {
+		    parent.putContextObject(visitor, ((ComplexNumber) context).setPart(index, value));
 		}
 		else if (context instanceof String) {
 		    String str = (String) context;
@@ -522,41 +535,30 @@ class LValueContext
 		    }
 		}
 
-		ArrayScope list = null;
-		ObjectScope map = null;
-		SetScope set = null;
+		Object arrayObj = null;
 
 		if (arrValue == null) {
 		    if (memberName != null) {
-			map = new ObjectScope(visitor.getSettings().sortKeys);
-			arrLValue.putContextObject(visitor, map);
+			arrayObj = new ObjectScope(visitor.getSettings().sortKeys);
 		    }
 		    else {
-			list = new ArrayScope();
-			arrLValue.putContextObject(visitor, list);
+			arrayObj = new ArrayScope();
 		    }
+		    arrLValue.putContextObject(visitor, arrayObj);
 		}
-		else if (arrValue instanceof ArrayScope) {
-		    list = (ArrayScope) arrValue;
+		else {
+		    arrayObj = arrValue;
 		}
-		else if (arrValue instanceof SetScope) {
-		    set = (SetScope) arrValue;
+		if (arrayObj instanceof ArrayScope || arrayObj instanceof SetScope ||
+		    arrayObj instanceof Quaternion || arrayObj instanceof ComplexNumber ||
+		    arrayObj instanceof String) {
+		    return new LValueContext(arrLValue, arrVarCtx, arrayObj, index);
 		}
-		else if (arrValue instanceof String) {
-		    return new LValueContext(arrLValue, arrVarCtx, arrValue, index);
+		else if (arrayObj instanceof ObjectScope) {
+		    return arrLValue.makeMapLValue(visitor, arrVarCtx, arrayObj, memberName);
 		}
 		else {
 		    throw new CalcExprException(arrVarCtx, "%calc#nonArrayValue", arrLValue, typeof(arrValue));
-		}
-
-		if (list != null) {
-		    return new LValueContext(arrLValue, arrVarCtx, list, index);
-		}
-		else if (set != null) {
-		    return new LValueContext(arrLValue, arrVarCtx, set, index);
-		}
-		else {
-		    return arrLValue.makeMapLValue(visitor, arrVarCtx, map, memberName);
 		}
 	    }
 	    else if (ctx instanceof CalcParser.ObjVarContext) {

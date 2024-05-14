@@ -34,8 +34,12 @@
  *			Comparable interface (same paradigm as ComplexNumber).
  *  05-May-23 rlw #558	New "negate()" method. Move F_ZERO into BigFraction.
  *  30-Jan-24 rlw #649	Options for extra spacing in fractional form.
+ *  14-May-24 rlw #674	New methods to determine if this is real, imaginary, or complex,
+ *			and then better conversions to real and complex.
  */
 package info.rlwhitcomb.math;
+
+import info.rlwhitcomb.util.Intl;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -266,6 +270,89 @@ public final class Quaternion extends Number
 	 */
 	public boolean isRational() {
 	    return rational;
+	}
+
+	/**
+	 * Is this quaternion uniquely the value zero?
+	 *
+	 * @return {@code true} if all parts are zero.
+	 * @see #normalize
+	 */
+	public boolean isZero() {
+	    if (rational)
+		return aFrac == null && bFrac == null && cFrac == null && dFrac == null;
+	    else
+		return a == null && b == null && c == null && d == null;
+	}
+
+	/**
+	 * Is this a pure real number (that is, the "b", "c", and "d" values are all zero)?
+	 * <p> Note: "a" could be zero as well, which means the value is zero, which is still
+	 * a pure real value.
+	 *
+	 * @return {@code true} if this quaternion is a pure real value.
+	 */
+	public boolean isPureReal() {
+	    if (rational)
+		return bFrac == null && cFrac == null && dFrac == null;
+	    else
+		return b == null && c == null && d == null;
+	}
+
+	/**
+	 * Is this is a pure imaginary number (that would be "a", "c", and "d" are all zero,
+	 * and "b" is non-zero)?
+	 *
+	 * @return {@code true} if this quaternion is a pure imaginary value.
+	 */
+	public boolean isPureImaginary() {
+	    if (rational)
+		return aFrac == null && bFrac != null && cFrac == null && dFrac == null;
+	    else
+		return a == null && b != null && c == null && d == null;
+	}
+
+	/**
+	 * Is this a pure complex number (that is, both "c" and "d" are zero)?
+	 * <p> Note: this will also return {@code true} if either {@link #isPureReal} or
+	 * {@link #isPureImaginary} return {@code true}, so those conditions should be
+	 * checked first.
+	 *
+	 * @return {@code true} if this quaternion is actually just a complex value.
+	 */
+	public boolean isPureComplex() {
+	    if (rational)
+		return (aFrac != null || bFrac != null) && cFrac == null && dFrac == null;
+	    else
+		return (a != null || b != null) && c == null && d == null;
+	}
+
+	/**
+	 * Convert this quaternion to a real value; if it {@link #isPureReal} then return
+	 * that value, otherwise compute the real {@link #magnitude} and return that.
+	 *
+	 * @param mc The rounding context for conversion (if necessary).
+	 * @return   The pure real value of this quaternion.
+	 */
+	public Number toReal(final MathContext mc) {
+	    return isPureReal() ? (rational ? aFrac() : a()) : magnitude(mc);
+	}
+
+	/**
+	 * If this quaternion is really just a complex number, then convert to that.
+	 *
+	 * @return The {@link ComplexNumber} value of this quaternion, if {@link #isPureComplex}
+	 * is {@code true}.
+	 * @throws IllegalArgumentException if there would be a loss of value.
+	 */
+	public ComplexNumber toComplex() {
+	    if (isPureComplex()) {
+		if (rational)
+		    return new ComplexNumber(aFrac(), bFrac());
+		else
+		    return new ComplexNumber(a(), b());
+	    }
+	    throw new Intl.IllegalArgumentException("math#quaternion.lossOfValue");
 	}
 
 	/**
@@ -555,6 +642,53 @@ public final class Quaternion extends Number
 			c().precision(),
 			d().precision());
 	}
+
+
+	/**
+	 * Return one part of this value (index operation).
+	 *
+	 * @param index An index from 0 .. 3 for one part of this value.
+	 * @return      This given part (either rational or not).
+	 * @throws      IllegalArgumentException if the index is out of range.
+	 */
+	public Number part(final int index) {
+	    switch (index) {
+		case 0: return rational ? aFrac() : a();
+		case 1: return rational ? bFrac() : b();
+		case 2: return rational ? cFrac() : c();
+		case 3: return rational ? dFrac() : d();
+		default:
+		    throw new Intl.IllegalArgumentException("math#quaternion.badIndex", index);
+	    }
+	}
+
+	/**
+	 * Set one part of this value (index operation).
+	 *
+	 * @param index An index from 0 .. 3 for one part of this value.
+	 * @param value New value for the specified part.
+	 * @return      New quaternion value with the given part updated.
+	 * @throws      IllegalArgumentException if the index is out of range.
+	 */
+	public Quaternion setPart(final int index, final Object value) {
+	    switch (index) {
+		case 0:
+		    return rational ? new Quaternion(BigFraction.valueOf(value), bFrac(), cFrac(), dFrac())
+				    : new Quaternion(ComplexNumber.getDecimal(value), b(), c(), d());
+		case 1:
+		    return rational ? new Quaternion(aFrac(), BigFraction.valueOf(value), cFrac(), dFrac())
+				    : new Quaternion(a(), ComplexNumber.getDecimal(value), c(), d());
+		case 2:
+		    return rational ? new Quaternion(aFrac(), bFrac(), BigFraction.valueOf(value), dFrac())
+				    : new Quaternion(a(), b(), ComplexNumber.getDecimal(value), d());
+		case 3:
+		    return rational ? new Quaternion(aFrac(), bFrac(), cFrac(), BigFraction.valueOf(value))
+				    : new Quaternion(a(), b(), c(), ComplexNumber.getDecimal(value));
+		default:
+		    throw new Intl.IllegalArgumentException("math#quaternion.badIndex", index);
+	    }
+	}
+
 
 
 	public BigDecimal a() {

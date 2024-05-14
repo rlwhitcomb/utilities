@@ -244,6 +244,8 @@
  *	20-Mar-2024 (rlwhitcomb)
  *	    #665: "addOp" and "compareValues" need to convert values using
  *	    "toStringValue" instead of generic "toString".
+ *	14-May-2024 (rlwhitcomb)
+ *	    "toDecimalValue" does a better job on complex and quaternion values.
  */
 package info.rlwhitcomb.calc;
 
@@ -797,10 +799,14 @@ public final class CalcUtil
 		return fixup(value);
 	    else if (value instanceof BigFraction)
 		return fixup(((BigFraction) value).toDecimal(mc));
-	    else if (value instanceof ComplexNumber)
-		return fixup(((ComplexNumber) value).r());
-	    else if (value instanceof Quaternion)
-		return fixup(((Quaternion) value).a());
+	    else if (value instanceof ComplexNumber) {
+		ComplexNumber cValue = (ComplexNumber) value;
+		return fixup(cValue.isPureReal() ? cValue.r() : cValue.abs(mc));
+	    }
+	    else if (value instanceof Quaternion) {
+		Quaternion qValue = (Quaternion) value;
+		return fixup(qValue.isPureReal() ? qValue.a() : qValue.magnitude(mc));
+	    }
 	    else if (value instanceof Boolean)
 		return ((Boolean) value).booleanValue() ? BigDecimal.ONE : BigDecimal.ZERO;
 	    else if (isFloat(value))

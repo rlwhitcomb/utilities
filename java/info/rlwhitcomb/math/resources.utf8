@@ -1,7 +1,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2022 Roger L. Whitcomb.
+# Copyright (c) 2022,2024 Roger L. Whitcomb.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -24,10 +24,12 @@
 #       Internationalizable strings for the info.rlwhitcomb.math code.
 #
 # History:
-#  19-Sep-22 rlw #426:	Original version for "DateUtil".
-#  12-Oct-22 rlw #514:	Move applicable resources from "util" package to here.
-#  18-Oct-22 rlw #480:	Update "badKMG" message for extended range.
-#		 #525:	Add some coloring to numeric messages.
+#  19-Sep-22 rlw #426	Original version for "DateUtil".
+#  12-Oct-22 rlw #514	Move applicable resources from "util" package to here.
+#  18-Oct-22 rlw #480	Update "badKMG" message for extended range.
+#		 #525	Add some coloring to numeric messages.
+#  14-May-24 rlw ----	New message when losing value in conversion.
+#			Messages for index out of range in "part" methods.
 #
 
 #
@@ -78,4 +80,12 @@ fraction.unknownFracChar	= Unsupported fraction character <y>%1$s<.>.
 complex.notRecognized	= Unable to convert <y>%1$s<.> to complex number.
 complex.noEmptyListMap	= Unable to create a complex number from an empty list or map.
 complex.tooManyValues	= Complex number only needs one or two values to define.
+complex.badIndex	= Index <y>%1$d<.> is out of range of 0 .. 1.
+
+#
+# From Quaternion.java
+#
+quaternion.lossOfValue	= Conversion from quaternion to complex loses the "c" and "d" axes.
+quaternion.badIndex	= Index <y>%1$d<.> is out of range of 0 .. 3.
+
 

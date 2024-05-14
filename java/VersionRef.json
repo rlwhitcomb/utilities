@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.53', date: d'2024-05-14',
+      issues: [ ],
+      comment: 'Better conversion of complex and quaternion to decimal; indexing into their parts.'
+    },
     { version: '2.52', date: d'2024-05-14',
       issues: [ 674 ],
       comment: 'Complex square and fourth roots for negative real values.'
