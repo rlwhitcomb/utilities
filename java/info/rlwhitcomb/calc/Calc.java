@@ -353,6 +353,8 @@
  *	    #659: Oops! Need to use "<y>" instead of "<x>" for this highlighting.
  *	08-May-2024 (rlwhitcomb)
  *	    #672: New command line option for proper fractions.
+ *	13-May-2024 (rlwhitcomb)
+ *	    Rename "setVariable" method to "setGlobalVariable".
  */
 package info.rlwhitcomb.calc;
 
@@ -1205,7 +1207,7 @@ public class Calc
 
 		// Set the variables defined on the command line
 		for (java.util.Map.Entry<String, String> var : variables.entrySet()) {
-		    visitor.setVariable(var.getKey(), var.getValue());
+		    visitor.setGlobalVariable(var.getKey(), var.getValue());
 		}
 
 		// Try to read and process any given libraries before doing anything else
@@ -2733,7 +2735,7 @@ public class Calc
 
 		    // Set the variables defined on the command line
 		    for (java.util.Map.Entry<String, String> var : variables.entrySet()) {
-			visitor.setVariable(var.getKey(), var.getValue());
+			visitor.setGlobalVariable(var.getKey(), var.getValue());
 		    }
 
 		    // Try to read and process any given libraries before doing anything else

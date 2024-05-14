@@ -3,10 +3,14 @@
  */
 $quiet on
 $rational on
+$properfractions on
 $colors off
 
-loop m over 1/32 .. 31/32, 1/32 {
-   f = `${m@-f}`
-   display `${pad(f, 5)}\t= ${m@d}`
+loop m over 1/64 .. 1/2, 1/64 {
+   n = m + 1/2
+   f = @@m
+   g = @@n
+   md = `${m@d}`
+   display `${pad(f, 5)}\t= ${rpad(md, 6)}\t\t${pad(g, 5)}\t= ${n@d}`
 }
 

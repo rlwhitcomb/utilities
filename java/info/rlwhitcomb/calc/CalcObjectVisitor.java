@@ -851,6 +851,9 @@
  *	    #672: Processing of "proper fractions" mode.
  *	11-May-2024 (rlwhitcomb)
  *	    #672: Fix for "@@" operator for proper fractions also.
+ *	13-May-2024 (rlwhitcomb)
+ *	    #673: Implement "iterateOverRangeExpr" and all supporting code for fractions.
+ *	    Rename "setVariable" to "setGlobalVariable".
  */
 package info.rlwhitcomb.calc;
 
@@ -1012,7 +1015,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		}
 
 		/**
-		 * Find the length of the arithmetic sequence, which is {@code (stop - start) / step}.
+		 * Find the length of the arithmetic sequence, which is {@code (stop - start) / step + 1}.
 		 *
 		 * @param start  Starting value of the sequence.
 		 * @param stop   Ending value of the sequence.
@@ -1026,6 +1029,13 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			int iStep  = (Integer) step;
 
 			return (iStop - iStart) / iStep + 1;
+		    }
+		    else if (start instanceof BigFraction) {
+			BigFraction fStart = (BigFraction) start;
+			BigFraction fStop  = (BigFraction) stop;
+			BigFraction fStep  = (BigFraction) step;
+
+			return fStop.subtract(fStart).divide(fStep).add(BigFraction.ONE);
 		    }
 		    else {
 			BigDecimal dStart = (BigDecimal) start;
@@ -1048,7 +1058,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		 * @return        Whether or not the target value is exactly contained in the range.
 		 */
 		static boolean containedIn(CalcObjectVisitor visitor, Object value, Number start, Number stop, Number step, ParserRuleContext ctx) {
-		    // The range values will either be all integers or all decimal values
+		    // The range values will either be all integers, all fractions, or all decimal values
 		    if (start instanceof Integer) {
 			int iValue = convertToInt(value, visitor.settings.mc, ctx);
 			int iStart = (Integer) start;
@@ -1060,6 +1070,21 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			}
 			else {
 			    return (iValue >= iStart && iValue <= iStop) && ((iValue - iStart) % iStep == 0);
+			}
+		    }
+		    else if (start instanceof BigFraction) {
+			BigFraction fValue = convertToFraction(value, ctx);
+			BigFraction fStart = (BigFraction) start;
+			BigFraction fStop  = (BigFraction) stop;
+			BigFraction fStep  = (BigFraction) step;
+
+			if (fStep.signum() < 0) {
+			    return (fValue.compareTo(fStop) >= 0 && fValue.compareTo(fStart) <= 0) &&
+				fValue.add(fStart).remainder(fStep).isZero();
+			}
+			else {
+			    return (fValue.compareTo(fStart) >= 0 && fValue.compareTo(fStop) <= 0) &&
+				fValue.subtract(fStart).remainder(fStep).isZero();
 			}
 		    }
 		    else {
@@ -1369,7 +1394,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	 * @param value	The original string value to set, which will be converted
 	 *		(if possible) to a number or boolean.
 	 */
-	public void setVariable(final String name, final String value) {
+	public void setGlobalVariable(final String name, final String value) {
 	    globals.setValue(name, stringToValue(value));
 	}
 
@@ -3170,6 +3195,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		final boolean doingWithin)
 	{
 	    List<CalcParser.ExprContext> exprs = null;
+	    CalcParser.ExprContext zeroExpr = null;
 	    CalcParser.ExprContext stepExpr = null;
 	    Iterator<Object> iter = null;
 	    java.util.stream.IntStream codePoints  = null;
@@ -3181,9 +3207,15 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    BigDecimal dStop  = BigDecimal.ONE;
 	    BigDecimal dStep  = BigDecimal.ONE;
 
+	    BigFraction fStart = BigFraction.ONE;
+	    BigFraction fStop  = BigFraction.ONE;
+	    BigFraction fStep  = BigFraction.ONE;
+
 	    int start = 1;
 	    int stop  = 1;
 	    int step  = 1;
+
+	    boolean doingFractions = false;
 
 	    Object lastValue = null;
 
@@ -3198,13 +3230,17 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 		if (exprs.size() == 0) {
 		    // This is the case of '(' ')', or an empty list
+		    visitor.start();
+		    visitor.finish();
 		    return lastValue;
 		}
 		else if (exprs.size() == 1) {
+		    zeroExpr = exprs.get(0);
+		    Object obj = evaluate(zeroExpr);
+
 		    // number of times, starting from 1
 		    if (allowSingle) {
 			// or it could be an array, object, or string to iterate over
-			Object obj = evaluate(exprs.get(0));
 			if (obj instanceof ObjectScope) {
 			    stepWise = false;
 			    @SuppressWarnings("unchecked")
@@ -3227,36 +3263,79 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			    stepWise = false;
 			    codePoints = ((String) obj).codePoints();
 			}
+			else if (obj instanceof BigFraction && settings.rationalMode) {
+			    fStop = (BigFraction) obj;
+			    doingFractions = true;
+			    allowWithin = true;
+			}
 			else {
-			    dStop = getDecimalValue(exprs.get(0));
+			    dStop = toDecimalValue(this, obj, settings.mc, zeroExpr);
 			    allowWithin = true;
 			}
 		    }
+		    else if (obj instanceof BigFraction && settings.rationalMode) {
+			fStop = (BigFraction) obj;
+			doingFractions = true;
+			allowWithin = true;
+		    }
 		    else {
-			dStop = getDecimalValue(exprs.get(0));
+			dStop = toDecimalValue(this, obj, settings.mc, zeroExpr);
 			allowWithin = true;
 		    }
 		}
 		else if (exprs.size() == 2) {
+		    zeroExpr = exprs.get(0);
+		    CalcParser.ExprContext expr1 = exprs.get(1);
+		    Object obj0 = evaluate(zeroExpr);
+		    Object obj1 = evaluate(expr1);
+
 		    if (hasDots) {
 			// start .. stop
-			dStart = getDecimalValue(exprs.get(0));
-			dStop  = getDecimalValue(exprs.get(1));
+			if (obj0 instanceof BigFraction && settings.rationalMode) {
+			    fStart = (BigFraction) obj0;
+			    fStop  = toFractionValue(this, obj1, expr1);
+			    doingFractions = true;
+			}
+			else {
+			    dStart = toDecimalValue(this, obj0, settings.mc, zeroExpr);
+			    dStop  = toDecimalValue(this, obj1, settings.mc, expr1);
+			}
 		    }
 		    else {
 			// stop, step
-			stepExpr = exprs.get(1);
-			dStop = getDecimalValue(exprs.get(0));
-			dStep = getDecimalValue(stepExpr);
+			stepExpr = expr1;
+
+			if (obj0 instanceof BigFraction && settings.rationalMode) {
+			    fStop = (BigFraction) obj0;
+			    fStep = toFractionValue(this, obj1, stepExpr);
+			    doingFractions = true;
+			}
+			else {
+			    dStop = toDecimalValue(this, obj0, settings.mc, zeroExpr);
+			    dStep = toDecimalValue(this, obj1, settings.mc, stepExpr);
+			}
 			allowWithin = true;
 		    }
 		}
 		else {
 		    // start .. stop, step
+		    zeroExpr = exprs.get(0);
+		    CalcParser.ExprContext expr1 = exprs.get(1);
 		    stepExpr = exprs.get(2);
-		    dStart = getDecimalValue(exprs.get(0));
-		    dStop  = getDecimalValue(exprs.get(1));
-		    dStep  = getDecimalValue(stepExpr);
+		    Object obj0 = evaluate(zeroExpr);
+		    Object obj1 = evaluate(expr1);
+
+		    if (obj0 instanceof BigFraction && settings.rationalMode) {
+			fStart = (BigFraction) obj0;
+			fStop  = toFractionValue(this, obj1, expr1);
+			fStep  = getFractionValue(stepExpr);
+			doingFractions = true;
+		    }
+		    else {
+			dStart = toDecimalValue(this, obj0, settings.mc, zeroExpr);
+			dStop  = toDecimalValue(this, obj1, settings.mc, expr1);
+			dStep  = getDecimalValue(stepExpr);
+		    }
 		}
 	    }
 
@@ -3264,106 +3343,157 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    visitor.start();
 
 	    if (stepWise) {
-		// Try to convert loop values to exact integers if possible
-		try {
-		    start = dStart.intValueExact();
-		    stop  = dStop.intValueExact();
-		    step  = dStep.intValueExact();
+		if (doingFractions) {
+		    try {
+			if (fStep.isZero())
+			    throw new CalcExprException("%calc#infLoopStepZero", stepExpr);
 
-		    if (step == 0)
-			throw new CalcExprException("%calc#infLoopStepZero", stepExpr);
-
-		    if (allowWithin) {
-			if (doingWithin) {
-			    start = 0;
-			    if (step < 0)
-				stop++;
-			    else
-				stop--;
-			}
-			else if (step < 0) {
-			    start = -start;
-			}
-		    }
-		    else if (doingWithin) {
-			throw new CalcExprException("%calc#withinNotAllowed", exprs.get(0));
-		    }
-
-		    // Try to apply optimization if possible to avoid stupidly running through
-		    // all the values if we don't need to
-		    boolean skipLoop = false;
-		    if (visitor.getPurpose() != Purpose.ALL) {
-			try {
-			    lastValue = visitor.finalValue(start, stop, step);
-			    skipLoop = true;
-			}
-			catch (IllegalArgumentException iae) {
-			    ;
-			}
-		    }
-		    if (!skipLoop) {
-			if (step < 0) {
-			    for (int loopIndex = start; loopIndex >= stop; loopIndex += step) {
-				lastValue = visitor.apply(BigInteger.valueOf(loopIndex));
+			if (allowWithin) {
+			    if (doingWithin) {
+				fStart = BigFraction.ZERO;
+				if (fStep.signum() < 0)
+				    fStop = fStop.increment();
+				else
+				    fStop = fStop.decrement();
+			    }
+			    else if (fStep.signum() < 0) {
+				fStart = fStart.negate();
 			    }
 			}
-			else {
-			    for (int loopIndex = start; loopIndex <= stop; loopIndex += step) {
-				lastValue = visitor.apply(BigInteger.valueOf(loopIndex));
+			else if (doingWithin) {
+			    throw new CalcExprException("%calc#withinNotAllowed", zeroExpr);
+			}
+
+			// Apply optimization if possible
+			boolean skipLoop = false;
+			if (visitor.getPurpose() != Purpose.ALL) {
+			    try {
+				lastValue = visitor.finalValue(fStart, fStop, fStep);
+				skipLoop = true;
+			    }
+			    catch (IllegalArgumentException iae) {
+				;
 			    }
 			}
+			if (!skipLoop) {
+			    if (fStep.signum() < 0) {
+				for (BigFraction loopIndex = fStart; loopIndex.compareTo(fStop) >= 0; loopIndex = loopIndex.add(fStep)) {
+				    lastValue = visitor.apply(loopIndex);
+				}
+			    }
+			    else {
+				for (BigFraction loopIndex = fStart; loopIndex.compareTo(fStop) <= 0; loopIndex = loopIndex.add(fStep)) {
+				    lastValue = visitor.apply(loopIndex);
+				}
+			    }
+			}
+		    }
+		    finally {
+			visitor.finish();
 		    }
 		}
-		catch (ArithmeticException ae) {
-		    // This means we stubbornly have fractional values, so use as such
-		    int sign = dStep.signum();
+		else {
+		    // Try to convert loop values to exact integers if possible
+		    try {
+			start = dStart.intValueExact();
+			stop  = dStop.intValueExact();
+			step  = dStep.intValueExact();
 
-		    if (sign == 0)
-			throw new CalcExprException("%calc#infLoopStepZero", stepExpr);
+			if (step == 0)
+			    throw new CalcExprException("%calc#infLoopStepZero", stepExpr);
 
-		    if (allowWithin) {
-			if (doingWithin) {
-			    dStart = BigDecimal.ZERO;
-			    if (sign < 0)
-				dStop = dStop.add(BigDecimal.ONE);
-			    else
-				dStop = dStop.subtract(BigDecimal.ONE);
-			}
-			else if (step < 0) {
-			    dStart = dStart.negate();
-			}
-		    }
-		    else if (doingWithin) {
-			throw new CalcExprException("%calc#withinNotAllowed", exprs.get(0));
-		    }
-
-		    // Try to apply an optimization if possible to avoid running through all the values if
-		    // we can get the result some other way (such as for "sumof").
-		    boolean skipLoop = false;
-		    if (visitor.getPurpose() != Purpose.ALL) {
-			try {
-			    lastValue = visitor.finalValue(dStart, dStop, dStep);
-			    skipLoop = true;
-			}
-			catch (IllegalArgumentException iae) {
-			    ;
-			}
-		    }
-		    if (!skipLoop) {
-			if (sign < 0) {
-			    for (BigDecimal loopIndex = dStart; loopIndex.compareTo(dStop) >= 0; loopIndex = loopIndex.add(dStep)) {
-				lastValue = visitor.apply(fixupToInteger(loopIndex));
+			if (allowWithin) {
+			    if (doingWithin) {
+				start = 0;
+				if (step < 0)
+				    stop++;
+				else
+				    stop--;
+			    }
+			    else if (step < 0) {
+				start = -start;
 			    }
 			}
-			else {
-			    for (BigDecimal loopIndex = dStart; loopIndex.compareTo(dStop) <= 0; loopIndex = loopIndex.add(dStep)) {
-				lastValue = visitor.apply(fixupToInteger(loopIndex));
+			else if (doingWithin) {
+			    throw new CalcExprException("%calc#withinNotAllowed", zeroExpr);
+			}
+
+			// Try to apply optimization if possible to avoid stupidly running through
+			// all the values if we don't need to
+			boolean skipLoop = false;
+			if (visitor.getPurpose() != Purpose.ALL) {
+			    try {
+				lastValue = visitor.finalValue(start, stop, step);
+				skipLoop = true;
+			    }
+			    catch (IllegalArgumentException iae) {
+				;
+			    }
+			}
+			if (!skipLoop) {
+			    if (step < 0) {
+				for (int loopIndex = start; loopIndex >= stop; loopIndex += step) {
+				    lastValue = visitor.apply(BigInteger.valueOf(loopIndex));
+				}
+			    }
+			    else {
+				for (int loopIndex = start; loopIndex <= stop; loopIndex += step) {
+				    lastValue = visitor.apply(BigInteger.valueOf(loopIndex));
+				}
 			    }
 			}
 		    }
-		}
-		finally {
-		    visitor.finish();
+		    catch (ArithmeticException ae) {
+			// This means we stubbornly have fractional values, so use as such
+			int sign = dStep.signum();
+
+			if (sign == 0)
+			    throw new CalcExprException("%calc#infLoopStepZero", stepExpr);
+
+			if (allowWithin) {
+			    if (doingWithin) {
+				dStart = BigDecimal.ZERO;
+				if (sign < 0)
+				    dStop = dStop.add(BigDecimal.ONE);
+				else
+				    dStop = dStop.subtract(BigDecimal.ONE);
+			    }
+			    else if (step < 0) {
+				dStart = dStart.negate();
+			    }
+			}
+			else if (doingWithin) {
+			    throw new CalcExprException("%calc#withinNotAllowed", exprs.get(0));
+			}
+
+			// Try to apply an optimization if possible to avoid running through all the values if
+			// we can get the result some other way (such as for "sumof").
+			boolean skipLoop = false;
+			if (visitor.getPurpose() != Purpose.ALL) {
+			    try {
+				lastValue = visitor.finalValue(dStart, dStop, dStep);
+				skipLoop = true;
+			    }
+			    catch (IllegalArgumentException iae) {
+				;
+			    }
+			}
+			if (!skipLoop) {
+			    if (sign < 0) {
+				for (BigDecimal loopIndex = dStart; loopIndex.compareTo(dStop) >= 0; loopIndex = loopIndex.add(dStep)) {
+				    lastValue = visitor.apply(fixupToInteger(loopIndex));
+				}
+			    }
+			    else {
+				for (BigDecimal loopIndex = dStart; loopIndex.compareTo(dStop) <= 0; loopIndex = loopIndex.add(dStep)) {
+				    lastValue = visitor.apply(fixupToInteger(loopIndex));
+				}
+			    }
+			}
+		    }
+		    finally {
+			visitor.finish();
+		    }
 		}
 	    }
 	    else {
@@ -5093,6 +5223,13 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			int iStep  = (Integer) step;
 
 			return (iStop - iStart) / iStep + 1;
+		    }
+		    else if (start instanceof BigFraction) {
+			BigFraction fStart = (BigFraction) start;
+			BigFraction fStop  = (BigFraction) stop;
+			BigFraction fStep  = (BigFraction) step;
+
+			return fStop.subtract(fStart).divide(fStep).add(BigFraction.ONE);
 		    }
 		    else {
 			BigDecimal dStart = (BigDecimal) start;

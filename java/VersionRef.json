@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.51', date: d'2024-05-13',
+      issues: [ 673 ],
+      comment: 'Retain fractions in rational mode for loop variables.'
+    },
     { version: '2.50.9', date: d'2024-05-12',
       issues: [ 672 ],
       comment: 'Make proper fractions work with "@@" operator.'
