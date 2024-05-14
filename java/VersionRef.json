@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.52', date: d'2024-05-14',
+      issues: [ 674 ],
+      comment: 'Complex square and fourth roots for negative real values.'
+    },
     { version: '2.51', date: d'2024-05-13',
       issues: [ 673 ],
       comment: 'Retain fractions in rational mode for loop variables.'

@@ -854,6 +854,8 @@
  *	13-May-2024 (rlwhitcomb)
  *	    #673: Implement "iterateOverRangeExpr" and all supporting code for fractions.
  *	    Rename "setVariable" to "setGlobalVariable".
+ *	14-May-2024 (rlwhitcomb)
+ *	    #674: Implement "sqrt" and "fort" for complex results (negative arguments).
  */
 package info.rlwhitcomb.calc;
 
@@ -5008,12 +5010,11 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		throw new CalcExprException(ctx, "%calc#notImplemented", "square root of quaternion");
 	    }
 	    else if (value instanceof ComplexNumber) {
-		ComplexNumber cValue = (ComplexNumber) value;
-		return cValue.sqrt(settings.mcDivide);
+		return ((ComplexNumber) value).sqrt(settings.mcDivide);
 	    }
 	    else {
 		try {
-		    return MathUtil.sqrt(convertToDecimal(value, settings.mc, expr), settings.mcDivide);
+		    return MathUtil.sqrt2(convertToDecimal(value, settings.mc, expr), settings.mcDivide);
 		}
 		catch (IllegalArgumentException iae) {
 		    throw new CalcExprException(iae, ctx);
@@ -5050,12 +5051,17 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		throw new CalcExprException(ctx, "%calc#notImplemented", "fourth root of quaternion");
 	    }
 	    else if (value instanceof ComplexNumber) {
-		ComplexNumber cValue = (ComplexNumber) value;
-		return cValue.pow(D_ONE_FOURTH, settings.mc);
+		return ((ComplexNumber) value).pow(D_ONE_FOURTH, settings.mc);
 	    }
 	    else {
 		try {
-		    return MathUtil.sqrt(MathUtil.sqrt(convertToDecimal(value, settings.mc, expr), settings.mc), settings.mc);
+		    Number firstRoot = MathUtil.sqrt2(convertToDecimal(value, settings.mc, expr), settings.mcDivide);
+		    if (firstRoot instanceof ComplexNumber) {
+			return ((ComplexNumber) firstRoot).sqrt(settings.mcDivide);
+		    }
+		    else {
+			return MathUtil.sqrt2((BigDecimal) firstRoot, settings.mcDivide);
+		    }
 		}
 		catch (IllegalArgumentException iae) {
 		    throw new CalcExprException(iae, ctx);

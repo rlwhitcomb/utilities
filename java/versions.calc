@@ -3,7 +3,7 @@ $quiet on {
     const VERSION_INFO = 'VersionRef.json'
 
     // make sure the "defined" function is implemented
-    $requires '2.32.9-alpha'
+    $requires '2.32.9'
 
     // also make sure the standard library is loaded
     if !defined("version") {

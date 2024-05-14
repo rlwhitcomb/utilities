@@ -158,6 +158,14 @@ i**61 @I
 c9 = Complex("{ radius: 5, θ: 0.875 }")
 c9@p
 
+// Complex roots of real numbers
+cr1 = sqrt(-2)
+cr1²
+cr2 = cbrt(-3)
+cr2³
+cr3 = fort(-17)
+cr3⁴
+
 complex('1.2')
 complex('(4.739)')
 complex('-4.7i')

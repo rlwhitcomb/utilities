@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2021-2023 Roger L. Whitcomb.
+ * Copyright (c) 2021-2024 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -63,6 +63,7 @@
  *  14-Dec-23 rlw ----	Use MaxInt.
  *  15-Feb-24 rlw #654	Simple additional test in prime number calculations to avoid exceptions.
  *  05-Mar-24 rlw ----	Optimization in "pow" for 10**n.
+ *  14-May-24 rlw #674	New "sqrt2" method to return a complex result if the value is negative.
  */
 package info.rlwhitcomb.math;
 
@@ -968,18 +969,38 @@ public final class MathUtil
 	}
 
 	/**
+	 * Find the square root of a number, which could be real or complex.
+	 *
+	 * @param x	The value to find the square root of.
+	 * @param mc	The {@code MathContext} to use for rounding / calculating the result.
+	 * @return	The {@code sqrt(x)} value such that {@code x = result * result} (which
+	 *		could be a complex number).
+	 */
+	public static Number sqrt2(final BigDecimal x, final MathContext mc) {
+	    int sign = x.signum();
+
+	    BigDecimal y = sign < 0 ? x.abs() : x;
+	    BigDecimal root = sqrt(y, mc);
+
+	    return sign < 0 ? new ComplexNumber(null, root) : root;
+	}
+
+	/**
 	 * Find the positive square root of a number (non-negative).
 	 *
 	 * @param x	The value to find the square root of.
 	 * @param mc	The {@code MathContext} to use for rounding / calculating the result.
 	 * @return	The {@code sqrt(x)} value such that {@code x = result * result}.
+	 * @throws	IllegalArgumentException if the value is negative.
 	 */
 	public static BigDecimal sqrt(final BigDecimal x, final MathContext mc) {
 	    int sign = x.signum();
-	    if (sign < 0)
-		throw new Intl.IllegalArgumentException("math#math.sqrtNegative");
+
 	    if (sign == 0 || x.equals(BigDecimal.ONE))
 		return x;
+
+	    if (sign < 0)
+		throw new Intl.IllegalArgumentException("math#math.sqrtNegative");
 
 	    BigDecimal trial_root = BigDecimal.ONE.movePointRight((x.precision() - x.scale()) / 2);
 	    BigDecimal result = trial_root;
