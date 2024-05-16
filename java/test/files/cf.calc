@@ -1,0 +1,31 @@
+/*
+ * Compute the continued fraction representation of a rational fraction
+ */
+define cf(num, den) = {
+   var a = num, b = den
+   var f = []
+   if a < b {
+      f += 0
+      a, b = b, a
+   }
+   while true {
+      f += a \ b
+      const r = a % b
+      if r == 0 leave f
+      a, b = b, r
+   }
+}
+
+// All examples taken from https://pi.math.cornell.edu/~gautam/ContinuedFractions.pdf
+
+cf(43, 19)
+cf(19, 43)
+cf(3, 7)
+cf(7, 3)
+cf(225, 157)
+cf(7, 38)
+cf(5, 27)
+cf(17, 12)
+cf(21, 8)
+cf(2875, 1000)
+

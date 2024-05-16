@@ -62,3 +62,8 @@ def approx(a, exact) = {
 
 approx(e_frac, e)
 approx(pi_frac, pi)
+
+approx([2, 1, 7], 2.875)
+approx([1, 2, 3, 4, 5], 225/157)
+
+
