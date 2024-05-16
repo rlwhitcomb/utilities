@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.53.2', date: d'2024-05-16',
+      issues: [ ],
+      comment: 'Indexed access to parts of a fraction.'
+    },
     { version: '2.53', date: d'2024-05-14',
       issues: [ ],
       comment: 'Better conversion of complex and quaternion to decimal; indexing into their parts.'

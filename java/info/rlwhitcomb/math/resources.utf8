@@ -30,15 +30,17 @@
 #		 #525	Add some coloring to numeric messages.
 #  14-May-24 rlw ----	New message when losing value in conversion.
 #			Messages for index out of range in "part" methods.
+#  16-May-24 rlw ----	New error when losing imaginary part in integer conversion.
+#			Update some color codes.
 #
 
 #
 # From DateUtil
 #
-date.monthOutOfRange	= Month value <u>%1$d<.> is out of range of <y>1..12<.>
-date.dayOutOfRange	= Day value <u>%1$d<.> is out of range
-date.yearOutOfRange	= Year value <u>%1$d<.> is illegal or out of range
-date.badFormatString	= Bad form for the date format string: <u>%1$s<.>
+date.monthOutOfRange	= Month value <y>%1$d<.> is out of range of <u>1..12<.>
+date.dayOutOfRange	= Day value <y>%1$d<.> is out of range
+date.yearOutOfRange	= Year value <y>%1$d<.> is illegal or out of range
+date.badFormatString	= Bad form for the date format string: <y>%1$s<.>
 
 #
 # From NumericUtil.java
@@ -80,12 +82,13 @@ fraction.unknownFracChar	= Unsupported fraction character <y>%1$s<.>.
 complex.notRecognized	= Unable to convert <y>%1$s<.> to complex number.
 complex.noEmptyListMap	= Unable to create a complex number from an empty list or map.
 complex.tooManyValues	= Complex number only needs one or two values to define.
-complex.badIndex	= Index <y>%1$d<.> is out of range of 0 .. 1.
+complex.badIndex	= Index <y>%1$d<.> is out of range of <u>0 .. 1<.>.
+complex.imaginaryInt	= Number with imaginary part(s) cannot be converted to integer.
 
 #
 # From Quaternion.java
 #
 quaternion.lossOfValue	= Conversion from quaternion to complex loses the "c" and "d" axes.
-quaternion.badIndex	= Index <y>%1$d<.> is out of range of 0 .. 3.
+quaternion.badIndex	= Index <y>%1$d<.> is out of range of <u>0 .. 3<.>.
 
 

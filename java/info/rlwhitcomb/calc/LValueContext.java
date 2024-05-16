@@ -83,9 +83,11 @@
  *  27-Sep-23 rlw #630	Add indexing into sets.
  *  23-Mar-24 rlw #664	Named parameter changes.
  *  14-May-24 rlw ----	Index into complex numbers and quaternions to get the parts.
+ *  15-May-24 rlw ----	Also into fractions.
  */
 package info.rlwhitcomb.calc;
 
+import info.rlwhitcomb.math.BigFraction;
 import info.rlwhitcomb.math.ComplexNumber;
 import info.rlwhitcomb.math.Quaternion;
 import info.rlwhitcomb.util.Intl;
@@ -264,6 +266,9 @@ class LValueContext
 		else if (contextObject instanceof ComplexNumber) {
 		    return ((ComplexNumber) contextObject).part(index);
 		}
+		else if (contextObject instanceof BigFraction) {
+		    return ((BigFraction) contextObject).part(index);
+		}
 		else if (contextObject instanceof String) {
 		    String str = (String) contextObject;
 		    if (index >= str.length()) {
@@ -365,38 +370,46 @@ class LValueContext
 		}
 	    }
 	    else if (index != Integer.MIN_VALUE) {
-		if (context instanceof ArrayScope) {
-		    ((ArrayScope) context).setValue(index, value);
-		}
-		else if (context instanceof ObjectScope) {
-		    ((ObjectScope) context).setValue(index, value);
-		}
-		else if (context instanceof Quaternion) {
-		    parent.putContextObject(visitor, ((Quaternion) context).setPart(index, value));
-		}
-		else if (context instanceof ComplexNumber) {
-		    parent.putContextObject(visitor, ((ComplexNumber) context).setPart(index, value));
-		}
-		else if (context instanceof String) {
-		    String str = (String) context;
-		    StringBuilder buf = new StringBuilder(str);
-		    String newValue = CalcUtil.toStringValue(visitor, varCtx, value, new StringFormat(false, false));
-		    int newLen = index + newValue.length();
-		    if (index < 0)
-			newLen += str.length();
-
-		    // Ensure the builder has enough length to do the replacement
-		    while (buf.length() < newLen) {
-			buf.append(' ');
+		try {
+		    if (context instanceof ArrayScope) {
+			((ArrayScope) context).setValue(index, value);
 		    }
-		    buf.replace(index < 0 ? index + str.length() : index, newLen, newValue);
-		    context = buf.toString();
-		    // Have to update the parent as well with the new string
-		    parent.putContextObject(visitor, context);
+		    else if (context instanceof ObjectScope) {
+			((ObjectScope) context).setValue(index, value);
+		    }
+		    else if (context instanceof Quaternion) {
+			parent.putContextObject(visitor, ((Quaternion) context).setPart(index, value));
+		    }
+		    else if (context instanceof ComplexNumber) {
+			parent.putContextObject(visitor, ((ComplexNumber) context).setPart(index, value));
+		    }
+		    else if (context instanceof BigFraction) {
+			parent.putContextObject(visitor, ((BigFraction) context).setPart(index, value));
+		    }
+		    else if (context instanceof String) {
+			String str = (String) context;
+			StringBuilder buf = new StringBuilder(str);
+			String newValue = CalcUtil.toStringValue(visitor, varCtx, value, new StringFormat(false, false));
+			int newLen = index + newValue.length();
+			if (index < 0)
+			    newLen += str.length();
+
+			// Ensure the builder has enough length to do the replacement
+			while (buf.length() < newLen) {
+			    buf.append(' ');
+			}
+			buf.replace(index < 0 ? index + str.length() : index, newLen, newValue);
+			context = buf.toString();
+			// Have to update the parent as well with the new string
+			parent.putContextObject(visitor, context);
+		    }
+		    else {
+			// Should never happen
+			throw new Intl.IllegalStateException("calc#badAssign", this);
+		    }
 		}
-		else {
-		    // Should never happen
-		    throw new Intl.IllegalStateException("calc#badAssign", this);
+		catch (ArithmeticException ae) {
+		    throw new CalcExprException(ae, varCtx);
 		}
 	    }
 	    else {
@@ -551,7 +564,7 @@ class LValueContext
 		}
 		if (arrayObj instanceof ArrayScope || arrayObj instanceof SetScope ||
 		    arrayObj instanceof Quaternion || arrayObj instanceof ComplexNumber ||
-		    arrayObj instanceof String) {
+		    arrayObj instanceof BigFraction || arrayObj instanceof String) {
 		    return new LValueContext(arrLValue, arrVarCtx, arrayObj, index);
 		}
 		else if (arrayObj instanceof ObjectScope) {

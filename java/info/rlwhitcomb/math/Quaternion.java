@@ -36,6 +36,7 @@
  *  30-Jan-24 rlw #649	Options for extra spacing in fractional form.
  *  14-May-24 rlw #674	New methods to determine if this is real, imaginary, or complex,
  *			and then better conversions to real and complex.
+ *  16-May-24 rlw ----	Add "toBigIntegerExact()" method.
  */
 package info.rlwhitcomb.math;
 
@@ -689,6 +690,20 @@ public final class Quaternion extends Number
 	    }
 	}
 
+
+	/**
+	 * Convert to an exact integer representation, if possible.
+	 *
+	 * @return The {@link BigInteger} representation of this value, if it is pure real,
+	 *         and has no fractional part.
+	 * @throws ArithmeticException otherwise.
+	 */
+	public BigInteger toBigIntegerExact() {
+	    if (isPureReal()) {
+		return rational ? BigFraction.getInteger(aFrac()) : a().toBigIntegerExact();
+	    }
+	    throw new Intl.ArithmeticException("math#complex.imaginaryInt");
+	}
 
 
 	public BigDecimal a() {

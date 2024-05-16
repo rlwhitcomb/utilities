@@ -56,6 +56,7 @@
  *  30-Jan-24 rlw #649	Options for spacing of fraction values.
  *  14-May-24 rlw ----	Conversion of Quaternion to complex in "valueOf". New "part" method
  *			to extract one part or the other.
+ *  16-May-24 rlw ----	New "toBigIntegerExact()" method.
  */
 package info.rlwhitcomb.math;
 
@@ -1226,7 +1227,7 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 	    if (value instanceof BigFraction)
 		return ((BigFraction) value).toDecimal();
 	    if (value instanceof Number)
-		return new BigDecimal(((Number) value).doubleValue());
+		return new BigDecimal(value.toString());
 	    if (value instanceof String) {
 		try {
 		    return new BigDecimal((String) value);
@@ -1396,6 +1397,20 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 	    }
 	}
 
+
+	/**
+	 * Return an exact {@link BigInteger} value from this complex number, if possible.
+	 *
+	 * @return The exact {@code BigInteger} representation if this number is pure real with
+	 *         no fractional part.
+	 * @throws ArithmeticException otherwise.
+	 */
+	public BigInteger toBigIntegerExact() {
+	    if (isPureReal()) {
+		return rational ? BigFraction.getInteger(rFrac()) : r().toBigIntegerExact();
+	    }
+	    throw new Intl.ArithmeticException("math#complex.imaginaryInt");
+	}
 
 	@Override
 	public double doubleValue() {

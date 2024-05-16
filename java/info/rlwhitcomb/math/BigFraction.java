@@ -77,6 +77,8 @@
  *  09-May-23 rlw ----	Move F_ZERO into here (too weird inside ComplexNumber).
  *  30-Jan-24 rlw #649	Add parameter to "internalToString" for adding spaces or not (soon to be extended).
  *			Move the "space" parameter up to callers.
+ *  16-May-24 rlw ----	Add "part" and "setPart" methods to access numerator and denominator separately;
+ *			new "getInteger" helper method.
  */
 package info.rlwhitcomb.math;
 
@@ -629,6 +631,80 @@ public class BigFraction extends Number
 	 */
 	public int precision() {
 	    return Math.max(iPrecision(numer), iPrecision(denom));
+	}
+
+	/**
+	 * Get a {@link BigInteger} value from the given object.
+	 *
+	 * @param obj Some arbitrary object, which presumably will result
+	 *            in an integer value.
+	 * @return    That object converted to its integer value.
+	 * @throws    IllegalArgumentException if there's no possible conversion.
+	 * @throws    ArithmeticException if the conversion couldn't be made exactly
+	 *            (because of a fractional part).
+	 */
+	public static BigInteger getInteger(final Object obj) {
+	    if (obj instanceof BigInteger)
+		return (BigInteger) obj;
+
+	    if (obj instanceof BigDecimal)
+		return ((BigDecimal) obj).toBigIntegerExact();
+
+	    if (obj instanceof BigFraction)
+		return ((BigFraction) obj).toIntegerExact();
+
+	    if (obj instanceof ComplexNumber)
+		return ((ComplexNumber) obj).toBigIntegerExact();
+
+	    if (obj instanceof Quaternion)
+		return ((Quaternion) obj).toBigIntegerExact();
+
+	    if (obj instanceof Number)
+		return new BigDecimal(((Number) obj).toString()).toBigIntegerExact();
+
+	    return new BigInteger(obj.toString());
+	}
+
+	/**
+	 * Access either the numerator or denominator (indexing).
+	 *
+	 * @param index Either 0 or 1 to access the numerator or denominator.
+	 * @return      The appropriate part.
+	 */
+	public BigInteger part(final int index) {
+	    switch (index) {
+		case 0: return numer;
+		case 1: return denom;
+		default:
+		    throw new Intl.IllegalArgumentException("math#complex.badIndex", index);
+	    }
+	}
+
+	/**
+	 * Set either numerator or denominator separately (returning a new value).
+	 *
+	 * @param index Either 0 or 1 to set the numerator or denominator respectively.
+	 * @param obj   The respective value to set.
+	 * @return      New fraction with the specified part changed.
+	 */
+	public BigFraction setPart(final int index, final Object obj) {
+	    BigFraction result;
+	    BigInteger value = getInteger(obj);
+
+	    switch (index) {
+		case 0:
+		    result = new BigFraction(value, denom);
+		    break;
+		case 1:
+		    result = new BigFraction(numer, value);
+		    break;
+		default:
+		    throw new Intl.IllegalArgumentException("math#complex.badIndex", index);
+	    }
+	    if (alwaysProper)
+		result.setAlwaysProper(true);
+
+	    return result;
 	}
 
 	/**
