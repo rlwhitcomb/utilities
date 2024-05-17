@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.53.4', date: d'2024-05-17',
+      issues: [ ],
+      comment: 'Fix "round" to remove trailing zeros.'
+    },
     { version: '2.53.2', date: d'2024-05-16',
       issues: [ ],
       comment: 'Indexed access to parts of a fraction.'

@@ -856,6 +856,8 @@
  *	    Rename "setVariable" to "setGlobalVariable".
  *	14-May-2024 (rlwhitcomb)
  *	    #674: Implement "sqrt" and "fort" for complex results (negative arguments).
+ *	16-May-2024 (rlwhitcomb)
+ *	    "round" needs "fixupToInteger" on the result.
  */
 package info.rlwhitcomb.calc;
 
@@ -5280,7 +5282,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    BigDecimal e = getDecimalValue(e2ctx.expr(0));
 	    int iPlaces  = getIntValue(e2ctx.expr(1));
 
-	    return MathUtil.round(e, iPlaces);
+	    return fixupToInteger(MathUtil.round(e, iPlaces));
 	}
 
 	@Override

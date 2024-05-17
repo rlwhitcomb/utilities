@@ -246,7 +246,7 @@ $dec 60
 a = sin(π/4)
 b = a * 2
 c = b*b
-round c, 14
+round b, 14
 round(a, 10)
 round a, -2
 round c, 0
@@ -259,7 +259,7 @@ asin(0.5)
 
 $radians
 
-v = 1621.9
+v = 1621.94397520429
 
 $resultonly on {
 loop -10 .. 10 { `round to $__ -> ${round(v, __)}` }
