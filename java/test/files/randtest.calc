@@ -2,6 +2,7 @@
 # Testing the distribution of random numbers
 #
 $quiet on
+$quotestrings off
 
 define bucket(v) = {
   case v of {
@@ -18,13 +19,15 @@ define bucket(v) = {
   }
 }
 
+const NUMBER_OF_VALUES = 10000
+
 v = []
-loop over 10000 { v += random() }
+loop over NUMBER_OF_VALUES { v += random() }
 
 mean = sumof(v)/length(v)
 
 variance = 0
-loop over v { variance += (__ - mean)**2 }
+loop over v { variance += (__ - mean)² }
 variance /= length v
 stddev = sqrt variance
 
@@ -39,19 +42,25 @@ $assert sumof(freq) == length(v)
 chisq = 0
 const expected = length(v) / length(freq)
 loop f over freq {
-  chisq += ((f - expected) ** 2) / expected
+  chisq += ((f - expected)²) / expected
 }
 
 b = 0
 $quiet pop
 $resultsonly on {
 
-`Minimum = ${min v}` @q
-`Maximum = ${max v}` @q
-`Average = $mean`    @q
-`Std Dev = $stddev`  @q
-`\u03C7\u00B2      = $chisq` @q
+print '"Random" Function Test Results'
+print '------------------------------'
 
+`# Values = $NUMBER_OF_VALUES`
+
+`Minimum  = ${min v}`
+`Maximum  = ${max v}`
+`Average  = $mean`
+`Std Dev  = $stddev`
+`\u03C7\u00B2       = $chisq`
+
+print
 print 'Bucket distribution'
 print '-------------------'
 loop f over freq {
