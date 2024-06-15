@@ -17,10 +17,6 @@ for jar_file in $PROJECTS_HOME/utilities/java/external-files/*.jar
 do
     CLASSPATH=$CLASSPATH:$jar_file
 done
-for jar_file in $PIVOT_HOME/lib/*.jar
-do
-    CLASSPATH=$CLASSPATH:$jar_file
-done
 export CLASSPATH
 
 # Aliases for frequent use
