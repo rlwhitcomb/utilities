@@ -2,6 +2,7 @@
  * Generate a handy little table of fraction to decimal conversions.
  */
 $quiet on
+$assert defined(in_to_mm), 'Requires the "library.calc" file; rerun without the "-nolib" flag!'
 $rational on
 $properfractions on
 $colors off
@@ -10,7 +11,10 @@ loop m over 1/64 .. 1/2, 1/64 {
    n = m + 1/2
    f = @@m
    g = @@n
+   fm = `${in_to_mm(f)@3d} mm`
+   gm = `${in_to_mm(g)@3d} mm`
    md = `${m@d}`
-   display `${pad(f, 5)}\t= ${rpad(md, 6)}\t\t${pad(g, 5)}\t= ${n@d}`
+   nd = `${n@d}`
+   display `${pad(f, 5)}\t= ${rpad(md, 6)}\t= ${rpad(fm, 6)}\t${pad(g, 5)}\t= ${rpad(nd, 6)}\t= ${rpad(gm, 6)}`
 }
 
