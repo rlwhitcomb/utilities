@@ -752,7 +752,7 @@ public final class CalcUtil
 	 * @param arg	The command line argument as typed by the user.
 	 * @return	The best possible representation of that argument.
 	 * @see CalcObjectVisitor#setArgument
-	 * @see CalcObjectVisitor#setVariable
+	 * @see CalcObjectVisitor#setGlobalVariable
 	 */
 	public static Object stringToValue(final String arg) {
 	    try {
