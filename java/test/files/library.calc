@@ -281,8 +281,10 @@ const MM_PER_MILE = MM_PER_FOOT × 5280
 
 /*
  * Constant for converting acres to square feet / yards.
+ * 22 yards to a "chain" and 10 chains to a "furlong";
+ * And an acre is one furlong by one chain.
  */
-const SQFT_PER_ACRE = 43560
+const SQFT_PER_ACRE = (22×3)² × 10
 
 /*
  * Convert millimeters to inches.
