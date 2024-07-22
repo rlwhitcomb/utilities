@@ -180,13 +180,13 @@ define from_excel_col(col) = {
    else {
       var idx = 0
       loop c over codes(upper(col)) {
-         idx = idx * _BASE_ + (c - _A_ + 1)
+         idx = idx × _BASE_ + (c - _A_ + 1)
       }
    }
 }
 
 /*
- * Convert radians to degrees: 2*pi = 360, so radians / pi * 180 = degrees
+ * Convert radians to degrees: 2 × pi = 360, so radians / pi × 180 = degrees
  *
  * @param rad The input radians value
  * @return    Computed degrees
@@ -194,7 +194,7 @@ define from_excel_col(col) = {
 def rad_to_deg(rad) = rad / pi × 180
 
 /*
- * Convert degrees to radians: 2*pi = 360, so degrees / 180 * pi = radians
+ * Convert degrees to radians: 2 × pi = 360, so degrees / 180 × pi = radians
  *
  * @param deg The input degrees value
  * @return    Computed radians
@@ -202,7 +202,7 @@ def rad_to_deg(rad) = rad / pi × 180
 def deg_to_rad(deg) = deg / 180 × pi
 
 /*
- * Convert radians to gradians (centesimal degrees): 2*pi = 400, so radians / pi * 200 = gradians
+ * Convert radians to gradians (centesimal degrees): 2 × pi = 400, so radians / pi × 200 = gradians
  *
  * @param rad The input radians value
  * @return    Computed gradians
@@ -210,7 +210,7 @@ def deg_to_rad(deg) = deg / 180 × pi
 def rad_to_grad(rad) = rad / pi × 200
 
 /*
- * Convert gradians to radians: 2*pi = 400, so gradians / 200 * pi = radians
+ * Convert gradians to radians: 2 × pi = 400, so gradians / 200 × pi = radians
  *
  * @param grad The input gradians value
  * @return     Computed radians
@@ -218,7 +218,7 @@ def rad_to_grad(rad) = rad / pi × 200
 def grad_to_rad(grad) = grad / 200 × pi
 
 /*
- * Convert gradians to degrees: 400 = 360, so gradians / 10 * 9 = degrees
+ * Convert gradians to degrees: 400 = 360, so gradians / 10 × 9 = degrees
  *
  * @param grad The input gradians value
  * @return     Computed degrees
@@ -226,7 +226,7 @@ def grad_to_rad(grad) = grad / 200 × pi
 def grad_to_deg(grad) = grad / 10 × 9
 
 /*
- * Convert degrees to gradians: 360 = 400, so degrees / 9 * 10 = gradians
+ * Convert degrees to gradians: 360 = 400, so degrees / 9 × 10 = gradians
  *
  * @param deg The input degrees value
  * @return    Computed gradians
@@ -262,7 +262,7 @@ const GM_PER_OZ = 28.349523125
 /*
  * Exact volume conversion from cubic inches to cubic cm.
  */
-const IN3_PER_CM3 = (MM_PER_INCH / 10) ** 3
+const IN3_PER_CM3 = (MM_PER_INCH / 10)³
 
 /*
  * Exact value of cubic inches per gallon.
@@ -470,7 +470,7 @@ def long_date(date = today) = `${dow_name(date)}, ${moy_name(date)} ${dom(date)}
  * @param h The high surrogate value.
  * @param l The low surrogate.
  */
-define surr_pair_to_cp(h, l) = (h - 0xD800) * 0x400 + (l - 0xDC00) + 0x10000
+define surr_pair_to_cp(h, l) = (h - 0xD800) × 0x400 + (l - 0xDC00) + 0x10000
 
 /*
  * Extract the high surrogate of a codepoint outside the BMP.
@@ -495,19 +495,19 @@ const TICKS_PER_SECOND = 1e9
 /*
  * For time values, the number of ticks in a minute.
  */
-const TICKS_PER_MINUTE = TICKS_PER_SECOND * 60
+const TICKS_PER_MINUTE = TICKS_PER_SECOND × 60
 /*
  * For time values, the number of ticks in an hour.
  */
-const TICKS_PER_HOUR = TICKS_PER_MINUTE * 60
+const TICKS_PER_HOUR = TICKS_PER_MINUTE × 60
 /*
  * For time values, the number of ticks in a day.
  */
-const TICKS_PER_DAY = TICKS_PER_HOUR * 24
+const TICKS_PER_DAY = TICKS_PER_HOUR × 24
 /*
  * Number of seconds in a standard day.
  */
-const SECS_PER_DAY = 60 * 60 * 24
+const SECS_PER_DAY = 60 × 60 × 24
 
 /*
  * Get the number of hours in a time value.
@@ -523,7 +523,7 @@ define hot(time) = time \ TICKS_PER_HOUR
  * @param time The time value (as from "now")
  * @return     The integer number of minutes.
  */
-define mot(time) = (time - (hot(time) * TICKS_PER_HOUR)) \ TICKS_PER_MINUTE
+define mot(time) = (time - (hot(time) × TICKS_PER_HOUR)) \ TICKS_PER_MINUTE
 
 /*
  * Get the number of seconds in a time value.
@@ -531,7 +531,7 @@ define mot(time) = (time - (hot(time) * TICKS_PER_HOUR)) \ TICKS_PER_MINUTE
  * @param time The time value (as from "now")
  * @return     The integer number of seconds.
  */
-define sot(time) = (time - (hot(time) * TICKS_PER_HOUR) - (mot(time) * TICKS_PER_MINUTE)) \ TICKS_PER_SECOND
+define sot(time) = (time - (hot(time) × TICKS_PER_HOUR) - (mot(time) × TICKS_PER_MINUTE)) \ TICKS_PER_SECOND
 
 /*
  * Get a timestamp from the given date and time in the Linux "date" form.
@@ -644,7 +644,7 @@ define ft2time(ft) = {
  */
 define epoch_secs_to_datetime(secs) = {
    var days = secs \ SECS_PER_DAY
-   var ticks = (secs % SECS_PER_DAY) * TICKS_PER_SECOND
+   var ticks = (secs % SECS_PER_DAY) × TICKS_PER_SECOND
    while ticks < 0 {
       --days; ticks += TICKS_PER_DAY
    }
@@ -659,7 +659,7 @@ define epoch_secs_to_datetime(secs) = {
  * @param time A time value (nanos since midnight).
  * @return Number of seconds since the epoch start.
  */
-define datetime_to_epoch_secs(d, t) = d * SECS_PER_DAY + t / TICKS_PER_SECOND
+define datetime_to_epoch_secs(d, t) = d × SECS_PER_DAY + t / TICKS_PER_SECOND
 
 /*
  * Compute the flat map of an array.
@@ -698,8 +698,8 @@ define primes(m = 2, n) = {
 
 /*
  * Solve the quadratic formula to find the roots of a general
- * quadratic equation: a*x**2 + b*x + c = 0.
- * x = (-b +- sqrt(b**2 - 4 * a * c))/2*a
+ * quadratic equation: a × x² + b × x + c = 0.
+ * x = (-b +- sqrt(b² - 4 × a × c))/2 × a
  *
  * @param a
  * @param b
@@ -707,9 +707,8 @@ define primes(m = 2, n) = {
  * @return [ x1, x2 ] if solution is real, error if not
  */
 define quad(a, b, c) = {
-  const _b2 = b²
-  const _2a = 2 * a
-  var _r = (_b2 - 4 * a * c)
+  const _2a = 2 × a
+  var _r = (b² - 4 × a × c)
   if _r < 0 {
     _r = abs(_r)
     [ ( -b/_2a, sqrt(_r)/_2a ), ( -b/_2a, -sqrt(_r)/_2a ) ]
@@ -720,7 +719,7 @@ define quad(a, b, c) = {
 
 /*
  * Find the value of a quadratic equation at the given point.
- * y = a*x² + b*x + c
+ * y = a×x² + b×x + c
  *
  * @param a
  * @param b
@@ -728,7 +727,7 @@ define quad(a, b, c) = {
  * @param x
  * @return The value of the equation at the given point.
  */
-define quad_exp(a, b, c, x) = a * x² + b * x + c
+define quad_exp(a, b, c, x) = a × x² + b × x + c
 
 /*
  * The Euler-Riemann "zeta" function for positive integer even values.
@@ -739,7 +738,7 @@ define quad_exp(a, b, c, x) = a * x² + b * x + c
  * @return    The Euler "zeta" function of that value
  * Note: no error checking if the parameter is not a positive even integer.
  */
-define zeta_2n(_2n) = ((-1)**(_2n / 2 + 1) * Bn(_2n) * (2 * pi) ** _2n) / (2 * _2n!)
+define zeta_2n(_2n) = ((-1)⭡ (_2n / 2 + 1) × Bn(_2n) × (2 × pi) ⭡ _2n) / (2 × _2n!)
 
 /*
  * Tangent numbers, derived from the Bernoulli numbers. Value is zero for 0
@@ -750,11 +749,11 @@ define zeta_2n(_2n) = ((-1)**(_2n / 2 + 1) * Bn(_2n) * (2 * pi) ** _2n) / (2 * _
  * @return The k-th Tangent number
  */
 define Tn(k) = {
-  const _2k2 = 2*k + 2
-  const _2_2k2 = 2 ** _2k2
+  const _2k2 = 2×k + 2
+  const _2_2k2 = 2 ⭡ _2k2
   $rational on {
     const _fact = Bn(_2k2) / _2k2
-    const _result = _2_2k2 * (_2_2k2 - 1) * _fact
+    const _result = _2_2k2 × (_2_2k2 - 1) × _fact
   }
   ~~_result
 }
@@ -782,16 +781,16 @@ define Tn(k) = {
 #    R = yearly interest rate (%)
 # or r = monthly interest rate (R/12)
 #    N = number of years
-# or n = number of months (N*12)
+# or n = number of months (N×12)
 # Then the calculated values are:
 #   rate = monthly interest as a decimal value (% / 100 / 12)
 #   num = number of months (years * 12)
-define _pmt_internal_(P, R=5, N=30, r=R/12, n=N*12) = {
+define _pmt_internal_(P, R=5, N=30, r=R/12, n=N×12) = {
   const rate = r / 100
 
   # Calculate the intermediate values (which are reused)
-  const r_n = (1 + rate) ** n
-  const r_r_n = rate * r_n
+  const r_n = (1 + rate) ⭡ n
+  const r_r_n = rate × r_n
   const r_n_1 = r_n - 1
 
   # Now the final monthly payment value
@@ -835,7 +834,7 @@ def win_pct(wins, losses, ties = 0) = wins / (wins + ties + losses) @2%
  * @param new   New value.
  * @return      (new - previous) / previous as a percentage
  */
-def pct_inc(old, new) = `${( new - old ) / old * 100 @2d}%`
+def pct_inc(old, new) = `${( new - old ) / old × 100 @2d}%`
 
 /*
  * Implementation of a stack data structure. The array of values is kept trimmed, so the current value array length
@@ -973,7 +972,7 @@ define collatz(start) = {
    var seq = [ value ]
    while value > 1 {
       if value % 2 == 0 { value \= 2            }
-                   else { value = 3 * value + 1 }
+                   else { value = 3 × value + 1 }
       seq += value
    }
    seq += value
@@ -996,7 +995,7 @@ define perm(N, R = 1) = N! / (N - R)!
  * @param R Number of objects to select each time.
  * @return  The number of combinations of those objects.
  */
-define comb(N, R) = N! / ((N - R)! * R!)
+define comb(N, R) = N! / ((N - R)! × R!)
 
 /*
  * Compute the nth triangle number.

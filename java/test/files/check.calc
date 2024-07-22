@@ -1,4 +1,4 @@
-$requires '2.12.0-alpha'
+$requires '2.12'
 
 $quiet on {
 define readJSON(f) = { eval(read(f)) }
