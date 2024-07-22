@@ -79,7 +79,7 @@ const TREE = [
 define traverse(tree, row = 0, col = 0) = {
    const len = length(tree)
    const value = tree[row][col]
-   const sum = case row of {
+   case row of {
       0 .. len - 2: {
          // There is a bug here: #648 -- max evaluates its first argument twice
          // which in this case means a LOT of extra work if we put the recursive
@@ -91,7 +91,6 @@ define traverse(tree, row = 0, col = 0) = {
       len - 1: value,
       default: 0
    }
-   sum
 }
 
 const demo_sum = traverse(DEMO)
