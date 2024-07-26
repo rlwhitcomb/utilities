@@ -345,10 +345,10 @@
 >Defining function “_junk5b05d” = junk[0]
 >cast (junk[0], 'function') -> 1
 >typeof (_junk5b05d) -> "function"
->Variables
->---------
+>Variables and Functions
+>-----------------------
 >define _junk5b05d -> junk[0]
->=========
+>=======================
 >info.version.major is integer -> true
 >info.locale.name is "string" -> true
 >info.cpu.cores is "integer" -> true

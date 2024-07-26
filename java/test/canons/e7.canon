@@ -1,7 +1,7 @@
 >verbose -> true
 >All variables and functions cleared.
->Variables
->---------
+>Variables and Functions
+>-----------------------
 >$# -> 6
 >$* -> [ "abc", "def", 1, 2, 3, "text" ]
 >$0 -> "abc"
@@ -10,7 +10,7 @@
 >$3 -> 2
 >$4 -> 3
 >$5 -> "text"
->=========
+>=======================
 >Defining function “oddness” = {
 >   Case value % 2 Of
 >   0: 'even',

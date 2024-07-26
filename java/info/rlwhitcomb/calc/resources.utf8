@@ -196,6 +196,8 @@
 #	    #672: Message for displaying proper fractions mode.
 #	22-Jul-2024 (rlwhitcomb)
 #	    #686: Message changes and additions for separate variable/function clearing.
+#	25-Jul-2024 (rlwhitcomb)
+#	    #686: Change "Variables" to "Variables and Functions" for the "$vars" directive also.
 #
 
 #
@@ -286,9 +288,9 @@ definedVar	= Defined variable <y>%1$s<.>
 definedVars	= Defined variables <y>%1$s<.>
 definedEnum	= Defined enum value <y>%1$s<.>
 definedEnums	= Defined enum values <y>%1$s<.>
-variables	= Variables
-varUnder1	= ---------
-varUnder2	= =========
+variables	= Variables and Functions
+varUnder1	= -----------------------
+varUnder2	= =======================
 predefined	= Predefined
 preUnder1	= ----------
 preUnder2	= ==========
