@@ -1,4 +1,4 @@
->All variables cleared.
+>All variables and functions cleared.
 >Separator display set to “false”.
 >excel_date(d'2021/10/8') -> 44477
 >excel_date_1904(D'12/7/1941') -> 13855
@@ -147,4 +147,4 @@
 >colored = `$RED_BOLD_BRIGHT red $RESET` -> "[1;91m red ”"
 >colored @Q -> "<Rd*!> red <.>"
 >Separator display set to “false”.
->All variables cleared.
+>All variables and functions cleared.

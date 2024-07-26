@@ -4,7 +4,7 @@
 print "Tests of the new LOOP construct"
 print
 
-$clear [ value, array, SIZE ]
+$clear value, array, SIZE
 $dec 50
 value = 1
 array = []
@@ -58,6 +58,25 @@ define tn(n) = { case n of 5..1,-1: 'five down to one', -1..-5,-1: 'negative 5 t
 loop x over 6..-6,-1 { `$x: ${tn(x)}` }
 define tm(d) = { case d of -2.0 .. -2.5, -0.1: 'minus 2.5', 3.1 .. 2.8, -0.1: 'around three', default: 'other' }
 loop x over -3.0 .. 3.3, 0.1 { `$x: ${tm(x)}` }
+
+// Misc tests of $clear directive and messaging
+
+def fn1(n) = n
+def fn2(n) = n + 1
+def fn3(n) = n + 2
+def fn4(n) = n + 3
+def fn5(n) = n + 4
+def fn6(n) = n + 5
+def fn7(n) = n + 6
+var vr1 = 0, vr2 = 1, vr3 = 2, vr4 = 12, vr5 = 42, vr6 = 89, vr7
+const cf0 = pi + 1, cf1 = e * 2, cf2 = cf0 ** cf1, cf3 = cf0 / cf1
+
+$clr fn1
+$clr vr1
+$clr fn2, vr2
+$clear fn3, fn4, vr3, vr4
+$clr fn*, vr*
+$clr cf*
 
 $quiet on {
 define test(value) = {

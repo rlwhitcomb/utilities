@@ -194,6 +194,8 @@
 #	    #666: Starting and ending punctuation values for "$echo" spacing.
 #	06-May-2024 (rlwhitcomb)
 #	    #672: Message for displaying proper fractions mode.
+#	22-Jul-2024 (rlwhitcomb)
+#	    #686: Message changes and additions for separate variable/function clearing.
 #
 
 #
@@ -256,10 +258,13 @@ trigMode	= Trig mode is now <u>%1$s<.>.
 unitsBinary	= Units in <u>binary<.>.
 unitsTen	= Units in <u>SI (base ten)<.> form.
 unitsMixed	= Units in <u>mixed<.> form.
-varsAllCleared	= All variables cleared.
+varsAllCleared	= All variables and functions cleared.
 varOneVariable	= "Variable "
+varOneFunction	= "Function "
 varVariables	= "Variables "
+varFunctions	= "Functions "
 varCleared	= %1$s cleared.
+varBothCleared	= %1$s plus %2$s cleared.
 varAnd		= "and "
 timingMode	= Timing mode set to <u>%1$s<.>.
 debugMode	= Debug mode set to <u>%1$s<.>.

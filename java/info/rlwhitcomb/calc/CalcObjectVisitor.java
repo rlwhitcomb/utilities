@@ -858,6 +858,8 @@
  *	    #674: Implement "sqrt" and "fort" for complex results (negative arguments).
  *	16-May-2024 (rlwhitcomb)
  *	    "round" needs "fixupToInteger" on the result.
+ *	25-Jul-2024 (rlwhitcomb)
+ *	    #686: Change output of "$clear" to separately report variable and functions cleared.
  */
 package info.rlwhitcomb.calc;
 
@@ -2146,6 +2148,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    CalcParser.WildIdListContext idList = ctx.wildIdList();
 	    List<CalcParser.WildIdContext> ids;
 	    int numberCleared = 0;
+	    int numberFunctions = 0;
 
 	    if (idList == null || (ids = idList.wildId()).isEmpty()) {
 		Iterator<Map.Entry<String, Object>> iter = globals.map().entrySet().iterator();
@@ -2161,7 +2164,10 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 	    else {
 		StringBuilder vars = new StringBuilder();
-		int lastNamePos = 0;
+		StringBuilder funcs = new StringBuilder();
+		int lastVarNamePos = 0;
+		int lastFuncNamePos = 0;
+
 		for (CalcParser.WildIdContext node : ids) {
 		    String varName = node.getText();
 		    if (varName.equals("<missing ID>"))
@@ -2177,7 +2183,13 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			    if (!isPredefined(value, false)) {
 				numberCleared++;
 				globals.remove(name, settings.ignoreNameCase);
-				lastNamePos = addName(name, vars);
+				if (value instanceof FunctionDeclaration) {
+				    numberFunctions++;
+				    lastFuncNamePos = addName(name, funcs);
+				}
+				else {
+				    lastVarNamePos = addName(name, vars);
+				}
 			    }
 			}
 		    }
@@ -2186,26 +2198,52 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			if (!isPredefined(value, false)) {
 			    numberCleared++;
 			    globals.remove(varName, settings.ignoreNameCase);
-			    lastNamePos = addName(varName, vars);
+			    if (value instanceof FunctionDeclaration) {
+				numberFunctions++;
+				lastFuncNamePos = addName(varName, funcs);
+			    }
+			    else {
+				lastVarNamePos = addName(varName, vars);
+			    }
 			}
 		    }
 		}
 
 		if (numberCleared > 0) {
-		    if (numberCleared == 1) {
+		    int numberVariables = numberCleared - numberFunctions;
+
+		    if (numberVariables == 1) {
 			vars.insert(0, Intl.getString("calc#varOneVariable"));
 		    }
-		    else if (numberCleared == 2) {
-			vars.deleteCharAt(lastNamePos - 2);
-			vars.insert(lastNamePos - 1, Intl.getString("calc#varAnd"));
+		    else if (numberVariables == 2) {
+			vars.deleteCharAt(lastVarNamePos - 2);
+			vars.insert(lastVarNamePos - 1, Intl.getString("calc#varAnd"));
 			vars.insert(0, Intl.getString("calc#varVariables"));
 		    }
 		    else {
-			vars.insert(lastNamePos, Intl.getString("calc#varAnd"));
+			vars.insert(lastVarNamePos, Intl.getString("calc#varAnd"));
 			vars.insert(0, Intl.getString("calc#varVariables"));
 		    }
 
-		    displayDirectiveMessage("%calc#varCleared", vars);
+		    if (numberFunctions == 1) {
+			funcs.insert(0, Intl.getString("calc#varOneFunction"));
+		    }
+		    else if (numberFunctions == 2) {
+			funcs.deleteCharAt(lastFuncNamePos - 2);
+			funcs.insert(lastFuncNamePos - 1, Intl.getString("calc#varAnd"));
+			funcs.insert(0, Intl.getString("calc#varFunctions"));
+		    }
+		    else {
+			funcs.insert(lastFuncNamePos, Intl.getString("calc#varAnd"));
+			funcs.insert(0, Intl.getString("calc#varFunctions"));
+		    }
+
+		    if (numberFunctions == 0)
+			displayDirectiveMessage("%calc#varCleared", vars);
+		    else if (numberVariables == 0)
+			displayDirectiveMessage("%calc#varCleared", funcs);
+		    else
+			displayDirectiveMessage("%calc#varBothCleared", vars, funcs);
 		}
 	    }
 

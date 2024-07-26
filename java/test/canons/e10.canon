@@ -309,6 +309,30 @@
 >`$x: ${tm(x)}` -> "3.1: around three"
 >`$x: ${tm(x)}` -> "3.2: other"
 >`$x: ${tm(x)}` -> "3.3: other"
+>Defining function “fn1(n)” = n
+>Defining function “fn2(n)” = n + 1
+>Defining function “fn3(n)” = n + 2
+>Defining function “fn4(n)” = n + 3
+>Defining function “fn5(n)” = n + 4
+>Defining function “fn6(n)” = n + 5
+>Defining function “fn7(n)” = n + 6
+>Defining variable “vr1” = 0
+>Defining variable “vr2” = 1
+>Defining variable “vr3” = 2
+>Defining variable “vr4” = 12
+>Defining variable “vr5” = 42
+>Defining variable “vr6” = 89
+>Defining variable “vr7”
+>Defining constant “cf0” = 4.1415926535897932384626433832795028841971693993751
+>Defining constant “cf1” = 5.4365636569180904707205749427053249955144941874
+>Defining constant “cf2” = 2266.0514029069248308927018322625202432814740477254
+>Defining constant “cf3” = 0.76180339548118201975280847673707858328333107709808
+>Function 'fn1' cleared.
+>Variable 'vr1' cleared.
+>Variable 'vr2' plus Function 'fn2' cleared.
+>Variables 'vr3' and 'vr4' plus Functions 'fn3' and 'fn4' cleared.
+>Variables 'vr5', 'vr6', and 'vr7' plus Functions 'fn5', 'fn6', and 'fn7' cleared.
+>Variables 'cf0', 'cf1', 'cf2', and 'cf3' cleared.
 >-2 -> negative
 >-1 -> negative
 >0 -> zero
