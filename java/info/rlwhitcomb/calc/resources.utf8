@@ -198,6 +198,8 @@
 #	    #686: Message changes and additions for separate variable/function clearing.
 #	25-Jul-2024 (rlwhitcomb)
 #	    #686: Change "Variables" to "Variables and Functions" for the "$vars" directive also.
+#	15-Aug-2024 (rlwhitcomb)
+#	    Change "valueNotNull" message text.
 #
 
 #
@@ -348,7 +350,7 @@ unknownOutput		= Unknown output type: <y>%1$s<.>
 #
 # From CalcUtil
 #
-valueNotNull		= Value of <y>%1$s<.> must not be null
+valueNotNull		= Value of <y>%1$s<.> is undefined (that is, <u>null<.>)
 noConvertDecimal	= Unable to convert value of <y>%1$s<.> type to decimal number
 noConvertFraction	= Unable to convert value of <y>%1$s<.> type to fraction
 unknownType		= Unknown value type: <y>%1$s<.>
