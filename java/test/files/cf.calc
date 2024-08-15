@@ -29,3 +29,33 @@ cf(17, 12)
 cf(21, 8)
 cf(2875, 1000)
 
+/*
+ * Now try for a decimal value.
+ */
+define cf2(x) = {
+   var f = []
+   var a = x
+   a0 = floor(a)
+   f += a0
+print `f = $f`
+a1 = a - a0
+a2 = round(a1, scale(a1) - 2)
+print `eps = $a1, rounded = $a2, diff = ${a1-a2}`
+   eps = a2
+   while eps > 0 && length(f) < 10 {
+      anprime = 1 / eps
+      an = floor(anprime)
+      f += an
+print `f = $f`
+      a1 = anprime - an
+      a2 = round(a1, scale(a1) - 2)
+print `eps = $a1, rounded = $a2, diff = ${a1-a2}`
+      eps = a2
+   }
+   f
+}
+
+c1 = cf2(3.875)
+
+c2 = cf2(1/3)
+
