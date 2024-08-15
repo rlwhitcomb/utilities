@@ -204,7 +204,7 @@ h2 {
         <li>Looping and conditional statements, including powerful pattern matching, to do pretty much any kind of calculation or programming task.</li>
         <li>Did I mention that this is an actual programming / scripting language?</li>
         <li>Therefore, this "calculator" is a <a href="https://en.wikipedia.org/wiki/Turing_completeness">&ldquo;Turing Complete&rdquo;</a> language.</li>
-        <li>Currently (as of early 2024 at least), it is being actively developed and maintained, meaning features and fixes are constantly being added.</li>
+        <li>Currently (as of mid-2024 at least), it is being actively developed and maintained, meaning features and fixes are constantly being added.</li>
         <li>This is <a href="https://opensource.com/resources/what-open-source">Open-Source Software</a> released under the very permissive
             <a href="https://opensource.org/license/mit">MIT</a> license, so the code can be freely examined, and modified (if desired) for your own use.</li>
       </ul>
