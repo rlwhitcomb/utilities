@@ -1,0 +1,24 @@
+/*
+ * Simple script to generate a calendar for the given month / year.
+ *
+ * Inputs:
+ *   $0 = month (should be 01 .. 12)
+ *   $1 = year (either YY or YYYY)
+ * Output:
+ *   A calendar such as this:
+ *
+ *          August 2024
+ *    S   M   T   W   T   F   S
+ *                    1   2   3
+ *    4   5   6   7   8   9  10
+ *   11  12  13  14  15  16  17
+ *   18  19  20  21  22  23  24
+ *   25  26  27  28  29  30  31
+ */
+$quiet on
+$assert defined(moy_name, dow_name, dateformat), 'Requires "library.calc"; rerun without the "-nolib" option!'
+$assert notnull($0) && ~~$0 >= 1 && ~~$0 <= 12, 'First parameter should be a month number from 1 .. 12.'
+$assert notnull($1) && ((~~$1 >= 1 && ~~$1 <= 99) || (~~$1 >= 1000 && ~~$1 <= 9999)), 'Second argument should be a two- or four-digit year.'
+
+
+
