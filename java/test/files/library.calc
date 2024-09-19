@@ -465,28 +465,16 @@ def moy_name(date) = info.locale.months [ moy(date) - 1 ]
 def long_date(date = today) = `${dow_name(date)}, ${moy_name(date)} ${dom(date)}, ${yod(date)@_d}`
 
 /*
- * Convert a surrogate pair to the corresponding Unicode codepoint.
+ * Adjust a two-digit ("short") year to a 4-digit year value, based on the
+ * same algorithm as DateUtil.adjustShortYear (used by "todate").
  *
- * @param h The high surrogate value.
- * @param l The low surrogate.
+ * @param year A 2-digit year value from 0 - 99
+ * @return     The year adjusted to 4 digits.
  */
-define surr_pair_to_cp(h, l) = (h - 0xD800) × 0x400 + (l - 0xDC00) + 0x10000
-
-/*
- * Extract the high surrogate of a codepoint outside the BMP.
- *
- * @param cp The codepoint under dissection.
- * @return   The high surrogate value for this codepoint.
- */
-define cp_to_high_surr(cp) = (cp - 0x10000) \ 0x400 + 0xD800
-
-/*
- * Extract the low surrogate of a codepoint outside the BMP.
- *
- * @param cp The codepoint under dissection.
- * @return   The low surrogate value for this codepoint.
- */
-define cp_to_low_surr(cp) = (cp - 0x10000) % 0x400 + 0xDC00
+def adjust_short_year(year) = {
+   const cutoverYear = yod(today) % 100 + 30
+   year < cutoverYear ? year + 2000 : year + 1900
+}
 
 /*
  * For time values, number of ticks (nanoseconds) in a second.
@@ -599,6 +587,30 @@ define dateformat(d, f = 'mm/dd/yyyy') = {
 def gmtnow = now - TZ_OFFSET
 
 /*
+ * Convert a surrogate pair to the corresponding Unicode codepoint.
+ *
+ * @param h The high surrogate value.
+ * @param l The low surrogate.
+ */
+define surr_pair_to_cp(h, l) = (h - 0xD800) × 0x400 + (l - 0xDC00) + 0x10000
+
+/*
+ * Extract the high surrogate of a codepoint outside the BMP.
+ *
+ * @param cp The codepoint under dissection.
+ * @return   The high surrogate value for this codepoint.
+ */
+define cp_to_high_surr(cp) = (cp - 0x10000) \ 0x400 + 0xD800
+
+/*
+ * Extract the low surrogate of a codepoint outside the BMP.
+ *
+ * @param cp The codepoint under dissection.
+ * @return   The low surrogate value for this codepoint.
+ */
+define cp_to_low_surr(cp) = (cp - 0x10000) % 0x400 + 0xDC00
+
+/*
  * Fix a directory name so it ends with the file separator, suitable for
  * constructing a path with a file name.
  *
@@ -699,7 +711,7 @@ define primes(m = 2, n) = {
 /*
  * Solve the quadratic formula to find the roots of a general
  * quadratic equation: a × x² + b × x + c = 0.
- * x = (-b +- sqrt(b² - 4 × a × c))/2 × a
+ * x = (-b +- √(b² - 4 × a × c))/2 × a
  *
  * @param a
  * @param b
@@ -711,9 +723,9 @@ define quad(a, b, c) = {
   var _r = (b² - 4 × a × c)
   if _r < 0 {
     _r = abs(_r)
-    [ ( -b/_2a, sqrt(_r)/_2a ), ( -b/_2a, -sqrt(_r)/_2a ) ]
+    [ ( -b/_2a, √(_r)/_2a ), ( -b/_2a, -√(_r)/_2a ) ]
   } else {
-    [ (-b + sqrt(_r))/_2a, (-b - sqrt(_r))/_2a ]
+    [ (-b + √(_r))/_2a, (-b - √(_r))/_2a ]
   }
 }
 
@@ -947,18 +959,25 @@ define capitalize(s, mode) = {
 }
 
 /*
+ * Easy average computation
+ *
+ * @param values
+ * @return The average of those values
+ */
+define avg(...) = sumof(_*) / _#
+
+/*
  * Compute the mean and standard deviation of a list of values.
  *
  * @param values
  * @return { mean: xxx, stddev: sss }
  */
-define mean_stddev (values) = {
-  const len = length(values)
-  const avg = sumof(values) / len
+define mean_stddev (...) = {
+  const avg = sumof(_*) / _#
   var variance = 0
-  loop v over values { variance += (v - avg)² }
-  variance /= len
-  { mean: avg, stddev: round(sqrt(variance), 3) }
+  loop v over _* { variance += (v - avg)² }
+  variance /= _#
+  { mean: avg, stddev: round(√ variance, 3) }
 }
 
 /*

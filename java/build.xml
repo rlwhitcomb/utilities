@@ -390,6 +390,8 @@
 	    09-Apr-2024 (rlwhitcomb)
 		Somehow the default git "short" rev length has changed, so make the length explicit.
 		More "echo" information during testing.
+	    19-Sep-2024 (rlwhitcomb)
+		#689: Copy "calendar.calc" to output directory for the new "calen" script.
 
      ========================================================================== -->
 
@@ -949,6 +951,7 @@ Test ending on ${end.of.test.date} at ${end.of.test.time}
 			</fileset>
 			<fileset dir="external-files" includes="*.jar" excludes="antlr-*-complete.jar"/>
 			<fileset dir="test/files" includes="lib*"/>
+			<fileset dir="test/files" includes="calendar.calc"/>
 		</copy>
 		<chmod dir="${env.UTILITIES_HOME}" perm="+x" if:true="${utilities.available}">
 			<patternset refid="wrapper-files"/>

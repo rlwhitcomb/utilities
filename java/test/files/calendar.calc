@@ -20,5 +20,44 @@ $assert defined(moy_name, dow_name, dateformat), 'Requires "library.calc"; rerun
 $assert notnull($0) && ~~$0 >= 1 && ~~$0 <= 12, 'First parameter should be a month number from 1 .. 12.'
 $assert notnull($1) && ((~~$1 >= 1 && ~~$1 <= 99) || (~~$1 >= 1000 && ~~$1 <= 9999)), 'Second argument should be a two- or four-digit year.'
 
+const year = $1 <= 99 ? adjust_short_year($1) : $1
 
+const HEADER = 'Su  Mo  Tu  We  Th  Fr  Sa'
+const WIDTH = length(HEADER)
+
+const start_of_month = todate($0, 1, year)
+const days_in_month  = ($0 == 12 ? todate(1, 1, year + 1) : todate($0 + 1, 1, year)) - start_of_month
+const end_of_month   = start_of_month + days_in_month
+
+
+var w = dateformat(start_of_month, 'MMM yyyy')
+pad(w, WIDTH)
+
+display
+display GREEN_BRIGHT + w + END
+display CYAN_UNDER + HEADER + END
+
+const start_date = start_of_month - dow(start_of_month)
+var current_date = start_date
+
+loop week over 6 {
+   var current_week = ''
+   loop day within 7 {
+      var this_day = ''
+      if current_date >= start_of_month && current_date < end_of_month
+         this_day = @@dom(current_date)
+      if current_date === today {
+         lpad(this_day, 2)
+         current_week += '  ' + CYAN_BKGND + this_day + WHITE
+      } else {
+         lpad(this_day, 4)
+         current_week += this_day
+      }
+      current_date++
+   }
+   if trim(current_week)
+      display current_week[2:]
+}
+
+display
 

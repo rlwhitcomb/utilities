@@ -38,49 +38,50 @@ bash: [
 ],
 
 settings: [
-    { name: '`',        class: '$calc.Calc', args: '-nolibraries'                  },
-    { name: '``',       class: '$calc.Calc', args: '-g -nolibraries', find: '_gui' },
-    { name: 'b64',      class: '$tools.B64'                                        },
-    { name: 'c',        class: '$calc.Calc'                                        },
-    { name: 'calc',     class: '$calc.Calc'                                        },
-    { name: 'cat',      class: '$cat.Cat'                                          },
-    { name: 'cg',       class: '$calc.Calc',           args: '-g',    find: '_gui' },
-    { name: 'cmp',      class: '$compare.CompareFiles'                             },
-    { name: 'cn',       class: '$calc.Calc', args: '-nolibraries'                  },
-    { name: 'crl',      class: '$curl.CURL',                          find: '_gui' },
-    { name: 'csv',      class: '$test.CSVTest'                                     },
-    { name: 'd',        class: '$directory.Dir'                                    },
-    { name: 'decode',   class: 'net.iharder.b64.Base64', args: '-d'                },
-    { name: 'encode',   class: 'net.iharder.b64.Base64', args: '-e'                },
-    { name: 'environ',  class: '$util.Environment'                                 },
-    { name: 'gmt',      class: '$tools.Gmt'                                        },
-    { name: 'gunz',     class: '$tools.GUnzip'                                     },
-    { name: 'gz',       class: '$tools.GZip'                                       },
-    { name: 'hd',       class: '$tools.Head'                                       },
-    { name: 'hexd',     class: '$tools.HexDump'                                    },
-    { name: 'hsh',      class: '$tools.Hash'                                       },
-    { name: 'isdir',    class: '$tools.IsDir'                                      },
-    { name: 'lists',    class: '$util.Lists'                                       },
-    { name: 'manifest', class: '$tools.DumpManifest'                               },
-    { name: 'matches',  class: '$matches.Matches'                                  },
-    { name: 'md5',      class: '$tools.Hash',          args: '--algorithm=MD5'     },
-    { name: 'os',       class: '$tools.OS'                                         },
-    { name: 'prep',     class: '$preproc.PreProc'                                  },
-    { name: 'preproc',  class: '$preproc.PreProc'                                  },
-    { name: 'sha1',     class: '$tools.Hash',          args: '--algorithm=SHA-1'   },
-    { name: 'sha256',   class: '$tools.Hash'                                       },
-    { name: 'sha512',   class: '$tools.Hash',          args: '--algorithm=SHA-512' },
-    { name: 'sleep',    class: '$util.Sleep'                                       },
-    { name: 'tester',   class: '$tester.Tester',       jvm: '@@@JVM17+@@@'         },
-    { name: 'timethis', class: '$util.TimeThis'                                    },
-    { name: 'tre',      class: '$tree.Tree'                                        },
-    { name: 'unq',      class: '$tools.Uniq'                                       },
-    { name: 'uuid',     class: '$tools.Uuid'                                       },
-    { name: 'uversion'                                                             },
-    { name: 'wc',       class: '$tools.WordCount'                                  },
-    { name: 'wf',       class: '$wordfind.WordFind'                                },
-    { name: 'wfg',      class: '$wordfind.WordFind',   args: '-gui',  find: '_gui' },
-    { name: 'which',    class: '$util.Which'                                       }
+    { name: '`',        class: '$calc.Calc', args: '-nolibraries'                    },
+    { name: '``',       class: '$calc.Calc', args: '"-g -nolibraries"', find: '_gui' },
+    { name: 'b64',      class: '$tools.B64'                                          },
+    { name: 'c',        class: '$calc.Calc'                                          },
+    { name: 'calc',     class: '$calc.Calc'                                          },
+    { name: 'calen',    class: '$calc.Calc', args: '"${outdir}calendar --"'          },
+    { name: 'cat',      class: '$cat.Cat'                                            },
+    { name: 'cg',       class: '$calc.Calc',           args: '-g',    find: '_gui'   },
+    { name: 'cmp',      class: '$compare.CompareFiles'                               },
+    { name: 'cn',       class: '$calc.Calc', args: '-nolibraries'                    },
+    { name: 'crl',      class: '$curl.CURL',                          find: '_gui'   },
+    { name: 'csv',      class: '$test.CSVTest'                                       },
+    { name: 'd',        class: '$directory.Dir'                                      },
+    { name: 'decode',   class: 'net.iharder.b64.Base64', args: '-d'                  },
+    { name: 'encode',   class: 'net.iharder.b64.Base64', args: '-e'                  },
+    { name: 'environ',  class: '$util.Environment'                                   },
+    { name: 'gmt',      class: '$tools.Gmt'                                          },
+    { name: 'gunz',     class: '$tools.GUnzip'                                       },
+    { name: 'gz',       class: '$tools.GZip'                                         },
+    { name: 'hd',       class: '$tools.Head'                                         },
+    { name: 'hexd',     class: '$tools.HexDump'                                      },
+    { name: 'hsh',      class: '$tools.Hash'                                         },
+    { name: 'isdir',    class: '$tools.IsDir'                                        },
+    { name: 'lists',    class: '$util.Lists'                                         },
+    { name: 'manifest', class: '$tools.DumpManifest'                                 },
+    { name: 'matches',  class: '$matches.Matches'                                    },
+    { name: 'md5',      class: '$tools.Hash',          args: '--algorithm=MD5'       },
+    { name: 'os',       class: '$tools.OS'                                           },
+    { name: 'prep',     class: '$preproc.PreProc'                                    },
+    { name: 'preproc',  class: '$preproc.PreProc'                                    },
+    { name: 'sha1',     class: '$tools.Hash',          args: '--algorithm=SHA-1'     },
+    { name: 'sha256',   class: '$tools.Hash'                                         },
+    { name: 'sha512',   class: '$tools.Hash',          args: '--algorithm=SHA-512'   },
+    { name: 'sleep',    class: '$util.Sleep'                                         },
+    { name: 'tester',   class: '$tester.Tester',       jvm: '@@@JVM17+@@@'           },
+    { name: 'timethis', class: '$util.TimeThis'                                      },
+    { name: 'tre',      class: '$tree.Tree'                                          },
+    { name: 'unq',      class: '$tools.Uniq'                                         },
+    { name: 'uuid',     class: '$tools.Uuid'                                         },
+    { name: 'uversion'                                                               },
+    { name: 'wc',       class: '$tools.WordCount'                                    },
+    { name: 'wf',       class: '$wordfind.WordFind'                                  },
+    { name: 'wfg',      class: '$wordfind.WordFind',   args: '-gui',  find: '_gui'   },
+    { name: 'which',    class: '$util.Which'                                         }
 ]
 } // end of "data"
 
@@ -96,7 +97,6 @@ define properties() = {
     var file = []
     const outputFile = outdir + 'calcscripts.properties'
     display `Generating "$outputFile" ...`
-
     loop set in data.settings {
         var name = set.name
         rpad(name, 12)
@@ -119,6 +119,7 @@ define scripts() = {
         const class = set.class ?! replace(set.class, '$', 'info.rlwhitcomb.')
         const jvm   = set.jvm   ?! replace(set.jvm, token, replacement)
         const find  = set.find  ?: ''
+        const args  = set.args  ?! replace(set.args, '${outdir}', outdir)
 
         if ON_WINDOWS {
             outputFile = set.name + ".bat"
@@ -133,10 +134,10 @@ define scripts() = {
         display `Generating "$outputFile" ...`
         loop line over template {
             case line in {
-                matches s'.+\$\{class\}'  : if class    { file += replace(line, '${class}', class)   },
-                matches s'.+\$\{args\}'   : if set.args { file += replace(line, '${args}',  set.args)},
-                matches s'.+\$\{jvm\}'    : if jvm      { file += replace(line, '${jvm}',   jvm)     },
-                matches s'.+\$\{find\}.*' :               file += replace(line, '${find}',  find),
+                matches s'.+\$\{class\}'  : if class { file += replace(line, '${class}',  class) },
+                matches s'.+\$\{args\}'   : if args  { file += replace(line, '${args}',   args)  },
+                matches s'.+\$\{jvm\}'    : if jvm   { file += replace(line, '${jvm}',    jvm)   },
+                matches s'.+\$\{find\}.*' :            file += replace(line, '${find}',   find),
                 default: file += line
             }
         }
