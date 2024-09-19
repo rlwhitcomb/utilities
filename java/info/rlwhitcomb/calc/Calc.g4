@@ -549,6 +549,8 @@
  *	    #668: Change "$echo" to "print" or "display" (that is, a statement not a directive).
  *	06-May-2024 (rlwhitcomb)
  *	    #672: New "proper fractions" directive.
+ *	17-Sep-2024 (rlwhitcomb)
+ *	    #690: Keywords for "lmask" and "rmask" built-in functions.
  */
 
 grammar Calc;
@@ -736,6 +738,7 @@ builtinFunction
    | K_PFACTORS expr1                    # primeFactorsExpr
    | K_CHARS expr1                       # charsExpr
    | K_CODES expr1                       # codesExpr
+   | K_MASK expr1                        # maskExpr
    | K_DOW expr1                         # dayOfWeekExpr
    | K_DOM expr1                         # dayOfMonthExpr
    | K_DOY expr1                         # dayOfYearExpr
@@ -1357,6 +1360,8 @@ K_PFACTORS : 'pfactors' | 'PFACTORS' | 'Pfactors' | 'PFactors' | 'pFactors' ;
 K_CHARS    : 'chars' | 'CHARS' | 'Chars' ;
 
 K_CODES    : 'codes' | 'CODES' | 'Codes' ;
+
+K_MASK     : [lLrR] ( 'mask' | 'MASK' | 'Mask' ) ;
 
 K_DOW      : 'dow' | 'DOW' | 'DoW' ;
 
