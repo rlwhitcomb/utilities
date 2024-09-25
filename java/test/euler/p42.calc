@@ -48,7 +48,7 @@ define wordScore(word) = {
 /*
  * Generate the list of triangle numbers up to the value needed for the longest word
  */
-global T = []
+var T = []
 loop over UPPER_T_LIMIT { T += tri(__)  }
 
 var tri_words = []
