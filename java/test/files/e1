@@ -9,7 +9,7 @@ print
 info.version.major > 2 ||
     (info.version.major == 2 && info.version.minor > 4) ||
     (info.version.major == 2 && info.version.minor == 4 && info.version.patch >= 11)
-$requires 2.45.0, base 1.12.3
+$requires 2.54.0, base 1.12.3
 
 # Various simple expressions
 $decimal(50)

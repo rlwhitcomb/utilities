@@ -45,6 +45,8 @@ check         : -noLib test/files/check -clear -- test/data/cake.json test/data/
 
 test/data/406.json : -noLibs dupjson.calc -clear -- test/data/406.json
 
+calendar      : calendar -lib library -- 9 2024 4
+
 # Notice there is no ".canon" file here because we must prove that the program
 # produces itself exactly as the output.
 
