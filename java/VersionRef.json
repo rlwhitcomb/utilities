@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.54.0', date: d'2024-09-24',
+      issues: [ 690 ],
+      comment: 'Add "lmask" and "rmask" functions.'
+    },
     { version: '2.53.6', date: d'2024-07-25',
       issues: [ 686 ],
       comment: 'Change message from "$clear" directive to separately report variables and functions cleared.'

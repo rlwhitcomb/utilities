@@ -1153,6 +1153,10 @@
 >__ -> "⅛"
 >__ -> "3"
 >__ -> "4"
+>Precision is now “7” digits.
+>lmask (4) @x -> 0x3c000000
+>rmask (4) @x -> 0xf
+>Precision is now “34” digits.
 >set1 = {} -> { }
 >typeof set1 -> "collection"
 >set1 += {2} -> { 2 }

@@ -859,8 +859,8 @@ or<br>
     <tr><td>33</td><td><i>expr</i> <code>IS</code> ( <i>string</i> | <i>type_id</i> )</td><td>check if expression is the given type (same as <code>typeof</code>)</td><td>left to right</td></tr>
     <tr><td>32</td><td><i>expr</i> <code>[</code> <i>expr</i> ? <code>:</code> <i>expr</i> ? <code>]</code></td><td>produce a slice of an object or string</td><td>left to right</td></tr>
     <tr><td>31</td><td><code>( </code><i>expr</i><code> )</code></td><td>group an expression</td><td>N/A</td></tr>
-    <tr><td rowspan="91">30</td>
-            <td><code>ABS</code>&nbsp;<i>expr</i></td><td>absolute value</td><td rowspan="91">left to right</td></tr>
+    <tr><td rowspan="92">30</td>
+            <td><code>ABS</code>&nbsp;<i>expr</i></td><td>absolute value</td><td rowspan="92">left to right</td></tr>
             <tr><td><code>SIN</code>&nbsp;<i>expr</i></td><td>sine</td></tr>
             <tr><td><code>COS</code>&nbsp;<i>expr</i></td><td>cosine</td></tr>
             <tr><td><code>TAN</code>&nbsp;<i>expr</i></td><td>tangent</td></tr>
@@ -946,6 +946,7 @@ or<br>
             <tr><td><code>PFACTORS</code>&nbsp;<i>expr</i></td><td>calculate the prime factors of the number</td></tr>
             <tr><td><code>CHARS</code>&nbsp;<i>expr</i></td><td>break apart a string or an array of strings into separate characters<br>or convert a number to a single character</td></tr>
             <tr><td><code>CODES</code>&nbsp;<i>expr</i></td><td>convert a single character to its codepoint value<br>or break apart numbers or strings into an array of codepoints</td></tr>
+            <tr><td><code>RMASK</code> | <code>LMASK</code>&nbsp;<i>expr</i></td><td>construct a bit mask of <i>expr</i> <code>1</code> bits,<br>in rightmost bits, or left-justified within the precision</td></tr>
             <tr><td><code>DOW</code>&nbsp;<i>expr</i></td><td>day of the week of a date (integer)<br>(0=Sunday to 6=Saturday)</td></tr>
             <tr><td><code>DOM</code>&nbsp;<i>expr</i></td><td>day of the month of a date (integer)<br>(1 .. 31)</td></tr>
             <tr><td><code>DOY</code>&nbsp;<i>expr</i></td><td>day of the year of a date (integer)<br>(1 .. 365/366)</td></tr>

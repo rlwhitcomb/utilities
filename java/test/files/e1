@@ -934,6 +934,14 @@ loop codes "⅛34" __
 loop chars "⅛34" {__}
 
 #
+# Mask functions
+#
+$float {
+lmask(4)@x
+rmask(4)@x
+}
+
+#
 # Sets
 #
 set1 = {}

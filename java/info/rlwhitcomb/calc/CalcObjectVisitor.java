@@ -860,6 +860,8 @@
  *	    "round" needs "fixupToInteger" on the result.
  *	25-Jul-2024 (rlwhitcomb)
  *	    #686: Change output of "$clear" to separately report variable and functions cleared.
+ *	24-Sep-2024 (rlwhitcomb)
+ *	    #690: Add code for "lmask" and "rmask".
  */
 package info.rlwhitcomb.calc;
 
@@ -7090,6 +7092,32 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 		return result;
 	    }
+	}
+
+	@Override
+	public Object visitMaskExpr(CalcParser.MaskExprContext ctx) {
+	    CalcParser.ExprContext expr = ctx.expr1().expr();
+	    int i = getIntValue(expr);
+	    String op = ctx.K_MASK().getText();
+
+	    if (i < 1)
+		throw new CalcExprException(expr, "%calc#illegalArgument", expr.getText(), op);
+
+	    // 5 bits of 1's (11111) will be 2^5 - 1
+	    BigInteger bits = BigInteger.ZERO.setBit(i).subtract(BigInteger.ONE);
+
+	    switch(op.toLowerCase()) {
+		case "lmask":
+		    // Need to figure out from the precision, the number of bits there
+		    // Handy approximation (from here: https://www.quora.com/How-do-I-determine-the-minimum-number-of-bits-required-to-represent-a-20-digit-decimal-value-3-141592-as-an-unsigned-fixed-point-binary-number)
+		    // 10 bits for 3 decimal digits (1024 > 999)
+		    // Use the "mcDivide" value, which will not be 0 for unlimited
+		    int precBits = (settings.mcDivide.getPrecision() + 2) / 3 * 10;
+		    return bits.shiftLeft(precBits - i);
+		case "rmask":
+		    return bits;
+	    }
+	    return null;
 	}
 
 	@Override
