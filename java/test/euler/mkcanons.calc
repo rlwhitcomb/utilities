@@ -1,8 +1,8 @@
-$quiet on {
+$quiet on
 files = sort(findfiles('test/euler', 'p*.calc', 'fr!'))
 loop f over files {
    finfo = fileinfo(f)
-   print `Generating ${finfo.nameOnly}.canon ...`
-   exec('test/euler/upe', finfo.nameOnly)
-}
+   timethis `Generating ${finfo.nameOnly}.canon` {
+      exec('test/euler/upe', finfo.nameOnly)
+   }
 }
