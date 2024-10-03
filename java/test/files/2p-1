@@ -23,5 +23,9 @@ print "47th Mersenne prime: (2**43112609) - 1"
 (2**43112609) - 1
 
 print
+print "Verified non-prime (2**375743) - 1"
+(2**375743 - 1) / 1472912561
+
+print
 print "Done."
 
