@@ -222,7 +222,7 @@ define selectRandomCorner(_color) = {
  */
 define acceptUserMove() = {
   move = EMPTY
-  while true {
+  while {
     // need "input" function to integer "move" (range 1-9)
     // input 'Which square do you want?', move:"integer"(1-9)
     if valueAt(move) != EMPTY {

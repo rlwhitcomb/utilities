@@ -862,6 +862,8 @@
  *	    #686: Change output of "$clear" to separately report variable and functions cleared.
  *	24-Sep-2024 (rlwhitcomb)
  *	    #690: Add code for "lmask" and "rmask".
+ *	27-Oct-2024 (rlwhitcomb)
+ *	    Make "while" expression optional for "infinite" loops.
  */
 package info.rlwhitcomb.calc;
 
@@ -3643,7 +3645,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    Object lastValue = null;
 	    String loopLabel = label != null ? label.id().getText() : null;
 
-	    boolean exprResult = getBooleanValue(exprCtx);
+	    boolean exprResult = exprCtx == null ? true : getBooleanValue(exprCtx);
 
 	    pushScope(new WhileScope());
 	    try {
@@ -3655,7 +3657,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    catch (NextException next) {
 			// Note: lastValue should not be updated here
 		    }
-		    exprResult = getBooleanValue(exprCtx);
+		    exprResult = exprCtx == null ? true : getBooleanValue(exprCtx);
 		}
 	    }
 	    catch (LeaveException lex) {

@@ -551,6 +551,8 @@
  *	    #672: New "proper fractions" directive.
  *	17-Sep-2024 (rlwhitcomb)
  *	    #690: Keywords for "lmask" and "rmask" built-in functions.
+ *	27-Oct-2024 (rlwhitcomb)
+ *	    Make termination expression for "WHILE" optional to make "infinite" loops easier.
  */
 
 grammar Calc;
@@ -613,7 +615,7 @@ loopStmt
    ;
 
 whileStmt
-   : loopLabel ? K_WHILE expr stmtBlock
+   : loopLabel ? K_WHILE expr ? stmtBlock
    ;
 
 ifStmt

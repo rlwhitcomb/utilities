@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.54.4', date: d'2024-10-27',
+      issues: [ ],
+      comment: 'Allow infinite loop with just "WHILE { ... }".'
+    },
     { version: '2.54.0', date: d'2024-09-24',
       issues: [ 690 ],
       comment: 'Add "lmask" and "rmask" functions.'

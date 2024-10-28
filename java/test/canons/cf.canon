@@ -5,7 +5,7 @@
 >      f += 0
 >      a, b = b, a
 >   }
->   while true {
+>   while {
 >      f += a \ b
 >      const r = a % b
 >      if r == 0 leave f
