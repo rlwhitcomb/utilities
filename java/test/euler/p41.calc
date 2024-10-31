@@ -1,0 +1,106 @@
+/*
+ * Problem 41 from Project Euler (projecteuler.net)
+ *
+ * Pandigital Prime
+ *
+ * We shall say that an n-digit number is pandigital if it makes use of all the digits 1 to n exactly once.
+ * For example, 2143 is a 4-digit pandigital and is also prime.
+ *
+ * What is the largest n-digit pandigital prime that exists?
+ */
+$quiet on {
+$separators off
+
+/* Excerpt from "library.calc" (which we usually don't include) */
+const SORT_DESCENDING       = 0x0004
+
+/* This will hold the primes found among all the permutations */
+var prime_values = []
+
+/*
+ * Callback to deal with each permutation as it is produced (called from
+ * "permute" function).
+ *
+ * @param p The value to test / deal with
+ */
+define prime_test_callback(p) = {
+   if isprime(p) prime_values += p
+}
+
+/*
+ * Produce an n-digit pandigital number, like '654321'
+ *
+ * @param n Number of digits
+ * @return  The desired pandigital number
+ */
+define pandigital(n) = {
+   var digits = ''
+   loop over n {
+      digits += @@__
+   }
+   ~~reverse(digits)
+}
+
+/*
+ * Produce a list of all the permutations of the given number.
+ * Heap's algorithm, transcribed from the code here:
+ * https://www.geeksforgeeks.org/heaps-algorithm-for-generating-permutations/
+ *
+ * @param n        Any number to permute.
+ * @param callback The function to call to deal with each permutation.
+ */
+define permute(n, callback) = {
+   // The string representation of the input number
+   var a = @@n
+
+   /*
+    * Permute the "size" characters of "a" in place.
+    */
+   define perm(size) = {
+      if size == 1 {
+         // Let the caller do what they want with this permutation (numeric)
+         callback(~~a)
+         leave
+      }
+
+      loop m within size {
+         perm(size - 1)
+
+         if size % 2 == 1 {
+            // Swap first and last elements for even sizes
+            a[0], a[size-1] = a[size-1], a[0]
+         }
+         else {
+            // Swap current and last elements for odd sizes
+            a[m], a[size-1] = a[size-1], a[m]
+         }
+      }
+   }
+
+   perm(length(a))
+}
+
+// Heuristically, 4 has prime candidates, as does 7, but 5, 6, 8, and 9 have none
+// (which is confirmed by others in the comments, AFTER I found the solution),
+// so only check the required ones (to reduce execution time)
+
+// loop number over 4..9 {
+loop number in [4, 7] {
+   const pan = pandigital(number)
+   print `Candidate is $pan ...`
+
+   // Compute and test all the permutations of the candidate
+   // saving the primes found (in global "prime_values")
+   permute(pan, prime_test_callback)
+}
+
+} // end of quiet
+
+$resultsonly on {
+
+   print `Number of primes found is ${length(prime_values)}.`
+   const sorted_primes = sort(prime_values, SORT_DESCENDING)
+
+   print `Largest pandigital prime is ${sorted_primes[0]}.`
+
+}
