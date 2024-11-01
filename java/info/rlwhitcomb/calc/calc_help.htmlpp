@@ -1185,7 +1185,10 @@ or<br>
      as in "1", "2", "3", ... "10", "11", .... Future versions may include an option for this. The optional second argument to <code>sort</code>
      actually can hold two flags:  a value of <code>1</code> (or <code>true</code>) will do the sort in a case-insensitive way for strings,
      while a value of <code>2</code> will sort objects by key instead of value.  Using <code>3</code> (or <code>2|1</code> or <code>2+1</code>)
-     will sort by the keys, ignoring case differences. Sorting arrays or sets ignores the <code>2</code> flag value.
+     will sort by the keys, ignoring case differences. Sorting arrays or sets ignores the <code>2</code> flag value. The other combining flag is a value
+     of <code>4</code>, which will do the sort in reverse (that is, highest to lowest). This value can be combined with either of the other flags as desired.
+     The standard library (<code>"library.calc"</code>) has constants for these flag values as follows: <code>SORT_CASE_INSENSITIVE = 0x0001</code>,
+     <code>SORT_SORT_KEYS = 0x0002</code>, and <code>SORT_DESCENDING = 0x0004</code>.
   <p>The <code>FRAC</code> function constructs a fraction value from a numerator and denominator, from an integer along with
      a numerator and denominator, or a single expression which is converted to a string and parsed in the same manner as
      a fractional constant, such as <code>frac('1 &#x215c;')</code>, except that any of the Unicode fraction values can
