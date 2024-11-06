@@ -864,6 +864,8 @@
  *	    #690: Add code for "lmask" and "rmask".
  *	27-Oct-2024 (rlwhitcomb)
  *	    Make "while" expression optional for "infinite" loops.
+ *	06-Nov-2024 (rlwhitcomb)
+ *	    #693: Do some (maybe) optimizations for integer powers of integers. Notes for #694 also.
  */
 package info.rlwhitcomb.calc;
 
@@ -4661,9 +4663,10 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public Object visitPowerExpr(CalcParser.PowerExprContext ctx) {
 	    CalcParser.ExprContext expr = ctx.expr(0);
 	    double exp = getDoubleValue(ctx.expr(1));
+	    boolean isIntPower = Math.floor(exp) == exp && !Double.isInfinite(exp);
 
 	    if (settings.rationalMode) {
-		if (Math.floor(exp) == exp && !Double.isInfinite(exp)) {
+		if (isIntPower) {
 		    BigFraction f = getFractionValue(expr);
 		    return f.pow((int) exp);
 		}
@@ -4673,7 +4676,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    if (value instanceof Quaternion) {
 		Quaternion base = (Quaternion) value;
-		if (Math.floor(exp) == exp && !Double.isInfinite(exp)) {
+		if (isIntPower) {
 		    return base.power((int) exp, settings.mc);
 		}
 		// TODO: temporary
@@ -4682,6 +4685,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    else if (value instanceof ComplexNumber) {
 		ComplexNumber base = (ComplexNumber) value;
 		return base.pow(new BigDecimal(exp), settings.mc);
+	    }
+	    else if (isIntPower && value instanceof BigInteger) {
+		return ((BigInteger) value).pow((int) exp);
 	    }
 	    else {
 		BigDecimal base = convertToDecimal(value, settings.mc, expr);
@@ -4742,14 +4748,13 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		return base.pow(exp);
 	    }
 	    else if (value instanceof Quaternion) {
-		Quaternion base = (Quaternion) value;
-
-		return base.power(exp, settings.mc);
+		return ((Quaternion) value).power(exp, settings.mc);
 	    }
 	    else if (value instanceof ComplexNumber) {
-		ComplexNumber base = (ComplexNumber) value;
-
-		return base.pow(new BigDecimal(exp), settings.mc);
+		return ((ComplexNumber) value).pow(new BigDecimal(exp), settings.mc);
+	    }
+	    else if (value instanceof BigInteger) {
+		return ((BigInteger) value).pow(exp);
 	    }
 	    else {
 		BigDecimal base = convertToDecimal(value, settings.mc, expr);
@@ -8424,6 +8429,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public Object visitPowerAssignExpr(CalcParser.PowerAssignExprContext ctx) {
 	    LValueContext lValue = makeLValue(ctx.var());
 
+// TODO: same calculations as "visitPowerExpr" ... please...
 	    BigDecimal base = convertToDecimal(lValue.getContextObject(this), settings.mc, ctx);
 	    double exp      = getDoubleValue(ctx.expr());
 

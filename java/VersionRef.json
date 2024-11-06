@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.54.5', date: d'2024-11-06',
+      issues: [ 693 ],
+      comment: "Fix bug with strict equality where integers of a decimal type don't compare to straight integers."
+    },
     { version: '2.54.4', date: d'2024-10-27',
       issues: [ ],
       comment: 'Allow infinite loop with just "WHILE { ... }".'

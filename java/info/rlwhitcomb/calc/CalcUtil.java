@@ -246,6 +246,8 @@
  *	    "toStringValue" instead of generic "toString".
  *	14-May-2024 (rlwhitcomb)
  *	    "toDecimalValue" does a better job on complex and quaternion values.
+ *	06-Nov-2024 (rlwhitcomb)
+ *	    #693: Fix strict equality in one specific case of wanna-be integers.
  */
 package info.rlwhitcomb.calc;
 
@@ -1675,6 +1677,21 @@ public final class CalcUtil
 	    }
 
 	    if (strict) {
+		// Okay ... here we *could have* a decimal that has no fraction compared to an integer
+		// that by most reasonable metrics should be strictly equal and aren't just by class, so
+		// do a bit more checking
+
+		if (e1 instanceof BigDecimal && e2 instanceof BigInteger) {
+		    BigDecimal d1 = (BigDecimal) e1;
+		    if (d1.scale() <= 0)
+			e1 = d1.toBigIntegerExact();
+		}
+		else if (e1 instanceof BigInteger && e2 instanceof BigDecimal) {
+		    BigDecimal d2 = (BigDecimal) e2;
+		    if (d2.scale() <= 0)
+			e2 = d2.toBigIntegerExact();
+		}
+
 		if (!e1.getClass().equals(e2.getClass()))
 		    return -1;
 	    }

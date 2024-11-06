@@ -93,6 +93,12 @@ dec("-14.67583")
 $rational pop
 
 #
+# Random test of issue #693 with strict equality
+#
+3³+4³+5³⩶6³
+8===2**3
+
+#
 # Complex Numbers
 #
 ( 1.5, 2.5 )
