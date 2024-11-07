@@ -996,11 +996,18 @@ $rational on
 "5 3/8" * "4 1/4"@F
 (4/6)⁹
 u = 1/2
-u **= -2
-u**=-2
-u**= -2
-u**=-2
-frac u
+u **= -2 @F
+u**=-2 @F
+u**= -2 @F
+u**=-2 @F
+
+# Fraction to integer power (rational mode)
+(4/5) ** 3
+var u23 = 4/5
+u23 **= 3
+frac(7,3) ** -2
+u23 = 7/3
+u23 **= -2
 
 #
 # Bernoulli numbers
@@ -1013,6 +1020,29 @@ bn 20
 bn 126
 $rational pop
 
+# Power assign (quaternion to integer power)
+var q87 = (1, 2, 3, 4)
+q87 ** 4
+q87 **= 4
+
+# Power assign (complex to int power)
+var c79 = (3, 4)
+c79 ** 3
+c79 **= 3
+# Now complex to real power
+c79 = (4, 5)
+c79 ** 2.5
+c79 **= 2.5
+# Int to positive int power
+var i65 = 83
+i65 ** 27
+i65 **= 27
+# Other power assigns
+var d34 = pi
+d34 ** sqrt(2)
+d34 **= sqrt(2)
+
+#
 #
 # Tests of functions
 #

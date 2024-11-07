@@ -866,6 +866,7 @@
  *	    Make "while" expression optional for "infinite" loops.
  *	06-Nov-2024 (rlwhitcomb)
  *	    #693: Do some (maybe) optimizations for integer powers of integers. Notes for #694 also.
+ *	    #694: Fix results of "**=" to match "**".
  */
 package info.rlwhitcomb.calc;
 
@@ -8427,13 +8428,44 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitPowerAssignExpr(CalcParser.PowerAssignExprContext ctx) {
-	    LValueContext lValue = makeLValue(ctx.var());
+	    CalcParser.VarContext  var  = ctx.var();
+	    CalcParser.ExprContext expr = ctx.expr();
 
-// TODO: same calculations as "visitPowerExpr" ... please...
-	    BigDecimal base = convertToDecimal(lValue.getContextObject(this), settings.mc, ctx);
-	    double exp      = getDoubleValue(ctx.expr());
+	    LValueContext lValue = makeLValue(var);
+	    Object        value  = lValue.getContextObject(this);
+	    double        exp    = getDoubleValue(expr);
 
-	    return lValue.putContextObject(this, MathUtil.pow(base, exp, settings.mc));
+	    boolean isIntPower = Math.floor(exp) == exp && !Double.isInfinite(exp);
+
+	    Object result = null;
+
+	    if (settings.rationalMode && isIntPower) {
+		BigFraction f = toFractionValue(this, value, var);
+		result = f.pow((int) exp);
+	    }
+	    else if (value instanceof Quaternion) {
+		Quaternion base = (Quaternion) value;
+		if (isIntPower) {
+		    result = base.power((int) exp, settings.mc);
+		}
+		else {
+		    // TODO: temporary
+		    throw new CalcExprException(ctx, "%calc#notImplemented", "quaternion to decimal power");
+		}
+	    }
+	    else if (value instanceof ComplexNumber) {
+		ComplexNumber base = (ComplexNumber) value;
+		result = base.pow(new BigDecimal(exp), settings.mc);
+	    }
+	    else if (isIntPower && value instanceof BigInteger && ((int) exp) >= 0) {
+		result = ((BigInteger) value).pow((int) exp);
+	    }
+	    else {
+		BigDecimal base = convertToDecimal(value, settings.mc, expr);
+		result = MathUtil.pow(base, exp, settings.mc);
+	    }
+
+	    return lValue.putContextObject(this, result);
 	}
 
 	@Override

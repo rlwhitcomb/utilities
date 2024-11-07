@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.54.6', date: d'2024-11-06',
+      issues: [ 694 ],
+      comment: 'Fix results of "**=" to match "**".'
+    },
     { version: '2.54.5', date: d'2024-11-06',
       issues: [ 693 ],
       comment: "Fix bug with strict equality where integers of a decimal type don't compare to straight integers."
