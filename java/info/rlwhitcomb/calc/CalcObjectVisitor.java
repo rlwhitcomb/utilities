@@ -4686,7 +4686,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		ComplexNumber base = (ComplexNumber) value;
 		return base.pow(new BigDecimal(exp), settings.mc);
 	    }
-	    else if (isIntPower && value instanceof BigInteger) {
+	    else if (isIntPower && value instanceof BigInteger && ((int) exp) >= 0) {
 		return ((BigInteger) value).pow((int) exp);
 	    }
 	    else {

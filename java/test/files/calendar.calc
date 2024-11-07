@@ -43,8 +43,10 @@ loop within number_of_months {
    const start_date = start_of_month - dow(start_of_month)
    var current_date = start_date
 
+ weeks:
    loop week over 6 {
       var current_week = ''
+      if current_date >= end_of_month leave weeks:
       loop day within 7 {
          var this_day = ''
          if current_date >= start_of_month && current_date < end_of_month
@@ -58,8 +60,7 @@ loop within number_of_months {
          }
          current_date++
       }
-      if trim(current_week)
-         display current_week[2:]
+      display current_week[2:]
    }
 
    if ++month > 12 {
