@@ -254,6 +254,7 @@ package info.rlwhitcomb.calc;
 import de.onyxbits.SemanticVersion;
 import info.rlwhitcomb.math.BigFraction;
 import info.rlwhitcomb.math.ComplexNumber;
+import info.rlwhitcomb.math.MathUtil;
 import info.rlwhitcomb.math.Num;
 import info.rlwhitcomb.math.Quaternion;
 import info.rlwhitcomb.util.CharUtil;
@@ -2185,6 +2186,53 @@ public final class CalcUtil
 
 		default:
 		    throw new UnknownOpException(op, ctx);
+	    }
+
+	    return result;
+	}
+
+
+	/**
+	 * Do a "power" operation (that is, {@code a**b}) where {@code a} can be arbitrary (numeric, not a data structure)
+	 * type, and {@code b} will be a real (double) value. It's not realistic to work with exponents outside that range.
+	 *
+	 * @param visitor  The visitor object for evaluating expressions.
+	 * @param baseExpr Expression node for the base value (for error reporting).
+	 * @param value    Base value object.
+	 * @param exp      The exponent value.
+	 * @param settings Global settings for rounding, modes, etc.
+	 * @return         Result of the power operation.
+	 * @throws CalcExprException mostly for unimplemented things
+	 */
+	public static Object powerOp(final CalcObjectVisitor visitor, final ParserRuleContext baseExpr, final Object value, final double exp, final Settings settings) {
+	    boolean isIntPower = Math.floor(exp) == exp && !Double.isInfinite(exp);
+
+	    Object result = null;
+
+	    if (settings.rationalMode && isIntPower) {
+		BigFraction f = toFractionValue(visitor, value, baseExpr);
+		result = f.pow((int) exp);
+	    }
+	    else if (value instanceof Quaternion) {
+		Quaternion base = (Quaternion) value;
+		if (isIntPower) {
+		    result = base.power((int) exp, settings.mc);
+		}
+		else {
+		    // TODO: temporary
+		    throw new CalcExprException(baseExpr, "%calc#notImplemented", "quaternion to decimal power");
+		}
+	    }
+	    else if (value instanceof ComplexNumber) {
+		ComplexNumber base = (ComplexNumber) value;
+		result = base.pow(new BigDecimal(exp), settings.mc);
+	    }
+	    else if (isIntPower && value instanceof BigInteger && ((int) exp) >= 0) {
+		result = ((BigInteger) value).pow((int) exp);
+	    }
+	    else {
+		BigDecimal base = convertToDecimal(value, settings.mc, baseExpr);
+		result = MathUtil.pow(base, exp, settings.mc);
 	    }
 
 	    return result;

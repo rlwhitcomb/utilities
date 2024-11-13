@@ -867,6 +867,8 @@
  *	06-Nov-2024 (rlwhitcomb)
  *	    #693: Do some (maybe) optimizations for integer powers of integers. Notes for #694 also.
  *	    #694: Fix results of "**=" to match "**".
+ *	13-Nov-2024 (rlwhitcomb)
+ *	    #694: Move power operation to CalcUtil.
  */
 package info.rlwhitcomb.calc;
 
@@ -4664,36 +4666,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public Object visitPowerExpr(CalcParser.PowerExprContext ctx) {
 	    CalcParser.ExprContext expr = ctx.expr(0);
 	    double exp = getDoubleValue(ctx.expr(1));
-	    boolean isIntPower = Math.floor(exp) == exp && !Double.isInfinite(exp);
 
-	    if (settings.rationalMode) {
-		if (isIntPower) {
-		    BigFraction f = getFractionValue(expr);
-		    return f.pow((int) exp);
-		}
-	    }
-
-	    Object value = evaluate(expr);
-
-	    if (value instanceof Quaternion) {
-		Quaternion base = (Quaternion) value;
-		if (isIntPower) {
-		    return base.power((int) exp, settings.mc);
-		}
-		// TODO: temporary
-		throw new CalcExprException(ctx, "%calc#notImplemented", "quaternion to decimal power");
-	    }
-	    else if (value instanceof ComplexNumber) {
-		ComplexNumber base = (ComplexNumber) value;
-		return base.pow(new BigDecimal(exp), settings.mc);
-	    }
-	    else if (isIntPower && value instanceof BigInteger && ((int) exp) >= 0) {
-		return ((BigInteger) value).pow((int) exp);
-	    }
-	    else {
-		BigDecimal base = convertToDecimal(value, settings.mc, expr);
-		return MathUtil.pow(base, exp, settings.mc);
-	    }
+	    return powerOp(this, expr, evaluate(expr), exp, settings);
 	}
 
 	private int nToPower(String power, ParserRuleContext ctx) {
@@ -8435,35 +8409,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    Object        value  = lValue.getContextObject(this);
 	    double        exp    = getDoubleValue(expr);
 
-	    boolean isIntPower = Math.floor(exp) == exp && !Double.isInfinite(exp);
-
-	    Object result = null;
-
-	    if (settings.rationalMode && isIntPower) {
-		BigFraction f = toFractionValue(this, value, var);
-		result = f.pow((int) exp);
-	    }
-	    else if (value instanceof Quaternion) {
-		Quaternion base = (Quaternion) value;
-		if (isIntPower) {
-		    result = base.power((int) exp, settings.mc);
-		}
-		else {
-		    // TODO: temporary
-		    throw new CalcExprException(ctx, "%calc#notImplemented", "quaternion to decimal power");
-		}
-	    }
-	    else if (value instanceof ComplexNumber) {
-		ComplexNumber base = (ComplexNumber) value;
-		result = base.pow(new BigDecimal(exp), settings.mc);
-	    }
-	    else if (isIntPower && value instanceof BigInteger && ((int) exp) >= 0) {
-		result = ((BigInteger) value).pow((int) exp);
-	    }
-	    else {
-		BigDecimal base = convertToDecimal(value, settings.mc, expr);
-		result = MathUtil.pow(base, exp, settings.mc);
-	    }
+	    Object result = powerOp(this, var, value, exp, settings);
 
 	    return lValue.putContextObject(this, result);
 	}
