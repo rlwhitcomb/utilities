@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.54.8', date: d'2025-01-05',
+      issues: [ 698 ],
+      comment: 'Add "copyright" field to "info" structure.'
+    },
     { version: '2.54.6', date: d'2024-11-06',
       issues: [ 694 ],
       comment: 'Fix results of "**=" to match "**".'

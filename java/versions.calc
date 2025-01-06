@@ -19,6 +19,7 @@ $resultsonly on {
     '============================================='
     print '           Calc Versions Reference'
     print ` Current ${version}`
+    print ' ' + info.copyright
     '============================================='
     ''
     print 'Version  Date        Comment'

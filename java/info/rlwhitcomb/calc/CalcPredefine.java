@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2022-2023 Roger L. Whitcomb.
+ * Copyright (c) 2022-2023,2025 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,28 +24,29 @@
  *	Predefine all the Calc predefined values (not functions).
  *
  * History:
- *  26-Jan-22 rlw #206:	Moved out of CalcObjectVisitor.
+ *  26-Jan-22 rlw #206	Moved out of CalcObjectVisitor.
  *			Added the hardware values out of Environment, and more "os" fields.
- *  30-Jan-22 rlw #103:	Extend "I_ALIASES" (must agree with ComplexNumber).
- *  01-Feb-22 rlw #103:	Another I_ALIAS.
- *		  #231:	Use Constants class values instead of where they used to be.
- *  02-Feb-22 rlw #115:	Make (for now predefined) "info.settings" for these values.
+ *  30-Jan-22 rlw #103	Extend "I_ALIASES" (must agree with ComplexNumber).
+ *  01-Feb-22 rlw #103	Another I_ALIAS.
+ *		  #231	Use Constants class values instead of where they used to be.
+ *  02-Feb-22 rlw #115	Make (for now predefined) "info.settings" for these values.
  *			New "makePredefinedMap" method to wrap the map values.
- *  05-Feb-22 rlw #233:	Remove that method as it's not needed now with SystemValue.
- *  07-Feb-22 rlw  ---	Add "specificationversion" to "info.java" in case we ever need it.
- *  12-Feb-22 rlw #199:	Take out "arguments" and the ARG_ initialization because it moved
+ *  05-Feb-22 rlw #233	Remove that method as it's not needed now with SystemValue.
+ *  07-Feb-22 rlw ----	Add "specificationversion" to "info.java" in case we ever need it.
+ *  12-Feb-22 rlw #199	Take out "arguments" and the ARG_ initialization because it moved
  *			into ParameterizedScope and GlobalScope.
- *  14-Apr-22 rlw #273:	Move math-related classes to "math" package.
- *  17-May-22 rlw #323:	Add "env" variables as predefined.
- *  28-May-22 rlw #344:	Quote map keys for "env" that aren't valid identifiers.
- *  11-Jun-22 rlw #365:	Mark the outer objects as immutable.
- *  08-Jul-22 rlw #393:	Cleanup imports.
- *  28-Jul-22 rlw #429:	Make "cpu" memory values into dynamic suppliers; add "usedmemory".
- *  25-Dec-22 rlw #83:	Another alias for "e".
- *  10-Jan-23 rlw #558:	Add aliases for "j" and "k" (quaternions).
- *  11-Jan-23 rlw #558:	More aliases for "j" and "k".
- *  09-Feb-23 rlw  ---	Rearrange some code and all history.
- *  05-May-23 rlw #610:	Add "currentdir" to "info.os".
+ *  14-Apr-22 rlw #273	Move math-related classes to "math" package.
+ *  17-May-22 rlw #323	Add "env" variables as predefined.
+ *  28-May-22 rlw #344	Quote map keys for "env" that aren't valid identifiers.
+ *  11-Jun-22 rlw #365	Mark the outer objects as immutable.
+ *  08-Jul-22 rlw #393	Cleanup imports.
+ *  28-Jul-22 rlw #429	Make "cpu" memory values into dynamic suppliers; add "usedmemory".
+ *  25-Dec-22 rlw #83	Another alias for "e".
+ *  10-Jan-23 rlw #558	Add aliases for "j" and "k" (quaternions).
+ *  11-Jan-23 rlw #558	More aliases for "j" and "k".
+ *  09-Feb-23 rlw ----	Rearrange some code and all history.
+ *  05-May-23 rlw #610	Add "currentdir" to "info.os".
+ *  05-Jan-25 rlw #698	Add copyright string to "info" at the top level.
  */
 package info.rlwhitcomb.calc;
 
@@ -308,8 +309,11 @@ class CalcPredefine
 	    PredefinedValue.define(tz, "offset",   tzOffset(offset));
 	    tz.setImmutable(true);
 
+	    String copyright = Environment.getCopyrightNotice();
+
 	    ObjectScope info = new ObjectScope();
 
+	    PredefinedValue.define(info, "copyright",  copyright);
 	    PredefinedValue.define(info, "version",    version);
 	    PredefinedValue.define(info, "libversion", libVersion);
 	    PredefinedValue.define(info, "cpu",        cpu);
