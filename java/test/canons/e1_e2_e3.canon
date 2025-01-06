@@ -1618,6 +1618,12 @@
 >vaar2 -> 12.3
 >vaar3 = 1492, "Columbus", "sails", "the", "ocean", "blue" -> [ 1492, "Columbus", "sails", "the", "ocean", "blue" ]
 >vaar3[-1] -> "blue"
+>vaar1, vaar2, vaar3 = vaar2, vaar3, vaar1 -> "abc"
+>vaar1 -> 12.3
+>vaar2 -> [ 1492, "Columbus", "sails", "the", "ocean", "blue" ]
+>vaar3 -> "abc"
+>vaar2[-2], vaar2[-1] = vaar2[-1], vaar2[-2] -> "ocean"
+>vaar2 -> [ 1492, "Columbus", "sails", "the", "blue", "ocean" ]
 >
 >End of expression tests (suite 1).
 >Tests of nested object / array variables.

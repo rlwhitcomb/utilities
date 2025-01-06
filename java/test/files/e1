@@ -1419,6 +1419,10 @@ vaar1, vaar2 = vaar2, vaar1
 vaar1;vaar2
 vaar3 = 1492, "Columbus", "sails", "the", "ocean", "blue"
 vaar3[-1]
+vaar1, vaar2, vaar3 = vaar2, vaar3, vaar1
+vaar1;vaar2;vaar3
+vaar2[-2], vaar2[-1] = vaar2[-1], vaar2[-2]
+vaar2
 
 print
 print "End of expression tests (suite 1)."
