@@ -9,7 +9,7 @@ print
 info.version.major > 2 ||
     (info.version.major == 2 && info.version.minor > 4) ||
     (info.version.major == 2 && info.version.minor == 4 && info.version.patch >= 11)
-$requires 2.54.0, base 1.12.3
+$requires 2.54.9, base 1.12.3
 
 # Various simple expressions
 $decimal(50)
@@ -223,6 +223,7 @@ cast(junk[0], 'function')
 typeof(_junk5b05d)
 $var _junk5b05d
 
+info.copyright is string
 info.version.major is integer
 info.locale.name is "string"
 info.cpu.cores is "integer"
@@ -1043,7 +1044,6 @@ d34 ** sqrt(2)
 d34 **= sqrt(2)
 
 #
-#
 # Tests of functions
 #
 $clear a
@@ -1409,6 +1409,16 @@ z22()
 define z09 = { var b22 }
 z09()
 var a27, a38 = 7!, a92
+
+#
+# Variations of assignments
+#
+vaar1 = 12.3
+vaar2 = "abc"
+vaar1, vaar2 = vaar2, vaar1
+vaar1;vaar2
+vaar3 = 1492, "Columbus", "sails", "the", "ocean", "blue"
+vaar3[-1]
 
 print
 print "End of expression tests (suite 1)."

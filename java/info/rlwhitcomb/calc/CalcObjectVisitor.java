@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2020-2024 Roger L. Whitcomb.
+ * Copyright (c) 2020-2025 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -869,6 +869,8 @@
  *	    #694: Fix results of "**=" to match "**".
  *	13-Nov-2024 (rlwhitcomb)
  *	    #694: Move power operation to CalcUtil.
+ *	05-Jan-2025 (rlwhitcomb)
+ *	   #696: Special case of list assignment shorthand.
  */
 package info.rlwhitcomb.calc;
 
@@ -8548,6 +8550,18 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public Object visitAssignExpr(CalcParser.AssignExprContext ctx) {
 	    List<CalcParser.VarContext> vars = ctx.var();
 	    List<CalcParser.ExprContext> exprs = ctx.expr();
+
+	    // Special case of "a = 1, 2, 3" which is a shorthand for assigning a list
+	    if (vars.size() == 1 && exprs.size() > 1) {
+		ArrayScope<Object> list = new ArrayScope<>(exprs.size());
+		for (CalcParser.ExprContext expr : exprs) {
+		    list.add(evaluate(expr));
+		}
+		LValueContext lValue = makeLValue(vars.get(0));
+		lValue.putContextObject(this, list);
+
+		return list;
+	    }
 
 	    if (vars.size() != exprs.size())
 		throw new CalcExprException(ctx, "%calc#mismatchVarExpr", exprs.size(), vars.size());

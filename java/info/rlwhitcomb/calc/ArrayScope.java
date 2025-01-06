@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2021-2024 Roger L. Whitcomb.
+ * Copyright (c) 2021-2025 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -40,6 +40,7 @@
  *  08-Jan-23 rlw #592	Move "isEmpty()" to CollectionScope.
  *  28-Nov-23 rlw #627	Add "ensureCapacity" method.
  *  11-Feb-24 rlw #65	Methods to get array sizes.
+ *  05-Jan-25 rlw #696	New constructor with the array size.
  */
 package info.rlwhitcomb.calc;
 
@@ -69,6 +70,16 @@ class ArrayScope<T> extends CollectionScope
 	ArrayScope() {
 	    super(Type.ARRAY);
 	    values = new ArrayList<>();
+	}
+
+	/**
+	 * Construct given the size of the anticipated value list.
+	 *
+	 * @param size Anticipated value list size.
+	 */
+	ArrayScope(final int size) {
+	    super(Type.ARRAY);
+	    values = new ArrayList<>(size);
 	}
 
 	/**

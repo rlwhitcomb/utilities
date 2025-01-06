@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.54.9', date: d'2025-01-05',
+      issues: [ 696 ],
+      comment: 'New shorthand for assigning a list of values to a single variable.'
+    },
     { version: '2.54.8', date: d'2025-01-05',
       issues: [ 698 ],
       comment: 'Add "copyright" field to "info" structure.'

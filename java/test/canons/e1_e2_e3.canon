@@ -349,6 +349,7 @@
 >-----------------------
 >define _junk5b05d -> junk[0]
 >=======================
+>info.copyright is string -> true
 >info.version.major is integer -> true
 >info.locale.name is "string" -> true
 >info.cpu.cores is "integer" -> true
@@ -1610,6 +1611,13 @@
 >Defining variable “a27”
 >Defining variable “a38” = 5040
 >Defining variable “a92”
+>vaar1 = 12.3 -> 12.3
+>vaar2 = "abc" -> "abc"
+>vaar1, vaar2 = vaar2, vaar1 -> 12.3
+>vaar1 -> "abc"
+>vaar2 -> 12.3
+>vaar3 = 1492, "Columbus", "sails", "the", "ocean", "blue" -> [ 1492, "Columbus", "sails", "the", "ocean", "blue" ]
+>vaar3[-1] -> "blue"
 >
 >End of expression tests (suite 1).
 >Tests of nested object / array variables.
