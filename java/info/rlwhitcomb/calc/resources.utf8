@@ -1,7 +1,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2021-2024 Roger L. Whitcomb.
+# Copyright (c) 2021-2025 Roger L. Whitcomb.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -200,6 +200,8 @@
 #	    #686: Change "Variables" to "Variables and Functions" for the "$vars" directive also.
 #	15-Aug-2024 (rlwhitcomb)
 #	    Change "valueNotNull" message text.
+#	15-Jan-2025 (rlwhitcomb)
+#	    Update "unknownOp" message to be clearer.
 #
 
 #
@@ -377,7 +379,7 @@ noChangeValue		= Cannot change %1$s <y>%2$s%3$s<.>
 #
 # From UnknownOpException
 #
-unknownOp		= Unknown operator <y>%1$s<.>
+unknownOp		= Unknown operator <y>%1$s<.> for these data types
 
 #
 # From ArrayScope
