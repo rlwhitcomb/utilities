@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.55.0', date: d'2025-01-15',
+      issues: [ 703 ],
+      comment: 'Fixed some fraction, quaternion, and complex operations.'
+    },
     { version: '2.54.9', date: d'2025-01-05',
       issues: [ 696 ],
       comment: 'New shorthand for assigning a list of values to a single variable.'

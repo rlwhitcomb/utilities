@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2022-2024 Roger L. Whitcomb.
+ * Copyright (c) 2022-2025 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -37,6 +37,9 @@
  *  14-May-24 rlw #674	New methods to determine if this is real, imaginary, or complex,
  *			and then better conversions to real and complex.
  *  16-May-24 rlw ----	Add "toBigIntegerExact()" method.
+ *  15-Jan-25 rlw ----	Rename "normalize" to "internalize" and make a real "normal"
+ *			method; add "signum", "ceil", and "floor" methods; new constructor
+ *			from BigInteger values.
  */
 package info.rlwhitcomb.math;
 
@@ -118,7 +121,24 @@ public final class Quaternion extends Number
 	    b = bVal;
 	    c = cVal;
 	    d = dVal;
-	    normalize();
+	    internalize();
+	}
+
+	/**
+	 * Construct given integer values for the coefficients, but make it a "real" quaternion.
+	 *
+	 * @param aInt The first term coefficient.
+	 * @param bInt Second coefficient (i).
+	 * @param cInt Third term (j) coefficient.
+	 * @param dInt Fourth coefficient (k).
+	 */
+	public Quaternion(final BigInteger aInt, final BigInteger bInt, final BigInteger cInt, final BigInteger dInt) {
+	    rational = false;
+	    a = new BigDecimal(aInt);
+	    b = new BigDecimal(bInt);
+	    c = new BigDecimal(cInt);
+	    d = new BigDecimal(dInt);
+	    internalize();
 	}
 
 	/**
@@ -135,7 +155,7 @@ public final class Quaternion extends Number
 	    bFrac = BigFraction.properFraction(bF);
 	    cFrac = BigFraction.properFraction(cF);
 	    dFrac = BigFraction.properFraction(dF);
-	    normalize();
+	    internalize();
 	}
 
 	/**
@@ -152,7 +172,7 @@ public final class Quaternion extends Number
 	    b = new BigDecimal(bVal);
 	    c = new BigDecimal(cVal);
 	    d = new BigDecimal(dVal);
-	    normalize();
+	    internalize();
 	}
 
 
@@ -210,7 +230,7 @@ public final class Quaternion extends Number
 		c = null;
 		d = null;
 	    }
-	    normalize();
+	    internalize();
 	}
 
 	/**
@@ -239,9 +259,9 @@ public final class Quaternion extends Number
 
 
 	/**
-	 * Maintain this value in its "normalized" form, that is, keeping zero (unused) terms as null instead.
+	 * Maintain this value in its "internalized" form, that is, keeping zero (unused) terms as null instead.
 	 */
-	private void normalize() {
+	private void internalize() {
 	    if (rational) {
 		if (aFrac != null && aFrac.equals(BigFraction.ZERO))
 		    aFrac = null;
@@ -277,7 +297,7 @@ public final class Quaternion extends Number
 	 * Is this quaternion uniquely the value zero?
 	 *
 	 * @return {@code true} if all parts are zero.
-	 * @see #normalize
+	 * @see #internalize
 	 */
 	public boolean isZero() {
 	    if (rational)
@@ -563,6 +583,42 @@ public final class Quaternion extends Number
 	}
 
 	/**
+	 * Compute a normalized form of this quaternion, which has a magnitude of one,
+	 * but the same direction as this quaternion.
+	 * <p> Note: even if the original was in fractional form, the returned value
+	 * will be in decimal form, in order for the new magnitude to be as close to
+	 * one as the precision allows.
+	 *
+	 * @paraam mc The rounding value for computing the magnitude (for division).
+	 * @return    Original value with coefficients divided by the magnitude, to
+	 *            make the new magnitude equal to one.
+	 */
+	public Quaternion normal(final MathContext mc) {
+	    BigDecimal aDec = a();
+	    BigDecimal bDec = b();
+	    BigDecimal cDec = c();
+	    BigDecimal dDec = d();
+	    BigDecimal mag = magnitude(mc);
+
+	    return new Quaternion(
+		aDec.divide(mag, mc),
+		bDec.divide(mag, mc),
+		cDec.divide(mag, mc),
+		dDec.divide(mag, mc));
+	}
+
+	/**
+	 * Return the signum value of this quaternion, which is the original if the value
+	 * is zero, and the normalized value (magnitude one) if the value is non-zero.
+	 *
+	 * @param mc MathContext for use in normalizing the value if needed.
+	 * @return   The original value if zero, or the normalized value if not.
+	 */
+	public Quaternion signum(final MathContext mc) {
+	    return isZero() ? this : normal(mc);
+	}
+
+	/**
 	 * Compute the inverse value of this quaternion, which is {@code q'/(q*q')},
 	 * where {@code q'} is the conjugate of {@code q}.
 	 *
@@ -588,6 +644,44 @@ public final class Quaternion extends Number
 			MathUtil.fixup(c().divide(magSquare, mc).negate(), mc),
 			MathUtil.fixup(d().divide(magSquare, mc).negate(), mc));
 	    }
+	}
+
+	/**
+	 * Return a new quaternion consisting of the "ceil" value of each component.
+	 * <p> Note: a rational quaternion will be converted to decimal form in the result.
+	 *
+	 * @return The "ceil" value of this quaternion.
+	 */
+	public Quaternion ceil() {
+	    BigDecimal aDec = a();
+	    BigDecimal bDec = b();
+	    BigDecimal cDec = c();
+	    BigDecimal dDec = d();
+
+	    return new Quaternion(
+		MathUtil.ceil(aDec),
+		MathUtil.ceil(bDec),
+		MathUtil.ceil(cDec),
+		MathUtil.ceil(dDec));
+	}
+
+	/**
+	 * Return a new quaternion consisting of the "floor" value of each component.
+	 * <p> Note: a rational quaternion will be converted to decimal form in the result.
+	 *
+	 * @return The "floor" value of this quaternion.
+	 */
+	public Quaternion floor() {
+	    BigDecimal aDec = a();
+	    BigDecimal bDec = b();
+	    BigDecimal cDec = c();
+	    BigDecimal dDec = d();
+
+	    return new Quaternion(
+		MathUtil.floor(aDec),
+		MathUtil.floor(bDec),
+		MathUtil.floor(cDec),
+		MathUtil.floor(dDec));
 	}
 
 	/**

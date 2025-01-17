@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2022-2024 Roger L. Whitcomb.
+ * Copyright (c) 2022-2025 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -57,6 +57,7 @@
  *  14-May-24 rlw ----	Conversion of Quaternion to complex in "valueOf". New "part" method
  *			to extract one part or the other.
  *  16-May-24 rlw ----	New "toBigIntegerExact()" method.
+ *  15-Jan-25 rlw ----	New "ceil" and "floor" functions.
  */
 package info.rlwhitcomb.math;
 
@@ -1097,6 +1098,35 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 
 	    return divide(radius(mc), mc);
 	}
+
+	/**
+	 * Return a complex number that is the "ceil" value of this one, meaning
+	 * both parts will be the "ceil" value of each, respectively.
+	 * <p> Note: the return value will always be decimal (not rational).
+	 *
+	 * @return The "ceil" value of this complex number.
+	 */
+	public ComplexNumber ceil() {
+	    BigDecimal rDec = r();
+	    BigDecimal iDec = i();
+
+	    return new ComplexNumber(MathUtil.ceil(rDec), MathUtil.ceil(iDec));
+	}
+
+	/**
+	 * Return a complex number that is the "floor" value of this one, meaning
+	 * both parts will be the "floor" value of each, respectively.
+	 * <p> Note: the return value will always be decimal (not rational).
+	 *
+	 * @return The "floor" value of this complex number.
+	 */
+	public ComplexNumber floor() {
+	    BigDecimal rDec = r();
+	    BigDecimal iDec = i();
+
+	    return new ComplexNumber(MathUtil.floor(rDec), MathUtil.floor(iDec));
+	}
+
 
 	/**
 	 * Calculate the complex number to the given integer power, using the "squaring"

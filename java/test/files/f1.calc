@@ -39,6 +39,20 @@ F'3,-3,-8'@F
 1/5 + 2/9 + 7/15
 3/27 + 11/15 + 17/30
 
+// Issue 703 tests
+1*2
+xyz1 = 2
+xyz1 *= 3
+2/3
+xyz2 = 4
+xyz2 /= 4
+5\2
+xyz3 = 5
+xyz3 \= 3
+9%6
+xyz4 = 12
+xyz4 %= 7
+
 $proper on {
 5/14 + 13/21 + 3/28
 13/19 + 5/7 + 8/11
@@ -223,6 +237,14 @@ cf1[0]
 cf1[1]
 cf4[1]=6
 cf4
+
+// Test of issue #703
+$rational on
+cr1=(6,3)
+cr2=(10,8)
+cr1/cr2
+$rational off
+cr1/cr2
 
 // more to come (to complex powers)
 

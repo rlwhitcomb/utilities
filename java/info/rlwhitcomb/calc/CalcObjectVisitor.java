@@ -870,7 +870,9 @@
  *	13-Nov-2024 (rlwhitcomb)
  *	    #694: Move power operation to CalcUtil.
  *	05-Jan-2025 (rlwhitcomb)
- *	   #696: Special case of list assignment shorthand.
+ *	    #696: Special case of list assignment shorthand.
+ *	15-Jan-2025 (rlwhitcomb)
+ *	    #703: Fix a bunch of fraction, complex, and quaternion functions.
  */
 package info.rlwhitcomb.calc;
 
@@ -3316,7 +3318,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			    stepWise = false;
 			    codePoints = ((String) obj).codePoints();
 			}
-			else if (obj instanceof BigFraction && settings.rationalMode) {
+			else if (settings.rationalMode && obj instanceof BigFraction) {
 			    fStop = (BigFraction) obj;
 			    doingFractions = true;
 			    allowWithin = true;
@@ -3326,7 +3328,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			    allowWithin = true;
 			}
 		    }
-		    else if (obj instanceof BigFraction && settings.rationalMode) {
+		    else if (settings.rationalMode && obj instanceof BigFraction) {
 			fStop = (BigFraction) obj;
 			doingFractions = true;
 			allowWithin = true;
@@ -3344,7 +3346,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 		    if (hasDots) {
 			// start .. stop
-			if (obj0 instanceof BigFraction && settings.rationalMode) {
+			if (settings.rationalMode && obj0 instanceof BigFraction) {
 			    fStart = (BigFraction) obj0;
 			    fStop  = toFractionValue(this, obj1, expr1);
 			    doingFractions = true;
@@ -3358,7 +3360,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			// stop, step
 			stepExpr = expr1;
 
-			if (obj0 instanceof BigFraction && settings.rationalMode) {
+			if (settings.rationalMode && obj0 instanceof BigFraction) {
 			    fStop = (BigFraction) obj0;
 			    fStep = toFractionValue(this, obj1, stepExpr);
 			    doingFractions = true;
@@ -3378,7 +3380,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    Object obj0 = evaluate(zeroExpr);
 		    Object obj1 = evaluate(expr1);
 
-		    if (obj0 instanceof BigFraction && settings.rationalMode) {
+		    if (settings.rationalMode && obj0 instanceof BigFraction) {
 			fStart = (BigFraction) obj0;
 			fStop  = toFractionValue(this, obj1, expr1);
 			fStep  = getFractionValue(stepExpr);
@@ -4262,7 +4264,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    Object o1 = evaluate(expr1);
 	    Object o2 = evaluate(expr2);
 
-	    if (settings.rationalMode || o1 instanceof BigFraction || o2 instanceof BigFraction) {
+	    if (settings.rationalMode || (o1 instanceof BigFraction || o2 instanceof BigFraction)) {
 		BigFraction rFrac = convertToFraction(o1, expr1);
 		BigFraction iFrac = convertToFraction(o2, expr2);
 
@@ -4432,7 +4434,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 		afterValue = obj;
 	    }
-	    else if (settings.rationalMode || value instanceof BigFraction) {
+	    else if (settings.rationalMode && value instanceof BigFraction) {
 		BigFraction fValue = convertToFraction(value, var);
 		beforeValue = fValue;
 
@@ -4555,7 +4557,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 		afterValue = list;
 	    }
-	    else if (settings.rationalMode || value instanceof BigFraction) {
+	    else if (settings.rationalMode && value instanceof BigFraction) {
 		BigFraction fValue = convertToFraction(value, var);
 
 		if (incr)
@@ -4719,7 +4721,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    String power = ctx.POWERS().getText();
 	    int exp = nToPower(power, ctx);
 
-	    if (settings.rationalMode) {
+	    if (settings.rationalMode && value instanceof BigFraction) {
 		BigFraction base = convertToFraction(value, expr);
 
 		return base.pow(exp);
@@ -4785,7 +4787,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 
 	    try {
-		if (settings.rationalMode || (e1 instanceof BigFraction || e2 instanceof BigFraction)) {
+		if (((settings.rationalMode && (op == "/" || op == "\\")) || (e1 instanceof BigFraction || e2 instanceof BigFraction)) &&
+		    (!(e1 instanceof Quaternion || e2 instanceof Quaternion)) &&
+		    (!(e1 instanceof ComplexNumber || e2 instanceof ComplexNumber))) {
 		    BigFraction f1 = convertToFraction(e1, ctx1);
 		    BigFraction f2 = convertToFraction(e2, ctx2);
 
@@ -4888,7 +4892,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		case "-":
 		case "\u2212":
 		case "\u2796":
-		    if (settings.rationalMode) {
+		    if (settings.rationalMode && (e1 instanceof BigFraction || e2 instanceof BigFraction)) {
 			BigFraction f1 = convertToFraction(e1, ctx1);
 			BigFraction f2 = convertToFraction(e2, ctx2);
 
@@ -4929,7 +4933,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    CalcParser.ExprContext expr = ctx.expr1().expr();
 	    Object value = evaluate(expr);
 
-	    if (settings.rationalMode || value instanceof BigFraction) {
+	    if (settings.rationalMode && value instanceof BigFraction) {
 		BigFraction f = convertToFraction(value, ctx);
 		return f.abs();
 	    }
@@ -5160,22 +5164,28 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitSignumExpr(CalcParser.SignumExprContext ctx) {
 	    CalcParser.ExprContext expr = ctx.expr1().expr();
+	    Object value = evaluate(expr);
 	    int signum;
 
-	    if (settings.rationalMode) {
-		BigFraction f = getFractionValue(expr);
+	    if (value instanceof BigFraction) {
+		BigFraction f = (BigFraction) value;
 		signum = f.signum();
 	    }
+	    else if (value instanceof Quaternion) {
+		Quaternion q = (Quaternion) value;
+		return q.signum(MathUtil.divideContext(q, settings.mcDivide));
+	    }
+	    else if (value instanceof ComplexNumber) {
+		ComplexNumber c = (ComplexNumber) value;
+		return c.signum(MathUtil.divideContext(c, settings.mcDivide));
+	    }
+	    else if (value instanceof BigInteger) {
+		BigInteger i = (BigInteger) value;
+		signum = i.signum();
+	    }
 	    else {
-		Object value = evaluate(expr);
-		if (value instanceof ComplexNumber) {
-		    ComplexNumber c = (ComplexNumber) value;
-		    return c.signum(MathUtil.divideContext(c, settings.mcDivide));
-		}
-		else {
-		    BigDecimal e = convertToDecimal(value, settings.mc, expr);
-		    signum = e.signum();
-		}
+		BigDecimal e = convertToDecimal(value, settings.mc, expr);
+		signum = e.signum();
 	    }
 
 	    return BigInteger.valueOf(signum);
@@ -5311,28 +5321,46 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitCeilExpr(CalcParser.CeilExprContext ctx) {
-	    if (settings.rationalMode) {
-		BigFraction f = getFractionValue(ctx.expr1().expr());
+	    CalcParser.ExprContext expr = ctx.expr1().expr();
+	    Object value = evaluate(expr);
 
+	    if (settings.rationalMode && value instanceof BigFraction) {
+		BigFraction f = (BigFraction) value;
 		return f.ceil();
 	    }
+	    else if (value instanceof Quaternion) {
+		Quaternion q = (Quaternion) value;
+		return q.ceil();
+	    }
+	    else if (value instanceof ComplexNumber) {
+		ComplexNumber c = (ComplexNumber) value;
+		return c.ceil();
+	    }
 	    else {
-		BigDecimal e = getDecimalValue(ctx.expr1().expr());
-
+		BigDecimal e = toDecimalValue(this, value, settings.mc, expr);
 		return MathUtil.ceil(e);
 	    }
 	}
 
 	@Override
 	public Object visitFloorExpr(CalcParser.FloorExprContext ctx) {
-	    if (settings.rationalMode) {
-		BigFraction f = getFractionValue(ctx.expr1().expr());
+	    CalcParser.ExprContext expr = ctx.expr1().expr();
+	    Object value = evaluate(expr);
 
+	    if (settings.rationalMode && value instanceof BigFraction) {
+		BigFraction f = (BigFraction) value;
 		return f.floor();
 	    }
+	    else if (value instanceof Quaternion) {
+		Quaternion q = (Quaternion) value;
+		return q.floor();
+	    }
+	    else if (value instanceof ComplexNumber) {
+		ComplexNumber c = (ComplexNumber) value;
+		return c.floor();
+	    }
 	    else {
-		BigDecimal e = getDecimalValue(ctx.expr1().expr());
-
+		BigDecimal e = toDecimalValue(this, value, settings.mc, expr);
 		return MathUtil.floor(e);
 	    }
 	}
@@ -6852,7 +6880,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    o3 = evaluate(expr3);
 		    o4 = evaluate(expr4);
 
-		    if (settings.rationalMode ||
+		    if (settings.rationalMode &&
 			(o1 instanceof BigFraction || o2 instanceof BigFraction || o3 instanceof BigFraction || o4 instanceof BigFraction)) {
 			f1 = convertToFraction(o1, expr1);
 			f2 = convertToFraction(o2, expr2);
@@ -6876,7 +6904,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			o2 = evaluate(expr2);
 			o3 = evaluate(expr3);
 
-			if (settings.rationalMode ||
+			if (settings.rationalMode &&
 			    (o1 instanceof BigFraction || o2 instanceof BigFraction || o3 instanceof BigFraction)) {
 			    f1 = convertToFraction(o1, expr1);
 			    f2 = convertToFraction(o2, expr2);
@@ -6896,7 +6924,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			    o1 = evaluate(expr1);
 			    o2 = evaluate(expr2);
 
-			    if (settings.rationalMode || o1 instanceof BigFraction || o2 instanceof BigFraction) {
+			    if (settings.rationalMode && (o1 instanceof BigFraction || o2 instanceof BigFraction)) {
 				f1 = convertToFraction(o1, expr1);
 				f2 = convertToFraction(o2, expr2);
 			    }
@@ -8370,7 +8398,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		case "-=":
 		case "\u2212=":
 		case "\u2796=":
-		    if (settings.rationalMode || e1 instanceof BigFraction || e2 instanceof BigFraction) {
+		    if (settings.rationalMode && (e1 instanceof BigFraction || e2 instanceof BigFraction)) {
 			BigFraction f1 = convertToFraction(e1, varCtx);
 			BigFraction f2 = convertToFraction(e2, exprCtx);
 
@@ -8425,32 +8453,66 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    Object result;
 
 	    String op = ctx.MULT_ASSIGN().getText();
+	    switch (op) {
+		case "*=":
+		case "\u00D7=":
+		case "\u2217=":
+		case "\u2715=":
+		case "\u2716=":
+		    op = "*";
+		    break;
+		case "/=":
+		case "\u00F7=":
+		case "\u2215=":
+		case "\u2797=":
+		    op = "/";
+		    break;
+		case "\\=":
+		case "\u2216=":
+		    op = "\\";
+		    break;
+		case "%=":
+		    op = "%";
+		    break;
+		default:
+		    throw new UnknownOpException(op, ctx);
+	    }
+
 	    Object e1 = lValue.getContextObject(this);
 	    Object e2 = evaluate(exprCtx);
 
 	    try {
-		if (settings.rationalMode || e1 instanceof BigFraction || e2 instanceof BigFraction) {
+		if (((settings.rationalMode && (op == "/" || op == "\\")) || (e1 instanceof BigFraction || e2 instanceof BigFraction)) &&
+		    (!(e1 instanceof Quaternion || e2 instanceof Quaternion)) &&
+		    (!(e1 instanceof ComplexNumber || e2 instanceof ComplexNumber))) {
 		    BigFraction f1 = convertToFraction(e1, varCtx);
 		    BigFraction f2 = convertToFraction(e2, exprCtx);
 
 		    switch (op) {
-			case "*=":
-			case "\u00D7=":
-			case "\u2217=":
-			case "\u2715=":
-			case "\u2716=":
+			case "*":
 			    result = f1.multiply(f2);
 			    break;
-			case "/=":
-			case "\u00F7=":
-			case "\u2215=":
-			case "\u2797=":
-			case "\\=":
-			case "\u2216=":
+			case "/":
+			case "\\":
 			    result = f1.divide(f2);
 			    break;
-			case "%=":
+			case "%":
 			    result = f1.remainder(f2);
+			    break;
+			default:
+			    throw new UnknownOpException(op, ctx);
+		    }
+		}
+		else if (e1 instanceof Quaternion || e2 instanceof Quaternion) {
+		    Quaternion q1 = Quaternion.valueOf(e1);
+		    Quaternion q2 = Quaternion.valueOf(e2);
+
+		    switch (op) {
+			case "*":
+			    result = q1.multiply(q2, settings.mc);
+			    break;
+			case "/":
+			    result = q1.divide(q2, MathUtil.divideContext(q1, settings.mcDivide));
 			    break;
 			default:
 			    throw new UnknownOpException(op, ctx);
@@ -8461,20 +8523,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    ComplexNumber c2 = ComplexNumber.valueOf(e2);
 
 		    switch (op) {
-			case "*=":
-			case "\u00D7=":
-			case "\u2217=":
-			case "\u2715=":
-			case "\u2716=":
+			case "*":
 			    result = c1.multiply(c2, settings.mc);
-			case "/=":
-			case "\u00F7=":
-			case "\u2215=":
-			case "\u2797=":
+			    break;
+			case "/":
 			    result = c1.divide(c2, MathUtil.divideContext(c1, settings.mcDivide));
-			case "\\=":
-			case "\u2216=":
-			case "%=":
+			    break;
 			default:
 			    throw new UnknownOpException(op, ctx);
 		    }
@@ -8486,24 +8540,16 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    MathContext mcDivide = MathUtil.divideContext(d1, settings.mcDivide);
 
 		    switch (op) {
-			case "*=":
-			case "\u00D7=":
-			case "\u2217=":
-			case "\u2715=":
-			case "\u2716=":
+			case "*":
 			    result = fixupToInteger(d1.multiply(d2, settings.mc));
 			    break;
-			case "/=":
-			case "\u00F7=":
-			case "\u2215=":
-			case "\u2797=":
+			case "/":
 			    result = fixupToInteger(d1.divide(d2, mcDivide));
 			    break;
-			case "\\=":
-			case "\u2216=":
+			case "\\":
 			    result = fixupToInteger(d1.divideToIntegralValue(d2, mcDivide));
 			    break;
-			case "%=":
+			case "%":
 			    result = fixupToInteger(d1.remainder(d2, mcDivide));
 			    break;
 			default:

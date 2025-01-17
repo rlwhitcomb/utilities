@@ -17,7 +17,7 @@ $resultsonly on {
     $quotestrings off
     // use just strings or "print" statements to display different colors
     '============================================='
-    print '           Calc Versions Reference'
+    print CYAN_BRIGHT + '           Calc Versions Reference' + RESET
     print ` Current ${version}`
     print ' ' + info.copyright
     '============================================='
