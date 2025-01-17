@@ -46,8 +46,17 @@ const MATCH_UNIX_LINES       = 0x0020
 /*
  * Color tags
  */
-const RESET   = "<.>"
+const RESET   = "<r>"
+const CLOSE   = "<.>"
 const END     = "<-->"
+
+const EXPR         = "<x>"
+const EXPR_QUOTE   = "<y>"
+const VALUE        = "<v>"
+const VALUE_QUOTE  = "<u>"
+const ARROW        = "<a>"
+const ERROR        = "<e>"
+const ERROR_BRIGHT = "<f>"
 
 const BLACK   = "<Bk>"
 const RED     = "<Rd>"
