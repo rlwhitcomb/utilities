@@ -10,3 +10,4 @@ length(primes); primes;
 
 print 'Another interesting Mersenne number (not prime) ...'
 (2⌃67 - 1) == (193707721 × 761838257287)
+pfactors(193707721); pfactors(761838257287)
