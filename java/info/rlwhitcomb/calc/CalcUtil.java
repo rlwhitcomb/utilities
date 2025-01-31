@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2021-2024 Roger L. Whitcomb.
+ * Copyright (c) 2021-2025 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -248,6 +248,8 @@
  *	    "toDecimalValue" does a better job on complex and quaternion values.
  *	06-Nov-2024 (rlwhitcomb)
  *	    #693: Fix strict equality in one specific case of wanna-be integers.
+ *	31-Jan-2024 (rlwhitcomb)
+ *	    #706: Fix cast of a collection to a set.
  */
 package info.rlwhitcomb.calc;
 
@@ -2375,6 +2377,9 @@ public final class CalcUtil
 		    if (value instanceof ComplexNumber) {
 			ComplexNumber c = (ComplexNumber) value;
 			castValue = new SetScope<Object>(c.toSet());
+		    }
+		    else if (value instanceof CollectionScope) {
+			castValue = SetScope.from((CollectionScope) value);
 		    }
 		    else if (!(value instanceof SetScope)) {
 			SetScope<Object> set = new SetScope<>(value);

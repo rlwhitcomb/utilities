@@ -349,6 +349,15 @@
 >-----------------------
 >define _junk5b05d -> junk[0]
 >=======================
+>castlist = [1, 2, 3] -> [ 1, 2, 3 ]
+>castobj = {a: true, b: 'abc', c: 457} -> { a: true, b: "abc", c: 457 }
+>castset = {19, 23, 29} -> { 19, 23, 29 }
+>cast (castlist, "set") -> { 1, 2, 3 }
+>keyset = cast (castobj, "set") -> { "a", "b", "c" }
+>cast (castset, "set") -> { 19, 23, 29 }
+>castobj[key] -> true
+>castobj[key] -> "abc"
+>castobj[key] -> 457
 >info.copyright is string -> true
 >info.version.major is integer -> true
 >info.locale.name is "string" -> true

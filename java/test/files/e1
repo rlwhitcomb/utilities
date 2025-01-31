@@ -9,7 +9,7 @@ print
 info.version.major > 2 ||
     (info.version.major == 2 && info.version.minor > 4) ||
     (info.version.major == 2 && info.version.minor == 4 && info.version.patch >= 11)
-$requires 2.54.9, base 1.12.3
+$requires 2.55.1, base 1.12.3
 
 # Various simple expressions
 $decimal(50)
@@ -222,6 +222,15 @@ junk=[1,2,3]
 cast(junk[0], 'function')
 typeof(_junk5b05d)
 $var _junk5b05d
+
+// Issue #706
+castlist = [ 1, 2, 3]
+castobj  = { a:true, b:'abc', c:457 }
+castset  = { 19, 23, 29 }
+cast(castlist, "set")
+keyset = cast(castobj, "set")
+cast(castset, "set")
+loop key over keyset { castobj[key] }
 
 info.copyright is string
 info.version.major is integer

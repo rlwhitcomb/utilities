@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.55.1', date: d'2025-01-31',
+      issues: [ 706 ],
+      comment: 'Fixed casting objects to sets.'
+    },
     { version: '2.55.0', date: d'2025-01-15',
       issues: [ 703 ],
       comment: 'Fixed some fraction, quaternion, and complex operations.'
