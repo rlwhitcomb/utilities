@@ -8,3 +8,5 @@ $quiet on {
 }
 length(primes); primes;
 
+print 'Another interesting Mersenne number (not prime) ...'
+(2⌃67 - 1) == (193707721 × 761838257287)
