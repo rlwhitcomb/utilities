@@ -38,6 +38,7 @@ e_func        : e_func
 e_s           : e_s
 ex            : ex
 cf            : cf
+stirling      : stirling
 e_sort        : e_sort -clear -- e10 e1 e11 e12 e20 e2 e3 e5 e30 e31
 e_lorem       : e_lorem -expressions
 check         : -noLib test/files/check -clear -- test/data/cake.json test/data/cake.json

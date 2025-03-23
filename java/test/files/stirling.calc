@@ -1,0 +1,54 @@
+// Values can be checked here: https://owlcalculator.com/combinatorics/stirling-numbers-calculator
+
+// Stirling numbers of the first kind
+define S1(n, k, signed=true) = {
+    $assert n >= 0 && k >= 0, 'n and k cannot be negative'
+    define impl(n, k) = {
+        if n == 0 && k == 0 leave 1
+        if k == 0 || k > n leave 0
+        impl(n - 1, k - 1) + ((n - 1) * impl(n - 1, k))
+    }
+    const term = impl(n, k)
+    signed ? (-1)**(n-k) * term : term
+}
+
+// Stirling number of the second kind
+define S2(n, k) = {
+    $assert n >= 0 && k >= 0, 'n and k cannot be negative'
+    if n == 0 && k == 0 leave 1
+    if k == 0 || k > n leave 0
+    k * S2(n - 1, k) + S2(n - 1, k - 1)
+}
+
+$quiet on
+
+const START = 0
+const N = !!$0 ? ~~$0 : 12
+const SIGNED = !!$1
+const WIDTH = 13
+
+var UNDER = ''
+
+fill(UNDER, '-', WIDTH)
+const FORMAT = formatstring('%%,%dd', WIDTH)
+
+display (SIGNED ? 'Signed' : 'Unsigned') + ' Stirling Numbers of the First Kind'
+
+var line = 'n/k| '
+var under = '---+-'
+
+loop k over START..N {
+    line += formatstring(FORMAT, k)
+    under += UNDER
+}
+display line
+display under
+
+loop n over START..N {
+    var line = formatstring('%-3d| ', n)
+    loop k over START..n {
+        line += formatstring(FORMAT, S1(n, k, SIGNED))
+    }
+    display line
+}
+
