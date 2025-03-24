@@ -32,22 +32,41 @@ var UNDER = ''
 fill(UNDER, '-', WIDTH)
 const FORMAT = formatstring('%%,%dd', WIDTH)
 
-display (SIGNED ? 'Signed' : 'Unsigned') + ' Stirling Numbers of the First Kind'
-
-var line = 'n/k| '
+var header = 'n/k| '
 var under = '---+-'
 
 loop k over START..N {
-    line += formatstring(FORMAT, k)
+    header += formatstring(FORMAT, k)
     under += UNDER
 }
-display line
+
+// First Kind table
+display (SIGNED ? 'Signed' : 'Unsigned') + ' Stirling Numbers of the First Kind'
+
+display header
 display under
 
 loop n over START..N {
     var line = formatstring('%-3d| ', n)
     loop k over START..n {
         line += formatstring(FORMAT, S1(n, k, SIGNED))
+    }
+    display line
+}
+
+// Second Kind table
+// Results can be partially verified from here:
+// https://en.wikipedia.org/wiki/Stirling_numbers_of_the_second_kind
+
+display 'Stirling Numbers of the Second Kind'
+
+display header
+display under
+
+loop n over START..N {
+    var line = formatstring('%-3d| ', n)
+    loop k over START..n {
+        line += formatstring(FORMAT, S2(n, k))
     }
     display line
 }
