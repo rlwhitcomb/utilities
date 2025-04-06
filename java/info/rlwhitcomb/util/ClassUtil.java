@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2012-2014,2016-2018,2020-2024 Roger L. Whitcomb.
+ * Copyright (c) 2012-2014,2016-2018,2020-2025 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -76,6 +76,7 @@
  *  09-Apr-23 rlw #601	New method to determine if an object is an integer object.
  *  03-Jan-24 rlw #640	Method to check null and throw IllegalStateException.
  *  05-Feb-24 rlw #645	"fullToString" method for debugging purposes.
+ *  26-Mar-25 rlw ----	Move "isInteger" into MathUtil.
  */
 package info.rlwhitcomb.util;
 
@@ -424,38 +425,6 @@ public final class ClassUtil
 	    }
 	    catch (NoSuchMethodException | InstantiationException | IllegalAccessException ex) { }
 	    return obj;
-	}
-
-
-	/**
-	 * Determine if the given object is an "integer" type, which includes the built-in
-	 * integers, as well as the {@link BigInteger} type and {@link BigDecimal} values
-	 * with no decimal part.
-	 *
-	 * @param obj The object to check.
-	 * @return    Whether or not this object is an integer type.
-	 */
-	public static boolean isInteger(final Object obj) {
-	    if (obj instanceof Number) {
-		Class<?> clz = obj.getClass();
-		if (clz == BigInteger.class)
-		    return true;
-		if (clz == Integer.class || clz == Integer.TYPE)
-		    return true;
-		if (clz == Long.class || clz == Long.TYPE)
-		    return true;
-		if (clz == Short.class || clz == Short.TYPE)
-		    return true;
-		if (clz == Byte.class || clz == Byte.TYPE)
-		    return true;
-		if (clz == BigDecimal.class) {
-		    BigDecimal bd = ((BigDecimal) obj).stripTrailingZeros();
-		    if (bd.scale() <= 0)
-			return true;
-		}
-	    }
-
-	    return false;
 	}
 
 

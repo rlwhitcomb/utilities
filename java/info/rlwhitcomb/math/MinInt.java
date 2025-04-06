@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2023 Roger L. Whitcomb.
+ * Copyright (c) 2023,2025 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,6 +25,7 @@
  *
  * History:
  *  14-Dec-23 rlw ----	Clone from "MaxInt".
+ *  14-Mar-25 rlw ----	Add constructor of a list of values.
  */
 package info.rlwhitcomb.math;
 
@@ -86,6 +87,17 @@ public final class MinInt extends Number
 	 */
 	public MinInt(final int v) {
 	    value = initialValue = v;
+	}
+
+	/**
+	 * Construct the minimum of a list of values.
+	 *
+	 * @param values The set of values to inspect.
+	 */
+	public MinInt(final int... values) {
+	    this();
+	    for (int v : values)
+		set(v);
 	}
 
 	/**

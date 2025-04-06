@@ -1,7 +1,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2022,2024 Roger L. Whitcomb.
+# Copyright (c) 2022,2024-2025 Roger L. Whitcomb.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -32,6 +32,7 @@
 #			Messages for index out of range in "part" methods.
 #  16-May-24 rlw ----	New error when losing imaginary part in integer conversion.
 #			Update some color codes.
+#  07-Mar-25 rlw #710	New errors from MathUtil.
 #
 
 #
@@ -67,6 +68,9 @@ math.piDigitMismatch		= Calculated digit length is %1$,d, but requested number o
 math.wholeInteger		= The value <y>%1$,g<.> is not an integer number.
 math.primeTooBig		= The value <y>%1$,d<.> is too big for the prime number calculations.
 math.sqrtNegative		= Square root of a negative number is not real.
+math.nOutOfRange		= Input value <y>%1$d<.> is out of the defined range.
+math.fOutOfRange		= Input value <y>%1$g<.> is out of the defined range.
+math.unsupportedType		= The value <y>%1$s<.> cannot be converted to an integer.
 
 #
 # From BigFraction.java

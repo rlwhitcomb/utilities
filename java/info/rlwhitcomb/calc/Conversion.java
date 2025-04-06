@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2022-2024 Roger L. Whitcomb.
+ * Copyright (c) 2022-2025 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,13 +29,14 @@
  *  03-Apr-23 rlw #263	New conversion function for "buildFlatMap".
  *  08-Apr-23 rlw #601	Add INTEGER for "gcd" and "lcm".
  *  11-Feb-24 rlw #65	New param for "fromValue"; reorder the enum values.
+ *  26-Mar-25 rlw ----	Move "isInteger" from ClassUtil to MathUtil.
  */
 package info.rlwhitcomb.calc;
 
 import info.rlwhitcomb.math.BigFraction;
 import info.rlwhitcomb.math.ComplexNumber;
+import info.rlwhitcomb.math.MathUtil;
 import info.rlwhitcomb.math.Quaternion;
-import info.rlwhitcomb.util.ClassUtil;
 
 
 /**
@@ -75,7 +76,7 @@ public enum Conversion
 	    if (rational || (obj instanceof BigFraction))
 		return FRACTION;
 
-	    if (ClassUtil.isInteger(obj))
+	    if (MathUtil.isInteger(obj))
 		return INTEGER;
 
 	    // Any remaining number that isn't an integer from above will be a decimal

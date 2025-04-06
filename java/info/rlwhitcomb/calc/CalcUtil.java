@@ -252,6 +252,8 @@
  *	    #706: Fix cast of a collection to a set.
  *	23-Mar-2025 (rlwhitcomb)
  *	    Broaden the use of integer base for "powerOp" to use the appropriate MathUtil method.
+ *	26-Mar-2025 (rlwhitcomb)
+ *	    Move "isInteger()" from ClassUtil to MathUtil.
  */
 package info.rlwhitcomb.calc;
 
@@ -262,7 +264,6 @@ import info.rlwhitcomb.math.MathUtil;
 import info.rlwhitcomb.math.Num;
 import info.rlwhitcomb.math.Quaternion;
 import info.rlwhitcomb.util.CharUtil;
-import info.rlwhitcomb.util.ClassUtil;
 import info.rlwhitcomb.util.Environment;
 import info.rlwhitcomb.util.Exceptions;
 import info.rlwhitcomb.util.Intl;
@@ -2232,7 +2233,7 @@ public final class CalcUtil
 		ComplexNumber base = (ComplexNumber) value;
 		result = base.pow(new BigDecimal(exp), settings.mc);
 	    }
-	    else if (ClassUtil.isInteger(value)) {
+	    else if (MathUtil.isInteger(value)) {
 		BigInteger iValue = convertToInteger(value, settings.mc, baseExpr);
 		return MathUtil.pow(iValue, exp, settings.mc);
 	    }

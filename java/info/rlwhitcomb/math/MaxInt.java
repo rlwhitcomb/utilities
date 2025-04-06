@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2022-2023 Roger L. Whitcomb.
+ * Copyright (c) 2022-2023,2025 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,6 +27,7 @@
  *  15-Dec-22 rlw ----	Initial coding.
  *  13-Dec-23 rlw ----	Add "next" method to get max value + 1; rename "pos" to "zero";
  *			Add "increment" and "reset" methods. Add "min" static method.
+ *  14-Mar-25 rlw ----	Add constructor from a list of initial values.
  */
 package info.rlwhitcomb.math;
 
@@ -88,6 +89,17 @@ public final class MaxInt extends Number
 	 */
 	public MaxInt(final int v) {
 	    value = initialValue = v;
+	}
+
+	/**
+	 * Construct the maximum of a list of initial values.
+	 *
+	 * @param values The list of values to inspect.
+	 */
+	public MaxInt(final int... values) {
+	    this();
+	    for (int v : values)
+		set(v);
 	}
 
 	/**

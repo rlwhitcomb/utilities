@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2021-2024 Roger L. Whitcomb.
+ * Copyright (c) 2021-2025 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -64,6 +64,11 @@
  *  15-Feb-24 rlw #654	Simple additional test in prime number calculations to avoid exceptions.
  *  05-Mar-24 rlw ----	Optimization in "pow" for 10**n.
  *  14-May-24 rlw #674	New "sqrt2" method to return a complex result if the value is negative.
+ *  19-Feb-25 rlw #708	Fix "round()".
+ *		  #710	Add "harmonic()" to compute harmonic numbers; rework factorial calculations.
+ *			New "intValueExact()" method also.
+ *		  ----	New constructors for MinInt and MaxInt.
+ *  26-Mar-25 rlw ----	Move "isInteger()" from ClassUtil into here.
  */
 package info.rlwhitcomb.math;
 
@@ -78,6 +83,7 @@ import java.math.BigInteger;
 import java.math.MathContext;
 import java.math.RoundingMode;
 import java.security.SecureRandom;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -158,6 +164,87 @@ public final class MathUtil
 
 
 	/**
+	 * Determine if the given object is an "integer" type, which includes the built-in
+	 * integers, as well as the {@link BigInteger} type and {@link BigDecimal} values
+	 * with no decimal part.
+	 *
+	 * @param obj The object to check.
+	 * @return    Whether or not this object is an integer type.
+	 */
+	public static boolean isInteger(final Object obj) {
+	    if (obj instanceof Number) {
+		Class<?> clz = obj.getClass();
+		if (clz == BigInteger.class)
+		    return true;
+		if (clz == Integer.class || clz == Integer.TYPE)
+		    return true;
+		if (clz == Long.class || clz == Long.TYPE)
+		    return true;
+		if (clz == Short.class || clz == Short.TYPE)
+		    return true;
+		if (clz == Byte.class || clz == Byte.TYPE)
+		    return true;
+		if (clz == BigDecimal.class) {
+		    return isInteger((BigDecimal) obj);
+		}
+	    }
+
+	    return false;
+	}
+
+	/**
+	 * Another flavor of {@link #isInteger(Object)} that just works for {@link BigDecimal}.
+	 *
+	 * @param bd A decimal number that is potentially just an integer.
+	 * @return   Whether it really is just an integer (or not).
+	 */
+	public static boolean isInteger(final BigDecimal bd) {
+	    return bd.stripTrailingZeros().scale() <= 0;
+	}
+
+	/**
+	 * Get an exact integer value of the given {@link Number} input, throwing up if the
+	 * value is not exact.
+	 *
+	 * @param num	Input value to convert.
+	 * @return	Exact integer equivalent.
+	 * @throws	ArithmeticException if the value overflows {@code int} range, or
+	 *		if the input value is fractional and can't be converted exactly.
+	 */
+	public static final int intValueExact(final Number num) {
+	    Class<?> cls = num.getClass();
+	    if (cls == Integer.class || cls == Integer.TYPE)
+		return ((Integer) num).intValue();
+	    if (cls == Long.class || cls == Long.TYPE) {
+		long lValue = ((Long) num).longValue();
+		if (lValue <= Integer.MAX_VALUE && lValue >= Integer.MIN_VALUE)
+		    return (int) lValue;
+		throw new Intl.ArithmeticException("math#math.nOutOfRange", lValue);
+	    }
+	    if (cls == Float.class || cls == Float.TYPE || cls == Double.class || cls == Double.TYPE) {
+		double dValue = num.doubleValue();
+		if (dValue != Math.floor(dValue))
+		    throw new Intl.ArithmeticException("math#math.math.fOutOfRange", dValue);
+		if (dValue <= (double) Integer.MAX_VALUE && dValue >= (double) Integer.MIN_VALUE)
+		    return (int) dValue;
+		throw new Intl.ArithmeticException("math#math.fOutOfRange", dValue);
+	    }
+	    if (cls == BigInteger.class)
+		return ((BigInteger) num).intValueExact();
+	    if (cls == BigDecimal.class)
+		return ((BigDecimal) num).intValueExact();
+	    if (cls == BigFraction.class)
+		return ((BigFraction) num).intValueExact();
+	    if (cls == ComplexNumber.class)
+		return ((ComplexNumber) num).intValueExact();
+	    if (cls == Quaternion.class)
+		return ((Quaternion) num).intValueExact();
+
+	    throw new Intl.ArithmeticException("math#math.unsupportedType", num.toString());
+	}
+
+
+	/**
 	 * Round a value to the specified number of fractional places, no matter how many integer
 	 * digits there are.  This is different than simply rounding to a given precision, which
 	 * tracks the total number of digits.
@@ -177,13 +264,17 @@ public final class MathUtil
 	 * @return        The incoming value rounded as above.
 	 */
 	public static BigDecimal round(final BigDecimal value, final int fPlaces) {
-	    int prec      = value.precision();
-	    int scale     = value.scale();
-	    int roundPrec = Math.max(1, (prec - scale) + fPlaces);
+	    if (fPlaces <= 0)
+		return value.setScale(fPlaces, RoundingMode.HALF_UP);
 
-	    return (roundPrec > prec)
-		? value.setScale(scale + (roundPrec - prec))
-		: value.round(new MathContext(roundPrec));
+	    int prec   = value.precision();
+	    int scale  = value.scale();
+	    int places = (prec - scale) + fPlaces;
+
+	    if (places <= 0)
+		return value.setScale(places, RoundingMode.HALF_UP);
+
+	    return value.round(new MathContext(places));
 	}
 
 
@@ -336,6 +427,43 @@ public final class MathUtil
 	    return BigInteger.TEN.pow(pow);
 	}
 
+
+	/**
+	 * Table of small factorial values ({@link #intFactorial} uses this).
+	 */
+	private static final long FACTORIALS[] = {
+	    1L, 1L, 2L, 6L, 24L, 120L, 720L, 5040L, 40320L, 362880L, 3628800L,
+	    39916800L, 479001600L, 6227020800L, 87178291200L, 1307674368000L,
+	    20922789888000L, 355687428096000L, 6402373705728000L, 121645100408832000L, 2432902008176640000L
+	};
+
+
+	/**
+	 * Compute an integer factorial, using some shortcuts to make things faster.
+	 *
+	 * @param base	The integer base (n).
+	 * @return	Value of {@code n!} as a {@link BigInteger}.
+	 * @throws	IllegalArgumentException if the base is negative.
+	 */
+	public static BigInteger intFactorial(final long base) {
+	    if (base < 0L)
+		throw new Intl.IllegalArgumentException("math#math.math.nOutOfRange", base);
+
+	    // Start with the (small) static lookup table (up to limit of "long")
+	    if (base < FACTORIALS.length)
+		return BigInteger.valueOf(FACTORIALS[(int) base]);
+
+	    // This starts with 21! so reduce base by starting value
+	    BigInteger result = BigInteger.valueOf(FACTORIALS[FACTORIALS.length - 1]);
+	    for (long factor = FACTORIALS.length; factor <= base; factor++) {
+		BigInteger multiplier = BigInteger.valueOf(factor);
+		result = result.multiply(multiplier);
+	    }
+
+	    return result;
+	}
+
+
 	/**
 	 * Compute the factorial value for the given integer value.
 	 * <p> The value for <code>n!</code> is <code>1 * 2 * 3 * 4</code>... to n
@@ -362,13 +490,8 @@ public final class MathUtil
 		negative = true;
 		loops = -loops - 1L;
 	    }
-	    BigInteger result = BigInteger.ONE;
-	    BigInteger term   = BigInteger.ONE;
 
-	    for (long i = 2L; i <= loops; i++) {
-		term   = term.add(BigInteger.ONE);
-		result = result.multiply(term);
-	    }
+	    BigInteger result = intFactorial(loops);
 
 	    BigDecimal dResult = new BigDecimal(result);
 	    if (negative) {
@@ -633,7 +756,7 @@ public final class MathUtil
 	 * @param n Which Bernoulli number to calculate.
 	 * @return  The value as a fraction.
 	 */
-	private static BigFraction bern(int n) {
+	private static BigFraction bern(final int n) {
 	    int num = Math.abs(n);
 
 	    // First, check if we have already computed and cached the value
@@ -663,10 +786,10 @@ public final class MathUtil
 	 * @param mc	The {@link MathContext} to use for rounding the division
 	 *		(non-rational mode).
 	 * @param rational Whether to return the result as a rational number.
-	 * @return	Then N-th Bernoulli number as a decimal (rounded to {@code mc}),
-	 *		or as a fraction.
+	 * @return	The N-th Bernoulli number as a decimal (rounded to {@code mc}),
+	 *		or as an exact fraction.
 	 */
-	public static Object bernoulli(int n, MathContext mc, boolean rational) {
+	public static Object bernoulli(final int n, final MathContext mc, final boolean rational) {
 	    if (n == 0)
 		return rational ? BigFraction.ONE : BigDecimal.ONE;
 	    if (n == 1 || n == -1) {
@@ -679,14 +802,57 @@ public final class MathUtil
 		return rational ? BigFraction.ZERO : BigDecimal.ZERO;
 
 	    BigFraction bn = bern(n);
-	    if (rational) {
-		return bn;
-	    }
-	    else {
-		return bn.toDecimal(mc);
-	    }
+
+	    return rational ? bn : bn.toDecimal(mc);
 	}
 
+
+	/**
+	 * Calculate the N-th Harmonic number.
+	 * <p> We will do the calculations as an (exact) rational fraction, and
+	 * only convert to decimal at the end if needed ({@code rational} parameter).
+	 * <p> Empirically, instead of doing the entire calculation as fractions
+	 * (which requires renormalization every time), calculate the numerator
+	 * and denominator separately and only normalize right at the end.
+	 *
+	 * @param n	Which Harmonic number to get.
+	 * @param mc	The {@link MathContext} to use for rounding the division
+	 *		(non-rational mode).
+	 * @param rational Whether to return the result as a rational number.
+	 * @return	The N-th Harmonic number as a decimal (rounded to {@code mc}),
+	 *		or as an exact fraction.
+	 * @throws	IllegalArgumentException if {@code num} is less than one, or not an integer.
+	 */
+	public static Object harmonic(final Number num, final MathContext mc, final boolean rational) {
+	    int n = intValueExact(num);
+
+	    // Not sure, but do this for now
+	    if (n <= 0)
+		throw new Intl.IllegalArgumentException("math#math.nOutOfRange", n);
+
+	    BigInteger factorial = intFactorial(n);
+	    // This starts as n! / 1
+	    BigInteger sum = factorial;
+
+	    for (int i = 2; i <= n; i++) {
+		BigInteger factor = factorial.divide(BigInteger.valueOf((long) i));
+		sum = sum.add(factor);
+	    }
+	    BigFraction result = new BigFraction(sum, factorial);
+
+	    return rational ? result : result.toDecimal(mc);
+	}
+
+
+	/**
+	 * Helper method to convert any input "number" to equivalent {@link BigDecimal} value.
+	 * <p> Note: dubious results for complex or quaternion inputs, even though these are
+	 * derived from {@link Number}.
+	 *
+	 * @param x	An arbitrary input numeric value.
+	 * @param mc	Rounding context for the fractional conversion (if necessary).
+	 * @return	{@code BigDecimal} equivalent of the input, rounded to the specific precision.
+	 */
 	private static BigDecimal toDecimal(final Number x, final MathContext mc) {
 	    if (x instanceof BigDecimal)
 		return (BigDecimal) x;
@@ -1087,8 +1253,7 @@ public final class MathUtil
 	    int[] arr = new int[loops + 1];
 	    int carry = 0;
 
-	    for (int i = 0; i <= loops; ++i)
-		arr[i] = ARRINIT;
+	    Arrays.fill(arr, ARRINIT);
 
 	    for (int i = loops; i > 0; i-= 14) {
 		int sum = 0;
@@ -1984,11 +2149,7 @@ public final class MathUtil
 	 * @return       Minimum value of the input set.
 	 */
 	public static int minimum(final int... values) {
-	    MinInt min = MinInt.max();
-	    for (int value : values) {
-		min.set(value);
-	    }
-	    return min.get();
+	    return new MinInt(values).get();
 	}
 
 	/**
@@ -1998,11 +2159,7 @@ public final class MathUtil
 	 * @return       Maximum value of the input set.
 	 */
 	public static int maximum(final int... values) {
-	    MaxInt max = MaxInt.min();
-	    for (int value : values) {
-		max.set(value);
-	    }
-	    return max.get();
+	    return new MaxInt(values).get();
 	}
 
 }

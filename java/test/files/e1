@@ -259,6 +259,11 @@ c = b*b
 round b, 14
 round(a, 10)
 round a, -2
+round a, -1
+round a, 0
+round a, 1
+round a, 2
+round a, 3
 round c, 0
 
 $grad
@@ -269,10 +274,11 @@ asin(0.5)
 
 $radians
 
-v = 1621.94397520429
+v = 467321.94397520429
 
 $resultonly on {
 loop -10 .. 10 { `round to $__ -> ${round(v, __)}` }
+
 random(123)
 loop over 20 { random }
 }
