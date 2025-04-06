@@ -1,7 +1,8 @@
->>Width value (300) must be between 1 and 255.
+>>[1;91mWidth value (300) must be between 1 and 255.[0m
 >>
->>Usage: java Lists [-c] [-j] [-b] [-n] [-l] [-nnn] [-w] [-e prefix_text] [-f postfix_text] [-x nn]
->>                  [-lower] [-upper] [-o output_file] [-i nn] [list_file_name+ | @]
+>>
+>>Usage: lists [-c] [-j] [-b] [-n] [-l] [-nnn] [-w] [-e prefix_text] [-f postfix_text] [-x nn]
+>>                  [-lower] [-upper] [-o output_file] [-i nn] [ input_file_name+ | @ ]
 >>
 >>  Aliases: -c | -concat | -concatenate; -j | -join; -b | -blank | -blanks; -n | -count | -counting
 >>           -l | -line | -lines | -newlines; -w | -white | -whitespace; -e | -pre | -prefix
@@ -9,7 +10,7 @@
 >>           -lower | -low; -upper | -up; -o | -out | -output; -i | -in | -indent
 >>
 >>  If you specify the "-c" flag the output will have all the lines
->>    of the file concatenated (using commas) into a single line.
+>>    of the file(s) concatenated (using commas) into a single line.
 >>
 >>  The "-j" flag is similar except the lines will be joined by a
 >>    single space between each into a single line.

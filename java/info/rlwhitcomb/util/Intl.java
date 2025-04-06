@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2012-2018,2020-2022 Roger L. Whitcomb.
+ * Copyright (c) 2012-2018,2020-2022,2025 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -160,6 +160,8 @@
  *	    #506: Flag to only print LF line endings on any platform.
  *	12-Oct-2022 (rlwhitcomb)
  *	    #513: Move Logging to new package.
+ *	05-Apr-2025 (rlwhitcomb)
+ *	    Full "printHelp" wasn't using passed in PrintStream!
  */
 package info.rlwhitcomb.util;
 
@@ -1422,17 +1424,15 @@ public final class Intl
 		    String helpLine = getOptionalString(helpKey(prefix, lineNo++));
 		    if (helpLine == null)
 			break;
-		    System.out.print(
-			ConsoleColor.color(CharUtil.substituteEnvValues(helpLine, symbols), colors, colorCodeMap));
-		    println(System.out);
+		    ps.print(ConsoleColor.color(CharUtil.substituteEnvValues(helpLine, symbols), colors, colorCodeMap));
+		    println(ps);
 		}
 	    }
 	    else {
 		while (lineNo <= numLines) {
 		    String helpLine = getString(helpKey(prefix, lineNo++));
-		    System.out.print(
-			ConsoleColor.color(CharUtil.substituteEnvValues(helpLine, symbols), colors, colorCodeMap));
-		    println(System.out);
+		    ps.print(ConsoleColor.color(CharUtil.substituteEnvValues(helpLine, symbols), colors, colorCodeMap));
+		    println(ps);
 		}
 	    }
 	}
