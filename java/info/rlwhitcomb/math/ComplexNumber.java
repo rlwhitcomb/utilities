@@ -58,6 +58,8 @@
  *			to extract one part or the other.
  *  16-May-24 rlw ----	New "toBigIntegerExact()" method.
  *  15-Jan-25 rlw ----	New "ceil" and "floor" functions.
+ *  29-Jan-25 rlw #702	New "idivide", "remainder", and "modulus" functions.
+ *  12-Mar-25 rlw #710	New "intValueExact()" and "isPureInteger()"  methods.
  */
 package info.rlwhitcomb.math;
 
@@ -204,6 +206,13 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 	};
 
 
+	/** A real complex value of zero ({@code (0,null)}). */
+	private static ComplexNumber ZERO = new ComplexNumber();
+
+	/** A rational complex value of zero ({@code (0/1,null)}). */
+	private static ComplexNumber F_ZERO = real(BigFraction.F_ZERO);
+
+
 	/**
 	 * Flag indicating this complex number is composed of rational (fraction) parts.
 	 */
@@ -229,6 +238,16 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 	 */
 	private BigFraction imaginaryFrac;
 
+
+	/**
+	 * Default constructor, with a real value of {@code (0,0)}.
+	 */
+	public ComplexNumber() {
+	    rational = false;
+	    realPart      = null;
+	    imaginaryPart = null;
+	    normalize();
+	}
 
 	/**
 	 * Construct one, given the real and imaginary values.
@@ -325,17 +344,18 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 	 * Construct from a list of one, two, or three values.
 	 *
 	 * @param list Any list of one to three values.
+	 * @param rat  Whether to interpret some values as rational.
 	 * @return     The new complex number, if possible.
 	 * @throws IllegalArgumentException if the number of values is wrong.
 	 */
-	public static ComplexNumber fromList(List<Object> list) {
+	public static ComplexNumber fromList(final List<Object> list, final boolean rat) {
 	    if (list == null || list.size() == 0)
 		throw new Intl.IllegalArgumentException("math#complex.noEmptyListMap");
 	    if (list.size() > 3)
 		throw new Intl.IllegalArgumentException("math#complex.tooManyValues");
 
 	    if (list.size() == 1)
-		return valueOf(list.get(0));
+		return valueOf(list.get(0), rat);
 
 	    Object o1 = list.get(0);
 	    Object o2 = list.get(1);
@@ -354,6 +374,12 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 		BigDecimal r = getDecimal(o1);
 		BigDecimal i = getDecimal(o2);
 
+		if (rat && MathUtil.isInteger(r) && MathUtil.isInteger(i)) {
+		    BigInteger rInt = r.toBigIntegerExact();
+		    BigInteger iInt = i.toBigIntegerExact();
+
+		    return rational(rInt, iInt);
+		}
 		return new ComplexNumber(r, i);
 	    }
 	}
@@ -362,13 +388,14 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 	 * Construct from a map of one or two values, with or without a "rational" flag.
 	 *
 	 * @param map Any map with "r" and/or "i" keys, and possible "rational" key.
+	 * @param rat Whether or not to interpret some values as rational.
 	 * @return    The new complex number.
 	 * @throws IllegalArgumentException if the input map is null or empty.
 	 * @see #REAL_KEY
 	 * @see #IMAG_KEY
 	 * @see #RATIONAL_KEY
 	 */
-	public static ComplexNumber fromMap(Map<String, Object> map) {
+	public static ComplexNumber fromMap(final Map<String, Object> map, final boolean rat) {
 	    if (map == null || map.size() == 0)
 		throw new Intl.IllegalArgumentException("math#complex.noEmptyListMap");
 
@@ -386,6 +413,12 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 		    BigDecimal r = getDecimal(map.get(REAL_KEY));
 		    BigDecimal i = getDecimal(map.get(IMAG_KEY));
 
+		    if (rat && MathUtil.isInteger(r) && MathUtil.isInteger(i)) {
+			BigInteger rInt = r.toBigIntegerExact();
+			BigInteger iInt = i.toBigIntegerExact();
+
+			return rational(rInt, iInt);
+		    }
 		    return new ComplexNumber(r, i);
 		}
 	    }
@@ -413,19 +446,20 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 	/**
 	 * Construct from a set of one, two, or three values.
 	 * <p> This gets complicated since there are several scenarios:
-	 * <nl><li>One decimal value, meaning this a complex number of the form {@code (v, v)}
+	 * <nl><li>One decimal value, meaning this a complex number of the form {@code (v, 0)}
 	 * <li>Two decimal values, meaning a complex number of the form {@code (r, i)}
 	 * <li>One fraction value, and one boolean value, meaning a rational complex number of
-	 * the form {@code (f, f)}
+	 * the form {@code (f, 0)}
 	 * <li>Two fraction values, and one boolean value, meaning a rational complex number of
 	 * the form {@code (fr, fi)}
 	 * </nl>
 	 *
 	 * @param set Any set of one to three values.
+	 * @param rat Whether or not pure integers could be rational values.
 	 * @return    The new complex number, if possible.
 	 * @throws IllegalArgumentException if the number of values is wrong.
 	 */
-	public static ComplexNumber fromSet(Set<Object> set) {
+	public static ComplexNumber fromSet(final Set<Object> set, final boolean rat) {
 	    if (set == null || set.size() == 0)
 		throw new Intl.IllegalArgumentException("math#complex.noEmptyListMap");
 	    if (set.size() > 3)
@@ -435,7 +469,12 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 
 	    if (set.size() == 1) {
 		BigDecimal v = getDecimal(iter.next());
-		return new ComplexNumber(v, v);
+		if (rat && MathUtil.isInteger(v)) {
+		    BigInteger vInt = v.toBigIntegerExact();
+
+		    return rational(vInt, BigInteger.ZERO);
+		}
+		return real(v);
 	    }
 
 	    Object o1 = iter.next();
@@ -454,12 +493,17 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 	    else if (o2 instanceof Boolean) {
 		BigFraction vFrac = BigFraction.valueOf(o1);
 
-		return new ComplexNumber(vFrac, vFrac);
+		return new ComplexNumber(vFrac, BigFraction.ZERO);
 	    }
 	    else {
 		BigDecimal r = getDecimal(o1);
 		BigDecimal i = getDecimal(o2);
+		if (rat && MathUtil.isInteger(r) && MathUtil.isInteger(i)) {
+		    BigInteger rInt = r.toBigIntegerExact();
+		    BigInteger iInt = i.toBigIntegerExact();
 
+		    return rational(rInt, iInt);
+		}
 		return new ComplexNumber(r, i);
 	    }
 	}
@@ -586,6 +630,17 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 	 */
 	public static ComplexNumber imaginary(final long i) {
 	    return new ComplexNumber(null, BigDecimal.valueOf(i));
+	}
+
+	/**
+	 * Produce a rational value of whole numbers.
+	 *
+	 * @param rInt Value of the real part.
+	 * @param iInt Value of the imaginary part.
+	 * @return A rational complex number with these whole number parts.
+	 */
+	public static ComplexNumber rational(final BigInteger rInt, final BigInteger iInt) {
+	    return new ComplexNumber(new BigFraction(rInt), new BigFraction(iInt));
 	}
 
 
@@ -741,6 +796,16 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 	 */
 	public boolean isPureImaginary() {
 	    return (rational && realFrac == null) || (!rational && realPart == null);
+	}
+
+	/**
+	 * @return Is this a pure Gaussian integer (that is, both real and imaginary parts
+	 * are integers)?
+	 */
+	public boolean isPureInteger() {
+	    if (rational)
+		return rFrac().isWholeNumber() && iFrac().isWholeNumber();
+	    return MathUtil.isInteger(r()) && MathUtil.isInteger(i());
 	}
 
 
@@ -1070,6 +1135,50 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 	}
 
 	/**
+	 * Do an "integer" division of this number by the given one. This is the "\" operator.
+	 *
+	 * @param other The number to divide by.
+	 * @param mc    Rounding precision to use for the result.
+	 * @return      This divided by other, set to the "floor" of that result.
+	 */
+	public ComplexNumber idivide(final ComplexNumber other, final MathContext mc) {
+	    ComplexNumber fullResult = divide(other, mc);
+	    if (rational)
+		return new ComplexNumber(fullResult.rFrac().toNearestInteger(),
+					 fullResult.iFrac().toNearestInteger());
+	    else
+		return new ComplexNumber(MathUtil.round(fullResult.r(), 0),
+					 MathUtil.round(fullResult.i(), 0));
+	}
+
+	/**
+	 * Get the remainder after division, which is {@code c1 - (c1\c2 * c2)}, and only
+	 * makes real sense with Gaussian integers, yet is "accurate" in the sense that it
+	 * satisifies the above calculation always.
+	 *
+	 * @param other Number to divide by.
+	 * @param mc    Rounding precision to use for the result.
+	 * @return      Result of {@code this % other}.
+	 */
+	public ComplexNumber remainder(final ComplexNumber other, final MathContext mc) {
+	    ComplexNumber quotient = idivide(other, mc);
+	    return subtract(quotient.multiply(other, mc), mc);
+	}
+
+	/**
+	 * Get the modulus of this divided by the given one; differs from the remainder for
+	 * negative values.
+	 *
+	 * @param other Number to divide by.
+	 * @param mc    Rounding precision to use for the result.
+	 * @return      Result of {@code this mod other}.
+	 */
+	public ComplexNumber modulus(final ComplexNumber other, final MathContext mc) {
+	    ComplexNumber intResult = idivide(other, mc);
+	    return subtract(intResult.multiply(other, mc), mc);
+	}
+
+	/**
 	 * The absolute value of a complex number is the distance from the origin in the
 	 * polar plane, which can be calculated using the Pythagorean theorem.
 	 *
@@ -1278,6 +1387,19 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 	 * @throws IllegalArgumentException if the object can't be converted.
 	 */
 	public static ComplexNumber valueOf(final Object value) {
+	    return valueOf(value, false);
+	}
+
+	/**
+	 * Get the {@code ComplexNumber} equivalent of the input value, with the
+	 * option to make it rational.
+	 *
+	 * @param value    Some (presumably compatible) value.
+	 * @param rational Flag to make it rational (if possible).
+	 * @return         The complex equivalent.
+	 * @throws IllegalArgumentException if the object can't be converted.
+	 */
+	public static ComplexNumber valueOf(final Object value, final boolean rational) {
 	    if (value == null)
 		return null;
 
@@ -1287,17 +1409,17 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 	    if (value instanceof List) {
 		@SuppressWarnings("unchecked")
 		List<Object> list = (List<Object>) value;
-		return fromList(list);
+		return fromList(list, rational);
 	    }
 	    if (value instanceof Map) {
 		@SuppressWarnings("unchecked")
 		Map<String, Object> map = (Map<String, Object>) value;
-		return fromMap(map);
+		return fromMap(map, rational);
 	    }
 	    if (value instanceof Set) {
 		@SuppressWarnings("unchecked")
 		Set<Object> set = (Set<Object>) value;
-		return fromSet(set);
+		return fromSet(set, rational);
 	    }
 
 	    if (value instanceof Quaternion) {
@@ -1308,15 +1430,30 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 		return real((BigFraction) value);
 	    }
 
-	    BigDecimal dValue = getDecimal(value);
-	    if (dValue != null)
-		return real(dValue);
+	    if (value instanceof BigInteger) {
+		return rational ? real(new BigFraction((BigInteger) value)) : real((BigInteger) value);
+	    }
 
-	    BigFraction fValue = BigFraction.valueOf(value);
-	    if (fValue != null)
-		return real(fValue);
+	    if (rational) {
+		BigFraction fValue = BigFraction.valueOf(value);
+		if (fValue != null)
+		    return real(fValue);
 
-	    return parse(value.toString());
+		BigDecimal dValue = getDecimal(value);
+		if (dValue != null)
+		    return real(dValue);
+	    }
+	    else {
+		BigDecimal dValue = getDecimal(value);
+		if (dValue != null)
+		    return real(dValue);
+
+		BigFraction fValue = BigFraction.valueOf(value);
+		if (fValue != null)
+		    return real(fValue);
+	    }
+
+	    return parse(value.toString(), rational);
 	}
 
 
@@ -1326,10 +1463,11 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 	 * and {@link #toPolarString}.
 	 *
 	 * @param string The supposed string form of a complex number.
+	 * @param rat    Whether to produce a rational form or not in certain cases.
 	 * @return       The parsed number.
 	 * @throws       IllegalArgumentException if it cannot be parsed.
 	 */
-	public static ComplexNumber parse(final String string) {
+	public static ComplexNumber parse(final String string, final boolean rat) {
 	    boolean rational = false;
 
 	    Matcher m = null;
@@ -1371,11 +1509,21 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 	    else {
 		if (m.groupCount() == 5) {
 		    // Pure real number
-		    return real(new BigDecimal(m.group(1)));
+		    BigDecimal r = new BigDecimal(m.group(1));
+		    if (rat && MathUtil.isInteger(r)) {
+			BigInteger rInt = r.toBigIntegerExact();
+			return real(new BigFraction(rInt));
+		    }
+		    return real(r);
 		}
 		else if (m.groupCount() == 6) {
 		    // Pure imaginary number
-		    return imaginary(new BigDecimal(m.group(1)));
+		    BigDecimal i = new BigDecimal(m.group(1));
+		    if (rat && MathUtil.isInteger(i)) {
+			BigInteger iInt = i.toBigIntegerExact();
+			return imaginary(new BigFraction(iInt));
+		    }
+		    return imaginary(i);
 		}
 		else {
 		    BigDecimal rPart = new BigDecimal(m.group(1));
@@ -1385,6 +1533,11 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 		    if (m.group(6) != null && m.group(6).equals("-"))
 			iPart = iPart.negate();
 
+		    if (rat && MathUtil.isInteger(rPart) && MathUtil.isInteger(iPart)) {
+			BigInteger rInt = rPart.toBigIntegerExact();
+			BigInteger iInt = iPart.toBigIntegerExact();
+			return new ComplexNumber(new BigFraction(rInt), new BigFraction(iInt));
+		    }
 		    return new ComplexNumber(rPart, iPart);
 		}
 	    }
@@ -1438,6 +1591,19 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 	public BigInteger toBigIntegerExact() {
 	    if (isPureReal()) {
 		return rational ? BigFraction.getInteger(rFrac()) : r().toBigIntegerExact();
+	    }
+	    throw new Intl.ArithmeticException("math#complex.imaginaryInt");
+	}
+
+	/**
+	 * Return an exact integer value, if possible.
+	 *
+	 * @return The exact integer value of this number, if possible.
+	 * @throws ArithmeticException otherwise.
+	 */
+	public int intValueExact() {
+	    if (isPureReal()) {
+		return rational ? rFrac().intValueExact() : r().intValueExact();
 	    }
 	    throw new Intl.ArithmeticException("math#complex.imaginaryInt");
 	}

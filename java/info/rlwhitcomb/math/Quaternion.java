@@ -40,6 +40,7 @@
  *  15-Jan-25 rlw ----	Rename "normalize" to "internalize" and make a real "normal"
  *			method; add "signum", "ceil", and "floor" methods; new constructor
  *			from BigInteger values.
+ *  14-Mar-25 rlw #710	Add "intValueExact()"; code cleanup.
  */
 package info.rlwhitcomb.math;
 
@@ -259,7 +260,7 @@ public final class Quaternion extends Number
 
 
 	/**
-	 * Maintain this value in its "internalized" form, that is, keeping zero (unused) terms as null instead.
+	 * Maintain this value in its "internalized" form, that is, keeping zero (unused) terms as {@code null} instead.
 	 */
 	private void internalize() {
 	    if (rational) {
@@ -594,17 +595,13 @@ public final class Quaternion extends Number
 	 *            make the new magnitude equal to one.
 	 */
 	public Quaternion normal(final MathContext mc) {
-	    BigDecimal aDec = a();
-	    BigDecimal bDec = b();
-	    BigDecimal cDec = c();
-	    BigDecimal dDec = d();
 	    BigDecimal mag = magnitude(mc);
 
 	    return new Quaternion(
-		aDec.divide(mag, mc),
-		bDec.divide(mag, mc),
-		cDec.divide(mag, mc),
-		dDec.divide(mag, mc));
+		a().divide(mag, mc),
+		b().divide(mag, mc),
+		c().divide(mag, mc),
+		d().divide(mag, mc));
 	}
 
 	/**
@@ -653,16 +650,11 @@ public final class Quaternion extends Number
 	 * @return The "ceil" value of this quaternion.
 	 */
 	public Quaternion ceil() {
-	    BigDecimal aDec = a();
-	    BigDecimal bDec = b();
-	    BigDecimal cDec = c();
-	    BigDecimal dDec = d();
-
 	    return new Quaternion(
-		MathUtil.ceil(aDec),
-		MathUtil.ceil(bDec),
-		MathUtil.ceil(cDec),
-		MathUtil.ceil(dDec));
+		MathUtil.ceil(a()),
+		MathUtil.ceil(b()),
+		MathUtil.ceil(c()),
+		MathUtil.ceil(d()));
 	}
 
 	/**
@@ -672,16 +664,11 @@ public final class Quaternion extends Number
 	 * @return The "floor" value of this quaternion.
 	 */
 	public Quaternion floor() {
-	    BigDecimal aDec = a();
-	    BigDecimal bDec = b();
-	    BigDecimal cDec = c();
-	    BigDecimal dDec = d();
-
 	    return new Quaternion(
-		MathUtil.floor(aDec),
-		MathUtil.floor(bDec),
-		MathUtil.floor(cDec),
-		MathUtil.floor(dDec));
+		MathUtil.floor(a()),
+		MathUtil.floor(b()),
+		MathUtil.floor(c()),
+		MathUtil.floor(d()));
 	}
 
 	/**
@@ -795,6 +782,21 @@ public final class Quaternion extends Number
 	public BigInteger toBigIntegerExact() {
 	    if (isPureReal()) {
 		return rational ? BigFraction.getInteger(aFrac()) : a().toBigIntegerExact();
+	    }
+	    throw new Intl.ArithmeticException("math#complex.imaginaryInt");
+	}
+
+
+	/**
+	 * Convert to an exact integer representation, if possible.
+	 *
+	 * @return The {@code int} representation of this value, if it is pure real,
+	 *         and has no fractional part.
+	 * @throws ArithmeticException otherwise.
+	 */
+	public int intValueExact() {
+	    if (isPureReal()) {
+		return rational ? aFrac().intValueExact() : a().intValueExact();
 	    }
 	    throw new Intl.ArithmeticException("math#complex.imaginaryInt");
 	}

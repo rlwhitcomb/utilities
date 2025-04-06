@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2021-2024 Roger L. Whitcomb.
+ * Copyright (c) 2021-2025 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -79,10 +79,13 @@
  *			Move the "space" parameter up to callers.
  *  16-May-24 rlw ----	Add "part" and "setPart" methods to access numerator and denominator separately;
  *			new "getInteger" helper method.
+ *  30-Jan-25 rlw #702	New "idivide" and "toNearestInteger" methods; so we can rework "remainder" methods.
+ *  07-Mar-25 rlw #710	New constructor with integer values.
  */
 package info.rlwhitcomb.math;
 
 import info.rlwhitcomb.math.Num;
+import static info.rlwhitcomb.util.Constants.*;
 import info.rlwhitcomb.util.Intl;
 
 import java.io.Serializable;
@@ -310,6 +313,17 @@ public class BigFraction extends Number
 	 */
 	public BigFraction(final long numerator, final long denominator) {
 	    this(BigInteger.valueOf(numerator), BigInteger.valueOf(denominator));
+	}
+
+	/**
+	 * Construct a fraction from the given numerator and denominator,
+	 * normalized to the greatest common denominator.
+	 *
+	 * @param numerator	The numerator of this new fraction.
+	 * @param denominator	The denominator of this new fraction.
+	 */
+	public BigFraction(final int numerator, final int denominator) {
+	    this(BigInteger.valueOf((long) numerator), BigInteger.valueOf((long) denominator));
 	}
 
 	/**
@@ -801,7 +815,7 @@ public class BigFraction extends Number
 	 *		of this numerator, over the same denominator.
 	 */
 	public BigFraction negate() {
-	    if (numer.equals(BigInteger.ZERO))
+	    if (isZero())
 		return this;
 
 	    return new BigFraction(numer.negate(), denom);
@@ -1023,22 +1037,15 @@ public class BigFraction extends Number
 	}
 
 	/**
-	 * Compute the remainder after division (for the {@code remainder} function).
+	 * Return a new whole number fraction which is the result of this divided by {@code other}.
 	 *
-	 * @param result The result after division.
-	 * @return       What the non-whole-number part is.
+	 * @param other The fraction to divide by.
+	 * @return      Only the integer part of the division result.
 	 */
-	private static BigFraction getRemainder(final BigFraction result) {
-	    if (result.isWholeNumber())
-		return BigFraction.ZERO;
-	    else if (result.numer.abs().compareTo(result.denom) >= 0) {
-		BigInteger[] results = result.numer.divideAndRemainder(result.denom);
-		if (results[1].equals(BigInteger.ZERO))
-		    return BigFraction.ZERO;
-		else
-		    return new BigFraction(results[1].abs(), result.denom);
-	    }
-	    return result;
+	public BigFraction idivide(final BigFraction other) {
+	    BigFraction fullResult = divide(other);
+	    BigInteger numer = fullResult.toInteger();
+	    return new BigFraction(numer);
 	}
 
 	/**
@@ -1049,13 +1056,7 @@ public class BigFraction extends Number
 	 * @return	The result of {@code this.n % (this.d * value)}.
 	 */
 	public BigFraction remainder(final long value) {
-	    if (value == 0L)
-		throw new ArithmeticException(Intl.getString("math#fraction.divideByZero"));
-	    else if (value == 1L)
-		return this;
-
-	    BigFraction result = new BigFraction(numer, denom.multiply(BigInteger.valueOf(value)));
-	    return getRemainder(result);
+	    return remainder(new BigFraction(value));
 	}
 
 	/**
@@ -1066,13 +1067,7 @@ public class BigFraction extends Number
 	 * @return	The result of {@code this.n % (this.d * value)}.
 	 */
 	public BigFraction remainder(final BigInteger value) {
-	    if (value.equals(BigInteger.ZERO))
-		throw new ArithmeticException(Intl.getString("math#fraction.divideByZero"));
-	    else if (value.equals(BigInteger.ONE))
-		return this;
-
-	    BigFraction result = new BigFraction(numer, denom.multiply(value));
-	    return getRemainder(result);
+	    return remainder(new BigFraction(value));
 	}
 
 	/**
@@ -1082,16 +1077,9 @@ public class BigFraction extends Number
 	 * @return	The result of {@code (this.n/this.d) % (other.n/other.d)}.
 	 */
 	public BigFraction remainder(final BigFraction other) {
-	    if (other.isZero())
-		throw new ArithmeticException(Intl.getString("math#fraction.divideByZero"));
-	    else if (isZero())
-		return ZERO;
-	    else if (other.equals(ONE))
-		return this;
-	    else if (this.equals(ONE))
-		return getRemainder(other.reciprocal());
-
-	    return getRemainder(new BigFraction(numer.multiply(other.denom), denom.multiply(other.numer)));
+	    BigFraction result = divide(other);
+	    BigFraction quotient = idivide(other);
+	    return result.subtract(quotient);
 	}
 
 	/**
@@ -1157,7 +1145,14 @@ public class BigFraction extends Number
 	 * @return An integral fraction &le; this value.
 	 */
 	public BigFraction floor() {
-	    return isWholeNumber() ? this : new BigFraction(MathUtil.floor(toDecimal()));
+	    if (isWholeNumber())
+		return this;
+
+	    BigInteger intValue = numer.divide(denom);
+
+	    return numer.signum() < 0
+		? new BigFraction(I_MINUS_ONE.add(intValue))
+		: new BigFraction(intValue);
 	}
 
 	/**
@@ -1166,7 +1161,14 @@ public class BigFraction extends Number
 	 * @return An integral fraction &ge; this value.
 	 */
 	public BigFraction ceil() {
-	    return isWholeNumber() ? this : new BigFraction(MathUtil.ceil(toDecimal()));
+	    if (isWholeNumber())
+		return this;
+
+	    BigInteger intValue = numer.divide(denom);
+
+	    return numer.signum() > 0
+		? new BigFraction(BigInteger.ONE.add(intValue))
+		: new BigFraction(intValue);
 	}
 
 	/**
@@ -1237,6 +1239,27 @@ public class BigFraction extends Number
 	 */
 	public BigInteger toInteger() {
 	    return isWholeNumber() ? numer : numer.divide(denom);
+	}
+
+	/**
+	 * Round the value of this fraction to the nearest whole integer, disregarding the sign.
+	 * <p> An exact value of {@code 1/2} or larger will round up, less will round down.
+	 *
+	 * @return The nearest integer value to this fraction, with the same sign as the input.
+	 */
+	public BigFraction toNearestInteger() {
+	    int sign = signum();
+	    if (sign == 0)
+		return this;
+
+	    BigFraction absValue = abs();
+	    BigInteger[] parts = absValue.numer.divideAndRemainder(absValue.denom);
+	    BigInteger halfDenom = absValue.denom.shiftRight(1);
+	    int cmp = parts[1].compareTo(halfDenom);
+	    if (cmp >= 0)
+		parts[0] = parts[0].add(BigInteger.ONE);
+
+	    return new BigFraction(sign < 0 ? parts[0].negate() : parts[0]);
 	}
 
 	/**
