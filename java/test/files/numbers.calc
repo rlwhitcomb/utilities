@@ -1,0 +1,16 @@
+$rational on {
+// Verification of the Bernoulli numbers
+loop n over 0..20 {
+    Bn(n)
+    Bn(n)@d
+}
+
+// Verification of the Harmonic numbers
+// These results can be verified here: https://en.wikipedia.org/wiki/Harmonic_number
+loop n over 1..40 Hn(n)
+
+// Verification of the Stirling numbers
+// see "stirling.calc"
+
+}
+

@@ -324,14 +324,22 @@ ty\=6
 21 mod -4
 
 $frac on {
-g1 = 2/3
-g2 = 9/7
+g1 = 9/7
+g2 = 2/3
+g1 / g2
+g1 \ g2
 g1 % g2
 g1 mod g2
+-g1 / g2
+-g1 \ g2
 -g1 % g2
 -g1 mod g2
+g1 / -g2
+g1 \ -g2
 g1 % -g2
 g1 mod -g2
+-g1 / -g2
+-g1 \ -g2
 -g1 % -g2
 -g1 mod -g2
 }

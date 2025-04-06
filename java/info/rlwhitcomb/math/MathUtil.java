@@ -815,7 +815,7 @@ public final class MathUtil
 	 * (which requires renormalization every time), calculate the numerator
 	 * and denominator separately and only normalize right at the end.
 	 *
-	 * @param n	Which Harmonic number to get.
+	 * @param num	Which Harmonic number to get.
 	 * @param mc	The {@link MathContext} to use for rounding the division
 	 *		(non-rational mode).
 	 * @param rational Whether to return the result as a rational number.

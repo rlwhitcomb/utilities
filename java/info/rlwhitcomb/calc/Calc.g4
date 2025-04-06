@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2020-2024 Roger L. Whitcomb.
+ * Copyright (c) 2020-2025 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -553,6 +553,8 @@
  *	    #690: Keywords for "lmask" and "rmask" built-in functions.
  *	27-Oct-2024 (rlwhitcomb)
  *	    Make termination expression for "WHILE" optional to make "infinite" loops easier.
+ *	07-Mar-2025 (rlwhitcomb)
+ *	    #710: Grammar for Harmonic number.
  */
 
 grammar Calc;
@@ -727,6 +729,7 @@ builtinFunction
    | K_PAD padArgs                       # padExpr
    | K_FIB expr1                         # fibExpr
    | K_BN expr1                          # bernExpr
+   | K_HN expr1                          # harmExpr
    | K_DEC expr1                         # decExpr
    | K_TODATE ( expr3 | expr2 | expr1 )  # dateExpr
    | K_TOBASE expr2                      # toBaseExpr
@@ -1333,6 +1336,11 @@ K_FIB      : 'fib' | 'FIB' | 'Fib'
 K_BN       : 'bn' | 'BN' | 'Bn'
            | '\u{1D435}'
            | '\u212C'
+           ;
+
+K_HN       : 'hn' | 'HN' | 'Hn'
+           | '\u{1D43B}'
+           | '\u210B'
            ;
 
 K_DEC      : 'dec' | 'DEC' | 'Dec' ;

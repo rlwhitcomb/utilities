@@ -873,6 +873,10 @@
  *	    #696: Special case of list assignment shorthand.
  *	15-Jan-2025 (rlwhitcomb)
  *	    #703: Fix a bunch of fraction, complex, and quaternion functions.
+ *	29-Jan-2025 (rlwhitcomb)
+ *	    #702: Integer divide and "mod" operators for more values.
+ *	07-Mar-2025 (rlwhitcomb)
+ *	    #710: New Harmonic number function.
  */
 package info.rlwhitcomb.calc;
 
@@ -4797,8 +4801,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			case "*":
 			    return f1.multiply(f2);
 			case "/":
-			case "\\":
 			    return f1.divide(f2);
+			case "\\":
+			    return f1.idivide(f2);
 			case "%":
 			    return f1.remainder(f2);
 			case "mod":
@@ -4822,17 +4827,20 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    }
 		}
 		else if (e1 instanceof ComplexNumber || e2 instanceof ComplexNumber) {
-		    ComplexNumber c1 = ComplexNumber.valueOf(e1);
-		    ComplexNumber c2 = ComplexNumber.valueOf(e2);
+		    ComplexNumber c1 = ComplexNumber.valueOf(e1, settings.rationalMode);
+		    ComplexNumber c2 = ComplexNumber.valueOf(e2, settings.rationalMode);
+		    MathContext mc = MathUtil.divideContext(c1, settings.mcDivide);
 
 		    switch (op) {
 			case "*":
 			    return c1.multiply(c2, settings.mc);
 			case "/":
-			    return c1.divide(c2, MathUtil.divideContext(c1, settings.mcDivide));
+			    return c1.divide(c2, mc);
 			case "\\":
-			case "%":
+			    return c1.idivide(c2, mc);
 			case "mod":
+			    return c1.modulus(c2, mc);
+			case "%":
 			    // This one in particular potentially could be done with the same definition as for reals
 			default:
 			    throw new UnknownOpException(op, ctx);
@@ -4905,8 +4913,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			return q1.subtract(q2);
 		    }
 		    else if (e1 instanceof ComplexNumber || e2 instanceof ComplexNumber) {
-			ComplexNumber c1 = ComplexNumber.valueOf(e1);
-			ComplexNumber c2 = ComplexNumber.valueOf(e2);
+			ComplexNumber c1 = ComplexNumber.valueOf(e1, settings.rationalMode);
+			ComplexNumber c2 = ComplexNumber.valueOf(e2, settings.rationalMode);
 
 			return c1.subtract(c2, settings.mc);
 		    }
@@ -4944,6 +4952,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    else if (value instanceof ComplexNumber) {
 		ComplexNumber c = (ComplexNumber) value;
 		return c.abs(settings.mcDivide);
+	    }
+	    else if (value instanceof BigInteger) {
+		return ((BigInteger) value).abs();
 	    }
 	    else {
 		BigDecimal e = convertToDecimal(value, settings.mc, ctx);
@@ -5542,7 +5553,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		objectList.add(Quaternion.valueOf(value));
 	    }
 	    else if (conv == Conversion.COMPLEX) {
-		objectList.add(ComplexNumber.valueOf(value));
+		objectList.add(ComplexNumber.valueOf(value, settings.rationalMode));
 	    }
 	    else if (conv == Conversion.DECIMAL) {
 		objectList.add(convertToDecimal(value, settings.mc, ctx));
@@ -6695,6 +6706,13 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	@Override
+	public Object visitHarmExpr(CalcParser.HarmExprContext ctx) {
+	    int n = getIntValue(ctx.expr1().expr());
+
+	    return MathUtil.harmonic(n, settings.mcDivide, settings.rationalMode);
+	}
+
+	@Override
 	public Object visitDecExpr(CalcParser.DecExprContext ctx) {
 	    // Note: this will convert fractions, strings, etc.
 	    return getDecimalValue(ctx.expr1().expr());
@@ -6822,7 +6840,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			return ComplexNumber.valueOf(set.set());
 		    }
 		    else {
-			return ComplexNumber.valueOf(e);
+			return ComplexNumber.valueOf(e, settings.rationalMode);
 		    }
 		}
 		else {
@@ -7696,7 +7714,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			    sumFrac = sumFrac.add(frac);
 			    return sumFrac;
 			case COMPLEX:
-			    ComplexNumber cmplx = ComplexNumber.valueOf(value);
+			    ComplexNumber cmplx = ComplexNumber.valueOf(value, settings.rationalMode);
 			    sumCmplx = sumCmplx.add(cmplx);
 			    return sumCmplx;
 			case QUATERNION:
@@ -7805,7 +7823,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			    productFrac = productFrac.multiply(frac);
 			    return productFrac;
 			case COMPLEX:
-			    ComplexNumber cmplx = ComplexNumber.valueOf(value);
+			    ComplexNumber cmplx = ComplexNumber.valueOf(value, settings.rationalMode);
 			    productCmplx = productCmplx.multiply(cmplx, settings.mc);
 			    return productCmplx;
 			case QUATERNION:
@@ -8411,8 +8429,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			result = q1.subtract(q2);
 		    }
 		    else if (e1 instanceof ComplexNumber || e2 instanceof ComplexNumber) {
-			ComplexNumber c1 = ComplexNumber.valueOf(e1);
-			ComplexNumber c2 = ComplexNumber.valueOf(e2);
+			ComplexNumber c1 = ComplexNumber.valueOf(e1, settings.rationalMode);
+			ComplexNumber c2 = ComplexNumber.valueOf(e2, settings.rationalMode);
 
 			result = c1.subtract(c2, settings.mc);
 		    }
@@ -8493,11 +8511,16 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			    result = f1.multiply(f2);
 			    break;
 			case "/":
-			case "\\":
 			    result = f1.divide(f2);
+			    break;
+			case "\\":
+			    result = f1.idivide(f2);
 			    break;
 			case "%":
 			    result = f1.remainder(f2);
+			    break;
+			case "mod":
+			    result = f1.modulus(f2);
 			    break;
 			default:
 			    throw new UnknownOpException(op, ctx);
@@ -8519,15 +8542,22 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    }
 		}
 		else if (e1 instanceof ComplexNumber || e2 instanceof ComplexNumber) {
-		    ComplexNumber c1 = ComplexNumber.valueOf(e1);
-		    ComplexNumber c2 = ComplexNumber.valueOf(e2);
+		    ComplexNumber c1 = ComplexNumber.valueOf(e1, settings.rationalMode);
+		    ComplexNumber c2 = ComplexNumber.valueOf(e2, settings.rationalMode);
+		    MathContext mc = MathUtil.divideContext(c1, settings.mcDivide);
 
 		    switch (op) {
 			case "*":
 			    result = c1.multiply(c2, settings.mc);
 			    break;
 			case "/":
-			    result = c1.divide(c2, MathUtil.divideContext(c1, settings.mcDivide));
+			    result = c1.divide(c2, mc);
+			    break;
+			case "\\":
+			    result = c1.idivide(c2, mc);
+			    break;
+			case "mod":
+			    result = c1.modulus(c2, mc);
 			    break;
 			default:
 			    throw new UnknownOpException(op, ctx);

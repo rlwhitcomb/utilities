@@ -98,6 +98,8 @@ approx(e_frac, e)
 approx(pi_frac, pi)
 
 approx([2, 1, 7], 2.875)
+approx([3, 1, 7], 3.875)
+approx([3, 1, 9], 3.9)
 approx([1, 2, 3, 4, 5], 225/157)
 
 // All examples taken from https://pi.math.cornell.edu/~gautam/ContinuedFractions.pdf
