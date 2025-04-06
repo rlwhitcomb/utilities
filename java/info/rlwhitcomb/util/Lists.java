@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2013-2014,2016-2022 Roger L. Whitcomb.
+ * Copyright (c) 2013-2014,2016-2022,2025 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,6 +25,7 @@
  *
  * History:
  *      23-Mar-2016 (rlwhitcomb)
+ *	    Start history.
  *          Add another option to recognize blank-separated input files.
  *      10-May-2016 (rlwhitcomb)
  *          Allow reading from System.in with file named "@".
@@ -88,6 +89,8 @@
  *	    #270: Make this automatic.
  *	09-Jul-2022 (rlwhitcomb)
  *	    #393: Cleanup imports.
+ *	27-Mar-2025 (rlwhitcomb)
+ *	    Move text to the resource file for internationalization.
  */
 package info.rlwhitcomb.util;
 
@@ -96,8 +99,9 @@ import info.rlwhitcomb.util.Exceptions;
 
 import java.io.*;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -138,65 +142,6 @@ public class Lists
 
 	private static final String STDIN = "@";
 
-	private static final String[] HELP = {
-	    "Usage: java Lists [-c] [-j] [-b] [-n] [-l] [-nnn] [-w] [-e prefix_text] [-f postfix_text] [-x nn]",
-	    "                  [-lower] [-upper] [-o output_file] [-i nn] [list_file_name+ | " + STDIN + "]",
-	    "",
-	    "  Aliases: -c | -concat | -concatenate; -j | -join; -b | -blank | -blanks; -n | -count | -counting",
-	    "           -l | -line | -lines | -newlines; -w | -white | -whitespace; -e | -pre | -prefix",
-	    "           -f | -post | -postfix; -x | -cut | -cutting; -s | -single; -u | -unchanged",
-	    "           -lower | -low; -upper | -up; -o | -out | -output; -i | -in | -indent",
-	    "",
-	    "  If you specify the \"-c\" flag the output will have all the lines",
-	    "    of the file concatenated (using commas) into a single line.",
-	    "",
-	    "  The \"-j\" flag is similar except the lines will be joined by a",
-	    "    single space between each into a single line.",
-	    "",
-	    "  Without either of these options, the input file will be deconstructed",
-	    "    into one element per line and the commas (if any) will be removed.",
-	    "",
-	    "  The \"-x nn\" option will cut the nn number of characters (if present)",
-	    "    from the start of each input line (useful for \"svn st\" output).",
-	    "",
-	    "  Using \"-b\" without \"-c\" will print a blank line between",
-	    "    each output value, while with \"-c\" will put a blank after",
-	    "    each comma.",
-	    "",
-	    "  Using \"-l\" will print newlines after each entry, even with \"-c\"",
-	    "",
-	    "  The \"-nnn\" option (where \"nnn\" is a number from 1 to 255) specifies",
-	    "    a maximum line width for the \"-c\" output mode.",
-	    "",
-	    "  The \"-n\" option simply counts the number of entries in the input",
-	    "    using the rules from the other options and outputs the number of entries.",
-	    "",
-	    "  The \"-w\" option will recognize input files where the input",
-	    "    values are separated by whitespace instead of \",\".",
-	    "",
-	    "  The \"-e prefix_text\" and \"-f postfix_text\" options will add this text",
-	    "    before (after) the single line or each line of the output.",
-	    "",
-	    "  The \"-s\" option will join the whole file into a single string without",
-	    "    changing anything else.",
-	    "",
-	    "  The \"-u\" option will do nothing to the input except do any cutting specified,",
-	    "    and add the prefix or postfix text to each line.",
-	    "",
-	    "  The \"-i nn\" option will indent each line by nn tab/space characters.",
-	    "",
-	    "  Using \"" + STDIN + "\" or nothing for the list_file_name will read from stdin.",
-	    "  Multiple file names are allowed as well as mixing \"" + STDIN + "\" with regular",
-	    "    file names, which will simply read and concatenate everything together.",
-	    "",
-	    "  Unless the \"-o output_file\" option is given, all output will be sent to",
-	    "    stdout. This output file option is preferable when reading from the console.",
-	    "",
-	    "  Use \"-help\" (or \"-h\" or \"-?\") to display this help text.",
-	    "  Use \"-version\" (or \"-vers\", \"-ver\", or \"-v\" to display version information.)",
-	    ""
-	};
-
 
 	private static void usage() {
 	    usage(false);
@@ -205,22 +150,27 @@ public class Lists
 	private static void usage(boolean helpOnly) {
 	    if (!helpOnly)
 		System.err.println();
-	    Arrays.stream(HELP).forEach(System.err::println);
+
+	    Map<String, String> symbols = new HashMap<>();
+	    symbols.put("STDIN", STDIN);
+
+	    Intl.printHelp(System.err, "util#lists", symbols, true);
 	}
 
-	private static int errUsage(String messageFormat, Object... args) {
-	    System.err.println(String.format(messageFormat, args));
+	private static int errUsage(String messageKey, Object... args) {
+	    String message = Intl.formatString("util#lists." + messageKey, args);
+	    Intl.errFormat("util#lists.error", message);
 	    usage();
 	    return BAD_ARGUMENT;
 	}
 
-	private static int missingValue(String expected, String option) {
-	    errUsage("Expecting %1$s for the \"-%2$s\" option!", expected, option);
+	private static int missingValue(String expectedKey, String option) {
+	    errUsage("missingValue", Intl.getString("util#lists", expectedKey), option);
 	    return MISSING_OPTION;
 	}
 
-	private static int onlyOnce(String option) {
-	    return errUsage("Can only specify the %1$s once!", option);
+	private static int onlyOnce(String optionKey) {
+	    return errUsage("onlyOnce", Intl.getString("util#lists", optionKey));
 	}
 
 	private void outPrint(String value) {
@@ -271,6 +221,9 @@ public class Lists
 
 	@Override
 	public int setup(String[] args) {
+	    // We have no "-colors" option, so enable by default
+	    Intl.setColoring(true);
+
 	    fileNames = new ArrayList<>();
 
 	    // First parse the command line arguments
@@ -284,19 +237,19 @@ public class Lists
 		String option = Options.isOption(arg);
 		if (option != null) {
 		    if (sawOutputOption) {
-			return missingValue("an output file name", "o");
+			return missingValue("optionOutputFile", "o");
 		    }
 		    if (sawCutOption) {
-			return missingValue("a number", "x");
+			return missingValue("optionNumber", "x");
 		    }
 		    if (sawPrefixTextOption) {
-			return missingValue("prefix text", "e");
+			return missingValue("optionPrefix", "e");
 		    }
 		    if (sawPostfixTextOption) {
-			return missingValue("postfix text", "f");
+			return missingValue("optionPostfix", "f");
 		    }
 		    if (sawIndentOption) {
-			return missingValue("a number", "i");
+			return missingValue("optionNumber", "i");
 		    }
 		    if (Options.matchesOption(arg, true, "concatenate", "concat", "c"))
 			concatenate = true;
@@ -326,25 +279,25 @@ public class Lists
 			makeUpper = true;
 		    else if (Options.matchesOption(arg, true, "output", "out", "o")) {
 			if (outputFileName != null) {
-			    return onlyOnce("output file name");
+			    return onlyOnce("optionOutputFile");
 			}
 			sawOutputOption = true;
 		    }
 		    else if (Options.matchesOption(arg, true, "prefix", "pre", "e")) {
 			if (prefixText != null) {
-			    return onlyOnce("prefix text");
+			    return onlyOnce("optionPrefix");
 			}
 			sawPrefixTextOption = true;
 		    }
 		    else if (Options.matchesOption(arg, true, "postfix", "post", "f")) {
 			if (postfixText != null) {
-			    return onlyOnce("postfix text");
+			    return onlyOnce("optionPostfix");
 			}
 			sawPostfixTextOption = true;
 		    }
 		    else if (Options.matchesOption(arg, true, "indent", "in", "i")) {
 			if (indent > 0) {
-			    return onlyOnce("indent value");
+			    return onlyOnce("optionIndent");
 			}
 			sawIndentOption = true;
 		    }
@@ -360,11 +313,11 @@ public class Lists
 			try {
 			    width = Integer.parseInt(option);
 			    if (width < 1 || width > 255) {
-				return errUsage("Width value (%1$d) must be between 1 and 255.", width);
+				return errUsage("badWidth", width);
 			    }
 			}
 			catch (NumberFormatException nfe) {
-			    return errUsage("Unsupported option: \"%1$s\".", arg);
+			    return errUsage("unsupported", arg);
 			}
 		    }
 		}
@@ -381,7 +334,7 @@ public class Lists
 			    cutSize = -1; // to trigger the error below
 			}
 			if (cutSize < 1 || cutSize > 255) {
-			    return errUsage("The cut size (%1$s) should be between 1 and 255.", arg);
+			    return errUsage("badCutSize", arg);
 			}
 			sawCutOption = false;
 		    }
@@ -403,14 +356,14 @@ public class Lists
 			    indent = -1; // to trigger the error below
 			}
 			if (indent < 1 || indent > 255) {
-			    return errUsage("The indent value (%1$s) should be between 1 and 255.", arg);
+			    return errUsage("badIndent", arg);
 			}
 			sawIndentOption = false;
 		    }
 		    else {
 			if (arg.equals(STDIN)) {
 			    if (sawConsoleInput) {
-				return errUsage("Cannot specify \"%1$s\" for the input more than once.", STDIN);
+				return errUsage("noDupInput", STDIN);
 			    }
 			    sawConsoleInput = true;
 			}
@@ -424,16 +377,32 @@ public class Lists
 	    }
 
 	    // Error checking on the supplied parameters
+	    if (sawOutputOption) {
+		return missingValue("optionOutputFile", "o");
+	    }
+	    if (sawCutOption) {
+		return missingValue("optionNumber", "x");
+	    }
+	    if (sawPrefixTextOption) {
+		return missingValue("optionPrefix", "e");
+	    }
+	    if (sawPostfixTextOption) {
+		return missingValue("optionPostfix", "f");
+	    }
+	    if (sawIndentOption) {
+		return missingValue("optionNumber", "i");
+	    }
+
 	    if (!concatenate && width > 0) {
-		return errUsage("Specifying an output width (\"-%1$d\") is only effective with the \"-c\" or \"-j\" options.", width);
+		return errUsage("widthNeedsJoin", width);
 	    }
 
 	    if (counting && (concatenate || blanks || width > 0)) {
-		return errUsage("The \"-count\" option should not be used together with either the%n\"-c\", \"-j\", or \"-b\" options%nor with an output width.");
+		return errUsage("countWontWork");
 	    }
 
 	    if (makeUpper && makeLower) {
-		return errUsage("You can specify either \"-lower\" or \"-upper\", but not both.");
+		return errUsage("notBothCase");
 	    }
 
 	    if (outputFileName != null) {
@@ -441,7 +410,7 @@ public class Lists
 		    output = new PrintStream(outputFileName);
 		}
 		catch (IOException ioe) {
-		    errUsage("Unable to open \"%1$s\" file for writing: %2$s", outputFileName, Exceptions.toString(ioe));
+		    Intl.errFormat("util#lists.errOutputFile", outputFileName, Exceptions.toString(ioe));
 		    return OUTPUT_IO_ERROR;
 		}
 	    }
@@ -612,10 +581,10 @@ public class Lists
 	    }
 	    catch (IOException ioe) {
 		if (readConsole) {
-		    System.err.format("Error reading from the console: %1$s%n", Exceptions.toString(ioe));
+		    Intl.errFormat("util#lists.errConsoleRead", Exceptions.toString(ioe));
 		}
 		else {
-		    System.err.format("Error accessing the file \"%1$s\": %2$s%n", fileName, Exceptions.toString(ioe));
+		    Intl.errFormat("util#lists.errFileAccess", fileName, Exceptions.toString(ioe));
 		}
 		return INPUT_IO_ERROR;
 	    }
