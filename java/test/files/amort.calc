@@ -1,0 +1,36 @@
+//
+// Print an amortization schedule for a loan
+//   $0 = principal amount
+//   $1 = yearly interest rate (percentage)
+//   $2 = number of years
+//
+$assert defined(PMT), 'The "library.calc" file must be included.'
+$quiet on
+$separators on
+
+if isnull($0) {
+    display 'Usage: c amort -- PRINCIPAL RATE YEARS'
+    leave 1
+}
+
+payment = PMT(P=$0, R=$1, N=$2)
+
+principal = $0
+monthly_interest = $1 / 100 / 12
+months = $2 * 12
+
+display `Monthly payment on $$$principal at ${$1}% interest for ${$2} years is $$$payment.`
+display
+
+loop m over months {
+    var interest = round(monthly_interest * principal, 2)
+
+    if principal <= payment {
+        payment = principal + interest
+    }
+    var principal_decrease = payment - interest
+
+    display `Month: $m Balance: $$$principal, Payment: $payment, Interest: $interest, Principal: $principal_decrease`
+    principal -= principal_decrease
+}
+
