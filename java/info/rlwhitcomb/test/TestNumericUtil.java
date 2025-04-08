@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2020-2022 Roger L. Whitcomb.
+ * Copyright (c) 2020-2022,2025 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -60,6 +60,8 @@
  *	    #301: Tests of "getZillionNames".
  *	30-Sep-2022 (rlwhitcomb)
  *	    #496: Change comma settings.
+ *	07-Apr-2025 (rlwhitcomb)
+ *	    #711: Tweak expected results from zillion names.
  */
 package info.rlwhitcomb.test;
 
@@ -535,7 +537,7 @@ public class TestNumericUtil
 	private static final String zillionNames[] = {
 	    "million", "billion", "trillion", "quadrillion", "quintillion", "sextillion", "septillion", "octillion",
 	    "nonillion", "decillion", "undecillion", "duodecillion", "tredecillion", "quattuordecillion", "quindecillion",
-	    "sedecillion", "septendecillion", "octodecillion", "novendecillion", "vigintillion", "unvigintillion",
+	    "sexdecillion", "septendecillion", "octodecillion", "novemdecillion", "vigintillion", "unvigintillion",
 	    "duovigintillion", "tresvigintillion", "quattuorvigintillion", "quinvigintillion", "sesvigintillion",
 	    "septemvigintillion", "octovigintillion", "novemvigintillion", "trigintillion", "untrigintillion",
 	    "duotrigintillion", "trestrigintillion", "quattuortrigintillion", "quintrigintillion", "sestrigintillion",
