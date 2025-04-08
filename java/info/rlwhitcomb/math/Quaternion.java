@@ -590,7 +590,7 @@ public final class Quaternion extends Number
 	 * will be in decimal form, in order for the new magnitude to be as close to
 	 * one as the precision allows.
 	 *
-	 * @paraam mc The rounding value for computing the magnitude (for division).
+	 * @param mc  The rounding value for computing the magnitude (for division).
 	 * @return    Original value with coefficients divided by the magnitude, to
 	 *            make the new magnitude equal to one.
 	 */
