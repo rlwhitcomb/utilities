@@ -781,8 +781,10 @@ or<br>
 <div class="cols">
   <p>The <code>@w</code> (and <code>@W</code>) formats use the Conway-Guy-Wechsler (from "The Book of Numbers" [1996]) proposal,
      as explained here: <a href="https://en.wikipedia.org/wiki/Names_of_large_numbers">Names of large numbers</a>. We always use
-     the US, Canada, and modern British (short scale) form, regardless of the locale used. The implementation here will work up to a
-     value of around 10<sup>3,000,000,000</sup>. The optional <code>+</code> modifier will modify the formatting of a value like 312 from <code>312@w -> three hundred twelve</code> to <code>312@+w -> three hundred <i>and</i> twelve</code>.
+     the US, Canada, and modern British (short scale) form, regardless of the locale used.
+  <p>The Conway-Guy system conflicts with two dictionary words "sexdecillion" and "novemdecillion" (producing instead "sedecillion" and "novendecillion"). So we use the system but translate "sedeci" to "sexdeci" everywhere and similarly "novendeci" to "novemdeci" (also affecting "novemdecicentillion" and " and "sexdecicentillion", for instance, as suggested in the Wikipedia article in the middle of the "Extensions of the standard dictionary numbers" section).
+  <p>The implementation here will work up to a
+     value of around 10<sup>3,000,000,000</sup>. The optional <code>+</code> modifier will modify the formatting of a value like 312 from <code>312@w -> three hundred twelve</code> to <code>312@+w -> three hundred <i>and</i> twelve</code>. The <code>@,w</code> or <code>@_w</code> formats will add or omit thousands separators to the results, as in: <code>12345678 @,w -> twelve million, three hundred forty-five thousand, six hundred seventy-eight</code>.
   <p>While thousands separators are supported on output (the <code>d</code>, <code>j</code>, <code>%</code>, and <code>$</code> formats), they are not supported on input. For this reason, the separators setting is ignored for <code>$save</code>, and should be avoided if the output is meant to be read as input by Calc.
   <p>The optional <code>-</code> modifier for <code>@h</code>, <code>@t</code>, <code>@e</code>, and <code>@r</code> will remove the constant formatting
      and treat the value as a simple quoted string. This simplifies using these values inside interpolated strings (for instance), as in:&nbsp;

@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { base: '1.12.5', date: d'2025-04-07',
+      issues: [ 711 ],
+      comment: 'Correct a couple of incorrect number words (according to the dictionary).'
+    },
     { version: '2.56.0', date: d'2025-04-05',
       issues: [ 702, 710 ],
       comment: 'Add Harmonic numbers; fix integer math operations for fractions and complex numbers.'

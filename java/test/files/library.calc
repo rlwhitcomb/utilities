@@ -27,6 +27,11 @@ const ON_WINDOWS = info.os.id == 'windows'
 const TZ_OFFSET = eval(info.timezone.offset)
 
 /*
+ * Just for fun
+ */
+const GOOGOL = 10⌃100
+
+/*
  * Flag values for "sort"
  */
 const SORT_CASE_INSENSITIVE = 0x0001

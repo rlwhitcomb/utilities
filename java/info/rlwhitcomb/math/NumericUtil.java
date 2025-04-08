@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2011,2013-2014,2016-2018,2020-2023 Roger L. Whitcomb.
+ * Copyright (c) 2011,2013-2014,2016-2018,2020-2023,2025 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -180,6 +180,8 @@
  *	    #48: Introduce TINY format for names (for "Dir" utility).
  *	03-May-2023 (rlwhitcomb)
  *	    #599: New option for "convertToWords" for British usage (to use "and" as in "three hundred and twenty").
+ *	07-Apr-2025 (rlwhitcomb)
+ *	    #711: Tweak some values in the number word algorithm.
  */
 package info.rlwhitcomb.math;
 
@@ -1091,6 +1093,17 @@ public final class NumericUtil
 	    if (addSuffix && len > 0 && "aeiou".indexOf(buf.charAt(len - 1)) >= 0) {
 		buf.replace(len - 1, len, useNillion ? "illi" : "illion");
 	    }
+
+	    // The Conway-Guy-Wechsler system generates two values that are not in the dictionary
+	    // these days, so switch them out.
+	    // Found the problem from this:
+	    // https://www.quora.com/What-are-some-of-the-most-mind-blowing-facts/answer/Sunil-Kumar-Singh-38?ch=17&oid=53430214&share=d8589e1a&srid=obNJ&target_type=answer
+	    // Note: this could probably easily be done with the combining tables but I'm too tired tonight to figure it out...
+	    int ix;
+	    while ((ix = buf.indexOf("sedeci")) >= 0)
+		buf.replace(ix, ix + 6, "sexdeci");
+	    while ((ix = buf.indexOf("novendeci")) >= 0)
+		buf.replace(ix, ix + 9, "novemdeci");
 
 	    return buf.toString();
 	}
