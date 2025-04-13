@@ -877,6 +877,8 @@
  *	    #702: Integer divide and "mod" operators for more values.
  *	07-Mar-2025 (rlwhitcomb)
  *	    #710: New Harmonic number function.
+ *	12-Apr-2025 (rlwhitcomb)
+ *	    Allow expression for "$decimal" directive operand.
  */
 package info.rlwhitcomb.calc;
 
@@ -2003,18 +2005,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitDecimalDirective(CalcParser.DecimalDirectiveContext ctx) {
-	    CalcParser.NumberOptionContext opt = ctx.numberOption();
+	    BigDecimal dPrecision = getDecimalValue(ctx.expr1().expr());
 	    CalcParser.BracketBlockContext blockCtx = ctx.bracketBlock();
-	    BigDecimal dPrecision;
 	    MathContext oldMc = settings.mc;
-
-	    if (opt.NUMBER() != null) {
-		dPrecision = new BigDecimal(opt.NUMBER().getText());
-	    }
-	    else {
-		LValueContext lValue = makeLValue(opt.var());
-		dPrecision = convertToDecimal(lValue.getContextObject(this, false), settings.mc, opt);
-	    }
 
 	    int precision = 0;
 	    try {

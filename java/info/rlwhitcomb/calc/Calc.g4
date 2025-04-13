@@ -555,6 +555,8 @@
  *	    Make termination expression for "WHILE" optional to make "infinite" loops easier.
  *	07-Mar-2025 (rlwhitcomb)
  *	    #710: Grammar for Harmonic number.
+ *	12-Apr-2025 (rlwhitcomb)
+ *	    Allow full expression for "$decimal" setting.
  */
 
 grammar Calc;
@@ -1041,7 +1043,7 @@ dropObjs
    ;
 
 directive
-   : ( D_DECIMAL | D_PRECISION ) numberOption
+   : ( D_DECIMAL | D_PRECISION ) expr1
                                bracketBlock ?     # decimalDirective
    | D_DEFAULT bracketBlock ?                     # defaultDirective
    | D_DOUBLE bracketBlock ?                      # doubleDirective
@@ -1076,12 +1078,6 @@ directive
    | D_HELP                                       # helpDirective
    | D_VERSION                                    # versionDirective
    | D_GUI                                        # guiDirective
-   ;
-
-numberOption
-   : LPAREN NUMBER RPAREN
-   |        NUMBER
-   | var
    ;
 
 outputOption

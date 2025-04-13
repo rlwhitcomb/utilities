@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.56.2', date: d'2025-04-12',
+      issues: [ ],
+      comment: 'Allow full expressions for "$decimal"; more precise results for "**" operator.'
+    },
     { base: '1.12.5', date: d'2025-04-07',
       issues: [ 711 ],
       comment: 'Correct a couple of incorrect number words (according to the dictionary).'
