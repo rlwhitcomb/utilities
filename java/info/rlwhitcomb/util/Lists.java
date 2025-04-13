@@ -91,6 +91,8 @@
  *	    #393: Cleanup imports.
  *	27-Mar-2025 (rlwhitcomb)
  *	    Move text to the resource file for internationalization.
+ *	12-Apr-2025 (rlwhitcomb)
+ *	    Add "-noblanks" option.
  */
 package info.rlwhitcomb.util;
 
@@ -115,6 +117,7 @@ public class Lists
 	private boolean concatenate = false;
 	private boolean join        = false;
 	private boolean blanks      = false;
+	private boolean noblanks    = false;
 	private boolean whitespace  = false;
 	private boolean counting    = false;
 	private boolean cutting     = false;
@@ -251,12 +254,15 @@ public class Lists
 		    if (sawIndentOption) {
 			return missingValue("optionNumber", "i");
 		    }
+
 		    if (Options.matchesOption(arg, true, "concatenate", "concat", "c"))
 			concatenate = true;
 		    else if (Options.matchesOption(arg, "join", "j"))
 			concatenate = join = true;
 		    else if (Options.matchesOption(arg, true, "blanks", "blank", "b"))
 			blanks = true;
+		    else if (Options.matchesOption(arg, true, "noblanks", "noblank", "nob", "nb"))
+			noblanks = true;
 		    else if (Options.matchesOption(arg, true, "whitespace", "white", "w"))
 			whitespace = true;
 		    else if (Options.matchesOption(arg, true, "newlines", "lines", "line", "l")) {
@@ -396,11 +402,12 @@ public class Lists
 	    if (!concatenate && width > 0) {
 		return errUsage("widthNeedsJoin", width);
 	    }
-
 	    if (counting && (concatenate || blanks || width > 0)) {
 		return errUsage("countWontWork");
 	    }
-
+	    if (noblanks && !join) {
+		return errUsage("noBlankNeedJoin");
+	    }
 	    if (makeUpper && makeLower) {
 		return errUsage("notBothCase");
 	    }
@@ -529,7 +536,7 @@ public class Lists
 						if (width > 0 && outputLength(buf) >= width) {
 						    outputLine(buf);
 						}
-						else if (blanks || join)
+						else if (blanks || (join && !noblanks))
 						    buf.append(" ");
 					    }
 					    if (width > 0 && outputLength(buf) + value.length() >= width) {

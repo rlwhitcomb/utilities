@@ -1,0 +1,8 @@
+$dec 102 {
+r = read('test/data/ln2.txt')
+r2 = split(r, '\n')
+ln_2 = ~~("0." + replace(r2[2], ', '))
+ln_1 = ln(2)
+ln_1 === ln_2
+epow(ln_2)
+}

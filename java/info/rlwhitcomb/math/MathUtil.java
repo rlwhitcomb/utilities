@@ -69,6 +69,7 @@
  *			New "intValueExact()" method also.
  *		  ----	New constructors for MinInt and MaxInt.
  *  26-Mar-25 rlw ----	Move "isInteger()" from ClassUtil into here.
+ *  12-Apr-25 rlw ----	Add "fixup" to several results.
  */
 package info.rlwhitcomb.math;
 
@@ -1335,7 +1336,7 @@ public final class MathUtil
 		result = e(mc);
 		if (reciprocal)
 		    result = BigDecimal.ONE.divide(result, mc);
-		return result;
+		return fixup(result, mc);
 	    }
 
 	    int intExp         = exponent.intValue();
@@ -1371,7 +1372,7 @@ public final class MathUtil
 	    if (reciprocal)
 		result = BigDecimal.ONE.divide(result, mc);
 
-	    return result;
+	    return fixup(result, mc);
 	}
 
 
@@ -1410,7 +1411,7 @@ public final class MathUtil
 		    result = D_TEN.pow(intExp, mc);
 	    }
 
-	    return result;
+	    return fixup(result, mc);
 	}
 
 

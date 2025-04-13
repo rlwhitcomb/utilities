@@ -159,6 +159,8 @@
 #	    New copyright year again.
 #	26-Mar-2025 (rlwhitcomb)
 #	    Move text from Lists into here; reorganize.
+#	12-Apr-2025 (rlwhitcomb)
+#	    Help for "-noblanks" in Lists; add an error for it.
 #
 
 #
@@ -283,6 +285,7 @@ lists.unsupported	= Unsupported option: "%1$s".
 lists.widthNeedsJoin	= Specifying an output width ("-%1$d") is only effective with the "-c" or "-j" options.
 lists.countWontWork	= The "-count" option should not be used together with either the%n"-c", "-j", or "-b" options%nor with an output width.
 lists.notBothCase	= You can specify either "-lower" or "-upper", but not both.
+lists.noBlankNeedJoin	= Using "-noblanks" requires "-join" also.
 lists.errOutputFile	= <Rd*!>Unable to open "%1$s" file for writing:<.> %2$s
 lists.errConsoleRead	= <Rd*!>Error reading from the console:<.> %1$s
 lists.errFileAccess	= <Rd*!>Error accessing the file "%1$s":<.> %2$s
@@ -297,8 +300,8 @@ lists.help2	= Usage: lists [-c] [-j] [-b] [-n] [-l] [-nnn] [-w] [-e prefix_text]
 lists.help3	= "                  [-lower] [-upper] [-o output_file] [-i nn] [ input_file_name+ | %STDIN% ]"
 lists.help4	= ""
 lists.help5	= "  Aliases: -c | -concat | -concatenate; -j | -join; -b | -blank | -blanks; -n | -count | -counting"
-lists.help6	= "           -l | -line | -lines | -newlines; -w | -white | -whitespace; -e | -pre | -prefix"
-lists.help7	= "           -f | -post | -postfix; -x | -cut | -cutting; -s | -single; -u | -unchanged"
+lists.help6	= "           -l | -line | -lines | -newlines; -w | -white | -whitespace; -noblanks | -noblank | -nob | -nb"
+lists.help7	= "           -e | -pre | -prefix;  -f | -post | -postfix; -x | -cut | -cutting; -s | -single; -u | -unchanged"
 lists.help8	= "           -lower | -low; -upper | -up; -o | -out | -output; -i | -in | -indent"
 lists.help9	= ""
 lists.help10	= "  If you specify the \"-c\" flag the output will have all the lines"
