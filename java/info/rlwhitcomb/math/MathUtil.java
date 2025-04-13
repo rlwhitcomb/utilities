@@ -70,6 +70,8 @@
  *		  ----	New constructors for MinInt and MaxInt.
  *  26-Mar-25 rlw ----	Move "isInteger()" from ClassUtil into here.
  *  12-Apr-25 rlw ----	Add "fixup" to several results.
+ *			Extra code in "pow()" to use "ePower" if the base is "e"; increase precision
+ *			in there for better results.
  */
 package info.rlwhitcomb.math;
 
@@ -140,6 +142,19 @@ public final class MathUtil
 	 * can instantiate it.
 	 */
 	private MathUtil() {
+	}
+
+
+	/**
+	 * Return a new {@link MathContext} with the precision increased/decreased by the
+	 * given amount.
+	 *
+	 * @param mc   The root context to update.
+	 * @param incr Amount to add/subtract from the given context's precision.
+	 * @return     A new context with updated precision, and the same rounding as the original.
+	 */
+	private static MathContext newPrecision(final MathContext mc, final int incr) {
+	    return new MathContext(mc.getPrecision() + incr, mc.getRoundingMode());
 	}
 
 
@@ -365,6 +380,9 @@ public final class MathUtil
 	    // Turn an integer power of ten into a simple scale change
 	    else if (base.equals(D_TEN) && (double) intExp == inputExp) {
 		result = BigDecimal.ONE.scaleByPowerOfTen(intExp);
+	    }
+	    else if (e(mc).equals(base)) {
+		result = ePower(new BigDecimal(exp), mc);
 	    }
 	    else {
 		// Do the integer power part
@@ -891,9 +909,10 @@ public final class MathUtil
 	    BigDecimal factTerm = BigDecimal.ONE;
 
 	    // This converges very rapidly, except when the value is near zero
-	    int loops = mc.getPrecision() * 3 / 2;
+	    int prec  = mc.getPrecision();
+	    int loops = prec * 3 / 2;
 
-	    MathContext mc2 = new MathContext(mc.getPrecision() * 2);
+	    MathContext mc2 = newPrecision(mc, prec);
 
 	    for (int i = 1; i < loops; i++) {
 		power     = power.multiply(xSquared);
@@ -938,9 +957,10 @@ public final class MathUtil
 	    BigDecimal factTerm = BigDecimal.ONE;
 
 	    // This converges very rapidly, except when the value is near zero
-	    int loops = mc.getPrecision() * 3 / 2;
+	    int prec  = mc.getPrecision();
+	    int loops = prec * 3 / 2;
 
-	    MathContext mc2 = new MathContext(mc.getPrecision() * 2);
+	    MathContext mc2 = newPrecision(mc, prec);
 
 	    for (int i = 1; i < loops; i++) {
 		power     = power.multiply(xSquared);
@@ -971,7 +991,7 @@ public final class MathUtil
 	 */
 	public static BigDecimal tan(final Number x, final MathContext mc) {
 	    // Rounding context for the loops, to ensure we get accuracy to the requested precision
-	    MathContext mc2 = new MathContext(mc.getPrecision() + 2);
+	    MathContext mc2 = newPrecision(mc, 2);
 
 	    BigDecimal xValue = toDecimal(x, mc2);
 
@@ -1087,7 +1107,7 @@ public final class MathUtil
 		return result.round(mc);
 
 	    // Use extra precision to ensure we get as accurate a value as possible
-	    MathContext mc2 = new MathContext(mc.getPrecision() * 2);
+	    MathContext mc2 = newPrecision(mc, mc.getPrecision());
 
 	    // Else there is one of three series depending on the size of the value
 	    BigDecimal _x = y.divide(x, mc2);
@@ -1332,10 +1352,12 @@ public final class MathUtil
 		exponent = exp.abs();
 	    }
 
+	    MathContext mc2 = newPrecision(mc, 2);
+
 	    if (exp.equals(BigDecimal.ONE)) {
-		result = e(mc);
+		result = e(mc2);
 		if (reciprocal)
-		    result = BigDecimal.ONE.divide(result, mc);
+		    result = BigDecimal.ONE.divide(result, mc2);
 		return fixup(result, mc);
 	    }
 
@@ -1368,9 +1390,9 @@ public final class MathUtil
 		}
 	    }
 
-	    result = e(mc).pow(intExp).multiply(result, mc);
+	    result = e(mc2).pow(intExp).multiply(result, mc2);
 	    if (reciprocal)
-		result = BigDecimal.ONE.divide(result, mc);
+		result = BigDecimal.ONE.divide(result, mc2);
 
 	    return fixup(result, mc);
 	}
@@ -1903,7 +1925,7 @@ public final class MathUtil
 
 	    // Calculate a sufficient number of loops for the value to converge nicely
 	    int loops = mc.getPrecision() * 15;	// TODO: find out a good value
-	    MathContext lc = new MathContext(mc.getPrecision() + 10, mc.getRoundingMode());
+	    MathContext lc = newPrecision(mc, 10);
 
 	    // Range reduce to get the argument value below one, so that:
 	    // ln(x) = ln(e**n * x/e**n)
@@ -1987,7 +2009,7 @@ public final class MathUtil
 
 	    // Intermediate calculations can use a couple extra digits of precision to ensure
 	    // LSD accuracy at the end
-	    MathContext mc2 = new MathContext(mc.getPrecision() + 2, mc.getRoundingMode());
+	    MathContext mc2 = newPrecision(mc, 2);
 
 	    // Since we are calculating one bit at a time, the number of loops should be about
 	    // precision * ln2(10) or about 3.3219 or say 3.4 to give us some wiggle room
@@ -2105,7 +2127,7 @@ public final class MathUtil
 	    BigDecimal fraction = BigDecimal.ZERO;
 	    BigDecimal divisor = new BigDecimal(radix);
 	    BigDecimal mult = new BigDecimal(radix);
-	    MathContext mcDivide = new MathContext(mc.getPrecision() * 2, mc.getRoundingMode());
+	    MathContext mcDivide = newPrecision(mc, mc.getPrecision());
 
 	    if (pointPos > 0) {
 		for (int pos = pointPos + 1; pos < value.length(); pos++) {
