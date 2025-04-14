@@ -879,6 +879,8 @@
  *	    #710: New Harmonic number function.
  *	12-Apr-2025 (rlwhitcomb)
  *	    Allow expression for "$decimal" directive operand.
+ *	13-Apr-2025 (rlwhitcomb)
+ *	    #702: Remainder for complex numbers; integer divide and remainder for quaternions.
  */
 package info.rlwhitcomb.calc;
 
@@ -4806,14 +4808,17 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		else if (e1 instanceof Quaternion || e2 instanceof Quaternion) {
 		    Quaternion q1 = Quaternion.valueOf(e1);
 		    Quaternion q2 = Quaternion.valueOf(e2);
+		    MathContext mc = MathUtil.divideContext(q1, settings.mcDivide);
 
 		    switch (op) {
 			case "*":
 			    return q1.multiply(q2, settings.mc);
 			case "/":
-			    return q1.divide(q2, MathUtil.divideContext(q1, settings.mcDivide));
+			    return q1.divide(q2, mc);
 			case "\\":
+			    return q1.idivide(q2, mc);
 			case "%":
+			    return q1.remainder(q2, mc);
 			case "mod":
 			default:
 			    throw new UnknownOpException(op, ctx);
@@ -4831,10 +4836,10 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			    return c1.divide(c2, mc);
 			case "\\":
 			    return c1.idivide(c2, mc);
+			case "%":
+			    return c1.remainder(c2, mc);
 			case "mod":
 			    return c1.modulus(c2, mc);
-			case "%":
-			    // This one in particular potentially could be done with the same definition as for reals
 			default:
 			    throw new UnknownOpException(op, ctx);
 		    }

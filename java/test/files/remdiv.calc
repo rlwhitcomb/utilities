@@ -1,0 +1,96 @@
+// Testing integer division and remainder for all the data types
+// where x / y = q * y + r
+// and r < 1
+$silencedirectives on
+
+display
+display 'Defining our testing functions ...'
+define remdiv(x, y) = {
+   [ x \ y, x % y ]
+}
+
+define test(arr, x, y) = {
+   const q = arr[0]
+   const r = arr[1]
+   $assert r < y, `Remainder $r too big!`
+   const result = q × y + r
+   print `x($x) == q($q) × y($y) + r($r)? ${result == x}`
+   result
+}
+
+display
+display 'Defining the test constants of every type ...'
+const ix = 7
+const iy = 3
+
+const dx = 14.9
+const dy = 2.7
+
+$rational on {
+const fx = 27/13
+const fy = 3/7
+}
+
+const cix = ( 19, 3 )
+const ciy = ( 7, 4 )
+
+const crx = ( 11.7, 4.6 )
+const cry = ( 6.2, 4.1 )
+
+$rational on {
+const cfx = ( 37/9, 5/8 )
+const cfy = ( 11/4, 3/7 )
+}
+
+const qix = ( 4, 6, 2, 1 )
+const qiy = ( 2, 3, 0, 9 )
+
+const qrx = ( 18.2, 4.7, 8.3, 1.5 )
+const qry = ( 2.88, 1.73, 3.12, 0.9 )
+
+$rational on {
+const qfx = ( 3/4, 7/6, 11/12, 25/13 )
+const qfy = ( 17/9, 1, 0, -3/2 )
+}
+
+display
+display 'Now do the actual testing ...'
+ix/iy
+ir = remdiv(ix, iy)
+test(ir, ix, iy)
+
+dx/dy
+dr = remdiv(dx, dy)
+test(dr, dx, dy)
+
+$rational on {
+fx/fy
+fr = remdiv(fx, fy)
+test(fr, fx, fy)
+}
+
+cix/ciy
+cir = remdiv(cix, ciy)
+test(cir, cix, ciy)
+
+crx/cry
+crr = remdiv(crx, cry)
+test(crr, crx, cry)
+
+cfx/cfy
+cfr = remdiv(cfx, cfy)
+test(cfr, cfx, cfy)
+
+qix/qiy
+qir = remdiv(qix, qiy)
+test(qir, qix, qiy)
+
+qrx/qry
+qrr = remdiv(qrx, qry)
+test(qrr, qrx, qry)
+
+qfx/qfy
+qfr = remdiv(qfx, qfy)
+test(qfr, qfx, qfy)
+
+$silencedirectives pop

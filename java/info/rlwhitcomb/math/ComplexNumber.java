@@ -1138,8 +1138,8 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 	 * Do an "integer" division of this number by the given one. This is the "\" operator.
 	 *
 	 * @param other The number to divide by.
-	 * @param mc    Rounding precision to use for the result.
-	 * @return      This divided by other, set to the "floor" of that result.
+	 * @param mc    Rounding precision to use for the division.
+	 * @return      This divided by other, set to the nearest integer of that result.
 	 */
 	public ComplexNumber idivide(final ComplexNumber other, final MathContext mc) {
 	    ComplexNumber fullResult = divide(other, mc);
@@ -1152,12 +1152,10 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 	}
 
 	/**
-	 * Get the remainder after division, which is {@code c1 - (c1\c2 * c2)}, and only
-	 * makes real sense with Gaussian integers, yet is "accurate" in the sense that it
-	 * satisifies the above calculation always.
+	 * Get the remainder after division, which is {@code c1 - (c1\c2 * c2)}.
 	 *
 	 * @param other Number to divide by.
-	 * @param mc    Rounding precision to use for the result.
+	 * @param mc    Rounding precision to use for the decimal result.
 	 * @return      Result of {@code this % other}.
 	 */
 	public ComplexNumber remainder(final ComplexNumber other, final MathContext mc) {

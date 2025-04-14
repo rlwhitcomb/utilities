@@ -41,6 +41,7 @@
  *			method; add "signum", "ceil", and "floor" methods; new constructor
  *			from BigInteger values.
  *  14-Mar-25 rlw #710	Add "intValueExact()"; code cleanup.
+ *  13-Apr-25 rlw #702	New "idivide" and "remainder" methods.
  */
 package info.rlwhitcomb.math;
 
@@ -680,6 +681,39 @@ public final class Quaternion extends Number
 	 */
 	public Quaternion divide(final Quaternion q, final MathContext mc) {
 	    return multiply(q.inverse(mc), mc);
+	}
+
+	/**
+	 * Do an "integer" division of this number by the given one. This is the "\" operator.
+	 *
+	 * @param other The number to divide by.
+	 * @param mc    Rounding precision to use for the division.
+	 * @return      This divided by other, set to the nearest integer of that result.
+	 */
+	public Quaternion idivide(final Quaternion other, final MathContext mc) {
+	    Quaternion fullResult = divide(other, mc);
+	    if (rational)
+		return new Quaternion(fullResult.aFrac().toNearestInteger(),
+				      fullResult.bFrac().toNearestInteger(),
+				      fullResult.cFrac().toNearestInteger(),
+				      fullResult.dFrac().toNearestInteger());
+	    else
+		return new Quaternion(MathUtil.round(fullResult.a(), 0),
+				      MathUtil.round(fullResult.b(), 0),
+				      MathUtil.round(fullResult.c(), 0),
+				      MathUtil.round(fullResult.d(), 0));
+	}
+
+	/**
+	 * Get the remainder after division, which is {@code q1 - (q1\q2 * q2)}.
+	 *
+	 * @param other Number to divide by.
+	 * @param mc    Rounding precision to use for the decimal results.
+	 * @return      Result of {@code this % other}.
+	 */
+	public Quaternion remainder(final Quaternion other, final MathContext mc) {
+	    Quaternion quotient = idivide(other, mc);
+	    return subtract(quotient.multiply(other, mc));
 	}
 
 	/**

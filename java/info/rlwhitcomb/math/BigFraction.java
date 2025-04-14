@@ -81,6 +81,7 @@
  *			new "getInteger" helper method.
  *  30-Jan-25 rlw #702	New "idivide" and "toNearestInteger" methods; so we can rework "remainder" methods.
  *  07-Mar-25 rlw #710	New constructor with integer values.
+ *  13-Apr-25 rlw #702	Fix "remainder".
  */
 package info.rlwhitcomb.math;
 
@@ -1077,9 +1078,8 @@ public class BigFraction extends Number
 	 * @return	The result of {@code (this.n/this.d) % (other.n/other.d)}.
 	 */
 	public BigFraction remainder(final BigFraction other) {
-	    BigFraction result = divide(other);
 	    BigFraction quotient = idivide(other);
-	    return result.subtract(quotient);
+	    return subtract(quotient.multiply(other));
 	}
 
 	/**

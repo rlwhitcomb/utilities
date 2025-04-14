@@ -1,0 +1,71 @@
+>
+>Defining our testing functions ...
+>Defining function “remdiv(x, y)” = {
+>   [x \ y, x % y]
+>}
+>Defining function “test(arr, x, y)” = {
+>   const q = arr[0]
+>   const r = arr[1]
+>   $assert r < y, `Remainder $r too big!`
+>   const result = q × y + r
+>   print `x($x) == q($q) × y($y) + r($r)? ${result == x}`
+>   result
+>}
+>
+>Defining the test constants of every type ...
+>Defining constant “ix” = 7
+>Defining constant “iy” = 3
+>Defining constant “dx” = 14.9
+>Defining constant “dy” = 2.7
+>Defining constant “fx” = 27 / 13
+>Defining constant “fy” = 3 / 7
+>Defining constant “cix” = ( 19, 3 )
+>Defining constant “ciy” = ( 7, 4 )
+>Defining constant “crx” = ( 11.7, 4.6 )
+>Defining constant “cry” = ( 6.2, 4.1 )
+>Defining constant “cfx” = ( 4 1/9, 5/8 )
+>Defining constant “cfy” = ( 2 3/4, 3/7 )
+>Defining constant “qix” = ( 4, 6, 2, 1 )
+>Defining constant “qiy” = ( 2, 3, 0, 9 )
+>Defining constant “qrx” = ( 18.2, 4.7, 8.3, 1.5 )
+>Defining constant “qry” = ( 2.88, 1.73, 3.12, 0.9 )
+>Defining constant “qfx” = ( 3/4, 1 1/6, 11/12, 1 12/13 )
+>Defining constant “qfy” = ( 1 8/9, 1, 0, -1 1/2 )
+>
+>Now do the actual testing ...
+>ix / iy -> 2.333333333333333333333333333333333
+>ir = remdiv(ix, iy) -> [ 2, 1 ]
+>x(7) == q(2) × y(3) + r(1)? true
+>test(ir, ix, iy) -> 7
+>dx / dy -> 5.518518518518518518518518518518519
+>dr = remdiv(dx, dy) -> [ 5, 1.4 ]
+>x(14.9) == q(5) × y(2.7) + r(1.4)? true
+>test(dr, dx, dy) -> 14.9
+>fx / fy -> 63 / 13
+>fr = remdiv(fx, fy) -> [ 4 / 1, 33 / 91 ]
+>x(27 / 13) == q(4 / 1) × y(3 / 7) + r(33 / 91)? true
+>test(fr, fx, fy) -> 27 / 13
+>cix / ciy -> ( 2.230769230769230769230769230769231, -0.8461538461538461538461538461538462 )
+>cir = remdiv(cix, ciy) -> [ ( 2, -1 ), ( 1, 2 ) ]
+>x(( 19, 3 )) == q(( 2, -1 )) × y(( 7, 4 )) + r(( 1, 2 ))? true
+>test(cir, cix, ciy) -> ( 19, 3 )
+>crx / cry -> ( 1.654298642533936651583710407239819, -0.3520361990950226244343891402714932 )
+>crr = remdiv(crx, cry) -> [ ( 2, 0 ), ( -0.7, -3.6 ) ]
+>x(( 11.7, 4.6 )) == q(( 2, 0 )) × y(( 6.2, 4.1 )) + r(( -0.7, -3.6 ))? true
+>test(crr, crx, cry) -> ( 11.7, 4.6 )
+>cfx / cfy -> ( 1 27005/54657, -203/36438 )
+>cfr = remdiv(cfx, cfy) -> [ ( 1, 0 ), ( 1 13/36, 11/56 ) ]
+>x(( 4 1/9, 5/8 )) == q(( 1, 0 )) × y(( 2 3/4, 3/7 )) + r(( 1 13/36, 11/56 ))? true
+>test(cfr, cfx, cfy) -> ( 4 1/9, 5/8 )
+>qix / qiy -> ( 0.3723404255319148936170212765957447, -0.191489361702127659574468085106383, 0.5851063829787234042553191489361702, -0.2978723404255319148936170212765958 )
+>qir = remdiv(qix, qiy) -> [ ( 0, 0, 1, 0 ), ( 4, -3, 0, 4 ) ]
+>x(( 4, 6, 2, 1 )) == q(( 0, 0, 1, 0 )) × y(( 2, 3, 0, 9 )) + r(( 4, -3, 0, 4 ))? true
+>test(qir, qix, qiy) -> ( 4, 6, 2, 1 )
+>qrx / qry -> ( 4.021354269250676768185711602852732, -0.9499947324303650196732274628178294, -1.431175767347480956590645712427342, -0.5663782481437542655862805003733104 )
+>qrr = remdiv(qrx, qry) -> [ ( 4, -1, -1, -1 ), ( 0.93, -1.56, -0.47, 2.17 ) ]
+>x(( 18.2, 4.7, 8.3, 1.5 )) == q(( 4, -1, -1, -1 )) × y(( 2.88, 1.73, 3.12, 0.9 )) + r(( 0.93, -1.56, -0.47, 2.17 ))? false
+>test(qrr, qrx, qry) -> ( 18.20, 4.70, 8.30, 1.50 )
+>qfx / qfy -> ( -27/611, 39/94, -174/611, 1017/1222 )
+>qfr = remdiv(qfx, qfy) -> [ ( 0, 0, 0, 1 ), ( -3/4, 1 1/6, -1/12, 4/117 ) ]
+>x(( 3/4, 1 1/6, 11/12, 1 12/13 )) == q(( 0, 0, 0, 1 )) × y(( 1 8/9, 1, 0, -1 1/2 )) + r(( -3/4, 1 1/6, -1/12, 4/117 ))? true
+>test(qfr, qfx, qfy) -> ( 3/4, 1 1/6, 11/12, 1 12/13 )
