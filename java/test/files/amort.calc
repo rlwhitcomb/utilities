@@ -19,6 +19,9 @@ principal = $0
 monthly_interest = $1 / 100 / 12
 months = $2 * 12
 
+total_payments = 0
+total_interest = 0
+
 display `Monthly payment on $$$principal at ${$1}% interest for ${$2} years is $$$payment.`
 display
 
@@ -30,7 +33,12 @@ loop m over months {
     }
     var principal_decrease = payment - interest
 
-    display `Month: $m Balance: $$$principal, Payment: $payment, Interest: $interest, Principal: $principal_decrease`
+    total_payments += payment
+    total_interest += interest
+
+    display `Month: $m Balance: ${principal@2,$}, Payment: ${payment@2,$}, Interest: ${interest@2,$}, Principal: ${principal_decrease@2,$}`
     principal -= principal_decrease
 }
 
+display
+display `Total of $months monthly payments is ${total_payments@2,$}, Total interest is ${total_interest@2,$}`
