@@ -543,5 +543,12 @@
 >num = num1 > num2 ? num1 - num2 : num2 - num1 -> 6174
 >++ iterations -> 7
 >Starting from 3752, sequence converged to Kaprekar's constant (6174) in 7 iterations.
+>list1 = 1, 2, 3, 4, 5, 6, 7, 8, 9 -> [ 1, 2, 3, 4, 5, 6, 7, 8, 9 ]
+>Defining function “length_of_list(lst, pos, max_checks)” = {
+>   if pos > max_checks leave -1
+>   if isnull (lst[pos]) leave pos
+>   length_of_list(lst, pos + 1, max_checks)
+>}
+>Length of list is 9
 >
 >Done with LOOP tests.

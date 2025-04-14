@@ -136,6 +136,16 @@ while num != KAPREKAR {
 }
 print `Starting from $START, sequence converged to Kaprekar's constant ($KAPREKAR) in $iterations iterations.`
 
+list1 = 1, 2, 3, 4, 5, 6, 7, 8, 9
+
+define length_of_list(lst, pos, max_checks) = {
+   if pos > max_checks leave -1
+   if isnull(lst[pos]) leave pos
+   length_of_list(lst, pos + 1, max_checks)
+}
+
+print `Length of list is ${length_of_list(list1, 0, 99)}`
+
 print
 print "Done with LOOP tests."
 
