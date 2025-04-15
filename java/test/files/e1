@@ -137,6 +137,7 @@ b = -27; c = 0; d = 153;
 signum b; signum c; signum d;
 length b; length c; length d;
 scale b; scale c; scale d;
+scale 1.23; scale 1e4; scale 15400; scale 0.012
 h = 23
 h2 = ln(h)
 e**h2

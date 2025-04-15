@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.56.6', date: d'2025-04-14',
+      issues: [ 713 ],
+      comment: 'Fix "scale" for integer values.'
+    },
     { version: '2.56.4', date: d'2025-04-13',
       issues: [ 702 ],
       comment: 'Fix integer divide and remainder for fractions, complex, and quaternions.'

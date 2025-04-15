@@ -881,6 +881,8 @@
  *	    Allow expression for "$decimal" directive operand.
  *	13-Apr-2025 (rlwhitcomb)
  *	    #702: Remainder for complex numbers; integer divide and remainder for quaternions.
+ *	14-Apr-2025 (rlwhitcomb)
+ *	    #713: Change parameter list for CalcUtil.scale(..)
  */
 package info.rlwhitcomb.calc;
 
@@ -5315,7 +5317,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    // This calculates the recursive size of objects and arrays
 	    // so, use "length" to calculate the non-recursive size
-	    return BigInteger.valueOf((long) scale(this, obj, ctx));
+	    return BigInteger.valueOf((long) scale(this, obj, settings.mc, ctx));
 	}
 
 	@Override

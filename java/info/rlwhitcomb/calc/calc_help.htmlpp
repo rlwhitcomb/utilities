@@ -1075,7 +1075,7 @@ or<br>
      decimal numbers or fractions the value is the "scale" of the decimal representation of the number, which is complicated
      but basically means where the decimal point is placed relative to the raw digits: zero or positive is the number of digits
      to the right of the decimal point, negative is the number of extra zeros after the significant digits and to the left of
-     the decimal point.  Some examples: <code>scale(1.2) &#x21E8; 1</code>, while <code>scale 10000 &#x21E8; 0</code>.
+     the decimal point.  Some examples: <code>scale(1.2) &#x21E8; 1</code>, while <code>scale 10000 &#x21E8; -4</code>.
   <p>The <code>random</code> function will generate a random value, of the current decimal precision, with a value between 0 and 1 (exclusive).
      If a seed expression is given, the bytes of that value will be used to seed the random number generator, which will produce a predictable
      value every time the same seed is used (useful for testing purposes), otherwise a different value will be returned every time (without the seed value).

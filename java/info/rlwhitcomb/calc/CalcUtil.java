@@ -254,6 +254,8 @@
  *	    Broaden the use of integer base for "powerOp" to use the appropriate MathUtil method.
  *	26-Mar-2025 (rlwhitcomb)
  *	    Move "isInteger()" from ClassUtil to MathUtil.
+ *	14-Apr-2025 (rlwhitcomb)
+ *	    #713: Fix "scale" for integer values.
  */
 package info.rlwhitcomb.calc;
 
@@ -1432,12 +1434,15 @@ public final class CalcUtil
 	 *
 	 * @param visitor	The visitor (for function evaluation).
 	 * @param valueObj	The object to interrogate.
+	 * @param mc            Rounding mode and precision for conversion to decimal.
 	 * @param ctx		The context to use for error reporting.
 	 * @return		The scale of the object.
 	 */
-	public static int scale(final CalcObjectVisitor visitor, final Object valueObj, final ParserRuleContext ctx) {
+	public static int scale(final CalcObjectVisitor visitor, final Object valueObj, final MathContext mc, final ParserRuleContext ctx) {
 	    Object obj = visitor.evaluateToValue(ctx, valueObj);
 
+	    if (MathUtil.isInteger(obj))
+		return convertToDecimal(obj, mc, ctx).scale();
 	    if (obj instanceof BigDecimal)
 		return ((BigDecimal) obj).scale();
 	    if (obj instanceof BigFraction)
