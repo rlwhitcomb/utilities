@@ -47,7 +47,7 @@ define verify_files(list1, list2, ext1, ext2) = {
       const g = replace(f, ext1, '')
       const h = join(g, g, ': ')
       $assert (g + ext2 in list2), `"$f" exists but the "${g + ext2}" file was not found!`
-      $assert (g in TEST_VALUES), `"$g" is not in our test list!`
+      $assert (g in TEST_VALUES), `"$g" is not in the list of verified values in "$VALUES"!`
       $assert (h in TEST_LINES), `"$g" is not in the "eulertest" script!`
    }
 }
