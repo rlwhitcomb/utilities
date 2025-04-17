@@ -60,6 +60,7 @@
  *  15-Jan-25 rlw ----	New "ceil" and "floor" functions.
  *  29-Jan-25 rlw #702	New "idivide", "remainder", and "modulus" functions.
  *  12-Mar-25 rlw #710	New "intValueExact()" and "isPureInteger()"  methods.
+ *  16-Apr-25 rlw	Really use ZERO where needed.
  */
 package info.rlwhitcomb.math;
 
@@ -1051,7 +1052,7 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 	 * @return A complex number that is the negative of this one.
 	 */
 	public ComplexNumber negate() {
-	    if (equals(C_ZERO))
+	    if (equals(ZERO))
 		return this;
 
 	    if (rational) {
@@ -1195,7 +1196,7 @@ public class ComplexNumber extends Number implements Serializable, Comparable<Co
 	 * @return {@code 0, +1, -1} depending if real or zero, or {@code z / |z|}.
 	 */
 	public Object signum(final MathContext mc) {
-	    if (equals(C_ZERO))
+	    if (equals(ZERO))
 		return BigInteger.ZERO;
 
 	    if (isPureReal()) {

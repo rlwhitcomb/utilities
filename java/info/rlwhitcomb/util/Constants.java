@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2022-2023 Roger L. Whitcomb.
+ * Copyright (c) 2022-2023,2025 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -41,6 +41,7 @@
  *  10-Jan-23 rlw #558	More quaternion constants.
  *  05-May-23 rlw ----	Remove actually unused values.
  *  28-Nov-23 rlw #627	New boolean constants (strings).
+ *  16-Apr-25 rlw	New complex number constructor for zero value.
  */
 package info.rlwhitcomb.util;
 
@@ -176,7 +177,7 @@ public final class Constants
 	public static final ComplexNumber C_I = new ComplexNumber(0, 1);
 
 	/** A complex number corresponding to {@code 0}. */
-	public static final ComplexNumber C_ZERO = new ComplexNumber(0, 0);
+	public static final ComplexNumber C_ZERO = new ComplexNumber();
 
 	/** A complex number corresponding to a real value of {@code 1}. */
 	public static final ComplexNumber C_ONE = new ComplexNumber(1, 0);
