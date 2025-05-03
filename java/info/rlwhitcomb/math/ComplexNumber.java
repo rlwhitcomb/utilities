@@ -22,8 +22,9 @@
  * SOFTWARE.
  *
  *	A complex number, consisting of BigDecimal real part and BigDecimal
- *	imaginary part. This class stores these values, and provides a number
- *	of arithmetic and other operations related to them.
+ *	imaginary part, or BigFraction parts for a "rational" complex number.
+ *	This class stores these values, and provides a number of arithmetic
+ *	and other operations related to them.
  *
  * History:
  *  24-Jan-22 rlw ----	Created.
@@ -62,6 +63,7 @@
  *  12-Mar-25 rlw #710	New "intValueExact()" and "isPureInteger()"  methods.
  *  16-Apr-25 rlw	Really use ZERO where needed.
  *  19-Apr-25 rlw #716	Extensive refactoring.
+ *  01-May-25 rlw #716	More refactoring, including updated doc.
  */
 package info.rlwhitcomb.math;
 
@@ -82,14 +84,14 @@ import static info.rlwhitcomb.util.Constants.*;
 
 /**
  * Storage of and calculations with complex numbers.
- * <p> Values are stored as {@link BigDecimal} values and kept in a
- * normalized form, which means that pure real and pure imaginary
- * numbers have their other component set to {@code null},
- * which also means that {@code 0} values for either are
- * removed, to reduce the number of special cases in the math.
- * <p> Values can also be stored as two {@link BigFraction} values (real
- * and imaginary) if desired, in which case all arithmetic (if possible)
- * is done as rational values also.
+ * <p> Values are stored as separate real and imaginary values and kept in an
+ * internal form, which means that pure real and pure imaginary numbers have
+ * their other component set to {@code null}, which also means that {@code 0}
+ * values for either are removed, to reduce the number of special cases in the math.
+ * <p> For the "decimal" subclass, values are stored as {@link BigDecimal}
+ * values and calculations are done with those values. The "rational"
+ * subclass uses {@link BigFraction} values, and all calculations produce
+ * strictly rational results.
  * <p> TODO: more math operations.
  */
 public abstract class ComplexNumber extends Number implements Serializable, Comparable<ComplexNumber>
@@ -176,17 +178,17 @@ public abstract class ComplexNumber extends Number implements Serializable, Comp
 	/**
 	 * A map key indicating the real part.
 	 */
-	private static final String REAL_KEY = "r";
+	protected static final String REAL_KEY = "r";
 
 	/**
 	 * Map key indicating the imaginary part.
 	 */
-	private static final String IMAG_KEY = "i";
+	protected static final String IMAG_KEY = "i";
 
 	/**
 	 * Optional map key indicating the rational flag.
 	 */
-	private static final String RATIONAL_KEY = "rational";
+	protected static final String RATIONAL_KEY = "rational";
 
 	/**
 	 * Map keys indicating the radius part.
@@ -223,6 +225,15 @@ public abstract class ComplexNumber extends Number implements Serializable, Comp
 	}
 
 	/**
+	 * Produce a decimal value given the real value.
+	 *
+	 * @param r Value for the real part, with an empty imaginary part.
+	 */
+	public static ComplexNumber decimal(final BigDecimal r) {
+	    return new DecimalComplexNumber(r, null);
+	}
+
+	/**
 	 * Produce a decimal value given the real and imaginary values.
 	 *
 	 * @param r Value for the real part (can be {@code null} for a pure
@@ -243,6 +254,16 @@ public abstract class ComplexNumber extends Number implements Serializable, Comp
 	 */
 	public static ComplexNumber decimal(final BigInteger rInt, final BigInteger iInt) {
 	    return new DecimalComplexNumber(rInt, iInt);
+	}
+
+	/**
+	 * Produce a rational value given the real value.
+	 *
+	 * @param rFrac Value of the real part, with an empty imaginary part.
+	 * @return A rational complex number with these parts.
+	 */
+	public static ComplexNumber rational(final BigFraction rFrac) {
+	    return new RationalComplexNumber(rFrac, null);
 	}
 
 	/**
@@ -591,7 +612,7 @@ public abstract class ComplexNumber extends Number implements Serializable, Comp
 
 	/**
 	 * Is this complex number equal to zero?
-	 * <p> Assumes this complex number has been normalized.
+	 * <p> Assumes this complex number has been internalized.
 	 *
 	 * @return {@code true} if the real part equals {@code zero}
 	 *         and the imaginary part is {@code null}.
@@ -660,22 +681,7 @@ public abstract class ComplexNumber extends Number implements Serializable, Comp
 	 * @return A list with the real part and imaginary part, in that order, with the
 	 * optional third element if this is a rational complex number.
 	 */
-	public List<Object> toList() {
-	    List<Object> list = new ArrayList<>();
-	    boolean rational = isRational();
-
-	    if (rational) {
-		list.add(rFrac());
-		list.add(iFrac());
-		list.add(rational);
-	    }
-	    else {
-		list.add(r());
-		list.add(i());
-	    }
-
-	    return list;
-	}
+	public abstract List<Object> toList();
 
 	/**
 	 * Convert to a map with real and imaginary keys.
@@ -683,22 +689,7 @@ public abstract class ComplexNumber extends Number implements Serializable, Comp
 	 * @return {@code Map} with {@link #REAL_KEY} and {@link #IMAG_KEY} entries, and
 	 * optional {@link #RATIONAL_KEY}.
 	 */
-	public Map<String, Object> toMap() {
-	    Map<String, Object> map = new LinkedHashMap<>();
-	    boolean rational = isRational();
-
-	    if (rational) {
-		map.put(REAL_KEY, rFrac());
-		map.put(IMAG_KEY, iFrac());
-		map.put(RATIONAL_KEY, rational);
-	    }
-	    else {
-		map.put(REAL_KEY, r());
-		map.put(IMAG_KEY, i());
-	    }
-
-	    return map;
-	}
+	public abstract Map<String, Object> toMap();
 
 	/**
 	 * Convert to a set with one, two, or three values.
@@ -716,24 +707,7 @@ public abstract class ComplexNumber extends Number implements Serializable, Comp
 	 * @return {@code Set} with either one value (for both real and imaginary)
 	 * or two values, with optional third value if this is a rational number.
 	 */
-	public Set<Object> toSet() {
-	    Set<Object> set = new LinkedHashSet<>();
-	    boolean rational = isRational();
-
-	    if (rational) {
-		// This could result in two or three values
-		set.add(rFrac());
-		set.add(iFrac());
-		set.add(rational);
-	    }
-	    else {
-		// This could result in one or two values
-		set.add(r());
-		set.add(i());
-	    }
-
-	    return set;
-	}
+	public abstract Set<Object> toSet();
 
 
 	@Override
@@ -796,22 +770,10 @@ public abstract class ComplexNumber extends Number implements Serializable, Comp
 	 */
 	public ComplexNumber add(final ComplexNumber other) {
 	    // If both are rational then we can stay that way
-	    if (isRational() && other.isRational()) {
-		BigFraction a1f = rFrac();
-		BigFraction a2f = other.rFrac();
-		BigFraction b1f = iFrac();
-		BigFraction b2f = other.iFrac();
-
-		return rational(a1f.add(a2f), b1f.add(b2f));
-	    }
-	    else {
-		BigDecimal a1 = r();
-		BigDecimal a2 = other.r();
-		BigDecimal b1 = i();
-		BigDecimal b2 = other.i();
-
-		return decimal(a1.add(a2), b1.add(b2));
-	    }
+	    if (isRational() && other.isRational())
+		return ((RationalComplexNumber) this).add(other);
+	    else
+		return ((DecimalComplexNumber) this).add(other);
 	}
 
 	/**
@@ -824,25 +786,10 @@ public abstract class ComplexNumber extends Number implements Serializable, Comp
 	 * @return      The difference.
 	 */
 	public ComplexNumber subtract(final ComplexNumber other, final MathContext mc) {
-	    if (isRational() && other.isRational()) {
-		BigFraction a1f = rFrac();
-		BigFraction a2f = other.rFrac();
-		BigFraction b1f = iFrac();
-		BigFraction b2f = other.iFrac();
-
-		return rational(a1f.subtract(a2f), b1f.subtract(b2f));
-	    }
-	    else {
-		BigDecimal a1 = r();
-		BigDecimal a2 = other.r();
-		BigDecimal b1 = i();
-		BigDecimal b2 = other.i();
-
-		BigDecimal rTerm = MathUtil.fixup(a1.subtract(a2), mc);
-		BigDecimal iTerm = MathUtil.fixup(b1.subtract(b2), mc);
-
-		return decimal(rTerm, iTerm);
-	    }
+	    if (isRational() && other.isRational())
+		return ((RationalComplexNumber) this).subtract(other);
+	    else
+		return ((DecimalComplexNumber) this).subtract(other, mc);
 	}
 
 	/**
@@ -856,28 +803,10 @@ public abstract class ComplexNumber extends Number implements Serializable, Comp
 	 */
 	public ComplexNumber multiply(final ComplexNumber other, final MathContext mc) {
 	    // If both are rational then we can proceed on that basis
-	    if (isRational() && other.isRational()) {
-		BigFraction xf = rFrac();
-		BigFraction yf = iFrac();
-		BigFraction uf = other.rFrac();
-		BigFraction vf = other.iFrac();
-
-		BigFraction rFracTerm = xf.multiply(uf).subtract(yf.multiply(vf));
-		BigFraction iFracTerm = xf.multiply(vf).add(yf.multiply(uf));
-
-		return rational(rFracTerm, iFracTerm);
-	    }
-	    else {
-		BigDecimal x = r();
-		BigDecimal y = i();
-		BigDecimal u = other.r();
-		BigDecimal v = other.i();
-
-		BigDecimal rTerm = MathUtil.fixup(x.multiply(u).subtract(y.multiply(v), mc), mc);
-		BigDecimal iTerm = MathUtil.fixup(x.multiply(v).add(y.multiply(u), mc), mc);
-
-		return decimal(rTerm, iTerm);
-	    }
+	    if (isRational() && other.isRational())
+		return ((RationalComplexNumber) this).multiply(other);
+	    else
+		return ((DecimalComplexNumber) this).multiply(other, mc);
 	}
 
 	/**
@@ -937,15 +866,7 @@ public abstract class ComplexNumber extends Number implements Serializable, Comp
 	 * @param mc    Rounding precision to use for the division.
 	 * @return      This divided by other, set to the nearest integer of that result.
 	 */
-	public ComplexNumber idivide(final ComplexNumber other, final MathContext mc) {
-	    ComplexNumber fullResult = divide(other, mc);
-	    if (isRational())
-		return rational(fullResult.rFrac().toNearestInteger(),
-				fullResult.iFrac().toNearestInteger());
-	    else
-		return decimal(MathUtil.round(fullResult.r(), 0),
-			       MathUtil.round(fullResult.i(), 0));
-	}
+	public abstract ComplexNumber idivide(final ComplexNumber other, final MathContext mc);
 
 	/**
 	 * Get the remainder after division, which is {@code c1 - (c1\c2 * c2)}.
@@ -1501,6 +1422,10 @@ public abstract class ComplexNumber extends Number implements Serializable, Comp
 
 }
 
+/**
+ * A rational {@link ComplexNumber} with values stored as {@link BigFraction} and
+ * all arithmetic done by them.
+ */
 class RationalComplexNumber extends ComplexNumber
 {
 	/**
@@ -1529,15 +1454,15 @@ class RationalComplexNumber extends ComplexNumber
 	protected RationalComplexNumber(final BigFraction rFrac, final BigFraction iFrac) {
 	    realFrac      = BigFraction.properFraction(rFrac);
 	    imaginaryFrac = BigFraction.properFraction(iFrac);
-	    normalize();
+	    internalize();
 	}
 
 	/**
-	 * Do the normalization to keep our values in a consistent form.
+	 * Do the internalization to keep our values in a consistent form.
 	 * <p> For now, until we need other things, we will remove {@code 0}
 	 * values and keep them stored as {@code null} in that part.
 	 */
-	private void normalize() {
+	private void internalize() {
 	    if (realFrac != null && realFrac.isZero())
 		realFrac = null;
 	    if (imaginaryFrac != null && imaginaryFrac.isZero())
@@ -1578,6 +1503,41 @@ class RationalComplexNumber extends ComplexNumber
 	}
 
 	@Override
+	public List<Object> toList() {
+	    List<Object> list = new ArrayList<>();
+
+	    list.add(rFrac());
+	    list.add(iFrac());
+	    // "rational" flag
+	    list.add(true);
+
+	    return list;
+	}
+
+	@Override
+	public Map<String, Object> toMap() {
+	    Map<String, Object> map = new LinkedHashMap<>();
+
+	    map.put(REAL_KEY, rFrac());
+	    map.put(IMAG_KEY, iFrac());
+	    map.put(RATIONAL_KEY, true);
+
+	    return map;
+	}
+
+	@Override
+	public Set<Object> toSet() {
+	    Set<Object> set = new LinkedHashSet<>();
+
+	    // This could result in two or three values
+	    set.add(rFrac());
+	    set.add(iFrac());
+	    set.add(true);
+
+	    return set;
+	}
+
+	@Override
 	public BigDecimal r() {
 	    return realFrac == null ? BigDecimal.ZERO : realFrac.toDecimal();
 	}
@@ -1609,6 +1569,36 @@ class RationalComplexNumber extends ComplexNumber
 		prec.set(imaginaryFrac.precision());
 
 	    return prec.get();
+	}
+
+	public ComplexNumber add(final ComplexNumber other) {
+	    BigFraction a1f = rFrac();
+	    BigFraction a2f = other.rFrac();
+	    BigFraction b1f = iFrac();
+	    BigFraction b2f = other.iFrac();
+
+	    return new RationalComplexNumber(a1f.add(a2f), b1f.add(b2f));
+	}
+
+	public ComplexNumber subtract(final ComplexNumber other) {
+	    BigFraction a1f = rFrac();
+	    BigFraction a2f = other.rFrac();
+	    BigFraction b1f = iFrac();
+	    BigFraction b2f = other.iFrac();
+
+	    return new RationalComplexNumber(a1f.subtract(a2f), b1f.subtract(b2f));
+	}
+
+	public ComplexNumber multiply(final ComplexNumber other) {
+	    BigFraction xf = rFrac();
+	    BigFraction yf = iFrac();
+	    BigFraction uf = other.rFrac();
+	    BigFraction vf = other.iFrac();
+
+	    BigFraction rFracTerm = xf.multiply(uf).subtract(yf.multiply(vf));
+	    BigFraction iFracTerm = xf.multiply(vf).add(yf.multiply(uf));
+
+	    return rational(rFracTerm, iFracTerm);
 	}
 
 	@Override
@@ -1649,6 +1639,13 @@ class RationalComplexNumber extends ComplexNumber
 	    BigFraction divisor = other.multiply(conjugate, mc).rFrac();
 
 	    return multiply(conjugate, mc).divide(divisor, mc);
+	}
+
+	@Override
+	public ComplexNumber idivide(final ComplexNumber other, final MathContext mc) {
+	    ComplexNumber fullResult = divide(other, mc);
+
+	    return new RationalComplexNumber(fullResult.rFrac().toNearestInteger(), fullResult.iFrac().toNearestInteger());
 	}
 
 	@Override
@@ -1694,6 +1691,10 @@ class RationalComplexNumber extends ComplexNumber
 	}
 }
 
+/**
+ * A decimal {@link ComplexNumber} with values stored as {@link BigDecimal} and all
+ * arithmetic done that way.
+ */
 class DecimalComplexNumber extends ComplexNumber
 {
 	/**
@@ -1713,7 +1714,7 @@ class DecimalComplexNumber extends ComplexNumber
 	public DecimalComplexNumber() {
 	    realPart      = null;
 	    imaginaryPart = null;
-	    normalize();
+	    internalize();
 	}
 
 	/**
@@ -1727,7 +1728,7 @@ class DecimalComplexNumber extends ComplexNumber
 	public DecimalComplexNumber(final BigDecimal r, final BigDecimal i) {
 	    realPart      = r;
 	    imaginaryPart = i;
-	    normalize();
+	    internalize();
 	}
 
 	/**
@@ -1741,7 +1742,7 @@ class DecimalComplexNumber extends ComplexNumber
 	public DecimalComplexNumber(final BigInteger r, final BigInteger i) {
 	    realPart      = r == null ? null : new BigDecimal(r);
 	    imaginaryPart = i == null ? null : new BigDecimal(i);
-	    normalize();
+	    internalize();
 	}
 
 	/**
@@ -1756,7 +1757,7 @@ class DecimalComplexNumber extends ComplexNumber
 	public DecimalComplexNumber(final double r, final double i) {
 	    realPart      = BigDecimal.valueOf(r);
 	    imaginaryPart = BigDecimal.valueOf(i);
-	    normalize();
+	    internalize();
 	}
 
 	/**
@@ -1771,15 +1772,15 @@ class DecimalComplexNumber extends ComplexNumber
 	public DecimalComplexNumber(final long r, final long i) {
 	    realPart      = BigDecimal.valueOf(r);
 	    imaginaryPart = BigDecimal.valueOf(i);
-	    normalize();
+	    internalize();
 	}
 
 	/**
-	 * Do the normalization to keep our values in a consistent form.
+	 * Do the internalization to keep our values in a consistent form.
 	 * <p> For now, until we need other things, we will remove {@code 0}
 	 * values and keep them stored as {@code null} in that part.
 	 */
-	private void normalize() {
+	private void internalize() {
 	    if (realPart != null && realPart.equals(BigDecimal.ZERO))
 		realPart = null;
 	    if (imaginaryPart != null && imaginaryPart.equals(BigDecimal.ZERO))
@@ -1816,6 +1817,37 @@ class DecimalComplexNumber extends ComplexNumber
 	}
 
 	@Override
+	public List<Object> toList() {
+	    List<Object> list = new ArrayList<>();
+
+	    list.add(r());
+	    list.add(i());
+
+	    return list;
+	}
+
+	@Override
+	public Map<String, Object> toMap() {
+	    Map<String, Object> map = new LinkedHashMap<>();
+
+	    map.put(REAL_KEY, r());
+	    map.put(IMAG_KEY, i());
+
+	    return map;
+	}
+
+	@Override
+	public Set<Object> toSet() {
+	    Set<Object> set = new LinkedHashSet<>();
+
+	    // This could result in one or two values
+	    set.add(r());
+	    set.add(i());
+
+	    return set;
+	}
+
+	@Override
 	public BigDecimal r() {
 	    return realPart == null ? BigDecimal.ZERO : realPart;
 	}
@@ -1847,6 +1879,39 @@ class DecimalComplexNumber extends ComplexNumber
 		prec.set(imaginaryPart.precision());
 
 	    return prec.get();
+	}
+
+	public ComplexNumber add(final ComplexNumber other) {
+	    BigDecimal a1 = r();
+	    BigDecimal a2 = other.r();
+	    BigDecimal b1 = i();
+	    BigDecimal b2 = other.i();
+
+	    return new DecimalComplexNumber(a1.add(a2), b1.add(b2));
+	}
+
+	public ComplexNumber subtract(final ComplexNumber other, final MathContext mc) {
+	    BigDecimal a1 = r();
+	    BigDecimal a2 = other.r();
+	    BigDecimal b1 = i();
+	    BigDecimal b2 = other.i();
+
+	    BigDecimal rTerm = MathUtil.fixup(a1.subtract(a2), mc);
+	    BigDecimal iTerm = MathUtil.fixup(b1.subtract(b2), mc);
+
+	    return new DecimalComplexNumber(rTerm, iTerm);
+	}
+
+	public ComplexNumber multiply(final ComplexNumber other, final MathContext mc) {
+	    BigDecimal x = r();
+	    BigDecimal y = i();
+	    BigDecimal u = other.r();
+	    BigDecimal v = other.i();
+
+	    BigDecimal rTerm = MathUtil.fixup(x.multiply(u).subtract(y.multiply(v), mc), mc);
+	    BigDecimal iTerm = MathUtil.fixup(x.multiply(v).add(y.multiply(u), mc), mc);
+
+	    return new DecimalComplexNumber(rTerm, iTerm);
 	}
 
 	@Override
@@ -1887,6 +1952,13 @@ class DecimalComplexNumber extends ComplexNumber
 	    BigDecimal divisor = other.multiply(conjugate, mc).r();
 
 	    return multiply(conjugate, mc).divide(divisor, mc);
+	}
+
+	@Override
+	public ComplexNumber idivide(final ComplexNumber other, final MathContext mc) {
+	    ComplexNumber fullResult = divide(other, mc);
+
+	    return new DecimalComplexNumber(MathUtil.round(fullResult.r(), 0), MathUtil.round(fullResult.i(), 0));
 	}
 
 	@Override

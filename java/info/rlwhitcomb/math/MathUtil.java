@@ -72,6 +72,7 @@
  *  12-Apr-25 rlw ----	Add "fixup" to several results.
  *			Extra code in "pow()" to use "ePower" if the base is "e"; increase precision
  *			in there for better results.
+ *  01-May-25 rlw #716	New constructors for ComplexNumber.
  */
 package info.rlwhitcomb.math;
 
@@ -1169,7 +1170,7 @@ public final class MathUtil
 	    BigDecimal y = sign < 0 ? x.abs() : x;
 	    BigDecimal root = sqrt(y, mc);
 
-	    return sign < 0 ? new ComplexNumber(null, root) : root;
+	    return sign < 0 ? ComplexNumber.imaginary(root) : root;
 	}
 
 	/**

@@ -42,6 +42,7 @@
  *			from BigInteger values.
  *  14-Mar-25 rlw #710	Add "intValueExact()"; code cleanup.
  *  13-Apr-25 rlw #702	New "idivide" and "remainder" methods.
+ *  01-May-25 rlw #716	Massive refactoring.
  */
 package info.rlwhitcomb.math;
 
@@ -67,80 +68,54 @@ import java.math.MathContext;
  * <p>Description from the Wikipedia article at: <a href="https://en.wikipedia.org/wiki/Quaternion">https://en.wikipedia.org/wiki/Quaternion</a>
  * accessed on 28-Dec-2022 at 09:10am.
  */
-public final class Quaternion extends Number
-	implements Comparable<Quaternion>
+public abstract class Quaternion extends Number implements Comparable<Quaternion>
 {
 	/** A value of a real zero, as a quaternion. */
-	public static final Quaternion ZERO = new Quaternion(0);
+	public static final Quaternion ZERO = Quaternion.zero();
 
 	/** A value of a real one, as a quaternion. */
-	public static final Quaternion ONE = new Quaternion(1);
+	public static final Quaternion ONE = Quaternion.real(1);
 
 
 	/** Normal format for display. */
-	private static final String NORMAL_FORMAT = "( %1$s, %2$s, %3$s, %4$s )";
-
-
-	/** First term, the real part. */
-	private BigDecimal a;
-
-	/** Second term, coefficient of <code><b>i</b></code>. */
-	private BigDecimal b;
-
-	/** Third term, coefficient of <code><b>j</b></code>. */
-	private BigDecimal c;
-
-	/** Fourth term, coefficient of <code><b>k</b></code>. */
-	private BigDecimal d;
-
-	/** Whether this quaternion is based on rational coefficients or real values. */
-	private boolean rational;
-
-	/** First term, the real part, as a fraction. */
-	private BigFraction aFrac;
-
-	/** Second term, coefficient of <code><b>i</b></code>, as a fraction. */
-	private BigFraction bFrac;
-
-	/** Third term, coefficient of <code><b>j</b></code>, as a fraction. */
-	private BigFraction cFrac;
-
-	/** Fourth term, coefficient of <code><b>k</b></code>, as a fraction. */
-	private BigFraction dFrac;
+	protected static final String NORMAL_FORMAT = "( %1$s, %2$s, %3$s, %4$s )";
 
 
 	/**
-	 * Construct given all four coefficients (as "real", that is {@link BigDecimal}, values).
+	 * @return Whether or not this is a rational (composed of {@link BigFraction} values) quaternion?
+	 */
+	public abstract boolean isRational();
+
+
+	/**
+	 * Construct with a decimal value of {@code (0, 0, 0, 0)}.
+	 */
+	public static Quaternion zero() {
+	    return real(0);
+	}
+
+	/**
+	 * Construct given all four coefficients (as "decimal", that is {@link BigDecimal}, values).
 	 *
 	 * @param aVal The first term coefficient.
 	 * @param bVal Second coefficient (i).
 	 * @param cVal Third term (j) coefficient.
 	 * @param dVal Fourth coefficient (k).
 	 */
-	public Quaternion(final BigDecimal aVal, final BigDecimal bVal, final BigDecimal cVal, final BigDecimal dVal) {
-	    rational = false;
-	    a = aVal;
-	    b = bVal;
-	    c = cVal;
-	    d = dVal;
-	    internalize();
+	public static Quaternion decimal(final BigDecimal aVal, final BigDecimal bVal, final BigDecimal cVal, final BigDecimal dVal) {
+	    return new DecimalQuaternion(aVal, bVal, cVal, dVal);
 	}
 
 	/**
-	 * Construct given integer values for the coefficients, but make it a "real" quaternion.
+	 * Construct given integer values for the coefficients, but make it a "decimal" quaternion.
 	 *
 	 * @param aInt The first term coefficient.
 	 * @param bInt Second coefficient (i).
 	 * @param cInt Third term (j) coefficient.
 	 * @param dInt Fourth coefficient (k).
 	 */
-	public Quaternion(final BigInteger aInt, final BigInteger bInt, final BigInteger cInt, final BigInteger dInt) {
-	    rational = false;
-	    a = new BigDecimal(aInt);
-	    b = new BigDecimal(bInt);
-	    c = new BigDecimal(cInt);
-	    d = new BigDecimal(dInt);
-	    internalize();
+	public static Quaternion decimal(final BigInteger aInt, final BigInteger bInt, final BigInteger cInt, final BigInteger dInt) {
+	    return new DecimalQuaternion(aInt, bInt, cInt, dInt);
 	}
 
 	/**
@@ -151,88 +126,57 @@ public final class Quaternion extends Number
 	 * @param cF Third term (j) coefficient.
 	 * @param dF Fourth coefficient (k).
 	 */
-	public Quaternion(final BigFraction aF, final BigFraction bF, final BigFraction cF, final BigFraction dF) {
-	    rational = true;
-	    aFrac = BigFraction.properFraction(aF);
-	    bFrac = BigFraction.properFraction(bF);
-	    cFrac = BigFraction.properFraction(cF);
-	    dFrac = BigFraction.properFraction(dF);
-	    internalize();
+	public static Quaternion rational(final BigFraction aF, final BigFraction bF, final BigFraction cF, final BigFraction dF) {
+	    return new RationalQuaternion(aF, bF, cF, dF);
 	}
 
 	/**
-	 * Construct given all four coefficients (as "real", that is {@code long}, values).
+	 * Construct given all four coefficients (as "decimal", that is {@code long}, values).
 	 *
 	 * @param aVal The first term coefficient.
 	 * @param bVal Second coefficient (i).
 	 * @param cVal Third term (j) coefficient.
 	 * @param dVal Fourth coefficient (k).
 	 */
-	public Quaternion(final long aVal, final long bVal, final long cVal, final long dVal) {
-	    rational = false;
-	    a = new BigDecimal(aVal);
-	    b = new BigDecimal(bVal);
-	    c = new BigDecimal(cVal);
-	    d = new BigDecimal(dVal);
-	    internalize();
+	public static Quaternion decimal(final long aVal, final long bVal, final long cVal, final long dVal) {
+	    return new DecimalQuaternion(aVal, bVal, cVal, dVal);
 	}
 
 
 	/**
-	 * Construct a real quaternion, with the given value.
+	 * Construct a real (decimal) quaternion, with the given value.
 	 *
 	 * @param r The real value (all other parts will be zero).
 	 */
-	public Quaternion(final long r) {
-	    this(new BigDecimal(r), null, null, null);
+	public static Quaternion real(final long r) {
+	    return decimal(new BigDecimal(r), null, null, null);
 	}
 
 	/**
-	 * Construct a real quaternion, with the given value.
+	 * Construct a real (decimal) quaternion, with the given value.
 	 *
 	 * @param r The real value (all other parts will be zero).
 	 */
-	public Quaternion(final BigInteger r) {
-	    this(new BigDecimal(r), null, null, null);
+	public static Quaternion real(final BigInteger r) {
+	    return decimal(new BigDecimal(r), null, null, null);
 	}
 
 	/**
-	 * Construct a real quaternion, with the given value.
+	 * Construct a real (decimal) quaternion, with the given value.
 	 *
 	 * @param r The real value (all other parts will be zero).
 	 */
-	public Quaternion(final BigDecimal r) {
-	    this(r, null, null, null);
+	public static Quaternion real(final BigDecimal r) {
+	    return decimal(r, null, null, null);
 	}
 
 	/**
-	 * Construct a real, rational quaternion with the given value.
+	 * Construct a real (rational) quaternion with the given value.
 	 *
 	 * @param rFrac The real fractional value (all other parts will be zero).
 	 */
-	public Quaternion(final BigFraction rFrac) {
-	    this(rFrac, null, null, null);
-	}
-
-	/**
-	 * Construct a quaternion, given a complex number with two of the values.
-	 *
-	 * @param cn Complex number to convert.
-	 */
-	public Quaternion(final ComplexNumber cn) {
-	    if (cn.isRational()) {
-		aFrac = cn.rFrac();
-		bFrac = cn.iFrac();
-		cFrac = null;
-		dFrac = null;
-	    }
-	    else {
-		a = cn.r();
-		b = cn.i();
-		c = null;
-		d = null;
-	    }
-	    internalize();
+	public static Quaternion rational(final BigFraction rFrac) {
+	    return rational(rFrac, null, null, null);
 	}
 
 	/**
@@ -247,13 +191,18 @@ public final class Quaternion extends Number
 	    if (value instanceof Quaternion)
 		return (Quaternion) value;
 	    if (value instanceof BigDecimal)
-		return new Quaternion((BigDecimal) value);
+		return Quaternion.real((BigDecimal) value);
 	    if (value instanceof BigInteger)
-		return new Quaternion((BigInteger) value);
+		return Quaternion.real((BigInteger) value);
 	    if (value instanceof BigFraction)
-		return new Quaternion((BigFraction) value);
-	    if (value instanceof ComplexNumber)
-		return new Quaternion((ComplexNumber) value);
+		return Quaternion.rational((BigFraction) value);
+	    if (value instanceof ComplexNumber) {
+		ComplexNumber cn = (ComplexNumber) value;
+		if (cn.isRational())
+		    return new RationalQuaternion(cn.rFrac(), cn.iFrac(), null, null);
+		else
+		    return new DecimalQuaternion(cn.r(), cn.i(), null, null);
+	    }
 
 // TODO: more to do, expecially String parsing
 	    return null;
@@ -261,52 +210,11 @@ public final class Quaternion extends Number
 
 
 	/**
-	 * Maintain this value in its "internalized" form, that is, keeping zero (unused) terms as {@code null} instead.
-	 */
-	private void internalize() {
-	    if (rational) {
-		if (aFrac != null && aFrac.equals(BigFraction.ZERO))
-		    aFrac = null;
-		if (bFrac != null && bFrac.equals(BigFraction.ZERO))
-		    bFrac = null;
-		if (cFrac != null && cFrac.equals(BigFraction.ZERO))
-		    cFrac = null;
-		if (dFrac != null && dFrac.equals(BigFraction.ZERO))
-		    dFrac = null;
-	    }
-	    else {
-		if (a != null && a.equals(BigDecimal.ZERO))
-		    a = null;
-		if (b != null && b.equals(BigDecimal.ZERO))
-		    b = null;
-		if (c != null && c.equals(BigDecimal.ZERO))
-		    c = null;
-		if (d != null && d.equals(BigDecimal.ZERO))
-		    d = null;
-	    }
-	}
-
-	/**
-	 * Is this a rational quaternion (that is, values are stored as {@link BigFraction})?
-	 *
-	 * @return The {@link #rational} flag.
-	 */
-	public boolean isRational() {
-	    return rational;
-	}
-
-	/**
 	 * Is this quaternion uniquely the value zero?
 	 *
 	 * @return {@code true} if all parts are zero.
-	 * @see #internalize
 	 */
-	public boolean isZero() {
-	    if (rational)
-		return aFrac == null && bFrac == null && cFrac == null && dFrac == null;
-	    else
-		return a == null && b == null && c == null && d == null;
-	}
+	public abstract boolean isZero();
 
 	/**
 	 * Is this a pure real number (that is, the "b", "c", and "d" values are all zero)?
@@ -315,12 +223,7 @@ public final class Quaternion extends Number
 	 *
 	 * @return {@code true} if this quaternion is a pure real value.
 	 */
-	public boolean isPureReal() {
-	    if (rational)
-		return bFrac == null && cFrac == null && dFrac == null;
-	    else
-		return b == null && c == null && d == null;
-	}
+	public abstract boolean isPureReal();
 
 	/**
 	 * Is this is a pure imaginary number (that would be "a", "c", and "d" are all zero,
@@ -328,12 +231,7 @@ public final class Quaternion extends Number
 	 *
 	 * @return {@code true} if this quaternion is a pure imaginary value.
 	 */
-	public boolean isPureImaginary() {
-	    if (rational)
-		return aFrac == null && bFrac != null && cFrac == null && dFrac == null;
-	    else
-		return a == null && b != null && c == null && d == null;
-	}
+	public abstract boolean isPureImaginary();
 
 	/**
 	 * Is this a pure complex number (that is, both "c" and "d" are zero)?
@@ -343,12 +241,7 @@ public final class Quaternion extends Number
 	 *
 	 * @return {@code true} if this quaternion is actually just a complex value.
 	 */
-	public boolean isPureComplex() {
-	    if (rational)
-		return (aFrac != null || bFrac != null) && cFrac == null && dFrac == null;
-	    else
-		return (a != null || b != null) && c == null && d == null;
-	}
+	public abstract boolean isPureComplex();
 
 	/**
 	 * Convert this quaternion to a real value; if it {@link #isPureReal} then return
@@ -358,7 +251,7 @@ public final class Quaternion extends Number
 	 * @return   The pure real value of this quaternion.
 	 */
 	public Number toReal(final MathContext mc) {
-	    return isPureReal() ? (rational ? aFrac() : a()) : magnitude(mc);
+	    return isPureReal() ? (isRational() ? aFrac() : a()) : magnitude(mc);
 	}
 
 	/**
@@ -370,10 +263,10 @@ public final class Quaternion extends Number
 	 */
 	public ComplexNumber toComplex() {
 	    if (isPureComplex()) {
-		if (rational)
-		    return new ComplexNumber(aFrac(), bFrac());
+		if (isRational())
+		    return ComplexNumber.rational(aFrac(), bFrac());
 		else
-		    return new ComplexNumber(a(), b());
+		    return ComplexNumber.decimal(a(), b());
 	    }
 	    throw new Intl.IllegalArgumentException("math#quaternion.lossOfValue");
 	}
@@ -386,20 +279,10 @@ public final class Quaternion extends Number
 	 * @return  A new quaternion that represents the sum of the two.
 	 */
 	public Quaternion add(final Quaternion q) {
-	    if (rational && q.rational) {
-		return new Quaternion(
-			aFrac().add(q.aFrac()),
-			bFrac().add(q.bFrac()),
-			cFrac().add(q.cFrac()),
-			dFrac().add(q.dFrac()));
-	    }
-	    else {
-		return new Quaternion(
-			a().add(q.a()),
-			b().add(q.b()),
-			c().add(q.c()),
-			d().add(q.d()));
-	    }
+	    if (isRational() && q.isRational())
+		return ((RationalQuaternion) this).add(q);
+	    else
+		return ((DecimalQuaternion) this).add(q);
 	}
 
 	/**
@@ -410,20 +293,10 @@ public final class Quaternion extends Number
 	 * @return  A new quaternion that represents the difference of the two.
 	 */
 	public Quaternion subtract(final Quaternion q) {
-	    if (rational && q.rational) {
-		return new Quaternion(
-			aFrac().subtract(q.aFrac()),
-			bFrac().subtract(q.bFrac()),
-			cFrac().subtract(q.cFrac()),
-			dFrac().subtract(q.dFrac()));
-	    }
-	    else {
-		return new Quaternion(
-			a().subtract(q.a()),
-			b().subtract(q.b()),
-			c().subtract(q.c()),
-			d().subtract(q.d()));
-	    }
+	    if (isRational() && q.isRational())
+		return ((RationalQuaternion) this).subtract(q);
+	    else
+		return ((DecimalQuaternion) this).subtract(q);
 	}
 
 	/**
@@ -431,22 +304,8 @@ public final class Quaternion extends Number
 	 *
 	 * @return A new quaternion that is the negative of this one.
 	 */
-	public Quaternion negate() {
-	    if (rational) {
-		return new Quaternion(
-		    aFrac().negate(),
-		    bFrac().negate(),
-		    cFrac().negate(),
-		    dFrac().negate());
-	    }
-	    else {
-		return new Quaternion(
-		    a().negate(),
-		    b().negate(),
-		    c().negate(),
-		    d().negate());
-	    }
-	}
+	public abstract Quaternion negate();
+
 
 	/**
 	 * Multiply this quaternion by another; and notice that multiplication
@@ -462,66 +321,10 @@ public final class Quaternion extends Number
 	 * @return  Result of multiplying this by the other.
 	 */
 	public Quaternion multiply(final Quaternion q, final MathContext mc) {
-	    if (rational && q.rational) {
-		BigFraction a = aFrac();
-		BigFraction b = bFrac();
-		BigFraction c = cFrac();
-		BigFraction d = dFrac();
-		BigFraction e = q.aFrac();
-		BigFraction f = q.bFrac();
-		BigFraction g = q.cFrac();
-		BigFraction h = q.dFrac();
-
-		return new Quaternion(
-		    a.multiply(e)
-			.subtract(b.multiply(f))
-			.subtract(c.multiply(g))
-			.subtract(d.multiply(h)),
-		    b.multiply(e)
-			.add(a.multiply(f))
-			.add(c.multiply(h))
-			.subtract(d.multiply(g)),
-		    a.multiply(g)
-			.subtract(b.multiply(h))
-			.add(c.multiply(e))
-			.add(d.multiply(f)),
-		    a.multiply(h)
-			.add(b.multiply(g))
-			.subtract(c.multiply(f))
-			.add(d.multiply(e)));
-	    }
-	    else {
-		BigDecimal a = a();
-		BigDecimal b = b();
-		BigDecimal c = c();
-		BigDecimal d = d();
-		BigDecimal e = q.a();
-		BigDecimal f = q.b();
-		BigDecimal g = q.c();
-		BigDecimal h = q.d();
-
-		return new Quaternion(
-		  MathUtil.fixup(
-		    a.multiply(e, mc)
-			.subtract(b.multiply(f, mc))
-			.subtract(c.multiply(g, mc))
-			.subtract(d.multiply(h, mc)), mc),
-		  MathUtil.fixup(
-		    b.multiply(e, mc)
-			.add(a.multiply(f, mc))
-			.add(c.multiply(h, mc))
-			.subtract(d.multiply(g, mc)), mc),
-		  MathUtil.fixup(
-		    a.multiply(g, mc)
-			.subtract(b.multiply(h, mc))
-			.add(c.multiply(e, mc))
-			.add(d.multiply(f, mc)), mc),
-		  MathUtil.fixup(
-		    a.multiply(h, mc)
-			.add(b.multiply(g, mc))
-			.subtract(c.multiply(f, mc))
-			.add(d.multiply(e, mc)), mc));
-	    }
+	    if (isRational() && q.isRational())
+		return ((RationalQuaternion) this).multiply(q, mc);
+	    else
+		return ((DecimalQuaternion) this).multiply(q, mc);
 	}
 
 	/**
@@ -530,19 +333,15 @@ public final class Quaternion extends Number
 	 *
 	 * @return This quaternion's conjugate value.
 	 */
-	public Quaternion conjugate() {
-	    if (rational)
-		return new Quaternion(aFrac(), bFrac().negate(), cFrac().negate(), dFrac().negate());
-	    else
-		return new Quaternion(a(), b().negate(), c().negate(), d().negate());
-	}
+	public abstract Quaternion conjugate();
+
 
 	/**
 	 * The magnitude of this rational quaternion, squared.
 	 *
 	 * @return {@code a*a + b*b + c*c + d*d}.
 	 */
-	private BigFraction magSquareFrac() {
+	protected BigFraction magSquareFrac() {
 	    BigFraction a = aFrac();
 	    BigFraction b = bFrac();
 	    BigFraction c = cFrac();
@@ -559,7 +358,7 @@ public final class Quaternion extends Number
 	 *
 	 * @return {@code a*a + b*b + c*c + d*d}.
 	 */
-	private BigDecimal magSquare() {
+	protected BigDecimal magSquare() {
 	    BigDecimal a = a();
 	    BigDecimal b = b();
 	    BigDecimal c = c();
@@ -579,7 +378,7 @@ public final class Quaternion extends Number
 	 * as a fraction or not.
 	 */
 	public BigDecimal magnitude(final MathContext mc) {
-	    BigDecimal magSquare = rational ? magSquareFrac().toDecimal(mc) : magSquare();
+	    BigDecimal magSquare = isRational() ? magSquareFrac().toDecimal(mc) : magSquare();
 
 	    return MathUtil.sqrt(magSquare, mc);
 	}
@@ -598,7 +397,7 @@ public final class Quaternion extends Number
 	public Quaternion normal(final MathContext mc) {
 	    BigDecimal mag = magnitude(mc);
 
-	    return new Quaternion(
+	    return Quaternion.decimal(
 		a().divide(mag, mc),
 		b().divide(mag, mc),
 		c().divide(mag, mc),
@@ -623,26 +422,8 @@ public final class Quaternion extends Number
 	 * @param mc The rounding context for decimal values.
 	 * @return {@code 1/q} as a new value.
 	 */
-	public Quaternion inverse(final MathContext mc) {
-	    if (rational) {
-		BigFraction magSquare = magSquareFrac();
+	public abstract Quaternion inverse(final MathContext mc);
 
-		return new Quaternion(
-			aFrac().divide(magSquare),
-			bFrac().divide(magSquare).negate(),
-			cFrac().divide(magSquare).negate(),
-			dFrac().divide(magSquare).negate());
-	    }
-	    else {
-		BigDecimal magSquare = magSquare();
-
-		return new Quaternion(
-			MathUtil.fixup(a().divide(magSquare, mc), mc),
-			MathUtil.fixup(b().divide(magSquare, mc).negate(), mc),
-			MathUtil.fixup(c().divide(magSquare, mc).negate(), mc),
-			MathUtil.fixup(d().divide(magSquare, mc).negate(), mc));
-	    }
-	}
 
 	/**
 	 * Return a new quaternion consisting of the "ceil" value of each component.
@@ -651,7 +432,7 @@ public final class Quaternion extends Number
 	 * @return The "ceil" value of this quaternion.
 	 */
 	public Quaternion ceil() {
-	    return new Quaternion(
+	    return Quaternion.decimal(
 		MathUtil.ceil(a()),
 		MathUtil.ceil(b()),
 		MathUtil.ceil(c()),
@@ -665,7 +446,7 @@ public final class Quaternion extends Number
 	 * @return The "floor" value of this quaternion.
 	 */
 	public Quaternion floor() {
-	    return new Quaternion(
+	    return Quaternion.decimal(
 		MathUtil.floor(a()),
 		MathUtil.floor(b()),
 		MathUtil.floor(c()),
@@ -690,19 +471,7 @@ public final class Quaternion extends Number
 	 * @param mc    Rounding precision to use for the division.
 	 * @return      This divided by other, set to the nearest integer of that result.
 	 */
-	public Quaternion idivide(final Quaternion other, final MathContext mc) {
-	    Quaternion fullResult = divide(other, mc);
-	    if (rational)
-		return new Quaternion(fullResult.aFrac().toNearestInteger(),
-				      fullResult.bFrac().toNearestInteger(),
-				      fullResult.cFrac().toNearestInteger(),
-				      fullResult.dFrac().toNearestInteger());
-	    else
-		return new Quaternion(MathUtil.round(fullResult.a(), 0),
-				      MathUtil.round(fullResult.b(), 0),
-				      MathUtil.round(fullResult.c(), 0),
-				      MathUtil.round(fullResult.d(), 0));
-	}
+	public abstract Quaternion idivide(final Quaternion other, final MathContext mc);
 
 	/**
 	 * Get the remainder after division, which is {@code q1 - (q1\q2 * q2)}.
@@ -745,19 +514,7 @@ public final class Quaternion extends Number
 	 *
 	 * @return Aggregate precision of this value.
 	 */
-	public int precision() {
-	    return rational ?
-		MathUtil.maximum(
-			aFrac().precision(),
-			bFrac().precision(),
-			cFrac().precision(),
-			dFrac().precision()) :
-		MathUtil.maximum(
-			a().precision(),
-			b().precision(),
-			c().precision(),
-			d().precision());
-	}
+	public abstract int precision();
 
 
 	/**
@@ -767,16 +524,7 @@ public final class Quaternion extends Number
 	 * @return      This given part (either rational or not).
 	 * @throws      IllegalArgumentException if the index is out of range.
 	 */
-	public Number part(final int index) {
-	    switch (index) {
-		case 0: return rational ? aFrac() : a();
-		case 1: return rational ? bFrac() : b();
-		case 2: return rational ? cFrac() : c();
-		case 3: return rational ? dFrac() : d();
-		default:
-		    throw new Intl.IllegalArgumentException("math#quaternion.badIndex", index);
-	    }
-	}
+	public abstract Number part(final int index);
 
 	/**
 	 * Set one part of this value (index operation).
@@ -786,24 +534,7 @@ public final class Quaternion extends Number
 	 * @return      New quaternion value with the given part updated.
 	 * @throws      IllegalArgumentException if the index is out of range.
 	 */
-	public Quaternion setPart(final int index, final Object value) {
-	    switch (index) {
-		case 0:
-		    return rational ? new Quaternion(BigFraction.valueOf(value), bFrac(), cFrac(), dFrac())
-				    : new Quaternion(ComplexNumber.getDecimal(value), b(), c(), d());
-		case 1:
-		    return rational ? new Quaternion(aFrac(), BigFraction.valueOf(value), cFrac(), dFrac())
-				    : new Quaternion(a(), ComplexNumber.getDecimal(value), c(), d());
-		case 2:
-		    return rational ? new Quaternion(aFrac(), bFrac(), BigFraction.valueOf(value), dFrac())
-				    : new Quaternion(a(), b(), ComplexNumber.getDecimal(value), d());
-		case 3:
-		    return rational ? new Quaternion(aFrac(), bFrac(), cFrac(), BigFraction.valueOf(value))
-				    : new Quaternion(a(), b(), c(), ComplexNumber.getDecimal(value));
-		default:
-		    throw new Intl.IllegalArgumentException("math#quaternion.badIndex", index);
-	    }
-	}
+	public abstract Quaternion setPart(final int index, final Object value);
 
 
 	/**
@@ -815,7 +546,7 @@ public final class Quaternion extends Number
 	 */
 	public BigInteger toBigIntegerExact() {
 	    if (isPureReal()) {
-		return rational ? BigFraction.getInteger(aFrac()) : a().toBigIntegerExact();
+		return isRational() ? BigFraction.getInteger(aFrac()) : a().toBigIntegerExact();
 	    }
 	    throw new Intl.ArithmeticException("math#complex.imaginaryInt");
 	}
@@ -830,138 +561,27 @@ public final class Quaternion extends Number
 	 */
 	public int intValueExact() {
 	    if (isPureReal()) {
-		return rational ? aFrac().intValueExact() : a().intValueExact();
+		return isRational() ? aFrac().intValueExact() : a().intValueExact();
 	    }
 	    throw new Intl.ArithmeticException("math#complex.imaginaryInt");
 	}
 
 
-	public BigDecimal a() {
-	    if (rational)
-		return aFrac == null ? BigDecimal.ZERO : aFrac.toDecimal();
-	    else
-		return a == null ? BigDecimal.ZERO : a;
-	}
+	public abstract BigDecimal a();
 
-	public BigDecimal b() {
-	    if (rational)
-		return bFrac == null ? BigDecimal.ZERO : bFrac.toDecimal();
-	    else
-		return b == null ? BigDecimal.ZERO : b;
-	}
+	public abstract BigDecimal b();
 
-	public BigDecimal c() {
-	    if (rational)
-		return cFrac == null ? BigDecimal.ZERO : cFrac.toDecimal();
-	    else
-		return c == null ? BigDecimal.ZERO : c;
-	}
+	public abstract BigDecimal c();
 
-	public BigDecimal d() {
-	    if (rational)
-		return dFrac == null ? BigDecimal.ZERO : dFrac.toDecimal();
-	    else
-		return d == null ? BigDecimal.ZERO : d;
-	}
+	public abstract BigDecimal d();
 
-	public BigFraction aFrac() {
-	    if (rational)
-		return aFrac == null ? BigFraction.F_ZERO: aFrac;
-	    else
-		return a == null ? BigFraction.F_ZERO : BigFraction.valueOf(a);
-	}
+	public abstract BigFraction aFrac();
 
-	public BigFraction bFrac() {
-	    if (rational)
-		return bFrac == null ? BigFraction.F_ZERO: bFrac;
-	    else
-		return b == null ? BigFraction.F_ZERO : BigFraction.valueOf(b);
-	}
+	public abstract BigFraction bFrac();
 
-	public BigFraction cFrac() {
-	    if (rational)
-		return cFrac == null ? BigFraction.F_ZERO: cFrac;
-	    else
-		return c == null ? BigFraction.F_ZERO : BigFraction.valueOf(c);
-	}
+	public abstract BigFraction cFrac();
 
-	public BigFraction dFrac() {
-	    if (rational)
-		return dFrac == null ? BigFraction.F_ZERO: dFrac;
-	    else
-		return d == null ? BigFraction.F_ZERO : BigFraction.valueOf(d);
-	}
-
-	@Override
-	public double doubleValue() {
-	    if (a != null)
-		return a.doubleValue();
-	    else if (aFrac != null)
-		return aFrac.doubleValue();
-	    return 0.0d;
-	}
-
-	@Override
-	public float floatValue() {
-	    if (a != null)
-		return a.floatValue();
-	    else if (aFrac != null)
-		return aFrac.floatValue();
-	    return 0.0f;
-	}
-
-	@Override
-	public long longValue() {
-	    if (a != null)
-		return a.longValue();
-	    else if (aFrac != null)
-		return aFrac.longValue();
-	    return 0L;
-	}
-
-	@Override
-	public int intValue() {
-	    if (a != null)
-		return a.intValue();
-	    else if (aFrac != null)
-		return aFrac.intValue();
-	    return 0;
-	}
-
-	@Override
-	public short shortValue() {
-	    if (a != null)
-		return a.shortValue();
-	    else if (aFrac != null)
-		return aFrac.shortValue();
-	    return 0;
-	}
-
-	@Override
-	public byte byteValue() {
-	    if (a != null)
-		return a.byteValue();
-	    else if (aFrac != null)
-		return aFrac.byteValue();
-	    return 0;
-	}
-
-	@Override
-	public int compareTo(final Quaternion o) {
-	    if (rational && o.rational) {
-		BigFraction mag = magSquareFrac();
-		BigFraction mag2 = o.magSquareFrac();
-		return mag.compareTo(mag2);
-	    }
-	    else {
-		// Presumably since this comparison doesn't make any sense anyway
-		// using an arbitrary precision here won't make a real difference
-		BigDecimal mag = magnitude(MathContext.DECIMAL128);
-		BigDecimal mag2 = o.magnitude(MathContext.DECIMAL128);
-		// Magnitude alone says nothing about direction
-		return mag.compareTo(mag2);
-	    }
-	}
+	public abstract BigFraction dFrac();
 
 	@Override
 	public boolean equals(final Object o) {
@@ -970,10 +590,10 @@ public final class Quaternion extends Number
 
 	    Quaternion q = (Quaternion) o;
 
-	    if (rational != q.rational)
+	    if (isRational() != q.isRational())
 		return false;
 
-	    if (rational) {
+	    if (isRational()) {
 		return aFrac().equals(q.aFrac()) &&
 		       bFrac().equals(q.bFrac()) &&
 		       cFrac().equals(q.cFrac()) &&
@@ -988,11 +608,20 @@ public final class Quaternion extends Number
 	}
 
 	@Override
-	public int hashCode() {
-	    if (rational)
-		return aFrac().hashCode() ^ bFrac().hashCode() ^ cFrac().hashCode() ^ dFrac().hashCode();
-	    else
-		return a().hashCode() ^ b().hashCode() ^ c().hashCode() ^ d().hashCode();
+	public int compareTo(final Quaternion o) {
+	    if (isRational() && o.isRational()) {
+		BigFraction mag = magSquareFrac();
+		BigFraction mag2 = o.magSquareFrac();
+		return mag.compareTo(mag2);
+	    }
+	    else {
+		// Presumably since this comparison doesn't make any sense anyway
+		// using an arbitrary precision here won't make a real difference
+		BigDecimal mag = magnitude(MathContext.DECIMAL128);
+		BigDecimal mag2 = o.magnitude(MathContext.DECIMAL128);
+		// Magnitude alone says nothing about direction
+		return mag.compareTo(mag2);
+	    }
 	}
 
 	/**
@@ -1003,22 +632,7 @@ public final class Quaternion extends Number
 	 * @return      The formatted value.
 	 * @see #NORMAL_FORMAT
 	 */
-	private String internalToString(final boolean sep, final boolean space) {
-	    if (rational) {
-		return String.format(NORMAL_FORMAT,
-			aFrac().toFormatString(sep, space),
-			bFrac().toFormatString(sep, space),
-			cFrac().toFormatString(sep, space),
-			dFrac().toFormatString(sep, space));
-	    }
-	    else {
-		return String.format(NORMAL_FORMAT,
-			Num.formatWithSeparators(a(), sep),
-			Num.formatWithSeparators(b(), sep),
-			Num.formatWithSeparators(c(), sep),
-			Num.formatWithSeparators(d(), sep));
-	    }
-	}
+	protected abstract String internalToString(final boolean sep, final boolean space);
 
 	/**
 	 * Format the value for display, with the option to use thousands separators.
@@ -1037,4 +651,618 @@ public final class Quaternion extends Number
 	}
 
 }
+
+/**
+ * A rational quaternion, whose coordinates are {@link BigFraction} values and all calculations
+ * are done as exact fractions.
+ */
+class RationalQuaternion extends Quaternion
+{
+	/** First term, the real part, as a fraction. */
+	private BigFraction aFrac;
+
+	/** Second term, coefficient of <code><b>i</b></code>, as a fraction. */
+	private BigFraction bFrac;
+
+	/** Third term, coefficient of <code><b>j</b></code>, as a fraction. */
+	private BigFraction cFrac;
+
+	/** Fourth term, coefficient of <code><b>k</b></code>, as a fraction. */
+	private BigFraction dFrac;
+
+
+	@Override
+	public boolean isRational() {
+	    return true;
+	}
+
+	/**
+	 * Construct given all four coefficients (as fractions, that is {@link BigFraction}, values).
+	 *
+	 * @param aF The first term coefficient.
+	 * @param bF Second coefficient (i).
+	 * @param cF Third term (j) coefficient.
+	 * @param dF Fourth coefficient (k).
+	 */
+	public RationalQuaternion(final BigFraction aF, final BigFraction bF, final BigFraction cF, final BigFraction dF) {
+	    aFrac = aF == null ? null : BigFraction.properFraction(aF);
+	    bFrac = bF == null ? null : BigFraction.properFraction(bF);
+	    cFrac = cF == null ? null : BigFraction.properFraction(cF);
+	    dFrac = dF == null ? null : BigFraction.properFraction(dF);
+	    internalize();
+	}
+
+	@Override
+	public boolean isZero() {
+	    // Assumes already internalized
+	    return (aFrac != null && aFrac.equals(BigFraction.ZERO)) && bFrac == null && cFrac == null && dFrac == null;
+	}
+
+	@Override
+	public boolean isPureReal() {
+	    return bFrac == null && cFrac == null && dFrac == null;
+	}
+
+	@Override
+	public boolean isPureImaginary() {
+	    return aFrac == null && bFrac != null && cFrac == null && dFrac == null;
+	}
+
+	@Override
+	public boolean isPureComplex() {
+	    return (aFrac != null || bFrac != null) && cFrac == null && dFrac == null;
+	}
+
+	/**
+	 * Maintain this value in its "internalized" form, that is, keeping zero (unused) terms as {@code null} instead.
+	 */
+	private void internalize() {
+	    if (aFrac != null && aFrac.equals(BigFraction.ZERO))
+		aFrac = null;
+	    if (bFrac != null && bFrac.equals(BigFraction.ZERO))
+		bFrac = null;
+	    if (cFrac != null && cFrac.equals(BigFraction.ZERO))
+		cFrac = null;
+	    if (dFrac != null && dFrac.equals(BigFraction.ZERO))
+		dFrac = null;
+
+	    if (aFrac == null && bFrac == null && cFrac == null && dFrac == null)
+		aFrac = BigFraction.ZERO;
+	}
+
+	public Quaternion add(final Quaternion q) {
+	    return new RationalQuaternion(
+			aFrac().add(q.aFrac()),
+			bFrac().add(q.bFrac()),
+			cFrac().add(q.cFrac()),
+			dFrac().add(q.dFrac()));
+	}
+
+	public Quaternion subtract(final Quaternion q) {
+	    return new RationalQuaternion(
+			aFrac().subtract(q.aFrac()),
+			bFrac().subtract(q.bFrac()),
+			cFrac().subtract(q.cFrac()),
+			dFrac().subtract(q.dFrac()));
+	}
+
+	@Override
+	public Quaternion negate() {
+	    return new RationalQuaternion(aFrac().negate(), bFrac().negate(), cFrac().negate(), dFrac().negate());
+	}
+
+	@Override
+	public Quaternion conjugate() {
+	    return new RationalQuaternion(aFrac(), bFrac().negate(), cFrac().negate(), dFrac().negate());
+	}
+
+	public Quaternion multiply(final Quaternion q, final MathContext mc) {
+	    BigFraction a = aFrac();
+	    BigFraction b = bFrac();
+	    BigFraction c = cFrac();
+	    BigFraction d = dFrac();
+	    BigFraction e = q.aFrac();
+	    BigFraction f = q.bFrac();
+	    BigFraction g = q.cFrac();
+	    BigFraction h = q.dFrac();
+
+	    return new RationalQuaternion(
+		    a.multiply(e)
+			.subtract(b.multiply(f))
+			.subtract(c.multiply(g))
+			.subtract(d.multiply(h)),
+		    b.multiply(e)
+			.add(a.multiply(f))
+			.add(c.multiply(h))
+			.subtract(d.multiply(g)),
+		    a.multiply(g)
+			.subtract(b.multiply(h))
+			.add(c.multiply(e))
+			.add(d.multiply(f)),
+		    a.multiply(h)
+			.add(b.multiply(g))
+			.subtract(c.multiply(f))
+			.add(d.multiply(e)));
+	}
+
+	@Override
+	public Quaternion inverse(final MathContext mc) {
+	    BigFraction magSquare = magSquareFrac();
+
+	    return new RationalQuaternion(
+			aFrac().divide(magSquare),
+			bFrac().divide(magSquare).negate(),
+			cFrac().divide(magSquare).negate(),
+			dFrac().divide(magSquare).negate());
+	}
+
+	@Override
+	public Quaternion idivide(final Quaternion other, final MathContext mc) {
+	    Quaternion fullResult = divide(other, mc);
+
+	    return new RationalQuaternion(fullResult.aFrac().toNearestInteger(),
+					  fullResult.bFrac().toNearestInteger(),
+					  fullResult.cFrac().toNearestInteger(),
+					  fullResult.dFrac().toNearestInteger());
+	}
+
+	@Override
+	public int precision() {
+	    return MathUtil.maximum(
+			aFrac().precision(),
+			bFrac().precision(),
+			cFrac().precision(),
+			dFrac().precision());
+	}
+
+	@Override
+	public Number part(final int index) {
+	    switch (index) {
+		case 0: return aFrac();
+		case 1: return bFrac();
+		case 2: return cFrac();
+		case 3: return dFrac();
+		default:
+		    throw new Intl.IllegalArgumentException("math#quaternion.badIndex", index);
+	    }
+	}
+
+	@Override
+	public Quaternion setPart(final int index, final Object value) {
+	    BigFraction part = BigFraction.valueOf(value);
+
+	    switch (index) {
+		case 0:
+		    return new RationalQuaternion(part, bFrac(), cFrac(), dFrac());
+		case 1:
+		    return new RationalQuaternion(aFrac(), part, cFrac(), dFrac());
+		case 2:
+		    return new RationalQuaternion(aFrac(), bFrac(), part, dFrac());
+		case 3:
+		    return new RationalQuaternion(aFrac(), bFrac(), cFrac(), part);
+		default:
+		    throw new Intl.IllegalArgumentException("math#quaternion.badIndex", index);
+	    }
+	}
+
+	@Override
+	public BigDecimal a() {
+	    return aFrac == null ? BigDecimal.ZERO : aFrac.toDecimal();
+	}
+
+	@Override
+	public BigDecimal b() {
+	    return bFrac == null ? BigDecimal.ZERO : bFrac.toDecimal();
+	}
+
+	@Override
+	public BigDecimal c() {
+	    return cFrac == null ? BigDecimal.ZERO : cFrac.toDecimal();
+	}
+
+	@Override
+	public BigDecimal d() {
+	    return dFrac == null ? BigDecimal.ZERO : dFrac.toDecimal();
+	}
+
+	@Override
+	public BigFraction aFrac() {
+	    return aFrac == null ? BigFraction.F_ZERO: aFrac;
+	}
+
+	@Override
+	public BigFraction bFrac() {
+	    return bFrac == null ? BigFraction.F_ZERO: bFrac;
+	}
+
+	@Override
+	public BigFraction cFrac() {
+	    return cFrac == null ? BigFraction.F_ZERO: cFrac;
+	}
+
+	@Override
+	public BigFraction dFrac() {
+	    return dFrac == null ? BigFraction.F_ZERO: dFrac;
+	}
+
+	@Override
+	public double doubleValue() {
+	    if (aFrac != null)
+		return aFrac.doubleValue();
+	    return 0.0d;
+	}
+
+	@Override
+	public float floatValue() {
+	    if (aFrac != null)
+		return aFrac.floatValue();
+	    return 0.0f;
+	}
+
+	@Override
+	public long longValue() {
+	    if (aFrac != null)
+		return aFrac.longValue();
+	    return 0L;
+	}
+
+	@Override
+	public int intValue() {
+	    if (aFrac != null)
+		return aFrac.intValue();
+	    return 0;
+	}
+
+	@Override
+	public short shortValue() {
+	    if (aFrac != null)
+		return aFrac.shortValue();
+	    return 0;
+	}
+
+	@Override
+	public byte byteValue() {
+	    if (aFrac != null)
+		return aFrac.byteValue();
+	    return 0;
+	}
+
+	@Override
+	protected String internalToString(final boolean sep, final boolean space) {
+	    return String.format(NORMAL_FORMAT,
+			aFrac().toFormatString(sep, space),
+			bFrac().toFormatString(sep, space),
+			cFrac().toFormatString(sep, space),
+			dFrac().toFormatString(sep, space));
+	}
+
+	@Override
+	public int hashCode() {
+	    return aFrac().hashCode() ^ bFrac().hashCode() ^ cFrac().hashCode() ^ dFrac().hashCode();
+	}
+
+}
+
+/**
+ * A decimal quaternion, whose coordinates are {@link BigDecimal} values and all calculations
+ * are done to an appropriate precision.
+ */
+class DecimalQuaternion extends Quaternion
+{
+	/** First term, the real part. */
+	private BigDecimal a;
+
+	/** Second term, coefficient of <code><b>i</b></code>. */
+	private BigDecimal b;
+
+	/** Third term, coefficient of <code><b>j</b></code>. */
+	private BigDecimal c;
+
+	/** Fourth term, coefficient of <code><b>k</b></code>. */
+	private BigDecimal d;
+
+
+	@Override
+	public boolean isRational() {
+	    return false;
+	}
+
+	public DecimalQuaternion(final BigDecimal aVal, final BigDecimal bVal, final BigDecimal cVal, final BigDecimal dVal) {
+	    a = aVal;
+	    b = bVal;
+	    c = cVal;
+	    d = dVal;
+
+	    internalize();
+	}
+
+	/**
+	 * Construct given integer values for the coefficients, but make it a "real" quaternion.
+	 *
+	 * @param aInt The first term coefficient.
+	 * @param bInt Second coefficient (i).
+	 * @param cInt Third term (j) coefficient.
+	 * @param dInt Fourth coefficient (k).
+	 */
+	public DecimalQuaternion(final BigInteger aInt, final BigInteger bInt, final BigInteger cInt, final BigInteger dInt) {
+	    a = aInt == null ? null : new BigDecimal(aInt);
+	    b = bInt == null ? null : new BigDecimal(bInt);
+	    c = cInt == null ? null : new BigDecimal(cInt);
+	    d = dInt == null ? null : new BigDecimal(dInt);
+
+	    internalize();
+	}
+
+	/**
+	 * Construct given all four coefficients (as "decimal", that is {@code long}, values).
+	 *
+	 * @param aVal The first term coefficient.
+	 * @param bVal Second coefficient (i).
+	 * @param cVal Third term (j) coefficient.
+	 * @param dVal Fourth coefficient (k).
+	 */
+	public DecimalQuaternion(final long aVal, final long bVal, final long cVal, final long dVal) {
+	    a = new BigDecimal(aVal);
+	    b = new BigDecimal(bVal);
+	    c = new BigDecimal(cVal);
+	    d = new BigDecimal(dVal);
+
+	    internalize();
+	}
+
+	@Override
+	public boolean isZero() {
+	    // Assumes already internalized
+	    return (a != null && a.equals(BigDecimal.ZERO)) && b == null && c == null && d == null;
+	}
+
+	@Override
+	public boolean isPureReal() {
+	    return b == null && c == null && d == null;
+	}
+
+	@Override
+	public boolean isPureImaginary() {
+	    return a == null && b != null && c == null && d == null;
+	}
+
+	@Override
+	public boolean isPureComplex() {
+	    return (a != null || b != null) && c == null && d == null;
+	}
+
+	/**
+	 * Maintain this value in its "internalized" form, that is, keeping zero (unused) terms as {@code null} instead.
+	 */
+	private void internalize() {
+	    if (a != null && a.equals(BigDecimal.ZERO))
+		a = null;
+	    if (b != null && b.equals(BigDecimal.ZERO))
+		b = null;
+	    if (c != null && c.equals(BigDecimal.ZERO))
+		c = null;
+	    if (d != null && d.equals(BigDecimal.ZERO))
+		d = null;
+
+	    if (a == null && b == null && c == null && d == null)
+		a = BigDecimal.ZERO;
+	}
+
+	public Quaternion add(final Quaternion q) {
+	    return new DecimalQuaternion(
+			a().add(q.a()),
+			b().add(q.b()),
+			c().add(q.c()),
+			d().add(q.d()));
+	}
+
+	public Quaternion subtract(final Quaternion q) {
+	    return new DecimalQuaternion(
+			a().subtract(q.a()),
+			b().subtract(q.b()),
+			c().subtract(q.c()),
+			d().subtract(q.d()));
+	}
+
+	@Override
+	public Quaternion negate() {
+	    return new DecimalQuaternion(a().negate(), b().negate(), c().negate(), d().negate());
+	}
+
+	@Override
+	public Quaternion conjugate() {
+	    return new DecimalQuaternion(a(), b().negate(), c().negate(), d().negate());
+	}
+
+	public Quaternion multiply(final Quaternion q, final MathContext mc) {
+	    BigDecimal a = a();
+	    BigDecimal b = b();
+	    BigDecimal c = c();
+	    BigDecimal d = d();
+	    BigDecimal e = q.a();
+	    BigDecimal f = q.b();
+	    BigDecimal g = q.c();
+	    BigDecimal h = q.d();
+
+	    return new DecimalQuaternion(
+		  MathUtil.fixup(
+		    a.multiply(e, mc)
+			.subtract(b.multiply(f, mc))
+			.subtract(c.multiply(g, mc))
+			.subtract(d.multiply(h, mc)), mc),
+		  MathUtil.fixup(
+		    b.multiply(e, mc)
+			.add(a.multiply(f, mc))
+			.add(c.multiply(h, mc))
+			.subtract(d.multiply(g, mc)), mc),
+		  MathUtil.fixup(
+		    a.multiply(g, mc)
+			.subtract(b.multiply(h, mc))
+			.add(c.multiply(e, mc))
+			.add(d.multiply(f, mc)), mc),
+		  MathUtil.fixup(
+		    a.multiply(h, mc)
+			.add(b.multiply(g, mc))
+			.subtract(c.multiply(f, mc))
+			.add(d.multiply(e, mc)), mc));
+	}
+
+	@Override
+	public Quaternion inverse(final MathContext mc) {
+	    BigDecimal magSquare = magSquare();
+
+	    return new DecimalQuaternion(
+			MathUtil.fixup(a().divide(magSquare, mc), mc),
+			MathUtil.fixup(b().divide(magSquare, mc).negate(), mc),
+			MathUtil.fixup(c().divide(magSquare, mc).negate(), mc),
+			MathUtil.fixup(d().divide(magSquare, mc).negate(), mc));
+	}
+
+	@Override
+	public Quaternion idivide(final Quaternion other, final MathContext mc) {
+	    Quaternion fullResult = divide(other, mc);
+
+	    return new DecimalQuaternion(MathUtil.round(fullResult.a(), 0),
+					 MathUtil.round(fullResult.b(), 0),
+					 MathUtil.round(fullResult.c(), 0),
+					 MathUtil.round(fullResult.d(), 0));
+	}
+
+	@Override
+	public int precision() {
+	    return MathUtil.maximum(
+			a().precision(),
+			b().precision(),
+			c().precision(),
+			d().precision());
+	}
+
+	@Override
+	public Number part(final int index) {
+	    switch (index) {
+		case 0: return a();
+		case 1: return b();
+		case 2: return c();
+		case 3: return d();
+		default:
+		    throw new Intl.IllegalArgumentException("math#quaternion.badIndex", index);
+	    }
+	}
+
+	@Override
+	public Quaternion setPart(final int index, final Object value) {
+	    BigDecimal part = ComplexNumber.getDecimal(value);
+
+	    switch (index) {
+		case 0:
+		    return new DecimalQuaternion(part, b(), c(), d());
+		case 1:
+		    return new DecimalQuaternion(a(), part, c(), d());
+		case 2:
+		    return new DecimalQuaternion(a(), b(), part, d());
+		case 3:
+		    return new DecimalQuaternion(a(), b(), c(), part);
+		default:
+		    throw new Intl.IllegalArgumentException("math#quaternion.badIndex", index);
+	    }
+	}
+
+	@Override
+	public BigDecimal a() {
+	    return a == null ? BigDecimal.ZERO : a;
+	}
+
+	@Override
+	public BigDecimal b() {
+	    return b == null ? BigDecimal.ZERO : b;
+	}
+
+	@Override
+	public BigDecimal c() {
+	    return c == null ? BigDecimal.ZERO : c;
+	}
+
+	@Override
+	public BigDecimal d() {
+	    return d == null ? BigDecimal.ZERO : d;
+	}
+
+	@Override
+	public BigFraction aFrac() {
+	    return a == null ? BigFraction.F_ZERO : BigFraction.valueOf(a);
+	}
+
+	@Override
+	public BigFraction bFrac() {
+	    return b == null ? BigFraction.F_ZERO : BigFraction.valueOf(b);
+	}
+
+	@Override
+	public BigFraction cFrac() {
+	    return c == null ? BigFraction.F_ZERO : BigFraction.valueOf(c);
+	}
+
+	@Override
+	public BigFraction dFrac() {
+	    return d == null ? BigFraction.F_ZERO : BigFraction.valueOf(d);
+	}
+
+	@Override
+	public double doubleValue() {
+	    if (a != null)
+		return a.doubleValue();
+	    return 0.0d;
+	}
+
+	@Override
+	public float floatValue() {
+	    if (a != null)
+		return a.floatValue();
+	    return 0.0f;
+	}
+
+	@Override
+	public long longValue() {
+	    if (a != null)
+		return a.longValue();
+	    return 0L;
+	}
+
+	@Override
+	public int intValue() {
+	    if (a != null)
+		return a.intValue();
+	    return 0;
+	}
+
+	@Override
+	public short shortValue() {
+	    if (a != null)
+		return a.shortValue();
+	    return 0;
+	}
+
+	@Override
+	public byte byteValue() {
+	    if (a != null)
+		return a.byteValue();
+	    return 0;
+	}
+
+	@Override
+	protected String internalToString(final boolean sep, final boolean space) {
+	    return String.format(NORMAL_FORMAT,
+			Num.formatWithSeparators(a(), sep),
+			Num.formatWithSeparators(b(), sep),
+			Num.formatWithSeparators(c(), sep),
+			Num.formatWithSeparators(d(), sep));
+	}
+
+	@Override
+	public int hashCode() {
+	    return a().hashCode() ^ b().hashCode() ^ c().hashCode() ^ d().hashCode();
+	}
+
+}
+
 

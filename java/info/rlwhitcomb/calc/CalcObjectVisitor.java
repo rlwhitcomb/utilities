@@ -883,6 +883,8 @@
  *	    #702: Remainder for complex numbers; integer divide and remainder for quaternions.
  *	14-Apr-2025 (rlwhitcomb)
  *	    #713: Change parameter list for CalcUtil.scale(..)
+ *	01-May-2025 (rlwhitcomb)
+ *	    #716: Change ComplexNumber and Quaternion constructors.
  */
 package info.rlwhitcomb.calc;
 
@@ -4269,13 +4271,13 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		BigFraction rFrac = convertToFraction(o1, expr1);
 		BigFraction iFrac = convertToFraction(o2, expr2);
 
-		return new ComplexNumber(rFrac, iFrac);
+		return ComplexNumber.rational(rFrac, iFrac);
 	    }
 	    else {
 		BigDecimal r = convertToDecimal(o1, settings.mc, expr1);
 		BigDecimal i = convertToDecimal(o2, settings.mc, expr2);
 
-		return new ComplexNumber(r, i);
+		return ComplexNumber.decimal(r, i);
 	    }
 	}
 
@@ -4298,7 +4300,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		BigFraction cFrac = convertToFraction(o3, expr3);
 		BigFraction dFrac = convertToFraction(o4, expr4);
 
-		return new Quaternion(aFrac, bFrac, cFrac, dFrac);
+		return Quaternion.rational(aFrac, bFrac, cFrac, dFrac);
 	    }
 	    else {
 		BigDecimal a = convertToDecimal(o1, settings.mc, expr1);
@@ -4306,7 +4308,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		BigDecimal c = convertToDecimal(o3, settings.mc, expr3);
 		BigDecimal d = convertToDecimal(o4, settings.mc, expr4);
 
-		return new Quaternion(a, b, c, d);
+		return Quaternion.decimal(a, b, c, d);
 	    }
 	}
 
@@ -6855,13 +6857,13 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			BigFraction rFrac = convertToFraction(o1, expr1);
 			BigFraction iFrac = convertToFraction(o2, expr2);
 
-			return new ComplexNumber(rFrac, iFrac);
+			return ComplexNumber.rational(rFrac, iFrac);
 		    }
 		    else {
 			BigDecimal r = convertToDecimal(o1, settings.mc, expr1);
 			BigDecimal i = convertToDecimal(o2, settings.mc, expr2);
 
-			return new ComplexNumber(r, i);
+			return ComplexNumber.decimal(r, i);
 		    }
 		}
 	    }
@@ -6955,10 +6957,10 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		}
 
 		if (f1 != null) {
-		    return new Quaternion(f1, f2, f3, f4);
+		    return Quaternion.rational(f1, f2, f3, f4);
 		}
 		else if (d1 != null) {
-		    return new Quaternion(d1, d2, d3, d4);
+		    return Quaternion.decimal(d1, d2, d3, d4);
 		}
 		else {
 		    CalcParser.Expr1Context e1ctx = ctx.expr1();

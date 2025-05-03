@@ -42,6 +42,7 @@
  *  05-May-23 rlw ----	Remove actually unused values.
  *  28-Nov-23 rlw #627	New boolean constants (strings).
  *  16-Apr-25 rlw	New complex number constructor for zero value.
+ *  01-May-25 rlw #716	Refactor ComplexNumber and Quaternion.
  */
 package info.rlwhitcomb.util;
 
@@ -174,26 +175,26 @@ public final class Constants
 
 
 	/** A complex number corresponding to {@code i}. */
-	public static final ComplexNumber C_I = new ComplexNumber(0, 1);
+	public static final ComplexNumber C_I = ComplexNumber.imaginary(1);
 
 	/** A complex number corresponding to {@code 0}. */
-	public static final ComplexNumber C_ZERO = new ComplexNumber();
+	public static final ComplexNumber C_ZERO = ComplexNumber.zero();
 
 	/** A complex number corresponding to a real value of {@code 1}. */
-	public static final ComplexNumber C_ONE = new ComplexNumber(1, 0);
+	public static final ComplexNumber C_ONE = ComplexNumber.real(1);
 
 	/** A rational complex number corresponding to a rational value of {@code 1/1}. */
-	public static final ComplexNumber CR_ONE = ComplexNumber.real(BigFraction.ONE);
+	public static final ComplexNumber CR_ONE = ComplexNumber.rational(BigFraction.ONE);
 
 
 	/** A quaternion corresponding to a rational value of {@code (1, 0, 0, 0)}. */
-	public static final Quaternion QR_ONE = new Quaternion(BigFraction.ONE);
+	public static final Quaternion QR_ONE = Quaternion.rational(BigFraction.ONE);
 
 	/** Quaternion with a value of "j" ({@code (0, 0, 1, 0)}). */
-	public static final Quaternion Q_J = new Quaternion(0, 0, 1, 0);
+	public static final Quaternion Q_J = Quaternion.decimal(0, 0, 1, 0);
 
 	/** Quaternion with a value of "k" ({@code (0, 0, 0, 1)}). */
-	public static final Quaternion Q_K = new Quaternion(0, 0, 0, 1);
+	public static final Quaternion Q_K = Quaternion.decimal(0, 0, 0, 1);
 
 
 	/** Number of nanoseconds in a second. */
