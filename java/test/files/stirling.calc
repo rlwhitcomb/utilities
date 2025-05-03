@@ -20,7 +20,7 @@ define S2(n, k) = {
     k * S2(n - 1, k) + S2(n - 1, k - 1)
 }
 
-$quiet on
+$quiet on {
 
 const START = 0
 const N = !!$0 ? ~~$0 : 12
@@ -71,3 +71,4 @@ loop n over START..N {
     display line
 }
 
+}

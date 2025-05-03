@@ -5,7 +5,7 @@
 //   $2 = number of years
 //
 $assert defined(PMT), 'The "library.calc" file must be included.'
-$quiet on
+$quiet on {
 $separators on
 
 if isnull($0) {
@@ -42,3 +42,6 @@ loop m over months {
 
 display
 display `Total of $months monthly payments is ${total_payments@2,$}, Total interest is ${total_interest@2,$}`
+
+}
+
