@@ -43,6 +43,8 @@
  *  14-Mar-25 rlw #710	Add "intValueExact()"; code cleanup.
  *  13-Apr-25 rlw #702	New "idivide" and "remainder" methods.
  *  01-May-25 rlw #716	Massive refactoring.
+ *  03-May-25 rlw #716	Refactor "ceil" and "floor".
+ *		  #702	Fix "modulus".
  */
 package info.rlwhitcomb.math;
 
@@ -424,34 +426,19 @@ public abstract class Quaternion extends Number implements Comparable<Quaternion
 	 */
 	public abstract Quaternion inverse(final MathContext mc);
 
-
 	/**
 	 * Return a new quaternion consisting of the "ceil" value of each component.
-	 * <p> Note: a rational quaternion will be converted to decimal form in the result.
 	 *
 	 * @return The "ceil" value of this quaternion.
 	 */
-	public Quaternion ceil() {
-	    return Quaternion.decimal(
-		MathUtil.ceil(a()),
-		MathUtil.ceil(b()),
-		MathUtil.ceil(c()),
-		MathUtil.ceil(d()));
-	}
+	public abstract Quaternion ceil();
 
 	/**
 	 * Return a new quaternion consisting of the "floor" value of each component.
-	 * <p> Note: a rational quaternion will be converted to decimal form in the result.
 	 *
 	 * @return The "floor" value of this quaternion.
 	 */
-	public Quaternion floor() {
-	    return Quaternion.decimal(
-		MathUtil.floor(a()),
-		MathUtil.floor(b()),
-		MathUtil.floor(c()),
-		MathUtil.floor(d()));
-	}
+	public abstract Quaternion floor();
 
 	/**
 	 * Divide this quaternion by another, which is computed as {@code this*(1/q)}.
@@ -486,6 +473,18 @@ public abstract class Quaternion extends Number implements Comparable<Quaternion
 	}
 
 	/**
+	 * Get the modulus of this divided by the given one; differs from the remainder for
+	 * negative values.
+	 *
+	 * @param other Number to divide by.
+	 * @param mc    Rounding precision to use for the result.
+	 * @return      Result of {@code this mod other}.
+	 */
+	public Quaternion modulus(final Quaternion other, final MathContext mc) {
+	    return subtract(other.multiply(divide(other, mc), mc));
+	}
+
+	/**
 	 * Take this quaternion to an integer power.
 	 *
 	 * @param n  The integer power to raise this quaternion to.
@@ -507,7 +506,6 @@ public abstract class Quaternion extends Number implements Comparable<Quaternion
 
 	    return result;
 	}
-
 
 	/**
 	 * The precision of this quaternion, which is the maximum precision of all parts.
@@ -804,6 +802,24 @@ class RationalQuaternion extends Quaternion
 					  fullResult.bFrac().toNearestInteger(),
 					  fullResult.cFrac().toNearestInteger(),
 					  fullResult.dFrac().toNearestInteger());
+	}
+
+	@Override
+	public Quaternion ceil() {
+	    return new RationalQuaternion(
+		aFrac().ceil(),
+		bFrac().ceil(),
+		cFrac().ceil(),
+		dFrac().ceil());
+	}
+
+	@Override
+	public Quaternion floor() {
+	    return new RationalQuaternion(
+		aFrac().floor(),
+		bFrac().floor(),
+		cFrac().floor(),
+		dFrac().floor());
 	}
 
 	@Override
@@ -1126,6 +1142,24 @@ class DecimalQuaternion extends Quaternion
 					 MathUtil.round(fullResult.b(), 0),
 					 MathUtil.round(fullResult.c(), 0),
 					 MathUtil.round(fullResult.d(), 0));
+	}
+
+	@Override
+	public Quaternion ceil() {
+	    return new DecimalQuaternion(
+		MathUtil.ceil(a()),
+		MathUtil.ceil(b()),
+		MathUtil.ceil(c()),
+		MathUtil.ceil(d()));
+	}
+
+	@Override
+	public Quaternion floor() {
+	    return new DecimalQuaternion(
+		MathUtil.floor(a()),
+		MathUtil.floor(b()),
+		MathUtil.floor(c()),
+		MathUtil.floor(d()));
 	}
 
 	@Override

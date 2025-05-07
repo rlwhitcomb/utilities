@@ -64,6 +64,8 @@
  *  16-Apr-25 rlw	Really use ZERO where needed.
  *  19-Apr-25 rlw #716	Extensive refactoring.
  *  01-May-25 rlw #716	More refactoring, including updated doc.
+ *  03-May-25 rlw #716	Refactor "ceil" and "floor".
+ *		  #702	Fix "modulus".
  */
 package info.rlwhitcomb.math;
 
@@ -889,8 +891,7 @@ public abstract class ComplexNumber extends Number implements Serializable, Comp
 	 * @return      Result of {@code this mod other}.
 	 */
 	public ComplexNumber modulus(final ComplexNumber other, final MathContext mc) {
-	    ComplexNumber intResult = idivide(other, mc);
-	    return subtract(intResult.multiply(other, mc), mc);
+	    return subtract(other.multiply(divide(other, mc).floor(), mc), mc);
 	}
 
 	/**
@@ -930,12 +931,7 @@ public abstract class ComplexNumber extends Number implements Serializable, Comp
 	 *
 	 * @return The "ceil" value of this complex number.
 	 */
-	public ComplexNumber ceil() {
-	    BigDecimal rDec = r();
-	    BigDecimal iDec = i();
-
-	    return decimal(MathUtil.ceil(rDec), MathUtil.ceil(iDec));
-	}
+	public abstract ComplexNumber ceil();
 
 	/**
 	 * Return a complex number that is the "floor" value of this one, meaning
@@ -944,13 +940,7 @@ public abstract class ComplexNumber extends Number implements Serializable, Comp
 	 *
 	 * @return The "floor" value of this complex number.
 	 */
-	public ComplexNumber floor() {
-	    BigDecimal rDec = r();
-	    BigDecimal iDec = i();
-
-	    return decimal(MathUtil.floor(rDec), MathUtil.floor(iDec));
-	}
-
+	public abstract ComplexNumber floor();
 
 	/**
 	 * Calculate the complex number to the given integer power, using the "squaring"
@@ -1649,6 +1639,22 @@ class RationalComplexNumber extends ComplexNumber
 	}
 
 	@Override
+	public ComplexNumber ceil() {
+	    BigFraction rFrac = rFrac();
+	    BigFraction iFrac = iFrac();
+
+	    return new RationalComplexNumber(rFrac.ceil(), iFrac.ceil());
+	}
+
+	@Override
+	public ComplexNumber floor() {
+	    BigFraction rFrac = rFrac();
+	    BigFraction iFrac = iFrac();
+
+	    return new RationalComplexNumber(rFrac.floor(), iFrac.floor());
+	}
+
+	@Override
 	public int hashCode() {
 	    if (realFrac == null)
 		return imaginaryFrac.hashCode();
@@ -1959,6 +1965,22 @@ class DecimalComplexNumber extends ComplexNumber
 	    ComplexNumber fullResult = divide(other, mc);
 
 	    return new DecimalComplexNumber(MathUtil.round(fullResult.r(), 0), MathUtil.round(fullResult.i(), 0));
+	}
+
+	@Override
+	public ComplexNumber ceil() {
+	    BigDecimal rDec = r();
+	    BigDecimal iDec = i();
+
+	    return new DecimalComplexNumber(MathUtil.ceil(rDec), MathUtil.ceil(iDec));
+	}
+
+	@Override
+	public ComplexNumber floor() {
+	    BigDecimal rDec = r();
+	    BigDecimal iDec = i();
+
+	    return new DecimalComplexNumber(MathUtil.floor(rDec), MathUtil.floor(iDec));
 	}
 
 	@Override

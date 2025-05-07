@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.57', date: d'2025-05-03',
+      issues: [ 702, 716 ],
+      comment: 'Refactor; final fixes for remainder, modulus, floor, ceil on complex and quaternions.'
+    },
     { version: '2.56.6', date: d'2025-04-14',
       issues: [ 713 ],
       comment: 'Fix "scale" for integer values.'

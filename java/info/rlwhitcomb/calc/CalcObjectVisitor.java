@@ -885,6 +885,8 @@
  *	    #713: Change parameter list for CalcUtil.scale(..)
  *	01-May-2025 (rlwhitcomb)
  *	    #716: Change ComplexNumber and Quaternion constructors.
+ *	03-May-2025 (rlwhitcomb)
+ *	    #702: Fix remainder and modulus for complex and quaternion.
  */
 package info.rlwhitcomb.calc;
 
@@ -4824,6 +4826,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			case "%":
 			    return q1.remainder(q2, mc);
 			case "mod":
+			    return q1.modulus(q2, mc);
 			default:
 			    throw new UnknownOpException(op, ctx);
 		    }
@@ -4863,20 +4866,19 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		else {
 		    BigDecimal d1 = convertToDecimal(e1, settings.mc, ctx1);
 		    BigDecimal d2 = convertToDecimal(e2, settings.mc, ctx2);
-
-		    MathContext mcDivide = MathUtil.divideContext(d1, settings.mcDivide);
+		    MathContext mc = MathUtil.divideContext(d1, settings.mcDivide);
 
 		    switch (op) {
 			case "*":
 			    return fixupToInteger(d1.multiply(d2, settings.mc));
 			case "/":
-			    return fixupToInteger(d1.divide(d2, mcDivide));
+			    return fixupToInteger(d1.divide(d2, mc));
 			case "\\":
-			    return fixupToInteger(d1.divideToIntegralValue(d2, mcDivide));
+			    return fixupToInteger(d1.divideToIntegralValue(d2, mc));
 			case "%":
-			    return fixupToInteger(d1.remainder(d2, mcDivide));
+			    return fixupToInteger(d1.remainder(d2, mc));
 			case "mod":
-			    return fixupToInteger(MathUtil.modulus(d1, d2, mcDivide));
+			    return fixupToInteger(MathUtil.modulus(d1, d2, mc));
 		    }
 		}
 	    }
@@ -8531,13 +8533,23 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		else if (e1 instanceof Quaternion || e2 instanceof Quaternion) {
 		    Quaternion q1 = Quaternion.valueOf(e1);
 		    Quaternion q2 = Quaternion.valueOf(e2);
+		    MathContext mc = MathUtil.divideContext(q1, settings.mcDivide);
 
 		    switch (op) {
 			case "*":
 			    result = q1.multiply(q2, settings.mc);
 			    break;
 			case "/":
-			    result = q1.divide(q2, MathUtil.divideContext(q1, settings.mcDivide));
+			    result = q1.divide(q2, mc);
+			    break;
+			case "\\":
+			    result = q1.idivide(q2, mc);
+			    break;
+			case "%":
+			    result = q1.remainder(q2, mc);
+			    break;
+			case "mod":
+			    result = q1.modulus(q2, mc);
 			    break;
 			default:
 			    throw new UnknownOpException(op, ctx);
@@ -8558,8 +8570,24 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			case "\\":
 			    result = c1.idivide(c2, mc);
 			    break;
+			case "%":
+			    result = c1.remainder(c2, mc);
+			    break;
 			case "mod":
 			    result = c1.modulus(c2, mc);
+			    break;
+			default:
+			    throw new UnknownOpException(op, ctx);
+		    }
+		}
+		else if (e1 instanceof SetScope && e2 instanceof CollectionScope) {
+		    @SuppressWarnings("unchecked")
+		    SetScope<Object> set = (SetScope<Object>) e1;
+		    CollectionScope c = (CollectionScope) e2;
+
+		    switch (op) {
+			case "\\":
+			    result = set.diff(c);
 			    break;
 			default:
 			    throw new UnknownOpException(op, ctx);
@@ -8568,21 +8596,23 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		else {
 		    BigDecimal d1 = convertToDecimal(e1, settings.mc, varCtx);
 		    BigDecimal d2 = convertToDecimal(e2, settings.mc, exprCtx);
-
-		    MathContext mcDivide = MathUtil.divideContext(d1, settings.mcDivide);
+		    MathContext mc = MathUtil.divideContext(d1, settings.mcDivide);
 
 		    switch (op) {
 			case "*":
 			    result = fixupToInteger(d1.multiply(d2, settings.mc));
 			    break;
 			case "/":
-			    result = fixupToInteger(d1.divide(d2, mcDivide));
+			    result = fixupToInteger(d1.divide(d2, mc));
 			    break;
 			case "\\":
-			    result = fixupToInteger(d1.divideToIntegralValue(d2, mcDivide));
+			    result = fixupToInteger(d1.divideToIntegralValue(d2, mc));
 			    break;
 			case "%":
-			    result = fixupToInteger(d1.remainder(d2, mcDivide));
+			    result = fixupToInteger(d1.remainder(d2, mc));
+			    break;
+			case "mod":
+			    result = fixupToInteger(MathUtil.modulus(d1, d2, mc));
 			    break;
 			default:
 			    throw new UnknownOpException(op, ctx);
