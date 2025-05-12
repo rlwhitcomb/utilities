@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.57.1', date: d'2025-05-11',
+      issues: [ 702 ],
+      comment: 'Fix for modulus of quaternions.'
+    },
     { version: '2.57', date: d'2025-05-03',
       issues: [ 702, 716 ],
       comment: 'Refactor; final fixes for remainder, modulus, floor, ceil on complex and quaternions.'

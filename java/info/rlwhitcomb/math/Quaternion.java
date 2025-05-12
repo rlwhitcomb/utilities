@@ -45,6 +45,7 @@
  *  01-May-25 rlw #716	Massive refactoring.
  *  03-May-25 rlw #716	Refactor "ceil" and "floor".
  *		  #702	Fix "modulus".
+ *  11-May-25 rlw #702	Ooops! "modulus" still needed work.
  */
 package info.rlwhitcomb.math;
 
@@ -481,7 +482,7 @@ public abstract class Quaternion extends Number implements Comparable<Quaternion
 	 * @return      Result of {@code this mod other}.
 	 */
 	public Quaternion modulus(final Quaternion other, final MathContext mc) {
-	    return subtract(other.multiply(divide(other, mc), mc));
+	    return subtract(other.multiply(divide(other, mc).floor(), mc));
 	}
 
 	/**

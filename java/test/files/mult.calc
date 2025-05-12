@@ -1,0 +1,178 @@
+/*
+ * Test all the various multiplication and division operators on all data types.
+ */
+$silencedirectives on {
+
+display 'Setting values ...'
+
+d1 = 4.7; d2 = 1.3
+d3 = -6.2; d4 = -4.3
+
+$rational on {
+f1 = 7/3; f2 = 3/8
+f3 = -5/2; f4 = -14/5
+
+cf1 = (f1, 2/3); cf2 = (f2, 9/7)
+cf3 = (f3, -8/9); cf4 = (f4, -3/4)
+
+qf1 = (f1, 1, 2, 1); qf2 = (f2, 3, 5, 2)
+qf3 = (f3, -4, -1, -2); qf4 = (f4, -6, -1/2, -3)
+}
+
+c1 = (d1, 2.3); c2 = (d2, 8.9)
+c3 = (d3, -3.1); c4 = (d4, -1.7)
+
+q1 = (d1, 2, 1, 1); q2 = (d2, 4, 5, 6)
+q3 = (d3, -2, -4.5, -8.7); q4 = (d4, -83, -14, -1.7)
+
+$quiet on {
+var dx1, dx2, dx3, dx4, fx1, fx2, fx3, fx4, cx1, cx2, cx3, cx4, qx1, qx2, qx3, qx4
+}
+
+display 'Testing decimal operations ...'
+
+d1*d2
+d3*d4
+d1/d2
+d3/d4
+dx1 = d1\d2
+dx2 = d3\d4
+dx3 = d1%d2
+dx4 = d3%d4
+(dx1 * d2 + dx3) == d1
+(dx2 * d4 + dx4) == d3
+d1 mod d2
+d3 mod d4
+
+$quiet on { dx1 = d1 }; dx1 *= d2
+$quiet on { dx1 = d3 }; dx1 *= d4
+$quiet on { dx1 = d1 }; dx1 /= d2
+$quiet on { dx1 = d3 }; dx1 /= d4
+$quiet on { dx1 = d1 }; dx1 \= d2
+$quiet on { dx1 = d3 }; dx1 \= d4
+$quiet on { dx1 = d1 }; dx1 %= d2
+$quiet on { dx1 = d3 }; dx1 %= d4
+
+display 'Testing simple fractional operations ...'
+
+f1*f2
+f3*f4
+f1/f2
+f3/f4
+fx1 = f1\f2
+fx2 = f3\f4
+fx3 = f1%f2
+fx4 = f3%f4
+(fx1 * f2 + fx3) == f1
+(fx2 * f4 + fx4) == f3
+f1 mod f2
+f3 mod f4
+
+$quiet on { fx1 = f1 }; fx1 *= f2
+$quiet on { fx1 = f3 }; fx1 *= f4
+$quiet on { fx1 = f1 }; fx1 /= f2
+$quiet on { fx1 = f3 }; fx1 /= f4
+$quiet on { fx1 = f1 }; fx1 \= f2
+$quiet on { fx1 = f3 }; fx1 \= f4
+$quiet on { fx1 = f1 }; fx1 %= f2
+$quiet on { fx1 = f3 }; fx1 %= f4
+
+display 'Now for complex numbers ...'
+
+c1*c2
+c3*c4
+c1/c2
+c3/c4
+cx1 = c1\c2
+cx2 = c3\c4
+cx3 = c1%c2
+cx4 = c3%c4
+(cx1 * c2 + cx3) == c1
+(cx2 * c4 + cx4) == c3
+c1 mod c2
+c3 mod c4
+
+$quiet on { cx1 = c1 }; cx1 *= c2
+$quiet on { cx1 = c3 }; cx1 *= c4
+$quiet on { cx1 = c1 }; cx1 /= c2
+$quiet on { cx1 = c3 }; cx1 /= c4
+$quiet on { cx1 = c1 }; cx1 \= c2
+$quiet on { cx1 = c3 }; cx1 \= c4
+$quiet on { cx1 = c1 }; cx1 %= c2
+$quiet on { cx1 = c3 }; cx1 %= c4
+
+display 'Rational complex numbers ...'
+
+cf1*cf2
+cf3*cf4
+cf1/cf2
+cf3/cf4
+cx1 = cf1\cf2
+cx2 = cf3\cf4
+cx3 = cf1%cf2
+cx4 = cf3%cf4
+(cx1 * cf2 + cx3) == cf1
+(cx2 * cf4 + cx4) == cf3
+cf1 mod cf2
+cf3 mod cf4
+
+$quiet on { cx1 = cf1 }; cx1 *= cf2
+$quiet on { cx1 = cf3 }; cx1 *= cf4
+$quiet on { cx1 = cf1 }; cx1 /= cf2
+$quiet on { cx1 = cf3 }; cx1 /= cf4
+$quiet on { cx1 = cf1 }; cx1 \= cf2
+$quiet on { cx1 = cf3 }; cx1 \= cf4
+$quiet on { cx1 = cf1 }; cx1 %= cf2
+$quiet on { cx1 = cf3 }; cx1 %= cf4
+
+display 'Now for quaternions ...'
+
+q1*q2
+q3*q4
+q1/q2
+q3/q4
+qx1 = q1\q2
+qx2 = q3\q4
+qx3 = q1%q2
+qx4 = q3%q4
+(qx1 * q2 + qx3) == q1
+(qx2 * q4 + qx4) == q3
+q1 mod q2
+q3 mod q4
+(49,0,0,0) mod (11,0,0,0)
+
+$quiet on { qx1 = q1 }; qx1 *= q2
+$quiet on { qx1 = q3 }; qx1 *= q4
+$quiet on { qx1 = q1 }; qx1 /= q2
+$quiet on { qx1 = q3 }; qx1 /= q4
+$quiet on { qx1 = q1 }; qx1 \= q2
+$quiet on { qx1 = q3 }; qx1 \= q4
+$quiet on { qx1 = q1 }; qx1 %= q2
+$quiet on { qx1 = q3 }; qx1 %= q4
+
+display 'Finally, rational quaternions ...'
+
+qf1*qf2
+qf3*qf4
+qf1/qf2
+qf3/qf4
+qx1 = qf1\qf2
+qx2 = qf3\qf4
+qx3 = qf1%qf2
+qx4 = qf3%qf4
+(qx1 * qf2 + qx3) == qf1
+(qx2 * qf4 + qx4) == qf3
+qf1 mod qf2
+qf3 mod qf4
+
+$quiet on { qx1 = qf1 }; qx1 *= qf2
+$quiet on { qx1 = qf3 }; qx1 *= qf4
+$quiet on { qx1 = qf1 }; qx1 /= qf2
+$quiet on { qx1 = qf3 }; qx1 /= qf4
+$quiet on { qx1 = qf1 }; qx1 \= qf2
+$quiet on { qx1 = qf3 }; qx1 \= qf4
+$quiet on { qx1 = qf1 }; qx1 %= qf2
+$quiet on { qx1 = qf3 }; qx1 %= qf4
+
+}
+
