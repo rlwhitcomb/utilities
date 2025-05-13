@@ -28,6 +28,7 @@ primes_10000  : primes_10000
 factors       : factors
 pfactors      : pfactors
 perfect       : perfect
+format        : format
 mort          : e_m1,e_m2
 amort         : amort -- 50000 6.75 15
 f1            : f1

@@ -1,0 +1,26 @@
+// #715 - tests of "@d" and "@$" formatting
+
+const A1 = 12
+const A2 = 12.1
+
+// Note: I don't know quite how to make a format string variable and have it work
+display A1@3d
+display A1@3$
+display A2@3d
+display A2@3$
+
+display A1@3.7d
+display A2@3.7d
+
+display pi@14d
+display pi@14$
+
+const B1 = 12345.6
+const B2 = 1234567.9081
+
+display B1@3,d
+display B1@3,$
+
+display B2@2,d
+display B2@2,$
+

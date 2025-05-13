@@ -3,9 +3,13 @@
 /*======================*/
 
 [
+    { version: '2.57.2', date: d'2025-05-12',
+      issues: [ 715 ],
+      comment: 'Fix scale setting for "@nd" formatting.'
+    },
     { version: '2.57.1', date: d'2025-05-11',
       issues: [ 702 ],
-      comment: 'Fix for modulus of quaternions.'
+      comment: 'Another fix for modulus of quaternions.'
     },
     { version: '2.57', date: d'2025-05-03',
       issues: [ 702, 716 ],

@@ -887,6 +887,8 @@
  *	    #716: Change ComplexNumber and Quaternion constructors.
  *	03-May-2025 (rlwhitcomb)
  *	    #702: Fix remainder and modulus for complex and quaternion.
+ *	12-May-2025 (rlwhitcomb)
+ *	    #715: Fix problem of scale with "@d" formatting.
  */
 package info.rlwhitcomb.calc;
 
@@ -2907,7 +2909,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			}
 
 			if (precision != Integer.MIN_VALUE) {
-			    dValue = MathUtil.round(dValue, precision);
+			    dValue = MathUtil.round(dValue, precision).setScale(precision);
 			}
 			valueBuf.append(Num.formatWithSeparators(dValue, separators, scale));
 			break;
