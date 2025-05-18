@@ -14,8 +14,9 @@ $resultsonly on {
 define lucas_lehmer_test(p) = {
    $assert p >= 2, 'p should not be less than 2!'
    if p == 2 leave true
+   // This is the same as 2⌃p - 1, but faster to compute
+   const m = (1 << p) - 1
    var s = 4
-   var m = (1 << p) - 1
    loop over p - 2 {
       s = (s² - 2) mod m
    }
