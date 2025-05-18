@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.57.5', date: d'2025-05-17',
+      issues: [ 719 ],
+      comment: 'Recursive interpolation of strings.'
+    },
     { version: '2.57.2', date: d'2025-05-12',
       issues: [ 715 ],
       comment: 'Fix scale setting for "@nd" formatting.'

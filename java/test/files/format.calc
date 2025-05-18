@@ -3,24 +3,25 @@
 const A1 = 12
 const A2 = 12.1
 
-// Note: I don't know quite how to make a format string variable and have it work
-display A1@3d
-display A1@3$
-display A2@3d
-display A2@3$
+define disp(value, format) = `${value@${format}}`
 
-display A1@3.7d
-display A2@3.7d
+disp(A1,"3d")@q
+disp(A1,"3$")@q
+disp(A2,"3d")@q
+disp(A2,"3$")@q
 
-display pi@14d
-display pi@14$
+disp(A1,"3.7d")@q
+disp(A2,"3.7d")@q
+
+disp(pi,"14d")@q
+disp(pi,"14$")@q
 
 const B1 = 12345.6
 const B2 = 1234567.9081
 
-display B1@3,d
-display B1@3,$
+disp(B1,"3,d")@q
+disp(B1,"3,$")@q
 
-display B2@2,d
-display B2@2,$
+disp(B2,"2,d")@q
+disp(B2,"2,$")@q
 

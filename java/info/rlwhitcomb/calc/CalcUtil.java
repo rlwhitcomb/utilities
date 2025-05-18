@@ -256,6 +256,8 @@
  *	    Move "isInteger()" from ClassUtil to MathUtil.
  *	14-Apr-2025 (rlwhitcomb)
  *	    #713: Fix "scale" for integer values.
+ *	17-May-2025 (rlwhitcomb)
+ *	    #719: Recursive interpolation of strings.
  */
 package info.rlwhitcomb.calc;
 
@@ -2493,6 +2495,17 @@ public final class CalcUtil
 	    Settings settings = visitor.getSettings();
 
 	    String rawValue = getRawString(value, true);
+
+	    return getRecursiveStringValue(visitor, variables, settings, ctx, rawValue);
+	}
+
+	private static String getRecursiveStringValue(
+		final CalcObjectVisitor visitor,
+		final NestedScope variables,
+		final Settings settings,
+		final ParserRuleContext ctx,
+		final String rawValue)
+	{
 	    int lastPos = -1;
 	    int pos, startPos;
 	    StringBuilder output = new StringBuilder(rawValue.length() * 2);
@@ -2539,6 +2552,9 @@ public final class CalcUtil
 			throw new CalcExprException("%calc#invalidConst2", ctx);
 
 		    String expr = rawValue.substring(pos + 2, nextPos);
+		    if (expr.indexOf("${") >= 0)
+			expr = getRecursiveStringValue(visitor, variables, settings, ctx, expr);
+
 		    Object exprValue = Calc.processString(expr, true);
 		    String stringValue = toStringValue(visitor, ctx, exprValue, new StringFormat(false, settings));
 

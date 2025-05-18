@@ -349,6 +349,8 @@
  *	    Minor code and doc tweaks.
  *	26-Mar-2024 (rlwhitcomb)
  *	    #666: New "startsWithAny" and "endsWithAny" methods.
+ *	13-May-2025 (rlwhitcomb)
+ *	    #719: Additional comments in "findMatching" to clarify operation.
  */
 package info.rlwhitcomb.util;
 
@@ -1086,7 +1088,7 @@ public final class CharUtil
 
 	/**
 	 * Find the matching end bracket/brace/paren/quote for the start character
-	 * at the given position.
+	 * at the given position, taking into account nested occurrences of the pair.
 	 *
 	 * @param value The char sequence to search.
 	 * @param pos   Position of the starting character to match.
@@ -1111,15 +1113,23 @@ public final class CharUtil
 		case '"':
 		case '\'':
 		    break;
+		default:
+		    // This is something we don't know how to match ...
+		    return -1;
 	    }
 
 	    int depth = 0;
 	    for (int ix = pos; ix < value.length(); ix++) {
 		char ch = value.charAt(ix);
+		// Since "ix" starts at "pos", the depth here will immediately go to 1
+		// as well as incrementing every time we encounter a nested start char
 		if (ch == start) {
 		    depth++;
 		}
 		else if (ch == end) {
+		    // If we are not nested, depth will be 1 here, and will immediately
+		    // go to 0 on the first occurrence of the end char, otherwise we will
+		    // just unnest at each end character
 		    if (--depth == 0)
 			return ix;
 		}
