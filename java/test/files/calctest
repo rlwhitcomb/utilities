@@ -45,6 +45,7 @@ ex            : ex
 cf            : cf
 stirling      : stirling
 numbers       : numbers
+llt           : llt
 ln2test       : ln2test
 e_sort        : e_sort -clear -- e10 e1 e11 e12 e20 e2 e3 e5 e30 e31
 e_lorem       : e_lorem -expressions

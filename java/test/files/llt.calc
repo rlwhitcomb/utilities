@@ -1,0 +1,31 @@
+// Lucas-Lehmer tests for primality of Mersenne primes
+// Taken from Python code at:
+// https://github.com/TheAlgorithms/Python/blob/master/maths/lucas_lehmer_primality_test.py
+
+$unlimited
+$resultsonly on {
+
+/*
+ * Test if the Mersenne number 2⌃p - 1 is prime or not.
+ *
+ * @param p Mersenne exponent to test
+ * @return  true/false if the Mersenne number is prime
+ */
+define lucas_lehmer_test(p) = {
+   $assert p >= 2, 'p should not be less than 2!'
+   if p == 2 leave true
+   var s = 4
+   var m = (1 << p) - 1
+   loop over p - 2 {
+      s = (s² - 2) mod m
+   }
+   s == 0
+}
+
+// These are the first 20 Mersenne primes, and a ringer to test
+tests = 2, 3, 5, 7, 13, 17, 19, 31, 61, 89, 107, 127, 521, 607, 1279, 2039, 2203, 2281, 3217, 4253, 4423
+
+loop over tests `M$__: ${lucas_lehmer_test(__)}` @q
+
+}
+
