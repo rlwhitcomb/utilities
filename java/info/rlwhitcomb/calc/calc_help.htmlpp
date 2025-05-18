@@ -542,6 +542,9 @@ Defining enum value SYSTEM = 2</code>
      inside the <code>{ }</code> pair is interpreted exactly as typed (in other words, escape sequences don't have to be doubly escaped to work correctly).
      For example:
      <code>`pieces = ${split(trim(c9), '\\s+') @Q}`</code>.
+  <p>Expression values inside <code>`${ ... }`</code> are evaluated recursively such that embedded <code>${ ... }</code> constructs are evaluated as needed.
+     These enables such things as:<br>
+     <code>a="3d";b=12.1;`&dollar;{b&commat;&dollar;{a}}` -&gt; "12.100"</code> (see "test/files/format.calc" for examples).
   <p>For any kind of string, except raw, the normal C/Java escapes such as <code>\t</code> or <code>\n</code> are also available.
      To embed any Unicode codepoint, use <code>\u<i>NNNN</i></code> where <code><i>N</i></code> is a hexadecimal digit, for values up
      to 0xFFFF, or <code>\u{<i>NNNNNN</i>}</code> for codepoints beyond the Unicode BMP (Basic Multilingual Plane) (that is, above
