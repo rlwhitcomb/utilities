@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2011-2024 Roger L. Whitcomb.
+ * Copyright (c) 2011-2025 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -351,6 +351,8 @@
  *	    #666: New "startsWithAny" and "endsWithAny" methods.
  *	13-May-2025 (rlwhitcomb)
  *	    #719: Additional comments in "findMatching" to clarify operation.
+ *	21-May-2025 (rlwhitcomb)
+ *	    #721: New "isSingleCodeString" method.
  */
 package info.rlwhitcomb.util;
 
@@ -1664,6 +1666,25 @@ public final class CharUtil
 		;
 	    }
 	    return false;
+	}
+
+
+	/**
+	 * Determine if the object is a single-character (code point) string.
+	 *
+	 * @param obj The input object to test.
+	 * @return    {@code true} if the input is a string which consists of a
+	 *	      single code point.
+	 */
+	public static boolean isSingleCodeString(final Object obj) {
+	    long count = 0;
+
+	    if (obj instanceof CharSequence) {
+		CharSequence seq = (CharSequence) obj;
+		count = seq.codePoints().count();
+	    }
+
+	    return count == 1L;
 	}
 
 

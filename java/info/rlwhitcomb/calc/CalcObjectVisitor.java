@@ -889,6 +889,8 @@
  *	    #702: Fix remainder and modulus for complex and quaternion.
  *	12-May-2025 (rlwhitcomb)
  *	    #715: Fix problem of scale with "@d" formatting.
+ *	21-May-2025 (rlwhitcomb)
+ *	    #721: Allow enum values to be single characters as well as integers.
  */
 package info.rlwhitcomb.calc;
 
@@ -4194,7 +4196,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    List<CalcParser.VarAssignContext> assigns = ctx.varAssign();
 	    List<String> enumNames = new ArrayList<>();
 	    StringFormat format = new StringFormat(settings);
-	    BigInteger value = BigInteger.ZERO;
+	    Object value = BigInteger.ZERO;
 
 	    for (int i = 0; i < assigns.size(); i++) {
 		String enumName             = assigns.get(i).id().getText();
@@ -4204,7 +4206,13 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    throw new CalcExprException(ctx, "%calc#noDupLocalVar", enumName);
 
 		if (expr != null) {
-		    value = getIntegerValue(expr);
+		    Object objValue = evaluateToValue(expr);
+		    if (CharUtil.isSingleCodeString(objValue)) {
+			value = ((CharSequence) objValue).toString();
+		    }
+		    else {
+			value = convertToInteger(objValue, settings.mc, expr);
+		    }
 		}
 		displayActionMessage("%calc#definingEnum", enumName, toStringValue(this, ctx, value, format));
 
@@ -4212,7 +4220,15 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 		enumNames.add(enumName);
 
-		value = value.add(BigInteger.ONE);
+		if (value instanceof BigInteger) {
+		    value = ((BigInteger) value).add(BigInteger.ONE);
+		}
+		else {
+		    int val = ((String) value).codePointAt(0) + 1;
+		    StringBuilder buf = new StringBuilder();
+		    buf.appendCodePoint(val);
+		    value = buf.toString();
+		}
 	    }
 
 	    return enumNames.size() == 1 ? Intl.formatString("calc#definedEnum", enumNames.get(0))

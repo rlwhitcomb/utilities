@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.57.6', date: d'2025-05-21',
+      issues: [ 721 ],
+      comment: 'Allow enums to be single characters.'
+    },
     { version: '2.57.5', date: d'2025-05-17',
       issues: [ 719 ],
       comment: 'Recursive interpolation of strings.'
