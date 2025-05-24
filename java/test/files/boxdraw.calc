@@ -1,0 +1,150 @@
+/*
+ * Unicode box drawing characters: \u2500 - \u257F
+ *
+ * Derived from the descriptions here:
+ *  https://www.unicode.org/Public/draft/charts/blocks/U2500.pdf
+ *  Version 17.0 BETA REVIEW DRAFT, retrieved 2025-05-20
+ *
+ * Standard abbreviations used here:
+ *  LT  = LIGHT
+ *  HV  = HEAVY
+ *  HZ  = HORIZONTAL
+ *  VT  = VERTICAL
+ *  UP  = UP
+ *  DN  = DOWN
+ *  L   = LEFT
+ *  R   = RIGHT
+ *  SGL = SINGLE
+ *  DBL = DOUBLE
+ *  3PL = TRIPLE
+ *  4QD = QUADRUPLE
+ *  DSH = DASH
+ */
+
+//     ─                 ━      │      ┃
+enum LT_HZ = '\u2500', HV_HZ, LT_VT, HV_VT,
+
+//         ┄              ┅              ┆              ┇
+     LT_3PL_DSH_HZ, HV_3PL_DSH_HZ, LT_3PL_DSH_VT, HV_3PL_DSH_VT,
+//         ┈              ┉              ┊              ┋
+     LT_4QD_DSH_HZ, HV_4QD_DSH_HZ, LT_4QD_DSH_VT, HV_4QD_DSH_VT,
+
+//        ┌           ┍           ┎           ┏
+     LT_DN_LT_R, LT_DN_HV_R, HV_DN_LT_R, HV_DN_HV_R,
+//        ┐           ┑           ┒           ┓
+     LT_DN_LT_L, LT_DN_HV_L, HV_DN_LT_L, HV_DN_HV_L,
+
+//        └           ┕           ┖           ┗
+     LT_UP_LT_R, LT_UP_HV_R, HV_UP_LT_R, HV_UP_HV_R,
+//        ┘           ┙           ┚           ┛
+     LT_UP_LT_L, LT_UP_HV_L, HV_UP_LT_L, HV_UP_HV_L,
+
+//        ├           ┝               ┞              ┟
+     LT_VT_LT_R, LT_VT_HV_R,    HV_UP_LT_R_DN, HV_DN_LT_R_UP,
+//        ┠            ┡              ┢             ┣
+     HV_VT_LT_R, LT_DN_HV_R_UP, LT_UP_HV_R_DN, HV_VT_HV_R,
+
+//        ┤            ┥           ┦              ┧
+     LT_VT_LT_L, LT_VT_HV_L, HV_UP_LT_L_DN, HV_DN_LT_L_UP,
+//        ┨            ┩              ┪             ┫
+     HV_VT_LT_L, LT_DN_HV_L_UP, LT_UP_HV_L_DN, HV_VT_HV_L,
+
+//        ┬            ┭             ┮             ┯
+     LT_DN_LT_HZ, HV_L_LT_R_DN, HV_R_LT_L_DN, LT_DN_HV_HZ,
+//        ┰            ┱             ┲             ┳
+     HV_DN_LT_HZ, LT_R_HV_L_DN, LT_L_HV_R_DN, HV_DN_HV_HZ,
+
+//        ┴            ┵             ┶             ┷
+     LT_UP_LT_HZ, HV_L_LT_R_UP, HV_R_LT_L_UP, LT_UP_HV_HZ,
+//        ┸            ┹             ┺             ┻
+     HV_UP_LT_HZ, LT_R_HV_L_UP, LT_L_HV_R_UP, HV_UP_HV_HZ,
+
+//        ┼            ┽             ┾             ┿
+     LT_VT_LT_HZ, HV_L_LT_R_VT, HV_R_LT_L_VT, LT_VT_HV_HZ,
+//         ╀               ╁             ╂              ╃
+     HV_UP_LT_DN_HZ, HV_DN_L_UP_HZ, HV_VT_LT_HZ, HV_L_UP_LT_R_DN,
+//          ╄                ╅                ╆               ╇
+     HV_R_UP_LT_L_DN, HV_L_DN_LT_R_UP, HV_R_DN_LT_L_UP, LT_DN_HV_UP_HZ,
+//         ╈              ╉             ╊             ╋
+     LT_UP_HV_DN_HZ, LT_R_HV_L_VT, LT_L_HV_R_VT, HV_VT_HV_HZ,
+
+//          ╌              ╍              ╎              ╏
+     LT_DBL_DSH_HZ, HV_DBL_DSH_HZ, LT_DBL_DSH_VT, HV_DBL_DSH_VT,
+
+//      ═       ║
+     DBL_HZ, DBL_VT,
+
+//         ╒             ╓             ╔
+     SGL_DN_DBL_R, DBL_DN_SGL_R, DBL_DN_DBL_R,
+//         ╕             ╖             ╗
+     SGL_DN_DBL_L, DBL_DN_SGL_L, DBL_DN_DBL_L,
+//         ╘             ╙             ╚
+     SGL_UP_DBL_R, DBL_UP_SGL_R, DBL_UP_DBL_R,
+//         ╛             ╜             ╝
+     SGL_UP_DBL_L, DBL_UP_SGL_L, DBL_UP_DBL_L,
+
+//         ╞             ╟             ╠
+     SGL_VT_DBL_R, DBL_VT_SGL_R, DBL_VT_DBL_R,
+//         ╡             ╢             ╣
+     SGL_VT_DBL_L, DBL_VT_SGL_L, DBL_VT_DBL_L,
+
+//         ╤              ╥              ╦
+     SGL_DN_DBL_HZ, DBL_DN_SGL_HZ, DBL_DN_DBL_HZ,
+//         ╧              ╨              ╩
+     SGL_UP_DBL_HZ, DBL_UP_SGL_HZ, DBL_UP_DBL_HZ,
+
+//         ╪              ╫              ╬
+     SGL_VT_DBL_HZ, DBL_VT_SGL_HZ, DBL_VT_DBL_HZ,
+
+//         ╭            ╮            ╯            ╰
+     LT_ARC_DN_R, LT_ARC_DN_L, LT_ARC_UP_L, LT_ARC_UP_R
+
+//     ╴                ╵      ╶     ╷
+enum LT_L = '\u2574', LT_UP, LT_R, LT_DN,
+//     ╸     ╹      ╺     ╻
+     HV_L, HV_UP, HV_R, HV_DN,
+//       ╼           ╽           ╾           ╿
+     LT_L_HV_R, LT_UP_HV_DN, HV_L_LT_R, HV_UP_LT_DN
+
+
+const __EOL__ = info.os.linesep
+
+
+define __construct_line(left, mid, right, width) = {
+   var line = left
+   fill(line, mid, 1, width - 2)
+   line += right
+}
+
+define __construct_box(width, height, top_line, mid_line, bot_line) = {
+   var box = top_line(width)
+   const mid = mid_line(width)
+   loop over height - 2 { box += __EOL__ + mid }
+   box + __EOL__ + bot_line(width)
+}
+
+define lt_top_line(width) = __construct_line(LT_DN_LT_R, LT_HZ, LT_DN_LT_L, width)
+define lt_mid_line(width) = __construct_line(LT_VT, ' ', LT_VT, width)
+define lt_bot_line(width) = __construct_line(LT_UP_LT_R, LT_HZ, LT_UP_LT_L, width)
+
+define lt_box(width, height) = __construct_box(width, height, lt_top_line, lt_mid_line, lt_bot_line)
+
+
+define hv_top_line(width) = __construct_line(HV_DN_HV_R, HV_HZ, HV_DN_HV_L, width)
+define hv_mid_line(width) = __construct_line(HV_VT, ' ', HV_VT, width)
+define hv_bot_line(width) = __construct_line(HV_UP_HV_R, HV_HZ, HV_UP_HV_L, width)
+
+define hv_box(width, height) = __construct_box(width, height, hv_top_line, hv_mid_line, hv_bot_line)
+
+define arc_top_line(width) = __construct_line(LT_ARC_DN_R, LT_HZ, LT_ARC_DN_L, width)
+define arc_bot_line(width) = __construct_line(LT_ARC_UP_R, LT_HZ, LT_ARC_UP_L, width)
+
+define arc_box(width, height) = __construct_box(width, height, arc_top_line, lt_mid_line, arc_bot_line)
+
+
+define dash_line(reps, ...) = {
+   const pat = join(_*[1:], '')
+   var line = ''
+   loop over reps line += pat
+}
+
