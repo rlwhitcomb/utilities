@@ -891,6 +891,8 @@
  *	    #715: Fix problem of scale with "@d" formatting.
  *	21-May-2025 (rlwhitcomb)
  *	    #721: Allow enum values to be single characters as well as integers.
+ *	24-May-2025 (rlwhitcomb)
+ *	    #721: Allow quaternion, complex, and fraction values for enums also.
  */
 package info.rlwhitcomb.calc;
 
@@ -4210,6 +4212,11 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    if (CharUtil.isSingleCodeString(objValue)) {
 			value = ((CharSequence) objValue).toString();
 		    }
+		    else if (objValue instanceof Quaternion ||
+			     objValue instanceof ComplexNumber ||
+			     (settings.rationalMode && objValue instanceof BigFraction)) {
+			value = objValue;
+		    }
 		    else {
 			value = convertToInteger(objValue, settings.mc, expr);
 		    }
@@ -4220,7 +4227,16 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 		enumNames.add(enumName);
 
-		if (value instanceof BigInteger) {
+		if (value instanceof Quaternion) {
+		    value = ((Quaternion) value).increment();
+		}
+		else if (value instanceof ComplexNumber) {
+		    value = ((ComplexNumber) value).increment();
+		}
+		else if (value instanceof BigFraction) {
+		    value = ((BigFraction) value).increment();
+		}
+		else if (value instanceof BigInteger) {
 		    value = ((BigInteger) value).add(BigInteger.ONE);
 		}
 		else {

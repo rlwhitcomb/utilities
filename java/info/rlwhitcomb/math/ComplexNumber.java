@@ -66,6 +66,7 @@
  *  01-May-25 rlw #716	More refactoring, including updated doc.
  *  03-May-25 rlw #716	Refactor "ceil" and "floor".
  *		  #702	Fix "modulus".
+ *  24-May-25 rlw #721	Add "increment()".
  */
 package info.rlwhitcomb.math;
 
@@ -943,6 +944,13 @@ public abstract class ComplexNumber extends Number implements Serializable, Comp
 	public abstract ComplexNumber floor();
 
 	/**
+	 * Return a complex number which is one bigger than the current one.
+	 *
+	 * @return One bigger.
+	 */
+	public abstract ComplexNumber increment();
+
+	/**
 	 * Calculate the complex number to the given integer power, using the "squaring"
 	 * technique for efficiency and precision.
 	 *
@@ -1655,6 +1663,11 @@ class RationalComplexNumber extends ComplexNumber
 	}
 
 	@Override
+	public ComplexNumber increment() {
+	    return add(CR_ONE);
+	}
+
+	@Override
 	public int hashCode() {
 	    if (realFrac == null)
 		return imaginaryFrac.hashCode();
@@ -1981,6 +1994,11 @@ class DecimalComplexNumber extends ComplexNumber
 	    BigDecimal iDec = i();
 
 	    return new DecimalComplexNumber(MathUtil.floor(rDec), MathUtil.floor(iDec));
+	}
+
+	@Override
+	public ComplexNumber increment() {
+	    return add(C_ONE);
 	}
 
 	@Override

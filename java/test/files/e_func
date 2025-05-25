@@ -15,6 +15,16 @@ def visit(type) = { case type of F1: f1, F2: f2 }
 visit(F1)(4,5)
 visit(F2)(7,8)
 
+enum AABB = 'a', AAAB, AAAA
+
+$rational on {
+enum af1 = (1/2, 1), bf1, cf1
+enum qf1 = (3/4, 1/2, 2/3, 4), qf2, qf3
+enum ff1 = 7/8, ff2, ff3
+}
+enum ql2 = (1, 1, 2, 3), ql3, ql5, ql7
+enum cg1 = (18, 2), cg2, cg3
+
 #
 # Passing a function as a parameter to another function
 #

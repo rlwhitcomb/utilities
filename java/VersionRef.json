@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.57.8', date: d'2025-05-24',
+      issues: [ 721 ],
+      comment: 'Allow enums to be quaternions, complex numbers, and fractions also.'
+    },
     { version: '2.57.6', date: d'2025-05-21',
       issues: [ 721 ],
       comment: 'Allow enums to be single characters.'

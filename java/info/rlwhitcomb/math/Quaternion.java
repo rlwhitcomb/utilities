@@ -46,6 +46,7 @@
  *  03-May-25 rlw #716	Refactor "ceil" and "floor".
  *		  #702	Fix "modulus".
  *  11-May-25 rlw #702	Ooops! "modulus" still needed work.
+ *  24-May-25 rlw #721	Add R_ONE constant and "increment()" methods.
  */
 package info.rlwhitcomb.math;
 
@@ -78,6 +79,9 @@ public abstract class Quaternion extends Number implements Comparable<Quaternion
 
 	/** A value of a real one, as a quaternion. */
 	public static final Quaternion ONE = Quaternion.real(1);
+
+	/** A value of a rational one, as a quaternion. */
+	public static final Quaternion R_ONE = Quaternion.rational(BigFraction.ONE);
 
 
 	/** Normal format for display. */
@@ -486,6 +490,13 @@ public abstract class Quaternion extends Number implements Comparable<Quaternion
 	}
 
 	/**
+	 * Increment the value of this quaternion.
+	 *
+	 * @return One bigger.
+	 */
+	public abstract Quaternion increment();
+
+	/**
 	 * Take this quaternion to an integer power.
 	 *
 	 * @param n  The integer power to raise this quaternion to.
@@ -803,6 +814,11 @@ class RationalQuaternion extends Quaternion
 					  fullResult.bFrac().toNearestInteger(),
 					  fullResult.cFrac().toNearestInteger(),
 					  fullResult.dFrac().toNearestInteger());
+	}
+
+	@Override
+	public Quaternion increment() {
+	    return add(R_ONE);
 	}
 
 	@Override
@@ -1143,6 +1159,11 @@ class DecimalQuaternion extends Quaternion
 					 MathUtil.round(fullResult.b(), 0),
 					 MathUtil.round(fullResult.c(), 0),
 					 MathUtil.round(fullResult.d(), 0));
+	}
+
+	@Override
+	public Quaternion increment() {
+	    return add(ONE);
 	}
 
 	@Override
