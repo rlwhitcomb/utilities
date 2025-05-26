@@ -21,24 +21,26 @@ define S2(n, k) = {
 }
 
 $quiet on {
+$library 'boxdraw'
 
 const START = 0
 const N = !!$0 ? ~~$0 : 12
 const SIGNED = !!$1
 const WIDTH = 13
 
-var UNDER = ''
+const UNDER = __construct_line(LT_VT_LT_HZ, LT_HZ, LT_HZ, WIDTH)
+const BLANK = __construct_line(' ', ' ', ' ', WIDTH - 1) + LT_VT
 
-fill(UNDER, '-', WIDTH)
-const FORMAT = formatstring('%%,%dd', WIDTH)
+const FORMAT = formatstring('%%,%dd', WIDTH - 1)
 
-var header = 'n/k| '
-var under = '---+-'
+var header = 'n/k' + LT_VT
+var under = dash_line(3, LT_HZ)
 
 loop k over START..N {
-    header += formatstring(FORMAT, k)
+    header += formatstring(FORMAT, k) + LT_VT
     under += UNDER
 }
+under += LT_VT_LT_L
 
 // First Kind table
 display (SIGNED ? 'Signed' : 'Unsigned') + ' Stirling Numbers of the First Kind'
@@ -47,12 +49,16 @@ display header
 display under
 
 loop n over START..N {
-    var line = formatstring('%-3d| ', n)
+    var line = formatstring('%-3d' + LT_VT, n)
     loop k over START..n {
-        line += formatstring(FORMAT, S1(n, k, SIGNED))
+        line += formatstring(FORMAT, S1(n, k, SIGNED)) + LT_VT
+    }
+    loop k over n+1..N {
+        line += BLANK
     }
     display line
 }
+display
 
 // Second Kind table
 // Results can be partially verified from here:
@@ -64,11 +70,15 @@ display header
 display under
 
 loop n over START..N {
-    var line = formatstring('%-3d| ', n)
+    var line = formatstring('%-3d' + LT_VT, n)
     loop k over START..n {
-        line += formatstring(FORMAT, S2(n, k))
+        line += formatstring(FORMAT, S2(n, k)) + LT_VT
+    }
+    loop k over n+1..N {
+        line += BLANK
     }
     display line
 }
+display
 
 }
