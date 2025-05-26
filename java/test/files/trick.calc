@@ -1,0 +1,23 @@
+$quiet on
+$assert defined(GREEN), 'Include "library.calc"!'
+const LIMIT = 20
+
+// Generalized function to calculate the supposed root of the given value
+define root(x, n) = {
+   const power = x ** n
+   sumof(chars(@@power)) - n
+}
+
+// Square roots
+loop x over 1..LIMIT {
+    const sqr = x²
+    const root = root(x, 2)
+    print `x = $x, sqr = $sqr, root = $root,\tcorrect? ${root==x?GREEN+'good'+RESET:RED+'WRONG'+RESET}`
+}
+
+// Cube roots
+loop x over 1..LIMIT {
+    const cub = x³
+    const root = root(x, 3)
+    print `x = $x, cub = $cub, root = $root,\tcorrect? ${root==x?GREEN+'good'+RESET:RED+'WRONG'+RESET}`
+}

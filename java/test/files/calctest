@@ -36,6 +36,7 @@ q1            : q1
 remdiv        : remdiv
 complex_divide_test : complex_divide_test
 mult          : mult
+trick         : trick
 text          : -text pi;e;phi;ln 2
 save          : -filetext save
 e_lib         : e_lib
