@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.58.1', date: d'2025-06-01',
+      issues: [ 724 ],
+      comment: 'Fix stack overflow bug using "_*" as parameter to another function call.'
+    },
     { version: '2.58', date: d'2025-05-26',
       issues: [ 722 ],
       comment: 'Add new "Library" button to Calc GUI.'

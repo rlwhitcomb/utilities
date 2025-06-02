@@ -357,6 +357,8 @@
  *	    Rename "setVariable" method to "setGlobalVariable".
  *	01-Jun-2025 (rlwhitcomb)
  *	    #722: New "Library" GUI button.
+ *	01-Jun-2025 (rlwhitcomb)
+ *	    #724: New calls to "finalizeGlobals" to fix the problem.
  */
 package info.rlwhitcomb.calc;
 
@@ -1220,6 +1222,8 @@ public class Calc
 		for (java.util.Map.Entry<String, String> var : variables.entrySet()) {
 		    visitor.setGlobalVariable(var.getKey(), var.getValue());
 		}
+
+		visitor.finalizeGlobals();
 
 		// Try to read and process any given libraries before doing anything else
 		readAndProcessLibraries(visitor, libraryNames, errorStrategy);
@@ -2790,6 +2794,8 @@ public class Calc
 		    for (java.util.Map.Entry<String, String> var : variables.entrySet()) {
 			visitor.setGlobalVariable(var.getKey(), var.getValue());
 		    }
+
+		    visitor.finalizeGlobals();
 
 		    // Try to read and process any given libraries before doing anything else
 		    // But save the "-inputdir" setting and restore once we're done

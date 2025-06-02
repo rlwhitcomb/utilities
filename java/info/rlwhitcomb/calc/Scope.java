@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2021-2023 Roger L. Whitcomb.
+ * Copyright (c) 2021-2023,2025 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,20 +25,21 @@
  *      local symbol tables, etc.
  *
  * History:
- *  06-Oct-21 rlw  ---  Initial coding.
- *  26-Oct-21 rlw  ---  Add PREDEFINED type.
- *  21-Jan-22 rlw #135: Add CONSTANT; refactor "toString()".
- *  04-Feb-22 rlw  ---  Add "isPredefined" method.
- *		  #233: Add SYSTEM_VALUE, used for Settings.
- *  12-Feb-22 rlw #199: Add PARAMETER; rename SYSTEM_VALUE to just SYSTEM;
+ *  06-Oct-21 rlw ----  Initial coding.
+ *  26-Oct-21 rlw ----  Add PREDEFINED type.
+ *  21-Jan-22 rlw #135	Add CONSTANT; refactor "toString()".
+ *  04-Feb-22 rlw ----  Add "isPredefined" method.
+ *		  #233	Add SYSTEM_VALUE, used for Settings.
+ *  12-Feb-22 rlw #199	Add PARAMETER; rename SYSTEM_VALUE to just SYSTEM;
  *			add "isImmutable" for read-only values.
- *  14-Feb-22 rlw #199: Only put the default implementation of "isPredefined", "isImmutable",
+ *  14-Feb-22 rlw #199	Only put the default implementation of "isPredefined", "isImmutable",
  *			and "toString" in here, let the appropriate subclasses override.
- *  25-May-22 rlw #348: Make the enum package private.
- *  21-Jun-22 rlw #314: Add SET type.
- *  08-Jan-23 rlw #225:	New description field and methods.
- *		  #592:	Move basic fields out of subclasses into this base class.
- *  06-Aug-23 rlw #621:	Add "ENUM" type.
+ *  25-May-22 rlw #348	Make the enum package private.
+ *  21-Jun-22 rlw #314	Add SET type.
+ *  08-Jan-23 rlw #225	New description field and methods.
+ *		  #592	Move basic fields out of subclasses into this base class.
+ *  06-Aug-23 rlw #621	Add "ENUM" type.
+ *  01-Jun-25 rlw #724	Add scope name to "toString".
  */
 package info.rlwhitcomb.calc;
 
@@ -227,7 +228,7 @@ class Scope
 
 	@Override
 	public String toString() {
-	    return String.format("%1$s scope", toBookCase());
+	    return String.format("%1$s scope '%2$s'", toBookCase(), name);
 	}
 }
 

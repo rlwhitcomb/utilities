@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2022,2024 Roger L. Whitcomb.
+ * Copyright (c) 2022,2024,2025 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -28,6 +28,9 @@
  *  12-Feb-22 rlw #199	Initial coding, abstracted out of other code.
  *  25-May-22 rlw #348	Make all methods package private.
  *  22-Mar-24 rlw #664	Open "parameters" to subclasses.
+ *  01-Jun-25 rlw #724	Changes to delay defining "_*" and "_#" until the
+ *			end of parameter processing to avoid infinite
+ *			recursion if "_*" is used in a nested call.
  */
 package info.rlwhitcomb.calc;
 
@@ -65,13 +68,11 @@ class ParameterizedScope extends NestedScope
 	ParameterizedScope(final Type t, final String prefix) {
 	    super(t);
 
-	    parameters = new ArrayScope<>();
-
 	    arrayName = String.format("%1$s*", prefix);
 	    countName = String.format("%1$s#", prefix);
 
-	    ParameterValue.put(this, arrayName, parameters);
-	    ParameterValue.put(this, countName, BigInteger.ZERO);
+	    parameters = new ArrayScope<>();
+	    parameters.setName(arrayName);
 	}
 
 	/**
@@ -83,10 +84,15 @@ class ParameterizedScope extends NestedScope
 	void addParamValue(final ParameterValue param) {
 	    setValue(param.getName(), param);
 	    parameters.add(param);
-
-	    ParameterValue.put(this, countName, BigInteger.valueOf(parameters.size()));
 	}
 
+	/**
+	 * Finalize the parameter setup by defining the "_*" and "_#" variables with their final values.
+	 */
+	void finalizeParameters() {
+	    ParameterValue.put(this, arrayName, parameters);
+	    ParameterValue.put(this, countName, BigInteger.valueOf(parameters.size()));
+	}
 }
 
 
@@ -102,6 +108,7 @@ class GlobalScope extends ParameterizedScope
 
 	GlobalScope() {
 	    super(Type.GLOBAL, GLOBAL_PREFIX);
+	    setName("globals");
 	}
 }
 

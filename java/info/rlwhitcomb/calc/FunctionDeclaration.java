@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2021-2024 Roger L. Whitcomb.
+ * Copyright (c) 2021-2025 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -44,6 +44,7 @@
  *  04-Feb-24 rlw #645	Non-constant parameter declarations.
  *  22-Mar-24 rlw #664	Support for named parameters.
  *  07-Apr-24 rlw #664	Fix bug with positional parameters before named ones.
+ *  01-Jun-25 rlw #724	Call "finalizeParameters" at the end of setting up parameters.
  */
 package info.rlwhitcomb.calc;
 
@@ -300,6 +301,8 @@ class FunctionDeclaration
 	 */
 	public FunctionScope setupFunctionCall(final ParserRuleContext ctx, final CalcObjectVisitor visitor, final List<CalcParser.OptParamContext> params) {
 	    FunctionScope funcScope = new FunctionScope(this);
+	    funcScope.setName(functionName);
+
 	    int numParams = getNumberOfParameters();
 	    int numActuals = params != null ? params.size() : 0;
 
@@ -384,6 +387,8 @@ class FunctionDeclaration
 		for (int index = actualPos; index < positionActuals.size(); index++) {
 		    funcScope.setParameterValue(visitor, paramPos++, positionActuals.get(index));
 		}
+
+		funcScope.finalizeParameters();
 	    }
 
 	    return funcScope;

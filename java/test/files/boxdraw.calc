@@ -148,3 +148,37 @@ define dash_line(reps, ...) = {
    loop over reps line += pat
 }
 
+define lt_top_cols(...) = {
+    var line = LT_DN_LT_R
+    loop col_width over flat_map(_*) {
+       line += dash_line(col_width, LT_HZ) + LT_DN_LT_HZ
+    }
+    line[-1] = LT_DN_LT_L
+    line
+}
+
+define lt_bot_cols(...) = {
+    var line = LT_UP_LT_R
+    loop col_width over flat_map(_*) {
+       line += dash_line(col_width, LT_HZ) + LT_UP_LT_HZ
+    }
+    line[-1] = LT_UP_LT_L
+    line
+}
+
+define lt_mid_cols(...) = {
+    var line = LT_VT
+    loop col_width over flat_map(_*) {
+       line += dash_line(col_width, ' ') + LT_VT
+    }
+}
+
+define lt_cross_cols(...) = {
+    var line = LT_VT_LT_R
+    loop col_width over flat_map(_*) {
+       line += dash_line(col_width, LT_HZ) + LT_VT_LT_HZ
+    }
+    line[-1] = LT_VT_LT_L
+    line
+}
+

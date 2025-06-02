@@ -893,6 +893,8 @@
  *	    #721: Allow enum values to be single characters as well as integers.
  *	24-May-2025 (rlwhitcomb)
  *	    #721: Allow quaternion, complex, and fraction values for enums also.
+ *	01-Jun-2025 (rlwhitcomb)
+ *	    #724: New method "finalizeGlobals" for defining the "$*" and "$#" builtins.
  */
 package info.rlwhitcomb.calc;
 
@@ -1435,6 +1437,13 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	 */
 	public void setGlobalVariable(final String name, final String value) {
 	    globals.setValue(name, stringToValue(value));
+	}
+
+	/**
+	 * Finalize the global parameters.
+	 */
+	public void finalizeGlobals() {
+	    globals.finalizeParameters();
 	}
 
 
@@ -5542,40 +5551,41 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		final boolean forJoin)
 	{
 	    Object value = evaluate(ctx, obj);
-
 	    nullCheck(value, ctx);
 
 	    if (value instanceof ArrayScope) {
-		@SuppressWarnings("unchecked")
-		ArrayScope<Object> array = (ArrayScope<Object>) value;
 		if (forJoin) {
-		    objectList.add(array);
+		    objectList.add(value);
 		}
 		else {
+		    @SuppressWarnings("unchecked")
+		    ArrayScope<Object> array = (ArrayScope<Object>) value;
+
 		    for (Object listObj : array.list()) {
 			buildFlatMap(ctx, listObj, objectList, conv, forJoin);
 		    }
 		}
 	    }
 	    else if (value instanceof ObjectScope) {
-		@SuppressWarnings("unchecked")
-		ObjectScope object = (ObjectScope) value;
 		if (forJoin) {
-		    objectList.add(object);
+		    objectList.add(value);
 		}
 		else {
+		    ObjectScope object = (ObjectScope) value;
+
 		    for (Object mapObj : object.values()) {
 			buildFlatMap(ctx, mapObj, objectList, conv, forJoin);
 		    }
 		}
 	    }
 	    else if (value instanceof SetScope) {
-		@SuppressWarnings("unchecked")
-		SetScope<Object> set = (SetScope<Object>) value;
 		if (forJoin) {
-		    objectList.add(set);
+		    objectList.add(value);
 		}
 		else {
+		    @SuppressWarnings("unchecked")
+		    SetScope<Object> set = (SetScope<Object>) value;
+
 		    for (Object setObj : set.set()) {
 			buildFlatMap(ctx, setObj, objectList, conv, forJoin);
 		    }
@@ -5762,7 +5772,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    if (i > 0)
 			buf.append(joinExpr);
 		    Object obj = objects.get(i);
-		    if (obj instanceof Scope) {
+		    if (obj instanceof CollectionScope) {
 			List<Object> objects1 = new ArrayList<>();
 			buildFlatMap(ctx, obj, objects1, Conversion.STRING, false);
 			for (int j = 0; j < objects1.size(); j++) {
