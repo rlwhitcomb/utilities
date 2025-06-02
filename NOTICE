@@ -1,5 +1,12 @@
 This project contains code from several other open-source projects.
 
+Images
+======
+Library icon ("books_32x32.png") is resized to 32x32 from the 512x512 original:
+Designed by Freepik
+https://www.freepik.com
+Found by search: https://www.freepik.com/search?format=search&iconType=standard&img=1&last_filter=img&last_value=1&query=Library&type=icon
+
 Diff Match Patch
 ================
 Diff Match Patch is licensed under an Apache-2.0 License:

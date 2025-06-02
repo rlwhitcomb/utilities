@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2020-2024 Roger L. Whitcomb.
+ * Copyright (c) 2020-2025 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -355,6 +355,8 @@
  *	    #672: New command line option for proper fractions.
  *	13-May-2024 (rlwhitcomb)
  *	    Rename "setVariable" method to "setGlobalVariable".
+ *	01-Jun-2025 (rlwhitcomb)
+ *	    #722: New "Library" GUI button.
  */
 package info.rlwhitcomb.calc;
 
@@ -476,6 +478,7 @@ public class Calc
 		SETTINGS ("settings",  SettingsAction.class),
 		SAVE     ("save",      SaveAction.class),
 		OPEN     ("open",      OpenAction.class),
+		LIBRARY  ("library",   LibraryAction.class),
 		CLEAR    ("clear",     ClearAction.class),
 		CALCULATE("calculate", CalculateAction.class),
 		EXIT     ("exit",      ExitAction.class),
@@ -588,6 +591,8 @@ public class Calc
 	@BXML private Label outputSizeLabel;
 	@BXML private PushButton versionButton;
 	@BXML private Label versionKeyLabel;
+	@BXML private PushButton libraryButton;
+	@BXML private Label libraryKeyLabel;
 	@BXML private Prompt versionPrompt;
 	@BXML private Label versionText;
 	@BXML private Label implementationText;
@@ -1139,6 +1144,12 @@ public class Calc
 		versionButton.setTooltipText(Intl.formatString("versionTip", key));
 		versionKeyLabel.setText(key);
 
+		KeyStroke libraryKey = KeyStroke.decode("Cmd-F4");
+		key = libraryKey.toString();
+
+		libraryButton.setTooltipText(Intl.formatString("libraryTip", key));
+		libraryKeyLabel.setText(key);
+
 		KeyStroke enterKey = KeyStroke.decode("Enter");
 		KeyStroke cmdEnterKey = KeyStroke.decode("Cmd-Enter");
 
@@ -1211,7 +1222,7 @@ public class Calc
 		}
 
 		// Try to read and process any given libraries before doing anything else
-		readAndProcessLibraries(visitor, errorStrategy);
+		readAndProcessLibraries(visitor, libraryNames, errorStrategy);
 
 		mainWindow.open(display);
 		requestFocus(inputTextPane);
@@ -1681,6 +1692,48 @@ public class Calc
 		}
 	}
 
+	private class LibraryAction extends Action
+	{
+		@Override
+		public void perform(Component source) {
+		    if (inputDirectory == null) {
+			if (rootDirectory == null) {
+			    rootDirectory = new File("./");
+			}
+		    }
+		    else if (rootDirectory == null) {
+			rootDirectory = inputDirectory;
+		    }
+		    try {
+			rootDirectory = rootDirectory.getCanonicalFile();
+		    }
+		    catch (IOException ioe) {
+			// just leave root directory as-is
+		    }
+		    final FileBrowserSheet browser =
+			new FileBrowserSheet(FileBrowserSheet.Mode.OPEN_MULTIPLE, rootDirectory.getPath());
+		    browser.open(mainWindow, sheet -> {
+			if (!sheet.getResult())
+			    return;
+			try {
+			    Sequence<File> selectedFiles = browser.getSelectedFiles();
+			    rootDirectory = browser.getRootDirectory();
+			    List<String> names = new ArrayList<>(selectedFiles.getLength());
+			    for (int i = 0; i < selectedFiles.getLength(); i++) {
+				File f = selectedFiles.get(i);
+				names.add(f.getPath());
+			    }
+			    readAndProcessLibraries(visitor, names, errorStrategy);
+			}
+			catch (IOException ioe) {
+			    Alert.alert(MessageType.ERROR, Exceptions.toString(ioe), ioe.getClass().getSimpleName(), null, mainWindow, null);
+			}
+			characterListener.enableActions();
+			requestFocus(inputTextPane);
+		    });
+		}
+	}
+
 	private class ClearAction extends Action
 	{
 		@Override
@@ -2109,13 +2162,13 @@ public class Calc
 	    return returnValue;
 	}
 
-	private static void readAndProcessLibraries(CalcObjectVisitor visitor, BailErrorStrategy errorStrategy)
+	private static void readAndProcessLibraries(CalcObjectVisitor visitor, List<String> names, BailErrorStrategy errorStrategy)
 		throws IOException
 	{
-	    if (libraryNames != null) {
+	    if (names != null) {
 		initialLibraryLoad = true;
 		try {
-		    for (String libraryName : libraryNames) {
+		    for (String libraryName : names) {
 			process(CharStreams.fromString(getFileContents(libraryName)), visitor, errorStrategy, true, false);
 		    }
 		}
@@ -2741,7 +2794,7 @@ public class Calc
 		    // Try to read and process any given libraries before doing anything else
 		    // But save the "-inputdir" setting and restore once we're done
 		    File savedInputDirectory = inputDirectory;
-		    readAndProcessLibraries(visitor, errorStrategy);
+		    readAndProcessLibraries(visitor, libraryNames, errorStrategy);
 		    inputDirectory = savedInputDirectory;
 
 		    // If no input arguments were given, go into "REPL" mode, reading

@@ -2,7 +2,7 @@
 
         The MIT License (MIT)
 
-        Copyright (c) 2020-2022 Roger L. Whitcomb.
+        Copyright (c) 2020-2022,2025 Roger L. Whitcomb.
 
         Permission is hereby granted, free of charge, to any person obtaining a copy
         of this software and associated documentation files (the "Software"), to deal
@@ -92,6 +92,8 @@
 		#454: Settings option for colored output; always disabled for now until we implement
 		coloring of the results in the GUI.
 		#447: New grads trig mode.
+	    25-May-2025 (rlwhitcomb)
+		#722: New "Library" button.
 
      ========================================================================== -->
 
@@ -110,6 +112,7 @@
 	<Window.ActionMapping action="settings" keyStroke="F2" />
 	<Window.ActionMapping action="save" keyStroke="F3" />
 	<Window.ActionMapping action="open" keyStroke="F4" />
+	<Window.ActionMapping action="library" keyStroke="Cmd-F4" />
 	<Window.ActionMapping action="clear" keyStroke="F6" />
 	<Window.ActionMapping action="calculate" keyStroke="F9" />
 	<Window.ActionMapping action="exit" keyStroke="F10" />
@@ -258,7 +261,7 @@
 				action="help"
 				buttonData="%helpButton"
 				preferredWidth="60"
-				preferredHeight="32"
+				preferredHeight="40"
 				styles="{color:'BlueViolet', font:{size:24,bold:true}}"/>
 			<Label text="%helpLabel"/>
 			<Label text="%helpKeyLabel"/>
@@ -268,7 +271,7 @@
 				action="version"
 				buttonData="%versionButton"
 				preferredWidth="60"
-				preferredHeight="32"
+				preferredHeight="40"
 				styles="{color:'MediumOrchid', font:{size:24,bold:true}}"/>
 			<Label text="%versionLabel"/>
 			<Label bxml:id="versionKeyLabel" text=""/>
@@ -279,7 +282,7 @@
 				action="settings"
 				buttonData="%settingsButton"
 				preferredWidth="60"
-				preferredHeight="32"
+				preferredHeight="40"
 				styles="{color:'DarkOrange', font:{size:24,bold:true}}"/>
 			<Label text="%settingsLabel"/>
 			<Label text="%settingsKeyLabel"/>
@@ -290,7 +293,7 @@
 				action="save"
 				buttonData="%saveButton"
 				preferredWidth="60"
-				preferredHeight="32"
+				preferredHeight="40"
 				styles="{color:'DodgerBlue', font:{size:24,bold:true}}"/>
 			<Label text="%saveLabel"/>
 			<Label text="%saveKeyLabel"/>
@@ -300,10 +303,20 @@
 				action="open"
 				buttonData="%openButton"
 				preferredWidth="60"
-				preferredHeight="32"
+				preferredHeight="40"
 				styles="{color:'DeepSkyBlue', font:{size:24,bold:true}}"/>
 			<Label text="%openLabel"/>
 			<Label text="%openKeyLabel"/>
+		    </BoxPane>
+		    <BoxPane orientation="vertical" styles="{horizontalAlignment:'center'}">
+			<PushButton bxml:id="libraryButton" tooltipText="%libraryTip"
+				action="library"
+				preferredWidth="60"
+				preferredHeight="40">
+				<content:ButtonData icon="/images/books_32x32.png"/>
+			</PushButton>
+			<Label text="%libraryLabel"/>
+			<Label bxml:id="libraryKeyLabel" text=""/>
 		    </BoxPane>
 		    <Label preferredWidth="25"/>
 		    <BoxPane orientation="vertical" styles="{horizontalAlignment:'center'}">
@@ -311,7 +324,7 @@
 				action="clear"
 				buttonData="%clearButton"
 				preferredWidth="60"
-				preferredHeight="32"
+				preferredHeight="40"
 				styles="{color:'forestgreen', font:{size:24,bold:true}}"/>
 			<Label text="%clearLabel"/>
 			<Label text="%clearKeyLabel"/>
@@ -321,7 +334,7 @@
 				action="calculate"
 				buttonData="%calculateButton"
 				preferredWidth="60"
-				preferredHeight="32"
+				preferredHeight="40"
 				styles="{color:'red', font:{size:24,bold:true}}"/>
 			<Label text="%calculateLabel"/>
 			<Label text="%calculateKeyLabel"/>
@@ -332,7 +345,7 @@
 				action="exit"
 				buttonData="%exitButton"
 				preferredWidth="60"
-				preferredHeight="32"
+				preferredHeight="40"
 				styles="{color:'indigo', font:{size:24,bold:true}}"/>
 			<Label text="%exitLabel"/>
 			<Label text="%exitKeyLabel"/>

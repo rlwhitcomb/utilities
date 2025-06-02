@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.58', date: d'2025-05-26',
+      issues: [ 722 ],
+      comment: 'Add new "Library" button to Calc GUI.'
+    },
     { version: '2.57.8', date: d'2025-05-24',
       issues: [ 721 ],
       comment: 'Allow enums to be quaternions, complex numbers, and fractions also.'

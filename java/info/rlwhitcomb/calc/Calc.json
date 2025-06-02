@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2021-2022 Roger L. Whitcomb.
+ * Copyright (c) 2021-2022,2025 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -54,6 +54,8 @@
  *	24-Aug-2022 (rlwhitcomb)
  *	    #454: New settings option to color the output.
  *	    #447: New "grads" trig mode.
+ *	25-May-2025 (rlwhitcomb)
+ *	    #722: Text for "Library" button.
  */
 {
     title:              'Calc',
@@ -108,6 +110,9 @@
     openTip:            'Open file (F4)',
     openLabel:          'Open File',
     openKeyLabel:       'F4',
+
+    libraryTip:         'Load one or more libraries (%1$s)',
+    libraryLabel:       'Library',
 
     clearButton:        'C',
     clearTip:           'Clear Expressions and Results (F6)',
