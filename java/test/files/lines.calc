@@ -1,0 +1,16 @@
+$quiet on {
+$include 'test/files/boxdraw'
+}
+
+cols = 5, 11, 11, 11, 11, 11
+
+const mid = lt_mid_cols(cols)
+const x   = lt_cross_cols(cols)
+
+display lt_top_cols(cols)
+display mid
+display x
+display mid
+loop over 5 display mid
+display lt_bot_cols(cols)
+

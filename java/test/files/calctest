@@ -44,6 +44,7 @@ e_func        : e_func
 e_s           : e_s
 ex            : ex
 cf            : cf
+lines         : lines
 stirling      : stirling
 numbers       : numbers
 llt           : llt
