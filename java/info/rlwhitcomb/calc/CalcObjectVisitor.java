@@ -895,6 +895,8 @@
  *	    #721: Allow quaternion, complex, and fraction values for enums also.
  *	01-Jun-2025 (rlwhitcomb)
  *	    #724: New method "finalizeGlobals" for defining the "$*" and "$#" builtins.
+ *	05-Jun-2025 (rlwhitcomb)
+ *	    #725: Add "flatmap" built-in function.
  */
 package info.rlwhitcomb.calc;
 
@@ -5787,6 +5789,15 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		}
 		return buf.toString();
 	    }
+	}
+
+	@Override
+	public Object visitFlatMapExpr(CalcParser.FlatMapExprContext ctx) {
+	    List<CalcParser.ExprContext> exprs = ctx.exprN().exprList().expr();
+	    List<Object> objects = buildFlatMap(exprs, false, Conversion.UNCHANGED);
+	    ArrayScope<Object> array = new ArrayScope<>(objects);
+
+	    return array;
 	}
 
 	@Override

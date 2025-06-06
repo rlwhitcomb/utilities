@@ -11,8 +11,12 @@
 >dow_name(D'10/13/1957') -> "Sunday"
 >moy_name(D'9/11/2001') -> "September"
 >long_date(D'11/11/1918') -> "Monday, November 11, 1918"
->flat_map([[[1, 2], [3, 4]], [[5, 6], [7, 8]], [[9, 10], [11, 12]]]) -> [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 ]
->sort flat_map([[3, 9], [4, 7], [1, 2], [10, 8]]) -> [ 1, 2, 3, 4, 7, 8, 9, 10 ]
+>As of version 2.59.0 "flat_map" in "library.calc" is now a built-in function "flatmap", which accepts any number of arguments.
+>flatmap ([[[1, 2], [3, 4]], [[5, 6], [7, 8]], [[9, 10], [11, 12]]]) -> [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 ]
+>sort flatmap ([[3, 9], [4, 7], [1, 2], [10, 8]]) -> [ 1, 2, 3, 4, 7, 8, 9, 10 ]
+>arry1 = [1, 2, [4, 6, 8], 10] -> [ 1, 2, [ 4, 6, 8 ], 10 ]
+>arry2 = [[7, 9], [11, 13]] -> [ [ 7, 9 ], [ 11, 13 ] ]
+>flatmap (arry1, arry2) -> [ 1, 2, 4, 6, 8, 10, 7, 9, 11, 13 ]
 >is_perfect(28) -> true
 >is_perfect(99) -> false
 >primes(1, 50) -> [ 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47 ]

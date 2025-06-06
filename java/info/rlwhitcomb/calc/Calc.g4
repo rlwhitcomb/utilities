@@ -557,6 +557,8 @@
  *	    #710: Grammar for Harmonic number.
  *	12-Apr-2025 (rlwhitcomb)
  *	    Allow full expression for "$decimal" setting.
+ *	01-Jun-2025 (rlwhitcomb)
+ *	    #725: Grammar for "flatmap".
  */
 
 grammar Calc;
@@ -715,6 +717,7 @@ builtinFunction
    | K_PRODUCTOF ( exprN | rangeExpr )   # productOfExpr
    | K_ARRAYOF ( exprN | rangeExpr )     # arrayOfExpr
    | K_JOIN exprN                        # joinExpr
+   | K_FLATMAP exprN                     # flatMapExpr
    | K_SPLIT ( expr3 | expr2 )           # splitExpr
    | K_INDEX ( expr3 | expr2 )           # indexExpr
    | K_SEARCH searchArgs                 # searchExpr
@@ -1289,6 +1292,8 @@ K_MAX      : 'max' | 'MAX' | 'Max' ;
 K_MIN      : 'min' | 'MIN' | 'Min' ;
 
 K_JOIN     : 'join' | 'JOIN' | 'Join' ;
+
+K_FLATMAP  : 'flatmap' | 'FLATMAP' | 'Flatmap' | 'FlatMap' | 'flatMap' ;
 
 K_SPLIT    : 'split' | 'SPLIT' | 'Split' ;
 

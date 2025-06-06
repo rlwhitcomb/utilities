@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.59', date: d'2025-06-05',
+      issues: [ 725 ],
+      comment: 'Implement "flatmap" instead of the "flat_map" library function.'
+    },
     { version: '2.58.1', date: d'2025-06-01',
       issues: [ 724 ],
       comment: 'Fix stack overflow bug using "_*" as parameter to another function call.'

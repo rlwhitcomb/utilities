@@ -688,14 +688,6 @@ define epoch_secs_to_datetime(secs) = {
 define datetime_to_epoch_secs(d, t) = d × SECS_PER_DAY + t / TICKS_PER_SECOND
 
 /*
- * Compute the flat map of an array.
- *
- * @param arr The input array.
- * @return    The flat map of that array.
- */
-def flat_map(arr) = eval `[${join arr, ','}]`
-
-/*
  * Determine if a given number is a "perfect" number - equal to the sum of
  * all its positive divisors, excluding itself.
  * Note: the first few perfect numbers are: 6, 28, 496, and 8128.

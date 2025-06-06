@@ -1,3 +1,4 @@
+$requires 2.59.0
 /*
  * Unicode box drawing characters: \u2500 - \u257F
  *
@@ -150,7 +151,7 @@ define dash_line(reps, ...) = {
 
 define lt_top_cols(...) = {
     var line = LT_DN_LT_R
-    loop col_width over flat_map(_*) {
+    loop col_width over flatmap(_*) {
        line += dash_line(col_width, LT_HZ) + LT_DN_LT_HZ
     }
     line[-1] = LT_DN_LT_L
@@ -159,7 +160,7 @@ define lt_top_cols(...) = {
 
 define lt_bot_cols(...) = {
     var line = LT_UP_LT_R
-    loop col_width over flat_map(_*) {
+    loop col_width over flatmap(_*) {
        line += dash_line(col_width, LT_HZ) + LT_UP_LT_HZ
     }
     line[-1] = LT_UP_LT_L
@@ -168,14 +169,14 @@ define lt_bot_cols(...) = {
 
 define lt_mid_cols(...) = {
     var line = LT_VT
-    loop col_width over flat_map(_*) {
+    loop col_width over flatmap(_*) {
        line += dash_line(col_width, ' ') + LT_VT
     }
 }
 
 define lt_cross_cols(...) = {
     var line = LT_VT_LT_R
-    loop col_width over flat_map(_*) {
+    loop col_width over flatmap(_*) {
        line += dash_line(col_width, LT_HZ) + LT_VT_LT_HZ
     }
     line[-1] = LT_VT_LT_L

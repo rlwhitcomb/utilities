@@ -864,8 +864,8 @@ or<br>
     <tr><td>33</td><td><i>expr</i> <code>IS</code> ( <i>string</i> | <i>type_id</i> )</td><td>check if expression is the given type (same as <code>typeof</code>)</td><td>left to right</td></tr>
     <tr><td>32</td><td><i>expr</i> <code>[</code> <i>expr</i> ? <code>:</code> <i>expr</i> ? <code>]</code></td><td>produce a slice of an object or string</td><td>left to right</td></tr>
     <tr><td>31</td><td><code>( </code><i>expr</i><code> )</code></td><td>group an expression</td><td>N/A</td></tr>
-    <tr><td rowspan="93">30</td>
-            <td><code>ABS</code>&nbsp;<i>expr</i></td><td>absolute value</td><td rowspan="93">left to right</td></tr>
+    <tr><td rowspan="94">30</td>
+            <td><code>ABS</code>&nbsp;<i>expr</i></td><td>absolute value</td><td rowspan="94">left to right</td></tr>
             <tr><td><code>SIN</code>&nbsp;<i>expr</i></td><td>sine</td></tr>
             <tr><td><code>COS</code>&nbsp;<i>expr</i></td><td>cosine</td></tr>
             <tr><td><code>TAN</code>&nbsp;<i>expr</i></td><td>tangent</td></tr>
@@ -903,6 +903,7 @@ or<br>
             <tr><td><code>PRODUCTOF</code> or <code>&#x220F;</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;) *<br>or <i>expr</i> ( <code>..</code> or <code>&#x2026;</code> <i>expr</i> ( <code>,</code> <i>expr</i> ) )</td><td>product of all the values</td></tr>
             <tr><td><code>ARRAYOF</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;) *<br>or <i>expr</i> ( <code>..</code> or <code>&#x2026;</code> <i>expr</i> ( <code>,</code> <i>expr</i> ) )</td><td>make a single array of all the values</td></tr>
             <tr><td><code>JOIN</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;) *</td><td>join strings</td></tr>
+            <tr><td><code>FLATMAP</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;) *</td><td>map any dimensional array to a single "flat" array</td></tr>
             <tr><td><code>SPLIT</code>&nbsp;<i>expr</i> <code>,</code> <i>regexpr</i> (&nbsp;<code>,</code> <i>limit_expr</i>&nbsp;)</td><td>split string into parts</td></tr>
 	    <tr><td><code>REVERSE</code>&nbsp;<i>expr</i></td><td>reverse the order of an array or string</td></tr>
             <tr><td><code>UNIQUE</code>&nbsp;<i>expr</i></td><td>produce the unique values in an array or string</td></tr>
@@ -1102,6 +1103,8 @@ or<br>
      Some examples:  <code>join 1 &#x21E8; "1"</code>, while <code>join 1, 2 &#x21E8; "12"</code>.
      The complicated ones look like this:  <code>join 'a','b','c','-' &#x21E8; "a-b-c"</code>.
      While <code>arr=[1,2,3];join arr,'-' &#x21E8; 1-2-3</code>.
+  <p>The <code>flatmap</code> function simply does the flat mapping of any kind or dimension of array or arrays into a single list. Objects included in the list
+     or as array elements have their values (not the keys) included in the final array. Individual values are also included as-is in the result.
   <p>The <code>split</code> function takes one string argument, a second regular expression string, and an optional limit
      value that determines how many splits are returned. See the documentation for the Java <code>String.split</code> method
      for further details on how this parameter works.
@@ -1694,7 +1697,6 @@ whether it has previously been used/defined.
     <tr><td><code>timestamp</code></td><td><code>date</code> (default <i>today</i>),<br><code>time</code> (default <i>now</i>)</td><td>Timestamp from given date, time in Linux "date" format</td></tr>
     <tr><td><code>dateformat</code></td><td><code>d</code>,<br><code>f</code> (default <code>"mm/dd/yyyy"</code>)</td><td>Format the date according to the custom format string</td></tr>
     <tr><td><code>gmtnow</code></td><td></td><td>Current time in the GMT time zone</td></tr>
-    <tr><td><code>flat_map</code></td><td><code>arr</code></td><td>Compute the flat map of an array</td></tr>
     <tr><td><code>is_perfect</code></td><td><code>n</code></td><td>Determine if the given number is a "perfect" number</td></tr>
     <tr><td><code>version</code></td><td></td><td>Complete current version information</td></tr>
     <tr><td><code>quad</code></td><td><code>a</code>, <code>b</code>, <code>c</code></td><td>Solve the quadratic formula for the equation <code>a<i>x</i><sup>2</sup> + b<i>x</i> + c = 0</code></td></tr>
