@@ -182,6 +182,8 @@
  *	    #599: New option for "convertToWords" for British usage (to use "and" as in "three hundred and twenty").
  *	07-Apr-2025 (rlwhitcomb)
  *	    #711: Tweak some values in the number word algorithm.
+ *	05-Jun-2025 (rlwhitcomb)
+ *	    #711: Tweak that last code in the number -> word function.
  */
 package info.rlwhitcomb.math;
 
@@ -1099,11 +1101,12 @@ public final class NumericUtil
 	    // Found the problem from this:
 	    // https://www.quora.com/What-are-some-of-the-most-mind-blowing-facts/answer/Sunil-Kumar-Singh-38?ch=17&oid=53430214&share=d8589e1a&srid=obNJ&target_type=answer
 	    // Note: this could probably easily be done with the combining tables but I'm too tired tonight to figure it out...
+	    // "sedeci" -> "sexdeci" and "novendeci" -> "novemdeci"
 	    int ix;
 	    while ((ix = buf.indexOf("sedeci")) >= 0)
-		buf.replace(ix, ix + 6, "sexdeci");
+		buf.insert(ix + 2, 'x');
 	    while ((ix = buf.indexOf("novendeci")) >= 0)
-		buf.replace(ix, ix + 9, "novemdeci");
+		buf.setCharAt(ix + 4, 'm');
 
 	    return buf.toString();
 	}
