@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2012-2023 Roger L. Whitcomb.
+ * Copyright (c) 2012-2023,2025 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -256,6 +256,8 @@
  *	    #633: New methods in Options to disable checking TESTER_OPTIONS if desired.
  *	28-Nov-2023 (rlwhitcomb)
  *	    #627: Set/clear the "in testing" property for use in the testable classes.
+ *	06-Jun-2025 (rlwhitcomb)
+ *	    Tiny change in tearing down the ExitSecurityManager after execution.
  */
 package info.rlwhitcomb.tester;
 
@@ -294,6 +296,7 @@ import static info.rlwhitcomb.util.Constants.*;
  * lines, each corresponding to one test.  Each line contains
  * the name of a canon file (with optional character set)
  * and a command line for the test class.
+ * <p> Description files can be nested via the {@code $include} statement.
  * <p> There is a command line option to specify the test class
  * name, or it can be supplied (before any tests) in the test
  * description file, and different test classes can be specified
@@ -1755,11 +1758,11 @@ public class Tester
 	    }
 	    catch (Exception err) {
 		Intl.errFormat("tester#exception", Exceptions.toString(err));
-		exitSecurityManager.setAllowed(true);
 		return OTHER_ERROR;
 	    }
-
-	    exitSecurityManager.setAllowed(true);
+	    finally {
+		exitSecurityManager.setAllowed(true);
+	    }
 
 	    int failed = numberFailed.intValue();
 	    return failed == 0 ? 0 : NUMBER_OF_ERRORS + failed;
