@@ -490,6 +490,9 @@
 >-g1 % -g2 -> -13 / 21
 >-g1 mod -g2 -> -13 / 21
 >Calculation mode set to “DECIMAL(60)”.
+>cq1 = complex ('6 + 4i') -> ( 6, 4 )
+>cq2 = complex ('3 + 5i') -> ( 3, 5 )
+>cq1 mod cq2 @i -> -2 + 2ⅈ
 >127 | 128 -> 255
 >15 & 7 -> 7
 >31 ^ 10 -> 21

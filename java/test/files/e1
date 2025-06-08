@@ -345,6 +345,10 @@ g1 mod -g2
 -g1 mod -g2
 }
 
+cq1 = complex('6 + 4i')
+cq2 = complex('3 + 5i')
+cq1 mod cq2 @i
+
 # Bit and logical operators
 127 | 128
 15 & 7
