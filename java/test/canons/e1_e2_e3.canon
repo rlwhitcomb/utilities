@@ -1621,6 +1621,7 @@
 {{  windows }}>FindFiles ('.', 'latest*', 'fx') -> [ "latest_push.bat", "latest_test.bat" ]
 >findFiles ('.', '*.java') -> [ "CheckCopyrights.java", "FormatValues.java" ]
 >findfiles ('test', 'd*', 'fr*~') -> [ "Declaration.txt", "dacted.canon", "defunkt.json", "demo", "dupjson.calc", "dynarray.canon", "dynarraytest" ]
+>findFiles ('images', 'backspace_32.png;*.gif') -> [ "backspace_32.png", "calculator_32.gif" ]
 >delete 'alpha.beta', 'delta.gamma', 'alpha.omega' -> false
 >fileinfo ('build.xml').name -> "build.xml"
 >Defining constant “FILE1” = "_ftest_.beta"

@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { base: '1.12.6', date: d'2025-06-07',
+      issues: [ 723 ],
+      comment: 'Allow multiple file specs (separated by ";" or ":") in "findfiles" function.'
+    },
     { version: '2.59', date: d'2025-06-05',
       issues: [ 725 ],
       comment: 'Implement "flatmap" instead of the "flat_map" library function.'

@@ -939,7 +939,7 @@ or<br>
             <tr><td><code>ENCODE</code>&nbsp;<i>expr</i></td><td>encode a string into its base64 form</td></tr>
             <tr><td><code>EXISTS</code>&nbsp;<i>expr</i>&nbsp;( <code>,</code>&nbsp;<i>flags_expr</i>&nbsp;)</td><td>check the existence/permissions of file or directory</td></tr>
             <tr><td><code>FILEINFO</code>&nbsp;<i>expr</i></td><td>get information about a given file</td></tr>
-            <tr><td><code>FINDFILES</code>&nbsp;<i>dir</i><code>,</code> <i>pattern_expr</i> ( <code>,</code> <i>flags_expr</i> )</td><td>list files in the given directory<br>matching the pattern and optional flags</td></tr> 
+            <tr><td><code>FINDFILES</code>&nbsp;<i>dir</i><code>,</code> <i>pattern_expr</i> ( <code>,</code> <i>flags_expr</i> )</td><td>list files in the given directory<br>matching the pattern(s) and optional flags</td></tr>
             <tr><td><code>READ</code>&nbsp;<i>file_name_expr</i>&nbsp;( <code>:</code>&nbsp;<i>charset_expr</i>&nbsp;)</td><td>read the file (or files) using the optional charset</td></tr>
             <tr><td><code>WRITE</code>&nbsp;<i>expr</i> <code>,</code>&nbsp;<i>file_name_expr</i>&nbsp;( <code>:</code>&nbsp;<i>charset_expr</i>&nbsp;)</td><td>write the value to the file using the optional charset</td></tr>
             <tr><td><code>READPROPERTIES</code>&nbsp;<i>file_name_expr</i>&nbsp;( <code>:</code>&nbsp;<i>charset_expr</i>&nbsp;)</td><td>read the properties file using the optional charset</td></tr>
@@ -1137,7 +1137,7 @@ or<br>
      using the various modes. If no mode is given, or a variable is used whose value is null or an empty string, then the replacement is done
      exactly, as in <code>replace('tell', 'l', 'b') &#x21E8; 'tebb'</code>. If the option value is <code>all</code>, <code>first</code>, or
      <code>last</code>, the second string is a regular expression and either all, the first, or the last substring(s) that match the regular
-     expression are replaced with the third string value. Group substitutions are allowed in the replacement string, as in
+     expression are replaced with the 3<sup>rd</sup> string value. Group substitutions are allowed in the replacement string, as in
      <code>replace ('tell teal tail teel toil tool toll', 't(..)l', 't$1b', all) &#x21E8; "telb teab taib teeb toib toob tolb"</code>.
   <p>If the first argument to <code>replace</code> is an object or array, the replace operation is performed on each of the values in that object recursively.
   <p>If the replacement value is missing or empty the search value is deleted in the result according to the option value used,
@@ -1163,7 +1163,7 @@ or<br>
      will not clear any values, so be careful. For an array, specifying a start value and a count of zero will clear nothing.
   <p>The <code>fill</code> function requires a variable as the first argument. The contents of the variable are replaced or
      set to the second argument value (or <code>null</code> or <code>'\0'</code> if missing), depending on the optional
-     third and fourth parameters. If only the third argument is
+     3<sup>rd</sup> and 4<sup>th</sup> parameters. If only the 3<sup>rd</sup> argument is
      given this is taken as the length, and the array or string is filled to that length with the value. If both the
      3<sup>rd</sup> and 4<sup>th</sup> arguments are given, these are taken as the starting offset and a length.
      If a string is filled and the starting offset is past the end of the existing string, the intervening characters are
@@ -1250,7 +1250,8 @@ or<br>
   <p><code>FileInfo</code> takes a single file name / path parameter and returns an object containing various pieces of information about the file:
   <p class="indent"><code style="color:blue;">fileinfo "doc" </code><code style="color:grey;">&#x21E8;</code> <code style="color:green;">{ name: "doc", file: false, directory: true, link: false, other: false, size: 0, &mldr; }</code>
   <p>If the named file does not exist the return value is an empty object (<code style="color:green;">{ }</code>).
-  <p>For <code>findfiles</code> the pattern is a normal file-system wildcard pattern, and the flags (if given) are the same as for <code>exists</code> with some additions.
+  <p>For <code>findfiles</code> the pattern spec is one or more normal file-system wildcard patterns, separated by either <code>';'</code> or <code>':'</code>, and the flags
+     (if given) are the same as for <code>exists</code> with some additions.
      If the flags contains <code>'*'</code> then the search will continue down subdirectories of the parent directory. If <code>'!'</code> is added to the flags,
      full paths are returned in the list instead of just the file names. And if <code>'~'</code> is included, the file name matching will ignore the case of the name.
      If the flags are omitted, the files are found regardless of type (only matching the name pattern, with case-sensitive compare).
@@ -1275,7 +1276,7 @@ or<br>
      another object containing only those keys that match the regex. For arrays, the returned array contains only those elements
      that match. For all other values, the input expression is converted to a string and matched against the regex,
      returning a <code>true</code> / <code>false</code> value.
-     The optional third flags value can be one or more of the following:
+     The optional 3<sup>rd</sup>flags value can be one or more of the following:
      <ul><li><code>0x0001</code> = case insensitive</li>
          <li><code>0x0002</code> = dotall (the <code>'.'</code> pattern matches line endings)</li>
          <li><code>0x0004</code> = Unicode case folding</li>
