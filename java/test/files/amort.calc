@@ -13,6 +13,8 @@ if isnull($0) {
     leave 1
 }
 
+$include 'boxdraw'
+
 payment = PMT(P=$0, R=$1, N=$2)
 
 principal = $0
@@ -25,6 +27,16 @@ total_interest = 0
 display `Monthly payment on $$$principal at ${$1}% interest for ${$2} years is $$$payment.`
 display
 
+const TITLES = [ "Year", "Month", "Balance", "Payment", "Interest", "Principal" ]
+const WIDTHS = title_widths(TITLES, 4)
+const YEAR_LINE = dash_line(WIDTHS[0], HV_HZ)
+
+display lt_top_cols(WIDTHS)
+var title_line = lt_mid_cols(WIDTHS)
+display insert_titles(title_line, TITLES, WIDTHS, ALIGN_CENTER)
+display lt_cross_cols(WIDTHS)
+
+var year = 1
 loop m over months {
     var interest = round(monthly_interest * principal, 2)
 
@@ -36,9 +48,17 @@ loop m over months {
     total_payments += payment
     total_interest += interest
 
-    display `Month: $m Balance: ${principal@2,$}, Payment: ${payment@2,$}, Interest: ${interest@2,$}, Principal: ${principal_decrease@2,$}`
+    var line = lt_mid_cols(WIDTHS)
+    const ys = (m mod 12 == 1) ? @@year : (m mod 12 == 0) ? YEAR_LINE : ''
+    const values = [ ys, @@m, `${principal@2,$}`, `${payment@2,$}`, `${interest@2,$}`, `${principal_decrease@2,$}` ]
+    display insert_titles(line, values, WIDTHS, ALIGN_RIGHT)
+
     principal -= principal_decrease
+
+    if m mod 12 == 0 year++
 }
+
+display lt_bot_cols(WIDTHS)
 
 display
 display `Total of $months monthly payments is ${total_payments@2,$}, Total interest is ${total_interest@2,$}`

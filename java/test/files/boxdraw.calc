@@ -183,3 +183,30 @@ define lt_cross_cols(...) = {
     line
 }
 
+define title_widths(titles, padding) = {
+    var widths = []
+    loop title over titles {
+        widths += length(title) + padding
+    }
+}
+
+enum ALIGN_LEFT, ALIGN_CENTER, ALIGN_RIGHT
+
+define insert_titles(line, titles, widths, align = ALIGN_CENTER) = {
+    $assert length(titles) == length(widths), 'Titles and widths arrays must be the same size!'
+    var new_line = chars(line)
+    var pos = 1
+    loop ix within length(titles) {
+        const title = titles[ix]
+        const len = length(title)
+        const left = case align of {
+            ALIGN_LEFT: 0,
+            ALIGN_CENTER: (widths[ix] - len + 1) \ 2,
+            ALIGN_RIGHT: widths[ix] - len
+        }
+        splice(new_line, pos + left, len, chars(title))
+        pos += widths[ix] + 1
+    }
+    join new_line
+}
+
