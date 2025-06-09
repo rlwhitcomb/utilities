@@ -897,6 +897,8 @@
  *	    #724: New method "finalizeGlobals" for defining the "$*" and "$#" builtins.
  *	05-Jun-2025 (rlwhitcomb)
  *	    #725: Add "flatmap" built-in function.
+ *	08-Jun-2025 (rlwhitcomb)
+ *	    #729: Fix "splice" inserting objects.
  */
 package info.rlwhitcomb.calc;
 
@@ -6329,7 +6331,29 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    for (int index = 3; index < exprLen; index++) {
 			CalcParser.ExprContext valueCtx = exprs.get(index);
 			Object value = evaluate(valueCtx);
-			array.insert(index - 3 + start, value);
+			if (value instanceof ArrayScope) {
+			    @SuppressWarnings("unchecked")
+			    ArrayScope<Object> src = (ArrayScope<Object>) value;
+			    for (int pos = 0; pos < src.size(); pos++) {
+				array.insert(index - 3 + start + pos, src.getValue(pos));
+			    }
+			}
+			else if (value instanceof ObjectScope) {
+			    ObjectScope src = (ObjectScope) value;
+			    for (int pos = 0; pos < src.size(); pos++) {
+				array.insert(index - 3 + start + pos, src.valueAt(pos));
+			    }
+			}
+			else if (value instanceof SetScope) {
+			    @SuppressWarnings("unchecked")
+			    SetScope<Object> src = (SetScope<Object>) value;
+			    for (int pos = 0; pos < src.size(); pos++) {
+				array.insert(index - 3 + start + pos, src.get(pos));
+			    }
+			}
+			else {
+			    array.insert(index - 3 + start, value);
+			}
 		    }
 
 		    return removed;

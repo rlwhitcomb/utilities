@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.59.1', date: d'2025-06-08',
+      issues: [ 729 ],
+      comment: 'Fix "splice" when inserting an array, object, or set into an array.'
+    },
     { base: '1.12.6', date: d'2025-06-07',
       issues: [ 723 ],
       comment: 'Allow multiple file specs (separated by ";" or ":") in "findfiles" function.'

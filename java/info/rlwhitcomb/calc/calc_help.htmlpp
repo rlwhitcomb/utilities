@@ -1161,6 +1161,7 @@ or<br>
      For an object source, the return is a possibly empty object containing the key:value pairs removed from the original.
      Also, for an object, if the drop list is omitted, the object is cleared of all values, but specifying an empty list
      will not clear any values, so be careful. For an array, specifying a start value and a count of zero will clear nothing.
+     Note: inserting an array, object, or set into an array will insert each individual element from the source into the result.
   <p>The <code>fill</code> function requires a variable as the first argument. The contents of the variable are replaced or
      set to the second argument value (or <code>null</code> or <code>'\0'</code> if missing), depending on the optional
      3<sup>rd</sup> and 4<sup>th</sup> parameters. If only the 3<sup>rd</sup> argument is
