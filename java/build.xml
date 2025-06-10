@@ -4,7 +4,7 @@
 
 	The MIT License (MIT)
 
-	Copyright (c) 2020-2024 Roger L. Whitcomb.
+	Copyright (c) 2020-2025 Roger L. Whitcomb.
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -392,6 +392,8 @@
 		More "echo" information during testing.
 	    19-Sep-2024 (rlwhitcomb)
 		#689: Copy "calendar.calc" to output directory for the new "calen" script.
+	    10-Jun-2025 (rlwhitcomb)
+		#707: Copy needed resources to output directory for "amort" script.
 
      ========================================================================== -->
 
@@ -951,7 +953,7 @@ Test ending on ${end.of.test.date} at ${end.of.test.time}
 			</fileset>
 			<fileset dir="external-files" includes="*.jar" excludes="antlr-*-complete.jar"/>
 			<fileset dir="test/files" includes="lib*"/>
-			<fileset dir="test/files" includes="calendar.calc"/>
+			<fileset dir="test/files" includes="amort.calc,boxdraw.calc,calendar.calc"/>
 		</copy>
 		<chmod dir="${env.UTILITIES_HOME}" perm="+x" if:true="${utilities.available}">
 			<patternset refid="wrapper-files"/>

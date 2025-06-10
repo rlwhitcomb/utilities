@@ -40,10 +40,11 @@ bash: [
 settings: [
     { name: '`',        class: '$calc.Calc', args: '-nolibraries'                    },
     { name: '``',       class: '$calc.Calc', args: '"-g -nolibraries"', find: '_gui' },
+    { name: 'amort',    class: '$calc.Calc', args: '"${outdir}amort.calc --"'        },
     { name: 'b64',      class: '$tools.B64'                                          },
     { name: 'c',        class: '$calc.Calc'                                          },
     { name: 'calc',     class: '$calc.Calc'                                          },
-    { name: 'calen',    class: '$calc.Calc', args: '"${outdir}calendar --"'          },
+    { name: 'calen',    class: '$calc.Calc', args: '"${outdir}calendar.calc --"'     },
     { name: 'cat',      class: '$cat.Cat'                                            },
     { name: 'cg',       class: '$calc.Calc',           args: '-g',    find: '_gui'   },
     { name: 'cmp',      class: '$compare.CompareFiles'                               },
