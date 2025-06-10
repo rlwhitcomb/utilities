@@ -1,0 +1,24 @@
+$quiet on {
+var results = []
+
+define sum_of_digits(n) = sumof(chars(@@n))
+
+loop n over 1002..3000 {
+    if sum_of_digits(n) == 3
+        results += n
+}
+
+display 'All the four-digit numbers whose digits add up to 3 are:'
+display results
+
+results = []
+
+loop n over 10000..50000 {
+    if sum_of_digits(n) == 5
+        results += n
+}
+
+display 'All the five-digit numbers whose digits add up to 5 are:'
+display results
+
+}

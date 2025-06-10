@@ -37,6 +37,7 @@ remdiv        : remdiv
 complex_divide_test : complex_divide_test
 mult          : mult
 trick         : trick
+sum3          : sum3
 text          : -text pi;e;phi;ln 2
 save          : -filetext save
 e_lib         : e_lib
