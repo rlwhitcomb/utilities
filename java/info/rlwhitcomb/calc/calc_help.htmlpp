@@ -593,7 +593,8 @@ which gives:
   <p class="indent"> <code>f'2&#x00BC;'</code> = <code>2.25</code> or <code>f'1 2/3'</code> = <code>1.66666...</code>
   <p>Complex numbers are constructed as such: <code>(</code>&nbsp;<i>real</i>&nbsp;<code>,</code>&nbsp;<i>imaginary</i>&nbsp;<code>)</code>. There is also the <code>complex</code> function that accepts one or two arguments:
      either the two value parts or a string convertible to these two parts, or an object with <code>r</code> and <code>i</code> keys, or <code>radius</code> and <code>theta</code> keys, or an array with two values.
-  <p>The string syntax for <code>complex</code> is either <code>"( <i>expr</i> )"</code>, <code>"( <i>n</i>, <i>n</i> )"</code>, or <code>"( <i>n</i> &pm; <i>n</i> i )"</code>, or <code>"{ r: <i>radius</i>, &#x03B8;: <i>theta</i> }"</code>.
+  <p>The string syntax for <code>complex(...)</code> is either <code>"( <i>expr</i> )"</code>, <code>"( <i>n</i>, <i>n</i> )"</code>, or <code>"( <i>n</i> &pm; <i>n</i> i )"</code>, or <code>"{ r: <i>radius</i>, &#x03B8;: <i>theta</i> }"</code>.
+  <p>A complex number can also be specified as a constant via the <code>c'...'</code> form where the quoted part is exactly the string syntax given above (without the enclosing parentheses), as in <code>c'3/4 - 2/3i'</code> or <code>c'17 + 3i'</code>. Note however that the polar syntax is not supported in this context.
   <p>There is also a constant type used to express values as Roman Numerals. The syntax is <code>R'<i>xxxx</i>'</code>, where the
      digits are the typical Roman values of <code>I</code> (one), <code>V</code> (five), <code>X</code> (ten), and so on (case-insensitive), but also including the Unicode
      values in the range of <code>'\u2160'</code> (<code>&#x2160;</code> or one) to <code>'\u2182'</code> (<code>&#x2182;</code> or ten thousand).

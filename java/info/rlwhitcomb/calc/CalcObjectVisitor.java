@@ -899,6 +899,8 @@
  *	    #725: Add "flatmap" built-in function.
  *	08-Jun-2025 (rlwhitcomb)
  *	    #729: Fix "splice" inserting objects.
+ *	18-Jun-2025 (rlwhitcomb)
+ *	    #731: Add complexValue method.
  */
 package info.rlwhitcomb.calc;
 
@@ -8465,6 +8467,13 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    catch (DateTimeParseException | NumberFormatException ex) {
 		throw new CalcExprException(ex, ctx);
 	    }
+	}
+
+	@Override
+	public Object visitComplexValue(CalcParser.ComplexValueContext ctx) {
+	    String text = ctx.COMPLEX_CONST().getText();
+	    String string = text.substring(2, text.length()-1);
+	    return ComplexNumber.parse(string, settings.rationalMode);
 	}
 
 	@Override

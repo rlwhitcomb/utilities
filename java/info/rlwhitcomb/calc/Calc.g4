@@ -559,6 +559,8 @@
  *	    Allow full expression for "$decimal" setting.
  *	01-Jun-2025 (rlwhitcomb)
  *	    #725: Grammar for "flatmap".
+ *	18-Jun-2025 (rlwhitcomb)
+ *	    #731: Grammar for complex constants.
  */
 
 grammar Calc;
@@ -1006,6 +1008,7 @@ value
    | ROMAN_CONST                        # romanValue
    | TIME_CONST                         # timeValue
    | DATE_CONST                         # dateValue
+   | COMPLEX_CONST                      # complexValue
    | ( LBRACE EOL* RBRACE | EMPTY_SET ) # emptyObjValue
    ;
 
@@ -1206,6 +1209,8 @@ DATE_CONST
          | 'D' '\'' DIG DIG DIG DIG '-' ? DIG DIG '\''
          ;
 
+COMPLEX_CONST
+         : [Cc] '\'' [0-9+\-, /\tiI\u0131\u0399\u03B9\u2110\u2148]+ '\'' ;
 
 /*
  * Predefined function names

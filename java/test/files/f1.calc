@@ -131,7 +131,7 @@ c3 = ( 12, 0 )
 c4 = complex('( 6 -5 ı)')
 c3+c4
 12+c4
-c5 = complex('10-5I')
+c5 = c'10-5I'
 c6 = (-5,+5)
 c5+c6
 
@@ -182,8 +182,8 @@ complex(ls1)
 complex(mp1)
 
 // Tests from https://www.hackmath.net/en/calculator/complex-number
-sqrt((0, 9))
-sqrt(complex("10-6i"))
+sqrt(c'9i')
+sqrt(c'10-6i')
 (-32, 0)**(1/5) / 5
 cbrt((1,2)) * sqrt(4)
 (0, -5) ** (1/8) * cbrt(8)
