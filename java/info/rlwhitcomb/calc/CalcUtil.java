@@ -258,6 +258,8 @@
  *	    #713: Fix "scale" for integer values.
  *	17-May-2025 (rlwhitcomb)
  *	    #719: Recursive interpolation of strings.
+ *	22-Jun-2025 (rlwhitcomb)
+ *	    #694: A little tweaking of "bitOp" parameters.
  */
 package info.rlwhitcomb.calc;
 
@@ -2045,14 +2047,16 @@ public final class CalcUtil
 	 * Calculates the given bit-wise operation on the operands.
 	 *
 	 * @param visitor The calculation visitor.
-	 * @param o1  The LHS operand.
-	 * @param o2  The RHS operand.
-	 * @param op  The desired bit-wise operation.
-	 * @param ctx The rule context (for error reporting).
-	 * @param mc  Rounding mode and precision for the result.
+	 * @param oper The desired bit-wise operation.
+	 * @param o1   The LHS operand.
+	 * @param o2   The RHS operand.
+	 * @param ctx  The rule context (for error reporting).
+	 * @param mc   Rounding mode and precision for the result.
 	 * @return <code>o1 <i>op</i> o2</code>
 	 */
-	public static Object bitOp(final CalcObjectVisitor visitor, final Object o1, final Object o2, final String op, final ParserRuleContext ctx, final MathContext mc) {
+	public static Object bitOp(final CalcObjectVisitor visitor, final String oper, final Object o1, final Object o2, final ParserRuleContext ctx, final MathContext mc) {
+	    String op = oper.replace("=", "");
+
 	    if (o1 instanceof CollectionScope && o2 instanceof CollectionScope) {
 		SetScope<Object> s1 = SetScope.from((CollectionScope) o1);
 		SetScope<Object> s2 = SetScope.from((CollectionScope) o2);
@@ -2072,7 +2076,7 @@ public final class CalcUtil
 			result = s1.union(s2);
 			break;
 		    default:
-			throw new UnknownOpException(op, ctx);
+			throw new UnknownOpException(oper, ctx);
 		}
 
 		return result;
@@ -2113,7 +2117,7 @@ public final class CalcUtil
 			result = b1 | !b2;
 			break;
 		    default:
-			throw new UnknownOpException(op, ctx);
+			throw new UnknownOpException(oper, ctx);
 		}
 
 		return Boolean.valueOf(result);
@@ -2158,7 +2162,7 @@ public final class CalcUtil
 			result = i1.or(i2.not());
 			break;
 		    default:
-			throw new UnknownOpException(op, ctx);
+			throw new UnknownOpException(oper, ctx);
 		}
 
 		return result;

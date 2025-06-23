@@ -901,6 +901,9 @@
  *	    #729: Fix "splice" inserting objects.
  *	18-Jun-2025 (rlwhitcomb)
  *	    #731: Add complexValue method.
+ *	22-Jun-2025 (rlwhitcomb)
+ *	   #694: Consolidate the remaining operators into common routines, so the expression
+ *	   and the expression assignment are exactly alike.
  */
 package info.rlwhitcomb.calc;
 
@@ -4801,43 +4804,32 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    return evaluate(ctx.expr());
 	}
 
-	@Override
-	public Object visitMultiplyExpr(CalcParser.MultiplyExprContext ctx) {
-	    CalcParser.ExprContext ctx1 = ctx.expr(0);
-	    CalcParser.ExprContext ctx2 = ctx.expr(1);
-	    Object e1 = evaluate(ctx1);
-	    Object e2 = evaluate(ctx2);
+	private Object multiplyDivideOp(String oper, Object e1, Object e2, ParserRuleContext ctx, ParserRuleContext ctx1, ParserRuleContext ctx2) {
+	    String op = oper.replace("=", "");
 
-	    String op;
-	    if (ctx.K_MOD() == null) {
-		op = ctx.MULT_OP().getText();
-		switch (op) {
-		    case "*":
-		    case "\u00D7":
-		    case "\u2217":
-		    case "\u2715":
-		    case "\u2716":
-			op = "*";
-			break;
-		    case "/":
-		    case "\u00F7":
-		    case "\u2215":
-		    case "\u2797":
-			op = "/";
-			break;
-		    case "\\":
-		    case "\u2216":
-			op = "\\";
-			break;
-		    case "%":
-		    case "mod":
-			break;
-		    default:
-			throw new UnknownOpException(op, ctx);
-		}
-	    }
-	    else {
-		op = "mod";
+	    switch (op) {
+		case "*":
+		case "\u00D7":
+		case "\u2217":
+		case "\u2715":
+		case "\u2716":
+		    op = "*";
+		    break;
+		case "/":
+		case "\u00F7":
+		case "\u2215":
+		case "\u2797":
+		    op = "/";
+		    break;
+		case "\\":
+		case "\u2216":
+		    op = "\\";
+		    break;
+		case "%":
+		case "mod":
+		    break;
+		default:
+		    throw new UnknownOpException(oper, ctx);
 	    }
 
 	    try {
@@ -4877,7 +4869,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			case "mod":
 			    return q1.modulus(q2, mc);
 			default:
-			    throw new UnknownOpException(op, ctx);
+			    throw new UnknownOpException(oper, ctx);
 		    }
 		}
 		else if (e1 instanceof ComplexNumber || e2 instanceof ComplexNumber) {
@@ -4897,7 +4889,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			case "mod":
 			    return c1.modulus(c2, mc);
 			default:
-			    throw new UnknownOpException(op, ctx);
+			    throw new UnknownOpException(oper, ctx);
 		    }
 		}
 		else if (e1 instanceof SetScope && e2 instanceof CollectionScope) {
@@ -4909,7 +4901,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			case "\\":
 			     return set.diff(c);
 			default:
-			    throw new UnknownOpException(op, ctx);
+			    throw new UnknownOpException(oper, ctx);
 		    }
 		}
 		else {
@@ -4935,17 +4927,24 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		throw new CalcExprException(ae, ctx);
 	    }
 
-	    return null;
+	    return null;	// should never happen but the compiler couldn't figure that out
 	}
 
 	@Override
-	public Object visitAddExpr(CalcParser.AddExprContext ctx) {
+	public Object visitMultiplyExpr(CalcParser.MultiplyExprContext ctx) {
 	    CalcParser.ExprContext ctx1 = ctx.expr(0);
 	    CalcParser.ExprContext ctx2 = ctx.expr(1);
 	    Object e1 = evaluate(ctx1);
 	    Object e2 = evaluate(ctx2);
 
-	    String op = ctx.ADD_OP().getText();
+	    String op = (ctx.K_MOD() == null) ? ctx.MULT_OP().getText() : "mod";
+
+	    return multiplyDivideOp(op, e1, e2, ctx, ctx1, ctx2);
+	}
+
+	private Object addSubtractOp(String oper, Object e1, Object e2, ParserRuleContext ctx, ParserRuleContext ctx1, ParserRuleContext ctx2) {
+	    String op = oper.replace("=", "");
+
 	    switch (op) {
 		case "+":
 		case "\u2795":
@@ -4985,8 +4984,20 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			return fixupToInteger(d1.subtract(d2, settings.mc));
 		    }
 		default:
-		    throw new UnknownOpException(op, ctx);
+		    throw new UnknownOpException(oper, ctx);
 	    }
+	}
+
+	@Override
+	public Object visitAddExpr(CalcParser.AddExprContext ctx) {
+	    CalcParser.ExprContext ctx1 = ctx.expr(0);
+	    CalcParser.ExprContext ctx2 = ctx.expr(1);
+	    Object e1 = evaluate(ctx1);
+	    Object e2 = evaluate(ctx2);
+
+	    String op = ctx.ADD_OP().getText();
+
+	    return addSubtractOp(op, e1, e2, ctx, ctx1, ctx2);
 	}
 
 	@Override
@@ -8234,7 +8245,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    String op = ctx.BIT_OP().getText();
 
-	    return bitOp(this, o1, o2, op, ctx, settings.mc);
+	    return bitOp(this, op, o1, o2, ctx, settings.mc);
 	}
 
 	@Override
@@ -8494,48 +8505,11 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    ParserRuleContext exprCtx    = ctx.expr();
 	    LValueContext lValue         = makeLValue(varCtx);
 
-	    Object result;
-
 	    String op = ctx.ADD_ASSIGN().getText();
 	    Object e1 = lValue.getContextObject(this);
 	    Object e2 = visit(exprCtx);
 
-	    switch (op) {
-		case "+=":
-		case "\u2795=":
-		    result = addOp(this, e1, e2, varCtx, exprCtx, settings.mc, settings.rationalMode, settings.sortKeys);
-		    break;
-		case "-=":
-		case "\u2212=":
-		case "\u2796=":
-		    if (settings.rationalMode && (e1 instanceof BigFraction || e2 instanceof BigFraction)) {
-			BigFraction f1 = convertToFraction(e1, varCtx);
-			BigFraction f2 = convertToFraction(e2, exprCtx);
-
-			result = f1.subtract(f2);
-		    }
-		    else if (e1 instanceof Quaternion || e2 instanceof Quaternion) {
-			Quaternion q1 = Quaternion.valueOf(e1);
-			Quaternion q2 = Quaternion.valueOf(e2);
-
-			result = q1.subtract(q2);
-		    }
-		    else if (e1 instanceof ComplexNumber || e2 instanceof ComplexNumber) {
-			ComplexNumber c1 = ComplexNumber.valueOf(e1, settings.rationalMode);
-			ComplexNumber c2 = ComplexNumber.valueOf(e2, settings.rationalMode);
-
-			result = c1.subtract(c2, settings.mc);
-		    }
-		    else {
-			BigDecimal d1 = convertToDecimal(e1, settings.mc, varCtx);
-			BigDecimal d2 = convertToDecimal(e2, settings.mc, exprCtx);
-
-			result = fixupToInteger(d1.subtract(d2, settings.mc));
-		    }
-		    break;
-		default:
-		    throw new UnknownOpException(op, ctx);
-	    }
+	    Object result = addSubtractOp(op, e1, e2, ctx, varCtx, exprCtx);
 
 	    return lValue.putContextObject(this, result);
 	}
@@ -8560,156 +8534,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    ParserRuleContext exprCtx    = ctx.expr();
 
 	    LValueContext lValue = makeLValue(varCtx);
-	    Object result;
-
-	    String op = ctx.MULT_ASSIGN().getText();
-	    switch (op) {
-		case "*=":
-		case "\u00D7=":
-		case "\u2217=":
-		case "\u2715=":
-		case "\u2716=":
-		    op = "*";
-		    break;
-		case "/=":
-		case "\u00F7=":
-		case "\u2215=":
-		case "\u2797=":
-		    op = "/";
-		    break;
-		case "\\=":
-		case "\u2216=":
-		    op = "\\";
-		    break;
-		case "%=":
-		    op = "%";
-		    break;
-		default:
-		    throw new UnknownOpException(op, ctx);
-	    }
 
 	    Object e1 = lValue.getContextObject(this);
 	    Object e2 = evaluate(exprCtx);
+	    String op = ctx.MULT_ASSIGN().getText();
 
-	    try {
-		if (((settings.rationalMode && (op == "/" || op == "\\")) || (e1 instanceof BigFraction || e2 instanceof BigFraction)) &&
-		    (!(e1 instanceof Quaternion || e2 instanceof Quaternion)) &&
-		    (!(e1 instanceof ComplexNumber || e2 instanceof ComplexNumber))) {
-		    BigFraction f1 = convertToFraction(e1, varCtx);
-		    BigFraction f2 = convertToFraction(e2, exprCtx);
-
-		    switch (op) {
-			case "*":
-			    result = f1.multiply(f2);
-			    break;
-			case "/":
-			    result = f1.divide(f2);
-			    break;
-			case "\\":
-			    result = f1.idivide(f2);
-			    break;
-			case "%":
-			    result = f1.remainder(f2);
-			    break;
-			case "mod":
-			    result = f1.modulus(f2);
-			    break;
-			default:
-			    throw new UnknownOpException(op, ctx);
-		    }
-		}
-		else if (e1 instanceof Quaternion || e2 instanceof Quaternion) {
-		    Quaternion q1 = Quaternion.valueOf(e1);
-		    Quaternion q2 = Quaternion.valueOf(e2);
-		    MathContext mc = MathUtil.divideContext(q1, settings.mcDivide);
-
-		    switch (op) {
-			case "*":
-			    result = q1.multiply(q2, settings.mc);
-			    break;
-			case "/":
-			    result = q1.divide(q2, mc);
-			    break;
-			case "\\":
-			    result = q1.idivide(q2, mc);
-			    break;
-			case "%":
-			    result = q1.remainder(q2, mc);
-			    break;
-			case "mod":
-			    result = q1.modulus(q2, mc);
-			    break;
-			default:
-			    throw new UnknownOpException(op, ctx);
-		    }
-		}
-		else if (e1 instanceof ComplexNumber || e2 instanceof ComplexNumber) {
-		    ComplexNumber c1 = ComplexNumber.valueOf(e1, settings.rationalMode);
-		    ComplexNumber c2 = ComplexNumber.valueOf(e2, settings.rationalMode);
-		    MathContext mc = MathUtil.divideContext(c1, settings.mcDivide);
-
-		    switch (op) {
-			case "*":
-			    result = c1.multiply(c2, settings.mc);
-			    break;
-			case "/":
-			    result = c1.divide(c2, mc);
-			    break;
-			case "\\":
-			    result = c1.idivide(c2, mc);
-			    break;
-			case "%":
-			    result = c1.remainder(c2, mc);
-			    break;
-			case "mod":
-			    result = c1.modulus(c2, mc);
-			    break;
-			default:
-			    throw new UnknownOpException(op, ctx);
-		    }
-		}
-		else if (e1 instanceof SetScope && e2 instanceof CollectionScope) {
-		    @SuppressWarnings("unchecked")
-		    SetScope<Object> set = (SetScope<Object>) e1;
-		    CollectionScope c = (CollectionScope) e2;
-
-		    switch (op) {
-			case "\\":
-			    result = set.diff(c);
-			    break;
-			default:
-			    throw new UnknownOpException(op, ctx);
-		    }
-		}
-		else {
-		    BigDecimal d1 = convertToDecimal(e1, settings.mc, varCtx);
-		    BigDecimal d2 = convertToDecimal(e2, settings.mc, exprCtx);
-		    MathContext mc = MathUtil.divideContext(d1, settings.mcDivide);
-
-		    switch (op) {
-			case "*":
-			    result = fixupToInteger(d1.multiply(d2, settings.mc));
-			    break;
-			case "/":
-			    result = fixupToInteger(d1.divide(d2, mc));
-			    break;
-			case "\\":
-			    result = fixupToInteger(d1.divideToIntegralValue(d2, mc));
-			    break;
-			case "%":
-			    result = fixupToInteger(d1.remainder(d2, mc));
-			    break;
-			case "mod":
-			    result = fixupToInteger(MathUtil.modulus(d1, d2, mc));
-			    break;
-			default:
-			    throw new UnknownOpException(op, ctx);
-		    }
-		}
-	    }
-	    catch (ArithmeticException ae) {
-		throw new CalcExprException(ae, ctx);
-	    }
+	    Object result = multiplyDivideOp(op, e1, e2, ctx, varCtx, exprCtx);
 
 	    return lValue.putContextObject(this, result);
 	}
@@ -8722,10 +8552,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    Object o2 = evaluate(ctx.expr());
 
 	    String op = ctx.BIT_ASSIGN().getText();
-	    // Strip off the trailing '=' of the operator
-	    op = op.substring(0, op.length() - 1);
 
-	    return lValue.putContextObject(this, bitOp(this, o1, o2, op, ctx, settings.mc));
+	    return lValue.putContextObject(this, bitOp(this, op, o1, o2, ctx, settings.mc));
 	}
 
 	@Override

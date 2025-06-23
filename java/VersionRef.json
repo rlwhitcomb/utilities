@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.59.3', date: d'2025-06-23',
+      issues: [ 694 ],
+      comment: 'Refactoring to correct differences between "expr" and "expr-assign" operations.'
+    },
     { version: '2.59.2', date: d'2025-06-18',
       issues: [ 731 ],
       comment: 'Add complex value constant.'

@@ -12,23 +12,28 @@ $quiet on {
     }
 
     versions = eval(read(VERSION_INFO))
+
+    $library 'test/files/boxdraw'
+
+    const HDR_LINE = dash_line(45, DBL_HZ)
+    const UNDER_LINE = dash_line(7, LT_HZ) + "  " + dash_line(10, LT_HZ) + "  " + dash_line(72, LT_HZ)
 }
 $resultsonly on {
     $quotestrings off
     // use just strings or "print" statements to display different colors
-    '============================================='
+    HDR_LINE
     print CYAN_BRIGHT + '           Calc Versions Reference' + RESET
     print ` Current ${version}`
     print ' ' + info.copyright
-    '============================================='
+    HDR_LINE
     ''
     print 'Version  Date        Comment'
-          '-------  ----------  ---------------------------------------------------------'
+    UNDER_LINE
     loop v over versions {
         const dt = dateformat(v.date, 'yyyy.mm.dd')
         const cm = replace(replace(v.comment, "\t ", "\t\t     "), "[BREAKING]", `$RED_BRIGHT[BREAKING]$RESET`)
         if v.base { print `${CYAN_BRIGHT}B${v.base@6s}  $BLACK_BRIGHT$dt$RESET  $YELLOW_BRIGHT$cm` }
         else      { print `${YELLOW_BRIGHT}${v.version@7s}  $BLACK_BRIGHT$dt$RESET  $cm` }
     }
-          '-------  ----------  ---------------------------------------------------------'
+    UNDER_LINE
 }
