@@ -18,15 +18,31 @@
  */
 $quiet on
 $assert defined(moy_name, dow_name, dateformat), 'Requires "library.calc"; rerun without the "-nolib" option!'
-$assert notnull($0) && ~~$0 >= 1 && ~~$0 <= 12, 'First parameter should be a month number from 1 .. 12.'
-$assert notnull($1) && ((~~$1 >= 1 && ~~$1 <= 99) || (~~$1 >= 1000 && ~~$1 <= 9999)), 'Second argument should be a two- or four-digit year.'
 
 const HEADER = 'Su  Mo  Tu  We  Th  Fr  Sa'
 const WIDTH = length(HEADER)
 
-var month = ~~$0
-var year = $1 <= 99 ? adjust_short_year($1) : $1
-const number_of_months = isnull($2) ? 1 : ~~$2
+define adjust_year(y) = {
+   const yr = ~~y
+   yr <= 99 ? adjust_short_year(yr) : yr
+}
+
+const TDAY = today
+var month, year, number_of_months = 1
+case $# of {
+   0: { month = moy(TDAY)
+        year  = yod(TDAY) },
+   1: { month = ~~$0
+        year  = yod(TDAY) },
+   2: { month = ~~$0
+        year = adjust_year($1) },
+default: { month = ~~$0
+           year = adjust_year($1)
+           number_of_months = ~~$2 }
+}
+$assert (month >= 1 && month <= 12), 'First parameter should be a month number from 1 .. 12.'
+$assert (year >= 1000 && year <= 9999), 'Second argument should be a two- or four-digit year.'
+$assert (number_of_months >= 1), 'Third argument should be the number of months (>= 1).'
 
 loop within number_of_months {
    var start_of_month = todate(month, 1, year)
