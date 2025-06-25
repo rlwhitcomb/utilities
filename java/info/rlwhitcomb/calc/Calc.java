@@ -359,6 +359,8 @@
  *	    #722: New "Library" GUI button.
  *	01-Jun-2025 (rlwhitcomb)
  *	    #724: New calls to "finalizeGlobals" to fix the problem.
+ *	23-Jun-2025 (rlwhitcomb)
+ *	    #733: Don't require any user arguments to be defined after "--".
  */
 package info.rlwhitcomb.calc;
 
@@ -2663,11 +2665,8 @@ public class Calc
  
 	    switch (expecting) {
 		case DEFAULT:
+		case ARGUMENTS: // allow no arguments to be given
 		    break;
-		case ARGUMENTS:
-		    if (argValues.size() > 0)
-			break;
-		    // else fall through to error
 		default:
 		    Intl.errFormat("calc#noOptionValue", expecting);
 	    }
