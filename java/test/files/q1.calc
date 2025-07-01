@@ -59,3 +59,24 @@ dec(q7)
 q7[2]=0;q7[3]=0
 complex(q7)
 
+// Tests from various internet examples
+// From: https://math.umd.edu/~immortal/MATH431/book/ch_quaternions.pdf
+qm1 = (2, 1, 0, 0)
+qm2 = (3, 0, 4, 0)
+qm1*qm2
+qm2*qm1
+qn1 = (2, 3, -2, 1)
+qn2 = (1, -1, 4, 5)
+qn1*qn2
+
+sq14 = √14
+qp = (0, 2/sq14, -1/sq14, 3/sq14)
+abs(qp)
+
+(0, 2, 3, -1) + (0, 5, 2, 7)
+
+qv = (0, 2, 1, 0)
+p = cos(pi/6) + sin(pi/6)*(0, 0, 1/√2, 1/√2)
+p1 = cos(pi/6) - sin(pi/6)*(0, 0, 1/√2, 1/√2)
+p * qv * p1
+
