@@ -902,8 +902,10 @@
  *	18-Jun-2025 (rlwhitcomb)
  *	    #731: Add complexValue method.
  *	22-Jun-2025 (rlwhitcomb)
- *	   #694: Consolidate the remaining operators into common routines, so the expression
- *	   and the expression assignment are exactly alike.
+ *	    #694: Consolidate the remaining operators into common routines, so the expression
+ *	    and the expression assignment are exactly alike.
+ *	30-Jun-2025 (rlwhitcomb)
+ *	    #695: Add new "lsb", "msb", "hypot", "expmod", and "polymod" functions.
  */
 package info.rlwhitcomb.calc;
 
@@ -5175,6 +5177,18 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	@Override
+	public Object visitHypotExpr(CalcParser.HypotExprContext ctx) {
+	    CalcParser.ExprContext exprX = ctx.expr2().expr(0);
+	    CalcParser.ExprContext exprY = ctx.expr2().expr(1);
+	    BigDecimal x = getDecimalValue(exprX);
+	    BigDecimal y = getDecimalValue(exprY);
+	    BigDecimal x2 = x.multiply(x);
+	    BigDecimal y2 = y.multiply(y);
+
+	    return MathUtil.sqrt2(x2.add(y2), settings.mcDivide);
+	}
+
+	@Override
 	public Object visitLogExpr(CalcParser.LogExprContext ctx) {
 	    // For now, get a double value and use the standard Math method
 	    double d = getDoubleValue(ctx.expr1().expr());
@@ -5508,6 +5522,18 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    catch (ArithmeticException ae) {
 		throw new CalcExprException(ae, ctx);
 	    }
+	}
+
+	@Override
+	public Object visitLsbExpr(CalcParser.LsbExprContext ctx) {
+	    BigInteger iValue = getIntegerValue(ctx.expr1().expr());
+	    return Integer.valueOf(iValue.getLowestSetBit());
+	}
+
+	@Override
+	public Object visitMsbExpr(CalcParser.MsbExprContext ctx) {
+	    BigInteger iValue = getIntegerValue(ctx.expr1().expr());
+	    return Integer.valueOf(iValue.bitLength() - 1);
 	}
 
 	/**
@@ -8031,6 +8057,125 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    else {
 		iterateOverRangeExpr(null, rangeExpr.expr(), rangeExpr.DOTS() != null, arrayVisitor, true, false);
 	    }
+
+	    return array;
+	}
+
+	@Override
+	public Object visitExpModExpr(CalcParser.ExpModExprContext ctx) {
+	    CalcParser.Expr3Context e3ctx = ctx.expr3();
+	    // Calculate x**y mod z
+	    CalcParser.ExprContext xCtx = e3ctx.expr(0);
+	    CalcParser.ExprContext yCtx = e3ctx.expr(1);
+	    CalcParser.ExprContext zCtx = e3ctx.expr(2);
+	    Object x = evaluateToValue(xCtx);
+	    Object y = evaluateToValue(yCtx);
+	    Object z = evaluateToValue(zCtx);
+
+	    if (settings.rationalMode && (x instanceof BigFraction || z instanceof BigFraction)) {
+		BigFraction xFrac = convertToFraction(x, xCtx);
+		int yInt = convertToInt(y, settings.mc, yCtx);
+		BigFraction zFrac = convertToFraction(z, zCtx);
+
+		return xFrac.pow(yInt).modulus(zFrac);
+	    }
+	    else if (x instanceof Quaternion || z instanceof Quaternion) {
+		Quaternion xQuad = Quaternion.valueOf(x);
+		int yInt = convertToInt(y, settings.mc, yCtx);
+		Quaternion zQuad = Quaternion.valueOf(z);
+		MathContext mc = MathUtil.divideContext(xQuad, settings.mcDivide);
+
+		return xQuad.power(yInt, settings.mc).modulus(zQuad, mc);
+	    }
+	    else if (x instanceof ComplexNumber || z instanceof ComplexNumber) {
+		ComplexNumber xC = ComplexNumber.valueOf(x);
+		int yInt = convertToInt(y, settings.mc, yCtx);
+		ComplexNumber zC = ComplexNumber.valueOf(z);
+		MathContext mc = MathUtil.divideContext(xC, settings.mcDivide);
+
+		return xC.power(yInt, settings.mc).modulus(zC, mc);
+	    }
+	    else if (MathUtil.isInteger(x) && MathUtil.isInteger(z)) {
+		BigInteger xInt = convertToInteger(x, settings.mc, xCtx);
+		BigInteger yInt = convertToInteger(y, settings.mc, yCtx);
+		BigInteger zInt = convertToInteger(z, settings.mc, zCtx);
+
+		return xInt.modPow(yInt, zInt);
+	    }
+	    else {
+		BigDecimal xDec = convertToDecimal(x, settings.mc, xCtx);
+		BigDecimal yDec = convertToDecimal(y, settings.mc, yCtx);
+		BigDecimal zDec = convertToDecimal(z, settings.mc, zCtx);
+		MathContext mc = MathUtil.divideContext(xDec, settings.mcDivide);
+
+		return MathUtil.modulus(MathUtil.pow(xDec, yDec.doubleValue(), settings.mc), zDec, mc);
+	    }
+	}
+
+	@Override
+	public Object visitPolyModExpr(CalcParser.PolyModExprContext ctx) {
+	    // 1st value is what to deconstruct, loop over 1..n as divisors
+	    // output array is value mod divisor
+	    // value /= divisor
+	    // end loop over divisors
+	    List<CalcParser.ExprContext> divisors;
+	    if (ctx.exprN() != null)
+		divisors = ctx.exprN().exprList().expr();
+	    else if (ctx.expr4() != null)
+		divisors = ctx.expr4().expr();
+	    else if (ctx.expr3() != null)
+		divisors = ctx.expr3().expr();
+	    else
+		divisors = ctx.expr2().expr();
+	    Object value = evaluateToValue(divisors.get(0));
+
+	    ArrayScope<Object> array = new ArrayScope<>(divisors.size());
+
+	    for (int divIndex = 1; divIndex < divisors.size(); divIndex++) {
+		Object div = evaluateToValue(divisors.get(divIndex));
+
+		if (settings.rationalMode && value instanceof BigFraction) {
+		    BigFraction fVal = (BigFraction) value;
+		    BigFraction fDiv = toFractionValue(this, div, ctx);
+
+		    array.add(fVal.modulus(fDiv));
+		    value = fVal.divide(fDiv);
+		}
+		else if (value instanceof Quaternion) {
+		    Quaternion qVal = (Quaternion) value;
+		    Quaternion qDiv = Quaternion.valueOf(div);
+		    MathContext mc = MathUtil.divideContext(qVal, settings.mcDivide);
+
+		    array.add(qVal.modulus(qDiv, mc));
+		    value = qVal.divide(qDiv, mc);
+		}
+		else if (value instanceof ComplexNumber) {
+		    ComplexNumber cVal = (ComplexNumber) value;
+		    ComplexNumber cDiv = ComplexNumber.valueOf(div);
+		    MathContext mc = MathUtil.divideContext(cVal, settings.mcDivide);
+
+		    array.add(cVal.modulus(cDiv, mc));
+		    value = cVal.divide(cDiv, mc);
+		}
+		else if (MathUtil.isInteger(value)) {
+		    BigInteger iVal = convertToInteger(value, settings.mc, ctx);
+		    BigInteger iDiv = convertToInteger(div, settings.mc, ctx);
+
+		    array.add(iVal.mod(iDiv));
+		    value = iVal.divide(iDiv);
+		}
+		else {
+		    BigDecimal dVal = toDecimalValue(this, value, settings.mc, ctx);
+		    BigDecimal dDiv = toDecimalValue(this, div, settings.mc, ctx);
+		    MathContext mc = MathUtil.divideContext(dVal, settings.mcDivide);
+
+		    array.add(MathUtil.modulus(dVal, dDiv, mc));
+		    value = dVal.divide(dDiv, mc);
+		}
+	    }
+
+	    // Add the final remainder to the returned list
+	    array.add(value);
 
 	    return array;
 	}

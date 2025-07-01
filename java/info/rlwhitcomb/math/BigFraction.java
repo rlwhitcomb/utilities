@@ -82,6 +82,7 @@
  *  30-Jan-25 rlw #702	New "idivide" and "toNearestInteger" methods; so we can rework "remainder" methods.
  *  07-Mar-25 rlw #710	New constructor with integer values.
  *  13-Apr-25 rlw #702	Fix "remainder".
+ *  28-Jun-25 rlw #695	New "toIntExact()" method.
  */
 package info.rlwhitcomb.math;
 
@@ -1275,6 +1276,18 @@ public class BigFraction extends Number
 		return numer;
 	    }
 	    throw new ArithmeticException(Intl.formatString("calc#noConvertInteger", this));
+	}
+
+	/**
+	 * Return the value of this fraction as an exact {@code int} if possible.
+	 * <p> If {@link #isWholeNumber} would return true, then try to return
+	 * the integer value in the range of a natural {@code int} if possible.
+	 *
+	 * @return The value of this fraction as a whole {@code int}, if possible.
+	 * @throws ArithmeticException if the conversion fails.
+	 */
+	public int toIntExact() {
+	    return toIntegerExact().intValueExact();
 	}
 
 	/**

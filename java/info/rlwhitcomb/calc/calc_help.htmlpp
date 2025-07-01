@@ -865,8 +865,8 @@ or<br>
     <tr><td>33</td><td><i>expr</i> <code>IS</code> ( <i>string</i> | <i>type_id</i> )</td><td>check if expression is the given type (same as <code>typeof</code>)</td><td>left to right</td></tr>
     <tr><td>32</td><td><i>expr</i> <code>[</code> <i>expr</i> ? <code>:</code> <i>expr</i> ? <code>]</code></td><td>produce a slice of an object or string</td><td>left to right</td></tr>
     <tr><td>31</td><td><code>( </code><i>expr</i><code> )</code></td><td>group an expression</td><td>N/A</td></tr>
-    <tr><td rowspan="94">30</td>
-            <td><code>ABS</code>&nbsp;<i>expr</i></td><td>absolute value</td><td rowspan="94">left to right</td></tr>
+    <tr><td rowspan="99">30</td>
+            <td><code>ABS</code>&nbsp;<i>expr</i></td><td>absolute value</td><td rowspan="99">left to right</td></tr>
             <tr><td><code>SIN</code>&nbsp;<i>expr</i></td><td>sine</td></tr>
             <tr><td><code>COS</code>&nbsp;<i>expr</i></td><td>cosine</td></tr>
             <tr><td><code>TAN</code>&nbsp;<i>expr</i></td><td>tangent</td></tr>
@@ -880,6 +880,7 @@ or<br>
             <tr><td><code>SQRT</code> or <code>&radic;</code>&nbsp;<i>expr</i></td><td>square root</td></tr>
             <tr><td><code>CBRT</code> or <code>&#x221B;</code>&nbsp;<i>expr</i></td><td>cube root</td></tr>
             <tr><td><code>FORT</code> or <code>&#x221C;</code>&nbsp;<i>expr</i></td><td>fourth root</td></tr>
+            <tr><td><code>HYPOT</code>&nbsp;<i>expr<sub>x</sub></i><code>,</code>&nbsp;<i>expr<sub>y</sub></i></td><td>hypotenuse of right triangle<br><code>&radic; x&#x00B2; + y&#x00b2;</code></td></tr>
             <tr><td><code>LOG</code>&nbsp;<i>expr</i></td><td>log base 10</td></tr>
             <tr><td><code>LN2</code>&nbsp;<i>expr</i></td><td>log base 2</td></tr>
             <tr><td><code>LN</code>&nbsp;<i>expr</i></td><td>natural log (base e)</td></tr>
@@ -900,9 +901,13 @@ or<br>
             <tr><td><code>LCM</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;) *</td><td>least common multiple</td></tr>
             <tr><td><code>MAX</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;) *</td><td>maximum value</td></tr>
             <tr><td><code>MIN</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;) *</td><td>minimum value</td></tr>
+            <tr><td><code>LSB</code>&nbsp;<i>expr</i></td><td>index of least-significant set bit</td></tr>
+            <tr><td><code>MSB</code>&nbsp;<i>expr</i></td><td>index of most-significant set bit (without sign)</td></tr>
             <tr><td><code>SUMOF</code> or <code>&#x2211;</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;) *<br>or <i>expr</i> ( <code>..</code> or <code>&#x2026;</code> <i>expr</i> ( <code>,</code> <i>expr</i> ) )</td><td>sum of all the values</td></tr>
             <tr><td><code>PRODUCTOF</code> or <code>&#x220F;</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;) *<br>or <i>expr</i> ( <code>..</code> or <code>&#x2026;</code> <i>expr</i> ( <code>,</code> <i>expr</i> ) )</td><td>product of all the values</td></tr>
             <tr><td><code>ARRAYOF</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;) *<br>or <i>expr</i> ( <code>..</code> or <code>&#x2026;</code> <i>expr</i> ( <code>,</code> <i>expr</i> ) )</td><td>make a single array of all the values</td></tr>
+            <tr><td><code>EXPMOD</code>&nbsp;<i>expr<sub>1</sub></i><code>,</code>&nbsp;<i>expr<sub>2</sub></i><code>,</code>&nbsp;<i>expr<sub>3</sub></i></td><td>value of <i>expr<sub>1</sub></i>&nbsp;<code>&#x2B61;</code>&nbsp;<i>expr<sub>2</sub></i><code>&nbsp;mod&nbsp;</code><i>expr<sub>3</sub></i></td></tr>
+            <tr><td><code>POLYMOD</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;) +</td><td>calculate successive modulus values</td></tr>
             <tr><td><code>JOIN</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;) *</td><td>join strings</td></tr>
             <tr><td><code>FLATMAP</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;) *</td><td>map any dimensional array to a single "flat" array</td></tr>
             <tr><td><code>SPLIT</code>&nbsp;<i>expr</i> <code>,</code> <i>regexpr</i> (&nbsp;<code>,</code> <i>limit_expr</i>&nbsp;)</td><td>split string into parts</td></tr>
@@ -1095,6 +1100,11 @@ or<br>
   <p>The <code>min</code> and <code>max</code> functions do either numeric or string comparisons, depending on the type of the
      first value in the list. While the <code>sumof</code> and <code>productof</code> functions try to convert all their
      values to the (numeric) type of their first operand (decimals by default, or fractions in rational mode).
+  <p>The <code>lsb</code> and <code>msb</code> functions return a zero-based index into the bits of a simple integer value, denoting either the
+     least-significant set bit (a "1") or the most-significant bit set (excluding the sign bit). Yeah, this gets a bit weird with negative values,
+     as the <code>MSB</code> will be the index of the first "0" bit from the left. Example: <code>-14@x &#x21e8; 0xf2</code> and <code>msb -14 &#x21e8; 3</code>
+     but <code>msb -1 &#x21e8; -1</code>. So, the MSB operation for negative numbers will first take the ones-complement value and return the index of the
+     most-significant "1" bit there. Capisce?
   <p>The <code>join</code> function is a little complicated, but still intuitive once you figure it out. With one simple value argument
      the result is the string representation of the value. With one array or object value, the result is the concatenation of the values
      within the object (the flat map of the values, that is). With one array/object value and one other value, the flat map of the values
@@ -1226,6 +1236,9 @@ or<br>
      <code style="color:blue;">$ignorecase on { upper g3 }</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">{ b: 'THIS', c: 'IS', d: 'CRAZY' }</code>
   <p>The <code>FACTORS</code> and <code>PFACTORS</code> functions only accept integer values, and produce arrays of the
      desired values.<br>Examples: <code>factors(123) &#x21E8; [ 1, 3, 41, 123 ]</code>, while <code>pfactors 123 &#x21E8; [ 3, 41 ]</code>.
+  <p>Both the <code>expmod</code> and <code>polymod</code> functions work exactly as they do in the Raku (Python 6) language, documented here:
+     <a href="https://docs.raku.org/type/Int">Raku Int class</a>, <i>except</i> that here the calculations are done on fractions, quaternions,
+     complex numbers, or decimals, depending on the type of the operands.
   <p>The <code>EXEC</code> function will execute the operating system program given by the first (string) expression, using the remaining
      expression values as parameters, and return the merged stdout and stderr streams as a string result. On Windows operating systems
      if the command to execute is a batch file (<code>.bat</code> or <code>.cmd</code> extension) then <code>cmd /c</code> is automatically

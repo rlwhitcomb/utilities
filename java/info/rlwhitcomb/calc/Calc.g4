@@ -561,6 +561,8 @@
  *	    #725: Grammar for "flatmap".
  *	18-Jun-2025 (rlwhitcomb)
  *	    #731: Grammar for complex constants.
+ *	24-Jun-2025 (rlwhitcomb)
+ *	    #695: Grammar for "lsb", "msb", "expmod", "polymod", and "hypot" functions.
  */
 
 grammar Calc;
@@ -695,6 +697,7 @@ builtinFunction
    | K_SQRT expr1                        # sqrtExpr
    | K_CBRT expr1                        # cbrtExpr
    | K_FORT expr1                        # fortExpr
+   | K_HYPOT expr2                       # hypotExpr
    | K_LOG expr1                         # logExpr
    | K_LN2 expr1                         # ln2Expr
    | K_LN expr1                          # lnExpr
@@ -715,9 +718,13 @@ builtinFunction
    | K_LCM exprN                         # lcmExpr
    | K_MAX exprN                         # maxExpr
    | K_MIN exprN                         # minExpr
+   | K_LSB expr1                         # lsbExpr
+   | K_MSB expr1                         # msbExpr
    | K_SUMOF ( exprN | rangeExpr )       # sumOfExpr
    | K_PRODUCTOF ( exprN | rangeExpr )   # productOfExpr
    | K_ARRAYOF ( exprN | rangeExpr )     # arrayOfExpr
+   | K_EXPMOD expr3                      # expModExpr
+   | K_POLYMOD ( exprN | expr4 | expr3 | expr2 ) #polyModExpr
    | K_JOIN exprN                        # joinExpr
    | K_FLATMAP exprN                     # flatMapExpr
    | K_SPLIT ( expr3 | expr2 )           # splitExpr
@@ -1296,6 +1303,10 @@ K_MAX      : 'max' | 'MAX' | 'Max' ;
 
 K_MIN      : 'min' | 'MIN' | 'Min' ;
 
+K_LSB      : 'lsb' | 'LSB' | 'Lsb' ;
+
+K_MSB      : 'msb' | 'MSB' | 'Msb' ;
+
 K_JOIN     : 'join' | 'JOIN' | 'Join' ;
 
 K_FLATMAP  : 'flatmap' | 'FLATMAP' | 'Flatmap' | 'FlatMap' | 'flatMap' ;
@@ -1426,6 +1437,12 @@ K_CALLERS  : 'callers' | 'CALLERS' | 'Callers' ;
 K_SUMOF    : 'sumof' | 'SUMOF' | 'Sumof' | 'SumOf' | 'sumOf' | '\u2211' ;
 
 K_PRODUCTOF: 'productof' | 'PRODUCTOF' | 'Productof' | 'ProductOf' | 'productOf' | '\u220F' ;
+
+K_EXPMOD   : 'expmod' | 'EXPMOD' | 'Expmod' | 'ExpMod' ;
+
+K_POLYMOD  : 'polymod' | 'POLYMOD' | 'Polymod' | 'PolyMod' ;
+
+K_HYPOT    : 'hypot' | 'HYPOT' | 'Hypot' ;
 
 K_ARRAYOF  : 'arrayof' | 'ARRAYOF' | 'Arrayof' | 'ArrayOf' | 'arrayOf' ;
 

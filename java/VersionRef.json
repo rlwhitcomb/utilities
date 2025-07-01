@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.60.0', date: d'2025-06-30',
+      issues: [ 695 ],
+      comment: 'Add "lsb", "msb", "hypot", "expmod", and "polymod" functions.'
+    },
     { version: '2.59.4', date: d'2025-06-24',
       issues: [ 733 ],
       comment: 'Allow no user arguments to be given after or between the "--" markers.'

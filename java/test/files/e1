@@ -1370,6 +1370,18 @@ arr3 = arrayof 10..20,2
 arrayof arr1, arr2, arr3
 
 #
+# expmod, polymod
+#
+expmod(2, 9, 11)
+2**9
+2**9 mod 11
+exp3 = 2**9 \ 11
+2**9 - exp3*11
+
+atime= 2*60*60*24 + 3*60*60 + 4*60 + 5
+polymod(atime, 60, 60, 24)
+
+#
 # Test read/write, especially of Unicode data
 #
 const UTF_8 = 'utf-8'
