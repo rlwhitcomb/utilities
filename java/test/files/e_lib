@@ -27,6 +27,13 @@ arry1 = [ 1, 2, [4, 6, 8], 10]
 arry2 = [ [ 7, 9 ], [ 11, 13 ] ]
 flatmap(arry1, arry2)
 
+// Test of the bug that overflowed the stack
+print 'Test of fix to issue 724 (stack overflow using "_*" as parameter)'
+def flat_map(arr) = eval `[${join arr, ','}]`
+cols = 1, 2, 3
+define x(...) = { flat_map(_*) }
+x(cols)
+
 is_perfect(28)
 is_perfect(99)
 primes(1, 50)
