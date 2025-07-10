@@ -8,6 +8,7 @@ $separators off
 $quiet on { $open 'test/files/library' }
 
 excel_date(d'2021/10/8')
+excel_date(D'9/11/2001')
 excel_date_1904(D'12/7/1941')
 rad_to_deg(pi/4)
 deg_to_rad(135)
@@ -18,6 +19,10 @@ grad_to_deg(400)
 dow_name(D'10/13/1957')
 moy_name(D'9/11/2001')
 long_date(D'11/11/1918')
+long_date(d'2038/01/19')
+print 'These short years will change as the years go by.'
+adjust_short_year(54)
+adjust_short_year(58)
 
 // Note: as of 2.59 "flat_map" in "library" becomes the "flatmap" built-in
 display 'As of version 2.59.0 "flat_map" in "library.calc" is now a built-in function "flatmap", which accepts any number of arguments.'
@@ -44,6 +49,8 @@ quad(1, -1, -1)[0]
 quad(1, 0, 4)
 quad_exp(1, 0, 4, (0,2) )
 quad_exp(1, 0, 4, (0,-2) )
+
+log(GOOGOL)
 
 zeta_2n(2)
 
@@ -141,6 +148,18 @@ capitalize(TS, 1)
 capitalize(TS, WORDCAP)
 
 #
+# Time functions
+#
+hot(noon)
+mot(noon + 3 × TICKS_PER_MINUTE)
+sot(midnight + 27 × TICKS_PER_SECOND)
+
+timestamp(d'1984-03-14', h'14:27:54')
+
+// Since the time values are in nanoseconds, we need to remove the least-significant bits for comparison
+gmtnow \ TICKS_PER_SECOND + TZ_OFFSET \ TICKS_PER_SECOND == now \ TICKS_PER_SECOND
+
+#
 # Date format checks
 #
 dt1 = d'2021-8-5'
@@ -158,6 +177,18 @@ dateformat(dt1, 'mm/dd/yy')
 define dx2 = dt1 - 1
 dateformat(dx2)
 dateformat(dt1)
+
+#
+# Yesterday, today, and tomorrow tests
+#
+today == yesterday + 1
+tomorrow == yesterday + 2
+
+#
+# Time constants
+#
+midnight@h
+noon @h
 
 #
 # Surrogate pair conversions
@@ -194,6 +225,14 @@ $resultsonly on {
 loop k over 0..20 `Tn($k) = ${Tn(k)}` @q
 }
 $default
+
+#
+# Sum of digits function
+#
+sum_of_digits(20!)
+sum_of_digits(123)
+sum_of_digits('456')
+
 
 colored = `$RED_BOLD_BRIGHT red $CLOSE`
 colored@Q

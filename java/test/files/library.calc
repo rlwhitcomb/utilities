@@ -1047,6 +1047,14 @@ define pent(n) = (3 × n² - n) / 2
 define hex(n) = 2 × n² - n
 
 /*
+ * Compute the sum of the digits of this number.
+ *
+ * @param num A number (or number string)
+ * @return    Sum of the digits of this number
+ */
+define sum_of_digits(num) = sumof(chars(@@~~num))
+
+/*
  * Read a text file, separate into lines, then return the list of them in order.
  *
  * @param fn The full or partially qualified file name to read.

@@ -1,6 +1,7 @@
 >All variables and functions cleared.
 >Separator display set to “false”.
 >excel_date(d'2021/10/8') -> 44477
+>excel_date(D'9/11/2001') -> 37145
 >excel_date_1904(D'12/7/1941') -> 13855
 >rad_to_deg(pi / 4) -> 45
 >deg_to_rad(135) -> 2.356194490192344928846982537459627
@@ -11,6 +12,10 @@
 >dow_name(D'10/13/1957') -> "Sunday"
 >moy_name(D'9/11/2001') -> "September"
 >long_date(D'11/11/1918') -> "Monday, November 11, 1918"
+>long_date(d'2038/01/19') -> "Tuesday, January 19, 2038"
+>These short years will change as the years go by.
+>adjust_short_year(54) -> 2054
+>adjust_short_year(58) -> 1958
 >As of version 2.59.0 "flat_map" in "library.calc" is now a built-in function "flatmap", which accepts any number of arguments.
 >flatmap ([[[1, 2], [3, 4]], [[5, 6], [7, 8]], [[9, 10], [11, 12]]]) -> [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 ]
 >sort flatmap ([[3, 9], [4, 7], [1, 2], [10, 8]]) -> [ 1, 2, 3, 4, 7, 8, 9, 10 ]
@@ -32,6 +37,7 @@
 >quad(1, 0, 4) -> [ ( 0, 2 ), ( 0, -2 ) ]
 >quad_exp(1, 0, 4,(0, 2)) -> ( 0, 0 )
 >quad_exp(1, 0, 4,(0, -2)) -> ( 0, 0 )
+>log (GOOGOL) -> 100
 >zeta_2n(2) -> 1.644934066848226436472415166646026
 >win_pct(25, 75) -> "25.00%"
 >win_pct(662, 174, 2) -> "79.00%"
@@ -109,6 +115,11 @@
 >capitalize(TS, 0) -> "THIS IS A TEST"
 >capitalize(TS, 1) -> "This is a test"
 >capitalize(TS, WORDCAP) -> "This Is A Test"
+>hot(noon) -> 12
+>mot(noon + 3 × TICKS_PER_MINUTE) -> 3
+>sot(midnight + 27 × TICKS_PER_SECOND) -> 27
+>timestamp(d'1984-03-14', h'14:27:54') -> "Wed Mar 14 14:27:54 PDT 1984"
+>gmtnow \ TICKS_PER_SECOND + TZ_OFFSET \ TICKS_PER_SECOND == now \ TICKS_PER_SECOND -> true
 >dt1 = d'2021-8-5' -> 18844
 >dateformat(dt1, 'MMM d, yyyy') -> "August 5, 2021"
 >dateformat(dt1, 'mm/dd/yyyy') -> "08/05/2021"
@@ -120,6 +131,10 @@
 >Defining function “dx2” = dt1 - 1
 >dateformat(dx2) -> "08/04/2021"
 >dateformat(dt1) -> "08/05/2021"
+>today == yesterday + 1 -> true
+>tomorrow == yesterday + 2 -> true
+>midnight @h -> h'0:00'
+>noon @h -> h'12:00'
 >cp = 0x1f603 -> 128515
 >surr_pair_to_cp(0xd83d, 0xde03) @c -> "😃"
 >cp_to_high_surr(cp) @x -> 0xd83d
@@ -154,6 +169,9 @@
 >Tn(19) = -583203324917310043943191641625494290432
 >Tn(20) = 387635983772083031828014624002175135645696
 >Precision is now “34” digits.
+>sum_of_digits(20 !) -> 54
+>sum_of_digits(123) -> 6
+>sum_of_digits('456') -> 15
 >colored = `$RED_BOLD_BRIGHT red $CLOSE` -> "[1;91m red ”"
 >colored @Q -> "<Rd*!> red <.>"
 >Separator display set to “false”.
