@@ -154,7 +154,7 @@ hot(noon)
 mot(noon + 3 × TICKS_PER_MINUTE)
 sot(midnight + 27 × TICKS_PER_SECOND)
 
-timestamp(d'1984-03-14', h'14:27:54')
+timestamp(d'1984-03-14', h'14:27:54', "UTC")
 
 // Since the time values are in nanoseconds, we need to remove the least-significant bits for comparison
 gmtnow \ TICKS_PER_SECOND + TZ_OFFSET \ TICKS_PER_SECOND == now \ TICKS_PER_SECOND

@@ -118,7 +118,7 @@
 >hot(noon) -> 12
 >mot(noon + 3 × TICKS_PER_MINUTE) -> 3
 >sot(midnight + 27 × TICKS_PER_SECOND) -> 27
->timestamp(d'1984-03-14', h'14:27:54') -> "Wed Mar 14 14:27:54 PDT 1984"
+>timestamp(d'1984-03-14', h'14:27:54', "UTC") -> "Wed Mar 14 14:27:54 UTC 1984"
 >gmtnow \ TICKS_PER_SECOND + TZ_OFFSET \ TICKS_PER_SECOND == now \ TICKS_PER_SECOND -> true
 >dt1 = d'2021-8-5' -> 18844
 >dateformat(dt1, 'MMM d, yyyy') -> "August 5, 2021"

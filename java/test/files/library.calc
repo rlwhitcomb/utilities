@@ -538,12 +538,13 @@ define sot(time) = (time - (hot(time) × TICKS_PER_HOUR) - (mot(time) × TICKS_P
 /*
  * Get a timestamp from the given date and time in the Linux "date" form.
  *
- * @param date The desired date.
- * @param time The desired time.
+ * @param date The desired date (default "today").
+ * @param time The desired time (default "now").
+ * @param tz   Timezone name (default "info.timezone.name").
  * @return     Timestamp in the form of "Mon Dec 20  6:46:19 PST 2021"
  */
-def timestamp(date = today, time = now) = {
-   `${dow_name(date)[:3]} ${moy_name(date)[:3]} ${dom(date)@.2d} ${hot(time)@-2s}:${mot(time)@.2d}:${sot(time)@.2d} ${info.timezone.name} ${yod(date)@_d}`
+def timestamp(date = today, time = now, tz = info.timezone.name) = {
+   `${dow_name(date)[:3]} ${moy_name(date)[:3]} ${dom(date)@.2d} ${hot(time)@-2s}:${mot(time)@.2d}:${sot(time)@.2d} ${tz} ${yod(date)@_d}`
 }
 
 /*
