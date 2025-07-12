@@ -27,6 +27,7 @@ radiochemically: radiochemically
 zygodactylous: zygodactylous
 
 abcdefghijklmnop: abcdefghijklmno..
+mmeeins: mmeeins -min 7
 
 :echo
 :echo Done with WordFind tests.

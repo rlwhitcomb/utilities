@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2020-2024 Roger L. Whitcomb.
+ * Copyright (c) 2020-2025 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -121,8 +121,10 @@
  *          Allow "$quit" and etc. for the REPL commands.
  *      04-Nov-2023 (rlwhitcomb)
  *          #633: New options "-opt" and "-noopt" for processing environment defaults.
- *	13-Mar-2024 (rlwhitcomb)
- *	    #663: Immediate dictionary lookup from the command line.
+ *      13-Mar-2024 (rlwhitcomb)
+ *          #663: Immediate dictionary lookup from the command line.
+ *      12-Jul-2025 (rlwhitcomb)
+ *          #737: Correct extraneous character in "min word size" report display.
  */
 package info.rlwhitcomb.wordfind;
 
@@ -281,7 +283,7 @@ public class WordFind implements Application
     private static final String WORD_FORMAT = "%1$s%2$s " + BLACK_BRIGHT + "(%3$3d)" + RESET;
 
     /** Continuation. */
-    private static final String DOTS = " " + BLACK_BRIGHT + "..." + RESET;
+    private static final String DOTS = " " + BLACK_BRIGHT + "... " + RESET;
 
     /** Heading color. */
     private static ConsoleColor.Code headingColor = null;
@@ -887,6 +889,8 @@ public class WordFind implements Application
                 System.out.println();
             }
         }
+        if (minWordSizeToReport > 1)
+            System.out.println();
 
         return numberOfWordsFound;
     }
