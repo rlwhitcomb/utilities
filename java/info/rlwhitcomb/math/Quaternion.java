@@ -47,6 +47,7 @@
  *		  #702	Fix "modulus".
  *  11-May-25 rlw #702	Ooops! "modulus" still needed work.
  *  24-May-25 rlw #721	Add R_ONE constant and "increment()" methods.
+ *  12-Jul-25 rlw #740	Add "dot" (product) method.
  */
 package info.rlwhitcomb.math;
 
@@ -432,6 +433,15 @@ public abstract class Quaternion extends Number implements Comparable<Quaternion
 	public abstract Quaternion inverse(final MathContext mc);
 
 	/**
+	 * Compute the dot product of this quaternion and the other. This is a scalar value.
+	 *
+	 * @param other The other quaternion to dot with.
+	 * @param mc    Rounding precision for the result (in the "decimal" case).
+	 * @return      Dot product of this · other.
+	 */
+	public abstract Number dot(final Quaternion other, final MathContext mc);
+
+	/**
 	 * Return a new quaternion consisting of the "ceil" value of each component.
 	 *
 	 * @return The "ceil" value of this quaternion.
@@ -807,6 +817,20 @@ class RationalQuaternion extends Quaternion
 	}
 
 	@Override
+	public Number dot(final Quaternion other, final MathContext mc) {
+	    BigFraction x1 = aFrac();
+	    BigFraction y1 = bFrac();
+	    BigFraction z1 = cFrac();
+	    BigFraction w1 = dFrac();
+	    BigFraction x2 = other.aFrac();
+	    BigFraction y2 = other.bFrac();
+	    BigFraction z2 = other.cFrac();
+	    BigFraction w2 = other.dFrac();
+
+	    return x1.multiply(x2).add(y1.multiply(y2)).add(z1.multiply(z2)).add(w1.multiply(w2));
+	}
+
+	@Override
 	public Quaternion idivide(final Quaternion other, final MathContext mc) {
 	    Quaternion fullResult = divide(other, mc);
 
@@ -1149,6 +1173,21 @@ class DecimalQuaternion extends Quaternion
 			MathUtil.fixup(b().divide(magSquare, mc).negate(), mc),
 			MathUtil.fixup(c().divide(magSquare, mc).negate(), mc),
 			MathUtil.fixup(d().divide(magSquare, mc).negate(), mc));
+	}
+
+	@Override
+	public Number dot(final Quaternion other, final MathContext mc) {
+	    BigDecimal x1 = a();
+	    BigDecimal y1 = b();
+	    BigDecimal z1 = c();
+	    BigDecimal w1 = d();
+	    BigDecimal x2 = other.a();
+	    BigDecimal y2 = other.b();
+	    BigDecimal z2 = other.c();
+	    BigDecimal w2 = other.d();
+
+	    // Note: retain all possible precision until the final result
+	    return MathUtil.fixup(x1.multiply(x2).add(y1.multiply(y2)).add(z1.multiply(z2)).add(w1.multiply(w2)), mc);
 	}
 
 	@Override

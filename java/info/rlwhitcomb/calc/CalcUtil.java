@@ -260,6 +260,8 @@
  *	    #719: Recursive interpolation of strings.
  *	22-Jun-2025 (rlwhitcomb)
  *	    #694: A little tweaking of "bitOp" parameters.
+ *	13-Jul-2025 (rlwhitcomb)
+ *	    #740: New method for dot product of lists.
  */
 package info.rlwhitcomb.calc;
 
@@ -3238,6 +3240,33 @@ public final class CalcUtil
 		    e = mid;
 	    }
 	    return (b > end) ? -(end + 1) : -(b + 1);
+	}
+
+	/**
+	 * Compute the dot product of two vectors.
+	 *
+	 * @param visitor The visitor used to do all evaluations.
+	 * @param v1      First operand.
+	 * @param v2      Second operand.
+	 * @param mc      Rounding mode and precision for the result.
+	 * @param ctx     Parsing context for any error reporting.
+	 * @return Dot product of the two vectors.
+	 * @throw IllegalArgumentException if the vectors are not the same size.
+	 */
+	public static Object dotProduct(final CalcObjectVisitor visitor, final List<?> v1, final List<?> v2, final MathContext mc, final ParserRuleContext ctx) {
+	    if (v1.size() != v2.size())
+		throw new Intl.IllegalArgumentException("calc#vectorSizeMismatch", v1.size(), v2.size());
+
+	    // For now just do a decimal calculation
+	    BigDecimal result = BigDecimal.ZERO;
+	    for (int i = 0; i < v1.size(); i++) {
+		Object obj1 = v1.get(i);
+		Object obj2 = v2.get(i);
+		BigDecimal e1 = toDecimalValue(visitor, obj1, mc, ctx);
+		BigDecimal e2 = toDecimalValue(visitor, obj2, mc, ctx);
+		result = result.add(e1.multiply(e2));
+	    }
+	    return fixupToInteger(MathUtil.fixup(result, mc));
 	}
 
 }

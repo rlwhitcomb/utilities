@@ -906,6 +906,9 @@
  *	    and the expression assignment are exactly alike.
  *	30-Jun-2025 (rlwhitcomb)
  *	    #695: Add new "lsb", "msb", "hypot", "expmod", and "polymod" functions.
+ *	18-Jul-2025 (rlwhitcomb)
+ *	    #740: Implement dot product; implement set diff with single value second operand;
+ *	    #738: Use "valueList" instead of "list" on sets.
  */
 package info.rlwhitcomb.calc;
 
@@ -4806,7 +4809,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    return evaluate(ctx.expr());
 	}
 
-	private Object multiplyDivideOp(String oper, Object e1, Object e2, ParserRuleContext ctx, ParserRuleContext ctx1, ParserRuleContext ctx2) {
+	private Object multiplyDivideOp(String oper, Object e1, Object e2, ParserRuleContext ctx, ParserRuleContext ctx1, ParserRuleContext ctx2, boolean doDot) {
 	    String op = oper.replace("=", "");
 
 	    switch (op) {
@@ -4830,6 +4833,10 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		case "%":
 		case "mod":
 		    break;
+		case "\u00B7":
+		    if (doDot)
+			break;
+		    // Otherwise it's illegal (as for assignment)
 		default:
 		    throw new UnknownOpException(oper, ctx);
 	    }
@@ -4852,6 +4859,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			    return f1.remainder(f2);
 			case "mod":
 			    return f1.modulus(f2);
+			case "\u00B7":
+			    throw new UnknownOpException(oper, ctx);
 		    }
 		}
 		else if (e1 instanceof Quaternion || e2 instanceof Quaternion) {
@@ -4870,6 +4879,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			    return q1.remainder(q2, mc);
 			case "mod":
 			    return q1.modulus(q2, mc);
+			case "\u00B7":
+			    return q1.dot(q2, mc);
 			default:
 			    throw new UnknownOpException(oper, ctx);
 		    }
@@ -4890,18 +4901,26 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			    return c1.remainder(c2, mc);
 			case "mod":
 			    return c1.modulus(c2, mc);
+			case "\u00B7":
+			    return c1.dot(c2, mc);
 			default:
 			    throw new UnknownOpException(oper, ctx);
 		    }
 		}
-		else if (e1 instanceof SetScope && e2 instanceof CollectionScope) {
-		    @SuppressWarnings("unchecked")
-		    SetScope<Object> set = (SetScope<Object>) e1;
-		    CollectionScope c = (CollectionScope) e2;
+		else if (e1 instanceof CollectionScope && e2 instanceof CollectionScope) {
+		    CollectionScope c2 = (CollectionScope) e2;
 
 		    switch (op) {
+			case "\u00B7":
+			    CollectionScope c1 = (CollectionScope) e1;
+			    return dotProduct(this, c1.valueList(), c2.valueList(), settings.mc, ctx);
 			case "\\":
-			     return set.diff(c);
+			    if (e1 instanceof SetScope) {
+				@SuppressWarnings("unchecked")
+				SetScope<Object> set = (SetScope<Object>) e1;
+
+				return set.diff(c2);
+			    }
 			default:
 			    throw new UnknownOpException(oper, ctx);
 		    }
@@ -4922,6 +4941,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			    return fixupToInteger(d1.remainder(d2, mc));
 			case "mod":
 			    return fixupToInteger(MathUtil.modulus(d1, d2, mc));
+			default:
+			    throw new UnknownOpException(oper, ctx);
 		    }
 		}
 	    }
@@ -4941,7 +4962,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    String op = (ctx.K_MOD() == null) ? ctx.MULT_OP().getText() : "mod";
 
-	    return multiplyDivideOp(op, e1, e2, ctx, ctx1, ctx2);
+	    return multiplyDivideOp(op, e1, e2, ctx, ctx1, ctx2, true);
 	}
 
 	private Object addSubtractOp(String oper, Object e1, Object e2, ParserRuleContext ctx, ParserRuleContext ctx1, ParserRuleContext ctx2) {
@@ -4972,10 +4993,17 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 			return c1.subtract(c2, settings.mc);
 		    }
-		    else if (e1 instanceof SetScope && e2 instanceof CollectionScope) {
+		    else if (e1 instanceof SetScope) {
 			@SuppressWarnings("unchecked")
 			SetScope<Object> set = (SetScope<Object>) e1;
-			CollectionScope c = (CollectionScope) e2;
+			CollectionScope c;
+
+			if (e2 instanceof CollectionScope) {
+			    c = (CollectionScope) e2;
+			}
+			else {
+			    c = new SetScope<Object>(e2);
+			}
 
 			return set.diff(c);
 		    }
@@ -5974,7 +6002,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    else if (target instanceof SetScope) {
 		@SuppressWarnings("unchecked")
 		SetScope<Object> set = (SetScope<Object>) target;
-		objects = set.list();
+		objects = set.valueList();
 	    }
 	    else {
 		String targetString = getNonNullString(e0ctx, target);
@@ -8684,7 +8712,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    Object e2 = evaluate(exprCtx);
 	    String op = ctx.MULT_ASSIGN().getText();
 
-	    Object result = multiplyDivideOp(op, e1, e2, ctx, varCtx, exprCtx);
+	    Object result = multiplyDivideOp(op, e1, e2, ctx, varCtx, exprCtx, false);
 
 	    return lValue.putContextObject(this, result);
 	}

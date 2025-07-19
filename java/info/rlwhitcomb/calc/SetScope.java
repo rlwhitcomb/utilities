@@ -36,6 +36,8 @@
  *  08-Mar-24 rlw #657	Use ArrayList instead of array for indexed access;
  *			new accessor for the values as a list.
  *  13-Mar-24 rlw #661	New "from" static function to convert from other collections.
+ *  18-Jul-25 rlw #738	Implement "valueList" base method by refactoring "list";
+ *			rename "valueList" variable to "valuesAsList".
  */
 package info.rlwhitcomb.calc;
 
@@ -64,7 +66,7 @@ class SetScope<T extends Object> extends CollectionScope
 	 * The current set of values, as an array (for convenience in indexing). This is only
 	 * present (allocated) as needed, and not constantly maintained (for performance reasons).
 	 */
-	private transient List<Object> valueList = new ArrayList<>();
+	private transient List<Object> valuesAsList = new ArrayList<>();
 
 
 	/**
@@ -129,7 +131,7 @@ class SetScope<T extends Object> extends CollectionScope
 
 	    values.add(value);
 	    // Invalidate the list copy now that we (potentially) have a new member
-	    valueList.clear();
+	    valuesAsList.clear();
 	}
 
 	/**
@@ -141,7 +143,7 @@ class SetScope<T extends Object> extends CollectionScope
 	boolean addAll(final SetScope<T> set) {
 	    checkImmutable();
 
-	    valueList.clear();
+	    valuesAsList.clear();
 	    return values.addAll(set.values);
 	}
 
@@ -154,7 +156,7 @@ class SetScope<T extends Object> extends CollectionScope
 	boolean addAll(final Collection<T> c) {
 	    checkImmutable();
 
-	    valueList.clear();
+	    valuesAsList.clear();
 	    return values.addAll(c);
 	}
 
@@ -177,7 +179,7 @@ class SetScope<T extends Object> extends CollectionScope
 	    checkImmutable();
 
 	    values.remove(value);
-	    valueList.clear();
+	    valuesAsList.clear();
 	}
 
 	/**
@@ -190,11 +192,11 @@ class SetScope<T extends Object> extends CollectionScope
 	 */
 	@SuppressWarnings("unchecked")
 	T get(final int index) {
-	    if (valueList.isEmpty()) {
-		valueList.addAll(values);
+	    if (valuesAsList.isEmpty()) {
+		valuesAsList.addAll(values);
 	    }
 
-	    return (T) valueList.get(index);
+	    return (T) valuesAsList.get(index);
 	}
 
 	/**
@@ -296,11 +298,12 @@ class SetScope<T extends Object> extends CollectionScope
 	 *
 	 * @return Indexable list of the values.
 	 */
-	List<Object> list() {
-	    if (valueList.isEmpty() && !values.isEmpty())
-		valueList.addAll(values);
+	@Override
+	protected List<Object> valueList() {
+	    if (valuesAsList.isEmpty() && !values.isEmpty())
+		valuesAsList.addAll(values);
 
-	    return valueList;
+	    return valuesAsList;
 	}
 
 	/**

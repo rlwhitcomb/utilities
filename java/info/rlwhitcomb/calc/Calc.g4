@@ -563,6 +563,8 @@
  *	    #731: Grammar for complex constants.
  *	24-Jun-2025 (rlwhitcomb)
  *	    #695: Grammar for "lsb", "msb", "expmod", "polymod", and "hypot" functions.
+ *	12-Jul-2025 (rlwhitcomb)
+ *	    #740: Add dot product symbol/character as a "MULT_OP", remove as a potential name character.
  */
 
 grammar Calc;
@@ -1603,6 +1605,7 @@ MULT_OP
        | ( '/' | '\u00F7' | '\u2215' | '\u2797' )
        | ( '\\' | '\u2216' )
        | '%'
+       | '\u00B7'
        ;
 
 POW_ASSIGN
@@ -2108,7 +2111,6 @@ fragment NAME_START_CHAR
 fragment NAME_CHAR
    : NAME_START_CHAR
    | '0'..'9'
-   | '\u00B7'
    | '\u0300'..'\u036F'
    | '\u203F'..'\u2040'
    ;

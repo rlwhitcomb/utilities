@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2022-2023 Roger L. Whitcomb.
+ * Copyright (c) 2022-2023,2025 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -25,12 +25,16 @@
  *	such as Object, Array, and Set.
  *
  * History:
- *  21-Jun-22 rlw  ---  Initial coding.
- *  08-Jul-22 rlw #393: Cleanup imports.
- *  15-Aug-22 rlw #440: Move "size()" up to here.
- *  08-Jan-23 rlw #592:	Move "immutable" down to Scope; move "isEmpty" to here.
+ *  21-Jun-22 rlw ----	Initial coding.
+ *  08-Jul-22 rlw #393	Cleanup imports.
+ *  15-Aug-22 rlw #440	Move "size()" up to here.
+ *  08-Jan-23 rlw #592	Move "immutable" down to Scope; move "isEmpty" to here.
+ *  13-Jul-25 rlw #738	Add "valueList" base method.
  */
 package info.rlwhitcomb.calc;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Parent scope for all the composite (collection) objects.
@@ -41,6 +45,11 @@ class CollectionScope extends Scope
 	 * An empty collection, to be used as the basis for any other collection.
 	 */
 	static final CollectionScope EMPTY = new CollectionScope();
+
+	/**
+	 * An empty object list for the default {@link #valueList} implementation.
+	 */
+	private static final List<Object> EMPTY_LIST = new ArrayList<>(0);
 
 
 	/**
@@ -68,6 +77,15 @@ class CollectionScope extends Scope
 	}
 
 	/**
+	 * Get the first-level list of values.
+	 *
+	 * @return All the collection's first-level values.
+	 */
+	protected List<Object> valueList() {
+	    return EMPTY_LIST;
+	}
+
+	/**
 	 * Access whether this collection is empty.
 	 *
 	 * @return Whether the size is zero.
@@ -75,4 +93,5 @@ class CollectionScope extends Scope
 	protected boolean isEmpty() {
 	    return true;
 	}
+
 }

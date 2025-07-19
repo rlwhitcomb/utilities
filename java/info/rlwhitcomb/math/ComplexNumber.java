@@ -67,6 +67,7 @@
  *  03-May-25 rlw #716	Refactor "ceil" and "floor".
  *		  #702	Fix "modulus".
  *  24-May-25 rlw #721	Add "increment()".
+ *  12-Jul-25 rlw #740	Add "dot" (product) function.
  */
 package info.rlwhitcomb.math;
 
@@ -861,7 +862,6 @@ public abstract class ComplexNumber extends Number implements Serializable, Comp
 	 */
 	public abstract ComplexNumber divide(final ComplexNumber other, final MathContext mc);
 
-
 	/**
 	 * Do an "integer" division of this number by the given one. This is the "\" operator.
 	 *
@@ -924,6 +924,17 @@ public abstract class ComplexNumber extends Number implements Serializable, Comp
 
 	    return divide(radius(mc), mc);
 	}
+
+	/**
+	 * Return the dot product of this complex number and the other one.
+	 * Result is a scalar, with the real and imaginary parts treated as elements
+	 * of a two-element vector.
+	 *
+	 * @param other Number to compute dot product of.
+	 * @param mc    Rounding precision for the multiplications.
+	 * @return      The scalar dot product of this · other.
+	 */
+	public abstract Number dot(final ComplexNumber other, final MathContext mc);
 
 	/**
 	 * Return a complex number that is the "ceil" value of this one, meaning
@@ -1647,6 +1658,16 @@ class RationalComplexNumber extends ComplexNumber
 	}
 
 	@Override
+	public Number dot(final ComplexNumber other, final MathContext mc) {
+	    BigFraction x1 = rFrac();
+	    BigFraction y1 = iFrac();
+	    BigFraction x2 = other.rFrac();
+	    BigFraction y2 = other.iFrac();
+
+	    return x1.multiply(x2).add(y1.multiply(y2));
+	}
+
+	@Override
 	public ComplexNumber ceil() {
 	    BigFraction rFrac = rFrac();
 	    BigFraction iFrac = iFrac();
@@ -1978,6 +1999,17 @@ class DecimalComplexNumber extends ComplexNumber
 	    ComplexNumber fullResult = divide(other, mc);
 
 	    return new DecimalComplexNumber(MathUtil.round(fullResult.r(), 0), MathUtil.round(fullResult.i(), 0));
+	}
+
+	@Override
+	public Number dot(final ComplexNumber other, final MathContext mc) {
+	    BigDecimal x1 = r();
+	    BigDecimal y1 = i();
+	    BigDecimal x2 = other.r();
+	    BigDecimal y2 = other.i();
+
+	    // Note: retain as much precision as possible until the final addition
+	    return x1.multiply(x2).add(y1.multiply(y2), mc);
 	}
 
 	@Override
