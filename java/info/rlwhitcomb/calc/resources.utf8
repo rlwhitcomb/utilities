@@ -202,6 +202,8 @@
 #	    Change "valueNotNull" message text.
 #	15-Jan-2025 (rlwhitcomb)
 #	    Update "unknownOp" message to be clearer.
+#	13-Jul-2025 (rlwhitcomb)
+#	    #740: New error message for dot product.
 #
 
 #
@@ -356,6 +358,7 @@ valueNotNull		= Value of <y>%1$s<.> is undefined (that is, <u>null<.>)
 noConvertDecimal	= Unable to convert value of <y>%1$s<.> type to decimal number
 noConvertFraction	= Unable to convert value of <y>%1$s<.> type to fraction
 unknownType		= Unknown value type: <y>%1$s<.>
+vectorSizeMismatch	= List sizes <y>%1$d<.> and <y>%2$d<.> must be the same for this operation.
 
 #
 # From CalcPiWorker

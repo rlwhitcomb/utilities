@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2021-2024 Roger L. Whitcomb.
+ * Copyright (c) 2021-2025 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -71,6 +71,8 @@
  *	    #440: Move "size()" up to CollectionScope.
  *	08-Jan-2023 (rlwhitcomb)
  *	    #592: Move "isEmpty()" to CollectionScope.
+ *	18-Jul-2025 (rlwhitcomb)
+ *	    #738: Implement new "valueList" base method here.
  */
 package info.rlwhitcomb.calc;
 
@@ -528,6 +530,16 @@ class ObjectScope extends CollectionScope
 	 */
 	Collection<Object> values() {
 	    return variables.values();
+	}
+
+	/**
+	 * Access the list of values.
+	 *
+	 * @return The list of all the values.
+	 */
+	@Override
+	protected List<Object> valueList() {
+	    return new ArrayList<>(variables.values());
 	}
 
 	/**

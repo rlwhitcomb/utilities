@@ -41,6 +41,7 @@
  *  28-Nov-23 rlw #627	Add "ensureCapacity" method.
  *  11-Feb-24 rlw #65	Methods to get array sizes.
  *  05-Jan-25 rlw #696	New constructor with the array size.
+ *  18-Jul-25 rlw #738	Implementation of new "valueList" base method.
  */
 package info.rlwhitcomb.calc;
 
@@ -236,6 +237,16 @@ class ArrayScope<T> extends CollectionScope
 	 */
 	List<T> list() {
 	    return values;
+	}
+
+	/**
+	 * Access the underlying list as an object list.
+	 *
+	 * @return The underlying list we are wrapping, as {@link Object}s.
+	 */
+	@Override
+	protected List<Object> valueList() {
+	    return new ArrayList<>(values);
 	}
 
 	/**

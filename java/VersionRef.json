@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '2.60.5', date: d'2025-07-18',
+      issues: [ 738, 740 ],
+      comment: 'New dot product ( \u00B7 ) operator; remove single value from set using "-".'
+    },
     { version: '2.60.0', date: d'2025-06-30',
       issues: [ 695 ],
       comment: 'Add "lsb", "msb", "hypot", "expmod", and "polymod" functions.'

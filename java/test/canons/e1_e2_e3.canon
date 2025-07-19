@@ -1199,9 +1199,11 @@
 >typeof set1 -> "set"
 >set1 += 2 -> { 2 }
 >set1 += {3} -> { 2, 3 }
->set1 += {1, 2} -> { 2, 3, 1 }
->length set1 -> 3
->scale set1 -> 3
+>set1 += {1, 2, 4} -> { 2, 3, 1, 4 }
+>set1 -= {4} -> { 2, 3, 1 }
+>set1 -= 1 -> { 2, 3 }
+>length set1 -> 2
+>scale set1 -> 2
 >3 within set1 -> true
 >0 in set1 -> false
 >index (set1, 2) -> 1
