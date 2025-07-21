@@ -237,3 +237,32 @@
 >1
 >42
 >call(n = 3, 17, , 42, 99) -> [ 17, 3, 1, 42, 99 ]
+>Defining variable “debug” = false
+>Defining function “count” = {
+>   a = 0
+>   while a < 5 {
+>      a ++
+>      if debug && a > 3 leave a
+>   }
+>   else {
+>      a = -1
+>   }
+>   print `a = $a`
+>}
+>Defining function “come” = {
+>   var latest = 0
+>   loop over 5 {
+>      if debug && __ mod 4 == 3 leave latest
+>      latest = __ ²
+>   }
+>   else {
+>      -1
+>   }
+>}
+>a = -1
+>count -> "a = -1"
+>come -> -1
+>debug = ! debug -> true
+>a = 4
+>count -> "a = 4"
+>come -> 4

@@ -1418,10 +1418,10 @@ whether it has previously been used/defined.
      All keywords in these statements have three differently-cased forms: all lower case, all UPPER case, and MixedCase.  For example: <code>loop</code>, <code>LOOP</code>, and <code>Loop</code>.
   <p>The syntax for each is as follows:
   <p class="indent">
-     [ <i>id</i> <code>:</code> ] <code>LOOP</code>&nbsp;[ [ <i>loopvar</i> ] ( <code>IN</code> | <code>WITHIN</code> | <code>OVER</code> | <code>&#x2208;</code> | <code>&#x220A;</code>) ] <i>expr</i> [ <code>...</code>,&nbsp;<code>..</code>,&nbsp;or&nbsp;<code>&#x2026;</code>&nbsp;<i>expr</i> ] [ <code>,</code> <i>expr</i> ] <code>{</code> <i>statements or expressions</i> <code>}</code>
+     [ <i>id</i> <code>:</code> ] <code>LOOP</code>&nbsp;[ [ <i>loopvar</i> ] ( <code>IN</code> | <code>WITHIN</code> | <code>OVER</code> | <code>&#x2208;</code> | <code>&#x220A;</code>) ] <i>expr</i> [ <code>...</code>,&nbsp;<code>..</code>,&nbsp;or&nbsp;<code>&#x2026;</code>&nbsp;<i>expr</i> ] [ <code>,</code> <i>expr</i> ] <code>{</code> <i>statements or expressions</i> <code>}</code> [ <code>ELSE</code>&nbsp; <code>{</code> <i>statements or expressions</i> <code>}</code> ]
   </p>
   <p class="indent">
-     [ <i>id</i> <code>:</code> ] <code>WHILE</code>&nbsp;<i>expr</i> <code>{</code> <i>statements or expressions</i> <code>}</code>
+     [ <i>id</i> <code>:</code> ] <code>WHILE</code>&nbsp;<i>expr</i> <code>{</code> <i>statements or expressions</i> <code>}</code> [ <code>ELSE</code>&nbsp; <code>{</code> <i>statements or expressions</i> <code>}</code> ]
   </p>
   <p class="indent">
      <code>IF</code>&nbsp;<i>expr</i>&nbsp;<code>{</code> <i>statements or expressions</i> <code>}</code> [ <code>ELSE {</code> <i>statements or expressions</i> <code>}</code> ]
@@ -1485,6 +1485,7 @@ whether it has previously been used/defined.
      the enclosing function early by referencing the function name as the label. For Java aficionados, this means <code>LEAVE</code>
      can function either as a labeled "break" statement, or as a "return", depending on the context and the label name, but also with
      the option to return the expression value, if given.
+  <p>As in Python, if the <code>ELSE</code> clause is added to either <code>WHILE</code> or <code>LOOP</code> and the loop terminates normally (without a <code>LEAVE</code> being executed) the <code>else</code> block will execute. The <code>ELSE</code> will be skipped if the loop terminates abnormally (via <code>LEAVE</code>).
   <p>The <code>IF</code> statement evaluates the expression and executes the code block only if the expression evaluates to a
      boolean <code>true</code> value. If the optional <code>ELSE</code> block is given and the expression evaluates to
      <code>false</code> that block will be executed instead.

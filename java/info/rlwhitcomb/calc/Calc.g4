@@ -565,6 +565,8 @@
  *	    #695: Grammar for "lsb", "msb", "expmod", "polymod", and "hypot" functions.
  *	12-Jul-2025 (rlwhitcomb)
  *	    #740: Add dot product symbol/character as a "MULT_OP", remove as a potential name character.
+ *	18-Jul-2025 (rlwhitcomb)
+ *	    #742: Add "else" clause to "WHILE" and "LOOP".
  */
 
 grammar Calc;
@@ -623,11 +625,11 @@ loopLabel
    ;
 
 loopStmt
-   : loopLabel ? K_LOOP ( id ? ( K_OVER | K_IN | K_WITHIN | SET_IN ) ) ? loopCtl stmtBlock
+   : loopLabel ? K_LOOP ( id ? ( K_OVER | K_IN | K_WITHIN | SET_IN ) ) ? loopCtl stmtBlock ( EOL* K_ELSE stmtBlock ) ?
    ;
 
 whileStmt
-   : loopLabel ? K_WHILE expr ? stmtBlock
+   : loopLabel ? K_WHILE expr ? stmtBlock ( EOL* K_ELSE stmtBlock ) ?
    ;
 
 ifStmt

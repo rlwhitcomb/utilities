@@ -250,3 +250,38 @@ call(r=87, n=6)
 call(n = 3, 17, 9, 8, 10)
 call(n = 3, 17, , 42, 99)
 
+#
+# #742: else clause on "while" and "loop"
+#
+var debug = false
+
+define count = {
+a=0
+while a<5 {
+   a++
+   if debug && a > 3 leave a
+}
+else {
+   a = -1
+}
+print `a = $a`
+}
+
+define come = {
+var latest = 0
+loop over 5 {
+   if debug && __ mod 4 == 3 leave latest
+   latest = __²
+}
+else {
+  -1
+}
+}
+
+count
+come
+
+debug = !debug
+
+count
+come

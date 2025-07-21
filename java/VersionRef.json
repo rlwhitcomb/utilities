@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '3.0', date: d'2025-07-20',
+      issues: [ 742 ],
+      comment: 'Add "else" clauses to "while" and "loop" (from Python syntax).'
+    },
     { version: '2.60.5', date: d'2025-07-18',
       issues: [ 738, 740 ],
       comment: 'New dot product ( \u00B7 ) operator; remove single value from set using "-".'

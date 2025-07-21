@@ -909,6 +909,8 @@
  *	18-Jul-2025 (rlwhitcomb)
  *	    #740: Implement dot product; implement set diff with single value second operand;
  *	    #738: Use "valueList" instead of "list" on sets.
+ *	20-Jul-2025 (rlwhitcomb)
+ *	    #742: Process "else" clauses on "loop" and "while" statements.
  */
 package info.rlwhitcomb.calc;
 
@@ -3646,7 +3648,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    CalcParser.LoopLabelContext label    = ctx.loopLabel();
 	    CalcParser.IdContext id              = ctx.id();
 	    CalcParser.LoopCtlContext ctlCtx     = ctx.loopCtl();
-	    CalcParser.StmtBlockContext block    = ctx.stmtBlock();
+	    CalcParser.StmtBlockContext block    = ctx.stmtBlock(0);
 	    CalcParser.ExprListContext exprList  = ctlCtx.exprList();
 	    CalcParser.RangeExprContext rangeCtx = ctlCtx.rangeExpr();
 
@@ -3657,36 +3659,66 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    LoopVisitor visitor = new LoopVisitor(block, new LoopScope(), localVarName);
 
-	    Object value = null;
+	    Object lastValue = null;
+	    boolean left = false;
 
 	    try {
 		if (exprList != null)
-		    value = iterateOverRangeExpr(exprList.expr(), null, false, visitor, true, doingWithin);
+		    lastValue = iterateOverRangeExpr(exprList.expr(), null, false, visitor, true, doingWithin);
 		else
-		    value = iterateOverRangeExpr(null, rangeCtx.expr(), rangeCtx.DOTS() != null, visitor, true, doingWithin);
+		    lastValue = iterateOverRangeExpr(null, rangeCtx.expr(), rangeCtx.DOTS() != null, visitor, true, doingWithin);
 	    }
 	    catch (LeaveException lex) {
+		// This "leave" is prematurely terminating the loop, no matter whether meant for this block or not
+		// so it definitely qualifies for the "else" treatment either way
+		left = true;
 		if (compareLabels(loopLabel, lex.getLabel())) {
 		    if (lex.hasValue()) {
-			value = lex.getValue();
+			lastValue = lex.getValue();
 		    }
 		}
 		else {
 		    throw lex;
 		}
 	    }
+	    finally {
+		if (!left) {
+		    if (ctx.K_ELSE() != null) {
+			CalcParser.StmtBlockContext elseBlock = ctx.stmtBlock(1);
+			// This will put the loop symbol table back into scope
+			visitor.start();
+			try {
+			    lastValue = evaluate(elseBlock);
+			}
+			catch (LeaveException lex) {
+			    if (compareLabels(loopLabel, lex.getLabel())) {
+				if (lex.hasValue()) {
+				    lastValue = lex.getValue();
+				}
+			    }
+			    else {
+				throw lex;
+			    }
+			}
+			finally {
+			    visitor.finish();
+			}
+		    }
+		}
+	    }
 
-	    return value;
+	    return lastValue;
 	}
 
 	@Override
 	public Object visitWhileStmt(CalcParser.WhileStmtContext ctx) {
 	    CalcParser.LoopLabelContext label = ctx.loopLabel();
 	    CalcParser.ExprContext exprCtx    = ctx.expr();
-	    CalcParser.StmtBlockContext block = ctx.stmtBlock();
+	    CalcParser.StmtBlockContext block = ctx.stmtBlock(0);
 
 	    Object lastValue = null;
 	    String loopLabel = label != null ? label.id().getText() : null;
+	    boolean left = false;
 
 	    boolean exprResult = exprCtx == null ? true : getBooleanValue(exprCtx);
 
@@ -3704,6 +3736,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		}
 	    }
 	    catch (LeaveException lex) {
+		// This "leave" is prematurely terminating the loop, no matter whether meant for this block or not
+		// so it definitely qualifies for the "else" treatment either way
+		left = true;
 		if (compareLabels(loopLabel, lex.getLabel())) {
 		    if (lex.hasValue()) {
 			lastValue = lex.getValue();
@@ -3714,7 +3749,32 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		}
 	    }
 	    finally {
-		popScope();
+		boolean didPop = false;
+		if (!left) {
+		    if (ctx.K_ELSE() != null) {
+			CalcParser.StmtBlockContext elseBlock = ctx.stmtBlock(1);
+			try {
+			    lastValue = evaluate(elseBlock);
+			}
+			catch (LeaveException lex) {
+			    if (compareLabels(loopLabel, lex.getLabel())) {
+				if (lex.hasValue()) {
+				    lastValue = lex.getValue();
+				}
+			    }
+			    else {
+				throw lex;
+			    }
+			}
+			finally {
+			    popScope();
+			    didPop = true;
+			}
+		    }
+		}
+		if (!didPop) {
+		    popScope();
+		}
 	    }
 
 	    return lastValue;
