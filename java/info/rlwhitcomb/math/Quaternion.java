@@ -48,6 +48,7 @@
  *  11-May-25 rlw #702	Ooops! "modulus" still needed work.
  *  24-May-25 rlw #721	Add R_ONE constant and "increment()" methods.
  *  12-Jul-25 rlw #740	Add "dot" (product) method.
+ *  22-Jul-25 rlw #677	"divideAndRemainder" method.
  */
 package info.rlwhitcomb.math;
 
@@ -485,6 +486,20 @@ public abstract class Quaternion extends Number implements Comparable<Quaternion
 	public Quaternion remainder(final Quaternion other, final MathContext mc) {
 	    Quaternion quotient = idivide(other, mc);
 	    return subtract(quotient.multiply(other, mc));
+	}
+
+	/**
+	 * Return both the quotient and remainder from division in one operation.
+	 *
+	 * @param other Number to divide by.
+	 * @param mc    Rounding precision to use for decimal results.
+	 * @return      Quotient in [0], remainder in [1].
+	 */
+	public Quaternion[] divideAndRemainder(final Quaternion other, final MathContext mc) {
+	    Quaternion[] results = new Quaternion[2];
+	    results[0] = idivide(other, mc);
+	    results[1] = subtract(results[0].multiply(other, mc));
+	    return results;
 	}
 
 	/**

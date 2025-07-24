@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '3.0.5', date: d'2025-07-23',
+      issues: [ 677 ],
+      comment: 'Add "∖%" operator.'
+    },
     { version: '3.0', date: d'2025-07-20',
       issues: [ 742 ],
       comment: 'Add "else" clauses to "while" and "loop" (from Python syntax).'

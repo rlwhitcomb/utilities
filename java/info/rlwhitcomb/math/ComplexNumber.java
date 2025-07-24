@@ -68,6 +68,8 @@
  *		  #702	Fix "modulus".
  *  24-May-25 rlw #721	Add "increment()".
  *  12-Jul-25 rlw #740	Add "dot" (product) function.
+ *  22-Jul-25 rlw #677	New "divideAndRemainder" function; fix "add", "subtract", "multiply" for non-rational;
+ *			add "toDecimalComplex()" for these fixes.
  */
 package info.rlwhitcomb.math;
 
@@ -777,7 +779,7 @@ public abstract class ComplexNumber extends Number implements Serializable, Comp
 	    if (isRational() && other.isRational())
 		return ((RationalComplexNumber) this).add(other);
 	    else
-		return ((DecimalComplexNumber) this).add(other);
+		return toDecimalComplex().add(other.toDecimalComplex());
 	}
 
 	/**
@@ -793,7 +795,7 @@ public abstract class ComplexNumber extends Number implements Serializable, Comp
 	    if (isRational() && other.isRational())
 		return ((RationalComplexNumber) this).subtract(other);
 	    else
-		return ((DecimalComplexNumber) this).subtract(other, mc);
+		return toDecimalComplex().subtract(other.toDecimalComplex(), mc);
 	}
 
 	/**
@@ -810,7 +812,7 @@ public abstract class ComplexNumber extends Number implements Serializable, Comp
 	    if (isRational() && other.isRational())
 		return ((RationalComplexNumber) this).multiply(other);
 	    else
-		return ((DecimalComplexNumber) this).multiply(other, mc);
+		return toDecimalComplex().multiply(other.toDecimalComplex(), mc);
 	}
 
 	/**
@@ -881,6 +883,20 @@ public abstract class ComplexNumber extends Number implements Serializable, Comp
 	public ComplexNumber remainder(final ComplexNumber other, final MathContext mc) {
 	    ComplexNumber quotient = idivide(other, mc);
 	    return subtract(quotient.multiply(other, mc), mc);
+	}
+
+	/**
+	 * Return both the "integer" quotient from division, and the remainder after division.
+	 *
+	 * @param other Number to divide by.
+	 * @param mc    Rounding precision to use (for decimal results).
+	 * @return      Quotient in [0] and remainder in [1].
+	 */
+	public ComplexNumber[] divideAndRemainder(final ComplexNumber other, final MathContext mc) {
+	    ComplexNumber[] results = new ComplexNumber[2];
+	    results[0] = idivide(other, mc);
+	    results[1] = subtract(results[0].multiply(other, mc), mc);
+	    return results;
 	}
 
 	/**
@@ -1104,6 +1120,13 @@ public abstract class ComplexNumber extends Number implements Serializable, Comp
 
 	    return null;
 	}
+
+	/**
+	 * Convert to a pure decimal complex number, regardless of the input type.
+	 *
+	 * @return A pure decimal complex number (that is, NOT rational).
+	 */
+	public abstract DecimalComplexNumber toDecimalComplex();
 
 	/**
 	 * Get the {@code ComplexNumber} equivalent of the input value.
@@ -1512,6 +1535,11 @@ class RationalComplexNumber extends ComplexNumber
 	}
 
 	@Override
+	public DecimalComplexNumber toDecimalComplex() {
+	    return new DecimalComplexNumber(getDecimal(rFrac()), getDecimal(iFrac()));
+	}
+
+	@Override
 	public List<Object> toList() {
 	    List<Object> list = new ArrayList<>();
 
@@ -1854,6 +1882,11 @@ class DecimalComplexNumber extends ComplexNumber
 	@Override
 	public boolean isPureInteger() {
 	    return MathUtil.isInteger(r()) && MathUtil.isInteger(i());
+	}
+
+	@Override
+	public DecimalComplexNumber toDecimalComplex() {
+	    return this;
 	}
 
 	@Override

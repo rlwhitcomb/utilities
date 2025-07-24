@@ -83,6 +83,7 @@
  *  07-Mar-25 rlw #710	New constructor with integer values.
  *  13-Apr-25 rlw #702	Fix "remainder".
  *  28-Jun-25 rlw #695	New "toIntExact()" method.
+ *  22-Jul-25 rlw #677	"divideAndRemainder" and "toIntegerFraction" methods.
  */
 package info.rlwhitcomb.math;
 
@@ -1046,8 +1047,7 @@ public class BigFraction extends Number
 	 */
 	public BigFraction idivide(final BigFraction other) {
 	    BigFraction fullResult = divide(other);
-	    BigInteger numer = fullResult.toInteger();
-	    return new BigFraction(numer);
+	    return fullResult.toIntegerFraction();
 	}
 
 	/**
@@ -1081,6 +1081,19 @@ public class BigFraction extends Number
 	public BigFraction remainder(final BigFraction other) {
 	    BigFraction quotient = idivide(other);
 	    return subtract(quotient.multiply(other));
+	}
+
+	/**
+	 * Compute both the integer division quotient and its remainder in one operation.
+	 *
+	 * @param other The fraction to divide by.
+	 * @return      The quotient in [0] and the remainder in [1].
+	 */
+	public BigFraction[] divideAndRemainder(final BigFraction other) {
+	    BigFraction[] results = new BigFraction[2];
+	    results[0] = idivide(other);
+	    results[1] = subtract(results[0].multiply(other));
+	    return results;
 	}
 
 	/**
@@ -1240,6 +1253,16 @@ public class BigFraction extends Number
 	 */
 	public BigInteger toInteger() {
 	    return isWholeNumber() ? numer : numer.divide(denom);
+	}
+
+	/**
+	 * Return a new fraction that is the next lowest integer of this fraction.
+	 *
+	 * @return A new fraction of this value as a whole integer.
+	 * @see #toInteger
+	 */
+	public BigFraction toIntegerFraction() {
+	    return new BigFraction(toInteger());
 	}
 
 	/**

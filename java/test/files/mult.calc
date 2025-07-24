@@ -41,6 +41,8 @@ dx3 = d1%d2
 dx4 = d3%d4
 (dx1 * d2 + dx3) == d1
 (dx2 * d4 + dx4) == d3
+d1 \% d2
+d3 ∖% d4
 d1 mod d2
 d3 mod d4
 
@@ -65,6 +67,8 @@ fx3 = f1%f2
 fx4 = f3%f4
 (fx1 * f2 + fx3) == f1
 (fx2 * f4 + fx4) == f3
+f1 \% f2
+f3 ∖% f4
 f1 mod f2
 f3 mod f4
 
@@ -89,8 +93,12 @@ cx3 = c1%c2
 cx4 = c3%c4
 (cx1 * c2 + cx3) == c1
 (cx2 * c4 + cx4) == c3
+c1 ∖% c2
+c3 \% c4
 c1 mod c2
 c3 mod c4
+c1 · c2
+c3 · c4
 
 $quiet on { cx1 = c1 }; cx1 *= c2
 $quiet on { cx1 = c3 }; cx1 *= c4
@@ -113,8 +121,12 @@ cx3 = cf1%cf2
 cx4 = cf3%cf4
 (cx1 * cf2 + cx3) == cf1
 (cx2 * cf4 + cx4) == cf3
+cf1 \% cf2
+cf3 ∖% cf4
 cf1 mod cf2
 cf3 mod cf4
+cf1 · cf2
+cf3 · cf4
 
 $quiet on { cx1 = cf1 }; cx1 *= cf2
 $quiet on { cx1 = cf3 }; cx1 *= cf4
@@ -137,9 +149,13 @@ qx3 = q1%q2
 qx4 = q3%q4
 (qx1 * q2 + qx3) == q1
 (qx2 * q4 + qx4) == q3
+q1 \% q2
+q3 \% q4
 q1 mod q2
 q3 mod q4
 (49,0,0,0) mod (11,0,0,0)
+q1 · q2
+q3 · q4
 
 $quiet on { qx1 = q1 }; qx1 *= q2
 $quiet on { qx1 = q3 }; qx1 *= q4
@@ -162,8 +178,12 @@ qx3 = qf1%qf2
 qx4 = qf3%qf4
 (qx1 * qf2 + qx3) == qf1
 (qx2 * qf4 + qx4) == qf3
+qf1 ∖% qf2
+qf3 ∖% qf4
 qf1 mod qf2
 qf3 mod qf4
+qf1 · qf2
+qf3·qf4
 
 $quiet on { qx1 = qf1 }; qx1 *= qf2
 $quiet on { qx1 = qf3 }; qx1 *= qf4
@@ -173,6 +193,11 @@ $quiet on { qx1 = qf1 }; qx1 \= qf2
 $quiet on { qx1 = qf3 }; qx1 \= qf4
 $quiet on { qx1 = qf1 }; qx1 %= qf2
 $quiet on { qx1 = qf3 }; qx1 %= qf4
+
+display 'Some vector dot products ...'
+vec1 = 3,2,5,7
+vec2 = 14,6,19,4
+vec1·vec2
 
 }
 

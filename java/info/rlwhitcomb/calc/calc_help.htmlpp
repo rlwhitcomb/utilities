@@ -982,9 +982,10 @@ or<br>
         <i>expr</i>&nbsp;&nbsp;<code>/</code>, <code>&divide;</code>, <code>&#x2215;</code>, or <code>&#x2797;</code>&nbsp;&nbsp;<i>expr</i><br>
         <i>expr</i>&nbsp;&nbsp;<code>\</code>, or <code>&#x2216;</code>&nbsp;&nbsp;<i>expr</i><br>
         <i>expr</i>&nbsp;<code> % </code>&nbsp;<i>expr</i><br>
+        <i>expr</i>&nbsp;&nbsp;<code>\%</code>, or <code>&#x2216;%</code>&nbsp;&nbsp;<i>expr</i><br>
         <i>expr</i>&nbsp;<code> mod </code>&nbsp;<i>expr</i><br>
         <i>expr</i>&nbsp;<code> &#x00B7; </code>&nbsp;<i>expr</i></td>
-        <td>multiply<br>divide<br>integer divide or set difference<br>remainder<br>modulus<br>dot product</td><td>left to right</td></tr>
+        <td>multiply<br>divide<br>integer divide or set difference<br>remainder<br>quotient, remainder<br>modulus<br>dot product</td><td>left to right</td></tr>
     <tr><td>18</td><td>
         <i>expr</i>&nbsp;&nbsp;<code>+</code> or <code>&#x2795;</code>&nbsp;&nbsp;<i>expr</i><br>
         <i>expr</i>&nbsp;&nbsp;<code>-</code>,  <code>&#x2212;</code>, or <code>&#x2796;</code>&nbsp;&nbsp;<i>expr</i></td>

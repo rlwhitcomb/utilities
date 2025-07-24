@@ -567,6 +567,8 @@
  *	    #740: Add dot product symbol/character as a "MULT_OP", remove as a potential name character.
  *	18-Jul-2025 (rlwhitcomb)
  *	    #742: Add "else" clause to "WHILE" and "LOOP".
+ *	21-Jul-2025 (rlwhitcomb)
+ *	    #677: New "\%" operator to give combined results.
  */
 
 grammar Calc;
@@ -1574,11 +1576,6 @@ INC_OP
        | ( '--' | '\u2212\u2212' | '\u2796\u2796' )
        ;
 
-ADD_OP
-       : ( '+' | '\u2795' )
-       | ( '-' | '\u2212' | '\u2796' )
-       ;
-
 POWERS
        : '\u2070' // 0
        | '\u00B9' // 1
@@ -1606,8 +1603,13 @@ MULT_OP
        : ( '*' | '\u00D7' | '\u2217' | '\u2715' | '\u2716' )
        | ( '/' | '\u00F7' | '\u2215' | '\u2797' )
        | ( '\\' | '\u2216' )
-       | '%'
+       | '%' | '\\%' | '\u2216%'
        | '\u00B7'
+       ;
+
+ADD_OP
+       : ( '+' | '\u2795' )
+       | ( '-' | '\u2212' | '\u2796' )
        ;
 
 POW_ASSIGN

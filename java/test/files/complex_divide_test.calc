@@ -33,11 +33,11 @@ q*c2
 // Tests from this worksheet:
 print 'Tests taken from https://www.lavc.edu/sites/lavc.edu/files/2022-08/complexD_0.pdf'
 
-5 / (0, -5)
-1 / (0, -2)
--2 / (0, 1)
-7 / (0, 4)
-(4, 1) / (0, 8)
+5 / c'-5i'
+1 / c'-2i'
+-2 / i
+7 / c'4i'
+c'4 + i' / c'8i'
 (-5, -1) / (0, -10)
 (9, 1) / complex('-7i')
 complex('6-6i')/(0,-4)

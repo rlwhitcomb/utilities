@@ -911,6 +911,8 @@
  *	    #738: Use "valueList" instead of "list" on sets.
  *	20-Jul-2025 (rlwhitcomb)
  *	    #742: Process "else" clauses on "loop" and "while" statements.
+ *	22-Jul-2025 (rlwhitcomb)
+ *	    #677: New "\%" operator (quotient, remainder).
  */
 package info.rlwhitcomb.calc;
 
@@ -4869,7 +4871,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    return evaluate(ctx.expr());
 	}
 
-	private Object multiplyDivideOp(String oper, Object e1, Object e2, ParserRuleContext ctx, ParserRuleContext ctx1, ParserRuleContext ctx2, boolean doDot) {
+	private Object multiplyDivideOp(String oper, Object e1, Object e2, ParserRuleContext ctx, ParserRuleContext ctx1, ParserRuleContext ctx2, boolean notAssign) {
 	    String op = oper.replace("=", "");
 
 	    switch (op) {
@@ -4893,8 +4895,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		case "%":
 		case "mod":
 		    break;
+		case "\\%":
+		case "\u2216%":
+		    op = "\\%";
+		    // fall through
 		case "\u00B7":
-		    if (doDot)
+		    if (notAssign)
 			break;
 		    // Otherwise it's illegal (as for assignment)
 		default:
@@ -4919,6 +4925,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			    return f1.remainder(f2);
 			case "mod":
 			    return f1.modulus(f2);
+			case "\\%":
+			    return new ArrayScope<Object>((Object[]) f1.divideAndRemainder(f2));
 			case "\u00B7":
 			    throw new UnknownOpException(oper, ctx);
 		    }
@@ -4939,6 +4947,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			    return q1.remainder(q2, mc);
 			case "mod":
 			    return q1.modulus(q2, mc);
+			case "\\%":
+			    return new ArrayScope<Object>((Object[]) q1.divideAndRemainder(q2, mc));
 			case "\u00B7":
 			    return q1.dot(q2, mc);
 			default:
@@ -4961,6 +4971,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			    return c1.remainder(c2, mc);
 			case "mod":
 			    return c1.modulus(c2, mc);
+			case "\\%":
+			    return new ArrayScope<Object>((Object[]) c1.divideAndRemainder(c2, mc));
 			case "\u00B7":
 			    return c1.dot(c2, mc);
 			default:
@@ -5001,6 +5013,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			    return fixupToInteger(d1.remainder(d2, mc));
 			case "mod":
 			    return fixupToInteger(MathUtil.modulus(d1, d2, mc));
+			case "\\%":
+			    BigDecimal results[] = d1.divideAndRemainder(d2, mc);
+			    return new ArrayScope<Object>(fixupToInteger(results[0]), fixupToInteger(results[1]));
 			default:
 			    throw new UnknownOpException(oper, ctx);
 		    }
