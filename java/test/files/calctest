@@ -36,6 +36,7 @@ q1            : q1
 remdiv        : remdiv
 complex_divide_test : complex_divide_test
 mult          : mult
+totient       : totient
 trick         : trick
 sum3          : sum3
 text          : -text pi;e;phi;ln 2

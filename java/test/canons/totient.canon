@@ -1,0 +1,51 @@
+>Defining function “totient(n)” = {
+>   const facts = unique (pfactors (n))
+>   var result = n
+>   $rational on {
+>      loop f over facts {
+>         result ×= (1 - 1 / f)
+>      }
+>   }
+>   ~~ result
+>}
+>totient(1) = 0
+>totient(2) = 1
+>totient(3) = 2
+>totient(4) = 2
+>totient(5) = 4
+>totient(6) = 2
+>totient(7) = 6
+>totient(8) = 4
+>totient(9) = 6
+>totient(10) = 4
+>totient(11) = 10
+>totient(12) = 4
+>totient(13) = 12
+>totient(14) = 6
+>totient(15) = 8
+>totient(16) = 8
+>totient(17) = 16
+>totient(18) = 6
+>totient(19) = 18
+>totient(20) = 8
+>totient(21) = 12
+>totient(22) = 10
+>totient(23) = 22
+>totient(24) = 8
+>totient(25) = 20
+>totient(26) = 12
+>totient(27) = 18
+>totient(28) = 12
+>totient(29) = 28
+>totient(30) = 8
+>totient(31) = 30
+>totient(32) = 16
+>totient(33) = 20
+>totient(34) = 16
+>totient(35) = 24
+>totient(36) = 12
+>totient(37) = 36
+>totient(38) = 18
+>totient(39) = 24
+>totient(40) = 16
+>totient(1000) -> 400
