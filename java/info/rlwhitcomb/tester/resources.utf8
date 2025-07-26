@@ -1,7 +1,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2012,2014,2016-2023 Roger L. Whitcomb.
+# Copyright (c) 2012,2014,2016-2023,2025 Roger L. Whitcomb.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -90,6 +90,8 @@
 #	    #593: Preprocessing error message.
 #	27-Oct-2023 (rlwhitcomb)
 #	    #633: New help text for "-noopt" and "-opt" options.
+#	25-Jul-2025 (rlwhitcomb)
+#	    #736: New parsing exception error message.
 #
 
 mismatch		= Mismatch on test \"%1$s\":%n  Canon file: %2$s%n Output file: %3$s
@@ -133,6 +135,7 @@ badOption		= Unrecognized option \"%1$s\"
 cannotFindFile		= Cannot find the '%1$s' file.
 missingDescFile		= Must specify at least one description file name.
 exception		= Exception thrown during testing: %1$s
+parseException          = Expression parsing error: %1$s
 compareFiles		= compare files(\"%1$s\",%2$s,%3$s)
 statusPassed		= Passed
 statusFailed		= Failed

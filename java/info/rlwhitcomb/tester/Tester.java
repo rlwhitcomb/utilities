@@ -258,6 +258,9 @@
  *	    #627: Set/clear the "in testing" property for use in the testable classes.
  *	06-Jun-2025 (rlwhitcomb)
  *	    Tiny change in tearing down the ExitSecurityManager after execution.
+ *	25-Jul-2025 (rlwhitcomb)
+ *	    #736: New syntax for canon files to allow arbitrary expressions to choose alternate
+ *	    canon lines.
  */
 package info.rlwhitcomb.tester;
 
@@ -279,6 +282,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.UnsupportedCharsetException;
 import java.nio.file.Files;
 import java.security.Permission;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -337,6 +341,8 @@ public class Tester
 	private String testClassName = null;
 
 	private Charset currentCharset = null;
+
+	private PreProc preProc = null;
 
 
 	/**
@@ -856,9 +862,9 @@ public class Tester
 
 
 	/**
-	 * Check a potential canon line for platform, version and charset values
-	 * specified as <code>{{ <i>platform</i> }}</code> or <code>{{ ,<i>major</i>.<i>minor</i> }}</code>
-	 * or <code>{{ <i>platform</i>,<i>major</i>.<i>minor</i> }}</code>.
+	 * Check a potential canon line for platform, version, charset, or random expression values.
+	 * <p>Platform/version checks are specified as <code>{{ <i>platform</i> }}</code> or
+	 * <code>{{ ,<i>major</i>.<i>minor</i> }}</code> or <code>{{ <i>platform</i>,<i>major</i>.<i>minor</i> }}</code>.
 	 * <p>Platform can be <code>"windows"</code>, <code>"linux"</code>, <code>"unix"</code>, or
 	 * <code>"osx"</code>. Also, <code>"^<i>platform</i>"</code> will match any platform EXCEPT the given one.
 	 * <p>Version can also be <code><i>major</i></code>, <code><i>major</i>.<i>x</i></code> or
@@ -868,13 +874,16 @@ public class Tester
 	 * <p>Charset is specified by <code>[&lt; <i>charset</i> &gt;]</code>, and can be given as
 	 * <code>[&lt;*&gt;]</code> to match any character set (same as leaving out the check),
 	 * or by <code>[&lt;^<i>name</i>&gt;]</code> which matches any charset BUT the given one.
-	 * <p>Either a platform/version or charset check can be given (or both, in either order) and all the
-	 * given checks must pass for the canon line to be included in the final canon test file.
+	 * <p>Random expressions are given by <code>{[ <i>expression</i> ]}</code> syntax, and where expressions
+	 * conform to the preprocessor syntax. All the environment variables, the system properties, and a few extra
+	 * preprocessor variables have values predefined.
+	 * <p>A platform/version or charset check can be given (or both, in either order) and any number of expression
+	 * checks can also be given and all the given checks must pass for the canon line to be included in the final canon test file.
 	 *
-	 * @param input	The input line, with a potential platform/version or charset specification.
-	 * @return	{@code null} if the platform/version or charset spec exists and we don't pass the test, or the
-	 *		input line (less the version part) if the spec doesn't exist or if it does and we pass the
-	 *		tests, and thus the line should be part of the test.
+	 * @param input	The input line, with potential platform/version, charset, or other expression specifications.
+	 * @return	{@code null} if platform/version, charset, or expression specs exist and we don't pass the tests, or the
+	 *		complete input line if the spec doesn't exist or some other syntax error occurs, or the input line without
+	 *		any specs if we pass all the tests, and thus the line should be passed to the final canon file.
 	 */
 	private String platformAndVersionCheck(final String input) {
 	    if (input.startsWith("{{")) {
@@ -982,6 +991,27 @@ public class Tester
 			    return input;
 			}
 		    }
+		}
+		// Not valid syntax
+		return input;
+	    }
+	    else if (input.startsWith("{[")) {
+		// {[ expression ]}
+		int end = input.indexOf("]}");
+		if (end > 0) {
+		    String expression = input.substring(2, end).trim();
+		    if (expression.isEmpty())
+			return input;
+		    String canonLine = input.substring(end + 2);
+		    boolean exprResult = false;
+		    try {
+			exprResult = preProc.evaluate(expression, PreProc.ProcessAs.NORMAL);
+		    }
+		    catch (ParseException pe) {
+			Intl.errFormat("tester#parseException", Exceptions.toString(pe));
+			return input;
+		    }
+		    return exprResult ? platformAndVersionCheck(canonLine) : null;
 		}
 		// Not valid syntax
 		return input;
@@ -1403,7 +1433,7 @@ public class Tester
 	    File descript = null;
 	    try {
 		descript = FileUtilities.createTempFile("desc");
-		PreProc preProc = new PreProc()
+		preProc = new PreProc()
 			.setAlwaysProcess(true)
 			.setIgnoreUnknownDirectives(true)
 			.setOutputFileName(descript.getPath())

@@ -1,4 +1,4 @@
->Monthly payment on $50,000 at 6.75% interest for 15 years is $442.45.
+{[ __JAVA_PP_VERSION__ >= 1.4.1 ]}>Monthly payment on $50,000 at 6.75% interest for 15 years is $442.45.
 >
 >┌────────┬─────────┬───────────┬───────────┬────────────┬─────────────┐
 >│  Year  │  Month  │  Balance  │  Payment  │  Interest  │  Principal  │

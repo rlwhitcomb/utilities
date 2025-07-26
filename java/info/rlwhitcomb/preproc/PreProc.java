@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2010-2011,2014-2016,2019-2023 Roger L. Whitcomb.
+ * Copyright (c) 2010-2011,2014-2016,2019-2023,2025 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,34 +24,34 @@
  *	Language Pre-processor for Java and other files.
  *
  * History:
- *  19-May-10 rlw  ---	First version after not finding anything useful via Google.
- *  24-May-10 rlw  ---	Correct backwards test of return values from processing
+ *  19-May-10 rlw ----	First version after not finding anything useful via Google.
+ *  24-May-10 rlw ----	Correct backwards test of return values from processing
  *			functions: true means error, false is success.
- *  25-May-10 rlw  ---	Because of problems reporting undefined var errors even
+ *  25-May-10 rlw ----	Because of problems reporting undefined var errors even
  *			with #if defined(abc) && $(abc)... as well as possible
  *			problems recognizing 'and' as an operator instead of
  *			text :( we need to tokenize the input before passing to
  *			evaluate(); this requires a complete rewrite of the parser.
- *  28-May-10 rlw  ---	Add some predefined symbols for use:
+ *  28-May-10 rlw ----	Add some predefined symbols for use:
  *			__DATE__, __TIME__, __FILE__, __LINE__
  *			__JAVA_VERSION__, __JAVA_PP_VERSION__
- *  28-May-10 rlw  ---	Fix problems that give spurious errors on #endif if there
+ *  28-May-10 rlw ----	Fix problems that give spurious errors on #endif if there
  *			were previous #endif errors.
- *  23-Jul-10 rlw  ---	Only allow '/' to start options on Windows; added "usage()"
+ *  23-Jul-10 rlw ----	Only allow '/' to start options on Windows; added "usage()"
  *			and "signOnBanner()" in response to "-?".
- *  02-Aug-10 rlw  ---	Output an error message when an input file cannot be found;
+ *  02-Aug-10 rlw ----	Output an error message when an input file cannot be found;
  *			implement "nologo" command-line option.
- *  04-Aug-10 rlw  ---	Implement "-p path" command-line option for searching for
+ *  04-Aug-10 rlw ----	Implement "-p path" command-line option for searching for
  *			included files; renamed enum "Tokens" to "Token" to be better
  *			English; more descriptive Javadoc to improve documentation.
- *  06-Aug-10 rlw  ---	Implement "-C" option to specify a different directive
+ *  06-Aug-10 rlw ----	Implement "-C" option to specify a different directive
  *			character (for files that use "#" as a comment indicator).
- *  13-Aug-10 rlw  ---	Implement checks for input and output files already existing
+ *  13-Aug-10 rlw ----	Implement checks for input and output files already existing
  *			and output file newer than input.  This will reduce the
  *			unnecessary preprocessing of files that didn't change.
  *			But, adding a "-A" (always) switch to force things (if,
  *			for instance, environment variables have changed).
- *  16-Aug-10 rlw  ---	Small coding change in the use of the "defines" map; made
+ *  16-Aug-10 rlw ----	Small coding change in the use of the "defines" map; made
  *			distinction between "-r" and "-R" switches and added recursive
  *			directory searching for "-R"; cleaned up setting of input and
  *			output extensions and set by default for single files from the
@@ -63,49 +63,49 @@
  *			implemented #error <msg> directive; allow #define VAR without a
  *			value (value becomes empty string); standardized the syntax for a
  *			variable name as "[_A-Za-z]\\w*".
- *  20-Aug-10 rlw  ---	Cleaned up output a little bit by not writing Line/Directive
+ *  20-Aug-10 rlw ----	Cleaned up output a little bit by not writing Line/Directive
  *			header until we actually get a directive to display.
- *  24-Aug-10 rlw  ---	Fix parsing problems with a version string like "1.5.1"; fix
+ *  24-Aug-10 rlw ----	Fix parsing problems with a version string like "1.5.1"; fix
  *			error reporting position for macro substitutions; do substitutions
  *			inside quoted strings; strip quotes before doing string compares.
  *			Made the leap to make this into an Ant task -- still will execute
  *			from the command line also.
- *  06-Sep-10 rlw  ---	Silently allow an empty value for the "define=" property within
+ *  06-Sep-10 rlw ----	Silently allow an empty value for the "define=" property within
  *			Ant. Necessary because of the DEBUG setting which will be undefined
  *			unless set and there is no way to not define something with the
  *			<condition> tasks.  So, just ignore empty values.
- *  22-Sep-10 rlw  ---	Make output a little less verbose in the "skipping" case.
- *  06-Oct-10 rlw  ---	Fix subtle bugs with "!" and "||" operators; add "plus" verbose mode.
- *  20-Oct-10 rlw  ---	Fix bug with #elif; added "#elseif" as an alternative spelling.
- *  04-Nov-10 rlw  ---	Allow multiple defines or undefines (comma or semicolon delimited)
+ *  22-Sep-10 rlw ----	Make output a little less verbose in the "skipping" case.
+ *  06-Oct-10 rlw ----	Fix subtle bugs with "!" and "||" operators; add "plus" verbose mode.
+ *  20-Oct-10 rlw ----	Fix bug with #elif; added "#elseif" as an alternative spelling.
+ *  04-Nov-10 rlw ----	Allow multiple defines or undefines (comma or semicolon delimited)
  *			on the -D or define= attribute (necessary for use inside Ant);
  *			handle VARREF at the "otherFactor" and "stringFactor" levels;
  *			add "Error: " prefix to all System.err messages.
- *  19-May-11 rlw  ---	Add ability to pass through #directives if specified as
+ *  19-May-11 rlw ----	Add ability to pass through #directives if specified as
  *			##directive.
- *  31-Aug-11 rlw  ---	Oops!  Updated COPYRIGHT_YEAR to be the correct value.
- *  05-May-14 rlw  ---	Trace the output line after doing variable substitution.
+ *  31-Aug-11 rlw ----	Oops!  Updated COPYRIGHT_YEAR to be the correct value.
+ *  05-May-14 rlw ----	Trace the output line after doing variable substitution.
  *			Update version and copyright year.
- *  31-Aug-15 rlw  ---	Javadoc cleanup (found by Java 8).
- *  23-Feb-16 rlw  ---	Well, there are more Javadoc fixes to be made...
- *  15-Mar-19 rlw  ---	Don't use FileInputStream/FileOutputStream due to GC problems b/c of
+ *  31-Aug-15 rlw ----	Javadoc cleanup (found by Java 8).
+ *  23-Feb-16 rlw ----	Well, there are more Javadoc fixes to be made...
+ *  15-Mar-19 rlw ----	Don't use FileInputStream/FileOutputStream due to GC problems b/c of
  *			the finalize method in these classes. Fix wildcard imports.
  *			Use StandardCharsets.
- *  21-May-19 rlw  ---	Add Timezone to __TIME__ display; update copyright year string.
+ *  21-May-19 rlw ----	Add Timezone to __TIME__ display; update copyright year string.
  *			Reformat to current tab specs.  Bump version.
- *  09-Jan-20 rlw  ---	Change package, bump version, update copyright year.
- *  21-Dec-20 rlw  ---	Update Javadoc to latest conventions.
- *  21-Jan-21 rlw  ---	Add "-L" (log file) and "-W" parameters. Recognize "${macro}" format
+ *  09-Jan-20 rlw ----	Change package, bump version, update copyright year.
+ *  21-Dec-20 rlw ----	Update Javadoc to latest conventions.
+ *  21-Jan-21 rlw ----	Add "-L" (log file) and "-W" parameters. Recognize "${macro}" format
  *			also.
- *  27-Jan-21 rlw  ---	Fix a bug with flags when setting "recurseDirectories"; some tiny cleanup.
- *  10-Feb-21 rlw  ---	Read "build.properties", "build.number", and "version.properties" and
+ *  27-Jan-21 rlw ----	Fix a bug with flags when setting "recurseDirectories"; some tiny cleanup.
+ *  10-Feb-21 rlw ----	Read "build.properties", "build.number", and "version.properties" and
  *			define variables with everything we find in there. Implement #echo
  *			directive. Macro variable names can now have "." in them. Reset the
  *			date and time variables for each file processed.
- *  22-Feb-21 rlw  ---	Align "exceptMessage" with our own ExceptionUtil code.
- *  07-Nov-22 rlw  ---	More exceptions to process specially.
- *  01-Jan-23 rlw  ---	Update copyright years.
- *  13-Jan-23 rlw #593:	Rename to PreProc; refactoring, rearrangement and renaming of variables.
+ *  22-Feb-21 rlw ----	Align "exceptMessage" with our own ExceptionUtil code.
+ *  07-Nov-22 rlw ----	More exceptions to process specially.
+ *  01-Jan-23 rlw ----	Update copyright years.
+ *  13-Jan-23 rlw #593	Rename to PreProc; refactoring, rearrangement and renaming of variables.
  *			Much more refactoring.
  *  14-Jan-23		Wrap this with PreProcTask for use with Ant. Interestingly, now we can use this
  *			class either as an Ant task, as a standalone preprocessor, or as a helper class
@@ -113,8 +113,10 @@
  *  15-Jan-23		More refactoring in the token analysis. New output file name option.
  *  16-Jan-23		"Ignore unknown directive" option for Tester.
  *			Change all "set" option methods to a fluent paradigm.
- *  29-Jan-23 rlw #553:	Introduce VERSIONCONST and Version class with parsing, compares, etc.
+ *  29-Jan-23 rlw #553	Introduce VERSIONCONST and Version class with parsing, compares, etc.
  *  30-Jan-23		Change OTHERCONST to BOOLCONST.
+ *  24-Jul-25 rlw #736	Make several things public to be called externally; quote string values
+ *			from the environment that aren't a constant value.
  */
 package info.rlwhitcomb.preproc;
 
@@ -375,9 +377,9 @@ public class PreProc
 	private static final Pattern IDENT = Pattern.compile("^([_A-Za-z][\\w\\.]*)");
 
 	/** The current version of this software. */
-	private static final String VERSION = "1.4.0";
+	private static final String VERSION = "1.4.1";
 	/** The current copyright year. */
-	private static final String COPYRIGHT_YEAR = "2010-2011,2014-2016,2019-2023";
+	private static final String COPYRIGHT_YEAR = "2010-2011,2014-2016,2019-2023,2025";
 
 
 	/**********************************************************/
@@ -470,7 +472,7 @@ public class PreProc
 	/**
 	 * Enum to determine how to interpret expressions.
 	 */
-	enum ProcessAs
+	public enum ProcessAs
 	{
 		/** Process the expression as numeric.  All values will be coerced
 		 * to numbers and any that can't be coerced will be flagged as errors.
@@ -832,6 +834,30 @@ public class PreProc
 	 */
 	private static boolean empty(final String value) {
 	    return value == null || value.trim().isEmpty();
+	}
+
+
+	/**
+	 * Check to see if a value is one of our constant values.
+	 *
+	 * @param	value	A string to check the syntax of.
+	 * @return	Whether the string value matches one of our constant patterns.
+	 */
+	private static boolean isConstant(final String value) {
+	    Matcher m;
+
+	    m = FALSE_CONST.matcher(value);
+	    if (m.matches()) return true;
+	    m = TRUE_CONST.matcher(value);
+	    if (m.matches()) return true;
+	    m = VERSION_CONST.matcher(value);
+	    if (m.matches()) return true;
+	    m = INT_CONST.matcher(value);
+	    if (m.matches()) return true;
+	    m = FLT_CONST.matcher(value);
+	    if (m.matches()) return true;
+
+	    return false;
 	}
 
 
@@ -1330,7 +1356,7 @@ public class PreProc
 	    String value;
 	    if ((value = defines.get(t.value)) == null) {
 		if (!ignoreUndefined) {
-		    String s = String.format("Macro \"%1$s\" not defined!", t.value);
+		    String s = String.format("Variable \"%1$s\" not defined!", t.value);
 		    throw new ParseException(s, t.startPos);
 		}
 		else
@@ -1993,7 +2019,7 @@ public class PreProc
 	}
 
 	/**
-	 * Evaluate an expression given a tokenized input stream (as a ListIterator)
+	 * Evaluate an expression given an already tokenized input stream (in {@link #inputExpr})
 	 * and return the boolean result.
 	 *
 	 * @param	type	How to process the evaluation.
@@ -2003,6 +2029,9 @@ public class PreProc
 	 *
 	 * @throws	ParseException if the expression was not properly formed
 	 *		according to our rules.
+	 *
+	 * @see #evaluate(String, ProcessAs)
+	 * @see #tokenizeInput
 	 */
 	private boolean evaluate(final ProcessAs type, final int exprLen)
 		throws ParseException
@@ -2026,7 +2055,7 @@ public class PreProc
 	 * @throws	ParseException if the expression was not properly formed
 	 *		according to our rules.
 	 */
-	private boolean evaluate(final String expr, final ProcessAs type)
+	public boolean evaluate(final String expr, final ProcessAs type)
 		throws ParseException
 	{
 	    // First, tokenize the input stream
@@ -3147,6 +3176,29 @@ public class PreProc
 
 
 	/**
+	 * Quote a string value that has (possibly) embedded quotes.
+	 *
+	 * @param input	A string value to be quoted.
+	 * @return	The value with appropriate quotes.
+	 */
+	private String quote(final String input) {
+	    if (isConstant(input))
+		return input;
+
+	    StringBuilder buf = new StringBuilder(input);
+	    if (input.indexOf('\'') >= 0) {
+		buf.insert(0, '"');
+		buf.append('"');
+	    }
+	    else {
+		buf.insert(0, '\'');
+		buf.append('\'');
+	    }
+	    return buf.toString();
+	}
+
+
+	/**
 	 * Read in all the build properties from the various sources and define variables
 	 * for all of them.
 	 *
@@ -3161,7 +3213,7 @@ public class PreProc
 
 	    for (String name : buildProperties.stringPropertyNames()) {
 		String value = buildProperties.getProperty(name);
-		defines.put(name, value);
+		defines.put(name, quote(value));
 	    }
 	}
 
@@ -3172,7 +3224,11 @@ public class PreProc
 	 */
 	public PreProc() {
 	    // Read in the environment and define everything found
-	    defines = new HashMap<>(System.getenv());
+	    Map<String, String> env = System.getenv();
+	    defines = new HashMap<>(env.size());
+	    for (Map.Entry<String, String> entry : env.entrySet()) {
+		defines.put(entry.getKey(), quote(entry.getValue()));
+	    }
 
 	    // Define some predefined variables
 	    defines.put(JAVA_VERSION_VAR_NAME, System.getProperty("java.version"));
