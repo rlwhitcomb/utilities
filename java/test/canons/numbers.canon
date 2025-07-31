@@ -82,3 +82,5 @@
 >Hn (n) -> 2066035355155033 / 485721041551200
 >Hn (n) -> 2078178381193813 / 485721041551200
 >Calculation mode set to “DECIMAL(34)”.
+>Counterexample to Euler's Conjecture of Sums of Like Powers
+>27 ⁵ + 84 ⁵ + 110 ⁵ + 133 ⁵ == 144 ⁵ -> true

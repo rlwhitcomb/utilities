@@ -14,3 +14,6 @@ loop n over 1..40 Hn(n)
 
 }
 
+print "Counterexample to Euler's Conjecture of Sums of Like Powers"
+27 ⁵ + 84 ⁵ + 110 ⁵ + 133 ⁵ == 144 ⁵
+
