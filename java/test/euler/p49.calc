@@ -119,7 +119,7 @@ loop n over p {
                if __ < 1000 in_range = false
             }
             if in_range {
-               const string = join(s, "")
+               const string = join(s)
                winners.`$string` = s
             }
          }

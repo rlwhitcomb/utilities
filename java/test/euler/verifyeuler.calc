@@ -44,7 +44,7 @@ const TEST_LINES = readFileLines(TEST_FILE)
 define verify_files(list1, list2, ext1, ext2) = {
    print `Verifying "$ext2" files exist for each "$ext1" file ...`
    loop f over list1 {
-      const g = replace(f, ext1, '')
+      const g = replace(f, ext1)
       const h = join(g, g, ': ')
       $assert (g + ext2 in list2), `"$f" exists but the "${g + ext2}" file was not found!`
       $assert (g in TEST_VALUES), `"$g" is not in the list of verified values in "$VALUES"!`
@@ -79,5 +79,5 @@ loop test over TEST_VALUES {
    verify(test, TEST_VALUES[test])
 }
 
-const res = `${numberOfTests@w}`
+const res = numberOfTests@w
 print `${capitalize(res, FIRSTCAP)} canon files verified.`

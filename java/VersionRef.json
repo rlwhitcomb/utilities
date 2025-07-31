@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '3.0.8', date: d'2025-07-30',
+      issues: [ 730 ],
+      comment: 'Allow formatted expressions for "const" and "var" statements.'
+    },
     { version: '3.0.5', date: d'2025-07-23',
       issues: [ 677 ],
       comment: 'Add "∖%" operator.'

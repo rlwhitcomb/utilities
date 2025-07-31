@@ -913,6 +913,8 @@
  *	    #742: Process "else" clauses on "loop" and "while" statements.
  *	22-Jul-2025 (rlwhitcomb)
  *	    #677: New "\%" operator (quotient, remainder).
+ *	30-Jul-2025 (rlwhitcomb)
+ *	    #730: Allow "exprStmt" (expression with format) on "const" and "var".
  */
 package info.rlwhitcomb.calc;
 
@@ -4220,23 +4222,23 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitConstStmt(CalcParser.ConstStmtContext ctx) {
-	    List<CalcParser.IdContext>   ids   = ctx.id();
-	    List<CalcParser.ExprContext> exprs = ctx.expr();
+	    List<CalcParser.IdContext>       ids   = ctx.id();
+	    List<CalcParser.ExprStmtContext> exprs = ctx.exprStmt();
 	    List<String> constNames = new ArrayList<>();
 	    StringFormat format = new StringFormat(settings);
 
 	    for (int i = 0; i < ids.size(); i++) {
-		String constantName         = ids.get(i).getText();
-		CalcParser.ExprContext expr = exprs.get(i);
+		String constantName             = ids.get(i).getText();
+		CalcParser.ExprStmtContext expr = exprs.get(i);
 
 		if (currentScope.isDefinedLocally(constantName, settings.ignoreNameCase))
 		    throw new CalcExprException(ctx, "%calc#noDupConstant", constantName);
 
-		Object value = evaluate(expr);
+		ExprStmtResult res = formatExpr(expr, settings.silent, settings.quoteStrings);
 
-		ConstantValue.define(currentScope, constantName, value);
+		ConstantValue.define(currentScope, constantName, res.result);
 
-		displayActionMessage("%calc#definingConst", constantName, toStringValue(this, ctx, value, format));
+		displayActionMessage("%calc#definingConst", constantName, toStringValue(this, ctx, res.result, format));
 
 		constNames.add(constantName);
 	    }
@@ -4252,8 +4254,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    StringFormat format = new StringFormat(settings);
 
 	    for (int i = 0; i < assigns.size(); i++) {
-		String varName              = assigns.get(i).id().getText();
-		CalcParser.ExprContext expr = assigns.get(i).expr();
+		String varName                  = assigns.get(i).id().getText();
+		CalcParser.ExprStmtContext expr = assigns.get(i).exprStmt();
 
 		if (currentScope.isDefinedLocally(varName, settings.ignoreNameCase))
 		    throw new CalcExprException(ctx, "%calc#noDupLocalVar", varName);
@@ -4261,7 +4263,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		Object value = null;
 
 		if (expr != null) {
-		    value = evaluate(expr);
+		    ExprStmtResult res = formatExpr(expr, settings.silent, settings.quoteStrings);
+		    value = res.result;
 
 		    displayActionMessage("%calc#definingVar", varName,
 			    toStringValue(this, ctx, value, format));
@@ -4280,7 +4283,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitEnumStmt(CalcParser.EnumStmtContext ctx) {
-	    List<CalcParser.VarAssignContext> assigns = ctx.varAssign();
+	    List<CalcParser.EnumAssignContext> assigns = ctx.enumAssign();
 	    List<String> enumNames = new ArrayList<>();
 	    StringFormat format = new StringFormat(settings);
 	    Object value = BigInteger.ZERO;

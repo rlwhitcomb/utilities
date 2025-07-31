@@ -24,7 +24,7 @@ define countLetters(word) = {
 }
 
 loop value over LIMIT {
-   const word = `${value@+w}`
+   const word = value@+w
    sum += countLetters(word)
 }
 

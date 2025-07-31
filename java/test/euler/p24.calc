@@ -55,6 +55,6 @@ while number++ < FINISH {
 
 $resultsonly on {
 
-`The ${FINISH}th lexicographic permutation is ${join(current, "")}.`
+`The ${FINISH}th lexicographic permutation is ${join(current)}.`
 
 }

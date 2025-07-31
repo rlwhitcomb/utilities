@@ -28,7 +28,7 @@ define word_score(n) = {
 }
 
 // Read, process, and sort the input names
-var names = sort(split(replace(read(FILENAME), '"', ''), ','))
+var names = sort(split(replace(read(FILENAME), '"'), ','))
 
 var sum = 0
 

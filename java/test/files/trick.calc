@@ -4,7 +4,7 @@ const LIMIT = 20
 
 // Generalized function to calculate the supposed root of the given value
 define root(x, n) = {
-   const power = x ** n
+   const power = x ⌃ n
    sumof(chars(@@power)) - n
 }
 

@@ -569,6 +569,8 @@
  *	    #742: Add "else" clause to "WHILE" and "LOOP".
  *	21-Jul-2025 (rlwhitcomb)
  *	    #677: New "\%" operator to give combined results.
+ *	27-Jul-2025 (rlwhitcomb)
+ *	    #730: Allow "exprStmt" on "var" and "const".
  */
 
 grammar Calc;
@@ -607,19 +609,23 @@ defineStmt
    ;
 
 constStmt
-   : K_CONST id ASSIGN expr ( COMMA EOL* id ASSIGN expr ) *
+   : K_CONST id ASSIGN exprStmt ( COMMA EOL* id ASSIGN exprStmt ) *
    ;
 
 varAssign
-   : id ( ASSIGN expr ) ?
+   : id ( ASSIGN exprStmt ) ?
    ;
 
 varStmt
    : K_VAR varAssign ( COMMA EOL* varAssign ) *
    ;
 
+enumAssign
+   : id ( ASSIGN expr ) ?
+   ;
+
 enumStmt
-   : K_ENUM varAssign ( COMMA EOL* varAssign ) *
+   : K_ENUM enumAssign ( COMMA EOL* enumAssign ) *
    ;
 
 loopLabel

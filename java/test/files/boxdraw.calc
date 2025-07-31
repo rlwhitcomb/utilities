@@ -144,7 +144,7 @@ define arc_box(width, height) = __construct_box(width, height, arc_top_line, lt_
 
 
 define dash_line(reps, ...) = {
-   const pat = join(_*[1:], '')
+   const pat = join(_*[1:])
    var line = ''
    loop over reps line += pat
 }
