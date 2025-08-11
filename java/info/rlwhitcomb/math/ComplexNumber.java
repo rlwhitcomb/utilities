@@ -70,6 +70,7 @@
  *  12-Jul-25 rlw #740	Add "dot" (product) function.
  *  22-Jul-25 rlw #677	New "divideAndRemainder" function; fix "add", "subtract", "multiply" for non-rational;
  *			add "toDecimalComplex()" for these fixes.
+ *  10-Aug-25 rlw #745	Change exponent for "pow" to BigDecimal.
  */
 package info.rlwhitcomb.math;
 
@@ -1041,7 +1042,7 @@ public abstract class ComplexNumber extends Number implements Serializable, Comp
 	    BigDecimal radius = radius(mc);
 	    BigDecimal nTheta = n.multiply(theta);
 
-	    BigDecimal rPower = MathUtil.pow(radius, n.doubleValue(), mc);
+	    BigDecimal rPower = MathUtil.pow(radius, n, mc);
 
 	    ComplexNumber result = polar(rPower, nTheta, mc);
 

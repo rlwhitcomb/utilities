@@ -571,6 +571,8 @@
  *	    #677: New "\%" operator to give combined results.
  *	27-Jul-2025 (rlwhitcomb)
  *	    #730: Allow "exprStmt" on "var" and "const".
+ *	09-Aug-2025 (rlwhitcomb)
+ *	    #748: Add "twopow" function, to complement "ln2".
  */
 
 grammar Calc;
@@ -710,11 +712,12 @@ builtinFunction
    | K_CBRT expr1                        # cbrtExpr
    | K_FORT expr1                        # fortExpr
    | K_HYPOT expr2                       # hypotExpr
+   | K_LN expr1                          # lnExpr
    | K_LOG expr1                         # logExpr
    | K_LN2 expr1                         # ln2Expr
-   | K_LN expr1                          # lnExpr
    | K_EPOW expr1                        # ePowerExpr
    | K_TENPOW expr1                      # tenPowerExpr
+   | K_TWOPOW expr1                      # twoPowerExpr
    | K_RANDOM optExpr1                   # randomExpr
    | K_SIGNUM expr1                      # signumExpr
    | ( K_ISNULL | K_NOTNULL ) expr1      # isNullExpr
@@ -1269,15 +1272,17 @@ K_CBRT     : 'cbrt' | 'CBRT' | 'Cbrt' | '\u221B' ;
 
 K_FORT     : 'fort' | 'FORT' | 'Fort' | '\u221C' ;
 
-K_LOG      : 'log' | 'LOG' | 'Log' ;
-
 K_LN       : 'ln' | 'LN' | 'Ln' ;
+
+K_LOG      : 'log' | 'LOG' | 'Log' ;
 
 K_LN2      : 'ln2' | 'LN2' | 'Ln2' ;
 
 K_EPOW     : 'epow' | 'EPOW' | 'Epow' | 'EPow' | 'ePow' ;
 
 K_TENPOW   : 'tenpow' | 'TENPOW' | 'Tenpow' | 'TenPow' | 'tenPow' ;
+
+K_TWOPOW   : 'twopow' | 'TWOPOW' | 'Twopow' | 'TwoPow' | 'twoPow' ;
 
 K_RANDOM   : 'random' | 'RANDOM' | 'Random'
            | 'rand'   | 'RAND'   | 'Rand'

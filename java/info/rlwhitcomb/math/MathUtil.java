@@ -73,6 +73,9 @@
  *			Extra code in "pow()" to use "ePower" if the base is "e"; increase precision
  *			in there for better results.
  *  01-May-25 rlw #716	New constructors for ComplexNumber.
+ *  30-Jul-25 rlw #746	Fix bad bugs in the general "tenPower" method; make "newPrecision" public.
+ *		  #748	Add "twoPower" method.
+ *		  #745	Some changes for exponentiation.
  */
 package info.rlwhitcomb.math;
 
@@ -154,7 +157,7 @@ public final class MathUtil
 	 * @param incr Amount to add/subtract from the given context's precision.
 	 * @return     A new context with updated precision, and the same rounding as the original.
 	 */
-	private static MathContext newPrecision(final MathContext mc, final int incr) {
+	public static MathContext newPrecision(final MathContext mc, final int incr) {
 	    return new MathContext(mc.getPrecision() + incr, mc.getRoundingMode());
 	}
 
@@ -354,8 +357,8 @@ public final class MathUtil
 	 * @param mc       Precision and rounding for the result.
 	 * @throws IllegalArgumentException if the exponent is infinite or not-a-number.
 	 */
-	public static BigDecimal pow(final BigDecimal base, final double inputExp, final MathContext mc) {
-	    double exp = inputExp;
+	public static BigDecimal pow(final BigDecimal base, final BigDecimal inputExp, final MathContext mc) {
+	    double exp = inputExp.doubleValue();
 	    if (Double.isNaN(exp) || Double.isInfinite(exp))
 		throw new Intl.IllegalArgumentException("math#numeric.outOfRange");
 
@@ -368,22 +371,23 @@ public final class MathUtil
 		exp = -exp;
 	    }
 
-	    int intExp     = (int) Math.floor(exp);
-	    double fracExp = exp - (double) intExp;
+	    int intExp       = (int) Math.floor(exp);
+	    double fracExp   = exp - (double) intExp;
+	    boolean isIntExp = isInteger(inputExp);
 
 	    BigDecimal result;
 
 	    // Turn an integer power of two into a "setBit" on a BigInteger
-	    if (base.equals(D_TWO) && (double) intExp == inputExp) {
+	    if (base.equals(D_TWO) && isIntExp) {
 		BigInteger value = BigInteger.ZERO.setBit(intExp);
 		result = new BigDecimal(value);
 	    }
 	    // Turn an integer power of ten into a simple scale change
-	    else if (base.equals(D_TEN) && (double) intExp == inputExp) {
+	    else if (base.equals(D_TEN) && isIntExp) {
 		result = BigDecimal.ONE.scaleByPowerOfTen(intExp);
 	    }
 	    else if (e(mc).equals(base)) {
-		result = ePower(new BigDecimal(exp), mc);
+		result = ePower(inputExp, mc);
 	    }
 	    else {
 		// Do the integer power part
@@ -400,10 +404,8 @@ public final class MathUtil
 
 	    if (reciprocal)
 		result = BigDecimal.ONE.divide(result, mc);
-	    else
-		result = fixup(result, mc);
 
-	    return result;
+	    return fixup(result, mc);
 	}
 
 
@@ -413,21 +415,17 @@ public final class MathUtil
 	 * @param base The number to raise to the given power.
 	 * @param exp The power to raise the number to.
 	 * @param mc The precision and rounding mode for the result.
-	 * @throws IllegalArgumentException if the exponent is infinite, or not-a-number.
 	 */
-	public static Number pow(final BigInteger base, final double exp, final MathContext mc) {
-	    if (Double.isNaN(exp) || Double.isInfinite(exp))
-		throw new Intl.IllegalArgumentException("math#numeric.outOfRange");
-	    if (exp == 0.0d)
+	public static Number pow(final BigInteger base, final BigDecimal exp, final MathContext mc) {
+	    if (exp.signum() == 0)
 		return BigInteger.ONE;
 
 	    // Test for negative or fractional powers and convert to BigDecimal for those cases
-	    double wholeExp = Math.floor(exp);
-	    if (exp < 0.0d || wholeExp != exp) {
+	    if (!isInteger(exp) || exp.signum() < 0) {
 		return pow(new BigDecimal(base), exp, mc);
 	    }
 
-	    int intExp = (int) wholeExp;
+	    int intExp = exp.intValueExact();
 
 	    // Turn a power of two into a "setBit"
 	    if (base.equals(I_TWO)) {
@@ -1413,18 +1411,22 @@ public final class MathUtil
 
 	    BigDecimal result;
 
-	    int intExp         = exp.intValue();
-	    BigDecimal fracExp = exp.subtract(new BigDecimal(intExp));
+	    int intExp = exp.intValue();
 
-	    if (fracExp.signum() != 0) {
+	    if (!isInteger(exp)) {
 		boolean reciprocal = false;
 		BigDecimal exponent = exp;
-		if (exp.signum() < 0) {
+		if (intExp < 0) {
 		    reciprocal = true;
-		    exponent = exp.abs();
+		    exponent = exponent.abs();
+		    intExp = -intExp;
 		}
+		BigDecimal fracExp = exponent.subtract(new BigDecimal(intExp));
 
-		result = pow(D_TEN, fracExp.doubleValue(), mc);
+		result = D_TEN.pow(intExp).multiply(pow(D_TEN, fracExp, mc));
+		if (reciprocal) {
+		    result = BigDecimal.ONE.divide(result, mc);
+		}
 	    }
 	    else {
 		// Integer (positive or negative) power
@@ -1435,6 +1437,47 @@ public final class MathUtil
 	    }
 
 	    return fixup(result, mc);
+	}
+
+
+	/**
+	 * Calculate 2**x to an arbitrary precision.
+	 *
+	 * @param exp	The power of two we are calculating.
+	 * @param mc	The precision and rounding mode for the result.
+	 * @return	The result of 2**x rounded to the given precision.
+	 */
+	public static Number twoPower(final BigDecimal exp, final MathContext mc) {
+	    // 2**0 == 1
+	    if (exp.signum() == 0)
+		return BigDecimal.ONE;
+
+	    Number result;
+
+	    int intExp = exp.intValue();
+
+	    if (!isInteger(exp)) {
+		boolean reciprocal = false;
+		BigDecimal exponent = exp;
+		if (intExp < 0) {
+		    reciprocal = true;
+		    exponent = exponent.abs();
+		    intExp = -intExp;
+		}
+		BigDecimal fracExp = exponent.subtract(new BigDecimal(intExp));
+
+		BigDecimal value = D_TWO.pow(intExp).multiply(pow(D_TWO, fracExp, mc));
+		result = reciprocal ? BigDecimal.ONE.divide(value, mc) : fixup(value, mc);
+	    }
+	    else {
+		// Integer (positive or negative) power
+		if (intExp > 0)
+		    result = BigInteger.ZERO.setBit(intExp);
+		else
+		    result = fixup(D_TWO.pow(intExp, mc), mc);
+	    }
+
+	    return result;
 	}
 
 
@@ -1969,11 +2012,11 @@ public final class MathUtil
 		lastResult = result;
 	    }
 
-	    result = result.multiply(D_TWO, mc);
+	    result = result.multiply(D_TWO);
 	    if (n != 0)
 		result = result.add(new BigDecimal(n));
 
-	    return result;
+	    return fixup(result, mc);
 	}
 
 	/**

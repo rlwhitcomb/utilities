@@ -866,8 +866,8 @@ or<br>
     <tr><td>33</td><td><i>expr</i> <code>IS</code> ( <i>string</i> | <i>type_id</i> )</td><td>check if expression is the given type (same as <code>typeof</code>)</td><td>left to right</td></tr>
     <tr><td>32</td><td><i>expr</i> <code>[</code> <i>expr</i> ? <code>:</code> <i>expr</i> ? <code>]</code></td><td>produce a slice of an object or string</td><td>left to right</td></tr>
     <tr><td>31</td><td><code>( </code><i>expr</i><code> )</code></td><td>group an expression</td><td>N/A</td></tr>
-    <tr><td rowspan="99">30</td>
-            <td><code>ABS</code>&nbsp;<i>expr</i></td><td>absolute value</td><td rowspan="99">left to right</td></tr>
+    <tr><td rowspan="100">30</td>
+            <td><code>ABS</code>&nbsp;<i>expr</i></td><td>absolute value</td><td rowspan="100">left to right</td></tr>
             <tr><td><code>SIN</code>&nbsp;<i>expr</i></td><td>sine</td></tr>
             <tr><td><code>COS</code>&nbsp;<i>expr</i></td><td>cosine</td></tr>
             <tr><td><code>TAN</code>&nbsp;<i>expr</i></td><td>tangent</td></tr>
@@ -882,11 +882,12 @@ or<br>
             <tr><td><code>CBRT</code> or <code>&#x221B;</code>&nbsp;<i>expr</i></td><td>cube root</td></tr>
             <tr><td><code>FORT</code> or <code>&#x221C;</code>&nbsp;<i>expr</i></td><td>fourth root</td></tr>
             <tr><td><code>HYPOT</code>&nbsp;<i>expr<sub>x</sub></i><code>,</code>&nbsp;<i>expr<sub>y</sub></i></td><td>hypotenuse of right triangle<br><code>&radic; x&#x00B2; + y&#x00b2;</code></td></tr>
+            <tr><td><code>LN</code>&nbsp;<i>expr</i></td><td>natural log (base e)</td></tr>
             <tr><td><code>LOG</code>&nbsp;<i>expr</i></td><td>log base 10</td></tr>
             <tr><td><code>LN2</code>&nbsp;<i>expr</i></td><td>log base 2</td></tr>
-            <tr><td><code>LN</code>&nbsp;<i>expr</i></td><td>natural log (base e)</td></tr>
             <tr><td><code>EPOW</code>&nbsp;<i>expr</i></td><td>anti-log (e ** <i>expr</i>)</td></tr>
             <tr><td><code>TENPOW</code>&nbsp;<i>expr</i></td><td>10 ** <i>expr</i> (anti-log base ten)</td></tr>
+            <tr><td><code>TWOPOW</code>&nbsp;<i>expr</i></td><td>2 ** <i>expr</i> (anti-log base two)</td></tr>
             <tr><td><code>RANDOM</code>&nbsp;( <i>expr</i> ? )&nbsp;</td><td>random number with optional seed value</td></tr>
             <tr><td><code>SIGNUM</code> or <code>SGN</code>&nbsp;<i>expr</i></td><td>sign (&lt; 0 = -1, 0 = 0, &gt; 0 = +1)</td></tr>
             <tr><td><code>ISNULL</code> or <code>NOTNULL</code>&nbsp;<i>expr</i></td><td>is the value null / not null?</td></tr>

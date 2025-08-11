@@ -209,6 +209,8 @@
 >u ** (1 / 3) -> 782.4302897679189072732697241008281707763671875
 >t ⁸ -> 83521.0000000000058056539028476285186906560463719062610295841
 >3 ⁶ -> 729
+>(sqrt (18) + sqrt (18)) / sqrt (2) -> 6
+>sqrt (81 × 81 / 9) + 3 -> 30
 >_This_is_a_very_long_variable_name_Which_not_surprisingly_is_not_worth_remembering_1_ = sqrt 42 -> 6.48074069840786023096596743608799665770520430705834654971136
 >++ _This_is_a_very_long_variable_name_Which_not_surprisingly_is_not_worth_remembering_1_ -> 7.48074069840786023096596743608799665770520430705834654971136
 >Variable '_This_is_a_very_long_variable_name_Which_not_surprisingly_is_not_worth_remembering_1_' cleared.
@@ -263,7 +265,9 @@
 >scale 15400 -> -2
 >scale 0.012 -> 3
 >h = 23 -> 23
->h2 = ln (h) -> 3.1354942159291497
+>Precision is now “18” digits.
+>h2 = ln (h) -> 3.13549421592914969
+>Precision is now “16” digits.
 >e ** h2 -> 23
 >epow (h2) -> 23
 >m = 10000 -> 10000
@@ -272,6 +276,9 @@
 >tenpow (n) -> 10000
 >p = ln2 (1000000) -> 19.93156856932417
 >2 ** p -> 999999.9999999974
+>epow (ln (27)) -> 27
+>tenpow (log (432.7)) -> 432.6999999999996
+>twopow (ln2 (19.7)) -> 19.7
 >Precision is now “34” digits.
 >isprime 15485863 -> true
 >t31 = ((2 ** 31 - 1) ** 2) - 1 -> 4611686014132420608
@@ -371,11 +378,11 @@
 >settings.trigMode -> "RADIANS"
 >Trig mode is now “DEGREES”.
 >settings.trigMode -> "DEGREES"
->sin (45) -> 0.7071067811865475244008443621048491
+>sin (45) -> 0.707106781186547524400844362104849
 >cos (60) -> 0.4999999999999999999999999999999997
->asin (sin (50)) -> 50.00000000000000
->acos (cos (30)) -> 30.00000000000000
->atan (tan (15)) -> 15.00000000000000
+>asin (sin (50)) -> 50
+>acos (cos (30)) -> 30
+>atan (tan (15)) -> 15
 >Trig mode is now “RADIANS”.
 >settings.trigMode -> "RADIANS"
 >Precision is now “60” digits.

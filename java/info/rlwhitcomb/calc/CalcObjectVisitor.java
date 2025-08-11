@@ -915,6 +915,10 @@
  *	    #677: New "\%" operator (quotient, remainder).
  *	30-Jul-2025 (rlwhitcomb)
  *	    #730: Allow "exprStmt" (expression with format) on "const" and "var".
+ *	09-Aug-2025 (rlwhitcomb)
+ *	    #748: Add "twopow" function.
+ *	    #745: Misc fixes for exponentiation and "fixup" changes; change exponent for
+ *	    "powerOp" to BigDecimal.
  */
 package info.rlwhitcomb.calc;
 
@@ -1949,7 +1953,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    else if (settings.trigMode == TrigMode.GRADS)
 		value = value.multiply(piWorker.getPiOver200(), settings.mc);
 
-	    return value;
+	    return MathUtil.fixup(value, settings.mc);
 	}
 
 	private double getTrigValue(final ParserRuleContext ctx) {
@@ -1960,11 +1964,11 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    BigDecimal radianValue = new BigDecimal(value, MC_DOUBLE);
 
 	    if (settings.trigMode == TrigMode.DEGREES)
-		return radianValue.divide(piWorker.getPiOver180(), MC_DOUBLE);
+		radianValue = radianValue.divide(piWorker.getPiOver180(), MC_DOUBLE);
 	    else if (settings.trigMode == TrigMode.GRADS)
-		return radianValue.divide(piWorker.getPiOver200(), MC_DOUBLE);
+		radianValue = radianValue.divide(piWorker.getPiOver200(), MC_DOUBLE);
 
-	    return radianValue;
+	    return MathUtil.fixup(radianValue, MC_DOUBLE);
 	}
 
 	private BigDecimal returnTrigValue(final BigDecimal value) {
@@ -1973,11 +1977,11 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    MathContext mcDivide = MathUtil.divideContext(radianValue, settings.mcDivide);
 
 	    if (settings.trigMode == TrigMode.DEGREES)
-		return radianValue.divide(piWorker.getPiOver180(), mcDivide);
+		radianValue = radianValue.divide(piWorker.getPiOver180(), mcDivide);
 	    else if (settings.trigMode == TrigMode.GRADS)
-		return radianValue.divide(piWorker.getPiOver200(), mcDivide);
+		radianValue = radianValue.divide(piWorker.getPiOver200(), mcDivide);
 
-	    return radianValue;
+	    return MathUtil.fixup(radianValue, settings.mc);
 	}
 
 	private Charset getCharsetValue(final ParserRuleContext ctx, final boolean useDefault) {
@@ -4796,7 +4800,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitPowerExpr(CalcParser.PowerExprContext ctx) {
 	    CalcParser.ExprContext expr = ctx.expr(0);
-	    double exp = getDoubleValue(ctx.expr(1));
+	    BigDecimal exp = getDecimalValue(ctx.expr(1));
 
 	    return powerOp(this, expr, evaluate(expr), exp, settings);
 	}
@@ -4850,7 +4854,6 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    if (settings.rationalMode && value instanceof BigFraction) {
 		BigFraction base = convertToFraction(value, expr);
-
 		return base.pow(exp);
 	    }
 	    else if (value instanceof Quaternion) {
@@ -4864,8 +4867,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 	    else {
 		BigDecimal base = convertToDecimal(value, settings.mc, expr);
-
-		return MathUtil.pow(base, (double) exp, settings.mc);
+		return base.pow(exp, settings.mc);
 	    }
 	}
 
@@ -5295,15 +5297,24 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	@Override
+	public Object visitLnExpr(CalcParser.LnExprContext ctx) {
+	    BigDecimal d = getDecimalValue(ctx.expr1().expr());
+
+	    try {
+		return MathUtil.ln(d, settings.mc);
+	    }
+	    catch (IllegalArgumentException iae) {
+		throw new CalcExprException(iae, ctx);
+	    }
+	}
+
+	@Override
 	public Object visitLogExpr(CalcParser.LogExprContext ctx) {
-	    // For now, get a double value and use the standard Math method
-	    double d = getDoubleValue(ctx.expr1().expr());
+	    BigDecimal d = getDecimalValue(ctx.expr1().expr());
 
-	    double logValue = Math.log10(d);
-	    if (Double.isInfinite(logValue) || Double.isNaN(logValue))
-		throw new CalcExprException("%math#numeric.outOfRange", ctx);
-
-	    return new BigDecimal(logValue, MC_DOUBLE);
+	    MathContext mc2 = MathUtil.newPrecision(settings.mc, 2);
+	    BigDecimal ln = MathUtil.ln(d, mc2);
+	    return fixup(ln.divide(piWorker.getLn10(), settings.mcDivide));
 	}
 
 	@Override
@@ -5312,18 +5323,6 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    try {
 		return MathUtil.ln2(d, settings.mc);
-	    }
-	    catch (IllegalArgumentException iae) {
-		throw new CalcExprException(iae, ctx);
-	    }
-	}
-
-	@Override
-	public Object visitLnExpr(CalcParser.LnExprContext ctx) {
-	    BigDecimal d = getDecimalValue(ctx.expr1().expr());
-
-	    try {
-		return MathUtil.ln(d, settings.mc);
 	    }
 	    catch (IllegalArgumentException iae) {
 		throw new CalcExprException(iae, ctx);
@@ -5342,6 +5341,13 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    BigDecimal e = getDecimalValue(ctx.expr1().expr());
 
 	    return MathUtil.tenPower(e, settings.mc);
+	}
+
+	@Override
+	public Object visitTwoPowerExpr(CalcParser.TwoPowerExprContext ctx) {
+	    BigDecimal e = getDecimalValue(ctx.expr1().expr());
+
+	    return MathUtil.twoPower(e, settings.mc);
 	}
 
 	@Override
@@ -8214,7 +8220,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		BigDecimal zDec = convertToDecimal(z, settings.mc, zCtx);
 		MathContext mc = MathUtil.divideContext(xDec, settings.mcDivide);
 
-		return MathUtil.modulus(MathUtil.pow(xDec, yDec.doubleValue(), settings.mc), zDec, mc);
+		return MathUtil.modulus(MathUtil.pow(xDec, yDec, settings.mc), zDec, mc);
 	    }
 	}
 
@@ -8772,7 +8778,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    LValueContext lValue = makeLValue(var);
 	    Object        value  = lValue.getContextObject(this);
-	    double        exp    = getDoubleValue(expr);
+	    BigDecimal    exp    = getDecimalValue(expr);
 
 	    Object result = powerOp(this, var, value, exp, settings);
 

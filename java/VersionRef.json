@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '3.0.10', date: d'2025-08-10',
+      issues: [ 748, 746, 745 ],
+      comment: 'Add "twopow" function; some fixes for "tenpow"; misc. changes for trailing zeros.'
+    },
     { version: '3.0.8', date: d'2025-07-30',
       issues: [ 730 ],
       comment: 'Allow formatted expressions for "const" and "var" statements.'
@@ -45,7 +49,7 @@
     },
     { version: '2.59', date: d'2025-06-05',
       issues: [ 725 ],
-      comment: 'Implement "flatmap" instead of the "flat_map" library function.'
+      comment: '[BREAKING] Implement "flatmap" instead of the "flat_map" library function.'
     },
     { version: '2.58.1', date: d'2025-06-01',
       issues: [ 724 ],

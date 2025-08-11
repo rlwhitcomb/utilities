@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2020-2022,2024 Roger L. Whitcomb.
+ * Copyright (c) 2020-2022,2024-2025 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -34,6 +34,7 @@
  *  30-Sep-22 rlw #288	Return best fractional values for PI in rational mode.
  *  01-Oct-22 rlw #288	Rename "piFraction" to "ratpi".
  *  03-Jan-24 rlw #640	Refactor.
+ *  30-Jul-25 rlw #746	Add "ln(10)" to the calculation.
  */
 package info.rlwhitcomb.calc;
 
@@ -82,6 +83,10 @@ public class CalcPiWorker
 	 * {@link #pi} divided by 200, or the conversion between grads and radians.
 	 */
 	private BigDecimal piOver200;
+	/**
+	 * Natural logarithm of 10, used to calculate "log".
+	 */
+	private BigDecimal ln10;
 
 
 	/** The captive thread used to do the background calculations. */
@@ -133,12 +138,16 @@ public class CalcPiWorker
 	 * and {@link #getPi} is determined exactly by the desired precision.
 	 */
 	private void calculate() {
-	    e         = MathUtil.e(precision + 1);
-	    pi        = MathUtil.pi(precision + 1);
+	    e         = MathUtil.e(precision + 2);
+	    pi        = MathUtil.pi(precision + 2);
 
-	    piOver2   = pi.divide(D_TWO, mc);
-	    piOver180 = pi.divide(D_180, mc);
-	    piOver200 = pi.divide(D_200, mc);
+	    MathContext mc2 = MathUtil.newPrecision(mc, 2);
+
+	    piOver2   = pi.divide(D_TWO, mc2);
+	    piOver180 = pi.divide(D_180, mc2);
+	    piOver200 = pi.divide(D_200, mc2);
+
+	    ln10      = MathUtil.ln(D_TEN, mc2);
 
 	    // Release a permit to say the calculation results are now available
 	    readySem.release();
@@ -202,7 +211,7 @@ public class CalcPiWorker
 	 * <p> Waits until the background thread is done with the calculation
 	 * if a new precision was just recently specified.
 	 *
-	 * @return The value of <code>pi / 180</code> to the current precision.
+	 * @return The value of <code>pi / 180</code> to the current precision plus 2.
 	 */
 	public BigDecimal getPiOver180() {
 	    return getWhenReady( () -> piOver180 );
@@ -213,10 +222,21 @@ public class CalcPiWorker
 	 * <p> Waits until the background thread is done with the calculation
 	 * if a new precision was just recently specified.
 	 *
-	 * @return The value of <code>pi / 200</code> to the current precision.
+	 * @return The value of <code>pi / 200</code> to the current precision plus 2.
 	 */
 	public BigDecimal getPiOver200() {
 	    return getWhenReady( () -> piOver200 );
+	}
+
+	/**
+	 * Get the calculated value of <code>ln(10)</code> to the current number of digits.
+	 * <p> Waits until the background thread is done with the calculation
+	 * if a new precision was just recently specified.
+	 *
+	 * @return The value of <code>ln 10</code> to the current precision plus 2.
+	 */
+	public BigDecimal getLn10() {
+	    return getWhenReady( () -> ln10 );
 	}
 
 	/**

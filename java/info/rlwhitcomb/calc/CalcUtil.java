@@ -262,6 +262,8 @@
  *	    #694: A little tweaking of "bitOp" parameters.
  *	13-Jul-2025 (rlwhitcomb)
  *	    #740: New method for dot product of lists.
+ *	10-Aug-2025 (rlwhitcomb)
+ *	    #745: Change exponent for "powerOp" to BigDecimal.
  */
 package info.rlwhitcomb.calc;
 
@@ -2223,19 +2225,19 @@ public final class CalcUtil
 	 * @return         Result of the power operation.
 	 * @throws CalcExprException mostly for unimplemented things
 	 */
-	public static Object powerOp(final CalcObjectVisitor visitor, final ParserRuleContext baseExpr, final Object value, final double exp, final Settings settings) {
-	    boolean isIntPower = Math.floor(exp) == exp && !Double.isInfinite(exp);
+	public static Object powerOp(final CalcObjectVisitor visitor, final ParserRuleContext baseExpr, final Object value, final BigDecimal exp, final Settings settings) {
+	    boolean isIntPower = MathUtil.isInteger(exp);
 
 	    Object result = null;
 
 	    if (settings.rationalMode && isIntPower) {
 		BigFraction f = toFractionValue(visitor, value, baseExpr);
-		result = f.pow((int) exp);
+		result = f.pow(exp.intValueExact());
 	    }
 	    else if (value instanceof Quaternion) {
 		Quaternion base = (Quaternion) value;
 		if (isIntPower) {
-		    result = base.power((int) exp, settings.mc);
+		    result = base.power(exp.intValueExact(), settings.mc);
 		}
 		else {
 		    // TODO: temporary
@@ -2244,7 +2246,7 @@ public final class CalcUtil
 	    }
 	    else if (value instanceof ComplexNumber) {
 		ComplexNumber base = (ComplexNumber) value;
-		result = base.pow(new BigDecimal(exp), settings.mc);
+		result = base.pow(exp, settings.mc);
 	    }
 	    else if (MathUtil.isInteger(value)) {
 		BigInteger iValue = convertToInteger(value, settings.mc, baseExpr);
