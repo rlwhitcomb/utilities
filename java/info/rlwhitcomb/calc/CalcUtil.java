@@ -264,6 +264,8 @@
  *	    #740: New method for dot product of lists.
  *	10-Aug-2025 (rlwhitcomb)
  *	    #745: Change exponent for "powerOp" to BigDecimal.
+ *	10-Aug-2025 (rlwhitcomb)
+ *	    #750: New "rootOp" method.
  */
 package info.rlwhitcomb.calc;
 
@@ -322,6 +324,13 @@ public final class CalcUtil
 
 	/** Cached properties for the utilities programs. */
 	private static Properties calcScripts = null;
+
+	/** Square root symbol. */
+	public static final String SQ_ROOT = "\u221A";
+	/** Cube root symbol. */
+	public static final String CB_ROOT = "\u221B";
+	/** Fourth root symbol. */
+	public static final String FT_ROOT = "\u221C";
 
 
 	/** Private constructor since this is a static class. */
@@ -2255,6 +2264,82 @@ public final class CalcUtil
 	    else {
 		BigDecimal base = convertToDecimal(value, settings.mc, baseExpr);
 		result = MathUtil.pow(base, exp, settings.mc);
+	    }
+
+	    return result;
+	}
+
+
+	/**
+	 * Calculate one of the fixed "root" operations.
+	 *
+	 * @param visitor  Visitor to use for evaluation.
+	 * @param op       The operation to perform.
+	 * @param expr     Expression context for the operand.
+	 * @param settings Precision settings.
+	 * @return         The given root of the operand.
+	 */
+	public static Number rootOp(final CalcObjectVisitor visitor, final String op, final CalcParser.ExprContext expr, final Settings settings) {
+	    Object value = visitor.evaluate(expr);
+	    Number result = null;
+
+	    switch (op) {
+		case SQ_ROOT:
+		    if (value instanceof Quaternion) {
+			// TODO: temporary
+			throw new CalcExprException(expr, "%calc#notImplemented", "square root of quaternion");
+		    }
+		    else if (value instanceof ComplexNumber) {
+			result = ((ComplexNumber) value).sqrt(settings.mcDivide);
+		    }
+		    else {
+			try {
+			    result = MathUtil.sqrt2(convertToDecimal(value, settings.mc, expr), settings.mcDivide);
+			}
+			catch (IllegalArgumentException iae) {
+			    throw new CalcExprException(iae, expr);
+			}
+		    }
+		    break;
+
+		case CB_ROOT:
+		    if (value instanceof Quaternion) {
+			// TODO: temporary
+			throw new CalcExprException(expr, "%calc#notImplemented", "cube root of quaternion");
+		    }
+		    else if (value instanceof ComplexNumber) {
+			ComplexNumber cValue = (ComplexNumber) value;
+			MathContext mcPow = MathUtil.divideContext(cValue, settings.mcDivide);
+			result = cValue.pow(BigDecimal.ONE.divide(D_THREE, mcPow), mcPow);
+		    }
+		    else {
+			result = MathUtil.cbrt(convertToDecimal(value, settings.mc, expr), settings.mcDivide);
+		    }
+		    break;
+
+		case FT_ROOT:
+		    if (value instanceof Quaternion) {
+			// TODO: temporary
+			throw new CalcExprException(expr, "%calc#notImplemented", "fourth root of quaternion");
+		    }
+		    else if (value instanceof ComplexNumber) {
+			result = ((ComplexNumber) value).pow(D_ONE_FOURTH, settings.mc);
+		    }
+		    else {
+			try {
+			    Number firstRoot = MathUtil.sqrt2(convertToDecimal(value, settings.mc, expr), settings.mcDivide);
+			    if (firstRoot instanceof ComplexNumber) {
+				result = ((ComplexNumber) firstRoot).sqrt(settings.mcDivide);
+			    }
+			    else {
+				result = MathUtil.sqrt2((BigDecimal) firstRoot, settings.mcDivide);
+			    }
+			}
+			catch (IllegalArgumentException iae) {
+			    throw new CalcExprException(iae, expr);
+			}
+		    }
+		    break;
 	    }
 
 	    return result;

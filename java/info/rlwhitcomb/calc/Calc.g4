@@ -573,6 +573,8 @@
  *	    #730: Allow "exprStmt" on "var" and "const".
  *	09-Aug-2025 (rlwhitcomb)
  *	    #748: Add "twopow" function, to complement "ln2".
+ *	11-Aug-2025 (rlwhitcomb)
+ *	    #750: Rearrange root symbols to be operators.
  */
 
 grammar Calc;
@@ -820,6 +822,7 @@ expr
    | expr '!'                                     # factorialExpr
    |<assoc=right> expr POW_OP expr                # powerExpr
    |<assoc=right> expr POWERS                     # powerNExpr
+   |<assoc=right> ROOTS expr                      # rootExpr
    | expr ( MULT_OP | K_MOD ) expr                # multiplyExpr
    | expr ADD_OP expr                             # addExpr
    | expr SHIFT_OP expr                           # shiftExpr
@@ -1266,11 +1269,11 @@ K_ATAN2    : 'atan2' | 'ATAN2' | 'Atan2' | 'ATan2' | 'aTan2' ;
 
 K_ATAN     : 'atan' | 'ATAN' | 'Atan' | 'ATan' | 'aTan' ;
 
-K_SQRT     : 'sqrt' | 'SQRT' | 'Sqrt' | '\u221A' ;
+K_SQRT     : 'sqrt' | 'SQRT' | 'Sqrt' ;
 
-K_CBRT     : 'cbrt' | 'CBRT' | 'Cbrt' | '\u221B' ;
+K_CBRT     : 'cbrt' | 'CBRT' | 'Cbrt' ;
 
-K_FORT     : 'fort' | 'FORT' | 'Fort' | '\u221C' ;
+K_FORT     : 'fort' | 'FORT' | 'Fort' ;
 
 K_LN       : 'ln' | 'LN' | 'Ln' ;
 
@@ -1598,6 +1601,12 @@ POWERS
        | '\u2077' // 7
        | '\u2078' // 8
        | '\u2079' // 9
+       ;
+
+ROOTS
+       : '\u221A' // sqrt
+       | '\u221B' // cbrt
+       | '\u221C' // fort
        ;
 
 INDEXES

@@ -919,6 +919,9 @@
  *	    #748: Add "twopow" function.
  *	    #745: Misc fixes for exponentiation and "fixup" changes; change exponent for
  *	    "powerOp" to BigDecimal.
+ *	10-Aug-2025 (rlwhitcomb)
+ *	    #745: "fixup" changes to "nPower" method.
+ *	    #750: Refactor the basic root operations to common "rootOp" method.
  */
 package info.rlwhitcomb.calc;
 
@@ -4849,26 +4852,33 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public Object visitPowerNExpr(CalcParser.PowerNExprContext ctx) {
 	    CalcParser.ExprContext expr = ctx.expr();
 	    Object value = evaluate(expr);
-	    String power = ctx.POWERS().getText();
-	    int exp = nToPower(power, ctx);
+	    int intExp = nToPower(ctx.POWERS().getText(), ctx);
 
 	    if (settings.rationalMode && value instanceof BigFraction) {
 		BigFraction base = convertToFraction(value, expr);
-		return base.pow(exp);
+		return base.pow(intExp);
 	    }
 	    else if (value instanceof Quaternion) {
-		return ((Quaternion) value).power(exp, settings.mc);
+		return ((Quaternion) value).power(intExp, settings.mc);
 	    }
 	    else if (value instanceof ComplexNumber) {
-		return ((ComplexNumber) value).pow(new BigDecimal(exp), settings.mc);
+		return ((ComplexNumber) value).pow(new BigDecimal(intExp), settings.mc);
 	    }
 	    else if (value instanceof BigInteger) {
-		return ((BigInteger) value).pow(exp);
+		return ((BigInteger) value).pow(intExp);
 	    }
 	    else {
 		BigDecimal base = convertToDecimal(value, settings.mc, expr);
-		return base.pow(exp, settings.mc);
+		return MathUtil.fixup(base.pow(intExp), settings.mc);
 	    }
+	}
+
+	@Override
+	public Object visitRootExpr(CalcParser.RootExprContext ctx) {
+	    String op = ctx.ROOTS().getText();
+	    CalcParser.ExprContext expr = ctx.expr();
+
+	    return rootOp(this, op, expr, settings);
 	}
 
 	@Override
@@ -5218,70 +5228,22 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitSqrtExpr(CalcParser.SqrtExprContext ctx) {
 	    CalcParser.ExprContext expr = ctx.expr1().expr();
-	    Object value = evaluate(expr);
 
-	    if (value instanceof Quaternion) {
-		// TODO: temporary
-		throw new CalcExprException(ctx, "%calc#notImplemented", "square root of quaternion");
-	    }
-	    else if (value instanceof ComplexNumber) {
-		return ((ComplexNumber) value).sqrt(settings.mcDivide);
-	    }
-	    else {
-		try {
-		    return MathUtil.sqrt2(convertToDecimal(value, settings.mc, expr), settings.mcDivide);
-		}
-		catch (IllegalArgumentException iae) {
-		    throw new CalcExprException(iae, ctx);
-		}
-	    }
+	    return rootOp(this, SQ_ROOT, expr, settings);
 	}
 
 	@Override
 	public Object visitCbrtExpr(CalcParser.CbrtExprContext ctx) {
 	    CalcParser.ExprContext expr = ctx.expr1().expr();
-	    Object value = evaluate(expr);
 
-	    if (value instanceof Quaternion) {
-		// TODO: temporary
-		throw new CalcExprException(ctx, "%calc#notImplemented", "cube root of quaternion");
-	    }
-	    else if (value instanceof ComplexNumber) {
-		ComplexNumber cValue = (ComplexNumber) value;
-		MathContext mcPow = MathUtil.divideContext(cValue, settings.mcDivide);
-		return cValue.pow(BigDecimal.ONE.divide(D_THREE, mcPow), mcPow);
-	    }
-	    else {
-		return MathUtil.cbrt(convertToDecimal(value, settings.mc, expr), settings.mcDivide);
-	    }
+	    return rootOp(this, CB_ROOT, expr, settings);
 	}
 
 	@Override
 	public Object visitFortExpr(CalcParser.FortExprContext ctx) {
 	    CalcParser.ExprContext expr = ctx.expr1().expr();
-	    Object value = evaluate(expr);
 
-	    if (value instanceof Quaternion) {
-		// TODO: temporary
-		throw new CalcExprException(ctx, "%calc#notImplemented", "fourth root of quaternion");
-	    }
-	    else if (value instanceof ComplexNumber) {
-		return ((ComplexNumber) value).pow(D_ONE_FOURTH, settings.mc);
-	    }
-	    else {
-		try {
-		    Number firstRoot = MathUtil.sqrt2(convertToDecimal(value, settings.mc, expr), settings.mcDivide);
-		    if (firstRoot instanceof ComplexNumber) {
-			return ((ComplexNumber) firstRoot).sqrt(settings.mcDivide);
-		    }
-		    else {
-			return MathUtil.sqrt2((BigDecimal) firstRoot, settings.mcDivide);
-		    }
-		}
-		catch (IllegalArgumentException iae) {
-		    throw new CalcExprException(iae, ctx);
-		}
-	    }
+	    return rootOp(this, FT_ROOT, expr, settings);
 	}
 
 	@Override

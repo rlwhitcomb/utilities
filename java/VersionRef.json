@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '3.0.12', date: d'2025-08-11',
+      issues: [ 750 ],
+      comment: 'Adjust precedence of root symbols to behave like operators rather than functions.'
+    },
     { version: '3.0.10', date: d'2025-08-10',
       issues: [ 748, 746, 745 ],
       comment: 'Add "twopow" function; some fixes for "tenpow"; misc. changes for trailing zeros.'
