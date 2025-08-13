@@ -49,6 +49,9 @@ quad(1, -1, -1)[0]
 quad(1, 0, 4)
 quad_exp(1, 0, 4, (0,2) )
 quad_exp(1, 0, 4, (0,-2) )
+xy = quad(1, -1, -30)
+quad_exp(1, -1, -30, xy[0])
+quad_exp(1, -1, -30, xy[1])
 
 log(GOOGOL)
 

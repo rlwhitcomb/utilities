@@ -922,6 +922,8 @@
  *	10-Aug-2025 (rlwhitcomb)
  *	    #745: "fixup" changes to "nPower" method.
  *	    #750: Refactor the basic root operations to common "rootOp" method.
+ *	12-Aug-2025 (rlwhitcomb)
+ *	    #735: Implement complex and quaternion conjugate.
  */
 package info.rlwhitcomb.calc;
 
@@ -4798,6 +4800,22 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    Boolean bValue = getBooleanValue(ctx.expr());
 
 	    return bValue.booleanValue() ? Boolean.FALSE : Boolean.TRUE;
+	}
+
+	@Override
+	public Object visitConjugateExpr(CalcParser.ConjugateExprContext ctx) {
+	    CalcParser.ExprContext expr = ctx.expr();
+	    Object value = evaluate(expr);
+
+	    if (value instanceof Quaternion) {
+		return ((Quaternion) value).conjugate();
+	    }
+	    else if (value instanceof ComplexNumber) {
+		return ((ComplexNumber) value).conjugate();
+	    }
+	    else {
+		throw new UnknownOpException("\u2217", ctx);
+	    }
 	}
 
 	@Override

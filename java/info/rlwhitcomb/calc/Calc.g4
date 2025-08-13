@@ -575,6 +575,8 @@
  *	    #748: Add "twopow" function, to complement "ln2".
  *	11-Aug-2025 (rlwhitcomb)
  *	    #750: Rearrange root symbols to be operators.
+ *	12-Aug-2025 (rlwhitcomb)
+ *	    #735: Recast '\u2217' as conjugate operator instead of power/multiply symbol.
  */
 
 grammar Calc;
@@ -816,6 +818,7 @@ expr
    |<assoc=right> ADD_OP expr                     # negPosExpr
    |<assoc=right> '!!' expr                       # toBooleanExpr
    |<assoc=right> ( '!' | '\u00AC' | K_NOT ) expr # booleanNotExpr
+   | expr '\u2217'                                # conjugateExpr
    |<assoc=right> TO_STRING_OP expr               # toStringExpr
    |<assoc=right> TO_NUM_OP expr                  # toNumberExpr
    |<assoc=right> BIT_NOT_OP expr                 # bitNotExpr
@@ -1615,12 +1618,12 @@ INDEXES
        ;
 
 POW_OP
-       : ( '**' | '\u00D7\u00D7' | '\u2217\u2217' | '\u2715\u2715' | '\u2716\u2716' )
+       : ( '**' | '\u00D7\u00D7' | '\u2715\u2715' | '\u2716\u2716' )
        | ( '\u2303' | '\u2B61' | '\u2191' )
        ;
 
 MULT_OP
-       : ( '*' | '\u00D7' | '\u2217' | '\u2715' | '\u2716' )
+       : ( '*' | '\u00D7' | '\u2715' | '\u2716' )
        | ( '/' | '\u00F7' | '\u2215' | '\u2797' )
        | ( '\\' | '\u2216' )
        | '%' | '\\%' | '\u2216%'
@@ -1633,12 +1636,12 @@ ADD_OP
        ;
 
 POW_ASSIGN
-       : ( '**=' | '\u00D7\u00D7=' | '\u2217\u2217=' | '\u2715\u2715=' | '\u2716\u2716=' )
+       : ( '**=' | '\u00D7\u00D7=' | '\u2715\u2715=' | '\u2716\u2716=' )
        | ( '\u2303=' | '\u2B61=' | '\u2191=' )
        ;
 
 MULT_ASSIGN
-       : ( '*=' | '\u00D7=' | '\u2217=' | '\u2715=' | '\u2716=' )
+       : ( '*=' | '\u00D7=' | '\u2715=' | '\u2716=' )
        | ( '/=' | '\u00F7=' | '\u2215=' | '\u2797=' )
        | ( '\\=' | '\u2216=' )
        | '%='
