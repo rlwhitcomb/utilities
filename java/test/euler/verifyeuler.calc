@@ -63,7 +63,7 @@ define verify_files(list1, list2, ext1, ext2) = {
  * @param val  Expected value (from the Project Euler archives).
  */
 define verify(name, val) = {
-   print `Verifying "$name" ...`
+   print `Verifying solution for "$name" ...`
    var f = read(DIR + name + CANON)
    $assert notnull(index(f, @@val)), `"${name + CANON} does not contain correct value of $val!`
    numberOfTests++

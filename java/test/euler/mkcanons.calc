@@ -6,3 +6,7 @@ loop f over files {
       exec('test/euler/upe', finfo.nameOnly)
    }
 }
+if exists('test/euler/euler_values.txt') {
+   $load 'test/euler/verifyeuler'
+}
+
