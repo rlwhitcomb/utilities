@@ -205,14 +205,14 @@ h2 {
         <li>Looping and conditional statements, including powerful pattern matching, to do pretty much any kind of calculation or programming task.</li>
         <li>Did I mention that this is an actual programming / scripting language?</li>
         <li>Therefore, this "calculator" is a <a href="https://en.wikipedia.org/wiki/Turing_completeness">&ldquo;Turing Complete&rdquo;</a> language.</li>
-        <li>Currently (as of mid-2024 at least), it is being actively developed and maintained, meaning features and fixes are constantly being added.</li>
+        <li>Currently (as of mid-2025 at least), it is being actively developed and maintained, meaning features and fixes are constantly being added.</li>
         <li>This is <a href="https://opensource.com/resources/what-open-source">Open-Source Software</a> released under the very permissive
             <a href="https://opensource.org/license/mit">MIT</a> license, so the code can be freely examined, and modified (if desired) for your own use.</li>
       </ul>
   <h3>History</h3>
   <p>"Calc" started out as an exercise in learning the <a href="https://www.antlr.org/">Antlr</a> parser generator, by combining the simple expression grammar from the introductory book
      with the JSON grammar in another chapter of the book. Once that was working, adding more operators and then built-in functions, and then user-defined functions, and on and on,
-     was fairly easy. And now, over 3 years later, with a lot of head-scratching along the way, we have what we have here.
+     was fairly easy. And now, almost five years later, with a lot of head-scratching and "dog-fooding" along the way, we have what we have here.
   <p>The language is built around the idea of an expression evaluator. So, everything in the language (with the exception of <a href="#Directives">Directives</a>) is basically an expression.
      And since each piece of data basically describes itself (by its Java class) we can get away with being dynamically typed, and doing "appropriate" conversions as needed.
      Even the <a href="#Statements">Statements</a> in the language actually return a value, so it is not a stretch for the result of anything to simply be the last expression value
