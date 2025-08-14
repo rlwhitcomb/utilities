@@ -1009,6 +1009,13 @@ scale set1
 0 in set1
 index(set1, 2)
 set1[1]
+// Symmetric difference
+fruit1 = { 'apple', 'banana', 'orange' }
+fruit2 = { 'banana', 'grape', 'kiwi' }
+fruit1 ^ fruit2
+number1 = { 1, 2, 3 }
+number2 = { 2, 3, 4 }
+number1 ^ number2
 
 A = {1,2,3,4,5,6}
 B = {3,4,5,6,7,8}

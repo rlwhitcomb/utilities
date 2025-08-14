@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '3.0.18', date: d'2025-08-14',
+      issues: [ 744 ],
+      comment: 'Implement symmetric difference ("^") for sets.'
+    },
     { version: '3.0.16', date: d'2025-08-14',
       issues: [ 751 ],
       comment: 'New "isInt" function.'

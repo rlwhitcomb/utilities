@@ -258,6 +258,7 @@ h2 {
       <li>All kinds of quick conversions, such as temperature, metric-to-English measurements, etc. (see "java/test/files/library.calc")</li>
       <li>Building a library of your own frequently-used calculations (again, "library.calc" is a good example)</li>
       <li>There are even library functions for calculating mortgage and loan payments</li>
+      <li>As a teaching tool for mathematics; simple things like fractions and Roman numerals, to applications involving quaternions, or set operations.
       <li>And the ultimate application could be using "Calc" as an embedded calculation / scripting engine inside one of your own JVM-based programs</li>
   </ul>
   <h3>Notes</h3>
@@ -1008,7 +1009,7 @@ or<br>
         <i>expr</i>&nbsp;<code> | </code>or<code> &#x222A; </code>or<code> &#x22C3; </code>&nbsp;<i>expr</i><br>
         <i>expr</i>&nbsp;<code> ~| </code>or<code> &#x22BD; </code>&nbsp;<i>expr</i><br>
         <i>expr</i>&nbsp;<code> |~ </code>&nbsp;<i>expr</i></td>
-        <td>bitwise AND or set INTERSECTION<br>NOT AND (or NAND)<br>AND NOT<br>exclusive OR<br>NOT exclusive OR<br>exclusive OR NOT<br>bitwise OR or set UNION<br>NOT OR (or NOR)<br>OR NOT</td><td>left to right</td></tr>
+        <td>bitwise AND or set INTERSECTION<br>NOT AND (or NAND)<br>AND NOT<br>exclusive OR or set SYMMETRIC DIFFERENCE<br>NOT exclusive OR<br>exclusive OR NOT<br>bitwise OR or set UNION<br>NOT OR (or NOR)<br>OR NOT</td><td>left to right</td></tr>
     <tr><td>15</td><td><i>expr</i>&nbsp;<code> &lt;=&gt; </code>&nbsp;<i>expr</i><td>returns <code>-1</code> if <i>expr</i> &lt; 0<br><code>0</code> if <i>expr</i> = 0<br><code>+1</code> if <i>expr</i> &gt; 0</td><td>left to right</td></tr>
     <tr><td>14</td><td>
         <i>expr</i>&nbsp;<code> &lt;= </code>or<code> &#x2264; </code>&nbsp;<i>expr</i><br>

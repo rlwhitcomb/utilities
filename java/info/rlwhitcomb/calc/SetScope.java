@@ -38,6 +38,7 @@
  *  13-Mar-24 rlw #661	New "from" static function to convert from other collections.
  *  18-Jul-25 rlw #738	Implement "valueList" base method by refactoring "list";
  *			rename "valueList" variable to "valuesAsList".
+ *  14-Aug-25 rlw #744	New "symdiff" method; rework stuff related to "valueList()".
  */
 package info.rlwhitcomb.calc;
 
@@ -210,23 +211,27 @@ class SetScope<T extends Object> extends CollectionScope
 		return this;
 
 	    SetScope<T> result = new SetScope<T>(values);
-
-	    if (c instanceof ArrayScope) {
-		@SuppressWarnings("unchecked")
-		ArrayScope<Object> array = (ArrayScope<Object>) c;
-		result.values.removeAll(array.list());
-	    }
-	    else if (c instanceof ObjectScope) {
-		ObjectScope map = (ObjectScope) c;
-		result.values.removeAll(map.values());
-	    }
-	    else if (c instanceof SetScope) {
-		@SuppressWarnings("unchecked")
-		SetScope<Object> set = (SetScope<Object>) c;
-		result.values.removeAll(set.set());
-	    }
+	    result.values.removeAll(c.valueList());
 
 	    return result;
+	}
+
+	/**
+	 * Compute the symmetric difference between this set and the other collection,
+	 * that is the set of items in both sets, except those that are common to both.
+	 *
+	 * @param c Another collection to compute the symmetric difference of.
+	 * @return  The symmetric difference of this with the other.
+	 */
+	SetScope<T> symdiff(final CollectionScope c) {
+	    if (c.equals(CollectionScope.EMPTY))
+		return this;
+
+	    SetScope<T> intersect = intersect(c);
+	    SetScope<T> union = union(c);
+
+	    union.values.removeAll(intersect.values);
+	    return union;
 	}
 
 	/**
@@ -274,21 +279,7 @@ class SetScope<T extends Object> extends CollectionScope
 		return new SetScope<T>();
 
 	    SetScope<T> result = new SetScope<T>(values);
-
-	    if (c instanceof ArrayScope) {
-		@SuppressWarnings("unchecked")
-		ArrayScope<Object> array = (ArrayScope<Object>) c;
-		result.values.retainAll(array.list());
-	    }
-	    else if (c instanceof ObjectScope) {
-		ObjectScope map = (ObjectScope) c;
-		result.values.retainAll(map.values());
-	    }
-	    else if (c instanceof SetScope) {
-		@SuppressWarnings("unchecked")
-		SetScope<Object> set = (SetScope<Object>) c;
-		result.values.retainAll(set.set());
-	    }
+	    result.values.retainAll(c.valueList());
 
 	    return result;
 	}

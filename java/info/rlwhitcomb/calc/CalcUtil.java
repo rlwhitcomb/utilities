@@ -266,6 +266,8 @@
  *	    #745: Change exponent for "powerOp" to BigDecimal.
  *	10-Aug-2025 (rlwhitcomb)
  *	    #750: New "rootOp" method.
+ *	14-Aug-2025 (rlwhitcomb)
+ *	    #744: Symmetric difference of sets.
  */
 package info.rlwhitcomb.calc;
 
@@ -2087,6 +2089,10 @@ public final class CalcUtil
 		    case "\u22C3":   // UN-ARY UNION
 			// set union
 			result = s1.union(s2);
+			break;
+		    case "^":
+			// symmetric difference
+			result = s1.symdiff(s2);
 			break;
 		    default:
 			throw new UnknownOpException(oper, ctx);
