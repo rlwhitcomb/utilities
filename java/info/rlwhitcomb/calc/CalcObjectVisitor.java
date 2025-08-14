@@ -924,6 +924,8 @@
  *	    #750: Refactor the basic root operations to common "rootOp" method.
  *	12-Aug-2025 (rlwhitcomb)
  *	    #735: Implement complex and quaternion conjugate.
+ *	14-Aug-2025 (rlwhitcomb)
+ *	    #751: Add "isint" function.
  */
 package info.rlwhitcomb.calc;
 
@@ -5553,6 +5555,19 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    for (Object obj : objects) {
 		if (!MathUtil.isPrime((BigInteger) obj))
+		    return Boolean.FALSE;
+	    }
+
+	    return Boolean.TRUE;
+	}
+
+	@Override
+	public Object visitIsIntExpr(CalcParser.IsIntExprContext ctx) {
+	    List<CalcParser.ExprContext> exprs = ctx.exprN().exprList().expr();
+	    List<Object> objects = buildValueList(this, exprs, Conversion.UNCHANGED);
+
+	    for (Object obj : objects) {
+		if (!MathUtil.isInteger(obj))
 		    return Boolean.FALSE;
 	    }
 

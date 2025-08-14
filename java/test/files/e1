@@ -166,6 +166,14 @@ productof p31
 // Fibonacci primes!
 isprime(2, 3, 5, 13, 89, 233, 1597, 28657, 514229, 433494437, 2971215073)
 
+isInt(pi)
+IsInt(tenpow(20))
+isint 27
+ISINT 13.0
+isint(factors(238))
+isint(5/5)
+isint(5/4)
+
 isnull junk
 notnull junk
 notnull h2

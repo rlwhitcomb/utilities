@@ -577,6 +577,8 @@
  *	    #750: Rearrange root symbols to be operators.
  *	12-Aug-2025 (rlwhitcomb)
  *	    #735: Recast '\u2217' as conjugate operator instead of power/multiply symbol.
+ *	14-Aug-2025 (rlwhitcomb)
+ *	    #751: Add "isint" function.
  */
 
 grammar Calc;
@@ -733,6 +735,7 @@ builtinFunction
    | K_CEIL expr1                        # ceilExpr
    | K_FLOOR expr1                       # floorExpr
    | K_ISPRIME exprN                     # isPrimeExpr
+   | K_ISINT exprN                       # isIntExpr
    | K_GCD exprN                         # gcdExpr
    | K_LCM exprN                         # lcmExpr
    | K_MAX exprN                         # maxExpr
@@ -1309,6 +1312,8 @@ K_CEIL     : 'ceil' | 'CEIL' | 'Ceil' ;
 K_FLOOR    : 'floor' | 'FLOOR' | 'Floor' ;
 
 K_ISPRIME  : 'isprime' | 'ISPRIME' | 'Isprime' | 'IsPrime' | 'isPrime' ;
+
+K_ISINT    : 'isint' | 'ISINT' | 'Isint' | 'IsInt' | 'isInt' ;
 
 K_ISNULL   : 'isnull' | 'ISNULL' | 'Isnull' | 'IsNull' | 'isNull' ;
 

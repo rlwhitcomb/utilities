@@ -289,6 +289,13 @@
 >p31 = pfactors (t31) -> [ 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 7, 11, 31, 151, 331 ]
 >productof p31 -> 4611686014132420608
 >isprime (2, 3, 5, 13, 89, 233, 1597, 28657, 514229, 433494437, 2971215073) -> true
+>isInt (pi) -> false
+>IsInt (tenpow (20)) -> true
+>isint 27 -> true
+>ISINT 13.0 -> true
+>isint (factors (238)) -> true
+>isint (5 / 5) -> true
+>isint (5 / 4) -> false
 >isnull junk -> true
 >notnull junk -> false
 >notnull h2 -> true

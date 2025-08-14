@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '3.0.16', date: d'2025-08-14',
+      issues: [ 751 ],
+      comment: 'New "isInt" function.'
+    },
     { version: '3.0.14', date: d'2025-08-12',
       issues: [ 735 ],
       comment: '[BREAKING] Recast "\u2217" as conjugate operator instead of power/multiply.'

@@ -866,8 +866,8 @@ or<br>
     <tr><td>34</td><td><i>expr</i> <code>IS</code> ( <i>string</i> | <i>type_id</i> )</td><td>check if expression is the given type (same as <code>typeof</code>)</td><td>left to right</td></tr>
     <tr><td>33</td><td><i>expr</i> <code>[</code> <i>expr</i> ? <code>:</code> <i>expr</i> ? <code>]</code></td><td>produce a slice of an object or string</td><td>left to right</td></tr>
     <tr><td>32</td><td><code>( </code><i>expr</i><code> )</code></td><td>group an expression</td><td>N/A</td></tr>
-    <tr><td rowspan="100">31</td>
-            <td><code>ABS</code>&nbsp;<i>expr</i></td><td>absolute value</td><td rowspan="100">left to right</td></tr>
+    <tr><td rowspan="101">31</td>
+            <td><code>ABS</code>&nbsp;<i>expr</i></td><td>absolute value</td><td rowspan="101">left to right</td></tr>
             <tr><td><code>SIN</code>&nbsp;<i>expr</i></td><td>sine</td></tr>
             <tr><td><code>COS</code>&nbsp;<i>expr</i></td><td>cosine</td></tr>
             <tr><td><code>TAN</code>&nbsp;<i>expr</i></td><td>tangent</td></tr>
@@ -899,6 +899,7 @@ or<br>
             <tr><td><code>FLOOR</code>&nbsp;<i>expr</i></td><td>the "floor" of a numeric value</td></tr>
             <tr><td><code>CEIL</code>&nbsp;<i>expr</i></td><td>the "ceil" of a numeric value</td></tr>
             <tr><td><code>ISPRIME</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;) *</td><td>are all the values prime numbers?</td></tr>
+            <tr><td><code>ISINT</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;) *</td><td>are all the values numeric integers?</td></tr>
             <tr><td><code>GCD</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;) *</td><td>greatest common divisor</td></tr>
             <tr><td><code>LCM</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;) *</td><td>least common multiple</td></tr>
             <tr><td><code>MAX</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;) *</td><td>maximum value</td></tr>
