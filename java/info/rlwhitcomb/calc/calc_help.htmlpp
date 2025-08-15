@@ -807,7 +807,9 @@ or<br>
      For the most part, automatic coercions are applied to the operands of functions if necessary (and possible), and the results of operations are
      automatically widened to support the results. The only exceptions to this are some of the lesser-used trig and log functions which can only be
      done to "double" precision (currently &mdash; this may change in subsequent versions).
-  <p>Names of predefined functions are available in 3 or 4 forms: all lower case, all UPPER case, and one or two MixedCase forms. For example: <code>sin</code>, <code>SIN</code>, or <code>Sin</code>, and <code>sumof</code>, <code>SUMOF</code>, <code>Sumof</code>, or <code>SumOf</code>.
+  <p>Names of predefined functions are available in 3 or more forms: all lower case, all UPPER case, one or more MixedCase forms, and/or a Unicode symbol.
+     For example: <code>sin</code>, <code>SIN</code>, or <code>Sin</code>, and <code>sumof</code>, <code>SUMOF</code>, <code>Sumof</code>,
+     <code>SumOf</code>, <code>sumOf</code>, or <code>&#x2211;</code>.
 </div>
 <a class="right-link" href="#Notes_on_Operators_and_Functions">Notes</a>
   <div class="center">
