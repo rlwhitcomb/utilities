@@ -7,6 +7,7 @@
 
 primes: test/data/primes.txt -b -c -80
 Psalm23: test/data/Psalm23.txt -j
+numwords: test/data/numwords.txt -nl
 {1}listerr: -300
 
 :echo

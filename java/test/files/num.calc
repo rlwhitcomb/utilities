@@ -1,0 +1,7 @@
+$quiet on {
+list = []
+loop num over 100 { const w = num@w; list += w }
+}
+$results on {
+join list, ', '@q
+}

@@ -93,6 +93,8 @@
  *	    Move text to the resource file for internationalization.
  *	12-Apr-2025 (rlwhitcomb)
  *	    Add "-noblanks" option.
+ *	17-Aug-2025 (rlwhitcomb)
+ *	    More aliases for the "-newlines" option.
  */
 package info.rlwhitcomb.util;
 
@@ -265,7 +267,7 @@ public class Lists
 			noblanks = true;
 		    else if (Options.matchesOption(arg, true, "whitespace", "white", "w"))
 			whitespace = true;
-		    else if (Options.matchesOption(arg, true, "newlines", "lines", "line", "l")) {
+		    else if (Options.matchesOption(arg, true, "newlines", "newline", "lines", "line", "nl", "l")) {
 			newlines = true;
 			concatenate = false;
 		    }
