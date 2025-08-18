@@ -95,6 +95,8 @@
  *	    Add "-noblanks" option.
  *	17-Aug-2025 (rlwhitcomb)
  *	    More aliases for the "-newlines" option.
+ *	17-Aug-2025 (rlwhitcomb)
+ *	    #757: Refactor into separate input and output loops to fix trailing commas.
  */
 package info.rlwhitcomb.util;
 
@@ -178,13 +180,15 @@ public class Lists
 	    return errUsage("onlyOnce", Intl.getString("util#lists", optionKey));
 	}
 
-	private void outPrint(String value) {
-	    if (makeLower)
-		output.print(value.toLowerCase());
-	    else if (makeUpper)
-		output.print(value.toUpperCase());
-	    else
-		output.print(value);
+	private void outPrint(final String value) {
+	    if (value != null) {
+		if (makeLower)
+		    output.print(value.toLowerCase());
+		else if (makeUpper)
+		    output.print(value.toUpperCase());
+		else
+		    output.print(value);
+	    }
 	}
 
 	private void outPrintln() {
@@ -414,7 +418,7 @@ public class Lists
 		return errUsage("notBothCase");
 	    }
 
-	    if (outputFileName != null) {
+	    if (outputFileName != null && !counting) {
 		try {
 		    output = new PrintStream(outputFileName);
 		}
@@ -461,18 +465,12 @@ public class Lists
 	    boolean readConsole = false;
 	    String fileName     = "";
 	    BufferedReader r    = null;
+	    List<String> values = new ArrayList<>();
 
-	    if (indent > 0) {
-		indentText = indentString(indent);
-	    }
-
+	    /*
+	     * Read all the input into the "values" list, doing input processing along the way.
+	     */
 	    try {
-		StringBuilder buf = new StringBuilder();
-		if (indentText != null)
-		    buf.append(indentText);
-		if (prefixText != null)
-		    buf.append(prefixText);
-
 		while (nextFile < fileNames.size()) {
 		    fileName      = fileNames.get(nextFile++);
 		    readConsole   = fileName.equals(STDIN);
@@ -506,7 +504,7 @@ public class Lists
 				    numberOfValues++;
 				}
 				else {
-				    buf.append(line);
+				    values.add(line);
 				}
 			    }
 			}
@@ -515,10 +513,7 @@ public class Lists
 				numberOfValues++;
 			    }
 			    else {
-				if (!empty) {
-				    buf.append(line);
-				}
-				outputLine(buf);
+				values.add(line);
 			    }
 			}
 			else if (!empty) {
@@ -530,36 +525,7 @@ public class Lists
 					numberOfValues++;
 				    }
 				    else {
-					if (concatenate) {
-					    int textLength = outputLength(buf);
-					    if (textLength > indent + prefixTextLength) {
-						if (!join)
-						    buf.append(",");
-						if (width > 0 && outputLength(buf) >= width) {
-						    outputLine(buf);
-						}
-						else if (blanks || (join && !noblanks))
-						    buf.append(" ");
-					    }
-					    if (width > 0 && outputLength(buf) + value.length() >= width) {
-						outputLine(buf);
-					    }
-					    buf.append(value);
-					}
-					else {
-					    if (indentText != null)
-						outPrint(indentText);
-					    if (prefixText != null)
-						outPrint(prefixText);
-					    outPrint(value);
-					    if (newlines)
-						outPrint(",");
-					    if (postfixText != null)
-						outPrint(postfixText);
-					    outPrintln();
-					    if (blanks)
-						outPrintln();
-					}
+					values.add(value);
 				    }
 				}
 			    }
@@ -573,19 +539,77 @@ public class Lists
 		    }
 		}
 
-		if (concatenate || single) {
-		    if (postfixText != null)
-			buf.append(postfixText);
-		    outPrintln(buf.toString());
-		}
-
+		// If we're counting, we're done with everything by now
 		if (counting) {
 		    outPrintln(String.format("%1$d", numberOfValues));
 		}
+		else {
+		    StringBuilder buf = new StringBuilder();
+		    if (indent > 0) {
+			indentText = indentString(indent);
+		    }
 
-		if (outputFileName != null) {
-		    output.flush();
-		    output.close();
+		    if (indentText != null)
+			buf.append(indentText);
+		    if (prefixText != null)
+			buf.append(prefixText);
+
+		    final int rowCount = values.size();
+		    final int lastRow = rowCount - 1;
+
+		    for (int row = 0; row < rowCount; row++) {
+			String value = values.get(row);
+			boolean empty = value.isEmpty();
+
+			if (single) {
+			    if (!empty)
+				buf.append(value);
+			}
+			else if (unchanged) {
+			    if (!empty)
+				buf.append(value);
+			    outputLine(buf);
+			}
+			else if (!empty) {
+			    if (concatenate) {
+				int textLength = outputLength(buf);
+				if (textLength > indent + prefixTextLength) {
+				    if (!join)
+					buf.append(",");
+				    if (width > 0 && outputLength(buf) >= width)
+					outputLine(buf);
+				    else if (blanks || (join && !noblanks))
+					buf.append(" ");
+				}
+				if (width > 0 && outputLength(buf) + value.length() >= width)
+				    outputLine(buf);
+				buf.append(value);
+			    }
+			    else {
+				outPrint(indentText);
+				outPrint(prefixText);
+				outPrint(value);
+				if (newlines && row < lastRow)
+				    outPrint(",");
+				if (postfixText != null)
+				    outPrint(postfixText);
+				outPrintln();
+				if (blanks)
+				    outPrintln();
+			    }
+			}
+		    }
+
+		    if (concatenate || single) {
+			if (postfixText != null)
+			    buf.append(postfixText);
+			outPrintln(buf.toString());
+		    }
+
+		    if (outputFileName != null) {
+			output.flush();
+			output.close();
+		    }
 		}
 	    }
 	    catch (IOException ioe) {
