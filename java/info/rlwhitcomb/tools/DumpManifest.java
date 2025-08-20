@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2010-2011,2015,2017-2018,2020-2022 Roger L. Whitcomb.
+ * Copyright (c) 2010-2011,2015,2017-2018,2020-2022,2025 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -34,6 +34,8 @@
  *	25-Jul-2022 (rlwhitcomb)
  *	    Change messages to use double quotes around file names
  *	    so they can be copy/pasted and used directly (on Windows).
+ *	20-Aug-2025 (rlwhitcomb)
+ *	    Cleanup messages when there are no entries; error message for unknown option.
  */
 package info.rlwhitcomb.tools;
 
@@ -58,8 +60,12 @@ import java.util.jar.Manifest;
  */
 public class DumpManifest
 {
+	private static final String USAGE = "Usage: java DumpManifest [--raw] <jarfilename> [<jarfilename>]*%n%n";
+
 	private static final boolean onWindows = Environment.isWindows();
 	private static boolean unsorted = false;
+
+
 	private static Comparator<Object> attributeNameComparator = new Comparator<Object>() {
 		@Override
 		public int compare(Object t1, Object t2) {
@@ -78,7 +84,7 @@ public class DumpManifest
 
 	public static void main(String[] args) {
 	    if (args.length == 0) {
-		System.err.format("Usage: java DumpManifest [--raw] <jarfilename> [<jarfilename>]*%n");
+		System.err.format(USAGE);
 		return;
 	    }
 	    for (String arg: args) {
@@ -86,6 +92,13 @@ public class DumpManifest
 		 || arg.equalsIgnoreCase("-raw")
 		 || (onWindows && arg.equalsIgnoreCase("/raw"))) {
 		    unsorted = true;
+		}
+		else if ((arg.startsWith("--") && arg.length() > 2)
+		      || (arg.startsWith("-") && arg.length() > 1)
+		      || (onWindows && arg.startsWith("/") && arg.length() > 1)) {
+		    System.err.format("Unsupported option: \"%1$s\"%n%n", arg);
+		    System.err.format(USAGE);
+		    return;
 		}
 		else {
 		    try {
@@ -95,38 +108,49 @@ public class DumpManifest
 			    JarEntry entry = e.nextElement();
 			    if (entry.isDirectory()) {
 				System.out.format(" Dir: %1$s%n", entry.getName());
-				
 			    }
 			    else {
-				System.out.format("Name: %1$s  (%2$d -> %3$d bytes)%n", entry.getName(),
+				System.out.format("File: %1$s  (%2$d -> %3$d bytes)%n", entry.getName(),
 				    entry.getSize(), entry.getCompressedSize());
 			    }
 			}
 
 			Manifest man = jar.getManifest();
 			Attributes att = man.getMainAttributes();
-			if (unsorted) {
-			    System.out.format("%n---- Main attributes (%1$d) (raw) for \"%2$s\" ----%n", att.size(), arg);
-			    for (Object o : att.keySet()) {
-				System.out.format("%1$s : %2$s%n", o.toString(), att.getValue(o.toString()));
-			    }
+			if (att.size() == 0) {
+			    System.out.format("%n---- No main attributes for \"%1$s\" ----%n", arg);
 			}
 			else {
-			    System.out.format("%n---- Main attributes (%1$d) (sorted) for \"%2$s\" ----%n", att.size(), arg);
-			    TreeSet<Object> sortedSet = new TreeSet<>(attributeNameComparator);
-			    sortedSet.addAll(att.keySet());
-			    for (Object o : sortedSet) {
-				System.out.format("%1$s : %2$s%n", o.toString(), att.getValue(o.toString()));
+			    if (unsorted) {
+				System.out.format("%n---- Main attributes (%1$d) (raw) for \"%2$s\" ----%n", att.size(), arg);
+				for (Object o : att.keySet()) {
+				    String key = o.toString();
+				    System.out.format("%1$s : %2$s%n", key, att.getValue(key));
+				}
+			    }
+			    else {
+				System.out.format("%n---- Main attributes (%1$d) (sorted) for \"%2$s\" ----%n", att.size(), arg);
+				TreeSet<Object> sortedSet = new TreeSet<>(attributeNameComparator);
+				sortedSet.addAll(att.keySet());
+				for (Object o : sortedSet) {
+				    String key = o.toString();
+				    System.out.format("%1$s : %2$s%n", key, att.getValue(key));
+				}
 			    }
 			}
 
 			Map<String,Attributes> attrMap = man.getEntries();
-			System.out.format("%n---- Manifest entries (%1$d) for \"%2$s\" ----%n", attrMap.size(), arg);
-			for (String key : attrMap.keySet()) {
-			    Attributes attrs = attrMap.get(key);
-			    System.out.format("Attributes for \"%1$s\":%n", key);
-			    for (Object attrKey : attrs.keySet()) {
-				System.out.format("    %1$s: %2$s%n", attrKey.toString(), attrs.get(attrKey).toString());
+			if (attrMap.size() == 0) {
+			    System.out.format("%n---- No manifest entries for \"%1$s\" ----%n", arg);
+			}
+			else {
+			    System.out.format("%n---- Manifest entries (%1$d) for \"%2$s\" ----%n", attrMap.size(), arg);
+			    for (String key : attrMap.keySet()) {
+				Attributes attrs = attrMap.get(key);
+				System.out.format("Attributes for \"%1$s\":%n", key);
+				for (Object attrKey : attrs.keySet()) {
+				    System.out.format("    %1$s: %2$s%n", attrKey.toString(), attrs.get(attrKey).toString());
+				}
 			    }
 			}
 		    }
