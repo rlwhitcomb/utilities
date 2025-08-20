@@ -1302,6 +1302,7 @@
 >1962 @R -> R'MCMLXII'
 >1954 @-r -> "mcmliv"
 >roman ('xx' + 'ii') -> 22
+>R'MDCCCXCVII' -> 1897
 >t'27h' + t'13m' + t'27.9s' @h -> h'27:13:27.9'
 >h'12:30 pm' - h'11:45 am' @mt -> t'45m'
 >h'8:30 am' + t'1h' + t'37m' @h -> h'10:07'

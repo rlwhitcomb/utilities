@@ -1119,6 +1119,7 @@ s = r'ⅿⅽⅿⅼⅹⅶ'
 1954 @-r
 
 roman('xx' + 'ii')
+R'MDCCCXCVII'
 
 #
 # Time and duration constants, expressions, and formats
