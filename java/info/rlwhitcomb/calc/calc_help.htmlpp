@@ -1081,7 +1081,7 @@ or<br>
      to swap the values of two variables as in: <code>a,b = b,a</code>. It is an error if the number of variables does not equal
      the number of expressions. Multiple variables can be rearranged or "swapped" in this fashion, as in: <code>a,b,c = b,c,a</code>.
      Another feature of the assignment operator automatically constructs a list / array object from a list of values assigned to a single
-     variable, such as: <code>a = 1,2,3 &#x21E8 [ 1, 2, 3 ]</code>.
+     variable, such as: <code>a = 1,2,3 &#x21E8; [ 1, 2, 3 ]</code>.
   <p>The <code>length</code> function takes any one of a number, an array, an object, a string, or a range expression and returns the "size"
      of the value. For strings, this is the number of codepoints in the string, for arrays it is the number of items in the array (first-level size),
      for objects it is the number of elements in the object (again, not recursive for nested objects). A string embedded
