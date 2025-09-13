@@ -986,11 +986,11 @@ or<br>
     <tr><td>19</td><td>
         <i>expr</i>&nbsp;&nbsp;<code>*</code>, <code>&times;</code>, <code>&#x2715;</code>, or <code>&#x2716;</code>&nbsp;&nbsp;<i>expr</i><br>
         <i>expr</i>&nbsp;&nbsp;<code>/</code>, <code>&divide;</code>, <code>&#x2215;</code>, or <code>&#x2797;</code>&nbsp;&nbsp;<i>expr</i><br>
-        <i>expr</i>&nbsp;&nbsp;<code>\</code>, or <code>&#x2216;</code>&nbsp;&nbsp;<i>expr</i><br>
-        <i>expr</i>&nbsp;<code> % </code>&nbsp;<i>expr</i><br>
-        <i>expr</i>&nbsp;&nbsp;<code>\%</code>, or <code>&#x2216;%</code>&nbsp;&nbsp;<i>expr</i><br>
-        <i>expr</i>&nbsp;<code> mod </code>&nbsp;<i>expr</i><br>
-        <i>expr</i>&nbsp;<code> &#x00B7; </code>&nbsp;<i>expr</i></td>
+        <i>expr</i>&nbsp;&nbsp;<code>\</code> or <code>&#x2216;</code>&nbsp;&nbsp;<i>expr</i><br>
+        <i>expr</i>&nbsp;&nbsp;<code>%</code>&nbsp;&nbsp;<i>expr</i><br>
+        <i>expr</i>&nbsp;&nbsp;<code>\%</code> or <code>&#x2216;%</code>&nbsp;&nbsp;<i>expr</i><br>
+        <i>expr</i>&nbsp;&nbsp;<code>mod</code>&nbsp;&nbsp;<i>expr</i><br>
+        <i>expr</i>&nbsp;&nbsp;<code>&#x00B7;</code> or <code>&#x22C5;</code>&nbsp;&nbsp;<i>expr</i></td>
         <td>multiply<br>divide<br>integer divide or set difference<br>remainder<br>quotient, remainder<br>modulus<br>dot product</td><td>left to right</td></tr>
     <tr><td>18</td><td>
         <i>expr</i>&nbsp;&nbsp;<code>+</code> or <code>&#x2795;</code>&nbsp;&nbsp;<i>expr</i><br>
@@ -1043,7 +1043,7 @@ or<br>
     <tr><td>4</td><td>
         <i>var</i>&nbsp;<code> *=</code>,<code> &times;=</code>,<code> &#x2715;=</code>, or<code> &#x2716;= </code>&nbsp;<i>expr</i><br>
         <i>var</i>&nbsp;<code> /=</code>,<code> &divide;=</code>,<code> &#x2215;=</code>, or<code> &#x2797;= </code>&nbsp;<i>expr</i><br>
-        <i>var</i>&nbsp;<code> \= </code>, or<code> &#x2216;= </code>&nbsp;<i>expr</i><br>
+        <i>var</i>&nbsp;<code> \= </code> or<code> &#x2216;= </code>&nbsp;<i>expr</i><br>
         <i>var</i>&nbsp;<code> %= </code>&nbsp;<i>expr</i></td>
         <td>perform the operation, reassign to variable</td><td>right to left</td></tr>
     <tr><td>3</td><td>

@@ -296,6 +296,8 @@
 >isint (factors (238)) -> true
 >isint (5 / 5) -> true
 >isint (5 / 4) -> false
+>isInt (1.345e10) -> true
+>IsInt (10e4) -> true
 >isnull junk -> true
 >notnull junk -> false
 >notnull h2 -> true

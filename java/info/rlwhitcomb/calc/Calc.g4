@@ -579,6 +579,8 @@
  *	    #735: Recast '\u2217' as conjugate operator instead of power/multiply symbol.
  *	14-Aug-2025 (rlwhitcomb)
  *	    #751: Add "isint" function.
+ *	12-Sep-2025 (rlwhitcomb)
+ *	    Add another dot product symbol.
  */
 
 grammar Calc;
@@ -1632,7 +1634,7 @@ MULT_OP
        | ( '/' | '\u00F7' | '\u2215' | '\u2797' )
        | ( '\\' | '\u2216' )
        | '%' | '\\%' | '\u2216%'
-       | '\u00B7'
+       | '\u00B7' | '\u22C5'
        ;
 
 ADD_OP

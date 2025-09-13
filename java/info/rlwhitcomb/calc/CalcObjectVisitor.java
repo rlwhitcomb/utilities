@@ -926,6 +926,9 @@
  *	    #735: Implement complex and quaternion conjugate.
  *	14-Aug-2025 (rlwhitcomb)
  *	    #751: Add "isint" function.
+ *	10-Sep-2025 (rlwhitcomb)
+ *	    #762: Small cleanup to "toBase" function; similar fix in other places.
+ *	    Add "\u22C5" as another symbol for dot product.
  */
 package info.rlwhitcomb.calc;
 
@@ -4335,8 +4338,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		else if (value instanceof BigFraction) {
 		    value = ((BigFraction) value).increment();
 		}
-		else if (value instanceof BigInteger) {
-		    value = ((BigInteger) value).add(BigInteger.ONE);
+		else if (MathUtil.isInteger(value)) {
+		    BigInteger iValue = convertToInteger(value, settings.mc, expr);
+		    value = iValue.add(BigInteger.ONE);
 		}
 		else {
 		    int val = ((String) value).codePointAt(0) + 1;
@@ -4884,8 +4888,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    else if (value instanceof ComplexNumber) {
 		return ((ComplexNumber) value).pow(new BigDecimal(intExp), settings.mc);
 	    }
-	    else if (value instanceof BigInteger) {
-		return ((BigInteger) value).pow(intExp);
+	    else if (MathUtil.isInteger(value)) {
+		BigInteger iBase = convertToInteger(value, settings.mc, expr);
+		return iBase.pow(intExp);
 	    }
 	    else {
 		BigDecimal base = convertToDecimal(value, settings.mc, expr);
@@ -4935,6 +4940,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    op = "\\%";
 		    // fall through
 		case "\u00B7":
+		case "\u22C5":
 		    if (notAssign)
 			break;
 		    // Otherwise it's illegal (as for assignment)
@@ -4963,6 +4969,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			case "\\%":
 			    return new ArrayScope<Object>((Object[]) f1.divideAndRemainder(f2));
 			case "\u00B7":
+			case "\u22C5":
 			    throw new UnknownOpException(oper, ctx);
 		    }
 		}
@@ -4985,6 +4992,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			case "\\%":
 			    return new ArrayScope<Object>((Object[]) q1.divideAndRemainder(q2, mc));
 			case "\u00B7":
+			case "\u22C5":
 			    return q1.dot(q2, mc);
 			default:
 			    throw new UnknownOpException(oper, ctx);
@@ -5009,6 +5017,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			case "\\%":
 			    return new ArrayScope<Object>((Object[]) c1.divideAndRemainder(c2, mc));
 			case "\u00B7":
+			case "\u22C5":
 			    return c1.dot(c2, mc);
 			default:
 			    throw new UnknownOpException(oper, ctx);
@@ -5019,6 +5028,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 		    switch (op) {
 			case "\u00B7":
+			case "\u22C5":
 			    CollectionScope c1 = (CollectionScope) e1;
 			    return dotProduct(this, c1.valueList(), c2.valueList(), settings.mc, ctx);
 			case "\\":
@@ -5157,11 +5167,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		ComplexNumber c = (ComplexNumber) value;
 		return c.abs(settings.mcDivide);
 	    }
-	    else if (value instanceof BigInteger) {
-		return ((BigInteger) value).abs();
+	    else if (MathUtil.isInteger(value)) {
+		BigInteger i = convertToInteger(value, settings.mc, expr);
+		return i.abs();
 	    }
 	    else {
-		BigDecimal e = convertToDecimal(value, settings.mc, ctx);
+		BigDecimal e = convertToDecimal(value, settings.mc, expr);
 		return e.abs();
 	    }
 	}
@@ -5362,8 +5373,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		ComplexNumber c = (ComplexNumber) value;
 		return c.signum(MathUtil.divideContext(c, settings.mcDivide));
 	    }
-	    else if (value instanceof BigInteger) {
-		BigInteger i = (BigInteger) value;
+	    else if (MathUtil.isInteger(value)) {
+		BigInteger i = convertToInteger(value, settings.mc, expr);
 		signum = i.signum();
 	    }
 	    else {
@@ -6988,8 +6999,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    if (radix < Character.MIN_RADIX || radix > Character.MAX_RADIX)
 		throw new CalcExprException(rExpr, "%calc#radixOutOfRange", radix, Character.MIN_RADIX, Character.MAX_RADIX);
 
-	    if (valueObj instanceof BigInteger) {
-		return ((BigInteger) valueObj).toString(radix);
+	    if (MathUtil.isInteger(valueObj)) {
+		BigInteger iValue = convertToInteger(valueObj, settings.mc, vExpr);
+		return iValue.toString(radix);
 	    }
 	    else {
 		BigDecimal dValue = convertToDecimal(valueObj, settings.mc, vExpr);

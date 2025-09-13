@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '3.0.19', date: d'2025-09-13',
+      issues: [ 762 ],
+      comment: 'Fixup some integer conversions; add "\u22C5" for dot product.'
+    },
     { version: '3.0.18', date: d'2025-08-14',
       issues: [ 744 ],
       comment: 'Implement symmetric difference ("^") for sets.'

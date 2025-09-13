@@ -173,6 +173,8 @@ ISINT 13.0
 isint(factors(238))
 isint(5/5)
 isint(5/4)
+isInt(1.345e10)
+IsInt(10e4)
 
 isnull junk
 notnull junk

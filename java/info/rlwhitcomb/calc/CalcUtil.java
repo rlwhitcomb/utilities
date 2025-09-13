@@ -268,6 +268,8 @@
  *	    #750: New "rootOp" method.
  *	14-Aug-2025 (rlwhitcomb)
  *	    #744: Symmetric difference of sets.
+ *	12-Sep-2025 (rlwhitcomb)
+ *	    #762: Small changes for integer conversions. Remove '\u00B7' as part of a name.
  */
 package info.rlwhitcomb.calc;
 
@@ -663,7 +665,6 @@ public final class CalcUtil
 	    char ch = str.charAt(pos);
 
 	    if ((ch >= '0' && ch <= '9')
-	     || (ch == '\u00B7')
 	     || (ch >= '\u0300' && ch <= '\u036F')
 	     || (ch >= '\u203F' && ch <= '\u2040'))
 		return true;
@@ -1148,8 +1149,9 @@ public final class CalcUtil
 		    else if (result instanceof BigDecimal) {
 			return Num.formatWithSeparators(((BigDecimal) result), format.separators, Integer.MIN_VALUE);
 		    }
-		    else if (result instanceof BigInteger) {
-			return Num.formatWithSeparators(((BigInteger) result), format.separators);
+		    else if (MathUtil.isInteger(result)) {
+			BigInteger iResult = convertToInteger(result, visitor.getSettings().mc, ctx);
+			return Num.formatWithSeparators(iResult, format.separators);
 		    }
 		    else if (result instanceof BigFraction) {
 			return ((BigFraction) result).toFormatString(format.separators, format.extraSpace);
@@ -2369,7 +2371,7 @@ public final class CalcUtil
 		    return Typeof.INTEGER;
 		return Typeof.FLOAT;
 	    }
-	    if (obj instanceof BigInteger || obj instanceof Long || obj instanceof Integer)
+	    if (MathUtil.isInteger(obj))
 		return Typeof.INTEGER;
 	    if (obj instanceof BigFraction)
 		return Typeof.FRACTION;
