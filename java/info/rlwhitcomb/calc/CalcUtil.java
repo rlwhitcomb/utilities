@@ -3346,7 +3346,7 @@ public final class CalcUtil
 	 * @param mc      Rounding mode and precision for the result.
 	 * @param ctx     Parsing context for any error reporting.
 	 * @return Dot product of the two vectors.
-	 * @throw IllegalArgumentException if the vectors are not the same size.
+	 * @throws IllegalArgumentException if the vectors are not the same size.
 	 */
 	public static Object dotProduct(final CalcObjectVisitor visitor, final List<?> v1, final List<?> v2, final MathContext mc, final ParserRuleContext ctx) {
 	    if (v1.size() != v2.size())
