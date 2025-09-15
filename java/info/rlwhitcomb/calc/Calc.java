@@ -361,6 +361,8 @@
  *	    #724: New calls to "finalizeGlobals" to fix the problem.
  *	23-Jun-2025 (rlwhitcomb)
  *	    #733: Don't require any user arguments to be defined after "--".
+ *	14-Sep-2025 (rlwhitcomb)
+ *	    #761: Add "noquiet" option; change the way we do "quiet" around silent blocks.
  */
 package info.rlwhitcomb.calc;
 
@@ -1212,7 +1214,7 @@ public class Calc
 		});
 
 		displayer = this;
-		visitor = new CalcObjectVisitor(displayer, rational, separators, silenceDirectives, ignoreCase, quotes, proper, sortKeys);
+		visitor = new CalcObjectVisitor(displayer, rational, separators, quiet, silenceDirectives, ignoreCase, quotes, proper, sortKeys);
 
 		// Set the command-line arguments into the symbol table as $nn
 		int index = 0;
@@ -1600,7 +1602,7 @@ public class Calc
 
 		    execService.execute(() -> {
 			try {
-			    processString(exprText, quiet);
+			    processString(exprText);
 			}
 			finally {
 			    ApplicationContext.queueCallback(() -> {
@@ -2061,17 +2063,16 @@ public class Calc
 	}
 
 	/**
-	 * Take an expression string and process it, optionally silent (that is, not outputting anything).
+	 * Take an expression string and process it.
 	 * <p> Called from the main loop, and also from inside interpolated strings.
 	 * <p> Traps any {@link IOException}s thrown by {@link #process}.
 	 *
 	 * @param inputText The text to parse and evaluate.
-	 * @param silent    Whether to output anything to the displayer.
 	 * @return          The last value returned from the evaluated expression text.
 	 */
-	public static Object processString(String inputText, boolean silent) {
+	public static Object processString(final String inputText) {
 	    try {
-		return process(CharStreams.fromString(inputText), visitor, errorStrategy, silent, false);
+		return process(CharStreams.fromString(inputText), visitor, errorStrategy, false);
 	    }
 	    catch (IOException ioe) {
 		displayer.displayErrorMessage(Intl.formatString("calc#ioError", Exceptions.toString(ioe)));
@@ -2086,17 +2087,14 @@ public class Calc
 	 * @param input         The input character stream.
 	 * @param visitor       Tree visitor which traverses the parsed expression tree to produce the result.
 	 * @param errorStrategy Error handler which implements our error reporting strategy.
-	 * @param silent        Set {@code true} from inside interpolated strings, otherwise set by the global setting
-	 *                      value and/or the command-line option.
 	 * @param throwError    If {@code true} then trapped exceptions are re-thrown, otherwise reported to the displayer.
 	 * @return              The last object produced by the visitor from the parsed input.
 	 * @throws IOException if there is a problem readng the input stream.
 	 */
-	private static Object process(CharStream input, CalcObjectVisitor visitor, BailErrorStrategy errorStrategy, boolean silent, boolean throwError)
+	private static Object process(CharStream input, CalcObjectVisitor visitor, BailErrorStrategy errorStrategy, boolean throwError)
 		throws IOException
 	{
 	    Object returnValue = null;
-	    boolean oldSilent  = setQuietMode(silent);
 	    long startTime     = Environment.highResTimer();
 	    long parseEndTime  = 0L;
 	    long execStartTime = 0L;
@@ -2155,10 +2153,9 @@ public class Calc
 		    parseEndTime = endTime;
 		if (execStartTime == 0L)
 		    execStartTime = endTime;
-		setQuietMode(oldSilent);
 	    }
 
-	    if (timing && (!silent || initialLibraryLoad)) {
+	    if (timing && (!quiet || initialLibraryLoad)) {
 		double parseTime = Environment.timerValueToSeconds(parseEndTime - startTime);
 		double execTime  = Environment.timerValueToSeconds(endTime - execStartTime);
 		double totalTime = Environment.timerValueToSeconds(endTime - startTime);
@@ -2173,12 +2170,14 @@ public class Calc
 	{
 	    if (names != null) {
 		initialLibraryLoad = true;
+		boolean oldQuiet = setQuietMode(true);
 		try {
 		    for (String libraryName : names) {
-			process(CharStreams.fromString(getFileContents(libraryName)), visitor, errorStrategy, true, false);
+			process(CharStreams.fromString(getFileContents(libraryName)), visitor, errorStrategy, false);
 		    }
 		}
 		finally {
+		    setQuietMode(oldQuiet);
 		    initialLibraryLoad = false;
 		}
 	    }
@@ -2306,6 +2305,14 @@ public class Calc
 		case "quiet":
 		case "q":
 		    quiet = true;
+		    break;
+		case "loud":  // LOL
+		case "noisy": // ROFL
+		case "verbose":
+		case "nonquiet":
+		case "noquiet":
+		case "nq":
+		    quiet = false;
 		    break;
 		case "fractions":
 		case "rational":
@@ -2774,7 +2781,7 @@ public class Calc
 		    else
 			displayer = new ConsoleDisplayer();
 
-		    visitor = new CalcObjectVisitor(displayer, rational, separators, silenceDirectives, ignoreCase, quotes, proper, sortKeys);
+		    visitor = new CalcObjectVisitor(displayer, rational, separators, quiet, silenceDirectives, ignoreCase, quotes, proper, sortKeys);
 
 		    // In case there are version requirements for libraries or variables,
 		    // check the values set by "-requires", etc.
@@ -2806,7 +2813,7 @@ public class Calc
 		    // a line at a time from the console and processing
 		    if (input == null) {
 			if (console == null || System.in.available() > 0) {
-			    process(CharStreams.fromStream(System.in), visitor, errorStrategy, quiet, true);
+			    process(CharStreams.fromStream(System.in), visitor, errorStrategy, true);
 			}
 			else {
 			    if (!noIntro) {
@@ -2825,7 +2832,7 @@ public class Calc
 				}
 				else {
 				    buf.append(line);
-				    process(CharStreams.fromString(buf.toString()), visitor, errorStrategy, quiet, false);
+				    process(CharStreams.fromString(buf.toString()), visitor, errorStrategy, false);
 				    buf.setLength(0);
 				}
 			    }
@@ -2837,7 +2844,7 @@ public class Calc
 			}
 		    }
 		    else {
-			process(input, visitor, errorStrategy, quiet, true);
+			process(input, visitor, errorStrategy, true);
 		    }
 		}
 	    }

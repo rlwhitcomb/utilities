@@ -929,6 +929,8 @@
  *	10-Sep-2025 (rlwhitcomb)
  *	    #762: Small cleanup to "toBase" function; similar fix in other places.
  *	    Add "\u22C5" as another symbol for dot product.
+ *	14-Sep-2025 (rlwhitcomb)
+ *	    #761: Change the way we do "quiet" processing.
  */
 package info.rlwhitcomb.calc;
 
@@ -1009,12 +1011,13 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		PREVIOUS;
 
 		static ModeOption fromValue(final Object obj) {
-		    String string = obj.toString();
-		    for (ModeOption opt : values()) {
-			if (opt.toString().equalsIgnoreCase(string))
-			    return opt;
-		    }
-		    throw new Intl.IllegalArgumentException("calc#modeError", string);
+		    if (CharUtil.isNullOrEmpty(obj))
+			throw new Intl.IllegalArgumentException("calc#modeError", obj);
+
+		    if (obj instanceof ModeOption)
+			return (ModeOption) obj;
+
+		    return valueOf(obj.toString().trim().toUpperCase());
 		}
 	}
 
@@ -1384,7 +1387,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	 * @param resultDisplayer Where to display the results.
 	 * @param rational        The initial rational flag setting.
 	 * @param separators      Setting for numeric separators.
-	 * @param silence         Flag for "quiet" mode.
+	 * @param quiet           Setting for "quiet" mode.
+	 * @param silence         Flag for silencing directives.
 	 * @param ignoreCase      Whether to ignore variable name case.
 	 * @param quotes          Setting for quoting strings on output.
 	 * @param proper          Using proper fraction display mode by default.
@@ -1394,6 +1398,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		final CalcDisplayer resultDisplayer,
 		final boolean rational,
 		final boolean separators,
+		final boolean quiet,
 		final boolean silence,
 		final boolean ignoreCase,
 		final boolean quotes,
@@ -1401,7 +1406,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		final boolean sortKeys)
 	{
 	    displayer = resultDisplayer;
-	    settings  = new Settings(rational, separators, silence, ignoreCase, quotes, proper, sortKeys);
+	    settings  = new Settings(rational, separators, quiet, silence, ignoreCase, quotes, proper, sortKeys);
 	    setIntMathContext(MathContext.DECIMAL128);
 
 	    globals = new GlobalScope();
@@ -1412,17 +1417,17 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    ObjectScope sets = new ObjectScope();
 	    PredefinedValue.define(globals, "settings", sets);
 
-	    SystemValue.define(sets, settings, "trigMode",          this::setTrigMode      );
-	    SystemValue.define(sets, settings, "units",             this::setUnits         );
-	    SystemValue.define(sets, settings, "rationalMode",      pushRationalMode       );
-	    SystemValue.define(sets, settings, "separatorMode",     pushSeparatorMode      );
-	    SystemValue.define(sets, settings, "silent",            pushQuietMode          );
-	    SystemValue.define(sets, settings, "silenceDirectives", pushSilenceMode        );
-	    SystemValue.define(sets, settings, "ignoreNameCase",    pushIgnoreCaseMode     );
-	    SystemValue.define(sets, settings, "quoteStrings",      pushQuoteStringsMode   );
-	    SystemValue.define(sets, settings, "properFractions",   pushProperFractionsMode);
-	    SystemValue.define(sets, settings, "sortKeys",          pushSortKeysMode       );
-	    SystemValue.define(sets, settings, "precision",         this::setPrecision     );
+	    SystemValue.define(sets, settings, "trigMode",          this::setTrigMode         );
+	    SystemValue.define(sets, settings, "units",             this::setUnits            );
+	    SystemValue.define(sets, settings, "rationalMode",      processRationalMode       );
+	    SystemValue.define(sets, settings, "separatorMode",     processSeparatorMode      );
+	    SystemValue.define(sets, settings, "silent",            processQuietMode          );
+	    SystemValue.define(sets, settings, "silenceDirectives", processSilenceMode        );
+	    SystemValue.define(sets, settings, "ignoreNameCase",    processIgnoreCaseMode     );
+	    SystemValue.define(sets, settings, "quoteStrings",      processQuoteStringsMode   );
+	    SystemValue.define(sets, settings, "properFractions",   processProperFractionsMode);
+	    SystemValue.define(sets, settings, "sortKeys",          processSortKeysMode       );
+	    SystemValue.define(sets, settings, "precision",         this::setPrecision        );
 	    sets.setImmutable(true);
 
 	    initialized = true;
@@ -1531,7 +1536,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    return Calc.setQuietMode(mode);
 	};
 
-	private Consumer<Object> pushQuietMode = mode -> {
+	private Consumer<Object> processQuietMode = mode -> {
 	    processModeOption(mode, quietModeStack, setQuietMode);
 	};
 
@@ -1548,7 +1553,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    return Calc.setSilenceMode(mode);
 	};
 
-	private Consumer<Object> pushSilenceMode = mode -> {
+	private Consumer<Object> processSilenceMode = mode -> {
 	    processModeOption(mode, silenceModeStack, setSilenceMode);
 	};
 
@@ -1600,7 +1605,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    return setSeparatorMode(mode);
 	};
 
-	private Consumer<Object> pushSeparatorMode = mode -> {
+	private Consumer<Object> processSeparatorMode = mode -> {
 	    processModeOption(mode, separatorModeStack, setSeparatorMode);
 	};
 
@@ -1621,7 +1626,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    return setIgnoreCaseMode(mode);
 	};
 
-	private Consumer<Object> pushIgnoreCaseMode = mode -> {
+	private Consumer<Object> processIgnoreCaseMode = mode -> {
 	    processModeOption(mode, ignoreCaseModeStack, setIgnoreCaseMode);
 	};
 
@@ -1641,7 +1646,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    return setQuoteStringsMode(mode);
 	};
 
-	private Consumer<Object> pushQuoteStringsMode = mode -> {
+	private Consumer<Object> processQuoteStringsMode = mode -> {
 	    processModeOption(mode, quoteStringsModeStack, setQuoteStringsMode);
 	};
 
@@ -1661,7 +1666,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    return setProperFractionsMode(mode);
 	};
 
-	private Consumer<Object> pushProperFractionsMode = mode -> {
+	private Consumer<Object> processProperFractionsMode = mode -> {
 	    processModeOption(mode, properFractionsModeStack, setProperFractionsMode);
 	};
 
@@ -1681,7 +1686,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    return setSortKeysMode(mode);
 	};
 
-	private Consumer<Object> pushSortKeysMode = mode -> {
+	private Consumer<Object> processSortKeysMode = mode -> {
 	    processModeOption(mode, sortKeysModeStack, setSortKeysMode);
 	};
 
@@ -1699,7 +1704,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    return setColoredMode(mode);
 	};
 
-	private Consumer<Object> pushColoredMode = mode -> {
+	private Consumer<Object> processColoredMode = mode -> {
 	    processModeOption(mode, coloredModeStack, setColoredMode);
 	};
 
@@ -1734,7 +1739,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    return setRationalMode(mode);
 	};
 
-	private Consumer<Object> pushRationalMode = mode -> {
+	private Consumer<Object> processRationalMode = mode -> {
 	    processModeOption(mode, rationalModeStack, setRationalMode);
 	};
 
@@ -1861,7 +1866,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		FunctionScope func = (FunctionScope) returnValue;
 		String functionName = func.getFunctionName();
 
-		pushQuietMode.accept(true);
+		processQuietMode.accept(true);
 		try {
 		    returnValue = visit(func.getFunctionBody());
 		}
@@ -1880,7 +1885,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		}
 		finally {
 		    popScope();
-		    pushQuietMode.accept(ModeOption.POP);
+		    processQuietMode.accept(ModeOption.POP);
 		}
 	    }
 
@@ -2470,7 +2475,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    try {
 		String contents = Calc.getFileContents(paths, charset, true);
-		return Calc.processString(contents, settings.silent);
+		return Calc.processString(contents);
 	    }
 	    catch (IOException ioe) {
 		throw new CalcExprException(ctx, "%calc#ioError", Exceptions.toString(ioe));
@@ -2510,32 +2515,48 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		final CalcParser.BracketBlockContext bracketBlock,
 		final UnaryOperator<Boolean> setOperator)
 	{
-	    String option;
+	    String optionText;
 
 	    if (ctx.var() != null) {
 		CalcParser.VarContext var = ctx.var();
 		LValueContext lValue = makeLValue(var);
 		Object modeObject = evaluate(ctx, lValue.getContextObject(this, false));
-		option = toStringValue(this, var, modeObject, new StringFormat(false, false));
+		optionText = toStringValue(this, var, modeObject, new StringFormat(false, false));
 	    }
 	    else {
-		option = ctx.getText();
+		optionText = ctx.getText();
 	    }
+
+	    ModeOption mode = ModeOption.fromValue(optionText);
 
 	    try {
 		Object ret = null;
 
 		if (bracketBlock != null) {
-		    processModeOption(option, stack, setOperator);
+		    Boolean previousMode = processModeOption(mode, stack, setOperator);
 		    try {
 			ret = evaluate(bracketBlock);
 		    }
 		    finally {
-			processModeOption(ModeOption.POP, stack, setOperator);
+			switch (mode) {
+			    case TRUE:
+			    case ON:
+			    case YES:
+			    case FALSE:
+			    case OFF:
+			    case NO:
+				processModeOption(ModeOption.POP, stack, setOperator);
+				break;
+			    case POP:
+			    case PREV:
+			    case PREVIOUS:
+				processModeOption(previousMode, stack, setOperator);
+				break;
+			}
 		    }
 		}
 		else {
-		    ret = processModeOption(option, stack, setOperator);
+		    ret = processModeOption(mode, stack, setOperator);
 		}
 
 		return ret;
@@ -2545,6 +2566,17 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 	}
 
+	/**
+	 * Just do the operation of processing the mode option, starting from the new value,
+	 * the stack of previous values, and the processing routine for the "set" operation.
+	 *
+	 * @param value       The new value to set for the option (any kind of object, translated here
+	 *                    to a {@link ModeOption}.
+	 * @param stack       Stack of previous values.
+	 * @param setOperator Operator used to set the new value.
+	 * @return            The previous value (boolean) for the option.
+	 * @see ModeOption#fromValue
+	 */
 	private Boolean processModeOption(final Object value, final Deque<Boolean> stack, final UnaryOperator<Boolean> setOperator) {
 	    boolean mode = false;
 	    boolean push = true;
@@ -2579,7 +2611,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    if (push)
 		stack.push(previousMode);
 
-	    return Boolean.valueOf(mode);
+	    return Boolean.valueOf(previousMode);
 	}
 
 	@Override
@@ -3871,7 +3903,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 		public Object execute() {
 		    Object returnValue = null;
-		    pushQuietMode.accept(true);
+		    processQuietMode.accept(true);
 		    pushScope(caseScope);
 		    try {
 			returnValue = evaluate(blockCtx.stmtBlock());
@@ -3881,7 +3913,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    }
 		    finally {
 			popScope();
-			pushQuietMode.accept(ModeOption.POP);
+			processQuietMode.accept(ModeOption.POP);
 			isMatched = true;
 		    }
 		    return returnValue;
@@ -7437,7 +7469,13 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	public Object visitEvalExpr(CalcParser.EvalExprContext ctx) {
 	    String exprString = getStringValue(ctx.expr1().expr());
 
-	    return Calc.processString(exprString, true);
+	    processQuietMode.accept(true);
+	    try {
+		return Calc.processString(exprString);
+	    }
+	    finally {
+		processQuietMode.accept(ModeOption.POP);
+	    }
 	}
 
 

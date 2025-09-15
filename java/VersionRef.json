@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '3.1.0', date: d'2025-09-14',
+      issues: [ 761 ],
+      comment: 'Fix the way "quiet" mode works everywhere; add "-noquiet" option.'
+    },
     { version: '3.0.19', date: d'2025-09-13',
       issues: [ 762 ],
       comment: 'Fixup some integer conversions; add "\u22C5" for dot product.'

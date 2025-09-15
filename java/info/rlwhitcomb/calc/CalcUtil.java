@@ -270,6 +270,8 @@
  *	    #744: Symmetric difference of sets.
  *	12-Sep-2025 (rlwhitcomb)
  *	    #762: Small changes for integer conversions. Remove '\u00B7' as part of a name.
+ *	14-Sep-2025 (rlwhitcomb)
+ *	    #761: Changes to the way we handle "quiet" calculations inside interpolated strings.
  */
 package info.rlwhitcomb.calc;
 
@@ -2656,7 +2658,14 @@ public final class CalcUtil
 		    if (expr.indexOf("${") >= 0)
 			expr = getRecursiveStringValue(visitor, variables, settings, ctx, expr);
 
-		    Object exprValue = Calc.processString(expr, true);
+		    Object exprValue = null;
+		    boolean oldQuiet = Calc.setQuietMode(true);
+		    try {
+			exprValue = Calc.processString(expr);
+		    }
+		    finally {
+			Calc.setQuietMode(oldQuiet);
+		    }
 		    String stringValue = toStringValue(visitor, ctx, exprValue, new StringFormat(false, settings));
 
 		    // The result is going to be formatted with quotes, separators, everything that it currently
