@@ -184,6 +184,8 @@
  *	    #711: Tweak some values in the number word algorithm.
  *	05-Jun-2025 (rlwhitcomb)
  *	    #711: Tweak that last code in the number -> word function.
+ *	20-Sep-2025 (rlwhitcomb)
+ *	    Fix "getRangeBySuffix" for single-char match (which is allowed by the Calc grammar).
  */
 package info.rlwhitcomb.math;
 
@@ -575,9 +577,18 @@ public final class NumericUtil
 		 * @param suffix The suffix to look up (either binary or SI value).
 		 */
 		public static Range getRangeBySuffix(final String suffix) {
-		    for (Range r : values()) {
-			if (r.binSuffix.equalsIgnoreCase(suffix) || r.siSuffix.equalsIgnoreCase(suffix))
-			    return r;
+		    if (suffix.length() == 1) {
+			char single = Character.toUpperCase(suffix.charAt(0));
+			for (Range r : values()) {
+			    if (r.siSuffix.charAt(0) == single)
+				return r;
+			}
+		    }
+		    else {
+			for (Range r : values()) {
+			    if (r.siSuffix.equalsIgnoreCase(suffix) || r.binSuffix.equalsIgnoreCase(suffix))
+				return r;
+			}
 		    }
 		    return null;
 		}

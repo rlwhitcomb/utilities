@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { base: '1.12.7', date: d'2025-09-20',
+      issues: [ 767 ],
+      comment: 'Fix evaluation of single character KMG values.'
+    },
     { version: '3.1.0', date: d'2025-09-14',
       issues: [ 761 ],
       comment: 'Fix the way "quiet" mode works everywhere; add "-noquiet" option.'
