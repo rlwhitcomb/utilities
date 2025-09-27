@@ -1051,6 +1051,36 @@ Z-{a:7, b:9}
 Z\{}
 
 #
+# Issue #754 strict element ordering
+#
+// Test equal maps but keys in different order
+m1={a:1, b:2, c:3}
+m2={b:2, c:3, a:1}
+m1==m2
+m1===m2
+m1<>m2
+m1!==m2
+m1<m2
+m1>m2
+
+$ignorecase on {
+m3 = { a:"abc", b:"BCD", c:"ghi" }
+m4 = { B:"BCD", C:"ghi", A:"abc" }
+m3 == m4
+m3 === m4
+}
+
+// Test equal sets, ordered differently
+s1={1,2,3}
+s2={3,2,1}
+s1==s2
+s1===s2
+s1!=s2
+s1!==s2
+s1<s2
+s1>s2
+
+#
 # Fractions
 #
 $rational on

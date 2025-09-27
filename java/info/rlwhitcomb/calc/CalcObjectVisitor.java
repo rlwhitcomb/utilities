@@ -931,6 +931,8 @@
  *	    Add "\u22C5" as another symbol for dot product.
  *	14-Sep-2025 (rlwhitcomb)
  *	    #761: Change the way we do "quiet" processing.
+ *	26-Sep-2025 (rlwhitcomb)
+ *	    #754: Do better at passing the "ignoreNameCase" setting down to the compare methods.
  */
 package info.rlwhitcomb.calc;
 
@@ -2022,7 +2024,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	private int compareValues(final ParserRuleContext ctx1, final ParserRuleContext ctx2, final boolean strict, final boolean allowNulls, final boolean equality) {
-	    return CalcUtil.compareValues(this, ctx1, ctx2, settings.mc, strict, allowNulls, equality);
+	    return CalcUtil.compareValues(this, ctx1, ctx2, visit(ctx1), visit(ctx2),
+		settings.mc, strict, allowNulls, settings.ignoreNameCase, false, equality);
 	}
 
 
@@ -8392,7 +8395,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		case "\u2262": // NOT IDENTICAL
 		    if (optObj1 != null)
 			cmp = CalcUtil.compareValues(this, expr1, expr2, optObj1.orElse(null), visit(expr2),
-				settings.mc, true, true, false, false, true);
+				settings.mc, true, true, settings.ignoreNameCase, false, true);
 		    else
 			cmp = compareValues(expr1, expr2, true, true, true);
 		    break;

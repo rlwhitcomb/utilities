@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '3.1.2', date: d'2025-09-26',
+      issues: [ 754 ],
+      comment: 'Allow sets and maps to be regularly (but not strictly) equal with different ordering.'
+    },
     { base: '1.12.7', date: d'2025-09-20',
       issues: [ 767 ],
       comment: 'Fix evaluation of single character KMG values.'

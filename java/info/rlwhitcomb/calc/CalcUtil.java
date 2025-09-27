@@ -272,6 +272,8 @@
  *	    #762: Small changes for integer conversions. Remove '\u00B7' as part of a name.
  *	14-Sep-2025 (rlwhitcomb)
  *	    #761: Changes to the way we handle "quiet" calculations inside interpolated strings.
+ *	13-Sep-2025 (rlwhitcomb)
+ *	    #754: Strict equality of sets means same order also.
  */
 package info.rlwhitcomb.calc;
 
@@ -1512,6 +1514,84 @@ public final class CalcUtil
 
 
 	/**
+	 * Compare two sets. Turns out {@link Set#equals} returns true if the sets both contain
+	 * the same elements, but could be in different "order". In our paradigms, set elements can be
+	 * selected in order, so strict equality means they need to be in the same order. Normal set
+	 * semantics say that order doesn't matter, as that is an implementation matter, but we use
+	 * {@link LinkedHashSet} which does maintain order.
+	 *
+	 * @param visitor      Calculation visitor to do expression evaluations.
+	 * @param ctx1         Context for first set.
+	 * @param ctx2         Context for second set.
+	 * @param s1           First set to be tested.
+	 * @param s2           Set to be checked against the first.
+	 * @param mc           MathContext for rouding during comparisons.
+	 * @param strict       Whether the comparison should be "strict" ordering.
+	 * @param allowNulls   Will nulls be allowed for either value.
+	 * @param ignoreCase   Ignore case on the string compares?
+	 * @param naturalOrder Use the natural order comparator?
+	 * @param equality     Is this an equality test only?
+	 * @return             {@code &lt; 0} if {@code s1} less than {@code s2}, {@code 0} if they are equal according
+	 *                     to the parameters, or {@code &gt; 0} otherwise
+	 */
+	public static int setCompare(
+		final CalcObjectVisitor visitor,
+		final ParserRuleContext ctx1,
+		final ParserRuleContext ctx2,
+		final Set<?> s1,
+		final Set<?> s2,
+		final MathContext mc,
+		final boolean strict,
+		final boolean allowNulls,
+		final boolean ignoreCase,
+		final boolean naturalOrder,
+		final boolean equality)
+	{
+	    int size1 = s1.size();
+	    int size2 = s2.size();
+
+	    // Set sizes must be the same, just to start with
+	    if (size1 != size2)
+		return Integer.signum(size1 - size2);
+
+	    Object obj1, obj2;
+	    int ret;
+
+	    // Strict equality means the keys must be in the same order, but may be in different case
+	    if (strict) {
+		Iterator<?> iter1 = s1.iterator();
+		Iterator<?> iter2 = s2.iterator();
+		for (int i = 0; i < size1; i++) {
+		    obj1 = iter1.next();
+		    obj2 = iter2.next();
+		    ret = compareValues(visitor, ctx1, ctx2, obj1, obj2, mc, strict, allowNulls, ignoreCase, naturalOrder, equality);
+		    if (ret != 0)
+			return ret;
+		}
+	    }
+	    else {
+		// Non-strict equality means the keys can be in any order, so we need to sort first
+		List<Object> list1 = new ArrayList<>(s1);
+		List<Object> list2 = new ArrayList<>(s2);
+		sort(visitor, list1, ctx1, mc, ignoreCase, false);
+		sort(visitor, list2, ctx2, mc, ignoreCase, false);
+
+		for (int i = 0; i < size1; i++) {
+		    obj1 = list1.get(i);
+		    obj2 = list2.get(i);
+
+		    ret = compareValues(visitor, ctx1, ctx2, obj1, obj2, mc, strict, allowNulls, ignoreCase, naturalOrder, equality);
+		    if (ret != 0)
+			return ret;
+		}
+	    }
+
+	    // Depending on the parameters, no differences found
+	    return 0;
+	}
+
+
+	/**
 	 * Compare string values using either the natural-order comparator or the standard string comparison, either ignoring case or not.
 	 *
 	 * @param s1		First string to compare.
@@ -1651,27 +1731,6 @@ public final class CalcUtil
 
 	/**
 	 * Compare two objects of possibly differing types.
-	 *
-	 * @param visitor    The object visitor used to calculate the values.
-	 * @param ctx1       The Rule context of the first operand.
-	 * @param ctx2       The Rule context of the second operand.
-	 * @param mc         Rounding mode used when converting to decimal.
-	 * @param strict     Whether or not the object classes must match for the comparison.
-	 * @param allowNulls Some comparisons (strings) can be compared even if one or both operands are null.
-	 * @return {@code -1} if the first object is "less than" the second,
-	 *         {@code 0} if the objects are "equal",
-	 *         {@code +1} if the first object is "greater than" the second.
-	 */
-	public static int compareValues(final CalcObjectVisitor visitor,
-		final ParserRuleContext ctx1, final ParserRuleContext ctx2,
-		final MathContext mc, final boolean strict, final boolean allowNulls,
-		final boolean equality) {
-	    return compareValues(visitor, ctx1, ctx2, visitor.visit(ctx1), visitor.visit(ctx2),
-		mc, strict, allowNulls, false, false, equality);
-	}
-
-	/**
-	 * Compare two objects of possibly differing types.
 	 * <p> This is the recursive version, for use when comparing elements of lists and maps.
 	 *
 	 * @param visitor      The object visitor used to calculate the values.
@@ -1749,9 +1808,8 @@ public final class CalcUtil
 		ComplexNumber c1 = ComplexNumber.valueOf(e1);
 		ComplexNumber c2 = ComplexNumber.valueOf(e2);
 
-		if (equality) {
+		if (equality)
 		    return c1.equals(c2) ? 0 : -1;
-		}
 
 		return c1.compareTo(c2);
 	    }
@@ -1759,9 +1817,8 @@ public final class CalcUtil
 		Quaternion q1 = Quaternion.valueOf(e1);
 		Quaternion q2 = Quaternion.valueOf(e2);
 
-		if (equality) {
+		if (equality)
 		    return q1.equals(q2) ? 0 : -1;
-		}
 
 		return q1.compareTo(q2);
 	    }
@@ -1821,37 +1878,22 @@ public final class CalcUtil
 		ObjectScope map1 = (ObjectScope) e1;
 		@SuppressWarnings("unchecked")
 		ObjectScope map2 = (ObjectScope) e2;
-		int size1 = map1.size();
-		int size2 = map2.size();
 
-		// The "smaller" map is less than the "bigger" one
-		if (size1 != size2)
-		    return Integer.signum(size1 - size2);
-
-		// First, compare the key sets -- if they are different then sort and compare them lexicographically
+		// First, compare the key sets
 		Set<String> keySet1 = map1.keySet();
 		Set<String> keySet2 = map2.keySet();
-		if (!keySet1.equals(keySet2)) {
-		    TreeSet<String> sortedKeys1 = new TreeSet<>(keySet1);
-		    TreeSet<String> sortedKeys2 = new TreeSet<>(keySet2);
-
-		    String key1, key2;
-		    while ((key1 = sortedKeys1.pollFirst()) != null) {
-			key2 = sortedKeys2.pollFirst();
-			int ret = compareStrings(key1, key2, ignoreCase, naturalOrder);
-			if (ret != 0)
-			    return ret;
-		    }
-		}
+		int cmp = setCompare(visitor, ctx1, ctx2, keySet1, keySet2, mc, strict, allowNulls, ignoreCase, naturalOrder, equality);
+		if (cmp != 0)
+		    return cmp;
 
 		// If the key sets are the same, then iterate through the values and compare them
 		for (String key : keySet1) {
-		    Object value1 = map1.getValue(key, false);
-		    Object value2 = map2.getValue(key, false);
+		    Object value1 = map1.getValue(key, ignoreCase);
+		    Object value2 = map2.getValue(key, ignoreCase);
 
-		    int ret = compareValues(visitor, ctx1, ctx2, value1, value2, mc, strict, allowNulls, ignoreCase, naturalOrder, equality);
-		    if (ret != 0)
-			return ret;
+		    cmp = compareValues(visitor, ctx1, ctx2, value1, value2, mc, strict, allowNulls, false, naturalOrder, equality);
+		    if (cmp != 0)
+			return cmp;
 		}
 
 		// Finally, if no differences were found, the maps are the same
@@ -1862,27 +1904,8 @@ public final class CalcUtil
 		SetScope<Object> set1 = (SetScope<Object>) e1;
 		@SuppressWarnings("unchecked")
 		SetScope<Object> set2 = (SetScope<Object>) e2;
-		int size1 = set1.size();
-		int size2 = set2.size();
 
-		if (size1 != size2)
-		    return Integer.signum(size1 - size2);
-
-		// Sort the two sets and compare the values in sorted order
-		List<Object> list1 = new ArrayList<>(set1.set());
-		List<Object> list2 = new ArrayList<>(set2.set());
-
-		sort(visitor, list1, ctx1, mc, ignoreCase, false);
-		sort(visitor, list2, ctx2, mc, ignoreCase, false);
-
-		// Iterate through the set and compare the values in order
-		for (int i = 0; i < list1.size(); i++) {
-		    int ret = compareValues(visitor, ctx1, ctx2, list1.get(i), list2.get(i), mc, strict, allowNulls, ignoreCase, naturalOrder, equality);
-		    if (ret != 0)
-			return ret;
-		}
-
-		return 0;
+		return setCompare(visitor, ctx1, ctx2, set1.set(), set2.set(), mc, strict, allowNulls, false, naturalOrder, equality);
 	    }
 	    else if (e1 instanceof CollectionScope && e2 instanceof CollectionScope) {
 		return 0;
