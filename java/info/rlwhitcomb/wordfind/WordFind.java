@@ -125,6 +125,8 @@
  *          #663: Immediate dictionary lookup from the command line.
  *      12-Jul-2025 (rlwhitcomb)
  *          #737: Correct extraneous character in "min word size" report display.
+ *	28-Sep-2025 (rlwhitcomb)
+ *	    Fix index error for some online results.
  */
 package info.rlwhitcomb.wordfind;
 
@@ -1108,33 +1110,35 @@ public class WordFind implements Application
 
         @SuppressWarnings("unchecked")
         ArrayList<Object> queryList = (ArrayList<Object>) queryResult;
-        Object queryEntry = queryList.get(0);
-        if (queryEntry instanceof String) {
-            outputln(String.format(errorColor + Intl.formatString("wordfind#" + errorKey, word) + RESET));
-            output(BLACK_BRIGHT + "");
+        if (!queryList.isEmpty()) {
+            Object queryEntry = queryList.get(0);
+            if (queryEntry instanceof String) {
+                outputln(String.format(errorColor + Intl.formatString("wordfind#" + errorKey, word) + RESET));
+                output(BLACK_BRIGHT + "");
 
-            int lineWidth = 0;
-            for (Object obj: queryList) {
-                String otherWord = obj.toString();
-                if (lineWidth + otherWord.length() + 4 >= maxLineLength) {
-                    System.out.println();
-                    lineWidth = 0;
+                int lineWidth = 0;
+                for (Object obj: queryList) {
+                    String otherWord = obj.toString();
+                    if (lineWidth + otherWord.length() + 4 >= maxLineLength) {
+                        System.out.println();
+                        lineWidth = 0;
+                    }
+                    System.out.printf("%1$s    ", otherWord);
+                    lineWidth += otherWord.length() + 4;
                 }
-                System.out.printf("%1$s    ", otherWord);
-                lineWidth += otherWord.length() + 4;
+                outputln(RESET + "");
             }
-            outputln(RESET + "");
-        }
-        else {
-            @SuppressWarnings("unchecked")
-            HashMap<String, Object> map = (HashMap<String, Object>) queryList.get(0);
-            @SuppressWarnings("unchecked")
-            ArrayList<String> defs = (ArrayList<String>) map.get("shortdef");
-            if (!defs.isEmpty() && number == 1) {
-                outputln(headingColor + Intl.formatString("wordfind#lookupTitle", word) + RESET);
-            }
-            for (String definition : defs) {
-                outputln(String.format(BLACK_BRIGHT + "  %1$d." + infoColor + " %2$s" + RESET, number++, definition));
+            else {
+                @SuppressWarnings("unchecked")
+                HashMap<String, Object> map = (HashMap<String, Object>) queryList.get(0);
+                @SuppressWarnings("unchecked")
+                ArrayList<String> defs = (ArrayList<String>) map.get("shortdef");
+                if (!defs.isEmpty() && number == 1) {
+                    outputln(headingColor + Intl.formatString("wordfind#lookupTitle", word) + RESET);
+                }
+                for (String definition : defs) {
+                    outputln(String.format(BLACK_BRIGHT + "  %1$d." + infoColor + " %2$s" + RESET, number++, definition));
+                }
             }
         }
 
