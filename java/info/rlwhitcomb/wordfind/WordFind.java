@@ -910,7 +910,7 @@ public class WordFind implements Application
         StringBuilder buf = new StringBuilder(input.length());
         for (int i = 0; i < input.length(); i++) {
             char ch = input.charAt(i);
-            if (ch >= 'a' && ch <= 'z' || ch >= 'A' && ch <= 'Z')
+            if (ch >= 'a' && ch <= 'z' || ch >= 'A' && ch <= 'Z' || Dictionary.isWild(ch))
                 buf.append(ch);
         }
         return buf.toString();

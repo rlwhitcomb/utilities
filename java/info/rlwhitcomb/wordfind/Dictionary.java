@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2022-2023 Roger L. Whitcomb.
+ * Copyright (c) 2022-2023,2025 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -41,6 +41,7 @@
  *  06-Jan-23 rlw ----	Protect against index exceptions inside "contained".
  *  07-Jan-23 rlw #591	Fix bug with multiple wildcards that are the same letter.
  *  12-Dec-23 rlw ----	Use MaxInt.
+ *  30-Sep-25 rlw #771	Documentation fix.
  */
 package info.rlwhitcomb.wordfind;
 
@@ -150,7 +151,7 @@ public class Dictionary
 
 	/**
 	 * Is the given character a "wild card" character, that is, one of
-	 * {@code ' '}, {@code '?'}, or {@code '.'}.
+	 * {@code ' '}, {@code '?'}, {@code '.'}, or {@code '_'}.
 	 *
 	 * @param ch The given character to check.
 	 * @return   Whether it is "wild"?
