@@ -125,8 +125,10 @@
  *          #663: Immediate dictionary lookup from the command line.
  *      12-Jul-2025 (rlwhitcomb)
  *          #737: Correct extraneous character in "min word size" report display.
- *	28-Sep-2025 (rlwhitcomb)
- *	    Fix index error for some online results.
+ *      28-Sep-2025 (rlwhitcomb)
+ *          Fix index error for some online results.
+ *      30-Sep-2025 (rlwhitcomb)
+ *          #771: Fix index errors with non-alphabetic input characters.
  */
 package info.rlwhitcomb.wordfind;
 
@@ -898,6 +900,23 @@ public class WordFind implements Application
     }
 
     /**
+     * Take the input letters and remove the non-alphabetic (input), returning the good
+     * remaining characters.
+     *
+     * @param input String of input letters from the command line.
+     * @return      String of only the alphabetic letters from the input.
+     */
+    private static String onlyAlphabetic(final String input) {
+        StringBuilder buf = new StringBuilder(input.length());
+        for (int i = 0; i < input.length(); i++) {
+            char ch = input.charAt(i);
+            if (ch >= 'a' && ch <= 'z' || ch >= 'A' && ch <= 'Z')
+                buf.append(ch);
+        }
+        return buf.toString();
+    }
+
+    /**
      * Process all command line arguments, calling {@link #processOption} for options and
      * @param nonOptions The list to fill up with all the non-option arguments (can be
      * {@code null} to not collect any).
@@ -969,8 +988,9 @@ public class WordFind implements Application
                 if (nonOptions != null) {
                     if (totalInputSize == 0)
                         nonOptions.clear();
-                    nonOptions.add(arg);
-                    totalInputSize += arg.length();
+                    String safeArg = onlyAlphabetic(arg);
+                    nonOptions.add(safeArg);
+                    totalInputSize += safeArg.length();
                 }
             }
         }
