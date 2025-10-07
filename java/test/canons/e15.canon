@@ -1,0 +1,133 @@
+>Precision is now “200” digits.
+>base = 100 ! -> 93326215443944152681699238856266700490715968264381621468592963895217599993229915608941463976156518286253697920827223758251185210916864000000000000000000000000
+>prime 100! + 2? false
+>prime 100! + 3? false
+>prime 100! + 4? false
+>prime 100! + 5? false
+>prime 100! + 6? false
+>prime 100! + 7? false
+>prime 100! + 8? false
+>prime 100! + 9? false
+>prime 100! + 10? false
+>prime 100! + 11? false
+>prime 100! + 12? false
+>prime 100! + 13? false
+>prime 100! + 14? false
+>prime 100! + 15? false
+>prime 100! + 16? false
+>prime 100! + 17? false
+>prime 100! + 18? false
+>prime 100! + 19? false
+>prime 100! + 20? false
+>prime 100! + 21? false
+>prime 100! + 22? false
+>prime 100! + 23? false
+>prime 100! + 24? false
+>prime 100! + 25? false
+>prime 100! + 26? false
+>prime 100! + 27? false
+>prime 100! + 28? false
+>prime 100! + 29? false
+>prime 100! + 30? false
+>prime 100! + 31? false
+>prime 100! + 32? false
+>prime 100! + 33? false
+>prime 100! + 34? false
+>prime 100! + 35? false
+>prime 100! + 36? false
+>prime 100! + 37? false
+>prime 100! + 38? false
+>prime 100! + 39? false
+>prime 100! + 40? false
+>prime 100! + 41? false
+>prime 100! + 42? false
+>prime 100! + 43? false
+>prime 100! + 44? false
+>prime 100! + 45? false
+>prime 100! + 46? false
+>prime 100! + 47? false
+>prime 100! + 48? false
+>prime 100! + 49? false
+>prime 100! + 50? false
+>prime 100! + 51? false
+>prime 100! + 52? false
+>prime 100! + 53? false
+>prime 100! + 54? false
+>prime 100! + 55? false
+>prime 100! + 56? false
+>prime 100! + 57? false
+>prime 100! + 58? false
+>prime 100! + 59? false
+>prime 100! + 60? false
+>prime 100! + 61? false
+>prime 100! + 62? false
+>prime 100! + 63? false
+>prime 100! + 64? false
+>prime 100! + 65? false
+>prime 100! + 66? false
+>prime 100! + 67? false
+>prime 100! + 68? false
+>prime 100! + 69? false
+>prime 100! + 70? false
+>prime 100! + 71? false
+>prime 100! + 72? false
+>prime 100! + 73? false
+>prime 100! + 74? false
+>prime 100! + 75? false
+>prime 100! + 76? false
+>prime 100! + 77? false
+>prime 100! + 78? false
+>prime 100! + 79? false
+>prime 100! + 80? false
+>prime 100! + 81? false
+>prime 100! + 82? false
+>prime 100! + 83? false
+>prime 100! + 84? false
+>prime 100! + 85? false
+>prime 100! + 86? false
+>prime 100! + 87? false
+>prime 100! + 88? false
+>prime 100! + 89? false
+>prime 100! + 90? false
+>prime 100! + 91? false
+>prime 100! + 92? false
+>prime 100! + 93? false
+>prime 100! + 94? false
+>prime 100! + 95? false
+>prime 100! + 96? false
+>prime 100! + 97? false
+>prime 100! + 98? false
+>prime 100! + 99? false
+>prime 100! + 100? false
+>
+>Defining function “prime_gap(start, end)” = {
+>   var gap_size = 1
+>   loop p over start + 1 ... end - 1 {
+>      if isprime (p) leave
+>      else gap_size ++
+>   }
+>   gap_size
+>}
+>prime_gap(4302407359, 4302407713) -> 354
+>
+>prime = 1351523 -> 1351523
+>pfactors (prime - 1) -> [ 2, 73, 9257 ]
+>
+>Defining function “prove_sixth(facts, total)” = {
+>   var sum = 0
+>   loop fact over facts { sum += fact ⁶ }
+>   total ⁶ === sum
+>}
+>prove_sixth([74, 234, 402, 474, 702, 894, 1077], 1141) -> true
+>prove_sixth([8, 12, 30, 78, 102, 138, 165, 246], 251) -> true
+>prove_sixth([1, 17, 19, 22, 31, 37, 37, 41, 49], 54) -> true
+>prove_sixth([2, 4, 7, 14, 16, 26, 26, 30, 32, 32], 39) -> true
+>prove_sixth([2, 5, 5, 5, 7, 7, 9, 9, 10, 14, 17], 18) -> true
+>
+>M67 = 2 ** 67 - 1 -> 147573952589676412927
+>F1 = 193707721 -> 193707721
+>F2 = 761838257287 -> 761838257287
+>isprime F1 -> true
+>isprime F2 -> true
+>F1 × F2 === M67 -> true
+>

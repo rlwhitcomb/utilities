@@ -1,0 +1,51 @@
+//
+// Misc issue tests and misc mathematical stuff (mostly from Quora)
+//
+
+// From an answer from Alon Amit about gaps between primes
+$dec 200
+base = 100!
+loop n over 2...100 {
+   display `prime 100! + $n? ${isprime(base + n)}`
+}
+display
+
+// Question about prime gaps
+define prime_gap(start, end) = {
+   var gap_size = 1
+   loop p over start + 1 ... end - 1 {
+      if isprime(p) leave
+      else gap_size++
+   }
+   gap_size
+}
+prime_gap(4302407359, 4302407713)
+display
+
+// Another Quora answer
+prime = 1351523
+pfactors(prime - 1)
+display
+
+// And another from Alon Amit
+define prove_sixth(facts, total) = {
+   var sum = 0
+   loop fact over facts { sum += fact⁶ }
+   total⁶ === sum
+}
+
+prove_sixth([ 74, 234, 402, 474, 702, 894, 1077 ], 1141)
+prove_sixth([ 8, 12, 30, 78, 102, 138, 165, 246], 251)
+prove_sixth([ 1, 17, 19, 22, 31, 37, 37, 41, 49 ], 54)
+prove_sixth([ 2, 4, 7, 14, 16, 26, 26, 30, 32, 32 ], 39)
+prove_sixth([ 2, 5, 5, 5, 7, 7, 9, 9, 10, 14, 17], 18)
+display
+
+// From David Filmer
+M67 = 2**67-1
+F1 = 193707721
+F2 = 761838257287
+isprime F1; isprime F2
+F1 × F2 === M67
+display
+
