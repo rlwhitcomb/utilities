@@ -274,6 +274,8 @@
  *	    #761: Changes to the way we handle "quiet" calculations inside interpolated strings.
  *	13-Sep-2025 (rlwhitcomb)
  *	    #754: Strict equality of sets means same order also.
+ *	27-Sep-2025 (rlwhitcomb)
+ *	    #768: Better handling of "cast" with sets and objects in and out of array form.
  */
 package info.rlwhitcomb.calc;
 
@@ -2495,9 +2497,28 @@ public final class CalcUtil
 			ComplexNumber c = (ComplexNumber) value;
 			castValue = new ArrayScope<Object>(c.toList());
 		    }
-		    else if (!(value instanceof ArrayScope)) {
-			ArrayScope<Object> array = new ArrayScope<>(value);
+		    else if (value instanceof SetScope) {
+			@SuppressWarnings("unchecked")
+			SetScope<Object> set = (SetScope<Object>) value;
+			castValue = new ArrayScope<Object>(set.set());
+		    }
+		    else if (value instanceof ObjectScope) {
+			ObjectScope obj = (ObjectScope) value;
+			ArrayScope<Object> array = new ArrayScope<>(obj.size());
+			for (String key : obj.keySet()) {
+			    ObjectScope element = new ObjectScope(sortKeys);
+			    element.setValue(key, obj.getValue(key, false));
+			    array.add(element);
+			}
 			castValue = array;
+		    }
+		    else if (!(value instanceof ArrayScope)) {
+			if (value instanceof CollectionScope) {
+			    castValue = new ArrayScope<Object>();
+			}
+			else {
+			    castValue = new ArrayScope<Object>(value);
+			}
 		    }
 		    break;
 		case OBJECT:

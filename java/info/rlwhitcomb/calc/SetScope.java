@@ -39,6 +39,7 @@
  *  18-Jul-25 rlw #738	Implement "valueList" base method by refactoring "list";
  *			rename "valueList" variable to "valuesAsList".
  *  14-Aug-25 rlw #744	New "symdiff" method; rework stuff related to "valueList()".
+ *  04-Oct-25 rlw ----	Allow negative indices inside "get()".
  */
 package info.rlwhitcomb.calc;
 
@@ -188,7 +189,7 @@ class SetScope<T extends Object> extends CollectionScope
 	 * <p> Since we maintain the set using {@link LinkedHashSet} we can guarantee
 	 * the ordering, so this operation makes sense where it normally would not.
 	 *
-	 * @param index The specific element index.
+	 * @param index The specific element index (can be negative for indices relative to the end).
 	 * @return      The typed object at that index in the set.
 	 */
 	@SuppressWarnings("unchecked")
@@ -197,7 +198,8 @@ class SetScope<T extends Object> extends CollectionScope
 		valuesAsList.addAll(values);
 	    }
 
-	    return (T) valuesAsList.get(index);
+	    int idx = index < 0 ? index + valuesAsList.size() : index;
+	    return (T) valuesAsList.get(idx);
 	}
 
 	/**

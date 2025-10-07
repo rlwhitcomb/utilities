@@ -244,13 +244,22 @@ typeof(_junk5b05d)
 $var _junk5b05d
 
 // Issue #706
-castlist = [ 1, 2, 3]
+castlist = [ 1, 2, 3 ]
 castobj  = { a:true, b:'abc', c:457 }
 castset  = { 19, 23, 29 }
 cast(castlist, "set")
 keyset = cast(castobj, "set")
 cast(castset, "set")
 loop key over keyset { castobj[key] }
+
+// Issue #768
+cast(castobj, "array")
+cast(castset, "array")
+cast({}, "array")
+
+const setobj1 = { 1, 2, 3 }
+setobj1[0]
+setobj1[-1]
 
 info.copyright is string
 info.version.major is integer
