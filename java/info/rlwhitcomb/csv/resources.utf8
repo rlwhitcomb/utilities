@@ -1,7 +1,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2014-2016,2020-2023 Roger L. Whitcomb.
+# Copyright (c) 2014-2016,2020-2023,2025 Roger L. Whitcomb.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -50,6 +50,8 @@
 #	    #308: Change reset color tag.
 #	02-Nov-2023 (rlwhitcomb)
 #	    #633: New help text for CSVTest for the "-opt" and "-noopt" options.
+#	01-Oct-2025 (rlwhitcomb)
+#	    #773: More explanatory text for "-E" option.
 #
 
 #
@@ -106,7 +108,7 @@ test.help12			= \t<Gr>-e<Bk!>x<-->  = set the escape charater to '<Bk!>x<.>' (de
 test.help13			= \t<Gr>-a<-->   = always delimit strings (default is not)
 test.help14			= \t<Gr>-u<-->   = preserve quotes (default is not)
 test.help15			= \t<Gr>-w<-->   = preserve whitespace in unquoted fields (default is not)
-test.help16			= \t<Gr>-E<-->   = set to no escape character in strings
+test.help16			= \t<Gr>-E<-->   = set to no escape character in strings (embed quotes by doubling)
 test.help17			= \t<Gr>-B<-->   = set the column delimiter to a blank
 test.help18			= \t<Gr>-T<-->   = set the column delimiter to a tab character
 test.help19			= \t<Gr>-R<-->   = set the record separator to CR
