@@ -6,3 +6,5 @@ quote:        test/data/test_quote.dsv -Qangle -Dspace -W
 non_standard: test/data/nonstandard_delims.csv -d@ -r% -I
 border_data:  test/data/Border_Crossing_Entry_Data_2020.csv -H
 emp:          test/data/emp.dsv -B -E
+white1:       -c test/data/773.csv
+white2:       test/data/773.csv

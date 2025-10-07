@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2014-2017,2019-2023 Roger L. Whitcomb.
+ * Copyright (c) 2014-2017,2019-2023,2025 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -67,7 +67,7 @@
  *	29-Mar-2021 (rlwhitcomb)
  *	    Move to new package.
  *	15-Dec-2021 (rlwhitcomb)
- *	    #150: Change "=E" option to be "no escape" and make "-H" into "has header row".
+ *	    #150: Change "-E" option to be "no escape" and make "-H" into "has header row".
  *	21-Jan-2021 (rlwhitcomb)
  *	    #217: Allow default options from CSVTEST_OPTIONS environment variable, using new
  *	    Options method.
@@ -79,6 +79,8 @@
  *	02-Nov-2023 (rlwhitcomb)
  *	    #633: New "-opt" and "-noopt" options for default processing of options via
  *	    the environment variable.
+ *	07-Oct-2025 (rlwhitcomb)
+ *	    #773: New "-c" flag to compress whitespace inside quoted strings.
  */
 package info.rlwhitcomb.test;
 
@@ -129,6 +131,7 @@ public class CSVTest
 	private static boolean preserveWhitespace = false;
 	private static boolean alwaysDelimitStrings = false;
 	private static boolean hasHeaderRow = false;
+	private static boolean compressWhitespace = false;
 	private static boolean ignoreEmpty = false;
 	private static boolean writeBack = false;
 	private static boolean useUTF8 = false;
@@ -153,6 +156,7 @@ public class CSVTest
 	    preserveWhitespace = false;
 	    alwaysDelimitStrings = false;
 	    hasHeaderRow = false;
+	    compressWhitespace = false;
 	    ignoreEmpty = false;
 	    writeBack = false;
 	    useUTF8 = false;
@@ -235,6 +239,9 @@ public class CSVTest
 		switch (arg0) {
 		    case 'a':	// always delimit strings
 			alwaysDelimitStrings = true;
+			break;
+		    case 'c':	// compress whitespace
+			compressWhitespace = true;
 			break;
 		    case 'u':	// preserve quotes
 			preserveQuotes = true;
@@ -353,6 +360,8 @@ public class CSVTest
 		format.withAlwaysDelimitStrings(true);
 	    if (hasHeaderRow)
 		format.withHasHeaderRow(true);
+	    if (compressWhitespace)
+		format.withCompressWhitespace(true);
 	    if (ignoreEmpty)
 		format.withIgnoreEmptyLines(true);
 

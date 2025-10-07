@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2014-2017,2019-2022 Roger L. Whitcomb.
+ * Copyright (c) 2014-2017,2019-2022,2025 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -54,6 +54,8 @@
  *	    for convenience.
  *	08-Jul-2022 (rlwhitcomb)
  *	    #393: Cleanup imports.
+ *	07-Oct-2025 (rlwhitcomb)
+ *	    #773: New "compress whitespace" option inside quotes.
  */
 package info.rlwhitcomb.csv;
 
@@ -207,6 +209,7 @@ public class CSVParser
 		    StringBuffer buf = null;
 		    boolean insideQuotes = false;
 		    boolean sawQuotes = false;
+		    int whiteCount = 0;
 
 		    for (;;) {
 			int nextChar = getNextChar();
@@ -261,11 +264,37 @@ public class CSVParser
 					insideQuotes = false;
 				    }
 				    else {
-					buf.append((char) nextChar);
+					if (Character.isWhitespace(nextChar)) {
+					    if (format.compressWhitespace) {
+						if (whiteCount++ == 0) {
+						    buf.append(' ');
+						}
+					    }
+					    else {
+						buf.append((char) nextChar);
+					    }
+					}
+					else {
+					    whiteCount = 0;
+					    buf.append((char) nextChar);
+					}
 				    }
 				}
 				else {
-				    buf.append((char) nextChar);
+				    if (Character.isWhitespace(nextChar)) {
+					if (format.compressWhitespace) {
+					    if (whiteCount++ == 0) {
+						buf.append(' ');
+					    }
+					}
+					else {
+					    buf.append((char) nextChar);
+					}
+				    }
+				    else {
+					whiteCount = 0;
+					buf.append((char) nextChar);
+				    }
 				}
 			    }
 			    else {

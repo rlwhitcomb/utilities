@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2014-2017,2019-2022 Roger L. Whitcomb.
+ * Copyright (c) 2014-2017,2019-2022,2025 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -59,6 +59,8 @@
  *	    are not symmetric (partly due to the "Builder" pattern and partly
  *	    because the flag names aren't quite grammatical with "is" prefix).
  *	    Add "Scriptable" annotations for fields to be exposed.
+ *	07-Oct-2025 (rlwhitcomb)
+ *	    #773: New option for compressing whitespace at/after newlines.
  */
 package info.rlwhitcomb.csv;
 
@@ -148,6 +150,10 @@ public class CSVFormat
 	/** Whether on input there is a header row before the actual data. */
 	@Scriptable
 	protected boolean hasHeaderRow = false;
+
+	/** Whether to compress whitespace at/after newlines (inside quoted values). */
+	@Scriptable
+	protected boolean compressWhitespace = false;
 
 
 	/**
@@ -452,6 +458,18 @@ public class CSVFormat
 	}
 
 	/**
+	 * Set the "compress whitespace" flag for this format.
+	 *
+	 * @param	flag	New value for the "compress whitespace" flag.
+	 *
+	 * @return	The updated {@link CSVFormat} object.
+	 */
+	public CSVFormat withCompressWhitespace(final boolean flag) {
+	    compressWhitespace = flag;
+	    return this;
+	}
+
+	/**
 	 * Are there different quotes on the left and right sides of strings?
 	 * <p> This corresponds to several standard sets of {@code Quotes}, such as
 	 * {@link Quotes#SMARTSINGLE} and {@link Quotes#SMARTDOUBLE}.
@@ -558,6 +576,17 @@ public class CSVFormat
 	 */
 	protected boolean isHasHeaderRow() {
 	    return hasHeaderRow;
+	}
+
+	/**
+	 * Are we compressing whitespace at and after newlines within quoted values? This allows
+	 * formatting for readability without adding extraneous spaces within a string. Similar
+	 * to the way HTML handles multiple whitespaces, compressing to a single space.
+	 *
+	 * @return	The {@link #compressWhitespace} flag.
+	 */
+	protected boolean isCompressingWhitespace() {
+	    return compressWhitespace;
 	}
 
 }
