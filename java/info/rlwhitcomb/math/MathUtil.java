@@ -76,6 +76,7 @@
  *  30-Jul-25 rlw #746	Fix bad bugs in the general "tenPower" method; make "newPrecision" public.
  *		  #748	Add "twoPower" method.
  *		  #745	Some changes for exponentiation.
+ *  08-Oct-25 rlw ----	A little change in the primality testing.
  */
 package info.rlwhitcomb.math;
 
@@ -1351,7 +1352,7 @@ public final class MathUtil
 		exponent = exp.abs();
 	    }
 
-	    MathContext mc2 = newPrecision(mc, 2);
+	    MathContext mc2 = newPrecision(mc, mc.getPrecision() / 2);
 
 	    if (exp.equals(BigDecimal.ONE)) {
 		result = e(mc2);
@@ -1717,9 +1718,6 @@ public final class MathUtil
 	    // Negative numbers are essentially the same primality as their positive counterparts
 	    BigInteger posN = n.abs();
 
-	    if (posN.compareTo(MAX_PRIME) >= 0)
-		throw new Intl.IllegalArgumentException("math#math.primeTooBig", posN);
-
 	    // Easy decisions here: zero and one are not prime
 	    if (posN.compareTo(BigInteger.ONE) <= 0)
 		return false;
@@ -1750,6 +1748,11 @@ public final class MathUtil
 	    // Quick test for "is this probably a prime" vs. "is this definitely composite"?
 	    if (!posN.isProbablePrime(PRIME_CERTAINTY))
 		return false;
+
+	    // Before doing the sieve don't even try if the value is too big
+	    // but the preceding work could have given us an answer without this ...
+	    if (posN.compareTo(MAX_PRIME) >= 0)
+		throw new Intl.IllegalArgumentException("math#math.primeTooBig", posN);
 
 	    // Choose a size for our sieve that is at least as big as the square root
 	    // of the number in question (a little bit bigger is better)
@@ -1799,9 +1802,6 @@ public final class MathUtil
 	public static void getFactors(final BigInteger n, final List<BigInteger> factors) {
 	    int sign = n.signum();
 	    BigInteger posN = (sign < 0) ? n.negate() : n;
-
-	    if (posN.compareTo(MAX_PRIME) >= 0)
-		throw new Intl.IllegalArgumentException("math#math.primeTooBig", posN);
 
 	    // Zero has no factors
 	    if (posN.signum() == 0)
@@ -1890,9 +1890,6 @@ public final class MathUtil
 
 	    BigInteger posN = (sign < 0) ? n.negate() : n;
 
-	    if (posN.compareTo(MAX_PRIME) >= 0)
-		throw new Intl.IllegalArgumentException("math#math.primeTooBig", posN);
-
 	    // One has only itself
 	    if (posN.equals(BigInteger.ONE)) {
 		factors.add(BigInteger.ONE);
@@ -1910,6 +1907,9 @@ public final class MathUtil
 		else
 		    break;
 	    }
+
+	    if (posN.compareTo(MAX_PRIME) >= 0)
+		throw new Intl.IllegalArgumentException("math#math.primeTooBig", posN);
 
 	    // Choose a size for our sieve that is at least as big as the square root
 	    // of the number in question (a little bit bigger is better)
@@ -1969,7 +1969,7 @@ public final class MathUtil
 
 	    // Calculate a sufficient number of loops for the value to converge nicely
 	    int loops = mc.getPrecision() * 15;	// TODO: find out a good value
-	    MathContext lc = newPrecision(mc, 10);
+	    MathContext lc = newPrecision(mc, mc.getPrecision() / 2);
 
 	    // Range reduce to get the argument value below one, so that:
 	    // ln(x) = ln(e**n * x/e**n)
