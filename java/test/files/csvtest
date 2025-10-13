@@ -1,7 +1,7 @@
 $inputDir test/canons
 # Specified on command line: -testclass:info.rlwhitcomb.test.CSVTest
 
-all_quotes:   -Qall -Dspace -8 test/data/test_all_quotes.dsv
+all_quotes:   -Qall -Dspace -8 -debug test/data/test_all_quotes.dsv
 quote:        test/data/test_quote.dsv -Qangle -Dspace -W
 non_standard: test/data/nonstandard_delims.csv -d@ -r% -I
 border_data:  test/data/Border_Crossing_Entry_Data_2020.csv -H

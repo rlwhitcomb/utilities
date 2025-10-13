@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2022 Roger L. Whitcomb.
+ * Copyright (c) 2022,2025 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -30,6 +30,8 @@
  *	    Additional tests and test data files.
  *	26-Oct-2022 (rlwhitcomb)
  *	    #196: Rename a method.
+ *	12-Oct-2025 (rlwhitcomb)
+ *	    #146: Compensate for new line ending on "JSON.toStringValue" results.
  */
 package info.rlwhitcomb.test;
 
@@ -75,7 +77,7 @@ public class JSONTest
 		    InputStream is = Files.newInputStream(f.toPath());
 		    System.out.println("===== " + f.getName() + " =====");
 		    Object obj = JSON.readObject(is);
-		    System.out.println(JSON.toStringValue(obj, true, true));
+		    System.out.print(JSON.toStringValue(obj, true, true));
 		    System.out.println("----- " + f.getName() + " -----");
 		    System.out.println();
 		}
@@ -119,7 +121,7 @@ public class JSONTest
 		    String testName = String.format("String Test #%1$d", stringTest);
 		    System.out.println("===== " + testName + " =====");
 		    Object obj = JSON.readFromString(test);
-		    System.out.println(JSON.toStringValue(obj, true, true));
+		    System.out.print(JSON.toStringValue(obj, true, true));
 		    System.out.println("----- " + testName + " -----");
 		    System.out.println();
 		}

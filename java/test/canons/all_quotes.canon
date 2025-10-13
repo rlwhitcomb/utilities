@@ -1,3 +1,30 @@
+>>{
+>>  "alwaysDelimitStrings": false,
+>>  "compressWhitespace": false,
+>>  "escapeChar": "\\",
+>>  "fieldSepChar": " ",
+>>  "hasHeaderRow": false,
+>>  "ignoreEmptyLines": false,
+>>  "preserveQuotes": false,
+>>  "preserveWhitespace": false,
+>>  "quoteChar": "\u00a0",
+>>  "recordSep": "\r\n",
+>>  "rightQuoteChar": "\u00a0"
+>>}
+>>{
+>>  "alwaysDelimitStrings": false,
+>>  "compressWhitespace": false,
+>>  "escapeChar": "\\",
+>>  "fieldSepChar": " ",
+>>  "hasHeaderRow": false,
+>>  "ignoreEmptyLines": false,
+>>  "preserveQuotes": false,
+>>  "preserveWhitespace": false,
+>>  "quoteChar": "\u00a0",
+>>  "recordSep": "\r\n",
+>>  "rightQuoteChar": "\u00a0"
+>>}
+>>
 >Record 1:
 >    1. 'abc'
 >    2. 'def'

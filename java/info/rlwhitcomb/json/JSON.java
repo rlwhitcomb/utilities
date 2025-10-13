@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2022 Roger L. Whitcomb.
+ * Copyright (c) 2022,2025 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -33,6 +33,9 @@
  *	    #393: Cleanup imports.
  *	25-Oct-2022 (rlwhitcomb)
  *	    #196: Add convenience methods to read straight from a File.
+ *	12-Oct-2025 (rlwhitcomb)
+ *	    #146: A bit of code reformatting; add final line ending to string form
+ *	    in "pretty" mode; support character field outputs as strings.
  */
 package info.rlwhitcomb.json;
 
@@ -200,20 +203,20 @@ public class JSON
 	private static Object parseStream(final CharStream stream)
 		throws JSONException
 	{
-		JSONLexer lexer = new JSONBailLexer(stream);
-		lexer.removeErrorListeners();
-		lexer.addErrorListener(errorListener);
+	    JSONLexer lexer = new JSONBailLexer(stream);
+	    lexer.removeErrorListeners();
+	    lexer.addErrorListener(errorListener);
 
-		CommonTokenStream tokens = new CommonTokenStream(lexer);
+	    CommonTokenStream tokens = new CommonTokenStream(lexer);
 
-		JSONParser parser = new JSONParser(tokens);
-		parser.setErrorHandler(errorStrategy);
-		parser.removeErrorListeners();
-		parser.addErrorListener(errorListener);
+	    JSONParser parser = new JSONParser(tokens);
+	    parser.setErrorHandler(errorStrategy);
+	    parser.removeErrorListeners();
+	    parser.addErrorListener(errorListener);
 
-		ParseTree tree = parser.json();
+	    ParseTree tree = parser.json();
 
-		return visitor.visit(tree);
+	    return visitor.visit(tree);
 	}
 
 
@@ -263,6 +266,10 @@ public class JSON
 		String stringValue = (String) obj;
 		buf.append(quote(stringValue));
 	    }
+	    else if (obj instanceof Character) {
+		Character ch = (Character) obj;
+		buf.append(quote(ch.toString()));
+	    }
 	    else if (obj == null) {
 		buf.append("null");
 	    }
@@ -273,6 +280,7 @@ public class JSON
 
 	private static void toStringValue(final List<Object> list, final boolean pretty, final boolean newlines, final String indent, final StringBuilder buf) {
 	    String nextIndent = indent + "  ";
+
 	    if (list.size() > 0) {
 		boolean comma = false;
 		String newLine = newlines ? "\n" : NEWLINE;
@@ -309,13 +317,16 @@ public class JSON
 
 	private static void toStringValue(final Map<String, Object> map, final boolean pretty, final boolean newlines, final String indent, final StringBuilder buf) {
 	    String nextIndent = indent + "  ";
+
 	    if (map.size() > 0) {
 		boolean comma = false;
 		String newLine = newlines ? "\n" : NEWLINE;
+
 		if (pretty)
 		    buf.append("{").append(newLine);
 		else
 		    buf.append("{ ");
+
 		for (Map.Entry<String, Object> entry : map.entrySet()) {
 		    if (comma) {
 			if (pretty)
@@ -367,6 +378,11 @@ public class JSON
 	    StringBuilder buf = new StringBuilder();
 
 	    toStringValue(obj, pretty, newlines, "", buf);
+
+	    if (pretty) {
+		String newLine = newlines ? "\n" : NEWLINE;
+		buf.append(newLine);
+	    }
 
 	    return buf.toString();
 	}

@@ -81,6 +81,8 @@
  *	    the environment variable.
  *	07-Oct-2025 (rlwhitcomb)
  *	    #773: New "-c" flag to compress whitespace inside quoted strings.
+ *	12-Oct-2025 (rlwhitcomb)
+ *	    #146: Add "-debug" option and test CSVFormat to/from JSON strings.
  */
 package info.rlwhitcomb.test;
 
@@ -139,6 +141,8 @@ public class CSVTest
 
 	private static boolean argErrors = false;
 
+	private static boolean debug = false;
+
 
 	/**
 	 * Reinitialize our static members for use with {@code Tester}
@@ -162,6 +166,7 @@ public class CSVTest
 	    useUTF8 = false;
 	    useIterator = false;
 	    argErrors = false;
+	    debug = false;
 	}
 
 	private static void doHelp(PrintStream ps) {
@@ -191,6 +196,10 @@ public class CSVTest
 			}
 			break;
 		    case 'd':	// delimiter
+			if (arg.equalsIgnoreCase("debug")) {
+			    debug = true;
+			    break;
+			}
 			if (moreThanOne) {
 			    Intl.errFormat("csv#test.onlyOneChar", "d");
 			    return false;
@@ -198,6 +207,10 @@ public class CSVTest
 			delimChar = arg1;
 			break;
 		    case 'D':	// delimiter from Delimiter
+			if (arg.equalsIgnoreCase("debug")) {
+			    debug = true;
+			    break;
+			}
 			String delimName = arg.substring(1);
 			delimiter = Delimiter.fromString(delimName);
 			if (delimiter == null) {
@@ -364,6 +377,15 @@ public class CSVTest
 		format.withCompressWhitespace(true);
 	    if (ignoreEmpty)
 		format.withIgnoreEmptyLines(true);
+
+	    if (debug) {
+		String fmt = format.toString();
+		System.err.print(fmt);
+		// Here's the test part
+		CSVFormat newFormat = CSVFormat.fromString(fmt);
+		String newFmt = newFormat.toString();
+		System.err.println(newFmt);
+	    }
 
 	    List<CSVRecord> recordList = null;
 	    if (writeBack) {

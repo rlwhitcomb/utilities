@@ -353,6 +353,9 @@
  *	    #719: Additional comments in "findMatching" to clarify operation.
  *	21-May-2025 (rlwhitcomb)
  *	    #721: New "isSingleCodeString" method.
+ *	12-Oct-2025 (rlwhitcomb)
+ *	    #756: New option to force quoting in "quoteForCSV".
+ *	    #146: Better handling of "space" characters inside "quoteControl".
  */
 package info.rlwhitcomb.util;
 
@@ -811,6 +814,10 @@ public final class CharUtil
 			    }
 			    break;
 		    }
+		}
+		else if (Character.isSpaceChar(ch) && ch != ' ') {
+		    buf.append(escapeChar).append('u');
+		    buf.append(String.format("%1$04x", (int) ch));
 		}
 		else {
 		    buf.append(ch);
@@ -2112,8 +2119,22 @@ public final class CharUtil
 	 * @param	buf	The buffer where we're building the record.
 	 */
 	public static void quoteForCSV(final String input, final StringBuilder buf) {
+	    quoteForCSV(input, buf, false);
+	}
+
+
+	/**
+	 * Quote for CSV into a larger {@link StringBuilder}.
+	 *
+	 * @param	input	The raw text to be added to a CSV record (can
+	 *			be {@code null} or empty).
+	 * @param	buf	The buffer where we're building the record.
+	 * @param	force	Force quotes regardless of the content of the value.
+	 */
+	public static void quoteForCSV(final String input, final StringBuilder buf, final boolean force) {
 	    if (input != null && !input.isEmpty()) {
-		if (input.indexOf("\"") >= 0 ||
+		if (force ||
+		    input.indexOf("\"") >= 0 ||
 		    input.indexOf(",") >= 0 ||
 		    input.indexOf("\n") >= 0 ||
 		    input.indexOf("\r") >= 0 ||
@@ -2133,6 +2154,9 @@ public final class CharUtil
 		else {
 		    buf.append(input);
 		}
+	    }
+	    else if (force) {
+		buf.append('"').append('"');
 	    }
 	}
 

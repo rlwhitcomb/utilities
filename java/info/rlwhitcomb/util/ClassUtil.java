@@ -77,6 +77,7 @@
  *  03-Jan-24 rlw #640	Method to check null and throw IllegalStateException.
  *  05-Feb-24 rlw #645	"fullToString" method for debugging purposes.
  *  26-Mar-25 rlw ----	Move "isInteger" into MathUtil.
+ *  12-Oct-25 rlw #146	Add "createAndSetValues" from a Map; handle "char" fields there.
  */
 package info.rlwhitcomb.util;
 
@@ -261,6 +262,33 @@ public final class ClassUtil
 
 	/**
 	 * Construct a given object (from its class) and set the key,value
+	 * pairs from the input map into the object.
+	 * <p> Throws a whole host of possible exceptions if the values
+	 * don't have the right type as the fields.
+	 *
+	 * @param	clazz	The object class we want to construct.
+	 * @param	map	Input map of key/value pairs to set the object properties.
+	 * @return		The constructed object with all the given
+	 *			properties set to their values.
+	 * @throws	Throwable for whatever might go wrong.
+	 */
+	public static <T> T createAndSetValues(final Class<T> clazz, final Map<String, Object> map)
+		throws Throwable
+	{
+	    List<String> keys = new ArrayList<>(map.size());
+	    List<Object> values = new ArrayList<>(map.size());
+
+	    for (Map.Entry<String, Object> entry : map.entrySet()) {
+		keys.add(entry.getKey());
+		values.add(entry.getValue());
+	    }
+
+	    return createAndSetValues(clazz, keys, values);
+	}
+
+
+	/**
+	 * Construct a given object (from its class) and set the key,value
 	 * pairs into the object.
 	 * <p> Throws a whole host of possible exceptions if the values
 	 * don't have the right type as the fields.
@@ -272,12 +300,12 @@ public final class ClassUtil
 	 *			properties set to their values.
 	 * @throws	Throwable for whatever might go wrong.
 	 */
-	public static Object createAndSetValues(final Class<?> clazz, final List<String> keys, final List<Object> values)
+	public static <T> T createAndSetValues(final Class<T> clazz, final List<String> keys, final List<Object> values)
 		throws Throwable
 	{
-	    Object obj = null;
+	    T obj = null;
 	    try {
-		Constructor<?> constructor = clazz.getConstructor();
+		Constructor<T> constructor = clazz.getConstructor();
 		obj = constructor.newInstance();
 		if (obj != null) {
 		    Field[] fields = clazz.getDeclaredFields();
@@ -294,13 +322,21 @@ public final class ClassUtil
 			    if (fieldClass == String.class) {
 				field.set(obj, value == null ? null : value.toString());
 			    }
+			    else if (fieldClass == char.class) {
+				if (value instanceof Character)
+				    field.setChar(obj, ((Character) value).charValue());
+				else if (value instanceof CharSequence)
+				    field.setChar(obj, ((CharSequence) value).charAt(0));
+				else
+				    field.setChar(obj, value.toString().charAt(0));
+			    }
 			    else if (fieldClass == boolean.class) {
 				if (value instanceof Boolean)
 				    field.setBoolean(obj, ((Boolean) value).booleanValue());
 				else if (value instanceof Number)
 				    field.setBoolean(obj, ((Number) value).intValue() != 0);
 				else if (value instanceof String)
-				    field.setBoolean(obj, Boolean.valueOf((String)value));
+				    field.setBoolean(obj, Boolean.valueOf((String) value));
 				else
 				    field.set(obj, value);
 			    }

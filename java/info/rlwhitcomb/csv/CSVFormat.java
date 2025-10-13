@@ -61,11 +61,17 @@
  *	    Add "Scriptable" annotations for fields to be exposed.
  *	07-Oct-2025 (rlwhitcomb)
  *	    #773: New option for compressing whitespace at/after newlines.
+ *	12-Oct-2025 (rlwhitcomb)
+ *	    #146: Add "toString" to produce a JSON-format string representation.
+ *	    Add "fromString" to produce one of us from a JSON string.
  */
 package info.rlwhitcomb.csv;
 
 import info.rlwhitcomb.annotations.Scriptable;
+import info.rlwhitcomb.json.JSON;
+import info.rlwhitcomb.util.ClassUtil;
 import info.rlwhitcomb.util.Intl;
+import java.util.Map;
 
 
 /**
@@ -587,6 +593,35 @@ public class CSVFormat
 	 */
 	protected boolean isCompressingWhitespace() {
 	    return compressWhitespace;
+	}
+
+	/**
+	 * Produce a JSON format string of the {@link Scriptable} values in this object.
+	 *
+	 * @return The JSON-format string of these values.
+	 */
+	@Override
+	public String toString() {
+	    Map<String, Object> map = ClassUtil.getMapFromObject(this);
+	    return JSON.toStringValue(map, true);
+	}
+
+	/**
+	 * Construct a new object from a JSON format string of the {@link Scriptable} values.
+	 *
+	 * @param	input	The JSON format string.
+	 * @return	The new object with the given values, or {@code null} if there were errors.
+	 */
+	public static CSVFormat fromString(final String input) {
+	    @SuppressWarnings("unchecked")
+	    Map<String, Object> map = (Map<String, Object>) JSON.readFromString(input);
+	    try {
+		return ClassUtil.createAndSetValues(CSVFormat.class, map);
+	    }
+	    catch (Throwable ex) {
+		ex.printStackTrace();
+		return null;
+	    }
 	}
 
 }
