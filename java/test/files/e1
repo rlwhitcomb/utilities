@@ -783,6 +783,8 @@ $mixed
 300PB
 450PiB
 320Yb @K
+4.7Rb
+0.8Qb
 
 $binary { settings.units }
 $si { settings.units }

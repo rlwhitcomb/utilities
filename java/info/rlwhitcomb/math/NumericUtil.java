@@ -186,6 +186,9 @@
  *	    #711: Tweak that last code in the number -> word function.
  *	20-Sep-2025 (rlwhitcomb)
  *	    Fix "getRangeBySuffix" for single-char match (which is allowed by the Calc grammar).
+ *	13-Oct-2025 (rlwhitcomb)
+ *	    #777: Update the range table with the new official prefixes: "ronna" and "quetta".
+ *	    Allow decimals in KMG values; update "convertKMGValue" to use BigDecimal.
  */
 package info.rlwhitcomb.math;
 
@@ -348,7 +351,7 @@ public final class NumericUtil
 	}
 
 
-	private static final Pattern VALUE_MATCH= Pattern.compile("^([0-9]+)([kKmMgGtTpPeEzZyYbB][iI]?[bB]?)$");
+	private static final Pattern VALUE_MATCH= Pattern.compile("^([0-9\\.]+)([kKmMgGtTpPeEzZyYrRqQ][iI]?[bB]?)$");
 
 
 	private static final String _T = "\u2182";
@@ -461,7 +464,8 @@ public final class NumericUtil
 		EXABYTES    (18,      60,      "EB", "EiB", "Ebytes", "Eibytes", "Exabytes",    "Exbibytes"  ),
 		ZETTABYTES  (21,      70,      "ZB", "ZiB", "Zbytes", "Zibytes", "Zettabytes",  "Zebibytes"  ),
 		YOTTABYTES  (24,      80,      "YB", "YiB", "Ybytes", "Yibytes", "Yottabytes",  "Yobibytes"  ),
-		BRONTOBYTES (27,      90,      "BB", "BiB", "Bbytes", "Bibytes", "Brontobytes", "Brobibytes" );
+		RONNABYTES  (27,      90,      "RB", "RiB", "Rbytes", "Ribytes", "Ronnabytes",  "Robibytes"  ),
+		QUETTABYTES (30,     100,      "QB", "QiB", "Qbytes", "Qibytes", "Quettabytes", "Quebibytes" );
 
 		private int tenPower;
 		private int twoPower;
@@ -502,6 +506,20 @@ public final class NumericUtil
 			    return I_TWO.pow(twoPower);
 			case DECIMAL:
 			    return I_TEN.pow(tenPower);
+		    }
+		}
+
+		/**
+		 * @return The decimal multiplier for this range, either SI or binary.
+		 * @param mode Decide which value to use.
+		 */
+		public BigDecimal getDecMultiplier(final RangeMode mode) {
+		    switch (mode) {
+			case BINARY:
+			default:
+			    return D_TWO.pow(twoPower);
+			case DECIMAL:
+			    return D_TEN.pow(tenPower);
 		    }
 		}
 
@@ -627,7 +645,7 @@ public final class NumericUtil
 			}
 		    }
 		    // Well beyond the range of our largest, but use it anyway
-		    return Range.BRONTOBYTES;
+		    return Range.QUETTABYTES;
 		}
 	}
 
@@ -666,20 +684,20 @@ public final class NumericUtil
 	 *			1024 * 1024 * 1024 for "G".
 	 * @throws		NumberFormatException for bad input formats
 	 */
-	public static BigInteger convertKMGValue(final String input) {
+	public static BigDecimal convertKMGValue(final String input) {
 	    Matcher m = VALUE_MATCH.matcher(input);
 	    if (m.matches()) {
-		BigInteger value = new BigInteger(m.group(1));
+		BigDecimal value = new BigDecimal(m.group(1));
 		String suffix = m.group(2);
 		Range range = Range.getRangeBySuffix(suffix);
 		if (range != null) {
 		    String end = suffix.toUpperCase();
 		    if (end.endsWith("IB") || end.endsWith("I"))
-			value = value.multiply(range.getMultiplier(RangeMode.BINARY));
+			value = value.multiply(range.getDecMultiplier(RangeMode.BINARY));
 		    else
-			value = value.multiply(range.getMultiplier(RangeMode.DECIMAL));
+			value = value.multiply(range.getDecMultiplier(RangeMode.DECIMAL));
 		}
-		return value;
+		return value.stripTrailingZeros();
 	    }
 	    else
 		throw new NumberFormatException(Intl.getString("math#numeric.badKMGFormat"));

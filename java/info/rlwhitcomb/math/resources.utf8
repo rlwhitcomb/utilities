@@ -33,6 +33,7 @@
 #  16-May-24 rlw ----	New error when losing imaginary part in integer conversion.
 #			Update some color codes.
 #  07-Mar-25 rlw #710	New errors from MathUtil.
+#  13-Oct-25 rlw #777	Update message for allowed KMG prefixes.
 #
 
 #
@@ -46,7 +47,7 @@ date.badFormatString	= Bad form for the date format string: <y>%1$s<.>
 #
 # From NumericUtil.java
 #
-numeric.badKMGFormat		= Improper input format: suffix must be one of [K,M,G,T,P,E,Z,Y, or B].
+numeric.badKMGFormat		= Improper input format: suffix must be one of [K,M,G,T,P,E,Z,Y,R, or Q].
 numeric.outOfRange		= Value is out of range.
 numeric.outOfRangeWords		= Value out of range for "@w" conversions.
 numeric.badRomanFormat		= Unable to convert Roman numeral: <y>%1$s<.>.

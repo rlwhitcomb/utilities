@@ -581,6 +581,8 @@
  *	    #751: Add "isint" function.
  *	12-Sep-2025 (rlwhitcomb)
  *	    Add another dot product symbol.
+ *	13-Oct-2025 (rlwhitcomb)
+ *	    #777: Update KB_CONST prefixes for new official values "R" and "Q"; allow x.y in KB_CONST also.
  */
 
 grammar Calc;
@@ -2158,8 +2160,8 @@ fragment PI_VALUES
    ;
 
 NUMBER
-   : INT ('.' [0-9] +)? EXP?
-   | '.' [0-9] + EXP?
+   : INT ('.' DIG +)? EXP?
+   | '.' DIG + EXP?
    ;
 
 VERSION
@@ -2197,13 +2199,13 @@ HEX_CONST
    ;
 
 KB_CONST
-   : INT ( [Kk] | [Mm] | [Gg] | [Tt] | [Pp] | [Ee] | [Zz] | [Yy] | [Bb] ) ( [Ii] ? [Bb] ) ?
+   : INT ('.' DIG +)? ( [Kk] | [Mm] | [Gg] | [Tt] | [Pp] | [Ee] | [Zz] | [Yy] | [Rr] | [Qq] ) ( [Ii] ? [Bb] ) ?
    ;
 
 // no leading zeros
 fragment INT
    : '0'
-   | [1-9] [0-9]*
+   | [1-9] DIG*
    ;
 
 // \- since - means "range" inside [...]
