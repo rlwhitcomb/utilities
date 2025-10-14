@@ -8,6 +8,8 @@ $scriptDir test/euler
 
 $defaultOptions -dir test/euler -nosep -noquote -nolib -nocolors
 
+$echo Testing the solutions to Project Euler problems
+
 p1: p1
 p2: p2
 p3: p3
@@ -21,6 +23,7 @@ p10: p10
 p11: p11
 p12: p12
 p13: p13
+$echo Test "p14" takes about three minutes (so, much longer than the typical time)
 p14: p14
 p15: p15
 p16: p16
@@ -30,7 +33,9 @@ p19: p19
 p20: p20
 p21: p21
 p22: p22
+$echo "p23" is about two minutes long (wait for it...)
 p23: p23
+$echo And "p24" is also about two minutes
 p24: p24
 p25: p25
 p26: p26
@@ -51,6 +56,7 @@ p40: p40
 p41: p41
 p42: p42
 
+$echo Finally, "p44" is about a minute and a half (give or take)
 p44: p44
 p45: p45
 
@@ -58,3 +64,4 @@ p47: p47
 p48: p48
 p49: p49
 
+$echo Done testing all our solved Project Euler problems
