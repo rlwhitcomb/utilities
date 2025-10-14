@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { base: '1.13.1', date: d'2025-10-13',
+      issues: [ 770 ],
+      comment: 'Increase file size limit for "read" functions.'
+    },
     { base: '1.12.9', date: d'2025-10-08',
       issues: [ ],
       comment: 'Tweaks to primality tests to allow larger values.'

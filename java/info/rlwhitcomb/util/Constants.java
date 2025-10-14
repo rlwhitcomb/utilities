@@ -43,6 +43,7 @@
  *  28-Nov-23 rlw #627	New boolean constants (strings).
  *  16-Apr-25 rlw	New complex number constructor for zero value.
  *  01-May-25 rlw #716	Refactor ComplexNumber and Quaternion.
+ *  30-Sep-25 rlw #770	Increase maximum file string size.
  */
 package info.rlwhitcomb.util;
 
@@ -239,8 +240,8 @@ public final class Constants
 	public static final int CHAR_BUFFER_SIZE = 4_096;
 
 
-	/** Maximum size of file we want to read into a string (10MB). */
-	public static final long FILE_STRING_SIZE_LIMIT = 10_485_760L;
+	/** Maximum size of file we want to read into a string (50MB). */
+	public static final long FILE_STRING_SIZE_LIMIT = 52_428_800L;
 
 
 	/** A string value of {@link Boolean#TRUE} (for use in setting properties). */
