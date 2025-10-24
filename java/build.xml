@@ -396,6 +396,8 @@
 		#707: Copy needed resources to output directory for "amort" script.
 	    11-Aug-2025 (rlwhitcomb)
 		Rename "all-install" to "all" and eliminate the old definition.
+	    24-Oct-2025 (rlwhitcomb)
+		#779: Add file to the install directory (in preparation for release packaging).
 
      ========================================================================== -->
 
@@ -954,6 +956,8 @@ Test ending on ${end.of.test.date} at ${end.of.test.time}
 			<fileset dir="external-files" includes="*.jar" excludes="antlr-*-complete.jar"/>
 			<fileset dir="test/files" includes="lib*"/>
 			<fileset dir="test/files" includes="amort.calc,boxdraw.calc,calendar.calc"/>
+			<fileset dir="." includes="VersionRef.json,versions.calc"/>
+			<fileset dir=".." includes="LICENSE,NOTICE,README.md"/>
 		</copy>
 		<chmod dir="${env.UTILITIES_HOME}" perm="+x" if:true="${utilities.available}">
 			<patternset refid="wrapper-files"/>
