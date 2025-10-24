@@ -6,7 +6,7 @@ $quiet on {
     $requires '2.32.9'
 
     // also make sure the standard library is loaded
-    if !defined("version") {
+    if !defined("version", "dateformat") {
         print 'Rerun without the "-nolib" flag ...'
         leave 1
     }

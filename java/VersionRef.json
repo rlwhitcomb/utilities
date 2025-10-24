@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '3.1.5', date: d'2025-10-24',
+      issues: [ 760 ],
+      comment: 'Fix the aftermath of the "$gui" command from REPL mode.'
+    },
     { version: '3.1.4', base: '1.13.2', date: d'2025-10-14',
       issues: [ 777 ],
       comment: 'Fix KMG conversion to conform to 2022 BIPM standards for large number naming.'

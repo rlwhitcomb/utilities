@@ -363,6 +363,8 @@
  *	    #733: Don't require any user arguments to be defined after "--".
  *	14-Sep-2025 (rlwhitcomb)
  *	    #761: Add "noquiet" option; change the way we do "quiet" around silent blocks.
+ *	24-Oct-2025 (rlwhitcomb)
+ *	    #760: Add GUI shutdown signal and exit REPL mode with "$gui" directive.
  */
 package info.rlwhitcomb.calc;
 
@@ -405,6 +407,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.jar.JarFile;
 import java.util.prefs.BackingStoreException;
@@ -574,8 +577,6 @@ public class Calc
 	private static String  requiredVersion = null;
 	private static String  baseRequiredVersion = null;
 
-	private BXMLSerializer serializer = null;
-
 	private static File inputDirectory = null;
 	private static File rootDirectory = null;
 	private static List<String> libraryNames = null;
@@ -586,7 +587,12 @@ public class Calc
 	private static Charset inputCharset = null;
 	private static String outputCharsetName = null;
 
+	private static CountDownLatch guiFinishedSignal = new CountDownLatch(1);
+
+
+	private BXMLSerializer serializer = null;
 	private Display display;
+
 
 	@BXML private Window mainWindow;
 	@BXML private SplitPane splitPane;
@@ -1815,6 +1821,7 @@ public class Calc
 	public static void doGuiMode(String[] args) {
 	    if (!guiMode) {
 		guiMode = true;
+		replMode = false;
 		DesktopApplicationContext.main(Calc.class, args);
 	    }
 	}
@@ -1911,10 +1918,13 @@ public class Calc
 	}
 
 	public static void exit() {
-	    if (guiMode)
+	    if (guiMode) {
+		guiFinishedSignal.countDown();
 		DesktopApplicationContext.exit(false);
-	    else
+	    }
+	    else {
 		System.exit(0);
+	    }
 	}
 
 	/**
@@ -2823,10 +2833,10 @@ public class Calc
 			    replMode = true;
 
 			    StringBuilder buf = new StringBuilder();
-			    String line;
+			    String line = null;
 			    String prompt = ConsoleColor.color("<Bk!>> <.>");
 			replLoop:
-			    while ((line = console.readLine(prompt)) != null) {
+			    while (replMode && (line = console.readLine(prompt)) != null) {
 				if (line.endsWith("\\")) {
 				    buf.append(line.substring(0, line.length() - 1)).append(LINESEP);
 				}
@@ -2837,7 +2847,7 @@ public class Calc
 				}
 			    }
 
-			    if (line == null)
+			    if (replMode && line == null)
 				System.out.println();
 
 			    replMode = false;
@@ -2845,6 +2855,15 @@ public class Calc
 		    }
 		    else {
 			process(input, visitor, errorStrategy, true);
+		    }
+
+		    if (guiMode) {
+			try {
+			    guiFinishedSignal.await();
+			}
+			catch (InterruptedException ie) {
+			    ; // being interrupted is actually a good thing here, so let things proceed
+			}
 		    }
 		}
 	    }
