@@ -933,6 +933,8 @@
  *	    #761: Change the way we do "quiet" processing.
  *	26-Sep-2025 (rlwhitcomb)
  *	    #754: Do better at passing the "ignoreNameCase" setting down to the compare methods.
+ *	24-Oct-2025 (rlwhitcomb)
+ *	    Allow "dot" operator to do multiplication in certain contexts (such as decimal x decimal).
  */
 package info.rlwhitcomb.calc;
 
@@ -1312,6 +1314,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	/** Stack of previous "silence" mode values. */
 	private final Deque<Boolean> silenceModeStack         = new ArrayDeque<>();
+
+	/** Replacement for "dot" operator. */
+	private static final String DOT = "\u00B7";
 
 
 	/**
@@ -4970,12 +4975,13 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		case "%":
 		case "mod":
 		    break;
+		case "\u00B7":
+		case "\u22C5":
+		    op = DOT;
+		    break;
 		case "\\%":
 		case "\u2216%":
 		    op = "\\%";
-		    // fall through
-		case "\u00B7":
-		case "\u22C5":
 		    if (notAssign)
 			break;
 		    // Otherwise it's illegal (as for assignment)
@@ -4992,6 +4998,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 		    switch (op) {
 			case "*":
+			case DOT:
 			    return f1.multiply(f2);
 			case "/":
 			    return f1.divide(f2);
@@ -5003,8 +5010,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			    return f1.modulus(f2);
 			case "\\%":
 			    return new ArrayScope<Object>((Object[]) f1.divideAndRemainder(f2));
-			case "\u00B7":
-			case "\u22C5":
+			default:
 			    throw new UnknownOpException(oper, ctx);
 		    }
 		}
@@ -5012,6 +5018,10 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    Quaternion q1 = Quaternion.valueOf(e1);
 		    Quaternion q2 = Quaternion.valueOf(e2);
 		    MathContext mc = MathUtil.divideContext(q1, settings.mcDivide);
+
+		    // If we're going to do a mixed "dot" product, convert to multiplication
+		    if ((isScalar(e1) || isScalar(e2)) && op.equals(DOT))
+			op = "*";
 
 		    switch (op) {
 			case "*":
@@ -5026,9 +5036,10 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			    return q1.modulus(q2, mc);
 			case "\\%":
 			    return new ArrayScope<Object>((Object[]) q1.divideAndRemainder(q2, mc));
-			case "\u00B7":
-			case "\u22C5":
-			    return q1.dot(q2, mc);
+			case DOT:
+			    if (notAssign)
+				return q1.dot(q2, mc);
+			    // else this won't work (result type is different than source)
 			default:
 			    throw new UnknownOpException(oper, ctx);
 		    }
@@ -5037,6 +5048,10 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    ComplexNumber c1 = ComplexNumber.valueOf(e1, settings.rationalMode);
 		    ComplexNumber c2 = ComplexNumber.valueOf(e2, settings.rationalMode);
 		    MathContext mc = MathUtil.divideContext(c1, settings.mcDivide);
+
+		    // If we're going to do a mixed "dot" product, convert to multiplication
+		    if ((isScalar(e1) || isScalar(e2)) && op.equals(DOT))
+			op = "*";
 
 		    switch (op) {
 			case "*":
@@ -5051,9 +5066,10 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			    return c1.modulus(c2, mc);
 			case "\\%":
 			    return new ArrayScope<Object>((Object[]) c1.divideAndRemainder(c2, mc));
-			case "\u00B7":
-			case "\u22C5":
-			    return c1.dot(c2, mc);
+			case DOT:
+			    if (notAssign)
+				return c1.dot(c2, mc);
+			    // not allowed for assignments
 			default:
 			    throw new UnknownOpException(oper, ctx);
 		    }
@@ -5062,10 +5078,13 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    CollectionScope c2 = (CollectionScope) e2;
 
 		    switch (op) {
-			case "\u00B7":
-			case "\u22C5":
-			    CollectionScope c1 = (CollectionScope) e1;
-			    return dotProduct(this, c1.valueList(), c2.valueList(), settings.mc, ctx);
+			case DOT:
+			    if (notAssign) {
+				CollectionScope c1 = (CollectionScope) e1;
+				return dotProduct(this, c1.valueList(), c2.valueList(), settings.mc, ctx);
+			    }
+			    else
+				throw new UnknownOpException(oper, ctx);
 			case "\\":
 			    if (e1 instanceof SetScope) {
 				@SuppressWarnings("unchecked")
@@ -5073,6 +5092,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 				return set.diff(c2);
 			    }
+			    // fall through
 			default:
 			    throw new UnknownOpException(oper, ctx);
 		    }
@@ -5084,6 +5104,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 		    switch (op) {
 			case "*":
+			case DOT:
 			    return fixupToInteger(d1.multiply(d2, settings.mc));
 			case "/":
 			    return fixupToInteger(d1.divide(d2, mc));
@@ -5104,8 +5125,6 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    catch (ArithmeticException ae) {
 		throw new CalcExprException(ae, ctx);
 	    }
-
-	    return null;	// should never happen but the compiler couldn't figure that out
 	}
 
 	@Override

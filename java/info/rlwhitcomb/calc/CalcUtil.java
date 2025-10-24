@@ -276,6 +276,8 @@
  *	    #754: Strict equality of sets means same order also.
  *	27-Sep-2025 (rlwhitcomb)
  *	    #768: Better handling of "cast" with sets and objects in and out of array form.
+ *	24-Oct-2025 (rlwhitcomb)
+ *	    Add "isScalar" method to support determining when "dot" operator is just a multiply.
  */
 package info.rlwhitcomb.calc;
 
@@ -2421,6 +2423,25 @@ public final class CalcUtil
 // TODO: "date" or "time" ??
 
 	    return Typeof.UNKNOWN;
+	}
+
+
+	/**
+	 * Building on {@link typeof}, determine if the value is a scalar (e.g., not complex or quaternion, not map nor list).
+	 *
+	 * @param obj	An object to inspect.
+	 * @return	Whether or not this object is a scalar value.
+	 */
+	public static boolean isScalar(final Object obj) {
+	    switch (typeof(obj)) {
+		case NULL:
+		case INTEGER:
+		case FLOAT:
+		case FRACTION:
+		case BOOLEAN:
+		    return true;
+	    }
+	    return false;
 	}
 
 

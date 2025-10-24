@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '3.1.6', date: d'2025-10-24',
+      issues: [ ],
+      comment: 'Allow "\u00B7" (dot) operator to act as multiply for scalar values.'
+    },
     { version: '3.1.5', date: d'2025-10-24',
       issues: [ 760 ],
       comment: 'Fix the aftermath of the "$gui" command from REPL mode.'

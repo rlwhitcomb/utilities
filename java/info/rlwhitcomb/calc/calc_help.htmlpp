@@ -530,6 +530,8 @@ Defining enum value SYSTEM = 2</code>
 <span style="color:grey;">&gt;</span> 2000@K<br>
 <span style="color:blue;">2000 @K</span><span style="color:grey;"> &#x21E8; </span><span style="color:green;">1.95 Kibibytes</span>
 </code>
+  <p>Note: the supported suffixes conform to the 2022 BIPM metric standards (<a href="https://en.wikipedia.org/wiki/Metric_prefix">Metric prefix</a>)
+     for naming, up to "Ronnabytes" (10<sup>27</sup>) and "Quettabytes" (10<sup>30</sup>).
   <p>String constants are of four types: <i>simple</i> strings, constructed using either single- or double-quotes (or "smart"
      quotes: see below), <i>multiline</i> strings, constructed using a triple set of any quotes, as in
      <code>"""</code>...<code>"""</code> or <code>&#x201C;&#x201C;&#x201C;</code>...<code>&#x201D;&#x201D;&#x201D;</code>,
@@ -604,9 +606,9 @@ which gives:
      You can use the <code>@r</code> or <code>@R</code> formats to display positive integer values in this form as well.
      Note that the range of possible values for these formats are the integers from 1 to 39,999.
   <p>Time and duration values (to nanosecond precision) can be entered as:
-<p class="indent"> <code>h'<i>hh</i>:<i>mm</i>:<i>ss</i>.<i>nnnnnnnnn</i></code>&nbsp;[ <code>a</code> | <code>p</code> | <code>am</code> | <code>pm</code> ]<code>'</code> ("hour" or time-of-day value)</p>
+<p class="indent"> <code>h'<i>hh</i>:<i>mm</i>:<i>ss</i>.<i>nnnnnnnnn</i></code>&nbsp;[ <code>a</code> | <code>p</code> | <code>am</code> | <code>pm</code> ]<code>'</code> ("hour-minute-second" or time-of-day value)</p>
 or
-<p class="indent"> <code>t'<i>nn.nn</i>&nbsp;w</code> | <code>d</code> | <code>h</code> | <code>m</code> | <code>s'</code> ("amount of time" or duration value)</p>
+<p class="indent"> <code>t'<i>nn.nn</i>&nbsp;w</code> | <code>d</code> | <code>h</code> | <code>m</code> | <code>s'</code> ("time amount" or duration value)</p>
      These values are computed and stored as integer nanoseconds (so that 1,000,000,000 equals one second), with midnight (<code>12:00:00.0 am</code>) as zero for time-of-day. They can be used
      in any other kind of operation, or formatted again as an <i>hour:minute:second</i> time or a duration (in weeks, down to seconds) using the <code>@h</code> or <code>@t</code> formats. See the Formats section below for more details.
      For example:
@@ -992,7 +994,7 @@ or<br>
         <i>expr</i>&nbsp;&nbsp;<code>\%</code> or <code>&#x2216;%</code>&nbsp;&nbsp;<i>expr</i><br>
         <i>expr</i>&nbsp;&nbsp;<code>mod</code>&nbsp;&nbsp;<i>expr</i><br>
         <i>expr</i>&nbsp;&nbsp;<code>&#x00B7;</code> or <code>&#x22C5;</code>&nbsp;&nbsp;<i>expr</i></td>
-        <td>multiply<br>divide<br>integer divide or set difference<br>remainder<br>quotient, remainder<br>modulus<br>dot product</td><td>left to right</td></tr>
+        <td>multiply<br>divide<br>integer divide or set difference<br>remainder<br>quotient, remainder<br>modulus<br>dot product (or multiply for scalars)</td><td>left to right</td></tr>
     <tr><td>18</td><td>
         <i>expr</i>&nbsp;&nbsp;<code>+</code> or <code>&#x2795;</code>&nbsp;&nbsp;<i>expr</i><br>
         <i>expr</i>&nbsp;&nbsp;<code>-</code>,  <code>&#x2212;</code>, or <code>&#x2796;</code>&nbsp;&nbsp;<i>expr</i></td>
