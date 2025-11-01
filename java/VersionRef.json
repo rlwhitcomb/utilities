@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '3.1.7', date: d'2025-10-26',
+      issues: [ 781 ],
+      comment: 'Support another traditional form of octal escapes in strings: "\\0nnn".'
+    },
     { version: '3.1.6', date: d'2025-10-24',
       issues: [ ],
       comment: 'Allow "\u00B7" (dot) operator to act as multiply for scalar values.'

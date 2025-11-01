@@ -583,6 +583,8 @@
  *	    Add another dot product symbol.
  *	13-Oct-2025 (rlwhitcomb)
  *	    #777: Update KB_CONST prefixes for new official values "R" and "Q"; allow x.y in KB_CONST also.
+ *	28-Oct-2025 (rlwhitcomb)
+ *	    #781: Additional octal escape syntax inside strings.
  */
 
 grammar Calc;
@@ -2031,6 +2033,7 @@ fragment UNICODE
    | 'u' '{' HEX + '}'
    | 'o' OCT OCT OCT
    | 'o' '{' OCT + '}'
+   | '0' OCT ( OCT? ( OCT? ) )
    | 'B' BIN BIN BIN BIN BIN BIN BIN BIN
    | 'B' '{' BIN + '}'
    ;

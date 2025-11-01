@@ -163,6 +163,8 @@
 #	    Help for "-noblanks" in Lists; add an error for it.
 #	17-Aug-2025 (rlwhitcomb)
 #	    New aliases for a Lists option.
+#	28-Oct-2025 (rlwhitcomb)
+#	    #781: New error message for illegal char escape sequences.
 #
 
 #
@@ -186,6 +188,7 @@ char.illegalUnicodeEscape	= Unsupported Unicode escape sequence: "%1$s"
 char.unknownBooleanString	= Unknown boolean value: "%1$s"
 char.unknownBooleanType		= Cannot convert object of type %1$s to a boolean value.
 char.illegalHexLiteral		= Unsupported hex literal: "%1$s"
+char.illegalCharEscape		= Illegal character escape in string literal
 
 # Note: these are lists of valid values separated by a comma and optional spaces.
 # The English versions should remain untranslated, but additional choices in other languages

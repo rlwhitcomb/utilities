@@ -356,6 +356,8 @@
  *	12-Oct-2025 (rlwhitcomb)
  *	    #756: New option to force quoting in "quoteForCSV".
  *	    #146: Better handling of "space" characters inside "quoteControl".
+ *	28-Oct-2025 (rlwhitcomb)
+ *	    #781: Traditional octal escape sequence inside strings.
  */
 package info.rlwhitcomb.util;
 
@@ -1057,16 +1059,20 @@ public final class CharUtil
 	 * (in other words, the syntax should have been checked before calling this method).
 	 *
 	 * @param input        The input string to be parsed.
-	 * @param index        Starting index of the sequence to be interpreted.
-	 * @param base         Integer number base to be expected here (usually 16, 8, or 2).
-	 * @param normalLength The expected number of digits of that base to find.
+	 * @param index        Index JUST BEFORE the sequence to be interpreted; the digits start
+	 *                     at {@code index + 1}.
+	 * @param radix        Integer number radix to be expected here (usually 16, 8, or 2).
+	 * @param normalLength The expected number of digits of that base to find; if negative,
+	 *                     the absolute value is the maximum number of expected digits (so
+	 *                     could be as few as one).
 	 * @param output       Buffer to add the parsed codepoint to.
 	 * @return             "index" advanced past the parsed sequence.
+	 * @throws NumberFormatException if the integer value cannot be parsed from the input
 	 */
 	private static int parseCharEscape(
 		final String input,
 		final int index,
-		final int base,
+		final int radix,
 		final int normalLength,
 		final StringBuilder output)
 	{
@@ -1082,14 +1088,32 @@ public final class CharUtil
 		}
 	    }
 	    else {
-		for (int j = 0; j < normalLength; j++) {
-		    if (++pos < input.length()) {
-			charBuilder.append(input.charAt(pos));
+		if (normalLength < 0) {
+		    int maxLength = Math.min(Math.abs(normalLength), (input.length() - (pos + 1)));
+		    if (maxLength <= 0)
+			throw new NumberFormatException(Intl.getString("util#char.illegalCharEscape"));
+
+		    int digit = 0;
+		    for (int j = 0; j < maxLength && digit >= 0; j++) {
+			ch = input.charAt(++pos);
+			if ((digit = Character.digit(ch, radix)) >= 0) {
+			    charBuilder.append(ch);
+			}
+			else {
+			    pos--;
+			}
+		    }
+		}
+		else {
+		    for (int j = 0; j < normalLength; j++) {
+			if (++pos < input.length()) {
+			    charBuilder.append(input.charAt(pos));
+			}
 		    }
 		}
 	    }
 
-	    charValue = Integer.parseInt(charBuilder.toString(), base);
+	    charValue = Integer.parseInt(charBuilder.toString(), radix);
 	    output.appendCodePoint(charValue);
 
 	    return pos;
@@ -1178,7 +1202,6 @@ public final class CharUtil
 	    if (input == null || input.isEmpty())
 		return input;
 
-
 	    StringBuilder buf = new StringBuilder(input.length());
 
 	    for (int i = 0; i < input.length(); i++) {
@@ -1215,6 +1238,11 @@ public final class CharUtil
 				i = parseCharEscape(input, i, 2, 8, buf);
 				break;
 			    case '0':
+				// Check for pure octal escapes (\0nnn) with at least one digit, max of three
+				if (i + 1 < input.length() && Character.digit(input.charAt(i + 1), 8) >= 0) {
+				    i = parseCharEscape(input, i, 8, -3, buf);
+				    break;
+				}
 				buf.append('\0');
 				break;
 			    case '/':

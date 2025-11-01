@@ -1,5 +1,5 @@
-$Require '2.44.0'
-$Requires '2.44.0', Base '1.12.3'
+$Require '3.1.7'
+$Requires '3.1.7', Base '1.13.2'
 // Calc latest version is in "version.properties", base version is in "build.properties"
 
 /*
@@ -134,6 +134,9 @@ const BLUE_BKGND_BRIGHT    = "<Bl.!>"
 const MAGENTA_BKGND_BRIGHT = "<Mg.!>"
 const CYAN_BKGND_BRIGHT    = "<Cy.!>"
 const WHITE_BKGND_BRIGHT   = "<Wh.!>"
+
+/* Escape sequence to clear the screen */
+const CLS = '\033[2J'
 
 /*
  * Convert one of our dates to an Excel date serial number

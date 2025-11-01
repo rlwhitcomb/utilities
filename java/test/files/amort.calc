@@ -4,12 +4,12 @@
 //   $1 = yearly interest rate (percentage)
 //   $2 = number of years
 //
-$assert defined(PMT), 'The "library.calc" file must be included.'
+$assert defined(PMT,CLS), 'The "library.calc" file must be included.'
 $quiet on {
 $separators on
 
 if isnull($0) {
-    display 'Usage: c amort -- PRINCIPAL RATE YEARS'
+    display 'Usage: amort <PRINCIPAL> <YEARLY RATE %> <YEARS>'
     leave 1
 }
 
@@ -24,6 +24,7 @@ months = $2 * 12
 total_payments = 0
 total_interest = 0
 
+display CLS
 display `Monthly payment on $$$principal at ${$1}% interest for ${$2} years is $$$payment.`
 display
 
