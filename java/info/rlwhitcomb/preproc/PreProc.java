@@ -117,6 +117,8 @@
  *  30-Jan-23		Change OTHERCONST to BOOLCONST.
  *  24-Jul-25 rlw #736	Make several things public to be called externally; quote string values
  *			from the environment that aren't a constant value.
+ *  03-Noc-25 rlw #784	Add "-predef" option to print the (multitudinous) predefined values; add
+ *			"-version" command also; update version number.
  */
 package info.rlwhitcomb.preproc;
 
@@ -150,6 +152,7 @@ import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.IllegalFormatException;
@@ -241,6 +244,8 @@ import java.util.regex.Pattern;
  * <li><code>-P<i>path(s)</i></code> (path(s) to use to search for #include'd files, separate by ";" or ",")
  * <li><code>-L:<i>path</i></code> (path to log file to receive output - defaults to stdout)
  * <li><code>-W</code> (overwrite the output log file - defaults to append)
+ * <li><code>-version</code> (display the program version number)
+ * <li><code>-predef</code> (display all the currently predefined values, including "-D" values)
  * <li>file name(s)
  * </ul>
  * <p> This process can also be invoked as an Ant task by using the following in your "build.xml":
@@ -377,7 +382,7 @@ public class PreProc
 	private static final Pattern IDENT = Pattern.compile("^([_A-Za-z][\\w\\.]*)");
 
 	/** The current version of this software. */
-	private static final String VERSION = "1.4.1";
+	private static final String VERSION = "1.4.5";
 	/** The current copyright year. */
 	private static final String COPYRIGHT_YEAR = "2010-2011,2014-2016,2019-2023,2025";
 
@@ -2686,6 +2691,18 @@ public class PreProc
 
 
 	/**
+	 * List the current values of all the predefined variables (including environment, etc.)
+	 */
+	private void displayPredefined() {
+	    List<String> keys = new ArrayList<>(defines.keySet());
+	    Collections.sort(keys);
+	    for (String key : keys) {
+		out.format("%1$-20s -> %2$s%n", key, defines.get(key));
+	    }
+	}
+
+
+	/**
 	 * Process command line options.
 	 *
 	 * @param	inst	The preprocessor instance.
@@ -2697,11 +2714,15 @@ public class PreProc
 	 * @throws	IllegalArgumentException for errors parsing these arguments.
 	 */
 	private static boolean processCommandLine(final PreProc inst, final String[] args) throws IllegalArgumentException {
-	    // Process the command-line switches
+	    boolean showPredefined = false;
+
 	    for (String arg: args) {
 		if (isOptionString(arg)) {
 		    arg = arg.substring(1);
-		    if (arg.startsWith("C") || arg.startsWith("c")) {
+		    if (arg.equalsIgnoreCase("predefined") || arg.equalsIgnoreCase("predef") || arg.equalsIgnoreCase("pre")) {
+			showPredefined = true;
+		    }
+		    else if (arg.startsWith("C") || arg.startsWith("c")) {
 			inst.setDirectiveChar(arg.substring(1));
 		    }
 		    else if (arg.startsWith("D") || arg.startsWith("d")) {
@@ -2743,6 +2764,10 @@ public class PreProc
 		    else if (arg.equalsIgnoreCase("W")) {
 			inst.setOverwrite(true);
 		    }
+		    else if (arg.equalsIgnoreCase("version") || arg.equalsIgnoreCase("ver")) {
+			inst.signOnBanner(true);
+			return true;
+		    }
 		    else if (arg.startsWith("V") || arg.startsWith("v")) {
 			inst.setVerbose(arg.substring(1));
 		    }
@@ -2771,6 +2796,12 @@ public class PreProc
 		    }
 		}
 	    }
+
+	    if (showPredefined) {
+		inst.displayPredefined();
+		return true;
+	    }
+
 	    return false;
 	}
 
