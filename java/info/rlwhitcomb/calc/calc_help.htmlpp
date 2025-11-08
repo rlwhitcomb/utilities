@@ -1079,6 +1079,10 @@ or<br>
   <p>Some of the operators and functions might require a bit of explanation as to how they work.
   <p>The set union and intersection operators work on any collections, but also on integers (operating as bit sets). The other bit operators
      also work with pure boolean values, doing the appropriate boolean operations.
+  <p>Sets and objects (maps) maintain their contents in the original order as items are added or removed. However, the <code>==</code> and <code>!=</code>
+     operators will consider any two objects as equal if they have the same contents, regardless of order, as in <code>{1,2,3} == {3,2,1} &#x21E8; true</code>.
+     However, the "exactly equal" operators (<code>===</code> and <code>!==</code>) require the same contents AND the same order for the values to be
+     considered exactly equal (so <code>{1,2,3} === {3,2,1} &#x21E8; false</code>).
   <p>The multiple assignment operation assigns the values of the corresponding expressions to the respective variables. The normal
      case is one variable and one expression (normal assignment), as in <code>a = 7</code>. In addition, this construct can be used
      to swap the values of two variables as in: <code>a,b = b,a</code>. It is an error if the number of variables does not equal
@@ -1303,7 +1307,7 @@ or<br>
      another object containing only those keys that match the regex. For arrays, the returned array contains only those elements
      that match. For all other values, the input expression is converted to a string and matched against the regex,
      returning a <code>true</code> / <code>false</code> value.
-     The optional 3<sup>rd</sup>flags value can be one or more of the following:
+     The optional 3<sup>rd</sup> flags value can be one or more of the following:
      <ul><li><code>0x0001</code> = case insensitive</li>
          <li><code>0x0002</code> = dotall (the <code>'.'</code> pattern matches line endings)</li>
          <li><code>0x0004</code> = Unicode case folding</li>
@@ -1311,6 +1315,10 @@ or<br>
          <li><code>0x0010</code> = match multiline patterns</li>
          <li><code>0x0020</code> = only Unix line endings recognized</li>
      </ul>
+  <p>The Calc "library" file (<code>test/files/library.calc</code>) has human-readable names for these values, such as
+     <code>const MATCH_CASE_INSENSITIVE = 0x0001</code>. An easy way to always load this library is to set
+     <code>CALC_OPTIONS = -lib,test/files/library.calc</code> (set the path to wherever you have the utilities code installed, if not running
+     from a development environment).
   <p>The <code>callers()</code> function returns either the name of the specified function caller (with a numeric parameter), or a list
      of all callers (no parameter). The "name" is the full function name (including the parameter names). When called with a single
      integer parameter to retrieve the caller at the specified level, <code>0</code> means the current function (so, the return is
