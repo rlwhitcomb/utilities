@@ -158,7 +158,7 @@ Most of the bug and enhancement issues are current at https://github.com/rlwhitc
 - How do the new interfaces fit in with this scheme (ChoiceEnum)?
 
 ### Translation
-- Nothing in .../tools directory has had their text moved to resources.
+- Still some text is not in resource files
 - Much more translation could be done.
 - Is there a good way to check the existing translations with native speakers?
 - Need a way to check the text resources to make sure of:
