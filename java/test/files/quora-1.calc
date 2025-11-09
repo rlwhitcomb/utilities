@@ -1,0 +1,16 @@
+const START_P = 11
+const END_P = 300
+
+loop p over START_P .. END_P, 2 {
+  if !isprime(p) {
+    f1 = factors(p-1)
+    f2 = factors(p)
+    f3 = factors(p+1)
+
+    if length(f1) < length(f2) && length(f2) > length(f3) {
+      display `First p where number of factors of p is greater than p-1 and p+1 is $p.`
+      leave
+    }
+  }
+}
+
