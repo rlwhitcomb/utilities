@@ -30,7 +30,9 @@ import java.util.regex.Pattern;
  * href="http://semver.org">semver.org</a>).
  *
  * @author patrick
+ * @author rlwhitcomb
  *
+ * Original source: https://raccoon.onyxbits.de/blog/single-class-java-semantic-versioning-parser-implementation/SemanticVersion.java
  */
 public final class SemanticVersion implements Comparable<SemanticVersion> {
 
