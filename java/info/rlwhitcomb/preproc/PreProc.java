@@ -117,8 +117,11 @@
  *  30-Jan-23		Change OTHERCONST to BOOLCONST.
  *  24-Jul-25 rlw #736	Make several things public to be called externally; quote string values
  *			from the environment that aren't a constant value.
- *  03-Noc-25 rlw #784	Add "-predef" option to print the (multitudinous) predefined values; add
+ *  03-Nov-25 rlw #784	Add "-predef" option to print the (multitudinous) predefined values; add
  *			"-version" command also; update version number.
+ *  14-Nov-25 rlw #785	Regularize exceptions thrown; rename preproc version variable name; change
+ *			source of copyright notice; add Java data model variable; put title and
+ *			version into the "version.properties" file.
  */
 package info.rlwhitcomb.preproc;
 
@@ -221,7 +224,9 @@ import java.util.regex.Pattern;
  * <li><code>__FILE__</code> (the current file being processed)
  * <li><code>__LINE__</code> (the line number within that file)
  * <li><code>__JAVA_VERSION__</code> (the Java version)
- * <li><code>__JAVA_PP_VERSION__</code> (the Java preprocessor version)
+ * <li><code>__JAVA_VM_VERSION__</code> (full Java version string)
+ * <li><code>__JAVA_DATA_MODEL__</code> (32 or 64 Java data model)
+ * <li><code>__PREPROC_VERSION__</code> (version of this PreProcessor)
  * </ul>
  * <p> In addition, the contents of the <code>"build.properties"</code>, <code>"build.number"</code>, and <code>"version.properties"</code>
  * files will be read and a variable defined for each of the properties found in there.
@@ -241,7 +246,7 @@ import java.util.regex.Pattern;
  * <li><code>-r</code> (in which case the file name spec(s) are processed as directories)
  * <li><code>-R</code> (file name spec(s) are processed as directories and searched recursively)
  * <li><code>-E<i>envvar</i></code> (env var to use to search for #include'd files, defaults to "INCLUDE")
- * <li><code>-P<i>path(s)</i></code> (path(s) to use to search for #include'd files, separate by ";" or ",")
+ * <li><code>-P<i>path(s)</i></code> (path(s) to use to search for #include'd files, separated by ";" or ",")
  * <li><code>-L:<i>path</i></code> (path to log file to receive output - defaults to stdout)
  * <li><code>-W</code> (overwrite the output log file - defaults to append)
  * <li><code>-version</code> (display the program version number)
@@ -333,8 +338,12 @@ public class PreProc
 	private static final String LINE_VAR_NAME = "__LINE__";
 	/** <code>__JAVA_VERSION__</code> predefined variable name. */
 	private static final String JAVA_VERSION_VAR_NAME = "__JAVA_VERSION__";
-	/** <code>__JAVA_PP_VERSION__</code> predefined variable name. */
-	private static final String JAVA_PP_VERSION_VAR_NAME = "__JAVA_PP_VERSION__";
+	/** <code>__JAVA_VM_VERSION__</code> predefined variable name. */
+	private static final String JAVA_VM_VERSION_VAR_NAME = "__JAVA_VM_VERSION__";
+	/** <code>__JAVA_DATA_MODEL__</code> predefined variable name. */
+	private static final String JAVA_DATA_MODEL_VAR_NAME = "__JAVA_DATA_MODEL__";
+	/** <code>__PREPROC_VERSION__</code> predefined variable name. */
+	private static final String PREPROC_VERSION_VAR_NAME = "__PREPROC_VERSION__";
 
 	/** Pattern to parse the <code>-D<i>var</i>=<i>value</i></code> command-line switch. */
 	private static final Pattern DEFINE_PATTERN = Pattern.compile("^([_A-Za-z][\\w\\.]*)=(.*)$");
@@ -381,8 +390,6 @@ public class PreProc
 	/** Pattern to recognize any old identifier. */
 	private static final Pattern IDENT = Pattern.compile("^([_A-Za-z][\\w\\.]*)");
 
-	/** The current version of this software. */
-	private static final String VERSION = "1.4.5";
 	/** The current copyright year. */
 	private static final String COPYRIGHT_YEAR = "2010-2011,2014-2016,2019-2023,2025";
 
@@ -429,7 +436,7 @@ public class PreProc
 	/** Directive start character. */
 	private char directiveStartCh = '#';
 	/** List of input files or directories to process. */
-	private List<String> fileArgs = new ArrayList<String>();
+	private List<String> fileArgs = new ArrayList<>();
 	/** Output log stream (defaults to {@link System#out}). */
 	private PrintStream out = System.out;
 	/** Error stream (defaults to {@link System#err}). */
@@ -746,7 +753,7 @@ public class PreProc
 				case DEFINEDFUNC:
 				    return t.value.equals(value);
 				case WHITESPACE:
-				    return t.tok == tok;
+				    return t.tok.equals(tok);
 			    }
 			}
 			catch (NumberFormatException nfe) {
@@ -828,6 +835,32 @@ public class PreProc
 	 */
 	static class DontProcessException extends Exception {
 		static final DontProcessException INSTANCE = new DontProcessException();
+	}
+
+
+	/**
+	 * Format a parse error message and construct the new exception.
+	 *
+	 * @param format	Format for the final message.
+	 * @param arg		Argument (if needed) for that message.
+	 * @param pos		Input position for the exception.
+	 * @return		New {@link ParseException} with the given message and position.
+	 */
+	static ParseException parseException(final String format, final Object arg, final int pos) {
+	    String s = String.format(format, arg);
+	    return new ParseException(s, pos);
+	}
+
+
+	/**
+	 * Format a parse error message and construct the new exception.
+	 *
+	 * @param message	The final message.
+	 * @param pos		Input position for the exception.
+	 * @return		New {@link ParseException} with the given message and position.
+	 */
+	static ParseException parseException(final String message, final int pos) {
+	    return parseException(message, "", pos);
 	}
 
 
@@ -1219,7 +1252,7 @@ public class PreProc
 		    pos += len;
 		}
 		else
-		    throw new ParseException("Unrecognized input", pos);
+		    throw parseException("Unrecognized input \"%1$s\"", input.substring(pos), pos);
 	    }
 	    return tokens;
 	}
@@ -1269,13 +1302,13 @@ public class PreProc
 			if (inputPos < inputSize) {
 			    TokenValue t2 = inputExpr.get(inputPos++);
 			    if (t2.tok != Token.CLOSEPAREN)
-				throw new ParseException("Expecting ')' after expression", t2.startPos);
+				throw parseException("Expecting '%1$s' after expression", ")", t2.startPos);
 			}
 			else
-			    throw new ParseException("Expecting ')' before end of expression", exprLen);
+			    throw parseException("Expecting '%1$s' before end of expression", ")", exprLen);
 		    }
 		    else
-			throw new ParseException("Expecting an expression after '('", exprLen);
+			throw parseException("Expecting an expression after '%1$s'", "(", exprLen);
 		    break;
 		case VARREF:
 		    handleVarRef(t);
@@ -1303,14 +1336,13 @@ public class PreProc
 	 *
 	 * @return	The string result of the factor.
 	 *
-	 * @throws	NumberFormatException if numbers are allowed and one of them is malformed.
-	 * @throws	ParseException for other kinds of syntax errors.
+	 * @throws	ParseException for syntax errors.
 	 */
 	private String stringFactor(final boolean allowNumbers, final int exprLen, final boolean eating)
-		throws NumberFormatException, ParseException
+		throws ParseException
 	{
 	    String value = null;
-	    TokenValue t= inputExpr.get(inputPos++);
+	    TokenValue t = inputExpr.get(inputPos++);
 	    switch (t.tok) {
 		case SQSTRING:
 		case DQSTRING:
@@ -1332,13 +1364,13 @@ public class PreProc
 			if (inputPos < inputSize) {
 			    TokenValue t2 = inputExpr.get(inputPos++);
 			    if (t2.tok != Token.CLOSEPAREN)
-				throw new NumberFormatException("Expecting ')' after stringFactor");
+				throw parseException("Expecting '%1$s' after stringFactor", ")", t2.startPos);
 			}
 			else
-			    throw new NumberFormatException("Expecting ')' before end in stringFactor");
+			    throw parseException("Expecting '%1$s' before end in stringFactor", ")", exprLen);
 		    }
 		    else
-			throw new NumberFormatException("Expecting an expression after '('");
+			throw parseException("Expecting an expression after '%1$s'", "(", t.startPos);
 		    break;
 		default:
 		    inputPos--;
@@ -1361,8 +1393,7 @@ public class PreProc
 	    String value;
 	    if ((value = defines.get(t.value)) == null) {
 		if (!ignoreUndefined) {
-		    String s = String.format("Variable \"%1$s\" not defined!", t.value);
-		    throw new ParseException(s, t.startPos);
+		    throw parseException("Variable \"%1$s\" not defined!", t.value, t.startPos);
 		}
 		else
 		    value = "";
@@ -1388,11 +1419,10 @@ public class PreProc
 	 *
 	 * @return	The double result.
 	 *
-	 * @throws	NumberFormatException if one of the numbers was not properly formed.
 	 * @throws	ParseException if the expression was not properly formed
 	 */
 	private int integerValue(final TokenValue tok, final ProcessAs type, final int exprLen, final boolean eating)
-		throws NumberFormatException, ParseException
+		throws ParseException
 	{
 	    TokenValue t = tok;
 	    int v = 0;
@@ -1406,11 +1436,11 @@ public class PreProc
 		else if (t.op == Operator.SUBTRACT)
 		    sign = -1;
 		else
-		    throw new NumberFormatException("Expecting only + or - here");
+		    throw parseException("Expecting only %1$s here", "'+' or '-'", t.startPos);
 		if (inputPos < inputSize)
 		    t = inputExpr.get(inputPos++);
 		else
-		    throw new ParseException("Expecting a number after the sign", exprLen);
+		    throw parseException("Expecting a number after the sign", exprLen);
 	    }
 	    if (eating) {
 		// We only care about the high-level syntax, not whether numbers are good or not
@@ -1421,13 +1451,13 @@ public class PreProc
 			    if (inputPos < inputSize) {
 				TokenValue t2 = inputExpr.get(inputPos++);
 				if (t2.tok != Token.CLOSEPAREN)
-				    throw new NumberFormatException("Expecting ')' after integer term in integerValue");
+				    throw parseException("Expecting %1$s after integer term in integerValue", "')'", t2.startPos);
 			    }
 			    else
-				throw new NumberFormatException("Expecting ')' before end in integerValue");
+				throw parseException("Expecting %1$s before end in integerValue", "')'", exprLen);
 			}
 			else
-			    throw new NumberFormatException("Expecting an expression after '('");
+			    throw parseException("Expecting an expression after %1$s", "'('", exprLen);
 			break;
 		}
 	    }
@@ -1459,16 +1489,16 @@ public class PreProc
 			    if (inputPos < inputSize) {
 				TokenValue t2 = inputExpr.get(inputPos++);
 				if (t2.tok != Token.CLOSEPAREN)
-				    throw new NumberFormatException("Expecting ')' after integer term in integerValue");
+				    throw parseException("Expecting %1$s after integer term in integerValue", "')'", t2.startPos);
 			    }
 			    else
-				throw new NumberFormatException("Expecting ')' before end in integerValue");
+				throw parseException("Expecting %1$s before end in integerValue", "')'", exprLen);
 			}
 			else
-			    throw new NumberFormatException("Expecting an expression after '('");
+			    throw parseException("Expecting an expression after %1$s", "'('", exprLen);
 			break;
 		    default:
-			throw new NumberFormatException("Not an integer");
+			throw parseException("Not an integer", t.startPos);
 		}
 	    }
 	    return v * sign;
@@ -1484,11 +1514,10 @@ public class PreProc
 	 *
 	 * @return	The double result.
 	 *
-	 * @throws	NumberFormatException if one of the numbers was not properly formed.
 	 * @throws	ParseException if the expression was not properly formed
 	 */
 	private double doubleValue(final TokenValue tok, final ProcessAs type, final int exprLen, final boolean eating)
-		throws NumberFormatException, ParseException
+		throws ParseException
 	{
 	    TokenValue t = tok;
 	    double dv = 0.0;
@@ -1501,11 +1530,11 @@ public class PreProc
 		else if (t.op == Operator.SUBTRACT)
 		    sign = -1.0;
 		else
-		    throw new NumberFormatException("Expecting only + or - here");
+		    throw parseException("Expecting only %1$s here", "'+' or '-'", t.startPos);
 		if (inputPos < inputSize)
 		    t = inputExpr.get(inputPos++);
 		else
-		    throw new ParseException("Expecting a number after the sign", exprLen);
+		    throw parseException("Expecting a number after the sign", exprLen);
 	    }
 	    if (eating) {
 		// We only care about the high-level syntax, not whether numbers are good or not
@@ -1516,13 +1545,13 @@ public class PreProc
 			    if (inputPos < inputSize) {
 				TokenValue t2 = inputExpr.get(inputPos++);
 				if (t2.tok != Token.CLOSEPAREN)
-				    throw new NumberFormatException("Expecting ')' after doubleTerm in doubleValue");
+				    throw parseException("Expecting %1$s after doubleTerm in doubleValue", "')'", t2.startPos);
 			    }
 			    else
-				throw new NumberFormatException("Expecting ')' before end in doubleValue");
+				throw parseException("Expecting %1$s before end in doubleValue", "')'", exprLen);
 			}
 			else
-			    throw new NumberFormatException("Expecting an expression after '('");
+			    throw parseException("Expecting an expression after %1$s", "'('", t.startPos);
 			break;
 		}
 	    }
@@ -1554,16 +1583,16 @@ public class PreProc
 			    if (inputPos < inputSize) {
 				TokenValue t2 = inputExpr.get(inputPos++);
 				if (t2.tok != Token.CLOSEPAREN)
-				    throw new NumberFormatException("Expecting ')' after doubleTerm in doubleValue");
+				    throw parseException("Expecting %1$s after doubleTerm in doubleValue", "')'", t2.startPos);
 			    }
 			    else
-				throw new NumberFormatException("Expecting ')' before end in doubleValue");
+				throw parseException("Expecting %1$s before end in doubleValue", "')'", exprLen);
 			}
 			else
-			    throw new NumberFormatException("Expecting an expression after '('");
+			    throw parseException("Expecting an expression after %1$s", "'('", t.startPos);
 			break;
 		    default:
-			throw new NumberFormatException("Not a double");
+			throw parseException("Not a double", t.startPos);
 		}
 	    }
 	    return dv * sign;
@@ -1578,11 +1607,10 @@ public class PreProc
 	 *
 	 * @return	The integer result of the expression.
 	 *
-	 * @throws	NumberFormatException if one of the numbers was not properly formed.
 	 * @throws	ParseException if the expression was not properly formed
 	 */
 	private int integerFactor(final ProcessAs type, final int exprLen, final boolean eating)
-		throws NumberFormatException, ParseException
+		throws ParseException
 	{
 	    TokenValue t = inputExpr.get(inputPos++);
 	    int v = integerValue(t, type, exprLen, eating);
@@ -1604,8 +1632,7 @@ public class PreProc
 			}
 		    }
 		    else {
-			String s = String.format("Expecting an expression after %1$s", t2.value);
-			throw new ParseException(s, exprLen);
+			throw parseException("Expecting an expression after '%1$s'", t2.value, exprLen);
 		    }
 		}
 		else {
@@ -1625,11 +1652,10 @@ public class PreProc
 	 *
 	 * @return	The integer result of the expression.
 	 *
-	 * @throws	NumberFormatException if one of the numbers was not properly formed.
 	 * @throws	ParseException if the expression was not properly formed
 	 */
 	private int integerTerm(final ProcessAs type, final int exprLen, final boolean eating)
-		throws NumberFormatException, ParseException
+		throws ParseException
 	{
 	    int v = integerFactor(type, exprLen, eating);
 	    while (inputPos < inputSize) {
@@ -1665,8 +1691,7 @@ public class PreProc
 			}
 		    }
 		    else {
-			String s = String.format("Expecting an expression after %1$s", t.value);
-			throw new ParseException(s, exprLen);
+			throw parseException("Expecting an expression after '%1$s'", t.value, exprLen);
 		    }
 		}
 		else {
@@ -1686,11 +1711,10 @@ public class PreProc
 	 *
 	 * @return	The double result of the expression.
 	 *
-	 * @throws	NumberFormatException if one of the numbers was not properly formed.
 	 * @throws	ParseException if the expression was not properly formed
 	 */
 	private double doubleFactor(final ProcessAs type, final int exprLen, final boolean eating)
-		throws NumberFormatException, ParseException
+		throws ParseException
 	{
 	    TokenValue t = inputExpr.get(inputPos++);
 	    double dv = doubleValue(t, type, exprLen, eating);
@@ -1712,8 +1736,7 @@ public class PreProc
 			}
 		    }
 		    else {
-			String s = String.format("Expecting an expression after %1$s", t2.value);
-			throw new ParseException(s, exprLen);
+			throw parseException("Expecting an expression after '%1$s'", t2.value, exprLen);
 		    }
 		}
 		else {
@@ -1733,11 +1756,10 @@ public class PreProc
 	 *
 	 * @return	The double result of the expression.
 	 *
-	 * @throws	NumberFormatException if one of the numbers was not properly formed.
 	 * @throws	ParseException if the expression was not properly formed
 	 */
 	private double doubleTerm(final ProcessAs type, final int exprLen, final boolean eating)
-		throws NumberFormatException, ParseException
+		throws ParseException
 	{
 	    double dv = doubleFactor(type, exprLen, eating);
 	    while (inputPos < inputSize) {
@@ -1773,8 +1795,7 @@ public class PreProc
 			}
 		    }
 		    else {
-			String s = String.format("Expecting an expression after %1$s", t.value);
-			throw new ParseException(s, exprLen);
+			throw parseException("Expecting an expression after '%1$s'", t.value, exprLen);
 		    }
 		}
 		else {
@@ -1838,7 +1859,7 @@ public class PreProc
 			return (v != 0);
 		    }
 		}
-		catch (NumberFormatException infe) {
+		catch (NumberFormatException | ParseException infe) {
 		    // Not an integer, rollback the input position and try a double
 		    inputPos = savePos;
 		    try {
@@ -1878,7 +1899,7 @@ public class PreProc
 			    return (dv != 0.0);
 			}
 		    }
-		    catch (NumberFormatException dnfe) {
+		    catch (NumberFormatException | ParseException dnfe) {
 			// Not a double either, drop out to string compare
 		    }
 		}
@@ -1889,7 +1910,7 @@ public class PreProc
 		if (sv != null) {
 		    if (type == ProcessAs.NUMERIC) {
 			TokenValue t = inputExpr.get(inputPos-1);
-			throw new ParseException("#ifnum requires numeric values", t.startPos);
+			throw parseException("#ifnum requires numeric values", t.startPos);
 		    }
 		    if (inputPos < inputSize) {
 			TokenValue t = inputExpr.get(inputPos++);
@@ -1923,15 +1944,15 @@ public class PreProc
 			    }
 			}
 			else {
-			    throw new ParseException("Expecting a relational operator with a string", exprLen);
+			    throw parseException("Expecting a relational operator with a string", exprLen);
 			}
 		    }
 		    else {
-			throw new ParseException("Expecting a relational operator with a string", exprLen);
+			throw parseException("Expecting a relational operator with a string", exprLen);
 		    }
 		}
 	    }
-	    catch (NumberFormatException nfes) {
+	    catch (NumberFormatException | ParseException nfes) {
 		// This means that the nested parens didn't result in a string value
 		// so default to "otherFactor" to deal with
 	    }
@@ -1970,8 +1991,7 @@ public class PreProc
 			    v = relTerm(type, exprLen, false);
 		    }
 		    else {
-			String s = String.format("Expecting an expression after %1$s", t.value);
-			throw new ParseException(s, exprLen);
+			throw parseException("Expecting an expression after '%1$s'", t.value, exprLen);
 		    }
 		}
 		else {
@@ -2011,8 +2031,7 @@ public class PreProc
 			    v = andTerm(type, exprLen, false);
 		    }
 		    else {
-			String s = String.format("Expecting an expression after %1$s", t.value);
-			throw new ParseException(s, exprLen);
+			throw parseException("Expecting an expression after '%1$s'", t.value, exprLen);
 		    }
 		}
 		else {
@@ -2044,7 +2063,7 @@ public class PreProc
 	    boolean v = orTerm(type, exprLen);
 	    if (inputPos < inputSize) {
 		TokenValue t = inputExpr.get(inputPos++);
-		throw new ParseException("Not expecting anything more", t.startPos);
+		throw parseException("Not expecting anything more", t.startPos);
 	    }
 	    return v;
 	}
@@ -2677,8 +2696,12 @@ public class PreProc
 	 * @param	display	Flag to say whether or not to really display it.
 	 */
 	private void signOnBanner(final boolean display) {
-	    if (display)
-		out.format("Pre-Processor -- version %1$s%nCopyright (c) %2$s Roger L. Whitcomb.%n", VERSION, COPYRIGHT_YEAR);
+	    if (display) {
+		String title   = defines.get("PreProc.title");
+		String version = defines.get("PreProc.version");
+
+		out.format("%1$s -- version %2$s%nCopyright (c) %3$s Roger L. Whitcomb.%n", title, version, COPYRIGHT_YEAR);
+	    }
 	}
 
 
@@ -3207,29 +3230,6 @@ public class PreProc
 
 
 	/**
-	 * Quote a string value that has (possibly) embedded quotes.
-	 *
-	 * @param input	A string value to be quoted.
-	 * @return	The value with appropriate quotes.
-	 */
-	private String quote(final String input) {
-	    if (isConstant(input))
-		return input;
-
-	    StringBuilder buf = new StringBuilder(input);
-	    if (input.indexOf('\'') >= 0) {
-		buf.insert(0, '"');
-		buf.append('"');
-	    }
-	    else {
-		buf.insert(0, '\'');
-		buf.append('\'');
-	    }
-	    return buf.toString();
-	}
-
-
-	/**
 	 * Read in all the build properties from the various sources and define variables
 	 * for all of them.
 	 *
@@ -3244,7 +3244,7 @@ public class PreProc
 
 	    for (String name : buildProperties.stringPropertyNames()) {
 		String value = buildProperties.getProperty(name);
-		defines.put(name, quote(value));
+		defines.put(name, value);
 	    }
 	}
 
@@ -3258,14 +3258,17 @@ public class PreProc
 	    Map<String, String> env = System.getenv();
 	    defines = new HashMap<>(env.size());
 	    for (Map.Entry<String, String> entry : env.entrySet()) {
-		defines.put(entry.getKey(), quote(entry.getValue()));
+		defines.put(entry.getKey(), entry.getValue());
 	    }
+
+	    defineBuildProperties();
 
 	    // Define some predefined variables
 	    defines.put(JAVA_VERSION_VAR_NAME, System.getProperty("java.version"));
-	    defines.put(JAVA_PP_VERSION_VAR_NAME, VERSION);
-
-	    defineBuildProperties();
+	    defines.put(JAVA_VM_VERSION_VAR_NAME, System.getProperty("java.vm.version"));
+	    defines.put(JAVA_DATA_MODEL_VAR_NAME, System.getProperty("sun.arch.data.model"));
+	    // A specific alias for our version
+	    defines.put(PREPROC_VERSION_VAR_NAME, defines.get("PreProc.version"));
 
 	    setFileVariables("-- none --");
 	}

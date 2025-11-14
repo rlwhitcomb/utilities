@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { base: '1.13.3', date: d'2025-11-14',
+      issues: [ 785 ],
+      comment: 'Redo some preprocessor variables.'
+    },
     { version: '3.1.7', date: d'2025-10-26',
       issues: [ 781 ],
       comment: 'Support another traditional form of octal escapes in strings: "\\0nnn".'

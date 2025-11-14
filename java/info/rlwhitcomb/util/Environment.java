@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2011-2017,2019-2024 Roger L. Whitcomb.
+ * Copyright (c) 2011-2017,2019-2025 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -208,6 +208,9 @@
  *	    Use MaxInt as appropriate.
  *	14-Feb-2024 (rlwhitcomb)
  *	    #653: Fix "programVersion" so the metadata is more compatible with SemanticVersion.
+ *	14-Nov-2025 (rlwhitcomb)
+ *	    #785: Move copyright notice to "build.properties" (so it can be accessed more easily
+ *	    from PreProc code).
  */
 package info.rlwhitcomb.util;
 
@@ -294,7 +297,8 @@ public final class Environment
 	/**
 	 * The set of properties read from various files: "build.properties", "build.number",
 	 * and "version.properties", which should include titles and versions for the major
-	 * main programs, as well as other build-related information.
+	 * main programs, as well as other build-related information, including product name
+	 * and copyright notice.
 	 */
 	private static Properties buildProperties = null;
 
@@ -1736,11 +1740,12 @@ public final class Environment
 		buildProperties = readPropertiesFile("/build.number", buildProperties);
 		buildProperties = readPropertiesFile("/version.properties", buildProperties);
 
-		productName    = buildProperties.getProperty("product.name");
-		APP_VERSION    = buildProperties.getProperty("build.version");
-		APP_BUILD      = buildProperties.getProperty("build.number");
-		BUILD_DATE     = buildProperties.getProperty("build.date");
-		BUILD_TIME     = buildProperties.getProperty("build.time");
+		productName     = buildProperties.getProperty("product.name");
+		copyrightNotice = buildProperties.getProperty("product.copyright");
+		APP_VERSION     = buildProperties.getProperty("build.version");
+		APP_BUILD       = buildProperties.getProperty("build.number");
+		BUILD_DATE      = buildProperties.getProperty("build.date");
+		BUILD_TIME      = buildProperties.getProperty("build.time");
 
 		try {
 		    BUILD_VERSION = new SemanticVersion(APP_VERSION);
@@ -1823,12 +1828,9 @@ public final class Environment
 
 
 	/**
-	 * @return The current copyright notice string (from the resources).
+	 * @return The current copyright notice string (from the build properties).
 	 */
 	public static String getCopyrightNotice() {
-	    if (copyrightNotice == null) {
-		copyrightNotice = Intl.getString("util#env.copyright");
-	    }
 	    return copyrightNotice;
 	}
 
