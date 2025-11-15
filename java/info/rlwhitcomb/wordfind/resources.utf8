@@ -1,7 +1,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2021-2024 Roger L. Whitcomb.
+# Copyright (c) 2021-2025 Roger L. Whitcomb.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -48,6 +48,8 @@
 #	    #633: More help for the "-noopt" and "-opt" options.
 #	13-Mar-2024 (rlwhitcomb)
 #	    #663: Title string for dictionary lookup; help for "-look" option.
+#	15-Nov-2025 (rlwhitcomb)
+#	    #786: New "-reverse" and "-normal" options.
 #
 
 exception		= Error: %1$s from %2$s%n
@@ -113,18 +115,20 @@ repl.help19	= "  -lightbackground, -lightback, -lightbg, -light\tuse colors for 
 repl.help20	= "  -darkbackground, -darkback, -darkbg, -dark\t\tuse colors for a dark window background"
 repl.help21	= "  -timings, -timing, -verbose, -time, -t, -v\tshow lookup timing"
 repl.help22	= "  -notimings, -notiming, -quiet, -not, -q\tdon't show the timings"
-repl.help23	= "  -minwordsize, -minword, -minsize, -min\tset the minimum length of word to display in the results"
-repl.help24	= "  -maxnumberwords, -maxnumber, -maxwords\tset the maximum number of words of each length to display"
-repl.help25	= "  -maxlinelength, -maxwidth, -width, -wid\tset the maximum line width for wrapping the display"
-repl.help26	= ""
-repl.help27	= There are also a few commands available in this mode:
-repl.help28	= "  :help, :h, :?\t\t\t\tdisplay this help text"
-repl.help29	= "  :version, :vers, :ver, :v\t\tdisplay the program version information"
-repl.help30	= "  :statistics, :stats, :stat, :s\tdisplay dictionary statistics"
-repl.help31	= "  :dictionary, :lookup, :dict, :look\tdictionary / thesaurus lookup"
-repl.help32	= "  :quit, :exit, :q, :x\t\t\tleave the program"
-repl.help33	= ""
-
+repl.help23	= "  -reversed, -reverse, -rev, -r\t\t\tshow results reversed (shortest to longest)"
+repl.help24	= "  -normal, -norm, -n\t\t\t\tshow results normally (longest down to shortest)"
+repl.help25	= "  -minwordsize, -minword, -minsize, -min\tset the minimum length of word to display in the results"
+repl.help26	= "  -maxnumberwords, -maxnumber, -maxwords\tset the maximum number of words of each length to display"
+repl.help27	= "  -maxlinelength, -maxwidth, -width, -wid\tset the maximum line width for wrapping the display"
+repl.help28	= ""
+repl.help29	= There are also a few commands available in this mode:
+repl.help30	= "  :help, :h, :?\t\t\t\tdisplay this help text"
+repl.help31	= "  :version, :vers, :ver, :v\t\tdisplay the program version information"
+repl.help32	= "  :statistics, :stats, :stat, :s\tdisplay dictionary statistics"
+repl.help33	= "  :dictionary, :lookup, :dict, :look\tdictionary / thesaurus lookup"
+repl.help34	= "  :quit, :exit, :q, :x\t\t\tleave the program"
+repl.help35	= ""
+6
 addl.help1	= Additional options available only on the command line:
 addl.help2	= ""
 addl.help3	= "  -console, -con\t\t\tstartup in console (not GUI) mode"

@@ -129,6 +129,8 @@
  *          Fix index error for some online results.
  *      30-Sep-2025 (rlwhitcomb)
  *          #771: Fix index errors with non-alphabetic input characters.
+ *      15-Nov-2025 (rlwhitcomb)
+ *          #786: Add "-reverse" and "-normal" options.
  */
 package info.rlwhitcomb.wordfind;
 
@@ -263,6 +265,9 @@ public class WordFind implements Application
 
     /** Whether or not the next value is supposed to be the max line length. */
     private static boolean needMaxLineLength = false;
+
+    /** Whether results are displayed from shortest to longest (reversed) or not. */
+    private static boolean reverseResults = false;
 
     /**
      * Sort alphabetically?
@@ -728,6 +733,10 @@ public class WordFind implements Application
             timings = false;
         } else if (matches(arg, "timings", "timing", "verbose", "time", "t", "v")) {
             timings = true;
+        } else if (matches(arg, "reversed", "reverse", "rev", "r")) {
+            reverseResults = true;
+        } else if (matches(arg, "normal", "norm", "n")) {
+            reverseResults = false;
         } else if (matches(arg, "minwordsize", "minword", "minsize", "min")) {
             needMinWordSize = true;
         } else if (matches(arg, "maxnumberwords", "maxnumber", "maxwords")) {
@@ -850,7 +859,9 @@ public class WordFind implements Application
     private static int reportResults(final Set<String>[] validWords, final int largest) {
         int numberOfWordsFound = 0;
 
-        for (int index = largest - 1; index >= 0; index--) {
+        for (int slot = largest - 1; slot >= 0; slot--) {
+            int index = reverseResults ? largest - 1 - slot : slot;
+
             Set<String> wordSet = validWords[index];
             int size = wordSet.size();
             if (size > 0) {

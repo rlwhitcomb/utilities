@@ -22,10 +22,11 @@
 >Test 'radiochemically': Passed
 >Test 'zygodactylous': Passed
 >Test 'abcdefghijklmnop': Passed
+>Test 'thorough': Passed
 >Test 'mmeeins': Passed
 >
 >Done with WordFind tests.
 >------------------------------------
->Ran 20 tests: 20 passed, 0 failed.
+>Ran 21 tests: 21 passed, 0 failed.
 >====================================
 >

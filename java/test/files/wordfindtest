@@ -27,7 +27,9 @@ radiochemically: radiochemically
 zygodactylous: zygodactylous
 
 abcdefghijklmnop: abcdefghijklmno..
-mmeeins: mmeeins -min 7
+thorough: -reverse thorough
+
+mmeeins: mmeeins -normal -min 7
 
 :echo
 :echo Done with WordFind tests.
