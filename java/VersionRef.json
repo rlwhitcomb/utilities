@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '3.1.8', date: d'2025-11-14',
+      issues: [ 782 ],
+      comment: 'New "><" and ">=<" (in-between) operators and case selectors.'
+    },
     { base: '1.13.3', date: d'2025-11-14',
       issues: [ 785 ],
       comment: 'Redo some preprocessor variables.'

@@ -935,6 +935,8 @@
  *	    #754: Do better at passing the "ignoreNameCase" setting down to the compare methods.
  *	24-Oct-2025 (rlwhitcomb)
  *	    Allow "dot" operator to do multiplication in certain contexts (such as decimal x decimal).
+ *	14-Nov-2025 (rlwhitcomb)
+ *	    #782: Evaluation code for "in-between" operators and case selectors.
  */
 package info.rlwhitcomb.calc;
 
@@ -4087,6 +4089,22 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			    }
 			}
 			if (matched) {
+			    returnValue = visitor.execute();
+			    fallThrough = visitor.fallIntoNext();
+			    if (fallThrough)
+				break selectors;
+
+			    return returnValue;
+			}
+		    }
+		    else if (select.BETWEEN_OP() != null) {
+			CalcParser.ExprContext expr1 = select.expr().get(0);
+			CalcParser.ExprContext expr2 = select.expr().get(1);
+			Object obj1 = evaluateToValue(expr1);
+			Object obj2 = evaluateToValue(expr2);
+
+			Boolean between = betweenOp(caseExpr, expr1, expr2, caseValue, obj1, obj2, select.BETWEEN_OP().getText());
+			if (between) {
 			    returnValue = visitor.execute();
 			    fallThrough = visitor.fallIntoNext();
 			    if (fallThrough)
@@ -8551,6 +8569,55 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		retValue = iterateOverRangeExpr(null, rangeCtx.expr(), rangeCtx.DOTS() != null, visitor, true, doingWithin);
 
 	    return retValue;
+	}
+
+	private Boolean betweenOp(
+		CalcParser.ExprContext e1,
+		CalcParser.ExprContext e2,
+		CalcParser.ExprContext e3,
+		Object obj1,
+		Object obj2,
+		Object obj3,
+		String op)
+	{
+	    // Test that lower <= upper
+	    int ret0 = CalcUtil.compareValues(this, e2, e3, obj2, obj3, settings.mc, false, false, settings.ignoreNameCase, false, false);
+
+	    int ret1 = CalcUtil.compareValues(this, e1, e2, obj1, obj2, settings.mc, false, false, settings.ignoreNameCase, false, false);
+	    int ret2 = CalcUtil.compareValues(this, e1, e3, obj1, obj3, settings.mc, false, false, settings.ignoreNameCase, false, false);
+
+	    // range values are reversed, so switch the comparisons
+	    if (ret0 > 0) {
+		int ret = ret1;
+		ret1 = ret2;
+		ret2 = ret;
+	    }
+
+	    if (op.equals(">=<")) {
+		// within or equal to boundaries
+		if (ret1 >= 0 && ret2 <= 0)
+		    return Boolean.TRUE;
+	    }
+	    else {
+		// strictly within the boundaries
+		if (ret1 > 0 && ret2 < 0)
+		    return Boolean.TRUE;
+	    }
+	    return Boolean.FALSE;
+	}
+
+	@Override
+	public Object visitBetweenExpr(CalcParser.BetweenExprContext ctx) {
+	    CalcParser.ExprContext expr1 = ctx.expr(0);
+	    CalcParser.ExprContext expr2 = ctx.expr(1);
+	    CalcParser.ExprContext expr3 = ctx.expr(2);
+	    Object obj1 = evaluateToValue(expr1);	// test value
+	    Object obj2 = evaluateToValue(expr2);	// "lower" end of range
+	    Object obj3 = evaluateToValue(expr3);	// "upper" end of range
+
+	    String op = ctx.BETWEEN_OP().getText();
+
+	    return betweenOp(expr1, expr2, expr3, obj1, obj2, obj3, op);
 	}
 
 	@Override

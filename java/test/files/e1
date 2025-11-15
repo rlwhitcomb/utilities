@@ -1074,6 +1074,22 @@ m1!==m2
 m1<m2
 m1>m2
 
+#
+# Issue #782 - In-between operators
+#
+"abc" >< "abc", "def"
+"abc" >=< "abc", "def"
+123 >< 100, 125
+123 >< 125, 100
+123 >< 125, 200
+123 >< 123, 123
+123 >=< 123, 123
+"def" >< "abc", "ghi"
+"def" >< "deg", "ghi"
+"def" >< "def", "def"
+"def" >=< "def", "def"
+"def" >< "ghi", "abc"
+
 $ignorecase on {
 m3 = { a:"abc", b:"BCD", c:"ghi" }
 m4 = { B:"BCD", C:"ghi", A:"abc" }

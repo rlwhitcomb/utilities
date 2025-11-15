@@ -1275,6 +1275,18 @@
 >m1 !== m2 -> true
 >m1 < m2 -> false
 >m1 > m2 -> false
+>"abc" >< "abc", "def" -> false
+>"abc" >=< "abc", "def" -> true
+>123 >< 100, 125 -> true
+>123 >< 125, 100 -> true
+>123 >< 125, 200 -> false
+>123 >< 123, 123 -> false
+>123 >=< 123, 123 -> true
+>"def" >< "abc", "ghi" -> true
+>"def" >< "deg", "ghi" -> false
+>"def" >< "def", "def" -> false
+>"def" >=< "def", "def" -> true
+>"def" >< "ghi", "abc" -> true
 >Ignoring case is now “true”.
 >m3 = {a: "abc", b: "BCD", c: "ghi"} -> { a: "abc", b: "BCD", c: "ghi" }
 >m4 = {B: "BCD", C: "ghi", A: "abc"} -> { B: "BCD", C: "ghi", A: "abc" }

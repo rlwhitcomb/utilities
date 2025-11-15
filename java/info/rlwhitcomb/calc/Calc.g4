@@ -585,6 +585,8 @@
  *	    #777: Update KB_CONST prefixes for new official values "R" and "Q"; allow x.y in KB_CONST also.
  *	28-Oct-2025 (rlwhitcomb)
  *	    #781: Additional octal escape syntax inside strings.
+ *	14-Nov-2025 (rlwhitcomb)
+ *	    #782: Introduce weird "in-between" operators, as well as the new case selector based on it.
  */
 
 grammar Calc;
@@ -842,6 +844,7 @@ expr
    | expr SPACE_OP expr                           # spaceshipExpr
    | expr COMPARE_OP expr                         # compareExpr
    | expr ( K_OF|K_IN|K_WITHIN|SET_IN ) loopCtl   # inExpr
+   | expr BETWEEN_OP expr COMMA expr              # betweenExpr
    | expr EQUAL_OP expr                           # equalExpr
    | expr EOL* ( BOOL_AND_OP | K_AND ) EOL* expr  # booleanAndExpr
    | expr EOL* ( BOOL_OR_OP | K_OR ) EOL* expr    # booleanOrExpr
@@ -998,6 +1001,7 @@ exprList
 caseSelector
    : K_MATCHES ( expr2 | expr1 )
    | expr DOTS expr ( COMMA expr ) ?
+   | BETWEEN_OP expr COMMA expr
    | expr
    | compareOp expr ( boolOp compareOp expr ) ?
    | K_DEFAULT
@@ -1668,6 +1672,10 @@ EQUAL_OP
        | ( '!==' | '\u2262' )
        | ( '==' | '\u2A75' )
        | ( '!=' | '<>' | '\u2260' )
+       ;
+
+BETWEEN_OP
+       : '><' | '>=<'
        ;
 
 SPACE_OP

@@ -116,9 +116,7 @@ case test_string of {
 
 define test(a) = {
   case a of {
-    0: 'zero',
-    1: 'one',
-    3: 'three',
+    0, 1, 3: a@w,
     default: next,
     4: 'even'
   }
@@ -217,7 +215,7 @@ $5
 
 # Solutions taken from https://en.wikipedia.org/wiki/Sums_of_three_cubes
 # and here: https://www.uni-math.gwdg.de/jahnel/Arbeiten/Liste/threecubes_20070419.txt
-define sum_of_cubes(sum, x, y, z) = { x**3 + y**3 + z**3 == sum }
+define sum_of_cubes(sum, x, y, z) = { x³ + y³ + z³ == sum }
 $dec 400 {
 sum_of_cubes(1, 9, 10, −12)
 sum_of_cubes(2, 1214928, 3480205, -3528875)
