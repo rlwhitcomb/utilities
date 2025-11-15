@@ -131,3 +131,17 @@
 >isprime F2 -> true
 >F1 × F2 === M67 -> true
 >
+>Pentium FDIV bug example: real value should be 1.333820449136241002
+>                        while the bug produced 1.333739068902037589
+>Precision is now “19” digits.
+>4195835 / 3145727 -> 1.333820449136241002
+>Precision is now “200” digits.
+>
+>Quora example of supposed Fermat solution that only works with limited (calculator) precision
+>Precision is now “10” digits.
+>1782 ↑ 12 + 1841 ↑ 12 -> 2541210259000000000000000000000000000000
+>round (1922 ↑ 12, -30) -> 2541210259000000000000000000000000000000
+>Precision is now “200” digits.
+>1782 ↑ 12 + 1841 ↑ 12 -> 2541210258614589176288669958142428526657
+>1922 ↑ 12 -> 2541210259314801410819278649643651567616
+>

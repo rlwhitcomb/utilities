@@ -49,3 +49,22 @@ isprime F1; isprime F2
 F1 × F2 === M67
 display
 
+// The Pentium FDIV bug
+display "Pentium FDIV bug example: real value should be 1.333820449136241002"
+display "                        while the bug produced 1.333739068902037589"
+$decimal 19 {
+4195835 / 3145727
+}
+display
+
+// Another Quora answer
+display "Quora example of supposed Fermat solution that only works with limited (calculator) precision"
+$decimal 10 {
+1782↑12 + 1841↑12
+round(1922↑12,-30)
+}
+1782↑12 + 1841↑12
+1922↑12
+
+display
+
