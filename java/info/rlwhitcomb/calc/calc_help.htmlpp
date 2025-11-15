@@ -39,6 +39,15 @@ code {
 h2 {
    margin-left: 30px;
    margin-right: 30px;
+   color: red;
+}
+
+h4 {
+   margin-left: 30px;
+   margin-right: 30px;
+   font-family: helvetica, arial, sans-serif;
+   font-size: 110%;
+   color: blue;
 }
 
 .right-link {
@@ -142,8 +151,23 @@ h2 {
 
 <body>
   <div id="topofpage" class="title-box">
-    <h1 style="font-family:'Fredericka the Great';font-size:400%;">Calculator</h1>
-    <h2>Version ${Calc.version}, build ${build.number}</h2>
+    <h1 style="font-family:'Fredericka the Great';font-size:400%;margin-left:30px;margin-right:30px;">Calculator</h1>
+#if ${release.build}
+  #define DEBUG_FLAG
+#else
+  #define DEBUG_FLAG .debug
+#endif
+#if ${__JAVA_DATA_MODEL__} == 64
+  #define DATA_MODEL (64-bit)
+#else
+  #define DATA_MODEL (32-bit)
+#endif
+    <h2>Version ${Calc.version}</h2>
+    <h4>Implementation version ${build.version}+${build.number}${DEBUG_FLAG}<br>
+        Built on ${__DATE__} at ${__TIME__}<br>
+        ${product.copyright}<br>
+    <br>
+        Java version: ${__JAVA_VM_VERSION__} ${DATA_MODEL}</h4>
   </div>
 <div class="toc_container">
   <p class="toc_title">Contents</p>
@@ -215,7 +239,7 @@ h2 {
      was fairly easy. And now, almost five years later, with a lot of head-scratching and "dog-fooding" along the way, we have what we have here.
   <p>The language is built around the idea of an expression evaluator. So, everything in the language (with the exception of <a href="#Directives">Directives</a>) is basically an expression.
      And since each piece of data basically describes itself (by its Java class) we can get away with being dynamically typed, and doing "appropriate" conversions as needed.
-     Even the <a href="#Statements">Statements</a> in the language actually return a value, so it is not a stretch for the result of anything to simply be the last expression value
+     Even some of the <a href="#Statements">Statements</a> in the language actually return a value, so it is not a stretch for the result of anything to simply be the last expression value
      in the "anything". Et voil&aacute;, a "functional" language is born. Most pieces of data are immutable, although arrays, objects, and sets are meant to be updated.
      Many, if not most, of the features of the language have come about by actual need or desire to be able to accomplish something but lacking the tools. And it turns out that
      having JSON objects as "native" data types is pretty darn useful. And, of course, many features and ideas have come from JavaScript, the most (mis-)used dynamically typed
@@ -247,7 +271,7 @@ h2 {
       <li>Efficiently doing text searches and reporting on files in a directory tree (see "constants.calc")</li>
       <li>Generating handy conversion tables (such as "java/test/files/frac_table.calc")</li>
       <li>As a desktop calculator (using GUI mode with the "-gui" command line option)</li>
-      <li>As a teaching tool for learning fractions, Roman numerals, complex numbers, or even quaternions</li>
+      <li>As a teaching tool for mathematics; simple things like fractions and Roman numerals, to complex numbers and applications involving quaternions or set operations.
       <li>Doing statistical or other data-analysis tasks (see "mean_stddev" inside "library.calc")</li>
       <li>Developing and playing simple games (see "java/test/files/tictactoe.calc")</li>
       <li>Efficiently reformatting input data (see "versions.calc" along with "VersionRef.json")</li>
@@ -258,7 +282,6 @@ h2 {
       <li>All kinds of quick conversions, such as temperature, metric-to-English measurements, etc. (see "java/test/files/library.calc")</li>
       <li>Building a library of your own frequently-used calculations (again, "library.calc" is a good example)</li>
       <li>There are even library functions for calculating mortgage and loan payments</li>
-      <li>As a teaching tool for mathematics; simple things like fractions and Roman numerals, to applications involving quaternions, or set operations.
       <li>And the ultimate application could be using "Calc" as an embedded calculation / scripting engine inside one of your own JVM-based programs</li>
   </ul>
   <h3>Notes</h3>
@@ -1791,7 +1814,7 @@ whether it has previously been used/defined.
 <a class="right-link" href="#topofpage">Top</a>
 <hr class="sectionsep">
 
-  <footer><br><div class="title-box">Copyright&nbsp;&copy;&nbsp;2020-2025 Roger L. Whitcomb.<br>Licensed under an <a href="https://github.com/rlwhitcomb/utilities/blob/master/LICENSE">MIT</a> license.<br>Last modified: ${__DATE__} at ${__TIME__}</div><br></footer>
+  <footer><br><div class="title-box">${product.copyright}<br>Licensed under an <a href="https://github.com/rlwhitcomb/utilities/blob/master/LICENSE">MIT</a> license.<br>Last modified: ${__DATE__} at ${__TIME__}</div><br></footer>
 </body>
 </html>
 
