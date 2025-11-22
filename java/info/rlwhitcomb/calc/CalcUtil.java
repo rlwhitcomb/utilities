@@ -278,12 +278,15 @@
  *	    #768: Better handling of "cast" with sets and objects in and out of array form.
  *	24-Oct-2025 (rlwhitcomb)
  *	    Add "isScalar" method to support determining when "dot" operator is just a multiply.
+ *	20-Nov-2025 (rlwhitcomb)
+ *	    #643: Start of continued fraction support.
  */
 package info.rlwhitcomb.calc;
 
 import de.onyxbits.SemanticVersion;
 import info.rlwhitcomb.math.BigFraction;
 import info.rlwhitcomb.math.ComplexNumber;
+import info.rlwhitcomb.math.ContinuedFraction;
 import info.rlwhitcomb.math.MathUtil;
 import info.rlwhitcomb.math.Num;
 import info.rlwhitcomb.math.Quaternion;
@@ -846,6 +849,8 @@ public final class CalcUtil
 		Quaternion qValue = (Quaternion) value;
 		return fixup(qValue.isPureReal() ? qValue.a() : qValue.magnitude(mc));
 	    }
+	    else if (value instanceof ContinuedFraction)
+		return ((ContinuedFraction) value).toDecimal(mc);
 	    else if (value instanceof Boolean)
 		return ((Boolean) value).booleanValue() ? BigDecimal.ONE : BigDecimal.ZERO;
 	    else if (isFloat(value))
@@ -892,6 +897,8 @@ public final class CalcUtil
 		return new BigFraction(((ComplexNumber) value).r());
 	    else if (value instanceof Quaternion)
 		return new BigFraction(((Quaternion) value).a());
+	    else if (value instanceof ContinuedFraction)
+		return ((ContinuedFraction) value).toFraction();
 	    else if (value instanceof String)
 		return BigFraction.valueOf((String) value);
 	    else if (value instanceof Boolean)
@@ -950,27 +957,22 @@ public final class CalcUtil
 	    }
 
 	    try {
-		if (value instanceof BigInteger) {
+		if (value instanceof BigInteger)
 		    return (BigInteger) value;
-		}
-		else if (value instanceof BigDecimal) {
+		else if (value instanceof BigDecimal)
 		    return ((BigDecimal) value).toBigIntegerExact();
-		}
-		else if (value instanceof BigFraction) {
+		else if (value instanceof BigFraction)
 		    return ((BigFraction) value).toIntegerExact();
-		}
-		else if (value instanceof ComplexNumber) {
-		    return (((ComplexNumber) value).r().toBigIntegerExact());
-		}
-		else if (value instanceof Quaternion) {
-		    return (((Quaternion) value).a().toBigIntegerExact());
-		}
-		else if (value instanceof Number) {
+		else if (value instanceof ComplexNumber)
+		    return ((ComplexNumber) value).r().toBigIntegerExact();
+		else if (value instanceof Quaternion)
+		    return ((Quaternion) value).a().toBigIntegerExact();
+		else if (value instanceof ContinuedFraction)
+		    return ((ContinuedFraction) value).toIntegerExact();
+		else if (value instanceof Number)
 		    return BigInteger.valueOf(((Number) value).longValue());
-		}
-		else {
+		else
 		    return convertToDecimal(value, mc, ctx).toBigIntegerExact();
-		}
 	    }
 	    catch (ArithmeticException ae) {
 		throw new CalcExprException(ae, ctx);
@@ -1006,27 +1008,22 @@ public final class CalcUtil
 	    }
 
 	    try {
-		if (value instanceof BigInteger) {
+		if (value instanceof BigInteger)
 		    return ((BigInteger) value).intValueExact();
-		}
-		else if (value instanceof BigDecimal) {
+		else if (value instanceof BigDecimal)
 		    return ((BigDecimal) value).intValueExact();
-		}
-		else if (value instanceof BigFraction) {
+		else if (value instanceof BigFraction)
 		    return ((BigFraction) value).intValueExact();
-		}
-		else if (value instanceof ComplexNumber) {
-		    return (((ComplexNumber) value).r().intValueExact());
-		}
-		else if (value instanceof Quaternion) {
-		    return (((Quaternion) value).a().intValueExact());
-		}
-		else if (value instanceof Number) {
+		else if (value instanceof ComplexNumber)
+		    return ((ComplexNumber) value).r().intValueExact();
+		else if (value instanceof Quaternion)
+		    return ((Quaternion) value).a().intValueExact();
+		else if (value instanceof ContinuedFraction)
+		    return ((ContinuedFraction) value).intValueExact();
+		else if (value instanceof Number)
 		    return ((Number) value).intValue();
-		}
-		else {
+		else
 		    return convertToDecimal(value, mc, ctx).intValueExact();
-		}
 	    }
 	    catch (ArithmeticException ae) {
 		throw new CalcExprException(ae, ctx);
@@ -1123,18 +1120,14 @@ public final class CalcUtil
 	    Object result = visitor.evaluateToValue(ctx, obj);
 
 	    if (result instanceof CollectionScope) {
-		if (result instanceof ObjectScope) {
+		if (result instanceof ObjectScope)
 		    return toStringValue(visitor, ctx, ((ObjectScope) result).map(), format, indent, level);
-		}
-		else if (result instanceof ArrayScope) {
+		else if (result instanceof ArrayScope)
 		    return toStringValue(visitor, ctx, ((ArrayScope) result).list(), format, indent, level);
-		}
-		else if (result instanceof SetScope) {
+		else if (result instanceof SetScope)
 		    return toStringValue(visitor, ctx, ((SetScope) result).set(), format, indent, level);
-		}
-		else if (result instanceof CollectionScope) {
+		else if (result instanceof CollectionScope)
 		    return format.extraSpace ? "{ }" : "{}";
-		}
 	    }
 	    else {
 		if (level >= format.skipLevels) {
@@ -1169,6 +1162,9 @@ public final class CalcUtil
 		    }
 		    else if (result instanceof Quaternion) {
 			return ((Quaternion) result).toFormatString(format.separators, format.extraSpace);
+		    }
+		    else if (result instanceof ContinuedFraction) {
+			return ((ContinuedFraction) result).toFormatString(format.separators, format.extraSpace);
 		    }
 
 		    // Any other type, just get the string representation
@@ -1394,6 +1390,8 @@ public final class CalcUtil
 		return ((ComplexNumber) obj).precision();
 	    if (obj instanceof Quaternion)
 		return ((Quaternion) obj).precision();
+	    if (obj instanceof ContinuedFraction)
+		return ((ContinuedFraction) obj).toFraction().precision();
 	    if (obj instanceof String) {
 		String str = (String) obj;
 		return str.codePointCount(0, str.length());
@@ -1826,6 +1824,15 @@ public final class CalcUtil
 
 		return q1.compareTo(q2);
 	    }
+	    else if (e1 instanceof ContinuedFraction || e2 instanceof ContinuedFraction) {
+		ContinuedFraction cf1 = ContinuedFraction.valueOf(e1);
+		ContinuedFraction cf2 = ContinuedFraction.valueOf(e2);
+
+		if (equality)
+		    return cf1.equals(cf2) ? 0 : -1;
+
+		return cf1.compareTo(cf2);
+	    }
 	    else if (e1 instanceof BigDecimal || e2 instanceof BigDecimal) {
 		BigDecimal d1 = toDecimalValue(visitor, e1, mc, ctx1);
 		BigDecimal d2 = toDecimalValue(visitor, e2, mc, ctx2);
@@ -2080,6 +2087,12 @@ public final class CalcUtil
 		ComplexNumber c2 = ComplexNumber.valueOf(v2);
 
 		return c1.add(c2);
+	    }
+	    else if (v1 instanceof ContinuedFraction || v2 instanceof ContinuedFraction) {
+		ContinuedFraction cf1 = ContinuedFraction.valueOf(v1);
+		ContinuedFraction cf2 = ContinuedFraction.valueOf(v2);
+
+		return cf1.add(cf2);
 	    }
 	    else {
 		BigDecimal d1 = convertToDecimal(v1, mc, ctx1);

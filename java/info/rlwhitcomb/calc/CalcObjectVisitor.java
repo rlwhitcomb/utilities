@@ -937,6 +937,8 @@
  *	    Allow "dot" operator to do multiplication in certain contexts (such as decimal x decimal).
  *	14-Nov-2025 (rlwhitcomb)
  *	    #782: Evaluation code for "in-between" operators and case selectors.
+ *	20-Nov-2025 (rlwhitcomb)
+ *	    #643: Beginnings of continued fraction support.
  */
 package info.rlwhitcomb.calc;
 
@@ -945,6 +947,7 @@ import info.rlwhitcomb.directory.FileInfo;
 import info.rlwhitcomb.directory.Match;
 import info.rlwhitcomb.math.BigFraction;
 import info.rlwhitcomb.math.ComplexNumber;
+import info.rlwhitcomb.math.ContinuedFraction;
 import info.rlwhitcomb.math.DateUtil;
 import info.rlwhitcomb.math.MathUtil;
 import info.rlwhitcomb.math.Num;
@@ -4431,16 +4434,32 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	@Override
+	public Object visitCfExpr(CalcParser.CfExprContext ctx) {
+	    CalcParser.ExprContext exprCtx = ctx.cf().expr();
+	    CalcParser.ExprListContext exprListCtx = ctx.cf().exprList();
+	    BigInteger iPart = getIntegerValue(exprCtx);
+	    List<BigInteger> denominators = new ArrayList<>();
+	    if (exprListCtx != null) {
+		for (CalcParser.ExprContext expr : exprListCtx.expr()) {
+		    BigInteger iValue = getIntegerValue(expr);
+		    denominators.add(iValue);
+		}
+	    }
+	    ContinuedFraction cf = new ContinuedFraction(iPart, denominators);
+	    return cf;
+	}
+
+	@Override
 	public Object visitArrExpr(CalcParser.ArrExprContext ctx) {
 	   CalcParser.ExprListContext exprList = ctx.arr().exprList();
-	   ArrayScope<Object> list = new ArrayScope<>();
+	   ArrayScope<Object> array = new ArrayScope<>();
 	   if (exprList != null) {
 		for (CalcParser.ExprContext expr : exprList.expr()) {
 		    Object value = evaluate(expr);
-		    list.add(value);
+		    array.add(value);
 		}
 	   }
-	   return list;
+	   return array;
 	}
 
 	@Override
@@ -5092,6 +5111,21 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			    throw new UnknownOpException(oper, ctx);
 		    }
 		}
+		else if (e1 instanceof ContinuedFraction || e2 instanceof ContinuedFraction) {
+		    ContinuedFraction cf1 = ContinuedFraction.valueOf(e1);
+		    ContinuedFraction cf2 = ContinuedFraction.valueOf(e2);
+
+		    switch (op) {
+			case "*":
+			case DOT:
+			    return cf1.multiply(cf2);
+			case "/":
+			    return cf1.divide(cf2);
+			// more to implement here
+			default:
+			    throw new UnknownOpException(oper, ctx);
+		    }
+		}
 		else if (e1 instanceof CollectionScope && e2 instanceof CollectionScope) {
 		    CollectionScope c2 = (CollectionScope) e2;
 
@@ -5184,6 +5218,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			ComplexNumber c2 = ComplexNumber.valueOf(e2, settings.rationalMode);
 
 			return c1.subtract(c2, settings.mc);
+		    }
+		    else if (e1 instanceof ContinuedFraction || e2 instanceof ContinuedFraction) {
+			ContinuedFraction cf1 = ContinuedFraction.valueOf(e1);
+			ContinuedFraction cf2 = ContinuedFraction.valueOf(e2);
+
+			return cf1.subtract(cf2);
 		    }
 		    else if (e1 instanceof SetScope) {
 			@SuppressWarnings("unchecked")

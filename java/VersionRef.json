@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '3.2', date: d'2025-11-20',
+      issues: [ 643 ],
+      comment: 'Start of support for continued fractions.'
+    },
     { version: '3.1.8', date: d'2025-11-14',
       issues: [ 782 ],
       comment: 'New "><" and ">=<" (in-between) operators and case selectors.'

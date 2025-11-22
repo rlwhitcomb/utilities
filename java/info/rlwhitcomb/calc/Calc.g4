@@ -587,6 +587,8 @@
  *	    #781: Additional octal escape syntax inside strings.
  *	14-Nov-2025 (rlwhitcomb)
  *	    #782: Introduce weird "in-between" operators, as well as the new case selector based on it.
+ *	15-Nov-2025 (rlwhitcomb)
+ *	    #643: New continued fraction notation.
  */
 
 grammar Calc;
@@ -815,6 +817,7 @@ builtinFunction
 expr
    : value                                        # valueExpr
    | obj                                          # objExpr
+   | cf                                           # cfExpr
    | arr                                          # arrExpr
    | set                                          # setExpr
    | complex                                      # complexValueExpr
@@ -987,6 +990,10 @@ loopCtl
    : rangeExpr
    | LPAREN exprList RPAREN
    | LPAREN RPAREN
+   ;
+
+cf
+   : LBRACK EOL* expr ';' EOL* exprList ? EOL* RBRACK
    ;
 
 arr
